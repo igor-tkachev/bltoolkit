@@ -1,0 +1,1612 @@
+<HTML><HEAD><TITLE>Пространство имён Rsdn.Framework.Data</TITLE><META http-equiv="Content-Type" content="text/html; charset=windows-1251">
+<LINK rel="stylesheet"  type="text/css"href="C:/Program Files/RSDN/AuthPack/Authoring/css/article.css">
+<SCRIPT LANGUAGE="JavaScript">
+function ToggleCode(id){ el=document.all[id];
+    img=document.all[ "img"+id];if(el.style.display=="none") 
+    {img.src="C:/Program Files/RSDN/AuthPack/Authoring/images/ls2.gif";el.style.display="";}else 
+    {img.src="C:/Program Files/RSDN/AuthPack/Authoring/images/ls1.gif";el.style.display="none";}}
+</SCRIPT></HEAD>
+<H1>Пространство имён Rsdn.Framework.Data<A href="printv.asp?what=this"></A><BR><SPAN class="subtitle"></SPAN></H1>
+<H5><SPAN class="title">Автор: </SPAN><SPAN class="value"><A target="_blank" href="mailto:it@rsdn.ru" title="">Игорь Ткачёв</A><BR>The RSDN Group</SPAN></H5>
+<H6><SPAN class="title">Опубликовано: </SPAN><SPAN class="value">01.07.2003</SPAN><BR><SPAN class="title">Версия текста: </SPAN><SPAN class="value">1.2</SPAN></H6>
+<DIV style="margin-left:2em"><A href="#IDAWQ0ZF"><B></B></A><BR><DIV style="margin-left:2em">
+</DIV><A href="#IDABR0ZF"><B>Введение</B></A><BR><DIV style="margin-left:2em">
+</DIV><A href="#IDAKU0ZF"><B>Класс DbManager</B></A><BR><DIV style="margin-left:2em"><A href="#IDANU0ZF">Инициализация и создание экземпляра объекта</A><BR><A href="#IDAAC1ZF">Параметры запроса</A><BR><A href="#IDACM1ZF">Методы Execute</A><BR></DIV><A href="#IDAES1ZF"><B>Отображение данных</B></A><BR><DIV style="margin-left:2em"><A href="#IDA0V1ZF">MapFieldAttribute</A><BR><A href="#IDAIZ1ZF">MapValueAttribute</A><BR><A href="#IDAK11ZF">Отображение вложенных классов</A><BR></DIV><A href="#IDAO31ZF"><B>Класс Map</B></A><BR><DIV style="margin-left:2em">
+</DIV><A href="#IDAVE2ZF"><B>Заключение</B></A><BR><DIV style="margin-left:2em">
+</DIV><A href="#IDA3E2ZF"><B>Добавления и исправления версии 1.1</B></A><BR><DIV style="margin-left:2em">
+</DIV><A href="#IDABH2ZF"><B>Добавления и исправления версии 1.2</B></A><BR><DIV style="margin-left:2em"><A href="#IDALJ2ZF">Абстрактные классы</A><BR><A href="#IDAHL2ZF">MapTypeAttribute</A><BR><A href="#IDANN2ZF">MapIgnoreAttribute</A><BR><A href="#IDATN2ZF">MapDescriptor</A><BR><A href="#IDAHO2ZF">IMapObjectFactory</A><BR><A href="#IDALP2ZF">MapFieldAttribute</A><BR><A href="#IDA4Q2ZF">Nullable values</A><BR><A href="#IDA0R2ZF">Guid</A><BR><A href="#IDACS2ZF">Xml схемы отображения</A><BR><A href="#IDAUU2ZF">MapXmlAttribute</A><BR></DIV><A href="#IDAZV2ZF"><B>Добавления и исправления версии 1.3</B></A><BR><DIV style="margin-left:2em"><A href="#IDAWW2ZF">SetCommand, SetSpCommand</A><BR><A href="#IDAJY2ZF">Update</A><BR><A href="#IDAJZ2ZF">MapTypeAttribute</A><BR><A href="#IDAL02ZF">ISupportInitialize</A><BR><A href="#IDAJ12ZF">IMapSettable</A><BR></DIV><A href="#IDA222ZF"><B>Известные проблемы</B></A><BR><DIV style="margin-left:2em">
+</DIV>
+</DIV>
+<H2><A name="IDAWQ0ZF"></A></H2>
+<P><A href="RsdnFrameworkData/Setup.msi"><IMG src="C:/Program Files/RSDN/AuthPack/Authoring/images/fileA.gif" border="0" width="28" height="11" align="absmiddle">Setup.msi - 334 k</A></P>
+<P><CENTER><IMG src="RsdnFrameworkData\RsdnFrameworkData.gif" title=""><BR><FONT face="verdana" style="font-size:x-small"><I></I></FONT>
+</CENTER></P>
+<H2>Введение<A name="IDABR0ZF"></A></H2>
+<P><I>Rsdn.Framework.Data</I> является пространством имён, содержащим набор классов, представляющих собой высокоуровневую обёртку над ADO.NET. Казалось бы, ADO.NET сама по себе штука достаточно высокоуровневая и зачем над ней ещё городить какой-то огород? Всё это так, но как это часто бывает, в борьбе добра со злом обычно, увы, побеждает лень.</P>
+<P>Рассмотрим в качестве примера функцию, которая возвращает список объектов, содержащих информацию о категории товаров: ID категории, имя и число товаров, соответствующее данной категории (здесь и далее мы будем использовать базу данных Northwind из поставки MS SQL Server). Вот как это может выглядеть с использованием ADO.NET:</P>
+<DIV id="IDAKR0ZF">
+<TABLE class="code" width="98%"><TR><TD>
+<PRE>
+<SPAN class="KEYWORD">public</SPAN> <SPAN class="KEYWORD">class</SPAN> CategoryInfo
+{
+    <SPAN class="KEYWORD">public</SPAN> <SPAN class="KEYWORD">int</SPAN>    CategoryID;
+    <SPAN class="KEYWORD">public</SPAN> <SPAN class="KEYWORD">string</SPAN> CategoryName;
+    <SPAN class="KEYWORD">public</SPAN> <SPAN class="KEYWORD">int</SPAN>    Count;
+}
+
+ArrayList GetCategories(<SPAN class="KEYWORD">int</SPAN> min)
+{
+    <SPAN class="KEYWORD">string</SPAN> connectionString =
+<SPAN class="KEYWORD">        </SPAN><SPAN class="STRING">"Server=.;Database=Northwind;Integrated Security=SSPI"</SPAN>;
+    <SPAN class="KEYWORD">string</SPAN> commandText = <SPAN class="STRING">@"
+        SELECT 
+            p.CategoryID,
+            c.CategoryName,
+            Count(p.CategoryID) Count
+        FROM Products p
+            INNER JOIN Categories c ON c.CategoryID = p.CategoryID
+        GROUP BY p.CategoryID, c.CategoryName
+        HAVING Count(p.CategoryID) &gt;= @min
+        ORDER BY c.CategoryName"</SPAN>;
+
+    <SPAN class="KEYWORD">using</SPAN> (SqlConnection con = <SPAN class="KEYWORD">new</SPAN> SqlConnection(connectionString))
+    {
+        con.Open();
+
+        <SPAN class="KEYWORD">using</SPAN> (SqlCommand cmd = <SPAN class="KEYWORD">new</SPAN> SqlCommand(commandText, con))
+        {
+            cmd.Parameters.Add(<SPAN class="STRING">"@min"</SPAN>, min);
+
+            <SPAN class="KEYWORD">using</SPAN> (SqlDataReader rd = cmd.ExecuteReader())
+            {
+                ArrayList al = <SPAN class="KEYWORD">new</SPAN> ArrayList();
+
+                <SPAN class="KEYWORD">while</SPAN> (rd.Read())
+                {
+                    CategoryInfo ci = <SPAN class="KEYWORD">new</SPAN> CategoryInfo();
+
+                    ci.CategoryID   = Convert.ToInt32 (rd[<SPAN class="STRING">"CategoryID"</SPAN>]);
+                    ci.CategoryName = Convert.ToString(rd[<SPAN class="STRING">"CategoryName"</SPAN>]);
+                    ci.Count        = Convert.ToInt32 (rd[<SPAN class="STRING">"Count"</SPAN>]);
+
+                    al.Add(ci);
+                }
+
+                <SPAN class="KEYWORD">return</SPAN> al;
+            }
+        }
+    }
+}
+</PRE>
+</TD></TR></TABLE>
+</DIV>
+<P>А теперь тоже самое в исполнении Rsdn.Framework.Data:</P>
+<DIV id="IDADT0ZF">
+<TABLE class="code" width="98%"><TR><TD>
+<PRE>
+<SPAN class="KEYWORD">public</SPAN> <SPAN class="KEYWORD">class</SPAN> CategoryInfo
+{
+    <SPAN class="KEYWORD">public</SPAN> <SPAN class="KEYWORD">int</SPAN>    CategoryID;
+    <SPAN class="KEYWORD">public</SPAN> <SPAN class="KEYWORD">string</SPAN> CategoryName;
+    <SPAN class="KEYWORD">public</SPAN> <SPAN class="KEYWORD">int</SPAN>    Count;
+}
+
+ArrayList GetCategories(<SPAN class="KEYWORD">int</SPAN> min)
+{
+    <SPAN class="KEYWORD">using</SPAN> (DbManager db = <SPAN class="KEYWORD">new</SPAN> DbManager())
+    {
+        <SPAN class="KEYWORD">return</SPAN> db
+<SPAN class="KEYWORD">            </SPAN>.SetCommand(<SPAN class="STRING">@"
+                SELECT 
+                    p.CategoryID,
+                    c.CategoryName,
+                    Count(p.CategoryID) Count
+                FROM Products p
+                    INNER JOIN Categories c ON c.CategoryID = p.CategoryID
+                GROUP BY p.CategoryID, c.CategoryName
+                HAVING Count(p.CategoryID) &gt;= @min
+                ORDER BY c.CategoryName"</SPAN>,
+                db.Parameter(<SPAN class="STRING">"@min"</SPAN>, min)
+            .ExecuteList(<SPAN class="KEYWORD">typeof</SPAN>(CategoryInfo));
+    }
+}
+</PRE>
+</TD></TR></TABLE>
+</DIV>
+<P>Не трудно заметить, что последний вариант заметно короче. Фактически все, что у нас осталось – это текст самого запроса. Класс DbManager самостоятельно осуществляет всю работу по созданию списка объектов и отображению (mapping) полей рекордсета на заданную структуру.</P>
+<P>Естественно функциональность данного класса этим не ограничивается. Но, давайте обо всём по порядку.</P>
+<H2>Класс DbManager<A name="IDAKU0ZF"></A></H2>
+<H3>Инициализация и создание экземпляра объекта<A name="IDANU0ZF"></A></H3>
+<P>Класс <I>DbManager</I> является основным классом рассматриваемого пространства имён и в единственном лице представляет собой замену всем основным объектам ADO.NET.</P>
+<P>Для создания экземпляра данного класса служат следующие конструкторы, которые инициализируют объект и открывают соединение с базой данных: </P>
+<DIV id="IDAWU0ZF">
+<TABLE class="code" width="98%"><TR><TD>
+<PRE>
+<SPAN class="KEYWORD">public</SPAN> DbManager();
+
+<SPAN class="KEYWORD">public</SPAN> DbManager(
+<SPAN class="KEYWORD">    string</SPAN> configurationString
+);
+
+<SPAN class="KEYWORD">public</SPAN> DbManager(
+<SPAN class="KEYWORD">    </SPAN>IDbConnection connection
+);
+
+<SPAN class="KEYWORD">public</SPAN> DbManager(
+<SPAN class="KEYWORD">    </SPAN>IDbConnection connection,
+<SPAN class="KEYWORD">    string</SPAN>        configurationString
+);
+</PRE>
+</TD></TR></TABLE>
+</DIV>
+<P><I>ConfigurationString</I> в данном случае это не строка соединения с базой данных (Connection String), а только ключ, по которому строка соединения будет читаться из конфигурационного файла. Правила задания строки соединения с БД в конфигурационном файле следующие:</P>
+<DIV id="IDAMV0ZF">
+<TABLE class="code" width="98%"><TR><TD>
+<PRE>
+&lt;appSettings&gt;
+  &lt;add key=<SPAN class="STRING">"ConnectionString.</SPAN><SPAN class="ACCENT">configurationString</SPAN><SPAN class="STRING">"</SPAN> value=<SPAN class="STRING">"..."</SPAN>&gt;
+&lt;/appSettings&gt;
+</PRE>
+</TD></TR></TABLE>
+</DIV>
+<P>Если <I>configurationString</I> не задана, то используется следующее правило:</P>
+<DIV id="IDAYV0ZF">
+<TABLE class="code" width="98%"><TR><TD>
+<PRE>
+&lt;appSettings&gt;
+  &lt;add key=<SPAN class="STRING">"ConnectionString"</SPAN> value=<SPAN class="STRING">"..."</SPAN>&gt;
+&lt;/appSettings&gt;
+</PRE>
+</TD></TR></TABLE>
+</DIV>
+<P>Таким образом, мы можем одновременно работать с различными конфигурациями, например, <I>“Production”</I>, <I>“Development”</I>, <I>“QA”</I> и т.п. Секция <I>appSettings</I> может находиться как в <I>app.config</I> или <I>web.config</I> так и <I>machine.config</I> файле.</P>
+<P>Если же вам не хочется возиться с конфигурационными файлами, то для задания строки соединения можно воспользоваться методом <I>AddConnectionString</I>:</P>
+<DIV id="IDASW0ZF">
+<TABLE class="code" width="98%"><TR><TD>
+<PRE>
+DbManager.<STRONG>AddConnectionString</STRONG>(<SPAN class="STRING">"MyConfig"</SPAN>, connectionString);
+
+<SPAN class="KEYWORD">using</SPAN> (DbManager db = <SPAN class="KEYWORD">new</SPAN> DbManager(<SPAN class="STRING">"MyConfig"</SPAN>))
+{
+    <SPAN class="COMMENT">// ...</SPAN>
+}
+</PRE>
+</TD></TR></TABLE>
+</DIV>
+<P>или</P>
+<DIV id="IDACX0ZF">
+<TABLE class="code" width="98%"><TR><TD>
+<PRE>
+DbManager.AddConnectionString(connectionString);
+
+<SPAN class="KEYWORD">using</SPAN> (DbManager db = <SPAN class="KEYWORD">new</SPAN> DbManager())
+{
+    <SPAN class="COMMENT">// ...</SPAN>
+}
+</PRE>
+</TD></TR></TABLE>
+</DIV>
+<P>Метод <I>AddConnectionString</I> достаточно вызвать один раз для каждой конфигурации в начале программы.</P>
+<P>Отличительной особенностью класса <I>DbManager</I> является то, что он работает исключительно с интерфейсами пространства имён System.Data и вполне может использоваться для работы с различными провайдерами данных. На данный момент поддерживается работа с Data Provider for SQL Server, Data Provider for Oracle, Data Provider for OLE DB и Data Provider for ODBC. Выбор провайдера осуществляется также с помощью строки конфигурации. Для этого достаточно добавить к ней один из следующих постфиксов: “.OleDb”,  “.Odbc”, “.Oracle”, “.Sql”. Если постфикс не задан, то по умолчанию выбирается провайдер для SQL Server. В дополнение к существующим провайдерам совсем несложно подключить любой другой. Следующий пример демонстрирует подключение Borland Data Providers for .NET (BDP.NET):</P>
+<DIV id="IDASX0ZF">
+<TABLE class="code" width="98%"><TR><TD>
+<PRE>
+<SPAN class="KEYWORD">using</SPAN> System;
+<SPAN class="KEYWORD">using</SPAN> System.Data;
+<SPAN class="KEYWORD">using</SPAN> System.Data.Common;
+
+<SPAN class="KEYWORD">using</SPAN> Borland.Data.Provider;
+
+<SPAN class="KEYWORD">using</SPAN> Rsdn.Framework.Data;
+<SPAN class="KEYWORD">using</SPAN> Rsdn.Framework.Data.DataProvider;
+
+<SPAN class="KEYWORD">namespace</SPAN> Example
+{
+    <SPAN class="KEYWORD">public</SPAN> <SPAN class="KEYWORD">class</SPAN> BdpDataProvider: IDataProvider
+    {
+        IDbConnection IDataProvider.CreateConnectionObject()
+        {
+            <SPAN class="KEYWORD">return</SPAN> <SPAN class="KEYWORD">new</SPAN> BdpConnection();
+        }
+
+        DbDataAdapter IDataProvider.CreateDataAdapterObject()
+        {
+            <SPAN class="KEYWORD">return</SPAN> <SPAN class="KEYWORD">new</SPAN> BdpDataAdapter();
+        }
+
+        <SPAN class="KEYWORD">void</SPAN> IDataProvider.DeriveParameters(IDbCommand command)
+        {
+            BdpCommandBuilder.DeriveParameters((BdpCommand)command);
+        }
+
+        Type IDataProvider.ConnectionType
+        {
+            <SPAN class="KEYWORD">get</SPAN>
+            {
+                <SPAN class="KEYWORD">return</SPAN> <SPAN class="KEYWORD">typeof</SPAN>(BdpConnection);
+            }
+        }
+
+        <SPAN class="KEYWORD">string</SPAN> IDataProvider.Name
+        {
+            <SPAN class="KEYWORD">get</SPAN>
+            {
+                <SPAN class="KEYWORD">return</SPAN> <SPAN class="STRING">"Bdp"</SPAN>;
+            }
+        }
+    }
+
+    <SPAN class="KEYWORD">class</SPAN> Test
+    {
+        <SPAN class="KEYWORD">static</SPAN> <SPAN class="KEYWORD">void</SPAN> Main()
+        {
+            DbManager.AddDataProvider(<SPAN class="KEYWORD">new</SPAN> BdpDataProvider());
+            DbManager.AddConnectionString(<SPAN class="STRING">".bdp"</SPAN>,
+                <SPAN class="STRING">"assembly=Borland.Data.Mssql,Version=1.1.0.0,”</SPAN> +<SPAN class="STRING">
+                ”Culture=neutral,PublicKeyToken=91d62ebb5b0d1b1b;"</SPAN> +
+                <SPAN class="STRING">"vendorclient=sqloledb.dll;osauthentication=True;"</SPAN> +
+                <SPAN class="STRING">"database=Northwind;hostname=localhost;provider=MSSQL"</SPAN>);
+
+            <SPAN class="KEYWORD">using</SPAN> (DbManager db = <SPAN class="KEYWORD">new</SPAN> DbManager())
+            {
+                <SPAN class="KEYWORD">int</SPAN> count = (<SPAN class="KEYWORD">int</SPAN>)db
+<SPAN class="KEYWORD">                    </SPAN>.SetCommand(<SPAN class="STRING">"SELECT Count(*) FROM Categories"</SPAN>)
+                    .ExecuteScalar();
+
+                Console.WriteLine(count);
+            }
+        }
+    }
+}
+</PRE>
+</TD></TR></TABLE>
+</DIV>
+
+<H3>Параметры запроса<A name="IDAAC1ZF"></A></H3>
+<P>Большинство используемых запросов требуют тот или иной набор параметров для своего выполнения. В приведённом выше примере таким параметром является <I>@min</I> - минимальное количество типов товаров для заданной категории. Зачастую, среднеленивый программист предпочитает использовать в подобных случаях обычную конкатенацию строк, т.е. что-то наподобие следующего:</P>
+<DIV id="IDAHC1ZF">
+<TABLE class="code" width="98%"><TR><TD>
+<PRE>
+<SPAN class="KEYWORD">void</SPAN> Test(<SPAN class="KEYWORD">int</SPAN> id)
+{
+    <SPAN class="KEYWORD">string</SPAN> commandText = <SPAN class="STRING">@"
+        SELECT CategoryName
+        FROM   Categories
+        WHERE  CategoryID = "</SPAN> + id;
+
+    <SPAN class="COMMENT">// ...</SPAN>
+}
+</PRE>
+</TD></TR></TABLE>
+</DIV>
+<P>К сожалению, при всей своей простоте, такой стиль плохо читаем, часто ведёт к непредсказуемым ошибкам и долгим мучениям с подбором формата, если в качестве параметра, например, используется дата. Более того, если наш параметр имеет строковый тип, то применение такого подхода в Web-приложениях может сделать их весьма уязвимыми для хакерских атак. Поэтому, отложим шутки в сторону и серьёзно займёмся рассмотрением возможностей, предоставляемых классом <I>DbManager</I> для работы с параметрами.</P>
+<P>Для создания параметров служит следующий набор методов:</P>
+<DIV id="IDAZC1ZF">
+<TABLE class="code" width="98%"><TR><TD>
+<PRE>
+<SPAN class="KEYWORD">public</SPAN> IDbDataParameter Parameter(
+<SPAN class="KEYWORD">    string</SPAN> parameterName,
+<SPAN class="KEYWORD">   </SPAN> <SPAN class="KEYWORD">object</SPAN> value
+);
+
+<SPAN class="KEYWORD">public</SPAN> IDbDataParameter InputParameter(
+<SPAN class="KEYWORD">    string</SPAN> parameterName,
+<SPAN class="KEYWORD">   </SPAN> <SPAN class="KEYWORD">object</SPAN> value
+);
+</PRE>
+</TD></TR></TABLE>
+</DIV>
+<P>Создаёт входной (<I>ParameterDirection.Input</I>) параметр с именем <I>parameterName</I> и значением <I>value</I>.</P>
+<DIV id="IDATD1ZF">
+<TABLE class="code" width="98%"><TR><TD>
+<PRE>
+<SPAN class="KEYWORD">public</SPAN> IDbDataParameter NullParameter(
+<SPAN class="KEYWORD">    string</SPAN> parameterName,
+<SPAN class="KEYWORD">   </SPAN> <SPAN class="KEYWORD">object</SPAN> value
+);
+</PRE>
+</TD></TR></TABLE>
+</DIV>
+<P>Делает тоже, что и предыдущие методы и в дополнение проверяет значение <I>value</I>. Если оно представляет собой <I>null</I>, пустую строку, значение даты <I>DateTime.MinValue</I> или 0 для целых типов, то вместо заданного значения подставляется <I>DBNull.Value</I>.</P>
+<DIV id="IDAHE1ZF">
+<TABLE class="code" width="98%"><TR><TD>
+<PRE>
+<SPAN class="KEYWORD">public</SPAN> IDbDataParameter OutputParameter(
+<SPAN class="KEYWORD">    string</SPAN> parameterName,
+<SPAN class="KEYWORD">   </SPAN> <SPAN class="KEYWORD">object</SPAN> value
+);
+</PRE>
+</TD></TR></TABLE>
+</DIV>
+<P>Создаёт выходной (<I>ParameterDirection.Output</I>) параметр.</P>
+<DIV id="IDAVE1ZF">
+<TABLE class="code" width="98%"><TR><TD>
+<PRE>
+<SPAN class="KEYWORD">public</SPAN> IDbDataParameter InputOutputParameter(
+<SPAN class="KEYWORD">    string</SPAN> parameterName,
+<SPAN class="KEYWORD">   </SPAN> <SPAN class="KEYWORD">object</SPAN> value
+);
+</PRE>
+</TD></TR></TABLE>
+</DIV>
+<P>Создаёт параметр, работающий как входной и выходной (<I>ParameterDirection.InputOutput</I>).</P>
+<DIV id="IDADF1ZF">
+<TABLE class="code" width="98%"><TR><TD>
+<PRE>
+<SPAN class="KEYWORD">public</SPAN> IDbDataParameter ReturnValue(
+<SPAN class="KEYWORD">    string</SPAN> parameterName
+);
+</PRE>
+</TD></TR></TABLE>
+</DIV>
+<P>Создаёт параметр-возвращаемое значение (<I>ParameterDirection.ReturnValue</I>).</P>
+<DIV id="IDANF1ZF">
+<TABLE class="code" width="98%"><TR><TD>
+<PRE>
+<SPAN class="KEYWORD">public</SPAN> IDbDataParameter Parameter(
+    ParameterDirection parameterDirection,
+<SPAN class="KEYWORD">    string</SPAN> parameterName,
+<SPAN class="KEYWORD">    object</SPAN> value
+);
+</PRE>
+</TD></TR></TABLE>
+</DIV>
+<P>Создаёт параметр с заданными значениями.</P>
+<P>Создание выходных параметров и возвращаемое значение используются для работы с сохранёнными процедурами. Входной параметр можно использовать для построения любых запросов.</P>
+<P>Для чтения выходных параметров после выполнения запроса служит следующий метод:</P>
+<DIV id="IDA1F1ZF">
+<TABLE class="code" width="98%"><TR><TD>
+<PRE>
+<SPAN class="KEYWORD">public</SPAN> IDbDataParameter Parameter(
+<SPAN class="KEYWORD">    string</SPAN> parameterName
+);
+</PRE>
+</TD></TR></TABLE>
+</DIV>
+<P>Каждая версия метода Execute… имеет в своём составе метод, принимающий в качестве последнего аргумента список параметров запроса. Например, для <I>ExecuteNonQuery</I> одна из таких функций имеет следующий вид:</P>
+<DIV id="IDAFG1ZF">
+<TABLE class="code" width="98%"><TR><TD>
+<PRE>
+<SPAN class="KEYWORD">public</SPAN> <SPAN class="KEYWORD">int</SPAN> ExecuteNonQuery(
+    <SPAN class="KEYWORD">string</SPAN> commandText,
+    <SPAN class="KEYWORD">params</SPAN> IDbDataParameter[] commandParameters
+);
+</PRE>
+</TD></TR></TABLE>
+</DIV>
+<P>Таким образом, список параметров задаётся простым перечислением через запятую:</P>
+<DIV id="IDARG1ZF">
+<TABLE class="code" width="98%"><TR><TD>
+<PRE>
+<SPAN class="KEYWORD">void</SPAN> InsertRegion(<SPAN class="KEYWORD">int</SPAN> id, <SPAN class="KEYWORD">string</SPAN> description)
+{
+    <SPAN class="KEYWORD">using</SPAN> (DbManager db = <SPAN class="KEYWORD">new</SPAN> DbManager())
+    {
+        db
+            .SetCommand(<SPAN class="STRING">@"
+                INSERT INTO Region (
+                    RegionID,
+                    RegionDescription
+                ) VALUES (
+                    @id,
+                    @desc
+                )"</SPAN>,
+                db.Parameter(<SPAN class="STRING">"@id"</SPAN>,   id),
+                db.Parameter(<SPAN class="STRING">"@desc"</SPAN>, description))
+            .ExecuteNonQuery();
+    }
+}
+</PRE>
+</TD></TR></TABLE>
+</DIV>
+<P>Для создания списка параметров из бизнес объектов существует метод CreateParameters, который принимает в качестве аргумента объект DataRow или любой бизнес-объект. Допустим, у нас имеется класс Region, содержащий информацию о регионе. В этом случае мы могли бы переписать предыдущий пример следующим образом:</P>
+<DIV id="IDAFH1ZF">
+<TABLE class="code" width="98%"><TR><TD>
+<PRE>
+<SPAN class="KEYWORD">public</SPAN> <SPAN class="KEYWORD">class</SPAN> Region
+{
+    <SPAN class="KEYWORD">public</SPAN> <SPAN class="KEYWORD">int</SPAN>    ID;
+    <SPAN class="KEYWORD">public</SPAN> <SPAN class="KEYWORD">string</SPAN> Description;
+}
+
+<SPAN class="KEYWORD">void</SPAN> InsertRegion(Region region)
+{
+    <SPAN class="KEYWORD">using</SPAN> (DbManager db = <SPAN class="KEYWORD">new</SPAN> DbManager())
+    {
+        db
+            .SetCommand(<SPAN class="STRING">@"
+                INSERT INTO Region (
+                    RegionID,
+                    RegionDescription
+                ) VALUES (
+                    @ID,
+                    @Description
+                )"</SPAN>,
+                db.CreateParameters(region)).
+            .ExecuteNonQuery();
+    }
+}
+</PRE>
+</TD></TR></TABLE>
+</DIV>
+<P>Для передачи параметров сохранённой процедуре можно воспользоваться ещё одним способом, не требующим явного указания имён параметров:</P>
+<DIV id="IDA3H1ZF">
+<TABLE class="code" width="98%"><TR><TD>
+<PRE>
+DataSet SalesByCategory(<SPAN class="KEYWORD">string</SPAN> categoryName, <SPAN class="KEYWORD">string</SPAN> ordYear)
+{
+    <SPAN class="KEYWORD">using</SPAN> (DbManager db = <SPAN class="KEYWORD">new</SPAN> DbManager())
+    {
+<SPAN class="KEYWORD">        return</SPAN> db
+<SPAN class="KEYWORD">            </SPAN>.SetSpCommand(<SPAN class="STRING">"SalesByCategory"</SPAN>, categoryName, ordYear)
+            .ExecuteDataSet();
+    }
+}
+</PRE>
+</TD></TR></TABLE>
+</DIV>
+<P>В данном случае важен лишь порядок следования аргументов процедуры. Данная функция самостоятельно строит список параметров исходя из списка параметров сохранённой процедуры.</P>
+<P>Для анализа возвращаемого значения и выходных параметров можно воспользоваться следующим методом:</P>
+<DIV id="IDAUI1ZF">
+<TABLE class="code" width="98%"><TR><TD>
+<PRE>
+<SPAN class="KEYWORD">public</SPAN> IDbDataParameter Parameter(
+<SPAN class="KEYWORD">    string</SPAN> parameterName
+);
+</PRE>
+</TD></TR></TABLE>
+</DIV>
+<P>Например, в приведённом выше примере возвращаемое значение сохранённой процедуры можно проверить следующим образом:</P>
+<DIV id="IDA2I1ZF">
+<TABLE class="code" width="98%"><TR><TD>
+<PRE>
+DataSet SalesByCategory(<SPAN class="KEYWORD">string</SPAN> categoryName, <SPAN class="KEYWORD">string</SPAN> ordYear)
+{
+    <SPAN class="KEYWORD">using</SPAN> (DbManager db = <SPAN class="KEYWORD">new</SPAN> DbManager())
+    {
+        DataSet dataSet = db
+            .SetSpCommand(<SPAN class="STRING">"SalesByCategory"</SPAN>, categoryName, ordYear)
+            .ExecuteSpDataSet();
+
+        <SPAN class="KEYWORD">int</SPAN> returnValue = (<SPAN class="KEYWORD">int</SPAN>)db.<STRONG>Parameter</STRONG>(<SPAN class="STRING">"@RETURN_VALUE"</SPAN>).Value;
+
+        <SPAN class="KEYWORD">if</SPAN> (returnValue != 0)
+        {
+            <SPAN class="KEYWORD">throw</SPAN> <SPAN class="KEYWORD">new</SPAN> Exception(
+<SPAN class="KEYWORD">                string</SPAN>.Format(<SPAN class="STRING">"Return value is '{0}'"</SPAN>, returnValue));
+        }
+
+        <SPAN class="KEYWORD">return</SPAN> dataSet;
+    }
+}
+</PRE>
+</TD></TR></TABLE>
+</DIV>
+<P>Последней возможностью работы с параметрами, которую нам осталось рассмотреть, является использование функции подготовки запроса <I>Prepare</I>, которая может быть полезной при выполнении одного и того же запроса несколько раз. Фактически в данном случае вызов метода <I>Execute</I>… разбивается на две части: первая - вызов <I>Prepare</I> с заданием типа, текста и параметров запроса, вторая - вызов соответствующего метода <I>Execute</I>… для выполнения запроса определённое число раз. Следующий пример демонстрирует данную возможность.</P>
+<DIV id="IDAGK1ZF">
+<TABLE class="code" width="98%"><TR><TD>
+<PRE>
+<SPAN class="KEYWORD">void</SPAN> InsertRegionList(Region[] regionList)
+{
+    <SPAN class="KEYWORD">using</SPAN> (DbManager db = <SPAN class="KEYWORD">new</SPAN> DbManager())
+    {
+        db
+            .SetCommand (<SPAN class="STRING">@"
+                INSERT INTO Region (
+                    RegionID,
+                    RegionDescription
+                ) VALUES (
+                    @ID,
+                    @Description
+                )"</SPAN>,
+                db.Parameter(<SPAN class="STRING">"@ID"</SPAN>,          regionList[0].ID),
+                db.Parameter(<SPAN class="STRING">"@Description"</SPAN>, regionList[0].Description))
+            .<STRONG>Prepare()</STRONG>;
+
+        <SPAN class="KEYWORD">foreach</SPAN> (Region r <SPAN class="KEYWORD">in</SPAN> regionList)
+        {
+            db.Parameter(<SPAN class="STRING">"@ID"</SPAN>).Value          = r.ID;
+            db.Parameter(<SPAN class="STRING">"@Description"</SPAN>).Value = r.Description;
+
+            db.ExecuteNonQuery();
+        }
+    }
+}
+</PRE>
+</TD></TR></TABLE>
+</DIV>
+<P>Либо мы можем упростить его следующим образом для бизнес объектов...</P>
+<DIV id="IDAAL1ZF">
+<TABLE class="code" width="98%"><TR><TD>
+<PRE>
+<SPAN class="KEYWORD">void</SPAN> InsertRegionList(Region[] regionList)
+{
+    <SPAN class="KEYWORD">using</SPAN> (DbManager db = <SPAN class="KEYWORD">new</SPAN> DbManager())
+    {
+        db
+            .SetCommand(<SPAN class="STRING">@"
+                INSERT INTO Region (
+                    RegionID,
+                    RegionDescription
+                ) VALUES (
+                    @ID,
+                    @Description
+                )"</SPAN>,
+                db.CreateParameters(regionList[0]))
+            .Prepare();
+
+        <SPAN class="KEYWORD">foreach</SPAN> (Region r <SPAN class="KEYWORD">in</SPAN> regionList)
+        {
+            db.AssignParameterValues(r);
+            db.ExecuteNonQuery();
+        }
+    }
+}
+</PRE>
+</TD></TR></TABLE>
+</DIV>
+<P>и класса <I>DataRow</I></P>
+<DIV id="IDARL1ZF">
+<TABLE class="code" width="98%"><TR><TD>
+<PRE>
+<SPAN class="KEYWORD">static</SPAN> <SPAN class="KEYWORD">void</SPAN> InsertRegionTable(DataTable dataTable)
+{
+    <SPAN class="KEYWORD">using</SPAN> (DbManager db = <SPAN class="KEYWORD">new</SPAN> DbManager())
+    {
+        db
+            .SetCommand(<SPAN class="STRING">@"
+                INSERT INTO Region (
+                    RegionID,
+                    RegionDescription
+                ) VALUES (
+                    @ID,
+                    @Description
+                )"</SPAN>,
+                db.CreateParameters(dataTable.Rows[0]))
+            .Prepare();
+
+        <SPAN class="KEYWORD">foreach</SPAN> (DataRow dr <SPAN class="KEYWORD">in</SPAN> dataTable.Rows)
+            db.AssignParameterValues(dr).ExecuteNonQuery();
+    }
+}
+</PRE>
+</TD></TR></TABLE>
+</DIV>
+
+<H3>Методы Execute<A name="IDACM1ZF"></A></H3>
+<P>В свою очередь предыдущие примеры тоже можно упростить. Класс <I>DbManager</I> уже содержит реализацию методов для выполнения подобных групповых операций:</P>
+<DIV id="IDAJM1ZF">
+<TABLE class="code" width="98%"><TR><TD>
+<PRE>
+<SPAN class="KEYWORD">public</SPAN> <SPAN class="KEYWORD">int</SPAN> Execute(IList list);
+
+<SPAN class="KEYWORD">public</SPAN> <SPAN class="KEYWORD">int</SPAN> Execute(DataTable table);
+
+<SPAN class="KEYWORD">public</SPAN> <SPAN class="KEYWORD">int</SPAN> Execute(DataSet dataSet);
+
+<SPAN class="KEYWORD">public</SPAN> <SPAN class="KEYWORD">int</SPAN> Execute(DataSet dataSet, <SPAN class="KEYWORD">string</SPAN> tableName);
+</PRE>
+</TD></TR></TABLE>
+</DIV>
+<P>Эти методы могут использоваться для выполнения операций добавления и модификации группы записей в базе данных.</P>
+<P>Также класс <I>DbManager</I> предоставляет аналогичные ADO.NET методы <I>Execute</I>, доступные при использовании интерфейса <I>IDbCommand</I>, и добавляет свои расширения для классов <I>DataSet</I>, <I>DataTable</I>, бизнес объектов и списков.</P>
+<H4>ExecuteNonQuery</H4>
+<P>Метод <I>ExecuteNonQuery</I> возвращает число записей обработанных запросом.</P>
+<DIV id="IDASN1ZF">
+<TABLE class="code" width="98%"><TR><TD>
+<PRE>
+<SPAN class="KEYWORD">public</SPAN> <SPAN class="KEYWORD">int</SPAN> ExecuteNonQuery();
+</PRE>
+</TD></TR></TABLE>
+</DIV>
+
+<H4>ExecuteScalar</H4>
+<P>Данный метод отличается от предыдущего только тем, что вместо числа обработанных запросом записей возвращает значение первой колонки первой записи из набора данных, полученного в результате запроса. </P>
+<DIV id="IDA4N1ZF">
+<TABLE class="code" width="98%"><TR><TD>
+<PRE>
+<SPAN class="KEYWORD">public</SPAN> <SPAN class="KEYWORD">object</SPAN> ExecuteScalar();
+</PRE>
+</TD></TR></TABLE>
+</DIV>
+
+<H4>ExecuteReader</H4>
+<P>Метод <I>ExecuteReader</I> возвращает <I>IDataReader</I> интерфейс.</P>
+<DIV id="IDAOO1ZF">
+<TABLE class="code" width="98%"><TR><TD>
+<PRE>
+<SPAN class="KEYWORD">public</SPAN> IDataReader ExecuteReader();
+</PRE>
+</TD></TR></TABLE>
+</DIV>
+<P>Для полученного объекта нужно не забыть вызвать его метод <I>Dispose</I> или использовать ключевое слово <I>using</I>.</P>
+<DIV id="IDAYO1ZF">
+<TABLE class="code" width="98%"><TR><TD>
+<PRE>
+<SPAN class="KEYWORD">using</SPAN> (DbManager   db = <SPAN class="KEYWORD">new</SPAN> DbManager())
+<SPAN class="KEYWORD">using</SPAN> (IDataReader dr = db.SetCommand(...).ExecuteReader())
+{
+<SPAN class="KEYWORD">    while</SPAN> (dr.Read())
+    {
+<SPAN class="COMMENT">        // ...</SPAN>
+    }
+}
+</PRE>
+</TD></TR></TABLE>
+</DIV>
+
+<H4>ExecuteDataSet</H4>
+<P>Данная версия метода предназначена для чтения данных в <I>DataSet</I>, для которого в ADO.NET используется один из наследников объекта <I>DbDataAdapter</I>.</P>
+<DIV id="IDAOP1ZF">
+<TABLE class="code" width="98%"><TR><TD>
+<PRE>
+<SPAN class="KEYWORD">public</SPAN> DataSet ExecuteDataSet();
+<SPAN class="KEYWORD">
+public</SPAN> DataSet ExecuteDataSet(DataSet dataSet);
+<SPAN class="KEYWORD">
+public</SPAN> DataSet ExecuteDataSet(<SPAN class="KEYWORD">string</SPAN> tableName);
+<SPAN class="KEYWORD">
+public</SPAN> DataSet ExecuteDataSet(DataSet dataSet, <SPAN class="KEYWORD">string</SPAN> tableName);
+
+<SPAN class="KEYWORD">public</SPAN> DataSet ExecuteDataSet(
+<SPAN class="KEYWORD">    </SPAN>DataSet dataSet,
+    <SPAN class="KEYWORD">int</SPAN>     startRecord,<SPAN class="KEYWORD">
+</SPAN>    <SPAN class="KEYWORD">int</SPAN>     maxRecords,<SPAN class="KEYWORD">
+</SPAN>    <SPAN class="KEYWORD">string</SPAN>  tableName);
+</PRE>
+</TD></TR></TABLE>
+</DIV>
+
+<H4>ExecuteDataTable</H4>
+<P>Чтение данных в отдельную таблицу также представлено соответствующими методами в Rsdn.Framework.Data:</P>
+<DIV id="IDATQ1ZF">
+<TABLE class="code" width="98%"><TR><TD>
+<PRE>
+<SPAN class="KEYWORD">public</SPAN> DataTable ExecuteDataTable();
+<SPAN class="KEYWORD">
+public</SPAN> DataTable ExecuteDataTable(DataTable dataTable);
+</PRE>
+</TD></TR></TABLE>
+</DIV>
+
+<H4>ExecuteBizEntity</H4>
+<P>Этот метод предназначен для чтения одной записи из набора данных в бизнес-объект.</P>
+<DIV id="IDA5Q1ZF">
+<TABLE class="code" width="98%"><TR><TD>
+<PRE>
+<SPAN class="KEYWORD">public</SPAN> <SPAN class="KEYWORD">object</SPAN> ExecuteBizEntity(<SPAN class="KEYWORD">object</SPAN> entity);
+<SPAN class="KEYWORD">
+public</SPAN> <SPAN class="KEYWORD">object</SPAN> ExecuteBizEntity(Type type);
+</PRE>
+</TD></TR></TABLE>
+</DIV>
+<P>Если в результирующем наборе данных не будет обнаружено ни одной записи, то данный метод сгенерирует исключение <I>RsdnDataRecordNotFoundException</I>.</P>
+
+<H4>ExecuteList</H4>
+<P>Метод <I>ExecuteList</I> позволяет читать все записи набора данных в коллекцию.</P>
+<DIV id="IDAXR1ZF">
+<TABLE class="code" width="98%"><TR><TD>
+<PRE>
+<SPAN class="KEYWORD">public</SPAN> ArrayList ExecuteList(Type type);
+<SPAN class="KEYWORD">
+public</SPAN> IList     ExecuteList(IList list, Type type);
+</PRE>
+</TD></TR></TABLE>
+</DIV>
+<P>На этом описание класса <I>DbManager</I> можно завершить и перейти к рассмотрению принципов работы последних двух методов.</P>
+
+
+<H2>Отображение данных<A name="IDAES1ZF"></A></H2>
+<P>ADO.NET поддерживает два способа чтения данных из источника: прямое чтение из объекта класса <I>DataReader</I>, либо с помощью класса <I>DataAdapter</I> в экземпляр класса <I>DataSet</I>, который по сути представляет собой единственный вариант бизнес сущностей, предлагаемых и культивируемых Microsoft. </P>
+<P>Оставим сегодня в покое достоинствах и преимущества класса <I>DataSet</I>, и лишь заметим, что часто бывает необходимо уметь читать данные непосредственно в бизнес объекты приложения. При этом иногда нужно выполнять некоторые действия по отображению данных, например, из строковых значений в перечислители (enumerators) или замене значений <I>NULL</I> на нечто более удобоваримое. Как вы заметили из нашего самого первого примера, класс <I>DbManager</I> великодушно предоставляет нам такие возможности.</P>
+<P>Рассмотрим ещё один пример, который возвращает все записи из таблицы <I>Categories</I>:</P>
+<DIV id="IDA1S1ZF">
+<TABLE class="code" width="98%"><TR><TD>
+<PRE>
+<SPAN class="KEYWORD">public</SPAN> <SPAN class="KEYWORD">class</SPAN> Category
+{
+    <SPAN class="KEYWORD">public</SPAN> <SPAN class="KEYWORD">int</SPAN>    CategoryID;
+    <SPAN class="KEYWORD">public</SPAN> <SPAN class="KEYWORD">string</SPAN> CategoryName;
+    <SPAN class="KEYWORD">public</SPAN> <SPAN class="KEYWORD">string</SPAN> Description;
+}
+
+<SPAN class="KEYWORD">static</SPAN> ArrayList GetAllCategories()
+{
+    <SPAN class="KEYWORD">using</SPAN> (DbManager db = <SPAN class="KEYWORD">new</SPAN> DbManager())
+    {
+        <SPAN class="KEYWORD">return</SPAN> db
+<SPAN class="KEYWORD">            </SPAN>.SeCommand(<SPAN class="STRING">@"
+                SELECT
+                    CategoryID,
+                    CategoryName,
+                    Description
+                FROM Categories"</SPAN>)
+<SPAN class="STRING">            .</SPAN>ExecuteList(<SPAN class="KEYWORD">typeof</SPAN>(Category));
+    }
+}
+</PRE>
+</TD></TR></TABLE>
+</DIV>
+<P>Метод <I>ExecuteList</I> создаёт экземпляр класса <I>Category</I> для каждой записи в таблице, затем осуществляет отображение данных на поля объекта и добавляет его в список. Для отображения колонок таблицы на поля и свойства нашего объекта используется механизм <I>Reflection</I>, единственным недостатком которого является некоторая нерасторопность. Для решения этой проблемы применён ещё один механизм .NET – генерация исполняемого кода во время выполнения программы (<I>System.Reflection.Emit</I> namespace), что позволяет максимально увеличить производительность и свести использование <I>Reflection</I> только для начальной инициализации.</P>
+<P>Ко всему прочему, метод ExecuteList берёт на себя работу по замене значений <I>NULL</I> на <I>string.Empty</I> для строковых переменных, в результате вам не придётся каждый раз проверять ваши строки на <I>null</I>. Также, по умолчанию, все концевые пробелы строковые переменные усекаются.</P>
+<P>Если имена полей нашего класса и таблицы базы данных не совпадают, то мы можем воспользоваться двумя способами. Первый – использование стандартной возможности SQL сервера по замене имён колонок их псевдонимами:</P>
+<DIV id="IDATU1ZF">
+<TABLE class="code" width="98%"><TR><TD>
+<PRE>
+<SPAN class="KEYWORD">public</SPAN> <SPAN class="KEYWORD">class</SPAN> Category
+{
+    <SPAN class="KEYWORD">public</SPAN> <SPAN class="KEYWORD">int</SPAN>    ID;
+    <SPAN class="KEYWORD">public</SPAN> <SPAN class="KEYWORD">string</SPAN> CategoryName;
+    <SPAN class="KEYWORD">public</SPAN> <SPAN class="KEYWORD">string</SPAN> Description;
+}
+
+<SPAN class="KEYWORD">static</SPAN> ArrayList GetAllCategories()
+{
+    <SPAN class="KEYWORD">using</SPAN> (DbManager db = <SPAN class="KEYWORD">new</SPAN> DbManager())
+    {
+        <SPAN class="KEYWORD">return</SPAN> db
+<SPAN class="KEYWORD">            </SPAN>.SetCommand(<SPAN class="STRING">@"
+                SELECT
+                    CategoryID </SPAN><SPAN class="ACCENT">as ID</SPAN><SPAN class="STRING">,
+                    CategoryName,
+                    Description
+                FROM Categories"</SPAN>)
+<SPAN class="STRING">            .</SPAN>ExecuteList(<SPAN class="KEYWORD">typeof</SPAN>(Category));
+    }
+}
+</PRE>
+</TD></TR></TABLE>
+</DIV>
+<P>Второй – применение специального атрибута MapFieldAttribute.</P>
+<H3>MapFieldAttribute<A name="IDA0V1ZF"></A></H3>
+<P>Данный атрибут отвечает за именование отображаемого поля нашего бизнес объекта, позволяет определить поля, для которых разрешено нулевое значение и управляет усечением концевых пробелов для строковых переменных. Ниже приведены свойства данного атрибута с кратким описанием.</P>
+<TABLE border="0" cellspacing="2" cellpadding="5"><TR>
+<TD><STRONG>Свойство</STRONG></TD>
+<TD><STRONG>Описание</STRONG></TD>
+<TD><STRONG>Значение по умолчанию</STRONG></TD>
+</TR>
+<TR>
+<TD>Name</TD>
+<TD>Заменяет отображаемое имя поля/свойства на заданное.</TD>
+<TD>null, используется оригинальное имя поля</TD>
+</TR>
+<TR>
+<TD>IsNullable</TD>
+<TD>true, если поле может содержать нулевое значение. При сохранении поля из объекта в базу данных вместо нулевого значения такого поля подставляется <I>NULL</I>.</TD>
+<TD>false</TD>
+</TR>
+<TR>
+<TD>IsTrimmable</TD>
+<TD>true, если концевые пробелы для строкового поля должны быть усечены.</TD>
+<TD>True</TD>
+</TR>
+</TABLE>
+<P>Для свойства IsNullable конвертация в NULL производится для следующих типов и их значений:</P>
+<TABLE border="0" cellspacing="2" cellpadding="5"><TR>
+<TD><STRONG>Тип</STRONG></TD>
+<TD><STRONG>Значение</STRONG></TD>
+</TR>
+<TR>
+<TD>String</TD>
+<TD>Length == 0</TD>
+</TR>
+<TR>
+<TD>DateTime</TD>
+<TD>DateTime.MinValue</TD>
+</TR>
+<TR>
+<TD>Int16</TD>
+<TD>0</TD>
+</TR>
+<TR>
+<TD>Int32</TD>
+<TD>0</TD>
+</TR>
+<TR>
+<TD>Int64</TD>
+<TD>0</TD>
+</TR>
+</TABLE>
+<P>Таким образом, предыдущий пример можно переписать следующим образом с применением рассматриваемого атрибута:</P>
+<DIV id="IDA0X1ZF">
+<TABLE class="code" width="98%"><TR><TD>
+<PRE>
+<SPAN class="KEYWORD">public</SPAN> <SPAN class="KEYWORD">class</SPAN> Category
+{
+    [MapField(<SPAN class="ACCENT">Name</SPAN> = <SPAN class="STRING">"CategoryID"</SPAN>)]
+    <SPAN class="KEYWORD">public</SPAN> <SPAN class="KEYWORD">int</SPAN>    ID;
+
+    <SPAN class="KEYWORD">public</SPAN> <SPAN class="KEYWORD">string</SPAN> CategoryName;
+
+    [MapField(<SPAN class="ACCENT">IsNullable</SPAN> = <SPAN class="KEYWORD">true</SPAN>)]
+    <SPAN class="KEYWORD">public</SPAN> <SPAN class="KEYWORD">string</SPAN> Description;
+}
+
+<SPAN class="KEYWORD">static</SPAN> ArrayList GetAllCategories()
+{
+    <SPAN class="KEYWORD">using</SPAN> (DbManager db = <SPAN class="KEYWORD">new</SPAN> DbManager())
+    {
+        <SPAN class="KEYWORD">return</SPAN> db
+<SPAN class="KEYWORD">            </SPAN>.SetCommand(<SPAN class="STRING">@"
+                SELECT
+                    CategoryID,
+                    CategoryName,
+                    Description
+                FROM Categories"</SPAN>)
+            .ExecuteList(<SPAN class="KEYWORD">typeof</SPAN>(Category));
+    }
+}
+</PRE>
+</TD></TR></TABLE>
+</DIV>
+
+<H3>MapValueAttribute<A name="IDAIZ1ZF"></A></H3>
+<P>Ещё одной возможностью, предоставляемой пространством имён <I>Rsdn.Framework.Data</I>, является атрибут <I>MapValueAtribute</I>, который позволяет гибко управлять значениями отображаемых полей. С помощью данного атрибута можно переотобразить, например, строковые значения на числа или перечислители и наоборот, задать значение по умолчанию и значения <I>NULL</I>.</P>
+<P>Следующий пример демонстрирует преобразование целого значения в Boolean:</P>
+<DIV id="IDAVZ1ZF">
+<TABLE class="code" width="98%"><TR><TD>
+<PRE>
+<SPAN class="KEYWORD">public</SPAN> <SPAN class="KEYWORD">class</SPAN> Sample
+{
+    [MapValue(<SPAN class="KEYWORD">true</SPAN>,  1)]
+    [MapValue(<SPAN class="KEYWORD">false</SPAN>, 0)]
+<SPAN class="KEYWORD">    public</SPAN> <SPAN class="KEYWORD">bool</SPAN> Value;
+}
+</PRE>
+</TD></TR></TABLE>
+</DIV>
+<P>Либо же более осмысленный вариант, в случае, если логические значения хранятся в вашей базе данных в виде литералов:</P>
+<DIV id="IDAF01ZF">
+<TABLE class="code" width="98%"><TR><TD>
+<PRE>
+<SPAN class="KEYWORD">public</SPAN> <SPAN class="KEYWORD">class</SPAN> Sample
+{
+    [MapValue(<SPAN class="KEYWORD">true</SPAN>,  <SPAN class="STRING">"Y"</SPAN>)]
+    [MapValue(<SPAN class="KEYWORD">false</SPAN>, <SPAN class="STRING">"N"</SPAN>)]
+<SPAN class="KEYWORD">    public</SPAN> <SPAN class="KEYWORD">bool</SPAN> Value;
+}
+</PRE>
+</TD></TR></TABLE>
+</DIV>
+<P>Таким же способом можно воспользоваться для отображения данных на перечислители. Кроме того, данный атрибут можно применить к самому перечислителю, задав, таким образом, отображение для него во всех объектах, в которых он будет использоваться:</P>
+<DIV id="IDAZ01ZF">
+<TABLE class="code" width="98%"><TR><TD>
+<PRE>
+[MapValue(Status.Active,   <SPAN class="STRING">"A"</SPAN>)]
+[MapValue(Status.Inactive, <SPAN class="STRING">"I"</SPAN>)]
+[MapValue(Status.Pending,  <SPAN class="STRING">"P"</SPAN>)]
+[MapNullValue(Status.Unknown)]
+[MapDefaultValue(Status.Unknown)]
+<SPAN class="KEYWORD">public</SPAN> <SPAN class="KEYWORD">enum</SPAN> Status
+{
+    Unknown,
+    Active,
+    Inactive,
+    Pending
+}
+</PRE>
+</TD></TR></TABLE>
+</DIV>
+<P>Данный пример демонстрирует ещё две версии атрибута. Предпоследний вариант используется для задания значения, если в базе данных поле-источник представлено как <I>NULL</I>. Последний вариант задаёт значение в случае, если исходное значение не соответствует ни одному из вышеперечисленных.</P>
+
+<H3>Отображение вложенных классов<A name="IDAK11ZF"></A></H3>
+<P>Для отображения данных на поля, которые сами являются классами можно воспользоваться следующим способом:</P>
+<DIV id="IDAP11ZF">
+<TABLE class="code" width="98%"><TR><TD>
+<PRE>
+<SPAN class="KEYWORD">public</SPAN> <SPAN class="KEYWORD">class</SPAN> RecordHeader
+{
+    <SPAN class="KEYWORD">public</SPAN> <SPAN class="KEYWORD">int</SPAN>    <SPAN class="ACCENT">ID</SPAN>;
+    <SPAN class="KEYWORD">public</SPAN> <SPAN class="KEYWORD">string</SPAN> <SPAN class="ACCENT">Name</SPAN>;
+}
+<SPAN class="KEYWORD">
+public</SPAN> <SPAN class="KEYWORD">class</SPAN> Category
+{
+    <SPAN class="KEYWORD">public</SPAN> RecordHeader <SPAN class="ACCENT">Header</SPAN> = <SPAN class="KEYWORD">new</SPAN> RecordHeader();
+    <SPAN class="KEYWORD">public</SPAN> <SPAN class="KEYWORD">string</SPAN>       Description;
+}
+
+<SPAN class="KEYWORD">static</SPAN> ArrayList GetAllCategories()
+{
+    <SPAN class="KEYWORD">using</SPAN> (DbManager db = <SPAN class="KEYWORD">new</SPAN> DbManager())
+    {
+        <SPAN class="KEYWORD">return</SPAN> db
+<SPAN class="KEYWORD">            </SPAN>.SetCommand(<SPAN class="STRING">@"
+                SELECT
+                    CategoryID   </SPAN><SPAN class="ACCENT">as [Header.ID]</SPAN><SPAN class="STRING">,
+                    CategoryName </SPAN><SPAN class="ACCENT">as [Header.Name]</SPAN><SPAN class="STRING">,
+                    Description
+                FROM Categories"</SPAN>)
+            .ExecuteList(<SPAN class="KEYWORD">typeof</SPAN>(Category));
+    }
+}
+</PRE>
+</TD></TR></TABLE>
+</DIV>
+<P>Здесь следует обратить внимание, прежде всего, на два момента. Во-первых, поле <I>Header</I> должно быть явно проинициализировано приведённым выше способом или в конструкторе без параметров, который используется для создания экземпляра объекта <I>Category</I>. Инициализацией таких полей библиотека не занимается и нулевое значение данного поля будет просто проигнорировано. Во-вторых, для разделения имени вложенного класса и его полей используется специальное соглашение об именовании – такие имена должны разделяться точкой. Ограничения на число вложений не существует.</P>
+
+<H2>Класс Map<A name="IDAO31ZF"></A></H2>
+<P>Для всех перечисленных манипуляций рассматриваемый нами метод <I>ExecuteList</I> пользуется услугами класса <I>Map</I>, который может иметь и вполне самостоятельное применение. Ниже приведён полный список методов класса <I>Map</I>.</P>
+<H4>ToValue</H4>
+<DIV id="IDA231ZF">
+<TABLE class="code" width="98%"><TR><TD>
+<PRE>
+<SPAN class="KEYWORD">public</SPAN> <SPAN class="KEYWORD">static</SPAN> <SPAN class="KEYWORD">object</SPAN> ToValue(<SPAN class="KEYWORD">object</SPAN> sourceValue, Type type);
+</PRE>
+</TD></TR></TABLE>
+</DIV>
+<P>С помощью данного метода можно получить отображаемое на него значение для заданного типа. Например, следующий код:</P>
+<DIV id="IDAI41ZF">
+<TABLE class="code" width="98%"><TR><TD>
+<PRE>
+<SPAN class="KEYWORD">object</SPAN> o = Map.ToValue(<SPAN class="STRING">"P"</SPAN>, <SPAN class="KEYWORD">typeof</SPAN>(Status));
+Console.WriteLine(o);
+</PRE>
+</TD></TR></TABLE>
+</DIV>
+<P>напечатает соответствующее название значения перечислителя</P>
+<DIV id="IDAS41ZF">
+<TABLE class="code" width="98%"><TR><TD>
+<PRE>
+Pending
+</PRE>
+</TD></TR></TABLE>
+</DIV>
+
+<H4>FromValue</H4>
+<DIV id="IDAY41ZF">
+<TABLE class="code" width="98%"><TR><TD>
+<PRE>
+<SPAN class="KEYWORD">public</SPAN> <SPAN class="KEYWORD">static</SPAN> <SPAN class="KEYWORD">object</SPAN> FromValue(<SPAN class="KEYWORD">object</SPAN> sourceValue);
+</PRE>
+</TD></TR></TABLE>
+</DIV>
+<P>Этот метод может применяться для обратной задачи – получения значения, которое отображается на заданное значение указанного типа. Следующий код:</P>
+<DIV id="IDAE51ZF">
+<TABLE class="code" width="98%"><TR><TD>
+<PRE>
+<SPAN class="KEYWORD">object</SPAN> o = Map.FromValue(Status.Pending);
+Console.WriteLine(o);
+</PRE>
+</TD></TR></TABLE>
+</DIV>
+<P>напечатает строку</P>
+<DIV id="IDAK51ZF">
+<TABLE class="code" width="98%"><TR><TD>
+<PRE>
+P
+</PRE>
+</TD></TR></TABLE>
+</DIV>
+
+<H4>IsNull</H4>
+<DIV id="IDAQ51ZF">
+<TABLE class="code" width="98%"><TR><TD>
+<PRE>
+<SPAN class="KEYWORD">public</SPAN> <SPAN class="KEYWORD">static</SPAN> <SPAN class="KEYWORD">bool</SPAN> IsNull(<SPAN class="KEYWORD">object</SPAN> value);
+</PRE>
+</TD></TR></TABLE>
+</DIV>
+<P>Возвращает <I>true</I>, если заданное значение рассматривается библиотекой как нулевое. Список таких значений мы рассматривали при описании атрибута <I>MapFieldAttribute</I>.</P>
+
+<H4>ToObject</H4>
+<P>Данный метод предназначен для отображения одного объекта на другой и имеет несколько версий.</P>
+<DIV id="IDAJA2ZF">
+<TABLE class="code" width="98%"><TR><TD>
+<PRE>
+<SPAN class="KEYWORD">public</SPAN> <SPAN class="KEYWORD">static</SPAN> <SPAN class="KEYWORD">object</SPAN> ToObject(<SPAN class="KEYWORD">object</SPAN> source, <SPAN class="KEYWORD">object</SPAN> dest);
+</PRE>
+</TD></TR></TABLE>
+</DIV>
+<P>Отображает объект <I>source</I> на <I>dest</I> и возвращает последний. В качестве исходного и целевого объекта могут выступать как обычные бизнес объекты, так и экземпляр класса <I>DataRow</I> или <I>DataTable</I>. В последнем случае будет использоваться первая запись таблицы.</P>
+<DIV id="IDA5A2ZF">
+<TABLE class="code" width="98%"><TR><TD>
+<PRE>
+<SPAN class="KEYWORD">public</SPAN> <SPAN class="KEYWORD">static</SPAN> <SPAN class="KEYWORD">object</SPAN> ToObject(<SPAN class="KEYWORD">object</SPAN> source, Type type);
+</PRE>
+</TD></TR></TABLE>
+</DIV>
+<P>Создаёт объект заданного типа <I>type</I> и отображает на него <I>source</I>.</P>
+<DIV id="IDAPB2ZF">
+<TABLE class="code" width="98%"><TR><TD>
+<PRE>
+<SPAN class="KEYWORD">public</SPAN> <SPAN class="KEYWORD">static</SPAN> <SPAN class="KEYWORD">object</SPAN> ToObject(
+<SPAN class="KEYWORD">    </SPAN>DataRow dataRow,
+    DataRowVersion version,
+    <SPAN class="KEYWORD">object</SPAN> dest);
+
+<SPAN class="KEYWORD">public</SPAN> <SPAN class="KEYWORD">static</SPAN> <SPAN class="KEYWORD">object</SPAN> ToObject(
+<SPAN class="KEYWORD">    </SPAN>DataRow dataRow,
+    DataRowVersion version,
+    Type type);
+</PRE>
+</TD></TR></TABLE>
+</DIV>
+<P>Специальные версии для класса <I>DataRow</I>, позволяющие задавать также и версию отображаемых записей.</P>
+
+<H4>ToList</H4>
+<P>Данное семейство методов применяется для отображения одного списка записей на другой.</P>
+<DIV id="IDANC2ZF">
+<TABLE class="code" width="98%"><TR><TD>
+<PRE>
+<SPAN class="KEYWORD">public</SPAN> <SPAN class="KEYWORD">static</SPAN> IList ToList(
+<SPAN class="KEYWORD">    </SPAN>DataTable sourceTable,
+    IList     list,
+    Type      type);
+</PRE>
+</TD></TR></TABLE>
+</DIV>
+<P>Отображает таблицу <I>sourceTable</I> на список объектов <I>list</I> заданного типа <I>type</I>.</P>
+<DIV id="IDA3C2ZF">
+<TABLE class="code" width="98%"><TR><TD>
+<PRE>
+<SPAN class="KEYWORD">public</SPAN> <SPAN class="KEYWORD">static</SPAN> IList ToList(
+<SPAN class="KEYWORD">    </SPAN>DataTable      sourceTable,
+    DataRowVersion version,
+    IList          list,
+    Type           type);
+</PRE>
+</TD></TR></TABLE>
+</DIV>
+<P>Специальная версия предыдущего метода, позволяющая задавать версию записей исходной таблицы.</P>
+<DIV id="IDAHD2ZF">
+<TABLE class="code" width="98%"><TR><TD>
+<PRE>
+<SPAN class="KEYWORD">public</SPAN> <SPAN class="KEYWORD">static</SPAN> ArrayList ToList(
+<SPAN class="KEYWORD">    </SPAN>DataTable dataTable,
+    Type      type);
+</PRE>
+</TD></TR></TABLE>
+</DIV>
+<P>Создаёт экземпляр класса <I>ArrayList</I> и отображает на него исходную таблицу.</P>
+<DIV id="IDATD2ZF">
+<TABLE class="code" width="98%"><TR><TD>
+<PRE>
+<SPAN class="KEYWORD">public</SPAN> <SPAN class="KEYWORD">static</SPAN> ArrayList ToList(
+    DataTable      dataTable,
+    DataRowVersion version,
+<SPAN class="KEYWORD">    </SPAN>Type           type	);
+</PRE>
+</TD></TR></TABLE>
+</DIV>
+<P>Специальная версия предыдущего метода.</P>
+<DIV id="IDA3D2ZF">
+<TABLE class="code" width="98%"><TR><TD>
+<PRE>
+<SPAN class="KEYWORD">public</SPAN> <SPAN class="KEYWORD">static</SPAN> DataTable ToList(
+<SPAN class="KEYWORD">    </SPAN>IList list);
+</PRE>
+</TD></TR></TABLE>
+</DIV>
+<P>Создаёт экземпляр объекта <I>DataTable</I> и отображает на него заданный список объектов.</P>
+<DIV id="IDAJE2ZF">
+<TABLE class="code" width="98%"><TR><TD>
+<PRE>
+<SPAN class="KEYWORD">public</SPAN> <SPAN class="KEYWORD">static</SPAN> DataTable ToList(
+<SPAN class="KEYWORD">    </SPAN>IList list,
+    DataTable dataTable);
+</PRE>
+</TD></TR></TABLE>
+</DIV>
+<P>Отображает список объектов на заданную таблицу.</P>
+
+<H2>Заключение<A name="IDAVE2ZF"></A></H2>
+<P>Данная библиотека используется продолжительное время на нашем сайте и показала себя достаточно удобным и лёгким в использовании средством. Надеюсь, вам она так же не доставит особых хлопот, и её применение будет для вас простым делом.</P>
+<P>Дополнительную справочную информацию, а так же множество примеров вы можете найти в файле-справке, приложенному к дистрибутиву.</P>
+<H2>Добавления и исправления версии 1.1<A name="IDA3E2ZF"></A></H2>
+<OL>
+<LI>Добавлен метод <I>DbManager.ExecuteDictionary</I>, позволяющий читать записи набора данных в хеш-таблицу или любой другой объект, поддерживающий интерфейс <I>IDictionary</I>.</LI>
+</OL>
+<DIV id="IDAIF2ZF">
+<TABLE class="code" width="98%"><TR><TD>
+<PRE>
+<SPAN class="KEYWORD">public</SPAN> Hashtable   ExecuteDictionary(Type type);
+<SPAN class="KEYWORD">
+public</SPAN> IDictionary ExecuteDictionary(IDictionary dic, Type type);
+</PRE>
+</TD></TR></TABLE>
+</DIV>
+<OL>
+<LI>Добавлен метод <I>Map.ToDictionary</I>, отображающий данный в / из списка объектов в хеш-таблицу или другой объект, реализующий интерфейс <I>IDictionary</I>.</LI>
+<LI>Добавлены версии методов <I>Map.ToList</I> и <I>Map.ToDictionary</I>, позволяющие отображать данные в / из объекта <I>IDataReader</I>.</LI>
+<LI>Добавлены атрибуты <I>MapNullValueAttribute</I> и <I>MapDefaultValueAttribute</I>.</LI>
+<LI>Атрибут <I>MapValueAttribute</I> теперь может применяться к значению перечислителя, что является единственной возможностью его задания в Managed C++.</LI>
+</OL>
+<DIV id="IDAIG2ZF">
+<TABLE class="code" width="98%"><TR><TD>
+<PRE>
+<SPAN class="KEYWORD">public</SPAN> <SPAN class="KEYWORD">enum</SPAN> Status
+{
+    [MapValue(<SPAN class="STRING">"A"</SPAN>)] Active,
+    [MapValue(<SPAN class="STRING">"I"</SPAN>)] Inactive,
+    [MapValue(<SPAN class="STRING">"P"</SPAN>)] Pending
+}
+</PRE>
+</TD></TR></TABLE>
+</DIV>
+<OL>
+<LI>Добавлены классы исключений <I>RsdnDbManagerException</I> и <I>RsdnMapException</I>. Все исключения, возникающие в процессе работы библиотеки, включая исключения используемых классов, заворачиваются в данные классы и возвращаются как вложенные.</LI>
+<LI>Исправлен баг, не позволявший помещать объекты класса <I>DbManager</I> на форму.</LI>
+</OL>
+<H2>Добавления и исправления версии 1.2<A name="IDABH2ZF"></A></H2>
+<UL style="LIST-STYLE:square"><LI>Класс <I>MapData</I> перенесён в пространство имён <I>Rsdn.Framework.Data.Mapping </I>и переименован в <STRONG>Map</STRONG>. Также переименованы класс исключения <I>RsdnMapDataException</I> в <I>RsdnMapException</I>, и методы класса <I>Map</I>: <I>MapBizEntity</I> в <I>ToObject</I>, <I>MapList</I> в <I>ToList</I>, <I>MapDictionary</I> в <I>ToDictionary</I>.</LI>
+<LI>Добавлена поддержка абстрактых классов. </LI>
+<LI>Атрибут <STRONG>MapTypeAttribute</STRONG>.</LI>
+<LI>Атрибут <STRONG>MapIgnoreAttribute</STRONG>.</LI>
+<LI>Класс <STRONG>MapDescriptor</STRONG>.</LI>
+<LI>Интерфейс <STRONG>IMapObjectFactory</STRONG><I>.</I></LI>
+<LI>Расширено применение атрибута <STRONG>MapFieldAttribute</STRONG>.</LI>
+<LI>Поддержка nullable values.</LI>
+<LI>Улучшена поддержка <STRONG>Guid</STRONG> типов.</LI>
+<LI>Добавлено задание правил отображения во внешних xml файлах.</LI>
+<LI>Атрибут <STRONG>MapXmlAttribute</STRONG>.</LI>
+<LI>Исправлена пара несущественных багов.</LI>
+</UL>
+<P>Как видно из приведённого списка основные добавления в данной версии коснулись отображения данных. Класс MapData переименован и перенесён в пространство имён <I>Rsdn.Framework.Data.Mapping</I>. Так же переименованы некоторые методы данного класса. Старые имена объявлены obsolete и будут удалены в следующей версии библиотеки.</P>
+<H3>Абстрактные классы<A name="IDALJ2ZF"></A></H3>
+<P>Поддержка абстрактных классов позволяет добиться практически декларативного объявления бизнес объектов и полностью опустить реализацию свойств. Далее приведено типичное объявление бизнес объекта:</P>
+<DIV id="IDAQJ2ZF">
+<TABLE class="code" width="98%"><TR><TD>
+<PRE>
+<SPAN class="KEYWORD">public</SPAN> <SPAN class="KEYWORD">class</SPAN> MyBizEntity
+{
+    <SPAN class="KEYWORD">private int</SPAN> _id;
+    <SPAN class="KEYWORD">public</SPAN>  <SPAN class="KEYWORD">int</SPAN>  ID
+    {
+        <SPAN class="KEYWORD">get</SPAN> { <SPAN class="KEYWORD">return</SPAN> _id;  }
+        <SPAN class="KEYWORD">set</SPAN> { _id = <SPAN class="KEYWORD">value</SPAN>; }
+    }
+
+    <SPAN class="KEYWORD">private string</SPAN> _description;
+    <SPAN class="KEYWORD">public</SPAN>  <SPAN class="KEYWORD">string</SPAN>  Description
+    {
+        <SPAN class="KEYWORD">get</SPAN> { <SPAN class="KEYWORD">return</SPAN> _description;  }
+        <SPAN class="KEYWORD">set</SPAN> { _description = <SPAN class="KEYWORD">value</SPAN>; }
+    }
+}
+</PRE>
+</TD></TR></TABLE>
+</DIV>
+<P>Абстрактное объявление выглядит следующим образом:</P>
+<DIV id="IDAUK2ZF">
+<TABLE class="code" width="98%"><TR><TD>
+<PRE>
+<SPAN class="KEYWORD">public abstract</SPAN> <SPAN class="KEYWORD">class</SPAN> MyBizEntity
+{
+    <SPAN class="KEYWORD">public abstract int</SPAN>    ID          { <SPAN class="KEYWORD">get</SPAN>; }
+    <SPAN class="KEYWORD">public abstract string</SPAN> Description { <SPAN class="KEYWORD">get</SPAN>; <SPAN class="KEYWORD">set</SPAN>; }
+}
+</PRE>
+</TD></TR></TABLE>
+</DIV>
+<P>Такой способ несколько короче оригинального, к тому же, он позволяет задавать read-only свойства класса. </P>
+
+<H3>MapTypeAttribute<A name="IDAHL2ZF"></A></H3>
+<P>Если одно из абстрактных свойств должно реализовываться отличным от возвращаемого типа классом, то в данном случае может пригодиться атрибут <I>MapTypeAttribute</I>. Допустим, мы имеем внутреннюю реализацию свойства при помощи следующего класса:</P>
+<DIV id="IDAOL2ZF">
+<TABLE class="code" width="98%"><TR><TD>
+<PRE>
+<SPAN class="KEYWORD">public</SPAN> <SPAN class="KEYWORD">class</SPAN> MyString
+{
+    <SPAN class="KEYWORD">private string</SPAN> _value;
+    <SPAN class="KEYWORD">public</SPAN>  <SPAN class="KEYWORD">string</SPAN>  Value
+    {
+        <SPAN class="KEYWORD">get</SPAN> { <SPAN class="KEYWORD">return</SPAN> _value;  }
+        <SPAN class="KEYWORD">set</SPAN> { _value = <SPAN class="KEYWORD">value</SPAN>; }
+    }
+}
+</PRE>
+</TD></TR></TABLE>
+</DIV>
+<P>Обычное объявление свойства может быть следующим:</P>
+<DIV id="IDAEM2ZF">
+<TABLE class="code" width="98%"><TR><TD>
+<PRE>
+<SPAN class="KEYWORD">public</SPAN> <SPAN class="KEYWORD">class</SPAN> MyBizEntity
+{
+    <SPAN class="KEYWORD">private </SPAN>MyString _description;
+    <SPAN class="KEYWORD">public</SPAN>  <SPAN class="KEYWORD">string</SPAN>    Description
+    {
+        <SPAN class="KEYWORD">get</SPAN> { <SPAN class="KEYWORD">return</SPAN> _description.Value;  }
+        <SPAN class="KEYWORD">set</SPAN> { _description.Value = <SPAN class="KEYWORD">value</SPAN>; }
+    }
+}
+</PRE>
+</TD></TR></TABLE>
+</DIV>
+<P>Абстрактное объявление свойства:</P>
+<DIV id="IDA0M2ZF">
+<TABLE class="code" width="98%"><TR><TD>
+<PRE>
+<SPAN class="KEYWORD">public abstract</SPAN> <SPAN class="KEYWORD">class</SPAN> MyBizEntity
+{
+    [MapType(<SPAN class="KEYWORD">typeof</SPAN>(MyString))]
+    <SPAN class="KEYWORD">public abstract string</SPAN> Description { <SPAN class="KEYWORD">get</SPAN>; <SPAN class="KEYWORD">set</SPAN>; }
+}
+</PRE>
+</TD></TR></TABLE>
+</DIV>
+<P>В данном случае маппер подразумевает у используемого типа наличие свойства <I>Value</I> с типом, совпадающим с типом возвращаемого значения данного свойства.</P>
+
+<H3>MapIgnoreAttribute<A name="IDANN2ZF"></A></H3>
+<P>Данный атрибут позволяет исключать поля из процесса отображения. </P>
+
+<H3>MapDescriptor<A name="IDATN2ZF"></A></H3>
+<P>Класс <I>MapDescriptor</I> является описателем отображаемого типа и предоставляет методы для создания объектов и доступа к их свойствам и полям. Например, создать экземпляр класса <I>MyBizEntity</I> из предыдущего примера и задать значение для его read-only свойства ID можно следующим образом:</P>
+<DIV id="IDA2N2ZF">
+<TABLE class="code" width="98%"><TR><TD>
+<PRE>
+MapDescriptor desc   = MapDescriptor.GetDescriptor(<SPAN class="KEYWORD">typeof</SPAN>(MyBizEntity));
+MyBizEntity   entity = desc.CreateInstance() <SPAN class="KEYWORD">as</SPAN> MyBizEntity;
+
+Desc[<SPAN class="STRING">"ID"</SPAN>].SetValue(entity, 1);
+</PRE>
+</TD></TR></TABLE>
+</DIV>
+<P>На самом деле такой способ установления значения является шпионским и не предназначен для повседневного использования. Но, тем не менее, может быть полезен в качестве “чёрного входа” для написания всевозможных фреймворков.</P>
+
+<H3>IMapObjectFactory<A name="IDAHO2ZF"></A></H3>
+<P>Данный интерфейс позволяет полностью контролировать процесс создания бизнес объектов. </P>
+<DIV id="IDAMO2ZF">
+<TABLE class="code" width="98%"><TR><TD>
+<PRE>
+<SPAN class="KEYWORD">public</SPAN> MyBizEntityManager : IMapObjectFactory
+{
+    <SPAN class="KEYWORD">private</SPAN> MapDescriptor _descriptor;
+
+    <SPAN class="KEYWORD">public</SPAN> MyBizEntityManager()
+    {
+        _descriptor = MapDescriptor.getDescriptor(<SPAN class="KEYWORD">typeof</SPAN>(MyBizEntity));
+        _descriptor.ObjectFactory = <SPAN class="KEYWORD">this</SPAN>;
+    }
+
+    <SPAN class="KEYWORD">object</SPAN> IMapObjectFactory.CreateInstance(
+<SPAN class="KEYWORD">        </SPAN>IMapDataSource dataSource,
+        <SPAN class="KEYWORD">object</SPAN>         sourceObject,
+        <SPAN class="KEYWORD">object</SPAN>[]       parameters,
+<SPAN class="KEYWORD">        ref</SPAN> <SPAN class="KEYWORD">bool</SPAN>       stopMapping)
+    {
+        <SPAN class="KEYWORD">return</SPAN> _descriptor.CreateInstance(
+<SPAN class="KEYWORD">            </SPAN>dataSource, sourceObject, parameters, stopMapping);
+    }
+}
+</PRE>
+</TD></TR></TABLE>
+</DIV>
+<P>Как видно из примера объект может быть создан путём обращения к описателю типа. Но это совсем не обязательно.</P>
+
+<H3>MapFieldAttribute<A name="IDALP2ZF"></A></H3>
+<P>Данный атрибут теперь может применяться к классу и позволяет задавать дополнительное именование полей источника и приёмника, которое невозможно осуществить обычным способом.</P>
+<DIV id="IDAQP2ZF">
+<TABLE class="code" width="98%"><TR><TD>
+<PRE>
+<SPAN class="KEYWORD">public</SPAN> <SPAN class="KEYWORD">class</SPAN> BaseBizEntity
+{
+    <SPAN class="KEYWORD">public</SPAN> <SPAN class="KEYWORD">int</SPAN> ID;
+}
+
+[MapField(SourceName=<SPAN class="STRING">"OrderID"</SPAN>, TargetName=<SPAN class="STRING">"ID"</SPAN>)]
+<SPAN class="KEYWORD">public</SPAN> <SPAN class="KEYWORD">class</SPAN> Order : BaseBizEntity
+{
+    <SPAN class="KEYWORD">public</SPAN> <SPAN class="KEYWORD">int</SPAN> Number;
+}
+
+[MapField(<SPAN class="STRING">"CustomerID"</SPAN>, <SPAN class="STRING">"ID"</SPAN>)]
+[MapField(<SPAN class="STRING">"OrderID"</SPAN>,    <SPAN class="STRING">"Order.ID"</SPAN>)]
+<SPAN class="KEYWORD">public</SPAN> <SPAN class="KEYWORD">class</SPAN> Customer : BaseBizEntity
+{
+    <SPAN class="KEYWORD">public</SPAN> <SPAN class="KEYWORD">string</SPAN> Name;
+    <SPAN class="KEYWORD">public</SPAN> Order  Order = <SPAN class="KEYWORD">new</SPAN> Order();
+}
+</PRE>
+</TD></TR></TABLE>
+</DIV>
+
+<H3>Nullable values<A name="IDA4Q2ZF"></A></H3>
+<P>Теперь маппер понимает типы, поддерживающие работу со значениями, которые могут иметь нулевое значение. Не путать с <I>MapNullValueAttribute</I>. К таким типам относятся типы пространства имён <I>System.Data.SqlTypes</I> и их аналоги.</P>
+<DIV id="IDAHR2ZF">
+<TABLE class="code" width="98%"><TR><TD>
+<PRE>
+<SPAN class="KEYWORD">public abstract</SPAN> <SPAN class="KEYWORD">class</SPAN> MyBizEntity
+{
+    <SPAN class="KEYWORD">public abstract </SPAN>SqlString Description { <SPAN class="KEYWORD">get</SPAN>; <SPAN class="KEYWORD">set</SPAN>; }
+}
+</PRE>
+</TD></TR></TABLE>
+</DIV>
+<P>Для таких типов маппер подразумевает наличие свойств <I>Value</I> и <I>IsNull</I>.</P>
+
+<H3>Guid<A name="IDA0R2ZF"></A></H3>
+<P>Добавлена поддержка типа <I>Guid</I>.</P>
+
+<H3>Xml схемы отображения<A name="IDACS2ZF"></A></H3>
+<P>В общем случае xml схема отображения выглядит следующим образом:</P>
+<DIV id="IDAHS2ZF">
+<TABLE class="code" width="98%"><TR><TD>
+<PRE>
+&lt;?xml version="1.0" encoding="utf-8" ?&gt;
+&lt;<STRONG>mapping</STRONG> xmlns="http://www.rsdn.ru/mapping.xsd"&gt;
+    &lt;<STRONG>type</STRONG> name="NamespaceName.TypeName"&gt;
+        &lt;<STRONG>field</STRONG> name="field1" source="field1" trimmable="true" /&gt;
+        &lt;field name="field2"&gt;
+            &lt;value target="3" source="2" source_type="System.Int32" /&gt;
+        &lt;/field&gt;
+        &lt;field name="field3" nullable="true"&gt;
+            &lt;value target="3" source="2" source_type="System.Int32" /&gt;
+            &lt;null_value target="111"/&gt;
+        &lt;/field&gt;
+        &lt;field name="field4" ignore="true" /&gt;
+    &lt;/type&gt;
+    &lt;<STRONG>value_type</STRONG> name="NamespaceName.ValueTypeName "&gt;
+        &lt;value target="Active"   source="A" source_type="System.String" /&gt;
+        &lt;value target="Inactive" source="I" source_type="System.String" /&gt;
+        &lt;value target="Pending"  source="P" source_type="System.String" /&gt;
+        &lt;null_value target="Unknown"/&gt;
+	&lt;/value_type&gt;
+&lt;/mapping&gt;
+</PRE>
+</TD></TR></TABLE>
+</DIV>
+<P>Секция <I>type</I> определяет схему отображения для конкретного типа. Секция <I>value_type</I> может быть использована для задания отображения перечислителей.</P>
+<P>Зарегистрировать xml схему можно с помощью одной из версий метода <I>SetMappingSchema</I>. Метод <I>SetMappingSchema(string)</I> производит поиск файла с заданным именем на диске, и если такой не найден, то в ресурсах сборки, которая вызвала данный метод.</P>
+<P>Если у типа уже заданы атрибуты отображения, то xml схема имеет высший приоритет. Например:</P>
+<DIV id="IDA5S2ZF">
+<TABLE class="code" width="98%"><TR><TD>
+<PRE>
+&lt;?xml version="1.0" encoding="utf-8" ?&gt;
+&lt;mapping xmlns="http://www.rsdn.ru/mapping.xsd"&gt;
+    &lt;type name="NamespaceName.Dest"&gt;
+        &lt;field name="Field1"&gt;
+            <STRONG>&lt;null_value target="-1" /&gt;
+</STRONG>        &lt;/field&gt;
+    &lt;/type&gt;
+&lt;/mapping&gt;
+</PRE>
+</TD></TR></TABLE>
+</DIV>
+<P>
+</P>
+<DIV id="IDAFT2ZF">
+<TABLE class="code" width="98%"><TR><TD>
+<PRE>
+<SPAN class="KEYWORD">public</SPAN> <SPAN class="KEYWORD">class</SPAN> Src
+{
+    <SPAN class="KEYWORD">public</SPAN> <SPAN class="KEYWORD">object</SPAN> Field1 = <SPAN class="KEYWORD">null</SPAN>;
+    <SPAN class="KEYWORD">public</SPAN> <SPAN class="KEYWORD">object</SPAN> Field2 = <SPAN class="KEYWORD">null</SPAN>;
+}
+
+<SPAN class="KEYWORD">public</SPAN> <SPAN class="KEYWORD">class</SPAN> Dest
+{
+    [MapNullValue(-2)]
+    <SPAN class="KEYWORD">public</SPAN> <SPAN class="KEYWORD">int</SPAN> Field1;
+
+    [MapNullValue(-3)]
+    <SPAN class="KEYWORD">public</SPAN> <SPAN class="KEYWORD">int</SPAN> Field2;
+}
+
+<SPAN class="KEYWORD">void</SPAN> Test()
+{
+    MapDescriptor.SetMappingSchema(<SPAN class="STRING">"Map.xml"</SPAN>);
+
+    Src  s = <SPAN class="KEYWORD">new</SPAN> Src();
+    Dest d = Map.ToObject(s, <SPAN class="KEYWORD">typeof</SPAN>(Dest)) <SPAN class="KEYWORD">as</SPAN> Dest;
+
+    <SPAN class="COMMENT">// d.Field1 == -1</SPAN>
+    <SPAN class="COMMENT">// d.Field2 == -3</SPAN>
+}
+</PRE>
+</TD></TR></TABLE>
+</DIV>
+<P>При выполнении данного теста значение поля Field1 будет взято из xml схемы, значение Field2 из атрибута.</P>
+
+<H3>MapXmlAttribute<A name="IDAUU2ZF"></A></H3>
+<P>Данный атрибут позволяет задать конкретные имена xml файла и строки поиска типа в нём. Например:</P>
+<DIV id="IDAZU2ZF">
+<TABLE class="code" width="98%"><TR><TD>
+<PRE>
+&lt;?xml version="1.0" encoding="utf-8" ?&gt;
+&lt;mapping xmlns="http://www.rsdn.ru/mapping.xsd"&gt;
+    &lt;type name="MyBizEntity"&gt;
+        ...
+    &lt;/type&gt;
+&lt;/mapping&gt;
+</PRE>
+</TD></TR></TABLE>
+</DIV>
+<P>
+</P>
+<DIV id="IDA3U2ZF">
+<TABLE class="code" width="98%"><TR><TD>
+<PRE>
+[MapXml(<SPAN class="STRING">"MyMapping.xml"</SPAN>, <SPAN class="STRING">"MyBizEntity"</SPAN>)]
+<SPAN class="KEYWORD">public</SPAN> <SPAN class="KEYWORD">class</SPAN> MyBizEntity
+{
+    <SPAN class="COMMENT">// ...</SPAN>
+}
+</PRE>
+</TD></TR></TABLE>
+</DIV>
+<P>Или, если xml схема задаётся с помощью <I>SetMappingSchema</I>:</P>
+<DIV id="IDANV2ZF">
+<TABLE class="code" width="98%"><TR><TD>
+<PRE>
+[MapXml(<SPAN class="STRING">"MyBizEntity"</SPAN>)]
+<SPAN class="KEYWORD">public</SPAN> <SPAN class="KEYWORD">class</SPAN> MyBizEntity
+{
+    <SPAN class="COMMENT">// ...</SPAN>
+}
+</PRE>
+</TD></TR></TABLE>
+</DIV>
+
+<H2>Добавления и исправления версии 1.3<A name="IDAZV2ZF"></A></H2>
+<UL style="LIST-STYLE:square"><LI>Параметры задания команды вынесены из методов <I>Execute</I> в методы <STRONG>SetCommand</STRONG> и <STRONG>SetSpCommand</STRONG>.</LI>
+<LI>Добавлен метод <STRONG>Update</STRONG>.</LI>
+<LI>Расширено применение атрибута <STRONG>MapTypeAttribute</STRONG>.</LI>
+<LI>Добавлена поддержка интерфейса <STRONG>ISupportInitialize</STRONG>.</LI>
+<LI>Добавлен интерфейс <STRONG>IMapSettable</STRONG>.</LI>
+</UL>
+<H3>SetCommand, SetSpCommand<A name="IDAWW2ZF"></A></H3>
+<P>Основные добавления данной версии коснулись класса <I>DbManager</I>. Из методов <I>Execute...</I> вынесены параметры, отвечающие за формирование выполняемой команды. Так, если вызов метода <I>ExecuteScalar</I> ранее выглядел следующим образом</P>
+<DIV id="IDABX2ZF">
+<TABLE class="code" width="98%"><TR><TD>
+<PRE>
+<SPAN class="KEYWORD">using</SPAN> (DbManager db = <SPAN class="KEYWORD">new</SPAN> DbManager())
+{
+    <SPAN class="KEYWORD">return</SPAN> (<SPAN class="KEYWORD">int</SPAN>)db.ExecuteScalar(<SPAN class="STRING">"SELECT Count(*) FROM Categories"</SPAN>);
+}
+</PRE>
+</TD></TR></TABLE>
+</DIV>
+<UL style="LIST-STYLE:square"><LI>то теперь его вызову должен предшествовать вызов метода <I>SetCommand</I> или <I>SetSpCommand</I>:</LI>
+</UL>
+<DIV id="IDAVX2ZF">
+<TABLE class="code" width="98%"><TR><TD>
+<PRE>
+<SPAN class="KEYWORD">using</SPAN> (DbManager db = <SPAN class="KEYWORD">new</SPAN> DbManager())
+{
+    <SPAN class="KEYWORD">return</SPAN> (<SPAN class="KEYWORD">int</SPAN>)db
+<SPAN class="KEYWORD">         </SPAN>.SetCommand(<SPAN class="STRING">"SELECT Count(*) FROM Categories"</SPAN>)
+         .ExecuteScalar();
+}
+</PRE>
+</TD></TR></TABLE>
+</DIV>
+<P>Старые методы объявлены obsolete и будут удалены в следующей версии библиотеки.</P>
+
+<H3>Update<A name="IDAJY2ZF"></A></H3>
+<P>Метод Update представляет собой обёртку для вызова метода <I>DbDataAdapter.Update</I>. Для задания команд вставки обновления и удаления используются соответствующие методы <I>SetInsertCommand</I>, <I>SetUpdateCommand</I>, <I>SetDeleteCommand</I>.</P>
+<DIV id="IDAWY2ZF">
+<TABLE class="code" width="98%"><TR><TD>
+<PRE>
+<SPAN class="KEYWORD">using</SPAN> (DbManager db = <SPAN class="KEYWORD">new</SPAN> DbManager())
+{
+    db
+<SPAN class="KEYWORD">        </SPAN>.SetInsertCommand(<SPAN class="STRING">"INSERT statement"</SPAN>)
+<SPAN class="KEYWORD">        </SPAN>.SetUpdateCommand(<SPAN class="STRING">"UPDATE statement"</SPAN>)
+<SPAN class="KEYWORD">        </SPAN>.SetDeleteCommand(<SPAN class="STRING">"DELETE statement"</SPAN>)
+        .Update(dataSet);
+}
+</PRE>
+</TD></TR></TABLE>
+</DIV>
+
+<H3>MapTypeAttribute<A name="IDAJZ2ZF"></A></H3>
+<P>Данный атрибут обзавёлся набором параметров, которые могут быть переданы конструктору класса, имплементирующего  абстрактное свойство. Например:</P>
+<DIV id="IDAOZ2ZF">
+<TABLE class="code" width="98%"><TR><TD>
+<PRE>
+<SPAN class="KEYWORD">public</SPAN> <SPAN class="KEYWORD">abstract</SPAN> <SPAN class="KEYWORD">class</SPAN> MyBizEntity : BizEntityBase
+{
+    [MapType(<SPAN class="KEYWORD">typeof</SPAN>(RequiredString), <SPAN class="STRING">"Description"</SPAN>, 20)]
+    <SPAN class="KEYWORD">public</SPAN> <SPAN class="KEYWORD">abstract</SPAN> <SPAN class="KEYWORD">string</SPAN> Description { <SPAN class="KEYWORD">get</SPAN>; <SPAN class="KEYWORD">set</SPAN>; }
+} 
+</PRE>
+</TD></TR></TABLE>
+</DIV>
+<P>См. полный пример использования данного атрибута в <A href="http://rfd.rsdn.ru/doc/Rsdn.Framework.Data.Mapping.MapTypeAttributeConstructor3.html">документации</A>.</P>
+
+<H3>ISupportInitialize<A name="IDAL02ZF"></A></H3>
+<P>Если класс, участвующий в маппинге реализует интерфейс <I>ISupportInitialize</I>, то маппер вызовет метод <I>BeginInit</I> перед началом отображения и <I>EndInit</I> перед его завершением.</P>
+<DIV id="IDAW02ZF">
+<TABLE class="code" width="98%"><TR><TD>
+<PRE>
+<SPAN class="KEYWORD">public</SPAN> <SPAN class="KEYWORD">class</SPAN> InitializedEntity : <STRONG>ISupportInitialize</STRONG>
+{
+<SPAN class="KEYWORD">    private bool</SPAN> _isBeingMapped;
+
+<SPAN class="KEYWORD">    void</SPAN> ISupportInitialize.BeginInit()
+    {
+        _isBeingMapped = <SPAN class="KEYWORD">true</SPAN>;
+	}
+
+<SPAN class="KEYWORD">    void</SPAN> ISupportInitialize.EndInit()
+    {
+        _isBeingMapped = <SPAN class="KEYWORD">false</SPAN>;
+    }
+}
+</PRE>
+</TD></TR></TABLE>
+</DIV>
+
+<H3>IMapSettable<A name="IDAJ12ZF"></A></H3>
+<P>Данный интерфейс имеет всего лишь один метод – <I>SetField</I>. В процессе отображения поля источника передаются в этот метод одно за другим. Если объект обрабатывает поле самостоятельно, то он должен вернуть <I>true</I>. В противном случае маппер попытается произвести отображение самостоятельно. Следующий пример демонстрирует применение данного интерфейса для реализации свойства <I>ID</I> базового класса бизнес объектов:</P>
+<DIV id="IDAU12ZF">
+<TABLE class="code" width="98%"><TR><TD>
+<PRE>
+<SPAN class="KEYWORD">public</SPAN> <SPAN class="KEYWORD">abstract</SPAN> <SPAN class="KEYWORD">class</SPAN> BizEntityBase : IMapSettable
+{
+    <SPAN class="KEYWORD">private</SPAN> Guid _id;
+    <SPAN class="KEYWORD">public</SPAN>  Guid  ID { <SPAN class="KEYWORD">get</SPAN> { <SPAN class="KEYWORD">return</SPAN> _id; } }
+
+    <SPAN class="KEYWORD">bool</SPAN> IMapSettable.SetField(<SPAN class="KEYWORD">string</SPAN> fieldName, <SPAN class="KEYWORD">object</SPAN> value)
+    {
+        <SPAN class="KEYWORD">if</SPAN> (<SPAN class="KEYWORD">string</SPAN>.Compare(fieldName, GetType().Name + <SPAN class="STRING">"ID"</SPAN>) == 0)
+        {
+            _id = (Guid)value;
+
+            <SPAN class="KEYWORD">return</SPAN> <SPAN class="KEYWORD">true</SPAN>;
+        }
+
+        <SPAN class="KEYWORD">return</SPAN> <SPAN class="KEYWORD">false</SPAN>;
+    }
+}
+</PRE>
+</TD></TR></TABLE>
+</DIV>
+<P>
+</P>
+
+<H2>Известные проблемы<A name="IDA222ZF"></A></H2>
+<P>Существует несколько проблемы использования отображения, связанные с ограничениями абстрактных классов и динамических классов и сборок, созданных с помощью <I>System.Reflection.Emit</I>.</P>
+<P>В процессе работы маппер создаёт наследуемый от абстрактного класса класс, который реализует указанные абстрактные свойства. Вполне естественно, что полное имя этого класса отличается от оригинального. Имя сгенерированного класса строится по следующим правилам:</P>
+<DIV id="IDAF32ZF">
+<TABLE class="code" width="98%"><TR><TD>
+<PRE>
+<I>NamespaceName</I>.<I>AbstractClassName</I>.MappingExtension.<I>AbstractClassName</I>
+</PRE>
+</TD></TR></TABLE>
+</DIV>
+<P>Таким образом, метод <I>GetType().Name</I> для класса <I>MyBizEntity</I> и его наследника выдаст одинаковые имена, а метод <I>GetType().FullName</I> различные. Также не будет работать прямое сравнение типов:</P>
+<DIV id="IDAV32ZF">
+<TABLE class="code" width="98%"><TR><TD>
+<PRE>
+MyBizEntity entity = 
+    MapDescriptor.GetDescriptor(<SPAN class="KEYWORD">typeof</SPAN>(MyBizEntity)).CreateInstanceEx();
+
+<SPAN class="KEYWORD">if</SPAN> (entity.GetType() == <SPAN class="KEYWORD">typeof</SPAN>(MyBizEntity))  <SPAN class="COMMENT">// false</SPAN>
+{
+}
+
+<SPAN class="KEYWORD">if</SPAN> (entity <SPAN class="KEYWORD">is</SPAN> MyBizEntity)  <SPAN class="COMMENT">// true</SPAN>
+{
+}
+</PRE>
+</TD></TR></TABLE>
+</DIV>
+<P>Проблема динамических сборок заключается в следующем. Так как такие сборки создаются в памяти, то они не реализуют некоторые свойства и при обращении к ним генерируют исключение <I>NotImplementedException</I>. Данную проблему можно обойти с помощью явной проверки типа библиотеки.</P>
+<DIV id="IDAJ42ZF">
+<TABLE class="code" width="98%"><TR><TD>
+<PRE>
+<SPAN class="KEYWORD">foreach</SPAN> (Assembly a <SPAN class="KEYWORD">in</SPAN> AppDomain.CurrentDomain.GetAssemblies())
+{
+<STRONG>    <SPAN class="KEYWORD">if</SPAN> (a <SPAN class="KEYWORD">is</SPAN> System.Reflection.Emit.AssemblyBuilder)
+        <SPAN class="KEYWORD">continue</SPAN>;
+</STRONG>
+    Console.WriteLine(a.CodeBase);
+}
+</PRE>
+</TD></TR></TABLE>
+</DIV>
+<P>
+</P>
+<P>Спасибо всем принявшим участие в обсуждение библиотеки.</P>
+<P>Отдельное спасибо <A href="http://www.rsdn.ru/Users/Profile.aspx?uid=12284">Илье Рыженкову</A> и Андрею Касьянову за детальное review библиотеки и ценные замечания и предложения.</P>
+<DIV align="right">
+<FONT style="font-family:arial;font-size:9pt;color:#8088a0"><I><HR color="#8088a0" width="100%" size="1">
+                Любой из материалов, опубликованных на этом сервере, не может быть воспроизведен в какой бы
+                то ни было форме и какими бы то ни было средствами без письменного разрешения владельцев авторских
+                прав. 
+             </I></FONT>
+</DIV>
+</HTML>

@@ -1,0 +1,12 @@
+package JS;
+
+import System.Data.*;
+
+import NUnit.Framework.*;
+
+import Rsdn.Framework.Data.*;
+
+/** @attribute TestFixture()*/
+public class MapDataTest
+{
+}

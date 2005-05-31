@@ -1,0 +1,794 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<examples>
+
+<db name="AddConnectionString(string)">
+<example>
+The following example uses the <b>AddConnectionString</b> method to add a new database connection string. 
+<code>
+using System;
+
+using NUnit.Framework;
+
+using Rsdn.Framework.Data;
+
+namespace Examples_DbManager
+{
+	[TestFixture]
+	public class AddConnectionString_string
+	{
+		[Test]
+		public void Test()
+		{
+			DbManager.AddConnectionString(
+				"Server=.;Database=Northwind;Integrated Security=SSPI");
+            
+			using (DbManager db = new DbManager())
+			{
+				// ...
+			}
+		}
+	}
+}
+</code>
+</example>
+</db>
+
+<db name="AddConnectionString(string,string)">
+<example>
+The following example uses the <b>AddConnectionString</b> method to add a new database connection string
+for the "Test" configuration. 
+<code>
+using System;
+
+using NUnit.Framework;
+
+using Rsdn.Framework.Data;
+
+namespace Examples_DbManager
+{
+	[TestFixture]
+	public class AddConnectionString_string_string
+	{
+		[Test]
+		public void Test()
+		{
+			DbManager.AddConnectionString(
+				"Test", "Server=.;Database=Northwind;Integrated Security=SSPI");
+
+			using (DbManager db = new DbManager("Test"))
+			{
+				// ...
+			}
+		}
+	}
+}
+</code>
+</example>
+</db>
+
+<db name="BeginTransaction">
+<example>
+The following example creates an instance of the <see cref="DbManager"/>, 
+calls the <see cref="BeginTransaction"/> method, and commit the transaction.
+<code>
+using System;
+
+using NUnit.Framework;
+
+using Rsdn.Framework.Data;
+
+namespace Examples_DbManager
+{
+	[TestFixture]
+	public class BeginTransaction
+	{
+		[Test]
+		public void Test()
+		{
+			using (DbManager db = new DbManager())
+			{
+				db.BeginTransaction();
+                
+				// ...
+                
+				db.Transaction.Commit();
+			}
+		}
+	}
+}
+</code>
+</example>
+</db>
+
+<db name="BeginTransaction">
+<example>
+The following example creates an instance of the <see cref="DbManager"/>, 
+calls the <see cref="BeginTransaction"/> method, and commit the transaction.
+<code>
+using System;
+using System.Data;
+
+using NUnit.Framework;
+
+using Rsdn.Framework.Data;
+
+namespace Examples_DbManager
+{
+	[TestFixture]
+	public class BeginTransaction_IsolationLevel
+	{
+		[Test]
+		public void Test()
+		{
+			using (DbManager db = new DbManager())
+			{
+				db.BeginTransaction(IsolationLevel.ReadCommitted);
+                
+				// ...
+                
+				db.Transaction.Commit();
+			}
+		}
+	}
+}
+</code>
+</example>
+</db>
+
+<db name="DbManager">
+<example>
+The following example demonstrates how to create and use the <b>DbManager</b> class.
+<code>
+using System;
+
+using NUnit.Framework;
+
+using Rsdn.Framework.Data;
+
+namespace Examples_DbManager
+{
+	[TestFixture]
+	public class ClassDemo
+	{
+		[Test]
+		public void Test()
+		{
+			using (DbManager db = new DbManager())
+			{
+				string name = (string)db
+					.SetCommand(@"
+						SELECT
+							CategoryName
+						FROM 
+							Categories
+						WHERE
+							CategoryID = @id",
+						db.Parameter("@id", 1))
+					.ExecuteScalar();
+
+				Console.WriteLine(name);
+			}
+		}
+	}
+}
+</code>
+</example>
+</db>
+
+<db name="Close()">
+<example>
+The following example creates and opens a <see cref="DbManager"/>, then closes it.
+<code>
+using System;
+
+using NUnit.Framework;
+
+using Rsdn.Framework.Data;
+
+namespace Examples_DbManager
+{
+	[TestFixture]
+	public class Close
+	{
+		[Test]
+		public void Test1()
+		{
+			DbManager db = new DbManager();
+            
+			try
+			{
+				// ...
+			}
+			finally
+			{
+				if (db != null)
+					db.Close();
+			}
+		}
+
+		// Consider using the C# &lt;b&gt;using&lt;/b&gt; statement instead.
+		// The following example shows use of this method.
+
+		[Test]
+		public void Test2()
+		{
+			using (DbManager db = new DbManager())
+			{
+				// ...
+			}
+		}
+	}
+}
+</code>
+</example>
+</db>
+
+<db name="Command">
+<example>
+The following example demonstrates how to use the property.
+<code>
+using System;
+
+using NUnit.Framework;
+
+using Rsdn.Framework.Data;
+
+namespace Examples_DbManager
+{
+	[TestFixture]
+	public class Command
+	{
+		[Test]
+		public void Test()
+		{
+			using (DbManager db = new DbManager())
+			{
+				Console.WriteLine(db.Command.CommandTimeout);
+			}
+		}
+	}
+}
+</code>
+</example>
+</db>
+
+<db name="Connection">
+<example>
+The following example demonstrates how to use the property.
+<code>
+using System;
+using System.Data;
+
+using NUnit.Framework;
+
+using Rsdn.Framework.Data;
+
+namespace Examples_DbManager
+{
+	[TestFixture]
+	public class Connection
+	{
+		[Test]
+		public void Test()
+		{
+			using (DbManager db = new DbManager())
+			{
+				Console.WriteLine(db.Connection.State);
+
+				Assert.AreEqual(ConnectionState.Open, db.Connection.State);
+			}
+		}
+	}
+}
+</code>
+</example>
+</db>
+
+<db name="CreateParameters(DataRow,IDbDataParameter[])">
+<example>
+The following example creates the <see cref="DataTable"/>, 
+populates and adds one <see cref="DataRow"/> to the table.
+Then it creates the <see cref="DbManager"/> and
+calls the <see cref="SetCommand(string,IDbDataParameter[])"/> method passing a parameter list that is created 
+by calling the <b>CreateParameters</b> method.
+<code>
+using System;
+using System.Data;
+
+using NUnit.Framework;
+
+using Rsdn.Framework.Data;
+
+namespace Examples_DbManager
+{
+	[TestFixture]
+	public class CreateParameters_DataRow_IDbDataParameter
+	{
+		[Test]
+		public void Test()
+		{
+			DataTable table = new DataTable();
+            
+			table.Columns.Add("CategoryID",   typeof(int));
+			table.Columns.Add("CategoryName", typeof(string));
+			table.Columns.Add("Description",  typeof(string));
+            
+			table.Rows.Add(new object[] { 0, "New category", null });
+            
+			using (DbManager db = new DbManager())
+			{
+				foreach (DataRow row in table.Rows)
+				{
+					db
+						.SetCommand(@"
+							INSERT INTO Categories (
+								CategoryName, Description
+							) VALUES (
+								@CategoryName, @Description
+							)",
+							db.CreateParameters(row))
+						.ExecuteNonQuery();
+				}
+			}
+		}
+	}
+}
+</code>
+</example>
+</db>
+
+<db name="CreateParameters(object,IDbDataParameter[])">
+<example>
+The following example creates a business object, creates the <see cref="DbManager"/>, and
+calls the <see cref="SetCommand(string,IDbDataParameter[])"/> method passing a parameter list that is created 
+by calling the <b>CreateParameters</b> method.
+<code>
+using System;
+
+using NUnit.Framework;
+
+using Rsdn.Framework.Data;
+
+namespace Examples_DbManager
+{
+	[TestFixture]
+	public class CreateParameters_object_IDbDataParameter
+	{
+		public class Category
+		{
+			public int    ID;
+			public string Name;
+			public string Description;
+		}
+
+		[Test]
+		public void Test()
+		{
+			Category category = new Category();
+
+			category.Name = "New category";
+            
+			using (DbManager db = new DbManager())
+			{
+				db
+					.SetCommand(@"
+						INSERT INTO Categories (
+							CategoryName, Description
+						) VALUES (
+							@Name, @Description
+						)",
+						db.CreateParameters(category))
+					.ExecuteNonQuery();
+			}
+		}
+	}
+}
+</code>
+</example>
+</db>
+
+<db name="ctor">
+<example>
+<para>
+The following example creates the <see cref="DbManager"/>
+and opens a database connection associated with the default configuration.
+</para>
+<para>
+App.config:
+</para>
+<code>
+&lt;configuration&gt;
+    &lt;appSettings&gt;
+        &lt;add 
+            key   = "ConnectionString" 
+            va<i/>lue = "Server=.;Database=NorthwindDev;Integrated Security=SSPI" /&gt;
+    &lt;/appSettings&gt;
+&lt;configuration&gt;
+</code>
+<para>
+Test.cs:
+</para>
+<code>
+using System;
+using System.Data;
+
+using NUnit.Framework;
+
+using Rsdn.Framework.Data;
+
+namespace Examples_DbManager
+{
+	[TestFixture]
+	public class ctor
+	{
+		[Test]
+		public void Test()
+		{
+			using (DbManager db = new DbManager())
+			{
+				Assert.AreEqual(ConnectionState.Open, db.Connection.State);
+			}
+		}
+	}
+}
+</code>
+</example>
+</db>
+
+<db name="ctor(IDbConnection)">
+<example>
+The following example creates the <see cref="System.Data.SqlClient.SqlConnection"/>, opens it, 
+and creates the <see cref="DbManager"/>.
+<code>
+using System;
+using System.Data;
+using System.Data.SqlClient;
+
+using NUnit.Framework;
+
+using Rsdn.Framework.Data;
+
+namespace Examples_DbManager
+{
+	[TestFixture]
+	public class ctor_IDbConnection
+	{
+		[Test]
+		public void Test()
+		{
+			string connectionString =
+				"Server=.;Database=Northwind;Integrated Security=SSPI";
+
+			using (SqlConnection con = new SqlConnection(connectionString))
+			{
+				con.Open();
+                
+				using (DbManager db = new DbManager(con))
+				{
+					Assert.AreEqual(ConnectionState.Open, db.Connection.State);
+				}
+			}
+		}
+	}
+}
+</code>
+</example>
+</db>
+
+<db name="ctor(IDbConnection,string)">
+<example>
+<para>
+The following example creates the <see cref="System.Data.SqlClient.SqlConnection"/>
+and then creates the <see cref="DbManager"/> for the "Development" configuration.
+</para>
+<para>
+App.config:
+</para>
+<code>
+&lt;configuration&gt;
+    &lt;appSettings&gt;
+        &lt;add 
+            key   = "ConnectionString.<b>Development</b>" 
+            va<i/>lue = "Server=.;Database=NorthwindDev;Integrated Security=SSPI" /&gt;
+        &lt;add 
+            key   = "ConnectionString.<b>Production</b>" 
+            va<i/>lue = "Server=.;Database=Northwind;Integrated Security=SSPI" /&gt;
+    &lt;/appSettings&gt;
+&lt;configuration&gt;
+</code>
+<para>
+Test.cs:
+</para>
+<code>
+using System;
+using System.Data;
+using System.Data.SqlClient;
+
+using NUnit.Framework;
+
+using Rsdn.Framework.Data;
+
+namespace Examples_DbManager
+{
+	[TestFixture]
+	public class ctor_IDbConnection_string
+	{
+		[Test]
+		public void Test()
+		{
+			using (SqlConnection con = new SqlConnection())
+			{
+				using (DbManager db = new DbManager(con, "Development"))
+				{
+					Assert.AreEqual(ConnectionState.Open, con.State);
+				}
+			}
+		}
+	}
+}
+</code>
+</example>
+</db>
+
+<db name="ctor(IDbTransaction)">
+<example>
+The following example creates the <see cref="System.Data.SqlClient.SqlConnection"/>, opens it, 
+and creates the <see cref="DbManager"/>.
+<code>
+using System;
+using System.Data;
+using System.Data.SqlClient;
+
+using NUnit.Framework;
+
+using Rsdn.Framework.Data;
+
+namespace Examples_DbManager
+{
+	[TestFixture]
+	public class ctor_IDbTransaction
+	{
+		[Test]
+		public void Test()
+		{
+			string connectionString =
+				"Server=.;Database=Northwind;Integrated Security=SSPI";
+
+			using (SqlConnection con = new SqlConnection(connectionString))
+			{
+				con.Open();
+
+				SqlTransaction tran = con.BeginTransaction();
+                
+				using (DbManager db = new DbManager(tran))
+				{
+					Assert.AreEqual(ConnectionState.Open, db.Connection.State);
+				}
+
+				tran.Commit();
+			}
+		}
+	}
+}
+</code>
+</example>
+</db>
+
+<db name="ctor(string)">
+<example>
+<para>
+The following example creates the <see cref="DbManager"/>
+and opens a database connection associated with the "Development" configuration.
+</para>
+<para>
+App.config:
+</para>
+<code>
+&lt;configuration&gt;
+    &lt;appSettings&gt;
+        &lt;add 
+            key   = "ConnectionString.<b>Development</b>" 
+            va<i/>lue = "Server=.;Database=NorthwindDev;Integrated Security=SSPI" /&gt;
+        &lt;add 
+            key   = "ConnectionString.<b>Production</b>" 
+            va<i/>lue = "Server=.;Database=Northwind;Integrated Security=SSPI" /&gt;
+    &lt;/appSettings&gt;
+&lt;/configuration&gt;
+</code>
+<para>
+Test.cs:
+</para>
+<code>
+using System;
+using System.Data;
+
+using NUnit.Framework;
+
+using Rsdn.Framework.Data;
+
+namespace Examples_DbManager
+{
+	[TestFixture]
+	public class ctor_string
+	{
+		[Test]
+		public void Test()
+		{
+			using (DbManager db = new DbManager("Development"))
+			{
+				Assert.AreEqual(ConnectionState.Open, db.Connection.State);
+			}
+		}
+	}
+}
+</code>
+</example>
+</db>
+
+<db name="DataProvider">
+<example>
+The following example demonstrates how to use the property.
+<code>
+using System;
+
+using NUnit.Framework;
+
+using Rsdn.Framework.Data;
+
+namespace Examples_DbManager
+{
+	[TestFixture]
+	public class DataProvider
+	{
+		[Test]
+		public void Test()
+		{
+			using (DbManager db = new DbManager())
+			{
+				Assert.AreEqual("Sql", db.DataProvider.Name);
+			}
+		}
+	}
+}
+</code>
+</example>
+</db>
+
+<db name="ExecuteDictionary(Hashtable,string,Type)">
+<example>
+The following example demonstrates how to use the <b>ExecuteDictionary</b> method.
+<code>
+using System;
+using System.Collections;
+
+using NUnit.Framework;
+
+using Rsdn.Framework.Data;
+
+namespace Examples_DbManager
+{
+	[TestFixture]
+	public class ExecuteDictionary_Hashtable_string_Type
+	{
+		public class Category
+		{
+			public int    ID;
+			public string Name;
+			public string Description;
+		}
+
+		[Test]
+		public void Test()
+		{
+			using (DbManager db = new DbManager())
+			{
+				Hashtable ht = new Hashtable();
+
+				db
+					.SetCommand(@"
+						SELECT
+							CategoryID   as ID,
+							CategoryName as Name,
+							Description  as Description
+						FROM Categories")
+					.ExecuteDictionary(ht, "ID", typeof(Category));
+                    
+				foreach (Category category in ht.Values)
+				{
+					Console.WriteLine("ID  : {0}\nName: {1}\nDesc: {2}",
+						category.ID, category.Name, category.Description);
+					Console.WriteLine();
+				}
+			}
+		}
+	}
+}
+</code>
+</example>
+</db>
+
+<db name="ExecuteDictionary(string,Type)">
+<example>
+The following example demonstrates how to use the <b>ExecuteDictionary</b> method.
+<code>
+using System;
+using System.Collections;
+
+using NUnit.Framework;
+
+using Rsdn.Framework.Data;
+
+namespace Examples_DbManager
+{
+	[TestFixture]
+	public class ExecuteDictionary_string_Type
+	{
+		public class Category
+		{
+			public int    ID;
+			public string Name;
+			public string Description;
+		}
+
+		[Test]
+		public void Test()
+		{
+			using (DbManager db = new DbManager())
+			{
+				Hashtable ht = db
+					.SetCommand(@"
+						SELECT
+							CategoryID   as ID,
+							CategoryName as Name,
+							Description  as Description
+						FROM Categories")
+					.ExecuteDictionary("ID", typeof(Category));
+                    
+				foreach (Category category in ht.Values)
+				{
+					Console.WriteLine("ID  : {0}\nName: {1}\nDesc: {2}",
+						category.ID, category.Name, category.Description);
+					Console.WriteLine();
+				}
+			}
+		}
+	}
+}
+</code>
+</example>
+</db>
+
+<db name="Transaction">
+<example>
+The following example creates an instance of the <see cref="DbManager"/>, 
+calls the <see cref="BeginTransaction"/> method, and commit the transaction,
+<code>
+using System;
+
+using NUnit.Framework;
+
+using Rsdn.Framework.Data;
+
+namespace Examples_DbManager
+{
+	[TestFixture]
+	public class Transaction
+	{
+		[Test]
+		public void Test()
+		{
+			using (DbManager db = new DbManager())
+			{
+				db.BeginTransaction();
+
+				db.Transaction.Commit();
+			}
+		}
+	}
+}
+</code>
+</example>
+</db>
+
+
+</examples>

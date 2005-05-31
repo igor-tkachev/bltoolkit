@@ -1,0 +1,85 @@
+Microsoft Visual Studio Solution File, Format Version 8.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rsdn.Framework.Data", "Source\Rsdn.Framework.Data.csproj", "{653EBAE9-B766-4B78-8077-8EC009156DE5}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
+Project("{FE3BBBB6-72D5-11D2-9ACE-00C04F79A2A4}") = "Documentation", "Documentation\Documentation.etp", "{6989FEE9-7FD3-4ED0-A339-A7200605A946}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
+Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "Setup", "Setup\Setup.vdproj", "{33AF814D-3D1F-4486-AA26-3D855B3269D5}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestData", "TestData\TestData.csproj", "{B2689B7F-B435-48F2-95D2-5F4992C84A5E}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Examples", "Examples\Examples.csproj", "{BD8F5FB3-EDFC-4A9E-B293-4B41EF7B19F7}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebRFD", "http://localhost/WebRFD/WebRFD.csproj", "{422D5F83-5EA9-4028-9519-B92E1ED75173}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
+Project("{FE3BBBB6-72D5-11D2-9ACE-00C04F79A2A4}") = "UnitTest", "UnitTest\UnitTest.etp", "{B1E02FBB-F0AE-45A5-8213-37A7DF36A383}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfiguration) = preSolution
+		Debug = Debug
+		Release = Release
+	EndGlobalSection
+	GlobalSection(ProjectConfiguration) = postSolution
+		{653EBAE9-B766-4B78-8077-8EC009156DE5}.Debug.ActiveCfg = Debug|.NET
+		{653EBAE9-B766-4B78-8077-8EC009156DE5}.Debug.Build.0 = Debug|.NET
+		{653EBAE9-B766-4B78-8077-8EC009156DE5}.Release.ActiveCfg = Release|.NET
+		{653EBAE9-B766-4B78-8077-8EC009156DE5}.Release.Build.0 = Release|.NET
+		{33AF814D-3D1F-4486-AA26-3D855B3269D5}.Debug.ActiveCfg = Debug
+		{33AF814D-3D1F-4486-AA26-3D855B3269D5}.Release.ActiveCfg = Release
+		{B2689B7F-B435-48F2-95D2-5F4992C84A5E}.Debug.ActiveCfg = Debug|.NET
+		{B2689B7F-B435-48F2-95D2-5F4992C84A5E}.Debug.Build.0 = Debug|.NET
+		{B2689B7F-B435-48F2-95D2-5F4992C84A5E}.Release.ActiveCfg = Release|.NET
+		{B2689B7F-B435-48F2-95D2-5F4992C84A5E}.Release.Build.0 = Release|.NET
+		{BD8F5FB3-EDFC-4A9E-B293-4B41EF7B19F7}.Debug.ActiveCfg = Debug|.NET
+		{BD8F5FB3-EDFC-4A9E-B293-4B41EF7B19F7}.Debug.Build.0 = Debug|.NET
+		{BD8F5FB3-EDFC-4A9E-B293-4B41EF7B19F7}.Release.ActiveCfg = Release|.NET
+		{BD8F5FB3-EDFC-4A9E-B293-4B41EF7B19F7}.Release.Build.0 = Release|.NET
+		{422D5F83-5EA9-4028-9519-B92E1ED75173}.Debug.ActiveCfg = Debug|.NET
+		{422D5F83-5EA9-4028-9519-B92E1ED75173}.Debug.Build.0 = Debug|.NET
+		{422D5F83-5EA9-4028-9519-B92E1ED75173}.Release.ActiveCfg = Release|.NET
+		{422D5F83-5EA9-4028-9519-B92E1ED75173}.Release.Build.0 = Release|.NET
+		{90AAB2AC-0DE2-4A75-AEB8-A2FC1782B27A}.Debug.ActiveCfg = Debug|.NET
+		{90AAB2AC-0DE2-4A75-AEB8-A2FC1782B27A}.Debug.Build.0 = Debug|.NET
+		{90AAB2AC-0DE2-4A75-AEB8-A2FC1782B27A}.Release.ActiveCfg = Release|.NET
+		{90AAB2AC-0DE2-4A75-AEB8-A2FC1782B27A}.Release.Build.0 = Release|.NET
+		{FBB14E75-99D0-4F6A-8344-C028B7615019}.Debug.ActiveCfg = Debug|.NET
+		{FBB14E75-99D0-4F6A-8344-C028B7615019}.Debug.Build.0 = Debug|.NET
+		{FBB14E75-99D0-4F6A-8344-C028B7615019}.Release.ActiveCfg = Release|.NET
+		{FBB14E75-99D0-4F6A-8344-C028B7615019}.Release.Build.0 = Release|.NET
+		{2F458667-1D0E-470D-8223-E29B350E414A}.Debug.ActiveCfg = Debug|.NET
+		{2F458667-1D0E-470D-8223-E29B350E414A}.Debug.Build.0 = Debug|.NET
+		{2F458667-1D0E-470D-8223-E29B350E414A}.Release.ActiveCfg = Release|.NET
+		{2F458667-1D0E-470D-8223-E29B350E414A}.Release.Build.0 = Release|.NET
+		{9A41A88E-FB45-4C41-8412-2F4CE540ECA0}.Debug.ActiveCfg = Debug|.NET
+		{9A41A88E-FB45-4C41-8412-2F4CE540ECA0}.Debug.Build.0 = Debug|.NET
+		{9A41A88E-FB45-4C41-8412-2F4CE540ECA0}.Release.ActiveCfg = Release|.NET
+		{9A41A88E-FB45-4C41-8412-2F4CE540ECA0}.Release.Build.0 = Release|.NET
+		{5AE18977-9F9F-460E-86F5-E42668CDFE9E}.Debug.ActiveCfg = Debug|.NET
+		{5AE18977-9F9F-460E-86F5-E42668CDFE9E}.Debug.Build.0 = Debug|.NET
+		{5AE18977-9F9F-460E-86F5-E42668CDFE9E}.Release.ActiveCfg = Release|.NET
+		{5AE18977-9F9F-460E-86F5-E42668CDFE9E}.Release.Build.0 = Release|.NET
+		{E42AB6EB-9BF5-466C-A761-521FF3459137}.Debug.ActiveCfg = Debug|.NET
+		{E42AB6EB-9BF5-466C-A761-521FF3459137}.Debug.Build.0 = Debug|.NET
+		{E42AB6EB-9BF5-466C-A761-521FF3459137}.Release.ActiveCfg = Release|.NET
+		{E42AB6EB-9BF5-466C-A761-521FF3459137}.Release.Build.0 = Release|.NET
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		XCSharpSolutionEnabled = True
+		XCSharpProjectsDisabled = 
+	EndGlobalSection
+	GlobalSection(ExtensibilityAddIns) = postSolution
+	EndGlobalSection
+EndGlobal
