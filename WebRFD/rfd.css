@@ -1,0 +1,84 @@
+body
+{
+	background-color:White;
+	font-family: verdana, tahoma, helvetica, arial;
+	padding: 0 0 0 0;
+	margin: 0 0 0 0;
+}
+
+td.hdr
+{
+	color: #336699;
+	background-color: #eeeeee;
+	padding: 5 10 5 10;	
+	border-bottom-width: 1px;
+	border-bottom-style: solid;
+	border-bottom-color: #336699;
+}
+
+td.ftr
+{
+	padding: 3 5 3 5;	
+}
+
+td.menu
+{
+	color: White;
+	background-color: #336699;
+	padding: 10 10 10 10;	
+}
+
+td.art
+{
+	padding: 10 10 10 10;	
+}
+
+a.mn      { color: #eeeeee; }
+a:link    { text-decoration: none; }
+a:visited { text-decoration: none; }
+a:hover   { text-decoration: underline; }
+
+h2
+{
+	font-family: arial ;
+	font-weight: bolder;
+	text-align: center;
+	color: #4580A0; 
+}
+
+h3
+{
+	font-weight:lighter;
+	text-align:left;
+	color:#4580A0; 
+}
+
+h4
+{
+	font-weight:bold;            
+	text-align:left;
+	color:#4580A0;
+}
+
+P, UL, OL, DL
+{
+	text-align:justify; 
+}
+
+PRE, CODE 
+{
+	padding: 10px;
+	margin: 0;
+	font-family: "courier new";
+	font-size: x-small; 
+}
+
+.code { background-color:#F4F4F4; }
+
+SPAN.COMMENT      { color: #008800; }
+SPAN.STRING       { color: #007777; }
+SPAN.CHARACTER    { color: black; }
+SPAN.KEYWORD      { color: blue; }
+SPAN.PREPROCESSOR { color: blue; }
+SPAN.NUMBER       { color: black; }
+SPAN.ACCENT       { color: red; }

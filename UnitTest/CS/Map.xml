@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mapping>
+    <type name="CS.MapDataTest.x1.Dest1">
+		<field name="ix1" source="i1"/>
+    </type>
+    <my_tag>
+   		<my_tag_type my_name="dest_attr">
+			<field name="ixx1" source="i1" nullable="true"  />
+		</my_tag_type>
+	</my_tag>
+</mapping>
