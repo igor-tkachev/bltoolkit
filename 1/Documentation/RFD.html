@@ -1,0 +1,806 @@
+<HTML><HEAD><TITLE>The Rsdn.Framework.Data namespace</TITLE><META http-equiv="Content-Type" content="text/html; charset=windows-1251">
+<LINK rel="stylesheet"  type="text/css"href="C:/Program Files/RSDN/AuthPack/Authoring/css/article.css">
+<SCRIPT LANGUAGE="JavaScript">
+function ToggleCode(id){ el=document.all[id];
+    img=document.all[ "img"+id];if(el.style.display=="none") 
+    {img.src="C:/Program Files/RSDN/AuthPack/Authoring/images/ls2.gif";el.style.display="";}else 
+    {img.src="C:/Program Files/RSDN/AuthPack/Authoring/images/ls1.gif";el.style.display="none";}}
+</SCRIPT></HEAD>
+<H1>The Rsdn.Framework.Data namespace<A href="printv.asp?what=this"></A><BR><SPAN class="subtitle"></SPAN></H1>
+<H5>
+</H5>
+<H6><SPAN class="title">Опубликовано: </SPAN><SPAN class="value">25.12.2003</SPAN></H6>
+<DIV style="margin-left:2em"><A href="#IDAPYSOB"><B></B></A><BR><DIV style="margin-left:2em">
+</DIV><A href="#IDATYSOB"><B>Introduction</B></A><BR><DIV style="margin-left:2em">
+</DIV><A href="#IDA5ZSOB"><B>Examples</B></A><BR><DIV style="margin-left:2em"><A href="#IDAF0SOB">Basic example, just an introduction</A><BR><A href="#IDAD1SOB">Default configuration</A><BR><A href="#IDAL3SOB">Adding a data provider - Borland Data Providers for .NET (BDP.NET)</A><BR><A href="#IDAV5SOB">Business object reading</A><BR><A href="#IDAWJQOB">Stored procedure use</A><BR><A href="#IDAUKQOB">Mapping an array of the object to the DataTable</A><BR><A href="#IDASMQOB">… and back</A><BR></DIV><A href="#IDAROQOB"><B>Version 1.1 Fixes and Features</B></A><BR><DIV style="margin-left:2em"><A href="#IDAUOQOB">Features</A><BR></DIV>
+</DIV>
+<H2><A name="IDAPYSOB"></A></H2>
+<P><CENTER><IMG src="http://www.rsdn.ru/article/files/libs/RsdnFrameworkData/RsdnFrameworkData.gif" title=""><BR><FONT face="verdana" style="font-size:x-small"><I></I></FONT>
+</CENTER></P>
+<H2>Introduction<A name="IDATYSOB"></A></H2>
+<P><STRONG>Rsdn.Framework.Data</STRONG> is a namespace that represents a higher-level wrapper for ADO.NET with high performance object-relational mapping.</P>
+<P>The following features are implemented by the namespace: </P>
+<UL style="LIST-STYLE:square"><LI><STRONG>Support for different data providers. </STRONG>The namespace manipulates the ADO.NET interfaces only. It does not use any data provider directly. Instead it communicates with the simple <I>IDataProvider</I> interface, which can be easily used to extend the list of supported data providers.</LI>
+<LI><STRONG>Returning <I>IDataReader</I>, <I>DataTable</I>, <I>DataSet</I>, business objects, or single values.</STRONG> Obviously the namespace supports all standard ways to obtain data, adds some new methods to get DataTable, and simplifies working with your business objects. </LI>
+<LI><STRONG>Returning a list of business entity objects.</STRONG> You can get a list of business objects as easy as you read <I>DataSet</I> using the <I>Fill</I> method of the <I>SqlDataAdapter</I> class.</LI>
+<LI><STRONG>High performance object-relational mapping.</STRONG> The library is optimized for high performance data mapping. The <I>System.Reflection</I> namespace is used to prepare initial type information, and then custom classes are generated. This allows to avoid slowness of the reflection and gain incredible performance.</LI>
+</UL>
+<H2>Examples<A name="IDA5ZSOB"></A></H2>
+<P>I won't make you bored by providing you with the complete list of the library functions and features here. You can find that in the documentation. Instead let's take a look at a few examples that will give you some ideas of what the library is and how it can be used.</P>
+<H3>Basic example, just an introduction<A name="IDAF0SOB"></A></H3>
+<DIV id="IDAJ0SOB">
+<TABLE class="code" width="98%"><TR><TD>
+<PRE>
+<SPAN class="KEYWORD">using</SPAN> System;
+
+<SPAN class="KEYWORD">using</SPAN> Rsdn.Framework.Data;
+
+<SPAN class="KEYWORD">namespace</SPAN> Example
+{
+<SPAN class="KEYWORD">    class</SPAN> Test
+    {
+<SPAN class="KEYWORD">        static</SPAN> <SPAN class="KEYWORD">void</SPAN> Main()
+        {
+<SPAN class="KEYWORD">            using</SPAN> (DbManager db = <SPAN class="KEYWORD">new</SPAN> DbManager())
+            {
+<SPAN class="KEYWORD">                string</SPAN> name = (<SPAN class="KEYWORD">string</SPAN>)db.ExecuteScalar(<SPAN class="STRING">@"
+                    SELECT
+                        CategoryName
+                    FROM
+                        Categories 
+                    WHERE
+                        CategoryID = @id"</SPAN>,
+                    db.Parameter(<SPAN class="STRING">"@id"</SPAN>, 1));
+
+                Console.WriteLine(name);
+            }
+        }
+    }
+}
+</PRE>
+</TD></TR></TABLE>
+</DIV>
+
+<H3>Default configuration<A name="IDAD1SOB"></A></H3>
+<P>App.config</P>
+<DIV id="IDAJ1SOB">
+<TABLE class="code" width="98%"><TR><TD>
+<PRE>
+&lt;configuration&gt;
+    &lt;appSettings&gt;
+        &lt;add 
+            key   = <SPAN class="STRING">"ConnectionString"</SPAN> 
+            value = <SPAN class="STRING">"Server=.;Database=NorthwindDev;Integrated Security=SSPI"</SPAN> /&gt;
+    &lt;/appSettings&gt;
+&lt;configuration&gt;
+</PRE>
+</TD></TR></TABLE>
+</DIV>
+<P>Test.cs</P>
+<DIV id="IDAR1SOB">
+<TABLE class="code" width="98%"><TR><TD>
+<PRE>
+<SPAN class="KEYWORD">using</SPAN> System;
+
+<SPAN class="KEYWORD">using</SPAN> Rsdn.Framework.Data;
+
+<SPAN class="KEYWORD">namespace</SPAN> Example
+{
+<SPAN class="KEYWORD">    class</SPAN> Test
+    {
+<SPAN class="KEYWORD">        static</SPAN> <SPAN class="KEYWORD">void</SPAN> Main()
+        {
+<SPAN class="KEYWORD">            using</SPAN> (DbManager db = <SPAN class="KEYWORD">new</SPAN> DbManager())
+            {
+<SPAN class="COMMENT">                // ...</SPAN>
+            }
+        }
+    }
+}
+</PRE>
+</TD></TR></TABLE>
+</DIV>
+<P>Advanced configuration</P>
+<P>App.config</P>
+<DIV id="IDAJ2SOB">
+<TABLE class="code" width="98%"><TR><TD>
+<PRE>
+&lt;configuration&gt;
+    &lt;appSettings&gt;
+        &lt;add 
+            key   = <SPAN class="STRING">"ConnectionString.Development"</SPAN> 
+            value = <SPAN class="STRING">"Server=.;Database=NorthwindDev;Integrated Security=SSPI"</SPAN> /&gt;
+        &lt;add 
+            key   = <SPAN class="STRING">"ConnectionString.Production"</SPAN> 
+            value = <SPAN class="STRING">"Server=.;Database=Northwind;Integrated Security=SSPI"</SPAN> /&gt;
+    &lt;/appSettings&gt;
+&lt;configuration&gt;
+</PRE>
+</TD></TR></TABLE>
+</DIV>
+<P>Test.cs</P>
+<DIV id="IDAV2SOB">
+<TABLE class="code" width="98%"><TR><TD>
+<PRE>
+<SPAN class="KEYWORD">using</SPAN> System;
+
+<SPAN class="KEYWORD">using</SPAN> Rsdn.Framework.Data;
+
+<SPAN class="KEYWORD">namespace</SPAN> Example
+{
+    <SPAN class="KEYWORD">class</SPAN> Test
+    {
+        <SPAN class="KEYWORD">static</SPAN> <SPAN class="KEYWORD">void</SPAN> Main()
+        {
+            <SPAN class="KEYWORD">using</SPAN> (DbManager db = <SPAN class="KEYWORD">new</SPAN> DbManager(<SPAN class="STRING">"Development"</SPAN>))
+            {
+                <SPAN class="COMMENT">// ...</SPAN>
+            }
+        }
+    }
+}
+</PRE>
+</TD></TR></TABLE>
+</DIV>
+
+<H3>Adding a data provider - Borland Data Providers for .NET (BDP.NET)<A name="IDAL3SOB"></A></H3>
+<DIV id="IDAP3SOB">
+<TABLE class="code" width="98%"><TR><TD>
+<PRE>
+<SPAN class="KEYWORD">using</SPAN> System;
+<SPAN class="KEYWORD">using</SPAN> System.Data;
+<SPAN class="KEYWORD">using</SPAN> System.Data.Common;
+
+<SPAN class="KEYWORD">using</SPAN> Borland.Data.Provider;
+
+<SPAN class="KEYWORD">using</SPAN> Rsdn.Framework.Data;
+<SPAN class="KEYWORD">using</SPAN> Rsdn.Framework.Data.DataProvider;
+
+<SPAN class="KEYWORD">namespace</SPAN> Example
+{
+    <SPAN class="KEYWORD">public</SPAN> <SPAN class="KEYWORD">class</SPAN> BdpDataProvider: IDataProvider
+    {
+        IDbConnection IDataProvider.CreateConnectionObject()
+        {
+            <SPAN class="KEYWORD">return</SPAN> <SPAN class="KEYWORD">new</SPAN> BdpConnection();
+        }
+
+        DbDataAdapter IDataProvider.CreateDataAdapterObject()
+        {
+            <SPAN class="KEYWORD">return</SPAN> <SPAN class="KEYWORD">new</SPAN> BdpDataAdapter();
+        }
+
+        <SPAN class="KEYWORD">void</SPAN> IDataProvider.DeriveParameters(IDbCommand command)
+        {
+            BdpCommandBuilder.DeriveParameters((BdpCommand)command);
+        }
+
+        Type IDataProvider.ConnectionType
+        {
+            get { <SPAN class="KEYWORD">return</SPAN> <SPAN class="KEYWORD">typeof</SPAN>(BdpConnection); }
+        }
+
+        <SPAN class="KEYWORD">string</SPAN> IDataProvider.Name
+        {
+            get { <SPAN class="KEYWORD">return</SPAN> <SPAN class="STRING">"Bdp"</SPAN>; }
+        }
+    }
+
+    <SPAN class="KEYWORD">class</SPAN> Test
+    {
+        <SPAN class="KEYWORD">static</SPAN> <SPAN class="KEYWORD">void</SPAN> Main()
+        {
+            DbManager.AddDataProvider(<SPAN class="KEYWORD">new</SPAN> BdpDataProvider());
+            DbManager.AddConnectionString(<SPAN class="STRING">".bdp"</SPAN>,
+                <SPAN class="STRING">"assembly=Borland.Data.Mssql,"</SPAN> + 
+                <SPAN class="STRING">"Version=1.1.0.0,Culture=neutral, "</SPAN> +                 
+                <SPAN class="STRING">"PublicKeyToken=91d62ebb5b0d1b1b;"</SPAN> +
+                <SPAN class="STRING">"vendorclient=sqloledb.dll;osauthentication=True;"</SPAN> +
+                <SPAN class="STRING">"database=Northwind;hostname=localhost;provider=MSSQL"</SPAN>);
+
+            <SPAN class="KEYWORD">using</SPAN> (DbManager db = <SPAN class="KEYWORD">new</SPAN> DbManager())
+            {
+                <SPAN class="KEYWORD">int</SPAN> count = (<SPAN class="KEYWORD">int</SPAN>)db.ExecuteScalar(<SPAN class="STRING">"SELECT Count(*) FROM Categories"</SPAN>);
+
+                Console.WriteLine(count);
+            }
+        }
+    }
+}
+</PRE>
+</TD></TR></TABLE>
+</DIV>
+
+<H3>Business object reading<A name="IDAV5SOB"></A></H3>
+<DIV id="IDAZ5SOB">
+<TABLE class="code" width="98%"><TR><TD>
+<PRE>
+<SPAN class="KEYWORD">using</SPAN> System;
+
+<SPAN class="KEYWORD">using</SPAN> Rsdn.Framework.Data;
+
+<SPAN class="KEYWORD">namespace</SPAN> Example
+{
+    <SPAN class="KEYWORD">public</SPAN> <SPAN class="KEYWORD">class</SPAN> Category
+    {
+        [MapField(Name=<SPAN class="STRING">"CategoryID"</SPAN>)]
+        <SPAN class="KEYWORD">public</SPAN> <SPAN class="KEYWORD">int</SPAN> ID;
+
+        [MapField(Name=<SPAN class="STRING">"CategoryName"</SPAN>)]
+        <SPAN class="KEYWORD">public</SPAN> <SPAN class="KEYWORD">string</SPAN> Name;
+
+        [MapField(IsNullable=<SPAN class="KEYWORD">true</SPAN>)]
+        <SPAN class="KEYWORD">public</SPAN> <SPAN class="KEYWORD">string</SPAN> Description;
+    }
+
+    <SPAN class="KEYWORD">class</SPAN> Test
+    {
+        <SPAN class="KEYWORD">static</SPAN> <SPAN class="KEYWORD">void</SPAN> Main()
+        {
+            <SPAN class="KEYWORD">using</SPAN> (DbManager   db = <SPAN class="KEYWORD">new</SPAN> DbManager())
+            {
+                Category category = db.ExecuteBizEntity(
+                    <SPAN class="KEYWORD">typeof</SPAN>(Category), <SPAN class="STRING">@"
+</SPAN>                    <SPAN class="STRING">SELECT TOP 1
+</SPAN>                        <SPAN class="STRING">CategoryID,
+</SPAN>                        <SPAN class="STRING">CategoryName,
+</SPAN>                        <SPAN class="STRING">Description
+</SPAN>                    <SPAN class="STRING">FROM Categories"</SPAN>);
+
+                <SPAN class="KEYWORD">if</SPAN> (category != <SPAN class="KEYWORD">null</SPAN>)
+                {
+                    Console.WriteLine(<SPAN class="STRING">"ID  : {0}\nName: {1}\nDesc: {2}"</SPAN>,
+                        category.ID, category.Name, category.Description);
+                }
+            }
+        }
+    }
+}
+</PRE>
+</TD></TR></TABLE>
+</DIV>
+
+<H3>Stored procedure use<A name="IDAWJQOB"></A></H3>
+<DIV id="IDAZJQOB">
+<TABLE class="code" width="98%"><TR><TD>
+<PRE>
+<SPAN class="KEYWORD">using</SPAN> System;
+<SPAN class="KEYWORD">using</SPAN> System.Data;
+
+<SPAN class="KEYWORD">using</SPAN> Rsdn.Framework.Data;
+
+<SPAN class="KEYWORD">namespace</SPAN> Example
+{
+    <SPAN class="KEYWORD">class</SPAN> Test
+    {
+        <SPAN class="KEYWORD">static</SPAN> <SPAN class="KEYWORD">void</SPAN> Main()
+        {
+            <SPAN class="KEYWORD">using</SPAN> (DbManager db = <SPAN class="KEYWORD">new</SPAN> DbManager())
+            {
+                DataSet dataSet = db.ExecuteSpDataSet(<SPAN class="STRING">"SalesByCategory"</SPAN>, <SPAN class="STRING">"Seafood"</SPAN>, <SPAN class="KEYWORD">null</SPAN>);
+            }
+        }
+    }
+}
+</PRE>
+</TD></TR></TABLE>
+</DIV>
+
+<H3>Mapping an array of the object to the DataTable<A name="IDAUKQOB"></A></H3>
+<DIV id="IDAXKQOB">
+<TABLE class="code" width="98%"><TR><TD>
+<PRE>
+<SPAN class="KEYWORD">using</SPAN> System;
+<SPAN class="KEYWORD">using</SPAN> System.Collections;
+<SPAN class="KEYWORD">using</SPAN> System.Data;
+
+<SPAN class="KEYWORD">using</SPAN> Rsdn.Framework.Data;
+
+<SPAN class="KEYWORD">namespace</SPAN> Example
+{
+    <SPAN class="KEYWORD">public</SPAN> <SPAN class="KEYWORD">class</SPAN> BizEntity
+    {
+        <SPAN class="KEYWORD">public</SPAN> <SPAN class="KEYWORD">int</SPAN>    ID;
+        <SPAN class="KEYWORD">public</SPAN> <SPAN class="KEYWORD">string</SPAN> Name;
+    }
+
+    <SPAN class="KEYWORD">class</SPAN> Test
+    {
+        <SPAN class="KEYWORD">static</SPAN> <SPAN class="KEYWORD">void</SPAN> Main()
+        {
+            DataTable table = <SPAN class="KEYWORD">new</SPAN> DataTable();
+
+            table.Columns.Add(<SPAN class="STRING">"ID"</SPAN>,   <SPAN class="KEYWORD">typeof</SPAN>(<SPAN class="KEYWORD">int</SPAN>));
+            table.Columns.Add(<SPAN class="STRING">"Name"</SPAN>, <SPAN class="KEYWORD">typeof</SPAN>(<SPAN class="KEYWORD">string</SPAN>));
+
+            ArrayList array  = <SPAN class="KEYWORD">new</SPAN> ArrayList();
+            BizEntity entity = <SPAN class="KEYWORD">new</SPAN> BizEntity();
+
+            entity.ID   = 1;
+            entity.Name = <SPAN class="STRING">"Example"</SPAN>;
+
+            array.Add(entity);
+
+            MapData.MapList(array, table);
+
+            Console.WriteLine(<SPAN class="STRING">"ID  : {0}"</SPAN>, table.Rows[0][<SPAN class="STRING">"ID"</SPAN>]);
+            Console.WriteLine(<SPAN class="STRING">"Name: {0}"</SPAN>, table.Rows[0][<SPAN class="STRING">"Name"</SPAN>]);
+        }
+    }
+}
+</PRE>
+</TD></TR></TABLE>
+</DIV>
+
+<H3>… and back<A name="IDASMQOB"></A></H3>
+<DIV id="IDAVMQOB">
+<TABLE class="code" width="98%"><TR><TD>
+<PRE>
+<SPAN class="KEYWORD">using</SPAN> System;
+<SPAN class="KEYWORD">using</SPAN> System.Collections;
+<SPAN class="KEYWORD">using</SPAN> System.Data;
+
+<SPAN class="KEYWORD">using</SPAN> Rsdn.Framework.Data;
+
+<SPAN class="KEYWORD">namespace</SPAN> Example
+{
+    <SPAN class="KEYWORD">public</SPAN> <SPAN class="KEYWORD">class</SPAN> BizEntity
+    {
+        <SPAN class="KEYWORD">public</SPAN> <SPAN class="KEYWORD">int</SPAN>    ID;
+        <SPAN class="KEYWORD">public</SPAN> <SPAN class="KEYWORD">string</SPAN> Name;
+    }
+
+    <SPAN class="KEYWORD">class</SPAN> Test
+    {
+        <SPAN class="KEYWORD">static</SPAN> <SPAN class="KEYWORD">void</SPAN> Main()
+        {
+            DataTable table = <SPAN class="KEYWORD">new</SPAN> DataTable();
+
+            table.Columns.Add(<SPAN class="STRING">"ID"</SPAN>,   <SPAN class="KEYWORD">typeof</SPAN>(<SPAN class="KEYWORD">int</SPAN>));
+            table.Columns.Add(<SPAN class="STRING">"Name"</SPAN>, <SPAN class="KEYWORD">typeof</SPAN>(<SPAN class="KEYWORD">string</SPAN>));
+
+            table.Rows.Add(<SPAN class="KEYWORD">new</SPAN> <SPAN class="KEYWORD">object</SPAN>[] { 1, <SPAN class="STRING">"Example"</SPAN> });
+
+            ArrayList array = MapData.MapList(table, <SPAN class="KEYWORD">typeof</SPAN>(BizEntity));
+
+            Console.WriteLine(<SPAN class="STRING">"ID  : {0}"</SPAN>, ((BizEntity)array[0]).ID);
+            Console.WriteLine(<SPAN class="STRING">"Name: {0}"</SPAN>, ((BizEntity)array[0]).Name);
+        }
+    }
+}
+</PRE>
+</TD></TR></TABLE>
+</DIV>
+<P>
+</P>
+
+<H2>Version 1.1 Fixes and Features<A name="IDAROQOB"></A></H2>
+<H3>Features<A name="IDAUOQOB"></A></H3>
+<P>
+</P>
+<P>New DbManager.ExecuteDictionary method</P>
+<P>The method executes a query and returns the Hashtable of business entities. </P>
+<P>New MapData.MapDictionary method</P>
+<P>The method maps data from/to Hashtable or an object that implements the IDictionary interface. </P>
+<P>Support for IDataReader interface</P>
+<P>New overloaded versions of the MapData.MapList and MapData.MapDictionary methods added to support mapping from/to the IDataReader. </P>
+<P>Enhancement of the MapValueAttribute attribute</P>
+<P>Now the attribute can be applied to enumeration values. public enum Status</P>
+<P>{</P>
+<P>    [MapValue("A")] Active,</P>
+<P>    [MapValue("I")] Inactive,</P>
+<P>    [MapValue("P")] Pending</P>
+<P>}</P>
+<P>This is only way to define the attributes in Managed C++. </P>
+<P>New RsdnDbManagerException and RsdnMapDataException classes.</P>
+<P>All exceptions thrown by the library or used classes are wrapped in these exception classes and returned as inners. </P>
+<P>Fixes</P>
+<P>An exception occurs when attempting to add the DbManager to a form. </P>
+<P>Version 1.2 Fixes and Features</P>
+<P>Features</P>
+<P>
+</P>
+<P>The MapData class has been moved to the Rsdn.Framework.Data.Mapping namespace and renamed to Map. </P>
+<P>Support for abstract classes added.</P>
+<P>Now it's possible to skip implementation of class properties and define read-only class members.</P>
+<DIV id="IDAMYQOB">
+<TABLE class="code" width="98%"><TR><TD>
+<PRE>
+<SPAN class="KEYWORD">public</SPAN> <SPAN class="KEYWORD">abstract</SPAN> <SPAN class="KEYWORD">class</SPAN> MyBizEntity
+{
+    <SPAN class="KEYWORD">public</SPAN> <SPAN class="KEYWORD">abstract</SPAN> <SPAN class="KEYWORD">int</SPAN>    ID          { get; }
+    <SPAN class="KEYWORD">public</SPAN> <SPAN class="KEYWORD">abstract</SPAN> <SPAN class="KEYWORD">string</SPAN> Description { get; set; }
+}
+</PRE>
+</TD></TR></TABLE>
+</DIV>
+<P>New MapTypeAttribute attribute. </P>
+<P>New MapParameterAttribute attribute. </P>
+<P>New MapIgnoreAttribute attribute. </P>
+<P>New MapDescriptor class. </P>
+<P>New IMapObjectFactory interface. </P>
+<P>Enhancement of the MapFieldAttribute attribute use. </P>
+<P>Support for nullable types added. </P>
+<P>Support for the Guid type added. </P>
+<P>Xml schema mapping added.</P>
+<P>The SetMappingSchema method can be used to assign default mapping schema. </P>
+<P>New MapXmlAttribute attribute. </P>
+<P>Fixes</P>
+<P>Couple of minor bugs has been fixed. </P>
+<P>The major changes of this version apply to mapping features. The MapData class was renamed and moved to the Rsdn.Framework.Data.Mapping namespace. Some methods of the class were renamed as well. Old names decorated with the Obsolete attribute and will be removed with the next version of the library. </P>
+<P>
+</P>
+<P>Abstract classes</P>
+<P>Support for abstract classes allows to get actually declarative business object definition and to skip implementation of properties. The following example demonstrates typical business object definition: </P>
+<P>
+</P>
+<DIV id="IDAE0QOB">
+<TABLE class="code" width="98%"><TR><TD>
+<PRE>
+<SPAN class="KEYWORD">public</SPAN> <SPAN class="KEYWORD">class</SPAN> MyBizEntity
+{
+    <SPAN class="KEYWORD">private</SPAN> <SPAN class="KEYWORD">int</SPAN> _id;
+    <SPAN class="KEYWORD">public</SPAN>  <SPAN class="KEYWORD">int</SPAN>  ID
+    {
+        get { <SPAN class="KEYWORD">return</SPAN> _id;  }
+        set { _id = value; }
+    }
+
+    <SPAN class="KEYWORD">private</SPAN> <SPAN class="KEYWORD">string</SPAN> _description;
+    <SPAN class="KEYWORD">public</SPAN>  <SPAN class="KEYWORD">string</SPAN>  Description
+    {
+        get { <SPAN class="KEYWORD">return</SPAN> _description;  }
+        set { _description = value; }
+    }
+}
+</PRE>
+</TD></TR></TABLE>
+</DIV>
+<P>Abstract definition looks like the following:</P>
+<P>
+</P>
+<DIV id="IDAC1QOB">
+<TABLE class="code" width="98%"><TR><TD>
+<PRE>
+<SPAN class="KEYWORD">public</SPAN> <SPAN class="KEYWORD">abstract</SPAN> <SPAN class="KEYWORD">class</SPAN> MyBizEntity
+{
+    <SPAN class="KEYWORD">public</SPAN> <SPAN class="KEYWORD">abstract</SPAN> <SPAN class="KEYWORD">int</SPAN>    ID          { get; }
+    <SPAN class="KEYWORD">public</SPAN> <SPAN class="KEYWORD">abstract</SPAN> <SPAN class="KEYWORD">string</SPAN> Description { get; set; }
+}
+</PRE>
+</TD></TR></TABLE>
+</DIV>
+<P>This way is a little bit shorter and allows to define read-only class properties.</P>
+<P>
+</P>
+<P>MapTypeAttribute</P>
+<P>If one of the abstract properties has to be implemented by different from return value type, the MapTypeAttribute attribute can be used. Suppose we have internal property implementation using the following class: </P>
+<P>
+</P>
+<DIV id="IDAA2QOB">
+<TABLE class="code" width="98%"><TR><TD>
+<PRE>
+<SPAN class="KEYWORD">public</SPAN> <SPAN class="KEYWORD">class</SPAN> MyString
+{
+    <SPAN class="KEYWORD">private</SPAN> <SPAN class="KEYWORD">string</SPAN> _value;
+    <SPAN class="KEYWORD">public</SPAN>  <SPAN class="KEYWORD">string</SPAN>  Value
+    {
+        get { <SPAN class="KEYWORD">return</SPAN> _value;  }
+        set { _value = value; }
+    }
+}
+</PRE>
+</TD></TR></TABLE>
+</DIV>
+<P>Typical property definition could be the following: </P>
+<P>
+</P>
+<DIV id="IDAU2QOB">
+<TABLE class="code" width="98%"><TR><TD>
+<PRE>
+<SPAN class="KEYWORD">public</SPAN> <SPAN class="KEYWORD">class</SPAN> MyBizEntity
+{
+    <SPAN class="KEYWORD">private</SPAN> MyString _description;
+    <SPAN class="KEYWORD">public</SPAN>  <SPAN class="KEYWORD">string</SPAN>    Description
+    {
+        get { <SPAN class="KEYWORD">return</SPAN> _description.Value;  }
+        set { _description.Value = value; }
+    }
+}
+</PRE>
+</TD></TR></TABLE>
+</DIV>
+<P>Abstract property definition: </P>
+<P>
+</P>
+<DIV id="IDAG3QOB">
+<TABLE class="code" width="98%"><TR><TD>
+<PRE>
+<SPAN class="KEYWORD">public</SPAN> <SPAN class="KEYWORD">abstract</SPAN> <SPAN class="KEYWORD">class</SPAN> MyBizEntity
+{
+    [MapType(<SPAN class="KEYWORD">typeof</SPAN>(MyString))]
+    <SPAN class="KEYWORD">public</SPAN> <SPAN class="KEYWORD">abstract</SPAN> <SPAN class="KEYWORD">string</SPAN> Description { get; set; }
+}
+</PRE>
+</TD></TR></TABLE>
+</DIV>
+<P>In this case the mapper expects that MyString has Value property and the property type is coincident with the property return value type. </P>
+<P>
+</P>
+<P>MapIgnoreAttribute</P>
+<P>This attribute excludes a class member from the mapping. </P>
+<P>
+</P>
+<P>MapDescriptor</P>
+<P>The MapDescriptor class represents a mapped type descriptor. It consists of methods that can be used to create business objects and to access object members. The following example demonstrates how to create an instance of the MyBizEntity class and to assign a value to its read-only property ID: </P>
+<P>
+</P>
+<DIV id="IDAG4QOB">
+<TABLE class="code" width="98%"><TR><TD>
+<PRE>
+MapDescriptor desc   = MapDescriptor.GetDescriptor(<SPAN class="KEYWORD">typeof</SPAN>(MyBizEntity));
+MyBizEntity   entity = desc.CreateInstance() <SPAN class="KEYWORD">as</SPAN> MyBizEntity;
+
+Desc[<SPAN class="STRING">"ID"</SPAN>].SetValue(entity, 1);
+</PRE>
+</TD></TR></TABLE>
+</DIV>
+<P>Actually, this way is not designed for daily use. Hovever, it can be useful as a "back door" to develop various frameworks. </P>
+<P>
+</P>
+<P>IMapObjectFactory</P>
+<P>This interface allows to control the business object creation process. </P>
+<P>
+</P>
+<DIV id="IDAY4QOB">
+<TABLE class="code" width="98%"><TR><TD>
+<PRE>
+<SPAN class="KEYWORD">public</SPAN> MyBizEntityManager : IMapObjectFactory
+{
+    <SPAN class="KEYWORD">private</SPAN> MapDescriptor _descriptor;
+
+    <SPAN class="KEYWORD">public</SPAN> MyBizEntityManager()
+    {
+        _descriptor = MapDescriptor.getDescriptor(<SPAN class="KEYWORD">typeof</SPAN>(MyBizEntity));
+        _descriptor.ObjectFactory = <SPAN class="KEYWORD">this</SPAN>;
+    }
+
+    <SPAN class="KEYWORD">object</SPAN> IMapObjectFactory.CreateInstance(
+        IMapDataSource dataSource,
+        <SPAN class="KEYWORD">object</SPAN>         sourceObject,
+        <SPAN class="KEYWORD">object</SPAN>[]       parameters,
+        <SPAN class="KEYWORD">ref</SPAN> <SPAN class="KEYWORD">bool</SPAN>       stopMapping)
+    {
+        <SPAN class="KEYWORD">return</SPAN> _descriptor.CreateInstance(
+            dataSource, sourceObject, parameters, stopMapping);
+    }
+}
+</PRE>
+</TD></TR></TABLE>
+</DIV>
+<P>As you see, the object is created by using type descriptor. However, it's not required. </P>
+<P>
+</P>
+<P>MapFieldAttribute</P>
+<P>Now this attribute can be applied to a class itself. In this case, it specifies additional naming of source and target objects that can not be done in normal way. </P>
+<P>
+</P>
+<DIV id="IDA05QOB">
+<TABLE class="code" width="98%"><TR><TD>
+<PRE>
+<SPAN class="KEYWORD">public</SPAN> <SPAN class="KEYWORD">class</SPAN> BaseBizEntity
+{
+    <SPAN class="KEYWORD">public</SPAN> <SPAN class="KEYWORD">int</SPAN> ID;
+}
+
+[MapField(SourceName=<SPAN class="STRING">"OrderID"</SPAN>, TargetName=<SPAN class="STRING">"ID"</SPAN>)]
+<SPAN class="KEYWORD">public</SPAN> <SPAN class="KEYWORD">class</SPAN> Order : BaseBizEntity
+{
+    <SPAN class="KEYWORD">public</SPAN> <SPAN class="KEYWORD">int</SPAN> Number;
+}
+
+[MapField(<SPAN class="STRING">"CustomerID"</SPAN>, <SPAN class="STRING">"ID"</SPAN>)]
+[MapField(<SPAN class="STRING">"OrderID"</SPAN>,    <SPAN class="STRING">"Order.ID"</SPAN>)]
+<SPAN class="KEYWORD">public</SPAN> <SPAN class="KEYWORD">class</SPAN> Customer : BaseBizEntity
+{
+    <SPAN class="KEYWORD">public</SPAN> <SPAN class="KEYWORD">string</SPAN> Name;
+    <SPAN class="KEYWORD">public</SPAN> Order  Order = <SPAN class="KEYWORD">new</SPAN> Order();
+}
+</PRE>
+</TD></TR></TABLE>
+</DIV>
+<P>Nullable values</P>
+<P>Now the mapper supports nullable types such as System.Data.SqlTypes and its analogues. </P>
+<P>
+</P>
+<DIV id="IDANBROB">
+<TABLE class="code" width="98%"><TR><TD>
+<PRE>
+<SPAN class="KEYWORD">public</SPAN> <SPAN class="KEYWORD">abstract</SPAN> <SPAN class="KEYWORD">class</SPAN> MyBizEntity
+{
+    <SPAN class="KEYWORD">public</SPAN> <SPAN class="KEYWORD">abstract</SPAN> SqlString Description { get; set; }
+}
+</PRE>
+</TD></TR></TABLE>
+</DIV>
+<P>The mapper expects the presence of the Value and IsNull properties of these types. </P>
+<P>
+</P>
+<P>Guid</P>
+<P>Support for the Guid type added.</P>
+<P>
+</P>
+<P>Xml mapping schemas</P>
+<P>Generally, xml mapping schema looks like the following: </P>
+<P>
+</P>
+<DIV id="IDAJCROB">
+<TABLE class="code" width="98%"><TR><TD>
+<PRE>
+&lt;?xml version=<SPAN class="STRING">"1.0"</SPAN> encoding=<SPAN class="STRING">"utf-8"</SPAN> ?&gt;
+&lt;mapping xmlns=<SPAN class="STRING">"http://www.rsdn.ru/mapping.xsd"</SPAN>&gt;
+    &lt;type name=<SPAN class="STRING">"NamespaceName.TypeName"</SPAN>&gt;
+        &lt;field name=<SPAN class="STRING">"field1"</SPAN> source=<SPAN class="STRING">"field1"</SPAN> trimmable=<SPAN class="STRING">"true"</SPAN> /&gt;
+        &lt;field name=<SPAN class="STRING">"field2"</SPAN>&gt;
+            &lt;value target=<SPAN class="STRING">"3"</SPAN> source=<SPAN class="STRING">"2"</SPAN> source_type=<SPAN class="STRING">"System.Int32"</SPAN> /&gt;
+        &lt;/field&gt;
+        &lt;field name=<SPAN class="STRING">"field3"</SPAN> nullable=<SPAN class="STRING">"true"</SPAN>&gt;
+            &lt;value target=<SPAN class="STRING">"3"</SPAN> source=<SPAN class="STRING">"2"</SPAN> source_type=<SPAN class="STRING">"System.Int32"</SPAN> /&gt;
+            &lt;null_value target=<SPAN class="STRING">"111"</SPAN>/&gt;
+        &lt;/field&gt;
+        &lt;field name=<SPAN class="STRING">"field4"</SPAN> ignore=<SPAN class="STRING">"true"</SPAN> /&gt;
+    &lt;/type&gt;
+    &lt;value_type name=<SPAN class="STRING">"NamespaceName.ValueTypeName "</SPAN>&gt;
+        &lt;value target=<SPAN class="STRING">"Active"</SPAN>   source=<SPAN class="STRING">"A"</SPAN> source_type=<SPAN class="STRING">"System.String"</SPAN> /&gt;
+        &lt;value target=<SPAN class="STRING">"Inactive"</SPAN> source=<SPAN class="STRING">"I"</SPAN> source_type=<SPAN class="STRING">"System.String"</SPAN> /&gt;
+        &lt;value target=<SPAN class="STRING">"Pending"</SPAN>  source=<SPAN class="STRING">"P"</SPAN> source_type=<SPAN class="STRING">"System.String"</SPAN> /&gt;
+        &lt;null_value target=<SPAN class="STRING">"Unknown"</SPAN>/&gt;
+    &lt;/value_type&gt;
+&lt;/mapping&gt;
+</PRE>
+</TD></TR></TABLE>
+</DIV>
+<P>The type tag defines mapping schema of the particular type. The value_type tag is used to define mapping for enumerators. The SetMappingSchema overrides register a default xml mapping schema. The SetMappingSchema(string) method performs a search of schema file for provided name. If the file is not found, the method tries to find it in the calling assembly resources. If the type has mapping attribute, the xml schema has a higher priority. For example: </P>
+<P>
+</P>
+<DIV id="IDALEROB">
+<TABLE class="code" width="98%"><TR><TD>
+<PRE>
+&lt;?xml version=<SPAN class="STRING">"1.0"</SPAN> encoding=<SPAN class="STRING">"utf-8"</SPAN> ?&gt;
+&lt;mapping xmlns=<SPAN class="STRING">"http://www.rsdn.ru/mapping.xsd"</SPAN>&gt;
+    &lt;type name=<SPAN class="STRING">"NamespaceName.Dest"</SPAN>&gt;
+        &lt;field name=<SPAN class="STRING">"Field1"</SPAN>&gt;
+            &lt;null_value target=<SPAN class="STRING">"-1"</SPAN> /&gt;
+        &lt;/field&gt;
+    &lt;/type&gt;
+&lt;/mapping&gt;
+</PRE>
+</TD></TR></TABLE>
+</DIV>
+<P>
+</P>
+<DIV id="IDA1EROB">
+<TABLE class="code" width="98%"><TR><TD>
+<PRE>
+<SPAN class="KEYWORD">public</SPAN> <SPAN class="KEYWORD">class</SPAN> Src
+{
+    <SPAN class="KEYWORD">public</SPAN> <SPAN class="KEYWORD">object</SPAN> Field1 = <SPAN class="KEYWORD">null</SPAN>;
+    <SPAN class="KEYWORD">public</SPAN> <SPAN class="KEYWORD">object</SPAN> Field2 = <SPAN class="KEYWORD">null</SPAN>;
+}
+
+<SPAN class="KEYWORD">public</SPAN> <SPAN class="KEYWORD">class</SPAN> Dest
+{
+    [MapNullValue(-2)]
+    <SPAN class="KEYWORD">public</SPAN> <SPAN class="KEYWORD">int</SPAN> Field1;
+
+    [MapNullValue(-3)]
+    <SPAN class="KEYWORD">public</SPAN> <SPAN class="KEYWORD">int</SPAN> Field2;
+}
+
+<SPAN class="KEYWORD">void</SPAN> Test()
+{
+    MapDescriptor.SetMappingSchema(<SPAN class="STRING">"Map.xml"</SPAN>);
+
+    Src  s = <SPAN class="KEYWORD">new</SPAN> Src();
+    Dest d = Map.ToObject(s, <SPAN class="KEYWORD">typeof</SPAN>(Dest)) <SPAN class="KEYWORD">as</SPAN> Dest;
+
+    <SPAN class="COMMENT">// d.Field1 == -1</SPAN>
+    <SPAN class="COMMENT">// d.Field2 == -3</SPAN>
+}
+</PRE>
+</TD></TR></TABLE>
+</DIV>
+<P>During the test execution, xml schema is used to assign Field1 field value. Field2 is assigned from the attribute. </P>
+<P>
+</P>
+<P>MapXmlAttribute</P>
+<P>This attribute specifies xml file name and path to type definition. For example: </P>
+<P>
+</P>
+<DIV id="IDARGROB">
+<TABLE class="code" width="98%"><TR><TD>
+<PRE>
+&lt;?xml version=<SPAN class="STRING">"1.0"</SPAN> encoding=<SPAN class="STRING">"utf-8"</SPAN> ?&gt;
+&lt;mapping xmlns=<SPAN class="STRING">"http://www.rsdn.ru/mapping.xsd"</SPAN>&gt;
+    &lt;type name=<SPAN class="STRING">"MyBizEntity"</SPAN>&gt;
+        ...
+    &lt;/type&gt;
+&lt;/mapping&gt;
+</PRE>
+</TD></TR></TABLE>
+</DIV>
+<P>
+</P>
+<DIV id="IDA3GROB">
+<TABLE class="code" width="98%"><TR><TD>
+<PRE>
+[MapXml(<SPAN class="STRING">"MyMapping.xml"</SPAN>, <SPAN class="STRING">"MyBizEntity"</SPAN>)]
+<SPAN class="KEYWORD">public</SPAN> <SPAN class="KEYWORD">class</SPAN> MyBizEntity
+{
+    <SPAN class="COMMENT">// ...</SPAN>
+}
+</PRE>
+</TD></TR></TABLE>
+</DIV>
+<P>If xml schema is set by SetMappingSchema method, single attribute parameter can be used: </P>
+<P>
+</P>
+<DIV id="IDANHROB">
+<TABLE class="code" width="98%"><TR><TD>
+<PRE>
+[MapXml(&lt;str&gt;"MyBizEntity"&lt;/str&gt;)]
+<SPAN class="KEYWORD">public</SPAN> <SPAN class="KEYWORD">class</SPAN> MyBizEntity
+{
+    <SPAN class="COMMENT">// ...</SPAN>
+}
+</PRE>
+</TD></TR></TABLE>
+</DIV>
+<P>Known Problems</P>
+<P>During the abstract class mapping the mapper creates a derived class that implements abstract properties. Obviously, the full name of the class is different from the original name. Name of the generated class is the following: </P>
+<DIV id="IDAZHROB">
+<TABLE class="code" width="98%"><TR><TD>
+<PRE>
+NamespaceName.AbstractClassName.MappingExtension.AbstractClassName
+</PRE>
+</TD></TR></TABLE>
+</DIV>
+<P>
+</P>
+<P>So, the GetType().Name property returns the same name for the original and derived classes. The GetType().FullName method returns different ones. Also direct type comparison does not work correctly. </P>
+<DIV id="IDACIROB">
+<TABLE class="code" width="98%"><TR><TD>
+<PRE>
+MyBizEntity entity = MapDescriptor.GetDescriptor
+    (<SPAN class="KEYWORD">typeof</SPAN>(MyBizEntity)).CreateInstanceEx();
+
+<SPAN class="KEYWORD">if</SPAN> (entity.GetType() == <SPAN class="KEYWORD">typeof</SPAN>(MyBizEntity)) {}  <SPAN class="COMMENT">// false</SPAN>
+<SPAN class="KEYWORD">if</SPAN> (entity <SPAN class="KEYWORD">is</SPAN> MyBizEntity) {}                    <SPAN class="COMMENT">// true</SPAN>
+</PRE>
+</TD></TR></TABLE>
+</DIV>
+<P>As dynamic assemblies are generated in memory, they don't implement some methods and throw the NonImplementedException when the methods are addressed. This issue can be solved by the explicit assembly type check.</P>
+<DIV id="IDAUIROB">
+<TABLE class="code" width="98%"><TR><TD>
+<PRE>
+<SPAN class="KEYWORD">foreach</SPAN> (Assembly a <SPAN class="KEYWORD">in</SPAN> AppDomain.CurrentDomain.GetAssemblies())
+{
+    <SPAN class="KEYWORD">if</SPAN> (a <SPAN class="KEYWORD">is</SPAN> System.Reflection.Emit.AssemblyBuilder)
+        <SPAN class="KEYWORD">continue</SPAN>;
+
+    Console.WriteLine(a.CodeBase);
+}
+</PRE>
+</TD></TR></TABLE>
+</DIV>
+<P>
+</P>
+
+<DIV align="right">
+<FONT style="font-family:arial;font-size:9pt;color:#8088a0"><I><HR color="#8088a0" width="100%" size="1">
+                Любой из материалов, опубликованных на этом сервере, не может быть воспроизведен в какой бы
+                то ни было форме и какими бы то ни было средствами без письменного разрешения владельцев авторских
+                прав. 
+             </I></FONT>
+</DIV>
+</HTML>
