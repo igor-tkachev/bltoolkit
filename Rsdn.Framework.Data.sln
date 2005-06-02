@@ -19,10 +19,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Examples", "Examples\Exampl
 	ProjectSection(ProjectDependencies) = postProject
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebRFD", "http://localhost/WebRFD/WebRFD.csproj", "{422D5F83-5EA9-4028-9519-B92E1ED75173}"
-	ProjectSection(ProjectDependencies) = postProject
-	EndProjectSection
-EndProject
 Project("{FE3BBBB6-72D5-11D2-9ACE-00C04F79A2A4}") = "UnitTest", "UnitTest\UnitTest.etp", "{B1E02FBB-F0AE-45A5-8213-37A7DF36A383}"
 	ProjectSection(ProjectDependencies) = postProject
 	EndProjectSection
@@ -47,10 +43,6 @@ Global
 		{BD8F5FB3-EDFC-4A9E-B293-4B41EF7B19F7}.Debug.Build.0 = Debug|.NET
 		{BD8F5FB3-EDFC-4A9E-B293-4B41EF7B19F7}.Release.ActiveCfg = Release|.NET
 		{BD8F5FB3-EDFC-4A9E-B293-4B41EF7B19F7}.Release.Build.0 = Release|.NET
-		{422D5F83-5EA9-4028-9519-B92E1ED75173}.Debug.ActiveCfg = Debug|.NET
-		{422D5F83-5EA9-4028-9519-B92E1ED75173}.Debug.Build.0 = Debug|.NET
-		{422D5F83-5EA9-4028-9519-B92E1ED75173}.Release.ActiveCfg = Release|.NET
-		{422D5F83-5EA9-4028-9519-B92E1ED75173}.Release.Build.0 = Release|.NET
 		{90AAB2AC-0DE2-4A75-AEB8-A2FC1782B27A}.Debug.ActiveCfg = Debug|.NET
 		{90AAB2AC-0DE2-4A75-AEB8-A2FC1782B27A}.Debug.Build.0 = Debug|.NET
 		{90AAB2AC-0DE2-4A75-AEB8-A2FC1782B27A}.Release.ActiveCfg = Release|.NET
@@ -77,8 +69,8 @@ Global
 		{E42AB6EB-9BF5-466C-A761-521FF3459137}.Release.Build.0 = Release|.NET
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		XCSharpSolutionEnabled = True
 		XCSharpProjectsDisabled = 
+		XCSharpSolutionEnabled = True
 	EndGlobalSection
 	GlobalSection(ExtensibilityAddIns) = postSolution
 	EndGlobalSection
