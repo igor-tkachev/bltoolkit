@@ -809,7 +809,7 @@ namespace Rsdn.Framework.Data.Mapping
 			MapDescriptor desc = (MapDescriptor)Activator.CreateInstance(descriptorType);
 			desc.InitMembers(originalType, type, moduleBuilder);
 
-#if DEBUG
+#if DEBUG1
 			try
 			{
 				assemblyBuilder.Save(assemblyName.Name);
