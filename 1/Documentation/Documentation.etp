@@ -14,23 +14,19 @@
                 <File>ExampleGenerator\ExampleGenerator.csproj</File>
                 <File>Rsdn.Framework.Data.ndoc</File>
                 <File>Overview.html</File>
-                <File>RsdnFrameworkData.doc</File>
                 <File>CodeProject.htm</File>
             </ProjectExplorer>
         </Views>
         <References>
             <Reference>
+                <FILE>Rsdn.Framework.Data.ndoc</FILE>
+            </Reference>
+            <Reference>
                 <FILE>ExampleGenerator\ExampleGenerator.csproj</FILE>
                 <GUIDPROJECTID>{90AAB2AC-0DE2-4A75-AEB8-A2FC1782B27A}</GUIDPROJECTID>
             </Reference>
             <Reference>
-                <FILE>Rsdn.Framework.Data.ndoc</FILE>
-            </Reference>
-            <Reference>
                 <FILE>Overview.html</FILE>
-            </Reference>
-            <Reference>
-                <FILE>RsdnFrameworkData.doc</FILE>
             </Reference>
             <Reference>
                 <FILE>CodeProject.htm</FILE>
