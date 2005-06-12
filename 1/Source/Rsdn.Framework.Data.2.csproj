@@ -1,0 +1,233 @@
+﻿<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <ProjectType>Local</ProjectType>
+    <ProductVersion>8.0.50215</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{653EBAE9-B766-4B78-8077-8EC009156DE5}</ProjectGuid>
+    <SccProjectName>
+    </SccProjectName>
+    <SccLocalPath>
+    </SccLocalPath>
+    <SccAuxPath>
+    </SccAuxPath>
+    <SccProvider>
+    </SccProvider>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ApplicationIcon>
+    </ApplicationIcon>
+    <AssemblyKeyContainerName>
+    </AssemblyKeyContainerName>
+    <AssemblyName>Rsdn.Framework.Data</AssemblyName>
+    <AssemblyOriginatorKeyFile>
+    </AssemblyOriginatorKeyFile>
+    <DefaultClientScript>JScript</DefaultClientScript>
+    <DefaultHTMLPageLayout>Grid</DefaultHTMLPageLayout>
+    <DefaultTargetSchema>IE50</DefaultTargetSchema>
+    <DelaySign>false</DelaySign>
+    <OutputType>Library</OutputType>
+    <RootNamespace>Rsdn.Framework.Data</RootNamespace>
+    <RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
+    <StartupObject>
+    </StartupObject>
+    <FileUpgradeFlags>
+    </FileUpgradeFlags>
+    <UpgradeBackupLocation>
+    </UpgradeBackupLocation>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <OutputPath>bin\Debug\</OutputPath>
+    <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
+    <BaseAddress>285212672</BaseAddress>
+    <CheckForOverflowUnderflow>false</CheckForOverflowUnderflow>
+    <ConfigurationOverrideFile>
+    </ConfigurationOverrideFile>
+    <DefineConstants>TRACE;DEBUG;VER2</DefineConstants>
+    <DocumentationFile>bin\Debug\Rsdn.Framework.Data.xml</DocumentationFile>
+    <DebugSymbols>true</DebugSymbols>
+    <FileAlignment>4096</FileAlignment>
+    <NoStdLib>false</NoStdLib>
+    <NoWarn>
+    </NoWarn>
+    <Optimize>false</Optimize>
+    <RegisterForComInterop>false</RegisterForComInterop>
+    <RemoveIntegerChecks>false</RemoveIntegerChecks>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <OutputPath>bin\Release\</OutputPath>
+    <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
+    <BaseAddress>285212672</BaseAddress>
+    <CheckForOverflowUnderflow>false</CheckForOverflowUnderflow>
+    <ConfigurationOverrideFile>
+    </ConfigurationOverrideFile>
+    <DefineConstants>TRACE;VER2</DefineConstants>
+    <DocumentationFile>bin\Release\Rsdn.Framework.Data.xml</DocumentationFile>
+    <DebugSymbols>false</DebugSymbols>
+    <FileAlignment>4096</FileAlignment>
+    <NoStdLib>false</NoStdLib>
+    <NoWarn>
+    </NoWarn>
+    <Optimize>true</Optimize>
+    <RegisterForComInterop>false</RegisterForComInterop>
+    <RemoveIntegerChecks>false</RemoveIntegerChecks>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System">
+      <Name>System</Name>
+    </Reference>
+    <Reference Include="System.configuration" />
+    <Reference Include="System.Data">
+      <Name>System.Data</Name>
+    </Reference>
+    <Reference Include="System.Data.OracleClient">
+      <Name>System.Data.OracleClient</Name>
+    </Reference>
+    <Reference Include="System.Xml">
+      <Name>System.XML</Name>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="AssemblyInfo.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="DataProvider\IDataProvider.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="DataProvider\OdbcDataProvider.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="DataProvider\OleDbDataProvider.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="DataProvider\OracleDataProvider.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="DataProvider\SqlDataProvider.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="DbManager.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Mapping\BaseMemberMapper.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Mapping\DataReaderSource.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Mapping\DataRowReader.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Mapping\FieldMapper.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Mapping\IMapDataReceiver.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Mapping\IMapDataSource.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Mapping\IMapGenerated.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Mapping\IMapObjectFactory.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Mapping\IMapSetPropertyInfo.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Mapping\IMapSettable.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Mapping\IMemberMapper.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Mapping\Map.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Mapping\MapDefaultValueAttribute.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Mapping\MapDescriptor.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Mapping\MapEmit.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Mapping\MapFieldAttribute.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Mapping\MapGenerator.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Mapping\MapIgnoreAttribute.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Mapping\MapInitializingData.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Mapping\MapNullDateTimeAttribute.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Mapping\MapNullGuidAttribute.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Mapping\MapNullValueAttribute.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Mapping\MapParameterAttribute.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Mapping\MappingSchema.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Mapping\MapPropertyInfo.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Mapping\MapTypeAttribute.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Mapping\MapValueAttribute.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Mapping\MapXmlAttribute.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Mapping\PropertyMapper.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Mapping\RsdnMapException.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="ParameterReader.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="RsdnDataException.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="RsdnDbManagerException.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <EmbeddedResource Include="DbManager.resx">
+      <DependentUpon>DbManager.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Mapping\Mapping.xsd" />
+    <Content Include="Examples.xml" />
+    <Content Include="Examples1.xml" />
+    <Content Include="Mapping\Doc.xml" />
+    <Content Include="Mapping\Examples.xml" />
+    <None Include="Mapping\Mapping.xsx">
+      <DependentUpon>Mapping.xsd</DependentUpon>
+    </None>
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PreBuildEvent>
+    </PreBuildEvent>
+    <PostBuildEvent>
+    </PostBuildEvent>
+  </PropertyGroup>
+</Project>

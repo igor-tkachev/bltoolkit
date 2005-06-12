@@ -28,10 +28,10 @@ namespace Examples_Mapping_Map
 		[Test]
 		public void Test()
 		{
-			Assert.AreEqual("A",  Map.FromValue(Status.Active));
-			Assert.AreEqual("I",  Map.FromValue(Status.Inactive));
-			Assert.AreEqual("P",  Map.FromValue(Status.Pending));
-			Assert.AreEqual(null, Map.FromValue(Status.Null));
+			Assert.AreEqual("A",  Map.FromEnum(Status.Active));
+			Assert.AreEqual("I",  Map.FromEnum(Status.Inactive));
+			Assert.AreEqual("P",  Map.FromEnum(Status.Pending));
+			Assert.AreEqual(null, Map.FromEnum(Status.Null));
 		}
 	}
 }

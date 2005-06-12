@@ -5,6 +5,10 @@
 	Name="Cpp.Test"
 	ProjectGUID="{46B4D47C-F67E-4CC6-ACA4-E16545368680}"
 	RootNamespace="CppTest"
+	SccProjectName="SAK"
+	SccAuxPath="SAK"
+	SccLocalPath="SAK"
+	SccProvider="SAK"
 	Keyword="ManagedCProj">
 	<Platforms>
 		<Platform

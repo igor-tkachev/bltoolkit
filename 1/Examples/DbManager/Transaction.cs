@@ -2,7 +2,7 @@
 /// db Transaction
 /// comment:
 /// The following example creates an instance of the <see cref="DbManager"/>, 
-/// calls the <see cref="BeginTransaction"/> method, and commit the transaction,
+/// calls the <see cref="BeginTransaction()"/> method, and commit the transaction,
 using System;
 
 using NUnit.Framework;

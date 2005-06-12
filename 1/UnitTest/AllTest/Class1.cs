@@ -1,5 +1,11 @@
 using System;
+using System.Collections;
+using System.Data;
 using System.Data.SqlTypes;
+
+#if VER2
+using System.Collections.Generic;
+#endif
 
 using NUnit.Framework;
 
@@ -147,6 +153,27 @@ namespace AllTest
 		int GetItemCount()
 		{
 				return 0; 
+		}
+	}
+
+	public class ToListTest
+	{
+		public static void Test()
+		{
+			DataTable table = new DataTable();
+			ArrayList list  = new ArrayList();
+
+			Map.ToList(table, list, typeof(Category));
+			Map.ToList(table, list, typeof(Category), 1, "2");
+
+#if VER2
+			List<Category> clist = new List<Category>();
+
+			clist = Map.ToList<Category>(table, clist);
+			clist = Map.ToList<Category>(table, clist, 1, "2");
+			clist = Map.ToList(table, clist);
+			clist = Map.ToList(table, clist, 1, "2");
+#endif
 		}
 	}
 }

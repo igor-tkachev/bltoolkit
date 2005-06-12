@@ -20,7 +20,7 @@ namespace Examples_DbManager
 		public void Test()
 		{
 			string connectionString =
-				"Server=.;Database=Northwind;Integrated Security=SSPI";
+				"Server=(local);Database=Northwind;Integrated Security=SSPI";
 
 			using (SqlConnection con = new SqlConnection(connectionString))
 			{

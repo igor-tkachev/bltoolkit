@@ -53,7 +53,6 @@ namespace TestData
 			// 
 			// Form1
 			// 
-			this.AutoScaleBaseSize = new System.Drawing.Size(5, 13);
 			this.ClientSize = new System.Drawing.Size(448, 390);
 			this.Name = "Form1";
 			this.Text = "Form1";

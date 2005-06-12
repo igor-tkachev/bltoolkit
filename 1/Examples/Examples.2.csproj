@@ -1,0 +1,207 @@
+﻿<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <ProjectType>Local</ProjectType>
+    <ProductVersion>8.0.50215</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{BD8F5FB3-EDFC-4A9E-B293-4B41EF7B19F7}</ProjectGuid>
+    <SccProjectName>
+    </SccProjectName>
+    <SccLocalPath>
+    </SccLocalPath>
+    <SccAuxPath>
+    </SccAuxPath>
+    <SccProvider>
+    </SccProvider>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ApplicationIcon>
+    </ApplicationIcon>
+    <AssemblyKeyContainerName>
+    </AssemblyKeyContainerName>
+    <AssemblyName>Examples</AssemblyName>
+    <AssemblyOriginatorKeyFile>
+    </AssemblyOriginatorKeyFile>
+    <DefaultClientScript>JScript</DefaultClientScript>
+    <DefaultHTMLPageLayout>Grid</DefaultHTMLPageLayout>
+    <DefaultTargetSchema>IE50</DefaultTargetSchema>
+    <DelaySign>false</DelaySign>
+    <OutputType>Library</OutputType>
+    <RootNamespace>Examples</RootNamespace>
+    <RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
+    <StartupObject>
+    </StartupObject>
+    <FileUpgradeFlags>
+    </FileUpgradeFlags>
+    <UpgradeBackupLocation>
+    </UpgradeBackupLocation>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <OutputPath>bin\Debug\</OutputPath>
+    <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
+    <BaseAddress>285212672</BaseAddress>
+    <CheckForOverflowUnderflow>false</CheckForOverflowUnderflow>
+    <ConfigurationOverrideFile>
+    </ConfigurationOverrideFile>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DocumentationFile>
+    </DocumentationFile>
+    <DebugSymbols>true</DebugSymbols>
+    <FileAlignment>4096</FileAlignment>
+    <NoStdLib>false</NoStdLib>
+    <NoWarn>
+    </NoWarn>
+    <Optimize>false</Optimize>
+    <RegisterForComInterop>false</RegisterForComInterop>
+    <RemoveIntegerChecks>false</RemoveIntegerChecks>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <OutputPath>bin\Release\</OutputPath>
+    <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
+    <BaseAddress>285212672</BaseAddress>
+    <CheckForOverflowUnderflow>false</CheckForOverflowUnderflow>
+    <ConfigurationOverrideFile>
+    </ConfigurationOverrideFile>
+    <DefineConstants>TRACE</DefineConstants>
+    <DocumentationFile>
+    </DocumentationFile>
+    <DebugSymbols>false</DebugSymbols>
+    <FileAlignment>4096</FileAlignment>
+    <NoStdLib>false</NoStdLib>
+    <NoWarn>
+    </NoWarn>
+    <Optimize>true</Optimize>
+    <RegisterForComInterop>false</RegisterForComInterop>
+    <RemoveIntegerChecks>false</RemoveIntegerChecks>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="nunit.framework">
+      <Name>nunit.framework</Name>
+      <HintPath>..\..\..\Program Files\NUnit V2.1\\bin\nunit.framework.dll</HintPath>
+      <AssemblyFolderKey>hklm\dn\nunit.framework</AssemblyFolderKey>
+    </Reference>
+    <Reference Include="System">
+      <Name>System</Name>
+    </Reference>
+    <Reference Include="System.Data">
+      <Name>System.Data</Name>
+    </Reference>
+    <Reference Include="System.Xml">
+      <Name>System.XML</Name>
+    </Reference>
+    <ProjectReference Include="..\Source\Rsdn.Framework.Data.2.csproj">
+      <Name>Rsdn.Framework.Data.2</Name>
+      <Project>{653EBAE9-B766-4B78-8077-8EC009156DE5}</Project>
+      <Package>{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</Package>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
+    <Compile Include="AssemblyInfo.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="DbManager\AddConnectionString_string.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="DbManager\AddConnectionString_string_string.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="DbManager\BeginTransaction.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="DbManager\BeginTransaction_IsolationLevel.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="DbManager\ClassDemo.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="DbManager\Close.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="DbManager\Command.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="DbManager\Connection.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="DbManager\CreateParameters_DataRow_IDbDataParameter.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="DbManager\CreateParameters_object_IDbDataParameter.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="DbManager\ctor.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="DbManager\ctor_IDbConnection.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="DbManager\ctor_IDbConnection_string.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="DbManager\ctor_IDbTransaction.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="DbManager\ctor_string.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="DbManager\DataProvider.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="DbManager\ExecuteDictionary_IDictionary_string_Type.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="DbManager\ExecuteDictionary_string_Type.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="DbManager\Transaction.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Mapping\IMapSettable\SetField_string_object.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Mapping\Map\FromValue_object.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Mapping\Map\ISupportInitialize_Support.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Mapping\Map\ToObject_object_object.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Mapping\Map\ToObject_object_Type.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Mapping\Map\ToValue_object_Type.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Mapping\MapDescriptor\SetMappingSchema_string.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Mapping\MapEmit\Custom_ctor.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Mapping\MapFieldAttribute\IsTrimmable.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Mapping\MapParameterAttribute\ctor_object.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Mapping\MapTypeAttribute\ctor_Type.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Mapping\MapTypeAttribute\ctor_Type_object_object.cs">
+      <SubType>Code</SubType>
+    </Compile>
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PreBuildEvent>
+    </PreBuildEvent>
+    <PostBuildEvent>
+    </PostBuildEvent>
+  </PropertyGroup>
+</Project>
