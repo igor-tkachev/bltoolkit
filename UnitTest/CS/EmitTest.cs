@@ -2,7 +2,13 @@ using System;
 using System.Data;
 using System.Data.SqlTypes;
 
+#if !MSTEST
 using NUnit.Framework;
+#else
+using Microsoft.VisualStudio.QualityTools.UnitTesting.Framework;
+using TestFixture = Microsoft.VisualStudio.QualityTools.UnitTesting.Framework.TestClassAttribute;
+using Test        = Microsoft.VisualStudio.QualityTools.UnitTesting.Framework.TestMethodAttribute;
+#endif
 
 using Rsdn.Framework.Data;
 using Rsdn.Framework.Data.Mapping;

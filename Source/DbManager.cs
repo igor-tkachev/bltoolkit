@@ -12,6 +12,10 @@ using System.Configuration;
 using System.Data;
 using System.Data.Common;
 
+#if VER2
+using System.Collections.Generic;
+#endif
+
 namespace Rsdn.Framework.Data
 {
 	/// <summary>
@@ -43,7 +47,7 @@ namespace Rsdn.Framework.Data
 		/// </para>
 		/// </remarks>
 		/// <include file="Examples.xml" path='examples/db[@name="ctor"]/*' />
-		/// <seealso cref="AddConnectionString">AddConnectionString Method</seealso>
+		/// <seealso cref="AddConnectionString(string)">AddConnectionString Method</seealso>
 		/// <returns>An instance of the database manager class.</returns>
 		public DbManager() 
 			: this(null, null)
@@ -333,10 +337,10 @@ namespace Rsdn.Framework.Data
 		/// The <see cref="IDbTransaction"/>. The default value is a null reference.
 		/// </value>
 		/// <remarks>
-		/// You have to call the <see cref="BeginTransaction"/> method to begin a transaction.
+		/// You have to call the <see cref="BeginTransaction()"/> method to begin a transaction.
 		/// </remarks>
 		/// <include file="Examples.xml" path='examples/db[@name="Transaction"]/*' />
-		/// <seealso cref="BeginTransaction">BeginTransaction Method</seealso>
+		/// <seealso cref="BeginTransaction()">BeginTransaction Method</seealso>
 		public IDbTransaction Transaction
 		{
 			[System.Diagnostics.DebuggerStepThrough]
@@ -375,7 +379,7 @@ namespace Rsdn.Framework.Data
 		/// </code>
 		/// <para>
 		/// If you don't want to use a configuration file, you can add a database connection string 
-		/// using the <see cref="AddConnectionString"/> method.
+		/// using the <see cref="AddConnectionString(string)"/> method.
 		/// </para>
 		/// <para>
 		/// The configuration string may have a postfix used to define a data provider. The following table
@@ -389,7 +393,7 @@ namespace Rsdn.Framework.Data
 		/// </list>
 		/// </para>
 		/// </remarks>
-		/// <seealso cref="AddConnectionString">AddConnectionString Method</seealso>
+		/// <seealso cref="AddConnectionString(string)">AddConnectionString Method</seealso>
 		public string ConfigurationString
 		{
 			[System.Diagnostics.DebuggerStepThrough]
@@ -455,7 +459,7 @@ namespace Rsdn.Framework.Data
 		/// by using the <see cref="System.Data.IDbTransaction.Commit">Commit</see> or 
 		/// <see cref="System.Data.IDbTransaction.Rollback">Rollback</see> methods.
 		/// </remarks>
-		/// <include file="Examples.xml" path='examples/db[@name="BeginTransaction"]/*' />
+		/// <include file="Examples.xml" path='examples/db[@name="BeginTransaction()"]/*' />
 		/// <returns>This instance of the <see cref="DbManager"/>.</returns>
 		/// <seealso cref="Transaction">Transaction Property</seealso>
 		public DbManager BeginTransaction()
@@ -931,7 +935,7 @@ namespace Rsdn.Framework.Data
 		/// The method can be used to register a new data manager for further use.
 		/// </remarks>
 		/// <include file="Examples1.xml" path='examples/db[@name="AddDataProvider(DataProvider.IDataProvider)"]/*' />
-		/// <seealso cref="AddConnectionString">AddConnectionString Method.</seealso>
+		/// <seealso cref="AddConnectionString(string)">AddConnectionString Method.</seealso>
 		/// <seealso cref="Rsdn.Framework.Data.DataProvider.IDataProvider.Name">IDataProvider.Name Property.</seealso>
 		/// <param name="dataProvider">An instance of the <see cref="Rsdn.Framework.Data.DataProvider.IDataProvider"/> interface.</param>
 		public static void AddDataProvider(DataProvider.IDataProvider dataProvider)
@@ -1036,7 +1040,11 @@ namespace Rsdn.Framework.Data
 					configurationString.Length == 0? "": ".",
 					configurationString);
 
+#if VER2
+				o = ConfigurationManager.AppSettings.Get(key);
+#else
 				o = ConfigurationSettings.AppSettings.Get(key);
+#endif
 
 				if (o == null)
 				{
@@ -1139,7 +1147,7 @@ namespace Rsdn.Framework.Data
 		/// </summary>
 		/// <include file="Examples1.xml" path='examples/db[@name="AssignParameterValues(DataRow)"]/*' />
 		/// <remarks>
-		/// The method is used in addition to the <see cref="CreateParameters"/> method.
+		/// The method is used in addition to the <see cref="CreateParameters(object,IDbDataParameter[])"/> method.
 		/// </remarks>
 		/// <param name="dataRow">The <see cref="DataRow"/> to assign.</param>
 		/// <returns>This instance of the <see cref="DbManager"/>.</returns>
@@ -1171,7 +1179,7 @@ namespace Rsdn.Framework.Data
 		/// Assigns a business object to command parameters.
 		/// </summary>
 		/// <remarks>
-		/// The method is used in addition to the <see cref="CreateParameters"/> method.
+		/// The method is used in addition to the <see cref="CreateParameters(object,IDbDataParameter[])"/> method.
 		/// </remarks>
 		/// <include file="Examples1.xml" path='examples/db[@name="AssignParameterValues(object)"]/*' />
 		/// <param name="entity">A business entity to assign.</param>
@@ -2213,6 +2221,18 @@ namespace Rsdn.Framework.Data
 			}
 		}
 
+#if VER2
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <returns></returns>
+		public T ExecuteScalar<T>()
+		{
+			return (T)ExecuteScalar();
+		}
+#endif
+
 		#endregion
 
 		#region ExecuteReader
@@ -2435,7 +2455,7 @@ namespace Rsdn.Framework.Data
 		#region ExecuteBizEntity
 
 		/// <summary>
-		/// Executes a SQL statement using the provided parameters.
+		/// Executes a SQL statement and maps resultset to an object.
 		/// </summary>
 		/// <param name="entity">An object to populate.</param>
 		/// <returns>A business object.</returns>
@@ -2445,7 +2465,7 @@ namespace Rsdn.Framework.Data
 		}
 
 		/// <summary>
-		/// Executes a SQL statement using the provided parameters.
+		/// Executes a SQL statement and maps resultset to an object.
 		/// </summary>
 		/// <param name="entity">An object to populate.</param>
 		/// <param name="type">The System.Type of the object.</param>
@@ -2493,14 +2513,26 @@ namespace Rsdn.Framework.Data
 		}
 
 		/// <summary>
-		/// Executes a SQL statement using the provided parameters.
+		/// Executes a SQL statement and maps resultset to an object.
 		/// </summary>
-		/// <param name="type">Type of the business object.</param>
+		/// <param name="type">Type of an object.</param>
 		/// <returns>A business object.</returns>
 		public object ExecuteBizEntity(Type type)
 		{
 			return ExecuteBizEntityInternal(null, type);
 		}
+
+#if VER2
+		/// <summary>
+		/// Executes a SQL statement and maps resultset to an object.
+		/// </summary>
+		/// <typeparam name="T">Type of an object.</typeparam>
+		/// <returns>A business object.</returns>
+		public T ExecuteBizEntity<T>()
+		{
+			return (T)ExecuteBizEntityInternal(null, typeof(T));
+		}
+#endif
 
 		#endregion
 
@@ -2524,7 +2556,7 @@ namespace Rsdn.Framework.Data
 		/// Executes the query, and returns an array of business entities.
 		/// </summary>
 		/// <param name="list">The list of mapped business objects to populate.</param>
-		/// <param name="type">Type of the business object.</param>
+		/// <param name="type">Type of an object.</param>
 		/// <returns>Populated list of mapped business objects.</returns>
 		public IList ExecuteList(IList list, Type type)
 		{
@@ -2544,6 +2576,22 @@ namespace Rsdn.Framework.Data
 				return null;
 			}
 		}
+
+#if VER2
+		/// <summary>
+		/// Executes the query, and returns an array of business entities.
+		/// </summary>
+		/// <typeparam name="T">Type of an object.</typeparam>
+		/// <returns>Populated list of mapped business objects.</returns>
+		public List<T> ExecuteList<T>() 
+		{
+			List<T> list = new List<T>();
+
+			ExecuteList(list, typeof(T));
+
+			return list;
+		}
+#endif
 
 		#endregion
 
@@ -2598,6 +2646,24 @@ namespace Rsdn.Framework.Data
 			}
 		}
 
+#if VER2
+		/// <summary>
+		/// Executes the query, and returns a dictionary of business entities.
+		/// </summary>
+		/// <typeparam name="TKey">Key's type.</typeparam>
+		/// <typeparam name="TValue">Value's type.</typeparam>
+		/// <param name="keyFieldName">The field name that is used as a key to populate the dictionary.</param>
+		/// <returns>An instance of the dictionary.</returns>
+		public Dictionary<TKey, TValue> ExecuteDictionary<TKey, TValue>(string keyFieldName)
+		{
+			Dictionary<TKey, TValue> dic = new Dictionary<TKey, TValue>();
+
+			ExecuteDictionary(dic, keyFieldName, typeof(TValue));
+
+			return dic;
+		}
+#endif
+
 		#endregion
 
 		#region Update
@@ -2614,27 +2680,24 @@ namespace Rsdn.Framework.Data
 		}
 
 		/// <summary>
-		/// Calls the respective INSERT, UPDATE, or DELETE statements for each inserted, updated, or 
+		/// Calls the corresponding INSERT, UPDATE, or DELETE statements for each inserted, updated, or 
 		/// deleted row in the specified <see cref="DataSet"/>.
 		/// </summary>
 		/// <param name="dataSet">The <see cref="DataSet"/> used to update the data source.</param>
 		/// <returns>The number of rows successfully updated from the <see cref="DataSet"/>.</returns>
-		public int Update(
-			DataSet dataSet)
+		public int Update(DataSet dataSet)
 		{
 			return Update(dataSet, null);
 		}
 
 		/// <summary>
-		/// Calls the respective INSERT, UPDATE, or DELETE statements for each inserted, updated, or 
+		/// Calls the corresponding INSERT, UPDATE, or DELETE statements for each inserted, updated, or 
 		/// deleted row in the <see cref="DataSet"/> with the specified <see cref="DataTable"/> name.
 		/// </summary>
 		/// <param name="dataSet">The <see cref="DataSet"/> used to update the data source.</param>
 		/// <param name="tableName">The name of the source table to use for table mapping.</param>
 		/// <returns>The number of rows successfully updated from the <see cref="DataSet"/>.</returns>
-		public int Update(
-			DataSet dataSet,
-			string  tableName)
+		public int Update(DataSet dataSet, string tableName)
 		{
 			try
 			{
@@ -2665,13 +2728,13 @@ namespace Rsdn.Framework.Data
 		/// </summary>
 		/// <param name="dataTable"></param>
 		/// <returns></returns>
-		public int Update(
-			DataTable dataTable)
+		public int Update(DataTable dataTable)
 		{
 			try
 			{
 				if (dataTable == null)
-					throw new ArgumentNullException("dataTable",
+					throw new ArgumentNullException(
+						"dataTable",
 						"DataTable must be initialized before calling Update routine. Cannot update database from a null data table.");
 
 				DbDataAdapter da = CreateDataAdapter();

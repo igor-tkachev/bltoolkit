@@ -853,7 +853,11 @@ namespace Rsdn.Framework.Data.Mapping
 
 		private static XmlDocument GetMappingSchema(Stream schemaStream)
 		{
+#if VER2
+			XmlSchemaSet schema = new XmlSchemaSet();
+#else
 			XmlSchemaCollection schema = new XmlSchemaCollection();
+#endif
 
 			string resourceName = "Rsdn.Framework.Data.Mapping.Mapping.xsd";
 			Stream mapSchema    = Assembly.GetExecutingAssembly().GetManifestResourceStream(resourceName);
@@ -864,13 +868,20 @@ namespace Rsdn.Framework.Data.Mapping
 
 			schema.Add(XmlSchema.Read(mapSchema, null));
 
+#if VER2
+			XmlReader reader = XmlReader.Create(schemaStream);
+
+			reader.Settings.ValidationType = ValidationType.Schema;
+			reader.Settings.Schemas.Add(schema);
+#else
 			XmlValidatingReader reader = new XmlValidatingReader(new XmlTextReader(schemaStream));
 
 			reader.ValidationType = ValidationType.Schema;
 			reader.Schemas.Add(schema);
+#endif
 
 			XmlDocument doc = new XmlDocument();
-				
+
 			doc.Load(reader);
 
 			return doc;

@@ -21,8 +21,10 @@ namespace Cpp
 
 	public __value enum StateNullable
 	{
+#ifndef VER2
 		[MapDefaultValue(0)] Unknown,
 		[MapNullValue(0)]    Null,
+#endif
 		[MapValue(S"A")]     Active,
 		[MapValue(S"I")]     Inactive,
 		[MapValue(S"P")]     Pending
@@ -62,7 +64,7 @@ namespace Cpp
 				message = String::Format("'null' does not map to '{0}'", __box(state));
 			}
 
-			Object       *obj      = Map::ToValue(value, __typeof(StateNullable));
+			Object       *obj      = Map::ToEnum(value, __typeof(StateNullable));
 			StateNullable mapValue = obj != 0? *dynamic_cast<__box StateNullable*>(obj): (StateNullable)-1;
 
 			Assert::IsTrue(mapValue == state, message);
@@ -76,31 +78,33 @@ namespace Cpp
 			CheckState(S"A", StateNullable::Active);
 			CheckState(S"I", StateNullable::Inactive);
 			CheckState(S"P", StateNullable::Pending);
+#ifndef VER2
 			CheckState(S"X",     StateNullable::Unknown);
 			CheckState(__box(0), StateNullable::Unknown);
 			CheckState(0,             StateNullable::Null);
 			CheckState(DBNull::Value, StateNullable::Null);
+#endif
 		}
 
 		[Test]
 		[ExpectedException(__typeof(RsdnMapException))]
 		void ToValue_Exception1()
 		{
-			Map::ToValue(DBNull::Value, __typeof(State));
+			Map::ToEnum(DBNull::Value, __typeof(State));
 		}
 
 		[Test]
 		[ExpectedException(__typeof(RsdnMapException))]
 		void ToValue_Exception2()
 		{
-			Map::ToValue(S"X", __typeof(State));
+			Map::ToEnum(S"X", __typeof(State));
 		}
 	
 		[Test]
 		[ExpectedException(__typeof(RsdnMapException))]
 		void ToValue_Exception3()
 		{
-			Map::ToValue(0, __typeof(State));
+			Map::ToEnum(0, __typeof(State));
 		}
 
 		[Test]

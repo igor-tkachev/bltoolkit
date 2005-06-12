@@ -45,7 +45,7 @@ namespace CS
 			}
 
 			Assert.IsTrue(
-				(StateNullable)Map.ToValue(value, typeof(StateNullable)) == state, 
+				(StateNullable)Map.ToEnum(value, typeof(StateNullable)) == state, 
 				message);
 		}
 
@@ -77,21 +77,21 @@ namespace CS
 		[ExpectedException(typeof(RsdnMapException))]
 		public void ToValue_Exception1()
 		{
-			Map.ToValue(DBNull.Value, typeof(State));
+			Map.ToEnum(DBNull.Value, typeof(State));
 		}
 
 		[Test]
 		[ExpectedException(typeof(RsdnMapException))]
 		public void ToValue_Exception2()
 		{
-			Map.ToValue("X", typeof(State));
+			Map.ToEnum("X", typeof(State));
 		}
 	
 		[Test]
 		[ExpectedException(typeof(RsdnMapException))]
 		public void ToValue_Exception3()
 		{
-			Map.ToValue(null, typeof(State));
+			Map.ToEnum(null, typeof(State));
 		}
 		#endregion
 

@@ -13,10 +13,10 @@
 ///     &lt;appSettings&gt;
 ///         &lt;add 
 ///             key   = "ConnectionString.<b>Development</b>" 
-///             va<i/>lue = "Server=.;Database=NorthwindDev;Integrated Security=SSPI" /&gt;
+///             va<i/>lue = "Server=(local);Database=NorthwindDev;Integrated Security=SSPI" /&gt;
 ///         &lt;add 
 ///             key   = "ConnectionString.<b>Production</b>" 
-///             va<i/>lue = "Server=.;Database=Northwind;Integrated Security=SSPI" /&gt;
+///             va<i/>lue = "Server=(local);Database=Northwind;Integrated Security=SSPI" /&gt;
 ///     &lt;/appSettings&gt;
 /// &lt;configuration&gt;
 /// </code>

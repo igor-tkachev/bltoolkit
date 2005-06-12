@@ -13,7 +13,7 @@
 ///     &lt;appSettings&gt;
 ///         &lt;add 
 ///             key   = "ConnectionString" 
-///             va<i/>lue = "Server=.;Database=NorthwindDev;Integrated Security=SSPI" /&gt;
+///             va<i/>lue = "Server=(local);Database=NorthwindDev;Integrated Security=SSPI" /&gt;
 ///     &lt;/appSettings&gt;
 /// &lt;configuration&gt;
 /// </code>

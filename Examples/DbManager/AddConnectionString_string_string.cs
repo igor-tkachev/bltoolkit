@@ -18,7 +18,7 @@ namespace Examples_DbManager
 		public void Test()
 		{
 			DbManager.AddConnectionString(
-				"Test", "Server=.;Database=Northwind;Integrated Security=SSPI");
+				"Test", "Server=(local);Database=Northwind;Integrated Security=SSPI");
 
 			using (DbManager db = new DbManager("Test"))
 			{

@@ -61,7 +61,7 @@ namespace TestData
 		{
 			ArrayList al = null;
 
-			string connectionString = "Server=.;Database=Northwind;Integrated Security=SSPI";
+			string connectionString = "Server=(local);Database=Northwind;Integrated Security=SSPI";
 			string commandText = @"
 				SELECT 
 					p.CategoryID,
@@ -82,8 +82,11 @@ namespace TestData
 				{
 					using (SqlCommand cmd = new SqlCommand(commandText, con))
 					{
+#if VER2
+						cmd.Parameters.AddWithValue("@min", min);
+#else
 						cmd.Parameters.Add("@min", min);
-
+#endif
 						using (SqlDataReader rd = cmd.ExecuteReader())
 						{
 							al = new ArrayList();
@@ -392,7 +395,7 @@ namespace TestData
 
 		static void Main()
 		{
-			DbManager.AddConnectionString("Server=.;Database=Northwind;Integrated Security=SSPI");
+			DbManager.AddConnectionString("Server=(local);Database=Northwind;Integrated Security=SSPI");
 
 			GetCategories1(10);
 			GetCategories2(10);

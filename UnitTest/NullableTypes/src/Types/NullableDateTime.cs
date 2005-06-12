@@ -280,8 +280,12 @@ namespace NullableTypes {
             string elementValue = reader.IsEmptyElement ? null : reader.ReadElementString();
 
             if (nilValue == null || nilValue == "false" || nilValue == "0") {
+#if VER2
+                _value = sys.Xml.XmlConvert.ToDateTime(elementValue, sysXml.XmlDateTimeSerializationMode.Local);
+#else
                 _value = sys.Xml.XmlConvert.ToDateTime(elementValue);
-                _notNull = true;
+#endif
+				_notNull = true;
             }
             else {
                 _notNull = false;

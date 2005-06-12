@@ -11,6 +11,10 @@ using System.ComponentModel;
 using System.Data;
 using System.Reflection;
 
+#if VER2
+using System.Collections.Generic;
+#endif
+
 namespace Rsdn.Framework.Data.Mapping
 {
 	/// <summary>
@@ -25,6 +29,8 @@ namespace Rsdn.Framework.Data.Mapping
 	{
 		static char[] _trimArray = new char[0];
 
+		#region xEnum
+
 		/// <summary>
 		/// Maps the source value to one of enumeration values.
 		/// </summary>
@@ -36,11 +42,12 @@ namespace Rsdn.Framework.Data.Mapping
 		/// <param name="sourceValue">A source value.</param>
 		/// <param name="type">An enumeration type.</param>
 		/// <returns>One of enumeration values.</returns>
+		[Obsolete("Use method ToEnum instead.")]
 		public static object ToValue(object sourceValue, Type type)
 		{
 			try
 			{
-				object[] attributes = MapDescriptor.GetValueAttributes(type); // GetCustomAttributes(type);
+				object[] attributes = MapDescriptor.GetValueAttributes(type);
 
 				return BaseMemberMapper.MapFrom(type, (Attribute[])attributes, sourceValue, true);
 			}
@@ -61,6 +68,7 @@ namespace Rsdn.Framework.Data.Mapping
 		/// <include file="Examples.xml" path='examples/map[@name="FromValue(object)"]/*' />
 		/// <param name="sourceValue">One of enumeration values.</param>
 		/// <returns>Mapped value.</returns>
+		[Obsolete("Use method FromEnum instead.")]
 		public static object FromValue(object sourceValue)
 		{
 			try
@@ -91,7 +99,17 @@ namespace Rsdn.Framework.Data.Mapping
 		/// <returns>One of enumeration values.</returns>
 		public static Enum ToEnum(object sourceValue, Type type)
 		{
-			return (Enum)ToValue(sourceValue, type);
+			try
+			{
+				object[] attributes = MapDescriptor.GetValueAttributes(type);
+
+				return (Enum)BaseMemberMapper.MapFrom(type, (Attribute[])attributes, sourceValue, true);
+			}
+			catch (Exception ex)
+			{
+				HandleException(ex);
+				return null;
+			}
 		}
 
 		/// <summary>
@@ -106,8 +124,24 @@ namespace Rsdn.Framework.Data.Mapping
 		/// <returns>Mapped value.</returns>
 		public static object FromEnum(Enum sourceValue)
 		{
-			return FromValue(sourceValue);
+			try
+			{
+				Type type = sourceValue.GetType();
+
+				object[] attributes = MapDescriptor.GetValueAttributes(type);
+
+				return BaseMemberMapper.MapTo((Attribute[])attributes, sourceValue, true);
+			}
+			catch (Exception ex)
+			{
+				HandleException(ex);
+				return null;
+			}
 		}
+
+		#endregion
+
+		#region IsNull
 
 		/// <summary>
 		/// Checks an object if it equals <i>null</i> value.
@@ -136,6 +170,10 @@ namespace Rsdn.Framework.Data.Mapping
 				value is Int32    && ((Int32)   value) == 0 ||
 				value is Int64    && ((Int64)   value) == 0;
 		}
+
+		#endregion
+
+		#region MapInternal
 
 		private static object MapInternal(MapDescriptor md, MapInitializingData data)
 		{
@@ -247,6 +285,10 @@ namespace Rsdn.Framework.Data.Mapping
 			}
 		}
 
+		#endregion
+
+		#region ToObject
+
 		/// <summary>
 		/// Maps an object to another object.
 		/// </summary>
@@ -295,6 +337,25 @@ namespace Rsdn.Framework.Data.Mapping
 			return ToObject(source, type, (object[])null);
 		}
 
+#if VER2
+		/// <summary>
+		/// Maps an object to a business entity.
+		/// </summary>
+		/// <remarks>
+		/// The <paramref name="source"/> parameter can be <see cref="DataRow"/>, 
+		/// <see cref="DataTable"/>, or business entity. 
+		/// In case the <paramref name="source"/> is a <see cref="DataTable"/>, 
+		/// the first row is taken as a source object.
+		/// </remarks>
+		/// <typeparam name="T">Type of the resulting object.</typeparam>
+		/// <param name="source">The source object.</param>
+		/// <returns>A business object.</returns>
+		public static T ToObject<T>(object source)
+		{
+			return (T)ToObject(source, typeof(T), (object[])null);
+		}
+#endif
+
 		/// <summary>
 		/// 
 		/// </summary>
@@ -319,6 +380,20 @@ namespace Rsdn.Framework.Data.Mapping
 				return null;
 			}
 		}
+
+#if VER2
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <param name="source"></param>
+		/// <param name="parameters"></param>
+		/// <returns></returns>
+		public static T ToObject<T>(object source, params object[] parameters)
+		{
+			return (T)ToObject(source, typeof(T), parameters);
+		}
+#endif
 
 		/// <summary>
 		/// Maps the <see cref="DataRow"/> to a business object.
@@ -453,6 +528,20 @@ namespace Rsdn.Framework.Data.Mapping
 			return ToObject(dataRow, version, type, (object[])null);
 		}
 
+#if VER2
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <param name="dataRow"></param>
+		/// <param name="version"></param>
+		/// <returns></returns>
+		public static T ToObject<T>(DataRow dataRow, DataRowVersion version)
+		{
+			return (T)ToObject(dataRow, version, typeof(T), (object[])null);
+		}
+#endif
+
 		/// <summary>
 		/// 
 		/// </summary>
@@ -472,6 +561,61 @@ namespace Rsdn.Framework.Data.Mapping
 				return MapInternal(
 					MapDescriptor.GetDescriptor(type),
 					new MapInitializingData(new DataRowReader(dataRow, version), dataRow, parameters));
+			}
+			catch (Exception ex)
+			{
+				HandleException(ex);
+				return null;
+			}
+		}
+
+#if VER2
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <param name="dataRow"></param>
+		/// <param name="version"></param>
+		/// <param name="parameters"></param>
+		/// <returns></returns>
+		public static T ToObject<T>(
+			DataRow         dataRow,
+			DataRowVersion  version,
+			params object[] parameters)
+		{
+			return (T)ToObject(dataRow, version, typeof(T), parameters);
+		}
+#endif
+
+		#endregion
+
+		#region ToList
+
+			#region From DataTable
+
+		private static IList ToListInternal(
+			DataTable sourceTable,
+			IList     list,
+			Type      type,
+			params object[] parameters)
+		{
+			try
+			{
+				DataRowReader       rr   = new DataRowReader(null);
+				MapDescriptor       md   = MapDescriptor.GetDescriptor(type);
+				MapInitializingData data = new MapInitializingData(rr, null, parameters);
+
+				foreach (DataRow dr in sourceTable.Rows)
+				{
+					if (dr.RowState != DataRowState.Deleted)
+					{
+						rr.DataRow = dr;
+						data.SetSourceData(dr);
+						list.Add(MapInternal(md, data));
+					}
+				}
+
+				return list;
 			}
 			catch (Exception ex)
 			{
@@ -534,8 +678,22 @@ namespace Rsdn.Framework.Data.Mapping
 			IList     list,
 			Type      type)
 		{
-			return ToList(sourceTable, list, type, (object[])null);
+			return ToListInternal(sourceTable, list, type, (object[])null);
 		}
+
+#if VER2
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <param name="sourceTable"></param>
+		/// <param name="list"></param>
+		/// <returns></returns>
+		public static List<T> ToList<T>(DataTable sourceTable, List<T> list)
+		{
+			return (List<T>)ToListInternal(sourceTable, list, typeof(T), (object[])null);
+		}
+#endif
 
 		/// <summary>
 		/// 
@@ -551,20 +709,46 @@ namespace Rsdn.Framework.Data.Mapping
 			Type      type,
 			params object[] parameters)
 		{
+			return ToListInternal(sourceTable, list, type, parameters);
+		}
+
+#if VER2
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <param name="sourceTable"></param>
+		/// <param name="list"></param>
+		/// <param name="parameters"></param>
+		/// <returns></returns>
+		public static List<T> ToList<T>(DataTable sourceTable, List<T> list, params object[] parameters)
+		{
+			return (List<T>)ToListInternal(sourceTable, list, typeof(T), parameters);
+		}
+#endif
+
+			#endregion
+
+			#region From DataTable + DataRowVersion
+
+		private static IList ToListInternal(
+			DataTable       sourceTable,
+			DataRowVersion  version,
+			IList           list,
+			Type            type,
+			params object[] parameters)
+		{
 			try
 			{
-				DataRowReader       rr   = new DataRowReader(null);
+				DataRowReader       rr   = new DataRowReader(null, version);
 				MapDescriptor       md   = MapDescriptor.GetDescriptor(type);
 				MapInitializingData data = new MapInitializingData(rr, null, parameters);
 
 				foreach (DataRow dr in sourceTable.Rows)
 				{
-					if (dr.RowState != DataRowState.Deleted)
-					{
-						rr.DataRow = dr;
-						data.SetSourceData(dr);
-						list.Add(MapInternal(md, data));
-					}
+					rr.DataRow = dr;
+					data.SetSourceData(dr);
+					list.Add(MapInternal(md, data));
 				}
 
 				return list;
@@ -636,8 +820,23 @@ namespace Rsdn.Framework.Data.Mapping
 			IList          list,
 			Type           type)
 		{
-			return ToList(sourceTable, version, list, type, (object[])null);
+			return ToListInternal(sourceTable, version, list, type, (object[])null);
 		}
+
+#if VER2
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <param name="sourceTable"></param>
+		/// <param name="version"></param>
+		/// <param name="list"></param>
+		/// <returns></returns>
+		public static List<T> ToList<T>(DataTable sourceTable, DataRowVersion version, List<T> list)
+		{
+			return (List<T>)ToListInternal(sourceTable, version, list, typeof(T), (object[])null);
+		}
+#endif
 
 		/// <summary>
 		/// 
@@ -655,27 +854,28 @@ namespace Rsdn.Framework.Data.Mapping
 			Type            type,
 			params object[] parameters)
 		{
-			try
-			{
-				DataRowReader       rr   = new DataRowReader(null, version);
-				MapDescriptor       md   = MapDescriptor.GetDescriptor(type);
-				MapInitializingData data = new MapInitializingData(rr, null, parameters);
-
-				foreach (DataRow dr in sourceTable.Rows)
-				{
-					rr.DataRow = dr;
-					data.SetSourceData(dr);
-					list.Add(MapInternal(md, data));
-				}
-
-				return list;
-			}
-			catch (Exception ex)
-			{
-				HandleException(ex);
-				return null;
-			}
+			return ToListInternal(sourceTable, version, list, type, parameters);
 		}
+
+#if VER2
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <param name="sourceTable"></param>
+		/// <param name="version"></param>
+		/// <param name="list"></param>
+		/// <param name="parameters"></param>
+		/// <returns></returns>
+		public static List<T> ToList<T>(
+			DataTable       sourceTable,
+			DataRowVersion  version,
+			List<T>         list,
+			params object[] parameters)
+		{
+			return (List<T>)ToListInternal(sourceTable, version, list, typeof(T), parameters);
+		}
+#endif
 
 		/// <summary>
 		/// Maps the <see cref="DataTable"/> to the <see cref="ArrayList"/>.
@@ -727,10 +927,27 @@ namespace Rsdn.Framework.Data.Mapping
 		{
 			ArrayList arrayList = new ArrayList();
 
-			ToList(dataTable, arrayList, type);
+			ToListInternal(dataTable, arrayList, type, (object[])null);
 
 			return arrayList;
 		}
+
+#if VER2
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <param name="dataTable"></param>
+		/// <returns></returns>
+		public static List<T> ToList<T>(DataTable dataTable)
+		{
+			List<T> list = new List<T>();
+
+			ToListInternal(dataTable, list, typeof(T), (object[])null);
+
+			return list;
+		}
+#endif
 
 		/// <summary>
 		/// Maps the <see cref="DataTable"/> to the <see cref="ArrayList"/>.
@@ -789,132 +1006,78 @@ namespace Rsdn.Framework.Data.Mapping
 		{
 			ArrayList arrayList = new ArrayList();
 
-			ToList(dataTable, version, arrayList, type);
+			ToListInternal(dataTable, version, arrayList, type, (object[])null);
 
 			return arrayList;
 		}
 
+#if VER2
 		/// <summary>
-		/// Maps the <see cref="IList"/> to the <see cref="DataTable"/>.
+		/// 
 		/// </summary>
-		/// <remarks>
-		/// The method populates the <see cref="DataTable"/> from the provided <see cref="IList"/>.
-		/// </remarks>
-		/// <example>
-		/// The following example demonstrates how to use the method.
-		/// <code>
-		/// using System;
-		/// using System.Collections;
-		/// using System.Data;
+		/// <typeparam name="T"></typeparam>
+		/// <param name="dataTable"></param>
+		/// <param name="version"></param>
+		/// <returns></returns>
+		public static List<T> ToList<T>(DataTable dataTable, DataRowVersion version)
+		{
+			List<T> list = new List<T>();
+
+			ToListInternal(dataTable, version, list, typeof(T), (object[])null);
+
+			return list;
+		}
+#endif
+
+		/// <summary>
 		/// 
-		/// using Rsdn.Framework.Data.Mapping;
-		/// 
-		/// namespace Example
-		/// {
-		///     public class BizEntity
-		///     {
-		///         public int    ID;
-		///         public string Name;
-		///     }
-		///     
-		///     class Test
-		///     {
-		///         static void Main()
-		///         {
-		///             ArrayList array  = new ArrayList();
-		///             BizEntity entity = new BizEntity();
-		///             
-		///             entity.ID   = 1;
-		///             entity.Name = "Example";
-		///             
-		///             array.Add(entity);
-		///             
-		///             DataTable table = Map.ToList(array);
-		///             
-		///             Console.WriteLine("ID  : {0}", table.Rows[0]["ID"]);
-		///             Console.WriteLine("Name: {0}", table.Rows[0]["Name"]);
-		///         }
-		///     }
-		/// }
-		/// </code>
-		/// </example>
-		/// <param name="list">The resultant array.</param>
-		/// <returns>An array of business objects.</returns>
+		/// </summary>
+		/// <param name="list"></param>
+		/// <returns></returns>
+		[Obsolete("Use method ToDataTable instead.")]
 		public static DataTable ToList(IList list)
 		{
-			return ToList(list, new DataTable());
+			return ToDataTable(list);
 		}
 
 		/// <summary>
-		/// Maps the <see cref="IList"/> to the <see cref="DataTable"/>.
+		/// 
 		/// </summary>
-		/// <remarks>
-		/// The method populates the <see cref="DataTable"/> from the provided <see cref="IList"/>.
-		/// </remarks>
-		/// <example>
-		/// The following example demonstrates how to use the method.
-		/// <code>
-		/// using System;
-		/// using System.Collections;
-		/// using System.Data;
-		/// 
-		/// using Rsdn.Framework.Data.Mapping;
-		/// 
-		/// namespace Example
-		/// {
-		///     public class BizEntity
-		///     {
-		///         public int    ID;
-		///         public string Name;
-		///     }
-		///     
-		///     class Test
-		///     {
-		///         static void Main()
-		///         {
-		///             DataTable table = new DataTable();
-		///             
-		///             table.Columns.Add("ID",   typeof(int));
-		///             table.Columns.Add("Name", typeof(string));
-		///             
-		///             ArrayList array  = new ArrayList();
-		///             BizEntity entity = new BizEntity();
-		///             
-		///             entity.ID   = 1;
-		///             entity.Name = "Example";
-		///             
-		///             array.Add(entity);
-		///             
-		///             Map.ToList(array, table);
-		///             
-		///             Console.WriteLine("ID  : {0}", table.Rows[0]["ID"]);
-		///             Console.WriteLine("Name: {0}", table.Rows[0]["Name"]);
-		///         }
-		///     }
-		/// }
-		/// </code>
-		/// </example>
-		/// <param name="list">A source array.</param>
-		/// <param name="dataTable">A destination <see cref="DataTable"/>.</param>
-		/// <returns>A <see cref="DataTable"/> object.</returns>
-		public static DataTable ToList(
-			IList     list,
-			DataTable dataTable)
+		/// <param name="list"></param>
+		/// <param name="dataTable"></param>
+		/// <returns></returns>
+		[Obsolete("Use method ToDataTable instead.")]
+		public static DataTable ToList(IList list, DataTable dataTable)
+		{
+			return ToDataTable(list, dataTable);
+		}
+
+		#endregion
+
+			#region From DataReader
+
+		private static IList ToListInternal(
+			IDataReader     reader,
+			IList           list,
+			Type            type,
+			params object[] parameters)
 		{
 			try
 			{
-				DataRowReader rr = new DataRowReader(null);
-
-				foreach (object o in list)
+				if (reader.Read())
 				{
-					rr.DataRow = dataTable.NewRow();
-				
-					MapInternal(MapDescriptor.GetDescriptor(o.GetType()), o, rr, rr.DataRow);
-				
-					dataTable.Rows.Add(rr.DataRow);
+					DataReaderSource    drs  = new DataReaderSource(reader);
+					MapDescriptor       md   = MapDescriptor.GetDescriptor(type);
+					MapInitializingData data = new MapInitializingData(drs, reader, parameters);
+
+					do
+					{
+						list.Add(MapInternal(md, data));
+					}
+					while (reader.Read());
 				}
 
-				return dataTable;	
+				return list;
 			}
 			catch (Exception ex)
 			{
@@ -999,8 +1162,22 @@ namespace Rsdn.Framework.Data.Mapping
 		/// <returns>An <see cref="IList"/>.</returns>
 		public static IList ToList(IDataReader reader, IList list, Type type)
 		{
-			return ToList(reader, list, type, (object[])null);
+			return ToListInternal(reader, list, type, (object[])null);
 		}
+
+#if VER2
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <param name="reader"></param>
+		/// <param name="list"></param>
+		/// <returns></returns>
+		public static List<T> ToList<T>(IDataReader reader, List<T> list)
+		{
+			return (List<T>)ToListInternal(reader, list, typeof(T), (object[])null);
+		}
+#endif
 
 		/// <summary>
 		/// 
@@ -1016,29 +1193,23 @@ namespace Rsdn.Framework.Data.Mapping
 			Type            type,
 			params object[] parameters)
 		{
-			try
-			{
-				if (reader.Read())
-				{
-					DataReaderSource    drs  = new DataReaderSource(reader);
-					MapDescriptor       md   = MapDescriptor.GetDescriptor(type);
-					MapInitializingData data = new MapInitializingData(drs, reader, parameters);
-
-					do
-					{
-						list.Add(MapInternal(md, data));
-					}
-					while (reader.Read());
-				}
-
-				return list;
-			}
-			catch (Exception ex)
-			{
-				HandleException(ex);
-				return null;
-			}
+			return ToListInternal(reader, list, type, parameters);
 		}
+
+#if VER2
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <param name="reader"></param>
+		/// <param name="list"></param>
+		/// <param name="parameters"></param>
+		/// <returns></returns>
+		public static List<T> ToList<T>(IDataReader reader, List<T> list, params object[] parameters)
+		{
+			return (List<T>)ToListInternal(reader, list, typeof(T), parameters);
+		}
+#endif
 
 		/// <summary>
 		/// Maps the <see cref="IDataReader"/> to the <see cref="ArrayList"/>.
@@ -1050,47 +1221,41 @@ namespace Rsdn.Framework.Data.Mapping
 		/// <param name="reader">An instance of the <see cref="IDataReader"/>.</param>
 		/// <param name="type">A type of the objects to be created.</param>
 		/// <returns>An array of business objects.</returns>
-		public static ArrayList ToList(
-			IDataReader reader,
-			Type type)
+		public static ArrayList ToList(IDataReader reader, Type type)
 		{
 			ArrayList arrayList = new ArrayList();
 
-			ToList(reader, arrayList, type);
+			ToList(reader, arrayList, type, (object[])null);
 
 			return arrayList;
 		}
 
-		/// <summary>
-		/// Maps the <see cref="DataTable"/> to the <see cref="IDictionary"/>.
-		/// </summary>
-		/// <remarks>
-		/// The method creates objects of the provided type and adds them to the <see cref="IDictionary"/>.
-		/// </remarks>
-		/// <param name="sourceTable">An instance of the <see cref="DataTable"/>.</param>
-		/// <param name="dictionary"><see cref="IDictionary"/> object to be populated.</param>
-		/// <param name="keyFieldName">The field name that is used as a key to populate <see cref="IDictionary"/>.</param>
-		/// <param name="type">A type of the objects to be created.</param>
-		/// <returns>An instance of the <see cref="IDictionary"/>.</returns>
-		public static IDictionary ToDictionary(
-			DataTable   sourceTable,
-			IDictionary dictionary,
-			string      keyFieldName,
-			Type        type)
-		{
-			return ToDictionary(sourceTable, dictionary, keyFieldName, type, (object[])null);
-		}
-
+#if VER2
 		/// <summary>
 		/// 
 		/// </summary>
-		/// <param name="sourceTable"></param>
-		/// <param name="dictionary"></param>
-		/// <param name="keyFieldName"></param>
-		/// <param name="type"></param>
-		/// <param name="parameters"></param>
+		/// <typeparam name="T"></typeparam>
+		/// <param name="reader"></param>
 		/// <returns></returns>
-		public static IDictionary ToDictionary(
+		public static List<T> ToList<T>(IDataReader reader)
+		{
+			List<T> list = new List<T>();
+
+			ToListInternal(reader, list, typeof(T), (object[])null);
+
+			return list;
+		}
+#endif
+
+		#endregion
+
+		#endregion
+
+		#region ToDictionary
+
+			#region From DataTable
+
+		private static IDictionary ToDictionaryInternal(
 			DataTable       sourceTable,
 			IDictionary     dictionary,
 			string          keyFieldName,
@@ -1129,34 +1294,84 @@ namespace Rsdn.Framework.Data.Mapping
 		/// The method creates objects of the provided type and adds them to the <see cref="IDictionary"/>.
 		/// </remarks>
 		/// <param name="sourceTable">An instance of the <see cref="DataTable"/>.</param>
-		/// <param name="version">One of the <see cref="DataRowVersion"/> values 
-		/// that specifies the desired row version. 
-		/// Possible values are Default, Original, Current, and Proposed.</param>
 		/// <param name="dictionary"><see cref="IDictionary"/> object to be populated.</param>
 		/// <param name="keyFieldName">The field name that is used as a key to populate <see cref="IDictionary"/>.</param>
 		/// <param name="type">A type of the objects to be created.</param>
 		/// <returns>An instance of the <see cref="IDictionary"/>.</returns>
 		public static IDictionary ToDictionary(
-			DataTable      sourceTable,
-			DataRowVersion version,
-			IDictionary    dictionary,
-			string         keyFieldName,
-			Type           type)
+			DataTable   sourceTable,
+			IDictionary dictionary,
+			string      keyFieldName,
+			Type        type)
 		{
-			return ToDictionary(sourceTable, version, dictionary, keyFieldName, type, (object[])null);
+			return ToDictionaryInternal(sourceTable, dictionary, keyFieldName, type, (object[])null);
 		}
+
+#if VER2
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <typeparam name="TKey"></typeparam>
+		/// <typeparam name="TValue"></typeparam>
+		/// <param name="sourceTable"></param>
+		/// <param name="dictionary"></param>
+		/// <param name="keyFieldName"></param>
+		/// <returns></returns>
+		public static Dictionary<TKey, TValue> ToDictionary<TKey, TValue>(
+			DataTable                sourceTable,
+			Dictionary<TKey, TValue> dictionary,
+			string                   keyFieldName)
+		{
+			return (Dictionary<TKey, TValue>)ToDictionaryInternal(
+				sourceTable, dictionary, keyFieldName, typeof(TValue), (object[])null);
+		}
+#endif
 
 		/// <summary>
 		/// 
 		/// </summary>
 		/// <param name="sourceTable"></param>
-		/// <param name="version"></param>
 		/// <param name="dictionary"></param>
 		/// <param name="keyFieldName"></param>
 		/// <param name="type"></param>
 		/// <param name="parameters"></param>
 		/// <returns></returns>
 		public static IDictionary ToDictionary(
+			DataTable       sourceTable,
+			IDictionary     dictionary,
+			string          keyFieldName,
+			Type            type,
+			params object[] parameters)
+		{
+			return ToDictionaryInternal(sourceTable, dictionary, keyFieldName, type, parameters);
+		}
+
+#if VER2
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <typeparam name="TKey"></typeparam>
+		/// <typeparam name="TValue"></typeparam>
+		/// <param name="sourceTable"></param>
+		/// <param name="dictionary"></param>
+		/// <param name="keyFieldName"></param>
+		/// <param name="parameters"></param>
+		/// <returns></returns>
+		public static Dictionary<TKey, TValue> ToDictionary<TKey, TValue>(
+			DataTable                sourceTable,
+			Dictionary<TKey, TValue> dictionary,
+			string                   keyFieldName,
+			params object[]          parameters)
+		{
+			return (Dictionary<TKey, TValue>)ToDictionaryInternal(
+				sourceTable, dictionary, keyFieldName, typeof(TValue), parameters);
+		}
+#endif
+			#endregion
+
+			#region From DataTable + DataRowVersion
+
+		private static IDictionary ToDictionaryInternal(
 			DataTable       sourceTable,
 			DataRowVersion  version,
 			IDictionary     dictionary,
@@ -1187,6 +1402,97 @@ namespace Rsdn.Framework.Data.Mapping
 		}
 
 		/// <summary>
+		/// Maps the <see cref="DataTable"/> to the <see cref="IDictionary"/>.
+		/// </summary>
+		/// <remarks>
+		/// The method creates objects of the provided type and adds them to the <see cref="IDictionary"/>.
+		/// </remarks>
+		/// <param name="sourceTable">An instance of the <see cref="DataTable"/>.</param>
+		/// <param name="version">One of the <see cref="DataRowVersion"/> values 
+		/// that specifies the desired row version. 
+		/// Possible values are Default, Original, Current, and Proposed.</param>
+		/// <param name="dictionary"><see cref="IDictionary"/> object to be populated.</param>
+		/// <param name="keyFieldName">The field name that is used as a key to populate <see cref="IDictionary"/>.</param>
+		/// <param name="type">A type of the objects to be created.</param>
+		/// <returns>An instance of the <see cref="IDictionary"/>.</returns>
+		public static IDictionary ToDictionary(
+			DataTable      sourceTable,
+			DataRowVersion version,
+			IDictionary    dictionary,
+			string         keyFieldName,
+			Type           type)
+		{
+			return ToDictionaryInternal(sourceTable, version, dictionary, keyFieldName, type, (object[])null);
+		}
+
+#if VER2
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <typeparam name="TKey"></typeparam>
+		/// <typeparam name="TValue"></typeparam>
+		/// <param name="sourceTable"></param>
+		/// <param name="version"></param>
+		/// <param name="dictionary"></param>
+		/// <param name="keyFieldName"></param>
+		/// <returns></returns>
+		public static Dictionary<TKey, TValue> ToDictionary<TKey, TValue>(
+			DataTable                sourceTable,
+			DataRowVersion           version,
+			Dictionary<TKey, TValue> dictionary,
+			string                   keyFieldName)
+		{
+			return (Dictionary<TKey, TValue>)ToDictionaryInternal(
+				sourceTable, version, dictionary, keyFieldName, typeof(TValue), (object[])null);
+		}
+#endif
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="sourceTable"></param>
+		/// <param name="version"></param>
+		/// <param name="dictionary"></param>
+		/// <param name="keyFieldName"></param>
+		/// <param name="type"></param>
+		/// <param name="parameters"></param>
+		/// <returns></returns>
+		public static IDictionary ToDictionary(
+			DataTable       sourceTable,
+			DataRowVersion  version,
+			IDictionary     dictionary,
+			string          keyFieldName,
+			Type            type,
+			params object[] parameters)
+		{
+			return ToDictionaryInternal(sourceTable, version, dictionary, keyFieldName, type, parameters);
+		}
+
+#if VER2
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <typeparam name="TKey"></typeparam>
+		/// <typeparam name="TValue"></typeparam>
+		/// <param name="sourceTable"></param>
+		/// <param name="version"></param>
+		/// <param name="dictionary"></param>
+		/// <param name="keyFieldName"></param>
+		/// <param name="parameters"></param>
+		/// <returns></returns>
+		public static Dictionary<TKey, TValue> ToDictionary<TKey, TValue>(
+			DataTable                sourceTable,
+			DataRowVersion           version,
+			Dictionary<TKey, TValue> dictionary,
+			string                   keyFieldName,
+			params object[]          parameters)
+		{
+			return (Dictionary<TKey, TValue>)ToDictionaryInternal(
+				sourceTable, version, dictionary, keyFieldName, typeof(TValue), parameters);
+		}
+#endif
+
+		/// <summary>
 		/// Maps the <see cref="DataTable"/> to the <see cref="Hashtable"/>.
 		/// </summary>
 		/// <remarks>
@@ -1203,10 +1509,31 @@ namespace Rsdn.Framework.Data.Mapping
 		{
 			Hashtable hash = new Hashtable();
 
-			ToDictionary(dataTable, hash, keyFieldName, type);
+			ToDictionaryInternal(dataTable, hash, keyFieldName, type, (object[])null);
 
 			return hash;
 		}
+
+#if VER2
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <typeparam name="TKey"></typeparam>
+		/// <typeparam name="TValue"></typeparam>
+		/// <param name="dataTable"></param>
+		/// <param name="keyFieldName"></param>
+		/// <returns></returns>
+		public static Dictionary<TKey, TValue> ToDictionary<TKey, TValue>(
+			DataTable dataTable,
+			string    keyFieldName)
+		{
+			Dictionary<TKey, TValue> dic = new Dictionary<TKey,TValue>();
+
+			ToDictionaryInternal(dataTable, dic, keyFieldName, typeof(TValue), (object[])null);
+
+			return dic;
+		}
+#endif
 
 		/// <summary>
 		/// Maps the <see cref="DataTable"/> to the <see cref="Hashtable"/>.
@@ -1229,63 +1556,39 @@ namespace Rsdn.Framework.Data.Mapping
 		{
 			Hashtable ht = new Hashtable();
 
-			ToDictionary(dataTable, version, ht, keyFieldName, type);
+			ToDictionaryInternal(dataTable, version, ht, keyFieldName, type, (object[])null);
 
 			return ht;
 		}
 
-		/// <summary>
-		/// Maps the <see cref="IDataReader"/> to the <see cref="Hashtable"/>.
-		/// </summary>
-		/// <remarks>
-		/// The method creates objects of the provided type and adds them to the <see cref="Hashtable"/>.
-		/// </remarks>
-		/// <param name="reader">An instance of the <see cref="IDataReader"/>.</param>
-		/// <param name="keyFieldName">The field name that is used as a key to populate <see cref="Hashtable"/>.</param>
-		/// <param name="type">A type of the objects to be created.</param>
-		/// <returns>An instance of the <see cref="Hashtable"/>.</returns>
-		public static Hashtable ToDictionary(
-			IDataReader reader,
-			string      keyFieldName,
-			Type        type)
-		{
-			Hashtable ht = new Hashtable();
-
-			ToDictionary(reader, ht, keyFieldName, type, (object[])null);
-
-			return ht;
-		}
-
-		/// <summary>
-		/// Maps the <see cref="IDataReader"/> to the <see cref="IDictionary"/>.
-		/// </summary>
-		/// <remarks>
-		/// The method creates objects of the provided type and adds them to the <see cref="IDictionary"/>.
-		/// </remarks>
-		/// <param name="reader">An instance of the <see cref="IDataReader"/>.</param>
-		/// <param name="dictionary"><see cref="IDictionary"/> object to be populated.</param>
-		/// <param name="keyFieldName">The field name that is used as a key to populate <see cref="IDictionary"/>.</param>
-		/// <param name="type">A type of the objects to be created.</param>
-		/// <returns>An instance of the <see cref="IDictionary"/>.</returns>
-		public static IDictionary ToDictionary(
-			IDataReader reader,
-			IDictionary dictionary,
-			string      keyFieldName,
-			Type        type)
-		{
-			return ToDictionary(reader, dictionary, keyFieldName, type, (object[])null);
-		}
-
+#if VER2
 		/// <summary>
 		/// 
 		/// </summary>
-		/// <param name="reader"></param>
-		/// <param name="dictionary"></param>
+		/// <typeparam name="TKey"></typeparam>
+		/// <typeparam name="TValue"></typeparam>
+		/// <param name="dataTable"></param>
+		/// <param name="version"></param>
 		/// <param name="keyFieldName"></param>
-		/// <param name="type"></param>
-		/// <param name="parameters"></param>
 		/// <returns></returns>
-		public static IDictionary ToDictionary(
+		public static Dictionary<TKey, TValue> ToDictionary<TKey, TValue>(
+			DataTable      dataTable,
+			DataRowVersion version,
+			string         keyFieldName)
+		{
+			Dictionary<TKey, TValue> dic = new Dictionary<TKey, TValue>();
+
+			ToDictionaryInternal(dataTable, version, dic, keyFieldName, typeof(TValue), (object[])null);
+
+			return dic;
+		}
+#endif
+
+			#endregion
+
+			#region From DataReader
+
+		private static IDictionary ToDictionaryInternal(
 			IDataReader     reader,
 			IDictionary     dictionary,
 			string          keyFieldName,
@@ -1317,6 +1620,49 @@ namespace Rsdn.Framework.Data.Mapping
 		}
 
 		/// <summary>
+		/// Maps the <see cref="IDataReader"/> to the <see cref="Hashtable"/>.
+		/// </summary>
+		/// <remarks>
+		/// The method creates objects of the provided type and adds them to the <see cref="Hashtable"/>.
+		/// </remarks>
+		/// <param name="reader">An instance of the <see cref="IDataReader"/>.</param>
+		/// <param name="keyFieldName">The field name that is used as a key to populate <see cref="Hashtable"/>.</param>
+		/// <param name="type">A type of the objects to be created.</param>
+		/// <returns>An instance of the <see cref="Hashtable"/>.</returns>
+		public static Hashtable ToDictionary(
+			IDataReader reader,
+			string      keyFieldName,
+			Type        type)
+		{
+			Hashtable ht = new Hashtable();
+
+			ToDictionaryInternal(reader, ht, keyFieldName, type, (object[])null);
+
+			return ht;
+		}
+
+#if VER2
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <typeparam name="TKey"></typeparam>
+		/// <typeparam name="TValue"></typeparam>
+		/// <param name="reader"></param>
+		/// <param name="keyFieldName"></param>
+		/// <returns></returns>
+		public static Dictionary<TKey, TValue> ToDictionary<TKey, TValue>(
+			IDataReader reader,
+			string      keyFieldName)
+		{
+			Dictionary<TKey, TValue> dic = new Dictionary<TKey,TValue>();
+
+			ToDictionaryInternal(reader, dic, keyFieldName, typeof(TValue), (object[])null);
+
+			return dic;
+		}
+#endif
+
+		/// <summary>
 		/// Maps the <see cref="IDataReader"/> to the <see cref="IDictionary"/>.
 		/// </summary>
 		/// <remarks>
@@ -1324,19 +1670,192 @@ namespace Rsdn.Framework.Data.Mapping
 		/// </remarks>
 		/// <param name="reader">An instance of the <see cref="IDataReader"/>.</param>
 		/// <param name="dictionary"><see cref="IDictionary"/> object to be populated.</param>
+		/// <param name="keyFieldName">The field name that is used as a key to populate <see cref="IDictionary"/>.</param>
 		/// <param name="type">A type of the objects to be created.</param>
-		/// <returns>An instance of the <see cref="Hashtable"/> class.</returns>
-		public static Hashtable ToDictionary(
+		/// <returns>An instance of the <see cref="IDictionary"/>.</returns>
+		public static IDictionary ToDictionary(
 			IDataReader reader,
 			IDictionary dictionary,
+			string      keyFieldName,
 			Type        type)
 		{
-			Hashtable hash = new Hashtable();
-
-			ToDictionary(reader, hash, type);
-
-			return hash;
+			return ToDictionaryInternal(reader, dictionary, keyFieldName, type, (object[])null);
 		}
+
+#if VER2
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <typeparam name="TKey"></typeparam>
+		/// <typeparam name="TValue"></typeparam>
+		/// <param name="reader"></param>
+		/// <param name="dictionary"></param>
+		/// <param name="keyFieldName"></param>
+		/// <returns></returns>
+		public static Dictionary<TKey, TValue> ToDictionary<TKey, TValue>(
+			IDataReader              reader,
+			Dictionary<TKey, TValue> dictionary,
+			string                   keyFieldName)
+		{
+			return (Dictionary<TKey, TValue>)ToDictionaryInternal(
+				reader, dictionary, keyFieldName, typeof(TValue), (object[])null);
+		}
+#endif
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="reader"></param>
+		/// <param name="dictionary"></param>
+		/// <param name="keyFieldName"></param>
+		/// <param name="type"></param>
+		/// <param name="parameters"></param>
+		/// <returns></returns>
+		public static IDictionary ToDictionary(
+			IDataReader     reader,
+			IDictionary     dictionary,
+			string          keyFieldName,
+			Type            type,
+			params object[] parameters)
+		{
+			return ToDictionaryInternal(reader, dictionary, keyFieldName, type, parameters);
+		}
+
+			#endregion
+
+		#endregion
+
+		#region ToDataTable
+
+		/// <summary>
+		/// Maps the <see cref="IList"/> to the <see cref="DataTable"/>.
+		/// </summary>
+		/// <remarks>
+		/// The method populates the <see cref="DataTable"/> from the provided <see cref="IList"/>.
+		/// </remarks>
+		/// <example>
+		/// The following example demonstrates how to use the method.
+		/// <code>
+		/// using System;
+		/// using System.Collections;
+		/// using System.Data;
+		/// 
+		/// using Rsdn.Framework.Data.Mapping;
+		/// 
+		/// namespace Example
+		/// {
+		///     public class BizEntity
+		///     {
+		///         public int    ID;
+		///         public string Name;
+		///     }
+		///     
+		///     class Test
+		///     {
+		///         static void Main()
+		///         {
+		///             ArrayList array  = new ArrayList();
+		///             BizEntity entity = new BizEntity();
+		///             
+		///             entity.ID   = 1;
+		///             entity.Name = "Example";
+		///             
+		///             array.Add(entity);
+		///             
+		///             DataTable table = Map.ToList(array);
+		///             
+		///             Console.WriteLine("ID  : {0}", table.Rows[0]["ID"]);
+		///             Console.WriteLine("Name: {0}", table.Rows[0]["Name"]);
+		///         }
+		///     }
+		/// }
+		/// </code>
+		/// </example>
+		/// <param name="list">The resultant array.</param>
+		/// <returns>An array of business objects.</returns>
+		public static DataTable ToDataTable(IList list)
+		{
+			return ToDataTable(list, new DataTable());
+		}
+
+		/// <summary>
+		/// Maps the <see cref="IList"/> to the <see cref="DataTable"/>.
+		/// </summary>
+		/// <remarks>
+		/// The method populates the <see cref="DataTable"/> from the provided <see cref="IList"/>.
+		/// </remarks>
+		/// <example>
+		/// The following example demonstrates how to use the method.
+		/// <code>
+		/// using System;
+		/// using System.Collections;
+		/// using System.Data;
+		/// 
+		/// using Rsdn.Framework.Data.Mapping;
+		/// 
+		/// namespace Example
+		/// {
+		///     public class BizEntity
+		///     {
+		///         public int    ID;
+		///         public string Name;
+		///     }
+		///     
+		///     class Test
+		///     {
+		///         static void Main()
+		///         {
+		///             DataTable table = new DataTable();
+		///             
+		///             table.Columns.Add("ID",   typeof(int));
+		///             table.Columns.Add("Name", typeof(string));
+		///             
+		///             ArrayList array  = new ArrayList();
+		///             BizEntity entity = new BizEntity();
+		///             
+		///             entity.ID   = 1;
+		///             entity.Name = "Example";
+		///             
+		///             array.Add(entity);
+		///             
+		///             Map.ToList(array, table);
+		///             
+		///             Console.WriteLine("ID  : {0}", table.Rows[0]["ID"]);
+		///             Console.WriteLine("Name: {0}", table.Rows[0]["Name"]);
+		///         }
+		///     }
+		/// }
+		/// </code>
+		/// </example>
+		/// <param name="list">A source array.</param>
+		/// <param name="dataTable">A destination <see cref="DataTable"/>.</param>
+		/// <returns>A <see cref="DataTable"/> object.</returns>
+		public static DataTable ToDataTable(
+			IList     list,
+			DataTable dataTable)
+		{
+			try
+			{
+				DataRowReader rr = new DataRowReader(null);
+
+				foreach (object o in list)
+				{
+					rr.DataRow = dataTable.NewRow();
+				
+					MapInternal(MapDescriptor.GetDescriptor(o.GetType()), o, rr, rr.DataRow);
+				
+					dataTable.Rows.Add(rr.DataRow);
+				}
+
+				return dataTable;	
+			}
+			catch (Exception ex)
+			{
+				HandleException(ex);
+				return null;
+			}
+		}
+
 
 		/// <summary>
 		/// 
@@ -1412,6 +1931,10 @@ namespace Rsdn.Framework.Data.Mapping
 			}
 		}
 
+		#endregion
+
+		#region Descriptor
+
 		/// <summary>
 		/// 
 		/// </summary>
@@ -1419,5 +1942,19 @@ namespace Rsdn.Framework.Data.Mapping
 		{
 			return MapDescriptor.GetDescriptor(type);
 		}
+
+#if VER2
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <returns></returns>
+		public static MapDescriptor Descriptor<T>()
+		{
+			return MapDescriptor.GetDescriptor(typeof(T));
+		}
+#endif
+
+		#endregion
 	}
 }

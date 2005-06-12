@@ -30,11 +30,11 @@ namespace Examples_Mapping_Map
 		[Test]
 		public void Test()
 		{
-			Assert.AreEqual(Status.Active,   Map.ToValue("A",  typeof(Status)));
-			Assert.AreEqual(Status.Inactive, Map.ToValue("I",  typeof(Status)));
-			Assert.AreEqual(Status.Pending,  Map.ToValue("P",  typeof(Status)));
-			Assert.AreEqual(Status.Null,     Map.ToValue(null, typeof(Status)));
-			Assert.AreEqual(Status.Unknown,  Map.ToValue(123,  typeof(Status)));
+			Assert.AreEqual(Status.Active,   Map.ToEnum("A",  typeof(Status)));
+			Assert.AreEqual(Status.Inactive, Map.ToEnum("I",  typeof(Status)));
+			Assert.AreEqual(Status.Pending,  Map.ToEnum("P",  typeof(Status)));
+			Assert.AreEqual(Status.Null,     Map.ToEnum(null, typeof(Status)));
+			Assert.AreEqual(Status.Unknown,  Map.ToEnum(123,  typeof(Status)));
 		}
 	}
 }
