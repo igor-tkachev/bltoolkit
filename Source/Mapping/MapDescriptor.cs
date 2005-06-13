@@ -871,7 +871,7 @@ namespace Rsdn.Framework.Data.Mapping
 #if VER2
 			XmlReader reader = XmlReader.Create(schemaStream);
 
-			reader.Settings.ValidationType = ValidationType.Schema;
+			//reader.Settings.ValidationType = ValidationType.Schema;
 			reader.Settings.Schemas.Add(schema);
 #else
 			XmlValidatingReader reader = new XmlValidatingReader(new XmlTextReader(schemaStream));

@@ -29,7 +29,7 @@ namespace Rsdn.Framework.Data.Mapping
 	{
 		static char[] _trimArray = new char[0];
 
-		#region xEnum
+		#region xxEnum
 
 		/// <summary>
 		/// Maps the source value to one of enumeration values.
@@ -164,7 +164,10 @@ namespace Rsdn.Framework.Data.Mapping
 		{
 			return
 				value == null ||
-				value is String   && ((String)  value).TrimEnd(_trimArray).Length == 0   ||
+#if VER2
+				value is INullableValue && ((INullableValue)value).HasValue == false ||
+#endif
+				value is String   && ((String)  value).TrimEnd(_trimArray).Length == 0 ||
 				value is DateTime && ((DateTime)value) == DateTime.MinValue ||
 				value is Int16    && ((Int16)   value) == 0 ||
 				value is Int32    && ((Int32)   value) == 0 ||

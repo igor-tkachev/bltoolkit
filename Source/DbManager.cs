@@ -1,7 +1,7 @@
 /*
  * File:    DbManager.cs
  * Created: 12/30/2002
- * Author:  Igor Tkachev 
+ * Author:  Igor Tkachev
  *          mailto:it@rsdn.ru
  */
 
