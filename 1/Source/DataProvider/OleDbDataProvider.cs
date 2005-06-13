@@ -76,10 +76,7 @@ namespace Rsdn.Framework.Data.DataProvider
 		/// <value>An instance of the <see cref="Type"/> class.</value>
 		public Type ConnectionType
 		{
-			get
-			{
-				return typeof(OleDbConnection);
-			}
+			get { return typeof(OleDbConnection); }
 		}
 
 		/// <summary>
@@ -92,10 +89,7 @@ namespace Rsdn.Framework.Data.DataProvider
 		/// <value>Data provider name.</value>
 		public string Name
 		{
-			get
-			{
-				return "OleDb";
-			}
+			get { return "OleDb"; }
 		}
 	}
 }

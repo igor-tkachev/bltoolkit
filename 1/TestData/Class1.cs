@@ -393,7 +393,7 @@ namespace TestData
 			}
 		}
 
-		static void Main()
+		static void Main2()
 		{
 			DbManager.AddConnectionString("Server=(local);Database=Northwind;Integrated Security=SSPI");
 
@@ -428,90 +428,6 @@ namespace TestData
 		}
 	}
 }
-
-/*
-using System;
-using System.Data;
-using System.Collections;
- 
-using Rsdn.Framework.Data;
-using Rsdn.Framework.Data.DataProvider;
-
-namespace Example
-{
-	public class Category
-	{
-		[MapField(Name = "CategoryID")]
-		public int    ID;
-
-		public string CategoryName;
-
-		[MapField(IsNullable = true)]
-		public string Description;
-
-		public int Prop
-		{
-			get 
-			{
-				return ID;
-			}
-		}
-	}
-
-	class Test
-	{
-		static void Main()
-		{
-			using (DbManager   db = new DbManager())
-			using (IDataReader dr = db.ExecuteReader(@"
-			    SELECT
-					CategoryID,
-					CategoryName,
-					Description
-				FROM Categories
-
-			    SELECT
-					CategoryID,
-					CategoryName
-				FROM Categories"))
-			{
-				ArrayList al = MapData.MapList(dr, typeof(Category));
-
-				Print(al);
-
-				if (dr.NextResult())
-				{
-					MapData.MapList(dr, al, typeof(Category));
-
-					Print(al);
-				}
-			}
-		}
-
-		static void Print(ArrayList al)
-		{
-			foreach (Category c in al)
-			{
-				Console.WriteLine(
-					"{0,2}  {1,-15} {2}", c.ID, c.CategoryName, c.Description);
-			}
-		}
-	}
-
-	class TestDescriptor : Rsdn.Framework.Data.Mapping.MapDescriptor
-	{
-		public object GetValue(object obj)
-		{
-			return ((Category)obj).Prop;
-		}
-	}
-}
-*/
-
-/*
-using System;
-
-using Rsdn.Framework.Data.Mapping;
 
 namespace Test
 {
@@ -696,7 +612,7 @@ namespace Test
 			public abstract string Prop90 { get; set; } public abstract int Prop91 { get; set; } public abstract string Prop92 { get; set; } public abstract string Prop93 { get; set; } public abstract string Prop94 { get; set; } public abstract string Prop95 { get; set; } public abstract string Prop96 { get; set; } public abstract string Prop97 { get; set; } public abstract string Prop98 { get; set; } public abstract string Prop99 { get; set; }
 		}
 
-		static void Main()
+		static void Main1()
 		{
 			Class01 cl01 = (Class01)Map.Descriptor(typeof(Class01)).CreateInstance();
 			Class02 cl02 = (Class02)Map.Descriptor(typeof(Class02)).CreateInstance();
@@ -713,4 +629,26 @@ namespace Test
 		}
 	}
 }
-*/
+
+namespace Test
+{
+	public class TestNullableValue
+	{
+#if VER2
+		public class Test
+		{
+			public int? NullableInt;
+		}
+#endif
+
+		static void Main()
+		{
+#if VER2
+			Test t = new Test();
+
+			t.NullableInt = 10;
+			t.NullableInt = null;
+#endif
+		}
+	}
+}
