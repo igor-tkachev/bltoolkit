@@ -63,7 +63,6 @@ Global
 		{33AF814D-3D1F-4486-AA26-3D855B3269D5}.Release|.NET.ActiveCfg = Release
 		{33AF814D-3D1F-4486-AA26-3D855B3269D5}.Release|Any CPU.ActiveCfg = Release
 		{33AF814D-3D1F-4486-AA26-3D855B3269D5}.Release|Mixed Platforms.ActiveCfg = Release
-		{33AF814D-3D1F-4486-AA26-3D855B3269D5}.Release|Mixed Platforms.Build.0 = Release
 		{33AF814D-3D1F-4486-AA26-3D855B3269D5}.Release|Win32.ActiveCfg = Release
 		{33AF814D-3D1F-4486-AA26-3D855B3269D5}.Release|Win32.Build.0 = Release
 		{B2689B7F-B435-48F2-95D2-5F4992C84A5E}.Debug|.NET.ActiveCfg = Debug|Any CPU
@@ -179,7 +178,7 @@ Global
 		{337502B5-3F64-4A20-AD80-734F3611D30A} = {96876B08-1C6E-4B28-917F-5129DF9DA13A}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		XCSharpSolutionEnabled = True
 		XCSharpProjectsDisabled = 
+		XCSharpSolutionEnabled = True
 	EndGlobalSection
 EndGlobal

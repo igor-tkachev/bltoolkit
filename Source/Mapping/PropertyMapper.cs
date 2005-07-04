@@ -115,11 +115,11 @@ namespace Rsdn.Framework.Data.Mapping
 
 				if (o != null)
 				{
-					ISupportInitialize si = o as ISupportInitialize;
+					//ISupportInitialize si = o as ISupportInitialize;
 
-					if (si != null) si.BeginInit();
+					//if (si != null) si.BeginInit();
 					_classMember.SetValue(o, value);
-					if (si != null) si.EndInit();
+					//if (si != null) si.EndInit();
 				}
 			}
 			else if (_canWrite)
