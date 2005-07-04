@@ -6,6 +6,7 @@
 	ProjectGUID="{AA98067A-D81A-41E4-9EBE-A72BD05ABB2F}"
 	RootNamespace="CppTest2"
 	Keyword="ManagedCProj"
+	SignManifests="true"
 	>
 	<Platforms>
 		<Platform
@@ -97,7 +98,7 @@
 			IntermediateDirectory="$(ConfigurationName)"
 			ConfigurationType="2"
 			CharacterSet="2"
-			ManagedExtensions="1"
+			ManagedExtensions="4"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -117,7 +118,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="2"
-				PreprocessorDefinitions="WIN32;NDEBUG"
+				PreprocessorDefinitions="WIN32;NDEBUG;VER2"
 				MinimalRebuild="false"
 				RuntimeLibrary="2"
 				UsePrecompiledHeader="2"

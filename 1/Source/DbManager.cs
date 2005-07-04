@@ -1384,10 +1384,14 @@ namespace Rsdn.Framework.Data
 			try
 			{
 				IDbDataParameter parameter = Command.CreateParameter();
-			
+
 				parameter.ParameterName = parameterName;
 				parameter.Direction     = parameterDirection;
-				parameter.Value         = @value != null? @value: DBNull.Value;
+
+				if (value is DateTime)
+					parameter.DbType = DbType.Date;
+
+				parameter.Value = value != null? value: DBNull.Value;
 
 				return parameter;
 			}
@@ -1396,6 +1400,105 @@ namespace Rsdn.Framework.Data
 				HandleException(ex);
 				return null;
 			}
+		}
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="parameterDirection"></param>
+		/// <param name="parameterName"></param>
+		/// <param name="value"></param>
+		/// <param name="dbType"></param>
+		/// <returns></returns>
+		public IDbDataParameter Parameter(
+			ParameterDirection parameterDirection,
+			string parameterName,
+			object value,
+			DbType dbType)
+		{
+			try
+			{
+				IDbDataParameter parameter = Command.CreateParameter();
+
+				parameter.ParameterName = parameterName;
+				parameter.Direction     = parameterDirection;
+				parameter.DbType        = dbType;
+				parameter.Value         = value;
+
+				return parameter;
+			}
+			catch (Exception ex)
+			{
+				HandleException(ex);
+				return null;
+			}
+		}
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="parameterName"></param>
+		/// <param name="value"></param>
+		/// <param name="dbType"></param>
+		/// <returns></returns>
+		public IDbDataParameter Parameter(
+			string parameterName,
+			object value,
+			DbType dbType)
+		{
+			return Parameter(ParameterDirection.Input, parameterName, value, dbType);
+		}
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="parameterDirection"></param>
+		/// <param name="parameterName"></param>
+		/// <param name="value"></param>
+		/// <param name="dbType"></param>
+		/// <param name="size"></param>
+		/// <returns></returns>
+		public IDbDataParameter Parameter(
+			ParameterDirection parameterDirection,
+			string parameterName,
+			object value,
+			DbType dbType,
+			int    size)
+		{
+			try
+			{
+				IDbDataParameter parameter = Command.CreateParameter();
+
+				parameter.ParameterName = parameterName;
+				parameter.Direction     = parameterDirection;
+				parameter.DbType        = dbType;
+				parameter.Size          = size;
+				parameter.Value         = value;
+
+				return parameter;
+			}
+			catch (Exception ex)
+			{
+				HandleException(ex);
+				return null;
+			}
+		}
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="parameterName"></param>
+		/// <param name="value"></param>
+		/// <param name="dbType"></param>
+		/// <param name="size"></param>
+		/// <returns></returns>
+		public IDbDataParameter Parameter(
+			string parameterName,
+			object value,
+			DbType dbType,
+			int    size)
+		{
+			return Parameter(ParameterDirection.Input, parameterName, value, dbType, size);
 		}
 
 		/// <summary>
@@ -2477,7 +2580,7 @@ namespace Rsdn.Framework.Data
 				if (_prepared)
 					InitParameters(CommandAction.Select);
 
-				using (IDataReader dr = SelectCommand.ExecuteReader())
+				using (IDataReader dr = SelectCommand.ExecuteReader(CommandBehavior.SingleRow))
 				{
 					if (dr.Read()) 
 					{
@@ -2538,27 +2641,7 @@ namespace Rsdn.Framework.Data
 
 		#region ExecuteList
 
-		/// <summary>
-		/// Executes the query, and returns an array of business entities using the provided parameters.
-		/// </summary>
-		/// <param name="type">Type of the business object.</param>
-		/// <returns>An array of business objects.</returns>
-		public ArrayList ExecuteList(Type type)
-		{
-			ArrayList arrayList = new ArrayList();
-
-			ExecuteList(arrayList, type);
-
-			return arrayList;
-		}
-
-		/// <summary>
-		/// Executes the query, and returns an array of business entities.
-		/// </summary>
-		/// <param name="list">The list of mapped business objects to populate.</param>
-		/// <param name="type">Type of an object.</param>
-		/// <returns>Populated list of mapped business objects.</returns>
-		public IList ExecuteList(IList list, Type type)
+		private IList ExecuteListInternal(IList list, Type type, params object[] parameters)
 		{
 			try
 			{
@@ -2567,7 +2650,7 @@ namespace Rsdn.Framework.Data
 
 				using (IDataReader dr = SelectCommand.ExecuteReader())
 				{
-					return Mapping.Map.ToList(dr, list, type);
+					return Mapping.Map.ToList(dr, list, type, parameters);
 				}
 			}
 			catch (Exception ex)
@@ -2577,17 +2660,117 @@ namespace Rsdn.Framework.Data
 			}
 		}
 
+		/// <summary>
+		/// Executes the query, and returns an array of business entities using the provided parameters.
+		/// </summary>
+		/// <param name="type">Type of the business object.</param>
+		/// <returns>An array of business objects.</returns>
+		public ArrayList ExecuteList(Type type)
+		{
+			ArrayList arrayList = new ArrayList();
+
+			ExecuteListInternal(arrayList, type, (object[])null);
+
+			return arrayList;
+		}
+
 #if VER2
 		/// <summary>
 		/// Executes the query, and returns an array of business entities.
 		/// </summary>
 		/// <typeparam name="T">Type of an object.</typeparam>
 		/// <returns>Populated list of mapped business objects.</returns>
-		public List<T> ExecuteList<T>() 
+		public List<T> ExecuteList<T>()
 		{
 			List<T> list = new List<T>();
 
-			ExecuteList(list, typeof(T));
+			ExecuteListInternal(list, typeof(T), (object[])null);
+
+			return list;
+		}
+#endif
+
+		/// <summary>
+		/// Executes the query, and returns an array of business entities using the provided parameters.
+		/// </summary>
+		/// <param name="type">Type of the business object.</param>
+		/// <param name="parameters"></param>
+		/// <returns>An array of business objects.</returns>
+		public ArrayList ExecuteList(Type type, params object[] parameters)
+		{
+			ArrayList arrayList = new ArrayList();
+
+			ExecuteListInternal(arrayList, type, parameters);
+
+			return arrayList;
+		}
+
+#if VER2
+		/// <summary>
+		/// Executes the query, and returns an array of business entities.
+		/// </summary>
+		/// <typeparam name="T">Type of an object.</typeparam>
+		/// <param name="parameters"></param>
+		/// <returns>Populated list of mapped business objects.</returns>
+		public List<T> ExecuteList<T>(params object[] parameters)
+		{
+			List<T> list = new List<T>();
+
+			ExecuteListInternal(list, typeof(T), parameters);
+
+			return list;
+		}
+#endif
+
+		/// <summary>
+		/// Executes the query, and returns an array of business entities.
+		/// </summary>
+		/// <param name="list">The list of mapped business objects to populate.</param>
+		/// <param name="type">Type of an object.</param>
+		/// <returns>Populated list of mapped business objects.</returns>
+		public IList ExecuteList(IList list, Type type)
+		{
+			return ExecuteListInternal(list, type, (object[])null);
+		}
+
+#if VER2
+		/// <summary>
+		/// Executes the query, and returns an array of business entities.
+		/// </summary>
+		/// <typeparam name="T">Type of an object.</typeparam>
+		/// <param name="list">The list of mapped business objects to populate.</param>
+		/// <returns>Populated list of mapped business objects.</returns>
+		public List<T> ExecuteList<T>(List<T> list) 
+		{
+			ExecuteListInternal(list, typeof(T), (object[])null);
+
+			return list;
+		}
+#endif
+
+		/// <summary>
+		/// Executes the query, and returns an array of business entities.
+		/// </summary>
+		/// <param name="list">The list of mapped business objects to populate.</param>
+		/// <param name="type">Type of an object.</param>
+		/// <param name="parameters"></param>
+		/// <returns>Populated list of mapped business objects.</returns>
+		public IList ExecuteList(IList list, Type type, params object[] parameters)
+		{
+			return ExecuteListInternal(list, type, parameters);
+		}
+
+#if VER2
+		/// <summary>
+		/// Executes the query, and returns an array of business entities.
+		/// </summary>
+		/// <typeparam name="T">Type of an object.</typeparam>
+		/// <param name="list">The list of mapped business objects to populate.</param>
+		/// <param name="parameters"></param>
+		/// <returns>Populated list of mapped business objects.</returns>
+		public List<T> ExecuteList<T>(List<T> list, params object[] parameters)
+		{
+			ExecuteListInternal(list, typeof(T), parameters);
 
 			return list;
 		}

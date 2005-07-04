@@ -63,7 +63,8 @@ using System.Runtime.CompilerServices;
 #if DEBUG
 [assembly: AssemblyKeyFile("")]
 #else
-[assembly: AssemblyKeyFile("..\\..\\snk\\NullableTypes.snk")]
+//[assembly: AssemblyKeyFile("..\\..\\snk\\NullableTypes.snk")]
+[assembly: AssemblyKeyFile("")]
 #endif
 [assembly: AssemblyKeyName("")]
 
