@@ -11,6 +11,7 @@ using System.ComponentModel;
 using System.Configuration;
 using System.Data;
 using System.Data.Common;
+using System.Data.OleDb;
 
 #if VER2
 using System.Collections.Generic;
@@ -1388,8 +1389,8 @@ namespace Rsdn.Framework.Data
 				parameter.ParameterName = parameterName;
 				parameter.Direction     = parameterDirection;
 
-				if (value is DateTime)
-					parameter.DbType = DbType.Date;
+				if (value is DateTime && parameter is OleDbParameter)
+					((OleDbParameter)parameter).OleDbType = OleDbType.Date;
 
 				parameter.Value = value != null? value: DBNull.Value;
 
