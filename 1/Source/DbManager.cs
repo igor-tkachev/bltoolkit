@@ -96,10 +96,7 @@ namespace Rsdn.Framework.Data
 					Init(connection);
 			
 					if (_connection.State == ConnectionState.Closed)
-					{
-						_connection.Open();
-						_closeConnection = true;
-					}
+						OpenConnection();
 				}
 				catch (Exception ex)
 				{
@@ -162,10 +159,7 @@ namespace Rsdn.Framework.Data
 					_connection.ConnectionString = GetConnectionString(configurationString);
 
 					if (_connection.State == ConnectionState.Closed)
-					{
-						_connection.Open();
-						_closeConnection = true;
-					}
+						OpenConnection();
 				}
 			}
 			catch (Exception ex)
@@ -439,13 +433,17 @@ namespace Rsdn.Framework.Data
 
 			if (_transaction != null && _closeTransaction)
 			{
+				OnBeforeOperation(OperationType.DisposeTransaction);
 				_transaction.Dispose();
+				OnAfterOperation (OperationType.DisposeTransaction);
 				_transaction = null;
 			}
 
 			if (_connection != null && _closeConnection)
 			{
+				OnBeforeOperation(OperationType.CloseConnection);
 				_connection.Dispose();
+				OnAfterOperation (OperationType.CloseConnection);
 				_connection = null;
 			}
 
@@ -487,12 +485,16 @@ namespace Rsdn.Framework.Data
 				//
 				if (_transaction != null)
 				{
+					OnBeforeOperation(OperationType.DisposeTransaction);
 					_transaction.Dispose();
+					OnAfterOperation (OperationType.DisposeTransaction);
 				}
 
 				// Create new transaction object.
 				//
+				OnBeforeOperation(OperationType.BeginTransaction);
 				_transaction      = Connection.BeginTransaction(il);
+				OnAfterOperation (OperationType.BeginTransaction);
 				_closeTransaction = true;
 
 				// If the active command exists.
@@ -521,7 +523,9 @@ namespace Rsdn.Framework.Data
 			{
 				if (_transaction != null)
 				{
+					OnBeforeOperation(OperationType.CommitTransaction);
 					_transaction.Commit();
+					OnAfterOperation (OperationType.CommitTransaction);
 
 					if (_closeTransaction)
 						_transaction = null;
@@ -545,7 +549,7 @@ namespace Rsdn.Framework.Data
 			AddDataProvider(new DataProvider.SqlDataProvider());
 			AddDataProvider(new DataProvider.OleDbDataProvider());
 			AddDataProvider(new DataProvider.OdbcDataProvider());
-			//AddDataProvider(new DataProvider.OracleDataProvider());
+			AddDataProvider(new DataProvider.OracleDataProvider());
 		}
 
 		private static string                     _firstConfiguration = null;
@@ -622,6 +626,15 @@ namespace Rsdn.Framework.Data
 		{
 		}
 
+		private void OpenConnection()
+		{
+			OnBeforeOperation(OperationType.OpenConnection);
+			_connection.Open();
+			OnAfterOperation (OperationType.OpenConnection);
+
+			_closeConnection = true;
+		}
+
 		private void OpenConnection(string configurationString)
 		{
 			// If connection is already opened, we close it and open again.
@@ -640,8 +653,8 @@ namespace Rsdn.Framework.Data
 			//
 			_connection = _dataProvider.CreateConnectionObject();
 			_connection.ConnectionString = GetConnectionString(ConfigurationString);
-			_connection.Open();
-			_closeConnection = true;
+
+			OpenConnection();
 		}
 
 		private IDbDataParameter[] CreateSpParameters(string spName, object[] parameterValues)
@@ -803,14 +816,21 @@ namespace Rsdn.Framework.Data
 				con.ConnectionString = _closeConnection || _connection == null?
 					GetConnectionString(ConfigurationString):
 					_connection.ConnectionString;
+
+				OnBeforeOperation(OperationType.OpenConnection);
 				con.Open();
+				OnAfterOperation (OperationType.OpenConnection);
 
 				using (IDbCommand cmd = con.CreateCommand())
 				{
 					cmd.CommandType = CommandType.StoredProcedure;
 					cmd.CommandText = spName;
 
-					if (_dataProvider.DeriveParameters(cmd) == false)
+					OnBeforeOperation(OperationType.DeriveParameters);
+					bool res = _dataProvider.DeriveParameters(cmd);
+					OnAfterOperation(OperationType.DeriveParameters);
+
+					if (res == false)
 						return null;
 
 					if (includeReturnValueParameter == false)
@@ -922,6 +942,23 @@ namespace Rsdn.Framework.Data
 				commandParameters[i + dt].Value = value == null? DBNull.Value: value;
 			}
 		}
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="op"></param>
+		protected virtual void OnBeforeOperation(OperationType op)
+		{
+		}
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="op"></param>
+		protected virtual void OnAfterOperation(OperationType op)
+		{
+		}
+
 		#endregion
 
 		#region Public Static Methods.
@@ -2087,7 +2124,9 @@ namespace Rsdn.Framework.Data
 
 				if (InitParameters(CommandAction.Select) == false)
 				{
+					OnBeforeOperation(OperationType.PrepareCommand);
 					command.Prepare();
+					OnAfterOperation (OperationType.PrepareCommand);
 
 					_prepared = true;
 				}
@@ -2183,7 +2222,11 @@ namespace Rsdn.Framework.Data
 					}
 
 					foreach (object o in list)
+					{
+						OnBeforeOperation(OperationType.ExecuteNonQuery);
 						rows += AssignParameterValues(o).ExecuteNonQuery();
+						OnAfterOperation (OperationType.ExecuteNonQuery);
+					}
 				}
 			
 				return rows;
@@ -2227,7 +2270,11 @@ namespace Rsdn.Framework.Data
 					}
 
 					foreach (DataRow dr in table.Rows)
+					{
+						OnBeforeOperation(OperationType.ExecuteNonQuery);
 						rows += AssignParameterValues(dr).ExecuteNonQuery();
+						OnAfterOperation (OperationType.ExecuteNonQuery);
+					}
 				}
 			
 				return rows;
@@ -2291,7 +2338,11 @@ namespace Rsdn.Framework.Data
 				if (_prepared)
 					InitParameters(CommandAction.Select);
 
-				return SelectCommand.ExecuteNonQuery();
+				OnBeforeOperation(OperationType.ExecuteNonQuery);
+				int result = SelectCommand.ExecuteNonQuery();
+				OnAfterOperation (OperationType.ExecuteNonQuery);
+
+				return result;
 			}
 			catch (Exception ex)
 			{
@@ -2316,7 +2367,11 @@ namespace Rsdn.Framework.Data
 				if (_prepared)
 					InitParameters(CommandAction.Select);
 
-				return SelectCommand.ExecuteScalar();
+				OnBeforeOperation(OperationType.ExecuteScalar);
+				object result = SelectCommand.ExecuteScalar();
+				OnAfterOperation (OperationType.ExecuteScalar);
+
+				return result;
 			}
 			catch (Exception ex)
 			{
@@ -2352,7 +2407,11 @@ namespace Rsdn.Framework.Data
 				if (_prepared)
 					InitParameters(CommandAction.Select);
 
-				return SelectCommand.ExecuteReader();
+				OnBeforeOperation(OperationType.ExecuteReader);
+				IDataReader result = SelectCommand.ExecuteReader();
+				OnAfterOperation (OperationType.ExecuteReader);
+
+				return result;
 			}
 			catch (Exception ex)
 			{
@@ -2373,7 +2432,11 @@ namespace Rsdn.Framework.Data
 				if (_prepared)
 					InitParameters(CommandAction.Select);
 
-				return SelectCommand.ExecuteReader(commandBehavior);
+				OnBeforeOperation(OperationType.ExecuteReader);
+				IDataReader result = SelectCommand.ExecuteReader(commandBehavior);
+				OnAfterOperation (OperationType.ExecuteReader);
+
+				return result;
 			}
 			catch (Exception ex)
 			{
@@ -2465,6 +2528,8 @@ namespace Rsdn.Framework.Data
 
 				((IDbDataAdapter)da).SelectCommand = SelectCommand;
 
+				OnBeforeOperation(OperationType.Fill);
+
 				if (tableName == null)
 				{
 					da.Fill(dataSet);
@@ -2477,6 +2542,8 @@ namespace Rsdn.Framework.Data
 				{
 					da.Fill(dataSet, tableName);
 				}
+
+				OnAfterOperation(OperationType.Fill);
 
 				return dataSet;
 			}
@@ -2518,7 +2585,9 @@ namespace Rsdn.Framework.Data
 				DbDataAdapter da = _dataProvider.CreateDataAdapterObject();
 				((IDbDataAdapter)da).SelectCommand = SelectCommand;
 
+				OnBeforeOperation(OperationType.Fill);
 				da.Fill(dataTable);
+				OnAfterOperation (OperationType.Fill);
 
 				return dataTable;
 			}
@@ -2538,8 +2607,12 @@ namespace Rsdn.Framework.Data
 			if (tableList == null || tableList.Length == 0)
 				return;
 
+			OnBeforeOperation(OperationType.ExecuteReader);
+
 			using (IDataReader dr = ExecuteReader())
 			{
+				OnAfterOperation(OperationType.ExecuteReader);
+
 				int i = 0;
 
 				do 
@@ -2581,8 +2654,12 @@ namespace Rsdn.Framework.Data
 				if (_prepared)
 					InitParameters(CommandAction.Select);
 
+				OnBeforeOperation(OperationType.ExecuteReader);
+
 				using (IDataReader dr = SelectCommand.ExecuteReader(CommandBehavior.SingleRow))
 				{
+					OnAfterOperation(OperationType.ExecuteReader);
+
 					if (dr.Read()) 
 					{
 						Mapping.DataReaderSource drs = new Mapping.DataReaderSource(dr);
@@ -2649,8 +2726,12 @@ namespace Rsdn.Framework.Data
 				if (_prepared)
 					InitParameters(CommandAction.Select);
 
+				OnBeforeOperation(OperationType.ExecuteReader);
+
 				using (IDataReader dr = SelectCommand.ExecuteReader())
 				{
+					OnAfterOperation(OperationType.ExecuteReader);
+
 					return Mapping.Map.ToList(dr, list, type, parameters);
 				}
 			}
@@ -2818,8 +2899,12 @@ namespace Rsdn.Framework.Data
 				if (_prepared)
 					InitParameters(CommandAction.Select);
 
+				OnBeforeOperation(OperationType.ExecuteReader);
+
 				using (IDataReader dr = SelectCommand.ExecuteReader())
 				{
+					OnAfterOperation(OperationType.ExecuteReader);
+
 					return Mapping.Map.ToDictionary(dr, dictionary, keyFieldName, type);
 				}
 			}
@@ -2890,15 +2975,22 @@ namespace Rsdn.Framework.Data
 						"DataSet must be initialized before calling Update routine. Cannot update database from a null dataset.");
 
 				DbDataAdapter da = CreateDataAdapter();
+				int           result;
+
+				OnBeforeOperation(OperationType.Update);
 
 				if (tableName == null)
 				{
-					return da.Update(dataSet);
+					result = da.Update(dataSet);
 				}
 				else
 				{
-					return da.Update(dataSet, tableName);
+					result = da.Update(dataSet, tableName);
 				}
+
+				OnAfterOperation(OperationType.Update);
+
+				return result;
 			}
 			catch (Exception ex)
 			{
@@ -2923,7 +3015,11 @@ namespace Rsdn.Framework.Data
 
 				DbDataAdapter da = CreateDataAdapter();
 
-				return da.Update(dataTable);
+				OnBeforeOperation(OperationType.Update);
+				int result = da.Update(dataTable);
+				OnAfterOperation (OperationType.Update);
+
+				return result;
 			}
 			catch (Exception ex)
 			{
