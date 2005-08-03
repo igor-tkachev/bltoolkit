@@ -239,7 +239,7 @@ namespace Rsdn.Framework.Data.Mapping
 					}
 				}
 			}
-		
+
 			if (receiverData is ISupportInitialize)
 				((ISupportInitialize)receiverData).EndInit();
 		}
@@ -250,13 +250,16 @@ namespace Rsdn.Framework.Data.Mapping
 				return (IMapDataSource)obj;
 
 			if (obj is DataRow)
-				return new DataRowReader(obj as DataRow);
+				return new DataRowReader((DataRow)obj);
 
 			if (obj is DataTable)
-				return new DataRowReader((obj as DataTable).Rows[0]);
+				return new DataRowReader(((DataTable)(obj)).Rows[0]);
 
 			if (obj is IDataReader)
-				return new DataReaderSource(obj as IDataReader);
+				return new DataReaderSource((IDataReader)obj);
+
+			if (obj is IDictionary)
+				return new DictionaryReader((IDictionary)obj);
 
 			return MapDescriptor.GetDescriptor(obj.GetType());
 		}
@@ -278,6 +281,9 @@ namespace Rsdn.Framework.Data.Mapping
 
 				return new DataRowReader(dr);
 			}
+
+			if (obj is IDictionary)
+				return new DictionaryReader((IDictionary)obj);
 
 			return MapDescriptor.GetDescriptor(obj.GetType());
 		}

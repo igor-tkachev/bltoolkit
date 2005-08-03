@@ -579,6 +579,7 @@ namespace Rsdn.Framework.Data.Mapping
 
 			return mm != null? mm.GetValue(entity): null;
 		}
+
 		#endregion
 
 		#region IDataReceiver Members

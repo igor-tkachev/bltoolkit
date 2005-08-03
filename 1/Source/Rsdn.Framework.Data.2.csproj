@@ -121,6 +121,7 @@
     <Compile Include="Mapping\DataRowReader.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Mapping\DictionaryReader.cs" />
     <Compile Include="Mapping\FieldMapper.cs">
       <SubType>Code</SubType>
     </Compile>
