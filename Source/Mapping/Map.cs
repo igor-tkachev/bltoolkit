@@ -246,6 +246,9 @@ namespace Rsdn.Framework.Data.Mapping
 
 		private static IMapDataSource GetDataSource(object obj)
 		{
+			if (obj is IMapDataSource)
+				return (IMapDataSource)obj;
+
 			if (obj is DataRow)
 				return new DataRowReader(obj as DataRow);
 
@@ -260,6 +263,9 @@ namespace Rsdn.Framework.Data.Mapping
 
 		private static IMapDataReceiver GetDataReceiver(object obj)
 		{
+			if (obj is IMapDataReceiver)
+				return (IMapDataReceiver)obj;
+
 			if (obj is DataRow)
 				return new DataRowReader(obj as DataRow);
 
