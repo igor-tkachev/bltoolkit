@@ -23,11 +23,13 @@ namespace Rsdn.Framework.Data.Mapping
 		internal MapInitializingData(
 			IMapDataSource dataSource,
 			object         sourceData,
+			MapDescriptor  mapDescriptor,
 			object[]       parameters)
 		{
-			_dataSource = dataSource;
-			_sourceData = sourceData;
-			_parameters = parameters;
+			_dataSource    = dataSource;
+			_sourceData    = sourceData;
+			_mapDescriptor = mapDescriptor;
+			_parameters    = parameters;
 		}
 
 		internal void SetSourceData(object data)
@@ -42,6 +44,16 @@ namespace Rsdn.Framework.Data.Mapping
 		public  IMapDataSource  DataSource
 		{
 			get { return _dataSource; }
+		}
+
+		private MapDescriptor _mapDescriptor;
+		/// <summary>
+		/// 
+		/// </summary>
+		public  MapDescriptor  MapDescriptor
+		{
+			get { return _mapDescriptor;  }
+			set { _mapDescriptor = value; }
 		}
 
 		private object _sourceData;
@@ -80,6 +92,16 @@ namespace Rsdn.Framework.Data.Mapping
 		{
 			get { return _stopMapping;  }
 			set { _stopMapping = value; }
+		}
+
+		private bool _isInternal;
+		/// <summary>
+		/// 
+		/// </summary>
+		public  bool  IsInternal
+		{
+			get { return _isInternal;  }
+			set { _isInternal = value; }
 		}
 	}
 }

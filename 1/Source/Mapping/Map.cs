@@ -178,13 +178,13 @@ namespace Rsdn.Framework.Data.Mapping
 
 		#region MapInternal
 
-		private static object MapInternal(MapDescriptor md, MapInitializingData data)
+		private static object MapInternal(MapInitializingData data)
 		{
-			object dest = md.CreateInstanceEx(data);
+			object dest = data.MapDescriptor.CreateInstanceEx(data);
 
 			if (!data.StopMapping)
 			{
-				MapInternal(data.DataSource, data.SourceData, md, dest);
+				MapInternal(data.DataSource, data.SourceData, data.MapDescriptor, dest);
 			}
 
 			return dest;
@@ -386,8 +386,8 @@ namespace Rsdn.Framework.Data.Mapping
 			try
 			{
 				return MapInternal(
-					MapDescriptor.GetDescriptor(type),
-					new MapInitializingData(GetDataSource(source), source, parameters));
+					new MapInitializingData(
+						GetDataSource(source), source, MapDescriptor.GetDescriptor(type), parameters));
 			}
 			catch (Exception ex)
 			{
@@ -574,8 +574,8 @@ namespace Rsdn.Framework.Data.Mapping
 			try
 			{
 				return MapInternal(
-					MapDescriptor.GetDescriptor(type),
-					new MapInitializingData(new DataRowReader(dataRow, version), dataRow, parameters));
+					new MapInitializingData(
+						new DataRowReader(dataRow, version), dataRow, MapDescriptor.GetDescriptor(type), parameters));
 			}
 			catch (Exception ex)
 			{
@@ -618,15 +618,18 @@ namespace Rsdn.Framework.Data.Mapping
 			{
 				DataRowReader       rr   = new DataRowReader(null);
 				MapDescriptor       md   = MapDescriptor.GetDescriptor(type);
-				MapInitializingData data = new MapInitializingData(rr, null, parameters);
+				MapInitializingData data = new MapInitializingData(rr, null, md, parameters);
 
 				foreach (DataRow dr in sourceTable.Rows)
 				{
 					if (dr.RowState != DataRowState.Deleted)
 					{
 						rr.DataRow = dr;
+
 						data.SetSourceData(dr);
-						list.Add(MapInternal(md, data));
+						data.MapDescriptor = md;
+
+						list.Add(MapInternal(data));
 					}
 				}
 
@@ -757,13 +760,16 @@ namespace Rsdn.Framework.Data.Mapping
 			{
 				DataRowReader       rr   = new DataRowReader(null, version);
 				MapDescriptor       md   = MapDescriptor.GetDescriptor(type);
-				MapInitializingData data = new MapInitializingData(rr, null, parameters);
+				MapInitializingData data = new MapInitializingData(rr, null, md, parameters);
 
 				foreach (DataRow dr in sourceTable.Rows)
 				{
 					rr.DataRow = dr;
+
 					data.SetSourceData(dr);
-					list.Add(MapInternal(md, data));
+					data.MapDescriptor = md;
+
+					list.Add(MapInternal(data));
 				}
 
 				return list;
@@ -1083,11 +1089,12 @@ namespace Rsdn.Framework.Data.Mapping
 				{
 					DataReaderSource    drs  = new DataReaderSource(reader);
 					MapDescriptor       md   = MapDescriptor.GetDescriptor(type);
-					MapInitializingData data = new MapInitializingData(drs, reader, parameters);
+					MapInitializingData data = new MapInitializingData(drs, reader, md, parameters);
 
 					do
 					{
-						list.Add(MapInternal(md, data));
+						data.MapDescriptor = md;
+						list.Add(MapInternal(data));
 					}
 					while (reader.Read());
 				}
@@ -1281,15 +1288,18 @@ namespace Rsdn.Framework.Data.Mapping
 			{
 				DataRowReader       rr   = new DataRowReader(null);
 				MapDescriptor       md   = MapDescriptor.GetDescriptor(type);
-				MapInitializingData data = new MapInitializingData(rr, null, parameters);
+				MapInitializingData data = new MapInitializingData(rr, null, md, parameters);
 
 				foreach (DataRow dr in sourceTable.Rows)
 				{
 					if (dr.RowState != DataRowState.Deleted)
 					{
 						rr.DataRow = dr;
+
 						data.SetSourceData(dr);
-						dictionary.Add(dr[keyFieldName], MapInternal(md, data));
+						data.MapDescriptor = md;
+
+						dictionary.Add(dr[keyFieldName], MapInternal(data));
 					}
 				}
 
@@ -1398,13 +1408,16 @@ namespace Rsdn.Framework.Data.Mapping
 			{
 				DataRowReader       rr   = new DataRowReader(null, version);
 				MapDescriptor       md   = MapDescriptor.GetDescriptor(type);
-				MapInitializingData data = new MapInitializingData(rr, null, parameters);
+				MapInitializingData data = new MapInitializingData(rr, null, md, parameters);
 
 				foreach (DataRow dr in sourceTable.Rows)
 				{
 					rr.DataRow = dr;
+
 					data.SetSourceData(dr);
-					dictionary.Add(dr[keyFieldName], MapInternal(md, data));
+					data.MapDescriptor = md;
+
+					dictionary.Add(dr[keyFieldName], MapInternal(data));
 				}
 
 				return dictionary;
@@ -1616,11 +1629,12 @@ namespace Rsdn.Framework.Data.Mapping
 				{
 					DataReaderSource    drs  = new DataReaderSource(reader);
 					MapDescriptor       md   = MapDescriptor.GetDescriptor(type);
-					MapInitializingData data = new MapInitializingData(drs, reader, parameters);
+					MapInitializingData data = new MapInitializingData(drs, reader, md, parameters);
 
 					do
 					{
-						dictionary.Add(reader[keyFieldName], MapInternal(md, data));
+						data.MapDescriptor = md;
+						dictionary.Add(reader[keyFieldName], MapInternal(data));
 					}
 					while (reader.Read());
 				}
