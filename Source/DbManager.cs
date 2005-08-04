@@ -2668,12 +2668,14 @@ namespace Rsdn.Framework.Data
 						if (entity == null)
 						{
 							Mapping.MapInitializingData data = 
-								new Mapping.MapInitializingData(drs, dr, null);
+								new Mapping.MapInitializingData(drs, dr, td, null);
 
 							entity = td.CreateInstanceEx(data);
 
 							if (data.StopMapping)
 								return entity;
+
+							td = data.MapDescriptor;
 						}
 
 						Mapping.Map.MapInternal(drs, dr, td, entity);

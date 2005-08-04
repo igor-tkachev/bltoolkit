@@ -96,16 +96,17 @@ namespace Rsdn.Framework.Data.Mapping
 
 			// Property context.
 			//
-			public PropertyInfo PropertyInfo;    // property info
-			public object []    AttributeParams; // property attribute parameters
-			public FieldBuilder FieldBuilder;    // property implementation field builder
-			public Type         FieldType;       // field type
-			public bool         IsObject;        // true - field is a reference type
-			public FieldBuilder ParamBuilder;    // parameter builder
-			public MethodInfo   GetMethodInfo;   // getter info
-			public MethodInfo   SetMethodInfo;   // setter info
+			public PropertyInfo PropertyInfo;     // property info
+			public object []    AttributeParams;  // property attribute parameters
+			public FieldBuilder FieldBuilder;     // property implementation field builder
+			public Type         FieldType;        // field type
+			public bool         IsObject;         // true - field is a reference type
+			public FieldBuilder ParamBuilder;     // parameter builder
+			public MethodInfo   GetMethodInfo;    // getter info
+			public MethodInfo   SetMethodInfo;    // setter info
 
-			public LocalBuilder InitDataField;   // MapInitializingData local variable
+			public LocalBuilder DefInitDataField; // Default ctor MapInitializingData local variable
+			public LocalBuilder ObfInitDataField; // Object factory ctor MapInitializingData local variable
 		}
 
 		private static Type[]    _factoryParams             = new Type[] { typeof(MapInitializingData) };
@@ -237,6 +238,18 @@ namespace Rsdn.Framework.Data.Mapping
 			if (defParentCtor != null)
 			{
 				ctx.DefCtorGen.ldarg_0.call(defParentCtor);
+			}
+
+			if (ctx.ObfInitDataField != null)
+			{
+				ctx.ObfCtorGen
+					.ldarg_1
+					.ldloc(ctx.ObfInitDataField)
+					.callvirt(typeof(MapInitializingData).GetProperty("MapDescriptor").GetSetMethod())
+					
+					.ldarg_1
+					.ldc_i4_0
+					.callvirt(typeof(MapInitializingData).GetProperty("IsInternal").GetSetMethod());
 			}
 
 			// Find more appropriate object factory ctor.
@@ -407,6 +420,20 @@ namespace Rsdn.Framework.Data.Mapping
 							typeof(MapDescriptor),
 							FieldAttributes.Private | FieldAttributes.Static);
 
+						if (ctx.ObfInitDataField == null)
+						{
+							ctx.ObfInitDataField = ctx.ObfCtorGen.DeclareLocal(typeof(MapDescriptor));
+
+							ctx.ObfCtorGen
+								.ldarg_1
+								.callvirt(typeof(MapInitializingData).GetProperty("MapDescriptor").GetGetMethod())
+								.stloc(ctx.ObfInitDataField)
+
+								.ldarg_1
+								.ldc_i4_1
+								.callvirt(typeof(MapInitializingData).GetProperty("IsInternal").GetSetMethod());
+						}
+
 						Label l1 = ctx.ObfCtorGen.DefineLabel();
 
 						ctx.ObfCtorGen
@@ -450,14 +477,17 @@ namespace Rsdn.Framework.Data.Mapping
 						{
 							// Default constructor.
 							//
-							if (ctx.InitDataField == null)
+							if (ctx.DefInitDataField == null)
 							{
-								ctx.InitDataField = ctx.DefCtorGen.DeclareLocal(typeof(MapInitializingData));
+								ctx.DefInitDataField = ctx.DefCtorGen.DeclareLocal(typeof(MapInitializingData));
 
 								ctx.DefCtorGen
 									.newobj(GetDefaultConstructor(typeof(MapInitializingData)))
 									.stloc_0
-									.EndGen();
+
+									.ldloc_0
+									.ldc_i4_1
+									.callvirt(typeof(MapInitializingData).GetProperty("IsInternal").GetSetMethod());
 							}
 
 							Label l2 = ctx.DefCtorGen.DefineLabel();
@@ -554,6 +584,20 @@ namespace Rsdn.Framework.Data.Mapping
 
 								// Object factory constructor.
 								//
+								if (ctx.ObfInitDataField == null)
+								{
+									ctx.ObfInitDataField = ctx.ObfCtorGen.DeclareLocal(typeof(MapDescriptor));
+
+									ctx.ObfCtorGen
+										.ldarg_1
+										.callvirt(typeof(MapInitializingData).GetProperty("MapDescriptor").GetGetMethod())
+										.stloc(ctx.ObfInitDataField)
+
+										.ldarg_1
+										.ldc_i4_1
+										.callvirt(typeof(MapInitializingData).GetProperty("IsInternal").GetSetMethod());
+								}
+
 								if (ctx.ParamBuilder != null)
 								{
 									ctx.ObfCtorGen
@@ -580,14 +624,17 @@ namespace Rsdn.Framework.Data.Mapping
 								{
 									// Default constructor.
 									//
-									if (ctx.InitDataField == null)
+									if (ctx.DefInitDataField == null)
 									{
-										ctx.InitDataField = ctx.DefCtorGen.DeclareLocal(typeof(MapInitializingData));
+										ctx.DefInitDataField = ctx.DefCtorGen.DeclareLocal(typeof(MapInitializingData));
 
 										ctx.DefCtorGen
 											.newobj(GetDefaultConstructor(typeof(MapInitializingData)))
 											.stloc_0
-											.EndGen();
+
+											.ldloc_0
+											.ldc_i4_1
+											.callvirt(typeof(MapInitializingData).GetProperty("IsInternal").GetSetMethod());
 									}
 
 									ctx.DefCtorGen
@@ -809,7 +856,7 @@ namespace Rsdn.Framework.Data.Mapping
 			MapDescriptor desc = (MapDescriptor)Activator.CreateInstance(descriptorType);
 			desc.InitMembers(originalType, type, moduleBuilder);
 
-#if DEBUG1
+#if DEBUG
 			try
 			{
 				assemblyBuilder.Save(assemblyName.Name);

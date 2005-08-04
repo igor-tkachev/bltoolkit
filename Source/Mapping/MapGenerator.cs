@@ -135,6 +135,28 @@ namespace Rsdn.Framework.Data.Mapping
 		public MapGenerator ldloc_2 { get { m_gen.Emit(OpCodes.Ldloc_2); return this; } }
 		public MapGenerator ldloc_3 { get { m_gen.Emit(OpCodes.Ldloc_3); return this; } }
 
+		public MapGenerator ldloc(short n) 
+		{
+			switch (n)
+			{
+				case 0: ldloc_0.EndGen(); break;
+				case 1: ldloc_1.EndGen(); break;
+				case 2: ldloc_2.EndGen(); break;
+				case 3: ldloc_3.EndGen(); break;
+				default:
+					m_gen.Emit(OpCodes.Ldloc, n);
+					break;
+			}
+			
+			return this; 
+		}
+
+		public MapGenerator ldloc(LocalBuilder builder) 
+		{
+			m_gen.Emit(OpCodes.Ldloc, builder);
+			return this; 
+		}
+
 		public MapGenerator ldloca_s(byte n)     { m_gen.Emit(OpCodes.Ldloca_S, n); return this; }
 		public MapGenerator ldobj   (Type type)  { m_gen.Emit(OpCodes.Ldobj, type); return this; }
 		public MapGenerator ldsfld(FieldInfo fi) { m_gen.Emit(OpCodes.Ldsfld, fi);  return this; }
@@ -257,6 +279,28 @@ namespace Rsdn.Framework.Data.Mapping
 		public MapGenerator stloc_1 { get { m_gen.Emit(OpCodes.Stloc_1); return this; } }
 		public MapGenerator stloc_2 { get { m_gen.Emit(OpCodes.Stloc_2); return this; } }
 		public MapGenerator stloc_3 { get { m_gen.Emit(OpCodes.Stloc_3); return this; } }
+
+		public MapGenerator stloc(short n) 
+		{
+			switch (n)
+			{
+				case 0: stloc_0.EndGen(); break;
+				case 1: stloc_1.EndGen(); break;
+				case 2: stloc_2.EndGen(); break;
+				case 3: stloc_3.EndGen(); break;
+				default:
+					m_gen.Emit(OpCodes.Stloc, n);
+					break;
+			}
+			
+			return this; 
+		}
+
+		public MapGenerator stloc(LocalBuilder builder) 
+		{
+			m_gen.Emit(OpCodes.Stloc, builder);
+			return this; 
+		}
 
 		public MapGenerator stfld(FieldInfo fi) { m_gen.Emit(OpCodes.Stfld, fi); return this; }
 		public MapGenerator stfld(Type type, string fieldName) { return stfld(type.GetField(fieldName)); }
