@@ -16,13 +16,7 @@ namespace Rsdn.Framework.Data.Mapping
 	/// </summary>
 	public class FieldMapper : BaseMemberMapper
 	{
-		/// <summary>
-		/// 
-		/// </summary>
-		/// <param name="schema"></param>
-		/// <param name="fieldInfo"></param>
-		/// <returns></returns>
-		internal FieldMapper InitField(MappingSchema schema, FieldInfo fieldInfo)
+		internal FieldMapper InitField(MappingSchema schema, FieldInfo fieldInfo, Attribute[] valueAttributes)
 		{
 			_fieldInfo   = fieldInfo;
 			MemberType   = fieldInfo.FieldType;
@@ -33,7 +27,9 @@ namespace Rsdn.Framework.Data.Mapping
 			
 			// Get field values.
 			//
-			MapValueAttributeList = schema.GetValueAttributes(fieldInfo, Name, MemberType);
+			MapValueAttributeList = valueAttributes != null?
+				valueAttributes:
+				schema.GetValueAttributes(fieldInfo, Name, MemberType);
 
 			// Get field name.
 			//
@@ -66,7 +62,7 @@ namespace Rsdn.Framework.Data.Mapping
 		/// <returns></returns>
 		public FieldMapper InitField(FieldInfo fieldInfo, string name, IMemberMapper member)
 		{
-			InitField(new MappingSchema(), fieldInfo);
+			InitField(new MappingSchema(), fieldInfo, null);
 
 			Name         = name;
 			_classMember = member;

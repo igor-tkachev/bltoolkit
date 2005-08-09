@@ -72,7 +72,11 @@ namespace Rsdn.Framework.Data.Mapping
 		public  Type MemberType
 		{
 			get { return _memberType;  }
-			set { _memberType = value; }
+			set
+			{
+				_memberType = value;
+				_typeIsEnum = value.IsEnum;
+			}
 		}
 
 		private Attribute[] _mapValueAttributeList;
@@ -110,6 +114,7 @@ namespace Rsdn.Framework.Data.Mapping
 		public abstract void SetValue(object obj, object value);
 
 		private static char[] _trimArray = new char[0];
+		private bool _typeIsEnum;
 
 		/// <summary>
 		/// 
@@ -118,10 +123,10 @@ namespace Rsdn.Framework.Data.Mapping
 		/// <returns></returns>
 		public object MapFrom(object value)
 		{
-			return MapFrom(_memberType, _mapValueAttributeList, value, _isTrimmable);
+			return MapFrom(_memberType, _typeIsEnum, _mapValueAttributeList, value, _isTrimmable);
 		}
 
-		internal static object MapFrom(Type type, Attribute[] attributes, object value, bool trimmable)
+		internal static object MapFrom(Type type, bool isEnum, Attribute[] attributes, object value, bool trimmable)
 		{
 			if (trimmable && value is string)
 				value = ((string)value).TrimEnd(_trimArray);
@@ -210,8 +215,8 @@ namespace Rsdn.Framework.Data.Mapping
 				// We do not need the string type as a null value.
 				//
 				value = type == typeof(string)? string.Empty: null;
-			} 
-			else if (value != null && type.IsEnum && type != value.GetType())
+			}
+			else if (value != null && isEnum && type != value.GetType())
 			{
 				Type underlyingType = Enum.GetUnderlyingType(type);
 

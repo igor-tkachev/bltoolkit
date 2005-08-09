@@ -42,7 +42,6 @@ namespace Rsdn.Framework.Data.Mapping
 		/// 
 		/// </summary>
 		Attribute[] MapValueAttributeList { get; }
-
 		/// <summary>
 		/// 
 		/// </summary>

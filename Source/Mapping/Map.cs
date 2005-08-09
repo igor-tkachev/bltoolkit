@@ -49,7 +49,7 @@ namespace Rsdn.Framework.Data.Mapping
 			{
 				object[] attributes = MapDescriptor.GetValueAttributes(type);
 
-				return BaseMemberMapper.MapFrom(type, (Attribute[])attributes, sourceValue, true);
+				return BaseMemberMapper.MapFrom(type, type.IsEnum, (Attribute[])attributes, sourceValue, true);
 			}
 			catch (Exception ex)
 			{
@@ -103,7 +103,7 @@ namespace Rsdn.Framework.Data.Mapping
 			{
 				object[] attributes = MapDescriptor.GetValueAttributes(type);
 
-				return (Enum)BaseMemberMapper.MapFrom(type, (Attribute[])attributes, sourceValue, true);
+				return (Enum)BaseMemberMapper.MapFrom(type, true, (Attribute[])attributes, sourceValue, true);
 			}
 			catch (Exception ex)
 			{
@@ -201,7 +201,7 @@ namespace Rsdn.Framework.Data.Mapping
 
 			if (receiverData is IMapSettable)
 			{
-				IMapSettable mapReceiver = receiverData as IMapSettable;
+				IMapSettable mapReceiver = (IMapSettable)receiverData;
 
 				for (int i = 0; i < source.FieldCount; i++)
 				{

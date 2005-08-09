@@ -16,13 +16,8 @@ namespace Rsdn.Framework.Data.Mapping
 	/// </summary>
 	public class PropertyMapper : BaseMemberMapper
 	{
-		/// <summary>
-		/// 
-		/// </summary>
-		/// <param name="schema"></param>
-		/// <param name="propertyInfo"></param>
-		/// <returns></returns>
-		internal PropertyMapper InitProperty(MappingSchema schema, PropertyInfo propertyInfo)
+		internal PropertyMapper InitProperty(
+			MappingSchema schema, PropertyInfo propertyInfo, Attribute[] valueAttributes)
 		{
 			_propertyInfo = propertyInfo;
 			MemberType    = propertyInfo.PropertyType;
@@ -35,7 +30,9 @@ namespace Rsdn.Framework.Data.Mapping
 
 			// Get field values.
 			//
-			MapValueAttributeList = schema.GetValueAttributes(propertyInfo, Name, MemberType);
+			MapValueAttributeList = valueAttributes != null?
+				valueAttributes:
+				schema.GetValueAttributes(propertyInfo, Name, MemberType);
 
 			// Get field name.
 			//
@@ -69,7 +66,7 @@ namespace Rsdn.Framework.Data.Mapping
 		internal PropertyMapper InitProperty(
 			PropertyInfo propertyInfo, string name, IMemberMapper member)
 		{
-			InitProperty(new MappingSchema(), propertyInfo);
+			InitProperty(new MappingSchema(), propertyInfo, null);
 
 			Name         = name;
 			_classMember = member;
