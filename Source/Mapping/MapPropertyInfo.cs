@@ -6,6 +6,7 @@
  */
 
 using System;
+using System.Reflection;
 
 namespace Rsdn.Framework.Data.Mapping
 {
@@ -18,12 +19,21 @@ namespace Rsdn.Framework.Data.Mapping
 		/// <summary>
 		/// 
 		/// </summary>
-		/// <param name="propertyType"></param>
-		/// <param name="propertyName"></param>
-		public MapPropertyInfo(Type propertyType, string propertyName)
+		/// <param name="propertyInfo"></param>
+		public MapPropertyInfo(PropertyInfo propertyInfo)
 		{
-			_propertyType = propertyType;
-			_propertyName = propertyName;
+			_propertyInfo = propertyInfo;
+			_propertyType = propertyInfo.PropertyType;
+			_propertyName = propertyInfo.Name;
+		}
+
+		private PropertyInfo _propertyInfo;
+		/// <summary>
+		/// 
+		/// </summary>
+		public  PropertyInfo  PropertyInfo
+		{
+			get { return _propertyInfo; }
 		}
 
 		private Type _propertyType;
