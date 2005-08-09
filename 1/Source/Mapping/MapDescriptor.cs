@@ -68,6 +68,50 @@ namespace Rsdn.Framework.Data.Mapping
 			return _objectFactory != null? _objectFactory.CreateInstance(data): CreateInstance(data);
 		}
 
+#if VER2
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <returns></returns>
+		public T CreateInstance<T>()
+		{
+			return (T)CreateInstance();
+		}
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <param name="data"></param>
+		/// <returns></returns>
+		public T CreateInstance<T>(MapInitializingData data)
+		{
+			return (T)CreateInstance(data);
+		}
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <returns></returns>
+		public T CreateInstanceEx<T>()
+		{
+			return (T)CreateInstanceEx();
+		}
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <param name="data"></param>
+		/// <returns></returns>
+		public T CreateInstanceEx<T>(MapInitializingData data)
+		{
+			return (T)CreateInstanceEx(data);
+		}
+#endif
+
 		/*
 		/// <summary>
 		/// Attempts to create new instance using the constructor
@@ -411,18 +455,22 @@ namespace Rsdn.Framework.Data.Mapping
 				if (!schema.HasIgnoreAttribute(
 					fi.GetCustomAttributes(typeof(MapIgnoreAttribute), true), fi.Name))
 				{
+					Attribute[] valueAttributes = schema.GetValueAttributes(fi, fi.Name, fi.FieldType);
+
 					FieldMapper fm = moduleBuilder != null?
 						(FieldMapper)MapEmit.CreateMemberMapper(
-						_mappedType,
-						fi.FieldType,
-						fi.Name,
-						false,
-						true,
-						true,
-						moduleBuilder):
+							_originalType,
+							_mappedType,
+							fi.FieldType,
+							fi.Name,
+							false,
+							true,
+							true,
+							moduleBuilder,
+							valueAttributes):
 						new FieldMapper();
 
-					fm.InitField(schema, fi);
+					fm.InitField(schema, fi, valueAttributes);
 
 					this[fm.Name] = fm;
 
@@ -439,18 +487,22 @@ namespace Rsdn.Framework.Data.Mapping
 					!schema.HasIgnoreAttribute(
 					pi.GetCustomAttributes(typeof(MapIgnoreAttribute), true), pi.Name))
 				{
+					Attribute[] valueAttributes = schema.GetValueAttributes(pi, pi.Name, pi.PropertyType);
+
 					PropertyMapper pm = moduleBuilder != null?
 						(PropertyMapper)(MapEmit.CreateMemberMapper(
-						_mappedType, 
-						pi.PropertyType, 
-						pi.Name, 
-						true, 
-						pi.CanRead, 
-						pi.CanWrite, 
-						moduleBuilder)):
+							_originalType,
+							_mappedType,
+							pi.PropertyType,
+							pi.Name,
+							true,
+							pi.CanRead,
+							pi.CanWrite,
+							moduleBuilder,
+							valueAttributes)):
 						new PropertyMapper();
 
-					pm.InitProperty(schema, pi);
+					pm.InitProperty(schema, pi, valueAttributes);
 
 					this[pm.Name] = pm;
 
@@ -479,9 +531,35 @@ namespace Rsdn.Framework.Data.Mapping
 						if (_targetToSource.Contains(attr.TargetName) == false)
 							_targetToSource.Add(attr.TargetName, attr.SourceName);
 
-						// Just to add the member into the member collections.
-						//
-						((IMapDataReceiver)this).GetOrdinal(attr.TargetName);
+						IMemberMapper mm = this[attr.TargetName.ToLower()];
+
+						if (mm != null)
+						{
+							for (bool b = true; b; )
+							{
+								b = false;
+
+								foreach (DictionaryEntry de in _memberTable)
+								{
+									if (de.Value == mm)
+									{
+										_memberTable.Remove(de.Key);
+										b = true;
+
+										break;
+									}
+								}
+							}
+
+							((BaseMemberMapper)mm).Name = attr.SourceName;
+							_memberTable[attr.SourceName.ToLower()] = mm;
+						}
+						else
+						{
+							// Just to add the member into the member collections.
+							//
+							((IMapDataReceiver)this).GetOrdinal(attr.TargetName);
+						}
 					}
 				}
 			}

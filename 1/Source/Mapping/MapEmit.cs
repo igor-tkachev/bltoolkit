@@ -689,8 +689,8 @@ namespace Rsdn.Framework.Data.Mapping
 					if (ctx.FieldType.GetInterface(typeof(IMapSetPropertyInfo).Name) != null)
 					{
 						FieldBuilder initFieldBuilder = ctx.TypeBuilder.DefineField(
-							string.Format("_{0}_SetPropertyInfo", ctx.PropertyInfo.Name),
-							typeof(IMapSetPropertyInfo),
+							string.Format("_{0}_MapPropertyInfo", ctx.PropertyInfo.Name),
+							typeof(MapPropertyInfo),
 							FieldAttributes.Private | FieldAttributes.Static);
 
 						SetNonSerializedAttribute(initFieldBuilder);
@@ -841,7 +841,7 @@ namespace Rsdn.Framework.Data.Mapping
 			// Create mapping extension MapDescriptor.
 			//
 			TypeBuilder typeBuilder = moduleBuilder.DefineType(
-				fullName + ".Descriptor", TypeAttributes.Public, typeof(MapDescriptor));
+				fullName + ".MappingExtension.$$MapDescriptor", TypeAttributes.Public, typeof(MapDescriptor));
 
 			CreateCreateInstanceMethodOfDescriptor(type, typeBuilder);
 			CreateCreateInstance4MethodOfDescriptor(type, typeBuilder);
@@ -856,7 +856,7 @@ namespace Rsdn.Framework.Data.Mapping
 			MapDescriptor desc = (MapDescriptor)Activator.CreateInstance(descriptorType);
 			desc.InitMembers(originalType, type, moduleBuilder);
 
-#if DEBUG
+#if DEBUG1
 			try
 			{
 				assemblyBuilder.Save(assemblyName.Name);
@@ -1003,18 +1003,20 @@ namespace Rsdn.Framework.Data.Mapping
 		}
 
 		internal static object CreateMemberMapper(
+			Type          originalType,
 			Type          objectType,
 			Type          memberType,
 			string        memberName,
 			bool          isProperty,
 			bool          createGet,
 			bool          createSet,
-			ModuleBuilder moduleBuilder)
+			ModuleBuilder moduleBuilder,
+			Attribute[]   valueAttributes)
 		{
-			string fullName = objectType.FullName.Replace('+', '.');
+			string fullName = originalType.FullName.Replace('+', '.');
 
 			TypeBuilder typeBuilder = moduleBuilder.DefineType(
-				fullName + ".MemberDescriptor." + memberName,
+				fullName + ".MappingExtension.$" + memberName,
 				TypeAttributes.Public,
 				isProperty? typeof(PropertyMapper): typeof(FieldMapper));
 
@@ -1093,7 +1095,8 @@ namespace Rsdn.Framework.Data.Mapping
 			//
 			if (createSet)
 			{
-				CreateSetter(memberType, typeBuilder, objectType, isProperty, setMethod, memberName);
+				CreateSetter(
+					memberType, typeBuilder, objectType, isProperty, setMethod, memberName, valueAttributes);
 			}
 
 			Type descriptorType = typeBuilder.CreateType();
@@ -1107,7 +1110,8 @@ namespace Rsdn.Framework.Data.Mapping
 			Type        objectType,
 			bool        isProperty,
 			MethodInfo  setMethod,
-			string      memberName)
+			string      memberName,
+			Attribute[] valueAttributes)
 		{
 			if (memberType == typeof(string)    || memberType == typeof(bool)    ||
 				memberType == typeof(byte)      || memberType == typeof(char)    ||
@@ -1180,15 +1184,42 @@ namespace Rsdn.Framework.Data.Mapping
 				}
 				else
 				{
-					gen
-						.ldarg_0
-						.ldarg_2
-						.call(typeof(BaseMemberMapper), "MapFrom", typeof(object));
+					if (memberType.IsEnum || memberType == typeof(string) || valueAttributes.Length > 0)
+					{
+						gen
+							.ldarg_0
+							.ldarg_2
+							.call(typeof(BaseMemberMapper), "MapFrom", typeof(object));
+					}
+					else
+					{
+						Label l1 = gen.DefineLabel();
+						Label l2 = gen.DefineLabel();
+
+						gen
+							.ldarg_2
+							.isinst(typeof(DBNull))
+							.brtrue_s(l1)
+							.ldarg_2
+							.br_s(l2)
+							.MarkLabel(l1)
+							.ldnull
+							.MarkLabel(l2);
+
+						//gen
+						//	.ldarg_0
+						//	.ldarg_2
+						//	.call(typeof(BaseMemberMapper), "MapFrom2", typeof(object));
+					}
 
 					if (memberType.IsEnum)
+					{
 						gen.UnboxIfValueType(memberType).ldind_i4.EndGen();
+					}
 					else
+					{
 						gen.ConvertTo(memberType);
+					}
 				}
 
 				if (isProperty)

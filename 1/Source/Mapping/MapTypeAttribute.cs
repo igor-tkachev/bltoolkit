@@ -130,6 +130,57 @@ namespace Rsdn.Framework.Data.Mapping
 			_propertyType = propertyType;
 		}
 
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="propertyType"></param>
+		/// <param name="mappedType"></param>
+		/// <param name="parameter1"></param>
+		public MapTypeAttribute(
+			Type propertyType,
+			Type mappedType,
+			object parameter1)
+			: this(propertyType, mappedType)
+		{
+			SetParameters(parameter1);
+		}
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="propertyType"></param>
+		/// <param name="mappedType"></param>
+		/// <param name="parameter1"></param>
+		/// <param name="parameter2"></param>
+		public MapTypeAttribute(
+			Type propertyType,
+			Type mappedType,
+			object parameter1,
+			object parameter2)
+			: this(propertyType, mappedType)
+		{
+			SetParameters(parameter1, parameter2);
+		}
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="propertyType"></param>
+		/// <param name="mappedType"></param>
+		/// <param name="parameter1"></param>
+		/// <param name="parameter2"></param>
+		/// <param name="parameter3"></param>
+		public MapTypeAttribute(
+			Type propertyType,
+			Type mappedType,
+			object parameter1,
+			object parameter2,
+			object parameter3)
+			: this(propertyType, mappedType)
+		{
+			SetParameters(parameter1, parameter2, parameter3);
+		}
+
 		private Type _propertyType;
 		/// <summary>
 		/// 
