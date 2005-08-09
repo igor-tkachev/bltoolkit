@@ -3,7 +3,7 @@
   <Config name="Debug" appbase="AllTest\bin\Debug" configfile="App.config" binpathtype="Auto">
     <assembly path="CS.Test.dll" />
     <assembly path="JS.Test.dll" />
-    <assembly path="Cpp.Test.dll" />
+    <!-- <assembly path="Cpp.Test.dll" /> -->
     <assembly path="VB.Test.dll" />
     <assembly path="AllTest.dll" />
     <assembly path="Examples.dll" />
@@ -11,7 +11,7 @@
   <Config name="Release" appbase="AllTest\bin\Debug" configfile="App.config" binpathtype="Auto">
     <assembly path="CS.Test.dll" />
     <assembly path="JS.Test.dll" />
-    <assembly path="Cpp.Test.dll" />
+    <!-- <assembly path="Cpp.Test.dll" /> -->
     <assembly path="VB.Test.dll" />
     <assembly path="AllTest.dll" />
     <assembly path="Examples.dll" />

@@ -8,7 +8,7 @@
 using System;
 using System.IO;
 using System.Collections;
-using System.Data;
+//using System.Data;
 using System.Threading;
 using System.Reflection;
 using System.Reflection.Emit;
@@ -85,25 +85,26 @@ namespace Rsdn.Framework.Data.Mapping
 		{
 			// Type context.
 			//
-			public Type         Type;        // type
-			public TypeBuilder  TypeBuilder; // type builder
-			public MapGenerator IniCtorGen;  // static constructor generator
-			public MapGenerator DefCtorGen;  // default constructor generator
-			public MapGenerator ObfCtorGen;  // object factory constructor generator
-			public MapGenerator InitGen;     // init property method generator
+			public Type            Type;        // type
+			public TypeBuilder     TypeBuilder; // type builder
+			public MapGenerator    IniCtorGen;  // static constructor generator
+			public MapGenerator    DefCtorGen;  // default constructor generator
+			public MapGenerator    ObfCtorGen;  // object factory constructor generator
+			public MapGenerator    InitGen;     // init property method generator
+			public PropertyBuilder Descriptor;  // Descriptor
 
-			public ArrayList    Objects;     // created object's list
+			public ArrayList       Objects;     // created object's list
 
 			// Property context.
 			//
-			public PropertyInfo PropertyInfo;     // property info
-			public object []    AttributeParams;  // property attribute parameters
-			public FieldBuilder FieldBuilder;     // property implementation field builder
-			public Type         FieldType;        // field type
-			public bool         IsObject;         // true - field is a reference type
-			public FieldBuilder ParamBuilder;     // parameter builder
-			public MethodInfo   GetMethodInfo;    // getter info
-			public MethodInfo   SetMethodInfo;    // setter info
+			public PropertyInfo    PropertyInfo;     // property info
+			public object []       AttributeParams;  // property attribute parameters
+			public FieldBuilder    FieldBuilder;     // property implementation field builder
+			public Type            FieldType;        // field type
+			public bool            IsObject;         // true - field is a reference type
+			public FieldBuilder    ParamBuilder;     // parameter builder
+			public MethodInfo      GetMethodInfo;    // getter info
+			public MethodInfo      SetMethodInfo;    // setter info
 
 			public LocalBuilder DefInitDataField; // Default ctor MapInitializingData local variable
 			public LocalBuilder ObfInitDataField; // Object factory ctor MapInitializingData local variable
@@ -337,6 +338,53 @@ namespace Rsdn.Framework.Data.Mapping
 			fieldBuilder.SetCustomAttribute(caBuilder);
 		}
 
+		static private PropertyBuilder GetDescriptor(GenContext ctx)
+		{
+			if (ctx.Descriptor == null)
+			{
+				FieldBuilder fieldDescriptor = ctx.TypeBuilder.DefineField(
+					"_$MapDescriptor",
+					typeof(MapDescriptor),
+					FieldAttributes.Private | FieldAttributes.Static);
+
+				SetNonSerializedAttribute(fieldDescriptor);
+
+				ctx.Descriptor = ctx.TypeBuilder.DefineProperty(
+					"$MapDescriptor",
+					PropertyAttributes.None,
+					typeof(MapDescriptor),
+					Type.EmptyTypes);
+
+				MethodBuilder getMethod = ctx.TypeBuilder.DefineMethod(
+					"get_" + ctx.Descriptor.Name,
+					MethodAttributes.Private |
+					MethodAttributes.Static |
+					MethodAttributes.HideBySig | 
+					MethodAttributes.SpecialName,
+					ctx.Descriptor.PropertyType,
+					Type.EmptyTypes);
+
+				MapGenerator gen = new MapGenerator(getMethod.GetILGenerator());
+
+				Label label = gen.DefineLabel();
+
+				gen
+					.ldsfld(fieldDescriptor)
+					.brtrue_s(label)
+					.ldtoken(ctx.TypeBuilder.BaseType)
+					.call(typeof(Type),          "GetTypeFromHandle", typeof(RuntimeTypeHandle))
+					.call(typeof(MapDescriptor), "GetDescriptor",     typeof(Type))
+					.stsfld(fieldDescriptor)
+					.MarkLabel(label)
+					.ldsfld(fieldDescriptor)
+					.ret();
+
+				ctx.Descriptor.SetGetMethod(getMethod);
+			}
+
+			return ctx.Descriptor;
+		}
+
 		static private FieldBuilder InitializeMemberParameters(GenContext ctx)
 		{
 			FieldBuilder paramBuilder = null;
@@ -344,16 +392,16 @@ namespace Rsdn.Framework.Data.Mapping
 			if (ctx.AttributeParams != null)
 			{
 				paramBuilder = ctx.TypeBuilder.DefineField(
-					string.Format("_{0}_parameters", ctx.PropertyInfo.Name),
+					string.Format("_{0}_$parameters", ctx.PropertyInfo.Name),
 					typeof(object[]),
 					FieldAttributes.Private | FieldAttributes.Static);
 
 				SetNonSerializedAttribute(paramBuilder);
 
+				PropertyBuilder descriptor = GetDescriptor(ctx);
+
 				ctx.IniCtorGen
-					.ldtoken(ctx.TypeBuilder.BaseType)
-					.call(typeof(Type),          "GetTypeFromHandle", typeof(RuntimeTypeHandle))
-					.call(typeof(MapDescriptor), "GetDescriptor",     typeof(Type))
+					.call(descriptor.GetGetMethod(true))
 					.ldstr(ctx.PropertyInfo.Name)
 					.callvirt(typeof(MapDescriptor), "GetPropertyParameters", typeof(string))
 					.stsfld(paramBuilder)
@@ -416,7 +464,7 @@ namespace Rsdn.Framework.Data.Mapping
 						// Object factory construction.
 						//
 						FieldBuilder fieldBuilder = ctx.TypeBuilder.DefineField(
-							string.Format("_{0}_MapDescriptor", ctx.PropertyInfo.Name),
+							string.Format("_{0}_$MapDescriptor", ctx.PropertyInfo.Name),
 							typeof(MapDescriptor),
 							FieldAttributes.Private | FieldAttributes.Static);
 
@@ -689,20 +737,30 @@ namespace Rsdn.Framework.Data.Mapping
 					if (ctx.FieldType.GetInterface(typeof(IMapSetPropertyInfo).Name) != null)
 					{
 						FieldBuilder initFieldBuilder = ctx.TypeBuilder.DefineField(
-							string.Format("_{0}_MapPropertyInfo", ctx.PropertyInfo.Name),
+							string.Format("_{0}_$MapPropertyInfo", ctx.PropertyInfo.Name),
 							typeof(MapPropertyInfo),
 							FieldAttributes.Private | FieldAttributes.Static);
 
 						SetNonSerializedAttribute(initFieldBuilder);
 
-						ConstructorInfo ci = typeof(MapPropertyInfo).GetConstructor(new Type[] { typeof(Type), typeof(string) });
+						ConstructorInfo ci = typeof(MapPropertyInfo).GetConstructor(new Type[] { typeof(PropertyInfo) });
 
+						ctx.IniCtorGen
+							.ldtoken(ctx.Type)
+							.call(typeof(Type), "GetTypeFromHandle", typeof(RuntimeTypeHandle))
+							.ldstr("ID")
+							.call(typeof(Type), "GetProperty", typeof(string))
+							.newobj(ci)
+							.stsfld(initFieldBuilder);
+
+						/*
 						ctx.IniCtorGen
 							.ldtoken(ctx.PropertyInfo.PropertyType)
 							.call(typeof(Type), "GetTypeFromHandle", typeof(RuntimeTypeHandle))
 							.ldstr(ctx.PropertyInfo.Name)
 							.newobj(ci)
 							.stsfld(initFieldBuilder);
+						*/
 
 						ctx.InitGen
 							.ldarg_0
@@ -743,14 +801,17 @@ namespace Rsdn.Framework.Data.Mapping
 
 			if (ctx.IsObject)
 			{
+				if (ctx.FieldType.IsValueType) gen.ldflda(ctx.FieldBuilder);
+				else                           gen.ldfld (ctx.FieldBuilder);
+
 				gen
-					.ldfld(ctx.FieldBuilder)
 					.ldarg_1
 					.EndGen();
 
 				if (member is PropertyInfo)
 				{
-					gen.callvirt(((PropertyInfo)member).GetSetMethod());
+					if (ctx.FieldType.IsValueType) gen.call    (((PropertyInfo)member).GetSetMethod());
+					else                           gen.callvirt(((PropertyInfo)member).GetSetMethod());
 				}
 				else
 				{
@@ -780,9 +841,8 @@ namespace Rsdn.Framework.Data.Mapping
 
 			MapGenerator gen = new MapGenerator(getMethod.GetILGenerator());
 
-			gen
-				.ldarg_0
-				.ldfld(ctx.FieldBuilder);
+			if (ctx.FieldType.IsValueType) gen.ldarg_0.ldflda(ctx.FieldBuilder);
+			else                           gen.ldarg_0.ldfld(ctx.FieldBuilder);
 
 			if (ctx.IsObject)
 			{
@@ -792,7 +852,8 @@ namespace Rsdn.Framework.Data.Mapping
 				{
 					PropertyInfo mpi = ((PropertyInfo)member);
 
-					gen.callvirt(mpi.GetGetMethod());
+					if (ctx.FieldType.IsValueType) gen.call    (mpi.GetGetMethod());
+					else                           gen.callvirt(mpi.GetGetMethod());
 
 					if (mpi.PropertyType != ctx.PropertyInfo.PropertyType && 
 						!ctx.PropertyInfo.PropertyType.IsEnum)
@@ -856,7 +917,7 @@ namespace Rsdn.Framework.Data.Mapping
 			MapDescriptor desc = (MapDescriptor)Activator.CreateInstance(descriptorType);
 			desc.InitMembers(originalType, type, moduleBuilder);
 
-#if DEBUG1
+#if DEBUG
 			try
 			{
 				assemblyBuilder.Save(assemblyName.Name);

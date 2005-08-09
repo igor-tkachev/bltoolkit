@@ -207,6 +207,8 @@ namespace Rsdn.Framework.Data.Mapping
 		public MapGenerator ldfld(FieldInfo fi) { m_gen.Emit(OpCodes.Ldfld, fi); return this; }
 		public MapGenerator ldfld(Type type, string fieldName) { return ldfld(type.GetField(fieldName)); }
 
+		public MapGenerator ldflda(FieldInfo fi) { m_gen.Emit(OpCodes.Ldflda, fi); return this; }
+
 		public MapGenerator ldtoken(Type       tp) { m_gen.Emit(OpCodes.Ldtoken, tp); return this; }
 		public MapGenerator ldtoken(MethodInfo mi) { m_gen.Emit(OpCodes.Ldtoken, mi); return this; }
 
