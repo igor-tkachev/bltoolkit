@@ -209,6 +209,14 @@ namespace Rsdn.Framework.Data.Mapping
 
 		public MapGenerator ldflda(FieldInfo fi) { m_gen.Emit(OpCodes.Ldflda, fi); return this; }
 
+		public MapGenerator ldfldWhithCheck(FieldInfo fi)
+		{
+			if (fi.FieldType.IsValueType) ldflda(fi);
+			else                          ldfld (fi);
+
+			return this;
+		}
+
 		public MapGenerator ldtoken(Type       tp) { m_gen.Emit(OpCodes.Ldtoken, tp); return this; }
 		public MapGenerator ldtoken(MethodInfo mi) { m_gen.Emit(OpCodes.Ldtoken, mi); return this; }
 

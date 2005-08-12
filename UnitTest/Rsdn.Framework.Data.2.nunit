@@ -2,6 +2,7 @@
   <Settings activeconfig="Debug" />
   <Config name="Debug" appbase="AllTest\bin\Debug" configfile="App.config" binpathtype="Auto">
     <assembly path="CS.Test.2.dll" />
+    <assembly path="Toys.Test.2.dll" />
     <assembly path="Cpp.Test.2.dll" />
     <assembly path="VB.Test.2.dll" />
     <assembly path="AllTest.2.dll" />
@@ -9,6 +10,7 @@
   </Config>
   <Config name="Release" appbase="AllTest\bin\Release" configfile="App.config" binpathtype="Auto">
     <assembly path="CS.Test.2.dll" />
+    <assembly path="Toys.Test.2.dll" />
     <assembly path="Cpp.Test.2.dll" />
     <assembly path="VB.Test.2.dll" />
     <assembly path="AllTest.2.dll" />

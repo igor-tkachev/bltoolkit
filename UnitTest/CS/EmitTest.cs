@@ -176,6 +176,8 @@ namespace CS
 			public class Src
 			{
 				public int p1 = 1234;
+
+				public int ppppp { get { return p1; } }
 			}
 
 			public abstract class Dest
@@ -192,6 +194,34 @@ namespace CS
 			p1.Dest d = (p1.Dest)Map.ToObject(new p1.Src(), typeof(p1.Dest));
 
 			Assert.AreEqual(1234, d.p2);
+		}
+
+		public class InnerStruct
+		{
+			public class Src
+			{
+				public int p = 1234;
+			}
+
+			public struct MyInt
+			{
+				public int Value;
+			}
+
+			public abstract class Dest
+			{
+				[MapType(typeof(MyInt))]
+				public abstract int p { get; set; }
+			}
+		}
+
+		[Test]
+		public void InnerStructTest()
+		{
+			InnerStruct.Dest d = 
+				(InnerStruct.Dest)Map.ToObject(new InnerStruct.Src(), typeof(InnerStruct.Dest));
+
+			Assert.AreEqual(1234, d.p);
 		}
 
 		#endregion

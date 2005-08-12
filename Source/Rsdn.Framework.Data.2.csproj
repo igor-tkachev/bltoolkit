@@ -149,6 +149,8 @@
     <Compile Include="Mapping\Map.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Mapping\MapActionAttribute.cs" />
+    <Compile Include="Mapping\MapActionParentAttribute.cs" />
     <Compile Include="Mapping\MapDefaultValueAttribute.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -188,6 +190,7 @@
     <Compile Include="Mapping\MapPropertyInfo.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Mapping\MapPropertyInfoAttribute.cs" />
     <Compile Include="Mapping\MapTypeAttribute.cs">
       <SubType>Code</SubType>
     </Compile>

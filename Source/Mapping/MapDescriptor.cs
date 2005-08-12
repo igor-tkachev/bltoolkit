@@ -226,15 +226,17 @@ namespace Rsdn.Framework.Data.Mapping
 
 		private static Hashtable _mapTypes = new Hashtable(10);
 
-		private static object[] GetMapTypeAttributes(Type type)
+		private static object[] GetAttributes(Type type, Type attributeType)
 		{
-			object[] attrs = (object[])_mapTypes[type];
+			string key = type.FullName + attributeType.FullName;
+
+			object[] attrs = (object[])_mapTypes[key];
 
 			if (attrs == null)
 			{
-				attrs = type.GetCustomAttributes(typeof(MapTypeAttribute), false);
+				attrs = type.GetCustomAttributes(attributeType, false);
 
-				_mapTypes[type] = attrs;
+				_mapTypes[key] = attrs;
 			}
 
 			return attrs;
@@ -242,7 +244,7 @@ namespace Rsdn.Framework.Data.Mapping
 
 		private static object[] GetPropertyMapTypeInternal(Type type, PropertyInfo pi)
 		{
-			object[] attr = GetMapTypeAttributes(type);
+			object[] attr = GetAttributes(type, typeof(MapTypeAttribute));
 
 			foreach (MapTypeAttribute a in attr)
 				if (a.PropertyType == pi.PropertyType)
@@ -269,7 +271,7 @@ namespace Rsdn.Framework.Data.Mapping
 						return ((MapTypeAttribute)attr[0]).MappedType == null? null: attr;
 				}
 
-				attr = GetMapTypeAttributes(itf);
+				attr = GetAttributes(itf, typeof(MapTypeAttribute));
 
 				foreach (MapTypeAttribute a in attr)
 					if (a.PropertyType == pi.PropertyType)
