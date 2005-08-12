@@ -81,6 +81,24 @@ namespace Rsdn.Framework.Data.Mapping
 				null);
 		}
 
+		class CreatedObject
+		{
+			public CreatedObject(FieldBuilder fieldBuilder)
+			{
+				_fieldBuilder = fieldBuilder;
+			}
+
+			private FieldBuilder _fieldBuilder;
+			public  FieldBuilder  FieldBuilder { get { return _fieldBuilder; } }
+
+			private FieldBuilder _initFieldBuilder;
+			public  FieldBuilder  InitFieldBuilder
+			{ 
+				get { return _initFieldBuilder;  } 
+				set { _initFieldBuilder = value; } 
+			}
+		}
+
 		class GenContext
 		{
 			// Type context.
@@ -91,7 +109,8 @@ namespace Rsdn.Framework.Data.Mapping
 			public MapGenerator    DefCtorGen;  // default constructor generator
 			public MapGenerator    ObfCtorGen;  // object factory constructor generator
 			public MapGenerator    InitGen;     // init property method generator
-			public PropertyBuilder Descriptor;  // Descriptor
+			public PropertyBuilder Descriptor;  // descriptor
+			public object []       Actions;     // action attributes.
 
 			public ArrayList       Objects;     // created object's list
 
@@ -120,12 +139,26 @@ namespace Rsdn.Framework.Data.Mapping
 
 			ctx.Type    = type;
 			ctx.Objects = new ArrayList();
+			ctx.Actions = type.GetCustomAttributes(typeof(MapActionAttribute), true);
+
+			Type[] interfaces = new Type[ctx.Actions.Length + 1];
+
+			for (int i = 0; i < ctx.Actions.Length; i++)
+			{
+				interfaces[i] = ((MapActionAttribute)ctx.Actions[i]).Type;
+
+				if (interfaces[i].IsInterface == false)
+					throw new RsdnMapException(string.Format(
+						"MapAction: {0} type must be an interface.", interfaces[i].Name));
+			}
+
+			interfaces[ctx.Actions.Length] = typeof(IMapGenerated);
 
 			ctx.TypeBuilder = moduleBuilder.DefineType(
 				type.FullName.Replace('+', '.') + ".MappingExtension." + type.Name,
 				TypeAttributes.Public | TypeAttributes.BeforeFieldInit,
 				type,
-				new Type[] { typeof(IMapGenerated) } );
+				interfaces);
 
 			// Set Serializable attribute.
 			//
@@ -282,15 +315,26 @@ namespace Rsdn.Framework.Data.Mapping
 				}
 			}
 
+			DefineGetCreatedMembersMethod(ctx);
+			DefineActions                (ctx);
+
 			ctx.IniCtorGen.ret();
 			ctx.DefCtorGen.ret();
 			ctx.ObfCtorGen.ret();
 			ctx.InitGen.   ret();
 
-			// Create IMapEnumerable.GetCreatedObjects
+			_defaultConstructorBuilder.Remove(type);
+			_factoryConstructorBuilder.Remove(type);
+
+			return ctx.TypeBuilder.CreateType();
+		}
+
+		private static void DefineGetCreatedMembersMethod(GenContext ctx)
+		{
+			// Create IMapGenerated.GetCreatedObjects
 			//
 			MethodBuilder enumMethod = ctx.TypeBuilder.DefineMethod(
-				"GetCreatedObjects",
+				"$GetCreatedMembers",
 				MethodAttributes.Virtual,
 				typeof(object[]),
 				Type.EmptyTypes);
@@ -309,11 +353,14 @@ namespace Rsdn.Framework.Data.Mapping
 
 			for (int i = 0; i < ctx.Objects.Count; i++)
 			{
+				FieldBuilder fb = ((CreatedObject)ctx.Objects[i]).FieldBuilder;
+
 				gen
 					.ldloc_0
 					.ldc_i4(i)
 					.ldarg_0
-					.ldfld((FieldBuilder)ctx.Objects[i])
+					.ldfld(fb)
+					.BoxIfValueType(fb.FieldType)
 					.stelem_ref
 					.EndGen();
 			}
@@ -323,11 +370,139 @@ namespace Rsdn.Framework.Data.Mapping
 			ctx.TypeBuilder.DefineMethodOverride(
 				enumMethod,
 				typeof(IMapGenerated).GetMethod("GetCreatedMembers"));
+		}
 
-			_defaultConstructorBuilder.Remove(type);
-			_factoryConstructorBuilder.Remove(type);
+		private static void DefineActions(GenContext ctx)
+		{
+			foreach (MapActionAttribute attr in ctx.Actions)
+			{
+				Type         interfaceType = attr.Type;
+				MethodInfo[] methods       = interfaceType.GetMethods();
 
-			return ctx.TypeBuilder.CreateType();
+				foreach (MethodInfo m in methods)
+				{
+					ParameterInfo [] pi = m.GetParameters();
+					Type []  parameters = new Type[pi.Length];
+
+					for (int i = 0; i < pi.Length; i++)
+						parameters[i] = pi[i].ParameterType;
+
+					MethodBuilder mb = ctx.TypeBuilder.DefineMethod(
+						"$" + interfaceType.FullName.Replace("+", ".") + "$" + m.Name,
+						MethodAttributes.Virtual,
+						m.ReturnType,
+						parameters);
+
+					MapGenerator gen = new MapGenerator();
+
+					gen.Gen = mb.GetILGenerator();
+
+					LocalBuilder lb = m.ReturnType != typeof(void)? gen.DeclareLocal(m.ReturnType): null;
+
+					for (int i = 0; i < ctx.Objects.Count; i++)
+					{
+						FieldBuilder field = ((CreatedObject)ctx.Objects[i]).FieldBuilder;
+
+						Type[] types = field.FieldType.GetInterfaces();
+
+						foreach (Type type in types)
+						{
+							if (type != interfaceType)
+								continue;
+
+							InterfaceMapping im = field.FieldType.GetInterfaceMap(type);
+
+							for (int j = 0; j < im.InterfaceMethods.Length; j++)
+							{
+								if (im.InterfaceMethods[j] == m)
+								{
+									MethodInfo targetMethod = im.TargetMethods[j];
+
+									gen.ldarg_0.EndGen();
+
+									if (field.FieldType.IsValueType)
+									{
+										if (targetMethod.IsPublic)
+											gen.ldflda(field);
+										else
+											gen.ldfld(field).box(field.FieldType);
+									}
+									else
+									{
+										if (targetMethod.IsPublic)
+											gen.ldfld(field);
+										else
+											gen.ldfld(field).castclass(interfaceType);
+									}
+
+									for (int k = 0; k < parameters.Length; k++)
+									{
+										object[] attrs = pi[k].GetCustomAttributes(true);
+										bool     stop  = false;
+
+										foreach (object a in attrs)
+										{
+											if (a is MapActionParentAttribute)
+											{
+												gen.ldarg_0.castclass(pi[k].ParameterType);
+												stop = true;
+
+												break;
+											}
+
+											if (a is MapPropertyInfoAttribute)
+											{
+												FieldBuilder ifb = GetPropertyInitField(
+													ctx, (CreatedObject)ctx.Objects[i]);
+
+												gen.ldsfld(ifb);
+												stop = true;
+
+												break;
+											}
+										}
+
+										if (stop)
+											continue;
+
+										gen.ldarg_s((byte)(k + 1));
+									}
+
+
+									if (field.FieldType.IsValueType)
+									{
+										if (targetMethod.IsPublic)
+											gen.call    (targetMethod);
+										else
+											gen.callvirt(im.InterfaceMethods[j]);
+									}
+									else
+									{
+										if (targetMethod.IsPublic)
+											gen.callvirt(targetMethod);
+										else
+											gen.callvirt(im.InterfaceMethods[j]);
+									}
+
+									if (lb != null)
+										gen.stloc(lb);
+
+									break;
+								}
+							}
+
+							break;
+						}
+					}
+
+					if (lb != null)
+						gen.ldloc(lb);
+
+					gen.ret();
+
+					ctx.TypeBuilder.DefineMethodOverride(mb, m);
+				}
+			}
 		}
 
 		static private void SetNonSerializedAttribute(FieldBuilder fieldBuilder)
@@ -449,25 +624,195 @@ namespace Rsdn.Framework.Data.Mapping
 
 		static private void InitializeAbstractClassField(GenContext ctx)
 		{
-			if (ctx.FieldType.IsClass && ctx.FieldType != typeof(string))
+			if (IsPrimitive(ctx.FieldType))
+				return;
+
+			CreatedObject createdObject = new CreatedObject(ctx.FieldBuilder);
+
+			ctx.Objects.Add(createdObject);
+
+			if (ctx.FieldType.IsClass && MapDescriptor.GetDescriptor(ctx.FieldType) == null)
+				return;
+
+			ConstructType constructType = new ConstructType(ctx.FieldType);
+
+			bool callDefaultCtor = ctx.FieldType.IsClass;
+
+			// Call MapDescriptor to construct the object.
+			//
+			if (ctx.FieldType.IsAbstract)
 			{
-				if (MapDescriptor.GetDescriptor(ctx.FieldType) != null)
+				// Object factory construction.
+				//
+				FieldBuilder fieldBuilder = ctx.TypeBuilder.DefineField(
+					string.Format("_{0}_$MapDescriptor", ctx.PropertyInfo.Name),
+					typeof(MapDescriptor),
+					FieldAttributes.Private | FieldAttributes.Static);
+
+				if (ctx.ObfInitDataField == null)
 				{
-					ConstructType constructType = new ConstructType(ctx.FieldType);
+					ctx.ObfInitDataField = ctx.ObfCtorGen.DeclareLocal(typeof(MapDescriptor));
 
-					bool callDefaultCtor = true;
+					ctx.ObfCtorGen
+						.ldarg_1
+						.callvirt(typeof(MapInitializingData).GetProperty("MapDescriptor").GetGetMethod())
+						.stloc(ctx.ObfInitDataField)
 
-					// Call MapDescriptor to construct the object.
+						.ldarg_1
+						.ldc_i4_1
+						.callvirt(typeof(MapInitializingData).GetProperty("IsInternal").GetSetMethod());
+				}
+
+				Label l1 = ctx.ObfCtorGen.DefineLabel();
+
+				ctx.ObfCtorGen
+					.ldsfld(fieldBuilder)
+					.brtrue_s(l1)
+					.ldtoken(ctx.FieldType)
+					.call(typeof(Type),          "GetTypeFromHandle", typeof(RuntimeTypeHandle))
+					.call(typeof(MapDescriptor), "GetDescriptor",     typeof(Type))
+					.stsfld(fieldBuilder)
+					.MarkLabel(l1)
+					.ldarg_0
+					.ldsfld(fieldBuilder)
+					.ldarg_1
+					.EndGen();
+
+				MethodInfo memberParams = 
+					typeof(MapInitializingData).GetProperty("MemberParameters").GetSetMethod();
+
+				if (ctx.ParamBuilder != null)
+				{
+					ctx.ObfCtorGen
+						.ldarg_1
+						.ldsfld(ctx.ParamBuilder)
+						.callvirt(memberParams);
+				}
+
+				ctx.ObfCtorGen
+					.callvirt(typeof(MapDescriptor), "CreateInstanceEx", _factoryParams)
+					.isinst(ctx.FieldType)
+					.stfld(ctx.FieldBuilder);
+
+				if (ctx.ParamBuilder != null)
+				{
+					ctx.ObfCtorGen
+						.ldarg_1
+						.ldnull
+						.callvirt(memberParams);
+				}
+
+				if (ctx.ParamBuilder != null)
+				{
+					// Default constructor.
 					//
-					if (ctx.FieldType.IsAbstract)
+					if (ctx.DefInitDataField == null)
 					{
-						// Object factory construction.
-						//
-						FieldBuilder fieldBuilder = ctx.TypeBuilder.DefineField(
-							string.Format("_{0}_$MapDescriptor", ctx.PropertyInfo.Name),
-							typeof(MapDescriptor),
-							FieldAttributes.Private | FieldAttributes.Static);
+						ctx.DefInitDataField = ctx.DefCtorGen.DeclareLocal(typeof(MapInitializingData));
 
+						ctx.DefCtorGen
+							.newobj(GetDefaultConstructor(typeof(MapInitializingData)))
+							.stloc_0
+
+							.ldloc_0
+							.ldc_i4_1
+							.callvirt(typeof(MapInitializingData).GetProperty("IsInternal").GetSetMethod());
+					}
+
+					Label l2 = ctx.DefCtorGen.DefineLabel();
+
+					ctx.DefCtorGen
+						.ldsfld(fieldBuilder)
+						.brtrue_s(l1)
+						.ldtoken(ctx.FieldType)
+						.call(typeof(Type),          "GetTypeFromHandle", typeof(RuntimeTypeHandle))
+						.call(typeof(MapDescriptor), "GetDescriptor",     typeof(Type))
+						.stsfld(fieldBuilder)
+						.MarkLabel(l1)
+
+						.ldloc_0
+						.ldsfld(ctx.ParamBuilder)
+						.callvirt(memberParams)
+								
+						.ldarg_0
+						.ldsfld(fieldBuilder)
+						.ldloc_0
+						.callvirt(typeof(MapDescriptor), "CreateInstanceEx", _factoryParams)
+						.isinst(ctx.FieldType)
+						.stfld(ctx.FieldBuilder)
+
+						.ldloc_0
+						.ldnull
+						.callvirt(memberParams);
+
+					callDefaultCtor = false;
+				}
+			} 
+			else
+			{
+				ConstructorInfo ofci = null;
+
+				if (ctx.AttributeParams != null)
+				{
+					Type[] types = new Type[ctx.AttributeParams.Length];
+
+					for (int i = 0; i < ctx.AttributeParams.Length; i++)
+						types[i] = ctx.AttributeParams[i] != null?
+							ctx.AttributeParams[i].GetType(): typeof(object);
+
+					ofci = constructType.GetConstructor(types);
+
+					if (ofci != null)
+					{
+						callDefaultCtor = false;
+
+						ctx.DefCtorGen.ldarg_0.EndGen();
+						ctx.ObfCtorGen.ldarg_0.EndGen();
+
+						for (int i = 0; i < ctx.AttributeParams.Length; i++)
+						{
+							object o = ctx.AttributeParams[i];
+
+							if (ctx.DefCtorGen.LoadObject(o) == false)
+							{
+								ctx.DefCtorGen
+									.ldsfld(ctx.ParamBuilder)
+									.ldc_i4(i)
+									.ldelem_ref
+									.CastTo(types[i]);
+							}
+
+							if (ctx.ObfCtorGen.LoadObject(o) == false)
+							{
+								ctx.ObfCtorGen
+									.ldsfld(ctx.ParamBuilder)
+									.ldc_i4(i)
+									.ldelem_ref
+									.CastTo(types[i]);
+							}
+						}
+
+						ctx.DefCtorGen
+							.newobj(ofci)
+							.stfld(ctx.FieldBuilder);
+
+						ctx.ObfCtorGen
+							.newobj(ofci)
+							.stfld(ctx.FieldBuilder);
+					}
+				}
+
+				if (ofci == null)
+				{
+					ofci = constructType.GetConstructor(_factoryParams);
+
+					if (ofci != null)
+					{
+						MethodInfo memberParams = 
+							typeof(MapInitializingData).GetProperty("MemberParameters").GetSetMethod();
+
+						// Object factory constructor.
+						//
 						if (ctx.ObfInitDataField == null)
 						{
 							ctx.ObfInitDataField = ctx.ObfCtorGen.DeclareLocal(typeof(MapDescriptor));
@@ -482,24 +827,6 @@ namespace Rsdn.Framework.Data.Mapping
 								.callvirt(typeof(MapInitializingData).GetProperty("IsInternal").GetSetMethod());
 						}
 
-						Label l1 = ctx.ObfCtorGen.DefineLabel();
-
-						ctx.ObfCtorGen
-							.ldsfld(fieldBuilder)
-							.brtrue_s(l1)
-							.ldtoken(ctx.FieldType)
-							.call(typeof(Type),          "GetTypeFromHandle", typeof(RuntimeTypeHandle))
-							.call(typeof(MapDescriptor), "GetDescriptor",     typeof(Type))
-							.stsfld(fieldBuilder)
-							.MarkLabel(l1)
-							.ldarg_0
-							.ldsfld(fieldBuilder)
-							.ldarg_1
-							.EndGen();
-
-						MethodInfo memberParams = 
-							typeof(MapInitializingData).GetProperty("MemberParameters").GetSetMethod();
-
 						if (ctx.ParamBuilder != null)
 						{
 							ctx.ObfCtorGen
@@ -509,8 +836,9 @@ namespace Rsdn.Framework.Data.Mapping
 						}
 
 						ctx.ObfCtorGen
-							.callvirt(typeof(MapDescriptor), "CreateInstanceEx", _factoryParams)
-							.isinst(ctx.FieldType)
+							.ldarg_0
+							.ldarg_1
+							.newobj(ofci)
 							.stfld(ctx.FieldBuilder);
 
 						if (ctx.ParamBuilder != null)
@@ -538,242 +866,104 @@ namespace Rsdn.Framework.Data.Mapping
 									.callvirt(typeof(MapInitializingData).GetProperty("IsInternal").GetSetMethod());
 							}
 
-							Label l2 = ctx.DefCtorGen.DefineLabel();
-
 							ctx.DefCtorGen
-								.ldsfld(fieldBuilder)
-								.brtrue_s(l1)
-								.ldtoken(ctx.FieldType)
-								.call(typeof(Type),          "GetTypeFromHandle", typeof(RuntimeTypeHandle))
-								.call(typeof(MapDescriptor), "GetDescriptor",     typeof(Type))
-								.stsfld(fieldBuilder)
-								.MarkLabel(l1)
-
 								.ldloc_0
 								.ldsfld(ctx.ParamBuilder)
 								.callvirt(memberParams)
-								
 								.ldarg_0
-								.ldsfld(fieldBuilder)
 								.ldloc_0
-								.callvirt(typeof(MapDescriptor), "CreateInstanceEx", _factoryParams)
-								.isinst(ctx.FieldType)
+								.newobj(ofci)
 								.stfld(ctx.FieldBuilder)
-
 								.ldloc_0
 								.ldnull
 								.callvirt(memberParams);
-
-							callDefaultCtor = false;
 						}
-					} 
+					}
 					else
 					{
-						ConstructorInfo ofci = null;
+						ofci = constructType.GetConstructor(Type.EmptyTypes);
 
-						if (ctx.AttributeParams != null)
+						if (ofci != null)
 						{
-							Type[] types = new Type[ctx.AttributeParams.Length];
-
-							for (int i = 0; i < ctx.AttributeParams.Length; i++)
-								types[i] = ctx.AttributeParams[i] != null?
-									ctx.AttributeParams[i].GetType(): typeof(object);
-
-							ofci = constructType.GetConstructor(types);
-
-							if (ofci != null)
-							{
-								callDefaultCtor = false;
-
-								ctx.DefCtorGen.ldarg_0.EndGen();
-								ctx.ObfCtorGen.ldarg_0.EndGen();
-
-								for (int i = 0; i < ctx.AttributeParams.Length; i++)
-								{
-									object o = ctx.AttributeParams[i];
-
-									if (ctx.DefCtorGen.LoadObject(o) == false)
-									{
-										ctx.DefCtorGen
-											.ldsfld(ctx.ParamBuilder)
-											.ldc_i4(i)
-											.ldelem_ref
-											.CastTo(types[i]);
-									}
-
-									if (ctx.ObfCtorGen.LoadObject(o) == false)
-									{
-										ctx.ObfCtorGen
-											.ldsfld(ctx.ParamBuilder)
-											.ldc_i4(i)
-											.ldelem_ref
-											.CastTo(types[i]);
-									}
-								}
-
-								ctx.DefCtorGen
-									.newobj(ofci)
-									.stfld(ctx.FieldBuilder);
-
-								ctx.ObfCtorGen
-									.newobj(ofci)
-									.stfld(ctx.FieldBuilder);
-							}
+							ctx.ObfCtorGen
+								.ldarg_0
+								.newobj(ofci)
+								.stfld(ctx.FieldBuilder);
 						}
-
-						if (ofci == null)
-						{
-							ofci = constructType.GetConstructor(_factoryParams);
-
-							if (ofci != null)
-							{
-								MethodInfo memberParams = 
-									typeof(MapInitializingData).GetProperty("MemberParameters").GetSetMethod();
-
-								// Object factory constructor.
-								//
-								if (ctx.ObfInitDataField == null)
-								{
-									ctx.ObfInitDataField = ctx.ObfCtorGen.DeclareLocal(typeof(MapDescriptor));
-
-									ctx.ObfCtorGen
-										.ldarg_1
-										.callvirt(typeof(MapInitializingData).GetProperty("MapDescriptor").GetGetMethod())
-										.stloc(ctx.ObfInitDataField)
-
-										.ldarg_1
-										.ldc_i4_1
-										.callvirt(typeof(MapInitializingData).GetProperty("IsInternal").GetSetMethod());
-								}
-
-								if (ctx.ParamBuilder != null)
-								{
-									ctx.ObfCtorGen
-										.ldarg_1
-										.ldsfld(ctx.ParamBuilder)
-										.callvirt(memberParams);
-								}
-
-								ctx.ObfCtorGen
-									.ldarg_0
-									.ldarg_1
-									.newobj(ofci)
-									.stfld(ctx.FieldBuilder);
-
-								if (ctx.ParamBuilder != null)
-								{
-									ctx.ObfCtorGen
-										.ldarg_1
-										.ldnull
-										.callvirt(memberParams);
-								}
-
-								if (ctx.ParamBuilder != null)
-								{
-									// Default constructor.
-									//
-									if (ctx.DefInitDataField == null)
-									{
-										ctx.DefInitDataField = ctx.DefCtorGen.DeclareLocal(typeof(MapInitializingData));
-
-										ctx.DefCtorGen
-											.newobj(GetDefaultConstructor(typeof(MapInitializingData)))
-											.stloc_0
-
-											.ldloc_0
-											.ldc_i4_1
-											.callvirt(typeof(MapInitializingData).GetProperty("IsInternal").GetSetMethod());
-									}
-
-									ctx.DefCtorGen
-										.ldloc_0
-										.ldsfld(ctx.ParamBuilder)
-										.callvirt(memberParams)
-										.ldarg_0
-										.ldloc_0
-										.newobj(ofci)
-										.stfld(ctx.FieldBuilder)
-										.ldloc_0
-										.ldnull
-										.callvirt(memberParams);
-								}
-							}
-							else
-							{
-								ofci = constructType.GetConstructor(Type.EmptyTypes);
-
-								if (ofci != null)
-								{
-									ctx.ObfCtorGen
-										.ldarg_0
-										.newobj(ofci)
-										.stfld(ctx.FieldBuilder);
-								}
-							}
-						}
-					}
-
-					if (callDefaultCtor)
-					{
-						// Default construction.
-						//
-						ConstructorInfo ci = constructType.GetDefaultConstructor();
-
-						if (ci == null)
-						{
-							throw new RsdnMapException(
-								string.Format("The '{0}' type has to have public default constructor.",
-								ctx.FieldType.Name));
-						}
-
-						// Call default member constructor inside default constractor of the type.
-						//
-						ctx.DefCtorGen
-							.ldarg_0
-							.newobj(ci)
-							.stfld(ctx.FieldBuilder);
-					}
-
-					if (ctx.FieldType.GetInterface(typeof(IMapSetPropertyInfo).Name) != null)
-					{
-						FieldBuilder initFieldBuilder = ctx.TypeBuilder.DefineField(
-							string.Format("_{0}_$MapPropertyInfo", ctx.PropertyInfo.Name),
-							typeof(MapPropertyInfo),
-							FieldAttributes.Private | FieldAttributes.Static);
-
-						SetNonSerializedAttribute(initFieldBuilder);
-
-						ConstructorInfo ci = typeof(MapPropertyInfo).GetConstructor(new Type[] { typeof(PropertyInfo) });
-
-						ctx.IniCtorGen
-							.ldtoken(ctx.Type)
-							.call(typeof(Type), "GetTypeFromHandle", typeof(RuntimeTypeHandle))
-							.ldstr("ID")
-							.call(typeof(Type), "GetProperty", typeof(string))
-							.newobj(ci)
-							.stsfld(initFieldBuilder);
-
-						/*
-						ctx.IniCtorGen
-							.ldtoken(ctx.PropertyInfo.PropertyType)
-							.call(typeof(Type), "GetTypeFromHandle", typeof(RuntimeTypeHandle))
-							.ldstr(ctx.PropertyInfo.Name)
-							.newobj(ci)
-							.stsfld(initFieldBuilder);
-						*/
-
-						ctx.InitGen
-							.ldarg_0
-							.ldfld(ctx.FieldBuilder)
-							.castclass(typeof(IMapSetPropertyInfo))
-							.ldsfld(initFieldBuilder)
-							.ldarg_0
-							.callvirt(typeof(IMapSetPropertyInfo), "SetInfo", typeof(MapPropertyInfo), typeof(object));
 					}
 				}
-
-				ctx.Objects.Add(ctx.FieldBuilder);
 			}
+
+			if (callDefaultCtor)
+			{
+				// Default construction.
+				//
+				ConstructorInfo ci = constructType.GetDefaultConstructor();
+
+				if (ci == null)
+				{
+					throw new RsdnMapException(
+						string.Format("The '{0}' type has to have public default constructor.",
+						ctx.FieldType.Name));
+				}
+
+				// Call default member constructor inside default constractor of the type.
+				//
+				ctx.DefCtorGen
+					.ldarg_0
+					.newobj(ci)
+					.stfld(ctx.FieldBuilder);
+			}
+
+			if (ctx.FieldType.GetInterface(typeof(IMapSetPropertyInfo).Name) != null)
+			{
+				FieldBuilder initFieldBuilder = GetPropertyInitField(ctx, createdObject);
+
+				if (ctx.FieldBuilder.FieldType.IsValueType)
+				{
+					ctx.InitGen
+						.ldarg_0
+						.ldflda(ctx.FieldBuilder)
+						.ldsfld(initFieldBuilder)
+						.ldarg_0
+						.call(ctx.FieldBuilder.FieldType, "SetInfo", typeof(MapPropertyInfo), typeof(object));
+				}
+				else
+				{
+					ctx.InitGen
+						.ldarg_0
+						.ldfld(ctx.FieldBuilder)
+						.castclass(typeof(IMapSetPropertyInfo))
+						.ldsfld(initFieldBuilder)
+						.ldarg_0
+						.callvirt(typeof(IMapSetPropertyInfo), "SetInfo", typeof(MapPropertyInfo), typeof(object));
+				}
+			}
+		}
+
+		static private FieldBuilder GetPropertyInitField(GenContext ctx, CreatedObject createdObject)
+		{
+			if (createdObject.InitFieldBuilder == null)
+			{
+				createdObject.InitFieldBuilder = ctx.TypeBuilder.DefineField(
+					string.Format("_{0}_$MapPropertyInfo", ctx.PropertyInfo.Name),
+					typeof(MapPropertyInfo),
+					FieldAttributes.Private | FieldAttributes.Static);
+
+				SetNonSerializedAttribute(createdObject.InitFieldBuilder);
+
+				ConstructorInfo ci = typeof(MapPropertyInfo).GetConstructor(new Type[] { typeof(PropertyInfo) });
+
+				ctx.IniCtorGen
+					.ldtoken(ctx.Type)
+					.call(typeof(Type), "GetTypeFromHandle", typeof(RuntimeTypeHandle))
+					.ldstr(ctx.PropertyInfo.Name)
+					.call(typeof(Type), "GetProperty", typeof(string))
+					.newobj(ci)
+					.stsfld(createdObject.InitFieldBuilder);
+			}
+
+			return createdObject.InitFieldBuilder;
 		}
 
 		static private void CreateNonAbstractSetter(GenContext ctx)
@@ -801,10 +991,8 @@ namespace Rsdn.Framework.Data.Mapping
 
 			if (ctx.IsObject)
 			{
-				if (ctx.FieldType.IsValueType) gen.ldflda(ctx.FieldBuilder);
-				else                           gen.ldfld (ctx.FieldBuilder);
-
 				gen
+					.ldfldWhithCheck(ctx.FieldBuilder)
 					.ldarg_1
 					.EndGen();
 
@@ -841,8 +1029,8 @@ namespace Rsdn.Framework.Data.Mapping
 
 			MapGenerator gen = new MapGenerator(getMethod.GetILGenerator());
 
-			if (ctx.FieldType.IsValueType) gen.ldarg_0.ldflda(ctx.FieldBuilder);
-			else                           gen.ldarg_0.ldfld(ctx.FieldBuilder);
+			if (ctx.FieldType.IsValueType && ctx.IsObject) gen.ldarg_0.ldflda(ctx.FieldBuilder);
+			else                                           gen.ldarg_0.ldfld (ctx.FieldBuilder);
 
 			if (ctx.IsObject)
 			{
@@ -1165,6 +1353,20 @@ namespace Rsdn.Framework.Data.Mapping
 			return Activator.CreateInstance(descriptorType);
 		}
 
+		static private bool IsPrimitive(Type type)
+		{
+			return
+				type == typeof(string)   || type == typeof(bool)    ||
+				type == typeof(byte)     || type == typeof(char)    ||
+				type == typeof(DateTime) || type == typeof(decimal) ||
+				type == typeof(double)   || type == typeof(Int16)   ||
+				type == typeof(Int32)    || type == typeof(Int64)   ||
+				type == typeof(sbyte)    || type == typeof(float)   ||
+				type == typeof(UInt16)   || type == typeof(UInt32)  ||
+				type == typeof(UInt64)   || type == typeof(Guid)    ||
+				type.IsEnum              || IsNullableType(type);
+		}
+
 		static private void CreateSetter(
 			Type        memberType,
 			TypeBuilder typeBuilder,
@@ -1174,15 +1376,7 @@ namespace Rsdn.Framework.Data.Mapping
 			string      memberName,
 			Attribute[] valueAttributes)
 		{
-			if (memberType == typeof(string)    || memberType == typeof(bool)    ||
-				memberType == typeof(byte)      || memberType == typeof(char)    ||
-				memberType == typeof(DateTime)  || memberType == typeof(decimal) ||
-				memberType == typeof(double)    || memberType == typeof(Int16)   ||
-				memberType == typeof(Int32)     || memberType == typeof(Int64)   ||
-				memberType == typeof(sbyte)     || memberType == typeof(float)   ||
-				memberType == typeof(UInt16)    || memberType == typeof(UInt32)  ||
-				memberType == typeof(UInt64)    || memberType == typeof(Guid)    ||
-				memberType.IsEnum               || IsNullableType(memberType))
+			if (IsPrimitive(memberType))
 			{
 				MethodBuilder methodBuilder = typeBuilder.DefineMethod(
 					"SetValue",

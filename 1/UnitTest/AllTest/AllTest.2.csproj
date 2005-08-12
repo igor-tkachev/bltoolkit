@@ -108,6 +108,10 @@
       <Project>{2F458667-1D0E-470D-8223-E29B350E414A}</Project>
       <Name>CS.Test.2</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Toys.Test\Toys.Test.2.csproj">
+      <Project>{861E4884-DE2C-4EAF-9BEB-FCF008FE136F}</Project>
+      <Name>Toys.Test.2</Name>
+    </ProjectReference>
     <ProjectReference Include="..\VB\VB.Test.2.vbproj">
       <Project>{337502B5-3F64-4A20-AD80-734F3611D30A}</Project>
       <Name>VB.Test.2</Name>

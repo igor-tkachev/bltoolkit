@@ -124,6 +124,11 @@
                     Project = "{46B4D47C-F67E-4CC6-ACA4-E16545368680}"
                     Package = "{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}"
                 />
+                <Reference
+                    Name = "Toys.Test"
+                    Project = "{75A6D1A3-9E38-42AA-806B-49BC22C44F63}"
+                    Package = "{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}"
+                />
             </References>
         </Build>
         <Files>

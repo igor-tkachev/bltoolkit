@@ -29,6 +29,10 @@ Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "VB.Test.2", "UnitTest\VB\VB
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{5165FFEF-8CA1-47A4-AF49-9279EA92315D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rsdn.Framework.Validation.2", "Toys\Validation\Rsdn.Framework.Validation.2.csproj", "{D4867994-FD37-44E9-A200-CDBC26E117DA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Toys.Test.2", "UnitTest\Toys.Test\Toys.Test.2.csproj", "{861E4884-DE2C-4EAF-9BEB-FCF008FE136F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|.NET = Debug|.NET
@@ -165,6 +169,30 @@ Global
 		{337502B5-3F64-4A20-AD80-734F3611D30A}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{337502B5-3F64-4A20-AD80-734F3611D30A}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{337502B5-3F64-4A20-AD80-734F3611D30A}.Release|Win32.ActiveCfg = Release|Any CPU
+		{D4867994-FD37-44E9-A200-CDBC26E117DA}.Debug|.NET.ActiveCfg = Debug|Any CPU
+		{D4867994-FD37-44E9-A200-CDBC26E117DA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D4867994-FD37-44E9-A200-CDBC26E117DA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D4867994-FD37-44E9-A200-CDBC26E117DA}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{D4867994-FD37-44E9-A200-CDBC26E117DA}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{D4867994-FD37-44E9-A200-CDBC26E117DA}.Debug|Win32.ActiveCfg = Debug|Any CPU
+		{D4867994-FD37-44E9-A200-CDBC26E117DA}.Release|.NET.ActiveCfg = Release|Any CPU
+		{D4867994-FD37-44E9-A200-CDBC26E117DA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D4867994-FD37-44E9-A200-CDBC26E117DA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D4867994-FD37-44E9-A200-CDBC26E117DA}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{D4867994-FD37-44E9-A200-CDBC26E117DA}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{D4867994-FD37-44E9-A200-CDBC26E117DA}.Release|Win32.ActiveCfg = Release|Any CPU
+		{861E4884-DE2C-4EAF-9BEB-FCF008FE136F}.Debug|.NET.ActiveCfg = Debug|Any CPU
+		{861E4884-DE2C-4EAF-9BEB-FCF008FE136F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{861E4884-DE2C-4EAF-9BEB-FCF008FE136F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{861E4884-DE2C-4EAF-9BEB-FCF008FE136F}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{861E4884-DE2C-4EAF-9BEB-FCF008FE136F}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{861E4884-DE2C-4EAF-9BEB-FCF008FE136F}.Debug|Win32.ActiveCfg = Debug|Any CPU
+		{861E4884-DE2C-4EAF-9BEB-FCF008FE136F}.Release|.NET.ActiveCfg = Release|Any CPU
+		{861E4884-DE2C-4EAF-9BEB-FCF008FE136F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{861E4884-DE2C-4EAF-9BEB-FCF008FE136F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{861E4884-DE2C-4EAF-9BEB-FCF008FE136F}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{861E4884-DE2C-4EAF-9BEB-FCF008FE136F}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{861E4884-DE2C-4EAF-9BEB-FCF008FE136F}.Release|Win32.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -176,9 +204,10 @@ Global
 		{AA98067A-D81A-41E4-9EBE-A72BD05ABB2F} = {96876B08-1C6E-4B28-917F-5129DF9DA13A}
 		{5AE18977-9F9F-460E-86F5-E42668CDFE9E} = {96876B08-1C6E-4B28-917F-5129DF9DA13A}
 		{337502B5-3F64-4A20-AD80-734F3611D30A} = {96876B08-1C6E-4B28-917F-5129DF9DA13A}
+		{861E4884-DE2C-4EAF-9BEB-FCF008FE136F} = {96876B08-1C6E-4B28-917F-5129DF9DA13A}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		XCSharpProjectsDisabled = 
 		XCSharpSolutionEnabled = True
+		XCSharpProjectsDisabled = 
 	EndGlobalSection
 EndGlobal

@@ -14,8 +14,8 @@ namespace Rsdn.Framework.Data.Mapping
 	/// </summary>
 	/// <include file="Doc.xml" path='examples/maptype[@name="remarks"]/*' />
 	[AttributeUsage(
-	AttributeTargets.Property | AttributeTargets.Class | AttributeTargets.Interface,
-	AllowMultiple = true)]
+		AttributeTargets.Property | AttributeTargets.Class | AttributeTargets.Interface,
+		AllowMultiple = true)]
 	public class MapTypeAttribute : MapParameterAttribute
 	{
 		/// <summary>

@@ -11,6 +11,7 @@
         </SourceControlSettings>
         <Views>
             <ProjectExplorer>
+                <File>Toys.Test\Toys.Test.csproj</File>
                 <File>VB\VB.Test.vbproj</File>
                 <File>JS\JS.Test.vjsproj</File>
                 <File>NullableTypes\src\Types\Types.csproj</File>
@@ -20,6 +21,10 @@
             </ProjectExplorer>
         </Views>
         <References>
+            <Reference>
+                <FILE>Toys.Test\Toys.Test.csproj</FILE>
+                <GUIDPROJECTID>{75A6D1A3-9E38-42AA-806B-49BC22C44F63}</GUIDPROJECTID>
+            </Reference>
             <Reference>
                 <FILE>VB\VB.Test.vbproj</FILE>
                 <GUIDPROJECTID>{E42AB6EB-9BF5-466C-A761-521FF3459137}</GUIDPROJECTID>

@@ -23,6 +23,10 @@ Project("{FE3BBBB6-72D5-11D2-9ACE-00C04F79A2A4}") = "UnitTest", "UnitTest\UnitTe
 	ProjectSection(ProjectDependencies) = postProject
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rsdn.Framework.Validation", "Toys\Validation\Rsdn.Framework.Validation.csproj", "{3FB5794F-5FC0-4B7C-B89E-D1625234873A}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfiguration) = preSolution
 		Debug = Debug
@@ -67,10 +71,14 @@ Global
 		{E42AB6EB-9BF5-466C-A761-521FF3459137}.Debug.Build.0 = Debug|.NET
 		{E42AB6EB-9BF5-466C-A761-521FF3459137}.Release.ActiveCfg = Release|.NET
 		{E42AB6EB-9BF5-466C-A761-521FF3459137}.Release.Build.0 = Release|.NET
+		{3FB5794F-5FC0-4B7C-B89E-D1625234873A}.Debug.ActiveCfg = Debug|.NET
+		{3FB5794F-5FC0-4B7C-B89E-D1625234873A}.Debug.Build.0 = Debug|.NET
+		{3FB5794F-5FC0-4B7C-B89E-D1625234873A}.Release.ActiveCfg = Release|.NET
+		{3FB5794F-5FC0-4B7C-B89E-D1625234873A}.Release.Build.0 = Release|.NET
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		XCSharpSolutionEnabled = True
 		XCSharpProjectsDisabled = 
+		XCSharpSolutionEnabled = True
 	EndGlobalSection
 	GlobalSection(ExtensibilityAddIns) = postSolution
 	EndGlobalSection
