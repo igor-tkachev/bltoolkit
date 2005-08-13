@@ -241,7 +241,7 @@ namespace Rsdn.Framework.Data.Mapping
 
 			return attrs;
 		}
-
+		
 		private static object[] GetPropertyMapTypeInternal(Type type, PropertyInfo pi)
 		{
 			object[] attr = GetAttributes(type, typeof(MapTypeAttribute));
@@ -287,6 +287,20 @@ namespace Rsdn.Framework.Data.Mapping
 				return GetPropertyMapTypeInternal(type.BaseType, pi);
 
 			return null;
+		}
+
+		internal static ArrayList GetAllAttributes(Type type, Type attributeType)
+		{
+			ArrayList list = new ArrayList();
+
+			list.AddRange(GetAttributes(type, attributeType));
+
+			Type[] interfaces = type.GetInterfaces();
+
+			for (int i = interfaces.Length - 1; i >= 0; i--)
+				list.AddRange(GetAttributes(interfaces[i], attributeType));
+
+			return list;
 		}
 
 		internal static object[] GetPropertyMapType(Type type, PropertyInfo pi)

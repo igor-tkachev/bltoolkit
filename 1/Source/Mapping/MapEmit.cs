@@ -110,7 +110,7 @@ namespace Rsdn.Framework.Data.Mapping
 			public MapGenerator    ObfCtorGen;  // object factory constructor generator
 			public MapGenerator    InitGen;     // init property method generator
 			public PropertyBuilder Descriptor;  // descriptor
-			public object []       Actions;     // action attributes.
+			public ArrayList       Actions;     // action attributes.
 
 			public ArrayList       Objects;     // created object's list
 
@@ -139,11 +139,11 @@ namespace Rsdn.Framework.Data.Mapping
 
 			ctx.Type    = type;
 			ctx.Objects = new ArrayList();
-			ctx.Actions = type.GetCustomAttributes(typeof(MapActionAttribute), true);
+			ctx.Actions = MapDescriptor.GetAllAttributes(type, typeof(MapActionAttribute));
 
-			Type[] interfaces = new Type[ctx.Actions.Length + 1];
+			Type[] interfaces = new Type[ctx.Actions.Count + 1];
 
-			for (int i = 0; i < ctx.Actions.Length; i++)
+			for (int i = 0; i < ctx.Actions.Count; i++)
 			{
 				interfaces[i] = ((MapActionAttribute)ctx.Actions[i]).Type;
 
@@ -152,7 +152,7 @@ namespace Rsdn.Framework.Data.Mapping
 						"MapAction: {0} type must be an interface.", interfaces[i].Name));
 			}
 
-			interfaces[ctx.Actions.Length] = typeof(IMapGenerated);
+			interfaces[ctx.Actions.Count] = typeof(IMapGenerated);
 
 			ctx.TypeBuilder = moduleBuilder.DefineType(
 				type.FullName.Replace('+', '.') + ".MappingExtension." + type.Name,
@@ -690,7 +690,7 @@ namespace Rsdn.Framework.Data.Mapping
 				}
 
 				ctx.ObfCtorGen
-					.callvirt(typeof(MapDescriptor), "CreateInstanceEx", _factoryParams)
+					.callvirtNoGenerics(typeof(MapDescriptor), "CreateInstanceEx", _factoryParams)
 					.isinst(ctx.FieldType)
 					.stfld(ctx.FieldBuilder);
 
@@ -737,7 +737,7 @@ namespace Rsdn.Framework.Data.Mapping
 						.ldarg_0
 						.ldsfld(fieldBuilder)
 						.ldloc_0
-						.callvirt(typeof(MapDescriptor), "CreateInstanceEx", _factoryParams)
+						.callvirtNoGenerics(typeof(MapDescriptor), "CreateInstanceEx", _factoryParams)
 						.isinst(ctx.FieldType)
 						.stfld(ctx.FieldBuilder)
 
