@@ -4,10 +4,7 @@ using Rsdn.Framework.Data.Mapping;
 
 namespace Rsdn.Framework.Validation
 {
-	[MapAction(typeof(IValidatable))]
-	[MapType(typeof(int),    typeof(ValidatableValue<int>))]
-	[MapType(typeof(string), typeof(ValidatableValue<string>), "")]
-	public abstract class ValidatableEntityBase
+	public abstract class ValidatableEntityBase : IValidatableEntity
 	{
 		public virtual void Validate()
 		{

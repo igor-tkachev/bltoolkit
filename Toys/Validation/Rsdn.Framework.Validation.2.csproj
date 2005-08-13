@@ -33,6 +33,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="IValidatableEntity.cs" />
     <Compile Include="ValidatableEntityBase.cs" />
     <Compile Include="FriendlyNameAttribute.cs" />
     <Compile Include="IValidatable.cs" />

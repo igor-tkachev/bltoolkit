@@ -385,7 +385,37 @@ namespace Rsdn.Framework.Data.Mapping
 		{
 			return callvirt(type.GetMethod(methodName, optionalParameterTypes), null);
 		}
-		
+
+		public MapGenerator callvirtNoGenerics(Type type, string methodName, params Type[] optionalParameterTypes)
+		{
+#if VER2
+			foreach (MethodInfo method in type.GetMethods())
+			{
+				if (method.IsGenericMethodDefinition == false && method.Name == methodName)
+				{
+					ParameterInfo[] pis = method.GetParameters();
+
+					if (pis.Length == optionalParameterTypes.Length)
+					{
+						bool match = true;
+
+						for (int i = 0; match && i < pis.Length; i++)
+							if (pis[i].ParameterType != optionalParameterTypes[i])
+								match = false;
+
+						if (match)
+							return callvirt(method, optionalParameterTypes.Length == 0? null: optionalParameterTypes);
+					}
+				}
+			}
+
+			throw new RsdnMapException(string.Format("Method '{0}' not found.", methodName));
+#else
+
+			return callvirt(type.GetMethod(methodName, optionalParameterTypes), null);
+#endif
+		}
+
 		#endregion
 
 		#region Method Generation
