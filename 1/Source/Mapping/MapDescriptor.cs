@@ -298,7 +298,14 @@ namespace Rsdn.Framework.Data.Mapping
 			Type[] interfaces = type.GetInterfaces();
 
 			for (int i = interfaces.Length - 1; i >= 0; i--)
-				list.AddRange(GetAttributes(interfaces[i], attributeType));
+				foreach (object o in GetAttributes(interfaces[i], attributeType))
+					if (list.Contains(o) == false)
+						list.Add(o);
+
+			if (type.BaseType != typeof(object))
+				foreach (object o in GetAllAttributes(type.BaseType, attributeType))
+					if (list.Contains(o) == false)
+						list.Add(o);
 
 			return list;
 		}

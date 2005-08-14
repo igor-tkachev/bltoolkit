@@ -34,6 +34,14 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="IValidatableEntity.cs" />
+    <Compile Include="MaxDateValueAttribute.cs" />
+    <Compile Include="MaxLengthAttribute.cs" />
+    <Compile Include="MaxValueAttribute.cs" />
+    <Compile Include="MinDateValueAttribute.cs" />
+    <Compile Include="MinLengthAttribute.cs" />
+    <Compile Include="MinValueAttribute.cs" />
+    <Compile Include="RegExAttribute.cs" />
+    <Compile Include="RsdnValidationException.cs" />
     <Compile Include="ValidatableEntityBase.cs" />
     <Compile Include="FriendlyNameAttribute.cs" />
     <Compile Include="IValidatable.cs" />

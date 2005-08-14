@@ -16,6 +16,10 @@ namespace Rsdn.Framework.Validation
 #else
 	public class ValidatableValue : IValidatable
 	{
+		public ValidatableValue()
+		{
+		}
+
 		public ValidatableValue(object value)
 		{
 			_value = value;

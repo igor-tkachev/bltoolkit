@@ -47,6 +47,10 @@ Global
 		{BD8F5FB3-EDFC-4A9E-B293-4B41EF7B19F7}.Debug.Build.0 = Debug|.NET
 		{BD8F5FB3-EDFC-4A9E-B293-4B41EF7B19F7}.Release.ActiveCfg = Release|.NET
 		{BD8F5FB3-EDFC-4A9E-B293-4B41EF7B19F7}.Release.Build.0 = Release|.NET
+		{3FB5794F-5FC0-4B7C-B89E-D1625234873A}.Debug.ActiveCfg = Debug|.NET
+		{3FB5794F-5FC0-4B7C-B89E-D1625234873A}.Debug.Build.0 = Debug|.NET
+		{3FB5794F-5FC0-4B7C-B89E-D1625234873A}.Release.ActiveCfg = Release|.NET
+		{3FB5794F-5FC0-4B7C-B89E-D1625234873A}.Release.Build.0 = Release|.NET
 		{90AAB2AC-0DE2-4A75-AEB8-A2FC1782B27A}.Debug.ActiveCfg = Debug|.NET
 		{90AAB2AC-0DE2-4A75-AEB8-A2FC1782B27A}.Debug.Build.0 = Debug|.NET
 		{90AAB2AC-0DE2-4A75-AEB8-A2FC1782B27A}.Release.ActiveCfg = Release|.NET
@@ -63,6 +67,9 @@ Global
 		{9A41A88E-FB45-4C41-8412-2F4CE540ECA0}.Debug.Build.0 = Debug|.NET
 		{9A41A88E-FB45-4C41-8412-2F4CE540ECA0}.Release.ActiveCfg = Release|.NET
 		{9A41A88E-FB45-4C41-8412-2F4CE540ECA0}.Release.Build.0 = Release|.NET
+		{75A6D1A3-9E38-42AA-806B-49BC22C44F63}.Debug.ActiveCfg = Debug|.NET
+		{75A6D1A3-9E38-42AA-806B-49BC22C44F63}.Debug.Build.0 = Debug|.NET
+		{75A6D1A3-9E38-42AA-806B-49BC22C44F63}.Release.ActiveCfg = Release|.NET
 		{5AE18977-9F9F-460E-86F5-E42668CDFE9E}.Debug.ActiveCfg = Debug|.NET
 		{5AE18977-9F9F-460E-86F5-E42668CDFE9E}.Debug.Build.0 = Debug|.NET
 		{5AE18977-9F9F-460E-86F5-E42668CDFE9E}.Release.ActiveCfg = Release|.NET
@@ -71,14 +78,10 @@ Global
 		{E42AB6EB-9BF5-466C-A761-521FF3459137}.Debug.Build.0 = Debug|.NET
 		{E42AB6EB-9BF5-466C-A761-521FF3459137}.Release.ActiveCfg = Release|.NET
 		{E42AB6EB-9BF5-466C-A761-521FF3459137}.Release.Build.0 = Release|.NET
-		{3FB5794F-5FC0-4B7C-B89E-D1625234873A}.Debug.ActiveCfg = Debug|.NET
-		{3FB5794F-5FC0-4B7C-B89E-D1625234873A}.Debug.Build.0 = Debug|.NET
-		{3FB5794F-5FC0-4B7C-B89E-D1625234873A}.Release.ActiveCfg = Release|.NET
-		{3FB5794F-5FC0-4B7C-B89E-D1625234873A}.Release.Build.0 = Release|.NET
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		XCSharpProjectsDisabled = 
 		XCSharpSolutionEnabled = True
+		XCSharpProjectsDisabled = 
 	EndGlobalSection
 	GlobalSection(ExtensibilityAddIns) = postSolution
 	EndGlobalSection

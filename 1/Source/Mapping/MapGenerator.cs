@@ -99,11 +99,12 @@ namespace Rsdn.Framework.Data.Mapping
 		#region Boxing
 
 		public MapGenerator unbox(Type type) { m_gen.Emit(OpCodes.Unbox, type); return this; }
-		public MapGenerator box(Type type)   { m_gen.Emit(OpCodes.Box,   type); return this; }
 		public MapGenerator UnboxIfValueType(Type type)
 		{ 
 			return type.IsValueType? unbox(type): this;
 		}
+
+		public MapGenerator box(Type type)   { m_gen.Emit(OpCodes.Box,   type); return this; }
 		public MapGenerator BoxIfValueType(Type type)
 		{ 
 			return type.IsValueType? box(type): this;
@@ -263,12 +264,16 @@ namespace Rsdn.Framework.Data.Mapping
 		{
 			UnboxIfValueType(type);
 
+			if (type.IsEnum)
+				type = Enum.GetUnderlyingType(type);
+
 			if      (type == typeof(byte))   ldind_u1.EndGen();
 			else if (type == typeof(char))   ldind_u2.EndGen();
 			else if (type == typeof(ushort)) ldind_u2.EndGen();
 			else if (type == typeof(uint))   ldind_u4.EndGen();
 			else if (type == typeof(ulong))  ldind_i8.EndGen();
 			else if (type == typeof(bool))   ldind_i1.EndGen();
+			else if (type == typeof(sbyte))  ldind_i1.EndGen();
 			else if (type == typeof(short))  ldind_i2.EndGen();
 			else if (type == typeof(int))    ldind_i4.EndGen();
 			else if (type == typeof(long))   ldind_i8.EndGen();
@@ -280,7 +285,6 @@ namespace Rsdn.Framework.Data.Mapping
 
 			return this;
 		}
-
 		#endregion
 
 		#region St (pop)

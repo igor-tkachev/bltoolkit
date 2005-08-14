@@ -7,6 +7,7 @@
     <assembly path="VB.Test.dll" />
     <assembly path="AllTest.dll" />
     <assembly path="Examples.dll" />
+    <assembly path="Toys.Test.dll" />
   </Config>
   <Config name="Release" appbase="AllTest\bin\Debug" configfile="App.config" binpathtype="Auto">
     <assembly path="CS.Test.dll" />
@@ -15,5 +16,6 @@
     <assembly path="VB.Test.dll" />
     <assembly path="AllTest.dll" />
     <assembly path="Examples.dll" />
+    <assembly path="Toys.Test.dll" />
   </Config>
 </NUnitProject>
