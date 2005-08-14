@@ -1,6 +1,6 @@
 /*
- * File:    MapActionParentAttribute.cs
- * Created: 8/11/2003
+ * File:    MapParentAttribute.cs
+ * Created: 8/11/2005
  * Author:  Igor Tkachev
  *          mailto:it@rsdn.ru
  */
@@ -13,12 +13,12 @@ namespace Rsdn.Framework.Data.Mapping
 	/// 
 	/// </summary>
 	[AttributeUsage(AttributeTargets.Parameter)]
-	public sealed class MapActionParentAttribute : Attribute
+	public sealed class MapParentAttribute : Attribute
 	{
 		/// <summary>
 		/// 
 		/// </summary>
-		public MapActionParentAttribute()
+		public MapParentAttribute()
 		{
 		}
 	}

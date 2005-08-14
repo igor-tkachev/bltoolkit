@@ -235,11 +235,6 @@
                     BuildAction = "Compile"
                 />
                 <File
-                    RelPath = "Mapping\MapActionParentAttribute.cs"
-                    SubType = "Code"
-                    BuildAction = "Compile"
-                />
-                <File
                     RelPath = "Mapping\MapDefaultValueAttribute.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
@@ -291,6 +286,11 @@
                 />
                 <File
                     RelPath = "Mapping\MapParameterAttribute.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "Mapping\MapParentAttribute.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
                 />
