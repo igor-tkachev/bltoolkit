@@ -30,7 +30,7 @@ namespace Rsdn.Framework.Data.Mapping
 
 		private static bool IsBasedOnType(Type memberType, Type type)
 		{
-			for (Type baseType = memberType.BaseType; baseType != null && baseType != typeof(object); baseType = baseType.BaseType)
+			for (Type baseType = memberType.BaseType; baseType != null /*&& baseType != typeof(object)*/; baseType = baseType.BaseType)
 				if (baseType == type)
 					return true;
 
@@ -998,12 +998,22 @@ namespace Rsdn.Framework.Data.Mapping
 
 				if (member is PropertyInfo)
 				{
-					if (ctx.FieldType.IsValueType) gen.call    (((PropertyInfo)member).GetSetMethod());
-					else                           gen.callvirt(((PropertyInfo)member).GetSetMethod());
+					PropertyInfo mpi = ((PropertyInfo)member);
+
+					if (ctx.PropertyInfo.PropertyType.IsValueType && !mpi.PropertyType.IsValueType)
+						gen.box(ctx.PropertyInfo.PropertyType);
+
+					if (ctx.FieldType.IsValueType) gen.call    (mpi.GetSetMethod());
+					else                           gen.callvirt(mpi.GetSetMethod());
 				}
 				else
 				{
-					gen.stfld((FieldInfo)member);
+					FieldInfo mfi = (FieldInfo)member;
+
+					if (ctx.PropertyInfo.PropertyType.IsValueType && !mfi.FieldType.IsValueType)
+						gen.box(ctx.PropertyInfo.PropertyType);
+
+					gen.stfld(mfi);
 				}
 			}
 			else
@@ -1043,7 +1053,11 @@ namespace Rsdn.Framework.Data.Mapping
 					if (ctx.FieldType.IsValueType) gen.call    (mpi.GetGetMethod());
 					else                           gen.callvirt(mpi.GetGetMethod());
 
-					if (mpi.PropertyType != ctx.PropertyInfo.PropertyType && 
+					if (ctx.PropertyInfo.PropertyType.IsValueType && !mpi.PropertyType.IsValueType)
+					{
+						gen.CastTo(ctx.PropertyInfo.PropertyType);
+					}
+					else if (mpi.PropertyType != ctx.PropertyInfo.PropertyType && 
 						!ctx.PropertyInfo.PropertyType.IsEnum)
 					{
 						gen.castclass(ctx.PropertyInfo.PropertyType);
@@ -1055,7 +1069,11 @@ namespace Rsdn.Framework.Data.Mapping
 
 					gen.ldfld((FieldInfo)member);
 
-					if (mfi.FieldType != ctx.PropertyInfo.PropertyType && 
+					if (ctx.PropertyInfo.PropertyType.IsValueType && !mfi.FieldType.IsValueType)
+					{
+						gen.CastTo(ctx.PropertyInfo.PropertyType);
+					}
+					else if (mfi.FieldType != ctx.PropertyInfo.PropertyType && 
 						!ctx.PropertyInfo.PropertyType.IsEnum)
 					{
 						gen.castclass(mfi.FieldType);
@@ -1469,7 +1487,7 @@ namespace Rsdn.Framework.Data.Mapping
 
 					if (memberType.IsEnum)
 					{
-						gen.UnboxIfValueType(memberType).ldind_i4.EndGen();
+						gen.CastTo(memberType);
 					}
 					else
 					{

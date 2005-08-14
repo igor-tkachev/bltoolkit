@@ -12,7 +12,7 @@ namespace Rsdn.Framework.Validation
 				(value is string   && value.ToString().Length == 0) ||
 				(value is DateTime && (DateTime)value == DateTime.MinValue))
 			{
-				throw new Exception(
+				throw new RsdnValidationException(
 					string.Format("'{0}' is required.", GetPropertyFriendlyName(pi)));
 			}
 		}

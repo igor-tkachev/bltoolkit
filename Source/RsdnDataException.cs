@@ -60,7 +60,7 @@ namespace Rsdn.Framework.Data
 		/// <param name="context">The contextual information about the source or destination.</param>
 		/// <remarks>This constructor is called during deserialization to reconstitute the exception object transmitted over a stream.</remarks>
 		protected RsdnDataException(SerializationInfo info, StreamingContext context) 
-			: base(info,context) 
+			: base(info, context) 
 		{
 		}
 	}
