@@ -1,6 +1,6 @@
 /*
  * File:    MapPropertyInfoAttribute.cs
- * Created: 8/11/2003
+ * Created: 8/11/2005
  * Author:  Igor Tkachev
  *          mailto:it@rsdn.ru
  */

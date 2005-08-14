@@ -442,7 +442,7 @@ namespace Rsdn.Framework.Data.Mapping
 
 										foreach (object a in attrs)
 										{
-											if (a is MapActionParentAttribute)
+											if (a is MapParentAttribute)
 											{
 												gen.ldarg_0.castclass(pi[k].ParameterType);
 												stop = true;

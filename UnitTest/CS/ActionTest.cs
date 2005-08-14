@@ -29,7 +29,7 @@ namespace CS
 		public interface IAction2
 		{
 			void DoAction();
-			void DoAction(int p1, [MapActionParent] EntityBase entity);
+			void DoAction(int p1, [MapParent] EntityBase entity);
 			bool Property { get; }
 		}
 
