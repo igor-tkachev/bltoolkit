@@ -275,6 +275,11 @@
                     BuildAction = "Compile"
                 />
                 <File
+                    RelPath = "Mapping\MapNullDecimalAttribute.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
                     RelPath = "Mapping\MapNullGuidAttribute.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
@@ -315,6 +320,36 @@
                 />
                 <File
                     RelPath = "Mapping\MapPropertyInfoAttribute.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "Mapping\MapReturnIfFalseAttribute.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "Mapping\MapReturnIfNonZeroAttribute.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "Mapping\MapReturnIfNotNullAttribute.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "Mapping\MapReturnIfNullAttribute.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "Mapping\MapReturnIfTrueAttribute.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "Mapping\MapReturnIfZeroAttribute.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
                 />

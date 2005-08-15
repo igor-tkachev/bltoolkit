@@ -176,4 +176,26 @@ namespace AllTest
 #endif
 		}
 	}
+
+	[TestFixture]
+	public class TestConvert
+	{
+		public class Src
+		{
+			public int Value = 100;
+		}
+
+		public class Dest
+		{
+			public string Value;
+		}
+
+		[Test]
+		public void IntToString()
+		{
+			Dest d = (Dest)Map.ToObject(new Src(), typeof(Dest));
+
+			Assert.AreEqual("100", d.Value);
+		}
+	}
 }
