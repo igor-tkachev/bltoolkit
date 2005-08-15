@@ -91,14 +91,23 @@ namespace Rsdn.Framework.Data.Mapping
 
 		public MapGenerator castclass(Type objectType) { m_gen.Emit(OpCodes.Castclass, objectType); return this; }
 
-		public void ret()    { m_gen.Emit(OpCodes.Ret); }
+		public MapGenerator nop { get { m_gen.Emit(OpCodes.Nop); return this; } }
+
+		public MapGenerator initobj(Type type) { m_gen.Emit(OpCodes.Initobj, type); return this; }
+
+		public void ret() { m_gen.Emit(OpCodes.Ret); }
 		public void EndGen() {}
 
 		#endregion
 
 		#region Boxing
 
-		public MapGenerator unbox(Type type) { m_gen.Emit(OpCodes.Unbox, type); return this; }
+		public MapGenerator unbox    (Type type) { m_gen.Emit(OpCodes.Unbox,     type); return this; }
+
+#if VER2
+		public MapGenerator unbox_any(Type type) { m_gen.Emit(OpCodes.Unbox_Any, type); return this; }
+#endif
+		
 		public MapGenerator UnboxIfValueType(Type type)
 		{ 
 			return type.IsValueType? unbox(type): this;

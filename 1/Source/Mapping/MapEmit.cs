@@ -1371,20 +1371,6 @@ namespace Rsdn.Framework.Data.Mapping
 			return Activator.CreateInstance(descriptorType);
 		}
 
-		static private bool IsPrimitive(Type type)
-		{
-			return
-				type == typeof(string)   || type == typeof(bool)    ||
-				type == typeof(byte)     || type == typeof(char)    ||
-				type == typeof(DateTime) || type == typeof(decimal) ||
-				type == typeof(double)   || type == typeof(Int16)   ||
-				type == typeof(Int32)    || type == typeof(Int64)   ||
-				type == typeof(sbyte)    || type == typeof(float)   ||
-				type == typeof(UInt16)   || type == typeof(UInt32)  ||
-				type == typeof(UInt64)   || type == typeof(Guid)    ||
-				type.IsEnum              || IsNullableType(type);
-		}
-
 		static private void CreateSetter(
 			Type        memberType,
 			TypeBuilder typeBuilder,
@@ -1407,8 +1393,9 @@ namespace Rsdn.Framework.Data.Mapping
 				// code
 				//
 				gen
-					.ldarg_1
-					.castclass(objectType);
+					//.nop                  // IL_0000: nop 
+					.ldarg_1                // IL_0001: ldarg.1
+					.castclass(objectType); // IL_0002: castclass CS.ActionTest
 
 				if (IsNullableType(memberType))
 				{
@@ -1416,8 +1403,13 @@ namespace Rsdn.Framework.Data.Mapping
 					FieldInfo       fi = memberType.GetField   ("Null");
 					ConstructorInfo ci = memberType.GetConstructor(new Type[] { pi.PropertyType } );
 
-					// IL_0000:  ldarg.1    
-					// IL_0001:  castclass  class AllTest.Dest
+					// public override void SetValue(object obj1, object obj2)
+					// {
+					//     ((MyType) obj1).Field = 
+					//         obj2 == null || obj2 is DBNull? SqlInt32.Null:
+					//         obj2 is SqlInt32?               (SqlInt32)obj2:
+					//                                         new SqlInt32(Convert.ToInt32(obj2));
+					// }
 
 					Label l1 = gen.DefineLabel();
 					Label l2 = gen.DefineLabel();
@@ -1455,6 +1447,63 @@ namespace Rsdn.Framework.Data.Mapping
 					// IL_0030:  stfld      valuetype [System.Data]System.Data.SqlTypes.SqlInt32 AllTest.Dest::m_int
 					// IL_0035:  ret        
 				}
+#if VER2
+				else if (IsNullableValue(memberType))
+				{
+					PropertyInfo    pi = memberType.GetProperty("Value");
+					ConstructorInfo ci = memberType.GetConstructor(new Type[] { pi.PropertyType });
+
+					// public void SetValue(object obj, object value)
+					// {
+					//     ((ActionTest) obj).NullInt = 
+					//         value == null || value is DBNull? null:
+					//         value is int? ?                   (int?)value:
+					//                                           new int?(Convert.ToInt32(value));
+					// }
+
+					Label l1 = gen.DefineLabel();
+					Label l2 = gen.DefineLabel();
+					Label l3 = gen.DefineLabel();
+
+					// .maxstack 3
+					// .locals ([mscorlib]System.Nullable`1<int32> nullable1)
+
+					LocalBuilder lb = gen.DeclareLocal(memberType);
+
+					gen
+						.ldarg_2                    // IL_0007: ldarg.2 
+						.brfalse_s(l1)              // IL_0008: brfalse.s L_002f
+						.ldarg_2                    // IL_000a: ldarg.2
+						.IsDBNull                   // IL_000b: isinst [mscorlib]System.DBNull
+						.brtrue_s(l1)               // IL_0010: brtrue.s L_002f
+						.ldarg_2                    // IL_0012: ldarg.2
+
+						.isinst(memberType)         // IL_0013: isinst [mscorlib]System.Nullable`1<int32>
+						.brtrue_s(l2)               // IL_0018: brtrue.s L_0027
+
+						.ldarg_2                    // IL_001a: ldarg.2
+						.ConvertTo(pi.PropertyType) // IL_001b: call int32 [mscorlib]System.Convert::ToInt32(object)
+						.newobj(ci)                 // IL_0020: newobj instance void [mscorlib]System.Nullable`1<int32>::.ctor(!0)
+						.br_s(l3)                   // IL_0025: br.s L_002d
+
+						.MarkLabel(l2)
+
+						.ldarg_2                    // IL_0027: ldarg.2
+						.unbox_any(memberType)      // IL_0028: unbox.any [mscorlib]System.Nullable`1<int32>
+						.br_s(l3)                   // IL_002d: br.s L_0038
+
+						.MarkLabel(l1)
+
+						.ldloca_s(0)                // IL_002f: ldloca.s nullable1
+						.initobj(memberType)        // IL_0031: initobj [mscorlib]System.Nullable`1<int32>
+						.ldloc_0                    // IL_0037: ldloc.0 
+
+						.MarkLabel(l3);
+
+					// L_0038: stfld [mscorlib]System.Nullable`1<int32> CS.ActionTest::NullInt
+					// L_003d: ret 
+				}
+#endif
 				else
 				{
 					if (memberType.IsEnum || memberType == typeof(string) || valueAttributes.Length > 0)
@@ -1516,8 +1565,9 @@ namespace Rsdn.Framework.Data.Mapping
 			MethodInfo  getMethod,
 			string      memberName)
 		{
-			PropertyInfo piIsNull = memberType.GetProperty("IsNull");
-			PropertyInfo piValue  = memberType.GetProperty("Value");
+			PropertyInfo piIsNull  = memberType.GetProperty("IsNull");
+			PropertyInfo piHasNull = memberType.GetProperty("HasValue");
+			PropertyInfo piValue   = memberType.GetProperty("Value");
 
 			MethodBuilder methodBuilder = typeBuilder.DefineMethod(
 				"GetValue",
@@ -1562,6 +1612,24 @@ namespace Rsdn.Framework.Data.Mapping
 					.ldloca_s(0);
 			}
 
+			if (piHasNull != null)
+			{
+				LocalBuilder local = gen.DeclareLocal(memberType);
+				Label l1 = gen.DefineLabel();
+
+				gen
+					.stloc_0
+					.ldloca_s(0)
+
+					.call(piHasNull.GetGetMethod())
+					.brtrue_s(l1)
+					.ldnull
+					.br_s(end)
+
+					.MarkLabel(l1)
+					.ldloca_s(0);
+			}
+
 			Type retType = memberType;
 
 			if (piValue != null)
@@ -1580,12 +1648,45 @@ namespace Rsdn.Framework.Data.Mapping
 				.ret();
 		}
 
+		static private bool IsPrimitive(Type type)
+		{
+			return IsBaseType(type) || IsNullableValue(type) || IsNullableType(type);
+		}
+
+		static private bool IsBaseType(Type type)
+		{
+			return
+				type == typeof(string)   || type == typeof(bool)    ||
+				type == typeof(byte)     || type == typeof(char)    ||
+				type == typeof(DateTime) || type == typeof(decimal) ||
+				type == typeof(double)   || type == typeof(Int16)   ||
+				type == typeof(Int32)    || type == typeof(Int64)   ||
+				type == typeof(sbyte)    || type == typeof(float)   ||
+				type == typeof(UInt16)   || type == typeof(UInt32)  ||
+				type == typeof(UInt64)   || type == typeof(Guid)    ||
+				type.IsEnum;
+		}
+
 		private static bool IsNullableType(Type type)
 		{
 			return 
 				type.GetInterface("INullable") != null &&
 				type.GetProperty ("Value")     != null &&
 				type.GetField    ("Null")      != null;
+		}
+
+		private static bool IsNullableValue(Type type)
+		{
+#if VER2
+			if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>))
+			{
+				Type[] types = type.GetGenericArguments();
+
+				return types.Length == 1 && IsBaseType(types[0]);
+			}
+#endif
+
+			return false;
 		}
 	}
 }
