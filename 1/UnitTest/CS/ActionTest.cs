@@ -126,7 +126,7 @@ namespace CS
 		#endregion
 
 		[Test]
-		public void Test()
+		public void TestAction()
 		{
 			Entity e = (Entity)Map.Descriptor(typeof(Entity)).CreateInstance();
 
@@ -152,6 +152,133 @@ namespace CS
 			ISetInfo si = (ISetInfo)e;
 			si.SetInfo(1, null, 2);
 			Assert.AreEqual("Str", e.Str); 
+		}
+
+		public interface IReturnTrueAction
+		{
+			bool IsDirty { [return: MapReturnIfTrue] get; }
+		}
+
+		public interface IReturnFalseAction
+		{
+			[return: MapReturnIfFalse] bool DoFalse();
+		}
+
+		public interface IReturnNullAction
+		{
+			[return: MapReturnIfNull] object DoNull();
+		}
+
+		public struct Value1 : IReturnTrueAction, IReturnFalseAction, IReturnNullAction
+		{
+			public int Value;
+
+			public bool IsDirty
+			{
+				get { Value = 100; return false; } 
+			}
+
+			public bool DoFalse()
+			{
+				Value = 200;
+				return true;
+			}
+
+			public object DoNull()
+			{
+				Value = 300;
+				return null;
+			}
+		}
+
+		public class Value2 : IReturnTrueAction, IReturnFalseAction, IReturnNullAction
+		{
+			public decimal Value;
+
+			public bool IsDirty 
+			{
+				get { Value = 100; return true; } 
+			}
+
+			public bool DoFalse()
+			{
+				Value = 200;
+				return true;
+			}
+
+			public object DoNull()
+			{
+				Value = 300;
+				return null;
+			}
+		}
+
+		public class Value3 : IReturnTrueAction, IReturnFalseAction, IReturnNullAction
+		{
+			public string Value;
+
+			public bool IsDirty 
+			{
+				get { Value = "100"; return true; } 
+			}
+
+			public bool DoFalse()
+			{
+				Value = "200";
+				return false;
+			}
+		
+			public object DoNull()
+			{
+				Value = "300";
+				return null;
+			}
+		}
+
+		[MapAction(typeof(IReturnTrueAction))]
+		[MapAction(typeof(IReturnFalseAction))]
+		[MapAction(typeof(IReturnNullAction))]
+		public abstract class ReturnEntity
+		{
+			[MapType(typeof(Value1))] public abstract int     Value1 { get; set; }
+			[MapType(typeof(Value2))] public abstract decimal Value2 { get; set; }
+			[MapType(typeof(Value3))] public abstract string  Value3 { get; set; }
+		}
+
+		[Test]
+		public void TestTrueReturn()
+		{
+			ReturnEntity e = (ReturnEntity)Map.Descriptor(typeof(ReturnEntity)).CreateInstance();
+
+			bool b = ((IReturnTrueAction)e).IsDirty;
+
+			Assert.AreEqual(100,  e.Value1);
+			Assert.AreEqual(100M, e.Value2);
+			Assert.AreEqual(null, e.Value3);
+		}
+
+		[Test]
+		public void TestFalseReturn()
+		{
+			ReturnEntity e = (ReturnEntity)Map.Descriptor(typeof(ReturnEntity)).CreateInstance();
+
+			((IReturnFalseAction)e).DoFalse();
+
+			Assert.AreEqual(200,   e.Value1);
+			Assert.AreEqual(200M,  e.Value2);
+			Assert.AreEqual("200", e.Value3);
+		}
+
+		[Test]
+		public void TestNullReturn()
+		{
+			ReturnEntity e = (ReturnEntity)Map.Descriptor(typeof(ReturnEntity)).CreateInstance();
+
+			((IReturnNullAction)e).DoNull();
+
+			Assert.AreEqual(300,  e.Value1);
+			Assert.AreEqual(0M,   e.Value2);
+			Assert.AreEqual(null, e.Value3);
 		}
 	}
 }

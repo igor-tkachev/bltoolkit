@@ -443,7 +443,24 @@ namespace Rsdn.Framework.Data.Mapping
 			Type   convert   = typeof(Convert);
 			Type[] objectArr = new Type[] { typeof(object) };
 
-			if (convertTo == typeof(string))        castclass(typeof(string));
+			if (convertTo == typeof(string))
+			{
+				LocalBuilder lb = DeclareLocal(typeof(object));
+				Label        l1 = DefineLabel();
+				Label        l2 = DefineLabel();
+
+				this
+					.stloc(lb)
+					.ldloc(lb)
+					.brfalse_s(l1)
+					.ldloc(lb)
+					.callvirt(typeof(object), "ToString")
+					.br_s(l2)
+					.MarkLabel(l1)
+					.ldnull
+					.MarkLabel(l2);
+				//castclass(typeof(string));
+			}
 			else if (convertTo == typeof(bool))     call(convert, "ToBoolean",  typeof(object));
 			else if (convertTo == typeof(byte))     call(convert, "ToByte",     typeof(object));
 			else if (convertTo == typeof(char))     call(convert, "ToChar",     typeof(object));

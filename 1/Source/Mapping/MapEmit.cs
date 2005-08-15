@@ -397,7 +397,24 @@ namespace Rsdn.Framework.Data.Mapping
 
 					gen.Gen = mb.GetILGenerator();
 
-					LocalBuilder lb = m.ReturnType != typeof(void)? gen.DeclareLocal(m.ReturnType): null;
+					LocalBuilder lb              = null;
+					Label        retLabel        = new Label();
+					bool         returnIfNonZero = false;
+					bool         returnIfZero    = false;
+					
+					if (m.ReturnType != typeof(void))
+					{
+						lb       = gen.DeclareLocal(m.ReturnType);
+						retLabel = gen.DefineLabel();
+
+						object[] attrs = m.ReturnTypeCustomAttributes.GetCustomAttributes(true);
+
+						foreach (object o in attrs)
+						{
+							if      (o is MapReturnIfNonZeroAttribute) returnIfNonZero = true;
+							else if (o is MapReturnIfZeroAttribute)    returnIfZero    = true;
+						}
+					}
 
 					for (int i = 0; i < ctx.Objects.Count; i++)
 					{
@@ -485,7 +502,25 @@ namespace Rsdn.Framework.Data.Mapping
 									}
 
 									if (lb != null)
+									{
 										gen.stloc(lb);
+
+										if (i < ctx.Objects.Count - 1)
+										{
+											if (returnIfNonZero)
+											{
+												gen
+													.ldloc(lb)
+													.brtrue_s(retLabel);
+											} 
+											else if (returnIfZero)
+											{
+												gen
+													.ldloc(lb)
+													.brfalse_s(retLabel);
+											}
+										}
+									}
 
 									break;
 								}
@@ -496,7 +531,9 @@ namespace Rsdn.Framework.Data.Mapping
 					}
 
 					if (lb != null)
-						gen.ldloc(lb);
+						gen
+							.MarkLabel(retLabel)
+							.ldloc(lb);
 
 					gen.ret();
 
