@@ -2,6 +2,7 @@ using System;
 
 using NUnit.Framework;
 using NullableTypes;
+
 using Rsdn.Framework.Data.Mapping;
 
 namespace AllTest

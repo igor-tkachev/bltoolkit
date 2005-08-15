@@ -123,33 +123,6 @@ namespace CS
 		}
 
 		#region GenTest
-
-		MyInt      _myInt = new MyInt();
-		MyDateTime _dt    = new MyDateTime();
-		MyString   _str   = new MyString();
-
-		class OOO
-		{
-			object _ooo;
-			public object ooo
-			{
-				get { return _ooo;  }
-				set { _ooo = value; }
-			}
-		}
-
-		OOO ooo = new OOO();
-
-		public DateTime GenTest()
-		{
-			return (DateTime)ooo.ooo;
-		}
-
-		public void GenTest(DateTime o)
-		{
-			ooo.ooo = o;
-		}
-
 		#endregion
 
 		[Test]

@@ -6,7 +6,6 @@
 	ProjectGUID="{AA98067A-D81A-41E4-9EBE-A72BD05ABB2F}"
 	RootNamespace="CppTest2"
 	Keyword="ManagedCProj"
-	SignManifests="true"
 	>
 	<Platforms>
 		<Platform
@@ -186,7 +185,7 @@
 		/>
 		<AssemblyReference
 			RelativePath="nunit.framework.dll"
-			AssemblyName="nunit.framework, Version=2.2.0.0, PublicKeyToken=96d09a1eb7f44a77, processorArchitecture=MSIL"
+			AssemblyName="nunit.framework, Version=2.2.2.0, PublicKeyToken=96d09a1eb7f44a77, processorArchitecture=MSIL"
 		/>
 	</References>
 	<Files>
