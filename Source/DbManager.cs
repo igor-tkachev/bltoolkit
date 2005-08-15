@@ -50,8 +50,8 @@ namespace Rsdn.Framework.Data
 		/// <include file="Examples.xml" path='examples/db[@name="ctor"]/*' />
 		/// <seealso cref="AddConnectionString(string)">AddConnectionString Method</seealso>
 		/// <returns>An instance of the database manager class.</returns>
-		public DbManager() 
-			: this(null, null)
+		public DbManager()
+			: this((IDbConnection)null, null)
 		{
 		}
 
@@ -64,10 +64,26 @@ namespace Rsdn.Framework.Data
 		/// for an explanation and use of the configuration string.
 		/// </remarks>
 		/// <include file="Examples.xml" path='examples/db[@name="ctor(string)"]/*' />
-		/// <param name="configurationString">The configuration string.</param>
+		/// <param name="configurationString">Configuration string.</param>
 		/// <returns>An instance of the <see cref="DbManager"/> class.</returns>
-		public DbManager(string configurationString) 
-			: this(null, configurationString)
+		public DbManager(string configurationString)
+			: this((IDbConnection)null, configurationString)
+		{
+		}
+
+		/// <summary>
+		/// Initializes a new instance of the <see cref="DbManager"/> class 
+		/// and opens a database connection for the provided configuration.
+		/// </summary>
+		/// <remarks>
+		/// See the <see cref="ConfigurationString"/> property 
+		/// for an explanation and use of the configuration string.
+		/// </remarks>
+		/// <param name="configuration">Configuration string not containing provider name.</param>
+		/// <param name="provider">Provider configuration name.</param>
+		/// <returns>An instance of the <see cref="DbManager"/> class.</returns>
+		public DbManager(string configuration, string provider)
+			: this((IDbConnection)null, configuration + "." + provider)
 		{
 		}
 
