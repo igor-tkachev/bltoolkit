@@ -27,7 +27,7 @@ namespace Rsdn.Framework.Data
 		/// to a system-supplied message that describes the error, 
 		/// such as "An Rsdn Data error has occurred."
 		/// </remarks>
-		public RsdnDataException() 
+		protected RsdnDataException() 
 			: base("An Rsdn Data error has occurred.")
 		{
 		}
@@ -37,7 +37,7 @@ namespace Rsdn.Framework.Data
 		/// with the specified error message.
 		/// </summary>
 		/// <param name="message">The message to display to the client when the exception is thrown.</param>
-		public RsdnDataException(string message) 
+		protected RsdnDataException(string message) 
 			: base(message) 
 		{
 		}
@@ -48,7 +48,7 @@ namespace Rsdn.Framework.Data
 		/// </summary>
 		/// <param name="message">The message to display to the client when the exception is thrown.</param>
 		/// <param name="innerException">The InnerException, if any, that threw the current exception.</param>
-		public RsdnDataException(string message, Exception innerException) 
+		protected RsdnDataException(string message, Exception innerException) 
 			: base(message, innerException) 
 		{
 		}

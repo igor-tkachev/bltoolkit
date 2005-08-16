@@ -440,8 +440,7 @@ namespace Rsdn.Framework.Data.Mapping
 
 		public MapGenerator ConvertTo(Type convertTo)
 		{
-			Type   convert   = typeof(Convert);
-			Type[] objectArr = new Type[] { typeof(object) };
+			Type convert = typeof(Convert);
 
 			if (convertTo == typeof(string))
 			{
@@ -482,19 +481,19 @@ namespace Rsdn.Framework.Data.Mapping
 				LocalBuilder loc0 = DeclareLocal(typeof(object));
 
 				this
-					.stloc_0
-					.ldloc_0
+					.stloc(loc0)
+					.ldloc(loc0)
 					.IsGuid                               // IL_0007:  isinst     [mscorlib]System.Guid
 					.brtrue_s(l1)                         // IL_000c:  brtrue.s   IL_001b
 
-					.ldloc_0
+					.ldloc(loc0)
 					.ToString()                           // IL_000f:  callvirt   instance string [mscorlib]System.Object::ToString()
 					.newobj(typeof(Guid), typeof(string)) // IL_0014:  newobj     instance void [mscorlib]System.Guid::.ctor(string)
 					.br_s(l2)                             // IL_0019:  br.s       IL_0026
 
 					.MarkLabel(l1)                        // IL_001b:
 
-					.ldloc_0
+					.ldloc(loc0)
 					.unbox(typeof(Guid))                  // IL_001c:  unbox      [mscorlib]System.Guid
 					.ldobj(typeof(Guid))                  // IL_0021:  ldobj      [mscorlib]System.Guid
 

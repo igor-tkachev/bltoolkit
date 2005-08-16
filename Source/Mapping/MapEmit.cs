@@ -348,7 +348,7 @@ namespace Rsdn.Framework.Data.Mapping
 			gen
 				.ldc_i4(ctx.Objects.Count)
 				.newarr(typeof(object))
-				.stloc_0
+				.stloc(arr)
 				.EndGen();
 
 			for (int i = 0; i < ctx.Objects.Count; i++)
@@ -356,7 +356,7 @@ namespace Rsdn.Framework.Data.Mapping
 				FieldBuilder fb = ((CreatedObject)ctx.Objects[i]).FieldBuilder;
 
 				gen
-					.ldloc_0
+					.ldloc(arr)
 					.ldc_i4(i)
 					.ldarg_0
 					.ldfld(fb)
@@ -760,12 +760,12 @@ namespace Rsdn.Framework.Data.Mapping
 
 					ctx.DefCtorGen
 						.ldsfld(fieldBuilder)
-						.brtrue_s(l1)
+						.brtrue_s(l2)
 						.ldtoken(ctx.FieldType)
 						.call(typeof(Type),          "GetTypeFromHandle", typeof(RuntimeTypeHandle))
 						.call(typeof(MapDescriptor), "GetDescriptor",     typeof(Type))
 						.stsfld(fieldBuilder)
-						.MarkLabel(l1)
+						.MarkLabel(l2)
 
 						.ldloc_0
 						.ldsfld(ctx.ParamBuilder)
@@ -1147,11 +1147,10 @@ namespace Rsdn.Framework.Data.Mapping
 			TypeBuilder typeBuilder = moduleBuilder.DefineType(
 				fullName + ".MappingExtension.$$MapDescriptor", TypeAttributes.Public, typeof(MapDescriptor));
 
-			CreateCreateInstanceMethodOfDescriptor(type, typeBuilder);
+			CreateCreateInstanceMethodOfDescriptor (type, typeBuilder);
 			CreateCreateInstance4MethodOfDescriptor(type, typeBuilder);
 
-			ConstructorBuilder ctorBuilder =
-				typeBuilder.DefineDefaultConstructor(MethodAttributes.Public);
+			typeBuilder.DefineDefaultConstructor(MethodAttributes.Public);
 
 			// Create the type descriptor.
 			//
@@ -1219,21 +1218,21 @@ namespace Rsdn.Framework.Data.Mapping
 					// return new BizObject();
 					//
 					.newobj(ci)
-					.stloc_1
+					.stloc(l1)
 
 					// catch (Exception ex)
 					// {
 					.BeginCatchBlock_Exception
 
-					.stloc_0
-					.ldloc_0
+					.stloc(l0)
+					.ldloc(l0)
 					.call(typeof(MapDescriptor), "HandleException", BindingFlags.Static | BindingFlags.NonPublic)
 					.ldnull
-					.stloc_1
+					.stloc(l1)
 
 					.EndExceptionBlock
 
-					.ldloc_1
+					.ldloc(l1)
 					.ret();
 			}
 		}
@@ -1288,21 +1287,21 @@ namespace Rsdn.Framework.Data.Mapping
 
 			gen
 				.newobj(ci)
-				.stloc_1
+				.stloc(l1)
 
 				// catch (Exception ex)
 				// {
 				.BeginCatchBlock_Exception
 
-				.stloc_0
-				.ldloc_0
+				.stloc(l0)
+				.ldloc(l0)
 				.call(typeof(MapDescriptor), "HandleException", BindingFlags.Static | BindingFlags.NonPublic)
 				.ldnull
-				.stloc_1
+				.stloc(l1)
 
 				.EndExceptionBlock
 
-				.ldloc_1
+				.ldloc(l1)
 				.ret();
 		}
 
@@ -1326,8 +1325,7 @@ namespace Rsdn.Framework.Data.Mapping
 
 			// Create default constructor.
 			//
-			ConstructorBuilder ctorBuilder =
-				typeBuilder.DefineDefaultConstructor(MethodAttributes.Public);
+			typeBuilder.DefineDefaultConstructor(MethodAttributes.Public);
 
 			MethodInfo getMethod    = null;
 			Type       definingType = objectType;
@@ -1637,7 +1635,7 @@ namespace Rsdn.Framework.Data.Mapping
 				Label        l1    = gen.DefineLabel();
 
 				gen
-					.stloc_0
+					.stloc(local)
 					.ldloca_s(0)
 
 					.call(piIsNull.GetGetMethod())

@@ -188,7 +188,7 @@ namespace Rsdn.Framework.Data
 
 		#region Public Properties
 
-		private DataProvider.IDataProvider _dataProvider = null;
+		private DataProvider.IDataProvider _dataProvider;
 		/// <summary>
 		/// Gets the <see cref="Rsdn.Framework.Data.DataProvider.IDataProvider"/> 
 		/// used by this instance of the <see cref="DbManager"/>.
@@ -204,7 +204,7 @@ namespace Rsdn.Framework.Data
 		}
 
 		private bool          _closeConnection;
-		private IDbConnection _connection = null;
+		private IDbConnection _connection;
 		/// <summary>
 		/// Gets or sets the <see cref="IDbConnection"/> used by this instance of the <see cref="DbManager"/>.
 		/// </summary>
@@ -255,7 +255,7 @@ namespace Rsdn.Framework.Data
 			}
 		}
 
-		private IDbCommand _selectCommand = null;
+		private IDbCommand _selectCommand;
 		/// <summary>
 		/// Gets the <see cref="IDbCommand"/> used by this instance of the <see cref="DbManager"/>.
 		/// </summary>
@@ -288,7 +288,7 @@ namespace Rsdn.Framework.Data
 			get { return _selectCommand = InitCommand(_selectCommand); }
 		}
 
-		private IDbCommand _insertCommand = null;
+		private IDbCommand _insertCommand;
 		/// <summary>
 		/// Gets the insert <see cref="IDbCommand"/> used by this instance of the <see cref="DbManager"/>.
 		/// </summary>
@@ -305,7 +305,7 @@ namespace Rsdn.Framework.Data
 			get { return _insertCommand = InitCommand(_insertCommand); }
 		}
 
-		private IDbCommand _updateCommand = null;
+		private IDbCommand _updateCommand;
 		/// <summary>
 		/// Gets the update <see cref="IDbCommand"/> used by this instance of the <see cref="DbManager"/>.
 		/// </summary>
@@ -322,7 +322,7 @@ namespace Rsdn.Framework.Data
 			get { return _updateCommand = InitCommand(_updateCommand); }
 		}
 
-		private IDbCommand _deleteCommand = null;
+		private IDbCommand _deleteCommand;
 		/// <summary>
 		/// Gets the delete <see cref="IDbCommand"/> used by this instance of the <see cref="DbManager"/>.
 		/// </summary>
@@ -340,7 +340,7 @@ namespace Rsdn.Framework.Data
 		}
 
 		private bool           _closeTransaction = true;
-		private IDbTransaction _transaction = null;
+		private IDbTransaction _transaction;
 		/// <summary>
 		/// Gets the <see cref="IDbTransaction"/> used by this instance of the <see cref="DbManager"/>.
 		/// </summary>
@@ -358,7 +358,7 @@ namespace Rsdn.Framework.Data
 			get { return _transaction; }
 		}
 
-		private string _configurationString = null;
+		private string _configurationString;
 		/// <summary>
 		/// Gets the string used to open a database.
 		/// </summary>
@@ -568,7 +568,7 @@ namespace Rsdn.Framework.Data
 			AddDataProvider(new DataProvider.OracleDataProvider());
 		}
 
-		private static string                     _firstConfiguration = null;
+		private static string                     _firstConfiguration;
 		private static DataProvider.IDataProvider _firstProvider;
 		private static Hashtable _configurationList = Hashtable.Synchronized(new Hashtable());
 
@@ -610,7 +610,7 @@ namespace Rsdn.Framework.Data
 			int idx = configurationString.LastIndexOf('.');
 
 			string key = idx >= 0 && configurationString.Length > idx + 1?
-				configurationString.Substring(idx + 1).ToLower():
+				configurationString.Substring(idx + 1):
 				"sql";
 
 			DataProvider.IDataProvider dataProvider = 
@@ -780,6 +780,13 @@ namespace Rsdn.Framework.Data
 			}
 		}
 
+		/// <summary>
+		/// Helper function. Creates the command object and sets command type and command text.
+		/// </summary>
+		/// <param name="commandAction">Command action.</param>
+		/// <param name="commandType">The <see cref="System.Data.CommandType">CommandType</see> (stored procedure, text, etc.)</param>
+		/// <param name="sql">The SQL statement.</param>
+		/// <returns>The command object.</returns>
 		private IDbCommand GetCommand(CommandAction commandAction, CommandType commandType, string sql)
 		{
 			IDbCommand command = GetCommand(commandAction);
@@ -789,17 +796,6 @@ namespace Rsdn.Framework.Data
 			command.CommandText = sql;
 
 			return command;
-		}
-
-		/// <summary>
-		/// Helper function. Creates the command object and sets command type and command text.
-		/// </summary>
-		/// <param name="commandType">The <see cref="System.Data.CommandType">CommandType</see> (stored procedure, text, etc.)</param>
-		/// <param name="sql">The SQL statement.</param>
-		/// <returns>The command object.</returns>
-		private IDbCommand GetCommand(CommandType commandType, string sql)
-		{
-			return GetCommand(CommandAction.Select, commandType, sql);
 		}
 
 		/// <summary>
@@ -979,8 +975,10 @@ namespace Rsdn.Framework.Data
 
 		#region Public Static Methods.
 
-		private static Hashtable _dataProviderNameList = Hashtable.Synchronized(new Hashtable(3));
-		private static Hashtable _dataProviderTypeList = Hashtable.Synchronized(new Hashtable(3));
+		private static Hashtable _dataProviderNameList =
+			Hashtable.Synchronized(new Hashtable(4, new CaseInsensitiveHashCodeProvider(), new CaseInsensitiveComparer()));
+		
+		private static Hashtable _dataProviderTypeList = Hashtable.Synchronized(new Hashtable(4));
 
 		/// <summary>
 		/// Adds a new data manager.
@@ -994,7 +992,7 @@ namespace Rsdn.Framework.Data
 		/// <param name="dataProvider">An instance of the <see cref="Rsdn.Framework.Data.DataProvider.IDataProvider"/> interface.</param>
 		public static void AddDataProvider(DataProvider.IDataProvider dataProvider)
 		{
-			_dataProviderNameList[dataProvider.Name.ToLower()] = dataProvider;
+			_dataProviderNameList[dataProvider.Name]           = dataProvider;
 			_dataProviderTypeList[dataProvider.ConnectionType] = dataProvider;
 		}
 
@@ -1035,7 +1033,7 @@ namespace Rsdn.Framework.Data
 		/// This table caches connection strings which were already read.
 		/// </summary>
 		private static Hashtable _connectionStringList = Hashtable.Synchronized(new Hashtable());
-		private static string    _defaultConfiguration = null;
+		private static string    _defaultConfiguration;
 
 		/// <summary>
 		/// Gets and sets the default configuration string.

@@ -193,7 +193,11 @@
     </Compile>
     <Compile Include="Mapping\MapPropertyInfoAttribute.cs" />
     <Compile Include="Mapping\MapReturnIfFalseAttribute.cs" />
+    <Compile Include="Mapping\MapReturnIfNonZeroAttribute.cs" />
+    <Compile Include="Mapping\MapReturnIfNotNullAttribute.cs" />
+    <Compile Include="Mapping\MapReturnIfNullAttribute.cs" />
     <Compile Include="Mapping\MapReturnIfTrueAttribute.cs" />
+    <Compile Include="Mapping\MapReturnIfZeroAttribute.cs" />
     <Compile Include="Mapping\MapTypeAttribute.cs">
       <SubType>Code</SubType>
     </Compile>
