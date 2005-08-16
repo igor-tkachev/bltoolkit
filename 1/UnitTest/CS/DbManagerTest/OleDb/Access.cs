@@ -14,7 +14,7 @@ namespace CS.DbManagerTest.OleDb
 		{
 			get 
 			{
-				return "Access.OleDb";
+				return "Access.oledb";
 			}
 		}
 
