@@ -102,7 +102,7 @@ namespace Rsdn.Framework.Data.Mapping
 
 		#region Boxing
 
-		public MapGenerator unbox    (Type type) { m_gen.Emit(OpCodes.Unbox,     type); return this; }
+		public MapGenerator unbox(Type type) { m_gen.Emit(OpCodes.Unbox, type); return this; }
 
 #if VER2
 		public MapGenerator unbox_any(Type type) { m_gen.Emit(OpCodes.Unbox_Any, type); return this; }
@@ -113,7 +113,7 @@ namespace Rsdn.Framework.Data.Mapping
 			return type.IsValueType? unbox(type): this;
 		}
 
-		public MapGenerator box(Type type)   { m_gen.Emit(OpCodes.Box,   type); return this; }
+		public MapGenerator box(Type type) { m_gen.Emit(OpCodes.Box, type); return this; }
 		public MapGenerator BoxIfValueType(Type type)
 		{ 
 			return type.IsValueType? box(type): this;

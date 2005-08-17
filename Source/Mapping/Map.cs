@@ -1269,7 +1269,42 @@ namespace Rsdn.Framework.Data.Mapping
 		}
 #endif
 
-		#endregion
+		private static IList ToListInternal(
+			IDataReader  reader,
+			IList        list,
+			MapResultSet[] nextResults)
+		{
+			ArrayList resultList = new ArrayList();
+			bool      readNext = true;
+
+			// Obtain all records.
+			//
+			for (int i = 0; i < nextResults.Length; i++)
+			{
+				ResultInfo result = new ResultInfo();
+
+				result.ResultSet = nextResults[i];
+				result.List       = i == 0 && list != null? list: new ArrayList();
+
+				resultList.Add(result);
+
+				if (readNext)
+				{
+					ToListInternal(
+						reader, result.List, result.ResultSet.ObjectType, result.ResultSet.Parameters);
+
+					readNext = reader.NextResult();
+				}
+			}
+
+			// Map relations.
+			//
+			
+
+			return ((ResultInfo)resultList[0]).List;
+		}
+
+			#endregion
 
 		#endregion
 

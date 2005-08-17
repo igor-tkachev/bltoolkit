@@ -168,9 +168,12 @@
     <Compile Include="Mapping\MapIgnoreAttribute.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Mapping\MapIndex.cs" />
     <Compile Include="Mapping\MapInitializingData.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Mapping\MapRelation.cs" />
+    <Compile Include="Mapping\ResultInfo.cs" />
     <Compile Include="Mapping\MapNullDateTimeAttribute.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -213,6 +216,7 @@
     <Compile Include="Mapping\RsdnMapException.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Mapping\MapResultSet.cs" />
     <Compile Include="OperationType.cs" />
     <Compile Include="ParameterReader.cs">
       <SubType>Code</SubType>
