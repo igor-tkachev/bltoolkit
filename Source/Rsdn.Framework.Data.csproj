@@ -265,6 +265,11 @@
                     BuildAction = "Compile"
                 />
                 <File
+                    RelPath = "Mapping\MapIndex.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
                     RelPath = "Mapping\MapInitializingData.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
@@ -324,6 +329,16 @@
                     BuildAction = "Compile"
                 />
                 <File
+                    RelPath = "Mapping\MapRelation.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "Mapping\MapResultSet.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
                     RelPath = "Mapping\MapReturnIfFalseAttribute.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
@@ -370,6 +385,11 @@
                 />
                 <File
                     RelPath = "Mapping\PropertyMapper.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "Mapping\ResultInfo.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
                 />
