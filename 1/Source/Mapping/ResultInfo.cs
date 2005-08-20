@@ -14,5 +14,7 @@ namespace Rsdn.Framework.Data.Mapping
 	{
 		public MapResultSet ResultSet;
 		public IList        List;
+		public string       IndexID;
+		public Hashtable    Hashtable;
 	}
 }
