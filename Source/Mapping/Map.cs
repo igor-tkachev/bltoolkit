@@ -1269,13 +1269,13 @@ namespace Rsdn.Framework.Data.Mapping
 		}
 #endif
 
-		private static IList ToListInternal(
-			IDataReader  reader,
-			IList        list,
+		public static IList[] ToList(
+			IDataReader    reader,
 			MapResultSet[] nextResults)
 		{
-			ArrayList resultList = new ArrayList();
-			bool      readNext = true;
+			Hashtable resultSetInfo = new Hashtable(nextResults.Length);
+			ArrayList resultList    = new ArrayList();
+			bool      readNext      = true;
 
 			// Obtain all records.
 			//
@@ -1284,9 +1284,11 @@ namespace Rsdn.Framework.Data.Mapping
 				ResultInfo result = new ResultInfo();
 
 				result.ResultSet = nextResults[i];
-				result.List       = i == 0 && list != null? list: new ArrayList();
+				result.List      = new ArrayList();
 
 				resultList.Add(result);
+
+				resultSetInfo[nextResults[i]] = result;
 
 				if (readNext)
 				{
@@ -1299,9 +1301,64 @@ namespace Rsdn.Framework.Data.Mapping
 
 			// Map relations.
 			//
-			
+			foreach (ResultInfo ri in resultList)
+			{
+				if (ri.ResultSet.Relations == null)
+					continue;
 
-			return ((ResultInfo)resultList[0]).List;
+				MapDescriptor masterDescriptor = ri.ResultSet.Descriptor;
+
+				foreach (MapRelation r in ri.ResultSet.Relations)
+				{
+					// Create hash.
+					//
+					if (ri.IndexID != r.MasterIndex.ID)
+					{
+						ri.Hashtable = new Hashtable();
+						ri.IndexID   = r.MasterIndex.ID;
+
+						foreach (object o in ri.List)
+						{
+							object key = r.MasterIndex.GetKey(masterDescriptor, o);
+							ri.Hashtable[key] = o;
+						}
+					}
+
+					// Map.
+					//
+					ResultInfo slave = (ResultInfo)resultSetInfo[r.SlaveResultSet];
+
+					foreach (object o in slave.List)
+					{
+						object key    = r.SlaveIndex.GetKey(slave.ResultSet.Descriptor, o);
+						object master = ri.Hashtable[key];
+
+						IMemberMapper mm = masterDescriptor[r.ContainerName];
+
+						if (mm == null)
+							throw new RsdnMapException(string.Format("Type '{0}' does not contain field '{1}'.",
+								masterDescriptor.OriginalType.Name, r.ContainerName));
+
+						object container = mm.GetValue(master);
+
+						if (container is IList)
+						{
+							((IList)container).Add(o);
+						}
+						else
+						{
+							masterDescriptor[r.ContainerName].SetValue(master, o);
+						}
+					}
+				}
+			}
+
+			IList[] ret = new IList[resultList.Count];
+
+			for (int i = 0; i < resultList.Count; i++)
+				ret[i] = ((ResultInfo)resultList[i]).List;
+
+			return ret;
 		}
 
 			#endregion
@@ -1995,6 +2052,9 @@ namespace Rsdn.Framework.Data.Mapping
 			}
 		}
 
+		#endregion
+
+		#region ToResult
 		#endregion
 
 		#region Descriptor

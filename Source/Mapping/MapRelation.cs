@@ -21,9 +21,11 @@ namespace Rsdn.Framework.Data.Mapping
 		/// <param name="masterIndex"></param>
 		/// <param name="slaveResultSet"></param>
 		/// <param name="slaveIndex"></param>
+		/// <param name="containerName"></param>
 		public MapRelation(
 			MapResultSet masterResultSet, MapIndex masterIndex,
-			MapResultSet  slaveResultSet, MapIndex  slaveIndex)
+			MapResultSet  slaveResultSet, MapIndex  slaveIndex,
+			string containerName)
 		{
 			if (masterIndex.Fields.Length == 0)
 				throw new RsdnMapException("Master index length can not be 0.");
@@ -34,10 +36,14 @@ namespace Rsdn.Framework.Data.Mapping
 			if (masterIndex.Fields.Length != slaveIndex.Fields.Length)
 				throw new RsdnMapException("Master and slave indexes do not match.");
 
+			if (containerName == null || containerName.Length == 0)
+				throw new RsdnMapException("Master container field name is wrong.");
+
 			_masterResultSet = masterResultSet;
 			_slaveResultSet  = slaveResultSet;
 			_masterIndex     = masterIndex;
 			_slaveIndex      = slaveIndex;
+			_containerName   = containerName;
 		}
 
 		private MapResultSet _masterResultSet;
@@ -74,6 +80,15 @@ namespace Rsdn.Framework.Data.Mapping
 		public  MapIndex  SlaveIndex
 		{
 			get { return _slaveIndex; }
+		}
+
+		private string _containerName;
+		/// <summary>
+		/// 
+		/// </summary>
+		public  string  ContainerName
+		{
+			get { return _containerName; }
 		}
 	}
 }

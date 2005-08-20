@@ -6,6 +6,7 @@
  */
 
 using System;
+using System.Collections;
 
 namespace Rsdn.Framework.Data.Mapping
 {
@@ -21,6 +22,7 @@ namespace Rsdn.Framework.Data.Mapping
 		public MapResultSet(Type objectType)
 		{
 			_objectType = objectType;
+			_descriptor = Map.Descriptor(objectType);
 		}
 
 		/// <summary>
@@ -40,6 +42,12 @@ namespace Rsdn.Framework.Data.Mapping
 			get { return _objectType; }
 		}
 
+		private  MapDescriptor _descriptor;
+		internal MapDescriptor  Descriptor
+		{
+			get { return _descriptor;  }
+		}
+
 		private  object[] _parameters;
 		internal object[]  Parameters
 		{
@@ -49,8 +57,52 @@ namespace Rsdn.Framework.Data.Mapping
 		private  MapRelation[] _relations;
 		internal MapRelation[]  Relations
 		{
-			get { return _relations;  }
+			get 
+			{
+				if (_relationList != null && (_relations == null || _relations.Length != _relationList.Count))
+					_relations = (MapRelation[])_relationList.ToArray(typeof(MapRelation));
+
+				return _relations;
+			}
+
 			set { _relations = value; }
+		}
+
+		private ArrayList _relationList;
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="masterIndex"></param>
+		/// <param name="slaveResultSet"></param>
+		/// <param name="slaveIndex"></param>
+		/// <param name="containerName"></param>
+		public void AddRelation(
+			MapIndex     masterIndex,
+			MapResultSet slaveResultSet,
+			MapIndex     slaveIndex,
+			string       containerName)
+		{
+			if (_relationList == null)
+				_relationList = new ArrayList();
+
+			_relationList.Add(new MapRelation(this, masterIndex, slaveResultSet, slaveIndex, containerName));
+		}
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="masterIndex"></param>
+		/// <param name="slaveResultSet"></param>
+		/// <param name="slaveIndex"></param>
+		/// <param name="containerName"></param>
+		public void AddRelation(
+			string       masterIndex,
+			MapResultSet slaveResultSet,
+			string       slaveIndex,
+			string       containerName)
+		{
+			AddRelation(new MapIndex(masterIndex), slaveResultSet, new MapIndex(slaveIndex), containerName);
 		}
 	}
 }

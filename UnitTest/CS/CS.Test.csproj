@@ -131,6 +131,11 @@
                     BuildAction = "EmbeddedResource"
                 />
                 <File
+                    RelPath = "ResultSetTest.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
                     RelPath = "DbManagerTest\SqlServer.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
