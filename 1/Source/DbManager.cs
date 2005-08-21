@@ -26,10 +26,14 @@ namespace Rsdn.Framework.Data
 	/// <remarks>
 	/// When the <b>DbManager</b> goes out of scope, it does not close the internal connection object.
 	/// Therefore, you must explicitly close the connection by calling <see cref="Close"/> or 
-	/// <see cref="Dispose"/>. Also, you can use the C# <b>using</b> statement.
+	/// <see cref="Dispose()"/>. Also, you can use the C# <b>using</b> statement.
 	/// </remarks>
 	/// <include file="Examples.xml" path='examples/db[@name="DbManager"]/*' />
-	public class DbManager : Component, IDisposable
+	public class DbManager :
+#if DEFINE_COMPONENT
+		Component,
+#endif
+		IDisposable
 	{
 		#region Public Constructors
 
@@ -431,10 +435,36 @@ namespace Rsdn.Framework.Data
 		/// and the <see cref="Component.Finalize"/> method.
 		/// </remarks>
 		/// <param name="disposing"><b>true</b> to release both managed and unmanaged resources; <b>false</b> to release only unmanaged resources.</param>
-		protected override void Dispose(bool disposing)
+		protected 
+#if DEFINE_COMPONENT
+			override 
+#else
+			virtual
+#endif
+			void Dispose(bool disposing)
 		{
 			Close();
 		}
+
+#if !DEFINE_COMPONENT
+		/// <summary>
+		/// 
+		/// </summary>
+		public void Dispose()
+		{
+			Dispose(true);
+			GC.SuppressFinalize(this);
+		}
+
+		/// <summary>
+		/// 
+		/// </summary>
+		~DbManager()
+		{
+			Dispose(false);
+		}
+#endif
+
 		#endregion
 
 		#region Public Methods
@@ -447,7 +477,7 @@ namespace Rsdn.Framework.Data
 		/// and then closes the connection.
 		/// </remarks>
 		/// <include file="Examples.xml" path='examples/db[@name="Close()"]/*' />
-		/// <seealso cref="Dispose">Dispose Method</seealso>
+		/// <seealso cref="Dispose()">Dispose Method</seealso>
 		public void Close()
 		{
 			if (_selectCommand != null) { _selectCommand.Dispose(); _selectCommand = null; }
@@ -470,8 +500,6 @@ namespace Rsdn.Framework.Data
 				OnAfterOperation (OperationType.CloseConnection);
 				_connection = null;
 			}
-
-			GC.SuppressFinalize(this);
 		}
 
 		/// <summary>
@@ -2752,16 +2780,16 @@ namespace Rsdn.Framework.Data
 
 		#endregion
 
-		#region ExecuteBizEntity
+		#region ExecuteObject
 
 		/// <summary>
 		/// Executes a SQL statement and maps resultset to an object.
 		/// </summary>
 		/// <param name="entity">An object to populate.</param>
 		/// <returns>A business object.</returns>
-		public object ExecuteBizEntity(object entity)
+		public object ExecuteObject(object entity)
 		{
-			return ExecuteBizEntityInternal(entity, entity.GetType());
+			return ExecuteObjectInternal(entity, entity.GetType());
 		}
 
 		/// <summary>
@@ -2770,7 +2798,7 @@ namespace Rsdn.Framework.Data
 		/// <param name="entity">An object to populate.</param>
 		/// <param name="type">The System.Type of the object.</param>
 		/// <returns>A business object.</returns>
-		private object ExecuteBizEntityInternal(object entity, Type type)
+		private object ExecuteObjectInternal(object entity, Type type)
 		{
 #if HANDLE_EXCEPTIONS
 			try
@@ -2827,9 +2855,9 @@ namespace Rsdn.Framework.Data
 		/// </summary>
 		/// <param name="type">Type of an object.</param>
 		/// <returns>A business object.</returns>
-		public object ExecuteBizEntity(Type type)
+		public object ExecuteObject(Type type)
 		{
-			return ExecuteBizEntityInternal(null, type);
+			return ExecuteObjectInternal(null, type);
 		}
 
 #if VER2
@@ -2838,9 +2866,9 @@ namespace Rsdn.Framework.Data
 		/// </summary>
 		/// <typeparam name="T">Type of an object.</typeparam>
 		/// <returns>A business object.</returns>
-		public T ExecuteBizEntity<T>()
+		public T ExecuteObject<T>()
 		{
-			return (T)ExecuteBizEntityInternal(null, typeof(T));
+			return (T)ExecuteObjectInternal(null, typeof(T));
 		}
 #endif
 
@@ -3222,6 +3250,45 @@ namespace Rsdn.Framework.Data
 			}
 #endif
 		}
+
+		#endregion
+
+		#region Obsolete
+
+		/// <summary>
+		/// Executes a SQL statement and maps resultset to an object.
+		/// </summary>
+		/// <param name="entity">An object to populate.</param>
+		/// <returns>A business object.</returns>
+		[Obsolete("Use method ExecuteObject instead.")]
+		public object ExecuteBizEntity(object entity)
+		{
+			return ExecuteObject(entity);
+		}
+
+		/// <summary>
+		/// Executes a SQL statement and maps resultset to an object.
+		/// </summary>
+		/// <param name="type">Type of an object.</param>
+		/// <returns>A business object.</returns>
+		[Obsolete("Use method ExecuteObject instead.")]
+		public object ExecuteBizEntity(Type type)
+		{
+			return ExecuteObject(type);
+		}
+
+#if VER2
+		/// <summary>
+		/// Executes a SQL statement and maps resultset to an object.
+		/// </summary>
+		/// <typeparam name="T">Type of an object.</typeparam>
+		/// <returns>A business object.</returns>
+		[Obsolete("Use method ExecuteObject instead.")]
+		public T ExecuteBizEntity<T>()
+		{
+			return ExecuteObject<T>();
+		}
+#endif
 
 		#endregion
 	}

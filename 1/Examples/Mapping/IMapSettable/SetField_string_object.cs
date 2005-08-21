@@ -63,7 +63,7 @@ namespace Examples_Mapping_IMapSettable
 							NewID() as CustomerID,
 							'RSDN'  as Name,
 							'Number one Russian resource for software developers!' as Description")
-					.ExecuteBizEntity(typeof(Customer));
+					.ExecuteObject(typeof(Customer));
 			}
 
 			Console.WriteLine("ID:          {0}", customer.ID);

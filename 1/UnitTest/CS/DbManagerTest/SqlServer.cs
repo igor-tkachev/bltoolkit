@@ -52,7 +52,7 @@ namespace CS.DbManagerTest
 			{
 				TestGuid guid = (TestGuid)db
 					.SetCommand("SELECT NewID() as Guid")
-					.ExecuteBizEntity(typeof(TestGuid));
+					.ExecuteObject(typeof(TestGuid));
 
 				Console.WriteLine(guid.Guid);
 
