@@ -275,6 +275,11 @@
                     BuildAction = "Compile"
                 />
                 <File
+                    RelPath = "Mapping\MapNextResult.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
                     RelPath = "Mapping\MapNullDateTimeAttribute.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
@@ -385,11 +390,6 @@
                 />
                 <File
                     RelPath = "Mapping\PropertyMapper.cs"
-                    SubType = "Code"
-                    BuildAction = "Compile"
-                />
-                <File
-                    RelPath = "Mapping\ResultInfo.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
                 />

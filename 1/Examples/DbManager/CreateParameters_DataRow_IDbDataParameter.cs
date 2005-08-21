@@ -22,13 +22,13 @@ namespace Examples_DbManager
 		public void Test()
 		{
 			DataTable table = new DataTable();
-            
+
 			table.Columns.Add("CategoryID",   typeof(int));
 			table.Columns.Add("CategoryName", typeof(string));
 			table.Columns.Add("Description",  typeof(string));
-            
+
 			table.Rows.Add(new object[] { 0, "New category", null });
-            
+
 			using (DbManager db = new DbManager())
 			{
 				foreach (DataRow row in table.Rows)

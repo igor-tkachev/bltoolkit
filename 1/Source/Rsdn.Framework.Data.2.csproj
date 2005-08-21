@@ -172,8 +172,8 @@
     <Compile Include="Mapping\MapInitializingData.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Mapping\MapNextResult.cs" />
     <Compile Include="Mapping\MapRelation.cs" />
-    <Compile Include="Mapping\ResultInfo.cs" />
     <Compile Include="Mapping\MapNullDateTimeAttribute.cs">
       <SubType>Code</SubType>
     </Compile>
