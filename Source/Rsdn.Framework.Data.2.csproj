@@ -110,7 +110,6 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="DbManager.cs">
-      <SubType>Component</SubType>
     </Compile>
     <Compile Include="Mapping\BaseMemberMapper.cs">
       <SubType>Code</SubType>
