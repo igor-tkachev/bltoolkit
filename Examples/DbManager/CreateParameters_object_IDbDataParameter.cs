@@ -28,7 +28,7 @@ namespace Examples_DbManager
 			Category category = new Category();
 
 			category.Name = "New category";
-            
+
 			using (DbManager db = new DbManager())
 			{
 				db

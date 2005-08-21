@@ -1269,98 +1269,6 @@ namespace Rsdn.Framework.Data.Mapping
 		}
 #endif
 
-		public static IList[] ToList(
-			IDataReader    reader,
-			MapResultSet[] nextResults)
-		{
-			Hashtable resultSetInfo = new Hashtable(nextResults.Length);
-			ArrayList resultList    = new ArrayList();
-			bool      readNext      = true;
-
-			// Obtain all records.
-			//
-			for (int i = 0; i < nextResults.Length; i++)
-			{
-				ResultInfo result = new ResultInfo();
-
-				result.ResultSet = nextResults[i];
-				result.List      = new ArrayList();
-
-				resultList.Add(result);
-
-				resultSetInfo[nextResults[i]] = result;
-
-				if (readNext)
-				{
-					ToListInternal(
-						reader, result.List, result.ResultSet.ObjectType, result.ResultSet.Parameters);
-
-					readNext = reader.NextResult();
-				}
-			}
-
-			// Map relations.
-			//
-			foreach (ResultInfo ri in resultList)
-			{
-				if (ri.ResultSet.Relations == null)
-					continue;
-
-				MapDescriptor masterDescriptor = ri.ResultSet.Descriptor;
-
-				foreach (MapRelation r in ri.ResultSet.Relations)
-				{
-					// Create hash.
-					//
-					if (ri.IndexID != r.MasterIndex.ID)
-					{
-						ri.Hashtable = new Hashtable();
-						ri.IndexID   = r.MasterIndex.ID;
-
-						foreach (object o in ri.List)
-						{
-							object key = r.MasterIndex.GetKey(masterDescriptor, o);
-							ri.Hashtable[key] = o;
-						}
-					}
-
-					// Map.
-					//
-					ResultInfo slave = (ResultInfo)resultSetInfo[r.SlaveResultSet];
-
-					foreach (object o in slave.List)
-					{
-						object key    = r.SlaveIndex.GetKey(slave.ResultSet.Descriptor, o);
-						object master = ri.Hashtable[key];
-
-						IMemberMapper mm = masterDescriptor[r.ContainerName];
-
-						if (mm == null)
-							throw new RsdnMapException(string.Format("Type '{0}' does not contain field '{1}'.",
-								masterDescriptor.OriginalType.Name, r.ContainerName));
-
-						object container = mm.GetValue(master);
-
-						if (container is IList)
-						{
-							((IList)container).Add(o);
-						}
-						else
-						{
-							masterDescriptor[r.ContainerName].SetValue(master, o);
-						}
-					}
-				}
-			}
-
-			IList[] ret = new IList[resultList.Count];
-
-			for (int i = 0; i < resultList.Count; i++)
-				ret[i] = ((ResultInfo)resultList[i]).List;
-
-			return ret;
-		}
-
 			#endregion
 
 		#endregion
@@ -2054,7 +1962,161 @@ namespace Rsdn.Framework.Data.Mapping
 
 		#endregion
 
-		#region ToResult
+		#region ToResultSet
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="resultSets"></param>
+		public static void MapResultSets(MapResultSet[] resultSets)
+		{
+			// Map relations.
+			//
+			foreach (MapResultSet rs in resultSets)
+			{
+				if (rs.Relations == null)
+					continue;
+
+				MapDescriptor masterDescriptor = rs.Descriptor;
+
+				foreach (MapRelation r in rs.Relations)
+				{
+					// Create hash.
+					//
+					if (rs.IndexID != r.MasterIndex.ID)
+					{
+						rs.Hashtable = new Hashtable();
+						rs.IndexID   = r.MasterIndex.ID;
+
+						foreach (object o in rs.List)
+						{
+							object key = r.MasterIndex.GetKey(masterDescriptor, o);
+							rs.Hashtable[key] = o;
+						}
+					}
+
+					// Map.
+					//
+					MapResultSet slave = r.SlaveResultSet;
+
+					foreach (object o in slave.List)
+					{
+						object key    = r.SlaveIndex.GetKey(slave.Descriptor, o);
+						object master = rs.Hashtable[key];
+
+						IMemberMapper mm = masterDescriptor[r.ContainerName];
+
+						if (mm == null)
+							throw new RsdnMapException(string.Format("Type '{0}' does not contain field '{1}'.",
+								masterDescriptor.OriginalType.Name, r.ContainerName));
+
+						object container = mm.GetValue(master);
+
+						if (container is IList)
+						{
+							((IList)container).Add(o);
+						}
+						else
+						{
+							masterDescriptor[r.ContainerName].SetValue(master, o);
+						}
+					}
+				}
+			}
+		}
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="reader"></param>
+		/// <param name="resultSets"></param>
+		public static void ToResultSet(IDataReader reader, MapResultSet[] resultSets)
+		{
+			foreach (MapResultSet rs in resultSets)
+			{
+				ToListInternal(reader, rs.List, rs.ObjectType, rs.Parameters);
+
+				if (reader.NextResult() == false)
+					break;
+			}
+
+			MapResultSets(resultSets);
+		}
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="dataSet"></param>
+		/// <param name="resultSets"></param>
+		public static void ToResultSet(DataSet dataSet, MapResultSet[] resultSets)
+		{
+			for (int i = 0; i < resultSets.Length && i < dataSet.Tables.Count; i++)
+			{
+				MapResultSet rs = resultSets[i];
+
+				ToListInternal(dataSet.Tables[i], rs.List, rs.ObjectType, rs.Parameters);
+			}
+
+			MapResultSets(resultSets);
+		}
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="resultSets"></param>
+		/// <returns></returns>
+		public static MapResultSet[] Clone(MapResultSet[] resultSets)
+		{
+			MapResultSet[] output = new MapResultSet[resultSets.Length];
+
+			for (int i = 0; i < resultSets.Length; i++)
+				output[i] = new MapResultSet(resultSets[i]);
+
+			return output;
+		}
+
+		private static int GetResultCount(MapNextResult[] nextResults)
+		{
+			int n = nextResults.Length;
+
+			foreach (MapNextResult nr in nextResults)
+				n += GetResultCount(nr.NextResults);
+
+			return n;
+		}
+
+		private static int GetResultSets(
+			int current, MapResultSet[] output, MapResultSet master, MapNextResult[] nextResults)
+		{
+			foreach (MapNextResult nr in nextResults)
+			{
+				output[current] = new MapResultSet(nr.ObjectType);
+
+				master.AddRelation(output[current], nr.SlaveIndex, nr.MasterIndex, nr.ContainerName);
+
+				current += GetResultSets(current + 1, output, output[current], nr.NextResults);
+			}
+
+			return current;
+		}
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="masterType"></param>
+		/// <param name="nextResults"></param>
+		/// <returns></returns>
+		public static MapResultSet[] ConvertToResultSet(Type masterType, params MapNextResult[] nextResults)
+		{
+			MapResultSet[] output = new MapResultSet[1 + GetResultCount(nextResults)];
+
+			output[0] = new MapResultSet(masterType);
+
+			GetResultSets(1, output, output[0], nextResults);
+
+			return output;
+		}
+
 		#endregion
 
 		#region Descriptor

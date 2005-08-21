@@ -40,42 +40,39 @@ namespace CS
 		[Test]
 		public void TestResultSet()
 		{
-			using (DbManager   db = new DbManager())
-			using (IDataReader rd = db
-				.SetCommand(SqlResultSet)
-				.ExecuteReader())
+			MapResultSet[] sets = new MapResultSet[2];
+
+			sets[0] = new MapResultSet(typeof(Master));
+			sets[1] = new MapResultSet(typeof(Slave));
+
+			sets[0].AddRelation(sets[1], "MasterID", "MasterID", "Slaves");
+
+			using (DbManager db = new DbManager())
 			{
-				MapResultSet[] sets = new MapResultSet[2];
-
-				sets[0] = new MapResultSet(typeof(Master));
-				sets[1] = new MapResultSet(typeof(Slave));
-
-				sets[0].AddRelation("MasterID", sets[1], "MasterID", "Slaves");
-
-				IList[] lists = Map.ToListInternal(rd, sets);
-
-				Assert.AreEqual(2, lists.Length);
-				Assert.AreEqual(7, ((Slave)(((Master)lists[0][0]).Slaves[1])).ID);
+				db
+					.SetCommand(SqlResultSet)
+					.ExecuteResultSet(sets);
 			}
+
+			Assert.AreEqual(7, ((Slave)(((Master)sets[0].List[0]).Slaves[1])).ID);
 		}
 
 		[Test]
 		[ExpectedException(typeof(RsdnMapException))]
 		public void TestFailResultSet1()
 		{
-			using (DbManager   db = new DbManager())
-			using (IDataReader rd = db
-					   .SetCommand(SqlResultSet)
-					   .ExecuteReader())
+			MapResultSet[] sets = new MapResultSet[2];
+
+			sets[0] = new MapResultSet(typeof(Master));
+			sets[1] = new MapResultSet(typeof(Slave));
+
+			sets[0].AddRelation(sets[1], "MasterID", "ID", "Slaves");
+
+			using (DbManager db = new DbManager())
 			{
-				MapResultSet[] sets = new MapResultSet[2];
-
-				sets[0] = new MapResultSet(typeof(Master));
-				sets[1] = new MapResultSet(typeof(Slave));
-
-				sets[0].AddRelation("ID", sets[1], "MasterID", "Slaves");
-
-				IList[] lists = Map.ToListInternal(rd, sets);
+				db
+					.SetCommand(SqlResultSet)
+					.ExecuteResultSet(sets);
 			}
 		}
 
@@ -83,19 +80,18 @@ namespace CS
 		[ExpectedException(typeof(RsdnMapException))]
 		public void TestFailResultSet2()
 		{
-			using (DbManager   db = new DbManager())
-			using (IDataReader rd = db
-					   .SetCommand(SqlResultSet)
-					   .ExecuteReader())
+			MapResultSet[] sets = new MapResultSet[2];
+
+			sets[0] = new MapResultSet(typeof(Master));
+			sets[1] = new MapResultSet(typeof(Slave));
+
+			sets[0].AddRelation(sets[1], "Master", "MasterID", "Slaves");
+
+			using (DbManager db = new DbManager())
 			{
-				MapResultSet[] sets = new MapResultSet[2];
-
-				sets[0] = new MapResultSet(typeof(Master));
-				sets[1] = new MapResultSet(typeof(Slave));
-
-				sets[0].AddRelation("MasterID", sets[1], "Master", "Slaves");
-
-				IList[] lists = Map.ToListInternal(rd, sets);
+				db
+					.SetCommand(SqlResultSet)
+					.ExecuteResultSet(sets);
 			}
 		}
 
@@ -103,19 +99,32 @@ namespace CS
 		[ExpectedException(typeof(RsdnMapException))]
 		public void TestFailResultSet3()
 		{
-			using (DbManager   db = new DbManager())
-			using (IDataReader rd = db
-					   .SetCommand(SqlResultSet)
-					   .ExecuteReader())
+			MapResultSet[] sets = new MapResultSet[2];
+
+			sets[0] = new MapResultSet(typeof(Master));
+			sets[1] = new MapResultSet(typeof(Slave));
+
+			sets[0].AddRelation(sets[1], "MasterID", "MasterID", "Slave");
+
+			using (DbManager db = new DbManager())
 			{
-				MapResultSet[] sets = new MapResultSet[2];
+				db
+					.SetCommand(SqlResultSet)
+					.ExecuteResultSet(sets);
+			}
+		}
 
-				sets[0] = new MapResultSet(typeof(Master));
-				sets[1] = new MapResultSet(typeof(Slave));
+		[Test]
+		public void TestNextResult()
+		{
+			using (DbManager db = new DbManager())
+			{
+				MapResultSet[] sets = db
+					.SetCommand(SqlResultSet)
+					.ExecuteResultSet(typeof(Master),
+						new MapNextResult(typeof(Slave), "MasterID", "MasterID", "Slaves"));
 
-				sets[0].AddRelation("MasterID", sets[1], "MasterID", "Slave");
-
-				IList[] lists = Map.ToListInternal(rd, sets);
+				Assert.AreEqual(7, ((Slave)(((Master)sets[0].List[0]).Slaves[1])).ID);
 			}
 		}
 	}

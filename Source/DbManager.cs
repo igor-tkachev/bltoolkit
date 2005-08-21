@@ -611,13 +611,13 @@ namespace Rsdn.Framework.Data
 
 			string key = idx >= 0 && configurationString.Length > idx + 1?
 				configurationString.Substring(idx + 1):
-				"sql";
+				"SQL";
 
 			DataProvider.IDataProvider dataProvider = 
-				(DataProvider.IDataProvider)_dataProviderNameList[key];
+				(DataProvider.IDataProvider)_dataProviderNameList[key.ToUpper()];
 
 			if (dataProvider == null)
-				dataProvider = (DataProvider.IDataProvider)_dataProviderNameList["sql"];
+				dataProvider = (DataProvider.IDataProvider)_dataProviderNameList["SQL"];
 
 			return dataProvider;
 		}
@@ -975,9 +975,7 @@ namespace Rsdn.Framework.Data
 
 		#region Public Static Methods.
 
-		private static Hashtable _dataProviderNameList =
-			Hashtable.Synchronized(new Hashtable(4, new CaseInsensitiveHashCodeProvider(), new CaseInsensitiveComparer()));
-		
+		private static Hashtable _dataProviderNameList = Hashtable.Synchronized(new Hashtable(4));
 		private static Hashtable _dataProviderTypeList = Hashtable.Synchronized(new Hashtable(4));
 
 		/// <summary>
@@ -992,7 +990,7 @@ namespace Rsdn.Framework.Data
 		/// <param name="dataProvider">An instance of the <see cref="Rsdn.Framework.Data.DataProvider.IDataProvider"/> interface.</param>
 		public static void AddDataProvider(DataProvider.IDataProvider dataProvider)
 		{
-			_dataProviderNameList[dataProvider.Name]           = dataProvider;
+			_dataProviderNameList[dataProvider.Name.ToUpper()] = dataProvider;
 			_dataProviderTypeList[dataProvider.ConnectionType] = dataProvider;
 		}
 
@@ -1055,7 +1053,6 @@ namespace Rsdn.Framework.Data
 					foreach (DictionaryEntry de in _connectionStringList)
 					{
 						_defaultConfiguration = de.Key.ToString();
-
 						break;
 					}
 
@@ -2948,6 +2945,52 @@ namespace Rsdn.Framework.Data
 			return dic;
 		}
 #endif
+
+		#endregion
+
+		#region ExecuteResultSet
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="resultSets"></param>
+		/// <returns></returns>
+		public Mapping.MapResultSet[] ExecuteResultSet(Mapping.MapResultSet[] resultSets)
+		{
+			try
+			{
+				if (_prepared)
+					InitParameters(CommandAction.Select);
+
+				OnBeforeOperation(OperationType.ExecuteReader);
+
+				using (IDataReader dr = SelectCommand.ExecuteReader())
+				{
+					OnAfterOperation(OperationType.ExecuteReader);
+
+					Mapping.Map.ToResultSet(dr, resultSets);
+				}
+
+				return resultSets;
+			}
+			catch (Exception ex)
+			{
+				HandleException(ex);
+				return null;
+			}
+		}
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="masterType"></param>
+		/// <param name="nextResults"></param>
+		/// <returns></returns>
+		public Mapping.MapResultSet[] ExecuteResultSet(
+			Type masterType, params Mapping.MapNextResult[] nextResults)
+		{
+			return ExecuteResultSet(Mapping.Map.ConvertToResultSet(masterType, nextResults));
+		}
 
 		#endregion
 

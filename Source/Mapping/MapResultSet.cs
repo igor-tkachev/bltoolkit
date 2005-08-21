@@ -36,6 +36,19 @@ namespace Rsdn.Framework.Data.Mapping
 			_parameters = parameters;
 		}
 
+		internal MapResultSet(MapResultSet resultSet)
+		{
+			_objectType = resultSet._objectType;
+			_parameters = resultSet._parameters;
+			_descriptor = resultSet._descriptor;
+
+			if (resultSet._relationList != null)
+			{
+				_relationList = new ArrayList(resultSet._relationList.Count);
+				_relationList.AddRange(resultSet._relationList);
+			}
+		}
+
 		private  Type _objectType;
 		internal Type  ObjectType
 		{
@@ -48,10 +61,51 @@ namespace Rsdn.Framework.Data.Mapping
 			get { return _descriptor;  }
 		}
 
-		private  object[] _parameters;
-		internal object[]  Parameters
+		private object[] _parameters;
+		/// <summary>
+		/// 
+		/// </summary>
+		public  object[]  Parameters
 		{
-			get { return _parameters; }
+			get { return _parameters;  }
+			set { _parameters = value; }
+		}
+
+		private IList _list;
+		/// <summary>
+		/// 
+		/// </summary>
+		public  IList  List
+		{
+			get
+			{
+				if (_list == null)
+					_list = new ArrayList();
+
+				return _list;
+			}
+
+			set { _list = value; }
+		}
+
+		private  string _indexID;
+		/// <summary>
+		/// 
+		/// </summary>
+		internal string  IndexID
+		{
+			get { return _indexID;  }
+			set { _indexID = value; }
+		}
+
+		private  Hashtable _hashtable;
+		/// <summary>
+		/// 
+		/// </summary>
+		internal Hashtable  Hashtable
+		{
+			get { return _hashtable;  }
+			set { _hashtable = value; }
 		}
 
 		private  MapRelation[] _relations;
@@ -73,36 +127,36 @@ namespace Rsdn.Framework.Data.Mapping
 		/// <summary>
 		/// 
 		/// </summary>
-		/// <param name="masterIndex"></param>
 		/// <param name="slaveResultSet"></param>
 		/// <param name="slaveIndex"></param>
+		/// <param name="masterIndex"></param>
 		/// <param name="containerName"></param>
 		public void AddRelation(
-			MapIndex     masterIndex,
 			MapResultSet slaveResultSet,
 			MapIndex     slaveIndex,
+			MapIndex     masterIndex,
 			string       containerName)
 		{
 			if (_relationList == null)
 				_relationList = new ArrayList();
 
-			_relationList.Add(new MapRelation(this, masterIndex, slaveResultSet, slaveIndex, containerName));
+			_relationList.Add(new MapRelation(slaveResultSet, slaveIndex, masterIndex, containerName));
 		}
 
 		/// <summary>
 		/// 
 		/// </summary>
-		/// <param name="masterIndex"></param>
 		/// <param name="slaveResultSet"></param>
 		/// <param name="slaveIndex"></param>
+		/// <param name="masterIndex"></param>
 		/// <param name="containerName"></param>
 		public void AddRelation(
-			string       masterIndex,
 			MapResultSet slaveResultSet,
 			string       slaveIndex,
+			string       masterIndex,
 			string       containerName)
 		{
-			AddRelation(new MapIndex(masterIndex), slaveResultSet, new MapIndex(slaveIndex), containerName);
+			AddRelation( slaveResultSet, new MapIndex(slaveIndex), new MapIndex(masterIndex),containerName);
 		}
 	}
 }
