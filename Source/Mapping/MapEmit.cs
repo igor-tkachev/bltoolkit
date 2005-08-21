@@ -1211,13 +1211,17 @@ namespace Rsdn.Framework.Data.Mapping
 				LocalBuilder l1 = gen.DeclareLocal(typeof(object));
 
 				gen
+#if HANDLE_EXCEPTIONS
 					// try
 					// {
 					.BeginExceptionBlock
+#endif
 
 					// return new BizObject();
 					//
 					.newobj(ci)
+
+#if HANDLE_EXCEPTIONS
 					.stloc(l1)
 
 					// catch (Exception ex)
@@ -1233,6 +1237,7 @@ namespace Rsdn.Framework.Data.Mapping
 					.EndExceptionBlock
 
 					.ldloc(l1)
+#endif
 					.ret();
 			}
 		}
@@ -1275,10 +1280,12 @@ namespace Rsdn.Framework.Data.Mapping
 			LocalBuilder l0 = gen.DeclareLocal(typeof(Exception));
 			LocalBuilder l1 = gen.DeclareLocal(typeof(object));
 
+#if HANDLE_EXCEPTIONS
 			gen
 				// try
 				// {
 				.BeginExceptionBlock.EndGen();
+#endif
 
 			// return new BizObject();
 			//
@@ -1287,6 +1294,7 @@ namespace Rsdn.Framework.Data.Mapping
 
 			gen
 				.newobj(ci)
+#if HANDLE_EXCEPTIONS
 				.stloc(l1)
 
 				// catch (Exception ex)
@@ -1302,6 +1310,7 @@ namespace Rsdn.Framework.Data.Mapping
 				.EndExceptionBlock
 
 				.ldloc(l1)
+#endif
 				.ret();
 		}
 

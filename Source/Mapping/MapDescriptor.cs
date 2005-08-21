@@ -28,15 +28,19 @@ namespace Rsdn.Framework.Data.Mapping
 		/// <returns></returns>
 		public virtual object CreateInstance()
 		{
+#if HANDLE_EXCEPTIONS
 			try
 			{
+#endif
 				return Activator.CreateInstance(_mappedType);
+#if HANDLE_EXCEPTIONS
 			}
 			catch (Exception ex)
 			{
 				HandleException(ex);
 				return null;
 			}
+#endif
 		}
 
 		/// <summary>
@@ -434,6 +438,8 @@ namespace Rsdn.Framework.Data.Mapping
 				new ResolveEventHandler(CurrentDomain_AssemblyResolve);
 		}
 
+#if HANDLE_EXCEPTIONS
+
 		/// <summary>
 		/// 
 		/// </summary>
@@ -442,6 +448,8 @@ namespace Rsdn.Framework.Data.Mapping
 		{
 			Map.HandleException(ex);
 		}
+
+#endif
 
 		/// <summary>
 		/// 
@@ -994,14 +1002,18 @@ namespace Rsdn.Framework.Data.Mapping
 		/// <param name="schemaStream"></param>
 		public static void SetMappingSchema(Stream schemaStream)
 		{
+#if HANDLE_EXCEPTIONS
 			try
 			{
+#endif
 				SetMappingSchema(GetMappingSchema(schemaStream));
+#if HANDLE_EXCEPTIONS
 			} 
 			catch (Exception ex)
 			{
 				HandleException(ex);
 			}
+#endif
 		}
 
 		private static XmlDocument GetMappingSchemaX(XmlDocument mappingSchema)
@@ -1021,8 +1033,10 @@ namespace Rsdn.Framework.Data.Mapping
 		/// <param name="mappingSchema"></param>
 		public static void SetMappingSchema(XmlDocument mappingSchema)
 		{
+#if HANDLE_EXCEPTIONS
 			try
 			{
+#endif
 				if (mappingSchema.DocumentElement.NamespaceURI == _namespaceUri)
 				{
 					_defaultSchemaNamespace = new XmlNamespaceManager(mappingSchema.NameTable);
@@ -1030,11 +1044,13 @@ namespace Rsdn.Framework.Data.Mapping
 				}
 
 				_defaultSchemaDocument = mappingSchema;
+#if HANDLE_EXCEPTIONS
 			} 
 			catch (Exception ex)
 			{
 				HandleException(ex);
 			}
+#endif
 		}
 
 		private const  string _namespaceUri = "http://www.rsdn.ru/mapping.xsd";

@@ -45,17 +45,21 @@ namespace Rsdn.Framework.Data.Mapping
 		[Obsolete("Use method ToEnum instead.")]
 		public static object ToValue(object sourceValue, Type type)
 		{
+#if HANDLE_EXCEPTIONS
 			try
 			{
+#endif
 				object[] attributes = MapDescriptor.GetValueAttributes(type);
 
 				return BaseMemberMapper.MapFrom(type, type.IsEnum, (Attribute[])attributes, sourceValue, true);
+#if HANDLE_EXCEPTIONS
 			}
 			catch (Exception ex)
 			{
 				HandleException(ex);
 				return null;
 			}
+#endif
 		}
 
 		/// <summary>
@@ -71,19 +75,23 @@ namespace Rsdn.Framework.Data.Mapping
 		[Obsolete("Use method FromEnum instead.")]
 		public static object FromValue(object sourceValue)
 		{
+#if HANDLE_EXCEPTIONS
 			try
 			{
+#endif
 				Type type = sourceValue.GetType();
 
 				object[] attributes = MapDescriptor.GetValueAttributes(type);
 
 				return BaseMemberMapper.MapTo((Attribute[])attributes, sourceValue, true);
+#if HANDLE_EXCEPTIONS
 			}
 			catch (Exception ex)
 			{
 				HandleException(ex);
 				return null;
 			}
+#endif
 		}
 
 		/// <summary>
@@ -99,17 +107,21 @@ namespace Rsdn.Framework.Data.Mapping
 		/// <returns>One of enumeration values.</returns>
 		public static Enum ToEnum(object sourceValue, Type type)
 		{
+#if HANDLE_EXCEPTIONS
 			try
 			{
+#endif
 				object[] attributes = MapDescriptor.GetValueAttributes(type);
 
 				return (Enum)BaseMemberMapper.MapFrom(type, true, (Attribute[])attributes, sourceValue, true);
+#if HANDLE_EXCEPTIONS
 			}
 			catch (Exception ex)
 			{
 				HandleException(ex);
 				return null;
 			}
+#endif
 		}
 
 		/// <summary>
@@ -124,19 +136,23 @@ namespace Rsdn.Framework.Data.Mapping
 		/// <returns>Mapped value.</returns>
 		public static object FromEnum(Enum sourceValue)
 		{
+#if HANDLE_EXCEPTIONS
 			try
 			{
+#endif
 				Type type = sourceValue.GetType();
 
 				object[] attributes = MapDescriptor.GetValueAttributes(type);
 
 				return BaseMemberMapper.MapTo((Attribute[])attributes, sourceValue, true);
+#if HANDLE_EXCEPTIONS
 			}
 			catch (Exception ex)
 			{
 				HandleException(ex);
 				return null;
 			}
+#endif
 		}
 
 		#endregion
@@ -288,6 +304,8 @@ namespace Rsdn.Framework.Data.Mapping
 			return MapDescriptor.GetDescriptor(obj.GetType());
 		}
 
+#if HANDLE_EXCEPTIONS
+
 		internal static void HandleException(Exception ex)
 		{
 			if (ex is RsdnDataException || ex is ArgumentNullException)
@@ -299,6 +317,8 @@ namespace Rsdn.Framework.Data.Mapping
 				throw new RsdnMapException(ex.Message, ex);
 			}
 		}
+
+#endif
 
 		#endregion
 
@@ -321,17 +341,21 @@ namespace Rsdn.Framework.Data.Mapping
 		/// <returns>The destination object.</returns>
 		public static object ToObject(object source, object dest)
 		{
+#if HANDLE_EXCEPTIONS
 			try
 			{
+#endif
 				MapInternal(GetDataSource(source), source, GetDataReceiver(dest), dest);
 
 				return dest;
+#if HANDLE_EXCEPTIONS
 			}
 			catch (Exception ex)
 			{
 				HandleException(ex);
 				return null;
 			}
+#endif
 		}
 
 		/// <summary>
@@ -383,17 +407,21 @@ namespace Rsdn.Framework.Data.Mapping
 			Type   type,
 			params object[] parameters)
 		{
+#if HANDLE_EXCEPTIONS
 			try
 			{
+#endif
 				return MapInternal(
 					new MapInitializingData(
 						GetDataSource(source), source, MapDescriptor.GetDescriptor(type), parameters));
+#if HANDLE_EXCEPTIONS
 			}
 			catch (Exception ex)
 			{
 				HandleException(ex);
 				return null;
 			}
+#endif
 		}
 
 #if VER2
@@ -469,17 +497,21 @@ namespace Rsdn.Framework.Data.Mapping
 		/// <returns>A business object.</returns>
 		public static object ToObject(DataRow dataRow, DataRowVersion version, object dest)
 		{
+#if HANDLE_EXCEPTIONS
 			try
 			{
+#endif
 				MapInternal(new DataRowReader(dataRow, version), dataRow, GetDataReceiver(dest), dest);
 
 				return dest;
+#if HANDLE_EXCEPTIONS
 			}
 			catch (Exception ex)
 			{
 				HandleException(ex);
 				return null;
 			}
+#endif
 		}
 
 		/// <summary>
@@ -571,17 +603,21 @@ namespace Rsdn.Framework.Data.Mapping
 			Type            type,
 			params object[] parameters)
 		{
+#if HANDLE_EXCEPTIONS
 			try
 			{
+#endif
 				return MapInternal(
 					new MapInitializingData(
 						new DataRowReader(dataRow, version), dataRow, MapDescriptor.GetDescriptor(type), parameters));
+#if HANDLE_EXCEPTIONS
 			}
 			catch (Exception ex)
 			{
 				HandleException(ex);
 				return null;
 			}
+#endif
 		}
 
 #if VER2
@@ -614,8 +650,10 @@ namespace Rsdn.Framework.Data.Mapping
 			Type      type,
 			params object[] parameters)
 		{
+#if HANDLE_EXCEPTIONS
 			try
 			{
+#endif
 				DataRowReader       rr   = new DataRowReader(null);
 				MapDescriptor       md   = MapDescriptor.GetDescriptor(type);
 				MapInitializingData data = new MapInitializingData(rr, null, md, parameters);
@@ -634,12 +672,14 @@ namespace Rsdn.Framework.Data.Mapping
 				}
 
 				return list;
+#if HANDLE_EXCEPTIONS
 			}
 			catch (Exception ex)
 			{
 				HandleException(ex);
 				return null;
 			}
+#endif
 		}
 
 		/// <summary>
@@ -756,8 +796,10 @@ namespace Rsdn.Framework.Data.Mapping
 			Type            type,
 			params object[] parameters)
 		{
+#if HANDLE_EXCEPTIONS
 			try
 			{
+#endif
 				DataRowReader       rr   = new DataRowReader(null, version);
 				MapDescriptor       md   = MapDescriptor.GetDescriptor(type);
 				MapInitializingData data = new MapInitializingData(rr, null, md, parameters);
@@ -773,12 +815,14 @@ namespace Rsdn.Framework.Data.Mapping
 				}
 
 				return list;
+#if HANDLE_EXCEPTIONS
 			}
 			catch (Exception ex)
 			{
 				HandleException(ex);
 				return null;
 			}
+#endif
 		}
 
 		/// <summary>
@@ -1083,8 +1127,10 @@ namespace Rsdn.Framework.Data.Mapping
 			Type            type,
 			params object[] parameters)
 		{
+#if HANDLE_EXCEPTIONS
 			try
 			{
+#endif
 				if (reader.Read())
 				{
 					DataReaderSource    drs  = new DataReaderSource(reader);
@@ -1100,12 +1146,14 @@ namespace Rsdn.Framework.Data.Mapping
 				}
 
 				return list;
+#if HANDLE_EXCEPTIONS
 			}
 			catch (Exception ex)
 			{
 				HandleException(ex);
 				return null;
 			}
+#endif
 		}
 
 		/// <summary>
@@ -1284,8 +1332,10 @@ namespace Rsdn.Framework.Data.Mapping
 			Type            type,
 			params object[] parameters)
 		{
+#if HANDLE_EXCEPTIONS
 			try
 			{
+#endif
 				DataRowReader       rr   = new DataRowReader(null);
 				MapDescriptor       md   = MapDescriptor.GetDescriptor(type);
 				MapInitializingData data = new MapInitializingData(rr, null, md, parameters);
@@ -1304,12 +1354,14 @@ namespace Rsdn.Framework.Data.Mapping
 				}
 
 				return dictionary;
+#if HANDLE_EXCEPTIONS
 			}
 			catch (Exception ex)
 			{
 				HandleException(ex);
 				return null;
 			}
+#endif
 		}
 
 		/// <summary>
@@ -1404,8 +1456,10 @@ namespace Rsdn.Framework.Data.Mapping
 			Type            type,
 			params object[] parameters)
 		{
+#if HANDLE_EXCEPTIONS
 			try
 			{
+#endif
 				DataRowReader       rr   = new DataRowReader(null, version);
 				MapDescriptor       md   = MapDescriptor.GetDescriptor(type);
 				MapInitializingData data = new MapInitializingData(rr, null, md, parameters);
@@ -1421,12 +1475,14 @@ namespace Rsdn.Framework.Data.Mapping
 				}
 
 				return dictionary;
+#if HANDLE_EXCEPTIONS
 			}
 			catch (Exception ex)
 			{
 				HandleException(ex);
 				return null;
 			}
+#endif
 		}
 
 		/// <summary>
@@ -1623,8 +1679,10 @@ namespace Rsdn.Framework.Data.Mapping
 			Type            type,
 			params object[] parameters)
 		{
+#if HANDLE_EXCEPTIONS
 			try
 			{
+#endif
 				if (reader.Read())
 				{
 					DataReaderSource    drs  = new DataReaderSource(reader);
@@ -1640,12 +1698,14 @@ namespace Rsdn.Framework.Data.Mapping
 				}
 
 				return dictionary;
+#if HANDLE_EXCEPTIONS
 			}
 			catch (Exception ex)
 			{
 				HandleException(ex);
 				return null;
 			}
+#endif
 		}
 
 		/// <summary>
@@ -1863,8 +1923,10 @@ namespace Rsdn.Framework.Data.Mapping
 			IList     list,
 			DataTable dataTable)
 		{
+#if HANDLE_EXCEPTIONS
 			try
 			{
+#endif
 				DataRowReader rr = new DataRowReader(null);
 
 				foreach (object o in list)
@@ -1877,12 +1939,14 @@ namespace Rsdn.Framework.Data.Mapping
 				}
 
 				return dataTable;	
+#if HANDLE_EXCEPTIONS
 			}
 			catch (Exception ex)
 			{
 				HandleException(ex);
 				return null;
 			}
+#endif
 		}
 
 
@@ -1896,8 +1960,10 @@ namespace Rsdn.Framework.Data.Mapping
 			DataTable sourceTable,
 			DataTable targetTable)
 		{
+#if HANDLE_EXCEPTIONS
 			try
 			{
+#endif
 				DataRowReader sr = new DataRowReader(null);
 				DataRowReader tr = new DataRowReader(null);
 
@@ -1913,12 +1979,14 @@ namespace Rsdn.Framework.Data.Mapping
 				}
 
 				return targetTable;
+#if HANDLE_EXCEPTIONS
 			}
 			catch (Exception ex)
 			{
 				HandleException(ex);
 				return null;
 			}
+#endif
 		}
 
 		/// <summary>
@@ -1933,8 +2001,10 @@ namespace Rsdn.Framework.Data.Mapping
 			DataTable       table,
 			params object[] parameters)
 		{
+#if HANDLE_EXCEPTIONS
 			try
 			{
+#endif
 				if (reader.Read())
 				{
 					DataReaderSource drs = new DataReaderSource(reader);
@@ -1952,12 +2022,14 @@ namespace Rsdn.Framework.Data.Mapping
 				}
 
 				return table;
+#if HANDLE_EXCEPTIONS
 			}
 			catch (Exception ex)
 			{
 				HandleException(ex);
 				return null;
 			}
+#endif
 		}
 
 		#endregion
@@ -1970,59 +2042,71 @@ namespace Rsdn.Framework.Data.Mapping
 		/// <param name="resultSets"></param>
 		public static void MapResultSets(MapResultSet[] resultSets)
 		{
-			// Map relations.
-			//
-			foreach (MapResultSet rs in resultSets)
+#if HANDLE_EXCEPTIONS
+			try
 			{
-				if (rs.Relations == null)
-					continue;
-
-				MapDescriptor masterDescriptor = rs.Descriptor;
-
-				foreach (MapRelation r in rs.Relations)
+#endif
+				// Map relations.
+				//
+				foreach (MapResultSet rs in resultSets)
 				{
-					// Create hash.
-					//
-					if (rs.IndexID != r.MasterIndex.ID)
+					if (rs.Relations == null)
+						continue;
+
+					MapDescriptor masterDescriptor = rs.Descriptor;
+
+					foreach (MapRelation r in rs.Relations)
 					{
-						rs.Hashtable = new Hashtable();
-						rs.IndexID   = r.MasterIndex.ID;
-
-						foreach (object o in rs.List)
+						// Create hash.
+						//
+						if (rs.IndexID != r.MasterIndex.ID)
 						{
-							object key = r.MasterIndex.GetKey(masterDescriptor, o);
-							rs.Hashtable[key] = o;
+							rs.Hashtable = new Hashtable();
+							rs.IndexID   = r.MasterIndex.ID;
+
+							foreach (object o in rs.List)
+							{
+								object key = r.MasterIndex.GetKey(masterDescriptor, o);
+								rs.Hashtable[key] = o;
+							}
 						}
-					}
 
-					// Map.
-					//
-					MapResultSet slave = r.SlaveResultSet;
+						// Map.
+						//
+						MapResultSet slave = r.SlaveResultSet;
 
-					foreach (object o in slave.List)
-					{
-						object key    = r.SlaveIndex.GetKey(slave.Descriptor, o);
-						object master = rs.Hashtable[key];
-
-						IMemberMapper mm = masterDescriptor[r.ContainerName];
-
-						if (mm == null)
-							throw new RsdnMapException(string.Format("Type '{0}' does not contain field '{1}'.",
-								masterDescriptor.OriginalType.Name, r.ContainerName));
-
-						object container = mm.GetValue(master);
-
-						if (container is IList)
+						foreach (object o in slave.List)
 						{
-							((IList)container).Add(o);
-						}
-						else
-						{
-							masterDescriptor[r.ContainerName].SetValue(master, o);
+							object key    = r.SlaveIndex.GetKey(slave.Descriptor, o);
+							object master = rs.Hashtable[key];
+
+							IMemberMapper mm = masterDescriptor[r.ContainerName];
+
+							if (mm == null)
+								throw new RsdnMapException(string.Format("Type '{0}' does not contain field '{1}'.",
+									masterDescriptor.OriginalType.Name, r.ContainerName));
+
+							object container = mm.GetValue(master);
+
+							if (container is IList)
+							{
+								((IList)container).Add(o);
+							}
+							else
+							{
+								masterDescriptor[r.ContainerName].SetValue(master, o);
+							}
 						}
 					}
 				}
+#if HANDLE_EXCEPTIONS
 			}
+			catch (Exception ex)
+			{
+				HandleException(ex);
+				return null;
+			}
+#endif
 		}
 
 		/// <summary>
@@ -2032,13 +2116,25 @@ namespace Rsdn.Framework.Data.Mapping
 		/// <param name="resultSets"></param>
 		public static void ToResultSet(IDataReader reader, MapResultSet[] resultSets)
 		{
-			foreach (MapResultSet rs in resultSets)
+#if HANDLE_EXCEPTIONS
+			try
 			{
-				ToListInternal(reader, rs.List, rs.ObjectType, rs.Parameters);
+#endif
+				foreach (MapResultSet rs in resultSets)
+				{
+					ToListInternal(reader, rs.List, rs.ObjectType, rs.Parameters);
 
-				if (reader.NextResult() == false)
-					break;
+					if (reader.NextResult() == false)
+						break;
+				}
+#if HANDLE_EXCEPTIONS
 			}
+			catch (Exception ex)
+			{
+				HandleException(ex);
+				return null;
+			}
+#endif
 
 			MapResultSets(resultSets);
 		}
@@ -2050,12 +2146,24 @@ namespace Rsdn.Framework.Data.Mapping
 		/// <param name="resultSets"></param>
 		public static void ToResultSet(DataSet dataSet, MapResultSet[] resultSets)
 		{
-			for (int i = 0; i < resultSets.Length && i < dataSet.Tables.Count; i++)
+#if HANDLE_EXCEPTIONS
+			try
 			{
-				MapResultSet rs = resultSets[i];
+#endif
+				for (int i = 0; i < resultSets.Length && i < dataSet.Tables.Count; i++)
+				{
+					MapResultSet rs = resultSets[i];
 
-				ToListInternal(dataSet.Tables[i], rs.List, rs.ObjectType, rs.Parameters);
+					ToListInternal(dataSet.Tables[i], rs.List, rs.ObjectType, rs.Parameters);
+				}
+#if HANDLE_EXCEPTIONS
 			}
+			catch (Exception ex)
+			{
+				HandleException(ex);
+				return null;
+			}
+#endif
 
 			MapResultSets(resultSets);
 		}

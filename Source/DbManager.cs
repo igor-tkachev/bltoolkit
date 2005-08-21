@@ -107,17 +107,21 @@ namespace Rsdn.Framework.Data
 		{
 			if (connection != null)
 			{
+#if HANDLE_EXCEPTIONS
 				try 
 				{
+#endif
 					Init(connection);
 			
 					if (_connection.State == ConnectionState.Closed)
 						OpenConnection();
+#if HANDLE_EXCEPTIONS
 				}
 				catch (Exception ex)
 				{
 					HandleException(ex);
 				}
+#endif
 			}
 		}
 
@@ -156,9 +160,11 @@ namespace Rsdn.Framework.Data
 			IDbConnection connection,
 			string        configurationString)
 		{
+#if HANDLE_EXCEPTIONS
 			try
 			{
-				if (connection == null)
+#endif
+			if (connection == null)
 				{
 					Init(configurationString);
 
@@ -177,11 +183,13 @@ namespace Rsdn.Framework.Data
 					if (_connection.State == ConnectionState.Closed)
 						OpenConnection();
 				}
+#if HANDLE_EXCEPTIONS
 			}
 			catch (Exception ex)
 			{
 				HandleException(ex);
 			}
+#endif
 		}
 
 		#endregion
@@ -495,8 +503,10 @@ namespace Rsdn.Framework.Data
 		/// <returns>This instance of the <see cref="DbManager"/>.</returns>
 		public virtual DbManager BeginTransaction(IsolationLevel il)
 		{
+#if HANDLE_EXCEPTIONS
 			try
 			{
+#endif
 				// If transaction is open, we dispose it, it will rollback all changes.
 				//
 				if (_transaction != null)
@@ -521,12 +531,14 @@ namespace Rsdn.Framework.Data
 				if (_deleteCommand != null) _deleteCommand.Transaction = _transaction;
 
 				return this;
+#if HANDLE_EXCEPTIONS
 			}
 			catch (Exception ex)
 			{
 				HandleException(ex);
 				return null;
 			}
+#endif
 		}
 
 		/// <summary>
@@ -535,8 +547,10 @@ namespace Rsdn.Framework.Data
 		/// <returns></returns>
 		public DbManager CommitTransaction()
 		{
+#if HANDLE_EXCEPTIONS
 			try
 			{
+#endif
 				if (_transaction != null)
 				{
 					OnBeforeOperation(OperationType.CommitTransaction);
@@ -548,12 +562,14 @@ namespace Rsdn.Framework.Data
 				}
 
 				return this;
+#if HANDLE_EXCEPTIONS
 			}
 			catch (Exception ex)
 			{
 				HandleException(ex);
 				return null;
 			}
+#endif
 		}
 
 		#endregion
@@ -739,6 +755,8 @@ namespace Rsdn.Framework.Data
 			return commandParameters;
 		}
 
+#if HANDLE_EXCEPTIONS
+
 		private static void HandleException(Exception ex)
 		{
 			if (ex is RsdnDataException || ex is ArgumentNullException)
@@ -751,10 +769,14 @@ namespace Rsdn.Framework.Data
 			}
 		}
 
+#endif
+
 		private IDbCommand InitCommand(IDbCommand command)
 		{
+#if HANDLE_EXCEPTIONS
 			try
 			{
+#endif
 				IDbCommand cmd = command;
 
 				if (cmd == null) 
@@ -772,12 +794,14 @@ namespace Rsdn.Framework.Data
 				}
 
 				return cmd;
+#if HANDLE_EXCEPTIONS
 			}
 			catch (Exception ex)
 			{
 				HandleException(ex);
 				return null;
 			}
+#endif
 		}
 
 		/// <summary>
@@ -889,8 +913,10 @@ namespace Rsdn.Framework.Data
 		/// <returns>An array of the <see cref="IDbDataParameter"/>.</returns>
 		public IDbDataParameter[] GetSpParameterSet(string spName, bool includeReturnValueParameter)
 		{
+#if HANDLE_EXCEPTIONS
 			try
 			{
+#endif
 				string key = 
 					string.Format("{0}:{1}:{2}", ConfigurationString, spName, includeReturnValueParameter);
 
@@ -906,12 +932,14 @@ namespace Rsdn.Framework.Data
 				}
 			
 				return cachedParameters == null? null: CloneParameters(cachedParameters);
+#if HANDLE_EXCEPTIONS
 			}
 			catch (Exception ex)
 			{
 				HandleException(ex);
 				return null;
 			}
+#endif
 		}
 
 		/// <summary>
@@ -1127,8 +1155,10 @@ namespace Rsdn.Framework.Data
 			DataRow dataRow,
 			params IDbDataParameter[] commandParameters)
 		{
+#if HANDLE_EXCEPTIONS
 			try
 			{
+#endif
 				ArrayList paramList = new ArrayList();
 
 				foreach (DataColumn c in dataRow.Table.Columns)
@@ -1146,12 +1176,14 @@ namespace Rsdn.Framework.Data
 					paramList.Add(p);
 
 				return (IDbDataParameter[])paramList.ToArray(typeof(IDbDataParameter));
+#if HANDLE_EXCEPTIONS
 			}
 			catch (Exception ex)
 			{
 				HandleException(ex);
 				return null;
 			}
+#endif
 		}
 
 		/// <summary>
@@ -1169,8 +1201,10 @@ namespace Rsdn.Framework.Data
 			object entity,
 			params IDbDataParameter[] commandParameters)
 		{
+#if HANDLE_EXCEPTIONS
 			try
 			{
+#endif
 				ParameterReader       pr = new ParameterReader(this);
 				Mapping.MapDescriptor td = Mapping.MapDescriptor.GetDescriptor(entity.GetType());
 
@@ -1180,12 +1214,14 @@ namespace Rsdn.Framework.Data
 					pr.ParamList.Add(p);
 
 				return (IDbDataParameter[])pr.ParamList.ToArray(typeof(IDbDataParameter));
+#if HANDLE_EXCEPTIONS
 			}
 			catch (Exception ex)
 			{
 				HandleException(ex);
 				return null;
 			}
+#endif
 		}
 
 		/// <overloads>
@@ -1202,8 +1238,10 @@ namespace Rsdn.Framework.Data
 		/// <returns>This instance of the <see cref="DbManager"/>.</returns>
 		public DbManager AssignParameterValues(DataRow dataRow)
 		{
+#if HANDLE_EXCEPTIONS
 			try
 			{
+#endif
 				foreach (DataColumn c in dataRow.Table.Columns)
 				{
 					if (c.AutoIncrement == false && c.ReadOnly == false)
@@ -1216,12 +1254,14 @@ namespace Rsdn.Framework.Data
 				}
 
 				return this;
+#if HANDLE_EXCEPTIONS
 			}
 			catch (Exception ex)
 			{
 				HandleException(ex);
 				return null;
 			}
+#endif
 		}
 
 		/// <summary>
@@ -1235,8 +1275,10 @@ namespace Rsdn.Framework.Data
 		/// <returns>This instance of the <see cref="DbManager"/>.</returns>
 		public DbManager AssignParameterValues(object entity)
 		{
+#if HANDLE_EXCEPTIONS
 			try
 			{
+#endif
 				ParameterReader       pr = new ParameterReader(this);
 				Mapping.MapDescriptor td = Mapping.MapDescriptor.GetDescriptor(entity.GetType());
 
@@ -1247,12 +1289,14 @@ namespace Rsdn.Framework.Data
 						Parameter(p.ParameterName).Value = p.Value;
 
 				return this;
+#if HANDLE_EXCEPTIONS
 			}
 			catch (Exception ex)
 			{
 				HandleException(ex);
 				return null;
 			}
+#endif
 		}
 
 		/// <overloads>
@@ -1269,15 +1313,19 @@ namespace Rsdn.Framework.Data
 		/// <returns>The <see cref="IDbDataParameter"/> object.</returns>
 		public IDbDataParameter Parameter(string parameterName)
 		{
+#if HANDLE_EXCEPTIONS
 			try 
 			{
+#endif
 				return (IDbDataParameter)Command.Parameters[parameterName];
+#if HANDLE_EXCEPTIONS
 			}
 			catch (Exception ex)
 			{
 				HandleException(ex);
 				return null;
 			}
+#endif
 		}
 
 		/// <summary>
@@ -1430,8 +1478,10 @@ namespace Rsdn.Framework.Data
 			string parameterName,
 			object value)
 		{
+#if HANDLE_EXCEPTIONS
 			try
 			{
+#endif
 				IDbDataParameter parameter = Command.CreateParameter();
 
 				parameter.ParameterName = parameterName;
@@ -1443,12 +1493,14 @@ namespace Rsdn.Framework.Data
 				parameter.Value = value != null? value: DBNull.Value;
 
 				return parameter;
+#if HANDLE_EXCEPTIONS
 			}
 			catch (Exception ex)
 			{
 				HandleException(ex);
 				return null;
 			}
+#endif
 		}
 
 		/// <summary>
@@ -1465,8 +1517,10 @@ namespace Rsdn.Framework.Data
 			object value,
 			DbType dbType)
 		{
+#if HANDLE_EXCEPTIONS
 			try
 			{
+#endif
 				IDbDataParameter parameter = Command.CreateParameter();
 
 				parameter.ParameterName = parameterName;
@@ -1475,12 +1529,14 @@ namespace Rsdn.Framework.Data
 				parameter.Value         = value;
 
 				return parameter;
+#if HANDLE_EXCEPTIONS
 			}
 			catch (Exception ex)
 			{
 				HandleException(ex);
 				return null;
 			}
+#endif
 		}
 
 		/// <summary>
@@ -1514,8 +1570,10 @@ namespace Rsdn.Framework.Data
 			DbType dbType,
 			int    size)
 		{
+#if HANDLE_EXCEPTIONS
 			try
 			{
+#endif
 				IDbDataParameter parameter = Command.CreateParameter();
 
 				parameter.ParameterName = parameterName;
@@ -1525,12 +1583,14 @@ namespace Rsdn.Framework.Data
 				parameter.Value         = value;
 
 				return parameter;
+#if HANDLE_EXCEPTIONS
 			}
 			catch (Exception ex)
 			{
 				HandleException(ex);
 				return null;
 			}
+#endif
 		}
 
 		/// <summary>
@@ -1566,8 +1626,10 @@ namespace Rsdn.Framework.Data
 			string parameterName,
 			DbType dbType)
 		{
+#if HANDLE_EXCEPTIONS
 			try
 			{
+#endif
 				IDbDataParameter parameter = Command.CreateParameter();
 			
 				parameter.ParameterName = parameterName;
@@ -1575,12 +1637,14 @@ namespace Rsdn.Framework.Data
 				parameter.DbType        = dbType;
 
 				return parameter;
+#if HANDLE_EXCEPTIONS
 			}
 			catch (Exception ex)
 			{
 				HandleException(ex);
 				return null;
 			}
+#endif
 		}
 
 		/// <summary>
@@ -1601,8 +1665,10 @@ namespace Rsdn.Framework.Data
 			DbType dbType,
 			int    size)
 		{
+#if HANDLE_EXCEPTIONS
 			try
 			{
+#endif
 				IDbDataParameter parameter = Command.CreateParameter();
 			
 				parameter.ParameterName = parameterName;
@@ -1611,12 +1677,14 @@ namespace Rsdn.Framework.Data
 				parameter.Size          = size;
 
 				return parameter;
+#if HANDLE_EXCEPTIONS
 			}
 			catch (Exception ex)
 			{
 				HandleException(ex);
 				return null;
 			}
+#endif
 		}
 
 		/// <summary>
@@ -2102,8 +2170,10 @@ namespace Rsdn.Framework.Data
 			string             commandText,
 			IDbDataParameter[] commandParameters)
 		{
+#if HANDLE_EXCEPTIONS
 			try
 			{
+#endif
 				IDbCommand command = GetCommand(commandAction, commandType, commandText);
 
 				SetCommand          (commandAction, command);
@@ -2115,12 +2185,14 @@ namespace Rsdn.Framework.Data
 				}
 
 				return command;
+#if HANDLE_EXCEPTIONS
 			}
 			catch (Exception ex)
 			{
 				HandleException(ex);
 				return null;
 			}
+#endif
 		}
 
 		/// <summary>
@@ -2129,8 +2201,10 @@ namespace Rsdn.Framework.Data
 		/// <returns>Current instance.</returns>
 		public DbManager Prepare()
 		{
+#if HANDLE_EXCEPTIONS
 			try
 			{
+#endif
 				IDbCommand command = GetCommand(CommandAction.Select);
 
 				if (InitParameters(CommandAction.Select) == false)
@@ -2143,20 +2217,24 @@ namespace Rsdn.Framework.Data
 				}
 
 				return this;
+#if HANDLE_EXCEPTIONS
 			}
 			catch (Exception ex)
 			{
 				HandleException(ex);
 				return null;
 			}
+#endif
 		}
 
 		private bool InitParameters(CommandAction commandAction)
 		{
 			bool prepare = false;
 
+#if HANDLE_EXCEPTIONS
 			try 
 			{
+#endif
 				IDbDataParameter[] commandParameters = GetCommandParameters(commandAction);
 
 				if (commandParameters != null)
@@ -2189,11 +2267,13 @@ namespace Rsdn.Framework.Data
 						command.Prepare();
 					}
 				}
+#if HANDLE_EXCEPTIONS
 			}
 			catch (Exception ex)
 			{
 				HandleException(ex);
 			}
+#endif
 
 			return prepare;
 		}
@@ -2215,8 +2295,10 @@ namespace Rsdn.Framework.Data
 		/// <returns>The number of rows affected by the command.</returns>
 		public int Execute(IList list)
 		{
+#if HANDLE_EXCEPTIONS
 			try
 			{
+#endif
 				int rows = 0;
 
 				if (list != null && list.Count != 0)
@@ -2241,12 +2323,14 @@ namespace Rsdn.Framework.Data
 				}
 			
 				return rows;
+#if HANDLE_EXCEPTIONS
 			}
 			catch (Exception ex)
 			{
 				HandleException(ex);
 				return 0;
 			}
+#endif
 		}
 
 		/// <summary>
@@ -2263,8 +2347,10 @@ namespace Rsdn.Framework.Data
 		/// <returns>The number of rows affected by the command.</returns>
 		public int Execute(DataTable table)
 		{
+#if HANDLE_EXCEPTIONS
 			try
 			{
+#endif
 				int rows = 0;
 
 				if (table != null && table.Rows.Count != 0)
@@ -2289,12 +2375,14 @@ namespace Rsdn.Framework.Data
 				}
 			
 				return rows;
+#if HANDLE_EXCEPTIONS
 			}
 			catch (Exception ex)
 			{
 				HandleException(ex);
 				return 0;
 			}
+#endif
 		}
 
 		/// <summary>
@@ -2344,8 +2432,10 @@ namespace Rsdn.Framework.Data
 		/// <returns>The number of rows affected by the command.</returns>
 		public int ExecuteNonQuery()
 		{
+#if HANDLE_EXCEPTIONS
 			try
 			{
+#endif
 				if (_prepared)
 					InitParameters(CommandAction.Select);
 
@@ -2354,12 +2444,14 @@ namespace Rsdn.Framework.Data
 				OnAfterOperation (OperationType.ExecuteNonQuery);
 
 				return result;
+#if HANDLE_EXCEPTIONS
 			}
 			catch (Exception ex)
 			{
 				HandleException(ex);
 				return 0;
 			}
+#endif
 		}
 
 		#endregion
@@ -2373,8 +2465,10 @@ namespace Rsdn.Framework.Data
 		/// <returns>The first column of the first row in the resultset.</returns>
 		public object ExecuteScalar()
 		{
+#if HANDLE_EXCEPTIONS
 			try
 			{
+#endif
 				if (_prepared)
 					InitParameters(CommandAction.Select);
 
@@ -2383,12 +2477,14 @@ namespace Rsdn.Framework.Data
 				OnAfterOperation (OperationType.ExecuteScalar);
 
 				return result;
+#if HANDLE_EXCEPTIONS
 			}
 			catch (Exception ex)
 			{
 				HandleException(ex);
 				return null;
 			}
+#endif
 		}
 
 #if VER2
@@ -2413,8 +2509,10 @@ namespace Rsdn.Framework.Data
 		/// <returns>An instance of the <see cref="IDataReader"/> class.</returns>
 		public IDataReader ExecuteReader()
 		{
+#if HANDLE_EXCEPTIONS
 			try
 			{
+#endif
 				if (_prepared)
 					InitParameters(CommandAction.Select);
 
@@ -2423,12 +2521,14 @@ namespace Rsdn.Framework.Data
 				OnAfterOperation (OperationType.ExecuteReader);
 
 				return result;
+#if HANDLE_EXCEPTIONS
 			}
 			catch (Exception ex)
 			{
 				HandleException(ex);
 				return null;
 			}
+#endif
 		}
 
 		/// <summary>
@@ -2438,8 +2538,10 @@ namespace Rsdn.Framework.Data
 		/// <returns>An instance of the <see cref="IDataReader"/> class.</returns>
 		public IDataReader ExecuteReader(CommandBehavior commandBehavior)
 		{
+#if HANDLE_EXCEPTIONS
 			try
 			{
+#endif
 				if (_prepared)
 					InitParameters(CommandAction.Select);
 
@@ -2448,12 +2550,14 @@ namespace Rsdn.Framework.Data
 				OnAfterOperation (OperationType.ExecuteReader);
 
 				return result;
+#if HANDLE_EXCEPTIONS
 			}
 			catch (Exception ex)
 			{
 				HandleException(ex);
 				return null;
 			}
+#endif
 		}
 
 		#endregion
@@ -2527,8 +2631,10 @@ namespace Rsdn.Framework.Data
 			int     maxRecords,
 			string  tableName)
 		{
+#if HANDLE_EXCEPTIONS
 			try
 			{
+#endif
 				if (_prepared)
 					InitParameters(CommandAction.Select);
 
@@ -2557,12 +2663,14 @@ namespace Rsdn.Framework.Data
 				OnAfterOperation(OperationType.Fill);
 
 				return dataSet;
+#if HANDLE_EXCEPTIONS
 			}
 			catch (Exception ex)
 			{
 				HandleException(ex);
 				return null;
 			}
+#endif
 		}
 
 		#endregion
@@ -2585,8 +2693,10 @@ namespace Rsdn.Framework.Data
 		/// <returns>The <see cref="DataTable"/>.</returns>
 		public DataTable ExecuteDataTable(DataTable dataTable)
 		{
+#if HANDLE_EXCEPTIONS
 			try 
 			{
+#endif
 				if (_prepared)
 					InitParameters(CommandAction.Select);
 
@@ -2601,12 +2711,14 @@ namespace Rsdn.Framework.Data
 				OnAfterOperation (OperationType.Fill);
 
 				return dataTable;
+#if HANDLE_EXCEPTIONS
 			}
 			catch (Exception ex)
 			{
 				HandleException(ex);
 				return null;
 			}
+#endif
 		}
 
 		/// <summary>
@@ -2660,8 +2772,10 @@ namespace Rsdn.Framework.Data
 		/// <returns>A business object.</returns>
 		private object ExecuteBizEntityInternal(object entity, Type type)
 		{
+#if HANDLE_EXCEPTIONS
 			try
 			{
+#endif
 				if (_prepared)
 					InitParameters(CommandAction.Select);
 
@@ -2698,12 +2812,14 @@ namespace Rsdn.Framework.Data
 						return null;
 					}
 				}
+#if HANDLE_EXCEPTIONS
 			}
 			catch (Exception ex)
 			{
 				HandleException(ex);
 				return null;
 			}
+#endif
 		}
 
 		/// <summary>
@@ -2734,8 +2850,10 @@ namespace Rsdn.Framework.Data
 
 		private IList ExecuteListInternal(IList list, Type type, params object[] parameters)
 		{
+#if HANDLE_EXCEPTIONS
 			try
 			{
+#endif
 				if (_prepared)
 					InitParameters(CommandAction.Select);
 
@@ -2747,12 +2865,14 @@ namespace Rsdn.Framework.Data
 
 					return Mapping.Map.ToList(dr, list, type, parameters);
 				}
+#if HANDLE_EXCEPTIONS
 			}
 			catch (Exception ex)
 			{
 				HandleException(ex);
 				return null;
 			}
+#endif
 		}
 
 		/// <summary>
@@ -2907,8 +3027,10 @@ namespace Rsdn.Framework.Data
 			string      keyFieldName,
 			Type        type)
 		{
+#if HANDLE_EXCEPTIONS
 			try
 			{
+#endif
 				if (_prepared)
 					InitParameters(CommandAction.Select);
 
@@ -2920,12 +3042,14 @@ namespace Rsdn.Framework.Data
 
 					return Mapping.Map.ToDictionary(dr, dictionary, keyFieldName, type);
 				}
+#if HANDLE_EXCEPTIONS
 			}
 			catch (Exception ex)
 			{
 				HandleException(ex);
 				return null;
 			}
+#endif
 		}
 
 #if VER2
@@ -2957,8 +3081,10 @@ namespace Rsdn.Framework.Data
 		/// <returns></returns>
 		public Mapping.MapResultSet[] ExecuteResultSet(Mapping.MapResultSet[] resultSets)
 		{
+#if HANDLE_EXCEPTIONS
 			try
 			{
+#endif
 				if (_prepared)
 					InitParameters(CommandAction.Select);
 
@@ -2972,12 +3098,14 @@ namespace Rsdn.Framework.Data
 				}
 
 				return resultSets;
+#if HANDLE_EXCEPTIONS
 			}
 			catch (Exception ex)
 			{
 				HandleException(ex);
 				return null;
 			}
+#endif
 		}
 
 		/// <summary>
@@ -3027,8 +3155,10 @@ namespace Rsdn.Framework.Data
 		/// <returns>The number of rows successfully updated from the <see cref="DataSet"/>.</returns>
 		public int Update(DataSet dataSet, string tableName)
 		{
+#if HANDLE_EXCEPTIONS
 			try
 			{
+#endif
 				if (dataSet == null)
 					throw new ArgumentNullException("dataSet",
 						"DataSet must be initialized before calling Update routine. Cannot update database from a null dataset.");
@@ -3050,12 +3180,14 @@ namespace Rsdn.Framework.Data
 				OnAfterOperation(OperationType.Update);
 
 				return result;
+#if HANDLE_EXCEPTIONS
 			}
 			catch (Exception ex)
 			{
 				HandleException(ex);
 				return 0;
 			}
+#endif
 		}
 
 		/// <summary>
@@ -3065,8 +3197,10 @@ namespace Rsdn.Framework.Data
 		/// <returns></returns>
 		public int Update(DataTable dataTable)
 		{
+#if HANDLE_EXCEPTIONS
 			try
 			{
+#endif
 				if (dataTable == null)
 					throw new ArgumentNullException(
 						"dataTable",
@@ -3079,12 +3213,14 @@ namespace Rsdn.Framework.Data
 				OnAfterOperation (OperationType.Update);
 
 				return result;
+#if HANDLE_EXCEPTIONS
 			}
 			catch (Exception ex)
 			{
 				HandleException(ex);
 				return 0;
 			}
+#endif
 		}
 
 		#endregion
