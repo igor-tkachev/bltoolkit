@@ -3,8 +3,10 @@ using System.Collections;
 #if VER2
 using System.Collections.Generic;
 #endif
+using System.Text;
 
 using Rsdn.Framework.Data;
+using Rsdn.Framework.Data.Mapping;
 
 namespace Rsdn.Framework.DataAccess
 {
@@ -49,6 +51,21 @@ namespace Rsdn.Framework.DataAccess
 			}
 
 			return sprocName;
+		}
+
+		protected virtual string GetKeyFieldName(Type type)
+		{
+			return type.Name + "ID";
+		}
+
+		protected virtual string GetTableName(Type type)
+		{
+			object[] attrs = type.GetCustomAttributes(typeof(TableNameAttribute), true);
+
+			if (attrs.Length > 0)
+				return ((TableNameAttribute)attrs[0]).Name;
+
+			return type.Name;
 		}
 
 		#endregion
@@ -180,6 +197,79 @@ namespace Rsdn.Framework.DataAccess
 			return Delete(typeof(T), id);
 		}
 #endif
+
+			#endregion
+
+		#endregion
+
+		#region CRUDL (SQL)
+
+			#region Protected Members
+
+		protected string CreateUpdateSqlTest(Type type)
+		{
+			string   keyName = GetKeyFieldName(type);
+			StringBuilder sb = new StringBuilder();
+
+			sb.AppendFormat("UPDATE [{0}] SET ", GetTableName(type));
+
+			foreach (IMemberMapper mm in Map.Descriptor(type))
+				if (mm.Name != keyName && (mm.MemberType.IsValueType || mm.MemberType == typeof(string)))
+					sb.AppendFormat("{0} = @{0}, ", mm.Name);
+
+			sb.Remove(sb.Length - 2, 1);
+
+			sb.AppendFormat("WHERE {0} = @{0}", keyName);
+
+			return sb.ToString();
+		}
+
+		protected virtual string CreateSqlText(Type type, string actionName)
+		{
+			switch (actionName)
+			{
+				case "Update": return CreateUpdateSqlTest(type);
+				default:
+					throw new RsdnDataAccessException(
+						string.Format("Unknown action '{0}'.", actionName));
+			}
+		}
+
+		private static Hashtable _actionSql = new Hashtable();
+
+		protected virtual string GetSqlText(Type type, string actionName)
+		{
+			string key = type.Name + "$" + actionName;
+			string sql = (string)_actionSproc[key];
+
+			if (sql == null)
+			{
+				sql = CreateSqlText(type, actionName);
+				_actionSql[key] = sql;
+			}
+
+			return sql;
+
+		}
+
+			#endregion
+
+			#region Update
+
+		public int UpdateSql(DbManager db, object obj)
+		{
+			return db
+				.SetCommand(
+					GetSqlText(obj.GetType(), "Update"),
+					db.CreateParameters(obj))
+				.ExecuteNonQuery();
+		}
+
+		public int UpdateSql(object obj)
+		{
+			using (DbManager db = GetDbManager())
+				return UpdateSql(db, obj);
+		}
 
 			#endregion
 
