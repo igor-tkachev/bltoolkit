@@ -95,7 +95,7 @@
                 />
                 <File
                     RelPath = "DbManager.cs"
-                    SubType = "Component"
+                    SubType = "Code"
                     BuildAction = "Compile"
                 />
                 <File

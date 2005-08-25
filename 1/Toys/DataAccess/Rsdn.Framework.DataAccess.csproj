@@ -3,13 +3,13 @@
         ProjectType = "Local"
         ProductVersion = "7.10.3077"
         SchemaVersion = "2.0"
-        ProjectGuid = "{75A6D1A3-9E38-42AA-806B-49BC22C44F63}"
+        ProjectGuid = "{86ED1077-CDE9-402A-9F5B-1A59B3E40FF6}"
     >
         <Build>
             <Settings
                 ApplicationIcon = ""
                 AssemblyKeyContainerName = ""
-                AssemblyName = "Toys.Test"
+                AssemblyName = "Rsdn.Framework.DataAccess"
                 AssemblyOriginatorKeyFile = ""
                 DefaultClientScript = "JScript"
                 DefaultHTMLPageLayout = "Grid"
@@ -18,7 +18,7 @@
                 OutputType = "Library"
                 PreBuildEvent = ""
                 PostBuildEvent = ""
-                RootNamespace = "Toys.Test"
+                RootNamespace = "Rsdn.Framework.DataAccess"
                 RunPostBuildEvent = "OnBuildSuccess"
                 StartupObject = ""
             >
@@ -80,24 +80,8 @@
                     HintPath = "..\..\..\..\..\..\..\WINDOWS\Microsoft.NET\Framework\v1.1.4322\System.XML.dll"
                 />
                 <Reference
-                    Name = "nunit.framework"
-                    AssemblyName = "nunit.framework"
-                    HintPath = "..\..\..\..\..\..\..\Program Files\NUnit\bin\nunit.framework.dll"
-                    AssemblyFolderKey = "hklm\dn\nunit.framework"
-                />
-                <Reference
                     Name = "Rsdn.Framework.Data"
                     Project = "{653EBAE9-B766-4B78-8077-8EC009156DE5}"
-                    Package = "{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}"
-                />
-                <Reference
-                    Name = "Rsdn.Framework.Validation"
-                    Project = "{3FB5794F-5FC0-4B7C-B89E-D1625234873A}"
-                    Package = "{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}"
-                />
-                <Reference
-                    Name = "Rsdn.Framework.DataAccess"
-                    Project = "{86ED1077-CDE9-402A-9F5B-1A59B3E40FF6}"
                     Package = "{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}"
                 />
             </References>
@@ -110,12 +94,32 @@
                     BuildAction = "Compile"
                 />
                 <File
-                    RelPath = "DataAccess.cs"
+                    RelPath = "DataAccessorBase.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
                 />
                 <File
-                    RelPath = "Validation.cs"
+                    RelPath = "NonUpdatableAttribute.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "PrimaryKeyAttribute.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "RsdnDataAccessException.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "SprocNameAttribute.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "TableNameAttribute.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
                 />

@@ -34,6 +34,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DataAccess.cs" />
     <Compile Include="Validation.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
@@ -41,6 +42,10 @@
     <ProjectReference Include="..\..\Source\Rsdn.Framework.Data.2.csproj">
       <Project>{653EBAE9-B766-4B78-8077-8EC009156DE5}</Project>
       <Name>Rsdn.Framework.Data.2</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Toys\DataAccess\Rsdn.Framework.DataAccess.2.csproj">
+      <Project>{90B49831-511C-41CC-827B-31E26B9E25A4}</Project>
+      <Name>Rsdn.Framework.DataAccess.2</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\Toys\Validation\Rsdn.Framework.Validation.2.csproj">
       <Project>{D4867994-FD37-44E9-A200-CDBC26E117DA}</Project>

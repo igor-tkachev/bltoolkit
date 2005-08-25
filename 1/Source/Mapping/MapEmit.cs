@@ -83,13 +83,17 @@ namespace Rsdn.Framework.Data.Mapping
 
 		class CreatedObject
 		{
-			public CreatedObject(FieldBuilder fieldBuilder)
+			public CreatedObject(GenContext ctx)
 			{
-				_fieldBuilder = fieldBuilder;
+				_fieldBuilder = ctx.FieldBuilder;
+				_propertyInfo = ctx.PropertyInfo;
 			}
 
 			private FieldBuilder _fieldBuilder;
 			public  FieldBuilder  FieldBuilder { get { return _fieldBuilder; } }
+
+			private PropertyInfo _propertyInfo;
+			public  PropertyInfo  PropertyInfo { get { return _propertyInfo; } }
 
 			private FieldBuilder _initFieldBuilder;
 			public  FieldBuilder  InitFieldBuilder
@@ -418,9 +422,11 @@ namespace Rsdn.Framework.Data.Mapping
 
 					for (int i = 0; i < ctx.Objects.Count; i++)
 					{
-						FieldBuilder field = ((CreatedObject)ctx.Objects[i]).FieldBuilder;
+						CreatedObject createdObject = (CreatedObject)ctx.Objects[i];
+						FieldBuilder  field         = createdObject.FieldBuilder;
+						Type[]        types         = field.FieldType.GetInterfaces();
 
-						Type[] types = field.FieldType.GetInterfaces();
+						ctx.PropertyInfo = createdObject.PropertyInfo;
 
 						foreach (Type type in types)
 						{
@@ -664,7 +670,7 @@ namespace Rsdn.Framework.Data.Mapping
 			if (IsPrimitive(ctx.FieldType))
 				return;
 
-			CreatedObject createdObject = new CreatedObject(ctx.FieldBuilder);
+			CreatedObject createdObject = new CreatedObject(ctx);
 
 			ctx.Objects.Add(createdObject);
 
@@ -1008,7 +1014,8 @@ namespace Rsdn.Framework.Data.Mapping
 			MemberInfo member = 
 				ctx.IsObject? GetValueMember(ctx.FieldType, ctx.PropertyInfo.PropertyType): null;
 
-			if (ctx.SetMethodInfo == null && ctx.IsObject && ((PropertyInfo)member).GetSetMethod() == null)
+			if (ctx.SetMethodInfo == null && ctx.IsObject && 
+				member is PropertyInfo && ((PropertyInfo)member).GetSetMethod() == null)
 				return;
 
 			MethodBuilder setMethod = ctx.TypeBuilder.DefineMethod(
