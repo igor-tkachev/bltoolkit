@@ -54,5 +54,12 @@ namespace Rsdn.Framework.Data.Mapping
 		/// <param name="obj"></param>
 		/// <param name="value"></param>
 		void   SetValue(object obj, object value);
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="attributeType"></param>
+		/// <param name="inherit"></param>
+		/// <returns></returns>
+		object[] GetCustomAttributes(Type attributeType, bool inherit);
 	}
 }

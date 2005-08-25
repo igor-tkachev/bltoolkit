@@ -13,7 +13,7 @@ namespace Rsdn.Framework.Data.Mapping
 	/// <summary>
 	/// Internal class.
 	/// </summary>
-	abstract public class BaseMemberMapper : IMemberMapper
+	 public abstract class BaseMemberMapper : IMemberMapper
 	{
 		private string _name;
 		/// <summary>
@@ -83,7 +83,7 @@ namespace Rsdn.Framework.Data.Mapping
 		/// <summary>
 		/// 
 		/// </summary>
-		public  Attribute[] MapValueAttributeList
+		public  Attribute[]  MapValueAttributeList
 		{
 			get { return _mapValueAttributeList;  }
 			set { _mapValueAttributeList = value; }
@@ -112,6 +112,14 @@ namespace Rsdn.Framework.Data.Mapping
 		/// <param name="obj"></param>
 		/// <param name="value"></param>
 		public abstract void SetValue(object obj, object value);
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="attributeType"></param>
+		/// <param name="inherit"></param>
+		/// <returns></returns>
+		public abstract object[] GetCustomAttributes(Type attributeType, bool inherit);
 
 		private static char[] _trimArray = new char[0];
 		private bool _typeIsEnum;

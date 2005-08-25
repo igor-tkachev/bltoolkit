@@ -126,6 +126,17 @@ namespace Rsdn.Framework.Data.Mapping
 			}
 		}
 
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="attributeType"></param>
+		/// <param name="inherit"></param>
+		/// <returns></returns>
+		public override object[] GetCustomAttributes(Type attributeType, bool inherit)
+		{
+			return _fieldInfo.GetCustomAttributes(attributeType, inherit);
+		}
+
 		#region ICloneable Members
 
 		/// <summary>

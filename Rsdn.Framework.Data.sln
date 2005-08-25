@@ -27,6 +27,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rsdn.Framework.Validation",
 	ProjectSection(ProjectDependencies) = postProject
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rsdn.Framework.DataAccess", "Toys\DataAccess\Rsdn.Framework.DataAccess.csproj", "{86ED1077-CDE9-402A-9F5B-1A59B3E40FF6}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfiguration) = preSolution
 		Debug = Debug
@@ -78,6 +82,10 @@ Global
 		{E42AB6EB-9BF5-466C-A761-521FF3459137}.Debug.Build.0 = Debug|.NET
 		{E42AB6EB-9BF5-466C-A761-521FF3459137}.Release.ActiveCfg = Release|.NET
 		{E42AB6EB-9BF5-466C-A761-521FF3459137}.Release.Build.0 = Release|.NET
+		{86ED1077-CDE9-402A-9F5B-1A59B3E40FF6}.Debug.ActiveCfg = Debug|.NET
+		{86ED1077-CDE9-402A-9F5B-1A59B3E40FF6}.Debug.Build.0 = Debug|.NET
+		{86ED1077-CDE9-402A-9F5B-1A59B3E40FF6}.Release.ActiveCfg = Release|.NET
+		{86ED1077-CDE9-402A-9F5B-1A59B3E40FF6}.Release.Build.0 = Release|.NET
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		XCSharpSolutionEnabled = True
