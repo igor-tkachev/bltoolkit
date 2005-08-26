@@ -34,6 +34,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DataAccessorBase.cs" />
+    <Compile Include="DataAccessFactory.cs" />
+    <Compile Include="IObjectFactory.cs" />
     <Compile Include="NonUpdatableAttribute.cs" />
     <Compile Include="PrimaryKeyAttribute.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

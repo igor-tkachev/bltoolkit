@@ -37,20 +37,28 @@ namespace Toys.Test
 			public abstract ArrayList Territories { get; set; }
 		}
 
+		public abstract class EmployeeDataAccessor : DataAccessorBase
+		{
+			public abstract void Test();
+		}
+
+		private EmployeeDataAccessor _da;
+
+		public DataAccess()
+		{
+			_da = (EmployeeDataAccessor)DataAccessFactory.CreateInstance(typeof(EmployeeDataAccessor));
+		}
+
 		[Test]
 		public void SelectSql()
 		{
-			DataAccessorBase da = new DataAccessorBase();
-
-			Employee e = (Employee)da.SelectByKeySql(typeof(Employee), 1);
+			Employee e = (Employee)_da.SelectByKeySql(typeof(Employee), 1);
 		}
 
 		[Test]
 		public void SelectAllSql()
 		{
-			DataAccessorBase da = new DataAccessorBase();
-
-			ArrayList list = da.SelectAllSql(typeof(Employee));
+			ArrayList list = _da.SelectAllSql(typeof(Employee));
 
 			Console.WriteLine(list.Count);
 		}
@@ -58,9 +66,7 @@ namespace Toys.Test
 		[Test]
 		public void InsertSql()
 		{
-			DataAccessorBase da = new DataAccessorBase();
-
-			ArrayList list = da.SelectAllSql(typeof(Employee));
+			ArrayList list = _da.SelectAllSql(typeof(Employee));
 			Hashtable tbl  = new Hashtable();
 
 			foreach (Employee e in list)
@@ -71,23 +77,21 @@ namespace Toys.Test
 			em.FirstName = "1";
 			em.LastName  = "2";
 
-			da.InsertSql(em);
+			_da.InsertSql(em);
 
-			list = da.SelectAllSql(typeof(Employee));
+			list = _da.SelectAllSql(typeof(Employee));
 
 			foreach (Employee e in list)
 				if (tbl.ContainsKey(e.ID) == false)
-					da.DeleteSql(e);
+					_da.DeleteSql(e);
 		}
 
 		[Test]
 		public void UpdateSql()
 		{
-			DataAccessorBase da = new DataAccessorBase();
+			Employee e = (Employee)_da.SelectByKeySql(typeof(Employee), 1);
 
-			Employee e = (Employee)da.SelectByKeySql(typeof(Employee), 1);
-
-			int n = da.UpdateSql(e);
+			int n = _da.UpdateSql(e);
 
 			Assert.AreEqual(1, n);
 		}
@@ -95,9 +99,7 @@ namespace Toys.Test
 		[Test]
 		public void DeleteByKeySql()
 		{
-			DataAccessorBase da = new DataAccessorBase();
-
-			ArrayList list = da.SelectAllSql(typeof(Employee));
+			ArrayList list = _da.SelectAllSql(typeof(Employee));
 			Hashtable tbl = new Hashtable();
 
 			foreach (Employee e in list)
@@ -108,13 +110,13 @@ namespace Toys.Test
 			em.FirstName = "1";
 			em.LastName  = "2";
 
-			da.InsertSql(em);
+			_da.InsertSql(em);
 
-			list = da.SelectAllSql(typeof(Employee));
+			list = _da.SelectAllSql(typeof(Employee));
 
 			foreach (Employee e in list)
 				if (tbl.ContainsKey(e.ID) == false)
-					da.DeleteByKeySql(typeof(Employee), e.ID);
+					_da.DeleteByKeySql(typeof(Employee), e.ID);
 		}
 	}
 }
