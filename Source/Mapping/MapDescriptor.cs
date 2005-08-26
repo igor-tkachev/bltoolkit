@@ -679,7 +679,9 @@ namespace Rsdn.Framework.Data.Mapping
 
 		object IMapDataSource.GetFieldValue(int i, object entity)
 		{
-			return ((IMemberMapper)_memberList[i]).GetValue(entity);
+			IMemberMapper mm = (IMemberMapper)_memberList[i];
+
+			return mm.GetValue(entity);
 		}
 
 		object IMapDataSource.GetFieldValue(string name, object entity)

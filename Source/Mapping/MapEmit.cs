@@ -807,6 +807,8 @@ namespace Rsdn.Framework.Data.Mapping
 
 					if (ofci != null)
 					{
+						ParameterInfo[] pi = ofci.GetParameters();
+
 						callDefaultCtor = false;
 
 						ctx.DefCtorGen.ldarg_0.EndGen();
@@ -816,7 +818,12 @@ namespace Rsdn.Framework.Data.Mapping
 						{
 							object o = ctx.AttributeParams[i];
 
-							if (ctx.DefCtorGen.LoadObject(o) == false)
+							if (ctx.DefCtorGen.LoadObject(o))
+							{
+								if (o.GetType().IsValueType && !pi[i].ParameterType.IsValueType)
+									ctx.DefCtorGen.box(o.GetType());
+							}
+							else
 							{
 								ctx.DefCtorGen
 									.ldsfld(ctx.ParamBuilder)
@@ -825,7 +832,12 @@ namespace Rsdn.Framework.Data.Mapping
 									.CastTo(types[i]);
 							}
 
-							if (ctx.ObfCtorGen.LoadObject(o) == false)
+							if (ctx.ObfCtorGen.LoadObject(o))
+							{
+								if (o.GetType().IsValueType && !pi[i].ParameterType.IsValueType)
+									ctx.ObfCtorGen.box(o.GetType());
+							}
+							else
 							{
 								ctx.ObfCtorGen
 									.ldsfld(ctx.ParamBuilder)

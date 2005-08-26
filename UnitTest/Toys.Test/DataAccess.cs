@@ -16,7 +16,7 @@ namespace Toys.Test
 		public abstract class Employee : ValidatableEntityBase
 		{
 			[PrimaryKey, NonUpdatableAttribute]
-			[MapField("EmployeeID")]           public abstract int      ID              { get; }
+			[MapField("EmployeeID")]           public abstract int      ID              { get; set; }
 			[MaxLength(20), Required]          public abstract string   LastName        { get; set; }
 			[MaxLength(10), Required]          public abstract string   FirstName       { get; set; }
 			[MaxLength(30), MapNullValue("")]  public abstract string   Title           { get; set; }
@@ -30,7 +30,7 @@ namespace Toys.Test
 			[MaxLength(15), MapNullValue("")]  public abstract string   Country         { get; set; }
 			[MaxLength(24), MapNullValue("")]  public abstract string   HomePhone       { get; set; }
 			[MaxLength(4),  MapNullValue("")]  public abstract string   Extension       { get; set; }
-			[NonUpdatableAttribute,  MapNullValue("")]  public abstract string   Notes           { get; set; }
+			               [MapNullValue("")]  public abstract string   Notes           { get; set; }
 			[MapNullValue(0)]                  public abstract int      ReportsTo       { get; set; }
 			[MaxLength(255), MapNullValue("")] public abstract string   PhotoPath       { get; set; }
 

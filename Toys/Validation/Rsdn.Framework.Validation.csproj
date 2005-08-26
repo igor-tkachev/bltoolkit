@@ -154,7 +154,22 @@
                     BuildAction = "Compile"
                 />
                 <File
+                    RelPath = "ValidatableDateTime.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "ValidatableDecimal.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
                     RelPath = "ValidatableEntityBase.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "ValidatableGuid.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
                 />
