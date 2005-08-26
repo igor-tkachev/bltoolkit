@@ -11,7 +11,7 @@ using System.Reflection.Emit;
 
 namespace Rsdn.Framework.Data.Mapping
 {
-	internal class MapGenerator
+	public class MapGenerator
 	{
 		#region Constructors & Public Properties
 

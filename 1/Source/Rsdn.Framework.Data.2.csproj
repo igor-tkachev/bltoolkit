@@ -43,7 +43,8 @@
     <ConfigurationOverrideFile>
     </ConfigurationOverrideFile>
     <DefineConstants>TRACE;DEBUG;VER2;NO_HANDLE_EXCEPTIONS</DefineConstants>
-    <DocumentationFile>bin\Debug\Rsdn.Framework.Data.xml</DocumentationFile>
+    <DocumentationFile>
+    </DocumentationFile>
     <DebugSymbols>true</DebugSymbols>
     <FileAlignment>4096</FileAlignment>
     <NoStdLib>false</NoStdLib>
@@ -63,7 +64,8 @@
     <ConfigurationOverrideFile>
     </ConfigurationOverrideFile>
     <DefineConstants>TRACE;VER2;NO_HANDLE_EXCEPTIONS</DefineConstants>
-    <DocumentationFile>bin\Release\Rsdn.Framework.Data.xml</DocumentationFile>
+    <DocumentationFile>
+    </DocumentationFile>
     <DebugSymbols>false</DebugSymbols>
     <FileAlignment>4096</FileAlignment>
     <NoStdLib>false</NoStdLib>

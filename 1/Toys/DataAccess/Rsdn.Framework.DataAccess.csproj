@@ -94,7 +94,17 @@
                     BuildAction = "Compile"
                 />
                 <File
+                    RelPath = "DataAccessFactory.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
                     RelPath = "DataAccessorBase.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "IObjectFactory.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
                 />

@@ -20,7 +20,7 @@ using System.Runtime.InteropServices;
 // FxCop rules
 //
 [assembly: ComVisible(true)]
-[assembly: CLSCompliant(true)]
+//[assembly: CLSCompliant(true)]
 
 //
 // Version information for an assembly consists of the following four values:

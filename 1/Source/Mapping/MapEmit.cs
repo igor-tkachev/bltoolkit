@@ -1226,8 +1226,10 @@ namespace Rsdn.Framework.Data.Mapping
 			
 				MapGenerator gen = new MapGenerator(methodBuilder.GetILGenerator());
 
+#if HANDLE_EXCEPTIONS
 				LocalBuilder l0 = gen.DeclareLocal(typeof(Exception));
 				LocalBuilder l1 = gen.DeclareLocal(typeof(object));
+#endif
 
 				gen
 #if HANDLE_EXCEPTIONS
