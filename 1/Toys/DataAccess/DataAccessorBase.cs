@@ -603,7 +603,7 @@ namespace Rsdn.Framework.DataAccess
 			ArrayList list = new ArrayList();
 
 			foreach (IMemberMapper mm in GetKeyFieldList((obj.GetType())))
-				list.Add(db.Parameter(mm.Name, mm.GetValue(obj)));
+				list.Add(db.Parameter("@" + mm.Name, mm.GetValue(obj)));
 
 			return db
 				.SetCommand(
