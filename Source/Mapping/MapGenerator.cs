@@ -21,23 +21,23 @@ namespace Rsdn.Framework.Data.Mapping
 
 		public MapGenerator(ILGenerator il)
 		{
-			m_gen = il;
+			_gen = il;
 		}
 
-		private ILGenerator m_gen;
-		public  ILGenerator   Gen
+		private ILGenerator _gen;
+		public  ILGenerator  Gen
 		{
-			get { return m_gen;  }
-			set { m_gen = value; }
+			get { return _gen;  }
+			set { _gen = value; }
 		}
 
 		#endregion
 
 		#region Definitions
 
-		public LocalBuilder DeclareLocal(Type localType) { return m_gen.DeclareLocal(localType); }
-		public Label        DefineLabel ()               { return m_gen.DefineLabel();           }
-		public MapGenerator MarkLabel   (Label l)        { m_gen.MarkLabel(l); return this;      }
+		public LocalBuilder DeclareLocal(Type localType) { return _gen.DeclareLocal(localType); }
+		public Label        DefineLabel ()               { return _gen.DefineLabel();           }
+		public MapGenerator MarkLabel   (Label l)        { _gen.MarkLabel(l); return this;      }
 
 		#endregion
 
@@ -47,7 +47,7 @@ namespace Rsdn.Framework.Data.Mapping
 		{
 			get 
 			{
-				m_gen.BeginExceptionBlock();
+				_gen.BeginExceptionBlock();
 				return this;
 			}
 		}
@@ -56,14 +56,14 @@ namespace Rsdn.Framework.Data.Mapping
 		{
 			get 
 			{
-				m_gen.BeginCatchBlock(typeof(Exception));
+				_gen.BeginCatchBlock(typeof(Exception));
 				return this;
 			}
 		}
 
 		public MapGenerator BeginCatchBlock(Type exceptionType)
 		{
-			m_gen.BeginCatchBlock(exceptionType);
+			_gen.BeginCatchBlock(exceptionType);
 			return this;
 		}
 
@@ -71,7 +71,7 @@ namespace Rsdn.Framework.Data.Mapping
 		{
 			get
 			{
-				m_gen.EndExceptionBlock();
+				_gen.EndExceptionBlock();
 				return this;
 			}
 		}
@@ -80,7 +80,7 @@ namespace Rsdn.Framework.Data.Mapping
 		{
 			get
 			{
-				m_gen.BeginFinallyBlock();
+				_gen.BeginFinallyBlock();
 				return this;
 			}
 		}
@@ -89,8 +89,8 @@ namespace Rsdn.Framework.Data.Mapping
 
 		#region Newobj & Newarr
 		
-		public MapGenerator newarr(Type type) { m_gen.Emit(OpCodes.Newarr, type); return this; }
-		public MapGenerator newobj(ConstructorInfo ci) { m_gen.Emit(OpCodes.Newobj, ci); return this; }
+		public MapGenerator newarr(Type type) { _gen.Emit(OpCodes.Newarr, type); return this; }
+		public MapGenerator newobj(ConstructorInfo ci) { _gen.Emit(OpCodes.Newobj, ci); return this; }
 		public MapGenerator newobj(Type type, params Type[] parameters) 
 		{
 			return newobj(type.GetConstructor(parameters));
@@ -100,24 +100,24 @@ namespace Rsdn.Framework.Data.Mapping
 
 		#region Other
 
-		public MapGenerator castclass(Type objectType) { m_gen.Emit(OpCodes.Castclass, objectType); return this; }
+		public MapGenerator castclass(Type objectType) { _gen.Emit(OpCodes.Castclass, objectType); return this; }
 
-		public MapGenerator nop { get { m_gen.Emit(OpCodes.Nop); return this; } }
-		public MapGenerator pop { get { m_gen.Emit(OpCodes.Pop); return this; } }
+		public MapGenerator nop { get { _gen.Emit(OpCodes.Nop); return this; } }
+		public MapGenerator pop { get { _gen.Emit(OpCodes.Pop); return this; } }
 
-		public MapGenerator initobj(Type type) { m_gen.Emit(OpCodes.Initobj, type); return this; }
+		public MapGenerator initobj(Type type) { _gen.Emit(OpCodes.Initobj, type); return this; }
 
-		public void ret() { m_gen.Emit(OpCodes.Ret); }
+		public void ret() { _gen.Emit(OpCodes.Ret); }
 		public void EndGen() {}
 
 		#endregion
 
 		#region Boxing
 
-		public MapGenerator unbox(Type type) { m_gen.Emit(OpCodes.Unbox, type); return this; }
+		public MapGenerator unbox(Type type) { _gen.Emit(OpCodes.Unbox, type); return this; }
 
 #if VER2
-		public MapGenerator unbox_any(Type type) { m_gen.Emit(OpCodes.Unbox_Any, type); return this; }
+		public MapGenerator unbox_any(Type type) { _gen.Emit(OpCodes.Unbox_Any, type); return this; }
 #endif
 		
 		public MapGenerator UnboxIfValueType(Type type)
@@ -125,7 +125,7 @@ namespace Rsdn.Framework.Data.Mapping
 			return type.IsValueType? unbox(type): this;
 		}
 
-		public MapGenerator box(Type type) { m_gen.Emit(OpCodes.Box, type); return this; }
+		public MapGenerator box(Type type) { _gen.Emit(OpCodes.Box, type); return this; }
 		public MapGenerator BoxIfValueType(Type type)
 		{ 
 			return type.IsValueType? box(type): this;
@@ -137,25 +137,26 @@ namespace Rsdn.Framework.Data.Mapping
 
 		public MapGenerator IsDBNull { get { return isinst(typeof(DBNull)); } }
 		public MapGenerator IsGuid   { get { return isinst(typeof(Guid)); } }
-		public MapGenerator isinst   (Type type) { m_gen.Emit(OpCodes.Isinst, type); return this; }
+		public MapGenerator isinst   (Type type) { _gen.Emit(OpCodes.Isinst, type); return this; }
 
 		#endregion
 
 		#region Branch
 
-		public MapGenerator brtrue_s (Label l) { m_gen.Emit(OpCodes.Brtrue_S,  l); return this; }
-		public MapGenerator brfalse_s(Label l) { m_gen.Emit(OpCodes.Brfalse_S, l); return this; }
-		public MapGenerator br_s     (Label l) { m_gen.Emit(OpCodes.Br_S, l);      return this; }
+		public MapGenerator brtrue_s (Label l) { _gen.Emit(OpCodes.Brtrue_S,  l); return this; }
+		public MapGenerator brfalse_s(Label l) { _gen.Emit(OpCodes.Brfalse_S, l); return this; }
+		public MapGenerator br_s     (Label l) { _gen.Emit(OpCodes.Br_S, l);      return this; }
+		public MapGenerator ble_s    (Label l) { _gen.Emit(OpCodes.Ble_S, l);     return this; }
 
 		#endregion
 
 		#region Load
 
-		public MapGenerator ldnull  { get { m_gen.Emit(OpCodes.Ldnull);  return this; } }
-		public MapGenerator ldloc_0 { get { m_gen.Emit(OpCodes.Ldloc_0); return this; } }
-		public MapGenerator ldloc_1 { get { m_gen.Emit(OpCodes.Ldloc_1); return this; } }
-		public MapGenerator ldloc_2 { get { m_gen.Emit(OpCodes.Ldloc_2); return this; } }
-		public MapGenerator ldloc_3 { get { m_gen.Emit(OpCodes.Ldloc_3); return this; } }
+		public MapGenerator ldnull  { get { _gen.Emit(OpCodes.Ldnull);  return this; } }
+		public MapGenerator ldloc_0 { get { _gen.Emit(OpCodes.Ldloc_0); return this; } }
+		public MapGenerator ldloc_1 { get { _gen.Emit(OpCodes.Ldloc_1); return this; } }
+		public MapGenerator ldloc_2 { get { _gen.Emit(OpCodes.Ldloc_2); return this; } }
+		public MapGenerator ldloc_3 { get { _gen.Emit(OpCodes.Ldloc_3); return this; } }
 
 		public MapGenerator ldloc(short n) 
 		{
@@ -166,7 +167,7 @@ namespace Rsdn.Framework.Data.Mapping
 				case 2: ldloc_2.EndGen(); break;
 				case 3: ldloc_3.EndGen(); break;
 				default:
-					m_gen.Emit(OpCodes.Ldloc, n);
+					_gen.Emit(OpCodes.Ldloc, n);
 					break;
 			}
 			
@@ -175,18 +176,18 @@ namespace Rsdn.Framework.Data.Mapping
 
 		public MapGenerator ldloc(LocalBuilder builder) 
 		{
-			m_gen.Emit(OpCodes.Ldloc, builder);
+			_gen.Emit(OpCodes.Ldloc, builder);
 			return this; 
 		}
 
-		public MapGenerator ldloca_s(byte n)     { m_gen.Emit(OpCodes.Ldloca_S, n); return this; }
-		public MapGenerator ldobj   (Type type)  { m_gen.Emit(OpCodes.Ldobj, type); return this; }
-		public MapGenerator ldsfld(FieldInfo fi) { m_gen.Emit(OpCodes.Ldsfld, fi);  return this; }
+		public MapGenerator ldloca_s(byte n)     { _gen.Emit(OpCodes.Ldloca_S, n); return this; }
+		public MapGenerator ldobj   (Type type)  { _gen.Emit(OpCodes.Ldobj, type); return this; }
+		public MapGenerator ldsfld(FieldInfo fi) { _gen.Emit(OpCodes.Ldsfld, fi);  return this; }
 
-		public MapGenerator ldarg_0 { get { m_gen.Emit(OpCodes.Ldarg_0); return this; } }
-		public MapGenerator ldarg_1 { get { m_gen.Emit(OpCodes.Ldarg_1); return this; } }
-		public MapGenerator ldarg_2 { get { m_gen.Emit(OpCodes.Ldarg_2); return this; } }
-		public MapGenerator ldarg_3 { get { m_gen.Emit(OpCodes.Ldarg_3); return this; } }
+		public MapGenerator ldarg_0 { get { _gen.Emit(OpCodes.Ldarg_0); return this; } }
+		public MapGenerator ldarg_1 { get { _gen.Emit(OpCodes.Ldarg_1); return this; } }
+		public MapGenerator ldarg_2 { get { _gen.Emit(OpCodes.Ldarg_2); return this; } }
+		public MapGenerator ldarg_3 { get { _gen.Emit(OpCodes.Ldarg_3); return this; } }
 		public MapGenerator ldarg_s(byte n) 
 		{
 			switch (n)
@@ -196,17 +197,17 @@ namespace Rsdn.Framework.Data.Mapping
 				case 2: ldarg_2.EndGen(); break;
 				case 3: ldarg_3.EndGen(); break;
 				default:
-					m_gen.Emit(OpCodes.Ldarg_S, n);
+					_gen.Emit(OpCodes.Ldarg_S, n);
 					break;
 			}
 			
 			return this; 
 		}
 
-		public MapGenerator ldc_i4_0 { get { m_gen.Emit(OpCodes.Ldc_I4_0); return this; } }
-		public MapGenerator ldc_i4_1 { get { m_gen.Emit(OpCodes.Ldc_I4_1); return this; } }
-		public MapGenerator ldc_i4_2 { get { m_gen.Emit(OpCodes.Ldc_I4_2); return this; } }
-		public MapGenerator ldc_i4_3 { get { m_gen.Emit(OpCodes.Ldc_I4_3); return this; } }
+		public MapGenerator ldc_i4_0 { get { _gen.Emit(OpCodes.Ldc_I4_0); return this; } }
+		public MapGenerator ldc_i4_1 { get { _gen.Emit(OpCodes.Ldc_I4_1); return this; } }
+		public MapGenerator ldc_i4_2 { get { _gen.Emit(OpCodes.Ldc_I4_2); return this; } }
+		public MapGenerator ldc_i4_3 { get { _gen.Emit(OpCodes.Ldc_I4_3); return this; } }
 		public MapGenerator ldc_i4(int count) 
 		{ 
 			switch (count)
@@ -219,17 +220,17 @@ namespace Rsdn.Framework.Data.Mapping
 					if (count >= byte.MinValue && count <= byte.MaxValue)
 						ldc_i4_s((byte)count);
 					else
-						m_gen.Emit(OpCodes.Ldc_I4, count);
+						_gen.Emit(OpCodes.Ldc_I4, count);
 					break;
 			}
 
 			return this; 
 		}
 
-		public MapGenerator ldfld(FieldInfo fi) { m_gen.Emit(OpCodes.Ldfld, fi); return this; }
+		public MapGenerator ldfld(FieldInfo fi) { _gen.Emit(OpCodes.Ldfld, fi); return this; }
 		public MapGenerator ldfld(Type type, string fieldName) { return ldfld(type.GetField(fieldName)); }
 
-		public MapGenerator ldflda(FieldInfo fi) { m_gen.Emit(OpCodes.Ldflda, fi); return this; }
+		public MapGenerator ldflda(FieldInfo fi) { _gen.Emit(OpCodes.Ldflda, fi); return this; }
 
 		public MapGenerator ldfldWhithCheck(FieldInfo fi)
 		{
@@ -239,26 +240,26 @@ namespace Rsdn.Framework.Data.Mapping
 			return this;
 		}
 
-		public MapGenerator ldtoken(Type       tp) { m_gen.Emit(OpCodes.Ldtoken, tp); return this; }
-		public MapGenerator ldtoken(MethodInfo mi) { m_gen.Emit(OpCodes.Ldtoken, mi); return this; }
+		public MapGenerator ldtoken(Type       tp) { _gen.Emit(OpCodes.Ldtoken, tp); return this; }
+		public MapGenerator ldtoken(MethodInfo mi) { _gen.Emit(OpCodes.Ldtoken, mi); return this; }
 
-		public MapGenerator ldstr  (string str) { m_gen.Emit(OpCodes.Ldstr, str); return this; }
+		public MapGenerator ldstr  (string str) { _gen.Emit(OpCodes.Ldstr, str); return this; }
 
-		public MapGenerator ldelem_ref       { get { m_gen.Emit(OpCodes.Ldelem_Ref);      return this; } }
-		public MapGenerator ldc_i4_s(byte   value) { m_gen.Emit(OpCodes.Ldc_I4_S, value); return this; }
-		public MapGenerator ldc_i8  (long   value) { m_gen.Emit(OpCodes.Ldc_I8,   value); return this; }
-		public MapGenerator ldc_i8  (ulong  value) { m_gen.Emit(OpCodes.Ldc_I8,   value); return this; }
-		public MapGenerator ldc_r4  (float  value) { m_gen.Emit(OpCodes.Ldc_R4,   value); return this; }
-		public MapGenerator ldc_r8  (double value) { m_gen.Emit(OpCodes.Ldc_R8,   value); return this; }
-		public MapGenerator ldind_u1         { get { m_gen.Emit(OpCodes.Ldind_U1);        return this; } }
-		public MapGenerator ldind_u2         { get { m_gen.Emit(OpCodes.Ldind_U2);        return this; } }
-		public MapGenerator ldind_u4         { get { m_gen.Emit(OpCodes.Ldind_U4);        return this; } }
-		public MapGenerator ldind_i1         { get { m_gen.Emit(OpCodes.Ldind_I1);        return this; } }
-		public MapGenerator ldind_i2         { get { m_gen.Emit(OpCodes.Ldind_I2);        return this; } }
-		public MapGenerator ldind_i4         { get { m_gen.Emit(OpCodes.Ldind_I4);        return this; } }
-		public MapGenerator ldind_i8         { get { m_gen.Emit(OpCodes.Ldind_I8);        return this; } }
-		public MapGenerator ldind_r4         { get { m_gen.Emit(OpCodes.Ldind_R4);        return this; } }
-		public MapGenerator ldind_r8         { get { m_gen.Emit(OpCodes.Ldind_R8);        return this; } }
+		public MapGenerator ldelem_ref       { get { _gen.Emit(OpCodes.Ldelem_Ref);      return this; } }
+		public MapGenerator ldc_i4_s(byte   value) { _gen.Emit(OpCodes.Ldc_I4_S, value); return this; }
+		public MapGenerator ldc_i8  (long   value) { _gen.Emit(OpCodes.Ldc_I8,   value); return this; }
+		public MapGenerator ldc_i8  (ulong  value) { _gen.Emit(OpCodes.Ldc_I8,   value); return this; }
+		public MapGenerator ldc_r4  (float  value) { _gen.Emit(OpCodes.Ldc_R4,   value); return this; }
+		public MapGenerator ldc_r8  (double value) { _gen.Emit(OpCodes.Ldc_R8,   value); return this; }
+		public MapGenerator ldind_u1         { get { _gen.Emit(OpCodes.Ldind_U1);        return this; } }
+		public MapGenerator ldind_u2         { get { _gen.Emit(OpCodes.Ldind_U2);        return this; } }
+		public MapGenerator ldind_u4         { get { _gen.Emit(OpCodes.Ldind_U4);        return this; } }
+		public MapGenerator ldind_i1         { get { _gen.Emit(OpCodes.Ldind_I1);        return this; } }
+		public MapGenerator ldind_i2         { get { _gen.Emit(OpCodes.Ldind_I2);        return this; } }
+		public MapGenerator ldind_i4         { get { _gen.Emit(OpCodes.Ldind_I4);        return this; } }
+		public MapGenerator ldind_i8         { get { _gen.Emit(OpCodes.Ldind_I8);        return this; } }
+		public MapGenerator ldind_r4         { get { _gen.Emit(OpCodes.Ldind_R4);        return this; } }
+		public MapGenerator ldind_r8         { get { _gen.Emit(OpCodes.Ldind_R8);        return this; } }
 
 		public bool LoadObject(object o)
 		{
@@ -279,6 +280,12 @@ namespace Rsdn.Framework.Data.Mapping
 				return false;
 
 			return true;
+		}
+
+		public MapGenerator LoadType(Type type)
+		{
+			ldtoken(type).call(typeof(Type), "GetTypeFromHandle", typeof(RuntimeTypeHandle));
+			return this;
 		}
 
 		public MapGenerator CastTo(Type type)
@@ -310,10 +317,10 @@ namespace Rsdn.Framework.Data.Mapping
 
 		#region St (pop)
 		
-		public MapGenerator stloc_0 { get { m_gen.Emit(OpCodes.Stloc_0); return this; } }
-		public MapGenerator stloc_1 { get { m_gen.Emit(OpCodes.Stloc_1); return this; } }
-		public MapGenerator stloc_2 { get { m_gen.Emit(OpCodes.Stloc_2); return this; } }
-		public MapGenerator stloc_3 { get { m_gen.Emit(OpCodes.Stloc_3); return this; } }
+		public MapGenerator stloc_0 { get { _gen.Emit(OpCodes.Stloc_0); return this; } }
+		public MapGenerator stloc_1 { get { _gen.Emit(OpCodes.Stloc_1); return this; } }
+		public MapGenerator stloc_2 { get { _gen.Emit(OpCodes.Stloc_2); return this; } }
+		public MapGenerator stloc_3 { get { _gen.Emit(OpCodes.Stloc_3); return this; } }
 
 		public MapGenerator stloc(short n) 
 		{
@@ -324,7 +331,7 @@ namespace Rsdn.Framework.Data.Mapping
 				case 2: stloc_2.EndGen(); break;
 				case 3: stloc_3.EndGen(); break;
 				default:
-					m_gen.Emit(OpCodes.Stloc, n);
+					_gen.Emit(OpCodes.Stloc, n);
 					break;
 			}
 			
@@ -333,16 +340,16 @@ namespace Rsdn.Framework.Data.Mapping
 
 		public MapGenerator stloc(LocalBuilder builder) 
 		{
-			m_gen.Emit(OpCodes.Stloc, builder);
+			_gen.Emit(OpCodes.Stloc, builder);
 			return this; 
 		}
 
-		public MapGenerator stfld(FieldInfo fi) { m_gen.Emit(OpCodes.Stfld, fi); return this; }
+		public MapGenerator stfld(FieldInfo fi) { _gen.Emit(OpCodes.Stfld, fi); return this; }
 		public MapGenerator stfld(Type type, string fieldName) { return stfld(type.GetField(fieldName)); }
 
-		public MapGenerator stelem_ref { get { m_gen.Emit(OpCodes.Stelem_Ref); return this; } }
+		public MapGenerator stelem_ref { get { _gen.Emit(OpCodes.Stelem_Ref); return this; } }
 
-		public MapGenerator stsfld(FieldInfo fi) { m_gen.Emit(OpCodes.Stsfld, fi); return this; }
+		public MapGenerator stsfld(FieldInfo fi) { _gen.Emit(OpCodes.Stsfld, fi); return this; }
 		
 		#endregion
 
@@ -355,7 +362,7 @@ namespace Rsdn.Framework.Data.Mapping
 
 		public MapGenerator call(MethodInfo methodInfo, params Type[] optionalParameterTypes)
 		{
-			m_gen.EmitCall(OpCodes.Call, methodInfo, optionalParameterTypes);
+			_gen.EmitCall(OpCodes.Call, methodInfo, optionalParameterTypes);
 			return this;
 		}
 
@@ -376,7 +383,7 @@ namespace Rsdn.Framework.Data.Mapping
 
 		public MapGenerator call(ConstructorInfo ci)
 		{
-			m_gen.Emit(OpCodes.Call, ci);
+			_gen.Emit(OpCodes.Call, ci);
 			return this;
 		}
 		
@@ -391,7 +398,7 @@ namespace Rsdn.Framework.Data.Mapping
 
 		public MapGenerator callvirt(MethodInfo methodInfo, params Type[] optionalParameterTypes)
 		{
-			m_gen.EmitCall(OpCodes.Callvirt, methodInfo, optionalParameterTypes);
+			_gen.EmitCall(OpCodes.Callvirt, methodInfo, optionalParameterTypes);
 			
 			return this;
 		}

@@ -39,7 +39,9 @@
     <Compile Include="DataAccessFactory.cs" />
     <Compile Include="DiscoverParametersAttribute.cs" />
     <Compile Include="IObjectFactory.cs" />
+    <Compile Include="MethodGenerator.cs" />
     <Compile Include="NonUpdatableAttribute.cs" />
+    <Compile Include="ObjectTypeAttribute.cs" />
     <Compile Include="ParamNameAttribute.cs" />
     <Compile Include="PrimaryKeyAttribute.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
