@@ -124,7 +124,17 @@
                     BuildAction = "Compile"
                 />
                 <File
+                    RelPath = "MethodGenerator.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
                     RelPath = "NonUpdatableAttribute.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "ObjectTypeAttribute.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
                 />

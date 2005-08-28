@@ -115,6 +115,25 @@
                     BuildAction = "Compile"
                 />
                 <File
+                    RelPath = "EmployeeDataSet.xsd"
+                    BuildAction = "Content"
+                    Generator = "MSDataSetGenerator"
+                    LastGenOutput = "EmployeeDataSet.cs"
+                />
+                <File
+                    RelPath = "EmployeeDataSet.cs"
+                    DependentUpon = "EmployeeDataSet.xsd"
+                    SubType = "code"
+                    BuildAction = "Compile"
+                    DesignTime = "True"
+                    AutoGen = "True"
+                />
+                <File
+                    RelPath = "EmployeeDataSet.xsx"
+                    DependentUpon = "EmployeeDataSet.xsd"
+                    BuildAction = "None"
+                />
+                <File
                     RelPath = "Validation.cs"
                     SubType = "Code"
                     BuildAction = "Compile"

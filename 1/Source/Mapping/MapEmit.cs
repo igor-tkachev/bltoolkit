@@ -589,9 +589,8 @@ namespace Rsdn.Framework.Data.Mapping
 				gen
 					.ldsfld(fieldDescriptor)
 					.brtrue_s(label)
-					.ldtoken(ctx.TypeBuilder.BaseType)
-					.call(typeof(Type),          "GetTypeFromHandle", typeof(RuntimeTypeHandle))
-					.call(typeof(MapDescriptor), "GetDescriptor",     typeof(Type))
+					.LoadType(ctx.TypeBuilder.BaseType)
+					.call(typeof(MapDescriptor), "GetDescriptor", typeof(Type))
 					.stsfld(fieldDescriptor)
 					.MarkLabel(label)
 					.ldsfld(fieldDescriptor)
@@ -711,9 +710,8 @@ namespace Rsdn.Framework.Data.Mapping
 				ctx.ObfCtorGen
 					.ldsfld(fieldBuilder)
 					.brtrue_s(l1)
-					.ldtoken(ctx.FieldType)
-					.call(typeof(Type),          "GetTypeFromHandle", typeof(RuntimeTypeHandle))
-					.call(typeof(MapDescriptor), "GetDescriptor",     typeof(Type))
+					.LoadType(ctx.FieldType)
+					.call(typeof(MapDescriptor), "GetDescriptor", typeof(Type))
 					.stsfld(fieldBuilder)
 					.MarkLabel(l1)
 					.ldarg_0
@@ -767,9 +765,8 @@ namespace Rsdn.Framework.Data.Mapping
 					ctx.DefCtorGen
 						.ldsfld(fieldBuilder)
 						.brtrue_s(l2)
-						.ldtoken(ctx.FieldType)
-						.call(typeof(Type),          "GetTypeFromHandle", typeof(RuntimeTypeHandle))
-						.call(typeof(MapDescriptor), "GetDescriptor",     typeof(Type))
+						.LoadType(ctx.FieldType)
+						.call(typeof(MapDescriptor), "GetDescriptor", typeof(Type))
 						.stsfld(fieldBuilder)
 						.MarkLabel(l2)
 
@@ -1010,8 +1007,7 @@ namespace Rsdn.Framework.Data.Mapping
 				ConstructorInfo ci = typeof(MapPropertyInfo).GetConstructor(new Type[] { typeof(PropertyInfo) });
 
 				ctx.IniCtorGen
-					.ldtoken(ctx.Type)
-					.call(typeof(Type), "GetTypeFromHandle", typeof(RuntimeTypeHandle))
+					.LoadType(ctx.Type)
 					.ldstr(ctx.PropertyInfo.Name)
 					.call(typeof(Type), "GetProperty", typeof(string))
 					.newobj(ci)
