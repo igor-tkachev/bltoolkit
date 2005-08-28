@@ -5,6 +5,7 @@ using System.Reflection;
 using System.Reflection.Emit;
 using System.Threading;
 
+using Rsdn.Framework.Data;
 using Rsdn.Framework.Data.Mapping;
 
 namespace Rsdn.Framework.DataAccess
@@ -155,14 +156,266 @@ namespace Rsdn.Framework.DataAccess
 
 					classBuilder.DefineMethodOverride(methodBuilder, method);
 
-					MapGenerator gen = new MapGenerator(methodBuilder.GetILGenerator());
-
-					gen
-						.ret();
+					GenerateMethod(method, methodBuilder);
 				}
 			}
 
 			return classBuilder.CreateType();
+		}
+
+		private static void GenerateMethod(MethodInfo methodInfo, MethodBuilder methodBuilder)
+		{
+			MapGenerator    gen          = new MapGenerator(methodBuilder.GetILGenerator());
+			ParameterInfo[] parameters   = methodInfo.GetParameters();
+
+			BindingFlags    bindingFlags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
+			Type            baseType     = typeof(DataAccessorBase);
+			Type            objectType   = null;
+			ArrayList       paramList    = new ArrayList();
+
+			bool            defManager   = true;
+			LocalBuilder    lManager     = gen.DeclareLocal(typeof(DbManager));
+
+			// Process parameters.
+			//
+			for (int i = 0; i < parameters.Length; i++)
+			{
+				Type pType = parameters[i].ParameterType;
+
+				if (pType.IsValueType || pType == typeof(string))
+				{
+					paramList.Add(parameters[i]);
+				}
+				else if (pType == typeof(DbManager) || pType.IsSubclassOf(typeof(DbManager)))
+				{
+					if (defManager)
+					{
+						// Store DbManager.
+						//
+						defManager = false;
+						gen
+							.ldarg_s((byte)(parameters[i].Position + 1))
+							.stloc(lManager)
+							;
+					}
+				}
+			}
+
+			// Define object type.
+			//
+			if (objectType == null)
+			{
+				if (methodInfo.ReturnType.IsValueType || methodInfo.ReturnType == typeof(string))
+				{
+
+				}
+				else
+				{
+					objectType = methodInfo.ReturnType;
+				}
+			}
+
+			// Create DbManager.
+			//
+			if (defManager)
+			{
+				gen
+					.ldarg_0
+					.callvirt(baseType, "GetDbManager", bindingFlags)
+					.stloc(lManager)
+					.BeginExceptionBlock
+					.EndGen()
+					;
+			}
+
+			// Initialize object type.
+			//
+			LocalBuilder lObjType = gen.DeclareLocal(typeof(Type));
+
+			if (objectType == null)
+			{
+				gen
+					.ldnull
+					.stloc(lObjType)
+					;
+			}
+			else
+			{
+				gen
+					.ldtoken(objectType)
+					.call(typeof(Type), "GetTypeFromHandle", typeof(RuntimeTypeHandle))
+					.stloc(lObjType)
+					;
+			}
+
+			// Get Sproc name.
+			//
+			object[] attrs = methodInfo.GetCustomAttributes(typeof(SprocNameAttribute), true);
+
+			if (attrs.Length == 0)
+			{
+				attrs = methodInfo.GetCustomAttributes(typeof(ActionNameAttribute), true);
+
+				string actionName = attrs.Length == 0?
+					methodInfo.Name: ((ActionNameAttribute)attrs[0]).Name;
+
+				// Call GetSpName.
+				//
+				gen
+					.ldloc(lManager)
+					.ldarg_0
+					.ldloc(lObjType)
+					.ldstr(actionName)
+					.callvirt(baseType, "GetSpName", bindingFlags, typeof(Type), typeof(string))
+					;
+			}
+			else
+			{
+				gen
+					.ldloc(lManager)
+					.ldstr(((SprocNameAttribute)attrs[0]).Name)
+					;
+			}
+
+			// Parameters.
+			//
+			LocalBuilder lParams = gen.DeclareLocal(typeof(object[]));
+
+			gen
+				.ldc_i4(paramList.Count)
+				.newarr(typeof(object))
+				.stloc(lParams)
+				;
+
+			attrs = methodInfo.DeclaringType.GetCustomAttributes(typeof(DiscoverParametersAttribute), true);
+
+			bool discoverParams = attrs.Length == 0?
+				false: ((DiscoverParametersAttribute)attrs[0]).Discover;
+
+			attrs = methodInfo.GetCustomAttributes(typeof(DiscoverParametersAttribute), true);
+
+			if (attrs.Length != 0)
+				discoverParams = ((DiscoverParametersAttribute)attrs[0]).Discover;
+
+			for (int i = 0; i < paramList.Count; i++)
+			{
+				ParameterInfo pi = (ParameterInfo)paramList[i];
+
+				gen
+					.ldloc(lParams)
+					.ldc_i4(i)
+					;
+
+				if (discoverParams)
+				{
+					gen
+						.ldarg_s((byte)(pi.Position + 1))
+						.BoxIfValueType(pi.ParameterType)
+						;
+				}
+				else
+				{
+					attrs = pi.GetCustomAttributes(typeof(ParamNameAttribute), true);
+
+					string paramName = attrs.Length == 0?
+						pi.Name: ((ParamNameAttribute)attrs[0]).Name;
+
+					if (paramName[0] != '@')
+						paramName = '@' + paramName;
+
+					gen
+						.ldloc_0
+						.ldstr(paramName)
+						.ldarg_s((byte)(pi.Position + 1))
+						.BoxIfValueType(pi.ParameterType)
+						.callvirt(typeof(DbManager), "Parameter", typeof(string), typeof(object))
+						;
+				}
+
+				gen
+					.stelem_ref
+					.EndGen()
+					;
+			}
+
+			// Call SetSpCommand.
+			//
+			gen
+				.ldloc(lParams) 
+				.callvirt(typeof(DbManager), "SetSpCommand", bindingFlags, typeof(string), typeof(object[]))
+				;
+
+			// Call Execute Method.
+			//
+			MethodInfo executeMethod;
+
+			if (methodInfo.ReturnType == objectType)
+			{
+				executeMethod = typeof(DbManager).GetMethod("ExecuteObject", new Type[] { typeof(Type) });
+
+				gen
+					.ldloc(lObjType)
+					;
+			}
+			else
+			{
+				executeMethod = typeof(DbManager).GetMethod("ExecuteNonQuery");
+			}
+
+			LocalBuilder lExec = gen.DeclareLocal(executeMethod.ReturnType);
+			LocalBuilder lRet  = gen.DeclareLocal(methodInfo.ReturnType);
+
+			gen
+				.callvirt(executeMethod)
+				.stloc(lExec)
+				;
+
+			// Finally block.
+			//
+			if (defManager)
+			{
+				Label fin = gen.DefineLabel();
+
+				gen
+					.BeginFinallyBlock
+					.ldloc(lManager)
+					.brfalse_s(fin)
+					.ldloc(lManager)
+					.callvirt(typeof(IDisposable).GetMethod("Dispose"))
+					.MarkLabel(fin)
+					.EndExceptionBlock
+					.EndGen()
+					;
+			}
+
+			// Return Value.
+			//
+			if (executeMethod.ReturnType == methodInfo.ReturnType ||
+				executeMethod.ReturnType.IsSubclassOf(methodInfo.ReturnType))
+			{
+				gen
+					.ldloc(lExec)
+					.stloc(lRet)
+					;
+			}
+			else if (methodInfo.ReturnType == objectType)
+			{
+				gen
+					.ldloc(lExec)
+					.castclass(objectType)
+					.stloc(lRet)
+					;
+			}
+
+			if (methodInfo.ReturnType != typeof(void))
+			{
+				gen
+					.ldloc(lRet)
+					;
+			}
+
+			gen
+				.ret();
 		}
 	}
 }

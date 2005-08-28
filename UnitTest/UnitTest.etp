@@ -14,6 +14,7 @@
                 <File>Toys.Test\Toys.Test.csproj</File>
                 <File>VB\VB.Test.vbproj</File>
                 <File>JS\JS.Test.vjsproj</File>
+                <File>Database\Database.dbp</File>
                 <File>NullableTypes\src\Types\Types.csproj</File>
                 <File>CS\CS.Test.csproj</File>
                 <File>AllTest\AllTest.csproj</File>
@@ -36,6 +37,10 @@
             <Reference>
                 <FILE>NullableTypes\src\Types\Types.csproj</FILE>
                 <GUIDPROJECTID>{5AE18977-9F9F-460E-86F5-E42668CDFE9E}</GUIDPROJECTID>
+            </Reference>
+            <Reference>
+                <FILE>Database\Database.dbp</FILE>
+                <GUIDPROJECTID>{FCC38F99-128E-4ED6-9BEB-238C3923544C}</GUIDPROJECTID>
             </Reference>
             <Reference>
                 <FILE>CS\CS.Test.csproj</FILE>

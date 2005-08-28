@@ -15,28 +15,33 @@ namespace Rsdn.Framework.DataAccess
 	{
 		#region Protected Members
 
-		protected virtual DbManager GetDbManager()
+		public virtual DbManager GetDbManager()
 		{
 			return new DbManager();
 		}
 
 		protected virtual string GetSpName(string typeName, string actionName)
 		{
-			return string.Format("{0}_{1}", typeName, actionName);
+			return typeName == null?
+				actionName:
+				string.Format("{0}_{1}", typeName, actionName);
 		}
 
 		private static Hashtable _actionSproc = new Hashtable();
 
 		protected virtual string GetSpName(Type type, string actionName)
 		{
+			if (type == null)
+				return GetSpName((string)null, actionName);
+
 			string key       = type.Name + "$" + actionName;
 			string sprocName = (string)_actionSproc[key];
 
 			if (sprocName == null)
 			{
-				object[] attrs = type.GetCustomAttributes(typeof(SprocNameAttribute), true);
+				object[] attrs = type.GetCustomAttributes(typeof(ActionSprocNameAttribute), true);
 
-				foreach (SprocNameAttribute attr in attrs)
+				foreach (ActionSprocNameAttribute attr in attrs)
 				{
 					if (attr.ActionName == actionName)
 					{
@@ -52,11 +57,6 @@ namespace Rsdn.Framework.DataAccess
 			}
 
 			return sprocName;
-		}
-
-		protected virtual string GetKeyFieldName(Type type)
-		{
-			return type.Name + "ID";
 		}
 
 		protected virtual string GetTableName(Type type)

@@ -55,6 +55,10 @@ Global
 		{3FB5794F-5FC0-4B7C-B89E-D1625234873A}.Debug.Build.0 = Debug|.NET
 		{3FB5794F-5FC0-4B7C-B89E-D1625234873A}.Release.ActiveCfg = Release|.NET
 		{3FB5794F-5FC0-4B7C-B89E-D1625234873A}.Release.Build.0 = Release|.NET
+		{86ED1077-CDE9-402A-9F5B-1A59B3E40FF6}.Debug.ActiveCfg = Debug|.NET
+		{86ED1077-CDE9-402A-9F5B-1A59B3E40FF6}.Debug.Build.0 = Debug|.NET
+		{86ED1077-CDE9-402A-9F5B-1A59B3E40FF6}.Release.ActiveCfg = Release|.NET
+		{86ED1077-CDE9-402A-9F5B-1A59B3E40FF6}.Release.Build.0 = Release|.NET
 		{90AAB2AC-0DE2-4A75-AEB8-A2FC1782B27A}.Debug.ActiveCfg = Debug|.NET
 		{90AAB2AC-0DE2-4A75-AEB8-A2FC1782B27A}.Debug.Build.0 = Debug|.NET
 		{90AAB2AC-0DE2-4A75-AEB8-A2FC1782B27A}.Release.ActiveCfg = Release|.NET
@@ -82,14 +86,10 @@ Global
 		{E42AB6EB-9BF5-466C-A761-521FF3459137}.Debug.Build.0 = Debug|.NET
 		{E42AB6EB-9BF5-466C-A761-521FF3459137}.Release.ActiveCfg = Release|.NET
 		{E42AB6EB-9BF5-466C-A761-521FF3459137}.Release.Build.0 = Release|.NET
-		{86ED1077-CDE9-402A-9F5B-1A59B3E40FF6}.Debug.ActiveCfg = Debug|.NET
-		{86ED1077-CDE9-402A-9F5B-1A59B3E40FF6}.Debug.Build.0 = Debug|.NET
-		{86ED1077-CDE9-402A-9F5B-1A59B3E40FF6}.Release.ActiveCfg = Release|.NET
-		{86ED1077-CDE9-402A-9F5B-1A59B3E40FF6}.Release.Build.0 = Release|.NET
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		XCSharpSolutionEnabled = True
 		XCSharpProjectsDisabled = 
+		XCSharpSolutionEnabled = True
 	EndGlobalSection
 	GlobalSection(ExtensibilityAddIns) = postSolution
 	EndGlobalSection

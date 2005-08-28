@@ -41,7 +41,8 @@ namespace Rsdn.Framework.Data.Mapping
 
 		#endregion
 
-		#region Exception Block
+		#region Exception & Finnaly Block
+
 		public MapGenerator BeginExceptionBlock
 		{
 			get 
@@ -74,6 +75,16 @@ namespace Rsdn.Framework.Data.Mapping
 				return this;
 			}
 		}
+
+		public MapGenerator BeginFinallyBlock
+		{
+			get
+			{
+				m_gen.BeginFinallyBlock();
+				return this;
+			}
+		}
+
 		#endregion
 
 		#region Newobj & Newarr
@@ -92,6 +103,7 @@ namespace Rsdn.Framework.Data.Mapping
 		public MapGenerator castclass(Type objectType) { m_gen.Emit(OpCodes.Castclass, objectType); return this; }
 
 		public MapGenerator nop { get { m_gen.Emit(OpCodes.Nop); return this; } }
+		public MapGenerator pop { get { m_gen.Emit(OpCodes.Pop); return this; } }
 
 		public MapGenerator initobj(Type type) { m_gen.Emit(OpCodes.Initobj, type); return this; }
 
@@ -384,9 +396,14 @@ namespace Rsdn.Framework.Data.Mapping
 			return this;
 		}
 
-		public MapGenerator callvirt(Type type, string methodName, BindingFlags bindingAttr, Type[] optionalParameterTypes)
+		public MapGenerator callvirt(Type type, string methodName, BindingFlags bindingAttr, params Type[] optionalParameterTypes)
 		{
-			return callvirt(type.GetMethod(methodName, bindingAttr), optionalParameterTypes);
+			MethodInfo methodInfo = 
+				optionalParameterTypes == null?
+					type.GetMethod(methodName, bindingAttr):
+					type.GetMethod(methodName, bindingAttr, null, optionalParameterTypes, null);
+
+			return callvirt(methodInfo, optionalParameterTypes);
 		}
 
 		public MapGenerator callvirt(Type type, string methodName, BindingFlags bindingAttr)

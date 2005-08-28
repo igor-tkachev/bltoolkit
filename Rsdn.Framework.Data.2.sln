@@ -35,6 +35,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Toys.Test.2", "UnitTest\Toy
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rsdn.Framework.DataAccess.2", "Toys\DataAccess\Rsdn.Framework.DataAccess.2.csproj", "{90B49831-511C-41CC-827B-31E26B9E25A4}"
 EndProject
+Project("{4F174C21-8C12-11D0-8340-0000F80270F8}") = "Database.2", "UnitTest\Database\Database.2.dbp", "{850FB4BA-02FE-47AF-9FD8-755426DEED75}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|.NET = Debug|.NET
@@ -219,6 +221,7 @@ Global
 		{5AE18977-9F9F-460E-86F5-E42668CDFE9E} = {96876B08-1C6E-4B28-917F-5129DF9DA13A}
 		{337502B5-3F64-4A20-AD80-734F3611D30A} = {96876B08-1C6E-4B28-917F-5129DF9DA13A}
 		{861E4884-DE2C-4EAF-9BEB-FCF008FE136F} = {96876B08-1C6E-4B28-917F-5129DF9DA13A}
+		{850FB4BA-02FE-47AF-9FD8-755426DEED75} = {96876B08-1C6E-4B28-917F-5129DF9DA13A}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		XCSharpProjectsDisabled = 
