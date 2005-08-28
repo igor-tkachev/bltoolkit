@@ -89,6 +89,16 @@
         <Files>
             <Include>
                 <File
+                    RelPath = "ActionNameAttribute.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "ActionSprocNameAttribute.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
                     RelPath = "AssemblyInfo.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
@@ -104,12 +114,22 @@
                     BuildAction = "Compile"
                 />
                 <File
+                    RelPath = "DiscoverParametersAttribute.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
                     RelPath = "IObjectFactory.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
                 />
                 <File
                     RelPath = "NonUpdatableAttribute.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "ParamNameAttribute.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
                 />

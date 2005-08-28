@@ -2,10 +2,10 @@ using System;
 
 namespace Rsdn.Framework.DataAccess
 {
-	[AttributeUsage(AttributeTargets.Method)]
-	public class SprocNameAttribute : Attribute
+	[AttributeUsage(AttributeTargets.Parameter)]
+	public class ParamNameAttribute : Attribute
 	{
-		public SprocNameAttribute(string name)
+		public ParamNameAttribute(string name)
 		{
 			_name = name;
 		}

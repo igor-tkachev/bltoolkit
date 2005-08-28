@@ -3,9 +3,9 @@ using System;
 namespace Rsdn.Framework.DataAccess
 {
 	[AttributeUsage(AttributeTargets.Method)]
-	public class SprocNameAttribute : Attribute
+	public class ActionNameAttribute : Attribute
 	{
-		public SprocNameAttribute(string name)
+		public ActionNameAttribute(string name)
 		{
 			_name = name;
 		}
