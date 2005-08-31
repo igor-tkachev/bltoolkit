@@ -10,7 +10,7 @@ namespace Toys.Test
 	[TestFixture]
 	public class Validation
 	{
-		public abstract class BizEntity1 : ValidatableEntityBase
+		public abstract class BizEntity1 : ValidatableObjectBase
 		{
 			[Required]
 			public abstract string Name { get; set; }
@@ -25,7 +25,7 @@ namespace Toys.Test
 			be.Validate();
 		}
 
-		public abstract class BizEntity2 : ValidatableEntityBase
+		public abstract class BizEntity2 : ValidatableObjectBase
 		{
 			[MinValue(10)]
 			public abstract int Number { get; set; }
@@ -42,7 +42,7 @@ namespace Toys.Test
 			be.Validate();
 		}
 
-		public abstract class BizEntity3 : ValidatableEntityBase
+		public abstract class BizEntity3 : ValidatableObjectBase
 		{
 			[MinDateValue(2000, 1, 1)]
 			public abstract DateTime Date { get; set; }
@@ -69,7 +69,7 @@ namespace Toys.Test
 			be.Validate();
 		}
 
-		public abstract class BizEntity4 : ValidatableEntityBase
+		public abstract class BizEntity4 : ValidatableObjectBase
 		{
 			[MinDateValue(2000, 1, 1, IsExclusive = true)]
 			public abstract DateTime Date { get; set; }
@@ -86,7 +86,7 @@ namespace Toys.Test
 			be.Validate();
 		}
 
-		public abstract class BizEntity5 : ValidatableEntityBase
+		public abstract class BizEntity5 : ValidatableObjectBase
 		{
 			[MaxValue(100.001)]
 			public abstract double Total { get; set; }
@@ -103,7 +103,7 @@ namespace Toys.Test
 			be.Validate();
 		}
 
-		public abstract class BizEntity6 : ValidatableEntityBase
+		public abstract class BizEntity6 : ValidatableObjectBase
 		{
 			[MaxValue(100.001, true)]
 			public abstract double Total { get; set; }
@@ -120,7 +120,7 @@ namespace Toys.Test
 			be.Validate();
 		}
 
-		public abstract class BizEntity7 : ValidatableEntityBase
+		public abstract class BizEntity7 : ValidatableObjectBase
 		{
 			[RegEx("abcd")]
 			public abstract string Number { get; set; }
@@ -147,7 +147,7 @@ namespace Toys.Test
 			be.Validate();
 		}
 
-		public abstract class BizEntity8 : ValidatableEntityBase
+		public abstract class BizEntity8 : ValidatableObjectBase
 		{
 			[MinLength(10)]
 			public abstract string Name { get; set; }
@@ -164,7 +164,7 @@ namespace Toys.Test
 			be.Validate();
 		}
 
-		public abstract class BizEntity9 : ValidatableEntityBase
+		public abstract class BizEntity9 : ValidatableObjectBase
 		{
 			[MaxLength(10), FriendlyName("First Name")]
 			public abstract string Name { get; set; }

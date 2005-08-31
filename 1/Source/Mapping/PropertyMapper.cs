@@ -78,6 +78,14 @@ namespace Rsdn.Framework.Data.Mapping
 		private IMemberMapper _classMember;
 		private PropertyInfo  _propertyInfo;
 
+		/// <summary>
+		/// 
+		/// </summary>
+		public override MemberInfo MemberInfo 
+		{ 
+			get { return _propertyInfo; }
+		}
+
 		private bool _canRead;
 		private bool _canWrite;
 

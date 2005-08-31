@@ -102,6 +102,11 @@ namespace Rsdn.Framework.Data.Mapping
 		/// <summary>
 		/// 
 		/// </summary>
+		public abstract MemberInfo MemberInfo { get; }
+
+		/// <summary>
+		/// 
+		/// </summary>
 		/// <param name="obj"></param>
 		/// <returns></returns>
 		public abstract object GetValue(object obj);

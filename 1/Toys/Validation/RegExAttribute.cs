@@ -18,11 +18,11 @@ namespace Rsdn.Framework.Validation
 			get { return _value; }
 		}
 
-		public override void Validate(object value, PropertyInfo pi)
+		public override void Validate(object value, MemberInfo mi)
 		{
 			if (value != null && Regex.IsMatch(value.ToString(), Value) == false)
 				throw new RsdnValidationException(
-					string.Format("'{0}' format is not valid.", GetPropertyFriendlyName(pi)));
+					string.Format("'{0}' format is not valid.", GetPropertyFriendlyName(mi)));
 		}
 	}
 }

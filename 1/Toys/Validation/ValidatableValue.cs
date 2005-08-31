@@ -5,6 +5,7 @@ using Rsdn.Framework.Data.Mapping;
 namespace Rsdn.Framework.Validation
 {
 #if VER2
+	[Obsolete]
 	public struct ValidatableValue<T> : IValidatable
 	{
 		public ValidatableValue(T value)
@@ -14,6 +15,7 @@ namespace Rsdn.Framework.Validation
 
 		public T Value;
 #else
+	[Obsolete]
 	public class ValidatableValue : IValidatable
 	{
 		public ValidatableValue()

@@ -17,12 +17,12 @@ namespace Rsdn.Framework.Validation
 			get { return _value; }
 		}
 	
-		public override void Validate(object value, PropertyInfo pi)
+		public override void Validate(object value, MemberInfo mi)
 		{
 			if (value != null && value.ToString().Length > _value)
 				throw new RsdnValidationException(
 					string.Format("'{0}' maximum length is {1}.",
-						GetPropertyFriendlyName(pi), Value));
+						GetPropertyFriendlyName(mi), Value));
 		}
 	}
 }

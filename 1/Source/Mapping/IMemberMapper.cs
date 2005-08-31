@@ -6,6 +6,7 @@
  */
 
 using System;
+using System.Reflection;
 
 namespace Rsdn.Framework.Data.Mapping
 {
@@ -61,5 +62,9 @@ namespace Rsdn.Framework.Data.Mapping
 		/// <param name="inherit"></param>
 		/// <returns></returns>
 		object[] GetCustomAttributes(Type attributeType, bool inherit);
+		/// <summary>
+		/// 
+		/// </summary>
+		MemberInfo MemberInfo { get; }		
 	}
 }

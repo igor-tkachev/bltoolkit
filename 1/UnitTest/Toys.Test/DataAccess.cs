@@ -21,7 +21,7 @@ namespace Toys.Test
 	public class DataAccess
 	{
 		[TableName("Employees")]
-		public abstract class Employee : ValidatableEntityBase
+		public abstract class Employee : ValidatableObjectBase
 		{
 			[PrimaryKey, NonUpdatable]
 			[MapField("EmployeeID")]           public abstract int      ID              { get; set; }

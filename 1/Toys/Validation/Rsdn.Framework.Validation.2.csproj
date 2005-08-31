@@ -33,7 +33,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="IValidatableEntity.cs" />
     <Compile Include="MaxDateValueAttribute.cs" />
     <Compile Include="MaxLengthAttribute.cs" />
     <Compile Include="MaxValueAttribute.cs" />
@@ -42,12 +41,11 @@
     <Compile Include="MinValueAttribute.cs" />
     <Compile Include="RegExAttribute.cs" />
     <Compile Include="RsdnValidationException.cs" />
-    <Compile Include="ValidatableEntityBase.cs" />
     <Compile Include="FriendlyNameAttribute.cs" />
-    <Compile Include="IValidatable.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RequiredAttribute.cs" />
-    <Compile Include="ValidatableValue.cs" />
+    <Compile Include="ValidatableObjectBase.cs" />
+    <Compile Include="Validator.cs" />
     <Compile Include="ValidatorBaseAttribute.cs" />
   </ItemGroup>
   <ItemGroup>
