@@ -410,7 +410,7 @@ namespace Rsdn.Framework.Data.Mapping
 					type.GetMethod(methodName, bindingAttr):
 					type.GetMethod(methodName, bindingAttr, null, optionalParameterTypes, null);
 
-			return callvirt(methodInfo, optionalParameterTypes);
+			return callvirt(methodInfo, null);
 		}
 
 		public MapGenerator callvirt(Type type, string methodName, BindingFlags bindingAttr)

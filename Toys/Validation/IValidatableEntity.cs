@@ -40,6 +40,7 @@ namespace Rsdn.Framework.Validation
 	[MapType(typeof(Decimal),  typeof(ValidatableDecimal))]
 	[MapType(typeof(Guid),     typeof(ValidatableGuid))]
 #endif
+	[Obsolete]
 	public interface IValidatableEntity
 	{
 	}

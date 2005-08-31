@@ -99,16 +99,6 @@
                     BuildAction = "Compile"
                 />
                 <File
-                    RelPath = "IValidatable.cs"
-                    SubType = "Code"
-                    BuildAction = "Compile"
-                />
-                <File
-                    RelPath = "IValidatableEntity.cs"
-                    SubType = "Code"
-                    BuildAction = "Compile"
-                />
-                <File
                     RelPath = "MaxDateValueAttribute.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
@@ -154,27 +144,12 @@
                     BuildAction = "Compile"
                 />
                 <File
-                    RelPath = "ValidatableDateTime.cs"
+                    RelPath = "ValidatableObjectBase.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
                 />
                 <File
-                    RelPath = "ValidatableDecimal.cs"
-                    SubType = "Code"
-                    BuildAction = "Compile"
-                />
-                <File
-                    RelPath = "ValidatableEntityBase.cs"
-                    SubType = "Code"
-                    BuildAction = "Compile"
-                />
-                <File
-                    RelPath = "ValidatableGuid.cs"
-                    SubType = "Code"
-                    BuildAction = "Compile"
-                />
-                <File
-                    RelPath = "ValidatableValue.cs"
+                    RelPath = "Validator.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
                 />

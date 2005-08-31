@@ -5,20 +5,20 @@ namespace Rsdn.Framework.Validation
 {
 	public abstract class ValidatorBaseAttribute : Attribute
 	{
-		public abstract void Validate(object value, PropertyInfo pi);
+		public abstract void Validate(object value, MemberInfo mi);
 
-		protected string GetPropertyFriendlyName(PropertyInfo pi)
+		protected string GetPropertyFriendlyName(MemberInfo mi)
 		{
-			string className = pi.DeclaringType.Name;
+			string className = mi.DeclaringType.Name;
 
-			object[] attrs = pi.DeclaringType.GetCustomAttributes(typeof(FriendlyNameAttribute), true);
+			object[] attrs = mi.DeclaringType.GetCustomAttributes(typeof(FriendlyNameAttribute), true);
 
 			if (attrs.Length > 0)
 				className = ((FriendlyNameAttribute)attrs[0]).Name;
 
-			string fieldName = className + "." + pi.Name;
+			string fieldName = className + "." + mi.Name;
 
-			attrs = pi.GetCustomAttributes(typeof(FriendlyNameAttribute), true);
+			attrs = mi.GetCustomAttributes(typeof(FriendlyNameAttribute), true);
 
 			if (attrs.Length > 0)
 				fieldName = ((FriendlyNameAttribute)attrs[0]).Name;

@@ -16,12 +16,12 @@ namespace Rsdn.Framework.Validation
 		{
 		}
 
-		public override void Validate(object value, PropertyInfo pi)
+		public override void Validate(object value, MemberInfo mi)
 		{
 			if ( IsExclusive && (DateTime)Value <= Convert.ToDateTime(value)  ||
 				!IsExclusive && (DateTime)Value <  Convert.ToDateTime(value))
 			{
-				ThrowException(pi);
+				ThrowException(mi);
 			}
 		}
 	}

@@ -30,16 +30,16 @@ namespace Rsdn.Framework.Validation
 			set { _isExclusive = value; }
 		}
 
-		protected void ThrowException(PropertyInfo pi)
+		protected void ThrowException(MemberInfo mi)
 		{
 			throw new RsdnValidationException(
 				string.Format("Minimum {0} value is {1}{2}.",
-				GetPropertyFriendlyName(pi),
+				GetPropertyFriendlyName(mi),
 				Value,
 				IsExclusive? " exclusive": string.Empty));
 		}
 
-		public override void Validate(object value, PropertyInfo pi)
+		public override void Validate(object value, MemberInfo mi)
 		{
 			if (Value is byte &&
 			    ( IsExclusive && (byte)Value    >= Convert.ToByte(value)  ||
@@ -79,7 +79,7 @@ namespace Rsdn.Framework.Validation
 			     !IsExclusive && (UInt64)Value  >  Convert.ToUInt64(value))
 				)
 			{
-				ThrowException(pi);
+				ThrowException(mi);
 			}
 		}
 	}

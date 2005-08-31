@@ -88,6 +88,11 @@ namespace Rsdn.Framework.Data.Mapping
 		private IMemberMapper _classMember;
 		private FieldInfo     _fieldInfo;
 
+		public override MemberInfo MemberInfo 
+		{ 
+			get { return _fieldInfo; }
+		}
+
 		/// <summary>
 		/// 
 		/// </summary>
