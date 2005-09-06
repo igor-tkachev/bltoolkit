@@ -85,9 +85,13 @@ namespace Rsdn.Framework.Data.Mapping
 		{
 			public CreatedObject(GenContext ctx)
 			{
+				_isPrimitive  = MapEmit.IsPrimitive(ctx.FieldType);
 				_fieldBuilder = ctx.FieldBuilder;
 				_propertyInfo = ctx.PropertyInfo;
 			}
+
+			private bool _isPrimitive;
+			public  bool  IsPrimitive { get { return _isPrimitive; } }
 
 			private FieldBuilder _fieldBuilder;
 			public  FieldBuilder  FieldBuilder { get { return _fieldBuilder; } }
@@ -349,24 +353,37 @@ namespace Rsdn.Framework.Data.Mapping
 
 			LocalBuilder arr = gen.DeclareLocal(typeof(object[]));
 
+			int count = 0;
+
+			foreach (CreatedObject o in ctx.Objects)
+				if (!o.IsPrimitive)
+					count++;
+
 			gen
-				.ldc_i4(ctx.Objects.Count)
+				.ldc_i4(count)
 				.newarr(typeof(object))
 				.stloc(arr)
 				.EndGen();
 
-			for (int i = 0; i < ctx.Objects.Count; i++)
+			for (int i = 0, n = 0; i < ctx.Objects.Count; i++)
 			{
-				FieldBuilder fb = ((CreatedObject)ctx.Objects[i]).FieldBuilder;
+				CreatedObject createdObject = (CreatedObject)ctx.Objects[i];
+
+				if (createdObject.IsPrimitive)
+					continue;
+
+				FieldBuilder fb = createdObject.FieldBuilder;
 
 				gen
 					.ldloc(arr)
-					.ldc_i4(i)
+					.ldc_i4(n)
 					.ldarg_0
 					.ldfld(fb)
 					.BoxIfValueType(fb.FieldType)
 					.stelem_ref
 					.EndGen();
+
+				n++;
 			}
 
 			gen.ldloc_0.ret();
@@ -423,8 +440,12 @@ namespace Rsdn.Framework.Data.Mapping
 					for (int i = 0; i < ctx.Objects.Count; i++)
 					{
 						CreatedObject createdObject = (CreatedObject)ctx.Objects[i];
-						FieldBuilder  field         = createdObject.FieldBuilder;
-						Type[]        types         = field.FieldType.GetInterfaces();
+
+						if (createdObject.IsPrimitive)
+							continue;
+
+						FieldBuilder field = createdObject.FieldBuilder;
+						Type[]       types = field.FieldType.GetInterfaces();
 
 						ctx.PropertyInfo = createdObject.PropertyInfo;
 
@@ -475,8 +496,7 @@ namespace Rsdn.Framework.Data.Mapping
 
 											if (a is MapPropertyInfoAttribute)
 											{
-												FieldBuilder ifb = GetPropertyInitField(
-													ctx, (CreatedObject)ctx.Objects[i]);
+												FieldBuilder ifb = GetPropertyInitField(ctx, createdObject);
 
 												gen.ldsfld(ifb);
 												stop = true;
@@ -666,14 +686,14 @@ namespace Rsdn.Framework.Data.Mapping
 
 		static private void InitializeAbstractClassField(GenContext ctx)
 		{
-			if (IsPrimitive(ctx.FieldType))
-				return;
-
 			CreatedObject createdObject = new CreatedObject(ctx);
 
 			ctx.Objects.Add(createdObject);
 
-			if (ctx.FieldType.IsClass && MapDescriptor.GetDescriptor(ctx.FieldType) == null)
+			if (createdObject.IsPrimitive)
+				return;
+
+			if (ctx.FieldType.IsAbstract && MapDescriptor.GetDescriptor(ctx.FieldType) == null)
 				return;
 
 			ConstructType constructType = new ConstructType(ctx.FieldType);
@@ -1073,6 +1093,35 @@ namespace Rsdn.Framework.Data.Mapping
 				gen
 					.ldarg_1
 					.stfld(ctx.FieldBuilder);
+			}
+
+			// IPropertyChangeNotification.
+			//
+			Type[] interfaces = ctx.Type.GetInterfaces();
+
+			foreach (Type itf in interfaces)
+			{
+				if (itf == typeof(IMapNotifyPropertyChanged))
+				{
+					InterfaceMapping im  = ctx.Type.GetInterfaceMap(itf);
+					MethodInfo       mi  = im.TargetMethods[0];
+					FieldBuilder     ifb =
+						GetPropertyInitField(ctx, (CreatedObject)ctx.Objects[ctx.Objects.Count - 1]);
+
+					gen.ldarg_0.EndGen();
+
+					if (mi.IsPublic == false)
+						gen.castclass(typeof(IMapNotifyPropertyChanged));
+
+					gen.ldsfld(ifb);
+
+					if (mi.IsPublic)
+						gen.callvirt(mi);
+					else
+						gen.callvirt(im.InterfaceMethods[0]);
+
+					break;
+				}
 			}
 
 			gen.ret();

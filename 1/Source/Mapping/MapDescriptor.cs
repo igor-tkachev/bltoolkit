@@ -773,7 +773,7 @@ namespace Rsdn.Framework.Data.Mapping
 		{
 			MapDescriptor md = MapDescriptor.GetDescriptor(type);
 
-            if (md == null)
+			if (md == null)
 				return null;
 
 			int n = ((IMapDataReceiver)md).GetOrdinal(memberName);

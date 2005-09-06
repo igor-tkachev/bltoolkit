@@ -36,6 +36,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DataAccess.cs" />
+    <Compile Include="EditableObject.cs" />
     <Compile Include="EmployeeDataSet2.cs">
       <DependentUpon>EmployeeDataSet2.xsd</DependentUpon>
     </Compile>
@@ -60,6 +61,10 @@
     <ProjectReference Include="..\..\Toys\DataAccess\Rsdn.Framework.DataAccess.2.csproj">
       <Project>{90B49831-511C-41CC-827B-31E26B9E25A4}</Project>
       <Name>Rsdn.Framework.DataAccess.2</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Toys\EditableObject\Rsdn.Framework.EditableObject.2.csproj">
+      <Project>{3390347B-0F00-49A3-BA58-FCB2ECFF1BAC}</Project>
+      <Name>Rsdn.Framework.EditableObject.2</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\Toys\Validation\Rsdn.Framework.Validation.2.csproj">
       <Project>{D4867994-FD37-44E9-A200-CDBC26E117DA}</Project>

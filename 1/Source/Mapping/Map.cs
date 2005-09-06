@@ -658,6 +658,9 @@ namespace Rsdn.Framework.Data.Mapping
 				MapDescriptor       md   = MapDescriptor.GetDescriptor(type);
 				MapInitializingData data = new MapInitializingData(rr, null, md, parameters);
 
+				if (list is ISupportInitialize)
+					((ISupportInitialize)list).BeginInit();
+
 				foreach (DataRow dr in sourceTable.Rows)
 				{
 					if (dr.RowState != DataRowState.Deleted)
@@ -670,6 +673,9 @@ namespace Rsdn.Framework.Data.Mapping
 						list.Add(MapInternal(data));
 					}
 				}
+
+				if (list is ISupportInitialize)
+					((ISupportInitialize)list).EndInit();
 
 				return list;
 #if HANDLE_EXCEPTIONS
@@ -804,6 +810,9 @@ namespace Rsdn.Framework.Data.Mapping
 				MapDescriptor       md   = MapDescriptor.GetDescriptor(type);
 				MapInitializingData data = new MapInitializingData(rr, null, md, parameters);
 
+				if (list is ISupportInitialize)
+					((ISupportInitialize)list).BeginInit();
+
 				foreach (DataRow dr in sourceTable.Rows)
 				{
 					rr.DataRow = dr;
@@ -813,6 +822,9 @@ namespace Rsdn.Framework.Data.Mapping
 
 					list.Add(MapInternal(data));
 				}
+
+				if (list is ISupportInitialize)
+					((ISupportInitialize)list).EndInit();
 
 				return list;
 #if HANDLE_EXCEPTIONS
@@ -1137,6 +1149,9 @@ namespace Rsdn.Framework.Data.Mapping
 					MapDescriptor       md   = MapDescriptor.GetDescriptor(type);
 					MapInitializingData data = new MapInitializingData(drs, reader, md, parameters);
 
+					if (list is ISupportInitialize)
+						((ISupportInitialize)list).BeginInit();
+
 					do
 					{
 						data.MapDescriptor = md;
@@ -1144,6 +1159,9 @@ namespace Rsdn.Framework.Data.Mapping
 					}
 					while (reader.Read());
 				}
+
+				if (list is ISupportInitialize)
+					((ISupportInitialize)list).EndInit();
 
 				return list;
 #if HANDLE_EXCEPTIONS
@@ -1340,6 +1358,9 @@ namespace Rsdn.Framework.Data.Mapping
 				MapDescriptor       md   = MapDescriptor.GetDescriptor(type);
 				MapInitializingData data = new MapInitializingData(rr, null, md, parameters);
 
+				if (dictionary is ISupportInitialize)
+					((ISupportInitialize)dictionary).BeginInit();
+
 				foreach (DataRow dr in sourceTable.Rows)
 				{
 					if (dr.RowState != DataRowState.Deleted)
@@ -1352,6 +1373,9 @@ namespace Rsdn.Framework.Data.Mapping
 						dictionary.Add(dr[keyFieldName], MapInternal(data));
 					}
 				}
+
+				if (dictionary is ISupportInitialize)
+					((ISupportInitialize)dictionary).EndInit();
 
 				return dictionary;
 #if HANDLE_EXCEPTIONS
@@ -1464,6 +1488,9 @@ namespace Rsdn.Framework.Data.Mapping
 				MapDescriptor       md   = MapDescriptor.GetDescriptor(type);
 				MapInitializingData data = new MapInitializingData(rr, null, md, parameters);
 
+				if (dictionary is ISupportInitialize)
+					((ISupportInitialize)dictionary).BeginInit();
+
 				foreach (DataRow dr in sourceTable.Rows)
 				{
 					rr.DataRow = dr;
@@ -1473,6 +1500,9 @@ namespace Rsdn.Framework.Data.Mapping
 
 					dictionary.Add(dr[keyFieldName], MapInternal(data));
 				}
+
+				if (dictionary is ISupportInitialize)
+					((ISupportInitialize)dictionary).EndInit();
 
 				return dictionary;
 #if HANDLE_EXCEPTIONS
@@ -1689,6 +1719,9 @@ namespace Rsdn.Framework.Data.Mapping
 					MapDescriptor       md   = MapDescriptor.GetDescriptor(type);
 					MapInitializingData data = new MapInitializingData(drs, reader, md, parameters);
 
+					if (dictionary is ISupportInitialize)
+						((ISupportInitialize)dictionary).BeginInit();
+
 					do
 					{
 						data.MapDescriptor = md;
@@ -1696,6 +1729,9 @@ namespace Rsdn.Framework.Data.Mapping
 					}
 					while (reader.Read());
 				}
+
+				if (dictionary is ISupportInitialize)
+					((ISupportInitialize)dictionary).EndInit();
 
 				return dictionary;
 #if HANDLE_EXCEPTIONS
@@ -2042,10 +2078,11 @@ namespace Rsdn.Framework.Data.Mapping
 		/// <param name="resultSets"></param>
 		public static void MapResultSets(MapResultSet[] resultSets)
 		{
-#if HANDLE_EXCEPTIONS
+			Hashtable initTable     = null;
+			object    lastContainer = null;
+
 			try
 			{
-#endif
 				// Map relations.
 				//
 				foreach (MapResultSet rs in resultSets)
@@ -2090,6 +2127,25 @@ namespace Rsdn.Framework.Data.Mapping
 
 							if (container is IList)
 							{
+								if (lastContainer != container)
+								{
+									lastContainer = container;
+
+									ISupportInitialize si = container as ISupportInitialize;
+
+									if (si != null)
+									{
+										if (initTable == null)
+											initTable = new Hashtable();
+
+										if (initTable.ContainsKey(container) == false)
+										{
+											si.BeginInit();
+											initTable[container] = si;
+										}
+									}
+								}
+
 								((IList)container).Add(o);
 							}
 							else
@@ -2099,14 +2155,20 @@ namespace Rsdn.Framework.Data.Mapping
 						}
 					}
 				}
-#if HANDLE_EXCEPTIONS
 			}
+#if HANDLE_EXCEPTIONS
 			catch (Exception ex)
 			{
 				HandleException(ex);
 				return null;
 			}
 #endif
+			finally
+			{
+				if (initTable != null)
+					foreach (ISupportInitialize si in initTable.Values)
+						si.EndInit();
+			}
 		}
 
 		/// <summary>
@@ -2246,6 +2308,23 @@ namespace Rsdn.Framework.Data.Mapping
 		public static MapDescriptor Descriptor<T>()
 		{
 			return MapDescriptor.GetDescriptor(typeof(T));
+		}
+#endif
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="type"></param>
+		/// <returns></returns>
+		public static object CreateInstance(Type type)
+		{
+			return MapDescriptor.GetDescriptor(type).CreateInstance();
+		}
+
+#if VER2
+		public static T CreateInstance<T>()
+		{
+			return (T)MapDescriptor.GetDescriptor(typeof(T)).CreateInstance();
 		}
 #endif
 

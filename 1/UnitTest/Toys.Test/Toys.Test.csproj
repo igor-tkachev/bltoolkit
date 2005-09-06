@@ -100,6 +100,11 @@
                     Project = "{86ED1077-CDE9-402A-9F5B-1A59B3E40FF6}"
                     Package = "{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}"
                 />
+                <Reference
+                    Name = "Rsdn.Framework.EditableObject"
+                    Project = "{40AD5851-67C0-4D0A-977C-86CB5AAD4883}"
+                    Package = "{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}"
+                />
             </References>
         </Build>
         <Files>
@@ -111,6 +116,11 @@
                 />
                 <File
                     RelPath = "DataAccess.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "EditableObject.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
                 />

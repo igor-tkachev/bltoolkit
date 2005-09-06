@@ -147,6 +147,7 @@
     <Compile Include="Mapping\IMemberMapper.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Mapping\IMapPropertyChangeNotification.cs" />
     <Compile Include="Mapping\Map.cs">
       <SubType>Code</SubType>
     </Compile>

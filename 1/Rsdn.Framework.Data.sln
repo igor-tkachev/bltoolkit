@@ -31,6 +31,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rsdn.Framework.DataAccess",
 	ProjectSection(ProjectDependencies) = postProject
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rsdn.Framework.EditableObject", "Toys\EditableObject\Rsdn.Framework.EditableObject.csproj", "{40AD5851-67C0-4D0A-977C-86CB5AAD4883}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfiguration) = preSolution
 		Debug = Debug
@@ -86,10 +90,14 @@ Global
 		{E42AB6EB-9BF5-466C-A761-521FF3459137}.Debug.Build.0 = Debug|.NET
 		{E42AB6EB-9BF5-466C-A761-521FF3459137}.Release.ActiveCfg = Release|.NET
 		{E42AB6EB-9BF5-466C-A761-521FF3459137}.Release.Build.0 = Release|.NET
+		{40AD5851-67C0-4D0A-977C-86CB5AAD4883}.Debug.ActiveCfg = Debug|.NET
+		{40AD5851-67C0-4D0A-977C-86CB5AAD4883}.Debug.Build.0 = Debug|.NET
+		{40AD5851-67C0-4D0A-977C-86CB5AAD4883}.Release.ActiveCfg = Release|.NET
+		{40AD5851-67C0-4D0A-977C-86CB5AAD4883}.Release.Build.0 = Release|.NET
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		XCSharpProjectsDisabled = 
 		XCSharpSolutionEnabled = True
+		XCSharpProjectsDisabled = 
 	EndGlobalSection
 	GlobalSection(ExtensibilityAddIns) = postSolution
 	EndGlobalSection

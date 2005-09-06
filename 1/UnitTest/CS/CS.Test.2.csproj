@@ -122,6 +122,7 @@
     <Compile Include="MapDataTest.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="PropertyChangeNotification.cs" />
     <Compile Include="ResultSetTest.cs" />
     <EmbeddedResource Include="Map.xml" />
     <EmbeddedResource Include="MapAttribute.xml" />
