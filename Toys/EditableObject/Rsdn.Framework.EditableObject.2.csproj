@@ -40,6 +40,9 @@
     <Compile Include="IEditable.cs" />
     <Compile Include="IEditableValueList.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TypedBindingList.cs">
+      <SubType>Component</SubType>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Source\Rsdn.Framework.Data.2.csproj">

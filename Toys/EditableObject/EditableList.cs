@@ -46,6 +46,11 @@ namespace Rsdn.Framework.EditableObject
 			return (T[])base.ToArray(typeof(T));
 		}
 
+		public new T AddNew()
+		{
+			return (T)base.AddNew();
+		}
+
 		#endregion
 
 		#region Like List<T> Methods
