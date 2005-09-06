@@ -18,27 +18,31 @@ namespace Rsdn.Framework.Data.Mapping
 		/// <summary>
 		/// 
 		/// </summary>
-		string Name        { get; }
+		string Name         { get; }
 		/// <summary>
 		/// 
 		/// </summary>
-		bool   IsNullable  { get; }
+		string OriginalName { get; }
 		/// <summary>
 		/// 
 		/// </summary>
-		bool   IsTrimmable { get; }
+		bool   IsNullable   { get; }
 		/// <summary>
 		/// 
 		/// </summary>
-		bool   IsClass     { get; }
+		bool   IsTrimmable  { get; }
 		/// <summary>
 		/// 
 		/// </summary>
-		Type   MemberType  { get; }
+		bool   IsClass      { get; }
+		/// <summary>
+		/// 
+		/// </summary>
+		Type   MemberType   { get; }
 		/// <summary>
 		/// Gets or sets the member order number.
 		/// </summary>
-		int    Order       { get; set; }
+		int    Order        { get; set; }
 		/// <summary>
 		/// 
 		/// </summary>

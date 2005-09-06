@@ -210,6 +210,11 @@
                     BuildAction = "Compile"
                 />
                 <File
+                    RelPath = "Mapping\IMapPropertyChangeNotification.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
                     RelPath = "Mapping\IMapSetPropertyInfo.cs"
                     SubType = "Code"
                     BuildAction = "Compile"

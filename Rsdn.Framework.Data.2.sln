@@ -37,6 +37,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rsdn.Framework.DataAccess.2
 EndProject
 Project("{4F174C21-8C12-11D0-8340-0000F80270F8}") = "Database.2", "UnitTest\Database\Database.2.dbp", "{850FB4BA-02FE-47AF-9FD8-755426DEED75}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rsdn.Framework.EditableObject.2", "Toys\EditableObject\Rsdn.Framework.EditableObject.2.csproj", "{3390347B-0F00-49A3-BA58-FCB2ECFF1BAC}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|.NET = Debug|.NET
@@ -209,6 +211,18 @@ Global
 		{90B49831-511C-41CC-827B-31E26B9E25A4}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{90B49831-511C-41CC-827B-31E26B9E25A4}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{90B49831-511C-41CC-827B-31E26B9E25A4}.Release|Win32.ActiveCfg = Release|Any CPU
+		{3390347B-0F00-49A3-BA58-FCB2ECFF1BAC}.Debug|.NET.ActiveCfg = Debug|Any CPU
+		{3390347B-0F00-49A3-BA58-FCB2ECFF1BAC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3390347B-0F00-49A3-BA58-FCB2ECFF1BAC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3390347B-0F00-49A3-BA58-FCB2ECFF1BAC}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{3390347B-0F00-49A3-BA58-FCB2ECFF1BAC}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{3390347B-0F00-49A3-BA58-FCB2ECFF1BAC}.Debug|Win32.ActiveCfg = Debug|Any CPU
+		{3390347B-0F00-49A3-BA58-FCB2ECFF1BAC}.Release|.NET.ActiveCfg = Release|Any CPU
+		{3390347B-0F00-49A3-BA58-FCB2ECFF1BAC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3390347B-0F00-49A3-BA58-FCB2ECFF1BAC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3390347B-0F00-49A3-BA58-FCB2ECFF1BAC}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{3390347B-0F00-49A3-BA58-FCB2ECFF1BAC}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{3390347B-0F00-49A3-BA58-FCB2ECFF1BAC}.Release|Win32.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -224,7 +238,7 @@ Global
 		{850FB4BA-02FE-47AF-9FD8-755426DEED75} = {96876B08-1C6E-4B28-917F-5129DF9DA13A}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		XCSharpProjectsDisabled = 
 		XCSharpSolutionEnabled = True
+		XCSharpProjectsDisabled = 
 	EndGlobalSection
 EndGlobal
