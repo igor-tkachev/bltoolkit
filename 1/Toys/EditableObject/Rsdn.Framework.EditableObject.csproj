@@ -134,6 +134,11 @@
                     BuildAction = "Compile"
                 />
                 <File
+                    RelPath = "TypedBindingList.cs"
+                    SubType = "Component"
+                    BuildAction = "Compile"
+                />
+                <File
                     RelPath = "Compatibility\INotifyPropertyChanged.cs"
                     SubType = "Code"
                     BuildAction = "Compile"

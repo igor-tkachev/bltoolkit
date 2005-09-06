@@ -410,7 +410,7 @@ namespace Rsdn.Framework.EditableObject
 						{
 							if (mm.OriginalName == p.Name)
 							{
-								pd = new MapPropertyDescriptor(pd, mm);
+								pd = new MapPropertyDescriptor(p, mm);
 								break;
 							}
 						}
@@ -433,8 +433,9 @@ namespace Rsdn.Framework.EditableObject
 		{
 			string name = ItemType.Name;
 
-			foreach (PropertyDescriptor pd in listAccessors)
-				name += "_" + pd.Name;
+			if (listAccessors != null)
+				foreach (PropertyDescriptor pd in listAccessors)
+					name += "_" + pd.Name;
 
 			return name;
 		}
