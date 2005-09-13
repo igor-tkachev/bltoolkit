@@ -2240,9 +2240,9 @@ namespace Rsdn.Framework.Data
 					OnBeforeOperation(OperationType.PrepareCommand);
 					command.Prepare();
 					OnAfterOperation (OperationType.PrepareCommand);
-
-					_prepared = true;
 				}
+
+				_prepared = true;
 
 				return this;
 #if HANDLE_EXCEPTIONS
