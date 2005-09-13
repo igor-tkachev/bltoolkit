@@ -183,11 +183,15 @@ namespace Rsdn.Framework.Data.Mapping
 #if VER2
 				value is INullableValue && ((INullableValue)value).HasValue == false ||
 #endif
-				value is String   && ((String)  value).TrimEnd(_trimArray).Length == 0 ||
+				value is string   && ((string)  value).TrimEnd(_trimArray).Length == 0 ||
 				value is DateTime && ((DateTime)value) == DateTime.MinValue ||
 				value is Int16    && ((Int16)   value) == 0 ||
 				value is Int32    && ((Int32)   value) == 0 ||
-				value is Int64    && ((Int64)   value) == 0;
+				value is Int64    && ((Int64)   value) == 0 ||
+				value is double   && ((double)  value) == 0 ||
+				value is float    && ((float)   value) == 0 ||
+				value is decimal  && ((decimal) value) == 0 ||
+				value is Guid     && ((Guid)    value) == Guid.Empty;
 		}
 
 		#endregion

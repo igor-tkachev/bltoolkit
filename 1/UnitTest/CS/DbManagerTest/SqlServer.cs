@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Data;
 
 using NUnit.Framework;
@@ -98,5 +99,37 @@ namespace CS.DbManagerTest
 				Assert.AreEqual(4, o);
 			}
 		}
+
+		#region Execute
+
+		public class ExecuteTestObject
+		{
+			public ExecuteTestObject(string s)
+			{
+				Len = s.Length;
+				Str = s;
+			}
+
+			public int    Len;
+			public string Str;
+		}
+
+		[Test]
+		public virtual void Execute_IList()
+		{
+			ArrayList list = new ArrayList(2);
+
+			list.Add(new ExecuteTestObject("12345"));
+			list.Add(new ExecuteTestObject("1234567890"));
+
+			using (DbManager db = new DbManager(ConfigurationString))
+			{
+				db
+					.SetSpCommand("Length_Test")
+					.Execute(list);
+			}
+		}
+
+		#endregion
 	}
 }

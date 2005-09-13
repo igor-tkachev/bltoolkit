@@ -16,5 +16,6 @@ Begin DataProject = "Database.2"
    Begin Folder = "Queries"
       Script = "Employee_SelectAll.sql"
       Script = "Employee_SelectByName.sql"
+      Script = "Length_Test.sql"
    End
 End
