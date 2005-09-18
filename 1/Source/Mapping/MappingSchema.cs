@@ -104,19 +104,14 @@ namespace Rsdn.Framework.Data.Mapping
 				}
 			}
 
-			return type.GetCustomAttributes(typeof(MapFieldAttribute), true);
+			return MapDescriptor.GetAllAttributes(type, typeof(MapFieldAttribute)).ToArray();
+			//return type.GetCustomAttributes(typeof(MapFieldAttribute), true);
 		}
 
-		public Attribute[] GetFieldAttributes(FieldInfo fieldInfo, string fieldName)
+		public Attribute[] GetFieldAttributes(MemberInfo memberInfo)
 		{
 			return GetFieldAttributes(
-				Attribute.GetCustomAttributes(fieldInfo, typeof(MapFieldAttribute)), fieldName);
-		}
-
-		public Attribute[] GetFieldAttributes(PropertyInfo propertyInfo, string fieldName)
-		{
-			return GetFieldAttributes(
-				Attribute.GetCustomAttributes(propertyInfo, typeof(MapFieldAttribute)), fieldName);
+				Attribute.GetCustomAttributes(memberInfo, typeof(MapFieldAttribute)), memberInfo.Name);
 		}
 
 		private Attribute[] GetFieldAttributes(Attribute[] attributes, string fieldName)

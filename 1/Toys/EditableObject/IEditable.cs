@@ -8,6 +8,6 @@ namespace Rsdn.Framework.EditableObject
 	{
 		void AcceptChanges();
 		void RejectChanges();
-		bool IsDirty { [return: MapReturnIfFalse] get; }
+		bool IsDirty { [return: MapReturnIfTrue] get; }
 	}
 }

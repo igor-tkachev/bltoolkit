@@ -410,7 +410,8 @@ namespace Rsdn.Framework.EditableObject
 						{
 							if (mm.OriginalName == p.Name)
 							{
-								pd = new MapPropertyDescriptor(p, mm);
+								if (mm.MemberType.IsEnum == false)
+									pd = new MapPropertyDescriptor(p, mm);
 								break;
 							}
 						}
@@ -418,7 +419,7 @@ namespace Rsdn.Framework.EditableObject
 				}
 
 				if (pd == null)
-					pd = new StandardPropertyDescriptor(pd);
+					pd = new StandardPropertyDescriptor(p);
 
 				list.Add(pd);
 			}
@@ -764,24 +765,32 @@ namespace Rsdn.Framework.EditableObject
 			return new EditableArrayList(itemType, ArrayList.Adapter(list));
 		}
 
-		public static EditableArrayList Adapter(ArrayList list)
+		private static Type GetItemType(IList list)
 		{
 			if (list == null) throw new ArgumentNullException("list");
 
 			PropertyInfo pi = list.GetType().GetProperty("Item", new Type[] { typeof(int) });
 			Type         it = pi == null? typeof(object): pi.PropertyType;
 
-			return new EditableArrayList(it, list);
+			if (it == typeof(object) && list.Count > 0)
+			{
+				object o = list[0];
+
+				if (o != null)
+					it = o.GetType();
+			}
+
+			return it;
+		}
+
+		public static EditableArrayList Adapter(ArrayList list)
+		{
+			return new EditableArrayList(GetItemType(list), list);
 		}
 
 		public static new EditableArrayList Adapter(IList list)
 		{
-			if (list == null) throw new ArgumentNullException("list");
-
-			PropertyInfo pi = list.GetType().GetProperty("Item", new Type[] { typeof(int) });
-			Type         it = pi == null? typeof(object): pi.PropertyType;
-
-			return new EditableArrayList(it, ArrayList.Adapter(list));
+			return new EditableArrayList(GetItemType(list), ArrayList.Adapter(list));
 		}
 
 		#endregion
@@ -854,7 +863,7 @@ namespace Rsdn.Framework.EditableObject
 
 		#endregion
 
-		#region StandardPropertyDescriptor
+		#region MapPropertyDescriptor
 
 		class MapPropertyDescriptor : StandardPropertyDescriptor
 		{

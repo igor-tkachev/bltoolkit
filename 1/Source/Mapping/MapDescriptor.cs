@@ -556,12 +556,6 @@ namespace Rsdn.Framework.Data.Mapping
 					if (attr.SourceName != null && attr.SourceName.Length != 0 &&
 						attr.TargetName != null && attr.TargetName.Length != 0)
 					{
-						if (_sourceToTarget.Contains(attr.SourceName) == false)
-							_sourceToTarget.Add(attr.SourceName, attr.TargetName);
-						
-						if (_targetToSource.Contains(attr.TargetName) == false)
-							_targetToSource.Add(attr.TargetName, attr.SourceName);
-
 						IMemberMapper mm = this[attr.TargetName.ToLower()];
 
 						if (mm != null)
@@ -587,6 +581,12 @@ namespace Rsdn.Framework.Data.Mapping
 						}
 						else
 						{
+							if (_sourceToTarget.Contains(attr.SourceName) == false)
+								_sourceToTarget.Add(attr.SourceName, attr.TargetName);
+						
+							if (_targetToSource.Contains(attr.TargetName) == false)
+								_targetToSource.Add(attr.TargetName, attr.SourceName);
+
 							// Just to add the member into the member collections.
 							//
 							((IMapDataReceiver)this).GetOrdinal(attr.TargetName);

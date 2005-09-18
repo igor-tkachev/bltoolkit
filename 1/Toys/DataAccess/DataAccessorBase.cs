@@ -270,7 +270,6 @@ namespace Rsdn.Framework.DataAccess
 		private static PrimaryKeyComparer _primaryKeyComparer = new PrimaryKeyComparer();
 		private static Hashtable          _keyList            = new Hashtable();
 
-
 		protected IMemberMapper[] GetKeyFieldList(Type type)
 		{
 			IMemberMapper[] mmList = (IMemberMapper[])_keyList[type];
