@@ -52,11 +52,23 @@ namespace Rsdn.Framework.EditableObject
 					EditableArrayList list;
 
 					if (value is EditableArrayList)
+					{
 						list = (EditableArrayList)value;
+					}
 					else if (value is ArrayList)
-						list = EditableArrayList.Adapter((ArrayList)value);
+					{
+						if (value.Count != 0 || _type == null || _type.Type == null)
+							list = EditableArrayList.Adapter((ArrayList)value);
+						else
+							list = EditableArrayList.Adapter(_type.Type, (ArrayList)value);
+					}
 					else
-						list = EditableArrayList.Adapter(value);
+					{
+						if (value.Count != 0 && _type == null || _type.Type == null)
+							list = EditableArrayList.Adapter(value);
+						else
+							list = EditableArrayList.Adapter(_type.Type, value);
+					}
 
 					if (_type == null || _type.Type == null)
 					{
@@ -241,7 +253,7 @@ namespace Rsdn.Framework.EditableObject
 
 		object IList.this[int index]
 		{
-			get { return _list[index];  }
+			get { return index == -1? null: _list[index];  }
 			set { _list[index] = value; }
 		}
 

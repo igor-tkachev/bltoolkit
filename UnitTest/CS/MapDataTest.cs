@@ -16,9 +16,9 @@ namespace CS
 		#region ToValue
 
 		[MapValue(StateNullable.Pending, "P")]
-		[MapNullValue(StateNullable.Null)]
-		[MapDefaultValue(StateNullable.Unknown)]
-		public enum StateNullable
+			[MapNullValue(StateNullable.Null)]
+			[MapDefaultValue(StateNullable.Unknown)]
+			public enum StateNullable
 		{
 			Unknown,
 			Null,
@@ -64,9 +64,9 @@ namespace CS
 		#region ToValue_Exception
 
 		[MapValue(State.Active,   "A")]
-		[MapValue(State.Inactive, "I")]
-		[MapValue(TypeValue = State.Pending, MappedValue = "P")]
-		public enum State
+			[MapValue(State.Inactive, "I")]
+			[MapValue(TypeValue = State.Pending, MappedValue = "P")]
+			public enum State
 		{
 			Active,
 			Inactive,
@@ -229,21 +229,21 @@ namespace CS
 			}
 
 			[MapXml("DestAttr")]
-			public class DestAttr
+				public class DestAttr
 			{
 				public int ix1;
 				public int i2;
 			}
 
 			[MapXml("CS.MapAttribute.xml", "DestAttr")]
-			public class DestAttr2
+				public class DestAttr2
 			{
 				public int ixx1;
 				public int i2;
 			}
 
 			[MapXml(FileName="CS.Map.xml", XPath="my_tag/my_tag_type[@my_name=\"dest_attr\"]")]
-			public class DestAttr3
+				public class DestAttr3
 			{
 				public int ixx1;
 				public int i2;
@@ -447,10 +447,10 @@ namespace CS
 			}
 
 			[MapField("TestID1", "Test1.ID")]
-			[MapField("TestID2", "Test2.ID")]
-			[MapField("TestID3", "Test3.ID")]
-			[MapField("TestID4", "Test4.ID")]
-			public abstract class Dest
+				[MapField("TestID2", "Test2.ID")]
+				[MapField("TestID3", "Test3.ID")]
+				[MapField("TestID4", "Test4.ID")]
+				public abstract class Dest
 			{
 				public abstract TestType Test1 { get; set; }
 				public abstract TestType Test3 { get; set; }
@@ -625,6 +625,75 @@ namespace CS
 			Assert.AreEqual(123, d.Field1, "f1");
 		}
 		
+		#endregion
+
+		#region FromEnum
+
+		public enum OperationDirection
+		{
+			[MapValue(0)] Income,
+			[MapValue(1)] Outcome,
+			[MapValue(2)] Discard,
+			[MapValue(3)] Request
+		} ;
+
+		[Test]
+		public void FromEnumTest()
+		{
+			object o = Map.FromEnum(OperationDirection.Income);
+
+			Assert.AreEqual(0, o);
+		}
+
+		#endregion
+
+		#region Test Onion
+
+		public interface I1
+		{
+		}
+
+		public abstract class O1 : I1
+		{
+			private        int _id = int.MinValue;
+			public virtual int ID
+			{
+				get { return _id;  }
+				set { _id = value; }
+			}
+		}
+
+		public interface I2
+		{
+		}
+
+		public abstract class O2 : O1, I2
+		{
+		}
+
+		//[MapField("SourceID", "ID")]
+		public class O3 : O2, I2
+		{
+		}
+
+		[MapField("SourceID", "ID")]
+		public class O4 : O3
+		{
+		}
+
+		public class Source
+		{
+			public int SourceID = 10;
+		}
+
+		[Test]
+		public void TestOnion()
+		{
+			O4 o = (O4)Map.ToObject(new Source(), typeof(O4));
+
+			Assert.AreEqual(10, o.ID);
+		}
+
 		#endregion
 	}
 }

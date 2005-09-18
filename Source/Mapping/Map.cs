@@ -144,7 +144,7 @@ namespace Rsdn.Framework.Data.Mapping
 
 				object[] attributes = MapDescriptor.GetValueAttributes(type);
 
-				return BaseMemberMapper.MapTo((Attribute[])attributes, sourceValue, true);
+				return BaseMemberMapper.MapTo((Attribute[])attributes, sourceValue, false);
 #if HANDLE_EXCEPTIONS
 			}
 			catch (Exception ex)

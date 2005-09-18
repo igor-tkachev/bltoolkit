@@ -36,7 +36,7 @@ namespace Rsdn.Framework.Data.Mapping
 
 			// Get field name.
 			//
-			Attribute[] attributes = schema.GetFieldAttributes(propertyInfo, Name);
+			Attribute[] attributes = schema.GetFieldAttributes(propertyInfo);
 
 			// If field has MapField attribute.
 			//
