@@ -47,10 +47,6 @@ namespace Rsdn.Framework.Data.Mapping
 					return field;
 
 			foreach (FieldInfo field in fields)
-				if (IsMemberOfType(memberType, field.FieldType))
-					return field;
-
-			foreach (FieldInfo field in fields)
 				if (field.Name == "Value" && IsBasedOnType(memberType, field.FieldType))
 					return field;
 
@@ -62,11 +58,15 @@ namespace Rsdn.Framework.Data.Mapping
 					return prop;
 
 			foreach (PropertyInfo prop in props)
-				if (IsMemberOfType(memberType, prop.PropertyType))
+				if (prop.Name == "Value" && IsBasedOnType(memberType, prop.PropertyType))
 					return prop;
 
+			foreach (FieldInfo field in fields)
+				if (IsMemberOfType(memberType, field.FieldType))
+					return field;
+
 			foreach (PropertyInfo prop in props)
-				if (prop.Name == "Value" && IsBasedOnType(memberType, prop.PropertyType))
+				if (IsMemberOfType(memberType, prop.PropertyType))
 					return prop;
 
 			return null;
@@ -537,13 +537,13 @@ namespace Rsdn.Framework.Data.Mapping
 											{
 												gen
 													.ldloc(lb)
-													.brtrue_s(retLabel);
+													.brtrue(retLabel);
 											} 
 											else if (returnIfZero)
 											{
 												gen
 													.ldloc(lb)
-													.brfalse_s(retLabel);
+													.brfalse(retLabel);
 											}
 										}
 									}
@@ -835,7 +835,7 @@ namespace Rsdn.Framework.Data.Mapping
 						{
 							object o = ctx.AttributeParams[i];
 
-							if (ctx.DefCtorGen.LoadObject(o))
+							if (ctx.DefCtorGen.LoadConst(o))
 							{
 								if (o.GetType().IsValueType && !pi[i].ParameterType.IsValueType)
 									ctx.DefCtorGen.box(o.GetType());
@@ -849,7 +849,7 @@ namespace Rsdn.Framework.Data.Mapping
 									.CastTo(types[i]);
 							}
 
-							if (ctx.ObfCtorGen.LoadObject(o))
+							if (ctx.ObfCtorGen.LoadConst(o))
 							{
 								if (o.GetType().IsValueType && !pi[i].ParameterType.IsValueType)
 									ctx.ObfCtorGen.box(o.GetType());

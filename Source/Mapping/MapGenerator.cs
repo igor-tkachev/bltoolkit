@@ -144,9 +144,13 @@ namespace Rsdn.Framework.Data.Mapping
 		#region Branch
 
 		public MapGenerator brtrue_s (Label l) { _gen.Emit(OpCodes.Brtrue_S,  l); return this; }
+		public MapGenerator brtrue   (Label l) { _gen.Emit(OpCodes.Brtrue,    l); return this; }
 		public MapGenerator brfalse_s(Label l) { _gen.Emit(OpCodes.Brfalse_S, l); return this; }
+		public MapGenerator brfalse  (Label l) { _gen.Emit(OpCodes.Brfalse,   l); return this; }
 		public MapGenerator br_s     (Label l) { _gen.Emit(OpCodes.Br_S, l);      return this; }
+		public MapGenerator br       (Label l) { _gen.Emit(OpCodes.Br, l);        return this; }
 		public MapGenerator ble_s    (Label l) { _gen.Emit(OpCodes.Ble_S, l);     return this; }
+		public MapGenerator ble      (Label l) { _gen.Emit(OpCodes.Ble, l);       return this; }
 
 		#endregion
 
@@ -261,18 +265,19 @@ namespace Rsdn.Framework.Data.Mapping
 		public MapGenerator ldind_r4         { get { _gen.Emit(OpCodes.Ldind_R4);        return this; } }
 		public MapGenerator ldind_r8         { get { _gen.Emit(OpCodes.Ldind_R8);        return this; } }
 
-		public bool LoadObject(object o)
+		public bool LoadConst(object o)
 		{
 			if      (o == null)   ldnull.EndGen();
 			else if (o is string) ldstr ((string)o);
+			else if (o is int)    ldc_i4((int)o);
 			else if (o is byte)   ldc_i4((byte)o);
+			else if (o is sbyte)  ldc_i4((sbyte)o);
 			else if (o is char)   ldc_i4((char)o);
 			else if (o is ushort) ldc_i4((ushort)o);
-			else if (o is uint)   ldc_i4((int)o);
-			else if (o is ulong)  ldc_i8((ulong)o);
+			else if (o is uint)   ldc_i4((int)(uint)o);
+			else if (o is ulong)  ldc_i8((long)(ulong)o);
 			else if (o is bool)   ldc_i4((bool)o? 1: 0);
 			else if (o is short)  ldc_i4((short)o);
-			else if (o is int)    ldc_i4((int)o);
 			else if (o is long)   ldc_i8((long)o);
 			else if (o is float)  ldc_r4((float)o);
 			else if (o is double) ldc_r8((double)o);
