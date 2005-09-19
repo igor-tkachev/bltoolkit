@@ -37,7 +37,7 @@ namespace Rsdn.Framework.EditableObject
 	[MapType(typeof(double),   typeof(EditableValue), (double)0)]
 	[MapType(typeof(string),   typeof(EditableValue), "")]
 	[MapType(typeof(DateTime), typeof(EditableDateTime))]
-	[MapType(typeof(Decimal),  typeof(EditableDecimal))]
+	[MapType(typeof(decimal),  typeof(EditableDecimal))]
 	[MapType(typeof(Guid),     typeof(EditableGuid))]
 #endif
 	public interface IEditableTypeList

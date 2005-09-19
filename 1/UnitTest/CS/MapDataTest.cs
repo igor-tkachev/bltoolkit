@@ -671,12 +671,11 @@ namespace CS
 		{
 		}
 
-		//[MapField("SourceID", "ID")]
+		[MapField("SourceID", "ID")]
 		public class O3 : O2, I2
 		{
 		}
 
-		[MapField("SourceID", "ID")]
 		public class O4 : O3
 		{
 		}
