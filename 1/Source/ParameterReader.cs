@@ -34,7 +34,7 @@ namespace Rsdn.Framework.Data
 
 		public void SetFieldValue(int i, string name, object entity, object value)
 		{
-			if (value == null || value.GetType().IsClass == false || value is string)
+			if (value == null || value.GetType().IsClass == false || value is string || value is byte[])
 				_paramList.Add(_db.Parameter("@" + name, value == null? DBNull.Value: value));
 		}
 

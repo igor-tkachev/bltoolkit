@@ -103,6 +103,15 @@ namespace Toys.Test
 			}
 		}
 
+		public class EmployeeList : ArrayList
+		{
+			public new Employee this[int idx]
+			{
+				get { return (Employee)base[idx]; }
+				set { base[idx] = value;          }
+			}
+		}
+
 		private EmployeeDataAccessor _da;
 
 		public DataAccess()

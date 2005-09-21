@@ -60,6 +60,9 @@ namespace Rsdn.Framework.DataAccess
 					_objectType = returnType.GetGenericArguments()[0];
 #endif
 				if (_objectType == null)
+					_objectType = returnType.GetElementType();
+
+				if (_objectType == null)
 					throw new RsdnDataAccessException(string.Format(
 						"Can not determine object type for method '{0}.{1}'",
 						_methodInfo.DeclaringType.Name,
