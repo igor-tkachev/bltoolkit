@@ -2285,6 +2285,16 @@ namespace Rsdn.Framework.Data
 						{
 							p.Size = 1;
 						}
+						else if (p.Value is byte[])
+						{
+							int len = ((byte[])p.Value).Length;
+
+							if (p.Size < len)
+							{
+								p.Size  = len;
+								prepare = true;
+							}
+						}
 					}
 
 					if (prepare)

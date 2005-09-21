@@ -42,6 +42,7 @@ namespace Rsdn.Framework.DataAccess
 			return (T)CreateInstance(typeof(T));
 		}
 #endif
+
 		private static IObjectFactory CreateFactory(Type type)
 		{
 			AssemblyName assemblyName = new AssemblyName();

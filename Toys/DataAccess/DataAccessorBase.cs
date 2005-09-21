@@ -20,7 +20,7 @@ namespace Rsdn.Framework.DataAccess
 			return new DbManager();
 		}
 
-		protected virtual string GetSpName(string typeName, string actionName)
+		protected virtual string GetDefaultSpName(string typeName, string actionName)
 		{
 			return typeName == null?
 				actionName:
@@ -32,7 +32,7 @@ namespace Rsdn.Framework.DataAccess
 		protected virtual string GetSpName(Type type, string actionName)
 		{
 			if (type == null)
-				return GetSpName((string)null, actionName);
+				return GetDefaultSpName((string)null, actionName);
 
 			string key       = type.Name + "$" + actionName;
 			string sprocName = (string)_actionSproc[key];
@@ -51,7 +51,7 @@ namespace Rsdn.Framework.DataAccess
 				}
 
 				if (sprocName == null)
-					sprocName = GetSpName(type.Name, actionName);
+					sprocName = GetDefaultSpName(type.Name, actionName);
 
 				_actionSproc[key] = sprocName;
 			}
@@ -316,7 +316,7 @@ namespace Rsdn.Framework.DataAccess
 			sb.Remove(sb.Length - 5, 5);
 		}
 
-		protected string CreateSelectByIDSqlTest(Type type)
+		protected string CreateSelectByKeySqlText(Type type)
 		{
 			MapDescriptor md = Map.Descriptor(type);
 			StringBuilder sb = new StringBuilder();
@@ -335,7 +335,7 @@ namespace Rsdn.Framework.DataAccess
 			return sb.ToString();
 		}
 
-		protected string CreateSelectAllSqlTest(Type type)
+		protected string CreateSelectAllSqlText(Type type)
 		{
 			MapDescriptor md = Map.Descriptor(type);
 			StringBuilder sb = new StringBuilder();
@@ -352,7 +352,7 @@ namespace Rsdn.Framework.DataAccess
 			return sb.ToString();
 		}
 
-		protected string CreateInsertSqlTest(Type type)
+		protected string CreateInsertSqlText(Type type)
 		{
 			MapDescriptor md = Map.Descriptor(type);
 			StringBuilder sb = new StringBuilder();
@@ -378,7 +378,7 @@ namespace Rsdn.Framework.DataAccess
 			return sb.ToString();
 		}
 
-		protected string CreateUpdateSqlTest(Type type)
+		protected string CreateUpdateSqlText(Type type)
 		{
 			MapDescriptor md = Map.Descriptor(type);
 			StringBuilder sb = new StringBuilder();
@@ -396,7 +396,7 @@ namespace Rsdn.Framework.DataAccess
 			return sb.ToString();
 		}
 
-		protected string CreateDeleteSqlTest(Type type)
+		protected string CreateDeleteSqlText(Type type)
 		{
 			MapDescriptor md = Map.Descriptor(type);
 			StringBuilder sb = new StringBuilder();
@@ -412,11 +412,11 @@ namespace Rsdn.Framework.DataAccess
 		{
 			switch (actionName)
 			{
-				case "SelectByKey": return CreateSelectByIDSqlTest(type);
-				case "SelectAll":   return CreateSelectAllSqlTest (type);
-				case "Insert":      return CreateInsertSqlTest    (type);
-				case "Update":      return CreateUpdateSqlTest    (type);
-				case "Delete":      return CreateDeleteSqlTest    (type);
+				case "SelectByKey": return CreateSelectByKeySqlText(type);
+				case "SelectAll":   return CreateSelectAllSqlText  (type);
+				case "Insert":      return CreateInsertSqlText     (type);
+				case "Update":      return CreateUpdateSqlText     (type);
+				case "Delete":      return CreateDeleteSqlText     (type);
 				default:
 					throw new RsdnDataAccessException(
 						string.Format("Unknown action '{0}'.", actionName));
