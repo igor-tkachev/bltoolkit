@@ -47,12 +47,8 @@ namespace Rsdn.Framework.EditableObject
 			get { return _itemType; }
 		}
 
-		#endregion
-
-		#region Protected Members
-
 		private ArrayList _newItems;
-		private ArrayList  NewItems
+		public  ArrayList  NewItems
 		{
 			get
 			{
@@ -63,7 +59,7 @@ namespace Rsdn.Framework.EditableObject
 		}
 
 		private ArrayList _delItems;
-		private ArrayList  DelItems
+		public  ArrayList  DelItems
 		{
 			get
 			{
@@ -72,6 +68,10 @@ namespace Rsdn.Framework.EditableObject
 				return _delItems;
 			}
 		}
+
+		#endregion
+
+		#region Protected Members
 
 		public virtual object Clone(EditableArrayList el)
 		{
@@ -410,8 +410,9 @@ namespace Rsdn.Framework.EditableObject
 						{
 							if (mm.OriginalName == p.Name)
 							{
-								if (mm.MemberType.IsEnum == false)
+								if (mm.MemberType.IsEnum == false && mm.MapValueAttributeList.Length == 0)
 									pd = new MapPropertyDescriptor(p, mm);
+
 								break;
 							}
 						}
@@ -462,7 +463,7 @@ namespace Rsdn.Framework.EditableObject
 			_list.AddRange(c);
 
 			AddInternal(c);
-			OnListChanged(ListChangedType.ItemAdded, Count);
+			OnListChanged(ListChangedType.Reset, idx);
 		}
 
 		public override int BinarySearch(int index, int count, object value, IComparer comparer)
@@ -489,6 +490,7 @@ namespace Rsdn.Framework.EditableObject
 		public override void Clear()
 		{
 			_list.Clear();
+			OnListChanged(ListChangedType.Reset, -1);
 		}
 
 		public override object Clone()
@@ -576,7 +578,7 @@ namespace Rsdn.Framework.EditableObject
 			if (c.Count > 0)
 			{
 				AddInternal(c);
-				OnListChanged(ListChangedType.ItemAdded, index);
+				OnListChanged(ListChangedType.Reset, index);
 			}
 		}
 
@@ -641,7 +643,7 @@ namespace Rsdn.Framework.EditableObject
 
 			_list.RemoveRange(index, count);
 
-			OnListChanged(ListChangedType.ItemDeleted, index);
+			OnListChanged(ListChangedType.Reset, index);
 		}
 
 		public override void Reverse()
@@ -649,7 +651,7 @@ namespace Rsdn.Framework.EditableObject
 			_list.Reverse();
 
 			if (_list.Count > 1)
-				OnListChanged(ListChangedType.ItemMoved, 0);
+				OnListChanged(ListChangedType.Reset, 0);
 		}
 
 		public override void Reverse(int index, int count)
@@ -657,7 +659,7 @@ namespace Rsdn.Framework.EditableObject
 			_list.Reverse(index, count);
 
 			if (count > 1)
-				OnListChanged(ListChangedType.ItemMoved, index);
+				OnListChanged(ListChangedType.Reset, 0);
 		}
 
 		public override void SetRange(int index, ICollection c)
@@ -667,7 +669,7 @@ namespace Rsdn.Framework.EditableObject
 			if (_list.Count > 1)
 			{
 				AddInternal(c);
-				OnListChanged(ListChangedType.ItemAdded, index);
+				OnListChanged(ListChangedType.Reset, index);
 			}
 		}
 
@@ -676,7 +678,7 @@ namespace Rsdn.Framework.EditableObject
 			_list.Sort();
 
 			if (_list.Count > 1)
-				OnListChanged(ListChangedType.ItemMoved, 0);
+				OnListChanged(ListChangedType.Reset, 0);
 		}
 
 		public override void Sort(int index, int count, IComparer comparer)
@@ -684,7 +686,7 @@ namespace Rsdn.Framework.EditableObject
 			_list.Sort(index, count, comparer);
 
 			if (count > 1)
-				OnListChanged(ListChangedType.ItemMoved, index);
+				OnListChanged(ListChangedType.Reset, 0);
 		}
 
 		public override void Sort(IComparer comparer)
@@ -692,7 +694,7 @@ namespace Rsdn.Framework.EditableObject
 			_list.Sort(comparer);
 
 			if (_list.Count > 1)
-				OnListChanged(ListChangedType.ItemMoved, 0);
+				OnListChanged(ListChangedType.Reset, 0);
 		}
 
 		public override object SyncRoot

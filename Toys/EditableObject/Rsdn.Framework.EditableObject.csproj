@@ -139,6 +139,11 @@
                     BuildAction = "Compile"
                 />
                 <File
+                    RelPath = "TypedBindingList.resx"
+                    DependentUpon = "TypedBindingList.cs"
+                    BuildAction = "EmbeddedResource"
+                />
+                <File
                     RelPath = "Compatibility\INotifyPropertyChanged.cs"
                     SubType = "Code"
                     BuildAction = "Compile"

@@ -29,6 +29,9 @@ namespace Rsdn.Framework.EditableObject
 			set
 			{
 				_type = value;
+
+				OnListChanged(ListChangedType.PropertyDescriptorChanged, -1);
+
 				List  = null;
 			}
 		}
@@ -44,6 +47,9 @@ namespace Rsdn.Framework.EditableObject
 			{
 				if (value == null)
 				{
+					if (_list != null)
+						((IBindingList)_list).ListChanged -= new ListChangedEventHandler(ListChangedHandler);
+
 					_list = _type == null || _type.Type == null?
 						_empty: new EditableArrayList(_type.Type);
 				}
@@ -76,15 +82,21 @@ namespace Rsdn.Framework.EditableObject
 					}
 					else
 					{
-						if (list.ItemType.IsSubclassOf(_type.Type) == false)
+						if (list.ItemType != _type.Type && !list.ItemType.IsSubclassOf(_type.Type))
 							throw new ArgumentException(string.Format(
 								"Item type (0) of the new list must be a subclass of {1}.",
 								list.ItemType,
 								_type.Type));
 					}
 
+					if (_list != null)
+						((IBindingList)_list).ListChanged -= new ListChangedEventHandler(ListChangedHandler);
+
 					_list = list;
 				}
+
+				((IBindingList)_list).ListChanged += new ListChangedEventHandler(ListChangedHandler);
+				OnListChanged(ListChangedType.Reset, -1);
 			}
 		}
 
@@ -119,6 +131,26 @@ namespace Rsdn.Framework.EditableObject
 		}
 
 		#endregion Public members
+
+		#region Protected Members
+
+		protected virtual void OnListChanged(ListChangedEventArgs e)
+		{
+			if (_listChanged != null)
+				_listChanged(this, e);
+		}
+
+		protected void OnListChanged(ListChangedType listChangedType, int newIndex)
+		{
+			OnListChanged(new ListChangedEventArgs(listChangedType, newIndex));
+		}
+
+		private void ListChangedHandler(object sender, ListChangedEventArgs e)
+		{
+			OnListChanged(e);
+		}
+
+		#endregion
 
 		#region ITypedList Members
 
@@ -161,10 +193,11 @@ namespace Rsdn.Framework.EditableObject
 			get { return ((IBindingList)_list).IsSorted; }
 		}
 
-		event ListChangedEventHandler IBindingList.ListChanged
+		private ListChangedEventHandler _listChanged;
+		event   ListChangedEventHandler IBindingList.ListChanged
 		{
-			add    { ((IBindingList)_list).ListChanged += value; }
-			remove { ((IBindingList)_list).ListChanged -= value; }
+			add    { _listChanged += value; }
+			remove { _listChanged -= value; }
 		}
 
 		void IBindingList.RemoveIndex(PropertyDescriptor property)
@@ -317,7 +350,8 @@ namespace Rsdn.Framework.EditableObject
 
 			public Type Type
 			{
-				get { return _type; }
+				get { return _type;  }
+				set { _type = value; }
 			}
 		}
 
