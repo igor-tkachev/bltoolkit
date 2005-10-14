@@ -138,7 +138,10 @@ namespace BLToolkit.Reflection.Emit
 		/// <returns>The defined method.</returns>
 		public MethodBuilderHelper DefineMethod(MethodInfo methodInfoDeclaration)
 		{
-			return DefineMethod(methodInfoDeclaration.Name, methodInfoDeclaration, MethodAttributes.Virtual);
+			return DefineMethod(
+				methodInfoDeclaration.DeclaringType.FullName + "." + methodInfoDeclaration.Name,
+				methodInfoDeclaration,
+				MethodAttributes.Virtual);
 		}
 
 		#endregion

@@ -221,11 +221,54 @@ namespace BLToolkit.Reflection
 		}
 
 		/// <summary>
+		/// Gets the name of the Type.
+		/// </summary>
+		public string Name
+		{
+			get { return _type.Name; }
+		}
+
+		/// <summary>
 		/// Gets a value indicating whether the Type is abstract and must be overridden.
 		/// </summary>
 		public bool IsAbstract
 		{
 			get { return _type.IsAbstract; }
+		}
+
+		/// <summary>
+		/// Indicates whether the Type is serializable.
+		/// </summary>
+		public bool IsSerializable
+		{
+			get { return _type.IsSerializable; }
+		}
+
+		#endregion
+
+		#region GetMethods
+
+		/// <summary>
+		/// Returns all the public methods of the current Type.
+		/// </summary>
+		/// <returns>An array of <see cref="MethodInfo"/> objects representing all the public methods 
+		/// defined for the current Type.</returns>
+		public MethodInfo[] GetMethods()
+		{
+			return _type.GetMethods();
+		}
+
+		/// <summary>
+		/// Searches for the methods defined for the current Type,
+		/// using the specified binding constraints.
+		/// </summary>
+		/// <param name="bindingAttr">A bitmask comprised of one or more <see cref="BindingFlags"/> 
+		/// that specify how the search is conducted.</param>
+		/// <returns>An array of <see cref="MethodInfo"/> objects representing all methods defined 
+		/// for the current Type that match the specified binding constraints.</returns>
+		public MethodInfo[] GetMethods(BindingFlags bindingAttr)
+		{
+			return _type.GetMethods(bindingAttr);
 		}
 
 		#endregion

@@ -1863,6 +1863,18 @@ namespace BLToolkit.Reflection.Emit
 		}
 
 		/// <summary>
+		/// Calls ILGenerator.Emit(<see cref="OpCodes.Ldloc"/>, LocalBuilder) that
+		/// load an argument address onto the evaluation stack.
+		/// </summary>
+		/// <param name="localBuilder">Local variable builder.</param>
+		/// <seealso cref="OpCodes.Ldloc">OpCodes.Ldloc</seealso>
+		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode,short)">ILGenerator.Emit</seealso>
+		public EmitHelper ldloc (LocalBuilder localBuilder)
+		{
+			_ilGenerator.Emit(OpCodes.Ldloc, localBuilder); return this;
+		}
+
+		/// <summary>
 		/// Calls ILGenerator.Emit(<see cref="OpCodes.Ldloca"/>, short) that
 		/// loads the address of the local variable at a specific index onto the evaluation stack.
 		/// </summary>
