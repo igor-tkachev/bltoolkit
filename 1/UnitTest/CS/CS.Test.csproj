@@ -127,11 +127,6 @@
                     BuildAction = "Compile"
                 />
                 <File
-                    RelPath = "MapEnum.cs"
-                    SubType = "Code"
-                    BuildAction = "Compile"
-                />
-                <File
                     RelPath = "MapNamespace.xml"
                     BuildAction = "EmbeddedResource"
                 />

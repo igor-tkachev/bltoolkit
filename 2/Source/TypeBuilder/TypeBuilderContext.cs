@@ -3,6 +3,7 @@ using System.Collections;
 using System.Reflection;
 using System.Reflection.Emit;
 
+using BLToolkit.Reflection;
 using BLToolkit.Reflection.Emit;
 
 namespace BLToolkit.TypeBuilder
@@ -23,7 +24,7 @@ namespace BLToolkit.TypeBuilder
 			set { _info = value; }
 		}
 
-		public Type Type
+		public TypeHelper Type
 		{
 			get { return _info.OriginalType; }
 		}
@@ -51,6 +52,34 @@ namespace BLToolkit.TypeBuilder
 
 				return _interfaceMap;
 			}
+		}
+
+		private TypeHelper _currentInterface;
+		public  TypeHelper  CurrentInterface
+		{
+			get { return _currentInterface;  }
+			set { _currentInterface = value; }
+		}
+
+		private MethodBuilderHelper _methodBuilder;
+		public  MethodBuilderHelper  MethodBuilder
+		{
+			get { return _methodBuilder;  }
+			set { _methodBuilder = value; }
+		}
+
+		private LocalBuilder _returnValue;
+		public  LocalBuilder  ReturnValue
+		{
+			get { return _returnValue;  }
+			set { _returnValue = value; }
+		}
+
+		private Label _returnLabel;
+		public  Label  ReturnLabel
+		{
+			get { return _returnLabel;  }
+			set { _returnLabel = value; }
 		}
 	}
 }

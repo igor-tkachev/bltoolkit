@@ -10,6 +10,12 @@ namespace TypeBuilder
 	[TestFixture]
 	public class IAbstractTypeBuilder
 	{
+		public interface ITest
+		{
+			void Method();
+			Type Property { get; }
+		}
+
 		public class AbstractTypeBuilder : BLToolkit.TypeBuilder.IAbstractTypeBuilder
 		{
 			public bool IsCompatible (ITypeBuilder typeBuilder)
@@ -19,7 +25,7 @@ namespace TypeBuilder
 
 			public Type[] GetInterfaces() 
 			{
-				return null;
+				return new Type[] { typeof(ITest) };
 			}
 
 			public void BeforeBuild(TypeBuilderContext context)
@@ -28,6 +34,10 @@ namespace TypeBuilder
 			}
 
 			public void AfterBuild(TypeBuilderContext context)
+			{
+			}
+
+			public void BuildInterfaceMethod(TypeBuilderContext context)
 			{
 			}
 		}

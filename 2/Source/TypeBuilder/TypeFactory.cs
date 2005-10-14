@@ -292,6 +292,54 @@ namespace BLToolkit.TypeBuilder
 				context.TypeBuilder.SetCustomAttribute(typeof(SerializableAttribute));
 		}
 
+		private static void DefineInterfaces (TypeBuilderContext context)
+		{
+			foreach (DictionaryEntry de in context.InterfaceMap)
+			{
+				context.CurrentInterface = (Type)de.Key;
+
+				MethodInfo[] methods = context.CurrentInterface.GetMethods();
+
+				foreach (MethodInfo m in methods)
+				{
+					context.MethodBuilder = context.TypeBuilder.DefineMethod(m);
+
+					EmitHelper emit = context.MethodBuilder.Emitter;
+
+					// Label right before return.
+					//
+					context.ReturnLabel = emit.DefineLabel();
+
+					// Create return value.
+					//
+					if (m.ReturnType != typeof(void))
+						context.ReturnValue = context.MethodBuilder.Emitter.DeclareLocal(m.ReturnType);
+
+					// Call builder to build the method.
+					//
+					IAbstractTypeBuilder builder = (IAbstractTypeBuilder)de.Value;
+
+					builder.BuildInterfaceMethod(context);
+
+					// Prepare return.
+					//
+					emit.MarkLabel(context.ReturnLabel);
+
+					if (context.ReturnValue != null)
+						emit.ldloc(context.ReturnValue);
+
+					emit.ret();
+
+					// Cleanup the context.
+					//
+					context.ReturnValue   = null;
+					context.MethodBuilder = null;
+				}
+
+				context.CurrentInterface = null;
+			}
+		}
+
 		private static void BuildNonAbstractType(TypeBuilderContext context)
 		{
 			ArrayList builders = GetAbstractBuilders(context);
@@ -301,7 +349,7 @@ namespace BLToolkit.TypeBuilder
 			foreach (IAbstractTypeBuilder tb in builders)
 				tb.BeforeBuild(context);
 
-			
+			DefineInterfaces(context);
 
 			foreach (IAbstractTypeBuilder tb in builders)
 				tb.AfterBuild(context);
