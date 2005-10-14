@@ -1,0 +1,13 @@
+﻿<NUnitProject>
+  <Settings activeconfig="Debug" />
+  <Config name="Debug" binpathtype="Auto">
+    <assembly path="All\bin\Debug\UnitTests.CS.2.dll" />
+    <assembly path="All\bin\Debug\Examples.CS.2.dll" />
+    <assembly path="All\bin\Debug\Examples.VB.2.dll" />
+  </Config>
+  <Config name="Release" binpathtype="Auto">
+    <assembly path="All\bin\Release\UnitTests.CS.2.dll" />
+    <assembly path="All\bin\Release\Examples.CS.2.dll" />
+    <assembly path="All\bin\Release\Examples.VB.2.dll" />
+  </Config>
+</NUnitProject>

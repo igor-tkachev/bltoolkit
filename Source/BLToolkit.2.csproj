@@ -1,0 +1,64 @@
+﻿<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.50215</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{0C325F5D-E50E-4340-8724-D29896CCC583}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>BLToolkit</RootNamespace>
+    <AssemblyName>BLToolkit.2</AssemblyName>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Reflection\Emit\AssemblyBuilderHelper.cs" />
+    <Compile Include="Reflection\Emit\ConstructorBuilderHelper.cs" />
+    <Compile Include="Reflection\Emit\EmitHelper.cs" />
+    <Compile Include="Reflection\Emit\MethodBuilderBase.cs" />
+    <Compile Include="Reflection\Emit\MethodBuilderHelper.cs" />
+    <Compile Include="Reflection\Emit\TypeBuilderHelper.cs" />
+    <Compile Include="Reflection\TypeHelper.cs" />
+    <Compile Include="TypeBuilder\BLToolkitGeneratedAttribute.cs" />
+    <Compile Include="TypeBuilder\IAbstractTypeBuilder.cs" />
+    <Compile Include="TypeBuilder\TypeBuilderContext.cs" />
+    <Compile Include="TypeBuilder\TypeBuilderException.cs" />
+    <Compile Include="TypeBuilder\TypeBuilderInfo.cs" />
+    <Compile Include="TypeBuilder\ITypeBuilder.cs" />
+    <Compile Include="TypeBuilder\TypeAccessor.cs" />
+    <Compile Include="TypeBuilder\TypeBuilderAttribute.cs" />
+    <Compile Include="TypeBuilder\TypeBuilderBase.cs" />
+    <Compile Include="TypeBuilder\TypeFactory.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Reflection\Emit\Examples.CS.xml" />
+    <Content Include="Reflection\Emit\Examples.VB.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Data\DataProvider\" />
+    <Folder Include="Mapping\" />
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+</Project>
