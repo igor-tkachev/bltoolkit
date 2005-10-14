@@ -11,7 +11,7 @@ using Rsdn.Framework.Data.Mapping;
 
 namespace TestData
 {
-	public class TestReader 
+	public class TestReader
 	{
 		public object Read(object o, IDataReader dr)
 		{
