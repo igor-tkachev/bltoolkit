@@ -5,11 +5,13 @@ namespace Rsdn.Framework.Validation
 {
 	public abstract class ValidatorBaseAttribute : Attribute
 	{
-		public abstract void Validate(object value, MemberInfo mi);
+		public abstract bool   IsValid        (ValidationContext context);
+		public abstract string GetErrorMessage(ValidationContext context);
 
-		protected string GetPropertyFriendlyName(MemberInfo mi)
+		protected string GetPropertyFriendlyName(ValidationContext context)
 		{
-			string className = mi.DeclaringType.Name;
+			MemberInfo mi        = context.MemberInfo;
+			string     className = mi.DeclaringType.Name;
 
 			object[] attrs = mi.DeclaringType.GetCustomAttributes(typeof(FriendlyNameAttribute), true);
 

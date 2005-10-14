@@ -3,18 +3,17 @@ using System.Reflection;
 
 namespace Rsdn.Framework.Validation
 {
-	[AttributeUsage(AttributeTargets.Property)]
+	[AttributeUsage(AttributeTargets.Property | AttributeTargets.Field)]
 	public class RequiredAttribute : ValidatorBaseAttribute
 	{
-		public override void Validate(object value, MemberInfo mi)
+		public override bool IsValid(ValidationContext context)
 		{
-			if (value == null ||
-				(value is string   && value.ToString().Length == 0) ||
-				(value is DateTime && (DateTime)value == DateTime.MinValue))
-			{
-				throw new RsdnValidationException(
-					string.Format("'{0}' is required.", GetPropertyFriendlyName(mi)));
-			}
+			return context.IsNull(context) == false;
+		}
+
+		public override string GetErrorMessage(ValidationContext context)
+		{
+			return string.Format("'{0}' is required.", GetPropertyFriendlyName(context));
 		}
 	}
 }

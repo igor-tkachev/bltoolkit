@@ -4,7 +4,7 @@ using System.Text.RegularExpressions;
 
 namespace Rsdn.Framework.Validation
 {
-	[AttributeUsage(AttributeTargets.Property)]
+	[AttributeUsage(AttributeTargets.Property | AttributeTargets.Field)]
 	public class RegExAttribute : ValidatorBaseAttribute 
 	{
 		public RegExAttribute(string regex)
@@ -18,11 +18,14 @@ namespace Rsdn.Framework.Validation
 			get { return _value; }
 		}
 
-		public override void Validate(object value, MemberInfo mi)
+		public override bool IsValid(ValidationContext context)
 		{
-			if (value != null && Regex.IsMatch(value.ToString(), Value) == false)
-				throw new RsdnValidationException(
-					string.Format("'{0}' format is not valid.", GetPropertyFriendlyName(mi)));
+			return context.IsNull(context) || Regex.IsMatch(context.Value.ToString(), Value);
+		}
+
+		public override string GetErrorMessage(ValidationContext context)
+		{
+			return string.Format("'{0}' format is not valid.", GetPropertyFriendlyName(context));
 		}
 	}
 }

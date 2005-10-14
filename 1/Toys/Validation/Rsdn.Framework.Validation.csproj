@@ -84,6 +84,10 @@
                     Project = "{653EBAE9-B766-4B78-8077-8EC009156DE5}"
                     Package = "{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}"
                 />
+                <Reference
+                    Name = "Syncfusion.Core"
+                    AssemblyName = "Syncfusion.Core"
+                />
             </References>
         </Build>
         <Files>
@@ -145,6 +149,11 @@
                 />
                 <File
                     RelPath = "ValidatableObjectBase.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "ValidationContext.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
                 />

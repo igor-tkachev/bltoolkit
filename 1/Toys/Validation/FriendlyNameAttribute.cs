@@ -2,7 +2,7 @@ using System;
 
 namespace Rsdn.Framework.Validation
 {
-	[AttributeUsage(AttributeTargets.Property | AttributeTargets.Class)]
+	[AttributeUsage(AttributeTargets.Property | AttributeTargets.Field | AttributeTargets.Class)]
 	public class FriendlyNameAttribute : Attribute
 	{
 		public FriendlyNameAttribute(string name)

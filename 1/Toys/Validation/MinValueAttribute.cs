@@ -3,7 +3,7 @@ using System.Reflection;
 
 namespace Rsdn.Framework.Validation
 {
-	[AttributeUsage(AttributeTargets.Property)]
+	[AttributeUsage(AttributeTargets.Property | AttributeTargets.Field)]
 	public class MinValueAttribute : ValidatorBaseAttribute
 	{
 		public MinValueAttribute(object minValue)
@@ -30,57 +30,94 @@ namespace Rsdn.Framework.Validation
 			set { _isExclusive = value; }
 		}
 
-		protected void ThrowException(MemberInfo mi)
+		public override bool IsValid(ValidationContext context)
 		{
-			throw new RsdnValidationException(
-				string.Format("Minimum {0} value is {1}{2}.",
-				GetPropertyFriendlyName(mi),
-				Value,
-				IsExclusive? " exclusive": string.Empty));
+			if (context.IsNull(context))
+				return true;
+
+			object value = context.Value;
+
+			if (Value is Int32)
+			{
+				Int32 v = Convert.ToInt32(value);
+				return (Int32)Value < v || !IsExclusive && (Int32)Value == v;
+			}
+
+			if (Value is decimal)
+			{
+				decimal v = Convert.ToDecimal(value);
+				return (decimal)Value < v || !IsExclusive && (decimal)Value == v;
+			}
+
+			if (Value is double)
+			{
+				double v = Convert.ToDouble(value);
+				return (double)Value < v || !IsExclusive && (double)Value == v;
+			}
+
+			if (Value is Int64)
+			{
+				Int64 v = Convert.ToInt64(value);
+				return (Int64)Value < v || !IsExclusive && (Int64)Value == v;
+			}
+
+			if (Value is float)
+			{
+				float v = Convert.ToSingle(value);
+				return (float)Value < v || !IsExclusive && (float)Value == v;
+			}
+
+			if (Value is byte)
+			{
+				byte v = Convert.ToByte(value);
+				return (byte)Value < v || !IsExclusive && (byte)Value == v;
+			}
+
+			if (Value is char)
+			{
+				char v = Convert.ToChar(value);
+				return (char)Value < v || !IsExclusive && (char)Value == v;
+			}
+
+			if (Value is Int16)
+			{
+				Int16 v = Convert.ToInt16(value);
+				return (Int16)Value < v || !IsExclusive && (Int16)Value == v;
+			}
+
+			if (Value is sbyte)
+			{
+				sbyte v = Convert.ToSByte(value);
+				return (sbyte)Value < v || !IsExclusive && (sbyte)Value == v;
+			}
+
+			if (Value is UInt16)
+			{
+				UInt16 v = Convert.ToUInt16(value);
+				return (UInt16)Value < v || !IsExclusive && (UInt16)Value == v;
+			}
+
+			if (Value is UInt32)
+			{
+				UInt32 v = Convert.ToUInt32(value);
+				return (Int32)Value < v || !IsExclusive && (Int32)Value == v;
+			}
+
+			if (Value is UInt64)
+			{
+				UInt64 v = Convert.ToUInt64(value);
+				return (UInt64)Value < v || !IsExclusive && (UInt64)Value == v;
+			}
+
+			return true;
 		}
 
-		public override void Validate(object value, MemberInfo mi)
+		public override string GetErrorMessage(ValidationContext context)
 		{
-			if (Value is byte &&
-			    ( IsExclusive && (byte)Value    >= Convert.ToByte(value)  ||
-			     !IsExclusive && (byte)Value    >  Convert.ToByte(value)) ||
-			    Value is char &&
-			    ( IsExclusive && (char)Value    >= Convert.ToByte(value)  ||
-			     !IsExclusive && (char)Value    >  Convert.ToByte(value)) ||
-			    Value is decimal &&
-			    ( IsExclusive && (decimal)Value >= Convert.ToDecimal(value)  ||
-			     !IsExclusive && (decimal)Value >  Convert.ToDecimal(value)) ||
-			    Value is double &&
-			    ( IsExclusive && (double)Value  >= Convert.ToDouble(value)  ||
-			     !IsExclusive && (double)Value  >  Convert.ToDouble(value)) ||
-			    Value is Int16 &&
-			    ( IsExclusive && (Int16)Value   >= Convert.ToInt16(value)  ||
-			     !IsExclusive && (Int16)Value   >  Convert.ToInt16(value)) ||
-			    Value is Int32 &&
-			    ( IsExclusive && (Int32)Value   >= Convert.ToInt32(value)  ||
-			     !IsExclusive && (Int32)Value   >  Convert.ToInt32(value)) ||
-			    Value is Int64 &&
-			    ( IsExclusive && (Int64)Value   >= Convert.ToInt64(value)  ||
-			     !IsExclusive && (Int64)Value   >  Convert.ToInt64(value)) ||
-			    Value is sbyte &&
-			    ( IsExclusive && (sbyte)Value   >= Convert.ToSByte(value)  ||
-			     !IsExclusive && (sbyte)Value   >  Convert.ToSByte(value)) ||
-			    Value is float &&
-			    ( IsExclusive && (float)Value   >= Convert.ToSingle(value)  ||
-			     !IsExclusive && (float)Value   >  Convert.ToSingle(value)) ||
-			    Value is UInt16 &&
-			    ( IsExclusive && (UInt16)Value  >= Convert.ToUInt16(value)  ||
-			     !IsExclusive && (UInt16)Value  >  Convert.ToUInt16(value)) ||
-			    Value is UInt32 &&
-			    ( IsExclusive && (Int32)Value   >= Convert.ToUInt32(value)  ||
-			     !IsExclusive && (Int32)Value   >  Convert.ToUInt32(value)) ||
-			    Value is UInt64 &&
-			    ( IsExclusive && (UInt64)Value  >= Convert.ToUInt64(value)  ||
-			     !IsExclusive && (UInt64)Value  >  Convert.ToUInt64(value))
-				)
-			{
-				ThrowException(mi);
-			}
+			return string.Format("Minimum {0} value is {1}{2}.",
+				GetPropertyFriendlyName(context),
+				Value,
+				IsExclusive? " exclusive": string.Empty);
 		}
 	}
 }
