@@ -3,7 +3,7 @@ using System.Reflection;
 
 namespace Rsdn.Framework.Validation
 {
-	[AttributeUsage(AttributeTargets.Property)]
+	[AttributeUsage(AttributeTargets.Property | AttributeTargets.Field)]
 	public class MinDateValueAttribute : MinValueAttribute
 	{
 		public MinDateValueAttribute(int year, int month, int day)
@@ -16,13 +16,14 @@ namespace Rsdn.Framework.Validation
 		{
 		}
 
-		public override void Validate(object value, MemberInfo mi)
+		public override bool IsValid(ValidationContext context)
 		{
-			if ( IsExclusive && (DateTime)Value >= Convert.ToDateTime(value) ||
-				!IsExclusive && (DateTime)Value >  Convert.ToDateTime(value))
-			{
-				ThrowException(mi);
-			}
+			if (context.IsNull(context))
+				return true;
+
+			DateTime v = Convert.ToDateTime(context.Value);
+
+			return (DateTime)Value < v || !IsExclusive && (DateTime)Value == v;
 		}
 	}
 }

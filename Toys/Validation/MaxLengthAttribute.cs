@@ -3,7 +3,7 @@ using System.Reflection;
 
 namespace Rsdn.Framework.Validation
 {
-	[AttributeUsage(AttributeTargets.Property)]
+	[AttributeUsage(AttributeTargets.Property | AttributeTargets.Field)]
 	public sealed class MaxLengthAttribute : ValidatorBaseAttribute
 	{
 		public MaxLengthAttribute(int maxLength)
@@ -17,12 +17,15 @@ namespace Rsdn.Framework.Validation
 			get { return _value; }
 		}
 	
-		public override void Validate(object value, MemberInfo mi)
+		public override bool IsValid(ValidationContext context)
 		{
-			if (value != null && value.ToString().Length > _value)
-				throw new RsdnValidationException(
-					string.Format("'{0}' maximum length is {1}.",
-						GetPropertyFriendlyName(mi), Value));
+			return context.IsNull(context) || context.Value.ToString().Length <= _value;
+		}
+
+		public override string GetErrorMessage(ValidationContext context)
+		{
+			return string.Format("'{0}' maximum length is {1}.",
+				GetPropertyFriendlyName(context), Value);
 		}
 	}
 }
