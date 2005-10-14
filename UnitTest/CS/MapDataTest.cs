@@ -694,5 +694,33 @@ namespace CS
 		}
 
 		#endregion
+
+		#region MapDayOfWeek
+
+		public class DayOfWeekSource
+		{
+			public string DayOfWeek = "MO";
+		}
+
+		public class DayOfWeekTarget
+		{
+			public DayOfWeek DayOfWeek;
+		}
+
+		[Test]
+		public void MapDayOfWeekXml()
+		{
+			Assembly assembly = Assembly.GetExecutingAssembly();
+			Stream   stream   = assembly.GetManifestResourceStream("CS.Map.xml");
+
+			MapDescriptor.SetMappingSchema(stream);
+
+			DayOfWeekTarget t = (DayOfWeekTarget)Map.ToObject(
+				new DayOfWeekSource(), typeof(DayOfWeekTarget));
+
+			Assert.AreEqual(DayOfWeek.Monday, t.DayOfWeek);
+		}
+
+		#endregion
 	}
 }

@@ -8,4 +8,15 @@
 			<field name="ixx1" source="i1" nullable="true"  />
 		</my_tag_type>
 	</my_tag>
+	
+	<value_type name="System.DayOfWeek">
+		<value target="Friday"    source="FR" source_type="System.String" />
+		<value target="Monday"    source="MO" source_type="System.String" />
+		<value target="Saturday"  source="SA" source_type="System.String" />
+		<value target="Sunday"    source="SU" source_type="System.String" />
+		<value target="Thursday"  source="TH" source_type="System.String" />
+		<value target="Tuesday"   source="TU" source_type="System.String" />
+		<value target="Wednesday" source="WE" source_type="System.String" />
+	</value_type>
+
 </mapping>
