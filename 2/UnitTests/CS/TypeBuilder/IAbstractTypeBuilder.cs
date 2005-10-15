@@ -31,6 +31,8 @@ namespace TypeBuilder
 			public void BeforeBuild(TypeBuilderContext context)
 			{
 				ConstructorBuilderHelper cb = context.TypeBuilder.DefaultConstructor;
+				cb = context.TypeBuilder.TypeInitializer;
+				cb = context.TypeBuilder.InitConstructor;
 			}
 
 			public void AfterBuild(TypeBuilderContext context)
