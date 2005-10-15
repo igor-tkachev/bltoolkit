@@ -145,8 +145,17 @@ namespace Rsdn.Framework.EditableObject
 
 		void IMapNotifyPropertyChanged.PropertyChanged(MapPropertyInfo pi)
 		{
-			if (_isInInit == false)
+			if (_isInInit == false && _notifyChanges)
 				OnPropertyChanged(pi);
+		}
+
+		private bool _notifyChanges = true;
+		[MapIgnore]
+		[Bindable(false)]
+		public bool NotifyChanges
+		{
+			get { return _notifyChanges;  }
+			set { _notifyChanges = value; }
 		}
 
 		#endregion

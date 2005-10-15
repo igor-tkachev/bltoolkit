@@ -151,6 +151,22 @@ namespace Rsdn.Framework.Data.Mapping
 				{
 					obj = _memberTable[name.ToLower()];
 
+					if (obj == null)
+					{
+						PropertyInfo pi = _mappedType.GetProperty(name);
+
+						if (pi != null)
+						{
+							PropertyMapper pm = new PropertyMapper();
+
+							pm.InitProperty(pi);
+
+							this[name] = pm;
+
+							return pm;
+						}
+					}
+
 					_memberTable[name] = obj;
 				}
 
