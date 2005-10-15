@@ -2,6 +2,8 @@ using System;
 using System.Reflection;
 using System.Reflection.Emit;
 
+using BLToolkit.TypeBuilder;
+
 namespace BLToolkit.Reflection.Emit
 {
 	/// <summary>
@@ -182,9 +184,14 @@ namespace BLToolkit.Reflection.Emit
 			}
 		}
 
+		public bool IsTypeInitializerDefined
+		{
+			get { return _typeInitializer != null; }
+		}
+
 		private ConstructorBuilderHelper _defaultConstructor;
 		/// <summary>
-		/// Gets the initializer for this type.
+		/// Gets the default constructor for this type.
 		/// </summary>
 		public ConstructorBuilderHelper DefaultConstructor
 		{
@@ -196,6 +203,38 @@ namespace BLToolkit.Reflection.Emit
 
 				return _typeInitializer;
 			}
+		}
+
+		public bool IsDefaultConstructorDefined
+		{
+			get { return _defaultConstructor != null; }
+		}
+
+		private ConstructorBuilderHelper _initConstructor;
+		/// <summary>
+		/// Gets the init context constructor for this type.
+		/// </summary>
+		public ConstructorBuilderHelper InitConstructor
+		{
+			get 
+			{
+				if (_initConstructor == null)
+				{
+					ConstructorBuilder builder = _typeBuilder.DefineConstructor(
+						MethodAttributes.Public, 
+						CallingConventions.Standard,
+						new Type[] { typeof(InitContext) });
+
+					_initConstructor = new ConstructorBuilderHelper(this, builder);
+				}
+
+				return _initConstructor;
+			}
+		}
+
+		public bool IsInitConstructorDefined
+		{
+			get { return _initConstructor != null; }
 		}
 	}
 }

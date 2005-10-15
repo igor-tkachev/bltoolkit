@@ -136,6 +136,11 @@
                     BuildAction = "Compile"
                 />
                 <File
+                    RelPath = "TypeBuilder\InitContext.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
                     RelPath = "TypeBuilder\ITypeBuilder.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
