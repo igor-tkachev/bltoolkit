@@ -75,6 +75,16 @@ namespace Rsdn.Framework.Data.Mapping
 			return this;
 		}
 
+		internal PropertyMapper InitProperty(PropertyInfo propertyInfo)
+		{
+			InitProperty(new MappingSchema(), propertyInfo, null);
+
+			Name = propertyInfo.Name;
+			MapValueAttributeList = new Attribute[0];
+
+			return this;
+		}
+
 		private IMemberMapper _classMember;
 		private PropertyInfo  _propertyInfo;
 
