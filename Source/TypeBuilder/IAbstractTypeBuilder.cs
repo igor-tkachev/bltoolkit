@@ -6,8 +6,7 @@ namespace BLToolkit.TypeBuilder
 	{
 		Type[] GetInterfaces();
 
-		void BeforeBuild         (TypeBuilderContext context);
-		void AfterBuild          (TypeBuilderContext context);
-		void BuildInterfaceMethod(TypeBuilderContext context);
+		int  GetPriority(BuildOperation operation);
+		void Build      (BuildContext context);
 	}
 }
