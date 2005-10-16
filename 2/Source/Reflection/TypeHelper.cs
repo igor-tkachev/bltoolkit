@@ -334,5 +334,16 @@ namespace BLToolkit.Reflection
 		}
 
 		#endregion
+
+		public static Type GetUnderlyingType(Type type)
+		{
+			if (type.IsByRef)
+				type = type.GetElementType();
+
+			if (type.IsEnum)
+				type = Enum.GetUnderlyingType(type);
+
+			return type;
+		}
 	}
 }

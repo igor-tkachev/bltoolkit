@@ -1294,6 +1294,43 @@ namespace BLToolkit.Reflection.Emit
 		}
 
 		/// <summary>
+		/// Calls ILGenerator.Emit(<see cref="OpCodes.Ldarg"/>, short) or 
+		/// ILGenerator.Emit(<see cref="OpCodes.Ldarg_S"/>, byte) that
+		/// loads an argument (referenced by a specified index value) onto the stack.
+		/// </summary>
+		/// <param name="index">Index of the argument that is pushed onto the stack.</param>
+		/// <seealso cref="OpCodes.Ldarg">OpCodes.Ldarg</seealso>
+		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode,short)">ILGenerator.Emit</seealso>
+		public EmitHelper ldarg(int index)
+		{
+			switch (index)
+			{
+				case 0: ldarg_0.end(); break;
+				case 1: ldarg_1.end(); break;
+				case 2: ldarg_2.end(); break;
+				case 3: ldarg_3.end(); break;
+				default:
+					if      (index <= byte. MaxValue) ldarg_s((byte)index);
+					else if (index <= short.MaxValue) ldarg ((short)index);
+					else
+						throw new ArgumentOutOfRangeException("index");
+
+					break;
+			}
+
+			return this;
+		}
+
+		/// <summary>
+		/// Loads an argument onto the stack.
+		/// </summary>
+		/// <param name="ParameterInfo">A ParameterInfo representing a parameter.</param>
+		public EmitHelper ldarg(ParameterInfo parameterInfo)
+		{
+			return ldarg(parameterInfo.Position + 1);
+		}
+
+		/// <summary>
 		/// Calls ILGenerator.Emit(<see cref="OpCodes.Ldarga"/>, short) that
 		/// load an argument address onto the evaluation stack.
 		/// </summary>
@@ -1315,6 +1352,17 @@ namespace BLToolkit.Reflection.Emit
 		public EmitHelper ldarga_s(byte index)
 		{
 			_ilGenerator.Emit(OpCodes.Ldarga_S, index); return this;
+		}
+
+		/// <summary>
+		/// Load an argument address onto the evaluation stack.
+		/// </summary>
+		/// <param name="ParameterInfo">A <see cref="ParameterInfo"/> representing the parameter.</param>
+		public EmitHelper ldarga(ParameterInfo parameterInfo)
+		{
+			int index = parameterInfo.Position + 1;
+
+			return index < byte.MinValue? ldarga_s((byte)index): ldarga((short)index);
 		}
 
 		/// <summary>
@@ -1885,7 +1933,7 @@ namespace BLToolkit.Reflection.Emit
 		{
 			_ilGenerator.Emit(OpCodes.Ldloca, index); return this;
 		}
-
+		
 		/// <summary>
 		/// Calls ILGenerator.Emit(<see cref="OpCodes.Ldloca_S"/>, byte) that
 		/// loads the address of the local variable at a specific index onto the evaluation stack, short form.
@@ -1896,6 +1944,18 @@ namespace BLToolkit.Reflection.Emit
 		public EmitHelper ldloca_s(byte index)
 		{
 			_ilGenerator.Emit(OpCodes.Ldloca_S, index); return this;
+		}
+
+		/// <summary>
+		/// Calls ILGenerator.Emit(<see cref="OpCodes.Ldloca"/>, LocalBuilder) that
+		/// loads the address of the local variable at a specific index onto the evaluation stack.
+		/// </summary>
+		/// <param name="LocalBuilder">A <see cref="LocalBuilder"/> representing the local variable.</param>
+		/// <seealso cref="OpCodes.Ldloca">OpCodes.Ldloca</seealso>
+		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode,short)">ILGenerator.Emit</seealso>
+		public EmitHelper ldloca(LocalBuilder local)
+		{
+			_ilGenerator.Emit(OpCodes.Ldloca, local); return this;
 		}
 
 		/// <summary>
@@ -2373,6 +2433,30 @@ namespace BLToolkit.Reflection.Emit
 		}
 
 		/// <summary>
+		/// Stores the value on top of the evaluation stack in the argument slot at a specified parameter index.
+		/// </summary>
+		/// <param name="parameterInfo">A <see cref="ParameterInfo"/> representing the parameter.</param>
+		public EmitHelper starg(ParameterInfo parameterInfo)
+		{
+			int index = parameterInfo.Position + 1;
+
+			switch (index)
+			{
+				case 0: stloc_0.end(); break;
+				case 1: stloc_1.end(); break;
+				case 2: stloc_2.end(); break;
+				case 3: stloc_3.end(); break;
+				default:
+					if (index < byte.MinValue) stloc_s((byte)index);
+					else                       stloc ((short)index);
+
+					break;
+			}
+
+			return this;
+		}
+
+		/// <summary>
 		/// Calls ILGenerator.Emit(<see cref="OpCodes.Stelem_I"/>) that
 		/// replaces the array element at a given index with the natural int value 
 		/// on the evaluation stack.
@@ -2560,6 +2644,31 @@ namespace BLToolkit.Reflection.Emit
 		public EmitHelper stind_ref
 		{
 			get { _ilGenerator.Emit(OpCodes.Stind_Ref); return this; }
+		}
+
+		/// <summary>
+		/// Stores a value of the type at a supplied address.
+		/// </summary>
+		/// <param name="type">A Type.</param>
+		public EmitHelper stind(Type type)
+		{
+			if      (type.IsClass)           stind_ref.end();
+			else if (type == typeof(bool)  ||
+			         type == typeof(byte)  ||
+			         type == typeof(sbyte))  stind_i1.end();
+			else if (type == typeof(char)  ||
+			         type == typeof(short) ||
+			         type == typeof(ushort)) stind_i2.end();
+			else if (type == typeof(double)) stind_r8.end();
+			else if (type == typeof(float))  stind_r4.end();
+			else if (type == typeof(int)   ||
+			         type == typeof(uint))   stind_i4.end();
+			else if (type == typeof(long)  ||
+			         type == typeof(ulong))  stind_i8.end();
+			else
+				throw new InvalidOperationException();
+
+			return this;
 		}
 
 		/// <summary>
@@ -2829,5 +2938,63 @@ namespace BLToolkit.Reflection.Emit
 		}
 
 		#endregion
+
+		public EmitHelper LoadInitValue(Type type)
+		{
+			if      (type == typeof(string)) ldstr("").end();
+			else if (type.IsClass)           ldnull.   end();
+			else if (type == typeof(bool)   ||
+			         type == typeof(byte)   ||
+			         type == typeof(int)    ||
+			         type == typeof(uint)   ||
+			         type == typeof(short)  ||
+			         type == typeof(ushort) ||
+			         type == typeof(sbyte)  ||
+			         type == typeof(char))   ldc_i4_0. end();
+			else if (type == typeof(double) ||
+			         type == typeof(float))  ldc_r4(0).end();
+			else if (type == typeof(long)   ||
+			         type == typeof(ulong))  ldc_i4_0. conv_i8.end();
+			else
+				throw new InvalidOperationException();
+
+			return this;
+		}
+
+		public EmitHelper Init(ParameterInfo parameterInfo)
+		{
+			Type type = TypeHelper.GetUnderlyingType(parameterInfo.ParameterType);
+
+			if (parameterInfo.ParameterType.IsByRef)
+			{
+				return type.IsValueType && type.IsPrimitive == false?
+					ldarg(parameterInfo).initobj(type):
+					ldarg(parameterInfo).LoadInitValue(type).stind(type);
+			}
+			else
+			{
+				return type.IsValueType && type.IsPrimitive == false?
+					ldarga(parameterInfo).initobj(type):
+					LoadInitValue(type).starg(parameterInfo);
+			}
+		}
+
+		public EmitHelper InitOutParameters(ParameterInfo[] parameters)
+		{
+			foreach (ParameterInfo pi in parameters)
+				if (pi.IsOut)
+					Init(pi);
+
+			return this;
+		}
+
+		public EmitHelper Init(LocalBuilder localBuilder)
+		{
+			Type type = TypeHelper.GetUnderlyingType(localBuilder.LocalType);
+
+			return type.IsValueType && type.IsPrimitive == false?
+				ldloca(localBuilder).initobj(type):
+				LoadInitValue(type).stloc(localBuilder);
+		}
 	}
 }

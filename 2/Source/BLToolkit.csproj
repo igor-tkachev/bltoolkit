@@ -126,7 +126,27 @@
                     BuildAction = "Compile"
                 />
                 <File
+                    RelPath = "TypeBuilder\AbstractClassBuilder.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "TypeBuilder\AbstractTypeBuilderBase.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
                     RelPath = "TypeBuilder\BLToolkitGeneratedAttribute.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "TypeBuilder\BuildContext.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "TypeBuilder\BuildOperation.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
                 />
@@ -157,11 +177,6 @@
                 />
                 <File
                     RelPath = "TypeBuilder\TypeBuilderBase.cs"
-                    SubType = "Code"
-                    BuildAction = "Compile"
-                />
-                <File
-                    RelPath = "TypeBuilder\TypeBuilderContext.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
                 />

@@ -41,9 +41,13 @@
     <Compile Include="Reflection\Emit\MethodBuilderHelper.cs" />
     <Compile Include="Reflection\Emit\TypeBuilderHelper.cs" />
     <Compile Include="Reflection\TypeHelper.cs" />
+    <Compile Include="TypeBuilder\AbstractClassBuilder.cs" />
+    <Compile Include="TypeBuilder\AbstractTypeBuilderBase.cs" />
     <Compile Include="TypeBuilder\BLToolkitGeneratedAttribute.cs" />
+    <Compile Include="TypeBuilder\BuildContext.cs" />
+    <Compile Include="TypeBuilder\BuildOperation.cs" />
     <Compile Include="TypeBuilder\IAbstractTypeBuilder.cs" />
-    <Compile Include="TypeBuilder\TypeBuilderContext.cs" />
+    <Compile Include="TypeBuilder\InitContext.cs" />
     <Compile Include="TypeBuilder\TypeBuilderException.cs" />
     <Compile Include="TypeBuilder\TypeBuilderInfo.cs" />
     <Compile Include="TypeBuilder\ITypeBuilder.cs" />

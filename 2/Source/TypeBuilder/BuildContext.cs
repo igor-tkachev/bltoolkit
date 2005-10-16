@@ -8,7 +8,7 @@ using BLToolkit.Reflection.Emit;
 
 namespace BLToolkit.TypeBuilder
 {
-	public class TypeBuilderContext
+	public class BuildContext
 	{
 		private AssemblyBuilderHelper _assemblyBuilder;
 		public  AssemblyBuilderHelper  AssemblyBuilder
@@ -81,5 +81,13 @@ namespace BLToolkit.TypeBuilder
 			get { return _returnLabel;  }
 			set { _returnLabel = value; }
 		}
+
+		private BuildOperation _buildOperation;
+		public  BuildOperation  BuildOperation
+		{
+			get { return _buildOperation;  }
+			set { _buildOperation = value; }
+		}
+	
 	}
 }

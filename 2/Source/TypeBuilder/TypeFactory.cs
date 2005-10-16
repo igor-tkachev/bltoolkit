@@ -104,7 +104,7 @@ namespace BLToolkit.TypeBuilder
 			}
 		}
 
-		private static void Error(string format, params object[] parameters)
+		internal static void Error(string format, params object[] parameters)
 		{
 			throw new TypeBuilderException(
 				string.Format("Could not build the '{0}' type: " + format, parameters));
@@ -183,13 +183,13 @@ namespace BLToolkit.TypeBuilder
 			
 			info.SetTypeBuilders(builders);
 
-			TypeBuilderContext context = new TypeBuilderContext();
+			BuildContext context = new BuildContext();
 
 			context.Info            = info;
 			context.AssemblyBuilder = GetAssemblyBuilder(info.Type);
 
 			if (info.OriginalType.IsAbstract)
-				BuildNonAbstractType(context);
+				new AbstractClassBuilder(context).Build();
 
 			SaveAssembly(context);
 		}
@@ -208,7 +208,7 @@ namespace BLToolkit.TypeBuilder
 			return ab;
 		}
 
-		private static void SaveAssembly(TypeBuilderContext context)
+		private static void SaveAssembly(BuildContext context)
 		{
 			if (_globalAssembly != null)
 				return;
@@ -231,130 +231,6 @@ namespace BLToolkit.TypeBuilder
 						ex.Message);
 				}
 			}
-		}
-
-		private static ArrayList GetAbstractBuilders(TypeBuilderContext context)
-		{
-			ArrayList builders = new ArrayList();
-
-			foreach (ITypeBuilder tb in context.Info.TypeBuilders)
-				if (tb is IAbstractTypeBuilder)
-					builders.Add(tb);
-
-			if (builders.Count == 0)
-				Error("No builders found to build the abstract type.", context.Type.FullName);
-
-			return builders;
-		}
-
-		private static void DefineNonAbstractType(TypeBuilderContext context, ArrayList abstractBuilders)
-		{
-			ArrayList interfaces = new ArrayList();
-
-			foreach (IAbstractTypeBuilder tb in abstractBuilders)
-			{
-				Type[] types = tb.GetInterfaces();
-
-				if (types != null)
-				{
-					foreach (Type t in types)
-					{
-						if (t == null)
-							continue;
-						
-						if (t.IsInterface == false)
-						{
-							Error("The '{1}' must be an interface.", context.Type.FullName, t.FullName);
-						}
-						else if (interfaces.Contains(t) == false)
-						{
-							interfaces.Add(t);
-							context.InterfaceMap.Add(t, tb);
-						}
-					}
-				}
-			}
-
-			string typeName = context.Type.FullName.Replace('+', '.');
-
-			typeName = typeName.Substring(0, typeName.Length - context.Type.Name.Length);
-			typeName = typeName + "BLToolkitExtension." + context.Type.Name;
-
-			context.TypeBuilder = context.AssemblyBuilder.DefineType(
-				typeName,
-				TypeAttributes.Public | TypeAttributes.BeforeFieldInit,
-				context.Type,
-				(Type[])interfaces.ToArray(typeof(Type)));
-
-			context.Info.SetType(context.TypeBuilder);
-
-			if (context.Type.IsSerializable)
-				context.TypeBuilder.SetCustomAttribute(typeof(SerializableAttribute));
-		}
-
-		private static void DefineInterfaces (TypeBuilderContext context)
-		{
-			foreach (DictionaryEntry de in context.InterfaceMap)
-			{
-				context.CurrentInterface = (Type)de.Key;
-
-				MethodInfo[] methods = context.CurrentInterface.GetMethods();
-
-				foreach (MethodInfo m in methods)
-				{
-					context.MethodBuilder = context.TypeBuilder.DefineMethod(m);
-
-					EmitHelper emit = context.MethodBuilder.Emitter;
-
-					// Label right before return.
-					//
-					context.ReturnLabel = emit.DefineLabel();
-
-					// Create return value.
-					//
-					if (m.ReturnType != typeof(void))
-						context.ReturnValue = context.MethodBuilder.Emitter.DeclareLocal(m.ReturnType);
-
-					// Call builder to build the method.
-					//
-					IAbstractTypeBuilder builder = (IAbstractTypeBuilder)de.Value;
-
-					builder.BuildInterfaceMethod(context);
-
-					// Prepare return.
-					//
-					emit.MarkLabel(context.ReturnLabel);
-
-					if (context.ReturnValue != null)
-						emit.ldloc(context.ReturnValue);
-
-					emit.ret();
-
-					// Cleanup the context.
-					//
-					context.ReturnValue   = null;
-					context.MethodBuilder = null;
-				}
-
-				context.CurrentInterface = null;
-			}
-		}
-
-		private static void BuildNonAbstractType(TypeBuilderContext context)
-		{
-			ArrayList builders = GetAbstractBuilders(context);
-
-			DefineNonAbstractType(context, builders);
-
-			foreach (IAbstractTypeBuilder tb in builders)
-				tb.BeforeBuild(context);
-
-			DefineInterfaces(context);
-
-			foreach (IAbstractTypeBuilder tb in builders)
-				tb.AfterBuild(context);
-
-			context.Info.SetType(context.TypeBuilder.Create());
 		}
 	}
 }
