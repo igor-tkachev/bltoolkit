@@ -4,7 +4,7 @@ namespace BLToolkit.TypeBuilder
 {
 	public abstract class TypeBuilderBase : ITypeBuilder
 	{
-		public virtual bool IsCompatible(ITypeBuilder typeBuilder)
+		public virtual bool IsCompatible(BuildContext context, ITypeBuilder typeBuilder)
 		{
 			return true;
 		}

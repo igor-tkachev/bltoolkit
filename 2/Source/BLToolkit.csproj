@@ -186,7 +186,7 @@
                     BuildAction = "Compile"
                 />
                 <File
-                    RelPath = "TypeBuilder\TypeBuilderInfo.cs"
+                    RelPath = "TypeBuilder\TypeBuilderList.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
                 />

@@ -46,7 +46,7 @@ namespace TypeBuilder
 				return new Type[] { typeof(ITest) };
 			}
 
-			protected override void BeforeBuild(BuildContext context)
+			protected override void BeginBuild(BuildContext context)
 			{
 				ConstructorBuilderHelper cb = context.TypeBuilder.DefaultConstructor;
 
@@ -57,6 +57,11 @@ namespace TypeBuilder
 
 		public abstract class Object
 		{
+			public    abstract int Property1      { get; set; }
+			public    abstract int Property2      { set; }
+			protected abstract int this[string s] { get; }
+			protected abstract int Method1(float f);
+			public    abstract int Method2(float f);
 		}
 
 		[Test]
@@ -64,11 +69,11 @@ namespace TypeBuilder
 		{
 			TypeFactory.SaveTypes = true;
 
-			TypeBuilderInfo info = TypeFactory.GetType(typeof(Object), new AbstractTypeBuilder());
+			BuildContext context = TypeFactory.GetType(typeof(Object), new AbstractTypeBuilder());
 
-			Console.WriteLine(info.Type.Type);
+			Console.WriteLine(context.Type.Type);
 
-			ITest test = (ITest)Activator.CreateInstance(info.Type);
+			ITest test = (ITest)Activator.CreateInstance(context.Type);
 
 			bool      pbool;
 			byte      pbyte;

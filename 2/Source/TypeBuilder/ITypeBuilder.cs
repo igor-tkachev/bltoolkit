@@ -4,6 +4,6 @@ namespace BLToolkit.TypeBuilder
 {
 	public interface ITypeBuilder
 	{
-		bool IsCompatible    (ITypeBuilder typeBuilder);
+		bool IsCompatible(BuildContext context, ITypeBuilder typeBuilder);
 	}
 }

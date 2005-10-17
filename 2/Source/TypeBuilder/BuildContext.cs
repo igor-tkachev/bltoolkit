@@ -10,23 +10,37 @@ namespace BLToolkit.TypeBuilder
 {
 	public class BuildContext
 	{
+		public BuildContext(Type type)
+		{
+			_originalType = _type = type;
+		}
+
+		private bool _inProgress = true;
+		public  bool  InProgress
+		{
+			get { return _inProgress;  }
+			set { _inProgress = value; }
+		}
+
+		private TypeHelper _type;
+		public  TypeHelper  Type
+		{
+			get { return _type;  }
+			set { _type = value; }
+		}
+
+		public TypeHelper _originalType;
+		public TypeHelper  OriginalType
+		{
+			get { return _originalType;  }
+			set { _originalType = value; }
+		}
+
 		private AssemblyBuilderHelper _assemblyBuilder;
 		public  AssemblyBuilderHelper  AssemblyBuilder
 		{
 			get { return _assemblyBuilder;  }
 			set { _assemblyBuilder = value; }
-		}
-
-		private TypeBuilderInfo _info;
-		public  TypeBuilderInfo  Info
-		{
-			get { return _info;  }
-			set { _info = value; }
-		}
-
-		public TypeHelper Type
-		{
-			get { return _info.OriginalType; }
 		}
 
 		private TypeBuilderHelper _typeBuilder;
@@ -88,6 +102,19 @@ namespace BLToolkit.TypeBuilder
 			get { return _buildOperation;  }
 			set { _buildOperation = value; }
 		}
-	
+
+		private TypeBuilderList _typeBuilders;
+		public  TypeBuilderList  TypeBuilders
+		{
+			get { return _typeBuilders;  }
+			set { _typeBuilders = value; }
+		}
+
+		private PropertyInfo _currentProperty;
+		public PropertyInfo   CurrentProperty
+		{
+			get { return _currentProperty;  }
+			set { _currentProperty = value; }
+		}
 	}
 }

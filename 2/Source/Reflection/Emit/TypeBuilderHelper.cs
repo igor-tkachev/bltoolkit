@@ -119,6 +119,8 @@ namespace BLToolkit.Reflection.Emit
 
 			_typeBuilder.DefineMethodOverride(method.MethodBuilder, methodInfoDeclaration);
 
+			method.OverriddenMethod = methodInfoDeclaration;
+
 			return method;
 		}
 
@@ -134,16 +136,32 @@ namespace BLToolkit.Reflection.Emit
 		}
 
 		/// <summary>
-		/// Adds a new method to the class.
+		/// Adds a new private method to the class.
 		/// </summary>
 		/// <param name="methodInfoDeclaration">The method whose declaration is to be used.</param>
 		/// <returns>The defined method.</returns>
 		public MethodBuilderHelper DefineMethod(MethodInfo methodInfoDeclaration)
 		{
-			return DefineMethod(
-				methodInfoDeclaration.DeclaringType.FullName + "." + methodInfoDeclaration.Name,
-				methodInfoDeclaration,
-				MethodAttributes.Virtual);
+			bool isInterface = methodInfoDeclaration.DeclaringType.IsInterface;
+
+			string name = isInterface?
+				methodInfoDeclaration.DeclaringType.FullName + "." + methodInfoDeclaration.Name :
+				methodInfoDeclaration.Name;
+
+			MethodAttributes attrs = 
+				MethodAttributes.Virtual |
+					methodInfoDeclaration.Attributes &
+					(MethodAttributes.HideBySig | MethodAttributes.SpecialName);
+
+			if (isInterface)
+				attrs |= MethodAttributes.Private;
+			else if ((attrs & MethodAttributes.SpecialName) != 0)
+				attrs |= MethodAttributes.Public;
+			else
+				attrs |= methodInfoDeclaration.Attributes & 
+					(MethodAttributes.Public | MethodAttributes.Private);
+
+			return DefineMethod(name, methodInfoDeclaration, attrs);
 		}
 
 		#endregion
