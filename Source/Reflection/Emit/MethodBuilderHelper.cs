@@ -60,5 +60,15 @@ namespace BLToolkit.Reflection.Emit
 				return _emitter;
 			}
 		}
+
+		private MethodInfo _overriddenMethod;
+		/// <summary>
+		/// 
+		/// </summary>
+		public MethodInfo OverriddenMethod
+		{
+			get { return _overriddenMethod;  }
+			set { _overriddenMethod = value; }
+		}	
 	}
 }

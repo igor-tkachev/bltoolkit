@@ -4,8 +4,21 @@ namespace BLToolkit.TypeBuilder
 {
 	public enum BuildOperation
 	{
-		BeforeBuild,
-		BuildInterfaceMethod,
-		AfterBuild
+		BeginBuild,
+		EndBuild,
+
+		BeginBuildAbstractGetter,
+		BuildAbstractGetter,
+		EndBuildAbstractGetter,
+
+		BeginBuildAbstractSetter,
+		BuildAbstractSetter,
+		EndBuildAbstractSetter,
+
+		BeginBuildAbstractMethod,
+		BuildAbstractMethod,
+		EndBuildAbstractMethod,
+
+		BuildInterfaceMethod		
 	}
 }

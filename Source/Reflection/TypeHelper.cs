@@ -273,6 +273,31 @@ namespace BLToolkit.Reflection
 
 		#endregion
 
+		#region GetProperties
+
+		/// <summary>
+		/// Returns all the public properties of the current Type.
+		/// </summary>
+		/// <returns>An array of PropertyInfo objects representing all public properties of the current Type.</returns>
+		public PropertyInfo[] GetProperties()
+		{
+			return _type.GetProperties();
+		}
+
+		/// <summary>
+		/// Searches for the properties of the current Type, using the specified binding constraints.
+		/// </summary>
+		/// <param name="bindingFlags">A bitmask comprised of one or more <see cref="BindingFlags"/> 
+		/// that specify how the search is conducted.</param>
+		/// <returns>An array of PropertyInfo objects representing all properties of the current Type
+		/// that match the specified binding constraints.</returns>
+		public PropertyInfo[] GetProperties(BindingFlags bindingFlags)
+		{
+			return _type.GetProperties(bindingFlags);
+		}
+
+		#endregion
+
 		#region GetInterfaces
 
 		/*
@@ -345,5 +370,6 @@ namespace BLToolkit.Reflection
 
 			return type;
 		}
+
 	}
 }
