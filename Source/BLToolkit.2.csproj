@@ -46,6 +46,10 @@
     <Compile Include="TypeBuilder\BLToolkitGeneratedAttribute.cs" />
     <Compile Include="TypeBuilder\BuildContext.cs" />
     <Compile Include="TypeBuilder\BuildOperation.cs" />
+    <Compile Include="TypeBuilder\FakeGetter.cs" />
+    <Compile Include="TypeBuilder\FakeMethodInfo.cs" />
+    <Compile Include="TypeBuilder\FakeParameterInfo.cs" />
+    <Compile Include="TypeBuilder\FakeSetter.cs" />
     <Compile Include="TypeBuilder\IAbstractTypeBuilder.cs" />
     <Compile Include="TypeBuilder\InitContext.cs" />
     <Compile Include="TypeBuilder\TypeBuilderException.cs" />

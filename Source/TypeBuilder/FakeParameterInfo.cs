@@ -14,6 +14,14 @@ namespace BLToolkit.TypeBuilder
 			_attributes = attributes == null? new object[0]: attributes;
 		}
 
+		public FakeParameterInfo(MethodInfo method) : this(
+			"ret",
+			method.ReturnType,
+			method,
+			method.ReturnTypeCustomAttributes.GetCustomAttributes(true))
+		{
+		}
+
 		public override ParameterAttributes Attributes
 		{
 			get { return ParameterAttributes.Retval; }

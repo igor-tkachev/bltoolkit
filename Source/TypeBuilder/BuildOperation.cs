@@ -19,6 +19,6 @@ namespace BLToolkit.TypeBuilder
 		BuildAbstractMethod,
 		EndBuildAbstractMethod,
 
-		BuildInterfaceMethod		
+		BuildInterfaceMethod
 	}
 }

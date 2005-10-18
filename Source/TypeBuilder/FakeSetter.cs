@@ -28,7 +28,7 @@ namespace BLToolkit.TypeBuilder
 
 		public override Type ReturnType
 		{
-			get { return _property.PropertyType; }
+			get { return typeof(void); }
 		}
 	}
 }
