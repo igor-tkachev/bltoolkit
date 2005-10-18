@@ -22,7 +22,7 @@ namespace BLToolkit.TypeBuilder
 
 		public override Type ReturnType
 		{
-			get { return typeof(void); }
+			get { return _property.PropertyType; }
 		}
 	}
 }

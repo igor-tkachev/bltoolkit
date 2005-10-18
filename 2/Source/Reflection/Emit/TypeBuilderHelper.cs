@@ -117,7 +117,9 @@ namespace BLToolkit.Reflection.Emit
 			MethodBuilderHelper method = DefineMethod(
 				name, attributes | MethodAttributes.Virtual, methodInfoDeclaration.ReturnType, parameters);
 
-			_typeBuilder.DefineMethodOverride(method.MethodBuilder, methodInfoDeclaration);
+			if ((methodInfoDeclaration is FakeMethodInfo) == false &&
+				(attributes & MethodAttributes.SpecialName) != MethodAttributes.SpecialName)
+				_typeBuilder.DefineMethodOverride(method.MethodBuilder, methodInfoDeclaration);
 
 			method.OverriddenMethod = methodInfoDeclaration;
 

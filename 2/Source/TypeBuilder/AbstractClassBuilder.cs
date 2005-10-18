@@ -308,7 +308,7 @@ namespace BLToolkit.TypeBuilder
 #if FW2
 					GetBuilders(getter.ReturnParameter),
 #else
-					GetBuilders(new FakeParameterInfo("ret", typeof(void), getter, null)),
+					GetBuilders(new FakeParameterInfo(getter)),
 #endif
 					GetBuilders(getter),
 					propertyBuilders,
@@ -352,11 +352,18 @@ namespace BLToolkit.TypeBuilder
 		{
 			TypeBuilderList builders;
 
+			if (setter == null)
+				setter = new FakeSetter(propertyInfo);
+
 			if (setter != null)
 			{
 				builders = Combine(
 					GetBuilders(setter.GetParameters()),
-					/////GetBuilders(setter.ReturnParameter),
+#if FW2
+					GetBuilders(setter.ReturnParameter),
+#else
+					GetBuilders(new FakeParameterInfo(setter)),
+#endif
 					GetBuilders(setter),
 					propertyBuilders,
 					_builders);
@@ -373,7 +380,7 @@ namespace BLToolkit.TypeBuilder
 				ParameterInfo[] parameters  = new ParameterInfo[indexParams.Length + 1];
 				Type[]          paramTypes  = new Type[parameters.Length];
 
-				/////parameters[0] = getter.ReturnParameter;
+				//parameters[0] = getter.ReturnParameter;
 				indexParams.CopyTo(parameters, 1);
 
 				for (int i = 0; i < parameters.Length; i++)
@@ -409,7 +416,11 @@ namespace BLToolkit.TypeBuilder
 				{
 					TypeBuilderList builders = Combine(
 						GetBuilders(method.GetParameters()),
-						/////GetBuilders(method.ReturnParameter),
+#if FW2
+						GetBuilders(method.ReturnParameter),
+#else
+						GetBuilders(new FakeParameterInfo(method)),
+#endif
 						GetBuilders(method),
 						_builders);
 

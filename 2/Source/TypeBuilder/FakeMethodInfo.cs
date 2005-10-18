@@ -102,5 +102,12 @@ namespace BLToolkit.TypeBuilder
 		{
 			get { return _customAttributeProvider; }
 		}
+
+#if FW2
+		public override ParameterInfo ReturnParameter
+		{
+			get { return new FakeParameterInfo("ret", ReturnType, this, null); }
+		}
+#endif
 	}
 }
