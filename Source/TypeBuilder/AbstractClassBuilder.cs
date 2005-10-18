@@ -298,11 +298,18 @@ namespace BLToolkit.TypeBuilder
 		{
 			TypeBuilderList builders;
 
+			if (getter == null)
+				getter = new FakeGetter(propertyInfo);
+
 			if (getter != null)
 			{
 				builders = Combine(
 					GetBuilders(getter.GetParameters()),
-					/////GetBuilders(getter.ReturnParameter),
+#if FW2
+					GetBuilders(getter.ReturnParameter),
+#else
+					GetBuilders(new FakeParameterInfo("ret", typeof(void), getter, null)),
+#endif
 					GetBuilders(getter),
 					propertyBuilders,
 					_builders);

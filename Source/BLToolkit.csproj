@@ -151,6 +151,26 @@
                     BuildAction = "Compile"
                 />
                 <File
+                    RelPath = "TypeBuilder\FakeGetter.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "TypeBuilder\FakeMethodInfo.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "TypeBuilder\FakeParameterInfo.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "TypeBuilder\FakeSetter.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
                     RelPath = "TypeBuilder\IAbstractTypeBuilder.cs"
                     SubType = "Code"
                     BuildAction = "Compile"

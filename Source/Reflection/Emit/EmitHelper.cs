@@ -1325,10 +1325,10 @@ namespace BLToolkit.Reflection.Emit
 		/// Loads an argument onto the stack.
 		/// </summary>
 		/// <param name="ParameterInfo">A ParameterInfo representing a parameter.</param>
-		public EmitHelper ldarg(ParameterInfo parameterInfo)
-		{
-			return ldarg(parameterInfo.Position + 1);
-		}
+		///public EmitHelper ldarg(ParameterInfo parameterInfo)
+		///{
+		///	return ldarg(parameterInfo.Position + 1);
+		///}
 
 		/// <summary>
 		/// Calls ILGenerator.Emit(<see cref="OpCodes.Ldarga"/>, short) that
@@ -1357,13 +1357,27 @@ namespace BLToolkit.Reflection.Emit
 		/// <summary>
 		/// Load an argument address onto the evaluation stack.
 		/// </summary>
-		/// <param name="ParameterInfo">A <see cref="ParameterInfo"/> representing the parameter.</param>
-		public EmitHelper ldarga(ParameterInfo parameterInfo)
+		/// <param name="index">Index of the address addr of the argument that is pushed onto the stack.</param>
+		public EmitHelper ldarga(int index)
 		{
-			int index = parameterInfo.Position + 1;
+			if      (index <= byte. MaxValue) ldarga_s((byte)index);
+			else if (index <= short.MaxValue) ldarga ((short)index);
+			else
+				throw new ArgumentOutOfRangeException("index");
 
-			return index < byte.MinValue? ldarga_s((byte)index): ldarga((short)index);
+			return this;
 		}
+
+		/// <summary>
+		/// Load an argument address onto the evaluation stack.
+		/// </summary>
+		/// <param name="ParameterInfo">A <see cref="ParameterInfo"/> representing the parameter.</param>
+		///public EmitHelper ldarga(ParameterInfo parameterInfo)
+		///{
+		///	int index = parameterInfo.Position + 1;
+
+		///	return index < byte.MinValue? ldarga_s((byte)index): ldarga((short)index);
+		///}
 
 		/// <summary>
 		/// Calls ILGenerator.Emit(<see cref="OpCodes.Ldarg_0"/>) that
@@ -2433,28 +2447,44 @@ namespace BLToolkit.Reflection.Emit
 		}
 
 		/// <summary>
-		/// Stores the value on top of the evaluation stack in the argument slot at a specified parameter index.
+		/// Stores the value on top of the evaluation stack in the argument slot at a specified index.
 		/// </summary>
-		/// <param name="parameterInfo">A <see cref="ParameterInfo"/> representing the parameter.</param>
-		public EmitHelper starg(ParameterInfo parameterInfo)
+		/// <param name="index">Slot index.</param>
+		/// <seealso cref="OpCodes.Starg">OpCodes.Starg</seealso>
+		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode,short)">ILGenerator.Emit</seealso>
+		public EmitHelper starg(int index)
 		{
-			int index = parameterInfo.Position + 1;
-
-			switch (index)
-			{
-				case 0: stloc_0.end(); break;
-				case 1: stloc_1.end(); break;
-				case 2: stloc_2.end(); break;
-				case 3: stloc_3.end(); break;
-				default:
-					if (index < byte.MinValue) stloc_s((byte)index);
-					else                       stloc ((short)index);
-
-					break;
-			}
+			if      (index < byte. MaxValue) starg_s((byte)index);
+			else if (index < short.MaxValue) starg ((short)index);
+			else
+				throw new ArgumentOutOfRangeException("index");
 
 			return this;
 		}
+
+		/// <summary>
+		/// Stores the value on top of the evaluation stack in the argument slot at a specified parameter index.
+		/// </summary>
+		/// <param name="parameterInfo">A <see cref="ParameterInfo"/> representing the parameter.</param>
+		///public EmitHelper starg(ParameterInfo parameterInfo)
+		///{
+		///	int index = parameterInfo.Position + 1;
+
+		///	switch (index)
+		///	{
+		///		case 0: stloc_0.end(); break;
+		///		case 1: stloc_1.end(); break;
+		///		case 2: stloc_2.end(); break;
+		///		case 3: stloc_3.end(); break;
+		///		default:
+		///			if (index < byte.MinValue) stloc_s((byte)index);
+		///			else                       stloc ((short)index);
+
+		///			break;
+		///	}
+
+		///	return this;
+		///}
 
 		/// <summary>
 		/// Calls ILGenerator.Emit(<see cref="OpCodes.Stelem_I"/>) that
@@ -2961,29 +2991,33 @@ namespace BLToolkit.Reflection.Emit
 			return this;
 		}
 
-		public EmitHelper Init(ParameterInfo parameterInfo)
+		public EmitHelper Init(ParameterInfo parameterInfo, int index)
 		{
 			Type type = TypeHelper.GetUnderlyingType(parameterInfo.ParameterType);
 
 			if (parameterInfo.ParameterType.IsByRef)
 			{
 				return type.IsValueType && type.IsPrimitive == false?
-					ldarg(parameterInfo).initobj(type):
-					ldarg(parameterInfo).LoadInitValue(type).stind(type);
+					ldarg(index).initobj(type):
+					ldarg(index).LoadInitValue(type).stind(type);
 			}
 			else
 			{
 				return type.IsValueType && type.IsPrimitive == false?
-					ldarga(parameterInfo).initobj(type):
-					LoadInitValue(type).starg(parameterInfo);
+					ldarga(index).initobj(type):
+					LoadInitValue(type).starg(index);
 			}
 		}
 
 		public EmitHelper InitOutParameters(ParameterInfo[] parameters)
 		{
-			foreach (ParameterInfo pi in parameters)
+			for (int i = 0; i < parameters.Length; i++)
+			{
+				ParameterInfo pi = parameters[i];
+
 				if (pi.IsOut)
-					Init(pi);
+					Init(pi, i + 1);
+			}
 
 			return this;
 		}
