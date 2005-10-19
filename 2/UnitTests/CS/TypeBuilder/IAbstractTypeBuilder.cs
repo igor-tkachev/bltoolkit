@@ -47,7 +47,7 @@ namespace TypeBuilder
 				return new Type[] { typeof(ITest) };
 			}
 
-			protected override void BeginBuild(BuildContext context)
+			protected override void BuildType(BuildContext context)
 			{
 				ConstructorBuilderHelper cb = context.TypeBuilder.DefaultConstructor;
 

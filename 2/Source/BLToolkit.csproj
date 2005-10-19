@@ -91,6 +91,16 @@
                 <Folder RelPath = "Data\DataProvider\" />
                 <Folder RelPath = "Mapping\" />
                 <File
+                    RelPath = "Reflection\InitContext.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "Reflection\TypeAccessor.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
                     RelPath = "Reflection\TypeHelper.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
@@ -131,6 +141,11 @@
                     BuildAction = "Compile"
                 />
                 <File
+                    RelPath = "TypeBuilder\AbstractPropertyBuilder.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
                     RelPath = "TypeBuilder\AbstractTypeBuilderBase.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
@@ -146,7 +161,12 @@
                     BuildAction = "Compile"
                 />
                 <File
-                    RelPath = "TypeBuilder\BuildOperation.cs"
+                    RelPath = "TypeBuilder\BuildElemt.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "TypeBuilder\BuildStep.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
                 />
@@ -176,17 +196,7 @@
                     BuildAction = "Compile"
                 />
                 <File
-                    RelPath = "TypeBuilder\InitContext.cs"
-                    SubType = "Code"
-                    BuildAction = "Compile"
-                />
-                <File
                     RelPath = "TypeBuilder\ITypeBuilder.cs"
-                    SubType = "Code"
-                    BuildAction = "Compile"
-                />
-                <File
-                    RelPath = "TypeBuilder\TypeAccessor.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
                 />

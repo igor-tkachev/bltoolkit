@@ -1,6 +1,6 @@
 using System;
 
-namespace BLToolkit.TypeBuilder
+namespace BLToolkit.Reflection
 {
 	public abstract class TypeAccessor
 	{
