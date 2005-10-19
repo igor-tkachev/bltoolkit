@@ -105,6 +105,11 @@
                     BuildAction = "Compile"
                 />
                 <File
+                    RelPath = "Reflection\Emit\MethodBuilderHelper.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
                     RelPath = "TypeBuilder\IAbstractTypeBuilder.cs"
                     SubType = "Code"
                     BuildAction = "Compile"

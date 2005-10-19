@@ -115,10 +115,10 @@ namespace BLToolkit.Reflection.Emit
 				parameters[i] = pi[i].ParameterType;
 
 			MethodBuilderHelper method = DefineMethod(
-				name, attributes | MethodAttributes.Virtual, methodInfoDeclaration.ReturnType, parameters);
+				name, attributes, methodInfoDeclaration.ReturnType, parameters);
 
-			if ((methodInfoDeclaration is FakeMethodInfo) == false &&
-				(attributes & MethodAttributes.SpecialName) != MethodAttributes.SpecialName)
+			if ((methodInfoDeclaration is FakeMethodInfo) == false)// &&
+				//(attributes & MethodAttributes.SpecialName) != MethodAttributes.SpecialName)
 				_typeBuilder.DefineMethodOverride(method.MethodBuilder, methodInfoDeclaration);
 
 			method.OverriddenMethod = methodInfoDeclaration;
@@ -152,8 +152,10 @@ namespace BLToolkit.Reflection.Emit
 
 			MethodAttributes attrs = 
 				MethodAttributes.Virtual |
-					methodInfoDeclaration.Attributes &
-					(MethodAttributes.HideBySig | MethodAttributes.SpecialName);
+				MethodAttributes.HideBySig |
+				MethodAttributes.VtableLayoutMask |
+				MethodAttributes.PrivateScope |
+				methodInfoDeclaration.Attributes & MethodAttributes.SpecialName;
 
 			if (isInterface)
 				attrs |= MethodAttributes.Private;

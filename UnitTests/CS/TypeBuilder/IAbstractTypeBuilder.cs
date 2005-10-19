@@ -1,4 +1,5 @@
 using System;
+using System.Reflection;
 
 using NUnit.Framework;
 
@@ -62,6 +63,18 @@ namespace TypeBuilder
 			protected abstract int this[string s] { get; }
 			protected abstract int Method1(float f);
 			public    abstract int Method2(float f);
+		}
+
+		public abstract class TestImp
+		{
+			public abstract int Property { get; }
+			public abstract int Method ();
+		}
+
+		public class TestImp1
+		{
+			public virtual int Property { get { return 0; } }
+			public virtual int Method () { return 0; }
 		}
 
 		[Test]
