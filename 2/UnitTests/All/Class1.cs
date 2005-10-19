@@ -54,5 +54,18 @@ namespace UnitTests.All
 			pMyStruct  = new MyStruct();
 			pDayOfWeek = new DayOfWeek();
 		}
+
+		public abstract class TestImp
+		{
+			public abstract int Property { get; }
+			public abstract int Method ();
+		}
+
+		public class TestImp1
+		{
+			public int Property { get { return 0; } }
+			public int Method () { return 0; }
+		}
+
 	}
 }
