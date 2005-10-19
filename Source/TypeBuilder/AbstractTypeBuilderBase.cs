@@ -16,82 +16,124 @@ namespace BLToolkit.TypeBuilder
 			set { _targetElement = value; }
 		}
 
-		public virtual int GetPriority(BuildOperation operation)
+		public virtual bool IsApplied(BuildContext context)
 		{
-			switch (operation)
-			{
-				case BuildOperation.BeginBuild:               return BeginBuildPriority;
-				case BuildOperation.EndBuild:                 return EndBuildPriority;
+			return false;
+		}
 
-				case BuildOperation.BeginBuildAbstractGetter: return BeginBuildAbstractGetterPriority;
-				case BuildOperation.BuildAbstractGetter:      return BuildAbstractGetterPriority;
-				case BuildOperation.EndBuildAbstractGetter:   return EndBuildAbstractGetterPriority;
-
-				case BuildOperation.BeginBuildAbstractSetter: return BeginBuildAbstractSetterPriority;
-				case BuildOperation.BuildAbstractSetter:      return BuildAbstractSetterPriority;
-				case BuildOperation.EndBuildAbstractSetter:   return EndBuildAbstractSetterPriority;
-
-				case BuildOperation.BeginBuildAbstractMethod: return BeginBuildAbstractMethodPriority;
-				case BuildOperation.BuildAbstractMethod:      return BuildAbstractMethodPriority;
-				case BuildOperation.EndBuildAbstractMethod:   return EndBuildAbstractMethodPriority;
-			}
-
+		public virtual int GetPriority(BuildContext context)
+		{
 			return 0;
 		}
 
-		protected virtual int BeginBuildPriority               { get { return 0; } }
-		protected virtual int EndBuildPriority                 { get { return 0; } }
-
-		protected virtual int BeginBuildAbstractGetterPriority { get { return 0; } }
-		protected virtual int BuildAbstractGetterPriority      { get { return 0; } }
-		protected virtual int EndBuildAbstractGetterPriority   { get { return 0; } }
-
-		protected virtual int BeginBuildAbstractSetterPriority { get { return 0; } }
-		protected virtual int BuildAbstractSetterPriority      { get { return 0; } }
-		protected virtual int EndBuildAbstractSetterPriority   { get { return 0; } }
-
-		protected virtual int BeginBuildAbstractMethodPriority { get { return 0; } }
-		protected virtual int BuildAbstractMethodPriority      { get { return 0; } }
-		protected virtual int EndBuildAbstractMethodPriority   { get { return 0; } }
-
 		public virtual void Build(BuildContext context)
 		{
-			switch (context.BuildOperation)
+			switch (context.Element)
 			{
-				case BuildOperation.BeginBuild:               BeginBuild(context);               break;
-				case BuildOperation.EndBuild:                 EndBuild(context);                 break;
+				case BuildElement.Type:
+					switch (context.Step)
+					{
+						case BuildStep.Before: BeforeBuildType(context); break;
+						case BuildStep.Build:        BuildType(context); break;
+						case BuildStep.After:   AfterBuildType(context); break;
+					}
 
-				case BuildOperation.BeginBuildAbstractGetter: BeginBuildAbstractGetter(context); break;
-				case BuildOperation.BuildAbstractGetter:      BuildAbstractGetter(context);      break;
-				case BuildOperation.EndBuildAbstractGetter:   EndBuildAbstractGetter(context);   break;
+					break;
 
-				case BuildOperation.BeginBuildAbstractSetter: BeginBuildAbstractSetter(context); break;
-				case BuildOperation.BuildAbstractSetter:      BuildAbstractSetter(context);      break;
-				case BuildOperation.EndBuildAbstractSetter:   EndBuildAbstractSetter(context);   break;
+				case BuildElement.AbstractGetter:
+					switch (context.Step)
+					{
+						case BuildStep.Before: BeforeBuildAbstractGetter(context); break;
+						case BuildStep.Build:        BuildAbstractGetter(context); break;
+						case BuildStep.After:   AfterBuildAbstractGetter(context); break;
+					}
 
-				case BuildOperation.BeginBuildAbstractMethod: BeginBuildAbstractMethod(context); break;
-				case BuildOperation.BuildAbstractMethod:      BuildAbstractMethod(context);      break;
-				case BuildOperation.EndBuildAbstractMethod:   EndBuildAbstractMethod(context);   break;
+					break;
 
-				case BuildOperation.BuildInterfaceMethod:     BuildInterfaceMethod(context);     break;
+				case BuildElement.AbstractSetter:
+					switch (context.Step)
+					{
+						case BuildStep.Before: BeforeBuildAbstractSetter(context); break;
+						case BuildStep.Build:        BuildAbstractSetter(context); break;
+						case BuildStep.After:   AfterBuildAbstractSetter(context); break;
+					}
+
+					break;
+
+				case BuildElement.AbstractMethod:
+					switch (context.Step)
+					{
+						case BuildStep.Before: BeforeBuildAbstractMethod(context); break;
+						case BuildStep.Build:        BuildAbstractMethod(context); break;
+						case BuildStep.After:   AfterBuildAbstractMethod(context); break;
+					}
+
+					break;
+
+				case BuildElement.VirtualGetter:
+					switch (context.Step)
+					{
+						case BuildStep.Before: BeforeBuildVirtualGetter(context); break;
+						case BuildStep.Build:        BuildVirtualGetter(context); break;
+						case BuildStep.After:   AfterBuildVirtualGetter(context); break;
+					}
+
+					break;
+
+				case BuildElement.VirtualSetter:
+					switch (context.Step)
+					{
+						case BuildStep.Before: BeforeBuildVirtualSetter(context); break;
+						case BuildStep.Build:        BuildVirtualSetter(context); break;
+						case BuildStep.After:   AfterBuildVirtualSetter(context); break;
+					}
+
+					break;
+
+				case BuildElement.VirtualMethod:
+					switch (context.Step)
+					{
+						case BuildStep.Before: BeforeBuildVirtualMethod(context); break;
+						case BuildStep.Build:        BuildVirtualMethod(context); break;
+						case BuildStep.After:   AfterBuildVirtualMethod(context); break;
+					}
+
+					break;
+
+				case BuildElement.InterfaceMethod:
+					BuildInterfaceMethod(context);
+					break;
 			}
 		}
 
-		protected virtual void BeginBuild              (BuildContext context) {}
-		protected virtual void EndBuild                (BuildContext context) {}
+		protected virtual void BeforeBuildType          (BuildContext context) {}
+		protected virtual void       BuildType          (BuildContext context) {}
+		protected virtual void  AfterBuildType          (BuildContext context) {}
 
-		protected virtual void BeginBuildAbstractGetter(BuildContext context) {}
-		protected virtual void BuildAbstractGetter     (BuildContext context) {}
-		protected virtual void EndBuildAbstractGetter  (BuildContext context) {}
+		protected virtual void BeforeBuildAbstractGetter(BuildContext context) {}
+		protected virtual void       BuildAbstractGetter(BuildContext context) {}
+		protected virtual void  AfterBuildAbstractGetter(BuildContext context) {}
 
-		protected virtual void BeginBuildAbstractSetter(BuildContext context) {}
-		protected virtual void BuildAbstractSetter     (BuildContext context) {}
-		protected virtual void EndBuildAbstractSetter  (BuildContext context) {}
+		protected virtual void BeforeBuildAbstractSetter(BuildContext context) {}
+		protected virtual void       BuildAbstractSetter(BuildContext context) {}
+		protected virtual void  AfterBuildAbstractSetter(BuildContext context) {}
 
-		protected virtual void BeginBuildAbstractMethod(BuildContext context) {}
-		protected virtual void BuildAbstractMethod     (BuildContext context) {}
-		protected virtual void EndBuildAbstractMethod  (BuildContext context) {}
+		protected virtual void BeforeBuildAbstractMethod(BuildContext context) {}
+		protected virtual void       BuildAbstractMethod(BuildContext context) {}
+		protected virtual void  AfterBuildAbstractMethod(BuildContext context) {}
 
-		protected virtual void BuildInterfaceMethod    (BuildContext context) {}
+		protected virtual void BeforeBuildVirtualGetter (BuildContext context) {}
+		protected virtual void       BuildVirtualGetter (BuildContext context) {}
+		protected virtual void  AfterBuildVirtualGetter (BuildContext context) {}
+
+		protected virtual void BeforeBuildVirtualSetter (BuildContext context) {}
+		protected virtual void       BuildVirtualSetter (BuildContext context) {}
+		protected virtual void  AfterBuildVirtualSetter (BuildContext context) {}
+
+		protected virtual void BeforeBuildVirtualMethod (BuildContext context) {}
+		protected virtual void       BuildVirtualMethod (BuildContext context) {}
+		protected virtual void  AfterBuildVirtualMethod (BuildContext context) {}
+
+		protected virtual void BuildInterfaceMethod     (BuildContext context) {}
 	}
 }

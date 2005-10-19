@@ -2,7 +2,10 @@ using System;
 
 namespace BLToolkit.TypeBuilder
 {
-	public class InitContext
+	public enum BuildStep
 	{
+		Before,
+		Build,
+		After
 	}
 }

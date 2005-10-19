@@ -5,8 +5,10 @@ namespace BLToolkit.TypeBuilder
 	public interface IAbstractTypeBuilder : ITypeBuilder
 	{
 		Type[] GetInterfaces();
-		int    GetPriority(BuildOperation operation);
-		void   Build      (BuildContext context);
+
+		bool   IsApplied    (BuildContext context);
+		int    GetPriority  (BuildContext context);
+		void   Build        (BuildContext context);
 
 		object TargetElement { get; set; }
 	}

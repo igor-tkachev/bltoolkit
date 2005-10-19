@@ -96,11 +96,48 @@ namespace BLToolkit.TypeBuilder
 			set { _returnLabel = value; }
 		}
 
-		private BuildOperation _buildOperation;
-		public  BuildOperation  BuildOperation
+		private BuildStep _step;
+		public  BuildStep  Step
 		{
-			get { return _buildOperation;  }
-			set { _buildOperation = value; }
+			get { return _step;  }
+			set { _step = value; }
+		}
+
+		private BuildElement _element;
+		public  BuildElement  Element
+		{
+			get { return _element;  }
+			set { _element = value; }
+		}
+
+		public bool IsAbstractProperty
+		{
+			get
+			{
+				return
+					Element == BuildElement.AbstractGetter ||
+					Element == BuildElement.AbstractSetter;
+			}
+		}
+
+		public bool IsAbstractMethod
+		{
+			get { return Element == BuildElement.AbstractMethod; }
+		}
+
+		public bool IsOverrideProperty
+		{
+			get
+			{
+				return
+					Element == BuildElement.VirtualGetter||
+					Element == BuildElement.VirtualSetter;
+			}
+		}
+
+		public bool IsOverrideMethod
+		{
+			get { return Element == BuildElement.VirtualMethod; }
 		}
 
 		private TypeBuilderList _typeBuilders;
@@ -111,7 +148,7 @@ namespace BLToolkit.TypeBuilder
 		}
 
 		private PropertyInfo _currentProperty;
-		public PropertyInfo   CurrentProperty
+		public  PropertyInfo  CurrentProperty
 		{
 			get { return _currentProperty;  }
 			set { _currentProperty = value; }
