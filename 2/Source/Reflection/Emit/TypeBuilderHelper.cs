@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Reflection;
 using System.Reflection.Emit;
 
@@ -257,6 +258,18 @@ namespace BLToolkit.Reflection.Emit
 		public bool IsInitConstructorDefined
 		{
 			get { return _initConstructor != null; }
+		}
+
+		/// <summary>
+		/// Adds a new field to the class, with the given name, attributes and field type.
+		/// </summary>
+		/// <param name="fieldName">The name of the field. fieldName cannot contain embedded nulls.</param>
+		/// <param name="type">The type of the field.</param>
+		/// <param name="attributes">The attributes of the field.</param>
+		/// <returns>The defined field.</returns>
+		public FieldBuilder DefineField(string fieldName, Type type, FieldAttributes attributes)
+		{
+			return _typeBuilder.DefineField(fieldName, type, attributes);
 		}
 	}
 }

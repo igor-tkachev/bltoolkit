@@ -141,11 +141,6 @@
                     BuildAction = "Compile"
                 />
                 <File
-                    RelPath = "TypeBuilder\AbstractPropertyBuilder.cs"
-                    SubType = "Code"
-                    BuildAction = "Compile"
-                />
-                <File
                     RelPath = "TypeBuilder\AbstractTypeBuilderBase.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
@@ -167,6 +162,11 @@
                 />
                 <File
                     RelPath = "TypeBuilder\BuildStep.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "TypeBuilder\DefaultTypeBuilder.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
                 />

@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Reflection;
 
 using NUnit.Framework;
@@ -58,23 +59,15 @@ namespace TypeBuilder
 
 		public abstract class Object
 		{
-			public    abstract int Property1      { get; set; }
-			public    abstract int Property2      { set; }
-			protected abstract int this[string s] { get; }
-			protected abstract int Method1(float f);
-			public    abstract int Method2(float f);
-		}
+			public    abstract int       Int       { get; set; }
+			public    abstract double    Double    { get; set; }
+			public    abstract DateTime  DateTime  { get; set; }
+			public    abstract ArrayList ArrayList { get; set; }
 
-		public abstract class TestImp
-		{
-			public abstract int Property { get; }
-			public abstract int Method ();
-		}
+			protected abstract int    this[string s] { get; }
 
-		public class TestImp1
-		{
-			public virtual int Property { get { return 0; } }
-			public virtual int Method () { return 0; }
+			protected abstract int    Method1(float f);
+			public    abstract int    Method2(float f);
 		}
 
 		[Test]
@@ -135,6 +128,11 @@ namespace TypeBuilder
 			Assert.AreEqual(15, puint);
 			Assert.AreEqual(0,  pulong);
 			Assert.AreEqual(DayOfWeek.Sunday, test.PropertyDayOfWeek);
+
+			Object o = (Object)test;
+
+			o.Int    = 100; Assert.AreEqual(100, o.Int);
+			o.Double = 200; Assert.AreEqual(200, o.Double);
 		}
 	}
 }
