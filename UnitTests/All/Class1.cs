@@ -79,6 +79,26 @@ namespace UnitTests.All
 
 				set { _ArrayList = value; }
 			}
+
+			Hashtable _this = new Hashtable();
+			public string this[int i]
+			{
+				get { return (string)_this[i];  }
+				set { _this[i] = value; }
+			}
+
+			public int this[string i]
+			{
+				get { return (int)_this[i]; }
+				set { _this[i] = value; }
+			}
+
+			public DateTime this[DayOfWeek i]
+			{
+				get { return (DateTime)_this[i]; }
+				set { _this[i] = value; }
+			}
+
 		}
 	}
 }

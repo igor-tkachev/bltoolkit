@@ -124,6 +124,9 @@ namespace BLToolkit.Reflection.Emit
 
 			method.OverriddenMethod = methodInfoDeclaration;
 
+			for (int i = 0; i < pi.Length; i++)
+				method.MethodBuilder.DefineParameter(i + 1, pi[i].Attributes, pi[i].Name);
+
 			return method;
 		}
 
