@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 
 namespace UnitTests.All
 {
@@ -55,17 +56,29 @@ namespace UnitTests.All
 			pDayOfWeek = new DayOfWeek();
 		}
 
-		public abstract class TestImp
-		{
-			public abstract int Property { get; }
-			public abstract int Method ();
-		}
-
 		public class TestImp1
 		{
-			public int Property { get { return 0; } }
-			public int Method () { return 0; }
-		}
+			int       _Int;
+			public int       Int       { get { return _Int; } set { _Int = value; } }
 
+			double    _Double;
+			public double    Double    { get { return _Double; } set { _Double = value; } }
+
+			DateTime  _DateTime;
+			public DateTime  DateTime  { get { return _DateTime; } set { _DateTime = value; } }
+
+			ArrayList _ArrayList;
+			public ArrayList ArrayList 
+			{
+				get 
+				{
+					ArrayList al = null; 
+					al = _ArrayList; 
+					return al;
+				}
+
+				set { _ArrayList = value; }
+			}
+		}
 	}
 }

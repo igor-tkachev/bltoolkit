@@ -27,9 +27,11 @@ namespace BLToolkit.TypeBuilder
 				}
 			}
 
-			_builders.Add(new AbstractPropertyBuilder());
+			_builders.Add(_defaultTypeBuilder);
 			_context.TypeBuilders = new TypeBuilderList();
 		}
+
+		private static DefaultTypeBuilder _defaultTypeBuilder = new DefaultTypeBuilder();
 
 		private BuildContext    _context;
 		private TypeBuilderList _builders;
@@ -38,8 +40,10 @@ namespace BLToolkit.TypeBuilder
 		{
 			DefineNonAbstractType();
 
-			Build(BuildElement.Type, BuildStep.Before, _builders);
-			Build(BuildElement.Type, BuildStep.Build,  _builders);
+			_context.Element = BuildElement.Type;
+
+			Build(BuildStep.Before, _builders);
+			Build(BuildStep.Build,  _builders);
 
 			DefineAbstractProperties();
 			DefineAbstractMethods();
@@ -47,7 +51,9 @@ namespace BLToolkit.TypeBuilder
 			OverrideVirtualMethods();
 			DefineInterfaces();
 
-			Build(BuildElement.Type, BuildStep.After, _builders);
+			_context.Element = BuildElement.Type;
+
+			Build(BuildStep.After, _builders);
 
 			// Finalize constructors.
 			//
@@ -149,15 +155,17 @@ namespace BLToolkit.TypeBuilder
 		}
 #endif
 
-		private void Build(BuildElement element, BuildStep step, TypeBuilderList builders)
+		private void Build(BuildStep step, TypeBuilderList builders)
 		{
-			_context.Element = element;
-			_context.Step    = step;
+			_context.Step = step;
 			_context.TypeBuilders.Clear();
 
 			foreach (IAbstractTypeBuilder builder in builders)
 				if (builder.IsApplied(_context))
 					_context.TypeBuilders.Add(builder);
+
+			if (_context.IsOverrideMethod || _context.IsOverrideProperty)
+				builders.Add(_defaultTypeBuilder);
 
 			TypeFactory.CheckCompatibility(_context, _context.TypeBuilders);
 
@@ -274,6 +282,31 @@ namespace BLToolkit.TypeBuilder
 			return list;
 		}
 
+		private bool IsApplied(BuildElement element, TypeBuilderList builders)
+		{
+			_context.Element = element;
+
+			foreach (IAbstractTypeBuilder builder in builders)
+			{
+				_context.Step = BuildStep.Before;
+
+				if (builder.IsApplied(_context))
+					return true;
+
+				_context.Step = BuildStep.Build;
+
+				if (builder.IsApplied(_context))
+					return true;
+
+				_context.Step = BuildStep.After;
+
+				if (builder.IsApplied(_context))
+					return true;
+			}
+
+			return false;
+		}
+
 		private void DefineAbstractProperties()
 		{
 			PropertyInfo[] props = _context.OriginalType.GetProperties(
@@ -350,13 +383,17 @@ namespace BLToolkit.TypeBuilder
 				*/
 			}
 
-			Build(BuildElement.AbstractGetter, BuildStep.Before, builders);
-			Build(BuildElement.AbstractGetter, BuildStep.Build,  builders);
-			Build(BuildElement.AbstractGetter, BuildStep.After,  builders);
+			_context.Element = BuildElement.AbstractGetter;
 
-			Build(BuildElement.VirtualGetter,  BuildStep.Before, builders);
-			Build(BuildElement.VirtualGetter,  BuildStep.Build,  builders);
-			Build(BuildElement.VirtualGetter,  BuildStep.After,  builders);
+			Build(BuildStep.Before, builders);
+			Build(BuildStep.Build,  builders);
+			Build(BuildStep.After,  builders);
+
+			_context.Element = BuildElement.VirtualGetter;
+
+			Build(BuildStep.Before, builders);
+			Build(BuildStep.Build,  builders);
+			Build(BuildStep.After,  builders);
 
 			EndEmitMethod();
 		}
@@ -416,13 +453,17 @@ namespace BLToolkit.TypeBuilder
 				*/
 			}
 
-			Build(BuildElement.AbstractSetter, BuildStep.Before, builders);
-			Build(BuildElement.AbstractSetter, BuildStep.Build,  builders);
-			Build(BuildElement.AbstractSetter, BuildStep.After,  builders);
+			_context.Element = BuildElement.AbstractSetter;
 
-			Build(BuildElement.VirtualSetter,  BuildStep.Before, builders);
-			Build(BuildElement.VirtualSetter,  BuildStep.Build,  builders);
-			Build(BuildElement.VirtualSetter,  BuildStep.After,  builders);
+			Build(BuildStep.Before, builders);
+			Build(BuildStep.Build,  builders);
+			Build(BuildStep.After,  builders);
+
+			_context.Element = BuildElement.VirtualSetter;
+
+			Build(BuildStep.Before, builders);
+			Build(BuildStep.Build,  builders);
+			Build(BuildStep.After,  builders);
 
 			EndEmitMethod();
 		}
@@ -448,13 +489,17 @@ namespace BLToolkit.TypeBuilder
 
 					BeginEmitMethod(method);
 
-					Build(BuildElement.AbstractMethod, BuildStep.Before, builders);
-					Build(BuildElement.AbstractMethod, BuildStep.Build,  builders);
-					Build(BuildElement.AbstractMethod, BuildStep.After,  builders);
+					_context.Element = BuildElement.AbstractMethod;
 
-					Build(BuildElement.VirtualMethod,  BuildStep.Before, builders);
-					Build(BuildElement.VirtualMethod,  BuildStep.Build,  builders);
-					Build(BuildElement.VirtualMethod,  BuildStep.After,  builders);
+					Build(BuildStep.Before, builders);
+					Build(BuildStep.Build,  builders);
+					Build(BuildStep.After,  builders);
+
+					_context.Element = BuildElement.VirtualMethod;
+
+					Build(BuildStep.Before, builders);
+					Build(BuildStep.Build,  builders);
+					Build(BuildStep.After,  builders);
 
 					EndEmitMethod();
 				}
@@ -500,20 +545,15 @@ namespace BLToolkit.TypeBuilder
 				propertyBuilders,
 				_builders);
 
-			foreach (IAbstractTypeBuilder builder in builders)
+			if (IsApplied(BuildElement.VirtualGetter, builders))
 			{
-				if (builder.IsApplied(_context))
-				{
-					BeginEmitMethod(getter);
+				BeginEmitMethod(getter);
 
-					Build(BuildElement.VirtualGetter, BuildStep.Before, builders);
-					Build(BuildElement.VirtualGetter, BuildStep.Build, builders);
-					Build(BuildElement.VirtualGetter, BuildStep.After, builders);
+				Build(BuildStep.Before, builders);
+				Build(BuildStep.Build, builders);
+				Build(BuildStep.After, builders);
 
-					EndEmitMethod();
-
-					break;
-				}
+				EndEmitMethod();
 			}
 		}
 
@@ -531,20 +571,15 @@ namespace BLToolkit.TypeBuilder
 				propertyBuilders,
 				_builders);
 
-			foreach (IAbstractTypeBuilder builder in builders)
+			if (IsApplied(BuildElement.VirtualSetter, builders))
 			{
-				if (builder.IsApplied(_context))
-				{
-					BeginEmitMethod(setter);
+				BeginEmitMethod(setter);
 
-					Build(BuildElement.VirtualSetter, BuildStep.Before, builders);
-					Build(BuildElement.VirtualSetter, BuildStep.Build,  builders);
-					Build(BuildElement.VirtualSetter, BuildStep.After,  builders);
+				Build(BuildStep.Before, builders);
+				Build(BuildStep.Build,  builders);
+				Build(BuildStep.After,  builders);
 
-					EndEmitMethod();
-
-					break;
-				}
+				EndEmitMethod();
 			}
 		}
 
@@ -567,20 +602,15 @@ namespace BLToolkit.TypeBuilder
 						GetBuilders(method),
 						_builders);
 
-					foreach (IAbstractTypeBuilder builder in builders)
+					if (IsApplied(BuildElement.VirtualMethod, builders))
 					{
-						if (builder.IsApplied(_context))
-						{
-							BeginEmitMethod(method);
+						BeginEmitMethod(method);
 
-							Build(BuildElement.VirtualMethod, BuildStep.Before, builders);
-							Build(BuildElement.VirtualMethod, BuildStep.Build,  builders);
-							Build(BuildElement.VirtualMethod, BuildStep.After,  builders);
+						Build(BuildStep.Before, builders);
+						Build(BuildStep.Build,  builders);
+						Build(BuildStep.After,  builders);
 
-							EndEmitMethod();
-
-							break;
-						}
+						EndEmitMethod();
 					}
 				}
 			}

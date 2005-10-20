@@ -153,5 +153,31 @@ namespace BLToolkit.TypeBuilder
 			get { return _currentProperty;  }
 			set { _currentProperty = value; }
 		}
+
+		private Hashtable _fields;
+		private Hashtable  Fields
+		{
+			get 
+			{
+				if (_fields == null)
+					_fields = new Hashtable();
+
+				return _fields;
+			}
+		}
+
+		public FieldBuilder GetField(string fieldName, Type type, FieldAttributes attributes)
+		{
+			FieldBuilder field = (FieldBuilder)Fields[fieldName];
+
+			if (field == null)
+			{
+				field = TypeBuilder.DefineField(fieldName, type, attributes);
+
+				Fields.Add(fieldName, field);
+			}
+
+			return field;
+		}
 	}
 }
