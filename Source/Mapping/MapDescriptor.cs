@@ -151,22 +151,6 @@ namespace Rsdn.Framework.Data.Mapping
 				{
 					obj = _memberTable[name.ToLower()];
 
-					if (obj == null)
-					{
-						PropertyInfo pi = _mappedType.GetProperty(name);
-
-						if (pi != null)
-						{
-							PropertyMapper pm = new PropertyMapper();
-
-							pm.InitProperty(pi);
-
-							this[name] = pm;
-
-							return pm;
-						}
-					}
-
 					_memberTable[name] = obj;
 				}
 
@@ -198,8 +182,42 @@ namespace Rsdn.Framework.Data.Mapping
 					}
 
 					_memberTable[key] = value;
+					_allMembers [key] = value;
 				}
 			}
+		}
+
+		public IMemberMapper GetMember(string name)
+		{
+			object obj = _allMembers[name];
+
+			if (obj == null)
+			{
+				obj = this[name];
+
+				if (obj == null)
+				{
+					PropertyInfo pi = _mappedType.GetProperty(name);
+
+					if (pi != null)
+					{
+						PropertyMapper pm = new PropertyMapper();
+
+						pm.InitProperty(pi);
+
+						obj = pm;
+					}
+				}
+
+				_allMembers[name] = obj;
+
+				string lc = name.ToLower();
+
+				if (lc != name)
+					_allMembers[lc] = obj;
+			}
+
+			return (IMemberMapper)obj;
 		}
 
 		/// <summary>
@@ -642,6 +660,12 @@ namespace Rsdn.Framework.Data.Mapping
 		internal ArrayList  MemberList
 		{
 			get { return _memberList; }
+		}
+
+		private Hashtable _allMembers = new Hashtable();
+		public  IEnumerable AllMembers
+		{
+			get { return (IEnumerable)_allMembers.Values; }
 		}
 
 		private  Hashtable _memberTable;

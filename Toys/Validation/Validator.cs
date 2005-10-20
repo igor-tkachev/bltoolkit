@@ -10,7 +10,7 @@ namespace Rsdn.Framework.Validation
 
 		public static void Validate(ValidationContext context)
 		{
-			foreach (IMemberMapper mm in context.Descriptor)
+			foreach (IMemberMapper mm in context.Descriptor.AllMembers)
 			{
 				context.MemberMapper = mm;
 
@@ -64,7 +64,7 @@ namespace Rsdn.Framework.Validation
 
 		public static bool IsValid(ValidationContext context, string fieldName)
 		{
-			foreach (IMemberMapper mm in context.Descriptor)
+			foreach (IMemberMapper mm in context.Descriptor.AllMembers)
 			{
 				context.MemberMapper = mm;
 
@@ -84,7 +84,7 @@ namespace Rsdn.Framework.Validation
 				}
 			}
 
-			if (context.Descriptor[fieldName] != null)
+			if (context.Descriptor.GetMember(fieldName) != null)
 				return IsValid(context, fieldName);
 
 			return true;
@@ -106,7 +106,7 @@ namespace Rsdn.Framework.Validation
 
 		public static string[] GetErrorMessages(ValidationContext context, string fieldName)
 		{
-			foreach (IMemberMapper mm in context.Descriptor)
+			foreach (IMemberMapper mm in context.Descriptor.AllMembers)
 			{
 				context.MemberMapper = mm;
 
@@ -126,7 +126,7 @@ namespace Rsdn.Framework.Validation
 				}
 			}
 
-			if (context.Descriptor[fieldName] != null)
+			if (context.Descriptor.GetMember(fieldName) != null)
 				return GetErrorMessages(context, fieldName);
 
 			return new string[0];

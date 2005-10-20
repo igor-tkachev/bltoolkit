@@ -16,8 +16,8 @@ namespace Rsdn.Framework.Validation
 			_isExclusive = isExclusive;
 		}
 
-		private object _value;
-		public  object  Value
+		private         object _value;
+		public  virtual object  Value
 		{
 			get { return _value;}
 		}
@@ -113,7 +113,7 @@ namespace Rsdn.Framework.Validation
 
 		public override string GetErrorMessage(ValidationContext context)
 		{
-			return string.Format("Maximum {0} value is {1}{2}.",
+			return string.Format("Maximum '{0}' value is {1}{2}.",
 				GetPropertyFriendlyName(context),
 				Value,
 				IsExclusive? " exclusive": string.Empty);
