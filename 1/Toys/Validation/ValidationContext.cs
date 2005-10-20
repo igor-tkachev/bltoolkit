@@ -33,6 +33,11 @@ namespace Rsdn.Framework.Validation
 			set { _isNull = value; }
 		}
 
+		public  bool IsValueNull
+		{
+			get { return _isNull(this);  }
+		}
+
 		private object _value;
 		public  object  Value
 		{

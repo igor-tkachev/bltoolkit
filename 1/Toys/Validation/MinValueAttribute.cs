@@ -17,9 +17,9 @@ namespace Rsdn.Framework.Validation
 		}
 
 		private object _value;
-		public  object  Value
+		public  virtual object GetValue(ValidationContext context)
 		{
-			get { return _value;}
+			return _value;
 		}
 
 		private bool _isExclusive;
@@ -34,78 +34,79 @@ namespace Rsdn.Framework.Validation
 			if (context.IsNull(context))
 				return true;
 
-			object value = context.Value;
+			object contextValue = context.Value;
+			object testValue    = GetValue(context);
 
-			if (Value is Int32)
+			if (testValue is Int32)
 			{
-				Int32 v = Convert.ToInt32(value);
-				return (Int32)Value < v || !IsExclusive && (Int32)Value == v;
+				Int32 v = Convert.ToInt32(contextValue);
+				return (Int32)testValue < v || !IsExclusive && (Int32)testValue == v;
 			}
 
-			if (Value is decimal)
+			if (testValue is decimal)
 			{
-				decimal v = Convert.ToDecimal(value);
-				return (decimal)Value < v || !IsExclusive && (decimal)Value == v;
+				decimal v = Convert.ToDecimal(contextValue);
+				return (decimal)testValue < v || !IsExclusive && (decimal)testValue == v;
 			}
 
-			if (Value is double)
+			if (testValue is double)
 			{
-				double v = Convert.ToDouble(value);
-				return (double)Value < v || !IsExclusive && (double)Value == v;
+				double v = Convert.ToDouble(contextValue);
+				return (double)testValue < v || !IsExclusive && (double)testValue == v;
 			}
 
-			if (Value is Int64)
+			if (testValue is Int64)
 			{
-				Int64 v = Convert.ToInt64(value);
-				return (Int64)Value < v || !IsExclusive && (Int64)Value == v;
+				Int64 v = Convert.ToInt64(contextValue);
+				return (Int64)testValue < v || !IsExclusive && (Int64)testValue == v;
 			}
 
-			if (Value is float)
+			if (testValue is float)
 			{
-				float v = Convert.ToSingle(value);
-				return (float)Value < v || !IsExclusive && (float)Value == v;
+				float v = Convert.ToSingle(contextValue);
+				return (float)testValue < v || !IsExclusive && (float)testValue == v;
 			}
 
-			if (Value is byte)
+			if (testValue is byte)
 			{
-				byte v = Convert.ToByte(value);
-				return (byte)Value < v || !IsExclusive && (byte)Value == v;
+				byte v = Convert.ToByte(contextValue);
+				return (byte)testValue < v || !IsExclusive && (byte)testValue == v;
 			}
 
-			if (Value is char)
+			if (testValue is char)
 			{
-				char v = Convert.ToChar(value);
-				return (char)Value < v || !IsExclusive && (char)Value == v;
+				char v = Convert.ToChar(contextValue);
+				return (char)testValue < v || !IsExclusive && (char)testValue == v;
 			}
 
-			if (Value is Int16)
+			if (testValue is Int16)
 			{
-				Int16 v = Convert.ToInt16(value);
-				return (Int16)Value < v || !IsExclusive && (Int16)Value == v;
+				Int16 v = Convert.ToInt16(contextValue);
+				return (Int16)testValue < v || !IsExclusive && (Int16)testValue == v;
 			}
 
-			if (Value is sbyte)
+			if (testValue is sbyte)
 			{
-				sbyte v = Convert.ToSByte(value);
-				return (sbyte)Value < v || !IsExclusive && (sbyte)Value == v;
+				sbyte v = Convert.ToSByte(contextValue);
+				return (sbyte)testValue < v || !IsExclusive && (sbyte)testValue == v;
 			}
 
-			if (Value is UInt16)
+			if (testValue is UInt16)
 			{
-				UInt16 v = Convert.ToUInt16(value);
-				return (UInt16)Value < v || !IsExclusive && (UInt16)Value == v;
+				UInt16 v = Convert.ToUInt16(contextValue);
+				return (UInt16)testValue < v || !IsExclusive && (UInt16)testValue == v;
 			}
 
-			if (Value is UInt32)
+			if (testValue is UInt32)
 			{
-				UInt32 v = Convert.ToUInt32(value);
-				return (Int32)Value < v || !IsExclusive && (Int32)Value == v;
+				UInt32 v = Convert.ToUInt32(contextValue);
+				return (Int32)testValue < v || !IsExclusive && (Int32)testValue == v;
 			}
 
-			if (Value is UInt64)
+			if (testValue is UInt64)
 			{
-				UInt64 v = Convert.ToUInt64(value);
-				return (UInt64)Value < v || !IsExclusive && (UInt64)Value == v;
+				UInt64 v = Convert.ToUInt64(contextValue);
+				return (UInt64)testValue < v || !IsExclusive && (UInt64)testValue == v;
 			}
 
 			return true;
@@ -113,9 +114,9 @@ namespace Rsdn.Framework.Validation
 
 		public override string GetErrorMessage(ValidationContext context)
 		{
-			return string.Format("Minimum {0} value is {1}{2}.",
+			return string.Format("Minimum '{0}' value is {1}{2}.",
 				GetPropertyFriendlyName(context),
-				Value,
+			    GetValue(context),
 				IsExclusive? " exclusive": string.Empty);
 		}
 	}

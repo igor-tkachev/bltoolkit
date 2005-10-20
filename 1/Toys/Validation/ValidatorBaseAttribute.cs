@@ -18,7 +18,8 @@ namespace Rsdn.Framework.Validation
 			if (attrs.Length > 0)
 				className = ((FriendlyNameAttribute)attrs[0]).Name;
 
-			string fieldName = className + "." + mi.Name;
+			string fieldName =
+				className == null || className.Length == 0? mi.Name: className + "." + mi.Name;
 
 			attrs = mi.GetCustomAttributes(typeof(FriendlyNameAttribute), true);
 
