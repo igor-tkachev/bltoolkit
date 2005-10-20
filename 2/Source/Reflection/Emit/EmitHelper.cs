@@ -525,6 +525,17 @@ namespace BLToolkit.Reflection.Emit
 		}
 
 		/// <summary>
+		/// Converts a value type to an object reference if the value is a value type.
+		/// </summary>
+		/// <param name="type">A Type</param>
+		/// <seealso cref="OpCodes.Box">OpCodes.Box</seealso>
+		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode,Type)">ILGenerator.Emit</seealso>
+		public EmitHelper boxIfValueType(Type type)
+		{
+			return type.IsValueType? box(type): this;
+		}
+
+		/// <summary>
 		/// Calls ILGenerator.Emit(<see cref="OpCodes.Br"/>, label) that
 		/// unconditionally transfers control to a target instruction. 
 		/// </summary>
@@ -690,6 +701,21 @@ namespace BLToolkit.Reflection.Emit
 		}
 
 		/// <summary>
+		/// Calls ILGenerator.EmitCall(<see cref="OpCodes.Callvirt"/>, methodInfo, optionalParameterTypes) that
+		/// calls a late-bound method on an object, pushing the return value onto the evaluation stack.
+		/// </summary>
+		/// <param name="methodInfo">The method to be called.</param>
+		/// <param name="optionalParameterTypes">The types of the optional arguments if the method is a varargs method.</param>
+		/// <seealso cref="OpCodes.Callvirt">OpCodes.Callvirt</seealso>
+		/// <seealso cref="System.Reflection.Emit.ILGenerator.EmitCall(OpCode,MethodInfo,Type[])">ILGenerator.EmitCall</seealso>
+		public EmitHelper callvirt(Type type, string methodName, params Type[] parameterTypes)
+		{
+			MethodInfo mi = type.GetMethod(methodName, parameterTypes);
+
+			return callvirt(mi);
+		}
+
+		/// <summary>
 		/// Calls ILGenerator.Emit(<see cref="OpCodes.Castclass"/>, type) that
 		/// attempts to cast an object passed by reference to the specified class.
 		/// </summary>
@@ -699,6 +725,16 @@ namespace BLToolkit.Reflection.Emit
 		public EmitHelper castclass(Type type)
 		{
 			_ilGenerator.Emit(OpCodes.Castclass, type); return this;
+		}
+
+		/// <summary>
+		/// Attempts to cast an object passed by reference to the specified class 
+		/// or to unbox if the type is a value type.
+		/// </summary>
+		/// <param name="type">A Type</param>
+		public EmitHelper castType(Type type)
+		{
+			return type.IsValueType? unbox(type): castclass(type);
 		}
 
 		/// <summary>

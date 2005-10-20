@@ -64,7 +64,8 @@ namespace TypeBuilder
 			public    abstract DateTime  DateTime  { get; set; }
 			public    abstract ArrayList ArrayList { get; set; }
 
-			protected abstract int    this[string s] { get; }
+			protected abstract string this[int i]    { get; set; }
+			protected abstract int    this[string i] { get; set; }
 
 			protected abstract int    Method1(float f);
 			public    abstract int    Method2(float f);

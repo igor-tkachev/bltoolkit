@@ -42,12 +42,12 @@
     <Compile Include="Reflection\Emit\TypeBuilderHelper.cs" />
     <Compile Include="Reflection\TypeHelper.cs" />
     <Compile Include="TypeBuilder\AbstractClassBuilder.cs" />
-    <Compile Include="TypeBuilder\AbstractPropertyBuilder.cs" />
     <Compile Include="TypeBuilder\AbstractTypeBuilderBase.cs" />
     <Compile Include="TypeBuilder\BLToolkitGeneratedAttribute.cs" />
     <Compile Include="TypeBuilder\BuildContext.cs" />
     <Compile Include="TypeBuilder\BuildElemt.cs" />
     <Compile Include="TypeBuilder\BuildStep.cs" />
+    <Compile Include="TypeBuilder\DefaultTypeBuilder.cs" />
     <Compile Include="TypeBuilder\FakeGetter.cs" />
     <Compile Include="TypeBuilder\FakeMethodInfo.cs" />
     <Compile Include="TypeBuilder\FakeParameterInfo.cs" />

@@ -15,8 +15,8 @@ namespace BLToolkit.TypeBuilder
 			ParameterInfo[] index = _property.GetIndexParameters();
 			ParameterInfo[] pi    = new ParameterInfo[index.Length + 1];
 
-			pi[0] = new FakeParameterInfo("ret", _property.PropertyType, _property, null);
-			index.CopyTo(pi, 1);
+			index.CopyTo(pi, 0);
+			pi[index.Length] = new FakeParameterInfo("value", _property.PropertyType, _property, null);
 
 			return pi;
 		}
