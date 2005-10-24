@@ -1,7 +1,7 @@
 using System;
 using System.Reflection;
 
-namespace BLToolkit.TypeBuilder
+namespace BLToolkit.TypeBuilder.Builders
 {
 	class FakeGetter : FakeMethodInfo
 	{

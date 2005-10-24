@@ -118,8 +118,13 @@ namespace BLToolkit.Reflection.Emit
 			MethodBuilderHelper method = DefineMethod(
 				name, attributes, methodInfoDeclaration.ReturnType, parameters);
 
-			if ((methodInfoDeclaration is FakeMethodInfo) == false)// &&
-				//(attributes & MethodAttributes.SpecialName) != MethodAttributes.SpecialName)
+			// Compiler overrides methods only for interfaces. We do the same.
+			// If we wanted to override virtual methods, then methods should've had 
+			// MethodAttributes.VtableLayoutMask attribute 
+			// and the following condition should've been used below:
+			// if ((methodInfoDeclaration is FakeMethodInfo) == false)
+			//
+			if (methodInfoDeclaration.DeclaringType.IsInterface)
 				_typeBuilder.DefineMethodOverride(method.MethodBuilder, methodInfoDeclaration);
 
 			method.OverriddenMethod = methodInfoDeclaration;
@@ -157,7 +162,6 @@ namespace BLToolkit.Reflection.Emit
 			MethodAttributes attrs = 
 				MethodAttributes.Virtual |
 				MethodAttributes.HideBySig |
-				MethodAttributes.VtableLayoutMask |
 				MethodAttributes.PrivateScope |
 				methodInfoDeclaration.Attributes & MethodAttributes.SpecialName;
 

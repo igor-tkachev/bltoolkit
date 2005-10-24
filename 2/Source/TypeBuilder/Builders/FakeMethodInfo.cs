@@ -2,7 +2,7 @@ using System;
 using System.Globalization;
 using System.Reflection;
 
-namespace BLToolkit.TypeBuilder
+namespace BLToolkit.TypeBuilder.Builders
 {
 	abstract class FakeMethodInfo : MethodInfo
 	{

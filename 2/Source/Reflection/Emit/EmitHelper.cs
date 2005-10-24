@@ -643,6 +643,13 @@ namespace BLToolkit.Reflection.Emit
 			_ilGenerator.EmitCall(OpCodes.Call, methodInfo, optionalParameterTypes); return this;
 		}
 
+		public EmitHelper call(Type type, string methodName, params Type[] parameterTypes)
+		{
+			MethodInfo mi = type.GetMethod(methodName, parameterTypes);
+
+			return call(mi);
+		}
+
 		/// <summary>
 		/// Calls ILGenerator.EmitCalli(<see cref="OpCodes.Calli"/>, CallingConvention, Type, Type[]) that
 		/// calls the method indicated on the evaluation stack (as a pointer to an entry point) 
@@ -2971,6 +2978,11 @@ namespace BLToolkit.Reflection.Emit
 			_ilGenerator.Emit(OpCodes.Unbox, type); return this;
 		}
 
+		public EmitHelper unboxIfValueType(Type type)
+		{
+			return type.IsValueType? unbox(type): this;
+		}
+
 		/// <summary>
 		/// Calls ILGenerator.Emit(<see cref="OpCodes.Volatile"/>) that
 		/// specifies that an address currently atop the evaluation stack might be volatile, 
@@ -3007,7 +3019,7 @@ namespace BLToolkit.Reflection.Emit
 
 		public EmitHelper LoadInitValue(Type type)
 		{
-			if      (type == typeof(string)) ldstr("").end();
+			if      (type == typeof(string)) ldsfld(typeof(string).GetField("Empty")); // ldstr("").end();
 			else if (type.IsClass)           ldnull.   end();
 			else if (type == typeof(bool)   ||
 			         type == typeof(byte)   ||
@@ -3025,6 +3037,28 @@ namespace BLToolkit.Reflection.Emit
 				throw new InvalidOperationException();
 
 			return this;
+		}
+
+		public bool LoadWellKnownValue(object o)
+		{
+			if      (o == null)   ldnull.end();
+			else if (o is string) ldstr ((string)o);
+			else if (o is int)    ldc_i4((int)o);
+			else if (o is byte)   ldc_i4((byte)o);
+			else if (o is sbyte)  ldc_i4((sbyte)o);
+			else if (o is char)   ldc_i4((char)o);
+			else if (o is ushort) ldc_i4((ushort)o);
+			else if (o is uint)   ldc_i4((int)(uint)o);
+			else if (o is ulong)  ldc_i8((long)(ulong)o);
+			else if (o is bool)   ldc_i4((bool)o? 1: 0);
+			else if (o is short)  ldc_i4((short)o);
+			else if (o is long)   ldc_i8((long)o);
+			else if (o is float)  ldc_r4((float)o);
+			else if (o is double) ldc_r8((double)o);
+			else
+				return false;
+
+			return true;
 		}
 
 		public EmitHelper Init(ParameterInfo parameterInfo, int index)
@@ -3065,6 +3099,55 @@ namespace BLToolkit.Reflection.Emit
 			return type.IsValueType && type.IsPrimitive == false?
 				ldloca(localBuilder).initobj(type):
 				LoadInitValue(type).stloc(localBuilder);
+		}
+
+		public EmitHelper LoadType(Type type)
+		{
+			return ldtoken(type).call(typeof(Type), "GetTypeFromHandle", typeof(RuntimeTypeHandle));
+		}
+
+		public EmitHelper CastTo(Type type)
+		{
+			unboxIfValueType(type);
+
+			if (type.IsEnum)
+				type = Enum.GetUnderlyingType(type);
+
+			if      (type == typeof(byte))   ldind_u1.end();
+			else if (type == typeof(char))   ldind_u2.end();
+			else if (type == typeof(ushort)) ldind_u2.end();
+			else if (type == typeof(uint))   ldind_u4.end();
+			else if (type == typeof(ulong))  ldind_i8.end();
+			else if (type == typeof(bool))   ldind_i1.end();
+			else if (type == typeof(sbyte))  ldind_i1.end();
+			else if (type == typeof(short))  ldind_i2.end();
+			else if (type == typeof(int))    ldind_i4.end();
+			else if (type == typeof(long))   ldind_i8.end();
+			else if (type == typeof(float))  ldind_r4.end();
+			else if (type == typeof(double)) ldind_r8.end();
+			else if (type.IsValueType)       ldobj(type);
+			else
+				castclass(type);
+
+			return this;
+		}
+
+		public EmitHelper conv(Type type)
+		{
+			if      (type == typeof(byte))   conv_u1.end();
+			else if (type == typeof(char))   conv_u2.end();
+			else if (type == typeof(ushort)) conv_u2.end();
+			else if (type == typeof(uint))   conv_u4.end();
+			else if (type == typeof(ulong))  conv_i8.end();
+			else if (type == typeof(bool))   conv_i1.end();
+			else if (type == typeof(sbyte))  conv_i1.end();
+			else if (type == typeof(short))  conv_i2.end();
+			else if (type == typeof(int))    conv_i4.end();
+			else if (type == typeof(long))   conv_i8.end();
+			else if (type == typeof(float))  conv_r4.end();
+			else if (type == typeof(double)) conv_r8.end();
+
+			return this;
 		}
 	}
 }

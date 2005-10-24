@@ -6,7 +6,7 @@ using System.Reflection.Emit;
 using BLToolkit.Reflection;
 using BLToolkit.Reflection.Emit;
 
-namespace BLToolkit.TypeBuilder
+namespace BLToolkit.TypeBuilder.Builders
 {
 	public class BuildContext
 	{
@@ -29,8 +29,8 @@ namespace BLToolkit.TypeBuilder
 			set { _type = value; }
 		}
 
-		public TypeHelper _originalType;
-		public TypeHelper  OriginalType
+		private TypeHelper _originalType;
+		public  TypeHelper  OriginalType
 		{
 			get { return _originalType;  }
 			set { _originalType = value; }
@@ -96,12 +96,7 @@ namespace BLToolkit.TypeBuilder
 			set { _returnLabel = value; }
 		}
 
-		private BuildStep _step;
-		public  BuildStep  Step
-		{
-			get { return _step;  }
-			set { _step = value; }
-		}
+		#region BuildElement
 
 		private BuildElement _element;
 		public  BuildElement  Element
@@ -112,12 +107,17 @@ namespace BLToolkit.TypeBuilder
 
 		public bool IsAbstractProperty
 		{
-			get
-			{
-				return
-					Element == BuildElement.AbstractGetter ||
-					Element == BuildElement.AbstractSetter;
-			}
+			get { return Element == BuildElement.AbstractGetter || Element == BuildElement.AbstractSetter; }
+		}
+
+		public bool IsAbstractGetter
+		{
+			get { return Element == BuildElement.AbstractGetter; }
+		}
+
+		public bool IsAbstractSetter
+		{
+			get { return Element == BuildElement.AbstractSetter; }
 		}
 
 		public bool IsAbstractMethod
@@ -125,20 +125,58 @@ namespace BLToolkit.TypeBuilder
 			get { return Element == BuildElement.AbstractMethod; }
 		}
 
-		public bool IsOverrideProperty
+		public bool IsVirtualProperty
 		{
-			get
-			{
-				return
-					Element == BuildElement.VirtualGetter||
-					Element == BuildElement.VirtualSetter;
-			}
+			get { return Element == BuildElement.VirtualGetter|| Element == BuildElement.VirtualSetter; }
 		}
 
-		public bool IsOverrideMethod
+		public bool IsVirtualGetter
+		{
+			get { return Element == BuildElement.VirtualGetter; }
+		}
+
+		public bool IsVirtualSetter
+		{
+			get { return Element == BuildElement.VirtualSetter; }
+		}
+
+		public bool IsVirtualMethod
 		{
 			get { return Element == BuildElement.VirtualMethod; }
 		}
+
+		#endregion
+
+		#region BuildStep
+
+		private BuildStep _step;
+		public  BuildStep  Step
+		{
+			get { return _step;  }
+			set { _step = value; }
+		}
+
+		public bool IsBeforeStep
+		{
+			get { return Step == BuildStep.Before; }
+		}
+
+		public bool IsBuildStep
+		{
+			get { return Step == BuildStep.Build; }
+		}
+
+		public bool IsAfterStep
+		{
+			get { return Step == BuildStep.After; }
+		}
+
+		public bool IsBeforeOrBuildStep
+		{
+			get { return Step == BuildStep.Before || Step == BuildStep.Build; }
+		}
+
+		#endregion
 
 		private TypeBuilderList _typeBuilders;
 		public  TypeBuilderList  TypeBuilders
@@ -154,6 +192,8 @@ namespace BLToolkit.TypeBuilder
 			set { _currentProperty = value; }
 		}
 
+		#region Internal Fields
+
 		private Hashtable _fields;
 		private Hashtable  Fields
 		{
@@ -166,18 +206,49 @@ namespace BLToolkit.TypeBuilder
 			}
 		}
 
-		public FieldBuilder GetField(string fieldName, Type type, FieldAttributes attributes)
+		public FieldBuilder GetField(string fieldName)
 		{
-			FieldBuilder field = (FieldBuilder)Fields[fieldName];
+			return (FieldBuilder)Fields[fieldName];
+		}
 
-			if (field == null)
-			{
-				field = TypeBuilder.DefineField(fieldName, type, attributes);
+		public FieldBuilder CreateField(string fieldName, Type type, FieldAttributes attributes)
+		{
+			FieldBuilder field = TypeBuilder.DefineField(fieldName, type, attributes);
 
-				Fields.Add(fieldName, field);
-			}
+			field.SetCustomAttribute(MethodBuilder.Type.Assembly.BLToolkitAttribute);
+
+			Fields.Add(fieldName, field);
 
 			return field;
 		}
+
+		public FieldBuilder CreatePrivateField(string fieldName, Type type)
+		{
+			return CreateField(fieldName, type, FieldAttributes.Private);
+		}
+
+		public FieldBuilder CreatePrivateStaticField(string fieldName, Type type)
+		{
+			return CreateField(fieldName, type, FieldAttributes.Private | FieldAttributes.Static);
+		}
+
+		private  Hashtable _fieldInstanceEnsurers;
+		internal Hashtable  FieldInstanceEnsurers
+		{
+			get
+			{
+				if (_fieldInstanceEnsurers == null)
+					_fieldInstanceEnsurers = new Hashtable();
+
+				return _fieldInstanceEnsurers;
+			}
+		}
+
+		public MethodBuilderHelper GetFieldInstanceEnsurer(string fieldName)
+		{
+			return (MethodBuilderHelper)FieldInstanceEnsurers[fieldName];
+		}
+
+		#endregion
 	}
 }

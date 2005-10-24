@@ -36,7 +36,9 @@
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Reflection\TypeHelper.cs" />
-    <Compile Include="TypeBuilder\IAbstractTypeBuilder.cs" />
+    <Compile Include="TypeBuilder\Builders\IAbstractTypeBuilder.cs" />
+    <Compile Include="TypeBuilder\Builders\DefaultTypeBuilder.cs" />
+    <Compile Include="TypeBuilder\LazyInstanceAttribute.cs" />
     <Compile Include="TypeBuilder\TypeFactory.cs" />
   </ItemGroup>
   <ItemGroup>

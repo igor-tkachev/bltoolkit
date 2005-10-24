@@ -1,6 +1,6 @@
 using System;
 
-namespace BLToolkit.TypeBuilder
+namespace BLToolkit.TypeBuilder.Builders
 {
 	public enum BuildElement
 	{

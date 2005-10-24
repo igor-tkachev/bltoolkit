@@ -1,6 +1,6 @@
 using System;
 
-namespace BLToolkit.TypeBuilder
+namespace BLToolkit.TypeBuilder.Builders
 {
 	[AttributeUsage(AttributeTargets.Class | AttributeTargets.Interface)]
 	public abstract class TypeBuilderAttribute : Attribute

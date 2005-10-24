@@ -6,6 +6,7 @@ using System.Reflection.Emit;
 
 using BLToolkit.Reflection;
 using BLToolkit.Reflection.Emit;
+using BLToolkit.TypeBuilder.Builders;
 
 namespace BLToolkit.TypeBuilder
 {
@@ -14,6 +15,8 @@ namespace BLToolkit.TypeBuilder
 		private TypeFactory()
 		{
 		}
+
+		#region Create Assembly
 
 		private static string                _globalAssemblyPath;
 		private static AssemblyBuilderHelper _globalAssembly;
@@ -58,9 +61,52 @@ namespace BLToolkit.TypeBuilder
 			}
 		}
 
+		private static AssemblyBuilderHelper GetAssemblyBuilder(Type type)
+		{
+			AssemblyBuilderHelper ab = GlobalAssemblyBuilder;
+
+			if (ab == null)
+			{
+				string assemblyDir = Path.GetDirectoryName(type.Module.FullyQualifiedName);
+
+				ab = new AssemblyBuilderHelper(assemblyDir + "\\" + type.FullName + ".TypeBuilder.dll");
+			}
+
+			return ab;
+		}
+
+		private static void SaveAssembly (BuildContext context)
+		{
+			if (_globalAssembly != null)
+				return;
+
+			if (_saveTypes)
+			{
+				try
+				{
+					context.AssemblyBuilder.Save();
+
+					WriteDebug("The '{0}' type saved in '{1}'.",
+						context.OriginalType.FullName,
+						context.AssemblyBuilder.Path);
+				}
+				catch (Exception ex)
+				{
+					WriteDebug("Can't save the '{0}' assembly for the '{1}' type: {2}.", 
+						context.AssemblyBuilder.Path,
+						context.OriginalType.FullName,
+						ex.Message);
+				}
+			}
+		}
+
+		#endregion
+
+		#region GetType
+
 		private static Hashtable _builtTypes = Hashtable.Synchronized(new Hashtable(10));
 
-		public static BuildContext GetType(Type type, params ITypeBuilder[] defaultBuilders)
+		public static BuildContext GetType (Type type, params ITypeBuilder[] defaultBuilders)
 		{
 			if (type == null) throw new ArgumentNullException("type");
 
@@ -120,17 +166,6 @@ namespace BLToolkit.TypeBuilder
 			SaveAssembly(context);
 		}
 
-		internal static void Error(string format, params object[] parameters)
-		{
-			throw new TypeBuilderException(
-				string.Format("Could not build the '{0}' type: " + format, parameters));
-		}
-
-		private static void WriteDebug(string format, params object[] parameters)
-		{
-			System.Diagnostics.Debug.WriteLine(string.Format(format, parameters));
-		}
-
 		private static TypeBuilderList GetBuilderList(TypeHelper type, ITypeBuilder[] defaultBuilders)
 		{
 			object[]        attrs    = type.GetAttributes(typeof(TypeBuilderAttribute));
@@ -173,44 +208,22 @@ namespace BLToolkit.TypeBuilder
 					builders.RemoveAt(i--);
 		}
 
-		private static AssemblyBuilderHelper GetAssemblyBuilder(Type type)
+		#endregion
+
+		#region Private Helpers
+
+		internal static void Error(string format, params object[] parameters)
 		{
-			AssemblyBuilderHelper ab = GlobalAssemblyBuilder;
-
-			if (ab == null)
-			{
-				string assemblyDir = Path.GetDirectoryName(type.Module.FullyQualifiedName);
-
-				ab = new AssemblyBuilderHelper(assemblyDir + "\\" + type.FullName + ".TypeBuilder.dll");
-			}
-
-			return ab;
+			throw new TypeBuilderException(
+				string.Format("Could not build the '{0}' type: " + format, parameters));
 		}
 
-		private static void SaveAssembly(BuildContext context)
+		private static void WriteDebug(string format, params object[] parameters)
 		{
-			if (_globalAssembly != null)
-				return;
-
-			if (_saveTypes)
-			{
-				try
-				{
-					context.AssemblyBuilder.Save();
-
-					WriteDebug("The '{0}' type saved in '{1}'.",
-						context.OriginalType.FullName,
-						context.AssemblyBuilder.Path);
-				}
-				catch (Exception ex)
-				{
-					WriteDebug("Can't save the '{0}' assembly for the '{1}' type: {2}.", 
-						context.AssemblyBuilder.Path,
-						context.OriginalType.FullName,
-						ex.Message);
-				}
-			}
+			System.Diagnostics.Debug.WriteLine(string.Format(format, parameters));
 		}
+
+		#endregion
 	}
 }
 
