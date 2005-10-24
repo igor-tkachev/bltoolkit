@@ -3,6 +3,7 @@ using System;
 using NUnit.Framework;
 
 using BLToolkit.TypeBuilder;
+using BLToolkit.TypeBuilder.Builders;
 
 namespace TypeBuilder
 {

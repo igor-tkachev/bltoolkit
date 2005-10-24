@@ -46,6 +46,10 @@
       <Project>{308A4189-53AB-460D-B2B1-0EB4B9219654}</Project>
       <Name>Examples.VB.2</Name>
     </ProjectReference>
+    <ProjectReference Include="..\..\Source\BLToolkit.2.csproj">
+      <Project>{0C325F5D-E50E-4340-8724-D29896CCC583}</Project>
+      <Name>BLToolkit.2</Name>
+    </ProjectReference>
     <ProjectReference Include="..\CS\UnitTests.CS.2.csproj">
       <Project>{2BB4AD77-190F-4D7E-A83E-7B254A0A1FCA}</Project>
       <Name>UnitTests.CS.2</Name>

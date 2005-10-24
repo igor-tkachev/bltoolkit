@@ -6,8 +6,9 @@ using NUnit.Framework;
 
 using BLToolkit.Reflection.Emit;
 using BLToolkit.TypeBuilder;
+using BLToolkit.TypeBuilder.Builders;
 
-namespace TypeBuilder
+namespace TypeBuilder.Builders
 {
 	[TestFixture]
 	public class IAbstractTypeBuilder
@@ -41,34 +42,26 @@ namespace TypeBuilder
 				out DayOfWeek pDayOfWeek);
 		}
 
-		public class AbstractTypeBuilder : BLToolkit.TypeBuilder.AbstractTypeBuilderBase
+		public class AbstractTypeBuilder : AbstractTypeBuilderBase
 		{
 			public override Type[] GetInterfaces() 
 			{
 				return new Type[] { typeof(ITest) };
 			}
 
-			protected override void BuildType(BuildContext context)
+			protected override void BuildType()
 			{
-				ConstructorBuilderHelper cb = context.TypeBuilder.DefaultConstructor;
+				ConstructorBuilderHelper cb = Context.TypeBuilder.DefaultConstructor;
 
-				cb = context.TypeBuilder.TypeInitializer;
-				cb = context.TypeBuilder.InitConstructor;
+				cb = Context.TypeBuilder.TypeInitializer;
+				cb = Context.TypeBuilder.InitConstructor;
 			}
 		}
 
 		public abstract class Object
 		{
-			public    abstract int       Int       { get; set; }
-			public    abstract double    Double    { get; set; }
-			public    abstract DateTime  DateTime  { get; set; }
-			public    abstract ArrayList ArrayList { get; set; }
-
 			protected abstract string this[int i]    { get; set; }
 			protected abstract int    this[string i] { get; set; }
-
-			protected abstract int    Method1(float f);
-			public    abstract int    Method2(float f);
 		}
 
 		[Test]
@@ -129,11 +122,6 @@ namespace TypeBuilder
 			Assert.AreEqual(15, puint);
 			Assert.AreEqual(0,  pulong);
 			Assert.AreEqual(DayOfWeek.Sunday, test.PropertyDayOfWeek);
-
-			Object o = (Object)test;
-
-			o.Int    = 100; Assert.AreEqual(100, o.Int);
-			o.Double = 200; Assert.AreEqual(200, o.Double);
 		}
 	}
 }

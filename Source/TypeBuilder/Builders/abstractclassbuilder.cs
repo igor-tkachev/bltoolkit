@@ -9,7 +9,7 @@ using System.Collections.Generic;
 
 using BLToolkit.Reflection.Emit;
 
-namespace BLToolkit.TypeBuilder
+namespace BLToolkit.TypeBuilder.Builders
 {
 	class AbstractClassBuilder
 	{
@@ -164,8 +164,8 @@ namespace BLToolkit.TypeBuilder
 				if (builder.IsApplied(_context))
 					_context.TypeBuilders.Add(builder);
 
-			if (_context.IsOverrideMethod || _context.IsOverrideProperty)
-				builders.Add(_defaultTypeBuilder);
+			if (_context.IsVirtualMethod || _context.IsVirtualProperty)
+				_context.TypeBuilders.Add(_defaultTypeBuilder);
 
 			TypeFactory.CheckCompatibility(_context, _context.TypeBuilders);
 
@@ -389,12 +389,6 @@ namespace BLToolkit.TypeBuilder
 			Build(BuildStep.Build,  builders);
 			Build(BuildStep.After,  builders);
 
-			_context.Element = BuildElement.VirtualGetter;
-
-			Build(BuildStep.Before, builders);
-			Build(BuildStep.Build,  builders);
-			Build(BuildStep.After,  builders);
-
 			EndEmitMethod();
 		}
 
@@ -459,12 +453,6 @@ namespace BLToolkit.TypeBuilder
 			Build(BuildStep.Build,  builders);
 			Build(BuildStep.After,  builders);
 
-			_context.Element = BuildElement.VirtualSetter;
-
-			Build(BuildStep.Before, builders);
-			Build(BuildStep.Build,  builders);
-			Build(BuildStep.After,  builders);
-
 			EndEmitMethod();
 		}
 
@@ -519,12 +507,12 @@ namespace BLToolkit.TypeBuilder
 
 				MethodInfo getter = pi.GetGetMethod(true);
 
-				if (getter != null && getter.IsAbstract == false)
+				if (getter != null && getter.IsVirtual && getter.IsAbstract == false)
 					OverrideGetter(pi, getter, propertyBuilders);
 
 				MethodInfo setter = pi.GetSetMethod(true);
 
-				if (setter != null && setter.IsAbstract == false)
+				if (setter != null && setter.IsVirtual && setter.IsAbstract == false)
 					OverrideSetter(pi, getter, setter, propertyBuilders);
 			}
 
@@ -590,7 +578,10 @@ namespace BLToolkit.TypeBuilder
 
 			foreach (MethodInfo method in methods)
 			{
-				if (!method.IsAbstract && (method.Attributes & MethodAttributes.SpecialName) == 0)
+				if (method.IsVirtual &&
+					method.IsAbstract == false &&
+					(method.Attributes & MethodAttributes.SpecialName) == 0 &&
+					method.DeclaringType != typeof(object))
 				{
 					TypeBuilderList builders = Combine(
 						GetBuilders(method.GetParameters()),

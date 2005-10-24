@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Collections;
 #endif
 
-namespace BLToolkit.TypeBuilder
+namespace BLToolkit.TypeBuilder.Builders
 {
 #if FW2
 	public class TypeBuilderList : List<ITypeBuilder>

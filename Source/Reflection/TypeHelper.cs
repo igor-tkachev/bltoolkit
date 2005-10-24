@@ -344,7 +344,7 @@ namespace BLToolkit.Reflection
 		/// </summary>
 		/// <param name="types">An array of Type objects representing the number, order, and type of the parameters for the constructor to get.</param>
 		/// <returns>A <see cref="ConstructorInfo"/> object representing the public instance constructor whose parameters match the types in the parameter type array, if found; otherwise, a null reference.</returns>
-		public ConstructorInfo GetConstructor(Type[] types)
+		public ConstructorInfo GetPublicConstructor(params Type[] types)
 		{
 			return _type.GetConstructor(types);
 		}
@@ -353,9 +353,22 @@ namespace BLToolkit.Reflection
 		/// Searches for a public default constructor.
 		/// </summary>
 		/// <returns>A <see cref="ConstructorInfo"/> object representing the constructor.</returns>
-		public ConstructorInfo GetDefaultConstructor()
+		public ConstructorInfo GetPublicDefaultConstructor()
 		{
 			return _type.GetConstructor(Type.EmptyTypes);
+		}
+
+		/// <summary>
+		/// Searches for a default constructor.
+		/// </summary>
+		/// <returns>A <see cref="ConstructorInfo"/> object representing the constructor.</returns>
+		public ConstructorInfo GetDefaultConstructor()
+		{
+			return _type.GetConstructor(
+				BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic,
+				null,
+				Type.EmptyTypes,
+				null);
 		}
 
 		#endregion
