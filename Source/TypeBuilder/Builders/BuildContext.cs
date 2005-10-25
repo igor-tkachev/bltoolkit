@@ -50,7 +50,7 @@ namespace BLToolkit.TypeBuilder.Builders
 			set { _typeBuilder = value; }
 		}
 
-		private Hashtable  _items = new Hashtable();
+		private Hashtable  _items = new Hashtable(100);
 		public  IDictionary Items
 		{
 			get { return _items; }
@@ -194,21 +194,9 @@ namespace BLToolkit.TypeBuilder.Builders
 
 		#region Internal Fields
 
-		private Hashtable _fields;
-		private Hashtable  Fields
-		{
-			get 
-			{
-				if (_fields == null)
-					_fields = new Hashtable();
-
-				return _fields;
-			}
-		}
-
 		public FieldBuilder GetField(string fieldName)
 		{
-			return (FieldBuilder)Fields[fieldName];
+			return (FieldBuilder)Items["$BLToolkit.Field." + fieldName];
 		}
 
 		public FieldBuilder CreateField(string fieldName, Type type, FieldAttributes attributes)
@@ -217,7 +205,7 @@ namespace BLToolkit.TypeBuilder.Builders
 
 			field.SetCustomAttribute(MethodBuilder.Type.Assembly.BLToolkitAttribute);
 
-			Fields.Add(fieldName, field);
+			Items.Add("$BLToolkit.Field." + fieldName, field);
 
 			return field;
 		}
@@ -232,21 +220,9 @@ namespace BLToolkit.TypeBuilder.Builders
 			return CreateField(fieldName, type, FieldAttributes.Private | FieldAttributes.Static);
 		}
 
-		private  Hashtable _fieldInstanceEnsurers;
-		internal Hashtable  FieldInstanceEnsurers
-		{
-			get
-			{
-				if (_fieldInstanceEnsurers == null)
-					_fieldInstanceEnsurers = new Hashtable();
-
-				return _fieldInstanceEnsurers;
-			}
-		}
-
 		public MethodBuilderHelper GetFieldInstanceEnsurer(string fieldName)
 		{
-			return (MethodBuilderHelper)FieldInstanceEnsurers[fieldName];
+			return (MethodBuilderHelper)Items["$BLToolkit.FieldInstanceEnsurer." + fieldName];
 		}
 
 		#endregion

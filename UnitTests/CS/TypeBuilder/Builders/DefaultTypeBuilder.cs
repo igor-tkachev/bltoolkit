@@ -3,6 +3,7 @@ using System.Collections;
 
 using NUnit.Framework;
 
+using BLToolkit.Reflection;
 using BLToolkit.Reflection.Emit;
 using BLToolkit.TypeBuilder;
 using BLToolkit.TypeBuilder.Builders;
@@ -14,10 +15,10 @@ namespace TypeBuilder.Builders
 	{
 		public abstract class Object
 		{
-			public    abstract int       Int       { get; set; }
-			public    abstract double    Double    { get; set; }
-			public    abstract DateTime  DateTime  { get; set; }
-			public    abstract ArrayList ArrayList { get; set; }
+			public    abstract int         Int       { get; set; }
+			public    abstract double      Double    { get; set; }
+			public    abstract DateTime    DateTime  { get; set; }
+			public    abstract ArrayList   ArrayList { get; set; }
 
 			protected abstract string this[int i]    { get; set; }
 			protected abstract int    this[string i] { get; set; }

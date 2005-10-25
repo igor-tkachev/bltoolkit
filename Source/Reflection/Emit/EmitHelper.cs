@@ -722,6 +722,35 @@ namespace BLToolkit.Reflection.Emit
 			return callvirt(mi);
 		}
 
+		public EmitHelper callvirtNoGenerics(Type type, string methodName, params Type[] parameterTypes)
+		{
+#if FW2
+			foreach (MethodInfo method in type.GetMethods())
+			{
+				if (method.IsGenericMethodDefinition == false && method.Name == methodName)
+				{
+					ParameterInfo[] pis = method.GetParameters();
+
+					if (pis.Length == optionalParameterTypes.Length)
+					{
+						bool match = true;
+
+						for (int i = 0; match && i < pis.Length; i++)
+							if (pis[i].ParameterType != optionalParameterTypes[i])
+								match = false;
+
+						if (match)
+							return callvirt(method, optionalParameterTypes.Length == 0? null: optionalParameterTypes);
+					}
+				}
+			}
+
+			throw new RsdnMapException(string.Format("Method '{0}' not found.", methodName));
+#else
+			return callvirt(type, methodName, parameterTypes);
+#endif
+		}
+
 		/// <summary>
 		/// Calls ILGenerator.Emit(<see cref="OpCodes.Castclass"/>, type) that
 		/// attempts to cast an object passed by reference to the specified class.
