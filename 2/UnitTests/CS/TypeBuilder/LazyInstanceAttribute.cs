@@ -3,6 +3,7 @@ using System.Collections;
 
 using NUnit.Framework;
 
+using BLToolkit.Reflection;
 using BLToolkit.TypeBuilder;
 using BLToolkit.TypeBuilder.Builders;
 
@@ -14,6 +15,32 @@ namespace TypeBuilder
 		public LazyInstance()
 		{
 			TypeFactory.SaveTypes = true;
+		}
+
+		public abstract class AbstractObject
+		{
+			public AbstractObject(InitContext init)
+			{
+				if (init.MemberParameters != null && init.MemberParameters.Length == 1)
+					Field = (int)init.MemberParameters[0];
+				else
+					Field = 77;
+			}
+
+			public int Field;
+		}
+
+		public class InnerObject
+		{
+			public InnerObject(InitContext init)
+			{
+				if (init.MemberParameters != null && init.MemberParameters.Length == 1)
+					Field = (int)init.MemberParameters[0];
+				else
+					Field = 44;
+			}
+
+			public int Field;
 		}
 
 		public class TestField
@@ -49,6 +76,12 @@ namespace TypeBuilder
 
 			[LazyInstanceAttribute]
 			public abstract TestField Field { get; set; }
+
+			[LazyInstanceAttribute]
+			public abstract InnerObject InnerObject { get; set; }
+
+			[LazyInstanceAttribute]
+			public abstract AbstractObject AbstractObject { get; set; }
 		}
 
 		[Test]
@@ -63,6 +96,7 @@ namespace TypeBuilder
 			Assert.IsNotNull(o.List);
 			Assert.AreEqual("", o.Str);
 			Assert.AreEqual(10, o.Field.Value);
+			Assert.AreEqual(44, o.InnerObject.Field);
 		}
 
 		[AttributeUsage(AttributeTargets.Property)]
@@ -90,6 +124,12 @@ namespace TypeBuilder
 
 			[LazyInstanceAttribute, TestParameter]
 			public abstract TestField Field2 { get; set; }
+
+			[LazyInstanceAttribute, Parameter(55)]
+			public abstract InnerObject InnerObject { get; set; }
+
+			[LazyInstanceAttribute, Parameter(88)]
+			public abstract AbstractObject AbstractObject { get; set; }
 		}
 
 		[Test]
@@ -105,6 +145,7 @@ namespace TypeBuilder
 			Assert.AreEqual("test", o.Str);
 			Assert.AreEqual(50,     o.Field1.Value);
 			Assert.AreEqual(77,     o.Field2.Value);
+			Assert.AreEqual(55, o.InnerObject.Field);
 		}
 	}
 }

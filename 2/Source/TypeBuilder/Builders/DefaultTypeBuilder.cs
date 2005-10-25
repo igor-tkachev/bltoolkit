@@ -10,7 +10,9 @@ namespace BLToolkit.TypeBuilder.Builders
 {
 	public class DefaultTypeBuilder : AbstractTypeBuilderBase
 	{
-		public override bool IsCompatible (BuildContext context, ITypeBuilder typeBuilder)
+		#region Interface Overrides
+
+		public override bool IsCompatible(BuildContext context, ITypeBuilder typeBuilder)
 		{
 			return IsRelative(typeBuilder) == false;
 		}
@@ -24,6 +26,8 @@ namespace BLToolkit.TypeBuilder.Builders
 
 			return false;
 		}
+
+		#endregion
 
 		#region Get/Set Implementation
 
@@ -122,6 +126,22 @@ namespace BLToolkit.TypeBuilder.Builders
 
 		#endregion
 
+		#region Properties
+
+		private   TypeHelper _initContextType;
+		protected TypeHelper  InitContextType
+		{
+			get
+			{
+				if (_initContextType == null)
+					_initContextType = new TypeHelper(typeof(InitContext));
+
+				return _initContextType;
+			}
+		}
+
+		#endregion
+
 		#region Field Initialization
 
 		protected override void BeforeBuildAbstractGetter()
@@ -149,7 +169,8 @@ namespace BLToolkit.TypeBuilder.Builders
 				{
 					Context.MethodBuilder.Emitter
 						.ldarg_0
-						.call(ensurer);
+						.call    (ensurer)
+						;
 				}
 			}
 		}
@@ -203,13 +224,13 @@ namespace BLToolkit.TypeBuilder.Builders
 
 				if (index.Length > 0)
 				{
-					parameters = (LocalBuilder)Context.Items["$ParameterLocalBuilder$"];
+					parameters = (LocalBuilder)Context.Items["$BLToolkit.ParameterLocalBuilder."];
 
 					if (parameters == null)
 					{
 						parameters = emit.DeclareLocal(typeof(Type[]));
 
-						Context.Items["$ParameterLocalBuilder$"] = parameters;
+						Context.Items["$BLToolkit.ParameterLocalBuilder."] = parameters;
 					}
 				}
 
@@ -221,7 +242,9 @@ namespace BLToolkit.TypeBuilder.Builders
 
 				if (index.Length == 0)
 				{
-					emit.ldsfld(typeof(Type).GetField("EmptyTypes"));
+					emit
+						.ldsfld (typeof(Type).GetField("EmptyTypes"))
+						;
 				}
 				else
 				{
@@ -233,9 +256,10 @@ namespace BLToolkit.TypeBuilder.Builders
 
 					for (int i = 0; i < index.Length; i++)
 						emit
-							.ldc_i4   (i) 
-							.LoadType (index[i].ParameterType)
-							.stelem_ref 
+							.ldloc      (parameters)
+							.ldc_i4     (i) 
+							.LoadType   (index[i].ParameterType)
+							.stelem_ref
 							.end()
 							;
 
@@ -245,6 +269,28 @@ namespace BLToolkit.TypeBuilder.Builders
 				emit
 					.call   (typeof(DefaultTypeBuilder).GetMethod("GetPropertyParameters"))
 					.stsfld (field)
+					;
+			}
+
+			return field;
+		}
+
+		public FieldBuilder GetTypeAccessorField()
+		{
+			string       fieldName = "_" + GetFieldType().Name + "_$typeAccessor";
+			FieldBuilder field     = Context.GetField(fieldName);
+			PropertyInfo property  = Context.CurrentProperty;
+
+			if (field == null)
+			{
+				field = Context.CreatePrivateStaticField(fieldName, typeof(TypeAccessor));
+
+				EmitHelper emit = Context.TypeBuilder.TypeInitializer.Emitter;
+
+				emit
+					.LoadType (GetFieldType())
+					.call     (typeof(TypeAccessor), "GetAccessor", typeof(Type))
+					.stsfld   (field)
 					;
 			}
 
@@ -261,7 +307,7 @@ namespace BLToolkit.TypeBuilder.Builders
 
 			attrs = Context.OriginalType.GetAttributes(typeof(LazyInstancesAttribute));
 
-			return attrs.Length > 0 ? ((LazyInstancesAttribute)attrs[0]).IsLazy : false;
+			return attrs.Length > 0? ((LazyInstancesAttribute)attrs[0]).IsLazy: false;
 		}
 
 		private void BuildLazyInstanceEnsurer()
@@ -282,16 +328,19 @@ namespace BLToolkit.TypeBuilder.Builders
 				.brtrue_s (end)
 				;
 
+			object[] parameters = GetPropertyParameters(Context.CurrentProperty);
+
 			if (fieldType.IsAbstract)
 			{
+				CreateAbstractLazyInstance("$InitContextA$" + field.Name, field, fieldType, emit, parameters);
 			}
 			else
 			{
 				ConstructorInfo  ci = fieldType.GetPublicConstructor(typeof(InitContext));
-				object[] parameters = GetPropertyParameters(Context.CurrentProperty);
 
 				if (ci != null)
 				{
+					CreateInitContextLazyInstance("$InitContext$" + field.Name, field, fieldType, emit, parameters);
 				}
 				else
 				{
@@ -311,7 +360,115 @@ namespace BLToolkit.TypeBuilder.Builders
 				.ret()
 				;
 
-			Context.FieldInstanceEnsurers.Add(fieldName, ensurer);
+			Context.Items.Add("$BLToolkit.FieldInstanceEnsurer." + fieldName, ensurer);
+		}
+
+		private void CreateAbstractLazyInstance(
+			string initContextName, FieldBuilder field, TypeHelper fieldType, EmitHelper emit, object[] parameters)
+		{
+			initContextName = "$BLToolkit." + initContextName;
+
+			LocalBuilder initField = (LocalBuilder)Context.Items[initContextName];
+
+			if (initField == null)
+			{
+				Context.Items[initContextName] = initField = emit.DeclareLocal(InitContextType);
+
+				emit
+					.newobj   (InitContextType.GetPublicDefaultConstructor())
+					.stloc    (initField)
+
+					.ldloc    (initField)
+					.ldc_i4_1
+					.callvirt (InitContextType.GetProperty("IsInternal").GetSetMethod())
+
+					.ldloc    (initField)
+					.ldc_i4_1
+					.callvirt (InitContextType.GetProperty("IsLazyInstance").GetSetMethod())
+					;
+			}
+
+			MethodInfo memberParams = InitContextType.GetProperty("MemberParameters").GetSetMethod();
+
+			if (parameters != null)
+			{
+				emit
+					.ldloc    (initField)
+					.ldsfld   (GetParameterField())
+					.callvirt (memberParams)
+					;
+			}
+
+			emit
+				.ldarg_0
+				.ldsfld             (GetTypeAccessorField())
+				.ldloc              (initField)
+				.callvirtNoGenerics (typeof(TypeAccessor), "CreateInstanceEx", _initContextType)
+				.isinst             (fieldType)
+				.stfld              (field)
+				;
+
+			if (parameters != null)
+			{
+				emit
+					.ldloc    (initField)
+					.ldnull
+					.callvirt (memberParams)
+					;
+			}
+		}
+
+		private void CreateInitContextLazyInstance(
+			string initContextName, FieldBuilder field, TypeHelper fieldType, EmitHelper emit, object[] parameters)
+		{
+			initContextName = "$BLToolkit." + initContextName;
+
+			LocalBuilder initField = (LocalBuilder)Context.Items[initContextName];
+
+			if (initField == null)
+			{
+				Context.Items[initContextName] = initField = emit.DeclareLocal(InitContextType);
+
+				emit
+					.newobj   (InitContextType.GetPublicDefaultConstructor())
+					.stloc    (initField)
+
+					.ldloc    (initField)
+					.ldc_i4_1
+					.callvirt (InitContextType.GetProperty("IsInternal").GetSetMethod())
+
+					.ldloc    (initField)
+					.ldc_i4_1
+					.callvirt (InitContextType.GetProperty("IsLazyInstance").GetSetMethod())
+					;
+			}
+
+			MethodInfo memberParams = InitContextType.GetProperty("MemberParameters").GetSetMethod();
+
+			if (parameters != null)
+			{
+				emit
+					.ldloc    (initField)
+					.ldsfld   (GetParameterField())
+					.callvirt (memberParams)
+					;
+			}
+
+			emit
+				.ldarg_0
+				.ldloc   (initField)
+				.newobj  (fieldType.GetPublicConstructor(typeof(InitContext)))
+				.stfld   (field)
+				;
+
+			if (parameters != null)
+			{
+				emit
+					.ldloc    (initField)
+					.ldnull
+					.callvirt (memberParams)
+					;
+			}
 		}
 
 		private void CreateDefaultInstance(FieldBuilder field, TypeHelper fieldType, EmitHelper emit)
@@ -352,8 +509,8 @@ namespace BLToolkit.TypeBuilder.Builders
 			{
 				emit
 					.ldarg_0
-					.ldstr((string)parameters[0])
-					.stfld(field)
+					.ldstr   ((string)parameters[0])
+					.stfld   (field)
 					;
 
 				return;
@@ -396,24 +553,29 @@ namespace BLToolkit.TypeBuilder.Builders
 				else
 				{
 					emit
-						.ldsfld(GetParameterField())
-						.ldc_i4(i)
+						.ldsfld     (GetParameterField())
+						.ldc_i4     (i)
 						.ldelem_ref
-						.CastTo(types[i])
+						.CastTo     (types[i])
 						;
 				}
 			}
 
 			emit
-				.newobj(ci)
-				.stfld(field)
+				.newobj (ci)
+				.stfld  (field)
 				;
 		}
 
 		protected virtual string GetFieldName()
 		{
 			PropertyInfo pi   = Context.CurrentProperty;
-			string       name = "_" + pi.Name;
+			string       name = pi.Name;
+
+			if (char.IsUpper(name[0]) && name.Length > 1 && char.IsLower(name[1]))
+				name = char.ToLower(name[0]) + name.Substring(1, name.Length - 1);
+
+			name = "_" + name;
 
 			foreach (ParameterInfo p in pi.GetIndexParameters())
 				name += "." + p.ParameterType.FullName;//.Replace(".", "_").Replace("+", "_");

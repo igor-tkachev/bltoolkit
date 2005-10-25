@@ -296,6 +296,17 @@ namespace BLToolkit.Reflection
 			return _type.GetProperties(bindingFlags);
 		}
 
+		/// <summary>
+		/// Searches for the public property with the specified name.
+		/// </summary>
+		/// <param name="name">The String containing the name of the public property to get.</param>
+		/// <returns>A <see cref="PropertyInfo"/> object representing the public property with the specified name,
+		/// if found; otherwise, a null reference.</returns>
+		public PropertyInfo GetProperty(string name)
+		{
+			return _type.GetProperty(name);
+		}
+
 		#endregion
 
 		#region GetInterfaces
