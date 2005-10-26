@@ -228,10 +228,16 @@ namespace BLToolkit.Reflection.Emit
 			get 
 			{
 				if (_defaultConstructor == null)
-					_defaultConstructor = new ConstructorBuilderHelper(
-						this, _typeBuilder.DefineDefaultConstructor(MethodAttributes.Public));
+				{
+					ConstructorBuilder builder = _typeBuilder.DefineConstructor(
+						MethodAttributes.Public,
+						CallingConventions.Standard,
+						Type.EmptyTypes);
 
-				return _typeInitializer;
+					_defaultConstructor = new ConstructorBuilderHelper(this, builder);
+				}
+
+				return _defaultConstructor;
 			}
 		}
 
