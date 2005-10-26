@@ -71,7 +71,7 @@ namespace BLToolkit.TypeBuilder.Builders
 					Context.MethodBuilder.Emitter
 						.ldarg_0
 						.ldarg_1
-						.stfld(field)
+						.stfld   (field)
 						;
 					break;
 
@@ -144,17 +144,11 @@ namespace BLToolkit.TypeBuilder.Builders
 
 		#region Field Initialization
 
+		#region Overrides
+
 		protected override void BeforeBuildAbstractGetter()
 		{
-			FieldBuilder        field   = GetField();
-			MethodBuilderHelper ensurer = Context.GetFieldInstanceEnsurer(field.Name);
-
-			if (ensurer != null)
-			{
-				Context.MethodBuilder.Emitter
-					.ldarg_0
-					.call(ensurer);
-			}
+			CallLazyInstanceInsurer(GetField());
 		}
 
 		protected override void BeforeBuildAbstractSetter()
@@ -162,20 +156,14 @@ namespace BLToolkit.TypeBuilder.Builders
 			FieldBuilder field = GetField();
 
 			if (field.FieldType != Context.CurrentProperty.PropertyType)
-			{
-				MethodBuilderHelper ensurer = Context.GetFieldInstanceEnsurer(field.Name);
-
-				if (ensurer != null)
-				{
-					Context.MethodBuilder.Emitter
-						.ldarg_0
-						.call    (ensurer)
-						;
-				}
-			}
+				CallLazyInstanceInsurer(field);
 		}
 
-		public FieldBuilder GetField()
+		#endregion
+
+		#region Common
+
+		protected FieldBuilder GetField()
 		{
 			PropertyInfo propertyInfo = Context.CurrentProperty;
 			string       fieldName    = GetFieldName();
@@ -188,19 +176,15 @@ namespace BLToolkit.TypeBuilder.Builders
 
 				if (propertyInfo.GetCustomAttributes(typeof(NoInstanceAttribute), true).Length == 0)
 				{
-					if (fieldType.IsClass && IsLazyInstance())
+					if (fieldType.IsClass && IsLazyInstance(fieldType))
 					{
 						BuildLazyInstanceEnsurer();
 					}
-
-					/*
-					ParameterInfo[] index = propertyInfo.GetIndexParameters();
-					Type[]          types = index.Length == 0? Type.EmptyTypes: new Type[index.Length];
-					*/
-
-					object[] parameters = GetPropertyParameters(propertyInfo);
-
-
+					else
+					{
+						BuildDefaultInstance();
+						BuildInitContextInstance();
+					}
 				}
 			}
 
@@ -297,179 +281,39 @@ namespace BLToolkit.TypeBuilder.Builders
 			return field;
 		}
 
-		private bool IsLazyInstance()
+		protected virtual string GetFieldName()
 		{
-			object[] attrs = 
-				Context.CurrentProperty.GetCustomAttributes(typeof(LazyInstanceAttribute), true);
+			PropertyInfo pi   = Context.CurrentProperty;
+			string       name = pi.Name;
 
-			if (attrs.Length > 0)
-				return ((LazyInstanceAttribute)attrs[0]).IsLazy;
+			if (char.IsUpper(name[0]) && name.Length > 1 && char.IsLower(name[1]))
+				name = char.ToLower(name[0]) + name.Substring(1, name.Length - 1);
 
-			attrs = Context.OriginalType.GetAttributes(typeof(LazyInstancesAttribute));
+			name = "_" + name;
 
-			return attrs.Length > 0? ((LazyInstancesAttribute)attrs[0]).IsLazy: false;
+			foreach (ParameterInfo p in pi.GetIndexParameters())
+				name += "." + p.ParameterType.FullName;//.Replace(".", "_").Replace("+", "_");
+
+			return name;
 		}
 
-		private void BuildLazyInstanceEnsurer()
+		protected virtual Type GetFieldType()
 		{
-			string              fieldName = GetFieldName();
-			FieldBuilder        field     = Context.GetField(fieldName);
-			TypeHelper          fieldType = new TypeHelper(field.FieldType);
-			MethodBuilderHelper ensurer   = Context.TypeBuilder.DefineMethod(
-				string.Format("EnsureInstance${0}", fieldName), 
-				MethodAttributes.Private | MethodAttributes.HideBySig);
+			PropertyInfo    pi    = Context.CurrentProperty;
+			ParameterInfo[] index = pi.GetIndexParameters();
 
-			EmitHelper emit = ensurer.Emitter;
-			Label      end  = emit.DefineLabel();
-
-			emit
-				.ldarg_0
-				.ldfld    (field)
-				.brtrue_s (end)
-				;
-
-			object[] parameters = GetPropertyParameters(Context.CurrentProperty);
-
-			if (fieldType.IsAbstract)
+			switch (index.Length)
 			{
-				CreateAbstractLazyInstance("$InitContextA$" + field.Name, field, fieldType, emit, parameters);
-			}
-			else
-			{
-				ConstructorInfo  ci = fieldType.GetPublicConstructor(typeof(InitContext));
-
-				if (ci != null)
-				{
-					CreateInitContextLazyInstance("$InitContext$" + field.Name, field, fieldType, emit, parameters);
-				}
-				else
-				{
-					if (parameters == null)
-					{
-						CreateDefaultInstance(field, fieldType, emit);
-					}
-					else
-					{
-						CreateParametrizedInstance(field, fieldType, emit, parameters);
-					}
-				}
-			}
-
-			emit
-				.MarkLabel(end)
-				.ret()
-				;
-
-			Context.Items.Add("$BLToolkit.FieldInstanceEnsurer." + fieldName, ensurer);
-		}
-
-		private void CreateAbstractLazyInstance(
-			string initContextName, FieldBuilder field, TypeHelper fieldType, EmitHelper emit, object[] parameters)
-		{
-			initContextName = "$BLToolkit." + initContextName;
-
-			LocalBuilder initField = (LocalBuilder)Context.Items[initContextName];
-
-			if (initField == null)
-			{
-				Context.Items[initContextName] = initField = emit.DeclareLocal(InitContextType);
-
-				emit
-					.newobj   (InitContextType.GetPublicDefaultConstructor())
-					.stloc    (initField)
-
-					.ldloc    (initField)
-					.ldc_i4_1
-					.callvirt (InitContextType.GetProperty("IsInternal").GetSetMethod())
-
-					.ldloc    (initField)
-					.ldc_i4_1
-					.callvirt (InitContextType.GetProperty("IsLazyInstance").GetSetMethod())
-					;
-			}
-
-			MethodInfo memberParams = InitContextType.GetProperty("MemberParameters").GetSetMethod();
-
-			if (parameters != null)
-			{
-				emit
-					.ldloc    (initField)
-					.ldsfld   (GetParameterField())
-					.callvirt (memberParams)
-					;
-			}
-
-			emit
-				.ldarg_0
-				.ldsfld             (GetTypeAccessorField())
-				.ldloc              (initField)
-				.callvirtNoGenerics (typeof(TypeAccessor), "CreateInstanceEx", _initContextType)
-				.isinst             (fieldType)
-				.stfld              (field)
-				;
-
-			if (parameters != null)
-			{
-				emit
-					.ldloc    (initField)
-					.ldnull
-					.callvirt (memberParams)
-					;
+				case 0: return pi.PropertyType;
+				case 1: return typeof(Hashtable);
+				default:
+					throw new InvalidOperationException();
 			}
 		}
 
-		private void CreateInitContextLazyInstance(
-			string initContextName, FieldBuilder field, TypeHelper fieldType, EmitHelper emit, object[] parameters)
-		{
-			initContextName = "$BLToolkit." + initContextName;
+		#endregion
 
-			LocalBuilder initField = (LocalBuilder)Context.Items[initContextName];
-
-			if (initField == null)
-			{
-				Context.Items[initContextName] = initField = emit.DeclareLocal(InitContextType);
-
-				emit
-					.newobj   (InitContextType.GetPublicDefaultConstructor())
-					.stloc    (initField)
-
-					.ldloc    (initField)
-					.ldc_i4_1
-					.callvirt (InitContextType.GetProperty("IsInternal").GetSetMethod())
-
-					.ldloc    (initField)
-					.ldc_i4_1
-					.callvirt (InitContextType.GetProperty("IsLazyInstance").GetSetMethod())
-					;
-			}
-
-			MethodInfo memberParams = InitContextType.GetProperty("MemberParameters").GetSetMethod();
-
-			if (parameters != null)
-			{
-				emit
-					.ldloc    (initField)
-					.ldsfld   (GetParameterField())
-					.callvirt (memberParams)
-					;
-			}
-
-			emit
-				.ldarg_0
-				.ldloc   (initField)
-				.newobj  (fieldType.GetPublicConstructor(typeof(InitContext)))
-				.stfld   (field)
-				;
-
-			if (parameters != null)
-			{
-				emit
-					.ldloc    (initField)
-					.ldnull
-					.callvirt (memberParams)
-					;
-			}
-		}
+		#region Build
 
 		private void CreateDefaultInstance(FieldBuilder field, TypeHelper fieldType, EmitHelper emit)
 		{
@@ -487,6 +331,9 @@ namespace BLToolkit.TypeBuilder.Builders
 
 				if (ci == null)
 				{
+					if (fieldType.Type.IsValueType)
+						return;
+
 					throw new TypeBuilderException(
 						string.Format("Could not build the '{0}' property of the '{1}' type: type '{2}' has to have public default constructor.",
 							Context.CurrentProperty.Name,
@@ -567,35 +414,264 @@ namespace BLToolkit.TypeBuilder.Builders
 				;
 		}
 
-		protected virtual string GetFieldName()
+		#endregion
+
+		#region Build InitContext Instance
+
+		private void BuildInitContextInstance()
 		{
-			PropertyInfo pi   = Context.CurrentProperty;
-			string       name = pi.Name;
+			string       fieldName = GetFieldName();
+			FieldBuilder field     = Context.GetField(fieldName);
+			TypeHelper   fieldType = new TypeHelper(field.FieldType);
 
-			if (char.IsUpper(name[0]) && name.Length > 1 && char.IsLower(name[1]))
-				name = char.ToLower(name[0]) + name.Substring(1, name.Length - 1);
+			EmitHelper emit = Context.TypeBuilder.InitConstructor.Emitter;
 
-			name = "_" + name;
+			object[] parameters = GetPropertyParameters(Context.CurrentProperty);
+			ConstructorInfo  ci = fieldType.GetPublicConstructor(typeof(InitContext));
 
-			foreach (ParameterInfo p in pi.GetIndexParameters())
-				name += "." + p.ParameterType.FullName;//.Replace(".", "_").Replace("+", "_");
-
-			return name;
+			if (ci != null || fieldType.IsAbstract)
+				CreateAbstractInitContextInstance(field, fieldType, emit, parameters);
+			else if (parameters == null)
+				CreateDefaultInstance(field, fieldType, emit);
+			else
+				CreateParametrizedInstance(field, fieldType, emit, parameters);
 		}
 
-		protected virtual Type GetFieldType()
+		private void CreateAbstractInitContextInstance(
+			FieldBuilder field, TypeHelper fieldType, EmitHelper emit, object[] parameters)
 		{
-			PropertyInfo    pi    = Context.CurrentProperty;
-			ParameterInfo[] index = pi.GetIndexParameters();
+			MethodInfo memberParams = InitContextType.GetProperty("MemberParameters").GetSetMethod();
 
-			switch (index.Length)
+			if (parameters != null)
 			{
-				case 0: return pi.PropertyType;
-				case 1: return typeof(Hashtable);
-				default:
-					throw new InvalidOperationException();
+				emit
+					.ldarg_1
+					.ldsfld   (GetParameterField())
+					.callvirt (memberParams)
+					;
+			}
+
+			if (fieldType.IsAbstract)
+			{
+				emit
+					.ldarg_0
+					.ldsfld             (GetTypeAccessorField())
+					.ldarg_1
+					.callvirtNoGenerics (typeof(TypeAccessor), "CreateInstanceEx", _initContextType)
+					.isinst             (fieldType)
+					.stfld              (field)
+					;
+			}
+			else
+			{
+				emit
+					.ldarg_0
+					.ldarg_1
+					.newobj  (fieldType.GetPublicConstructor(typeof(InitContext)))
+					.stfld   (field)
+					;
+			}
+
+			if (parameters != null)
+			{
+				emit
+					.ldarg_1
+					.ldnull
+					.callvirt (memberParams)
+					;
 			}
 		}
+
+		#endregion
+
+		#region Build Default Instance
+
+		private void BuildDefaultInstance()
+		{
+			string       fieldName = GetFieldName();
+			FieldBuilder field     = Context.GetField(fieldName);
+			TypeHelper   fieldType = new TypeHelper(field.FieldType);
+
+			EmitHelper       emit = Context.TypeBuilder.DefaultConstructor.Emitter;
+			object[]         ps   = GetPropertyParameters(Context.CurrentProperty);
+			ConstructorInfo  ci   = fieldType.GetPublicConstructor(typeof(InitContext));
+
+			if (ci != null || fieldType.IsAbstract)
+				CreateInitContextDefaultInstance("$BLToolkit.DefaultInitContext.", field, fieldType, emit, ps);
+			else if (ps == null)
+				CreateDefaultInstance(field, fieldType, emit);
+			else
+				CreateParametrizedInstance(field, fieldType, emit, ps);
+		}
+
+		private void CreateInitContextDefaultInstance(
+			string initContextName, FieldBuilder field, TypeHelper fieldType, EmitHelper emit, object[] parameters)
+		{
+			LocalBuilder initField = (LocalBuilder)Context.Items[initContextName];
+
+			if (initField == null)
+			{
+				Context.Items[initContextName] = initField = emit.DeclareLocal(InitContextType);
+
+				emit
+					.newobj   (InitContextType.GetPublicDefaultConstructor())
+					.stloc    (initField)
+
+					.ldloc    (initField)
+					.ldc_i4_1
+					.callvirt (InitContextType.GetProperty("IsInternal").GetSetMethod())
+					;
+			}
+
+			MethodInfo memberParams = InitContextType.GetProperty("MemberParameters").GetSetMethod();
+
+			if (parameters != null)
+			{
+				emit
+					.ldloc    (initField)
+					.ldsfld   (GetParameterField())
+					.callvirt (memberParams)
+					;
+			}
+
+			if (fieldType.IsAbstract)
+			{
+				emit
+					.ldarg_0
+					.ldsfld             (GetTypeAccessorField())
+					.ldloc              (initField)
+					.callvirtNoGenerics (typeof(TypeAccessor), "CreateInstanceEx", _initContextType)
+					.isinst             (fieldType)
+					.stfld              (field)
+					;
+			}
+			else
+			{
+				emit
+					.ldarg_0
+					.ldloc   (initField)
+					.newobj  (fieldType.GetPublicConstructor(typeof(InitContext)))
+					.stfld   (field)
+					;
+			}
+
+			if (parameters != null)
+			{
+				emit
+					.ldloc    (initField)
+					.ldnull
+					.callvirt (memberParams)
+					;
+			}
+		}
+
+		#endregion
+
+		#region Build Lazy Instance
+
+		private bool IsLazyInstance(Type type)
+		{
+			object[] attrs = 
+				Context.CurrentProperty.GetCustomAttributes(typeof(LazyInstanceAttribute), true);
+
+			if (attrs.Length > 0)
+				return ((LazyInstanceAttribute)attrs[0]).IsLazy;
+
+			attrs = Context.OriginalType.GetAttributes(typeof(LazyInstancesAttribute));
+
+			foreach (LazyInstancesAttribute a in attrs)
+				if (a.Type == typeof(object) || type == a.Type || type.IsSubclassOf(a.Type))
+					return a.IsLazy;
+
+			return false;
+		}
+
+		private void BuildLazyInstanceEnsurer()
+		{
+			string              fieldName = GetFieldName();
+			FieldBuilder        field     = Context.GetField(fieldName);
+			TypeHelper          fieldType = new TypeHelper(field.FieldType);
+			MethodBuilderHelper ensurer   = Context.TypeBuilder.DefineMethod(
+				string.Format("EnsureInstance${0}", fieldName), 
+				MethodAttributes.Private | MethodAttributes.HideBySig);
+
+			EmitHelper emit = ensurer.Emitter;
+			Label      end  = emit.DefineLabel();
+
+			emit
+				.ldarg_0
+				.ldfld    (field)
+				.brtrue_s (end)
+				;
+
+			object[] parameters = GetPropertyParameters(Context.CurrentProperty);
+			ConstructorInfo  ci = fieldType.GetPublicConstructor(typeof(InitContext));
+
+			if (ci != null || fieldType.IsAbstract)
+				CreateInitContextLazyInstance(field, fieldType, emit, parameters);
+			else if (parameters == null)
+				CreateDefaultInstance(field, fieldType, emit);
+			else
+				CreateParametrizedInstance(field, fieldType, emit, parameters);
+
+			emit
+				.MarkLabel(end)
+				.ret()
+				;
+
+			Context.Items.Add("$BLToolkit.FieldInstanceEnsurer." + fieldName, ensurer);
+		}
+
+		private void CreateInitContextLazyInstance(
+			FieldBuilder field, TypeHelper fieldType, EmitHelper emit, object[] parameters)
+		{
+			LocalBuilder initField = emit.DeclareLocal(InitContextType);
+
+			emit
+				.newobj   (InitContextType.GetPublicDefaultConstructor())
+				.stloc    (initField)
+
+				.ldloc    (initField)
+				.ldc_i4_1
+				.callvirt (InitContextType.GetProperty("IsInternal").GetSetMethod())
+
+				.ldloc    (initField)
+				.ldc_i4_1
+				.callvirt (InitContextType.GetProperty("IsLazyInstance").GetSetMethod())
+				;
+
+			if (parameters != null)
+			{
+				emit
+					.ldloc    (initField)
+					.ldsfld   (GetParameterField())
+					.callvirt (InitContextType.GetProperty("MemberParameters").GetSetMethod())
+					;
+			}
+
+			if (fieldType.IsAbstract)
+			{
+				emit
+					.ldarg_0
+					.ldsfld             (GetTypeAccessorField())
+					.ldloc              (initField)
+					.callvirtNoGenerics (typeof(TypeAccessor), "CreateInstanceEx", _initContextType)
+					.isinst             (fieldType)
+					.stfld              (field)
+					;
+			}
+			else
+			{
+				emit
+					.ldarg_0
+					.ldloc   (initField)
+					.newobj  (fieldType.GetPublicConstructor(typeof(InitContext)))
+					.stfld   (field)
+					;
+			}
+		}
+
+		#endregion
 
 		#endregion
 

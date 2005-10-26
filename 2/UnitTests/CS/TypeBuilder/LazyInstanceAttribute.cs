@@ -10,9 +10,9 @@ using BLToolkit.TypeBuilder.Builders;
 namespace TypeBuilder
 {
 	[TestFixture]
-	public class LazyInstance
+	public class LazyInstanceAttribyte
 	{
-		public LazyInstance()
+		public LazyInstanceAttribyte()
 		{
 			TypeFactory.SaveTypes = true;
 		}
@@ -65,22 +65,22 @@ namespace TypeBuilder
 
 		public abstract class Object1
 		{
-			[LazyInstanceAttribute]
+			[LazyInstance]
 			public abstract ArrayList List { get; set; }
 
-			[LazyInstanceAttribute]
+			[LazyInstance]
 			public abstract string    Str { get; set; }
 
-			[LazyInstanceAttribute]
+			[LazyInstance]
 			public abstract string this[int i] { get; set; }
 
-			[LazyInstanceAttribute]
+			[LazyInstance]
 			public abstract TestField Field { get; set; }
 
-			[LazyInstanceAttribute]
+			[LazyInstance]
 			public abstract InnerObject InnerObject { get; set; }
 
-			[LazyInstanceAttribute]
+			[LazyInstance]
 			public abstract AbstractObject AbstractObject { get; set; }
 		}
 
@@ -110,25 +110,25 @@ namespace TypeBuilder
 
 		public abstract class Object2
 		{
-			[LazyInstanceAttribute, Parameter(10)]
+			[LazyInstance, Parameter(10)]
 			public abstract ArrayList List { get; set; }
 
-			[LazyInstanceAttribute, Parameter("test")]
+			[LazyInstance, Parameter("test")]
 			public abstract string Str { get; set; }
 
-			[LazyInstanceAttribute, Parameter(20)]
+			[LazyInstance, Parameter(20)]
 			public abstract string this[int i] { get; set; }
 
-			[LazyInstanceAttribute, Parameter(20, 30)]
+			[LazyInstance, Parameter(20, 30)]
 			public abstract TestField Field1 { get; set; }
 
-			[LazyInstanceAttribute, TestParameter]
+			[LazyInstance, TestParameter]
 			public abstract TestField Field2 { get; set; }
 
-			[LazyInstanceAttribute, Parameter(55)]
+			[LazyInstance, Parameter(55)]
 			public abstract InnerObject InnerObject { get; set; }
 
-			[LazyInstanceAttribute, Parameter(88)]
+			[LazyInstance, Parameter(88)]
 			public abstract AbstractObject AbstractObject { get; set; }
 		}
 
@@ -146,6 +146,83 @@ namespace TypeBuilder
 			Assert.AreEqual(50,     o.Field1.Value);
 			Assert.AreEqual(77,     o.Field2.Value);
 			Assert.AreEqual(55, o.InnerObject.Field);
+		}
+
+		[LazyInstances]
+		public abstract class Object3
+		{
+			public abstract string Str1 { get; set; }
+			[LazyInstance(false), Parameter("")]
+			public abstract string Str2 { get; set; }
+		}
+
+		[Test]
+		public void LazyInstancesTest()
+		{
+			BuildContext context = TypeFactory.GetType(typeof(Object3));
+
+			Console.WriteLine(context.Type.Type);
+
+			Object3 o = (Object3)Activator.CreateInstance(context.Type);
+
+			Assert.AreEqual("", o.Str1);
+			Assert.AreEqual("", o.Str2);
+
+			o.Str1 = null;
+			o.Str2 = null;
+
+			Assert.AreEqual("",   o.Str1);
+			Assert.AreEqual(null, o.Str2);
+		}
+
+		[LazyInstances(false)]
+		public abstract class Object4 : Object3
+		{
+		}
+
+		[Test]
+		public void LazyInstancesFalseTest()
+		{
+			BuildContext context = TypeFactory.GetType(typeof(Object4));
+
+			Console.WriteLine(context.Type.Type);
+
+			Object4 o = (Object4)Activator.CreateInstance(context.Type);
+
+			Assert.AreEqual("", o.Str1);
+			Assert.AreEqual("", o.Str2);
+
+			o.Str1 = null;
+			o.Str2 = null;
+
+			Assert.AreEqual(null, o.Str1);
+			Assert.AreEqual(null, o.Str2);
+		}
+
+		[LazyInstances(typeof(string))]
+		public abstract class Object5
+		{
+			public abstract string    Str  { get; set; }
+			public abstract ArrayList List { get; set; }
+		}
+
+		[Test]
+		public void LazyInstancesTypeTest()
+		{
+			BuildContext context = TypeFactory.GetType(typeof(Object5));
+
+			Console.WriteLine(context.Type.Type);
+
+			Object5 o = (Object5)Activator.CreateInstance(context.Type);
+
+			Assert.IsNotNull(o.Str);
+			Assert.IsNotNull(o.List);
+
+			o.Str  = null;
+			o.List = null;
+
+			Assert.IsNotNull(o.Str);
+			Assert.AreEqual (null, o.List);
 		}
 	}
 }

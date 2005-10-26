@@ -7,7 +7,11 @@ namespace BLToolkit.TypeBuilder
 	{
 		public LazyInstancesAttribute()
 		{
-			_isLazy = true;
+		}
+
+		public LazyInstancesAttribute(Type type)
+		{
+			_type = type;
 		}
 
 		public LazyInstancesAttribute(bool isLazy)
@@ -15,11 +19,24 @@ namespace BLToolkit.TypeBuilder
 			_isLazy = isLazy;
 		}
 
-		private bool _isLazy;
-		public bool IsLazy
+		public LazyInstancesAttribute(Type type, bool isLazy)
+		{
+			_type   = type;
+			_isLazy = isLazy;
+		}
+
+		private bool _isLazy = true;
+		public  bool  IsLazy
 		{
 			get { return _isLazy; }
 			set { _isLazy = value; }
+		}
+
+		private Type _type = typeof(object);
+		public  Type  Type
+		{
+			get { return _type; }
+			set { _type = value == null? typeof(object): value; }
 		}
 	}
 }

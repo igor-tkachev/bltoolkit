@@ -1,4 +1,7 @@
 using System;
+using System.Reflection.Emit;
+
+using BLToolkit.Reflection.Emit;
 
 namespace BLToolkit.TypeBuilder.Builders
 {
@@ -139,5 +142,21 @@ namespace BLToolkit.TypeBuilder.Builders
 		protected virtual void  AfterBuildVirtualMethod () {}
 
 		protected virtual void BuildInterfaceMethod     () {}
+
+		#region Helpers
+
+		protected void CallLazyInstanceInsurer(FieldBuilder field)
+		{
+			MethodBuilderHelper ensurer = Context.GetFieldInstanceEnsurer(field.Name);
+
+			if (ensurer != null)
+			{
+				Context.MethodBuilder.Emitter
+					.ldarg_0
+					.call    (ensurer);
+			}
+		}
+
+		#endregion
 	}
 }
