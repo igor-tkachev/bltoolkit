@@ -24,6 +24,13 @@ namespace BLToolkit.TypeBuilder.Builders
 				return context.CurrentProperty.GetIndexParameters().Length <= 1;
 			}
 
+			if (context.Element == BuildElement.Type && context.IsAfterStep)
+			{
+				object isDirty = context.Items["$BLToolkit.InitContext.DirtyParameters"];
+
+				return isDirty != null && (bool)isDirty;
+			}
+
 			return false;
 		}
 
@@ -39,7 +46,7 @@ namespace BLToolkit.TypeBuilder.Builders
 			switch (index.Length)
 			{
 				case 0:
-					Context.MethodBuilder.Emitter
+					Context.MethodBuilder.Emitter	
 						.ldarg_0
 						.ldfld   (field)
 						.stloc   (Context.ReturnValue)
@@ -128,8 +135,8 @@ namespace BLToolkit.TypeBuilder.Builders
 
 		#region Properties
 
-		private   TypeHelper _initContextType;
-		protected TypeHelper  InitContextType
+		private   static TypeHelper _initContextType;
+		protected static TypeHelper  InitContextType
 		{
 			get
 			{
@@ -174,7 +181,8 @@ namespace BLToolkit.TypeBuilder.Builders
 			{
 				field = Context.CreatePrivateField(fieldName, fieldType);
 
-				if (propertyInfo.GetCustomAttributes(typeof(NoInstanceAttribute), true).Length == 0)
+				if (fieldType.IsInterface == false &&
+					propertyInfo.GetCustomAttributes(typeof(NoInstanceAttribute), true).Length == 0)
 				{
 					if (fieldType.IsClass && IsLazyInstance(fieldType))
 					{
@@ -352,15 +360,56 @@ namespace BLToolkit.TypeBuilder.Builders
 		private void CreateParametrizedInstance(
 			FieldBuilder field, TypeHelper fieldType, EmitHelper emit, object[] parameters)
 		{
-			if (fieldType.Type == typeof(string) && parameters.Length == 1 && parameters[0] is string)
+			if (parameters.Length == 1)
 			{
-				emit
-					.ldarg_0
-					.ldstr   ((string)parameters[0])
-					.stfld   (field)
-					;
+				object o = parameters[0];
 
-				return;
+				if (o == null)
+				{
+					if (fieldType.IsValueType == false)
+						emit
+							.ldarg_0
+							.ldnull
+							.stfld   (field)
+							;
+
+					return;
+				}
+				else
+				{
+					if (fieldType.Type == o.GetType())
+					{
+						if (fieldType.Type == typeof(string))
+						{
+							emit
+								.ldarg_0
+								.ldstr   ((string)o)
+								.stfld   (field)
+								;
+
+							return;
+						}
+
+						if (fieldType.IsValueType)
+						{
+							emit.ldarg_0.end();
+
+							if (emit.LoadWellKnownValue(o) == false)
+							{
+								emit
+									.ldsfld     (GetParameterField())
+									.ldc_i4_0
+									.ldelem_ref
+									.end()
+									;
+							}
+
+							emit.stfld(field);
+
+							return;
+						}
+					}
+				}
 			}
 
 			Type[] types = new Type[parameters.Length];
@@ -442,6 +491,14 @@ namespace BLToolkit.TypeBuilder.Builders
 		{
 			MethodInfo memberParams = InitContextType.GetProperty("MemberParameters").GetSetMethod();
 
+			emit
+				.ldarg_1
+				.ldarg_0
+				.callvirt (InitContextType.GetProperty("Parent").GetSetMethod())
+				;
+
+			object isDirty = Context.Items["$BLToolkit.InitContext.DirtyParameters"];
+
 			if (parameters != null)
 			{
 				emit
@@ -450,6 +507,16 @@ namespace BLToolkit.TypeBuilder.Builders
 					.callvirt (memberParams)
 					;
 			}
+			else if (isDirty != null && (bool)isDirty)
+			{
+				emit
+					.ldarg_1
+					.ldnull
+					.callvirt (memberParams)
+					;
+			}
+
+			Context.Items["$BLToolkit.InitContext.DirtyParameters"] = parameters != null;
 
 			if (fieldType.IsAbstract)
 			{
@@ -471,13 +538,18 @@ namespace BLToolkit.TypeBuilder.Builders
 					.stfld   (field)
 					;
 			}
+		}
 
-			if (parameters != null)
+		protected override void AfterBuildType()
+		{
+			object isDirty = Context.Items["$BLToolkit.InitContext.DirtyParameters"];
+
+			if (isDirty != null && (bool)isDirty)
 			{
-				emit
+				Context.TypeBuilder.InitConstructor.Emitter
 					.ldarg_1
 					.ldnull
-					.callvirt (memberParams)
+					.callvirt (InitContextType.GetProperty("MemberParameters").GetSetMethod())
 					;
 			}
 		}
@@ -518,9 +590,15 @@ namespace BLToolkit.TypeBuilder.Builders
 					.stloc    (initField)
 
 					.ldloc    (initField)
+					.ldarg_0
+					.callvirt (InitContextType.GetProperty("Parent").GetSetMethod())
+
+					.ldloc    (initField)
 					.ldc_i4_1
 					.callvirt (InitContextType.GetProperty("IsInternal").GetSetMethod())
 					;
+
+				Context.Items.Add("$BLToolkit.Default.DirtyParameters", false);
 			}
 
 			MethodInfo memberParams = InitContextType.GetProperty("MemberParameters").GetSetMethod();
@@ -533,6 +611,16 @@ namespace BLToolkit.TypeBuilder.Builders
 					.callvirt (memberParams)
 					;
 			}
+			else if ((bool)Context.Items["$BLToolkit.Default.DirtyParameters"])
+			{
+				emit
+					.ldloc    (initField)
+					.ldnull
+					.callvirt (memberParams)
+					;
+			}
+
+			Context.Items["$BLToolkit.Default.DirtyParameters"] = parameters != null;
 
 			if (fieldType.IsAbstract)
 			{
@@ -552,15 +640,6 @@ namespace BLToolkit.TypeBuilder.Builders
 					.ldloc   (initField)
 					.newobj  (fieldType.GetPublicConstructor(typeof(InitContext)))
 					.stfld   (field)
-					;
-			}
-
-			if (parameters != null)
-			{
-				emit
-					.ldloc    (initField)
-					.ldnull
-					.callvirt (memberParams)
 					;
 			}
 		}
@@ -592,7 +671,7 @@ namespace BLToolkit.TypeBuilder.Builders
 			FieldBuilder        field     = Context.GetField(fieldName);
 			TypeHelper          fieldType = new TypeHelper(field.FieldType);
 			MethodBuilderHelper ensurer   = Context.TypeBuilder.DefineMethod(
-				string.Format("EnsureInstance${0}", fieldName), 
+				string.Format("$EnsureInstance{0}", fieldName), 
 				MethodAttributes.Private | MethodAttributes.HideBySig);
 
 			EmitHelper emit = ensurer.Emitter;
@@ -630,6 +709,10 @@ namespace BLToolkit.TypeBuilder.Builders
 			emit
 				.newobj   (InitContextType.GetPublicDefaultConstructor())
 				.stloc    (initField)
+
+				.ldloc    (initField)
+				.ldarg_0
+				.callvirt (InitContextType.GetProperty("Parent").GetSetMethod())
 
 				.ldloc    (initField)
 				.ldc_i4_1

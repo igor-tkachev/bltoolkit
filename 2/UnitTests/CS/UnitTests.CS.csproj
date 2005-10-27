@@ -110,12 +110,17 @@
                     BuildAction = "Compile"
                 />
                 <File
-                    RelPath = "TypeBuilder\LazyInstanceAttribute.cs"
+                    RelPath = "TypeBuilder\InstanceTypeAttributes.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
                 />
                 <File
-                    RelPath = "TypeBuilder\ParameterAttribute.cs"
+                    RelPath = "TypeBuilder\LazyInstanceAttributes.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "TypeBuilder\ParameterAttributes.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
                 />

@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 
 namespace BLToolkit.Reflection
 {
@@ -27,6 +28,25 @@ namespace BLToolkit.Reflection
 		{
 			get { return _isLazyInstance;  }
 			set { _isLazyInstance = value; }
+		}
+
+		private bool _parent;
+		public  bool  Parent
+		{
+			get { return _parent;  }
+			set { _parent = value; }
+		}
+
+		private Hashtable _items;
+		private Hashtable  Items
+		{
+			get 
+			{
+				if (_items == null)
+					_items = new Hashtable();
+
+				return _items;
+			}
 		}
 	}
 }

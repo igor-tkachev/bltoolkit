@@ -146,6 +146,16 @@
                     BuildAction = "Compile"
                 />
                 <File
+                    RelPath = "TypeBuilder\DefaultInstanceTypeAttribute.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "TypeBuilder\InstanceTypeAttribute.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
                     RelPath = "TypeBuilder\LazyInstanceAttribute.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
@@ -227,6 +237,11 @@
                 />
                 <File
                     RelPath = "TypeBuilder\Builders\IAbstractTypeBuilder.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "TypeBuilder\Builders\InstanceTypeBuilder.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
                 />
