@@ -32,6 +32,7 @@ namespace UnitTests.All
 		{
 			int p1 = 10;
 			int p2 = 10;
+			DateTime dt = DateTime.Now;
 
 			Foo(p1, p2);
 		}

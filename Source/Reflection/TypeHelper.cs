@@ -237,6 +237,22 @@ namespace BLToolkit.Reflection
 		}
 
 		/// <summary>
+		/// Gets a value indicating whether the Type is a value type.
+		/// </summary>
+		public bool IsValueType
+		{
+			get { return _type.IsValueType; }
+		}
+
+		/// <summary>
+		/// Gets a value indicating whether the Type is a class; that is, not a value type or interface.
+		/// </summary>
+		public bool IsClass
+		{
+			get { return _type.IsClass; }
+		}
+
+		/// <summary>
 		/// Indicates whether the Type is serializable.
 		/// </summary>
 		public bool IsSerializable
@@ -395,5 +411,25 @@ namespace BLToolkit.Reflection
 			return type;
 		}
 
+		public static bool IsSameOrParent(Type parent, Type child)
+		{
+			if (parent == child ||
+				child.IsEnum && Enum.GetUnderlyingType(child) == parent ||
+				child.IsSubclassOf(parent))
+			{
+				return true;
+			}
+
+			if (parent.IsInterface)
+			{
+				Type[] interfaces = child.GetInterfaces();
+
+				foreach (Type t in interfaces)
+					if (t == parent)
+						return true;
+			}
+
+			return false;
+		}
 	}
 }

@@ -55,6 +55,9 @@
     <Compile Include="TypeBuilder\Builders\FakeSetter.cs" />
     <Compile Include="TypeBuilder\Builders\IAbstractTypeBuilder.cs" />
     <Compile Include="Reflection\InitContext.cs" />
+    <Compile Include="TypeBuilder\Builders\InstanceTypeBuilder.cs" />
+    <Compile Include="TypeBuilder\DefaultInstanceTypeAttribute.cs" />
+    <Compile Include="TypeBuilder\InstanceTypeAttribute.cs" />
     <Compile Include="TypeBuilder\LazyInstanceAttribute.cs" />
     <Compile Include="TypeBuilder\LazyInstancesAttribute.cs" />
     <Compile Include="TypeBuilder\NoInstanceAttribute.cs" />

@@ -10,9 +10,9 @@ using BLToolkit.TypeBuilder.Builders;
 namespace TypeBuilder
 {
 	[TestFixture]
-	public class ParameterAttributeTest
+	public class ParameterAttributes
 	{
-		public ParameterAttributeTest()
+		public ParameterAttributes()
 		{
 			TypeFactory.SaveTypes = true;
 		}
@@ -81,7 +81,9 @@ namespace TypeBuilder
 			[TestParameter]     public abstract TestField      Field2         { get; set; }
 			[Parameter(55)]     public abstract InnerObject    InnerObject    { get; set; }
 			//[Parameter(88)]     public abstract AbstractObject AbstractObject { get; set; }
-			[Parameter(54)]     public abstract int            Int            { get; set; }
+			[Parameter(54)]     public abstract int            Int1           { get; set; }
+			//[Parameter(null)]   public abstract int            Int2           { get; set; }
+			[Parameter(2,2,2)]  public abstract DateTime       Date           { get; set; }
 		}
 
 		[Test]
@@ -98,7 +100,9 @@ namespace TypeBuilder
 			Assert.AreEqual(50,  o.Field1.Value);
 			Assert.AreEqual(77,  o.Field2.Value);
 			Assert.AreEqual(55,  o.InnerObject.Field);
-			Assert.AreEqual(54,  o.Int);
+			Assert.AreEqual(54,  o.Int1);
+
+			Assert.AreEqual(new DateTime(2,2,2),  o.Date);
 		}
 	}
 }

@@ -731,21 +731,21 @@ namespace BLToolkit.Reflection.Emit
 				{
 					ParameterInfo[] pis = method.GetParameters();
 
-					if (pis.Length == optionalParameterTypes.Length)
+					if (pis.Length == parameterTypes.Length)
 					{
 						bool match = true;
 
 						for (int i = 0; match && i < pis.Length; i++)
-							if (pis[i].ParameterType != optionalParameterTypes[i])
+							if (pis[i].ParameterType != parameterTypes[i])
 								match = false;
 
 						if (match)
-							return callvirt(method, optionalParameterTypes.Length == 0? null: optionalParameterTypes);
+							return callvirt(method, parameterTypes.Length == 0? null: parameterTypes);
 					}
 				}
 			}
 
-			throw new RsdnMapException(string.Format("Method '{0}' not found.", methodName));
+			throw new BLToolkit.TypeBuilder.TypeBuilderException(string.Format("Method '{0}' not found.", methodName));
 #else
 			return callvirt(type, methodName, parameterTypes);
 #endif
