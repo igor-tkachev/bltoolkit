@@ -421,10 +421,14 @@ namespace BLToolkit.TypeBuilder.Builders
 
 			if (ci == null)
 			{
+				if (fieldType.IsValueType)
+					return;
+
 				throw new TypeBuilderException(
-					string.Format("Could not build the '{0}' property of the '{1}' type: constructor not found for the '{2}' type.",
+					string.Format("Could not build the '{0}' property of the '{1}' type: {2}constructor not found for the '{3}' type.",
 						Context.CurrentProperty.Name,
 						Context.Type.FullName,
+						types.Length == 0? "default ": "",
 						fieldType.FullName));
 			}
 
@@ -449,10 +453,10 @@ namespace BLToolkit.TypeBuilder.Builders
 				else
 				{
 					emit
-						.ldsfld     (GetParameterField())
-						.ldc_i4     (i)
+						.ldsfld         (GetParameterField())
+						.ldc_i4         (i)
 						.ldelem_ref
-						.CastTo     (types[i])
+						.CastFromObject (types[i])
 						;
 				}
 			}
@@ -764,7 +768,15 @@ namespace BLToolkit.TypeBuilder.Builders
 		{
 			object[] attrs = propertyInfo.GetCustomAttributes(typeof(ParameterAttribute), true);
 
-			return attrs == null || attrs.Length == 0? null: ((ParameterAttribute)attrs[0]).Parameters;
+			if (attrs != null && attrs.Length > 0)
+				return ((ParameterAttribute)attrs[0]).Parameters;
+
+			attrs = propertyInfo.GetCustomAttributes(typeof(InstanceTypeAttribute), true);
+
+			if (attrs != null && attrs.Length > 0)
+				return ((InstanceTypeAttribute)attrs[0]).Parameters;
+
+			return null;
 		}
 
 		public static object[] GetPropertyParameters(

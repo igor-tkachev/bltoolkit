@@ -10,10 +10,10 @@ using System.Runtime.CompilerServices;
 [assembly: AssemblyDescription("Business Logic Toolkit")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("")]
-[assembly: AssemblyCopyright("")]
+[assembly: AssemblyProduct("Business Logic Toolkit")]
+[assembly: AssemblyCopyright("© 2002-2005 www.bltoolkit.cnet")]
 [assembly: AssemblyTrademark("")]
-[assembly: AssemblyCulture("")]		
+[assembly: AssemblyCulture("")]
 
 //
 // Version information for an assembly consists of the following four values:
@@ -26,7 +26,7 @@ using System.Runtime.CompilerServices;
 // You can specify all the values or you can default the Revision and Build Numbers 
 // by using the '*' as shown below:
 
-[assembly: AssemblyVersion("1.0.*")]
+[assembly: AssemblyVersion("2.0.*")]
 
 //
 // In order to sign your assembly you must specify a key to use. Refer to the 
