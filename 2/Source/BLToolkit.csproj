@@ -151,6 +151,11 @@
                     BuildAction = "Compile"
                 />
                 <File
+                    RelPath = "TypeBuilder\GetValueAttribute.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
                     RelPath = "TypeBuilder\InstanceTypeAttribute.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
@@ -172,6 +177,16 @@
                 />
                 <File
                     RelPath = "TypeBuilder\ParameterAttribute.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "TypeBuilder\ParentAttribute.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "TypeBuilder\SetValueAttribute.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
                 />

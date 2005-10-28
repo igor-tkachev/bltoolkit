@@ -42,6 +42,8 @@ namespace BLToolkit.TypeBuilder.Builders
 			if (InstanceType.IsValueType) emit.ldarg_0.ldflda(field);
 			else                          emit.ldarg_0.ldfld (field);
 
+			Type memberType;
+
 			if (getter is PropertyInfo)
 			{
 				PropertyInfo pi = ((PropertyInfo)getter);
@@ -49,10 +51,7 @@ namespace BLToolkit.TypeBuilder.Builders
 				if (InstanceType.IsValueType) emit.call    (pi.GetGetMethod());
 				else                          emit.callvirt(pi.GetGetMethod());
 
-				if (propertyType.IsValueType && !pi.PropertyType.IsValueType)
-					emit.CastTo(propertyType);
-				else if (pi.PropertyType != propertyType && !propertyType.IsEnum)
-					emit.castclass(propertyType);
+				memberType = pi.PropertyType;
 			}
 			else
 			{
@@ -60,11 +59,21 @@ namespace BLToolkit.TypeBuilder.Builders
 
 				emit.ldfld((FieldInfo)getter);
 
-				if (propertyType.IsValueType && !fi.FieldType.IsValueType)
-					emit.CastTo(propertyType);
-				else if (fi.FieldType != propertyType && !propertyType.IsEnum)
-					emit.castclass(fi.FieldType);
+				memberType = fi.FieldType;
 			}
+
+			if (propertyType.IsValueType)
+			{
+				if (memberType.IsValueType == false)
+					emit.CastFromObject(propertyType);
+			}
+			else
+			{
+				if (memberType != propertyType)
+					emit.castclass(propertyType);
+			}
+
+			emit.stloc(Context.ReturnValue);
 		}
 
 		protected override void BuildAbstractSetter()
@@ -108,11 +117,27 @@ namespace BLToolkit.TypeBuilder.Builders
 				BindingFlags.Public | BindingFlags.Instance | BindingFlags.GetField);
 
 			foreach (FieldInfo field in fields)
-				if (field.Name == "Value" && TypeHelper.IsSameOrParent(field.FieldType, propertyType))
+			{
+				object[] attrs = field.GetCustomAttributes(typeof(GetValueAttribute), true);
+
+				if (attrs.Length > 0 && TypeHelper.IsSameOrParent(field.FieldType, propertyType))
 					return field;
+			}
 
 			PropertyInfo[] props = InstanceType.GetProperties(
 				BindingFlags.Public | BindingFlags.Instance | BindingFlags.GetProperty);
+
+			foreach (PropertyInfo prop in props)
+			{
+				object[] attrs = prop.GetCustomAttributes(typeof(GetValueAttribute), true);
+
+				if (attrs.Length > 0 && TypeHelper.IsSameOrParent(prop.PropertyType, propertyType))
+					return prop;
+			}
+
+			foreach (FieldInfo field in fields)
+				if (field.Name == "Value" && TypeHelper.IsSameOrParent(field.FieldType, propertyType))
+					return field;
 
 			foreach (PropertyInfo prop in props)
 				if (prop.Name == "Value" && TypeHelper.IsSameOrParent(prop.PropertyType, propertyType))
@@ -134,11 +159,27 @@ namespace BLToolkit.TypeBuilder.Builders
 				BindingFlags.Public | BindingFlags.Instance | BindingFlags.SetField);
 
 			foreach (FieldInfo field in fields)
-				if (field.Name == "Value" && TypeHelper.IsSameOrParent(field.FieldType, propertyType))
+			{
+				object[] attrs = field.GetCustomAttributes(typeof(SetValueAttribute), true);
+
+				if (attrs.Length > 0 && TypeHelper.IsSameOrParent(field.FieldType, propertyType))
 					return field;
+			}
 
 			PropertyInfo[] props = InstanceType.GetProperties(
 				BindingFlags.Public | BindingFlags.Instance | BindingFlags.SetProperty);
+
+			foreach (PropertyInfo prop in props)
+			{
+				object[] attrs = prop.GetCustomAttributes(typeof(SetValueAttribute), true);
+
+				if (attrs.Length > 0 && TypeHelper.IsSameOrParent(prop.PropertyType, propertyType))
+					return prop;
+			}
+
+			foreach (FieldInfo field in fields)
+				if (field.Name == "Value" && TypeHelper.IsSameOrParent(field.FieldType, propertyType))
+					return field;
 
 			foreach (PropertyInfo prop in props)
 				if (prop.Name == "Value" && TypeHelper.IsSameOrParent(prop.PropertyType, propertyType))

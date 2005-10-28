@@ -3135,7 +3135,7 @@ namespace BLToolkit.Reflection.Emit
 			return ldtoken(type).call(typeof(Type), "GetTypeFromHandle", typeof(RuntimeTypeHandle));
 		}
 
-		public EmitHelper CastTo(Type type)
+		public EmitHelper CastFromObject(Type type)
 		{
 			unboxIfValueType(type);
 
