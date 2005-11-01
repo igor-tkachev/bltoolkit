@@ -89,11 +89,7 @@ namespace TypeBuilder
 		[Test]
 		public void ParamTest()
 		{
-			BuildContext context = TypeFactory.GetType(typeof(Object1));
-
-			Console.WriteLine(context.Type.Type);
-
-			Object1 o = (Object1)Activator.CreateInstance(context.Type);
+			Object1 o = (Object1)TypeAccessor.GetAccessor(typeof(Object1)).CreateInstance();
 
 			Assert.AreEqual(10,  o.List.Capacity);
 			Assert.AreEqual("t", o.Str);

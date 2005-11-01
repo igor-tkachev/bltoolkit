@@ -33,6 +33,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Aspects\NotNullAttribute.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Reflection\Emit\AssemblyBuilderHelper.cs" />
     <Compile Include="Reflection\Emit\ConstructorBuilderHelper.cs" />
@@ -53,15 +54,21 @@
     <Compile Include="TypeBuilder\Builders\FakeMethodInfo.cs" />
     <Compile Include="TypeBuilder\Builders\FakeParameterInfo.cs" />
     <Compile Include="TypeBuilder\Builders\FakeSetter.cs" />
+    <Compile Include="TypeBuilder\GlobalInstanceTypeAttribute.cs" />
     <Compile Include="TypeBuilder\Builders\IAbstractTypeBuilder.cs" />
     <Compile Include="Reflection\InitContext.cs" />
     <Compile Include="TypeBuilder\Builders\InstanceTypeBuilder.cs" />
+    <Compile Include="TypeBuilder\Builders\NotNullAspectBuilder.cs" />
+    <Compile Include="TypeBuilder\Builders\TypeBuilderPriority.cs" />
     <Compile Include="TypeBuilder\DefaultInstanceTypeAttribute.cs" />
+    <Compile Include="TypeBuilder\GetValueAttribute.cs" />
     <Compile Include="TypeBuilder\InstanceTypeAttribute.cs" />
     <Compile Include="TypeBuilder\LazyInstanceAttribute.cs" />
     <Compile Include="TypeBuilder\LazyInstancesAttribute.cs" />
     <Compile Include="TypeBuilder\NoInstanceAttribute.cs" />
     <Compile Include="TypeBuilder\ParameterAttribute.cs" />
+    <Compile Include="TypeBuilder\ParentAttribute.cs" />
+    <Compile Include="TypeBuilder\SetValueAttribute.cs" />
     <Compile Include="TypeBuilder\TypeBuilderException.cs" />
     <Compile Include="TypeBuilder\Builders\ITypeBuilder.cs" />
     <Compile Include="Reflection\TypeAccessor.cs" />

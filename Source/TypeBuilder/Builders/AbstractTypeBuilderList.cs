@@ -22,21 +22,21 @@ namespace BLToolkit.TypeBuilder.Builders
 		}
 	}
 #else
-	public class TypeBuilderList : ArrayList
+	public class AbstractTypeBuilderList : ArrayList
 	{
-		public TypeBuilderList() 
+		public AbstractTypeBuilderList() 
 			: base()
 		{
 		}
 
-		public TypeBuilderList(int capacity) 
+		public AbstractTypeBuilderList(int capacity) 
 			: base(capacity)
 		{
 		}
 
-		public new ITypeBuilder this[int i]
+		public new IAbstractTypeBuilder this[int i]
 		{
-			get { return (ITypeBuilder)base[i]; }
+			get { return (IAbstractTypeBuilder)base[i]; }
 			set { base[i] = value;              }
 		}
 	}

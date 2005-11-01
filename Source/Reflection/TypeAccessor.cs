@@ -1,5 +1,8 @@
 using System;
 
+using BLToolkit.TypeBuilder;
+using BLToolkit.TypeBuilder.Builders;
+
 namespace BLToolkit.Reflection
 {
 	public abstract class TypeAccessor
@@ -63,6 +66,9 @@ namespace BLToolkit.Reflection
 
 		public static TypeAccessor GetAccessor(Type type)
 		{
+			if (type.IsAbstract)
+				type = TypeFactory.GetType(type, new AbstractClassBuilder());
+
 			return new TempAccessor(type);
 		}
 

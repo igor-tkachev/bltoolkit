@@ -65,11 +65,7 @@ namespace TypeBuilder
 
 			public static void Test()
 			{
-				BuildContext context = TypeFactory.GetType(typeof(Object1));
-
-				Console.WriteLine(context.Type.Type);
-
-				Object1 o = (Object1)Activator.CreateInstance(context.Type);
+				Object1 o = (Object1)TypeAccessor.GetAccessor(typeof(Object1)).CreateInstance();
 
 				o.IntField = 10;
 				o.IntProp  = 11;
@@ -155,11 +151,7 @@ namespace TypeBuilder
 
 			public static void Test()
 			{
-				BuildContext context = TypeFactory.GetType(typeof(Object1));
-
-				Console.WriteLine(context.Type.Type);
-
-				Object1 o = (Object1)Activator.CreateInstance(context.Type);
+				Object1 o = (Object1)TypeAccessor.GetAccessor(typeof(Object1)).CreateInstance();
 
 				o.IntField = 10;
 				o.IntProp  = 11;
@@ -215,13 +207,49 @@ namespace TypeBuilder
 		[Test]
 		public void ParamTest()
 		{
-			BuildContext context = TypeFactory.GetType(typeof(Object1));
-
-			Console.WriteLine(context.Type.Type);
-
-			Object1 o = (Object1)Activator.CreateInstance(context.Type);
+			Object1 o = (Object1)TypeAccessor.GetAccessor(typeof(Object1)).CreateInstance();
 
 			Assert.AreEqual(58, o.IntField);
+		}
+
+		public class Instance2
+		{
+			public Instance2(int n)
+			{
+				_n = n;
+			}
+
+			private int _n;
+
+			private int _value;
+			public  int  Value
+			{
+				get { return _value * _n; }
+				set { _value = value; }
+			}
+		}
+
+		[GlobalInstanceType(typeof(int), typeof(Instance2), 3)]
+		public abstract class Object2
+		{
+			[InstanceType(typeof(Instance2), 5)] 
+			public abstract int   Int1   { get; set; }
+			public abstract int   Int2   { get; set; }
+			public abstract short Short1 { get; set; }
+		}
+
+		[Test]
+		public void GlobalParamTest()
+		{
+			Object2 o = (Object2)TypeAccessor.GetAccessor(typeof(Object2)).CreateInstance();
+
+			o.Int1   = 5;
+			o.Int2   = 5;
+			o.Short1 = 10;
+
+			Assert.AreEqual(25, o.Int1);
+			Assert.AreEqual(15, o.Int2);
+			Assert.AreEqual(10, o.Short1);
 		}
 	}
 }

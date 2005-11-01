@@ -1,9 +1,9 @@
 using System;
 using System.Reflection;
-
-using BLToolkit.Reflection.Emit;
 using System.Reflection.Emit;
+
 using BLToolkit.Reflection;
+using BLToolkit.Reflection.Emit;
 
 namespace BLToolkit.TypeBuilder.Builders
 {
@@ -14,19 +14,34 @@ namespace BLToolkit.TypeBuilder.Builders
 			_instanceType = instanceType;
 		}
 
+		public InstanceTypeBuilder(Type propertyType, Type instanceType)
+		{
+			_propertyType = propertyType;
+			_instanceType = instanceType;
+		}
+
+		private Type _propertyType;
+		public  Type  PropertyType
+		{
+			get { return _propertyType; }
+		}
+
 		private Type _instanceType;
 		public  Type  InstanceType
 		{
 			get { return _instanceType; }
 		}
 
-		public override bool IsApplied (BuildContext context)
+		public override bool IsApplied(BuildContext context)
 		{
-			return 
+			return
 				base.IsApplied(context) &&
 				context.CurrentProperty != null &&
-				context.CurrentProperty.GetIndexParameters().Length == 0;
-		}
+				context.CurrentProperty.GetIndexParameters().Length == 0 &&
+				(PropertyType == null ||
+				 TypeHelper.IsSameOrParent(PropertyType, context.CurrentProperty.PropertyType));
+		}
+
 		protected override Type GetFieldType()
 		{
 			return InstanceType;
@@ -148,7 +163,7 @@ namespace BLToolkit.TypeBuilder.Builders
 				"See '{1}' member of '{2}' type.",
 				InstanceType.FullName,
 				propertyType.FullName,
-				Context.OriginalType.FullName));
+				Context.Type.FullName));
 		}
 
 		private MemberInfo GetSetter()
@@ -190,7 +205,7 @@ namespace BLToolkit.TypeBuilder.Builders
 				"See '{1}' member of '{2}' type.",
 				InstanceType.FullName,
 				propertyType.FullName,
-				Context.OriginalType.FullName));
+				Context.Type.FullName));
 		}
 	}
 }

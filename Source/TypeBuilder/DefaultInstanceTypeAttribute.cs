@@ -3,15 +3,15 @@ using System;
 namespace BLToolkit.TypeBuilder
 {
 	[AttributeUsage(AttributeTargets.Property)]
-	public class DefaultInstanceTypeAttribute : Builders.TypeBuilderAttribute
+	public class DefaultInstanceTypeAttribute : Builders.AbstractTypeBuilderAttribute
 	{
 		public DefaultInstanceTypeAttribute ()
 		{
 			_typeBuilder = new Builders.DefaultTypeBuilder();
 		}
 
-		private         Builders.ITypeBuilder _typeBuilder;
-		public override Builders.ITypeBuilder  TypeBuilder
+		private         Builders.IAbstractTypeBuilder _typeBuilder;
+		public override Builders.IAbstractTypeBuilder  TypeBuilder
 		{
 			get { return _typeBuilder; }
 		}

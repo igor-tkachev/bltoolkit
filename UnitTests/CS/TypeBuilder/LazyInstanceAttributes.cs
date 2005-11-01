@@ -87,11 +87,7 @@ namespace TypeBuilder
 		[Test]
 		public void NoParamTest()
 		{
-			BuildContext context = TypeFactory.GetType(typeof(Object1));
-
-			Console.WriteLine(context.Type.Type);
-
-			Object1 o = (Object1)Activator.CreateInstance(context.Type);
+			Object1 o = (Object1)TypeAccessor.GetAccessor(typeof(Object1)).CreateInstance();
 
 			Assert.IsNotNull(o.List);
 			Assert.AreEqual("", o.Str);
@@ -135,17 +131,13 @@ namespace TypeBuilder
 		[Test]
 		public void ParamTest()
 		{
-			BuildContext context = TypeFactory.GetType(typeof(Object2));
-
-			Console.WriteLine(context.Type.Type);
-
-			Object2 o = (Object2)Activator.CreateInstance(context.Type);
+			Object2 o = (Object2)TypeAccessor.GetAccessor(typeof(Object2)).CreateInstance();
 
 			Assert.AreEqual(10,     o.List.Capacity);
 			Assert.AreEqual("test", o.Str);
 			Assert.AreEqual(50,     o.Field1.Value);
 			Assert.AreEqual(77,     o.Field2.Value);
-			Assert.AreEqual(55, o.InnerObject.Field);
+			Assert.AreEqual(55,     o.InnerObject.Field);
 		}
 
 		[LazyInstances]
@@ -159,11 +151,7 @@ namespace TypeBuilder
 		[Test]
 		public void LazyInstancesTest()
 		{
-			BuildContext context = TypeFactory.GetType(typeof(Object3));
-
-			Console.WriteLine(context.Type.Type);
-
-			Object3 o = (Object3)Activator.CreateInstance(context.Type);
+			Object3 o = (Object3)TypeAccessor.GetAccessor(typeof(Object3)).CreateInstance();
 
 			Assert.AreEqual("", o.Str1);
 			Assert.AreEqual("", o.Str2);
@@ -183,11 +171,7 @@ namespace TypeBuilder
 		[Test]
 		public void LazyInstancesFalseTest()
 		{
-			BuildContext context = TypeFactory.GetType(typeof(Object4));
-
-			Console.WriteLine(context.Type.Type);
-
-			Object4 o = (Object4)Activator.CreateInstance(context.Type);
+			Object4 o = (Object4)TypeAccessor.GetAccessor(typeof(Object4)).CreateInstance();
 
 			Assert.AreEqual("", o.Str1);
 			Assert.AreEqual("", o.Str2);
@@ -209,11 +193,7 @@ namespace TypeBuilder
 		[Test]
 		public void LazyInstancesTypeTest()
 		{
-			BuildContext context = TypeFactory.GetType(typeof(Object5));
-
-			Console.WriteLine(context.Type.Type);
-
-			Object5 o = (Object5)Activator.CreateInstance(context.Type);
+			Object5 o = (Object5)TypeAccessor.GetAccessor(typeof(Object5)).CreateInstance();
 
 			Assert.IsNotNull(o.Str);
 			Assert.IsNotNull(o.List);

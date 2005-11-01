@@ -28,7 +28,7 @@ namespace BLToolkit.TypeBuilder
 		private bool _isLazy = true;
 		public  bool  IsLazy
 		{
-			get { return _isLazy; }
+			get { return _isLazy;  }
 			set { _isLazy = value; }
 		}
 

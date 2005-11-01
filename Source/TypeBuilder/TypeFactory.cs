@@ -75,7 +75,7 @@ namespace BLToolkit.TypeBuilder
 			return ab;
 		}
 
-		private static void SaveAssembly (BuildContext context)
+		private static void SaveAssembly(AssemblyBuilderHelper assemblyBuilder, Type type)
 		{
 			if (_globalAssembly != null)
 				return;
@@ -84,17 +84,17 @@ namespace BLToolkit.TypeBuilder
 			{
 				try
 				{
-					context.AssemblyBuilder.Save();
+					assemblyBuilder.Save();
 
 					WriteDebug("The '{0}' type saved in '{1}'.",
-						context.OriginalType.FullName,
-						context.AssemblyBuilder.Path);
+						type.FullName,
+						assemblyBuilder.Path);
 				}
 				catch (Exception ex)
 				{
 					WriteDebug("Can't save the '{0}' assembly for the '{1}' type: {2}.", 
-						context.AssemblyBuilder.Path,
-						context.OriginalType.FullName,
+						assemblyBuilder.Path,
+						type.FullName,
 						ex.Message);
 				}
 			}
@@ -106,37 +106,50 @@ namespace BLToolkit.TypeBuilder
 
 		private static Hashtable _builtTypes = Hashtable.Synchronized(new Hashtable(10));
 
-		public static BuildContext GetType (Type type, params ITypeBuilder[] defaultBuilders)
+		public static Type GetType(Type sourceType, ITypeBuilder typeBuilder)
 		{
-			if (type == null) throw new ArgumentNullException("type");
+			if (sourceType  == null) throw new ArgumentNullException("sourceType");
+			if (typeBuilder == null) throw new ArgumentNullException("typeBuilder");
 
 			try
 			{
-				BuildContext context = (BuildContext)_builtTypes[type];
+				Hashtable builderTable = (Hashtable)_builtTypes[typeBuilder.GetType()];
+				Type      type;
 
-				if (context == null)
+				if (builderTable != null)
 				{
-					lock (_builtTypes.SyncRoot)
-					{
-						context = (BuildContext)_builtTypes[type];
+					type = (Type)builderTable[sourceType];
 
-						if (context == null)
-						{
-							_builtTypes.Add(type, context = new BuildContext(type));
-
-							BuildType(context, defaultBuilders);
-
-							context.InProgress = false;
-
-							return context;
-						}
-					}
+					if (type != null)
+						return type;
 				}
 
-				if (context.InProgress)
-					lock (_builtTypes.SyncRoot) { }
+				lock (_builtTypes.SyncRoot)
+				{
+					builderTable = (Hashtable)_builtTypes[typeBuilder.GetType()];
 
-				return context;
+					if (builderTable != null)
+					{
+						type = (Type)builderTable[sourceType];
+
+						if (type != null)
+							return type;
+					}
+					else
+					{
+						_builtTypes.Add(typeBuilder.GetType(), builderTable = new Hashtable());
+					}
+
+					AssemblyBuilderHelper assemblyBuilder = GetAssemblyBuilder(sourceType);
+
+					type = typeBuilder.Build(sourceType, assemblyBuilder);
+
+					builderTable.Add(sourceType, type);
+
+					SaveAssembly(assemblyBuilder, type);
+
+					return type;
+				}
 			}
 			catch (TypeBuilderException)
 			{
@@ -145,67 +158,9 @@ namespace BLToolkit.TypeBuilder
 			catch (Exception ex)
 			{
 				throw new TypeBuilderException(
-					string.Format("Could not build the '{0}' type: {1}", type.FullName, ex.Message),
+					string.Format("Could not build the '{0}' type: {1}", sourceType.FullName, ex.Message),
 					ex);
 			}
-		}
-
-		private static void BuildType(BuildContext context, ITypeBuilder[] defaultBuilders)
-		{
-			if (defaultBuilders == null)
-				defaultBuilders = new ITypeBuilder[0];
-
-			TypeBuilderList builders = GetBuilderList(context.OriginalType, defaultBuilders);
-
-			context.TypeBuilders    = builders;
-			context.AssemblyBuilder = GetAssemblyBuilder(context.OriginalType);
-
-			if (context.OriginalType.IsAbstract)
-				new AbstractClassBuilder(context).Build();
-
-			SaveAssembly(context);
-		}
-
-		private static TypeBuilderList GetBuilderList(TypeHelper type, ITypeBuilder[] defaultBuilders)
-		{
-			object[]        attrs    = type.GetAttributes(typeof(TypeBuilderAttribute));
-			TypeBuilderList builders = new TypeBuilderList(attrs.Length + defaultBuilders.Length);
-
-			foreach (TypeBuilderAttribute attr in attrs)
-				if (attr.TypeBuilder != null)
-					builders.Add(attr.TypeBuilder);
-
-			foreach (ITypeBuilder tb in defaultBuilders)
-				if (tb != null)
-					builders.Add(tb);
-
-			return builders;
-		}
-
-		internal static void CheckCompatibility(BuildContext context, TypeBuilderList builders)
-		{
-			for (int i = 0; i < builders.Count; i++)
-			{
-				ITypeBuilder cur = builders[i];
-
-				if (cur == null)
-					continue;
-
-				for (int j = 0; j < builders.Count; j++)
-				{
-					ITypeBuilder test = builders[j];
-
-					if (i == j || test == null)
-						continue;
-
-					if (cur.IsCompatible(context, test) == false)
-						builders[j] = null;
-				}
-			}
-
-			for (int i = 0; i < builders.Count; i++)
-				if (builders[i] == null)
-					builders.RemoveAt(i--);
 		}
 
 		#endregion

@@ -161,7 +161,7 @@ namespace BLToolkit.Reflection
 			return attrs;
 		}
 
-		private void GetAttributesInternal(ArrayList list, Type type)
+		private static void GetAttributesInternal(ArrayList list, Type type)
 		{
 			object[] attrs = type.GetCustomAttributes(false);
 
@@ -400,6 +400,8 @@ namespace BLToolkit.Reflection
 
 		#endregion
 
+		#region Static Members
+
 		public static Type GetUnderlyingType(Type type)
 		{
 			if (type.IsByRef)
@@ -431,5 +433,7 @@ namespace BLToolkit.Reflection
 
 			return false;
 		}
+
+		#endregion
 	}
 }
