@@ -3,8 +3,8 @@ using System.Collections;
 using System.Reflection;
 using System.Reflection.Emit;
 
-using BLToolkit.Reflection.Emit;
 using BLToolkit.Reflection;
+using BLToolkit.Reflection.Emit;
 
 namespace BLToolkit.TypeBuilder.Builders
 {
@@ -12,7 +12,7 @@ namespace BLToolkit.TypeBuilder.Builders
 	{
 		#region Interface Overrides
 
-		public override bool IsCompatible(BuildContext context, ITypeBuilder typeBuilder)
+		public override bool IsCompatible(BuildContext context, IAbstractTypeBuilder typeBuilder)
 		{
 			return IsRelative(typeBuilder) == false;
 		}
@@ -24,7 +24,7 @@ namespace BLToolkit.TypeBuilder.Builders
 				return context.CurrentProperty.GetIndexParameters().Length <= 1;
 			}
 
-			if (context.Element == BuildElement.Type && context.IsAfterStep)
+			if (context.BuildElement == BuildElement.Type && context.IsAfterStep)
 			{
 				object isDirty = context.Items["$BLToolkit.InitContext.DirtyParameters"];
 
@@ -126,9 +126,10 @@ namespace BLToolkit.TypeBuilder.Builders
 			for (int i = 0; i < ps.Length; i++)
 				emit.ldarg(i + 1);
 
-			emit
-				.call  (method)
-				.stloc (Context.ReturnValue);
+			emit.call(method);
+
+			if (Context.ReturnValue != null)
+				emit.stloc(Context.ReturnValue);
 		}
 
 		#endregion
@@ -227,7 +228,7 @@ namespace BLToolkit.TypeBuilder.Builders
 				}
 
 				emit
-					.LoadType (Context.OriginalType)
+					.LoadType (Context.Type)
 					.ldstr    (property.Name)
 					.LoadType (property.PropertyType)
 					;
@@ -660,7 +661,7 @@ namespace BLToolkit.TypeBuilder.Builders
 			if (attrs.Length > 0)
 				return ((LazyInstanceAttribute)attrs[0]).IsLazy;
 
-			attrs = Context.OriginalType.GetAttributes(typeof(LazyInstancesAttribute));
+			attrs = Context.Type.GetAttributes(typeof(LazyInstancesAttribute));
 
 			foreach (LazyInstancesAttribute a in attrs)
 				if (a.Type == typeof(object) || type == a.Type || type.IsSubclassOf(a.Type))
@@ -772,6 +773,12 @@ namespace BLToolkit.TypeBuilder.Builders
 				return ((ParameterAttribute)attrs[0]).Parameters;
 
 			attrs = propertyInfo.GetCustomAttributes(typeof(InstanceTypeAttribute), true);
+
+			if (attrs == null || attrs.Length == 0)
+			{
+				attrs = new TypeHelper(
+					propertyInfo.DeclaringType).GetAttributes(typeof(InstanceTypeAttribute));
+			}
 
 			if (attrs != null && attrs.Length > 0)
 				return ((InstanceTypeAttribute)attrs[0]).Parameters;

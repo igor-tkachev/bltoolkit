@@ -1,9 +1,11 @@
 using System;
 
+using BLToolkit.Reflection.Emit;
+
 namespace BLToolkit.TypeBuilder.Builders
 {
 	public interface ITypeBuilder
 	{
-		bool IsCompatible(BuildContext context, ITypeBuilder typeBuilder);
+		Type Build(Type sourceType, AssemblyBuilderHelper assemblyBuilder);
 	}
 }

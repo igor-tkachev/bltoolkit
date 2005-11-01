@@ -34,11 +34,13 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Aspects\NotNullAspect.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Reflection\Emit\MethodBuilderHelper.cs" />
     <Compile Include="Reflection\TypeHelper.cs" />
     <Compile Include="TypeBuilder\Builders\IAbstractTypeBuilder.cs" />
     <Compile Include="TypeBuilder\Builders\DefaultTypeBuilder.cs" />
+    <Compile Include="TypeBuilder\GetSetValueAttributes.cs" />
     <Compile Include="TypeBuilder\InstanceTypeAttributes.cs" />
     <Compile Include="TypeBuilder\LazyInstanceAttributes.cs" />
     <Compile Include="TypeBuilder\ParameterAttributes.cs" />

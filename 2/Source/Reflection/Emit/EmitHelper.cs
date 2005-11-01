@@ -1393,6 +1393,14 @@ namespace BLToolkit.Reflection.Emit
 			return this;
 		}
 
+		public EmitHelper ldarg(ParameterInfo parameterInfo)
+		{
+			bool isStatic = 
+				Method is MethodBuilderHelper && ((MethodBuilderHelper)Method).MethodBuilder.IsStatic;
+
+			return ldarg(parameterInfo.Position + (isStatic? 0: 1));
+		}
+
 		/// <summary>
 		/// Loads an argument onto the stack.
 		/// </summary>
@@ -2328,6 +2336,13 @@ namespace BLToolkit.Reflection.Emit
 		public EmitHelper newobj(ConstructorInfo constructorInfo)
 		{
 			_ilGenerator.Emit(OpCodes.Newobj, constructorInfo); return this;
+		}
+
+		public EmitHelper newobj(Type type, params Type[] parameters)
+		{
+			ConstructorInfo ci = type.GetConstructor(parameters);
+
+			return newobj(ci);
 		}
 
 		/// <summary>

@@ -12,14 +12,7 @@ namespace BLToolkit.TypeBuilder.Builders
 	{
 		public BuildContext(Type type)
 		{
-			_originalType = _type = type;
-		}
-
-		private bool _inProgress = true;
-		public  bool  InProgress
-		{
-			get { return _inProgress;  }
-			set { _inProgress = value; }
+			_type = type;
 		}
 
 		private TypeHelper _type;
@@ -27,13 +20,6 @@ namespace BLToolkit.TypeBuilder.Builders
 		{
 			get { return _type;  }
 			set { _type = value; }
-		}
-
-		private TypeHelper _originalType;
-		public  TypeHelper  OriginalType
-		{
-			get { return _originalType;  }
-			set { _originalType = value; }
 		}
 
 		private AssemblyBuilderHelper _assemblyBuilder;
@@ -99,7 +85,7 @@ namespace BLToolkit.TypeBuilder.Builders
 		#region BuildElement
 
 		private BuildElement _element;
-		public  BuildElement  Element
+		public  BuildElement  BuildElement
 		{
 			get { return _element;  }
 			set { _element = value; }
@@ -107,42 +93,42 @@ namespace BLToolkit.TypeBuilder.Builders
 
 		public bool IsAbstractProperty
 		{
-			get { return Element == BuildElement.AbstractGetter || Element == BuildElement.AbstractSetter; }
+			get { return IsAbstractGetter || IsAbstractSetter; }
 		}
 
 		public bool IsAbstractGetter
 		{
-			get { return Element == BuildElement.AbstractGetter; }
+			get { return BuildElement == BuildElement.AbstractGetter; }
 		}
 
 		public bool IsAbstractSetter
 		{
-			get { return Element == BuildElement.AbstractSetter; }
+			get { return BuildElement == BuildElement.AbstractSetter; }
 		}
 
 		public bool IsAbstractMethod
 		{
-			get { return Element == BuildElement.AbstractMethod; }
+			get { return BuildElement == BuildElement.AbstractMethod; }
 		}
 
 		public bool IsVirtualProperty
 		{
-			get { return Element == BuildElement.VirtualGetter|| Element == BuildElement.VirtualSetter; }
+			get { return IsVirtualGetter|| IsVirtualSetter; }
 		}
 
 		public bool IsVirtualGetter
 		{
-			get { return Element == BuildElement.VirtualGetter; }
+			get { return BuildElement == BuildElement.VirtualGetter; }
 		}
 
 		public bool IsVirtualSetter
 		{
-			get { return Element == BuildElement.VirtualSetter; }
+			get { return BuildElement == BuildElement.VirtualSetter; }
 		}
 
 		public bool IsVirtualMethod
 		{
-			get { return Element == BuildElement.VirtualMethod; }
+			get { return BuildElement == BuildElement.VirtualMethod; }
 		}
 
 		#endregion
@@ -178,8 +164,8 @@ namespace BLToolkit.TypeBuilder.Builders
 
 		#endregion
 
-		private TypeBuilderList _typeBuilders;
-		public  TypeBuilderList  TypeBuilders
+		private AbstractTypeBuilderList _typeBuilders;
+		public  AbstractTypeBuilderList  TypeBuilders
 		{
 			get { return _typeBuilders;  }
 			set { _typeBuilders = value; }

@@ -5,10 +5,8 @@ using BLToolkit.Reflection.Emit;
 
 namespace BLToolkit.TypeBuilder.Builders
 {
-	public class AbstractTypeBuilderBase : TypeBuilderBase, IAbstractTypeBuilder
+	public class AbstractTypeBuilderBase : IAbstractTypeBuilder
 	{
-		public const int NormalPriority = 0;
-
 		public virtual Type[] GetInterfaces()
 		{
 			return null;
@@ -21,6 +19,23 @@ namespace BLToolkit.TypeBuilder.Builders
 			set { _targetElement = value; }
 		}
 
+		private BuildContext _context;
+		public  BuildContext  Context
+		{
+			get { return _context;  }
+			set { _context = value; }
+		}
+
+		public virtual bool IsCompatible(BuildContext context, IAbstractTypeBuilder typeBuilder)
+		{
+			return true;
+		}
+
+		protected bool IsRelative(IAbstractTypeBuilder typeBuilder)
+		{
+			return GetType().IsInstanceOfType(typeBuilder) || typeBuilder.GetType().IsInstanceOfType(this);
+		}
+
 		public virtual bool IsApplied(BuildContext context)
 		{
 			return false;
@@ -28,14 +43,14 @@ namespace BLToolkit.TypeBuilder.Builders
 
 		public virtual int GetPriority(BuildContext context)
 		{
-			return NormalPriority;
+			return TypeBuilderPriority.Normal;
 		}
 
 		public virtual void Build(BuildContext context)
 		{
 			Context = context;
 
-			switch (context.Element)
+			switch (context.BuildElement)
 			{
 				case BuildElement.Type:
 					switch (context.Step)

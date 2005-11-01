@@ -3,55 +3,55 @@ using System;
 namespace BLToolkit.TypeBuilder
 {
 	[AttributeUsage(AttributeTargets.Property)]
-	public class InstanceTypeAttribute : Builders.TypeBuilderAttribute
+	public class InstanceTypeAttribute : Builders.AbstractTypeBuilderAttribute
 	{
-		public InstanceTypeAttribute(Type type)
+		public InstanceTypeAttribute (Type instanceType)
 		{
-			_type = type;
+			_instanceType = instanceType;
 			SetParameters();
 		}
 
-		public InstanceTypeAttribute(Type type, object parameter1)
+		public InstanceTypeAttribute (Type instanceType, object parameter1)
 		{
-			_type = type;
+			_instanceType = instanceType;
 			SetParameters(parameter1);
 		}
 
-		public InstanceTypeAttribute(Type type,
+		public InstanceTypeAttribute (Type instanceType,
 			object parameter1,
 			object parameter2)
 		{
-			_type = type;
+			_instanceType = instanceType;
 			SetParameters(parameter1, parameter2);
 		}
 
-		public InstanceTypeAttribute(Type type,
+		public InstanceTypeAttribute (Type instanceType,
 			object parameter1,
 			object parameter2,
 			object parameter3)
 		{
-			_type = type;
+			_instanceType = instanceType;
 			SetParameters(parameter1, parameter2, parameter3);
 		}
 
-		public InstanceTypeAttribute(Type type,
+		public InstanceTypeAttribute (Type instanceType,
 			object parameter1,
 			object parameter2,
 			object parameter3,
 			object parameter4)
 		{
-			_type = type;
+			_instanceType = instanceType;
 			SetParameters(parameter1, parameter2, parameter3, parameter4);
 		}
-		
-		public InstanceTypeAttribute(Type type,
+
+		public InstanceTypeAttribute (Type instanceType,
 			object parameter1,
 			object parameter2,
 			object parameter3,
 			object parameter4,
 			object parameter5)
 		{
-			_type = type;
+			_instanceType = instanceType;
 			SetParameters(parameter1, parameter2, parameter3, parameter4, parameter5);
 		}
 
@@ -66,15 +66,19 @@ namespace BLToolkit.TypeBuilder
 			get { return _parameters;  }
 		}
 
-		private Type _type;
+		private   Type _instanceType;
+		protected Type  InstanceType
+		{
+			get { return _instanceType; }
+		}
 
-		private         Builders.ITypeBuilder _typeBuilder;
-		public override Builders.ITypeBuilder  TypeBuilder
+		private         Builders.IAbstractTypeBuilder _typeBuilder;
+		public override Builders.IAbstractTypeBuilder  TypeBuilder
 		{
 			get 
 			{
 				if (_typeBuilder == null)
-					_typeBuilder = new Builders.InstanceTypeBuilder(_type);
+					_typeBuilder = new Builders.InstanceTypeBuilder(_instanceType);
 
 				return _typeBuilder;
 			}

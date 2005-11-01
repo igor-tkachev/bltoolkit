@@ -73,11 +73,7 @@ namespace TypeBuilder
 		[Test]
 		public void Test()
 		{
-			BuildContext context = TypeFactory.GetType(typeof(Object1));
-
-			Console.WriteLine(context.Type.Type);
-
-			Object1 o = (Object1)Activator.CreateInstance(context.Type);
+			Object1 o = (Object1)TypeAccessor.GetAccessor(typeof(Object1)).CreateInstance();
 
 			Assert.AreEqual(55, o.IntValue);
 			o.IntValue += 1;

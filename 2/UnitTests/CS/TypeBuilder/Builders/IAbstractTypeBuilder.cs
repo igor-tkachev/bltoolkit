@@ -4,6 +4,7 @@ using System.Reflection;
 
 using NUnit.Framework;
 
+using BLToolkit.Reflection;
 using BLToolkit.Reflection.Emit;
 using BLToolkit.TypeBuilder;
 using BLToolkit.TypeBuilder.Builders;
@@ -58,6 +59,15 @@ namespace TypeBuilder.Builders
 			}
 		}
 
+		public class TestTypeBuilderAttribute : AbstractTypeBuilderAttribute
+		{
+			public override BLToolkit.TypeBuilder.Builders.IAbstractTypeBuilder TypeBuilder
+			{
+				get { return new AbstractTypeBuilder(); }
+			}
+		}
+
+		[TestTypeBuilder]
 		public abstract class Object
 		{
 			protected abstract string this[int i]    { get; set; }
@@ -69,11 +79,7 @@ namespace TypeBuilder.Builders
 		{
 			TypeFactory.SaveTypes = true;
 
-			BuildContext context = TypeFactory.GetType(typeof(Object), new AbstractTypeBuilder());
-
-			Console.WriteLine(context.Type.Type);
-
-			ITest test = (ITest)Activator.CreateInstance(context.Type);
+			ITest test = (ITest)TypeAccessor.GetAccessor(typeof(Object)).CreateInstance();
 
 			bool      pbool;
 			byte      pbyte;

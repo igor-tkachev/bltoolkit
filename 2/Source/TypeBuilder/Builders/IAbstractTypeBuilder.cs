@@ -2,9 +2,10 @@ using System;
 
 namespace BLToolkit.TypeBuilder.Builders
 {
-	public interface IAbstractTypeBuilder : ITypeBuilder
+	public interface IAbstractTypeBuilder
 	{
 		Type[] GetInterfaces();
+		bool   IsCompatible (BuildContext context, IAbstractTypeBuilder typeBuilder);
 
 		bool   IsApplied    (BuildContext context);
 		int    GetPriority  (BuildContext context);

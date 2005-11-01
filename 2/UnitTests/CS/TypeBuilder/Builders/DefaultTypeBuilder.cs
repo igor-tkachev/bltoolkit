@@ -15,10 +15,10 @@ namespace TypeBuilder.Builders
 	{
 		public abstract class Object
 		{
-			public    abstract int         Int       { get; set; }
-			public    abstract double      Double    { get; set; }
-			public    abstract DateTime    DateTime  { get; set; }
-			public    abstract ArrayList   ArrayList { get; set; }
+			public    abstract int       Int       { get; set; }
+			public    abstract double    Double    { get; set; }
+			public    abstract DateTime  DateTime  { get; set; }
+			public    abstract ArrayList ArrayList { get; set; }
 
 			protected abstract string this[int i]    { get; set; }
 			protected abstract int    this[string i] { get; set; }
@@ -32,11 +32,7 @@ namespace TypeBuilder.Builders
 		{
 			TypeFactory.SaveTypes = true;
 
-			BuildContext context = TypeFactory.GetType(typeof(Object));
-
-			Console.WriteLine(context.Type.Type);
-
-			Object o = (Object)Activator.CreateInstance(context.Type);
+			Object o = (Object)TypeAccessor.GetAccessor(typeof(Object)).CreateInstance();
 
 			o.Int    = 100; Assert.AreEqual(100, o.Int);
 			o.Double = 200; Assert.AreEqual(200, o.Double);
@@ -70,6 +66,15 @@ namespace TypeBuilder.Builders
 			}
 		}
 
+		public class TestTypeBuilderAttribute : AbstractTypeBuilderAttribute
+		{
+			public override BLToolkit.TypeBuilder.Builders.IAbstractTypeBuilder TypeBuilder
+			{
+				get { return new AbstractTypeBuilder(); }
+			}
+		}
+
+		[TestTypeBuilder]
 		public abstract class VirtObject
 		{
 			public virtual int Foo(int i, ref int ii, DateTime d, string s)
@@ -84,11 +89,7 @@ namespace TypeBuilder.Builders
 		{
 			TypeFactory.SaveTypes = true;
 
-			BuildContext context = TypeFactory.GetType(typeof(VirtObject), new AbstractTypeBuilder());
-
-			Console.WriteLine(context.Type.Type);
-
-			VirtObject o = (VirtObject)Activator.CreateInstance(context.Type);
+			VirtObject o = (VirtObject)TypeAccessor.GetAccessor(typeof(VirtObject)).CreateInstance();
 
 			int i = 0;
 			int r = o.Foo(10, ref i, DateTime.Now, "");

@@ -2,8 +2,8 @@ using System;
 
 namespace BLToolkit.TypeBuilder.Builders
 {
-	public abstract class TypeBuilderAttribute : Attribute
+	public abstract class AbstractTypeBuilderAttribute : Attribute
 	{
-		public abstract ITypeBuilder TypeBuilder { get; }
+		public abstract IAbstractTypeBuilder TypeBuilder { get; }
 	}
 }

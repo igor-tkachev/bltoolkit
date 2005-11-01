@@ -88,6 +88,11 @@
                     SubType = "Code"
                     BuildAction = "Compile"
                 />
+                <File
+                    RelPath = "Aspects\NotNullAttribute.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
                 <Folder RelPath = "Data\DataProvider\" />
                 <Folder RelPath = "Mapping\" />
                 <File
@@ -156,6 +161,11 @@
                     BuildAction = "Compile"
                 />
                 <File
+                    RelPath = "TypeBuilder\GlobalInstanceTypeAttribute.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
                     RelPath = "TypeBuilder\InstanceTypeAttribute.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
@@ -207,6 +217,11 @@
                 />
                 <File
                     RelPath = "TypeBuilder\Builders\AbstractTypeBuilderBase.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "TypeBuilder\Builders\AbstractTypeBuilderList.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
                 />
@@ -266,17 +281,17 @@
                     BuildAction = "Compile"
                 />
                 <File
+                    RelPath = "TypeBuilder\Builders\NotNullAspectBuilder.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
                     RelPath = "TypeBuilder\Builders\TypeBuilderAttribute.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
                 />
                 <File
-                    RelPath = "TypeBuilder\Builders\TypeBuilderBase.cs"
-                    SubType = "Code"
-                    BuildAction = "Compile"
-                />
-                <File
-                    RelPath = "TypeBuilder\Builders\TypeBuilderList.cs"
+                    RelPath = "TypeBuilder\Builders\TypeBuilderPriority.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
                 />
