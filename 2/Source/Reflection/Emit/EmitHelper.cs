@@ -630,6 +630,11 @@ namespace BLToolkit.Reflection.Emit
 			_ilGenerator.Emit(OpCodes.Call, methodInfo); return this;
 		}
 
+		public EmitHelper call(ConstructorInfo constructorInfo)
+		{
+			_ilGenerator.Emit(OpCodes.Call, constructorInfo); return this;
+		}
+
 		/// <summary>
 		/// Calls ILGenerator.EmitCall(<see cref="OpCodes.Call"/>, methodInfo, optionalParameterTypes) that
 		/// calls the method indicated by the passed method descriptor.
@@ -725,27 +730,9 @@ namespace BLToolkit.Reflection.Emit
 		public EmitHelper callvirtNoGenerics(Type type, string methodName, params Type[] parameterTypes)
 		{
 #if FW2
-			foreach (MethodInfo method in type.GetMethods())
-			{
-				if (method.IsGenericMethodDefinition == false && method.Name == methodName)
-				{
-					ParameterInfo[] pis = method.GetParameters();
+			MethodInfo method = TypeHelper.GetMethodNoGeneric(type, methodName, parameterTypes);
 
-					if (pis.Length == parameterTypes.Length)
-					{
-						bool match = true;
-
-						for (int i = 0; match && i < pis.Length; i++)
-							if (pis[i].ParameterType != parameterTypes[i])
-								match = false;
-
-						if (match)
-							return callvirt(method, parameterTypes.Length == 0? null: parameterTypes);
-					}
-				}
-			}
-
-			throw new BLToolkit.TypeBuilder.TypeBuilderException(string.Format("Method '{0}' not found.", methodName));
+			return callvirt(method, parameterTypes.Length == 0? null: parameterTypes);
 #else
 			return callvirt(type, methodName, parameterTypes);
 #endif

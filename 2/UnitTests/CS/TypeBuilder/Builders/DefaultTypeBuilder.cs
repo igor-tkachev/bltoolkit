@@ -13,6 +13,11 @@ namespace TypeBuilder.Builders
 	[TestFixture]
 	public class DefaultTypeBuilder
 	{
+		public DefaultTypeBuilder()
+		{
+			TypeFactory.SaveTypes = true;
+		}
+
 		public abstract class Object
 		{
 			public    abstract int       Int       { get; set; }
@@ -30,8 +35,6 @@ namespace TypeBuilder.Builders
 		[Test]
 		public void AbstractProperties()
 		{
-			TypeFactory.SaveTypes = true;
-
 			Object o = (Object)TypeAccessor.GetAccessor(typeof(Object)).CreateInstance();
 
 			o.Int    = 100; Assert.AreEqual(100, o.Int);
@@ -87,8 +90,6 @@ namespace TypeBuilder.Builders
 		[Test]
 		public void AbstractMethod()
 		{
-			TypeFactory.SaveTypes = true;
-
 			VirtObject o = (VirtObject)TypeAccessor.GetAccessor(typeof(VirtObject)).CreateInstance();
 
 			int i = 0;
@@ -96,6 +97,84 @@ namespace TypeBuilder.Builders
 
 			Assert.AreEqual(10, i);
 			Assert.AreEqual(25, r);
+		}
+
+		public abstract class DefCtorObject1
+		{
+			protected DefCtorObject1()
+			{
+				Value = 10;
+			}
+
+			public int Value;
+		}
+
+		[Test]
+		public void DefCtorTest1()
+		{
+			DefCtorObject1 o = (DefCtorObject1)TypeAccessor.GetAccessor(typeof(DefCtorObject1)).CreateInstance();
+
+			Assert.AreEqual(10, o.Value);
+		}
+
+		public abstract class DefCtorObject2
+		{
+			protected DefCtorObject2()
+			{
+				Value = 10;
+			}
+
+			[Parameter(20)]
+			public abstract int Value { get; set; }
+
+		}
+
+		[Test]
+		public void DefCtorTest2()
+		{
+			DefCtorObject2 o = (DefCtorObject2)TypeAccessor.GetAccessor(typeof(DefCtorObject2)).CreateInstance();
+
+			Assert.AreEqual(10, o.Value);
+		}
+
+		public abstract class InitCtorObject1
+		{
+			protected InitCtorObject1(InitContext init)
+			{
+				Value = 10;
+			}
+
+			public int Value;
+		}
+
+		[Test]
+		public void InitCtorTest1()
+		{
+			InitCtorObject1 o = (InitCtorObject1)TypeAccessor.GetAccessor(typeof(InitCtorObject1)).CreateInstance();
+
+			Assert.AreEqual(10, o.Value);
+		}
+
+		public abstract class InitCtorObject2
+		{
+			protected InitCtorObject2(InitContext init)
+			{
+				Value = 10;
+			}
+
+			[Parameter(20)]
+			public abstract int Value { get; set; }
+
+			public abstract InitCtorObject1 InitCtor { get; set; }
+
+		}
+
+		[Test]
+		public void InitCtorTest2()
+		{
+			InitCtorObject2 o = (InitCtorObject2)TypeAccessor.GetAccessor(typeof(InitCtorObject2)).CreateInstance();
+
+			Assert.AreEqual(10, o.Value);
 		}
 	}
 }

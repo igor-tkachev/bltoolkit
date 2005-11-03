@@ -16,6 +16,13 @@ namespace BLToolkit.Reflection
 			set { _memberParameters = value; }
 		}
 
+		private object [] _Parameters;
+		public  object []  Parameters
+		{
+			get { return _Parameters;  }
+			set { _Parameters = value; }
+		}
+
 		private bool _isInternal;
 		public  bool  IsInternal
 		{
@@ -30,8 +37,8 @@ namespace BLToolkit.Reflection
 			set { _isLazyInstance = value; }
 		}
 
-		private bool _parent;
-		public  bool  Parent
+		private object _parent;
+		public  object  Parent
 		{
 			get { return _parent;  }
 			set { _parent = value; }

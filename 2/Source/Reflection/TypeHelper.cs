@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Reflection;
+using BLToolkit.TypeBuilder;
 
 namespace BLToolkit.Reflection
 {
@@ -376,6 +377,15 @@ namespace BLToolkit.Reflection
 			return _type.GetConstructor(types);
 		}
 
+		public ConstructorInfo GetConstructor(params Type[] types)
+		{
+			return _type.GetConstructor(
+				BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic,
+				null,
+				types,
+				null);
+		}
+
 		/// <summary>
 		/// Searches for a public default constructor.
 		/// </summary>
@@ -396,6 +406,16 @@ namespace BLToolkit.Reflection
 				null,
 				Type.EmptyTypes,
 				null);
+		}
+
+		public ConstructorInfo[] GetPublicConstructors()
+		{
+			return _type.GetConstructors();
+		}
+
+		public ConstructorInfo[] GetConstructors()
+		{
+			return _type.GetConstructors(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
 		}
 
 		#endregion
@@ -432,6 +452,36 @@ namespace BLToolkit.Reflection
 			}
 
 			return false;
+		}
+
+		public static MethodInfo GetMethodNoGeneric(Type type, string methodName, params Type[] parameterTypes)
+		{
+#if FW2
+
+			foreach (MethodInfo method in type.GetMethods())
+			{
+				if (method.IsGenericMethodDefinition == false && method.Name == methodName)
+				{
+					ParameterInfo[] pis = method.GetParameters();
+
+					if (pis.Length == parameterTypes.Length)
+					{
+						bool match = true;
+
+						for (int i = 0; match && i < pis.Length; i++)
+							if (pis[i].ParameterType != parameterTypes[i])
+								match = false;
+
+						if (match)
+							return method;
+					}
+				}
+			}
+
+			throw new TypeBuilderException(string.Format("Method '{0}' not found.", methodName));
+#else
+			return type.GetMethod(methodName, parameterTypes);
+#endif
 		}
 
 		#endregion

@@ -6,11 +6,11 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <StartAction>Program</StartAction>
     <StartProgram>C:\Program Files\NUnit\bin\nunit-gui.exe</StartProgram>
-    <StartArguments>..\..\..\BLToolkit.2.nunit /config=Debug /run /framework=v2.0.50215</StartArguments>
+    <StartArguments>..\..\..\BLToolkit.2.nunit /config=Debug /run /framework=v2.0.50727</StartArguments>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <StartAction>Program</StartAction>
     <StartProgram>C:\Program Files\NUnit\bin\nunit-gui.exe</StartProgram>
-    <StartArguments>..\..\..\BLToolkit.2.nunit /config=Release /run /framework=v2.0.50215</StartArguments>
+    <StartArguments>..\..\..\BLToolkit.2.nunit /config=Release /run /framework=v2.0.50727</StartArguments>
   </PropertyGroup>
 </Project>

@@ -2,7 +2,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>8.0.50215</ProductVersion>
+    <ProductVersion>8.0.50727</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{2BB4AD77-190F-4D7E-A83E-7B254A0A1FCA}</ProjectGuid>
     <OutputType>Library</OutputType>
@@ -40,11 +40,11 @@
     <Compile Include="Reflection\TypeHelper.cs" />
     <Compile Include="TypeBuilder\Builders\IAbstractTypeBuilder.cs" />
     <Compile Include="TypeBuilder\Builders\DefaultTypeBuilder.cs" />
+    <Compile Include="TypeBuilder\Builders\TypeAccessorBuilder.cs" />
     <Compile Include="TypeBuilder\GetSetValueAttributes.cs" />
     <Compile Include="TypeBuilder\InstanceTypeAttributes.cs" />
     <Compile Include="TypeBuilder\LazyInstanceAttributes.cs" />
     <Compile Include="TypeBuilder\ParameterAttributes.cs" />
-    <Compile Include="TypeBuilder\TypeFactory.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Source\BLToolkit.2.csproj">

@@ -14,6 +14,11 @@ namespace BLToolkit.TypeBuilder.Builders
 {
 	class AbstractClassBuilder : ITypeBuilder
 	{
+		public string AssemblyNameSuffix
+		{
+			get { return "TypeBuilder"; }
+		}
+
 		public Type Build(Type sourceType, AssemblyBuilderHelper assemblyBuilder)
 		{
 			_context  = new BuildContext(sourceType);
@@ -75,7 +80,8 @@ namespace BLToolkit.TypeBuilder.Builders
 
 			// Finalize constructors.
 			//
-			FinalizeDefaultConstructors();
+			if (_context.TypeBuilder.IsDefaultConstructorDefined)
+				_context.TypeBuilder.DefaultConstructor.Emitter.ret();
 
 			if (_context.TypeBuilder.IsInitConstructorDefined)
 				_context.TypeBuilder.InitConstructor.Emitter.ret();
@@ -86,16 +92,6 @@ namespace BLToolkit.TypeBuilder.Builders
 			// Create the type.
 			//
 			return _context.TypeBuilder.Create();
-		}
-
-		private void FinalizeDefaultConstructors()
-		{
-			ConstructorInfo ci = _context.Type.GetDefaultConstructor();
-
-			if (ci == null || _context.TypeBuilder.IsDefaultConstructorDefined)
-			{
-				_context.TypeBuilder.DefaultConstructor.Emitter.ret();
-			}
 		}
 
 		private void CheckCompatibility(BuildContext context, AbstractTypeBuilderList builders)
@@ -169,7 +165,7 @@ namespace BLToolkit.TypeBuilder.Builders
 		}
 
 #if FW2
-		class BuilderComparer : IComparer<ITypeBuilder>
+		class BuilderComparer : IComparer<IAbstractTypeBuilder>
 		{
 			public BuilderComparer(BuildContext context)
 			{
@@ -178,12 +174,9 @@ namespace BLToolkit.TypeBuilder.Builders
 
 			BuildContext _context;
 
-			public int Compare(ITypeBuilder x, ITypeBuilder y)
+			public int Compare(IAbstractTypeBuilder x, IAbstractTypeBuilder y)
 			{
-				IAbstractTypeBuilder bx = (IAbstractTypeBuilder)x;
-				IAbstractTypeBuilder by = (IAbstractTypeBuilder)y;
-
-				return bx.GetPriority(_context) - by.GetPriority(_context);
+				return x.GetPriority(_context) - y.GetPriority(_context);
 			}
 		}
 #else
