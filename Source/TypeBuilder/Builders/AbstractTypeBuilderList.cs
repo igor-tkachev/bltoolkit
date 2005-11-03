@@ -9,14 +9,14 @@ using System.Collections;
 namespace BLToolkit.TypeBuilder.Builders
 {
 #if FW2
-	public class TypeBuilderList : List<ITypeBuilder>
+	public class AbstractTypeBuilderList : List<IAbstractTypeBuilder>
 	{
-		public TypeBuilderList()
+		public AbstractTypeBuilderList()
 			: base()
 		{
 		}
 
-		public TypeBuilderList(int capacity)
+        public AbstractTypeBuilderList(int capacity)
 			: base(capacity)
 		{
 		}

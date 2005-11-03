@@ -24,7 +24,7 @@ namespace Aspects
 			}
 		}
 
-		//[Test]
+		[Test]
 		[ExpectedException(typeof(ArgumentNullException), "Value cannot be null.\r\nParameter name: str2")]
 		public void Test()
 		{

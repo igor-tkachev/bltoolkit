@@ -24,14 +24,7 @@ namespace BLToolkit.TypeBuilder.Builders
 				return context.CurrentProperty.GetIndexParameters().Length <= 1;
 			}
 
-			if (context.BuildElement == BuildElement.Type && context.IsAfterStep)
-			{
-				object isDirty = context.Items["$BLToolkit.InitContext.DirtyParameters"];
-
-				return isDirty != null && (bool)isDirty;
-			}
-
-			return false;
+			return context.BuildElement == BuildElement.Type && context.IsAfterStep;
 		}
 
 		#endregion
@@ -496,6 +489,19 @@ namespace BLToolkit.TypeBuilder.Builders
 		{
 			MethodInfo memberParams = InitContextType.GetProperty("MemberParameters").GetSetMethod();
 
+			LocalBuilder parentField = (LocalBuilder)Context.Items["$BLToolkit.InitContext.Parent"];
+
+			if (parentField == null)
+			{
+				Context.Items["$BLToolkit.InitContext.Parent"] = parentField = emit.DeclareLocal(typeof(object));
+
+				emit
+					.ldarg_1
+					.callvirt (InitContextType.GetProperty("Parent").GetGetMethod())
+					.stloc    (parentField)
+					;
+			}
+
 			emit
 				.ldarg_1
 				.ldarg_0
@@ -545,20 +551,6 @@ namespace BLToolkit.TypeBuilder.Builders
 			}
 		}
 
-		protected override void AfterBuildType()
-		{
-			object isDirty = Context.Items["$BLToolkit.InitContext.DirtyParameters"];
-
-			if (isDirty != null && (bool)isDirty)
-			{
-				Context.TypeBuilder.InitConstructor.Emitter
-					.ldarg_1
-					.ldnull
-					.callvirt (InitContextType.GetProperty("MemberParameters").GetSetMethod())
-					;
-			}
-		}
-
 		#endregion
 
 		#region Build Default Instance
@@ -584,29 +576,8 @@ namespace BLToolkit.TypeBuilder.Builders
 		private void CreateInitContextDefaultInstance(
 			string initContextName, FieldBuilder field, TypeHelper fieldType, EmitHelper emit, object[] parameters)
 		{
-			LocalBuilder initField = (LocalBuilder)Context.Items[initContextName];
-
-			if (initField == null)
-			{
-				Context.Items[initContextName] = initField = emit.DeclareLocal(InitContextType);
-
-				emit
-					.newobj   (InitContextType.GetPublicDefaultConstructor())
-					.stloc    (initField)
-
-					.ldloc    (initField)
-					.ldarg_0
-					.callvirt (InitContextType.GetProperty("Parent").GetSetMethod())
-
-					.ldloc    (initField)
-					.ldc_i4_1
-					.callvirt (InitContextType.GetProperty("IsInternal").GetSetMethod())
-					;
-
-				Context.Items.Add("$BLToolkit.Default.DirtyParameters", false);
-			}
-
-			MethodInfo memberParams = InitContextType.GetProperty("MemberParameters").GetSetMethod();
+			LocalBuilder initField    = GetInitContextBuilder(initContextName, emit);
+			MethodInfo   memberParams = InitContextType.GetProperty("MemberParameters").GetSetMethod();
 
 			if (parameters != null)
 			{
@@ -647,6 +618,34 @@ namespace BLToolkit.TypeBuilder.Builders
 					.stfld   (field)
 					;
 			}
+		}
+
+		private LocalBuilder GetInitContextBuilder(
+			string initContextName, EmitHelper emit)
+		{
+			LocalBuilder initField = (LocalBuilder)Context.Items[initContextName];
+
+			if (initField == null)
+			{
+				Context.Items[initContextName] = initField = emit.DeclareLocal(InitContextType);
+
+				emit
+					.newobj   (InitContextType.GetPublicDefaultConstructor())
+					.stloc    (initField)
+
+					.ldloc    (initField)
+					.ldarg_0
+					.callvirt (InitContextType.GetProperty("Parent").GetSetMethod())
+
+					.ldloc    (initField)
+					.ldc_i4_1
+					.callvirt (InitContextType.GetProperty("IsInternal").GetSetMethod())
+					;
+
+				Context.Items.Add("$BLToolkit.Default.DirtyParameters", false);
+			}
+
+			return initField;
 		}
 
 		#endregion
@@ -756,6 +755,108 @@ namespace BLToolkit.TypeBuilder.Builders
 					.newobj  (fieldType.GetPublicConstructor(typeof(InitContext)))
 					.stfld   (field)
 					;
+			}
+		}
+
+		#endregion
+
+		#region Finalize Type
+
+		protected override void AfterBuildType()
+		{
+			object isDirty = Context.Items["$BLToolkit.InitContext.DirtyParameters"];
+
+			if (isDirty != null && (bool)isDirty)
+			{
+				Context.TypeBuilder.InitConstructor.Emitter
+					.ldarg_1
+					.ldnull
+					.callvirt (InitContextType.GetProperty("MemberParameters").GetSetMethod())
+					;
+			}
+
+			LocalBuilder parentField = (LocalBuilder)Context.Items["$BLToolkit.InitContext.Parent"];
+
+			if (parentField != null)
+			{
+				Context.TypeBuilder.InitConstructor.Emitter
+					.ldarg_1
+					.ldloc    (parentField)
+					.callvirt (InitContextType.GetProperty("Parent").GetSetMethod())
+					;
+			}
+
+			FinalizeDefaultConstructors();
+			FinalizeInitContextConstructors();
+		}
+
+		private void FinalizeDefaultConstructors()
+		{
+			ConstructorInfo ci = Context.Type.GetDefaultConstructor();
+
+			if (ci == null || Context.TypeBuilder.IsDefaultConstructorDefined)
+			{
+				EmitHelper emit = Context.TypeBuilder.DefaultConstructor.Emitter;
+
+				if (ci != null)
+				{
+					emit.ldarg_0.call(ci);
+				}
+				else
+				{
+					ci = Context.Type.GetConstructor(typeof(InitContext));
+
+					if (ci != null)
+					{
+						LocalBuilder initField = GetInitContextBuilder("$BLToolkit.DefaultInitContext.", emit);
+
+						emit
+							.ldarg_0
+							.ldloc   (initField)
+							.call    (ci);
+					}
+					else
+					{
+						if (Context.Type.GetConstructors().Length > 0)
+							throw new TypeBuilderException(
+								string.Format("Could not build the '{0}' type: default constructor not found.",
+								Context.Type.FullName));
+					}
+				}
+			}
+		}
+
+		private void FinalizeInitContextConstructors()
+		{
+			ConstructorInfo ci = Context.Type.GetConstructor(typeof(InitContext));
+
+			if (ci != null || Context.TypeBuilder.IsInitConstructorDefined)
+			{
+				EmitHelper emit = Context.TypeBuilder.InitConstructor.Emitter;
+
+				if (ci != null)
+				{
+					emit
+						.ldarg_0
+						.ldarg_1
+						.call    (ci);
+				}
+				else
+				{
+					ci = Context.Type.GetDefaultConstructor();
+
+					if (ci != null)
+					{
+						emit.ldarg_0.call(ci);
+					}
+					else
+					{
+						if (Context.Type.GetConstructors().Length > 0)
+							throw new TypeBuilderException(
+								string.Format("Could not build the '{0}' type: default constructor not found.",
+								Context.Type.FullName));
+					}
+				}
 			}
 		}
 

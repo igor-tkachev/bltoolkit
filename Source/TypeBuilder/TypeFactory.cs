@@ -61,7 +61,7 @@ namespace BLToolkit.TypeBuilder
 			}
 		}
 
-		private static AssemblyBuilderHelper GetAssemblyBuilder(Type type)
+		private static AssemblyBuilderHelper GetAssemblyBuilder(Type type, string suffix)
 		{
 			AssemblyBuilderHelper ab = GlobalAssemblyBuilder;
 
@@ -69,7 +69,7 @@ namespace BLToolkit.TypeBuilder
 			{
 				string assemblyDir = Path.GetDirectoryName(type.Module.FullyQualifiedName);
 
-				ab = new AssemblyBuilderHelper(assemblyDir + "\\" + type.FullName + ".TypeBuilder.dll");
+				ab = new AssemblyBuilderHelper(assemblyDir + "\\" + type.FullName + "." + suffix + ".dll");
 			}
 
 			return ab;
@@ -104,7 +104,7 @@ namespace BLToolkit.TypeBuilder
 
 		#region GetType
 
-		private static Hashtable _builtTypes = Hashtable.Synchronized(new Hashtable(10));
+		private static Hashtable _builtTypes = new Hashtable(10);
 
 		public static Type GetType(Type sourceType, ITypeBuilder typeBuilder)
 		{
@@ -140,7 +140,8 @@ namespace BLToolkit.TypeBuilder
 						_builtTypes.Add(typeBuilder.GetType(), builderTable = new Hashtable());
 					}
 
-					AssemblyBuilderHelper assemblyBuilder = GetAssemblyBuilder(sourceType);
+					AssemblyBuilderHelper assemblyBuilder =
+						GetAssemblyBuilder(sourceType, typeBuilder.AssemblyNameSuffix);
 
 					type = typeBuilder.Build(sourceType, assemblyBuilder);
 

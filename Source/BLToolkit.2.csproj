@@ -2,7 +2,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>8.0.50215</ProductVersion>
+    <ProductVersion>8.0.50727</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{0C325F5D-E50E-4340-8724-D29896CCC583}</ProjectGuid>
     <OutputType>Library</OutputType>
@@ -46,6 +46,7 @@
     <Compile Include="TypeBuilder\Builders\AbstractClassBuilder.cs" />
     <Compile Include="TypeBuilder\Builders\AbstractTypeBuilderBase.cs" />
     <Compile Include="TypeBuilder\BLToolkitGeneratedAttribute.cs" />
+    <Compile Include="TypeBuilder\Builders\AbstractTypeBuilderList.cs" />
     <Compile Include="TypeBuilder\Builders\BuildContext.cs" />
     <Compile Include="TypeBuilder\Builders\BuildElement.cs" />
     <Compile Include="TypeBuilder\Builders\BuildStep.cs" />
@@ -54,6 +55,7 @@
     <Compile Include="TypeBuilder\Builders\FakeMethodInfo.cs" />
     <Compile Include="TypeBuilder\Builders\FakeParameterInfo.cs" />
     <Compile Include="TypeBuilder\Builders\FakeSetter.cs" />
+    <Compile Include="TypeBuilder\Builders\TypeAccessorBuilder.cs" />
     <Compile Include="TypeBuilder\GlobalInstanceTypeAttribute.cs" />
     <Compile Include="TypeBuilder\Builders\IAbstractTypeBuilder.cs" />
     <Compile Include="Reflection\InitContext.cs" />
@@ -73,8 +75,6 @@
     <Compile Include="TypeBuilder\Builders\ITypeBuilder.cs" />
     <Compile Include="Reflection\TypeAccessor.cs" />
     <Compile Include="TypeBuilder\Builders\TypeBuilderAttribute.cs" />
-    <Compile Include="TypeBuilder\Builders\TypeBuilderBase.cs" />
-    <Compile Include="TypeBuilder\Builders\TypeBuilderList.cs" />
     <Compile Include="TypeBuilder\TypeFactory.cs" />
   </ItemGroup>
   <ItemGroup>

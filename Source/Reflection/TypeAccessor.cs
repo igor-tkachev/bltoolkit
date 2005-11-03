@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 
 using BLToolkit.TypeBuilder;
 using BLToolkit.TypeBuilder.Builders;
@@ -7,9 +8,8 @@ namespace BLToolkit.Reflection
 {
 	public abstract class TypeAccessor
 	{
-		protected TypeAccessor(Type type)
+		protected TypeAccessor()
 		{
-			_type = type;
 		}
 
 		public abstract object CreateInstance();
@@ -58,31 +58,39 @@ namespace BLToolkit.Reflection
 			set { _objectFactory = value; }
 		}
 
-		private Type _type;
-		public  Type  Type
-		{
-			get { return _type; }
-		}
+		public abstract Type Type         { get; }
+		public abstract Type OriginalType { get; }
 
-		public static TypeAccessor GetAccessor(Type type)
-		{
-			if (type.IsAbstract)
-				type = TypeFactory.GetType(type, new AbstractClassBuilder());
+		private static Hashtable _accessors = new Hashtable(10);
 
-			return new TempAccessor(type);
-		}
-
-		class TempAccessor : TypeAccessor
+		public static TypeAccessor GetAccessor(Type originalType)
 		{
-			public TempAccessor(Type type)
-				: base(type)
+			TypeAccessor accessor = (TypeAccessor)_accessors[originalType];
+
+			if (accessor == null)
 			{
+				lock (_accessors.SyncRoot)
+				{
+					accessor = (TypeAccessor)_accessors[originalType];
+
+					if (accessor == null)
+					{
+						Type type = originalType.IsAbstract?
+							TypeFactory.GetType(originalType, new AbstractClassBuilder()):
+							originalType;
+
+						Type accessorType = 
+							TypeFactory.GetType(originalType, new TypeAccessorBuilder(type, originalType));
+
+						_accessors[originalType] = accessor = (TypeAccessor)Activator.CreateInstance(accessorType);
+
+						if (type.IsAbstract)
+							_accessors[type] = accessor;
+					}
+				}
 			}
 
-			public override object CreateInstance()
-			{
-				return Activator.CreateInstance(Type);
-			}
+			return accessor;
 		}
 	}
 }
