@@ -284,5 +284,102 @@ namespace BLToolkit.Reflection.Emit
 		{
 			return _typeBuilder.DefineField(fieldName, type, attributes);
 		}
+
+		#region DefineConstructor Overrides
+
+		public ConstructorBuilderHelper DefinePublicConstructor(params Type[] parameterTypes)
+		{
+			return new ConstructorBuilderHelper(
+				this,
+				_typeBuilder.DefineConstructor(
+					MethodAttributes.Public, CallingConventions.Standard, parameterTypes));
+		}
+
+		public ConstructorBuilderHelper DefineConstructor(
+			MethodAttributes   attributes,
+			CallingConventions callingConventions,
+			params Type[]      parameterTypes)
+		{
+			return new ConstructorBuilderHelper(
+				this,
+				_typeBuilder.DefineConstructor(attributes, callingConventions, parameterTypes));
+		}
+
+		#endregion
+
+		#region DefineNestedType Overrides
+
+		/// <summary>
+		/// Defines a nested type given its name..
+		/// </summary>
+		/// <param name="name">The short name of the type.</param>
+		/// <returns>Returns the created <b>TypeBuilderHelper</b>.</returns>
+		/// <seealso cref="System.Reflection.Emit.typeBuilder.DefineNestedType(string)">
+		/// TypeBuilder.DefineNestedType Method</seealso>
+		public TypeBuilderHelper DefineNestedType(string name)
+		{
+			return new TypeBuilderHelper(_assembly, _typeBuilder.DefineNestedType(name));
+		}
+
+		/// <summary>
+		/// Defines a public nested type given its name and the type that it extends.
+		/// </summary>
+		/// <param name="name">The short name of the type.</param>
+		/// <param name="parent">The type that the nested type extends.</param>
+		/// <returns>Returns the created <b>TypeBuilderHelper</b>.</returns>
+		/// <seealso cref="System.Reflection.Emit.TypeBuilder.DefineNestedType(string,TypeAttributes,Type)">
+		/// TypeBuilder.DefineNestedType Method</seealso>
+		public TypeBuilderHelper DefineNestedType(string name, Type parent)
+		{
+			return new TypeBuilderHelper(
+				_assembly, _typeBuilder.DefineNestedType(name, TypeAttributes.NestedPublic, parent));
+		}
+
+		/// <summary>
+		/// Defines a nested type given its name, attributes, and the type that it extends.
+		/// </summary>
+		/// <param name="name">The short name of the type.</param>
+		/// <param name="attrs">The attributes of the type.</param>
+		/// <param name="parent">The type that the nested type extends.</param>
+		/// <returns>Returns the created <b>TypeBuilderHelper</b>.</returns>
+		/// <seealso cref="System.Reflection.Emit.TypeBuilder.DefineNestedType(string,TypeAttributes,Type)">
+		/// TypeBuilder.DefineNestedType Method</seealso>
+		public TypeBuilderHelper DefineNestedType(string name, TypeAttributes attrs, Type parent)
+		{
+			return new TypeBuilderHelper(
+				_assembly, _typeBuilder.DefineNestedType(name, attrs, parent));
+		}
+
+		/// <summary>
+		/// Defines a public nested type given its name, the type that it extends, and the interfaces that it implements.
+		/// </summary>
+		/// <param name="name">The short name of the type.</param>
+		/// <param name="parent">The type that the nested type extends.</param>
+		/// <param name="interfaces">The interfaces that the nested type implements.</param>
+		/// <returns>Returns the created <b>TypeBuilderHelper</b>.</returns>
+		/// <seealso cref="System.Reflection.Emit.TypeBuilder.DefineNestedType(string,TypeAttributes,Type,Type[])">
+		/// TypeBuilder.DefineNestedType Method</seealso>
+		public TypeBuilderHelper DefineNestedType(string name, Type parent, params Type[] interfaces)
+		{
+			return new TypeBuilderHelper(
+				_assembly, _typeBuilder.DefineNestedType(name, TypeAttributes.NestedPublic, parent, interfaces));
+		}
+
+		/// <summary>
+		/// Defines a nested type given its name, attributes, the type that it extends, and the interfaces that it implements.
+		/// </summary>
+		/// <param name="name">The short name of the type.</param>
+		/// <param name="attrs">The attributes of the type.</param>
+		/// <param name="parent">The type that the nested type extends.</param>
+		/// <param name="interfaces">The interfaces that the nested type implements.</param>
+		/// <returns>Returns the created <b>TypeBuilderHelper</b>.</returns>
+		/// <seealso cref="System.Reflection.Emit.ModuleBuilder.DefineType(string,TypeAttributes,Type,Type[])">ModuleBuilder.DefineType Method</seealso>
+		public TypeBuilderHelper DefineNestedType(string name, TypeAttributes attrs, Type parent, params Type[] interfaces)
+		{
+			return new TypeBuilderHelper(
+				_assembly, _typeBuilder.DefineNestedType(name, attrs, parent, interfaces));
+		}
+
+		#endregion
 	}
 }

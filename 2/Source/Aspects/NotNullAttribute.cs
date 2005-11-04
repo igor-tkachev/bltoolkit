@@ -10,9 +10,21 @@ namespace BLToolkit.Aspects
 		{
 		}
 
+		public NotNullAttribute(string message)
+		{
+			_message = message;
+		}
+
+		private string _message;
+		public  string  Message
+		{
+			get { return _message;  }
+			set { _message = value; }
+		}
+
 		public override IAbstractTypeBuilder TypeBuilder
 		{
-			get { return new NotNullAspectBuilder(); }
+			get { return new NotNullAspectBuilder(_message); }
 		}
 	}
 }

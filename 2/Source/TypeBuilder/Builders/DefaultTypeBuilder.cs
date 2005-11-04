@@ -495,7 +495,21 @@ namespace BLToolkit.TypeBuilder.Builders
 			{
 				Context.Items["$BLToolkit.InitContext.Parent"] = parentField = emit.DeclareLocal(typeof(object));
 
+				Label label = emit.DefineLabel();
+
 				emit
+					.ldarg_1
+					.brtrue_s(label)
+
+					.newobj(InitContextType.GetPublicDefaultConstructor())
+					.starg(1)
+
+					.ldarg_1
+					.ldc_i4_1
+					.callvirt(InitContextType.GetProperty("IsInternal").GetSetMethod())
+
+					.MarkLabel(label)
+
 					.ldarg_1
 					.callvirt (InitContextType.GetProperty("Parent").GetGetMethod())
 					.stloc    (parentField)
