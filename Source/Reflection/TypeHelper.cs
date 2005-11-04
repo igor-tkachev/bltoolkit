@@ -290,6 +290,19 @@ namespace BLToolkit.Reflection
 
 		#endregion
 
+		#region GetFields
+
+		/// <summary>
+		/// Returns all the public fields of the current Type.
+		/// </summary>
+		/// <returns>An array of FieldInfo objects representing all the public fields defined for the current Type.</returns>
+		public FieldInfo[] GetFields()
+		{
+			return _type.GetFields();
+		}
+
+		#endregion
+
 		#region GetProperties
 
 		/// <summary>
@@ -377,9 +390,14 @@ namespace BLToolkit.Reflection
 			return _type.GetConstructor(types);
 		}
 
-		public ConstructorInfo GetConstructor(params Type[] types)
+		public ConstructorInfo GetConstructor(Type type1)
 		{
-			return _type.GetConstructor(
+			return GetConstructor(_type, type1);
+		}
+
+		public static ConstructorInfo GetConstructor(Type type, params Type[] types)
+		{
+			return type.GetConstructor(
 				BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic,
 				null,
 				types,

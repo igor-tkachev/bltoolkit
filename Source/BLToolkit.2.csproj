@@ -42,6 +42,7 @@
     <Compile Include="Reflection\Emit\MethodBuilderHelper.cs" />
     <Compile Include="Reflection\Emit\TypeBuilderHelper.cs" />
     <Compile Include="Reflection\IObjectFactory.cs" />
+    <Compile Include="Reflection\MemberAccessor.cs" />
     <Compile Include="Reflection\TypeHelper.cs" />
     <Compile Include="TypeBuilder\Builders\AbstractClassBuilder.cs" />
     <Compile Include="TypeBuilder\Builders\AbstractTypeBuilderBase.cs" />

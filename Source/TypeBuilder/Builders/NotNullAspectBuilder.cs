@@ -8,9 +8,12 @@ namespace BLToolkit.TypeBuilder.Builders
 {
 	class NotNullAspectBuilder : AbstractTypeBuilderBase
 	{
-		public NotNullAspectBuilder()
+		public NotNullAspectBuilder(string message)
 		{
+			_message = message;
 		}
+
+		private string _message;
 
 		public override int GetPriority(BuildContext context)
 		{
@@ -28,17 +31,39 @@ namespace BLToolkit.TypeBuilder.Builders
 
 			if (pi.ParameterType.IsValueType == false)
 			{
-				EmitHelper emit  = context.MethodBuilder.Emitter;
-				Label      label = emit.DefineLabel();
-				LocalBuilder lb = emit.DeclareLocal(typeof(object));
+				EmitHelper   emit  = context.MethodBuilder.Emitter;
+				Label        label = emit.DefineLabel();
+				LocalBuilder lb    = emit.DeclareLocal(typeof(object));
+
+				string message =
+					_message == null || _message.Length == 0 ?
+						string.Empty :
+						string.Format(_message, pi.Name);
 
 				emit
-					.ldarg     (pi)
-					.brtrue_s  (label)
-					.ldstr     (pi.Name)
-					.newobj    (typeof(ArgumentNullException), typeof(string))
+					.ldarg(pi)
+					.brtrue_s(label)
+					;
+
+				if (message.Length == 0)
+				{
+					emit
+						.ldstr(pi.Name)
+						.newobj(typeof(ArgumentNullException), typeof(string))
+						;
+				}
+				else
+				{
+					emit
+						.ldnull
+						.ldstr(message)
+						.newobj(typeof(ArgumentNullException), typeof(string), typeof(string))
+						;
+				}
+
+				emit
 					.@throw
-					.MarkLabel (label)
+					.MarkLabel(label)
 					;
 			}
 		}
