@@ -655,6 +655,13 @@ namespace BLToolkit.Reflection.Emit
 			return call(mi);
 		}
 
+		public EmitHelper call(Type type, string methodName, BindingFlags flags, params Type[] parameterTypes)
+		{
+			MethodInfo mi = type.GetMethod(methodName, flags, null, parameterTypes, null);
+
+			return call(mi);
+		}
+
 		/// <summary>
 		/// Calls ILGenerator.EmitCalli(<see cref="OpCodes.Calli"/>, CallingConvention, Type, Type[]) that
 		/// calls the method indicated on the evaluation stack (as a pointer to an entry point) 

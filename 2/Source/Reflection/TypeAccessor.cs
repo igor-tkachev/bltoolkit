@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Reflection;
 
 using BLToolkit.TypeBuilder;
 using BLToolkit.TypeBuilder.Builders;
@@ -11,6 +12,28 @@ namespace BLToolkit.Reflection
 		protected TypeAccessor()
 		{
 		}
+
+		protected MemberInfo GetMember(int memberType, string memberName)
+		{
+			MemberInfo mi;
+
+			switch (memberType)
+			{
+				case 1: mi = Type.GetField   (memberName); break;
+				case 2: mi = Type.GetProperty(memberName); break;
+				default:
+					throw new InvalidOperationException();
+			}
+
+			return mi;
+		}
+
+		protected void AddMember(MemberAccessor member)
+		{
+			_members.Add(member.MemberInfo.Name, member);
+		}
+
+		#region CreateInstance
 
 		public abstract object CreateInstance();
 
@@ -51,6 +74,8 @@ namespace BLToolkit.Reflection
 		}
 #endif
 
+		#endregion
+
 		private IObjectFactory _objectFactory = null;
 		public  IObjectFactory  ObjectFactory
 		{
@@ -60,6 +85,15 @@ namespace BLToolkit.Reflection
 
 		public abstract Type Type         { get; }
 		public abstract Type OriginalType { get; }
+
+		private Hashtable _members = new Hashtable();
+
+		protected MemberInfo GetFieldInfo(string name)
+		{
+			return Type.GetField(name);
+		}
+
+		#region Static Members
 
 		private static Hashtable _accessors = new Hashtable(10);
 
@@ -92,5 +126,7 @@ namespace BLToolkit.Reflection
 
 			return accessor;
 		}
+
+		#endregion
 	}
 }

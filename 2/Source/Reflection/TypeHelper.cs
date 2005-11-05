@@ -288,6 +288,11 @@ namespace BLToolkit.Reflection
 			return _type.GetMethods(bindingAttr);
 		}
 
+		public MethodInfo GetMethod(string methodName)
+		{
+			return _type.GetMethod(methodName);
+		}
+
 		#endregion
 
 		#region GetFields
