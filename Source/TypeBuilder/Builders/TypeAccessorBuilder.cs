@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Reflection;
+using System.Reflection.Emit;
 
 using BLToolkit.Reflection;
 using BLToolkit.Reflection.Emit;
@@ -34,7 +35,7 @@ namespace BLToolkit.TypeBuilder.Builders
 
 			_typeBuilder.DefaultConstructor.Emitter
 				.ldarg_0
-				.call(_accessor.GetDefaultConstructor())
+				.call     (_accessor.GetDefaultConstructor())
 				;
 
 			BuildCreateInstanceMethods();
@@ -145,12 +146,23 @@ namespace BLToolkit.TypeBuilder.Builders
 			TypeBuilderHelper nestedType = _typeBuilder.DefineNestedType(
 				"Accessor$" + mi.Name, TypeAttributes.NestedPrivate, typeof(MemberAccessor));
 
-			BuildNestedTypeConstructor(nestedType, mi);
+			ConstructorBuilderHelper ctorBuilder = BuildNestedTypeConstructor(nestedType, mi);
+
+			_typeBuilder.DefaultConstructor.Emitter
+				.ldarg_0
+				.ldarg_0
+				.ldc_i4  (mi is FieldInfo ? 1 : 2)
+				.ldstr   (mi.Name)
+				.call    (_accessor, "GetMember", BindingFlags.Instance | BindingFlags.NonPublic, typeof(int), typeof(string))
+				.newobj  (ctorBuilder)
+				.call    (_accessor, "AddMember", BindingFlags.Instance | BindingFlags.NonPublic, typeof(MemberAccessor))
+				;
 
 			_nestedTypes.Add(nestedType);
 		}
 
-		private void BuildNestedTypeConstructor(TypeBuilderHelper nestedType, MemberInfo mi)
+		private ConstructorBuilderHelper BuildNestedTypeConstructor(
+			TypeBuilderHelper nestedType, MemberInfo mi)
 		{
 			ConstructorBuilderHelper ctorBuilder = nestedType.DefinePublicConstructor(typeof(MemberInfo));
 
@@ -160,6 +172,8 @@ namespace BLToolkit.TypeBuilder.Builders
 				.call    (TypeHelper.GetConstructor(typeof(MemberAccessor), typeof(MemberInfo)))
 				.ret()
 				;
+
+			return ctorBuilder;
 		}
 	}
 }
