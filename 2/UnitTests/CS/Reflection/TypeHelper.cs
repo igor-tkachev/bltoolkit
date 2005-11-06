@@ -61,7 +61,7 @@ namespace Reflection
 		}
 
 		[Attribute5(2)]
-		public class Object : Base, IObject2, IObject1, IBase2
+		public class TestObject : Base, IObject2, IObject1, IBase2
 		{
 			public new void Method2() {}
 		}
@@ -69,7 +69,7 @@ namespace Reflection
 		[Test]
 		public void GetAttributes()
 		{
-			object[] attrs = new TypeHelper(typeof(Object)).GetAttributes();
+			object[] attrs = new TypeHelper(typeof(TestObject)).GetAttributes();
 
 			foreach (object attr in attrs)
 				Console.WriteLine("{0} {1}", attr, attr.GetHashCode());
@@ -89,7 +89,7 @@ namespace Reflection
 		[Test]
 		public void GetAttributes_ByType()
 		{
-			object[] attrs = new TypeHelper(typeof(Object)).GetAttributes(typeof(Attribute2));
+			object[] attrs = new TypeHelper(typeof(TestObject)).GetAttributes(typeof(Attribute2));
 
 			foreach (object attr in attrs)
 				Console.WriteLine("{0} {1}", attr, attr.GetHashCode());

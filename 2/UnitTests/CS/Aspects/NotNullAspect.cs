@@ -17,7 +17,7 @@ namespace Aspects
 			TypeFactory.SaveTypes = true;
 		}
 
-		public abstract class Object1
+		public abstract class TestObject1
 		{
 			public virtual void Foo1(string str1, [NotNull] string str2, string str3) {}
 			public virtual void Foo2(string str1, [NotNull("Null")] string str2, string str3) { }
@@ -28,7 +28,7 @@ namespace Aspects
 		[ExpectedException(typeof(ArgumentNullException), "Value cannot be null.\r\nParameter name: str2")]
 		public void Test1()
 		{
-			Object1 o = (Object1)TypeAccessor.GetAccessor(typeof(Object1)).CreateInstance();
+			TestObject1 o = (TestObject1)TypeAccessor.GetAccessor(typeof(TestObject1)).CreateInstance();
 
 			o.Foo1("str1", null, "str3");
 		}
@@ -37,7 +37,7 @@ namespace Aspects
 		[ExpectedException(typeof(ArgumentNullException), "Null")]
 		public void Test2()
 		{
-			Object1 o = (Object1)TypeAccessor.GetAccessor(typeof(Object1)).CreateInstance();
+			TestObject1 o = (TestObject1)TypeAccessor.GetAccessor(typeof(TestObject1)).CreateInstance();
 
 			o.Foo2("str1", null, "str3");
 		}
@@ -46,7 +46,7 @@ namespace Aspects
 		[ExpectedException(typeof(ArgumentNullException), "Null: str2")]
 		public void Test3()
 		{
-			Object1 o = (Object1)TypeAccessor.GetAccessor(typeof(Object1)).CreateInstance();
+			TestObject1 o = (TestObject1)TypeAccessor.GetAccessor(typeof(TestObject1)).CreateInstance();
 
 			o.Foo3("str1", null, "str3");
 		}

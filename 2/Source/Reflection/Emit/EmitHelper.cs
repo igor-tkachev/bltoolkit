@@ -3016,6 +3016,20 @@ namespace BLToolkit.Reflection.Emit
 			_ilGenerator.Emit(OpCodes.Unbox, type); return this;
 		}
 
+#if FW2
+		/// <summary>
+		/// Calls ILGenerator.Emit(<see cref="OpCodes.Unbox_Any"/>, type) that
+		/// converts the boxed representation of a value type to its unboxed form.
+		/// </summary>
+		/// <param name="type">A Type</param>
+		/// <seealso cref="OpCodes.Unbox_Any">OpCodes.Unbox_Any</seealso>
+		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode,Type)">ILGenerator.Emit</seealso>
+		public EmitHelper unbox_any(Type type)
+		{
+			_ilGenerator.Emit(OpCodes.Unbox_Any, type); return this;
+		}
+#endif
+
 		public EmitHelper unboxIfValueType(Type type)
 		{
 			return type.IsValueType? unbox(type): this;
@@ -3146,6 +3160,9 @@ namespace BLToolkit.Reflection.Emit
 
 		public EmitHelper CastFromObject(Type type)
 		{
+#if FW2
+			return type.IsValueType? unbox_any(type): castclass(type);
+#else
 			unboxIfValueType(type);
 
 			if (type.IsEnum)
@@ -3168,6 +3185,7 @@ namespace BLToolkit.Reflection.Emit
 				castclass(type);
 
 			return this;
+#endif
 		}
 
 		public EmitHelper conv(Type type)
@@ -3186,6 +3204,11 @@ namespace BLToolkit.Reflection.Emit
 			else if (type == typeof(double)) conv_r8.end();
 
 			return this;
+		}
+
+		public EmitHelper unboxOrCast(Type type)
+		{
+			return type.IsValueType? unbox(type): castclass(type);
 		}
 	}
 }

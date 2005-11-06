@@ -18,8 +18,9 @@ namespace BLToolkit.TypeBuilder.Builders
 
 		TypeHelper        _type;
 		TypeHelper        _originalType;
-		TypeHelper        _accessor   = new TypeHelper(typeof(TypeAccessor));
-		ArrayList         _nestedTypes = new ArrayList();
+		TypeHelper        _typeAccessor   = new TypeHelper(typeof(TypeAccessor));
+		TypeHelper        _memberAccessor = new TypeHelper(typeof(MemberAccessor));
+		ArrayList         _nestedTypes    = new ArrayList();
 		TypeBuilderHelper _typeBuilder;
 
 		public string AssemblyNameSuffix
@@ -31,11 +32,11 @@ namespace BLToolkit.TypeBuilder.Builders
 		{
 			string typeName = _type.FullName.Replace('+', '.') + ".TypeAccessor";
 			
-			_typeBuilder = assemblyBuilder.DefineType(typeName, _accessor);
+			_typeBuilder = assemblyBuilder.DefineType(typeName, _typeAccessor);
 
 			_typeBuilder.DefaultConstructor.Emitter
 				.ldarg_0
-				.call     (_accessor.GetDefaultConstructor())
+				.call     (_typeAccessor.GetDefaultConstructor())
 				;
 
 			BuildCreateInstanceMethods();
@@ -68,7 +69,7 @@ namespace BLToolkit.TypeBuilder.Builders
 			// CreateInstance.
 			//
 			MethodBuilderHelper method = _typeBuilder.DefineMethod(
-				TypeHelper.GetMethodNoGeneric(_accessor, "CreateInstance", Type.EmptyTypes));
+				TypeHelper.GetMethodNoGeneric(_typeAccessor, "CreateInstance", Type.EmptyTypes));
 
 			if (baseDefCtor != null)
 			{
@@ -89,7 +90,7 @@ namespace BLToolkit.TypeBuilder.Builders
 			// CreateInstance(IniContext).
 			//
 			method = _typeBuilder.DefineMethod(
-				TypeHelper.GetMethodNoGeneric(_accessor, "CreateInstance", typeof(InitContext)));
+				TypeHelper.GetMethodNoGeneric(_typeAccessor, "CreateInstance", typeof(InitContext)));
 
 			if (baseInitCtor != null)
 			{
@@ -113,7 +114,7 @@ namespace BLToolkit.TypeBuilder.Builders
 			// Type.
 			//
 			MethodBuilderHelper method =
-				_typeBuilder.DefineMethod(_accessor.GetProperty("Type").GetGetMethod());
+				_typeBuilder.DefineMethod(_typeAccessor.GetProperty("Type").GetGetMethod());
 
 			method.Emitter
 				.LoadType(_type)
@@ -123,7 +124,7 @@ namespace BLToolkit.TypeBuilder.Builders
 			// OriginalType.
 			//
 			method = 
-				_typeBuilder.DefineMethod(_accessor.GetProperty("OriginalType").GetGetMethod());
+				_typeBuilder.DefineMethod(_typeAccessor.GetProperty("OriginalType").GetGetMethod());
 
 			method.Emitter
 				.LoadType(_originalType)
@@ -148,17 +149,141 @@ namespace BLToolkit.TypeBuilder.Builders
 
 			ConstructorBuilderHelper ctorBuilder = BuildNestedTypeConstructor(nestedType, mi);
 
+			BuildInitMember(mi, ctorBuilder);
+			BuildGetter    (mi, nestedType);
+			BuildSetter    (mi, nestedType);
+
+			// FW 1.1 wants nested types to be created before parent.
+			//
+			_nestedTypes.Add(nestedType);
+		}
+
+		private void BuildInitMember(MemberInfo mi, ConstructorBuilderHelper ctorBuilder)
+		{
 			_typeBuilder.DefaultConstructor.Emitter
 				.ldarg_0
 				.ldarg_0
-				.ldc_i4  (mi is FieldInfo ? 1 : 2)
+				.ldc_i4  (mi is FieldInfo? 1: 2)
 				.ldstr   (mi.Name)
-				.call    (_accessor, "GetMember", BindingFlags.Instance | BindingFlags.NonPublic, typeof(int), typeof(string))
+				.call    (_typeAccessor.GetMethod("GetMember", typeof(int), typeof(string)))
 				.newobj  (ctorBuilder)
-				.call    (_accessor, "AddMember", BindingFlags.Instance | BindingFlags.NonPublic, typeof(MemberAccessor))
+				.call    (_typeAccessor.GetMethod("AddMember", typeof(MemberAccessor)))
+				;
+		}
+
+		private void BuildGetter(MemberInfo mi, TypeBuilderHelper nestedType)
+		{
+			MethodInfo getMethod = null;
+
+			if (mi is PropertyInfo)
+			{
+				getMethod = ((PropertyInfo)mi).GetGetMethod();
+
+				if (getMethod == null)
+				{
+					if (_type != _originalType)
+						getMethod = _type.GetMethod("get_" + mi.Name);
+
+					if (getMethod == null)
+						return;
+				}
+			}
+
+			MethodBuilderHelper method = nestedType.DefineMethod(
+				_memberAccessor.GetMethod("GetValue", typeof(object)));
+			
+			EmitHelper emit = method.Emitter;
+
+			emit
+				.ldarg_1
+				.castclass (_type)
+				.end();
+
+			if (mi is FieldInfo)
+			{
+				FieldInfo fi = (FieldInfo)mi;
+
+				emit
+					.ldfld          (fi)
+					.boxIfValueType (fi.FieldType)
+					;
+			}
+			else
+			{
+				PropertyInfo pi = (PropertyInfo)mi;
+
+				emit
+					.callvirt       (getMethod)
+					.boxIfValueType (pi.PropertyType)
+					;
+			}
+
+			emit
+				.ret()
 				;
 
-			_nestedTypes.Add(nestedType);
+			nestedType.DefineMethod(_memberAccessor.GetProperty("HasGetter").GetGetMethod()).Emitter
+				.ldc_i4_1
+				.ret()
+				;
+		}
+
+		private void BuildSetter(MemberInfo mi, TypeBuilderHelper nestedType)
+		{
+			MethodInfo setMethod = null;
+
+			if (mi is PropertyInfo)
+			{
+				setMethod = ((PropertyInfo)mi).GetSetMethod();
+
+				if (setMethod == null)
+				{
+					if (_type != _originalType)
+						setMethod = _type.GetMethod("set_" + mi.Name);
+
+					if (setMethod == null)
+						return;
+				}
+			}
+
+			MethodBuilderHelper method = nestedType.DefineMethod(
+				_memberAccessor.GetMethod("SetValue", typeof(object), typeof(object)));
+			
+			EmitHelper emit = method.Emitter;
+
+			emit
+				.ldarg_1
+				.castclass (_type)
+				.ldarg_2
+				.end();
+
+			if (mi is FieldInfo)
+			{
+				FieldInfo fi = (FieldInfo)mi;
+
+				emit
+					.CastFromObject (fi.FieldType)
+					.stfld          (fi)
+					;
+			}
+			else
+			{
+				PropertyInfo pi = (PropertyInfo)mi;
+
+				emit
+					.CastFromObject (pi.PropertyType)
+					.callvirt       (setMethod)
+					;
+			}
+
+			emit
+				.ret()
+				;
+
+			nestedType.DefineMethod(_memberAccessor.GetProperty("HasSetter").GetGetMethod()).Emitter
+				.ldc_i4_1
+				.ret()
+				;
 		}
 
 		private ConstructorBuilderHelper BuildNestedTypeConstructor(

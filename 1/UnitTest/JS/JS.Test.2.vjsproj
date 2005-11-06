@@ -2,9 +2,9 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
-    <ProductVersion>8.0.50215</ProductVersion>
+    <ProductVersion>8.0.50727</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>105fcc3e-7fa8-4d72-a21c-de6b640137ca</ProjectGuid>
+    <ProjectGuid>{EDBCA632-E853-4B38-B59B-F58D202FDC6E}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>JS.Test.2</RootNamespace>
     <AssemblyName>JS.Test.2</AssemblyName>
@@ -24,13 +24,26 @@
     <DefineConstants>TRACE</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="nunit.framework, Version=2.2.2.0, Culture=neutral, PublicKeyToken=96d09a1eb7f44a77" />
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Class1.jsl" />
-    <Compile Include="Properties\AssemblyInfo.jsl" />
+    <Compile Include="DbManagerTest\OleDb\Access.jsl" />
+    <Compile Include="DbManagerTest\OleDb\SqlServer.jsl" />
+    <Compile Include="DbManagerTest\SqlServer.jsl" />
+    <Compile Include="DbManagerTest\Test.jsl" />
+    <Compile Include="MapDataTest.jsl" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\Source\Rsdn.Framework.Data.2.csproj">
+      <Project>{653EBAE9-B766-4B78-8077-8EC009156DE5}</Project>
+      <Name>Rsdn.Framework.Data.2</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Properties\" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.VisualJSharp.targets" />
 </Project>

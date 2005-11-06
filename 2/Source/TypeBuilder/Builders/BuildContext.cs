@@ -96,6 +96,11 @@ namespace BLToolkit.TypeBuilder.Builders
 			get { return IsAbstractGetter || IsAbstractSetter; }
 		}
 
+		public bool IsSetter
+		{
+			get { return IsAbstractSetter || IsVirtualSetter; }
+		}
+
 		public bool IsAbstractGetter
 		{
 			get { return BuildElement == BuildElement.AbstractGetter; }

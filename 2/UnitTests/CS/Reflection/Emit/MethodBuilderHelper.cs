@@ -10,7 +10,7 @@ namespace Reflection.Emit
 	[TestFixture]
 	public class MethodBuilderHelperTest
 	{
-		public abstract class Object
+		public abstract class TestObject
 		{
 			public    abstract int Property { get; }
 			protected abstract int Method1(float f);
@@ -23,11 +23,11 @@ namespace Reflection.Emit
 		public void Test()
 		{
 			TypeBuilderHelper typeBuilder = 
-				new AssemblyBuilderHelper("HelloWorld.dll").DefineType("Test", typeof(Object));
+				new AssemblyBuilderHelper("HelloWorld.dll").DefineType("Test", typeof(TestObject));
 
 			// Property
 			//
-			PropertyInfo        propertyInfo  = typeof(Object).GetProperty("Property");
+			PropertyInfo        propertyInfo  = typeof(TestObject).GetProperty("Property");
 			MethodBuilderHelper methodBuilder = typeBuilder.DefineMethod(propertyInfo.GetGetMethod());
 			EmitHelper          emit          = methodBuilder.Emitter;
 
@@ -38,7 +38,7 @@ namespace Reflection.Emit
 
 			// Method1
 			//
-			MethodInfo methodInfo = typeof(Object).GetMethod(
+			MethodInfo methodInfo = typeof(TestObject).GetMethod(
 				"Method1", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
 
 			methodBuilder = typeBuilder.DefineMethod(methodInfo);
@@ -51,7 +51,7 @@ namespace Reflection.Emit
 
 			// Method2
 			//
-			methodInfo = typeof(Object).GetMethod("Method2", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
+			methodInfo = typeof(TestObject).GetMethod("Method2", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
 
 			methodBuilder = typeBuilder.DefineMethod(
 				"Method2",
@@ -76,7 +76,7 @@ namespace Reflection.Emit
 			//
 			Type type = typeBuilder.Create();
 
-			Object obj = (Object)Activator.CreateInstance(type);
+			TestObject obj = (TestObject)Activator.CreateInstance(type);
 
 			Assert.AreEqual(10, obj.Property);
 			Assert.AreEqual(10, obj.Method3(0));

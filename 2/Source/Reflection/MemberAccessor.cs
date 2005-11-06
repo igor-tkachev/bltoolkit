@@ -17,7 +17,16 @@ namespace BLToolkit.Reflection
 			set { _memberInfo = value; }
 		}
 
-//		public abstract object GetValue(object o);
-//		public abstract void   SetValue(object o, object value);
+		public virtual bool HasGetter { get { return false; } }
+		public virtual bool HasSetter { get { return false; } }
+
+		public virtual object GetValue(object o)
+		{
+			return null;
+		}
+
+		public virtual void SetValue(object o, object value)
+		{
+		}
 	}
 }

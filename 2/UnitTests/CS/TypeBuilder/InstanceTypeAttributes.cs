@@ -17,7 +17,7 @@ namespace TypeBuilder
 			TypeFactory.SaveTypes = true;
 		}
 
-		public class Class
+		public class TestClass
 		{
 			public class IntFieldInstance
 			{
@@ -49,7 +49,7 @@ namespace TypeBuilder
 				}
 			}
 
-			public abstract class Object1
+			public abstract class TestObject1
 			{
 				[InstanceType(typeof(IntFieldInstance))]    public abstract int       IntField  { get; set; }
 				[InstanceType(typeof(IntPropertyInstance))] public abstract int       IntProp   { get; set; }
@@ -65,7 +65,7 @@ namespace TypeBuilder
 
 			public static void Test()
 			{
-				Object1 o = (Object1)TypeAccessor.GetAccessor(typeof(Object1)).CreateInstance();
+				TestObject1 o = (TestObject1)TypeAccessor.GetAccessor(typeof(TestObject1)).CreateInstance();
 
 				o.IntField = 10;
 				o.IntProp  = 11;
@@ -100,10 +100,10 @@ namespace TypeBuilder
 		[Test]
 		public void InstanceClassTest()
 		{
-			Class.Test();
+			TestClass.Test();
 		}
 
-		public class Struct
+		public class TestStruct
 		{
 			public struct IntFieldInstance
 			{
@@ -135,7 +135,7 @@ namespace TypeBuilder
 				}
 			}
 
-			public abstract class Object1
+			public abstract class TestObject1
 			{
 				[InstanceType(typeof(IntFieldInstance))]    public abstract int       IntField  { get; set; }
 				[InstanceType(typeof(IntPropertyInstance))] public abstract int       IntProp   { get; set; }
@@ -151,7 +151,7 @@ namespace TypeBuilder
 
 			public static void Test()
 			{
-				Object1 o = (Object1)TypeAccessor.GetAccessor(typeof(Object1)).CreateInstance();
+				TestObject1 o = (TestObject1)TypeAccessor.GetAccessor(typeof(TestObject1)).CreateInstance();
 
 				o.IntField = 10;
 				o.IntProp  = 11;
@@ -186,7 +186,7 @@ namespace TypeBuilder
 		[Test]
 		public void InstanceStructTest()
 		{
-			Struct.Test();
+			TestStruct.Test();
 		}
 
 		public struct IntParamInstance
@@ -199,7 +199,7 @@ namespace TypeBuilder
 			public int Value;
 		}
 
-		public abstract class Object1
+		public abstract class TestObject1
 		{
 			[InstanceType(typeof(IntParamInstance), 58)] public abstract int IntField { get; set; }
 		}
@@ -207,7 +207,7 @@ namespace TypeBuilder
 		[Test]
 		public void ParamTest()
 		{
-			Object1 o = (Object1)TypeAccessor.GetAccessor(typeof(Object1)).CreateInstance();
+			TestObject1 o = (TestObject1)TypeAccessor.GetAccessor(typeof(TestObject1)).CreateInstance();
 
 			Assert.AreEqual(58, o.IntField);
 		}

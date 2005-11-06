@@ -7,11 +7,13 @@ using BLToolkit.TypeBuilder.Builders;
 
 namespace BLToolkit.Reflection
 {
-	public abstract class TypeAccessor
+	public abstract class TypeAccessor : ICollection
 	{
 		protected TypeAccessor()
 		{
 		}
+
+		#region Protected Emit Helpers
 
 		protected MemberInfo GetMember(int memberType, string memberName)
 		{
@@ -32,6 +34,8 @@ namespace BLToolkit.Reflection
 		{
 			_members.Add(member.MemberInfo.Name, member);
 		}
+
+		#endregion
 
 		#region CreateInstance
 
@@ -76,6 +80,8 @@ namespace BLToolkit.Reflection
 
 		#endregion
 
+		#region ObjectFactory
+
 		private IObjectFactory _objectFactory = null;
 		public  IObjectFactory  ObjectFactory
 		{
@@ -83,15 +89,25 @@ namespace BLToolkit.Reflection
 			set { _objectFactory = value; }
 		}
 
+		#endregion
+
+		#region Abstract Members
+
 		public abstract Type Type         { get; }
 		public abstract Type OriginalType { get; }
 
+		#endregion
+
+		#region Items
+
 		private Hashtable _members = new Hashtable();
 
-		protected MemberInfo GetFieldInfo(string name)
+		public MemberAccessor this[string memberName]
 		{
-			return Type.GetField(name);
+			get { return (MemberAccessor)_members[memberName]; }
 		}
+
+		#endregion
 
 		#region Static Members
 
@@ -125,6 +141,39 @@ namespace BLToolkit.Reflection
 			}
 
 			return accessor;
+		}
+
+		#endregion
+
+		#region ICollection Members
+
+		public void CopyTo(Array array, int index)
+		{
+			_members.Values.CopyTo(array, index);
+		}
+
+		public int Count
+		{
+			get { return _members.Count; }
+		}
+
+		public bool IsSynchronized
+		{
+			get { return _members.IsSynchronized; }
+		}
+
+		public object SyncRoot
+		{
+			get { return _members.SyncRoot; }
+		}
+
+		#endregion
+
+		#region IEnumerable Members
+
+		public IEnumerator GetEnumerator()
+		{
+			return _members.Values.GetEnumerator();
 		}
 
 		#endregion
