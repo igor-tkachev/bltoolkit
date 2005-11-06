@@ -1,7 +1,7 @@
 ﻿<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <ProjectType>Local</ProjectType>
-    <ProductVersion>8.0.50215</ProductVersion>
+    <ProductVersion>8.0.50727</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{FBB14E75-99D0-4F6A-8344-C028B7615019}</ProjectGuid>
     <SccProjectName>
@@ -108,6 +108,10 @@
       <Project>{2F458667-1D0E-470D-8223-E29B350E414A}</Project>
       <Name>CS.Test.2</Name>
     </ProjectReference>
+    <ProjectReference Include="..\JS\JS.Test.2.vjsproj">
+      <Project>{EDBCA632-E853-4B38-B59B-F58D202FDC6E}</Project>
+      <Name>JS.Test.2</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Toys.Test\Toys.Test.2.csproj">
       <Project>{861E4884-DE2C-4EAF-9BEB-FCF008FE136F}</Project>
       <Name>Toys.Test.2</Name>
@@ -115,11 +119,6 @@
     <ProjectReference Include="..\VB\VB.Test.2.vbproj">
       <Project>{337502B5-3F64-4A20-AD80-734F3611D30A}</Project>
       <Name>VB.Test.2</Name>
-    </ProjectReference>
-    <ProjectReference Include="JS.Test">
-      <Name>JS.Test</Name>
-      <Project>{9A41A88E-FB45-4C41-8412-2F4CE540ECA0}</Project>
-      <Package>{E6FDF86B-F3D1-11D4-8576-0002A516ECE8}</Package>
     </ProjectReference>
     <ProjectReference Include="..\NullableTypes\src\Types\Types.2.csproj">
       <Name>Types.2</Name>

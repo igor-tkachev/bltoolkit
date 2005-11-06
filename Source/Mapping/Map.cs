@@ -181,7 +181,7 @@ namespace Rsdn.Framework.Data.Mapping
 			return
 				value == null ||
 #if VER2
-				value is INullableValue && ((INullableValue)value).HasValue == false ||
+				//value is Nullable && ((Nullable)value).HasValue == false ||
 #endif
 				value is string   && ((string)  value).TrimEnd(_trimArray).Length == 0 ||
 				value is DateTime && ((DateTime)value) == DateTime.MinValue ||
