@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Reflection;
+
 using BLToolkit.TypeBuilder;
 
 namespace BLToolkit.Reflection
@@ -288,9 +289,39 @@ namespace BLToolkit.Reflection
 			return _type.GetMethods(bindingAttr);
 		}
 
-		public MethodInfo GetMethod(string methodName)
+		public MethodInfo GetPublicMethod(string methodName)
 		{
 			return _type.GetMethod(methodName);
+		}
+
+		public MethodInfo GetMethod(string methodName)
+		{
+			return _type.GetMethod(methodName, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+		}
+
+		public MethodInfo GetMethod(string methodName, BindingFlags flags)
+		{
+			return _type.GetMethod(methodName, flags);
+		}
+
+		public MethodInfo GetPublicMethod(string methodName, params Type[] types)
+		{
+			return _type.GetMethod(methodName, types);
+		}
+
+		public MethodInfo GetMethod(string methodName, params Type[] types)
+		{
+			return _type.GetMethod(
+				methodName,
+				BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic,
+				null,
+				types,
+				null);
+		}
+
+		public MethodInfo GetMethod(string methodName, BindingFlags flags, params Type[] types)
+		{
+			return _type.GetMethod(methodName, flags, null, types, null);
 		}
 
 		#endregion
@@ -380,6 +411,11 @@ namespace BLToolkit.Reflection
 			return null;
 		}
 		*/
+
+		public InterfaceMapping GetInterfaceMap(Type type)
+		{
+			return _type.GetInterfaceMap(type);
+		}
 
 		#endregion
 

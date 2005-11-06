@@ -62,13 +62,18 @@ namespace BLToolkit.Reflection.Emit
 		}
 
 		private MethodInfo _overriddenMethod;
-		/// <summary>
-		/// 
-		/// </summary>
 		public MethodInfo OverriddenMethod
 		{
 			get { return _overriddenMethod;  }
 			set { _overriddenMethod = value; }
-		}	
+		}
+
+		/// <summary>
+		/// Returns the type that declares this method.
+		/// </summary>
+		public Type DeclaringType
+		{
+			get { return _methodBuilder.DeclaringType; }
+		}
 	}
 }

@@ -63,7 +63,7 @@ namespace TypeBuilder
 			public int Value;
 		}
 
-		public abstract class Object1
+		public abstract class TestObject1
 		{
 			[LazyInstance]
 			public abstract ArrayList List { get; set; }
@@ -87,7 +87,7 @@ namespace TypeBuilder
 		[Test]
 		public void NoParamTest()
 		{
-			Object1 o = (Object1)TypeAccessor.GetAccessor(typeof(Object1)).CreateInstance();
+			TestObject1 o = (TestObject1)TypeAccessor.GetAccessor(typeof(TestObject1)).CreateInstance();
 
 			Assert.IsNotNull(o.List);
 			Assert.AreEqual("", o.Str);
@@ -104,7 +104,7 @@ namespace TypeBuilder
 			}
 		}
 
-		public abstract class Object2
+		public abstract class TestObject2
 		{
 			[LazyInstance, Parameter(10)]
 			public abstract ArrayList List { get; set; }
@@ -131,7 +131,7 @@ namespace TypeBuilder
 		[Test]
 		public void ParamTest()
 		{
-			Object2 o = (Object2)TypeAccessor.GetAccessor(typeof(Object2)).CreateInstance();
+			TestObject2 o = (TestObject2)TypeAccessor.GetAccessor(typeof(TestObject2)).CreateInstance();
 
 			Assert.AreEqual(10,     o.List.Capacity);
 			Assert.AreEqual("test", o.Str);
@@ -141,7 +141,7 @@ namespace TypeBuilder
 		}
 
 		[LazyInstances]
-		public abstract class Object3
+		public abstract class TestObject3
 		{
 			public abstract string Str1 { get; set; }
 			[LazyInstance(false), Parameter("")]
@@ -151,7 +151,7 @@ namespace TypeBuilder
 		[Test]
 		public void LazyInstancesTest()
 		{
-			Object3 o = (Object3)TypeAccessor.GetAccessor(typeof(Object3)).CreateInstance();
+			TestObject3 o = (TestObject3)TypeAccessor.GetAccessor(typeof(TestObject3)).CreateInstance();
 
 			Assert.AreEqual("", o.Str1);
 			Assert.AreEqual("", o.Str2);
@@ -164,14 +164,14 @@ namespace TypeBuilder
 		}
 
 		[LazyInstances(false)]
-		public abstract class Object4 : Object3
+		public abstract class TestObject4 : TestObject3
 		{
 		}
 
 		[Test]
 		public void LazyInstancesFalseTest()
 		{
-			Object4 o = (Object4)TypeAccessor.GetAccessor(typeof(Object4)).CreateInstance();
+			TestObject4 o = (TestObject4)TypeAccessor.GetAccessor(typeof(TestObject4)).CreateInstance();
 
 			Assert.AreEqual("", o.Str1);
 			Assert.AreEqual("", o.Str2);
@@ -184,7 +184,7 @@ namespace TypeBuilder
 		}
 
 		[LazyInstances(typeof(string))]
-		public abstract class Object5
+		public abstract class TestObject5
 		{
 			public abstract string    Str  { get; set; }
 			public abstract ArrayList List { get; set; }
@@ -193,7 +193,7 @@ namespace TypeBuilder
 		[Test]
 		public void LazyInstancesTypeTest()
 		{
-			Object5 o = (Object5)TypeAccessor.GetAccessor(typeof(Object5)).CreateInstance();
+			TestObject5 o = (TestObject5)TypeAccessor.GetAccessor(typeof(TestObject5)).CreateInstance();
 
 			Assert.IsNotNull(o.Str);
 			Assert.IsNotNull(o.List);

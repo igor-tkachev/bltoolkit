@@ -60,7 +60,7 @@ namespace TypeBuilder
 			}
 		}
 
-		public abstract class Object1
+		public abstract class TestObject1
 		{
 			[InstanceType(typeof(Value), 55)]        public abstract int    IntValue   { get; set; }
 			[InstanceType(typeof(Value), (float)16)] public abstract float  FloatValue { get; set; }
@@ -73,7 +73,7 @@ namespace TypeBuilder
 		[Test]
 		public void Test()
 		{
-			Object1 o = (Object1)TypeAccessor.GetAccessor(typeof(Object1)).CreateInstance();
+			TestObject1 o = (TestObject1)TypeAccessor.GetAccessor(typeof(TestObject1)).CreateInstance();
 
 			Assert.AreEqual(55, o.IntValue);
 			o.IntValue += 1;

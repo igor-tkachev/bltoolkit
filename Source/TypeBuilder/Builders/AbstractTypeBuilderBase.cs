@@ -1,7 +1,10 @@
 using System;
+using System.Reflection;
 using System.Reflection.Emit;
 
+using BLToolkit.Reflection;
 using BLToolkit.Reflection.Emit;
+using System.Collections;
 
 namespace BLToolkit.TypeBuilder.Builders
 {
@@ -172,6 +175,187 @@ namespace BLToolkit.TypeBuilder.Builders
 			}
 		}
 
+		protected virtual string GetFieldName()
+		{
+			PropertyInfo pi   = Context.CurrentProperty;
+			string       name = pi.Name;
+
+			if (char.IsUpper(name[0]) && name.Length > 1 && char.IsLower(name[1]))
+				name = char.ToLower(name[0]) + name.Substring(1, name.Length - 1);
+
+			name = "_" + name;
+
+			foreach (ParameterInfo p in pi.GetIndexParameters())
+				name += "." + p.ParameterType.FullName;//.Replace(".", "_").Replace("+", "_");
+
+			return name;
+		}
+
+		protected FieldBuilder GetPropertyInfoField()
+		{
+			string       fieldName = GetFieldName() + "_$propertyInfo";
+			FieldBuilder field     = Context.GetField(fieldName);
+			PropertyInfo property  = Context.CurrentProperty;
+
+			if (field == null)
+			{
+				field = Context.CreatePrivateStaticField(fieldName, typeof(PropertyInfo));
+
+				EmitHelper emit = Context.TypeBuilder.TypeInitializer.Emitter;
+
+				ParameterInfo[] index      = property.GetIndexParameters();
+				LocalBuilder    parameters = null;
+
+				if (index.Length > 0)
+				{
+					parameters = (LocalBuilder)Context.Items["$BLToolkit.ParameterLocalBuilder."];
+
+					if (parameters == null)
+					{
+						parameters = emit.DeclareLocal(typeof(Type[]));
+
+						Context.Items["$BLToolkit.ParameterLocalBuilder."] = parameters;
+					}
+				}
+
+				emit
+					.LoadType (Context.Type)
+					.ldstr    (property.Name)
+					.LoadType (property.PropertyType)
+					;
+
+				if (index.Length == 0)
+				{
+					emit
+						.ldsfld (typeof(Type).GetField("EmptyTypes"))
+						;
+				}
+				else
+				{
+					emit
+						.ldc_i4 (index.Length) 
+						.newarr (typeof(Type))
+						.stloc  (parameters)
+						;
+
+					for (int i = 0; i < index.Length; i++)
+						emit
+							.ldloc      (parameters)
+							.ldc_i4     (i) 
+							.LoadType   (index[i].ParameterType)
+							.stelem_ref
+							.end()
+							;
+
+					emit.ldloc(parameters);
+				}
+
+				emit
+					.call   (typeof(AbstractTypeBuilderBase).GetMethod("GetPropertyInfo"))
+					.stsfld (field)
+					;
+			}
+
+			return field;
+		}
+
+		protected FieldBuilder GetParameterField()
+		{
+			string       fieldName = GetFieldName() + "_$parameters";
+			FieldBuilder field     = Context.GetField(fieldName);
+			PropertyInfo property  = Context.CurrentProperty;
+
+			if (field == null)
+			{
+				field = Context.CreatePrivateStaticField(fieldName, typeof(object[]));
+
+				FieldBuilder piField = GetPropertyInfoField();
+				EmitHelper   emit    = Context.TypeBuilder.TypeInitializer.Emitter;
+
+				emit
+					.ldsfld (piField)
+					.call   (typeof(AbstractTypeBuilderBase).GetMethod("GetPropertyParameters"))
+					.stsfld (field)
+					;
+			}
+
+			return field;
+		}
+
+		protected FieldBuilder GetTypeAccessorField()
+		{
+			string       fieldName = "_" + GetFieldType().Name + "_$typeAccessor";
+			FieldBuilder field     = Context.GetField(fieldName);
+			PropertyInfo property  = Context.CurrentProperty;
+
+			if (field == null)
+			{
+				field = Context.CreatePrivateStaticField(fieldName, typeof(TypeAccessor));
+
+				EmitHelper emit = Context.TypeBuilder.TypeInitializer.Emitter;
+
+				emit
+					.LoadType (GetFieldType())
+					.call     (typeof(TypeAccessor), "GetAccessor", typeof(Type))
+					.stsfld   (field)
+					;
+			}
+
+			return field;
+		}
+
+		protected virtual Type GetFieldType()
+		{
+			PropertyInfo    pi    = Context.CurrentProperty;
+			ParameterInfo[] index = pi.GetIndexParameters();
+
+			switch (index.Length)
+			{
+				case 0: return pi.PropertyType;
+				case 1: return typeof(Hashtable);
+				default:
+					throw new InvalidOperationException();
+			}
+		}
+
 		#endregion
+
+		#region Public Helpers
+
+		public static object[] GetPropertyParameters(PropertyInfo propertyInfo)
+		{
+			object[] attrs = propertyInfo.GetCustomAttributes(typeof(ParameterAttribute), true);
+
+			if (attrs != null && attrs.Length > 0)
+				return ((ParameterAttribute)attrs[0]).Parameters;
+
+			attrs = propertyInfo.GetCustomAttributes(typeof(InstanceTypeAttribute), true);
+
+			if (attrs == null || attrs.Length == 0)
+			{
+				attrs = new TypeHelper(
+					propertyInfo.DeclaringType).GetAttributes(typeof(InstanceTypeAttribute));
+			}
+
+			if (attrs != null && attrs.Length > 0)
+				return ((InstanceTypeAttribute)attrs[0]).Parameters;
+
+			return null;
+		}
+
+		public static PropertyInfo GetPropertyInfo(
+			Type type, string propertyName, Type returnType, Type[] types)
+		{
+			return type.GetProperty(
+				propertyName,
+				BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance,
+				null,
+				returnType,
+				types,
+				null);
+		}
+
+		#endregion
+
 	}
 }

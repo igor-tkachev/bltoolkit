@@ -18,7 +18,7 @@ namespace TypeBuilder.Builders
 			TypeFactory.SaveTypes = true;
 		}
 
-		public abstract class Object
+		public abstract class TestObject
 		{
 			public    abstract int       Int       { get; set; }
 			public    abstract double    Double    { get; set; }
@@ -35,7 +35,7 @@ namespace TypeBuilder.Builders
 		[Test]
 		public void AbstractProperties()
 		{
-			Object o = (Object)TypeAccessor.GetAccessor(typeof(Object)).CreateInstance();
+			TestObject o = (TestObject)TypeAccessor.GetAccessor(typeof(TestObject)).CreateInstance();
 
 			o.Int    = 100; Assert.AreEqual(100, o.Int);
 			o.Double = 200; Assert.AreEqual(200, o.Double);

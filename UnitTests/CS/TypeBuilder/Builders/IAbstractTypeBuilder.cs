@@ -68,7 +68,7 @@ namespace TypeBuilder.Builders
 		}
 
 		[TestTypeBuilder]
-		public abstract class Object
+		public abstract class TestObject
 		{
 			protected abstract string this[int i]    { get; set; }
 			protected abstract int    this[string i] { get; set; }
@@ -79,7 +79,7 @@ namespace TypeBuilder.Builders
 		{
 			TypeFactory.SaveTypes = true;
 
-			ITest test = (ITest)TypeAccessor.GetAccessor(typeof(Object)).CreateInstance();
+			ITest test = (ITest)TypeAccessor.GetAccessor(typeof(TestObject)).CreateInstance();
 
 			bool      pbool;
 			byte      pbyte;

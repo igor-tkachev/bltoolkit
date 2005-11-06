@@ -7,28 +7,28 @@ using BLToolkit.TypeBuilder.Builders;
 
 namespace UnitTests.All
 {
-	public class Base
+	public class TestObject1
 	{
-		public virtual void Foo (string str1, string str2, string str3)
-		{
-		}
+		public int       IntField = 10;
+		public string    StrField = "10";
+		public DayOfWeek DowField;
 	}
 
-	[TestFixture]
-	public class Class1 : Base
+	public class Accessor
 	{
-		public override void Foo (string str1, string str2, string str3)
+		public virtual void SetValue1(object o, object value)
 		{
-			if (str2 == null)
-				throw new ArgumentNullException("str2");
-
-			base.Foo(str1, str2, str3);
+			((TestObject1)o).IntField = (int)value;
 		}
 
-		//[Test]
-		public void Test()
+		public virtual void SetValue2(object o, object value)
 		{
-			Foo("str1", null, "str3");
+			((TestObject1)o).StrField = (string)value;
+		}
+
+		public virtual void SetValue3(object o, object value)
+		{
+			((TestObject1)o).DowField = (DayOfWeek)value;
 		}
 	}
 }

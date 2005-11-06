@@ -6,7 +6,7 @@ using BLToolkit.Reflection.Emit;
 
 namespace BLToolkit.TypeBuilder.Builders
 {
-	class NotNullAspectBuilder : AbstractTypeBuilderBase
+	public class NotNullAspectBuilder : AbstractTypeBuilderBase
 	{
 		public NotNullAspectBuilder(string message)
 		{
@@ -35,10 +35,7 @@ namespace BLToolkit.TypeBuilder.Builders
 				Label        label = emit.DefineLabel();
 				LocalBuilder lb    = emit.DeclareLocal(typeof(object));
 
-				string message =
-					_message == null || _message.Length == 0 ?
-						string.Empty :
-						string.Format(_message, pi.Name);
+				string message = _message != null? string.Format(_message, pi.Name): string.Empty;
 
 				emit
 					.ldarg(pi)

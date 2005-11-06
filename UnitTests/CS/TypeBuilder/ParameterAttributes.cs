@@ -72,7 +72,7 @@ namespace TypeBuilder
 			}
 		}
 
-		public abstract class Object1
+		public abstract class TestObject1
 		{
 			[Parameter(10)]     public abstract ArrayList      List           { get; set; }
 			[Parameter("t")]    public abstract string         Str            { get; set; }
@@ -89,7 +89,7 @@ namespace TypeBuilder
 		[Test]
 		public void ParamTest()
 		{
-			Object1 o = (Object1)TypeAccessor.GetAccessor(typeof(Object1)).CreateInstance();
+			TestObject1 o = (TestObject1)TypeAccessor.GetAccessor(typeof(TestObject1)).CreateInstance();
 
 			Assert.AreEqual(10,  o.List.Capacity);
 			Assert.AreEqual("t", o.Str);
