@@ -150,6 +150,11 @@
                     BuildAction = "Compile"
                 />
                 <File
+                    RelPath = "TypeBuilder\Builders\PropertyChangeBuilder.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
                     RelPath = "TypeBuilder\Builders\TypeAccessorBuilder.cs"
                     SubType = "Code"
                     BuildAction = "Compile"

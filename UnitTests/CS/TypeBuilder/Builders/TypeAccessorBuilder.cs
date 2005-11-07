@@ -36,15 +36,15 @@ namespace TypeBuilder.Builders
 		[Test]
 		public void Test1()
 		{
-			TestObject1 o = (TestObject1)TypeAccessor.GetAccessor(typeof(TestObject1)).CreateInstance();
+			TestObject1 o = (TestObject1)TypeAccessor.CreateInstance(typeof(TestObject1));
 			Assert.AreEqual(10, o.Value);
 
-			o = (TestObject1)TypeAccessor.GetAccessor(typeof(TestObject1)).CreateInstance(null);
+			o = (TestObject1)TypeAccessor.CreateInstance(typeof(TestObject1), null);
 			Assert.AreEqual(20, o.Value);
 
 			InitContext ic = new InitContext();
 			ic.Parameters = new object[] { 30 };
-			o = (TestObject1)TypeAccessor.GetAccessor(typeof(TestObject1)).CreateInstance(ic);
+			o = (TestObject1)TypeAccessor.CreateInstance(typeof(TestObject1), ic);
 			Assert.AreEqual(30, o.Value);
 		}
 
@@ -61,15 +61,15 @@ namespace TypeBuilder.Builders
 		[Test]
 		public void Test2()
 		{
-			TestObject2 o = (TestObject2)TypeAccessor.GetAccessor(typeof(TestObject2)).CreateInstance();
+			TestObject2 o = (TestObject2)TypeAccessor.CreateInstance(typeof(TestObject2));
 			Assert.AreEqual(10, o.Value);
 
-			o = (TestObject2)TypeAccessor.GetAccessor(typeof(TestObject2)).CreateInstance(null);
+			o = (TestObject2)TypeAccessor.CreateInstance(typeof(TestObject2), null);
 			Assert.AreEqual(10, o.Value);
 
 			InitContext ic = new InitContext();
 			ic.Parameters = new object[] { 30 };
-			o = (TestObject2)TypeAccessor.GetAccessor(typeof(TestObject2)).CreateInstance(ic);
+			o = (TestObject2)TypeAccessor.CreateInstance(typeof(TestObject2), ic);
 			Assert.AreEqual(10, o.Value);
 		}
 
@@ -86,15 +86,15 @@ namespace TypeBuilder.Builders
 		[Test]
 		public void Test3()
 		{
-			TestObject3 o = (TestObject3)TypeAccessor.GetAccessor(typeof(TestObject3)).CreateInstance();
+			TestObject3 o = (TestObject3)TypeAccessor.CreateInstance(typeof(TestObject3));
 			Assert.AreEqual(20, o.Value);
 
-			o = (TestObject3)TypeAccessor.GetAccessor(typeof(TestObject3)).CreateInstance(null);
+			o = (TestObject3)TypeAccessor.CreateInstance(typeof(TestObject3), null);
 			Assert.AreEqual(20, o.Value);
 
 			InitContext ic = new InitContext();
 			ic.Parameters = new object[] { 30 };
-			o = (TestObject3)TypeAccessor.GetAccessor(typeof(TestObject3)).CreateInstance(ic);
+			o = (TestObject3)TypeAccessor.CreateInstance(typeof(TestObject3), ic);
 			Assert.AreEqual(30, o.Value);
 		}
 
@@ -124,15 +124,15 @@ namespace TypeBuilder.Builders
 		[Test]
 		public void Test4()
 		{
-			TestObject4 o = (TestObject4)TypeAccessor.GetAccessor(typeof(TestObject4)).CreateInstance();
+			TestObject4 o = (TestObject4)TypeAccessor.CreateInstance(typeof(TestObject4));
 			Assert.AreEqual(20, o.Value);
 
-			o = (TestObject4)TypeAccessor.GetAccessor(typeof(TestObject4)).CreateInstance(null);
+			o = (TestObject4)TypeAccessor.CreateInstance(typeof(TestObject4), null);
 			Assert.AreEqual(20, o.Value);
 
 			InitContext ic = new InitContext();
 			ic.Parameters = new object[] { 30 };
-			o = (TestObject4)TypeAccessor.GetAccessor(typeof(TestObject4)).CreateInstance(ic);
+			o = (TestObject4)TypeAccessor.CreateInstance(typeof(TestObject4), ic);
 			Assert.AreEqual(30, o.Value);
 		}
 	}

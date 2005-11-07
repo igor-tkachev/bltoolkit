@@ -1,7 +1,10 @@
 //@ example:
 //@ emit Emit
 using System;
+
 using NUnit.Framework;
+
+using BLToolkit.Reflection;
 using BLToolkit.Reflection.Emit;
 
 namespace Examples.Reflection.Emit
@@ -30,7 +33,7 @@ namespace Examples.Reflection.Emit
 
 			Type type = emit.Method.Type.Create();
 
-			IHello hello = (IHello)Activator.CreateInstance(type);
+			IHello hello = (IHello)TypeAccessor.CreateInstance(type);
 
 			hello.SayHello();
 		}

@@ -65,7 +65,7 @@ namespace TypeBuilder
 
 			public static void Test()
 			{
-				TestObject1 o = (TestObject1)TypeAccessor.GetAccessor(typeof(TestObject1)).CreateInstance();
+				TestObject1 o = (TestObject1)TypeAccessor.CreateInstance(typeof(TestObject1));
 
 				o.IntField = 10;
 				o.IntProp  = 11;
@@ -151,7 +151,7 @@ namespace TypeBuilder
 
 			public static void Test()
 			{
-				TestObject1 o = (TestObject1)TypeAccessor.GetAccessor(typeof(TestObject1)).CreateInstance();
+				TestObject1 o = (TestObject1)TypeAccessor.CreateInstance(typeof(TestObject1));
 
 				o.IntField = 10;
 				o.IntProp  = 11;
@@ -207,7 +207,7 @@ namespace TypeBuilder
 		[Test]
 		public void ParamTest()
 		{
-			TestObject1 o = (TestObject1)TypeAccessor.GetAccessor(typeof(TestObject1)).CreateInstance();
+			TestObject1 o = (TestObject1)TypeAccessor.CreateInstance(typeof(TestObject1));
 
 			Assert.AreEqual(58, o.IntField);
 		}
@@ -241,7 +241,7 @@ namespace TypeBuilder
 		[Test]
 		public void GlobalParamTest()
 		{
-			Object2 o = (Object2)TypeAccessor.GetAccessor(typeof(Object2)).CreateInstance();
+			Object2 o = (Object2)TypeAccessor.CreateInstance(typeof(Object2));
 
 			o.Int1   = 5;
 			o.Int2   = 5;

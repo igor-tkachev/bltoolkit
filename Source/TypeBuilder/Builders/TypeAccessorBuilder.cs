@@ -18,7 +18,7 @@ namespace BLToolkit.TypeBuilder.Builders
 
 		TypeHelper        _type;
 		TypeHelper        _originalType;
-		TypeHelper        _typeAccessor   = new TypeHelper(typeof(TypeAccessor));
+		TypeHelper        _accessorType   = new TypeHelper(typeof(TypeAccessor));
 		TypeHelper        _memberAccessor = new TypeHelper(typeof(MemberAccessor));
 		ArrayList         _nestedTypes    = new ArrayList();
 		TypeBuilderHelper _typeBuilder;
@@ -31,12 +31,18 @@ namespace BLToolkit.TypeBuilder.Builders
 		public Type Build(Type sourceType, AssemblyBuilderHelper assemblyBuilder)
 		{
 			string typeName = _type.FullName.Replace('+', '.') + ".TypeAccessor";
-			
-			_typeBuilder = assemblyBuilder.DefineType(typeName, _typeAccessor);
+
+			Type accessorType = _accessorType;
+
+#if FW2
+			accessorType = typeof(TypeAccessor<>).MakeGenericType(new Type[] { _type });
+#endif
+
+			_typeBuilder = assemblyBuilder.DefineType(typeName, accessorType);
 
 			_typeBuilder.DefaultConstructor.Emitter
 				.ldarg_0
-				.call     (_typeAccessor.GetDefaultConstructor())
+				.call    (TypeHelper.GetDefaultConstructor(accessorType))
 				;
 
 			BuildCreateInstanceMethods();
@@ -69,7 +75,7 @@ namespace BLToolkit.TypeBuilder.Builders
 			// CreateInstance.
 			//
 			MethodBuilderHelper method = _typeBuilder.DefineMethod(
-				TypeHelper.GetMethodNoGeneric(_typeAccessor, "CreateInstance", Type.EmptyTypes));
+				TypeHelper.GetMethodNoGeneric(_accessorType, "CreateInstance", Type.EmptyTypes));
 
 			if (baseDefCtor != null)
 			{
@@ -90,7 +96,7 @@ namespace BLToolkit.TypeBuilder.Builders
 			// CreateInstance(IniContext).
 			//
 			method = _typeBuilder.DefineMethod(
-				TypeHelper.GetMethodNoGeneric(_typeAccessor, "CreateInstance", typeof(InitContext)));
+				TypeHelper.GetMethodNoGeneric(_accessorType, "CreateInstance", typeof(InitContext)));
 
 			if (baseInitCtor != null)
 			{
@@ -114,7 +120,7 @@ namespace BLToolkit.TypeBuilder.Builders
 			// Type.
 			//
 			MethodBuilderHelper method =
-				_typeBuilder.DefineMethod(_typeAccessor.GetProperty("Type").GetGetMethod());
+				_typeBuilder.DefineMethod(_accessorType.GetProperty("Type").GetGetMethod());
 
 			method.Emitter
 				.LoadType(_type)
@@ -124,7 +130,7 @@ namespace BLToolkit.TypeBuilder.Builders
 			// OriginalType.
 			//
 			method = 
-				_typeBuilder.DefineMethod(_typeAccessor.GetProperty("OriginalType").GetGetMethod());
+				_typeBuilder.DefineMethod(_accessorType.GetProperty("OriginalType").GetGetMethod());
 
 			method.Emitter
 				.LoadType(_originalType)
@@ -165,9 +171,9 @@ namespace BLToolkit.TypeBuilder.Builders
 				.ldarg_0
 				.ldc_i4  (mi is FieldInfo? 1: 2)
 				.ldstr   (mi.Name)
-				.call    (_typeAccessor.GetMethod("GetMember", typeof(int), typeof(string)))
+				.call    (_accessorType.GetMethod("GetMember", typeof(int), typeof(string)))
 				.newobj  (ctorBuilder)
-				.call    (_typeAccessor.GetMethod("AddMember", typeof(MemberAccessor)))
+				.call    (_accessorType.GetMethod("AddMember", typeof(MemberAccessor)))
 				;
 		}
 

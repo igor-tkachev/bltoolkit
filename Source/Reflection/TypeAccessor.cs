@@ -39,43 +39,39 @@ namespace BLToolkit.Reflection
 
 		#region CreateInstance
 
-		public abstract object CreateInstance();
+		public virtual object CreateInstance()
+		{
+			throw new InvalidOperationException();
+		}
 
 		public virtual object CreateInstance(InitContext context)
 		{
 			return CreateInstance();
 		}
 
-		public virtual object CreateInstanceEx()
+		public object CreateInstanceEx()
 		{
-			return _objectFactory != null? _objectFactory.CreateInstance(null): CreateInstance(null);
+			return _objectFactory != null?
+				_objectFactory.CreateInstance(null): CreateInstance((InitContext)null);
 		}
 
-		public virtual object CreateInstanceEx(InitContext context)
+		public object CreateInstanceEx(InitContext context)
 		{
 			return _objectFactory != null? _objectFactory.CreateInstance(context): CreateInstance(context);
 		}
 
 #if FW2
-		public T CreateInstance<T>()
+
+		protected object CreateInstanceInternal()
 		{
-			return (T)CreateInstance();
+			return CreateInstance();
 		}
 
-		public T CreateInstance<T>(InitContext context)
+		protected object CreateInstanceInternal(InitContext context)
 		{
-			return (T)CreateInstance(context);
+			return CreateInstance(context);
 		}
 
-		public T CreateInstanceEx<T>()
-		{
-			return (T)CreateInstanceEx();
-		}
-
-		public T CreateInstanceEx<T>(InitContext context)
-		{
-			return (T)CreateInstanceEx(context);
-		}
 #endif
 
 		#endregion
@@ -142,6 +138,50 @@ namespace BLToolkit.Reflection
 
 			return accessor;
 		}
+
+		public static object CreateInstance(Type type)
+		{
+			return GetAccessor(type).CreateInstance();
+		}
+
+		public static object CreateInstance(Type type, InitContext context)
+		{
+			return GetAccessor(type).CreateInstance(context);
+		}
+
+		public static object CreateInstanceEx(Type type)
+		{
+			return GetAccessor(type).CreateInstanceEx();
+		}
+
+		public static object CreateInstanceEx(Type type, InitContext context)
+		{
+			return GetAccessor(type).CreateInstance(context);
+		}
+
+#if FW2
+
+		public static T CreateInstance<T>()
+		{
+			return (T)GetAccessor(typeof(T)).CreateInstance();
+		}
+
+		public static T CreateInstance<T>(InitContext context)
+		{
+			return (T)GetAccessor(typeof(T)).CreateInstance(context);
+		}
+
+		public static T CreateInstanceEx<T>()
+		{
+			return (T)GetAccessor(typeof(T)).CreateInstanceEx();
+		}
+
+		public static T CreateInstanceEx<T>(InitContext context)
+		{
+			return (T)GetAccessor(typeof(T)).CreateInstance(context);
+		}
+
+#endif
 
 		#endregion
 
