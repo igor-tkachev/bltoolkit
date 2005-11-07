@@ -73,7 +73,7 @@ namespace TypeBuilder
 		[Test]
 		public void Test()
 		{
-			TestObject1 o = (TestObject1)TypeAccessor.GetAccessor(typeof(TestObject1)).CreateInstance();
+			TestObject1 o = (TestObject1)TypeAccessor.CreateInstance(typeof(TestObject1));
 
 			Assert.AreEqual(55, o.IntValue);
 			o.IntValue += 1;

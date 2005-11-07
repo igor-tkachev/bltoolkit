@@ -35,7 +35,7 @@ namespace TypeBuilder.Builders
 		[Test]
 		public void AbstractProperties()
 		{
-			TestObject o = (TestObject)TypeAccessor.GetAccessor(typeof(TestObject)).CreateInstance();
+			TestObject o = (TestObject)TypeAccessor.CreateInstance(typeof(TestObject));
 
 			o.Int    = 100; Assert.AreEqual(100, o.Int);
 			o.Double = 200; Assert.AreEqual(200, o.Double);
@@ -90,7 +90,7 @@ namespace TypeBuilder.Builders
 		[Test]
 		public void AbstractMethod()
 		{
-			VirtObject o = (VirtObject)TypeAccessor.GetAccessor(typeof(VirtObject)).CreateInstance();
+			VirtObject o = (VirtObject)TypeAccessor.CreateInstance(typeof(VirtObject));
 
 			int i = 0;
 			int r = o.Foo(10, ref i, DateTime.Now, "");
@@ -112,7 +112,7 @@ namespace TypeBuilder.Builders
 		[Test]
 		public void DefCtorTest1()
 		{
-			DefCtorObject1 o = (DefCtorObject1)TypeAccessor.GetAccessor(typeof(DefCtorObject1)).CreateInstance();
+			DefCtorObject1 o = (DefCtorObject1)TypeAccessor.CreateInstance(typeof(DefCtorObject1));
 
 			Assert.AreEqual(10, o.Value);
 		}
@@ -132,7 +132,7 @@ namespace TypeBuilder.Builders
 		[Test]
 		public void DefCtorTest2()
 		{
-			DefCtorObject2 o = (DefCtorObject2)TypeAccessor.GetAccessor(typeof(DefCtorObject2)).CreateInstance();
+			DefCtorObject2 o = (DefCtorObject2)TypeAccessor.CreateInstance(typeof(DefCtorObject2));
 
 			Assert.AreEqual(10, o.Value);
 		}
@@ -150,7 +150,7 @@ namespace TypeBuilder.Builders
 		[Test]
 		public void InitCtorTest1()
 		{
-			InitCtorObject1 o = (InitCtorObject1)TypeAccessor.GetAccessor(typeof(InitCtorObject1)).CreateInstance();
+			InitCtorObject1 o = (InitCtorObject1)TypeAccessor.CreateInstance(typeof(InitCtorObject1));
 
 			Assert.AreEqual(10, o.Value);
 		}
@@ -172,7 +172,7 @@ namespace TypeBuilder.Builders
 		[Test]
 		public void InitCtorTest2()
 		{
-			InitCtorObject2 o = (InitCtorObject2)TypeAccessor.GetAccessor(typeof(InitCtorObject2)).CreateInstance();
+			InitCtorObject2 o = (InitCtorObject2)TypeAccessor.CreateInstance(typeof(InitCtorObject2));
 
 			Assert.AreEqual(10, o.Value);
 		}

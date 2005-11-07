@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 
 using NUnit.Framework;
 
@@ -18,7 +19,9 @@ namespace UnitTests.All
 	{
 		public virtual void SetValue1(object o, object value)
 		{
-			((TestObject1)o).IntField = (int)value;
+			Type t = typeof(List<TestObject1>);
+
+			//((TestObject1)o).IntField = (int)value;
 		}
 
 		public virtual void SetValue2(object o, object value)

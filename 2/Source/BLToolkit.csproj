@@ -176,6 +176,11 @@
                     BuildAction = "Compile"
                 />
                 <File
+                    RelPath = "TypeBuilder\IPropertyChanged.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
                     RelPath = "TypeBuilder\LazyInstanceAttribute.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
@@ -197,6 +202,11 @@
                 />
                 <File
                     RelPath = "TypeBuilder\ParentAttribute.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "TypeBuilder\PropertyChangedAttribute.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
                 />
@@ -287,6 +297,11 @@
                 />
                 <File
                     RelPath = "TypeBuilder\Builders\NotNullAspectBuilder.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "TypeBuilder\Builders\PropertyChangedBuilder.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
                 />

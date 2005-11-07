@@ -460,7 +460,12 @@ namespace BLToolkit.Reflection
 		/// <returns>A <see cref="ConstructorInfo"/> object representing the constructor.</returns>
 		public ConstructorInfo GetDefaultConstructor()
 		{
-			return _type.GetConstructor(
+			return GetDefaultConstructor(_type);
+		}
+
+		public static ConstructorInfo GetDefaultConstructor(Type type)
+		{
+			return type.GetConstructor(
 				BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic,
 				null,
 				Type.EmptyTypes,

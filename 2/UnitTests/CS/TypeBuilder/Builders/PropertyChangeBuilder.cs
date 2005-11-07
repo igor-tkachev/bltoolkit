@@ -32,7 +32,7 @@ namespace TypeBuilder.Builders
 		[Test]
 		public void TestPublic()
 		{
-			TestObject1 o = (TestObject1)TypeAccessor.GetAccessor(typeof(TestObject1)).CreateInstance();
+			TestObject1 o = (TestObject1)TypeAccessor.CreateInstance(typeof(TestObject1));
 
 			o.ID = 1;
 
@@ -55,7 +55,7 @@ namespace TypeBuilder.Builders
 		[Test]
 		public void TestPrivate()
 		{
-			TestObject2 o = (TestObject2)TypeAccessor.GetAccessor(typeof(TestObject2)).CreateInstance();
+			TestObject2 o = (TestObject2)TypeAccessor.CreateInstance(typeof(TestObject2));
 
 			o.ID = 1;
 

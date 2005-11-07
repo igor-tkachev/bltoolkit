@@ -2,6 +2,8 @@
 ''@ emit Emit
 Imports System
 Imports NUnit.Framework
+
+Imports BLToolkit.Reflection
 Imports BLToolkit.Reflection.Emit
 
 Namespace Examples.Reflection.Emit
@@ -29,7 +31,7 @@ Namespace Examples.Reflection.Emit
 
             Dim type As Type = typeHelper.Create()
 
-            Dim hello As IHello = Activator.CreateInstance(type)
+            Dim hello As IHello = TypeAccessor.CreateInstance(type)
 
             hello.SayHello()
         End Sub

@@ -79,7 +79,7 @@ namespace TypeBuilder.Builders
 		{
 			TypeFactory.SaveTypes = true;
 
-			ITest test = (ITest)TypeAccessor.GetAccessor(typeof(TestObject)).CreateInstance();
+			ITest test = (ITest)TypeAccessor.CreateInstance(typeof(TestObject));
 
 			bool      pbool;
 			byte      pbyte;

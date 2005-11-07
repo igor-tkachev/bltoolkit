@@ -28,7 +28,7 @@ namespace Aspects
 		[ExpectedException(typeof(ArgumentNullException), "Value cannot be null.\r\nParameter name: str2")]
 		public void Test1()
 		{
-			TestObject1 o = (TestObject1)TypeAccessor.GetAccessor(typeof(TestObject1)).CreateInstance();
+			TestObject1 o = (TestObject1)TypeAccessor.CreateInstance(typeof(TestObject1));
 
 			o.Foo1("str1", null, "str3");
 		}
@@ -37,7 +37,7 @@ namespace Aspects
 		[ExpectedException(typeof(ArgumentNullException), "Null")]
 		public void Test2()
 		{
-			TestObject1 o = (TestObject1)TypeAccessor.GetAccessor(typeof(TestObject1)).CreateInstance();
+			TestObject1 o = (TestObject1)TypeAccessor.CreateInstance(typeof(TestObject1));
 
 			o.Foo2("str1", null, "str3");
 		}
@@ -46,7 +46,7 @@ namespace Aspects
 		[ExpectedException(typeof(ArgumentNullException), "Null: str2")]
 		public void Test3()
 		{
-			TestObject1 o = (TestObject1)TypeAccessor.GetAccessor(typeof(TestObject1)).CreateInstance();
+			TestObject1 o = (TestObject1)TypeAccessor.CreateInstance(typeof(TestObject1));
 
 			o.Foo3("str1", null, "str3");
 		}

@@ -89,7 +89,7 @@ namespace TypeBuilder
 		[Test]
 		public void ParamTest()
 		{
-			TestObject1 o = (TestObject1)TypeAccessor.GetAccessor(typeof(TestObject1)).CreateInstance();
+			TestObject1 o = (TestObject1)TypeAccessor.CreateInstance(typeof(TestObject1));
 
 			Assert.AreEqual(10,  o.List.Capacity);
 			Assert.AreEqual("t", o.Str);

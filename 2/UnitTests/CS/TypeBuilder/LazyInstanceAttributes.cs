@@ -87,7 +87,7 @@ namespace TypeBuilder
 		[Test]
 		public void NoParamTest()
 		{
-			TestObject1 o = (TestObject1)TypeAccessor.GetAccessor(typeof(TestObject1)).CreateInstance();
+			TestObject1 o = (TestObject1)TypeAccessor.CreateInstance(typeof(TestObject1));
 
 			Assert.IsNotNull(o.List);
 			Assert.AreEqual("", o.Str);
@@ -131,7 +131,7 @@ namespace TypeBuilder
 		[Test]
 		public void ParamTest()
 		{
-			TestObject2 o = (TestObject2)TypeAccessor.GetAccessor(typeof(TestObject2)).CreateInstance();
+			TestObject2 o = (TestObject2)TypeAccessor.CreateInstance(typeof(TestObject2));
 
 			Assert.AreEqual(10,     o.List.Capacity);
 			Assert.AreEqual("test", o.Str);
@@ -151,7 +151,7 @@ namespace TypeBuilder
 		[Test]
 		public void LazyInstancesTest()
 		{
-			TestObject3 o = (TestObject3)TypeAccessor.GetAccessor(typeof(TestObject3)).CreateInstance();
+			TestObject3 o = (TestObject3)TypeAccessor.CreateInstance(typeof(TestObject3));
 
 			Assert.AreEqual("", o.Str1);
 			Assert.AreEqual("", o.Str2);
@@ -171,7 +171,7 @@ namespace TypeBuilder
 		[Test]
 		public void LazyInstancesFalseTest()
 		{
-			TestObject4 o = (TestObject4)TypeAccessor.GetAccessor(typeof(TestObject4)).CreateInstance();
+			TestObject4 o = (TestObject4)TypeAccessor.CreateInstance(typeof(TestObject4));
 
 			Assert.AreEqual("", o.Str1);
 			Assert.AreEqual("", o.Str2);
@@ -193,7 +193,7 @@ namespace TypeBuilder
 		[Test]
 		public void LazyInstancesTypeTest()
 		{
-			TestObject5 o = (TestObject5)TypeAccessor.GetAccessor(typeof(TestObject5)).CreateInstance();
+			TestObject5 o = (TestObject5)TypeAccessor.CreateInstance(typeof(TestObject5));
 
 			Assert.IsNotNull(o.Str);
 			Assert.IsNotNull(o.List);
