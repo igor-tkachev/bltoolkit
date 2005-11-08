@@ -62,7 +62,7 @@ namespace BLToolkit.Reflection.Emit
 		}
 
 		private MethodInfo _overriddenMethod;
-		public MethodInfo OverriddenMethod
+		public  MethodInfo  OverriddenMethod
 		{
 			get { return _overriddenMethod;  }
 			set { _overriddenMethod = value; }

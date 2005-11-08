@@ -37,8 +37,7 @@ namespace BLToolkit.TypeBuilder.Builders
 		{
 			object[] attrs = type.GetAttributes(typeof(AbstractTypeBuilderAttribute));
 
-			AbstractTypeBuilderList builders =
-				new AbstractTypeBuilderList(attrs.Length);
+			AbstractTypeBuilderList builders = new AbstractTypeBuilderList(attrs.Length);
 
 			foreach (AbstractTypeBuilderAttribute attr in attrs)
 			{
@@ -609,7 +608,7 @@ namespace BLToolkit.TypeBuilder.Builders
 					IAbstractTypeBuilder builder = (IAbstractTypeBuilder)de.Value;
 
 					_context.BuildElement = BuildElement.InterfaceMethod;
-					_context.Step    = BuildStep.Build;
+					_context.Step         = BuildStep.Build;
 					builder.Build(_context);
 
 					EndEmitMethod();

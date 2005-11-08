@@ -42,6 +42,18 @@ namespace BLToolkit.TypeBuilder.Builders
 			get { return _items; }
 		}
 
+		private Hashtable  _fields;
+		public  IDictionary Fields
+		{
+			get
+			{
+				if (_fields == null)
+					_fields = new Hashtable(10);
+
+				return _fields;
+			}
+		}
+
 		private Hashtable _interfaceMap;
 		public  Hashtable  InterfaceMap
 		{
@@ -201,9 +213,14 @@ namespace BLToolkit.TypeBuilder.Builders
 			return field;
 		}
 
-		public FieldBuilder CreatePrivateField(string fieldName, Type type)
+		public FieldBuilder CreatePrivateField(PropertyInfo propertyInfo, string fieldName, Type type)
 		{
-			return CreateField(fieldName, type, FieldAttributes.Private);
+			FieldBuilder field = CreateField(fieldName, type, FieldAttributes.Private);
+
+			if (propertyInfo != null)
+				Fields[propertyInfo] = field;
+
+			return field;
 		}
 
 		public FieldBuilder CreatePrivateStaticField(string fieldName, Type type)

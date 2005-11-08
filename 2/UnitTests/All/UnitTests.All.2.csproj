@@ -2,7 +2,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>8.0.50215</ProductVersion>
+    <ProductVersion>8.0.50727</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{6AE74A35-B337-4B17-8092-E1B98DEF06AF}</ProjectGuid>
     <OutputType>Library</OutputType>
@@ -38,6 +38,10 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\Examples\Cpp\Examples.Cpp.2.vcproj">
+      <Project>{1710C5C2-0416-4981-81FC-BBBDFDA0B24D}</Project>
+      <Name>Examples.Cpp.2</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\Examples\CS\Examples.CS.2.csproj">
       <Project>{34989C73-F82A-4905-9349-D0CF1419CD1C}</Project>
       <Name>Examples.CS.2</Name>

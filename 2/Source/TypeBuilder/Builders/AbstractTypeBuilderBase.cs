@@ -163,7 +163,7 @@ namespace BLToolkit.TypeBuilder.Builders
 
 		#region Helpers
 
-		protected void CallLazyInstanceInsurer(FieldBuilder field)
+		protected bool CallLazyInstanceInsurer(FieldBuilder field)
 		{
 			MethodBuilderHelper ensurer = Context.GetFieldInstanceEnsurer(field.Name);
 
@@ -173,29 +173,34 @@ namespace BLToolkit.TypeBuilder.Builders
 					.ldarg_0
 					.call    (ensurer);
 			}
+
+			return ensurer != null;
 		}
 
-		protected virtual string GetFieldName()
+		protected virtual string GetFieldName(PropertyInfo propertyInfo)
 		{
-			PropertyInfo pi   = Context.CurrentProperty;
-			string       name = pi.Name;
+			string name = propertyInfo.Name;
 
 			if (char.IsUpper(name[0]) && name.Length > 1 && char.IsLower(name[1]))
 				name = char.ToLower(name[0]) + name.Substring(1, name.Length - 1);
 
 			name = "_" + name;
 
-			foreach (ParameterInfo p in pi.GetIndexParameters())
+			foreach (ParameterInfo p in propertyInfo.GetIndexParameters())
 				name += "." + p.ParameterType.FullName;//.Replace(".", "_").Replace("+", "_");
 
 			return name;
 		}
 
-		protected FieldBuilder GetPropertyInfoField()
+		protected string GetFieldName()
 		{
-			string       fieldName = GetFieldName() + "_$propertyInfo";
+			return GetFieldName(Context.CurrentProperty);
+		}
+
+		protected FieldBuilder GetPropertyInfoField(PropertyInfo property)
+		{
+			string       fieldName = GetFieldName(property) + "_$propertyInfo";
 			FieldBuilder field     = Context.GetField(fieldName);
-			PropertyInfo property  = Context.CurrentProperty;
 
 			if (field == null)
 			{
@@ -257,6 +262,11 @@ namespace BLToolkit.TypeBuilder.Builders
 			}
 
 			return field;
+		}
+
+		protected FieldBuilder GetPropertyInfoField()
+		{
+			return GetPropertyInfoField(Context.CurrentProperty);
 		}
 
 		protected FieldBuilder GetParameterField()
