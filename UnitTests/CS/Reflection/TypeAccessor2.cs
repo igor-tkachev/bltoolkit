@@ -20,7 +20,6 @@ namespace Reflection
 			TestObject o1 = TypeAccessor<TestObject>.GetAccessor().CreateInstance();
 
 			TestObject o2 = TypeAccessor.CreateInstance<TestObject>();
-
 		}
 	}
 }

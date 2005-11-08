@@ -42,6 +42,7 @@
     <Compile Include="Reflection\TypeHelper.cs" />
     <Compile Include="TypeBuilder\Builders\IAbstractTypeBuilder.cs" />
     <Compile Include="TypeBuilder\Builders\DefaultTypeBuilder.cs" />
+    <Compile Include="TypeBuilder\Builders\ImplemetInterfaceBuilder.cs" />
     <Compile Include="TypeBuilder\Builders\TypeAccessorBuilder.cs" />
     <Compile Include="TypeBuilder\GetSetValueAttributes.cs" />
     <Compile Include="TypeBuilder\InstanceTypeAttributes.cs" />

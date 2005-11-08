@@ -173,7 +173,7 @@ namespace BLToolkit.TypeBuilder.Builders
 
 			if (field == null)
 			{
-				field = Context.CreatePrivateField(fieldName, fieldType);
+				field = Context.CreatePrivateField(propertyInfo, fieldName, fieldType);
 
 				if (fieldType.IsInterface == false &&
 					propertyInfo.GetCustomAttributes(typeof(NoInstanceAttribute), true).Length == 0)
@@ -379,20 +379,20 @@ namespace BLToolkit.TypeBuilder.Builders
 
 				emit
 					.ldarg_1
-					.brtrue_s(label)
+					.brtrue_s  (label)
 
-					.newobj(InitContextType.GetPublicDefaultConstructor())
-					.starg(1)
+					.newobj    (InitContextType.GetPublicDefaultConstructor())
+					.starg     (1)
 
 					.ldarg_1
 					.ldc_i4_1
-					.callvirt(InitContextType.GetProperty("IsInternal").GetSetMethod())
+					.callvirt  (InitContextType.GetProperty("IsInternal").GetSetMethod())
 
-					.MarkLabel(label)
+					.MarkLabel (label)
 
 					.ldarg_1
-					.callvirt (InitContextType.GetProperty("Parent").GetGetMethod())
-					.stloc    (parentField)
+					.callvirt  (InitContextType.GetProperty("Parent").GetGetMethod())
+					.stloc     (parentField)
 					;
 			}
 
