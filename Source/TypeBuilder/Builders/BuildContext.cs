@@ -42,13 +42,26 @@ namespace BLToolkit.TypeBuilder.Builders
 			get { return _items; }
 		}
 
-		private Hashtable  _fields;
-		public  IDictionary Fields
+		class PropertyInfoComparer : IComparer
+		{
+			public int Compare(object x, object y)
+			{
+				PropertyInfo px = (PropertyInfo)x;
+				PropertyInfo py = (PropertyInfo)y;
+
+				return px.Name.CompareTo(py.Name);
+			}
+		}
+
+		private static PropertyInfoComparer _piComparer = new PropertyInfoComparer();
+
+		private SortedList  _fields;
+		public  IDictionary  Fields
 		{
 			get
 			{
 				if (_fields == null)
-					_fields = new Hashtable(10);
+					_fields = new SortedList(_piComparer, 10);
 
 				return _fields;
 			}
