@@ -9,7 +9,9 @@ using namespace NUnit::Framework;
 using namespace BLToolkit::Reflection;
 using namespace BLToolkit::Reflection::Emit;
 
-namespace Examples { namespace Reflection { namespace Emit
+namespace Examples {
+namespace Reflection {
+namespace Emit
 {
 	[TestFixture]
 	public ref class HelloWorld

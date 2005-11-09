@@ -99,6 +99,7 @@
                     AssemblyName = "nunit.framework"
                     HintPath = "..\..\..\..\Program Files\NUnit\bin\nunit.framework.dll"
                     AssemblyFolderKey = "hklm\dn\nunit.framework"
+                    Private = "True"
                 />
                 <Reference
                     Name = "nunit.uikit"
