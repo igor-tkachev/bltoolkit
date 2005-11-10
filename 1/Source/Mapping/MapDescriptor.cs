@@ -12,7 +12,7 @@ using System.Reflection;
 using System.Reflection.Emit;
 using System.Xml;
 using System.Xml.Schema;
-
+ 
 namespace Rsdn.Framework.Data.Mapping
 {
 	/// <summary>
@@ -137,6 +137,11 @@ namespace Rsdn.Framework.Data.Mapping
 			}
 		}
 		*/
+
+		public IMemberMapper this[int index]
+		{
+			get { return (IMemberMapper)_memberList[index]; }
+		}
 
 		/// <summary>
 		/// 
@@ -624,6 +629,7 @@ namespace Rsdn.Framework.Data.Mapping
 							// Just to add the member into the member collections.
 							//
 							((IMapDataReceiver)this).GetOrdinal(attr.TargetName);
+							//((IMapDataReceiver)this).GetOrdinal(attr.SourceName);
 						}
 					}
 				}
@@ -666,6 +672,11 @@ namespace Rsdn.Framework.Data.Mapping
 		public  IEnumerable AllMembers
 		{
 			get { return (IEnumerable)_allMembers.Values; }
+		}
+
+		public  int AllMembersCount
+		{
+			get { return _allMembers.Count; }
 		}
 
 		private  Hashtable _memberTable;
@@ -791,7 +802,7 @@ namespace Rsdn.Framework.Data.Mapping
 
 							lock (_memberList.SyncRoot)
 							{
-								_memberList.Add(md);
+								((FieldMapper)md).Order = _memberList.Add(md);
 								_memberTable[name.ToLower()] = md;
 							}
 

@@ -11,6 +11,12 @@ namespace Rsdn.Framework.Validation
 			_value = regex;
 		}
 
+		public RegExAttribute(string regex, string errorMessage)
+			: this(regex)
+		{
+			ErrorMessage = errorMessage;
+		}
+
 		private string _value;
 		public  string  Value
 		{
@@ -22,9 +28,15 @@ namespace Rsdn.Framework.Validation
 			return context.IsNull(context) || Regex.IsMatch(context.Value.ToString(), Value);
 		}
 
+		public override string ErrorMessage
+		{
+			get { return base.ErrorMessage != null? base.ErrorMessage: "'{0}' format is not valid."; }
+			set { base.ErrorMessage = value; }
+		}
+
 		public override string GetErrorMessage(ValidationContext context)
 		{
-			return string.Format("'{0}' format is not valid.", GetPropertyFriendlyName(context));
+			return string.Format(ErrorMessage, GetPropertyFriendlyName(context));
 		}
 	}
 }

@@ -49,8 +49,7 @@ namespace Rsdn.Framework.EditableObject
 
 		protected virtual void OnPropertyChanged(MapPropertyInfo pi)
 		{
-			if (/*_isEditing == false &&*/ PropertyChanged != null)
-				PropertyChanged(this, new PropertyChangedEventArgs(pi.PropertyName));
+			OnPropertyChanged(pi.PropertyName);
 		}
 
 		protected virtual void OnPropertyChanged(string propertyName)
@@ -94,18 +93,29 @@ namespace Rsdn.Framework.EditableObject
 			}
 		}
 
+		public virtual bool IsDirtyMember(string memberName)
+		{
+			bool isDirty = false;
+
+			return ((IEditable)this).IsDirtyMember(memberName, null, ref isDirty) && isDirty;
+		}
+
 		#endregion
 
 		#region ISupportInitialize Members
 
-		private bool _isInInit;
+		private   bool _isInInit;
+		protected bool  IsInInit
+		{
+			get { return _isInInit; }
+		}
 
-		void ISupportInitialize.BeginInit()
+		public virtual void BeginInit()
 		{
 			_isInInit = true;
 		}
 
-		void ISupportInitialize.EndInit()
+		public virtual void EndInit()
 		{
 			AcceptChanges();
 

@@ -6,7 +6,12 @@ namespace Rsdn.Framework.Validation
 	public class MaxValueAttribute : ValidatorBaseAttribute
 	{
 		public MaxValueAttribute(object maxValue)
-			: this (maxValue, false)
+			: this(maxValue, false)
+		{
+		}
+
+		public MaxValueAttribute(object maxValue, string errorMessage)
+			: this(maxValue, false, errorMessage)
 		{
 		}
 
@@ -14,6 +19,12 @@ namespace Rsdn.Framework.Validation
 		{
 			_value       = maxValue;
 			_isExclusive = isExclusive;
+		}
+
+		public MaxValueAttribute(object maxValue, bool isExclusive, string errorMessage)
+			: this(maxValue, isExclusive)
+		{
+			ErrorMessage = errorMessage;
 		}
 
 		private         object _value;
@@ -111,9 +122,15 @@ namespace Rsdn.Framework.Validation
 			return true;
 		}
 
+		public override string ErrorMessage
+		{
+			get { return base.ErrorMessage != null? base.ErrorMessage: "Maximum '{0}' value is {1}{2}."; }
+			set { base.ErrorMessage = value; }
+		}
+
 		public override string GetErrorMessage(ValidationContext context)
 		{
-			return string.Format("Maximum '{0}' value is {1}{2}.",
+			return string.Format(ErrorMessage,
 				GetPropertyFriendlyName(context),
 				Value,
 				IsExclusive? " exclusive": string.Empty);

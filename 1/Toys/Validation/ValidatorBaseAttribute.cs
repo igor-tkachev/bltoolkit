@@ -5,6 +5,22 @@ namespace Rsdn.Framework.Validation
 {
 	public abstract class ValidatorBaseAttribute : Attribute
 	{
+		public ValidatorBaseAttribute()
+		{
+		}
+
+		public ValidatorBaseAttribute(string errorMessage)
+		{
+			_errorMessage = errorMessage;
+		}
+
+		private        string _errorMessage;
+		public virtual string  ErrorMessage
+		{
+			get { return _errorMessage;  }
+			set { _errorMessage = value; }
+		}
+
 		public abstract bool   IsValid        (ValidationContext context);
 		public abstract string GetErrorMessage(ValidationContext context);
 

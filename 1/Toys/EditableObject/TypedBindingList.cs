@@ -36,6 +36,30 @@ namespace Rsdn.Framework.EditableObject
 			}
 		}
 
+		//private MapDescriptor _descriptor;
+
+		[Browsable(false)]
+		protected Type Type
+		{
+			get
+			{
+				if (_type == null || _type.Type == null)
+					return null;
+
+				return _type.Type;
+
+				/*
+				if (DesignMode)
+					return _type.Type;
+
+				if (_descriptor == null || _descriptor.OriginalType != _type.Type)
+					_descriptor = Map.Descriptor(_type.Type);
+
+				return _descriptor.MappedType;
+				*/
+			}
+		}
+
 		private EditableArrayList _list = _empty;
 		[Browsable(false)]
 		[RefreshProperties(RefreshProperties.Repaint)]
@@ -50,8 +74,7 @@ namespace Rsdn.Framework.EditableObject
 					if (_list != null)
 						((IBindingList)_list).ListChanged -= new ListChangedEventHandler(ListChangedHandler);
 
-					_list = _type == null || _type.Type == null?
-						_empty: new EditableArrayList(_type.Type);
+					_list = Type == null? _empty: new EditableArrayList(Type);
 				}
 				else
 				{
@@ -63,30 +86,30 @@ namespace Rsdn.Framework.EditableObject
 					}
 					else if (value is ArrayList)
 					{
-						if (value.Count != 0 || _type == null || _type.Type == null)
+						if (value.Count != 0 || Type == null)
 							list = EditableArrayList.Adapter((ArrayList)value);
 						else
-							list = EditableArrayList.Adapter(_type.Type, (ArrayList)value);
+							list = EditableArrayList.Adapter(Type, (ArrayList)value);
 					}
 					else
 					{
-						if (value.Count != 0 && _type == null || _type.Type == null)
+						if (value.Count != 0 && Type == null)
 							list = EditableArrayList.Adapter(value);
 						else
-							list = EditableArrayList.Adapter(_type.Type, value);
+							list = EditableArrayList.Adapter(Type, value);
 					}
 
-					if (_type == null || _type.Type == null)
+					if (Type == null)
 					{
 						_type = new TypeWrapper(list.ItemType);
 					}
 					else
 					{
-						if (list.ItemType != _type.Type && !list.ItemType.IsSubclassOf(_type.Type))
+						if (list.ItemType != Type && !list.ItemType.IsSubclassOf(Type))
 							throw new ArgumentException(string.Format(
 								"Item type (0) of the new list must be a subclass of {1}.",
 								list.ItemType,
-								_type.Type));
+								Type));
 					}
 
 					if (_list != null)
@@ -136,8 +159,8 @@ namespace Rsdn.Framework.EditableObject
 
 		protected virtual void OnListChanged(ListChangedEventArgs e)
 		{
-			if (_listChanged != null)
-				_listChanged(this, e);
+			if (ListChanged != null)
+				ListChanged(this, e);
 		}
 
 		protected void OnListChanged(ListChangedType listChangedType, int newIndex)
@@ -148,6 +171,16 @@ namespace Rsdn.Framework.EditableObject
 		private void ListChangedHandler(object sender, ListChangedEventArgs e)
 		{
 			OnListChanged(e);
+		}
+
+		protected override void Dispose(bool disposing)
+		{
+			if (_list != null)
+				((IBindingList)_list).ListChanged -= new ListChangedEventHandler(ListChangedHandler);
+
+			_list = null;
+
+			base.Dispose(disposing);
 		}
 
 		#endregion
@@ -193,12 +226,7 @@ namespace Rsdn.Framework.EditableObject
 			get { return ((IBindingList)_list).IsSorted; }
 		}
 
-		private ListChangedEventHandler _listChanged;
-		event   ListChangedEventHandler IBindingList.ListChanged
-		{
-			add    { _listChanged += value; }
-			remove { _listChanged -= value; }
-		}
+		public event ListChangedEventHandler ListChanged;
 
 		void IBindingList.RemoveIndex(PropertyDescriptor property)
 		{
@@ -341,6 +369,9 @@ namespace Rsdn.Framework.EditableObject
 					throw new NullReferenceException("type");
 
 				_type = type;
+
+				//if (_type != null && _type.IsAbstract)
+				//	_type = Map.Descriptor(_type).MappedType;
 			}
 
 			internal TypeWrapper(string typeName)

@@ -2,7 +2,6 @@ using System;
 using System.Collections;
 using System.ComponentModel;
 using System.Data;
-using System.Globalization;
 using System.Reflection;
 using System.Runtime.InteropServices;
 
@@ -10,9 +9,11 @@ using Rsdn.Framework.Data.Mapping;
 
 namespace Rsdn.Framework.EditableObject
 {
+	public delegate bool IsNullHandler(object value);
+
 	[Serializable, ComVisible(true)]
 	public class EditableArrayList :
-		ArrayList, IBindingList, ITypedList, ISupportInitialize, 
+		ArrayList, IBindingList, ITypedList, ISupportInitialize, IDisposable,
 #if VER2
 		//IBindingListView,
 #endif
@@ -69,6 +70,23 @@ namespace Rsdn.Framework.EditableObject
 			}
 		}
 
+		private IsNullHandler _isNull;
+		public  IsNullHandler  IsNull
+		{
+			get { return _isNull;  }
+			set { _isNull = value; }
+		}
+
+		public void Sort(string memberName)
+		{
+			Sort(memberName, ListSortDirection.Ascending);
+		}
+
+		public void Sort(string memberName, ListSortDirection direction)
+		{
+			Sort(new SortMemberComparer(Map.Descriptor(ItemType)[memberName], direction));
+		}
+
 		#endregion
 
 		#region Protected Members
@@ -121,7 +139,7 @@ namespace Rsdn.Framework.EditableObject
 
 		#region Add/Remove Internal
 
-		private void AddInternal(object value)
+		void AddInternal(object value)
 		{
 			if (IsTrackingChanges)
 			{
@@ -134,6 +152,8 @@ namespace Rsdn.Framework.EditableObject
 			if (value is INotifyPropertyChanged)
 				((INotifyPropertyChanged)value).PropertyChanged += 
 					new PropertyChangedEventHandler(ItemPropertyChanged);
+
+			OnAdd(value);
 		}
 
 		private void RemoveInternal(object value)
@@ -149,6 +169,8 @@ namespace Rsdn.Framework.EditableObject
 			if (value is INotifyPropertyChanged)
 				((INotifyPropertyChanged)value).PropertyChanged -=
 					new PropertyChangedEventHandler(ItemPropertyChanged);
+
+			OnRemove(value);
 		}
 
 		private void AddInternal(IEnumerable e)
@@ -161,6 +183,14 @@ namespace Rsdn.Framework.EditableObject
 		{
 			foreach (object o in e)
 				RemoveInternal(o);
+		}
+
+		protected virtual void OnAdd(object value)
+		{
+		}
+
+		protected virtual void OnRemove(object value)
+		{
 		}
 
 		#endregion
@@ -244,6 +274,11 @@ namespace Rsdn.Framework.EditableObject
 
 				return false;
 			}
+		}
+
+		bool IEditable.IsDirtyMember(string memberName, MapPropertyInfo propertyInfo, ref bool isDirty)
+		{
+			return false;
 		}
 
 		#endregion
@@ -377,58 +412,81 @@ namespace Rsdn.Framework.EditableObject
 
 		#region ITypedList Members
 
-		PropertyDescriptorCollection ITypedList.GetItemProperties(PropertyDescriptor[] listAccessors)
+		private static Hashtable _descriptors = new Hashtable();
+		private static Hashtable _fieldCount  = new Hashtable();
+
+		public PropertyDescriptorCollection GetItemProperties(PropertyDescriptor[] listAccessors)
 		{
-			PropertyDescriptorCollection pdc = TypeDescriptor.GetProperties(ItemType);
+			string key = ItemType.ToString() + "." + (_isNull == null? "0": "1");
 
-			ArrayList     list      = new ArrayList(pdc.Count);
-			bool          isDataRow = ItemType.IsSubclassOf(typeof(DataRow));
-			MapDescriptor md        = null;
+			PropertyDescriptorCollection pdc = (PropertyDescriptorCollection)_descriptors[key];
 
-			foreach (PropertyDescriptor p in pdc)
+			if (pdc == null)
 			{
-				if (p.Attributes.Matches(BindableAttribute.No))
-					continue;
+				pdc = TypeDescriptor.GetProperties(ItemType);
 
-				if (isDataRow && p.Name == "ItemArray")
-					continue;
+				ArrayList     list      = new ArrayList(pdc.Count);
+				bool          isDataRow = ItemType.IsSubclassOf(typeof(DataRow));
+				MapDescriptor md        = null;
 
-				PropertyDescriptor pd = null;
-
-				if (p.PropertyType.GetInterface("IList") != null)
+				foreach (PropertyDescriptor p in pdc)
 				{
-					pd = new IListPropertyDescriptor(p, this);
-				}
-				else
-				{
-					if (isDataRow == false)
+					if (p.Attributes.Matches(BindableAttribute.No))
+						continue;
+
+					if (isDataRow && p.Name == "ItemArray")
+						continue;
+
+					PropertyDescriptor pd = null;
+
+					if (p.PropertyType.GetInterface("IList") != null)
 					{
-						if (md == null)
-							md = Map.Descriptor(ItemType);
-
-						foreach (IMemberMapper mm in md)
+						pd = new IListPropertyDescriptor(p, this, IsNull);
+					}
+					else
+					{
+						if (isDataRow == false)
 						{
-							if (mm.OriginalName == p.Name)
-							{
-								if (mm.MemberType.IsEnum == false && mm.MapValueAttributeList.Length == 0)
-									pd = new MapPropertyDescriptor(p, mm);
+							if (md == null)
+								md = Map.Descriptor(ItemType);
 
-								break;
+							foreach (IMemberMapper mm in md)
+							{
+								if (mm.OriginalName == p.Name)
+								{
+									if (mm.MemberType.IsEnum == false && mm.MapValueAttributeList.Length == 0)
+										pd = new MapPropertyDescriptor(p, mm, IsNull);
+
+									break;
+								}
 							}
 						}
 					}
+
+					if (pd == null)
+						pd = new StandardPropertyDescriptor(p, IsNull);
+
+					list.Add(pd);
 				}
 
-				if (pd == null)
-					pd = new StandardPropertyDescriptor(p);
+				list.Sort(new PropertyDescriptorComparer());
 
-				list.Add(pd);
+				pdc = new PropertyDescriptorCollection(
+					(PropertyDescriptor[])list.ToArray(typeof(PropertyDescriptor)));
+
+				_descriptors[key] = pdc;
+				_fieldCount [key] = md.AllMembersCount;
+			}
+			else
+			{
+				if ((int)_fieldCount[key] != Map.Descriptor(ItemType).AllMembersCount)
+				{
+					_descriptors.Remove(key);
+					return GetItemProperties(listAccessors);
+				}
 			}
 
-			list.Sort(new PropertyDescriptorComparer());
-
-			return new PropertyDescriptorCollection(
-				(PropertyDescriptor[])list.ToArray(typeof(PropertyDescriptor)));
+			return pdc;
 		}
 
 		string ITypedList.GetListName(PropertyDescriptor[] listAccessors)
@@ -489,8 +547,12 @@ namespace Rsdn.Framework.EditableObject
 
 		public override void Clear()
 		{
-			_list.Clear();
-			OnListChanged(ListChangedType.Reset, -1);
+			if (_list.Count > 0)
+			{
+				RemoveInternal(_list);
+				_list.Clear();
+				OnListChanged(ListChangedType.Reset, -1);
+			}
 		}
 
 		public override object Clone()
@@ -573,10 +635,10 @@ namespace Rsdn.Framework.EditableObject
 
 		public override void InsertRange(int index, ICollection c)
 		{
-			_list.InsertRange(index, c);
-
 			if (c.Count > 0)
 			{
+				_list.InsertRange(index, c);
+
 				AddInternal(c);
 				OnListChanged(ListChangedType.Reset, index);
 			}
@@ -754,6 +816,9 @@ namespace Rsdn.Framework.EditableObject
 			_itemType = itemType;
 			_list     = list;
 
+			//if (_itemType.IsAbstract)
+			//	_itemType = Map.Descriptor(_itemType).MappedType;
+
 			AddInternal(_list);
 		}
 
@@ -814,11 +879,13 @@ namespace Rsdn.Framework.EditableObject
 		class StandardPropertyDescriptor : PropertyDescriptor
 		{
 			protected PropertyDescriptor _descriptor = null;
+			protected IsNullHandler      _isNull;
 
-			public StandardPropertyDescriptor(PropertyDescriptor pd)
+			public StandardPropertyDescriptor(PropertyDescriptor pd, IsNullHandler isNull)
 				: base(pd)
 			{
 				_descriptor = pd;
+				_isNull     = isNull;
 			}
 
 			public override void SetValue(object component, object value)
@@ -828,7 +895,7 @@ namespace Rsdn.Framework.EditableObject
 
 			public override object GetValue(object component)
 			{
-				return _descriptor.GetValue(component);
+				return CheckNull(_descriptor.GetValue(component));
 			}
 
 			public override Type ComponentType
@@ -861,6 +928,10 @@ namespace Rsdn.Framework.EditableObject
 				_descriptor.ResetValue(component);
 			}
 
+			protected object CheckNull(object value)
+			{
+				return _isNull != null && _isNull(value)? DBNull.Value: value;
+			}
 		}
 
 		#endregion
@@ -871,8 +942,8 @@ namespace Rsdn.Framework.EditableObject
 		{
 			private IMemberMapper _memberMapper;
 
-			public MapPropertyDescriptor(PropertyDescriptor pd, IMemberMapper mm)
-				: base(pd)
+			public MapPropertyDescriptor(PropertyDescriptor pd, IMemberMapper mm, IsNullHandler isNull)
+				: base(pd, isNull)
 			{
 				_memberMapper = mm;
 			}
@@ -884,7 +955,7 @@ namespace Rsdn.Framework.EditableObject
 
 			public override object GetValue(object component)
 			{
-				return _memberMapper.GetValue(component);
+				return CheckNull(_memberMapper.GetValue(component));
 			}
 		}
 
@@ -896,8 +967,9 @@ namespace Rsdn.Framework.EditableObject
 		{
 			private EditableArrayList _parent;
 
-			public IListPropertyDescriptor(PropertyDescriptor descriptor, EditableArrayList parent)
-				: base(descriptor)
+			public IListPropertyDescriptor(
+				PropertyDescriptor descriptor, EditableArrayList parent, IsNullHandler isNull)
+				: base(descriptor, isNull)
 			{
 				_parent = parent;
 			}
@@ -948,6 +1020,41 @@ namespace Rsdn.Framework.EditableObject
 
 				return _direction == ListSortDirection.Ascending? n: -n;
 			}
+		}
+
+		#endregion
+
+		#region SortMemberComparer
+
+		class SortMemberComparer : IComparer
+		{
+			IMemberMapper      _member;
+			ListSortDirection  _direction;
+
+			public SortMemberComparer(IMemberMapper member, ListSortDirection direction)
+			{
+				_member    = member;
+				_direction = direction;
+			}
+
+			public int Compare(object x, object y)
+			{
+				object a = _member.GetValue(x);
+				object b = _member.GetValue(y);
+
+				int n = Comparer.Default.Compare(a, b);
+
+				return _direction == ListSortDirection.Ascending? n: -n;
+			}
+		}
+
+		#endregion
+
+		#region IDisposable
+
+		public void Dispose()
+		{
+			Clear();
 		}
 
 		#endregion
