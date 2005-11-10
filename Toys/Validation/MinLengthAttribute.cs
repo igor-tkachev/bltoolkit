@@ -10,6 +10,12 @@ namespace Rsdn.Framework.Validation
 			_value = minLength;
 		}
 
+		public MinLengthAttribute(int minLength, string errorMessage)
+			: this(minLength)
+		{
+			ErrorMessage = errorMessage;
+		}
+
 		private int _value;
 		public  int  Value
 		{
@@ -21,9 +27,15 @@ namespace Rsdn.Framework.Validation
 			return context.IsNull(context) || context.Value.ToString().Length >= _value;
 		}
 
+		public override string ErrorMessage
+		{
+			get { return base.ErrorMessage != null? base.ErrorMessage: "'{0}' minimum length is {1}."; }
+			set { base.ErrorMessage = value; }
+		}
+
 		public override string GetErrorMessage(ValidationContext context)
 		{
-			return string.Format("'{0}' minimum length is {1}.",
+			return string.Format(ErrorMessage,
 				GetPropertyFriendlyName(context), Value);
 		}
 	}

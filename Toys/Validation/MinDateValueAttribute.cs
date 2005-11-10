@@ -10,9 +10,21 @@ namespace Rsdn.Framework.Validation
 		{
 		}
 
+		public MinDateValueAttribute(int year, int month, int day, string errorMessage)
+			: this(year, month, day)
+		{
+			ErrorMessage = errorMessage;
+		}
+
 		public MinDateValueAttribute(int year, int month, int day, bool isExclusive)
 			: base(new DateTime(year, month, day), isExclusive)
 		{
+		}
+
+		public MinDateValueAttribute(int year, int month, int day, bool isExclusive, string errorMessage)
+			: this(year, month, day, isExclusive)
+		{
+			ErrorMessage = errorMessage;
 		}
 
 		public override bool IsValid(ValidationContext context)

@@ -6,7 +6,12 @@ namespace Rsdn.Framework.Validation
 	public class MinValueAttribute : ValidatorBaseAttribute
 	{
 		public MinValueAttribute(object minValue)
-			: this (minValue, false)
+			: this(minValue, false)
+		{
+		}
+
+		public MinValueAttribute(object minValue, string errorMessage)
+			: this(minValue, false, errorMessage)
 		{
 		}
 
@@ -14,6 +19,12 @@ namespace Rsdn.Framework.Validation
 		{
 			_value       = minValue;
 			_isExclusive = isExclusive;
+		}
+
+		public MinValueAttribute(object minValue, bool isExclusive, string errorMessage)
+			: this(minValue, isExclusive)
+		{
+			ErrorMessage = errorMessage;
 		}
 
 		private object _value;
@@ -112,9 +123,15 @@ namespace Rsdn.Framework.Validation
 			return true;
 		}
 
+		public override string ErrorMessage
+		{
+			get { return base.ErrorMessage != null? base.ErrorMessage: "Minimum '{0}' value is {1}{2}."; }
+			set { base.ErrorMessage = value; }
+		}
+
 		public override string GetErrorMessage(ValidationContext context)
 		{
-			return string.Format("Minimum '{0}' value is {1}{2}.",
+			return string.Format(ErrorMessage,
 				GetPropertyFriendlyName(context),
 			    GetValue(context),
 				IsExclusive? " exclusive": string.Empty);

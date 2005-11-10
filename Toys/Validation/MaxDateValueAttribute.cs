@@ -10,9 +10,21 @@ namespace Rsdn.Framework.Validation
 		{
 		}
 
+		public MaxDateValueAttribute(int year, int month, int day, string errorMessage)
+			: this(year, month, day)
+		{
+			ErrorMessage = errorMessage;
+		}
+
 		public MaxDateValueAttribute(int year, int month, int day, bool isExclusive)
 			: base(new DateTime(year, month, day), isExclusive)
 		{
+		}
+
+		public MaxDateValueAttribute(int year, int month, int day, bool isExclusive, string errorMessage)
+			: this(year, month, day, isExclusive)
+		{
+			ErrorMessage = errorMessage;
 		}
 
 		public override bool IsValid(ValidationContext context)

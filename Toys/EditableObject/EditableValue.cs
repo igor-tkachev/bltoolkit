@@ -1,5 +1,7 @@
 using System;
 
+using Rsdn.Framework.Data.Mapping;
+
 #if !VER2
 using T = System.Object;
 #endif
@@ -55,6 +57,16 @@ namespace Rsdn.Framework.EditableObject
 
 				return o == null? c == null: o.Equals(c) == false;
 			}
+		}
+
+		bool IEditable.IsDirtyMember(string memberName, MapPropertyInfo propertyInfo, ref bool isDirty)
+		{
+			if (memberName != propertyInfo.PropertyName)
+				return false;
+
+			isDirty = IsDirty;
+
+			return true;
 		}
 	}
 }
