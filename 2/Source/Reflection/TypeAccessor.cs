@@ -52,12 +52,12 @@ namespace BLToolkit.Reflection
 		public object CreateInstanceEx()
 		{
 			return _objectFactory != null?
-				_objectFactory.CreateInstance(null): CreateInstance((InitContext)null);
+				_objectFactory.CreateInstance(this, null): CreateInstance((InitContext)null);
 		}
 
 		public object CreateInstanceEx(InitContext context)
 		{
-			return _objectFactory != null? _objectFactory.CreateInstance(context): CreateInstance(context);
+			return _objectFactory != null? _objectFactory.CreateInstance(this, context): CreateInstance(context);
 		}
 
 #if FW2

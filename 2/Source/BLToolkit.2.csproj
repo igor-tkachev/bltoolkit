@@ -43,6 +43,7 @@
     <Compile Include="Reflection\Emit\TypeBuilderHelper.cs" />
     <Compile Include="Reflection\IObjectFactory.cs" />
     <Compile Include="Reflection\MemberAccessor.cs" />
+    <Compile Include="Reflection\ObjectFactoryAttribute.cs" />
     <Compile Include="Reflection\TypeAccessorT.cs" />
     <Compile Include="Reflection\TypeHelper.cs" />
     <Compile Include="TypeBuilder\Builders\AbstractClassBuilder.cs" />
@@ -65,7 +66,7 @@
     <Compile Include="Reflection\InitContext.cs" />
     <Compile Include="TypeBuilder\Builders\InstanceTypeBuilder.cs" />
     <Compile Include="TypeBuilder\Builders\NotNullAspectBuilder.cs" />
-    <Compile Include="TypeBuilder\Builders\TypeBuilderPriority.cs" />
+    <Compile Include="TypeBuilder\Builders\TypeBuilderConsts.cs" />
     <Compile Include="TypeBuilder\DefaultInstanceTypeAttribute.cs" />
     <Compile Include="TypeBuilder\GetValueAttribute.cs" />
     <Compile Include="TypeBuilder\ImplementInterfaceAttribute.cs" />

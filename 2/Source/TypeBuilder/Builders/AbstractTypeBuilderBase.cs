@@ -46,7 +46,7 @@ namespace BLToolkit.TypeBuilder.Builders
 
 		public virtual int GetPriority(BuildContext context)
 		{
-			return TypeBuilderPriority.Normal;
+			return TypeBuilderConsts.NormalBuilderPriority;
 		}
 
 		public virtual void Build(BuildContext context)
@@ -365,7 +365,13 @@ namespace BLToolkit.TypeBuilder.Builders
 				null);
 		}
 
-		#endregion
+		public static Attribute GetFirstAttribute(Type type, Type attributeType)
+		{
+			object[] attrs = new TypeHelper(type).GetAttributes(attributeType);
 
+			return attrs.Length > 0? (Attribute)attrs[0]: null;
+		}
+
+		#endregion
 	}
 }

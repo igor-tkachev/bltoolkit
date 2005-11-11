@@ -180,6 +180,99 @@ namespace BLToolkit.TypeBuilder
 		}
 
 		#endregion
+
+		#region Resolve Types
+
+		private static bool _isInit;
+
+		public static void Init()
+		{
+			if (_isInit == false)
+			{
+				_isInit = true;
+
+				AppDomain.CurrentDomain.AssemblyResolve += new ResolveEventHandler(CurrentDomain_AssemblyResolve);
+			}
+		}
+
+		private static Assembly CurrentDomain_AssemblyResolve(object sender, ResolveEventArgs args)
+		{
+			lock (_builtTypes.SyncRoot)
+			{
+				foreach (Type type in _builtTypes.Values)
+					if (type.FullName == args.Name)
+						return type.Assembly;
+			}
+
+			int idx = args.Name.IndexOf("." + TypeBuilderConsts.AssemblyNameSuffix + ".dll");
+
+			if (idx > 0)
+			{
+				string typeName = args.Name.Substring(0, idx);
+
+				Type type = Type.GetType(typeName);
+
+				if (type == null)
+				{
+					foreach (Assembly a in ((AppDomain)sender).GetAssemblies())
+					{
+						if (a.CodeBase.IndexOf("Microsoft.NET/Framework") > 0)
+							continue;
+
+						type = a.GetType(typeName);
+
+						if (type != null) break;
+
+						foreach (Type t in a.GetTypes())
+						{
+							if (!t.IsAbstract)
+								continue;
+
+							if (t.FullName == typeName)
+							{
+								type = t;
+							}
+							else
+							{
+								if (t.FullName.IndexOf('+') > 0)
+								{
+									string s = typeName;
+
+									while (type == null && (idx = s.LastIndexOf(".")) > 0)
+									{
+										s = s.Remove(idx, 1).Insert(idx, "+");
+
+										if (t.FullName == s)
+											type = t;
+									}
+								}
+							}
+
+							if (type != null) break;
+						}
+
+						if (type != null) break;
+					}
+				}
+
+				if (type != null)
+				{
+					Type newType = TypeFactory.GetType(type, new AbstractClassBuilder());
+
+					if (newType.Assembly.FullName == args.Name)
+						return newType.Assembly;
+				}
+			}
+
+			return null;
+		}
+
+		static TypeFactory()
+		{
+			Init();
+		}
+
+		#endregion
 	}
 }
 

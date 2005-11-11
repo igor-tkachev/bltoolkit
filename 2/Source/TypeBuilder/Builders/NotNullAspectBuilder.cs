@@ -17,7 +17,7 @@ namespace BLToolkit.TypeBuilder.Builders
 
 		public override int GetPriority(BuildContext context)
 		{
-			return TypeBuilderPriority.NotNullAspect;
+			return TypeBuilderConsts.NotNullAspectPriority;
 		}
 
 		public override bool IsApplied(BuildContext context)
