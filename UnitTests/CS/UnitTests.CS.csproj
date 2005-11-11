@@ -105,6 +105,11 @@
                     BuildAction = "Compile"
                 />
                 <File
+                    RelPath = "Reflection\ObjectFactoryAttribute.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
                     RelPath = "Reflection\TypeAccessor.cs"
                     SubType = "Code"
                     BuildAction = "Compile"

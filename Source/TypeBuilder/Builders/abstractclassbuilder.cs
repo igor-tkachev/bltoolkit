@@ -16,7 +16,7 @@ namespace BLToolkit.TypeBuilder.Builders
 	{
 		public string AssemblyNameSuffix
 		{
-			get { return "TypeBuilder"; }
+			get { return TypeBuilderConsts.AssemblyNameSuffix; }
 		}
 
 		public Type Build(Type sourceType, AssemblyBuilderHelper assemblyBuilder)

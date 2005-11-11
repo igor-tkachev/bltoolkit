@@ -4,6 +4,6 @@ namespace BLToolkit.Reflection
 {
 	public interface IObjectFactory
 	{
-		object CreateInstance(InitContext context);
+		object CreateInstance(TypeAccessor typeAccessor, InitContext context);
 	}
 }

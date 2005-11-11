@@ -48,6 +48,7 @@ namespace BLToolkit.TypeBuilder.Builders
 			BuildCreateInstanceMethods();
 			BuildTypeProperties();
 			BuildMembers();
+			BuildObjectFactory();
 
 			_typeBuilder.DefaultConstructor.Emitter
 				.ret()
@@ -305,6 +306,24 @@ namespace BLToolkit.TypeBuilder.Builders
 				;
 
 			return ctorBuilder;
+		}
+
+		private void BuildObjectFactory()
+		{
+			Attribute attrs = AbstractTypeBuilderBase.GetFirstAttribute(_type, typeof(ObjectFactoryAttribute));
+
+			if (attrs != null)
+			{
+				_typeBuilder.DefaultConstructor.Emitter
+					.ldarg_0
+					.LoadType  (_type)
+					.LoadType  (typeof(ObjectFactoryAttribute))
+					.call      (typeof(AbstractTypeBuilderBase).GetMethod("GetFirstAttribute"))
+					.castclass (typeof(ObjectFactoryAttribute))
+					.call      (typeof(ObjectFactoryAttribute).GetProperty("ObjectFactory").GetGetMethod())
+					.call      (typeof(TypeAccessor).          GetProperty("ObjectFactory").GetSetMethod())
+					;
+			}
 		}
 	}
 }
