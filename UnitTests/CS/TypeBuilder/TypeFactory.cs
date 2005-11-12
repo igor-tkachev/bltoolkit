@@ -1,8 +1,9 @@
 using System;
 using System.Collections;
+using System.IO;
 
 using NUnit.Framework;
-using System.IO;
+
 using BLToolkit.Reflection;
 using BLToolkit.TypeBuilder;
 
