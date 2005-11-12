@@ -34,6 +34,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Aspects\NotNullAttribute.cs" />
+    <Compile Include="Mapping\DataReaderMapSource.cs" />
+    <Compile Include="Mapping\IMapDestination.cs" />
+    <Compile Include="Mapping\IMapSource.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Reflection\Emit\AssemblyBuilderHelper.cs" />
     <Compile Include="Reflection\Emit\ConstructorBuilderHelper.cs" />
@@ -94,7 +97,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Data\DataProvider\" />
-    <Folder Include="Mapping\" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>

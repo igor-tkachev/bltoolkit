@@ -275,4 +275,3 @@ namespace BLToolkit.TypeBuilder
 		#endregion
 	}
 }
-

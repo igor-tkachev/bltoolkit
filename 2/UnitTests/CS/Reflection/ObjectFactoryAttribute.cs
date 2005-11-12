@@ -30,7 +30,7 @@ namespace Reflection
 
 			public int Number;
 
-			class Factory : IObjectFactory
+			public class Factory : IObjectFactory
 			{
 				object IObjectFactory.CreateInstance(TypeAccessor typeAccessor, InitContext context)
 				{
