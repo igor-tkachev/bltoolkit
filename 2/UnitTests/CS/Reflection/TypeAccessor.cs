@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 
 using NUnit.Framework;
 
@@ -131,6 +132,23 @@ namespace Reflection
 			Assert.IsNull   (ta["ProtField"]);
 			Assert.IsNull   (ta["ProtProperty1"]);
 			Assert.IsNotNull(ta["ProtProperty2"]);
+		}
+
+		public class TestObject3
+		{
+			public int       IntField    = 10;
+			public string    StringField = "256";
+			public ArrayList ListField   = new ArrayList();
+			public ArrayList NullField   = null;
+		}
+
+		[Test]
+		public void Write()
+		{
+			TestObject3 o = new TestObject3();
+
+			TypeAccessor.WriteConsole(o);
+			TypeAccessor.WriteDebug  (o);
 		}
 	}
 }

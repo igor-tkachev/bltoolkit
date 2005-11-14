@@ -16,7 +16,7 @@ namespace TypeBuilder
 		{
 			TypeFactory.Init();
 
-			Console.WriteLine(AppDomain.CurrentDomain.FriendlyName);
+			Console.WriteLine("Domain name: {0}", AppDomain.CurrentDomain.FriendlyName);
 		}
 
 		[Serializable]

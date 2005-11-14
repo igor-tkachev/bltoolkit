@@ -28,5 +28,15 @@ namespace BLToolkit.Reflection
 		public virtual void SetValue(object o, object value)
 		{
 		}
+
+		public Type Type
+		{
+			get
+			{
+				return _memberInfo is PropertyInfo?
+					((PropertyInfo)_memberInfo).PropertyType:
+					((FieldInfo)   _memberInfo).FieldType;
+			}
+		}
 	}
 }

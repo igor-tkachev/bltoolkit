@@ -548,6 +548,46 @@ namespace BLToolkit.Reflection
 #endif
 		}
 
+		public static object[] GetPropertyParameters(PropertyInfo propertyInfo)
+		{
+			object[] attrs = propertyInfo.GetCustomAttributes(typeof(ParameterAttribute), true);
+
+			if (attrs != null && attrs.Length > 0)
+				return ((ParameterAttribute)attrs[0]).Parameters;
+
+			attrs = propertyInfo.GetCustomAttributes(typeof(InstanceTypeAttribute), true);
+
+			if (attrs == null || attrs.Length == 0)
+			{
+				attrs = new TypeHelper(
+					propertyInfo.DeclaringType).GetAttributes(typeof(InstanceTypeAttribute));
+			}
+
+			if (attrs != null && attrs.Length > 0)
+				return ((InstanceTypeAttribute)attrs[0]).Parameters;
+
+			return null;
+		}
+
+		public static PropertyInfo GetPropertyInfo(
+			Type type, string propertyName, Type returnType, Type[] types)
+		{
+			return type.GetProperty(
+				propertyName,
+				BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance,
+				null,
+				returnType,
+				types,
+				null);
+		}
+
+		public static Attribute GetFirstAttribute(Type type, Type attributeType)
+		{
+			object[] attrs = new TypeHelper(type).GetAttributes(attributeType);
+
+			return attrs.Length > 0? (Attribute)attrs[0]: null;
+		}
+
 		#endregion
 	}
 }

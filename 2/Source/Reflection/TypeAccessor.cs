@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Reflection;
+using System.Diagnostics;
 
 using BLToolkit.TypeBuilder;
 using BLToolkit.TypeBuilder.Builders;
@@ -214,6 +215,124 @@ namespace BLToolkit.Reflection
 		public IEnumerator GetEnumerator()
 		{
 			return _members.Values.GetEnumerator();
+		}
+
+		#endregion
+
+		#region Write Object Info
+
+		public static void WriteDebug(object o)
+		{
+#if DEBUG
+			Write(o, false);
+#endif
+		}
+
+		public static void WriteConsole(object o)
+		{
+			Write(o, true);
+		}
+
+		private static string MapTypeName(Type type)
+		{
+#if FW2
+			if (type.IsGenericType)
+			{
+				if (type.GetGenericTypeDefinition() == typeof(Nullable<>))
+					return string.Format("{0}?", MapTypeName(type.GetGenericArguments()[0]));
+
+				string name = type.Name;
+
+				int idx = name.IndexOf('`');
+
+				if (idx >= 0)
+					name = name.Substring(0, idx);
+
+				name += "<";
+
+				foreach (Type t in type.GetGenericArguments())
+					name += MapTypeName(t) + ',';
+
+				if (name[name.Length - 1] == ',')
+					name = name.Substring(0, name.Length - 1);
+
+				name += ">";
+
+				return name;
+			}
+#endif
+			if (type.IsPrimitive ||
+				type == typeof(string) ||
+				type == typeof(object) ||
+				type == typeof(decimal))
+			{
+				if (type == typeof(int))    return "int";
+				if (type == typeof(bool))   return "bool";
+				if (type == typeof(short))  return "short";
+				if (type == typeof(long))   return "long";
+				if (type == typeof(ushort)) return "ushort";
+				if (type == typeof(uint))   return "uint";
+				if (type == typeof(ulong))  return "ulong";
+				if (type == typeof(float))  return "float";
+
+				return type.Name.ToLower();
+			}
+
+			return type.Name;
+		}
+
+		private static void Write(object o, bool console)
+		{
+			if (o == null)
+			{
+				if (console) Console.WriteLine("*** (null) ***");
+				else         Debug.  WriteLine("*** (null) ***");
+
+				return;
+			}
+
+			TypeAccessor   ta      = TypeAccessor.GetAccessor(o.GetType());
+			MemberAccessor ma;
+			int            nameLen = 0;
+			int            typeLen = 0;
+
+			foreach (DictionaryEntry de in ta._members)
+			{
+				if (nameLen < de.Key.ToString().Length)
+					nameLen = de.Key.ToString().Length;
+
+				ma = (MemberAccessor)de.Value;
+
+				if (typeLen < MapTypeName(ma.Type).Length)
+					typeLen = MapTypeName(ma.Type).Length;
+			}
+
+			string text = "*** " + o.GetType().FullName + ": ***";
+
+			if (console) Console.WriteLine(text);
+			else         Debug.  WriteLine(text);
+
+			string format = string.Format("{{0,-{0}}} {{1,-{1}}} : {{2}}", typeLen, nameLen);
+
+			foreach (DictionaryEntry de in ta._members)
+			{
+				ma = (MemberAccessor)de.Value;
+
+				object value = ma.GetValue(o);
+
+				if (value == null)
+					value = "(null)";
+				else if (value is ICollection)
+					value = string.Format("(Count = {0})", ((ICollection)value).Count);
+
+				text = string.Format(format, MapTypeName(ma.Type), de.Key, value);
+
+				if (console) Console.WriteLine(text);
+				else         Debug.  WriteLine(text);
+			}
+
+			if (console) Console.WriteLine("***");
+			else         Debug.  WriteLine("***");
 		}
 
 		#endregion
