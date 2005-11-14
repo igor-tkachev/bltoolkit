@@ -310,7 +310,7 @@ namespace BLToolkit.TypeBuilder.Builders
 
 		private void BuildObjectFactory()
 		{
-			Attribute attrs = AbstractTypeBuilderBase.GetFirstAttribute(_type, typeof(ObjectFactoryAttribute));
+			Attribute attrs = TypeHelper.GetFirstAttribute(_type, typeof(ObjectFactoryAttribute));
 
 			if (attrs != null)
 			{
@@ -318,7 +318,7 @@ namespace BLToolkit.TypeBuilder.Builders
 					.ldarg_0
 					.LoadType  (_type)
 					.LoadType  (typeof(ObjectFactoryAttribute))
-					.call      (typeof(AbstractTypeBuilderBase).GetMethod("GetFirstAttribute"))
+					.call      (typeof(TypeHelper).            GetMethod("GetFirstAttribute"))
 					.castclass (typeof(ObjectFactoryAttribute))
 					.call      (typeof(ObjectFactoryAttribute).GetProperty("ObjectFactory").GetGetMethod())
 					.call      (typeof(TypeAccessor).          GetProperty("ObjectFactory").GetSetMethod())

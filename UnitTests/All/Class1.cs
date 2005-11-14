@@ -1,24 +1,24 @@
 using System;
+using System.Data.SqlClient;
+using System.Data;
+using System.Text;
+#if FW2
+using System.Collections.Generic;
+#endif
 
 using NUnit.Framework;
 
-using BLToolkit.TypeBuilder.Builders;
 using BLToolkit.Reflection;
+using BLToolkit.TypeBuilder.Builders;
 
 namespace UnitTests.All
 {
-	public class Accessor
+	[TestFixture]
+	public class GetValueTest
 	{
-		public Accessor()
+		[Test]
+		public void Test()
 		{
-			ObjectFactory = ((ObjectFactoryAttribute)AbstractTypeBuilderBase.
-				GetFirstAttribute(typeof(Accessor), typeof(ObjectFactoryAttribute))).ObjectFactory;
-		}
-
-		public IObjectFactory ObjectFactory
-		{
-			get { return null; }
-			set { }
 		}
 	}
 }

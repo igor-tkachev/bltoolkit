@@ -353,7 +353,7 @@ namespace BLToolkit.TypeBuilder.Builders
 
 			EmitHelper emit = Context.TypeBuilder.InitConstructor.Emitter;
 
-			object[] parameters = GetPropertyParameters(Context.CurrentProperty);
+			object[] parameters = TypeHelper.GetPropertyParameters(Context.CurrentProperty);
 			ConstructorInfo  ci = fieldType.GetPublicConstructor(typeof(InitContext));
 
 			if (ci != null || fieldType.IsAbstract)
@@ -456,7 +456,7 @@ namespace BLToolkit.TypeBuilder.Builders
 			TypeHelper   fieldType = new TypeHelper(field.FieldType);
 
 			EmitHelper       emit = Context.TypeBuilder.DefaultConstructor.Emitter;
-			object[]         ps   = GetPropertyParameters(Context.CurrentProperty);
+			object[]         ps   = TypeHelper.GetPropertyParameters(Context.CurrentProperty);
 			ConstructorInfo  ci   = fieldType.GetPublicConstructor(typeof(InitContext));
 
 			if (ci != null || fieldType.IsAbstract)
@@ -569,7 +569,7 @@ namespace BLToolkit.TypeBuilder.Builders
 			FieldBuilder        field     = Context.GetField(fieldName);
 			TypeHelper          fieldType = new TypeHelper(field.FieldType);
 			MethodBuilderHelper ensurer   = Context.TypeBuilder.DefineMethod(
-				string.Format("$EnsureInstance{0}", fieldName), 
+				string.Format("$EnsureInstance{0}", fieldName),
 				MethodAttributes.Private | MethodAttributes.HideBySig);
 
 			EmitHelper emit = ensurer.Emitter;
@@ -581,7 +581,7 @@ namespace BLToolkit.TypeBuilder.Builders
 				.brtrue_s (end)
 				;
 
-			object[] parameters = GetPropertyParameters(Context.CurrentProperty);
+			object[] parameters = TypeHelper.GetPropertyParameters(Context.CurrentProperty);
 			ConstructorInfo  ci = fieldType.GetPublicConstructor(typeof(InitContext));
 
 			if (ci != null || fieldType.IsAbstract)

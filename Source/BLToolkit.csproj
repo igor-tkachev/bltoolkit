@@ -94,7 +94,26 @@
                     BuildAction = "Compile"
                 />
                 <Folder RelPath = "Data\DataProvider\" />
-                <Folder RelPath = "Mapping\" />
+                <File
+                    RelPath = "Mapping\DataReaderMapper.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "Mapping\DataRowMapper.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "Mapping\IMapDataDestination.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "Mapping\IMapDataSource.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
                 <File
                     RelPath = "Reflection\InitContext.cs"
                     SubType = "Code"

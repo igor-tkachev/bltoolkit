@@ -256,7 +256,7 @@ namespace BLToolkit.TypeBuilder.Builders
 				}
 
 				emit
-					.call   (typeof(AbstractTypeBuilderBase).GetMethod("GetPropertyInfo"))
+					.call   (typeof(TypeHelper).GetMethod("GetPropertyInfo"))
 					.stsfld (field)
 					;
 			}
@@ -284,7 +284,7 @@ namespace BLToolkit.TypeBuilder.Builders
 
 				emit
 					.ldsfld (piField)
-					.call   (typeof(AbstractTypeBuilderBase).GetMethod("GetPropertyParameters"))
+					.call   (typeof(TypeHelper).GetMethod("GetPropertyParameters"))
 					.stsfld (field)
 					;
 			}
@@ -326,50 +326,6 @@ namespace BLToolkit.TypeBuilder.Builders
 				default:
 					throw new InvalidOperationException();
 			}
-		}
-
-		#endregion
-
-		#region Public Helpers
-
-		public static object[] GetPropertyParameters(PropertyInfo propertyInfo)
-		{
-			object[] attrs = propertyInfo.GetCustomAttributes(typeof(ParameterAttribute), true);
-
-			if (attrs != null && attrs.Length > 0)
-				return ((ParameterAttribute)attrs[0]).Parameters;
-
-			attrs = propertyInfo.GetCustomAttributes(typeof(InstanceTypeAttribute), true);
-
-			if (attrs == null || attrs.Length == 0)
-			{
-				attrs = new TypeHelper(
-					propertyInfo.DeclaringType).GetAttributes(typeof(InstanceTypeAttribute));
-			}
-
-			if (attrs != null && attrs.Length > 0)
-				return ((InstanceTypeAttribute)attrs[0]).Parameters;
-
-			return null;
-		}
-
-		public static PropertyInfo GetPropertyInfo(
-			Type type, string propertyName, Type returnType, Type[] types)
-		{
-			return type.GetProperty(
-				propertyName,
-				BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance,
-				null,
-				returnType,
-				types,
-				null);
-		}
-
-		public static Attribute GetFirstAttribute(Type type, Type attributeType)
-		{
-			object[] attrs = new TypeHelper(type).GetAttributes(attributeType);
-
-			return attrs.Length > 0? (Attribute)attrs[0]: null;
 		}
 
 		#endregion

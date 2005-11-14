@@ -18,8 +18,7 @@ namespace BLToolkit.Reflection
 		}
 
 		private IObjectFactory _objectFactory;
-
-		public IObjectFactory ObjectFactory
+		public  IObjectFactory  ObjectFactory
 		{
 			get { return _objectFactory; }
 		}

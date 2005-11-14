@@ -34,9 +34,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Aspects\NotNullAttribute.cs" />
-    <Compile Include="Mapping\DataReaderMapSource.cs" />
-    <Compile Include="Mapping\IMapDestination.cs" />
-    <Compile Include="Mapping\IMapSource.cs" />
+    <Compile Include="Mapping\DataReaderMapper.cs" />
+    <Compile Include="Mapping\DataRowMapper.cs" />
+    <Compile Include="Mapping\IMapDataDestination.cs" />
+    <Compile Include="Mapping\IMapDataSource.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Reflection\Emit\AssemblyBuilderHelper.cs" />
     <Compile Include="Reflection\Emit\ConstructorBuilderHelper.cs" />

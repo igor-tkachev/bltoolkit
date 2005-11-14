@@ -66,24 +66,21 @@ namespace TypeBuilder
 		[AttributeUsage(AttributeTargets.Property)]
 		public class TestParameterAttribute : ParameterAttribute
 		{
-			public TestParameterAttribute()
-				: base(new TestField())
+			public TestParameterAttribute() : base(new TestField())
 			{
 			}
 		}
 
 		public abstract class TestObject1
 		{
-			[Parameter(10)]     public abstract ArrayList      List           { get; set; }
-			[Parameter("t")]    public abstract string         Str            { get; set; }
-			[Parameter(20)]     public abstract string         this[int i]    { get; set; }
-			[Parameter(20, 30)] public abstract TestField      Field1         { get; set; }
-			[TestParameter]     public abstract TestField      Field2         { get; set; }
-			[Parameter(55)]     public abstract InnerObject    InnerObject    { get; set; }
-			//[Parameter(88)]     public abstract AbstractObject AbstractObject { get; set; }
-			[Parameter(54)]     public abstract int            Int1           { get; set; }
-			//[Parameter(null)]   public abstract int            Int2           { get; set; }
-			[Parameter(2,2,2)]  public abstract DateTime       Date           { get; set; }
+			[Parameter(10)]     public abstract ArrayList   List        { get; set; }
+			[Parameter("t")]    public abstract string      Str         { get; set; }
+			[Parameter(20)]     public abstract string      this[int i] { get; set; }
+			[Parameter(20, 30)] public abstract TestField   Field1      { get; set; }
+			[TestParameter]     public abstract TestField   Field2      { get; set; }
+			[Parameter(55)]     public abstract InnerObject InnerObject { get; set; }
+			[Parameter(54)]     public abstract int         Int1        { get; set; }
+			[Parameter(2,2,2)]  public abstract DateTime    Date        { get; set; }
 		}
 
 		[Test]
@@ -98,7 +95,7 @@ namespace TypeBuilder
 			Assert.AreEqual(55,  o.InnerObject.Field);
 			Assert.AreEqual(54,  o.Int1);
 
-			Assert.AreEqual(new DateTime(2,2,2),  o.Date);
+			Assert.AreEqual(new DateTime(2,2,2), o.Date);
 		}
 	}
 }

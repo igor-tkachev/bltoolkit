@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 using NUnit.Framework;
 
@@ -20,6 +21,21 @@ namespace Reflection
 			TestObject o1 = TypeAccessor<TestObject>.GetAccessor().CreateInstance();
 
 			TestObject o2 = TypeAccessor.CreateInstance<TestObject>();
+		}
+
+		public class TestObject1
+		{
+			public int?                             IntField;
+			public Dictionary<int?, List<decimal?>> ListField = new Dictionary<int?,List<decimal?>>();
+		}
+
+		[Test]
+		public void Write()
+		{
+			TestObject1 o = new TestObject1();
+
+			TypeAccessor.WriteConsole(o);
+			TypeAccessor.WriteDebug(o);
 		}
 	}
 }
