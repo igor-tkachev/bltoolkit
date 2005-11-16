@@ -36,8 +36,14 @@
     <Compile Include="Aspects\NotNullAttribute.cs" />
     <Compile Include="Mapping\DataReaderMapper.cs" />
     <Compile Include="Mapping\DataRowMapper.cs" />
+    <Compile Include="Mapping\DefaultMapper.cs" />
     <Compile Include="Mapping\IMapDataDestination.cs" />
     <Compile Include="Mapping\IMapDataSource.cs" />
+    <Compile Include="Mapping\IObjectMapper.cs" />
+    <Compile Include="Mapping\Map.cs" />
+    <Compile Include="Mapping\Mapper.cs" />
+    <Compile Include="Mapping\MemberMapper.cs" />
+    <Compile Include="Mapping\ObjectMapper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Reflection\Emit\AssemblyBuilderHelper.cs" />
     <Compile Include="Reflection\Emit\ConstructorBuilderHelper.cs" />

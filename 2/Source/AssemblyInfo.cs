@@ -1,3 +1,4 @@
+using System;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 
@@ -56,3 +57,24 @@ using System.Runtime.CompilerServices;
 [assembly: AssemblyDelaySign(false)]
 [assembly: AssemblyKeyFile("")]
 [assembly: AssemblyKeyName("")]
+
+// FxCop
+
+[assembly: CLSCompliant(true)]
+
+namespace System.Diagnostics.CodeAnalysis
+{
+	[AttributeUsage(AttributeTargets.All, AllowMultiple=true)]
+	public class SuppressMessageAttribute :  Attribute
+	{
+		public SuppressMessageAttribute(string category, string checkId)
+		{
+		}
+
+		public string MessageId
+		{
+			get { return string.Empty; }
+			set {}
+		}
+	}
+}

@@ -1,7 +1,10 @@
 using System;
+using System.Diagnostics.CodeAnalysis;
 
 namespace BLToolkit.Reflection
 {
+	[SuppressMessage("Microsoft.Design", "CA1019:DefineAccessorsForAttributeArguments")]
+	[SuppressMessage("Microsoft.Performance", "CA1813:AvoidUnsealedAttributes")]
 	[AttributeUsage(AttributeTargets.Class | AttributeTargets.Interface)]
 	public class ObjectFactoryAttribute : Attribute
 	{
@@ -9,11 +12,9 @@ namespace BLToolkit.Reflection
 		{
 			if (type == null) throw new ArgumentNullException("type");
 
-			object obj = (IObjectFactory)Activator.CreateInstance(type);
+			_objectFactory = (IObjectFactory)Activator.CreateInstance(type) as IObjectFactory;
 
-			if (obj is IObjectFactory)
-				_objectFactory = (IObjectFactory)obj;
-			else
+			if (_objectFactory == null)
 				throw new ArgumentException(string.Format("Type '{0}' does not implement IObjectFactroty interface."));
 		}
 

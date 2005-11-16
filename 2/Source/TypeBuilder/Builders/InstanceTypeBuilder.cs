@@ -72,7 +72,7 @@ namespace BLToolkit.TypeBuilder.Builders
 			{
 				FieldInfo fi = (FieldInfo)getter;
 
-				emit.ldfld((FieldInfo)getter);
+				emit.ldfld(fi);
 
 				memberType = fi.FieldType;
 			}
@@ -159,8 +159,8 @@ namespace BLToolkit.TypeBuilder.Builders
 					return prop;
 
 			throw new TypeBuilderException(string.Format(
-				"The '{0}' type does not have appropriate getter. " +
-				"See '{1}' member of '{2}' type.",
+				(IFormatProvider)null,
+				"The '{0}' type does not have appropriate getter. See '{1}' member of '{2}' type.",
 				InstanceType.FullName,
 				propertyType.FullName,
 				Context.Type.FullName));
