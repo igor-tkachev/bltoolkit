@@ -1,7 +1,7 @@
 ﻿<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <ProjectType>Local</ProjectType>
-    <ProductVersion>8.0.50215</ProductVersion>
+    <ProductVersion>8.0.50727</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{653EBAE9-B766-4B78-8077-8EC009156DE5}</ProjectGuid>
     <SccProjectName>
@@ -232,11 +232,19 @@
     <EmbeddedResource Include="DbManager.resx">
       <DependentUpon>DbManager.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Mapping\Mapping.xsd" />
+    <EmbeddedResource Include="Mapping\Mapping.xsd">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
     <Content Include="Examples.xml" />
     <Content Include="Examples1.xml" />
     <Content Include="Mapping\Doc.xml" />
     <Content Include="Mapping\Examples.xml" />
+    <None Include="Mapping\Mapping.xsc">
+      <DependentUpon>Mapping.xsd</DependentUpon>
+    </None>
+    <None Include="Mapping\Mapping.xss">
+      <DependentUpon>Mapping.xsd</DependentUpon>
+    </None>
     <None Include="Mapping\Mapping.xsx">
       <DependentUpon>Mapping.xsd</DependentUpon>
     </None>

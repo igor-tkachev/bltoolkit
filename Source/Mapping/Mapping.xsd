@@ -3,7 +3,7 @@
 	xmlns:msdata="urn:schemas-microsoft-com:xml-msdata" xmlns="http://www.rsdn.ru/mapping.xsd"
 	id="mapping" targetNamespace="http://www.rsdn.ru/mapping.xsd" attributeFormDefault="qualified"
 	elementFormDefault="qualified">
-	<xs:element name="mapping" msdata:IsDataSet="true" msdata:EnforceConstraints="False">
+	<xs:element name="mapping">
 		<xs:complexType>
 			<xs:choice maxOccurs="unbounded">
 				<xs:element name="type">
