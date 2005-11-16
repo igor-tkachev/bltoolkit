@@ -2,12 +2,15 @@ using System;
 using System.Collections;
 using System.Reflection;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 
 using BLToolkit.TypeBuilder;
 using BLToolkit.TypeBuilder.Builders;
+using System.Globalization;
 
 namespace BLToolkit.Reflection
 {
+	[SuppressMessage("Microsoft.Naming", "CA1710:IdentifiersShouldHaveCorrectSuffix")]
 	public abstract class TypeAccessor : ICollection
 	{
 		protected TypeAccessor()
@@ -33,6 +36,8 @@ namespace BLToolkit.Reflection
 
 		protected void AddMember(MemberAccessor member)
 		{
+			if (member == null) throw new ArgumentNullException("member");
+
 			_members.Add(member.MemberInfo.Name, member);
 		}
 
@@ -40,22 +45,28 @@ namespace BLToolkit.Reflection
 
 		#region CreateInstance
 
+		[SuppressMessage("Microsoft.Usage", "CA2223:MembersShouldDifferByMoreThanReturnType")]
 		public virtual object CreateInstance()
 		{
 			throw new InvalidOperationException();
 		}
 
+		[SuppressMessage("Microsoft.Usage", "CA2223:MembersShouldDifferByMoreThanReturnType")]
 		public virtual object CreateInstance(InitContext context)
 		{
 			return CreateInstance();
 		}
 
+		[SuppressMessage("Microsoft.Naming", "CA1706:ShortAcronymsShouldBeUppercase", MessageId = "Member")]
+		[SuppressMessage("Microsoft.Usage", "CA2223:MembersShouldDifferByMoreThanReturnType")]
 		public object CreateInstanceEx()
 		{
 			return _objectFactory != null?
 				_objectFactory.CreateInstance(this, null): CreateInstance((InitContext)null);
 		}
 
+		[SuppressMessage("Microsoft.Naming", "CA1706:ShortAcronymsShouldBeUppercase", MessageId = "Member")]
+		[SuppressMessage("Microsoft.Usage", "CA2223:MembersShouldDifferByMoreThanReturnType")]
 		public object CreateInstanceEx(InitContext context)
 		{
 			return _objectFactory != null? _objectFactory.CreateInstance(this, context): CreateInstance(context);
@@ -79,7 +90,7 @@ namespace BLToolkit.Reflection
 
 		#region ObjectFactory
 
-		private IObjectFactory _objectFactory = null;
+		private IObjectFactory _objectFactory;
 		public  IObjectFactory  ObjectFactory
 		{
 			get { return _objectFactory;  }
@@ -112,6 +123,8 @@ namespace BLToolkit.Reflection
 
 		public static TypeAccessor GetAccessor(Type originalType)
 		{
+			if (originalType == null) throw new ArgumentNullException("originalType");
+
 			TypeAccessor accessor = (TypeAccessor)_accessors[originalType];
 
 			if (accessor == null)
@@ -150,11 +163,13 @@ namespace BLToolkit.Reflection
 			return GetAccessor(type).CreateInstance(context);
 		}
 
+		[SuppressMessage("Microsoft.Naming", "CA1706:ShortAcronymsShouldBeUppercase", MessageId = "Member")]
 		public static object CreateInstanceEx(Type type)
 		{
 			return GetAccessor(type).CreateInstanceEx();
 		}
 
+		[SuppressMessage("Microsoft.Naming", "CA1706:ShortAcronymsShouldBeUppercase", MessageId = "Member")]
 		public static object CreateInstanceEx(Type type, InitContext context)
 		{
 			return GetAccessor(type).CreateInstance(context);
@@ -162,21 +177,31 @@ namespace BLToolkit.Reflection
 
 #if FW2
 
+		[SuppressMessage("Microsoft.Design", "CA1004:GenericMethodsShouldProvideTypeParameter")]
+		[SuppressMessage("Microsoft.Usage", "CA2223:MembersShouldDifferByMoreThanReturnType")]
 		public static T CreateInstance<T>()
 		{
 			return (T)GetAccessor(typeof(T)).CreateInstance();
 		}
 
+		[SuppressMessage("Microsoft.Design", "CA1004:GenericMethodsShouldProvideTypeParameter")]
+		[SuppressMessage("Microsoft.Usage", "CA2223:MembersShouldDifferByMoreThanReturnType")]
 		public static T CreateInstance<T>(InitContext context)
 		{
 			return (T)GetAccessor(typeof(T)).CreateInstance(context);
 		}
 
+		[SuppressMessage("Microsoft.Naming", "CA1706:ShortAcronymsShouldBeUppercase", MessageId = "Member")]
+		[SuppressMessage("Microsoft.Design", "CA1004:GenericMethodsShouldProvideTypeParameter")]
+		[SuppressMessage("Microsoft.Usage", "CA2223:MembersShouldDifferByMoreThanReturnType")]
 		public static T CreateInstanceEx<T>()
 		{
 			return (T)GetAccessor(typeof(T)).CreateInstanceEx();
 		}
 
+		[SuppressMessage("Microsoft.Naming", "CA1706:ShortAcronymsShouldBeUppercase", MessageId = "Member")]
+		[SuppressMessage("Microsoft.Design", "CA1004:GenericMethodsShouldProvideTypeParameter")]
+		[SuppressMessage("Microsoft.Usage", "CA2223:MembersShouldDifferByMoreThanReturnType")]
 		public static T CreateInstanceEx<T>(InitContext context)
 		{
 			return (T)GetAccessor(typeof(T)).CreateInstance(context);
@@ -233,13 +258,14 @@ namespace BLToolkit.Reflection
 			Write(o, true);
 		}
 
+		[SuppressMessage("Microsoft.Performance", "CA1818:DoNotConcatenateStringsInsideLoops")]
 		private static string MapTypeName(Type type)
 		{
 #if FW2
 			if (type.IsGenericType)
 			{
 				if (type.GetGenericTypeDefinition() == typeof(Nullable<>))
-					return string.Format("{0}?", MapTypeName(type.GetGenericArguments()[0]));
+					return string.Format((IFormatProvider)null, "{0}?", MapTypeName(type.GetGenericArguments()[0]));
 
 				string name = type.Name;
 
@@ -275,12 +301,14 @@ namespace BLToolkit.Reflection
 				if (type == typeof(ulong))  return "ulong";
 				if (type == typeof(float))  return "float";
 
-				return type.Name.ToLower();
+				return type.Name.ToLower(CultureInfo.CurrentCulture);
 			}
 
 			return type.Name;
 		}
 
+		[SuppressMessage("Microsoft.Usage", "CA2241:ProvideCorrectArgumentsToFormattingMethods")]
+		[SuppressMessage("Microsoft.Performance", "CA1800:DoNotCastUnnecessarily")]
 		private static void Write(object o, bool console)
 		{
 			if (o == null)
@@ -312,7 +340,9 @@ namespace BLToolkit.Reflection
 			if (console) Console.WriteLine(text);
 			else         Debug.  WriteLine(text);
 
-			string format = string.Format("{{0,-{0}}} {{1,-{1}}} : {{2}}", typeLen, nameLen);
+			IFormatProvider fp = null;
+
+			string format = string.Format(fp, "{{0,-{0}}} {{1,-{1}}} : {{2}}", typeLen, nameLen);
 
 			foreach (DictionaryEntry de in ta._members)
 			{
@@ -323,9 +353,9 @@ namespace BLToolkit.Reflection
 				if (value == null)
 					value = "(null)";
 				else if (value is ICollection)
-					value = string.Format("(Count = {0})", ((ICollection)value).Count);
+					value = string.Format(fp, "(Count = {0})", ((ICollection)value).Count);
 
-				text = string.Format(format, MapTypeName(ma.Type), de.Key, value);
+				text = string.Format(fp, format, MapTypeName(ma.Type), de.Key, value);
 
 				if (console) Console.WriteLine(text);
 				else         Debug.  WriteLine(text);

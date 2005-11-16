@@ -293,7 +293,7 @@ namespace BLToolkit.TypeBuilder.Builders
 				;
 		}
 
-		private ConstructorBuilderHelper BuildNestedTypeConstructor(
+		private static ConstructorBuilderHelper BuildNestedTypeConstructor(
 			TypeBuilderHelper nestedType, MemberInfo mi)
 		{
 			ConstructorBuilderHelper ctorBuilder = nestedType.DefinePublicConstructor(typeof(MemberInfo));

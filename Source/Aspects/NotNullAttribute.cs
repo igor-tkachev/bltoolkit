@@ -1,10 +1,13 @@
 using System;
+using System.Diagnostics.CodeAnalysis;
 
 using BLToolkit.TypeBuilder.Builders;
 
 namespace BLToolkit.Aspects
 {
-	public class NotNullAttribute : AbstractTypeBuilderAttribute
+	[SuppressMessage("Microsoft.Design", "CA1019:DefineAccessorsForAttributeArguments")]
+	[AttributeUsage(AttributeTargets.Parameter)]
+	public sealed class NotNullAttribute : AbstractTypeBuilderAttribute
 	{
 		public NotNullAttribute()
 		{

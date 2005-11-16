@@ -1,9 +1,10 @@
 using System;
 using System.Data;
+using System.Threading;
 
 namespace BLToolkit.Mapping
 {
-	public class DataRowMapper : IMapDataSource, IMapDataDestination
+	public sealed class DataRowMapper : IMapDataSource, IMapDataDestination
 	{
 		bool           _createColumns;
 		DataRowVersion _version;
@@ -37,9 +38,9 @@ namespace BLToolkit.Mapping
 
 		#region IMapDataSource Members
 
-		int IMapDataSource.GetCount()
+		int IMapDataSource.Count
 		{
-			return _dataRow.Table.Columns.Count;
+			get { return _dataRow.Table.Columns.Count; }
 		}
 
 		string IMapDataSource.GetName(int index)
@@ -49,12 +50,14 @@ namespace BLToolkit.Mapping
 
 		object IMapDataSource.GetValue(object o, int index)
 		{
-			return _version == DataRowVersion.Default? _dataRow[index]: _dataRow[index, _version];
+			object value = _version == DataRowVersion.Default ? _dataRow[index] : _dataRow[index, _version];
+			return value is DBNull? null: value;
 		}
 
 		object IMapDataSource.GetValue(object o, string name)
 		{
-			return _version == DataRowVersion.Default? _dataRow[name]: _dataRow[name, _version];
+			object value = _version == DataRowVersion.Default ? _dataRow[name] : _dataRow[name, _version];
+			return value is DBNull? null: value;
 		}
 
 		#endregion
@@ -92,7 +95,7 @@ namespace BLToolkit.Mapping
 					else
 					{
 						if (dc.DataType != typeof(string))
-							value = Convert.ChangeType(value, dc.DataType);
+							value = Convert.ChangeType(value, dc.DataType, Thread.CurrentThread.CurrentCulture);
 					}
 				}
 

@@ -113,6 +113,8 @@ namespace BLToolkit.Reflection
 		/// or an array with zero (0) elements if no attributes are defined.</returns>
 		public object[] GetAttributes(Type attributeType)
 		{
+			if (attributeType == null) throw new ArgumentNullException("attributeType");
+
 			string key = _type.FullName + "." + attributeType.FullName;
 
 			object[] attrs = (object[])_typeAttributes[key];
@@ -438,6 +440,8 @@ namespace BLToolkit.Reflection
 
 		public static ConstructorInfo GetConstructor(Type type, params Type[] types)
 		{
+			if (type == null) throw new ArgumentNullException("type");
+
 			return type.GetConstructor(
 				BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic,
 				null,
@@ -465,6 +469,8 @@ namespace BLToolkit.Reflection
 
 		public static ConstructorInfo GetDefaultConstructor(Type type)
 		{
+			if (type == null) throw new ArgumentNullException("type");
+
 			return type.GetConstructor(
 				BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic,
 				null,
@@ -488,6 +494,8 @@ namespace BLToolkit.Reflection
 
 		public static Type GetUnderlyingType(Type type)
 		{
+			if (type == null) throw new ArgumentNullException("type");
+
 			if (type.IsByRef)
 				type = type.GetElementType();
 
@@ -499,6 +507,9 @@ namespace BLToolkit.Reflection
 
 		public static bool IsSameOrParent(Type parent, Type child)
 		{
+			if (parent == null) throw new ArgumentNullException("parent");
+			if (child  == null) throw new ArgumentNullException("child");
+
 			if (parent == child ||
 				child.IsEnum && Enum.GetUnderlyingType(child) == parent ||
 				child.IsSubclassOf(parent))
@@ -522,6 +533,8 @@ namespace BLToolkit.Reflection
 		{
 #if FW2
 
+			if (type == null) throw new ArgumentNullException("type");
+
 			foreach (MethodInfo method in type.GetMethods())
 			{
 				if (method.IsGenericMethodDefinition == false && method.Name == methodName)
@@ -542,7 +555,7 @@ namespace BLToolkit.Reflection
 				}
 			}
 
-			throw new TypeBuilderException(string.Format("Method '{0}' not found.", methodName));
+			throw new TypeBuilderException(string.Format((IFormatProvider)null, "Method '{0}' not found.", methodName));
 #else
 			return type.GetMethod(methodName, parameterTypes);
 #endif
@@ -572,6 +585,8 @@ namespace BLToolkit.Reflection
 		public static PropertyInfo GetPropertyInfo(
 			Type type, string propertyName, Type returnType, Type[] types)
 		{
+			if (type == null) throw new ArgumentNullException("type");
+
 			return type.GetProperty(
 				propertyName,
 				BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance,

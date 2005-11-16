@@ -9,15 +9,17 @@ namespace BLToolkit.Reflection
 		{
 		}
 
-		private object [] _memberParameters;
-		public  object []  MemberParameters
+		private object[] _memberParameters;
+		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1819:PropertiesShouldNotReturnArrays")]
+		public  object[]  MemberParameters
 		{
 			get { return _memberParameters;  }
 			set { _memberParameters = value; }
 		}
 
-		private object [] _Parameters;
-		public  object []  Parameters
+		private object[] _Parameters;
+		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1819:PropertiesShouldNotReturnArrays")]
+		public  object[]  Parameters
 		{
 			get { return _Parameters;  }
 			set { _Parameters = value; }

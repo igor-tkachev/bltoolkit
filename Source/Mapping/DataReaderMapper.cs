@@ -3,7 +3,7 @@ using System.Data;
 
 namespace BLToolkit.Mapping
 {
-	public class DataReaderMapper : IMapDataSource
+	public sealed class DataReaderMapper : IMapDataSource
 	{
 		IDataReader _dataReader;
 
@@ -14,9 +14,9 @@ namespace BLToolkit.Mapping
 
 		#region IMapDataSource Members
 
-		int IMapDataSource.GetCount()
+		int IMapDataSource.Count
 		{
-			return _dataReader.FieldCount;
+			get { return _dataReader.FieldCount; }
 		}
 
 		string IMapDataSource.GetName(int index)
@@ -26,12 +26,14 @@ namespace BLToolkit.Mapping
 
 		object IMapDataSource.GetValue(object o, int index)
 		{
-			return _dataReader.GetValue(index);
+			object value = _dataReader.GetValue(index);
+			return value is DBNull? null: value;
 		}
 
 		object IMapDataSource.GetValue(object o, string name)
 		{
-			return _dataReader[name];
+			object value = _dataReader[name];
+			return value is DBNull? null: value;
 		}
 
 		#endregion
