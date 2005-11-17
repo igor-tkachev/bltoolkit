@@ -5,7 +5,7 @@ using BLToolkit.TypeBuilder.Builders;
 namespace BLToolkit.TypeBuilder
 {
 	[AttributeUsage(AttributeTargets.Interface)]
-	class PropertyChangedAttribute : AbstractTypeBuilderAttribute
+	sealed class PropertyChangedAttribute : AbstractTypeBuilderAttribute
 	{
 		public override IAbstractTypeBuilder TypeBuilder
 		{

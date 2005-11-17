@@ -7,6 +7,8 @@ using System.Reflection.Emit;
 using BLToolkit.Reflection;
 using BLToolkit.Reflection.Emit;
 using BLToolkit.TypeBuilder.Builders;
+using System.Security.Permissions;
+using System.Diagnostics.CodeAnalysis;
 
 namespace BLToolkit.TypeBuilder
 {
@@ -39,6 +41,8 @@ namespace BLToolkit.TypeBuilder
 			set { _saveTypes = value; }
 		}
 
+		[SuppressMessage("Microsoft.Design", "CA1062:ValidateArgumentsOfPublicMethods")]
+		[SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate")]
 		public static void SetGlobalAssembly(string path)
 		{
 			if (_globalAssembly != null)
@@ -75,6 +79,7 @@ namespace BLToolkit.TypeBuilder
 			return ab;
 		}
 
+		[SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
 		private static void SaveAssembly(AssemblyBuilderHelper assemblyBuilder, Type type)
 		{
 			if (_globalAssembly != null)
@@ -158,8 +163,9 @@ namespace BLToolkit.TypeBuilder
 			}
 			catch (Exception ex)
 			{
-				throw new TypeBuilderException(
-					string.Format("Could not build the '{0}' type: {1}", sourceType.FullName, ex.Message),
+				throw new TypeBuilderException(string.Format(
+					(IFormatProvider)null,
+					"Could not build the '{0}' type: {1}", sourceType.FullName, ex.Message),
 					ex);
 			}
 		}
@@ -171,12 +177,12 @@ namespace BLToolkit.TypeBuilder
 		internal static void Error(string format, params object[] parameters)
 		{
 			throw new TypeBuilderException(
-				string.Format("Could not build the '{0}' type: " + format, parameters));
+				string.Format((IFormatProvider)null, "Could not build the '{0}' type: " + format, parameters));
 		}
 
 		private static void WriteDebug(string format, params object[] parameters)
 		{
-			System.Diagnostics.Debug.WriteLine(string.Format(format, parameters));
+			System.Diagnostics.Debug.WriteLine(string.Format((IFormatProvider)null, format, parameters));
 		}
 
 		#endregion
@@ -185,6 +191,7 @@ namespace BLToolkit.TypeBuilder
 
 		private static bool _isInit;
 
+		[EnvironmentPermission(SecurityAction.LinkDemand, Unrestricted = true)]
 		public static void Init()
 		{
 			if (_isInit == false)

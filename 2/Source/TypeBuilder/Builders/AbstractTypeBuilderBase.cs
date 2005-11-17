@@ -5,6 +5,8 @@ using System.Reflection.Emit;
 using BLToolkit.Reflection;
 using BLToolkit.Reflection.Emit;
 using System.Collections;
+using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 
 namespace BLToolkit.TypeBuilder.Builders
 {
@@ -36,6 +38,8 @@ namespace BLToolkit.TypeBuilder.Builders
 
 		protected bool IsRelative(IAbstractTypeBuilder typeBuilder)
 		{
+			if (typeBuilder == null) throw new ArgumentNullException("typeBuilder");
+
 			return GetType().IsInstanceOfType(typeBuilder) || typeBuilder.GetType().IsInstanceOfType(this);
 		}
 
@@ -49,8 +53,11 @@ namespace BLToolkit.TypeBuilder.Builders
 			return TypeBuilderConsts.NormalBuilderPriority;
 		}
 
+		[SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity")]
 		public virtual void Build(BuildContext context)
 		{
+			if (context == null) throw new ArgumentNullException("context");
+
 			Context = context;
 
 			switch (context.BuildElement)
@@ -163,8 +170,11 @@ namespace BLToolkit.TypeBuilder.Builders
 
 		#region Helpers
 
+		[SuppressMessage("Microsoft.Design", "CA1011:ConsiderPassingBaseTypesAsParameters")]
 		protected bool CallLazyInstanceInsurer(FieldBuilder field)
 		{
+			if (field == null) throw new ArgumentNullException("field");
+
 			MethodBuilderHelper ensurer = Context.GetFieldInstanceEnsurer(field.Name);
 
 			if (ensurer != null)
@@ -177,12 +187,13 @@ namespace BLToolkit.TypeBuilder.Builders
 			return ensurer != null;
 		}
 
+		[SuppressMessage("Microsoft.Performance", "CA1818:DoNotConcatenateStringsInsideLoops")]
 		protected virtual string GetFieldName(PropertyInfo propertyInfo)
 		{
 			string name = propertyInfo.Name;
 
 			if (char.IsUpper(name[0]) && name.Length > 1 && char.IsLower(name[1]))
-				name = char.ToLower(name[0]) + name.Substring(1, name.Length - 1);
+				name = char.ToLower(name[0], CultureInfo.CurrentCulture) + name.Substring(1, name.Length - 1);
 
 			name = "_" + name;
 
@@ -269,11 +280,11 @@ namespace BLToolkit.TypeBuilder.Builders
 			return GetPropertyInfoField(Context.CurrentProperty);
 		}
 
+		[SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate")]
 		protected FieldBuilder GetParameterField()
 		{
 			string       fieldName = GetFieldName() + "_$parameters";
 			FieldBuilder field     = Context.GetField(fieldName);
-			PropertyInfo property  = Context.CurrentProperty;
 
 			if (field == null)
 			{
@@ -292,11 +303,11 @@ namespace BLToolkit.TypeBuilder.Builders
 			return field;
 		}
 
+		[SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate")]
 		protected FieldBuilder GetTypeAccessorField()
 		{
 			string       fieldName = "_" + GetFieldType().Name + "_$typeAccessor";
 			FieldBuilder field     = Context.GetField(fieldName);
-			PropertyInfo property  = Context.CurrentProperty;
 
 			if (field == null)
 			{
@@ -314,6 +325,7 @@ namespace BLToolkit.TypeBuilder.Builders
 			return field;
 		}
 
+		[SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate")]
 		protected virtual Type GetFieldType()
 		{
 			PropertyInfo    pi    = Context.CurrentProperty;

@@ -64,7 +64,7 @@ using System.Runtime.CompilerServices;
 
 namespace System.Diagnostics.CodeAnalysis
 {
-	[AttributeUsage(AttributeTargets.All, AllowMultiple=true)]
+	[AttributeUsage(AttributeTargets.All, Inherited=false, AllowMultiple=true)]
 	public class SuppressMessageAttribute :  Attribute
 	{
 		public SuppressMessageAttribute(string category, string checkId)

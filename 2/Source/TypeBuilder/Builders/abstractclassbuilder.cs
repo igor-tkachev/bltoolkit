@@ -9,6 +9,7 @@ using System.Collections.Generic;
 
 using BLToolkit.Reflection;
 using BLToolkit.Reflection.Emit;
+using System.Diagnostics.CodeAnalysis;
 
 namespace BLToolkit.TypeBuilder.Builders
 {
@@ -93,7 +94,7 @@ namespace BLToolkit.TypeBuilder.Builders
 			return _context.TypeBuilder.Create();
 		}
 
-		private void CheckCompatibility(BuildContext context, AbstractTypeBuilderList builders)
+		private static void CheckCompatibility(BuildContext context, AbstractTypeBuilderList builders)
 		{
 			for (int i = 0; i < builders.Count; i++)
 			{
@@ -173,6 +174,7 @@ namespace BLToolkit.TypeBuilder.Builders
 
 			BuildContext _context;
 
+			[SuppressMessage("Microsoft.Design", "CA1062:ValidateArgumentsOfPublicMethods")]
 			public int Compare(IAbstractTypeBuilder x, IAbstractTypeBuilder y)
 			{
 				return x.GetPriority(_context) - y.GetPriority(_context);
@@ -266,7 +268,7 @@ namespace BLToolkit.TypeBuilder.Builders
 			_context.MethodBuilder = null;
 		}
 
-		private AbstractTypeBuilderList GetBuilders(object[] attributes, object target)
+		private static AbstractTypeBuilderList GetBuilders(object[] attributes, object target)
 		{
 			AbstractTypeBuilderList builders = new AbstractTypeBuilderList(attributes.Length);
 
@@ -281,19 +283,19 @@ namespace BLToolkit.TypeBuilder.Builders
 			return builders;
 		}
 
-		private AbstractTypeBuilderList GetBuilders(MemberInfo memberInfo)
+		private static AbstractTypeBuilderList GetBuilders(MemberInfo memberInfo)
 		{
 			return GetBuilders(
 				memberInfo.GetCustomAttributes(typeof(AbstractTypeBuilderAttribute), true), memberInfo);
 		}
 
-		private AbstractTypeBuilderList GetBuilders(ParameterInfo parameterInfo)
+		private static AbstractTypeBuilderList GetBuilders(ParameterInfo parameterInfo)
 		{
 			return GetBuilders(
 				parameterInfo.GetCustomAttributes(typeof(AbstractTypeBuilderAttribute), true), parameterInfo);
 		}
 
-		private AbstractTypeBuilderList GetBuilders(ParameterInfo[] parameters)
+		private static AbstractTypeBuilderList GetBuilders(ParameterInfo[] parameters)
 		{
 			AbstractTypeBuilderList builders = new AbstractTypeBuilderList();
 
@@ -313,7 +315,7 @@ namespace BLToolkit.TypeBuilder.Builders
 			return builders;
 		}
 
-		private AbstractTypeBuilderList Combine(params AbstractTypeBuilderList[] builders)
+		private static AbstractTypeBuilderList Combine(params AbstractTypeBuilderList[] builders)
 		{
 			AbstractTypeBuilderList list = new AbstractTypeBuilderList();
 
@@ -366,7 +368,7 @@ namespace BLToolkit.TypeBuilder.Builders
 					setter != null && setter.IsAbstract)
 				{
 					DefineAbstractGetter(pi, getter, propertyBuilders);
-					DefineAbstractSetter(pi, getter, setter, propertyBuilders);
+					DefineAbstractSetter(pi, setter, propertyBuilders);
 				}
 			}
 
@@ -407,7 +409,6 @@ namespace BLToolkit.TypeBuilder.Builders
 
 		private void DefineAbstractSetter(
 			PropertyInfo            propertyInfo,
-			MethodInfo              getter,
 			MethodInfo              setter,
 			AbstractTypeBuilderList propertyBuilders)
 		{
@@ -492,19 +493,18 @@ namespace BLToolkit.TypeBuilder.Builders
 				MethodInfo getter = pi.GetGetMethod(true);
 
 				if (getter != null && getter.IsVirtual && getter.IsAbstract == false)
-					OverrideGetter(pi, getter, propertyBuilders);
+					OverrideGetter(getter, propertyBuilders);
 
 				MethodInfo setter = pi.GetSetMethod(true);
 
 				if (setter != null && setter.IsVirtual && setter.IsAbstract == false)
-					OverrideSetter(pi, getter, setter, propertyBuilders);
+					OverrideSetter(setter, propertyBuilders);
 			}
 
 			_context.CurrentProperty = null;
 		}
 
-		private void OverrideGetter(
-			PropertyInfo pi, MethodInfo getter, AbstractTypeBuilderList propertyBuilders)
+		private void OverrideGetter(MethodInfo getter, AbstractTypeBuilderList propertyBuilders)
 		{
 			AbstractTypeBuilderList builders = Combine(
 				GetBuilders(getter.GetParameters()),
@@ -529,8 +529,7 @@ namespace BLToolkit.TypeBuilder.Builders
 			}
 		}
 
-		private void OverrideSetter(
-			PropertyInfo pi, MethodInfo getter, MethodInfo setter, AbstractTypeBuilderList propertyBuilders)
+		private void OverrideSetter(MethodInfo setter, AbstractTypeBuilderList propertyBuilders)
 		{
 			AbstractTypeBuilderList builders = Combine(
 				GetBuilders(setter.GetParameters()),

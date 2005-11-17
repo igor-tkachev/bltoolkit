@@ -1,8 +1,11 @@
 using System;
+using System.Diagnostics.CodeAnalysis;
 
 namespace BLToolkit.TypeBuilder
 {
-	[AttributeUsage(AttributeTargets.Class | AttributeTargets.Interface, AllowMultiple=true)]
+	[SuppressMessage("Microsoft.Design", "CA1019:DefineAccessorsForAttributeArguments")]
+	[SuppressMessage("Microsoft.Performance", "CA1813:AvoidUnsealedAttributes")]
+	[AttributeUsage(AttributeTargets.Class | AttributeTargets.Interface, AllowMultiple = true)]
 	public class GlobalInstanceTypeAttribute : InstanceTypeAttribute
 	{
 		public GlobalInstanceTypeAttribute(Type propertyType, Type instanceType)

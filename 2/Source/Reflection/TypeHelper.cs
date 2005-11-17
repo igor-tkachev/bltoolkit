@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 
 using BLToolkit.TypeBuilder;
@@ -32,23 +33,27 @@ namespace BLToolkit.Reflection
 		}
 
 		/// <summary>
-		/// Converts the supplied <see cref="TypeHelper"/> to a <see cref="Type"/>.
-		/// </summary>
-		/// <param name="typeHelper">The TypeHelper.</param>
-		/// <returns>A Type.</returns>
-		public static implicit operator Type(TypeHelper typeHelper)
-		{
-			return typeHelper.Type;
-		}
-
-		/// <summary>
 		/// Converts the supplied <see cref="Type"/> to a <see cref="TypeHelper"/>.
 		/// </summary>
 		/// <param name="type">The Type.</param>
 		/// <returns>A TypeHelper.</returns>
 		public static implicit operator TypeHelper(Type type)
 		{
+			if (type == null) throw new ArgumentNullException("type");
+
 			return new TypeHelper(type);
+		}
+
+		/// <summary>
+		/// Converts the supplied <see cref="TypeHelper"/> to a <see cref="Type"/>.
+		/// </summary>
+		/// <param name="typeHelper">The TypeHelper.</param>
+		/// <returns>A Type.</returns>
+		public static implicit operator Type(TypeHelper typeHelper)
+		{
+			if (typeHelper == null) throw new ArgumentNullException("typeHelper");
+
+			return typeHelper.Type;
 		}
 
 		#region GetAttributes
@@ -453,6 +458,7 @@ namespace BLToolkit.Reflection
 		/// Searches for a public default constructor.
 		/// </summary>
 		/// <returns>A <see cref="ConstructorInfo"/> object representing the constructor.</returns>
+		[SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate")]
 		public ConstructorInfo GetPublicDefaultConstructor()
 		{
 			return _type.GetConstructor(Type.EmptyTypes);
@@ -561,8 +567,11 @@ namespace BLToolkit.Reflection
 #endif
 		}
 
+		[SuppressMessage("Microsoft.Design", "CA1011:ConsiderPassingBaseTypesAsParameters")]
 		public static object[] GetPropertyParameters(PropertyInfo propertyInfo)
 		{
+			if (propertyInfo == null) throw new ArgumentNullException("propertyInfo");
+
 			object[] attrs = propertyInfo.GetCustomAttributes(typeof(ParameterAttribute), true);
 
 			if (attrs != null && attrs.Length > 0)

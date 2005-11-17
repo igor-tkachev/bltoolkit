@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Reflection;
 using System.Reflection.Emit;
+using System.Diagnostics.CodeAnalysis;
 
 using BLToolkit.Reflection;
 using BLToolkit.Reflection.Emit;
@@ -195,6 +196,7 @@ namespace BLToolkit.TypeBuilder.Builders
 		#endregion
 
 		private AbstractTypeBuilderList _typeBuilders;
+		[SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
 		public  AbstractTypeBuilderList  TypeBuilders
 		{
 			get { return _typeBuilders;  }

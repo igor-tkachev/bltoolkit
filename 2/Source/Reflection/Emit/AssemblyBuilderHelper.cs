@@ -109,6 +109,8 @@ namespace BLToolkit.Reflection.Emit
 		/// <returns>An AssemblyBuilder.</returns>
 		public static implicit operator AssemblyBuilder(AssemblyBuilderHelper assemblyBuilder)
 		{
+			if (assemblyBuilder == null) throw new ArgumentNullException("assemblyBuilder");
+
 			return assemblyBuilder.AssemblyBuilder;
 		}
 
@@ -119,6 +121,8 @@ namespace BLToolkit.Reflection.Emit
 		/// <returns>A ModuleBuilder.</returns>
 		public static implicit operator ModuleBuilder(AssemblyBuilderHelper assemblyBuilder)
 		{
+			if (assemblyBuilder == null) throw new ArgumentNullException("assemblyBuilder");
+
 			return assemblyBuilder.ModuleBuilder;
 		}
 

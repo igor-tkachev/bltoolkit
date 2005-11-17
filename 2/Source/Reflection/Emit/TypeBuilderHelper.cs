@@ -57,6 +57,8 @@ namespace BLToolkit.Reflection.Emit
 		/// <returns>A TypeBuilder.</returns>
 		public static implicit operator System.Reflection.Emit.TypeBuilder(TypeBuilderHelper typeBuilder)
 		{
+			if (typeBuilder == null) throw new ArgumentNullException("typeBuilder");
+
 			return typeBuilder.TypeBuilder;
 		}
 
@@ -109,6 +111,8 @@ namespace BLToolkit.Reflection.Emit
 		public MethodBuilderHelper DefineMethod(
 			string name, MethodInfo methodInfoDeclaration, MethodAttributes attributes)
 		{
+			if (methodInfoDeclaration == null) throw new ArgumentNullException("methodInfoDeclaration");
+
 			ParameterInfo[] pi = methodInfoDeclaration.GetParameters();
 			Type[]  parameters = new Type[pi.Length];
 
@@ -153,6 +157,8 @@ namespace BLToolkit.Reflection.Emit
 		/// <returns>The defined method.</returns>
 		public MethodBuilderHelper DefineMethod(MethodInfo methodInfoDeclaration)
 		{
+			if (methodInfoDeclaration == null) throw new ArgumentNullException("methodInfoDeclaration");
+
 			bool isInterface = methodInfoDeclaration.DeclaringType.IsInterface;
 
 			string name = isInterface?
@@ -193,6 +199,8 @@ namespace BLToolkit.Reflection.Emit
 		/// <param name="attributeType">Attribute type</param>
 		public void SetCustomAttribute(Type attributeType)
 		{
+			if (attributeType == null) throw new ArgumentNullException("attributeType");
+
 			ConstructorInfo        ci        = attributeType.GetConstructor(Type.EmptyTypes);
 			CustomAttributeBuilder caBuilder = new CustomAttributeBuilder(ci, new object[0]);
 

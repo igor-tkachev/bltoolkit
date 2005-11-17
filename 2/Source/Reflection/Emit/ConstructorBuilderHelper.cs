@@ -40,6 +40,8 @@ namespace BLToolkit.Reflection.Emit
 		/// <returns>A ConstructorBuilder.</returns>
 		public static implicit operator ConstructorBuilder(ConstructorBuilderHelper constructorBuilder)
 		{
+			if (constructorBuilder == null) throw new ArgumentNullException("constructorBuilder");
+
 			return constructorBuilder.ConstructorBuilder;
 		}
 
