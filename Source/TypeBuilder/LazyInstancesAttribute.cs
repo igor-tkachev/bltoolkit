@@ -1,7 +1,10 @@
 using System;
+using System.Diagnostics.CodeAnalysis;
 
 namespace BLToolkit.TypeBuilder
 {
+	[SuppressMessage("Microsoft.Design", "CA1019:DefineAccessorsForAttributeArguments")]
+	[SuppressMessage("Microsoft.Performance", "CA1813:AvoidUnsealedAttributes")]
 	[AttributeUsage(AttributeTargets.Class | AttributeTargets.Interface)]
 	public class LazyInstancesAttribute : Attribute
 	{

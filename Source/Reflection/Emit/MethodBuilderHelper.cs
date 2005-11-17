@@ -43,6 +43,8 @@ namespace BLToolkit.Reflection.Emit
 		/// <returns>A MethodBuilder.</returns>
 		public static implicit operator MethodBuilder(MethodBuilderHelper methodBuilder)
 		{
+			if (methodBuilder == null) throw new ArgumentNullException("methodBuilder");
+
 			return methodBuilder.MethodBuilder;
 		}
 

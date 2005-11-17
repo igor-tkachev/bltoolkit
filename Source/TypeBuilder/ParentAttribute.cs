@@ -3,7 +3,7 @@ using System;
 namespace BLToolkit.TypeBuilder
 {
 	[AttributeUsage(AttributeTargets.Parameter)]
-	public class ParentAttribute : Attribute
+	public sealed class ParentAttribute : Attribute
 	{
 	}
 }

@@ -3,6 +3,7 @@ using System.Reflection.Emit;
 using System.Reflection;
 using BLToolkit.Reflection.Emit;
 using System.Collections;
+using System.Diagnostics.CodeAnalysis;
 
 namespace BLToolkit.TypeBuilder.Builders
 {
@@ -22,9 +23,12 @@ namespace BLToolkit.TypeBuilder.Builders
 
 		public override bool IsApplied(BuildContext context)
 		{
+			if (context == null) throw new ArgumentNullException("context");
+
 			return context.BuildElement == BuildElement.InterfaceMethod;
 		}
 
+		[SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity")]
 		protected override void BuildInterfaceMethod()
 		{
 			bool returnIfNonZero = false;

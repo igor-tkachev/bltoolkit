@@ -22,45 +22,50 @@ namespace BLToolkit.TypeBuilder.Builders
 
 		public override bool IsApplied(BuildContext context)
 		{
+			if (context == null) throw new ArgumentNullException("context");
+
 			return context.IsBeforeStep && context.BuildElement != BuildElement.Type;
 		}
 
 		public override void Build(BuildContext context)
 		{
+			if (context == null) throw new ArgumentNullException("context");
+
 			ParameterInfo pi = (ParameterInfo)TargetElement;
 
 			if (pi.ParameterType.IsValueType == false)
 			{
-				EmitHelper   emit  = context.MethodBuilder.Emitter;
-				Label        label = emit.DefineLabel();
-				LocalBuilder lb    = emit.DeclareLocal(typeof(object));
+				EmitHelper emit  = context.MethodBuilder.Emitter;
+				Label      label = emit.DefineLabel();
 
-				string message = _message != null? string.Format(_message, pi.Name): string.Empty;
+				string message = _message != null?
+					string.Format((IFormatProvider)null, _message, pi.Name):
+					string.Empty;
 
 				emit
-					.ldarg(pi)
-					.brtrue_s(label)
+					.ldarg    (pi)
+					.brtrue_s (label)
 					;
 
 				if (message.Length == 0)
 				{
 					emit
-						.ldstr(pi.Name)
-						.newobj(typeof(ArgumentNullException), typeof(string))
+						.ldstr  (pi.Name)
+						.newobj (typeof(ArgumentNullException), typeof(string))
 						;
 				}
 				else
 				{
 					emit
 						.ldnull
-						.ldstr(message)
-						.newobj(typeof(ArgumentNullException), typeof(string), typeof(string))
+						.ldstr  (message)
+						.newobj (typeof(ArgumentNullException), typeof(string), typeof(string))
 						;
 				}
 
 				emit
 					.@throw
-					.MarkLabel(label)
+					.MarkLabel (label)
 					;
 			}
 		}

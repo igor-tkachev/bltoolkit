@@ -1,9 +1,11 @@
 using System;
+using System.Diagnostics.CodeAnalysis;
 
 using BLToolkit.TypeBuilder.Builders;
 
 namespace BLToolkit.TypeBuilder
 {
+	[SuppressMessage("Microsoft.Performance", "CA1813:AvoidUnsealedAttributes")]
 	[AttributeUsage(AttributeTargets.Class | AttributeTargets.Interface, AllowMultiple = true)]
 	public class ImplementInterfaceAttribute : AbstractTypeBuilderAttribute
 	{
@@ -16,7 +18,6 @@ namespace BLToolkit.TypeBuilder
 		public  Type  Type
 		{
 			get { return _type;  }
-			set { _type = value; }
 		}
 
 		public override IAbstractTypeBuilder TypeBuilder

@@ -4,6 +4,7 @@ using System.Reflection.Emit;
 
 using BLToolkit.Reflection;
 using BLToolkit.Reflection.Emit;
+using System.Diagnostics.CodeAnalysis;
 
 namespace BLToolkit.TypeBuilder.Builders
 {
@@ -34,6 +35,8 @@ namespace BLToolkit.TypeBuilder.Builders
 
 		public override bool IsApplied(BuildContext context)
 		{
+			if (context == null) throw new ArgumentNullException("context");
+
 			return
 				base.IsApplied(context) &&
 				context.CurrentProperty != null &&
@@ -47,6 +50,7 @@ namespace BLToolkit.TypeBuilder.Builders
 			return InstanceType;
 		}
 
+		[SuppressMessage("Microsoft.Performance", "CA1800:DoNotCastUnnecessarily")]
 		protected override void BuildAbstractGetter()
 		{
 			FieldBuilder field        = GetField();
@@ -91,12 +95,13 @@ namespace BLToolkit.TypeBuilder.Builders
 			emit.stloc(Context.ReturnValue);
 		}
 
+		[SuppressMessage("Microsoft.Performance", "CA1800:DoNotCastUnnecessarily")]
 		protected override void BuildAbstractSetter()
 		{
 			FieldBuilder field        = GetField();
 			EmitHelper   emit         = Context.MethodBuilder.Emitter;
 			Type         propertyType = Context.CurrentProperty.PropertyType;
-			MemberInfo   setter       = GetGetter();
+			MemberInfo   setter       = GetSetter();
 
 			if (InstanceType.IsValueType) emit.ldarg_0.ldflda(field);
 			else                          emit.ldarg_0.ldfld (field);
@@ -201,8 +206,8 @@ namespace BLToolkit.TypeBuilder.Builders
 					return prop;
 
 			throw new TypeBuilderException(string.Format(
-				"The '{0}' type does not have appropriate setter. " +
-				"See '{1}' member of '{2}' type.",
+				(IFormatProvider)null,
+				"The '{0}' type does not have appropriate setter. See '{1}' member of '{2}' type.",
 				InstanceType.FullName,
 				propertyType.FullName,
 				Context.Type.FullName));

@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics.CodeAnalysis;
 
 #if FW2
 using System.Collections.Generic;
@@ -9,6 +10,7 @@ using System.Collections;
 namespace BLToolkit.TypeBuilder.Builders
 {
 #if FW2
+	[SuppressMessage("Microsoft.Naming", "CA1710:IdentifiersShouldHaveCorrectSuffix")]
 	public class AbstractTypeBuilderList : List<IAbstractTypeBuilder>
 	{
 		public AbstractTypeBuilderList()

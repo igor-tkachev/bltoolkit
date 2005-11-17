@@ -1,7 +1,10 @@
 using System;
+using System.Diagnostics.CodeAnalysis;
 
 namespace BLToolkit.TypeBuilder
 {
+	[SuppressMessage("Microsoft.Design", "CA1019:DefineAccessorsForAttributeArguments")]
+	[SuppressMessage("Microsoft.Performance", "CA1813:AvoidUnsealedAttributes")]
 	[AttributeUsage(AttributeTargets.Property)]
 	public class ParameterAttribute : Attribute
 	{
@@ -49,12 +52,14 @@ namespace BLToolkit.TypeBuilder
 			SetParameters(parameter1, parameter2, parameter3, parameter4, parameter5);
 		}
 
+		[SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate")]
 		protected void SetParameters(params object[] parameters)
 		{
 			_parameters = parameters;
 		}
 
 		private object[] _parameters;
+		[SuppressMessage("Microsoft.Performance", "CA1819:PropertiesShouldNotReturnArrays")]
 		public  object[]  Parameters
 		{
 			get { return _parameters;  }

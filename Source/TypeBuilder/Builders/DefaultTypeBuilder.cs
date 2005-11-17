@@ -5,6 +5,7 @@ using System.Reflection.Emit;
 
 using BLToolkit.Reflection;
 using BLToolkit.Reflection.Emit;
+using System.Diagnostics.CodeAnalysis;
 
 namespace BLToolkit.TypeBuilder.Builders
 {
@@ -19,6 +20,8 @@ namespace BLToolkit.TypeBuilder.Builders
 
 		public override bool IsApplied(BuildContext context)
 		{
+			if (context == null) throw new ArgumentNullException("context");
+
 			if (context.IsAbstractProperty && context.IsBeforeOrBuildStep)
 			{
 				return context.CurrentProperty.GetIndexParameters().Length <= 1;
@@ -164,6 +167,7 @@ namespace BLToolkit.TypeBuilder.Builders
 
 		#region Common
 
+		[SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate")]
 		protected FieldBuilder GetField()
 		{
 			PropertyInfo propertyInfo = Context.CurrentProperty;
@@ -217,7 +221,9 @@ namespace BLToolkit.TypeBuilder.Builders
 						return;
 
 					throw new TypeBuilderException(
-						string.Format("Could not build the '{0}' property of the '{1}' type: type '{2}' has to have public default constructor.",
+						string.Format(
+							(IFormatProvider)null,
+							"Could not build the '{0}' property of the '{1}' type: type '{2}' has to have public default constructor.",
 							Context.CurrentProperty.Name,
 							Context.Type.FullName,
 							fieldType.FullName));
@@ -299,7 +305,9 @@ namespace BLToolkit.TypeBuilder.Builders
 					return;
 
 				throw new TypeBuilderException(
-					string.Format("Could not build the '{0}' property of the '{1}' type: {2}constructor not found for the '{3}' type.",
+					string.Format(
+						(IFormatProvider)null,
+						"Could not build the '{0}' property of the '{1}' type: {2}constructor not found for the '{3}' type.",
 						Context.CurrentProperty.Name,
 						Context.Type.FullName,
 						types.Length == 0? "default ": "",
@@ -569,7 +577,7 @@ namespace BLToolkit.TypeBuilder.Builders
 			FieldBuilder        field     = Context.GetField(fieldName);
 			TypeHelper          fieldType = new TypeHelper(field.FieldType);
 			MethodBuilderHelper ensurer   = Context.TypeBuilder.DefineMethod(
-				string.Format("$EnsureInstance{0}", fieldName),
+				string.Format((IFormatProvider)null, "$EnsureInstance{0}", fieldName),
 				MethodAttributes.Private | MethodAttributes.HideBySig);
 
 			EmitHelper emit = ensurer.Emitter;
@@ -713,8 +721,10 @@ namespace BLToolkit.TypeBuilder.Builders
 					{
 						if (Context.Type.GetConstructors().Length > 0)
 							throw new TypeBuilderException(
-								string.Format("Could not build the '{0}' type: default constructor not found.",
-								Context.Type.FullName));
+								string.Format(
+									(IFormatProvider)null,
+									"Could not build the '{0}' type: default constructor not found.",
+									Context.Type.FullName));
 					}
 				}
 			}
@@ -747,8 +757,10 @@ namespace BLToolkit.TypeBuilder.Builders
 					{
 						if (Context.Type.GetConstructors().Length > 0)
 							throw new TypeBuilderException(
-								string.Format("Could not build the '{0}' type: default constructor not found.",
-								Context.Type.FullName));
+								string.Format(
+									(IFormatProvider)null,
+									"Could not build the '{0}' type: default constructor not found.",
+									Context.Type.FullName));
 					}
 				}
 			}

@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Reflection;
 using System.Reflection.Emit;
+using System.Diagnostics.CodeAnalysis;
 
 using BLToolkit.Reflection;
 using BLToolkit.Reflection.Emit;
@@ -30,6 +31,8 @@ namespace BLToolkit.TypeBuilder.Builders
 
 		public Type Build(Type sourceType, AssemblyBuilderHelper assemblyBuilder)
 		{
+			if (assemblyBuilder == null) throw new ArgumentNullException("assemblyBuilder");
+
 			string typeName = _type.FullName.Replace('+', '.') + ".TypeAccessor";
 
 			Type accessorType = _accessorType;
@@ -69,8 +72,10 @@ namespace BLToolkit.TypeBuilder.Builders
 
 			if (baseDefCtor == null && baseInitCtor == null)
 			{
-				throw new TypeBuilderException(
-					string.Format("The '{0}' type must have public default or init constructor.", _type.Name));
+				throw new TypeBuilderException(string.Format(
+					(IFormatProvider)null,
+					"The '{0}' type must have public default or init constructor.",
+					_type.Name));
 			}
 
 			// CreateInstance.
@@ -154,7 +159,7 @@ namespace BLToolkit.TypeBuilder.Builders
 			TypeBuilderHelper nestedType = _typeBuilder.DefineNestedType(
 				"Accessor$" + mi.Name, TypeAttributes.NestedPrivate, typeof(MemberAccessor));
 
-			ConstructorBuilderHelper ctorBuilder = BuildNestedTypeConstructor(nestedType, mi);
+			ConstructorBuilderHelper ctorBuilder = BuildNestedTypeConstructor(nestedType);
 
 			BuildInitMember(mi, ctorBuilder);
 			BuildGetter    (mi, nestedType);
@@ -178,6 +183,7 @@ namespace BLToolkit.TypeBuilder.Builders
 				;
 		}
 
+		[SuppressMessage("Microsoft.Performance", "CA1800:DoNotCastUnnecessarily")]
 		private void BuildGetter(MemberInfo mi, TypeBuilderHelper nestedType)
 		{
 			MethodInfo getMethod = null;
@@ -235,6 +241,7 @@ namespace BLToolkit.TypeBuilder.Builders
 				;
 		}
 
+		[SuppressMessage("Microsoft.Performance", "CA1800:DoNotCastUnnecessarily")]
 		private void BuildSetter(MemberInfo mi, TypeBuilderHelper nestedType)
 		{
 			MethodInfo setMethod = null;
@@ -293,8 +300,7 @@ namespace BLToolkit.TypeBuilder.Builders
 				;
 		}
 
-		private static ConstructorBuilderHelper BuildNestedTypeConstructor(
-			TypeBuilderHelper nestedType, MemberInfo mi)
+		private static ConstructorBuilderHelper BuildNestedTypeConstructor(TypeBuilderHelper nestedType)
 		{
 			ConstructorBuilderHelper ctorBuilder = nestedType.DefinePublicConstructor(typeof(MemberInfo));
 

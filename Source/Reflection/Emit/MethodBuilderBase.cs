@@ -14,7 +14,7 @@ namespace BLToolkit.Reflection.Emit
 		/// </summary>
 		/// <param name="typeBuilder">Associated <see cref="TypeBuilderHelper"/>.</param>
 		/// <param name="methodBuilder">A <see cref="MethodBuilder"/></param>
-		public MethodBuilderBase(TypeBuilderHelper typeBuilder)
+		protected MethodBuilderBase(TypeBuilderHelper typeBuilder)
 		{
 			if (typeBuilder == null) throw new ArgumentNullException("typeBuilder");
 

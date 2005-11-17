@@ -10,6 +10,8 @@ namespace BLToolkit.TypeBuilder.Builders
 	{
 		public override bool IsApplied(BuildContext context)
 		{
+			if (context == null) throw new ArgumentNullException("context");
+
 			return context.IsAfterStep && context.IsSetter;
 		}
 

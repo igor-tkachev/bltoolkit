@@ -34,6 +34,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Aspects\NotNullAttribute.cs" />
+    <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="Mapping\DataReaderMapper.cs" />
     <Compile Include="Mapping\DataRowMapper.cs" />
     <Compile Include="Mapping\DefaultMapper.cs" />

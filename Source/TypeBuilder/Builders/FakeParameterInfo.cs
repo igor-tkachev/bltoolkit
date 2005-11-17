@@ -41,6 +41,8 @@ namespace BLToolkit.TypeBuilder.Builders
 
 		public override object[] GetCustomAttributes(Type attributeType, bool inherit)
 		{
+			if (attributeType == null) throw new ArgumentNullException("attributeType");
+
 			if (_attributes.Length == 0)
 				return _attributes;
 
@@ -55,6 +57,8 @@ namespace BLToolkit.TypeBuilder.Builders
 
 		public override bool IsDefined(Type attributeType, bool inherit)
 		{
+			if (attributeType == null) throw new ArgumentNullException("attributeType");
+
 			foreach (object o in _attributes)
 				if (o.GetType() == attributeType || attributeType.IsInstanceOfType(o))
 					return true;
