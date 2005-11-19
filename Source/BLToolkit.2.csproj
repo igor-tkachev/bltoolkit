@@ -34,7 +34,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Aspects\NotNullAttribute.cs" />
-    <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="Mapping\DataReaderMapper.cs" />
     <Compile Include="Mapping\DataRowMapper.cs" />
     <Compile Include="Mapping\DefaultMapper.cs" />
@@ -76,7 +75,7 @@
     <Compile Include="TypeBuilder\Builders\IAbstractTypeBuilder.cs" />
     <Compile Include="Reflection\InitContext.cs" />
     <Compile Include="TypeBuilder\Builders\InstanceTypeBuilder.cs" />
-    <Compile Include="TypeBuilder\Builders\NotNullAspectBuilder.cs" />
+    <Compile Include="Aspects\NotNullAspectBuilder.cs" />
     <Compile Include="TypeBuilder\Builders\TypeBuilderConsts.cs" />
     <Compile Include="TypeBuilder\DefaultInstanceTypeAttribute.cs" />
     <Compile Include="TypeBuilder\GetValueAttribute.cs" />

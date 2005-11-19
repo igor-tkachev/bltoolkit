@@ -7,11 +7,23 @@ namespace BLToolkit.Mapping
 {
 	public class Mapper
 	{
-		public virtual IObjectMapper GetObjectMapper(Type type)
+		private Hashtable _mappers = new Hashtable();
+
+		public IObjectMapper GetObjectMapper(Type type)
 		{
 			IObjectMapper om = (IObjectMapper)_mappers[type];
 
-			return om != null? om: Map.DefaultMapper.GetObjectMapper(type);
+			if (om == null)
+			{
+				om = CreateMapper(type);
+
+				if (om == null)
+					om = Map.DefaulMapper.CreateMapper(type);
+
+				SetObjectMapper(type, om);
+			}
+
+			return om;
 		}
 
 		public void SetObjectMapper(Type type, IObjectMapper om)
@@ -24,10 +36,9 @@ namespace BLToolkit.Mapping
 				_mappers[TypeAccessor.GetAccessor(type).Type] = om;
 		}
 
-		private   Hashtable _mappers = new Hashtable();
-		protected Hashtable  Mappers
+		protected virtual IObjectMapper CreateMapper(Type type)
 		{
-			get { return _mappers; }
+			return null;
 		}
 	}
 }

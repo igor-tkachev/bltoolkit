@@ -53,3 +53,4 @@ using System.Diagnostics.CodeAnalysis;
 [assembly: SuppressMessage("Microsoft.Globalization", "CA1303:DoNotPassLiteralsAsLocalizedParameters", Scope = "member", Target = "BLToolkit.TypeBuilder.TypeBuilderException..ctor()", MessageId = "System.Exception.#ctor(System.String)")]
 [assembly: SuppressMessage("Microsoft.Performance", "CA1810:InitializeReferenceTypeStaticFieldsInline", Scope = "member", Target = "BLToolkit.TypeBuilder.TypeFactory..cctor()")]
 [assembly: SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode", Scope = "member", Target = "BLToolkit.TypeBuilder.Builders.FakeParameterInfo..ctor(System.Reflection.MethodInfo)")]
+[assembly: System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1807:AvoidUnnecessaryStringCreation", Scope = "member", Target = "BLToolkit.Mapping.ObjectMapper.Item[System.String]", MessageId = "name")]

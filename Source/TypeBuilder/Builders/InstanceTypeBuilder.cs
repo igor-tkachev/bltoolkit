@@ -1,10 +1,10 @@
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Reflection.Emit;
 
 using BLToolkit.Reflection;
 using BLToolkit.Reflection.Emit;
-using System.Diagnostics.CodeAnalysis;
 
 namespace BLToolkit.TypeBuilder.Builders
 {

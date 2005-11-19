@@ -3,10 +3,10 @@ using System.Collections;
 using System.Reflection;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 
 using BLToolkit.TypeBuilder;
 using BLToolkit.TypeBuilder.Builders;
-using System.Globalization;
 
 namespace BLToolkit.Reflection
 {

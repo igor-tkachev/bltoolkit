@@ -4,26 +4,13 @@ using BLToolkit.Reflection;
 
 namespace BLToolkit.Mapping
 {
-	class DefaultMapper : Mapper
+	public class DefaultMapper : Mapper
 	{
-		public override IObjectMapper GetObjectMapper(Type type)
+		protected override IObjectMapper CreateMapper(Type type)
 		{
-			IObjectMapper om = (IObjectMapper)Mappers[type];
+			IObjectMapper om = new ObjectMapper();
 
-			if (om == null)
-				Mappers[type] = om = CreateMapper(type);
-
-			return om;
-		}
-
-		private static IObjectMapper CreateMapper(Type type)
-		{
-			//TypeHelper   typeHelper = new TypeHelper(type);
-			TypeAccessor accessor   = TypeAccessor.GetAccessor(type);
-
-			ObjectMapper om = new ObjectMapper();
-
-			om.SetTypeAccessor(accessor);
+			om.Init(TypeAccessor.GetAccessor(type));
 
 			return om;
 		}

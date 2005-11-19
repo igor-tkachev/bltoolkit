@@ -38,5 +38,10 @@ namespace BLToolkit.Reflection
 					((FieldInfo)   _memberInfo).FieldType;
 			}
 		}
+
+		public string Name
+		{
+			get { return _memberInfo.Name; }
+		}
 	}
 }

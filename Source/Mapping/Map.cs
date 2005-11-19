@@ -9,9 +9,10 @@ namespace BLToolkit.Mapping
 		}
 
 		private static Mapper _defaultMapper = new DefaultMapper();
-		public  static Mapper  DefaultMapper
+		public  static Mapper  DefaulMapper
 		{
-			get { return _defaultMapper; }
+			get { return _defaultMapper;  }
+			set { _defaultMapper = value; }
 		}
 
 		public static IObjectMapper Mapper(Type type)
