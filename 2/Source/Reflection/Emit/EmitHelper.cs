@@ -3525,7 +3525,7 @@ namespace BLToolkit.Reflection.Emit
 			return this;
 		}
 
-		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1800:DoNotCastUnnecessarily")]
+		[SuppressMessage("Microsoft.Performance", "CA1800:DoNotCastUnnecessarily")]
 		public bool LoadWellKnownValue(object o)
 		{
 			if      (o == null)   ldnull.end();

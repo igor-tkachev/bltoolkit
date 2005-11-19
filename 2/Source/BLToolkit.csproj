@@ -89,6 +89,11 @@
                     BuildAction = "Compile"
                 />
                 <File
+                    RelPath = "Aspects\NotNullAspectBuilder.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
                     RelPath = "Aspects\NotNullAttribute.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
@@ -105,12 +110,42 @@
                     BuildAction = "Compile"
                 />
                 <File
+                    RelPath = "Mapping\DefaultMapper.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
                     RelPath = "Mapping\IMapDataDestination.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
                 />
                 <File
                     RelPath = "Mapping\IMapDataSource.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "Mapping\IObjectMapper.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "Mapping\Map.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "Mapping\Mapper.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "Mapping\MemberMapper.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "Mapping\ObjectMapper.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
                 />
@@ -361,11 +396,6 @@
                 />
                 <File
                     RelPath = "TypeBuilder\Builders\ITypeBuilder.cs"
-                    SubType = "Code"
-                    BuildAction = "Compile"
-                />
-                <File
-                    RelPath = "TypeBuilder\Builders\NotNullAspectBuilder.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
                 />

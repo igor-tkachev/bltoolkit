@@ -8,5 +8,7 @@ namespace BLToolkit.Mapping
 	{
 		object CreateInstance();
 		object CreateInstance(InitContext context);
+
+		void Init(TypeAccessor typeAccessor);
 	}
 }

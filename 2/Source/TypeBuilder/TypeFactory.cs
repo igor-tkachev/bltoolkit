@@ -1,14 +1,14 @@
 using System;
 using System.Collections;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Reflection;
 using System.Reflection.Emit;
+using System.Security.Permissions;
 
 using BLToolkit.Reflection;
 using BLToolkit.Reflection.Emit;
 using BLToolkit.TypeBuilder.Builders;
-using System.Security.Permissions;
-using System.Diagnostics.CodeAnalysis;
 
 namespace BLToolkit.TypeBuilder
 {

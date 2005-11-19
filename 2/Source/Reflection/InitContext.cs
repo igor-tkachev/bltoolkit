@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Diagnostics.CodeAnalysis;
 
 namespace BLToolkit.Reflection
 {
@@ -10,7 +11,7 @@ namespace BLToolkit.Reflection
 		}
 
 		private object[] _memberParameters;
-		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1819:PropertiesShouldNotReturnArrays")]
+		[SuppressMessage("Microsoft.Performance", "CA1819:PropertiesShouldNotReturnArrays")]
 		public  object[]  MemberParameters
 		{
 			get { return _memberParameters;  }
@@ -18,7 +19,7 @@ namespace BLToolkit.Reflection
 		}
 
 		private object[] _Parameters;
-		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1819:PropertiesShouldNotReturnArrays")]
+		[SuppressMessage("Microsoft.Performance", "CA1819:PropertiesShouldNotReturnArrays")]
 		public  object[]  Parameters
 		{
 			get { return _Parameters;  }
