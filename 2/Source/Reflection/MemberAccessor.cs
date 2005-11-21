@@ -43,5 +43,12 @@ namespace BLToolkit.Reflection
 		{
 			get { return _memberInfo.Name; }
 		}
+
+		public Attribute GetAttribute(Type attributeType)
+		{
+			object[] attrs = _memberInfo.GetCustomAttributes(attributeType, true);
+
+			return attrs.Length > 0? (Attribute)attrs[0]: null;
+		}
 	}
 }

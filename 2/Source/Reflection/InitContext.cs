@@ -11,7 +11,6 @@ namespace BLToolkit.Reflection
 		}
 
 		private object[] _memberParameters;
-		[SuppressMessage("Microsoft.Performance", "CA1819:PropertiesShouldNotReturnArrays")]
 		public  object[]  MemberParameters
 		{
 			get { return _memberParameters;  }
@@ -19,7 +18,6 @@ namespace BLToolkit.Reflection
 		}
 
 		private object[] _Parameters;
-		[SuppressMessage("Microsoft.Performance", "CA1819:PropertiesShouldNotReturnArrays")]
 		public  object[]  Parameters
 		{
 			get { return _Parameters;  }

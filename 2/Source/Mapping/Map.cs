@@ -15,7 +15,7 @@ namespace BLToolkit.Mapping
 			set { _defaultMapper = value; }
 		}
 
-		public static IObjectMapper Mapper(Type type)
+		public static IObjectMapper GetObjectMapper(Type type)
 		{
 			return _defaultMapper.GetObjectMapper(type);
 		}

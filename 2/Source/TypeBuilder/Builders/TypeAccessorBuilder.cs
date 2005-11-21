@@ -35,17 +35,11 @@ namespace BLToolkit.TypeBuilder.Builders
 
 			string typeName = _type.FullName.Replace('+', '.') + ".TypeAccessor";
 
-			Type accessorType = _accessorType;
-
-#if FW2
-			accessorType = typeof(TypeAccessor<>).MakeGenericType(new Type[] { _type });
-#endif
-
-			_typeBuilder = assemblyBuilder.DefineType(typeName, accessorType);
+			_typeBuilder = assemblyBuilder.DefineType(typeName, _accessorType);
 
 			_typeBuilder.DefaultConstructor.Emitter
 				.ldarg_0
-				.call    (TypeHelper.GetDefaultConstructor(accessorType))
+				.call    (TypeHelper.GetDefaultConstructor(_accessorType))
 				;
 
 			BuildCreateInstanceMethods();
@@ -73,7 +67,6 @@ namespace BLToolkit.TypeBuilder.Builders
 			if (baseDefCtor == null && baseInitCtor == null)
 			{
 				throw new TypeBuilderException(string.Format(
-					(IFormatProvider)null,
 					"The '{0}' type must have public default or init constructor.",
 					_type.Name));
 			}
@@ -316,9 +309,9 @@ namespace BLToolkit.TypeBuilder.Builders
 
 		private void BuildObjectFactory()
 		{
-			Attribute attrs = TypeHelper.GetFirstAttribute(_type, typeof(ObjectFactoryAttribute));
+			Attribute attr = TypeHelper.GetFirstAttribute(_type, typeof(ObjectFactoryAttribute));
 
-			if (attrs != null)
+			if (attr != null)
 			{
 				_typeBuilder.DefaultConstructor.Emitter
 					.ldarg_0

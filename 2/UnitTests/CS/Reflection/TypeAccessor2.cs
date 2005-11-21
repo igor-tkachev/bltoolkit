@@ -18,8 +18,7 @@ namespace Reflection
 		[Test]
 		public void Test()
 		{
-			TestObject o1 = TypeAccessor<TestObject>.GetAccessor().CreateInstance();
-
+			TestObject o1 = TypeAccessor<TestObject>.CreateInstance();
 			TestObject o2 = TypeAccessor.CreateInstance<TestObject>();
 		}
 

@@ -167,7 +167,6 @@ namespace BLToolkit.TypeBuilder.Builders
 
 		#region Common
 
-		[SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate")]
 		protected FieldBuilder GetField()
 		{
 			PropertyInfo propertyInfo = Context.CurrentProperty;
@@ -222,7 +221,6 @@ namespace BLToolkit.TypeBuilder.Builders
 
 					throw new TypeBuilderException(
 						string.Format(
-							(IFormatProvider)null,
 							"Could not build the '{0}' property of the '{1}' type: type '{2}' has to have public default constructor.",
 							Context.CurrentProperty.Name,
 							Context.Type.FullName,
@@ -306,7 +304,6 @@ namespace BLToolkit.TypeBuilder.Builders
 
 				throw new TypeBuilderException(
 					string.Format(
-						(IFormatProvider)null,
 						"Could not build the '{0}' property of the '{1}' type: {2}constructor not found for the '{3}' type.",
 						Context.CurrentProperty.Name,
 						Context.Type.FullName,
@@ -577,7 +574,7 @@ namespace BLToolkit.TypeBuilder.Builders
 			FieldBuilder        field     = Context.GetField(fieldName);
 			TypeHelper          fieldType = new TypeHelper(field.FieldType);
 			MethodBuilderHelper ensurer   = Context.TypeBuilder.DefineMethod(
-				string.Format((IFormatProvider)null, "$EnsureInstance{0}", fieldName),
+				string.Format("$EnsureInstance{0}", fieldName),
 				MethodAttributes.Private | MethodAttributes.HideBySig);
 
 			EmitHelper emit = ensurer.Emitter;
@@ -722,7 +719,6 @@ namespace BLToolkit.TypeBuilder.Builders
 						if (Context.Type.GetConstructors().Length > 0)
 							throw new TypeBuilderException(
 								string.Format(
-									(IFormatProvider)null,
 									"Could not build the '{0}' type: default constructor not found.",
 									Context.Type.FullName));
 					}
@@ -758,7 +754,6 @@ namespace BLToolkit.TypeBuilder.Builders
 						if (Context.Type.GetConstructors().Length > 0)
 							throw new TypeBuilderException(
 								string.Format(
-									(IFormatProvider)null,
 									"Could not build the '{0}' type: default constructor not found.",
 									Context.Type.FullName));
 					}

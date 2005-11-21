@@ -193,7 +193,7 @@ namespace BLToolkit.TypeBuilder.Builders
 			string name = propertyInfo.Name;
 
 			if (char.IsUpper(name[0]) && name.Length > 1 && char.IsLower(name[1]))
-				name = char.ToLower(name[0], CultureInfo.CurrentCulture) + name.Substring(1, name.Length - 1);
+				name = char.ToLower(name[0]) + name.Substring(1, name.Length - 1);
 
 			name = "_" + name;
 
@@ -280,7 +280,6 @@ namespace BLToolkit.TypeBuilder.Builders
 			return GetPropertyInfoField(Context.CurrentProperty);
 		}
 
-		[SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate")]
 		protected FieldBuilder GetParameterField()
 		{
 			string       fieldName = GetFieldName() + "_$parameters";
@@ -303,7 +302,6 @@ namespace BLToolkit.TypeBuilder.Builders
 			return field;
 		}
 
-		[SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate")]
 		protected FieldBuilder GetTypeAccessorField()
 		{
 			string       fieldName = "_" + GetFieldType().Name + "_$typeAccessor";
@@ -325,7 +323,6 @@ namespace BLToolkit.TypeBuilder.Builders
 			return field;
 		}
 
-		[SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate")]
 		protected virtual Type GetFieldType()
 		{
 			PropertyInfo    pi    = Context.CurrentProperty;

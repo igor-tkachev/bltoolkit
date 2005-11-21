@@ -5,7 +5,6 @@ using BLToolkit.TypeBuilder.Builders;
 
 namespace BLToolkit.Aspects
 {
-	[SuppressMessage("Microsoft.Design", "CA1019:DefineAccessorsForAttributeArguments")]
 	[AttributeUsage(AttributeTargets.Parameter)]
 	public sealed class NotNullAttribute : AbstractTypeBuilderAttribute
 	{

@@ -3,7 +3,6 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace BLToolkit.TypeBuilder
 {
-	[SuppressMessage("Microsoft.Design", "CA1019:DefineAccessorsForAttributeArguments")]
 	[AttributeUsage(AttributeTargets.Property)]
 	public sealed class LazyInstanceAttribute : Attribute
 	{

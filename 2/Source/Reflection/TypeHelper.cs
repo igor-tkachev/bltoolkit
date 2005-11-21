@@ -388,7 +388,7 @@ namespace BLToolkit.Reflection
 		private Type[] _interfaces;
 
 		/// <summary>
-		/// gets all the interfaces implemented or inherited by the current <see cref="Type"/>.
+		/// Gets all the interfaces implemented or inherited by the current <see cref="Type"/>.
 		/// </summary>
 		/// <returns>An array of Type objects representing all the interfaces implemented or
 		/// inherited by the current Type,
@@ -458,7 +458,6 @@ namespace BLToolkit.Reflection
 		/// Searches for a public default constructor.
 		/// </summary>
 		/// <returns>A <see cref="ConstructorInfo"/> object representing the constructor.</returns>
-		[SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate")]
 		public ConstructorInfo GetPublicDefaultConstructor()
 		{
 			return _type.GetConstructor(Type.EmptyTypes);
@@ -561,7 +560,7 @@ namespace BLToolkit.Reflection
 				}
 			}
 
-			throw new TypeBuilderException(string.Format((IFormatProvider)null, "Method '{0}' not found.", methodName));
+			throw new TypeBuilderException(string.Format("Method '{0}' not found.", methodName));
 #else
 			return type.GetMethod(methodName, parameterTypes);
 #endif
