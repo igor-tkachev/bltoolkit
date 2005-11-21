@@ -164,7 +164,6 @@ namespace BLToolkit.TypeBuilder.Builders
 					return prop;
 
 			throw new TypeBuilderException(string.Format(
-				(IFormatProvider)null,
 				"The '{0}' type does not have appropriate getter. See '{1}' member of '{2}' type.",
 				InstanceType.FullName,
 				propertyType.FullName,
@@ -206,7 +205,6 @@ namespace BLToolkit.TypeBuilder.Builders
 					return prop;
 
 			throw new TypeBuilderException(string.Format(
-				(IFormatProvider)null,
 				"The '{0}' type does not have appropriate setter. See '{1}' member of '{2}' type.",
 				InstanceType.FullName,
 				propertyType.FullName,

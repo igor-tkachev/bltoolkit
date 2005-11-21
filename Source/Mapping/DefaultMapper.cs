@@ -8,9 +8,11 @@ namespace BLToolkit.Mapping
 	{
 		protected override IObjectMapper CreateMapper(Type type)
 		{
-			IObjectMapper om = new ObjectMapper();
+			Attribute attr = TypeHelper.GetFirstAttribute(type, typeof(ObjectMapperAttribute));
 
-			om.Init(TypeAccessor.GetAccessor(type));
+			IObjectMapper om = attr == null? new ObjectMapper(): ((ObjectMapperAttribute)attr).ObjectMapper;
+
+			om.Init(this, TypeAccessor.GetAccessor(type));
 
 			return om;
 		}

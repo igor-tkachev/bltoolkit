@@ -21,11 +21,11 @@ namespace BLToolkit.Mapping
 
 		#region Protected Members
 
-		protected virtual MemberMapper CreateMemberMapper(string name, MemberAccessor ma)
+		protected virtual MemberMapper CreateMemberMapper(MapMemberInfo mapMemberInfo)
 		{
-			MemberMapper mm = MemberMapper.CreateMemberMapper(ma.Type);
+			MemberMapper mm = MemberMapper.CreateMemberMapper(mapMemberInfo);
 
-			mm.Init(name, ma);
+			mm.Init(mapMemberInfo);
 
 			return mm;
 		}
@@ -38,7 +38,7 @@ namespace BLToolkit.Mapping
 			memberMapper.SetOrdinal(_members.Count);
 
 			_members.     Add(memberMapper);
-			_nameToMember.Add(memberMapper.Name.ToLower(CultureInfo.CurrentCulture),  memberMapper);
+			_nameToMember.Add(memberMapper.Name.ToLower(),  memberMapper);
 		}
 
 		private   ArrayList _members;
@@ -89,7 +89,7 @@ namespace BLToolkit.Mapping
 			return _typeAccessor.CreateInstance(context);
 		}
 
-		public virtual void Init(TypeAccessor typeAccessor)
+		public virtual void Init(Mapper mapper, TypeAccessor typeAccessor)
 		{
 			if (typeAccessor == null) throw new ArgumentNullException("typeAccessor");
 
@@ -97,9 +97,48 @@ namespace BLToolkit.Mapping
 
 			foreach (MemberAccessor ma in typeAccessor)
 			{
-				MemberMapper mm = CreateMemberMapper(ma.Name, ma);
-				Add(mm);
+				if (GetIgnore(ma))
+					continue;
+
+				MapMemberInfo mi = new MapMemberInfo();
+
+				mi.MemberAccessor = ma;
+				mi.Name           = ma.Name;
+				mi.Mapper         = mapper;
+				mi.IsTrimmable    = GetIsTrimmable(ma);
+
+				Add(CreateMemberMapper(mi));
 			}
+		}
+
+		protected virtual bool GetIgnore(MemberAccessor memberAccessor)
+		{
+			MapIgnoreAttribute attr = 
+				(MapIgnoreAttribute)memberAccessor.GetAttribute(typeof(MapIgnoreAttribute));
+
+			if (attr != null)
+				return attr.Ignore;
+
+			Type type = memberAccessor.Type;
+
+			return type.IsClass && type != typeof(string);
+		}
+
+		protected virtual bool GetIsTrimmable(MemberAccessor memberAccessor)
+		{
+			TrimmableAttribute attr1 = 
+				(TrimmableAttribute)memberAccessor.GetAttribute(typeof(TrimmableAttribute));
+
+			if (attr1 != null)
+				return attr1.IsTrimmable;
+
+			TrimStringsAttribute attr2 = (TrimStringsAttribute)TypeHelper.GetFirstAttribute(
+				memberAccessor.MemberInfo.DeclaringType, typeof(TrimStringsAttribute));
+
+			if (attr2 != null)
+				return attr2.IsTrimmable;
+
+			return true;
 		}
 
 		#endregion
@@ -123,7 +162,12 @@ namespace BLToolkit.Mapping
 
 		public virtual object GetValue(object o, string name)
 		{
-			return ((MemberMapper)_nameToMember[name]).GetValue(o);
+			MemberMapper mm = (MemberMapper)_nameToMember[name];
+
+			if (mm == null)
+				mm = this[name];
+
+			return mm == null? null: mm.GetValue(o);
 		}
 
 		#endregion
@@ -132,12 +176,22 @@ namespace BLToolkit.Mapping
 
 		public virtual int GetOrdinal(string name)
 		{
-			return ((MemberMapper)_nameToMember[name]).Ordinal;
+			MemberMapper mm = (MemberMapper)_nameToMember[name];
+
+			if (mm == null)
+				mm = this[name];
+
+			return mm == null? -1: mm.Ordinal;
 		}
 
 		public virtual void SetValue(object o, int index, object value)
 		{
 			((MemberMapper)_members[index]).SetValue(o, value);
+		}
+
+		public virtual void SetValue(object o, string name, object value)
+		{
+			SetValue(o, GetOrdinal(name), value);
 		}
 
 		#endregion

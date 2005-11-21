@@ -216,7 +216,6 @@ namespace BLToolkit.Reflection.Emit
 		/// </summary>
 		/// <seealso cref="OpCodes.Add">OpCodes.Add</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper add
 		{
 			get { _ilGenerator.Emit(OpCodes.Add); return this; }
@@ -228,8 +227,6 @@ namespace BLToolkit.Reflection.Emit
 		/// </summary>
 		/// <seealso cref="OpCodes.Add_Ovf">OpCodes.Add_Ovf</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores", MessageId = "Member")]
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper add_ovf
 		{
 			get { _ilGenerator.Emit(OpCodes.Add_Ovf); return this; }
@@ -241,9 +238,6 @@ namespace BLToolkit.Reflection.Emit
 		/// </summary>
 		/// <seealso cref="OpCodes.Add_Ovf_Un">OpCodes.Add_Ovf_Un</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1706:ShortAcronymsShouldBeUppercase", MessageId = "Member")]
-		[SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores", MessageId = "Member")]
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper add_ovf_un
 		{
 			get { _ilGenerator.Emit(OpCodes.Add_Ovf_Un); return this; }
@@ -255,7 +249,6 @@ namespace BLToolkit.Reflection.Emit
 		/// </summary>
 		/// <seealso cref="OpCodes.And">OpCodes.And</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper and
 		{
 			get { _ilGenerator.Emit(OpCodes.And); return this; }
@@ -267,7 +260,6 @@ namespace BLToolkit.Reflection.Emit
 		/// </summary>
 		/// <seealso cref="OpCodes.Arglist">OpCodes.Arglist</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper arglist
 		{
 			get { _ilGenerator.Emit(OpCodes.Arglist); return this; }
@@ -280,7 +272,6 @@ namespace BLToolkit.Reflection.Emit
 		/// <param name="label">The label to branch from this location.</param>
 		/// <seealso cref="OpCodes.Beq">OpCodes.Beq</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode,Label)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper beq(Label label)
 		{
 			_ilGenerator.Emit(OpCodes.Beq, label); return this;
@@ -293,8 +284,6 @@ namespace BLToolkit.Reflection.Emit
 		/// <param name="label">The label to branch from this location.</param>
 		/// <seealso cref="OpCodes.Beq_S">OpCodes.Beq_S</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode,Label)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores", MessageId = "Member")]
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper beq_s(Label label)
 		{
 			_ilGenerator.Emit(OpCodes.Beq_S, label); return this;
@@ -307,7 +296,6 @@ namespace BLToolkit.Reflection.Emit
 		/// <param name="label">The label to branch from this location.</param>
 		/// <seealso cref="OpCodes.Bge">OpCodes.Bge</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode,Label)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper bge(Label label)
 		{
 			_ilGenerator.Emit(OpCodes.Bge, label); return this;
@@ -321,8 +309,6 @@ namespace BLToolkit.Reflection.Emit
 		/// <param name="label">The label to branch from this location.</param>
 		/// <seealso cref="OpCodes.Bge_S">OpCodes.Bge_S</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode,Label)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores", MessageId = "Member")]
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper bge_s(Label label)
 		{
 			_ilGenerator.Emit(OpCodes.Bge_S, label); return this;
@@ -336,9 +322,6 @@ namespace BLToolkit.Reflection.Emit
 		/// <param name="label">The label to branch from this location.</param>
 		/// <seealso cref="OpCodes.Bge_Un">OpCodes.Bge_Un</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode,Label)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1706:ShortAcronymsShouldBeUppercase", MessageId = "Member")]
-		[SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores", MessageId = "Member")]
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper bge_un(Label label)
 		{
 			_ilGenerator.Emit(OpCodes.Bge_Un, label); return this;
@@ -352,9 +335,6 @@ namespace BLToolkit.Reflection.Emit
 		/// <param name="label">The label to branch from this location.</param>
 		/// <seealso cref="OpCodes.Bge_Un_S">OpCodes.Bge_Un_S</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode,Label)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1706:ShortAcronymsShouldBeUppercase", MessageId = "Member")]
-		[SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores", MessageId = "Member")]
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper bge_un_s(Label label)
 		{
 			_ilGenerator.Emit(OpCodes.Bge_Un_S, label); return this;
@@ -367,7 +347,6 @@ namespace BLToolkit.Reflection.Emit
 		/// <param name="label">The label to branch from this location.</param>
 		/// <seealso cref="OpCodes.Bgt">OpCodes.Bgt</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode,Label)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper bgt(Label label)
 		{
 			_ilGenerator.Emit(OpCodes.Bgt, label); return this;
@@ -380,8 +359,6 @@ namespace BLToolkit.Reflection.Emit
 		/// <param name="label">The label to branch from this location.</param>
 		/// <seealso cref="OpCodes.Bgt_S">OpCodes.Bgt_S</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode,Label)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores", MessageId = "Member")]
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper bgt_s(Label label)
 		{
 			_ilGenerator.Emit(OpCodes.Bgt_S, label); return this;
@@ -395,9 +372,6 @@ namespace BLToolkit.Reflection.Emit
 		/// <param name="label">The label to branch from this location.</param>
 		/// <seealso cref="OpCodes.Bgt_Un">OpCodes.Bgt_Un</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode,Label)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1706:ShortAcronymsShouldBeUppercase", MessageId = "Member")]
-		[SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores", MessageId = "Member")]
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper bgt_un(Label label)
 		{
 			_ilGenerator.Emit(OpCodes.Bgt_Un, label); return this;
@@ -411,9 +385,6 @@ namespace BLToolkit.Reflection.Emit
 		/// <param name="label">The label to branch from this location.</param>
 		/// <seealso cref="OpCodes.Bgt_Un_S">OpCodes.Bgt_Un_S</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode,Label)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1706:ShortAcronymsShouldBeUppercase", MessageId = "Member")]
-		[SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores", MessageId = "Member")]
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper bgt_un_s(Label label)
 		{
 			_ilGenerator.Emit(OpCodes.Bgt_Un_S, label); return this;
@@ -426,7 +397,6 @@ namespace BLToolkit.Reflection.Emit
 		/// <param name="label">The label to branch from this location.</param>
 		/// <seealso cref="OpCodes.Ble">OpCodes.Ble</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode,Label)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper ble(Label label)
 		{
 			_ilGenerator.Emit(OpCodes.Ble, label); return this;
@@ -439,8 +409,6 @@ namespace BLToolkit.Reflection.Emit
 		/// <param name="label">The label to branch from this location.</param>
 		/// <seealso cref="OpCodes.Ble_S">OpCodes.Ble_S</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode,Label)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores", MessageId = "Member")]
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper ble_s(Label label)
 		{
 			_ilGenerator.Emit(OpCodes.Ble_S, label); return this;
@@ -454,9 +422,6 @@ namespace BLToolkit.Reflection.Emit
 		/// <param name="label">The label to branch from this location.</param>
 		/// <seealso cref="OpCodes.Ble_Un">OpCodes.Ble_Un</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode,Label)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1706:ShortAcronymsShouldBeUppercase", MessageId = "Member")]
-		[SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores", MessageId = "Member")]
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper ble_un(Label label)
 		{
 			_ilGenerator.Emit(OpCodes.Ble_Un, label); return this;
@@ -470,9 +435,6 @@ namespace BLToolkit.Reflection.Emit
 		/// <param name="label">The label to branch from this location.</param>
 		/// <seealso cref="OpCodes.Ble_Un_S">OpCodes.Ble_Un_S</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode,Label)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1706:ShortAcronymsShouldBeUppercase", MessageId = "Member")]
-		[SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores", MessageId = "Member")]
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper ble_un_s(Label label)
 		{
 			_ilGenerator.Emit(OpCodes.Ble_Un_S, label); return this;
@@ -485,7 +447,6 @@ namespace BLToolkit.Reflection.Emit
 		/// <param name="label">The label to branch from this location.</param>
 		/// <seealso cref="OpCodes.Blt">OpCodes.Blt</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode,Label)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper blt(Label label)
 		{
 			_ilGenerator.Emit(OpCodes.Blt, label); return this;
@@ -498,8 +459,6 @@ namespace BLToolkit.Reflection.Emit
 		/// <param name="label">The label to branch from this location.</param>
 		/// <seealso cref="OpCodes.Blt_S">OpCodes.Blt_S</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode,Label)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores", MessageId = "Member")]
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper blt_s(Label label)
 		{
 			_ilGenerator.Emit(OpCodes.Blt_S, label); return this;
@@ -513,9 +472,6 @@ namespace BLToolkit.Reflection.Emit
 		/// <param name="label">The label to branch from this location.</param>
 		/// <seealso cref="OpCodes.Blt_Un">OpCodes.Blt_Un</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode,Label)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1706:ShortAcronymsShouldBeUppercase", MessageId = "Member")]
-		[SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores", MessageId = "Member")]
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper blt_un(Label label)
 		{
 			_ilGenerator.Emit(OpCodes.Blt_Un, label); return this;
@@ -529,9 +485,6 @@ namespace BLToolkit.Reflection.Emit
 		/// <param name="label">The label to branch from this location.</param>
 		/// <seealso cref="OpCodes.Blt_Un_S">OpCodes.Blt_Un_S</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode,Label)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1706:ShortAcronymsShouldBeUppercase", MessageId = "Member")]
-		[SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores", MessageId = "Member")]
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper blt_un_s(Label label)
 		{
 			_ilGenerator.Emit(OpCodes.Blt_Un_S, label); return this;
@@ -544,9 +497,6 @@ namespace BLToolkit.Reflection.Emit
 		/// <param name="label">The label to branch from this location.</param>
 		/// <seealso cref="OpCodes.Bne_Un">OpCodes.Bne_Un</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode,Label)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1706:ShortAcronymsShouldBeUppercase", MessageId = "Member")]
-		[SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores", MessageId = "Member")]
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper bne_un(Label label)
 		{
 			_ilGenerator.Emit(OpCodes.Bne_Un, label); return this;
@@ -560,9 +510,6 @@ namespace BLToolkit.Reflection.Emit
 		/// <param name="label">The label to branch from this location.</param>
 		/// <seealso cref="OpCodes.Bne_Un_S">OpCodes.Bne_Un_S</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode,Label)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1706:ShortAcronymsShouldBeUppercase", MessageId = "Member")]
-		[SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores", MessageId = "Member")]
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper bne_un_s(Label label)
 		{
 			_ilGenerator.Emit(OpCodes.Bne_Un_S, label); return this;
@@ -575,7 +522,6 @@ namespace BLToolkit.Reflection.Emit
 		/// <param name="type">A Type</param>
 		/// <seealso cref="OpCodes.Box">OpCodes.Box</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode,Type)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper box(Type type)
 		{
 			_ilGenerator.Emit(OpCodes.Box, type); return this;
@@ -587,7 +533,6 @@ namespace BLToolkit.Reflection.Emit
 		/// <param name="type">A Type</param>
 		/// <seealso cref="OpCodes.Box">OpCodes.Box</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode,Type)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper boxIfValueType(Type type)
 		{
 			if (type == null) throw new ArgumentNullException("type");
@@ -602,8 +547,6 @@ namespace BLToolkit.Reflection.Emit
 		/// <param name="label">The label to branch from this location.</param>
 		/// <seealso cref="OpCodes.Br">OpCodes.Br</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode,Label)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1706:ShortAcronymsShouldBeUppercase", MessageId = "Member")]
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper br(Label label)
 		{
 			_ilGenerator.Emit(OpCodes.Br, label); return this;
@@ -615,7 +558,6 @@ namespace BLToolkit.Reflection.Emit
 		/// </summary>
 		/// <seealso cref="OpCodes.Break">OpCodes.Break</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper @break
 		{
 			get { _ilGenerator.Emit(OpCodes.Break); return this; }
@@ -628,7 +570,6 @@ namespace BLToolkit.Reflection.Emit
 		/// <param name="label">The label to branch from this location.</param>
 		/// <seealso cref="OpCodes.Brfalse">OpCodes.Brfalse</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode,Label)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper brfalse(Label label)
 		{
 			_ilGenerator.Emit(OpCodes.Brfalse, label); return this;
@@ -641,8 +582,6 @@ namespace BLToolkit.Reflection.Emit
 		/// <param name="label">The label to branch from this location.</param>
 		/// <seealso cref="OpCodes.Brfalse_S">OpCodes.Brfalse_S</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode,Label)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores", MessageId = "Member")]
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper brfalse_s(Label label)
 		{
 			_ilGenerator.Emit(OpCodes.Brfalse_S, label); return this;
@@ -655,7 +594,6 @@ namespace BLToolkit.Reflection.Emit
 		/// <param name="label">The label to branch from this location.</param>
 		/// <seealso cref="OpCodes.Brtrue">OpCodes.Brtrue</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode,Label)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper brtrue(Label label)
 		{
 			_ilGenerator.Emit(OpCodes.Brtrue, label); return this;
@@ -668,8 +606,6 @@ namespace BLToolkit.Reflection.Emit
 		/// <param name="label">The label to branch from this location.</param>
 		/// <seealso cref="OpCodes.Brtrue_S">OpCodes.Brtrue_S</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode,Label)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores", MessageId = "Member")]
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper brtrue_s(Label label)
 		{
 			_ilGenerator.Emit(OpCodes.Brtrue_S, label); return this;
@@ -682,9 +618,6 @@ namespace BLToolkit.Reflection.Emit
 		/// <param name="label">The label to branch from this location.</param>
 		/// <seealso cref="OpCodes.Br_S">OpCodes.Br_S</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode,Label)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1706:ShortAcronymsShouldBeUppercase", MessageId = "Member")]
-		[SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores", MessageId = "Member")]
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper br_s(Label label)
 		{
 			_ilGenerator.Emit(OpCodes.Br_S, label); return this;
@@ -697,13 +630,11 @@ namespace BLToolkit.Reflection.Emit
 		/// <param name="methodInfo">The method to be called.</param>
 		/// <seealso cref="OpCodes.Call">OpCodes.Call</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode,MethodInfo)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper call(MethodInfo methodInfo)
 		{
 			_ilGenerator.Emit(OpCodes.Call, methodInfo); return this;
 		}
 
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper call(ConstructorInfo constructorInfo)
 		{
 			_ilGenerator.Emit(OpCodes.Call, constructorInfo); return this;
@@ -717,13 +648,11 @@ namespace BLToolkit.Reflection.Emit
 		/// <param name="optionalParameterTypes">The types of the optional arguments if the method is a varargs method.</param>
 		/// <seealso cref="OpCodes.Call">OpCodes.Call</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.EmitCall(OpCode,MethodInfo,Type[])">ILGenerator.EmitCall</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper call(MethodInfo methodInfo, Type[] optionalParameterTypes)
 		{
 			_ilGenerator.EmitCall(OpCodes.Call, methodInfo, optionalParameterTypes); return this;
 		}
 
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper call(Type type, string methodName, params Type[] parameterTypes)
 		{
 			if (type == null) throw new ArgumentNullException("type");
@@ -733,7 +662,6 @@ namespace BLToolkit.Reflection.Emit
 			return call(mi);
 		}
 
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper call(Type type, string methodName, BindingFlags flags, params Type[] parameterTypes)
 		{
 			if (type == null) throw new ArgumentNullException("type");
@@ -753,7 +681,6 @@ namespace BLToolkit.Reflection.Emit
 		/// <param name="parameterTypes">The types of the required arguments to the instruction.</param>
 		/// <seealso cref="OpCodes.Calli">OpCodes.Calli</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.EmitCalli(OpCode,CallingConvention,Type,Type[])">ILGenerator.EmitCalli</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper calli(CallingConvention unmanagedCallConv, Type returnType, Type[] parameterTypes)
 		{
 			_ilGenerator.EmitCalli(OpCodes.Calli, unmanagedCallConv, returnType, parameterTypes); return this;
@@ -770,7 +697,6 @@ namespace BLToolkit.Reflection.Emit
 		/// <param name="optionalParameterTypes">The types of the optional arguments for vararg calls.</param>
 		/// <seealso cref="OpCodes.Calli">OpCodes.Calli</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.EmitCalli(OpCode,CallingConventions,Type,Type[],Type[])">ILGenerator.EmitCalli</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper calli(CallingConventions callingConvention, Type returnType, Type[] parameterTypes, Type[] optionalParameterTypes)
 		{
 			_ilGenerator.EmitCalli(OpCodes.Calli, callingConvention, returnType, parameterTypes, optionalParameterTypes);
@@ -784,7 +710,6 @@ namespace BLToolkit.Reflection.Emit
 		/// <param name="methodInfo">The method to be called.</param>
 		/// <seealso cref="OpCodes.Callvirt">OpCodes.Callvirt</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode,MethodInfo)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper callvirt(MethodInfo methodInfo)
 		{
 			_ilGenerator.Emit(OpCodes.Callvirt, methodInfo); return this;
@@ -798,7 +723,6 @@ namespace BLToolkit.Reflection.Emit
 		/// <param name="optionalParameterTypes">The types of the optional arguments if the method is a varargs method.</param>
 		/// <seealso cref="OpCodes.Callvirt">OpCodes.Callvirt</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.EmitCall(OpCode,MethodInfo,Type[])">ILGenerator.EmitCall</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper callvirt(MethodInfo methodInfo, Type[] optionalParameterTypes)
 		{
 			_ilGenerator.EmitCall(OpCodes.Callvirt, methodInfo, optionalParameterTypes); return this;
@@ -812,7 +736,6 @@ namespace BLToolkit.Reflection.Emit
 		/// <param name="optionalParameterTypes">The types of the optional arguments if the method is a varargs method.</param>
 		/// <seealso cref="OpCodes.Callvirt">OpCodes.Callvirt</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.EmitCall(OpCode,MethodInfo,Type[])">ILGenerator.EmitCall</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper callvirt(Type type, string methodName, params Type[] parameterTypes)
 		{
 			if (type == null) throw new ArgumentNullException("type");
@@ -822,7 +745,6 @@ namespace BLToolkit.Reflection.Emit
 			return callvirt(mi);
 		}
 
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper callvirtNoGenerics(Type type, string methodName, params Type[] parameterTypes)
 		{
 #if FW2
@@ -841,7 +763,6 @@ namespace BLToolkit.Reflection.Emit
 		/// <param name="type">A Type</param>
 		/// <seealso cref="OpCodes.Castclass">OpCodes.Castclass</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode,Type)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper castclass(Type type)
 		{
 			_ilGenerator.Emit(OpCodes.Castclass, type); return this;
@@ -852,7 +773,6 @@ namespace BLToolkit.Reflection.Emit
 		/// or to unbox if the type is a value type.
 		/// </summary>
 		/// <param name="type">A Type</param>
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper castType(Type type)
 		{
 			if (type == null) throw new ArgumentNullException("type");
@@ -867,7 +787,6 @@ namespace BLToolkit.Reflection.Emit
 		/// </summary>
 		/// <seealso cref="OpCodes.Ceq">OpCodes.Ceq</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper ceq
 		{
 			get { _ilGenerator.Emit(OpCodes.Ceq); return this; }
@@ -881,7 +800,6 @@ namespace BLToolkit.Reflection.Emit
 		/// </summary>
 		/// <seealso cref="OpCodes.Cgt">OpCodes.Cgt</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper cgt
 		{
 			get { _ilGenerator.Emit(OpCodes.Cgt); return this; }
@@ -895,9 +813,6 @@ namespace BLToolkit.Reflection.Emit
 		/// </summary>
 		/// <seealso cref="OpCodes.Cgt_Un">OpCodes.Cgt_Un</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1706:ShortAcronymsShouldBeUppercase", MessageId = "Member")]
-		[SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores", MessageId = "Member")]
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper cgt_un
 		{
 			get { _ilGenerator.Emit(OpCodes.Cgt_Un); return this; }
@@ -909,7 +824,6 @@ namespace BLToolkit.Reflection.Emit
 		/// </summary>
 		/// <seealso cref="OpCodes.Ckfinite">OpCodes.Ckfinite</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper ckfinite
 		{
 			get { _ilGenerator.Emit(OpCodes.Ckfinite); return this; }
@@ -923,7 +837,6 @@ namespace BLToolkit.Reflection.Emit
 		/// </summary>
 		/// <seealso cref="OpCodes.Clt">OpCodes.Clt</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper clt
 		{
 			get { _ilGenerator.Emit(OpCodes.Clt); return this; }
@@ -937,9 +850,6 @@ namespace BLToolkit.Reflection.Emit
 		/// </summary>
 		/// <seealso cref="OpCodes.Clt_Un">OpCodes.Clt_Un</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1706:ShortAcronymsShouldBeUppercase", MessageId = "Member")]
-		[SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores", MessageId = "Member")]
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper clt_un
 		{
 			get { _ilGenerator.Emit(OpCodes.Clt_Un); return this; }
@@ -951,8 +861,6 @@ namespace BLToolkit.Reflection.Emit
 		/// </summary>
 		/// <seealso cref="OpCodes.Conv_I">OpCodes.Conv_I</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores", MessageId = "Member")]
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper conv_i
 		{
 			get { _ilGenerator.Emit(OpCodes.Conv_I); return this; }
@@ -964,8 +872,6 @@ namespace BLToolkit.Reflection.Emit
 		/// </summary>
 		/// <seealso cref="OpCodes.Conv_I1">OpCodes.Conv_I1</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores", MessageId = "Member")]
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper conv_i1
 		{
 			get { _ilGenerator.Emit(OpCodes.Conv_I1); return this; }
@@ -977,8 +883,6 @@ namespace BLToolkit.Reflection.Emit
 		/// </summary>
 		/// <seealso cref="OpCodes.Conv_I2">OpCodes.Conv_I2</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores", MessageId = "Member")]
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper conv_i2
 		{
 			get { _ilGenerator.Emit(OpCodes.Conv_I2); return this; }
@@ -990,8 +894,6 @@ namespace BLToolkit.Reflection.Emit
 		/// </summary>
 		/// <seealso cref="OpCodes.Conv_I4">OpCodes.Conv_I4</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores", MessageId = "Member")]
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper conv_i4
 		{
 			get { _ilGenerator.Emit(OpCodes.Conv_I4); return this; }
@@ -1003,8 +905,6 @@ namespace BLToolkit.Reflection.Emit
 		/// </summary>
 		/// <seealso cref="OpCodes.Conv_I8">OpCodes.Conv_I8</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores", MessageId = "Member")]
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper conv_i8
 		{
 			get { _ilGenerator.Emit(OpCodes.Conv_I8); return this; }
@@ -1017,8 +917,6 @@ namespace BLToolkit.Reflection.Emit
 		/// </summary>
 		/// <seealso cref="OpCodes.Conv_Ovf_I">OpCodes.Conv_Ovf_I</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores", MessageId = "Member")]
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper conv_ovf_i
 		{
 			get { _ilGenerator.Emit(OpCodes.Conv_Ovf_I); return this; }
@@ -1031,8 +929,6 @@ namespace BLToolkit.Reflection.Emit
 		/// </summary>
 		/// <seealso cref="OpCodes.Conv_Ovf_I1">OpCodes.Conv_Ovf_I1</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores", MessageId = "Member")]
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper conv_ovf_i1
 		{
 			get { _ilGenerator.Emit(OpCodes.Conv_Ovf_I1); return this; }
@@ -1045,9 +941,6 @@ namespace BLToolkit.Reflection.Emit
 		/// </summary>
 		/// <seealso cref="OpCodes.Conv_Ovf_I1_Un">OpCodes.Conv_Ovf_I1_Un</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1706:ShortAcronymsShouldBeUppercase", MessageId = "Member")]
-		[SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores", MessageId = "Member")]
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper conv_ovf_i1_un
 		{
 			get { _ilGenerator.Emit(OpCodes.Conv_Ovf_I1_Un); return this; }
@@ -1060,8 +953,6 @@ namespace BLToolkit.Reflection.Emit
 		/// </summary>
 		/// <seealso cref="OpCodes.Conv_Ovf_I2">OpCodes.Conv_Ovf_I2</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores", MessageId = "Member")]
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper conv_ovf_i2
 		{
 			get { _ilGenerator.Emit(OpCodes.Conv_Ovf_I2); return this; }
@@ -1074,9 +965,6 @@ namespace BLToolkit.Reflection.Emit
 		/// </summary>
 		/// <seealso cref="OpCodes.Conv_Ovf_I2_Un">OpCodes.Conv_Ovf_I2_Un</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1706:ShortAcronymsShouldBeUppercase", MessageId = "Member")]
-		[SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores", MessageId = "Member")]
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper conv_ovf_i2_un
 		{
 			get { _ilGenerator.Emit(OpCodes.Conv_Ovf_I2_Un); return this; }
@@ -1088,8 +976,6 @@ namespace BLToolkit.Reflection.Emit
 		/// </summary>
 		/// <seealso cref="OpCodes.Conv_Ovf_I4">OpCodes.Conv_Ovf_I4</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores", MessageId = "Member")]
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper conv_ovf_i4
 		{
 			get { _ilGenerator.Emit(OpCodes.Conv_Ovf_I2_Un); return this; }
@@ -1101,9 +987,6 @@ namespace BLToolkit.Reflection.Emit
 		/// </summary>
 		/// <seealso cref="OpCodes.Conv_Ovf_I4_Un">OpCodes.Conv_Ovf_I4_Un</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1706:ShortAcronymsShouldBeUppercase", MessageId = "Member")]
-		[SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores", MessageId = "Member")]
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper conv_ovf_i4_un
 		{
 			get { _ilGenerator.Emit(OpCodes.Conv_Ovf_I4_Un); return this; }
@@ -1115,8 +998,6 @@ namespace BLToolkit.Reflection.Emit
 		/// </summary>
 		/// <seealso cref="OpCodes.Conv_Ovf_I8">OpCodes.Conv_Ovf_I8</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores", MessageId = "Member")]
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper conv_ovf_i8
 		{
 			get { _ilGenerator.Emit(OpCodes.Conv_Ovf_I8); return this; }
@@ -1128,9 +1009,6 @@ namespace BLToolkit.Reflection.Emit
 		/// </summary>
 		/// <seealso cref="OpCodes.Conv_Ovf_I8_Un">OpCodes.Conv_Ovf_I8_Un</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1706:ShortAcronymsShouldBeUppercase", MessageId = "Member")]
-		[SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores", MessageId = "Member")]
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper conv_ovf_i8_un
 		{
 			get { _ilGenerator.Emit(OpCodes.Conv_Ovf_I8_Un); return this; }
@@ -1143,9 +1021,6 @@ namespace BLToolkit.Reflection.Emit
 		/// </summary>
 		/// <seealso cref="OpCodes.Conv_Ovf_I_Un">OpCodes.Conv_Ovf_I_Un</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1706:ShortAcronymsShouldBeUppercase", MessageId = "Member")]
-		[SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores", MessageId = "Member")]
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper conv_ovf_i_un
 		{
 			get { _ilGenerator.Emit(OpCodes.Conv_Ovf_I_Un); return this; }
@@ -1158,8 +1033,6 @@ namespace BLToolkit.Reflection.Emit
 		/// </summary>
 		/// <seealso cref="OpCodes.Conv_Ovf_U">OpCodes.Conv_Ovf_U</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores", MessageId = "Member")]
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper conv_ovf_u
 		{
 			get { _ilGenerator.Emit(OpCodes.Conv_Ovf_U); return this; }
@@ -1172,8 +1045,6 @@ namespace BLToolkit.Reflection.Emit
 		/// </summary>
 		/// <seealso cref="OpCodes.Conv_Ovf_U1">OpCodes.Conv_Ovf_U1</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores", MessageId = "Member")]
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper conv_ovf_u1
 		{
 			get { _ilGenerator.Emit(OpCodes.Conv_Ovf_U1); return this; }
@@ -1186,9 +1057,6 @@ namespace BLToolkit.Reflection.Emit
 		/// </summary>
 		/// <seealso cref="OpCodes.Conv_Ovf_U1_Un">OpCodes.Conv_Ovf_U1_Un</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1706:ShortAcronymsShouldBeUppercase", MessageId = "Member")]
-		[SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores", MessageId = "Member")]
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper conv_ovf_u1_un
 		{
 			get { _ilGenerator.Emit(OpCodes.Conv_Ovf_U1_Un); return this; }
@@ -1201,9 +1069,6 @@ namespace BLToolkit.Reflection.Emit
 		/// </summary>
 		/// <seealso cref="OpCodes.Conv_Ovf_U2">OpCodes.Conv_Ovf_U2</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1706:ShortAcronymsShouldBeUppercase", MessageId = "Member")]
-		[SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores", MessageId = "Member")]
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper conv_ovf_u2
 		{
 			get { _ilGenerator.Emit(OpCodes.Conv_Ovf_U2); return this; }
@@ -1216,9 +1081,6 @@ namespace BLToolkit.Reflection.Emit
 		/// </summary>
 		/// <seealso cref="OpCodes.Conv_Ovf_U2_Un">OpCodes.Conv_Ovf_U2_Un</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1706:ShortAcronymsShouldBeUppercase", MessageId = "Member")]
-		[SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores", MessageId = "Member")]
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper conv_ovf_u2_un
 		{
 			get { _ilGenerator.Emit(OpCodes.Conv_Ovf_U2_Un); return this; }
@@ -1230,8 +1092,6 @@ namespace BLToolkit.Reflection.Emit
 		/// </summary>
 		/// <seealso cref="OpCodes.Conv_Ovf_U4">OpCodes.Conv_Ovf_U4</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores", MessageId = "Member")]
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper conv_ovf_u4
 		{
 			get { _ilGenerator.Emit(OpCodes.Conv_Ovf_U4); return this; }
@@ -1243,9 +1103,6 @@ namespace BLToolkit.Reflection.Emit
 		/// </summary>
 		/// <seealso cref="OpCodes.Conv_Ovf_U4_Un">OpCodes.Conv_Ovf_U4_Un</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1706:ShortAcronymsShouldBeUppercase", MessageId = "Member")]
-		[SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores", MessageId = "Member")]
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper conv_ovf_u4_un
 		{
 			get { _ilGenerator.Emit(OpCodes.Conv_Ovf_U4_Un); return this; }
@@ -1257,8 +1114,6 @@ namespace BLToolkit.Reflection.Emit
 		/// </summary>
 		/// <seealso cref="OpCodes.Conv_Ovf_U8">OpCodes.Conv_Ovf_U8</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores", MessageId = "Member")]
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper conv_ovf_u8
 		{
 			get { _ilGenerator.Emit(OpCodes.Conv_Ovf_U8); return this; }
@@ -1270,9 +1125,6 @@ namespace BLToolkit.Reflection.Emit
 		/// </summary>
 		/// <seealso cref="OpCodes.Conv_Ovf_U8_Un">OpCodes.Conv_Ovf_U8_Un</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1706:ShortAcronymsShouldBeUppercase", MessageId = "Member")]
-		[SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores", MessageId = "Member")]
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper conv_ovf_u8_un
 		{
 			get { _ilGenerator.Emit(OpCodes.Conv_Ovf_U8_Un); return this; }
@@ -1285,9 +1137,6 @@ namespace BLToolkit.Reflection.Emit
 		/// </summary>
 		/// <seealso cref="OpCodes.Conv_Ovf_U_Un">OpCodes.Conv_Ovf_U_Un</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1706:ShortAcronymsShouldBeUppercase", MessageId = "Member")]
-		[SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores", MessageId = "Member")]
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper conv_ovf_u_un
 		{
 			get { _ilGenerator.Emit(OpCodes.Conv_Ovf_U_Un); return this; }
@@ -1299,8 +1148,6 @@ namespace BLToolkit.Reflection.Emit
 		/// </summary>
 		/// <seealso cref="OpCodes.Conv_R4">OpCodes.Conv_R4</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores", MessageId = "Member")]
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper conv_r4
 		{
 			get { _ilGenerator.Emit(OpCodes.Conv_R4); return this; }
@@ -1312,8 +1159,6 @@ namespace BLToolkit.Reflection.Emit
 		/// </summary>
 		/// <seealso cref="OpCodes.Conv_R8">OpCodes.Conv_R8</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores", MessageId = "Member")]
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper conv_r8
 		{
 			get { _ilGenerator.Emit(OpCodes.Conv_R8); return this; }
@@ -1325,9 +1170,6 @@ namespace BLToolkit.Reflection.Emit
 		/// </summary>
 		/// <seealso cref="OpCodes.Conv_R_Un">OpCodes.Conv_R_Un</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1706:ShortAcronymsShouldBeUppercase", MessageId = "Member")]
-		[SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores", MessageId = "Member")]
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper conv_r_un
 		{
 			get { _ilGenerator.Emit(OpCodes.Conv_R_Un); return this; }
@@ -1339,8 +1181,6 @@ namespace BLToolkit.Reflection.Emit
 		/// </summary>
 		/// <seealso cref="OpCodes.Conv_U">OpCodes.Conv_U</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores", MessageId = "Member")]
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper conv_u
 		{
 			get { _ilGenerator.Emit(OpCodes.Conv_U); return this; }
@@ -1352,8 +1192,6 @@ namespace BLToolkit.Reflection.Emit
 		/// </summary>
 		/// <seealso cref="OpCodes.Conv_U1">OpCodes.Conv_U1</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores", MessageId = "Member")]
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper conv_u1
 		{
 			get { _ilGenerator.Emit(OpCodes.Conv_U1); return this; }
@@ -1365,8 +1203,6 @@ namespace BLToolkit.Reflection.Emit
 		/// </summary>
 		/// <seealso cref="OpCodes.Conv_U2">OpCodes.Conv_U2</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores", MessageId = "Member")]
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper conv_u2
 		{
 			get { _ilGenerator.Emit(OpCodes.Conv_U2); return this; }
@@ -1378,8 +1214,6 @@ namespace BLToolkit.Reflection.Emit
 		/// </summary>
 		/// <seealso cref="OpCodes.Conv_U4">OpCodes.Conv_U4</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores", MessageId = "Member")]
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper conv_u4
 		{
 			get { _ilGenerator.Emit(OpCodes.Conv_U4); return this; }
@@ -1391,8 +1225,6 @@ namespace BLToolkit.Reflection.Emit
 		/// </summary>
 		/// <seealso cref="OpCodes.Conv_U8">OpCodes.Conv_U8</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores", MessageId = "Member")]
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper conv_u8
 		{
 			get { _ilGenerator.Emit(OpCodes.Conv_U8); return this; }
@@ -1404,7 +1236,6 @@ namespace BLToolkit.Reflection.Emit
 		/// </summary>
 		/// <seealso cref="OpCodes.Cpblk">OpCodes.Cpblk</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper cpblk
 		{
 			get { _ilGenerator.Emit(OpCodes.Cpblk); return this; }
@@ -1418,7 +1249,6 @@ namespace BLToolkit.Reflection.Emit
 		/// <param name="type">A Type</param>
 		/// <seealso cref="OpCodes.Cpobj">OpCodes.Cpobj</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode,Type)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper cpobj(Type type)
 		{
 			_ilGenerator.Emit(OpCodes.Cpobj, type); return this;
@@ -1431,7 +1261,6 @@ namespace BLToolkit.Reflection.Emit
 		/// </summary>
 		/// <seealso cref="OpCodes.Div">OpCodes.Div</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper div
 		{
 			get { _ilGenerator.Emit(OpCodes.Div); return this; }
@@ -1443,9 +1272,6 @@ namespace BLToolkit.Reflection.Emit
 		/// </summary>
 		/// <seealso cref="OpCodes.Div_Un">OpCodes.Div_Un</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1706:ShortAcronymsShouldBeUppercase", MessageId = "Member")]
-		[SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores", MessageId = "Member")]
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper div_un
 		{
 			get { _ilGenerator.Emit(OpCodes.Div_Un); return this; }
@@ -1457,7 +1283,6 @@ namespace BLToolkit.Reflection.Emit
 		/// </summary>
 		/// <seealso cref="OpCodes.Dup">OpCodes.Dup</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper dup
 		{
 			get { _ilGenerator.Emit(OpCodes.Dup); return this; }
@@ -1470,7 +1295,6 @@ namespace BLToolkit.Reflection.Emit
 		/// </summary>
 		/// <seealso cref="OpCodes.Endfilter">OpCodes.Endfilter</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper endfilter
 		{
 			get { _ilGenerator.Emit(OpCodes.Endfilter); return this; }
@@ -1483,7 +1307,6 @@ namespace BLToolkit.Reflection.Emit
 		/// </summary>
 		/// <seealso cref="OpCodes.Endfinally">OpCodes.Endfinally</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper endfinally
 		{
 			get { _ilGenerator.Emit(OpCodes.Endfinally); return this; }
@@ -1495,7 +1318,6 @@ namespace BLToolkit.Reflection.Emit
 		/// </summary>
 		/// <seealso cref="OpCodes.Initblk">OpCodes.Initblk</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper initblk
 		{
 			get { _ilGenerator.Emit(OpCodes.Initblk); return this; }
@@ -1509,7 +1331,6 @@ namespace BLToolkit.Reflection.Emit
 		/// <param name="type">A Type</param>
 		/// <seealso cref="OpCodes.Initobj">OpCodes.Initobj</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode,Type)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper initobj(Type type)
 		{
 			_ilGenerator.Emit(OpCodes.Initobj, type); return this;
@@ -1522,7 +1343,6 @@ namespace BLToolkit.Reflection.Emit
 		/// <param name="type">A Type</param>
 		/// <seealso cref="OpCodes.Isinst">OpCodes.Isinst</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode,Type)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper isinst(Type type)
 		{
 			_ilGenerator.Emit(OpCodes.Isinst, type); return this;
@@ -1535,7 +1355,6 @@ namespace BLToolkit.Reflection.Emit
 		/// <param name="methodInfo">The method to be jumped.</param>
 		/// <seealso cref="OpCodes.Jmp">OpCodes.Jmp</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode,MethodInfo)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper jmp(MethodInfo methodInfo)
 		{
 			_ilGenerator.Emit(OpCodes.Jmp, methodInfo); return this;
@@ -1548,7 +1367,6 @@ namespace BLToolkit.Reflection.Emit
 		/// <param name="index">Index of the argument that is pushed onto the stack.</param>
 		/// <seealso cref="OpCodes.Ldarg">OpCodes.Ldarg</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode,short)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper ldarg(short index)
 		{
 			_ilGenerator.Emit(OpCodes.Ldarg, index); return this;
@@ -1562,7 +1380,6 @@ namespace BLToolkit.Reflection.Emit
 		/// <param name="index">Index of the argument that is pushed onto the stack.</param>
 		/// <seealso cref="OpCodes.Ldarg">OpCodes.Ldarg</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode,short)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper ldarg(int index)
 		{
 			switch (index)
@@ -1583,7 +1400,6 @@ namespace BLToolkit.Reflection.Emit
 			return this;
 		}
 
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper ldarg(ParameterInfo parameterInfo)
 		{
 			if (parameterInfo == null) throw new ArgumentNullException("parameterInfo");
@@ -1598,7 +1414,6 @@ namespace BLToolkit.Reflection.Emit
 		/// Loads an argument onto the stack.
 		/// </summary>
 		/// <param name="ParameterInfo">A ParameterInfo representing a parameter.</param>
-		///[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		///public EmitHelper ldarg(ParameterInfo parameterInfo)
 		///{
 		///	return ldarg(parameterInfo.Position + 1);
@@ -1611,7 +1426,6 @@ namespace BLToolkit.Reflection.Emit
 		/// <param name="index">Index of the address addr of the argument that is pushed onto the stack.</param>
 		/// <seealso cref="OpCodes.Ldarga">OpCodes.Ldarga</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode,short)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper ldarga(short index)
 		{
 			_ilGenerator.Emit(OpCodes.Ldarga, index); return this;
@@ -1624,8 +1438,6 @@ namespace BLToolkit.Reflection.Emit
 		/// <param name="index">Index of the address addr of the argument that is pushed onto the stack.</param>
 		/// <seealso cref="OpCodes.Ldarga_S">OpCodes.Ldarga_S</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode,byte)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores", MessageId = "Member")]
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper ldarga_s(byte index)
 		{
 			_ilGenerator.Emit(OpCodes.Ldarga_S, index); return this;
@@ -1635,7 +1447,6 @@ namespace BLToolkit.Reflection.Emit
 		/// Load an argument address onto the evaluation stack.
 		/// </summary>
 		/// <param name="index">Index of the address addr of the argument that is pushed onto the stack.</param>
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper ldarga(int index)
 		{
 			if      (index <= byte. MaxValue) ldarga_s((byte)index);
@@ -1650,7 +1461,6 @@ namespace BLToolkit.Reflection.Emit
 		/// Load an argument address onto the evaluation stack.
 		/// </summary>
 		/// <param name="ParameterInfo">A <see cref="ParameterInfo"/> representing the parameter.</param>
-		///[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		///public EmitHelper ldarga(ParameterInfo parameterInfo)
 		///{
 		///	int index = parameterInfo.Position + 1;
@@ -1664,8 +1474,6 @@ namespace BLToolkit.Reflection.Emit
 		/// </summary>
 		/// <seealso cref="OpCodes.Ldarg_0">OpCodes.Ldarg_0</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores", MessageId = "Member")]
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper ldarg_0
 		{
 			get { _ilGenerator.Emit(OpCodes.Ldarg_0); return this; }
@@ -1677,8 +1485,6 @@ namespace BLToolkit.Reflection.Emit
 		/// </summary>
 		/// <seealso cref="OpCodes.Ldarg_1">OpCodes.Ldarg_1</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores", MessageId = "Member")]
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper ldarg_1
 		{
 			get { _ilGenerator.Emit(OpCodes.Ldarg_1); return this; }
@@ -1690,8 +1496,6 @@ namespace BLToolkit.Reflection.Emit
 		/// </summary>
 		/// <seealso cref="OpCodes.Ldarg_2">OpCodes.Ldarg_2</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores", MessageId = "Member")]
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper ldarg_2
 		{
 			get { _ilGenerator.Emit(OpCodes.Ldarg_2); return this; }
@@ -1703,8 +1507,6 @@ namespace BLToolkit.Reflection.Emit
 		/// </summary>
 		/// <seealso cref="OpCodes.Ldarg_3">OpCodes.Ldarg_3</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores", MessageId = "Member")]
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper ldarg_3
 		{
 			get { _ilGenerator.Emit(OpCodes.Ldarg_3); return this; }
@@ -1717,8 +1519,6 @@ namespace BLToolkit.Reflection.Emit
 		/// <param name="index">Index of the argument value that is pushed onto the stack.</param>
 		/// <seealso cref="OpCodes.Ldarg_S">OpCodes.Ldarg_S</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode,byte)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores", MessageId = "Member")]
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper ldarg_s(byte index)
 		{
 			_ilGenerator.Emit(OpCodes.Ldarg_S, index); return this;
@@ -1731,8 +1531,6 @@ namespace BLToolkit.Reflection.Emit
 		/// <param name="num">The value pushed onto the stack.</param>
 		/// <seealso cref="OpCodes.Ldc_I4">OpCodes.Ldc_I4</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode,int)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores", MessageId = "Member")]
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper ldc_i4(int num)
 		{
 			_ilGenerator.Emit(OpCodes.Ldc_I4, num); return this;
@@ -1744,8 +1542,6 @@ namespace BLToolkit.Reflection.Emit
 		/// </summary>
 		/// <seealso cref="OpCodes.Ldc_I4_0">OpCodes.Ldc_I4_0</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores", MessageId = "Member")]
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper ldc_i4_0
 		{
 			get { _ilGenerator.Emit(OpCodes.Ldc_I4_0); return this; }
@@ -1757,8 +1553,6 @@ namespace BLToolkit.Reflection.Emit
 		/// </summary>
 		/// <seealso cref="OpCodes.Ldc_I4_1">OpCodes.Ldc_I4_1</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores", MessageId = "Member")]
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper ldc_i4_1
 		{
 			get { _ilGenerator.Emit(OpCodes.Ldc_I4_1); return this; }
@@ -1770,8 +1564,6 @@ namespace BLToolkit.Reflection.Emit
 		/// </summary>
 		/// <seealso cref="OpCodes.Ldc_I4_2">OpCodes.Ldc_I4_2</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores", MessageId = "Member")]
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper ldc_i4_2
 		{
 			get { _ilGenerator.Emit(OpCodes.Ldc_I4_2); return this; }
@@ -1783,8 +1575,6 @@ namespace BLToolkit.Reflection.Emit
 		/// </summary>
 		/// <seealso cref="OpCodes.Ldc_I4_3">OpCodes.Ldc_I4_3</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores", MessageId = "Member")]
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper ldc_i4_3
 		{
 			get { _ilGenerator.Emit(OpCodes.Ldc_I4_3); return this; }
@@ -1796,8 +1586,6 @@ namespace BLToolkit.Reflection.Emit
 		/// </summary>
 		/// <seealso cref="OpCodes.Ldc_I4_4">OpCodes.Ldc_I4_4</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores", MessageId = "Member")]
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper ldc_i4_4
 		{
 			get { _ilGenerator.Emit(OpCodes.Ldc_I4_4); return this; }
@@ -1809,8 +1597,6 @@ namespace BLToolkit.Reflection.Emit
 		/// </summary>
 		/// <seealso cref="OpCodes.Ldc_I4_5">OpCodes.Ldc_I4_0</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores", MessageId = "Member")]
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper ldc_i4_5
 		{
 			get { _ilGenerator.Emit(OpCodes.Ldc_I4_5); return this; }
@@ -1822,8 +1608,6 @@ namespace BLToolkit.Reflection.Emit
 		/// </summary>
 		/// <seealso cref="OpCodes.Ldc_I4_6">OpCodes.Ldc_I4_6</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores", MessageId = "Member")]
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper ldc_i4_6
 		{
 			get { _ilGenerator.Emit(OpCodes.Ldc_I4_6); return this; }
@@ -1835,8 +1619,6 @@ namespace BLToolkit.Reflection.Emit
 		/// </summary>
 		/// <seealso cref="OpCodes.Ldc_I4_7">OpCodes.Ldc_I4_7</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores", MessageId = "Member")]
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper ldc_i4_7
 		{
 			get { _ilGenerator.Emit(OpCodes.Ldc_I4_7); return this; }
@@ -1848,8 +1630,6 @@ namespace BLToolkit.Reflection.Emit
 		/// </summary>
 		/// <seealso cref="OpCodes.Ldc_I4_8">OpCodes.Ldc_I4_8</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores", MessageId = "Member")]
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper ldc_i4_8
 		{
 			get { _ilGenerator.Emit(OpCodes.Ldc_I4_8); return this; }
@@ -1861,8 +1641,6 @@ namespace BLToolkit.Reflection.Emit
 		/// </summary>
 		/// <seealso cref="OpCodes.Ldc_I4_M1">OpCodes.Ldc_I4_M1</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores", MessageId = "Member")]
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper ldc_i4_m1
 		{
 			get { _ilGenerator.Emit(OpCodes.Ldc_I4_M1); return this; }
@@ -1875,8 +1653,6 @@ namespace BLToolkit.Reflection.Emit
 		/// <param name="num">The value pushed onto the stack.</param>
 		/// <seealso cref="OpCodes.Ldc_I4_S">OpCodes.Ldc_I4_S</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode,byte)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores", MessageId = "Member")]
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper ldc_i4_s(byte num)
 		{
 			_ilGenerator.Emit(OpCodes.Ldc_I4_S, num); return this;
@@ -1889,8 +1665,6 @@ namespace BLToolkit.Reflection.Emit
 		/// <param name="num">The value pushed onto the stack.</param>
 		/// <seealso cref="OpCodes.Ldc_I8">OpCodes.Ldc_I8</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode,long)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores", MessageId = "Member")]
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper ldc_i8(long num)
 		{
 			_ilGenerator.Emit(OpCodes.Ldc_I8, num); return this;
@@ -1903,8 +1677,6 @@ namespace BLToolkit.Reflection.Emit
 		/// <param name="num">The value pushed onto the stack.</param>
 		/// <seealso cref="OpCodes.Ldc_R4">OpCodes.Ldc_R4</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode,float)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores", MessageId = "Member")]
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper ldc_r4(float num)
 		{
 			_ilGenerator.Emit(OpCodes.Ldc_R4, num); return this;
@@ -1917,8 +1689,6 @@ namespace BLToolkit.Reflection.Emit
 		/// <param name="num">The value pushed onto the stack.</param>
 		/// <seealso cref="OpCodes.Ldc_R8">OpCodes.Ldc_R8</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode,double)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores", MessageId = "Member")]
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper ldc_r8(double num)
 		{
 			_ilGenerator.Emit(OpCodes.Ldc_R8, num); return this;
@@ -1932,7 +1702,6 @@ namespace BLToolkit.Reflection.Emit
 		/// <param name="type">A Type</param>
 		/// <seealso cref="OpCodes.Ldelema">OpCodes.Ldelema</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode,Type)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper ldelema(Type type)
 		{
 			_ilGenerator.Emit(OpCodes.Ldelema, type); return this;
@@ -1945,8 +1714,6 @@ namespace BLToolkit.Reflection.Emit
 		/// </summary>
 		/// <seealso cref="OpCodes.Ldelem_I">OpCodes.Ldelem_I</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores", MessageId = "Member")]
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper ldelem_i
 		{
 			get { _ilGenerator.Emit(OpCodes.Ldelem_I); return this; }
@@ -1958,8 +1725,6 @@ namespace BLToolkit.Reflection.Emit
 		/// </summary>
 		/// <seealso cref="OpCodes.Ldelem_I1">OpCodes.Ldelem_I1</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores", MessageId = "Member")]
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper ldelem_i1
 		{
 			get { _ilGenerator.Emit(OpCodes.Ldelem_I1); return this; }
@@ -1971,8 +1736,6 @@ namespace BLToolkit.Reflection.Emit
 		/// </summary>
 		/// <seealso cref="OpCodes.Ldelem_I2">OpCodes.Ldelem_I2</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores", MessageId = "Member")]
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper ldelem_i2
 		{
 			get { _ilGenerator.Emit(OpCodes.Ldelem_I2); return this; }
@@ -1984,8 +1747,6 @@ namespace BLToolkit.Reflection.Emit
 		/// </summary>
 		/// <seealso cref="OpCodes.Ldelem_I4">OpCodes.Ldelem_I4</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores", MessageId = "Member")]
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper ldelem_i4
 		{
 			get { _ilGenerator.Emit(OpCodes.Ldelem_I4); return this; }
@@ -1997,8 +1758,6 @@ namespace BLToolkit.Reflection.Emit
 		/// </summary>
 		/// <seealso cref="OpCodes.Ldelem_I8">OpCodes.Ldelem_I8</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores", MessageId = "Member")]
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper ldelem_i8
 		{
 			get { _ilGenerator.Emit(OpCodes.Ldelem_I8); return this; }
@@ -2010,8 +1769,6 @@ namespace BLToolkit.Reflection.Emit
 		/// </summary>
 		/// <seealso cref="OpCodes.Ldelem_R4">OpCodes.Ldelem_R4</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores", MessageId = "Member")]
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper ldelem_r4
 		{
 			get { _ilGenerator.Emit(OpCodes.Ldelem_R4); return this; }
@@ -2023,8 +1780,6 @@ namespace BLToolkit.Reflection.Emit
 		/// </summary>
 		/// <seealso cref="OpCodes.Ldelem_R8">OpCodes.Ldelem_R8</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores", MessageId = "Member")]
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper ldelem_r8
 		{
 			get { _ilGenerator.Emit(OpCodes.Ldelem_R8); return this; }
@@ -2037,8 +1792,6 @@ namespace BLToolkit.Reflection.Emit
 		/// </summary>
 		/// <seealso cref="OpCodes.Ldelem_Ref">OpCodes.Ldelem_Ref</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores", MessageId = "Member")]
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper ldelem_ref
 		{
 			get { _ilGenerator.Emit(OpCodes.Ldelem_Ref); return this; }
@@ -2050,8 +1803,6 @@ namespace BLToolkit.Reflection.Emit
 		/// </summary>
 		/// <seealso cref="OpCodes.Ldelem_U1">OpCodes.Ldelem_U1</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores", MessageId = "Member")]
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper ldelem_u1
 		{
 			get { _ilGenerator.Emit(OpCodes.Ldelem_U1); return this; }
@@ -2064,8 +1815,6 @@ namespace BLToolkit.Reflection.Emit
 		/// </summary>
 		/// <seealso cref="OpCodes.Ldelem_U2">OpCodes.Ldelem_U2</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores", MessageId = "Member")]
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper ldelem_u2
 		{
 			get { _ilGenerator.Emit(OpCodes.Ldelem_U2); return this; }
@@ -2078,8 +1827,6 @@ namespace BLToolkit.Reflection.Emit
 		/// </summary>
 		/// <seealso cref="OpCodes.Ldelem_U4">OpCodes.Ldelem_U4</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores", MessageId = "Member")]
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper ldelem_u4
 		{
 			get { _ilGenerator.Emit(OpCodes.Ldelem_U4); return this; }
@@ -2092,7 +1839,6 @@ namespace BLToolkit.Reflection.Emit
 		/// <param name="fieldInfo">A FieldInfo representing a field.</param>
 		/// <seealso cref="OpCodes.Ldfld">OpCodes.Ldfld</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode,FieldInfo)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper ldfld(FieldInfo fieldInfo)
 		{
 			_ilGenerator.Emit(OpCodes.Ldfld, fieldInfo); return this;
@@ -2105,7 +1851,6 @@ namespace BLToolkit.Reflection.Emit
 		/// <param name="fieldInfo">A FieldInfo representing a field.</param>
 		/// <seealso cref="OpCodes.Ldflda">OpCodes.Ldflda</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode,FieldInfo)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper ldflda(FieldInfo fieldInfo)
 		{
 			_ilGenerator.Emit(OpCodes.Ldflda, fieldInfo); return this;
@@ -2119,7 +1864,6 @@ namespace BLToolkit.Reflection.Emit
 		/// <param name="methodInfo">The method to be called.</param>
 		/// <seealso cref="OpCodes.Ldftn">OpCodes.Ldftn</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode,MethodInfo)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper ldftn(MethodInfo methodInfo)
 		{
 			_ilGenerator.Emit(OpCodes.Ldftn, methodInfo); return this;
@@ -2131,8 +1875,6 @@ namespace BLToolkit.Reflection.Emit
 		/// </summary>
 		/// <seealso cref="OpCodes.Ldind_I">OpCodes.Ldind_I</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores", MessageId = "Member")]
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper ldind_i
 		{
 			get { _ilGenerator.Emit(OpCodes.Ldind_I); return this; }
@@ -2144,8 +1886,6 @@ namespace BLToolkit.Reflection.Emit
 		/// </summary>
 		/// <seealso cref="OpCodes.Ldind_I1">OpCodes.Ldind_I1</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores", MessageId = "Member")]
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper ldind_i1
 		{
 			get { _ilGenerator.Emit(OpCodes.Ldind_I1); return this; }
@@ -2157,8 +1897,6 @@ namespace BLToolkit.Reflection.Emit
 		/// </summary>
 		/// <seealso cref="OpCodes.Ldind_I2">OpCodes.Ldind_I2</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores", MessageId = "Member")]
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper ldind_i2
 		{
 			get { _ilGenerator.Emit(OpCodes.Ldind_I2); return this; }
@@ -2170,8 +1908,6 @@ namespace BLToolkit.Reflection.Emit
 		/// </summary>
 		/// <seealso cref="OpCodes.Ldind_I4">OpCodes.Ldind_I4</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores", MessageId = "Member")]
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper ldind_i4
 		{
 			get { _ilGenerator.Emit(OpCodes.Ldind_I4); return this; }
@@ -2183,8 +1919,6 @@ namespace BLToolkit.Reflection.Emit
 		/// </summary>
 		/// <seealso cref="OpCodes.Ldind_I8">OpCodes.Ldind_I8</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores", MessageId = "Member")]
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper ldind_i8
 		{
 			get { _ilGenerator.Emit(OpCodes.Ldind_I8); return this; }
@@ -2196,8 +1930,6 @@ namespace BLToolkit.Reflection.Emit
 		/// </summary>
 		/// <seealso cref="OpCodes.Ldind_R4">OpCodes.Ldind_R4</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores", MessageId = "Member")]
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper ldind_r4
 		{
 			get { _ilGenerator.Emit(OpCodes.Ldind_R4); return this; }
@@ -2209,8 +1941,6 @@ namespace BLToolkit.Reflection.Emit
 		/// </summary>
 		/// <seealso cref="OpCodes.Ldind_R8">OpCodes.Ldind_R8</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores", MessageId = "Member")]
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper ldind_r8
 		{
 			get { _ilGenerator.Emit(OpCodes.Ldind_R8); return this; }
@@ -2222,8 +1952,6 @@ namespace BLToolkit.Reflection.Emit
 		/// </summary>
 		/// <seealso cref="OpCodes.Ldind_Ref">OpCodes.Ldind_Ref</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores", MessageId = "Member")]
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper ldind_ref
 		{
 			get { _ilGenerator.Emit(OpCodes.Ldind_Ref); return this; }
@@ -2235,8 +1963,6 @@ namespace BLToolkit.Reflection.Emit
 		/// </summary>
 		/// <seealso cref="OpCodes.Ldind_U1">OpCodes.Ldind_U1</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores", MessageId = "Member")]
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper ldind_u1
 		{
 			get { _ilGenerator.Emit(OpCodes.Ldind_U1); return this; }
@@ -2248,8 +1974,6 @@ namespace BLToolkit.Reflection.Emit
 		/// </summary>
 		/// <seealso cref="OpCodes.Ldind_U2">OpCodes.Ldind_U2</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores", MessageId = "Member")]
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper ldind_u2
 		{
 			get { _ilGenerator.Emit(OpCodes.Ldind_U2); return this; }
@@ -2261,8 +1985,6 @@ namespace BLToolkit.Reflection.Emit
 		/// </summary>
 		/// <seealso cref="OpCodes.Ldind_U4">OpCodes.Ldind_U4</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores", MessageId = "Member")]
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper ldind_u4
 		{
 			get { _ilGenerator.Emit(OpCodes.Ldind_U4); return this; }
@@ -2274,7 +1996,6 @@ namespace BLToolkit.Reflection.Emit
 		/// </summary>
 		/// <seealso cref="OpCodes.Ldlen">OpCodes.Ldlen</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper ldlen
 		{
 			get { _ilGenerator.Emit(OpCodes.Ldlen); return this; }
@@ -2287,7 +2008,6 @@ namespace BLToolkit.Reflection.Emit
 		/// <param name="index">Index of the local variable value pushed onto the stack.</param>
 		/// <seealso cref="OpCodes.Ldloc">OpCodes.Ldloc</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode,short)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper ldloc(short index)
 		{
 			_ilGenerator.Emit(OpCodes.Ldloc, index); return this;
@@ -2300,7 +2020,6 @@ namespace BLToolkit.Reflection.Emit
 		/// <param name="localBuilder">Local variable builder.</param>
 		/// <seealso cref="OpCodes.Ldloc">OpCodes.Ldloc</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode,short)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper ldloc(LocalBuilder localBuilder)
 		{
 			_ilGenerator.Emit(OpCodes.Ldloc, localBuilder); return this;
@@ -2313,7 +2032,6 @@ namespace BLToolkit.Reflection.Emit
 		/// <param name="index">Index of the local variable.</param>
 		/// <seealso cref="OpCodes.Ldloca">OpCodes.Ldloca</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode,short)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper ldloca(short index)
 		{
 			_ilGenerator.Emit(OpCodes.Ldloca, index); return this;
@@ -2326,8 +2044,6 @@ namespace BLToolkit.Reflection.Emit
 		/// <param name="index">Index of the local variable.</param>
 		/// <seealso cref="OpCodes.Ldloca_S">OpCodes.Ldloca_S</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode,byte)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores", MessageId = "Member")]
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper ldloca_s(byte index)
 		{
 			_ilGenerator.Emit(OpCodes.Ldloca_S, index); return this;
@@ -2340,7 +2056,6 @@ namespace BLToolkit.Reflection.Emit
 		/// <param name="LocalBuilder">A <see cref="LocalBuilder"/> representing the local variable.</param>
 		/// <seealso cref="OpCodes.Ldloca">OpCodes.Ldloca</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode,short)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper ldloca(LocalBuilder local)
 		{
 			_ilGenerator.Emit(OpCodes.Ldloca, local); return this;
@@ -2352,8 +2067,6 @@ namespace BLToolkit.Reflection.Emit
 		/// </summary>
 		/// <seealso cref="OpCodes.Ldloc_0">OpCodes.Ldloc_0</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores", MessageId = "Member")]
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper ldloc_0
 		{
 			get { _ilGenerator.Emit(OpCodes.Ldloc_0); return this; }
@@ -2365,8 +2078,6 @@ namespace BLToolkit.Reflection.Emit
 		/// </summary>
 		/// <seealso cref="OpCodes.Ldloc_1">OpCodes.Ldloc_1</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores", MessageId = "Member")]
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper ldloc_1
 		{
 			get { _ilGenerator.Emit(OpCodes.Ldloc_1); return this; }
@@ -2378,8 +2089,6 @@ namespace BLToolkit.Reflection.Emit
 		/// </summary>
 		/// <seealso cref="OpCodes.Ldloc_2">OpCodes.Ldloc_2</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores", MessageId = "Member")]
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper ldloc_2
 		{
 			get { _ilGenerator.Emit(OpCodes.Ldloc_2); return this; }
@@ -2391,8 +2100,6 @@ namespace BLToolkit.Reflection.Emit
 		/// </summary>
 		/// <seealso cref="OpCodes.Ldloc_3">OpCodes.Ldloc_3</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores", MessageId = "Member")]
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper ldloc_3
 		{
 			get { _ilGenerator.Emit(OpCodes.Ldloc_3); return this; }
@@ -2405,8 +2112,6 @@ namespace BLToolkit.Reflection.Emit
 		/// <param name="index">Index of the local variable.</param>
 		/// <seealso cref="OpCodes.Ldloc_S">OpCodes.Ldloc_S</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode,byte)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores", MessageId = "Member")]
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper ldloc_s(byte index)
 		{
 			_ilGenerator.Emit(OpCodes.Ldloca_S, index); return this;
@@ -2418,7 +2123,6 @@ namespace BLToolkit.Reflection.Emit
 		/// </summary>
 		/// <seealso cref="OpCodes.Ldnull">OpCodes.Ldnull</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper ldnull
 		{
 			get { _ilGenerator.Emit(OpCodes.Ldnull); return this; }
@@ -2431,7 +2135,6 @@ namespace BLToolkit.Reflection.Emit
 		/// <param name="type">A Type</param>
 		/// <seealso cref="OpCodes.Ldobj">OpCodes.Ldobj</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode,Type)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper ldobj(Type type)
 		{
 			_ilGenerator.Emit(OpCodes.Ldobj, type); return this;
@@ -2444,7 +2147,6 @@ namespace BLToolkit.Reflection.Emit
 		/// <param name="fieldInfo">A FieldInfo representing a field.</param>
 		/// <seealso cref="OpCodes.Ldsfld">OpCodes.Ldsfld</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode,FieldInfo)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper ldsfld(FieldInfo fieldInfo)
 		{
 			_ilGenerator.Emit(OpCodes.Ldsfld, fieldInfo); return this;
@@ -2457,7 +2159,6 @@ namespace BLToolkit.Reflection.Emit
 		/// <param name="fieldInfo">A FieldInfo representing a field.</param>
 		/// <seealso cref="OpCodes.Ldsflda">OpCodes.Ldsflda</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode,FieldInfo)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper ldsflda(FieldInfo fieldInfo)
 		{
 			_ilGenerator.Emit(OpCodes.Ldsflda, fieldInfo); return this;
@@ -2470,7 +2171,6 @@ namespace BLToolkit.Reflection.Emit
 		/// <param name="str">The String to be emitted.</param>
 		/// <seealso cref="OpCodes.Ldstr">OpCodes.Ldstr</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode,FieldInfo)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper ldstr(string str)
 		{
 			_ilGenerator.Emit(OpCodes.Ldstr, str); return this;
@@ -2483,7 +2183,6 @@ namespace BLToolkit.Reflection.Emit
 		/// <param name="methodInfo">The method to be called.</param>
 		/// <seealso cref="OpCodes.Ldtoken">OpCodes.Ldtoken</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode,MethodInfo)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper ldtoken(MethodInfo methodInfo)
 		{
 			_ilGenerator.Emit(OpCodes.Ldtoken, methodInfo); return this;
@@ -2497,7 +2196,6 @@ namespace BLToolkit.Reflection.Emit
 		/// <param name="fieldInfo">A FieldInfo representing a field.</param>
 		/// <seealso cref="OpCodes.Ldtoken">OpCodes.Ldtoken</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode,FieldInfo)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper ldtoken(FieldInfo fieldInfo)
 		{
 			_ilGenerator.Emit(OpCodes.Ldtoken, fieldInfo); return this;
@@ -2510,7 +2208,6 @@ namespace BLToolkit.Reflection.Emit
 		/// <param name="type">A Type</param>
 		/// <seealso cref="OpCodes.Ldtoken">OpCodes.Ldtoken</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode,Type)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper ldtoken(Type type)
 		{
 			_ilGenerator.Emit(OpCodes.Ldtoken, type); return this;
@@ -2524,7 +2221,6 @@ namespace BLToolkit.Reflection.Emit
 		/// <param name="methodInfo">The method to be called.</param>
 		/// <seealso cref="OpCodes.Ldvirtftn">OpCodes.Ldvirtftn</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode,MethodInfo)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper ldvirtftn(MethodInfo methodInfo)
 		{
 			_ilGenerator.Emit(OpCodes.Ldvirtftn, methodInfo); return this;
@@ -2537,7 +2233,6 @@ namespace BLToolkit.Reflection.Emit
 		/// <param name="label">The label.</param>
 		/// <seealso cref="OpCodes.Leave">OpCodes.Leave</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode,Label)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper leave(Label label)
 		{
 			_ilGenerator.Emit(OpCodes.Leave, label); return this;
@@ -2550,8 +2245,6 @@ namespace BLToolkit.Reflection.Emit
 		/// <param name="label">The label.</param>
 		/// <seealso cref="OpCodes.Leave_S">OpCodes.Leave_S</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode,Label)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores", MessageId = "Member")]
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper leave_s(Label label)
 		{
 			_ilGenerator.Emit(OpCodes.Leave_S, label); return this;
@@ -2564,7 +2257,6 @@ namespace BLToolkit.Reflection.Emit
 		/// </summary>
 		/// <seealso cref="OpCodes.Localloc">OpCodes.Localloc</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper localloc
 		{
 			get { _ilGenerator.Emit(OpCodes.Localloc); return this; }
@@ -2577,7 +2269,6 @@ namespace BLToolkit.Reflection.Emit
 		/// <param name="type">A Type</param>
 		/// <seealso cref="OpCodes.Mkrefany">OpCodes.Mkrefany</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode,Type)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper mkrefany(Type type)
 		{
 			_ilGenerator.Emit(OpCodes.Mkrefany, type); return this;
@@ -2590,7 +2281,6 @@ namespace BLToolkit.Reflection.Emit
 		/// </summary>
 		/// <seealso cref="OpCodes.Mul">OpCodes.Mul</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper mul
 		{
 			get { _ilGenerator.Emit(OpCodes.Mul); return this; }
@@ -2603,8 +2293,6 @@ namespace BLToolkit.Reflection.Emit
 		/// </summary>
 		/// <seealso cref="OpCodes.Mul_Ovf">OpCodes.Mul_Ovf</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores", MessageId = "Member")]
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper mul_ovf
 		{
 			get { _ilGenerator.Emit(OpCodes.Mul_Ovf); return this; }
@@ -2617,9 +2305,6 @@ namespace BLToolkit.Reflection.Emit
 		/// </summary>
 		/// <seealso cref="OpCodes.Mul_Ovf_Un">OpCodes.Mul_Ovf_Un</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1706:ShortAcronymsShouldBeUppercase", MessageId = "Member")]
-		[SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores", MessageId = "Member")]
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper mul_ovf_un
 		{
 			get { _ilGenerator.Emit(OpCodes.Mul_Ovf_Un); return this; }
@@ -2631,7 +2316,6 @@ namespace BLToolkit.Reflection.Emit
 		/// </summary>
 		/// <seealso cref="OpCodes.Neg">OpCodes.Neg</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper neg
 		{
 			get { _ilGenerator.Emit(OpCodes.Neg); return this; }
@@ -2645,7 +2329,6 @@ namespace BLToolkit.Reflection.Emit
 		/// <param name="type">A Type</param>
 		/// <seealso cref="OpCodes.Newarr">OpCodes.Newarr</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode,Type)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper newarr(Type type)
 		{
 			_ilGenerator.Emit(OpCodes.Newarr, type); return this;
@@ -2659,13 +2342,11 @@ namespace BLToolkit.Reflection.Emit
 		/// <param name="constructorInfo">A ConstructorInfo representing a constructor.</param>
 		/// <seealso cref="OpCodes.Newobj">OpCodes.Newobj</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode,ConstructorInfo)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper newobj(ConstructorInfo constructorInfo)
 		{
 			_ilGenerator.Emit(OpCodes.Newobj, constructorInfo); return this;
 		}
 
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper newobj(Type type, params Type[] parameters)
 		{
 			if (type == null) throw new ArgumentNullException("type");
@@ -2682,7 +2363,6 @@ namespace BLToolkit.Reflection.Emit
 		/// </summary>
 		/// <seealso cref="OpCodes.Nop">OpCodes.Nop</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper nop
 		{
 			get { _ilGenerator.Emit(OpCodes.Nop); return this; }
@@ -2695,7 +2375,6 @@ namespace BLToolkit.Reflection.Emit
 		/// </summary>
 		/// <seealso cref="OpCodes.Not">OpCodes.Not</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper not
 		{
 			get { _ilGenerator.Emit(OpCodes.Not); return this; }
@@ -2708,7 +2387,6 @@ namespace BLToolkit.Reflection.Emit
 		/// </summary>
 		/// <seealso cref="OpCodes.Or">OpCodes.Or</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper or
 		{
 			get { _ilGenerator.Emit(OpCodes.Or); return this; }
@@ -2720,7 +2398,6 @@ namespace BLToolkit.Reflection.Emit
 		/// </summary>
 		/// <seealso cref="OpCodes.Pop">OpCodes.Pop</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper pop
 		{
 			get { _ilGenerator.Emit(OpCodes.Pop); return this; }
@@ -2732,7 +2409,6 @@ namespace BLToolkit.Reflection.Emit
 		/// </summary>
 		/// <seealso cref="OpCodes.Refanytype">OpCodes.Refanytype</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper refanytype
 		{
 			get { _ilGenerator.Emit(OpCodes.Refanytype); return this; }
@@ -2745,7 +2421,6 @@ namespace BLToolkit.Reflection.Emit
 		/// <param name="type">A Type</param>
 		/// <seealso cref="OpCodes.Refanyval">OpCodes.Refanyval</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode,Type)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper refanyval(Type type)
 		{
 			_ilGenerator.Emit(OpCodes.Refanyval, type); return this;
@@ -2757,7 +2432,6 @@ namespace BLToolkit.Reflection.Emit
 		/// </summary>
 		/// <seealso cref="OpCodes.Rem">OpCodes.Rem</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper rem
 		{
 			get { _ilGenerator.Emit(OpCodes.Rem); return this; }
@@ -2769,9 +2443,6 @@ namespace BLToolkit.Reflection.Emit
 		/// </summary>
 		/// <seealso cref="OpCodes.Rem_Un">OpCodes.Rem_Un</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1706:ShortAcronymsShouldBeUppercase", MessageId = "Member")]
-		[SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores", MessageId = "Member")]
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper rem_un
 		{
 			get { _ilGenerator.Emit(OpCodes.Rem_Un); return this; }
@@ -2784,7 +2455,6 @@ namespace BLToolkit.Reflection.Emit
 		/// </summary>
 		/// <seealso cref="OpCodes.Ret">OpCodes.Ret</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper ret()
 		{
 			_ilGenerator.Emit(OpCodes.Ret); return this;
@@ -2796,7 +2466,6 @@ namespace BLToolkit.Reflection.Emit
 		/// </summary>
 		/// <seealso cref="OpCodes.Rethrow">OpCodes.Rethrow</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper rethrow
 		{
 			get { _ilGenerator.Emit(OpCodes.Rethrow); return this; }
@@ -2809,7 +2478,6 @@ namespace BLToolkit.Reflection.Emit
 		/// </summary>
 		/// <seealso cref="OpCodes.Shl">OpCodes.Shl</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper shl
 		{
 			get { _ilGenerator.Emit(OpCodes.Shl); return this; }
@@ -2822,7 +2490,6 @@ namespace BLToolkit.Reflection.Emit
 		/// </summary>
 		/// <seealso cref="OpCodes.Shr">OpCodes.Shr</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper shr
 		{
 			get { _ilGenerator.Emit(OpCodes.Shr); return this; }
@@ -2835,9 +2502,6 @@ namespace BLToolkit.Reflection.Emit
 		/// </summary>
 		/// <seealso cref="OpCodes.Shr_Un">OpCodes.Shr_Un</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1706:ShortAcronymsShouldBeUppercase", MessageId = "Member")]
-		[SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores", MessageId = "Member")]
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper shr_un
 		{
 			get { _ilGenerator.Emit(OpCodes.Shr_Un); return this; }
@@ -2850,7 +2514,6 @@ namespace BLToolkit.Reflection.Emit
 		/// <param name="type">A Type</param>
 		/// <seealso cref="OpCodes.Sizeof">OpCodes.Sizeof</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode,Type)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper @sizeof(Type type)
 		{
 			_ilGenerator.Emit(OpCodes.Sizeof, type); return this;
@@ -2863,7 +2526,6 @@ namespace BLToolkit.Reflection.Emit
 		/// <param name="index">Slot index.</param>
 		/// <seealso cref="OpCodes.Starg">OpCodes.Starg</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode,short)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper starg(short index)
 		{
 			_ilGenerator.Emit(OpCodes.Starg, index); return this;
@@ -2877,8 +2539,6 @@ namespace BLToolkit.Reflection.Emit
 		/// <param name="index">Slot index.</param>
 		/// <seealso cref="OpCodes.Starg_S">OpCodes.Starg_S</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode,byte)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores", MessageId = "Member")]
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper starg_s(byte index)
 		{
 			_ilGenerator.Emit(OpCodes.Starg_S, index); return this;
@@ -2890,7 +2550,6 @@ namespace BLToolkit.Reflection.Emit
 		/// <param name="index">Slot index.</param>
 		/// <seealso cref="OpCodes.Starg">OpCodes.Starg</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode,short)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper starg(int index)
 		{
 			if      (index < byte. MaxValue) starg_s((byte)index);
@@ -2905,7 +2564,6 @@ namespace BLToolkit.Reflection.Emit
 		/// Stores the value on top of the evaluation stack in the argument slot at a specified parameter index.
 		/// </summary>
 		/// <param name="parameterInfo">A <see cref="ParameterInfo"/> representing the parameter.</param>
-		///[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		///public EmitHelper starg(ParameterInfo parameterInfo)
 		///{
 		///	int index = parameterInfo.Position + 1;
@@ -2933,8 +2591,6 @@ namespace BLToolkit.Reflection.Emit
 		/// </summary>
 		/// <seealso cref="OpCodes.Stelem_I">OpCodes.Stelem_I</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores", MessageId = "Member")]
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper stelem_i
 		{
 			get { _ilGenerator.Emit(OpCodes.Stelem_I); return this; }
@@ -2946,8 +2602,6 @@ namespace BLToolkit.Reflection.Emit
 		/// </summary>
 		/// <seealso cref="OpCodes.Stelem_I1">OpCodes.Stelem_I1</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores", MessageId = "Member")]
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper stelem_i1
 		{
 			get { _ilGenerator.Emit(OpCodes.Stelem_I1); return this; }
@@ -2959,8 +2613,6 @@ namespace BLToolkit.Reflection.Emit
 		/// </summary>
 		/// <seealso cref="OpCodes.Stelem_I2">OpCodes.Stelem_I2</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores", MessageId = "Member")]
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper stelem_i2
 		{
 			get { _ilGenerator.Emit(OpCodes.Stelem_I2); return this; }
@@ -2972,8 +2624,6 @@ namespace BLToolkit.Reflection.Emit
 		/// </summary>
 		/// <seealso cref="OpCodes.Stelem_I4">OpCodes.Stelem_I4</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores", MessageId = "Member")]
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper stelem_i4
 		{
 			get { _ilGenerator.Emit(OpCodes.Stelem_I4); return this; }
@@ -2985,8 +2635,6 @@ namespace BLToolkit.Reflection.Emit
 		/// </summary>
 		/// <seealso cref="OpCodes.Stelem_I8">OpCodes.Stelem_I8</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores", MessageId = "Member")]
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper stelem_i8
 		{
 			get { _ilGenerator.Emit(OpCodes.Stelem_I8); return this; }
@@ -2998,8 +2646,6 @@ namespace BLToolkit.Reflection.Emit
 		/// </summary>
 		/// <seealso cref="OpCodes.Stelem_R4">OpCodes.Stelem_R4</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores", MessageId = "Member")]
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper stelem_r4
 		{
 			get { _ilGenerator.Emit(OpCodes.Stelem_R4); return this; }
@@ -3011,8 +2657,6 @@ namespace BLToolkit.Reflection.Emit
 		/// </summary>
 		/// <seealso cref="OpCodes.Stelem_R8">OpCodes.Stelem_R8</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores", MessageId = "Member")]
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper stelem_r8
 		{
 			get { _ilGenerator.Emit(OpCodes.Stelem_R8); return this; }
@@ -3025,8 +2669,6 @@ namespace BLToolkit.Reflection.Emit
 		/// </summary>
 		/// <seealso cref="OpCodes.Stelem_Ref">OpCodes.Stelem_Ref</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores", MessageId = "Member")]
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper stelem_ref
 		{
 			get { _ilGenerator.Emit(OpCodes.Stelem_Ref); return this; }
@@ -3039,7 +2681,6 @@ namespace BLToolkit.Reflection.Emit
 		/// <param name="fieldInfo">A FieldInfo representing a field.</param>
 		/// <seealso cref="OpCodes.Stfld">OpCodes.Stfld</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode,FieldInfo)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper stfld(FieldInfo fieldInfo)
 		{
 			_ilGenerator.Emit(OpCodes.Stfld, fieldInfo); return this;
@@ -3051,8 +2692,6 @@ namespace BLToolkit.Reflection.Emit
 		/// </summary>
 		/// <seealso cref="OpCodes.Stind_I">OpCodes.Stind_I</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores", MessageId = "Member")]
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper stind_i
 		{
 			get { _ilGenerator.Emit(OpCodes.Stind_I); return this; }
@@ -3064,8 +2703,6 @@ namespace BLToolkit.Reflection.Emit
 		/// </summary>
 		/// <seealso cref="OpCodes.Stind_I1">OpCodes.Stind_I1</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores", MessageId = "Member")]
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper stind_i1
 		{
 			get { _ilGenerator.Emit(OpCodes.Stind_I1); return this; }
@@ -3077,8 +2714,6 @@ namespace BLToolkit.Reflection.Emit
 		/// </summary>
 		/// <seealso cref="OpCodes.Stind_I2">OpCodes.Stind_I2</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores", MessageId = "Member")]
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper stind_i2
 		{
 			get { _ilGenerator.Emit(OpCodes.Stind_I2); return this; }
@@ -3090,8 +2725,6 @@ namespace BLToolkit.Reflection.Emit
 		/// </summary>
 		/// <seealso cref="OpCodes.Stind_I4">OpCodes.Stind_I4</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores", MessageId = "Member")]
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper stind_i4
 		{
 			get { _ilGenerator.Emit(OpCodes.Stind_I4); return this; }
@@ -3103,8 +2736,6 @@ namespace BLToolkit.Reflection.Emit
 		/// </summary>
 		/// <seealso cref="OpCodes.Stind_I8">OpCodes.Stind_I8</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores", MessageId = "Member")]
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper stind_i8
 		{
 			get { _ilGenerator.Emit(OpCodes.Stind_I8); return this; }
@@ -3116,8 +2747,6 @@ namespace BLToolkit.Reflection.Emit
 		/// </summary>
 		/// <seealso cref="OpCodes.Stind_R4">OpCodes.Stind_R4</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores", MessageId = "Member")]
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper stind_r4
 		{
 			get { _ilGenerator.Emit(OpCodes.Stind_R4); return this; }
@@ -3129,8 +2758,6 @@ namespace BLToolkit.Reflection.Emit
 		/// </summary>
 		/// <seealso cref="OpCodes.Stind_R8">OpCodes.Stind_R8</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores", MessageId = "Member")]
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper stind_r8
 		{
 			get { _ilGenerator.Emit(OpCodes.Stind_R8); return this; }
@@ -3142,8 +2769,6 @@ namespace BLToolkit.Reflection.Emit
 		/// </summary>
 		/// <seealso cref="OpCodes.Stind_Ref">OpCodes.Stind_Ref</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores", MessageId = "Member")]
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper stind_ref
 		{
 			get { _ilGenerator.Emit(OpCodes.Stind_Ref); return this; }
@@ -3153,7 +2778,6 @@ namespace BLToolkit.Reflection.Emit
 		/// Stores a value of the type at a supplied address.
 		/// </summary>
 		/// <param name="type">A Type.</param>
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper stind(Type type)
 		{
 			if (type == null) throw new ArgumentNullException("type");
@@ -3185,7 +2809,6 @@ namespace BLToolkit.Reflection.Emit
 		/// <param name="local">A local variable.</param>
 		/// <seealso cref="OpCodes.Stloc">OpCodes.Stloc</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode,LocalBuilder)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper stloc(LocalBuilder local)
 		{
 			_ilGenerator.Emit(OpCodes.Stloc, local); return this;
@@ -3199,7 +2822,6 @@ namespace BLToolkit.Reflection.Emit
 		/// <param name="index">A local variable index.</param>
 		/// <seealso cref="OpCodes.Stloc">OpCodes.Stloc</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode,short)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper stloc(short index)
 		{
 			_ilGenerator.Emit(OpCodes.Stloc, index); return this;
@@ -3212,8 +2834,6 @@ namespace BLToolkit.Reflection.Emit
 		/// </summary>
 		/// <seealso cref="OpCodes.Stloc_0">OpCodes.Stloc_0</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores", MessageId = "Member")]
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper stloc_0
 		{
 			get { _ilGenerator.Emit(OpCodes.Stloc_0); return this; }
@@ -3226,8 +2846,6 @@ namespace BLToolkit.Reflection.Emit
 		/// </summary>
 		/// <seealso cref="OpCodes.Stloc_1">OpCodes.Stloc_1</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores", MessageId = "Member")]
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper stloc_1
 		{
 			get { _ilGenerator.Emit(OpCodes.Stloc_1); return this; }
@@ -3240,8 +2858,6 @@ namespace BLToolkit.Reflection.Emit
 		/// </summary>
 		/// <seealso cref="OpCodes.Stloc_2">OpCodes.Stloc_2</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores", MessageId = "Member")]
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper stloc_2
 		{
 			get { _ilGenerator.Emit(OpCodes.Stloc_2); return this; }
@@ -3254,8 +2870,6 @@ namespace BLToolkit.Reflection.Emit
 		/// </summary>
 		/// <seealso cref="OpCodes.Stloc_3">OpCodes.Stloc_3</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores", MessageId = "Member")]
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper stloc_3
 		{
 			get { _ilGenerator.Emit(OpCodes.Stloc_3); return this; }
@@ -3269,8 +2883,6 @@ namespace BLToolkit.Reflection.Emit
 		/// <param name="local">A local variable.</param>
 		/// <seealso cref="OpCodes.Stloc_S">OpCodes.Stloc_S</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode,LocalBuilder)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores", MessageId = "Member")]
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper stloc_s(LocalBuilder local)
 		{
 			_ilGenerator.Emit(OpCodes.Stloc_S, local); return this;
@@ -3284,8 +2896,6 @@ namespace BLToolkit.Reflection.Emit
 		/// <param name="index">A local variable index.</param>
 		/// <seealso cref="OpCodes.Stloc_S">OpCodes.Stloc_S</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode,short)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores", MessageId = "Member")]
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper stloc_s(byte index)
 		{
 			_ilGenerator.Emit(OpCodes.Stloc_S, index); return this;
@@ -3298,7 +2908,6 @@ namespace BLToolkit.Reflection.Emit
 		/// <param name="type">A Type</param>
 		/// <seealso cref="OpCodes.Stobj">OpCodes.Stobj</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode,Type)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper stobj(Type type)
 		{
 			_ilGenerator.Emit(OpCodes.Stobj, type); return this;
@@ -3311,7 +2920,6 @@ namespace BLToolkit.Reflection.Emit
 		/// <param name="fieldInfo">A FieldInfo representing a field.</param>
 		/// <seealso cref="OpCodes.Stsfld">OpCodes.Stsfld</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode,FieldInfo)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper stsfld(FieldInfo fieldInfo)
 		{
 			_ilGenerator.Emit(OpCodes.Stsfld, fieldInfo); return this;
@@ -3323,7 +2931,6 @@ namespace BLToolkit.Reflection.Emit
 		/// </summary>
 		/// <seealso cref="OpCodes.Sub">OpCodes.Sub</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper sub
 		{
 			get { _ilGenerator.Emit(OpCodes.Sub); return this; }
@@ -3336,8 +2943,6 @@ namespace BLToolkit.Reflection.Emit
 		/// </summary>
 		/// <seealso cref="OpCodes.Sub_Ovf">OpCodes.Sub_Ovf</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores", MessageId = "Member")]
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper sub_ovf
 		{
 			get { _ilGenerator.Emit(OpCodes.Sub_Ovf); return this; }
@@ -3350,9 +2955,6 @@ namespace BLToolkit.Reflection.Emit
 		/// </summary>
 		/// <seealso cref="OpCodes.Sub_Ovf_Un">OpCodes.Sub_Ovf_Un</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1706:ShortAcronymsShouldBeUppercase", MessageId = "Member")]
-		[SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores", MessageId = "Member")]
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper sub_ovf_un
 		{
 			get { _ilGenerator.Emit(OpCodes.Sub_Ovf_Un); return this; }
@@ -3365,7 +2967,6 @@ namespace BLToolkit.Reflection.Emit
 		/// <param name="labels">The array of label objects to which to branch from this location.</param>
 		/// <seealso cref="OpCodes.Switch">OpCodes.Switch</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode,Label[])">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper @switch(Label[] labels)
 		{
 			_ilGenerator.Emit(OpCodes.Switch, labels); return this;
@@ -3378,7 +2979,6 @@ namespace BLToolkit.Reflection.Emit
 		/// </summary>
 		/// <seealso cref="OpCodes.Tailcall">OpCodes.Tailcall</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper tailcall
 		{
 			get { _ilGenerator.Emit(OpCodes.Tailcall); return this; }
@@ -3390,7 +2990,6 @@ namespace BLToolkit.Reflection.Emit
 		/// </summary>
 		/// <seealso cref="OpCodes.Throw">OpCodes.Throw</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper @throw
 		{
 			get { _ilGenerator.Emit(OpCodes.Throw); return this; }
@@ -3405,7 +3004,6 @@ namespace BLToolkit.Reflection.Emit
 		/// <param name="label">The label to branch from this location.</param>
 		/// <seealso cref="OpCodes.Unaligned">OpCodes.Unaligned</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode,Label)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper unaligned(Label label)
 		{
 			_ilGenerator.Emit(OpCodes.Unaligned, label); return this;
@@ -3420,7 +3018,6 @@ namespace BLToolkit.Reflection.Emit
 		/// <param name="addr">An address is pushed onto the stack.</param>
 		/// <seealso cref="OpCodes.Unaligned">OpCodes.Unaligned</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode,long)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper unaligned(long addr)
 		{
 			_ilGenerator.Emit(OpCodes.Unaligned, addr); return this;
@@ -3433,7 +3030,6 @@ namespace BLToolkit.Reflection.Emit
 		/// <param name="type">A Type</param>
 		/// <seealso cref="OpCodes.Unbox">OpCodes.Unbox</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode,Type)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper unbox(Type type)
 		{
 			_ilGenerator.Emit(OpCodes.Unbox, type); return this;
@@ -3447,15 +3043,12 @@ namespace BLToolkit.Reflection.Emit
 		/// <param name="type">A Type</param>
 		/// <seealso cref="OpCodes.Unbox_Any">OpCodes.Unbox_Any</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode,Type)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores", MessageId = "Member")]
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper unbox_any(Type type)
 		{
 			_ilGenerator.Emit(OpCodes.Unbox_Any, type); return this;
 		}
 #endif
 
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper unboxIfValueType(Type type)
 		{
 			if (type == null) throw new ArgumentNullException("type");
@@ -3471,7 +3064,6 @@ namespace BLToolkit.Reflection.Emit
 		/// </summary>
 		/// <seealso cref="OpCodes.Volatile">OpCodes.Volatile</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper @volatile
 		{
 			get { _ilGenerator.Emit(OpCodes.Volatile); return this; }
@@ -3484,7 +3076,6 @@ namespace BLToolkit.Reflection.Emit
 		/// </summary>
 		/// <seealso cref="OpCodes.Xor">OpCodes.Xor</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode)">ILGenerator.Emit</seealso>
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper xor
 		{
 			get { _ilGenerator.Emit(OpCodes.Xor); return this; }
@@ -3494,7 +3085,6 @@ namespace BLToolkit.Reflection.Emit
 		/// Ends sequence of property calls.
 		/// </summary>
 		[SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic")]
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public void end()
 		{
 		}
@@ -3629,7 +3219,6 @@ namespace BLToolkit.Reflection.Emit
 #endif
 		}
 
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper conv(Type type)
 		{
 			if      (type == typeof(byte))   conv_u1.end();
@@ -3648,7 +3237,6 @@ namespace BLToolkit.Reflection.Emit
 			return this;
 		}
 
-		[SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Member")]
 		public EmitHelper unboxOrCast(Type type)
 		{
 			if (type == null) throw new ArgumentNullException("type");

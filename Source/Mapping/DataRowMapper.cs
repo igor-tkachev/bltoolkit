@@ -95,11 +95,38 @@ namespace BLToolkit.Mapping
 					else
 					{
 						if (dc.DataType != typeof(string))
-							value = Convert.ChangeType(value, dc.DataType, Thread.CurrentThread.CurrentCulture);
+							value = Convert.ChangeType(value, dc.DataType);
 					}
 				}
 
 				_dataRow[index] = value;
+			}
+		}
+
+		void IMapDataDestination.SetValue(object o, string name, object value)
+		{
+			if (value == null || value is DBNull)
+			{
+				_dataRow[name] = DBNull.Value;
+			}
+			else
+			{
+				DataColumn dc = _dataRow.Table.Columns[name];
+
+				if (dc.DataType != value.GetType())
+				{
+					if (dc.DataType == typeof(Guid))
+					{
+						value = new Guid(value.ToString());
+					}
+					else
+					{
+						if (dc.DataType != typeof(string))
+							value = Convert.ChangeType(value, dc.DataType);
+					}
+				}
+
+				_dataRow[name] = value;
 			}
 		}
 

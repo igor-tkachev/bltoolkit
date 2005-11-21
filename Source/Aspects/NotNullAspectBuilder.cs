@@ -39,9 +39,7 @@ namespace BLToolkit.Aspects
 				EmitHelper emit  = context.MethodBuilder.Emitter;
 				Label      label = emit.DefineLabel();
 
-				string message = _message != null?
-					string.Format((IFormatProvider)null, _message, pi.Name):
-					string.Empty;
+				string message = _message != null? string.Format(_message, pi.Name): string.Empty;
 
 				emit
 					.ldarg    (pi)

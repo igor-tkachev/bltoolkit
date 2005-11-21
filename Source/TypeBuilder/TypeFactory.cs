@@ -42,7 +42,6 @@ namespace BLToolkit.TypeBuilder
 		}
 
 		[SuppressMessage("Microsoft.Design", "CA1062:ValidateArgumentsOfPublicMethods")]
-		[SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate")]
 		public static void SetGlobalAssembly(string path)
 		{
 			if (_globalAssembly != null)
@@ -164,9 +163,7 @@ namespace BLToolkit.TypeBuilder
 			catch (Exception ex)
 			{
 				throw new TypeBuilderException(string.Format(
-					(IFormatProvider)null,
-					"Could not build the '{0}' type: {1}", sourceType.FullName, ex.Message),
-					ex);
+					"Could not build the '{0}' type: {1}", sourceType.FullName, ex.Message), ex);
 			}
 		}
 
@@ -177,12 +174,12 @@ namespace BLToolkit.TypeBuilder
 		internal static void Error(string format, params object[] parameters)
 		{
 			throw new TypeBuilderException(
-				string.Format((IFormatProvider)null, "Could not build the '{0}' type: " + format, parameters));
+				string.Format("Could not build the '{0}' type: " + format, parameters));
 		}
 
 		private static void WriteDebug(string format, params object[] parameters)
 		{
-			System.Diagnostics.Debug.WriteLine(string.Format((IFormatProvider)null, format, parameters));
+			System.Diagnostics.Debug.WriteLine(string.Format(format, parameters));
 		}
 
 		#endregion

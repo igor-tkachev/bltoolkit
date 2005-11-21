@@ -3,36 +3,42 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace BLToolkit.Reflection
 {
-	[SuppressMessage("Microsoft.Naming", "CA1710:IdentifiersShouldHaveCorrectSuffix")]
-	public abstract class TypeAccessor<T> : TypeAccessor
+	public static class TypeAccessor<T>
 	{
-		public new T CreateInstance()
+		public static T CreateInstance()
 		{
-			return (T)CreateInstanceInternal();
+			return (T)_accessor.CreateInstance();
 		}
 
-		public new T CreateInstance(InitContext context)
+		public static T CreateInstance(InitContext context)
 		{
-			return (T)CreateInstanceInternal(context);
+			return (T)_accessor.CreateInstance(context);
 		}
 
-		[SuppressMessage("Microsoft.Naming", "CA1706:ShortAcronymsShouldBeUppercase", MessageId = "Member")]
-		public new T CreateInstanceEx()
+		public static T CreateInstanceEx()
 		{
-			return (T)base.CreateInstanceEx();
+			return (T)_accessor.CreateInstanceEx();
 		}
 
-		[SuppressMessage("Microsoft.Naming", "CA1706:ShortAcronymsShouldBeUppercase", MessageId = "Member")]
-		public new T CreateInstanceEx(InitContext context)
+		public static T CreateInstanceEx(InitContext context)
 		{
-			return (T)base.CreateInstanceEx(context);
+			return (T)_accessor.CreateInstanceEx(context);
 		}
 
-		[SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate")]
-		[SuppressMessage("Microsoft.Design", "CA1000:DoNotDeclareStaticMembersOnGenericTypes")]
-		public static TypeAccessor<T> GetAccessor()
+		public static IObjectFactory  ObjectFactory
 		{
-			return (TypeAccessor<T>)GetAccessor(typeof(T));
+			get { return _accessor.ObjectFactory;  }
+			set { _accessor.ObjectFactory = value; }
+		}
+
+		public static Type Type         { get { return _accessor.Type; } }
+		public static Type OriginalType { get { return _accessor.OriginalType; } }
+
+		private static TypeAccessor _accessor = TypeAccessor.GetAccessor(typeof(T));
+		public  static TypeAccessor  Accessor
+		{
+			get { return _accessor; }
 		}
 	}
 }
+
