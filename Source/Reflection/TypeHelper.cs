@@ -118,26 +118,7 @@ namespace BLToolkit.Reflection
 		/// or an array with zero (0) elements if no attributes are defined.</returns>
 		public object[] GetAttributes(Type attributeType)
 		{
-			if (attributeType == null) throw new ArgumentNullException("attributeType");
-
-			string key = _type.FullName + "." + attributeType.FullName;
-
-			object[] attrs = (object[])_typeAttributes[key];
-
-			if (attrs == null)
-			{
-				ArrayList list = new ArrayList();
-
-				GetAttributesInternal(list, _type);
-
-				for (int i = 0; i < list.Count; i++)
-					if (attributeType.IsInstanceOfType(list[i]) == false)
-						list.RemoveAt(i--);
-
-				_typeAttributes[key] = attrs = list.ToArray();
-			}
-
-			return attrs;
+			return GetAttributes(_type, attributeType);
 		}
 
 		/// <summary>
@@ -149,8 +130,6 @@ namespace BLToolkit.Reflection
 		{
 			return GetAttributesInternal();
 		}
-
-		private static Hashtable _typeAttributes = new Hashtable(10);
 
 		private object[] GetAttributesInternal()
 		{
@@ -215,6 +194,39 @@ namespace BLToolkit.Reflection
 				if (type.BaseType != typeof(object))
 					GetAttributesInternal(list, type.BaseType);
 			}
+		}
+
+		private static Hashtable _typeAttributes = new Hashtable(10);
+
+		public static object[] GetAttributes(Type type, Type attributeType)
+		{
+			if (attributeType == null) throw new ArgumentNullException("attributeType");
+
+			string key = type.FullName + "." + attributeType.FullName;
+
+			object[] attrs = (object[])_typeAttributes[key];
+
+			if (attrs == null)
+			{
+				ArrayList list = new ArrayList();
+
+				GetAttributesInternal(list, type);
+
+				for (int i = 0; i < list.Count; i++)
+					if (attributeType.IsInstanceOfType(list[i]) == false)
+						list.RemoveAt(i--);
+
+				_typeAttributes[key] = attrs = list.ToArray();
+			}
+
+			return attrs;
+		}
+
+		public static Attribute GetFirstAttribute(Type type, Type attributeType)
+		{
+			object[] attrs = new TypeHelper(type).GetAttributes(attributeType);
+
+			return attrs.Length > 0? (Attribute)attrs[0]: null;
 		}
 
 		#endregion
@@ -501,8 +513,18 @@ namespace BLToolkit.Reflection
 		{
 			if (type == null) throw new ArgumentNullException("type");
 
-			if (type.IsByRef)
-				type = type.GetElementType();
+			//if (type.IsByRef)
+			//	type = type.GetElementType();
+
+#if FW2
+			if (type.IsGenericType)
+			{
+				Type t = Nullable.GetUnderlyingType(type);
+
+				if (t != null)
+					type = t;
+			}
+#endif
 
 			if (type.IsEnum)
 				type = Enum.GetUnderlyingType(type);
@@ -602,13 +624,6 @@ namespace BLToolkit.Reflection
 				returnType,
 				types,
 				null);
-		}
-
-		public static Attribute GetFirstAttribute(Type type, Type attributeType)
-		{
-			object[] attrs = new TypeHelper(type).GetAttributes(attributeType);
-
-			return attrs.Length > 0? (Attribute)attrs[0]: null;
 		}
 
 		#endregion

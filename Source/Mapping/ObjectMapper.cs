@@ -71,29 +71,25 @@ namespace BLToolkit.Mapping
 		private   TypeAccessor _typeAccessor;
 		protected TypeAccessor  TypeAccessor
 		{
-			get { return _typeAccessor;  }
-			//set { _typeAccessor = value; }
+			get { return _typeAccessor; }
+		}
+
+		private   MappingSchema _mappingSchema;
+		protected MappingSchema  MappingSchema
+		{
+			get { return _mappingSchema; }
 		}
 
 		#endregion
 
-		#region IObjectMappper Members
+		#region Init Mapper
 
-		public virtual object CreateInstance()
-		{
-			return _typeAccessor.CreateInstance();
-		}
-
-		public virtual object CreateInstance(InitContext context)
-		{
-			return _typeAccessor.CreateInstance(context);
-		}
-
-		public virtual void Init(Mapper mapper, TypeAccessor typeAccessor)
+		public virtual void Init(MappingSchema mappingSchema, TypeAccessor typeAccessor)
 		{
 			if (typeAccessor == null) throw new ArgumentNullException("typeAccessor");
 
-			_typeAccessor = typeAccessor;
+			_typeAccessor  = typeAccessor;
+			_mappingSchema = mappingSchema;
 
 			foreach (MemberAccessor ma in typeAccessor)
 			{
@@ -104,8 +100,11 @@ namespace BLToolkit.Mapping
 
 				mi.MemberAccessor = ma;
 				mi.Name           = ma.Name;
-				mi.Mapper         = mapper;
+				mi.MappingSchema  = mappingSchema;
 				mi.IsTrimmable    = GetIsTrimmable(ma);
+				mi.DefaultValue   = GetDefaultValue(ma);
+				mi.IsNullable     = GetIsNullable(ma);
+				mi.NullValue      = GetNullValue(ma, mi.IsNullable);
 
 				Add(CreateMemberMapper(mi));
 			}
@@ -126,19 +125,134 @@ namespace BLToolkit.Mapping
 
 		protected virtual bool GetIsTrimmable(MemberAccessor memberAccessor)
 		{
-			TrimmableAttribute attr1 = 
+			if (memberAccessor.Type != typeof(string))
+				return false;
+
+			TrimmableAttribute attr =
 				(TrimmableAttribute)memberAccessor.GetAttribute(typeof(TrimmableAttribute));
 
-			if (attr1 != null)
-				return attr1.IsTrimmable;
+			if (attr != null)
+				return attr.IsTrimmable;
 
-			TrimStringsAttribute attr2 = (TrimStringsAttribute)TypeHelper.GetFirstAttribute(
-				memberAccessor.MemberInfo.DeclaringType, typeof(TrimStringsAttribute));
+			attr = (TrimmableAttribute)TypeHelper.GetFirstAttribute(
+				memberAccessor.MemberInfo.DeclaringType, typeof(TrimmableAttribute));
+
+			if (attr != null)
+				return attr.IsTrimmable;
+
+			return TrimmableAttribute.Default.IsTrimmable;
+		}
+
+		protected virtual object GetDefaultValue(MemberAccessor memberAccessor)
+		{
+			// Check member [DefaultValue(0)]
+			//
+			DefaultValueAttribute attr =
+				(DefaultValueAttribute)memberAccessor.GetAttribute(typeof(DefaultValueAttribute));
+
+			if (attr != null)
+				return attr.Value;
+
+			// Check type [DefaultValues(typeof(int), 0)]
+			//
+			object[] attrs = TypeHelper.GetAttributes(
+				memberAccessor.MemberInfo.DeclaringType, typeof(DefaultValueAttribute));
+
+			foreach (DefaultValueAttribute a in attrs)
+				if (a.Type == memberAccessor.Type)
+					return a.Value;
+
+			return null;
+		}
+
+		protected virtual bool GetIsNullable(MemberAccessor memberAccessor)
+		{
+			// Check member [Nullable(true | false)]
+			//
+			NullableAttribute attr1 =
+				(NullableAttribute)memberAccessor.GetAttribute(typeof(NullableAttribute));
+
+			if (attr1 != null)
+				return attr1.IsNullable;
+
+			// Check member [NullValue(0)]
+			//
+			NullValueAttribute attr2 =
+				(NullValueAttribute)memberAccessor.GetAttribute(typeof(NullValueAttribute));
 
 			if (attr2 != null)
-				return attr2.IsTrimmable;
+				return true;
 
-			return true;
+			// Check type [Nullable(true || false)]
+			//
+			attr1 = (NullableAttribute)TypeHelper.GetFirstAttribute(
+				memberAccessor.MemberInfo.DeclaringType, typeof(NullableAttribute));
+
+			if (attr1 != null)
+				return attr1.IsNullable;
+
+			// Check type [NullValues(typeof(int), 0)]
+			//
+			object[] attrs = TypeHelper.GetAttributes(
+				memberAccessor.MemberInfo.DeclaringType, typeof(NullValueAttribute));
+
+			foreach (NullValueAttribute a in attrs)
+				if (a.Type == memberAccessor.Type)
+					return true;
+
+			return false;
+		}
+
+		private static object CheckNullValue(object value, MemberAccessor memberAccessor)
+		{
+			if (value is Type && (Type)value == typeof(DBNull))
+			{
+				value = DBNull.Value;
+
+				if (memberAccessor.Type == typeof(string))
+					value = null;
+			}
+
+			return value;
+		}
+
+		protected virtual object GetNullValue(MemberAccessor memberAccessor, bool isNullable)
+		{
+			if (isNullable)
+			{
+				// Check member [NullValue(0)]
+				//
+				NullValueAttribute attr =
+					(NullValueAttribute)memberAccessor.GetAttribute(typeof(NullValueAttribute));
+
+				if (attr != null)
+					return CheckNullValue(attr.Value, memberAccessor);
+
+				// Check type [NullValues(typeof(int), 0)]
+				//
+				object[] attrs = TypeHelper.GetAttributes(
+					memberAccessor.MemberInfo.DeclaringType, typeof(NullValueAttribute));
+
+				foreach (NullValueAttribute a in attrs)
+					if (a.Type == memberAccessor.Type)
+						return CheckNullValue(a.Value, memberAccessor);
+			}
+
+			return CheckNullValue(MappingSchema.GetNullValue(memberAccessor.Type), memberAccessor);
+		}
+
+		#endregion
+
+		#region IObjectMappper Members
+
+		public virtual object CreateInstance()
+		{
+			return _typeAccessor.CreateInstance();
+		}
+
+		public virtual object CreateInstance(InitContext context)
+		{
+			return _typeAccessor.CreateInstance(context);
 		}
 
 		#endregion

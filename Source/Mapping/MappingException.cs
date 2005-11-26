@@ -1,59 +1,60 @@
 using System;
 using System.Runtime.Serialization;
 
-namespace BLToolkit.TypeBuilder
+namespace BLToolkit.Mapping
 {
 	/// <summary>
-	/// Defines the base class for the namespace exceptions.
+	/// The exception that is thrown by <see cref="Map"/>.
 	/// </summary>
 	/// <remarks>
-	/// This class is the base class for exceptions that may occur during execution of the namespace members.
+	/// <b>MappingException</b> is used as a wrapper of any exceptions,
+	/// which may occur during the the execution of the <see cref="Map"/> class methods.
 	/// </remarks>
 	[Serializable] 
-	public class TypeBuilderException : Exception
+	public class MappingException : Exception
 	{
 		/// <summary>
-		/// Initializes a new instance of the <b>TypeBuilderException</b> class.
+		/// Initializes a new instance of the <b>MappingException</b> class.
 		/// </summary>
 		/// <remarks>
 		/// This constructor initializes the <para>Message</para> property of the new instance 
 		/// to a system-supplied message that describes the error, 
-		/// such as "A Build Type exception has occurred."
+		/// such as "A mapping exception has occurred."
 		/// </remarks>
-		public TypeBuilderException() 
-			: base("A Build Type exception has occurred.")
+		public MappingException() 
+			: base("A mapping exception has occurred.")
 		{
 		}
         
 		/// <summary>
-		/// Initializes a new instance of the <b>TypeBuilderException</b> class 
+		/// Initializes a new instance of the <b>MappingException</b> class 
 		/// with the specified error message.
 		/// </summary>
 		/// <param name="message">The message to display to the client when the exception is thrown.</param>
-		public TypeBuilderException(string message) 
+		public MappingException(string message) 
 			: base(message) 
 		{
 		}
     	
 		/// <summary>
-		/// Initializes a new instance of the <b>TypeBuilderException</b> class 
+		/// Initializes a new instance of the <b>MappingException</b> class 
 		/// with the specified error message and InnerException property.
 		/// </summary>
 		/// <param name="message">The message to display to the client when the exception is thrown.</param>
 		/// <param name="innerException">The InnerException, if any, that threw the current exception.</param>
-		public TypeBuilderException(string message, Exception innerException) 
+		public MappingException(string message, Exception innerException) 
 			: base(message, innerException) 
 		{
 		}
 
 		/// <summary>
-		/// Initializes a new instance of the <b>TypeBuilderException</b> class with serialized data.
+		/// Initializes a new instance of the <b>MappingException</b> class with serialized data.
 		/// </summary>
 		/// <param name="info">The object that holds the serialized object data.</param>
 		/// <param name="context">The contextual information about the source or destination.</param>
 		/// <remarks>This constructor is called during deserialization to reconstitute the exception object transmitted over a stream.</remarks>
-		protected TypeBuilderException(SerializationInfo info, StreamingContext context) 
-			: base(info, context) 
+		protected MappingException(SerializationInfo info, StreamingContext context) 
+			: base(info,context) 
 		{
 		}
 	}

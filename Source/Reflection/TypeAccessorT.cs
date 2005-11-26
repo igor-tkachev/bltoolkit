@@ -7,37 +7,37 @@ namespace BLToolkit.Reflection
 	{
 		public static T CreateInstance()
 		{
-			return (T)_accessor.CreateInstance();
+			return (T)_instance.CreateInstance();
 		}
 
 		public static T CreateInstance(InitContext context)
 		{
-			return (T)_accessor.CreateInstance(context);
+			return (T)_instance.CreateInstance(context);
 		}
 
 		public static T CreateInstanceEx()
 		{
-			return (T)_accessor.CreateInstanceEx();
+			return (T)_instance.CreateInstanceEx();
 		}
 
 		public static T CreateInstanceEx(InitContext context)
 		{
-			return (T)_accessor.CreateInstanceEx(context);
+			return (T)_instance.CreateInstanceEx(context);
 		}
 
 		public static IObjectFactory  ObjectFactory
 		{
-			get { return _accessor.ObjectFactory;  }
-			set { _accessor.ObjectFactory = value; }
+			get { return _instance.ObjectFactory;  }
+			set { _instance.ObjectFactory = value; }
 		}
 
-		public static Type Type         { get { return _accessor.Type; } }
-		public static Type OriginalType { get { return _accessor.OriginalType; } }
+		public static Type Type         { get { return _instance.Type; } }
+		public static Type OriginalType { get { return _instance.OriginalType; } }
 
-		private static TypeAccessor _accessor = TypeAccessor.GetAccessor(typeof(T));
-		public  static TypeAccessor  Accessor
+		private static TypeAccessor _instance = TypeAccessor.GetAccessor(typeof(T));
+		public  static TypeAccessor  Instance
 		{
-			get { return _accessor; }
+			get { return _instance; }
 		}
 	}
 }

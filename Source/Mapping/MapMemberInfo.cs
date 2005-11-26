@@ -27,11 +27,39 @@ namespace BLToolkit.Mapping
 			set { _isTrimmable = value; }
 		}
 
-		private Mapper _mapper;
-		public  Mapper  Mapper
+		private bool _isNullable;
+		public  bool  IsNullable
 		{
-			get { return _mapper;  }
-			set { _mapper = value; }
+			get { return _isNullable;  }
+			set { _isNullable = value; }
+		}
+
+		private object _nullValue;
+		public  object  NullValue
+		{
+			get { return _nullValue;  }
+			set { _nullValue = value; }
+		}
+
+		private object _defaultValue;
+		public  object  DefaultValue
+		{
+			get { return _defaultValue;  }
+			set { _defaultValue = value; }
+		}
+
+		private MappingSchema _mappingSchema;
+		public  MappingSchema  MappingSchema
+		{
+			get { return _mappingSchema;  }
+			set { _mappingSchema = value; }
+		}
+
+		private MapValue[] _mapValues;
+		public  MapValue[]  MapValues
+		{
+			get { return _mapValues;  }
+			set { _mapValues = value; }
 		}
 	}
 }

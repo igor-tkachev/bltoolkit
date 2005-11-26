@@ -9,15 +9,15 @@ namespace Mapping
 	[TestFixture]
 	public class TrimmableAttributeTest
 	{
-		[TrimStrings(false)]
+		[Trimmable]
 		interface Interface1
 		{
 		}
 
 		public class TestObject : Interface1
 		{
+			[Trimmable(false)]
 			public string Str1;
-			[Trimmable]
 			public string Str2;
 		}
 

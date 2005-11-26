@@ -110,7 +110,12 @@
                     BuildAction = "Compile"
                 />
                 <File
-                    RelPath = "Mapping\DefaultMapper.cs"
+                    RelPath = "Mapping\DefaultMemberMapper.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "Mapping\DefaultValueAttribute.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
                 />
@@ -135,7 +140,32 @@
                     BuildAction = "Compile"
                 />
                 <File
-                    RelPath = "Mapping\Mapper.cs"
+                    RelPath = "Mapping\MapIgnoreAttribute.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "Mapping\MapMemberInfo.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "Mapping\MappingException.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "Mapping\MappingSchema.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "Mapping\MapValue.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "Mapping\MapValueAttribute.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
                 />
@@ -145,7 +175,27 @@
                     BuildAction = "Compile"
                 />
                 <File
+                    RelPath = "Mapping\NullableAttribute.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "Mapping\NullValueAttribute.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
                     RelPath = "Mapping\ObjectMapper.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "Mapping\ObjectMapperAttribute.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "Mapping\TrimmableAttribute.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
                 />

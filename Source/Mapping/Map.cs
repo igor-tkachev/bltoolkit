@@ -8,16 +8,16 @@ namespace BLToolkit.Mapping
 		{
 		}
 
-		private static Mapper _defaultMapper = new DefaultMapper();
-		public  static Mapper  DefaulMapper
+		private static MappingSchema _defaultSchema = new MappingSchema();
+		public  static MappingSchema  DefaultSchema
 		{
-			get { return _defaultMapper;  }
-			set { _defaultMapper = value; }
+			get { return _defaultSchema;  }
+			set { _defaultSchema = value; }
 		}
 
 		public static IObjectMapper GetObjectMapper(Type type)
 		{
-			return _defaultMapper.GetObjectMapper(type);
+			return _defaultSchema.GetObjectMapper(type);
 		}
 	}
 }

@@ -18,7 +18,7 @@
     <DefineConstants>TRACE;DEBUG;FW2</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <CodeAnalysisRules>-Microsoft.Design#CA1019;-Microsoft.Design#CA1004;-Microsoft.Design#CA1024;-Microsoft.Globalization#CA1304;-Microsoft.Globalization#CA1305;-Microsoft.Naming#CA1709;-Microsoft.Naming#CA1710;-Microsoft.Naming#CA1707;-Microsoft.Naming#CA1706;-Microsoft.Performance#CA1819;-Microsoft.Usage#CA2223;-Microsoft.Usage#CA2225</CodeAnalysisRules>
+    <CodeAnalysisRules>-Microsoft.Design#CA1019;-Microsoft.Design#CA1000;-Microsoft.Design#CA1004;-Microsoft.Design#CA1024;-Microsoft.Globalization#CA1304;-Microsoft.Globalization#CA1305;-Microsoft.Naming#CA1709;-Microsoft.Naming#CA1710;-Microsoft.Naming#CA1707;-Microsoft.Naming#CA1706;-Microsoft.Performance#CA1819;-Microsoft.Usage#CA2223;-Microsoft.Usage#CA2225</CodeAnalysisRules>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -27,7 +27,7 @@
     <DefineConstants>TRACE;FW2</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <CodeAnalysisRules>-Microsoft.Design#CA1019;-Microsoft.Design#CA1004;-Microsoft.Design#CA1024;-Microsoft.Globalization#CA1305;-Microsoft.Naming#CA1709;-Microsoft.Naming#CA1710;-Microsoft.Naming#CA1707;-Microsoft.Naming#CA1706;-Microsoft.Performance#CA1819;-Microsoft.Usage#CA2223;-Microsoft.Usage#CA2225</CodeAnalysisRules>
+    <CodeAnalysisRules>-Microsoft.Design#CA1019;-Microsoft.Design#CA1000;-Microsoft.Design#CA1004;-Microsoft.Design#CA1024;-Microsoft.Globalization#CA1305;-Microsoft.Naming#CA1709;-Microsoft.Naming#CA1710;-Microsoft.Naming#CA1707;-Microsoft.Naming#CA1706;-Microsoft.Performance#CA1819;-Microsoft.Usage#CA2223;-Microsoft.Usage#CA2225</CodeAnalysisRules>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -36,22 +36,28 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Aspects\NotNullAttribute.cs" />
+    <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="Mapping\DataReaderMapper.cs" />
     <Compile Include="Mapping\DataRowMapper.cs" />
-    <Compile Include="Mapping\DefaultMapper.cs" />
+    <Compile Include="Mapping\DefaultMemberMapper.cs" />
+    <Compile Include="Mapping\DefaultValueAttribute.cs" />
     <Compile Include="Mapping\IMapDataDestination.cs" />
     <Compile Include="Mapping\IMapDataSource.cs" />
     <Compile Include="Mapping\IObjectMapper.cs" />
     <Compile Include="Mapping\Map.cs" />
     <Compile Include="Mapping\MapIgnoreAttribute.cs" />
     <Compile Include="Mapping\MapMemberInfo.cs" />
-    <Compile Include="Mapping\Mapper.cs" />
+    <Compile Include="Mapping\MappingException.cs" />
+    <Compile Include="Mapping\MappingSchema.cs" />
+    <Compile Include="Mapping\MapValue.cs" />
+    <Compile Include="Mapping\MapValueAttribute.cs" />
+    <Compile Include="Mapping\NullableAttribute.cs" />
+    <Compile Include="Mapping\NullValueAttribute.cs" />
     <Compile Include="Mapping\ObjectMapperT.cs" />
     <Compile Include="Mapping\MemberMapper.cs" />
     <Compile Include="Mapping\ObjectMapper.cs" />
     <Compile Include="Mapping\ObjectMapperAttribute.cs" />
     <Compile Include="Mapping\TrimmableAttribute.cs" />
-    <Compile Include="Mapping\TrimStringsAttribute.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Reflection\Emit\AssemblyBuilderHelper.cs" />
     <Compile Include="Reflection\Emit\ConstructorBuilderHelper.cs" />

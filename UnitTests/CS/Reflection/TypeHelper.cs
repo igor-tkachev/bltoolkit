@@ -101,5 +101,23 @@ namespace Reflection
 				typeof(Attribute2) == attrs[2].GetType() && typeof(Attribute5) == attrs[3].GetType() ||
 				typeof(Attribute2) == attrs[3].GetType() && typeof(Attribute5) == attrs[2].GetType());
 		}
+
+#if FW2
+		[Test]
+		public void UnderlyingTypeTest()
+		{
+			Type type;
+
+			type = TypeHelper.GetUnderlyingType(typeof(int?));
+			Assert.AreEqual(typeof(int), type);
+
+			type = TypeHelper.GetUnderlyingType(typeof(DayOfWeek?));
+			Assert.AreEqual(typeof(int), type);
+
+			type = TypeHelper.GetUnderlyingType(typeof(IComparable<int>));
+			Assert.AreEqual(typeof(IComparable<int>), type);
+
+		}
+#endif
 	}
 }
