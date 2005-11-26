@@ -12,7 +12,7 @@ using System.Runtime.CompilerServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("Business Logic Toolkit")]
-[assembly: AssemblyCopyright("© 2002-2005 www.bltoolkit.cnet")]
+[assembly: AssemblyCopyright("© 2002-2005 www.bltoolkit.net")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

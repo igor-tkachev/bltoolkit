@@ -6,20 +6,55 @@ namespace BLToolkit.Mapping
 {
 	public static class ObjectMapper<T>
 	{
-		public static object CreateInstance()
+		public static T CreateInstance()
 		{
-			return _mapper.CreateInstance();
+			return (T)_instance.CreateInstance();
 		}
 
-		public static object CreateInstance(InitContext context)
+		public static T CreateInstance(InitContext context)
 		{
-			return _mapper.CreateInstance(context);
+			return (T)_instance.CreateInstance(context);
 		}
 
-		private static IObjectMapper _mapper = Map.GetObjectMapper(typeof(T));
-		public  static IObjectMapper  Mapper
+		public static int Count
 		{
-			get { return _mapper; }
+			get { return _instance.Count; }
+		}
+
+		public static string GetName(int index)
+		{
+			return _instance.GetName(index);
+		}
+
+		public static object GetValue(T o, int index)
+		{
+			return _instance.GetValue(o, index);
+		}
+
+		public static object GetValue(T o, string name)
+		{
+			return _instance.GetValue(o, name);
+		}
+
+		public static int GetOrdinal(string name)
+		{
+			return _instance.GetOrdinal(name);
+		}
+
+		public static void SetValue(T o, int index, object value)
+		{
+			_instance.SetValue(o, index, value);
+		}
+
+		public static void SetValue(object o, string name, object value)
+		{
+			_instance.SetValue(o, name, value);
+		}
+
+		private static IObjectMapper _instance = Map.GetObjectMapper(typeof(T));
+		public  static IObjectMapper  Instance
+		{
+			get { return _instance; }
 		}
 	}
 }

@@ -44,6 +44,18 @@ namespace BLToolkit.Reflection
 			get { return _memberInfo.Name; }
 		}
 
+		private Type _underlyingType;
+		public  Type  UnderlyingType
+		{
+			get
+			{
+				if (_underlyingType == null)
+					_underlyingType = TypeHelper.GetUnderlyingType(Type);
+
+				return _underlyingType;
+			}
+		}
+
 		public Attribute GetAttribute(Type attributeType)
 		{
 			object[] attrs = _memberInfo.GetCustomAttributes(attributeType, true);
