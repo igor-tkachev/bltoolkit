@@ -459,7 +459,7 @@ namespace Rsdn.Framework.Data.Mapping
 								attr.MappedValue = attr.TypeValue;
 						}
 
-						attr.TypeValue   = Enum.Parse(type, fi.Name);
+						attr.TypeValue = Enum.Parse(type, fi.Name);
 					}
 				}
 			}

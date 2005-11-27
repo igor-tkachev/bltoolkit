@@ -6,9 +6,14 @@ namespace BLToolkit.Mapping
 	[SuppressMessage("Microsoft.Performance", "CA1813:AvoidUnsealedAttributes")]
 	[AttributeUsage(
 		AttributeTargets.Class | AttributeTargets.Interface |
-		AttributeTargets.Property | AttributeTargets.Field)]
+		AttributeTargets.Property | AttributeTargets.Field |
+		AttributeTargets.Enum)]
 	public class DefaultValueAttribute : Attribute
 	{
+		public DefaultValueAttribute()
+		{
+		}
+
 		public DefaultValueAttribute(object value)
 		{
 			_value = value;

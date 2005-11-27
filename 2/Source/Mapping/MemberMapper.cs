@@ -99,17 +99,17 @@ namespace BLToolkit.Mapping
 
 			Type type = mi.MemberAccessor.UnderlyingType;
 
-			if (type == typeof(Int32))   return n? new Int32Mapper.  Nullable(): new Int32Mapper();
-			if (type == typeof(Double))  return n? new DoubleMapper. Nullable(): new DoubleMapper();
-			if (type == typeof(Int16))   return n? new Int16Mapper.  Nullable(): new Int16Mapper();
 			if (type == typeof(SByte))   return n? new SByteMapper.  Nullable(): new SByteMapper();
+			if (type == typeof(Int16))   return n? new Int16Mapper.  Nullable(): new Int16Mapper();
+			if (type == typeof(Int32))   return n? new Int32Mapper.  Nullable(): new Int32Mapper();
 			if (type == typeof(Int64))   return n? new Int64Mapper.  Nullable(): new Int64Mapper();
 			if (type == typeof(Byte))    return n? new ByteMapper.   Nullable(): new ByteMapper();
 			if (type == typeof(UInt16))  return n? new UInt16Mapper. Nullable(): new UInt16Mapper();
 			if (type == typeof(UInt32))  return n? new UInt32Mapper. Nullable(): new UInt32Mapper();
 			if (type == typeof(UInt64))  return n? new UInt64Mapper. Nullable(): new UInt64Mapper();
-			if (type == typeof(UInt64))  return n? new CharMapper.   Nullable(): new CharMapper();
 			if (type == typeof(Single))  return n? new SingleMapper. Nullable(): new SingleMapper();
+			if (type == typeof(Double))  return n? new DoubleMapper. Nullable(): new DoubleMapper();
+			if (type == typeof(Char))    return n? new CharMapper.   Nullable(): new CharMapper();
 			if (type == typeof(Boolean)) return n? new BooleanMapper.Nullable(): new BooleanMapper();
 
 			throw new InvalidOperationException();
@@ -421,18 +421,20 @@ namespace BLToolkit.Mapping
 
 		private static MemberMapper GetSimpleMemberMapper(MapMemberInfo mi)
 		{
-			if (mi.IsNullable || mi.MapValues != null)
+			if (mi.MapValues != null)
 				return null;
+
+			bool n = mi.IsNullable;
 
 			Type type = mi.MemberAccessor.Type;
 
 			if (type == typeof(String))
-				if (mi.IsTrimmable) return new StringMapper.Trimmable();
-				else                return new StringMapper();
+				if (mi.IsTrimmable) return n? new StringMapper.Trimmable.Nullable(): new StringMapper.Trimmable();
+				else                return n? new StringMapper.Nullable(): new StringMapper();
 
-			if (type == typeof(DateTime)) return new DateTimeMapper();
-			if (type == typeof(Decimal))  return new DecimalMapper();
-			if (type == typeof(Guid))     return new GuidMapper();
+			if (type == typeof(DateTime)) return n? new DateTimeMapper.Nullable(): new DateTimeMapper();
+			if (type == typeof(Decimal))  return n? new DecimalMapper. Nullable(): new DecimalMapper();
+			if (type == typeof(Guid))     return n? new GuidMapper.    Nullable(): new GuidMapper();
 
 			return null;
 		}
@@ -453,33 +455,87 @@ namespace BLToolkit.Mapping
 				base.Init(mapMemberInfo);
 			}
 
+			public class Nullable : StringMapper
+			{
+				public override object GetValue(object o)
+				{
+					object value = _memberAccessor.GetValue(o);
+					return (string)value == (string)_nullValue? null: value;
+				}
+			}
+
 			public class Trimmable : StringMapper
 			{
 				public override void SetValue(object o, object value)
 				{
 					_memberAccessor.SetValue(o, value == null? _nullValue: value.ToString().TrimEnd(null));
 				}
+
+				public new class Nullable : Trimmable
+				{
+					public override object GetValue(object o)
+					{
+						object value = _memberAccessor.GetValue(o);
+						return (string)value == (string)_nullValue? null: value;
+					}
+				}
 			}
 		}
 
 		class DateTimeMapper : MemberMapper
 		{
+			protected object _nullValue;
+
 			public override void SetValue(object o, object value)
 			{
 				_memberAccessor.SetValue(o, Convert.ToDateTime(value));
+			}
+
+			public override void Init(MapMemberInfo mapMemberInfo)
+			{
+				_nullValue = Convert.ToDateTime(mapMemberInfo.NullValue);
+				base.Init(mapMemberInfo);
+			}
+
+			public class Nullable : DateTimeMapper
+			{
+				public override object GetValue(object o)
+				{
+					object value = _memberAccessor.GetValue(o);
+					return (DateTime)value == (DateTime)_nullValue? null: value;
+				}
 			}
 		}
 
 		class DecimalMapper : MemberMapper
 		{
+			protected object _nullValue;
+
 			public override void SetValue(object o, object value)
 			{
 				_memberAccessor.SetValue(o, Convert.ToDecimal(value));
+			}
+
+			public override void Init(MapMemberInfo mapMemberInfo)
+			{
+				_nullValue = Convert.ToDecimal(mapMemberInfo.NullValue);
+				base.Init(mapMemberInfo);
+			}
+
+			public class Nullable : DecimalMapper
+			{
+				public override object GetValue(object o)
+				{
+					object value = _memberAccessor.GetValue(o);
+					return (decimal)value == (decimal)_nullValue? null: value;
+				}
 			}
 		}
 
 		class GuidMapper : MemberMapper
 		{
+			protected object _nullValue;
+
 			public override void SetValue(object o, object value)
 			{
 				if (value is Guid)
@@ -488,6 +544,24 @@ namespace BLToolkit.Mapping
 					_memberAccessor.SetValue(o, Guid.Empty);
 				else
 					_memberAccessor.SetValue(o, new Guid(value.ToString()));
+			}
+
+			public override void Init(MapMemberInfo mapMemberInfo)
+			{
+				if (mapMemberInfo.NullValue != null)
+					_nullValue = mapMemberInfo.NullValue is Guid?
+						mapMemberInfo.NullValue: new Guid(mapMemberInfo.NullValue.ToString());
+
+				base.Init(mapMemberInfo);
+			}
+
+			public class Nullable : GuidMapper
+			{
+				public override object GetValue(object o)
+				{
+					object value = _memberAccessor.GetValue(o);
+					return (Guid)value == (Guid)_nullValue? null: value;
+				}
 			}
 		}
 
@@ -511,21 +585,31 @@ namespace BLToolkit.Mapping
 
 			if (underlyingType.IsEnum)
 			{
+				underlyingType = Enum.GetUnderlyingType(underlyingType);
+
+				if (underlyingType == typeof(SByte))    return new NullableSByteMapper. Enum();
+				if (underlyingType == typeof(Int16))    return new NullableInt16Mapper. Enum();
+				if (underlyingType == typeof(Int32))    return new NullableInt32Mapper. Enum();
+				if (underlyingType == typeof(Int64))    return new NullableInt64Mapper. Enum();
+				if (underlyingType == typeof(Byte))     return new NullableByteMapper.  Enum();
+				if (underlyingType == typeof(UInt16))   return new NullableUInt16Mapper.Enum();
+				if (underlyingType == typeof(UInt32))   return new NullableUInt32Mapper.Enum();
+				if (underlyingType == typeof(UInt64))   return new NullableUInt64Mapper.Enum();
 			}
 			else
 			{
-				if (underlyingType == typeof(Int32))    return new NullableInt32Mapper();
-				if (underlyingType == typeof(Double))   return new NullableDoubleMapper();
-				if (underlyingType == typeof(Int16))    return new NullableInt16Mapper();
 				if (underlyingType == typeof(SByte))    return new NullableSByteMapper();
+				if (underlyingType == typeof(Int16))    return new NullableInt16Mapper();
+				if (underlyingType == typeof(Int32))    return new NullableInt32Mapper();
 				if (underlyingType == typeof(Int64))    return new NullableInt64Mapper();
 				if (underlyingType == typeof(Byte))     return new NullableByteMapper();
 				if (underlyingType == typeof(UInt16))   return new NullableUInt16Mapper();
 				if (underlyingType == typeof(UInt32))   return new NullableUInt32Mapper();
 				if (underlyingType == typeof(UInt64))   return new NullableUInt64Mapper();
-				if (underlyingType == typeof(UInt64))   return new NullableCharMapper();
+				if (underlyingType == typeof(Char))     return new NullableCharMapper();
 				if (underlyingType == typeof(Single))   return new NullableSingleMapper();
 				if (underlyingType == typeof(Boolean))  return new NullableBooleanMapper();
+				if (underlyingType == typeof(Double))   return new NullableDoubleMapper();
 				if (underlyingType == typeof(DateTime)) return new NullableDateTimeMapper();
 				if (underlyingType == typeof(Decimal))  return new NullableDecimalMapper();
 				if (underlyingType == typeof(Guid))     return new NullableGuidMapper();
@@ -534,11 +618,46 @@ namespace BLToolkit.Mapping
 			return null;
 		}
 
+		abstract class NullableEnumMapper : MemberMapper
+		{
+			protected Type _memberType;
+			protected Type _underlyingType;
+
+			public override void Init(MapMemberInfo mapMemberInfo)
+			{
+				_memberType     = Nullable.GetUnderlyingType(mapMemberInfo.MemberAccessor.Type);
+				_underlyingType = mapMemberInfo.MemberAccessor.UnderlyingType;
+
+				base.Init(mapMemberInfo);
+			}
+		}
+
 		class NullableInt16Mapper : MemberMapper
 		{
 			public override void SetValue(object o, object value)
 			{
 				_memberAccessor.SetValue(o, value == null || value is Int16? value: Convert.ToInt16(value));
+			}
+
+			public class Enum : NullableEnumMapper
+			{
+				public override void SetValue(object o, object value)
+				{
+					if (value != null)
+					{
+						Type valueType = value.GetType();
+						
+						if (valueType != _memberType)
+						{
+							if (valueType != _underlyingType)
+								value = Convert.ToInt16(value);
+
+							value = System.Enum.ToObject(_memberType, (Int16)value);
+						}
+					}
+
+					_memberAccessor.SetValue(o, value);
+				}
 			}
 		}
 
@@ -548,6 +667,27 @@ namespace BLToolkit.Mapping
 			{
 				_memberAccessor.SetValue(o, value == null || value is Int32? value: Convert.ToInt32(value));
 			}
+
+			public class Enum : NullableEnumMapper
+			{
+				public override void SetValue(object o, object value)
+				{
+					if (value != null)
+					{
+						Type valueType = value.GetType();
+						
+						if (valueType != _memberType)
+						{
+							if (valueType != _underlyingType)
+								value = Convert.ToInt32(value);
+
+							value = System.Enum.ToObject(_memberType, (Int32)value);
+						}
+					}
+
+					_memberAccessor.SetValue(o, value);
+				}
+			}
 		}
 
 		class NullableSByteMapper : MemberMapper
@@ -555,6 +695,27 @@ namespace BLToolkit.Mapping
 			public override void SetValue(object o, object value)
 			{
 				_memberAccessor.SetValue(o, value == null || value is SByte? value: Convert.ToSByte(value));
+			}
+
+			public class Enum : NullableEnumMapper
+			{
+				public override void SetValue(object o, object value)
+				{
+					if (value != null)
+					{
+						Type valueType = value.GetType();
+						
+						if (valueType != _memberType)
+						{
+							if (valueType != _underlyingType)
+								value = Convert.ToSByte(value);
+
+							value = System.Enum.ToObject(_memberType, (SByte)value);
+						}
+					}
+
+					_memberAccessor.SetValue(o, value);
+				}
 			}
 		}
 
@@ -564,6 +725,27 @@ namespace BLToolkit.Mapping
 			{
 				_memberAccessor.SetValue(o, value == null || value is Int64? value: Convert.ToInt64(value));
 			}
+
+			public class Enum : NullableEnumMapper
+			{
+				public override void SetValue(object o, object value)
+				{
+					if (value != null)
+					{
+						Type valueType = value.GetType();
+						
+						if (valueType != _memberType)
+						{
+							if (valueType != _underlyingType)
+								value = Convert.ToInt64(value);
+
+							value = System.Enum.ToObject(_memberType, (Int64)value);
+						}
+					}
+
+					_memberAccessor.SetValue(o, value);
+				}
+			}
 		}
 
 		class NullableByteMapper : MemberMapper
@@ -571,6 +753,27 @@ namespace BLToolkit.Mapping
 			public override void SetValue(object o, object value)
 			{
 				_memberAccessor.SetValue(o, value == null || value is Byte? value: Convert.ToByte(value));
+			}
+
+			public class Enum : NullableEnumMapper
+			{
+				public override void SetValue(object o, object value)
+				{
+					if (value != null)
+					{
+						Type valueType = value.GetType();
+						
+						if (valueType != _memberType)
+						{
+							if (valueType != _underlyingType)
+								value = Convert.ToByte(value);
+
+							value = System.Enum.ToObject(_memberType, (Byte)value);
+						}
+					}
+
+					_memberAccessor.SetValue(o, value);
+				}
 			}
 		}
 
@@ -580,6 +783,27 @@ namespace BLToolkit.Mapping
 			{
 				_memberAccessor.SetValue(o, value == null || value is UInt16? value: Convert.ToUInt16(value));
 			}
+
+			public class Enum : NullableEnumMapper
+			{
+				public override void SetValue(object o, object value)
+				{
+					if (value != null)
+					{
+						Type valueType = value.GetType();
+						
+						if (valueType != _memberType)
+						{
+							if (valueType != _underlyingType)
+								value = Convert.ToUInt16(value);
+
+							value = System.Enum.ToObject(_memberType, (UInt16)value);
+						}
+					}
+
+					_memberAccessor.SetValue(o, value);
+				}
+			}
 		}
 
 		class NullableUInt32Mapper : MemberMapper
@@ -588,6 +812,27 @@ namespace BLToolkit.Mapping
 			{
 				_memberAccessor.SetValue(o, value == null || value is UInt32? value: Convert.ToUInt32(value));
 			}
+
+			public class Enum : NullableEnumMapper
+			{
+				public override void SetValue(object o, object value)
+				{
+					if (value != null)
+					{
+						Type valueType = value.GetType();
+						
+						if (valueType != _memberType)
+						{
+							if (valueType != _underlyingType)
+								value = Convert.ToUInt32(value);
+
+							value = System.Enum.ToObject(_memberType, (UInt32)value);
+						}
+					}
+
+					_memberAccessor.SetValue(o, value);
+				}
+			}
 		}
 
 		class NullableUInt64Mapper : MemberMapper
@@ -595,6 +840,27 @@ namespace BLToolkit.Mapping
 			public override void SetValue(object o, object value)
 			{
 				_memberAccessor.SetValue(o, value == null || value is UInt64? value: Convert.ToUInt64(value));
+			}
+
+			public class Enum : NullableEnumMapper
+			{
+				public override void SetValue(object o, object value)
+				{
+					if (value != null)
+					{
+						Type valueType = value.GetType();
+						
+						if (valueType != _memberType)
+						{
+							if (valueType != _underlyingType)
+								value = Convert.ToUInt64(value);
+
+							value = System.Enum.ToObject(_memberType, (UInt64)value);
+						}
+					}
+
+					_memberAccessor.SetValue(o, value);
+				}
 			}
 		}
 
@@ -769,8 +1035,8 @@ namespace BLToolkit.Mapping
 				{
 					try
 					{
-						if (comp.CompareTo(mv.MapValues[0]) == 0)
-							return mv.OrigValue;
+						if (comp.CompareTo(mv.OrigValue) == 0)
+							return mv.MapValues[0];
 					}
 					catch
 					{

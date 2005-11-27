@@ -35,6 +35,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Aspects\NotNullAspect.cs" />
+    <Compile Include="Mapping\DefaultValueAttribute.cs" />
+    <Compile Include="Mapping\MapValueAttribute.cs" />
     <Compile Include="Mapping\MemberMapper.cs" />
     <Compile Include="Mapping\NullableAttribute.cs" />
     <Compile Include="Mapping\ObjectMapperAttribute.cs" />

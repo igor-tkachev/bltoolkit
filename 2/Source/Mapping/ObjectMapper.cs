@@ -102,6 +102,7 @@ namespace BLToolkit.Mapping
 				mi.Name           = ma.Name;
 				mi.MappingSchema  = mappingSchema;
 				mi.IsTrimmable    = GetIsTrimmable(ma);
+				mi.MapValues      = GetMapValues(ma);
 				mi.DefaultValue   = GetDefaultValue(ma);
 				mi.IsNullable     = GetIsNullable(ma);
 				mi.NullValue      = GetNullValue(ma, mi.IsNullable);
@@ -128,7 +129,7 @@ namespace BLToolkit.Mapping
 			if (memberAccessor.Type != typeof(string))
 				return false;
 
-			TrimmableAttribute attr =
+			TrimmableAttribute attr = 
 				(TrimmableAttribute)memberAccessor.GetAttribute(typeof(TrimmableAttribute));
 
 			if (attr != null)
@@ -141,6 +142,36 @@ namespace BLToolkit.Mapping
 				return attr.IsTrimmable;
 
 			return TrimmableAttribute.Default.IsTrimmable;
+		}
+
+		protected virtual MapValue[] GetMapValues(MemberAccessor memberAccessor)
+		{
+			object[] attrs = memberAccessor.GetAttributes(typeof(MapValueAttribute));
+
+			MapValue[] memberMapValues = null;
+
+			if (attrs != null)
+			{
+				memberMapValues = new MapValue[attrs.Length];
+
+				for (int i = 0; i < attrs.Length; i++)
+				{
+					MapValueAttribute a = (MapValueAttribute)attrs[i];
+					memberMapValues[i] = new MapValue(a.OrigValue, a.Values);
+				}
+			}
+
+			MapValue[] typeMapValues = _mappingSchema.GetMapValues(memberAccessor.Type);
+
+			if (typeMapValues   == null) return memberMapValues;
+			if (memberMapValues == null) return typeMapValues;
+
+			MapValue[] mapValues = new MapValue[memberMapValues.Length + typeMapValues.Length];
+
+			memberMapValues.CopyTo(mapValues, 0);
+			typeMapValues.  CopyTo(mapValues, memberMapValues.Length);
+
+			return mapValues;
 		}
 
 		protected virtual object GetDefaultValue(MemberAccessor memberAccessor)
@@ -162,7 +193,7 @@ namespace BLToolkit.Mapping
 				if (a.Type == memberAccessor.Type)
 					return a.Value;
 
-			return null;
+			return _mappingSchema.GetDefaultValue(memberAccessor.Type);
 		}
 
 		protected virtual bool GetIsNullable(MemberAccessor memberAccessor)

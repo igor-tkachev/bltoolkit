@@ -13,6 +13,7 @@ using BLToolkit.TypeBuilder.Builders;
 
 namespace UnitTests.All
 {
+#if FW2
 	[TestFixture]
 	public class GetValueTest
 	{
@@ -34,7 +35,7 @@ namespace UnitTests.All
 		}
 
 		[Test]
-		public void Test()
+		public void TestFW2()
 		{
 			Cast1(DayOfWeek.Thursday);
 			Cast1(2);
@@ -44,4 +45,13 @@ namespace UnitTests.All
 			Cast3(2);
 		}
 	}
+#else
+	[TestFixture]
+	public class GetValueTest
+	{
+		public void Test()
+		{
+		}
+	}
+#endif
 }
