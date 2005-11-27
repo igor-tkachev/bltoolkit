@@ -4,7 +4,7 @@ using System.Diagnostics.CodeAnalysis;
 namespace BLToolkit.Mapping
 {
 	[SuppressMessage("Microsoft.Performance", "CA1813:AvoidUnsealedAttributes")]
-	[AttributeUsage(AttributeTargets.Property | AttributeTargets.Field)]
+	[AttributeUsage(AttributeTargets.Property | AttributeTargets.Field | AttributeTargets.Enum, AllowMultiple=true)]
 	public class MapValueAttribute : Attribute
 	{
 		public MapValueAttribute(object value1)

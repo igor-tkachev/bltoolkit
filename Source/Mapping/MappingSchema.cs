@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Reflection;
 
 using BLToolkit.Reflection;
 
@@ -58,6 +59,8 @@ namespace BLToolkit.Mapping
 			return new ObjectMapper();
 		}
 
+		#region GetNullValue
+
 		public virtual object GetNullValue(Type type)
 		{
 			if (type == null) throw new ArgumentNullException("type");
@@ -91,5 +94,123 @@ namespace BLToolkit.Mapping
 
 			return null;
 		}
+
+		#endregion
+
+		#region GetMapValues
+
+		private Hashtable _mapValues = new Hashtable();
+
+		public virtual MapValue[] GetMapValues(Type type)
+		{
+			MapValue[] mapValues = (MapValue[])_mapValues[type];
+
+			if (mapValues != null || _mapValues.Contains(type))
+				return mapValues;
+
+			ArrayList list = null;
+
+			if (type.IsEnum)
+				list = GetEnumMapValues(type);
+
+			object[] attrs = TypeHelper.GetAttributes(type, typeof(MapValueAttribute));
+
+			if (attrs != null && attrs.Length != 0)
+			{
+				if (list == null)
+					list = new ArrayList(attrs.Length);
+
+				for (int i = 0; i < attrs.Length; i++)
+				{
+					MapValueAttribute a = (MapValueAttribute)attrs[i];
+					list.Add(new MapValue(a.OrigValue, a.Values));
+				}
+			}
+
+			if (list != null)
+				mapValues = (MapValue[])list.ToArray(typeof(MapValue));
+
+			_mapValues[type] = mapValues;
+
+			return mapValues;
+		}
+
+		const FieldAttributes EnumField = FieldAttributes.Public | FieldAttributes.Static | FieldAttributes.Literal;
+
+		private static ArrayList GetEnumMapValues(Type type)
+		{
+			ArrayList mapValues = null;
+
+			FieldInfo[] fields = type.GetFields();
+
+			foreach (FieldInfo fi in fields)
+			{
+				if ((fi.Attributes & EnumField) == EnumField)
+				{
+					Attribute[] enumAttributes = Attribute.GetCustomAttributes(fi, typeof(MapValueAttribute));
+
+					foreach (MapValueAttribute attr in enumAttributes)
+					{
+						if (mapValues == null)
+							mapValues = new ArrayList(fields.Length);
+
+						object origValue = Enum.Parse(type, fi.Name);
+
+						mapValues.Add(new MapValue(origValue, attr.Values));
+					}
+				}
+			}
+
+			return mapValues;
+		}
+
+		#endregion
+
+		#region GetDefaultValue
+
+		private Hashtable _defaultValues = new Hashtable();
+
+		public virtual object GetDefaultValue(Type type)
+		{
+			object defaultValue = _defaultValues[type];
+
+			if (defaultValue != null || _defaultValues.Contains(type))
+				return defaultValue;
+
+			if (type.IsEnum)
+				defaultValue = GetEnumDefaultValue(type);
+
+			if (defaultValue == null)
+			{
+				object[] attrs = TypeHelper.GetAttributes(type, typeof(DefaultValueAttribute));
+
+				if (attrs != null && attrs.Length != 0)
+					defaultValue = ((DefaultValueAttribute)attrs[0]).Value;
+			}
+
+			_defaultValues[type] = defaultValue;
+
+			return defaultValue;
+		}
+
+		private static object GetEnumDefaultValue(Type type)
+		{
+			FieldInfo[] fields = type.GetFields();
+
+			foreach (FieldInfo fi in fields)
+			{
+				if ((fi.Attributes & EnumField) == EnumField)
+				{
+					Attribute[] enumAttributes = Attribute.GetCustomAttributes(fi, typeof(DefaultValueAttribute));
+
+					foreach (DefaultValueAttribute attr in enumAttributes)
+						return Enum.Parse(type, fi.Name);
+				}
+			}
+
+			return null;
+		}
+
+		#endregion
 	}
 }

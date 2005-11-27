@@ -105,6 +105,11 @@
                     BuildAction = "Compile"
                 />
                 <File
+                    RelPath = "Mapping\MapValueAttribute.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
                     RelPath = "Mapping\MemberMapper.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
