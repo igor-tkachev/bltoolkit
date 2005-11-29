@@ -7,7 +7,8 @@ namespace BLToolkit.Mapping
 	[AttributeUsage(
 		AttributeTargets.Class | AttributeTargets.Interface |
 		AttributeTargets.Property | AttributeTargets.Field |
-		AttributeTargets.Enum)]
+		AttributeTargets.Enum,
+		AllowMultiple=true)]
 	public class DefaultValueAttribute : Attribute
 	{
 		public DefaultValueAttribute()

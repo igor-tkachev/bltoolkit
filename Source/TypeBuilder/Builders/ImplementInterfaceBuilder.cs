@@ -29,7 +29,6 @@ namespace BLToolkit.TypeBuilder.Builders
 			return context.BuildElement == BuildElement.InterfaceMethod;
 		}
 
-		[SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity")]
 		protected override void BuildInterfaceMethod()
 		{
 			bool returnIfNonZero = false;

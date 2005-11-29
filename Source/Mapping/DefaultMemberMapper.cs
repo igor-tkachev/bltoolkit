@@ -11,8 +11,7 @@ namespace BLToolkit.Mapping
 
 		public override void SetValue(object o, object value)
 		{
-			value = MapFrom(value);
-			base.SetValue(o, value);
+			base.SetValue(o, MapFrom(value));
 		}
 	}
 }

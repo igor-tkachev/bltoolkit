@@ -44,6 +44,7 @@ namespace Mapping
 		}
 
 		[NullValue(typeof(string), "(null)")]
+		[NullValue(typeof(bool),   false)]
 		public abstract class Object2
 		{
 			[Nullable(false)]
@@ -113,7 +114,42 @@ namespace Mapping
 			Assert.IsNull   (om.GetValue(o, "Str4"));
 		}
 
-		public class Object4
+		[NullValue("(null)")]
+		public abstract class Object4
+		{
+			[Nullable(false)]
+			public abstract string Str1 { get; set; }
+			[NullValue("")]
+			public abstract string Str2 { get; set; }
+			public abstract string Str3 { get; set; }
+			[NullValue(typeof(DBNull))]
+			public abstract string Str4 { get; set; }
+		}
+
+		[Test]
+		public void TestString4()
+		{
+			IObjectMapper om = Map.GetObjectMapper(typeof(Object2));
+
+			Object2 o = (Object2)om.CreateInstance();
+
+			om.SetValue(o, "Str1", null);
+			om.SetValue(o, "Str2", "2");
+			om.SetValue(o, "Str3", null);
+			om.SetValue(o, "Str4", null);
+
+			Assert.AreEqual("",       o.Str1);
+			Assert.AreEqual("2",      o.Str2);
+			Assert.AreEqual("(null)", o.Str3);
+			Assert.IsNull  (o.Str4);
+
+			Assert.IsNotNull(     om.GetValue(o, "Str1"));
+			Assert.AreEqual ("2", om.GetValue(o, "Str2"));
+			Assert.IsNull   (     om.GetValue(o, "Str3"));
+			Assert.IsNull   (     om.GetValue(o, "Str4"));
+		}
+
+		public class Object5
 		{
 			public int Int1;
 			[Nullable]
@@ -125,9 +161,9 @@ namespace Mapping
 		[Test]
 		public void TestPrimitive()
 		{
-			IObjectMapper om = Map.GetObjectMapper(typeof(Object4));
+			IObjectMapper om = Map.GetObjectMapper(typeof(Object5));
 
-			Object4 o = (Object4)om.CreateInstance();
+			Object5 o = (Object5)om.CreateInstance();
 
 			om.SetValue(o, "Int1", null);
 			om.SetValue(o, "Int2", null);

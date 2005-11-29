@@ -1,4 +1,5 @@
 using System;
+using System.Data.SqlTypes;
 
 using NUnit.Framework;
 
@@ -7,7 +8,7 @@ using BLToolkit.Mapping;
 namespace Mapping
 {
 	[TestFixture]
-	public class MemberMapper
+	public class MemberMapperTest
 	{
 		public class Object1
 		{
@@ -87,5 +88,28 @@ namespace Mapping
 			Assert.AreEqual(de,     ObjectMapper<Object2>.GetValue(o, "Dow2"));
 		}
 #endif
+
+		public class Object3
+		{
+			public SqlInt32  Int32;
+			public SqlSingle Single;
+		}
+
+		[Test]
+		public void SqlTypeMemberTest()
+		{
+			IObjectMapper om = Map.GetObjectMapper(typeof(Object3));
+
+			Object3 o = new Object3();
+
+			om.SetValue(o, "Int32",  123.56);
+			om.SetValue(o, "Single", "123.57");
+
+			Assert.AreEqual(124,    o.Int32. Value);
+			Assert.AreEqual(123.57, o.Single.Value);
+
+			Assert.AreEqual(new SqlInt32 (124),    om.GetValue(o, "Int32"));
+			Assert.AreEqual(new SqlSingle(123.57), om.GetValue(o, "Single"));
+		}
 	}
 }
