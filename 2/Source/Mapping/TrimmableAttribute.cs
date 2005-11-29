@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics.CodeAnalysis;
 
 namespace BLToolkit.Mapping
 {
@@ -21,11 +22,13 @@ namespace BLToolkit.Mapping
 		public  bool  IsTrimmable
 		{
 			get { return _isTrimmable;  }
-			set { _isTrimmable = value; }
 		}
 
+		[SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes")]
 		public static readonly TrimmableAttribute Yes     = new TrimmableAttribute(true);
+		[SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes")]
 		public static readonly TrimmableAttribute No      = new TrimmableAttribute(false);
-		public static readonly TrimmableAttribute Default = new TrimmableAttribute(false);
+		[SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes")]
+		public static readonly TrimmableAttribute Default = No;
 	}
 }

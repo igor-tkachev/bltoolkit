@@ -7,9 +7,14 @@ namespace BLToolkit.Mapping
 	[AttributeUsage(
 		AttributeTargets.Class | AttributeTargets.Interface |
 		AttributeTargets.Property | AttributeTargets.Field | 
-		AttributeTargets.Enum)]
+		AttributeTargets.Enum,
+		AllowMultiple=true)]
 	public class NullValueAttribute : Attribute
 	{
+		public NullValueAttribute()
+		{
+		}
+
 		public NullValueAttribute(object value)
 		{
 			_value = value;

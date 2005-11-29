@@ -1,1 +1,0 @@
-[assembly: System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Scope = "member", Target = "BLToolkit.Mapping.MemberMapper.MapTo(System.Object,BLToolkit.Mapping.MapMemberInfo):System.Object")]

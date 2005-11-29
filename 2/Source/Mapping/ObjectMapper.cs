@@ -23,7 +23,32 @@ namespace BLToolkit.Mapping
 
 		protected virtual MemberMapper CreateMemberMapper(MapMemberInfo mapMemberInfo)
 		{
-			MemberMapper mm = MemberMapper.CreateMemberMapper(mapMemberInfo);
+			if (mapMemberInfo == null) throw new ArgumentNullException("mapMemberInfo");
+
+			MemberMapper mm = null;
+
+			Attribute attr = mapMemberInfo.MemberAccessor.GetAttribute(typeof(MemberMapperAttribute));
+
+			if (attr != null)
+				mm = ((MemberMapperAttribute)attr).MemberMapper;
+
+			if (mm == null)
+			{
+				object[] attrs = TypeHelper.GetAttributes(
+					mapMemberInfo.MemberAccessor.MemberInfo.DeclaringType, typeof(MemberMapperAttribute));
+
+				foreach (MemberMapperAttribute a in attrs)
+				{
+					if (a.MemberType == mapMemberInfo.MemberAccessor.Type)
+					{
+						mm = a.MemberMapper;
+						break;
+					}
+				}
+			}
+
+			if (mm == null)
+				mm = MemberMapper.CreateMemberMapper(mapMemberInfo);
 
 			mm.Init(mapMemberInfo);
 
@@ -146,32 +171,38 @@ namespace BLToolkit.Mapping
 
 		protected virtual MapValue[] GetMapValues(MemberAccessor memberAccessor)
 		{
-			object[] attrs = memberAccessor.GetAttributes(typeof(MapValueAttribute));
-
-			MapValue[] memberMapValues = null;
+			ArrayList list  = null;
+			object[]  attrs = memberAccessor.GetAttributes(typeof(MapValueAttribute));
 
 			if (attrs != null)
 			{
-				memberMapValues = new MapValue[attrs.Length];
+				list = new ArrayList(attrs.Length);
 
-				for (int i = 0; i < attrs.Length; i++)
-				{
-					MapValueAttribute a = (MapValueAttribute)attrs[i];
-					memberMapValues[i] = new MapValue(a.OrigValue, a.Values);
-				}
+				foreach (MapValueAttribute a in attrs)
+					list.Add(new MapValue(a.OrigValue, a.Values));
+			}
+
+			attrs = TypeHelper.GetAttributes(memberAccessor.MemberInfo.DeclaringType, typeof(MapValueAttribute));
+
+			if (attrs != null && attrs.Length > 0)
+			{
+				if (list == null)
+					list = new ArrayList(attrs.Length);
+
+				foreach (MapValueAttribute a in attrs)
+					if (a.Type == null && a.OrigValue != null && a.OrigValue.GetType() == memberAccessor.Type ||
+						a.Type != null && a.Type == memberAccessor.Type)
+						list.Add(new MapValue(a.OrigValue, a.Values));
 			}
 
 			MapValue[] typeMapValues = _mappingSchema.GetMapValues(memberAccessor.Type);
 
-			if (typeMapValues   == null) return memberMapValues;
-			if (memberMapValues == null) return typeMapValues;
+			if (list == null) return typeMapValues;
 
-			MapValue[] mapValues = new MapValue[memberMapValues.Length + typeMapValues.Length];
+			if (typeMapValues != null)
+				list.AddRange(typeMapValues);
 
-			memberMapValues.CopyTo(mapValues, 0);
-			typeMapValues.  CopyTo(mapValues, memberMapValues.Length);
-
-			return mapValues;
+			return (MapValue[])list.ToArray(typeof(MapValue));
 		}
 
 		protected virtual object GetDefaultValue(MemberAccessor memberAccessor)
@@ -190,7 +221,8 @@ namespace BLToolkit.Mapping
 				memberAccessor.MemberInfo.DeclaringType, typeof(DefaultValueAttribute));
 
 			foreach (DefaultValueAttribute a in attrs)
-				if (a.Type == memberAccessor.Type)
+				if (a.Type == null && a.Value != null && a.Value.GetType() == memberAccessor.Type ||
+					a.Type != null && a.Type == memberAccessor.Type)
 					return a.Value;
 
 			return _mappingSchema.GetDefaultValue(memberAccessor.Type);
@@ -228,12 +260,17 @@ namespace BLToolkit.Mapping
 				memberAccessor.MemberInfo.DeclaringType, typeof(NullValueAttribute));
 
 			foreach (NullValueAttribute a in attrs)
-				if (a.Type == memberAccessor.Type)
+				if (a.Type == null && a.Value != null && a.Value.GetType() == memberAccessor.Type ||
+					a.Type != null && a.Type == memberAccessor.Type)
 					return true;
+
+			if (memberAccessor.Type.IsEnum)
+				return MappingSchema.GetNullValue(memberAccessor.Type) != null;
 
 			return false;
 		}
 
+		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1800:DoNotCastUnnecessarily")]
 		private static object CheckNullValue(object value, MemberAccessor memberAccessor)
 		{
 			if (value is Type && (Type)value == typeof(DBNull))
@@ -265,7 +302,8 @@ namespace BLToolkit.Mapping
 					memberAccessor.MemberInfo.DeclaringType, typeof(NullValueAttribute));
 
 				foreach (NullValueAttribute a in attrs)
-					if (a.Type == memberAccessor.Type)
+					if (a.Type == null && a.Value != null && a.Value.GetType() == memberAccessor.Type ||
+						a.Type != null && a.Type == memberAccessor.Type)
 						return CheckNullValue(a.Value, memberAccessor);
 			}
 

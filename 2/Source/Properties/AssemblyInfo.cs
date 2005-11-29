@@ -46,3 +46,8 @@ using System.Diagnostics.CodeAnalysis;
 [assembly: SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode", Scope = "member", Target = "BLToolkit.TypeBuilder.Builders.FakeParameterInfo..ctor(System.Reflection.MethodInfo)")]
 [assembly: SuppressMessage("Microsoft.Performance", "CA1807:AvoidUnnecessaryStringCreation", Scope = "member", Target = "BLToolkit.Mapping.ObjectMapper.Item[System.String]", MessageId = "name")]
 [assembly: SuppressMessage("Microsoft.Design", "CA1020:AvoidNamespacesWithFewTypes", Scope = "namespace", Target = "BLToolkit.Aspects")]
+[assembly: SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Scope = "member", Target = "BLToolkit.Mapping.MemberMapper.MapTo(System.Object,BLToolkit.Mapping.MapMemberInfo):System.Object")]
+[assembly: SuppressMessage("Microsoft.Globalization", "CA1303:DoNotPassLiteralsAsLocalizedParameters", Scope = "member", Target = "BLToolkit.Mapping.MappingException..ctor()", MessageId = "System.Exception.#ctor(System.String)")]
+[assembly: SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Scope = "member", Target = "BLToolkit.Mapping.MemberMapper.MapFrom(System.Object,BLToolkit.Mapping.MapMemberInfo):System.Object")]
+[assembly: SuppressMessage("Microsoft.Performance", "CA1800:DoNotCastUnnecessarily", Scope = "member", Target = "BLToolkit.Mapping.MemberMapper.MapTo(System.Object,BLToolkit.Mapping.MapMemberInfo):System.Object")]
+

@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
-using System.Diagnostics.CodeAnalysis;
+
+using BLToolkit.Mapping;
 
 namespace BLToolkit.Reflection
 {
@@ -17,11 +18,11 @@ namespace BLToolkit.Reflection
 			set { _memberParameters = value; }
 		}
 
-		private object[] _Parameters;
+		private object[] _parameters;
 		public  object[]  Parameters
 		{
-			get { return _Parameters;  }
-			set { _Parameters = value; }
+			get { return _parameters;  }
+			set { _parameters = value; }
 		}
 
 		private bool _isInternal;
@@ -55,6 +56,33 @@ namespace BLToolkit.Reflection
 
 				return _items;
 			}
+		}
+
+		private bool _stopMapping;
+		public  bool  StopMapping
+		{
+			get { return _stopMapping;  }
+			set { _stopMapping = value; }
+		}
+
+		private IObjectMapper _objectMapper;
+		public  IObjectMapper  ObjectMapper
+		{
+			get { return _objectMapper;  }
+			set { _objectMapper = value; }
+		}
+
+		private IMapDataSource _mapDataSource;
+		public  IMapDataSource  MapDataSource
+		{
+			get { return _mapDataSource;  }
+			set { _mapDataSource = value; }
+		}
+
+		private object _sourceObject;
+		public 	object  SourceData
+		{
+			get { return _sourceObject; }
 		}
 	}
 }

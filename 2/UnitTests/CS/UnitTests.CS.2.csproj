@@ -35,12 +35,14 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Aspects\NotNullAspect.cs" />
-    <Compile Include="Mapping\DefaultValueAttribute.cs" />
-    <Compile Include="Mapping\MapValueAttribute.cs" />
-    <Compile Include="Mapping\MemberMapper.cs" />
-    <Compile Include="Mapping\NullableAttribute.cs" />
-    <Compile Include="Mapping\ObjectMapperAttribute.cs" />
-    <Compile Include="Mapping\TrimmableAttribute.cs" />
+    <Compile Include="Mapping\DefaultValueAttributeTest.cs" />
+    <Compile Include="Mapping\MapperMemberAttributeTest.cs" />
+    <Compile Include="Mapping\MapTest.cs" />
+    <Compile Include="Mapping\MapValueAttributeTest.cs" />
+    <Compile Include="Mapping\MemberMapperTest.cs" />
+    <Compile Include="Mapping\NullableAttributeTest.cs" />
+    <Compile Include="Mapping\ObjectMapperAttributeTest.cs" />
+    <Compile Include="Mapping\TrimmableAttributeTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Reflection\Emit\MethodBuilderHelper.cs" />
     <Compile Include="Reflection\ObjectFactoryAttribute.cs" />

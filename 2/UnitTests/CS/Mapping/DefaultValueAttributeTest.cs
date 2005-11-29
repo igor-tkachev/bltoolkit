@@ -90,5 +90,25 @@ namespace Mapping
 
 			Assert.AreEqual("2",  om.GetValue(o, "Enum1"));
 		}
+
+		[DefaultValue(Enum2.Value2)]
+		public class Object4
+		{
+			public Enum2 Enum1;
+		}
+
+		[Test]
+		public void TestEnum4()
+		{
+			IObjectMapper om = Map.GetObjectMapper(typeof(Object4));
+
+			Object4 o = (Object4)om.CreateInstance();
+
+			om.SetValue(o, "Enum1", "55");
+
+			Assert.AreEqual(Enum2.Value2, o.Enum1);
+
+			Assert.AreEqual("2",  om.GetValue(o, "Enum1"));
+		}
 	}
 }

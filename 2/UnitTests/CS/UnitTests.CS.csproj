@@ -105,27 +105,32 @@
                     BuildAction = "Compile"
                 />
                 <File
-                    RelPath = "Mapping\MapValueAttribute.cs"
+                    RelPath = "Mapping\DefaultValueAttributeTest.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
                 />
                 <File
-                    RelPath = "Mapping\MemberMapper.cs"
+                    RelPath = "Mapping\MapValueAttributeTest.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
                 />
                 <File
-                    RelPath = "Mapping\NullableAttribute.cs"
+                    RelPath = "Mapping\MemberMapperTest.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
                 />
                 <File
-                    RelPath = "Mapping\ObjectMapperAttribute.cs"
+                    RelPath = "Mapping\NullableAttributeTest.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
                 />
                 <File
-                    RelPath = "Mapping\TrimmableAttribute.cs"
+                    RelPath = "Mapping\ObjectMapperAttributeTest.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "Mapping\TrimmableAttributeTest.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
                 />

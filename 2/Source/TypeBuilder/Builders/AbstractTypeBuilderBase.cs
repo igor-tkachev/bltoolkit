@@ -53,7 +53,6 @@ namespace BLToolkit.TypeBuilder.Builders
 			return TypeBuilderConsts.NormalBuilderPriority;
 		}
 
-		[SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity")]
 		public virtual void Build(BuildContext context)
 		{
 			if (context == null) throw new ArgumentNullException("context");

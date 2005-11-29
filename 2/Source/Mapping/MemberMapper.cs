@@ -1,8 +1,8 @@
 using System;
 using System.Data.SqlTypes;
+using System.Diagnostics.CodeAnalysis;
 
 using BLToolkit.Reflection;
-using System.Diagnostics.CodeAnalysis;
 
 namespace BLToolkit.Mapping
 {
@@ -54,6 +54,27 @@ namespace BLToolkit.Mapping
 			_memberAccessor = mapMemberInfo.MemberAccessor;
 		}
 
+		internal static MemberMapper CreateMemberMapper(MapMemberInfo mi)
+		{
+			Type         type = mi.MemberAccessor.Type;
+			MemberMapper mm   = null;
+
+			if (type.IsPrimitive || type.IsEnum)
+				mm = GetPrimitiveMemberMapper(mi);
+
+#if FW2
+			if (mm == null) mm = GetNullableMemberMapper(mi);
+#endif
+
+			if (mm == null) mm = GetSimpleMemberMapper(mi);
+			if (mm == null) mm = GetSqlTypeMemberMapper(mi);
+			if (mm == null) mm = new DefaultMemberMapper();
+
+			return mm;
+		}
+
+		#region Default GetValue, SetValue
+
 		public virtual object GetValue(object o)
 		{
 			return _memberAccessor.GetValue(o);
@@ -64,27 +85,7 @@ namespace BLToolkit.Mapping
 			_memberAccessor.SetValue(o, value);
 		}
 
-		internal static MemberMapper CreateMemberMapper(MapMemberInfo mi)
-		{
-			Type         type = mi.MemberAccessor.Type;
-			MemberMapper mm   = null;
-
-			if (type.IsPrimitive || type.IsEnum)
-				mm = GetPrimitiveMemberMapper(mi);
-
-			if (mm == null)
-				mm = GetSimpleMemberMapper(mi);
-
-#if FW2
-			if (mm == null)
-				mm = GetNullableMemberMapper(mi);
-#endif
-
-			if (mm == null)
-				mm = new DefaultMemberMapper();
-
-			return mm;
-		}
+		#endregion
 
 		#region Intermal Mappers
 
@@ -126,6 +127,8 @@ namespace BLToolkit.Mapping
 
 			public override void Init(MapMemberInfo mapMemberInfo)
 			{
+				if (mapMemberInfo == null) throw new ArgumentNullException("mapMemberInfo");
+
 				_nullValue = Convert.ToInt16(mapMemberInfo.NullValue);
 				base.Init(mapMemberInfo);
 			}
@@ -151,6 +154,8 @@ namespace BLToolkit.Mapping
 
 			public override void Init(MapMemberInfo mapMemberInfo)
 			{
+				if (mapMemberInfo == null) throw new ArgumentNullException("mapMemberInfo");
+
 				_nullValue = Convert.ToInt32(mapMemberInfo.NullValue);
 				base.Init(mapMemberInfo);
 			}
@@ -176,6 +181,8 @@ namespace BLToolkit.Mapping
 
 			public override void Init(MapMemberInfo mapMemberInfo)
 			{
+				if (mapMemberInfo == null) throw new ArgumentNullException("mapMemberInfo");
+
 				_nullValue = Convert.ToSByte(mapMemberInfo.NullValue);
 				base.Init(mapMemberInfo);
 			}
@@ -201,6 +208,8 @@ namespace BLToolkit.Mapping
 
 			public override void Init(MapMemberInfo mapMemberInfo)
 			{
+				if (mapMemberInfo == null) throw new ArgumentNullException("mapMemberInfo");
+
 				_nullValue = Convert.ToInt64(mapMemberInfo.NullValue);
 				base.Init(mapMemberInfo);
 			}
@@ -226,6 +235,8 @@ namespace BLToolkit.Mapping
 
 			public override void Init(MapMemberInfo mapMemberInfo)
 			{
+				if (mapMemberInfo == null) throw new ArgumentNullException("mapMemberInfo");
+
 				_nullValue = Convert.ToByte(mapMemberInfo.NullValue);
 				base.Init(mapMemberInfo);
 			}
@@ -251,6 +262,8 @@ namespace BLToolkit.Mapping
 
 			public override void Init(MapMemberInfo mapMemberInfo)
 			{
+				if (mapMemberInfo == null) throw new ArgumentNullException("mapMemberInfo");
+
 				_nullValue = Convert.ToUInt16(mapMemberInfo.NullValue);
 				base.Init(mapMemberInfo);
 			}
@@ -276,6 +289,8 @@ namespace BLToolkit.Mapping
 
 			public override void Init(MapMemberInfo mapMemberInfo)
 			{
+				if (mapMemberInfo == null) throw new ArgumentNullException("mapMemberInfo");
+
 				_nullValue = Convert.ToUInt32(mapMemberInfo.NullValue);
 				base.Init(mapMemberInfo);
 			}
@@ -301,6 +316,8 @@ namespace BLToolkit.Mapping
 
 			public override void Init(MapMemberInfo mapMemberInfo)
 			{
+				if (mapMemberInfo == null) throw new ArgumentNullException("mapMemberInfo");
+
 				_nullValue = Convert.ToUInt64(mapMemberInfo.NullValue);
 				base.Init(mapMemberInfo);
 			}
@@ -326,6 +343,8 @@ namespace BLToolkit.Mapping
 
 			public override void Init(MapMemberInfo mapMemberInfo)
 			{
+				if (mapMemberInfo == null) throw new ArgumentNullException("mapMemberInfo");
+
 				_nullValue = Convert.ToChar(mapMemberInfo.NullValue);
 				base.Init(mapMemberInfo);
 			}
@@ -351,6 +370,8 @@ namespace BLToolkit.Mapping
 
 			public override void Init(MapMemberInfo mapMemberInfo)
 			{
+				if (mapMemberInfo == null) throw new ArgumentNullException("mapMemberInfo");
+
 				_nullValue = Convert.ToDouble(mapMemberInfo.NullValue);
 				base.Init(mapMemberInfo);
 			}
@@ -376,6 +397,8 @@ namespace BLToolkit.Mapping
 
 			public override void Init(MapMemberInfo mapMemberInfo)
 			{
+				if (mapMemberInfo == null) throw new ArgumentNullException("mapMemberInfo");
+
 				_nullValue = Convert.ToSingle(mapMemberInfo.NullValue);
 				base.Init(mapMemberInfo);
 			}
@@ -401,6 +424,8 @@ namespace BLToolkit.Mapping
 
 			public override void Init(MapMemberInfo mapMemberInfo)
 			{
+				if (mapMemberInfo == null) throw new ArgumentNullException("mapMemberInfo");
+
 				_nullValue = Convert.ToBoolean(mapMemberInfo.NullValue);
 				base.Init(mapMemberInfo);
 			}
@@ -450,6 +475,8 @@ namespace BLToolkit.Mapping
 
 			public override void Init(MapMemberInfo mapMemberInfo)
 			{
+				if (mapMemberInfo == null) throw new ArgumentNullException("mapMemberInfo");
+
 				if (mapMemberInfo.NullValue != null)
 					_nullValue = Convert.ToString(mapMemberInfo.NullValue);
 				base.Init(mapMemberInfo);
@@ -493,6 +520,8 @@ namespace BLToolkit.Mapping
 
 			public override void Init(MapMemberInfo mapMemberInfo)
 			{
+				if (mapMemberInfo == null) throw new ArgumentNullException("mapMemberInfo");
+
 				_nullValue = Convert.ToDateTime(mapMemberInfo.NullValue);
 				base.Init(mapMemberInfo);
 			}
@@ -518,6 +547,8 @@ namespace BLToolkit.Mapping
 
 			public override void Init(MapMemberInfo mapMemberInfo)
 			{
+				if (mapMemberInfo == null) throw new ArgumentNullException("mapMemberInfo");
+
 				_nullValue = Convert.ToDecimal(mapMemberInfo.NullValue);
 				base.Init(mapMemberInfo);
 			}
@@ -548,6 +579,8 @@ namespace BLToolkit.Mapping
 
 			public override void Init(MapMemberInfo mapMemberInfo)
 			{
+				if (mapMemberInfo == null) throw new ArgumentNullException("mapMemberInfo");
+
 				if (mapMemberInfo.NullValue != null)
 					_nullValue = mapMemberInfo.NullValue is Guid?
 						mapMemberInfo.NullValue: new Guid(mapMemberInfo.NullValue.ToString());
@@ -625,6 +658,8 @@ namespace BLToolkit.Mapping
 
 			public override void Init(MapMemberInfo mapMemberInfo)
 			{
+				if (mapMemberInfo == null) throw new ArgumentNullException("mapMemberInfo");
+
 				_memberType     = Nullable.GetUnderlyingType(mapMemberInfo.MemberAccessor.Type);
 				_underlyingType = mapMemberInfo.MemberAccessor.UnderlyingType;
 
@@ -928,17 +963,345 @@ namespace BLToolkit.Mapping
 
 #endif
 
+		#region SqlTypes
+
+		private static MemberMapper GetSqlTypeMemberMapper(MapMemberInfo mi)
+		{
+			Type type = mi.MemberAccessor.Type;
+
+			if (TypeHelper.IsSameOrParent(typeof(INullable), type) == false)
+				return null;
+
+			bool d = mi.MapValues != null;
+
+			if (type == typeof(SqlByte))     return d? new SqlByteMapper.    Default(): new SqlByteMapper();
+			if (type == typeof(SqlInt16))    return d? new SqlInt16Mapper.   Default(): new SqlInt16Mapper();
+			if (type == typeof(SqlInt32))    return d? new SqlInt32Mapper.   Default(): new SqlInt32Mapper();
+			if (type == typeof(SqlInt64))    return d? new SqlInt64Mapper.   Default(): new SqlInt64Mapper();
+			if (type == typeof(SqlSingle))   return d? new SqlSingleMapper.  Default(): new SqlSingleMapper();
+			if (type == typeof(SqlBoolean))  return d? new SqlBooleanMapper. Default(): new SqlBooleanMapper();
+			if (type == typeof(SqlDouble))   return d? new SqlDoubleMapper.  Default(): new SqlDoubleMapper();
+			if (type == typeof(SqlDateTime)) return d? new SqlDateTimeMapper.Default(): new SqlDateTimeMapper();
+			if (type == typeof(SqlDecimal))  return d? new SqlDecimalMapper. Default(): new SqlDecimalMapper();
+			if (type == typeof(SqlMoney))    return d? new SqlMoneyMapper.   Default(): new SqlMoneyMapper();
+			if (type == typeof(SqlGuid))     return d? new SqlGuidMapper.    Default(): new SqlGuidMapper();
+			if (type == typeof(SqlString))   return d? new SqlStringMapper.  Default(): new SqlStringMapper();
+
+			return null;
+		}
+
+		class SqlTypeMapper : MemberMapper
+		{
+			public override object GetValue(object o)
+			{
+				object value = _memberAccessor.GetValue(o);
+				return ((INullable)value).IsNull? null: value;
+			}
+		}
+
+		class SqlByteMapper : SqlTypeMapper
+		{
+			public override void SetValue(object o, object value)
+			{
+				_memberAccessor.SetValue(o,
+					value == null?    SqlByte.Null:
+					value is SqlByte? value:
+					                  new SqlByte(Convert.ToByte(value)));
+			}
+
+			public class Default : SqlByteMapper
+			{
+				public override object GetValue(object o)
+				{
+					return MapTo(base.GetValue(o));
+				}
+
+				public override void SetValue(object o, object value)
+				{
+					base.SetValue(o, MapFrom(value));
+				}
+			}
+		}
+
+		class SqlInt16Mapper : SqlTypeMapper
+		{
+			public override void SetValue(object o, object value)
+			{
+				_memberAccessor.SetValue(o,
+					value == null?     SqlInt16.Null:
+					value is SqlInt16? value:
+					                   new SqlInt16(Convert.ToInt16(value)));
+			}
+
+			public class Default : SqlInt16Mapper
+			{
+				public override object GetValue(object o)
+				{
+					return MapTo(base.GetValue(o));
+				}
+
+				public override void SetValue(object o, object value)
+				{
+					base.SetValue(o, MapFrom(value));
+				}
+			}
+		}
+
+		class SqlInt32Mapper : SqlTypeMapper
+		{
+			public override void SetValue(object o, object value)
+			{
+				_memberAccessor.SetValue(o,
+					value == null?     SqlInt32.Null:
+					value is SqlInt32? value:
+					                   new SqlInt32(Convert.ToInt32(value)));
+			}
+
+			public class Default : SqlInt32Mapper
+			{
+				public override object GetValue(object o)
+				{
+					return MapTo(base.GetValue(o));
+				}
+
+				public override void SetValue(object o, object value)
+				{
+					base.SetValue(o, MapFrom(value));
+				}
+			}
+		}
+
+		class SqlInt64Mapper : SqlTypeMapper
+		{
+			public override void SetValue(object o, object value)
+			{
+				_memberAccessor.SetValue(o,
+					value == null?     SqlInt64.Null:
+					value is SqlInt64? value:
+					                   new SqlInt64(Convert.ToInt64(value)));
+			}
+
+			public class Default : SqlInt64Mapper
+			{
+				public override object GetValue(object o)
+				{
+					return MapTo(base.GetValue(o));
+				}
+
+				public override void SetValue(object o, object value)
+				{
+					base.SetValue(o, MapFrom(value));
+				}
+			}
+		}
+
+		class SqlSingleMapper : SqlTypeMapper
+		{
+			public override void SetValue(object o, object value)
+			{
+				_memberAccessor.SetValue(o,
+					value == null?      SqlSingle.Null:
+					value is SqlSingle? value:
+					                    new SqlSingle(Convert.ToSingle(value)));
+			}
+
+			public class Default : SqlSingleMapper
+			{
+				public override object GetValue(object o)
+				{
+					return MapTo(base.GetValue(o));
+				}
+
+				public override void SetValue(object o, object value)
+				{
+					base.SetValue(o, MapFrom(value));
+				}
+			}
+		}
+
+		class SqlBooleanMapper : SqlTypeMapper
+		{
+			public override void SetValue(object o, object value)
+			{
+				_memberAccessor.SetValue(o,
+					value == null?       SqlBoolean.Null:
+					value is SqlBoolean? value:
+					                     new SqlBoolean(Convert.ToBoolean(value)));
+			}
+
+			public class Default : SqlBooleanMapper
+			{
+				public override object GetValue(object o)
+				{
+					return MapTo(base.GetValue(o));
+				}
+
+				public override void SetValue(object o, object value)
+				{
+					base.SetValue(o, MapFrom(value));
+				}
+			}
+		}
+
+		class SqlDoubleMapper : SqlTypeMapper
+		{
+			public override void SetValue(object o, object value)
+			{
+				_memberAccessor.SetValue(o,
+					value == null?      SqlDouble.Null:
+					value is SqlDouble? value:
+					                    new SqlDouble(Convert.ToDouble(value)));
+			}
+
+			public class Default : SqlDoubleMapper
+			{
+				public override object GetValue(object o)
+				{
+					return MapTo(base.GetValue(o));
+				}
+
+				public override void SetValue(object o, object value)
+				{
+					base.SetValue(o, MapFrom(value));
+				}
+			}
+		}
+
+		class SqlDateTimeMapper : SqlTypeMapper
+		{
+			public override void SetValue(object o, object value)
+			{
+				_memberAccessor.SetValue(o,
+					value == null?        SqlDateTime.Null:
+					value is SqlDateTime? value:
+					                      new SqlDateTime(Convert.ToDateTime(value)));
+			}
+
+			public class Default : SqlDateTimeMapper
+			{
+				public override object GetValue(object o)
+				{
+					return MapTo(base.GetValue(o));
+				}
+
+				public override void SetValue(object o, object value)
+				{
+					base.SetValue(o, MapFrom(value));
+				}
+			}
+		}
+
+		class SqlDecimalMapper : SqlTypeMapper
+		{
+			public override void SetValue(object o, object value)
+			{
+				_memberAccessor.SetValue(o,
+					value == null?       SqlDecimal.Null:
+					value is SqlDecimal? value:
+					                     new SqlDecimal(Convert.ToDecimal(value)));
+			}
+
+			public class Default : SqlDecimalMapper
+			{
+				public override object GetValue(object o)
+				{
+					return MapTo(base.GetValue(o));
+				}
+
+				public override void SetValue(object o, object value)
+				{
+					base.SetValue(o, MapFrom(value));
+				}
+			}
+		}
+
+		class SqlMoneyMapper : SqlTypeMapper
+		{
+			public override void SetValue(object o, object value)
+			{
+				_memberAccessor.SetValue(o,
+					value == null?     SqlMoney.Null:
+					value is SqlMoney? value:
+					                   new SqlMoney(Convert.ToDecimal(value)));
+			}
+
+			public class Default : SqlMoneyMapper
+			{
+				public override object GetValue(object o)
+				{
+					return MapTo(base.GetValue(o));
+				}
+
+				public override void SetValue(object o, object value)
+				{
+					base.SetValue(o, MapFrom(value));
+				}
+			}
+		}
+
+		class SqlGuidMapper : SqlTypeMapper
+		{
+			public override void SetValue(object o, object value)
+			{
+				_memberAccessor.SetValue(o,
+					value == null?    SqlGuid.Null:
+					value is SqlGuid? value:
+					                  new SqlGuid(new Guid(value.ToString())));
+			}
+
+			public class Default : SqlGuidMapper
+			{
+				public override object GetValue(object o)
+				{
+					return MapTo(base.GetValue(o));
+				}
+
+				public override void SetValue(object o, object value)
+				{
+					base.SetValue(o, MapFrom(value));
+				}
+			}
+		}
+
+		class SqlStringMapper : SqlTypeMapper
+		{
+			public override void SetValue(object o, object value)
+			{
+				_memberAccessor.SetValue(o,
+					value == null?      SqlString.Null:
+					value is SqlString? value:
+					                    new SqlString(Convert.ToString(value)));
+			}
+
+			public class Default : SqlStringMapper
+			{
+				public override object GetValue(object o)
+				{
+					return MapTo(base.GetValue(o));
+				}
+
+				public override void SetValue(object o, object value)
+				{
+					base.SetValue(o, MapFrom(value));
+				}
+			}
+		}
+
+		#endregion
+
 		#endregion
 
 		#region MapFrom, MapTo
 
-		public object MapFrom(object value)
+		protected object MapFrom(object value)
 		{
 			return MapFrom(value, _mapMemberInfo);
 		}
 
 		protected static object MapFrom(object value, MapMemberInfo mapInfo)
 		{
+			if (mapInfo == null) throw new ArgumentNullException("mapInfo");
+
 			if (value == null)
 				return mapInfo.NullValue;
 
@@ -1003,13 +1366,15 @@ namespace BLToolkit.Mapping
 			return value;
 		}
 
-		public object MapTo(object value)
+		protected object MapTo(object value)
 		{
 			return MapTo(value, _mapMemberInfo);
 		}
 
 		protected static object MapTo(object value, MapMemberInfo mapInfo)
 		{
+			if (mapInfo == null) throw new ArgumentNullException("mapInfo");
+
 			if (value == null)
 				return null;
 

@@ -200,6 +200,7 @@ namespace BLToolkit.Reflection
 
 		public static object[] GetAttributes(Type type, Type attributeType)
 		{
+			if (type          == null) throw new ArgumentNullException("type");
 			if (attributeType == null) throw new ArgumentNullException("attributeType");
 
 			string key = type.FullName + "." + attributeType.FullName;
