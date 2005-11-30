@@ -7,7 +7,7 @@ namespace BLToolkit.Mapping
 	{
 		public ObjectMapperAttribute(Type objectMapperType)
 		{
-			if (objectMapperType == null) throw new ArgumentNullException("type");
+			if (objectMapperType == null) throw new ArgumentNullException("objectMapperType");
 
 			_objectMapper = Activator.CreateInstance(objectMapperType) as IObjectMapper;
 

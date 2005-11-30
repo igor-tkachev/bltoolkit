@@ -80,9 +80,10 @@ namespace BLToolkit.Reflection
 		}
 
 		private object _sourceObject;
-		public 	object  SourceData
+		public 	object  SourceObject
 		{
-			get { return _sourceObject; }
+			get { return _sourceObject;  }
+			set { _sourceObject = value; }
 		}
 	}
 }

@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Data;
 using System.Reflection;
 using System.Diagnostics.CodeAnalysis;
 
@@ -267,6 +268,7 @@ namespace BLToolkit.Mapping
 
 		#region ToEnum, FromEnum
 
+		[SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
 		public object ToEnum(object value, Type type)
 		{
 			if (value == null)
@@ -302,6 +304,7 @@ namespace BLToolkit.Mapping
 			return value;
 		}
 
+		[SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
 		[SuppressMessage("Microsoft.Performance", "CA1800:DoNotCastUnnecessarily")]
 		public object FromEnum(object value)
 		{
@@ -357,9 +360,59 @@ namespace BLToolkit.Mapping
 
 		#endregion
 
+		#region GetDataSource
+
+		[SuppressMessage("Microsoft.Performance", "CA1800:DoNotCastUnnecessarily")]
+		protected virtual IMapDataSource GetDataSource(object obj)
+		{
+			if (obj is IMapDataSource)
+				return (IMapDataSource)obj;
+
+			if (obj is DataRow)
+				return new DataRowMapper((DataRow)obj);
+
+			if (obj is DataTable)
+				return new DataRowMapper(((DataTable)(obj)).Rows[0]);
+
+			if (obj is IDataReader)
+				return new DataReaderMapper((IDataReader)obj);
+
+			//if (obj is IDictionary)
+			//	return new DictionaryReader((IDictionary)obj);
+
+			return GetObjectMapper(obj.GetType());
+		}
+
+		[SuppressMessage("Microsoft.Performance", "CA1800:DoNotCastUnnecessarily")]
+		protected virtual IMapDataDestination GetDataDestination(object obj)
+		{
+			if (obj is IMapDataDestination)
+				return (IMapDataDestination)obj;
+
+			if (obj is DataRow)
+				return new DataRowMapper(obj as DataRow);
+
+			if (obj is DataTable)
+			{
+				DataTable dt = obj as DataTable;
+				DataRow   dr = dt.NewRow();
+
+				dt.Rows.Add(dr);
+
+				return new DataRowMapper(dr);
+			}
+
+			//if (obj is IDictionary)
+			//	return new DictionaryReader((IDictionary)obj);
+
+			return GetObjectMapper(obj.GetType());
+		}
+
+		#endregion
+
 		#region Mapping
 
-		protected int[] GetIndex(IMapDataSource source, IMapDataDestination dest)
+		protected static int[] GetIndex(IMapDataSource source, IMapDataDestination dest)
 		{
 			int   count = source.Count;
 			int[] index = new int[count];
@@ -370,15 +423,11 @@ namespace BLToolkit.Mapping
 			return index;
 		}
 
-		protected virtual void MapInternal(
+		protected static void MapInternal(
 			IMapDataSource      source, object sourceObject,
 			IMapDataDestination dest,   object destObject,
 			int[]               index)
 		{
-			ISupportMapping sm = destObject as ISupportMapping;
-
-			if (sm != null) sm.BeginMapping();
-
 			int count = index.Length;
 
 			for (int i = 0; i < count; i++)
@@ -388,10 +437,110 @@ namespace BLToolkit.Mapping
 				if (n >= 0)
 					dest.SetValue(destObject, n, source.GetValue(sourceObject, i));
 			}
-
-			if (sm != null) sm.EndMapping();
 		}
 
+		protected virtual void MapInternal(
+			InitContext         initContext, 
+			IMapDataSource      source, object sourceObject, 
+			IMapDataDestination dest,   object destObject)
+		{
+			ISupportMapping sm = destObject as ISupportMapping;
+
+			if (sm != null)
+			{
+				if (initContext == null)
+					initContext = new InitContext();
+
+				initContext.MapDataSource = source;
+				initContext.SourceObject  = sourceObject;
+				initContext.ObjectMapper  = dest as IObjectMapper;
+
+				sm.BeginMapping(initContext);
+
+				if (initContext.StopMapping)
+					return;
+
+				if (dest != initContext.ObjectMapper && initContext.ObjectMapper != null)
+					dest = initContext.ObjectMapper;
+			}
+
+			MapInternal(source, sourceObject, dest, destObject, GetIndex(source, dest));
+
+			if (sm != null)
+				sm.EndMapping(initContext);
+		}
+
+		protected virtual object MapInternal(InitContext initContext)
+		{
+			object dest = initContext.ObjectMapper.CreateInstance(initContext);
+
+			if (initContext.StopMapping == false)
+			{
+				MapInternal(initContext,
+					initContext.MapDataSource, initContext.SourceObject, 
+					initContext.ObjectMapper, dest);
+			}
+
+			return dest;
+		}
+
+		#endregion
+
+		#region ToObject
+
+		public object ToObject(object source, object destObject)
+		{
+			MapInternal(null, GetDataSource(source), source, GetDataDestination(destObject), destObject);
+			return destObject;
+		}
+
+		public object ToObject(object sourceObject, object destObject, params object[] parameters)
+		{
+			if (sourceObject == null) throw new ArgumentNullException("sourceObject");
+			if (destObject   == null) throw new ArgumentNullException("destObject");
+
+			InitContext ctx = new InitContext();
+
+			ctx.MapDataSource = GetDataSource(sourceObject);
+			ctx.SourceObject  = sourceObject;
+			ctx.ObjectMapper  = GetObjectMapper(destObject.GetType());
+			ctx.Parameters    = parameters;
+
+			MapInternal(ctx, ctx.MapDataSource, ctx.SourceObject, ctx.ObjectMapper, destObject);
+
+			return destObject;
+		}
+
+		public object ToObject(object sourceObject, Type destObjectType)
+		{
+			return ToObject(sourceObject, destObjectType, (object[])null);
+		}
+
+#if FW2
+		public T ToObject<T>(object sourceObject)
+		{
+			return (T)ToObject(sourceObject, typeof(T), (object[])null);
+		}
+#endif
+
+		public object ToObject(object sourceObject, Type destObjectType, params object[] parameters)
+		{
+			InitContext ctx = new InitContext();
+
+			ctx.MapDataSource = GetDataSource(sourceObject);
+			ctx.SourceObject  = sourceObject;
+			ctx.ObjectMapper  = GetObjectMapper(destObjectType);
+			ctx.Parameters    = parameters;
+
+			return MapInternal(ctx);
+		}
+
+#if FW2
+		public T ToObject<T>(object sourceObject, params object[] parameters)
+		{
+			return (T)ToObject(sourceObject, typeof(T), parameters);
+		}
+#endif
 
 		#endregion
 	}
