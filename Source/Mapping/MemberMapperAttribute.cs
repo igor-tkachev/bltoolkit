@@ -6,7 +6,7 @@ namespace BLToolkit.Mapping
 		AttributeTargets.Class    | AttributeTargets.Interface | 
 		AttributeTargets.Property | AttributeTargets.Field,
 		AllowMultiple=true)]
-	public class MemberMapperAttribute : Attribute
+	public sealed class MemberMapperAttribute : Attribute
 	{
 		public MemberMapperAttribute(Type memberMapperType)
 			: this(null, memberMapperType)
@@ -15,7 +15,7 @@ namespace BLToolkit.Mapping
 
 		public MemberMapperAttribute(Type memberType, Type memberMapperType)
 		{
-			if (memberMapperType == null) throw new ArgumentNullException("type");
+			if (memberMapperType == null) throw new ArgumentNullException("memberMapperType");
 
 			_memberType   = memberType;
 			_memberMapper = Activator.CreateInstance(memberMapperType) as MemberMapper;

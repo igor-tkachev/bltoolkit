@@ -316,12 +316,12 @@ namespace BLToolkit.Mapping
 
 		public virtual object CreateInstance()
 		{
-			return _typeAccessor.CreateInstance();
+			return _typeAccessor.CreateInstanceEx();
 		}
 
 		public virtual object CreateInstance(InitContext context)
 		{
-			return _typeAccessor.CreateInstance(context);
+			return _typeAccessor.CreateInstanceEx(context);
 		}
 
 		#endregion

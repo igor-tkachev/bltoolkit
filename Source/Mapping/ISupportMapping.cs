@@ -1,10 +1,12 @@
 using System;
 
+using BLToolkit.Reflection;
+
 namespace BLToolkit.Mapping
 {
 	public interface ISupportMapping
 	{
-		void BeginMapping();
-		void EndMapping();
+		void BeginMapping(InitContext initContext);
+		void EndMapping  (InitContext initContext);
 	}
 }

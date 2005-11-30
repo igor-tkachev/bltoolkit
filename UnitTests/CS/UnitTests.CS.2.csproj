@@ -36,6 +36,7 @@
   <ItemGroup>
     <Compile Include="Aspects\NotNullAspect.cs" />
     <Compile Include="Mapping\DefaultValueAttributeTest.cs" />
+    <Compile Include="Mapping\ISupportMappingTest.cs" />
     <Compile Include="Mapping\MapperMemberAttributeTest.cs" />
     <Compile Include="Mapping\MapTest.cs" />
     <Compile Include="Mapping\MapValueAttributeTest.cs" />

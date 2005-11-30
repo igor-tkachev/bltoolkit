@@ -42,5 +42,43 @@ namespace BLToolkit.Mapping
 #endif
 
 		#endregion
+
+		#region ToObject
+
+		public static object ToObject(object sourceObject, object destObject)
+		{
+			return _defaultSchema.ToObject(sourceObject, destObject);
+		}
+
+		public static object ToObject(object sourceObject, object destObject, params object[] parameters)
+		{
+			return _defaultSchema.ToObject(sourceObject, destObject, parameters);
+		}
+
+		public static object ToObject(object sourceObject, Type destObjectType)
+		{
+			return _defaultSchema.ToObject(sourceObject, destObjectType);
+		}
+
+#if FW2
+		public static T ToObject<T>(object sourceObject)
+		{
+			return _defaultSchema.ToObject<T>(sourceObject);
+		}
+#endif
+
+		public static object ToObject(object sourceObject, Type destObjectType, params object[] parameters)
+		{
+			return _defaultSchema.ToObject(sourceObject, destObjectType, parameters);
+		}
+
+#if FW2
+		public static T ToObject<T>(object sourceObject, params object[] parameters)
+		{
+			return _defaultSchema.ToObject<T>(sourceObject, parameters);
+		}
+#endif
+
+		#endregion
 	}
 }
