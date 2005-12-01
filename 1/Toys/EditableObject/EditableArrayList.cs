@@ -87,6 +87,27 @@ namespace Rsdn.Framework.EditableObject
 			Sort(new SortMemberComparer(Map.Descriptor(ItemType)[memberName], direction));
 		}
 
+		public void Move(int newIndex, int oldIndex)
+		{
+			if (oldIndex != newIndex)
+			{
+				object o = _list[oldIndex];
+
+				_list.RemoveAt(oldIndex);
+				_list.Insert  (newIndex, o);
+
+				OnListChanged(new ListChangedEventArgs(ListChangedType.ItemMoved, newIndex, oldIndex));
+			}
+		}
+
+		public void Move(int newIndex, object item)
+		{
+			int index = IndexOf(item);
+
+			if (index >= 0)
+				Move(newIndex, index);
+		}
+
 		#endregion
 
 		#region Protected Members
@@ -417,16 +438,22 @@ namespace Rsdn.Framework.EditableObject
 
 		public PropertyDescriptorCollection GetItemProperties(PropertyDescriptor[] listAccessors)
 		{
-			string key = ItemType.ToString() + "." + (_isNull == null? "0": "1");
+			return GetItemProperties(ItemType, "", new Type[] {}, new PropertyDescriptor[] {}, listAccessors);
+		}
 
-			PropertyDescriptorCollection pdc = (PropertyDescriptorCollection)_descriptors[key];
+		private PropertyDescriptorCollection GetItemProperties(Type itemType, string propertyPrefix, Type[] parentTypes, PropertyDescriptor[] parentAccessors, PropertyDescriptor[] listAccessors)
+		{
+			string key = itemType.ToString() + "." + (_isNull == null? "0": "1");
+
+			PropertyDescriptorCollection pdc =
+				propertyPrefix.Length == 0? (PropertyDescriptorCollection)_descriptors[key]: null;
 
 			if (pdc == null)
 			{
-				pdc = TypeDescriptor.GetProperties(ItemType);
+				pdc = TypeDescriptor.GetProperties(itemType);
 
 				ArrayList     list      = new ArrayList(pdc.Count);
-				bool          isDataRow = ItemType.IsSubclassOf(typeof(DataRow));
+				bool          isDataRow = itemType.IsSubclassOf(typeof(DataRow));
 				MapDescriptor md        = null;
 
 				foreach (PropertyDescriptor p in pdc)
@@ -441,21 +468,23 @@ namespace Rsdn.Framework.EditableObject
 
 					if (p.PropertyType.GetInterface("IList") != null)
 					{
-						pd = new IListPropertyDescriptor(p, this, IsNull);
+						pd = new IListPropertyDescriptor(p, propertyPrefix, parentAccessors, this, IsNull);
 					}
 					else
 					{
 						if (isDataRow == false)
 						{
 							if (md == null)
-								md = Map.Descriptor(ItemType);
+								md = Map.Descriptor(itemType);
 
 							foreach (IMemberMapper mm in md)
 							{
 								if (mm.OriginalName == p.Name)
 								{
 									if (mm.MemberType.IsEnum == false && mm.MapValueAttributeList.Length == 0)
-										pd = new MapPropertyDescriptor(p, mm, IsNull);
+									{
+										pd = new MapPropertyDescriptor(p, propertyPrefix, parentAccessors, mm, IsNull);
+									}
 
 									break;
 								}
@@ -464,9 +493,28 @@ namespace Rsdn.Framework.EditableObject
 					}
 
 					if (pd == null)
-						pd = new StandardPropertyDescriptor(p, IsNull);
+						pd = new StandardPropertyDescriptor(p, propertyPrefix, parentAccessors, IsNull);
 
-					list.Add(pd);
+					if (pd != null && !p.PropertyType.IsValueType && p.PropertyType != typeof(string) && 
+						Array.IndexOf(parentTypes, p.GetType()) == -1)
+					{
+						Type[] childParentTypes = new Type[parentTypes.Length+1];
+						
+						parentTypes.CopyTo(childParentTypes, 0);
+						childParentTypes[parentTypes.Length] = itemType;
+
+						PropertyDescriptor[] childParentAccessors = new PropertyDescriptor[parentAccessors.Length + 1];
+						
+						parentAccessors.CopyTo(childParentAccessors, 0);
+						childParentAccessors[parentAccessors.Length] = pd;
+
+						PropertyDescriptorCollection pdch = 
+							GetItemProperties(p.PropertyType, p.Name + "+", childParentTypes, childParentAccessors, listAccessors);
+
+						list.AddRange(pdch);
+					}
+					else
+						list.Add(pd);
 				}
 
 				list.Sort(new PropertyDescriptorComparer());
@@ -474,15 +522,18 @@ namespace Rsdn.Framework.EditableObject
 				pdc = new PropertyDescriptorCollection(
 					(PropertyDescriptor[])list.ToArray(typeof(PropertyDescriptor)));
 
-				_descriptors[key] = pdc;
-				_fieldCount [key] = md.AllMembersCount;
+				if (md != null && propertyPrefix.Length == 0)
+				{
+					_descriptors[key] = pdc;
+					_fieldCount [key] = md.AllMembersCount;
+				}
 			}
 			else
 			{
-				if ((int)_fieldCount[key] != Map.Descriptor(ItemType).AllMembersCount)
+				if ((int)_fieldCount[key] != Map.Descriptor(itemType).AllMembersCount)
 				{
 					_descriptors.Remove(key);
-					return GetItemProperties(listAccessors);
+					return GetItemProperties(itemType, propertyPrefix, parentTypes, parentAccessors, listAccessors);
 				}
 			}
 
@@ -881,21 +932,37 @@ namespace Rsdn.Framework.EditableObject
 			protected PropertyDescriptor _descriptor = null;
 			protected IsNullHandler      _isNull;
 
-			public StandardPropertyDescriptor(PropertyDescriptor pd, IsNullHandler isNull)
+			protected string               _prefixedName;
+			protected string               _namePrefix;
+			protected PropertyDescriptor[] _chainAccessors;
+
+			public StandardPropertyDescriptor(PropertyDescriptor pd, string namePrefix, PropertyDescriptor[] chainAccessors, IsNullHandler isNull)
 				: base(pd)
 			{
-				_descriptor = pd;
-				_isNull     = isNull;
+				_descriptor     = pd;
+				_isNull         = isNull;
+				_prefixedName   = namePrefix + pd.Name;
+				_namePrefix     = namePrefix;
+				_chainAccessors = chainAccessors;
+			}
+
+			protected object GetNestedComponent(object component)
+			{
+				if (_chainAccessors.Length > 0)
+					for (int i = 0; i < _chainAccessors.Length; i++)
+						component = _chainAccessors[i].GetValue(component);
+
+				return component;
 			}
 
 			public override void SetValue(object component, object value)
 			{
-				_descriptor.SetValue(component, value);
+				_descriptor.SetValue(GetNestedComponent(component), value);
 			}
 
 			public override object GetValue(object component)
 			{
-				return CheckNull(_descriptor.GetValue(component));
+				return CheckNull(_descriptor.GetValue(GetNestedComponent(component)));
 			}
 
 			public override Type ComponentType
@@ -911,6 +978,11 @@ namespace Rsdn.Framework.EditableObject
 			public override Type PropertyType
 			{
 				get { return _descriptor.PropertyType; }
+			}
+
+			public override string Name
+			{
+				get { return _prefixedName; }
 			}
 
 			public override bool CanResetValue(object component)
@@ -942,20 +1014,20 @@ namespace Rsdn.Framework.EditableObject
 		{
 			private IMemberMapper _memberMapper;
 
-			public MapPropertyDescriptor(PropertyDescriptor pd, IMemberMapper mm, IsNullHandler isNull)
-				: base(pd, isNull)
+			public MapPropertyDescriptor(PropertyDescriptor pd, string namePrefix, PropertyDescriptor[] chainAccessors, IMemberMapper mm, IsNullHandler isNull)
+				: base(pd, namePrefix, chainAccessors, isNull)
 			{
 				_memberMapper = mm;
 			}
 
 			public override void SetValue(object component, object value)
 			{
-				_memberMapper.SetValue(component, value);
+				_memberMapper.SetValue(GetNestedComponent(component), value);
 			}
 
 			public override object GetValue(object component)
 			{
-				return CheckNull(_memberMapper.GetValue(component));
+				return CheckNull(_memberMapper.GetValue(GetNestedComponent(component)));
 			}
 		}
 
@@ -968,15 +1040,15 @@ namespace Rsdn.Framework.EditableObject
 			private EditableArrayList _parent;
 
 			public IListPropertyDescriptor(
-				PropertyDescriptor descriptor, EditableArrayList parent, IsNullHandler isNull)
-				: base(descriptor, isNull)
+				PropertyDescriptor descriptor, string namePrefix, PropertyDescriptor[] chainAccessors, EditableArrayList parent, IsNullHandler isNull)
+				: base(descriptor, namePrefix, chainAccessors, isNull)
 			{
 				_parent = parent;
 			}
 
 			public override object GetValue(object component)
 			{
-				object value = base.GetValue(component);
+				object value = base.GetValue(GetNestedComponent(component));
 
 				if (value == null)
 					return value;
@@ -1033,6 +1105,8 @@ namespace Rsdn.Framework.EditableObject
 
 			public SortMemberComparer(IMemberMapper member, ListSortDirection direction)
 			{
+				if (member == null) throw new ArgumentNullException("member");
+
 				_member    = member;
 				_direction = direction;
 			}

@@ -212,6 +212,47 @@ namespace Rsdn.Framework.Data.Mapping
 
 						obj = pm;
 					}
+					else
+					{
+						int idx = name.IndexOf(".");
+						if (idx < 0) idx = name.IndexOf("+");
+
+						if (idx > 0 && idx < name.Length)
+						{
+							string fieldName = name.Substring(0, idx);
+
+							FieldInfo fi = _mappedType.GetField(fieldName);
+
+							if (fi != null)
+							{
+								IMemberMapper field = 
+									GetMemberMapper(fi.FieldType, name.Substring(idx + 1));
+
+								if (field != null)
+								{
+									obj = new FieldMapper().InitField(fi, name, field);
+								}
+							}
+							else
+							{
+								pi = _mappedType.GetProperty(fieldName);
+
+								if (pi != null)
+								{
+									IMemberMapper property = 
+										GetMemberMapper(pi.PropertyType, name.Substring(idx + 1));
+
+									if (property != null)
+									{
+										obj = new PropertyMapper().InitProperty(pi, name, property);
+									}
+								}
+							}
+
+							if (obj == null)
+								obj = new FieldMapper().InitField(name);
+						}
+					}
 				}
 
 				_allMembers[name] = obj;
@@ -671,7 +712,7 @@ namespace Rsdn.Framework.Data.Mapping
 		private Hashtable _allMembers = new Hashtable();
 		public  IEnumerable AllMembers
 		{
-			get { return (IEnumerable)_allMembers.Values; }
+			get { return _allMembers.Values; }
 		}
 
 		public  int AllMembersCount

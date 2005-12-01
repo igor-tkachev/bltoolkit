@@ -129,12 +129,12 @@ namespace Rsdn.Framework.EditableObject
 		[NonSerialized]
 		private int _editingCount;
 
-		void IEditableObject.BeginEdit()
+		public virtual void BeginEdit()
 		{
 			_editingCount++;
 		}
 
-		void IEditableObject.CancelEdit()
+		public virtual void CancelEdit()
 		{
 			_editingCount--;
 
@@ -142,7 +142,7 @@ namespace Rsdn.Framework.EditableObject
 				RejectChanges();
 		}
 
-		void IEditableObject.EndEdit()
+		public virtual void EndEdit()
 		{
 			_editingCount--;
 
