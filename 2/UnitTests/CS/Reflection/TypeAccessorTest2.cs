@@ -8,7 +8,7 @@ using BLToolkit.Reflection;
 namespace Reflection
 {
 	[TestFixture]
-	public class TypeAccessor2
+	public class TypeAccessorTest2
 	{
 		public class TestObject
 		{

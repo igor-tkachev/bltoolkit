@@ -10,9 +10,9 @@ using BLToolkit.TypeBuilder;
 namespace Aspects
 {
 	//[TestFixture]
-	public class NotNullAspect
+	public class NotNullAspectTest
 	{
-		public NotNullAspect()
+		public NotNullAspectTest()
 		{
 			TypeFactory.SaveTypes = true;
 		}

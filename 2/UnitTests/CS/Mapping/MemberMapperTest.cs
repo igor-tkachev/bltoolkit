@@ -108,8 +108,8 @@ namespace Mapping
 			Assert.AreEqual(124,    o.Int32. Value);
 			Assert.AreEqual(123.57, o.Single.Value);
 
-			Assert.AreEqual(new SqlInt32 (124),    om.GetValue(o, "Int32"));
-			Assert.AreEqual(new SqlSingle(123.57), om.GetValue(o, "Single"));
+			Assert.AreEqual(124,    om.GetValue(o, "Int32"));
+			Assert.AreEqual(123.57, om.GetValue(o, "Single"));
 		}
 	}
 }

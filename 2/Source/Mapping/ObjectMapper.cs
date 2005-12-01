@@ -105,6 +105,18 @@ namespace BLToolkit.Mapping
 			get { return _mappingSchema; }
 		}
 
+		private   object[] _mapFieldAttributes;
+		protected object[]  MapFieldAttributes
+		{
+			get
+			{
+				if (_mapFieldAttributes == null)
+					_mapFieldAttributes = TypeHelper.GetAttributes(_typeAccessor.Type, typeof(MapFieldAttribute));
+
+				return _mapFieldAttributes;
+			}
+		}
+
 		#endregion
 
 		#region Init Mapper
@@ -124,8 +136,8 @@ namespace BLToolkit.Mapping
 				MapMemberInfo mi = new MapMemberInfo();
 
 				mi.MemberAccessor = ma;
-				mi.Name           = ma.Name;
 				mi.MappingSchema  = mappingSchema;
+				mi.Name           = GetFieldName(ma);
 				mi.IsTrimmable    = GetIsTrimmable(ma);
 				mi.MapValues      = GetMapValues(ma);
 				mi.DefaultValue   = GetDefaultValue(ma);
@@ -134,6 +146,77 @@ namespace BLToolkit.Mapping
 
 				Add(CreateMemberMapper(mi));
 			}
+
+			foreach (MapFieldAttribute attr in MapFieldAttributes)
+				EnsureMapper(attr.MapName, attr.OrigName);
+		}
+
+		private MemberMapper EnsureMapper(string mapName, string origName)
+		{
+			MemberMapper mm = this[mapName];
+
+			if (mm == null)
+			{
+				string name = mapName.ToLower();
+
+				foreach (MemberMapper m in _members)
+				{
+					if (m.MemberAccessor.Name.ToLower() == name)
+					{
+						_nameToMember.Add(name,  m);
+						return m;
+					}
+				}
+
+				mm = GetComplexMapper(mapName, origName);
+
+				if (mm != null)
+					Add(mm);
+			}
+
+			return mm;
+		}
+
+		[SuppressMessage("Microsoft.Performance", "CA1807:AvoidUnnecessaryStringCreation", MessageId = "stack0"), SuppressMessage("Microsoft.Performance", "CA1807:AvoidUnnecessaryStringCreation", MessageId = "origName")]
+		protected MemberMapper GetComplexMapper(string mapName, string origName)
+		{
+			string name = origName.ToLower();
+			int    idx  = origName.IndexOf('.');
+
+			if (idx > 0 /*&& idx < origName.Length*/)
+			{
+				name = name.Substring(idx + 1);
+
+				foreach (MemberAccessor ma in TypeAccessor)
+				{
+					if (ma.Name.ToLower() == name)
+					{
+						
+					}
+				}
+			}
+			else
+				foreach (MemberMapper m in _members)
+					if (m.MemberAccessor.Name.ToLower() == name)
+						return m;
+
+			return null;
+		}
+
+		protected virtual string GetFieldName(MemberAccessor memberAccessor)
+		{
+			MapFieldAttribute a = (MapFieldAttribute)memberAccessor.GetAttribute(typeof(MapFieldAttribute));
+
+			if (a != null)
+				return a.MapName;
+
+			string name = memberAccessor.Name.ToLower();
+
+			foreach (MapFieldAttribute attr in MapFieldAttributes)
+				if (attr.OrigName.ToLower() == name)
+					return attr.MapName;
+
+			return memberAccessor.Name;
 		}
 
 		protected virtual bool GetIgnore(MemberAccessor memberAccessor)
@@ -182,7 +265,7 @@ namespace BLToolkit.Mapping
 					list.Add(new MapValue(a.OrigValue, a.Values));
 			}
 
-			attrs = TypeHelper.GetAttributes(memberAccessor.MemberInfo.DeclaringType, typeof(MapValueAttribute));
+			attrs = memberAccessor.GetTypeAttributes(typeof(MapValueAttribute));
 
 			if (attrs != null && attrs.Length > 0)
 			{
@@ -217,8 +300,7 @@ namespace BLToolkit.Mapping
 
 			// Check type [DefaultValues(typeof(int), 0)]
 			//
-			object[] attrs = TypeHelper.GetAttributes(
-				memberAccessor.MemberInfo.DeclaringType, typeof(DefaultValueAttribute));
+			object[] attrs = memberAccessor.GetTypeAttributes(typeof(DefaultValueAttribute));
 
 			foreach (DefaultValueAttribute a in attrs)
 				if (a.Type == null && a.Value != null && a.Value.GetType() == memberAccessor.Type ||
@@ -256,8 +338,7 @@ namespace BLToolkit.Mapping
 
 			// Check type [NullValues(typeof(int), 0)]
 			//
-			object[] attrs = TypeHelper.GetAttributes(
-				memberAccessor.MemberInfo.DeclaringType, typeof(NullValueAttribute));
+			object[] attrs = memberAccessor.GetTypeAttributes(typeof(NullValueAttribute));
 
 			foreach (NullValueAttribute a in attrs)
 				if (a.Type == null && a.Value != null && a.Value.GetType() == memberAccessor.Type ||
@@ -298,8 +379,7 @@ namespace BLToolkit.Mapping
 
 				// Check type [NullValues(typeof(int), 0)]
 				//
-				object[] attrs = TypeHelper.GetAttributes(
-					memberAccessor.MemberInfo.DeclaringType, typeof(NullValueAttribute));
+				object[] attrs = memberAccessor.GetTypeAttributes(typeof(NullValueAttribute));
 
 				foreach (NullValueAttribute a in attrs)
 					if (a.Type == null && a.Value != null && a.Value.GetType() == memberAccessor.Type ||

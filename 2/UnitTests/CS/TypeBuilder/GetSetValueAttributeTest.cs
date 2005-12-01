@@ -10,9 +10,9 @@ using BLToolkit.TypeBuilder.Builders;
 namespace TypeBuilder
 {
 	[TestFixture]
-	public class GetSetValueAttributes
+	public class GetSetValueAttributeTest
 	{
-		public GetSetValueAttributes()
+		public GetSetValueAttributeTest()
 		{
 			TypeFactory.SaveTypes = true;
 		}

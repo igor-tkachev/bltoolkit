@@ -10,9 +10,9 @@ using BLToolkit.TypeBuilder.Builders;
 namespace TypeBuilder
 {
 	[TestFixture]
-	public class InstanceTypeAttributes
+	public class InstanceTypeAttributeTest
 	{
-		public InstanceTypeAttributes()
+		public InstanceTypeAttributeTest()
 		{
 			TypeFactory.SaveTypes = true;
 		}

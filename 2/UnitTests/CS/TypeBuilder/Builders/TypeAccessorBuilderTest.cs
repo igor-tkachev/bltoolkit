@@ -11,9 +11,9 @@ using BLToolkit.TypeBuilder.Builders;
 namespace TypeBuilder.Builders
 {
 	[TestFixture]
-	public class TypeAccessorBuilder
+	public class TypeAccessorBuilderTest
 	{
-		public TypeAccessorBuilder()
+		public TypeAccessorBuilderTest()
 		{
 			TypeFactory.SaveTypes = true;
 		}

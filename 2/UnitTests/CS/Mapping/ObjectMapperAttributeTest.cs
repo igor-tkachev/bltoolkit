@@ -6,7 +6,7 @@ using BLToolkit.Mapping;
 
 namespace Mapping
 {
-	[TestFixture]
+	[TestFixture, Category("Mapping")]
 	public class ObjectMapperAttributeTest
 	{
 		class TestMapper : ObjectMapper
@@ -21,7 +21,7 @@ namespace Mapping
 		[Test]
 		public void Test()
 		{
-			IObjectMapper om = Map.DefaultSchema.GetObjectMapper(typeof(TestObject));
+			IObjectMapper om = Map.GetObjectMapper(typeof(TestObject));
 
 			Assert.AreEqual(typeof(TestMapper), om.GetType());
 		}

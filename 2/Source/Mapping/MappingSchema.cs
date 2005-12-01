@@ -59,7 +59,8 @@ namespace BLToolkit.Mapping
 		{
 			Attribute attr = TypeHelper.GetFirstAttribute(type, typeof(ObjectMapperAttribute));
 
-			IObjectMapper om = attr == null? GetDefaultObjectMapper(type): ((ObjectMapperAttribute)attr).ObjectMapper;
+			IObjectMapper om =
+				attr == null? GetDefaultObjectMapper(type): ((ObjectMapperAttribute)attr).ObjectMapper;
 
 			om.Init(this, TypeAccessor.GetAccessor(type));
 
@@ -360,7 +361,7 @@ namespace BLToolkit.Mapping
 
 		#endregion
 
-		#region GetDataSource
+		#region GetDataSource, GetDataDestination
 
 		[SuppressMessage("Microsoft.Performance", "CA1800:DoNotCastUnnecessarily")]
 		protected virtual IMapDataSource GetDataSource(object obj)

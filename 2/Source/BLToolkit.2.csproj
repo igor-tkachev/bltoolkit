@@ -46,6 +46,7 @@
     <Compile Include="Mapping\IObjectMapper.cs" />
     <Compile Include="Mapping\ISupportMapping.cs" />
     <Compile Include="Mapping\Map.cs" />
+    <Compile Include="Mapping\MapFieldAttribute.cs" />
     <Compile Include="Mapping\MapIgnoreAttribute.cs" />
     <Compile Include="Mapping\MapMemberInfo.cs" />
     <Compile Include="Mapping\MappingException.cs" />

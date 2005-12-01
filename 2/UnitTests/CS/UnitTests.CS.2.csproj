@@ -34,9 +34,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Aspects\NotNullAspect.cs" />
+    <Compile Include="Aspects\NotNullAspectTest.cs" />
     <Compile Include="Mapping\DefaultValueAttributeTest.cs" />
     <Compile Include="Mapping\ISupportMappingTest.cs" />
+    <Compile Include="Mapping\MapFieldAttributeTest.cs" />
     <Compile Include="Mapping\MapperMemberAttributeTest.cs" />
     <Compile Include="Mapping\MapTest.cs" />
     <Compile Include="Mapping\MapValueAttributeTest.cs" />
@@ -45,21 +46,21 @@
     <Compile Include="Mapping\ObjectMapperAttributeTest.cs" />
     <Compile Include="Mapping\TrimmableAttributeTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Reflection\Emit\MethodBuilderHelper.cs" />
-    <Compile Include="Reflection\ObjectFactoryAttribute.cs" />
-    <Compile Include="Reflection\TypeAccessor.cs" />
-    <Compile Include="Reflection\TypeAccessor2.cs" />
-    <Compile Include="Reflection\TypeHelper.cs" />
-    <Compile Include="TypeBuilder\Builders\IAbstractTypeBuilder.cs" />
-    <Compile Include="TypeBuilder\Builders\DefaultTypeBuilder.cs" />
-    <Compile Include="TypeBuilder\Builders\ImplemetInterfaceBuilder.cs" />
-    <Compile Include="TypeBuilder\Builders\TypeAccessorBuilder.cs" />
-    <Compile Include="TypeBuilder\GetSetValueAttributes.cs" />
-    <Compile Include="TypeBuilder\InstanceTypeAttributes.cs" />
-    <Compile Include="TypeBuilder\LazyInstanceAttributes.cs" />
-    <Compile Include="TypeBuilder\ParameterAttributes.cs" />
-    <Compile Include="TypeBuilder\Builders\PropertyChangeBuilder.cs" />
-    <Compile Include="TypeBuilder\TypeFactory.cs" />
+    <Compile Include="Reflection\Emit\MethodBuilderHelperTest.cs" />
+    <Compile Include="Reflection\ObjectFactoryAttributeTest.cs" />
+    <Compile Include="Reflection\TypeAccessorTest.cs" />
+    <Compile Include="Reflection\TypeAccessorTest2.cs" />
+    <Compile Include="Reflection\TypeHelperTest.cs" />
+    <Compile Include="TypeBuilder\Builders\IAbstractTypeBuilderTest.cs" />
+    <Compile Include="TypeBuilder\Builders\DefaultTypeBuilderTest.cs" />
+    <Compile Include="TypeBuilder\Builders\ImplemetInterfaceBuilderTest.cs" />
+    <Compile Include="TypeBuilder\Builders\TypeAccessorBuilderTest.cs" />
+    <Compile Include="TypeBuilder\GetSetValueAttributeTest.cs" />
+    <Compile Include="TypeBuilder\InstanceTypeAttributeTest.cs" />
+    <Compile Include="TypeBuilder\LazyInstanceAttributeTest.cs" />
+    <Compile Include="TypeBuilder\ParameterAttributeTest.cs" />
+    <Compile Include="TypeBuilder\Builders\PropertyChangeBuilderTest.cs" />
+    <Compile Include="TypeBuilder\TypeFactoryTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Source\BLToolkit.2.csproj">

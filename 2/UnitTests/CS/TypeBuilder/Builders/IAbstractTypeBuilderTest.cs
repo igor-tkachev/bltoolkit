@@ -12,7 +12,7 @@ using BLToolkit.TypeBuilder.Builders;
 namespace TypeBuilder.Builders
 {
 	[TestFixture]
-	public class IAbstractTypeBuilder
+	public class IAbstractTypeBuilderTest
 	{
 		public interface ITest
 		{

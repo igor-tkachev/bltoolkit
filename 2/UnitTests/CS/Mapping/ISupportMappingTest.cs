@@ -8,7 +8,7 @@ using BLToolkit.TypeBuilder;
 
 namespace Mapping
 {
-	[TestFixture]
+	[TestFixture, Category("Mapping")]
 	public class ISupportMappingTest
 	{
 		public class SourceObject
