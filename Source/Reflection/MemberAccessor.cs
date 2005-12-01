@@ -69,5 +69,10 @@ namespace BLToolkit.Reflection
 
 			return attrs.Length > 0? attrs: null;
 		}
+
+		public object[] GetTypeAttributes(Type attributeType)
+		{
+			return TypeHelper.GetAttributes(MemberInfo.DeclaringType, attributeType);
+		}
 	}
 }

@@ -100,12 +100,32 @@
                     BuildAction = "Compile"
                 />
                 <File
-                    RelPath = "Aspects\NotNullAspect.cs"
+                    RelPath = "Aspects\NotNullAspectTest.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
                 />
                 <File
                     RelPath = "Mapping\DefaultValueAttributeTest.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "Mapping\ISupportMappingTest.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "Mapping\MapFieldAttributeTest.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "Mapping\MapperMemberAttributeTest.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "Mapping\MapTest.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
                 />
@@ -135,72 +155,67 @@
                     BuildAction = "Compile"
                 />
                 <File
-                    RelPath = "Reflection\ObjectFactoryAttribute.cs"
+                    RelPath = "Reflection\ObjectFactoryAttributeTest.cs"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "Reflection\TypeAccessorTest.cs"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "Reflection\TypeHelperTest.cs"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "Reflection\Emit\MethodBuilderHelperTest.cs"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "TypeBuilder\GetSetValueAttributeTest.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
                 />
                 <File
-                    RelPath = "Reflection\TypeAccessor.cs"
+                    RelPath = "TypeBuilder\InstanceTypeAttributeTest.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
                 />
                 <File
-                    RelPath = "Reflection\TypeHelper.cs"
+                    RelPath = "TypeBuilder\LazyInstanceAttributeTest.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
                 />
                 <File
-                    RelPath = "Reflection\Emit\MethodBuilderHelper.cs"
+                    RelPath = "TypeBuilder\ParameterAttributeTest.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
                 />
                 <File
-                    RelPath = "TypeBuilder\GetSetValueAttributes.cs"
+                    RelPath = "TypeBuilder\TypeFactoryTest.cs"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "TypeBuilder\Builders\DefaultTypeBuilderTest.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
                 />
                 <File
-                    RelPath = "TypeBuilder\InstanceTypeAttributes.cs"
+                    RelPath = "TypeBuilder\Builders\IAbstractTypeBuilderTest.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
                 />
                 <File
-                    RelPath = "TypeBuilder\LazyInstanceAttributes.cs"
+                    RelPath = "TypeBuilder\Builders\ImplemetInterfaceBuilderTest.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
                 />
                 <File
-                    RelPath = "TypeBuilder\ParameterAttributes.cs"
+                    RelPath = "TypeBuilder\Builders\PropertyChangeBuilderTest.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
                 />
                 <File
-                    RelPath = "TypeBuilder\TypeFactory.cs"
-                    SubType = "Code"
-                    BuildAction = "Compile"
-                />
-                <File
-                    RelPath = "TypeBuilder\Builders\DefaultTypeBuilder.cs"
-                    SubType = "Code"
-                    BuildAction = "Compile"
-                />
-                <File
-                    RelPath = "TypeBuilder\Builders\IAbstractTypeBuilder.cs"
-                    SubType = "Code"
-                    BuildAction = "Compile"
-                />
-                <File
-                    RelPath = "TypeBuilder\Builders\ImplemetInterfaceBuilder.cs"
-                    SubType = "Code"
-                    BuildAction = "Compile"
-                />
-                <File
-                    RelPath = "TypeBuilder\Builders\PropertyChangeBuilder.cs"
-                    SubType = "Code"
-                    BuildAction = "Compile"
-                />
-                <File
-                    RelPath = "TypeBuilder\Builders\TypeAccessorBuilder.cs"
+                    RelPath = "TypeBuilder\Builders\TypeAccessorBuilderTest.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
                 />

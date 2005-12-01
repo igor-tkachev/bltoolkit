@@ -6,7 +6,7 @@ using BLToolkit.Mapping;
 
 namespace Mapping
 {
-	[TestFixture]
+	[TestFixture, Category("Mapping")]
 	public class TrimmableAttributeTest
 	{
 		[Trimmable]

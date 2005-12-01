@@ -9,9 +9,9 @@ using BLToolkit.Reflection;
 namespace TypeBuilder.Builders
 {
 	[TestFixture]
-	public class PropertyChangeBuilder
+	public class PropertyChangeBuilderTest
 	{
-		public PropertyChangeBuilder()
+		public PropertyChangeBuilderTest()
 		{
 			TypeFactory.SaveTypes = true;
 		}

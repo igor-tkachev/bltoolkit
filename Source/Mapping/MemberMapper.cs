@@ -990,17 +990,14 @@ namespace BLToolkit.Mapping
 			return null;
 		}
 
-		class SqlTypeMapper : MemberMapper
+		class SqlByteMapper : MemberMapper
 		{
 			public override object GetValue(object o)
 			{
-				object value = _memberAccessor.GetValue(o);
-				return ((INullable)value).IsNull? null: value;
+				SqlByte value = (SqlByte)_memberAccessor.GetValue(o);
+				return value.IsNull? null: (object)value.Value;
 			}
-		}
 
-		class SqlByteMapper : SqlTypeMapper
-		{
 			public override void SetValue(object o, object value)
 			{
 				_memberAccessor.SetValue(o,
@@ -1023,8 +1020,14 @@ namespace BLToolkit.Mapping
 			}
 		}
 
-		class SqlInt16Mapper : SqlTypeMapper
+		class SqlInt16Mapper : MemberMapper
 		{
+			public override object GetValue(object o)
+			{
+				SqlInt16 value = (SqlInt16)_memberAccessor.GetValue(o);
+				return value.IsNull? null: (object)value.Value;
+			}
+
 			public override void SetValue(object o, object value)
 			{
 				_memberAccessor.SetValue(o,
@@ -1047,8 +1050,14 @@ namespace BLToolkit.Mapping
 			}
 		}
 
-		class SqlInt32Mapper : SqlTypeMapper
+		class SqlInt32Mapper : MemberMapper
 		{
+			public override object GetValue(object o)
+			{
+				SqlInt32 value = (SqlInt32)_memberAccessor.GetValue(o);
+				return value.IsNull? null: (object)value.Value;
+			}
+
 			public override void SetValue(object o, object value)
 			{
 				_memberAccessor.SetValue(o,
@@ -1071,8 +1080,14 @@ namespace BLToolkit.Mapping
 			}
 		}
 
-		class SqlInt64Mapper : SqlTypeMapper
+		class SqlInt64Mapper : MemberMapper
 		{
+			public override object GetValue(object o)
+			{
+				SqlInt64 value = (SqlInt64)_memberAccessor.GetValue(o);
+				return value.IsNull? null: (object)value.Value;
+			}
+
 			public override void SetValue(object o, object value)
 			{
 				_memberAccessor.SetValue(o,
@@ -1095,8 +1110,14 @@ namespace BLToolkit.Mapping
 			}
 		}
 
-		class SqlSingleMapper : SqlTypeMapper
+		class SqlSingleMapper : MemberMapper
 		{
+			public override object GetValue(object o)
+			{
+				SqlSingle value = (SqlSingle)_memberAccessor.GetValue(o);
+				return value.IsNull? null: (object)value.Value;
+			}
+
 			public override void SetValue(object o, object value)
 			{
 				_memberAccessor.SetValue(o,
@@ -1119,8 +1140,14 @@ namespace BLToolkit.Mapping
 			}
 		}
 
-		class SqlBooleanMapper : SqlTypeMapper
+		class SqlBooleanMapper : MemberMapper
 		{
+			public override object GetValue(object o)
+			{
+				SqlBoolean value = (SqlBoolean)_memberAccessor.GetValue(o);
+				return value.IsNull? null: (object)value.Value;
+			}
+
 			public override void SetValue(object o, object value)
 			{
 				_memberAccessor.SetValue(o,
@@ -1143,8 +1170,14 @@ namespace BLToolkit.Mapping
 			}
 		}
 
-		class SqlDoubleMapper : SqlTypeMapper
+		class SqlDoubleMapper : MemberMapper
 		{
+			public override object GetValue(object o)
+			{
+				SqlDouble value = (SqlDouble)_memberAccessor.GetValue(o);
+				return value.IsNull? null: (object)value.Value;
+			}
+
 			public override void SetValue(object o, object value)
 			{
 				_memberAccessor.SetValue(o,
@@ -1167,8 +1200,14 @@ namespace BLToolkit.Mapping
 			}
 		}
 
-		class SqlDateTimeMapper : SqlTypeMapper
+		class SqlDateTimeMapper : MemberMapper
 		{
+			public override object GetValue(object o)
+			{
+				SqlDateTime value = (SqlDateTime)_memberAccessor.GetValue(o);
+				return value.IsNull? null: (object)value.Value;
+			}
+
 			public override void SetValue(object o, object value)
 			{
 				_memberAccessor.SetValue(o,
@@ -1191,8 +1230,14 @@ namespace BLToolkit.Mapping
 			}
 		}
 
-		class SqlDecimalMapper : SqlTypeMapper
+		class SqlDecimalMapper : MemberMapper
 		{
+			public override object GetValue(object o)
+			{
+				SqlDecimal value = (SqlDecimal)_memberAccessor.GetValue(o);
+				return value.IsNull? null: (object)value.Value;
+			}
+
 			public override void SetValue(object o, object value)
 			{
 				_memberAccessor.SetValue(o,
@@ -1215,8 +1260,14 @@ namespace BLToolkit.Mapping
 			}
 		}
 
-		class SqlMoneyMapper : SqlTypeMapper
+		class SqlMoneyMapper : MemberMapper
 		{
+			public override object GetValue(object o)
+			{
+				SqlMoney value = (SqlMoney)_memberAccessor.GetValue(o);
+				return value.IsNull? null: (object)value.Value;
+			}
+
 			public override void SetValue(object o, object value)
 			{
 				_memberAccessor.SetValue(o,
@@ -1239,8 +1290,14 @@ namespace BLToolkit.Mapping
 			}
 		}
 
-		class SqlGuidMapper : SqlTypeMapper
+		class SqlGuidMapper : MemberMapper
 		{
+			public override object GetValue(object o)
+			{
+				SqlGuid value = (SqlGuid)_memberAccessor.GetValue(o);
+				return value.IsNull? null: (object)value.Value;
+			}
+
 			public override void SetValue(object o, object value)
 			{
 				_memberAccessor.SetValue(o,
@@ -1263,8 +1320,14 @@ namespace BLToolkit.Mapping
 			}
 		}
 
-		class SqlStringMapper : SqlTypeMapper
+		class SqlStringMapper : MemberMapper
 		{
+			public override object GetValue(object o)
+			{
+				SqlString value = (SqlString)_memberAccessor.GetValue(o);
+				return value.IsNull? null: value.Value;
+			}
+
 			public override void SetValue(object o, object value)
 			{
 				_memberAccessor.SetValue(o,

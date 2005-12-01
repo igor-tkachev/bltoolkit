@@ -135,7 +135,17 @@
                     BuildAction = "Compile"
                 />
                 <File
+                    RelPath = "Mapping\ISupportMapping.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
                     RelPath = "Mapping\Map.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "Mapping\MapFieldAttribute.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
                 />
@@ -171,6 +181,11 @@
                 />
                 <File
                     RelPath = "Mapping\MemberMapper.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "Mapping\MemberMapperAttribute.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
                 />
