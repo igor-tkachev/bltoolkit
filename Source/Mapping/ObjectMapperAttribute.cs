@@ -9,15 +9,15 @@ namespace BLToolkit.Mapping
 		{
 			if (objectMapperType == null) throw new ArgumentNullException("objectMapperType");
 
-			_objectMapper = Activator.CreateInstance(objectMapperType) as IObjectMapper;
+			_objectMapper = Activator.CreateInstance(objectMapperType) as ObjectMapper;
 
 			if (_objectMapper == null)
 				throw new ArgumentException(
 					string.Format("Type '{0}' does not implement IObjectMapper interface.", objectMapperType));
 		}
 
-		private IObjectMapper _objectMapper;
-		public  IObjectMapper  ObjectMapper
+		private ObjectMapper _objectMapper;
+		public  ObjectMapper  ObjectMapper
 		{
 			get { return _objectMapper; }
 		}

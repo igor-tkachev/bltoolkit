@@ -21,7 +21,7 @@ namespace Mapping
 		[Test]
 		public void Test()
 		{
-			IObjectMapper om = Map.GetObjectMapper(typeof(TestObject));
+			ObjectMapper om = Map.GetObjectMapper(typeof(TestObject));
 
 			Assert.AreEqual(typeof(TestMapper), om.GetType());
 		}

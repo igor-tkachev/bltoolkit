@@ -14,15 +14,15 @@ namespace BLToolkit.Mapping
 
 		private Hashtable _mappers = new Hashtable();
 
-		public IObjectMapper GetObjectMapper(Type type)
+		public ObjectMapper GetObjectMapper(Type type)
 		{
-			IObjectMapper om = (IObjectMapper)_mappers[type];
+			ObjectMapper om = (ObjectMapper)_mappers[type];
 
 			if (om == null)
 			{
 				lock (_mappers.SyncRoot)
 				{
-					om = (IObjectMapper)_mappers[type];
+					om = (ObjectMapper)_mappers[type];
 
 					if (om == null)
 					{
@@ -38,6 +38,8 @@ namespace BLToolkit.Mapping
 						}
 
 						SetObjectMapper(type, om);
+
+						om.Init(this, type);
 					}
 				}
 			}
@@ -45,7 +47,7 @@ namespace BLToolkit.Mapping
 			return om;
 		}
 
-		public void SetObjectMapper(Type type, IObjectMapper om)
+		public void SetObjectMapper(Type type, ObjectMapper om)
 		{
 			if (type == null) throw new ArgumentNullException("type");
 
@@ -55,19 +57,13 @@ namespace BLToolkit.Mapping
 				_mappers[TypeAccessor.GetAccessor(type).Type] = om;
 		}
 
-		protected virtual IObjectMapper CreateObjectMapper(Type type)
+		protected virtual ObjectMapper CreateObjectMapper(Type type)
 		{
 			Attribute attr = TypeHelper.GetFirstAttribute(type, typeof(ObjectMapperAttribute));
-
-			IObjectMapper om =
-				attr == null? GetDefaultObjectMapper(type): ((ObjectMapperAttribute)attr).ObjectMapper;
-
-			om.Init(this, TypeAccessor.GetAccessor(type));
-
-			return om;
+			return attr == null? GetDefaultObjectMapper(type): ((ObjectMapperAttribute)attr).ObjectMapper;
 		}
 
-		protected virtual IObjectMapper GetDefaultObjectMapper(Type type)
+		protected virtual ObjectMapper GetDefaultObjectMapper(Type type)
 		{
 			return new ObjectMapper();
 		}
@@ -454,7 +450,7 @@ namespace BLToolkit.Mapping
 
 				initContext.MapDataSource = source;
 				initContext.SourceObject  = sourceObject;
-				initContext.ObjectMapper  = dest as IObjectMapper;
+				initContext.ObjectMapper  = dest as ObjectMapper;
 
 				sm.BeginMapping(initContext);
 
@@ -489,25 +485,36 @@ namespace BLToolkit.Mapping
 
 		#region ToObject
 
-		public object ToObject(object source, object destObject)
+		public object ToObject(object sourceObject, object destObject)
 		{
-			MapInternal(null, GetDataSource(source), source, GetDataDestination(destObject), destObject);
+			MapInternal(
+				null,
+				GetDataSource     (sourceObject), sourceObject,
+				GetDataDestination(destObject),   destObject);
+
 			return destObject;
 		}
 
 		public object ToObject(object sourceObject, object destObject, params object[] parameters)
 		{
-			if (sourceObject == null) throw new ArgumentNullException("sourceObject");
-			if (destObject   == null) throw new ArgumentNullException("destObject");
+			IMapDataSource      source = GetDataSource     (sourceObject);
+			IMapDataDestination dest   = GetDataDestination(destObject);
 
-			InitContext ctx = new InitContext();
+			if (dest is ObjectMapper)
+			{
+				InitContext ctx = new InitContext();
 
-			ctx.MapDataSource = GetDataSource(sourceObject);
-			ctx.SourceObject  = sourceObject;
-			ctx.ObjectMapper  = GetObjectMapper(destObject.GetType());
-			ctx.Parameters    = parameters;
+				ctx.MapDataSource = source;
+				ctx.SourceObject  = sourceObject;
+				ctx.ObjectMapper  = (ObjectMapper)dest;
+				ctx.Parameters    = parameters;
 
-			MapInternal(ctx, ctx.MapDataSource, ctx.SourceObject, ctx.ObjectMapper, destObject);
+				MapInternal(ctx, ctx.MapDataSource, ctx.SourceObject, ctx.ObjectMapper, destObject);
+			}
+			else
+			{
+				MapInternal(null, source, sourceObject, dest, destObject);
+			}
 
 			return destObject;
 		}
@@ -540,6 +547,73 @@ namespace BLToolkit.Mapping
 		public T ToObject<T>(object sourceObject, params object[] parameters)
 		{
 			return (T)ToObject(sourceObject, typeof(T), parameters);
+		}
+#endif
+
+		public object ToObject(DataRow dataRow, DataRowVersion version, object destObject)
+		{
+			MapInternal(
+				null,
+				new DataRowMapper(dataRow, version), dataRow,
+				GetDataDestination(destObject),      destObject);
+
+			return destObject;
+		}
+
+		public object ToObject(
+			DataRow dataRow, DataRowVersion version, object destObject, params object[] parameters)
+		{
+			IMapDataSource      source = new DataRowMapper(dataRow, version);
+			IMapDataDestination dest   = GetDataDestination(destObject);
+
+			if (dest is ObjectMapper)
+			{
+				InitContext ctx = new InitContext();
+
+				ctx.MapDataSource = source;
+				ctx.SourceObject  = dataRow;
+				ctx.ObjectMapper  = (ObjectMapper)dest;
+				ctx.Parameters    = parameters;
+
+				MapInternal(ctx, ctx.MapDataSource, ctx.SourceObject, ctx.ObjectMapper, destObject);
+			}
+			else
+			{
+				MapInternal(null, source, dataRow, dest, destObject);
+			}
+
+			return destObject;
+		}
+
+		public object ToObject(DataRow dataRow, DataRowVersion version, Type destObjectType)
+		{
+			return ToObject(dataRow, version, destObjectType, (object[])null);
+		}
+
+#if FW2
+		public T ToObject<T>(DataRow dataRow, DataRowVersion version)
+		{
+			return (T)ToObject(dataRow, version, typeof(T), (object[])null);
+		}
+#endif
+
+		public object ToObject(
+			DataRow dataRow, DataRowVersion version, Type destObjectType, params object[] parameters)
+		{
+			InitContext ctx = new InitContext();
+
+			ctx.MapDataSource = new DataRowMapper(dataRow, version);
+			ctx.SourceObject  = dataRow;
+			ctx.ObjectMapper  = GetObjectMapper(destObjectType);
+			ctx.Parameters    = parameters;
+
+			return MapInternal(ctx);
+		}
+
+#if FW2
+		public T ToObject<T>(DataRow dataRow, DataRowVersion version, params object[] parameters)
+		{
+			return (T)ToObject(dataRow, version, typeof(T), parameters);
 		}
 #endif
 

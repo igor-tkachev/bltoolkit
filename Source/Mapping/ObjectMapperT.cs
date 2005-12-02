@@ -51,8 +51,8 @@ namespace BLToolkit.Mapping
 			_instance.SetValue(o, name, value);
 		}
 
-		private static IObjectMapper _instance = Map.GetObjectMapper(typeof(T));
-		public  static IObjectMapper  Instance
+		private static ObjectMapper _instance = Map.GetObjectMapper(typeof(T));
+		public  static ObjectMapper  Instance
 		{
 			get { return _instance; }
 		}

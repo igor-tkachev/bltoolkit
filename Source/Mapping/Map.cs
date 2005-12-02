@@ -1,4 +1,5 @@
 using System;
+using System.Data;
 
 namespace BLToolkit.Mapping
 {
@@ -8,6 +9,8 @@ namespace BLToolkit.Mapping
 		{
 		}
 
+		#region Public Members
+		
 		private static MappingSchema _defaultSchema = new MappingSchema();
 		public  static MappingSchema  DefaultSchema
 		{
@@ -15,10 +18,12 @@ namespace BLToolkit.Mapping
 			set { _defaultSchema = value; }
 		}
 
-		public static IObjectMapper GetObjectMapper(Type type)
+		public static ObjectMapper GetObjectMapper(Type type)
 		{
 			return _defaultSchema.GetObjectMapper(type);
 		}
+
+		#endregion
 
 		#region ToEnum, FromEnum
 
@@ -76,6 +81,42 @@ namespace BLToolkit.Mapping
 		public static T ToObject<T>(object sourceObject, params object[] parameters)
 		{
 			return _defaultSchema.ToObject<T>(sourceObject, parameters);
+		}
+#endif
+
+		public static object ToObject(DataRow dataRow, DataRowVersion version, object destObject)
+		{
+			return _defaultSchema.ToObject(dataRow, version, destObject);
+		}
+
+		public static object ToObject(
+			DataRow dataRow, DataRowVersion version, object destObject, params object[] parameters)
+		{
+			return _defaultSchema.ToObject(dataRow, version, destObject, parameters);
+		}
+
+		public static object ToObject(DataRow dataRow, DataRowVersion version, Type destObjectType)
+		{
+			return _defaultSchema.ToObject(dataRow, version, destObjectType);
+		}
+
+#if FW2
+		public static T ToObject<T>(DataRow dataRow, DataRowVersion version)
+		{
+			return _defaultSchema.ToObject<T>(dataRow, version);
+		}
+#endif
+
+		public static object ToObject(
+			DataRow dataRow, DataRowVersion version, Type destObjectType, params object[] parameters)
+		{
+			return _defaultSchema.ToObject(dataRow, version, destObjectType, parameters);
+		}
+
+#if FW2
+		public static T ToObject<T>(DataRow dataRow, DataRowVersion version, params object[] parameters)
+		{
+			return _defaultSchema.ToObject<T>(dataRow, version, parameters);
 		}
 #endif
 

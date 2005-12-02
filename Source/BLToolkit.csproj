@@ -130,11 +130,6 @@
                     BuildAction = "Compile"
                 />
                 <File
-                    RelPath = "Mapping\IObjectMapper.cs"
-                    SubType = "Code"
-                    BuildAction = "Compile"
-                />
-                <File
                     RelPath = "Mapping\ISupportMapping.cs"
                     SubType = "Code"
                     BuildAction = "Compile"

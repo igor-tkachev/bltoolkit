@@ -23,7 +23,7 @@ namespace Mapping
 		[Test]
 		public void TestString1()
 		{
-			IObjectMapper om = Map.GetObjectMapper(typeof(Object1));
+			ObjectMapper om = Map.GetObjectMapper(typeof(Object1));
 
 			Object1 o = (Object1)om.CreateInstance();
 
@@ -59,7 +59,7 @@ namespace Mapping
 		[Test]
 		public void TestString2()
 		{
-			IObjectMapper om = Map.GetObjectMapper(typeof(Object2));
+			ObjectMapper om = Map.GetObjectMapper(typeof(Object2));
 
 			Object2 o = (Object2)om.CreateInstance();
 
@@ -94,7 +94,7 @@ namespace Mapping
 		[Test]
 		public void TestString3()
 		{
-			IObjectMapper om = Map.GetObjectMapper(typeof(Object3));
+			ObjectMapper om = Map.GetObjectMapper(typeof(Object3));
 
 			Object3 o = (Object3)om.CreateInstance();
 
@@ -129,7 +129,7 @@ namespace Mapping
 		[Test]
 		public void TestString4()
 		{
-			IObjectMapper om = Map.GetObjectMapper(typeof(Object2));
+			ObjectMapper om = Map.GetObjectMapper(typeof(Object2));
 
 			Object2 o = (Object2)om.CreateInstance();
 
@@ -161,7 +161,7 @@ namespace Mapping
 		[Test]
 		public void TestPrimitive()
 		{
-			IObjectMapper om = Map.GetObjectMapper(typeof(Object5));
+			ObjectMapper om = Map.GetObjectMapper(typeof(Object5));
 
 			Object5 o = (Object5)om.CreateInstance();
 

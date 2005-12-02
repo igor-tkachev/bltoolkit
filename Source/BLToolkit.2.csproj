@@ -43,7 +43,6 @@
     <Compile Include="Mapping\DefaultValueAttribute.cs" />
     <Compile Include="Mapping\IMapDataDestination.cs" />
     <Compile Include="Mapping\IMapDataSource.cs" />
-    <Compile Include="Mapping\IObjectMapper.cs" />
     <Compile Include="Mapping\ISupportMapping.cs" />
     <Compile Include="Mapping\Map.cs" />
     <Compile Include="Mapping\MapFieldAttribute.cs" />

@@ -65,8 +65,8 @@ namespace BLToolkit.Reflection
 			set { _stopMapping = value; }
 		}
 
-		private IObjectMapper _objectMapper;
-		public  IObjectMapper  ObjectMapper
+		private ObjectMapper _objectMapper;
+		public  ObjectMapper  ObjectMapper
 		{
 			get { return _objectMapper;  }
 			set { _objectMapper = value; }
