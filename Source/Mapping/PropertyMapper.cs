@@ -93,7 +93,7 @@ namespace Rsdn.Framework.Data.Mapping
 		/// </summary>
 		public override MemberInfo MemberInfo 
 		{ 
-			get { return _propertyInfo; }
+			get { return _classMember != null? _classMember.MemberInfo: _propertyInfo; }
 		}
 
 		private bool _canRead;
