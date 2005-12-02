@@ -23,7 +23,7 @@ namespace Mapping
 		[Test]
 		public void BoolTest1()
 		{
-			IObjectMapper om = Map.GetObjectMapper(typeof(Object1));
+			ObjectMapper om = Map.GetObjectMapper(typeof(Object1));
 
 			Object1 o = (Object1)om.CreateInstance();
 
@@ -51,7 +51,7 @@ namespace Mapping
 		[Test]
 		public void BoolTest2()
 		{
-			IObjectMapper om = Map.GetObjectMapper(typeof(Object2));
+			ObjectMapper om = Map.GetObjectMapper(typeof(Object2));
 
 			Object2 o = (Object2)om.CreateInstance();
 
@@ -90,7 +90,7 @@ namespace Mapping
 		[Test]
 		public void EnumTest1()
 		{
-			IObjectMapper om = Map.GetObjectMapper(typeof(Object3));
+			ObjectMapper om = Map.GetObjectMapper(typeof(Object3));
 
 			Object3 o = (Object3)om.CreateInstance();
 
@@ -121,7 +121,7 @@ namespace Mapping
 		[Test]
 		public void DayOfWeekTest1()
 		{
-			IObjectMapper om = Map.GetObjectMapper(typeof(Object4));
+			ObjectMapper om = Map.GetObjectMapper(typeof(Object4));
 
 			Object4 o = (Object4)om.CreateInstance();
 

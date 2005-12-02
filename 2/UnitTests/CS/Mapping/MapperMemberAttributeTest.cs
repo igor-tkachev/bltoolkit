@@ -26,7 +26,7 @@ namespace Mapping
 		[Test]
 		public void Test1()
 		{
-			IObjectMapper om = Map.GetObjectMapper(typeof(Object1));
+			ObjectMapper om = Map.GetObjectMapper(typeof(Object1));
 
 			Object1 o = new Object1();
 
@@ -45,7 +45,7 @@ namespace Mapping
 		[Test]
 		public void Test2()
 		{
-			IObjectMapper om = Map.GetObjectMapper(typeof(Object2));
+			ObjectMapper om = Map.GetObjectMapper(typeof(Object2));
 
 			Object2 o = new Object2();
 

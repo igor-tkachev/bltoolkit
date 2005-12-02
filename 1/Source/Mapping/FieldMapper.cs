@@ -90,7 +90,7 @@ namespace Rsdn.Framework.Data.Mapping
 
 		public override MemberInfo MemberInfo 
 		{ 
-			get { return _fieldInfo; }
+			get { return _classMember != null? _classMember.MemberInfo: _fieldInfo; }
 		}
 
 		/// <summary>

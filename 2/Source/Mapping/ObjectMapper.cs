@@ -7,7 +7,7 @@ using BLToolkit.Reflection;
 
 namespace BLToolkit.Mapping
 {
-	public class ObjectMapper : IObjectMapper
+	public class ObjectMapper : IMapDataSource, IMapDataDestination
 	{
 		#region Constructor
 
@@ -85,8 +85,17 @@ namespace BLToolkit.Mapping
 				{
 					mm = (MemberMapper)_nameToMember[name.ToLower(CultureInfo.CurrentCulture)];
 
-					if (mm != null)
+					if (mm == null)
+					{
+						mm = GetComplexMapper(name, name);
+
+						if (mm != null)
+							Add(mm);
+					}
+					else
+					{
 						_nameToMember[name] = mm;
+					}
 				}
 
 				return mm;
@@ -121,14 +130,14 @@ namespace BLToolkit.Mapping
 
 		#region Init Mapper
 
-		public virtual void Init(MappingSchema mappingSchema, TypeAccessor typeAccessor)
+		public virtual void Init(MappingSchema mappingSchema, Type type)
 		{
-			if (typeAccessor == null) throw new ArgumentNullException("typeAccessor");
+			if (type == null) throw new ArgumentNullException("type");
 
-			_typeAccessor  = typeAccessor;
+			_typeAccessor  = TypeAccessor.GetAccessor(type);
 			_mappingSchema = mappingSchema;
 
-			foreach (MemberAccessor ma in typeAccessor)
+			foreach (MemberAccessor ma in _typeAccessor)
 			{
 				if (GetIgnore(ma))
 					continue;
@@ -177,21 +186,46 @@ namespace BLToolkit.Mapping
 			return mm;
 		}
 
-		[SuppressMessage("Microsoft.Performance", "CA1807:AvoidUnnecessaryStringCreation", MessageId = "stack0"), SuppressMessage("Microsoft.Performance", "CA1807:AvoidUnnecessaryStringCreation", MessageId = "origName")]
+		[SuppressMessage("Microsoft.Performance", "CA1807:AvoidUnnecessaryStringCreation", MessageId = "stack0")]
+		[SuppressMessage("Microsoft.Performance", "CA1807:AvoidUnnecessaryStringCreation", MessageId = "origName")]
 		protected MemberMapper GetComplexMapper(string mapName, string origName)
 		{
+			if (origName == null) throw new ArgumentNullException("origName");
+
 			string name = origName.ToLower();
 			int    idx  = origName.IndexOf('.');
 
 			if (idx > 0 /*&& idx < origName.Length*/)
 			{
-				name = name.Substring(idx + 1);
+				name = name.Substring(0, idx);
 
 				foreach (MemberAccessor ma in TypeAccessor)
 				{
 					if (ma.Name.ToLower() == name)
 					{
-						
+						ObjectMapper om = MappingSchema.GetObjectMapper(ma.Type);
+
+						if (om != null)
+						{
+							MemberMapper mm = om.GetComplexMapper(mapName, origName.Substring(idx + 1));
+
+							if (mm != null)
+							{
+								MapMemberInfo mi = new MapMemberInfo();
+
+								mi.MemberAccessor = ma;
+								mi.MappingSchema  = MappingSchema;
+								mi.Name           = mapName;
+
+								MemberMapper mapper = new MemberMapper.ComplexMapper(mm);
+
+								mapper.Init(mi);
+
+								return mapper;
+							}
+						}
+
+						break;
 					}
 				}
 			}
@@ -351,7 +385,7 @@ namespace BLToolkit.Mapping
 			return false;
 		}
 
-		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1800:DoNotCastUnnecessarily")]
+		[SuppressMessage("Microsoft.Performance", "CA1800:DoNotCastUnnecessarily")]
 		private static object CheckNullValue(object value, MemberAccessor memberAccessor)
 		{
 			if (value is Type && (Type)value == typeof(DBNull))

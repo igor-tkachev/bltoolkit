@@ -1,9 +1,10 @@
 using System;
+using System.Data;
+using System.Data.SqlTypes;
 
 using NUnit.Framework;
 
 using BLToolkit.Mapping;
-using System.Data.SqlTypes;
 
 namespace Mapping
 {
@@ -90,6 +91,32 @@ namespace Mapping
 			Assert.AreEqual(30, o.Field3);
 		}
 #endif
+
+		public class DefaultNullType
+		{
+			[NullValue(-1)]
+			public int NullableInt;
+		}
+
+		[Test]
+		public void ToObjectD()
+		{
+			DataTable table = new DataTable();
+
+			table.Columns.Add("NullableInt", typeof(int));
+
+			table.Rows.Add(new object[] { DBNull.Value });
+			table.Rows.Add(new object[] { 1 });
+			table.AcceptChanges();
+
+			DefaultNullType dn = (DefaultNullType)Map.ToObject(table, typeof(DefaultNullType));
+
+			Assert.AreEqual(-1, dn.NullableInt);
+
+			Map.ToObject(table.Rows[1], DataRowVersion.Current, dn);
+
+			Assert.AreEqual(1, dn.NullableInt);
+		}
 
 		#endregion
 

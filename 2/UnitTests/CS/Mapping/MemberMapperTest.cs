@@ -21,7 +21,7 @@ namespace Mapping
 		[Test]
 		public void PrimitiveMemberTest()
 		{
-			IObjectMapper om = Map.GetObjectMapper(typeof(Object1));
+			ObjectMapper om = Map.GetObjectMapper(typeof(Object1));
 
 			Object1 o = new Object1();
 
@@ -98,7 +98,7 @@ namespace Mapping
 		[Test]
 		public void SqlTypeMemberTest()
 		{
-			IObjectMapper om = Map.GetObjectMapper(typeof(Object3));
+			ObjectMapper om = Map.GetObjectMapper(typeof(Object3));
 
 			Object3 o = new Object3();
 

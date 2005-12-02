@@ -813,7 +813,7 @@ namespace Rsdn.Framework.Data.Mapping
 
 						if (fi != null)
 						{
-							IMemberMapper field =
+							IMemberMapper field = 
 								GetMemberMapper(fi.FieldType, name.Substring(idx + 1));
 
 							if (field != null)

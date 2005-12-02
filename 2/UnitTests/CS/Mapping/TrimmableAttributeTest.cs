@@ -24,7 +24,7 @@ namespace Mapping
 		[Test]
 		public void Test()
 		{
-			IObjectMapper om = Map.GetObjectMapper(typeof(TestObject));
+			ObjectMapper om = Map.GetObjectMapper(typeof(TestObject));
 
 			TestObject o = new TestObject();
 

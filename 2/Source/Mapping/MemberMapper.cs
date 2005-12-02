@@ -89,6 +89,34 @@ namespace BLToolkit.Mapping
 
 		#region Intermal Mappers
 
+		#region Complex Mapper
+
+		internal class ComplexMapper :MemberMapper
+		{
+			public ComplexMapper(MemberMapper memberMapper)
+			{
+				_mapper = memberMapper;
+			}
+
+			MemberMapper _mapper;
+
+			public override object GetValue(object o)
+			{
+				object obj = _memberAccessor.GetValue(o);
+				return obj == null? null: _mapper.GetValue(obj);
+			}
+
+			public override void SetValue(object o, object value)
+			{
+				object obj = _memberAccessor.GetValue(o);
+
+				if (obj != null)
+					_mapper.SetValue(obj, value);
+			}
+		}
+
+		#endregion
+
 		#region Primitive Mappers
 
 		private static MemberMapper GetPrimitiveMemberMapper(MapMemberInfo mi)

@@ -18,9 +18,9 @@ namespace Mapping
 		}
 
 		[Test]
-		public void Test()
+		public void Test1()
 		{
-			IObjectMapper om = Map.GetObjectMapper(typeof(Object1));
+			ObjectMapper om = Map.GetObjectMapper(typeof(Object1));
 
 			Object1 o = (Object1)om.CreateInstance();
 
@@ -29,6 +29,48 @@ namespace Mapping
 
 			Assert.AreEqual(123, o.Field1);
 			Assert.AreEqual(234, o.Field2);
+		}
+
+		[MapValue(true,  "Y")]
+		[MapValue(false, "N")]
+		public class Object2
+		{
+			public bool Field1;
+			public int  Field2;
+		}
+
+		public class Object3
+		{
+			public Object2 Object2 = new Object2();
+			public Object4 Object4;
+		}
+
+		[MapField("fld1", "Object3.Object2.Field1")]
+		[MapField("fld2", "Object3.Object4.Str1")]
+		public class Object4
+		{
+			public Object3 Object3 = new Object3();
+			public string  Str1;
+		}
+
+		[Test]
+		public void Test2()
+		{
+			ObjectMapper om = Map.GetObjectMapper(typeof(Object4));
+
+			Object4 o = (Object4)om.CreateInstance();
+
+			om.SetValue(o, "fld1", "Y");
+			om.SetValue(o, "Object3.Object2.Field2", 123);
+			om.SetValue(o, "fld2", "str");
+
+			Assert.AreEqual(true, o.Object3.Object2.Field1);
+			Assert.AreEqual(123,  o.Object3.Object2.Field2);
+			Assert.IsNull  (      o.Object3.Object4);
+
+			Assert.AreEqual("Y", om.GetValue(o, "fld1"));
+			Assert.AreEqual(123, om.GetValue(o, "Object3.Object2.Field2"));
+			Assert.IsNull  (     om.GetValue(o, "fld2"));
 		}
 	}
 }
