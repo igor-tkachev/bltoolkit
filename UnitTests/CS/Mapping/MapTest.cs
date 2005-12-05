@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Data;
 using System.Data.SqlTypes;
 
@@ -9,7 +10,7 @@ using BLToolkit.Mapping;
 namespace Mapping
 {
 	[TestFixture, Category("Mapping")]
-	public class MapTest
+	public class MapTest : TestFixtureBase
 	{
 		#region ToEnum, FromEnum
 
@@ -161,6 +162,81 @@ namespace Mapping
 
 			Console.WriteLine("{0} - {1}", so.d2, o.d2); Assert.AreEqual(o.d2, so.d2.Value);
 			//Console.WriteLine("{0} - {1}", s.d1, d.d1); Assert.IsTrue(d.d1.Value == s.d1);
+		}
+
+		#endregion
+
+		#region SourceListToDestList
+
+		[Test]
+		public void ListToList()
+		{
+			DataTable table = GetDataTable();
+			ArrayList list1 = Map.TableToList(table, typeof(TestObject));
+			ArrayList list2 = new ArrayList();
+
+			Map.ListToList(list1, list2, typeof(TestObject));
+
+			CompareLists(table, list2);
+		}
+
+		[Test]
+		public void TableToList()
+		{
+			DataTable table = GetDataTable();
+			ArrayList list  = Map.TableToList(table, typeof(TestObject));
+
+			CompareLists(table, list);
+		}
+
+		[Test]
+		public void ListToTable1()
+		{
+			DataTable table1 = GetDataTable();
+			ArrayList list   = Map.TableToList(table1, typeof(TestObject));
+			DataTable table2 = Map.ListToTable(list);
+
+			table2.AcceptChanges();
+
+			CompareLists(table1, table2);
+		}
+
+		[Test]
+		public void ListToTable2()
+		{
+			DataTable table1 = GetDataTable();
+			ArrayList list   = Map.TableToList(table1, typeof(TestObject));
+			DataTable table2 = table1.Clone();
+
+			Map.ListToTable(list, table2);
+
+			table2.AcceptChanges();
+
+			CompareLists(table1, table2);
+		}
+
+		[Test]
+		public void TableToTable1()
+		{
+			DataTable table1 = GetDataTable();
+			DataTable table2 = Map.TableToTable(table1);
+
+			table2.AcceptChanges();
+
+			CompareLists(table1, table2);
+		}
+
+		[Test]
+		public void TableToTable2()
+		{
+			DataTable table1 = GetDataTable();
+			DataTable table2 = new DataTable();
+				
+			Map.TableToTable(table1, table2);
+
+			table2.AcceptChanges();
+
+			CompareLists(table1, table2);
 		}
 
 		#endregion

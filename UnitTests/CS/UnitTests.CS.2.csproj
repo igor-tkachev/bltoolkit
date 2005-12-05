@@ -51,6 +51,8 @@
     <Compile Include="Reflection\TypeAccessorTest.cs" />
     <Compile Include="Reflection\TypeAccessorTest2.cs" />
     <Compile Include="Reflection\TypeHelperTest.cs" />
+    <Compile Include="TestFixtureBase.cs" />
+    <Compile Include="TestObject.cs" />
     <Compile Include="TypeBuilder\Builders\IAbstractTypeBuilderTest.cs" />
     <Compile Include="TypeBuilder\Builders\DefaultTypeBuilderTest.cs" />
     <Compile Include="TypeBuilder\Builders\ImplemetInterfaceBuilderTest.cs" />

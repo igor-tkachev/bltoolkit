@@ -1,9 +1,6 @@
 using System;
-using System.Collections;
 using System.Reflection;
 using System.Reflection.Emit;
-
-using BLToolkit.TypeBuilder;
 
 namespace BLToolkit.Reflection.Emit
 {
@@ -322,7 +319,7 @@ namespace BLToolkit.Reflection.Emit
 		/// </summary>
 		/// <param name="name">The short name of the type.</param>
 		/// <returns>Returns the created <b>TypeBuilderHelper</b>.</returns>
-		/// <seealso cref="System.Reflection.Emit.typeBuilder.DefineNestedType(string)">
+		/// <seealso cref="System.Reflection.Emit.TypeBuilder.DefineNestedType(string)">
 		/// TypeBuilder.DefineNestedType Method</seealso>
 		public TypeBuilderHelper DefineNestedType(string name)
 		{

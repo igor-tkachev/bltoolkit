@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Diagnostics;
 
 using BLToolkit.Mapping;
 
@@ -14,40 +15,40 @@ namespace BLToolkit.Reflection
 		private object[] _memberParameters;
 		public  object[]  MemberParameters
 		{
-			get { return _memberParameters;  }
-			set { _memberParameters = value; }
+			[DebuggerStepThrough] get { return _memberParameters;  }
+			[DebuggerStepThrough] set { _memberParameters = value; }
 		}
 
 		private object[] _parameters;
 		public  object[]  Parameters
 		{
-			get { return _parameters;  }
-			set { _parameters = value; }
+			[DebuggerStepThrough] get { return _parameters;  }
+			[DebuggerStepThrough] set { _parameters = value; }
 		}
 
 		private bool _isInternal;
 		public  bool  IsInternal
 		{
-			get { return _isInternal;  }
-			set { _isInternal = value; }
+			[DebuggerStepThrough] get { return _isInternal;  }
+			[DebuggerStepThrough] set { _isInternal = value; }
 		}
 
 		private bool _isLazyInstance;
 		public  bool  IsLazyInstance
 		{
-			get { return _isLazyInstance;  }
-			set { _isLazyInstance = value; }
+			[DebuggerStepThrough] get { return _isLazyInstance;  }
+			[DebuggerStepThrough] set { _isLazyInstance = value; }
 		}
 
 		private object _parent;
 		public  object  Parent
 		{
-			get { return _parent;  }
-			set { _parent = value; }
+			[DebuggerStepThrough] get { return _parent;  }
+			[DebuggerStepThrough] set { _parent = value; }
 		}
 
 		private Hashtable _items;
-		private Hashtable  Items
+		public  Hashtable  Items
 		{
 			get 
 			{
@@ -61,29 +62,36 @@ namespace BLToolkit.Reflection
 		private bool _stopMapping;
 		public  bool  StopMapping
 		{
-			get { return _stopMapping;  }
-			set { _stopMapping = value; }
+			[DebuggerStepThrough] get { return _stopMapping;  }
+			[DebuggerStepThrough] set { _stopMapping = value; }
 		}
 
-		private ObjectMapper _objectMapper;
-		public  ObjectMapper  ObjectMapper
+		private IMapDataSource _dataSource;
+		public  IMapDataSource  DataSource
 		{
-			get { return _objectMapper;  }
-			set { _objectMapper = value; }
-		}
-
-		private IMapDataSource _mapDataSource;
-		public  IMapDataSource  MapDataSource
-		{
-			get { return _mapDataSource;  }
-			set { _mapDataSource = value; }
+			[DebuggerStepThrough] get { return _dataSource;  }
+			[DebuggerStepThrough] set { _dataSource = value; }
 		}
 
 		private object _sourceObject;
 		public 	object  SourceObject
 		{
-			get { return _sourceObject;  }
-			set { _sourceObject = value; }
+			[DebuggerStepThrough] get { return _sourceObject;  }
+			[DebuggerStepThrough] set { _sourceObject = value; }
+		}
+
+		private ObjectMapper _objectMapper;
+		public  ObjectMapper  ObjectMapper
+		{
+			[DebuggerStepThrough] get { return _objectMapper;  }
+			[DebuggerStepThrough] set { _objectMapper = value; }
+		}
+
+		private MappingSchema _mappingSchema;
+		public  MappingSchema  MappingSchema
+		{
+			[DebuggerStepThrough] get { return _mappingSchema;  }
+			[DebuggerStepThrough] set { _mappingSchema = value; }
 		}
 	}
 }
