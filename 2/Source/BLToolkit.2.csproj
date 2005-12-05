@@ -37,12 +37,17 @@
   <ItemGroup>
     <Compile Include="Aspects\NotNullAttribute.cs" />
     <Compile Include="GlobalSuppressions.cs" />
+    <Compile Include="Mapping\EnumeratorMapper.cs" />
+    <Compile Include="Mapping\DataReaderListMapper.cs" />
     <Compile Include="Mapping\DataReaderMapper.cs" />
+    <Compile Include="Mapping\DataTabletMapper.cs" />
     <Compile Include="Mapping\DataRowMapper.cs" />
     <Compile Include="Mapping\DefaultMemberMapper.cs" />
     <Compile Include="Mapping\DefaultValueAttribute.cs" />
     <Compile Include="Mapping\IMapDataDestination.cs" />
+    <Compile Include="Mapping\IMapDataDestinationList.cs" />
     <Compile Include="Mapping\IMapDataSource.cs" />
+    <Compile Include="Mapping\IMapDataSourceList.cs" />
     <Compile Include="Mapping\ISupportMapping.cs" />
     <Compile Include="Mapping\Map.cs" />
     <Compile Include="Mapping\MapFieldAttribute.cs" />
@@ -55,6 +60,7 @@
     <Compile Include="Mapping\MemberMapperAttribute.cs" />
     <Compile Include="Mapping\NullableAttribute.cs" />
     <Compile Include="Mapping\NullValueAttribute.cs" />
+    <Compile Include="Mapping\ObjectListMapper.cs" />
     <Compile Include="Mapping\ObjectMapperT.cs" />
     <Compile Include="Mapping\MemberMapper.cs" />
     <Compile Include="Mapping\ObjectMapper.cs" />

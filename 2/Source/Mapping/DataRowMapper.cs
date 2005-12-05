@@ -1,6 +1,5 @@
 using System;
 using System.Data;
-using System.Threading;
 
 namespace BLToolkit.Mapping
 {
@@ -14,8 +13,14 @@ namespace BLToolkit.Mapping
 		{
 		}
 
+		public DataRowMapper(DataRowView view)
+			: this(view.Row, view.RowVersion)
+		{
+		}
+
 		public DataRowMapper(DataRow dataRow, DataRowVersion version)
 		{
+			_dataRow = dataRow;
 			_version = version;
 
 			Init(dataRow);
@@ -84,18 +89,33 @@ namespace BLToolkit.Mapping
 			}
 			else
 			{
-				DataColumn dc = _dataRow.Table.Columns[index];
+				DataColumn column = _dataRow.Table.Columns[index];
 
-				if (dc.DataType != value.GetType())
+				if (column.DataType != value.GetType())
 				{
-					if (dc.DataType == typeof(Guid))
+					if (_createColumns && _dataRow.Table.Rows.Count == 1)
 					{
-						value = new Guid(value.ToString());
+						DataColumnCollection cc = _dataRow.Table.Columns;
+
+						int ordinal = column.Ordinal;
+
+						cc.Remove(column);
+
+						DataColumn newColumn = cc.Add(column.ColumnName, value.GetType());
+
+						newColumn.SetOrdinal(ordinal);
 					}
 					else
 					{
-						if (dc.DataType != typeof(string))
-							value = Convert.ChangeType(value, dc.DataType);
+						if (column.DataType == typeof(Guid))
+						{
+							value = new Guid(value.ToString());
+						}
+						else
+						{
+							if (column.DataType != typeof(string))
+								value = Convert.ChangeType(value, column.DataType);
+						}
 					}
 				}
 

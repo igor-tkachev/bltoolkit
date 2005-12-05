@@ -1,6 +1,5 @@
 using System;
 using System.Reflection.Emit;
-using System.Reflection;
 
 namespace BLToolkit.Reflection.Emit
 {

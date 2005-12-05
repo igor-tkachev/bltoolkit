@@ -3,6 +3,9 @@ using System.Collections;
 using System.Data;
 using System.Reflection;
 using System.Diagnostics.CodeAnalysis;
+#if FW2
+using System.Collections.Generic;
+#endif
 
 using BLToolkit.Reflection;
 
@@ -83,7 +86,7 @@ namespace BLToolkit.Mapping
 
 				if (type.IsPrimitive)
 				{
-					if (type == typeof(Int32))   return (Int32)0;
+					if (type == typeof(Int32))   return 0;
 					if (type == typeof(Double))  return (Double)0;
 					if (type == typeof(Int16))   return (Int16)0;
 					if (type == typeof(SByte))   return (SByte)0;
@@ -99,7 +102,7 @@ namespace BLToolkit.Mapping
 				else
 				{
 					if (type == typeof(DateTime)) return DateTime.MinValue;
-					if (type == typeof(Decimal))  return (decimal)0m;
+					if (type == typeof(Decimal))  return 0m;
 					if (type == typeof(Guid))     return Guid.Empty;
 				}
 			}
@@ -360,19 +363,22 @@ namespace BLToolkit.Mapping
 		#region GetDataSource, GetDataDestination
 
 		[SuppressMessage("Microsoft.Performance", "CA1800:DoNotCastUnnecessarily")]
-		protected virtual IMapDataSource GetDataSource(object obj)
+		public virtual IMapDataSource GetDataSource(object obj)
 		{
 			if (obj is IMapDataSource)
 				return (IMapDataSource)obj;
 
+			if (obj is IDataReader)
+				return new DataReaderMapper((IDataReader)obj);
+
 			if (obj is DataRow)
 				return new DataRowMapper((DataRow)obj);
 
+			if (obj is DataRowView)
+				return new DataRowMapper((DataRowView)obj);
+
 			if (obj is DataTable)
 				return new DataRowMapper(((DataTable)(obj)).Rows[0]);
-
-			if (obj is IDataReader)
-				return new DataReaderMapper((IDataReader)obj);
 
 			//if (obj is IDictionary)
 			//	return new DictionaryReader((IDictionary)obj);
@@ -381,13 +387,16 @@ namespace BLToolkit.Mapping
 		}
 
 		[SuppressMessage("Microsoft.Performance", "CA1800:DoNotCastUnnecessarily")]
-		protected virtual IMapDataDestination GetDataDestination(object obj)
+		public virtual IMapDataDestination GetDataDestination(object obj)
 		{
 			if (obj is IMapDataDestination)
 				return (IMapDataDestination)obj;
 
 			if (obj is DataRow)
-				return new DataRowMapper(obj as DataRow);
+				return new DataRowMapper((DataRow)obj);
+
+			if (obj is DataRowView)
+				return new DataRowMapper((DataRowView)obj);
 
 			if (obj is DataTable)
 			{
@@ -448,7 +457,8 @@ namespace BLToolkit.Mapping
 				if (initContext == null)
 					initContext = new InitContext();
 
-				initContext.MapDataSource = source;
+				initContext.MappingSchema = this;
+				initContext.DataSource    = source;
 				initContext.SourceObject  = sourceObject;
 				initContext.ObjectMapper  = dest as ObjectMapper;
 
@@ -474,16 +484,75 @@ namespace BLToolkit.Mapping
 			if (initContext.StopMapping == false)
 			{
 				MapInternal(initContext,
-					initContext.MapDataSource, initContext.SourceObject, 
+					initContext.DataSource, initContext.SourceObject, 
 					initContext.ObjectMapper, dest);
 			}
 
 			return dest;
 		}
 
+		private static ObjectMapper _nullMapper = new ObjectMapper();
+
+		public virtual void SourceListToDestinationList(
+			IMapDataSourceList      dataSourceList,
+			IMapDataDestinationList dataDestinationList,
+			params object[]         parameters)
+		{
+			if (dataSourceList      == null) throw new ArgumentNullException("dataSourceList");
+			if (dataDestinationList == null) throw new ArgumentNullException("dataDestinationList");
+
+			InitContext ctx = new InitContext();
+
+			ctx.MappingSchema = this;
+			ctx.Parameters    = parameters;
+
+			dataSourceList.     InitMapping(ctx); if (ctx.StopMapping) return;
+			dataDestinationList.InitMapping(ctx); if (ctx.StopMapping) return;
+
+			int[]               index   = null;
+			ObjectMapper        current = _nullMapper;
+			IMapDataDestination dest    = dataDestinationList.GetDataDestination(ctx);
+			ObjectMapper        om      = dest as ObjectMapper;
+
+			while (dataSourceList.SetNextDataSource(ctx))
+			{
+				ctx.ObjectMapper = om;
+
+				object destObject = dataDestinationList.GetNextObject(ctx);
+
+				if (ctx.StopMapping) continue;
+
+				ISupportMapping sm = destObject as ISupportMapping;
+
+				if (sm != null)
+				{
+					sm.BeginMapping(ctx);
+
+					if (ctx.StopMapping)
+						continue;
+				}
+
+				if (current != ctx.ObjectMapper)
+				{
+					current = ctx.ObjectMapper;
+					index   = GetIndex(ctx.DataSource, current != null? current: dest);
+				}
+
+				MapInternal(ctx.DataSource, ctx.SourceObject, dest, destObject, index);
+
+				if (sm != null)
+					sm.EndMapping(ctx);
+			}
+
+			dataDestinationList.EndMapping(ctx);
+			dataSourceList.     EndMapping(ctx);
+		}
+
 		#endregion
 
 		#region ToObject
+
+			#region From Object
 
 		public object ToObject(object sourceObject, object destObject)
 		{
@@ -504,12 +573,12 @@ namespace BLToolkit.Mapping
 			{
 				InitContext ctx = new InitContext();
 
-				ctx.MapDataSource = source;
-				ctx.SourceObject  = sourceObject;
-				ctx.ObjectMapper  = (ObjectMapper)dest;
-				ctx.Parameters    = parameters;
+				ctx.DataSource   = source;
+				ctx.SourceObject = sourceObject;
+				ctx.ObjectMapper = (ObjectMapper)dest;
+				ctx.Parameters   = parameters;
 
-				MapInternal(ctx, ctx.MapDataSource, ctx.SourceObject, ctx.ObjectMapper, destObject);
+				MapInternal(ctx, ctx.DataSource, ctx.SourceObject, ctx.ObjectMapper, destObject);
 			}
 			else
 			{
@@ -521,21 +590,15 @@ namespace BLToolkit.Mapping
 
 		public object ToObject(object sourceObject, Type destObjectType)
 		{
-			return ToObject(sourceObject, destObjectType, (object[])null);
+			return ToObject(sourceObject, destObjectType, null);
 		}
-
-#if FW2
-		public T ToObject<T>(object sourceObject)
-		{
-			return (T)ToObject(sourceObject, typeof(T), (object[])null);
-		}
-#endif
 
 		public object ToObject(object sourceObject, Type destObjectType, params object[] parameters)
 		{
 			InitContext ctx = new InitContext();
 
-			ctx.MapDataSource = GetDataSource(sourceObject);
+			ctx.MappingSchema = this;
+			ctx.DataSource    = GetDataSource(sourceObject);
 			ctx.SourceObject  = sourceObject;
 			ctx.ObjectMapper  = GetObjectMapper(destObjectType);
 			ctx.Parameters    = parameters;
@@ -544,11 +607,20 @@ namespace BLToolkit.Mapping
 		}
 
 #if FW2
+		public T ToObject<T>(object sourceObject)
+		{
+			return (T)ToObject(sourceObject, typeof(T), (object[])null);
+		}
+		
 		public T ToObject<T>(object sourceObject, params object[] parameters)
 		{
 			return (T)ToObject(sourceObject, typeof(T), parameters);
 		}
 #endif
+
+			#endregion
+
+			#region From DataRow
 
 		public object ToObject(DataRow dataRow, DataRowVersion version, object destObject)
 		{
@@ -570,12 +642,12 @@ namespace BLToolkit.Mapping
 			{
 				InitContext ctx = new InitContext();
 
-				ctx.MapDataSource = source;
+				ctx.DataSource = source;
 				ctx.SourceObject  = dataRow;
 				ctx.ObjectMapper  = (ObjectMapper)dest;
 				ctx.Parameters    = parameters;
 
-				MapInternal(ctx, ctx.MapDataSource, ctx.SourceObject, ctx.ObjectMapper, destObject);
+				MapInternal(ctx, ctx.DataSource, ctx.SourceObject, ctx.ObjectMapper, destObject);
 			}
 			else
 			{
@@ -587,22 +659,16 @@ namespace BLToolkit.Mapping
 
 		public object ToObject(DataRow dataRow, DataRowVersion version, Type destObjectType)
 		{
-			return ToObject(dataRow, version, destObjectType, (object[])null);
+			return ToObject(dataRow, version, destObjectType, null);
 		}
-
-#if FW2
-		public T ToObject<T>(DataRow dataRow, DataRowVersion version)
-		{
-			return (T)ToObject(dataRow, version, typeof(T), (object[])null);
-		}
-#endif
 
 		public object ToObject(
 			DataRow dataRow, DataRowVersion version, Type destObjectType, params object[] parameters)
 		{
 			InitContext ctx = new InitContext();
 
-			ctx.MapDataSource = new DataRowMapper(dataRow, version);
+			ctx.MappingSchema = this;
+			ctx.DataSource    = new DataRowMapper(dataRow, version);
 			ctx.SourceObject  = dataRow;
 			ctx.ObjectMapper  = GetObjectMapper(destObjectType);
 			ctx.Parameters    = parameters;
@@ -611,9 +677,303 @@ namespace BLToolkit.Mapping
 		}
 
 #if FW2
+		public T ToObject<T>(DataRow dataRow, DataRowVersion version)
+		{
+			return (T)ToObject(dataRow, version, typeof(T), (object[])null);
+		}
+
 		public T ToObject<T>(DataRow dataRow, DataRowVersion version, params object[] parameters)
 		{
 			return (T)ToObject(dataRow, version, typeof(T), parameters);
+		}
+#endif
+
+			#endregion
+
+		#endregion
+
+		#region ListToList
+
+		public IList ListToList(
+			ICollection     sourceList,
+			IList           destList,
+			Type            destObjectType,
+			params object[] parameters)
+		{
+			SourceListToDestinationList(
+				new EnumeratorMapper(sourceList.GetEnumerator()),
+				new ObjectListMapper(destList, GetObjectMapper(destObjectType)),
+				parameters);
+
+			return destList;
+		}
+
+		public ArrayList ListToList(ICollection sourceList, Type destObjectType, params object[] parameters)
+		{
+			ArrayList destList = new ArrayList();
+
+			SourceListToDestinationList(
+				new EnumeratorMapper(sourceList.GetEnumerator()),
+				new ObjectListMapper(destList, GetObjectMapper(destObjectType)),
+				parameters);
+
+			return destList;
+		}
+
+#if FW2
+		public List<T> ListToList<T>(ICollection sourceList, List<T> destList, params object[] parameters)
+		{
+			SourceListToDestinationList(
+				new EnumeratorMapper(sourceList.GetEnumerator()),
+				new ObjectListMapper(destList, GetObjectMapper(typeof(T))),
+				parameters);
+
+			return destList;
+		}
+
+		public List<T> ListToList<T>(ICollection sourceList, params object[] parameters)
+		{
+			List<T> destList = new List<T>();
+
+			SourceListToDestinationList(
+				new EnumeratorMapper(sourceList.GetEnumerator()),
+				new ObjectListMapper(destList, GetObjectMapper(typeof(T))),
+				parameters);
+
+			return destList;
+		}
+#endif
+
+		#endregion
+
+		#region ListToTable
+
+		public DataTable ListToTable(ICollection sourceList, DataTable destTable)
+		{
+			SourceListToDestinationList(
+				new EnumeratorMapper(sourceList.GetEnumerator()),
+				new DataTabletMapper(destTable),
+				null);
+
+			return destTable;
+		}
+
+		public DataTable ListToTable(ICollection sourceList)
+		{
+			DataTable destTable = new DataTable();
+
+			SourceListToDestinationList(
+				new EnumeratorMapper(sourceList.GetEnumerator()),
+				new DataTabletMapper(destTable),
+				null);
+
+			return destTable;
+		}
+
+		#endregion
+
+		#region TableToTable
+
+		public DataTable TableToTable(DataTable sourceTable, DataTable destTable)
+		{
+			SourceListToDestinationList(
+				new DataTabletMapper(sourceTable),
+				new DataTabletMapper(destTable),
+				null);
+
+			return destTable;
+		}
+
+		public DataTable TableToTable(DataTable sourceTable, DataRowVersion version, DataTable destTable)
+		{
+			SourceListToDestinationList(
+				new DataTabletMapper(sourceTable, version),
+				new DataTabletMapper(destTable),
+				null);
+
+			return destTable;
+		}
+
+		public DataTable TableToTable(DataTable sourceTable)
+		{
+			DataTable destTable = sourceTable.Clone();
+
+			SourceListToDestinationList(
+				new DataTabletMapper(sourceTable),
+				new DataTabletMapper(destTable),
+				null);
+
+			return destTable;
+		}
+
+		public DataTable TableToTable(DataTable sourceTable, DataRowVersion version)
+		{
+			DataTable destTable = sourceTable.Clone();
+
+			SourceListToDestinationList(
+				new DataTabletMapper(sourceTable, version),
+				new DataTabletMapper(destTable),
+				null);
+
+			return destTable;
+		}
+
+		#endregion
+
+		#region TableToList
+
+		public IList TableToList(
+			DataTable sourceTable, IList list, Type destObjectType, params object[] parameters)
+		{
+			SourceListToDestinationList(
+				new DataTabletMapper(sourceTable),
+				new ObjectListMapper(list, GetObjectMapper(destObjectType)),
+				parameters);
+
+			return list;
+		}
+
+		public IList TableToList(
+			DataTable       sourceTable,
+			DataRowVersion  version,
+			IList           list,
+			Type            destObjectType,
+			params object[] parameters)
+		{
+			SourceListToDestinationList(
+				new DataTabletMapper(sourceTable, version),
+				new ObjectListMapper(list, GetObjectMapper(destObjectType)),
+				parameters);
+
+			return list;
+		}
+
+		public ArrayList TableToList(DataTable sourceTable, Type destObjectType, params object[] parameters)
+		{
+			ArrayList list = new ArrayList();
+
+			SourceListToDestinationList(
+				new DataTabletMapper(sourceTable),
+				new ObjectListMapper(list, GetObjectMapper(destObjectType)),
+				parameters);
+
+			return list;
+		}
+
+		public ArrayList TableToList(
+			DataTable sourceTable, DataRowVersion version, Type destObjectType, params object[] parameters)
+		{
+			ArrayList list = new ArrayList();
+
+			SourceListToDestinationList(
+				new DataTabletMapper(sourceTable, version),
+				new ObjectListMapper(list, GetObjectMapper(destObjectType)),
+				parameters);
+
+			return list;
+		}
+
+#if FW2
+		public List<T> TableToList<T>(DataTable sourceTable, List<T> list, params object[] parameters)
+		{
+			SourceListToDestinationList(
+				new DataTabletMapper(sourceTable),
+				new ObjectListMapper(list, GetObjectMapper(typeof(T))),
+				parameters);
+
+			return list;
+		}
+
+		public List<T> TableToList<T>(
+			DataTable       sourceTable,
+			DataRowVersion  version,
+			List<T>         list,
+			params object[] parameters)
+		{
+			SourceListToDestinationList(
+				new DataTabletMapper(sourceTable, version),
+				new ObjectListMapper(list, GetObjectMapper(typeof(T))),
+				parameters);
+
+			return list;
+		}
+
+		public List<T> TableToList<T>(DataTable sourceTable, params object[] parameters)
+		{
+			List<T> list = new List<T>();
+
+			SourceListToDestinationList(
+				new DataTabletMapper(sourceTable),
+				new ObjectListMapper(list, GetObjectMapper(typeof(T))),
+				parameters);
+
+			return list;
+		}
+
+		public List<T> TableToList<T>(DataTable sourceTable, DataRowVersion version, params object[] parameters)
+		{
+			List<T> list = new List<T>();
+
+			SourceListToDestinationList(
+				new DataTabletMapper(sourceTable, version),
+				new ObjectListMapper(list, GetObjectMapper(typeof(T))),
+				parameters);
+
+			return list;
+		}
+#endif
+
+		#endregion
+
+		#region DataReaderToList
+
+		public IList DataReaderToList(
+			IDataReader     reader,
+			IList           list,
+			Type            destObjectType,
+			params object[] parameters)
+		{
+			SourceListToDestinationList(
+				new DataReaderListMapper(reader),
+				new ObjectListMapper(list, GetObjectMapper(destObjectType)),
+				parameters);
+
+			return list;
+		}
+
+		public ArrayList DataReaderToList(IDataReader reader, Type destObjectType, params object[] parameters)
+		{
+			ArrayList list = new ArrayList();
+
+			SourceListToDestinationList(
+				new DataReaderListMapper(reader),
+				new ObjectListMapper(list, GetObjectMapper(destObjectType)),
+				parameters);
+
+			return list;
+		}
+
+#if FW2
+		public List<T> DataReaderToList<T>(IDataReader reader, List<T> list, params object[] parameters)
+		{
+			SourceListToDestinationList(
+				new DataReaderListMapper(reader),
+				new ObjectListMapper(list, GetObjectMapper(typeof(T))),
+				parameters);
+
+			return list;
+		}
+
+		public List<T> DataReaderToList<T>(IDataReader reader, params object[] parameters)
+		{
+			List<T> list = new List<T>();
+
+			SourceListToDestinationList(
+				new DataReaderListMapper(reader),
+				new ObjectListMapper(list, GetObjectMapper(typeof(T))),
+				parameters);
+
+			return list;
 		}
 #endif
 

@@ -100,6 +100,16 @@
                     BuildAction = "Compile"
                 />
                 <File
+                    RelPath = "TestFixtureBase.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "TestObject.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
                     RelPath = "Aspects\NotNullAspectTest.cs"
                     SubType = "Code"
                     BuildAction = "Compile"

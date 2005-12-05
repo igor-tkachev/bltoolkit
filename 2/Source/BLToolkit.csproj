@@ -100,12 +100,22 @@
                 />
                 <Folder RelPath = "Data\DataProvider\" />
                 <File
+                    RelPath = "Mapping\DataReaderListMapper.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
                     RelPath = "Mapping\DataReaderMapper.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
                 />
                 <File
                     RelPath = "Mapping\DataRowMapper.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "Mapping\DataTabletMapper.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
                 />
@@ -120,12 +130,27 @@
                     BuildAction = "Compile"
                 />
                 <File
+                    RelPath = "Mapping\EnumeratorMapper.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
                     RelPath = "Mapping\IMapDataDestination.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
                 />
                 <File
+                    RelPath = "Mapping\IMapDataDestinationList.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
                     RelPath = "Mapping\IMapDataSource.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "Mapping\IMapDataSourceList.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
                 />
@@ -191,6 +216,11 @@
                 />
                 <File
                     RelPath = "Mapping\NullValueAttribute.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "Mapping\ObjectListMapper.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
                 />

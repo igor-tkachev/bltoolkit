@@ -1,5 +1,4 @@
 using System;
-using System.Reflection;
 
 namespace BLToolkit.Reflection.Emit
 {
@@ -13,7 +12,6 @@ namespace BLToolkit.Reflection.Emit
 		/// with the specified parameters.
 		/// </summary>
 		/// <param name="typeBuilder">Associated <see cref="TypeBuilderHelper"/>.</param>
-		/// <param name="methodBuilder">A <see cref="MethodBuilder"/></param>
 		protected MethodBuilderBase(TypeBuilderHelper typeBuilder)
 		{
 			if (typeBuilder == null) throw new ArgumentNullException("typeBuilder");
