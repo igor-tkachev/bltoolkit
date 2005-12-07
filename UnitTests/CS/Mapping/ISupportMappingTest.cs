@@ -51,7 +51,7 @@ namespace Mapping
 		[Test]
 		public void Test1()
 		{
-			Object1 o = (Object1)Map.ToObject(new SourceObject(), typeof(Object1), 11, 22, 44);
+			Object1 o = (Object1)Map.ObjectToObject(new SourceObject(), typeof(Object1), 11, 22, 44);
 
 			Assert.AreEqual(11, o.Int11);
 			Assert.AreEqual(22, o.Int22);
@@ -64,7 +64,7 @@ namespace Mapping
 		{
 			Object1 o = new Object1(null);
 
-			Map.ToObject(new SourceObject(), o, 11, 22, 44);
+			Map.ObjectToObject(new SourceObject(), o, 11, 22, 44);
 
 			Assert.AreEqual(0,  o.Int11);
 			Assert.AreEqual(22, o.Int22);
@@ -75,7 +75,7 @@ namespace Mapping
 		[Test]
 		public void Test3()
 		{
-			Object1 o = (Object1)Map.ToObject(new SourceObject(), typeof(Object1), 77, 66, 44);
+			Object1 o = (Object1)Map.ObjectToObject(new SourceObject(), typeof(Object1), 77, 66, 44);
 
 			Assert.AreEqual(77, o.Int11);
 			Assert.AreEqual(0,  o.Int22);
@@ -86,7 +86,7 @@ namespace Mapping
 		[Test]
 		public void Test4()
 		{
-			Object1 o = (Object1)Map.ToObject(new SourceObject(), typeof(Object1), 11, 66, 44);
+			Object1 o = (Object1)Map.ObjectToObject(new SourceObject(), typeof(Object1), 11, 66, 44);
 
 			Assert.AreEqual(11, o.Int11);
 			Assert.AreEqual(66, o.Int22);
@@ -122,7 +122,7 @@ namespace Mapping
 		[Test]
 		public void Test5()
 		{
-			Object5 o = (Object5)Map.ToObject(new SourceObject(), typeof(Object5), 11, 22, 44);
+			Object5 o = (Object5)Map.ObjectToObject(new SourceObject(), typeof(Object5), 11, 22, 44);
 
 			Assert.AreEqual(77, o.Int00);
 			Assert.AreEqual(11, o.Int11);

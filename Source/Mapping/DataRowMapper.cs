@@ -1,5 +1,6 @@
 using System;
 using System.Data;
+using System.Collections;
 
 namespace BLToolkit.Mapping
 {
@@ -69,20 +70,49 @@ namespace BLToolkit.Mapping
 
 		#region IMapDataDestination Members
 
+		ArrayList _nameList;
+
 		int IMapDataDestination.GetOrdinal(string name)
 		{
-			DataColumnCollection cc = _dataRow.Table.Columns;
+			if (_createColumns)
+			{
+				if (_nameList == null)
+					_nameList = new ArrayList();
 
-			int index = cc.IndexOf(name);
+				for (int i = 0; i < _nameList.Count; i++)
+					if (name == _nameList[i].ToString())
+						return i;
 
-			if (index < 0 && _createColumns)
-				index = cc.IndexOf(cc.Add(name));
+				return _nameList.Add(name);
+			}
 
-			return index;
+			return _dataRow.Table.Columns.IndexOf(name);
+		}
+
+		private void CreateColumn(int index, object value)
+		{
+			if (_dataRow.Table.Rows.Count > 1)
+			{
+				_createColumns = false;
+			}
+			else
+			{
+				DataColumnCollection cc   = _dataRow.Table.Columns;
+				string               name = _nameList[index].ToString();
+
+				DataColumn column = 
+					value == null || value is DBNull? cc.Add(name): cc.Add(name, value.GetType());
+
+				if (cc.IndexOf(column) != index)
+					throw new MappingException(string.Format("Cant create data column '{0}'.", name));
+			}
 		}
 
 		void IMapDataDestination.SetValue(object o, int index, object value)
 		{
+			if (_createColumns)
+				CreateColumn(index, value);
+
 			if (value == null || value is DBNull)
 			{
 				_dataRow[index] = DBNull.Value;
@@ -93,29 +123,14 @@ namespace BLToolkit.Mapping
 
 				if (column.DataType != value.GetType())
 				{
-					if (_createColumns && _dataRow.Table.Rows.Count == 1)
+					if (column.DataType == typeof(Guid))
 					{
-						DataColumnCollection cc = _dataRow.Table.Columns;
-
-						int ordinal = column.Ordinal;
-
-						cc.Remove(column);
-
-						DataColumn newColumn = cc.Add(column.ColumnName, value.GetType());
-
-						newColumn.SetOrdinal(ordinal);
+						value = new Guid(value.ToString());
 					}
 					else
 					{
-						if (column.DataType == typeof(Guid))
-						{
-							value = new Guid(value.ToString());
-						}
-						else
-						{
-							if (column.DataType != typeof(string))
-								value = Convert.ChangeType(value, column.DataType);
-						}
+						if (column.DataType != typeof(string))
+							value = Convert.ChangeType(value, column.DataType);
 					}
 				}
 
@@ -125,6 +140,9 @@ namespace BLToolkit.Mapping
 
 		void IMapDataDestination.SetValue(object o, string name, object value)
 		{
+			if (_createColumns)
+				CreateColumn(((IMapDataDestination)this).GetOrdinal(name), value);
+
 			if (value == null || value is DBNull)
 			{
 				_dataRow[name] = DBNull.Value;
