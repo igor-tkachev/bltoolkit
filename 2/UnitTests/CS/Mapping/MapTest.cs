@@ -25,22 +25,22 @@ namespace Mapping
 		[Test]
 		public void ToEnum()
 		{
-			Assert.AreEqual(Enum1.Value1, Map.ToEnum("1",         typeof(Enum1)));
-			Assert.AreEqual(Enum1.Value2, Map.ToEnum(null,        typeof(Enum1)));
-			Assert.AreEqual(Enum1.Value3, Map.ToEnum((Enum1)2727, typeof(Enum1)));
+			Assert.AreEqual(Enum1.Value1, Map.ValueToEnum("1",         typeof(Enum1)));
+			Assert.AreEqual(Enum1.Value2, Map.ValueToEnum(null,        typeof(Enum1)));
+			Assert.AreEqual(Enum1.Value3, Map.ValueToEnum((Enum1)2727, typeof(Enum1)));
 		}
 
 		[Test]
 		public void FromEnum()
 		{
-			Assert.AreEqual("1", Map.FromEnum(Enum1.Value1));
-			Assert.IsNull  (     Map.FromEnum(Enum1.Value2));
-			Assert.AreEqual("3", Map.FromEnum(Enum1.Value3));
+			Assert.AreEqual("1", Map.EnumToValue(Enum1.Value1));
+			Assert.IsNull  (     Map.EnumToValue(Enum1.Value2));
+			Assert.AreEqual("3", Map.EnumToValue(Enum1.Value3));
 		}
 
 		#endregion
 
-		#region ToObject
+		#region ObjectToObject
 
 		public class SourceObject
 		{
@@ -57,12 +57,12 @@ namespace Mapping
 		}
 
 		[Test]
-		public void ToObjectOO()
+		public void ObjectToObjectOO()
 		{
 			SourceObject so = new SourceObject();
 			Object1      o  = new Object1();
  
-			Map.ToObject(so, o);
+			Map.ObjectToObject(so, o);
 
 			Assert.AreEqual(10, o.Field1);
 			Assert.AreEqual(20, o.Field2);
@@ -70,10 +70,10 @@ namespace Mapping
 		}
 
 		[Test]
-		public void ToObjectOT()
+		public void ObjectToObjectOT()
 		{
 			SourceObject so = new SourceObject();
-			Object1      o  = (Object1)Map.ToObject(so, typeof(Object1));
+			Object1      o  = (Object1)Map.ObjectToObject(so, typeof(Object1));
 
 			Assert.AreEqual(10, o.Field1);
 			Assert.AreEqual(20, o.Field2);
@@ -82,10 +82,10 @@ namespace Mapping
 
 #if FW2
 		[Test]
-		public void ToObjectTO()
+		public void ObjectToObjectTO()
 		{
 			SourceObject so = new SourceObject();
-			Object1      o  = Map.ToObject<Object1>(so);
+			Object1      o  = Map.ObjectToObject<Object1>(so);
 
 			Assert.AreEqual(10, o.Field1);
 			Assert.AreEqual(20, o.Field2);
@@ -99,8 +99,12 @@ namespace Mapping
 			public int NullableInt;
 		}
 
+		#endregion
+
+		#region DataRowToObject
+
 		[Test]
-		public void ToObjectD()
+		public void DataRowToObjectD()
 		{
 			DataTable table = new DataTable();
 
@@ -110,13 +114,30 @@ namespace Mapping
 			table.Rows.Add(new object[] { 1 });
 			table.AcceptChanges();
 
-			DefaultNullType dn = (DefaultNullType)Map.ToObject(table, typeof(DefaultNullType));
+			DefaultNullType dn = (DefaultNullType)Map.DataRowToObject(table.Rows[0], typeof(DefaultNullType));
 
 			Assert.AreEqual(-1, dn.NullableInt);
 
-			Map.ToObject(table.Rows[1], DataRowVersion.Current, dn);
+			Map.DataRowToObject(table.Rows[1], DataRowVersion.Current, dn);
 
 			Assert.AreEqual(1, dn.NullableInt);
+		}
+
+		#endregion
+
+		#region ObjectToDictionary
+
+		[Test]
+		public void ObjectToDictionary()
+		{
+			SourceObject so = new SourceObject();
+			Hashtable    ht = new Hashtable();
+ 
+			Map.ObjectToDictionary(so, ht);
+
+			Assert.AreEqual(10,   ht["Field1"]);
+			Assert.AreEqual("20", ht["Field2"]);
+			Assert.AreEqual(30,   ht["Field3"]);
 		}
 
 		#endregion
@@ -152,7 +173,7 @@ namespace Mapping
 		public void SqlTypes()
 		{
 			SqlTypeTypes.SourceObject so = new SqlTypeTypes.SourceObject();
-			SqlTypeTypes.Object1      o  = (SqlTypeTypes.Object1)Map.ToObject(so, typeof(SqlTypeTypes.Object1));
+			SqlTypeTypes.Object1      o  = (SqlTypeTypes.Object1)Map.ObjectToObject(so, typeof(SqlTypeTypes.Object1));
 
 			Console.WriteLine(o.s1); Assert.AreEqual("123",  o.s1.Value);
 			Console.WriteLine(o.s2); Assert.AreEqual("1234", o.s2);

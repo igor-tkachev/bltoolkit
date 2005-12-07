@@ -1,6 +1,8 @@
 using System;
 using System.Collections;
 
+using BLToolkit.Reflection;
+
 namespace BLToolkit.Mapping
 {
 	public class EnumeratorMapper : IMapDataSourceList
@@ -15,13 +17,15 @@ namespace BLToolkit.Mapping
 
 		#region IMapDataSourceList Members
 
-		public void InitMapping(BLToolkit.Reflection.InitContext initContext)
+		public void InitMapping(InitContext initContext)
 		{
 			_enumerator.Reset();
 		}
 
-		public bool SetNextDataSource(BLToolkit.Reflection.InitContext initContext)
+		public bool SetNextDataSource(InitContext initContext)
 		{
+			if (initContext == null) throw new ArgumentNullException("initContext");
+
 			if (_enumerator.MoveNext() == false)
 				return false;
 
@@ -38,7 +42,7 @@ namespace BLToolkit.Mapping
 			return true;
 		}
 
-		public void EndMapping(BLToolkit.Reflection.InitContext initContext)
+		public void EndMapping(InitContext initContext)
 		{
 		}
 

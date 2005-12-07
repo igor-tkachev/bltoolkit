@@ -93,5 +93,13 @@ namespace BLToolkit.Reflection
 			[DebuggerStepThrough] get { return _mappingSchema;  }
 			[DebuggerStepThrough] set { _mappingSchema = value; }
 		}
+
+		private bool _isSource;
+		public  bool  IsSource
+		{
+			get { return _isSource;  }
+			set { _isSource = value; }
+		}
+	
 	}
 }
