@@ -33,6 +33,7 @@ namespace BLToolkit.Mapping
 			{
 				_currentIndex = 0;
 				_enumerator.Reset();
+				_enumerator.MoveNext();
 			}
 
 			for (; _currentIndex < i; _currentIndex++)

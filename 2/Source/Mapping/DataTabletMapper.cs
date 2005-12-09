@@ -5,14 +5,14 @@ using BLToolkit.Reflection;
 
 namespace BLToolkit.Mapping
 {
-	public sealed class DataTabletMapper : IMapDataSourceList, IMapDataDestinationList
+	public sealed class DataTableMapper : IMapDataSourceList, IMapDataDestinationList
 	{
-		public DataTabletMapper(DataTable dataTable)
+		public DataTableMapper(DataTable dataTable)
 			: this(dataTable, DataRowVersion.Default)
 		{
 		}
 
-		public DataTabletMapper(DataTable dataTable, DataRowVersion version)
+		public DataTableMapper(DataTable dataTable, DataRowVersion version)
 		{
 			_table  = dataTable;
 			_mapper = new DataRowMapper(null, version);

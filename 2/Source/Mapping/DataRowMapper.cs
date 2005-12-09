@@ -21,7 +21,6 @@ namespace BLToolkit.Mapping
 
 		public DataRowMapper(DataRow dataRow, DataRowVersion version)
 		{
-			_dataRow = dataRow;
 			_version = version;
 
 			Init(dataRow);

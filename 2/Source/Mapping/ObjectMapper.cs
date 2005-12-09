@@ -102,14 +102,14 @@ namespace BLToolkit.Mapping
 			}
 		}
 
-		private   TypeAccessor _typeAccessor;
-		protected TypeAccessor  TypeAccessor
+		private TypeAccessor _typeAccessor;
+		public  TypeAccessor  TypeAccessor
 		{
 			get { return _typeAccessor; }
 		}
 
-		private   MappingSchema _mappingSchema;
-		protected MappingSchema  MappingSchema
+		private MappingSchema _mappingSchema;
+		public  MappingSchema  MappingSchema
 		{
 			get { return _mappingSchema; }
 		}

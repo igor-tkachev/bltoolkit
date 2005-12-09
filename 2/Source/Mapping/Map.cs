@@ -46,7 +46,6 @@ namespace BLToolkit.Mapping
 
 		#endregion
 
-
 		#region ValueToEnum, EnumToValue
 
 		public static object ValueToEnum(object value, Type type)
@@ -69,6 +68,7 @@ namespace BLToolkit.Mapping
 
 		#endregion
 
+		#region Object
 
 		#region ObjectToObject
 
@@ -112,7 +112,16 @@ namespace BLToolkit.Mapping
 			return _defaultSchema.MapObjectToDictionary(sourceObject, destDictionary);
 		}
 
+		public static Hashtable ObjectToDictionary(object sourceObject)
+		{
+			return _defaultSchema.MapObjectToDictionary(sourceObject);
+		}
+
 		#endregion
+
+		#endregion
+
+		#region DataRow
 
 		#region DataRowToObject
 
@@ -183,13 +192,27 @@ namespace BLToolkit.Mapping
 			return _defaultSchema.MapDataRowToDictionary(sourceRow, destDictionary);
 		}
 
+		public static Hashtable DataRowToDictionary(DataRow sourceRow)
+		{
+			return _defaultSchema.MapDataRowToDictionary(sourceRow);
+		}
+
 		public static IDictionary DataRowToDictionary(
 			DataRow sourceRow, DataRowVersion version, IDictionary destDictionary)
 		{
 			return _defaultSchema.MapDataRowToDictionary(sourceRow, version, destDictionary);
 		}
 
+		public static Hashtable DataRowToDictionary(DataRow sourceRow, DataRowVersion version)
+		{
+			return _defaultSchema.MapDataRowToDictionary(sourceRow, version);
+		}
+
 		#endregion
+
+		#endregion
+
+		#region DataReader
 
 		#region DataReaderToObject
 
@@ -233,8 +256,57 @@ namespace BLToolkit.Mapping
 			return _defaultSchema.MapDataReaderToDictionary(dataReader, destDictionary);
 		}
 
+		public static Hashtable DataReaderToDictionary(IDataReader dataReader)
+		{
+			return _defaultSchema.MapDataReaderToDictionary(dataReader);
+		}
+
 		#endregion
 
+		#endregion
+
+		#region Dictionary
+
+		#region DictionaryToObject
+
+		public static object DictionaryToObject(
+			IDictionary sourceDictionary, object destObject, params object[] parameters)
+		{
+			return _defaultSchema.MapDictionaryToObject(sourceDictionary, destObject, parameters);
+		}
+
+		public static object DictionaryToObject(
+			IDictionary sourceDictionary, Type destObjectType, params object[] parameters)
+		{
+			return _defaultSchema.MapDictionaryToObject(sourceDictionary, destObjectType, parameters);
+		}
+
+#if FW2
+		public static T DictionaryToObject<T>(IDictionary sourceDictionary, params object[] parameters)
+		{
+			return (T)_defaultSchema.MapDictionaryToObject(sourceDictionary, typeof(T), parameters);
+		}
+#endif
+
+		#endregion
+
+		#region DictionaryToDataRow
+
+		public static DataRow DictionaryToDataRow(IDictionary sourceDictionary, DataRow destRow)
+		{
+			return _defaultSchema.MapDictionaryToDataRow(sourceDictionary, destRow);
+		}
+
+		public static DataRow DictionaryToDataRow(IDictionary sourceDictionary, DataTable destTable)
+		{
+			return _defaultSchema.MapDictionaryToDataRow(sourceDictionary, destTable);
+		}
+
+		#endregion
+
+		#endregion
+
+		#region List
 
 		#region ListToList
 
@@ -279,6 +351,53 @@ namespace BLToolkit.Mapping
 		}
 
 		#endregion
+
+		#region MapListToDictionary
+
+		public static IDictionary ListToDictionary(
+			ICollection     sourceList,
+			IDictionary     destDictionary,
+			string          keyFieldName,
+			Type            destObjectType,
+			params object[] parameters)
+		{
+			return _defaultSchema.MapListToDictionary(
+				sourceList, destDictionary, keyFieldName, destObjectType, parameters);
+		}
+
+		public static Hashtable ListToDictionary(
+			ICollection     sourceList,
+			string          keyFieldName,
+			Type            destObjectType,
+			params object[] parameters)
+		{
+			return _defaultSchema.MapListToDictionary(sourceList, keyFieldName, destObjectType, parameters);
+		}
+
+#if FW2
+		public static Dictionary<K,T> ListToDictionary<K,T>(
+			ICollection     sourceList,
+			Dictionary<K,T> destDictionary,
+			string          keyFieldName,
+			params object[] parameters)
+		{
+			return _defaultSchema.MapListToDictionary<K,T>(sourceList, destDictionary, keyFieldName, parameters);
+		}
+
+		public static Dictionary<K,T> ListToDictionary<K,T>(
+			ICollection     sourceList,
+			string          keyFieldName,
+			params object[] parameters)
+		{
+			return _defaultSchema.MapListToDictionary<K,T>(sourceList, keyFieldName, parameters);
+		}
+#endif
+
+		#endregion
+
+		#endregion
+
+		#region Table
 
 		#region TableToTable
 
@@ -361,6 +480,54 @@ namespace BLToolkit.Mapping
 
 		#endregion
 
+		#region TableToDictionary
+
+		public static IDictionary TableToDictionary(
+			DataTable       sourceTable,
+			IDictionary     destDictionary,
+			string          keyFieldName,
+			Type            destObjectType,
+			params object[] parameters)
+		{
+			return _defaultSchema.MapTableToDictionary(
+				sourceTable, destDictionary, keyFieldName, destObjectType, parameters);
+		}
+
+		public static Hashtable TableToDictionary(
+			DataTable       sourceTable,
+			string          keyFieldName,
+			Type            destObjectType,
+			params object[] parameters)
+		{
+			return _defaultSchema.MapTableToDictionary(sourceTable, keyFieldName, destObjectType, parameters);
+		}
+
+#if FW2
+		public static Dictionary<K,T> TableToDictionary<K,T>(
+			DataTable       sourceTable,
+			Dictionary<K,T> destDictionary,
+			string          keyFieldName,
+			params object[] parameters)
+		{
+			return _defaultSchema.MapTableToDictionary<K,T>(
+				sourceTable, destDictionary, keyFieldName, parameters);
+		}
+
+		public static Dictionary<K,T> TableToDictionary<K,T>(
+			DataTable       sourceTable,
+			string          keyFieldName,
+			params object[] parameters)
+		{
+			return _defaultSchema.MapTableToDictionary<K,T>(sourceTable, keyFieldName, parameters);
+		}
+#endif
+
+		#endregion
+
+		#endregion
+
+		#region DataReader
+
 		#region DataReaderToList
 
 		public static IList DataReaderToList(
@@ -402,6 +569,151 @@ namespace BLToolkit.Mapping
 		{
 			return _defaultSchema.MapDataReaderToTable(reader);
 		}
+
+		#endregion
+
+		#region DataReaderToDictionary
+
+		public static IDictionary DataReaderToDictionary(
+			IDataReader     dataReader,
+			IDictionary     destDictionary,
+			string          keyFieldName,
+			Type            destObjectType,
+			params object[] parameters)
+		{
+			return _defaultSchema.MapDataReaderToDictionary(
+				dataReader, destDictionary, keyFieldName, destObjectType, parameters);
+		}
+
+		public static Hashtable DataReaderToDictionary(
+			IDataReader     dataReader,
+			string          keyFieldName,
+			Type            destObjectType,
+			params object[] parameters)
+		{
+			return _defaultSchema.MapDataReaderToDictionary(dataReader, keyFieldName, destObjectType, parameters);
+		}
+
+#if FW2
+		public static Dictionary<K,T> DataReaderToDictionary<K,T>(
+			IDataReader     dataReader,
+			Dictionary<K,T> destDictionary,
+			string          keyFieldName,
+			params object[] parameters)
+		{
+			return _defaultSchema.MapDataReaderToDictionary<K,T>(
+				dataReader, destDictionary, keyFieldName, parameters);
+		}
+
+		public static Dictionary<K,T> DataReaderToDictionary<K,T>(
+			IDataReader     dataReader,
+			string          keyFieldName,
+			params object[] parameters)
+		{
+			return _defaultSchema.MapDataReaderToDictionary<K,T>(dataReader, keyFieldName, parameters);
+		}
+#endif
+
+		#endregion
+
+		#endregion
+
+		#region Dictionary
+
+		#region DictionaryToList
+
+		public static IList DictionaryToList(
+			IDictionary     sourceDictionary,
+			IList           destList,
+			Type            destObjectType,
+			params object[] parameters)
+		{
+			return _defaultSchema.MapDictionaryToList(sourceDictionary, destList, destObjectType, parameters);
+		}
+
+		public static ArrayList DictionaryToList(
+			IDictionary     sourceDictionary,
+			Type            destObjectType,
+			params object[] parameters)
+		{
+			return _defaultSchema.MapDictionaryToList(sourceDictionary, destObjectType, parameters);
+		}
+
+#if FW2
+		public static List<T> DictionaryToList<T>(
+			IDictionary     sourceDictionary,
+			List<T>         destList,
+			params object[] parameters)
+		{
+			return _defaultSchema.MapDictionaryToList<T>(sourceDictionary, destList, parameters);
+		}
+
+		public static List<T> DictionaryToList<T>(IDictionary sourceDictionary, params object[] parameters)
+		{
+			return _defaultSchema.MapDictionaryToList<T>(sourceDictionary, parameters);
+		}
+#endif
+
+		#endregion
+
+		#region DictionaryToTable
+
+		public static DataTable DictionaryToTable(IDictionary sourceDictionary, DataTable destTable)
+		{
+			return _defaultSchema.MapDictionaryToTable(sourceDictionary, destTable);
+		}
+
+		public static DataTable DictionaryToTable(IDictionary sourceDictionary)
+		{
+			return _defaultSchema.MapDictionaryToTable(sourceDictionary);
+		}
+
+		#endregion
+
+		#region DictionaryToDictionary
+
+		public static IDictionary DictionaryToDictionary(
+			IDictionary     sourceDictionary,
+			IDictionary     destDictionary,
+			string          keyFieldName,
+			Type            destObjectType,
+			params object[] parameters)
+		{
+			return _defaultSchema.MapDictionaryToDictionary(
+				sourceDictionary, destDictionary, keyFieldName, destObjectType, parameters);
+		}
+
+		public static Hashtable DictionaryToDictionary(
+			IDictionary     sourceDictionary,
+			string          keyFieldName,
+			Type            destObjectType,
+			params object[] parameters)
+		{
+			return _defaultSchema.MapDictionaryToDictionary(
+				sourceDictionary, keyFieldName, destObjectType, parameters);
+		}
+
+#if FW2
+		public static Dictionary<K,T> DictionaryToDictionary<K,T>(
+			IDictionary     sourceDictionary,
+			Dictionary<K,T> destDictionary,
+			string          keyFieldName,
+			params object[] parameters)
+		{
+			return _defaultSchema.MapDictionaryToDictionary<K,T>(
+				sourceDictionary, destDictionary, keyFieldName, parameters);
+		}
+
+		public static Dictionary<K,T> DictionaryToDictionary<K,T>(
+			IDictionary     sourceDictionary,
+			string          keyFieldName,
+			params object[] parameters)
+		{
+			return _defaultSchema.MapDictionaryToDictionary<K,T>(sourceDictionary, keyFieldName, parameters);
+		}
+#endif
+
+		#endregion
 
 		#endregion
 	}
