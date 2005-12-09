@@ -142,6 +142,55 @@ namespace Mapping
 
 		#endregion
 
+		#region DictionaryToObject
+
+		[Test]
+		public void DictionaryToObject()
+		{
+			SourceObject so = new SourceObject();
+			Hashtable    ht = Map.ObjectToDictionary(so);
+			Object1      o1 = (Object1)Map.DictionaryToObject(ht, typeof(Object1));
+
+			Assert.AreEqual(10, o1.Field1);
+			Assert.AreEqual(20, o1.Field2);
+			Assert.AreEqual(30, o1.Field3);
+		}
+
+		#endregion
+
+		#region DataRowToDictionary
+
+		[Test]
+		public void DataRowToDictionary()
+		{
+			DataTable table = GetDataTable();
+			Hashtable hash  = Map.DataRowToDictionary(table.Rows[0]);
+
+			Assert.AreEqual(table.Rows[0]["ID"],   hash["ID"]);
+			Assert.AreEqual(table.Rows[0]["Name"], hash["Name"]);
+			Assert.AreEqual(table.Rows[0]["Date"], hash["Date"]);
+		}
+
+		#endregion
+
+		#region DictionaryToDataRow
+
+		[Test]
+		public void DictionaryToDataRow()
+		{
+			DataTable table1 = GetDataTable();
+			Hashtable hash   = Map.DataRowToDictionary(table1.Rows[0]);
+			DataTable table2 = new DataTable();
+
+			Map.DictionaryToDataRow(hash, table2);
+
+			Assert.AreEqual(table1.Rows[0]["ID"],   table2.Rows[0]["ID"]);
+			Assert.AreEqual(table1.Rows[0]["Name"], table2.Rows[0]["Name"]);
+			Assert.AreEqual(table1.Rows[0]["Date"], table2.Rows[0]["Date"]);
+		}
+
+		#endregion
+
 		#region SqlTypes
 
 		public class SqlTypeTypes
@@ -258,6 +307,36 @@ namespace Mapping
 			table2.AcceptChanges();
 
 			CompareLists(table1, table2);
+		}
+
+		[Test]
+		public void TableToDictionary()
+		{
+			DataTable   table = GetDataTable();
+			IDictionary dic   = Map.TableToDictionary(table, new SortedList(), "ID", typeof(TestObject));
+
+			CompareLists(table, Map.ListToList(dic.Values, typeof(TestObject)));
+		}
+
+		[Test]
+		public void ListToDictionary()
+		{
+			DataTable   table = GetDataTable();
+			ArrayList   list  = Map.TableToList     (table, typeof(TestObject));
+			IDictionary dic   = Map.ListToDictionary(list, new SortedList(), "ID", typeof(TestObject));
+
+			CompareLists(table, Map.ListToList(dic.Values, typeof(TestObject)));
+		}
+
+		[Test]
+		public void DictionaryToDictionary()
+		{
+			DataTable   table = GetDataTable();
+			ArrayList   list  = Map.TableToList           (table, typeof(TestObject));
+			IDictionary dic1  = Map.ListToDictionary      (list, new SortedList(), "ID", typeof(TestObject));
+			IDictionary dic2  = Map.DictionaryToDictionary(dic1, new SortedList(), "ID", typeof(TestObject));
+
+			CompareLists(table, Map.ListToList(dic2.Values, typeof(TestObject)));
 		}
 
 		#endregion
