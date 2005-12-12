@@ -17,7 +17,14 @@ namespace Rsdn.Framework.DataAccess
 
 		public virtual DbManager GetDbManager()
 		{
-			return new DbManager();
+			return _dbManager != null? _dbManager: new DbManager();
+		}
+
+		private DbManager _dbManager;
+
+		internal void SetDbManager(DbManager dbManager)
+		{
+			_dbManager = dbManager;
 		}
 
 		protected virtual string GetDefaultSpName(string typeName, string actionName)
