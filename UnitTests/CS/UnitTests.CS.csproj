@@ -114,6 +114,7 @@
                     SubType = "Code"
                     BuildAction = "Compile"
                 />
+                <Folder RelPath = "EditableObjects\" />
                 <File
                     RelPath = "Mapping\DefaultValueAttributeTest.cs"
                     SubType = "Code"

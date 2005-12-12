@@ -100,6 +100,16 @@
                 />
                 <Folder RelPath = "Data\DataProvider\" />
                 <File
+                    RelPath = "EditableObjects\EditableValue.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "EditableObjects\IEditable.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
                     RelPath = "Mapping\DataReaderListMapper.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
@@ -126,6 +136,16 @@
                 />
                 <File
                     RelPath = "Mapping\DefaultValueAttribute.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "Mapping\DictionaryListMapper.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "Mapping\DictionaryMapper.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
                 />
