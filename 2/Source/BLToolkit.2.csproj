@@ -36,6 +36,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Aspects\NotNullAttribute.cs" />
+    <Compile Include="EditableObjects\EditableValue.cs" />
+    <Compile Include="EditableObjects\IEditable.cs" />
     <Compile Include="Mapping\DictionaryListMapper.cs" />
     <Compile Include="Mapping\DictionaryMapper.cs" />
     <Compile Include="Mapping\EnumeratorMapper.cs" />
