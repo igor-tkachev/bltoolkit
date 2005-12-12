@@ -6,7 +6,7 @@ using System.Reflection;
 using System.Reflection.Emit;
 using System.Threading;
 
-//using Rsdn.Framework.Data;
+using Rsdn.Framework.Data;
 using Rsdn.Framework.Data.Mapping;
 
 namespace Rsdn.Framework.DataAccess
@@ -36,10 +36,24 @@ namespace Rsdn.Framework.DataAccess
 			return factory.CreateInstance();
 		}
 
+		public static DataAccessorBase CreateInstance(Type type, DbManager dbManager)
+		{
+			DataAccessorBase da = (DataAccessorBase)CreateInstance(type);
+
+			da.SetDbManager(dbManager);
+
+			return da;
+		}
+
 #if VER2
 		public static T CreateInstance<T>()
 		{
 			return (T)CreateInstance(typeof(T));
+		}
+
+		public static T CreateInstance<T>(DbManager dbManager) where T : DataAccessorBase
+		{
+			return (T)CreateInstance(typeof(T), dbManager);
 		}
 #endif
 
