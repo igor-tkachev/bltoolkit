@@ -100,12 +100,27 @@
                 />
                 <Folder RelPath = "Data\DataProvider\" />
                 <File
+                    RelPath = "EditableObjects\EditableObject.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
                     RelPath = "EditableObjects\EditableValue.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
                 />
                 <File
                     RelPath = "EditableObjects\IEditable.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "EditableObjects\Compatibility\INotifyPropertyChanged.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "EditableObjects\Compatibility\PropertyChangedEventArgs.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
                 />

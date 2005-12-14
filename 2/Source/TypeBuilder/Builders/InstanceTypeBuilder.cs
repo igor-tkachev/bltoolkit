@@ -50,7 +50,6 @@ namespace BLToolkit.TypeBuilder.Builders
 			return InstanceType;
 		}
 
-		[SuppressMessage("Microsoft.Performance", "CA1800:DoNotCastUnnecessarily")]
 		protected override void BuildAbstractGetter()
 		{
 			FieldBuilder field        = GetField();
@@ -95,7 +94,6 @@ namespace BLToolkit.TypeBuilder.Builders
 			emit.stloc(Context.ReturnValue);
 		}
 
-		[SuppressMessage("Microsoft.Performance", "CA1800:DoNotCastUnnecessarily")]
 		protected override void BuildAbstractSetter()
 		{
 			FieldBuilder field        = GetField();

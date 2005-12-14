@@ -114,7 +114,11 @@
                     SubType = "Code"
                     BuildAction = "Compile"
                 />
-                <Folder RelPath = "EditableObjects\" />
+                <File
+                    RelPath = "EditableObjects\EditableObjectTest.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
                 <File
                     RelPath = "Mapping\DefaultValueAttributeTest.cs"
                     SubType = "Code"
@@ -171,6 +175,7 @@
                 />
                 <File
                     RelPath = "Reflection\TypeAccessorTest.cs"
+                    SubType = "Code"
                     BuildAction = "Compile"
                 />
                 <File
@@ -203,6 +208,7 @@
                 />
                 <File
                     RelPath = "TypeBuilder\TypeFactoryTest.cs"
+                    SubType = "Code"
                     BuildAction = "Compile"
                 />
                 <File

@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 
 using Rsdn.Framework.Data.Mapping;
 
@@ -48,6 +49,26 @@ namespace Rsdn.Framework.EditableObject
 			_current = _original;
 		}
 
+		public bool AcceptChanges(string memberName, MapPropertyInfo propertyInfo)
+		{
+			if (memberName != propertyInfo.PropertyName)
+				return false;
+
+			AcceptChanges();
+
+			return true;
+		}
+
+		public bool RejectChanges(string memberName, MapPropertyInfo propertyInfo)
+		{
+			if (memberName != propertyInfo.PropertyName)
+				return false;
+
+			RejectChanges();
+
+			return true;
+		}
+
 		public virtual bool IsDirty
 		{
 			get
@@ -67,6 +88,18 @@ namespace Rsdn.Framework.EditableObject
 			isDirty = IsDirty;
 
 			return true;
+		}
+
+		void IEditable.GetDirtyMembers(MapPropertyInfo propertyInfo, ArrayList list)
+		{
+			if (IsDirty)
+				list.Add(propertyInfo);
+		}
+
+		void IEditable.PrintDebugState(MapPropertyInfo propertyInfo, ref string str)
+		{
+			str += string.Format("{0,-25} {1} {2,-40} {3,-40} \r\n",
+				propertyInfo.PropertyName, IsDirty? "*": " ", _original, _current);
 		}
 	}
 }

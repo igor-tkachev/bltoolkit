@@ -34,7 +34,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Aspects\InterceptorAspectTest.cs" />
     <Compile Include="Aspects\NotNullAspectTest.cs" />
+    <Compile Include="EditableObjects\EditableObjectTest.cs" />
     <Compile Include="Mapping\DefaultValueAttributeTest.cs" />
     <Compile Include="Mapping\ISupportMappingTest.cs" />
     <Compile Include="Mapping\MapFieldAttributeTest.cs" />
@@ -69,9 +71,6 @@
       <Project>{0C325F5D-E50E-4340-8724-D29896CCC583}</Project>
       <Name>BLToolkit.2</Name>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="EditableObjects\" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>

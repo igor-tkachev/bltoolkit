@@ -278,6 +278,16 @@ namespace Rsdn.Framework.EditableObject
 			_delItems  = null;
 		}
 
+		public bool AcceptChanges(string memberName, MapPropertyInfo propertyInfo)
+		{
+			return false;
+		}
+
+		public bool RejectChanges(string memberName, MapPropertyInfo propertyInfo)
+		{
+			return false;
+		}
+
 		public virtual bool IsDirty
 		{
 			get
@@ -300,6 +310,14 @@ namespace Rsdn.Framework.EditableObject
 		bool IEditable.IsDirtyMember(string memberName, MapPropertyInfo propertyInfo, ref bool isDirty)
 		{
 			return false;
+		}
+
+		public void GetDirtyMembers([MapPropertyInfo] MapPropertyInfo propertyInfo, ArrayList list)
+		{
+		}
+
+		public void PrintDebugState([MapPropertyInfo] MapPropertyInfo propertyInfo, ref string str)
+		{
 		}
 
 		#endregion

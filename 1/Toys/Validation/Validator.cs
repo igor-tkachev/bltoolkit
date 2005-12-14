@@ -10,8 +10,15 @@ namespace Rsdn.Framework.Validation
 
 		public static void Validate(ValidationContext context)
 		{
-			foreach (IMemberMapper mm in context.Descriptor.AllMembers)
+			ArrayList list = new ArrayList();
+
+			foreach (object o in context.Descriptor.AllMembers)
+				list.Add(o);
+
+			for (int i = 0; i < list.Count; i++)
 			{
+				IMemberMapper mm = (IMemberMapper)list[i];
+
 				context.MemberMapper = mm;
 
 				object[] attrs = mm.MemberInfo.GetCustomAttributes(typeof(ValidatorBaseAttribute), true);

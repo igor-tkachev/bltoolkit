@@ -385,7 +385,6 @@ namespace BLToolkit.Mapping
 			return false;
 		}
 
-		[SuppressMessage("Microsoft.Performance", "CA1800:DoNotCastUnnecessarily")]
 		private static object CheckNullValue(object value, MemberAccessor memberAccessor)
 		{
 			if (value is Type && (Type)value == typeof(DBNull))

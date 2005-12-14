@@ -175,7 +175,6 @@ namespace BLToolkit.TypeBuilder.Builders
 				;
 		}
 
-		[SuppressMessage("Microsoft.Performance", "CA1800:DoNotCastUnnecessarily")]
 		private void BuildGetter(MemberInfo mi, TypeBuilderHelper nestedType)
 		{
 			MethodInfo getMethod = null;
@@ -233,7 +232,6 @@ namespace BLToolkit.TypeBuilder.Builders
 				;
 		}
 
-		[SuppressMessage("Microsoft.Performance", "CA1800:DoNotCastUnnecessarily")]
 		private void BuildSetter(MemberInfo mi, TypeBuilderHelper nestedType)
 		{
 			MethodInfo setMethod = null;
