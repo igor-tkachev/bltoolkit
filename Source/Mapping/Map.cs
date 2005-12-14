@@ -5,6 +5,8 @@ using System.Collections;
 using System.Collections.Generic;
 #endif
 
+using BLToolkit.Reflection;
+
 namespace BLToolkit.Mapping
 {
 	public 
@@ -714,6 +716,22 @@ namespace BLToolkit.Mapping
 #endif
 
 		#endregion
+
+		#endregion
+
+		#region CreateInstance
+
+		public static object CreateInstance(Type type)
+		{
+			return TypeAccessor.CreateInstanceEx(type);
+		}
+
+#if FW2
+		public static T CreateInstance<T>()
+		{
+			return TypeAccessor<T>.CreateInstanceEx();
+		}
+#endif
 
 		#endregion
 	}

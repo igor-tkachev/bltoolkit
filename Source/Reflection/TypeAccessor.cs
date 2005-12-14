@@ -275,7 +275,6 @@ namespace BLToolkit.Reflection
 		}
 
 		[SuppressMessage("Microsoft.Usage", "CA2241:ProvideCorrectArgumentsToFormattingMethods")]
-		[SuppressMessage("Microsoft.Performance", "CA1800:DoNotCastUnnecessarily")]
 		private static void Write(object o, bool console)
 		{
 			if (o == null)

@@ -6,6 +6,6 @@ namespace BLToolkit.TypeBuilder
 	[PropertyChanged]
 	public interface IPropertyChanged
 	{
-		void PropertyChanged(PropertyInfo propertyInfo);
+		void OnPropertyChanged(PropertyInfo propertyInfo);
 	}
 }

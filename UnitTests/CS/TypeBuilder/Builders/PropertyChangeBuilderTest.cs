@@ -23,7 +23,7 @@ namespace TypeBuilder.Builders
 			public abstract int    ID   { get; set; }
 			public abstract string Name { get; set; }
 
-			public void PropertyChanged(PropertyInfo pi)
+			public void OnPropertyChanged(PropertyInfo pi)
 			{
 				NotifiedName = pi.Name;
 			}
@@ -46,7 +46,7 @@ namespace TypeBuilder.Builders
 			public abstract int    ID   { get; set; }
 			public abstract string Name { get; set; }
 
-			void IPropertyChanged.PropertyChanged(PropertyInfo pi)
+			void IPropertyChanged.OnPropertyChanged(PropertyInfo pi)
 			{
 				NotifiedName = pi.Name;
 			}

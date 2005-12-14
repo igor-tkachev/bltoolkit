@@ -4,15 +4,15 @@ using System.Reflection;
 
 using BLToolkit.TypeBuilder;
 
-#if !FW2
+#if !FW21
 using T = System.Object;
 #endif
 
 namespace BLToolkit.EditableObjects
 {
 	[Serializable]
-	public class EditableValue
-#if FW2
+	public struct EditableValue
+#if FW21
 	<T>
 #endif
 	: IEditable
@@ -20,13 +20,14 @@ namespace BLToolkit.EditableObjects
 		private T _original;
 		private T _current;
 
+/*
 		public EditableValue()
-		{
-#if VER2
+#if FW21
 			_original = default(T);
 			_current  = default(T);
 #endif
 		}
+*/
 
 		public EditableValue(T value)
 		{
@@ -41,17 +42,19 @@ namespace BLToolkit.EditableObjects
 			set { _current = value; }
 		}
 
-		public virtual void AcceptChanges()
+		#region IEditable Members
+
+		public void AcceptChanges()
 		{
 			_original = _current;
 		}
 
-		public virtual void RejectChanges()
+		public void RejectChanges()
 		{
 			_current = _original;
 		}
 
-		public virtual bool IsDirty
+		public bool IsDirty
 		{
 			get
 			{
@@ -62,7 +65,27 @@ namespace BLToolkit.EditableObjects
 			}
 		}
 
-		public virtual bool IsDirtyMember(PropertyInfo propertyInfo, string memberName, ref bool isDirty)
+		public bool AcceptMemberChanges(PropertyInfo propertyInfo, string memberName)
+		{
+			if (memberName != propertyInfo.Name)
+				return false;
+
+			AcceptChanges();
+
+			return true;
+		}
+
+		public bool RejectMemberChanges(PropertyInfo propertyInfo, string memberName)
+		{
+			if (memberName != propertyInfo.Name)
+				return false;
+
+			RejectChanges();
+
+			return true;
+		}
+
+		public bool IsDirtyMember(PropertyInfo propertyInfo, string memberName, ref bool isDirty)
 		{
 			if (memberName != propertyInfo.Name)
 				return false;
@@ -72,10 +95,18 @@ namespace BLToolkit.EditableObjects
 			return true;
 		}
 
-		public virtual void GetDirtyMembers(PropertyInfo propertyInfo, ArrayList list)
+		public void GetDirtyMembers(PropertyInfo propertyInfo, ArrayList list)
 		{
 			if (IsDirty)
 				list.Add(propertyInfo);
 		}
+
+		public void PrintDebugState(PropertyInfo propertyInfo, ref string str)
+		{
+			str += string.Format("{0,-20} {1} {2,-40} {3,-40} \r\n",
+				propertyInfo.Name, IsDirty? "*": " ", _original, _current);
+		}
+
+		#endregion
 	}
 }

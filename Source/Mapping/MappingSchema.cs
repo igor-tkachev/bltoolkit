@@ -268,7 +268,6 @@ namespace BLToolkit.Mapping
 
 		#region GetDataSource, GetDataDestination
 
-		[SuppressMessage("Microsoft.Performance", "CA1800:DoNotCastUnnecessarily")]
 		public virtual IMapDataSource GetDataSource(object obj)
 		{
 			if (obj == null) throw new ArgumentNullException("obj");
@@ -294,7 +293,6 @@ namespace BLToolkit.Mapping
 			return GetObjectMapper(obj.GetType());
 		}
 
-		[SuppressMessage("Microsoft.Performance", "CA1800:DoNotCastUnnecessarily")]
 		public virtual IMapDataDestination GetDataDestination(object obj)
 		{
 			if (obj == null) throw new ArgumentNullException("obj");
@@ -559,7 +557,6 @@ namespace BLToolkit.Mapping
 		}
 
 		[SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
-		[SuppressMessage("Microsoft.Performance", "CA1800:DoNotCastUnnecessarily")]
 		public object MapEnumToValue(object value)
 		{
 			if (value == null)
