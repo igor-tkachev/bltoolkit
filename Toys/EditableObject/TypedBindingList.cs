@@ -189,7 +189,7 @@ namespace Rsdn.Framework.EditableObject
 
 		PropertyDescriptorCollection ITypedList.GetItemProperties(PropertyDescriptor[] listAccessors)
 		{
-			return ((ITypedList)_list).GetItemProperties(listAccessors);
+			return _list.GetItemProperties(listAccessors);
 		}
 
 		string ITypedList.GetListName(PropertyDescriptor[] listAccessors)

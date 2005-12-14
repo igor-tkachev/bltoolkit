@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.ComponentModel;
 
 using Rsdn.Framework.Data.Mapping;
@@ -80,6 +81,16 @@ namespace Rsdn.Framework.EditableObject
 			}
 		}
 
+		public virtual void AcceptChanges(string memberName)
+		{
+			((IEditable)this).AcceptChanges(memberName, null);
+		}
+
+		public virtual void RejectChanges(string memberName)
+		{
+			((IEditable)this).RejectChanges(memberName, null);
+		}
+
 		[MapIgnore]
 		[Bindable(false)]
 		public virtual bool IsDirty
@@ -98,6 +109,36 @@ namespace Rsdn.Framework.EditableObject
 			bool isDirty = false;
 
 			return ((IEditable)this).IsDirtyMember(memberName, null, ref isDirty) && isDirty;
+		}
+
+		public virtual ArrayList GetDirtyMembers()
+		{
+			ArrayList list = new ArrayList();
+
+			((IEditable)this).GetDirtyMembers(null, list);
+
+			return list;
+		}
+
+		[MapIgnore, Bindable(false)]
+		public string DebugState
+		{
+			get
+			{
+#if DEBUG
+				string s = string.Format(
+					"====== {0} ======\r\nIsDirty: {1}\r\n" + 
+					"Property            IsDirty Original                                 Current\r\n" +
+					"========================= = ======================================== ========================================\r\n",
+					GetType().Name, IsDirty);
+
+				((IEditable)this).PrintDebugState(null, ref s);
+
+				return s + "\r\n";
+#else
+				return "";
+#endif
+			}
 		}
 
 		#endregion
