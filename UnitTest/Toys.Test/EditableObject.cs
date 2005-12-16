@@ -80,9 +80,10 @@ namespace Toys.Test
 		{
 			Object1.CreateInstance();
 
-			Map.CreateInstance(typeof(Person));
+			//Map.CreateInstance(typeof(Person));
 		}
 
+		/*
 		public abstract class Person : EditableObjectBase
 		{
 			public abstract int      ID        { get; }
@@ -105,7 +106,7 @@ namespace Toys.Test
 			public  override      int   ID
 			{
 				get { return _ID.Value; }
-				/* set { _ID.Value = value; PropertyChanged(_ID_MapPropertyInfo); } */
+				set { _ID.Value = value; PropertyChanged(_ID_MapPropertyInfo); }
 			}
 
 			private EditableValue<string> _FirstName = new EditableValue<string>("");
@@ -205,5 +206,6 @@ namespace Toys.Test
 				}
 			}
 		}
+		*/
 	}
 }
