@@ -176,5 +176,35 @@ namespace TypeBuilder.Builders
 
 			Assert.AreEqual(10, o.Value);
 		}
+
+#if FW2
+		public abstract class TestObject2
+		{
+			public abstract int  Int1 { get; set; }
+			public abstract int? Int2 { get; set; }
+
+			private int _Int3;
+			public  virtual int  Int3 { get { return _Int3; } set { _Int3 = value; } }
+
+			private int? _Int4;
+			public virtual int? Int4
+			{
+				get { return _Int4;  }
+				set { _Int4 = value; }
+			}
+		}
+
+		[Test]
+		public void Test()
+		{
+			TestObject2 o = TypeAccessor<TestObject2>.CreateInstance();
+
+			int  i  = o.Int1;
+			int? i2 = o.Int2;
+
+			o.Int1 = 5;
+			o.Int2 = 6;
+		}
+#endif
 	}
 }

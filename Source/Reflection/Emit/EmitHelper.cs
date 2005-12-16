@@ -3174,7 +3174,10 @@ namespace BLToolkit.Reflection.Emit
 		{
 			if (localBuilder == null) throw new ArgumentNullException("localBuilder");
 
-			Type type = TypeHelper.GetUnderlyingType(localBuilder.LocalType);
+			Type type = localBuilder.LocalType;
+
+			if (type.IsEnum)
+				type = Enum.GetUnderlyingType(type);
 
 			return type.IsValueType && type.IsPrimitive == false?
 				ldloca(localBuilder).initobj(type):
@@ -3241,6 +3244,20 @@ namespace BLToolkit.Reflection.Emit
 			if (type == null) throw new ArgumentNullException("type");
 
 			return type.IsValueType? unbox(type): castclass(type);
+		}
+
+		public void AddMaxStackSize(int size)
+		{
+#if FW2
+			FieldInfo fi = _ilGenerator.GetType().GetField(
+				"m_maxStackSize", BindingFlags.Instance | BindingFlags.NonPublic);
+
+			if (fi != null)
+			{
+				size += (int)fi.GetValue(_ilGenerator);
+				fi.SetValue(_ilGenerator, size);
+			}
+#endif
 		}
 	}
 }

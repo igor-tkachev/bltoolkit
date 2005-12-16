@@ -37,6 +37,7 @@
   <ItemGroup>
     <Compile Include="Aspects\InterceptCallInfo.cs" />
     <Compile Include="Aspects\NotNullAttribute.cs" />
+    <Compile Include="EditableObjects\EditableArrayList.cs" />
     <Compile Include="EditableObjects\EditableObject.cs" />
     <Compile Include="EditableObjects\EditableValue.cs" />
     <Compile Include="EditableObjects\IEditable.cs" />

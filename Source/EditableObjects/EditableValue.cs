@@ -4,7 +4,7 @@ using System.Reflection;
 
 using BLToolkit.TypeBuilder;
 
-#if !FW21
+#if !FW2
 using T = System.Object;
 #endif
 
@@ -12,22 +12,13 @@ namespace BLToolkit.EditableObjects
 {
 	[Serializable]
 	public struct EditableValue
-#if FW21
+#if FW2
 	<T>
 #endif
 	: IEditable
 	{
 		private T _original;
 		private T _current;
-
-/*
-		public EditableValue()
-#if FW21
-			_original = default(T);
-			_current  = default(T);
-#endif
-		}
-*/
 
 		public EditableValue(T value)
 		{
