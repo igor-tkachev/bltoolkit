@@ -49,6 +49,7 @@ namespace UnitTests.All
 	[TestFixture]
 	public class GetValueTest
 	{
+		[Test]
 		public void Test()
 		{
 		}

@@ -75,6 +75,7 @@ namespace BLToolkit.TypeBuilder.Builders
 						.ldarg_1
 						.stfld   (field)
 						;
+					//Context.MethodBuilder.Emitter.AddMaxStackSize(6);
 					break;
 
 				case 1:
