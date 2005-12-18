@@ -4,12 +4,16 @@ using System.Reflection;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
+using System.Data.SqlTypes;
 
 using BLToolkit.TypeBuilder;
 using BLToolkit.TypeBuilder.Builders;
+using BLToolkit.Mapping;
 
 namespace BLToolkit.Reflection
 {
+	public delegate object NullValueProvider(Type type);
+
 	public abstract class TypeAccessor : ICollection
 	{
 		protected TypeAccessor()
@@ -175,6 +179,105 @@ namespace BLToolkit.Reflection
 		}
 
 #endif
+
+		#endregion
+
+		#region GetNullValue
+
+		public static NullValueProvider GetNullValue = new NullValueProvider(GetNull);
+
+		private static object GetNull(Type type)
+		{
+			return GetNullInternal(type);
+		}
+
+		private static object GetNullInternal(Type type)
+		{
+			if (type == null) throw new ArgumentNullException("type");
+
+			if (type.IsValueType)
+			{
+				if (type.IsEnum)
+					return GetEnumNullValue(type);
+
+				if (type.IsPrimitive)
+				{
+					if (type == typeof(Int32))       return 0;
+					if (type == typeof(Double))      return (Double)0;
+					if (type == typeof(Int16))       return (Int16)0;
+					if (type == typeof(SByte))       return (SByte)0;
+					if (type == typeof(Int64))       return (Int64)0;
+					if (type == typeof(Byte))        return (Byte)0;
+					if (type == typeof(UInt16))      return (UInt16)0;
+					if (type == typeof(UInt32))      return (UInt32)0;
+					if (type == typeof(UInt64))      return (UInt64)0;
+					if (type == typeof(UInt64))      return (UInt64)0;
+					if (type == typeof(Single))      return (Single)0;
+					if (type == typeof(Boolean))     return false;
+				}
+				else
+				{
+					if (type == typeof(DateTime))    return DateTime.MinValue;
+					if (type == typeof(Decimal))     return 0m;
+					if (type == typeof(Guid))        return Guid.Empty;
+
+					if (type == typeof(SqlBinary))   return SqlBinary.  Null;
+					if (type == typeof(SqlBoolean))  return SqlBoolean. Null;
+					if (type == typeof(SqlByte))     return SqlByte.    Null;
+					if (type == typeof(SqlDateTime)) return SqlDateTime.Null;
+					if (type == typeof(SqlDecimal))  return SqlDecimal. Null;
+					if (type == typeof(SqlDouble))   return SqlDouble.  Null;
+					if (type == typeof(SqlGuid))     return SqlGuid.    Null;
+					if (type == typeof(SqlInt16))    return SqlInt16.   Null;
+					if (type == typeof(SqlInt32))    return SqlInt32.   Null;
+					if (type == typeof(SqlInt64))    return SqlInt64.   Null;
+					if (type == typeof(SqlMoney))    return SqlMoney.   Null;
+					if (type == typeof(SqlSingle))   return SqlSingle.  Null;
+					if (type == typeof(SqlString))   return SqlString.  Null;
+#if FW2
+					if (type == typeof(SqlXml))      return SqlXml.     Null;
+#endif
+				}
+			}
+			else
+			{
+				if (type == typeof(String)) return string.Empty;
+			}
+
+			return null;
+		}
+
+		const FieldAttributes EnumField = FieldAttributes.Public | FieldAttributes.Static | FieldAttributes.Literal;
+
+		private static Hashtable _nullValues = new Hashtable();
+
+		private static object GetEnumNullValue(Type type)
+		{
+			object nullValue = _nullValues[type];
+
+			if (nullValue != null || _nullValues.Contains(type))
+				return nullValue;
+
+			FieldInfo[] fields = type.GetFields();
+
+			foreach (FieldInfo fi in fields)
+			{
+				if ((fi.Attributes & EnumField) == EnumField)
+				{
+					Attribute[] attrs = Attribute.GetCustomAttributes(fi, typeof(NullValueAttribute));
+
+					if (attrs.Length > 0)
+					{
+						nullValue = Enum.Parse(type, fi.Name);
+						break;
+					}
+				}
+			}
+
+			_nullValues[type] = nullValue;
+
+			return nullValue;
+		}
 
 		#endregion
 

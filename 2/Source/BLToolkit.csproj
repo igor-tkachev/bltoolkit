@@ -98,7 +98,17 @@
                     SubType = "Code"
                     BuildAction = "Compile"
                 />
+                <File
+                    RelPath = "ComponentModel\CustomPropertyDescriptor.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
                 <Folder RelPath = "Data\DataProvider\" />
+                <File
+                    RelPath = "EditableObjects\EditableArrayList.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
                 <File
                     RelPath = "EditableObjects\EditableObject.cs"
                     SubType = "Code"

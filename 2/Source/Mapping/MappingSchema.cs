@@ -77,71 +77,7 @@ namespace BLToolkit.Mapping
 
 		public virtual object GetNullValue(Type type)
 		{
-			if (type == null) throw new ArgumentNullException("type");
-
-			if (type.IsValueType)
-			{
-				if (type.IsEnum)
-					return GetEnumNullValue(type);
-
-				if (type.IsPrimitive)
-				{
-					if (type == typeof(Int32))   return 0;
-					if (type == typeof(Double))  return (Double)0;
-					if (type == typeof(Int16))   return (Int16)0;
-					if (type == typeof(SByte))   return (SByte)0;
-					if (type == typeof(Int64))   return (Int64)0;
-					if (type == typeof(Byte))    return (Byte)0;
-					if (type == typeof(UInt16))  return (UInt16)0;
-					if (type == typeof(UInt32))  return (UInt32)0;
-					if (type == typeof(UInt64))  return (UInt64)0;
-					if (type == typeof(UInt64))  return (UInt64)0;
-					if (type == typeof(Single))  return (Single)0;
-					if (type == typeof(Boolean)) return false;
-				}
-				else
-				{
-					if (type == typeof(DateTime)) return DateTime.MinValue;
-					if (type == typeof(Decimal))  return 0m;
-					if (type == typeof(Guid))     return Guid.Empty;
-				}
-			}
-			else
-			{
-				if (type == typeof(String)) return string.Empty;
-			}
-
-			return null;
-		}
-
-		private Hashtable _nullValues = new Hashtable();
-
-		private object GetEnumNullValue(Type type)
-		{
-			object nullValue = _nullValues[type];
-
-			if (nullValue != null || _nullValues.Contains(type))
-				return nullValue;
-
-			FieldInfo[] fields = type.GetFields();
-
-			foreach (FieldInfo fi in fields)
-			{
-				if ((fi.Attributes & EnumField) == EnumField)
-				{
-					Attribute[] attrs = Attribute.GetCustomAttributes(fi, typeof(NullValueAttribute));
-
-					if (attrs.Length > 0)
-					{
-						nullValue = Enum.Parse(type, fi.Name);
-						break;
-					}
-				}
-			}
-
-			_nullValues[type] = nullValue;
-
-			return nullValue;
+			return TypeAccessor.GetNullValue(type);
 		}
 
 		#endregion
