@@ -11,7 +11,18 @@ namespace BLToolkit.EditableObjects
 	public class EditableArrayList :
 		ArrayList, ISupportInitialize, IDisposable, IEditable
 	{
-		#region Public Members
+		#region Constructors
+
+		public EditableArrayList(Type itemType, ArrayList list)
+		{
+			if (itemType == null) throw new ArgumentNullException("itemType");
+			if (list     == null) throw new ArgumentNullException("list");
+
+			_itemType = itemType;
+			_list     = list;
+
+			AddInternal(_list);
+		}
 
 		public EditableArrayList(Type itemType)
 			: this(itemType, new ArrayList())
@@ -27,6 +38,10 @@ namespace BLToolkit.EditableObjects
 			: this(itemType, new ArrayList(c))
 		{
 		}
+
+		#endregion
+
+		#region Public Members
 
 		private  ArrayList _list;
 		/*
@@ -64,14 +79,17 @@ namespace BLToolkit.EditableObjects
 			}
 		}
 
-		public void Sort(string memberName)
+		public void Sort(params string[] memberNames)
 		{
-			Sort(ListSortDirection.Ascending, memberName);
+			Sort(ListSortDirection.Ascending, memberNames);
 		}
 
-		public void Sort(ListSortDirection direction, string memberName)
+		public void Sort(ListSortDirection direction, params string[] memberNames)
 		{
-			Sort(new SortMemberComparer(direction, TypeAccessor.GetAccessor(ItemType)[memberName]));
+			if (memberNames        == null) throw new ArgumentNullException      ("memberNames");
+			if (memberNames.Length == 0)    throw new ArgumentOutOfRangeException("memberNames");
+
+			Sort(new SortMemberComparer(TypeAccessor.GetAccessor(ItemType), direction, memberNames));
 		}
 
 		public void Move(int newIndex, int oldIndex)
@@ -111,20 +129,24 @@ namespace BLToolkit.EditableObjects
 
 		#region Change Notification
 
+		private bool _notifyChanges = true;
+		public  bool  NotifyChanges
+		{
+			get { return _notifyChanges;  }
+			set { _notifyChanges = value; }
+		}
+
 		public event ListChangedEventHandler ListChanged;
 
 		protected virtual void OnListChanged(ListChangedEventArgs e)
 		{
-			if (IsTrackingChanges)
-			{
-				if (ListChanged != null)
-					ListChanged(this, e);
-			}
+			if (_notifyChanges && ListChanged != null)
+				ListChanged(this, e);
 		}
 
 		protected void OnListChanged(ListChangedType listChangedType, int newIndex)
 		{
-			if (IsTrackingChanges)
+			if (_notifyChanges)
 				OnListChanged(new ListChangedEventArgs(listChangedType, newIndex));
 		}
 
@@ -601,20 +623,6 @@ namespace BLToolkit.EditableObjects
 
 		#region Static Methods
 
-		internal EditableArrayList(Type itemType, ArrayList list)
-		{
-			if (itemType == null) throw new ArgumentNullException("itemType");
-			if (list     == null) throw new ArgumentNullException("list");
-
-			_itemType = itemType;
-			_list     = list;
-
-			//if (_itemType.IsAbstract)
-			//	_itemType = Map.Descriptor(_itemType).MappedType;
-
-			AddInternal(_list);
-		}
-
 		public static EditableArrayList Adapter(Type itemType, ArrayList list)
 		{
 			return new EditableArrayList(itemType, list);
@@ -655,7 +663,6 @@ namespace BLToolkit.EditableObjects
 
 		#endregion
 
-
 		#region IDisposable
 
 		public void Dispose()
@@ -669,23 +676,39 @@ namespace BLToolkit.EditableObjects
 
 		class SortMemberComparer : IComparer
 		{
-			MemberAccessor     _member;
 			ListSortDirection  _direction;
+			string[]           _memberNames;
+			TypeAccessor       _typeAccessor;
+			MemberAccessor[]   _members;
+			MemberAccessor     _member;
 
-			public SortMemberComparer(ListSortDirection direction, MemberAccessor member)
+			public SortMemberComparer(TypeAccessor typeAccessor, ListSortDirection direction, string[] memberNames)
 			{
-				if (member == null) throw new ArgumentNullException("member");
+				_typeAccessor = typeAccessor;
+				_direction    = direction;
+				_memberNames  = memberNames;
+				_members      = new MemberAccessor[memberNames.Length];
 
-				_member    = member;
-				_direction = direction;
+				_member = _members[0] = _typeAccessor[memberNames[0]];
 			}
 
 			public int Compare(object x, object y)
 			{
 				object a = _member.GetValue(x);
 				object b = _member.GetValue(y);
+				int    n = Comparer.Default.Compare(a, b);
 
-				int n = Comparer.Default.Compare(a, b);
+				if (n == 0) for (int i = 1; n == 0 && i < _members.Length; i++)
+				{
+					MemberAccessor member = _members[i];
+
+					if (member == null)
+						member = _members[i] = _typeAccessor[_memberNames[i]];
+
+					a = member.GetValue(x);
+					b = member.GetValue(y);
+					n = Comparer.Default.Compare(a, b);
+				}
 
 				return _direction == ListSortDirection.Ascending? n: -n;
 			}

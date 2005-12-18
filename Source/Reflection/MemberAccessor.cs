@@ -1,20 +1,40 @@
 using System;
 using System.Reflection;
+using System.ComponentModel;
+
+using BLToolkit.ComponentModel;
 
 namespace BLToolkit.Reflection
 {
 	public abstract class MemberAccessor
 	{
-		protected MemberAccessor(MemberInfo memberInfo)
+		protected MemberAccessor(TypeAccessor typeAccessor, MemberInfo memberInfo)
 		{
-			_memberInfo = memberInfo;
+			_typeAccessor = typeAccessor;
+			_memberInfo   = memberInfo;
 		}
 
 		private MemberInfo _memberInfo;
 		public  MemberInfo  MemberInfo
 		{
 			get { return _memberInfo;  }
-			set { _memberInfo = value; }
+		}
+
+		private TypeAccessor _typeAccessor;
+		public  TypeAccessor  TypeAccessor
+		{
+			get { return _typeAccessor; }
+		}
+
+		private PropertyDescriptor _propertyDescriptor;
+		public  PropertyDescriptor  PropertyDescriptor
+		{
+			get
+			{
+				if (_propertyDescriptor == null)
+					_propertyDescriptor = new CustomPropertyDescriptor(_typeAccessor.OriginalType, Name);
+				return _propertyDescriptor;
+			}
 		}
 
 		public virtual bool HasGetter { get { return false; } }
@@ -70,9 +90,16 @@ namespace BLToolkit.Reflection
 			return attrs.Length > 0? attrs: null;
 		}
 
+		public object[] GetAttributes()
+		{
+			object[] attrs = _memberInfo.GetCustomAttributes(true);
+
+			return attrs.Length > 0? attrs: null;
+		}
+
 		public object[] GetTypeAttributes(Type attributeType)
 		{
-			return TypeHelper.GetAttributes(MemberInfo.DeclaringType, attributeType);
+			return TypeHelper.GetAttributes(_typeAccessor.OriginalType, attributeType);
 		}
 	}
 }

@@ -167,6 +167,7 @@ namespace BLToolkit.TypeBuilder.Builders
 			_typeBuilder.DefaultConstructor.Emitter
 				.ldarg_0
 				.ldarg_0
+				.ldarg_0
 				.ldc_i4  (mi is FieldInfo? 1: 2)
 				.ldstr   (mi.Name)
 				.call    (_accessorType.GetMethod("GetMember", typeof(int), typeof(string)))
@@ -292,12 +293,15 @@ namespace BLToolkit.TypeBuilder.Builders
 
 		private static ConstructorBuilderHelper BuildNestedTypeConstructor(TypeBuilderHelper nestedType)
 		{
-			ConstructorBuilderHelper ctorBuilder = nestedType.DefinePublicConstructor(typeof(MemberInfo));
+			Type[] parameters = new Type[] { typeof(TypeAccessor), typeof(MemberInfo) };
+
+			ConstructorBuilderHelper ctorBuilder = nestedType.DefinePublicConstructor(parameters);
 
 			ctorBuilder.Emitter
 				.ldarg_0
 				.ldarg_1
-				.call    (TypeHelper.GetConstructor(typeof(MemberAccessor), typeof(MemberInfo)))
+				.ldarg_2
+				.call    (TypeHelper.GetConstructor(typeof(MemberAccessor), parameters))
 				.ret()
 				;
 
