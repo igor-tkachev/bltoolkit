@@ -99,7 +99,22 @@
                     BuildAction = "Compile"
                 />
                 <File
-                    RelPath = "ComponentModel\CustomPropertyDescriptor.cs"
+                    RelPath = "ComponentModel\BindingListImpl.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "ComponentModel\ISortable.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "ComponentModel\MemberPropertyDescriptor.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "ComponentModel\PropertyDescriptorWrapper.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
                 />
@@ -110,7 +125,17 @@
                     BuildAction = "Compile"
                 />
                 <File
+                    RelPath = "EditableObjects\EditableListChangedEventArgs.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
                     RelPath = "EditableObjects\EditableObject.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "EditableObjects\EditableObjectWrapper.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
                 />

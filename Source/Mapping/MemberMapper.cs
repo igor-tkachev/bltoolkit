@@ -8,9 +8,41 @@ namespace BLToolkit.Mapping
 {
 	public class MemberMapper
 	{
+		#region Init
+
 		public MemberMapper()
 		{
 		}
+
+		public virtual void Init(MapMemberInfo mapMemberInfo)
+		{
+			if (mapMemberInfo == null) throw new ArgumentNullException("mapMemberInfo");
+
+			_mapMemberInfo  = mapMemberInfo;
+			_name           = mapMemberInfo.Name;
+			_memberAccessor = mapMemberInfo.MemberAccessor;
+		}
+
+		internal static MemberMapper CreateMemberMapper(MapMemberInfo mi)
+		{
+			Type         type = mi.MemberAccessor.Type;
+			MemberMapper mm   = null;
+
+			if (type.IsPrimitive || type.IsEnum)
+				mm = GetPrimitiveMemberMapper(mi);
+
+#if FW2
+			if (mm == null) mm = GetNullableMemberMapper(mi);
+#endif
+
+			if (mm == null) mm = GetSimpleMemberMapper(mi);
+			if (mm == null) mm = GetSqlTypeMemberMapper(mi);
+			if (mm == null) mm = new DefaultMemberMapper();
+
+			return mm;
+		}
+
+		#endregion
 
 		#region Public Properties
 
@@ -44,34 +76,6 @@ namespace BLToolkit.Mapping
 		}
 
 		#endregion
-
-		public virtual void Init(MapMemberInfo mapMemberInfo)
-		{
-			if (mapMemberInfo == null) throw new ArgumentNullException("mapMemberInfo");
-
-			_mapMemberInfo  = mapMemberInfo;
-			_name           = mapMemberInfo.Name;
-			_memberAccessor = mapMemberInfo.MemberAccessor;
-		}
-
-		internal static MemberMapper CreateMemberMapper(MapMemberInfo mi)
-		{
-			Type         type = mi.MemberAccessor.Type;
-			MemberMapper mm   = null;
-
-			if (type.IsPrimitive || type.IsEnum)
-				mm = GetPrimitiveMemberMapper(mi);
-
-#if FW2
-			if (mm == null) mm = GetNullableMemberMapper(mi);
-#endif
-
-			if (mm == null) mm = GetSimpleMemberMapper(mi);
-			if (mm == null) mm = GetSqlTypeMemberMapper(mi);
-			if (mm == null) mm = new DefaultMemberMapper();
-
-			return mm;
-		}
 
 		#region Default GetValue, SetValue
 

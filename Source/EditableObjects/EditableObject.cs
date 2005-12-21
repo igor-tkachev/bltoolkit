@@ -101,7 +101,7 @@ namespace BLToolkit.EditableObjects
 	#endregion
 	[ImplementInterface(typeof(IEditable))]
 	public abstract class EditableObject
-		: ISupportMapping, IPropertyChanged, INotifyPropertyChanged, IEditableObject
+		: IEditableObject, INotifyPropertyChanged, ISupportMapping, IPropertyChanged
 	{
 		#region IEditable
 

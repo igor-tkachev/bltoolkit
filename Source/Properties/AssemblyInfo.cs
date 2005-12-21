@@ -39,6 +39,7 @@ using System.Diagnostics.CodeAnalysis;
 // FxCop
 
 [assembly: CLSCompliant(true)]
+
 [assembly: SuppressMessage("Microsoft.Design", "CA2210:AssembliesShouldHaveValidStrongNames")]
 [assembly: SuppressMessage("Microsoft.Usage",  "CA2209:AssembliesShouldDeclareMinimumSecurity")]
 [assembly: SuppressMessage("Microsoft.Performance", "CA1810:InitializeReferenceTypeStaticFieldsInline", Scope = "member", Target = "BLToolkit.TypeBuilder.TypeFactory..cctor()")]
@@ -51,4 +52,5 @@ using System.Diagnostics.CodeAnalysis;
 [assembly: SuppressMessage("Microsoft.Design", "CA1062:ValidateArgumentsOfPublicMethods", Scope = "member", Target = "BLToolkit.Mapping.MappingSchema.MapInternal(BLToolkit.Mapping.IMapDataSource,System.Object,BLToolkit.Mapping.IMapDataDestination,System.Object,System.Int32[]):System.Void")]
 [assembly: SuppressMessage("Microsoft.Design", "CA1062:ValidateArgumentsOfPublicMethods", Scope = "member", Target = "BLToolkit.Mapping.MappingSchema.GetIndex(BLToolkit.Mapping.IMapDataSource,BLToolkit.Mapping.IMapDataDestination):System.Int32[]")]
 [assembly: SuppressMessage("Microsoft.Design", "CA1062:ValidateArgumentsOfPublicMethods", Scope = "member", Target = "BLToolkit.Mapping.DataRowMapper..ctor(System.Data.DataRowView)")]
+[assembly: SuppressMessage("Microsoft.Design", "CA1033:InterfaceMethodsShouldBeCallableByChildTypes", Scope = "member", Target = "BLToolkit.EditableObjects.EditableObject.BLToolkit.TypeBuilder.IPropertyChanged.PropertyChanged(System.Reflection.PropertyInfo):System.Void")]
 

@@ -82,6 +82,46 @@ namespace BLToolkit.Reflection
 
 		#endregion
 
+		#region Copy
+
+		public static object Copy(object source, object dest)
+		{
+			if (source == null) throw new ArgumentNullException("source");
+			if (dest   == null) throw new ArgumentNullException("dest");
+
+			TypeAccessor ta;
+			Type         sType = source.GetType();
+			Type         dType = dest.  GetType();
+
+			if (TypeHelper.IsSameOrParent(sType, dType))
+				ta = TypeAccessor.GetAccessor(sType);
+			else if (TypeHelper.IsSameOrParent(dType, sType))
+				ta = TypeAccessor.GetAccessor(dType);
+			else
+				throw new ArgumentException();
+
+			foreach (MemberAccessor ma in ta)
+				ma.SetValue(dest, ma.GetValue(source));
+
+			return dest;
+		}
+
+		public static object Copy(object source)
+		{
+			if (source == null) throw new ArgumentNullException("source");
+
+			TypeAccessor ta = TypeAccessor.GetAccessor(source.GetType());
+
+			object dest = ta.CreateInstanceEx();
+
+			foreach (MemberAccessor ma in ta)
+				ma.SetValue(dest, ma.GetValue(source));
+
+			return dest;
+		}
+
+		#endregion
+
 		#region Abstract Members
 
 		public abstract Type Type         { get; }
