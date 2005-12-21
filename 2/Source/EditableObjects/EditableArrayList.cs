@@ -1,15 +1,20 @@
 using System;
 using System.Collections;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Reflection;
 
 using BLToolkit.Reflection;
+using BLToolkit.Mapping;
+using BLToolkit.ComponentModel;
 
 namespace BLToolkit.EditableObjects
 {
+#if FW2
+	[DebuggerDisplay("Count = {Count}")]
+#endif
 	[Serializable]
-	public class EditableArrayList :
-		ArrayList, ISupportInitialize, IDisposable, IEditable
+	public class EditableArrayList : ArrayList, IEditable, ISortable, ISupportMapping, IDisposable
 	{
 		#region Constructors
 
@@ -44,12 +49,10 @@ namespace BLToolkit.EditableObjects
 		#region Public Members
 
 		private  ArrayList _list;
-		/*
 		internal ArrayList  List
 		{
 			get { return _list; }
 		}
-		*/
 
 		private Type _itemType;
 		public  Type  ItemType
@@ -101,7 +104,8 @@ namespace BLToolkit.EditableObjects
 				_list.RemoveAt(oldIndex);
 				_list.Insert  (newIndex, o);
 
-				OnListChanged(new ListChangedEventArgs(ListChangedType.ItemMoved, newIndex, oldIndex));
+				if (_notifyChanges)
+					OnListChanged(new EditableListChangedEventArgs(newIndex, oldIndex));
 			}
 		}
 
@@ -113,21 +117,11 @@ namespace BLToolkit.EditableObjects
 				Move(newIndex, index);
 		}
 
-		public virtual object Clone(EditableArrayList el)
-		{
-			if (_newItems != null) el._newItems = (ArrayList)_newItems.Clone();
-			if (_delItems != null) el._delItems = (ArrayList)_delItems.Clone();
-
-			el._trackingChanges = _trackingChanges;
-
-			el.AddInternal(el);
-
-			return el;
-		}
-
 		#endregion
 
 		#region Change Notification
+
+		public event ListChangedEventHandler ListChanged;
 
 		private bool _notifyChanges = true;
 		public  bool  NotifyChanges
@@ -136,23 +130,27 @@ namespace BLToolkit.EditableObjects
 			set { _notifyChanges = value; }
 		}
 
-		public event ListChangedEventHandler ListChanged;
-
-		protected virtual void OnListChanged(ListChangedEventArgs e)
+		protected virtual void OnListChanged(EditableListChangedEventArgs e)
 		{
 			if (_notifyChanges && ListChanged != null)
 				ListChanged(this, e);
 		}
 
-		protected void OnListChanged(ListChangedType listChangedType, int newIndex)
+		protected void OnListChanged(ListChangedType listChangedType, int index)
 		{
 			if (_notifyChanges)
-				OnListChanged(new ListChangedEventArgs(listChangedType, newIndex));
+				OnListChanged(new EditableListChangedEventArgs(listChangedType, index));
 		}
 
 		private void ItemPropertyChanged(object sender, PropertyChangedEventArgs e)
 		{
-			OnListChanged(new ListChangedEventArgs(ListChangedType.ItemChanged, _list.IndexOf(sender)));
+			if (_notifyChanges && sender != null)
+			{
+				MemberAccessor ma = TypeAccessor.GetAccessor(sender.GetType())[e.PropertyName];
+
+				if (ma != null)
+					OnListChanged(new EditableListChangedEventArgs(_list.IndexOf(sender), ma.PropertyDescriptor));
+			}
 		}
 
 		#endregion
@@ -161,7 +159,7 @@ namespace BLToolkit.EditableObjects
 
 		void AddInternal(object value)
 		{
-			if (IsTrackingChanges)
+			if (_isTrackingChanges)
 			{
 				if (DelItems.Contains(value))
 					DelItems.Remove(value);
@@ -178,7 +176,7 @@ namespace BLToolkit.EditableObjects
 
 		private void RemoveInternal(object value)
 		{
-			if (IsTrackingChanges)
+			if (_isTrackingChanges)
 			{
 				if (NewItems.Contains(value))
 					NewItems.Remove(value);
@@ -215,25 +213,19 @@ namespace BLToolkit.EditableObjects
 
 		#endregion
 
-		#region ISupportInitialize Members
+		#region ISupportMapping Members
 
-		private int   _trackingChanges;
-		private bool IsTrackingChanges
+		private bool _isTrackingChanges = true;
+
+		public void BeginMapping(InitContext initContext)
 		{
-			get { return _trackingChanges == 0; }
+			_isTrackingChanges = false;
 		}
 
-		public void BeginInit()
+		public void EndMapping(InitContext initContext)
 		{
-			_trackingChanges++;
-		}
-
-		public void EndInit()
-		{
-			if (_trackingChanges == 1)
-				AcceptChanges();
-
-			_trackingChanges--;
+			AcceptChanges();
+			_isTrackingChanges = true;
 		}
 
 		#endregion
@@ -242,10 +234,9 @@ namespace BLToolkit.EditableObjects
 
 		public virtual void AcceptChanges()
 		{
-			if (_list != null)
-				foreach (object o in _list)
-					if (o is IEditable)
-						((IEditable)o).AcceptChanges();
+			foreach (object o in _list)
+				if (o is IEditable)
+					((IEditable)o).AcceptChanges();
 
 			_newItems = null;
 			_delItems = null;
@@ -253,7 +244,7 @@ namespace BLToolkit.EditableObjects
 
 		public virtual void RejectChanges()
 		{
-			BeginInit();
+			_isTrackingChanges = false;
 
 			if (_delItems != null)
 				foreach (object o in _delItems)
@@ -263,12 +254,11 @@ namespace BLToolkit.EditableObjects
 				foreach (object o in _newItems)
 					Remove(o);
 
-			if (_list != null)
-				foreach (object o in _list)
-					if (o is IEditable)
-						((IEditable)o).RejectChanges();
+			foreach (object o in _list)
+				if (o is IEditable)
+					((IEditable)o).RejectChanges();
 
-			EndInit();
+			_isTrackingChanges = true;
 
 			_newItems  = null;
 			_delItems  = null;
@@ -282,11 +272,10 @@ namespace BLToolkit.EditableObjects
 					_delItems != null && _delItems.Count > 0)
 					return true;
 
-				if (_list != null)
-					foreach (object o in _list)
-						if (o is IEditable)
-							if (((IEditable)o).IsDirty)
-								return true;
+				foreach (object o in _list)
+					if (o is IEditable)
+						if (((IEditable)o).IsDirty)
+							return true;
 
 				return false;
 			}
@@ -368,6 +357,17 @@ namespace BLToolkit.EditableObjects
 				_list.Clear();
 				OnListChanged(ListChangedType.Reset, -1);
 			}
+		}
+
+		protected EditableArrayList Clone(EditableArrayList el)
+		{
+			if (_newItems != null) el._newItems = (ArrayList)_newItems.Clone();
+			if (_delItems != null) el._delItems = (ArrayList)_delItems.Clone();
+
+			el._notifyChanges     = _notifyChanges;
+			el._isTrackingChanges = _isTrackingChanges;
+
+			return el;
 		}
 
 		public override object Clone()
@@ -623,14 +623,13 @@ namespace BLToolkit.EditableObjects
 
 		#region Static Methods
 
-		public static EditableArrayList Adapter(Type itemType, ArrayList list)
-		{
-			return new EditableArrayList(itemType, list);
-		}
-
 		public static EditableArrayList Adapter(Type itemType, IList list)
 		{
-			return new EditableArrayList(itemType, ArrayList.Adapter(list));
+			if (list == null) throw new ArgumentNullException("list");
+
+			return list is ArrayList?
+				new EditableArrayList(itemType, (ArrayList)list):
+				new EditableArrayList(itemType, ArrayList.Adapter(list));
 		}
 
 		private static Type GetItemType(IList list)
@@ -651,14 +650,9 @@ namespace BLToolkit.EditableObjects
 			return it;
 		}
 
-		public static EditableArrayList Adapter(ArrayList list)
-		{
-			return new EditableArrayList(GetItemType(list), list);
-		}
-
 		public static new EditableArrayList Adapter(IList list)
 		{
-			return new EditableArrayList(GetItemType(list), ArrayList.Adapter(list));
+			return Adapter(GetItemType(list), list);
 		}
 
 		#endregion

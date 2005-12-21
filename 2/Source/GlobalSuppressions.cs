@@ -1,1 +1,0 @@
-[assembly: System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1033:InterfaceMethodsShouldBeCallableByChildTypes", Scope = "member", Target = "BLToolkit.EditableObjects.EditableObject.BLToolkit.TypeBuilder.IPropertyChanged.PropertyChanged(System.Reflection.PropertyInfo):System.Void")]

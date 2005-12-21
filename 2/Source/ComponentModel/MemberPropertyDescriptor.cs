@@ -6,9 +6,9 @@ using BLToolkit.Reflection;
 
 namespace BLToolkit.ComponentModel
 {
-	public class CustomPropertyDescriptor : PropertyDescriptor
+	public class MemberPropertyDescriptor : PropertyDescriptor
 	{
-		public CustomPropertyDescriptor(Type componentType, string memberName)
+		public MemberPropertyDescriptor(Type componentType, string memberName)
 			: base(memberName, null)
 		{
 			_componentType  = componentType;

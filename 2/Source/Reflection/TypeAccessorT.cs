@@ -25,7 +25,30 @@ namespace BLToolkit.Reflection
 			return (T)_instance.CreateInstanceEx(context);
 		}
 
-		public static IObjectFactory  ObjectFactory
+		public static T Copy(T source, T dest)
+		{
+			if (source == null) throw new ArgumentNullException("source");
+			if (dest   == null) throw new ArgumentNullException("dest");
+
+			foreach (MemberAccessor ma in _instance)
+				ma.SetValue(dest, ma.GetValue(source));
+
+			return dest;
+		}
+
+		public static T Copy(T source)
+		{
+			if (source == null) throw new ArgumentNullException("source");
+
+			T dest = CreateInstanceEx();
+
+			foreach (MemberAccessor ma in _instance)
+				ma.SetValue(dest, ma.GetValue(source));
+
+			return dest;
+		}
+
+		public static IObjectFactory ObjectFactory
 		{
 			get { return _instance.ObjectFactory;  }
 			set { _instance.ObjectFactory = value; }
