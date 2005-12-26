@@ -11,10 +11,16 @@ using BLToolkit.ComponentModel;
 namespace BLToolkit.EditableObjects
 {
 #if FW2
-	[DebuggerDisplay("Count = {Count}")]
+	[DebuggerDisplay("Count = {Count}, ItemType = {ItemType.Name}")]
 #endif
 	[Serializable]
-	public class EditableArrayList : ArrayList, IEditable, ISortable, ISupportMapping, IDisposable
+	public class EditableArrayList :
+		ArrayList, IEditable, ISortable, ISupportMapping, IDisposable, IPrintDebugState, ITypedList,
+#if FW2
+		IBindingListView
+#else
+		IBindingList
+#endif
 	{
 		#region Constructors
 
@@ -23,8 +29,10 @@ namespace BLToolkit.EditableObjects
 			if (itemType == null) throw new ArgumentNullException("itemType");
 			if (list     == null) throw new ArgumentNullException("list");
 
-			_itemType = itemType;
-			_list     = list;
+			_itemType        = itemType;
+			_list            = list;
+			_typedListImpl   = new TypedListImpl(itemType);
+			_bindingListImpl = new BindingListImpl(this, itemType);
 
 			AddInternal(_list);
 		}
@@ -121,8 +129,6 @@ namespace BLToolkit.EditableObjects
 
 		#region Change Notification
 
-		public event ListChangedEventHandler ListChanged;
-
 		private bool _notifyChanges = true;
 		public  bool  NotifyChanges
 		{
@@ -132,8 +138,8 @@ namespace BLToolkit.EditableObjects
 
 		protected virtual void OnListChanged(EditableListChangedEventArgs e)
 		{
-			if (_notifyChanges && ListChanged != null)
-				ListChanged(this, e);
+			if (_notifyChanges)
+				_bindingListImpl.FireListChangedEvent(this, e);
 		}
 
 		protected void OnListChanged(ListChangedType listChangedType, int index)
@@ -281,27 +287,14 @@ namespace BLToolkit.EditableObjects
 			}
 		}
 
-		bool IEditable.AcceptMemberChanges(PropertyInfo propertyInfo, string memberName)
+		void IPrintDebugState.PrintDebugState(PropertyInfo propertyInfo, ref string str)
 		{
-			return false;
-		}
+			int original = _list.Count
+				- (_newItems == null? 0: _newItems.Count)
+				+ (_delItems == null? 0: _delItems.Count);
 
-		bool IEditable.RejectMemberChanges(PropertyInfo propertyInfo, string memberName)
-		{
-			return false;
-		}
-
-		bool IEditable.IsDirtyMember(PropertyInfo propertyInfo, string memberName, ref bool isDirty)
-		{
-			return false;
-		}
-
-		void IEditable.GetDirtyMembers(PropertyInfo propertyInfo, ArrayList list)
-		{
-		}
-
-		void IEditable.PrintDebugState(PropertyInfo propertyInfo, ref string str)
-		{
+			str += string.Format("{0,-20} {1} {2,-40} {3,-40} \r\n",
+				propertyInfo.Name, IsDirty? "*": " ", original, _list.Count);
 		}
 
 		#endregion
@@ -632,27 +625,9 @@ namespace BLToolkit.EditableObjects
 				new EditableArrayList(itemType, ArrayList.Adapter(list));
 		}
 
-		private static Type GetItemType(IList list)
-		{
-			if (list == null) throw new ArgumentNullException("list");
-
-			PropertyInfo pi = list.GetType().GetProperty("Item", new Type[] { typeof(int) });
-			Type         it = pi == null? typeof(object): pi.PropertyType;
-
-			if (it == typeof(object) && list.Count > 0)
-			{
-				object o = list[0];
-
-				if (o != null)
-					it = o.GetType();
-			}
-
-			return it;
-		}
-
 		public static new EditableArrayList Adapter(IList list)
 		{
-			return Adapter(GetItemType(list), list);
+			return Adapter(TypeHelper.GetListItemType(list), list);
 		}
 
 		#endregion
@@ -707,6 +682,148 @@ namespace BLToolkit.EditableObjects
 				return _direction == ListSortDirection.Ascending? n: -n;
 			}
 		}
+
+		#endregion
+
+		#region ITypedList Members
+
+		private TypedListImpl _typedListImpl;
+
+		public PropertyDescriptorCollection GetItemProperties(PropertyDescriptor[] listAccessors)
+		{
+			return _typedListImpl.GetItemProperties(listAccessors);
+		}
+
+		public string GetListName(PropertyDescriptor[] listAccessors)
+		{
+			return _typedListImpl.GetListName(listAccessors);
+		}
+
+		#endregion
+
+		#region IBindingList Members
+
+		private BindingListImpl _bindingListImpl;
+
+		public void AddIndex(PropertyDescriptor property)
+		{
+			_bindingListImpl.AddIndex(property);
+		}
+
+		public object AddNew()
+		{
+			return _bindingListImpl.AddNew();
+		}
+
+		public bool AllowEdit
+		{
+			get { return _bindingListImpl.AllowEdit; }
+		}
+
+		public bool AllowNew
+		{
+			get { return _bindingListImpl.AllowNew; }
+		}
+
+		public bool AllowRemove
+		{
+			get { return _bindingListImpl.AllowRemove; }
+		}
+
+		public void ApplySort(PropertyDescriptor property, ListSortDirection direction)
+		{
+			_bindingListImpl.ApplySort(property, direction);
+		}
+
+		public int Find(PropertyDescriptor property, object key)
+		{
+			return _bindingListImpl.Find(property, key);
+		}
+
+		public bool IsSorted
+		{
+			get { return _bindingListImpl.IsSorted; }
+		}
+
+		public void RemoveIndex(PropertyDescriptor property)
+		{
+			_bindingListImpl.RemoveIndex(property);
+		}
+
+		public void RemoveSort()
+		{
+			_bindingListImpl.RemoveSort();
+		}
+
+		public ListSortDirection SortDirection
+		{
+			get { return _bindingListImpl.SortDirection; }
+		}
+
+		public PropertyDescriptor SortProperty
+		{
+			get { return _bindingListImpl.SortProperty; }
+		}
+
+		public bool SupportsChangeNotification
+		{
+			get { return _bindingListImpl.SupportsChangeNotification; }
+		}
+
+		public event ListChangedEventHandler ListChanged
+		{
+			add    { _bindingListImpl.ListChanged += value; }
+			remove { _bindingListImpl.ListChanged -= value; }
+		}
+
+		public bool SupportsSearching
+		{
+			get { return _bindingListImpl.SupportsSearching; }
+		}
+
+		public bool SupportsSorting
+		{
+			get { return _bindingListImpl.SupportsSorting; }
+		}
+
+		#endregion
+
+		#region IBindingListView Members
+
+#if FW2
+
+		public void ApplySort(ListSortDescriptionCollection sorts)
+		{
+			_bindingListImpl.ApplySort(sorts);
+		}
+
+		public string Filter
+		{
+			get { return _bindingListImpl.Filter;  }
+			set { _bindingListImpl.Filter = value; }
+		}
+
+		public void RemoveFilter()
+		{
+			_bindingListImpl.RemoveFilter();
+		}
+
+		public ListSortDescriptionCollection SortDescriptions
+		{
+			get { return _bindingListImpl.SortDescriptions; }
+		}
+
+		public bool SupportsAdvancedSorting
+		{
+			get { return _bindingListImpl.SupportsAdvancedSorting; }
+		}
+
+		public bool SupportsFiltering
+		{
+			get { return _bindingListImpl.SupportsFiltering; }
+		}
+
+#endif
 
 		#endregion
 	}

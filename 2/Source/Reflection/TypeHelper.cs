@@ -2,8 +2,10 @@ using System;
 using System.Collections;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
+using System.ComponentModel;
 
 using BLToolkit.TypeBuilder;
+using BLToolkit.EditableObjects;
 
 namespace BLToolkit.Reflection
 {
@@ -163,7 +165,7 @@ namespace BLToolkit.Reflection
 				// So, we are going to get some hemorrhoid here to restore the inheritance sequence.
 				//
 				Type[] interfaces      = type.GetInterfaces();
-				int    nBaseInterfaces = type.BaseType.GetInterfaces().Length;
+				int    nBaseInterfaces = type.BaseType != null? type.BaseType.GetInterfaces().Length: 0;
 
 				for (int i = 0; i < interfaces.Length; i++)
 				{
@@ -191,7 +193,7 @@ namespace BLToolkit.Reflection
 					GetAttributesInternal(list, intf);
 				}
 
-				if (type.BaseType != typeof(object))
+				if (type.BaseType != null && type.BaseType != typeof(object))
 					GetAttributesInternal(list, type.BaseType);
 			}
 		}
@@ -625,6 +627,90 @@ namespace BLToolkit.Reflection
 				returnType,
 				types,
 				null);
+		}
+
+		public static Type GetListItemType(object list)
+		{
+			Type typeOfObject = typeof(object);
+
+			if (list == null)
+				return typeOfObject;
+
+			if (list is EditableArrayList)
+				return ((EditableArrayList)list).ItemType;
+
+			if (list is Array)
+				return list.GetType().GetElementType();
+
+			Type type = list.GetType();
+
+#if FW2
+			if (type.IsGenericType)
+			{
+				
+			}
+#endif
+
+			if (list is IList || list is ITypedList || list is IListSource)
+			{
+				PropertyInfo last = null;
+
+				foreach (PropertyInfo pi in type.GetProperties())
+				{
+					if (pi.GetIndexParameters().Length > 0 && pi.PropertyType != typeOfObject)
+					{
+						if (pi.Name == "Item")
+							return pi.PropertyType;
+
+						last = pi;
+					}
+				}
+
+				if (last != null)
+					return last.PropertyType;
+			}
+
+			if (list is IList)
+			{
+				IList l = (IList)list;
+
+				for (int i = 0; i < l.Count; i++)
+				{
+					object o = l[i];
+
+					if (o != null && o.GetType() != typeOfObject)
+						return o.GetType();
+				}
+			}
+			else if (list is IEnumerable)
+			{
+				try
+				{
+					IEnumerator e = ((IEnumerable)list).GetEnumerator();
+
+					// Yield return does not support Reset.
+					//
+					try { e.Reset(); } catch {}
+
+					while (e.MoveNext())
+					{
+						object o = e.Current;
+
+						if (o != null && o.GetType() != typeOfObject)
+						{
+							try { e.Reset(); } catch {}
+							return o.GetType();
+						}
+					}
+
+					try { e.Reset(); } catch {}
+				}
+				catch
+				{
+				}
+			}
+
+			return typeOfObject;
 		}
 
 		#endregion

@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Data.SqlTypes;
+using System.ComponentModel;
 
 using BLToolkit.TypeBuilder;
 using BLToolkit.TypeBuilder.Builders;
@@ -122,6 +123,30 @@ namespace BLToolkit.Reflection
 
 		#endregion
 
+		#region Property Descriptors
+
+		private PropertyDescriptorCollection _propertyDescriptors;
+		public  PropertyDescriptorCollection  PropertyDescriptors
+		{
+			get
+			{
+				if (_propertyDescriptors == null)
+				{
+					PropertyDescriptor[] pd = new PropertyDescriptor[Count];
+
+					int i = 0;
+					foreach (MemberAccessor ma in _members.Values)
+						pd[i++] = ma.PropertyDescriptor;
+
+					_propertyDescriptors = new PropertyDescriptorCollection(pd);
+				}
+
+				return _propertyDescriptors;
+			}
+		}
+
+		#endregion
+
 		#region Abstract Members
 
 		public abstract Type Type         { get; }
@@ -224,11 +249,18 @@ namespace BLToolkit.Reflection
 
 		#region GetNullValue
 
-		public static NullValueProvider GetNullValue = new NullValueProvider(GetNull);
-
-		private static object GetNull(Type type)
+		private static NullValueProvider _getNullValue = new NullValueProvider(GetNullInternal);
+		public  static NullValueProvider  GetNullValue
 		{
-			return GetNullInternal(type);
+			get
+			{
+				if (_getNullValue == null)
+					_getNullValue = new NullValueProvider(GetNullInternal);
+
+				return _getNullValue;
+			}
+
+			set { _getNullValue = value; }
 		}
 
 		private static object GetNullInternal(Type type)
