@@ -15,7 +15,7 @@ namespace BLToolkit.EditableObjects
 #if FW2
 	<T>
 #endif
-	: IEditable
+	: IEditable, IMemberwiseEditable, IPrintDebugState
 	{
 		private T _original;
 		private T _current;
@@ -55,6 +55,10 @@ namespace BLToolkit.EditableObjects
 				return o == null? c != null: o.Equals(c) == false;
 			}
 		}
+
+		#endregion
+
+		#region IMemberwiseEditable Members
 
 		public bool AcceptMemberChanges(PropertyInfo propertyInfo, string memberName)
 		{

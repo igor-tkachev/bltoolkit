@@ -100,6 +100,8 @@ namespace BLToolkit.EditableObjects
 #endif
 	#endregion
 	[ImplementInterface(typeof(IEditable))]
+	[ImplementInterface(typeof(IMemberwiseEditable))]
+	[ImplementInterface(typeof(IPrintDebugState))]
 	public abstract class EditableObject
 		: IEditableObject, INotifyPropertyChanged, ISupportMapping, IPropertyChanged
 	{
@@ -125,22 +127,22 @@ namespace BLToolkit.EditableObjects
 
 		public virtual void AcceptMemberChanges(string memberName)
 		{
-			if (this is IEditable)
-				((IEditable)this).AcceptMemberChanges(null, memberName);
+			if (this is IMemberwiseEditable)
+				((IMemberwiseEditable)this).AcceptMemberChanges(null, memberName);
 		}
 
 		public virtual void RejectMemberChanges(string memberName)
 		{
-			if (this is IEditable)
-				((IEditable)this).RejectMemberChanges(null, memberName);
+			if (this is IMemberwiseEditable)
+				((IMemberwiseEditable)this).RejectMemberChanges(null, memberName);
 		}
 
 		public virtual bool IsDirtyMember(string memberName)
 		{
 			bool isDirty = false;
 
-			if (this is IEditable)
-				((IEditable)this).IsDirtyMember(null, memberName, ref isDirty);
+			if (this is IMemberwiseEditable)
+				((IMemberwiseEditable)this).IsDirtyMember(null, memberName, ref isDirty);
 
 			return isDirty;
 		}
@@ -149,8 +151,8 @@ namespace BLToolkit.EditableObjects
 		{
 			ArrayList list = new ArrayList();
 
-			if (this is IEditable)
-				((IEditable)this).GetDirtyMembers(null, list);
+			if (this is IMemberwiseEditable)
+				((IMemberwiseEditable)this).GetDirtyMembers(null, list);
 
 			return (PropertyInfo[])list.ToArray(typeof(PropertyInfo));
 		}
@@ -160,19 +162,20 @@ namespace BLToolkit.EditableObjects
 			get
 			{
 #if DEBUG
-				string s = string.Format(
-					"====== {0} ======\r\nIsDirty: {1}\r\n" +
-					"Property       IsDirty Original                                 Current\r\n" +
-					"==================== = ======================================== ========================================\r\n",
-					GetType().Name, IsDirty);
+				if (this is IPrintDebugState)
+				{
+					string s = string.Format(
+						"====== {0} ======\r\nIsDirty: {1}\r\n" +
+						"Property       IsDirty Original                                 Current\r\n" +
+						"==================== = ======================================== ========================================\r\n",
+						GetType().Name, IsDirty);
 
-				if (this is IEditable)
-					((IEditable)this).PrintDebugState(null, ref s);
+					((IPrintDebugState)this).PrintDebugState(null, ref s);
 
-				return s + "\r\n";
-#else
-				return "";
+					return s + "\r\n";
+				}
 #endif
+				return "";
 			}
 		}
 

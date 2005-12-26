@@ -180,6 +180,7 @@
                 />
                 <File
                     RelPath = "Reflection\TypeHelperTest.cs"
+                    SubType = "Code"
                     BuildAction = "Compile"
                 />
                 <File

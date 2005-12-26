@@ -1,8 +1,13 @@
 using System;
+using System.Collections;
+#if FW2
+using System.Collections.Generic;
+#endif
 
 using NUnit.Framework;
 
 using BLToolkit.Reflection;
+using BLToolkit.EditableObjects;
 
 namespace Reflection
 {
@@ -119,5 +124,25 @@ namespace Reflection
 
 		}
 #endif
+
+		class MyArrayList : ArrayList
+		{
+			public new TestObject this[int i]
+			{
+				get { return (TestObject)base[i]; }
+			}
+		}
+
+		[Test]
+		public void GetListItemType()
+		{
+			Assert.AreEqual(typeof(TestObject), TypeHelper.GetListItemType(new EditableArrayList(typeof(TestObject))));
+			Assert.AreEqual(typeof(TestObject), TypeHelper.GetListItemType(new TestObject[0]));
+			Assert.AreEqual(typeof(TestObject), TypeHelper.GetListItemType(new MyArrayList()));
+#if FW2
+			Assert.AreEqual(typeof(TestObject), TypeHelper.GetListItemType(new List<TestObject>()));
+#endif
+		}
 	}
 }
+

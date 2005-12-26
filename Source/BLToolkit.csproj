@@ -118,6 +118,21 @@
                     SubType = "Code"
                     BuildAction = "Compile"
                 />
+                <File
+                    RelPath = "ComponentModel\TypedBindingList.cs"
+                    SubType = "Component"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "ComponentModel\TypedBindingList.resx"
+                    DependentUpon = "TypedBindingList.cs"
+                    BuildAction = "EmbeddedResource"
+                />
+                <File
+                    RelPath = "ComponentModel\TypedListImpl.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
                 <Folder RelPath = "Data\DataProvider\" />
                 <File
                     RelPath = "EditableObjects\EditableArrayList.cs"
@@ -146,6 +161,16 @@
                 />
                 <File
                     RelPath = "EditableObjects\IEditable.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "EditableObjects\IMemberwiseEditable.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "EditableObjects\IPrintDebugState.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
                 />
