@@ -5,16 +5,16 @@ using System.Diagnostics.CodeAnalysis;
 
 using BLToolkit.Reflection;
 using BLToolkit.EditableObjects;
+using System.Diagnostics;
 
 namespace BLToolkit.ComponentModel
 {
 	public class BindingListImpl :
 #if FW2
-		IBindingListView,
+		IBindingListView, ICancelAddNew
 #else
-		IBindingList,
+		IBindingList
 #endif
-		IDisposable
 	{
 		#region Init
 
@@ -65,16 +65,40 @@ namespace BLToolkit.ComponentModel
 
 			#region Command
 
+		private int               _newItemIndex = -1;
+		private INotifyObjectEdit _newObject;
+
 		public object AddNew()
 		{
 			if (((IBindingList)this).AllowNew == false)
 				throw new NotSupportedException();
 
+			EndNew();
+
 			object o = TypeAccessor.CreateInstanceEx(_itemType);
 
-			_list.Add(o);
+			_newItemIndex = _list.Add(o);
+			_newObject    = o as INotifyObjectEdit;
+
+			if (_newObject != null)
+				_newObject.ObjectEdit += new ObjectEditEventHandler(NewObject_ObjectEdit);
+
+			Debug.WriteLine(string.Format("AddNew - ({0})", o.GetType().Name));
 
 			return o;
+		}
+
+		void NewObject_ObjectEdit(object sender, ObjectEditEventArgs args)
+		{
+			if (sender == _newObject)
+			{
+				switch (args.EditType)
+				{
+					case ObjectEditType.End:    EndNew();                 break;
+					case ObjectEditType.Cancel: CancelNew(_newItemIndex); break;
+					default:                    return;
+				}
+			}
 		}
 
 		public bool AllowNew
@@ -141,10 +165,14 @@ namespace BLToolkit.ComponentModel
 
 		public void ApplySort(PropertyDescriptor property, ListSortDirection direction)
 		{
-			ApplySort(new SortPropertyComparer(property, direction));
+			Debug.WriteLine(string.Format("Begin ApplySort(\"{0}\", {1})", property.Name, direction));
 
 			_sortProperty  = property;
 			_sortDirection = direction;
+
+			ApplySort(new SortPropertyComparer(property, direction));
+
+			Debug.WriteLine(string.Format("End   ApplySort(\"{0}\", {1})", property.Name, direction));
 		}
 
 		public void RemoveSort()
@@ -187,6 +215,35 @@ namespace BLToolkit.ComponentModel
 		}
 
 			#endregion
+
+		#endregion
+
+		#region ICancelAddNew Members
+
+		public void CancelNew(int itemIndex)
+		{
+			if (itemIndex >= 0 && itemIndex == _newItemIndex)
+			{
+				_list.RemoveAt(itemIndex);
+				EndNew();
+			}
+		}
+
+		public void EndNew(int itemIndex)
+		{
+			if (itemIndex == _newItemIndex)
+				EndNew();
+		}
+
+		public void EndNew()
+		{
+			_newItemIndex = -1;
+
+			if (_newObject != null)
+				_newObject.ObjectEdit -= new ObjectEditEventHandler(NewObject_ObjectEdit);
+
+			_newObject = null;
+		}
 
 		#endregion
 
@@ -300,15 +357,6 @@ namespace BLToolkit.ComponentModel
 
 				return _direction == ListSortDirection.Ascending? n: -n;
 			}
-		}
-
-		#endregion
-
-		#region IDisposable Members
-
-		public virtual void Dispose()
-		{
-			_list = null;
 		}
 
 		#endregion

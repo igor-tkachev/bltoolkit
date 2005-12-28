@@ -7,6 +7,7 @@ using System.Reflection;
 using BLToolkit.Mapping;
 using BLToolkit.Reflection;
 using BLToolkit.TypeBuilder;
+using BLToolkit.ComponentModel;
 
 namespace BLToolkit.EditableObjects
 {
@@ -103,7 +104,7 @@ namespace BLToolkit.EditableObjects
 	[ImplementInterface(typeof(IMemberwiseEditable))]
 	[ImplementInterface(typeof(IPrintDebugState))]
 	public abstract class EditableObject
-		: IEditableObject, INotifyPropertyChanged, ISupportMapping, IPropertyChanged
+		: IEditableObject, INotifyPropertyChanged, ISupportMapping, IPropertyChanged, INotifyObjectEdit
 	{
 		#region IEditable
 
@@ -184,6 +185,7 @@ namespace BLToolkit.EditableObjects
 		#region ISupportMapping Members
 
 		private bool _inMapping;
+		[MapIgnore]
 		public  bool  InMapping
 		{
 			get { return _inMapping; }
@@ -243,17 +245,27 @@ namespace BLToolkit.EditableObjects
 
 		public virtual void BeginEdit()
 		{
+			if (ObjectEdit != null)
+				ObjectEdit(this, new ObjectEditEventArgs(ObjectEditType.Begin));
 		}
 
 		public virtual void CancelEdit()
 		{
-			RejectChanges();
+			if (ObjectEdit != null)
+				ObjectEdit(this, new ObjectEditEventArgs(ObjectEditType.Cancel));
 		}
 
 		public virtual void EndEdit()
 		{
-			AcceptChanges();
+			if (ObjectEdit != null)
+				ObjectEdit(this, new ObjectEditEventArgs(ObjectEditType.End));
 		}
+
+		#endregion
+
+		#region INotifyObjectEdit Members
+
+		public event ObjectEditEventHandler ObjectEdit;
 
 		#endregion
 	}

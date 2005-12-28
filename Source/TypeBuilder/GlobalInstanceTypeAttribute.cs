@@ -58,6 +58,10 @@ namespace BLToolkit.TypeBuilder
 		}
 
 		private Type _propertyType;
+		public  Type  PropertyType
+		{
+			get { return _propertyType; }
+		}
 
 		private         Builders.IAbstractTypeBuilder _typeBuilder;
 		public override Builders.IAbstractTypeBuilder  TypeBuilder

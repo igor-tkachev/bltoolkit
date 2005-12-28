@@ -4,7 +4,7 @@ using System.ComponentModel;
 using BLToolkit.Reflection;
 using BLToolkit.Mapping;
 
-namespace BLToolkit.EditableObjects
+namespace BLToolkit.ComponentModel
 {
 	class EditableObjectWrapper : IEditableObject, INotifyPropertyChanged
 	{
@@ -47,6 +47,8 @@ namespace BLToolkit.EditableObjects
 		#region INotifyPropertyChanged Members
 
 		public event PropertyChangedEventHandler PropertyChanged;
+
+
 
 		#endregion
 	}
