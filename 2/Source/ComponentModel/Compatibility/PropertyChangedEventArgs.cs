@@ -1,7 +1,8 @@
 using System;
 
-namespace BLToolkit.EditableObjects
+namespace BLToolkit.ComponentModel
 {
+	/*
 	public class PropertyChangedEventArgs : EventArgs
 	{
 		public PropertyChangedEventArgs(string propertyName)
@@ -15,5 +16,6 @@ namespace BLToolkit.EditableObjects
 			get { return _propertyName; }
 		}
 	}
+	*/
 }
 

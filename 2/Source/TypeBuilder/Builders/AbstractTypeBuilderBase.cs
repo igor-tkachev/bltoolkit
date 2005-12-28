@@ -3,6 +3,7 @@ using System.Collections;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Reflection.Emit;
+using System.Diagnostics;
 
 using BLToolkit.Reflection;
 using BLToolkit.Reflection.Emit;
@@ -26,8 +27,8 @@ namespace BLToolkit.TypeBuilder.Builders
 		private BuildContext _context;
 		public  BuildContext  Context
 		{
-			get { return _context;  }
-			set { _context = value; }
+			[DebuggerStepThrough] get { return _context;  }
+			[DebuggerStepThrough] set { _context = value; }
 		}
 
 		public virtual bool IsCompatible(BuildContext context, IAbstractTypeBuilder typeBuilder)

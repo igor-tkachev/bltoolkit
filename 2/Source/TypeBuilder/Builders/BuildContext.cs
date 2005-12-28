@@ -3,6 +3,7 @@ using System.Collections;
 using System.Reflection;
 using System.Reflection.Emit;
 using System.Diagnostics.CodeAnalysis;
+using System.Diagnostics;
 
 using BLToolkit.Reflection;
 using BLToolkit.Reflection.Emit;
@@ -206,8 +207,8 @@ namespace BLToolkit.TypeBuilder.Builders
 		private PropertyInfo _currentProperty;
 		public  PropertyInfo  CurrentProperty
 		{
-			get { return _currentProperty;  }
-			set { _currentProperty = value; }
+			[DebuggerStepThrough] get { return _currentProperty;  }
+			[DebuggerStepThrough] set { _currentProperty = value; }
 		}
 
 		#region Internal Fields

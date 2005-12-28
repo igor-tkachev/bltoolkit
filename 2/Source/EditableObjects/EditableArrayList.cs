@@ -11,13 +11,13 @@ using BLToolkit.ComponentModel;
 namespace BLToolkit.EditableObjects
 {
 #if FW2
-	[DebuggerDisplay("Count = {Count}, ItemType = {ItemType.Name}")]
+	[DebuggerDisplay("Count = {Count}, ItemType = {ItemType}")]
 #endif
 	[Serializable]
 	public class EditableArrayList :
 		ArrayList, IEditable, ISortable, ISupportMapping, IDisposable, IPrintDebugState, ITypedList,
 #if FW2
-		IBindingListView
+		IBindingListView, ICancelAddNew
 #else
 		IBindingList
 #endif
@@ -107,6 +107,8 @@ namespace BLToolkit.EditableObjects
 		{
 			if (oldIndex != newIndex)
 			{
+				_bindingListImpl.EndNew();
+
 				object o = _list[oldIndex];
 
 				_list.RemoveAt(oldIndex);
@@ -165,6 +167,8 @@ namespace BLToolkit.EditableObjects
 
 		void AddInternal(object value)
 		{
+			_bindingListImpl.EndNew();
+
 			if (_isTrackingChanges)
 			{
 				if (DelItems.Contains(value))
@@ -182,6 +186,8 @@ namespace BLToolkit.EditableObjects
 
 		private void RemoveInternal(object value)
 		{
+			_bindingListImpl.EndNew();
+
 			if (_isTrackingChanges)
 			{
 				if (NewItems.Contains(value))
@@ -380,7 +386,7 @@ namespace BLToolkit.EditableObjects
 
 		public override void CopyTo(Array array)
 		{
-			_list.Add(array);
+			_list.CopyTo(array);
 		}
 
 		public override void CopyTo(Array array, int arrayIndex)
@@ -518,6 +524,8 @@ namespace BLToolkit.EditableObjects
 
 		public override void Reverse()
 		{
+			_bindingListImpl.EndNew();
+
 			_list.Reverse();
 
 			if (_list.Count > 1)
@@ -526,6 +534,8 @@ namespace BLToolkit.EditableObjects
 
 		public override void Reverse(int index, int count)
 		{
+			_bindingListImpl.EndNew();
+
 			_list.Reverse(index, count);
 
 			if (count > 1)
@@ -545,6 +555,8 @@ namespace BLToolkit.EditableObjects
 
 		public override void Sort()
 		{
+			_bindingListImpl.EndNew();
+
 			_list.Sort();
 
 			if (_list.Count > 1)
@@ -553,6 +565,8 @@ namespace BLToolkit.EditableObjects
 
 		public override void Sort(int index, int count, IComparer comparer)
 		{
+			_bindingListImpl.EndNew();
+
 			_list.Sort(index, count, comparer);
 
 			if (count > 1)
@@ -561,6 +575,8 @@ namespace BLToolkit.EditableObjects
 
 		public override void Sort(IComparer comparer)
 		{
+			_bindingListImpl.EndNew();
+
 			_list.Sort(comparer);
 
 			if (_list.Count > 1)
@@ -788,9 +804,9 @@ namespace BLToolkit.EditableObjects
 
 		#endregion
 
-		#region IBindingListView Members
-
 #if FW2
+
+		#region IBindingListView Members
 
 		public void ApplySort(ListSortDescriptionCollection sorts)
 		{
@@ -823,8 +839,22 @@ namespace BLToolkit.EditableObjects
 			get { return _bindingListImpl.SupportsFiltering; }
 		}
 
-#endif
+		#endregion
+
+		#region ICancelAddNew Members
+
+		public void CancelNew(int itemIndex)
+		{
+			_bindingListImpl.CancelNew(itemIndex);
+		}
+
+		public void EndNew(int itemIndex)
+		{
+			_bindingListImpl.EndNew(itemIndex);
+		}
 
 		#endregion
+
+#endif
 	}
 }

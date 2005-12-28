@@ -3,12 +3,16 @@ using System.Collections;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.ComponentModel;
+using System.Diagnostics;
 
 using BLToolkit.TypeBuilder;
 using BLToolkit.EditableObjects;
 
 namespace BLToolkit.Reflection
 {
+#if FW2
+	[DebuggerDisplay("Type = {Type}")]
+#endif
 	/// <summary>
 	/// A wrapper around the <see cref="Type"/> class.
 	/// </summary>
@@ -603,14 +607,15 @@ namespace BLToolkit.Reflection
 
 			attrs = propertyInfo.GetCustomAttributes(typeof(InstanceTypeAttribute), true);
 
-			if (attrs == null || attrs.Length == 0)
-			{
-				attrs = new TypeHelper(
-					propertyInfo.DeclaringType).GetAttributes(typeof(InstanceTypeAttribute));
-			}
-
-			if (attrs != null && attrs.Length > 0)
+			if (attrs.Length > 0)
 				return ((InstanceTypeAttribute)attrs[0]).Parameters;
+
+			attrs = new TypeHelper(
+				propertyInfo.DeclaringType).GetAttributes(typeof(GlobalInstanceTypeAttribute));
+
+			foreach (GlobalInstanceTypeAttribute attr in attrs)
+				if (attr.PropertyType == propertyInfo.PropertyType)
+					return attr.Parameters;
 
 			return null;
 		}

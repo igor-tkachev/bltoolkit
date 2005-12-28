@@ -104,12 +104,32 @@
                     BuildAction = "Compile"
                 />
                 <File
+                    RelPath = "ComponentModel\EditableObjectWrapper.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "ComponentModel\INotifyObjectEdit.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
                     RelPath = "ComponentModel\ISortable.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
                 />
                 <File
                     RelPath = "ComponentModel\MemberPropertyDescriptor.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "ComponentModel\ObjectEditEventArgs.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "ComponentModel\ObjectEditType.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
                 />
@@ -133,6 +153,16 @@
                     SubType = "Code"
                     BuildAction = "Compile"
                 />
+                <File
+                    RelPath = "ComponentModel\Compatibility\INotifyPropertyChanged.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "ComponentModel\Compatibility\PropertyChangedEventArgs.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
                 <Folder RelPath = "Data\DataProvider\" />
                 <File
                     RelPath = "EditableObjects\EditableArrayList.cs"
@@ -146,11 +176,6 @@
                 />
                 <File
                     RelPath = "EditableObjects\EditableObject.cs"
-                    SubType = "Code"
-                    BuildAction = "Compile"
-                />
-                <File
-                    RelPath = "EditableObjects\EditableObjectWrapper.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
                 />
@@ -171,16 +196,6 @@
                 />
                 <File
                     RelPath = "EditableObjects\IPrintDebugState.cs"
-                    SubType = "Code"
-                    BuildAction = "Compile"
-                />
-                <File
-                    RelPath = "EditableObjects\Compatibility\INotifyPropertyChanged.cs"
-                    SubType = "Code"
-                    BuildAction = "Compile"
-                />
-                <File
-                    RelPath = "EditableObjects\Compatibility\PropertyChangedEventArgs.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
                 />

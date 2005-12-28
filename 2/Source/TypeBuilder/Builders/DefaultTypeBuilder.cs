@@ -317,15 +317,16 @@ namespace BLToolkit.TypeBuilder.Builders
 
 			for (int i = 0; i < parameters.Length; i++)
 			{
-				object o = parameters[i];
+				object o     = parameters[i];
+				Type   oType = o.GetType();
 
 				if (emit.LoadWellKnownValue(o))
 				{
-					if (o != null && o.GetType().IsValueType)
+					if (o != null && oType.IsValueType)
 					{
 						if (!pi[i].ParameterType.IsValueType)
-							emit.box(o.GetType());
-						else if (o.GetType() != pi[i].ParameterType)
+							emit.box(oType);
+						else if (oType != pi[i].ParameterType)
 							emit.conv(pi[i].ParameterType);
 					}
 				}
@@ -337,6 +338,9 @@ namespace BLToolkit.TypeBuilder.Builders
 						.ldelem_ref
 						.CastFromObject (types[i])
 						;
+
+					if (oType.IsValueType && !pi[i].ParameterType.IsValueType)
+						emit.box(oType);
 				}
 			}
 
@@ -360,6 +364,9 @@ namespace BLToolkit.TypeBuilder.Builders
 
 			object[] parameters = TypeHelper.GetPropertyParameters(Context.CurrentProperty);
 			ConstructorInfo  ci = fieldType.GetPublicConstructor(typeof(InitContext));
+
+			if (ci != null && ci.GetParameters()[0].ParameterType != typeof(InitContext))
+				ci = null;
 
 			if (ci != null || fieldType.IsAbstract)
 				CreateAbstractInitContextInstance(field, fieldType, emit, parameters);
@@ -463,6 +470,9 @@ namespace BLToolkit.TypeBuilder.Builders
 			EmitHelper       emit = Context.TypeBuilder.DefaultConstructor.Emitter;
 			object[]         ps   = TypeHelper.GetPropertyParameters(Context.CurrentProperty);
 			ConstructorInfo  ci   = fieldType.GetPublicConstructor(typeof(InitContext));
+
+			if (ci != null && ci.GetParameters()[0].ParameterType != typeof(InitContext))
+				ci = null;
 
 			if (ci != null || fieldType.IsAbstract)
 				CreateInitContextDefaultInstance("$BLToolkit.DefaultInitContext.", field, fieldType, emit, ps);

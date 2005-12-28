@@ -6,10 +6,19 @@ using System.ComponentModel.Design.Serialization;
 using System.Reflection;
 
 using BLToolkit.EditableObjects;
+using System.ComponentModel.Design;
 
 namespace BLToolkit.ComponentModel
 {
-	public class TypedBindingList : Component, ITypedList, IBindingList
+	//[ComplexBindingProperties("TestType")]
+	[DefaultProperty("TestType")]
+	[Designer("System.Windows.Forms.Design.BindingSourceDesigner, System.Design, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
+	public class TypedBindingList : Component, ITypedList,
+#if FW2
+		IBindingListView, ICancelAddNew
+#else
+		IBindingList
+#endif
 	{
 		#region Constructors
 
@@ -19,12 +28,39 @@ namespace BLToolkit.ComponentModel
 		{
 		}
 
+		public TypedBindingList(IContainer container)
+			: this()
+		{
+			container.Add(this);
+		}
+
 		#endregion
+
+		private object _testType;
+		//[AttributeProvider(typeof(ITypeConverter))]
+		[TypeConverter(typeof(MyTypeConverter))]
+		public object TestType
+		{
+			get { return _testType; }
+			set { _testType = value; }
+		}
 
 		#region Public members
 
+		private Type _itemType1;
+		[DefaultValue(null)]
+		public  Type  ItemType1
+		{
+			get { return _itemType1; }
+			set
+			{
+				_itemType1 = value;
+			}
+		}
+
 		private TypeWrapper _itemType;
 		[DefaultValue(null)]
+		[Category("Data")]
 		public  TypeWrapper  ItemType
 		{
 			get { return _itemType; }
@@ -61,7 +97,7 @@ namespace BLToolkit.ComponentModel
 			{
 				if (value == null)
 				{
-					if (_list != null)
+					if (_list != _empty)
 						((IBindingList)_list).ListChanged -= new ListChangedEventHandler(ListChangedHandler);
 
 					_list = Type == null? _empty: new EditableArrayList(Type);
@@ -102,13 +138,14 @@ namespace BLToolkit.ComponentModel
 								Type));
 					}
 
-					if (_list != null)
-						((IBindingList)_list).ListChanged -= new ListChangedEventHandler(ListChangedHandler);
+					if (_list != _empty)
+						_list.ListChanged -= new ListChangedEventHandler(ListChangedHandler);
 
 					_list = list;
 				}
 
-				((IBindingList)_list).ListChanged += new ListChangedEventHandler(ListChangedHandler);
+				if (_list != _empty)
+					((IBindingList)_list).ListChanged += new ListChangedEventHandler(ListChangedHandler);
 				OnListChanged(ListChangedType.Reset, -1);
 			}
 		}
@@ -165,10 +202,10 @@ namespace BLToolkit.ComponentModel
 
 		protected override void Dispose(bool disposing)
 		{
-			if (_list != null)
+			if (_list != _empty)
 				((IBindingList)_list).ListChanged -= new ListChangedEventHandler(ListChangedHandler);
 
-			_list = null;
+			_list = _empty;
 
 			base.Dispose(disposing);
 		}
@@ -189,11 +226,64 @@ namespace BLToolkit.ComponentModel
 
 		#endregion
 
+#if FW2
+
+		#region IBindingListView Members
+
+		bool IBindingListView.SupportsAdvancedSorting
+		{
+			get { return _list.SupportsAdvancedSorting; }
+		}
+
+		ListSortDescriptionCollection IBindingListView.SortDescriptions
+		{
+			get { return _list.SortDescriptions; }
+		}
+
+		void IBindingListView.ApplySort(ListSortDescriptionCollection sorts)
+		{
+			_list.ApplySort(sorts);
+		}
+
+		bool IBindingListView.SupportsFiltering
+		{
+			get { return _list.SupportsFiltering; }
+		}
+
+		string IBindingListView.Filter
+		{
+			get { return _list.Filter;  }
+			set { _list.Filter = value; }
+		}
+
+		void IBindingListView.RemoveFilter()
+		{
+			_list.RemoveFilter();
+		}
+
+		#endregion
+
+		#region ICancelAddNew Members
+
+		void ICancelAddNew.CancelNew(int itemIndex)
+		{
+			_list.CancelNew(itemIndex);
+		}
+
+		void ICancelAddNew.EndNew(int itemIndex)
+		{
+			_list.EndNew(itemIndex);
+		}
+
+		#endregion
+
+#endif
+
 		#region IBindingList Members
 
 		void IBindingList.AddIndex(PropertyDescriptor property)
 		{
-			((IBindingList)_list).AddIndex(property);
+			_list.AddIndex(property);
 		}
 
 		object IBindingList.AddNew()
@@ -203,54 +293,54 @@ namespace BLToolkit.ComponentModel
 
 		void IBindingList.ApplySort(PropertyDescriptor property, ListSortDirection direction)
 		{
-			((IBindingList)_list).ApplySort(property, direction);
+			_list.ApplySort(property, direction);
 		}
 
 		int IBindingList.Find(PropertyDescriptor property, object key)
 		{
-			return ((IBindingList)_list).Find(property, key);
+			return _list.Find(property, key);
 		}
 
 		bool IBindingList.IsSorted
 		{
-			get { return ((IBindingList)_list).IsSorted; }
+			get { return _list.IsSorted; }
 		}
 
 		public event ListChangedEventHandler ListChanged;
 
 		void IBindingList.RemoveIndex(PropertyDescriptor property)
 		{
-			((IBindingList)_list).RemoveIndex(property);
+			_list.RemoveIndex(property);
 		}
 
 		void IBindingList.RemoveSort()
 		{
-			((IBindingList)_list).RemoveSort();
+			_list.RemoveSort();
 		}
 
 		ListSortDirection IBindingList.SortDirection
 		{
-			get { return ((IBindingList)_list).SortDirection; }
+			get { return _list.SortDirection; }
 		}
 
 		PropertyDescriptor IBindingList.SortProperty
 		{
-			get { return ((IBindingList)_list).SortProperty; }
+			get { return _list.SortProperty; }
 		}
 
 		bool IBindingList.SupportsChangeNotification
 		{
-			get { return ((IBindingList)_list).SupportsChangeNotification; }
+			get { return _list.SupportsChangeNotification; }
 		}
 
 		bool IBindingList.SupportsSearching
 		{
-			get { return ((IBindingList)_list).SupportsSearching; }
+			get { return _list.SupportsSearching; }
 		}
 
 		bool IBindingList.SupportsSorting
 		{
-			get { return ((IBindingList)_list).SupportsSorting; }
+			get { return _list.SupportsSorting; }
 		}
 
 		#endregion
@@ -343,6 +433,85 @@ namespace BLToolkit.ComponentModel
 
 		#endregion
 
+		[TypeConverter(typeof(MyTypeConverter))]
+		interface ITypeConverter
+		{
+		}
+
+		public class MyTypeConverter : TypeConverter
+		{
+			public MyTypeConverter()
+			{
+			}
+
+			public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType)
+			{
+				return sourceType == typeof(string);
+			}
+
+			public override object ConvertFrom(
+				ITypeDescriptorContext context, CultureInfo culture, object value)
+			{
+				if (value is string)
+				{
+					try
+					{
+						return Type.GetType(value.ToString(), true);
+					}
+					catch
+					{
+					}
+				}
+
+				return null;
+			}
+
+			public override bool CanConvertTo(ITypeDescriptorContext context, Type destinationType)
+			{
+				//if (destinationType == typeof(InstanceDescriptor))
+				//	return true;
+
+				if (destinationType == typeof(string))
+					return true;
+
+				return false;
+			}
+
+			public override object ConvertTo(
+				ITypeDescriptorContext context, 
+				CultureInfo            culture,
+				object                 value,
+				Type                   destinationType)
+			{
+				try
+				{
+					/*
+					if (destinationType == typeof(InstanceDescriptor))
+					{
+						ConstructorInfo ci =
+							typeof(TypeWrapper).GetConstructor(new Type[] { typeof(Type) });
+
+						return new InstanceDescriptor(ci, new Type[] { ((TypeWrapper)value).Type });
+					}
+					*/
+
+					if (destinationType == typeof(string))
+					{
+						if (value == null)
+							return "(none)";
+
+						return value.ToString();
+					}
+				}
+				catch
+				{
+				}
+
+				return null;
+			}
+		}
+
+
 		#region TypeWrapper
 
 		[TypeConverter(typeof(TypeWrapperConverter))]
@@ -384,6 +553,9 @@ namespace BLToolkit.ComponentModel
 				if (sourceType == typeof(string))
 					return true;
 
+				if (sourceType == typeof(Type))
+					return true;
+
 				return base.CanConvertFrom(context, sourceType);
 			}
 
@@ -392,14 +564,29 @@ namespace BLToolkit.ComponentModel
 			{
 				if (value is string)
 				{
+					ITypeResolutionService typeResolver =
+						(ITypeResolutionService)context.GetService(typeof(ITypeResolutionService));
+
+					if (typeResolver != null)
+					{
+						Type type = typeResolver.GetType((string)value);
+
+						if (type != null)
+							return new TypeWrapper(type);
+					}
+
 					try
 					{
 						return new TypeWrapper(value.ToString());
 					}
-					catch (Exception)
+					catch
 					{
 						return null;
 					}
+				}
+				else if (value is Type)
+				{
+					return new TypeWrapper((Type)value);
 				}
 
 				return base.ConvertFrom(context, culture, value);
@@ -413,6 +600,9 @@ namespace BLToolkit.ComponentModel
 				if (destinationType == typeof(string))
 					return true;
 
+				if (destinationType == typeof(Type))
+					return true;
+
 				return base.CanConvertTo(context, destinationType);
 			}
 
@@ -422,23 +612,39 @@ namespace BLToolkit.ComponentModel
 				object                 value,
 				Type                   destinationType)
 			{
-				if (destinationType == typeof(InstanceDescriptor))
+				try
 				{
-					ConstructorInfo ci = 
-						typeof(TypeWrapper).GetConstructor(new Type[] { typeof(Type) });
+					if (destinationType == typeof(InstanceDescriptor))
+					{
+						ConstructorInfo ci =
+							typeof(TypeWrapper).GetConstructor(new Type[] { typeof(Type) });
 
-					return new InstanceDescriptor(ci, new Type[] { ((TypeWrapper)value).Type });
+						return new InstanceDescriptor(ci, new Type[] { ((TypeWrapper)value).Type });
+					}
+
+					if (destinationType == typeof(string))
+					{
+						if (value == null)
+							return "(none)";
+
+						return ((TypeWrapper)value).Type.ToString();
+					}
+
+					if (destinationType == typeof(Type))
+					{
+						if (value == null)
+							return null;
+
+						return ((TypeWrapper)value).Type;
+					}
+
+					return base.ConvertTo(context, culture, value, destinationType);
+				}
+				catch
+				{
 				}
 
-				if (destinationType == typeof(string))
-				{
-					if (value == null)
-						return "(none)";
-
-					return ((TypeWrapper)value).Type.ToString();
-				}
-
-				return base.ConvertTo(context, culture, value, destinationType);
+				return null;
 			}
 		}
 

@@ -40,7 +40,7 @@
     <Compile Include="ComponentModel\BindingListImpl.cs" />
     <Compile Include="ComponentModel\ISortable.cs" />
     <Compile Include="ComponentModel\TypedListImpl.cs" />
-    <Compile Include="EditableObjects\EditableObjectWrapper.cs" />
+    <Compile Include="ComponentModel\EditableObjectWrapper.cs" />
     <Compile Include="EditableObjects\EditableList.cs" />
     <Compile Include="EditableObjects\EditableListChangedEventArgs.cs" />
     <Compile Include="ComponentModel\MemberPropertyDescriptor.cs" />
@@ -50,10 +50,13 @@
     <Compile Include="EditableObjects\EditableValue.cs" />
     <Compile Include="EditableObjects\IEditable.cs" />
     <Compile Include="EditableObjects\IMemberwiseEditable.cs" />
+    <Compile Include="ComponentModel\INotifyObjectEdit.cs" />
     <Compile Include="EditableObjects\IPrintDebugState.cs" />
     <Compile Include="ComponentModel\TypedBindingList.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="ComponentModel\ObjectEditEventArgs.cs" />
+    <Compile Include="ComponentModel\ObjectEditType.cs" />
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="Mapping\DictionaryListMapper.cs" />
     <Compile Include="Mapping\DictionaryMapper.cs" />
