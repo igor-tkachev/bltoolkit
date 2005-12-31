@@ -1,0 +1,201 @@
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Drawing;
+using System.Data;
+using System.Text;
+using System.Windows.Forms;
+using System.Windows.Forms.Design;
+using System.ComponentModel.Design.Data;
+using System.Collections;
+using System.ComponentModel.Design;
+
+namespace BLToolkit.ComponentModel.Design
+{
+	public partial class TypePicker : UserControl
+	{
+		public TypePicker()
+		{
+			InitializeComponent();
+		}
+
+		ITypeResolutionService     _typeResolutionService;
+		IWindowsFormsEditorService _windowsFormsEditorService;
+		IServiceProvider           _serviceProvider;
+		Type                       _resultType;
+		Predicate<Type>            _filter;
+
+		private T GetService<T>()
+		{
+			return (T)_serviceProvider.GetService(typeof(T));
+		}
+
+		public Type PickType(IServiceProvider serviceProvider, Type type, Predicate<Type> filter)
+		{
+			_resultType = type;
+			_filter     = filter;
+
+			_serviceProvider           = serviceProvider;
+			_typeResolutionService     = GetService<ITypeResolutionService>();
+			_windowsFormsEditorService = GetService<IWindowsFormsEditorService>();
+
+			InitUI  ();
+			AddTypes();
+
+			if (_windowsFormsEditorService != null)
+				_windowsFormsEditorService.DropDownControl(this);
+
+			return _resultType;
+		}
+
+		private void InitUI()
+		{
+			IUIService uiService = GetService<IUIService>();
+
+			if (uiService != null)
+			{
+				object color = uiService.Styles["VsColorPanelHyperLink"];
+
+				if (color is Color)
+					addNewLinkLabel.LinkColor = (Color)color;
+
+				color = uiService.Styles["VsColorPanelHyperLinkPressed"];
+
+				if (color is Color)
+					addNewLinkLabel.ActiveLinkColor = (Color)color;
+			}
+
+			// Add None node.
+			//
+			TreeNode node = new TypeNode("None");
+
+			treeView.Nodes.Add(node);
+			treeView.SelectedNode = node;
+		}
+
+		private TypeNode GetTypeNode(DataSourceDescriptor ds)
+		{
+			Type type = null;
+
+			if (_typeResolutionService != null)
+				type = _typeResolutionService.GetType(ds.TypeName);
+
+			try
+			{
+				if (type == null)
+					type = Type.GetType(ds.TypeName, true);
+			}
+			catch
+			{
+				return null;
+			}
+
+			if (_filter != null && _filter(type) == false)
+				return null;
+
+			return new TypeNode(ds.Name, type);
+		}
+
+		private void AddGroup(DataSourceGroup group)
+		{
+			TreeNode groupNode = null;
+
+			foreach (DataSourceDescriptor d in group.DataSources)
+			{
+				if (d == null)
+					continue;
+
+				TypeNode node = GetTypeNode(d);
+
+				if (node == null)
+					continue;
+
+				if (group.IsDefault)
+				{
+					treeView.Nodes.Add(node);
+				}
+				else
+				{
+					if (groupNode == null)
+						treeView.Nodes.Add(groupNode = new TreeNode(group.Name, 2, 2));
+
+					groupNode.Nodes.Add(node);
+				}
+
+				if (_resultType == node.Type)
+					treeView.SelectedNode = node;
+			}
+		}
+
+		private void AddTypes()
+		{
+			DataSourceProviderService dspService = GetService<DataSourceProviderService>();
+
+			if (dspService == null)
+				return;
+
+			DataSourceGroupCollection dataSources = dspService.GetDataSources();
+
+			if (dataSources == null)
+				return;
+
+			foreach (DataSourceGroup group in dataSources)
+				if (group != null)
+					AddGroup(group);
+		}
+
+		private void treeView_NodeMouseClick(object sender, TreeNodeMouseClickEventArgs e)
+		{
+			if (e.Node is TypeNode)
+			{
+				_resultType = ((TypeNode)e.Node).Type;
+				_windowsFormsEditorService.CloseDropDown();
+			}
+		}
+
+		private void addNewLinkLabel_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+		{
+			GetTypeDialog dlg = new GetTypeDialog(_serviceProvider, typeof(object), _filter);
+
+			DialogResult result = dlg.ShowDialog();
+
+			if (result == DialogResult.OK)
+			{
+			}
+		}
+
+		internal class TypeNode : TreeNode
+		{
+			public TypeNode(string name)
+				: base(name, 0, 0)
+			{
+				_isSelectable = true;
+			}
+
+			public TypeNode(string name, Type type)
+				: this(name, type, true)
+			{
+			}
+
+			public TypeNode(string name, Type type, bool isSelectable)
+				: base(name, 3, 3)
+			{
+				_type         = type;
+				_isSelectable = isSelectable;
+			}
+
+			private bool _isSelectable;
+			public  bool  IsSelectable
+			{
+				get { return _isSelectable;  }
+				set { _isSelectable = value; }
+			}
+
+			private Type _type;
+			public  Type  Type
+			{
+				get { return _type; }
+			}
+		}
+	}
+}

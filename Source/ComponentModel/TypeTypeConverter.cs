@@ -1,0 +1,91 @@
+using System;
+using System.ComponentModel;
+using System.Globalization;
+using System.ComponentModel.Design;
+using System.Reflection;
+using System.Diagnostics;
+
+namespace BLToolkit.ComponentModel
+{
+	public class TypeTypeConverter : TypeConverter
+	{
+		public TypeTypeConverter()
+		{
+		}
+
+		public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType)
+		{
+			return sourceType == typeof(string);
+		}
+
+		public override object ConvertFrom(
+			ITypeDescriptorContext context, CultureInfo culture, object value)
+		{
+			if (value == null)
+				return null;
+
+			if (value is string)
+			{
+				string str = value.ToString();
+
+				if (str.Length == 0)
+					return null;
+
+				ITypeResolutionService typeResolver =
+					(ITypeResolutionService)context.GetService(typeof(ITypeResolutionService));
+
+				if (typeResolver != null)
+				{
+					Type type = typeResolver.GetType(str);
+
+					if (type != null)
+						return type;
+				}
+
+				try
+				{
+					return Type.GetType(str, true);
+				}
+				catch
+				{
+					return null;
+				}
+			}
+
+			return null;
+		}
+
+		public override bool CanConvertTo(ITypeDescriptorContext context, Type destinationType)
+		{
+			if (destinationType == typeof(string))
+				return true;
+
+			return false;
+		}
+
+		public override object ConvertTo(
+			ITypeDescriptorContext context,
+			CultureInfo culture,
+			object value,
+			Type destinationType)
+		{
+			//Debug.WriteLine(value == null? "(none)": value);
+
+			try
+			{
+				if (destinationType == typeof(string))
+				{
+					if (value == null)
+						return "(none)";
+
+					return value.ToString();
+				}
+			}
+			catch
+			{
+			}
+
+			return null;
+		}
+	}
+}
