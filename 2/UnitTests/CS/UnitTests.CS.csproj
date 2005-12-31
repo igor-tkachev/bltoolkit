@@ -171,6 +171,7 @@
                 />
                 <File
                     RelPath = "Reflection\ObjectFactoryAttributeTest.cs"
+                    SubType = "Code"
                     BuildAction = "Compile"
                 />
                 <File
@@ -185,6 +186,7 @@
                 />
                 <File
                     RelPath = "Reflection\Emit\MethodBuilderHelperTest.cs"
+                    SubType = "Code"
                     BuildAction = "Compile"
                 />
                 <File

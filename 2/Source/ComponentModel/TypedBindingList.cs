@@ -4,15 +4,15 @@ using System.ComponentModel;
 using System.Globalization;
 using System.ComponentModel.Design.Serialization;
 using System.Reflection;
+using System.ComponentModel.Design;
+using System.Drawing.Design;
 
 using BLToolkit.EditableObjects;
-using System.ComponentModel.Design;
+using BLToolkit.ComponentModel.Design;
 
 namespace BLToolkit.ComponentModel
 {
-	//[ComplexBindingProperties("TestType")]
-	[DefaultProperty("TestType")]
-	[Designer("System.Windows.Forms.Design.BindingSourceDesigner, System.Design, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
+	[DefaultProperty("ItemType")]
 	public class TypedBindingList : Component, ITypedList,
 #if FW2
 		IBindingListView, ICancelAddNew
@@ -36,32 +36,15 @@ namespace BLToolkit.ComponentModel
 
 		#endregion
 
-		private object _testType;
-		//[AttributeProvider(typeof(ITypeConverter))]
-		[TypeConverter(typeof(MyTypeConverter))]
-		public object TestType
-		{
-			get { return _testType; }
-			set { _testType = value; }
-		}
-
 		#region Public members
 
-		private Type _itemType1;
-		[DefaultValue(null)]
-		public  Type  ItemType1
-		{
-			get { return _itemType1; }
-			set
-			{
-				_itemType1 = value;
-			}
-		}
-
-		private TypeWrapper _itemType;
+		private Type _itemType;
+		[RefreshProperties(RefreshProperties.Repaint)]
 		[DefaultValue(null)]
 		[Category("Data")]
-		public  TypeWrapper  ItemType
+		[TypeConverter(typeof(TypeEditor))]
+		[Editor(typeof(TypeEditor), typeof(UITypeEditor))]
+		public  Type  ItemType
 		{
 			get { return _itemType; }
 			set
@@ -74,15 +57,22 @@ namespace BLToolkit.ComponentModel
 			}
 		}
 
-		[Browsable(false)]
-		protected Type Type
+		[RefreshProperties(RefreshProperties.Repaint)]
+		[DefaultValue(null)]
+		[Category("Data")]
+		[TypeConverter(typeof(TypeTypeConverter))]
+		//[Editor("System.Windows.Forms.Design.DataSourceListEditor, System.Design, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a", "System.Drawing.Design.UITypeEditor, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
+		[Editor("System.Windows.Forms.Design.DataSourceListEditor, System.Design, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a", "System.Drawing.Design.UITypeEditor, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
+		public  Type  ItemType1
 		{
-			get
+			get { return _itemType; }
+			set
 			{
-				if (_itemType == null || _itemType.Type == null)
-					return null;
+				_itemType = value;
 
-				return _itemType.Type;
+				OnListChanged(ListChangedType.PropertyDescriptorChanged, -1);
+
+				List  = null;
 			}
 		}
 
@@ -100,7 +90,7 @@ namespace BLToolkit.ComponentModel
 					if (_list != _empty)
 						((IBindingList)_list).ListChanged -= new ListChangedEventHandler(ListChangedHandler);
 
-					_list = Type == null? _empty: new EditableArrayList(Type);
+					_list = _itemType == null? _empty: new EditableArrayList(_itemType);
 				}
 				else
 				{
@@ -112,30 +102,30 @@ namespace BLToolkit.ComponentModel
 					}
 					else if (value is ArrayList)
 					{
-						if (value.Count != 0 || Type == null)
+						if (value.Count != 0 || _itemType == null)
 							list = EditableArrayList.Adapter((ArrayList)value);
 						else
-							list = EditableArrayList.Adapter(Type, (ArrayList)value);
+							list = EditableArrayList.Adapter(_itemType, (ArrayList)value);
 					}
 					else
 					{
-						if (value.Count != 0 && Type == null)
+						if (value.Count != 0 && _itemType == null)
 							list = EditableArrayList.Adapter(value);
 						else
-							list = EditableArrayList.Adapter(Type, value);
+							list = EditableArrayList.Adapter(_itemType, value);
 					}
 
-					if (Type == null)
+					if (_itemType == null)
 					{
-						_itemType = new TypeWrapper(list.ItemType);
+						_itemType = list.ItemType;
 					}
 					else
 					{
-						if (list.ItemType != Type && !list.ItemType.IsSubclassOf(Type))
+						if (list.ItemType != _itemType && !list.ItemType.IsSubclassOf(_itemType))
 							throw new ArgumentException(string.Format(
 								"Item type (0) of the new list must be a subclass of {1}.",
 								list.ItemType,
-								Type));
+								_itemType));
 					}
 
 					if (_list != _empty)
@@ -433,83 +423,6 @@ namespace BLToolkit.ComponentModel
 
 		#endregion
 
-		[TypeConverter(typeof(MyTypeConverter))]
-		interface ITypeConverter
-		{
-		}
-
-		public class MyTypeConverter : TypeConverter
-		{
-			public MyTypeConverter()
-			{
-			}
-
-			public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType)
-			{
-				return sourceType == typeof(string);
-			}
-
-			public override object ConvertFrom(
-				ITypeDescriptorContext context, CultureInfo culture, object value)
-			{
-				if (value is string)
-				{
-					try
-					{
-						return Type.GetType(value.ToString(), true);
-					}
-					catch
-					{
-					}
-				}
-
-				return null;
-			}
-
-			public override bool CanConvertTo(ITypeDescriptorContext context, Type destinationType)
-			{
-				//if (destinationType == typeof(InstanceDescriptor))
-				//	return true;
-
-				if (destinationType == typeof(string))
-					return true;
-
-				return false;
-			}
-
-			public override object ConvertTo(
-				ITypeDescriptorContext context, 
-				CultureInfo            culture,
-				object                 value,
-				Type                   destinationType)
-			{
-				try
-				{
-					/*
-					if (destinationType == typeof(InstanceDescriptor))
-					{
-						ConstructorInfo ci =
-							typeof(TypeWrapper).GetConstructor(new Type[] { typeof(Type) });
-
-						return new InstanceDescriptor(ci, new Type[] { ((TypeWrapper)value).Type });
-					}
-					*/
-
-					if (destinationType == typeof(string))
-					{
-						if (value == null)
-							return "(none)";
-
-						return value.ToString();
-					}
-				}
-				catch
-				{
-				}
-
-				return null;
-			}
-		}
 
 
 		#region TypeWrapper

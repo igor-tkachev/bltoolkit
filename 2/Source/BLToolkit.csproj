@@ -154,6 +154,11 @@
                     BuildAction = "Compile"
                 />
                 <File
+                    RelPath = "ComponentModel\TypeTypeConverter.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
                     RelPath = "ComponentModel\Compatibility\INotifyPropertyChanged.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
