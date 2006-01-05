@@ -32,7 +32,7 @@ namespace BLToolkit.ComponentModel.Design
 			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(TypePicker));
 			this.treeView = new System.Windows.Forms.TreeView();
 			this.imageList = new System.Windows.Forms.ImageList(this.components);
-			this.addNewLinkLabel = new System.Windows.Forms.LinkLabel();
+			this.addNewLinkLabel = new NewLink();
 			this.addNewPanel = new System.Windows.Forms.Panel();
 			this.addNewSplitPanel = new System.Windows.Forms.Panel();
 			this.addNewPanel.SuspendLayout();
@@ -48,7 +48,7 @@ namespace BLToolkit.ComponentModel.Design
 			this.treeView.Location = new System.Drawing.Point(0, 0);
 			this.treeView.Name = "treeView";
 			this.treeView.SelectedImageIndex = 0;
-			this.treeView.Size = new System.Drawing.Size(222, 207);
+			this.treeView.Size = new System.Drawing.Size(251, 243);
 			this.treeView.TabIndex = 0;
 			this.treeView.NodeMouseClick += new System.Windows.Forms.TreeNodeMouseClickEventHandler(this.treeView_NodeMouseClick);
 			// 
@@ -63,14 +63,14 @@ namespace BLToolkit.ComponentModel.Design
 			// 
 			// addNewLinkLabel
 			// 
-			this.addNewLinkLabel.Dock = System.Windows.Forms.DockStyle.Fill;
+			this.addNewLinkLabel.AutoSize = true;
 			this.addNewLinkLabel.ForeColor = System.Drawing.SystemColors.WindowText;
 			this.addNewLinkLabel.ImageList = this.imageList;
 			this.addNewLinkLabel.LinkBehavior = System.Windows.Forms.LinkBehavior.HoverUnderline;
-			this.addNewLinkLabel.Location = new System.Drawing.Point(0, 1);
+			this.addNewLinkLabel.Location = new System.Drawing.Point(0, 3);
 			this.addNewLinkLabel.Name = "addNewLinkLabel";
-			this.addNewLinkLabel.Padding = new System.Windows.Forms.Padding(5, 2, 0, 2);
-			this.addNewLinkLabel.Size = new System.Drawing.Size(222, 17);
+			this.addNewLinkLabel.Padding = new System.Windows.Forms.Padding(5, 0, 0, 0);
+			this.addNewLinkLabel.Size = new System.Drawing.Size(103, 13);
 			this.addNewLinkLabel.TabIndex = 1;
 			this.addNewLinkLabel.TabStop = true;
 			this.addNewLinkLabel.Text = "Add Project Type...";
@@ -83,9 +83,9 @@ namespace BLToolkit.ComponentModel.Design
 			this.addNewPanel.Controls.Add(this.addNewLinkLabel);
 			this.addNewPanel.Controls.Add(this.addNewSplitPanel);
 			this.addNewPanel.Dock = System.Windows.Forms.DockStyle.Bottom;
-			this.addNewPanel.Location = new System.Drawing.Point(0, 207);
+			this.addNewPanel.Location = new System.Drawing.Point(0, 243);
 			this.addNewPanel.Name = "addNewPanel";
-			this.addNewPanel.Size = new System.Drawing.Size(222, 18);
+			this.addNewPanel.Size = new System.Drawing.Size(251, 20);
 			this.addNewPanel.TabIndex = 2;
 			// 
 			// addNewSplitPanel
@@ -94,7 +94,7 @@ namespace BLToolkit.ComponentModel.Design
 			this.addNewSplitPanel.Dock = System.Windows.Forms.DockStyle.Top;
 			this.addNewSplitPanel.Location = new System.Drawing.Point(0, 0);
 			this.addNewSplitPanel.Name = "addNewSplitPanel";
-			this.addNewSplitPanel.Size = new System.Drawing.Size(222, 1);
+			this.addNewSplitPanel.Size = new System.Drawing.Size(251, 1);
 			this.addNewSplitPanel.TabIndex = 2;
 			// 
 			// TypePicker
@@ -103,8 +103,10 @@ namespace BLToolkit.ComponentModel.Design
 			this.Controls.Add(this.treeView);
 			this.Controls.Add(this.addNewPanel);
 			this.Name = "TypePicker";
-			this.Size = new System.Drawing.Size(222, 225);
+			this.Size = new System.Drawing.Size(251, 263);
+			this.Resize += new System.EventHandler(this.TypePicker_Resize);
 			this.addNewPanel.ResumeLayout(false);
+			this.addNewPanel.PerformLayout();
 			this.ResumeLayout(false);
 
 		}
@@ -112,7 +114,7 @@ namespace BLToolkit.ComponentModel.Design
 		#endregion
 
 		private System.Windows.Forms.TreeView treeView;
-		private System.Windows.Forms.LinkLabel addNewLinkLabel;
+		private NewLink addNewLinkLabel;
 		private System.Windows.Forms.Panel addNewPanel;
 		private System.Windows.Forms.Panel addNewSplitPanel;
 		private System.Windows.Forms.ImageList imageList;

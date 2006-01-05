@@ -57,10 +57,7 @@ namespace BLToolkit.ComponentModel
 
 		public override bool CanConvertTo(ITypeDescriptorContext context, Type destinationType)
 		{
-			if (destinationType == typeof(string))
-				return true;
-
-			return false;
+			return destinationType == typeof(string);
 		}
 
 		public override object ConvertTo(
@@ -69,13 +66,11 @@ namespace BLToolkit.ComponentModel
 			object value,
 			Type destinationType)
 		{
-			//Debug.WriteLine(value == null? "(none)": value);
-
 			try
 			{
 				if (destinationType == typeof(string))
 				{
-					if (value == null)
+					if (value == null || value.ToString().Length == 0)
 						return "(none)";
 
 					return value.ToString();

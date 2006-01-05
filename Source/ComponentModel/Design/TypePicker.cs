@@ -9,21 +9,30 @@ using System.Windows.Forms.Design;
 using System.ComponentModel.Design.Data;
 using System.Collections;
 using System.ComponentModel.Design;
+using System.Reflection;
 
 namespace BLToolkit.ComponentModel.Design
 {
+	[DesignTimeVisible(false)]
+	[ToolboxItem(false)]
 	public partial class TypePicker : UserControl
 	{
 		public TypePicker()
 		{
 			InitializeComponent();
+
+			if (!_size.IsEmpty)
+				Size = _size;
 		}
 
 		ITypeResolutionService     _typeResolutionService;
 		IWindowsFormsEditorService _windowsFormsEditorService;
 		IServiceProvider           _serviceProvider;
+
 		Type                       _resultType;
 		Predicate<Type>            _filter;
+
+		static Size _size;
 
 		private T GetService<T>()
 		{
@@ -159,8 +168,48 @@ namespace BLToolkit.ComponentModel.Design
 
 			DialogResult result = dlg.ShowDialog();
 
-			if (result == DialogResult.OK)
+			if (result == DialogResult.OK && dlg.ResultType != null)
 			{
+				_resultType = dlg.ResultType;
+
+				SaveType(_resultType);
+
+				_windowsFormsEditorService.CloseDropDown();
+			}
+		}
+
+		private void TypePicker_Resize(object sender, EventArgs e)
+		{
+			_size = Size;
+		}
+
+		private void SaveType(Type type)
+		{
+			try
+			{
+				string typeName    = "Microsoft.VSDesigner.VSDesignerPackage.IGenericObjectDataSourcesService, Microsoft.VSDesigner, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a";
+				Type   serviceType = Type.GetType(typeName);
+
+				if (serviceType == null)
+					return;
+
+				object service = _serviceProvider.GetService(serviceType);
+
+				if (service == null)
+					return;
+
+				MethodInfo mi = serviceType.GetMethod("AddGenericObjectDataSource");
+
+				mi.Invoke(service, new object[] { _serviceProvider, null, type });
+			}
+			catch (Exception ex)
+			{
+				IUIService ui = GetService<IUIService>();
+
+				if (ui != null)
+					ui.ShowError(ex);
+				else
+					MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
 			}
 		}
 
@@ -195,6 +244,18 @@ namespace BLToolkit.ComponentModel.Design
 			public  Type  Type
 			{
 				get { return _type; }
+			}
+		}
+
+		class NewLink : LinkLabel
+		{
+			public NewLink()
+			{
+			}
+
+			protected override bool IsInputKey(Keys key)
+			{
+				return key == Keys.Return? true: base.IsInputKey(key);
 			}
 		}
 	}

@@ -20,7 +20,7 @@ namespace BLToolkit.ComponentModel.Design
 				return
 					type.IsPublic     &&
 					type.IsClass      &&
-					!type.IsInterface &&
+					//!type.IsInterface &&
 					!type.ContainsGenericParameters &&
 					!typeof(ICollection).IsAssignableFrom(type) &&
 					!typeof(Attribute).  IsAssignableFrom(type) &&

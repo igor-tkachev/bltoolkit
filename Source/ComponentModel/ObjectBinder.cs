@@ -6,6 +6,7 @@ using System.ComponentModel.Design.Serialization;
 using System.Reflection;
 using System.ComponentModel.Design;
 using System.Drawing.Design;
+using System.Drawing;
 
 using BLToolkit.EditableObjects;
 using BLToolkit.ComponentModel.Design;
@@ -13,7 +14,9 @@ using BLToolkit.ComponentModel.Design;
 namespace BLToolkit.ComponentModel
 {
 	[DefaultProperty("ItemType")]
-	public class TypedBindingList : Component, ITypedList,
+	[ToolboxItem(true)]
+	[ToolboxBitmap(typeof(ObjectBinder))]
+	public class ObjectBinder : Component, ITypedList,
 #if FW2
 		IBindingListView, ICancelAddNew
 #else
@@ -24,11 +27,11 @@ namespace BLToolkit.ComponentModel
 
 		static EditableArrayList _empty = new EditableArrayList(typeof(object));
 
-		public TypedBindingList()
+		public ObjectBinder()
 		{
 		}
 
-		public TypedBindingList(IContainer container)
+		public ObjectBinder(IContainer container)
 			: this()
 		{
 			container.Add(this);
@@ -42,28 +45,9 @@ namespace BLToolkit.ComponentModel
 		[RefreshProperties(RefreshProperties.Repaint)]
 		[DefaultValue(null)]
 		[Category("Data")]
-		[TypeConverter(typeof(TypeEditor))]
+		[TypeConverter(typeof(TypeTypeConverter))]
 		[Editor(typeof(TypeEditor), typeof(UITypeEditor))]
 		public  Type  ItemType
-		{
-			get { return _itemType; }
-			set
-			{
-				_itemType = value;
-
-				OnListChanged(ListChangedType.PropertyDescriptorChanged, -1);
-
-				List  = null;
-			}
-		}
-
-		[RefreshProperties(RefreshProperties.Repaint)]
-		[DefaultValue(null)]
-		[Category("Data")]
-		[TypeConverter(typeof(TypeTypeConverter))]
-		//[Editor("System.Windows.Forms.Design.DataSourceListEditor, System.Design, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a", "System.Drawing.Design.UITypeEditor, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
-		[Editor("System.Windows.Forms.Design.DataSourceListEditor, System.Design, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a", "System.Drawing.Design.UITypeEditor, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
-		public  Type  ItemType1
 		{
 			get { return _itemType; }
 			set
@@ -422,145 +406,5 @@ namespace BLToolkit.ComponentModel
 		}
 
 		#endregion
-
-
-
-		#region TypeWrapper
-
-		[TypeConverter(typeof(TypeWrapperConverter))]
-		public class TypeWrapper
-		{
-			private Type _type;
-
-			public TypeWrapper(Type type)
-			{
-				if (type == null) throw new NullReferenceException("type");
-
-				_type = type;
-			}
-
-			internal TypeWrapper(string typeName)
-			{
-				_type = Type.GetType(typeName, true);
-			}
-
-			public Type Type
-			{
-				get { return _type;  }
-				set { _type = value; }
-			}
-		}
-
-		#endregion ExTypeWrapper
-
-		#region TypeWrapperConverter
-
-		public class TypeWrapperConverter : TypeConverter
-		{
-			public TypeWrapperConverter()
-			{
-			}
-
-			public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType)
-			{
-				if (sourceType == typeof(string))
-					return true;
-
-				if (sourceType == typeof(Type))
-					return true;
-
-				return base.CanConvertFrom(context, sourceType);
-			}
-
-			public override object ConvertFrom(
-				ITypeDescriptorContext context, CultureInfo culture, object value)
-			{
-				if (value is string)
-				{
-					ITypeResolutionService typeResolver =
-						(ITypeResolutionService)context.GetService(typeof(ITypeResolutionService));
-
-					if (typeResolver != null)
-					{
-						Type type = typeResolver.GetType((string)value);
-
-						if (type != null)
-							return new TypeWrapper(type);
-					}
-
-					try
-					{
-						return new TypeWrapper(value.ToString());
-					}
-					catch
-					{
-						return null;
-					}
-				}
-				else if (value is Type)
-				{
-					return new TypeWrapper((Type)value);
-				}
-
-				return base.ConvertFrom(context, culture, value);
-			}
-
-			public override bool CanConvertTo(ITypeDescriptorContext context, Type destinationType)
-			{
-				if (destinationType == typeof(InstanceDescriptor))
-					return true;
-
-				if (destinationType == typeof(string))
-					return true;
-
-				if (destinationType == typeof(Type))
-					return true;
-
-				return base.CanConvertTo(context, destinationType);
-			}
-
-			public override object ConvertTo(
-				ITypeDescriptorContext context, 
-				CultureInfo            culture,
-				object                 value,
-				Type                   destinationType)
-			{
-				try
-				{
-					if (destinationType == typeof(InstanceDescriptor))
-					{
-						ConstructorInfo ci =
-							typeof(TypeWrapper).GetConstructor(new Type[] { typeof(Type) });
-
-						return new InstanceDescriptor(ci, new Type[] { ((TypeWrapper)value).Type });
-					}
-
-					if (destinationType == typeof(string))
-					{
-						if (value == null)
-							return "(none)";
-
-						return ((TypeWrapper)value).Type.ToString();
-					}
-
-					if (destinationType == typeof(Type))
-					{
-						if (value == null)
-							return null;
-
-						return ((TypeWrapper)value).Type;
-					}
-
-					return base.ConvertTo(context, culture, value, destinationType);
-				}
-				catch
-				{
-				}
-
-				return null;
-			}
-		}
-
-		#endregion ExTypeWrapperConverter
 	}
 }
