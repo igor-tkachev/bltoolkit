@@ -29,6 +29,12 @@ namespace BLToolkit.ComponentModel.Design
 		Type             _baseType;
 		Predicate<Type>  _filter;
 
+		private Type _resultType;
+		public  Type  ResultType
+		{
+			get { return _resultType; }
+		}
+
 		delegate TypePicker.TypeNode GetTypeNode(Type t);
 
 		private void LoadTypes()
@@ -46,7 +52,18 @@ namespace BLToolkit.ComponentModel.Design
 				ITypeDiscoveryService service = 
 					(ITypeDiscoveryService)_serviceProvider.GetService(typeof(ITypeDiscoveryService));
 
-				ICollection types = service.GetTypes(_baseType, systemCheckBox.Checked);
+				ICollection cTypes = service.GetTypes(_baseType, systemCheckBox.Checked);
+				List<Type>  types  = new List<Type>(cTypes.Count);
+
+				foreach (Type type in cTypes)
+					types.Add(type);
+
+				types.Sort(delegate(Type a, Type b)
+				{
+					return a.Assembly == b.Assembly?
+						a.FullName.CompareTo(b.FullName):
+						a.Assembly.FullName.CompareTo(b.Assembly.FullName);
+				});
 
 				foreach (Type type in types)
 				{
@@ -55,11 +72,6 @@ namespace BLToolkit.ComponentModel.Design
 
 					Assembly assembly     = type.Assembly;
 					TreeNode assemblyNode = (TreeNode)assemblyNodes[assembly];
-
-					if (assembly.GetName().Name == "System.Drawing.Design")
-					{
-						Debug.WriteLine(type);
-					}
 
 					if (assemblyNode == null)
 					{
@@ -73,11 +85,6 @@ namespace BLToolkit.ComponentModel.Design
 
 					if (namespaceNode == null)
 					{
-						if (assembly.GetName().Name == "System.Drawing.Design")
-						{
-							Debug.WriteLine(@namespace);
-						}
-
 						namespaceNodes[namespaceKey] = namespaceNode =
 							assemblyNode.Nodes.Add(namespaceKey, @namespace, 2, 2);
 					}
@@ -96,9 +103,6 @@ namespace BLToolkit.ComponentModel.Design
 						else
 						{
 							TreeNode parent = getTypeNode(t.DeclaringType);
-
-							if (parent == null)
-								parent = getTypeNode(t.DeclaringType);
 
 							parent.Nodes.Add(node = new TypePicker.TypeNode(t.Name, t, false));
 						}
@@ -128,15 +132,19 @@ namespace BLToolkit.ComponentModel.Design
 
 		private void treeView_AfterSelect(object sender, TreeViewEventArgs e)
 		{
-			if (e.Node is TypePicker.TypeNode)
-			{
-				TypePicker.TypeNode node = (TypePicker.TypeNode)e.Node;
+			TypePicker.TypeNode node = e.Node as TypePicker.TypeNode;
 
-				okButton.Enabled = node.IsSelectable;
-			}
-			else
+			_resultType = node != null && node.IsSelectable? node.Type: null;
+
+			okButton.Enabled = _resultType != null;
+		}
+
+		private void treeView_DoubleClick(object sender, EventArgs e)
+		{
+			if (okButton.Enabled)
 			{
-				okButton.Enabled = false;
+				DialogResult = DialogResult.OK;
+				Close();
 			}
 		}
 	}
