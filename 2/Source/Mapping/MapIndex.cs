@@ -31,7 +31,7 @@ namespace BLToolkit.Mapping
 
 		private object GetValue(ObjectMapper objectMapper, object obj, int idx)
 		{
-			MemberAccessor mm = objectMapper.TypeAccessor[Fields[idx]];
+			MemberMapper mm = objectMapper[Fields[idx]];
 
 			if (mm == null)
 				throw new MappingException(string.Format("Type '{0}' does not contain field '{1}'.",

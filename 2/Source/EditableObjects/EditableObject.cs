@@ -8,6 +8,7 @@ using BLToolkit.Mapping;
 using BLToolkit.Reflection;
 using BLToolkit.TypeBuilder;
 using BLToolkit.ComponentModel;
+using BLToolkit.Validation;
 
 namespace BLToolkit.EditableObjects
 {
@@ -266,6 +267,25 @@ namespace BLToolkit.EditableObjects
 		#region INotifyObjectEdit Members
 
 		public event ObjectEditEventHandler ObjectEdit;
+
+		#endregion
+
+		#region Validation
+
+		public virtual void Validate()
+		{
+			Validator.Validate(this);
+		}
+
+		public virtual bool IsValid(string fieldName)
+		{
+			return Validator.IsValid(this, fieldName);
+		}
+
+		public virtual string[] GetErrorMessages(string fieldName)
+		{
+			return Validator.GetErrorMessages(this, fieldName);
+		}
 
 		#endregion
 	}

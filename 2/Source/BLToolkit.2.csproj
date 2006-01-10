@@ -178,6 +178,20 @@
     <Compile Include="Reflection\TypeAccessor.cs" />
     <Compile Include="TypeBuilder\Builders\TypeBuilderAttribute.cs" />
     <Compile Include="TypeBuilder\TypeFactory.cs" />
+    <Compile Include="Validation\FriendlyNameAttribute.cs" />
+    <Compile Include="Validation\MaxDateValueAttribute.cs" />
+    <Compile Include="Validation\MaxLengthAttribute.cs" />
+    <Compile Include="Validation\MaxValueAttribute.cs" />
+    <Compile Include="Validation\MinDateValueAttribute.cs" />
+    <Compile Include="Validation\MinLengthAttribute.cs" />
+    <Compile Include="Validation\MinValueAttribute.cs" />
+    <Compile Include="Validation\RegExAttribute.cs" />
+    <Compile Include="Validation\RequiredAttribute.cs" />
+    <Compile Include="Validation\ValidationException.cs" />
+    <Compile Include="Validation\ValidatableObjectBase.cs" />
+    <Compile Include="Validation\ValidationContext.cs" />
+    <Compile Include="Validation\Validator.cs" />
+    <Compile Include="Validation\ValidatorBaseAttribute.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="ComponentModel\Design\GetTypeDialog.resx">

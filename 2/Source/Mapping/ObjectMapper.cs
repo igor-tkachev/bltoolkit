@@ -66,14 +66,30 @@ namespace BLToolkit.Mapping
 			_nameToMember.Add(memberMapper.Name.ToLower(),  memberMapper);
 		}
 
-		private   ArrayList _members;
-		protected MemberMapper this[int index]
+		private   object[] _mapFieldAttributes;
+		protected object[]  MapFieldAttributes
+		{
+			get
+			{
+				if (_mapFieldAttributes == null)
+					_mapFieldAttributes = TypeHelper.GetAttributes(_typeAccessor.Type, typeof(MapFieldAttribute));
+
+				return _mapFieldAttributes;
+			}
+		}
+
+		#endregion
+
+		#region Public Members
+
+		private ArrayList _members;
+		public  MemberMapper this[int index]
 		{
 			get { return (MemberMapper)_members[index]; }
 		}
 
-		private   Hashtable _nameToMember;
-		protected MemberMapper this[string name]
+		private Hashtable _nameToMember;
+		public  MemberMapper this[string name]
 		{
 			get
 			{
@@ -83,18 +99,33 @@ namespace BLToolkit.Mapping
 
 				if (mm == null)
 				{
-					mm = (MemberMapper)_nameToMember[name.ToLower(CultureInfo.CurrentCulture)];
-
-					if (mm == null)
+					lock (_nameToMember.SyncRoot)
 					{
-						mm = GetComplexMapper(name, name);
+						mm = (MemberMapper)_nameToMember[name];
 
-						if (mm != null)
-							Add(mm);
-					}
-					else
-					{
-						_nameToMember[name] = mm;
+						if (mm == null)
+						{
+							mm = (MemberMapper)_nameToMember[name.ToLower(CultureInfo.CurrentCulture)];
+
+							if (mm == null)
+							{
+								mm = GetComplexMapper(name, name);
+
+								if (mm != null)
+								{
+									if (_members.Contains(mm))
+										throw new MappingException(string.Format(
+											"Wrong mapping field name: '{0}', type: '{1}'. Use name '{2}' instead",
+											name, _typeAccessor.OriginalType.Name, mm.Name));
+
+									Add(mm);
+								}
+							}
+							else
+							{
+								_nameToMember[name] = mm;
+							}
+						}
 					}
 				}
 
@@ -112,18 +143,6 @@ namespace BLToolkit.Mapping
 		public  MappingSchema  MappingSchema
 		{
 			get { return _mappingSchema; }
-		}
-
-		private   object[] _mapFieldAttributes;
-		protected object[]  MapFieldAttributes
-		{
-			get
-			{
-				if (_mapFieldAttributes == null)
-					_mapFieldAttributes = TypeHelper.GetAttributes(_typeAccessor.Type, typeof(MapFieldAttribute));
-
-				return _mapFieldAttributes;
-			}
 		}
 
 		#endregion
