@@ -1,15 +1,15 @@
 ﻿<NUnitProject>
-  <Settings activeconfig="Debug" />
-  <Config name="Debug" binpathtype="Auto">
-    <assembly path="All\bin\Debug\UnitTests.CS.2.dll" />
-    <assembly path="All\bin\Debug\Examples.CS.2.dll" />
-    <assembly path="All\bin\Debug\Examples.VB.2.dll" />
-    <assembly path="All\bin\Debug\Examples.Cpp.2.dll" />
+  <Settings activeconfig="Release" />
+  <Config name="Debug" appbase="All\bin\Debug" configfile="App.config" binpathtype="Auto">
+    <assembly path="UnitTests.CS.2.dll" />
+    <assembly path="Examples.CS.2.dll" />
+    <assembly path="Examples.VB.2.dll" />
+    <assembly path="Examples.Cpp.2.dll" />
   </Config>
-  <Config name="Release" binpathtype="Auto">
-    <assembly path="All\bin\Release\UnitTests.CS.2.dll" />
-    <assembly path="All\bin\Release\Examples.CS.2.dll" />
-    <assembly path="All\bin\Release\Examples.VB.2.dll" />
-    <assembly path="All\bin\Release\Examples.Cpp.2.dll" />
+  <Config name="Release" appbase="All\bin\Release" configfile="App.config" binpathtype="Auto">
+    <assembly path="UnitTests.CS.2.dll" />
+    <assembly path="Examples.CS.2.dll" />
+    <assembly path="Examples.VB.2.dll" />
+    <assembly path="Examples.Cpp.2.dll" />
   </Config>
 </NUnitProject>

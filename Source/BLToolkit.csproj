@@ -79,6 +79,16 @@
                     AssemblyName = "System.Xml"
                     HintPath = "..\..\..\..\WINDOWS\Microsoft.NET\Framework\v1.1.4322\System.XML.dll"
                 />
+                <Reference
+                    Name = "System.Drawing"
+                    AssemblyName = "System.Drawing"
+                    HintPath = "..\..\..\..\..\..\WINDOWS\Microsoft.NET\Framework\v1.1.4322\System.Drawing.dll"
+                />
+                <Reference
+                    Name = "System.Data.OracleClient"
+                    AssemblyName = "System.Data.OracleClient"
+                    HintPath = "..\..\..\..\..\..\WINDOWS\Microsoft.NET\Framework\v1.1.4322\System.Data.OracleClient.dll"
+                />
             </References>
         </Build>
         <Files>
@@ -104,11 +114,6 @@
                     BuildAction = "Compile"
                 />
                 <File
-                    RelPath = "ComponentModel\EditableObjectWrapper.cs"
-                    SubType = "Code"
-                    BuildAction = "Compile"
-                />
-                <File
                     RelPath = "ComponentModel\INotifyObjectEdit.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
@@ -124,6 +129,20 @@
                     BuildAction = "Compile"
                 />
                 <File
+                    RelPath = "ComponentModel\ObjectBinder.cs"
+                    SubType = "Component"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "ComponentModel\ObjectBinder.resx"
+                    DependentUpon = "ObjectBinder.cs"
+                    BuildAction = "EmbeddedResource"
+                />
+                <File
+                    RelPath = "ComponentModel\ObjectBinder.ico"
+                    BuildAction = "EmbeddedResource"
+                />
+                <File
                     RelPath = "ComponentModel\ObjectEditEventArgs.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
@@ -137,16 +156,6 @@
                     RelPath = "ComponentModel\PropertyDescriptorWrapper.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
-                />
-                <File
-                    RelPath = "ComponentModel\TypedBindingList.cs"
-                    SubType = "Component"
-                    BuildAction = "Compile"
-                />
-                <File
-                    RelPath = "ComponentModel\TypedBindingList.resx"
-                    DependentUpon = "TypedBindingList.cs"
-                    BuildAction = "EmbeddedResource"
                 />
                 <File
                     RelPath = "ComponentModel\TypedListImpl.cs"
@@ -168,7 +177,31 @@
                     SubType = "Code"
                     BuildAction = "Compile"
                 />
-                <Folder RelPath = "Data\DataProvider\" />
+                <File
+                    RelPath = "Data\DataProvider\IDataProvider.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "Data\DataProvider\OdbcDataProvider.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "Data\DataProvider\OleDbDataProvider.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "Data\DataProvider\OracleDataProvider.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "Data\DataProvider\SqlDataProvider.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
                 <File
                     RelPath = "EditableObjects\EditableArrayList.cs"
                     SubType = "Code"
@@ -290,7 +323,17 @@
                     BuildAction = "Compile"
                 />
                 <File
+                    RelPath = "Mapping\MapIndex.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
                     RelPath = "Mapping\MapMemberInfo.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "Mapping\MapNextResult.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
                 />
@@ -301,6 +344,16 @@
                 />
                 <File
                     RelPath = "Mapping\MappingSchema.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "Mapping\MapRelation.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "Mapping\MapResultSet.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
                 />

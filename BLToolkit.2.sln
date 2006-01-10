@@ -15,6 +15,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnitTests.All.2", "UnitTest
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Examples.Cpp.2", "Examples\Cpp\Examples.Cpp.2.vcproj", "{1710C5C2-0416-4981-81FC-BBBDFDA0B24D}"
 EndProject
+Project("{4F174C21-8C12-11D0-8340-0000F80270F8}") = "Data", "Data\Data.dbp", "{EC231D13-4BA9-4646-BADA-3A33B4BA6264}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

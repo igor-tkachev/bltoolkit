@@ -169,7 +169,7 @@ namespace BLToolkit.EditableObjects
 		{
 			_bindingListImpl.EndNew();
 
-			if (_isTrackingChanges)
+			if (IsTrackingChanges)
 			{
 				if (DelItems.Contains(value))
 					DelItems.Remove(value);
@@ -188,7 +188,7 @@ namespace BLToolkit.EditableObjects
 		{
 			_bindingListImpl.EndNew();
 
-			if (_isTrackingChanges)
+			if (IsTrackingChanges)
 			{
 				if (NewItems.Contains(value))
 					NewItems.Remove(value);
@@ -225,19 +225,46 @@ namespace BLToolkit.EditableObjects
 
 		#endregion
 
-		#region ISupportMapping Members
+		#region Track Changes
 
-		private bool _isTrackingChanges = true;
+		private int _noTrackingChangesCount;
+
+		public  bool IsTrackingChanges
+		{
+			get { return _noTrackingChangesCount == 0; }
+		}
+
+		protected void SetTrackingChanges(bool trackChanges)
+		{
+			if (trackChanges)
+			{
+				_noTrackingChangesCount--;
+
+				if (_noTrackingChangesCount < 0)
+				{
+					_noTrackingChangesCount = 0;
+					throw new InvalidOperationException("Tracking Changes Counter con not be negative.");
+				}
+			}
+			else
+			{
+				_noTrackingChangesCount++;
+			}
+		}
+
+		#endregion
+
+		#region ISupportMapping Members
 
 		public void BeginMapping(InitContext initContext)
 		{
-			_isTrackingChanges = false;
+			_noTrackingChangesCount++;
 		}
 
 		public void EndMapping(InitContext initContext)
 		{
 			AcceptChanges();
-			_isTrackingChanges = true;
+			_noTrackingChangesCount--;
 		}
 
 		#endregion
@@ -256,7 +283,7 @@ namespace BLToolkit.EditableObjects
 
 		public virtual void RejectChanges()
 		{
-			_isTrackingChanges = false;
+			_noTrackingChangesCount++;
 
 			if (_delItems != null)
 				foreach (object o in _delItems)
@@ -270,7 +297,7 @@ namespace BLToolkit.EditableObjects
 				if (o is IEditable)
 					((IEditable)o).RejectChanges();
 
-			_isTrackingChanges = true;
+			_noTrackingChangesCount--;
 
 			_newItems  = null;
 			_delItems  = null;
@@ -317,6 +344,15 @@ namespace BLToolkit.EditableObjects
 			return idx;
 		}
 
+		public int Add(object value, bool trackChanges)
+		{
+			if (!trackChanges) _noTrackingChangesCount++;
+			int idx = Add(value);
+			if (!trackChanges) _noTrackingChangesCount--;
+
+			return idx;
+		}
+
 		public override void AddRange(ICollection c)
 		{
 			int idx = Count;
@@ -325,6 +361,13 @@ namespace BLToolkit.EditableObjects
 
 			AddInternal(c);
 			OnListChanged(ListChangedType.Reset, idx);
+		}
+
+		public void AddRange(ICollection c, bool trackChanges)
+		{
+			if (!trackChanges) _noTrackingChangesCount++;
+			AddRange(c);
+			if (!trackChanges) _noTrackingChangesCount--;
 		}
 
 		public override int BinarySearch(int index, int count, object value, IComparer comparer)
@@ -358,13 +401,20 @@ namespace BLToolkit.EditableObjects
 			}
 		}
 
+		public void Clear(bool trackChanges)
+		{
+			if (!trackChanges) _noTrackingChangesCount++;
+			Clear();
+			if (!trackChanges) _noTrackingChangesCount--;
+		}
+
 		protected EditableArrayList Clone(EditableArrayList el)
 		{
 			if (_newItems != null) el._newItems = (ArrayList)_newItems.Clone();
 			if (_delItems != null) el._delItems = (ArrayList)_delItems.Clone();
 
-			el._notifyChanges     = _notifyChanges;
-			el._isTrackingChanges = _isTrackingChanges;
+			el._notifyChanges          = _notifyChanges;
+			el._noTrackingChangesCount = _noTrackingChangesCount;
 
 			return el;
 		}
@@ -447,6 +497,13 @@ namespace BLToolkit.EditableObjects
 			OnListChanged(ListChangedType.ItemAdded, index);
 		}
 
+		public void Insert(int index, object value, bool trackChanges)
+		{
+			if (!trackChanges) _noTrackingChangesCount++;
+			Insert(index, value);
+			if (!trackChanges) _noTrackingChangesCount--;
+		}
+
 		public override void InsertRange(int index, ICollection c)
 		{
 			if (c.Count > 0)
@@ -456,6 +513,13 @@ namespace BLToolkit.EditableObjects
 				AddInternal(c);
 				OnListChanged(ListChangedType.Reset, index);
 			}
+		}
+
+		public void InsertRange(int index, ICollection c, bool trackChanges)
+		{
+			if (!trackChanges) _noTrackingChangesCount++;
+			InsertRange(index, c);
+			if (!trackChanges) _noTrackingChangesCount--;
 		}
 
 		public override bool IsFixedSize
@@ -501,6 +565,13 @@ namespace BLToolkit.EditableObjects
 				OnListChanged(ListChangedType.ItemDeleted, n);
 		}
 
+		public void Remove(object obj, bool trackChanges)
+		{
+			if (!trackChanges) _noTrackingChangesCount++;
+			Remove(obj);
+			if (!trackChanges) _noTrackingChangesCount--;
+		}
+
 		public override void RemoveAt(int index)
 		{
 			object o = this[index];
@@ -512,6 +583,13 @@ namespace BLToolkit.EditableObjects
 			OnListChanged(ListChangedType.ItemDeleted, index);
 		}
 
+		public void RemoveAt(int index, bool trackChanges)
+		{
+			if (!trackChanges) _noTrackingChangesCount++;
+			RemoveAt(index);
+			if (!trackChanges) _noTrackingChangesCount--;
+		}
+
 		public override void RemoveRange(int index, int count)
 		{
 			for (int i = index; i < _list.Count && i < index + count; i++)
@@ -520,6 +598,13 @@ namespace BLToolkit.EditableObjects
 			_list.RemoveRange(index, count);
 
 			OnListChanged(ListChangedType.Reset, index);
+		}
+
+		public void RemoveRange(int index, int count, bool trackChanges)
+		{
+			if (!trackChanges) _noTrackingChangesCount++;
+			RemoveRange(index, count);
+			if (!trackChanges) _noTrackingChangesCount--;
 		}
 
 		public override void Reverse()

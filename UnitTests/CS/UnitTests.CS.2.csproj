@@ -36,6 +36,7 @@
   <ItemGroup>
     <Compile Include="Aspects\InterceptorAspectTest.cs" />
     <Compile Include="Aspects\NotNullAspectTest.cs" />
+    <Compile Include="Data\DbManagerTest.cs" />
     <Compile Include="EditableObjects\EditableObjectTest.cs" />
     <Compile Include="Mapping\DefaultValueAttributeTest.cs" />
     <Compile Include="Mapping\ISupportMappingTest.cs" />

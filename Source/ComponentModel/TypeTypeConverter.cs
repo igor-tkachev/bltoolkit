@@ -2,8 +2,6 @@ using System;
 using System.ComponentModel;
 using System.Globalization;
 using System.ComponentModel.Design;
-using System.Reflection;
-using System.Diagnostics;
 
 namespace BLToolkit.ComponentModel
 {

@@ -183,7 +183,7 @@ namespace BLToolkit.Reflection
 
 					if (accessor == null)
 					{
-						Type type = originalType.IsAbstract?
+						Type type = originalType.IsAbstract && !originalType.IsSealed?
 							TypeFactory.GetType(originalType, new AbstractClassBuilder()):
 							originalType;
 
@@ -293,7 +293,8 @@ namespace BLToolkit.Reflection
 					if (type == typeof(Decimal))     return 0m;
 					if (type == typeof(Guid))        return Guid.Empty;
 
-					if (type == typeof(SqlBinary))   return SqlBinary.  Null;
+					if (type == typeof(SqlInt32))    return SqlInt32.   Null;
+					if (type == typeof(SqlString))   return SqlString.  Null;
 					if (type == typeof(SqlBoolean))  return SqlBoolean. Null;
 					if (type == typeof(SqlByte))     return SqlByte.    Null;
 					if (type == typeof(SqlDateTime)) return SqlDateTime.Null;
@@ -301,19 +302,20 @@ namespace BLToolkit.Reflection
 					if (type == typeof(SqlDouble))   return SqlDouble.  Null;
 					if (type == typeof(SqlGuid))     return SqlGuid.    Null;
 					if (type == typeof(SqlInt16))    return SqlInt16.   Null;
-					if (type == typeof(SqlInt32))    return SqlInt32.   Null;
 					if (type == typeof(SqlInt64))    return SqlInt64.   Null;
 					if (type == typeof(SqlMoney))    return SqlMoney.   Null;
 					if (type == typeof(SqlSingle))   return SqlSingle.  Null;
-					if (type == typeof(SqlString))   return SqlString.  Null;
-#if FW2
-					if (type == typeof(SqlXml))      return SqlXml.     Null;
-#endif
+					if (type == typeof(SqlBinary))   return SqlBinary.  Null;
 				}
 			}
 			else
 			{
 				if (type == typeof(String)) return string.Empty;
+				if (type == typeof(DBNull)) return DBNull.Value;
+
+#if FW2
+				if (type == typeof(SqlXml)) return SqlXml.Null;
+#endif
 			}
 
 			return null;
