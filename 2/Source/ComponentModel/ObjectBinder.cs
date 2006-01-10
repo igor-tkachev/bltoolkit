@@ -1,15 +1,10 @@
 using System;
 using System.Collections;
 using System.ComponentModel;
-using System.Globalization;
-using System.ComponentModel.Design.Serialization;
-using System.Reflection;
-using System.ComponentModel.Design;
 using System.Drawing.Design;
 using System.Drawing;
 
 using BLToolkit.EditableObjects;
-using BLToolkit.ComponentModel.Design;
 
 namespace BLToolkit.ComponentModel
 {
@@ -34,7 +29,8 @@ namespace BLToolkit.ComponentModel
 		public ObjectBinder(IContainer container)
 			: this()
 		{
-			container.Add(this);
+			if (container != null)
+				container.Add(this);
 		}
 
 		#endregion
@@ -46,7 +42,9 @@ namespace BLToolkit.ComponentModel
 		[DefaultValue(null)]
 		[Category("Data")]
 		[TypeConverter(typeof(TypeTypeConverter))]
-		[Editor(typeof(TypeEditor), typeof(UITypeEditor))]
+#if FW2
+		[Editor(typeof(Design.TypeEditor), typeof(UITypeEditor))]
+#endif
 		public  Type  ItemType
 		{
 			get { return _itemType; }
@@ -57,6 +55,31 @@ namespace BLToolkit.ComponentModel
 				OnListChanged(ListChangedType.PropertyDescriptorChanged, -1);
 
 				List  = null;
+			}
+		}
+
+		private object _object;
+		[Browsable(false)]
+		[RefreshProperties(RefreshProperties.Repaint)]
+		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+		public object Object
+		{
+			get { return _object; }
+			set
+			{
+				if (value == null)
+				{
+					List = null;
+				}
+				else
+				{
+					EditableArrayList list = new EditableArrayList(value.GetType(), 1);
+
+					list.Add(value, false);
+
+					List = list;
+					_object = value;
+				}
 			}
 		}
 

@@ -36,7 +36,7 @@ namespace BLToolkit.Mapping
 							om = Map.DefaultSchema.CreateObjectMapper(type);
 
 							if (om == null)
-								throw new InvalidOperationException(
+								throw new MappingException(
 									string.Format("Cannot create object mapper for the '{0}' type.", type.FullName));
 						}
 
@@ -78,6 +78,11 @@ namespace BLToolkit.Mapping
 		public virtual object GetNullValue(Type type)
 		{
 			return TypeAccessor.GetNullValue(type);
+		}
+
+		public virtual bool IsNull(object value)
+		{
+			return value == null || value.Equals(GetNullValue(value.GetType()));
 		}
 
 		#endregion
@@ -367,6 +372,14 @@ namespace BLToolkit.Mapping
 			}
 
 			return dest;
+		}
+
+		public void MapSourceToDestination(
+			IMapDataSource      source, object sourceObject, 
+			IMapDataDestination dest,   object destObject,
+			params object[]     parameters)
+		{
+			MapInternal(null, source, sourceObject, dest, destObject, parameters);
 		}
 
 		public void MapSourceToDestination(object sourceObject, object destObject, params object[] parameters)
@@ -1088,9 +1101,9 @@ namespace BLToolkit.Mapping
 
 		#endregion
 
-		#region MapListToTable
+		#region MapListToDataTable
 
-		public DataTable MapListToTable(ICollection sourceList, DataTable destTable)
+		public DataTable MapListToDataTable(ICollection sourceList, DataTable destTable)
 		{
 			if (sourceList == null) throw new ArgumentNullException("sourceList");
 
@@ -1103,7 +1116,7 @@ namespace BLToolkit.Mapping
 		}
 
 		[SuppressMessage("Microsoft.Globalization", "CA1306:SetLocaleForDataTypes")]
-		public DataTable MapListToTable(ICollection sourceList)
+		public DataTable MapListToDataTable(ICollection sourceList)
 		{
 			if (sourceList == null) throw new ArgumentNullException("sourceList");
 
@@ -1193,9 +1206,9 @@ namespace BLToolkit.Mapping
 
 		#region Table
 
-		#region MapTableToTable
+		#region MapDataTableToDataTable
 
-		public DataTable MapTableToTable(DataTable sourceTable, DataTable destTable)
+		public DataTable MapDataTableToDataTable(DataTable sourceTable, DataTable destTable)
 		{
 			MapSourceListToDestinationList(
 				new DataTableMapper(sourceTable),
@@ -1205,7 +1218,7 @@ namespace BLToolkit.Mapping
 			return destTable;
 		}
 
-		public DataTable MapTableToTable(DataTable sourceTable, DataRowVersion version, DataTable destTable)
+		public DataTable MapDataTableToDataTable(DataTable sourceTable, DataRowVersion version, DataTable destTable)
 		{
 			MapSourceListToDestinationList(
 				new DataTableMapper(sourceTable, version),
@@ -1215,7 +1228,7 @@ namespace BLToolkit.Mapping
 			return destTable;
 		}
 
-		public DataTable MapTableToTable(DataTable sourceTable)
+		public DataTable MapDataTableToDataTable(DataTable sourceTable)
 		{
 			if (sourceTable == null) throw new ArgumentNullException("sourceTable");
 
@@ -1229,7 +1242,7 @@ namespace BLToolkit.Mapping
 			return destTable;
 		}
 
-		public DataTable MapTableToTable(DataTable sourceTable, DataRowVersion version)
+		public DataTable MapDataTableToDataTable(DataTable sourceTable, DataRowVersion version)
 		{
 			if (sourceTable == null) throw new ArgumentNullException("sourceTable");
 
@@ -1245,9 +1258,9 @@ namespace BLToolkit.Mapping
 
 		#endregion
 
-		#region MapTableToList
+		#region MapDataTableToList
 
-		public IList MapTableToList(
+		public IList MapDataTableToList(
 			DataTable sourceTable, IList list, Type destObjectType, params object[] parameters)
 		{
 			MapSourceListToDestinationList(
@@ -1258,7 +1271,7 @@ namespace BLToolkit.Mapping
 			return list;
 		}
 
-		public IList MapTableToList(
+		public IList MapDataTableToList(
 			DataTable       sourceTable,
 			DataRowVersion  version,
 			IList           list,
@@ -1273,7 +1286,7 @@ namespace BLToolkit.Mapping
 			return list;
 		}
 
-		public ArrayList MapTableToList(DataTable sourceTable, Type destObjectType, params object[] parameters)
+		public ArrayList MapDataTableToList(DataTable sourceTable, Type destObjectType, params object[] parameters)
 		{
 			ArrayList list = new ArrayList();
 
@@ -1285,7 +1298,7 @@ namespace BLToolkit.Mapping
 			return list;
 		}
 
-		public ArrayList MapTableToList(
+		public ArrayList MapDataTableToList(
 			DataTable sourceTable, DataRowVersion version, Type destObjectType, params object[] parameters)
 		{
 			ArrayList list = new ArrayList();
@@ -1299,7 +1312,7 @@ namespace BLToolkit.Mapping
 		}
 
 #if FW2
-		public List<T> MapTableToList<T>(DataTable sourceTable, List<T> list, params object[] parameters)
+		public List<T> MapDataTableToList<T>(DataTable sourceTable, List<T> list, params object[] parameters)
 		{
 			MapSourceListToDestinationList(
 				new DataTableMapper (sourceTable),
@@ -1309,7 +1322,7 @@ namespace BLToolkit.Mapping
 			return list;
 		}
 
-		public List<T> MapTableToList<T>(
+		public List<T> MapDataTableToList<T>(
 			DataTable       sourceTable,
 			DataRowVersion  version,
 			List<T>         list,
@@ -1323,7 +1336,7 @@ namespace BLToolkit.Mapping
 			return list;
 		}
 
-		public List<T> MapTableToList<T>(DataTable sourceTable, params object[] parameters)
+		public List<T> MapDataTableToList<T>(DataTable sourceTable, params object[] parameters)
 		{
 			List<T> list = new List<T>();
 
@@ -1335,7 +1348,7 @@ namespace BLToolkit.Mapping
 			return list;
 		}
 
-		public List<T> MapTableToList<T>(DataTable sourceTable, DataRowVersion version, params object[] parameters)
+		public List<T> MapDataTableToList<T>(DataTable sourceTable, DataRowVersion version, params object[] parameters)
 		{
 			List<T> list = new List<T>();
 
@@ -1350,9 +1363,9 @@ namespace BLToolkit.Mapping
 
 		#endregion
 
-		#region MapTableToDictionary
+		#region MapDataTableToDictionary
 
-		public IDictionary MapTableToDictionary(
+		public IDictionary MapDataTableToDictionary(
 			DataTable       sourceTable,
 			IDictionary     destDictionary,
 			string          keyFieldName,
@@ -1367,7 +1380,7 @@ namespace BLToolkit.Mapping
 			return destDictionary;
 		}
 
-		public Hashtable MapTableToDictionary(
+		public Hashtable MapDataTableToDictionary(
 			DataTable       sourceTable,
 			string          keyFieldName,
 			Type            destObjectType,
@@ -1384,7 +1397,7 @@ namespace BLToolkit.Mapping
 		}
 
 #if FW2
-		public Dictionary<K,T> MapTableToDictionary<K,T>(
+		public Dictionary<K,T> MapDataTableToDictionary<K,T>(
 			DataTable       sourceTable,
 			Dictionary<K,T> destDictionary,
 			string          keyFieldName,
@@ -1398,7 +1411,7 @@ namespace BLToolkit.Mapping
 			return destDictionary;
 		}
 
-		public Dictionary<K,T> MapTableToDictionary<K,T>(
+		public Dictionary<K,T> MapDataTableToDictionary<K,T>(
 			DataTable       sourceTable,
 			string          keyFieldName,
 			params object[] parameters)
@@ -1474,9 +1487,9 @@ namespace BLToolkit.Mapping
 
 		#endregion
 
-		#region MapDataReaderToTable
+		#region MapDataReaderToDataTable
 
-		public DataTable MapDataReaderToTable(IDataReader reader, DataTable destTable)
+		public DataTable MapDataReaderToDataTable(IDataReader reader, DataTable destTable)
 		{
 			MapSourceListToDestinationList(
 				new DataReaderListMapper(reader),
@@ -1487,7 +1500,7 @@ namespace BLToolkit.Mapping
 		}
 
 		[SuppressMessage("Microsoft.Globalization", "CA1306:SetLocaleForDataTypes")]
-		public DataTable MapDataReaderToTable(IDataReader reader)
+		public DataTable MapDataReaderToDataTable(IDataReader reader)
 		{
 			DataTable destTable = new DataTable();
 
@@ -1641,9 +1654,9 @@ namespace BLToolkit.Mapping
 
 		#endregion
 
-		#region MapDictionaryToTable
+		#region MapDictionaryToDataTable
 
-		public DataTable MapDictionaryToTable(IDictionary sourceDictionary, DataTable destTable)
+		public DataTable MapDictionaryToDataTable(IDictionary sourceDictionary, DataTable destTable)
 		{
 			if (sourceDictionary == null) throw new ArgumentNullException("sourceDictionary");
 
@@ -1656,7 +1669,7 @@ namespace BLToolkit.Mapping
 		}
 
 		[SuppressMessage("Microsoft.Globalization", "CA1306:SetLocaleForDataTypes")]
-		public DataTable MapDictionaryToTable(IDictionary sourceDictionary)
+		public DataTable MapDictionaryToDataTable(IDictionary sourceDictionary)
 		{
 			if (sourceDictionary == null) throw new ArgumentNullException("sourceDictionary");
 
@@ -1745,6 +1758,174 @@ namespace BLToolkit.Mapping
 #endif
 
 		#endregion
+
+		#endregion
+
+		#region MapToResultSet
+
+		public void MapResultSets(MapResultSet[] resultSets)
+		{
+			Hashtable   initTable     = null;
+			object      lastContainer = null;
+			InitContext context       = new InitContext();
+
+			context.MappingSchema = this;
+
+			try
+			{
+				// Map relations.
+				//
+				foreach (MapResultSet rs in resultSets)
+				{
+					if (rs.Relations == null)
+						continue;
+
+					ObjectMapper masterMapper = rs.ObjectMapper;
+
+					foreach (MapRelation r in rs.Relations)
+					{
+						// Create hash.
+						//
+						if (rs.IndexID != r.MasterIndex.ID)
+						{
+							rs.Hashtable = new Hashtable();
+							rs.IndexID   = r.MasterIndex.ID;
+
+							foreach (object o in rs.List)
+							{
+								object key = r.MasterIndex.GetKey(masterMapper, o);
+								rs.Hashtable[key] = o;
+							}
+						}
+
+						// Map.
+						//
+						MapResultSet slave = r.SlaveResultSet;
+
+						foreach (object o in slave.List)
+						{
+							object key    = r.SlaveIndex.GetKey(slave.ObjectMapper, o);
+							object master = rs.Hashtable[key];
+
+							MemberAccessor ma = masterMapper.TypeAccessor[r.ContainerName];
+
+							if (ma == null)
+								throw new MappingException(string.Format("Type '{0}' does not contain field '{1}'.",
+									masterMapper.TypeAccessor.OriginalType.Name, r.ContainerName));
+
+							object container = ma.GetValue(master);
+
+							if (container is IList)
+							{
+								if (lastContainer != container)
+								{
+									lastContainer = container;
+
+									ISupportMapping sm = container as ISupportMapping;
+
+									if (sm != null)
+									{
+										if (initTable == null)
+											initTable = new Hashtable();
+
+										if (initTable.ContainsKey(container) == false)
+										{
+											sm.BeginMapping(context);
+											initTable[container] = sm;
+										}
+									}
+								}
+
+								((IList)container).Add(o);
+							}
+							else
+							{
+								masterMapper.TypeAccessor[r.ContainerName].SetValue(o, master);
+							}
+						}
+					}
+				}
+			}
+			finally
+			{
+				if (initTable != null)
+					foreach (ISupportMapping si in initTable.Values)
+						si.EndMapping(context);
+			}
+		}
+
+		public void MapDataReaderToResultSet(IDataReader reader, MapResultSet[] resultSets)
+		{
+			if (reader == null) throw new ArgumentNullException("reader");
+
+			foreach (MapResultSet rs in resultSets)
+			{
+				MapDataReaderToList(reader, rs.List, rs.ObjectType, rs.Parameters);
+
+				if (reader.NextResult() == false)
+					break;
+			}
+
+			MapResultSets(resultSets);
+		}
+
+		public void MapDataSetToResultSet(DataSet dataSet, MapResultSet[] resultSets)
+		{
+			for (int i = 0; i < resultSets.Length && i < dataSet.Tables.Count; i++)
+			{
+				MapResultSet rs = resultSets[i];
+
+				MapDataTableToList(dataSet.Tables[i], rs.List, rs.ObjectType, rs.Parameters);
+			}
+
+			MapResultSets(resultSets);
+		}
+
+		public MapResultSet[] Clone(MapResultSet[] resultSets)
+		{
+			MapResultSet[] output = new MapResultSet[resultSets.Length];
+
+			for (int i = 0; i < resultSets.Length; i++)
+				output[i] = new MapResultSet(resultSets[i]);
+
+			return output;
+		}
+
+		private int GetResultCount(MapNextResult[] nextResults)
+		{
+			int n = nextResults.Length;
+
+			foreach (MapNextResult nr in nextResults)
+				n += GetResultCount(nr.NextResults);
+
+			return n;
+		}
+
+		private int GetResultSets(
+			int current, MapResultSet[] output, MapResultSet master, MapNextResult[] nextResults)
+		{
+			foreach (MapNextResult nr in nextResults)
+			{
+				output[current] = new MapResultSet(nr.ObjectType);
+
+				master.AddRelation(output[current], nr.SlaveIndex, nr.MasterIndex, nr.ContainerName);
+
+				current += GetResultSets(current + 1, output, output[current], nr.NextResults);
+			}
+
+			return current;
+		}
+
+		public MapResultSet[] ConvertToResultSet(Type masterType, params MapNextResult[] nextResults)
+		{
+			MapResultSet[] output = new MapResultSet[1 + GetResultCount(nextResults)];
+
+			output[0] = new MapResultSet(masterType);
+
+			GetResultSets(1, output, output[0], nextResults);
+
+			return output;
+		}
 
 		#endregion
 	}

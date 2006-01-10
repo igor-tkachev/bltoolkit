@@ -242,7 +242,7 @@ namespace Mapping
 		public void ListToList()
 		{
 			DataTable table = GetDataTable();
-			ArrayList list1 = Map.TableToList(table, typeof(TestObject));
+			ArrayList list1 = Map.DataTableToList(table, typeof(TestObject));
 			ArrayList list2 = new ArrayList();
 
 			Map.ListToList(list1, list2, typeof(TestObject));
@@ -254,7 +254,7 @@ namespace Mapping
 		public void TableToList()
 		{
 			DataTable table = GetDataTable();
-			ArrayList list  = Map.TableToList(table, typeof(TestObject));
+			ArrayList list  = Map.DataTableToList(table, typeof(TestObject));
 
 			CompareLists(table, list);
 		}
@@ -263,8 +263,8 @@ namespace Mapping
 		public void ListToTable1()
 		{
 			DataTable table1 = GetDataTable();
-			ArrayList list   = Map.TableToList(table1, typeof(TestObject));
-			DataTable table2 = Map.ListToTable(list);
+			ArrayList list   = Map.DataTableToList(table1, typeof(TestObject));
+			DataTable table2 = Map.ListToDataTable(list);
 
 			table2.AcceptChanges();
 
@@ -275,10 +275,10 @@ namespace Mapping
 		public void ListToTable2()
 		{
 			DataTable table1 = GetDataTable();
-			ArrayList list   = Map.TableToList(table1, typeof(TestObject));
+			ArrayList list   = Map.DataTableToList(table1, typeof(TestObject));
 			DataTable table2 = table1.Clone();
 
-			Map.ListToTable(list, table2);
+			Map.ListToDataTable(list, table2);
 
 			table2.AcceptChanges();
 
@@ -289,7 +289,7 @@ namespace Mapping
 		public void TableToTable1()
 		{
 			DataTable table1 = GetDataTable();
-			DataTable table2 = Map.TableToTable(table1);
+			DataTable table2 = Map.DataTableToDataTable(table1);
 
 			table2.AcceptChanges();
 
@@ -302,7 +302,7 @@ namespace Mapping
 			DataTable table1 = GetDataTable();
 			DataTable table2 = new DataTable();
 				
-			Map.TableToTable(table1, table2);
+			Map.DataTableToDataTable(table1, table2);
 
 			table2.AcceptChanges();
 
@@ -313,7 +313,7 @@ namespace Mapping
 		public void TableToDictionary()
 		{
 			DataTable   table = GetDataTable();
-			IDictionary dic   = Map.TableToDictionary(table, new SortedList(), "ID", typeof(TestObject));
+			IDictionary dic   = Map.DataTableToDictionary(table, new SortedList(), "ID", typeof(TestObject));
 
 			CompareLists(table, Map.ListToList(dic.Values, typeof(TestObject)));
 		}
@@ -322,7 +322,7 @@ namespace Mapping
 		public void ListToDictionary()
 		{
 			DataTable   table = GetDataTable();
-			ArrayList   list  = Map.TableToList     (table, typeof(TestObject));
+			ArrayList   list  = Map.DataTableToList     (table, typeof(TestObject));
 			IDictionary dic   = Map.ListToDictionary(list, new SortedList(), "ID", typeof(TestObject));
 
 			CompareLists(table, Map.ListToList(dic.Values, typeof(TestObject)));
@@ -332,7 +332,7 @@ namespace Mapping
 		public void DictionaryToDictionary()
 		{
 			DataTable   table = GetDataTable();
-			ArrayList   list  = Map.TableToList           (table, typeof(TestObject));
+			ArrayList   list  = Map.DataTableToList           (table, typeof(TestObject));
 			IDictionary dic1  = Map.ListToDictionary      (list, new SortedList(), "ID", typeof(TestObject));
 			IDictionary dic2  = Map.DictionaryToDictionary(dic1, new SortedList(), "ID", typeof(TestObject));
 

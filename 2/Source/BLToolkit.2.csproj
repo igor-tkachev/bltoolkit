@@ -27,11 +27,13 @@
     <DefineConstants>TRACE;FW2</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <CodeAnalysisRules>-Microsoft.Design#CA1019;-Microsoft.Design#CA1000;-Microsoft.Design#CA1004;-Microsoft.Design#CA1024;-Microsoft.Globalization#CA1305;-Microsoft.Naming#CA1709;-Microsoft.Naming#CA1710;-Microsoft.Naming#CA1707;-Microsoft.Naming#CA1706;-Microsoft.Performance#CA1819;-Microsoft.Usage#CA2223;-Microsoft.Usage#CA2225</CodeAnalysisRules>
+    <CodeAnalysisRules>-Microsoft.Design#CA1019;-Microsoft.Design#CA1000;-Microsoft.Design#CA1004;-Microsoft.Design#CA1035;-Microsoft.Design#CA1033;-Microsoft.Design#CA1039;-Microsoft.Design#CA1024;-Microsoft.Globalization#CA1303;-Microsoft.Globalization#CA1304;-Microsoft.Globalization#CA1305;-Microsoft.Naming#CA1720;-Microsoft.Naming#CA1709;-Microsoft.Naming#CA1710;-Microsoft.Naming#CA1707;-Microsoft.Naming#CA1706;-Microsoft.Performance#CA1819;-Microsoft.Usage#CA2223;-Microsoft.Usage#CA2225</CodeAnalysisRules>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
+    <Reference Include="System.configuration" />
     <Reference Include="System.Data" />
+    <Reference Include="System.Data.OracleClient" />
     <Reference Include="System.Design" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Drawing.Design" />
@@ -56,9 +58,18 @@
     </Compile>
     <Compile Include="ComponentModel\ISortable.cs" />
     <Compile Include="ComponentModel\TypedListImpl.cs" />
-    <Compile Include="ComponentModel\EditableObjectWrapper.cs" />
     <Compile Include="ComponentModel\Design\TypeEditor.cs" />
     <Compile Include="ComponentModel\TypeTypeConverter.cs" />
+    <Compile Include="Data\DataException.cs" />
+    <Compile Include="Data\DataProvider\IDataProvider.cs" />
+    <Compile Include="Data\DataProvider\OdbcDataProvider.cs" />
+    <Compile Include="Data\DataProvider\OleDbDataProvider.cs" />
+    <Compile Include="Data\DataProvider\OracleDataProvider.cs" />
+    <Compile Include="Data\DataProvider\SqlDataProvider.cs" />
+    <Compile Include="Data\DbManager.cs">
+    </Compile>
+    <Compile Include="Data\OperationType.cs" />
+    <Compile Include="Data\ParameterReader.cs" />
     <Compile Include="EditableObjects\EditableList.cs" />
     <Compile Include="EditableObjects\EditableListChangedEventArgs.cs" />
     <Compile Include="ComponentModel\MemberPropertyDescriptor.cs" />
@@ -75,7 +86,6 @@
     </Compile>
     <Compile Include="ComponentModel\ObjectEditEventArgs.cs" />
     <Compile Include="ComponentModel\ObjectEditType.cs" />
-    <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="Mapping\DictionaryListMapper.cs" />
     <Compile Include="Mapping\DictionaryMapper.cs" />
     <Compile Include="Mapping\EnumeratorMapper.cs" />
@@ -93,9 +103,13 @@
     <Compile Include="Mapping\Map.cs" />
     <Compile Include="Mapping\MapFieldAttribute.cs" />
     <Compile Include="Mapping\MapIgnoreAttribute.cs" />
+    <Compile Include="Mapping\MapIndex.cs" />
     <Compile Include="Mapping\MapMemberInfo.cs" />
+    <Compile Include="Mapping\MapNextResult.cs" />
     <Compile Include="Mapping\MappingException.cs" />
     <Compile Include="Mapping\MappingSchema.cs" />
+    <Compile Include="Mapping\MapRelation.cs" />
+    <Compile Include="Mapping\MapResultSet.cs" />
     <Compile Include="Mapping\MapValue.cs" />
     <Compile Include="Mapping\MapValueAttribute.cs" />
     <Compile Include="Mapping\MemberMapperAttribute.cs" />
@@ -184,9 +198,6 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="ComponentModel\ObjectBinder.ico" />
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Data\DataProvider\" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>
