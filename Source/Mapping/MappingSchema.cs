@@ -82,7 +82,7 @@ namespace BLToolkit.Mapping
 
 		public virtual bool IsNull(object value)
 		{
-			return value == null || value.Equals(GetNullValue(value.GetType()));
+			return TypeAccessor.IsNull(value);
 		}
 
 		#endregion

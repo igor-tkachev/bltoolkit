@@ -14,6 +14,7 @@ using BLToolkit.Mapping;
 namespace BLToolkit.Reflection
 {
 	public delegate object NullValueProvider(Type type);
+	public delegate bool   IsNullHandler    (object obj);
 
 	public abstract class TypeAccessor : ICollection
 	{
@@ -351,6 +352,33 @@ namespace BLToolkit.Reflection
 			_nullValues[type] = nullValue;
 
 			return nullValue;
+		}
+
+		private static IsNullHandler _isNull = new IsNullHandler(IsNullInternal);
+		public  static IsNullHandler  IsNull
+		{
+			get
+			{
+				if (_isNull == null)
+					_isNull = new IsNullHandler(IsNullInternal);
+
+				return _isNull;
+			}
+
+			set { _isNull = value; }
+		}
+
+		private static bool IsNullInternal(object value)
+		{
+			if (value == null)
+				return true;
+
+			object nullValue = GetNullValue(value.GetType());
+
+			if (nullValue == null)
+				return false;
+
+			return value.Equals(nullValue);
 		}
 
 		#endregion
