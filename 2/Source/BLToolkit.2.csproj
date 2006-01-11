@@ -60,6 +60,13 @@
     <Compile Include="ComponentModel\TypedListImpl.cs" />
     <Compile Include="ComponentModel\Design\TypeEditor.cs" />
     <Compile Include="ComponentModel\TypeTypeConverter.cs" />
+    <Compile Include="DataAccess\ActionSprocNameAttribute.cs" />
+    <Compile Include="DataAccess\DataAccessorBase.cs" />
+    <Compile Include="DataAccess\DataAccessorBuilder.cs" />
+    <Compile Include="DataAccess\NonUpdatableAttribute.cs" />
+    <Compile Include="DataAccess\PrimaryKeyAttribute.cs" />
+    <Compile Include="DataAccess\DataAccessException.cs" />
+    <Compile Include="DataAccess\TableNameAttribute.cs" />
     <Compile Include="Data\DataException.cs" />
     <Compile Include="Data\DataProvider\IDataProvider.cs" />
     <Compile Include="Data\DataProvider\OdbcDataProvider.cs" />

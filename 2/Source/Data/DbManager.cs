@@ -2191,6 +2191,69 @@ namespace BLToolkit.Data
 
 		#endregion
 
+		#region ExecuteScalarList
+
+		public IList ExecuteScalarList(IList list, Type type)
+		{
+			if (_prepared)
+				InitParameters(CommandAction.Select);
+
+			object nullValue = _mappingSchema.GetNullValue(type);
+
+			OnBeforeOperation(OperationType.ExecuteReader);
+
+			using (IDataReader dr = SelectCommand.ExecuteReader())
+			{
+				OnAfterOperation(OperationType.ExecuteReader);
+
+				while (dr.Read())
+				{
+					object value = dr[0];
+
+					if (value == null || value.GetType() != type)
+					{
+						if (value is DBNull)
+							value = null;
+						else
+							value = Convert.ChangeType(value, type);
+					}
+
+					list.Add(value);
+				}
+			}
+
+			return list;
+		}
+
+		public ArrayList ExecuteScalarList(Type type)
+		{
+			ArrayList list = new ArrayList();
+
+			ExecuteScalarList(list, type);
+
+			return list;
+		}
+
+#if FW2
+		public List<T> ExecuteScalarList<T>(List<T> list) 
+		{
+			ExecuteScalarList(list, typeof(T));
+
+			return list;
+		}
+
+		public List<T> ExecuteScalarList<T>()
+		{
+			List<T> list = new List<T>();
+
+			ExecuteScalarList(list, typeof(T));
+
+			return list;
+		}
+#endif
+
+		#endregion
+
 		#region ExecuteReader
 
 		/// <summary>

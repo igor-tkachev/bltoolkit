@@ -1,5 +1,6 @@
 using System;
 using System.Reflection;
+using System.ComponentModel;
 
 namespace BLToolkit.Validation
 {
@@ -28,25 +29,45 @@ namespace BLToolkit.Validation
 			return string.Format(ErrorMessage, GetPropertyFriendlyName(context));
 		}
 
-		protected string GetPropertyFriendlyName(ValidationContext context)
+		protected virtual string GetPropertyFriendlyName(ValidationContext context)
 		{
 			MemberInfo mi        = context.MemberInfo;
 			string     className = mi.DeclaringType.Name;
+			string     fieldName = mi.Name;
 
+			// Get class name.
+			//
 			object[] attrs = mi.DeclaringType.GetCustomAttributes(typeof(FriendlyNameAttribute), true);
 
 			if (attrs.Length > 0)
 				className = ((FriendlyNameAttribute)attrs[0]).Name;
+			else
+			{
+#if FW2
+				attrs = mi.DeclaringType.GetCustomAttributes(typeof(DisplayNameAttribute), true);
 
-			string fieldName =
-				className == null || className.Length == 0? mi.Name: className + "." + mi.Name;
+				if (attrs.Length > 0)
+					className = ((DisplayNameAttribute)attrs[0]).DisplayName;
+#endif
+			}
 
+			// Get field name.
+			//
 			attrs = mi.GetCustomAttributes(typeof(FriendlyNameAttribute), true);
 
 			if (attrs.Length > 0)
 				fieldName = ((FriendlyNameAttribute)attrs[0]).Name;
+			else
+			{
+#if FW2
+				attrs = mi.GetCustomAttributes(typeof(DisplayNameAttribute), true);
 
-			return fieldName;
+				if (attrs.Length > 0)
+					fieldName = ((DisplayNameAttribute)attrs[0]).DisplayName;
+#endif
+			}
+
+			return className == null || className.Length == 0? fieldName: className + "." + fieldName;
 		}
 	}
 }

@@ -7,7 +7,7 @@ using BLToolkit.Reflection;
 
 namespace BLToolkit.Mapping
 {
-	public class ObjectMapper : IMapDataSource, IMapDataDestination
+	public class ObjectMapper : IMapDataSource, IMapDataDestination, IEnumerable
 	{
 		#region Constructor
 
@@ -507,6 +507,15 @@ namespace BLToolkit.Mapping
 		public virtual void SetValue(object o, string name, object value)
 		{
 			SetValue(o, GetOrdinal(name), value);
+		}
+
+		#endregion
+
+		#region IEnumerable Members
+
+		public IEnumerator GetEnumerator()
+		{
+			return _members.GetEnumerator();
 		}
 
 		#endregion

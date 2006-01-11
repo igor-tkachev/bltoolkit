@@ -18,7 +18,8 @@ CREATE TABLE Person
 	Gender     char(1)      NOT NULL CONSTRAINT CK_Person_Gender CHECK (Gender in ('M', 'F', 'U', 'O'))
 )
 ON [PRIMARY]
+GO
 
 INSERT INTO Person (FirstName, LastName, Gender)
 VALUES             ('John',    'Pupkin', 'M')
-
+GO
