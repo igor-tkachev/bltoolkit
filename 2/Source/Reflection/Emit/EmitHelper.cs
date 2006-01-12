@@ -745,6 +745,21 @@ namespace BLToolkit.Reflection.Emit
 			return callvirt(mi);
 		}
 
+		public EmitHelper callvirt(Type type, string methodName, BindingFlags bindingAttr, params Type[] optionalParameterTypes)
+		{
+			MethodInfo methodInfo = 
+				optionalParameterTypes == null?
+					type.GetMethod(methodName, bindingAttr):
+					type.GetMethod(methodName, bindingAttr, null, optionalParameterTypes, null);
+
+			return callvirt(methodInfo, null);
+		}
+
+		public EmitHelper callvirt(Type type, string methodName, BindingFlags bindingAttr)
+		{
+			return callvirt(type, methodName, bindingAttr, null);
+		}
+
 		public EmitHelper callvirtNoGenerics(Type type, string methodName, params Type[] parameterTypes)
 		{
 #if FW2
