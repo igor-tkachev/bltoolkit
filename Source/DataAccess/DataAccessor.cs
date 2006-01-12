@@ -12,14 +12,19 @@ using BLToolkit.Reflection;
 
 namespace BLToolkit.DataAccess
 {
-	public class DataAccessorBase
+	[DataAccessor]
+	public class DataAccessor
 	{
-		#region Protected Members
+		#region Public Members
 
 		public virtual DbManager GetDbManager()
 		{
 			return _dbManager != null? _dbManager: new DbManager();
 		}
+
+		#endregion
+
+		#region Protected Members
 
 		private DbManager _dbManager;
 
@@ -103,7 +108,7 @@ namespace BLToolkit.DataAccess
 				return SelectByKey(db, type, key);
 		}
 
-#if VER2
+#if FW2
 		public T SelectByKey<T>(DbManager db, params object[] key)
 		{
 			return (T)SelectByKey(db, typeof(T), key);
@@ -325,17 +330,17 @@ namespace BLToolkit.DataAccess
 			return list;
 		}
 
-		protected void AddWherePK(StringBuilder sb, Type type)
+		protected void AddWherePK(DbManager db, StringBuilder sb, Type type)
 		{
 			sb.Append("WHERE\n");
 
 			foreach (string s in GetFieldNameList(GetKeyFieldList(type)))
-				sb.AppendFormat("\t[{0}] = @{0} AND\n", s);
+				sb.AppendFormat("\t[{0}] = {0} AND\n", db.DataProvider.GetParameterName(s));
 
 			sb.Remove(sb.Length - 5, 5);
 		}
 
-		protected string CreateSelectByKeySqlText(Type type)
+		protected string CreateSelectByKeySqlText(DbManager db, Type type)
 		{
 			ObjectMapper  om = MappingSchema.GetObjectMapper(type);
 			StringBuilder sb = new StringBuilder();
@@ -349,12 +354,12 @@ namespace BLToolkit.DataAccess
 
 			sb.AppendFormat("FROM\n\t[{0}]\n", GetTableName(type));
 
-			AddWherePK(sb, type);
+			AddWherePK(db, sb, type);
 
 			return sb.ToString();
 		}
 
-		protected string CreateSelectAllSqlText(Type type)
+		protected string CreateSelectAllSqlText(DbManager db, Type type)
 		{
 			ObjectMapper  om = MappingSchema.GetObjectMapper(type);
 			StringBuilder sb = new StringBuilder();
@@ -371,7 +376,7 @@ namespace BLToolkit.DataAccess
 			return sb.ToString();
 		}
 
-		protected string CreateInsertSqlText(Type type)
+		protected string CreateInsertSqlText(DbManager db, Type type)
 		{
 			ObjectMapper  om = MappingSchema.GetObjectMapper(type);
 			StringBuilder sb = new StringBuilder();
@@ -388,7 +393,7 @@ namespace BLToolkit.DataAccess
 
 			foreach (MemberMapper mm in GetNonKeyFieldList(om))
 				if (mm.MemberAccessor.GetAttributes(typeof(NonUpdatableAttribute)) == null)
-					sb.AppendFormat("\t@{0},\n", mm.Name);
+					sb.AppendFormat("\t{0},\n", db.DataProvider.GetParameterName(mm.Name));
 
 			sb.Remove(sb.Length - 2, 1);
 
@@ -397,7 +402,7 @@ namespace BLToolkit.DataAccess
 			return sb.ToString();
 		}
 
-		protected string CreateUpdateSqlText(Type type)
+		protected string CreateUpdateSqlText(DbManager db, Type type)
 		{
 			ObjectMapper  om = MappingSchema.GetObjectMapper(type);
 			StringBuilder sb = new StringBuilder();
@@ -406,36 +411,36 @@ namespace BLToolkit.DataAccess
 
 			foreach (MemberMapper mm in GetNonKeyFieldList(om))
 				if (mm.MemberAccessor.GetAttributes(typeof(NonUpdatableAttribute)) == null)
-					sb.AppendFormat("\t[{0}] = @{0},\n", mm.Name);
+					sb.AppendFormat("\t[{0}] = {0},\n", db.DataProvider.GetParameterName(mm.Name));
 
 			sb.Remove(sb.Length - 2, 1);
 
-			AddWherePK(sb, type);
+			AddWherePK(db, sb, type);
 
 			return sb.ToString();
 		}
 
-		protected string CreateDeleteSqlText(Type type)
+		protected string CreateDeleteSqlText(DbManager db, Type type)
 		{
 			ObjectMapper  om = MappingSchema.GetObjectMapper(type);
 			StringBuilder sb = new StringBuilder();
 
 			sb.AppendFormat("DELETE FROM\n\t[{0}]\n", GetTableName(type));
 
-			AddWherePK(sb, type);
+			AddWherePK(db, sb, type);
 
 			return sb.ToString();
 		}
 
-		protected virtual string CreateSqlText(Type type, string actionName)
+		protected virtual string CreateSqlText(DbManager db, Type type, string actionName)
 		{
 			switch (actionName)
 			{
-				case "SelectByKey": return CreateSelectByKeySqlText(type);
-				case "SelectAll":   return CreateSelectAllSqlText  (type);
-				case "Insert":      return CreateInsertSqlText     (type);
-				case "Update":      return CreateUpdateSqlText     (type);
-				case "Delete":      return CreateDeleteSqlText     (type);
+				case "SelectByKey": return CreateSelectByKeySqlText(db, type);
+				case "SelectAll":   return CreateSelectAllSqlText  (db, type);
+				case "Insert":      return CreateInsertSqlText     (db, type);
+				case "Update":      return CreateUpdateSqlText     (db, type);
+				case "Delete":      return CreateDeleteSqlText     (db, type);
 				default:
 					throw new DataAccessException(
 						string.Format("Unknown action '{0}'.", actionName));
@@ -444,14 +449,14 @@ namespace BLToolkit.DataAccess
 
 		private static Hashtable _actionSql = new Hashtable();
 
-		protected virtual string GetSqlText(Type type, string actionName)
+		protected virtual string GetSqlText(DbManager db, Type type, string actionName)
 		{
 			string key = type.Name + "$" + actionName;
 			string sql = (string)_actionSql[key];
 
 			if (sql == null)
 			{
-				sql = CreateSqlText(type, actionName);
+				sql = CreateSqlText(db, type, actionName);
 				_actionSql[key] = sql;
 			}
 
@@ -490,7 +495,7 @@ namespace BLToolkit.DataAccess
 		{
 			return db
 				.SetCommand(
-					GetSqlText(type, "SelectByKey"),
+					GetSqlText(db, type, "SelectByKey"),
 					GetParameters(db, type, key))
 				.ExecuteObject(type);
 		}
@@ -501,7 +506,7 @@ namespace BLToolkit.DataAccess
 				return SelectByKeySql(db, type, key);
 		}
 
-#if VER2
+#if FW2
 		public T SelectByKeySql<T>(DbManager db, object key)
 		{
 			return (T)SelectByKeySql(db, typeof(T), key);
@@ -520,7 +525,7 @@ namespace BLToolkit.DataAccess
 		public ArrayList SelectAllSql(DbManager db, Type type)
 		{
 			return db
-				.SetCommand(GetSqlText(type, "SelectAll"))
+				.SetCommand(GetSqlText(db, type, "SelectAll"))
 				.ExecuteList(type);
 		}
 
@@ -530,11 +535,11 @@ namespace BLToolkit.DataAccess
 				return SelectAllSql(db, type);
 		}
 
-#if VER2
+#if FW2
 		public List<T> SelectAllSql<T>(DbManager db)
 		{
 			return db
-				.SetCommand(GetSqlText(typeof(T), "SelectAll"))
+				.SetCommand(GetSqlText(db, typeof(T), "SelectAll"))
 				.ExecuteList<T>();
 		}
 
@@ -553,7 +558,7 @@ namespace BLToolkit.DataAccess
 		{
 			return db
 			  .SetCommand(
-					GetSqlText(obj.GetType(), "Insert"),
+					GetSqlText(db, obj.GetType(), "Insert"),
 					db.CreateParameters(obj))
 			  .ExecuteNonQuery();
 		}
@@ -572,7 +577,7 @@ namespace BLToolkit.DataAccess
 		{
 			return db
 				.SetCommand(
-					GetSqlText(obj.GetType(), "Update"),
+					GetSqlText(db, obj.GetType(), "Update"),
 					db.CreateParameters(obj))
 				.ExecuteNonQuery();
 		}
@@ -591,7 +596,7 @@ namespace BLToolkit.DataAccess
 		{
 			return db
 				.SetCommand(
-					GetSqlText(type, "Delete"), 
+					GetSqlText(db, type, "Delete"), 
 					GetParameters(db, type, key))
 				.ExecuteNonQuery();
 		}
@@ -602,7 +607,7 @@ namespace BLToolkit.DataAccess
 				return DeleteByKeySql(db, type, key);
 		}
 
-#if VER2
+#if FW2
 		public int DeleteByKeySql<T>(DbManager db, params object[] key)
 		{
 			return DeleteByKeySql(db, typeof(T), key);
@@ -623,11 +628,11 @@ namespace BLToolkit.DataAccess
 			ArrayList list = new ArrayList();
 
 			foreach (MemberMapper mm in GetKeyFieldList((obj.GetType())))
-				list.Add(db.Parameter(db.DataProvider.GetParameterName("@" + mm.Name), mm.GetValue(obj)));
+				list.Add(db.Parameter(db.DataProvider.GetParameterName(mm.Name), mm.GetValue(obj)));
 
 			return db
 				.SetCommand(
-					GetSqlText(obj.GetType(), "Delete"),
+					GetSqlText(db, obj.GetType(), "Delete"),
 					(IDbDataParameter[])list.ToArray(typeof(IDbDataParameter)))
 				.ExecuteNonQuery();
 		}

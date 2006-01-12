@@ -20,28 +20,28 @@ namespace BLToolkit.TypeBuilder.Builders
 		private TypeHelper _type;
 		public  TypeHelper  Type
 		{
-			get { return _type;  }
-			set { _type = value; }
+			[DebuggerStepThrough] get { return _type;  }
+			[DebuggerStepThrough] set { _type = value; }
 		}
 
 		private AssemblyBuilderHelper _assemblyBuilder;
 		public  AssemblyBuilderHelper  AssemblyBuilder
 		{
-			get { return _assemblyBuilder;  }
-			set { _assemblyBuilder = value; }
+			[DebuggerStepThrough] get { return _assemblyBuilder;  }
+			[DebuggerStepThrough] set { _assemblyBuilder = value; }
 		}
 
 		private TypeBuilderHelper _typeBuilder;
 		public  TypeBuilderHelper  TypeBuilder
 		{
-			get { return _typeBuilder;  }
-			set { _typeBuilder = value; }
+			[DebuggerStepThrough] get { return _typeBuilder;  }
+			[DebuggerStepThrough] set { _typeBuilder = value; }
 		}
 
 		private Hashtable  _items = new Hashtable(100);
 		public  IDictionary Items
 		{
-			get { return _items; }
+			[DebuggerStepThrough] get { return _items; }
 		}
 
 		class PropertyInfoComparer : IComparer
@@ -84,29 +84,29 @@ namespace BLToolkit.TypeBuilder.Builders
 		private TypeHelper _currentInterface;
 		public  TypeHelper  CurrentInterface
 		{
-			get { return _currentInterface;  }
-			set { _currentInterface = value; }
+			[DebuggerStepThrough] get { return _currentInterface;  }
+			[DebuggerStepThrough] set { _currentInterface = value; }
 		}
 
 		private MethodBuilderHelper _methodBuilder;
 		public  MethodBuilderHelper  MethodBuilder
 		{
-			get { return _methodBuilder;  }
-			set { _methodBuilder = value; }
+			[DebuggerStepThrough] get { return _methodBuilder;  }
+			[DebuggerStepThrough] set { _methodBuilder = value; }
 		}
 
 		private LocalBuilder _returnValue;
 		public  LocalBuilder  ReturnValue
 		{
-			get { return _returnValue;  }
-			set { _returnValue = value; }
+			[DebuggerStepThrough] get { return _returnValue;  }
+			[DebuggerStepThrough] set { _returnValue = value; }
 		}
 
 		private Label _returnLabel;
 		public  Label  ReturnLabel
 		{
-			get { return _returnLabel;  }
-			set { _returnLabel = value; }
+			[DebuggerStepThrough] get { return _returnLabel;  }
+			[DebuggerStepThrough] set { _returnLabel = value; }
 		}
 
 		#region BuildElement
@@ -114,53 +114,53 @@ namespace BLToolkit.TypeBuilder.Builders
 		private BuildElement _element;
 		public  BuildElement  BuildElement
 		{
-			get { return _element;  }
-			set { _element = value; }
+			[DebuggerStepThrough] get { return _element;  }
+			[DebuggerStepThrough] set { _element = value; }
 		}
 
 		public bool IsAbstractProperty
 		{
-			get { return IsAbstractGetter || IsAbstractSetter; }
+			[DebuggerStepThrough] get { return IsAbstractGetter || IsAbstractSetter; }
 		}
 
 		public bool IsSetter
 		{
-			get { return IsAbstractSetter || IsVirtualSetter; }
+			[DebuggerStepThrough] get { return IsAbstractSetter || IsVirtualSetter; }
 		}
 
 		public bool IsAbstractGetter
 		{
-			get { return BuildElement == BuildElement.AbstractGetter; }
+			[DebuggerStepThrough] get { return BuildElement == BuildElement.AbstractGetter; }
 		}
 
 		public bool IsAbstractSetter
 		{
-			get { return BuildElement == BuildElement.AbstractSetter; }
+			[DebuggerStepThrough] get { return BuildElement == BuildElement.AbstractSetter; }
 		}
 
 		public bool IsAbstractMethod
 		{
-			get { return BuildElement == BuildElement.AbstractMethod; }
+			[DebuggerStepThrough] get { return BuildElement == BuildElement.AbstractMethod; }
 		}
 
 		public bool IsVirtualProperty
 		{
-			get { return IsVirtualGetter|| IsVirtualSetter; }
+			[DebuggerStepThrough] get { return IsVirtualGetter|| IsVirtualSetter; }
 		}
 
 		public bool IsVirtualGetter
 		{
-			get { return BuildElement == BuildElement.VirtualGetter; }
+			[DebuggerStepThrough] get { return BuildElement == BuildElement.VirtualGetter; }
 		}
 
 		public bool IsVirtualSetter
 		{
-			get { return BuildElement == BuildElement.VirtualSetter; }
+			[DebuggerStepThrough] get { return BuildElement == BuildElement.VirtualSetter; }
 		}
 
 		public bool IsVirtualMethod
 		{
-			get { return BuildElement == BuildElement.VirtualMethod; }
+			[DebuggerStepThrough] get { return BuildElement == BuildElement.VirtualMethod; }
 		}
 
 		#endregion
@@ -170,28 +170,28 @@ namespace BLToolkit.TypeBuilder.Builders
 		private BuildStep _step;
 		public  BuildStep  Step
 		{
-			get { return _step;  }
-			set { _step = value; }
+			[DebuggerStepThrough] get { return _step;  }
+			[DebuggerStepThrough] set { _step = value; }
 		}
 
 		public bool IsBeforeStep
 		{
-			get { return Step == BuildStep.Before; }
+			[DebuggerStepThrough] get { return Step == BuildStep.Before; }
 		}
 
 		public bool IsBuildStep
 		{
-			get { return Step == BuildStep.Build; }
+			[DebuggerStepThrough] get { return Step == BuildStep.Build; }
 		}
 
 		public bool IsAfterStep
 		{
-			get { return Step == BuildStep.After; }
+			[DebuggerStepThrough] get { return Step == BuildStep.After; }
 		}
 
 		public bool IsBeforeOrBuildStep
 		{
-			get { return Step == BuildStep.Before || Step == BuildStep.Build; }
+			[DebuggerStepThrough] get { return Step == BuildStep.Before || Step == BuildStep.Build; }
 		}
 
 		#endregion
@@ -200,8 +200,8 @@ namespace BLToolkit.TypeBuilder.Builders
 		[SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
 		public  AbstractTypeBuilderList  TypeBuilders
 		{
-			get { return _typeBuilders;  }
-			set { _typeBuilders = value; }
+			[DebuggerStepThrough] get { return _typeBuilders;  }
+			[DebuggerStepThrough] set { _typeBuilders = value; }
 		}
 
 		private PropertyInfo _currentProperty;
@@ -211,7 +211,14 @@ namespace BLToolkit.TypeBuilder.Builders
 			[DebuggerStepThrough] set { _currentProperty = value; }
 		}
 
-		#region Internal Fields
+		private MethodInfo _currentMethod;
+		public  MethodInfo  CurrentMethod
+		{
+			[DebuggerStepThrough] get { return _currentMethod;  }
+			[DebuggerStepThrough] set { _currentMethod = value; }
+		}
+
+		#region Internal Methods
 
 		public FieldBuilder GetField(string fieldName)
 		{

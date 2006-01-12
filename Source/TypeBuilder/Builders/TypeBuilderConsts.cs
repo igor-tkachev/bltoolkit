@@ -6,6 +6,7 @@ namespace BLToolkit.TypeBuilder.Builders
 	{
 		public const int    NormalBuilderPriority = 0;
 		public const int    NotNullAspectPriority = int.MaxValue / 2;
+		public const int    DataAccessorPriority  = int.MinValue / 2;
 		public const string AssemblyNameSuffix    = "TypeBuilder";
 
 		private TypeBuilderConsts()

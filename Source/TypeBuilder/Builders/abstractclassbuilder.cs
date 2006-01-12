@@ -222,6 +222,7 @@ namespace BLToolkit.TypeBuilder.Builders
 
 		private void BeginEmitMethod(MethodInfo method)
 		{
+			_context.CurrentMethod = method;
 			_context.MethodBuilder = _context.TypeBuilder.DefineMethod(method);
 
 			BeginEmitMethod(method.ReturnType, method.GetParameters());
@@ -264,7 +265,8 @@ namespace BLToolkit.TypeBuilder.Builders
 
 			// Cleanup the context.
 			//
-			_context.ReturnValue = null;
+			_context.ReturnValue   = null;
+			_context.CurrentMethod = null;
 			_context.MethodBuilder = null;
 		}
 

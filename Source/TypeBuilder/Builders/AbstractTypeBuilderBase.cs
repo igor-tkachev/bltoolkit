@@ -10,7 +10,7 @@ using BLToolkit.Reflection.Emit;
 
 namespace BLToolkit.TypeBuilder.Builders
 {
-	public class AbstractTypeBuilderBase : IAbstractTypeBuilder
+	public abstract class AbstractTypeBuilderBase : IAbstractTypeBuilder
 	{
 		public virtual Type[] GetInterfaces()
 		{
