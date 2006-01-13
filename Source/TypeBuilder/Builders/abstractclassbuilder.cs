@@ -470,11 +470,11 @@ namespace BLToolkit.TypeBuilder.Builders
 					Build(BuildStep.Build,  builders);
 					Build(BuildStep.After,  builders);
 
-					_context.BuildElement = BuildElement.VirtualMethod;
+					//_context.BuildElement = BuildElement.VirtualMethod;
 
-					Build(BuildStep.Before, builders);
-					Build(BuildStep.Build,  builders);
-					Build(BuildStep.After,  builders);
+					//Build(BuildStep.Before, builders);
+					//Build(BuildStep.Build,  builders);
+					//Build(BuildStep.After,  builders);
 
 					EndEmitMethod();
 				}

@@ -317,7 +317,7 @@ namespace BLToolkit.Mapping
 				}
 
 				initContext.IsSource = true;
-				smDest.BeginMapping(initContext);
+				smSource.BeginMapping(initContext);
 				initContext.IsSource = false;
 
 				if (initContext.StopMapping)
