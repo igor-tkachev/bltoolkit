@@ -335,7 +335,7 @@ namespace BLToolkit.DataAccess
 			sb.Append("WHERE\n");
 
 			foreach (string s in GetFieldNameList(GetKeyFieldList(type)))
-				sb.AppendFormat("\t[{0}] = {0} AND\n", db.DataProvider.GetParameterName(s));
+				sb.AppendFormat("\t[{0}] = {1} AND\n", s, db.DataProvider.GetParameterName(s));
 
 			sb.Remove(sb.Length - 5, 5);
 		}
@@ -411,7 +411,7 @@ namespace BLToolkit.DataAccess
 
 			foreach (MemberMapper mm in GetNonKeyFieldList(om))
 				if (mm.MemberAccessor.GetAttributes(typeof(NonUpdatableAttribute)) == null)
-					sb.AppendFormat("\t[{0}] = {0},\n", db.DataProvider.GetParameterName(mm.Name));
+					sb.AppendFormat("\t[{0}] = {1},\n", mm.Name, db.DataProvider.GetParameterName(mm.Name));
 
 			sb.Remove(sb.Length - 2, 1);
 

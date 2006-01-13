@@ -8,6 +8,7 @@ using BLToolkit.TypeBuilder.Builders;
 using BLToolkit.Data;
 using BLToolkit.Reflection.Emit;
 using BLToolkit.Reflection;
+using BLToolkit.TypeBuilder;
 
 namespace BLToolkit.DataAccess
 {
@@ -25,23 +26,21 @@ namespace BLToolkit.DataAccess
 
 		const BindingFlags _bindingFlags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
 
-		Type            _objectType;
 		Type            _baseType = typeof(DataAccessor);
+		Type            _objectType;
 		ParameterInfo[] _parameters;
-		ArrayList       _paramList = new ArrayList();
-		bool            _createManager = true;
+		ArrayList       _paramList;
+		bool            _createManager;
 		LocalBuilder    _locManager;
 		LocalBuilder    _locObjType;
 
 		protected override void BuildAbstractMethod()
 		{
-			//_methodInfo    = methodInfo;
-			//_methodBuilder = methodBuilder;
-
-			//_gen           = new MapGenerator(methodBuilder.GetILGenerator());
+			_paramList     = new ArrayList();
+			_createManager = true;
+			_objectType    = null;
 			_parameters    = Context.CurrentMethod.GetParameters();
 			_locManager    = Context.MethodBuilder.Emitter.DeclareLocal(typeof(DbManager));
-			//_locReturn     = _gen.DeclareLocal(methodInfo.ReturnType);
 			_locObjType    = Context.MethodBuilder.Emitter.DeclareLocal(typeof(Type));
 
 			ProcessParameters();
@@ -70,7 +69,7 @@ namespace BLToolkit.DataAccess
 					_objectType = returnType.GetElementType();
 
 				if (_objectType == null)
-					throw new DataAccessException(string.Format(
+					throw new TypeBuilderException(string.Format(
 						"Can not determine object type for method '{0}.{1}'",
 						Context.CurrentMethod.DeclaringType.Name,
 						Context.CurrentMethod.Name));
@@ -157,7 +156,7 @@ namespace BLToolkit.DataAccess
 		{
 			CreateReturnTypeInstance();
 			InitObjectType();
-			GetSpocName();
+			GetSprocName();
 			CallSetCommand();
 
 			EmitHelper emit = Context.MethodBuilder.Emitter;
@@ -210,7 +209,7 @@ namespace BLToolkit.DataAccess
 		{
 			CreateReturnTypeInstance();
 			InitObjectType();
-			GetSpocName();
+			GetSprocName();
 			CallSetCommand();
 
 			Context.MethodBuilder.Emitter
@@ -225,7 +224,7 @@ namespace BLToolkit.DataAccess
 		{
 			CreateReturnTypeInstance();
 			InitObjectType();
-			GetSpocName();
+			GetSprocName();
 			CallSetCommand();
 
 			Context.MethodBuilder.Emitter
@@ -240,7 +239,7 @@ namespace BLToolkit.DataAccess
 		public void ExecuteNonQuery()
 		{
 			InitObjectType();
-			GetSpocName();
+			GetSprocName();
 			CallSetCommand();
 
 			MethodInfo   mi      = typeof(DbManager).GetMethod("ExecuteNonQuery");
@@ -264,7 +263,7 @@ namespace BLToolkit.DataAccess
 		public void ExecuteObject()
 		{
 			InitObjectType();
-			GetSpocName();
+			GetSprocName();
 			CallSetCommand();
 
 			Context.MethodBuilder.Emitter
@@ -295,10 +294,10 @@ namespace BLToolkit.DataAccess
 
 		private void Return()
 		{
-			if (Context.CurrentMethod.ReturnType != typeof(void))
-				Context.MethodBuilder.Emitter.ldloc(Context.ReturnValue);
+			//if (Context.CurrentMethod.ReturnType != typeof(void))
+			//	Context.MethodBuilder.Emitter.ldloc(Context.ReturnValue);
 
-			Context.MethodBuilder.Emitter.ret();
+			//Context.MethodBuilder.Emitter.ret();
 		}
 
 		private void CreateReturnTypeInstance()
@@ -329,7 +328,7 @@ namespace BLToolkit.DataAccess
 			}
 		}
 
-		private void GetSpocName()
+		private void GetSprocName()
 		{
 			object[] attrs = Context.CurrentMethod.GetCustomAttributes(typeof(SprocNameAttribute), true);
 
@@ -411,7 +410,7 @@ namespace BLToolkit.DataAccess
 						paramName = '@' + paramName;
 
 					emit
-						.ldloc_0
+						.ldloc          (_locManager)
 						.ldstr          (paramName)
 						.ldarg_s        ((byte)(pi.Position + 1))
 						.boxIfValueType (pi.ParameterType)

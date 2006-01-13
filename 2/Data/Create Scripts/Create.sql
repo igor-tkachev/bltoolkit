@@ -4,6 +4,8 @@
 --( NAME = N'BLToolkitTest_log', FILENAME = N'C:\Data\MSSQL.1\MSSQL\DATA\BLToolkitData_log.ldf' , SIZE = 1024KB , FILEGROWTH = 10% )
 --GO
 
+-- Person Table
+
 IF EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID('Person') AND type in (N'U'))
 BEGIN
 	DROP TABLE Person
@@ -23,3 +25,47 @@ GO
 INSERT INTO Person (FirstName, LastName, Gender)
 VALUES             ('John',    'Pupkin', 'M')
 GO
+
+-- Person_SelectAll
+
+IF EXISTS (SELECT * FROM sysobjects WHERE type = 'P' AND name = 'Person_SelectAll')
+BEGIN
+	DROP  Procedure  Person_SelectAll
+END
+GO
+
+CREATE Procedure Person_SelectAll
+AS
+
+SELECT * FROM Person
+
+GO
+
+GRANT EXEC ON Person_SelectAll TO PUBLIC
+GO
+
+-- Person_SelectByName
+
+IF EXISTS (SELECT * FROM sysobjects WHERE type = 'P' AND name = 'Person_SelectByName')
+BEGIN
+	DROP  Procedure  Person_SelectByName
+END
+GO
+
+CREATE Procedure Person_SelectByName
+	@firstName varchar(10),
+	@lastName  varchar(20)
+AS
+
+SELECT
+	*
+FROM
+	Person
+WHERE
+	FirstName = @firstName AND LastName = @lastName
+
+GO
+
+GRANT EXEC ON Person_SelectByName TO PUBLIC
+GO
+

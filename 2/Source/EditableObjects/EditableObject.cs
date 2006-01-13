@@ -159,6 +159,7 @@ namespace BLToolkit.EditableObjects
 			return (PropertyInfo[])list.ToArray(typeof(PropertyInfo));
 		}
 
+		[MapIgnore]
 		public virtual string PrintDebugState
 		{
 			get
