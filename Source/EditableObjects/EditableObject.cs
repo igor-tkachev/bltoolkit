@@ -213,7 +213,7 @@ namespace BLToolkit.EditableObjects
 
 		protected virtual void OnPropertyChanged(string propertyName)
 		{
-			if (_notifyChanges && PropertyChanged != null)
+			if (NotifyChanges && PropertyChanged != null)
 				PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
 		}
 
@@ -239,7 +239,7 @@ namespace BLToolkit.EditableObjects
 
 		#region INotifyPropertyChanged Members
 
-		public event PropertyChangedEventHandler PropertyChanged;
+		public virtual event PropertyChangedEventHandler PropertyChanged;
 
 		#endregion
 

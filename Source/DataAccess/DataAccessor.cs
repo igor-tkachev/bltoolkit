@@ -24,6 +24,36 @@ namespace BLToolkit.DataAccess
 
 		#endregion
 
+		#region CreateInstance
+
+		public static DataAccessor CreateInstance(Type type)
+		{
+			return (DataAccessor)TypeAccessor.CreateInstance(type);
+		}
+
+		public static DataAccessor CreateInstance(Type type, DbManager dbManager)
+		{
+			DataAccessor da = CreateInstance(type);
+
+			da.SetDbManager(dbManager);
+
+			return da;
+		}
+
+#if FW2
+		public static T CreateInstance<T>() where T : DataAccessor
+		{
+			return (T)CreateInstance(typeof(T));
+		}
+
+		public static T CreateInstance<T>(DbManager dbManager) where T : DataAccessor
+		{
+			return (T)CreateInstance(typeof(T), dbManager);
+		}
+#endif
+
+		#endregion
+
 		#region Protected Members
 
 		private DbManager _dbManager;

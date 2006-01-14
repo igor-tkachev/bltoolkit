@@ -115,6 +115,36 @@
                     BuildAction = "Compile"
                 />
                 <File
+                    RelPath = "Data\DbManagerTest.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "DataAccess\DataAccessorTest.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "DataAccess\PersonDataSet.xsd"
+                    BuildAction = "Content"
+                    Generator = "MSDataSetGenerator"
+                    LastGenOutput = "PersonDataSet.cs"
+                    CustomToolNamespace = "DataAccessTest"
+                />
+                <File
+                    RelPath = "DataAccess\PersonDataSet.cs"
+                    DependentUpon = "PersonDataSet.xsd"
+                    SubType = "code"
+                    BuildAction = "Compile"
+                    DesignTime = "True"
+                    AutoGen = "True"
+                />
+                <File
+                    RelPath = "DataAccess\PersonDataSet.xsx"
+                    DependentUpon = "PersonDataSet.xsd"
+                    BuildAction = "None"
+                />
+                <File
                     RelPath = "EditableObjects\EditableObjectTest.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
@@ -161,6 +191,11 @@
                 />
                 <File
                     RelPath = "Mapping\ObjectMapperAttributeTest.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "Mapping\ResultSetTest.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
                 />
