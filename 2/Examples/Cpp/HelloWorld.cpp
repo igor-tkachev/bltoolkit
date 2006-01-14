@@ -34,8 +34,8 @@ namespace Emit
 				->Emitter;
 
 			emit
-				->ldstr("Hello, World!")
-				->call(Console::typeid->GetMethod("WriteLine", gcnew array<Type^>(1) { String::typeid }))
+				->ldstr ("Hello, World!")
+				->call  (Console::typeid, "WriteLine", String::typeid )
 				->ret()
 				;
 

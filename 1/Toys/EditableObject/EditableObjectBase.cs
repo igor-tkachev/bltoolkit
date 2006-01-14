@@ -214,7 +214,7 @@ namespace Rsdn.Framework.EditableObject
 
 		#region INotifyPropertyChanged Members
 
-		public event PropertyChangedEventHandler PropertyChanged;
+		public virtual event PropertyChangedEventHandler PropertyChanged;
 
 		#endregion
 	}

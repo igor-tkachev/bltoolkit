@@ -9,6 +9,7 @@ using BLToolkit.Data;
 using BLToolkit.Reflection.Emit;
 using BLToolkit.Reflection;
 using BLToolkit.TypeBuilder;
+using BLToolkit.Data.DataProvider;
 
 namespace BLToolkit.DataAccess
 {
@@ -47,7 +48,7 @@ namespace BLToolkit.DataAccess
 			CreateDbManager();
 			SetObjectType();
 
-			// Define execute type.
+			// Define execute method type.
 			//
 			Type returnType = Context.CurrentMethod.ReturnType;
 
@@ -76,9 +77,13 @@ namespace BLToolkit.DataAccess
 
 				ExecuteList();
 			}
-			else if (returnType.IsValueType || returnType == typeof(string))
+			else if (returnType == typeof(void))
 			{
 				ExecuteNonQuery();
+			}
+			else if (returnType.IsValueType || returnType == typeof(string))
+			{
+				ExecuteScalar();
 			}
 			else
 			{
@@ -89,7 +94,6 @@ namespace BLToolkit.DataAccess
 			}
 
 			Finally();
-			Return();
 		}
 
 		private void ProcessParameters()
@@ -181,17 +185,17 @@ namespace BLToolkit.DataAccess
 				Label l2 = emit.DefineLabel();
 
 				emit
-					.callvirt  (typeof(DataSet), "get_Tables")
-					.callvirt  (typeof(InternalDataCollectionBase), "get_Count")
+					.callvirt  (typeof(DataSet).GetProperty("Tables").GetGetMethod())
+					.callvirt  (typeof(InternalDataCollectionBase).GetProperty("Count").GetGetMethod())
 					.ldc_i4_0
 					.ble_s(l1)
 					.ldloc     (_locManager)
 					.ldloc     (Context.ReturnValue)
 					.ldloc     (Context.ReturnValue)
-					.callvirt  (typeof(DataSet), "get_Tables")
+					.callvirt  (typeof(DataSet).GetProperty("Tables").GetGetMethod())
 					.ldc_i4_0
 					.callvirt  (typeof(DataTableCollection), "get_Item", typeof(int))
-					.callvirt  (typeof(DataTable), "get_TableName")
+					.callvirt  (typeof(DataTable).GetProperty("TableName").GetGetMethod())
 					.callvirt  (typeof(DbManager), "ExecuteDataSet", typeof(DataSet), typeof(string))
 					.pop
 					.br_s      (l2)
@@ -250,14 +254,25 @@ namespace BLToolkit.DataAccess
 				.stloc    (locExec)
 				;
 
-			if (mi.ReturnType == Context.CurrentMethod.ReturnType ||
-				mi.ReturnType.IsSubclassOf(Context.CurrentMethod.ReturnType))
+			if (Context.ReturnValue != null)
 			{
 				Context.MethodBuilder.Emitter
 					.ldloc (locExec)
 					.stloc (Context.ReturnValue)
 					;
 			}
+		}
+
+		public void ExecuteScalar()
+		{
+			InitObjectType();
+			GetSprocName();
+			CallSetCommand();
+
+			Context.MethodBuilder.Emitter
+				.callvirtNoGenerics (typeof(DbManager), "ExecuteScalar")
+				.stloc              (Context.ReturnValue)
+				;
 		}
 
 		public void ExecuteObject()
@@ -290,14 +305,6 @@ namespace BLToolkit.DataAccess
 					.EndExceptionBlock()
 					;
 			}
-		}
-
-		private void Return()
-		{
-			//if (Context.CurrentMethod.ReturnType != typeof(void))
-			//	Context.MethodBuilder.Emitter.ldloc(Context.ReturnValue);
-
-			//Context.MethodBuilder.Emitter.ret();
 		}
 
 		private void CreateReturnTypeInstance()
@@ -406,12 +413,26 @@ namespace BLToolkit.DataAccess
 					string paramName = attrs.Length == 0 ?
 						pi.Name : ((ParamNameAttribute)attrs[0]).Name;
 
+					emit
+						.ldloc (_locManager);
+
 					if (paramName[0] != '@')
-						paramName = '@' + paramName;
+					{
+						//paramName = '@' + paramName;
+						emit
+							.ldloc    (_locManager)
+							.callvirt (typeof(DbManager).GetProperty("DataProvider").GetGetMethod())
+							.ldstr    (paramName)
+							.callvirt (typeof(IDataProvider), "GetParameterName", typeof(string))
+							;
+					}
+					else
+					{
+						emit
+							.ldstr (paramName);
+					}
 
 					emit
-						.ldloc          (_locManager)
-						.ldstr          (paramName)
 						.ldarg_s        ((byte)(pi.Position + 1))
 						.boxIfValueType (pi.ParameterType)
 						.callvirt       (typeof(DbManager), "Parameter", typeof(string), typeof(object))

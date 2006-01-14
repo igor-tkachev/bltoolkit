@@ -45,7 +45,6 @@ namespace DataAccessTest
 
 		public abstract class PersonDataAccessor : DataAccessor
 		{
-			public abstract int    PersonSalesByCountry(DateTime Beginning_Date, DateTime Ending_Date);
 			public abstract int    Person_SelectAll();
 			public abstract void   Person_SelectAll(DbManager db);
 			public abstract Person SelectByName(string firstName, string lastName);
@@ -119,7 +118,7 @@ namespace DataAccessTest
 			public new Person this[int idx]
 			{
 				get { return (Person)base[idx]; }
-				set { base[idx] = value;          }
+				set { base[idx] = value;        }
 			}
 		}
 
@@ -129,7 +128,7 @@ namespace DataAccessTest
 		{
 			TypeFactory.SaveTypes = true;
 
-			_da = (PersonDataAccessor)TypeAccessor.CreateInstance(typeof(PersonDataAccessor));
+			_da = (PersonDataAccessor)DataAccessor.CreateInstance(typeof(PersonDataAccessor));
 		}
 
 		[Test]
