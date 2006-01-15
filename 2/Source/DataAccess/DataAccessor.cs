@@ -15,6 +15,19 @@ namespace BLToolkit.DataAccess
 	[DataAccessor]
 	public class DataAccessor
 	{
+		#region Constructors
+
+		public DataAccessor()
+		{
+		}
+
+		public DataAccessor(DbManager dbManager)
+		{
+			SetDbManager(dbManager);
+		}
+
+		#endregion
+
 		#region Public Members
 
 		public virtual DbManager GetDbManager()
@@ -43,12 +56,16 @@ namespace BLToolkit.DataAccess
 #if FW2
 		public static T CreateInstance<T>() where T : DataAccessor
 		{
-			return (T)CreateInstance(typeof(T));
+			return TypeAccessor<T>.CreateInstanceEx();
 		}
 
 		public static T CreateInstance<T>(DbManager dbManager) where T : DataAccessor
 		{
-			return (T)CreateInstance(typeof(T), dbManager);
+			T da = TypeAccessor<T>.CreateInstanceEx();
+
+			da.SetDbManager(dbManager);
+
+			return da;
 		}
 #endif
 
@@ -61,6 +78,11 @@ namespace BLToolkit.DataAccess
 		protected internal void SetDbManager(DbManager dbManager)
 		{
 			_dbManager = dbManager;
+		}
+
+		protected virtual bool DisposeDbManager
+		{
+			get { return _dbManager == null; }
 		}
 
 		protected virtual string GetDefaultSpName(string typeName, string actionName)
@@ -134,8 +156,17 @@ namespace BLToolkit.DataAccess
 
 		public object SelectByKey(Type type, params object[] key)
 		{
-			using (DbManager db = GetDbManager())
+			DbManager db = GetDbManager();
+
+			try
+			{
 				return SelectByKey(db, type, key);
+			}
+			finally
+			{
+				if (DisposeDbManager)
+					db.Dispose();
+			}
 		}
 
 #if FW2
@@ -163,11 +194,20 @@ namespace BLToolkit.DataAccess
 
 		public ArrayList SelectAll(Type type)
 		{
-			using (DbManager db = GetDbManager())
+			DbManager db = GetDbManager();
+
+			try
+			{
 				return SelectAll(db, type);
+			}
+			finally
+			{
+				if (DisposeDbManager)
+					db.Dispose();
+			}
 		}
 
-#if VER2
+#if FW2
 		public List<T> SelectAll<T>(DbManager db)
 		{
 			return db
@@ -177,8 +217,17 @@ namespace BLToolkit.DataAccess
 
 		public List<T> SelectAll<T>()
 		{
-			using (DbManager db = GetDbManager())
+			DbManager db = GetDbManager();
+
+			try
+			{
 				return SelectAll<T>(db);
+			}
+			finally
+			{
+				if (DisposeDbManager)
+					db.Dispose();
+			}
 		}
 #endif
 
@@ -186,19 +235,28 @@ namespace BLToolkit.DataAccess
 
 			#region Insert
 
-		public int Insert(DbManager db, object obj)
+		public void Insert(DbManager db, object obj)
 		{
-			return db
+			db
 			  .SetSpCommand(
 					GetSpName(obj.GetType(), "Insert"),
 					db.CreateParameters(obj))
 			  .ExecuteNonQuery();
 		}
 
-		public int Insert(object obj)
+		public void Insert(object obj)
 		{
-			using (DbManager db = GetDbManager())
-				return Insert(db, obj);
+			DbManager db = GetDbManager();
+
+			try
+			{
+				Insert(db, obj);
+			}
+			finally
+			{
+				if (DisposeDbManager)
+					db.Dispose();
+			}
 		}
 
 			#endregion
@@ -216,8 +274,17 @@ namespace BLToolkit.DataAccess
 
 		public int Update(object obj)
 		{
-			using (DbManager db = GetDbManager())
+			DbManager db = GetDbManager();
+
+			try
+			{
 				return Update(db, obj);
+			}
+			finally
+			{
+				if (DisposeDbManager)
+					db.Dispose();
+			}
 		}
 
 			#endregion
@@ -233,11 +300,20 @@ namespace BLToolkit.DataAccess
 
 		public int DeleteByKey(Type type, params object[] key)
 		{
-			using (DbManager db = GetDbManager())
+			DbManager db = GetDbManager();
+
+			try
+			{
 				return DeleteByKey(db, type, key);
+			}
+			finally
+			{
+				if (DisposeDbManager)
+					db.Dispose();
+			}
 		}
 
-#if VER2
+#if FW2
 		public int DeleteByKey<T>(DbManager db, params object[] key)
 		{
 			return DeleteByKey(db, typeof(T), key);
@@ -264,8 +340,17 @@ namespace BLToolkit.DataAccess
 
 		public int Delete(object obj)
 		{
-			using (DbManager db = GetDbManager())
+			DbManager db = GetDbManager();
+
+			try
+			{
 				return Delete(db, obj);
+			}
+			finally
+			{
+				if (DisposeDbManager)
+					db.Dispose();
+			}
 		}
 
 			#endregion
@@ -493,7 +578,7 @@ namespace BLToolkit.DataAccess
 			return sql;
 		}
 
-		protected IDbDataParameter[] GetParameters(DbManager db, Type type, object[] key)
+		protected virtual IDbDataParameter[] GetParameters(DbManager db, Type type, object[] key)
 		{
 			string[] names = GetFieldNameList(GetKeyFieldList(type));
 
@@ -521,30 +606,39 @@ namespace BLToolkit.DataAccess
 
 			#region SelectByKey
 
-		public object SelectByKeySql(DbManager db, Type type, params object[] key)
+		public object SelectByKeySql(DbManager db, Type type, params object[] keys)
 		{
 			return db
 				.SetCommand(
 					GetSqlText(db, type, "SelectByKey"),
-					GetParameters(db, type, key))
+					GetParameters(db, type, keys))
 				.ExecuteObject(type);
 		}
 
-		public object SelectByKeySql(Type type, object key)
+		public object SelectByKeySql(Type type, params object[] keys)
 		{
-			using (DbManager db = GetDbManager())
-				return SelectByKeySql(db, type, key);
+			DbManager db = GetDbManager();
+
+			try
+			{
+				return SelectByKeySql(db, type, keys);
+			}
+			finally
+			{
+				if (DisposeDbManager)
+					db.Dispose();
+			}
 		}
 
 #if FW2
-		public T SelectByKeySql<T>(DbManager db, object key)
+		public T SelectByKeySql<T>(DbManager db, params object[] keys)
 		{
-			return (T)SelectByKeySql(db, typeof(T), key);
+			return (T)SelectByKeySql(db, typeof(T), keys);
 		}
 
-		public T SelectByKeySql<T>(object key)
+		public T SelectByKeySql<T>(params object[] keys)
 		{
-			return (T)SelectByKeySql(typeof(T), key);
+			return (T)SelectByKeySql(typeof(T), keys);
 		}
 #endif
 
@@ -561,8 +655,17 @@ namespace BLToolkit.DataAccess
 
 		public ArrayList SelectAllSql(Type type)
 		{
-			using (DbManager db = GetDbManager())
+			DbManager db = GetDbManager();
+
+			try
+			{
 				return SelectAllSql(db, type);
+			}
+			finally
+			{
+				if (DisposeDbManager)
+					db.Dispose();
+			}
 		}
 
 #if FW2
@@ -575,8 +678,17 @@ namespace BLToolkit.DataAccess
 
 		public List<T> SelectAllSql<T>()
 		{
-			using (DbManager db = GetDbManager())
+			DbManager db = GetDbManager();
+
+			try
+			{
 				return SelectAllSql<T>(db);
+			}
+			finally
+			{
+				if (DisposeDbManager)
+					db.Dispose();
+			}
 		}
 #endif
 
@@ -584,19 +696,28 @@ namespace BLToolkit.DataAccess
 
 			#region Insert
 
-		public int InsertSql(DbManager db, object obj)
+		public void InsertSql(DbManager db, object obj)
 		{
-			return db
+			db
 			  .SetCommand(
 					GetSqlText(db, obj.GetType(), "Insert"),
 					db.CreateParameters(obj))
 			  .ExecuteNonQuery();
 		}
 
-		public int InsertSql(object obj)
+		public void InsertSql(object obj)
 		{
-			using (DbManager db = GetDbManager())
-				return InsertSql(db, obj);
+			DbManager db = GetDbManager();
+
+			try
+			{
+				InsertSql(db, obj);
+			}
+			finally
+			{
+				if (DisposeDbManager)
+					db.Dispose();
+			}
 		}
 
 			#endregion
@@ -614,8 +735,17 @@ namespace BLToolkit.DataAccess
 
 		public int UpdateSql(object obj)
 		{
-			using (DbManager db = GetDbManager())
+			DbManager db = GetDbManager();
+
+			try
+			{
 				return UpdateSql(db, obj);
+			}
+			finally
+			{
+				if (DisposeDbManager)
+					db.Dispose();
+			}
 		}
 
 			#endregion
@@ -633,8 +763,17 @@ namespace BLToolkit.DataAccess
 
 		public int DeleteByKeySql(Type type, params object[] key)
 		{
-			using (DbManager db = GetDbManager())
+			DbManager db = GetDbManager();
+
+			try
+			{
 				return DeleteByKeySql(db, type, key);
+			}
+			finally
+			{
+				if (DisposeDbManager)
+					db.Dispose();
+			}
 		}
 
 #if FW2
@@ -669,8 +808,17 @@ namespace BLToolkit.DataAccess
 
 		public int DeleteSql(object obj)
 		{
-			using (DbManager db = GetDbManager())
+			DbManager db = GetDbManager();
+
+			try
+			{
 				return DeleteSql(db, obj);
+			}
+			finally
+			{
+				if (DisposeDbManager)
+					db.Dispose();
+			}
 		}
 
 			#endregion

@@ -51,6 +51,10 @@
       <Project>{308A4189-53AB-460D-B2B1-0EB4B9219654}</Project>
       <Name>Examples.VB.2</Name>
     </ProjectReference>
+    <ProjectReference Include="..\..\HowTo\HowTo.csproj">
+      <Project>{8DA66999-005A-49AB-86A9-2C1F62905B50}</Project>
+      <Name>HowTo</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\Source\BLToolkit.2.csproj">
       <Project>{0C325F5D-E50E-4340-8724-D29896CCC583}</Project>
       <Name>BLToolkit.2</Name>

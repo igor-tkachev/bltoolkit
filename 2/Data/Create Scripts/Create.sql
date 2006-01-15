@@ -26,6 +26,25 @@ INSERT INTO Person (FirstName, LastName, Gender)
 VALUES             ('John',    'Pupkin', 'M')
 GO
 
+-- Person_SelectByKey
+
+IF EXISTS (SELECT * FROM sysobjects WHERE type = 'P' AND name = 'Person_SelectByKey')
+BEGIN
+	DROP  Procedure  Person_SelectByKey
+END
+GO
+
+CREATE Procedure Person_SelectByKey
+	@id int
+AS
+
+SELECT * FROM Person WHERE PersonID = @id
+
+GO
+
+GRANT EXEC ON Person_SelectByKey TO PUBLIC
+GO
+
 -- Person_SelectAll
 
 IF EXISTS (SELECT * FROM sysobjects WHERE type = 'P' AND name = 'Person_SelectAll')
@@ -53,8 +72,8 @@ END
 GO
 
 CREATE Procedure Person_SelectByName
-	@firstName varchar(10),
-	@lastName  varchar(20)
+	@firstName nvarchar(50),
+	@lastName  nvarchar(50)
 AS
 
 SELECT
@@ -67,5 +86,82 @@ WHERE
 GO
 
 GRANT EXEC ON Person_SelectByName TO PUBLIC
+GO
+
+-- Person_Insert
+
+IF EXISTS (SELECT * FROM sysobjects WHERE type = 'P' AND name = 'Person_Insert')
+BEGIN
+	DROP  Procedure  Person_Insert
+END
+GO
+
+CREATE Procedure Person_Insert
+	@FirstName  nvarchar(50),
+	@LastName   nvarchar(50),
+	@MiddleName nvarchar(50),
+	@Gender     char(1)
+AS
+
+INSERT INTO Person
+	( LastName,  FirstName,  MiddleName,  Gender)
+VALUES
+	(@LastName, @FirstName, @MiddleName, @Gender)
+
+SELECT Cast(SCOPE_IDENTITY() as int)
+
+GO
+
+GRANT EXEC ON Person_Insert TO PUBLIC
+GO
+
+-- Person_Update
+
+IF EXISTS (SELECT * FROM sysobjects WHERE type = 'P' AND name = 'Person_Update')
+BEGIN
+	DROP  Procedure  Person_Update
+END
+GO
+
+CREATE Procedure Person_Update
+	@PersonID   int,
+	@FirstName  nvarchar(50),
+	@LastName   nvarchar(50),
+	@MiddleName nvarchar(50),
+	@Gender     char(1)
+AS
+
+UPDATE
+	Person
+SET
+	LastName   = @LastName,
+	FirstName  = @FirstName,
+	MiddleName = @MiddleName,
+	Gender     = @Gender
+WHERE
+	PersonID = @PersonID
+
+GO
+
+GRANT EXEC ON Person_Update TO PUBLIC
+GO
+
+-- Person_Delete
+
+IF EXISTS (SELECT * FROM sysobjects WHERE type = 'P' AND name = 'Person_Delete')
+BEGIN
+	DROP  Procedure  Person_Delete
+END
+GO
+
+CREATE Procedure Person_Delete
+	@PersonID int
+AS
+
+DELETE FROM Person WHERE PersonID = @PersonID
+
+GO
+
+GRANT EXEC ON Person_Delete TO PUBLIC
 GO
 

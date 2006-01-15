@@ -29,9 +29,11 @@ namespace Examples.Reflection.Emit
 				.DefineMethod(typeof(IHello).GetMethod("SayHello"))
 				.Emitter;
 
+			// Console.WriteLine("Hello, World!");
+			//
 			emit
-				.ldstr("Hello, World!")
-				.call(typeof(Console).GetMethod("WriteLine", new Type[] { typeof(string) }))
+				.ldstr ("Hello, World!")
+				.call  (typeof(Console), "WriteLine", typeof(string))
 				.ret()
 				;
 

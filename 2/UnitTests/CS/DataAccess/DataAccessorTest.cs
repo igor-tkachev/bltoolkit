@@ -43,7 +43,7 @@ namespace DataAccessTest
 			public abstract ArrayList Territories { get; set; }
 		}
 
-		public abstract class PersonDataAccessor : DataAccessor
+		public abstract class PersonAccessor : DataAccessor
 		{
 			public abstract int    Person_SelectAll();
 			public abstract void   Person_SelectAll(DbManager db);
@@ -73,19 +73,6 @@ namespace DataAccessTest
 			[SprocName("Person_SelectAll")] public abstract DataSet       SelectAllDataSet();
 			[SprocName("Person_SelectAll")] public abstract PersonDataSet SelectAllTypedDataSet();
 			[SprocName("Person_SelectAll")] public abstract DataTable     SelectAllDataTable();
-
-
-			public Person AnyActionName1(string firstName, string lastName)
-			{
-				DataAccessorTest.Person person1 = null;
-				using (DbManager manager1 = this.GetDbManager())
-				{
-					Type type1 = typeof(DataAccessorTest.Person);
-					object[] objArray1 = new object[] { manager1.Parameter("@firstName", firstName), manager1.Parameter("@lastName", lastName) } ;
-					person1 = (DataAccessorTest.Person) manager1.SetSpCommand(this.GetSpName(type1, "SelectByName"), objArray1).ExecuteObject(type1);
-				}
-				return person1;
-			}
 		}
 
 		public abstract class PersonDataAccessor2 : DataAccessor
@@ -93,7 +80,7 @@ namespace DataAccessTest
 			[SprocName("Person_SelectAll")] public abstract ArrayList SelectAllList();
 		}
 
-		public abstract class PersonDataAccessor1 : PersonDataAccessor
+		public abstract class PersonDataAccessor1 : PersonAccessor
 		{
 			public DataSet SelectByName()
 			{
@@ -122,13 +109,13 @@ namespace DataAccessTest
 			}
 		}
 
-		private PersonDataAccessor _da;
+		private PersonAccessor _da;
 
 		public DataAccessorTest()
 		{
 			TypeFactory.SaveTypes = true;
 
-			_da = (PersonDataAccessor)DataAccessor.CreateInstance(typeof(PersonDataAccessor));
+			_da = (PersonAccessor)DataAccessor.CreateInstance(typeof(PersonAccessor));
 		}
 
 		[Test]
