@@ -5,6 +5,8 @@ namespace BLToolkit.Reflection
 {
 	public static class TypeAccessor<T>
 	{
+		#region CreateInstance
+
 		public static T CreateInstance()
 		{
 			return (T)_instance.CreateInstance();
@@ -24,6 +26,8 @@ namespace BLToolkit.Reflection
 		{
 			return (T)_instance.CreateInstanceEx(context);
 		}
+
+		#endregion
 
 		public static T Copy(T source, T dest)
 		{
