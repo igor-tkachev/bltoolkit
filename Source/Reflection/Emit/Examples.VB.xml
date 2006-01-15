@@ -26,11 +26,8 @@ Namespace Examples.Reflection.Emit
             Dim methodHelper As MethodBuilderHelper = typeHelper.DefineMethod(GetType(IHello).GetMethod("SayHello"))
             Dim emit As EmitHelper = methodHelper.Emitter
 
-            Dim params() As Type = Array.CreateInstance(GetType(Type), 1)
-            params(0) = GetType(String)
-
             emit.ldstr("Hello, World!")
-            emit.call(GetType(Console).GetMethod("WriteLine", params))
+            emit.call(GetType(Console), "WriteLine", GetType(String))
             emit.ret()
 
             Dim type As Type = typeHelper.Create()

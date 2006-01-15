@@ -65,6 +65,7 @@
     <Compile Include="DataAccess\DataAccessorAttribute.cs" />
     <Compile Include="DataAccess\DataAccessor.cs" />
     <Compile Include="DataAccess\DataAccessorBuilder.cs" />
+    <Compile Include="DataAccess\DataAccessorT.cs" />
     <Compile Include="DataAccess\DiscoverParametersAttribute.cs" />
     <Compile Include="DataAccess\NonUpdatableAttribute.cs" />
     <Compile Include="DataAccess\ObjectTypeAttribute.cs" />

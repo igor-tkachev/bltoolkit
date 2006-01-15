@@ -31,6 +31,7 @@ namespace BLToolkit.DataAccess
 		Type            _objectType;
 		ParameterInfo[] _parameters;
 		ArrayList       _paramList;
+		ArrayList       _refParamList;
 		bool            _createManager;
 		LocalBuilder    _locManager;
 		LocalBuilder    _locObjType;
@@ -38,6 +39,7 @@ namespace BLToolkit.DataAccess
 		protected override void BuildAbstractMethod()
 		{
 			_paramList     = new ArrayList();
+			_refParamList  = new ArrayList();
 			_createManager = true;
 			_objectType    = null;
 			_parameters    = Context.CurrentMethod.GetParameters();
@@ -109,6 +111,10 @@ namespace BLToolkit.DataAccess
 				else if (pType == typeof(DbManager) || pType.IsSubclassOf(typeof(DbManager)))
 				{
 					_createManager = false;
+				}
+				else
+				{
+					_refParamList.Add(_parameters[i]);
 				}
 			}
 		}
@@ -271,6 +277,7 @@ namespace BLToolkit.DataAccess
 
 			Context.MethodBuilder.Emitter
 				.callvirtNoGenerics (typeof(DbManager), "ExecuteScalar")
+				.CastFromObject     (Context.CurrentMethod.ReturnType)
 				.stloc              (Context.ReturnValue)
 				;
 		}
@@ -293,14 +300,19 @@ namespace BLToolkit.DataAccess
 		{
 			if (_createManager)
 			{
-				Label fin = Context.MethodBuilder.Emitter.DefineLabel();
+				Label        fin = Context.MethodBuilder.Emitter.DefineLabel();
+				PropertyInfo pi  = typeof(DataAccessor)
+					.GetProperty("DisposeDbManager", BindingFlags.NonPublic | BindingFlags.Instance);
 
 				Context.MethodBuilder.Emitter
 					.BeginFinallyBlock()
 					.ldloc               (_locManager)
 					.brfalse_s           (fin)
+					.ldarg_0
+					.callvirt            (pi.GetGetMethod(true))
+					.brfalse_s           (fin)
 					.ldloc               (_locManager)
-					.callvirt            (typeof(IDisposable).GetMethod("Dispose"))
+					.callvirt            (typeof(IDisposable), "Dispose")
 					.MarkLabel           (fin)
 					.EndExceptionBlock()
 					;
@@ -369,16 +381,8 @@ namespace BLToolkit.DataAccess
 		{
 			EmitHelper emit = Context.MethodBuilder.Emitter;
 
-			// Parameters.
+			// Get DiscoverParametersAttribute.
 			//
-			LocalBuilder locParams = emit.DeclareLocal(typeof(object[]));
-
-			emit
-				.ldc_i4 (_paramList.Count)
-				.newarr (typeof(object))
-				.stloc  (locParams)
-				;
-
 			object[] attrs =
 				Context.CurrentMethod.DeclaringType.GetCustomAttributes(typeof(DiscoverParametersAttribute), true);
 
@@ -389,6 +393,20 @@ namespace BLToolkit.DataAccess
 
 			if (attrs.Length != 0)
 				discoverParams = ((DiscoverParametersAttribute)attrs[0]).Discover;
+
+			if (discoverParams)
+				_refParamList.Clear();
+
+			// Parameters.
+			//
+			LocalBuilder locParams = emit.DeclareLocal(
+				_refParamList.Count == 0? typeof(object[]): typeof(IDbDataParameter[]));
+
+			emit
+				.ldc_i4 (_paramList.Count)
+				.newarr (_refParamList.Count == 0? typeof(object): typeof(IDbDataParameter))
+				.stloc  (locParams)
+				;
 
 			for (int i = 0; i < _paramList.Count; i++)
 			{
@@ -402,7 +420,7 @@ namespace BLToolkit.DataAccess
 				if (discoverParams)
 				{
 					emit
-						.ldarg_s        ((byte)(pi.Position + 1))
+						.ldarg          (pi)
 						.boxIfValueType (pi.ParameterType)
 						;
 				}
@@ -418,7 +436,6 @@ namespace BLToolkit.DataAccess
 
 					if (paramName[0] != '@')
 					{
-						//paramName = '@' + paramName;
 						emit
 							.ldloc    (_locManager)
 							.callvirt (typeof(DbManager).GetProperty("DataProvider").GetGetMethod())
@@ -433,7 +450,7 @@ namespace BLToolkit.DataAccess
 					}
 
 					emit
-						.ldarg_s        ((byte)(pi.Position + 1))
+						.ldarg          (pi)
 						.boxIfValueType (pi.ParameterType)
 						.callvirt       (typeof(DbManager), "Parameter", typeof(string), typeof(object))
 						;
@@ -443,6 +460,22 @@ namespace BLToolkit.DataAccess
 					.stelem_ref
 					.end()
 					;
+			}
+
+			for (int i = _refParamList.Count - 1; i >= 0; i--)
+			{
+				ParameterInfo pi = (ParameterInfo)_refParamList[i];
+
+				Type type =
+					pi.ParameterType == typeof(DataRow) || pi.ParameterType.IsSubclassOf(typeof(DataRow))?
+						typeof(DataRow): typeof(object);
+
+				emit
+					.ldloc    (_locManager)
+					.ldarg    (pi)
+					.ldloc    (locParams)
+					.callvirt (typeof(DbManager), "CreateParameters", type, typeof(IDbDataParameter[]))
+					.stloc    (locParams);
 			}
 
 			// Call SetSpCommand.
