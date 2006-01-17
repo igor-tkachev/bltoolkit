@@ -50,6 +50,7 @@ namespace BLToolkit.Reflection
 		private Hashtable _items;
 		public  Hashtable  Items
 		{
+			[DebuggerStepThrough] 
 			get 
 			{
 				if (_items == null)
@@ -97,9 +98,8 @@ namespace BLToolkit.Reflection
 		private bool _isSource;
 		public  bool  IsSource
 		{
-			get { return _isSource;  }
-			set { _isSource = value; }
+			[DebuggerStepThrough] get { return _isSource;  }
+			[DebuggerStepThrough] set { _isSource = value; }
 		}
-	
 	}
 }

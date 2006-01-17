@@ -46,6 +46,11 @@ namespace BLToolkit.Data
 		{
 		}
 
+		public DataException(Exception innerException) 
+			: base(innerException.Message, innerException) 
+		{
+		}
+
 		/// <summary>
 		/// Initializes a new instance of the <b>DataException</b> class with serialized data.
 		/// </summary>
