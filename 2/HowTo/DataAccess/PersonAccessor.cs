@@ -63,7 +63,7 @@ namespace HowTo.DataAccess
 
 			PersonAccessor pa = DataAccessor.CreateInstance<PersonAccessor>();
 
-			// Insert.
+			// Insert and get id.
 			//
 			Person person = Person.CreateInstance();
 
@@ -114,7 +114,7 @@ namespace HowTo.DataAccess
 
 				db.BeginTransaction();
 
-				// Insert.
+				// Insert and get id.
 				//
 				Person person = Person.CreateInstance();
 

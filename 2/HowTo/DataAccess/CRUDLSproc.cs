@@ -38,12 +38,10 @@ namespace HowTo.DataAccess
 		}
 
 		[Test]
-		public void Test()
+		public void InsertTest()
 		{
 			DataAccessor da = new DataAccessor();
 
-			// Insert.
-			//
 			Person person = Person.CreateInstance();
 
 			person.FirstName = "Crazy";
@@ -51,88 +49,42 @@ namespace HowTo.DataAccess
 			person.Gender    = Gender.Unknown;
 
 			da.Insert(person);
-
-			using (DbManager db = new DbManager())
-			{
-				person = db
-					.SetSpCommand("Person_SelectByName",
-						db.CreateParameters(person))
-					.ExecuteObject<Person>();
-			}
-
-			TypeAccessor.WriteConsole(person);
-			Assert.IsNotNull(person);
-
-			// Update.
-			//
-			person.Gender = Gender.Other;
-
-			da.Update(person);
-
-			person = da.SelectByKey<Person>(person.ID);
-
-			TypeAccessor.WriteConsole(person);
-			Assert.AreEqual(Gender.Other, person.Gender);
-
-			// Delete.
-			//
-			da.Delete(person);
-
-			person = da.SelectByKey<Person>(person.ID);
-
-			Assert.IsNull(person);
-
-			// Get All.
-			//
-			List<Person> list = da.SelectAll<Person>();
-
-			foreach (Person p in list)
-				TypeAccessor.WriteConsole(p);
 		}
 
 		[Test]
-		public void TransactionTest()
+		public void Test()
 		{
 			using (DbManager db = new DbManager())
 			{
-				DataAccessor<Person> da = new DataAccessor<Person>();
-
 				db.BeginTransaction();
 
-				// Insert.
+				// Get object.
 				//
-				Person person = Person.CreateInstance();
-
-				person.FirstName = "Crazy";
-				person.LastName  = "Frog";
-				person.Gender    = Gender.Unknown;
-
-				da.Insert(db, person);
-
-				person = db
-					.SetSpCommand("Person_SelectByName",
-						db.CreateParameters(person))
+				Person person = db
+					.SetSpCommand("Person_SelectByName", "Crazy", "Frog")
 					.ExecuteObject<Person>();
 
 				TypeAccessor.WriteConsole(person);
 				Assert.IsNotNull(person);
 
+				DataAccessor da = new DataAccessor(db);
+
 				// Update.
 				//
 				person.Gender = Gender.Other;
 
-				da.Update(db, person);
+				da.Update(person);
 
-				person = da.SelectByKey(db, person.ID);
+				person = da.SelectByKey<Person>(person.ID);
 
 				TypeAccessor.WriteConsole(person);
 				Assert.AreEqual(Gender.Other, person.Gender);
 
 				// Delete.
 				//
-				da.Delete(db, person);
+				da.Delete(person);
 
-				person = da.SelectByKey(db, person.ID);
+				person = da.SelectByKey<Person>(person.ID);
 
 				Assert.IsNull(person);
 
@@ -140,7 +92,7 @@ namespace HowTo.DataAccess
 
 				// Get All.
 				//
-				List<Person> list = da.SelectAll(db);
+				List<Person> list = da.SelectAll<Person>();
 
 				foreach (Person p in list)
 					TypeAccessor.WriteConsole(p);
