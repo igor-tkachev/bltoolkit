@@ -3,34 +3,38 @@ using System.Data;
 
 namespace BLToolkit.Mapping
 {
-	public sealed class DataReaderMapper : IMapDataSource
+	public class DataReaderMapper : IMapDataSource
 	{
-		IDataReader _dataReader;
-
 		public DataReaderMapper(IDataReader dataReader)
 		{
 			_dataReader = dataReader;
 		}
 
+		private IDataReader _dataReader;
+		public  IDataReader  DataReader
+		{
+			get { return _dataReader; }
+		}
+
 		#region IMapDataSource Members
 
-		int IMapDataSource.Count
+		public virtual int Count
 		{
 			get { return _dataReader.FieldCount; }
 		}
 
-		string IMapDataSource.GetName(int index)
+		public virtual string GetName(int index)
 		{
 			return _dataReader.GetName(index);
 		}
 
-		object IMapDataSource.GetValue(object o, int index)
+		public virtual object GetValue(object o, int index)
 		{
 			object value = _dataReader.GetValue(index);
 			return value is DBNull? null: value;
 		}
 
-		object IMapDataSource.GetValue(object o, string name)
+		public virtual object GetValue(object o, string name)
 		{
 			object value = _dataReader[name];
 			return value is DBNull? null: value;

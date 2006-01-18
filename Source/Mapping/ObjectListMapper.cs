@@ -5,11 +5,11 @@ using BLToolkit.Reflection;
 
 namespace BLToolkit.Mapping
 {
-	public sealed class ObjectListMapper : IMapDataSourceList, IMapDataDestinationList
+	public class ObjectListMapper : IMapDataSourceList, IMapDataDestinationList
 	{
 		public ObjectListMapper(IList list, ObjectMapper objectMapper)
 		{
-			_list = list;
+			_list   = list;
 			_mapper = objectMapper;
 		}
 

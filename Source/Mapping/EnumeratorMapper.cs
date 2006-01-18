@@ -17,12 +17,12 @@ namespace BLToolkit.Mapping
 
 		#region IMapDataSourceList Members
 
-		public void InitMapping(InitContext initContext)
+		public virtual void InitMapping(InitContext initContext)
 		{
 			_enumerator.Reset();
 		}
 
-		public bool SetNextDataSource(InitContext initContext)
+		public virtual bool SetNextDataSource(InitContext initContext)
 		{
 			if (initContext == null) throw new ArgumentNullException("initContext");
 
@@ -42,7 +42,7 @@ namespace BLToolkit.Mapping
 			return true;
 		}
 
-		public void EndMapping(InitContext initContext)
+		public virtual void EndMapping(InitContext initContext)
 		{
 		}
 
