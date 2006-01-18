@@ -1020,6 +1020,11 @@ namespace BLToolkit.Data
 			throw new DataException(ex);
 		}
 
+		protected virtual ParameterReader CreateParameterReader()
+		{
+			return new ParameterReader(this);
+		}
+
 		#endregion
 
 		#region Public Static Methods
@@ -1223,15 +1228,15 @@ namespace BLToolkit.Data
 		public IDbDataParameter[] CreateParameters(
 			object obj, params IDbDataParameter[] commandParameters)
 		{
-			ParameterReader pr = new ParameterReader(this);
+			ParameterReader pr = CreateParameterReader();
 			ObjectMapper    om = _mappingSchema.GetObjectMapper(obj.GetType());
 
 			_mappingSchema.MapSourceToDestination(om, obj, pr, this);
 
 			foreach (IDbDataParameter p in commandParameters)
-				pr.ParamList.Add(p);
+				pr.AddParameter(p);
 
-			return (IDbDataParameter[])pr.ParamList.ToArray(typeof(IDbDataParameter));
+			return pr.GetParameters();
 		}
 
 		/// <overloads>
@@ -1273,12 +1278,12 @@ namespace BLToolkit.Data
 		/// <returns>This instance of the <see cref="DbManager"/>.</returns>
 		public DbManager AssignParameterValues(object entity)
 		{
-			ParameterReader pr = new ParameterReader(this);
+			ParameterReader pr = CreateParameterReader();
 			ObjectMapper    om = _mappingSchema.GetObjectMapper(entity.GetType());
 
 			_mappingSchema.MapSourceToDestination(om, entity, pr, this);
 
-			foreach (IDbDataParameter p in pr.ParamList)
+			foreach (IDbDataParameter p in pr)
 				if (Command.Parameters.Contains(p.ParameterName))
 					Parameter(p.ParameterName).Value = p.Value;
 
