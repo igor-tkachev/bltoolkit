@@ -659,7 +659,7 @@ namespace BLToolkit.Mapping
 
 			MapInternal(
 				null,
-				GetObjectMapper(sourceObject.GetType()), sourceObject,
+				GetObjectMapper    (sourceObject.GetType()), sourceObject,
 				CreateDataRowMapper(destRow, DataRowVersion.Default), destRow,
 				null);
 
@@ -677,7 +677,7 @@ namespace BLToolkit.Mapping
 
 			MapInternal(
 				null,
-				GetObjectMapper(sourceObject.GetType()), sourceObject,
+				GetObjectMapper    (sourceObject.GetType()), sourceObject,
 				CreateDataRowMapper(destRow, DataRowVersion.Default), destRow,
 				null);
 
