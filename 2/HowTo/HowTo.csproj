@@ -40,6 +40,7 @@
     <Compile Include="Data\ExecuteObject.cs" />
     <Compile Include="Data\ExecuteObjectList.cs" />
     <Compile Include="Data\UpdateObject.cs" />
+    <Compile Include="Mapping\CustomDataRowMapper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

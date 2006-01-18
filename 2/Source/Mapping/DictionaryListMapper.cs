@@ -5,7 +5,7 @@ using BLToolkit.Reflection;
 
 namespace BLToolkit.Mapping
 {
-	public sealed class DictionaryListMapper : IMapDataDestinationList
+	public class DictionaryListMapper : IMapDataDestinationList
 	{
 		public DictionaryListMapper(IDictionary dic, string keyFieldName, ObjectMapper objectMapper)
 		{
@@ -30,7 +30,7 @@ namespace BLToolkit.Mapping
 			}
 		}
 
-		void IMapDataDestinationList.InitMapping(InitContext initContext)
+		public virtual void InitMapping(InitContext initContext)
 		{
 			ISupportMapping sm = _dic as ISupportMapping;
 
@@ -43,18 +43,18 @@ namespace BLToolkit.Mapping
 			}
 		}
 
-		IMapDataDestination IMapDataDestinationList.GetDataDestination(InitContext initContext)
+		public virtual IMapDataDestination GetDataDestination(InitContext initContext)
 		{
 			return _mapper;
 		}
 
-		object IMapDataDestinationList.GetNextObject(InitContext initContext)
+		public virtual object GetNextObject(InitContext initContext)
 		{
 			AddObject();
 			return _newObject = _mapper.CreateInstance(initContext);
 		}
 
-		void IMapDataDestinationList.EndMapping(InitContext initContext)
+		public virtual void EndMapping(InitContext initContext)
 		{
 			AddObject();
 

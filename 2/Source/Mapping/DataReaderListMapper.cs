@@ -5,29 +5,27 @@ using BLToolkit.Reflection;
 
 namespace BLToolkit.Mapping
 {
-	public sealed class DataReaderListMapper : IMapDataSourceList
+	public class DataReaderListMapper : IMapDataSourceList
 	{
-		public DataReaderListMapper(IDataReader dataReader)
+		public DataReaderListMapper(DataReaderMapper mapper)
 		{
-			_reader = dataReader;
-			_mapper = new DataReaderMapper(dataReader);
+			_mapper = mapper;
 		}
 
-		private IDataReader      _reader;
 		private DataReaderMapper _mapper;
 
-		void IMapDataSourceList.InitMapping(InitContext initContext)
+		public virtual void InitMapping(InitContext initContext)
 		{
 			initContext.DataSource   = _mapper;
-			initContext.SourceObject = _reader;
+			initContext.SourceObject = _mapper.DataReader;
 		}
 
-		bool IMapDataSourceList.SetNextDataSource(InitContext initContext)
+		public virtual bool SetNextDataSource(InitContext initContext)
 		{
-			return _reader.Read();
+			return _mapper.DataReader.Read();
 		}
 
-		void IMapDataSourceList.EndMapping(InitContext initContext)
+		public virtual void EndMapping(InitContext initContext)
 		{
 		}
 	}

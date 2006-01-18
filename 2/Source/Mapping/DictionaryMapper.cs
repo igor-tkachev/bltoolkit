@@ -42,24 +42,24 @@ namespace BLToolkit.Mapping
 
 		#region IMapDataSource Members
 
-		public int Count
+		public virtual int Count
 		{
 			get { return _dictionary.Count; }
 		}
 
-		public string GetName(int index)
+		public virtual string GetName(int index)
 		{
 			SetEnumerator(index);
 			return _enumerator.Key.ToString();
 		}
 
-		public object GetValue(object o, int index)
+		public virtual object GetValue(object o, int index)
 		{
 			SetEnumerator(index);
 			return _enumerator.Value;
 		}
 
-		public object GetValue(object o, string name)
+		public virtual object GetValue(object o, string name)
 		{
 			return _dictionary[name];
 		}
@@ -70,7 +70,7 @@ namespace BLToolkit.Mapping
 
 		private ArrayList _nameList;
 
-		public int GetOrdinal(string name)
+		public virtual int GetOrdinal(string name)
 		{
 			if (_nameList == null)
 				_nameList = new ArrayList();
@@ -80,12 +80,12 @@ namespace BLToolkit.Mapping
 			return idx >= 0? idx: _nameList.Add(name);
 		}
 
-		public void SetValue(object o, int index, object value)
+		public virtual void SetValue(object o, int index, object value)
 		{
 			_dictionary[_nameList[index]] = value;
 		}
 
-		public void SetValue(object o, string name, object value)
+		public virtual void SetValue(object o, string name, object value)
 		{
 			_dictionary[name] = value;
 		}

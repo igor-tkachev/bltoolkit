@@ -4,7 +4,7 @@ using System.Collections;
 
 namespace BLToolkit.Mapping
 {
-	public sealed class DataRowMapper : IMapDataSource, IMapDataDestination
+	public class DataRowMapper : IMapDataSource, IMapDataDestination
 	{
 		bool           _createColumns;
 		DataRowVersion _version;
@@ -43,23 +43,23 @@ namespace BLToolkit.Mapping
 
 		#region IMapDataSource Members
 
-		int IMapDataSource.Count
+		public virtual int Count
 		{
 			get { return _dataRow.Table.Columns.Count; }
 		}
 
-		string IMapDataSource.GetName(int index)
+		public virtual string GetName(int index)
 		{
 			return _dataRow.Table.Columns[index].ColumnName;
 		}
 
-		object IMapDataSource.GetValue(object o, int index)
+		public virtual object GetValue(object o, int index)
 		{
 			object value = _version == DataRowVersion.Default ? _dataRow[index] : _dataRow[index, _version];
 			return value is DBNull? null: value;
 		}
 
-		object IMapDataSource.GetValue(object o, string name)
+		public virtual object GetValue(object o, string name)
 		{
 			object value = _version == DataRowVersion.Default ? _dataRow[name] : _dataRow[name, _version];
 			return value is DBNull? null: value;
@@ -69,9 +69,9 @@ namespace BLToolkit.Mapping
 
 		#region IMapDataDestination Members
 
-		ArrayList _nameList;
+		private ArrayList _nameList;
 
-		int IMapDataDestination.GetOrdinal(string name)
+		public virtual int GetOrdinal(string name)
 		{
 			if (_createColumns)
 			{
@@ -107,7 +107,7 @@ namespace BLToolkit.Mapping
 			}
 		}
 
-		void IMapDataDestination.SetValue(object o, int index, object value)
+		public virtual void SetValue(object o, int index, object value)
 		{
 			if (_createColumns)
 				CreateColumn(index, value);
@@ -137,7 +137,7 @@ namespace BLToolkit.Mapping
 			}
 		}
 
-		void IMapDataDestination.SetValue(object o, string name, object value)
+		public virtual void SetValue(object o, string name, object value)
 		{
 			if (_createColumns)
 				CreateColumn(((IMapDataDestination)this).GetOrdinal(name), value);
