@@ -8,7 +8,7 @@ Begin DataProject = "Database.2"
    End
    Begin DBRefFolder = "Database References"
       Begin DBRefNode = "(local).Northwind.dbo"
-         ConnectStr = "Provider=SQLOLEDB.1;Data Source=(local);Integrated Security=SSPI;Initial Catalog=Northwind"
+         ConnectStr = "Provider=SQLOLEDB.1;Data Source=it-book;Integrated Security=SSPI;Initial Catalog=Northwind"
          Provider = "{7F041D59-D76A-44ED-9AA2-FBF6B0548B80}"
          Colorizer = 5
       End
