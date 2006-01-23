@@ -83,7 +83,6 @@
     <Compile Include="Data\DbManager.cs">
     </Compile>
     <Compile Include="Data\OperationType.cs" />
-    <Compile Include="Data\ParameterReader.cs" />
     <Compile Include="EditableObjects\EditableList.cs" />
     <Compile Include="EditableObjects\EditableListChangedEventArgs.cs" />
     <Compile Include="ComponentModel\MemberPropertyDescriptor.cs" />
@@ -126,6 +125,7 @@
     <Compile Include="Mapping\MapResultSet.cs" />
     <Compile Include="Mapping\MapValue.cs" />
     <Compile Include="Mapping\MapValueAttribute.cs" />
+    <Compile Include="Mapping\MapXmlAttribute.cs" />
     <Compile Include="Mapping\MemberMapperAttribute.cs" />
     <Compile Include="Mapping\NullableAttribute.cs" />
     <Compile Include="Mapping\NullValueAttribute.cs" />
@@ -135,6 +135,7 @@
     <Compile Include="Mapping\ObjectMapper.cs" />
     <Compile Include="Mapping\ObjectMapperAttribute.cs" />
     <Compile Include="Mapping\TrimmableAttribute.cs" />
+    <Compile Include="Mapping\XmlMappingSchema.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Reflection\Emit\AssemblyBuilderHelper.cs" />
     <Compile Include="Reflection\Emit\ConstructorBuilderHelper.cs" />
@@ -192,6 +193,15 @@
     <Compile Include="Reflection\TypeAccessor.cs" />
     <Compile Include="TypeBuilder\Builders\TypeBuilderAttribute.cs" />
     <Compile Include="TypeBuilder\TypeFactory.cs" />
+    <Compile Include="TypeInfo\AttributeInfoCollection.cs" />
+    <Compile Include="TypeInfo\ValueCollection.cs" />
+    <Compile Include="TypeInfo\MemberInfoCollection.cs" />
+    <Compile Include="TypeInfo\TypeInfoException.cs" />
+    <Compile Include="TypeInfo\TypeInfo.cs" />
+    <Compile Include="TypeInfo\TypeInfoCollection.cs" />
+    <Compile Include="TypeInfo\TypeInfoReader.cs" />
+    <Compile Include="TypeInfo\AttributeInfo.cs" />
+    <Compile Include="TypeInfo\MemberInfo.cs" />
     <Compile Include="Validation\FriendlyNameAttribute.cs" />
     <Compile Include="Validation\MaxDateValueAttribute.cs" />
     <Compile Include="Validation\MaxLengthAttribute.cs" />
@@ -226,6 +236,23 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="ComponentModel\ObjectBinder.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Mapping\Mapping.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="Mapping\Mapping.xsx">
+      <DependentUpon>Mapping.xsd</DependentUpon>
+    </None>
+    <None Include="TypeInfo\TypeInfo.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="TypeInfo\TypeInfo.xsx">
+      <DependentUpon>TypeInfo.xsd</DependentUpon>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="TypeInfo\Test.xml" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>

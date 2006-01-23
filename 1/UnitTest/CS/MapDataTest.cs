@@ -447,10 +447,10 @@ namespace CS
 			}
 
 			[MapField("TestID1", "Test1.ID")]
-				[MapField("TestID2", "Test2.ID")]
-				[MapField("TestID3", "Test3.ID")]
-				[MapField("TestID4", "Test4.ID")]
-				public abstract class Dest
+			[MapField("TestID2", "Test2.ID")]
+			[MapField("TestID3", "Test3.ID")]
+			[MapField("TestID4", "Test4.ID")]
+			public abstract class Dest
 			{
 				public abstract TestType Test1 { get; set; }
 				public abstract TestType Test3 { get; set; }

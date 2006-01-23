@@ -1020,11 +1020,6 @@ namespace BLToolkit.Data
 			throw new DataException(ex);
 		}
 
-		protected virtual ParameterReader CreateParameterReader()
-		{
-			return new ParameterReader(this);
-		}
-
 		#endregion
 
 		#region Public Static Methods
@@ -1228,6 +1223,7 @@ namespace BLToolkit.Data
 		public IDbDataParameter[] CreateParameters(
 			object obj, params IDbDataParameter[] commandParameters)
 		{
+/*
 			ParameterReader pr = CreateParameterReader();
 			ObjectMapper    om = _mappingSchema.GetObjectMapper(obj.GetType());
 
@@ -1237,6 +1233,29 @@ namespace BLToolkit.Data
 				pr.AddParameter(p);
 
 			return pr.GetParameters();
+*/
+			ArrayList    paramList = new ArrayList();
+			ObjectMapper om        = _mappingSchema.GetObjectMapper(obj.GetType());
+
+			foreach (MemberMapper mm in om)
+			{
+				Type type = mm.MemberAccessor.Type;
+
+				if (type.IsClass == false || type == typeof(string) || type == typeof(byte[]))
+				{
+					object value = mm.GetValue(obj);
+					string name  = _dataProvider.GetParameterName(mm.Name);
+
+					paramList.Add(mm.MapMemberInfo.IsNullable || value == null?
+						NullParameter(name, value):
+						Parameter    (name, value));
+				}
+			}
+
+			foreach (IDbDataParameter p in commandParameters)
+				paramList.Add(p);
+
+			return (IDbDataParameter[])paramList.ToArray(typeof(IDbDataParameter));
 		}
 
 		/// <overloads>
@@ -1274,18 +1293,25 @@ namespace BLToolkit.Data
 		/// The method is used in addition to the <see cref="CreateParameters(object,IDbDataParameter[])"/> method.
 		/// </remarks>
 		/// <include file="Examples1.xml" path='examples/db[@name="AssignParameterValues(object)"]/*' />
-		/// <param name="entity">A business entity to assign.</param>
+		/// <param name="obj">An object to assign.</param>
 		/// <returns>This instance of the <see cref="DbManager"/>.</returns>
-		public DbManager AssignParameterValues(object entity)
+		public DbManager AssignParameterValues(object obj)
 		{
-			ParameterReader pr = CreateParameterReader();
-			ObjectMapper    om = _mappingSchema.GetObjectMapper(entity.GetType());
+			ObjectMapper om = _mappingSchema.GetObjectMapper(obj.GetType());
 
-			_mappingSchema.MapSourceToDestination(om, entity, pr, this);
+			foreach (MemberMapper mm in om)
+			{
+				string name  = _dataProvider.GetParameterName(mm.Name);
 
-			foreach (IDbDataParameter p in pr)
-				if (Command.Parameters.Contains(p.ParameterName))
-					Parameter(p.ParameterName).Value = p.Value;
+				if (Command.Parameters.Contains(name))
+				{
+					object value = mm.GetValue(obj);
+
+					Parameter(name).Value =
+						value == null || mm.MapMemberInfo.IsNullable && _mappingSchema.IsNull(value)?
+							DBNull.Value: value;
+				}
+			}
 
 			return this;
 		}

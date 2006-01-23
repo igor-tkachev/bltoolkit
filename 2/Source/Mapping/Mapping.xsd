@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xsd:schema id="Mapping"
+	xmlns:tns="urn:schemas-bltoolkit-net:mapping"
+	xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+	targetNamespace="urn:schemas-bltoolkit-net:mapping">
+	
+	<xsd:attribute name="MapIgnore" type="xsd:boolean" />
+	
+</xsd:schema>

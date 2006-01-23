@@ -1,5 +1,5 @@
 /*
- * File:    TypeDescriptor.cs
+ * File:    MappingSchema .cs
  * Created: 11/11/2003
  * Author:  Igor Tkachev
  *          mailto:it@rsdn.ru

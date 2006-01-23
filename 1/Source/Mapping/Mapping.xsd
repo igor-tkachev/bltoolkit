@@ -1,7 +1,12 @@
 <?xml version="1.0" ?>
-<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:mstns="http://www.rsdn.ru/mapping.xsd"
-	xmlns:msdata="urn:schemas-microsoft-com:xml-msdata" xmlns="http://www.rsdn.ru/mapping.xsd"
-	id="mapping" targetNamespace="http://www.rsdn.ru/mapping.xsd" attributeFormDefault="qualified"
+<xs:schema
+	xmlns:xs="http://www.w3.org/2001/XMLSchema"
+	xmlns:mstns="http://www.rsdn.ru/mapping.xsd"
+	xmlns:msdata="urn:schemas-microsoft-com:xml-msdata"
+	xmlns="http://www.rsdn.ru/mapping.xsd"
+	id="mapping"
+	targetNamespace="http://www.rsdn.ru/mapping.xsd"
+	attributeFormDefault="qualified"
 	elementFormDefault="qualified">
 	<xs:element name="mapping">
 		<xs:complexType>
@@ -18,9 +23,9 @@
 							<xs:element name="field" minOccurs="0" maxOccurs="unbounded">
 								<xs:complexType>
 									<xs:sequence>
-										<xs:element name="value" minOccurs="0" maxOccurs="unbounded" type="mstns:value"></xs:element>
-										<xs:element name="null_value" minOccurs="0" maxOccurs="1" type="mstns:null_value"></xs:element>
-										<xs:element name="default_value" minOccurs="0" maxOccurs="1" type="mstns:default_value"></xs:element>
+										<xs:element name="value" minOccurs="0" maxOccurs="unbounded" type="mstns:value"/>
+										<xs:element name="null_value" minOccurs="0" maxOccurs="1" type="mstns:null_value"/>
+										<xs:element name="default_value" minOccurs="0" maxOccurs="1" type="mstns:default_value"/>
 									</xs:sequence>
 									<xs:attribute name="name" form="unqualified" type="xs:string" use="required" />
 									<xs:attribute name="source" form="unqualified" type="xs:string" use="optional" />
@@ -37,9 +42,9 @@
 				<xs:element name="value_type">
 					<xs:complexType>
 						<xs:sequence>
-							<xs:element name="value" minOccurs="0" maxOccurs="unbounded" type="mstns:value"></xs:element>
-							<xs:element name="null_value" minOccurs="0" maxOccurs="1" type="mstns:null_value"></xs:element>
-							<xs:element name="default_value" minOccurs="0" maxOccurs="1" type="mstns:default_value"></xs:element>
+							<xs:element name="value" minOccurs="0" maxOccurs="unbounded" type="mstns:value"/>
+							<xs:element name="null_value" minOccurs="0" maxOccurs="1" type="mstns:null_value"/>
+							<xs:element name="default_value" minOccurs="0" maxOccurs="1" type="mstns:default_value"/>
 						</xs:sequence>
 						<xs:attribute name="name" form="unqualified" type="xs:string" use="required" />
 					</xs:complexType>

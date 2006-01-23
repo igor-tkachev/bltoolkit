@@ -153,6 +153,13 @@ namespace BLToolkit.Mapping
 		{
 			if (type == null) throw new ArgumentNullException("type");
 
+			/*
+			object[] customAttrs = originalType.GetCustomAttributes(typeof(MapXmlAttribute), true);
+
+			if (customAttrs != null && customAttrs.Length != 0)
+				XmlAttribute = (MapXmlAttribute)customAttrs[0];
+			*/
+
 			_typeAccessor  = TypeAccessor.GetAccessor(type);
 			_mappingSchema = mappingSchema;
 
@@ -165,12 +172,12 @@ namespace BLToolkit.Mapping
 
 				mi.MemberAccessor = ma;
 				mi.MappingSchema  = mappingSchema;
-				mi.Name           = GetFieldName(ma);
-				mi.IsTrimmable    = GetIsTrimmable(ma);
-				mi.MapValues      = GetMapValues(ma);
+				mi.Name           = GetFieldName   (ma);
+				mi.IsTrimmable    = GetIsTrimmable (ma);
+				mi.MapValues      = GetMapValues   (ma);
 				mi.DefaultValue   = GetDefaultValue(ma);
-				mi.IsNullable     = GetIsNullable(ma);
-				mi.NullValue      = GetNullValue(ma, mi.IsNullable);
+				mi.IsNullable     = GetIsNullable  (ma);
+				mi.NullValue      = GetNullValue   (ma, mi.IsNullable);
 
 				Add(CreateMemberMapper(mi));
 			}

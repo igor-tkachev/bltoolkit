@@ -1233,6 +1233,7 @@ namespace Rsdn.Framework.Data
 			try
 			{
 #endif
+/*
 				ParameterReader       pr = new ParameterReader(this);
 				Mapping.MapDescriptor td = Mapping.MapDescriptor.GetDescriptor(entity.GetType());
 
@@ -1242,6 +1243,29 @@ namespace Rsdn.Framework.Data
 					pr.ParamList.Add(p);
 
 				return (IDbDataParameter[])pr.ParamList.ToArray(typeof(IDbDataParameter));
+*/
+				ArrayList paramList = new ArrayList();
+
+				Mapping.MapDescriptor md = Mapping.MapDescriptor.GetDescriptor(entity.GetType());
+
+				foreach (Mapping.IMemberMapper mm in md)
+				{
+					Type type = mm.MemberType;
+
+					if (type.IsClass == false || type == typeof(string) || type == typeof(byte[]))
+					{
+						object value = mm.GetValue(entity);
+						string name  = "@" + mm.Name;
+
+						paramList.Add(mm.IsNullable || value == null?
+							NullParameter(name, value): Parameter(name, value));
+					}
+				}
+
+				foreach (IDbDataParameter p in commandParameters)
+					paramList.Add(p);
+
+				return (IDbDataParameter[])paramList.ToArray(typeof(IDbDataParameter));
 #if HANDLE_EXCEPTIONS
 			}
 			catch (Exception ex)
