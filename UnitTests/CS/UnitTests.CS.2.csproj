@@ -37,6 +37,9 @@
     <Compile Include="Aspects\InterceptorAspectTest.cs" />
     <Compile Include="Aspects\NotNullAspectTest.cs" />
     <Compile Include="DataAccess\DataAccessorTest.cs" />
+    <Compile Include="DataAccess\PersonDataSet2.cs">
+      <DependentUpon>PersonDataSet2.xsd</DependentUpon>
+    </Compile>
     <Compile Include="DataAccess\PersonDataSet2.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -97,6 +100,9 @@
       <CustomToolNamespace>DataAccessTest</CustomToolNamespace>
     </None>
     <None Include="DataAccess\PersonDataSet2.xss">
+      <DependentUpon>PersonDataSet2.xsd</DependentUpon>
+    </None>
+    <None Include="DataAccess\PersonDataSet2.xsx">
       <DependentUpon>PersonDataSet2.xsd</DependentUpon>
     </None>
     <None Include="Properties\Settings.settings">

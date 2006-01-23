@@ -32,7 +32,13 @@ namespace BLToolkit.Mapping
 				mm = GetPrimitiveMemberMapper(mi);
 
 #if FW2
-			if (mm == null) mm = GetNullableMemberMapper(mi);
+			if (mm == null)
+			{
+				mm = GetNullableMemberMapper(mi);
+
+				if (mm != null)
+					mi.IsNullable = true;
+			}
 #endif
 
 			if (mm == null) mm = GetSimpleMemberMapper(mi);
@@ -47,7 +53,7 @@ namespace BLToolkit.Mapping
 		#region Public Properties
 
 		private MapMemberInfo _mapMemberInfo;
-		public  MapMemberInfo  mapMemberInfo
+		public  MapMemberInfo  MapMemberInfo
 		{
 			get { return _mapMemberInfo; }
 		}

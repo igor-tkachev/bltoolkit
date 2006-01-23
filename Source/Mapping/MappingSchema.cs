@@ -32,13 +32,8 @@ namespace BLToolkit.Mapping
 						om = CreateObjectMapper(type);
 
 						if (om == null)
-						{
-							om = Map.DefaultSchema.CreateObjectMapper(type);
-
-							if (om == null)
-								throw new MappingException(
-									string.Format("Cannot create object mapper for the '{0}' type.", type.FullName));
-						}
+							throw new MappingException(
+								string.Format("Cannot create object mapper for the '{0}' type.", type.FullName));
 
 						SetObjectMapper(type, om);
 
@@ -63,10 +58,10 @@ namespace BLToolkit.Mapping
 		protected virtual ObjectMapper CreateObjectMapper(Type type)
 		{
 			Attribute attr = TypeHelper.GetFirstAttribute(type, typeof(ObjectMapperAttribute));
-			return attr == null? GetDefaultObjectMapper(type): ((ObjectMapperAttribute)attr).ObjectMapper;
+			return attr == null? CreateObjectMapperInstance(type): ((ObjectMapperAttribute)attr).ObjectMapper;
 		}
 
-		protected virtual ObjectMapper GetDefaultObjectMapper(Type type)
+		protected virtual ObjectMapper CreateObjectMapperInstance(Type type)
 		{
 			return new ObjectMapper();
 		}

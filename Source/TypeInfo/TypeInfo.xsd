@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xsd:schema id="TypeInfo"
+	xmlns:tns="urn:schemas-bltoolkit-net:typeinfo"
+	xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+	targetNamespace="urn:schemas-bltoolkit-net:typeinfo">
+	
+	<xsd:element name="Types" type="tns:Types" />
+
+	<xsd:complexType name="Types">
+		<xsd:choice minOccurs="0" maxOccurs="unbounded">
+			<xsd:element name="Type" type="tns:Type" />
+		</xsd:choice>
+	</xsd:complexType>
+
+	<xsd:complexType name="Type">
+		<xsd:choice minOccurs="0" maxOccurs="unbounded">
+			<xsd:element name="Member"    type="tns:Member"    minOccurs="0" maxOccurs="unbounded" />
+			<xsd:element name="Attribute" type="tns:Attribute" minOccurs="0" maxOccurs="unbounded" />
+		</xsd:choice>
+		<xsd:attribute name="Name" type="xsd:string" use="required" />
+	</xsd:complexType>
+
+	<xsd:complexType name="Member">
+		<xsd:choice minOccurs="0" maxOccurs="unbounded">
+			<xsd:element name="Attribute" type="tns:Attribute" minOccurs="0" maxOccurs="unbounded" />
+		</xsd:choice>
+		<xsd:attribute name="Name" type="xsd:string" use="required" />
+		<xsd:anyAttribute namespace="##any" />
+	</xsd:complexType>
+
+	<xsd:complexType name="Attribute">
+		<xsd:choice minOccurs="0" maxOccurs="unbounded">
+			<xsd:element name="Value" type="xsd:string" />
+		</xsd:choice>
+		<xsd:attribute name="Name"  type="xsd:string" use="required" />
+		<xsd:attribute name="Value" type="xsd:string" use="optional" />
+	</xsd:complexType>
+	
+</xsd:schema>
