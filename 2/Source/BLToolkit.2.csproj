@@ -125,7 +125,7 @@
     <Compile Include="Mapping\MapResultSet.cs" />
     <Compile Include="Mapping\MapValue.cs" />
     <Compile Include="Mapping\MapValueAttribute.cs" />
-    <Compile Include="Mapping\MapXmlAttribute.cs" />
+    <Compile Include="TypeInfo\TypeInfoAttribute.cs" />
     <Compile Include="Mapping\MemberMapperAttribute.cs" />
     <Compile Include="Mapping\NullableAttribute.cs" />
     <Compile Include="Mapping\NullValueAttribute.cs" />
@@ -135,7 +135,6 @@
     <Compile Include="Mapping\ObjectMapper.cs" />
     <Compile Include="Mapping\ObjectMapperAttribute.cs" />
     <Compile Include="Mapping\TrimmableAttribute.cs" />
-    <Compile Include="Mapping\XmlMappingSchema.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Reflection\Emit\AssemblyBuilderHelper.cs" />
     <Compile Include="Reflection\Emit\ConstructorBuilderHelper.cs" />
@@ -238,15 +237,15 @@
     <EmbeddedResource Include="ComponentModel\ObjectBinder.ico" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Mapping\Mapping.xsd">
+    <EmbeddedResource Include="Mapping\Mapping.xsd">
       <SubType>Designer</SubType>
-    </None>
+    </EmbeddedResource>
     <None Include="Mapping\Mapping.xsx">
       <DependentUpon>Mapping.xsd</DependentUpon>
     </None>
-    <None Include="TypeInfo\TypeInfo.xsd">
+    <EmbeddedResource Include="TypeInfo\TypeInfo.xsd">
       <SubType>Designer</SubType>
-    </None>
+    </EmbeddedResource>
     <None Include="TypeInfo\TypeInfo.xsx">
       <DependentUpon>TypeInfo.xsd</DependentUpon>
     </None>

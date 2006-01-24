@@ -614,7 +614,8 @@ namespace BLToolkit.Reflection
 				propertyInfo.DeclaringType).GetAttributes(typeof(GlobalInstanceTypeAttribute));
 
 			foreach (GlobalInstanceTypeAttribute attr in attrs)
-				if (attr.PropertyType == propertyInfo.PropertyType)
+				if (TypeHelper.IsSameOrParent(attr.PropertyType, propertyInfo.PropertyType))
+//				if (attr.PropertyType == propertyInfo.PropertyType)
 					return attr.Parameters;
 
 			return null;

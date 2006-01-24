@@ -8,6 +8,7 @@ using System.Collections.Generic;
 #endif
 
 using BLToolkit.Reflection;
+using BLToolkit.TypeInfo;
 
 namespace BLToolkit.Mapping
 {
@@ -66,6 +67,17 @@ namespace BLToolkit.Mapping
 			return new ObjectMapper();
 		}
 
+		#endregion
+
+		#region Public Members
+
+		private TypeInfoCollection _typeInfo;
+		public  TypeInfoCollection  TypeInfo
+		{
+			get { return _typeInfo;  }
+			set { _typeInfo = value; }
+		}
+	
 		#endregion
 
 		#region Protected Members

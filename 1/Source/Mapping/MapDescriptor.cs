@@ -1045,7 +1045,7 @@ namespace Rsdn.Framework.Data.Mapping
 		{
 			try
 			{
-				SetMappingSchema(GetMappingSchema(schemaFile, Assembly. GetCallingAssembly()));
+				SetMappingSchema(GetMappingSchema(schemaFile, Assembly.GetCallingAssembly()));
 			} 
 			catch (Exception ex)
 			{

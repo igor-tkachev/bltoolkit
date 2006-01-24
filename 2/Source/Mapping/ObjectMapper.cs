@@ -4,6 +4,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 
 using BLToolkit.Reflection;
+using BLToolkit.TypeInfo;
 
 namespace BLToolkit.Mapping
 {
@@ -88,6 +89,13 @@ namespace BLToolkit.Mapping
 			get { return (MemberMapper)_members[index]; }
 		}
 
+		private BLToolkit.TypeInfo.TypeInfo _typeInfo;
+		public  BLToolkit.TypeInfo.TypeInfo  TypeInfo
+		{
+			get { return _typeInfo;  }
+			set { _typeInfo = value; }
+		}
+
 		private Hashtable _nameToMember;
 		public  MemberMapper this[string name]
 		{
@@ -153,14 +161,8 @@ namespace BLToolkit.Mapping
 		{
 			if (type == null) throw new ArgumentNullException("type");
 
-			/*
-			object[] customAttrs = originalType.GetCustomAttributes(typeof(MapXmlAttribute), true);
-
-			if (customAttrs != null && customAttrs.Length != 0)
-				XmlAttribute = (MapXmlAttribute)customAttrs[0];
-			*/
-
 			_typeAccessor  = TypeAccessor.GetAccessor(type);
+			_typeInfo      = TypeInfoReader.GetTypeInfo(_typeAccessor.OriginalType, mappingSchema.TypeInfo);
 			_mappingSchema = mappingSchema;
 
 			foreach (MemberAccessor ma in _typeAccessor)
