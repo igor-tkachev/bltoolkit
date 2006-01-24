@@ -188,11 +188,6 @@
                     BuildAction = "Compile"
                 />
                 <File
-                    RelPath = "Data\ParameterReader.cs"
-                    SubType = "Code"
-                    BuildAction = "Compile"
-                />
-                <File
                     RelPath = "Data\DataProvider\IDataProvider.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
@@ -416,6 +411,15 @@
                     RelPath = "Mapping\MapNextResult.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "Mapping\Mapping.xsd"
+                    BuildAction = "Content"
+                />
+                <File
+                    RelPath = "Mapping\Mapping.xsx"
+                    DependentUpon = "Mapping.xsd"
+                    BuildAction = "None"
                 />
                 <File
                     RelPath = "Mapping\MappingException.cs"
@@ -754,6 +758,69 @@
                 />
                 <File
                     RelPath = "TypeBuilder\Builders\TypeBuilderConsts.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "TypeInfo\AttributeInfo.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "TypeInfo\AttributeInfoCollection.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "TypeInfo\MemberInfo.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "TypeInfo\MemberInfoCollection.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "TypeInfo\Test.xml"
+                    BuildAction = "Content"
+                />
+                <File
+                    RelPath = "TypeInfo\TypeInfo.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "TypeInfo\TypeInfo.xsd"
+                    BuildAction = "Content"
+                />
+                <File
+                    RelPath = "TypeInfo\TypeInfo.xsx"
+                    DependentUpon = "TypeInfo.xsd"
+                    BuildAction = "None"
+                />
+                <File
+                    RelPath = "TypeInfo\TypeInfoAttribute.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "TypeInfo\TypeInfoCollection.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "TypeInfo\TypeInfoException.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "TypeInfo\TypeInfoReader.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "TypeInfo\ValueCollection.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
                 />

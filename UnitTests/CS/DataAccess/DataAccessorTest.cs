@@ -33,12 +33,13 @@ namespace DataAccessTest
 		[TableName("Person")]
 		public abstract class Person : EditableObject
 		{
+			[Required]                     public abstract Gender Gender     { get; set; }
+
 			[PrimaryKey, NonUpdatable]
 			[MapField("PersonID")]         public abstract int    ID         { get; set; }
 			[MaxLength(50), Required]      public abstract string LastName   { get; set; }
 			[MaxLength(50), Required]      public abstract string FirstName  { get; set; }
 			[MaxLength(50), NullValue("")] public abstract string MiddleName { get; set; }
-			[Required]                     public abstract Gender Gender     { get; set; }
 
 			public abstract ArrayList Territories { get; set; }
 		}
@@ -114,6 +115,8 @@ namespace DataAccessTest
 		public DataAccessorTest()
 		{
 			TypeFactory.SaveTypes = true;
+
+			object o = TypeAccessor.CreateInstance(typeof(Person));
 
 			_da = (PersonAccessor)DataAccessor.CreateInstance(typeof(PersonAccessor));
 		}
