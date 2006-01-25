@@ -552,6 +552,64 @@
                     BuildAction = "Compile"
                 />
                 <File
+                    RelPath = "Reflection\Extension\AttributeExtension.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "Reflection\Extension\AttributeInfoCollection.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "Reflection\Extension\ExtensionList.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "Reflection\Extension\MemberExtension.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "Reflection\Extension\MemberExtensionCollection.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "Reflection\Extension\Test.xml"
+                    BuildAction = "Content"
+                />
+                <File
+                    RelPath = "Reflection\Extension\TypeExtension.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "Reflection\Extension\TypeExtension.xsd"
+                    BuildAction = "Content"
+                />
+                <File
+                    RelPath = "Reflection\Extension\TypeExtension.xsx"
+                    DependentUpon = "TypeExtension.xsd"
+                    BuildAction = "None"
+                />
+                <File
+                    RelPath = "Reflection\Extension\TypeExtensionAttribute.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "Reflection\Extension\TypeExtensionException.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "Reflection\Extension\ValueCollection.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
                     RelPath = "TypeBuilder\BLToolkitGeneratedAttribute.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
@@ -758,69 +816,6 @@
                 />
                 <File
                     RelPath = "TypeBuilder\Builders\TypeBuilderConsts.cs"
-                    SubType = "Code"
-                    BuildAction = "Compile"
-                />
-                <File
-                    RelPath = "TypeInfo\AttributeInfo.cs"
-                    SubType = "Code"
-                    BuildAction = "Compile"
-                />
-                <File
-                    RelPath = "TypeInfo\AttributeInfoCollection.cs"
-                    SubType = "Code"
-                    BuildAction = "Compile"
-                />
-                <File
-                    RelPath = "TypeInfo\MemberInfo.cs"
-                    SubType = "Code"
-                    BuildAction = "Compile"
-                />
-                <File
-                    RelPath = "TypeInfo\MemberInfoCollection.cs"
-                    SubType = "Code"
-                    BuildAction = "Compile"
-                />
-                <File
-                    RelPath = "TypeInfo\Test.xml"
-                    BuildAction = "Content"
-                />
-                <File
-                    RelPath = "TypeInfo\TypeInfo.cs"
-                    SubType = "Code"
-                    BuildAction = "Compile"
-                />
-                <File
-                    RelPath = "TypeInfo\TypeInfo.xsd"
-                    BuildAction = "Content"
-                />
-                <File
-                    RelPath = "TypeInfo\TypeInfo.xsx"
-                    DependentUpon = "TypeInfo.xsd"
-                    BuildAction = "None"
-                />
-                <File
-                    RelPath = "TypeInfo\TypeInfoAttribute.cs"
-                    SubType = "Code"
-                    BuildAction = "Compile"
-                />
-                <File
-                    RelPath = "TypeInfo\TypeInfoCollection.cs"
-                    SubType = "Code"
-                    BuildAction = "Compile"
-                />
-                <File
-                    RelPath = "TypeInfo\TypeInfoException.cs"
-                    SubType = "Code"
-                    BuildAction = "Compile"
-                />
-                <File
-                    RelPath = "TypeInfo\TypeInfoReader.cs"
-                    SubType = "Code"
-                    BuildAction = "Compile"
-                />
-                <File
-                    RelPath = "TypeInfo\ValueCollection.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
                 />

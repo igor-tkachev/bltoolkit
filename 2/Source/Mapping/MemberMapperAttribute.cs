@@ -6,7 +6,7 @@ namespace BLToolkit.Mapping
 		AttributeTargets.Class    | AttributeTargets.Interface | 
 		AttributeTargets.Property | AttributeTargets.Field,
 		AllowMultiple=true)]
-	public sealed class MemberMapperAttribute : Attribute
+	public class MemberMapperAttribute : Attribute
 	{
 		public MemberMapperAttribute(Type memberMapperType)
 			: this(null, memberMapperType)
@@ -17,12 +17,8 @@ namespace BLToolkit.Mapping
 		{
 			if (memberMapperType == null) throw new ArgumentNullException("memberMapperType");
 
-			_memberType   = memberType;
-			_memberMapper = Activator.CreateInstance(memberMapperType) as MemberMapper;
-
-			if (_memberMapper == null)
-				throw new ArgumentException(
-					string.Format("Type '{0}' is not MemberMapper.", memberMapperType));
+			_memberType       = memberType;
+			_memberMapperType = memberMapperType;
 		}
 
 		private Type _memberType;
@@ -31,10 +27,24 @@ namespace BLToolkit.Mapping
 			get { return _memberType; }
 		}
 
-		private MemberMapper _memberMapper;
-		public  MemberMapper  MemberMapper
+		private Type _memberMapperType;
+		public  Type  MemberMapperType
 		{
-			get { return _memberMapper; }
+			get { return _memberMapperType; }
+		}
+
+		public virtual MemberMapper  MemberMapper
+		{
+			get
+			{
+				MemberMapper mm = Activator.CreateInstance(_memberMapperType) as MemberMapper;
+
+				if (mm == null)
+					throw new ArgumentException(
+						string.Format("Type '{0}' is not MemberMapper.", _memberMapperType));
+
+				return mm;
+			}
 		}
 	}
 }

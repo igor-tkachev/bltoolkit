@@ -1,20 +1,23 @@
 using System;
 using System.Collections;
 
-namespace BLToolkit.TypeInfo
+namespace BLToolkit.Reflection.Extension
 {
-	public class MemberInfoCollection : ICollection
+	public class MemberExtensionCollection : ICollection
 	{
-		public MemberInfo this[string typeName]
+		public MemberExtension this[string memberName]
 		{
 			get
 			{
-				MemberInfo value = (MemberInfo)_members[typeName];
-				return value != null? value: MemberInfo.Null;
+				if (_isNull)
+					return MemberExtension.Null;
+
+				MemberExtension value = (MemberExtension)_members[memberName];
+				return value != null? value: MemberExtension.Null;
 			}
 		}
 
-		public void Add(MemberInfo memberInfo)
+		public void Add(MemberExtension memberInfo)
 		{
 			if (!_isNull)
 				_members[memberInfo.Name] = memberInfo;

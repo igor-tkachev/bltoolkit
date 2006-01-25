@@ -4,7 +4,8 @@ using System.IO;
 using NUnit.Framework;
 
 using BLToolkit.Mapping;
-using BLToolkit.TypeInfo;
+using BLToolkit.Reflection;
+using BLToolkit.Reflection.Extension;
 
 namespace A.TypeInfoTest
 {
@@ -32,7 +33,7 @@ namespace A.TypeInfoTest
 		//<null_value    target='NotApplicable' />
 		//<default_value target='NotApplicable' />
 
-		[TypeInfo("TriState")]
+		[TypeExtension("TriState")]
 		public enum TriState { Yes, No, NotApplicable };
 
 		public class Source
@@ -40,7 +41,7 @@ namespace A.TypeInfoTest
 			public string Field1 = "no";
 		}
 
-		[TypeInfo("Dest")]
+		[TypeExtension("Dest")]
 		public class Dest
 		{
 			private TriState _f1 = TriState.NotApplicable;
@@ -55,9 +56,9 @@ namespace A.TypeInfoTest
 		[Test]
 		public void Test()
 		{
-			TypeInfoCollection col = TypeInfoReader.GetTypeInfo("Mapping.xml");
+			Map.Extensions = TypeExtension.GetExtenstions("Mapping.xml");
 
-			object o = col["TriState"].Members["Yes"].Attributes["MapValue"].Value;
+			object o = Map.Extensions["TriState"]["Yes"]["MapValue"].Value;
 
 			Assert.AreEqual("yes", o);
 

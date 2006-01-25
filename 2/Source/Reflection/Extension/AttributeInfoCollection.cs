@@ -1,23 +1,26 @@
 using System;
 using System.Collections;
 
-namespace BLToolkit.TypeInfo
+namespace BLToolkit.Reflection.Extension
 {
-	public class AttributeInfoCollection : ICollection
+	public class AttributeExtensionCollection : ICollection
 	{
-		public AttributeInfo this[string attributeName]
+		public AttributeExtension this[string attributeName]
 		{
 			get
 			{
-				AttributeInfo value = (AttributeInfo)_attributes[attributeName];
-				return value != null? value: AttributeInfo.Null;
+				if (_isNull)
+					return AttributeExtension.Null;
+
+				AttributeExtension value = (AttributeExtension)_attributes[attributeName];
+				return value != null? value: AttributeExtension.Null;
 			}
 		}
 
-		public void Add(AttributeInfo memberInfo)
+		public void Add(AttributeExtension memberExtension)
 		{
 			if (!_isNull)
-				_attributes[memberInfo.Name] = memberInfo;
+				_attributes[memberExtension.Name] = memberExtension;
 		}
 
 		private  Hashtable _attributes = new Hashtable();

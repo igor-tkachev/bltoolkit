@@ -1,24 +1,36 @@
 using System;
 using System.Collections;
 
-namespace BLToolkit.TypeInfo
+namespace BLToolkit.Reflection.Extension
 {
-	public class TypeInfoCollection : ICollection
+	public class ExtensionList : ICollection
 	{
-		#region TypeInfo
+		#region ExtensionList
 		
 		private Hashtable _types = new Hashtable();
 
-		public TypeInfo this[string typeName]
+		public TypeExtension this[string typeName]
 		{
 			get
 			{
-				TypeInfo value = (TypeInfo)_types[typeName];
-				return value != null? value: TypeInfo.Null;
+				TypeExtension value = (TypeExtension)_types[typeName];
+				return value != null? value: TypeExtension.Null;
 			}
 		}
 
-		public void Add(TypeInfo typeInfo)
+		public TypeExtension this[Type type]
+		{
+			get
+			{
+				foreach (TypeExtension ext in _types.Values)
+					if (ext.Name == type.Name || ext.Name == type.FullName)
+						return ext;
+
+				return TypeExtension.Null;
+			}
+		}
+
+		public void Add(TypeExtension typeInfo)
 		{
 			_types[typeInfo.Name] = typeInfo;
 		}

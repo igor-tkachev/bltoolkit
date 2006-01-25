@@ -1,11 +1,11 @@
 using System;
 using System.Collections;
 
-namespace BLToolkit.TypeInfo
+namespace BLToolkit.Reflection.Extension
 {
-	public class AttributeInfo
+	public class AttributeExtension
 	{
-		static AttributeInfo()
+		static AttributeExtension()
 		{
 			_null._values._isNull = true;
 		}
@@ -17,7 +17,7 @@ namespace BLToolkit.TypeInfo
 			set { _name = value; }
 		}
 
-		public string Value
+		public object Value
 		{
 			get { return _values.Value; }
 		}
@@ -28,8 +28,8 @@ namespace BLToolkit.TypeInfo
 			get { return _values; }
 		}
 
-		private static AttributeInfo _null = new AttributeInfo();
-		public  static AttributeInfo  Null
+		private static AttributeExtension _null = new AttributeExtension();
+		public  static AttributeExtension  Null
 		{
 			get { return _null;  }
 		}

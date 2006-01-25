@@ -1,6 +1,8 @@
 using System;
+using System.Diagnostics;
 
 using BLToolkit.Reflection;
+using BLToolkit.Reflection.Extension;
 
 namespace BLToolkit.Mapping
 {
@@ -9,57 +11,65 @@ namespace BLToolkit.Mapping
 		private MemberAccessor _memberAccessor;
 		public  MemberAccessor  MemberAccessor
 		{
-			get { return _memberAccessor;  }
-			set { _memberAccessor = value; }
+			[DebuggerStepThrough] get { return _memberAccessor;  }
+			[DebuggerStepThrough] set { _memberAccessor = value; }
 		}
 
 		private string _name;
 		public  string  Name
 		{
-			get { return _name;  }
-			set { _name = value; }
+			[DebuggerStepThrough] get { return _name;  }
+			[DebuggerStepThrough] set { _name = value; }
 		}
 
 		private bool _isTrimmable;
 		public  bool  IsTrimmable
 		{
-			get { return _isTrimmable;  }
-			set { _isTrimmable = value; }
+			[DebuggerStepThrough] get { return _isTrimmable;  }
+			[DebuggerStepThrough] set { _isTrimmable = value; }
 		}
 
 		private bool _isNullable;
 		public  bool  IsNullable
 		{
-			get { return _isNullable;  }
-			set { _isNullable = value; }
+			[DebuggerStepThrough] get { return _isNullable;  }
+			[DebuggerStepThrough] set { _isNullable = value; }
 		}
 
 		private object _nullValue;
 		public  object  NullValue
 		{
-			get { return _nullValue;  }
-			set { _nullValue = value; }
+			[DebuggerStepThrough] get { return _nullValue;  }
+			[DebuggerStepThrough] set { _nullValue = value; }
 		}
 
 		private object _defaultValue;
 		public  object  DefaultValue
 		{
-			get { return _defaultValue;  }
-			set { _defaultValue = value; }
+			[DebuggerStepThrough] get { return _defaultValue;  }
+			[DebuggerStepThrough] set { _defaultValue = value; }
 		}
 
 		private MappingSchema _mappingSchema;
 		public  MappingSchema  MappingSchema
 		{
-			get { return _mappingSchema;  }
-			set { _mappingSchema = value; }
+			[DebuggerStepThrough] get { return _mappingSchema;  }
+			[DebuggerStepThrough] set { _mappingSchema = value; }
 		}
 
 		private MapValue[] _mapValues;
 		public  MapValue[]  MapValues
 		{
-			get { return _mapValues;  }
-			set { _mapValues = value; }
+			[DebuggerStepThrough] get { return _mapValues;  }
+			[DebuggerStepThrough] set { _mapValues = value; }
 		}
+
+		private MemberExtension _memberExtension;
+		public  MemberExtension  MemberExtension
+		{
+			[DebuggerStepThrough] get { return _memberExtension;  }
+			[DebuggerStepThrough] set { _memberExtension = value; }
+		}
+	
 	}
 }

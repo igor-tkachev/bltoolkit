@@ -191,9 +191,11 @@ namespace BLToolkit.Reflection
 						Type accessorType = 
 							TypeFactory.GetType(originalType, new TypeAccessorBuilder(type, originalType));
 
-						_accessors[originalType] = accessor = (TypeAccessor)Activator.CreateInstance(accessorType);
+						accessor = (TypeAccessor)Activator.CreateInstance(accessorType);
 
-						if (type.IsAbstract)
+						_accessors[originalType] = accessor;
+
+						if (originalType != type)
 							_accessors[type] = accessor;
 					}
 				}
