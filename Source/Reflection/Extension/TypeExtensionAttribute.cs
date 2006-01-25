@@ -1,20 +1,20 @@
 using System;
 
-namespace BLToolkit.TypeInfo
+namespace BLToolkit.Reflection.Extension
 {
 	[AttributeUsage(AttributeTargets.Class | AttributeTargets.Enum)]
-	public class TypeInfoAttribute : Attribute
+	public class TypeExtensionAttribute : Attribute
 	{
-		public TypeInfoAttribute()
+		public TypeExtensionAttribute()
 		{
 		}
 
-		public TypeInfoAttribute(string typeName) 
+		public TypeExtensionAttribute(string typeName) 
 			: this(null, typeName)
 		{
 		}
 
-		public TypeInfoAttribute(string fileName, string typeName)
+		public TypeExtensionAttribute(string fileName, string typeName)
 		{
 			_fileName = fileName;
 			_typeName = typeName;

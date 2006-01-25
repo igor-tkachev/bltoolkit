@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
-<ns:Types xmlns:ns="urn:schemas-bltoolkit-net:typeinfo" xmlns:m="urn:schemas-bltoolkit-net:mapping" >
+<ns:Types xmlns:ns="urn:schemas-bltoolkit-net:typeext" xmlns:m="urn:schemas-bltoolkit-net:mapping" >
 	<Type Name="Person">
 		<Member Name="FirstName" m:MapIgnore="1" />
 	</Type>

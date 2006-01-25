@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <xsd:schema id="TypeInfo"
-	xmlns:tns="urn:schemas-bltoolkit-net:typeinfo"
+	xmlns:tns="urn:schemas-bltoolkit-net:typeext"
 	xmlns:xsd="http://www.w3.org/2001/XMLSchema"
-	targetNamespace="urn:schemas-bltoolkit-net:typeinfo">
+	targetNamespace="urn:schemas-bltoolkit-net:typeext">
 	
 	<xsd:element name="Types" type="tns:Types" />
 

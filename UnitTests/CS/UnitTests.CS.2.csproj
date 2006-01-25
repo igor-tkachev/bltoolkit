@@ -36,6 +36,7 @@
   <ItemGroup>
     <Compile Include="Aspects\InterceptorAspectTest.cs" />
     <Compile Include="Aspects\NotNullAspectTest.cs" />
+    <Compile Include="DataAccess\CreateEntityTest.cs" />
     <Compile Include="DataAccess\DataAccessorTest.cs" />
     <Compile Include="DataAccess\PersonDataSet2.cs">
       <DependentUpon>PersonDataSet2.xsd</DependentUpon>

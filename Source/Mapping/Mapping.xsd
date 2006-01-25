@@ -4,7 +4,9 @@
 	xmlns:xsd="http://www.w3.org/2001/XMLSchema"
 	targetNamespace="urn:schemas-bltoolkit-net:mapping">
 
+	<xsd:attribute name="MapField"      type="xsd:string" />
 	<xsd:attribute name="MapIgnore"     type="xsd:boolean" />
+	<xsd:attribute name="IsTrimmable"   type="xsd:boolean" />
 	<xsd:attribute name="MapValue"      type="xsd:string" />
 	<xsd:attribute name="MapValueType"  type="xsd:string" />
 

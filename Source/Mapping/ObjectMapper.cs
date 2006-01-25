@@ -4,7 +4,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 
 using BLToolkit.Reflection;
-using BLToolkit.TypeInfo;
+using BLToolkit.Reflection.Extension;
 
 namespace BLToolkit.Mapping
 {
@@ -89,11 +89,11 @@ namespace BLToolkit.Mapping
 			get { return (MemberMapper)_members[index]; }
 		}
 
-		private BLToolkit.TypeInfo.TypeInfo _typeInfo;
-		public  BLToolkit.TypeInfo.TypeInfo  TypeInfo
+		private TypeExtension _extension;
+		public  TypeExtension  Extension
 		{
-			get { return _typeInfo;  }
-			set { _typeInfo = value; }
+			get { return _extension;  }
+			set { _extension = value; }
 		}
 
 		private Hashtable _nameToMember;
@@ -162,8 +162,9 @@ namespace BLToolkit.Mapping
 			if (type == null) throw new ArgumentNullException("type");
 
 			_typeAccessor  = TypeAccessor.GetAccessor(type);
-			_typeInfo      = TypeInfoReader.GetTypeInfo(_typeAccessor.OriginalType, mappingSchema.TypeInfo);
 			_mappingSchema = mappingSchema;
+			_extension     = TypeExtension.GetTypeExtenstion(
+				_typeAccessor.OriginalType, mappingSchema.Extensions);
 
 			foreach (MemberAccessor ma in _typeAccessor)
 			{
@@ -172,14 +173,15 @@ namespace BLToolkit.Mapping
 
 				MapMemberInfo mi = new MapMemberInfo();
 
-				mi.MemberAccessor = ma;
-				mi.MappingSchema  = mappingSchema;
-				mi.Name           = GetFieldName   (ma);
-				mi.IsTrimmable    = GetIsTrimmable (ma);
-				mi.MapValues      = GetMapValues   (ma);
-				mi.DefaultValue   = GetDefaultValue(ma);
-				mi.IsNullable     = GetIsNullable  (ma);
-				mi.NullValue      = GetNullValue   (ma, mi.IsNullable);
+				mi.MemberAccessor  = ma;
+				mi.MappingSchema   = mappingSchema;
+				mi.MemberExtension = _extension[ma.Name];
+				mi.Name            = GetFieldName   (ma);
+				mi.IsTrimmable     = GetIsTrimmable (ma);
+				mi.MapValues       = GetMapValues   (ma);
+				mi.DefaultValue    = GetDefaultValue(ma);
+				mi.IsNullable      = GetIsNullable  (ma);
+				mi.NullValue       = GetNullValue   (ma, mi.IsNullable);
 
 				Add(CreateMemberMapper(mi));
 			}
@@ -267,6 +269,11 @@ namespace BLToolkit.Mapping
 
 		protected virtual string GetFieldName(MemberAccessor memberAccessor)
 		{
+			object extValue = Extension[memberAccessor.Name]["MapField"].Value;
+
+			if (extValue != null)
+				return extValue.ToString();
+
 			MapFieldAttribute a = (MapFieldAttribute)memberAccessor.GetAttribute(typeof(MapFieldAttribute));
 
 			if (a != null)
@@ -283,6 +290,11 @@ namespace BLToolkit.Mapping
 
 		protected virtual bool GetIgnore(MemberAccessor memberAccessor)
 		{
+			object extValue = Extension[memberAccessor.Name]["MapIgnore"].Value;
+
+			if (extValue != null)
+				return TypeExtension.ToBoolean(extValue);
+
 			MapIgnoreAttribute attr = 
 				(MapIgnoreAttribute)memberAccessor.GetAttribute(typeof(MapIgnoreAttribute));
 
@@ -298,6 +310,11 @@ namespace BLToolkit.Mapping
 		{
 			if (memberAccessor.Type != typeof(string))
 				return false;
+
+			object extValue = Extension[memberAccessor.Name]["IsTrimmable"].Value;
+
+			if (extValue != null)
+				return TypeExtension.ToBoolean(extValue);
 
 			TrimmableAttribute attr = 
 				(TrimmableAttribute)memberAccessor.GetAttribute(typeof(TrimmableAttribute));
@@ -316,6 +333,15 @@ namespace BLToolkit.Mapping
 
 		protected virtual MapValue[] GetMapValues(MemberAccessor memberAccessor)
 		{
+			/*
+			ValueCollection values = Extension[memberAccessor.Name]["MapValue"].Values;
+
+			if (values.Count > 0)
+			{
+				return TypeExtension.ToBoolean(extValue);
+			}
+			*/
+
 			ArrayList list  = null;
 			object[]  attrs = memberAccessor.GetAttributes(typeof(MapValueAttribute));
 

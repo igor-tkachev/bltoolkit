@@ -8,7 +8,7 @@ using System.Collections.Generic;
 #endif
 
 using BLToolkit.Reflection;
-using BLToolkit.TypeInfo;
+using BLToolkit.Reflection.Extension;
 
 namespace BLToolkit.Mapping
 {
@@ -71,11 +71,11 @@ namespace BLToolkit.Mapping
 
 		#region Public Members
 
-		private TypeInfoCollection _typeInfo;
-		public  TypeInfoCollection  TypeInfo
+		private ExtensionList _extensions;
+		public  ExtensionList  Extensions
 		{
-			get { return _typeInfo;  }
-			set { _typeInfo = value; }
+			get { return _extensions;  }
+			set { _extensions = value; }
 		}
 	
 		#endregion
@@ -181,11 +181,12 @@ namespace BLToolkit.Mapping
 
 		const FieldAttributes EnumField = FieldAttributes.Public | FieldAttributes.Static | FieldAttributes.Literal;
 
-		private static ArrayList GetEnumMapValues(Type type)
+		private ArrayList GetEnumMapValues(Type type)
 		{
 			ArrayList mapValues = null;
 
-			FieldInfo[] fields = type.GetFields();
+			TypeExtension typeExt = TypeExtension.GetTypeExtenstion(type, Extensions);
+			FieldInfo[]   fields  = type.GetFields();
 
 			foreach (FieldInfo fi in fields)
 			{

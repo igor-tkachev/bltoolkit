@@ -125,7 +125,8 @@
     <Compile Include="Mapping\MapResultSet.cs" />
     <Compile Include="Mapping\MapValue.cs" />
     <Compile Include="Mapping\MapValueAttribute.cs" />
-    <Compile Include="TypeInfo\TypeInfoAttribute.cs" />
+    <Compile Include="Reflection\Extension\TypeExtensionException.cs" />
+    <Compile Include="Reflection\Extension\TypeExtensionAttribute.cs" />
     <Compile Include="Mapping\MemberMapperAttribute.cs" />
     <Compile Include="Mapping\NullableAttribute.cs" />
     <Compile Include="Mapping\NullValueAttribute.cs" />
@@ -192,15 +193,13 @@
     <Compile Include="Reflection\TypeAccessor.cs" />
     <Compile Include="TypeBuilder\Builders\TypeBuilderAttribute.cs" />
     <Compile Include="TypeBuilder\TypeFactory.cs" />
-    <Compile Include="TypeInfo\AttributeInfoCollection.cs" />
-    <Compile Include="TypeInfo\ValueCollection.cs" />
-    <Compile Include="TypeInfo\MemberInfoCollection.cs" />
-    <Compile Include="TypeInfo\TypeInfoException.cs" />
-    <Compile Include="TypeInfo\TypeInfo.cs" />
-    <Compile Include="TypeInfo\TypeInfoCollection.cs" />
-    <Compile Include="TypeInfo\TypeInfoReader.cs" />
-    <Compile Include="TypeInfo\AttributeInfo.cs" />
-    <Compile Include="TypeInfo\MemberInfo.cs" />
+    <Compile Include="Reflection\Extension\AttributeInfoCollection.cs" />
+    <Compile Include="Reflection\Extension\ValueCollection.cs" />
+    <Compile Include="Reflection\Extension\MemberExtensionCollection.cs" />
+    <Compile Include="Reflection\Extension\TypeExtension.cs" />
+    <Compile Include="Reflection\Extension\ExtensionList.cs" />
+    <Compile Include="Reflection\Extension\AttributeExtension.cs" />
+    <Compile Include="Reflection\Extension\MemberExtension.cs" />
     <Compile Include="Validation\FriendlyNameAttribute.cs" />
     <Compile Include="Validation\MaxDateValueAttribute.cs" />
     <Compile Include="Validation\MaxLengthAttribute.cs" />
@@ -243,15 +242,15 @@
     <None Include="Mapping\Mapping.xsx">
       <DependentUpon>Mapping.xsd</DependentUpon>
     </None>
-    <EmbeddedResource Include="TypeInfo\TypeInfo.xsd">
+    <EmbeddedResource Include="Reflection\Extension\TypeExtension.xsd">
       <SubType>Designer</SubType>
     </EmbeddedResource>
-    <None Include="TypeInfo\TypeInfo.xsx">
-      <DependentUpon>TypeInfo.xsd</DependentUpon>
+    <None Include="Reflection\Extension\TypeExtension.xsx">
+      <DependentUpon>TypeExtension.xsd</DependentUpon>
     </None>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="TypeInfo\Test.xml" />
+    <Content Include="Reflection\Extension\Test.xml" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>

@@ -6,6 +6,7 @@ using System.Collections.Generic;
 #endif
 
 using BLToolkit.Reflection;
+using BLToolkit.Reflection.Extension;
 
 namespace BLToolkit.Mapping
 {
@@ -18,6 +19,12 @@ namespace BLToolkit.Mapping
 		{
 			get { return _defaultSchema;  }
 			set { _defaultSchema = value; }
+		}
+
+		public static ExtensionList Extensions
+		{
+			get { return _defaultSchema.Extensions;  }
+			set { _defaultSchema.Extensions = value; }
 		}
 
 		public static ObjectMapper GetObjectMapper(Type type)

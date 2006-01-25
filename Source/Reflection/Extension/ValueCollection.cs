@@ -1,20 +1,20 @@
 using System;
 using System.Collections;
 
-namespace BLToolkit.TypeInfo
+namespace BLToolkit.Reflection
 {
 	public class ValueCollection : ICollection
 	{
-		public string Value
+		public object Value
 		{
 			get { return this[0]; }
 		}
 
-		public string this[int index]
+		public object this[int index]
 		{
 			get
 			{
-				return index < 0 || index >= _values.Count? null: (string)_values[index];
+				return _isNull || index < 0 || index >= _values.Count? null: _values[index];
 			}
 		}
 
