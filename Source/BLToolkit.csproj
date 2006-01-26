@@ -557,7 +557,12 @@
                     BuildAction = "Compile"
                 />
                 <File
-                    RelPath = "Reflection\Extension\AttributeInfoCollection.cs"
+                    RelPath = "Reflection\Extension\AttributeExtensionCollection.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "Reflection\Extension\AttributeNameCollection.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
                 />

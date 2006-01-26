@@ -10,10 +10,16 @@ namespace BLToolkit.Reflection.Extension
 	{
 		#region Public Instance Members
 
-		static TypeExtension()
+		public TypeExtension()
 		{
-			_null._members.   _isNull = true;
-			_null._attributes._isNull = true;
+			_members    = new MemberExtensionCollection();
+			_attributes = new AttributeNameCollection();
+		}
+
+		private TypeExtension(int i)
+		{
+			_members    = MemberExtensionCollection.Null;
+			_attributes = AttributeNameCollection.  Null;
 		}
 
 		private string _name;
@@ -28,19 +34,19 @@ namespace BLToolkit.Reflection.Extension
 			get { return _members[memberName]; }
 		}
 
-		private MemberExtensionCollection _members = new MemberExtensionCollection();
+		private MemberExtensionCollection _members;
 		public  MemberExtensionCollection  Members
 		{
 			get { return _members; }
 		}
 
-		private AttributeExtensionCollection _attributes = new AttributeExtensionCollection();
-		public  AttributeExtensionCollection  Attributes
+		private AttributeNameCollection _attributes;
+		public  AttributeNameCollection  Attributes
 		{
 			get { return _attributes; }
 		}
 
-		private static TypeExtension _null = new TypeExtension();
+		private static TypeExtension _null = new TypeExtension(0);
 		public  static TypeExtension  Null
 		{
 			get { return _null; }
@@ -49,6 +55,14 @@ namespace BLToolkit.Reflection.Extension
 		#endregion
 
 		#region Conversion
+
+		public static bool ToBoolean(object value,  bool defaultValue)
+		{
+			if (value == null)
+				return defaultValue;
+
+			return ToBoolean(value);
+		}
 
 		public static bool ToBoolean(object value)
 		{
@@ -59,8 +73,16 @@ namespace BLToolkit.Reflection.Extension
 
 				string s = value as string;
 
-				if (s != null && (s == "1" || s.ToLower() == "true"))
-					return true;
+				if (s != null)
+				{
+					if (s == "1")
+						return true;
+
+					s = s.ToLower();
+
+					if (s == "true" || s == "yes")
+						return true;
+				}
 
 				return Convert.ToBoolean(value);
 			}

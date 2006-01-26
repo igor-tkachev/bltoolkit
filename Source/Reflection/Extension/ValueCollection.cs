@@ -12,20 +12,37 @@ namespace BLToolkit.Reflection
 
 		public object this[int index]
 		{
-			get
-			{
-				return _isNull || index < 0 || index >= _values.Count? null: _values[index];
-			}
+			get { return this == _null || index < 0 || index >= _values.Count? null: _values[index]; }
+		}
+
+		public object this[string name]
+		{
+			get { return _namedValues[name]; }
 		}
 
 		public void Add(string value)
 		{
-			if (!_isNull)
+			if (this != _null)
 				_values.Add(value);
 		}
 
-		private  ArrayList _values = new ArrayList();
-		internal bool      _isNull;
+		public void Add(string name, string value)
+		{
+			if (this != _null)
+			{
+				_values.Add(value);
+				_namedValues[name] = value;
+			}
+		}
+
+		private ArrayList _values      = new ArrayList();
+		private Hashtable _namedValues = new Hashtable();
+
+		private static ValueCollection _null = new ValueCollection();
+		public  static ValueCollection  Null
+		{
+			get { return _null;  }
+		}
 
 		#region ICollection Members
 
