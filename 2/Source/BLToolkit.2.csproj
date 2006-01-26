@@ -125,6 +125,7 @@
     <Compile Include="Mapping\MapResultSet.cs" />
     <Compile Include="Mapping\MapValue.cs" />
     <Compile Include="Mapping\MapValueAttribute.cs" />
+    <Compile Include="Reflection\Extension\AttributeNameCollection.cs" />
     <Compile Include="Reflection\Extension\TypeExtensionException.cs" />
     <Compile Include="Reflection\Extension\TypeExtensionAttribute.cs" />
     <Compile Include="Mapping\MemberMapperAttribute.cs" />
@@ -193,7 +194,7 @@
     <Compile Include="Reflection\TypeAccessor.cs" />
     <Compile Include="TypeBuilder\Builders\TypeBuilderAttribute.cs" />
     <Compile Include="TypeBuilder\TypeFactory.cs" />
-    <Compile Include="Reflection\Extension\AttributeInfoCollection.cs" />
+    <Compile Include="Reflection\Extension\AttributeExtensionCollection.cs" />
     <Compile Include="Reflection\Extension\ValueCollection.cs" />
     <Compile Include="Reflection\Extension\MemberExtensionCollection.cs" />
     <Compile Include="Reflection\Extension\TypeExtension.cs" />

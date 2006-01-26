@@ -9,7 +9,7 @@ namespace BLToolkit.Reflection.Extension
 		{
 			get
 			{
-				if (_isNull)
+				if (this == _null)
 					return MemberExtension.Null;
 
 				MemberExtension value = (MemberExtension)_members[memberName];
@@ -19,12 +19,17 @@ namespace BLToolkit.Reflection.Extension
 
 		public void Add(MemberExtension memberInfo)
 		{
-			if (!_isNull)
+			if (this != _null)
 				_members[memberInfo.Name] = memberInfo;
 		}
 
-		private  Hashtable _members = new Hashtable();
-		internal bool      _isNull;
+		private Hashtable _members = new Hashtable();
+
+		private static MemberExtensionCollection _null = new MemberExtensionCollection();
+		public  static MemberExtensionCollection  Null
+		{
+			get { return _null; }
+		}
 
 		#region ICollection Members
 

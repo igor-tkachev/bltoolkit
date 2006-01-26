@@ -700,6 +700,9 @@ namespace BLToolkit.Data
 			//
 			IDbDataParameter[] commandParameters = GetSpParameters(spName, true);
 
+			if (parameterValues == null || parameterValues.Length == 0)
+				return commandParameters;
+
 			if (commandParameters == null)
 			{
 				commandParameters = new IDbDataParameter[parameterValues.Length];
@@ -1799,26 +1802,29 @@ namespace BLToolkit.Data
 			string          spName,
 			params object[] parameterValues)
 		{
-			// If we receive parameter values, we need to figure out where they go.
+			// http://rsdn.ru/?forum/message.1613538.aspx
 			//
-			if (parameterValues != null && parameterValues.Length > 0)
-			{
+
+			//// If we receive parameter values, we need to figure out where they go.
+			////
+			//if (parameterValues != null && parameterValues.Length > 0)
+			//{
 				return SetCommand(
 					commandAction,
 					CommandType.StoredProcedure,
 					spName,
 					CreateSpParameters(spName, parameterValues));
-			}
-			// Otherwise we can just call the SP without params.
-			//
-			else 
-			{
-				return SetCommand(
-					commandAction,
-					CommandType.StoredProcedure,
-					spName,
-					(IDbDataParameter[])null);
-			}
+			//}
+			//// Otherwise we can just call the SP without params.
+			////
+			//else 
+			//{
+			//    return SetCommand(
+			//        commandAction,
+			//        CommandType.StoredProcedure,
+			//        spName,
+			//        (IDbDataParameter[])null);
+			//}
 		}
 
 		#region Select

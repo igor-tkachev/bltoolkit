@@ -5,26 +5,33 @@ namespace BLToolkit.Reflection.Extension
 {
 	public class AttributeExtensionCollection : ICollection
 	{
-		public AttributeExtension this[string attributeName]
+		public AttributeExtension this[int index]
 		{
 			get
 			{
-				if (_isNull)
-					return AttributeExtension.Null;
-
-				AttributeExtension value = (AttributeExtension)_attributes[attributeName];
-				return value != null? value: AttributeExtension.Null;
+				return this == _null || index < 0 || index >= _attributes.Count?
+					AttributeExtension.Null: (AttributeExtension)_attributes[index];
 			}
 		}
 
-		public void Add(AttributeExtension memberExtension)
+		public object Value
 		{
-			if (!_isNull)
-				_attributes[memberExtension.Name] = memberExtension;
+			get { return this == _null? null: this[0].Value; }
 		}
 
-		private  Hashtable _attributes = new Hashtable();
-		internal bool      _isNull;
+		internal void Add(AttributeExtension attributeExtension)
+		{
+			if (this != _null)
+				_attributes.Add(attributeExtension);
+		}
+
+		private ArrayList _attributes = new ArrayList();
+
+		private static AttributeExtensionCollection _null = new AttributeExtensionCollection();
+		public  static AttributeExtensionCollection  Null
+		{
+			get { return _null;  }
+		}
 
 		#region ICollection Members
 
@@ -54,7 +61,7 @@ namespace BLToolkit.Reflection.Extension
 
 		public IEnumerator GetEnumerator()
 		{
-			return _attributes.Values.GetEnumerator();
+			return _attributes.GetEnumerator();
 		}
 
 		#endregion

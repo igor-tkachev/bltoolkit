@@ -7,9 +7,14 @@ namespace BLToolkit.Reflection.Extension
 {
 	public class MemberExtension
 	{
-		static MemberExtension()
+		public MemberExtension()
 		{
-			_null._attributes._isNull = true;
+			_attributes = new AttributeNameCollection();
+		}
+
+		private MemberExtension(int i)
+		{
+			_attributes = AttributeNameCollection.Null;
 		}
 
 		private string _name;
@@ -19,18 +24,18 @@ namespace BLToolkit.Reflection.Extension
 			set { _name = value; }
 		}
 
-		public AttributeExtension this[string attributeName]
+		public AttributeExtensionCollection this[string attributeName]
 		{
 			get { return _attributes[attributeName]; }
 		}
 
-		private AttributeExtensionCollection _attributes = new AttributeExtensionCollection();
-		public  AttributeExtensionCollection  Attributes
+		private AttributeNameCollection _attributes;
+		public  AttributeNameCollection  Attributes
 		{
 			get { return _attributes; }
 		}
 
-		private static MemberExtension _null = new MemberExtension();
+		private static MemberExtension _null = new MemberExtension(0);
 		public  static MemberExtension  Null
 		{
 			get { return _null; }

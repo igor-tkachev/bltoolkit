@@ -5,9 +5,14 @@ namespace BLToolkit.Reflection.Extension
 {
 	public class AttributeExtension
 	{
-		static AttributeExtension()
+		public AttributeExtension()
 		{
-			_null._values._isNull = true;
+			_values = new ValueCollection();
+		}
+
+		private AttributeExtension(int i)
+		{
+			_values = ValueCollection.Null;
 		}
 
 		private string _name;
@@ -19,16 +24,16 @@ namespace BLToolkit.Reflection.Extension
 
 		public object Value
 		{
-			get { return _values.Value; }
+			get { return this == _null? null: _values.Value; }
 		}
 
-		private ValueCollection _values = new ValueCollection();
+		private ValueCollection _values;
 		public  ValueCollection  Values
 		{
 			get { return _values; }
 		}
 
-		private static AttributeExtension _null = new AttributeExtension();
+		private static AttributeExtension _null = new AttributeExtension(0);
 		public  static AttributeExtension  Null
 		{
 			get { return _null;  }
