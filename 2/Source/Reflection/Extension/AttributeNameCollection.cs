@@ -12,24 +12,107 @@ namespace BLToolkit.Reflection.Extension
 				if (this == _null)
 					return AttributeExtensionCollection.Null;
 
-				AttributeExtensionCollection value =
+				AttributeExtensionCollection ext =
 					(AttributeExtensionCollection)_attributes[attributeName];
 
-				return value != null? value: AttributeExtensionCollection.Null;
+				return ext != null? ext: AttributeExtensionCollection.Null;
 			}
 		}
 
-		public void Add(AttributeExtension memberExtension)
+		public void Add(AttributeExtension attributeExtension)
 		{
 			if (this != _null)
 			{
+				// Add attribute.
+				//
 				AttributeExtensionCollection attr =
-					(AttributeExtensionCollection)_attributes[memberExtension.Name];
+					(AttributeExtensionCollection)_attributes[attributeExtension.Name];
 
 				if (attr == null)
-					_attributes[memberExtension.Name] = attr = new AttributeExtensionCollection();
+					_attributes[attributeExtension.Name] = attr = new AttributeExtensionCollection();
 
-				attr.Add(memberExtension);
+				attr.Add(attributeExtension);
+
+				/*
+				// Convert value type.
+				//
+				bool isType = attributeExtension.Name.EndsWith(TypeExtension.AttrName.TypePostfix);
+
+				if (isType)
+				{
+					string attrName = attributeExtension.Name.Substring(
+						0, attributeExtension.Name.Length - 5);
+
+					AttributeExtensionCollection ext =
+						(AttributeExtensionCollection)_attributes[attrName];
+
+					if (ext != null && ext.Count == 1)
+						ext[0].Values.ChangeValueType(attributeExtension.Value.ToString());
+				}
+				else
+				{
+					string attrName = attributeExtension.Name + TypeExtension.AttrName.TypePostfix;
+
+					AttributeExtensionCollection ext =
+						(AttributeExtensionCollection)_attributes[attrName];
+
+					if (ext != null && ext.Count == 1)
+						attributeExtension.Values.ChangeValueType(ext.Value.ToString());
+				}
+				*/
+			}
+		}
+
+		[Obsolete]
+		public void Add(string attributeName, string valueName, string value)
+		{
+			if (this != _null)
+			{
+				AttributeExtension attributeExtension = new AttributeExtension();
+
+				attributeExtension.Name = attributeName;
+				attributeExtension.Values.Add(valueName, value);
+
+				Add(attributeExtension);
+			}
+		}
+
+		public void Add(string name, string value)
+		{
+			if (this != _null)
+			{
+				string attrName  = name;
+				string valueName = string.Empty;
+
+				int idx = name.IndexOf(TypeExtension.ValueName.Delimiter);
+
+				if (idx > 0)
+				{
+					valueName = name.Substring(idx + 1).TrimStart(TypeExtension.ValueName.Delimiter);
+					attrName  = name.Substring(0, idx);
+				}
+
+				if (valueName.Length == 0)
+					valueName = TypeExtension.ValueName.Value;
+				else if (valueName == TypeExtension.ValueName.Type)
+					valueName = TypeExtension.ValueName.ValueType;
+
+				AttributeExtensionCollection ext =
+					(AttributeExtensionCollection)_attributes[name];
+
+				if (ext != null)
+				{
+					ext[0].Values.Add(valueName, value);
+				}
+				else
+				{
+					AttributeExtension attributeExtension = new AttributeExtension();
+
+					attributeExtension.Name = name;
+					attributeExtension.Values.Add(valueName, value);
+
+					Add(attributeExtension);
+				}
 			}
 		}
 

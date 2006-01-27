@@ -27,6 +27,11 @@ namespace BLToolkit.Reflection.Extension
 			get { return this == _null? null: _values.Value; }
 		}
 
+		public object this[string valueName]
+		{
+			get { return this == _null? null: _values[valueName]; }
+		}
+
 		private ValueCollection _values;
 		public  ValueCollection  Values
 		{

@@ -3111,7 +3111,8 @@ namespace BLToolkit.Reflection.Emit
 			if (type == null) throw new ArgumentNullException("type");
 
 			if      (type == typeof(string)) ldsfld(typeof(string).GetField("Empty")); // ldstr("").end();
-			else if (type.IsClass)           ldnull.   end();
+			else if (type.IsClass ||
+			         type.IsInterface)       ldnull.end();
 			else if (type == typeof(bool)   ||
 			         type == typeof(byte)   ||
 			         type == typeof(int)    ||

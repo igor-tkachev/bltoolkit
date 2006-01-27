@@ -1,42 +1,62 @@
 using System;
 using System.Collections;
 
-namespace BLToolkit.Reflection
+namespace BLToolkit.Reflection.Extension
 {
 	public class ValueCollection : ICollection
 	{
 		public object Value
 		{
-			get { return this[0]; }
-		}
-
-		public object this[int index]
-		{
-			get { return this == _null || index < 0 || index >= _values.Count? null: _values[index]; }
+			get { return _value; }
 		}
 
 		public object this[string name]
 		{
-			get { return _namedValues[name]; }
-		}
-
-		public void Add(string value)
-		{
-			if (this != _null)
-				_values.Add(value);
+			get { return _values[name]; }
 		}
 
 		public void Add(string name, string value)
 		{
 			if (this != _null)
 			{
-				_values.Add(value);
-				_namedValues[name] = value;
+				bool isType = name.EndsWith(TypeExtension.ValueName.TypePostfix);
+
+				if (isType)
+				{
+					Type   type      = Type.GetType(value, true);
+					string valueName =
+						name.Substring(0, name.Length - TypeExtension.ValueName.TypePostfix.Length);
+
+					_values[name] = type;
+
+					object val = _values[valueName];
+
+					if (val != null && val.GetType() != type)
+					{
+						_values[valueName] = val = TypeExtension.ChangeType(val.ToString(), type);
+
+						if (valueName == TypeExtension.ValueName.Value)
+							_value = val;
+					}
+				}
+				else
+				{
+					Type   type = (Type)_values[name + TypeExtension.ValueName.TypePostfix];
+					object val  = value;
+
+					if (type != null && type != _value.GetType())
+						val = TypeExtension.ChangeType(value, type);
+
+					_values[name] = val;
+
+					if (name == TypeExtension.ValueName.Value)
+						_value = val;
+				}
 			}
 		}
 
-		private ArrayList _values      = new ArrayList();
-		private Hashtable _namedValues = new Hashtable();
+		private object    _value;
+		private Hashtable _values = new Hashtable();
 
 		private static ValueCollection _null = new ValueCollection();
 		public  static ValueCollection  Null
@@ -48,7 +68,7 @@ namespace BLToolkit.Reflection
 
 		public void CopyTo(Array array, int index)
 		{
-			_values.CopyTo(array, index);
+			_values.Values.CopyTo(array, index);
 		}
 
 		public int Count
@@ -72,7 +92,7 @@ namespace BLToolkit.Reflection
 
 		public IEnumerator GetEnumerator()
 		{
-			return _values.GetEnumerator();
+			return _values.Values.GetEnumerator();
 		}
 
 		#endregion
