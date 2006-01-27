@@ -19,12 +19,16 @@ namespace A.TypeInfoTest
 			{
 				sw.WriteLine(@"<?xml version='1.0' encoding='utf-8' ?>
 <Types xmlns='urn:schemas-bltoolkit-net:typeinfo'>
-	<Type Name='Dest'>
-	</Type>
+    <Type Name='Dest'>
+    </Type>
     <Type Name='TriState'>
-        <Member Name='Yes'           MapValue='yes'   MapValueType='System.String' />
-        <Member Name='No'            MapValue='no'    MapValueType='System.String' />
-        <Member Name='NotApplicable' MapValue='(n/a)' MapValueType='System.String' />
+        <Member Name='Yes'           MapValue='yes'   MapValue-Type='System.String' />
+        <Member Name='No'>
+            <MapValue Value='no' Type='System.String' />
+            <MapValue Type='System.String'>N</MapValue>
+        </Member>
+        <Member Name='Maybe'         MapValue='xz'    MapValue-Type='System.String' />
+        <Member Name='NotApplicable' MapValue-Type='System.String' MapValue='(n/a)' />
     </Type>
 </Types>");
 			}

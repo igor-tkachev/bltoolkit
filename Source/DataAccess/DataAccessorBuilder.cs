@@ -54,7 +54,11 @@ namespace BLToolkit.DataAccess
 			//
 			Type returnType = Context.CurrentMethod.ReturnType;
 
-			if (returnType == typeof(DataSet) || returnType.IsSubclassOf(typeof(DataSet)))
+			if (returnType == typeof(IDataReader))
+			{
+				ExecuteReader();
+			}
+			else if (returnType == typeof(DataSet) || returnType.IsSubclassOf(typeof(DataSet)))
 			{
 				ExecuteDataSet();
 			}
@@ -160,6 +164,20 @@ namespace BLToolkit.DataAccess
 
 			if (attrs.Length != 0)
 				_objectType = ((ObjectTypeAttribute)attrs[0]).ObjectType;
+		}
+
+		private void ExecuteReader()
+		{
+			InitObjectType();
+			GetSprocName();
+			CallSetCommand();
+
+			MethodInfo mi = typeof(DbManager).GetMethod("ExecuteReader", Type.EmptyTypes);
+
+			Context.MethodBuilder.Emitter
+				.callvirt(mi)
+				.stloc(Context.ReturnValue)
+				;
 		}
 
 		private void ExecuteDataSet()

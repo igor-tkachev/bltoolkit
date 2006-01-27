@@ -8,6 +8,36 @@ namespace BLToolkit.Reflection.Extension
 {
 	public class TypeExtension
 	{
+		#region Consts
+
+		public sealed class NodeName
+		{
+			private NodeName() {}
+
+			public const string Type   = "Type";
+			public const string Member = "Member";
+		}
+
+		public sealed class AttrName
+		{
+			private AttrName() {}
+
+			public const string Name        = "Name";
+		}
+
+		public sealed class ValueName
+		{
+			private ValueName() {}
+
+			public const char   Delimiter   = '-';
+			public const string Value       = "Value";
+			public const string Type        = "Type";
+			public const string ValueType   = "Value-Type";
+			public const string TypePostfix = "-Type";
+		}
+
+		#endregion
+
 		#region Public Instance Members
 
 		public TypeExtension()
@@ -88,6 +118,17 @@ namespace BLToolkit.Reflection.Extension
 			}
 
 			return false;
+		}
+
+		public static object ChangeType(string value, Type type)
+		{
+			if (type == typeof(string))
+				return value;
+
+			if (type == typeof(bool))
+				ToBoolean(value);
+
+			return Convert.ChangeType(value, type);
 		}
 
 		#endregion
@@ -173,15 +214,8 @@ namespace BLToolkit.Reflection.Extension
 			ExtensionList list = new ExtensionList();
 
 			foreach (XmlNode typeNode in doc.DocumentElement.ChildNodes)
-			{
-				if (typeNode.Name == "Type")
-				{
-					TypeExtension ext = ParseType(typeNode);
-
-					if (ext != null)
-						list.Add(ext);
-				}
-			}
+				if (typeNode.Name == NodeName.Type)
+					list.Add(ParseType(typeNode));
 
 			return list;
 		}
@@ -190,40 +224,23 @@ namespace BLToolkit.Reflection.Extension
 		{
 			TypeExtension ext = new TypeExtension();
 
-			foreach (XmlNode node in typeNode.ChildNodes)
-			{
-				if (node.Name == "Member")
-				{
-					MemberExtension memberExt = ParseMember(node);
-
-					if (memberExt != null)
-						ext.Members.Add(memberExt);
-				}
-				else
-				{
-					AttributeExtension attributeInfo = ParseAttribute(node);
-
-					if (attributeInfo != null)
-						ext.Attributes.Add(attributeInfo);
-				}
-			}
-
 			if (typeNode.Attributes != null)
 			{
 				foreach (XmlAttribute attr in typeNode.Attributes)
 				{
-					if (attr.Name == "Name")
+					if (attr.Name == AttrName.Name)
 						ext.Name = attr.Value;
 					else
-					{
-						AttributeExtension attributeInfo = new AttributeExtension();
-
-						attributeInfo.Name = attr.Name;
-						attributeInfo.Values.Add(attr.Value);
-
-						ext.Attributes.Add(attributeInfo);
-					}
+						ext.Attributes.Add(attr.Name, attr.Value);
 				}
+			}
+
+			foreach (XmlNode node in typeNode.ChildNodes)
+			{
+				if (node.Name == NodeName.Member)
+					ext.Members.Add(ParseMember(node));
+				else
+					ext.Attributes.Add(ParseAttribute(node));
 			}
 
 			return ext;
@@ -233,31 +250,19 @@ namespace BLToolkit.Reflection.Extension
 		{
 			MemberExtension ext = new MemberExtension();
 
-			foreach (XmlNode node in memberNode.ChildNodes)
-			{
-				AttributeExtension attributeExt = ParseAttribute(node);
-
-				if (attributeExt != null)
-					ext.Attributes.Add(attributeExt);
-			}
-
 			if (memberNode.Attributes != null)
 			{
 				foreach (XmlAttribute attr in memberNode.Attributes)
 				{
-					if (attr.Name == "Name")
+					if (attr.Name == AttrName.Name)
 						ext.Name = attr.Value;
 					else
-					{
-						AttributeExtension attributeExt = new AttributeExtension();
-
-						attributeExt.Name = attr.Name;
-						attributeExt.Values.Add(attr.Value);
-
-						ext.Attributes.Add(attributeExt);
-					}
+						ext.Attributes.Add(attr.Name, attr.Value);
 				}
 			}
+
+			foreach (XmlNode node in memberNode.ChildNodes)
+				ext.Attributes.Add(ParseAttribute(node));
 
 			return ext;
 		}
@@ -266,23 +271,18 @@ namespace BLToolkit.Reflection.Extension
 		{
 			AttributeExtension ext = new AttributeExtension();
 
-			/*
-			foreach (XmlNode node in attributeNode.ChildNodes)
-			{
-			}
-			*/
+			ext.Name = attributeNode.Name;
 
 			if (attributeNode.Attributes != null)
 			{
+				ext.Values.Add(ValueName.Value, attributeNode.InnerText);
+
 				foreach (XmlAttribute attr in attributeNode.Attributes)
 				{
-					if (attr.Name == "Name")
-					{
-						ext.Name = attr.Value;
-					}
+					if (attr.Name == ValueName.Type)
+						ext.Values.Add(ValueName.ValueType, attr.Value);
 					else
-					{
-					}
+						ext.Values.Add(attr.Name, attr.Value);
 				}
 			}
 
