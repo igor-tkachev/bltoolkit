@@ -582,10 +582,6 @@
                     BuildAction = "Compile"
                 />
                 <File
-                    RelPath = "Reflection\Extension\Test.xml"
-                    BuildAction = "Content"
-                />
-                <File
                     RelPath = "Reflection\Extension\TypeExtension.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
