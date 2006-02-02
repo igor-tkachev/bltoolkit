@@ -397,8 +397,8 @@ namespace BLToolkit.DataAccess
 				object[] ax = ((MemberMapper)x).MemberAccessor.GetAttributes(typeof(PrimaryKeyAttribute));
 				object[] ay = ((MemberMapper)y).MemberAccessor.GetAttributes(typeof(PrimaryKeyAttribute));
 
-				int ix = ((PrimaryKeyAttribute)ax[0]).Index;
-				int iy = ((PrimaryKeyAttribute)ay[0]).Index;
+				int ix = ((PrimaryKeyAttribute)ax[0]).Order;
+				int iy = ((PrimaryKeyAttribute)ay[0]).Order;
 
 				return ix - iy;
 			}
