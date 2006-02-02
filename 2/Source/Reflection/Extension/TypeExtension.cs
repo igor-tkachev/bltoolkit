@@ -120,13 +120,16 @@ namespace BLToolkit.Reflection.Extension
 			return false;
 		}
 
-		public static object ChangeType(string value, Type type)
+		public static object ChangeType(object value, Type type)
 		{
-			if (type == typeof(string))
+			if (value == null || type == value.GetType())
 				return value;
 
+			if (type == typeof(string))
+				return value.ToString();
+
 			if (type == typeof(bool))
-				ToBoolean(value);
+				return ToBoolean(value);
 
 			return Convert.ChangeType(value, type);
 		}

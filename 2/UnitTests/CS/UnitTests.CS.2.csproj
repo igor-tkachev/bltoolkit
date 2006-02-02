@@ -82,7 +82,7 @@
     <Compile Include="TypeBuilder\ParameterAttributeTest.cs" />
     <Compile Include="TypeBuilder\Builders\PropertyChangeBuilderTest.cs" />
     <Compile Include="TypeBuilder\TypeFactoryTest.cs" />
-    <Compile Include="TypeInfo\TypeInfoReaderTest.cs" />
+    <Compile Include="Reflection\Extension\ExtensionTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Source\BLToolkit.2.csproj">

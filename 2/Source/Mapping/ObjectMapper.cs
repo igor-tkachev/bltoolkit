@@ -57,7 +57,7 @@ namespace BLToolkit.Mapping
 		}
 
 		[SuppressMessage("Microsoft.Performance", "CA1807:AvoidUnnecessaryStringCreation", MessageId = "stack1")]
-		protected void Add(MemberMapper memberMapper)
+		protected virtual void Add(MemberMapper memberMapper)
 		{
 			if (memberMapper == null) throw new ArgumentNullException("memberMapper");
 
@@ -331,19 +331,44 @@ namespace BLToolkit.Mapping
 			return TrimmableAttribute.Default.IsTrimmable;
 		}
 
+		private ArrayList GetExtensionMapValues(MemberAccessor memberAccessor)
+		{
+			AttributeExtensionCollection extList = Extension[memberAccessor.Name]["MapValue"];
+
+			ArrayList list = null;
+
+			if (extList == AttributeExtensionCollection.Null)
+			{
+				if (memberAccessor.Type.IsEnum)
+					list = MappingSchema.GetEnumMapValuesFromExtension(Extension, memberAccessor.Type);
+
+				return list != null? list: MappingSchema.GetExtensionMapValues(Extension, memberAccessor.Type);
+			}
+
+			list = new ArrayList(extList.Count);
+
+			foreach (AttributeExtension ext in extList)
+			{
+				object origValue = ext["OrigValue"];
+
+				if (origValue != null)
+				{
+					origValue = TypeExtension.ChangeType(origValue, memberAccessor.Type);
+					list.Add(new MapValue(origValue, ext.Value));
+				}
+			}
+
+			return list;
+		}
+
 		protected virtual MapValue[] GetMapValues(MemberAccessor memberAccessor)
 		{
-			/*
-			ValueCollection values = Extension[memberAccessor.Name]["MapValue"].Values;
+			ArrayList list = GetExtensionMapValues(memberAccessor);
 
-			if (values.Count > 0)
-			{
-				return TypeExtension.ToBoolean(extValue);
-			}
-			*/
+			if (list != null)
+				return (MapValue[])list.ToArray(typeof(MapValue));
 
-			ArrayList list  = null;
-			object[]  attrs = memberAccessor.GetAttributes(typeof(MapValueAttribute));
+			object[] attrs = memberAccessor.GetAttributes(typeof(MapValueAttribute));
 
 			if (attrs != null)
 			{
@@ -376,8 +401,23 @@ namespace BLToolkit.Mapping
 			return (MapValue[])list.ToArray(typeof(MapValue));
 		}
 
+		private object GetExtensionDefaultValue(MemberAccessor memberAccessor)
+		{
+			object value = Extension[memberAccessor.Name]["DefaultValue"].Value;
+
+			if (value == null)
+				value = MappingSchema.GetExtensionDefaultValue(Extension, memberAccessor.Type);
+
+			return TypeExtension.ChangeType(value, memberAccessor.Type);
+		}
+
 		protected virtual object GetDefaultValue(MemberAccessor memberAccessor)
 		{
+			object value = GetExtensionDefaultValue(memberAccessor);
+
+			if (value != null)
+				return value;
+
 			// Check member [DefaultValue(0)]
 			//
 			DefaultValueAttribute attr =

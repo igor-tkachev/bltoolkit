@@ -7,18 +7,18 @@ namespace BLToolkit.DataAccess
 	{
 		public PrimaryKeyAttribute()
 		{
-			_index = -1;
+			_order = -1;
 		}
 
-		public PrimaryKeyAttribute(int index)
+		public PrimaryKeyAttribute(int order)
 		{
-			_index = index;
+			_order = order;
 		}
 
-		private int _index;
-		public  int  Index
+		private int _order;
+		public  int  Order
 		{
-			get { return _index; }
+			get { return _order; }
 		}
 	}
 }
