@@ -36,8 +36,8 @@ namespace BLToolkit.Mapping
 			{
 				mm = GetNullableMemberMapper(mi);
 
-				if (mm != null)
-					mi.IsNullable = true;
+				//if (mm != null)
+				//    mi.IsNullable = true;
 			}
 #endif
 

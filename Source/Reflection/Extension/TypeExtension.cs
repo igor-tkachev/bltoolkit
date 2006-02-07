@@ -131,6 +131,12 @@ namespace BLToolkit.Reflection.Extension
 			if (type == typeof(bool))
 				return ToBoolean(value);
 
+			if (type.IsEnum)
+			{
+				if (value is string)
+					return Enum.Parse(type, value.ToString());
+			}
+
 			return Convert.ChangeType(value, type);
 		}
 

@@ -7,7 +7,7 @@ using BLToolkit.Mapping;
 using BLToolkit.Reflection;
 using BLToolkit.Reflection.Extension;
 
-namespace A.Reflection.Extension
+namespace Reflection.Extension
 {
 	[TestFixture]
 	public class ExtensionTestTest
@@ -15,6 +15,8 @@ namespace A.Reflection.Extension
 		[SetUp]
 		public void SetUp()
 		{
+			Map.DefaultSchema = new MappingSchema();
+
 			using (StreamWriter sw = File.CreateText("Mapping.xml"))
 			{
 				sw.WriteLine(@"<?xml version='1.0' encoding='utf-8' ?>
