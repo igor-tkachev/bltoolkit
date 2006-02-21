@@ -311,7 +311,7 @@ namespace BLToolkit.Mapping
 			if (memberAccessor.Type != typeof(string))
 				return false;
 
-			object extValue = Extension[memberAccessor.Name]["IsTrimmable"].Value;
+			object extValue = Extension[memberAccessor.Name]["Trimmable"].Value;
 
 			if (extValue != null)
 				return TypeExtension.ToBoolean(extValue);
@@ -438,8 +438,32 @@ namespace BLToolkit.Mapping
 			return _mappingSchema.GetDefaultValue(memberAccessor.Type);
 		}
 
+		private object GetExtensionIsNullable(MemberAccessor memberAccessor)
+		{
+			object value = Extension[memberAccessor.Name]["Nullable"].Value;
+
+			if (value != null)
+				return TypeExtension.ToBoolean(value);
+
+			value = Extension[memberAccessor.Name]["NullValue"].Value;
+
+			return value != null;
+		}
+
 		protected virtual bool GetIsNullable(MemberAccessor memberAccessor)
 		{
+			// Check extension <Member1 Nullable='true' />
+			//
+			object value = Extension[memberAccessor.Name]["Nullable"].Value;
+
+			if (value != null)
+				return TypeExtension.ToBoolean(value);
+
+			// Check extension <Member1 NullValue='-1' />
+			//
+			if (Extension[memberAccessor.Name]["NullValue"].Value != null)
+				return true;
+
 			// Check member [Nullable(true | false)]
 			//
 			NullableAttribute attr1 =
@@ -496,6 +520,13 @@ namespace BLToolkit.Mapping
 		{
 			if (isNullable)
 			{
+				// Check extension <Member1 NullValue='-1' />
+				//
+				object value = Extension[memberAccessor.Name]["NullValue"].Value;
+
+				if (value != null)
+					return TypeExtension.ChangeType(value, memberAccessor.Type);
+
 				// Check member [NullValue(0)]
 				//
 				NullValueAttribute attr =

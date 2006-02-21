@@ -35,6 +35,10 @@ namespace A.Reflection.Extension
             <MapValue Value='2' OrigValue='Value2' />
             <DefaultValue Value='Value1' />
         </Member>
+        <Member Name='Field3' DefaultValue='Value1'>
+            <MapValue Value='1' OrigValue='Value1' />
+            <MapValue Value='2' OrigValue='Value2' />
+        </Member>
     </Type>
 </Types>");
 			}
@@ -77,12 +81,14 @@ namespace A.Reflection.Extension
 		{
 			public string Field1 = "11";
 			public string Field2 = "22";
+			public string Field3 = "33";
 		}
 
 		public class Dest
 		{
 			public Enum1 Field1;
 			public Enum1 Field2;
+			public Enum2 Field3;
 		}
 
 		[Test]
@@ -106,6 +112,7 @@ namespace A.Reflection.Extension
 
 			Assert.AreEqual(Enum1.Value2, o.Field1);
 			Assert.AreEqual(Enum1.Value1, o.Field2);
+			Assert.AreEqual(Enum2.Value1, o.Field3);
 		}
 	}
 }

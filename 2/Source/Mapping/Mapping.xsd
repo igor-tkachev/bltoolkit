@@ -6,8 +6,8 @@
 
 	<xsd:attribute name="MapField"                type="xsd:string" />
 	<xsd:attribute name="MapIgnore"               type="xsd:boolean" />
-	<xsd:attribute name="IsTrimmable"             type="xsd:boolean" />
-	<xsd:attribute name="IsNullable"              type="xsd:boolean" />
+	<xsd:attribute name="Trimmable"               type="xsd:boolean" />
+	<xsd:attribute name="Nullable"                type="xsd:boolean" />
 	<xsd:attribute name="MapValue"                type="xsd:string" />
 	<xsd:attribute name="MapValue-Type"           type="xsd:string" />
 	<xsd:attribute name="MapValue-OrigValue"      type="xsd:string" />
