@@ -240,6 +240,7 @@
     <EmbeddedResource Include="Mapping\Mapping.xsd">
       <SubType>Designer</SubType>
     </EmbeddedResource>
+    <None Include="Doc\Development rules and regulations.doc" />
     <None Include="Mapping\Mapping.xsx">
       <DependentUpon>Mapping.xsd</DependentUpon>
     </None>
@@ -251,6 +252,8 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Doc\License.txt" />
+    <Content Include="Doc\OnlineDoc.txt" />
     <Content Include="Reflection\Extension\Test.xml" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />

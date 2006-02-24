@@ -3,6 +3,7 @@ using System.Collections;
 using System.Reflection;
 using System.Reflection.Emit;
 using System.Diagnostics.CodeAnalysis;
+using System.Xml.Serialization;
 
 #if FW2
 using System.Collections.Generic;
@@ -162,6 +163,36 @@ namespace BLToolkit.TypeBuilder.Builders
 
 			if (_context.Type.IsSerializable)
 				_context.TypeBuilder.SetCustomAttribute(typeof(SerializableAttribute));
+
+			/*
+			Type type = typeof(XmlTypeAttribute);
+
+			_context.TypeBuilder.SetCustomAttribute(
+				type,
+				new PropertyInfo[] {
+					type.GetProperty("IncludeInSchema"),
+					type.GetProperty("Namespace"),
+					type.GetProperty("TypeName")
+				},
+				new object[] {
+					false,
+					"urn:bltoolkit",
+					_context.Type.Name + "_"
+				});
+
+			type = typeof(XmlRootAttribute);
+
+			_context.TypeBuilder.SetCustomAttribute(
+				type,
+				new PropertyInfo[] {
+					type.GetProperty("Namespace"),
+					type.GetProperty("ElementName")
+				},
+				new object[] {
+					"urn:bltoolkit",
+					_context.Type.Name + "_"
+				});
+			*/
 		}
 
 #if FW2
