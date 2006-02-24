@@ -204,6 +204,25 @@ namespace BLToolkit.Reflection.Emit
 			_typeBuilder.SetCustomAttribute(caBuilder);
 		}
 
+		public void SetCustomAttribute(Type attributeType, PropertyInfo[] properties, object[] propertyValues)
+		{
+			if (attributeType == null) throw new ArgumentNullException("attributeType");
+
+			ConstructorInfo        ci        = attributeType.GetConstructor(Type.EmptyTypes);
+			CustomAttributeBuilder caBuilder = new CustomAttributeBuilder(
+				ci, new object[0], properties, propertyValues );
+
+			_typeBuilder.SetCustomAttribute(caBuilder);
+		}
+
+		public void SetCustomAttribute(Type attributeType, string propertyName, object propertyValue)
+		{
+			SetCustomAttribute(
+				attributeType,
+				new PropertyInfo[] { attributeType.GetProperty(propertyName) },
+				new object[]       { propertyValue } );
+		}
+
 		private ConstructorBuilderHelper _typeInitializer;
 		/// <summary>
 		/// Gets the initializer for this type.
