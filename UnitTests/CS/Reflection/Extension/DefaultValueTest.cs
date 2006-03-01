@@ -7,7 +7,7 @@ using BLToolkit.Mapping;
 using BLToolkit.Reflection;
 using BLToolkit.Reflection.Extension;
 
-namespace A.Reflection.Extension
+namespace Reflection.Extension
 {
 	[TestFixture]
 	public class DefaultValueTest
