@@ -1249,7 +1249,7 @@ namespace BLToolkit.Data
 					object value = mm.GetValue(obj);
 					string name  = _dataProvider.GetParameterName(mm.Name);
 
-					paramList.Add(mm.MapMemberInfo.IsNullable || value == null?
+					paramList.Add(mm.MapMemberInfo.Nullable || value == null?
 						NullParameter(name, value):
 						Parameter    (name, value));
 				}
@@ -1311,7 +1311,7 @@ namespace BLToolkit.Data
 					object value = mm.GetValue(obj);
 
 					Parameter(name).Value =
-						value == null || mm.MapMemberInfo.IsNullable && _mappingSchema.IsNull(value)?
+						value == null || mm.MapMemberInfo.Nullable && _mappingSchema.IsNull(value)?
 							DBNull.Value: value;
 				}
 			}

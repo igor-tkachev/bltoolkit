@@ -165,3 +165,16 @@ GO
 GRANT EXEC ON Person_Delete TO PUBLIC
 GO
 
+-- BinaryData Table
+
+IF EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID('BinaryData') AND type in (N'U'))
+BEGIN
+	DROP TABLE BinaryData
+END
+CREATE TABLE BinaryData
+(
+	BinaryDataID int             NOT NULL IDENTITY(1,1) CONSTRAINT PK_BinaryData PRIMARY KEY CLUSTERED,
+	Stamp        timestamp       NOT NULL,
+	Data         varbinary(1024) NOT NULL)
+ON [PRIMARY]
+GO

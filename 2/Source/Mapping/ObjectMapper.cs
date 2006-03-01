@@ -177,11 +177,11 @@ namespace BLToolkit.Mapping
 				mi.MappingSchema   = mappingSchema;
 				mi.MemberExtension = _extension[ma.Name];
 				mi.Name            = GetFieldName   (ma);
-				mi.IsTrimmable     = GetIsTrimmable (ma);
+				mi.Trimmable       = GetTrimmable   (ma);
 				mi.MapValues       = GetMapValues   (ma);
 				mi.DefaultValue    = GetDefaultValue(ma);
-				mi.IsNullable      = GetIsNullable  (ma);
-				mi.NullValue       = GetNullValue   (ma, mi.IsNullable);
+				mi.Nullable        = GetNullable    (ma);
+				mi.NullValue       = GetNullValue   (ma, mi.Nullable);
 
 				Add(CreateMemberMapper(mi));
 			}
@@ -303,10 +303,10 @@ namespace BLToolkit.Mapping
 
 			Type type = memberAccessor.Type;
 
-			return type.IsClass && type != typeof(string);
+			return type.IsClass && type != typeof(string) && type != typeof(byte[]);
 		}
 
-		protected virtual bool GetIsTrimmable(MemberAccessor memberAccessor)
+		protected virtual bool GetTrimmable(MemberAccessor memberAccessor)
 		{
 			if (memberAccessor.Type != typeof(string))
 				return false;
@@ -450,7 +450,7 @@ namespace BLToolkit.Mapping
 			return value != null;
 		}
 
-		protected virtual bool GetIsNullable(MemberAccessor memberAccessor)
+		protected virtual bool GetNullable(MemberAccessor memberAccessor)
 		{
 			// Check extension <Member1 Nullable='true' />
 			//

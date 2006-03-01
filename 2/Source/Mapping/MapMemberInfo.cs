@@ -22,18 +22,18 @@ namespace BLToolkit.Mapping
 			[DebuggerStepThrough] set { _name = value; }
 		}
 
-		private bool _isTrimmable;
-		public  bool  IsTrimmable
+		private bool _trimmable;
+		public  bool  Trimmable
 		{
-			[DebuggerStepThrough] get { return _isTrimmable;  }
-			[DebuggerStepThrough] set { _isTrimmable = value; }
+			[DebuggerStepThrough] get { return _trimmable;  }
+			[DebuggerStepThrough] set { _trimmable = value; }
 		}
 
-		private bool _isNullable;
-		public  bool  IsNullable
+		private bool _nullable;
+		public  bool  Nullable
 		{
-			[DebuggerStepThrough] get { return _isNullable;  }
-			[DebuggerStepThrough] set { _isNullable = value; }
+			[DebuggerStepThrough] get { return _nullable;  }
+			[DebuggerStepThrough] set { _nullable = value; }
 		}
 
 		private object _nullValue;

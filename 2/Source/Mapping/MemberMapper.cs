@@ -134,7 +134,7 @@ namespace BLToolkit.Mapping
 			if (mi.MapValues != null)
 				return null;
 
-			bool n = mi.IsNullable;
+			bool n = mi.Nullable;
 
 			Type type = mi.MemberAccessor.UnderlyingType;
 
@@ -487,13 +487,13 @@ namespace BLToolkit.Mapping
 			if (mi.MapValues != null)
 				return null;
 
-			bool n = mi.IsNullable;
+			bool n = mi.Nullable;
 
 			Type type = mi.MemberAccessor.Type;
 
 			if (type == typeof(String))
-				if (mi.IsTrimmable) return n? new StringMapper.Trimmable.Nullable(): new StringMapper.Trimmable();
-				else                return n? new StringMapper.Nullable(): new StringMapper();
+				if (mi.Trimmable) return n? new StringMapper.Trimmable.Nullable(): new StringMapper.Trimmable();
+				else              return n? new StringMapper.Nullable(): new StringMapper();
 
 			if (type == typeof(DateTime)) return n? new DateTimeMapper.Nullable(): new DateTimeMapper();
 			if (type == typeof(Decimal))  return n? new DecimalMapper. Nullable(): new DecimalMapper();
@@ -1406,7 +1406,7 @@ namespace BLToolkit.Mapping
 			if (value == null)
 				return mapInfo.NullValue;
 
-			if (mapInfo.IsTrimmable && value is string)
+			if (mapInfo.Trimmable && value is string)
 				value = value.ToString().TrimEnd(null);
 
 			if (mapInfo.MapValues != null)
@@ -1479,7 +1479,7 @@ namespace BLToolkit.Mapping
 			if (value == null)
 				return null;
 
-			if (mapInfo.IsNullable && mapInfo.NullValue != null)
+			if (mapInfo.Nullable && mapInfo.NullValue != null)
 			{
 				IComparable comp = (IComparable)value;
 

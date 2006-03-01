@@ -1,6 +1,6 @@
 <project>
     <assemblies>
-        <assembly location="C:\Projects\Rsdn.Framework.Data\Source\bin\Debug\Rsdn.Framework.Data.dll" documentation="C:\Projects\Rsdn.Framework.Data\Source\bin\Debug\Rsdn.Framework.Data.xml" />
+        <assembly location="C:\Projects\SVN\RFD\trunk\1\Source\bin\Debug\Rsdn.Framework.Data.dll" documentation="C:\Projects\SVN\RFD\trunk\1\Source\bin\Debug\Rsdn.Framework.Data.xml" />
     </assemblies>
     <namespaces>
         <namespace name="Rsdn.Framework.Data">The <b>Rsdn.Framework.Data</b> is a namespace that represents a higher-level wrapper for ADO.NET.</namespace>
