@@ -20,9 +20,9 @@ namespace Examples_DbManager
 			using (DbManager db = new DbManager())
 			{
 				db.BeginTransaction();
-                
+
 				// ...
-                
+
 				db.Transaction.Commit();
 			}
 		}
