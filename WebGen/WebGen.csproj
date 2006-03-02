@@ -41,7 +41,13 @@
     <Content Include="Content\bltoolkit.css" />
     <Content Include="Content\Doc\ComponentModel\index.htm" />
     <Content Include="Content\Doc\DataAccess\index.htm" />
+    <Content Include="Content\Doc\Data\Close.htm" />
+    <Content Include="Content\Doc\Data\OpenConfig2.htm" />
+    <Content Include="Content\Doc\Data\Transaction.htm" />
+    <Content Include="Content\Doc\Data\OpenConfig1.htm" />
+    <Content Include="Content\Doc\Data\CreateSql.htm" />
     <Content Include="Content\Doc\Data\index.htm" />
+    <Content Include="Content\Doc\Data\Intro.htm" />
     <Content Include="Content\Doc\EditableObjects\index.htm" />
     <Content Include="Content\Doc\Mapping\index.htm" />
     <Content Include="Content\Doc\Reflection\Emit\HelloWorld.htm" />
@@ -53,6 +59,15 @@
     <Content Include="Content\index.htm" />
     <Content Include="Content\License.htm" />
     <Content Include="Content\template.html" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\..\..\..\Rsdn\trunk\source\Framework\Format\Rsdn.Framework.Formatting.2.csproj">
+      <Project>{5D93361E-3F17-4553-91F0-B6C24DEBB4CC}</Project>
+      <Name>Rsdn.Framework.Formatting.2</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Content\Doc\Data\App.config" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

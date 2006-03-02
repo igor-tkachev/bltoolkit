@@ -53,6 +53,11 @@ namespace UnitTests.All
 		public void Test()
 		{
 		}
+
+		public void Foo(string toWhom)
+		{
+			Console.WriteLine(string.Format("Hello, {0}!", toWhom));
+		}
 	}
 #endif
 }

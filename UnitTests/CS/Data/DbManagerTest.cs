@@ -6,6 +6,7 @@ using NUnit.Framework;
 using BLToolkit.Data;
 using BLToolkit.Reflection;
 using BLToolkit.Mapping;
+using BLToolkit.EditableObjects;
 
 namespace Data
 {
@@ -31,13 +32,24 @@ namespace Data
 		}
 
 		[Test]
-		public void ExecuteList()
+		public void ExecuteList1()
 		{
 			using (DbManager db = new DbManager("Sql"))
 			{
 				ArrayList list = db
 					.SetCommand("SELECT * FROM Person")
 					.ExecuteList(typeof(Person));
+			}
+		}
+
+		[Test]
+		public void ExecuteList2()
+		{
+			using (DbManager db = new DbManager("Sql"))
+			{
+				IList list = db
+					.SetCommand("SELECT * FROM Person")
+					.ExecuteList(new EditableArrayList(typeof(Person)), typeof(Person));
 			}
 		}
 

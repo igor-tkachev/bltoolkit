@@ -18,7 +18,7 @@ namespace Examples.Reflection.Emit
 	{
 		public interface IHello
 		{
-			void SayHello();
+			void SayHello(string toWhom);
 		}
 
 		[Test]
@@ -29,19 +29,24 @@ namespace Examples.Reflection.Emit
 				.DefineMethod(typeof(IHello).GetMethod("SayHello"))
 				.Emitter;
 
-			// Console.WriteLine("Hello, World!");
-			//
-			emit
-				.ldstr ("Hello, World!")
-				.call  (typeof(Console), "WriteLine", typeof(string))
+			/*[b]*/emit
+				// string.Format("Hello, {0}!", toWhom)
+				//
+				.ldstr   ("Hello, {0}!")
+				.ldarg_1
+				.call    (typeof(string), "Format", typeof(string), typeof(object))
+
+				// Console.WriteLine("Hello, World!");
+				//
+				.call    (typeof(Console), "WriteLine", typeof(string))
 				.ret()
-				;
+				;/*[/b]*/
 
 			Type type = emit.Method.Type.Create();
 
 			IHello hello = (IHello)TypeAccessor.CreateInstance(type);
 
-			hello.SayHello();
+			hello.SayHello("World");
 		}
 	}
 }

@@ -37,7 +37,53 @@ td
 	vertical-align : top;
 }
 
+td.p
+{
+	font-size      : small;
+	vertical-align : top;
+	padding-top    : 7px;
+}
+
+td.pj
+{
+	font-size      : small;
+	vertical-align : top;
+	padding-top    : 7px;
+	text-align     : justify;
+}
+
 .j
 {
 	text-align : justify;
+}
+
+.kw
+{
+	color : blue;
+}
+
+.com
+{
+	color : green;
+}
+
+.str
+{
+	color : DarkCyan;
+}
+
+table.code
+{
+	border-color  : #999999;
+	border-style  : solid;
+	border-width  : 1px;
+	margin-top    : .6em;
+	margin-bottom : .6em;
+}
+
+pre.code
+{
+	font    : 100% Monospace, Courier New, Courier;
+	margin  : 0;
+	padding : 5px;
 }
