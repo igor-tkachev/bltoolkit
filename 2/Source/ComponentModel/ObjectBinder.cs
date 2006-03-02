@@ -130,7 +130,7 @@ namespace BLToolkit.ComponentModel
 					{
 						if (list.ItemType != _itemType && !list.ItemType.IsSubclassOf(_itemType))
 							throw new ArgumentException(string.Format(
-								"Item type (0) of the new list must be a subclass of {1}.",
+								"Item type {0} of the new list must be a subclass of {1}.",
 								list.ItemType,
 								_itemType));
 					}

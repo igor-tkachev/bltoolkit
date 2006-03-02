@@ -25,7 +25,7 @@ namespace Examples_DbManager
 			using (SqlConnection con = new SqlConnection(connectionString))
 			{
 				con.Open();
-                
+
 				using (DbManager db = new DbManager(con))
 				{
 					Assert.AreEqual(ConnectionState.Open, db.Connection.State);

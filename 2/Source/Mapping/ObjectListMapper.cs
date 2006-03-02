@@ -51,7 +51,7 @@ namespace BLToolkit.Mapping
 			{
 				sm.BeginMapping(initContext);
 
-				if (_mapper != initContext.ObjectMapper)
+				if (initContext.ObjectMapper != null && _mapper != initContext.ObjectMapper)
 					_mapper = initContext.ObjectMapper;
 			}
 		}

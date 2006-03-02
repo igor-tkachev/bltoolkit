@@ -1,8 +1,10 @@
---CREATE DATABASE BLToolkitData ON PRIMARY
---( NAME = N'BLToolkitTest',     FILENAME = N'C:\Data\MSSQL.1\MSSQL\DATA\BLToolkitData.mdf' ,     SIZE = 3072KB , FILEGROWTH = 1024KB )
---LOG ON 
---( NAME = N'BLToolkitTest_log', FILENAME = N'C:\Data\MSSQL.1\MSSQL\DATA\BLToolkitData_log.ldf' , SIZE = 1024KB , FILEGROWTH = 10% )
---GO
+/*
+CREATE DATABASE BLToolkitData ON PRIMARY
+(NAME=N'BLToolkitTest',     FILENAME=N'C:\Data\MSSQL.1\MSSQL\DATA\BLToolkitData.mdf',     SIZE=3072KB, FILEGROWTH=1024KB)
+LOG ON 
+(NAME=N'BLToolkitTest_log', FILENAME=N'C:\Data\MSSQL.1\MSSQL\DATA\BLToolkitData_log.ldf', SIZE=1024KB, FILEGROWTH=10%)
+GO
+*/
 
 -- Person Table
 

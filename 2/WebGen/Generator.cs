@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using Rsdn.Framework.Formatting;
 
 namespace WebGen
 {
@@ -72,26 +73,28 @@ namespace WebGen
 					continue;
 
 				string destName = Path.Combine(destFolder, Path.GetFileName(fileName));
+				string ext      = Path.GetExtension(destName).ToLower();
 
-				using (StreamWriter sw = File.CreateText(destName))
-				using (StreamReader sr = File.OpenText  (fileName))
+				Console.WriteLine(destName);
+
+				switch (ext)
 				{
-					Console.WriteLine(destName);
-
-					string source = sr.ReadToEnd();
-
-					switch (Path.GetExtension(destName).ToLower())
-					{
-						case ".css": 
-							sw.Write(source);
-							break;
-
-						case ".htm":
-							source = GenerateSource(source);
+					case ".config":
+						break;
+					case ".htm":
+						using (StreamWriter sw = File.CreateText(destName))
+						using (StreamReader sr = File.OpenText(fileName))
+						{
+							string source = GenerateSource(sr.ReadToEnd());
 
 							sw.WriteLine(string.Format(template, source, backPath, backLinks));
-							break;
-					}
+						}
+
+						break;
+
+					default:
+						File.Copy(fileName, destName, true);
+						break;
 				}
 			}
 
@@ -128,14 +131,38 @@ namespace WebGen
 				string fileName    = source.Substring(idx + 2, end - idx - 2).Trim();
 				string endSource   = source.Substring(end + 2);
 				string sourcePath  = Path.Combine(_sourcePath, fileName);
-				string code;
+				string code        = "";
 
 				using (StreamReader sr = File.OpenText(sourcePath))
-					code = sr.ReadToEnd();
+					for (string s = sr.ReadLine(); s != null; s = sr.ReadLine())
+						if (!s.StartsWith("//@"))
+							code += s + "\n";
 
-				code = "<pre>" + code + "</pre>";
+				switch (Path.GetExtension(fileName).ToLower())
+				{
+					case ".cs":     code = "[c#]"   + code + "[/c#]";   break;
+					case ".vb":     code = "[vb]"   + code + "[/vb]";   break;
+					case ".config": code = "[xml]"  + code + "[/xml]";  break;
+					case ".sql":    code = "[sql]"  + code + "[/sql]";  break;
+					default   :     code = "[code]" + code + "[/code]"; break;
+				}
 
-				source = startSource + code + endSource;
+				code = code
+					.Replace("/*[", "[")
+					.Replace("]*/", "]")
+				;
+
+				code = new TextFormatter().Format(code, false);
+
+				source =
+					startSource +
+					code
+						.Replace("\n", "\r\n")
+						.Replace("\r\r\n", "\r\n")
+						.Replace("<table width='96%'>", "<table width='100%' class='code'>")
+						.Replace("<pre>", "<pre class='code'>")
+						+
+					endSource;
 			}
 
 			return source;
