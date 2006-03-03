@@ -40,7 +40,9 @@ namespace HowTo.DataAccess
 		[Test]
 		public void InsertTest()
 		{
-			DataAccessor da = new DataAccessor();
+			// DataAccessor creates /*[i]*/DbManager/*[/i]*/ itself.
+			//
+			/*[b]*/DataAccessor da = new DataAccessor()/*[/b]*/;
 
 			Person person = Person.CreateInstance();
 
@@ -48,7 +50,7 @@ namespace HowTo.DataAccess
 			person.LastName  = "Frog";
 			person.Gender    = Gender.Unknown;
 
-			da.Insert(person);
+			da./*[b]*/Insert/*[/b]*/(person);
 		}
 
 		[Test]
@@ -67,32 +69,44 @@ namespace HowTo.DataAccess
 				TypeAccessor.WriteConsole(person);
 				Assert.IsNotNull(person);
 
-				DataAccessor da = new DataAccessor(db);
+				// DataAccessor takes /*[i]*/DbManager/*[/i]*/ as a parameter.
+				// /*[i]*/DbManager/*[/i]*/ controls the transaction.
+				//
+				/*[b]*/DataAccessor da = new DataAccessor(db)/*[/b]*/;
 
 				// Update.
 				//
 				person.Gender = Gender.Other;
 
-				da.Update(person);
+				da./*[b]*/Update/*[/b]*/(person);
 
-				person = da.SelectByKey<Person>(person.ID);
+				person = da./*[b]*/SelectByKey<Person>(person.ID)/*[/b]*/;
 
 				TypeAccessor.WriteConsole(person);
 				Assert.AreEqual(Gender.Other, person.Gender);
 
 				// Delete.
 				//
-				da.Delete(person);
+				da./*[b]*/Delete/*[/b]*/(person);
 
-				person = da.SelectByKey<Person>(person.ID);
+				person = da./*[b]*/SelectByKey<Person>(person.ID)/*[/b]*/;
 
 				Assert.IsNull(person);
 
 				db.CommitTransaction();
+			}
+		}
 
-				// Get All.
+		[Test]
+		public void SelectAll()
+		{
+			using (DbManager db = new DbManager())
+			{
+				/*[b]*/DataAccessor da = new DataAccessor(db)/*[/b]*/;
+
+				// Select All.
 				//
-				List<Person> list = da.SelectAll<Person>();
+				List<Person> list = da./*[b]*/SelectAll<Person>()/*[/b]*/;
 
 				foreach (Person p in list)
 					TypeAccessor.WriteConsole(p);

@@ -38,7 +38,7 @@ namespace HowTo.Data
 				return db
 					.SetCommand("SELECT * FROM Person WHERE PersonID = @id",
 						db.Parameter("@id", id))
-					.ExecuteObject<Person>();
+					./*[b]*/ExecuteObject<Person>()/*[/b]*/;
 			}
 		}
 
@@ -49,7 +49,7 @@ namespace HowTo.Data
 				return db
 					.SetSpCommand("Person_SelectByKey",
 						db.Parameter("@id", id))
-					.ExecuteObject<Person>();
+					./*[b]*/ExecuteObject<Person>()/*[/b]*/;
 			}
 		}
 
@@ -59,7 +59,7 @@ namespace HowTo.Data
 			{
 				return db
 					.SetSpCommand("Person_SelectByKey", id)
-					.ExecuteObject<Person>();
+					./*[b]*/ExecuteObject<Person>()/*[/b]*/;
 			}
 		}
 

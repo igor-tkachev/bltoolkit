@@ -34,7 +34,7 @@ namespace Examples_DbManager
 							Description  as Description
 						FROM Categories")
 					.ExecuteDictionary("ID", typeof(Category));
-                    
+
 				foreach (Category category in ht.Values)
 				{
 					Console.WriteLine("ID  : {0}\nName: {1}\nDesc: {2}",

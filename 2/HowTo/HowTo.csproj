@@ -34,6 +34,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DataAccess\DeleteSql.cs" />
+    <Compile Include="DataAccess\UpdateSql.cs" />
+    <Compile Include="DataAccess\InsertSql.cs" />
+    <Compile Include="DataAccess\SelectAllSql.cs" />
+    <Compile Include="DataAccess\OpenConfig.cs" />
+    <Compile Include="DataAccess\SelectByKeySql.cs" />
     <Compile Include="DataAccess\CRUDLSproc.cs" />
     <Compile Include="DataAccess\CRUDLSqlText.cs" />
     <Compile Include="DataAccess\PersonAccessor.cs" />
@@ -41,8 +47,9 @@
     <Compile Include="Data\OpenConfig1.cs" />
     <Compile Include="Data\OpenConfig2.cs" />
     <Compile Include="Data\ExecuteObject.cs" />
-    <Compile Include="Data\ExecuteObjectList.cs" />
+    <Compile Include="Data\ExecuteList.cs" />
     <Compile Include="Data\Intro.cs" />
+    <Compile Include="Data\OpenConfig3.cs" />
     <Compile Include="Data\Transaction.cs" />
     <Compile Include="Data\UpdateObject.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

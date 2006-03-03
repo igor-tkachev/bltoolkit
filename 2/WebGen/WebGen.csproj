@@ -40,8 +40,19 @@
   <ItemGroup>
     <Content Include="Content\bltoolkit.css" />
     <Content Include="Content\Doc\ComponentModel\index.htm" />
+    <Content Include="Content\Doc\DataAccess\DeleteSql.htm" />
+    <Content Include="Content\Doc\DataAccess\UpdateSql.htm" />
+    <Content Include="Content\Doc\DataAccess\InsertSql.htm" />
+    <Content Include="Content\Doc\DataAccess\SelectAllSql.htm" />
+    <Content Include="Content\Doc\DataAccess\OpenConfig.htm" />
+    <Content Include="Content\Doc\DataAccess\SelectByKeySql.htm" />
+    <Content Include="Content\Doc\DataAccess\CRUDLSqlText.htm" />
     <Content Include="Content\Doc\DataAccess\index.htm" />
+    <Content Include="Content\Doc\DataAccess\CRUDLSproc.htm" />
     <Content Include="Content\Doc\Data\Close.htm" />
+    <Content Include="Content\Doc\Data\ExecuteList.htm" />
+    <Content Include="Content\Doc\Data\ExecuteObject.htm" />
+    <Content Include="Content\Doc\Data\OpenConfig3.htm" />
     <Content Include="Content\Doc\Data\OpenConfig2.htm" />
     <Content Include="Content\Doc\Data\Transaction.htm" />
     <Content Include="Content\Doc\Data\OpenConfig1.htm" />

@@ -8,8 +8,8 @@ a:link    { text-decoration: none;      color : #338899; }
 a:visited { text-decoration: none;      color : #55AABB; }
 a:hover   { text-decoration: underline; color : #338899; }
 
-a.m:link    { text-decoration: none;      color : Black; }
-a.m:visited { text-decoration: none;      color : Black; }
+a.m:link    { text-decoration: underline; color : Black; }
+a.m:visited { text-decoration: underline; color : Black; }
 a.m:hover   { text-decoration: underline; color : Black; }
 
 .title
