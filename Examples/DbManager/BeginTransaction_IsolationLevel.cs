@@ -21,9 +21,9 @@ namespace Examples_DbManager
 			using (DbManager db = new DbManager())
 			{
 				db.BeginTransaction(IsolationLevel.ReadCommitted);
-                
+
 				// ...
-                
+
 				db.Transaction.Commit();
 			}
 		}

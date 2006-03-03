@@ -27,7 +27,7 @@ namespace Examples_DbManager
 				con.Open();
 
 				SqlTransaction tran = con.BeginTransaction();
-                
+
 				using (DbManager db = new DbManager(tran))
 				{
 					Assert.AreEqual(ConnectionState.Open, db.Connection.State);
