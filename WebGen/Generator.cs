@@ -53,12 +53,12 @@ namespace WebGen
 
 		private void GenerateContent(string template, string[] path)
 		{
-			string folder     = string.Join("\\", path);
+			string folder     = string.Join("/", path);
 			string destFolder = Path.Combine(_destFolder, folder);
 			string backPath   = "";
 
 			for (int i = 0; i < path.Length; i++)
-				backPath += "..\\";
+				backPath += "../";
 
 			if (Directory.Exists(destFolder) == false)
 				Directory.CreateDirectory(destFolder);

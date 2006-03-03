@@ -80,10 +80,19 @@ namespace HowTo.DataAccess
 				person = da.SelectByKeySql<Person>(db, person.ID);
 
 				Assert.IsNull(person);
+			}
+		}
 
-				// Get All.
+		[Test]
+		public void SelectAll()
+		{
+			using (DbManager db = new DbManager())
+			{
+				DataAccessor da = new DataAccessor(db);
+
+				// Select All.
 				//
-				List<Person> list = da.SelectAllSql<Person>(db);
+				List<Person> list = da.SelectAllSql<Person>();
 
 				foreach (Person p in list)
 					TypeAccessor.WriteConsole(p);

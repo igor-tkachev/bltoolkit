@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 
 using NUnit.Framework;
@@ -10,7 +11,7 @@ using BLToolkit.Reflection;
 namespace HowTo.Data
 {
 	[TestFixture]
-	public class ExecuteObjectList
+	public class ExecuteList
 	{
 		[MapValue(Gender.Female,  "F")]
 		[MapValue(Gender.Male,    "M")]
@@ -41,7 +42,7 @@ namespace HowTo.Data
 			{
 				return db
 					.SetCommand("SELECT * FROM Person")
-					.ExecuteList<Person>();
+					./*[b]*/ExecuteList<Person>()/*[/b]*/;
 			}
 		}
 
@@ -51,7 +52,17 @@ namespace HowTo.Data
 			{
 				return db
 					.SetSpCommand("Person_SelectAll")
-					.ExecuteList<Person>();
+					./*[b]*/ExecuteList<Person>()/*[/b]*/;
+			}
+		}
+
+		void GetCustomPersonList(IList list)
+		{
+			using (DbManager db = new DbManager())
+			{
+				db
+					.SetSpCommand("Person_SelectAll")
+					./*[b]*/ExecuteList(list, typeof(Person))/*[/b]*/;
 			}
 		}
 
@@ -68,6 +79,17 @@ namespace HowTo.Data
 		public void Sproc()
 		{
 			IList<Person> list = GetPersonListSproc();
+
+			foreach (Person p in list)
+				TypeAccessor.WriteDebug(p);
+		}
+
+		[Test]
+		public void CustomList()
+		{
+			ArrayList list = new ArrayList(10);
+
+			GetCustomPersonList(list);
 
 			foreach (Person p in list)
 				TypeAccessor.WriteDebug(p);

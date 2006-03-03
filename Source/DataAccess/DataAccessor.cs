@@ -498,7 +498,8 @@ namespace BLToolkit.DataAccess
 
 			sb.AppendFormat("INSERT INTO [{0}] (\n", GetTableName(type));
 
-			foreach (MemberMapper mm in GetNonKeyFieldList(om))
+			//foreach (MemberMapper mm in GetNonKeyFieldList(om))
+			foreach (MemberMapper mm in GetFieldList(om))
 				if (mm.MemberAccessor.GetAttributes(typeof(NonUpdatableAttribute)) == null)
 					sb.AppendFormat("\t[{0}],\n", mm.Name);
 
@@ -506,7 +507,8 @@ namespace BLToolkit.DataAccess
 
 			sb.Append(") VALUES (\n");
 
-			foreach (MemberMapper mm in GetNonKeyFieldList(om))
+			//foreach (MemberMapper mm in GetNonKeyFieldList(om))
+			foreach (MemberMapper mm in GetFieldList(om))
 				if (mm.MemberAccessor.GetAttributes(typeof(NonUpdatableAttribute)) == null)
 					sb.AppendFormat("\t{0},\n", db.DataProvider.GetParameterName(mm.Name));
 
@@ -524,7 +526,8 @@ namespace BLToolkit.DataAccess
 
 			sb.AppendFormat("UPDATE\n\t[{0}]\nSET\n", GetTableName(type));
 
-			foreach (MemberMapper mm in GetNonKeyFieldList(om))
+			//foreach (MemberMapper mm in GetNonKeyFieldList(om))
+			foreach (MemberMapper mm in GetFieldList(om))
 				if (mm.MemberAccessor.GetAttributes(typeof(NonUpdatableAttribute)) == null)
 					sb.AppendFormat("\t[{0}] = {1},\n", mm.Name, db.DataProvider.GetParameterName(mm.Name));
 
