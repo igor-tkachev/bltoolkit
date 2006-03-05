@@ -12,14 +12,14 @@ namespace HowTo.Data
 		{
 			DbManager db = new DbManager();
 
-			/*[b]*/try/*[/b]*/
+			/*[a]*/try/*[/a]*/
 			{
 				// ...
 			}
-			/*[b]*/finally/*[/b]*/
+			/*[a]*/finally/*[/a]*/
 			{
 				if (db != null)
-					db./*[b]*/Close/*[/b]*/();
+					db./*[a]*/Close/*[/a]*/();
 			}
 		}
 
@@ -28,7 +28,7 @@ namespace HowTo.Data
 		[Test]
 		public void Test2()
 		{
-			/*[b]*/using (DbManager db = new DbManager())/*[/b]*/
+			/*[a]*/using (DbManager db = new DbManager())/*[/a]*/
 			{
 				// ...
 			}

@@ -12,22 +12,12 @@ namespace HowTo.DataAccess
 	[TestFixture]
 	public class SelectAllSql
 	{
-		public class Person
-		{
-			[MapField("PersonID"), PrimaryKey, NonUpdatable]
-			public int    ID;
-
-			public string LastName;
-			public string FirstName;
-			public string MiddleName;
-		}
-
 		[Test]
 		public void Test1()
 		{
-			/*[b]*/DataAccessor da = new DataAccessor()/*[/b]*/;
+			/*[a]*/DataAccessor da = new DataAccessor()/*[/a]*/;
 
-			List<Person> list = da./*[b]*/SelectAllSql<Person>()/*[/b]*/;
+			List<Person> list = da./*[a]*/SelectAllSql<Person>()/*[/a]*/;
 		}
 
 		[Test]
@@ -35,18 +25,18 @@ namespace HowTo.DataAccess
 		{
 			using (DbManager db = new DbManager())
 			{
-				/*[b]*/DataAccessor da = new DataAccessor()/*[/b]*/;
+				/*[a]*/DataAccessor da = new DataAccessor()/*[/a]*/;
 
-				List<Person> list = da./*[b]*/SelectAllSql<Person>(db)/*[/b]*/;
+				List<Person> list = da./*[a]*/SelectAllSql<Person>(db)/*[/a]*/;
 			}
 		}
 
 		[Test]
 		public void Test3()
 		{
-			/*[b]*/DataAccessor<Person> da = new DataAccessor<Person>()/*[/b]*/;
+			/*[a]*/DataAccessor<Person> da = new DataAccessor<Person>()/*[/a]*/;
 
-			List<Person> list = da./*[b]*/SelectAllSql()/*[/b]*/;
+			List<Person> list = da./*[a]*/SelectAllSql()/*[/a]*/;
 		}
 	}
 }

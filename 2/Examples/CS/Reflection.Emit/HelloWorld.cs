@@ -25,7 +25,7 @@ namespace Examples.Reflection.Emit
 				.DefineMethod(typeof(IHello).GetMethod("SayHello"))
 				.Emitter;
 
-			/*[b]*/emit
+			/*[a]*/emit
 				// string.Format("Hello, {0}!", toWhom)
 				//
 				.ldstr   ("Hello, {0}!")
@@ -36,7 +36,7 @@ namespace Examples.Reflection.Emit
 				//
 				.call    (typeof(Console), "WriteLine", typeof(string))
 				.ret()
-				;/*[/b]*/
+				;/*[/a]*/
 
 			Type type = emit.Method.Type.Create();
 

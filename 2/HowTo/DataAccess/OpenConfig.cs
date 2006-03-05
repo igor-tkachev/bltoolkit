@@ -26,9 +26,9 @@ namespace HowTo.DataAccess
 		[Test]
 		public void Test1()
 		{
-			/*[b]*/DataAccessor da = new DataAccessor()/*[/b]*/;
+			/*[a]*/DataAccessor da = new DataAccessor()/*[/a]*/;
 
-			Person person = da./*[b]*/SelectByKeySql<Person>(1)/*[/b]*/;
+			Person person = da./*[a]*/SelectByKeySql<Person>(1)/*[/a]*/;
 
 			Assert.IsNotNull(person);
 		}
@@ -40,9 +40,9 @@ namespace HowTo.DataAccess
 		{
 			using (DbManager db = new DbManager())
 			{
-				/*[b]*/DataAccessor da = new DataAccessor(db)/*[/b]*/;
+				/*[a]*/DataAccessor da = new DataAccessor(db)/*[/a]*/;
 
-				Person person = da./*[b]*/SelectByKeySql<Person>(1)/*[/b]*/;
+				Person person = da./*[a]*/SelectByKeySql<Person>(1)/*[/a]*/;
 
 				Assert.IsNotNull(person);
 			}
@@ -55,9 +55,9 @@ namespace HowTo.DataAccess
 		{
 			using (DbManager db = new DbManager())
 			{
-				/*[b]*/DataAccessor da = new DataAccessor()/*[/b]*/;
+				/*[a]*/DataAccessor da = new DataAccessor()/*[/a]*/;
 
-				Person person = da./*[b]*/SelectByKeySql<Person>(db, 1)/*[/b]*/;
+				Person person = da./*[a]*/SelectByKeySql<Person>(db, 1)/*[/a]*/;
 
 				Assert.IsNotNull(person);
 			}
@@ -68,9 +68,9 @@ namespace HowTo.DataAccess
 		[Test]
 		public void Test4()
 		{
-			/*[b]*/DataAccessor<Person> da = new DataAccessor<Person>()/*[/b]*/;
+			/*[a]*/DataAccessor<Person> da = new DataAccessor<Person>()/*[/a]*/;
 
-			Person person = da./*[b]*/SelectByKeySql(1)/*[/b]*/;
+			Person person = da./*[a]*/SelectByKeySql(1)/*[/a]*/;
 
 			Assert.IsNotNull(person);
 		}

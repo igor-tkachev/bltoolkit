@@ -15,11 +15,11 @@ namespace HowTo.Data
 		{
 			using (DbManager db = new DbManager())
 			{
-				db./*[b]*/BeginTransaction()/*[/b]*/;
+				db./*[a]*/BeginTransaction()/*[/a]*/;
 
 				// ...
 
-				db./*[b]*/CommitTransaction()/*[/b]*/;
+				db./*[a]*/CommitTransaction()/*[/a]*/;
 			}
 		}
 
@@ -28,7 +28,7 @@ namespace HowTo.Data
 		{
 			using (DbManager db = new DbManager())
 			{
-				db.BeginTransaction(/*[b]*/IsolationLevel.ReadCommitted/*[/b]*/);
+				db.BeginTransaction(/*[a]*/IsolationLevel.ReadCommitted/*[/a]*/);
 
 				// ...
 

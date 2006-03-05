@@ -40,15 +40,22 @@
   <ItemGroup>
     <Content Include="Content\bltoolkit.css" />
     <Content Include="Content\Doc\ComponentModel\index.htm" />
+    <None Include="Content\Doc\DataAccess\SQL\SelectByKeySql.sql" />
+    <Content Include="Content\Doc\DataAccess\AbstractAccessor.htm" />
+    <Content Include="Content\Doc\DataAccess\PrimaryKeyAttribute.htm" />
+    <Content Include="Content\Doc\DataAccess\TableNameAttribute.htm" />
+    <Content Include="Content\Doc\DataAccess\Delete.htm" />
+    <Content Include="Content\Doc\DataAccess\Update.htm" />
+    <Content Include="Content\Doc\DataAccess\Insert.htm" />
+    <Content Include="Content\Doc\DataAccess\SelectAll.htm" />
+    <Content Include="Content\Doc\DataAccess\SelectByKey.htm" />
     <Content Include="Content\Doc\DataAccess\DeleteSql.htm" />
     <Content Include="Content\Doc\DataAccess\UpdateSql.htm" />
     <Content Include="Content\Doc\DataAccess\InsertSql.htm" />
     <Content Include="Content\Doc\DataAccess\SelectAllSql.htm" />
     <Content Include="Content\Doc\DataAccess\OpenConfig.htm" />
     <Content Include="Content\Doc\DataAccess\SelectByKeySql.htm" />
-    <Content Include="Content\Doc\DataAccess\CRUDLSqlText.htm" />
     <Content Include="Content\Doc\DataAccess\index.htm" />
-    <Content Include="Content\Doc\DataAccess\CRUDLSproc.htm" />
     <Content Include="Content\Doc\Data\Close.htm" />
     <Content Include="Content\Doc\Data\ExecuteList.htm" />
     <Content Include="Content\Doc\Data\ExecuteObject.htm" />
@@ -78,6 +85,17 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <None Include="Content\Doc\DataAccess\SQL\MultipleSelectByKeySql.sql" />
+    <None Include="Content\Doc\DataAccess\SQL\SelectByKey2.sql" />
+    <None Include="Content\Doc\DataAccess\SQL\Delete.sql" />
+    <None Include="Content\Doc\DataAccess\SQL\Update.sql" />
+    <None Include="Content\Doc\DataAccess\SQL\Insert.sql" />
+    <None Include="Content\Doc\DataAccess\SQL\SelectAll.sql" />
+    <None Include="Content\Doc\DataAccess\SQL\SelectByKey.sql" />
+    <None Include="Content\Doc\DataAccess\SQL\UpdateSql.sql" />
+    <None Include="Content\Doc\DataAccess\SQL\InsertSql.sql" />
+    <None Include="Content\Doc\DataAccess\SQL\DeleteSql.sql" />
+    <None Include="Content\Doc\DataAccess\SQL\SelectAllSql.sql" />
     <None Include="Content\Doc\Data\App.config" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />

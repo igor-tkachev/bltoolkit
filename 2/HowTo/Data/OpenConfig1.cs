@@ -15,7 +15,7 @@ namespace HowTo.Data
 		{
 			// Default configuration and default data provider.
 			//
-			using (DbManager db = /*[b]*/new DbManager()/*[/b]*/)
+			using (DbManager db = /*[a]*/new DbManager()/*[/a]*/)
 			{
 				Assert.AreEqual(ConnectionState.Open, db.Connection.State);
 			}
@@ -26,7 +26,7 @@ namespace HowTo.Data
 		{
 			// Development configuration and default data provider.
 			//
-			using (DbManager db = /*[b]*/new DbManager("Development")/*[/b]*/)
+			using (DbManager db = /*[a]*/new DbManager("Development")/*[/a]*/)
 			{
 				Assert.AreEqual(ConnectionState.Open, db.Connection.State);
 			}
@@ -37,7 +37,7 @@ namespace HowTo.Data
 		{
 			// Production configuration and default data provider.
 			//
-			using (DbManager db = /*[b]*/new DbManager("Production")/*[/b]*/)
+			using (DbManager db = /*[a]*/new DbManager("Production")/*[/a]*/)
 			{
 				Assert.AreEqual(ConnectionState.Open, db.Connection.State);
 			}
@@ -48,7 +48,7 @@ namespace HowTo.Data
 		{
 			// Default configuration and OleDb data provider.
 			//
-			using (DbManager db = /*[b]*/new DbManager("OleDb")/*[/b]*/)
+			using (DbManager db = /*[a]*/new DbManager("OleDb")/*[/a]*/)
 			{
 				Assert.AreEqual(ConnectionState.Open, db.Connection.State);
 			}
@@ -59,7 +59,7 @@ namespace HowTo.Data
 		{
 			// Development configuration and OleDb data provider.
 			//
-			using (DbManager db = /*[b]*/new DbManager("OleDb", "Development")/*[/b]*/)
+			using (DbManager db = /*[a]*/new DbManager("OleDb", "Development")/*[/a]*/)
 			{
 				Assert.AreEqual(ConnectionState.Open, db.Connection.State);
 			}
@@ -70,7 +70,7 @@ namespace HowTo.Data
 		{
 			// Production configuration and OleDb data provider.
 			//
-			using (DbManager db = /*[b]*/new DbManager("OleDb", "Production")/*[/b]*/)
+			using (DbManager db = /*[a]*/new DbManager("OleDb", "Production")/*[/a]*/)
 			{
 				Assert.AreEqual(ConnectionState.Open, db.Connection.State);
 			}

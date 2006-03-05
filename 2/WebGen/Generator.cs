@@ -80,6 +80,7 @@ namespace WebGen
 				switch (ext)
 				{
 					case ".config":
+					case ".sql":
 						break;
 					case ".htm":
 						using (StreamWriter sw = File.CreateText(destName))
@@ -150,17 +151,27 @@ namespace WebGen
 				code = code
 					.Replace("/*[", "[")
 					.Replace("]*/", "]")
-				;
+					;
 
 				code = new TextFormatter().Format(code, false);
+
+				if (source.IndexOf("<a name='Person'></a>") >= 0)
+					code = code
+						.Replace("&lt;Person&gt;", "&lt;<a class=m href=#Person>Person</a>&gt;")
+						.Replace("    Person ",    "    <a class='m' href=#Person>Person</a> ")
+						.Replace(" Person()",      " <a class='m' href=#Person>Person</a>()")
+						.Replace("(Person ",       "(<a class='m' href=#Person>Person</a> ")
+						;
 
 				source =
 					startSource +
 					code
-						.Replace("\n", "\r\n")
+						.Replace("\n",     "\r\n")
 						.Replace("\r\r\n", "\r\n")
 						.Replace("<table width='96%'>", "<table width='100%' class='code'>")
-						.Replace("<pre>", "<pre class='code'>")
+						.Replace("<pre>",  "<pre class='code'>")
+						.Replace("[a]",    "<span class='a'>")
+						.Replace("[/a]",   "</span>")
 						+
 					endSource;
 			}
@@ -183,7 +194,7 @@ namespace WebGen
 					string parent = "";
 
 					for (int j = i + 1; j < path.Length; j++)
-						parent += "..\\";
+						parent += "../";
 
 					backLinks += string.Format(".<a class='m' href='{0}index.htm'>{1}</a>", parent, path[i]);
 				}

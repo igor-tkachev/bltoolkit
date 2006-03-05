@@ -10,13 +10,13 @@ namespace HowTo.Data
 		[Test]
 		public void Test()
 		{
-			using (/*[b]*/DbManager db = new DbManager()/*[/b]*/)
+			using (/*[a]*/DbManager db = new DbManager()/*[/a]*/)
 			{
 				string name = db
-					./*[b]*/SetCommand/*[/b]*/(
+					./*[a]*/SetCommand/*[/a]*/(
 						"SELECT FirstName FROM Person WHERE PersonID = @id",
-						db./*[b]*/Parameter/*[/b]*/("@id", 1))
-					./*[b]*/ExecuteScalar/*[/b]*/<string>();
+						db./*[a]*/Parameter/*[/a]*/("@id", 1))
+					./*[a]*/ExecuteScalar/*[/a]*/<string>();
 
 				Console.WriteLine(name);
 			}

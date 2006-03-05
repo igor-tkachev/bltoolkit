@@ -31,6 +31,14 @@ hr
 	color  : #338899;
 }
 
+th
+{
+	font-size        : small;
+	vertical-align   : top;
+	background-color : #EEEEEE;
+	text-align       : center;
+}
+
 td
 {
 	font-size      : small;
@@ -70,6 +78,12 @@ td.pj
 .str
 {
 	color : DarkCyan;
+}
+
+.a
+{
+	color       : DarkRed;
+	font-weight : bold;
 }
 
 table.code

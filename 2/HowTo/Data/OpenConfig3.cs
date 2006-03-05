@@ -21,7 +21,7 @@ namespace HowTo.Data
 			{
 				con.Open();
 
-				using (DbManager db = /*[b]*/new DbManager(con)/*[/b]*/)
+				using (DbManager db = /*[a]*/new DbManager(con)/*[/a]*/)
 				{
 					Assert.AreEqual(ConnectionState.Open, db.Connection.State);
 				}
@@ -40,7 +40,7 @@ namespace HowTo.Data
 
 				SqlTransaction tran = con.BeginTransaction();
 
-				using (DbManager db = /*[b]*/new DbManager(tran)/*[/b]*/)
+				using (DbManager db = /*[a]*/new DbManager(tran)/*[/a]*/)
 				{
 					Assert.AreEqual(ConnectionState.Open, db.Connection.State);
 				}
