@@ -9,7 +9,7 @@ using BLToolkit.Mapping;
 namespace HowTo.DataAccess
 {
 	[TestFixture]
-	public class InsertSql
+	public class Insert
 	{
 		[Test]
 		public void Test1()
@@ -22,7 +22,7 @@ namespace HowTo.DataAccess
 			person.LastName  = "Frog";
 			person.Gender    = Gender.Unknown;
 
-			da./*[a]*/InsertSql(person)/*[/a]*/;
+			da./*[a]*/Insert(person)/*[/a]*/;
 		}
 
 		[Test]
@@ -38,7 +38,7 @@ namespace HowTo.DataAccess
 				person.LastName  = "Frog";
 				person.Gender    = Gender.Other;
 
-				da./*[a]*/InsertSql(db, person)/*[/a]*/;
+				da./*[a]*/Insert(db, person)/*[/a]*/;
 			}
 		}
 	}

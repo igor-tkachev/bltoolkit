@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 using NUnit.Framework;
 
@@ -9,20 +10,14 @@ using BLToolkit.Mapping;
 namespace HowTo.DataAccess
 {
 	[TestFixture]
-	public class InsertSql
+	public class SelectAll
 	{
 		[Test]
 		public void Test1()
 		{
 			/*[a]*/DataAccessor da = new DataAccessor()/*[/a]*/;
 
-			Person person = new Person();
-
-			person.FirstName = "Crazy";
-			person.LastName  = "Frog";
-			person.Gender    = Gender.Unknown;
-
-			da./*[a]*/InsertSql(person)/*[/a]*/;
+			List<Person> list = da./*[a]*/SelectAll<Person>()/*[/a]*/;
 		}
 
 		[Test]
@@ -32,14 +27,16 @@ namespace HowTo.DataAccess
 			{
 				/*[a]*/DataAccessor da = new DataAccessor()/*[/a]*/;
 
-				Person person = new Person();
-
-				person.FirstName = "Crazy";
-				person.LastName  = "Frog";
-				person.Gender    = Gender.Other;
-
-				da./*[a]*/InsertSql(db, person)/*[/a]*/;
+				List<Person> list = da./*[a]*/SelectAll<Person>(db)/*[/a]*/;
 			}
+		}
+
+		[Test]
+		public void Test3()
+		{
+			/*[a]*/DataAccessor<Person> da = new DataAccessor<Person>()/*[/a]*/;
+
+			List<Person> list = da./*[a]*/SelectAll()/*[/a]*/;
 		}
 	}
 }

@@ -9,7 +9,7 @@ using BLToolkit.Mapping;
 namespace HowTo.DataAccess
 {
 	[TestFixture]
-	public class UpdateSql
+	public class Update
 	{
 		int _id;
 
@@ -42,7 +42,7 @@ namespace HowTo.DataAccess
 
 			person.Gender = Gender.Other;
 
-			da./*[a]*/UpdateSql(person)/*[/a]*/;
+			da./*[a]*/Update(person)/*[/a]*/;
 		}
 
 		[Test]
@@ -56,7 +56,7 @@ namespace HowTo.DataAccess
 
 				person.Gender = Gender.Other;
 
-				da./*[a]*/UpdateSql(db, person)/*[/a]*/;
+				da./*[a]*/Update(db, person)/*[/a]*/;
 			}
 		}
 

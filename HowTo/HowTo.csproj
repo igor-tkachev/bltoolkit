@@ -34,14 +34,23 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DataAccess\AbstractAccessor.cs" />
+    <Compile Include="DataAccess\MultiplePrimaryKeyAttribute.cs" />
+    <Compile Include="DataAccess\PrimaryKeyAttribute.cs" />
+    <Compile Include="DataAccess\Gender.cs" />
+    <Compile Include="DataAccess\Person.cs" />
+    <Compile Include="DataAccess\TableNameAttribute.cs" />
+    <Compile Include="DataAccess\Delete.cs" />
+    <Compile Include="DataAccess\Update.cs" />
+    <Compile Include="DataAccess\Insert.cs" />
+    <Compile Include="DataAccess\SelectAll.cs" />
+    <Compile Include="DataAccess\SelectByKey.cs" />
     <Compile Include="DataAccess\DeleteSql.cs" />
     <Compile Include="DataAccess\UpdateSql.cs" />
     <Compile Include="DataAccess\InsertSql.cs" />
     <Compile Include="DataAccess\SelectAllSql.cs" />
     <Compile Include="DataAccess\OpenConfig.cs" />
     <Compile Include="DataAccess\SelectByKeySql.cs" />
-    <Compile Include="DataAccess\CRUDLSproc.cs" />
-    <Compile Include="DataAccess\CRUDLSqlText.cs" />
     <Compile Include="DataAccess\PersonAccessor.cs" />
     <Compile Include="Data\Close.cs" />
     <Compile Include="Data\OpenConfig1.cs" />

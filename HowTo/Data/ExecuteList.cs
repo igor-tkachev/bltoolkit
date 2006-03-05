@@ -42,7 +42,7 @@ namespace HowTo.Data
 			{
 				return db
 					.SetCommand("SELECT * FROM Person")
-					./*[b]*/ExecuteList<Person>()/*[/b]*/;
+					./*[a]*/ExecuteList<Person>()/*[/a]*/;
 			}
 		}
 
@@ -52,7 +52,7 @@ namespace HowTo.Data
 			{
 				return db
 					.SetSpCommand("Person_SelectAll")
-					./*[b]*/ExecuteList<Person>()/*[/b]*/;
+					./*[a]*/ExecuteList<Person>()/*[/a]*/;
 			}
 		}
 
@@ -62,7 +62,7 @@ namespace HowTo.Data
 			{
 				db
 					.SetSpCommand("Person_SelectAll")
-					./*[b]*/ExecuteList(list, typeof(Person))/*[/b]*/;
+					./*[a]*/ExecuteList(list, typeof(Person))/*[/a]*/;
 			}
 		}
 

@@ -35,6 +35,30 @@ namespace BLToolkit.DataAccess
 			return _dbManager != null? _dbManager: new DbManager();
 		}
 
+		public virtual void BeginTransaction()
+		{
+			if (_dbManager == null)
+				throw new InvalidOperationException("DbManager object is not provided.");
+
+			_dbManager.BeginTransaction();
+		}
+
+		public virtual void BeginTransaction(IsolationLevel il)
+		{
+			if (_dbManager == null)
+				throw new InvalidOperationException("DbManager object is not provided.");
+
+			_dbManager.BeginTransaction(il);
+		}
+
+		public virtual void CommitTransaction()
+		{
+			if (_dbManager == null)
+				throw new InvalidOperationException("DbManager object is not provided.");
+
+			_dbManager.CommitTransaction();
+		}
+
 		#endregion
 
 		#region CreateInstance
@@ -116,7 +140,7 @@ namespace BLToolkit.DataAccess
 				}
 
 				if (sprocName == null)
-					sprocName = GetDefaultSpName(type.Name, actionName);
+					sprocName = GetDefaultSpName(GetTableName(type), actionName);
 
 				_actionSproc[key] = sprocName;
 			}
@@ -569,7 +593,7 @@ namespace BLToolkit.DataAccess
 
 		protected virtual string GetSqlText(DbManager db, Type type, string actionName)
 		{
-			string key = type.Name + "$" + actionName;
+			string key = type.FullName + "$" + actionName;
 			string sql = (string)_actionSql[key];
 
 			if (sql == null)

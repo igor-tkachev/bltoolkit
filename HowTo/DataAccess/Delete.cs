@@ -9,7 +9,7 @@ using BLToolkit.Mapping;
 namespace HowTo.DataAccess
 {
 	[TestFixture]
-	public class DeleteSql
+	public class Delete
 	{
 		private int Insert()
 		{
@@ -37,7 +37,7 @@ namespace HowTo.DataAccess
 
 			/*[a]*/DataAccessor da = new DataAccessor()/*[/a]*/;
 
-			da./*[a]*/DeleteByKeySql<Person>(id)/*[/a]*/;
+			da./*[a]*/DeleteByKey<Person>(id)/*[/a]*/;
 		}
 
 		[Test]
@@ -47,7 +47,7 @@ namespace HowTo.DataAccess
 
 			/*[a]*/DataAccessor<Person> da = new DataAccessor<Person>()/*[/a]*/;
 
-			da./*[a]*/DeleteByKeySql(id)/*[/a]*/;
+			da./*[a]*/DeleteByKey(id)/*[/a]*/;
 		}
 
 		[Test]
@@ -61,7 +61,7 @@ namespace HowTo.DataAccess
 
 				Person person = da.SelectByKeySql<Person>(db, id);
 
-				da./*[a]*/DeleteSql(db, person)/*[/a]*/;
+				da./*[a]*/Delete(db, person)/*[/a]*/;
 			}
 		}
 	}

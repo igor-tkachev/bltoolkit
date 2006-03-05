@@ -9,20 +9,16 @@ using BLToolkit.Mapping;
 namespace HowTo.DataAccess
 {
 	[TestFixture]
-	public class InsertSql
+	public class SelectByKey
 	{
 		[Test]
 		public void Test1()
 		{
 			/*[a]*/DataAccessor da = new DataAccessor()/*[/a]*/;
 
-			Person person = new Person();
+			Person person = da./*[a]*/SelectByKey<Person>(1)/*[/a]*/;
 
-			person.FirstName = "Crazy";
-			person.LastName  = "Frog";
-			person.Gender    = Gender.Unknown;
-
-			da./*[a]*/InsertSql(person)/*[/a]*/;
+			Assert.IsNotNull(person);
 		}
 
 		[Test]
@@ -32,14 +28,20 @@ namespace HowTo.DataAccess
 			{
 				/*[a]*/DataAccessor da = new DataAccessor()/*[/a]*/;
 
-				Person person = new Person();
+				Person person = da./*[a]*/SelectByKey<Person>(db, 1)/*[/a]*/;
 
-				person.FirstName = "Crazy";
-				person.LastName  = "Frog";
-				person.Gender    = Gender.Other;
-
-				da./*[a]*/InsertSql(db, person)/*[/a]*/;
+				Assert.IsNotNull(person);
 			}
+		}
+
+		[Test]
+		public void Test3()
+		{
+			/*[a]*/DataAccessor<Person> da = new DataAccessor<Person>()/*[/a]*/;
+
+			Person person = da./*[a]*/SelectByKey(1)/*[/a]*/;
+
+			Assert.IsNotNull(person);
 		}
 	}
 }

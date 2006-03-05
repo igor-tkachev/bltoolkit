@@ -13,10 +13,10 @@ namespace HowTo.Data
 		[Test]
 		public void NoConfigConfiguration1()
 		{
-			/*[b]*/DbManager.AddConnectionString(
-				"Server=.;Database=BLToolkitData;Integrated Security=SSPI")/*[/b]*/;
+			/*[a]*/DbManager.AddConnectionString(
+				"Server=.;Database=BLToolkitData;Integrated Security=SSPI")/*[/a]*/;
 
-			using (DbManager db = /*[b]*/new DbManager()/*[/b]*/)
+			using (DbManager db = /*[a]*/new DbManager()/*[/a]*/)
 			{
 				Assert.AreEqual(ConnectionState.Open, db.Connection.State);
 			}
@@ -25,11 +25,11 @@ namespace HowTo.Data
 		[Test]
 		public void NoConfigConfiguration2()
 		{
-			/*[b]*/DbManager.AddConnectionString(
+			/*[a]*/DbManager.AddConnectionString(
 				"NewConfig",
-				"Server=.;Database=BLToolkitData;Integrated Security=SSPI")/*[/b]*/;
+				"Server=.;Database=BLToolkitData;Integrated Security=SSPI")/*[/a]*/;
 
-			using (DbManager db = /*[b]*/new DbManager("NewConfig")/*[/b]*/)
+			using (DbManager db = /*[a]*/new DbManager("NewConfig")/*[/a]*/)
 			{
 				Assert.AreEqual(ConnectionState.Open, db.Connection.State);
 			}

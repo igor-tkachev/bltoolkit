@@ -1,10 +1,8 @@
-/*
-CREATE DATABASE BLToolkitData ON PRIMARY
-(NAME=N'BLToolkitTest',     FILENAME=N'C:\Data\MSSQL.1\MSSQL\DATA\BLToolkitData.mdf',     SIZE=3072KB, FILEGROWTH=1024KB)
-LOG ON 
-(NAME=N'BLToolkitTest_log', FILENAME=N'C:\Data\MSSQL.1\MSSQL\DATA\BLToolkitData_log.ldf', SIZE=1024KB, FILEGROWTH=10%)
-GO
-*/
+--CREATE DATABASE BLToolkitData ON PRIMARY
+--(NAME=N'BLToolkitTest',     FILENAME=N'C:\Data\MSSQL.1\MSSQL\DATA\BLToolkitData.mdf',     SIZE=3072KB, FILEGROWTH=1024KB)
+--LOG ON 
+--(NAME=N'BLToolkitTest_log', FILENAME=N'C:\Data\MSSQL.1\MSSQL\DATA\BLToolkitData_log.ldf', SIZE=1024KB, FILEGROWTH=10%)
+--GO
 
 -- Person Table
 
@@ -84,6 +82,31 @@ FROM
 	Person
 WHERE
 	FirstName = @firstName AND LastName = @lastName
+
+GO
+
+GRANT EXEC ON Person_SelectByName TO PUBLIC
+GO
+
+-- Person_SelectListByName
+
+IF EXISTS (SELECT * FROM sysobjects WHERE type = 'P' AND name = 'Person_SelectListByName')
+BEGIN
+	DROP  Procedure  Person_SelectListByName
+END
+GO
+
+CREATE Procedure Person_SelectListByName
+	@firstName nvarchar(50),
+	@lastName  nvarchar(50)
+AS
+
+SELECT
+	*
+FROM
+	Person
+WHERE
+	FirstName like @firstName AND LastName like @lastName
 
 GO
 
