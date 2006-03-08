@@ -240,6 +240,12 @@
     <EmbeddedResource Include="Mapping\Mapping.xsd">
       <SubType>Designer</SubType>
     </EmbeddedResource>
+    <EmbeddedResource Include="DataAccess\DataAccess.xsd">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <None Include="DataAccess\DataAccess.xsx">
+      <DependentUpon>DataAccess.xsd</DependentUpon>
+    </None>
     <None Include="Doc\Development rules and regulations.doc" />
     <None Include="Mapping\Mapping.xsx">
       <DependentUpon>Mapping.xsd</DependentUpon>

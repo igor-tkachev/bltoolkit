@@ -35,11 +35,13 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DataAccess\AbstractAccessor.cs" />
+    <Compile Include="DataAccess\TableNameAttribute.cs" />
+    <Compile Include="DataAccess\NonUpdatableAttribute.cs" />
     <Compile Include="DataAccess\MultiplePrimaryKeyAttribute.cs" />
     <Compile Include="DataAccess\PrimaryKeyAttribute.cs" />
     <Compile Include="DataAccess\Gender.cs" />
     <Compile Include="DataAccess\Person.cs" />
-    <Compile Include="DataAccess\TableNameAttribute.cs" />
+    <Compile Include="DataAccess\XmlExtension.cs" />
     <Compile Include="DataAccess\Delete.cs" />
     <Compile Include="DataAccess\Update.cs" />
     <Compile Include="DataAccess\Insert.cs" />
@@ -68,6 +70,9 @@
       <Project>{0C325F5D-E50E-4340-8724-D29896CCC583}</Project>
       <Name>BLToolkit.2</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="DataAccess\XmlExtension.xml" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
