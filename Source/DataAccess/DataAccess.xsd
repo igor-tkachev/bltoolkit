@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xsd:schema id="DataAccess"
+	xmlns:tns="urn:schemas-bltoolkit-net:dataaccess"
+	xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+	targetNamespace="urn:schemas-bltoolkit-net:dataaccess">
+
+	<xsd:attribute name="TableName"    type="xsd:string" />
+	<xsd:attribute name="PrimaryKey"   type="xsd:int" />
+	<xsd:attribute name="NonUpdatable" type="xsd:boolean" />
+</xsd:schema>

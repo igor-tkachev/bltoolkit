@@ -173,6 +173,20 @@ namespace BLToolkit.Reflection.Extension
 					assembly.GetManifestResourceStream(xmlFile):
 					streamReader.BaseStream;
 
+				if (embedded && stream == null)
+				{
+					string[] names = assembly.GetManifestResourceNames();
+
+					foreach (string name in names)
+					{
+						if (name.EndsWith(xmlFile))
+						{
+							stream = assembly.GetManifestResourceStream(name);
+							break;
+						}
+					}
+				}
+
 				if (stream == null)
 					throw new TypeExtensionException(
 						string.Format("Could not find file '{0}'.", xmlFile));
@@ -223,7 +237,7 @@ namespace BLToolkit.Reflection.Extension
 			ExtensionList list = new ExtensionList();
 
 			foreach (XmlNode typeNode in doc.DocumentElement.ChildNodes)
-				if (typeNode.Name == NodeName.Type)
+				if (typeNode.LocalName == NodeName.Type)
 					list.Add(ParseType(typeNode));
 
 			return list;
@@ -237,16 +251,16 @@ namespace BLToolkit.Reflection.Extension
 			{
 				foreach (XmlAttribute attr in typeNode.Attributes)
 				{
-					if (attr.Name == AttrName.Name)
+					if (attr.LocalName == AttrName.Name)
 						ext.Name = attr.Value;
 					else
-						ext.Attributes.Add(attr.Name, attr.Value);
+						ext.Attributes.Add(attr.LocalName, attr.Value);
 				}
 			}
 
 			foreach (XmlNode node in typeNode.ChildNodes)
 			{
-				if (node.Name == NodeName.Member)
+				if (node.LocalName == NodeName.Member)
 					ext.Members.Add(ParseMember(node));
 				else
 					ext.Attributes.Add(ParseAttribute(node));
@@ -263,10 +277,10 @@ namespace BLToolkit.Reflection.Extension
 			{
 				foreach (XmlAttribute attr in memberNode.Attributes)
 				{
-					if (attr.Name == AttrName.Name)
+					if (attr.LocalName == AttrName.Name)
 						ext.Name = attr.Value;
 					else
-						ext.Attributes.Add(attr.Name, attr.Value);
+						ext.Attributes.Add(attr.LocalName, attr.Value);
 				}
 			}
 
@@ -280,7 +294,7 @@ namespace BLToolkit.Reflection.Extension
 		{
 			AttributeExtension ext = new AttributeExtension();
 
-			ext.Name = attributeNode.Name;
+			ext.Name = attributeNode.LocalName;
 
 			if (attributeNode.Attributes != null)
 			{
@@ -288,10 +302,10 @@ namespace BLToolkit.Reflection.Extension
 
 				foreach (XmlAttribute attr in attributeNode.Attributes)
 				{
-					if (attr.Name == ValueName.Type)
+					if (attr.LocalName == ValueName.Type)
 						ext.Values.Add(ValueName.ValueType, attr.Value);
 					else
-						ext.Values.Add(attr.Name, attr.Value);
+						ext.Values.Add(attr.LocalName, attr.Value);
 				}
 			}
 

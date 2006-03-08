@@ -9,6 +9,7 @@ using System.Text;
 using BLToolkit.Data;
 using BLToolkit.Mapping;
 using BLToolkit.Reflection;
+using BLToolkit.Reflection.Extension;
 
 namespace BLToolkit.DataAccess
 {
@@ -57,6 +58,13 @@ namespace BLToolkit.DataAccess
 				throw new InvalidOperationException("DbManager object is not provided.");
 
 			_dbManager.CommitTransaction();
+		}
+
+		private ExtensionList _extensions;
+		public  ExtensionList  Extensions
+		{
+			get { return _extensions;  }
+			set { _extensions = value; }
 		}
 
 		#endregion
@@ -150,6 +158,13 @@ namespace BLToolkit.DataAccess
 
 		protected virtual string GetTableName(Type type)
 		{
+			TypeExtension typeExt = TypeExtension.GetTypeExtenstion(type, Extensions);
+
+			object value = typeExt.Attributes["TableName"].Value;
+
+			if (value != null)
+				return value.ToString();
+
 			object[] attrs = type.GetCustomAttributes(typeof(TableNameAttribute), true);
 
 			if (attrs.Length > 0)
@@ -398,33 +413,43 @@ namespace BLToolkit.DataAccess
 
 		protected MemberMapper[] GetNonKeyFieldList(ObjectMapper om)
 		{
-			ArrayList list = new ArrayList();
+			TypeExtension typeExt = TypeExtension.GetTypeExtenstion(om.TypeAccessor.OriginalType, Extensions);
+			ArrayList     list    = new ArrayList();
 
 			foreach (MemberMapper mm in om)
 			{
 				MemberAccessor ma = mm.MemberAccessor;
 
-				if ((ma.Type.IsValueType || ma.Type == typeof(string)) &&
-					ma.GetAttributes(typeof(PrimaryKeyAttribute)) == null)
+				if (ma.Type.IsValueType || ma.Type == typeof(string) || ma.Type == typeof(byte[]))
 				{
-					list.Add(mm);
+					if (typeExt[ma.Name]["PrimaryKey"].Value          == null &&
+						ma.GetAttributes(typeof(PrimaryKeyAttribute)) == null)
+					{
+						list.Add(mm);
+					}
 				}
 			}
 
 			return (MemberMapper[])list.ToArray(typeof(MemberMapper));
 		}
 
+		class MemberOrder
+		{
+			public MemberOrder(MemberMapper memberMapper, int order)
+			{
+				MemberMapper = memberMapper;
+				Order        = order;
+			}
+
+			public MemberMapper MemberMapper;
+			public int          Order;
+		}
+
 		class PrimaryKeyComparer : IComparer
 		{
 			public int Compare(object x, object y)
 			{
-				object[] ax = ((MemberMapper)x).MemberAccessor.GetAttributes(typeof(PrimaryKeyAttribute));
-				object[] ay = ((MemberMapper)y).MemberAccessor.GetAttributes(typeof(PrimaryKeyAttribute));
-
-				int ix = ((PrimaryKeyAttribute)ax[0]).Order;
-				int iy = ((PrimaryKeyAttribute)ay[0]).Order;
-
-				return ix - iy;
+				return ((MemberOrder)x).Order - ((MemberOrder)y).Order;
 			}
 		}
 
@@ -437,23 +462,37 @@ namespace BLToolkit.DataAccess
 
 			if (mmList == null)
 			{
-				ArrayList list = new ArrayList();
+				TypeExtension typeExt = TypeExtension.GetTypeExtenstion(type, Extensions);
+				ArrayList     list    = new ArrayList();
 
 				foreach (MemberMapper mm in MappingSchema.GetObjectMapper(type))
 				{
 					MemberAccessor ma = mm.MemberAccessor;
 
-					if ((ma.Type.IsValueType || ma.Type == typeof(string)) &&
-						ma.GetAttributes(typeof(PrimaryKeyAttribute)) != null)
+					if ((ma.Type.IsValueType || ma.Type == typeof(string) || ma.Type == typeof(byte[])))
 					{
-						list.Add(mm);
+						object value = typeExt[ma.Name]["PrimaryKey"].Value;
+
+						if (value != null)
+						{
+							list.Add(new MemberOrder(mm, (int)TypeExtension.ChangeType(value, typeof(int))));
+						}
+						else
+						{
+							object[] attrs = ma.GetAttributes(typeof(PrimaryKeyAttribute));
+
+							if (attrs != null)
+								list.Add(new MemberOrder(mm, ((PrimaryKeyAttribute)attrs[0]).Order));
+						}
 					}
 				}
 
 				list.Sort(_primaryKeyComparer);
 
-				mmList = (MemberMapper[])list.ToArray(typeof(MemberMapper));
-				_keyList[type] = mmList;
+				_keyList[type] = mmList = new MemberMapper[list.Count];
+
+				for (int i = 0; i < list.Count; i++)
+					mmList[i] = ((MemberOrder)list[i]).MemberMapper;
 			}
 
 			return mmList;
@@ -517,24 +556,31 @@ namespace BLToolkit.DataAccess
 
 		protected string CreateInsertSqlText(DbManager db, Type type)
 		{
-			ObjectMapper  om = MappingSchema.GetObjectMapper(type);
-			StringBuilder sb = new StringBuilder();
+			TypeExtension typeExt = TypeExtension.GetTypeExtenstion(type, Extensions);
+			ObjectMapper  om      = MappingSchema.GetObjectMapper(type);
+			ArrayList     list    = new ArrayList();
+			StringBuilder sb      = new StringBuilder();
 
 			sb.AppendFormat("INSERT INTO [{0}] (\n", GetTableName(type));
 
-			//foreach (MemberMapper mm in GetNonKeyFieldList(om))
 			foreach (MemberMapper mm in GetFieldList(om))
-				if (mm.MemberAccessor.GetAttributes(typeof(NonUpdatableAttribute)) == null)
+			{
+				object value = typeExt[mm.MemberAccessor.Name]["NonUpdatable"].Value;
+
+				if ((value != null && (bool)TypeExtension.ChangeType(value, typeof(bool)) == true) ||
+					mm.MemberAccessor.GetAttributes(typeof(NonUpdatableAttribute)) == null)
+				{
 					sb.AppendFormat("\t[{0}],\n", mm.Name);
+					list.Add(mm);
+				}
+			}
 
 			sb.Remove(sb.Length - 2, 1);
 
 			sb.Append(") VALUES (\n");
 
-			//foreach (MemberMapper mm in GetNonKeyFieldList(om))
-			foreach (MemberMapper mm in GetFieldList(om))
-				if (mm.MemberAccessor.GetAttributes(typeof(NonUpdatableAttribute)) == null)
-					sb.AppendFormat("\t{0},\n", db.DataProvider.GetParameterName(mm.Name));
+			foreach (MemberMapper mm in list)
+				sb.AppendFormat("\t{0},\n", db.DataProvider.GetParameterName(mm.Name));
 
 			sb.Remove(sb.Length - 2, 1);
 
@@ -545,15 +591,22 @@ namespace BLToolkit.DataAccess
 
 		protected string CreateUpdateSqlText(DbManager db, Type type)
 		{
-			ObjectMapper  om = MappingSchema.GetObjectMapper(type);
-			StringBuilder sb = new StringBuilder();
+			TypeExtension typeExt = TypeExtension.GetTypeExtenstion(type, Extensions);
+			ObjectMapper  om      = MappingSchema.GetObjectMapper(type);
+			StringBuilder sb      = new StringBuilder();
 
 			sb.AppendFormat("UPDATE\n\t[{0}]\nSET\n", GetTableName(type));
 
-			//foreach (MemberMapper mm in GetNonKeyFieldList(om))
 			foreach (MemberMapper mm in GetFieldList(om))
-				if (mm.MemberAccessor.GetAttributes(typeof(NonUpdatableAttribute)) == null)
+			{
+				object value = typeExt[mm.MemberAccessor.Name]["NonUpdatable"].Value;
+
+				if ((value != null && (bool)TypeExtension.ChangeType(value, typeof(bool)) == true) ||
+					mm.MemberAccessor.GetAttributes(typeof(NonUpdatableAttribute)) == null)
+				{
 					sb.AppendFormat("\t[{0}] = {1},\n", mm.Name, db.DataProvider.GetParameterName(mm.Name));
+				}
+			}
 
 			sb.Remove(sb.Length - 2, 1);
 
@@ -614,7 +667,8 @@ namespace BLToolkit.DataAccess
 
 			if (key.Length == 1)
 			{
-				return new IDbDataParameter[] {
+				return new IDbDataParameter[]
+				{
 					db.Parameter(db.DataProvider.GetParameterName(names[0]), key[0])
 				};
 			}

@@ -13,7 +13,7 @@ namespace HowTo.DataAccess
 	[TestFixture]
 	public class AbstractAccessor
 	{
-		public /*[a]*/abstract/*[/a]*/ class /*[a]*/PersonAccessor/*[/a]*/ : DataAccessor<Person>
+		public /*[a]*/abstract/*[/a]*/ class /*[a]*/PersonAccessor : DataAccessor<Person>/*[/a]*/
 		{
 			public /*[a]*/abstract/*[/a]*/ Person  /*[a]*/SelectByName/*[/a]*/(Person person);
 			public /*[a]*/abstract/*[/a]*/ Person  /*[a]*/SelectByName/*[/a]*/(string firstName, string lastName);

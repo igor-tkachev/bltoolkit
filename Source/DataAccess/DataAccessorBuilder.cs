@@ -87,7 +87,7 @@ namespace BLToolkit.DataAccess
 			{
 				ExecuteNonQuery();
 			}
-			else if (returnType.IsValueType || returnType == typeof(string))
+			else if (returnType.IsValueType || returnType == typeof(string) || returnType == typeof(byte[]))
 			{
 				ExecuteScalar();
 			}

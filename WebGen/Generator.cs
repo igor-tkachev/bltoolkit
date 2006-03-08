@@ -80,6 +80,7 @@ namespace WebGen
 				switch (ext)
 				{
 					case ".config":
+					case ".xml":
 					case ".sql":
 						break;
 					case ".htm":
@@ -143,6 +144,7 @@ namespace WebGen
 				{
 					case ".cs":     code = "[c#]"   + code + "[/c#]";   break;
 					case ".vb":     code = "[vb]"   + code + "[/vb]";   break;
+					case ".xml":
 					case ".config": code = "[xml]"  + code + "[/xml]";  break;
 					case ".sql":    code = "[sql]"  + code + "[/sql]";  break;
 					default   :     code = "[code]" + code + "[/code]"; break;

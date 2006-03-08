@@ -42,6 +42,8 @@
     <Content Include="Content\Doc\ComponentModel\index.htm" />
     <None Include="Content\Doc\DataAccess\SQL\SelectByKeySql.sql" />
     <Content Include="Content\Doc\DataAccess\AbstractAccessor.htm" />
+    <Content Include="Content\Doc\DataAccess\XmlExtension.htm" />
+    <Content Include="Content\Doc\DataAccess\NonUpdatableAttribute.htm" />
     <Content Include="Content\Doc\DataAccess\PrimaryKeyAttribute.htm" />
     <Content Include="Content\Doc\DataAccess\TableNameAttribute.htm" />
     <Content Include="Content\Doc\DataAccess\Delete.htm" />
@@ -85,6 +87,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <None Include="Content\Doc\DataAccess\SQL\NonUpdatableAttribute.sql" />
     <None Include="Content\Doc\DataAccess\SQL\MultipleSelectByKeySql.sql" />
     <None Include="Content\Doc\DataAccess\SQL\SelectByKey2.sql" />
     <None Include="Content\Doc\DataAccess\SQL\Delete.sql" />

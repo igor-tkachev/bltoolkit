@@ -1,0 +1,9 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Types
+	xmlns    = "urn:schemas-bltoolkit-net:typeinfo"
+	xmlns:da = "urn:schemas-bltoolkit-net:dataaccess">
+
+	<Type Name="MyPersonObject" da:TableName="Person">
+		<Member Name="ID" da:PrimaryKey="1" da:NonUpdatable="1" />
+	</Type>
+</Types>
