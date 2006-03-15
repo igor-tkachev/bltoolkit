@@ -46,6 +46,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>PersonDataSet2.xsd</DependentUpon>
     </Compile>
+    <Compile Include="DataAccess\SqlTest.cs" />
     <Compile Include="Data\BinaryTest.cs" />
     <Compile Include="Data\DbManagerTest.cs" />
     <Compile Include="EditableObjects\EditableObjectTest.cs" />

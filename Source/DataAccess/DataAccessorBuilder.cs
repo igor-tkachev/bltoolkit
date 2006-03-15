@@ -458,7 +458,8 @@ namespace BLToolkit.DataAccess
 							.ldloc    (_locManager)
 							.callvirt (typeof(DbManager).GetProperty("DataProvider").GetGetMethod())
 							.ldstr    (paramName)
-							.callvirt (typeof(IDataProvider), "GetParameterName", typeof(string))
+							.ldc_i4   ((int)ConvertType.NameToParameter)
+							.callvirt (typeof(IDataProvider), "Convert", typeof(string), typeof(ConvertType))
 							;
 					}
 					else

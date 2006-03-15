@@ -51,24 +51,33 @@ namespace BLToolkit.Data.DataProvider
 		/// <param name="command">The IDbCommand referencing the stored procedure for which the parameter information is to be derived. The derived parameters will be populated into the Parameters of this command.</param>
 		public virtual bool DeriveParameters(IDbCommand command)
 		{
-			if (command.Connection.ConnectionString.IndexOf("Jet.OLEDB") > 0)
-				return false;
-
 			OleDbCommandBuilder.DeriveParameters((OleDbCommand)command);
-
 			return true;
 		}
 
-		public virtual string GetParameterName(string name)
+		public virtual object Convert(object value, ConvertType convertType)
 		{
-			return "@" + name;
+			switch (convertType)
+			{
+				case ConvertType.NameToQueryParameter:
+				case ConvertType.NameToParameter:
+					return "@" + value;
+
+				case ConvertType.ParameterToName:
+					if (value != null)
+					{
+						string str = value.ToString();
+						return str.Length > 0 && str[0] == '@' ? str.Substring(1) : str;
+					}
+
+					break;
+			}
+
+			return value;
 		}
 
-		public virtual string GetNameFromParameter(string parameterName)
+		public virtual void SetParameterType(IDbDataParameter parameter, object value)
 		{
-			return parameterName != null && parameterName.Length > 0 && parameterName[0] == '@'?
-				parameterName.Substring(1):
-				parameterName;
 		}
 
 		/// <summary>

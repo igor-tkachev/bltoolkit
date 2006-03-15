@@ -7,6 +7,7 @@ using System.Data;
 using System.Text;
 
 using BLToolkit.Data;
+using BLToolkit.Data.DataProvider;
 using BLToolkit.Mapping;
 using BLToolkit.Reflection;
 using BLToolkit.Reflection.Extension;
@@ -33,7 +34,12 @@ namespace BLToolkit.DataAccess
 
 		public virtual DbManager GetDbManager()
 		{
-			return _dbManager != null? _dbManager: new DbManager();
+			return _dbManager != null? _dbManager: CreateDbManager();
+		}
+
+		protected virtual DbManager CreateDbManager()
+		{
+			return new DbManager();
 		}
 
 		public virtual void BeginTransaction()
@@ -405,8 +411,7 @@ namespace BLToolkit.DataAccess
 			ArrayList list = new ArrayList();
 
 			foreach (MemberMapper mm in om)
-				if (mm.MemberAccessor.Type.IsValueType || mm.MemberAccessor.Type == typeof(string))
-					list.Add(mm);
+				list.Add(mm);
 
 			return (MemberMapper[])list.ToArray(typeof(MemberMapper));
 		}
@@ -420,13 +425,10 @@ namespace BLToolkit.DataAccess
 			{
 				MemberAccessor ma = mm.MemberAccessor;
 
-				if (ma.Type.IsValueType || ma.Type == typeof(string) || ma.Type == typeof(byte[]))
+				if (typeExt[ma.Name]["PrimaryKey"].Value          == null &&
+					ma.GetAttributes(typeof(PrimaryKeyAttribute)) == null)
 				{
-					if (typeExt[ma.Name]["PrimaryKey"].Value          == null &&
-						ma.GetAttributes(typeof(PrimaryKeyAttribute)) == null)
-					{
-						list.Add(mm);
-					}
+					list.Add(mm);
 				}
 			}
 
@@ -498,6 +500,7 @@ namespace BLToolkit.DataAccess
 			return mmList;
 		}
 
+		[Obsolete]
 		protected string[] GetFieldNameList(MemberMapper[] mm)
 		{
 			string[] list = new string[mm.Length];
@@ -508,58 +511,73 @@ namespace BLToolkit.DataAccess
 			return list;
 		}
 
-		protected void AddWherePK(DbManager db, StringBuilder sb, Type type)
+		protected void AddWherePK(DbManager db, SqlQueryInfo query, StringBuilder sb)
 		{
 			sb.Append("WHERE\n");
 
-			foreach (string s in GetFieldNameList(GetKeyFieldList(type)))
-				sb.AppendFormat("\t[{0}] = {1} AND\n", s, db.DataProvider.GetParameterName(s));
+			MemberMapper[] memberMappers = GetKeyFieldList(query.ObjectType);
+
+			foreach (MemberMapper mm in memberMappers)
+			{
+				SqlQueryParameterInfo p = query.AddParameter(
+					db.DataProvider.Convert(mm.Name + "_W", ConvertType.NameToQueryParameter).ToString(),
+					mm.Name);
+
+				sb.AppendFormat("\t[{0}] = {1} AND\n", p.FieldName, p.ParameterName);
+			}
 
 			sb.Remove(sb.Length - 5, 5);
 		}
 
-		protected string CreateSelectByKeySqlText(DbManager db, Type type)
+		protected SqlQueryInfo CreateSelectByKeySqlText(DbManager db, Type type)
 		{
-			ObjectMapper  om = MappingSchema.GetObjectMapper(type);
-			StringBuilder sb = new StringBuilder();
+			ObjectMapper  om    = MappingSchema.GetObjectMapper(type);
+			StringBuilder sb    = new StringBuilder();
+			SqlQueryInfo  query = new SqlQueryInfo(om);
 
 			sb.Append("SELECT\n");
 
-			foreach (string s in GetFieldNameList(GetFieldList(om)))
-				sb.AppendFormat("\t[{0}],\n", s);
+			foreach (MemberMapper mm in GetFieldList(om))
+				sb.AppendFormat("\t[{0}],\n", mm.Name);
 			
 			sb.Remove(sb.Length - 2, 1);
 
 			sb.AppendFormat("FROM\n\t[{0}]\n", GetTableName(type));
 
-			AddWherePK(db, sb, type);
+			AddWherePK(db, query, sb);
 
-			return sb.ToString();
+			query.QueryText = sb.ToString();
+
+			return query;
 		}
 
-		protected string CreateSelectAllSqlText(DbManager db, Type type)
+		protected SqlQueryInfo CreateSelectAllSqlText(DbManager db, Type type)
 		{
-			ObjectMapper  om = MappingSchema.GetObjectMapper(type);
-			StringBuilder sb = new StringBuilder();
+			ObjectMapper  om    = MappingSchema.GetObjectMapper(type);
+			StringBuilder sb    = new StringBuilder();
+			SqlQueryInfo  query = new SqlQueryInfo(om);
 
 			sb.Append("SELECT\n");
 
-			foreach (string s in GetFieldNameList(GetFieldList(om)))
-				sb.AppendFormat("\t[{0}],\n", s);
+			foreach (MemberMapper mm in GetFieldList(om))
+				sb.AppendFormat("\t[{0}],\n", mm.Name);
 
 			sb.Remove(sb.Length - 2, 1);
 
 			sb.AppendFormat("FROM\n\t[{0}]", GetTableName(type));
 
-			return sb.ToString();
+			query.QueryText = sb.ToString();
+
+			return query;
 		}
 
-		protected string CreateInsertSqlText(DbManager db, Type type)
+		protected SqlQueryInfo CreateInsertSqlText(DbManager db, Type type)
 		{
 			TypeExtension typeExt = TypeExtension.GetTypeExtenstion(type, Extensions);
 			ObjectMapper  om      = MappingSchema.GetObjectMapper(type);
 			ArrayList     list    = new ArrayList();
 			StringBuilder sb      = new StringBuilder();
+			SqlQueryInfo  query   = new SqlQueryInfo(om);
 
 			sb.AppendFormat("INSERT INTO [{0}] (\n", GetTableName(type));
 
@@ -580,20 +598,29 @@ namespace BLToolkit.DataAccess
 			sb.Append(") VALUES (\n");
 
 			foreach (MemberMapper mm in list)
-				sb.AppendFormat("\t{0},\n", db.DataProvider.GetParameterName(mm.Name));
+			{
+				SqlQueryParameterInfo p = query.AddParameter(
+					db.DataProvider.Convert(mm.Name, ConvertType.NameToQueryParameter).ToString(),
+					mm.Name);
+
+				sb.AppendFormat("\t{0},\n", p.ParameterName);
+			}
 
 			sb.Remove(sb.Length - 2, 1);
 
 			sb.Append(")");
 
-			return sb.ToString();
+			query.QueryText = sb.ToString();
+
+			return query;
 		}
 
-		protected string CreateUpdateSqlText(DbManager db, Type type)
+		protected SqlQueryInfo CreateUpdateSqlText(DbManager db, Type type)
 		{
 			TypeExtension typeExt = TypeExtension.GetTypeExtenstion(type, Extensions);
 			ObjectMapper  om      = MappingSchema.GetObjectMapper(type);
 			StringBuilder sb      = new StringBuilder();
+			SqlQueryInfo  query   = new SqlQueryInfo(om);
 
 			sb.AppendFormat("UPDATE\n\t[{0}]\nSET\n", GetTableName(type));
 
@@ -604,30 +631,39 @@ namespace BLToolkit.DataAccess
 				if ((value != null && (bool)TypeExtension.ChangeType(value, typeof(bool)) == true) ||
 					mm.MemberAccessor.GetAttributes(typeof(NonUpdatableAttribute)) == null)
 				{
-					sb.AppendFormat("\t[{0}] = {1},\n", mm.Name, db.DataProvider.GetParameterName(mm.Name));
+					SqlQueryParameterInfo p = query.AddParameter(
+						db.DataProvider.Convert(mm.Name, ConvertType.NameToQueryParameter).ToString(),
+						mm.Name);
+
+					sb.AppendFormat("\t[{0}] = {1},\n", p.FieldName, p.ParameterName);
 				}
 			}
 
 			sb.Remove(sb.Length - 2, 1);
 
-			AddWherePK(db, sb, type);
+			AddWherePK(db, query, sb);
 
-			return sb.ToString();
+			query.QueryText = sb.ToString();
+
+			return query;
 		}
 
-		protected string CreateDeleteSqlText(DbManager db, Type type)
+		protected SqlQueryInfo CreateDeleteSqlText(DbManager db, Type type)
 		{
-			ObjectMapper  om = MappingSchema.GetObjectMapper(type);
-			StringBuilder sb = new StringBuilder();
+			ObjectMapper  om    = MappingSchema.GetObjectMapper(type);
+			StringBuilder sb    = new StringBuilder();
+			SqlQueryInfo  query = new SqlQueryInfo(om);
 
 			sb.AppendFormat("DELETE FROM\n\t[{0}]\n", GetTableName(type));
 
-			AddWherePK(db, sb, type);
+			AddWherePK(db, query, sb);
 
-			return sb.ToString();
+			query.QueryText = sb.ToString();
+
+			return query;
 		}
 
-		protected virtual string CreateSqlText(DbManager db, Type type, string actionName)
+		protected virtual SqlQueryInfo CreateSqlText(DbManager db, Type type, string actionName)
 		{
 			switch (actionName)
 			{
@@ -642,45 +678,20 @@ namespace BLToolkit.DataAccess
 			}
 		}
 
-		private static Hashtable _actionSql = new Hashtable();
+		private static Hashtable _actionSqlQueryInfo = new Hashtable();
 
-		protected virtual string GetSqlText(DbManager db, Type type, string actionName)
+		protected virtual SqlQueryInfo GetSqlQueryInfo(DbManager db, Type type, string actionName)
 		{
-			string key = type.FullName + "$" + actionName;
-			string sql = (string)_actionSql[key];
+			string       key   = type.FullName + "$" + actionName + "$" + db.DataProvider.GetHashCode();
+			SqlQueryInfo query = (SqlQueryInfo)_actionSqlQueryInfo[key];
 
-			if (sql == null)
+			if (query == null)
 			{
-				sql = CreateSqlText(db, type, actionName);
-				_actionSql[key] = sql;
+				query = CreateSqlText(db, type, actionName);
+				_actionSqlQueryInfo[key] = query;
 			}
 
-			return sql;
-		}
-
-		protected virtual IDbDataParameter[] GetParameters(DbManager db, Type type, object[] key)
-		{
-			string[] names = GetFieldNameList(GetKeyFieldList(type));
-
-			if (names.Length != key.Length)
-				throw new DataAccessException("Parameter list does match key list.");
-
-			if (key.Length == 1)
-			{
-				return new IDbDataParameter[]
-				{
-					db.Parameter(db.DataProvider.GetParameterName(names[0]), key[0])
-				};
-			}
-			else
-			{
-				ArrayList list = new ArrayList();
-
-				for (int i = 0; i < names.Length; i++)
-					list.Add(db.Parameter(db.DataProvider.GetParameterName(names[i]), key[i]));
-
-				return (IDbDataParameter[])list.ToArray(typeof(IDbDataParameter));
-			}
+			return query;
 		}
 
 			#endregion
@@ -689,10 +700,10 @@ namespace BLToolkit.DataAccess
 
 		public object SelectByKeySql(DbManager db, Type type, params object[] keys)
 		{
+			SqlQueryInfo query = GetSqlQueryInfo(db, type, "SelectByKey");
+
 			return db
-				.SetCommand(
-					GetSqlText(db, type, "SelectByKey"),
-					GetParameters(db, type, keys))
+				.SetCommand(query.QueryText, query.GetParameters(db, keys))
 				.ExecuteObject(type);
 		}
 
@@ -729,8 +740,10 @@ namespace BLToolkit.DataAccess
 
 		public ArrayList SelectAllSql(DbManager db, Type type)
 		{
+			SqlQueryInfo query = GetSqlQueryInfo(db, type, "SelectAll");
+
 			return db
-				.SetCommand(GetSqlText(db, type, "SelectAll"))
+				.SetCommand(query.QueryText)
 				.ExecuteList(type);
 		}
 
@@ -752,8 +765,10 @@ namespace BLToolkit.DataAccess
 #if FW2
 		public List<T> SelectAllSql<T>(DbManager db)
 		{
+			SqlQueryInfo query = GetSqlQueryInfo(db, typeof(T), "SelectAll");
+
 			return db
-				.SetCommand(GetSqlText(db, typeof(T), "SelectAll"))
+				.SetCommand(query.QueryText)
 				.ExecuteList<T>();
 		}
 
@@ -779,10 +794,10 @@ namespace BLToolkit.DataAccess
 
 		public void InsertSql(DbManager db, object obj)
 		{
+			SqlQueryInfo query = GetSqlQueryInfo(db, obj.GetType(), "Insert");
+
 			db
-			  .SetCommand(
-					GetSqlText(db, obj.GetType(), "Insert"),
-					db.CreateParameters(obj))
+			  .SetCommand(query.QueryText, query.GetParameters(db, obj))
 			  .ExecuteNonQuery();
 		}
 
@@ -807,10 +822,10 @@ namespace BLToolkit.DataAccess
 
 		public int UpdateSql(DbManager db, object obj)
 		{
+			SqlQueryInfo query = GetSqlQueryInfo(db, obj.GetType(), "Update");
+
 			return db
-				.SetCommand(
-					GetSqlText(db, obj.GetType(), "Update"),
-					db.CreateParameters(obj))
+				.SetCommand(query.QueryText, query.GetParameters(db, obj))
 				.ExecuteNonQuery();
 		}
 
@@ -835,10 +850,10 @@ namespace BLToolkit.DataAccess
 
 		public int DeleteByKeySql(DbManager db, Type type, params object[] key)
 		{
+			SqlQueryInfo query = GetSqlQueryInfo(db, type, "Delete");
+
 			return db
-				.SetCommand(
-					GetSqlText(db, type, "Delete"), 
-					GetParameters(db, type, key))
+				.SetCommand(query.QueryText, query.GetParameters(db, key))
 				.ExecuteNonQuery();
 		}
 
@@ -875,15 +890,10 @@ namespace BLToolkit.DataAccess
 
 		public int DeleteSql(DbManager db, object obj)
 		{
-			ArrayList list = new ArrayList();
-
-			foreach (MemberMapper mm in GetKeyFieldList((obj.GetType())))
-				list.Add(db.Parameter(db.DataProvider.GetParameterName(mm.Name), mm.GetValue(obj)));
+			SqlQueryInfo query = GetSqlQueryInfo(db, obj.GetType(), "Delete");
 
 			return db
-				.SetCommand(
-					GetSqlText(db, obj.GetType(), "Delete"),
-					(IDbDataParameter[])list.ToArray(typeof(IDbDataParameter)))
+				.SetCommand(query.QueryText, query.GetParameters(db, obj))
 				.ExecuteNonQuery();
 		}
 

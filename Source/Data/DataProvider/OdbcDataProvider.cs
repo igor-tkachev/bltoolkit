@@ -52,20 +52,32 @@ namespace BLToolkit.Data.DataProvider
 		public virtual bool DeriveParameters(IDbCommand command)
 		{
 			OdbcCommandBuilder.DeriveParameters((OdbcCommand)command);
-
 			return true;
 		}
 
-		public virtual string GetParameterName(string name)
+		public virtual object Convert(object value, ConvertType convertType)
 		{
-			return "@" + name;
+			switch (convertType)
+			{
+				case ConvertType.NameToQueryParameter:
+				case ConvertType.NameToParameter:
+					return "@" + value;
+
+				case ConvertType.ParameterToName:
+					if (value != null)
+					{
+						string str = value.ToString();
+						return str.Length > 0 && str[0] == '@' ? str.Substring(1) : str;
+					}
+
+					break;
+			}
+
+			return value;
 		}
 
-		public virtual string GetNameFromParameter(string parameterName)
+		public virtual void SetParameterType(IDbDataParameter parameter, object value)
 		{
-			return parameterName != null && parameterName.Length > 0 && parameterName[0] == '@'?
-				parameterName.Substring(1):
-				parameterName;
 		}
 
 		/// <summary>
