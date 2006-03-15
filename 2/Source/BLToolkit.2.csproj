@@ -37,6 +37,7 @@
     <Reference Include="System.Design" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Drawing.Design" />
+    <Reference Include="System.Web" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
   </ItemGroup>
@@ -50,6 +51,7 @@
     <Compile Include="ComponentModel\Design\GetTypeDialog.Designer.cs">
       <DependentUpon>GetTypeDialog.cs</DependentUpon>
     </Compile>
+    <Compile Include="ComponentModel\Design\TypeNameEditor.cs" />
     <Compile Include="ComponentModel\Design\TypePicker.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -73,13 +75,18 @@
     <Compile Include="DataAccess\PrimaryKeyAttribute.cs" />
     <Compile Include="DataAccess\DataAccessException.cs" />
     <Compile Include="DataAccess\SprocNameAttribute.cs" />
+    <Compile Include="DataAccess\SqlQueryInfo.cs" />
+    <Compile Include="DataAccess\SqlQueryParameterInfo.cs" />
     <Compile Include="DataAccess\TableNameAttribute.cs" />
     <Compile Include="Data\DataException.cs" />
+    <Compile Include="Data\DataProvider\AccessDataProvider.cs" />
+    <Compile Include="Data\DataProvider\ConvertType.cs" />
     <Compile Include="Data\DataProvider\IDataProvider.cs" />
     <Compile Include="Data\DataProvider\OdbcDataProvider.cs" />
     <Compile Include="Data\DataProvider\OleDbDataProvider.cs" />
     <Compile Include="Data\DataProvider\OracleDataProvider.cs" />
     <Compile Include="Data\DataProvider\SqlDataProvider.cs" />
+    <Compile Include="Data\DataProvider\SybaseAdoDataProvider.cs" />
     <Compile Include="Data\DbManager.cs">
     </Compile>
     <Compile Include="Data\OperationType.cs" />
@@ -215,6 +222,7 @@
     <Compile Include="Validation\ValidationContext.cs" />
     <Compile Include="Validation\Validator.cs" />
     <Compile Include="Validation\ValidatorBaseAttribute.cs" />
+    <Compile Include="Web\UI\WebObjectBinder.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="ComponentModel\Design\GetTypeDialog.resx">
@@ -261,6 +269,7 @@
     <Content Include="Doc\License.txt" />
     <Content Include="Doc\OnlineDoc.txt" />
     <Content Include="Reflection\Extension\Test.xml" />
+    <EmbeddedResource Include="Web\UI\WebObjectBinder.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>

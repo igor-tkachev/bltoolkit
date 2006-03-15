@@ -188,6 +188,16 @@
                     BuildAction = "Compile"
                 />
                 <File
+                    RelPath = "Data\DataProvider\AccessDataProvider.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "Data\DataProvider\ConvertType.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
                     RelPath = "Data\DataProvider\IDataProvider.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
@@ -209,6 +219,11 @@
                 />
                 <File
                     RelPath = "Data\DataProvider\SqlDataProvider.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "Data\DataProvider\SybaseAdoDataProvider.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
                 />
@@ -269,6 +284,16 @@
                 />
                 <File
                     RelPath = "DataAccess\SprocNameAttribute.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "DataAccess\SqlQueryInfo.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "DataAccess\SqlQueryParameterInfo.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
                 />

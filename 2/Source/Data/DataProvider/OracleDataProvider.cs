@@ -52,18 +52,16 @@ namespace BLToolkit.Data.DataProvider
 		public virtual bool DeriveParameters(IDbCommand command)
 		{
 			OracleCommandBuilder.DeriveParameters((OracleCommand)command);
-
 			return true;
 		}
 
-		public virtual string GetParameterName(string name)
+		public virtual object Convert(object value, ConvertType convertType)
 		{
-			return name;
+			return value;
 		}
 
-		public virtual string GetNameFromParameter(string parameterName)
+		public virtual void SetParameterType(IDbDataParameter parameter, object value)
 		{
-			return parameterName;
 		}
 
 		/// <summary>

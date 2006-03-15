@@ -31,20 +31,12 @@ namespace BLToolkit.DataAccess
 			return base.GetSpName(type, actionName);
 		}
 
-		protected override string GetSqlText(DbManager db, Type type, string actionName)
+		protected override SqlQueryInfo GetSqlQueryInfo(DbManager db, Type type, string actionName)
 		{
 			if (type == null)
 				type = typeof(T);
 
-			return base.GetSqlText(db, type, actionName);
-		}
-
-		protected override IDbDataParameter[] GetParameters(DbManager db, Type type, object[] key)
-		{
-			if (type == null)
-				type = typeof(T);
-
-			return base.GetParameters(db, type, key);
+			return base.GetSqlQueryInfo(db, type, actionName);
 		}
 
 		#endregion

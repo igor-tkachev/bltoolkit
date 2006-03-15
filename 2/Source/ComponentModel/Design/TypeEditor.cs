@@ -1,6 +1,7 @@
 using System;
 using System.Drawing.Design;
 using System.ComponentModel;
+using System.ComponentModel.Design.Data;
 using System.Data;
 using System.Collections;
 using System.Windows.Forms;
@@ -13,9 +14,10 @@ namespace BLToolkit.ComponentModel.Design
 		{
 		}
 
-		public override object EditValue(ITypeDescriptorContext context, IServiceProvider provider, object value)
+		public override object EditValue(
+			ITypeDescriptorContext context, IServiceProvider provider, object value)
 		{
-			return new TypePicker().PickType(provider, value as Type, delegate(Type type)
+			Predicate<Type> filter = delegate(Type type)
 			{
 				return
 					type.IsPublic     &&
@@ -32,12 +34,31 @@ namespace BLToolkit.ComponentModel.Design
 					!typeof(DataRow).    IsAssignableFrom(type) &&
 					!typeof(DataRowView).IsAssignableFrom(type) &&
 					!typeof(DataSet).    IsAssignableFrom(type);
-			});
+			};
+
+			DataSourceProviderService dspService =
+				(DataSourceProviderService)provider.GetService(typeof(DataSourceProviderService));
+
+			if (dspService == null || !dspService.SupportsAddNewDataSource)
+			{
+				GetTypeDialog dlg = new GetTypeDialog(provider, typeof(object), filter);
+
+				DialogResult result = dlg.ShowDialog();
+
+				return result == DialogResult.OK && dlg.ResultType != null?
+					dlg.ResultType: value;
+			}
+
+			return new TypePicker().PickType(provider, value as Type, filter);
 		}
 
 		public override UITypeEditorEditStyle GetEditStyle(ITypeDescriptorContext context)
 		{
-			return UITypeEditorEditStyle.DropDown;	
+			DataSourceProviderService dspService =
+				(DataSourceProviderService)context.GetService(typeof(DataSourceProviderService));
+
+			return dspService == null || !dspService.SupportsAddNewDataSource?
+				UITypeEditorEditStyle.Modal: UITypeEditorEditStyle.DropDown;
 		}
 
 		public override bool IsDropDownResizable

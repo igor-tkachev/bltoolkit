@@ -48,8 +48,9 @@ namespace BLToolkit.Data.DataProvider
 		/// <returns>true - parameters can be derive.</returns>
 		bool DeriveParameters(IDbCommand command);
 
-		string GetParameterName    (string name);
-		string GetNameFromParameter(string parameterName);
+		void   SetParameterType(IDbDataParameter parameter, object value);
+
+		object Convert(object value, ConvertType convertType);
 
 		/// <summary>
 		/// Returns an actual type of the connection object used by this instance of the <see cref="DbManager"/>.

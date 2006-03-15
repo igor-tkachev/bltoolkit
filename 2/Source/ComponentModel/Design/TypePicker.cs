@@ -140,7 +140,7 @@ namespace BLToolkit.ComponentModel.Design
 		{
 			DataSourceProviderService dspService = GetService<DataSourceProviderService>();
 
-			if (dspService == null)
+			if (dspService == null || !dspService.SupportsAddNewDataSource)
 				return;
 
 			DataSourceGroupCollection dataSources = dspService.GetDataSources();
@@ -185,6 +185,11 @@ namespace BLToolkit.ComponentModel.Design
 
 		private void SaveType(Type type)
 		{
+			DataSourceProviderService dspService = GetService<DataSourceProviderService>();
+
+			if (dspService == null || !dspService.SupportsAddNewDataSource)
+				return;
+
 			try
 			{
 				string typeName    = "Microsoft.VSDesigner.VSDesignerPackage.IGenericObjectDataSourcesService, Microsoft.VSDesigner, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a";

@@ -4,7 +4,6 @@ using System.ComponentModel;
 using System.Configuration;
 using System.Data;
 using System.Data.Common;
-using System.Data.OleDb;
 
 #if FW2
 using System.Collections.Generic;
@@ -579,9 +578,11 @@ namespace BLToolkit.Data
 		static DbManager ()
 		{
 			AddDataProvider(new SqlDataProvider());
+			AddDataProvider(new AccessDataProvider());
 			AddDataProvider(new OleDbDataProvider());
 			AddDataProvider(new OdbcDataProvider());
 			AddDataProvider(new OracleDataProvider());
+			AddDataProvider(new SybaseAdoDataProvider());
 		}
 
 		private static string        _firstConfiguration;
@@ -748,7 +749,11 @@ namespace BLToolkit.Data
 						param.Direction == ParameterDirection.Input || 
 						param.Direction == ParameterDirection.InputOutput))
 					{
-						param.SourceColumn = _dataProvider.GetNameFromParameter(name);
+						System.Diagnostics.Debug.WriteLine(string.Format(
+							"Stored Procedure '{0}'. Parameter '{1}' not assigned.", spName, name),
+							typeof(DbManager).Namespace);
+
+						param.SourceColumn = _dataProvider.Convert(name, ConvertType.ParameterToName).ToString();
 					}
 				}
 			}
@@ -1201,8 +1206,12 @@ namespace BLToolkit.Data
 				{
 					paramList.Add(
 						c.AllowDBNull?
-						NullParameter(_dataProvider.GetParameterName(c.ColumnName), dataRow[c.ColumnName]):
-						Parameter    (_dataProvider.GetParameterName(c.ColumnName), dataRow[c.ColumnName]));
+						NullParameter(
+							_dataProvider.Convert(c.ColumnName, ConvertType.NameToParameter).ToString(),
+							dataRow[c.ColumnName]):
+						Parameter(
+							_dataProvider.Convert(c.ColumnName, ConvertType.NameToParameter).ToString(),
+							dataRow[c.ColumnName]));
 				}
 			}
 
@@ -1247,7 +1256,7 @@ namespace BLToolkit.Data
 				if (type.IsClass == false || type == typeof(string) || type == typeof(byte[]))
 				{
 					object value = mm.GetValue(obj);
-					string name  = _dataProvider.GetParameterName(mm.Name);
+					string name  = _dataProvider.Convert(mm.Name, ConvertType.NameToParameter).ToString();
 
 					paramList.Add(mm.MapMemberInfo.Nullable || value == null?
 						NullParameter(name, value):
@@ -1279,9 +1288,10 @@ namespace BLToolkit.Data
 			{
 				if (c.AutoIncrement == false && c.ReadOnly == false)
 				{
-					object o = dataRow[c.ColumnName];
+					object o    = dataRow[c.ColumnName];
+					string name = _dataProvider.Convert(c.ColumnName, ConvertType.NameToParameter).ToString();
 
-					Parameter(_dataProvider.GetParameterName(c.ColumnName)).Value = 
+					Parameter(name).Value =
 						c.AllowDBNull && _mappingSchema.IsNull(o)? DBNull.Value: o;
 				}
 			}
@@ -1304,7 +1314,7 @@ namespace BLToolkit.Data
 
 			foreach (MemberMapper mm in om)
 			{
-				string name  = _dataProvider.GetParameterName(mm.Name);
+				string name  = _dataProvider.Convert(mm.Name, ConvertType.NameToParameter).ToString();
 
 				if (Command.Parameters.Contains(name))
 				{
@@ -1489,8 +1499,7 @@ namespace BLToolkit.Data
 			parameter.ParameterName = parameterName;
 			parameter.Direction     = parameterDirection;
 
-			if (value is DateTime && parameter is OleDbParameter)
-				((OleDbParameter)parameter).OleDbType = OleDbType.Date;
+			_dataProvider.SetParameterType(parameter, value);
 
 			parameter.Value = value != null? value: DBNull.Value;
 
