@@ -10,6 +10,7 @@ using System.ComponentModel;
 using BLToolkit.TypeBuilder;
 using BLToolkit.TypeBuilder.Builders;
 using BLToolkit.Mapping;
+using BLToolkit.ComponentModel;
 
 namespace BLToolkit.Reflection
 {
@@ -133,17 +134,31 @@ namespace BLToolkit.Reflection
 			{
 				if (_propertyDescriptors == null)
 				{
-					PropertyDescriptor[] pd = new PropertyDescriptor[Count];
+					if (TypeHelper.IsSameOrParent(typeof(ICustomTypeDescriptor), OriginalType))
+					{
+						ICustomTypeDescriptor descriptor = CreateInstance() as ICustomTypeDescriptor;
 
-					int i = 0;
-					foreach (MemberAccessor ma in _members.Values)
-						pd[i++] = ma.PropertyDescriptor;
+						if (descriptor != null)
+							_propertyDescriptors = descriptor.GetProperties();
+					}
 
-					_propertyDescriptors = new PropertyDescriptorCollection(pd);
+					if (_propertyDescriptors == null)
+						_propertyDescriptors = CreatePropertyDescriptors();
 				}
 
 				return _propertyDescriptors;
 			}
+		}
+
+		public  PropertyDescriptorCollection  CreatePropertyDescriptors()
+		{
+			PropertyDescriptor[] pd = new PropertyDescriptor[Count];
+
+			int i = 0;
+			foreach (MemberAccessor ma in _members.Values)
+				pd[i++] = ma.PropertyDescriptor;
+
+			return new PropertyDescriptorCollection(pd);
 		}
 
 		#endregion
@@ -247,6 +262,34 @@ namespace BLToolkit.Reflection
 		}
 
 #endif
+
+		#endregion
+
+		#region CustomTypeDescriptor
+
+		private static Hashtable _descriptors = new Hashtable();
+
+		public static ICustomTypeDescriptor GetCustomTypeDescriptor(Type type)
+		{
+			ICustomTypeDescriptor descriptor = (ICustomTypeDescriptor)_descriptors[type];
+
+			if (descriptor == null)
+				descriptor = new CustomTypeDescriptorImpl(type);
+
+			return descriptor;
+		}
+
+		private ICustomTypeDescriptor _customTypeDescriptor;
+		public  ICustomTypeDescriptor  CustomTypeDescriptor
+		{
+			get
+			{
+				if (_customTypeDescriptor == null)
+					_customTypeDescriptor = GetCustomTypeDescriptor(OriginalType);
+
+				return _customTypeDescriptor;
+			}
+		}
 
 		#endregion
 

@@ -68,7 +68,10 @@ namespace BLToolkit.TypeBuilder
 
 			if (ab == null)
 			{
-				string assemblyDir = Path.GetDirectoryName(type.Module.FullyQualifiedName);
+				string assemblyDir =
+					type.Module.FullyQualifiedName == null?
+						AppDomain.CurrentDomain.BaseDirectory:
+						Path.GetDirectoryName(type.Module.FullyQualifiedName);
 
 				ab = new AssemblyBuilderHelper(assemblyDir + "\\" + type.FullName + "." + suffix + ".dll");
 			}
@@ -201,7 +204,7 @@ namespace BLToolkit.TypeBuilder
 		{
 			lock (_builtTypes.SyncRoot)
 			{
-				foreach (Type type in _builtTypes.Values)
+				foreach (Type type in _builtTypes.Keys)
 					if (type.FullName == args.Name)
 						return type.Assembly;
 			}

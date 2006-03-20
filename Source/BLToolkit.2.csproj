@@ -45,6 +45,7 @@
     <Compile Include="Aspects\InterceptCallInfo.cs" />
     <Compile Include="Aspects\NotNullAttribute.cs" />
     <Compile Include="ComponentModel\BindingListImpl.cs" />
+    <Compile Include="ComponentModel\CustomTypeDescriptorImpl.cs" />
     <Compile Include="ComponentModel\Design\GetTypeDialog.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -59,6 +60,7 @@
       <DependentUpon>TypePicker.cs</DependentUpon>
     </Compile>
     <Compile Include="ComponentModel\ISortable.cs" />
+    <Compile Include="ComponentModel\ObjectHolder.cs" />
     <Compile Include="ComponentModel\TypedListImpl.cs" />
     <Compile Include="ComponentModel\Design\TypeEditor.cs" />
     <Compile Include="ComponentModel\TypeTypeConverter.cs" />
@@ -222,6 +224,7 @@
     <Compile Include="Validation\ValidationContext.cs" />
     <Compile Include="Validation\Validator.cs" />
     <Compile Include="Validation\ValidatorBaseAttribute.cs" />
+    <Compile Include="Web\UI\Design\WebObjectBinderDesigner.cs" />
     <Compile Include="Web\UI\WebObjectBinder.cs" />
   </ItemGroup>
   <ItemGroup>
