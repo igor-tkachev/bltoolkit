@@ -121,7 +121,7 @@ namespace BLToolkit.EditableObjects
 				((IEditable)this).RejectChanges();
 		}
 
-		[MapIgnore]
+		[MapIgnore, Bindable(false)]
 		public virtual bool IsDirty
 		{
 			get { return this is IEditable? ((IEditable)this).IsDirty: false; }
@@ -159,7 +159,7 @@ namespace BLToolkit.EditableObjects
 			return (PropertyInfo[])list.ToArray(typeof(PropertyInfo));
 		}
 
-		[MapIgnore]
+		[MapIgnore, Bindable(false)]
 		public virtual string PrintDebugState
 		{
 			get
@@ -187,7 +187,7 @@ namespace BLToolkit.EditableObjects
 		#region ISupportMapping Members
 
 		private bool _inMapping;
-		[MapIgnore]
+		[MapIgnore, Bindable(false)]
 		public  bool  InMapping
 		{
 			get { return _inMapping; }
@@ -218,7 +218,7 @@ namespace BLToolkit.EditableObjects
 		}
 
 		private bool _notifyChanges = true;
-		[MapIgnore]
+		[MapIgnore, Bindable(false)]
 		public  bool  NotifyChanges
 		{
 			get { return _notifyChanges;  }

@@ -33,6 +33,7 @@ namespace BLToolkit.Reflection
 			{
 				if (_propertyDescriptor == null)
 					_propertyDescriptor = new MemberPropertyDescriptor(_typeAccessor.OriginalType, Name);
+
 				return _propertyDescriptor;
 			}
 		}

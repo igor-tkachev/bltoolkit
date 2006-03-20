@@ -15,17 +15,14 @@ namespace BLToolkit.Web.UI
 {
 	[DefaultProperty("TypeName")]
 	[ToolboxBitmap(typeof(WebObjectBinder))]
-	//[ControlBuilder(typeof(DataSourceControlBuilder))]
-	//[NonVisualControl]
-	[Designer("System.Web.UI.Design.DataSourceDesigner, System.Design, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
-	//[Bindable(false)]
+	[Designer(typeof(Design.WebObjectBinderDesigner))]
 	[PersistChildren(false)]
 	[ParseChildren(true)]
 	[Description("BLToolkit Web Object Binder")]
 	[DisplayName("Object Binder")]
-	[AspNetHostingPermission(SecurityAction.LinkDemand,        Level = AspNetHostingPermissionLevel.Minimal)]
-	[AspNetHostingPermission(SecurityAction.InheritanceDemand, Level = AspNetHostingPermissionLevel.Minimal)]
-	public class WebObjectBinder : Control, IDataSource, IListSource, ITypedList
+	//[AspNetHostingPermission(SecurityAction.LinkDemand,        Level = AspNetHostingPermissionLevel.Minimal)]
+	//[AspNetHostingPermission(SecurityAction.InheritanceDemand, Level = AspNetHostingPermissionLevel.Minimal)]
+	public class WebObjectBinder : DataSourceControl, IListSource
 	{
 		#region Constructors
 
@@ -95,20 +92,17 @@ namespace BLToolkit.Web.UI
 
 		#region Protected members
 
-		private ObjectBinder _objectBinder = new ObjectBinder();
+		internal ObjectBinder _objectBinder = new ObjectBinder();
 
 		private void _objectBinder_ListChanged(object sender, ListChangedEventArgs e)
 		{
-			if (DataSourceChanged != null)
+			switch (e.ListChangedType)
 			{
-				switch (e.ListChangedType)
-				{
-					case ListChangedType.PropertyDescriptorAdded:
-					case ListChangedType.PropertyDescriptorChanged:
-					case ListChangedType.PropertyDescriptorDeleted:
-						DataSourceChanged(this, e);
-						break;
-				}
+				case ListChangedType.PropertyDescriptorAdded:
+				case ListChangedType.PropertyDescriptorChanged:
+				case ListChangedType.PropertyDescriptorDeleted:
+					RaiseDataSourceChangedEvent(e);
+					break;
 			}
 		}
 
@@ -116,13 +110,12 @@ namespace BLToolkit.Web.UI
 
 		#region IListSource Members
 
-		[Browsable(false)]
-		public bool ContainsListCollection
+		bool IListSource.ContainsListCollection
 		{
-			get { return false; }
+		    get { return false; }
 		}
 
-		public IList GetList()
+		IList IListSource.GetList()
 		{
 			return _objectBinder.List;
 		}
@@ -131,11 +124,9 @@ namespace BLToolkit.Web.UI
 
 		#region IDataSource Members
 
-		public event EventHandler DataSourceChanged;
-
 		private ObjectDataSourceView _view;
 
-		public DataSourceView GetView(string viewName)
+		protected override DataSourceView GetView(string viewName)
 		{
 			if (_view == null)
 				_view = new ObjectDataSourceView(this, "DefaultView");
@@ -143,30 +134,16 @@ namespace BLToolkit.Web.UI
 			return _view;
 		}
 
-		public ICollection GetViewNames()
+		protected override ICollection GetViewNames()
 		{
 			return new string[] { "DefaultView" };
 		}
 
 		#endregion
 
-		#region ITypedList Members
-
-		public PropertyDescriptorCollection GetItemProperties(PropertyDescriptor[] listAccessors)
-		{
-			return ((ITypedList)_objectBinder).GetItemProperties(listAccessors);
-		}
-
-		public string GetListName(PropertyDescriptor[] listAccessors)
-		{
-			return ((ITypedList)_objectBinder).GetListName(listAccessors);
-		}
-
-		#endregion
-
 		#region ObjectDataSourceView
 
-		class ObjectDataSourceView : DataSourceView, ITypedList
+		class ObjectDataSourceView : DataSourceView
 		{
 			public ObjectDataSourceView(WebObjectBinder owner, string viewName)
 				: base(owner, viewName)
@@ -178,112 +155,86 @@ namespace BLToolkit.Web.UI
 
 			protected override IEnumerable ExecuteSelect(DataSourceSelectArguments arguments)
 			{
-				return new ObjectEnumerator(_owner._objectBinder);
+				return new ObjectEnumerator(_owner._objectBinder, arguments);
 			}
 
-			#region ITypedList Members
+			public override bool CanDelete { get { return _owner._objectBinder.AllowRemove; } }
+			public override bool CanInsert { get { return _owner._objectBinder.AllowNew;    } }
+			public override bool CanUpdate { get { return _owner._objectBinder.AllowEdit;   } }
+			public override bool CanPage   { get { return true;                             } }
+			public override bool CanSort   { get { return true;                             } }
+			public override bool CanRetrieveTotalRowCount { get { return true; } }
+		}
 
-			public PropertyDescriptorCollection GetItemProperties(PropertyDescriptor[] listAccessors)
+		#endregion
+
+		#region ObjectEnumerator
+
+		class ObjectEnumerator : ICollection, IEnumerable
+		{
+			public ObjectEnumerator(ObjectBinder objectBinder, DataSourceSelectArguments arguments)
 			{
-				return ((ITypedList)_owner._objectBinder).GetItemProperties(listAccessors);
+				_objectBinder = objectBinder;
+				_arguments    = arguments;
 			}
 
-			public string GetListName(PropertyDescriptor[] listAccessors)
+			private ObjectBinder              _objectBinder;
+			private DataSourceSelectArguments _arguments;
+
+			#region ICollection Members
+
+			public void CopyTo(Array array, int index)
 			{
-				return ((ITypedList)_owner._objectBinder).GetListName(listAccessors);
+				_objectBinder.List.CopyTo(array, index);
+			}
+
+			public int Count
+			{
+				get { return _objectBinder.List.Count; }
+			}
+
+			public bool IsSynchronized
+			{
+				get { return _objectBinder.List.IsSynchronized; }
+			}
+
+			public object SyncRoot
+			{
+				get { return _objectBinder.List.SyncRoot; }
 			}
 
 			#endregion
-		}
 
-		class ObjectEnumerator : EditableArrayList, IEnumerable
-		{
-			public ObjectEnumerator(ObjectBinder objectBinder)
-				: base(objectBinder.ItemType, (ArrayList)objectBinder.List)
+			#region IEnumerable Members
+
+			public IEnumerator GetEnumerator()
 			{
-				_objectBinder = objectBinder;
-			}
+				_arguments.AddSupportedCapabilities(DataSourceCapabilities.Page);
+				_arguments.AddSupportedCapabilities(DataSourceCapabilities.Sort);
+				_arguments.AddSupportedCapabilities(DataSourceCapabilities.RetrieveTotalRowCount);
 
-			private ObjectBinder _objectBinder;
+				EditableArrayList list = (EditableArrayList)_objectBinder.List;
 
-			public override IEnumerator GetEnumerator()
-			{
-				foreach (object o in List)
-					yield return new ObjectDescriptor(o, _objectBinder);;
-			}
-		}
+				_arguments.TotalRowCount = list.Count;
 
-		class ObjectDescriptor : ICustomTypeDescriptor
-		{
-			public ObjectDescriptor(object obj, ObjectBinder objectBinder)
-			{
-				_object       = obj;
-				_objectBinder = objectBinder;
-			}
+				if (!string.IsNullOrEmpty(_arguments.SortExpression))
+				{
+					list = new EditableArrayList(list.ItemType, list.Count);
+					list.AddRange(_objectBinder.List);
 
-			object       _object;
-			ObjectBinder _objectBinder;
+					list.Sort(_arguments.SortExpression);
+				}
 
-			#region ICustomTypeDescriptor Members
+				int start = _arguments.StartRowIndex >= 0? _arguments.StartRowIndex: 0;
+				int count = _arguments.MaximumRows    > 0?
+					Math.Min(_arguments.MaximumRows, list.Count): list.Count;
 
-			public System.ComponentModel.AttributeCollection GetAttributes()
-			{
-				return System.ComponentModel.AttributeCollection.Empty;
-			}
+				for (int i = 0; i < count; i++)
+				{
+					object o = list[i + start];
 
-			public string GetClassName()
-			{
-				return _object.GetType().Name;
-			}
-
-			public string GetComponentName()
-			{
-				return null;
-			}
-
-			public TypeConverter GetConverter()
-			{
-				return null;
-			}
-
-			public EventDescriptor GetDefaultEvent()
-			{
-				return null;
-			}
-
-			public PropertyDescriptor GetDefaultProperty()
-			{
-				return null;
-			}
-
-			public object GetEditor(Type editorBaseType)
-			{
-				return null;
-			}
-
-			public EventDescriptorCollection GetEvents(Attribute[] attributes)
-			{
-				return null;
-			}
-
-			public EventDescriptorCollection GetEvents()
-			{
-				return null;
-			}
-
-			public PropertyDescriptorCollection GetProperties(Attribute[] attributes)
-			{
-				return ((ITypedList)_objectBinder).GetItemProperties(null);
-			}
-
-			public PropertyDescriptorCollection GetProperties()
-			{
-				return ((ICustomTypeDescriptor)this).GetProperties(null);
-			}
-
-			public object GetPropertyOwner(PropertyDescriptor pd)
-			{
-				return this;//pd is ObjectDescriptor? this: null;
+					yield return o is ICustomTypeDescriptor? o: new ObjectHolder(o, _objectBinder);
+				}
 			}
 
 			#endregion

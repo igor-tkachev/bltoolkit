@@ -54,6 +54,9 @@ namespace BLToolkit.ComponentModel.Design
 
 		public override UITypeEditorEditStyle GetEditStyle(ITypeDescriptorContext context)
 		{
+			if (context == null)
+				return UITypeEditorEditStyle.DropDown;
+
 			DataSourceProviderService dspService =
 				(DataSourceProviderService)context.GetService(typeof(DataSourceProviderService));
 
