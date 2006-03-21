@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using NUnit.Framework;
 
 using BLToolkit.Reflection;
+using BLToolkit.EditableObjects;
+using BLToolkit.TypeBuilder;
 
 namespace Reflection
 {
@@ -25,7 +27,7 @@ namespace Reflection
 		public class TestObject1
 		{
 			public int?                             IntField;
-			public Dictionary<int?, List<decimal?>> ListField = new Dictionary<int?,List<decimal?>>();
+			public Dictionary<int?, List<decimal?>> ListField = new Dictionary<int?, List<decimal?>>();
 		}
 
 		[Test]
@@ -35,6 +37,13 @@ namespace Reflection
 
 			TypeAccessor.WriteConsole(o);
 			TypeAccessor.WriteDebug(o);
+		}
+
+		[Test]
+		public void TestLongName()
+		{
+			TypeFactory.SaveTypes = true;
+			EditableList<TestObject> o = TypeAccessor<EditableList<TestObject>>.CreateInstance();
 		}
 	}
 }

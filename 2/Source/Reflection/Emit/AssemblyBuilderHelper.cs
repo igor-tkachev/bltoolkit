@@ -23,6 +23,26 @@ namespace BLToolkit.Reflection.Emit
 		{
 			if (path == null) throw new ArgumentNullException("path");
 
+			int idx = path.IndexOf(',');
+
+			if (idx > 0)
+			{
+				path = path.Substring(0, idx);
+
+				if (path.Length >= 200)
+				{
+					idx = path.IndexOf('`');
+
+					if (idx > 0)
+					{
+						int idx2 = path.LastIndexOf('.');
+
+						if (idx2 > 0 && idx2 > idx)
+							path = path.Substring(0, idx + 1) + path.Substring(idx2 + 1);
+					}
+				}
+			}
+
 			path = path.Replace("+", ".");
 
 			string assemblyName = System.IO.Path.GetFileName     (path);

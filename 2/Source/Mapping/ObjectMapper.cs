@@ -141,6 +141,23 @@ namespace BLToolkit.Mapping
 			}
 		}
 
+		public MemberMapper this[string name, bool byPropertyName]
+		{
+			get
+			{
+				if (byPropertyName)
+				{
+					foreach (MemberMapper ma in _members)
+						if (ma.MemberAccessor.Name == name)
+							return ma;
+
+					return null;
+				}
+
+				return this[name];
+			}
+		}
+
 		private TypeAccessor _typeAccessor;
 		public  TypeAccessor  TypeAccessor
 		{

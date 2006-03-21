@@ -3,6 +3,7 @@ using System.ComponentModel;
 
 namespace BLToolkit.ComponentModel
 {
+	[System.Diagnostics.DebuggerStepThrough]
 	public abstract class PropertyDescriptorWrapper : PropertyDescriptor
 	{
 		public PropertyDescriptorWrapper(PropertyDescriptor propertyDescriptor)

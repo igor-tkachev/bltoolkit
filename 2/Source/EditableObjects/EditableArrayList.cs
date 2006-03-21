@@ -103,6 +103,23 @@ namespace BLToolkit.EditableObjects
 			Sort(new SortMemberComparer(TypeAccessor.GetAccessor(ItemType), direction, memberNames));
 		}
 
+		public void SortEx(string sortExpression)
+		{
+			string[] sorts = sortExpression.Split(',');
+
+			for (int i = 0; i < sorts.Length; i++)
+				sorts[i] = sorts[i].Trim();
+
+			string last  = sorts[sorts.Length - 1];
+
+			bool desc = last.ToLower().EndsWith(" desc");
+
+			if (desc)
+				sorts[sorts.Length - 1] = last.Substring(0, last.Length - " desc".Length);
+
+			Sort(desc? ListSortDirection.Descending: ListSortDirection.Ascending, sorts);
+		}
+
 		public void Move(int newIndex, int oldIndex)
 		{
 			if (oldIndex != newIndex)
@@ -760,6 +777,11 @@ namespace BLToolkit.EditableObjects
 				_members      = new MemberAccessor[memberNames.Length];
 
 				_member = _members[0] = _typeAccessor[memberNames[0]];
+
+				if (_member == null)
+					throw new InvalidOperationException(
+						string.Format("Field '{0}.{1}' not found.",
+							_typeAccessor.OriginalType.Name, _memberNames[0]));
 			}
 
 			public int Compare(object x, object y)
@@ -773,7 +795,14 @@ namespace BLToolkit.EditableObjects
 					MemberAccessor member = _members[i];
 
 					if (member == null)
+					{
 						member = _members[i] = _typeAccessor[_memberNames[i]];
+
+						if (member == null)
+							throw new InvalidOperationException(
+								string.Format("Field '{0}.{1}' not found.",
+									_typeAccessor.OriginalType.Name, _memberNames[i]));
+					}
 
 					a = member.GetValue(x);
 					b = member.GetValue(y);
@@ -792,7 +821,15 @@ namespace BLToolkit.EditableObjects
 
 		public PropertyDescriptorCollection GetItemProperties(PropertyDescriptor[] listAccessors)
 		{
-			return _typedListImpl.GetItemProperties(listAccessors);
+			return GetItemProperties(listAccessors, null, true);
+		}
+
+		public PropertyDescriptorCollection GetItemProperties(
+			PropertyDescriptor[] listAccessors,
+			IsNullHandler        isNull,
+			bool                 cache)
+		{
+			return _typedListImpl.GetItemProperties(listAccessors, isNull, cache);
 		}
 
 		public string GetListName(PropertyDescriptor[] listAccessors)

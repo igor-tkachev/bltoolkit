@@ -11,6 +11,8 @@ using BLToolkit.TypeBuilder;
 using BLToolkit.TypeBuilder.Builders;
 using BLToolkit.Mapping;
 using BLToolkit.ComponentModel;
+using System.Data;
+using BLToolkit.EditableObjects;
 
 namespace BLToolkit.Reflection
 {
@@ -125,44 +127,6 @@ namespace BLToolkit.Reflection
 
 		#endregion
 
-		#region Property Descriptors
-
-		private PropertyDescriptorCollection _propertyDescriptors;
-		public  PropertyDescriptorCollection  PropertyDescriptors
-		{
-			get
-			{
-				if (_propertyDescriptors == null)
-				{
-					if (TypeHelper.IsSameOrParent(typeof(ICustomTypeDescriptor), OriginalType))
-					{
-						ICustomTypeDescriptor descriptor = CreateInstance() as ICustomTypeDescriptor;
-
-						if (descriptor != null)
-							_propertyDescriptors = descriptor.GetProperties();
-					}
-
-					if (_propertyDescriptors == null)
-						_propertyDescriptors = CreatePropertyDescriptors();
-				}
-
-				return _propertyDescriptors;
-			}
-		}
-
-		public  PropertyDescriptorCollection  CreatePropertyDescriptors()
-		{
-			PropertyDescriptor[] pd = new PropertyDescriptor[Count];
-
-			int i = 0;
-			foreach (MemberAccessor ma in _members.Values)
-				pd[i++] = ma.PropertyDescriptor;
-
-			return new PropertyDescriptorCollection(pd);
-		}
-
-		#endregion
-
 		#region Abstract Members
 
 		public abstract Type Type         { get; }
@@ -262,34 +226,6 @@ namespace BLToolkit.Reflection
 		}
 
 #endif
-
-		#endregion
-
-		#region CustomTypeDescriptor
-
-		private static Hashtable _descriptors = new Hashtable();
-
-		public static ICustomTypeDescriptor GetCustomTypeDescriptor(Type type)
-		{
-			ICustomTypeDescriptor descriptor = (ICustomTypeDescriptor)_descriptors[type];
-
-			if (descriptor == null)
-				descriptor = new CustomTypeDescriptorImpl(type);
-
-			return descriptor;
-		}
-
-		private ICustomTypeDescriptor _customTypeDescriptor;
-		public  ICustomTypeDescriptor  CustomTypeDescriptor
-		{
-			get
-			{
-				if (_customTypeDescriptor == null)
-					_customTypeDescriptor = GetCustomTypeDescriptor(OriginalType);
-
-				return _customTypeDescriptor;
-			}
-		}
 
 		#endregion
 
@@ -578,6 +514,257 @@ namespace BLToolkit.Reflection
 			if (console) Console.WriteLine("***");
 			else         Debug.  WriteLine("***");
 		}
+
+		#endregion
+
+		#region CustomTypeDescriptor
+
+		private static Hashtable _descriptors = new Hashtable();
+
+		public static ICustomTypeDescriptor GetCustomTypeDescriptor(Type type)
+		{
+			ICustomTypeDescriptor descriptor = (ICustomTypeDescriptor)_descriptors[type];
+
+			if (descriptor == null)
+				descriptor = new CustomTypeDescriptorImpl(type);
+
+			return descriptor;
+		}
+
+		private ICustomTypeDescriptor _customTypeDescriptor;
+		public  ICustomTypeDescriptor  CustomTypeDescriptor
+		{
+			get
+			{
+				if (_customTypeDescriptor == null)
+					_customTypeDescriptor = GetCustomTypeDescriptor(OriginalType);
+
+				return _customTypeDescriptor;
+			}
+		}
+
+		#endregion
+
+		#region Property Descriptors
+
+		private PropertyDescriptorCollection _propertyDescriptors;
+		public  PropertyDescriptorCollection  PropertyDescriptors
+		{
+			get
+			{
+				if (_propertyDescriptors == null)
+				{
+					if (TypeHelper.IsSameOrParent(typeof(ICustomTypeDescriptor), OriginalType))
+					{
+						ICustomTypeDescriptor descriptor = CreateInstance() as ICustomTypeDescriptor;
+
+						if (descriptor != null)
+							_propertyDescriptors = descriptor.GetProperties();
+					}
+
+					if (_propertyDescriptors == null)
+						_propertyDescriptors = CreatePropertyDescriptors();
+				}
+
+				return _propertyDescriptors;
+			}
+		}
+
+		public  PropertyDescriptorCollection  CreatePropertyDescriptors()
+		{
+			PropertyDescriptor[] pd = new PropertyDescriptor[Count];
+
+			int i = 0;
+			foreach (MemberAccessor ma in _members.Values)
+				pd[i++] = ma.PropertyDescriptor;
+
+			return new PropertyDescriptorCollection(pd);
+		}
+
+		public PropertyDescriptorCollection CreateExtendedPropertyDescriptors(IsNullHandler isNull)
+		{
+			if (isNull == null)
+				isNull = _isNull;
+
+			PropertyDescriptorCollection pdc;
+
+			pdc = CreatePropertyDescriptors();
+			pdc = pdc.Sort(new PropertyDescriptorComparer());
+
+			pdc = GetExtendedProperties(pdc, OriginalType, "", new Type[0], new PropertyDescriptor[0], isNull);
+
+			return pdc;
+		}
+
+		private PropertyDescriptorCollection GetExtendedProperties(
+			PropertyDescriptorCollection pdc,
+			Type                         itemType,
+			string                       propertyPrefix,
+			Type[]                       parentTypes,
+			PropertyDescriptor[]         parentAccessors,
+			IsNullHandler                isNull)
+		{
+			ArrayList list      = new ArrayList(pdc.Count);
+			ArrayList objects   = new ArrayList();
+			bool      isDataRow = itemType.IsSubclassOf(typeof(DataRow));
+
+			foreach (PropertyDescriptor p in pdc)
+			{
+				if (p.Attributes.Matches(BindableAttribute.No))
+					continue;
+
+				if (isDataRow && p.Name == "ItemArray")
+					continue;
+
+				PropertyDescriptor pd = p;
+
+				if (pd.PropertyType.GetInterface("IList") != null)
+				{
+					if (!p.Attributes.Contains(BindableAttribute.Yes))
+						continue;
+
+					pd = new ListPropertyDescriptor(pd);
+				}
+
+				if (propertyPrefix.Length != 0 || isNull != null)
+					pd = new StandardPropertyDescriptor(pd, propertyPrefix, parentAccessors, isNull);
+
+				if (!pd.PropertyType.IsValueType &&
+					!pd.PropertyType.IsArray     &&
+					 pd.PropertyType != typeof(string) &&
+					 pd.PropertyType != typeof(object) &&
+					Array.IndexOf(parentTypes, pd.GetType()) == -1)
+				{
+					Type[] childParentTypes = new Type[parentTypes.Length + 1];
+
+					parentTypes.CopyTo(childParentTypes, 0);
+					childParentTypes[parentTypes.Length] = itemType;
+
+					PropertyDescriptor[] childParentAccessors = new PropertyDescriptor[parentAccessors.Length + 1];
+
+					parentAccessors.CopyTo(childParentAccessors, 0);
+					childParentAccessors[parentAccessors.Length] = pd;
+
+					PropertyDescriptorCollection pdch = TypeAccessor.GetAccessor(pd.PropertyType).PropertyDescriptors;
+
+					pdch = pdch.Sort(new PropertyDescriptorComparer());
+					pdch = GetExtendedProperties(
+						pdch, pd.PropertyType, pd.Name + "+", childParentTypes, childParentAccessors, isNull);
+
+					objects.AddRange(pdch);
+				}
+				else
+				{
+					list.Add(pd);
+				}
+			}
+
+			list.AddRange(objects);
+
+			return new PropertyDescriptorCollection(
+				(PropertyDescriptor[])list.ToArray(typeof(PropertyDescriptor)));
+		}
+
+		#region PropertyDescriptorComparer
+
+		class PropertyDescriptorComparer : IComparer
+		{
+			public int Compare(object x, object y)
+			{
+				return String.Compare(((PropertyDescriptor)x).Name, ((PropertyDescriptor)y).Name);
+			}
+		}
+
+		#endregion
+
+		#region ListPropertyDescriptor
+
+		class ListPropertyDescriptor : PropertyDescriptorWrapper
+		{
+			public ListPropertyDescriptor(PropertyDescriptor descriptor)
+				: base(descriptor)
+			{
+			}
+
+			public override object GetValue(object component)
+			{
+				object value = base.GetValue(component);
+
+				if (value == null)
+					return value;
+
+				if (value is IBindingList && value is ITypedList)
+					return value;
+
+				return EditableArrayList.Adapter((IList)value);
+			}
+		}
+
+		#endregion
+
+		#region StandardPropertyDescriptor
+
+		class StandardPropertyDescriptor : PropertyDescriptorWrapper
+		{
+			protected PropertyDescriptor _descriptor = null;
+			protected IsNullHandler      _isNull;
+
+			protected string               _prefixedName;
+			protected string               _namePrefix;
+			protected PropertyDescriptor[] _chainAccessors;
+
+			public StandardPropertyDescriptor(
+				PropertyDescriptor   pd,
+				string               namePrefix,
+				PropertyDescriptor[] chainAccessors,
+				IsNullHandler        isNull)
+				: base(pd)
+			{
+				_descriptor     = pd;
+				_isNull         = isNull;
+				_prefixedName   = namePrefix + pd.Name;
+				_namePrefix     = namePrefix;
+				_chainAccessors = chainAccessors;
+			}
+
+			protected object GetNestedComponent(object component)
+			{
+				for (int i = 0;
+				     i < _chainAccessors.Length && component != null && !(component is DBNull);
+				     i++)
+					component = _chainAccessors[i].GetValue(component);
+
+				return component;
+			}
+
+			public override void SetValue(object component, object value)
+			{
+				component = GetNestedComponent(component);
+
+				if (component != null && !(component is DBNull))
+					_descriptor.SetValue(component, value);
+			}
+
+			public override object GetValue(object component)
+			{
+				component = GetNestedComponent(component);
+
+				return CheckNull(
+					component != null && !(component is DBNull)? _descriptor.GetValue(component): null);
+			}
+
+			public override string Name
+			{
+				get { return _prefixedName; }
+			}
+
+			protected object CheckNull(object value)
+			{
+				return _isNull != null && _isNull(value)? DBNull.Value: value;
+			}
+		}
+
+		#endregion
 
 		#endregion
 	}

@@ -20,8 +20,6 @@ namespace BLToolkit.Web.UI
 	[ParseChildren(true)]
 	[Description("BLToolkit Web Object Binder")]
 	[DisplayName("Object Binder")]
-	//[AspNetHostingPermission(SecurityAction.LinkDemand,        Level = AspNetHostingPermissionLevel.Minimal)]
-	//[AspNetHostingPermission(SecurityAction.InheritanceDemand, Level = AspNetHostingPermissionLevel.Minimal)]
 	public class WebObjectBinder : DataSourceControl, IListSource
 	{
 		#region Constructors
@@ -34,21 +32,6 @@ namespace BLToolkit.Web.UI
 		#endregion
 
 		#region Public Members
-
-		/*
-		[RefreshProperties(RefreshProperties.Repaint)]
-		[DefaultValue(null)]
-		[Category("Data")]
-		[TypeConverter(typeof(TypeTypeConverter))]
-#if FW2
-		[Editor(typeof(BLToolkit.ComponentModel.Design.TypeEditor), typeof(UITypeEditor))]
-#endif
-		public Type ItemType
-		{
-			get { return _objectBinder.ItemType;  }
-			set { _objectBinder.ItemType = value; }
-		}
-		*/
 
 		[RefreshProperties(RefreshProperties.Repaint)]
 		[DefaultValue(null)]
@@ -106,13 +89,20 @@ namespace BLToolkit.Web.UI
 			}
 		}
 
+		public override void Dispose()
+		{
+			_objectBinder.Dispose();
+
+			base.Dispose();
+		}
+
 		#endregion
 
 		#region IListSource Members
 
 		bool IListSource.ContainsListCollection
 		{
-		    get { return false; }
+			get { return false; }
 		}
 
 		IList IListSource.GetList()
@@ -221,8 +211,7 @@ namespace BLToolkit.Web.UI
 				{
 					list = new EditableArrayList(list.ItemType, list.Count);
 					list.AddRange(_objectBinder.List);
-
-					list.Sort(_arguments.SortExpression);
+					list.SortEx(_arguments.SortExpression);
 				}
 
 				int start = _arguments.StartRowIndex >= 0? _arguments.StartRowIndex: 0;

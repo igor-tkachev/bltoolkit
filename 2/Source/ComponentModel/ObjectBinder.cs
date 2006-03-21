@@ -1,7 +1,6 @@
 using System;
 using System.Collections;
 using System.ComponentModel;
-using System.Data;
 using System.Drawing.Design;
 using System.Drawing;
 
@@ -233,78 +232,13 @@ namespace BLToolkit.ComponentModel
 
 			if (pdc == null)
 			{
-				pdc = _list.GetItemProperties(listAccessors);
-				pdc = pdc.Sort(new PropertyDescriptorComparer());
+				pdc = _list.GetItemProperties(listAccessors, _isNull, !DesignMode);
 
-				_descriptors[key] = pdc = GetItemProperties(
-					pdc, _itemType, "", new Type[0], new PropertyDescriptor[0], listAccessors);
+				if (!DesignMode)
+					_descriptors[key] = pdc;
 			}
 
 			return pdc;
-		}
-
-		private PropertyDescriptorCollection GetItemProperties(
-			PropertyDescriptorCollection pdc,
-			Type                         itemType,
-			string                       propertyPrefix,
-			Type[]                       parentTypes,
-			PropertyDescriptor[]         parentAccessors, 
-			PropertyDescriptor[]         listAccessors)
-		{
-			ArrayList list      = new ArrayList(pdc.Count);
-			ArrayList objects   = new ArrayList();
-			bool      isDataRow = itemType.IsSubclassOf(typeof(DataRow));
-
-			foreach (PropertyDescriptor p in pdc)
-			{
-				if (p.Attributes.Matches(BindableAttribute.No))
-					continue;
-
-				if (isDataRow && p.Name == "ItemArray")
-					continue;
-
-				PropertyDescriptor pd = p;
-
-				if (pd.PropertyType.GetInterface("IList") != null)
-					pd = new ListPropertyDescriptor(pd);
-
-				if (propertyPrefix.Length != 0 || _isNull != null)
-					pd = new StandardPropertyDescriptor(pd, propertyPrefix, parentAccessors, _isNull);
-
-				if (!pd.PropertyType.IsValueType &&
-					!pd.PropertyType.IsArray     &&
-					 pd.PropertyType != typeof(string) &&
-					 pd.PropertyType != typeof(object) &&
-					Array.IndexOf(parentTypes, pd.GetType()) == -1)
-				{
-					Type[] childParentTypes = new Type[parentTypes.Length + 1];
-
-					parentTypes.CopyTo(childParentTypes, 0);
-					childParentTypes[parentTypes.Length] = itemType;
-
-					PropertyDescriptor[] childParentAccessors = new PropertyDescriptor[parentAccessors.Length + 1];
-
-					parentAccessors.CopyTo(childParentAccessors, 0);
-					childParentAccessors[parentAccessors.Length] = pd;
-
-					PropertyDescriptorCollection pdch = TypeAccessor.GetAccessor(pd.PropertyType).PropertyDescriptors;
-
-					pdch = pdch.Sort(new PropertyDescriptorComparer());
-					pdch = GetItemProperties(
-						pdch, pd.PropertyType, pd.Name + "+", childParentTypes, childParentAccessors, listAccessors);
-
-					objects.AddRange(pdch);
-				}
-				else
-				{
-					list.Add(pd);
-				}
-			}
-
-			list.AddRange(objects);
-
-			return new PropertyDescriptorCollection(
-				(PropertyDescriptor[])list.ToArray(typeof(PropertyDescriptor)));
 		}
 
 		string ITypedList.GetListName(PropertyDescriptor[] listAccessors)
@@ -517,104 +451,6 @@ namespace BLToolkit.ComponentModel
 		IEnumerator IEnumerable.GetEnumerator()
 		{
 			return _list.GetEnumerator();
-		}
-
-		#endregion
-
-		#region PropertyDescriptorComparer
-
-		class PropertyDescriptorComparer : IComparer
-		{
-			public int Compare(object x, object y)
-			{
-				return String.Compare(((PropertyDescriptor)x).Name, ((PropertyDescriptor)y).Name);
-			}
-		}
-
-		#endregion
-
-		#region ListPropertyDescriptor
-
-		class ListPropertyDescriptor : PropertyDescriptorWrapper
-		{
-			public ListPropertyDescriptor(PropertyDescriptor descriptor)
-				: base(descriptor)
-			{
-			}
-
-			public override object GetValue(object component)
-			{
-				object value = base.GetValue(component);
-
-				if (value == null)
-					return value;
-
-				if (value is IBindingList && value is ITypedList)
-					return value;
-
-				return EditableArrayList.Adapter((IList)value);
-			}
-		}
-
-		#endregion
-
-		#region StandardPropertyDescriptor
-
-		class StandardPropertyDescriptor : PropertyDescriptorWrapper
-		{
-			protected PropertyDescriptor _descriptor = null;
-			protected IsNullHandler      _isNull;
-
-			protected string               _prefixedName;
-			protected string               _namePrefix;
-			protected PropertyDescriptor[] _chainAccessors;
-
-			public StandardPropertyDescriptor(
-				PropertyDescriptor   pd,
-				string               namePrefix,
-				PropertyDescriptor[] chainAccessors,
-				IsNullHandler        isNull)
-				: base(pd)
-			{
-				_descriptor     = pd;
-				_isNull         = isNull;
-				_prefixedName   = namePrefix + pd.Name;
-				_namePrefix     = namePrefix;
-				_chainAccessors = chainAccessors;
-			}
-
-			protected object GetNestedComponent(object component)
-			{
-				for (int i = 0; i < _chainAccessors.Length && component != null; i++)
-					component = _chainAccessors[i].GetValue(component);
-
-				return component;
-			}
-
-			public override void SetValue(object component, object value)
-			{
-				component = GetNestedComponent(component);
-
-				if (component != null)
-					_descriptor.SetValue(component, value);
-			}
-
-			public override object GetValue(object component)
-			{
-				component = GetNestedComponent(component);
-
-				return CheckNull(component != null? null: _descriptor.GetValue(component));
-			}
-
-			public override string Name
-			{
-				get { return _prefixedName; }
-			}
-
-			protected object CheckNull(object value)
-			{
-				return _isNull != null && _isNull(value)? DBNull.Value: value;
-			}
 		}
 
 		#endregion
