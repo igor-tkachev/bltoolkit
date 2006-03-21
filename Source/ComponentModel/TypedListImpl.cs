@@ -46,6 +46,14 @@ namespace BLToolkit.ComponentModel
 
 		public PropertyDescriptorCollection GetItemProperties(PropertyDescriptor[] listAccessors)
 		{
+			return GetItemProperties(listAccessors, null, true);
+		}
+
+		public PropertyDescriptorCollection GetItemProperties(
+			PropertyDescriptor[] listAccessors,
+			IsNullHandler        isNull,
+			bool                 cache)
+		{
 			PropertyDescriptorCollection pdc;
 
 			if (listAccessors == null || listAccessors.Length == 0)
@@ -53,11 +61,14 @@ namespace BLToolkit.ComponentModel
 				if (_pdc == null)
 				{
 					_pdc = _typeAccessor != null?
-						_typeAccessor.PropertyDescriptors:
+						_typeAccessor.CreateExtendedPropertyDescriptors(isNull):
 						new PropertyDescriptorCollection(null);
 				}
 
 				pdc = _pdc;
+
+				if (!cache)
+					_pdc = null;
 			}
 			else
 			{
