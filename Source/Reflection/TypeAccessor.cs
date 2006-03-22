@@ -55,7 +55,9 @@ namespace BLToolkit.Reflection
 
 		public virtual object CreateInstance()
 		{
-			throw new InvalidOperationException();
+			throw new TypeBuilderException(string.Format(
+				"The '{0}' type must have public default or init constructor.",
+				OriginalType.Name));
 		}
 
 		public virtual object CreateInstance(InitContext context)
@@ -163,7 +165,7 @@ namespace BLToolkit.Reflection
 
 					if (accessor == null)
 					{
-						Type type = originalType.IsAbstract && !originalType.IsSealed?
+						Type type = IsClassBulderNeeded(originalType)?
 							TypeFactory.GetType(originalType, new AbstractClassBuilder()):
 							originalType;
 
@@ -181,6 +183,20 @@ namespace BLToolkit.Reflection
 			}
 
 			return accessor;
+		}
+
+		private static bool IsClassBulderNeeded(Type type)
+		{
+			if (type.IsAbstract && !type.IsSealed)
+			{
+				if (TypeHelper.GetDefaultConstructor(type) != null)
+					return true;
+
+				if (TypeHelper.GetConstructor(type, typeof(InitContext)) != null)
+					return true;
+			}
+
+			return false;
 		}
 
 		public static object CreateInstance(Type type)
@@ -572,6 +588,8 @@ namespace BLToolkit.Reflection
 
 		public  PropertyDescriptorCollection  CreatePropertyDescriptors()
 		{
+			Debug.WriteLine(OriginalType.FullName, "CreatePropertyDescriptors");
+
 			PropertyDescriptor[] pd = new PropertyDescriptor[Count];
 
 			int i = 0;
@@ -610,17 +628,20 @@ namespace BLToolkit.Reflection
 
 			foreach (PropertyDescriptor p in pdc)
 			{
-				if (p.Attributes.Matches(BindableAttribute.No))
+				Type propertyType = p.PropertyType;
+
+				if (p.Attributes.Matches(BindableAttribute.No) ||
+					//propertyType == typeof(Type)               ||
+					isDataRow && p.Name == "ItemArray")
 					continue;
 
-				if (isDataRow && p.Name == "ItemArray")
-					continue;
+				bool explicitlyBound = p.Attributes.Contains(BindableAttribute.Yes);
 
 				PropertyDescriptor pd = p;
 
-				if (pd.PropertyType.GetInterface("IList") != null)
+				if (propertyType.GetInterface("IList") != null)
 				{
-					if (!p.Attributes.Contains(BindableAttribute.Yes))
+					if (!explicitlyBound)
 						continue;
 
 					pd = new ListPropertyDescriptor(pd);
@@ -629,11 +650,17 @@ namespace BLToolkit.Reflection
 				if (propertyPrefix.Length != 0 || isNull != null)
 					pd = new StandardPropertyDescriptor(pd, propertyPrefix, parentAccessors, isNull);
 
-				if (!pd.PropertyType.IsValueType &&
-					!pd.PropertyType.IsArray     &&
-					 pd.PropertyType != typeof(string) &&
-					 pd.PropertyType != typeof(object) &&
-					Array.IndexOf(parentTypes, pd.GetType()) == -1)
+				if (!propertyType.IsValueType &&
+					!propertyType.IsArray     &&
+					(!propertyType.FullName.StartsWith("System.") || explicitlyBound
+#if FW2
+					|| propertyType.IsGenericType
+#endif
+					 ) &&
+					 propertyType != typeof(Type)   &&
+					 propertyType != typeof(string) &&
+					 propertyType != typeof(object) &&
+					Array.IndexOf(parentTypes, propertyType) == -1)
 				{
 					Type[] childParentTypes = new Type[parentTypes.Length + 1];
 
@@ -645,11 +672,12 @@ namespace BLToolkit.Reflection
 					parentAccessors.CopyTo(childParentAccessors, 0);
 					childParentAccessors[parentAccessors.Length] = pd;
 
-					PropertyDescriptorCollection pdch = TypeAccessor.GetAccessor(pd.PropertyType).PropertyDescriptors;
+					PropertyDescriptorCollection pdch =
+						TypeAccessor.GetAccessor(propertyType).PropertyDescriptors;
 
 					pdch = pdch.Sort(new PropertyDescriptorComparer());
 					pdch = GetExtendedProperties(
-						pdch, pd.PropertyType, pd.Name + "+", childParentTypes, childParentAccessors, isNull);
+						pdch, propertyType, pd.Name + "+", childParentTypes, childParentAccessors, isNull);
 
 					objects.AddRange(pdch);
 				}

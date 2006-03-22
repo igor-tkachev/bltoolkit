@@ -219,19 +219,36 @@ namespace BLToolkit.TypeBuilder.Builders
 					if (fieldType.Type.IsValueType)
 						return;
 
+					string message = string.Format(
+						"Could not build the '{0}' property of the '{1}' type: type '{2}' has to have public default constructor.",
+						Context.CurrentProperty.Name,
+						Context.Type.FullName,
+						fieldType.FullName);
+
+					emit
+						.ldstr  (message)
+						.newobj (typeof(TypeBuilderException), typeof(string))
+						.@throw
+						.end()
+					;
+
+					/*
 					throw new TypeBuilderException(
 						string.Format(
 							"Could not build the '{0}' property of the '{1}' type: type '{2}' has to have public default constructor.",
 							Context.CurrentProperty.Name,
 							Context.Type.FullName,
 							fieldType.FullName));
+					*/
 				}
-
-				emit
-					.ldarg_0
-					.newobj(ci)
-					.stfld(field)
-					;
+				else
+				{
+					emit
+						.ldarg_0
+						.newobj  (ci)
+						.stfld   (field)
+						;
+				}
 			}
 		}
 
