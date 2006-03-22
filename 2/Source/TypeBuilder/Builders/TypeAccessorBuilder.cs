@@ -64,11 +64,7 @@ namespace BLToolkit.TypeBuilder.Builders
 			ConstructorInfo baseInitCtor = _type.GetPublicConstructor(typeof(InitContext));
 
 			if (baseDefCtor == null && baseInitCtor == null)
-			{
-				throw new TypeBuilderException(string.Format(
-					"The '{0}' type must have public default or init constructor.",
-					_type.Name));
-			}
+				return;
 
 			// CreateInstance.
 			//
