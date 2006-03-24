@@ -3,6 +3,7 @@ using System.Data;
 using System.Collections.Generic;
 
 using BLToolkit.Data;
+using System.Collections;
 
 namespace BLToolkit.DataAccess
 {
@@ -152,9 +153,21 @@ namespace BLToolkit.DataAccess
 			return base.SelectAllSql<T>(db);
 		}
 
+		public L SelectAllSql<L>(DbManager db, L list)
+			where L : IList
+		{
+			return base.SelectAllSql<L,T>(db, list);
+		}
+
 		public List<T> SelectAllSql()
 		{
 			return base.SelectAllSql<T>();
+		}
+
+		public L SelectAllSql<L>(L list)
+			where L : IList
+		{
+			return base.SelectAllSql<L,T>(list);
 		}
 
 			#endregion

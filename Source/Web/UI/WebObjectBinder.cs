@@ -53,6 +53,26 @@ namespace BLToolkit.Web.UI
 			}
 		}
 
+		[RefreshProperties(RefreshProperties.Repaint)]
+		[DefaultValue(null)]
+		[Category("Data")]
+#if FW2
+		[Editor(typeof(BLToolkit.ComponentModel.Design.ObjectViewTypeNameEditor), typeof(UITypeEditor))]
+#endif
+		public string ObjectViewTypeName
+		{
+			get
+			{
+				Type type = _objectBinder.ObjectViewType;
+				return type == null ? "(none)" : type.FullName;
+			}
+			set
+			{
+				_objectBinder.ObjectViewType = value == null || value.Length == 0 || value == "(none)"?
+					null: BuildManager.GetType(value, false, true);
+			}
+		}
+
 		[Browsable(false)]
 		[RefreshProperties(RefreshProperties.Repaint)]
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]

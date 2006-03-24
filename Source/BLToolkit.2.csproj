@@ -46,6 +46,7 @@
     <Compile Include="Aspects\NotNullAttribute.cs" />
     <Compile Include="ComponentModel\BindingListImpl.cs" />
     <Compile Include="ComponentModel\CustomTypeDescriptorImpl.cs" />
+    <Compile Include="ComponentModel\Design\ObjectViewTypeEditor.cs" />
     <Compile Include="ComponentModel\Design\GetTypeDialog.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -59,7 +60,9 @@
     <Compile Include="ComponentModel\Design\TypePicker.Designer.cs">
       <DependentUpon>TypePicker.cs</DependentUpon>
     </Compile>
+    <Compile Include="ComponentModel\Design\ObjectViewTypeNameEditor.cs" />
     <Compile Include="ComponentModel\ISortable.cs" />
+    <Compile Include="ComponentModel\IObjectView.cs" />
     <Compile Include="ComponentModel\ObjectHolder.cs" />
     <Compile Include="ComponentModel\TypedListImpl.cs" />
     <Compile Include="ComponentModel\Design\TypeEditor.cs" />
@@ -211,6 +214,7 @@
     <Compile Include="Reflection\Extension\AttributeExtension.cs" />
     <Compile Include="Reflection\Extension\MemberExtension.cs" />
     <Compile Include="Validation\FriendlyNameAttribute.cs" />
+    <Compile Include="Validation\IValidatable.cs" />
     <Compile Include="Validation\MaxDateValueAttribute.cs" />
     <Compile Include="Validation\MaxLengthAttribute.cs" />
     <Compile Include="Validation\MaxValueAttribute.cs" />

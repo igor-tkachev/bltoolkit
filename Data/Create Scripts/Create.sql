@@ -22,8 +22,8 @@ CREATE TABLE Person
 ON [PRIMARY]
 GO
 
-INSERT INTO Person (FirstName, LastName, Gender)
-VALUES             ('John',    'Pupkin', 'M')
+INSERT INTO Person (FirstName, LastName, Gender) VALUES ('John',   'Pupkin',    'M')
+INSERT INTO Person (FirstName, LastName, Gender) VALUES ('Tester', 'Testerson', 'M')
 GO
 
 -- Person_SelectByKey

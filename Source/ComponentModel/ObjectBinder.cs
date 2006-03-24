@@ -59,6 +59,25 @@ namespace BLToolkit.ComponentModel
 			}
 		}
 
+		private Type _objectViewType;
+		[RefreshProperties(RefreshProperties.Repaint)]
+		[DefaultValue(null)]
+		[Category("Data")]
+		[TypeConverter(typeof(TypeTypeConverter))]
+#if FW2
+		[Editor(typeof(Design.ObjectViewTypeEditor), typeof(UITypeEditor))]
+#endif
+		public  Type  ObjectViewType
+		{
+			get { return _objectViewType; }
+			set
+			{
+				_objectViewType = value;
+
+				OnListChanged(ListChangedType.PropertyDescriptorChanged, -1);
+			}
+		}
+
 		private object _object;
 		[Browsable(false)]
 		[RefreshProperties(RefreshProperties.Repaint)]
@@ -179,6 +198,7 @@ namespace BLToolkit.ComponentModel
 		}
 
 		private IsNullHandler _isNull;
+		[Browsable(false)]
 		public  IsNullHandler  IsNull
 		{
 			get { return _isNull;  }
@@ -226,13 +246,16 @@ namespace BLToolkit.ComponentModel
 			if (_itemType == null)
 				return new PropertyDescriptorCollection(new PropertyDescriptor[0]);
 
-			string key = _itemType.ToString() + "." + (_isNull == null? "0": "1");
+			string key =
+				_itemType.ToString() + "." +
+				(_objectViewType == null? "": _objectViewType.ToString()) + "." +
+				(_isNull == null? "0": "1");
 
 			PropertyDescriptorCollection pdc = (PropertyDescriptorCollection)_descriptors[key];
 
 			if (pdc == null)
 			{
-				pdc = _list.GetItemProperties(listAccessors, _isNull, !DesignMode);
+				pdc = _list.GetItemProperties(listAccessors, _objectViewType, _isNull, !DesignMode);
 
 				if (!DesignMode)
 					_descriptors[key] = pdc;

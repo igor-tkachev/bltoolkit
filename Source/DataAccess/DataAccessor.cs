@@ -747,6 +747,15 @@ namespace BLToolkit.DataAccess
 				.ExecuteList(type);
 		}
 
+		public IList SelectAllSql(DbManager db, IList list, Type type)
+		{
+			SqlQueryInfo query = GetSqlQueryInfo(db, type, "SelectAll");
+
+			return db
+				.SetCommand(query.QueryText)
+				.ExecuteList(list, type);
+		}
+
 		public ArrayList SelectAllSql(Type type)
 		{
 			DbManager db = GetDbManager();
@@ -754,6 +763,21 @@ namespace BLToolkit.DataAccess
 			try
 			{
 				return SelectAllSql(db, type);
+			}
+			finally
+			{
+				if (DisposeDbManager)
+					db.Dispose();
+			}
+		}
+
+		public IList SelectAllSql(IList list, Type type)
+		{
+			DbManager db = GetDbManager();
+
+			try
+			{
+				return SelectAllSql(db, list, type);
 			}
 			finally
 			{
@@ -772,6 +796,16 @@ namespace BLToolkit.DataAccess
 				.ExecuteList<T>();
 		}
 
+		public L SelectAllSql<L, T>(DbManager db, L list)
+			where L : IList
+		{
+			SqlQueryInfo query = GetSqlQueryInfo(db, typeof(T), "SelectAll");
+
+			return (L)db
+				.SetCommand(query.QueryText)
+				.ExecuteList<L,T>(list);
+		}
+
 		public List<T> SelectAllSql<T>()
 		{
 			DbManager db = GetDbManager();
@@ -779,6 +813,22 @@ namespace BLToolkit.DataAccess
 			try
 			{
 				return SelectAllSql<T>(db);
+			}
+			finally
+			{
+				if (DisposeDbManager)
+					db.Dispose();
+			}
+		}
+
+		public L SelectAllSql<L, T>(L list)
+			where L : IList
+		{
+			DbManager db = GetDbManager();
+
+			try
+			{
+				return SelectAllSql<L,T>(db, list);
 			}
 			finally
 			{
