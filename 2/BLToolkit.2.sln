@@ -19,6 +19,8 @@ Project("{4F174C21-8C12-11D0-8340-0000F80270F8}") = "Data", "Data\Data.dbp", "{E
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HowTo", "HowTo\HowTo.csproj", "{8DA66999-005A-49AB-86A9-2C1F62905B50}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BLToolkit.Demo", "Demo\BLToolkit.Demo.csproj", "{854749E5-9264-42FF-A576-3B5784C7C14C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -111,6 +113,16 @@ Global
 		{8DA66999-005A-49AB-86A9-2C1F62905B50}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{8DA66999-005A-49AB-86A9-2C1F62905B50}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{8DA66999-005A-49AB-86A9-2C1F62905B50}.Release|Win32.ActiveCfg = Release|Any CPU
+		{854749E5-9264-42FF-A576-3B5784C7C14C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{854749E5-9264-42FF-A576-3B5784C7C14C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{854749E5-9264-42FF-A576-3B5784C7C14C}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{854749E5-9264-42FF-A576-3B5784C7C14C}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{854749E5-9264-42FF-A576-3B5784C7C14C}.Debug|Win32.ActiveCfg = Debug|Any CPU
+		{854749E5-9264-42FF-A576-3B5784C7C14C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{854749E5-9264-42FF-A576-3B5784C7C14C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{854749E5-9264-42FF-A576-3B5784C7C14C}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{854749E5-9264-42FF-A576-3B5784C7C14C}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{854749E5-9264-42FF-A576-3B5784C7C14C}.Release|Win32.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

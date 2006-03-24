@@ -821,15 +821,16 @@ namespace BLToolkit.EditableObjects
 
 		public PropertyDescriptorCollection GetItemProperties(PropertyDescriptor[] listAccessors)
 		{
-			return GetItemProperties(listAccessors, null, true);
+			return GetItemProperties(listAccessors, null, null, true);
 		}
 
 		public PropertyDescriptorCollection GetItemProperties(
 			PropertyDescriptor[] listAccessors,
+			Type                 objectViewType,
 			IsNullHandler        isNull,
 			bool                 cache)
 		{
-			return _typedListImpl.GetItemProperties(listAccessors, isNull, cache);
+			return _typedListImpl.GetItemProperties(listAccessors, objectViewType, isNull, cache);
 		}
 
 		public string GetListName(PropertyDescriptor[] listAccessors)

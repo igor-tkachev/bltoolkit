@@ -599,7 +599,9 @@ namespace BLToolkit.Reflection
 			return new PropertyDescriptorCollection(pd);
 		}
 
-		public PropertyDescriptorCollection CreateExtendedPropertyDescriptors(IsNullHandler isNull)
+		public PropertyDescriptorCollection CreateExtendedPropertyDescriptors(
+			Type          objectViewType,
+			IsNullHandler isNull)
 		{
 			if (isNull == null)
 				isNull = _isNull;
@@ -607,6 +609,26 @@ namespace BLToolkit.Reflection
 			PropertyDescriptorCollection pdc;
 
 			pdc = CreatePropertyDescriptors();
+
+			if (objectViewType != null)
+			{
+				TypeAccessor viewAccessor = TypeAccessor.GetAccessor(objectViewType);
+				IObjectView  objectView   = (IObjectView)viewAccessor.CreateInstanceEx();
+				ArrayList    list         = new ArrayList();
+
+				PropertyDescriptorCollection viewpdc = viewAccessor.PropertyDescriptors;
+
+				foreach (PropertyDescriptor pd in viewpdc)
+					list.Add(new ObjectViewPropertyDescriptor(pd, objectView));
+
+				foreach (PropertyDescriptor pd in pdc)
+					if (viewpdc.Find(pd.Name, false) == null)
+						list.Add(pd);
+
+				pdc = new PropertyDescriptorCollection(
+					(PropertyDescriptor[])list.ToArray(typeof(PropertyDescriptor)));
+			}
+
 			pdc = pdc.Sort(new PropertyDescriptorComparer());
 
 			pdc = GetExtendedProperties(pdc, OriginalType, "", new Type[0], new PropertyDescriptor[0], isNull);
@@ -789,6 +811,35 @@ namespace BLToolkit.Reflection
 			protected object CheckNull(object value)
 			{
 				return _isNull != null && _isNull(value)? DBNull.Value: value;
+			}
+		}
+
+		#endregion
+
+		#region objectViewPropertyDescriptor
+
+		class ObjectViewPropertyDescriptor : PropertyDescriptorWrapper
+		{
+			public ObjectViewPropertyDescriptor(PropertyDescriptor pd, IObjectView objectView)
+				: base(pd)
+			{
+				_objectView = objectView;
+			}
+
+			private IObjectView _objectView;
+
+			public override object GetValue(object component)
+			{
+				_objectView.Object = component;
+
+				return base.GetValue(_objectView);
+			}
+
+			public override void SetValue(object component, object value)
+			{
+				_objectView.Object = component;
+
+				base.SetValue(_objectView, value);
 			}
 		}
 

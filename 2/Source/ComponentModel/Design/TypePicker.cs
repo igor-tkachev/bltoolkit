@@ -143,7 +143,25 @@ namespace BLToolkit.ComponentModel.Design
 			if (dspService == null || !dspService.SupportsAddNewDataSource)
 				return;
 
-			DataSourceGroupCollection dataSources = dspService.GetDataSources();
+			DataSourceGroupCollection dataSources = null;
+
+			try
+			{
+				dataSources = dspService.GetDataSources();
+			}
+			catch (Exception ex)
+			{
+				IUIService ui = GetService<IUIService>();
+
+				string message = 
+					"Cant retrieve Data Source Collection: " + ex.Message +
+					"\nCheck the 'Properties\\DataSources' folder of your project.";
+
+				if (ui != null)
+					ui.ShowError(ex, message);
+				else
+					MessageBox.Show(message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+			}
 
 			if (dataSources == null)
 				return;

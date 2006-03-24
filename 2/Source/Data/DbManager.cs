@@ -2811,6 +2811,14 @@ namespace BLToolkit.Data
 
 			return list;
 		}
+
+		public L ExecuteList<L, T>(L list, params object[] parameters)
+			where L : IList
+		{
+			ExecuteListInternal(list, typeof(T), parameters);
+
+			return list;
+		}
 #endif
 
 		#endregion
