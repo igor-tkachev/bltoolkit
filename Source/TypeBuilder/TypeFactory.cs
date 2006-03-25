@@ -68,10 +68,20 @@ namespace BLToolkit.TypeBuilder
 
 			if (ab == null)
 			{
-				string assemblyDir =
-					type.Module.FullyQualifiedName == null?
-						AppDomain.CurrentDomain.BaseDirectory:
-						Path.GetDirectoryName(type.Module.FullyQualifiedName);
+				string assemblyDir = AppDomain.CurrentDomain.BaseDirectory;
+
+				try
+				{
+					if (type.Module.FullyQualifiedName != null &&
+						type.Module.FullyQualifiedName.Length > 0 &&
+						type.Module.FullyQualifiedName != "<Unknown>")
+					{
+						assemblyDir = Path.GetDirectoryName(type.Module.FullyQualifiedName);
+					}
+				}
+				catch
+				{
+				}
 
 				ab = new AssemblyBuilderHelper(assemblyDir + "\\" + type.FullName + "." + suffix + ".dll");
 			}
