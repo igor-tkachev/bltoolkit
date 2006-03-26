@@ -657,22 +657,23 @@ namespace BLToolkit.Reflection
 					isDataRow && p.Name == "ItemArray")
 					continue;
 
-				bool explicitlyBound = p.Attributes.Contains(BindableAttribute.Yes);
-
+				bool isList           = false;
+				bool explicitlyBound  = p.Attributes.Contains(BindableAttribute.Yes);
 				PropertyDescriptor pd = p;
 
 				if (propertyType.GetInterface("IList") != null)
 				{
-					if (!explicitlyBound)
-						continue;
+					//if (!explicitlyBound)
+					//	continue;
 
-					pd = new ListPropertyDescriptor(pd);
+					isList = true;
+					pd     = new ListPropertyDescriptor(pd);
 				}
-
-				if (propertyPrefix.Length != 0 || isNull != null)
+				else if (propertyPrefix.Length != 0 || isNull != null)
 					pd = new StandardPropertyDescriptor(pd, propertyPrefix, parentAccessors, isNull);
 
-				if (!propertyType.IsValueType &&
+				if (!isList                   &&
+					!propertyType.IsValueType &&
 					!propertyType.IsArray     &&
 					(!propertyType.FullName.StartsWith("System.") || explicitlyBound
 #if FW2

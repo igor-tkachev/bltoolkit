@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.ComponentModel;
 
 using BLToolkit.Reflection;
@@ -55,7 +56,7 @@ namespace BLToolkit.ComponentModel
 			IsNullHandler        isNull,
 			bool                 cache)
 		{
-			PropertyDescriptorCollection pdc;
+			PropertyDescriptorCollection pdc = null;
 
 			if (listAccessors == null || listAccessors.Length == 0)
 			{
@@ -73,7 +74,36 @@ namespace BLToolkit.ComponentModel
 			}
 			else
 			{
-				pdc = new PropertyDescriptorCollection(null);
+				try
+				{
+					// Lets try to pick out the item type from the list type.
+					//
+					Type itemType = TypeHelper.GetListItemType(listAccessors[0].PropertyType);
+
+					if (itemType == typeof(object))
+					{
+						// We have to create an instance of the list to determine its item type.
+						//
+						object obj = _typeAccessor.CreateInstanceEx();
+						object o   = listAccessors[0].GetValue(obj);
+
+						if (o != null)
+							itemType = TypeHelper.GetListItemType(o);
+					}
+
+					if (itemType != typeof(object))
+					{
+						TypeAccessor ta = TypeAccessor.GetAccessor(itemType);
+
+						pdc = ta.CreateExtendedPropertyDescriptors(null, isNull);
+					}
+				}
+				catch
+				{
+				}
+
+				if (pdc == null)
+					pdc = new PropertyDescriptorCollection(null);
 			}
 
 			return pdc;

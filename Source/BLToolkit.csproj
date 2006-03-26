@@ -124,6 +124,11 @@
                     BuildAction = "Compile"
                 />
                 <File
+                    RelPath = "ComponentModel\IObjectView.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
                     RelPath = "ComponentModel\ISortable.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
@@ -852,6 +857,11 @@
                 />
                 <File
                     RelPath = "Validation\FriendlyNameAttribute.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "Validation\IValidatable.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
                 />

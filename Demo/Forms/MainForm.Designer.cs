@@ -43,6 +43,7 @@ namespace BLToolkit.Demo.Forms
 			this.personGridView.AllowUserToDeleteRows = false;
 			this.personGridView.AllowUserToOrderColumns = true;
 			this.personGridView.AutoGenerateColumns = false;
+			this.personGridView.BorderStyle = System.Windows.Forms.BorderStyle.None;
 			this.personGridView.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
 			this.personGridView.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
             this.iDDataGridViewTextBoxColumn,
