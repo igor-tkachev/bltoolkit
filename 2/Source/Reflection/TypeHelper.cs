@@ -653,7 +653,6 @@ namespace BLToolkit.Reflection
 #if FW2
 			if (type.IsGenericType)
 			{
-				
 			}
 #endif
 
@@ -717,6 +716,32 @@ namespace BLToolkit.Reflection
 			}
 
 			return typeOfObject;
+		}
+
+		public static Type GetListItemType(Type listType)
+		{
+			if (IsSameOrParent(typeof(IList),       listType) ||
+				IsSameOrParent(typeof(ITypedList),  listType) ||
+				IsSameOrParent(typeof(IListSource), listType))
+			{
+				PropertyInfo last = null;
+
+				foreach (PropertyInfo pi in listType.GetProperties())
+				{
+					if (pi.GetIndexParameters().Length > 0 && pi.PropertyType != typeof(object))
+					{
+						if (pi.Name == "Item")
+							return pi.PropertyType;
+
+						last = pi;
+					}
+				}
+
+				if (last != null)
+					return last.PropertyType;
+			}
+
+			return typeof(object);
 		}
 
 		#endregion

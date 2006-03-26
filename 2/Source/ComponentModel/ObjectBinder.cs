@@ -251,6 +251,10 @@ namespace BLToolkit.ComponentModel
 				(_objectViewType == null? "": _objectViewType.ToString()) + "." +
 				(_isNull == null? "0": "1");
 
+			if (listAccessors != null)
+				foreach (PropertyDescriptor pd in listAccessors)
+					key += "." + pd.Name;
+
 			PropertyDescriptorCollection pdc = (PropertyDescriptorCollection)_descriptors[key];
 
 			if (pdc == null)
