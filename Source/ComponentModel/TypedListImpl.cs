@@ -78,20 +78,47 @@ namespace BLToolkit.ComponentModel
 				{
 					// Lets try to pick out the item type from the list type.
 					//
-					Type itemType = TypeHelper.GetListItemType(listAccessors[0].PropertyType);
+					Type itemType = TypeHelper.GetListItemType(
+						listAccessors[listAccessors.Length - 1].PropertyType);
 
 					if (itemType == typeof(object))
 					{
-						// We have to create an instance of the list to determine its item type.
-						//
-						object obj = _typeAccessor.CreateInstanceEx();
-						object o   = listAccessors[0].GetValue(obj);
+						TypeAccessor parentAccessor = _typeAccessor;
 
-						if (o != null)
-							itemType = TypeHelper.GetListItemType(o);
+						foreach (PropertyDescriptor pd in listAccessors)
+						{
+							// We have to create an instance of the list to determine its item type
+							//
+
+							// Create an instance of the parent.
+							//
+							object parentObject = parentAccessor.CreateInstanceEx();
+
+							// Create an instance of the list.
+							//
+							object listObject   = listAccessors[0].GetValue(parentObject);
+
+							if (listObject == null)
+							{
+								// We failed. Item type can not be determined.
+								//
+								itemType = null;
+
+								break;
+							}
+
+							itemType = TypeHelper.GetListItemType(listObject);
+
+							// Still bad.
+							//
+							if (itemType == typeof(object))
+								break;
+
+							parentAccessor = TypeAccessor.GetAccessor(itemType);
+						}
 					}
 
-					if (itemType != typeof(object))
+					if (itemType != null && itemType != typeof(object))
 					{
 						TypeAccessor ta = TypeAccessor.GetAccessor(itemType);
 
