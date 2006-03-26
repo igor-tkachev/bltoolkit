@@ -611,7 +611,12 @@ namespace BLToolkit.Mapping
 					index   = GetIndex(ctx.DataSource, current != null? current: dest);
 				}
 
-				MapInternal(ctx.DataSource, ctx.SourceObject, dest, destObject, index);
+				MapInternal(
+					ctx.DataSource,
+					ctx.SourceObject,
+					current != null? current: dest,
+					destObject,
+					index);
 
 				if (smDest != null)
 					smDest.EndMapping(ctx);
