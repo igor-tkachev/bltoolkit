@@ -73,18 +73,13 @@
     <Content Include="Content\Doc\Reflection\Emit\HelloWorld.htm" />
     <Content Include="Content\Doc\Reflection\Emit\index.htm" />
     <Content Include="Content\Doc\Reflection\index.htm" />
+    <Content Include="Content\Doc\Reflection\ObjectFactory.htm" />
     <Content Include="Content\Doc\TypeBuilder\index.htm" />
     <Content Include="Content\Doc\Validation\index.htm" />
     <Content Include="Content\Download.htm" />
     <Content Include="Content\index.htm" />
     <Content Include="Content\License.htm" />
     <Content Include="Content\template.html" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\..\..\..\..\..\Rsdn\trunk\source\Framework\Format\Rsdn.Framework.Formatting.2.csproj">
-      <Project>{5D93361E-3F17-4553-91F0-B6C24DEBB4CC}</Project>
-      <Name>Rsdn.Framework.Formatting.2</Name>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <None Include="Content\Doc\DataAccess\SQL\NonUpdatableAttribute.sql" />
@@ -100,6 +95,12 @@
     <None Include="Content\Doc\DataAccess\SQL\DeleteSql.sql" />
     <None Include="Content\Doc\DataAccess\SQL\SelectAllSql.sql" />
     <None Include="Content\Doc\Data\App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\..\..\..\Rsdn\trunk\source\Framework\Format\Rsdn.Framework.Formatting.csproj">
+      <Project>{5D93361E-3F17-4553-91F0-B6C24DEBB4CC}</Project>
+      <Name>Rsdn.Framework.Formatting</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

@@ -4,12 +4,16 @@
 --(NAME=N'BLToolkitTest_log', FILENAME=N'C:\Data\MSSQL.1\MSSQL\DATA\BLToolkitData_log.ldf', SIZE=1024KB, FILEGROWTH=10%)
 --GO
 
+IF EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID('Doctor') AND type in (N'U'))
+BEGIN DROP TABLE Doctor END
+
+IF EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID('Patient') AND type in (N'U'))
+BEGIN DROP TABLE Patient END
+
 -- Person Table
 
 IF EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID('Person') AND type in (N'U'))
-BEGIN
-	DROP TABLE Person
-END
+BEGIN DROP TABLE Person END
 
 CREATE TABLE Person
 (
@@ -26,11 +30,46 @@ INSERT INTO Person (FirstName, LastName, Gender) VALUES ('John',   'Pupkin',    
 INSERT INTO Person (FirstName, LastName, Gender) VALUES ('Tester', 'Testerson', 'M')
 GO
 
+-- Doctor Table Extension
+
+CREATE TABLE Doctor
+(
+	PersonID int          NOT NULL
+		CONSTRAINT PK_Doctor        PRIMARY KEY CLUSTERED
+		CONSTRAINT FK_Doctor_Person FOREIGN KEY
+			REFERENCES Person ([PersonID])
+			ON UPDATE CASCADE
+			ON DELETE CASCADE,
+	Taxonomy nvarchar(50) NOT NULL
+)
+ON [PRIMARY]
+GO
+
+INSERT INTO Doctor (PersonID, Taxonomy) VALUES (1, 'Psychiatry')
+GO
+
+-- Patient Table Extension
+
+CREATE TABLE Patient
+(
+	PersonID  int           NOT NULL
+		CONSTRAINT PK_Patient        PRIMARY KEY CLUSTERED
+		CONSTRAINT FK_Patient_Person FOREIGN KEY
+			REFERENCES Person ([PersonID])
+			ON UPDATE CASCADE
+			ON DELETE CASCADE,
+	Diagnosis nvarchar(256) NOT NULL
+)
+ON [PRIMARY]
+GO
+
+INSERT INTO Patient (PersonID, Diagnosis) VALUES (2, 'Hallucination with Paranoid Bugs'' Delirium of Persecution')
+GO
+
 -- Person_SelectByKey
 
 IF EXISTS (SELECT * FROM sysobjects WHERE type = 'P' AND name = 'Person_SelectByKey')
-BEGIN
-	DROP  Procedure  Person_SelectByKey
+BEGIN DROP Procedure Person_SelectByKey
 END
 GO
 
@@ -48,9 +87,7 @@ GO
 -- Person_SelectAll
 
 IF EXISTS (SELECT * FROM sysobjects WHERE type = 'P' AND name = 'Person_SelectAll')
-BEGIN
-	DROP  Procedure  Person_SelectAll
-END
+BEGIN DROP Procedure Person_SelectAll END
 GO
 
 CREATE Procedure Person_SelectAll
@@ -66,9 +103,7 @@ GO
 -- Person_SelectByName
 
 IF EXISTS (SELECT * FROM sysobjects WHERE type = 'P' AND name = 'Person_SelectByName')
-BEGIN
-	DROP  Procedure  Person_SelectByName
-END
+BEGIN DROP Procedure Person_SelectByName END
 GO
 
 CREATE Procedure Person_SelectByName
@@ -91,8 +126,7 @@ GO
 -- Person_SelectListByName
 
 IF EXISTS (SELECT * FROM sysobjects WHERE type = 'P' AND name = 'Person_SelectListByName')
-BEGIN
-	DROP  Procedure  Person_SelectListByName
+BEGIN DROP Procedure Person_SelectListByName
 END
 GO
 
@@ -116,9 +150,7 @@ GO
 -- Person_Insert
 
 IF EXISTS (SELECT * FROM sysobjects WHERE type = 'P' AND name = 'Person_Insert')
-BEGIN
-	DROP  Procedure  Person_Insert
-END
+BEGIN DROP Procedure Person_Insert END
 GO
 
 CREATE Procedure Person_Insert
@@ -143,9 +175,7 @@ GO
 -- Person_Update
 
 IF EXISTS (SELECT * FROM sysobjects WHERE type = 'P' AND name = 'Person_Update')
-BEGIN
-	DROP  Procedure  Person_Update
-END
+BEGIN DROP Procedure Person_Update END
 GO
 
 CREATE Procedure Person_Update
@@ -174,9 +204,7 @@ GO
 -- Person_Delete
 
 IF EXISTS (SELECT * FROM sysobjects WHERE type = 'P' AND name = 'Person_Delete')
-BEGIN
-	DROP  Procedure  Person_Delete
-END
+BEGIN DROP Procedure Person_Delete END
 GO
 
 CREATE Procedure Person_Delete
@@ -193,9 +221,8 @@ GO
 -- BinaryData Table
 
 IF EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID('BinaryData') AND type in (N'U'))
-BEGIN
-	DROP TABLE BinaryData
-END
+BEGIN DROP TABLE BinaryData END
+
 CREATE TABLE BinaryData
 (
 	BinaryDataID int             NOT NULL IDENTITY(1,1) CONSTRAINT PK_BinaryData PRIMARY KEY CLUSTERED,
@@ -203,3 +230,4 @@ CREATE TABLE BinaryData
 	Data         varbinary(1024) NOT NULL)
 ON [PRIMARY]
 GO
+
