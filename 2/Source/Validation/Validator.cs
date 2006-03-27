@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.ComponentModel;
 
 using BLToolkit.Reflection;
 
@@ -35,7 +36,7 @@ namespace BLToolkit.Validation
 
 		public static void Validate(object obj, ValidationContext.IsNullHandler isNull)
 		{
-			Validate(InitContext(null, obj, isNull));
+			Validate(InitContext(null, obj, null, isNull));
 		}
 
 		public static void Validate(object obj)
@@ -49,17 +50,21 @@ namespace BLToolkit.Validation
 
 		private static bool IsNullInternal(ValidationContext context)
 		{
-			return TypeAccessor.IsNull(context.Value.GetType());
+			return TypeAccessor.IsNull(context.Value);
 		}
 
 		public static ValidationContext InitContext(
-			ValidationContext context, object obj, ValidationContext.IsNullHandler isNull)
+			ValidationContext  context,
+			object             obj,
+			PropertyDescriptor pd,
+			ValidationContext.IsNullHandler isNull)
 		{
 			if (context == null)
 				context = new ValidationContext();
 
 			context.Object = obj;
 			context.IsNull = isNull != null? isNull: new ValidationContext.IsNullHandler(IsNullInternal);
+			context.PropertyDescriptor = pd;
 
 			return context;
 		}
@@ -70,21 +75,51 @@ namespace BLToolkit.Validation
 
 		public static bool IsValid(ValidationContext context, string fieldName)
 		{
-			context.MemberAccessor = context.TypeAccessor[fieldName];
+			object[] attrs = null;
+			object   value = null;
 
-			if (context.MemberAccessor != null)
+			if (context.PropertyDescriptor != null)
 			{
-				object[] attrs = context.MemberAccessor.GetAttributes(typeof(ValidatorBaseAttribute));
+				value = context.PropertyDescriptor.GetValue(context.Object);
 
-				if (attrs != null)
+				ArrayList list = null;
+
+				foreach (object o in context.PropertyDescriptor.Attributes)
 				{
-					foreach (ValidatorBaseAttribute attr in attrs)
+					if (o is ValidatorBaseAttribute)
 					{
-						context.Value = context.MemberAccessor.GetValue(context.Object);
+						if (list == null)
+							list = new ArrayList();
 
-						if (attr.IsValid(context) == false)
-							return false;
+						list.Add(o);
 					}
+				}
+
+				if (list != null)
+				{
+					attrs = new object[list.Count];
+					list.CopyTo(attrs);
+				}
+			}
+			else
+			{
+				context.MemberAccessor = context.TypeAccessor[fieldName];
+
+				if (context.MemberAccessor != null)
+				{
+					value = context.MemberAccessor.GetValue(context.Object);
+					attrs = context.MemberAccessor.GetAttributes(typeof(ValidatorBaseAttribute));
+				}
+			}
+
+			if (attrs != null)
+			{
+				foreach (ValidatorBaseAttribute attr in attrs)
+				{
+					context.Value = value;
+
+					if (attr.IsValid(context) == false)
+						return false;
 				}
 			}
 
@@ -93,12 +128,22 @@ namespace BLToolkit.Validation
 
 		public static bool IsValid(object obj, string fieldName, ValidationContext.IsNullHandler isNull)
 		{
-			return IsValid(InitContext(null, obj, isNull), fieldName);
+			return IsValid(InitContext(null, obj, null, isNull), fieldName);
+		}
+
+		public static bool IsValid(object obj, PropertyDescriptor pd, ValidationContext.IsNullHandler isNull)
+		{
+			return IsValid(InitContext(null, obj, pd, isNull), pd.Name);
 		}
 
 		public static bool IsValid(object obj, string fieldName)
 		{
 			return IsValid(obj, fieldName, null);
+		}
+
+		public static bool IsValid(object obj, PropertyDescriptor pd)
+		{
+			return IsValid(obj, pd, null);
 		}
 
 		#endregion
@@ -129,14 +174,26 @@ namespace BLToolkit.Validation
 			return new string[0];
 		}
 
-		public static string[] GetErrorMessages(object obj, string fieldName, ValidationContext.IsNullHandler isNull)
+		public static string[] GetErrorMessages(
+			object obj, string fieldName, ValidationContext.IsNullHandler isNull)
 		{
-			return GetErrorMessages(InitContext(null, obj, isNull), fieldName);
+			return GetErrorMessages(InitContext(null, obj, null, isNull), fieldName);
+		}
+
+		public static string[] GetErrorMessages(
+			object obj, PropertyDescriptor pd, ValidationContext.IsNullHandler isNull)
+		{
+			return GetErrorMessages(InitContext(null, obj, pd, isNull), pd.Name);
 		}
 
 		public static string[] GetErrorMessages(object obj, string fieldName)
 		{
 			return GetErrorMessages(obj, fieldName, null);
+		}
+
+		public static string[] GetErrorMessages(object obj, PropertyDescriptor pd)
+		{
+			return GetErrorMessages(obj, pd, null);
 		}
 
 		#endregion

@@ -10,12 +10,15 @@ using BLToolkit.Demo.ObjectModel;
 
 namespace BLToolkit.Demo.Forms
 {
-	public partial class EditPersonForm : Form
+	public partial class EditPersonForm : BizEntityForm, IBizEntityForm<Person>
 	{
-		public EditPersonForm(Person person)
+		public EditPersonForm()
 		{
 			InitializeComponent();
+		}
 
+		public void SetBizEntity(Person person)
+		{
 			personBinder.Object = person;
 		}
 	}

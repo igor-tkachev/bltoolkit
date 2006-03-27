@@ -30,6 +30,7 @@ namespace BLToolkit.Demo.Forms
 		{
 			this.components = new System.ComponentModel.Container();
 			this.firstNameTextBox = new System.Windows.Forms.TextBox();
+			this.personBinder = new BLToolkit.ComponentModel.ObjectBinder(this.components);
 			this.firstNameLabel = new System.Windows.Forms.Label();
 			this.middleNameLabel = new System.Windows.Forms.Label();
 			this.MiddleNameTextBox = new System.Windows.Forms.TextBox();
@@ -37,7 +38,6 @@ namespace BLToolkit.Demo.Forms
 			this.lastNameTextBox = new System.Windows.Forms.TextBox();
 			this.okButton = new System.Windows.Forms.Button();
 			this.cancelButton = new System.Windows.Forms.Button();
-			this.personBinder = new BLToolkit.ComponentModel.ObjectBinder(this.components);
 			this.SuspendLayout();
 			// 
 			// firstNameTextBox
@@ -47,6 +47,12 @@ namespace BLToolkit.Demo.Forms
 			this.firstNameTextBox.Name = "firstNameTextBox";
 			this.firstNameTextBox.Size = new System.Drawing.Size(160, 20);
 			this.firstNameTextBox.TabIndex = 2;
+			// 
+			// personBinder
+			// 
+			this.personBinder.IsNull = null;
+			this.personBinder.ItemType = typeof(BLToolkit.Demo.ObjectModel.Person);
+			this.personBinder.ObjectViewType = typeof(BLToolkit.Demo.Forms.ObjectViews.PersonView);
 			// 
 			// firstNameLabel
 			// 
@@ -97,7 +103,7 @@ namespace BLToolkit.Demo.Forms
 			this.okButton.Location = new System.Drawing.Point(130, 268);
 			this.okButton.Name = "okButton";
 			this.okButton.Size = new System.Drawing.Size(75, 23);
-			this.okButton.TabIndex = 3;
+			this.okButton.TabIndex = 100;
 			this.okButton.Text = "Save";
 			this.okButton.UseVisualStyleBackColor = true;
 			// 
@@ -107,14 +113,9 @@ namespace BLToolkit.Demo.Forms
 			this.cancelButton.Location = new System.Drawing.Point(262, 268);
 			this.cancelButton.Name = "cancelButton";
 			this.cancelButton.Size = new System.Drawing.Size(75, 23);
-			this.cancelButton.TabIndex = 4;
+			this.cancelButton.TabIndex = 101;
 			this.cancelButton.Text = "Cancel";
 			this.cancelButton.UseVisualStyleBackColor = true;
-			// 
-			// personBinder
-			// 
-			this.personBinder.ItemType = typeof(BLToolkit.Demo.ObjectModel.Person);
-			this.personBinder.ObjectViewType = typeof(BLToolkit.Demo.Forms.ObjectViews.PersonView);
 			// 
 			// EditPersonForm
 			// 
@@ -122,7 +123,7 @@ namespace BLToolkit.Demo.Forms
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.CancelButton = this.cancelButton;
-			this.ClientSize = new System.Drawing.Size(437, 303);
+			this.ClientSize = new System.Drawing.Size(539, 303);
 			this.Controls.Add(this.cancelButton);
 			this.Controls.Add(this.okButton);
 			this.Controls.Add(this.lastNameLabel);

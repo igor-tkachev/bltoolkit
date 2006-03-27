@@ -1,4 +1,5 @@
 using System;
+using System.ComponentModel;
 using System.Reflection;
 
 using BLToolkit.Reflection;
@@ -12,18 +13,27 @@ namespace BLToolkit.Validation
 		private object _object;
 		public  object  Object
 		{
-			get { return _object; }
-			set 
-			{
-				_object       = value;
-				_typeAccessor = TypeAccessor.GetAccessor(value.GetType());
-			}
+			get { return _object;  }
+			set { _object = value; }
 		}
 
 		private TypeAccessor _typeAccessor;
 		public  TypeAccessor  TypeAccessor
 		{
-			get { return _typeAccessor;  }
+			get
+			{
+				if (_typeAccessor == null)
+					_typeAccessor = TypeAccessor.GetAccessor(_object.GetType());
+
+				return _typeAccessor;
+			}
+		}
+
+		private PropertyDescriptor _propertyDescriptor;
+		public  PropertyDescriptor  PropertyDescriptor
+		{
+			get { return _propertyDescriptor;  }
+			set { _propertyDescriptor = value; }
 		}
 
 		private IsNullHandler _isNull;
@@ -52,7 +62,7 @@ namespace BLToolkit.Validation
 			set 
 			{
 				_memberAccessor = value;
-				_memberInfo     = value.MemberInfo;
+				_memberInfo     = value != null? value.MemberInfo: null;
 			}
 		}
 

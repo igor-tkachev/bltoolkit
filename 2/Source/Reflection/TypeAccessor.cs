@@ -1,18 +1,17 @@
 using System;
 using System.Collections;
-using System.Reflection;
+using System.ComponentModel;
+using System.Data;
+using System.Data.SqlTypes;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
-using System.Globalization;
-using System.Data.SqlTypes;
-using System.ComponentModel;
+using System.Reflection;
 
+using BLToolkit.ComponentModel;
+using BLToolkit.EditableObjects;
+using BLToolkit.Mapping;
 using BLToolkit.TypeBuilder;
 using BLToolkit.TypeBuilder.Builders;
-using BLToolkit.Mapping;
-using BLToolkit.ComponentModel;
-using System.Data;
-using BLToolkit.EditableObjects;
 
 namespace BLToolkit.Reflection
 {

@@ -40,12 +40,16 @@
     <Compile Include="BusinessLogic\ManagerBase.cs" />
     <Compile Include="BusinessLogic\DataAccess\PersonAccessor.cs" />
     <Compile Include="BusinessLogic\PersonManager.cs" />
+    <Compile Include="Forms\BizEntityForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="Forms\EditPersonForm.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="Forms\EditPersonForm.Designer.cs">
       <DependentUpon>EditPersonForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="Forms\IBizEntityForm.cs" />
     <Compile Include="Forms\MainForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -94,6 +98,15 @@
       <Project>{0C325F5D-E50E-4340-8724-D29896CCC583}</Project>
       <Name>BLToolkit.2</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\delete.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\edit.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\new.png" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
