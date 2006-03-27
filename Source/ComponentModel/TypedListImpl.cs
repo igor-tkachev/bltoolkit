@@ -96,7 +96,7 @@ namespace BLToolkit.ComponentModel
 
 							// Create an instance of the list.
 							//
-							object listObject   = listAccessors[0].GetValue(parentObject);
+							object listObject   = pd.GetValue(parentObject);
 
 							if (listObject == null)
 							{

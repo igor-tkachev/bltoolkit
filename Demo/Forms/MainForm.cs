@@ -17,30 +17,63 @@ namespace BLToolkit.Demo.Forms
 			personBinder.List = new PersonManager().SelectAll();
 		}
 
+		private void Edit(Person person)
+		{
+			BizEntityForm.Edit<EditPersonForm, Person>(person, delegate(Person p)
+			{
+				new PersonManager().Update(p);
+			});
+		}
+
 		private void personGridView_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
 		{
 			DataGridViewRow row = personGridView.Rows[e.RowIndex];
 
-			Person person = (Person)row.DataBoundItem;
-			Person clone  = (Person)person.Clone();
+			Edit((Person)row.DataBoundItem);
+		}
 
-			if (new EditPersonForm(clone).ShowDialog() == DialogResult.OK)
+		private void edit_Click(object sender, EventArgs e)
+		{
+			if (personGridView.CurrentRow != null)
+				Edit((Person)personGridView.CurrentRow.DataBoundItem);
+		}
+
+		private void new_Click(object sender, EventArgs e)
+		{
+			Person person = BizEntityForm.EditNew<EditPersonForm, Person>(delegate(Person p)
 			{
-				if (clone.IsDirty)
-				{
-					try
-					{
-						new PersonManager().Update(clone);
+				new PersonManager().Insert(p);
+			});
 
-						clone.CopyTo(person);
-						person.AcceptChanges();
-					}
-					catch (Exception ex)
-					{
-						MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-					}
+			if (person != null)
+				personBinder.List.Add(person);
+		}
+
+		private void delete_Click(object sender, EventArgs e)
+		{
+			if (personGridView.CurrentRow != null)
+			{
+				Person person = (Person)personGridView.CurrentRow.DataBoundItem;
+
+				try
+				{
+					UseWaitCursor = true;
+					new PersonManager().Delete(person);
+					UseWaitCursor = false;
+
+					personBinder.List.Remove(person);
+				}
+				catch (Exception ex)
+				{
+					UseWaitCursor = false;
+					MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
 				}
 			}
+		}
+
+		private void exit_Click(object sender, EventArgs e)
+		{
+			Close();
 		}
 	}
 }

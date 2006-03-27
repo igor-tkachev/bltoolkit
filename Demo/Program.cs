@@ -12,7 +12,17 @@ namespace BLToolkit.Demo
 		{
 			Application.EnableVisualStyles();
 			Application.SetCompatibleTextRenderingDefault(false);
-			Application.Run(new MainForm());
+
+			MainForm form = new MainForm();
+
+			ToolStripManager.LoadSettings(form, "BLToolkit.Demo");
+
+			form.FormClosing += delegate(object sender, FormClosingEventArgs e)
+			{
+				ToolStripManager.SaveSettings(form, "BLToolkit.Demo");
+			};
+
+			Application.Run(form);
 		}
 	}
 }
