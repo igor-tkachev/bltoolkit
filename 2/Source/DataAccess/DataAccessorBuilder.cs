@@ -35,6 +35,7 @@ namespace BLToolkit.DataAccess
 		bool            _createManager;
 		LocalBuilder    _locManager;
 		LocalBuilder    _locObjType;
+		ArrayList       _outputParameters;
 
 		protected override void BuildAbstractMethod()
 		{
@@ -99,6 +100,7 @@ namespace BLToolkit.DataAccess
 				ExecuteObject();
 			}
 
+			GetOutRefParameters();
 			Finally();
 		}
 
@@ -108,7 +110,10 @@ namespace BLToolkit.DataAccess
 			{
 				Type pType = _parameters[i].ParameterType;
 
-				if (pType.IsValueType || pType == typeof(string))
+				if (pType.IsByRef)
+					pType = pType.GetElementType();
+
+				if (pType.IsValueType || pType == typeof(string) || pType == typeof(byte[]))
 				{
 					_paramList.Add(_parameters[i]);
 				}
@@ -412,17 +417,36 @@ namespace BLToolkit.DataAccess
 			if (attrs.Length != 0)
 				discoverParams = ((DiscoverParametersAttribute)attrs[0]).Discover;
 
-			if (discoverParams)
-				_refParamList.Clear();
+			LocalBuilder locParams = discoverParams?
+				BuildParametersWithDiscoverParameters():
+				BuildParameters();
+
+			// Call SetSpCommand.
+			//
+			emit
+				.ldloc    (locParams)
+				.callvirt (typeof(DbManager), "SetSpCommand", _bindingFlags, typeof(string), typeof(object[]))
+				;
+		}
+
+		private LocalBuilder BuildParameters()
+		{
+			return _refParamList.Count > 0?
+				BuildRefParameters():
+				BuildSimpleParameters();
+		}
+
+		private LocalBuilder BuildSimpleParameters()
+		{
+			EmitHelper emit = Context.MethodBuilder.Emitter;
 
 			// Parameters.
 			//
-			LocalBuilder locParams = emit.DeclareLocal(
-				_refParamList.Count == 0? typeof(object[]): typeof(IDbDataParameter[]));
+			LocalBuilder locParams = emit.DeclareLocal(typeof(object[]));
 
 			emit
 				.ldc_i4 (_paramList.Count)
-				.newarr (_refParamList.Count == 0? typeof(object): typeof(IDbDataParameter))
+				.newarr (typeof(object))
 				.stloc  (locParams)
 				;
 
@@ -435,16 +459,187 @@ namespace BLToolkit.DataAccess
 					.ldc_i4 (i)
 					;
 
-				if (discoverParams)
+				BuildParameter(pi);
+
+				emit
+					.stelem_ref
+					.end()
+					;
+			}
+
+			return locParams;
+		}
+
+		private LocalBuilder BuildRefParameters()
+		{
+			EmitHelper emit = Context.MethodBuilder.Emitter;
+
+			// Parameters.
+			//
+			LocalBuilder locParams = emit.DeclareLocal(typeof(object[]));
+
+			emit
+				.ldc_i4 (_parameters.Length)
+				.newarr (typeof(object))
+				.stloc  (locParams)
+				;
+
+			for (int i = 0; i < _parameters.Length; i++)
+			{
+				ParameterInfo pi = _parameters[i];
+
+				emit
+					.ldloc  (locParams)
+					.ldc_i4 (i)
+					;
+
+				if (_paramList.Contains(pi))
 				{
+					BuildParameter(pi);
+				}
+				else if (_refParamList.Contains(pi))
+				{
+					Type type =
+						pi.ParameterType == typeof(DataRow) || pi.ParameterType.IsSubclassOf(typeof(DataRow))?
+							typeof(DataRow): typeof(object);
+
 					emit
-						.ldarg          (pi)
-						.boxIfValueType (pi.ParameterType)
+						.ldloc    (_locManager)
+						.ldarg    (pi)
+						.ldnull
+						.callvirt (typeof(DbManager), "CreateParameters", type, typeof(IDbDataParameter[]))
 						;
 				}
 				else
 				{
-					attrs = pi.GetCustomAttributes(typeof(ParamNameAttribute), true);
+					emit
+						.ldnull
+						.end()
+						;
+				}
+
+				emit
+					.stelem_ref
+					.end()
+					;
+			}
+
+			LocalBuilder retParams = emit.DeclareLocal(typeof(IDbDataParameter[]));
+
+			emit
+				.ldarg_0
+				.ldloc    (locParams)
+				.callvirt (_baseType, "PrepareParameters", _bindingFlags, typeof(object[]))
+				.stloc    (retParams)
+				;
+
+			return retParams;
+		}
+
+		private void BuildParameter(ParameterInfo pi)
+		{
+			EmitHelper emit  = Context.MethodBuilder.Emitter;
+			object[]   attrs = pi.GetCustomAttributes(typeof(ParamNameAttribute), true);
+
+			string paramName = attrs.Length == 0?
+				pi.Name: ((ParamNameAttribute)attrs[0]).Name;
+
+			emit
+				.ldloc(_locManager);
+
+			if (paramName[0] != '@')
+			{
+				emit
+					.ldloc    (_locManager)
+					.callvirt (typeof(DbManager).GetProperty("DataProvider").GetGetMethod())
+					.ldstr    (paramName)
+					.ldc_i4   ((int)ConvertType.NameToParameter)
+					.callvirt (typeof(IDataProvider), "Convert", typeof(string), typeof(ConvertType))
+					;
+			}
+			else
+			{
+				emit
+					.ldstr(paramName);
+			}
+
+			if (pi.ParameterType.IsByRef)
+			{
+				if (_outputParameters == null)
+					_outputParameters = new ArrayList();
+
+				_outputParameters.Add(pi);
+
+				Type   type       = pi.ParameterType.GetElementType();
+				string methodName = pi.IsOut? "OutputParameter": "InputOutputParameter";
+
+				emit
+					.ldarg(pi)
+					;
+
+				if (type.IsValueType && type.IsPrimitive == false)
+					emit.ldobj(type);
+				else
+					emit.ldind(type);
+
+				emit
+					.boxIfValueType (type)
+					.callvirt       (typeof(DbManager), methodName, typeof(string), typeof(object))
+					;
+			}
+			else
+			{
+				emit
+					.ldarg          (pi)
+					.boxIfValueType (pi.ParameterType)
+					.callvirt       (typeof(DbManager), "Parameter", typeof(string), typeof(object))
+					;
+			}
+		}
+
+		private LocalBuilder BuildParametersWithDiscoverParameters()
+		{
+			EmitHelper   emit      = Context.MethodBuilder.Emitter;
+			LocalBuilder locParams = emit.DeclareLocal(typeof(object[]));
+
+			emit
+				.ldc_i4 (_paramList.Count)
+				.newarr (typeof(object))
+				.stloc  (locParams)
+				;
+
+			for (int i = 0; i < _paramList.Count; i++)
+			{
+				ParameterInfo pi = (ParameterInfo)_paramList[i];
+
+				emit
+					.ldloc          (locParams)
+					.ldc_i4         (i)
+					.ldarg          (pi)
+					.boxIfValueType (pi.ParameterType)
+					.stelem_ref
+					.end()
+					;
+			}
+
+			return locParams;
+		}
+
+		private void GetOutRefParameters()
+		{
+			if (_outputParameters != null)
+			{
+				EmitHelper emit = Context.MethodBuilder.Emitter;
+
+				foreach (ParameterInfo pi in _outputParameters)
+				{
+					Type type = pi.ParameterType.GetElementType();
+
+					emit
+						.ldarg(pi)
+						;
+
+					object[] attrs = pi.GetCustomAttributes(typeof(ParamNameAttribute), true);
 
 					string paramName = attrs.Length == 0 ?
 						pi.Name : ((ParamNameAttribute)attrs[0]).Name;
@@ -469,40 +664,19 @@ namespace BLToolkit.DataAccess
 					}
 
 					emit
-						.ldarg          (pi)
-						.boxIfValueType (pi.ParameterType)
-						.callvirt       (typeof(DbManager), "Parameter", typeof(string), typeof(object))
+						.callvirt       (typeof(DbManager), "Parameter", typeof(string))
+						.callvirt       (typeof(IDataParameter).GetProperty("Value").GetGetMethod())
+						.LoadType       (type)
+						.call           (typeof(Convert), "ChangeType", typeof(object), typeof(Type))
+						.CastFromObject (type)
 						;
+
+					if (type.IsValueType && type.IsPrimitive == false)
+						emit.stobj(type);
+					else
+						emit.stind(type);
 				}
-
-				emit
-					.stelem_ref
-					.end()
-					;
 			}
-
-			for (int i = _refParamList.Count - 1; i >= 0; i--)
-			{
-				ParameterInfo pi = (ParameterInfo)_refParamList[i];
-
-				Type type =
-					pi.ParameterType == typeof(DataRow) || pi.ParameterType.IsSubclassOf(typeof(DataRow))?
-						typeof(DataRow): typeof(object);
-
-				emit
-					.ldloc    (_locManager)
-					.ldarg    (pi)
-					.ldloc    (locParams)
-					.callvirt (typeof(DbManager), "CreateParameters", type, typeof(IDbDataParameter[]))
-					.stloc    (locParams);
-			}
-
-			// Call SetSpCommand.
-			//
-			emit
-				.ldloc    (locParams)
-				.callvirt (typeof(DbManager), "SetSpCommand", _bindingFlags, typeof(string), typeof(object[]))
-				;
 		}
 
 		private bool IsInterfaceOf(Type type, Type interfaceType)

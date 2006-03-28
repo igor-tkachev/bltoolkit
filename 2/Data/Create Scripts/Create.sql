@@ -231,3 +231,24 @@ CREATE TABLE BinaryData
 ON [PRIMARY]
 GO
 
+-- OutRefTest
+
+IF EXISTS (SELECT * FROM sysobjects WHERE type = 'P' AND name = 'OutRefTest')
+BEGIN DROP Procedure OutRefTest END
+GO
+
+CREATE Procedure OutRefTest
+	@ID             int,
+	@outputID       int output,
+	@inputOutputID  int output,
+	@str            varchar(50),
+	@outputStr      varchar(50) output,
+	@inputOutputStr varchar(50) output
+AS
+
+SET @outputID       = @ID
+SET @inputOutputID  = @ID + @inputOutputID
+SET @outputStr      = @str
+SET @inputOutputStr = @str + @inputOutputStr
+
+GO

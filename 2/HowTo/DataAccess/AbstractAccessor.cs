@@ -24,6 +24,8 @@ namespace HowTo.DataAccess
 		[Test]
 		public void Test()
 		{
+			BLToolkit.TypeBuilder.TypeFactory.SaveTypes = true;
+
 			using (DbManager db = new DbManager())
 			{
 				PersonAccessor pa = /*[a]*/DataAccessor.CreateInstance<PersonAccessor>(db)/*[/a]*/;
