@@ -739,6 +739,16 @@ namespace BLToolkit.Data
 							param.Value     = p.Value;
 							p.ParameterName = name;
 
+							if (param.Direction != p.Direction)
+							{
+								System.Diagnostics.Debug.WriteLine(string.Format(
+									"Stored Procedure '{0}'. Parameter '{1}' has different direction '{2}'. Should be '{3}'.",
+										spName, name, param.Direction, p.Direction),
+									typeof(DbManager).Namespace);
+
+								param.Direction = p.Direction;
+							}
+
 							found = true;
 
 							break;
@@ -1264,8 +1274,9 @@ namespace BLToolkit.Data
 				}
 			}
 
-			foreach (IDbDataParameter p in commandParameters)
-				paramList.Add(p);
+			if (commandParameters != null)
+				foreach (IDbDataParameter p in commandParameters)
+					paramList.Add(p);
 
 			return (IDbDataParameter[])paramList.ToArray(typeof(IDbDataParameter));
 		}

@@ -2006,6 +2006,33 @@ namespace BLToolkit.Reflection.Emit
 		}
 
 		/// <summary>
+		/// Loads a value of the type from a supplied address.
+		/// </summary>
+		/// <param name="type">A Type.</param>
+		public EmitHelper ldind(Type type)
+		{
+			if (type == null) throw new ArgumentNullException("type");
+
+			if      (type.IsClass)           ldind_ref.end();
+			else if (type == typeof(int))    ldind_i4.end();
+			else if (type == typeof(uint))   ldind_u4.end();
+			else if (type == typeof(bool)  ||
+			         type == typeof(byte))   ldind_u1.end();
+			else if (type == typeof(sbyte))  ldind_i1.end();
+			else if (type == typeof(char)  ||
+			         type == typeof(ushort)) ldind_u2.end();
+			else if (type == typeof(short))  ldind_i2.end();
+			else if (type == typeof(double)) ldind_r8.end();
+			else if (type == typeof(float))  ldind_r4.end();
+			else if (type == typeof(long)  ||
+			         type == typeof(ulong))  ldind_i8.end();
+			else
+				throw new InvalidOperationException();
+
+			return this;
+		}
+
+		/// <summary>
 		/// Calls ILGenerator.Emit(<see cref="OpCodes.Ldlen"/>) that
 		/// pushes the number of elements of a zero-based, one-dimensional array onto the evaluation stack.
 		/// </summary>
@@ -2798,6 +2825,8 @@ namespace BLToolkit.Reflection.Emit
 			if (type == null) throw new ArgumentNullException("type");
 
 			if      (type.IsClass)           stind_ref.end();
+			else if (type == typeof(int)   ||
+			         type == typeof(uint))   stind_i4.end();
 			else if (type == typeof(bool)  ||
 			         type == typeof(byte)  ||
 			         type == typeof(sbyte))  stind_i1.end();
@@ -2806,8 +2835,6 @@ namespace BLToolkit.Reflection.Emit
 			         type == typeof(ushort)) stind_i2.end();
 			else if (type == typeof(double)) stind_r8.end();
 			else if (type == typeof(float))  stind_r4.end();
-			else if (type == typeof(int)   ||
-			         type == typeof(uint))   stind_i4.end();
 			else if (type == typeof(long)  ||
 			         type == typeof(ulong))  stind_i8.end();
 			else
@@ -3161,6 +3188,8 @@ namespace BLToolkit.Reflection.Emit
 
 			if (parameterInfo.ParameterType.IsByRef)
 			{
+				type = type.GetElementType();
+
 				return type.IsValueType && type.IsPrimitive == false?
 					ldarg(index).initobj(type):
 					ldarg(index).LoadInitValue(type).stind(type);

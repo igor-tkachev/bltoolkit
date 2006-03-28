@@ -520,9 +520,6 @@ namespace BLToolkit.Reflection
 		{
 			if (type == null) throw new ArgumentNullException("type");
 
-			//if (type.IsByRef)
-			//	type = type.GetElementType();
-
 #if FW2
 			if (type.IsGenericType)
 			{

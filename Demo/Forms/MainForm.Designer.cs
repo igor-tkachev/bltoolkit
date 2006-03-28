@@ -32,6 +32,7 @@ namespace BLToolkit.Demo.Forms
 			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
 			System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
 			this.personGridView = new System.Windows.Forms.DataGridView();
+			this.personBinder = new BLToolkit.ComponentModel.ObjectBinder(this.components);
 			this.toolStripContainer = new System.Windows.Forms.ToolStripContainer();
 			this.menu = new System.Windows.Forms.MenuStrip();
 			this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -51,7 +52,6 @@ namespace BLToolkit.Demo.Forms
 			this.iDDataGridViewTextBoxColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
 			this.fullNameDataGridViewTextBoxColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
 			this.genderDataGridViewTextBoxColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
-			this.personBinder = new BLToolkit.ComponentModel.ObjectBinder(this.components);
 			((System.ComponentModel.ISupportInitialize)(this.personGridView)).BeginInit();
 			this.toolStripContainer.ContentPanel.SuspendLayout();
 			this.toolStripContainer.TopToolStripPanel.SuspendLayout();
@@ -77,9 +77,14 @@ namespace BLToolkit.Demo.Forms
 			this.personGridView.Location = new System.Drawing.Point(0, 0);
 			this.personGridView.Name = "personGridView";
 			this.personGridView.ReadOnly = true;
-			this.personGridView.Size = new System.Drawing.Size(455, 245);
+			this.personGridView.Size = new System.Drawing.Size(615, 344);
 			this.personGridView.TabIndex = 0;
 			this.personGridView.CellDoubleClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.personGridView_CellDoubleClick);
+			// 
+			// personBinder
+			// 
+			this.personBinder.IsNull = null;
+			this.personBinder.ItemType = typeof(BLToolkit.Demo.ObjectModel.Person);
 			// 
 			// toolStripContainer
 			// 
@@ -87,11 +92,11 @@ namespace BLToolkit.Demo.Forms
 			// toolStripContainer.ContentPanel
 			// 
 			this.toolStripContainer.ContentPanel.Controls.Add(this.personGridView);
-			this.toolStripContainer.ContentPanel.Size = new System.Drawing.Size(455, 245);
+			this.toolStripContainer.ContentPanel.Size = new System.Drawing.Size(615, 344);
 			this.toolStripContainer.Dock = System.Windows.Forms.DockStyle.Fill;
 			this.toolStripContainer.Location = new System.Drawing.Point(0, 0);
 			this.toolStripContainer.Name = "toolStripContainer";
-			this.toolStripContainer.Size = new System.Drawing.Size(455, 294);
+			this.toolStripContainer.Size = new System.Drawing.Size(615, 393);
 			this.toolStripContainer.TabIndex = 2;
 			this.toolStripContainer.Text = "toolStripContainer1";
 			// 
@@ -109,7 +114,7 @@ namespace BLToolkit.Demo.Forms
             this.helpToolStripMenuItem});
 			this.menu.Location = new System.Drawing.Point(0, 0);
 			this.menu.Name = "menu";
-			this.menu.Size = new System.Drawing.Size(455, 24);
+			this.menu.Size = new System.Drawing.Size(615, 24);
 			this.menu.TabIndex = 0;
 			this.menu.Text = "menuStrip1";
 			// 
@@ -124,7 +129,7 @@ namespace BLToolkit.Demo.Forms
 			// exitMenuItem
 			// 
 			this.exitMenuItem.Name = "exitMenuItem";
-			this.exitMenuItem.Size = new System.Drawing.Size(152, 22);
+			this.exitMenuItem.Size = new System.Drawing.Size(109, 22);
 			this.exitMenuItem.Text = "E&xit";
 			this.exitMenuItem.Click += new System.EventHandler(this.exit_Click);
 			// 
@@ -140,7 +145,7 @@ namespace BLToolkit.Demo.Forms
 			// 
 			// newMenuItem
 			// 
-			this.newMenuItem.Image = global::BLToolkit.Demo.Properties.Resources._new;
+			this.newMenuItem.Image = ((System.Drawing.Image)(resources.GetObject("newMenuItem.Image")));
 			this.newMenuItem.Name = "newMenuItem";
 			this.newMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.N)));
 			this.newMenuItem.Size = new System.Drawing.Size(158, 22);
@@ -149,7 +154,7 @@ namespace BLToolkit.Demo.Forms
 			// 
 			// editMenuItem
 			// 
-			this.editMenuItem.Image = global::BLToolkit.Demo.Properties.Resources.edit;
+			this.editMenuItem.Image = ((System.Drawing.Image)(resources.GetObject("editMenuItem.Image")));
 			this.editMenuItem.Name = "editMenuItem";
 			this.editMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.E)));
 			this.editMenuItem.Size = new System.Drawing.Size(158, 22);
@@ -158,7 +163,7 @@ namespace BLToolkit.Demo.Forms
 			// 
 			// deleteMenuItem
 			// 
-			this.deleteMenuItem.Image = global::BLToolkit.Demo.Properties.Resources.delete;
+			this.deleteMenuItem.Image = ((System.Drawing.Image)(resources.GetObject("deleteMenuItem.Image")));
 			this.deleteMenuItem.Name = "deleteMenuItem";
 			this.deleteMenuItem.ShortcutKeys = System.Windows.Forms.Keys.Delete;
 			this.deleteMenuItem.Size = new System.Drawing.Size(158, 22);
@@ -176,7 +181,7 @@ namespace BLToolkit.Demo.Forms
 			// aboutToolStripMenuItem
 			// 
 			this.aboutToolStripMenuItem.Name = "aboutToolStripMenuItem";
-			this.aboutToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+			this.aboutToolStripMenuItem.Size = new System.Drawing.Size(134, 22);
 			this.aboutToolStripMenuItem.Text = "&About...";
 			// 
 			// tool
@@ -197,7 +202,7 @@ namespace BLToolkit.Demo.Forms
 			// newToolStripButton
 			// 
 			this.newToolStripButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-			this.newToolStripButton.Image = global::BLToolkit.Demo.Properties.Resources._new;
+			this.newToolStripButton.Image = ((System.Drawing.Image)(resources.GetObject("newToolStripButton.Image")));
 			this.newToolStripButton.ImageTransparentColor = System.Drawing.Color.Magenta;
 			this.newToolStripButton.Name = "newToolStripButton";
 			this.newToolStripButton.Size = new System.Drawing.Size(23, 22);
@@ -207,7 +212,7 @@ namespace BLToolkit.Demo.Forms
 			// editToolStripButton
 			// 
 			this.editToolStripButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-			this.editToolStripButton.Image = global::BLToolkit.Demo.Properties.Resources.edit;
+			this.editToolStripButton.Image = ((System.Drawing.Image)(resources.GetObject("editToolStripButton.Image")));
 			this.editToolStripButton.ImageTransparentColor = System.Drawing.Color.Magenta;
 			this.editToolStripButton.Name = "editToolStripButton";
 			this.editToolStripButton.Size = new System.Drawing.Size(23, 22);
@@ -217,7 +222,7 @@ namespace BLToolkit.Demo.Forms
 			// deleteToolStripButton
 			// 
 			this.deleteToolStripButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-			this.deleteToolStripButton.Image = global::BLToolkit.Demo.Properties.Resources.delete;
+			this.deleteToolStripButton.Image = ((System.Drawing.Image)(resources.GetObject("deleteToolStripButton.Image")));
 			this.deleteToolStripButton.ImageTransparentColor = System.Drawing.Color.Magenta;
 			this.deleteToolStripButton.Name = "deleteToolStripButton";
 			this.deleteToolStripButton.Size = new System.Drawing.Size(23, 22);
@@ -255,25 +260,21 @@ namespace BLToolkit.Demo.Forms
 			this.fullNameDataGridViewTextBoxColumn.HeaderText = "Name";
 			this.fullNameDataGridViewTextBoxColumn.Name = "fullNameDataGridViewTextBoxColumn";
 			this.fullNameDataGridViewTextBoxColumn.ReadOnly = true;
-			this.fullNameDataGridViewTextBoxColumn.Width = 150;
+			this.fullNameDataGridViewTextBoxColumn.Width = 250;
 			// 
 			// genderDataGridViewTextBoxColumn
 			// 
 			this.genderDataGridViewTextBoxColumn.DataPropertyName = "Gender";
+			this.genderDataGridViewTextBoxColumn.FillWeight = 200F;
 			this.genderDataGridViewTextBoxColumn.HeaderText = "Gender";
 			this.genderDataGridViewTextBoxColumn.Name = "genderDataGridViewTextBoxColumn";
 			this.genderDataGridViewTextBoxColumn.ReadOnly = true;
-			// 
-			// personBinder
-			// 
-			this.personBinder.IsNull = null;
-			this.personBinder.ItemType = typeof(BLToolkit.Demo.ObjectModel.Person);
 			// 
 			// MainForm
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-			this.ClientSize = new System.Drawing.Size(455, 294);
+			this.ClientSize = new System.Drawing.Size(615, 393);
 			this.Controls.Add(this.toolStripContainer);
 			this.MainMenuStrip = this.menu;
 			this.Name = "MainForm";
@@ -298,9 +299,6 @@ namespace BLToolkit.Demo.Forms
 		private BLToolkit.ComponentModel.ObjectBinder personBinder;
 		private System.Windows.Forms.DataGridView personGridView;
 		private System.Windows.Forms.ToolStripContainer toolStripContainer;
-		private System.Windows.Forms.DataGridViewTextBoxColumn iDDataGridViewTextBoxColumn;
-		private System.Windows.Forms.DataGridViewTextBoxColumn fullNameDataGridViewTextBoxColumn;
-		private System.Windows.Forms.DataGridViewTextBoxColumn genderDataGridViewTextBoxColumn;
 		private System.Windows.Forms.MenuStrip menu;
 		private System.Windows.Forms.ToolStripMenuItem fileToolStripMenuItem;
 		private System.Windows.Forms.ToolStripMenuItem exitMenuItem;
@@ -316,5 +314,8 @@ namespace BLToolkit.Demo.Forms
 		private System.Windows.Forms.ToolStripMenuItem deleteMenuItem;
 		private System.Windows.Forms.ToolStripMenuItem editMenuItem;
 		private System.Windows.Forms.ToolStripMenuItem newMenuItem;
+		private System.Windows.Forms.DataGridViewTextBoxColumn iDDataGridViewTextBoxColumn;
+		private System.Windows.Forms.DataGridViewTextBoxColumn fullNameDataGridViewTextBoxColumn;
+		private System.Windows.Forms.DataGridViewTextBoxColumn genderDataGridViewTextBoxColumn;
 	}
 }

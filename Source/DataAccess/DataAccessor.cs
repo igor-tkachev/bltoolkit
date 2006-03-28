@@ -162,6 +162,49 @@ namespace BLToolkit.DataAccess
 			return sprocName;
 		}
 
+		protected virtual IDbDataParameter[] PrepareParameters(object[] parameters)
+		{
+			if (parameters.Length == 1)
+				return (IDbDataParameter[])parameters[0];
+
+			if (parameters.Length == 2 && parameters[0] == null)
+				return (IDbDataParameter[])parameters[1];
+
+			ArrayList list = new ArrayList(parameters.Length);
+			Hashtable hash = new Hashtable(parameters.Length);
+
+			foreach (object o in parameters)
+			{
+				IDbDataParameter p = o as IDbDataParameter;
+
+				if (p != null)
+				{
+					if (!hash.Contains(p.ParameterName))
+					{
+						list.Add(p);
+						hash.Add(p.ParameterName, p);
+					}
+				}
+				else if (o is IDbDataParameter[])
+				{
+					foreach (IDbDataParameter dbp in (IDbDataParameter[])o)
+					{
+						if (!hash.Contains(dbp.ParameterName))
+						{
+							list.Add(dbp);
+							hash.Add(dbp.ParameterName, dbp);
+						}
+					}
+				}
+			}
+
+			IDbDataParameter[] retParams = new IDbDataParameter[list.Count];
+
+			list.CopyTo(retParams);
+
+			return retParams;
+		}
+
 		protected virtual string GetTableName(Type type)
 		{
 			TypeExtension typeExt = TypeExtension.GetTypeExtenstion(type, Extensions);
