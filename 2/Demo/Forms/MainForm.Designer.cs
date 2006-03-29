@@ -29,9 +29,12 @@ namespace BLToolkit.Demo.Forms
 		private void InitializeComponent()
 		{
 			this.components = new System.ComponentModel.Container();
-			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
 			System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
+			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
 			this.personGridView = new System.Windows.Forms.DataGridView();
+			this.iDDataGridViewTextBoxColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
+			this.fullNameDataGridViewTextBoxColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
+			this.genderDataGridViewTextBoxColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
 			this.personBinder = new BLToolkit.ComponentModel.ObjectBinder(this.components);
 			this.toolStripContainer = new System.Windows.Forms.ToolStripContainer();
 			this.menu = new System.Windows.Forms.MenuStrip();
@@ -49,9 +52,6 @@ namespace BLToolkit.Demo.Forms
 			this.deleteToolStripButton = new System.Windows.Forms.ToolStripButton();
 			this.toolStripSeparator7 = new System.Windows.Forms.ToolStripSeparator();
 			this.helpToolStripButton = new System.Windows.Forms.ToolStripButton();
-			this.iDDataGridViewTextBoxColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
-			this.fullNameDataGridViewTextBoxColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
-			this.genderDataGridViewTextBoxColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
 			((System.ComponentModel.ISupportInitialize)(this.personGridView)).BeginInit();
 			this.toolStripContainer.ContentPanel.SuspendLayout();
 			this.toolStripContainer.TopToolStripPanel.SuspendLayout();
@@ -80,6 +80,33 @@ namespace BLToolkit.Demo.Forms
 			this.personGridView.Size = new System.Drawing.Size(615, 344);
 			this.personGridView.TabIndex = 0;
 			this.personGridView.CellDoubleClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.personGridView_CellDoubleClick);
+			// 
+			// iDDataGridViewTextBoxColumn
+			// 
+			this.iDDataGridViewTextBoxColumn.DataPropertyName = "ID";
+			dataGridViewCellStyle1.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
+			dataGridViewCellStyle1.Padding = new System.Windows.Forms.Padding(0, 0, 5, 0);
+			this.iDDataGridViewTextBoxColumn.DefaultCellStyle = dataGridViewCellStyle1;
+			this.iDDataGridViewTextBoxColumn.HeaderText = "ID";
+			this.iDDataGridViewTextBoxColumn.MinimumWidth = 20;
+			this.iDDataGridViewTextBoxColumn.Name = "iDDataGridViewTextBoxColumn";
+			this.iDDataGridViewTextBoxColumn.ReadOnly = true;
+			// 
+			// fullNameDataGridViewTextBoxColumn
+			// 
+			this.fullNameDataGridViewTextBoxColumn.DataPropertyName = "FullName";
+			this.fullNameDataGridViewTextBoxColumn.HeaderText = "Name";
+			this.fullNameDataGridViewTextBoxColumn.Name = "fullNameDataGridViewTextBoxColumn";
+			this.fullNameDataGridViewTextBoxColumn.ReadOnly = true;
+			this.fullNameDataGridViewTextBoxColumn.Width = 250;
+			// 
+			// genderDataGridViewTextBoxColumn
+			// 
+			this.genderDataGridViewTextBoxColumn.DataPropertyName = "Gender";
+			this.genderDataGridViewTextBoxColumn.FillWeight = 200F;
+			this.genderDataGridViewTextBoxColumn.HeaderText = "Gender";
+			this.genderDataGridViewTextBoxColumn.Name = "genderDataGridViewTextBoxColumn";
+			this.genderDataGridViewTextBoxColumn.ReadOnly = true;
 			// 
 			// personBinder
 			// 
@@ -195,7 +222,7 @@ namespace BLToolkit.Demo.Forms
             this.helpToolStripButton});
 			this.tool.Location = new System.Drawing.Point(3, 24);
 			this.tool.Name = "tool";
-			this.tool.Size = new System.Drawing.Size(110, 25);
+			this.tool.Size = new System.Drawing.Size(141, 25);
 			this.tool.TabIndex = 1;
 			this.tool.Text = "toolStrip1";
 			// 
@@ -226,7 +253,7 @@ namespace BLToolkit.Demo.Forms
 			this.deleteToolStripButton.ImageTransparentColor = System.Drawing.Color.Magenta;
 			this.deleteToolStripButton.Name = "deleteToolStripButton";
 			this.deleteToolStripButton.Size = new System.Drawing.Size(23, 22);
-			this.deleteToolStripButton.Text = "&Save";
+			this.deleteToolStripButton.Text = "&Delete";
 			this.deleteToolStripButton.Click += new System.EventHandler(this.delete_Click);
 			// 
 			// toolStripSeparator7
@@ -242,33 +269,6 @@ namespace BLToolkit.Demo.Forms
 			this.helpToolStripButton.Name = "helpToolStripButton";
 			this.helpToolStripButton.Size = new System.Drawing.Size(23, 22);
 			this.helpToolStripButton.Text = "He&lp";
-			// 
-			// iDDataGridViewTextBoxColumn
-			// 
-			this.iDDataGridViewTextBoxColumn.DataPropertyName = "ID";
-			dataGridViewCellStyle1.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
-			dataGridViewCellStyle1.Padding = new System.Windows.Forms.Padding(0, 0, 5, 0);
-			this.iDDataGridViewTextBoxColumn.DefaultCellStyle = dataGridViewCellStyle1;
-			this.iDDataGridViewTextBoxColumn.HeaderText = "ID";
-			this.iDDataGridViewTextBoxColumn.MinimumWidth = 20;
-			this.iDDataGridViewTextBoxColumn.Name = "iDDataGridViewTextBoxColumn";
-			this.iDDataGridViewTextBoxColumn.ReadOnly = true;
-			// 
-			// fullNameDataGridViewTextBoxColumn
-			// 
-			this.fullNameDataGridViewTextBoxColumn.DataPropertyName = "FullName";
-			this.fullNameDataGridViewTextBoxColumn.HeaderText = "Name";
-			this.fullNameDataGridViewTextBoxColumn.Name = "fullNameDataGridViewTextBoxColumn";
-			this.fullNameDataGridViewTextBoxColumn.ReadOnly = true;
-			this.fullNameDataGridViewTextBoxColumn.Width = 250;
-			// 
-			// genderDataGridViewTextBoxColumn
-			// 
-			this.genderDataGridViewTextBoxColumn.DataPropertyName = "Gender";
-			this.genderDataGridViewTextBoxColumn.FillWeight = 200F;
-			this.genderDataGridViewTextBoxColumn.HeaderText = "Gender";
-			this.genderDataGridViewTextBoxColumn.Name = "genderDataGridViewTextBoxColumn";
-			this.genderDataGridViewTextBoxColumn.ReadOnly = true;
 			// 
 			// MainForm
 			// 

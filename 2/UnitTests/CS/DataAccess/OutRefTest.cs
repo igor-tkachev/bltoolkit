@@ -5,7 +5,7 @@ using NUnit.Framework;
 using BLToolkit.DataAccess;
 using BLToolkit.TypeBuilder;
 
-namespace A.DataAccess
+namespace DataAccess
 {
 	[TestFixture]
 	public class OutRefTest
