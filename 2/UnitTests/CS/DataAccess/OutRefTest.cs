@@ -27,32 +27,32 @@ namespace A.DataAccess
 
 		public abstract class TestAccessor : DataAccessor
 		{
-			//public abstract void OutRefTest(
-			//    int    @ID,  out int    @outputID,  ref int    @inputOutputID,
-			//    string @str, out string @outputStr, ref string @inputOutputStr);
+			public abstract void OutRefTest(
+				int    @ID,  out int    @outputID,  ref int    @inputOutputID,
+				string @str, out string @outputStr, ref string @inputOutputStr);
 
 			public abstract void OutRefTest(
 				out int @outputID, Entity entity, ref string @inputOutputStr);
 
 		}
 
-		//[Test]
-		//public void Test1()
-		//{
-		//    int    @outputID;
-		//    int    @inputOutputID = 10;
-		//    string @outputStr;
-		//    string @inputOutputStr = "10";
+		[Test]
+		public void Test1()
+		{
+			int    @outputID;
+			int    @inputOutputID = 10;
+			string @outputStr;
+			string @inputOutputStr = "10";
 
-		//    ((TestAccessor)DataAccessor.CreateInstance(typeof(TestAccessor)))
-		//        .OutRefTest(5,  out @outputID,  ref @inputOutputID,
-		//                   "5", out @outputStr, ref @inputOutputStr);
+			((TestAccessor)DataAccessor.CreateInstance(typeof(TestAccessor)))
+				.OutRefTest(5,  out @outputID,  ref @inputOutputID,
+				           "5", out @outputStr, ref @inputOutputStr);
 
-		//    Assert.AreEqual(5,     @outputID);
-		//    Assert.AreEqual(15,    @inputOutputID);
-		//    Assert.AreEqual("5",   @outputStr);
-		//    Assert.AreEqual("510", @inputOutputStr);
-		//}
+			Assert.AreEqual(5,     @outputID);
+			Assert.AreEqual(15,    @inputOutputID);
+			Assert.AreEqual("5",   @outputStr);
+			Assert.AreEqual("510", @inputOutputStr);
+		}
 
 		[Test]
 		public void Test2()
