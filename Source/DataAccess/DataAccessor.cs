@@ -164,11 +164,27 @@ namespace BLToolkit.DataAccess
 
 		protected virtual IDbDataParameter[] PrepareParameters(object[] parameters)
 		{
-			if (parameters.Length == 1)
-				return (IDbDataParameter[])parameters[0];
+			// Little optimization.
+			// Check if we have only one single ref parameter.
+			//
+			object refParam = null;
 
-			if (parameters.Length == 2 && parameters[0] == null)
-				return (IDbDataParameter[])parameters[1];
+			for (int i = 0; i < parameters.Length; i++)
+			{
+				if (parameters[i] != null)
+				{
+					if (refParam != null)
+					{
+						refParam = null;
+						break;
+					}
+
+					refParam = parameters[i];
+				}
+			}
+
+			if (refParam != null)
+				return (IDbDataParameter[])refParam;
 
 			ArrayList list = new ArrayList(parameters.Length);
 			Hashtable hash = new Hashtable(parameters.Length);

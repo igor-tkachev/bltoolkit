@@ -125,6 +125,11 @@
                     BuildAction = "Compile"
                 />
                 <File
+                    RelPath = "DataAccess\OutRefTest.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
                     RelPath = "DataAccess\PersonDataSet.xsd"
                     BuildAction = "Content"
                     Generator = "MSDataSetGenerator"
@@ -143,6 +148,16 @@
                     RelPath = "DataAccess\PersonDataSet.xsx"
                     DependentUpon = "PersonDataSet.xsd"
                     BuildAction = "None"
+                />
+                <File
+                    RelPath = "DataAccess\SqlQueryTest.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "DataAccess\SqlTest.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
                 />
                 <File
                     RelPath = "EditableObjects\EditableObjectTest.cs"

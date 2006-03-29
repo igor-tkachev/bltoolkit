@@ -36,6 +36,8 @@ namespace BLToolkit.DataAccess
 		LocalBuilder    _locManager;
 		LocalBuilder    _locObjType;
 		ArrayList       _outputParameters;
+		string          _sqlText;
+		ArrayList       _formatParamList;
 
 		protected override void BuildAbstractMethod()
 		{
@@ -44,13 +46,16 @@ namespace BLToolkit.DataAccess
 			//
 			_paramList        = new ArrayList();
 			_refParamList     = new ArrayList();
+			_formatParamList  = new ArrayList();
 			_createManager    = true;
 			_objectType       = null;
 			_parameters       = Context.CurrentMethod.GetParameters();
 			_locManager       = Context.MethodBuilder.Emitter.DeclareLocal(typeof(DbManager));
 			_locObjType       = Context.MethodBuilder.Emitter.DeclareLocal(typeof(Type));
 			_outputParameters = null;
+			_sqlText          = null;
 
+			GetSqlQueryCommand();
 			ProcessParameters();
 			CreateDbManager();
 			SetObjectType();
@@ -108,26 +113,56 @@ namespace BLToolkit.DataAccess
 			Finally();
 		}
 
+		private void GetSqlQueryCommand()
+		{
+			object[] attrs = Context.CurrentMethod.GetCustomAttributes(typeof(SqlQueryAttribute), true);
+
+			if (attrs.Length != 0)
+			{
+				_sqlText = ((SqlQueryAttribute)attrs[0]).SqlText;
+
+				if (_sqlText != null && _sqlText.Length == 0)
+					_sqlText = null;
+			}
+		}
+
 		private void ProcessParameters()
 		{
 			for (int i = 0; i < _parameters.Length; i++)
 			{
-				Type pType = _parameters[i].ParameterType;
+				ParameterInfo pi    = _parameters[i];
+				object[]      attrs = pi.GetCustomAttributes(typeof(FormatAttribute), true);
 
-				if (pType.IsByRef)
-					pType = pType.GetElementType();
+				if (attrs.Length != 0)
+				{
+					int index = ((FormatAttribute)attrs[0]).Index;
 
-				if (pType.IsValueType || pType == typeof(string) || pType == typeof(byte[]))
-				{
-					_paramList.Add(_parameters[i]);
-				}
-				else if (pType == typeof(DbManager) || pType.IsSubclassOf(typeof(DbManager)))
-				{
-					_createManager = false;
+					if (index < 0)
+						index = 0;
+					else if (index > _formatParamList.Count)
+						index = _formatParamList.Count;
+
+					_formatParamList.Insert(index, pi);
 				}
 				else
 				{
-					_refParamList.Add(_parameters[i]);
+					Type pType = pi.ParameterType;
+
+					if (pType.IsByRef)
+						pType = pType.GetElementType();
+
+					if (pType.IsValueType || pType == typeof(string) || pType == typeof(byte[]))
+					{
+						_paramList.Add(pi);
+					}
+					else if (pType == typeof(DbManager) || pType.IsSubclassOf(typeof(DbManager)))
+					{
+						_createManager = false;
+					}
+					else
+					{
+						_refParamList.Add(pi);
+					}
 				}
 			}
 		}
@@ -376,30 +411,73 @@ namespace BLToolkit.DataAccess
 
 		private void GetSprocName()
 		{
-			object[] attrs = Context.CurrentMethod.GetCustomAttributes(typeof(SprocNameAttribute), true);
+			EmitHelper emit = Context.MethodBuilder.Emitter;
 
-			if (attrs.Length == 0)
+			if (_sqlText != null)
 			{
-				attrs = Context.CurrentMethod.GetCustomAttributes(typeof(ActionNameAttribute), true);
-
-				string actionName = attrs.Length == 0 ?
-					Context.CurrentMethod.Name : ((ActionNameAttribute)attrs[0]).Name;
-
-				// Call GetSpName.
-				//
-				Context.MethodBuilder.Emitter
-					.ldloc    (_locManager)
-					.ldarg_0
-					.ldloc    (_locObjType)
-					.ldstr    (actionName)
-					.callvirt (_baseType, "GetSpName", _bindingFlags, typeof(Type), typeof(string))
+				emit
+					.ldloc (_locManager)
+					.ldstr (_sqlText)
 					;
 			}
 			else
 			{
-				Context.MethodBuilder.Emitter
-					.ldloc (_locManager)
-					.ldstr (((SprocNameAttribute)attrs[0]).Name)
+				object[] attrs = Context.CurrentMethod.GetCustomAttributes(typeof(SprocNameAttribute), true);
+
+				if (attrs.Length == 0)
+				{
+					attrs = Context.CurrentMethod.GetCustomAttributes(typeof(ActionNameAttribute), true);
+
+					string actionName = attrs.Length == 0 ?
+						Context.CurrentMethod.Name : ((ActionNameAttribute)attrs[0]).Name;
+
+					// Call GetSpName.
+					//
+					emit
+						.ldloc    (_locManager)
+						.ldarg_0
+						.ldloc    (_locObjType)
+						.ldstr    (actionName)
+						.callvirt (_baseType, "GetSpName", _bindingFlags, typeof(Type), typeof(string))
+						;
+				}
+				else
+				{
+					emit
+						.ldloc (_locManager)
+						.ldstr (((SprocNameAttribute)attrs[0]).Name)
+						;
+				}
+			}
+
+			// string.Format
+			//
+			if (_formatParamList.Count > 0)
+			{
+				LocalBuilder locParams = emit.DeclareLocal(typeof(object[]));
+
+				emit
+					.ldc_i4 (_formatParamList.Count)
+					.newarr (typeof(object))
+					.stloc  (locParams)
+					;
+
+				for (int i = 0; i < _formatParamList.Count; i++)
+				{
+					ParameterInfo pi = (ParameterInfo)_formatParamList[i];
+
+					emit
+						.ldloc      (locParams)
+						.ldc_i4     (i)
+						.ldarg      (pi)
+						.stelem_ref
+						.end()
+						;
+				}
+
+				emit
+					.ldloc (locParams)
+					.call  (typeof(string), "Format", typeof(string), typeof(object[]))
 					;
 			}
 		}
@@ -413,13 +491,18 @@ namespace BLToolkit.DataAccess
 			object[] attrs =
 				Context.CurrentMethod.DeclaringType.GetCustomAttributes(typeof(DiscoverParametersAttribute), true);
 
-			bool discoverParams = attrs.Length == 0?
-				false: ((DiscoverParametersAttribute)attrs[0]).Discover;
+			bool discoverParams = false;
 
-			attrs = Context.CurrentMethod.GetCustomAttributes(typeof(DiscoverParametersAttribute), true);
+			if (_sqlText == null)
+			{
+				discoverParams = attrs.Length == 0?
+					false: ((DiscoverParametersAttribute)attrs[0]).Discover;
 
-			if (attrs.Length != 0)
-				discoverParams = ((DiscoverParametersAttribute)attrs[0]).Discover;
+				attrs = Context.CurrentMethod.GetCustomAttributes(typeof(DiscoverParametersAttribute), true);
+
+				if (attrs.Length != 0)
+					discoverParams = ((DiscoverParametersAttribute)attrs[0]).Discover;
+			}
 
 			LocalBuilder locParams = discoverParams?
 				BuildParametersWithDiscoverParameters():
@@ -427,9 +510,12 @@ namespace BLToolkit.DataAccess
 
 			// Call SetSpCommand.
 			//
+			string methodName = _sqlText == null? "SetSpCommand":   "SetCommand";
+			Type   paramType  = _sqlText == null? typeof(object[]): typeof(IDbDataParameter[]);
+
 			emit
 				.ldloc    (locParams)
-				.callvirt (typeof(DbManager), "SetSpCommand", _bindingFlags, typeof(string), typeof(object[]))
+				.callvirt (typeof(DbManager), methodName, _bindingFlags, typeof(string), paramType)
 				;
 		}
 
@@ -446,7 +532,8 @@ namespace BLToolkit.DataAccess
 
 			// Parameters.
 			//
-			LocalBuilder locParams = emit.DeclareLocal(typeof(object[]));
+			LocalBuilder locParams = emit.DeclareLocal(
+				_sqlText == null? typeof(object[]): typeof(IDbDataParameter[]));
 
 			emit
 				.ldc_i4 (_paramList.Count)
@@ -480,7 +567,8 @@ namespace BLToolkit.DataAccess
 
 			// Parameters.
 			//
-			LocalBuilder locParams = emit.DeclareLocal(typeof(object[]));
+			LocalBuilder locParams = emit.DeclareLocal(
+				_sqlText == null? typeof(object[]): typeof(IDbDataParameter[]));
 
 			emit
 				.ldc_i4 (_parameters.Length)
