@@ -629,7 +629,7 @@ namespace BLToolkit.DataAccess
 				object value = typeExt[mm.MemberAccessor.Name]["NonUpdatable"].Value;
 
 				if ((value != null && (bool)TypeExtension.ChangeType(value, typeof(bool)) == true) ||
-					mm.MemberAccessor.GetAttributes(typeof(NonUpdatableAttribute)) == null)
+					(value == null && mm.MemberAccessor.GetAttributes(typeof(NonUpdatableAttribute)) == null))
 				{
 					sb.AppendFormat("\t[{0}],\n", mm.Name);
 					list.Add(mm);
@@ -672,7 +672,7 @@ namespace BLToolkit.DataAccess
 				object value = typeExt[mm.MemberAccessor.Name]["NonUpdatable"].Value;
 
 				if ((value != null && (bool)TypeExtension.ChangeType(value, typeof(bool)) == true) ||
-					mm.MemberAccessor.GetAttributes(typeof(NonUpdatableAttribute)) == null)
+					(value == null && mm.MemberAccessor.GetAttributes(typeof(NonUpdatableAttribute)) == null))
 				{
 					SqlQueryParameterInfo p = query.AddParameter(
 						db.DataProvider.Convert(mm.Name, ConvertType.NameToQueryParameter).ToString(),
