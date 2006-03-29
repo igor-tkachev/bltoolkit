@@ -39,6 +39,9 @@ namespace BLToolkit.DataAccess
 
 		protected override void BuildAbstractMethod()
 		{
+			// Any class variable must be initialized before use
+			// as the same instance of the class is utilized to build abstract methods.
+			//
 			_paramList        = new ArrayList();
 			_refParamList     = new ArrayList();
 			_createManager    = true;
