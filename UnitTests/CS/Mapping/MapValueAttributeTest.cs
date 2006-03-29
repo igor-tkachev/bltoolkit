@@ -134,5 +134,36 @@ namespace Mapping
 			Assert.AreEqual("M", om.GetValue(o, "Dow1"));
 			Assert.AreEqual("F", om.GetValue(o, "Dow2"));
 		}
+
+		// http://www.rsdn.ru/Forum/?mid=1809157
+		//
+		public enum StringAlignment
+		{
+			Far,
+			Near,
+			Center
+		}
+
+		public class SourceObject
+		{
+			public string test = "Near";
+		}
+
+		public class DestObject
+		{
+			[MapValue(StringAlignment.Near,   "Near")]
+			[MapValue(StringAlignment.Far,    "Far")]
+			[MapValue(StringAlignment.Center, "Center")]
+			public StringAlignment test;
+		}
+
+		[Test]
+		public void TestEnum()
+		{
+			SourceObject so = new SourceObject();
+			DestObject o = (DestObject)Map.ObjectToObject(so, typeof(DestObject));
+
+			Assert.AreEqual(StringAlignment.Near, o.test);
+		}
 	}
 }
