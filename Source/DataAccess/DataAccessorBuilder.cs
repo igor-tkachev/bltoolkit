@@ -39,13 +39,14 @@ namespace BLToolkit.DataAccess
 
 		protected override void BuildAbstractMethod()
 		{
-			_paramList     = new ArrayList();
-			_refParamList  = new ArrayList();
-			_createManager = true;
-			_objectType    = null;
-			_parameters    = Context.CurrentMethod.GetParameters();
-			_locManager    = Context.MethodBuilder.Emitter.DeclareLocal(typeof(DbManager));
-			_locObjType    = Context.MethodBuilder.Emitter.DeclareLocal(typeof(Type));
+			_paramList        = new ArrayList();
+			_refParamList     = new ArrayList();
+			_createManager    = true;
+			_objectType       = null;
+			_parameters       = Context.CurrentMethod.GetParameters();
+			_locManager       = Context.MethodBuilder.Emitter.DeclareLocal(typeof(DbManager));
+			_locObjType       = Context.MethodBuilder.Emitter.DeclareLocal(typeof(Type));
+			_outputParameters = null;
 
 			ProcessParameters();
 			CreateDbManager();
