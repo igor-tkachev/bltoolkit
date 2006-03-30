@@ -91,7 +91,10 @@ namespace BLToolkit.DataAccess
 						Context.CurrentMethod.DeclaringType.Name,
 						Context.CurrentMethod.Name));
 
-				ExecuteList();
+				if (_objectType.IsValueType || _objectType == typeof(string) || _objectType == typeof(byte[]))
+					ExecuteScalarList();
+				else
+					ExecuteList();
 			}
 			else if (returnType == typeof(void))
 			{
@@ -169,12 +172,14 @@ namespace BLToolkit.DataAccess
 
 		private void CreateDbManager()
 		{
+			EmitHelper emit = Context.MethodBuilder.Emitter;
+
 			if (_createManager)
 			{
-				Context.MethodBuilder.Emitter
+				emit
 					.ldarg_0
-					.callvirt             (_baseType, "GetDbManager", _bindingFlags)
-					.stloc                (_locManager)
+					.callvirt              (typeof(DataAccessor), "GetDbManager")
+					.stloc                 (_locManager)
 					.BeginExceptionBlock()
 					;
 			}
@@ -186,7 +191,7 @@ namespace BLToolkit.DataAccess
 
 					if (pType == typeof(DbManager) || pType.IsSubclassOf(typeof(DbManager)))
 					{
-						Context.MethodBuilder.Emitter
+						emit
 							.ldarg_s ((byte)(_parameters[i].Position + 1))
 							.stloc   (_locManager)
 							;
@@ -287,6 +292,22 @@ namespace BLToolkit.DataAccess
 			Context.MethodBuilder.Emitter
 				.ldloc    (Context.ReturnValue)
 				.callvirt (typeof(DbManager), "ExecuteDataTable", typeof(DataTable))
+				.pop
+				.end()
+				;
+		}
+
+		private void ExecuteScalarList()
+		{
+			CreateReturnTypeInstance();
+			InitObjectType();
+			GetSprocName();
+			CallSetCommand();
+
+			Context.MethodBuilder.Emitter
+				.ldloc    (Context.ReturnValue)
+				.ldloc    (_locObjType)
+				.callvirt (typeof(DbManager), "ExecuteScalarList", typeof(IList), typeof(Type))
 				.pop
 				.end()
 				;
@@ -467,9 +488,10 @@ namespace BLToolkit.DataAccess
 					ParameterInfo pi = (ParameterInfo)_formatParamList[i];
 
 					emit
-						.ldloc      (locParams)
-						.ldc_i4     (i)
-						.ldarg      (pi)
+						.ldloc          (locParams)
+						.ldc_i4         (i)
+						.ldarg          (pi)
+						.boxIfValueType (pi.ParameterType)
 						.stelem_ref
 						.end()
 						;
@@ -536,9 +558,9 @@ namespace BLToolkit.DataAccess
 				_sqlText == null? typeof(object[]): typeof(IDbDataParameter[]));
 
 			emit
-				.ldc_i4 (_paramList.Count)
-				.newarr (typeof(object))
-				.stloc  (locParams)
+				.ldc_i4_ (_paramList.Count)
+				.newarr  (_sqlText == null? typeof(object): typeof(IDbDataParameter))
+				.stloc   (locParams)
 				;
 
 			for (int i = 0; i < _paramList.Count; i++)
@@ -571,9 +593,9 @@ namespace BLToolkit.DataAccess
 				_sqlText == null? typeof(object[]): typeof(IDbDataParameter[]));
 
 			emit
-				.ldc_i4 (_parameters.Length)
-				.newarr (typeof(object))
-				.stloc  (locParams)
+				.ldc_i4_ (_parameters.Length)
+				.newarr  (_sqlText == null? typeof(object): typeof(IDbDataParameter))
+				.stloc   (locParams)
 				;
 
 			for (int i = 0; i < _parameters.Length; i++)
@@ -642,11 +664,12 @@ namespace BLToolkit.DataAccess
 			if (paramName[0] != '@')
 			{
 				emit
-					.ldloc    (_locManager)
-					.callvirt (typeof(DbManager).GetProperty("DataProvider").GetGetMethod())
-					.ldstr    (paramName)
-					.ldc_i4   ((int)ConvertType.NameToParameter)
-					.callvirt (typeof(IDataProvider), "Convert", typeof(string), typeof(ConvertType))
+					.ldloc     (_locManager)
+					.callvirt  (typeof(DbManager).GetProperty("DataProvider").GetGetMethod())
+					.ldstr     (paramName)
+					.ldc_i4    ((int)ConvertType.NameToParameter)
+					.callvirt  (typeof(IDataProvider), "Convert", typeof(string), typeof(ConvertType))
+					.castclass (typeof(string))
 					;
 			}
 			else

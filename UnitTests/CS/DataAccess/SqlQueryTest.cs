@@ -6,7 +6,7 @@ using NUnit.Framework;
 using BLToolkit.DataAccess;
 using BLToolkit.TypeBuilder;
 
-namespace A.DataAccess
+namespace DataAccess
 {
 	[TestFixture]
 	public class SqlQueryTest
@@ -27,6 +27,9 @@ namespace A.DataAccess
 
 			[SqlQuery("SELECT * FROM Person WHERE {0} = @value")]
 			public abstract ArrayList SelectBy([Format] string fieldName, string value);
+
+			[SqlQuery("SELECT TOP {0} * FROM Person WHERE LastName = @lastName")]
+			public abstract ArrayList SelectByLastName(string lastName, [Format(0)] int top);
 		}
 
 		[Test]
@@ -42,11 +45,19 @@ namespace A.DataAccess
 		[Test]
 		public void Test2()
 		{
-			TypeFactory.SaveTypes = true;
-
 			PersonAccessor da = (PersonAccessor)DataAccessor.CreateInstance(typeof(PersonAccessor));
 
 			ArrayList list = da.SelectBy("FirstName", "John");
+
+			Assert.AreNotEqual(0, list.Count);
+		}
+
+		[Test]
+		public void Test3()
+		{
+			PersonAccessor da = (PersonAccessor)DataAccessor.CreateInstance(typeof(PersonAccessor));
+
+			ArrayList list = da.SelectByLastName("Pupkin", 1);
 
 			Assert.AreNotEqual(0, list.Count);
 		}

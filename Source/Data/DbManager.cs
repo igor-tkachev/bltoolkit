@@ -777,7 +777,7 @@ namespace BLToolkit.Data
 			return commandParameters;
 		}
 
-		private IDbCommand InitCommand(IDbCommand command)
+		protected virtual IDbCommand InitCommand(IDbCommand command)
 		{
 			if (command == null) 
 			{

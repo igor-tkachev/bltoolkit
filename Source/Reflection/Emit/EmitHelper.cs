@@ -1661,6 +1661,32 @@ namespace BLToolkit.Reflection.Emit
 			get { _ilGenerator.Emit(OpCodes.Ldc_I4_M1); return this; }
 		}
 
+		public EmitHelper ldc_i4_(int num)
+		{
+			switch (num)
+			{
+				case -1: ldc_i4_m1.end(); break;
+				case  0: ldc_i4_0. end(); break;
+				case  1: ldc_i4_1. end(); break;
+				case  2: ldc_i4_2. end(); break;
+				case  3: ldc_i4_3. end(); break;
+				case  4: ldc_i4_4. end(); break;
+				case  5: ldc_i4_5. end(); break;
+				case  6: ldc_i4_6. end(); break;
+				case  7: ldc_i4_7. end(); break;
+				case  8: ldc_i4_8. end(); break;
+				default:
+					if (num >= byte.MinValue && num <= byte.MaxValue)
+						ldc_i4_s((byte)num);
+					else
+						ldc_i4   (num);
+
+					break;
+			}
+
+			return this;
+		}
+
 		/// <summary>
 		/// Calls ILGenerator.Emit(<see cref="OpCodes.Ldc_I4_S"/>, byte) that
 		/// pushes the supplied int8 value onto the evaluation stack as an int32, short form.
