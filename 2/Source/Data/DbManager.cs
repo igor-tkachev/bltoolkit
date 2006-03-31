@@ -2413,9 +2413,32 @@ namespace BLToolkit.Data
 		}
 
 #if FW2
-		public List<T> ExecuteScalarList<T>(List<T> list) 
+		public IList<T> ExecuteScalarList<T>(IList<T> list) 
 		{
-			ExecuteScalarList(list, typeof(T));
+			if (_prepared)
+				InitParameters(CommandAction.Select);
+
+			Type type = typeof(T);
+
+			object nullValue = _mappingSchema.GetNullValue(type);
+
+			using (IDataReader dr = ExecuteReaderInternal())
+			{
+				while (dr.Read())
+				{
+					object value = dr[0];
+
+					if (value == null || value.GetType() != type)
+					{
+						if (value is DBNull)
+							value = null;
+						else
+							value = Convert.ChangeType(value, type);
+					}
+
+					list.Add((T)value);
+				}
+			}
 
 			return list;
 		}
@@ -2424,7 +2447,7 @@ namespace BLToolkit.Data
 		{
 			List<T> list = new List<T>();
 
-			ExecuteScalarList(list, typeof(T));
+			ExecuteScalarList<T>(list);
 
 			return list;
 		}
@@ -2708,6 +2731,19 @@ namespace BLToolkit.Data
 			}
 		}
 
+#if FW2
+		private IList<T> ExecuteListInternal<T>(IList<T> list, params object[] parameters)
+		{
+			if (_prepared)
+				InitParameters(CommandAction.Select);
+
+			using (IDataReader dr = ExecuteReaderInternal())
+			{
+				return _mappingSchema.MapDataReaderToList<T>(dr, list, parameters);
+			}
+		}
+#endif
+
 		/// <summary>
 		/// Executes the query, and returns an array of business entities using the provided parameters.
 		/// </summary>
@@ -2788,9 +2824,9 @@ namespace BLToolkit.Data
 		/// <typeparam name="T">Type of an object.</typeparam>
 		/// <param name="list">The list of mapped business objects to populate.</param>
 		/// <returns>Populated list of mapped business objects.</returns>
-		public List<T> ExecuteList<T>(List<T> list) 
+		public IList<T> ExecuteList<T>(IList<T> list) 
 		{
-			ExecuteListInternal(list, typeof(T), (object[])null);
+			ExecuteListInternal<T>(list, (object[])null);
 
 			return list;
 		}
@@ -2816,9 +2852,9 @@ namespace BLToolkit.Data
 		/// <param name="list">The list of mapped business objects to populate.</param>
 		/// <param name="parameters"></param>
 		/// <returns>Populated list of mapped business objects.</returns>
-		public List<T> ExecuteList<T>(List<T> list, params object[] parameters)
+		public IList<T> ExecuteList<T>(IList<T> list, params object[] parameters)
 		{
-			ExecuteListInternal(list, typeof(T), parameters);
+			ExecuteListInternal<T>(list, parameters);
 
 			return list;
 		}
