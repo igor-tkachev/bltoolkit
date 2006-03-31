@@ -373,7 +373,7 @@
                     BuildAction = "Compile"
                 />
                 <File
-                    RelPath = "Mapping\DataTabletMapper.cs"
+                    RelPath = "Mapping\DataTableMapper.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
                 />
@@ -384,6 +384,11 @@
                 />
                 <File
                     RelPath = "Mapping\DefaultValueAttribute.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "Mapping\DictionaryIndexListMapper.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
                 />
@@ -419,6 +424,11 @@
                 />
                 <File
                     RelPath = "Mapping\IMapDataSourceList.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "Mapping\IndexValue.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
                 />

@@ -2888,14 +2888,116 @@ namespace BLToolkit.Data
 		/// <param name="keyFieldName">The field name that is used as a key to populate the dictionary.</param>
 		/// <returns>An instance of the dictionary.</returns>
 		public Dictionary<TKey, TValue> ExecuteDictionary<TKey, TValue>(
-			string keyFieldName,
+			string          keyFieldName,
 			params object[] parameters)
 		{
-			Dictionary<TKey, TValue> dic = new Dictionary<TKey, TValue>();
+			if (_prepared)
+				InitParameters(CommandAction.Select);
 
-			ExecuteDictionary(dic, keyFieldName, typeof(TValue), parameters);
+			using (IDataReader dr = ExecuteReaderInternal())
+			{
+				return _mappingSchema.MapDataReaderToDictionary<TKey,TValue>(
+					dr, keyFieldName, parameters);
+			}
+		}
 
-			return dic;
+		public IDictionary<TKey, TValue> ExecuteDictionary<TKey, TValue>(
+			IDictionary<TKey, TValue> dictionary,
+			string                    keyFieldName,
+			params object[]           parameters)
+		{
+			if (_prepared)
+				InitParameters(CommandAction.Select);
+
+			using (IDataReader dr = ExecuteReaderInternal())
+			{
+				return _mappingSchema.MapDataReaderToDictionary<TKey,TValue>(
+					dr, dictionary, keyFieldName, parameters);
+			}
+		}
+#endif
+
+		#endregion
+
+		#region ExecuteDictionary (Index)
+
+		/// <summary>
+		/// Executes the query, and returns the <see cref="Hashtable"/> of business entities 
+		/// using the provided parameters.
+		/// </summary>
+		/// <include file="Examples.xml" path='examples/db[@name="ExecuteDictionary(string,Type)"]/*' />
+		/// <param name="keyFieldName">The field name that is used as a key to populate <see cref="Hashtable"/>.</param>
+		/// <param name="type">Business object type.</param>
+		/// <returns>An instance of the <see cref="Hashtable"/> class.</returns>
+		public Hashtable ExecuteDictionary(
+			MapIndex        index,
+			Type            type,
+			params object[] parameters)
+		{
+			Hashtable hash = new Hashtable();
+
+			ExecuteDictionary(hash, index, type, parameters);
+
+			return hash;
+		}
+
+		/// <summary>
+		/// Executes the query, and returns the <see cref="Hashtable"/> of business entities.
+		/// </summary>
+		/// <include file="Examples.xml" path='examples/db[@name="ExecuteDictionary(Hashtable,string,Type)"]/*' />
+		/// <param name="dictionary">A dictionary of mapped business objects to populate.</param>
+		/// <param name="keyFieldName">The field name that is used as a key to populate <see cref="IDictionary"/>.</param>
+		/// <param name="type">Business object type.</param>
+		/// <returns>An instance of the <see cref="IDictionary"/>.</returns>
+		public IDictionary ExecuteDictionary(
+			IDictionary     dictionary,
+			MapIndex        index,
+			Type            type,
+			params object[] parameters)
+		{
+			if (_prepared)
+				InitParameters(CommandAction.Select);
+
+			using (IDataReader dr = ExecuteReaderInternal())
+			{
+				return _mappingSchema.MapDataReaderToDictionary(dr, dictionary, index, type, parameters);
+			}
+		}
+
+#if FW2
+		/// <summary>
+		/// Executes the query, and returns a dictionary of business entities.
+		/// </summary>
+		/// <typeparam name="TKey">Key's type.</typeparam>
+		/// <typeparam name="TValue">Value's type.</typeparam>
+		/// <param name="keyFieldName">The field name that is used as a key to populate the dictionary.</param>
+		/// <returns>An instance of the dictionary.</returns>
+		public Dictionary<IndexValue, TValue> ExecuteDictionary<TValue>(
+			MapIndex        index,
+			params object[] parameters)
+		{
+			if (_prepared)
+				InitParameters(CommandAction.Select);
+
+			using (IDataReader dr = ExecuteReaderInternal())
+			{
+				return _mappingSchema.MapDataReaderToDictionary<TValue>(dr, index, parameters);
+			}
+		}
+
+		public IDictionary<IndexValue, TValue> ExecuteDictionary<TValue>(
+			IDictionary<IndexValue, TValue> dictionary,
+			MapIndex                        index,
+			params object[]                 parameters)
+		{
+			if (_prepared)
+				InitParameters(CommandAction.Select);
+
+			using (IDataReader dr = ExecuteReaderInternal())
+			{
+				return _mappingSchema.MapDataReaderToDictionary<TValue>(
+					dr, dictionary, index, parameters);
+			}
 		}
 #endif
 

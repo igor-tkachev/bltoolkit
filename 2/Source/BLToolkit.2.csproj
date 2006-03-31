@@ -113,12 +113,15 @@
     </Compile>
     <Compile Include="ComponentModel\ObjectEditEventArgs.cs" />
     <Compile Include="ComponentModel\ObjectEditType.cs" />
+    <Compile Include="Mapping\DictionaryIndexListMapperT.cs" />
+    <Compile Include="Mapping\DictionaryListMapperT.cs" />
+    <Compile Include="Mapping\DictionaryIndexListMapper.cs" />
     <Compile Include="Mapping\DictionaryListMapper.cs" />
     <Compile Include="Mapping\DictionaryMapper.cs" />
     <Compile Include="Mapping\EnumeratorMapper.cs" />
     <Compile Include="Mapping\DataReaderListMapper.cs" />
     <Compile Include="Mapping\DataReaderMapper.cs" />
-    <Compile Include="Mapping\DataTabletMapper.cs" />
+    <Compile Include="Mapping\DataTableMapper.cs" />
     <Compile Include="Mapping\DataRowMapper.cs" />
     <Compile Include="Mapping\DefaultMemberMapper.cs" />
     <Compile Include="Mapping\DefaultValueAttribute.cs" />
@@ -126,6 +129,7 @@
     <Compile Include="Mapping\IMapDataDestinationList.cs" />
     <Compile Include="Mapping\IMapDataSource.cs" />
     <Compile Include="Mapping\IMapDataSourceList.cs" />
+    <Compile Include="Mapping\IndexValue.cs" />
     <Compile Include="Mapping\ISupportMapping.cs" />
     <Compile Include="Mapping\Map.cs" />
     <Compile Include="Mapping\MapFieldAttribute.cs" />
