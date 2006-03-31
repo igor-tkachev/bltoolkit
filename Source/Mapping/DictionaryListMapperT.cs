@@ -1,13 +1,13 @@
 using System;
-using System.Collections;
+using System.Collections.Generic;
 
 using BLToolkit.Reflection;
 
 namespace BLToolkit.Mapping
 {
-	public class DictionaryListMapper : IMapDataDestinationList
+	public class DictionaryListMapper<K,T> : IMapDataDestinationList
 	{
-		public DictionaryListMapper(IDictionary dic, string keyFieldName, ObjectMapper objectMapper)
+		public DictionaryListMapper(IDictionary<K,T> dic, string keyFieldName, ObjectMapper objectMapper)
 		{
 			_dic          = dic;
 			_mapper       = objectMapper;
@@ -15,12 +15,12 @@ namespace BLToolkit.Mapping
 			_keyFieldName = _fromSource? keyFieldName.Substring(1): keyFieldName;
 		}
 
-		private string       _keyFieldName;
-		private IDictionary  _dic;
-		private ObjectMapper _mapper;
-		private object       _newObject;
-		private bool         _fromSource;
-		private object       _keyValue;
+		private string            _keyFieldName;
+		private IDictionary<K,T>  _dic;
+		private ObjectMapper      _mapper;
+		private T                 _newObject;
+		private bool              _fromSource;
+		private K                 _keyValue;
 
 		#region IMapDataDestinationList Members
 
@@ -29,9 +29,9 @@ namespace BLToolkit.Mapping
 			if (_newObject != null)
 			{
 				if (!_fromSource)
-					_keyValue = _mapper.TypeAccessor[_keyFieldName].GetValue(_newObject);
+					_keyValue = (K)_mapper.TypeAccessor[_keyFieldName].GetValue(_newObject);
 
-				_dic[_keyValue]  = _newObject;
+				_dic[_keyValue] = _newObject;
 			}
 		}
 
@@ -58,9 +58,9 @@ namespace BLToolkit.Mapping
 			AddObject();
 
 			if (_fromSource)
-				_keyValue = initContext.DataSource.GetValue(initContext.SourceObject, _keyFieldName);
+				_keyValue = (K)initContext.DataSource.GetValue(initContext.SourceObject, _keyFieldName);
 
-			return _newObject = _mapper.CreateInstance(initContext);
+			return _newObject = (T)_mapper.CreateInstance(initContext);
 		}
 
 		public virtual void EndMapping(InitContext initContext)

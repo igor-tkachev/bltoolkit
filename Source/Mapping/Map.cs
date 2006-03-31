@@ -402,11 +402,11 @@ namespace BLToolkit.Mapping
 		}
 
 #if FW2
-		public static Dictionary<K,T> ListToDictionary<K,T>(
-			ICollection     sourceList,
-			Dictionary<K,T> destDictionary,
-			string          keyFieldName,
-			params object[] parameters)
+		public static IDictionary<K,T> ListToDictionary<K,T>(
+			ICollection      sourceList,
+			IDictionary<K,T> destDictionary,
+			string           keyFieldName,
+			params object[]  parameters)
 		{
 			return _defaultSchema.MapListToDictionary<K,T>(sourceList, destDictionary, keyFieldName, parameters);
 		}
@@ -417,6 +417,49 @@ namespace BLToolkit.Mapping
 			params object[] parameters)
 		{
 			return _defaultSchema.MapListToDictionary<K,T>(sourceList, keyFieldName, parameters);
+		}
+#endif
+
+		#endregion
+
+		#region MapListToDictionary (Index)
+
+		public static IDictionary ListToDictionary(
+			ICollection     sourceList,
+			IDictionary     destDictionary,
+			MapIndex        index,
+			Type            destObjectType,
+			params object[] parameters)
+		{
+			return _defaultSchema.MapListToDictionary(
+				sourceList, destDictionary, index, destObjectType, parameters);
+		}
+
+		public static Hashtable ListToDictionary(
+			ICollection     sourceList,
+			MapIndex        index,
+			Type            destObjectType,
+			params object[] parameters)
+		{
+			return _defaultSchema.MapListToDictionary(sourceList, index, destObjectType, parameters);
+		}
+
+#if FW2
+		public static IDictionary<IndexValue,T> ListToDictionary<T>(
+			ICollection               sourceList,
+			IDictionary<IndexValue,T> destDictionary,
+			MapIndex                  index,
+			params object[]           parameters)
+		{
+			return _defaultSchema.MapListToDictionary<T>(sourceList, destDictionary, index, parameters);
+		}
+
+		public static Dictionary<IndexValue,T> ListToDictionary<T>(
+			ICollection     sourceList,
+			MapIndex        index,
+			params object[] parameters)
+		{
+			return _defaultSchema.MapListToDictionary<T>(sourceList, index, parameters);
 		}
 #endif
 
@@ -530,11 +573,11 @@ namespace BLToolkit.Mapping
 		}
 
 #if FW2
-		public static Dictionary<K,T> DataTableToDictionary<K,T>(
-			DataTable       sourceTable,
-			Dictionary<K,T> destDictionary,
-			string          keyFieldName,
-			params object[] parameters)
+		public static IDictionary<K,T> DataTableToDictionary<K,T>(
+			DataTable        sourceTable,
+			IDictionary<K,T> destDictionary,
+			string           keyFieldName,
+			params object[]  parameters)
 		{
 			return _defaultSchema.MapDataTableToDictionary<K,T>(
 				sourceTable, destDictionary, keyFieldName, parameters);
@@ -546,6 +589,50 @@ namespace BLToolkit.Mapping
 			params object[] parameters)
 		{
 			return _defaultSchema.MapDataTableToDictionary<K,T>(sourceTable, keyFieldName, parameters);
+		}
+#endif
+
+		#endregion
+
+		#region DataTableToDictionary (Index)
+
+		public static IDictionary DataTableToDictionary(
+			DataTable       sourceTable,
+			IDictionary     destDictionary,
+			MapIndex        index,
+			Type            destObjectType,
+			params object[] parameters)
+		{
+			return _defaultSchema.MapDataTableToDictionary(
+				sourceTable, destDictionary, index, destObjectType, parameters);
+		}
+
+		public static Hashtable DataTableToDictionary(
+			DataTable       sourceTable,
+			MapIndex        index,
+			Type            destObjectType,
+			params object[] parameters)
+		{
+			return _defaultSchema.MapDataTableToDictionary(sourceTable, index, destObjectType, parameters);
+		}
+
+#if FW2
+		public static IDictionary<IndexValue,T> DataTableToDictionary<T>(
+			DataTable                 sourceTable,
+			IDictionary<IndexValue,T> destDictionary,
+			MapIndex                  index,
+			params object[]           parameters)
+		{
+			return _defaultSchema.MapDataTableToDictionary<T>(
+				sourceTable, destDictionary, index, parameters);
+		}
+
+		public static Dictionary<IndexValue,T> DataTableToDictionary<T>(
+			DataTable       sourceTable,
+			MapIndex        index,
+			params object[] parameters)
+		{
+			return _defaultSchema.MapDataTableToDictionary<T>(sourceTable, index, parameters);
 		}
 #endif
 
@@ -622,11 +709,11 @@ namespace BLToolkit.Mapping
 		}
 
 #if FW2
-		public static Dictionary<K,T> DataReaderToDictionary<K,T>(
-			IDataReader     dataReader,
-			Dictionary<K,T> destDictionary,
-			string          keyFieldName,
-			params object[] parameters)
+		public static IDictionary<K,T> DataReaderToDictionary<K,T>(
+			IDataReader      dataReader,
+			IDictionary<K,T> destDictionary,
+			string           keyFieldName,
+			params object[]  parameters)
 		{
 			return _defaultSchema.MapDataReaderToDictionary<K,T>(
 				dataReader, destDictionary, keyFieldName, parameters);
@@ -638,6 +725,50 @@ namespace BLToolkit.Mapping
 			params object[] parameters)
 		{
 			return _defaultSchema.MapDataReaderToDictionary<K,T>(dataReader, keyFieldName, parameters);
+		}
+#endif
+
+		#endregion
+
+		#region DataReaderToDictionary (Index)
+
+		public static IDictionary DataReaderToDictionary(
+			IDataReader     dataReader,
+			IDictionary     destDictionary,
+			MapIndex        index,
+			Type            destObjectType,
+			params object[] parameters)
+		{
+			return _defaultSchema.MapDataReaderToDictionary(
+				dataReader, destDictionary, index, destObjectType, parameters);
+		}
+
+		public static Hashtable DataReaderToDictionary(
+			IDataReader     dataReader,
+			MapIndex        index,
+			Type            destObjectType,
+			params object[] parameters)
+		{
+			return _defaultSchema.MapDataReaderToDictionary(dataReader, index, destObjectType, parameters);
+		}
+
+#if FW2
+		public static IDictionary<IndexValue,T> DataReaderToDictionary<T>(
+			IDataReader               dataReader,
+			IDictionary<IndexValue,T> destDictionary,
+			MapIndex                  index,
+			params object[]           parameters)
+		{
+			return _defaultSchema.MapDataReaderToDictionary<T>(
+				dataReader, destDictionary, index, parameters);
+		}
+
+		public static Dictionary<IndexValue,T> DataReaderToDictionary<T>(
+			IDataReader     dataReader,
+			MapIndex        index,
+			params object[] parameters)
+		{
+			return _defaultSchema.MapDataReaderToDictionary<T>(dataReader, index, parameters);
 		}
 #endif
 
@@ -721,11 +852,11 @@ namespace BLToolkit.Mapping
 		}
 
 #if FW2
-		public static Dictionary<K,T> DictionaryToDictionary<K,T>(
-			IDictionary     sourceDictionary,
-			Dictionary<K,T> destDictionary,
-			string          keyFieldName,
-			params object[] parameters)
+		public static IDictionary<K,T> DictionaryToDictionary<K,T>(
+			IDictionary      sourceDictionary,
+			IDictionary<K,T> destDictionary,
+			string           keyFieldName,
+			params object[]  parameters)
 		{
 			return _defaultSchema.MapDictionaryToDictionary<K,T>(
 				sourceDictionary, destDictionary, keyFieldName, parameters);
@@ -737,6 +868,51 @@ namespace BLToolkit.Mapping
 			params object[] parameters)
 		{
 			return _defaultSchema.MapDictionaryToDictionary<K,T>(sourceDictionary, keyFieldName, parameters);
+		}
+#endif
+
+		#endregion
+
+		#region DictionaryToDictionary (Index)
+
+		public static IDictionary DictionaryToDictionary(
+			IDictionary     sourceDictionary,
+			IDictionary     destDictionary,
+			MapIndex        index,
+			Type            destObjectType,
+			params object[] parameters)
+		{
+			return _defaultSchema.MapDictionaryToDictionary(
+				sourceDictionary, destDictionary, index, destObjectType, parameters);
+		}
+
+		public static Hashtable DictionaryToDictionary(
+			IDictionary     sourceDictionary,
+			MapIndex        index,
+			Type            destObjectType,
+			params object[] parameters)
+		{
+			return _defaultSchema.MapDictionaryToDictionary(
+				sourceDictionary, index, destObjectType, parameters);
+		}
+
+#if FW2
+		public static IDictionary<IndexValue,T> DictionaryToDictionary<T>(
+			IDictionary               sourceDictionary,
+			IDictionary<IndexValue,T> destDictionary,
+			MapIndex                  index,
+			params object[]           parameters)
+		{
+			return _defaultSchema.MapDictionaryToDictionary<T>(
+				sourceDictionary, destDictionary, index, parameters);
+		}
+
+		public static Dictionary<IndexValue,T> DictionaryToDictionary<T>(
+			IDictionary     sourceDictionary,
+			MapIndex        index,
+			params object[] parameters)
+		{
+			return _defaultSchema.MapDictionaryToDictionary<T>(sourceDictionary, index, parameters);
 		}
 #endif
 

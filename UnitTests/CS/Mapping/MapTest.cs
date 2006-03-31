@@ -333,8 +333,8 @@ namespace Mapping
 		{
 			DataTable   table = GetDataTable();
 			ArrayList   list  = Map.DataTableToList           (table, typeof(TestObject));
-			IDictionary dic1  = Map.ListToDictionary      (list, new SortedList(), "ID", typeof(TestObject));
-			IDictionary dic2  = Map.DictionaryToDictionary(dic1, new SortedList(), "ID", typeof(TestObject));
+			IDictionary dic1  = Map.ListToDictionary      (list, new SortedList(), "ID",  typeof(TestObject));
+			IDictionary dic2  = Map.DictionaryToDictionary(dic1, new SortedList(), "@ID", typeof(TestObject));
 
 			CompareLists(table, Map.ListToList(dic2.Values, typeof(TestObject)));
 		}

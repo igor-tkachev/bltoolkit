@@ -29,28 +29,43 @@ namespace BLToolkit.Mapping
 			}
 		}
 
-		private object GetValue(ObjectMapper objectMapper, object obj, int idx)
+		public object GetValue(IMapDataSource source, object obj, int index)
 		{
-			MemberMapper mm = objectMapper[Fields[idx]];
+			object value = source.GetValue(obj, _fields[index]);
 
-			if (mm == null)
-				throw new MappingException(string.Format("Type '{0}' does not contain field '{1}'.",
-					objectMapper.TypeAccessor.OriginalType.Name, Fields[idx]));
+			if (value == null)
+			{
+				ObjectMapper objectMapper = source as ObjectMapper;
 
-			return mm.GetValue(obj);
+				if (objectMapper != null)
+				{
+					MemberMapper mm = objectMapper[_fields[index]];
+
+					if (mm == null)
+						throw new MappingException(string.Format("Type '{0}' does not contain field '{1}'.",
+							objectMapper.TypeAccessor.OriginalType.Name, Fields[index]));
+				}
+			}
+
+			return value;
 		}
 
-		internal object GetKey(ObjectMapper objectMapper, object obj)
+		public object GetValueOrIndex(IMapDataSource source, object obj)
 		{
 			if (Fields.Length == 1)
-				return GetValue(objectMapper, obj, 0);
+				return GetValue(source, obj, 0);
 
-			string[] keyFields = new string[Fields.Length];
+			return GetIndexValue(source, obj);
+		}
 
-			for (int i = 0; i < keyFields.Length; i++)
-				keyFields[i] = GetValue(objectMapper, obj, i).ToString();
+		public IndexValue GetIndexValue(IMapDataSource source, object obj)
+		{
+			object[] values = new string[Fields.Length];
 
-			return string.Join(".", keyFields);
+			for (int i = 0; i < values.Length; i++)
+				values[i] = GetValue(source, obj, i);
+
+			return new IndexValue(values);
 		}
 	}
 }
