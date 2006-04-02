@@ -741,6 +741,11 @@ namespace BLToolkit.Reflection
 			return typeof(object);
 		}
 
+		public static bool IsScalar(Type type)
+		{
+			return type.IsValueType || type == typeof(string) || type == typeof(byte[]);
+		}
+
 		#endregion
 	}
 }
