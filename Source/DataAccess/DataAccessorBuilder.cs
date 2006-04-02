@@ -78,14 +78,12 @@ namespace BLToolkit.DataAccess
 			}
 			else if (IsInterfaceOf(returnType, typeof(IList)))
 			{
-#if FW2
-				if (returnType.IsGenericType)
-					_objectType = returnType.GetGenericArguments()[0];
-#endif
-				if (_objectType == null)
-					_objectType = returnType.GetElementType();
+				Type elementType = TypeHelper.GetListItemType(returnType);
 
-				if (_objectType == null)
+				if (elementType != typeof(object))
+					_objectType = elementType;
+
+				if (_objectType == null || _objectType == typeof(object))
 					throw new TypeBuilderException(string.Format(
 						"Can not determine object type for method '{0}.{1}'",
 						Context.CurrentMethod.DeclaringType.Name,

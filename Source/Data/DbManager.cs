@@ -2388,7 +2388,7 @@ namespace BLToolkit.Data
 			if (_prepared)
 				InitParameters(CommandAction.Select);
 
-			object nullValue = _mappingSchema.GetNullValue(type);
+			//object nullValue = _mappingSchema.GetNullValue(type);
 
 			using (IDataReader dr = ExecuteReaderInternal())
 			{
@@ -2397,12 +2397,7 @@ namespace BLToolkit.Data
 					object value = dr[0];
 
 					if (value == null || value.GetType() != type)
-					{
-						if (value is DBNull)
-							value = null;
-						else
-							value = Convert.ChangeType(value, type);
-					}
+						value = value is DBNull? null: Convert.ChangeType(value, type);
 
 					list.Add(value);
 				}
@@ -2428,7 +2423,7 @@ namespace BLToolkit.Data
 
 			Type type = typeof(T);
 
-			object nullValue = _mappingSchema.GetNullValue(type);
+			//object nullValue = _mappingSchema.GetNullValue(type);
 
 			using (IDataReader dr = ExecuteReaderInternal())
 			{
@@ -2437,12 +2432,7 @@ namespace BLToolkit.Data
 					object value = dr[0];
 
 					if (value == null || value.GetType() != type)
-					{
-						if (value is DBNull)
-							value = null;
-						else
-							value = Convert.ChangeType(value, type);
-					}
+						value = value is DBNull? null: Convert.ChangeType(value, type);
 
 					list.Add((T)value);
 				}
@@ -2458,6 +2448,222 @@ namespace BLToolkit.Data
 			ExecuteScalarList<T>(list);
 
 			return list;
+		}
+#endif
+
+		#endregion
+
+		#region ExecuteScalarDictionary
+
+		public IDictionary ExecuteScalarDictionary(
+			IDictionary dic,
+			string keyFieldName,   Type keyFieldType,
+			string valueFieldName, Type valueFieldType)
+		{
+			if (_prepared)
+				InitParameters(CommandAction.Select);
+
+			//object nullValue = _mappingSchema.GetNullValue(type);
+
+			int keyIndex   = -1;
+			int valueIndex = -1;
+
+			using (IDataReader dr = ExecuteReaderInternal())
+			{
+				while (dr.Read())
+				{
+					if (keyIndex == -1)
+					{
+						keyIndex   = dr.GetOrdinal(keyFieldName);
+						valueIndex = dr.GetOrdinal(valueFieldName);
+					}
+
+					object value = dr[valueIndex];
+					object key   = dr[keyIndex];
+
+					if (key == null || key.GetType() != keyFieldType)
+						key = key is DBNull? null: Convert.ChangeType(key, keyFieldType);
+
+					if (value == null || value.GetType() != valueFieldType)
+						value = value is DBNull? null: Convert.ChangeType(value, valueFieldType);
+
+					dic.Add(key, value);
+				}
+			}
+
+			return dic;
+		}
+
+		public Hashtable ExecuteScalarDictionary(
+			string keyFieldName,   Type keyFieldType,
+			string valueFieldName, Type valueFieldType)
+		{
+			Hashtable table = new Hashtable();
+
+			ExecuteScalarDictionary(table, keyFieldName, keyFieldType, valueFieldName, valueFieldType);
+
+			return table;
+		}
+
+#if FW2
+		public IDictionary<K,T> ExecuteScalarDictionary<K,T>(
+			IDictionary<K,T> dic, string keyFieldName, string valueFieldName)
+		{
+			if (_prepared)
+				InitParameters(CommandAction.Select);
+
+			//object nullValue = _mappingSchema.GetNullValue(type);
+
+			Type keyFieldType   = typeof(K);
+			Type valueFieldType = typeof(T);
+
+			int keyIndex   = -1;
+			int valueIndex = -1;
+
+			using (IDataReader dr = ExecuteReaderInternal())
+			{
+				while (dr.Read())
+				{
+					if (keyIndex == -1)
+					{
+						keyIndex   = dr.GetOrdinal(keyFieldName);
+						valueIndex = dr.GetOrdinal(valueFieldName);
+					}
+
+					object value = dr[valueIndex];
+					object key   = dr[keyIndex];
+
+					if (key == null || key.GetType() != keyFieldType)
+						key = key is DBNull? null: Convert.ChangeType(key, keyFieldType);
+
+					if (value == null || value.GetType() != valueFieldType)
+						value = value is DBNull? null: Convert.ChangeType(value, valueFieldType);
+
+					dic.Add((K)key, (T)value);
+				}
+			}
+
+			return dic;
+		}
+
+		public Dictionary<K,T> ExecuteScalarDictionary<K,T>(
+			string keyFieldName, string valueFieldName)
+		{
+			Dictionary<K,T> dic = new Dictionary<K,T>();
+
+			ExecuteScalarDictionary<K,T>(dic, keyFieldName, valueFieldName);
+
+			return dic;
+		}
+#endif
+
+		#endregion
+
+		#region ExecuteScalarDictionary (Index)
+
+		public IDictionary ExecuteScalarDictionary(
+			IDictionary dic, MapIndex index, string valueFieldName, Type valueFieldType)
+		{
+			if (_prepared)
+				InitParameters(CommandAction.Select);
+
+			//object nullValue = _mappingSchema.GetNullValue(type);
+
+			int[] keyIndex   = null;
+			int   valueIndex = -1;
+
+			using (IDataReader dr = ExecuteReaderInternal())
+			{
+				while (dr.Read())
+				{
+					if (keyIndex == null)
+					{
+						valueIndex = dr.GetOrdinal(valueFieldName);
+						keyIndex   = new int[index.Fields.Length];
+
+						for (int i = 0; i < keyIndex.Length; i++)
+							keyIndex[i] = dr.GetOrdinal(index.Fields[i]);
+					}
+
+					object value = dr[valueIndex];
+
+					if (value == null || value.GetType() != valueFieldType)
+						value = value is DBNull? null: Convert.ChangeType(value, valueFieldType);
+
+					object[] key = new object[keyIndex.Length];
+
+					for (int i = 0; i < keyIndex.Length; i++)
+						key[i] = dr[keyIndex[i]];
+
+					dic.Add(new IndexValue(key), value);
+				}
+			}
+
+			return dic;
+		}
+
+		public Hashtable ExecuteScalarDictionary(
+			MapIndex index, string valueFieldName, Type valueFieldType)
+		{
+			Hashtable table = new Hashtable();
+
+			ExecuteScalarDictionary(table, index, valueFieldName, valueFieldType);
+
+			return table;
+		}
+
+#if FW2
+		public IDictionary<IndexValue,T> ExecuteScalarDictionary<T>(
+			IDictionary<IndexValue,T> dic, MapIndex index, string valueFieldName)
+		{
+			if (_prepared)
+				InitParameters(CommandAction.Select);
+
+			//object nullValue = _mappingSchema.GetNullValue(type);
+
+			int[] keyIndex   = null;
+			int   valueIndex = -1;
+
+			Type valueFieldType = typeof(T);
+
+			using (IDataReader dr = ExecuteReaderInternal())
+			{
+				while (dr.Read())
+				{
+					if (keyIndex == null)
+					{
+						valueIndex = dr.GetOrdinal(valueFieldName);
+						keyIndex   = new int[index.Fields.Length];
+
+						for (int i = 0; i < keyIndex.Length; i++)
+							keyIndex[i] = dr.GetOrdinal(index.Fields[i]);
+					}
+
+					object value = dr[valueIndex];
+
+					if (value == null || value.GetType() != valueFieldType)
+						value = value is DBNull? null: Convert.ChangeType(value, valueFieldType);
+
+					object[] key = new object[keyIndex.Length];
+
+					for (int i = 0; i < keyIndex.Length; i++)
+						key[i] = dr[keyIndex[i]];
+
+					dic.Add(new IndexValue(key), (T)value);
+				}
+			}
+
+			return dic;
+		}
+
+		public Dictionary<IndexValue,T> ExecuteScalarDictionary<T>(
+			MapIndex index, string valueFieldName)
+		{
+			Dictionary<IndexValue,T> dic = new Dictionary<IndexValue,T>();
+
+			ExecuteScalarDictionary<T>(dic, index, valueFieldName);
+
+			return dic;
 		}
 #endif
 
