@@ -945,7 +945,7 @@ namespace BLToolkit.Data
 		/// </summary>
 		/// <param name="commandParameters">array of IDbDataParameters to be assigned values</param>
 		/// <param name="parameterValues">array of objects holding the values to be assigned</param>
-		private static void AssignParameterValues(IDbDataParameter[] commandParameters, object[] parameterValues)
+		private void AssignParameterValues(IDbDataParameter[] commandParameters, object[] parameterValues)
 		{
 			if (commandParameters == null || parameterValues == null)
 			{
@@ -977,7 +977,14 @@ namespace BLToolkit.Data
 			{
 				object value = parameterValues[i];
 
-				commandParameters[i + dt].Value = value == null? DBNull.Value: value;
+				// http://www.rsdn.ru/Forum/Message.aspx?mid=1813383
+				//
+				//commandParameters[i + dt].Value = value == null? DBNull.Value: value;
+
+				IDbDataParameter parameter = commandParameters[i + dt];
+
+				parameter.Value = value == null? DBNull.Value: value;
+				_dataProvider.SetParameterType(parameter, value);
 			}
 		}
 
