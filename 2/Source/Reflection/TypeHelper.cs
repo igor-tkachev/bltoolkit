@@ -721,6 +721,21 @@ namespace BLToolkit.Reflection
 				IsSameOrParent(typeof(ITypedList),  listType) ||
 				IsSameOrParent(typeof(IListSource), listType))
 			{
+				Type elementType = listType.GetElementType();
+
+				if (elementType != null)
+					return elementType;
+
+#if FW2
+				if (listType.IsGenericType)
+				{
+					elementType = listType.GetGenericArguments()[0];
+
+					if (elementType != null)
+						return elementType;
+				}
+#endif
+
 				PropertyInfo last = null;
 
 				foreach (PropertyInfo pi in listType.GetProperties())
