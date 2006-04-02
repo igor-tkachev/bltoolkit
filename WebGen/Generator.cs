@@ -161,7 +161,7 @@ namespace WebGen
 					folders.Sort();
 
 					foreach (string s in folders)
-						str += string.Format("&#8226; <a href='{0}/index.htm'>{0}</a><br>",
+						str += string.Format("&#8226; <a href='{0}/index.htm'>{0}</a><br>\n",
 							Path.GetFileName(s));
 
 					if (str.Length > 0)
@@ -174,7 +174,7 @@ namespace WebGen
 							s.EndsWith(".htm",  true, CultureInfo.CurrentCulture) ||
 							s.EndsWith(".html", true, CultureInfo.CurrentCulture)?
 								"&#8226; <a href='{0}'>{0}</a><br>":
-								"&#8226; <a href='{0}.htm'>{0}</a><br>",
+								"&#8226; <a href='{0}.htm'>{0}</a><br>\n",
 							Path.GetFileName(s));
 
 					using (StreamWriter sw = File.CreateText(indexName))
@@ -285,7 +285,7 @@ namespace WebGen
 
 				case "Source":
 					backLinks += string.Format(
-						"<br><nobr>&nbsp;&nbsp;<small><a class='m' href='{0}/Source/index.htm'>BLToolkit</a>",
+						"<br><nobr>&nbsp;&nbsp;<small><a class='m' href='{0}Source/index.htm'>BLToolkit</a>",
 						backPath);
 
 					for (int i = 1; i < path.Length; i++)

@@ -95,10 +95,10 @@ namespace BLToolkit.EditableObjects
 	[GlobalInstanceType(typeof(float),  typeof(EditableValue), (float)0)]
 	[GlobalInstanceType(typeof(double), typeof(EditableValue), (double)0)]
 	[GlobalInstanceType(typeof(string), typeof(EditableValue), "")]
-	[DateTimeInstance, DecimalInstance, GuidInstance]
-	[SqlBooleanInstance, SqlByteInstance, SqlDateTimeInstance, SqlDecimalTimeInstance]
-	[SqlDoubleInstance, SqlGuidInstance, SqlInt16Instance, SqlInt32Instance]
-	[SqlInt64Instance, SqlMoneyInstance, SqlSingleInstance, SqlStringInstance]
+	[DateTimeInstance,   DecimalInstance,  GuidInstance]
+	[SqlBooleanInstance, SqlByteInstance,  SqlDateTimeInstance, SqlDecimalTimeInstance]
+	[SqlDoubleInstance,  SqlGuidInstance,  SqlInt16Instance,    SqlInt32Instance]
+	[SqlInt64Instance,   SqlMoneyInstance, SqlSingleInstance,   SqlStringInstance]
 #endif
 	#endregion
 	[ImplementInterface(typeof(IEditable))]
