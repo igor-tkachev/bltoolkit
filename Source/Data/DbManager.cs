@@ -11,6 +11,7 @@ using System.Collections.Generic;
 
 using BLToolkit.Data.DataProvider;
 using BLToolkit.Mapping;
+using BLToolkit.Reflection;
 
 namespace BLToolkit.Data
 {
@@ -1270,7 +1271,7 @@ namespace BLToolkit.Data
 			{
 				Type type = mm.MemberAccessor.Type;
 
-				if (type.IsClass == false || type == typeof(string) || type == typeof(byte[]))
+				if (TypeHelper.IsScalar(type))
 				{
 					object value = mm.GetValue(obj);
 					string name  = _dataProvider.Convert(mm.Name, ConvertType.NameToParameter).ToString();

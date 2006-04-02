@@ -530,7 +530,7 @@ namespace BLToolkit.DataAccess
 				{
 					MemberAccessor ma = mm.MemberAccessor;
 
-					if ((ma.Type.IsValueType || ma.Type == typeof(string) || ma.Type == typeof(byte[])))
+					if (TypeHelper.IsScalar(ma.Type))
 					{
 						object value = typeExt[ma.Name]["PrimaryKey"].Value;
 
@@ -644,7 +644,7 @@ namespace BLToolkit.DataAccess
 			{
 				object value = typeExt[mm.MemberAccessor.Name]["NonUpdatable"].Value;
 
-				if ((value != null && (bool)TypeExtension.ChangeType(value, typeof(bool)) == true) ||
+				if ((value != null && (bool)TypeExtension.ChangeType(value, typeof(bool)) == false) ||
 					(value == null && mm.MemberAccessor.GetAttributes(typeof(NonUpdatableAttribute)) == null))
 				{
 					sb.AppendFormat("\t[{0}],\n", mm.Name);
@@ -687,7 +687,7 @@ namespace BLToolkit.DataAccess
 			{
 				object value = typeExt[mm.MemberAccessor.Name]["NonUpdatable"].Value;
 
-				if ((value != null && (bool)TypeExtension.ChangeType(value, typeof(bool)) == true) ||
+				if ((value != null && (bool)TypeExtension.ChangeType(value, typeof(bool)) == false) ||
 					(value == null && mm.MemberAccessor.GetAttributes(typeof(NonUpdatableAttribute)) == null))
 				{
 					SqlQueryParameterInfo p = query.AddParameter(

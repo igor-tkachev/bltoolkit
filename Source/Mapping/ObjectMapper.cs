@@ -320,10 +320,8 @@ namespace BLToolkit.Mapping
 
 			Type type = memberAccessor.Type;
 
-			return
-				type.IsClass &&
-				type != typeof(string) &&
-				type != typeof(byte[]) &&
+			return 
+				TypeHelper.IsScalar(type) == false &&
 				memberAccessor.GetAttribute(typeof(MemberMapperAttribute)) == null;
 		}
 

@@ -91,7 +91,7 @@ namespace BLToolkit.DataAccess
 						Context.CurrentMethod.DeclaringType.Name,
 						Context.CurrentMethod.Name));
 
-				if (_objectType.IsValueType || _objectType == typeof(string) || _objectType == typeof(byte[]))
+				if (TypeHelper.IsScalar(_objectType))
 					ExecuteScalarList();
 				else
 					ExecuteList();
@@ -100,7 +100,7 @@ namespace BLToolkit.DataAccess
 			{
 				ExecuteNonQuery();
 			}
-			else if (returnType.IsValueType || returnType == typeof(string) || returnType == typeof(byte[]))
+			else if (TypeHelper.IsScalar(returnType))
 			{
 				ExecuteScalar();
 			}
@@ -154,7 +154,7 @@ namespace BLToolkit.DataAccess
 					if (pType.IsByRef)
 						pType = pType.GetElementType();
 
-					if (pType.IsValueType || pType == typeof(string) || pType == typeof(byte[]))
+					if (TypeHelper.IsScalar(pType))
 					{
 						_paramList.Add(pi);
 					}
