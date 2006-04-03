@@ -41,7 +41,7 @@ namespace BLToolkit.TypeBuilder.Builders
 			switch (index.Length)
 			{
 				case 0:
-					Context.MethodBuilder.Emitter	
+					Context.MethodBuilder.Emitter
 						.ldarg_0
 						.ldfld   (field)
 						.stloc   (Context.ReturnValue)
@@ -230,7 +230,7 @@ namespace BLToolkit.TypeBuilder.Builders
 						.newobj (typeof(TypeBuilderException), typeof(string))
 						.@throw
 						.end()
-					;
+						;
 
 					/*
 					throw new TypeBuilderException(
