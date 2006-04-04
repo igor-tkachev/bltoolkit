@@ -12,6 +12,7 @@ namespace BLToolkit.Data.DataProvider
 	/// See the <see cref="DbManager.AddDataProvider"/> method to find an example.
 	/// </remarks>
 	/// <seealso cref="DbManager.AddDataProvider">AddDataManager Method</seealso>
+	[Obsolete]
 	public interface IDataProvider
 	{
 		/// <summary>
