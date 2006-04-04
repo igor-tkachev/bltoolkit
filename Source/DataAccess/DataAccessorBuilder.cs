@@ -666,7 +666,7 @@ namespace BLToolkit.DataAccess
 					.callvirt  (typeof(DbManager).GetProperty("DataProvider").GetGetMethod())
 					.ldstr     (paramName)
 					.ldc_i4    ((int)ConvertType.NameToParameter)
-					.callvirt  (typeof(IDataProvider), "Convert", typeof(string), typeof(ConvertType))
+					.callvirt  (typeof(DataProviderBase), "Convert", typeof(string), typeof(ConvertType))
 					.castclass (typeof(string))
 					;
 			}
@@ -767,7 +767,7 @@ namespace BLToolkit.DataAccess
 							.callvirt (typeof(DbManager).GetProperty("DataProvider").GetGetMethod())
 							.ldstr    (paramName)
 							.ldc_i4   ((int)ConvertType.NameToParameter)
-							.callvirt (typeof(IDataProvider), "Convert", typeof(string), typeof(ConvertType))
+							.callvirt (typeof(DataProviderBase), "Convert", typeof(string), typeof(ConvertType))
 							;
 					}
 					else

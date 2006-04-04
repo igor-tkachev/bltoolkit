@@ -16,7 +16,7 @@ using BLToolkit.Reflection;
 namespace BLToolkit.Data
 {
 	/// <summary>
-	/// The <b>DbManager</b> is a primary class of the <see cref="Rsdn.Framework.Data"/> namespace
+	/// The <b>DbManager</b> is a primary class of the <see cref="BLToolkit.Data"/> namespace
 	/// that can be used to execute commands of different database providers.
 	/// </summary>
 	/// <remarks>
@@ -174,9 +174,9 @@ namespace BLToolkit.Data
 			set { _mappingSchema = value != null? value: Map.DefaultSchema; }
 		}
 
-		private IDataProvider _dataProvider;
+		private DataProviderBase _dataProvider;
 		/// <summary>
-		/// Gets the <see cref="Rsdn.Framework.Data.DataProvider.IDataProvider"/> 
+		/// Gets the <see cref="BLToolkit.Data.DataProvider.DataProviderBase"/> 
 		/// used by this instance of the <see cref="DbManager"/>.
 		/// </summary>
 		/// <value>
@@ -184,7 +184,7 @@ namespace BLToolkit.Data
 		/// </value>
 		/// <include file="Examples.xml" path='examples/db[@name="DataProvider"]/*' />
 		/// <seealso cref="AddDataProvider">AddDataProvider Method</seealso>
-		public IDataProvider DataProvider
+		public DataProviderBase DataProvider
 		{
 			get { return _dataProvider; }
 		}
@@ -586,9 +586,9 @@ namespace BLToolkit.Data
 			AddDataProvider(new SybaseAdoDataProvider());
 		}
 
-		private static string        _firstConfiguration;
-		private static IDataProvider _firstProvider;
-		private static Hashtable     _configurationList = Hashtable.Synchronized(new Hashtable());
+		private static string           _firstConfiguration;
+		private static DataProviderBase _firstProvider;
+		private static Hashtable        _configurationList = Hashtable.Synchronized(new Hashtable());
 
 		private void Init(string configurationString)
 		{
@@ -601,7 +601,7 @@ namespace BLToolkit.Data
 			}
 			else
 			{
-				_dataProvider = (IDataProvider)_configurationList[configurationString];
+				_dataProvider = (DataProviderBase)_configurationList[configurationString];
 
 				if (_dataProvider == null)
 				{
@@ -623,7 +623,7 @@ namespace BLToolkit.Data
 			}
 		}
 
-		private static IDataProvider GetDataProvider(string configurationString)
+		private static DataProviderBase GetDataProvider(string configurationString)
 		{
 			string cs  = configurationString.ToUpper();
 			string key = "SQL";
@@ -637,12 +637,12 @@ namespace BLToolkit.Data
 				}
 			}
 
-			return (IDataProvider)_dataProviderNameList[key];
+			return (DataProviderBase)_dataProviderNameList[key];
 		}
 
 		private void Init(IDbConnection connection)
 		{
-			_dataProvider = (IDataProvider)_dataProviderTypeList[connection.GetType()];
+			_dataProvider = (DataProviderBase)_dataProviderTypeList[connection.GetType()];
 
 			if (_dataProvider != null)
 			{
@@ -955,38 +955,31 @@ namespace BLToolkit.Data
 				return;
 			}
 
-			int len = commandParameters.Length;
-			int dt  = 0;
-
-			if (commandParameters[0].Direction == ParameterDirection.ReturnValue)
-			{
-				len--;
-				dt = 1;
-			}
-
-			// We must have the same number of values as we pave parameters to put them in.
-			//
-			if (len != parameterValues.Length)
-			{
-				throw new ArgumentException("Parameter count does not match Parameter Value count.");
-			}
+			int nValues = 0;
 
 			// Iterate through the parameters, assigning the values from 
 			// the corresponding position in the value array.
 			//
-			for (int i = 0; i < len; i++)
+			for (int i = 0; i < commandParameters.Length; i++)
 			{
-				object value = parameterValues[i];
+				IDbDataParameter parameter = commandParameters[i];
 
-				// http://www.rsdn.ru/Forum/Message.aspx?mid=1813383
-				//
-				//commandParameters[i + dt].Value = value == null? DBNull.Value: value;
+				if (_dataProvider.IsValueParameter(parameter))
+				{
+					if (nValues >= parameterValues.Length)
+						throw new ArgumentException("Parameter count does not match Parameter Value count.");
 
-				IDbDataParameter parameter = commandParameters[i + dt];
+					object value = parameterValues[nValues++];
 
-				parameter.Value = value == null? DBNull.Value: value;
-				_dataProvider.SetParameterType(parameter, value);
+					parameter.Value = value == null ? DBNull.Value : value;
+					_dataProvider.SetParameterType(parameter, value);
+				}
 			}
+
+			// We must have the same number of values as we pave parameters to put them in.
+			//
+			if (nValues != parameterValues.Length)
+				throw new ArgumentException("Parameter count does not match Parameter Value count.");
 		}
 
 		private IDataReader ExecuteReaderInternal()
@@ -1063,18 +1056,30 @@ namespace BLToolkit.Data
 		/// </remarks>
 		/// <include file="Examples1.xml" path='examples/db[@name="AddDataProvider(DataProvider.IDataProvider)"]/*' />
 		/// <seealso cref="AddConnectionString(string)">AddConnectionString Method.</seealso>
-		/// <seealso cref="Rsdn.Framework.Data.DataProvider.IDataProvider.Name">IDataProvider.Name Property.</seealso>
-		/// <param name="dataProvider">An instance of the <see cref="Rsdn.Framework.Data.DataProvider.IDataProvider"/> interface.</param>
-		public static void AddDataProvider(IDataProvider dataProvider)
+		/// <seealso cref="BLToolkit.Data.DataProvider.DataProviderBase.Name">DataProviderBase.Name Property.</seealso>
+		/// <param name="dataProvider">An instance of the <see cref="BLToolkit.Data.DataProvider.DataProviderBase"/> interface.</param>
+		public static void AddDataProvider(DataProviderBase dataProvider)
 		{
 			_dataProviderNameList[dataProvider.Name.ToUpper()] = dataProvider;
 			_dataProviderTypeList[dataProvider.ConnectionType] = dataProvider;
 		}
 
-		public static void AddDataProvider(string providerName, IDataProvider dataProvider)
+		public static void AddDataProvider(string providerName, DataProviderBase dataProvider)
 		{
 			_dataProviderNameList[providerName.ToUpper()]      = dataProvider;
 			_dataProviderTypeList[dataProvider.ConnectionType] = dataProvider;
+		}
+
+		[Obsolete]
+		public static void AddDataProvider(IDataProvider dataProvider)
+		{
+			AddDataProvider(new ObsoleteDataProvider(dataProvider));
+		}
+
+		[Obsolete]
+		public static void AddDataProvider(string providerName, IDataProvider dataProvider)
+		{
+			AddDataProvider(providerName, new ObsoleteDataProvider(dataProvider));
 		}
 
 		/// <summary>
