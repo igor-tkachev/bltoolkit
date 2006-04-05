@@ -363,6 +363,12 @@ namespace BLToolkit.Reflection
 			return _type.GetFields();
 		}
 
+		public FieldInfo GetField(string name)
+		{
+			return _type.GetField(
+				name, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+		}
+
 		#endregion
 
 		#region GetProperties
@@ -396,7 +402,8 @@ namespace BLToolkit.Reflection
 		/// if found; otherwise, a null reference.</returns>
 		public PropertyInfo GetProperty(string name)
 		{
-			return _type.GetProperty(name);
+			return _type.GetProperty(
+				name, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
 		}
 
 		#endregion

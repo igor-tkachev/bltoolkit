@@ -99,6 +99,16 @@
                     BuildAction = "Compile"
                 />
                 <File
+                    RelPath = "Aspects\MixinAspectBuilder.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "Aspects\MixinAttribute.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
                     RelPath = "Aspects\NotNullAspectBuilder.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
@@ -208,7 +218,17 @@
                     BuildAction = "Compile"
                 />
                 <File
+                    RelPath = "Data\DataProvider\DataProviderBase.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
                     RelPath = "Data\DataProvider\IDataProvider.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "Data\DataProvider\ObsoleteDataProvider.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
                 />

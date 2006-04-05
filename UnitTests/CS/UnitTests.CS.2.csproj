@@ -35,6 +35,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Aspects\InterceptorAspectTest.cs" />
+    <Compile Include="Aspects\MixinAspectTest.cs" />
     <Compile Include="Aspects\NotNullAspectTest.cs" />
     <Compile Include="DataAccess\CreateEntityTest.cs" />
     <Compile Include="DataAccess\DataAccessorTest.cs" />
