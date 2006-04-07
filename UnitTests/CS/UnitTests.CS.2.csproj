@@ -51,6 +51,7 @@
     <Compile Include="DataAccess\SqlQueryTest.cs" />
     <Compile Include="DataAccess\SqlTest.cs" />
     <Compile Include="Data\BinaryTest.cs" />
+    <Compile Include="Data\CompositeKeyTest.cs" />
     <Compile Include="Data\DbManagerTest.cs" />
     <Compile Include="EditableObjects\EditableObjectTest.cs" />
     <Compile Include="Mapping\DefaultValueAttributeTest.cs" />

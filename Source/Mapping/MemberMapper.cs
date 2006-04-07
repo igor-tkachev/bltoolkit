@@ -25,7 +25,7 @@ namespace BLToolkit.Mapping
 
 		internal static MemberMapper CreateMemberMapper(MapMemberInfo mi)
 		{
-			Type         type = mi.MemberAccessor.Type;
+			Type         type = mi.Type;
 			MemberMapper mm   = null;
 
 			if (type.IsPrimitive || type.IsEnum)
@@ -79,6 +79,11 @@ namespace BLToolkit.Mapping
 		public  string  Name
 		{
 			get { return _name; }
+		}
+
+		public  Type  Type
+		{
+			get { return _mapMemberInfo.Type; }
 		}
 
 		#endregion
@@ -489,7 +494,7 @@ namespace BLToolkit.Mapping
 
 			bool n = mi.Nullable;
 
-			Type type = mi.MemberAccessor.Type;
+			Type type = mi.Type;
 
 			if (type == typeof(String))
 				if (mi.Trimmable) return n? new StringMapper.Trimmable.Nullable(): new StringMapper.Trimmable();
@@ -644,7 +649,7 @@ namespace BLToolkit.Mapping
 
 		private static MemberMapper GetNullableMemberMapper(MapMemberInfo mi)
 		{
-			Type type = mi.MemberAccessor.Type;
+			Type type = mi.Type;
 
 			if (type.IsGenericType == false || mi.MapValues != null)
 				return null;
@@ -698,7 +703,7 @@ namespace BLToolkit.Mapping
 			{
 				if (mapMemberInfo == null) throw new ArgumentNullException("mapMemberInfo");
 
-				_memberType     = Nullable.GetUnderlyingType(mapMemberInfo.MemberAccessor.Type);
+				_memberType     = Nullable.GetUnderlyingType(mapMemberInfo.Type);
 				_underlyingType = mapMemberInfo.MemberAccessor.UnderlyingType;
 
 				base.Init(mapMemberInfo);
@@ -1005,7 +1010,7 @@ namespace BLToolkit.Mapping
 
 		private static MemberMapper GetSqlTypeMemberMapper(MapMemberInfo mi)
 		{
-			Type type = mi.MemberAccessor.Type;
+			Type type = mi.Type;
 
 			if (TypeHelper.IsSameOrParent(typeof(INullable), type) == false)
 				return null;
@@ -1433,7 +1438,7 @@ namespace BLToolkit.Mapping
 			}
 
 			Type valueType  = value.GetType();
-			Type memberType = mapInfo.MemberAccessor.Type;
+			Type memberType = mapInfo.Type;
 
 			if (valueType != memberType)
 			{

@@ -1274,7 +1274,7 @@ namespace BLToolkit.Data
 
 			foreach (MemberMapper mm in om)
 			{
-				Type type = mm.MemberAccessor.Type;
+				Type type = mm.Type;
 
 				if (TypeHelper.IsScalar(type))
 				{

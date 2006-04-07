@@ -66,7 +66,7 @@ namespace Mapping
 			ObjectMapper<Object2>.SetValue(o, "Int16", s);
 			ObjectMapper<Object2>.SetValue(o, "Int32", 123.56);
 			ObjectMapper<Object2>.SetValue(o, "Int64", null);
-			ObjectMapper<Object2>.SetValue(o, "Float", "123.57");
+			ObjectMapper<Object2>.SetValue(o, "Float", 123.57.ToString());
 			ObjectMapper<Object2>.SetValue(o, "Guid",  g);
 			ObjectMapper<Object2>.SetValue(o, "Dow1",  de);
 			ObjectMapper<Object2>.SetValue(o, "Dow2",  di);
@@ -103,7 +103,7 @@ namespace Mapping
 			Object3 o = new Object3();
 
 			om.SetValue(o, "Int32",  123.56);
-			om.SetValue(o, "Single", "123.57");
+			om.SetValue(o, "Single", 123.57.ToString());
 
 			Assert.AreEqual(124,    o.Int32. Value);
 			Assert.AreEqual(123.57, o.Single.Value);
