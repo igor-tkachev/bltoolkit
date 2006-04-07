@@ -109,6 +109,11 @@
                     BuildAction = "Compile"
                 />
                 <File
+                    RelPath = "Aspects\MixinOverrideAttribute.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
                     RelPath = "Aspects\NotNullAspectBuilder.cs"
                     SubType = "Code"
                     BuildAction = "Compile"

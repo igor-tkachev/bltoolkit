@@ -45,6 +45,7 @@
     <Compile Include="Aspects\InterceptCallInfo.cs" />
     <Compile Include="Aspects\MixinAspectBuilder.cs" />
     <Compile Include="Aspects\MixinAttribute.cs" />
+    <Compile Include="Aspects\MixinOverrideAttribute.cs" />
     <Compile Include="Aspects\NotNullAttribute.cs" />
     <Compile Include="ComponentModel\BindingListImpl.cs" />
     <Compile Include="ComponentModel\CustomTypeDescriptorImpl.cs" />

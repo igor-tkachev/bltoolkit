@@ -1,5 +1,6 @@
 using System;
 using System.Reflection;
+using System.Reflection.Emit;
 
 using BLToolkit.TypeBuilder.Builders;
 using BLToolkit.Reflection.Emit;
@@ -9,14 +10,19 @@ namespace BLToolkit.Aspects
 {
 	public class MixinAspectBuilder : AbstractTypeBuilderBase
 	{
-		public MixinAspectBuilder(Type targetInterface, string memberName)
+		public MixinAspectBuilder(
+			Type targetInterface, string memberName, bool throwExceptionIfNull, string exceptionMessage)
 		{
-			_targetInterface = targetInterface;
-			_memberName      = memberName;
+			_targetInterface      = targetInterface;
+			_memberName           = memberName;
+			_throwExceptionIfNull = throwExceptionIfNull;
+			_exceptionMessage     = exceptionMessage;
 		}
 
 		private Type   _targetInterface;
 		private string _memberName;
+		private bool   _throwExceptionIfNull;
+		private string _exceptionMessage;
 
 		public override bool IsApplied(BuildContext context)
 		{
@@ -31,6 +37,9 @@ namespace BLToolkit.Aspects
 		public override void Build(BuildContext context)
 		{
 			Context = context;
+
+			if (CheckOverrideAttribute())
+				return;
 
 			EmitHelper      emit   = Context.MethodBuilder.Emitter;
 			MethodInfo      method = Context.MethodBuilder.OverriddenMethod;
@@ -48,7 +57,11 @@ namespace BLToolkit.Aspects
 				emit
 					.ldarg_0
 					.ldfld   (field)
-					.brfalse (Context.ReturnLabel)
+					;
+
+				CheckNull(emit);
+
+				emit
 					.ldarg_0
 					.ldfld   (field)
 					;
@@ -74,7 +87,11 @@ namespace BLToolkit.Aspects
 					emit
 						.ldarg_0
 						.callvirt (mi)
-						.brfalse  (Context.ReturnLabel)
+						;
+
+					CheckNull(emit);
+
+					emit
 						.ldarg_0
 						.callvirt (mi)
 						;
@@ -94,6 +111,94 @@ namespace BLToolkit.Aspects
 
 			if (Context.ReturnValue != null)
 				emit.stloc(Context.ReturnValue);
+		}
+
+		private void CheckNull(EmitHelper emit)
+		{
+			if (_throwExceptionIfNull == false &&
+				(_exceptionMessage == null || _exceptionMessage.Length == 0))
+			{
+				emit
+					.brfalse (Context.ReturnLabel)
+					;
+			}
+			else
+			{
+				string message = string.Format(
+					_exceptionMessage == null || _exceptionMessage.Length == 0?
+						"'{0}.{1}' is not initialized." : _exceptionMessage,
+					_targetInterface.Name, _memberName, _targetInterface.FullName);
+
+				Label label = emit.DefineLabel();
+
+				emit
+					.brtrue    (label)
+					.ldstr     (message)
+					.newobj    (typeof(InvalidOperationException), typeof(string))
+					.@throw
+					.MarkLabel (label)
+					;
+			}
+		}
+
+		private bool CheckOverrideAttribute()
+		{
+			MethodInfo      method = Context.MethodBuilder.OverriddenMethod;
+			ParameterInfo[] ps     = method.GetParameters();
+
+			MethodInfo[] methods = Context.Type.GetMethods(
+				BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+
+			foreach (MethodInfo mi in methods)
+			{
+				if (mi.IsPrivate)
+					continue;
+
+				object[] attrs = mi.GetCustomAttributes(typeof(MixinOverrideAttribute), true);
+
+				if (attrs == null || attrs.Length == 0)
+					continue;
+
+				foreach (MixinOverrideAttribute attr in attrs)
+				{
+					if (attr.TargetInterface != null &&
+						attr.TargetInterface != Context.CurrentInterface.Type)
+						continue;
+
+					string name = attr.MethodName == null || attr.MethodName.Length == 0?
+						mi.Name: attr.MethodName;
+
+					if (name != method.Name || mi.ReturnType != method.ReturnType)
+						continue;
+
+					ParameterInfo[] mips = mi.GetParameters();
+
+					if (mips.Length != ps.Length)
+						continue;
+
+					bool equal = true;
+
+					for (int i = 0; equal && i < ps.Length; i++)
+						equal = ps[i].ParameterType == mips[i].ParameterType;
+
+					if (equal)
+					{
+						EmitHelper emit = Context.MethodBuilder.Emitter;
+
+						for (int i = -1; i < ps.Length; i++)
+							emit.ldarg(i + 1);
+
+						emit.callvirt(mi);
+
+						if (Context.ReturnValue != null)
+							emit.stloc(Context.ReturnValue);
+
+						return true;
+					}
+				}
+			}
+
+			return false;
 		}
 	}
 }

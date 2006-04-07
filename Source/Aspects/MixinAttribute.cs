@@ -7,10 +7,28 @@ namespace BLToolkit.Aspects
 	[AttributeUsage(AttributeTargets.Class, AllowMultiple=true)]
 	public sealed class MixinAttribute : AbstractTypeBuilderAttribute
 	{
-		public MixinAttribute(Type targetInterface, string memberName)
+		public MixinAttribute(
+			Type targetInterface, string memberName, bool throwExceptionIfNull, string exceptionMessage)
 		{
-			_targetInterface = targetInterface;
-			_memberName      = memberName;
+			_targetInterface      = targetInterface;
+			_memberName           = memberName;
+			_throwExceptionIfNull = throwExceptionIfNull;
+			_exceptionMessage     = exceptionMessage;
+		}
+
+		public MixinAttribute(Type targetInterface, string memberName, bool throwExceptionIfNull)
+			: this(targetInterface, memberName, throwExceptionIfNull, null)
+		{
+		}
+
+		public MixinAttribute(Type targetInterface, string memberName, string exceptionMessage)
+			: this(targetInterface, memberName, true, exceptionMessage)
+		{
+		}
+
+		public MixinAttribute(Type targetInterface, string memberName)
+			: this(targetInterface, memberName, true, null)
+		{
 		}
 
 		private Type _targetInterface;
@@ -25,9 +43,27 @@ namespace BLToolkit.Aspects
 			get { return _memberName;  }
 		}
 
+		private bool _throwExceptionIfNull = false;
+		public  bool  ThrowExceptionIfNull
+		{
+			get { return _throwExceptionIfNull;  }
+			set { _throwExceptionIfNull = value; }
+		}
+
+		private string _exceptionMessage;
+		public  string  ExceptionMessage
+		{
+			get { return _exceptionMessage;  }
+			set { _exceptionMessage = value; }
+		}
+
 		public override IAbstractTypeBuilder TypeBuilder
 		{
-			get { return new MixinAspectBuilder(_targetInterface, _memberName); }
+			get
+			{
+				return new MixinAspectBuilder(
+					_targetInterface, _memberName, _throwExceptionIfNull, _exceptionMessage);
+			}
 		}
 	}
 }
