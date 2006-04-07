@@ -70,6 +70,12 @@ namespace BLToolkit.Mapping
 			[DebuggerStepThrough] get { return _memberExtension;  }
 			[DebuggerStepThrough] set { _memberExtension = value; }
 		}
-	
+
+		private Type _type;
+		public  Type  Type
+		{
+			[DebuggerStepThrough] get { return _type;  }
+			[DebuggerStepThrough] set { _type = value; }
+		}
 	}
 }

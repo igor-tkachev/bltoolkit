@@ -40,7 +40,7 @@ namespace BLToolkit.Mapping
 
 				foreach (MemberMapperAttribute a in attrs)
 				{
-					if (a.MemberType == mapMemberInfo.MemberAccessor.Type)
+					if (a.MemberType == mapMemberInfo.Type)
 					{
 						mm = a.MemberMapper;
 						break;
@@ -191,6 +191,7 @@ namespace BLToolkit.Mapping
 				MapMemberInfo mi = new MapMemberInfo();
 
 				mi.MemberAccessor  = ma;
+				mi.Type            = ma.Type;
 				mi.MappingSchema   = mappingSchema;
 				mi.MemberExtension = _extension[ma.Name];
 				mi.Name            = GetFieldName   (ma);
@@ -261,6 +262,7 @@ namespace BLToolkit.Mapping
 								MapMemberInfo mi = new MapMemberInfo();
 
 								mi.MemberAccessor = ma;
+								mi.Type           = mm.Type;
 								mi.MappingSchema  = MappingSchema;
 								mi.Name           = mapName;
 
