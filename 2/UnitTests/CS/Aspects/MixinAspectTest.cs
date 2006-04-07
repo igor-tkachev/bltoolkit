@@ -17,16 +17,27 @@ namespace Aspects
 		{
 			int    Test1(ref int    value);
 			object Test2(ref object value);
+
+			int    Test3(string p);
+			int    Test4(double p);
+			int    Test5 { get; }
+			int    Test6 { get; }
 		}
 
 		public class TestInterfaceImpl : ITestInterface
 		{
 			int    ITestInterface.Test1(ref int    value) { return value; }
 			object ITestInterface.Test2(ref object value) { return value; }
+
+			int    ITestInterface.Test3(string p) { return 10; }
+			int    ITestInterface.Test4(double p) { return 20; }
+
+			int    ITestInterface.Test5 { get { return 30; } }
+			int    ITestInterface.Test6 { get { return 40; } }
 		}
 
 		[Mixin(typeof(ICustomTypeDescriptor), "_typeDescriptor")]
-		[Mixin(typeof(ITestInterface),        "_testInterface")]
+		[Mixin(typeof(ITestInterface),        "_testInterface", "'{0}.{1}' is null.")]
 		public abstract class TestClass
 		{
 			public TestClass()
@@ -38,6 +49,13 @@ namespace Aspects
 			protected object _testInterface = new TestInterfaceImpl();
 
 			public string Code = "code";
+
+			[MixinOverride]
+			protected int Test3(string p) { return 15; }
+			[MixinOverride(typeof(IDisposable))]
+			protected int Test4(double p) { return 25; }
+
+			protected int Test5 { [MixinOverride] get { return 35; } }
 		}
 
 		[Test]
@@ -62,6 +80,10 @@ namespace Aspects
 
 			Assert.AreEqual(10, ti.Test1(ref n));
 			Assert.AreSame (o,  ti.Test2(ref o));
+			Assert.AreEqual(15, ti.Test3(null));
+			Assert.AreEqual(20, ti.Test4(0));
+			Assert.AreEqual(35, ti.Test5);
+			Assert.AreEqual(40, ti.Test6);
 		}
 	}
 }
