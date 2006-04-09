@@ -7,6 +7,7 @@ using BLToolkit.Data;
 using BLToolkit.Reflection;
 using BLToolkit.Mapping;
 using BLToolkit.EditableObjects;
+using System.Data.SqlClient;
 
 namespace Data
 {
@@ -64,6 +65,21 @@ namespace Data
 					.ExecuteObject(typeof(Person));
 
 				TypeAccessor.WriteConsole(p);
+			}
+		}
+
+		[Test]
+		public void NewConnection()
+		{
+			string connectionString = "Server=.;Database=BLToolkitData;Integrated Security=SSPI";
+
+			using (DbManager db = new DbManager(new SqlConnection(connectionString)))
+			{
+				db
+					.SetSpCommand ("Person_SelectByName",
+						db.Parameter("@firstName", "John"),
+						db.Parameter("@lastName",  "Pupkin"))
+					.ExecuteScalar();
 			}
 		}
 	}

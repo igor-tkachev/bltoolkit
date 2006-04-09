@@ -157,7 +157,9 @@ namespace BLToolkit.TypeBuilder.Builders
 
 			_context.TypeBuilder = _context.AssemblyBuilder.DefineType(
 				typeName,
-				TypeAttributes.Public | TypeAttributes.BeforeFieldInit,
+				TypeAttributes.Public
+				| TypeAttributes.BeforeFieldInit
+				| (TypeFactory.SealTypes? TypeAttributes.Sealed: 0),
 				_context.Type,
 				(Type[])interfaces.ToArray(typeof(Type)));
 

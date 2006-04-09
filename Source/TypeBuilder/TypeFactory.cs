@@ -39,6 +39,13 @@ namespace BLToolkit.TypeBuilder
 			set { _saveTypes = value; }
 		}
 
+		private static bool _sealTypes = true;
+		public  static bool  SealTypes
+		{
+			get { return _sealTypes;  }
+			set { _sealTypes = value; }
+		}
+
 		[SuppressMessage("Microsoft.Design", "CA1062:ValidateArgumentsOfPublicMethods")]
 		public static void SetGlobalAssembly(string path)
 		{

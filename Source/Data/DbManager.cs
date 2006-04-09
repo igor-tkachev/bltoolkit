@@ -189,6 +189,7 @@ namespace BLToolkit.Data
 			get { return _dataProvider; }
 		}
 
+		private bool          _isExternalConnection;
 		private bool          _closeConnection;
 		private IDbConnection _connection;
 		/// <summary>
@@ -236,7 +237,9 @@ namespace BLToolkit.Data
 					Init(value);
 				}
 
-				_closeConnection = false;
+				
+				_isExternalConnection = true;
+				_closeConnection      = false;
 			}
 		}
 
@@ -623,6 +626,51 @@ namespace BLToolkit.Data
 			}
 		}
 
+		protected virtual string GetConnectionString(string configurationString)
+		{
+			// Use default configuration.
+			//
+			if (configurationString == null) 
+				configurationString = DefaultConfiguration;
+
+			// Check cached strings first.
+			//
+			object o = _connectionStringList[configurationString];
+
+			// Connection string is not in cache.
+			//
+			if (o == null)
+			{
+				string key = string.Format(
+					"ConnectionString{0}{1}",
+					configurationString.Length == 0? "": ".",
+					configurationString);
+
+#if FW2
+				o = ConfigurationManager.AppSettings.Get(key);
+#else
+				o = ConfigurationSettings.AppSettings.Get(key);
+#endif
+
+				if (o == null)
+				{
+					throw new DataException(string.Format(
+						"The '{0}' key does not exist in the configuration file.", key));
+				}
+
+				// Store the result in cache.
+				//
+				_connectionStringList[configurationString] = o;
+			}
+
+			return o.ToString();
+		}
+
+		protected virtual string GetConnectionString(IDbConnection connection)
+		{
+			return _connection.ConnectionString;
+		}
+
 		private static DataProviderBase GetDataProvider(string configurationString)
 		{
 			string cs  = configurationString.ToUpper();
@@ -842,9 +890,9 @@ namespace BLToolkit.Data
 		{
 			using (IDbConnection con = _dataProvider.CreateConnectionObject())
 			{
-				con.ConnectionString = _closeConnection || _connection == null?
-					GetConnectionString(ConfigurationString):
-					_connection.ConnectionString;
+				con.ConnectionString = _connection == null || !_isExternalConnection?
+					GetConnectionString(ConfigurationString): 
+					GetConnectionString(_connection);
 
 				try
 				{
@@ -1161,46 +1209,6 @@ namespace BLToolkit.Data
 			{
 				_defaultConfiguration = value;
 			}
-		}
-
-		private static string GetConnectionString(string configurationString)
-		{
-			// Use default configuration.
-			//
-			if (configurationString == null) 
-				configurationString = DefaultConfiguration;
-
-			// Check cached strings first.
-			//
-			object o = _connectionStringList[configurationString];
-
-			// Connection string is not in cache.
-			//
-			if (o == null)
-			{
-				string key = string.Format(
-					"ConnectionString{0}{1}",
-					configurationString.Length == 0? "": ".",
-					configurationString);
-
-#if FW2
-				o = ConfigurationManager.AppSettings.Get(key);
-#else
-				o = ConfigurationSettings.AppSettings.Get(key);
-#endif
-
-				if (o == null)
-				{
-					throw new DataException(string.Format(
-						"The '{0}' key does not exist in the configuration file.", key));
-				}
-
-				// Store the result in cache.
-				//
-				_connectionStringList[configurationString] = o;
-			}
-
-			return o.ToString();
 		}
 
 		#endregion
