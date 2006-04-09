@@ -274,6 +274,7 @@ namespace BLToolkit.Reflection
 					if (type == typeof(Int32))       return 0;
 					if (type == typeof(Double))      return (Double)0;
 					if (type == typeof(Int16))       return (Int16)0;
+					if (type == typeof(Boolean))     return false;
 					if (type == typeof(SByte))       return (SByte)0;
 					if (type == typeof(Int64))       return (Int64)0;
 					if (type == typeof(Byte))        return (Byte)0;
@@ -282,7 +283,7 @@ namespace BLToolkit.Reflection
 					if (type == typeof(UInt64))      return (UInt64)0;
 					if (type == typeof(UInt64))      return (UInt64)0;
 					if (type == typeof(Single))      return (Single)0;
-					if (type == typeof(Boolean))     return false;
+					if (type == typeof(Char))        return new char();
 				}
 				else
 				{

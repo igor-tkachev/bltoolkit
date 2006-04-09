@@ -67,8 +67,10 @@ namespace Mapping
 			ObjectMapper<Object2>.SetValue(o, "Int32", 123.56);
 			ObjectMapper<Object2>.SetValue(o, "Int64", null);
 			ObjectMapper<Object2>.SetValue(o, "Float", 123.57.ToString());
+			ObjectMapper<Object2>.SetValue(o, "Guid",  (Guid?)g);
 			ObjectMapper<Object2>.SetValue(o, "Guid",  g);
 			ObjectMapper<Object2>.SetValue(o, "Dow1",  de);
+			ObjectMapper<Object2>.SetValue(o, "Dow1",  (DayOfWeek?)de);
 			ObjectMapper<Object2>.SetValue(o, "Dow2",  di);
 
 			Assert.AreEqual(125,    o.Int16);

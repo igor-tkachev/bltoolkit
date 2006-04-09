@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Data;
+using System.Data.SqlTypes;
 using System.Reflection;
 using System.Diagnostics.CodeAnalysis;
 #if FW2
@@ -14,6 +15,15 @@ namespace BLToolkit.Mapping
 {
 	public class MappingSchema
 	{
+		#region Constructors
+
+		public MappingSchema()
+		{
+			InitNullValues();
+		}
+
+		#endregion
+
 		#region ObjectMapper Support
 
 		private Hashtable _mappers = new Hashtable();
@@ -78,6 +88,514 @@ namespace BLToolkit.Mapping
 			set { _extensions = value; }
 		}
 	
+		#endregion
+
+		#region Convert
+
+		public virtual void InitNullValues()
+		{
+			_defaultSByteNullValue    = (SByte)   GetNullValue(typeof(SByte));
+			_defaultInt16NullValue    = (Int16)   GetNullValue(typeof(Int16));
+			_defaultInt32NullValue    = (Int32)   GetNullValue(typeof(Int32));
+			_defaultInt64NullValue    = (Int64)   GetNullValue(typeof(Int64));
+			_defaultByteNullValue     = (Byte)    GetNullValue(typeof(Byte));
+			_defaultUInt16NullValue   = (UInt16)  GetNullValue(typeof(UInt16));
+			_defaultUInt32NullValue   = (UInt32)  GetNullValue(typeof(UInt32));
+			_defaultUInt64NullValue   = (UInt64)  GetNullValue(typeof(UInt64));
+			_defaultCharNullValue     = (Char)    GetNullValue(typeof(Char));
+			_defaultSingleNullValue   = (Single)  GetNullValue(typeof(Single));
+			_defaultDoubleNullValue   = (Double)  GetNullValue(typeof(Double));
+			_defaultBooleanNullValue  = (Boolean) GetNullValue(typeof(Boolean));
+
+			_defaultStringNullValue   = (String)  GetNullValue(typeof(String));
+			_defaultDateTimeNullValue = (DateTime)GetNullValue(typeof(DateTime));
+			_defaultDecimalNullValue  = (Decimal) GetNullValue(typeof(Decimal));
+			_defaultGuidNullValue     = (Guid)    GetNullValue(typeof(Guid));
+		}
+
+		#region Primitive Types
+
+		private SByte _defaultSByteNullValue;
+		[CLSCompliant(false)]
+		public  SByte  DefaultSByteNullValue
+		{
+			get { return _defaultSByteNullValue;  }
+			set { _defaultSByteNullValue = value; }
+		}
+
+		[CLSCompliant(false)]
+		public virtual SByte ConvertToSByte(object value)
+		{
+			return
+				value is SByte? (SByte)value:
+				value == null?  _defaultSByteNullValue:
+				                Convert.ToSByte(value);
+		}
+
+		private Int16 _defaultInt16NullValue;
+		public  Int16  DefaultInt16NullValue
+		{
+			get { return _defaultInt16NullValue;  }
+			set { _defaultInt16NullValue = value; }
+		}
+
+		public virtual Int16 ConvertToInt16(object value)
+		{
+			return
+				value is Int16? (Int16)value:
+				value == null?  _defaultInt16NullValue:
+				                Convert.ToInt16(value);
+		}
+
+		private Int32 _defaultInt32NullValue;
+		public  Int32  DefaultInt32NullValue
+		{
+			get { return _defaultInt32NullValue;  }
+			set { _defaultInt32NullValue = value; }
+		}
+
+		public virtual Int32 ConvertToInt32(object value)
+		{
+			return
+				value is Int32? (Int32)value:
+				value == null?  _defaultInt32NullValue:
+				                Convert.ToInt32  (value);
+		}
+
+		private Int64 _defaultInt64NullValue;
+		public  Int64  DefaultInt64NullValue
+		{
+			get { return _defaultInt64NullValue;  }
+			set { _defaultInt64NullValue = value; }
+		}
+
+		public virtual Int64 ConvertToInt64(object value)
+		{
+			return
+				value is Int64? (Int64)value:
+				value == null?  _defaultInt64NullValue:
+				                Convert.ToInt64(value);
+		}
+
+		private Byte _defaultByteNullValue;
+		public  Byte  DefaultByteNullValue
+		{
+			get { return _defaultByteNullValue;  }
+			set { _defaultByteNullValue = value; }
+		}
+
+		public virtual Byte ConvertToByte(object value)
+		{
+			return Convert.ToByte(value);
+		}
+
+		private UInt16 _defaultUInt16NullValue;
+		[CLSCompliant(false)]
+		public  UInt16  DefaultUInt16NullValue
+		{
+			get { return _defaultUInt16NullValue;  }
+			set { _defaultUInt16NullValue = value; }
+		}
+
+		[CLSCompliant(false)]
+		public virtual UInt16 ConvertToUInt16(object value)
+		{
+			return
+				value is UInt16? (UInt16)value:
+				value == null?   _defaultUInt16NullValue:
+				                 Convert.ToUInt16(value);
+		}
+
+		private UInt32 _defaultUInt32NullValue;
+		[CLSCompliant(false)]
+		public  UInt32  DefaultUInt32NullValue
+		{
+			get { return _defaultUInt32NullValue;  }
+			set { _defaultUInt32NullValue = value; }
+		}
+
+		[CLSCompliant(false)]
+		public virtual UInt32 ConvertToUInt32(object value)
+		{
+			return
+				value is UInt32? (UInt32)value:
+				value == null?   _defaultUInt32NullValue:
+				                 Convert.ToUInt32  (value);
+		}
+
+		private UInt64 _defaultUInt64NullValue;
+		[CLSCompliant(false)]
+		public  UInt64  DefaultUInt64NullValue
+		{
+			get { return _defaultUInt64NullValue;  }
+			set { _defaultUInt64NullValue = value; }
+		}
+
+		[CLSCompliant(false)]
+		public virtual UInt64 ConvertToUInt64(object value)
+		{
+			return
+				value is UInt64? (UInt64)value:
+				value == null?   _defaultUInt64NullValue:
+				                 Convert.ToUInt64(value);
+		}
+
+		private Char _defaultCharNullValue;
+		public  Char  DefaultCharNullValue
+		{
+			get { return _defaultCharNullValue;  }
+			set { _defaultCharNullValue = value; }
+		}
+
+		public virtual Char ConvertToChar(object value)
+		{
+			return
+				value is Char? (Char)value:
+				value == null? _defaultCharNullValue:
+				               Convert.ToChar(value);
+		}
+		
+		private Single _defaultSingleNullValue;
+		public  Single  DefaultSingleNullValue
+		{
+			get { return _defaultSingleNullValue;  }
+			set { _defaultSingleNullValue = value; }
+		}
+
+		public virtual Single ConvertToSingle(object value)
+		{
+			return
+				value is Single? (Single)value:
+				value == null?   _defaultSingleNullValue:
+				                 Convert.ToSingle (value);
+		}
+
+		private Double _defaultDoubleNullValue;
+		public  Double  DefaultDoubleNullValue
+		{
+			get { return _defaultDoubleNullValue;  }
+			set { _defaultDoubleNullValue = value; }
+		}
+
+		public virtual Double ConvertToDouble(object value)
+		{
+			return
+				value is Double? (Double)value:
+				value == null?   _defaultDoubleNullValue:
+				                 Convert.ToDouble (value);
+		}
+
+		private Boolean _defaultBooleanNullValue;
+		public  Boolean  DefaultBooleanNullValue
+		{
+			get { return _defaultBooleanNullValue;  }
+			set { _defaultBooleanNullValue = value; }
+		}
+
+		public virtual Boolean ConvertToBoolean(object value)
+		{
+			return
+				value is Boolean? (Boolean)value:
+				value == null?    _defaultBooleanNullValue:
+				                  Convert.ToBoolean(value);
+		}
+
+		#endregion
+
+		#region Simple Types
+
+		private string _defaultStringNullValue;
+		public  string  DefaultStringNullValue
+		{
+			get { return _defaultStringNullValue;  }
+			set { _defaultStringNullValue = value; }
+		}
+
+		public virtual String ConvertToString(object value)
+		{
+			return value == null? _defaultStringNullValue: value.ToString();
+		}
+
+		private DateTime _defaultDateTimeNullValue;
+		public  DateTime  DefaultDateTimeNullValue
+		{
+			get { return _defaultDateTimeNullValue;  }
+			set { _defaultDateTimeNullValue = value; }
+		}
+
+		public virtual DateTime ConvertToDateTime(object value)
+		{
+			return
+				value is DateTime? (DateTime)value:
+				value == null?     _defaultDateTimeNullValue:
+				                   Convert.ToDateTime(value);
+		}
+
+		private decimal _defaultDecimalNullValue;
+		public  decimal  DefaultDecimalNullValue
+		{
+			get { return _defaultDecimalNullValue;  }
+			set { _defaultDecimalNullValue = value; }
+		}
+
+		public virtual decimal ConvertToDecimal(object value)
+		{
+			return
+				value is decimal? (decimal)value:
+				value == null?    _defaultDecimalNullValue:
+				                  Convert.ToDecimal(value);
+		}
+
+		private Guid _defaultGuidNullValue;
+		public  Guid  DefaultGuidNullValue
+		{
+			get { return _defaultGuidNullValue;  }
+			set { _defaultGuidNullValue = value; }
+		}
+
+		public virtual Guid     ConvertToGuid    (object value)
+		{
+			return
+				value is Guid? (Guid)value:
+				value == null?  _defaultGuidNullValue:
+				                new Guid(value.ToString());
+		}
+
+		#endregion
+
+#if FW2
+
+		#region Nullable Types
+
+		[CLSCompliant(false)]
+		public virtual SByte? ConvertToNullableSByte(object value)
+		{
+			return
+				value == null?  (SByte?)null:
+				value is SByte? (SByte)value:
+				                Convert.ToSByte(value);
+		}
+
+		public virtual Int16? ConvertToNullableInt16(object value)
+		{
+			return
+				value == null?  (Int16?)null:
+				value is Int16? (Int16)value:
+				                Convert.ToInt16(value);
+		}
+
+		public virtual Int32? ConvertToNullableInt32(object value)
+		{
+			return
+				value == null? (Int32?)null:
+				value is Int32?(Int32)value:
+				               Convert.ToInt32(value);
+		}
+
+		public virtual Int64? ConvertToNullableInt64(object value)
+		{
+			return
+				value == null?  (Int64?)null:
+				value is Int64? (Int64)value:
+				                Convert.ToInt64(value);
+		}
+
+		public virtual Byte? ConvertToNullableByte(object value)
+		{
+			return
+				value == null? (Byte?)null:
+				value is Byte? (Byte)value:
+				               Convert.ToByte(value);
+		}
+
+		[CLSCompliant(false)]
+		public virtual UInt16? ConvertToNullableUInt16(object value)
+		{
+			return
+				value == null?   (UInt16?)null:
+				value is UInt16? (UInt16)value:
+				                 Convert.ToUInt16(value);
+		}
+
+		[CLSCompliant(false)]
+		public virtual UInt32? ConvertToNullableUInt32(object value)
+		{
+			return
+				value == null?   (UInt32?)null:
+				value is UInt32? (UInt32)value:
+				                 Convert.ToUInt32(value);
+		}
+
+		[CLSCompliant(false)]
+		public virtual UInt64? ConvertToNullableUInt64(object value)
+		{
+			return
+				value == null?   (UInt64?)null:
+				value is UInt64? (UInt64)value:
+				                 Convert.ToUInt64(value);
+		}
+
+		public virtual Char? ConvertToNullableChar(object value)
+		{
+			return
+				value == null? (Char?)null:
+				value is Char? (Char)value:
+				               Convert.ToChar(value);
+		}
+
+		public virtual Double? ConvertToNullableDouble(object value)
+		{
+			return
+				value == null?     null:
+				value is Double?   (Double) value:
+				value is Double? ? (Double?)value:
+				                   Convert.ToDouble(value);
+		}
+
+		public virtual Single? ConvertToNullableSingle(object value)
+		{
+			return
+				value == null?   (Single?)null:
+				value is Single? (Single)value:
+				                 Convert.ToSingle(value);
+		}
+
+		public virtual Boolean? ConvertToNullableBoolean(object value)
+		{
+			return
+				value == null?    (Boolean?)null:
+				value is Boolean? (Boolean)value:
+				                  Convert.ToBoolean(value);
+		}
+
+		public virtual DateTime? ConvertToNullableDateTime(object value)
+		{
+			return
+				value == null?     (DateTime?)null:
+				value is DateTime? (DateTime)value:
+				                   Convert.ToDateTime(value);
+		}
+
+		public virtual Decimal? ConvertToNullableDecimal(object value)
+		{
+			return
+				value == null?    (Decimal?)null:
+				value is Decimal? (Decimal) value:
+				                  Convert.ToDecimal(value);
+		}
+
+		public virtual Guid? ConvertToNullableGuid(object value)
+		{
+			return
+				value == null? (Guid?)null:
+				value is Guid? (Guid) value:
+				               new Guid(value.ToString());
+		}
+
+		#endregion
+
+#endif
+
+		#region SqlTypes
+
+		public virtual SqlByte ConvertToSqlByte(object value)
+		{
+			return
+				value == null?    SqlByte.Null:
+				value is SqlByte? (SqlByte)value:
+				                  new SqlByte(Convert.ToByte(value));
+		}
+
+		public virtual SqlInt16 ConvertToSqlInt16(object value)
+		{
+			return
+				value == null?     SqlInt16.Null:
+				value is SqlInt16? (SqlInt16)value:
+				                   new SqlInt16(Convert.ToInt16(value));
+		}
+
+		public virtual SqlInt32 ConvertToSqlInt32(object value)
+		{
+			return
+				value == null?     SqlInt32.Null:
+				value is SqlInt32? (SqlInt32)value:
+				                   new SqlInt32(Convert.ToInt32(value));
+		}
+
+		public virtual SqlInt64 ConvertToSqlInt64(object value)
+		{
+			return
+				value == null?     SqlInt64.Null:
+				value is SqlInt64? (SqlInt64)value:
+				                   new SqlInt64(Convert.ToInt64(value));
+		}
+
+		public virtual SqlSingle ConvertToSqlSingle(object value)
+		{
+			return
+				value == null?      SqlSingle.Null:
+				value is SqlSingle? (SqlSingle)value:
+				                    new SqlSingle(Convert.ToSingle(value));
+		}
+
+		public virtual SqlBoolean ConvertToSqlBoolean(object value)
+		{
+			return
+				value == null?       SqlBoolean.Null:
+				value is SqlBoolean? (SqlBoolean)value:
+				                     new SqlBoolean(Convert.ToBoolean(value));
+		}
+
+		public virtual SqlDouble ConvertToSqlDouble(object value)
+		{
+			return
+				value == null?      SqlDouble.Null:
+				value is SqlDouble? (SqlDouble)value:
+				                    new SqlDouble(Convert.ToDouble(value));
+		}
+
+		public virtual SqlDateTime ConvertToSqlDateTime(object value)
+		{
+			return
+				value == null?        SqlDateTime.Null:
+				value is SqlDateTime? (SqlDateTime)value:
+				                      new SqlDateTime(Convert.ToDateTime(value));
+		}
+
+		public virtual SqlDecimal ConvertToSqlDecimal(object value)
+		{
+			return
+				value == null?       SqlDecimal.Null:
+				value is SqlDecimal? (SqlDecimal)value:
+				                     new SqlDecimal(Convert.ToDecimal(value));
+		}
+
+		public virtual SqlMoney ConvertToSqlMoney(object value)
+		{
+			return
+				value == null?     SqlMoney.Null:
+				value is SqlMoney? (SqlMoney)value:
+				                   new SqlMoney(Convert.ToDecimal(value));
+		}
+
+		public virtual SqlGuid ConvertToSqlGuid(object value)
+		{
+			return
+				value == null?    SqlGuid.Null:
+				value is SqlGuid? (SqlGuid)value:
+				                  new SqlGuid(new Guid(value.ToString()));
+		}
+
+		public virtual SqlString ConvertToSqlString(object value)
+		{
+			return
+				value == null?      SqlString.Null:
+				value is SqlString? (SqlString)value:
+				                    new SqlString(Convert.ToString(value));
+		}
+
+		#endregion
+
 		#endregion
 
 		#region Protected Members

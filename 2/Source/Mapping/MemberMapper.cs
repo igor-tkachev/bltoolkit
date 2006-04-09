@@ -21,6 +21,7 @@ namespace BLToolkit.Mapping
 			_mapMemberInfo  = mapMemberInfo;
 			_name           = mapMemberInfo.Name;
 			_memberAccessor = mapMemberInfo.MemberAccessor;
+			_mappingSchema  = mapMemberInfo.MappingSchema;
 		}
 
 		internal static MemberMapper CreateMemberMapper(MapMemberInfo mi)
@@ -75,6 +76,12 @@ namespace BLToolkit.Mapping
 			get { return _memberAccessor; }
 		}
 
+		private MappingSchema _mappingSchema;
+		public  MappingSchema  MappingSchema
+		{
+			get { return _mappingSchema; }
+		}
+
 		private string _name;
 		public  string  Name
 		{
@@ -106,7 +113,7 @@ namespace BLToolkit.Mapping
 
 		#region Complex Mapper
 
-		internal class ComplexMapper :MemberMapper
+		internal sealed class ComplexMapper : MemberMapper
 		{
 			public ComplexMapper(MemberMapper memberMapper)
 			{
@@ -165,7 +172,11 @@ namespace BLToolkit.Mapping
 
 			public override void SetValue(object o, object value)
 			{
-				_memberAccessor.SetValue(o, value == null? _nullValue: Convert.ToInt16(value));
+				_memberAccessor.SetValue(
+					o,
+					value is Int16? (Int16)value:
+					value == null?  _nullValue:
+					                _mappingSchema.ConvertToInt16(value));
 			}
 
 			public override void Init(MapMemberInfo mapMemberInfo)
@@ -192,7 +203,11 @@ namespace BLToolkit.Mapping
 
 			public override void SetValue(object o, object value)
 			{
-				_memberAccessor.SetValue(o,  value == null? _nullValue: Convert.ToInt32(value));
+				_memberAccessor.SetValue(
+					o,
+					value is Int32? (Int32)value:
+					value == null?  _nullValue:
+					                _mappingSchema.ConvertToInt32(value));
 			}
 
 			public override void Init(MapMemberInfo mapMemberInfo)
@@ -219,7 +234,11 @@ namespace BLToolkit.Mapping
 
 			public override void SetValue(object o, object value)
 			{
-				_memberAccessor.SetValue(o, value == null? _nullValue: Convert.ToSByte(value));
+				_memberAccessor.SetValue(
+					o,
+					value is SByte? (SByte)value:
+					value == null?  _nullValue:
+					                _mappingSchema.ConvertToSByte(value));
 			}
 
 			public override void Init(MapMemberInfo mapMemberInfo)
@@ -246,7 +265,11 @@ namespace BLToolkit.Mapping
 
 			public override void SetValue(object o, object value)
 			{
-				_memberAccessor.SetValue(o, value == null? _nullValue: Convert.ToInt64(value));
+				_memberAccessor.SetValue(
+					o,
+					value is Int64? (Int64)value:
+					value == null?  _nullValue:
+					                _mappingSchema.ConvertToInt64(value));
 			}
 
 			public override void Init(MapMemberInfo mapMemberInfo)
@@ -273,7 +296,11 @@ namespace BLToolkit.Mapping
 
 			public override void SetValue(object o, object value)
 			{
-				_memberAccessor.SetValue(o, value == null? _nullValue: Convert.ToByte(value));
+				_memberAccessor.SetValue(
+					o,
+					value is Byte? (Byte)value:
+					value == null? _nullValue:
+					               _mappingSchema.ConvertToByte(value));
 			}
 
 			public override void Init(MapMemberInfo mapMemberInfo)
@@ -300,7 +327,11 @@ namespace BLToolkit.Mapping
 
 			public override void SetValue(object o, object value)
 			{
-				_memberAccessor.SetValue(o, value == null? _nullValue: Convert.ToUInt16(value));
+				_memberAccessor.SetValue(
+					o,
+					value is UInt16? (UInt16)value:
+					value == null?   _nullValue:
+					                 _mappingSchema.ConvertToUInt16(value));
 			}
 
 			public override void Init(MapMemberInfo mapMemberInfo)
@@ -327,7 +358,11 @@ namespace BLToolkit.Mapping
 
 			public override void SetValue(object o, object value)
 			{
-				_memberAccessor.SetValue(o, value == null? _nullValue: Convert.ToUInt32(value));
+				_memberAccessor.SetValue(
+					o,
+					value is UInt32? (UInt32)value:
+					value == null?   _nullValue:
+					                 _mappingSchema.ConvertToUInt32(value));
 			}
 
 			public override void Init(MapMemberInfo mapMemberInfo)
@@ -354,7 +389,11 @@ namespace BLToolkit.Mapping
 
 			public override void SetValue(object o, object value)
 			{
-				_memberAccessor.SetValue(o, value == null? _nullValue: Convert.ToUInt64(value));
+				_memberAccessor.SetValue(
+					o,
+					value is UInt64? (UInt64)value:
+					value == null?   _nullValue:
+					                 _mappingSchema.ConvertToUInt64(value));
 			}
 
 			public override void Init(MapMemberInfo mapMemberInfo)
@@ -381,7 +420,11 @@ namespace BLToolkit.Mapping
 
 			public override void SetValue(object o, object value)
 			{
-				_memberAccessor.SetValue(o, value == null? _nullValue: Convert.ToChar(value));
+				_memberAccessor.SetValue(
+					o,
+					value is Char? (Char)value:
+					value == null? _nullValue:
+					               _mappingSchema.ConvertToChar(value));
 			}
 
 			public override void Init(MapMemberInfo mapMemberInfo)
@@ -408,7 +451,11 @@ namespace BLToolkit.Mapping
 
 			public override void SetValue(object o, object value)
 			{
-				_memberAccessor.SetValue(o, value == null? _nullValue: Convert.ToDouble(value));
+				_memberAccessor.SetValue(
+					o,
+					value is Double? (Double)value:
+					value == null?   _nullValue:
+					                 _mappingSchema.ConvertToDouble(value));
 			}
 
 			public override void Init(MapMemberInfo mapMemberInfo)
@@ -435,7 +482,11 @@ namespace BLToolkit.Mapping
 
 			public override void SetValue(object o, object value)
 			{
-				_memberAccessor.SetValue(o, value == null? _nullValue: Convert.ToSingle(value));
+				_memberAccessor.SetValue(
+					o,
+					value is Single? (Single)value:
+					value == null?   _nullValue:
+					                 _mappingSchema.ConvertToSingle(value));
 			}
 
 			public override void Init(MapMemberInfo mapMemberInfo)
@@ -462,7 +513,11 @@ namespace BLToolkit.Mapping
 
 			public override void SetValue(object o, object value)
 			{
-				_memberAccessor.SetValue(o, value == null? _nullValue: Convert.ToBoolean(value));
+				_memberAccessor.SetValue(
+					o,
+					value is Boolean? (Boolean)value:
+					value == null?    _nullValue:
+					                  _mappingSchema.ConvertToBoolean(value));
 			}
 
 			public override void Init(MapMemberInfo mapMemberInfo)
@@ -509,11 +564,15 @@ namespace BLToolkit.Mapping
 
 		class StringMapper : MemberMapper
 		{
-			protected object _nullValue;
+			protected string _nullValue;
 
 			public override void SetValue(object o, object value)
 			{
-				_memberAccessor.SetValue(o, value == null? _nullValue: value.ToString());
+				_memberAccessor.SetValue(
+					o,
+					value is string? value:
+					value == null?   _nullValue:
+					                 _mappingSchema.ConvertToString(value));
 			}
 
 			public override void Init(MapMemberInfo mapMemberInfo)
@@ -522,6 +581,7 @@ namespace BLToolkit.Mapping
 
 				if (mapMemberInfo.NullValue != null)
 					_nullValue = Convert.ToString(mapMemberInfo.NullValue);
+
 				base.Init(mapMemberInfo);
 			}
 
@@ -530,7 +590,7 @@ namespace BLToolkit.Mapping
 				public override object GetValue(object o)
 				{
 					object value = _memberAccessor.GetValue(o);
-					return (string)value == (string)_nullValue? null: value;
+					return (string)value == _nullValue? null: value;
 				}
 			}
 
@@ -538,7 +598,8 @@ namespace BLToolkit.Mapping
 			{
 				public override void SetValue(object o, object value)
 				{
-					_memberAccessor.SetValue(o, value == null? _nullValue: value.ToString().TrimEnd(null));
+					_memberAccessor.SetValue(
+						o, value == null? _nullValue: _mappingSchema.ConvertToString(value).TrimEnd(null));
 				}
 
 				public new class Nullable : Trimmable
@@ -546,7 +607,7 @@ namespace BLToolkit.Mapping
 					public override object GetValue(object o)
 					{
 						object value = _memberAccessor.GetValue(o);
-						return (string)value == (string)_nullValue? null: value;
+						return (string)value == _nullValue? null: value;
 					}
 				}
 			}
@@ -558,7 +619,11 @@ namespace BLToolkit.Mapping
 
 			public override void SetValue(object o, object value)
 			{
-				_memberAccessor.SetValue(o, Convert.ToDateTime(value));
+				_memberAccessor.SetValue(
+					o,
+					value is DateTime? value:
+					value == null?     _nullValue:
+					                   _mappingSchema.ConvertToDateTime(value));
 			}
 
 			public override void Init(MapMemberInfo mapMemberInfo)
@@ -585,7 +650,11 @@ namespace BLToolkit.Mapping
 
 			public override void SetValue(object o, object value)
 			{
-				_memberAccessor.SetValue(o, Convert.ToDecimal(value));
+				_memberAccessor.SetValue(
+					o,
+					value is decimal? value:
+					value == null?    _nullValue:
+					                  _mappingSchema.ConvertToDecimal(value));
 			}
 
 			public override void Init(MapMemberInfo mapMemberInfo)
@@ -612,12 +681,11 @@ namespace BLToolkit.Mapping
 
 			public override void SetValue(object o, object value)
 			{
-				if (value is Guid)
-					_memberAccessor.SetValue(o, value);
-				else if (value == null)
-					_memberAccessor.SetValue(o, Guid.Empty);
-				else
-					_memberAccessor.SetValue(o, new Guid(value.ToString()));
+				_memberAccessor.SetValue(
+					o,
+					value is Guid? value:
+					value == null? _nullValue:
+					               _mappingSchema.ConvertToGuid(value));
 			}
 
 			public override void Init(MapMemberInfo mapMemberInfo)
@@ -714,7 +782,8 @@ namespace BLToolkit.Mapping
 		{
 			public override void SetValue(object o, object value)
 			{
-				_memberAccessor.SetValue(o, value == null || value is Int16? value: Convert.ToInt16(value));
+				_memberAccessor.SetValue(
+					o, value == null || value is Int16? value: _mappingSchema.ConvertToNullableInt16(value));
 			}
 
 			public class Enum : NullableEnumMapper
@@ -728,7 +797,7 @@ namespace BLToolkit.Mapping
 						if (valueType != _memberType)
 						{
 							if (valueType != _underlyingType)
-								value = Convert.ToInt16(value);
+								value = _mappingSchema.ConvertToNullableInt16(value);
 
 							value = System.Enum.ToObject(_memberType, (Int16)value);
 						}
@@ -743,7 +812,8 @@ namespace BLToolkit.Mapping
 		{
 			public override void SetValue(object o, object value)
 			{
-				_memberAccessor.SetValue(o, value == null || value is Int32? value: Convert.ToInt32(value));
+				_memberAccessor.SetValue(
+					o, value == null || value is Int32? value: _mappingSchema.ConvertToNullableInt32(value));
 			}
 
 			public class Enum : NullableEnumMapper
@@ -757,7 +827,7 @@ namespace BLToolkit.Mapping
 						if (valueType != _memberType)
 						{
 							if (valueType != _underlyingType)
-								value = Convert.ToInt32(value);
+								value = _mappingSchema.ConvertToNullableInt32(value);
 
 							value = System.Enum.ToObject(_memberType, (Int32)value);
 						}
@@ -772,7 +842,8 @@ namespace BLToolkit.Mapping
 		{
 			public override void SetValue(object o, object value)
 			{
-				_memberAccessor.SetValue(o, value == null || value is SByte? value: Convert.ToSByte(value));
+				_memberAccessor.SetValue(
+					o, value == null || value is SByte? value: _mappingSchema.ConvertToNullableSByte(value));
 			}
 
 			public class Enum : NullableEnumMapper
@@ -786,7 +857,7 @@ namespace BLToolkit.Mapping
 						if (valueType != _memberType)
 						{
 							if (valueType != _underlyingType)
-								value = Convert.ToSByte(value);
+								value = _mappingSchema.ConvertToNullableSByte(value);
 
 							value = System.Enum.ToObject(_memberType, (SByte)value);
 						}
@@ -801,7 +872,8 @@ namespace BLToolkit.Mapping
 		{
 			public override void SetValue(object o, object value)
 			{
-				_memberAccessor.SetValue(o, value == null || value is Int64? value: Convert.ToInt64(value));
+				_memberAccessor.SetValue(
+					o, value == null || value is Int64? value: _mappingSchema.ConvertToNullableInt64(value));
 			}
 
 			public class Enum : NullableEnumMapper
@@ -815,7 +887,7 @@ namespace BLToolkit.Mapping
 						if (valueType != _memberType)
 						{
 							if (valueType != _underlyingType)
-								value = Convert.ToInt64(value);
+								value = _mappingSchema.ConvertToNullableInt64(value);
 
 							value = System.Enum.ToObject(_memberType, (Int64)value);
 						}
@@ -830,7 +902,8 @@ namespace BLToolkit.Mapping
 		{
 			public override void SetValue(object o, object value)
 			{
-				_memberAccessor.SetValue(o, value == null || value is Byte? value: Convert.ToByte(value));
+				_memberAccessor.SetValue(
+					o, value == null || value is Byte? value: _mappingSchema.ConvertToNullableByte(value));
 			}
 
 			public class Enum : NullableEnumMapper
@@ -844,7 +917,7 @@ namespace BLToolkit.Mapping
 						if (valueType != _memberType)
 						{
 							if (valueType != _underlyingType)
-								value = Convert.ToByte(value);
+								value = _mappingSchema.ConvertToNullableByte(value);
 
 							value = System.Enum.ToObject(_memberType, (Byte)value);
 						}
@@ -859,7 +932,8 @@ namespace BLToolkit.Mapping
 		{
 			public override void SetValue(object o, object value)
 			{
-				_memberAccessor.SetValue(o, value == null || value is UInt16? value: Convert.ToUInt16(value));
+				_memberAccessor.SetValue(
+					o, value == null || value is UInt16? value: _mappingSchema.ConvertToNullableUInt16(value));
 			}
 
 			public class Enum : NullableEnumMapper
@@ -873,7 +947,7 @@ namespace BLToolkit.Mapping
 						if (valueType != _memberType)
 						{
 							if (valueType != _underlyingType)
-								value = Convert.ToUInt16(value);
+								value = _mappingSchema.ConvertToNullableUInt16(value);
 
 							value = System.Enum.ToObject(_memberType, (UInt16)value);
 						}
@@ -888,7 +962,8 @@ namespace BLToolkit.Mapping
 		{
 			public override void SetValue(object o, object value)
 			{
-				_memberAccessor.SetValue(o, value == null || value is UInt32? value: Convert.ToUInt32(value));
+				_memberAccessor.SetValue(
+					o, value == null || value is UInt32? value: _mappingSchema.ConvertToNullableUInt32(value));
 			}
 
 			public class Enum : NullableEnumMapper
@@ -902,7 +977,7 @@ namespace BLToolkit.Mapping
 						if (valueType != _memberType)
 						{
 							if (valueType != _underlyingType)
-								value = Convert.ToUInt32(value);
+								value = _mappingSchema.ConvertToNullableUInt32(value);
 
 							value = System.Enum.ToObject(_memberType, (UInt32)value);
 						}
@@ -917,7 +992,8 @@ namespace BLToolkit.Mapping
 		{
 			public override void SetValue(object o, object value)
 			{
-				_memberAccessor.SetValue(o, value == null || value is UInt64? value: Convert.ToUInt64(value));
+				_memberAccessor.SetValue(
+					o, value == null || value is UInt64? value: _mappingSchema.ConvertToNullableUInt64(value));
 			}
 
 			public class Enum : NullableEnumMapper
@@ -931,7 +1007,7 @@ namespace BLToolkit.Mapping
 						if (valueType != _memberType)
 						{
 							if (valueType != _underlyingType)
-								value = Convert.ToUInt64(value);
+								value = _mappingSchema.ConvertToNullableUInt64(value);
 
 							value = System.Enum.ToObject(_memberType, (UInt64)value);
 						}
@@ -946,7 +1022,8 @@ namespace BLToolkit.Mapping
 		{
 			public override void SetValue(object o, object value)
 			{
-				_memberAccessor.SetValue(o, value == null || value is Char? value: Convert.ToChar(value));
+				_memberAccessor.SetValue(
+					o, value == null || value is Char? value: _mappingSchema.ConvertToNullableChar(value));
 			}
 		}
 
@@ -954,7 +1031,8 @@ namespace BLToolkit.Mapping
 		{
 			public override void SetValue(object o, object value)
 			{
-				_memberAccessor.SetValue(o, value == null || value is Double? value: Convert.ToDouble(value));
+				_memberAccessor.SetValue(
+					o, value == null || value is Double? value: _mappingSchema.ConvertToNullableDouble(value));
 			}
 		}
 
@@ -962,7 +1040,8 @@ namespace BLToolkit.Mapping
 		{
 			public override void SetValue(object o, object value)
 			{
-				_memberAccessor.SetValue(o, value == null || value is Single? value: Convert.ToSingle(value));
+				_memberAccessor.SetValue(
+					o, value == null || value is Single? value: _mappingSchema.ConvertToNullableSingle(value));
 			}
 		}
 
@@ -970,7 +1049,8 @@ namespace BLToolkit.Mapping
 		{
 			public override void SetValue(object o, object value)
 			{
-				_memberAccessor.SetValue(o, value == null || value is Boolean? value: Convert.ToBoolean(value));
+				_memberAccessor.SetValue(
+					o, value == null || value is Boolean? value: _mappingSchema.ConvertToNullableBoolean(value));
 			}
 		}
 
@@ -978,7 +1058,8 @@ namespace BLToolkit.Mapping
 		{
 			public override void SetValue(object o, object value)
 			{
-				_memberAccessor.SetValue(o, value == null || value is DateTime? value: Convert.ToDateTime(value));
+				_memberAccessor.SetValue(
+					o, value == null || value is DateTime? value: _mappingSchema.ConvertToNullableDateTime(value));
 			}
 		}
 
@@ -986,19 +1067,17 @@ namespace BLToolkit.Mapping
 		{
 			public override void SetValue(object o, object value)
 			{
-				_memberAccessor.SetValue(o, value == null || value is Decimal? value: Convert.ToDecimal(value));
+				_memberAccessor.SetValue(
+					o, value == null || value is Decimal? value: _mappingSchema.ConvertToNullableDecimal(value));
 			}
 		}
 
 		class NullableGuidMapper : MemberMapper
 		{
-			[SuppressMessage("Microsoft.Design", "CA1062:ValidateArgumentsOfPublicMethods")]
 			public override void SetValue(object o, object value)
 			{
-				if (value == null || value is Guid? || value is Guid)
-					_memberAccessor.SetValue(o, value);
-				else
-					_memberAccessor.SetValue(o, new Guid(value.ToString()));
+				_memberAccessor.SetValue(
+					o, value == null || value is Guid? value: _mappingSchema.ConvertToNullableGuid(value));
 			}
 		}
 
@@ -1043,10 +1122,8 @@ namespace BLToolkit.Mapping
 
 			public override void SetValue(object o, object value)
 			{
-				_memberAccessor.SetValue(o,
-					value == null?    SqlByte.Null:
-					value is SqlByte? value:
-					                  new SqlByte(Convert.ToByte(value)));
+				_memberAccessor.SetValue(
+					o, value is SqlByte? value: _mappingSchema.ConvertToSqlByte(value));
 			}
 
 			public class Default : SqlByteMapper
@@ -1073,10 +1150,8 @@ namespace BLToolkit.Mapping
 
 			public override void SetValue(object o, object value)
 			{
-				_memberAccessor.SetValue(o,
-					value == null?     SqlInt16.Null:
-					value is SqlInt16? value:
-					                   new SqlInt16(Convert.ToInt16(value)));
+				_memberAccessor.SetValue(
+					o, value is SqlInt16? value: _mappingSchema.ConvertToSqlInt16(value));
 			}
 
 			public class Default : SqlInt16Mapper
@@ -1103,10 +1178,8 @@ namespace BLToolkit.Mapping
 
 			public override void SetValue(object o, object value)
 			{
-				_memberAccessor.SetValue(o,
-					value == null?     SqlInt32.Null:
-					value is SqlInt32? value:
-					                   new SqlInt32(Convert.ToInt32(value)));
+				_memberAccessor.SetValue(
+					o, value is SqlInt32? value: _mappingSchema.ConvertToSqlInt32(value));
 			}
 
 			public class Default : SqlInt32Mapper
@@ -1133,10 +1206,8 @@ namespace BLToolkit.Mapping
 
 			public override void SetValue(object o, object value)
 			{
-				_memberAccessor.SetValue(o,
-					value == null?     SqlInt64.Null:
-					value is SqlInt64? value:
-					                   new SqlInt64(Convert.ToInt64(value)));
+				_memberAccessor.SetValue(
+					o, value is SqlInt64? value: _mappingSchema.ConvertToSqlInt64(value));
 			}
 
 			public class Default : SqlInt64Mapper
@@ -1163,10 +1234,8 @@ namespace BLToolkit.Mapping
 
 			public override void SetValue(object o, object value)
 			{
-				_memberAccessor.SetValue(o,
-					value == null?      SqlSingle.Null:
-					value is SqlSingle? value:
-					                    new SqlSingle(Convert.ToSingle(value)));
+				_memberAccessor.SetValue(
+					o, value is SqlSingle? value: _mappingSchema.ConvertToSqlSingle(value));
 			}
 
 			public class Default : SqlSingleMapper
@@ -1193,10 +1262,8 @@ namespace BLToolkit.Mapping
 
 			public override void SetValue(object o, object value)
 			{
-				_memberAccessor.SetValue(o,
-					value == null?       SqlBoolean.Null:
-					value is SqlBoolean? value:
-					                     new SqlBoolean(Convert.ToBoolean(value)));
+				_memberAccessor.SetValue(
+					o, value is SqlBoolean? value: _mappingSchema.ConvertToSqlBoolean(value));
 			}
 
 			public class Default : SqlBooleanMapper
@@ -1223,10 +1290,8 @@ namespace BLToolkit.Mapping
 
 			public override void SetValue(object o, object value)
 			{
-				_memberAccessor.SetValue(o,
-					value == null?      SqlDouble.Null:
-					value is SqlDouble? value:
-					                    new SqlDouble(Convert.ToDouble(value)));
+				_memberAccessor.SetValue(
+					o, value is SqlDouble? value: _mappingSchema.ConvertToSqlDouble(value));
 			}
 
 			public class Default : SqlDoubleMapper
@@ -1253,10 +1318,8 @@ namespace BLToolkit.Mapping
 
 			public override void SetValue(object o, object value)
 			{
-				_memberAccessor.SetValue(o,
-					value == null?        SqlDateTime.Null:
-					value is SqlDateTime? value:
-					                      new SqlDateTime(Convert.ToDateTime(value)));
+				_memberAccessor.SetValue(
+					o, value is SqlDateTime? value: _mappingSchema.ConvertToSqlDateTime(value));
 			}
 
 			public class Default : SqlDateTimeMapper
@@ -1283,10 +1346,8 @@ namespace BLToolkit.Mapping
 
 			public override void SetValue(object o, object value)
 			{
-				_memberAccessor.SetValue(o,
-					value == null?       SqlDecimal.Null:
-					value is SqlDecimal? value:
-					                     new SqlDecimal(Convert.ToDecimal(value)));
+				_memberAccessor.SetValue(
+					o, value is SqlDecimal? value: _mappingSchema.ConvertToSqlDecimal(value));
 			}
 
 			public class Default : SqlDecimalMapper
@@ -1313,10 +1374,8 @@ namespace BLToolkit.Mapping
 
 			public override void SetValue(object o, object value)
 			{
-				_memberAccessor.SetValue(o,
-					value == null?     SqlMoney.Null:
-					value is SqlMoney? value:
-					                   new SqlMoney(Convert.ToDecimal(value)));
+				_memberAccessor.SetValue(
+					o, value is SqlMoney? value: _mappingSchema.ConvertToSqlDecimal(value));
 			}
 
 			public class Default : SqlMoneyMapper
@@ -1343,10 +1402,8 @@ namespace BLToolkit.Mapping
 
 			public override void SetValue(object o, object value)
 			{
-				_memberAccessor.SetValue(o,
-					value == null?    SqlGuid.Null:
-					value is SqlGuid? value:
-					                  new SqlGuid(new Guid(value.ToString())));
+				_memberAccessor.SetValue(
+					o, value is SqlGuid? value: _mappingSchema.ConvertToSqlGuid(value));
 			}
 
 			public class Default : SqlGuidMapper
@@ -1373,10 +1430,8 @@ namespace BLToolkit.Mapping
 
 			public override void SetValue(object o, object value)
 			{
-				_memberAccessor.SetValue(o,
-					value == null?      SqlString.Null:
-					value is SqlString? value:
-					                    new SqlString(Convert.ToString(value)));
+				_memberAccessor.SetValue(
+					o, value is SqlString? value: _mappingSchema.ConvertToSqlString(value));
 			}
 
 			public class Default : SqlStringMapper
