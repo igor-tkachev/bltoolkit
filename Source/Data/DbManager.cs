@@ -668,7 +668,7 @@ namespace BLToolkit.Data
 
 		protected virtual string GetConnectionString(IDbConnection connection)
 		{
-			return _connection.ConnectionString;
+			return connection.ConnectionString;
 		}
 
 		private static DataProviderBase GetDataProvider(string configurationString)
