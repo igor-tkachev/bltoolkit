@@ -69,7 +69,7 @@ namespace BLToolkit.TypeBuilder
 			get 
 			{
 				if (_typeBuilder == null)
-					_typeBuilder = new Builders.InstanceTypeBuilder(_propertyType, InstanceType);
+					_typeBuilder = new Builders.InstanceTypeBuilder(_propertyType, InstanceType, IsObjectHolder);
 
 				return _typeBuilder;
 			}

@@ -54,6 +54,7 @@
     <Compile Include="Data\CompositeKeyTest.cs" />
     <Compile Include="Data\DbManagerTest.cs" />
     <Compile Include="EditableObjects\EditableObjectTest.cs" />
+    <Compile Include="EditableObjects\NestedObjectTest.cs" />
     <Compile Include="Mapping\DefaultValueAttributeTest.cs" />
     <Compile Include="Mapping\ISupportMappingTest.cs" />
     <Compile Include="Mapping\MapFieldAttributeTest.cs" />

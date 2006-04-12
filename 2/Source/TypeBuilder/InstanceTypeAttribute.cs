@@ -10,7 +10,7 @@ namespace BLToolkit.TypeBuilder
 		public InstanceTypeAttribute (Type instanceType)
 		{
 			_instanceType = instanceType;
-			SetParameters();
+			//SetParameters();
 		}
 
 		public InstanceTypeAttribute (Type instanceType, object parameter1)
@@ -74,13 +74,20 @@ namespace BLToolkit.TypeBuilder
 			get { return _instanceType; }
 		}
 
+		private bool _isObjectHolder;
+		public  bool  IsObjectHolder
+		{
+			get { return _isObjectHolder;  }
+			set { _isObjectHolder = value; }
+		}
+
 		private         Builders.IAbstractTypeBuilder _typeBuilder;
 		public override Builders.IAbstractTypeBuilder  TypeBuilder
 		{
 			get 
 			{
 				if (_typeBuilder == null)
-					_typeBuilder = new Builders.InstanceTypeBuilder(_instanceType);
+					_typeBuilder = new Builders.InstanceTypeBuilder(_instanceType, _isObjectHolder);
 
 				return _typeBuilder;
 			}

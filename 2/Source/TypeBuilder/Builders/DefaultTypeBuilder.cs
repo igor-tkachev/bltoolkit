@@ -200,14 +200,15 @@ namespace BLToolkit.TypeBuilder.Builders
 
 		#region Build
 
-		private void CreateDefaultInstance(FieldBuilder field, TypeHelper fieldType, EmitHelper emit)
+		protected virtual void CreateDefaultInstance(
+			FieldBuilder field, TypeHelper fieldType, EmitHelper emit)
 		{
 			if (fieldType.Type == typeof(string))
 			{
 				emit
 					.ldarg_0
-					.LoadInitValue(fieldType)
-					.stfld(field)
+					.LoadInitValue (fieldType)
+					.stfld         (field)
 					;
 			}
 			else
@@ -231,15 +232,6 @@ namespace BLToolkit.TypeBuilder.Builders
 						.@throw
 						.end()
 						;
-
-					/*
-					throw new TypeBuilderException(
-						string.Format(
-							"Could not build the '{0}' property of the '{1}' type: type '{2}' has to have public default constructor.",
-							Context.CurrentProperty.Name,
-							Context.Type.FullName,
-							fieldType.FullName));
-					*/
 				}
 				else
 				{

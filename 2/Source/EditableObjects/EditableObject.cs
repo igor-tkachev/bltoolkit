@@ -13,6 +13,7 @@ using BLToolkit.Validation;
 namespace BLToolkit.EditableObjects
 {
 	#region Instance Types
+	//[GlobalInstanceType(typeof(EditableObject), typeof(EditableObjectHolder), IsObjectHolder=true)]
 #if FW2
 	[GlobalInstanceType(typeof(byte),     typeof(EditableValue<byte>))]
 	[GlobalInstanceType(typeof(char),     typeof(EditableValue<char>))]

@@ -108,6 +108,7 @@
     <Compile Include="ComponentModel\PropertyDescriptorWrapper.cs" />
     <Compile Include="EditableObjects\EditableArrayList.cs" />
     <Compile Include="EditableObjects\EditableObject.cs" />
+    <Compile Include="EditableObjects\EditableObjectHolder.cs" />
     <Compile Include="EditableObjects\EditableValue.cs" />
     <Compile Include="EditableObjects\IEditable.cs" />
     <Compile Include="EditableObjects\IMemberwiseEditable.cs" />
