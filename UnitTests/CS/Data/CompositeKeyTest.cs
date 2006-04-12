@@ -6,7 +6,7 @@ using NUnit.Framework;
 using BLToolkit.Data;
 using BLToolkit.Mapping;
 
-namespace A.Data
+namespace Data
 {
 	[TestFixture]
 	public class CompositeKeyTest

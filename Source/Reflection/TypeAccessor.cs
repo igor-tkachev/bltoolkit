@@ -603,8 +603,10 @@ namespace BLToolkit.Reflection
 			Type          objectViewType,
 			IsNullHandler isNull)
 		{
-			if (isNull == null)
-				isNull = _isNull;
+			// This is definitely wrong.
+			//
+			//if (isNull == null)
+			//	isNull = _isNull;
 
 			PropertyDescriptorCollection pdc;
 

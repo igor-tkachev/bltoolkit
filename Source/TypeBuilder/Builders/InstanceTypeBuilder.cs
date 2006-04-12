@@ -10,16 +10,20 @@ namespace BLToolkit.TypeBuilder.Builders
 {
 	class InstanceTypeBuilder : DefaultTypeBuilder
 	{
-		public InstanceTypeBuilder(Type instanceType)
+		public InstanceTypeBuilder(Type instanceType, bool isObjectHolder)
 		{
-			_instanceType = instanceType;
+			_instanceType   = instanceType;
+			_isObjectHolder = isObjectHolder;
 		}
 
-		public InstanceTypeBuilder(Type propertyType, Type instanceType)
+		public InstanceTypeBuilder(Type propertyType, Type instanceType, bool isObjectHolder)
 		{
-			_propertyType = propertyType;
-			_instanceType = instanceType;
+			_propertyType   = propertyType;
+			_instanceType   = instanceType;
+			_isObjectHolder = isObjectHolder;
 		}
+
+		private bool _isObjectHolder;
 
 		private Type _propertyType;
 		public  Type  PropertyType
@@ -207,6 +211,35 @@ namespace BLToolkit.TypeBuilder.Builders
 				InstanceType.FullName,
 				propertyType.FullName,
 				Context.Type.FullName));
+		}
+
+		protected override void CreateDefaultInstance(
+			FieldBuilder field, TypeHelper fieldType, EmitHelper emit)
+		{
+			if (_isObjectHolder && Context.CurrentProperty.PropertyType.IsClass)
+			{
+				TypeHelper      objType  = Context.CurrentProperty.PropertyType;
+				ConstructorInfo holderCi = fieldType.GetPublicConstructor(objType);
+
+				if (holderCi != null)
+				{
+					ConstructorInfo objCi = objType.GetPublicDefaultConstructor();
+
+					if (objCi != null)
+					{
+						emit
+							.ldarg_0
+							.newobj  (objCi)
+							.newobj  (holderCi)
+							.stfld   (field)
+							;
+
+						return;
+					}
+				}
+			}
+
+			base.CreateDefaultInstance(field, fieldType, emit);
 		}
 	}
 }
