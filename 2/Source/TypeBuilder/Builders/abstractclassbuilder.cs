@@ -79,13 +79,33 @@ namespace BLToolkit.TypeBuilder.Builders
 
 			Build(BuildStep.After, _builders);
 
+			MethodInfo initMethod = _context.Type.GetMethod("InitInstance", typeof(InitContext));
+
 			// Finalize constructors.
 			//
 			if (_context.TypeBuilder.IsDefaultConstructorDefined)
+			{
+				if (initMethod != null)
+					_context.TypeBuilder.DefaultConstructor.Emitter
+						.ldarg_0
+						.ldnull
+						.callvirt (initMethod)
+						;
+
 				_context.TypeBuilder.DefaultConstructor.Emitter.ret();
+			}
 
 			if (_context.TypeBuilder.IsInitConstructorDefined)
+			{
+				if (initMethod != null)
+					_context.TypeBuilder.InitConstructor.Emitter
+						.ldarg_0
+						.ldarg_1
+						.callvirt (initMethod)
+						;
+
 				_context.TypeBuilder.InitConstructor.Emitter.ret();
+			}
 
 			if (_context.TypeBuilder.IsTypeInitializerDefined)
 				_context.TypeBuilder.TypeInitializer.Emitter.ret();

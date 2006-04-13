@@ -111,6 +111,7 @@
     <Compile Include="EditableObjects\EditableObjectHolder.cs" />
     <Compile Include="EditableObjects\EditableValue.cs" />
     <Compile Include="EditableObjects\IEditable.cs" />
+    <Compile Include="TypeBuilder\ISetParent.cs" />
     <Compile Include="EditableObjects\IMemberwiseEditable.cs" />
     <Compile Include="ComponentModel\INotifyObjectEdit.cs" />
     <Compile Include="EditableObjects\IPrintDebugState.cs" />

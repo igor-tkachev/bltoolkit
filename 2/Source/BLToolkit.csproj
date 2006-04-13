@@ -363,6 +363,11 @@
                     BuildAction = "Compile"
                 />
                 <File
+                    RelPath = "EditableObjects\EditableObjectHolder.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
                     RelPath = "EditableObjects\EditableValue.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
@@ -722,6 +727,11 @@
                 />
                 <File
                     RelPath = "TypeBuilder\IPropertyChanged.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "TypeBuilder\ISetParent.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
                 />

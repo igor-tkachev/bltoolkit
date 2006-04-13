@@ -180,6 +180,11 @@
                     BuildAction = "Compile"
                 />
                 <File
+                    RelPath = "EditableObjects\NestedObjectTest.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
                     RelPath = "Mapping\DefaultValueAttributeTest.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
