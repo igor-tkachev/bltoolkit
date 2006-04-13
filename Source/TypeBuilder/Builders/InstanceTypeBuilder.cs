@@ -54,6 +54,13 @@ namespace BLToolkit.TypeBuilder.Builders
 			return InstanceType;
 		}
 
+		protected override Type GetObjectType()
+		{
+			return _isObjectHolder && Context.CurrentProperty.PropertyType.IsClass?
+				Context.CurrentProperty.PropertyType:
+				base.GetObjectType();
+		}
+
 		protected override void BuildAbstractGetter()
 		{
 			FieldBuilder field        = GetField();
@@ -211,35 +218,6 @@ namespace BLToolkit.TypeBuilder.Builders
 				InstanceType.FullName,
 				propertyType.FullName,
 				Context.Type.FullName));
-		}
-
-		protected override void CreateDefaultInstance(
-			FieldBuilder field, TypeHelper fieldType, EmitHelper emit)
-		{
-			if (_isObjectHolder && Context.CurrentProperty.PropertyType.IsClass)
-			{
-				TypeHelper      objType  = Context.CurrentProperty.PropertyType;
-				ConstructorInfo holderCi = fieldType.GetPublicConstructor(objType);
-
-				if (holderCi != null)
-				{
-					ConstructorInfo objCi = objType.GetPublicDefaultConstructor();
-
-					if (objCi != null)
-					{
-						emit
-							.ldarg_0
-							.newobj  (objCi)
-							.newobj  (holderCi)
-							.stfld   (field)
-							;
-
-						return;
-					}
-				}
-			}
-
-			base.CreateDefaultInstance(field, fieldType, emit);
 		}
 	}
 }

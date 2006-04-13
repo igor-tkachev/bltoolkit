@@ -303,7 +303,7 @@ namespace BLToolkit.TypeBuilder.Builders
 
 		protected FieldBuilder GetTypeAccessorField()
 		{
-			string       fieldName = "_" + GetFieldType().Name + "_$typeAccessor";
+			string       fieldName = "_" + GetObjectType().Name + "_$typeAccessor";
 			FieldBuilder field     = Context.GetField(fieldName);
 
 			if (field == null)
@@ -313,7 +313,7 @@ namespace BLToolkit.TypeBuilder.Builders
 				EmitHelper emit = Context.TypeBuilder.TypeInitializer.Emitter;
 
 				emit
-					.LoadType (GetFieldType())
+					.LoadType (GetObjectType())
 					.call     (typeof(TypeAccessor), "GetAccessor", typeof(Type))
 					.stsfld   (field)
 					;
@@ -334,6 +334,11 @@ namespace BLToolkit.TypeBuilder.Builders
 				default:
 					throw new InvalidOperationException();
 			}
+		}
+
+		protected virtual Type GetObjectType()
+		{
+			return GetFieldType();
 		}
 
 		#endregion

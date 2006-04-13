@@ -13,7 +13,6 @@ using BLToolkit.Validation;
 namespace BLToolkit.EditableObjects
 {
 	#region Instance Types
-	//[GlobalInstanceType(typeof(EditableObject), typeof(EditableObjectHolder), IsObjectHolder=true)]
 #if FW2
 	[GlobalInstanceType(typeof(byte),     typeof(EditableValue<byte>))]
 	[GlobalInstanceType(typeof(char),     typeof(EditableValue<char>))]
@@ -101,13 +100,27 @@ namespace BLToolkit.EditableObjects
 	[SqlDoubleInstance,  SqlGuidInstance,  SqlInt16Instance,    SqlInt32Instance]
 	[SqlInt64Instance,   SqlMoneyInstance, SqlSingleInstance,   SqlStringInstance]
 #endif
+	[GlobalInstanceType(typeof(EditableObject), typeof(EditableObjectHolder), IsObjectHolder=true)]
 	#endregion
 	[ImplementInterface(typeof(IEditable))]
 	[ImplementInterface(typeof(IMemberwiseEditable))]
 	[ImplementInterface(typeof(IPrintDebugState))]
+	[ImplementInterface(typeof(ISetParent))]
 	public abstract class EditableObject
 		: IEditableObject, IValidatable, INotifyPropertyChanged, ISupportMapping, IPropertyChanged, INotifyObjectEdit
 	{
+		#region Constructor
+
+		public EditableObject()
+		{
+			ISetParent setParent = this as ISetParent;
+
+			if (setParent != null)
+				setParent.SetParent(this, null);
+		}
+
+		#endregion
+
 		#region IEditable
 
 		public virtual void AcceptChanges()
@@ -212,7 +225,7 @@ namespace BLToolkit.EditableObjects
 
 		#region Notify Changes
 
-		protected virtual void OnPropertyChanged(string propertyName)
+		protected internal virtual void OnPropertyChanged(string propertyName)
 		{
 			if (NotifyChanges && PropertyChanged != null)
 				PropertyChanged(this, new PropertyChangedEventArgs(propertyName));

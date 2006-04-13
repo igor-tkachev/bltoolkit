@@ -96,6 +96,10 @@ namespace BLToolkit.EditableObjects
 				list.Add(propertyInfo);
 		}
 
+		#endregion
+
+		#region IPrintDebugState Members
+
 		public void PrintDebugState(PropertyInfo propertyInfo, ref string str)
 		{
 			str += string.Format("{0,-20} {1} {2,-40} {3,-40} \r\n",

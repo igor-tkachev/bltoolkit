@@ -200,31 +200,33 @@ namespace BLToolkit.TypeBuilder.Builders
 
 		#region Build
 
-		protected virtual void CreateDefaultInstance(
-			FieldBuilder field, TypeHelper fieldType, EmitHelper emit)
+		private void CreateDefaultInstance(
+			FieldBuilder field, TypeHelper fieldType, TypeHelper objectType, EmitHelper emit)
 		{
-			if (fieldType.Type == typeof(string))
+			if (!CheckObjectHolderCtor(fieldType, objectType))
+				return;
+
+			if (objectType.Type == typeof(string))
 			{
 				emit
 					.ldarg_0
-					.LoadInitValue (fieldType)
-					.stfld         (field)
+					.LoadInitValue (objectType)
 					;
 			}
 			else
 			{
-				ConstructorInfo ci = fieldType.GetPublicDefaultConstructor();
+				ConstructorInfo ci = objectType.GetPublicDefaultConstructor();
 
 				if (ci == null)
 				{
-					if (fieldType.Type.IsValueType)
+					if (objectType.Type.IsValueType)
 						return;
 
 					string message = string.Format(
 						"Could not build the '{0}' property of the '{1}' type: type '{2}' has to have public default constructor.",
 						Context.CurrentProperty.Name,
 						Context.Type.FullName,
-						fieldType.FullName);
+						objectType.FullName);
 
 					emit
 						.ldstr  (message)
@@ -232,41 +234,68 @@ namespace BLToolkit.TypeBuilder.Builders
 						.@throw
 						.end()
 						;
+
+					return;
 				}
 				else
 				{
 					emit
 						.ldarg_0
+						.nop     // without nop def ctor inserts two ldarg.0, no idea why :xz:
 						.newobj  (ci)
-						.stfld   (field)
 						;
 				}
 			}
+
+			// Object holder.
+			//
+			if (objectType.Type != fieldType.Type)
+				emit
+					.newobj (fieldType, objectType)
+					;
+
+			emit
+				.stfld (field)
+				;
 		}
 
 		private void CreateParametrizedInstance(
-			FieldBuilder field, TypeHelper fieldType, EmitHelper emit, object[] parameters)
+			FieldBuilder field, TypeHelper fieldType, TypeHelper objectType, EmitHelper emit, object[] parameters)
 		{
+			if (!CheckObjectHolderCtor(fieldType, objectType))
+				return;
+
 			if (parameters.Length == 1)
 			{
 				object o = parameters[0];
 
 				if (o == null)
 				{
-					if (fieldType.IsValueType == false)
+					if (objectType.IsValueType == false)
 						emit
 							.ldarg_0
 							.ldnull
-							.stfld   (field)
+							.end()
 							;
+
+					// Object holder.
+					//
+					if (objectType.Type != fieldType.Type)
+						emit
+							.newobj (fieldType, objectType)
+							;
+
+					emit
+						.stfld (field)
+						;
 
 					return;
 				}
 				else
 				{
-					if (fieldType.Type == o.GetType())
+					if (objectType.Type == o.GetType())
 					{
-						if (fieldType.Type == typeof(string))
+						if (objectType.Type == typeof(string))
 						{
 							emit
 								.ldarg_0
@@ -277,7 +306,7 @@ namespace BLToolkit.TypeBuilder.Builders
 							return;
 						}
 
-						if (fieldType.IsValueType)
+						if (objectType.IsValueType)
 						{
 							emit.ldarg_0.end();
 
@@ -304,11 +333,11 @@ namespace BLToolkit.TypeBuilder.Builders
 			for (int i = 0; i < parameters.Length; i++)
 				types[i] = parameters[i] != null? parameters[i].GetType(): typeof(object);
 
-			ConstructorInfo ci = fieldType.GetPublicConstructor(types);
+			ConstructorInfo ci = objectType.GetPublicConstructor(types);
 
 			if (ci == null)
 			{
-				if (fieldType.IsValueType)
+				if (objectType.IsValueType)
 					return;
 
 				throw new TypeBuilderException(
@@ -317,7 +346,7 @@ namespace BLToolkit.TypeBuilder.Builders
 						Context.CurrentProperty.Name,
 						Context.Type.FullName,
 						types.Length == 0? "default ": "",
-						fieldType.FullName));
+						objectType.FullName));
 			}
 
 			ParameterInfo[] pi = ci.GetParameters();
@@ -355,6 +384,16 @@ namespace BLToolkit.TypeBuilder.Builders
 
 			emit
 				.newobj (ci)
+				;
+
+			// Object holder.
+			//
+			if (objectType.Type != fieldType.Type)
+				emit
+					.newobj (fieldType, objectType)
+					;
+
+			emit
 				.stfld  (field)
 				;
 		}
@@ -365,29 +404,33 @@ namespace BLToolkit.TypeBuilder.Builders
 
 		private void BuildInitContextInstance()
 		{
-			string       fieldName = GetFieldName();
-			FieldBuilder field     = Context.GetField(fieldName);
-			TypeHelper   fieldType = new TypeHelper(field.FieldType);
+			string       fieldName  = GetFieldName();
+			FieldBuilder field      = Context.GetField(fieldName);
+			TypeHelper   fieldType  = new TypeHelper(field.FieldType);
+			TypeHelper   objectType = new TypeHelper(GetObjectType());
 
 			EmitHelper emit = Context.TypeBuilder.InitConstructor.Emitter;
 
 			object[] parameters = TypeHelper.GetPropertyParameters(Context.CurrentProperty);
-			ConstructorInfo  ci = fieldType.GetPublicConstructor(typeof(InitContext));
+			ConstructorInfo  ci = objectType.GetPublicConstructor(typeof(InitContext));
 
 			if (ci != null && ci.GetParameters()[0].ParameterType != typeof(InitContext))
 				ci = null;
 
-			if (ci != null || fieldType.IsAbstract)
-				CreateAbstractInitContextInstance(field, fieldType, emit, parameters);
+			if (ci != null || objectType.IsAbstract)
+				CreateAbstractInitContextInstance(field, fieldType, objectType, emit, parameters);
 			else if (parameters == null)
-				CreateDefaultInstance(field, fieldType, emit);
+				CreateDefaultInstance(field, fieldType, objectType, emit);
 			else
-				CreateParametrizedInstance(field, fieldType, emit, parameters);
+				CreateParametrizedInstance(field, fieldType, objectType, emit, parameters);
 		}
 
 		private void CreateAbstractInitContextInstance(
-			FieldBuilder field, TypeHelper fieldType, EmitHelper emit, object[] parameters)
+			FieldBuilder field, TypeHelper fieldType, TypeHelper objectType, EmitHelper emit, object[] parameters)
 		{
+			if (!CheckObjectHolderCtor(fieldType, objectType))
+				return;
+
 			MethodInfo memberParams = InitContextType.GetProperty("MemberParameters").GetSetMethod();
 
 			LocalBuilder parentField = (LocalBuilder)Context.Items["$BLToolkit.InitContext.Parent"];
@@ -444,15 +487,14 @@ namespace BLToolkit.TypeBuilder.Builders
 
 			Context.Items["$BLToolkit.InitContext.DirtyParameters"] = parameters != null;
 
-			if (fieldType.IsAbstract)
+			if (objectType.IsAbstract)
 			{
 				emit
 					.ldarg_0
 					.ldsfld             (GetTypeAccessorField())
 					.ldarg_1
 					.callvirtNoGenerics (typeof(TypeAccessor), "CreateInstanceEx", _initContextType)
-					.isinst             (fieldType)
-					.stfld              (field)
+					.isinst             (objectType)
 					;
 			}
 			else
@@ -460,10 +502,20 @@ namespace BLToolkit.TypeBuilder.Builders
 				emit
 					.ldarg_0
 					.ldarg_1
-					.newobj  (fieldType.GetPublicConstructor(typeof(InitContext)))
-					.stfld   (field)
+					.newobj  (objectType.GetPublicConstructor(typeof(InitContext)))
 					;
 			}
+
+			// Object holder.
+			//
+			if (objectType.Type != fieldType.Type)
+				emit
+					.newobj (fieldType, objectType)
+					;
+
+			emit
+				.stfld (field)
+				;
 		}
 
 		#endregion
@@ -472,28 +524,70 @@ namespace BLToolkit.TypeBuilder.Builders
 
 		private void BuildDefaultInstance()
 		{
-			string       fieldName = GetFieldName();
-			FieldBuilder field     = Context.GetField(fieldName);
-			TypeHelper   fieldType = new TypeHelper(field.FieldType);
+			string       fieldName  = GetFieldName();
+			FieldBuilder field      = Context.GetField(fieldName);
+			TypeHelper   fieldType  = new TypeHelper(field.FieldType);
+			TypeHelper   objectType = new TypeHelper(GetObjectType());
 
 			EmitHelper       emit = Context.TypeBuilder.DefaultConstructor.Emitter;
 			object[]         ps   = TypeHelper.GetPropertyParameters(Context.CurrentProperty);
-			ConstructorInfo  ci   = fieldType.GetPublicConstructor(typeof(InitContext));
+			ConstructorInfo  ci   = objectType.GetPublicConstructor(typeof(InitContext));
 
 			if (ci != null && ci.GetParameters()[0].ParameterType != typeof(InitContext))
 				ci = null;
 
-			if (ci != null || fieldType.IsAbstract)
-				CreateInitContextDefaultInstance("$BLToolkit.DefaultInitContext.", field, fieldType, emit, ps);
+			if (ci != null || objectType.IsAbstract)
+				CreateInitContextDefaultInstance(
+					"$BLToolkit.DefaultInitContext.", field, fieldType, objectType, emit, ps);
 			else if (ps == null)
-				CreateDefaultInstance(field, fieldType, emit);
+				CreateDefaultInstance(field, fieldType, objectType, emit);
 			else
-				CreateParametrizedInstance(field, fieldType, emit, ps);
+				CreateParametrizedInstance(field, fieldType, objectType, emit, ps);
+		}
+
+		private bool CheckObjectHolderCtor(TypeHelper fieldType, TypeHelper objectType)
+		{
+			if (objectType.Type != fieldType.Type)
+			{
+				// Check object holder.
+				//
+				ConstructorInfo holderCi = fieldType.GetPublicConstructor(objectType);
+
+				if (holderCi == null)
+				{
+					string message = string.Format(
+						"Could not build the '{0}' property of the '{1}' type: " +
+						"type '{2}' has to have constructor taking type '{3}'.",
+						Context.CurrentProperty.Name,
+						Context.Type.FullName,
+						fieldType.FullName,
+						objectType.FullName);
+
+					Context.TypeBuilder.DefaultConstructor.Emitter
+						.ldstr  (message)
+						.newobj (typeof(TypeBuilderException), typeof(string))
+						.@throw
+						.end()
+						;
+
+					return false;
+				}
+			}
+
+			return true;
 		}
 
 		private void CreateInitContextDefaultInstance(
-			string initContextName, FieldBuilder field, TypeHelper fieldType, EmitHelper emit, object[] parameters)
+			string       initContextName,
+			FieldBuilder field,
+			TypeHelper   fieldType,
+			TypeHelper   objectType,
+			EmitHelper   emit,
+			object[]     parameters)
 		{
+			if (!CheckObjectHolderCtor(fieldType, objectType))
+				return;
+
 			LocalBuilder initField    = GetInitContextBuilder(initContextName, emit);
 			MethodInfo   memberParams = InitContextType.GetProperty("MemberParameters").GetSetMethod();
 
@@ -516,26 +610,36 @@ namespace BLToolkit.TypeBuilder.Builders
 
 			Context.Items["$BLToolkit.Default.DirtyParameters"] = parameters != null;
 
-			if (fieldType.IsAbstract)
+			if (objectType.IsAbstract)
 			{
 				emit
 					.ldarg_0
 					.ldsfld             (GetTypeAccessorField())
 					.ldloc              (initField)
 					.callvirtNoGenerics (typeof(TypeAccessor), "CreateInstanceEx", _initContextType)
-					.isinst             (fieldType)
-					.stfld              (field)
+					.isinst             (objectType)
 					;
 			}
 			else
 			{
 				emit
 					.ldarg_0
+					.nop
 					.ldloc   (initField)
-					.newobj  (fieldType.GetPublicConstructor(typeof(InitContext)))
-					.stfld   (field)
+					.newobj  (objectType.GetPublicConstructor(typeof(InitContext)))
 					;
 			}
+
+			// Object holder.
+			//
+			if (objectType.Type != fieldType.Type)
+				emit
+					.newobj (fieldType, objectType)
+					;
+
+			emit
+				.stfld (field)
+				;
 		}
 
 		private LocalBuilder GetInitContextBuilder(
@@ -589,10 +693,11 @@ namespace BLToolkit.TypeBuilder.Builders
 
 		private void BuildLazyInstanceEnsurer()
 		{
-			string              fieldName = GetFieldName();
-			FieldBuilder        field     = Context.GetField(fieldName);
-			TypeHelper          fieldType = new TypeHelper(field.FieldType);
-			MethodBuilderHelper ensurer   = Context.TypeBuilder.DefineMethod(
+			string              fieldName  = GetFieldName();
+			FieldBuilder        field      = Context.GetField(fieldName);
+			TypeHelper          fieldType  = new TypeHelper(field.FieldType);
+			TypeHelper          objectType = new TypeHelper(GetObjectType());
+			MethodBuilderHelper ensurer    = Context.TypeBuilder.DefineMethod(
 				string.Format("$EnsureInstance{0}", fieldName),
 				MethodAttributes.Private | MethodAttributes.HideBySig);
 
@@ -606,14 +711,14 @@ namespace BLToolkit.TypeBuilder.Builders
 				;
 
 			object[] parameters = TypeHelper.GetPropertyParameters(Context.CurrentProperty);
-			ConstructorInfo  ci = fieldType.GetPublicConstructor(typeof(InitContext));
+			ConstructorInfo  ci = objectType.GetPublicConstructor(typeof(InitContext));
 
-			if (ci != null || fieldType.IsAbstract)
-				CreateInitContextLazyInstance(field, fieldType, emit, parameters);
+			if (ci != null || objectType.IsAbstract)
+				CreateInitContextLazyInstance(field, fieldType, objectType, emit, parameters);
 			else if (parameters == null)
-				CreateDefaultInstance(field, fieldType, emit);
+				CreateDefaultInstance(field, fieldType, objectType, emit);
 			else
-				CreateParametrizedInstance(field, fieldType, emit, parameters);
+				CreateParametrizedInstance(field, fieldType, objectType, emit, parameters);
 
 			emit
 				.MarkLabel(end)
@@ -624,8 +729,15 @@ namespace BLToolkit.TypeBuilder.Builders
 		}
 
 		private void CreateInitContextLazyInstance(
-			FieldBuilder field, TypeHelper fieldType, EmitHelper emit, object[] parameters)
+			FieldBuilder field,
+			TypeHelper   fieldType,
+			TypeHelper   objectType,
+			EmitHelper   emit,
+			object[]     parameters)
 		{
+			if (!CheckObjectHolderCtor(fieldType, objectType))
+				return;
+
 			LocalBuilder initField = emit.DeclareLocal(InitContextType);
 
 			emit
@@ -654,15 +766,14 @@ namespace BLToolkit.TypeBuilder.Builders
 					;
 			}
 
-			if (fieldType.IsAbstract)
+			if (objectType.IsAbstract)
 			{
 				emit
 					.ldarg_0
 					.ldsfld             (GetTypeAccessorField())
 					.ldloc              (initField)
 					.callvirtNoGenerics (typeof(TypeAccessor), "CreateInstanceEx", _initContextType)
-					.isinst             (fieldType)
-					.stfld              (field)
+					.isinst             (objectType)
 					;
 			}
 			else
@@ -670,10 +781,20 @@ namespace BLToolkit.TypeBuilder.Builders
 				emit
 					.ldarg_0
 					.ldloc   (initField)
-					.newobj  (fieldType.GetPublicConstructor(typeof(InitContext)))
-					.stfld   (field)
+					.newobj  (objectType.GetPublicConstructor(typeof(InitContext)))
 					;
 			}
+
+			// Object holder.
+			//
+			if (objectType.Type != fieldType.Type)
+				emit
+					.newobj (fieldType, objectType)
+					;
+
+			emit
+				.stfld (field)
+				;
 		}
 
 		#endregion

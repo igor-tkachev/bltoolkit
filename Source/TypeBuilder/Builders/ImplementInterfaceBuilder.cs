@@ -4,6 +4,7 @@ using System.Reflection;
 using System.Reflection.Emit;
 
 using BLToolkit.Reflection.Emit;
+using BLToolkit.Reflection;
 
 namespace BLToolkit.TypeBuilder.Builders
 {
@@ -133,7 +134,13 @@ namespace BLToolkit.TypeBuilder.Builders
 									{
 										emit
 											.ldarg_0
-											.castclass (pi[k].ParameterType);
+											.end()
+											;
+
+										if (!TypeHelper.IsSameOrParent(pi[k].ParameterType, Context.Type))
+											emit
+												.castclass (pi[k].ParameterType)
+												;
 
 										stop = true;
 
