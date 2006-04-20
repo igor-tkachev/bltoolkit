@@ -868,13 +868,13 @@ namespace BLToolkit.Data
 		/// </summary>
 		/// <param name="command">The command to which the parameters will be added</param>
 		/// <param name="commandParameters">An array of IDbDataParameters tho be added to command</param>
-		private static void AttachParameters(IDbCommand command, IDbDataParameter[] commandParameters)
+		private void AttachParameters(IDbCommand command, IDbDataParameter[] commandParameters)
 		{
 			command.Parameters.Clear();
 
 			foreach (IDbDataParameter p in commandParameters)
 			{
-				command.Parameters.Add(p);
+				_dataProvider.AttachParameter(command, p);
 			}
 		}
 
@@ -2386,6 +2386,8 @@ namespace BLToolkit.Data
 		}
 
 #if FW2
+		// I need partial specialization :crash:
+		//
 		public T ExecuteScalar<T>()
 		{
 			return (T)ExecuteScalar();

@@ -120,7 +120,7 @@ namespace Mapping
 			using (DbManager db = new DbManager())
 			{
 				MapResultSet[] sets = db
-					.SetCommand(SqlResultSet)
+					.SetCommand(SqlResultSet)	
 					.ExecuteResultSet(typeof(Master),
 						new MapNextResult(typeof(Slave), "MasterID", "MasterID", "Slaves"));
 

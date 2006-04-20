@@ -924,28 +924,45 @@ namespace BLToolkit.Mapping
 
 		public static void ResultSets(MapResultSet[] resultSets)
 		{
-			_defaultSchema.MapResultSets(resultSets);
+			_defaultSchema.MapResultSets(resultSets);//, true);
 		}
 
-		public static void DataReaderToResultSet(IDataReader reader, MapResultSet[] resultSets)
-		{
-			_defaultSchema.MapDataReaderToResultSet(reader, resultSets);
-		}
+		//public static void ResultSets(MapResultSet[] resultSets, bool throwException)
+		//{
+		//    _defaultSchema.MapResultSets(resultSets, throwException);
+		//}
 
-		public static void DataSetToResultSet(DataSet dataSet, MapResultSet[] resultSets)
-		{
-			_defaultSchema.MapDataSetToResultSet(dataSet, resultSets);
-		}
+		//public static void DataReaderToResultSet(IDataReader reader, MapResultSet[] resultSets)
+		//{
+		//    _defaultSchema.MapDataReaderToResultSet(reader, resultSets, true);
+		//}
 
-		public static MapResultSet[] Clone(MapResultSet[] resultSets)
-		{
-			return _defaultSchema.Clone(resultSets);
-		}
+		//public static void DataReaderToResultSet(
+		//    IDataReader reader, MapResultSet[] resultSets, bool throwException)
+		//{
+		//    _defaultSchema.MapDataReaderToResultSet(reader, resultSets, throwException);
+		//}
 
-		public static MapResultSet[] ConvertToResultSet(Type masterType, params MapNextResult[] nextResults)
-		{
-			return _defaultSchema.ConvertToResultSet(masterType, nextResults);
-		}
+		//public static void DataSetToResultSet(DataSet dataSet, MapResultSet[] resultSets)
+		//{
+		//    _defaultSchema.MapDataSetToResultSet(dataSet, resultSets, true);
+		//}
+
+		//public static void DataSetToResultSet(
+		//    DataSet dataSet, MapResultSet[] resultSets, bool throwException)
+		//{
+		//    _defaultSchema.MapDataSetToResultSet(dataSet, resultSets, throwException);
+		//}
+
+		//public static MapResultSet[] Clone(MapResultSet[] resultSets)
+		//{
+		//    return _defaultSchema.Clone(resultSets);
+		//}
+
+		//public static MapResultSet[] ConvertToResultSet(Type masterType, params MapNextResult[] nextResults)
+		//{
+		//    return _defaultSchema.ConvertToResultSet(masterType, nextResults);
+		//}
 
 		#endregion
 

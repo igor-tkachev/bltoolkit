@@ -101,6 +101,11 @@ namespace BLToolkit.Data.DataProvider
 		{
 		}
 
+		public virtual void AttachParameter(IDbCommand command, IDbDataParameter parameter)
+		{
+			command.Parameters.Add(parameter);
+		}
+
 		public virtual bool IsValueParameter(IDbDataParameter parameter)
 		{
 			return parameter.Direction != ParameterDirection.ReturnValue;

@@ -11,10 +11,24 @@ namespace BLToolkit.Mapping
 			_objectMapper = Map.GetObjectMapper(objectType);
 		}
 
+		public MapResultSet(Type objectType, IList list)
+		{
+			_objectType   = objectType;
+			_objectMapper = Map.GetObjectMapper(objectType);
+			_list         = list;
+		}
+
 		public MapResultSet(Type objectType, object[] parameters)
 		{
 			_objectType = objectType;
 			_parameters = parameters;
+		}
+
+		public MapResultSet(Type objectType, IList list, object[] parameters)
+		{
+			_objectType = objectType;
+			_parameters = parameters;
+			_list         = list;
 		}
 
 		internal MapResultSet(MapResultSet resultSet)

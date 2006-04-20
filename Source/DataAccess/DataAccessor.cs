@@ -4,6 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 #endif
 using System.Data;
+using System.Data.SqlTypes;
 using System.Text;
 
 using BLToolkit.Data;
@@ -236,13 +237,6 @@ namespace BLToolkit.DataAccess
 				return ((TableNameAttribute)attrs[0]).Name;
 
 			return type.Name;
-		}
-
-		private           MappingSchema _mappingSchema = Map.DefaultSchema;
-		protected virtual MappingSchema  MappingSchema
-		{
-			get { return _mappingSchema; }
-			set { _mappingSchema = value != null? value: Map.DefaultSchema; }
 		}
 
 		#endregion
@@ -517,7 +511,7 @@ namespace BLToolkit.DataAccess
 		private static PrimaryKeyComparer _primaryKeyComparer = new PrimaryKeyComparer();
 		private static Hashtable          _keyList            = new Hashtable();
 
-		protected MemberMapper[] GetKeyFieldList(Type type)
+		protected MemberMapper[] GetKeyFieldList(DbManager db, Type type)
 		{
 			MemberMapper[] mmList = (MemberMapper[])_keyList[type];
 
@@ -526,7 +520,7 @@ namespace BLToolkit.DataAccess
 				TypeExtension typeExt = TypeExtension.GetTypeExtenstion(type, Extensions);
 				ArrayList     list    = new ArrayList();
 
-				foreach (MemberMapper mm in MappingSchema.GetObjectMapper(type))
+				foreach (MemberMapper mm in db.MappingSchema.GetObjectMapper(type))
 				{
 					MemberAccessor ma = mm.MemberAccessor;
 
@@ -574,7 +568,7 @@ namespace BLToolkit.DataAccess
 		{
 			sb.Append("WHERE\n");
 
-			MemberMapper[] memberMappers = GetKeyFieldList(query.ObjectType);
+			MemberMapper[] memberMappers = GetKeyFieldList(db, query.ObjectType);
 
 			foreach (MemberMapper mm in memberMappers)
 			{
@@ -590,7 +584,7 @@ namespace BLToolkit.DataAccess
 
 		protected SqlQueryInfo CreateSelectByKeySqlText(DbManager db, Type type)
 		{
-			ObjectMapper  om    = MappingSchema.GetObjectMapper(type);
+			ObjectMapper  om    = db.MappingSchema.GetObjectMapper(type);
 			StringBuilder sb    = new StringBuilder();
 			SqlQueryInfo  query = new SqlQueryInfo(om);
 
@@ -612,7 +606,7 @@ namespace BLToolkit.DataAccess
 
 		protected SqlQueryInfo CreateSelectAllSqlText(DbManager db, Type type)
 		{
-			ObjectMapper  om    = MappingSchema.GetObjectMapper(type);
+			ObjectMapper  om    = db.MappingSchema.GetObjectMapper(type);
 			StringBuilder sb    = new StringBuilder();
 			SqlQueryInfo  query = new SqlQueryInfo(om);
 
@@ -633,7 +627,7 @@ namespace BLToolkit.DataAccess
 		protected SqlQueryInfo CreateInsertSqlText(DbManager db, Type type)
 		{
 			TypeExtension typeExt = TypeExtension.GetTypeExtenstion(type, Extensions);
-			ObjectMapper  om      = MappingSchema.GetObjectMapper(type);
+			ObjectMapper  om      = db.MappingSchema.GetObjectMapper(type);
 			ArrayList     list    = new ArrayList();
 			StringBuilder sb      = new StringBuilder();
 			SqlQueryInfo  query   = new SqlQueryInfo(om);
@@ -677,7 +671,7 @@ namespace BLToolkit.DataAccess
 		protected SqlQueryInfo CreateUpdateSqlText(DbManager db, Type type)
 		{
 			TypeExtension typeExt = TypeExtension.GetTypeExtenstion(type, Extensions);
-			ObjectMapper  om      = MappingSchema.GetObjectMapper(type);
+			ObjectMapper  om      = db.MappingSchema.GetObjectMapper(type);
 			StringBuilder sb      = new StringBuilder();
 			SqlQueryInfo  query   = new SqlQueryInfo(om);
 
@@ -709,7 +703,7 @@ namespace BLToolkit.DataAccess
 
 		protected SqlQueryInfo CreateDeleteSqlText(DbManager db, Type type)
 		{
-			ObjectMapper  om    = MappingSchema.GetObjectMapper(type);
+			ObjectMapper  om    = db.MappingSchema.GetObjectMapper(type);
 			StringBuilder sb    = new StringBuilder();
 			SqlQueryInfo  query = new SqlQueryInfo(om);
 
@@ -1022,6 +1016,247 @@ namespace BLToolkit.DataAccess
 		}
 
 			#endregion
+
+		#endregion
+
+		#region Convert
+
+		#region Primitive Types
+
+		[CLSCompliant(false)]
+		protected virtual SByte ConvertToSByte(DbManager db, object value, object parameter)
+		{
+			return db.MappingSchema.ConvertToSByte(value);
+		}
+
+		protected virtual Int16 ConvertToInt16(DbManager db, object value, object parameter)
+		{
+			return db.MappingSchema.ConvertToInt16(value);
+		}
+
+		protected virtual Int32 ConvertToInt32(DbManager db, object value, object parameter)
+		{
+			return db.MappingSchema.ConvertToInt32(value);
+		}
+
+		protected virtual Int64 ConvertToInt64(DbManager db, object value, object parameter)
+		{
+			return db.MappingSchema.ConvertToInt64(value);
+		}
+
+		protected virtual Byte ConvertToByte(DbManager db, object value, object parameter)
+		{
+			return db.MappingSchema.ConvertToByte(value);
+		}
+
+		[CLSCompliant(false)]
+		protected virtual UInt16 ConvertToUInt16(DbManager db, object value, object parameter)
+		{
+			return db.MappingSchema.ConvertToUInt16(value);
+		}
+
+		[CLSCompliant(false)]
+		protected virtual UInt32 ConvertToUInt32(DbManager db, object value, object parameter)
+		{
+			return db.MappingSchema.ConvertToUInt32(value);
+		}
+
+		[CLSCompliant(false)]
+		protected virtual UInt64 ConvertToUInt64(DbManager db, object value, object parameter)
+		{
+			return db.MappingSchema.ConvertToUInt64(value);
+		}
+
+		protected virtual Char ConvertToChar(DbManager db, object value, object parameter)
+		{
+			return db.MappingSchema.ConvertToChar(value);
+		}
+
+		protected virtual Single ConvertToSingle(DbManager db, object value, object parameter)
+		{
+			return db.MappingSchema.ConvertToSingle(value);
+		}
+
+		protected virtual Double ConvertToDouble(DbManager db, object value, object parameter)
+		{
+			return db.MappingSchema.ConvertToDouble(value);
+		}
+
+		protected virtual Boolean ConvertToBoolean(DbManager db, object value, object parameter)
+		{
+			return db.MappingSchema.ConvertToBoolean(value);
+		}
+
+		#endregion
+
+		#region Simple Types
+
+		protected virtual String ConvertToString(DbManager db, object value, object parameter)
+		{
+			return db.MappingSchema.ConvertToString(value);
+		}
+
+		protected virtual DateTime ConvertToDateTime(DbManager db, object value, object parameter)
+		{
+			return db.MappingSchema.ConvertToDateTime(value);
+		}
+
+		protected virtual Decimal ConvertToDecimal(DbManager db, object value, object parameter)
+		{
+			return db.MappingSchema.ConvertToDecimal(value);
+		}
+
+		protected virtual Guid ConvertToGuid(DbManager db, object value, object parameter)
+		{
+			return db.MappingSchema.ConvertToGuid(value);
+		}
+
+		#endregion
+
+#if FW2
+
+		#region Nullable Types
+
+		protected virtual Int16? ConvertToNullableInt16(DbManager db, object value, object parameter)
+		{
+			return db.MappingSchema.ConvertToNullableInt16(value);
+		}
+
+		protected virtual Int32? ConvertToNullableInt32(DbManager db, object value, object parameter)
+		{
+			return db.MappingSchema.ConvertToNullableInt32(value);
+		}
+
+		protected virtual Int64? ConvertToNullableInt64(DbManager db, object value, object parameter)
+		{
+			return db.MappingSchema.ConvertToNullableInt64(value);
+		}
+
+		protected virtual Byte? ConvertToNullableByte(DbManager db, object value, object parameter)
+		{
+			return db.MappingSchema.ConvertToNullableByte(value);
+		}
+
+		[CLSCompliant(false)]
+		protected virtual UInt16? ConvertToNullableUInt16(DbManager db, object value, object parameter)
+		{
+			return db.MappingSchema.ConvertToNullableUInt16(value);
+		}
+
+		[CLSCompliant(false)]
+		protected virtual UInt32? ConvertToNullableUInt32(DbManager db, object value, object parameter)
+		{
+			return db.MappingSchema.ConvertToNullableUInt32(value);
+		}
+
+		[CLSCompliant(false)]
+		protected virtual UInt64? ConvertToNullableUInt64(DbManager db, object value, object parameter)
+		{
+			return db.MappingSchema.ConvertToNullableUInt64(value);
+		}
+
+		protected virtual Char? ConvertToNullableChar(DbManager db, object value, object parameter)
+		{
+			return db.MappingSchema.ConvertToNullableChar(value);
+		}
+
+		protected virtual Double? ConvertToNullableDouble(DbManager db, object value, object parameter)
+		{
+			return db.MappingSchema.ConvertToNullableDouble(value);
+		}
+
+		protected virtual Single? ConvertToNullableSingle(DbManager db, object value, object parameter)
+		{
+			return db.MappingSchema.ConvertToNullableSingle(value);
+		}
+
+		protected virtual Boolean? ConvertToNullableBoolean(DbManager db, object value, object parameter)
+		{
+			return db.MappingSchema.ConvertToNullableBoolean(value);
+		}
+
+		protected virtual DateTime? ConvertToNullableDateTime(DbManager db, object value, object parameter)
+		{
+			return db.MappingSchema.ConvertToNullableDateTime(value);
+		}
+
+		protected virtual Decimal? ConvertToNullableDecimal(DbManager db, object value, object parameter)
+		{
+			return db.MappingSchema.ConvertToNullableDecimal(value);
+		}
+
+		protected virtual Guid? ConvertToNullableGuid(DbManager db, object value, object parameter)
+		{
+			return db.MappingSchema.ConvertToNullableGuid(value);
+		}
+
+		#endregion
+
+#endif
+
+		#region SqlTypes
+
+		protected virtual SqlByte ConvertToSqlByte(DbManager db, object value, object parameter)
+		{
+			return db.MappingSchema.ConvertToSqlByte(value);
+		}
+
+		protected virtual SqlInt16 ConvertToSqlInt16(DbManager db, object value, object parameter)
+		{
+			return db.MappingSchema.ConvertToSqlInt16(value);
+		}
+
+		protected virtual SqlInt32 ConvertToSqlInt32(DbManager db, object value, object parameter)
+		{
+			return db.MappingSchema.ConvertToSqlInt32(value);
+		}
+
+		protected virtual SqlInt64 ConvertToSqlInt64(DbManager db, object value, object parameter)
+		{
+			return db.MappingSchema.ConvertToSqlInt64(value);
+		}
+
+		protected virtual SqlSingle ConvertToSqlSingle(DbManager db, object value, object parameter)
+		{
+			return db.MappingSchema.ConvertToSqlSingle(value);
+		}
+
+		protected virtual SqlBoolean ConvertToSqlBoolean(DbManager db, object value, object parameter)
+		{
+			return db.MappingSchema.ConvertToSqlBoolean(value);
+		}
+
+		protected virtual SqlDouble ConvertToSqlDouble(DbManager db, object value, object parameter)
+		{
+			return db.MappingSchema.ConvertToSqlDouble(value);
+		}
+
+		protected virtual SqlDateTime ConvertToSqlDateTime(DbManager db, object value, object parameter)
+		{
+			return db.MappingSchema.ConvertToSqlDateTime(value);
+		}
+
+		protected virtual SqlDecimal ConvertToSqlDecimal(DbManager db, object value, object parameter)
+		{
+			return db.MappingSchema.ConvertToSqlDecimal(value);
+		}
+
+		protected virtual SqlMoney ConvertToSqlMoney(DbManager db, object value, object parameter)
+		{
+			return db.MappingSchema.ConvertToSqlMoney(value);
+		}
+
+		protected virtual SqlGuid ConvertToSqlGuid(DbManager db, object value, object parameter)
+		{
+			return db.MappingSchema.ConvertToSqlGuid(value);
+		}
+
+		protected virtual SqlString ConvertToSqlString(DbManager db, object value, object parameter)
+		{
+			return db.MappingSchema.ConvertToSqlString(value);
+		}
+
+		#endregion
 
 		#endregion
 	}
