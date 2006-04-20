@@ -30,6 +30,16 @@ namespace BLToolkit.Data.DataProvider
 				parameter.DbType = DbType.AnsiString;
 		}
 
+		public override void AttachParameter(IDbCommand command, IDbDataParameter parameter)
+		{
+			base.AttachParameter(command, parameter);
+			
+			AseParameter p = (AseParameter)parameter;
+
+			if (p.AseDbType == AseDbType.Unsupported && p.Value is DBNull)
+				parameter.DbType = DbType.AnsiString;
+		}
+
 		public override Type ConnectionType
 		{
 			get { return typeof(AseConnection); }

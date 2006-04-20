@@ -186,7 +186,10 @@ namespace BLToolkit.Mapping
 
 		public virtual Byte ConvertToByte(object value)
 		{
-			return Convert.ToByte(value);
+			return
+				value is Byte? (Byte)value:
+				value == null? _defaultByteNullValue:
+				               Convert.ToByte(value);
 		}
 
 		private UInt16 _defaultUInt16NullValue;
@@ -254,7 +257,7 @@ namespace BLToolkit.Mapping
 				value == null? _defaultCharNullValue:
 				               Convert.ToChar(value);
 		}
-		
+
 		private Single _defaultSingleNullValue;
 		public  Single  DefaultSingleNullValue
 		{
@@ -338,7 +341,7 @@ namespace BLToolkit.Mapping
 			set { _defaultDecimalNullValue = value; }
 		}
 
-		public virtual decimal ConvertToDecimal(object value)
+		public virtual Decimal ConvertToDecimal(object value)
 		{
 			return
 				value is decimal? (decimal)value:
@@ -353,7 +356,7 @@ namespace BLToolkit.Mapping
 			set { _defaultGuidNullValue = value; }
 		}
 
-		public virtual Guid     ConvertToGuid    (object value)
+		public virtual Guid ConvertToGuid(object value)
 		{
 			return
 				value is Guid? (Guid)value:
@@ -446,10 +449,9 @@ namespace BLToolkit.Mapping
 		public virtual Double? ConvertToNullableDouble(object value)
 		{
 			return
-				value == null?     null:
-				value is Double?   (Double) value:
-				value is Double? ? (Double?)value:
-				                   Convert.ToDouble(value);
+				value == null?   (Double?)null:
+				value is Double? (Double) value:
+				                 Convert.ToDouble(value);
 		}
 
 		public virtual Single? ConvertToNullableSingle(object value)

@@ -1,6 +1,7 @@
 using System;
 using System.Reflection;
 using System.Data;
+using System.Data.SqlTypes;
 using System.Collections;
 using System.Reflection.Emit;
 
@@ -219,11 +220,9 @@ namespace BLToolkit.DataAccess
 			GetSprocName();
 			CallSetCommand();
 
-			MethodInfo mi = typeof(DbManager).GetMethod("ExecuteReader", Type.EmptyTypes);
-
 			Context.MethodBuilder.Emitter
-				.callvirt(mi)
-				.stloc(Context.ReturnValue)
+				.callvirt (typeof(DbManager).GetMethod("ExecuteReader", Type.EmptyTypes))
+				.stloc    (Context.ReturnValue)
 				;
 		}
 
@@ -352,13 +351,23 @@ namespace BLToolkit.DataAccess
 
 		public void ExecuteScalar()
 		{
-			InitObjectType();
+			//InitObjectType();
+
+			Context.MethodBuilder.Emitter
+				.ldarg_0
+				.ldloc   (_locManager)
+				;
+
 			GetSprocName();
 			CallSetCommand();
 
+			string converterName = GetConverterMethodName(Context.CurrentMethod.ReturnType);
+
 			Context.MethodBuilder.Emitter
 				.callvirtNoGenerics (typeof(DbManager), "ExecuteScalar")
-				.CastFromObject     (Context.CurrentMethod.ReturnType)
+				.ldnull
+				.callvirt           (typeof(DataAccessor), converterName, _bindingFlags, typeof(DbManager), typeof(object), typeof(object))
+				//.CastFromObject     (Context.CurrentMethod.ReturnType)
 				.stloc              (Context.ReturnValue)
 				;
 		}
@@ -588,11 +597,13 @@ namespace BLToolkit.DataAccess
 			// Parameters.
 			//
 			LocalBuilder locParams = emit.DeclareLocal(
-				_sqlText == null? typeof(object[]): typeof(IDbDataParameter[]));
+				typeof(object[]));
+				//_sqlText == null? typeof(object[]): typeof(IDbDataParameter[]));
 
 			emit
 				.ldc_i4_ (_parameters.Length)
-				.newarr  (_sqlText == null? typeof(object): typeof(IDbDataParameter))
+				.newarr  (typeof(object))
+				//.newarr  (_sqlText == null? typeof(object): typeof(IDbDataParameter))
 				.stloc   (locParams)
 				;
 
@@ -776,13 +787,33 @@ namespace BLToolkit.DataAccess
 							.ldstr (paramName);
 					}
 
-					emit
-						.callvirt       (typeof(DbManager), "Parameter", typeof(string))
-						.callvirt       (typeof(IDataParameter).GetProperty("Value").GetGetMethod())
-						.LoadType       (type)
-						.call           (typeof(Convert), "ChangeType", typeof(object), typeof(Type))
-						.CastFromObject (type)
-						;
+					string converterName = GetConverterMethodName(type);
+
+					if (converterName == null)
+					{
+						emit
+							.callvirt       (typeof(DbManager), "Parameter", typeof(string))
+							.callvirt       (typeof(IDataParameter).GetProperty("Value").GetGetMethod())
+							.LoadType       (type)
+							.call           (typeof(Convert), "ChangeType", typeof(object), typeof(Type))
+							.CastFromObject (type)
+							;
+					}
+					else
+					{
+						LocalBuilder param = emit.DeclareLocal(typeof(IDataParameter));
+
+						emit
+							.callvirt (typeof(DbManager), "Parameter", typeof(string))
+							.stloc    (param)
+							.ldarg_0
+							.ldloc    (_locManager)
+							.ldloc    (param)
+							.callvirt (typeof(IDataParameter).GetProperty("Value").GetGetMethod())
+							.ldloc    (param)
+							.callvirt (typeof(DataAccessor), converterName, _bindingFlags, typeof(DbManager), typeof(object), typeof(object))
+							;
+					}
 
 					if (type.IsValueType && type.IsPrimitive == false)
 						emit.stobj(type);
@@ -801,6 +832,73 @@ namespace BLToolkit.DataAccess
 					return true;
 
 			return false;
+		}
+
+		private string GetConverterMethodName(Type type)
+		{
+#if FW2
+			Type underlyingType = Nullable.GetUnderlyingType(type);
+
+			if (underlyingType != null)
+			{
+				if (underlyingType.IsEnum)
+					underlyingType = Enum.GetUnderlyingType(underlyingType);
+
+				if (type == typeof(Int16))    return "ConvertToNullableInt16";
+				if (type == typeof(Int32))    return "ConvertToNullableInt32";
+				if (type == typeof(Int64))    return "ConvertToNullableInt64";
+				if (type == typeof(Byte))     return "ConvertToNullableByte";
+				if (type == typeof(UInt16))   return "ConvertToNullableUInt16";
+				if (type == typeof(UInt32))   return "ConvertToNullableUInt32";
+				if (type == typeof(UInt64))   return "ConvertToNullableUInt64";
+				if (type == typeof(Char))     return "ConvertToNullableChar";
+				if (type == typeof(Double))   return "ConvertToNullableDouble";
+				if (type == typeof(Single))   return "ConvertToNullableSingle";
+				if (type == typeof(Boolean))  return "ConvertToNullableBoolean";
+				if (type == typeof(DateTime)) return "ConvertToNullableDateTime";
+				if (type == typeof(Decimal))  return "ConvertToNullableDecimal";
+				if (type == typeof(Guid))     return "ConvertToNullableGuid";
+			}
+#endif
+
+			if (type.IsPrimitive)
+			{
+				if (type.IsEnum)
+					type = Enum.GetUnderlyingType(type);
+
+				if (type == typeof(SByte))    return "ConvertToSByte";
+				if (type == typeof(Int16))    return "ConvertToInt16";
+				if (type == typeof(Int32))    return "ConvertToInt32";
+				if (type == typeof(Int64))    return "ConvertToInt64";
+				if (type == typeof(Byte))     return "ConvertToByte";
+				if (type == typeof(UInt16))   return "ConvertToUInt16";
+				if (type == typeof(UInt32))   return "ConvertToUInt32";
+				if (type == typeof(UInt64))   return "ConvertToUInt64";
+				if (type == typeof(Char))     return "ConvertToChar";
+				if (type == typeof(Single))   return "ConvertToSingle";
+				if (type == typeof(Double))   return "ConvertToDouble";
+				if (type == typeof(Boolean))  return "ConvertToBoolean";
+			}
+
+			if (type == typeof(String))      return "ConvertToString";
+			if (type == typeof(DateTime))    return "ConvertToDateTime";
+			if (type == typeof(Decimal))     return "ConvertToDecimal";
+			if (type == typeof(Guid))        return "ConvertToGuid";
+
+			if (type == typeof(SqlByte))     return "ConvertToSqlByte";
+			if (type == typeof(SqlInt16))    return "ConvertToSqlInt16";
+			if (type == typeof(SqlInt32))    return "ConvertToSqlInt32";
+			if (type == typeof(SqlInt64))    return "ConvertToSqlInt64";
+			if (type == typeof(SqlSingle))   return "ConvertToSqlSingle";
+			if (type == typeof(SqlBoolean))  return "ConvertToSqlBoolean";
+			if (type == typeof(SqlDouble))   return "ConvertToSqlDouble";
+			if (type == typeof(SqlDateTime)) return "ConvertToSqlDateTime";
+			if (type == typeof(SqlDecimal))  return "ConvertToSqlDecimal";
+			if (type == typeof(SqlMoney))    return "ConvertToSqlMoney";
+			if (type == typeof(SqlGuid))     return "ConvertToSqlGuid";
+			if (type == typeof(SqlString))   return "ConvertToSqlString";
+
+			return null;
 		}
 	}
 }

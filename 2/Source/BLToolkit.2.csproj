@@ -111,6 +111,9 @@
     <Compile Include="EditableObjects\EditableObjectHolder.cs" />
     <Compile Include="EditableObjects\EditableValue.cs" />
     <Compile Include="EditableObjects\IEditable.cs" />
+    <Compile Include="Mapping\NullDateTimeAttribute.cs" />
+    <Compile Include="Mapping\NullDecimalAttribute.cs" />
+    <Compile Include="Mapping\NullGuidAttribute.cs" />
     <Compile Include="TypeBuilder\ISetParent.cs" />
     <Compile Include="EditableObjects\IMemberwiseEditable.cs" />
     <Compile Include="ComponentModel\INotifyObjectEdit.cs" />
