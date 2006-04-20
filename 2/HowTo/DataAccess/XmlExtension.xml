@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <Types
-	xmlns    = "urn:schemas-bltoolkit-net:typeinfo"
+	xmlns    = "urn:schemas-bltoolkit-net:typeext"
 	xmlns:da = "urn:schemas-bltoolkit-net:dataaccess">
 
 	<Type Name="MyPersonObject" da:TableName="Person">

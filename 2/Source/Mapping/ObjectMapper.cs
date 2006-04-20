@@ -205,6 +205,19 @@ namespace BLToolkit.Mapping
 				Add(CreateMemberMapper(mi));
 			}
 
+			foreach (AttributeExtension ae in _extension.Attributes["MapField"])
+			{
+				string mapName  = (string)ae["MapName"];
+				string origName = (string)ae["OrigName"];
+
+				if (mapName == null || origName == null)
+					throw new MappingException(string.Format(
+						"Type '{0}' has invalid  extension. MapField MapName='{1}' OrigName='{2}'.",
+							type.FullName, mapName, origName));
+
+				EnsureMapper(mapName, origName);
+			}
+
 			foreach (MapFieldAttribute attr in MapFieldAttributes)
 				EnsureMapper(attr.MapName, attr.OrigName);
 		}

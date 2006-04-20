@@ -1,0 +1,10 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Types
+	xmlns   = "urn:schemas-bltoolkit-net:typeext"
+	xmlns:m = "urn:schemas-bltoolkit-net:mapping">
+
+	<Type Name="Object5">
+		<m:MapField MapName="fld1" OrigName="Object3.Object2.Field1" />
+		<m:MapField MapName="fld2" OrigName="Object3.Object4.Str1" />
+	</Type>
+</Types>

@@ -3,6 +3,7 @@ using System;
 using NUnit.Framework;
 
 using BLToolkit.Mapping;
+using BLToolkit.Reflection.Extension;
 
 namespace A.Mapping
 {
@@ -80,6 +81,25 @@ namespace A.Mapping
 			MemberMapper mm = om["Object3.Object2.Field1", true];
 
 			Assert.IsNotNull(mm);
+		}
+
+		[MapField("fld2", "Object3.Object4.Str1")]
+		[TypeExtension(FileName="Map.xml")]
+		public class Object5
+		{
+			public Object3 Object3 = new Object3();
+			public string  Str1;
+		}
+
+		[Test]
+		public void Test4()
+		{
+			ObjectMapper om  = Map.GetObjectMapper(typeof(Object5));
+			MemberMapper mm1 = om["Object3.Object2.Field1", true];
+			MemberMapper mm2 = om["Object3.Object4.Str1", true];
+
+			Assert.IsNotNull(mm1);
+			Assert.IsNotNull(mm2);
 		}
 	}
 }
