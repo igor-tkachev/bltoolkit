@@ -22,6 +22,13 @@ namespace BLToolkit.Mapping
 			[DebuggerStepThrough] set { _name = value; }
 		}
 
+		private string _memberName;
+		public  string  MemberName
+		{
+			[DebuggerStepThrough] get { return _memberName;  }
+			[DebuggerStepThrough] set { _memberName = value; }
+		}
+
 		private bool _trimmable;
 		public  bool  Trimmable
 		{

@@ -4,7 +4,7 @@ using NUnit.Framework;
 
 using BLToolkit.Mapping;
 
-namespace Mapping
+namespace A.Mapping
 {
 	[TestFixture, Category("Mapping")]
 	public class MapFieldAttributeTest
@@ -71,6 +71,15 @@ namespace Mapping
 			Assert.AreEqual("Y", om.GetValue(o, "fld1"));
 			Assert.AreEqual(123, om.GetValue(o, "Object3.Object2.Field2"));
 			Assert.IsNull  (     om.GetValue(o, "fld2"));
+		}
+
+		[Test]
+		public void Test3()
+		{
+			ObjectMapper om = Map.GetObjectMapper(typeof(Object4));
+			MemberMapper mm = om["Object3.Object2.Field1", true];
+
+			Assert.IsNotNull(mm);
 		}
 	}
 }

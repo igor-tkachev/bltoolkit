@@ -6,7 +6,7 @@ using BLToolkit.EditableObjects;
 using BLToolkit.TypeBuilder;
 using BLToolkit.Reflection;
 
-namespace A.EditableObjects
+namespace EditableObjects
 {
 	[TestFixture]
 	public class NestedObjectTest
