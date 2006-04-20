@@ -20,6 +20,7 @@ namespace BLToolkit.Mapping
 
 			_mapMemberInfo  = mapMemberInfo;
 			_name           = mapMemberInfo.Name;
+			_memberName     = mapMemberInfo.MemberName;
 			_memberAccessor = mapMemberInfo.MemberAccessor;
 			_mappingSchema  = mapMemberInfo.MappingSchema;
 		}
@@ -86,6 +87,12 @@ namespace BLToolkit.Mapping
 		public  string  Name
 		{
 			get { return _name; }
+		}
+
+		private string _memberName;
+		public  string  MemberName
+		{
+			get { return _memberName; }
 		}
 
 		public  Type  Type

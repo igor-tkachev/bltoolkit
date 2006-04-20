@@ -148,7 +148,7 @@ namespace BLToolkit.Mapping
 				if (byPropertyName)
 				{
 					foreach (MemberMapper ma in _members)
-						if (ma.MemberAccessor.Name == name)
+						if (ma.MemberName == name)
 							return ma;
 
 					return null;
@@ -195,6 +195,7 @@ namespace BLToolkit.Mapping
 				mi.MappingSchema   = mappingSchema;
 				mi.MemberExtension = _extension[ma.Name];
 				mi.Name            = GetFieldName   (ma);
+				mi.MemberName      = ma.Name;
 				mi.Trimmable       = GetTrimmable   (ma);
 				mi.MapValues       = GetMapValues   (ma);
 				mi.DefaultValue    = GetDefaultValue(ma);
@@ -265,6 +266,7 @@ namespace BLToolkit.Mapping
 								mi.Type           = mm.Type;
 								mi.MappingSchema  = MappingSchema;
 								mi.Name           = mapName;
+								mi.MemberName     = origName;
 
 								MemberMapper mapper = new MemberMapper.ComplexMapper(mm);
 
