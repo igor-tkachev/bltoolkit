@@ -29,7 +29,7 @@ namespace Mapping
 			short     di = (short)de;
 
 			om.SetValue(o, "Int32", 123.56);
-			om.SetValue(o, "Float", "123.57");
+			om.SetValue(o, "Float", 123.57.ToString());
 			om.SetValue(o, "Dow1",  de);
 			om.SetValue(o, "Dow2",  di);
 
