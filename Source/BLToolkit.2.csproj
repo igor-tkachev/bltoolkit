@@ -291,7 +291,6 @@
   <ItemGroup>
     <Content Include="Doc\License.txt" />
     <Content Include="Doc\OnlineDoc.txt" />
-    <Content Include="Reflection\Extension\Test.xml" />
     <EmbeddedResource Include="Web\UI\WebObjectBinder.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />

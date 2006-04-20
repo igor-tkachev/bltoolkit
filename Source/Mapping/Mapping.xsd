@@ -36,4 +36,9 @@
 		<xsd:attribute name="Value"           type="xsd:string" use="optional" />
 		<xsd:attribute name="Type"            type="xsd:string" use="optional" />
 	</xsd:complexType>
+
+	<xsd:complexType name="MapField" id="MapField">
+		<xsd:attribute name="MapName"  type="xsd:string" use="required" />
+		<xsd:attribute name="OrigName" type="xsd:string" use="required" />
+	</xsd:complexType>
 </xsd:schema>

@@ -20,7 +20,7 @@ namespace Reflection.Extension
 			using (StreamWriter sw = File.CreateText("Mapping.xml"))
 			{
 				sw.WriteLine(@"<?xml version='1.0' encoding='utf-8' ?>
-<Types xmlns='urn:schemas-bltoolkit-net:typeinfo'>
+<Types xmlns='urn:schemas-bltoolkit-net:typeext'>
     <Type Name='Enum3'>
         <Member Name='Value1' MapValue='1' MapValue-Type='System.String' />
         <Member Name='Value2' MapValue='3' MapValue-Type='System.String' DefaultValue=''/>

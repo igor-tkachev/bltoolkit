@@ -13,10 +13,10 @@ namespace BLToolkit.Mapping
 			_mapName = mapName;
 		}
 
-		public MapFieldAttribute(string mapName, string originalName)
+		public MapFieldAttribute(string mapName, string origName)
 		{
-			_mapName      = mapName;
-			_origName = originalName;
+			_mapName  = mapName;
+			_origName = origName;
 		}
 
 		private string _mapName;

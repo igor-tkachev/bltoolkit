@@ -20,7 +20,7 @@ namespace Reflection.Extension
 			using (StreamWriter sw = File.CreateText("Mapping.xml"))
 			{
 				sw.WriteLine(@"<?xml version='1.0' encoding='utf-8' ?>
-<Types xmlns='urn:schemas-bltoolkit-net:typeinfo'>
+<Types xmlns='urn:schemas-bltoolkit-net:typeext'>
     <Type Name='Dest'>
         <Member Name='Field3'>
             <MapValue Value='-1-' OrigValue='1' OrigValue-Type='System.Double' />

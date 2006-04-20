@@ -1,8 +1,0 @@
-﻿<?xml version="1.0" encoding="utf-8" ?>
-<ns:Types xmlns:ns="urn:schemas-bltoolkit-net:typeext" xmlns:m="urn:schemas-bltoolkit-net:mapping" xmlns:html="http://www.w3.org/1999/xhtml">
-	<Type Name="Person" >
-		<Member Name="a123" ></Member>
-	</Type>
-	
-</ns:Types>
-
