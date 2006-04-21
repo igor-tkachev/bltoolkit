@@ -252,3 +252,21 @@ SET @outputStr      = @str
 SET @inputOutputStr = @str + @inputOutputStr
 
 GO
+
+-- OutRefEnumTest
+
+IF EXISTS (SELECT * FROM sysobjects WHERE type = 'P' AND name = 'OutRefEnumTest')
+BEGIN DROP Procedure OutRefEnumTest END
+GO
+
+CREATE Procedure OutRefEnumTest
+	@str            varchar(50),
+	@outputStr      varchar(50) output,
+	@inputOutputStr varchar(50) output
+AS
+
+SET @outputStr      = @str
+SET @inputOutputStr = @str + @inputOutputStr
+
+GO
+
