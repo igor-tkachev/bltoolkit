@@ -4,7 +4,7 @@ using System.Data.OleDb;
 
 namespace BLToolkit.Data.DataProvider
 {
-	public class AccessDataProvider : OleDbDataProvider
+	public sealed class AccessDataProvider : OleDbDataProvider
 	{
 		public override bool DeriveParameters(IDbCommand command)
 		{

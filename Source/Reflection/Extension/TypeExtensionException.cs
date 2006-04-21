@@ -18,7 +18,7 @@ namespace BLToolkit.Reflection.Extension
 		/// <remarks>
 		/// This constructor initializes the <para>Message</para> property of the new instance 
 		/// to a system-supplied message that describes the error, 
-		/// such as "An Rsdn Data error has occurred."
+		/// such as "BLToolkit Data error has occurred."
 		/// </remarks>
 		public TypeExtensionException() 
 			: base("An BLToolkit Data error has occurred.")

@@ -6,7 +6,7 @@ namespace BLToolkit.Data.DataProvider
 {
 	// Data Provider for DataDirect Sybase ADO Provider 4.2
 	//
-	public class SybaseAdoDataProvider : OleDbDataProvider
+	public sealed class SybaseAdoDataProvider : OleDbDataProvider
 	{
 		public override bool DeriveParameters(IDbCommand command)
 		{

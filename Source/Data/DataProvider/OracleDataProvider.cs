@@ -12,7 +12,7 @@ namespace BLToolkit.Data.DataProvider
 	/// See the <see cref="DbManager.AddDataProvider"/> method to find an example.
 	/// </remarks>
 	/// <seealso cref="DbManager.AddDataProvider">AddDataManager Method</seealso>
-	public class OracleDataProvider: DataProviderBase
+	public sealed class OracleDataProvider: DataProviderBase
 	{
 		/// <summary>
 		/// Creates the database connection object.

@@ -755,6 +755,8 @@ namespace BLToolkit.DataAccess
 			{
 				EmitHelper emit = Context.MethodBuilder.Emitter;
 
+				LocalBuilder param = emit.DeclareLocal(typeof(IDataParameter));
+
 				foreach (ParameterInfo pi in _outputParameters)
 				{
 					Type type = pi.ParameterType.GetElementType();
@@ -763,13 +765,16 @@ namespace BLToolkit.DataAccess
 						.ldarg(pi)
 						;
 
+					// Get parameter.
+					//
 					object[] attrs = pi.GetCustomAttributes(typeof(ParamNameAttribute), true);
 
 					string paramName = attrs.Length == 0 ?
 						pi.Name : ((ParamNameAttribute)attrs[0]).Name;
 
 					emit
-						.ldloc (_locManager);
+						.ldloc (_locManager)
+						;
 
 					if (paramName[0] != '@')
 					{
@@ -778,40 +783,52 @@ namespace BLToolkit.DataAccess
 							.callvirt (typeof(DbManager).GetProperty("DataProvider").GetGetMethod())
 							.ldstr    (paramName)
 							.ldc_i4   ((int)ConvertType.NameToParameter)
-							.callvirt (typeof(DataProviderBase), "Convert", typeof(string), typeof(ConvertType))
+							.callvirt (typeof(DataProviderBase), "Convert", typeof(object), typeof(ConvertType))
 							;
 					}
 					else
 					{
 						emit
-							.ldstr (paramName);
+							.ldstr (paramName)
+							;
 					}
 
+					emit
+						.callvirt (typeof(DbManager), "Parameter", typeof(string))
+						.stloc    (param)
+						;
+
+					// Process value.
+					//
 					string converterName = GetConverterMethodName(type);
 
 					if (converterName == null)
 					{
 						emit
-							.callvirt       (typeof(DbManager), "Parameter", typeof(string))
-							.callvirt       (typeof(IDataParameter).GetProperty("Value").GetGetMethod())
-							.LoadType       (type)
-							.call           (typeof(Convert), "ChangeType", typeof(object), typeof(Type))
-							.CastFromObject (type)
+								.ldloc        (_locManager)
+								.callvirt     (typeof(DbManager).GetProperty("DataProvider").GetGetMethod())
+									.ldloc    (param)
+									.callvirt (typeof(IDataParameter).GetProperty("Value").GetGetMethod())
+								.ldc_i4       ((int)ConvertType.OutputParameter)
+								.callvirt     (typeof(DataProviderBase), "Convert", typeof(object), typeof(ConvertType))
+							.LoadType         (type)
+							.call             (typeof(Convert), "ChangeType", typeof(object), typeof(Type))
+							.CastFromObject   (type)
 							;
 					}
 					else
 					{
-						LocalBuilder param = emit.DeclareLocal(typeof(IDataParameter));
-
 						emit
-							.callvirt (typeof(DbManager), "Parameter", typeof(string))
-							.stloc    (param)
 							.ldarg_0
-							.ldloc    (_locManager)
-							.ldloc    (param)
-							.callvirt (typeof(IDataParameter).GetProperty("Value").GetGetMethod())
-							.ldloc    (param)
-							.callvirt (typeof(DataAccessor), converterName, _bindingFlags, typeof(DbManager), typeof(object), typeof(object))
+							.ldloc            (_locManager)
+								.ldloc        (_locManager)
+								.callvirt     (typeof(DbManager).GetProperty("DataProvider").GetGetMethod())
+									.ldloc    (param)
+									.callvirt (typeof(IDataParameter).GetProperty("Value").GetGetMethod())
+								.ldc_i4       ((int)ConvertType.OutputParameter)
+								.callvirt     (typeof(DataProviderBase), "Convert", typeof(object), typeof(ConvertType))
+							.ldloc            (param)
+							.callvirt         (typeof(DataAccessor), converterName, _bindingFlags, typeof(DbManager), typeof(object), typeof(object))
 							;
 					}
 
