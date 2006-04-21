@@ -6,6 +6,7 @@ namespace BLToolkit.Data.DataProvider
 	{
 		NameToQueryParameter,
 		NameToParameter,
-		ParameterToName
+		ParameterToName,
+		OutputParameter
 	}
 }
