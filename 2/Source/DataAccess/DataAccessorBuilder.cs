@@ -11,6 +11,7 @@ using BLToolkit.Reflection.Emit;
 using BLToolkit.Reflection;
 using BLToolkit.TypeBuilder;
 using BLToolkit.Data.DataProvider;
+using BLToolkit.Mapping;
 
 namespace BLToolkit.DataAccess
 {
@@ -687,6 +688,9 @@ namespace BLToolkit.DataAccess
 					.ldstr(paramName);
 			}
 
+			Type   type       = pi.ParameterType;
+			string methodName = "Parameter";
+
 			if (pi.ParameterType.IsByRef)
 			{
 				if (_outputParameters == null)
@@ -694,9 +698,20 @@ namespace BLToolkit.DataAccess
 
 				_outputParameters.Add(pi);
 
-				Type   type       = pi.ParameterType.GetElementType();
-				string methodName = pi.IsOut? "OutputParameter": "InputOutputParameter";
+				type       = pi.ParameterType.GetElementType();
+				methodName = pi.IsOut? "OutputParameter": "InputOutputParameter";
+			}
 
+			if (type.IsEnum)
+			{
+				emit
+					.ldloc    (_locManager)
+					.callvirt (typeof(DbManager).GetProperty("MappingSchema").GetGetMethod())
+					;
+			}
+
+			if (pi.ParameterType.IsByRef)
+			{
 				emit
 					.ldarg(pi)
 					;
@@ -705,20 +720,28 @@ namespace BLToolkit.DataAccess
 					emit.ldobj(type);
 				else
 					emit.ldind(type);
-
-				emit
-					.boxIfValueType (type)
-					.callvirt       (typeof(DbManager), methodName, typeof(string), typeof(object))
-					;
 			}
 			else
 			{
 				emit
-					.ldarg          (pi)
-					.boxIfValueType (pi.ParameterType)
-					.callvirt       (typeof(DbManager), "Parameter", typeof(string), typeof(object))
+					.ldarg (pi)
 					;
 			}
+
+			emit
+				.boxIfValueType (type)
+				;
+
+			if (type.IsEnum)
+			{
+				emit
+					.callvirt (typeof(MappingSchema), "MapEnumToValue", typeof(object))
+					;
+			}
+
+			emit
+				.callvirt (typeof(DbManager), methodName, typeof(string), typeof(object))
+				;
 		}
 
 		private LocalBuilder BuildParametersWithDiscoverParameters()
@@ -800,36 +823,55 @@ namespace BLToolkit.DataAccess
 
 					// Process value.
 					//
-					string converterName = GetConverterMethodName(type);
-
-					if (converterName == null)
+					if (type.IsEnum)
 					{
-						emit
-								.ldloc        (_locManager)
-								.callvirt     (typeof(DbManager).GetProperty("DataProvider").GetGetMethod())
-									.ldloc    (param)
-									.callvirt (typeof(IDataParameter).GetProperty("Value").GetGetMethod())
-								.ldc_i4       ((int)ConvertType.OutputParameter)
-								.callvirt     (typeof(DataProviderBase), "Convert", typeof(object), typeof(ConvertType))
-							.LoadType         (type)
-							.call             (typeof(Convert), "ChangeType", typeof(object), typeof(Type))
-							.CastFromObject   (type)
-							;
+							emit
+								.ldloc            (_locManager)
+								.callvirt         (typeof(DbManager).GetProperty("MappingSchema").GetGetMethod())
+									.ldloc        (_locManager)
+									.callvirt     (typeof(DbManager).GetProperty("DataProvider").GetGetMethod())
+										.ldloc    (param)
+										.callvirt (typeof(IDataParameter).GetProperty("Value").GetGetMethod())
+									.ldc_i4       ((int)ConvertType.OutputParameter)
+									.callvirt     (typeof(DataProviderBase), "Convert", typeof(object), typeof(ConvertType))
+								.LoadType         (type)
+								.callvirt         (typeof(MappingSchema), "MapValueToEnum", typeof(object), typeof(Type))
+								.CastFromObject   (type)
+								;
 					}
 					else
 					{
-						emit
-							.ldarg_0
-							.ldloc            (_locManager)
-								.ldloc        (_locManager)
-								.callvirt     (typeof(DbManager).GetProperty("DataProvider").GetGetMethod())
-									.ldloc    (param)
-									.callvirt (typeof(IDataParameter).GetProperty("Value").GetGetMethod())
-								.ldc_i4       ((int)ConvertType.OutputParameter)
-								.callvirt     (typeof(DataProviderBase), "Convert", typeof(object), typeof(ConvertType))
-							.ldloc            (param)
-							.callvirt         (typeof(DataAccessor), converterName, _bindingFlags, typeof(DbManager), typeof(object), typeof(object))
-							;
+						string converterName = GetConverterMethodName(type);
+
+						if (converterName == null)
+						{
+							emit
+									.ldloc        (_locManager)
+									.callvirt     (typeof(DbManager).GetProperty("DataProvider").GetGetMethod())
+										.ldloc    (param)
+										.callvirt (typeof(IDataParameter).GetProperty("Value").GetGetMethod())
+									.ldc_i4       ((int)ConvertType.OutputParameter)
+									.callvirt     (typeof(DataProviderBase), "Convert", typeof(object), typeof(ConvertType))
+								.LoadType         (type)
+								.call             (typeof(Convert), "ChangeType", typeof(object), typeof(Type))
+								.CastFromObject   (type)
+								;
+						}
+						else
+						{
+							emit
+								.ldarg_0
+								.ldloc            (_locManager)
+									.ldloc        (_locManager)
+									.callvirt     (typeof(DbManager).GetProperty("DataProvider").GetGetMethod())
+										.ldloc    (param)
+										.callvirt (typeof(IDataParameter).GetProperty("Value").GetGetMethod())
+									.ldc_i4       ((int)ConvertType.OutputParameter)
+									.callvirt     (typeof(DataProviderBase), "Convert", typeof(object), typeof(ConvertType))
+								.ldloc            (param)
+								.callvirt         (typeof(DataAccessor), converterName, _bindingFlags, typeof(DbManager), typeof(object), typeof(object))
+								;
+						}
 					}
 
 					if (type.IsValueType && type.IsPrimitive == false)

@@ -186,6 +186,7 @@ namespace BLToolkit.Data
 		/// <seealso cref="AddDataProvider">AddDataProvider Method</seealso>
 		public DataProviderBase DataProvider
 		{
+			[System.Diagnostics.DebuggerStepThrough]
 			get { return _dataProvider; }
 		}
 
