@@ -1291,7 +1291,7 @@ namespace BLToolkit.Data
 					string name  = _dataProvider.Convert(mm.Name, ConvertType.NameToParameter).ToString();
 
 					paramList.Add(mm.MapMemberInfo.Nullable || value == null?
-						NullParameter(name, value):
+						NullParameter(name, value, mm.MapMemberInfo.NullValue):
 						Parameter    (name, value));
 				}
 			}
@@ -1443,6 +1443,14 @@ namespace BLToolkit.Data
 		public IDbDataParameter NullParameter(string parameterName, object value)
 		{
 			if (_mappingSchema.IsNull(value))
+				@value = DBNull.Value;
+
+			return Parameter(ParameterDirection.Input, parameterName, value);
+		}
+
+		public IDbDataParameter NullParameter(string parameterName, object value, object nullValue)
+		{
+			if (value == null || value.Equals(nullValue))
 				@value = DBNull.Value;
 
 			return Parameter(ParameterDirection.Input, parameterName, value);
