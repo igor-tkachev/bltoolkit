@@ -54,6 +54,7 @@
     <Compile Include="Data\BinaryTest.cs" />
     <Compile Include="Data\CompositeKeyTest.cs" />
     <Compile Include="Data\DbManagerTest.cs" />
+    <Compile Include="Data\NullableParameter.cs" />
     <Compile Include="EditableObjects\EditableObjectTest.cs" />
     <Compile Include="EditableObjects\NestedObjectTest.cs" />
     <Compile Include="Mapping\DefaultValueAttributeTest.cs" />

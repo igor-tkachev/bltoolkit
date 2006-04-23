@@ -5,7 +5,7 @@ using NUnit.Framework;
 using BLToolkit.Mapping;
 using BLToolkit.Reflection.Extension;
 
-namespace A.Mapping
+namespace Mapping
 {
 	[TestFixture]
 	public class EnumExtension
