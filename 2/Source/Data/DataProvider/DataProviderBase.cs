@@ -84,6 +84,10 @@ namespace BLToolkit.Data.DataProvider
 				case ConvertType.NameToParameter:
 					return "@" + value;
 
+				case ConvertType.NameToQueryField:
+				case ConvertType.NameToQueryTable:
+					return "[" + value + "]";
+
 				case ConvertType.ParameterToName:
 					if (value != null)
 					{

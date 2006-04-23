@@ -576,7 +576,9 @@ namespace BLToolkit.DataAccess
 					db.DataProvider.Convert(mm.Name + "_W", ConvertType.NameToQueryParameter).ToString(),
 					mm.Name);
 
-				sb.AppendFormat("\t[{0}] = {1} AND\n", p.FieldName, p.ParameterName);
+				sb.AppendFormat("\t{0} = {1} AND\n",
+					db.DataProvider.Convert(p.FieldName, ConvertType.NameToQueryField),
+					p.ParameterName);
 			}
 
 			sb.Remove(sb.Length - 5, 5);
@@ -591,11 +593,13 @@ namespace BLToolkit.DataAccess
 			sb.Append("SELECT\n");
 
 			foreach (MemberMapper mm in GetFieldList(om))
-				sb.AppendFormat("\t[{0}],\n", mm.Name);
+				sb.AppendFormat("\t{0},\n",
+					db.DataProvider.Convert(mm.Name, ConvertType.NameToQueryField));
 			
 			sb.Remove(sb.Length - 2, 1);
 
-			sb.AppendFormat("FROM\n\t[{0}]\n", GetTableName(type));
+			sb.AppendFormat("FROM\n\t{0}\n",
+				db.DataProvider.Convert(GetTableName(type), ConvertType.NameToQueryTable));
 
 			AddWherePK(db, query, sb);
 
@@ -613,11 +617,13 @@ namespace BLToolkit.DataAccess
 			sb.Append("SELECT\n");
 
 			foreach (MemberMapper mm in GetFieldList(om))
-				sb.AppendFormat("\t[{0}],\n", mm.Name);
+				sb.AppendFormat("\t{0},\n",
+					db.DataProvider.Convert(mm.Name, ConvertType.NameToQueryField));
 
 			sb.Remove(sb.Length - 2, 1);
 
-			sb.AppendFormat("FROM\n\t[{0}]", GetTableName(type));
+			sb.AppendFormat("FROM\n\t{0}",
+				db.DataProvider.Convert(GetTableName(type), ConvertType.NameToQueryTable));
 
 			query.QueryText = sb.ToString();
 
@@ -632,7 +638,8 @@ namespace BLToolkit.DataAccess
 			StringBuilder sb      = new StringBuilder();
 			SqlQueryInfo  query   = new SqlQueryInfo(om);
 
-			sb.AppendFormat("INSERT INTO [{0}] (\n", GetTableName(type));
+			sb.AppendFormat("INSERT INTO {0} (\n",
+				db.DataProvider.Convert(GetTableName(type), ConvertType.NameToQueryTable));
 
 			foreach (MemberMapper mm in GetFieldList(om))
 			{
@@ -641,7 +648,8 @@ namespace BLToolkit.DataAccess
 				if ((value != null && (bool)TypeExtension.ChangeType(value, typeof(bool)) == false) ||
 					(value == null && mm.MemberAccessor.GetAttributes(typeof(NonUpdatableAttribute)) == null))
 				{
-					sb.AppendFormat("\t[{0}],\n", mm.Name);
+					sb.AppendFormat("\t{0},\n",
+						db.DataProvider.Convert(mm.Name, ConvertType.NameToQueryField));
 					list.Add(mm);
 				}
 			}
@@ -675,7 +683,8 @@ namespace BLToolkit.DataAccess
 			StringBuilder sb      = new StringBuilder();
 			SqlQueryInfo  query   = new SqlQueryInfo(om);
 
-			sb.AppendFormat("UPDATE\n\t[{0}]\nSET\n", GetTableName(type));
+			sb.AppendFormat("UPDATE\n\t{0}\nSET\n",
+				db.DataProvider.Convert(GetTableName(type), ConvertType.NameToQueryTable));
 
 			foreach (MemberMapper mm in GetFieldList(om))
 			{
@@ -688,7 +697,9 @@ namespace BLToolkit.DataAccess
 						db.DataProvider.Convert(mm.Name, ConvertType.NameToQueryParameter).ToString(),
 						mm.Name);
 
-					sb.AppendFormat("\t[{0}] = {1},\n", p.FieldName, p.ParameterName);
+					sb.AppendFormat("\t{0} = {1},\n",
+						db.DataProvider.Convert(p.FieldName, ConvertType.NameToQueryField),
+						p.ParameterName);
 				}
 			}
 
@@ -707,7 +718,8 @@ namespace BLToolkit.DataAccess
 			StringBuilder sb    = new StringBuilder();
 			SqlQueryInfo  query = new SqlQueryInfo(om);
 
-			sb.AppendFormat("DELETE FROM\n\t[{0}]\n", GetTableName(type));
+			sb.AppendFormat("DELETE FROM\n\t{0}\n",
+				db.DataProvider.Convert(GetTableName(type), ConvertType.NameToQueryTable));
 
 			AddWherePK(db, query, sb);
 
@@ -735,7 +747,7 @@ namespace BLToolkit.DataAccess
 
 		protected virtual SqlQueryInfo GetSqlQueryInfo(DbManager db, Type type, string actionName)
 		{
-			string       key   = type.FullName + "$" + actionName + "$" + db.DataProvider.GetHashCode();
+			string       key   = type.FullName + "$" + actionName + "$" + db.DataProvider.Name;
 			SqlQueryInfo query = (SqlQueryInfo)_actionSqlQueryInfo[key];
 
 			if (query == null)
