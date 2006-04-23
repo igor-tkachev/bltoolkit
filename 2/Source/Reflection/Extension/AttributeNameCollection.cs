@@ -98,7 +98,7 @@ namespace BLToolkit.Reflection.Extension
 					valueName = TypeExtension.ValueName.ValueType;
 
 				AttributeExtensionCollection ext =
-					(AttributeExtensionCollection)_attributes[name];
+					(AttributeExtensionCollection)_attributes[attrName];
 
 				if (ext != null)
 				{

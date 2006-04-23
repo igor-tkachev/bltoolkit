@@ -7,4 +7,18 @@
 		<m:MapField MapName="fld1" OrigName="Object3.Object2.Field1" />
 		<m:MapField MapName="fld2" OrigName="Object3.Object4.Str1" />
 	</Type>
+
+	<Type Name='CountryCodeEnum'>
+		<Member Name='AF' MapValue='AF' MapValue-Type='System.String'/>
+		<Member Name='AL' MapValue='AL' MapValue-Type='System.String'/>
+		<Member Name='DZ' MapValue='DZ' MapValue-Type='System.String'/>
+		<Member Name='AS' MapValue='AS' MapValue-Type='System.String'/>
+		<Member Name='AD' MapValue='AD' MapValue-Type='System.String'/>
+	</Type>
+
+	<Type Name='OtherEnum'>
+		<Member Name='EnumValue1' MapValue='100' MapValue-Type='System.Int32' />
+		<Member Name='EnumValue2' MapValue='101' MapValue-Type='System.Int32' />
+	</Type>
+
 </Types>
