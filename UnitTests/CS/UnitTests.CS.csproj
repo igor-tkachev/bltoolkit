@@ -140,6 +140,11 @@
                     BuildAction = "Compile"
                 />
                 <File
+                    RelPath = "DataAccess\EnumTest.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
                     RelPath = "DataAccess\OutRefTest.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
