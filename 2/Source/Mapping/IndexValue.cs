@@ -37,5 +37,28 @@ namespace BLToolkit.Mapping
 		}
 
 		#endregion
+
+		public override int GetHashCode()
+		{
+			int code = 0;
+
+			foreach (object o in _values)
+				if (o != null)
+					code += o.GetHashCode() + o.GetType().GetHashCode();
+
+			return code;
+		}
+
+		public override bool Equals(object obj)
+		{
+			object[] values = ((IndexValue)obj)._values;
+
+			if (_values.Length == values.Length)
+				for (int i = 0; i < _values.Length; i++)
+					if (!_values[i].Equals(values[i]))
+						return false;
+
+			return true;
+		}
 	}
 }

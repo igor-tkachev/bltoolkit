@@ -145,6 +145,11 @@
                     BuildAction = "Compile"
                 />
                 <File
+                    RelPath = "DataAccess\DictionaryTest.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
                     RelPath = "DataAccess\EnumTest.cs"
                     SubType = "Code"
                     BuildAction = "Compile"

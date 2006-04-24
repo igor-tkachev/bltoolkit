@@ -78,11 +78,13 @@
     <Compile Include="DataAccess\DataAccessorBuilder.cs" />
     <Compile Include="DataAccess\DataAccessorT.cs" />
     <Compile Include="DataAccess\DiscoverParametersAttribute.cs" />
+    <Compile Include="DataAccess\IndexAttribute.cs" />
     <Compile Include="DataAccess\NonUpdatableAttribute.cs" />
     <Compile Include="DataAccess\ObjectTypeAttribute.cs" />
     <Compile Include="DataAccess\ParamNameAttribute.cs" />
     <Compile Include="DataAccess\PrimaryKeyAttribute.cs" />
     <Compile Include="DataAccess\DataAccessException.cs" />
+    <Compile Include="DataAccess\ScalarFieldNameAttribute.cs" />
     <Compile Include="DataAccess\SprocNameAttribute.cs" />
     <Compile Include="DataAccess\SqlQueryAttribute.cs" />
     <Compile Include="DataAccess\SqlQueryInfo.cs" />
