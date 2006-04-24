@@ -2492,6 +2492,9 @@ namespace BLToolkit.Data
 			int keyIndex   = -1;
 			int valueIndex = -1;
 
+			if (keyFieldName != null && keyFieldName.Length > 0 && keyFieldName[0] == '@')
+				keyFieldName = keyFieldName.Substring(1);
+
 			using (IDataReader dr = ExecuteReaderInternal())
 			{
 				while (dr.Read())

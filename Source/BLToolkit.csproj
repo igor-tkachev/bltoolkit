@@ -303,6 +303,11 @@
                     BuildAction = "Compile"
                 />
                 <File
+                    RelPath = "DataAccess\IndexAttribute.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
                     RelPath = "DataAccess\NonUpdatableAttribute.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
@@ -319,6 +324,11 @@
                 />
                 <File
                     RelPath = "DataAccess\PrimaryKeyAttribute.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "DataAccess\ScalarFieldNameAttribute.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
                 />
