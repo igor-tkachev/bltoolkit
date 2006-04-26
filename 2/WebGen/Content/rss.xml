@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<rss version="2.0">
+	<channel>
+		<title>Business Logic Toolkit for .NET</title>
+		<link>http://www.bltoolkit.net</link>
+		<description />
+		<lastBuildDate>Wed, 26 Apr 2006 00:00:00 -0500</lastBuildDate>
+		<item>
+			<title>IDictionary support for abstract accessors</title>
+			<link>http:\\www.bltoolkit.net\Doc\DataAccess\AbstractAccessor.htm</link>
+			<description>Now abstract accessor can return an object that implemens IDictionary interface.</description>
+			<category>Features</category>
+			<pubDate>Wed, 26 Apr 2006 00:00:00 -0500</pubDate>
+		</item>
+	</channel>
+</rss>

@@ -1,9 +1,10 @@
 using System;
 using System.IO;
 using System.Collections.Generic;
+using System.Globalization;
+using System.Xml;
 
 using Rsdn.Framework.Formatting;
-using System.Globalization;
 
 namespace WebGen
 {
@@ -81,9 +82,6 @@ namespace WebGen
 
 			foreach (string fileName in sourceFiles)
 			{
-				if (fileName.ToLower().EndsWith("template.html"))
-					continue;
-
 				string backLinks = GeneratePath(path, backPath, fileName);
 
 				string destName = Path.Combine(destFolder, Path.GetFileName(fileName));
@@ -193,66 +191,112 @@ namespace WebGen
 			return false;
 		}
 
-		private string GenerateSource(string source)
+		private string GenerateSource(string text)
 		{
 			for (int
-				 idx = source.IndexOf("<%"),
-				 end = source.IndexOf("%>", idx + 2);
+				 idx = text.IndexOf("<%"),
+				 end = text.IndexOf("%>", idx + 2);
 				 idx >= 0 &&
 				 end >= 0;
-				 idx = source.IndexOf("<%", end + 2),
-				 end = source.IndexOf("%>", idx + 2))
+				 idx = text.IndexOf("<%", end + 2),
+				 end = text.IndexOf("%>", idx + 2))
 			{
-				string startSource = source.Substring(0, idx);
-				string fileName    = source.Substring(idx + 2, end - idx - 2).Trim();
-				string endSource   = source.Substring(end + 2);
-				string sourcePath  = Path.Combine(_sourcePath, fileName);
-				string code        = "";
+				string startSource = text.Substring(0, idx);
+				string fileName    = text.Substring(idx + 2, end - idx - 2).Trim();
+				string command     = "source";
 
-				using (StreamReader sr = File.OpenText(sourcePath))
-					for (string s = sr.ReadLine(); s != null; s = sr.ReadLine())
-						if (!s.StartsWith("//@"))
-							code += s + "\n";
+				string[] cmds = fileName.Split('#');
 
-				switch (Path.GetExtension(fileName).ToLower())
+				if (cmds.Length > 1)
 				{
-					case ".cs":     code = "[c#]"   + code + "[/c#]";   break;
-					case ".vb":     code = "[vb]"   + code + "[/vb]";   break;
-					case ".xml":
-					case ".config": code = "[xml]"  + code + "[/xml]";  break;
-					case ".sql":    code = "[sql]"  + code + "[/sql]";  break;
-					default   :     code = "[code]" + code + "[/code]"; break;
+					command  = cmds[0].Trim().ToLower();
+					fileName = cmds[1].Trim();
 				}
 
-				code = code
-					.Replace("/*[", "[")
-					.Replace("]*/", "]")
-					;
+				string endSource   = text.Substring(end + 2);
+				string sourcePath  = Path.Combine(_sourcePath, fileName);
+				string source;
 
-				code = new TextFormatter().Format(code, false);
+				switch (command)
+				{
+					case "source": source = GetSourceCode(sourcePath, text); break;
+					case "rss"   : source = GetNews      (sourcePath);       break;
+					default      : throw new InvalidOperationException();
+				}
 
-				if (source.IndexOf("<a name='Person'></a>") >= 0)
-					code = code
-						.Replace("&lt;Person&gt;", "&lt;<a class=m href=#Person>Person</a>&gt;")
-						.Replace("    Person ",    "    <a class='m' href=#Person>Person</a> ")
-						.Replace(" Person()",      " <a class='m' href=#Person>Person</a>()")
-						.Replace("(Person ",       "(<a class='m' href=#Person>Person</a> ")
-						;
-
-				source =
-					startSource +
-					code
-						.Replace("\n",     "\r\n")
-						.Replace("\r\r\n", "\r\n")
-						.Replace("<table width='96%'>", "<table width='100%' class='code'>")
-						.Replace("<pre>",  "<pre class='code'>")
-						.Replace("[a]",    "<span class='a'>")
-						.Replace("[/a]",   "</span>")
-						+
-					endSource;
+				text = startSource + source + endSource;
 			}
 
-			return source;
+			return text;
+		}
+
+		private string GetNews(string sourcePath)
+		{
+			XmlDocument doc = new XmlDocument();
+
+			doc.Load(sourcePath);
+
+			string html = "<table>";
+
+			foreach (XmlNode item in doc.SelectNodes("rss/channel/item"))
+			{
+				html += string.Format(@"
+<tr><td><nobr><b>{0:MM/dd/yy}</nobr> <a href='{1}'>{2}</a></b></td></tr>
+<tr><td class='j'>{3}</td></tr>
+",
+					DateTime.Parse(item.SelectSingleNode("pubDate").InnerText),
+					item.SelectSingleNode("link").      InnerText,
+					item.SelectSingleNode("title").      InnerText,
+					item.SelectSingleNode("description").InnerText);
+			}
+
+			html += "</table>";
+
+			return html;
+		}
+
+		private static string GetSourceCode(string sourcePath, string source)
+		{
+			string code = "";
+
+			using (StreamReader sr = File.OpenText(sourcePath))
+				for (string s = sr.ReadLine(); s != null; s = sr.ReadLine())
+					if (!s.StartsWith("//@"))
+						code += s + "\n";
+
+			switch (Path.GetExtension(sourcePath).ToLower())
+			{
+				case ".cs":     code = "[c#]"   + code + "[/c#]";   break;
+				case ".vb":     code = "[vb]"   + code + "[/vb]";   break;
+				case ".xml":
+				case ".config": code = "[xml]"  + code + "[/xml]";  break;
+				case ".sql":    code = "[sql]"  + code + "[/sql]";  break;
+				default   :     code = "[code]" + code + "[/code]"; break;
+			}
+
+			code = code
+				.Replace("/*[", "[")
+				.Replace("]*/", "]")
+				;
+
+			code = new TextFormatter().Format(code, false);
+
+			if (source.IndexOf("<a name='Person'></a>") >= 0)
+				code = code
+					.Replace("&lt;Person&gt;", "&lt;<a class=m href=#Person>Person</a>&gt;")
+					.Replace("    Person ",    "    <a class='m' href=#Person>Person</a> ")
+					.Replace(" Person()",      " <a class='m' href=#Person>Person</a>()")
+					.Replace("(Person ",       "(<a class='m' href=#Person>Person</a> ")
+					;
+
+			return code
+				.Replace("\n",     "\r\n")
+				.Replace("\r\r\n", "\r\n")
+				.Replace("<table width='96%'>", "<table width='100%' class='code'>")
+				.Replace("<pre>",  "<pre class='code'>")
+				.Replace("[a]",    "<span class='a'>")
+				.Replace("[/a]",   "</span>")
+				;
 		}
 
 		private string GeneratePath(string[] path, string backPath, string fileName)

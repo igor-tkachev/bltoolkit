@@ -80,6 +80,7 @@
     <Content Include="Content\Download.htm" />
     <Content Include="Content\index.htm" />
     <Content Include="Content\License.htm" />
+    <Content Include="Content\rss.xml" />
     <Content Include="Content\template.html" />
   </ItemGroup>
   <ItemGroup>

@@ -7,15 +7,20 @@ Method's return value specifies one of the Execute methods in the following way:
 <tr><td>&nbsp;<i>IDataReader</i> interface</td><td>&nbsp;ExecuteReader</td></tr>
 <tr><td>&nbsp;Subclass of <i>DataSet</i></td><td>&nbsp;ExecuteDataSet</td></tr>
 <tr><td>&nbsp;Subclass of <i>DataTable</i></td><td>&nbsp;ExecuteDataTable</td></tr>
-<tr><td>&nbsp;Class implementing the <i>IList</i> interface</td><td>&nbsp;ExecuteList</td></tr>
+<tr><td>&nbsp;Class implementing the <i>IList</i> interface</td><td>&nbsp;ExecuteList or ExecuteScalarList</td></tr>
+<tr><td>&nbsp;Class implementing the <i>IDictionary</i> interface</td><td>&nbsp;ExecuteDictionary or ExecuteScalarDictionary</td></tr>
 <tr><td>&nbsp;<i>void</i></td><td>&nbsp;ExecuteNonQuery</td></tr>
 <tr><td>&nbsp;<i>string</i>, <i>byte[]</i> or value type&nbsp;</td><td>&nbsp;ExecuteScalar</td></tr>
 <tr><td>&nbsp;In any other case</td><td>&nbsp;ExecuteObject</td></tr>
 </table>
 Method name explicitly defines action name which is converted to stored procedure name.<br/>
-Type, sequential order, and name of the method parameters is mapped to the stored procedure parameters.
-The only exception from this rule is a parameter of <a href="../Data/Intro.htm"><i>DbManager</i></a> type.
-In this case generator uses provided <a href="../Data/Intro.htm"><i>DbManager</i></a> to call the stored procedure.
+Type, sequential order, and name of the method parameters is mapped to the command parameters.
+Exceptions from this rule are:
+<br>
+<div style="margin:-10px 0px -10px -10px"><ul compact="compact">
+<li>a parameter of <a href="../Data/Intro.htm"><i>DbManager</i></a> type. In this case generator uses provided <a href="../Data/Intro.htm"><i>DbManager</i></a> to call the command.</li>
+<li>parameters decorated with attribute <i>FormatAttribute</i>.</li>
+</ul></div>
 </p>
 AbstractAccessor.cs
 <% ..\..\HowTo\DataAccess\AbstractAccessor.cs %>

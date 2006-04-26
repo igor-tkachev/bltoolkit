@@ -19,6 +19,11 @@ namespace HowTo.DataAccess
 			public /*[a]*/abstract/*[/a]*/ Person  /*[a]*/SelectByName/*[/a]*/(string firstName, string lastName);
 
 			/*[a]*/new/*[/a]*/ public /*[a]*/abstract/*[/a]*/ int /*[a]*/Insert/*[/a]*/      (Person person);
+
+			[/*[a]*/SqlQuery(/*[/a]*/"SELECT Top /*[a]*/{0}/*[/a]*/ * FROM Person ORDER BY PersonID"/*[a]*/)]/*[/a]*/
+			[/*[a]*/Index("ID")/*[/a]*/]
+			public /*[a]*/abstract/*[/a]*/ Dictionary<int,Person> /*[a]*/SelectTop/*[/a]*/([/*[a]*/Format(0)/*[/a]*/] int top);
+
 		}
 
 		[Test]
@@ -47,6 +52,12 @@ namespace HowTo.DataAccess
 				person = pa./*[a]*/SelectByName("Crazy", "Frog")/*[/a]*/;
 
 				Assert.IsNotNull(person);
+
+				// Select top.
+				//
+				Dictionary<int,Person> dic = pa./*[a]*/SelectTop(10)/*[/a]*/;
+
+				Assert.IsTrue(dic.Count <= 10);
 
 				// Delete.
 				//
