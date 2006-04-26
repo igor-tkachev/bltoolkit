@@ -8,6 +8,8 @@ namespace BLToolkit.Mapping
 		public IndexValue(params object[] values)
 		{
 			_values = values;
+
+			CalcHashCode();
 		}
 
 		private object[] _values;
@@ -38,27 +40,42 @@ namespace BLToolkit.Mapping
 
 		#endregion
 
+		#region Object Overrides
+
+		int hash;
+
+		private void CalcHashCode()
+		{
+			hash = 0;
+
+			for (int i = 0; i < _values.Length; i++)
+			{
+				object o = _values[i];
+
+				if (o != null)
+					hash += o.GetHashCode();
+			}
+		}
+
 		public override int GetHashCode()
 		{
-			int code = 0;
-
-			foreach (object o in _values)
-				if (o != null)
-					code += o.GetHashCode() + o.GetType().GetHashCode();
-
-			return code;
+			return hash;
 		}
 
 		public override bool Equals(object obj)
 		{
 			object[] values = ((IndexValue)obj)._values;
 
-			if (_values.Length == values.Length)
-				for (int i = 0; i < _values.Length; i++)
-					if (!_values[i].Equals(values[i]))
-						return false;
+			if (_values.Length != values.Length)
+				return false;
+
+			for (int i = 0; i < _values.Length; i++)
+				if (!_values[i].Equals(values[i]))
+					return false;
 
 			return true;
 		}
+
+		#endregion
 	}
 }
