@@ -7,7 +7,7 @@
 		<lastBuildDate>Wed, 26 Apr 2006 00:00:00 -0500</lastBuildDate>
 		<item>
 			<title>IDictionary support for abstract accessors</title>
-			<link>http:\\www.bltoolkit.net\Doc\DataAccess\AbstractAccessor.htm</link>
+			<link>http://www.bltoolkit.net/Doc/DataAccess/AbstractAccessor.htm</link>
 			<description>Now abstract accessor can return an object that implemens IDictionary interface.</description>
 			<category>Features</category>
 			<pubDate>Wed, 26 Apr 2006 00:00:00 -0500</pubDate>

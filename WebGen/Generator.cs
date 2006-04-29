@@ -17,6 +17,7 @@ namespace WebGen
 		FileActionHandler _fileAction;
 
 		public void Generate(
+			List<string> createdFiles,
 			string templateFileName, string[] path,
 			string destFolder, string sourcePath,
 			bool cleanUp, bool createIndex, FileActionHandler fileAction)
@@ -35,7 +36,7 @@ namespace WebGen
 			using (StreamReader sr = File.OpenText(templateFileName))
 				template = sr.ReadToEnd();
 
-			GenerateContent(template, path, createIndex);
+			GenerateContent(createdFiles, template, path, createIndex);
 		}
 
 		private void CreateDestFolder()
@@ -65,7 +66,8 @@ namespace WebGen
 			clean(_destFolder);
 		}
 
-		private bool GenerateContent(string template, string[] path, bool createIndex)
+		private bool GenerateContent(
+			List<string> createdFiles, string template, string[] path, bool createIndex)
 		{
 			string folder     = string.Join("/", path);
 			string destFolder = Path.Combine(_destFolder, folder);
@@ -109,6 +111,8 @@ namespace WebGen
 								using (StreamWriter sw = File.CreateText(destName))
 								using (StreamReader sr = File.OpenText(fileName))
 								{
+									createdFiles.Add(destName);
+
 									string source = GenerateSource(sr.ReadToEnd());
 									sw.WriteLine(string.Format(template, source, backPath, backLinks));
 								}
@@ -117,6 +121,8 @@ namespace WebGen
 							case ".cs":
 								using (StreamWriter sw = File.CreateText(destName + ".htm"))
 								{
+									createdFiles.Add(destName + ".htm");
+
 									string source = GenerateSource("<% " + fileName + " %>");
 									sw.WriteLine(string.Format(template, source, backPath, backLinks));
 								}
@@ -144,7 +150,7 @@ namespace WebGen
 
 				newPath[path.Length] = dirName;
 
-				if (GenerateContent(template, newPath, createIndex))
+				if (GenerateContent(createdFiles, template, newPath, createIndex))
 					folders.Add(dir);
 			}
 
@@ -175,8 +181,12 @@ namespace WebGen
 								"&#8226; <a href='{0}.htm'>{0}</a><br>\n",
 							Path.GetFileName(s));
 
+					_fileAction(indexName);
+
 					using (StreamWriter sw = File.CreateText(indexName))
 					{
+						createdFiles.Add(indexName);
+
 						sw.WriteLine(string.Format(
 							template,
 							str,
@@ -236,7 +246,7 @@ namespace WebGen
 
 			doc.Load(sourcePath);
 
-			string html = "<table>";
+			string html = "<table border='0' cellpadding='0' cellspacing='0'>";
 
 			foreach (XmlNode item in doc.SelectNodes("rss/channel/item"))
 			{
