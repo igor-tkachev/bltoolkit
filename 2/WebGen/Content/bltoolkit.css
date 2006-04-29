@@ -101,3 +101,16 @@ pre.code
 	margin  : 0;
 	padding : 5px;
 }
+
+a.rss
+{
+	color            : White;
+	background-color : DarkOrange;
+	font-weight      : bold;
+	font-size        : 85%;
+	font-family      : Arial;
+}
+
+a.rss:link    { text-decoration: none; color : White; }
+a.rss:visited { text-decoration: none; color : White; }
+a.rss:hover   { text-decoration: nonr; color : White; }

@@ -23,7 +23,6 @@ namespace HowTo.DataAccess
 			[/*[a]*/SqlQuery(/*[/a]*/"SELECT Top /*[a]*/{0}/*[/a]*/ * FROM Person ORDER BY PersonID"/*[a]*/)]/*[/a]*/
 			[/*[a]*/Index("ID")/*[/a]*/]
 			public /*[a]*/abstract/*[/a]*/ Dictionary<int,Person> /*[a]*/SelectTop/*[/a]*/([/*[a]*/Format(0)/*[/a]*/] int top);
-
 		}
 
 		[Test]
