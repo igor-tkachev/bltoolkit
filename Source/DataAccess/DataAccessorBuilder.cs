@@ -102,17 +102,19 @@ namespace BLToolkit.DataAccess
 				Type keyType     = typeof(object);
 
 #if FW2
-				if (returnType.IsGenericType)
+				Type[] gTypes = TypeHelper.GetGenericArguments(returnType, "Dictionary");
+
+				if (gTypes != null && gTypes.Length == 2)
 				{
-					keyType     = returnType.GetGenericArguments()[0];
-					elementType = returnType.GetGenericArguments()[1];
+					keyType     = gTypes[0];
+					elementType = gTypes[1];
 				}
 #endif
 
-				if (elementType != null)
-					_objectType = elementType;
+				if (elementType == null)
+					elementType = _objectType;
 
-				if (_objectType == null || _objectType == typeof(object))
+				if (elementType == null || elementType == typeof(object))
 					throw new TypeBuilderException(string.Format(
 						"Can not determine object type for the method '{0}.{1}'",
 						Context.CurrentMethod.DeclaringType.Name,
@@ -129,16 +131,18 @@ namespace BLToolkit.DataAccess
 				MethodInfo mi = Context.CurrentMethod;
 
 				object[] attrs  = mi.GetCustomAttributes(typeof(IndexAttribute), true);
-				string[] fields = null;
+				string[] fields = new string[0];
 
 				if (attrs.Length != 0)
 					fields = ((IndexAttribute)attrs[0]).Fields;
 
+				/*
 				if (fields == null || fields.Length == 0)
 					throw new TypeBuilderException(string.Format(
 						"Index is not defined for the method '{0}.{1}'.",
 						Context.CurrentMethod.DeclaringType.Name,
 						Context.CurrentMethod.Name));
+				*/
 
 				if (fields.Length > 1 && keyType != typeof(object) && !isIndex)
 					throw new TypeBuilderException(string.Format(
@@ -146,7 +150,7 @@ namespace BLToolkit.DataAccess
 						Context.CurrentMethod.DeclaringType.Name,
 						Context.CurrentMethod.Name));
 
-				if (TypeHelper.IsScalar(_objectType))
+				if (TypeHelper.IsScalar(elementType))
 				{
 					string scalarFieldName = null;
 
@@ -161,17 +165,21 @@ namespace BLToolkit.DataAccess
 							Context.CurrentMethod.DeclaringType.Name,
 							Context.CurrentMethod.Name));
 
-					if (isIndex || fields.Length > 1)
-						ExecuteScalarDictionary(fields,    keyType, scalarFieldName);
+					if (fields.Length == 0) 
+						ExecuteDictionary(keyType, scalarFieldName, elementType);
+					else if (isIndex || fields.Length > 1)
+						ExecuteScalarDictionary(fields, scalarFieldName, elementType);
 					else
-						ExecuteScalarDictionary(fields[0], keyType, scalarFieldName);
+						ExecuteScalarDictionary(fields[0], keyType, scalarFieldName, elementType);
 				}
 				else
 				{
-					if (isIndex || fields.Length > 1)
-						ExecuteDictionary(fields);
+					if (fields.Length == 0) 
+						ExecuteDictionary(keyType, string.Empty, elementType);
+					else if (isIndex || fields.Length > 1)
+						ExecuteDictionary(fields, elementType);
 					else
-						ExecuteDictionary(fields[0], keyType);
+						ExecuteDictionary(fields[0], keyType, elementType);
 				}
 			}
 			else if (returnType == typeof(void))
@@ -291,6 +299,16 @@ namespace BLToolkit.DataAccess
 
 			if (attrs.Length != 0)
 				_objectType = ((ObjectTypeAttribute)attrs[0]).ObjectType;
+
+#if FW2
+			if (_objectType == null)
+			{
+				Type[] types = TypeHelper.GetGenericArguments(mi.DeclaringType, "DataAccessor");
+
+				if (types != null)
+					_objectType = types[0];
+			}
+#endif
 		}
 
 		#region ExecuteReader
@@ -461,8 +479,10 @@ namespace BLToolkit.DataAccess
 			return fieldBuilder;
 		}
 
-		private void ExecuteScalarDictionary(string[] index, Type keyType, string scalarFieldName)
+		private void ExecuteScalarDictionary(string[] index, string scalarFieldName, Type elementType)
 		{
+			_objectType = elementType;
+
 			CreateReturnTypeInstance();
 			InitObjectType();
 			GetSprocName();
@@ -480,8 +500,11 @@ namespace BLToolkit.DataAccess
 				;
 		}
 
-		private void ExecuteScalarDictionary(string keyFieldName, Type keyType, string scalarFieldName)
+		private void ExecuteScalarDictionary(
+			string keyFieldName, Type keyType, string scalarFieldName, Type elementType)
 		{
+			_objectType = elementType;
+
 			CreateReturnTypeInstance();
 			InitObjectType();
 			GetSprocName();
@@ -500,8 +523,38 @@ namespace BLToolkit.DataAccess
 				;
 		}
 
-		private void ExecuteDictionary(string[] index)
+		private void ExecuteDictionary(Type keyType, string scalarFieldName, Type elementType)
 		{
+			if (scalarFieldName.Length == 0)
+				_objectType = elementType;
+
+			CreateReturnTypeInstance();
+			InitObjectType();
+
+			Context.MethodBuilder.Emitter
+				.ldarg_0
+				.end()
+				;
+
+			GetSprocName();
+			CallSetCommand();
+
+			Context.MethodBuilder.Emitter
+				.ldloc    (Context.ReturnValue)
+				.ldloc    (_locObjType)
+				.LoadType (keyType)
+				.ldstr    (Context.CurrentMethod.Name)
+				.ldstr    (scalarFieldName)
+				.LoadType (elementType)
+				.callvirt (typeof(DataAccessor), "ExecuteDictionary", _bindingFlags,
+					typeof(DbManager), typeof(IDictionary), typeof(Type), typeof(Type), typeof(string), typeof(string), typeof(Type))
+				;
+		}
+
+		private void ExecuteDictionary(string[] index, Type elementType)
+		{
+			_objectType = elementType;
+
 			CreateReturnTypeInstance();
 			InitObjectType();
 			GetSprocName();
@@ -519,8 +572,10 @@ namespace BLToolkit.DataAccess
 				;
 		}
 
-		private void ExecuteDictionary(string keyFieldName, Type keyType)
+		private void ExecuteDictionary(string keyFieldName, Type keyType, Type elementType)
 		{
+			_objectType = elementType;
+
 			CreateReturnTypeInstance();
 			InitObjectType();
 			GetSprocName();

@@ -7,11 +7,11 @@ Method's return value specifies one of the Execute methods in the following way:
 <tr><td>&nbsp;<i>IDataReader</i> interface</td><td>&nbsp;ExecuteReader</td></tr>
 <tr><td>&nbsp;Subclass of <i>DataSet</i></td><td>&nbsp;ExecuteDataSet</td></tr>
 <tr><td>&nbsp;Subclass of <i>DataTable</i></td><td>&nbsp;ExecuteDataTable</td></tr>
-<tr><td>&nbsp;Class implementing the <i>IList</i> interface</td><td>&nbsp;ExecuteList or ExecuteScalarList</td></tr>
-<tr><td>&nbsp;Class implementing the <i>IDictionary</i> interface</td><td>&nbsp;ExecuteDictionary or ExecuteScalarDictionary</td></tr>
+<tr><td>&nbsp;Class implementing the <i>IList</i> interface</td><td>&nbsp;<a href="ExecuteList.htm">ExecuteList</a> or <a href="ExecuteList.htm">ExecuteScalarList</a></td></tr>
+<tr><td>&nbsp;Class implementing the <i>IDictionary</i> interface</td><td>&nbsp;<a href="ExecuteDictionary.htm">ExecuteDictionary</a> or <a href="ExecuteDictionary.htm">ExecuteScalarDictionary</a></td></tr>
 <tr><td>&nbsp;<i>void</i></td><td>&nbsp;ExecuteNonQuery</td></tr>
-<tr><td>&nbsp;<i>string</i>, <i>byte[]</i> or value type&nbsp;</td><td>&nbsp;ExecuteScalar</td></tr>
-<tr><td>&nbsp;In any other case</td><td>&nbsp;ExecuteObject</td></tr>
+<tr><td>&nbsp;<i>string</i>, <i>byte[]</i> or value type&nbsp;</td><td>&nbsp;<a href="ExecuteScalar.htm">ExecuteScalar</a></td></tr>
+<tr><td>&nbsp;In any other case</td><td>&nbsp;<a href="ExecuteObject.htm">ExecuteObject</a></td></tr>
 </table>
 Method name explicitly defines action name which is converted to stored procedure name.<br/>
 Type, sequential order, and name of the method parameters is mapped to the command parameters.

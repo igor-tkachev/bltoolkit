@@ -35,6 +35,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DataAccess\AbstractAccessor.cs" />
+    <Compile Include="DataAccess\ExecuteScalar.cs" />
+    <Compile Include="DataAccess\ExecuteObject.cs" />
+    <Compile Include="DataAccess\ExecuteList.cs" />
+    <Compile Include="DataAccess\ExecuteDictionary.cs" />
     <Compile Include="DataAccess\TableNameAttribute.cs" />
     <Compile Include="DataAccess\NonUpdatableAttribute.cs" />
     <Compile Include="DataAccess\MultiplePrimaryKeyAttribute.cs" />

@@ -33,6 +33,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Content\Doc\DataAccess\ExecuteDictionary.htm" />
     <Compile Include="FileAction.cs" />
     <Compile Include="Generator.cs" />
     <Compile Include="Program.cs" />
@@ -43,6 +44,9 @@
     <Content Include="Content\Doc\ComponentModel\index.htm" />
     <None Include="Content\Doc\DataAccess\SQL\SelectByKeySql.sql" />
     <Content Include="Content\Doc\DataAccess\AbstractAccessor.htm" />
+    <Content Include="Content\Doc\DataAccess\ExecuteScalar.htm" />
+    <Content Include="Content\Doc\DataAccess\ExecuteObject.htm" />
+    <Content Include="Content\Doc\DataAccess\ExecuteList.htm" />
     <Content Include="Content\Doc\DataAccess\XmlExtension.htm" />
     <Content Include="Content\Doc\DataAccess\NonUpdatableAttribute.htm" />
     <Content Include="Content\Doc\DataAccess\PrimaryKeyAttribute.htm" />
