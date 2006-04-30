@@ -239,6 +239,58 @@ namespace BLToolkit.DataAccess
 			return type.Name;
 		}
 
+		protected void ExecuteDictionary(
+			DbManager   db,
+			IDictionary dictionary,
+			Type        objectType,
+			Type        keyType,
+			string      methodName,
+			string      scalarFieldName,
+			Type        elementType)
+		{
+			bool           isIndex = TypeHelper.IsSameOrParent(typeof(IndexValue), keyType);
+			MemberMapper[] mms     = GetKeyFieldList(db, objectType);
+
+			if (mms.Length == 0)
+				throw new DataAccessException(string.Format(
+					"Index is not defined for the method '{0}.{1}'.",
+					GetType().Name, methodName));
+
+			if (mms.Length > 1 && keyType != typeof(object) && !isIndex)
+				throw new DataAccessException(string.Format(
+					"Key type for the method '{0}.{1}' can be of type object or IndexValue.",
+					GetType().Name, methodName));
+
+			if (isIndex || mms.Length > 1)
+			{
+				string[] fields = new string[mms.Length];
+
+				if (scalarFieldName.Length == 0)
+					for (int i = 0; i < mms.Length; i++)
+						fields[i] = mms[i].MemberName;
+				else
+					for (int i = 0; i < mms.Length; i++)
+						fields[i] = mms[i].Name;
+
+				if (scalarFieldName.Length > 0)
+					db.ExecuteScalarDictionary(dictionary, new MapIndex(fields), scalarFieldName, elementType);
+				else
+					db.ExecuteDictionary(dictionary, new MapIndex(fields), objectType, null);
+			}
+			else
+			{
+				if (scalarFieldName.Length > 0)
+					db.ExecuteScalarDictionary(
+						dictionary,
+						scalarFieldName.Length == 0? mms[0].MemberName: mms[0].Name,
+						keyType,
+						scalarFieldName,
+						elementType);
+				else
+					db.ExecuteDictionary(dictionary, mms[0].MemberName, objectType, null);
+			}
+		}
+
 		#endregion
 
 		#region CRUDL (SP)
@@ -513,7 +565,8 @@ namespace BLToolkit.DataAccess
 
 		protected MemberMapper[] GetKeyFieldList(DbManager db, Type type)
 		{
-			MemberMapper[] mmList = (MemberMapper[])_keyList[type];
+			string         key    = type.FullName + "$" + db.DataProvider.Name;
+			MemberMapper[] mmList = (MemberMapper[])_keyList[key];
 
 			if (mmList == null)
 			{
@@ -544,7 +597,7 @@ namespace BLToolkit.DataAccess
 
 				list.Sort(_primaryKeyComparer);
 
-				_keyList[type] = mmList = new MemberMapper[list.Count];
+				_keyList[key] = mmList = new MemberMapper[list.Count];
 
 				for (int i = 0; i < list.Count; i++)
 					mmList[i] = ((MemberOrder)list[i]).MemberMapper;

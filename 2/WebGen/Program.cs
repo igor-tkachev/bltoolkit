@@ -39,6 +39,7 @@ namespace WebGen
 					}
 				});
 
+return;
 			new Generator().Generate(
 				files,
 				template, new string[] { "Source" }, destPath, @"..\..\..\", false, true,

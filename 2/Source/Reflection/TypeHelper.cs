@@ -768,6 +768,16 @@ namespace BLToolkit.Reflection
 			return type.IsValueType || type == typeof(string) || type == typeof(byte[]);
 		}
 
+		public static Type[] GetGenericArguments(Type type, string baseTypeName)
+		{
+			for (Type t = type; t != typeof(object); t = t.BaseType)
+				if (t.IsGenericType && (baseTypeName == null || t.Name.Split('`')[0] == baseTypeName))
+					return t.GetGenericArguments();
+
+			return null;
+		}
+
+
 		#endregion
 	}
 }

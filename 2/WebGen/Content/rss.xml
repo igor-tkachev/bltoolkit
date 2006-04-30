@@ -4,13 +4,25 @@
 		<title>Business Logic Toolkit for .NET</title>
 		<link>http://www.bltoolkit.net</link>
 		<description />
-		<lastBuildDate>Wed, 26 Apr 2006 00:00:00 -0500</lastBuildDate>
+		<lastBuildDate>2006-04-30</lastBuildDate>
+		<item>
+			<title>DataAccessor examples</title>
+			<link>http://www.bltoolkit.net/Doc/DataAccess/index.htm</link>
+			<description>
+				&lt;a href="http://www.bltoolkit.net/Doc/DataAccess/ExecuteList.htm"&gt;ExecuteList&lt;/a&gt;&lt;br&gt;
+				&lt;a href="http://www.bltoolkit.net/Doc/DataAccess/ExecuteDictionary.htm"&gt;ExecuteDictionary&lt;/a&gt;&lt;br&gt;
+				&lt;a href="http://www.bltoolkit.net/Doc/DataAccess/ExecuteObject.htm"&gt;ExecuteObject&lt;/a&gt;&lt;br&gt;
+				&lt;a href="http://www.bltoolkit.net/Doc/DataAccess/ExecuteScalar.htm"&gt;ExecuteScalar&lt;/a&gt;
+			</description>
+			<category>Examples</category>
+			<pubDate>2006-04-30</pubDate>
+		</item>
 		<item>
 			<title>IDictionary support for abstract accessors</title>
-			<link>http://www.bltoolkit.net/Doc/DataAccess/AbstractAccessor.htm</link>
+			<link>http://www.bltoolkit.net/Doc/DataAccess/ExecuteDictionary.htm</link>
 			<description>Now abstract accessor can return an object that implemens IDictionary interface.</description>
 			<category>Features</category>
-			<pubDate>Wed, 26 Apr 2006 00:00:00 -0500</pubDate>
+			<pubDate>2006-04-26</pubDate>
 		</item>
 	</channel>
 </rss>

@@ -246,18 +246,22 @@ namespace WebGen
 
 			doc.Load(sourcePath);
 
-			string html = "<table border='0' cellpadding='0' cellspacing='0'>";
+			string html   = "<table border='0' cellpadding='0' cellspacing='0'>";
+			string @class = "";
 
 			foreach (XmlNode item in doc.SelectNodes("rss/channel/item"))
 			{
 				html += string.Format(@"
-<tr><td><nobr><b>{0:MM/dd/yy}</nobr> <a href='{1}'>{2}</a></b></td></tr>
-<tr><td class='j'>{3}</td></tr>
+<tr><td{0}><nobr><b>{1:MM/dd/yy}</nobr> <a href='{2}'>{3}</a></b></td></tr>
+<tr><td class='j'>{4}</td></tr>
 ",
+					@class,
 					DateTime.Parse(item.SelectSingleNode("pubDate").InnerText),
 					item.SelectSingleNode("link").      InnerText,
 					item.SelectSingleNode("title").      InnerText,
 					item.SelectSingleNode("description").InnerText);
+
+				@class = " class='p'";
 			}
 
 			html += "</table>";
