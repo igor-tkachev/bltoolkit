@@ -252,8 +252,8 @@ namespace WebGen
 			foreach (XmlNode item in doc.SelectNodes("rss/channel/item"))
 			{
 				html += string.Format(@"
-<tr><td{0}><nobr><b>{1:MM/dd/yy}</nobr> <a href='{2}'>{3}</a></b></td></tr>
-<tr><td class='j'>{4}</td></tr>
+<tr><td{0} colspan='2'><nobr><b>{1:MM/dd/yy}</nobr> <a href='{2}'>{3}</a></b></td></tr>
+<tr><td>&nbsp;&nbsp;</td><td class='j'>{4}</td></tr>
 ",
 					@class,
 					DateTime.Parse(item.SelectSingleNode("pubDate").InnerText),

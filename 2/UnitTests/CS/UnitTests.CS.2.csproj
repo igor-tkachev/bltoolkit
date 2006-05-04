@@ -52,6 +52,7 @@
     </Compile>
     <Compile Include="DataAccess\SqlQueryTest.cs" />
     <Compile Include="DataAccess\SqlTest.cs" />
+    <Compile Include="DataAccess\XmlExtension.cs" />
     <Compile Include="Data\BinaryTest.cs" />
     <Compile Include="Data\CompositeKeyTest.cs" />
     <Compile Include="Data\DbManagerTest.cs" />
@@ -126,6 +127,9 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Mapping\Map.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="DataAccess\XmlExtension.xml" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>

@@ -27,6 +27,8 @@ namespace BLToolkit.DataAccess
 		public DataAccessor(DbManager dbManager)
 		{
 			SetDbManager(dbManager);
+
+			_extensions = dbManager.MappingSchema.Extensions;
 		}
 
 		#endregion
