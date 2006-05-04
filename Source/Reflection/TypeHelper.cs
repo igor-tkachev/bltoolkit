@@ -774,6 +774,10 @@ namespace BLToolkit.Reflection
 				if (t.IsGenericType && (baseTypeName == null || t.Name.Split('`')[0] == baseTypeName))
 					return t.GetGenericArguments();
 
+			foreach (Type t in type.GetInterfaces())
+				if (t.IsGenericType && (baseTypeName == null || t.Name.Split('`')[0] == baseTypeName))
+					return t.GetGenericArguments();
+
 			return null;
 		}
 

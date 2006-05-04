@@ -5,7 +5,7 @@ using NUnit.Framework;
 using BLToolkit.Mapping;
 using BLToolkit.DataAccess;
 
-namespace DataAccessTest
+namespace DataAccess
 {
 	[TestFixture]
 	public class SqlTest

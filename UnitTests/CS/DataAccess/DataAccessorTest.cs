@@ -17,7 +17,7 @@ using BLToolkit.Validation;
 using BLToolkit.Reflection;
 using BLToolkit.TypeBuilder;
 
-namespace DataAccessTest
+namespace DataAccess
 {
 	[TestFixture]
 	public class DataAccessorTest

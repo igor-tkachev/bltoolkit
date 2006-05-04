@@ -25,10 +25,15 @@ a.m:hover   { text-decoration: underline; color : Black; }
 	color     : #338899;
 }
 
-hr
+.hr
 {
-	height : 1px;
-	color  : #338899;
+	height           : 1px;
+	background-color : #338899;
+}
+
+.sp
+{
+	height : 7px;
 }
 
 th
@@ -88,7 +93,7 @@ td.pj
 
 table.code
 {
-	border-color  : #999999;
+	border-color  : #116677;
 	border-style  : solid;
 	border-width  : 1px;
 	margin-top    : .6em;
