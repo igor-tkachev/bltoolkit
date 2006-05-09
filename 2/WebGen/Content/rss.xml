@@ -4,7 +4,16 @@
 		<title>Business Logic Toolkit for .NET</title>
 		<link>http://www.bltoolkit.net</link>
 		<description />
-		<lastBuildDate>2006-04-30</lastBuildDate>
+		<lastBuildDate>2006-05-10</lastBuildDate>
+		<item>
+			<title>How to emit with BLToolkit</title>
+			<link>http://www.bltoolkit.net/Doc/Reflection/Emit/HelloWorld.htm</link>
+			<description>
+				&lt;a href="http://www.bltoolkit.net/Doc/Reflection/Emit/HelloWorld.htm"&gt;Hello, World!&lt;/a&gt;&lt;br&gt;
+			</description>
+			<category>Examples</category>
+			<pubDate>2006-05-10</pubDate>
+		</item>
 		<item>
 			<title>DataAccessor examples</title>
 			<link>http://www.bltoolkit.net/Doc/DataAccess/index.htm</link>

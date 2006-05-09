@@ -606,7 +606,7 @@ namespace BLToolkit.Mapping
 				public override void SetValue(object o, object value)
 				{
 					_memberAccessor.SetValue(
-						o, value == null? _nullValue: _mappingSchema.ConvertToString(value).TrimEnd(null));
+						o, value == null? _nullValue: _mappingSchema.ConvertToString(value).TrimEnd(_trim));
 				}
 
 				public new class Nullable : Trimmable
@@ -1466,6 +1466,8 @@ namespace BLToolkit.Mapping
 			return MapFrom(value, _mapMemberInfo);
 		}
 
+		static char[] _trim = new char[] { ' ' };
+
 		protected static object MapFrom(object value, MapMemberInfo mapInfo)
 		{
 			if (mapInfo == null) throw new ArgumentNullException("mapInfo");
@@ -1474,7 +1476,7 @@ namespace BLToolkit.Mapping
 				return mapInfo.NullValue;
 
 			if (mapInfo.Trimmable && value is string)
-				value = value.ToString().TrimEnd(null);
+				value = value.ToString().TrimEnd(_trim);
 
 			if (mapInfo.MapValues != null)
 			{

@@ -14,7 +14,7 @@ namespace BLToolkit.Mapping
 	{
 		#region Public Members
 		
-		private static MappingSchema _defaultSchema = new MappingSchema();
+		private static MappingSchema _defaultSchema = new DefaultMappingSchema();
 		public  static MappingSchema  DefaultSchema
 		{
 			get { return _defaultSchema;  }

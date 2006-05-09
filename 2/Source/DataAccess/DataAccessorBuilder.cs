@@ -102,7 +102,7 @@ namespace BLToolkit.DataAccess
 				Type keyType     = typeof(object);
 
 #if FW2
-				Type[] gTypes = TypeHelper.GetGenericArguments(returnType, "Dictionary");
+				Type[] gTypes = TypeHelper.GetGenericArguments(returnType, "IDictionary");
 
 				if (gTypes != null && gTypes.Length == 2)
 				{
