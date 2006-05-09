@@ -74,7 +74,11 @@
     <Content Include="Content\Doc\Data\index.htm" />
     <Content Include="Content\Doc\Data\Intro.htm" />
     <Content Include="Content\Doc\EditableObjects\index.htm" />
+    <Content Include="Content\Doc\Mapping\ObjectToObject.htm" />
+    <Content Include="Content\Doc\Mapping\MapValueAttribute.htm" />
+    <Content Include="Content\Doc\Mapping\ValueToEnum.htm" />
     <Content Include="Content\Doc\Mapping\index.htm" />
+    <Content Include="Content\Doc\Mapping\EnumToValue.htm" />
     <Content Include="Content\Doc\Reflection\Emit\HelloWorld.htm" />
     <Content Include="Content\Doc\Reflection\Emit\index.htm" />
     <Content Include="Content\Doc\Reflection\index.htm" />

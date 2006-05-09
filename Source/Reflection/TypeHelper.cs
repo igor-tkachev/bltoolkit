@@ -770,6 +770,7 @@ namespace BLToolkit.Reflection
 
 		public static Type[] GetGenericArguments(Type type, string baseTypeName)
 		{
+#if FW2
 			for (Type t = type; t != typeof(object); t = t.BaseType)
 				if (t.IsGenericType && (baseTypeName == null || t.Name.Split('`')[0] == baseTypeName))
 					return t.GetGenericArguments();
@@ -777,6 +778,7 @@ namespace BLToolkit.Reflection
 			foreach (Type t in type.GetInterfaces())
 				if (t.IsGenericType && (baseTypeName == null || t.Name.Split('`')[0] == baseTypeName))
 					return t.GetGenericArguments();
+#endif
 
 			return null;
 		}

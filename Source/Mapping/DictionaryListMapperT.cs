@@ -53,12 +53,19 @@ namespace BLToolkit.Mapping
 			return _mapper;
 		}
 
+		static char[] _trim = new char[] { ' ' };
+
 		public virtual object GetNextObject(InitContext initContext)
 		{
 			AddObject();
 
 			if (_fromSource)
+			{
 				_keyValue = (K)initContext.DataSource.GetValue(initContext.SourceObject, _keyFieldName);
+
+				if (_keyValue is string)
+					_keyValue = (K)(object)_keyValue.ToString().TrimEnd(_trim);
+			}
 
 			return _newObject = (T)_mapper.CreateInstance(initContext);
 		}

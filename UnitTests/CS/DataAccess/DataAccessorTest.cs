@@ -17,6 +17,8 @@ using BLToolkit.Validation;
 using BLToolkit.Reflection;
 using BLToolkit.TypeBuilder;
 
+using DataAccessTest;
+
 namespace DataAccess
 {
 	[TestFixture]

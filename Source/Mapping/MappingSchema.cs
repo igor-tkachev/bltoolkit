@@ -13,7 +13,7 @@ using BLToolkit.Reflection.Extension;
 
 namespace BLToolkit.Mapping
 {
-	public class MappingSchema
+	public abstract class MappingSchema
 	{
 		#region Constructors
 

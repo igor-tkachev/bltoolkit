@@ -15,7 +15,7 @@ namespace Reflection.Extension
 		[SetUp]
 		public void SetUp()
 		{
-			Map.DefaultSchema = new MappingSchema();
+			Map.DefaultSchema = new DefaultMappingSchema();
 
 			using (StreamWriter sw = File.CreateText("Mapping.xml"))
 			{

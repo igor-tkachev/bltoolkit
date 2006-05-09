@@ -114,7 +114,17 @@ namespace WebGen
 									createdFiles.Add(destName);
 
 									string source = GenerateSource(sr.ReadToEnd());
-									sw.WriteLine(string.Format(template, source, backPath, backLinks));
+									string title  = Path.GetFileNameWithoutExtension(fileName);
+
+									if (title == "index")
+										title = Path.GetFileName(Path.GetDirectoryName(fileName));
+
+									sw.WriteLine(string.Format(
+										template,
+										source,
+										backPath,
+										backLinks,
+										title + " - "));
 								}
 								break;
 
@@ -124,7 +134,12 @@ namespace WebGen
 									createdFiles.Add(destName + ".htm");
 
 									string source = GenerateSource("<% " + fileName + " %>");
-									sw.WriteLine(string.Format(template, source, backPath, backLinks));
+									sw.WriteLine(string.Format(
+										template,
+										source,
+										backPath,
+										backLinks,
+										Path.GetFileNameWithoutExtension(fileName) + " - "));
 								}
 								break;
 						}
@@ -191,7 +206,8 @@ namespace WebGen
 							template,
 							str,
 							backPath,
-							GeneratePath(path, backPath, "@@@").Replace(".@@@", "")));
+							GeneratePath(path, backPath, "@@@").Replace(".@@@", ""),
+							Path.GetFileNameWithoutExtension(destFolder) + " - "));
 					}
 				}
 
