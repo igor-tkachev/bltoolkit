@@ -117,14 +117,22 @@ namespace WebGen
 									string title  = Path.GetFileNameWithoutExtension(fileName);
 
 									if (title == "index")
+									{
 										title = Path.GetFileName(Path.GetDirectoryName(fileName));
+
+										if (title == "content")
+											title = "";
+									}
+
+									if (title.Length > 0)
+										title += " - ";
 
 									sw.WriteLine(string.Format(
 										template,
 										source,
 										backPath,
 										backLinks,
-										title + " - "));
+										title));
 								}
 								break;
 

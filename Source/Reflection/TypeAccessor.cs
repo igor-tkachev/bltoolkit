@@ -418,13 +418,18 @@ namespace BLToolkit.Reflection
 		public static void WriteDebug(object o)
 		{
 #if DEBUG
-			Write(o, false);
+			Write(o, new WriteLine(DebugWriteLine));
 #endif
+		}
+
+		private static void DebugWriteLine(string text)
+		{
+			Debug.WriteLine(text);
 		}
 
 		public static void WriteConsole(object o)
 		{
-			Write(o, true);
+			Write(o, new WriteLine(Console.WriteLine));
 		}
 
 		[SuppressMessage("Microsoft.Performance", "CA1818:DoNotConcatenateStringsInsideLoops")]
@@ -476,14 +481,14 @@ namespace BLToolkit.Reflection
 			return type.Name;
 		}
 
+		public delegate void WriteLine(string text);
+
 		[SuppressMessage("Microsoft.Usage", "CA2241:ProvideCorrectArgumentsToFormattingMethods")]
-		private static void Write(object o, bool console)
+		public static void Write(object o, WriteLine writeLine)
 		{
 			if (o == null)
 			{
-				if (console) Console.WriteLine("*** (null) ***");
-				else         Debug.  WriteLine("*** (null) ***");
-
+				writeLine("*** (null) ***");
 				return;
 			}
 
@@ -505,8 +510,7 @@ namespace BLToolkit.Reflection
 
 			string text = "*** " + o.GetType().FullName + ": ***";
 
-			if (console) Console.WriteLine(text);
-			else         Debug.  WriteLine(text);
+			writeLine(text);
 
 			string format = string.Format("{{0,-{0}}} {{1,-{1}}} : {{2}}", typeLen, nameLen);
 
@@ -523,12 +527,10 @@ namespace BLToolkit.Reflection
 
 				text = string.Format(format, MapTypeName(ma.Type), de.Key, value);
 
-				if (console) Console.WriteLine(text);
-				else         Debug.  WriteLine(text);
+				writeLine(text);
 			}
 
-			if (console) Console.WriteLine("***");
-			else         Debug.  WriteLine("***");
+			writeLine("***");
 		}
 
 		#endregion
