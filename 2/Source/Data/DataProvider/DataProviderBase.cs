@@ -85,7 +85,26 @@ namespace BLToolkit.Data.DataProvider
 					return "@" + value;
 
 				case ConvertType.NameToQueryField:
+					{
+						string name = value.ToString();
+
+						if (name.Length > 0 && name[0] == '[')
+							return value;
+					}
+
+					return "[" + value + "]";
+
 				case ConvertType.NameToQueryTable:
+					{
+						string name = value.ToString();
+
+						if (name.Length > 0 && name[0] == '[')
+							return value;
+
+						if (name.IndexOf('.') > 0)
+							value = string.Join("].[", name.Split('.'));
+					}
+
 					return "[" + value + "]";
 
 				case ConvertType.ParameterToName:
