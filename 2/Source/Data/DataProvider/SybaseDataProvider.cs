@@ -24,14 +24,11 @@ namespace BLToolkit.Data.DataProvider
 			return true;
 		}
 
-		public override void SetParameterType(IDbDataParameter parameter, object value)
-		{
-			if (value is string)
-				parameter.DbType = DbType.AnsiString;
-		}
-
 		public override void AttachParameter(IDbCommand command, IDbDataParameter parameter)
 		{
+			if (parameter.Value is string && parameter.DbType == DbType.Guid)
+				parameter.DbType = DbType.AnsiString;
+
 			base.AttachParameter(command, parameter);
 			
 			AseParameter p = (AseParameter)parameter;

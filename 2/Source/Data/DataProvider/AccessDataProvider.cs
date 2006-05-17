@@ -11,10 +11,12 @@ namespace BLToolkit.Data.DataProvider
 			return false;
 		}
 
-		public override void SetParameterType(IDbDataParameter parameter, object value)
+		public override void AttachParameter(IDbCommand command, IDbDataParameter parameter)
 		{
-			if (value is DateTime)
+			if (parameter.Value is DateTime)
 				((OleDbParameter)parameter).OleDbType = OleDbType.Date;
+
+			base.AttachParameter(command, parameter);
 		}
 
 		public override string Name

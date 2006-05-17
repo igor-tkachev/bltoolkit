@@ -28,10 +28,12 @@ namespace BLToolkit.Data.DataProvider
 			return base.Convert(value, convertType);
 		}
 
-		public override void SetParameterType(IDbDataParameter parameter, object value)
+		public override void AttachParameter(IDbCommand command, IDbDataParameter parameter)
 		{
-			if (value is string)
+			if (parameter.Value is string && parameter.DbType == DbType.Guid)
 				parameter.DbType = DbType.AnsiString;
+
+			base.AttachParameter(command, parameter);
 		}
 
 		public override string Name

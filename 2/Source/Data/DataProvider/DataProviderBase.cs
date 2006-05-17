@@ -120,6 +120,7 @@ namespace BLToolkit.Data.DataProvider
 			return value;
 		}
 
+		[Obsolete]
 		public virtual void SetParameterType(IDbDataParameter parameter, object value)
 		{
 		}
@@ -132,6 +133,11 @@ namespace BLToolkit.Data.DataProvider
 		public virtual bool IsValueParameter(IDbDataParameter parameter)
 		{
 			return parameter.Direction != ParameterDirection.ReturnValue;
+		}
+
+		public virtual IDbDataParameter CloneParameter(IDbDataParameter parameter)
+		{
+			return (IDbDataParameter)((ICloneable)parameter).Clone();
 		}
 	}
 }
