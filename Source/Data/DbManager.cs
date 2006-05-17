@@ -949,13 +949,13 @@ namespace BLToolkit.Data
 		/// </summary>
 		/// <param name="originalParameters">The original parameter array.</param>
 		/// <returns>The result array.</returns>
-		private static IDbDataParameter[] CloneParameters(IDbDataParameter[] originalParameters)
+		private IDbDataParameter[] CloneParameters(IDbDataParameter[] originalParameters)
 		{
 			IDbDataParameter[] clonedParameters = new IDbDataParameter[originalParameters.Length];
 
 			for (int i = 0, j = originalParameters.Length; i < j; i++)
 			{
-				clonedParameters[i] = (IDbDataParameter)((ICloneable)originalParameters[i]).Clone();
+				clonedParameters[i] = _dataProvider.CloneParameter(originalParameters[i]);
 			}
 
 			return clonedParameters;
@@ -1021,7 +1021,7 @@ namespace BLToolkit.Data
 					object value = parameterValues[nValues++];
 
 					parameter.Value = value == null ? DBNull.Value : value;
-					_dataProvider.SetParameterType(parameter, value);
+					//_dataProvider.SetParameterType(parameter, value);
 				}
 			}
 
@@ -1540,7 +1540,7 @@ namespace BLToolkit.Data
 			parameter.ParameterName = parameterName;
 			parameter.Direction     = parameterDirection;
 
-			_dataProvider.SetParameterType(parameter, value);
+			//_dataProvider.SetParameterType(parameter, value);
 
 			parameter.Value = value != null? value: DBNull.Value;
 

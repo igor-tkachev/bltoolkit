@@ -106,6 +106,7 @@ namespace BLToolkit.EditableObjects
 	[ImplementInterface(typeof(IMemberwiseEditable))]
 	[ImplementInterface(typeof(IPrintDebugState))]
 	[ImplementInterface(typeof(ISetParent))]
+	[Serializable]
 	public abstract class EditableObject
 		: IEditableObject, IValidatable, INotifyPropertyChanged, ISupportMapping, IPropertyChanged, INotifyObjectEdit
 	{

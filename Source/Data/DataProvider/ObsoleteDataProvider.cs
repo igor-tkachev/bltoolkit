@@ -35,10 +35,12 @@ namespace BLToolkit.Data.DataProvider
 			return _dataProvider.Convert(value, convertType);
 		}
 
+		[Obsolete]
 		public override void SetParameterType(IDbDataParameter parameter, object value)
 		{
 			_dataProvider.SetParameterType(parameter, value);
 		}
+
 		public override Type ConnectionType
 		{
 			get { return _dataProvider.ConnectionType; }
