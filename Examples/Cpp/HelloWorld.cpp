@@ -20,7 +20,7 @@ namespace Emit
 
 		interface class IHello
 		{
-			void SayHello();
+			void SayHello(String ^toWhom);
 		};
 
 		[Test]
@@ -34,8 +34,15 @@ namespace Emit
 				->Emitter;
 
 			emit
-				->ldstr ("Hello, World!")
-				->call  (Console::typeid, "WriteLine", String::typeid )
+				// string.Format("Hello, {0} World!", toWhom)
+				//
+				->ldstr   ("Hello, {0} World!")
+				->ldarg_1
+				->call    (String::typeid, "Format", String::typeid, Object::typeid)
+
+				// Console.WriteLine("Hello, World!");
+				//
+				->call    (Console::typeid, "WriteLine", String::typeid)
 				->ret()
 				;
 
@@ -43,7 +50,7 @@ namespace Emit
 
 			IHello ^hello = (IHello^)TypeAccessor::CreateInstance(type);
 
-			hello->SayHello();
+			hello->SayHello("C++");
 		}
 	};
 }}}

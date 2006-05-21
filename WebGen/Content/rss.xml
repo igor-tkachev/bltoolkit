@@ -4,12 +4,21 @@
 		<title>Business Logic Toolkit for .NET</title>
 		<link>http://www.bltoolkit.net</link>
 		<description />
-		<lastBuildDate>2006-05-10</lastBuildDate>
+		<lastBuildDate>2006-05-21</lastBuildDate>
+		<item>
+			<title>How to map one object to another</title>
+			<link>http://www.bltoolkit.net/Doc/Mapping/ObjectToObject.htm</link>
+			<description>
+				&lt;a href="http://www.bltoolkit.net/Doc/Mapping/ObjectToObject.htm"&gt;Map.ObjectToObject&lt;/a&gt;
+			</description>
+			<category>Examples</category>
+			<pubDate>2006-05-21</pubDate>
+		</item>
 		<item>
 			<title>How to emit with BLToolkit</title>
 			<link>http://www.bltoolkit.net/Doc/Reflection/Emit/HelloWorld.htm</link>
 			<description>
-				&lt;a href="http://www.bltoolkit.net/Doc/Reflection/Emit/HelloWorld.htm"&gt;Hello, World!&lt;/a&gt;&lt;br&gt;
+				&lt;a href="http://www.bltoolkit.net/Doc/Reflection/Emit/HelloWorld.htm"&gt;Hello, World!&lt;/a&gt;
 			</description>
 			<category>Examples</category>
 			<pubDate>2006-05-10</pubDate>

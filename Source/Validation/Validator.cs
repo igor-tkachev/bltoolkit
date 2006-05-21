@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.ComponentModel;
 
+using BLToolkit.Mapping;
 using BLToolkit.Reflection;
 
 namespace BLToolkit.Validation
@@ -50,7 +51,27 @@ namespace BLToolkit.Validation
 
 		private static bool IsNullInternal(ValidationContext context)
 		{
-			return TypeAccessor.IsNull(context.Value);
+			if (context.Value == null)
+				return true;
+
+			if (context.NullValue == null)
+			{
+				ObjectMapper om = Map.GetObjectMapper(context.Object.GetType());
+				MemberMapper mm = om[context.MemberInfo.Name, true];
+
+				context.NullValue =
+					mm != null && mm.MapMemberInfo.Nullable && mm.MapMemberInfo.NullValue != null?
+						mm.MapMemberInfo.NullValue:
+						TypeAccessor.GetNullValue(context.Value.GetType());
+
+				if (context.NullValue == null)
+					context.NullValue = DBNull.Value;
+			}
+
+			if (context.NullValue is DBNull)
+				return false;
+
+			return context.NullValue.Equals(context.Value);
 		}
 
 		public static ValidationContext InitContext(

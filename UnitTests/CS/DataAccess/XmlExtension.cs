@@ -7,7 +7,7 @@ using BLToolkit.Mapping;
 using BLToolkit.Reflection.Extension;
 using BLToolkit.Data;
 
-namespace A.DataAccess
+namespace DataAccess
 {
 	[TestFixture]
 	public class XmlExtension

@@ -299,11 +299,12 @@ namespace WebGen
 
 			using (StreamReader sr = File.OpenText(sourcePath))
 				for (string s = sr.ReadLine(); s != null; s = sr.ReadLine())
-					if (!s.StartsWith("//@"))
+					if (!s.StartsWith("//@") && !s.StartsWith("''@"))
 						code += s + "\n";
 
 			switch (Path.GetExtension(sourcePath).ToLower())
 			{
+				case ".cpp":    code = "[c]"    + code + "[/c]";    break;
 				case ".cs":     code = "[c#]"   + code + "[/c#]";   break;
 				case ".vb":     code = "[vb]"   + code + "[/vb]";   break;
 				case ".xml":

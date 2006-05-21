@@ -71,5 +71,12 @@ namespace BLToolkit.Validation
 		{
 			get { return _memberInfo;  }
 		}
+
+		private object _nullValue;
+		public  object  NullValue
+		{
+			get { return _nullValue;  }
+			set { _nullValue = value; }
+		}
 	}
 }
