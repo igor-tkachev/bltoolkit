@@ -78,5 +78,19 @@ namespace BLToolkit.Validation
 			get { return _nullValue;  }
 			set { _nullValue = value; }
 		}
+
+		public string MemberName
+		{
+			get
+			{
+				if (_memberInfo != null)
+					return _memberInfo.Name;
+
+				if (_propertyDescriptor != null)
+					return _propertyDescriptor.Name;
+
+				return null;
+			}
+		}
 	}
 }

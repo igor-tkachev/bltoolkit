@@ -68,7 +68,7 @@ namespace WebGen
 
 			foreach (string file in files)
 			{
-				string s = file.Replace(destPath, "http://www.bltoolkit.net/");
+				string s = file.Replace(destPath, "http://www.bltoolkit.net/").Replace("\\", "/");
 
 				if (s == "http://www.bltoolkit.net/" + "index.htm")
 					continue;
@@ -79,8 +79,7 @@ namespace WebGen
 		<lastmod>{1:yyyy-MM-dd}</lastmod>
 		<changefreq>weekly</changefreq>
 	</url>",
-					file.Replace(destPath, "http://www.bltoolkit.net/"),
-					DateTime.Now);
+					s, DateTime.Now);
 			}
 
 			using (StreamWriter sw = File.CreateText(destPath + "sitemap.xml"))

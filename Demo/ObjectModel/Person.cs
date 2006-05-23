@@ -12,7 +12,7 @@ namespace BLToolkit.Demo.ObjectModel
 		[MaxLength(50), Required] public abstract string LastName   { get; set; }
 		[MaxLength(50), Required] public abstract string FirstName  { get; set; }
 		[MaxLength(50)]           public abstract string MiddleName { get; set; }
-		[               Required] public abstract Gender Gender     { get; set; }
+		                          public abstract Gender Gender     { get; set; }
 
 		[MapIgnore]
 		public string FullName

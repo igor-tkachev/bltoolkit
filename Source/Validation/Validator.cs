@@ -57,7 +57,7 @@ namespace BLToolkit.Validation
 			if (context.NullValue == null)
 			{
 				ObjectMapper om = Map.GetObjectMapper(context.Object.GetType());
-				MemberMapper mm = om[context.MemberInfo.Name, true];
+				MemberMapper mm = om[context.MemberName, true];
 
 				context.NullValue =
 					mm != null && mm.MapMemberInfo.Nullable && mm.MapMemberInfo.NullValue != null?
