@@ -40,6 +40,12 @@
     <Compile Include="BusinessLogic\ManagerBase.cs" />
     <Compile Include="BusinessLogic\DataAccess\PersonAccessor.cs" />
     <Compile Include="BusinessLogic\PersonManager.cs" />
+    <Compile Include="Controls\EnumSelector.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Controls\EnumSelector.Designer.cs">
+      <DependentUpon>EnumSelector.cs</DependentUpon>
+    </Compile>
     <Compile Include="Forms\BizEntityForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -82,6 +88,7 @@
     </Compile>
     <None Include="App.config" />
     <None Include="Properties\DataSources\BLToolkit.Demo.Forms.ObjectViews.PersonView.datasource" />
+    <None Include="Properties\DataSources\BLToolkit.Demo.ObjectModel.Gender.datasource" />
     <None Include="Properties\DataSources\BLToolkit.Demo.ObjectModel.Person.datasource" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>

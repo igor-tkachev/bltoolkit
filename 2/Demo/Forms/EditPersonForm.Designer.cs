@@ -33,11 +33,12 @@ namespace BLToolkit.Demo.Forms
 			this.personBinder = new BLToolkit.ComponentModel.ObjectBinder(this.components);
 			this.firstNameLabel = new System.Windows.Forms.Label();
 			this.middleNameLabel = new System.Windows.Forms.Label();
-			this.MiddleNameTextBox = new System.Windows.Forms.TextBox();
+			this.middleNameTextBox = new System.Windows.Forms.TextBox();
 			this.lastNameLabel = new System.Windows.Forms.Label();
 			this.lastNameTextBox = new System.Windows.Forms.TextBox();
 			this.okButton = new System.Windows.Forms.Button();
 			this.cancelButton = new System.Windows.Forms.Button();
+			this.genderSelector = new BLToolkit.Demo.Controls.EnumSelector(this.components);
 			this.SuspendLayout();
 			// 
 			// firstNameTextBox
@@ -72,13 +73,13 @@ namespace BLToolkit.Demo.Forms
 			this.middleNameLabel.TabIndex = 3;
 			this.middleNameLabel.Text = "Middle Name:";
 			// 
-			// MiddleNameTextBox
+			// middleNameTextBox
 			// 
-			this.MiddleNameTextBox.DataBindings.Add(new System.Windows.Forms.Binding("Text", this.personBinder, "MiddleName", true));
-			this.MiddleNameTextBox.Location = new System.Drawing.Point(90, 44);
-			this.MiddleNameTextBox.Name = "MiddleNameTextBox";
-			this.MiddleNameTextBox.Size = new System.Drawing.Size(160, 20);
-			this.MiddleNameTextBox.TabIndex = 4;
+			this.middleNameTextBox.DataBindings.Add(new System.Windows.Forms.Binding("Text", this.personBinder, "MiddleName", true));
+			this.middleNameTextBox.Location = new System.Drawing.Point(90, 44);
+			this.middleNameTextBox.Name = "middleNameTextBox";
+			this.middleNameTextBox.Size = new System.Drawing.Size(160, 20);
+			this.middleNameTextBox.TabIndex = 4;
 			// 
 			// lastNameLabel
 			// 
@@ -100,7 +101,7 @@ namespace BLToolkit.Demo.Forms
 			// okButton
 			// 
 			this.okButton.DialogResult = System.Windows.Forms.DialogResult.OK;
-			this.okButton.Location = new System.Drawing.Point(130, 268);
+			this.okButton.Location = new System.Drawing.Point(33, 235);
 			this.okButton.Name = "okButton";
 			this.okButton.Size = new System.Drawing.Size(75, 23);
 			this.okButton.TabIndex = 100;
@@ -110,12 +111,24 @@ namespace BLToolkit.Demo.Forms
 			// cancelButton
 			// 
 			this.cancelButton.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-			this.cancelButton.Location = new System.Drawing.Point(262, 268);
+			this.cancelButton.Location = new System.Drawing.Point(157, 235);
 			this.cancelButton.Name = "cancelButton";
 			this.cancelButton.Size = new System.Drawing.Size(75, 23);
 			this.cancelButton.TabIndex = 101;
 			this.cancelButton.Text = "Cancel";
 			this.cancelButton.UseVisualStyleBackColor = true;
+			// 
+			// genderSelector
+			// 
+			this.genderSelector.DataBindings.Add(new System.Windows.Forms.Binding("Value", this.personBinder, "Gender", true));
+			this.genderSelector.Location = new System.Drawing.Point(90, 103);
+			this.genderSelector.Name = "genderSelector";
+			this.genderSelector.Size = new System.Drawing.Size(102, 113);
+			this.genderSelector.TabIndex = 7;
+			this.genderSelector.TabStop = false;
+			this.genderSelector.Text = "Gender";
+			this.genderSelector.Value = -1;
+			this.genderSelector.ValueType = typeof(BLToolkit.Demo.ObjectModel.Gender);
 			// 
 			// EditPersonForm
 			// 
@@ -123,16 +136,18 @@ namespace BLToolkit.Demo.Forms
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.CancelButton = this.cancelButton;
-			this.ClientSize = new System.Drawing.Size(539, 303);
+			this.ClientSize = new System.Drawing.Size(269, 268);
 			this.Controls.Add(this.cancelButton);
 			this.Controls.Add(this.okButton);
+			this.Controls.Add(this.genderSelector);
 			this.Controls.Add(this.lastNameLabel);
 			this.Controls.Add(this.middleNameLabel);
 			this.Controls.Add(this.firstNameLabel);
 			this.Controls.Add(this.lastNameTextBox);
-			this.Controls.Add(this.MiddleNameTextBox);
+			this.Controls.Add(this.middleNameTextBox);
 			this.Controls.Add(this.firstNameTextBox);
 			this.DataBindings.Add(new System.Windows.Forms.Binding("Text", this.personBinder, "FormTitle", true));
+			this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
 			this.MaximizeBox = false;
 			this.MinimizeBox = false;
 			this.Name = "EditPersonForm";
@@ -151,10 +166,11 @@ namespace BLToolkit.Demo.Forms
 		private System.Windows.Forms.TextBox firstNameTextBox;
 		private System.Windows.Forms.Label firstNameLabel;
 		private System.Windows.Forms.Label middleNameLabel;
-		private System.Windows.Forms.TextBox MiddleNameTextBox;
+		private System.Windows.Forms.TextBox middleNameTextBox;
 		private System.Windows.Forms.Label lastNameLabel;
 		private System.Windows.Forms.TextBox lastNameTextBox;
 		private System.Windows.Forms.Button okButton;
 		private System.Windows.Forms.Button cancelButton;
+		private BLToolkit.Demo.Controls.EnumSelector genderSelector;
 	}
 }
