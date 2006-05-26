@@ -11,6 +11,7 @@ namespace BLToolkit.Data
 		CloseConnection,
 		BeginTransaction,
 		CommitTransaction,
+		RollbackTransaction,
 		DisposeTransaction,
 		DeriveParameters,
 		PrepareCommand,
