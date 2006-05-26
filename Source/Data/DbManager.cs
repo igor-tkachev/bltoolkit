@@ -576,6 +576,29 @@ namespace BLToolkit.Data
 			return this;
 		}
 
+		public DbManager RollbackTransaction()
+		{
+			if (_transaction != null)
+			{
+				try
+				{
+					OnBeforeOperation(OperationType.RollbackTransaction);
+					_transaction.Rollback();
+					OnAfterOperation (OperationType.RollbackTransaction);
+				}
+				catch (Exception ex)
+				{
+					OnOperationException(OperationType.RollbackTransaction, ex);
+					throw ex;
+				}
+
+				if (_closeTransaction)
+					_transaction = null;
+			}
+
+			return this;
+		}
+
 		#endregion
 
 		#region Protected Methods
