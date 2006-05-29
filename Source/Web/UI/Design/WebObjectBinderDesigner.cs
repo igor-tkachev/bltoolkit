@@ -8,10 +8,6 @@ namespace BLToolkit.Web.UI.Design
 	[SecurityPermission(SecurityAction.Demand, Flags=SecurityPermissionFlag.UnmanagedCode)]
 	class  WebObjectBinderDesigner : DataSourceDesigner
 	{
-		public WebObjectBinderDesigner()
-		{
-		}
-
 		private DesignerDataSourceView _view;
 		private WebObjectBinder        _component;
 

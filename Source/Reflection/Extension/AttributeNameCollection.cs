@@ -138,12 +138,12 @@ namespace BLToolkit.Reflection.Extension
 
 		public bool IsSynchronized
 		{
-			get { return _attributes.IsSynchronized; ; }
+			get { return _attributes.IsSynchronized; }
 		}
 
 		public object SyncRoot
 		{
-			get { return _attributes.SyncRoot;; }
+			get { return _attributes.SyncRoot; }
 		}
 
 		#endregion

@@ -51,12 +51,12 @@ namespace BLToolkit.Reflection.Extension
 
 		public bool IsSynchronized
 		{
-			get { return _types.IsSynchronized; ; }
+			get { return _types.IsSynchronized; }
 		}
 
 		public object SyncRoot
 		{
-			get { return _types.SyncRoot;; }
+			get { return _types.SyncRoot; }
 		}
 
 		#endregion

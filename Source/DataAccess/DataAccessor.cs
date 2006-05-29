@@ -138,7 +138,7 @@ namespace BLToolkit.DataAccess
 		protected virtual string GetSpName(Type type, string actionName)
 		{
 			if (type == null)
-				return GetDefaultSpName((string)null, actionName);
+				return GetDefaultSpName(null, actionName);
 
 			string key       = type.Name + "$" + actionName;
 			string sprocName = (string)_actionSproc[key];
@@ -921,7 +921,7 @@ namespace BLToolkit.DataAccess
 		{
 			SqlQueryInfo query = GetSqlQueryInfo(db, typeof(T), "SelectAll");
 
-			return (L)db
+			return db
 				.SetCommand(query.QueryText)
 				.ExecuteList<L,T>(list);
 		}

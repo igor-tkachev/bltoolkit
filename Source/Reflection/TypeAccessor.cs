@@ -99,10 +99,8 @@ namespace BLToolkit.Reflection
 			Type         sType = source.GetType();
 			Type         dType = dest.  GetType();
 
-			if (TypeHelper.IsSameOrParent(sType, dType))
-				ta = TypeAccessor.GetAccessor(sType);
-			else if (TypeHelper.IsSameOrParent(dType, sType))
-				ta = TypeAccessor.GetAccessor(dType);
+			if (TypeHelper.IsSameOrParent(sType, dType))      ta = GetAccessor(sType);
+			else if (TypeHelper.IsSameOrParent(dType, sType)) ta = GetAccessor(dType);
 			else
 				throw new ArgumentException();
 
@@ -116,7 +114,7 @@ namespace BLToolkit.Reflection
 		{
 			if (source == null) throw new ArgumentNullException("source");
 
-			TypeAccessor ta = TypeAccessor.GetAccessor(source.GetType());
+			TypeAccessor ta = GetAccessor(source.GetType());
 
 			object dest = ta.CreateInstanceEx();
 
@@ -492,7 +490,7 @@ namespace BLToolkit.Reflection
 				return;
 			}
 
-			TypeAccessor   ta      = TypeAccessor.GetAccessor(o.GetType());
+			TypeAccessor   ta      = GetAccessor(o.GetType());
 			MemberAccessor ma;
 			int            nameLen = 0;
 			int            typeLen = 0;
@@ -616,7 +614,7 @@ namespace BLToolkit.Reflection
 
 			if (objectViewType != null)
 			{
-				TypeAccessor viewAccessor = TypeAccessor.GetAccessor(objectViewType);
+				TypeAccessor viewAccessor = GetAccessor(objectViewType);
 				IObjectView  objectView   = (IObjectView)viewAccessor.CreateInstanceEx();
 				ArrayList    list         = new ArrayList();
 
@@ -700,7 +698,7 @@ namespace BLToolkit.Reflection
 					childParentAccessors[parentAccessors.Length] = pd;
 
 					PropertyDescriptorCollection pdch =
-						TypeAccessor.GetAccessor(propertyType).PropertyDescriptors;
+						GetAccessor(propertyType).PropertyDescriptors;
 
 					pdch = pdch.Sort(new PropertyDescriptorComparer());
 					pdch = GetExtendedProperties(

@@ -199,7 +199,7 @@ namespace BLToolkit.Reflection.Emit
 		/// Specifies the namespace to be used in evaluating locals and watches for 
 		/// the current active lexical scope.
 		/// </summary>
-		/// <param name="usingNamespace">The namespace to be used in evaluating locals and watches for the current active lexical scope.</param>
+		/// <param name="namespaceName">The namespace to be used in evaluating locals and watches for the current active lexical scope.</param>
 		/// <returns>Current instance of the EmitHelper.</returns>
 		public EmitHelper UsingNamespace(string namespaceName)
 		{
@@ -732,8 +732,8 @@ namespace BLToolkit.Reflection.Emit
 		/// Calls ILGenerator.EmitCall(<see cref="OpCodes.Callvirt"/>, methodInfo, optionalParameterTypes) that
 		/// calls a late-bound method on an object, pushing the return value onto the evaluation stack.
 		/// </summary>
-		/// <param name="methodInfo">The method to be called.</param>
-		/// <param name="optionalParameterTypes">The types of the optional arguments if the method is a varargs method.</param>
+		/// <param name="methodName">The method to be called.</param>
+		/// <param name="parameterTypes">The types of the optional arguments if the method is a varargs method.</param>
 		/// <seealso cref="OpCodes.Callvirt">OpCodes.Callvirt</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.EmitCall(OpCode,MethodInfo,Type[])">ILGenerator.EmitCall</seealso>
 		public EmitHelper callvirt(Type type, string methodName, params Type[] parameterTypes)
@@ -1415,6 +1415,10 @@ namespace BLToolkit.Reflection.Emit
 			return this;
 		}
 
+		/// <summary>
+		/// Loads an argument onto the stack.
+		/// </summary>
+		/// <param name="parameterInfo">A ParameterInfo representing a parameter.</param>
 		public EmitHelper ldarg(ParameterInfo parameterInfo)
 		{
 			if (parameterInfo == null) throw new ArgumentNullException("parameterInfo");
@@ -1424,15 +1428,6 @@ namespace BLToolkit.Reflection.Emit
 
 			return ldarg(parameterInfo.Position + (isStatic? 0: 1));
 		}
-
-		/// <summary>
-		/// Loads an argument onto the stack.
-		/// </summary>
-		/// <param name="ParameterInfo">A ParameterInfo representing a parameter.</param>
-		///public EmitHelper ldarg(ParameterInfo parameterInfo)
-		///{
-		///	return ldarg(parameterInfo.Position + 1);
-		///}
 
 		/// <summary>
 		/// Calls ILGenerator.Emit(<see cref="OpCodes.Ldarga"/>, short) that
@@ -1471,17 +1466,6 @@ namespace BLToolkit.Reflection.Emit
 
 			return this;
 		}
-
-		/// <summary>
-		/// Load an argument address onto the evaluation stack.
-		/// </summary>
-		/// <param name="ParameterInfo">A <see cref="ParameterInfo"/> representing the parameter.</param>
-		///public EmitHelper ldarga(ParameterInfo parameterInfo)
-		///{
-		///	int index = parameterInfo.Position + 1;
-
-		///	return index < byte.MinValue? ldarga_s((byte)index): ldarga((short)index);
-		///}
 
 		/// <summary>
 		/// Calls ILGenerator.Emit(<see cref="OpCodes.Ldarg_0"/>) that
@@ -2121,7 +2105,7 @@ namespace BLToolkit.Reflection.Emit
 		/// Calls ILGenerator.Emit(<see cref="OpCodes.Ldloca"/>, LocalBuilder) that
 		/// loads the address of the local variable at a specific index onto the evaluation stack.
 		/// </summary>
-		/// <param name="LocalBuilder">A <see cref="LocalBuilder"/> representing the local variable.</param>
+		/// <param name="local">A <see cref="LocalBuilder"/> representing the local variable.</param>
 		/// <seealso cref="OpCodes.Ldloca">OpCodes.Ldloca</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode,short)">ILGenerator.Emit</seealso>
 		public EmitHelper ldloca(LocalBuilder local)
@@ -2627,14 +2611,6 @@ namespace BLToolkit.Reflection.Emit
 
 			return this;
 		}
-
-		/// <summary>
-		/// Stores the value on top of the evaluation stack in the argument slot at a specified parameter index.
-		/// </summary>
-		/// <param name="parameterInfo">A <see cref="ParameterInfo"/> representing the parameter.</param>
-		///public EmitHelper starg(ParameterInfo parameterInfo)
-		///{
-		///	int index = parameterInfo.Position + 1;
 
 		///	switch (index)
 		///	{

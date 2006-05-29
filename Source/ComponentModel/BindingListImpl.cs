@@ -1,7 +1,6 @@
 using System;
 using System.Collections;
 using System.ComponentModel;
-using System.Diagnostics.CodeAnalysis;
 
 using BLToolkit.Reflection;
 using BLToolkit.EditableObjects;

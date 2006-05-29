@@ -1,6 +1,5 @@
 using System;
 using System.Data.SqlTypes;
-using System.Diagnostics.CodeAnalysis;
 
 using BLToolkit.Reflection;
 
@@ -9,10 +8,6 @@ namespace BLToolkit.Mapping
 	public class MemberMapper
 	{
 		#region Init
-
-		public MemberMapper()
-		{
-		}
 
 		public virtual void Init(MapMemberInfo mapMemberInfo)
 		{
@@ -157,17 +152,17 @@ namespace BLToolkit.Mapping
 
 			Type type = mi.MemberAccessor.UnderlyingType;
 
-			if (type == typeof(SByte))   return n? new SByteMapper.  Nullable(): new SByteMapper();
-			if (type == typeof(Int16))   return n? new Int16Mapper.  Nullable(): new Int16Mapper();
-			if (type == typeof(Int32))   return n? new Int32Mapper.  Nullable(): new Int32Mapper();
-			if (type == typeof(Int64))   return n? new Int64Mapper.  Nullable(): new Int64Mapper();
-			if (type == typeof(Byte))    return n? new ByteMapper.   Nullable(): new ByteMapper();
-			if (type == typeof(UInt16))  return n? new UInt16Mapper. Nullable(): new UInt16Mapper();
-			if (type == typeof(UInt32))  return n? new UInt32Mapper. Nullable(): new UInt32Mapper();
-			if (type == typeof(UInt64))  return n? new UInt64Mapper. Nullable(): new UInt64Mapper();
-			if (type == typeof(Single))  return n? new SingleMapper. Nullable(): new SingleMapper();
-			if (type == typeof(Double))  return n? new DoubleMapper. Nullable(): new DoubleMapper();
-			if (type == typeof(Char))    return n? new CharMapper.   Nullable(): new CharMapper();
+			if (type == typeof(SByte))   return n? new SByteMapper.Nullable(): new SByteMapper();
+			if (type == typeof(Int16))   return n? new Int16Mapper.Nullable(): new Int16Mapper();
+			if (type == typeof(Int32))   return n? new Int32Mapper.Nullable(): new Int32Mapper();
+			if (type == typeof(Int64))   return n? new Int64Mapper.Nullable(): new Int64Mapper();
+			if (type == typeof(Byte))    return n? new ByteMapper.Nullable(): new ByteMapper();
+			if (type == typeof(UInt16))  return n? new UInt16Mapper.Nullable(): new UInt16Mapper();
+			if (type == typeof(UInt32))  return n? new UInt32Mapper.Nullable(): new UInt32Mapper();
+			if (type == typeof(UInt64))  return n? new UInt64Mapper.Nullable(): new UInt64Mapper();
+			if (type == typeof(Single))  return n? new SingleMapper.Nullable(): new SingleMapper();
+			if (type == typeof(Double))  return n? new DoubleMapper.Nullable(): new DoubleMapper();
+			if (type == typeof(Char))    return n? new CharMapper.Nullable(): new CharMapper();
 			if (type == typeof(Boolean)) return n? new BooleanMapper.Nullable(): new BooleanMapper();
 
 			throw new InvalidOperationException();
@@ -563,8 +558,8 @@ namespace BLToolkit.Mapping
 				else              return n? new StringMapper.Nullable(): new StringMapper();
 
 			if (type == typeof(DateTime)) return n? new DateTimeMapper.Nullable(): new DateTimeMapper();
-			if (type == typeof(Decimal))  return n? new DecimalMapper. Nullable(): new DecimalMapper();
-			if (type == typeof(Guid))     return n? new GuidMapper.    Nullable(): new GuidMapper();
+			if (type == typeof(Decimal))  return n? new DecimalMapper.Nullable(): new DecimalMapper();
+			if (type == typeof(Guid))     return n? new GuidMapper.Nullable(): new GuidMapper();
 
 			return null;
 		}
@@ -738,11 +733,11 @@ namespace BLToolkit.Mapping
 			{
 				underlyingType = Enum.GetUnderlyingType(underlyingType);
 
-				if (underlyingType == typeof(SByte))    return new NullableSByteMapper. Enum();
-				if (underlyingType == typeof(Int16))    return new NullableInt16Mapper. Enum();
-				if (underlyingType == typeof(Int32))    return new NullableInt32Mapper. Enum();
-				if (underlyingType == typeof(Int64))    return new NullableInt64Mapper. Enum();
-				if (underlyingType == typeof(Byte))     return new NullableByteMapper.  Enum();
+				if (underlyingType == typeof(SByte))    return new NullableSByteMapper.Enum();
+				if (underlyingType == typeof(Int16))    return new NullableInt16Mapper.Enum();
+				if (underlyingType == typeof(Int32))    return new NullableInt32Mapper.Enum();
+				if (underlyingType == typeof(Int64))    return new NullableInt64Mapper.Enum();
+				if (underlyingType == typeof(Byte))     return new NullableByteMapper.Enum();
 				if (underlyingType == typeof(UInt16))   return new NullableUInt16Mapper.Enum();
 				if (underlyingType == typeof(UInt32))   return new NullableUInt32Mapper.Enum();
 				if (underlyingType == typeof(UInt64))   return new NullableUInt64Mapper.Enum();
@@ -1103,18 +1098,18 @@ namespace BLToolkit.Mapping
 
 			bool d = mi.MapValues != null;
 
-			if (type == typeof(SqlByte))     return d? new SqlByteMapper.    Default(): new SqlByteMapper();
-			if (type == typeof(SqlInt16))    return d? new SqlInt16Mapper.   Default(): new SqlInt16Mapper();
-			if (type == typeof(SqlInt32))    return d? new SqlInt32Mapper.   Default(): new SqlInt32Mapper();
-			if (type == typeof(SqlInt64))    return d? new SqlInt64Mapper.   Default(): new SqlInt64Mapper();
-			if (type == typeof(SqlSingle))   return d? new SqlSingleMapper.  Default(): new SqlSingleMapper();
-			if (type == typeof(SqlBoolean))  return d? new SqlBooleanMapper. Default(): new SqlBooleanMapper();
-			if (type == typeof(SqlDouble))   return d? new SqlDoubleMapper.  Default(): new SqlDoubleMapper();
+			if (type == typeof(SqlByte))     return d? new SqlByteMapper.Default(): new SqlByteMapper();
+			if (type == typeof(SqlInt16))    return d? new SqlInt16Mapper.Default(): new SqlInt16Mapper();
+			if (type == typeof(SqlInt32))    return d? new SqlInt32Mapper.Default(): new SqlInt32Mapper();
+			if (type == typeof(SqlInt64))    return d? new SqlInt64Mapper.Default(): new SqlInt64Mapper();
+			if (type == typeof(SqlSingle))   return d? new SqlSingleMapper.Default(): new SqlSingleMapper();
+			if (type == typeof(SqlBoolean))  return d? new SqlBooleanMapper.Default(): new SqlBooleanMapper();
+			if (type == typeof(SqlDouble))   return d? new SqlDoubleMapper.Default(): new SqlDoubleMapper();
 			if (type == typeof(SqlDateTime)) return d? new SqlDateTimeMapper.Default(): new SqlDateTimeMapper();
-			if (type == typeof(SqlDecimal))  return d? new SqlDecimalMapper. Default(): new SqlDecimalMapper();
-			if (type == typeof(SqlMoney))    return d? new SqlMoneyMapper.   Default(): new SqlMoneyMapper();
-			if (type == typeof(SqlGuid))     return d? new SqlGuidMapper.    Default(): new SqlGuidMapper();
-			if (type == typeof(SqlString))   return d? new SqlStringMapper.  Default(): new SqlStringMapper();
+			if (type == typeof(SqlDecimal))  return d? new SqlDecimalMapper.Default(): new SqlDecimalMapper();
+			if (type == typeof(SqlMoney))    return d? new SqlMoneyMapper.Default(): new SqlMoneyMapper();
+			if (type == typeof(SqlGuid))     return d? new SqlGuidMapper.Default(): new SqlGuidMapper();
+			if (type == typeof(SqlString))   return d? new SqlStringMapper.Default(): new SqlStringMapper();
 
 			return null;
 		}

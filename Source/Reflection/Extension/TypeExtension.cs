@@ -1,7 +1,6 @@
 using System;
-using System.Collections;
-using System.Reflection;
 using System.IO;
+using System.Reflection;
 using System.Xml;
 
 namespace BLToolkit.Reflection.Extension
@@ -225,7 +224,7 @@ namespace BLToolkit.Reflection.Extension
 					return typeExtensions[attr.TypeName];
 			}
 
-			return typeExtensions != null? typeExtensions[type]: TypeExtension.Null;
+			return typeExtensions != null? typeExtensions[type]: Null;
 		}
 
 		#endregion

@@ -75,7 +75,7 @@ namespace BLToolkit.Data
 		/// for an explanation and use of the configuration string.
 		/// </remarks>
 		/// <param name="configuration">Configuration string not containing provider name.</param>
-		/// <param name="provider">Provider configuration name.</param>
+		/// <param name="providerName">Provider configuration name.</param>
 		/// <returns>An instance of the <see cref="DbManager"/> class.</returns>
 		public DbManager(string providerName, string configuration)
 			: this((IDbConnection)null, providerName + ProviderNameDivider + configuration)
@@ -183,7 +183,6 @@ namespace BLToolkit.Data
 		/// A data provider.
 		/// </value>
 		/// <include file="Examples.xml" path='examples/db[@name="DataProvider"]/*' />
-		/// <seealso cref="AddDataProvider">AddDataProvider Method</seealso>
 		public DataProviderBase DataProvider
 		{
 			[System.Diagnostics.DebuggerStepThrough]
@@ -2260,7 +2259,7 @@ namespace BLToolkit.Data
 		/// and calls the <see cref="ExecuteNonQuery"/> method for each item of the list.
 		/// </remarks>
 		/// <include file="Examples1.xml" path='examples/db[@name="Execute(CommandType,string,IList)"]/*' />
-		/// <param name="list">The list of objects used to execute the command.</param>
+		/// <param name="collection">The list of objects used to execute the command.</param>
 		/// <returns>The number of rows affected by the command.</returns>
 		public int ExecuteForEach(ICollection collection)
 		{
@@ -2865,7 +2864,7 @@ namespace BLToolkit.Data
 		/// <returns>The <see cref="DataTable"/>.</returns>
 		public DataTable ExecuteDataTable()
 		{
-			return ExecuteDataTable((DataTable)null);
+			return ExecuteDataTable(null);
 		}
 
 		/// <summary>
@@ -3226,7 +3225,6 @@ namespace BLToolkit.Data
 		/// using the provided parameters.
 		/// </summary>
 		/// <include file="Examples.xml" path='examples/db[@name="ExecuteDictionary(string,Type)"]/*' />
-		/// <param name="keyFieldName">The field name that is used as a key to populate <see cref="Hashtable"/>.</param>
 		/// <param name="type">Business object type.</param>
 		/// <returns>An instance of the <see cref="Hashtable"/> class.</returns>
 		public Hashtable ExecuteDictionary(
@@ -3246,7 +3244,6 @@ namespace BLToolkit.Data
 		/// </summary>
 		/// <include file="Examples.xml" path='examples/db[@name="ExecuteDictionary(Hashtable,string,Type)"]/*' />
 		/// <param name="dictionary">A dictionary of mapped business objects to populate.</param>
-		/// <param name="keyFieldName">The field name that is used as a key to populate <see cref="IDictionary"/>.</param>
 		/// <param name="type">Business object type.</param>
 		/// <returns>An instance of the <see cref="IDictionary"/>.</returns>
 		public IDictionary ExecuteDictionary(
@@ -3268,9 +3265,7 @@ namespace BLToolkit.Data
 		/// <summary>
 		/// Executes the query, and returns a dictionary of business entities.
 		/// </summary>
-		/// <typeparam name="TKey">Key's type.</typeparam>
 		/// <typeparam name="TValue">Value's type.</typeparam>
-		/// <param name="keyFieldName">The field name that is used as a key to populate the dictionary.</param>
 		/// <returns>An instance of the dictionary.</returns>
 		public Dictionary<IndexValue, TValue> ExecuteDictionary<TValue>(
 			MapIndex        index,

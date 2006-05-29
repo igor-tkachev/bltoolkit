@@ -279,7 +279,7 @@ namespace BLToolkit.TypeBuilder
 
 				if (type != null)
 				{
-					Type newType = TypeFactory.GetType(type, new AbstractClassBuilder());
+					Type newType = GetType(type, new AbstractClassBuilder());
 
 					if (newType.Assembly.FullName == args.Name)
 						return newType.Assembly;

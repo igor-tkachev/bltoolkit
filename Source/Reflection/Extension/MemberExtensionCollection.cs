@@ -45,12 +45,12 @@ namespace BLToolkit.Reflection.Extension
 
 		public bool IsSynchronized
 		{
-			get { return _members.IsSynchronized; ; }
+			get { return _members.IsSynchronized; }
 		}
 
 		public object SyncRoot
 		{
-			get { return _members.SyncRoot;; }
+			get { return _members.SyncRoot; }
 		}
 
 		#endregion

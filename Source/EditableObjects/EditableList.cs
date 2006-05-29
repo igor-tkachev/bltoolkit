@@ -120,12 +120,12 @@ namespace BLToolkit.EditableObjects
 
 		public int FindLastIndex(Predicate<T> match)
 		{
-			return this.FindLastIndex(List.Count - 1, List.Count, match);
+			return FindLastIndex(List.Count - 1, List.Count, match);
 		}
 
 		public int FindLastIndex(int startIndex, Predicate<T> match)
 		{
-			return this.FindLastIndex(startIndex, startIndex + 1, match);
+			return FindLastIndex(startIndex, startIndex + 1, match);
 		}
 
 		public int FindLastIndex(int startIndex, int count, Predicate<T> match)

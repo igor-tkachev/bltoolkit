@@ -7,10 +7,6 @@ namespace BLToolkit.ComponentModel
 {
 	public class TypeTypeConverter : TypeConverter
 	{
-		public TypeTypeConverter()
-		{
-		}
-
 		public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType)
 		{
 			return sourceType == typeof(string);

@@ -1,7 +1,6 @@
 using System;
 using System.ComponentModel;
 
-using BLToolkit.EditableObjects;
 using BLToolkit.Reflection;
 
 namespace BLToolkit.ComponentModel

@@ -13,8 +13,6 @@ namespace BLToolkit.Validation
 
 		public static void Validate(ValidationContext context)
 		{
-			ArrayList list = new ArrayList();
-
 			foreach (MemberAccessor ma in context.TypeAccessor)
 			{
 				context.MemberAccessor = ma;
