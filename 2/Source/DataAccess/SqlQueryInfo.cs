@@ -3,7 +3,6 @@ using System.Collections;
 using System.Data;
 
 using BLToolkit.Data;
-using BLToolkit.Reflection;
 using BLToolkit.Mapping;
 
 namespace BLToolkit.DataAccess

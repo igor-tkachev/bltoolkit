@@ -1,7 +1,5 @@
 using System;
 
-using BLToolkit.Reflection;
-
 namespace BLToolkit.Mapping
 {
 	public class MapIndex

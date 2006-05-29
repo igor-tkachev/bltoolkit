@@ -3,19 +3,19 @@ using System.Collections;
 using System.ComponentModel;
 using System.Drawing;
 using System.Drawing.Design;
-using System.Security.Permissions;
-using System.Web;
+using System.Web.Compilation;
 using System.Web.UI;
 
 using BLToolkit.ComponentModel;
-using System.Web.Compilation;
+using BLToolkit.ComponentModel.Design;
 using BLToolkit.EditableObjects;
+using BLToolkit.Web.UI.Design;
 
 namespace BLToolkit.Web.UI
 {
 	[DefaultProperty("TypeName")]
 	[ToolboxBitmap(typeof(WebObjectBinder))]
-	[Designer(typeof(Design.WebObjectBinderDesigner))]
+	[Designer(typeof(WebObjectBinderDesigner))]
 	[PersistChildren(false)]
 	[ParseChildren(true)]
 	[Description("BLToolkit Web Object Binder")]
@@ -37,7 +37,7 @@ namespace BLToolkit.Web.UI
 		[DefaultValue(null)]
 		[Category("Data")]
 #if FW2
-		[Editor(typeof(BLToolkit.ComponentModel.Design.TypeNameEditor), typeof(UITypeEditor))]
+		[Editor(typeof(TypeNameEditor), typeof(UITypeEditor))]
 #endif
 		public string TypeName
 		{
@@ -57,7 +57,7 @@ namespace BLToolkit.Web.UI
 		[DefaultValue(null)]
 		[Category("Data")]
 #if FW2
-		[Editor(typeof(BLToolkit.ComponentModel.Design.ObjectViewTypeNameEditor), typeof(UITypeEditor))]
+		[Editor(typeof(ObjectViewTypeNameEditor), typeof(UITypeEditor))]
 #endif
 		public string ObjectViewTypeName
 		{

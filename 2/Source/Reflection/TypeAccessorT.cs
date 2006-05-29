@@ -1,5 +1,4 @@
 using System;
-using System.Diagnostics.CodeAnalysis;
 
 namespace BLToolkit.Reflection
 {

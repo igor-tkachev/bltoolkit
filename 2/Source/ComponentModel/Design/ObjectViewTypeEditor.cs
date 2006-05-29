@@ -1,7 +1,4 @@
 using System;
-using System.ComponentModel;
-using System.ComponentModel.Design.Data;
-using System.Windows.Forms;
 
 using BLToolkit.Reflection;
 

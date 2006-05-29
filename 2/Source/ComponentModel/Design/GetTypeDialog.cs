@@ -1,14 +1,10 @@
 using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Text;
-using System.Windows.Forms;
-using System.ComponentModel.Design;
 using System.Collections;
-using System.Reflection;
+using System.Collections.Generic;
+using System.ComponentModel.Design;
 using System.Diagnostics;
+using System.Reflection;
+using System.Windows.Forms;
 
 namespace BLToolkit.ComponentModel.Design
 {

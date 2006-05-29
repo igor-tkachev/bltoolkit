@@ -140,7 +140,7 @@ namespace BLToolkit.Mapping
 		public virtual void SetValue(object o, string name, object value)
 		{
 			if (_createColumns)
-				CreateColumn(((IMapDataDestination)this).GetOrdinal(name), value);
+				CreateColumn(GetOrdinal(name), value);
 
 			if (value == null || value is DBNull)
 			{
