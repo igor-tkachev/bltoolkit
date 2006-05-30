@@ -96,9 +96,9 @@ INSERT INTO Patient (PersonID, Diagnosis) VALUES (PersonSeq.CURRVAL, 'Hallucinat
 -- Person_Delete
 
 CREATE OR REPLACE 
-PROCEDURE Person_Delete(PersonID IN NUMBER) IS
+PROCEDURE Person_Delete(pPersonID IN NUMBER) IS
 BEGIN
-DELETE FROM Person WHERE Person.PersonID = Person_Delete.PersonID;
+DELETE FROM Person WHERE PersonID = pPersonID;
 END;
 /
 
@@ -106,101 +106,112 @@ END;
 
 CREATE OR REPLACE 
 PROCEDURE Person_Insert
-	( FirstName IN NVARCHAR2
-	, LastName IN NVARCHAR2
-	, MiddleName IN NVARCHAR2
-	, Gender IN CHAR
-	, PersonID OUT NUMBER
+	( pFirstName IN NVARCHAR2
+	, pLastName IN NVARCHAR2
+	, pMiddleName IN NVARCHAR2
+	, pGender IN CHAR
+	, pPersonID OUT NUMBER
 	) IS
 BEGIN
 INSERT INTO Person
 	( LastName,  FirstName,  MiddleName,  Gender)
 VALUES
-	(LastName, FirstName, MiddleName, Gender)
-        RETURNING Person.PersonID INTO Person_Insert.PersonID;
+	(pLastName, pFirstName, pMiddleName, pGender)
+        RETURNING PersonID INTO pPersonID;
 END;
 /
 
 -- Person_SelectAll
 
 CREATE OR REPLACE 
-PROCEDURE Person_SelectAll(ret OUT SYS_REFCURSOR) IS
+FUNCTION Person_SelectAll
+RETURN SYS_REFCURSOR IS
+    retCursor SYS_REFCURSOR;
 BEGIN
-OPEN ret FOR
-    SELECT * FROM Person;
+	OPEN retCursor FOR
+    	SELECT * FROM Person;
+	RETURN retCursor;
 END;
 /
 
 -- Person_SelectAllByGender
 
 CREATE OR REPLACE 
-PROCEDURE Person_SelectAllByGender(Gender IN CHAR, ret OUT SYS_REFCURSOR) IS
+FUNCTION Person_SelectAllByGender(pGender IN CHAR)
+RETURN SYS_REFCURSOR IS
+    retCursor SYS_REFCURSOR;
 BEGIN
-OPEN ret FOR
-    SELECT * FROM Person WHERE Person.Gender = Person_SelectAllByGender.Gender;
+	OPEN retCursor FOR
+		SELECT * FROM Person WHERE Gender = pGender;
+	RETURN retCursor;
 END;
 /
 
 -- Person_SelectByKey
 
 CREATE OR REPLACE 
-PROCEDURE Person_SelectByKey(PersonID IN NUMBER, ret OUT SYS_REFCURSOR) IS
+FUNCTION Person_SelectByKey(pPersonID IN NUMBER)
+RETURN SYS_REFCURSOR IS
+    retCursor SYS_REFCURSOR;
 BEGIN
-OPEN ret FOR
-    SELECT * FROM Person WHERE Person.PersonID = Person_SelectByKey.PersonID;
+	OPEN retCursor FOR
+		SELECT * FROM Person WHERE PersonID = pPersonID;
+	RETURN retCursor;
 END;
 /
 
 -- Person_SelectByName
 
 CREATE OR REPLACE 
-PROCEDURE Person_SelectByName
-    ( FirstName IN NVARCHAR2
-    , LastName IN NVARCHAR2
-    , ret OUT SYS_REFCURSOR
-    ) IS
+FUNCTION Person_SelectByName
+    ( pFirstName IN NVARCHAR2
+    , pLastName IN NVARCHAR2
+    )
+RETURN SYS_REFCURSOR IS
+    retCursor SYS_REFCURSOR;
 BEGIN
-OPEN ret FOR
-    SELECT * FROM Person
-        WHERE Person.FirstName = Person_SelectByName.FirstName
-            AND Person.LastName = Person_SelectByName.LastName;
+	OPEN retCursor FOR
+    	SELECT * FROM Person
+        	WHERE FirstName = pFirstName AND LastName = pLastName;
+	RETURN retCursor;
 END;
 /
 
 -- Person_SelectListByName
 
 CREATE OR REPLACE 
-PROCEDURE Person_SelectListByName
-    ( FirstName IN NVARCHAR2
-    , LastName IN NVARCHAR2
-    , ret OUT SYS_REFCURSOR
-    ) IS
+FUNCTION Person_SelectListByName
+    ( pFirstName IN NVARCHAR2
+    , pLastName IN NVARCHAR2
+    )
+RETURN SYS_REFCURSOR IS
+    retCursor SYS_REFCURSOR;
 BEGIN
-OPEN ret FOR
-    SELECT * FROM Person
-        WHERE Person.FirstName LIKE Person_SelectListByName.FirstName
-            AND Person.LastName LIKE Person_SelectListByName.LastName;
+	OPEN retCursor FOR
+    	SELECT * FROM Person
+        	WHERE FirstName LIKE pFirstName AND LastName LIKE pLastName;
+	RETURN retCursor;
 END;
 /
 
 CREATE OR REPLACE 
 PROCEDURE Person_Update
-    ( PersonID IN NUMBER
-    , FirstName IN NVARCHAR2
-    , LastName IN NVARCHAR2
-    , MiddleName IN NVARCHAR2
-    , Gender IN CHAR
+    ( pPersonID IN NUMBER
+    , pFirstName IN NVARCHAR2
+    , pLastName IN NVARCHAR2
+    , pMiddleName IN NVARCHAR2
+    , pGender IN CHAR
     ) IS
 BEGIN
 UPDATE
 	Person
 SET
-	Person.LastName   = Person_Update.LastName,
-	Person.FirstName  = Person_Update.FirstName,
-	Person.MiddleName = Person_Update.MiddleName,
-	Person.Gender     = Person_Update.Gender
+	LastName   = pLastName,
+	FirstName  = pFirstName,
+	MiddleName = pMiddleName,
+	Gender     = pGender
 WHERE
-	Person.PersonID = Person_Update.PersonID;
+	PersonID = pPersonID;
 END;
 /
 
@@ -231,18 +242,46 @@ END;
 
 CREATE OR REPLACE 
 PROCEDURE OutRefTest
-	( ID IN NUMBER
-	, outputID OUT NUMBER
-	, inputOutputID IN OUT NUMBER
-	, str IN NVARCHAR2
-	, outputStr OUT NVARCHAR2
-	, inputOutputStr IN OUT NVARCHAR2
+	( pID IN NUMBER
+	, pOutputID OUT NUMBER
+	, pInputOutputID IN OUT NUMBER
+	, pStr IN NVARCHAR2
+	, pOutputStr OUT NVARCHAR2
+	, pInputOutputStr IN OUT NVARCHAR2
 	) IS
 BEGIN
-    outputID := ID;
-    inputOutputID := ID + inputOutputID;
-    outputStr := Str;
-    inputOutputStr := Str || inputOutputStr;
+    pOutputID := pID;
+    pInputOutputID := pID + pInputOutputID;
+    pOutputStr := pStr;
+    pInputOutputStr := pStr || pInputOutputStr;
 END;
 /
 
+-- ExecuteScalarTest
+
+CREATE OR REPLACE 
+FUNCTION Scalar_Cursor
+RETURN SYS_REFCURSOR
+IS
+    retCursor SYS_REFCURSOR;
+BEGIN
+    OPEN retCursor FOR SELECT 12345 FROM DUAL;
+    RETURN retCursor;
+END;
+/
+
+CREATE OR REPLACE 
+PROCEDURE Scalar_OutputParameter(pOutputValue OUT BINARY_INTEGER)
+IS
+BEGIN
+	pOutputValue := 12345;
+END; -- Procedure
+/
+
+CREATE OR REPLACE 
+FUNCTION Scalar_ReturnParameter
+RETURN BINARY_INTEGER IS
+BEGIN
+    RETURN 12345;
+END;
+/
