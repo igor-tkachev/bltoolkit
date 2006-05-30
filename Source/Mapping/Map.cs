@@ -659,7 +659,7 @@ namespace BLToolkit.Mapping
 		}
 
 #if FW2
-		public static List<T> DataReaderToList<T>(IDataReader reader, List<T> list, params object[] parameters)
+		public static IList<T> DataReaderToList<T>(IDataReader reader, IList<T> list, params object[] parameters)
 		{
 			return _defaultSchema.MapDataReaderToList<T>(reader, list, parameters);
 		}

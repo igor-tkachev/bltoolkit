@@ -1,7 +1,16 @@
 <p>The <b>System.Reflection.Emit</b> namespace provides classes to create dynamic assemblies at runtime.
 It allows compilers and tools to emit <b>MSIL</b>, execute it and store it to a disk.
 Although <b>Emit</b> is a powerful tool, it is also extremely hard to use.</p>
-<p>BLToolkit provides a helper class, <a href='/Source/Reflection/Emit/EmitHelper.cs.htm'>EmitHelper</a>,
+<p>Let us take a look at the following example, which demonstrates the "normal" way of emit programming:</p>
+
+HelloWorld.cs
+<% ..\..\Examples\CS\Reflection.Emit\HelloWorldnormal.cs %>
+
+<p>Note that the Emit method takes one parameter as an OpCode and optionally another one,
+which does not depend on the current operation context. So, this way is not entirely type safe.</p>
+
+<p>Fortunately, there is an alternative way. BLToolkit provides a helper class, 
+<a href='/Source/Reflection/Emit/EmitHelper.cs.htm'>EmitHelper</a>,
 which can make your life a little bit easy.
 It contains typed wrapper methods for almost all emit commands and allows writing source code
 that looks similar to <b>MSIL</b>.</p>
