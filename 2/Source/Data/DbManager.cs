@@ -957,7 +957,7 @@ namespace BLToolkit.Data
 					}
 
 					IDbDataParameter[] discoveredParameters = 
-						new IDbDataParameter[cmd.Parameters.Count];;
+						new IDbDataParameter[cmd.Parameters.Count];
 
 					cmd.Parameters.CopyTo(discoveredParameters, 0);
 
@@ -2404,7 +2404,43 @@ namespace BLToolkit.Data
 			try
 			{
 				OnBeforeOperation(OperationType.ExecuteScalar);
-				object result = SelectCommand.ExecuteScalar();
+
+				// object result = SelectCommand.ExecuteScalar();
+				// PB 2006-05-30: ExecuteScalar replaced with ExecuteReader.
+				// This allow us to use parameters for return values.
+
+				object result = null;
+				IDbCommand command = SelectCommand;
+				
+				using (IDataReader reader = command.ExecuteReader())
+				{
+					if (reader.Read())
+					{
+						result = reader.GetValue(0);
+					}
+					else
+					{
+						// PB 2006-05-30: Uncomment the line above if you got an exception.
+						// reader.Close();
+						
+						// Grab the LAST parameter returned from the server.
+						// Since the return value will be the very first parameter,
+						// it will be used lastly.
+						for (int i = command.Parameters.Count - 1; i >= 0; --i)
+						{
+							IDataParameter parameter = (IDataParameter)command.Parameters[i];
+							
+							if (parameter.Direction == ParameterDirection.Output
+								|| parameter.Direction == ParameterDirection.InputOutput
+								|| parameter.Direction == ParameterDirection.ReturnValue)
+							{
+								result = _dataProvider.Convert(parameter.Value, ConvertType.OutputParameter);
+								break;
+							}
+						}
+					}
+				}
+				
 				OnAfterOperation (OperationType.ExecuteScalar);
 
 				return result;

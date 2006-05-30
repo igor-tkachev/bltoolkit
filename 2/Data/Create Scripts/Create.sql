@@ -270,3 +270,38 @@ SET @inputOutputStr = @str + @inputOutputStr
 
 GO
 
+-- ExecuteScalarTest
+
+IF EXISTS (SELECT * FROM sysobjects WHERE type = 'P' AND name = 'Scalar_Cursor')
+BEGIN DROP Procedure Scalar_Cursor END
+GO
+
+CREATE Procedure Scalar_Cursor
+AS
+SELECT Cast(12345 as int)
+
+GO
+
+IF EXISTS (SELECT * FROM sysobjects WHERE type = 'P' AND name = 'Scalar_OutputParameter')
+BEGIN DROP Procedure Scalar_OutputParameter END
+GO
+
+CREATE Procedure Scalar_OutputParameter
+	@outputValue    int output
+AS
+SET @outputValue = 12345
+
+GO
+
+IF EXISTS (SELECT * FROM sysobjects WHERE type in (N'FN', N'IF', N'TF', N'FS', N'FT') AND name = 'Scalar_ReturnParameter')
+BEGIN DROP Function Scalar_ReturnParameter END
+GO
+
+CREATE Function Scalar_ReturnParameter()
+RETURNS int
+AS
+BEGIN
+	RETURN 12345
+END
+
+GO
