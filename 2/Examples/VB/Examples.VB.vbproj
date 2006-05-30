@@ -96,11 +96,7 @@
                     SubType = "Code"
                     BuildAction = "Compile"
                 />
-                <File
-                    RelPath = "Reflection.Emit\HelloWorld.vb"
-                    SubType = "Code"
-                    BuildAction = "Compile"
-                />
+                <Folder RelPath = "Reflection.Emit\" />
             </Include>
         </Files>
     </VisualBasic>

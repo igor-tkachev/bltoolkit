@@ -2308,11 +2308,11 @@ namespace BLToolkit.Mapping
 		}
 
 #if FW2
-		public List<T> MapDataReaderToList<T>(IDataReader reader, List<T> list, params object[] parameters)
+		public IList<T> MapDataReaderToList<T>(IDataReader reader, IList<T> list, params object[] parameters)
 		{
 			MapSourceListToDestinationList(
 				CreateDataReaderListMapper(reader),
-				CreateObjectListMapper    (list, GetObjectMapper(typeof(T))),
+				CreateObjectListMapper    ((IList)list, GetObjectMapper(typeof(T))),
 				parameters);
 
 			return list;
