@@ -69,6 +69,6 @@
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>copy $(ProjectDir)App.config $(ProjectDir)$(OutDir)</PostBuildEvent>
+    <PostBuildEvent>copy "$(ProjectDir)App.config" "$(ProjectDir)$(OutDir)"</PostBuildEvent>
   </PropertyGroup>
 </Project>
