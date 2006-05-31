@@ -2487,77 +2487,58 @@ namespace BLToolkit.Data
 			if (_prepared)
 				InitParameters(CommandAction.Select);
 
-			try
+			switch (sourceType)
 			{
-				OnBeforeOperation(OperationType.ExecuteScalar);
+				case ScalarSourceType.DataReader:
+					using (IDataReader reader = ExecuteReaderInternal())
+						if (reader.Read())
+							return reader.GetValue(index);
 
-				object result = null;
-				IDbCommand command = SelectCommand;
-				
-				switch (sourceType)
-				{
-					case ScalarSourceType.DataReader:
-						using (IDataReader reader = command.ExecuteReader())
+					break;
+
+				case ScalarSourceType.OutputParameter:
+					ExecuteNonQueryInternal();
+
+					foreach (IDataParameter p in SelectCommand.Parameters)
+					{
+						if (p.Direction == ParameterDirection.Output ||
+							p.Direction == ParameterDirection.InputOutput)
 						{
-							if (reader.Read())
+							if (0 == index)
 							{
-								result = reader.GetValue(index);
+								return _dataProvider.Convert(p.Value, ConvertType.OutputParameter);
+							}
+							else
+							{
+								// Skip this parameter and look for next one.
+								//
+								--index;
 							}
 						}
-						break;
+					}
 
-					case ScalarSourceType.OutputParameter:
-						command.ExecuteNonQuery();
-						foreach (IDataParameter p in command.Parameters)
-						{
-							if (p.Direction == ParameterDirection.Output ||
-								p.Direction == ParameterDirection.InputOutput)
-							{
-								if (0 == index)
-								{
-									result = _dataProvider.Convert(p.Value, ConvertType.OutputParameter);
-									break;
-								}
-								else
-								{
-									// Skip this parameter and look for next one.
-									--index;
-								}
-							}
-						}
-						break;
+					break;
 
-					case ScalarSourceType.ReturnValue:
-						command.ExecuteNonQuery();
-						foreach (IDataParameter p in command.Parameters)
-						{
-							if (p.Direction == ParameterDirection.ReturnValue)
-							{
-								result = _dataProvider.Convert(p.Value, ConvertType.OutputParameter);
-								break;
-							}
-						}
-						break;
+				case ScalarSourceType.ReturnValue:
+					ExecuteNonQueryInternal();
 
-					case ScalarSourceType.AffectedRows:
-						result = command.ExecuteNonQuery();
-						break;
+					foreach (IDataParameter p in SelectCommand.Parameters)
+						if (p.Direction == ParameterDirection.ReturnValue)
+							return _dataProvider.Convert(p.Value, ConvertType.OutputParameter);
 
-					default:
-						System.Diagnostics.Debug.Fail("Not implemented case in DbManager.ExecuteScalar: " + sourceType);
-						break;
-				}
-				
-				OnAfterOperation(OperationType.ExecuteScalar);
-				return result;
+					break;
+
+				case ScalarSourceType.AffectedRows:
+					return ExecuteNonQueryInternal();
+
+				default:
+					System.Diagnostics.Debug.Fail("Not implemented case in DbManager.ExecuteScalar: " + sourceType);
+					break;
 			}
-			catch (Exception ex)
-			{
-				OnOperationException(OperationType.ExecuteScalar, ex);
-				throw ex;
-			}
+
+			return null;
 		}
-		
+
 #if FW2
 		// I need partial specialization :crash:
 		//
