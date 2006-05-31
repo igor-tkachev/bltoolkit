@@ -2409,9 +2409,9 @@ namespace BLToolkit.Data
 				// PB 2006-05-30: ExecuteScalar replaced with ExecuteReader.
 				// This allow us to use parameters for return values.
 
-				object result = null;
+				object     result  = null;
 				IDbCommand command = SelectCommand;
-				
+
 				using (IDataReader reader = command.ExecuteReader())
 				{
 					if (reader.Read())
@@ -2422,25 +2422,33 @@ namespace BLToolkit.Data
 					{
 						// PB 2006-05-30: Uncomment the line above if you got an exception.
 						// reader.Close();
-						
-						// Grab the LAST parameter returned from the server.
-						// Since the return value will be the very first parameter,
-						// it will be used lastly.
-						for (int i = command.Parameters.Count - 1; i >= 0; --i)
+
+						// Check output parameter first.
+						//
+						foreach (IDataParameter p in command.Parameters)
 						{
-							IDataParameter parameter = (IDataParameter)command.Parameters[i];
-							
-							if (parameter.Direction == ParameterDirection.Output
-								|| parameter.Direction == ParameterDirection.InputOutput
-								|| parameter.Direction == ParameterDirection.ReturnValue)
+							if (p.Direction == ParameterDirection.Output ||
+							    p.Direction == ParameterDirection.InputOutput)
 							{
-								result = _dataProvider.Convert(parameter.Value, ConvertType.OutputParameter);
+								result = _dataProvider.Convert(p.Value, ConvertType.OutputParameter);
 								break;
+							}
+						}
+
+						if (result == null)
+						{
+							foreach (IDataParameter p in command.Parameters)
+							{
+								if (p.Direction == ParameterDirection.ReturnValue)
+								{
+									result = _dataProvider.Convert(p.Value, ConvertType.OutputParameter);
+									break;
+								}
 							}
 						}
 					}
 				}
-				
+
 				OnAfterOperation (OperationType.ExecuteScalar);
 
 				return result;
