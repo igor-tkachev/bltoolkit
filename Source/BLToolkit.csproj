@@ -203,6 +203,11 @@
                     BuildAction = "Compile"
                 />
                 <File
+                    RelPath = "Data\ScalarSourceType.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
                     RelPath = "Data\DbManager.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
@@ -349,6 +354,11 @@
                 />
                 <File
                     RelPath = "DataAccess\SqlQueryParameterInfo.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "DataAccess\ScalarSourceAttribute.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
                 />
