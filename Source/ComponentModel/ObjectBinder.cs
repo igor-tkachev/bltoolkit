@@ -115,7 +115,7 @@ namespace BLToolkit.ComponentModel
 				if (value == null)
 				{
 					if (_list != _empty)
-						((IBindingList)_list).ListChanged -= new ListChangedEventHandler(ListChangedHandler);
+						_list.ListChanged -= new ListChangedEventHandler(ListChangedHandler);
 
 					_list = _itemType == null? _empty: new EditableArrayList(_itemType);
 				}
@@ -162,7 +162,7 @@ namespace BLToolkit.ComponentModel
 				}
 
 				if (_list != _empty)
-					((IBindingList)_list).ListChanged += new ListChangedEventHandler(ListChangedHandler);
+					_list.ListChanged += new ListChangedEventHandler(ListChangedHandler);
 				OnListChanged(ListChangedType.Reset, -1);
 			}
 		}
@@ -228,7 +228,7 @@ namespace BLToolkit.ComponentModel
 		protected override void Dispose(bool disposing)
 		{
 			if (_list != _empty)
-				((IBindingList)_list).ListChanged -= new ListChangedEventHandler(ListChangedHandler);
+				_list.ListChanged -= new ListChangedEventHandler(ListChangedHandler);
 
 			_list = _empty;
 
@@ -270,7 +270,7 @@ namespace BLToolkit.ComponentModel
 
 		string ITypedList.GetListName(PropertyDescriptor[] listAccessors)
 		{
-			return ((ITypedList)_list).GetListName(listAccessors);
+			return _list.GetListName(listAccessors);
 		}
 
 		#endregion
