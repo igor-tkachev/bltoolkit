@@ -276,9 +276,9 @@ IF EXISTS (SELECT * FROM sysobjects WHERE type = 'P' AND name = 'Scalar_Cursor')
 BEGIN DROP Procedure Scalar_Cursor END
 GO
 
-CREATE Procedure Scalar_Cursor
+CREATE Procedure Scalar_DataReader
 AS
-SELECT Cast(12345 as int)
+SELECT Cast(12345 as int), Cast('54321' as varchar(50))
 
 GO
 
@@ -287,9 +287,11 @@ BEGIN DROP Procedure Scalar_OutputParameter END
 GO
 
 CREATE Procedure Scalar_OutputParameter
-	@outputValue    int output
+	@outputInt      int = 0 output,
+	@outputString   varchar(50) = '' output
 AS
-SET @outputValue = 12345
+SET @outputInt = 12345
+SET @outputString = '54321'
 
 GO
 

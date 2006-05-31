@@ -260,22 +260,24 @@ END;
 -- ExecuteScalarTest
 
 CREATE OR REPLACE 
-FUNCTION Scalar_Cursor
+FUNCTION Scalar_DataReader
 RETURN SYS_REFCURSOR
 IS
     retCursor SYS_REFCURSOR;
 BEGIN
-    OPEN retCursor FOR SELECT 12345 FROM DUAL;
+    OPEN retCursor FOR SELECT 12345, '54321' FROM DUAL;
     RETURN retCursor;
 END;
 /
 
 CREATE OR REPLACE 
-PROCEDURE Scalar_OutputParameter(pOutputValue OUT BINARY_INTEGER)
-IS
+PROCEDURE Scalar_OutputParameter
+	( pOutputInt OUT BINARY_INTEGER
+	, pOutputString OUT NVARCHAR2
+	) IS
 BEGIN
-	pOutputValue := 12345;
-END; -- Procedure
+	pOutputInt := 12345;
+	pOutputString := '54321';
 /
 
 CREATE OR REPLACE 

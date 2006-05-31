@@ -10,38 +10,86 @@ namespace Data
 	public class ExecuteScalarTest
 	{
 		[Test]
-		public void CursorTest()
+		public void RegressionTest()
 		{
 			using (DbManager db = new DbManager())
 			{
 				int expectedValue = 12345;
-				int cursorValue = Convert.ToInt32(db.SetSpCommand("Scalar_Cursor").ExecuteScalar());
-				
-				Assert.AreEqual(expectedValue, cursorValue);
+				int actualValue = Convert.ToInt32(db.SetSpCommand("Scalar_DataReader").ExecuteScalar());
+
+				Assert.AreEqual(expectedValue, actualValue);
 			}
 		}
 
+		[Test]
+		public void DataReaderTest()
+		{
+			using (DbManager db = new DbManager())
+			{
+				int expectedValue = 12345;
+				int actualValue = Convert.ToInt32(db.SetSpCommand("Scalar_DataReader").ExecuteScalar(ScalarSourceType.DataReader));
+				
+				Assert.AreEqual(expectedValue, actualValue);
+			}
+		}
+
+		[Test]
+		public void DataReader2Test()
+		{
+			using (DbManager db = new DbManager())
+			{
+				string expectedValue = "54321";
+				string actualValue = Convert.ToString(db.SetSpCommand("Scalar_DataReader").ExecuteScalar(ScalarSourceType.DataReader, 1));
+
+				Assert.AreEqual(expectedValue, actualValue);
+			}
+		}
+		
 		[Test]
 		public void OutputParameterTest()
 		{
 			using (DbManager db = new DbManager())
 			{
 				int expectedValue = 12345;
-				int outputParameterValue = Convert.ToInt32(db.SetSpCommand("Scalar_OutputParameter").ExecuteScalar());
+				int actualValue = Convert.ToInt32(db.SetSpCommand("Scalar_OutputParameter").ExecuteScalar(ScalarSourceType.OutputParameter));
 
-				Assert.AreEqual(expectedValue, outputParameterValue);
+				Assert.AreEqual(expectedValue, actualValue);
 			}
 		}
-		
+
+		[Test]
+		public void OutputParameter2Test()
+		{
+			using (DbManager db = new DbManager())
+			{
+				string expectedValue = "54321";
+				string actualValue = Convert.ToString(db.SetSpCommand("Scalar_OutputParameter").ExecuteScalar(ScalarSourceType.OutputParameter, 1));
+
+				Assert.AreEqual(expectedValue, actualValue);
+			}
+		}
+
 		[Test]
 		public void ReturnParameterTest()
 		{
 			using (DbManager db = new DbManager())
 			{
 				int expectedValue = 12345;
-				int returnParameterValue = Convert.ToInt32(db.SetSpCommand("Scalar_ReturnParameter").ExecuteScalar());
+				int actualValue = Convert.ToInt32(db.SetSpCommand("Scalar_ReturnParameter").ExecuteScalar(ScalarSourceType.ReturnValue));
 
-				Assert.AreEqual(expectedValue, returnParameterValue);
+				Assert.AreEqual(expectedValue, actualValue);
+			}
+		}
+
+		[Test]
+		public void AffectedRowsTest()
+		{
+			using (DbManager db = new DbManager())
+			{
+				int expectedValue = -1;
+				int actualValue = Convert.ToInt32(db.SetSpCommand("Scalar_ReturnParameter").ExecuteScalar(ScalarSourceType.AffectedRows));
+
+				Assert.AreEqual(expectedValue, actualValue);
 			}
 		}
 	}

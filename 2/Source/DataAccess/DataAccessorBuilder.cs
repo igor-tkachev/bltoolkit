@@ -637,14 +637,32 @@ namespace BLToolkit.DataAccess
 			CallSetCommand();
 
 			string converterName = GetConverterMethodName(Context.CurrentMethod.ReturnType);
+			object[] attrs = Context.CurrentMethod.GetCustomAttributes(typeof(ScalarSourceAttribute), true);
 
-			Context.MethodBuilder.Emitter
-				.callvirtNoGenerics (typeof(DbManager), "ExecuteScalar")
-				.ldnull
-				.callvirt           (typeof(DataAccessor), converterName, _bindingFlags, typeof(DbManager), typeof(object), typeof(object))
-				//.CastFromObject     (Context.CurrentMethod.ReturnType)
-				.stloc              (Context.ReturnValue)
-				;
+			if (attrs.Length == 0)
+			{
+				Context.MethodBuilder.Emitter
+					.callvirtNoGenerics(typeof(DbManager), "ExecuteScalar")
+					.ldnull
+					.callvirt(typeof(DataAccessor), converterName, _bindingFlags, typeof(DbManager), typeof(object), typeof(object))
+					//.CastFromObject     (Context.CurrentMethod.ReturnType)
+					.stloc(Context.ReturnValue)
+					;
+			}
+			else
+			{
+				ScalarSourceAttribute attr = (ScalarSourceAttribute)attrs[0];
+				
+				Context.MethodBuilder.Emitter
+					.ldc_i4((int)attr.ScalarType)
+					.ldc_i4(attr.Index)
+					.callvirtNoGenerics(typeof(DbManager), "ExecuteScalar", typeof(ScalarSourceType), typeof(int))
+					.ldnull
+					.callvirt(typeof(DataAccessor), converterName, _bindingFlags, typeof(DbManager), typeof(object), typeof(object))
+					//.CastFromObject     (Context.CurrentMethod.ReturnType)
+					.stloc(Context.ReturnValue)
+					;
+			}
 		}
 
 		#endregion

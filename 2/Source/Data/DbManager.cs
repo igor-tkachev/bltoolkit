@@ -2404,51 +2404,7 @@ namespace BLToolkit.Data
 			try
 			{
 				OnBeforeOperation(OperationType.ExecuteScalar);
-
-				// object result = SelectCommand.ExecuteScalar();
-				// PB 2006-05-30: ExecuteScalar replaced with ExecuteReader.
-				// This allow us to use parameters for return values.
-
-				object     result  = null;
-				IDbCommand command = SelectCommand;
-
-				using (IDataReader reader = command.ExecuteReader())
-				{
-					if (reader.Read())
-					{
-						result = reader.GetValue(0);
-					}
-					else
-					{
-						// PB 2006-05-30: Uncomment the line above if you got an exception.
-						// reader.Close();
-
-						// Check output parameter first.
-						//
-						foreach (IDataParameter p in command.Parameters)
-						{
-							if (p.Direction == ParameterDirection.Output ||
-							    p.Direction == ParameterDirection.InputOutput)
-							{
-								result = _dataProvider.Convert(p.Value, ConvertType.OutputParameter);
-								break;
-							}
-						}
-
-						if (result == null)
-						{
-							foreach (IDataParameter p in command.Parameters)
-							{
-								if (p.Direction == ParameterDirection.ReturnValue)
-								{
-									result = _dataProvider.Convert(p.Value, ConvertType.OutputParameter);
-									break;
-								}
-							}
-						}
-					}
-				}
-
+				object result = SelectCommand.ExecuteScalar();
 				OnAfterOperation (OperationType.ExecuteScalar);
 
 				return result;
@@ -2460,6 +2416,148 @@ namespace BLToolkit.Data
 			}
 		}
 
+		/// <summary>
+		/// Executes the query, and returns the value with specified scalar source type.
+		/// </summary>
+		/// <param name="sourceType">The method used to return the scalar value.</param>
+		/// <returns><list type="table">
+		/// <listheader>
+		///  <term>ScalarSourceType</term>
+		///  <description>Return value</description>
+		/// </listheader>
+		/// <item>
+		///  <term>DataReader</term>
+		///  <description>The first column of the first row in the resultset.</description>
+		/// </item>
+		/// <item>
+		///  <term>OutputParameter</term>
+		///  <description>The value of the first output or input/output parameter returned.</description>
+		/// </item>
+		/// <item>
+		///  <term>ReturnValue</term>
+		///  <description>The value of the "return value" parameter returned.</description>
+		/// </item>
+		/// <item>
+		///  <term>AffectedRows</term>
+		///  <description>The number of rows affected.</description>
+		/// </item>
+		/// </list>
+		/// </returns>
+		public object ExecuteScalar(ScalarSourceType sourceType)
+		{
+			return ExecuteScalar(sourceType, 0);
+		}
+
+		/// <summary>
+		/// Executes the query, and returns the value with specified scalar source type.
+		/// </summary>
+		/// <param name="sourceType">The method used to return the scalar value.</param>
+		/// <param name="index">The column index or output parameter index.</param>
+		/// <returns><list type="table">
+		/// <listheader>
+		///  <term>ScalarSourceType</term>
+		///  <description>Return value</description>
+		/// </listheader>
+		/// <item>
+		///  <term>DataReader</term>
+		///  <description>The column at specified index of the first row in the resultset.</description>
+		/// </item>
+		/// <item>
+		///  <term>OutputParameter</term>
+		///  <description>The value of the output or input/output parameter returned at specified index.</description>
+		/// </item>
+		/// <item>
+		///  <term>ReturnValue</term>
+		///  <description>The value of the "return value" parameter returned. The index parameter is ignored.</description>
+		/// </item>
+		/// <item>
+		///  <term>AffectedRows</term>
+		///  <description>The number of rows affected. The index parameter is ignored.</description>
+		/// </item>
+		/// </list>
+		/// </returns>
+		public object ExecuteScalar(ScalarSourceType sourceType, int index)
+		{
+			if (index < 0)
+				throw new ArgumentException("Index must be grater or equal to zero.", "index");
+
+			if (!Enum.IsDefined(typeof(ScalarSourceType), sourceType))
+				throw new InvalidEnumArgumentException("sourceType", (int)sourceType, typeof(ScalarSourceType));
+			
+			if (_prepared)
+				InitParameters(CommandAction.Select);
+
+			try
+			{
+				OnBeforeOperation(OperationType.ExecuteScalar);
+
+				object result = null;
+				IDbCommand command = SelectCommand;
+				
+				switch (sourceType)
+				{
+					case ScalarSourceType.DataReader:
+						using (IDataReader reader = command.ExecuteReader())
+						{
+							if (reader.Read())
+							{
+								result = reader.GetValue(index);
+							}
+						}
+						break;
+
+					case ScalarSourceType.OutputParameter:
+						command.ExecuteNonQuery();
+						foreach (IDataParameter p in command.Parameters)
+						{
+							if (p.Direction == ParameterDirection.Output ||
+								p.Direction == ParameterDirection.InputOutput)
+							{
+								if (0 == index)
+								{
+									result = _dataProvider.Convert(p.Value, ConvertType.OutputParameter);
+									break;
+								}
+								else
+								{
+									// Skip this parameter and look for next one.
+									--index;
+								}
+							}
+						}
+						break;
+
+					case ScalarSourceType.ReturnValue:
+						command.ExecuteNonQuery();
+						foreach (IDataParameter p in command.Parameters)
+						{
+							if (p.Direction == ParameterDirection.ReturnValue)
+							{
+								result = _dataProvider.Convert(p.Value, ConvertType.OutputParameter);
+								break;
+							}
+						}
+						break;
+
+					case ScalarSourceType.AffectedRows:
+						result = command.ExecuteNonQuery();
+						break;
+
+					default:
+						System.Diagnostics.Debug.Fail("Not implemented case in DbManager.ExecuteScalar: " + sourceType);
+						break;
+				}
+				
+				OnAfterOperation(OperationType.ExecuteScalar);
+				return result;
+			}
+			catch (Exception ex)
+			{
+				OnOperationException(OperationType.ExecuteScalar, ex);
+				throw ex;
+			}
+		}
+		
 #if FW2
 		// I need partial specialization :crash:
 		//
@@ -2467,13 +2565,24 @@ namespace BLToolkit.Data
 		{
 			return (T)ExecuteScalar();
 		}
+		
+		public T ExecuteScalar<T>(ScalarSourceType sourceType)
+		{
+			return (T)ExecuteScalar(sourceType, 0);
+		}
+
+		public T ExecuteScalar<T>(ScalarSourceType sourceType, int index)
+		{
+			return (T)ExecuteScalar(sourceType, index);
+		}
+		
 #endif
 
 		#endregion
 
 		#region ExecuteScalarList
 
-		public IList ExecuteScalarList(IList list, Type type)
+		public IList ExecuteScalarList(IList list, Type type, int index)
 		{
 			if (_prepared)
 				InitParameters(CommandAction.Select);
@@ -2484,7 +2593,7 @@ namespace BLToolkit.Data
 			{
 				while (dr.Read())
 				{
-					object value = dr[0];
+					object value = dr[index];
 
 					if (value == null || value.GetType() != type)
 						value = value is DBNull? null: Convert.ChangeType(value, type);
@@ -2496,17 +2605,32 @@ namespace BLToolkit.Data
 			return list;
 		}
 
-		public ArrayList ExecuteScalarList(Type type)
+		public IList ExecuteScalarList(IList list, Type type)
+		{
+			return ExecuteScalarList(list, type, 0);
+		}
+		
+		public ArrayList ExecuteScalarList(Type type, int index)
 		{
 			ArrayList list = new ArrayList();
 
-			ExecuteScalarList(list, type);
+			ExecuteScalarList(list, type, index);
 
 			return list;
 		}
 
+		public ArrayList ExecuteScalarList(Type type)
+		{
+			ArrayList list = new ArrayList();
+
+			ExecuteScalarList(list, type, 0);
+
+			return list;
+		}
+
+		
 #if FW2
-		public IList<T> ExecuteScalarList<T>(IList<T> list) 
+		public IList<T> ExecuteScalarList<T>(IList<T> list, int index)
 		{
 			if (_prepared)
 				InitParameters(CommandAction.Select);
@@ -2519,7 +2643,7 @@ namespace BLToolkit.Data
 			{
 				while (dr.Read())
 				{
-					object value = dr[0];
+					object value = dr[index];
 
 					if (value == null || value.GetType() != type)
 						value = value is DBNull? null: Convert.ChangeType(value, type);
@@ -2531,11 +2655,16 @@ namespace BLToolkit.Data
 			return list;
 		}
 
+		public IList<T> ExecuteScalarList<T>(IList<T> list)
+		{
+			return ExecuteScalarList(list, 0);
+		}
+		
 		public List<T> ExecuteScalarList<T>()
 		{
 			List<T> list = new List<T>();
 
-			ExecuteScalarList<T>(list);
+			ExecuteScalarList<T>(list, 0);
 
 			return list;
 		}

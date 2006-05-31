@@ -72,6 +72,7 @@
     <Compile Include="ComponentModel\TypeTypeConverter.cs" />
     <Compile Include="DataAccess\ActionNameAttribute.cs" />
     <Compile Include="DataAccess\ActionSprocNameAttribute.cs" />
+    <Compile Include="DataAccess\ScalarSourceAttribute.cs" />
     <Compile Include="DataAccess\FormatAttribute.cs" />
     <Compile Include="DataAccess\DataAccessorAttribute.cs" />
     <Compile Include="DataAccess\DataAccessor.cs" />
@@ -90,6 +91,7 @@
     <Compile Include="DataAccess\SqlQueryInfo.cs" />
     <Compile Include="DataAccess\SqlQueryParameterInfo.cs" />
     <Compile Include="DataAccess\TableNameAttribute.cs" />
+    <Compile Include="Data\ScalarSourceType.cs" />
     <Compile Include="Data\DataException.cs" />
     <Compile Include="Data\DataProvider\AccessDataProvider.cs" />
     <Compile Include="Data\DataProvider\ConvertType.cs" />
