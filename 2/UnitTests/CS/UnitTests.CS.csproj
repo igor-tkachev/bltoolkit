@@ -135,6 +135,11 @@
                     BuildAction = "Compile"
                 />
                 <File
+                    RelPath = "Data\ExecuteScalarListTest.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
                     RelPath = "Data\CompositeKeyTest.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
@@ -156,6 +161,11 @@
                 />
                 <File
                     RelPath = "DataAccess\ScalarTest.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "DataAccess\ScalarListTest.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
                 />

@@ -133,5 +133,48 @@ namespace Data
 				Assert.AreEqual(expectedValue, actualValue);
 			}
 		}
+
+#if FW2
+		[Test]
+		public void FW2RegressionTest()
+		{
+			using (DbManager db = new DbManager())
+			{
+				int expectedValue = 12345;
+				int actualValue = db
+					.SetSpCommand("Scalar_DataReader").ExecuteScalar<int>();
+
+				Assert.AreEqual(expectedValue, actualValue);
+			}
+		}
+
+		[Test]
+		public void FW2DataReaderTest()
+		{
+			using (DbManager db = new DbManager())
+			{
+				int expectedValue = 12345;
+				int actualValue = db
+					.SetSpCommand("Scalar_DataReader")
+					.ExecuteScalar<int>(ScalarSourceType.DataReader);
+
+				Assert.AreEqual(expectedValue, actualValue);
+			}
+		}
+
+		[Test]
+		public void FW2DataReader2Test()
+		{
+			using (DbManager db = new DbManager())
+			{
+				string expectedValue = "54321";
+				string actualValue = db
+					.SetSpCommand("Scalar_DataReader")
+					.ExecuteScalar<string>(ScalarSourceType.DataReader, 1);
+
+				Assert.AreEqual(expectedValue, actualValue);
+			}
+		}
+#endif
 	}
 }
