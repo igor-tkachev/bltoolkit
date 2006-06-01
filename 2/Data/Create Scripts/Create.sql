@@ -278,7 +278,7 @@ GO
 
 CREATE Procedure Scalar_DataReader
 AS
-SELECT Cast(12345 as int), Cast('54321' as varchar(50))
+SELECT Cast(12345 as int) AS intField, Cast('54321' as varchar(50)) AS stringField
 
 GO
 

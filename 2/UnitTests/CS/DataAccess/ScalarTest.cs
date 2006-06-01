@@ -22,8 +22,13 @@ namespace DataAccess
 			[ScalarSource(ScalarSourceType.DataReader, 1)]
 			public abstract string Scalar_DataReader2(DbManager db);
 
+			[ActionName("Scalar_DataReader")]
+			[ScalarSource(ScalarSourceType.DataReader, "stringField")]
+			public abstract string Scalar_DataReader3(DbManager db);
+
 			[ActionName("Scalar_OutputParameter")]
-			public abstract void Scalar_OutputParameterRegression(DbManager db, out int outputInt, out string outputString);
+			public abstract void Scalar_OutputParameterRegression(
+				DbManager db, out int outputInt, out string outputString);
 
 			[ScalarSource(ScalarSourceType.OutputParameter)]
 			public abstract int Scalar_OutputParameter(DbManager db);
@@ -31,6 +36,10 @@ namespace DataAccess
 			[ActionName("Scalar_OutputParameter")]
 			[ScalarSource(ScalarSourceType.OutputParameter, 1)]
 			public abstract string Scalar_OutputParameter2(DbManager db);
+
+			[ActionName("Scalar_OutputParameter")]
+			[ScalarSource(ScalarSourceType.OutputParameter, "outputString")]
+			public abstract string Scalar_OutputParameter3(DbManager db);
 
 			[ScalarSource(ScalarSourceType.ReturnValue)]
 			public abstract int Scalar_ReturnParameter(DbManager db);
@@ -88,6 +97,20 @@ namespace DataAccess
 		}
 
 		[Test]
+		public void DataReader3Test()
+		{
+			using (DbManager db = new DbManager())
+			{
+				TestAccessor ta = TestAccessor.CreateInstance();
+
+				string expectedValue = "54321";
+				string actualValue = ta.Scalar_DataReader3(db);
+
+				Assert.AreEqual(expectedValue, actualValue);
+			}
+		}
+
+		[Test]
 		public void OutputParameterRegressionTest()
 		{
 			using (DbManager db = new DbManager())
@@ -99,7 +122,8 @@ namespace DataAccess
 				string expectedStringValue = "54321";
 				string actualStringValue;
 
-				ta.Scalar_OutputParameterRegression(db, out actualIntValue, out actualStringValue);
+				ta.Scalar_OutputParameterRegression(db,
+					out actualIntValue, out actualStringValue);
 
 				Assert.AreEqual(expectedIntValue, actualIntValue);
 				Assert.AreEqual(expectedStringValue, actualStringValue);
@@ -119,6 +143,7 @@ namespace DataAccess
 				Assert.AreEqual(expectedValue, actualValue);
 			}
 		}
+
 		[Test]
 		public void OutputParameter2Test()
 		{
@@ -132,7 +157,21 @@ namespace DataAccess
 				Assert.AreEqual(expectedValue, actualValue);
 			}
 		}
-		
+
+		[Test]
+		public void OutputParameter3Test()
+		{
+			using (DbManager db = new DbManager())
+			{
+				TestAccessor ta = TestAccessor.CreateInstance();
+
+				string expectedValue = "54321";
+				string actualValue = ta.Scalar_OutputParameter3(db);
+
+				Assert.AreEqual(expectedValue, actualValue);
+			}
+		}
+
 		[Test]
 		public void ReturnParameterTest()
 		{

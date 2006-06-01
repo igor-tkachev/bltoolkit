@@ -265,7 +265,7 @@ RETURN SYS_REFCURSOR
 IS
     retCursor SYS_REFCURSOR;
 BEGIN
-    OPEN retCursor FOR SELECT 12345, '54321' FROM DUAL;
+    OPEN retCursor FOR SELECT 12345 intField, '54321' stringField FROM DUAL;
     RETURN retCursor;
 END;
 /
@@ -278,6 +278,7 @@ PROCEDURE Scalar_OutputParameter
 BEGIN
 	pOutputInt := 12345;
 	pOutputString := '54321';
+END;
 /
 
 CREATE OR REPLACE 

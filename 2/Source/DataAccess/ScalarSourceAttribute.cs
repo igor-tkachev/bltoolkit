@@ -1,4 +1,5 @@
 using System;
+using BLToolkit.Common;
 using BLToolkit.Data;
 
 namespace BLToolkit.DataAccess
@@ -15,10 +16,16 @@ namespace BLToolkit.DataAccess
 			_scalarType = scalarType;
 		}
 
+		public ScalarSourceAttribute(ScalarSourceType scalarType, string name)
+		{
+			_scalarType = scalarType;
+			_nip = name;
+		}
+
 		public ScalarSourceAttribute(ScalarSourceType scalarType, int index)
 		{
 			_scalarType = scalarType;
-			_index = index;
+			_nip = index;
 		}
 		
 		private ScalarSourceType _scalarType;
@@ -28,11 +35,11 @@ namespace BLToolkit.DataAccess
 			set { _scalarType = value; }
 		}
 
-		private int _index;
-		public  int  Index
+		private NameOrIndexParameter _nip;
+		public  NameOrIndexParameter  NameOrIndex
 		{
-			get { return _index; }
-			set { _index = value; }
+			get { return _nip; }
+			set { _nip = value; }
 		}
 	}
 }

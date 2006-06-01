@@ -652,11 +652,20 @@ namespace BLToolkit.DataAccess
 			else
 			{
 				ScalarSourceAttribute attr = (ScalarSourceAttribute)attrs[0];
-				
-				Context.MethodBuilder.Emitter
-					.ldc_i4((int)attr.ScalarType)
-					.ldc_i4(attr.Index)
-					.callvirtNoGenerics(typeof(DbManager), "ExecuteScalar", typeof(ScalarSourceType), typeof(int))
+
+				EmitHelper emit = Context.MethodBuilder.Emitter
+					.ldc_i4((int)attr.ScalarType);
+				if (attr.NameOrIndex.ByName)
+				{
+					emit = emit.ldstr(attr.NameOrIndex.Name)
+						.call(typeof(Common.NameOrIndexParameter), "op_Implicit", typeof(string));
+				}
+				else
+				{
+					emit = emit.ldc_i4(attr.NameOrIndex.Index)
+						.call(typeof(Common.NameOrIndexParameter), "op_Implicit", typeof(int));
+				}
+				emit.callvirtNoGenerics(typeof(DbManager), "ExecuteScalar", typeof(ScalarSourceType), typeof(Common.NameOrIndexParameter))
 					.ldnull
 					.callvirt(typeof(DataAccessor), converterName, _bindingFlags, typeof(DbManager), typeof(object), typeof(object))
 					//.CastFromObject     (Context.CurrentMethod.ReturnType)
