@@ -1239,20 +1239,20 @@ namespace BLToolkit.DataAccess
 				if (underlyingType.IsEnum)
 					underlyingType = Enum.GetUnderlyingType(underlyingType);
 
-				if (type == typeof(Int16))    return "ConvertToNullableInt16";
-				if (type == typeof(Int32))    return "ConvertToNullableInt32";
-				if (type == typeof(Int64))    return "ConvertToNullableInt64";
-				if (type == typeof(Byte))     return "ConvertToNullableByte";
-				if (type == typeof(UInt16))   return "ConvertToNullableUInt16";
-				if (type == typeof(UInt32))   return "ConvertToNullableUInt32";
-				if (type == typeof(UInt64))   return "ConvertToNullableUInt64";
-				if (type == typeof(Char))     return "ConvertToNullableChar";
-				if (type == typeof(Double))   return "ConvertToNullableDouble";
-				if (type == typeof(Single))   return "ConvertToNullableSingle";
-				if (type == typeof(Boolean))  return "ConvertToNullableBoolean";
-				if (type == typeof(DateTime)) return "ConvertToNullableDateTime";
-				if (type == typeof(Decimal))  return "ConvertToNullableDecimal";
-				if (type == typeof(Guid))     return "ConvertToNullableGuid";
+				if (underlyingType == typeof(Int16))    return "ConvertToNullableInt16";
+				if (underlyingType == typeof(Int32))    return "ConvertToNullableInt32";
+				if (underlyingType == typeof(Int64))    return "ConvertToNullableInt64";
+				if (underlyingType == typeof(Byte))     return "ConvertToNullableByte";
+				if (underlyingType == typeof(UInt16))   return "ConvertToNullableUInt16";
+				if (underlyingType == typeof(UInt32))   return "ConvertToNullableUInt32";
+				if (underlyingType == typeof(UInt64))   return "ConvertToNullableUInt64";
+				if (underlyingType == typeof(Char))     return "ConvertToNullableChar";
+				if (underlyingType == typeof(Double))   return "ConvertToNullableDouble";
+				if (underlyingType == typeof(Single))   return "ConvertToNullableSingle";
+				if (underlyingType == typeof(Boolean))  return "ConvertToNullableBoolean";
+				if (underlyingType == typeof(DateTime)) return "ConvertToNullableDateTime";
+				if (underlyingType == typeof(Decimal))  return "ConvertToNullableDecimal";
+				if (underlyingType == typeof(Guid))     return "ConvertToNullableGuid";
 			}
 #endif
 

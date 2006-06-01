@@ -272,8 +272,8 @@ GO
 
 -- ExecuteScalarTest
 
-IF EXISTS (SELECT * FROM sysobjects WHERE type = 'P' AND name = 'Scalar_Cursor')
-BEGIN DROP Procedure Scalar_Cursor END
+IF EXISTS (SELECT * FROM sysobjects WHERE type = 'P' AND name = 'Scalar_DataReader')
+BEGIN DROP Procedure Scalar_DataReader END
 GO
 
 CREATE Procedure Scalar_DataReader
