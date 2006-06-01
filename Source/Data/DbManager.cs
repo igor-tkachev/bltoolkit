@@ -2568,17 +2568,88 @@ namespace BLToolkit.Data
 
 #if FW2
 		// I need partial specialization :crash:
-		//
+		
+		/// <summary>
+		/// Executes the query, and returns the first column of the first row
+		/// in the resultset returned by the query. Extra columns or rows are
+		/// ignored.</summary>
+		/// <returns>
+		/// The first column of the first row in the resultset.</returns>
 		public T ExecuteScalar<T>()
 		{
 			return (T)ExecuteScalar();
 		}
-		
+
+		/// <summary>
+		/// Executes the query, and returns the value with specified scalar
+		/// source type.</summary>
+		/// <param name="sourceType">The method used to return the scalar
+		/// value.</param>
+		/// <returns><list type="table">
+		/// <listheader>
+		///  <term>ScalarSourceType</term>
+		///  <description>Return value</description>
+		/// </listheader>
+		/// <item>
+		///  <term>DataReader</term>
+		///  <description>The first column of the first row in the resultset.
+		///  </description>
+		/// </item>
+		/// <item>
+		///  <term>OutputParameter</term>
+		///  <description>The value of the first output or input/output
+		///  parameter returned.</description>
+		/// </item>
+		/// <item>
+		///  <term>ReturnValue</term>
+		///  <description>The value of the "return value" parameter returned.
+		///  </description>
+		/// </item>
+		/// <item>
+		///  <term>AffectedRows</term>
+		///  <description>The number of rows affected.</description>
+		/// </item>
+		/// </list>
+		/// </returns>
 		public T ExecuteScalar<T>(ScalarSourceType sourceType)
 		{
 			return (T)ExecuteScalar(sourceType, new NameOrIndexParameter());
 		}
 
+		/// <summary>
+		/// Executes the query, and returns the value with specified scalar
+		/// source type.</summary>
+		/// <param name="sourceType">The method used to return the scalar
+		/// value.</param>
+		/// <param name="nip">The column name/index or output parameter
+		/// name/index.</param>
+		/// <returns><list type="table">
+		/// <listheader>
+		///  <term>ScalarSourceType</term>
+		///  <description>Return value</description>
+		/// </listheader>
+		/// <item>
+		///  <term>DataReader</term>
+		///  <description>The column with specified name or at specified index
+		///  of the first row in the resultset.</description>
+		/// </item>
+		/// <item>
+		///  <term>OutputParameter</term>
+		///  <description>The value of the output or input/output parameter
+		///  returned with specified name or at specified index.</description>
+		/// </item>
+		/// <item>
+		///  <term>ReturnValue</term>
+		///  <description>The value of the "return value" parameter returned.
+		///  The index parameter is ignored.</description>
+		/// </item>
+		/// <item>
+		///  <term>AffectedRows</term>
+		///  <description>The number of rows affected. The index parameter is
+		///  ignored.</description>
+		/// </item>
+		/// </list>
+		/// </returns>
 		public T ExecuteScalar<T>(
 			ScalarSourceType sourceType, NameOrIndexParameter nip)
 		{
@@ -2591,7 +2662,18 @@ namespace BLToolkit.Data
 
 		#region ExecuteScalarList
 
-		public IList ExecuteScalarList(IList list, Type type, int index)
+		/// <summary>
+		/// Executes the query, and returns the array list of values of the
+		/// specified column of  the every row in the resultset returned by the query.
+		/// Extra columns are ignored.</summary>
+		/// <param name="list">The array to fill in.</param>
+		/// <param name="nip">The column name/index or output parameter
+		/// name/index.</param>
+		/// <param name="type">The type of the each element.</param>
+		/// <returns>
+		/// Array list of values of the specified column of the every row in the resultset.
+		/// </returns>
+		public IList ExecuteScalarList(IList list, Type type, NameOrIndexParameter nip)
 		{
 			if (_prepared)
 				InitParameters(CommandAction.Select);
@@ -2602,7 +2684,8 @@ namespace BLToolkit.Data
 			{
 				while (dr.Read())
 				{
-					object value = dr[index];
+					object value = dr.GetValue(nip.ByName ?
+						dr.GetOrdinal(nip.Name) : nip.Index);
 
 					if (value == null || value.GetType() != type)
 						value = value is DBNull? null: Convert.ChangeType(value, type);
@@ -2614,32 +2697,69 @@ namespace BLToolkit.Data
 			return list;
 		}
 
+		/// <summary>
+		/// Executes the query, and returns the array list of values of first column of
+		/// the every row in the resultset returned by the query.
+		/// Extra columns are ignored.</summary>
+		/// <param name="list">The array to fill in.</param>
+		/// <param name="type">The type of the each element.</param>
+		/// <returns>
+		/// Array list of values of first column of the every row in the resultset.
+		/// </returns>
 		public IList ExecuteScalarList(IList list, Type type)
 		{
-			return ExecuteScalarList(list, type, 0);
+			return ExecuteScalarList(list, type, new NameOrIndexParameter());
 		}
-		
-		public ArrayList ExecuteScalarList(Type type, int index)
+
+		/// <summary>
+		/// Executes the query, and returns the array list of values of the specified
+		/// column of  the every row in the resultset returned by the query.
+		/// Extra columns are ignored.</summary>
+		/// <param name="nip">The column name/index.</param>
+		/// <param name="type">The type of the each element.</param>
+		/// <returns>
+		/// Array list of values of the specified column of the every row in the resultset.
+		/// </returns>
+		public ArrayList ExecuteScalarList(Type type, NameOrIndexParameter nip)
 		{
 			ArrayList list = new ArrayList();
 
-			ExecuteScalarList(list, type, index);
+			ExecuteScalarList(list, type, nip);
 
 			return list;
 		}
 
+		/// <summary>
+		/// Executes the query, and returns the array list of values of first column of
+		/// the every row in the resultset returned by the query.
+		/// Extra columns are ignored.</summary>
+		/// <param name="type">The type of the each element.</param>
+		/// <returns>
+		/// Array list of values of first column of the every row in the resultset.
+		/// </returns>
 		public ArrayList ExecuteScalarList(Type type)
 		{
 			ArrayList list = new ArrayList();
 
-			ExecuteScalarList(list, type, 0);
+			ExecuteScalarList(list, type, new NameOrIndexParameter());
 
 			return list;
 		}
 
 		
 #if FW2
-		public IList<T> ExecuteScalarList<T>(IList<T> list, int index)
+		/// <summary>
+		/// Executes the query, and returns the array list of values of the specified
+		/// column of  the every row in the resultset returned by the query.
+		/// Extra columns are ignored.</summary>
+		/// <param name="list">The array to fill in.</param>
+		/// <param name="nip">The column name/index or output parameter
+		/// name/index.</param>
+		/// <typeparam name="T">The type of the each element.</param>
+		/// <returns>
+		/// Array list of values of the specified column of the every row in the resultset.
+		/// </returns>
+		public IList<T> ExecuteScalarList<T>(IList<T> list, NameOrIndexParameter nip)
 		{
 			if (_prepared)
 				InitParameters(CommandAction.Select);
@@ -2652,7 +2772,8 @@ namespace BLToolkit.Data
 			{
 				while (dr.Read())
 				{
-					object value = dr[index];
+					object value = dr.GetValue(nip.ByName ?
+						dr.GetOrdinal(nip.Name) : nip.Index);
 
 					if (value == null || value.GetType() != type)
 						value = value is DBNull? null: Convert.ChangeType(value, type);
@@ -2664,16 +2785,54 @@ namespace BLToolkit.Data
 			return list;
 		}
 
+		/// <summary>
+		/// Executes the query, and returns the array list of values of first column of
+		/// the every row in the resultset returned by the query.
+		/// Extra columns are ignored.</summary>
+		/// <param name="list">The array to fill in.</param>
+		/// name/index.</param>
+		/// <typeparam name="T">The type of the each element.</param>
+		/// <returns>
+		/// Array list of values of first column of the every row in the resultset.
+		/// </returns>
 		public IList<T> ExecuteScalarList<T>(IList<T> list)
 		{
-			return ExecuteScalarList(list, 0);
+			return ExecuteScalarList(list, new NameOrIndexParameter());
 		}
-		
+
+		/// <summary>
+		/// Executes the query, and returns the array list of values of the specified column of
+		/// the every row in the resultset returned by the query.
+		/// Extra columns are ignored.</summary>
+		/// <param name="nip">The column name/index or output parameter
+		/// name/index.</param>
+		/// <typeparam name="T">The type of the each element.</param>
+		/// <returns>
+		/// Array list of values of the specified column of the every row in the resultset.
+		/// </returns>
+		public List<T> ExecuteScalarList<T>(NameOrIndexParameter nip)
+		{
+			List<T> list = new List<T>();
+
+			ExecuteScalarList<T>(list, nip);
+
+			return list;
+		}
+
+		/// <summary>
+		/// Executes the query, and returns the array list of values of first column of
+		/// the every row in the resultset returned by the query.
+		/// Extra columns are ignored.</summary>
+		/// name/index.</param>
+		/// <typeparam name="T">The type of the each element.</param>
+		/// <returns>
+		/// Array list of values of first column of the every row in the resultset.
+		/// </returns>
 		public List<T> ExecuteScalarList<T>()
 		{
 			List<T> list = new List<T>();
 
-			ExecuteScalarList<T>(list, 0);
+			ExecuteScalarList<T>(list, new NameOrIndexParameter());
 
 			return list;
 		}

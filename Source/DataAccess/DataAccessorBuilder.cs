@@ -4,7 +4,7 @@ using System.Data;
 using System.Data.SqlTypes;
 using System.Collections;
 using System.Reflection.Emit;
-
+using BLToolkit.Common;
 using BLToolkit.TypeBuilder.Builders;
 using BLToolkit.Data;
 using BLToolkit.Reflection.Emit;
@@ -157,7 +157,13 @@ namespace BLToolkit.DataAccess
 					attrs = mi.GetCustomAttributes(typeof(ScalarFieldNameAttribute), true);
 
 					if (attrs.Length != 0)
-						scalarFieldName = ((ScalarFieldNameAttribute)attrs[0]).Name;
+					{
+						// PB 2006-06-01 TODO: implement me
+						if (!((ScalarFieldNameAttribute)attrs[0]).NameOrIndex.ByName)
+							throw new NotImplementedException("DataAccessBuilder for IDictionary got scalar field with Index");
+						
+						scalarFieldName = ((ScalarFieldNameAttribute)attrs[0]).NameOrIndex.Name;
+					}
 
 					if (scalarFieldName == null || scalarFieldName.Length == 0)
 						throw new TypeBuilderException(string.Format(
@@ -311,6 +317,20 @@ namespace BLToolkit.DataAccess
 #endif
 		}
 
+		private void SetNameOrIndexParameter(NameOrIndexParameter nip)
+		{
+			if (nip.ByName)
+			{
+				Context.MethodBuilder.Emitter.ldstr(nip.Name)
+					.call(typeof(NameOrIndexParameter), "op_Implicit", typeof(string));
+			}
+			else
+			{
+				Context.MethodBuilder.Emitter.ldc_i4(nip.Index)
+					.call(typeof(NameOrIndexParameter), "op_Implicit", typeof(int));
+			}
+		}
+		
 		#region ExecuteReader
 
 		private void ExecuteReader()
@@ -412,13 +432,30 @@ namespace BLToolkit.DataAccess
 			GetSprocName();
 			CallSetCommand();
 
-			Context.MethodBuilder.Emitter
-				.ldloc    (Context.ReturnValue)
-				.ldloc    (_locObjType)
-				.callvirt (typeof(DbManager), "ExecuteScalarList", typeof(IList), typeof(Type))
-				.pop
-				.end()
-				;
+			object[] attrs = Context.CurrentMethod.GetCustomAttributes(typeof(ScalarFieldNameAttribute), true);
+
+			if (attrs.Length == 0)
+			{
+				Context.MethodBuilder.Emitter
+					.ldloc(Context.ReturnValue)
+					.ldloc(_locObjType)
+					.callvirt(typeof(DbManager), "ExecuteScalarList", typeof(IList), typeof(Type))
+					.pop
+					.end()
+					;
+			}
+			else
+			{
+				Context.MethodBuilder.Emitter
+					.ldloc(Context.ReturnValue)
+					.ldloc(_locObjType);
+				SetNameOrIndexParameter(((ScalarFieldNameAttribute)attrs[0]).NameOrIndex);
+				Context.MethodBuilder.Emitter
+					.callvirt(typeof(DbManager), "ExecuteScalarList", typeof(IList), typeof(Type), typeof(NameOrIndexParameter))
+					.pop
+					.end()
+					;
+			}
 		}
 
 		private void ExecuteList()
@@ -653,19 +690,11 @@ namespace BLToolkit.DataAccess
 			{
 				ScalarSourceAttribute attr = (ScalarSourceAttribute)attrs[0];
 
-				EmitHelper emit = Context.MethodBuilder.Emitter
+				Context.MethodBuilder.Emitter
 					.ldc_i4((int)attr.ScalarType);
-				if (attr.NameOrIndex.ByName)
-				{
-					emit = emit.ldstr(attr.NameOrIndex.Name)
-						.call(typeof(Common.NameOrIndexParameter), "op_Implicit", typeof(string));
-				}
-				else
-				{
-					emit = emit.ldc_i4(attr.NameOrIndex.Index)
-						.call(typeof(Common.NameOrIndexParameter), "op_Implicit", typeof(int));
-				}
-				emit.callvirtNoGenerics(typeof(DbManager), "ExecuteScalar", typeof(ScalarSourceType), typeof(Common.NameOrIndexParameter))
+				SetNameOrIndexParameter(attr.NameOrIndex);
+				Context.MethodBuilder
+					.Emitter.callvirtNoGenerics(typeof(DbManager), "ExecuteScalar", typeof(ScalarSourceType), typeof(NameOrIndexParameter))
 					.ldnull
 					.callvirt(typeof(DataAccessor), converterName, _bindingFlags, typeof(DbManager), typeof(object), typeof(object))
 					//.CastFromObject     (Context.CurrentMethod.ReturnType)
