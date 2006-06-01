@@ -120,6 +120,11 @@
                     BuildAction = "Compile"
                 />
                 <File
+                    RelPath = "Common\NameOrIndexParameterTest.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
                     RelPath = "Data\BinaryTest.cs"
                     SubType = "Code"
                     BuildAction = "Compile"

@@ -15,7 +15,8 @@ namespace Data
 			using (DbManager db = new DbManager())
 			{
 				int expectedValue = 12345;
-				int actualValue = Convert.ToInt32(db.SetSpCommand("Scalar_DataReader").ExecuteScalar());
+				int actualValue = Convert.ToInt32(db
+					.SetSpCommand("Scalar_DataReader").ExecuteScalar());
 
 				Assert.AreEqual(expectedValue, actualValue);
 			}
@@ -27,7 +28,9 @@ namespace Data
 			using (DbManager db = new DbManager())
 			{
 				int expectedValue = 12345;
-				int actualValue = Convert.ToInt32(db.SetSpCommand("Scalar_DataReader").ExecuteScalar(ScalarSourceType.DataReader));
+				int actualValue = Convert.ToInt32(db
+					.SetSpCommand("Scalar_DataReader")
+					.ExecuteScalar(ScalarSourceType.DataReader));
 				
 				Assert.AreEqual(expectedValue, actualValue);
 			}
@@ -39,7 +42,23 @@ namespace Data
 			using (DbManager db = new DbManager())
 			{
 				string expectedValue = "54321";
-				string actualValue = Convert.ToString(db.SetSpCommand("Scalar_DataReader").ExecuteScalar(ScalarSourceType.DataReader, 1));
+				string actualValue = Convert.ToString(db
+					.SetSpCommand("Scalar_DataReader")
+					.ExecuteScalar(ScalarSourceType.DataReader, 1));
+
+				Assert.AreEqual(expectedValue, actualValue);
+			}
+		}
+
+		[Test]
+		public void DataReader3Test()
+		{
+			using (DbManager db = new DbManager())
+			{
+				string expectedValue = "54321";
+				string actualValue = Convert.ToString(db
+					.SetSpCommand("Scalar_DataReader")
+					.ExecuteScalar(ScalarSourceType.DataReader, "stringField"));
 
 				Assert.AreEqual(expectedValue, actualValue);
 			}
@@ -51,7 +70,9 @@ namespace Data
 			using (DbManager db = new DbManager())
 			{
 				int expectedValue = 12345;
-				int actualValue = Convert.ToInt32(db.SetSpCommand("Scalar_OutputParameter").ExecuteScalar(ScalarSourceType.OutputParameter));
+				int actualValue = Convert.ToInt32(db
+					.SetSpCommand("Scalar_OutputParameter")
+					.ExecuteScalar(ScalarSourceType.OutputParameter));
 
 				Assert.AreEqual(expectedValue, actualValue);
 			}
@@ -63,19 +84,37 @@ namespace Data
 			using (DbManager db = new DbManager())
 			{
 				string expectedValue = "54321";
-				string actualValue = Convert.ToString(db.SetSpCommand("Scalar_OutputParameter").ExecuteScalar(ScalarSourceType.OutputParameter, 1));
+				string actualValue = Convert.ToString(db
+					.SetSpCommand("Scalar_OutputParameter")
+					.ExecuteScalar(ScalarSourceType.OutputParameter, 1));
 
 				Assert.AreEqual(expectedValue, actualValue);
 			}
 		}
 
 		[Test]
+		public void OutputParameter3Test()
+		{
+			using (DbManager db = new DbManager())
+			{
+				string expectedValue = "54321";
+				string actualValue = Convert.ToString(db
+					.SetSpCommand("Scalar_OutputParameter")
+					.ExecuteScalar(ScalarSourceType.OutputParameter, "outputString"));
+
+				Assert.AreEqual(expectedValue, actualValue);
+			}
+		}
+		
+		[Test]
 		public void ReturnParameterTest()
 		{
 			using (DbManager db = new DbManager())
 			{
 				int expectedValue = 12345;
-				int actualValue = Convert.ToInt32(db.SetSpCommand("Scalar_ReturnParameter").ExecuteScalar(ScalarSourceType.ReturnValue));
+				int actualValue = Convert.ToInt32(db
+					.SetSpCommand("Scalar_ReturnParameter")
+					.ExecuteScalar(ScalarSourceType.ReturnValue));
 
 				Assert.AreEqual(expectedValue, actualValue);
 			}
@@ -87,7 +126,9 @@ namespace Data
 			using (DbManager db = new DbManager())
 			{
 				int expectedValue = -1;
-				int actualValue = Convert.ToInt32(db.SetSpCommand("Scalar_ReturnParameter").ExecuteScalar(ScalarSourceType.AffectedRows));
+				int actualValue = Convert.ToInt32(db
+					.SetSpCommand("Scalar_ReturnParameter")
+					.ExecuteScalar(ScalarSourceType.AffectedRows));
 
 				Assert.AreEqual(expectedValue, actualValue);
 			}

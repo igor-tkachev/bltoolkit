@@ -12,6 +12,7 @@ using System.Collections.Generic;
 using BLToolkit.Data.DataProvider;
 using BLToolkit.Mapping;
 using BLToolkit.Reflection;
+using BLToolkit.Common;
 
 namespace BLToolkit.Data
 {
@@ -2392,10 +2393,11 @@ namespace BLToolkit.Data
 		#region ExecuteScalar
 
 		/// <summary>
-		/// Executes the query, and returns the first column of the first row in the resultset returned 
-		/// by the query. Extra columns or rows are ignored.
-		/// </summary>
-		/// <returns>The first column of the first row in the resultset.</returns>
+		/// Executes the query, and returns the first column of the first row
+		/// in the resultset returned by the query. Extra columns or rows are
+		/// ignored.</summary>
+		/// <returns>
+		/// The first column of the first row in the resultset.</returns>
 		public object ExecuteScalar()
 		{
 			if (_prepared)
@@ -2417,9 +2419,10 @@ namespace BLToolkit.Data
 		}
 
 		/// <summary>
-		/// Executes the query, and returns the value with specified scalar source type.
-		/// </summary>
-		/// <param name="sourceType">The method used to return the scalar value.</param>
+		/// Executes the query, and returns the value with specified scalar
+		/// source type.</summary>
+		/// <param name="sourceType">The method used to return the scalar
+		/// value.</param>
 		/// <returns><list type="table">
 		/// <listheader>
 		///  <term>ScalarSourceType</term>
@@ -2427,15 +2430,18 @@ namespace BLToolkit.Data
 		/// </listheader>
 		/// <item>
 		///  <term>DataReader</term>
-		///  <description>The first column of the first row in the resultset.</description>
+		///  <description>The first column of the first row in the resultset.
+		///  </description>
 		/// </item>
 		/// <item>
 		///  <term>OutputParameter</term>
-		///  <description>The value of the first output or input/output parameter returned.</description>
+		///  <description>The value of the first output or input/output
+		///  parameter returned.</description>
 		/// </item>
 		/// <item>
 		///  <term>ReturnValue</term>
-		///  <description>The value of the "return value" parameter returned.</description>
+		///  <description>The value of the "return value" parameter returned.
+		///  </description>
 		/// </item>
 		/// <item>
 		///  <term>AffectedRows</term>
@@ -2445,14 +2451,16 @@ namespace BLToolkit.Data
 		/// </returns>
 		public object ExecuteScalar(ScalarSourceType sourceType)
 		{
-			return ExecuteScalar(sourceType, 0);
+			return ExecuteScalar(sourceType, new NameOrIndexParameter());
 		}
 
 		/// <summary>
-		/// Executes the query, and returns the value with specified scalar source type.
-		/// </summary>
-		/// <param name="sourceType">The method used to return the scalar value.</param>
-		/// <param name="index">The column index or output parameter index.</param>
+		/// Executes the query, and returns the value with specified scalar
+		/// source type.</summary>
+		/// <param name="sourceType">The method used to return the scalar
+		/// value.</param>
+		/// <param name="nip">The column name/index or output parameter
+		/// name/index.</param>
 		/// <returns><list type="table">
 		/// <listheader>
 		///  <term>ScalarSourceType</term>
@@ -2460,29 +2468,32 @@ namespace BLToolkit.Data
 		/// </listheader>
 		/// <item>
 		///  <term>DataReader</term>
-		///  <description>The column at specified index of the first row in the resultset.</description>
+		///  <description>The column with specified name or at specified index
+		///  of the first row in the resultset.</description>
 		/// </item>
 		/// <item>
 		///  <term>OutputParameter</term>
-		///  <description>The value of the output or input/output parameter returned at specified index.</description>
+		///  <description>The value of the output or input/output parameter
+		///  returned with specified name or at specified index.</description>
 		/// </item>
 		/// <item>
 		///  <term>ReturnValue</term>
-		///  <description>The value of the "return value" parameter returned. The index parameter is ignored.</description>
+		///  <description>The value of the "return value" parameter returned.
+		///  The index parameter is ignored.</description>
 		/// </item>
 		/// <item>
 		///  <term>AffectedRows</term>
-		///  <description>The number of rows affected. The index parameter is ignored.</description>
+		///  <description>The number of rows affected. The index parameter is
+		///  ignored.</description>
 		/// </item>
 		/// </list>
 		/// </returns>
-		public object ExecuteScalar(ScalarSourceType sourceType, int index)
+		public object ExecuteScalar(ScalarSourceType sourceType,
+			NameOrIndexParameter nip)
 		{
-			if (index < 0)
-				throw new ArgumentException("Index must be grater or equal to zero.", "index");
-
 			if (!Enum.IsDefined(typeof(ScalarSourceType), sourceType))
-				throw new InvalidEnumArgumentException("sourceType", (int)sourceType, typeof(ScalarSourceType));
+				throw new InvalidEnumArgumentException("sourceType",
+					(int)sourceType, typeof(ScalarSourceType));
 			
 			if (_prepared)
 				InitParameters(CommandAction.Select);
@@ -2492,31 +2503,44 @@ namespace BLToolkit.Data
 				case ScalarSourceType.DataReader:
 					using (IDataReader reader = ExecuteReaderInternal())
 						if (reader.Read())
-							return reader.GetValue(index);
+							return reader.GetValue(nip.ByName ?
+								reader.GetOrdinal(nip.Name) : nip.Index);
 
 					break;
 
 				case ScalarSourceType.OutputParameter:
 					ExecuteNonQueryInternal();
 
-					foreach (IDataParameter p in SelectCommand.Parameters)
+					if (nip.ByName)
 					{
-						if (p.Direction == ParameterDirection.Output ||
-							p.Direction == ParameterDirection.InputOutput)
+						string name = (string)_dataProvider.Convert(nip.Name,
+							ConvertType.NameToParameter);
+						
+						return _dataProvider.Convert(Parameter(name).Value,
+							ConvertType.OutputParameter);
+					}
+					else
+					{
+						int index = nip.Index;
+						foreach (IDataParameter p in SelectCommand.Parameters)
 						{
-							if (0 == index)
+							if (p.Direction == ParameterDirection.Output ||
+								p.Direction == ParameterDirection.InputOutput)
 							{
-								return _dataProvider.Convert(p.Value, ConvertType.OutputParameter);
-							}
-							else
-							{
-								// Skip this parameter and look for next one.
-								//
-								--index;
+								if (0 == index)
+								{
+									return _dataProvider.Convert(p.Value
+										, ConvertType.OutputParameter);
+								}
+								else
+								{
+									// Skip this parameter and look for next one.
+									//
+									--index;
+								}
 							}
 						}
 					}
-
 					break;
 
 				case ScalarSourceType.ReturnValue:
@@ -2524,7 +2548,8 @@ namespace BLToolkit.Data
 
 					foreach (IDataParameter p in SelectCommand.Parameters)
 						if (p.Direction == ParameterDirection.ReturnValue)
-							return _dataProvider.Convert(p.Value, ConvertType.OutputParameter);
+							return _dataProvider.Convert(p.Value
+								, ConvertType.OutputParameter);
 
 					break;
 
@@ -2532,7 +2557,9 @@ namespace BLToolkit.Data
 					return ExecuteNonQueryInternal();
 
 				default:
-					System.Diagnostics.Debug.Fail("Not implemented case in DbManager.ExecuteScalar: " + sourceType);
+					System.Diagnostics.Debug.Fail(
+						"Not implemented case in DbManager.ExecuteScalar: "
+							+ sourceType);
 					break;
 			}
 
@@ -2549,12 +2576,13 @@ namespace BLToolkit.Data
 		
 		public T ExecuteScalar<T>(ScalarSourceType sourceType)
 		{
-			return (T)ExecuteScalar(sourceType, 0);
+			return (T)ExecuteScalar(sourceType, new NameOrIndexParameter());
 		}
 
-		public T ExecuteScalar<T>(ScalarSourceType sourceType, int index)
+		public T ExecuteScalar<T>(
+			ScalarSourceType sourceType, NameOrIndexParameter nip)
 		{
-			return (T)ExecuteScalar(sourceType, index);
+			return (T)ExecuteScalar(sourceType, nip);
 		}
 		
 #endif
