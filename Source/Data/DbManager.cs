@@ -2682,15 +2682,19 @@ namespace BLToolkit.Data
 
 			using (IDataReader dr = ExecuteReaderInternal())
 			{
-				while (dr.Read())
+				if (dr.Read())
 				{
-					object value = dr.GetValue(nip.ByName ?
-						dr.GetOrdinal(nip.Name) : nip.Index);
+					int index = nip.ByName ? dr.GetOrdinal(nip.Name) : nip.Index;
+					do
+					{
+						object value = dr.GetValue(index);
 
-					if (value == null || value.GetType() != type)
-						value = value is DBNull? null: Convert.ChangeType(value, type);
+						if (value == null || value.GetType() != type)
+							value = value is DBNull ? null : Convert.ChangeType(value, type);
 
-					list.Add(value);
+						list.Add(value);
+					}
+					while (dr.Read());
 				}
 			}
 
@@ -2770,15 +2774,19 @@ namespace BLToolkit.Data
 
 			using (IDataReader dr = ExecuteReaderInternal())
 			{
-				while (dr.Read())
+				if (dr.Read())
 				{
-					object value = dr.GetValue(nip.ByName ?
-						dr.GetOrdinal(nip.Name) : nip.Index);
+					int index = nip.ByName ? dr.GetOrdinal(nip.Name) : nip.Index;
+					do
+					{
+						object value = dr.GetValue(index);
 
-					if (value == null || value.GetType() != type)
-						value = value is DBNull? null: Convert.ChangeType(value, type);
+						if (value == null || value.GetType() != type)
+							value = value is DBNull ? null : Convert.ChangeType(value, type);
 
-					list.Add((T)value);
+						list.Add((T)value);
+					}
+					while (dr.Read());
 				}
 			}
 
