@@ -30,6 +30,8 @@ namespace DataAccess
 			public abstract int Person_Insert(
 				string @FirstName, string @LastName, string @MiddleName, Gender @Gender);
 
+			public abstract void Person_Delete(int @personID);
+
 			public abstract void OutRefEnumTest(
 				string @str, out RefEnum @outputStr, ref RefEnum @inputOutputStr);
 
@@ -43,6 +45,7 @@ namespace DataAccess
 			int id = ta.Person_Insert("Crazy", "Frog", null, Gender.E_Unknown);
 
 			Assert.IsTrue(id > 0);
+			ta.Person_Delete(id);
 		}
 
 		[Test]

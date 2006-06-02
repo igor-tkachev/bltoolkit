@@ -553,6 +553,10 @@ namespace BLToolkit.Data
 			return this;
 		}
 
+		/// <summary>
+		/// Commits the database transaction.
+		/// </summary>
+		/// <returns>This instance of the <see cref="DbManager"/>.</returns>
 		public DbManager CommitTransaction()
 		{
 			if (_transaction != null)
@@ -576,6 +580,10 @@ namespace BLToolkit.Data
 			return this;
 		}
 
+		/// <summary>
+		/// Rolls back a transaction from a pending state.
+		/// </summary>
+		/// <returns>This instance of the <see cref="DbManager"/>.</returns>
 		public DbManager RollbackTransaction()
 		{
 			if (_transaction != null)
@@ -2361,11 +2369,13 @@ namespace BLToolkit.Data
 		/// </remarks>
 		/// <include file="Examples1.xml" path='examples/db[@name="Execute(CommandType,string,DataSet,string)"]/*' />
 		/// <param name="dataSet">An instance of the <see cref="DataSet"/> class to execute the command.</param>
-		/// <param name="tableName">The table name.</param>
+		/// <param name="nip">The table name or index.
+		/// name/index.</param>
 		/// <returns>The number of rows affected by the command.</returns>
-		public int ExecuteForEach(DataSet dataSet, string tableName)
+		public int ExecuteForEach(DataSet dataSet, NameOrIndexParameter nip)
 		{
-			return ExecuteForEach(dataSet.Tables[tableName]);
+			return nip.ByName ? ExecuteForEach(dataSet.Tables[nip.Name])
+				: ExecuteForEach(dataSet.Tables[nip.Index]);
 		}
 
 		#endregion
@@ -2852,40 +2862,38 @@ namespace BLToolkit.Data
 
 		public IDictionary ExecuteScalarDictionary(
 			IDictionary dic,
-			string keyFieldName,   Type keyFieldType,
-			string valueFieldName, Type valueFieldType)
+			NameOrIndexParameter keyField,   Type keyFieldType,
+			NameOrIndexParameter valueField, Type valueFieldType)
 		{
 			if (_prepared)
 				InitParameters(CommandAction.Select);
 
 			//object nullValue = _mappingSchema.GetNullValue(type);
 
-			int keyIndex   = -1;
-			int valueIndex = -1;
-
-			if (keyFieldName != null && keyFieldName.Length > 0 && keyFieldName[0] == '@')
-				keyFieldName = keyFieldName.Substring(1);
+			if (keyField.ByName && keyField.Name.Length > 0 && keyField.Name[0] == '@')
+				keyField = keyField.Name.Substring(1);
 
 			using (IDataReader dr = ExecuteReaderInternal())
 			{
-				while (dr.Read())
+				if (dr.Read())
 				{
-					if (keyIndex == -1)
+					int keyIndex = keyField.ByName ? dr.GetOrdinal(keyField.Name) : keyField.Index;
+					int valueIndex = valueField.ByName ? dr.GetOrdinal(valueField.Name) : valueField.Index;
+
+					do
 					{
-						keyIndex   = dr.GetOrdinal(keyFieldName);
-						valueIndex = dr.GetOrdinal(valueFieldName);
+						object value = dr[valueIndex];
+						object key = dr[keyIndex];
+
+						if (key == null || key.GetType() != keyFieldType)
+							key = key is DBNull ? null : Convert.ChangeType(key, keyFieldType);
+
+						if (value == null || value.GetType() != valueFieldType)
+							value = value is DBNull ? null : Convert.ChangeType(value, valueFieldType);
+
+						dic.Add(key, value);
 					}
-
-					object value = dr[valueIndex];
-					object key   = dr[keyIndex];
-
-					if (key == null || key.GetType() != keyFieldType)
-						key = key is DBNull? null: Convert.ChangeType(key, keyFieldType);
-
-					if (value == null || value.GetType() != valueFieldType)
-						value = value is DBNull? null: Convert.ChangeType(value, valueFieldType);
-
-					dic.Add(key, value);
+					while (dr.Read());
 				}
 			}
 
@@ -2893,19 +2901,21 @@ namespace BLToolkit.Data
 		}
 
 		public Hashtable ExecuteScalarDictionary(
-			string keyFieldName,   Type keyFieldType,
-			string valueFieldName, Type valueFieldType)
+			NameOrIndexParameter keyField, Type keyFieldType,
+			NameOrIndexParameter valueField, Type valueFieldType)
 		{
 			Hashtable table = new Hashtable();
 
-			ExecuteScalarDictionary(table, keyFieldName, keyFieldType, valueFieldName, valueFieldType);
+			ExecuteScalarDictionary(table, keyField, keyFieldType, valueField, valueFieldType);
 
 			return table;
 		}
 
 #if FW2
 		public IDictionary<K,T> ExecuteScalarDictionary<K,T>(
-			IDictionary<K,T> dic, string keyFieldName, string valueFieldName)
+			IDictionary<K, T> dic,
+			NameOrIndexParameter keyField,
+			NameOrIndexParameter valueField)
 		{
 			if (_prepared)
 				InitParameters(CommandAction.Select);
@@ -2915,29 +2925,27 @@ namespace BLToolkit.Data
 			Type keyFieldType   = typeof(K);
 			Type valueFieldType = typeof(T);
 
-			int keyIndex   = -1;
-			int valueIndex = -1;
-
 			using (IDataReader dr = ExecuteReaderInternal())
 			{
-				while (dr.Read())
+				if (dr.Read())
 				{
-					if (keyIndex == -1)
+					int keyIndex = keyField.ByName ? dr.GetOrdinal(keyField.Name) : keyField.Index;
+					int valueIndex = valueField.ByName ? dr.GetOrdinal(valueField.Name) : valueField.Index;
+
+					do
 					{
-						keyIndex   = dr.GetOrdinal(keyFieldName);
-						valueIndex = dr.GetOrdinal(valueFieldName);
+						object value = dr[valueIndex];
+						object key = dr[keyIndex];
+
+						if (key == null || key.GetType() != keyFieldType)
+							key = key is DBNull ? null : Convert.ChangeType(key, keyFieldType);
+
+						if (value == null || value.GetType() != valueFieldType)
+							value = value is DBNull ? null : Convert.ChangeType(value, valueFieldType);
+
+						dic.Add((K)key, (T)value);
 					}
-
-					object value = dr[valueIndex];
-					object key   = dr[keyIndex];
-
-					if (key == null || key.GetType() != keyFieldType)
-						key = key is DBNull? null: Convert.ChangeType(key, keyFieldType);
-
-					if (value == null || value.GetType() != valueFieldType)
-						value = value is DBNull? null: Convert.ChangeType(value, valueFieldType);
-
-					dic.Add((K)key, (T)value);
+					while (dr.Read());
 				}
 			}
 
@@ -2945,11 +2953,12 @@ namespace BLToolkit.Data
 		}
 
 		public Dictionary<K,T> ExecuteScalarDictionary<K,T>(
-			string keyFieldName, string valueFieldName)
+			NameOrIndexParameter keyField,
+			NameOrIndexParameter valueField)
 		{
 			Dictionary<K,T> dic = new Dictionary<K,T>();
 
-			ExecuteScalarDictionary<K,T>(dic, keyFieldName, valueFieldName);
+			ExecuteScalarDictionary<K,T>(dic, keyField, valueField);
 
 			return dic;
 		}
@@ -2960,40 +2969,40 @@ namespace BLToolkit.Data
 		#region ExecuteScalarDictionary (Index)
 
 		public IDictionary ExecuteScalarDictionary(
-			IDictionary dic, MapIndex index, string valueFieldName, Type valueFieldType)
+			IDictionary dic, MapIndex index,
+			NameOrIndexParameter valueField, Type valueFieldType)
 		{
 			if (_prepared)
 				InitParameters(CommandAction.Select);
 
 			//object nullValue = _mappingSchema.GetNullValue(type);
 
-			int[] keyIndex   = null;
-			int   valueIndex = -1;
-
 			using (IDataReader dr = ExecuteReaderInternal())
 			{
-				while (dr.Read())
+				if (dr.Read())
 				{
-					if (keyIndex == null)
-					{
-						valueIndex = dr.GetOrdinal(valueFieldName);
-						keyIndex   = new int[index.Fields.Length];
-
-						for (int i = 0; i < keyIndex.Length; i++)
-							keyIndex[i] = dr.GetOrdinal(index.Fields[i]);
-					}
-
-					object value = dr[valueIndex];
-
-					if (value == null || value.GetType() != valueFieldType)
-						value = value is DBNull? null: Convert.ChangeType(value, valueFieldType);
-
-					object[] key = new object[keyIndex.Length];
+					int valueIndex = valueField.ByName ? dr.GetOrdinal(valueField.Name) : valueField.Index;
+					int[] keyIndex = new int[index.Fields.Length];
 
 					for (int i = 0; i < keyIndex.Length; i++)
-						key[i] = dr[keyIndex[i]];
+						keyIndex[i] = index.Fields[i].ByName ?
+							dr.GetOrdinal(index.Fields[i].Name) : index.Fields[i].Index;
 
-					dic.Add(new IndexValue(key), value);
+					do
+					{
+						object value = dr[valueIndex];
+
+						if (value == null || value.GetType() != valueFieldType)
+							value = value is DBNull ? null : Convert.ChangeType(value, valueFieldType);
+
+						object[] key = new object[keyIndex.Length];
+
+						for (int i = 0; i < keyIndex.Length; i++)
+							key[i] = dr[keyIndex[i]];
+
+						dic.Add(new IndexValue(key), value);
+					}
+					while (dr.Read());
 				}
 			}
 
@@ -3001,53 +3010,52 @@ namespace BLToolkit.Data
 		}
 
 		public Hashtable ExecuteScalarDictionary(
-			MapIndex index, string valueFieldName, Type valueFieldType)
+			MapIndex index, NameOrIndexParameter valueField, Type valueFieldType)
 		{
 			Hashtable table = new Hashtable();
 
-			ExecuteScalarDictionary(table, index, valueFieldName, valueFieldType);
+			ExecuteScalarDictionary(table, index, valueField, valueFieldType);
 
 			return table;
 		}
 
 #if FW2
 		public IDictionary<IndexValue,T> ExecuteScalarDictionary<T>(
-			IDictionary<IndexValue,T> dic, MapIndex index, string valueFieldName)
+			IDictionary<IndexValue, T> dic, MapIndex index, NameOrIndexParameter valueField)
 		{
 			if (_prepared)
 				InitParameters(CommandAction.Select);
 
 			//object nullValue = _mappingSchema.GetNullValue(type);
 
-			int[] keyIndex   = null;
-			int   valueIndex = -1;
-
 			Type valueFieldType = typeof(T);
 
 			using (IDataReader dr = ExecuteReaderInternal())
 			{
-				while (dr.Read())
+				if (dr.Read())
 				{
-					if (keyIndex == null)
-					{
-						valueIndex = dr.GetOrdinal(valueFieldName);
-						keyIndex   = new int[index.Fields.Length];
-
-						for (int i = 0; i < keyIndex.Length; i++)
-							keyIndex[i] = dr.GetOrdinal(index.Fields[i]);
-					}
-
-					object value = dr[valueIndex];
-
-					if (value == null || value.GetType() != valueFieldType)
-						value = value is DBNull? null: Convert.ChangeType(value, valueFieldType);
-
-					object[] key = new object[keyIndex.Length];
+					int valueIndex = valueField.ByName ? dr.GetOrdinal(valueField.Name) : valueField.Index;
+					int[] keyIndex = new int[index.Fields.Length];
 
 					for (int i = 0; i < keyIndex.Length; i++)
-						key[i] = dr[keyIndex[i]];
+						keyIndex[i] = index.Fields[i].ByName ?
+							dr.GetOrdinal(index.Fields[i].Name) : index.Fields[i].Index;
 
-					dic.Add(new IndexValue(key), (T)value);
+					do
+					{
+						object value = dr[valueIndex];
+
+						if (value == null || value.GetType() != valueFieldType)
+							value = value is DBNull ? null : Convert.ChangeType(value, valueFieldType);
+
+						object[] key = new object[keyIndex.Length];
+
+						for (int i = 0; i < keyIndex.Length; i++)
+							key[i] = dr[keyIndex[i]];
+
+						dic.Add(new IndexValue(key), (T)value);
+					}
+					while (dr.Read());
 				}
 			}
 
@@ -3055,11 +3063,11 @@ namespace BLToolkit.Data
 		}
 
 		public Dictionary<IndexValue,T> ExecuteScalarDictionary<T>(
-			MapIndex index, string valueFieldName)
+			MapIndex index, NameOrIndexParameter valueField)
 		{
 			Dictionary<IndexValue,T> dic = new Dictionary<IndexValue,T>();
 
-			ExecuteScalarDictionary<T>(dic, index, valueFieldName);
+			ExecuteScalarDictionary<T>(dic, index, valueField);
 
 			return dic;
 		}
@@ -3489,17 +3497,17 @@ namespace BLToolkit.Data
 		/// using the provided parameters.
 		/// </summary>
 		/// <include file="Examples.xml" path='examples/db[@name="ExecuteDictionary(string,Type)"]/*' />
-		/// <param name="keyFieldName">The field name that is used as a key to populate <see cref="Hashtable"/>.</param>
-		/// <param name="type">Business object type.</param>
+		/// <param name="keyField">The field name or index that is used as a key to populate <see cref="Hashtable"/>.</param>
+		/// <param name="keyFieldType">Business object type.</param>
 		/// <returns>An instance of the <see cref="Hashtable"/> class.</returns>
 		public Hashtable ExecuteDictionary(
-			string keyFieldName,
-			Type   type,
-			params object[] parameters)
+			NameOrIndexParameter keyField,
+			Type                 keyFieldType,
+			params object[]      parameters)
 		{
 			Hashtable hash = new Hashtable();
 
-			ExecuteDictionary(hash, keyFieldName, type, parameters);
+			ExecuteDictionary(hash, keyField, keyFieldType, parameters);
 
 			return hash;
 		}
@@ -3509,21 +3517,21 @@ namespace BLToolkit.Data
 		/// </summary>
 		/// <include file="Examples.xml" path='examples/db[@name="ExecuteDictionary(Hashtable,string,Type)"]/*' />
 		/// <param name="dictionary">A dictionary of mapped business objects to populate.</param>
-		/// <param name="keyFieldName">The field name that is used as a key to populate <see cref="IDictionary"/>.</param>
+		/// <param name="keyField">The field name or index that is used as a key to populate <see cref="IDictionary"/>.</param>
 		/// <param name="type">Business object type.</param>
 		/// <returns>An instance of the <see cref="IDictionary"/>.</returns>
 		public IDictionary ExecuteDictionary(
-			IDictionary     dictionary,
-			string          keyFieldName,
-			Type            type,
-			params object[] parameters)
+			IDictionary          dictionary,
+			NameOrIndexParameter keyField,
+			Type                 type,
+			params object[]      parameters)
 		{
 			if (_prepared)
 				InitParameters(CommandAction.Select);
 
 			using (IDataReader dr = ExecuteReaderInternal())
 			{
-				return _mappingSchema.MapDataReaderToDictionary(dr, dictionary, keyFieldName, type, parameters);
+				return _mappingSchema.MapDataReaderToDictionary(dr, dictionary, keyField, type, parameters);
 			}
 		}
 
@@ -3533,11 +3541,11 @@ namespace BLToolkit.Data
 		/// </summary>
 		/// <typeparam name="TKey">Key's type.</typeparam>
 		/// <typeparam name="TValue">Value's type.</typeparam>
-		/// <param name="keyFieldName">The field name that is used as a key to populate the dictionary.</param>
+		/// <param name="keyField">The field name or index that is used as a key to populate the dictionary.</param>
 		/// <returns>An instance of the dictionary.</returns>
 		public Dictionary<TKey, TValue> ExecuteDictionary<TKey, TValue>(
-			string          keyFieldName,
-			params object[] parameters)
+			NameOrIndexParameter keyField,
+			params object[]      parameters)
 		{
 			if (_prepared)
 				InitParameters(CommandAction.Select);
@@ -3545,13 +3553,13 @@ namespace BLToolkit.Data
 			using (IDataReader dr = ExecuteReaderInternal())
 			{
 				return _mappingSchema.MapDataReaderToDictionary<TKey,TValue>(
-					dr, keyFieldName, parameters);
+					dr, keyField, parameters);
 			}
 		}
 
 		public IDictionary<TKey, TValue> ExecuteDictionary<TKey, TValue>(
 			IDictionary<TKey, TValue> dictionary,
-			string                    keyFieldName,
+			NameOrIndexParameter      keyField,
 			params object[]           parameters)
 		{
 			if (_prepared)
@@ -3560,7 +3568,7 @@ namespace BLToolkit.Data
 			using (IDataReader dr = ExecuteReaderInternal())
 			{
 				return _mappingSchema.MapDataReaderToDictionary<TKey,TValue>(
-					dr, dictionary, keyFieldName, parameters);
+					dr, dictionary, keyField, parameters);
 			}
 		}
 #endif

@@ -152,31 +152,25 @@ namespace BLToolkit.DataAccess
 
 				if (TypeHelper.IsScalar(elementType))
 				{
-					string scalarFieldName = null;
+					NameOrIndexParameter scalarField = string.Empty;
 
 					attrs = mi.GetCustomAttributes(typeof(ScalarFieldNameAttribute), true);
 
 					if (attrs.Length != 0)
-					{
-						// PB 2006-06-01 TODO: implement me
-						if (!((ScalarFieldNameAttribute)attrs[0]).NameOrIndex.ByName)
-							throw new NotImplementedException("DataAccessBuilder for IDictionary got scalar field with Index");
-						
-						scalarFieldName = ((ScalarFieldNameAttribute)attrs[0]).NameOrIndex.Name;
-					}
+						scalarField = ((ScalarFieldNameAttribute)attrs[0]).NameOrIndex;
 
-					if (scalarFieldName == null || scalarFieldName.Length == 0)
+					if (scalarField.ByName && scalarField.Name.Length == 0)
 						throw new TypeBuilderException(string.Format(
 							"Scalar field name is not defined for the method '{0}.{1}'.",
 							Context.CurrentMethod.DeclaringType.Name,
 							Context.CurrentMethod.Name));
 
 					if (fields.Length == 0) 
-						ExecuteDictionary(keyType, scalarFieldName, elementType);
+						ExecuteDictionary(keyType, scalarField, elementType);
 					else if (isIndex || fields.Length > 1)
-						ExecuteScalarDictionary(fields, scalarFieldName, elementType);
+						ExecuteScalarDictionary(fields, scalarField, elementType);
 					else
-						ExecuteScalarDictionary(fields[0], keyType, scalarFieldName, elementType);
+						ExecuteScalarDictionary(fields[0], keyType, scalarField, elementType);
 				}
 				else
 				{
@@ -516,7 +510,10 @@ namespace BLToolkit.DataAccess
 			return fieldBuilder;
 		}
 
-		private void ExecuteScalarDictionary(string[] index, string scalarFieldName, Type elementType)
+		private void ExecuteScalarDictionary(
+			string[]             index,
+			NameOrIndexParameter scalarField,
+			Type                 elementType)
 		{
 			_objectType = elementType;
 
@@ -527,18 +524,22 @@ namespace BLToolkit.DataAccess
 
 			Context.MethodBuilder.Emitter
 				.ldloc    (Context.ReturnValue)
-				.ldsfld   (GetIndexField(index))
-				.ldstr    (scalarFieldName)
+				.ldsfld   (GetIndexField(index));
+				//.ldstr    (scalarFieldName)
+			SetNameOrIndexParameter(scalarField);
+			Context.MethodBuilder.Emitter
 				.ldloc    (_locObjType)
 				.callvirt (typeof(DbManager), "ExecuteScalarDictionary",
-					typeof(IDictionary), typeof(MapIndex), typeof(string), typeof(Type))
+					typeof(IDictionary), typeof(MapIndex),
+					typeof(NameOrIndexParameter), typeof(Type))
 				.pop
 				.end()
 				;
 		}
 
 		private void ExecuteScalarDictionary(
-			string keyFieldName, Type keyType, string scalarFieldName, Type elementType)
+			NameOrIndexParameter keyField,    Type keyType,
+			NameOrIndexParameter scalarField, Type elementType)
 		{
 			_objectType = elementType;
 
@@ -548,21 +549,29 @@ namespace BLToolkit.DataAccess
 			CallSetCommand();
 
 			Context.MethodBuilder.Emitter
-				.ldloc    (Context.ReturnValue)
-				.ldstr    (keyFieldName)
-				.LoadType (keyType)
-				.ldstr    (scalarFieldName)
-				.ldloc    (_locObjType)
+				.ldloc(Context.ReturnValue);
+				//.ldstr    (keyFieldName)
+			SetNameOrIndexParameter(keyField);
+			Context.MethodBuilder.Emitter
+				.LoadType (keyType);
+				//.ldstr    (scalarFieldName)
+			SetNameOrIndexParameter(scalarField);
+			Context.MethodBuilder.Emitter
+				.ldloc(_locObjType)
 				.callvirt (typeof(DbManager), "ExecuteScalarDictionary",
-					typeof(IDictionary), typeof(string), typeof(Type), typeof(string), typeof(Type))
+					typeof(IDictionary), typeof(NameOrIndexParameter), typeof(Type),
+					typeof(NameOrIndexParameter), typeof(Type))
 				.pop
 				.end()
 				;
 		}
 
-		private void ExecuteDictionary(Type keyType, string scalarFieldName, Type elementType)
+		private void ExecuteDictionary(
+			Type                 keyType,
+			NameOrIndexParameter scalarField,
+			Type                 elementType)
 		{
-			if (scalarFieldName.Length == 0)
+			if (scalarField.ByName && scalarField.Name.Length == 0)
 				_objectType = elementType;
 
 			CreateReturnTypeInstance();
@@ -580,11 +589,14 @@ namespace BLToolkit.DataAccess
 				.ldloc    (Context.ReturnValue)
 				.ldloc    (_locObjType)
 				.LoadType (keyType)
-				.ldstr    (Context.CurrentMethod.Name)
-				.ldstr    (scalarFieldName)
-				.LoadType (elementType)
+				.ldstr    (Context.CurrentMethod.Name);
+				//.ldstr    (scalarFieldName)
+			SetNameOrIndexParameter(scalarField);
+			Context.MethodBuilder.Emitter
+				.LoadType(elementType)
 				.callvirt (typeof(DataAccessor), "ExecuteDictionary", _bindingFlags,
-					typeof(DbManager), typeof(IDictionary), typeof(Type), typeof(Type), typeof(string), typeof(string), typeof(Type))
+					typeof(DbManager), typeof(IDictionary), typeof(Type),
+					typeof(Type), typeof(string), typeof(NameOrIndexParameter), typeof(Type))
 				;
 		}
 
@@ -609,7 +621,10 @@ namespace BLToolkit.DataAccess
 				;
 		}
 
-		private void ExecuteDictionary(string keyFieldName, Type keyType, Type elementType)
+		private void ExecuteDictionary(
+			NameOrIndexParameter keyField,
+			Type                 keyType,
+			Type                 elementType)
 		{
 			_objectType = elementType;
 
@@ -619,12 +634,14 @@ namespace BLToolkit.DataAccess
 			CallSetCommand();
 
 			Context.MethodBuilder.Emitter
-				.ldloc    (Context.ReturnValue)
-				.ldstr    (keyFieldName)
-				.ldloc    (_locObjType)
+				.ldloc    (Context.ReturnValue);
+				//.ldstr    (keyFieldName)
+			SetNameOrIndexParameter(keyField);
+			Context.MethodBuilder.Emitter
+				.ldloc(_locObjType)
 				.ldnull
 				.callvirt (typeof(DbManager), "ExecuteDictionary",
-					typeof(IDictionary), typeof(string), typeof(Type), typeof(object[]))
+					typeof(IDictionary), typeof(NameOrIndexParameter), typeof(Type), typeof(object[]))
 				.pop
 				.end()
 				;

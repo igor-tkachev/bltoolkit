@@ -7,6 +7,7 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 
+using BLToolkit.Common;
 using BLToolkit.ComponentModel;
 using BLToolkit.EditableObjects;
 using BLToolkit.Mapping;
@@ -45,7 +46,8 @@ namespace BLToolkit.Reflection
 		{
 			if (member == null) throw new ArgumentNullException("member");
 
-			_members.Add(member.MemberInfo.Name, member);
+			_members.Add(member);
+			_memberNames.Add(member.MemberInfo.Name, member);
 		}
 
 		#endregion
@@ -135,13 +137,28 @@ namespace BLToolkit.Reflection
 
 		#region Items
 
-		private Hashtable _members = new Hashtable();
+		private ArrayList _members = new ArrayList();
+		private Hashtable _memberNames = new Hashtable();
 
 		public MemberAccessor this[string memberName]
 		{
-			get { return (MemberAccessor)_members[memberName]; }
+			get { return (MemberAccessor)_memberNames[memberName]; }
 		}
 
+		public MemberAccessor this[int index]
+		{
+			get { return (MemberAccessor)_members[index]; }
+		}
+
+		public MemberAccessor this[NameOrIndexParameter nip]
+		{
+			get
+			{
+				return (MemberAccessor)
+					(nip.ByName ? _memberNames[nip.Name] : _members[nip.Index]);
+			}
+		}
+		
 		#endregion
 
 		#region Static Members
@@ -382,7 +399,7 @@ namespace BLToolkit.Reflection
 
 		public void CopyTo(Array array, int index)
 		{
-			_members.Values.CopyTo(array, index);
+			_members.CopyTo(array, index);
 		}
 
 		public int Count
@@ -406,7 +423,7 @@ namespace BLToolkit.Reflection
 
 		public IEnumerator GetEnumerator()
 		{
-			return _members.Values.GetEnumerator();
+			return _members.GetEnumerator();
 		}
 
 		#endregion
@@ -495,7 +512,7 @@ namespace BLToolkit.Reflection
 			int            nameLen = 0;
 			int            typeLen = 0;
 
-			foreach (DictionaryEntry de in ta._members)
+			foreach (DictionaryEntry de in ta._memberNames)
 			{
 				if (nameLen < de.Key.ToString().Length)
 					nameLen = de.Key.ToString().Length;
@@ -512,7 +529,7 @@ namespace BLToolkit.Reflection
 
 			string format = string.Format("{{0,-{0}}} {{1,-{1}}} : {{2}}", typeLen, nameLen);
 
-			foreach (DictionaryEntry de in ta._members)
+			foreach (DictionaryEntry de in ta._memberNames)
 			{
 				ma = (MemberAccessor)de.Value;
 
@@ -593,7 +610,7 @@ namespace BLToolkit.Reflection
 			PropertyDescriptor[] pd = new PropertyDescriptor[Count];
 
 			int i = 0;
-			foreach (MemberAccessor ma in _members.Values)
+			foreach (MemberAccessor ma in _members)
 				pd[i++] = ma.PropertyDescriptor;
 
 			return new PropertyDescriptorCollection(pd);

@@ -1,16 +1,65 @@
 using System;
 
+using BLToolkit.Common;
+
 namespace BLToolkit.Mapping
 {
 	public class MapIndex
 	{
-		public MapIndex(params string[] fields)
+		public MapIndex(string[] names)
 		{
+			if (null == names)
+				throw new ArgumentNullException("names");
+
+			if (names.Length == 0)
+				throw new ArgumentException("At least one field name or index must be specified", "names");
+
+#if FW2
+			_fields = Array.ConvertAll<string, NameOrIndexParameter>(names,
+						delegate(string name) { return name; });
+#else
+			_fields = new NameOrIndexParameter[names.Length];
+			for (int i = 0; i < _fields.Length; ++i)
+			{
+				_fields[i] = names[i];
+			}
+#endif
+			
+		}
+
+		public MapIndex(int[] indices)
+		{
+			if (null == indices)
+				throw new ArgumentNullException("indices");
+
+			if (indices.Length == 0)
+				throw new ArgumentException("At least one field name or index must be specified", "indices");
+
+#if FW2
+			_fields = Array.ConvertAll<int, NameOrIndexParameter>(indices,
+						delegate(int index) { return index; });
+#else
+			_fields = new NameOrIndexParameter[indices.Length];
+			for (int i = 0; i < _fields.Length; ++i)
+			{
+				_fields[i] = indices[i];
+			}
+#endif
+		}
+		
+		public MapIndex(params NameOrIndexParameter[] fields)
+		{
+			if (null == fields)
+				throw new ArgumentNullException("fields");
+
+			if (fields.Length == 0)
+				throw new ArgumentException("At least one field name or index must be specified", "fields");
+			
 			_fields = fields;
 		}
 
-		private string[] _fields;
-		public  string[]  Fields
+		private NameOrIndexParameter[] _fields;
+		public  NameOrIndexParameter[]  Fields
 		{
 			get { return _fields; }
 		}
@@ -21,7 +70,26 @@ namespace BLToolkit.Mapping
 			get 
 			{
 				if (_id == null)
-					_id = string.Join(".", _fields);
+				{
+#if FW2
+					_id = string.Join(".", Array.ConvertAll<NameOrIndexParameter, string>(_fields,
+						delegate(NameOrIndexParameter nip)
+						{
+							return nip.ToString();
+						}));
+#else
+					System.Text.StringBuilder sb = new System.Text.StringBuilder();
+					sb.Append(_fields[0]);
+					
+					for (int i = 1; i < _fields.Length; ++i)
+					{
+						sb.Append('.');
+						sb.Append(_fields[i]);
+					}
+					
+					_id = sb.ToString();
+#endif
+				}
 
 				return _id;
 			}
@@ -29,7 +97,8 @@ namespace BLToolkit.Mapping
 
 		public object GetValue(IMapDataSource source, object obj, int index)
 		{
-			object value = source.GetValue(obj, _fields[index]);
+			object value = _fields[index].ByName ?
+				source.GetValue(obj, _fields[index].Name) : source.GetValue(obj, _fields[index].Index);
 
 			if (value == null)
 			{
@@ -37,11 +106,12 @@ namespace BLToolkit.Mapping
 
 				if (objectMapper != null)
 				{
-					MemberMapper mm = objectMapper[_fields[index]];
+					MemberMapper mm = _fields[index].ByName ?
+						objectMapper[_fields[index].Name] : objectMapper[_fields[index].Index];
 
 					if (mm == null)
 						throw new MappingException(string.Format("Type '{0}' does not contain field '{1}'.",
-							objectMapper.TypeAccessor.OriginalType.Name, Fields[index]));
+							objectMapper.TypeAccessor.OriginalType.Name, Fields[index].ToString()));
 				}
 			}
 

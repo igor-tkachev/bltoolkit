@@ -6,6 +6,7 @@ namespace BLToolkit.Common
 	/// This argument adapter class allows either names (strings) or
 	/// indices (ints) to be passed to a function.
 	/// </summary>
+	[System.Diagnostics.DebuggerStepThrough]
 	public struct NameOrIndexParameter
 	{
 		public static implicit operator NameOrIndexParameter(string name)
@@ -57,6 +58,11 @@ namespace BLToolkit.Common
 
 				return _index;
 			}
+		}
+
+		public override string ToString()
+		{
+			return (null != _name) ? _name : "#" + _index;
 		}
 		
 		private string _name;
