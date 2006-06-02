@@ -47,6 +47,11 @@ namespace DataAccess
 			[ObjectType(typeof(string))]
 			public abstract Hashtable SelectAll4();
 
+			[SqlQuery("SELECT * FROM Person WHERE PersonID < 3")]
+			[Index("PersonID", "LastName")]
+			[ScalarFieldName(1)]
+			[ObjectType(typeof(string))]
+			public abstract Hashtable SelectAll5();
 #if FW2
 			[SqlQuery("SELECT * FROM Person")]
 			[Index(new string[] { "ID" })]
@@ -65,6 +70,11 @@ namespace DataAccess
 			[Index("PersonID", "LastName")]
 			[ScalarFieldName("FirstName")]
 			public abstract Dictionary<IndexValue, string> SelectAllT4();
+
+			[SqlQuery("SELECT * FROM Person")]
+			[Index("PersonID", "LastName")]
+			[ScalarFieldName(1)]
+			public abstract Dictionary<IndexValue, string> SelectAllT5();
 #endif
 		}
 
@@ -92,6 +102,9 @@ namespace DataAccess
 			Hashtable dic4 = _da.SelectAll4();
 			Assert.AreEqual("John", dic4[new IndexValue(1, "Pupkin")]);
 
+			Hashtable dic5 = _da.SelectAll5();
+			Assert.AreEqual("John", dic5[new IndexValue(1, "Pupkin")]);
+			
 #if FW2
 			Dictionary<int, Person> dict1 = _da.SelectAllT1();
 			Assert.AreEqual("John", dict1[1].FirstName);
@@ -104,6 +117,9 @@ namespace DataAccess
 
 			Dictionary<IndexValue, string> dict4 = _da.SelectAllT4();
 			Assert.AreEqual("John", dict4[new IndexValue(1, "Pupkin")]);
+
+			Dictionary<IndexValue, string> dict5 = _da.SelectAllT5();
+			Assert.AreEqual("John", dict5[new IndexValue(1, "Pupkin")]);
 #endif
 		}
 	}

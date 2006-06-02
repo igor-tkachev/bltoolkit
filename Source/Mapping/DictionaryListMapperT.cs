@@ -1,26 +1,30 @@
 using System;
 using System.Collections.Generic;
 
+using BLToolkit.Common;
 using BLToolkit.Reflection;
 
 namespace BLToolkit.Mapping
 {
 	public class DictionaryListMapper<K,T> : IMapDataDestinationList
 	{
-		public DictionaryListMapper(IDictionary<K,T> dic, string keyFieldName, ObjectMapper objectMapper)
+		public DictionaryListMapper(
+			IDictionary<K,T>     dic,
+			NameOrIndexParameter keyField,
+			ObjectMapper         objectMapper)
 		{
-			_dic          = dic;
-			_mapper       = objectMapper;
-			_fromSource   = keyFieldName[0] == '@';
-			_keyFieldName = _fromSource? keyFieldName.Substring(1): keyFieldName;
+			_dic        = dic;
+			_mapper     = objectMapper;
+			_fromSource = keyField.ByName && keyField.Name[0] == '@';
+			_keyField   = _fromSource ? keyField.Name.Substring(1): keyField;
 		}
 
-		private string            _keyFieldName;
-		private IDictionary<K,T>  _dic;
-		private ObjectMapper      _mapper;
-		private T                 _newObject;
-		private bool              _fromSource;
-		private K                 _keyValue;
+		private NameOrIndexParameter _keyField;
+		private IDictionary<K,T>     _dic;
+		private ObjectMapper         _mapper;
+		private T                    _newObject;
+		private bool                 _fromSource;
+		private K                    _keyValue;
 
 		#region IMapDataDestinationList Members
 
@@ -29,7 +33,7 @@ namespace BLToolkit.Mapping
 			if (_newObject != null)
 			{
 				if (!_fromSource)
-					_keyValue = (K)_mapper.TypeAccessor[_keyFieldName].GetValue(_newObject);
+					_keyValue = (K)_mapper.TypeAccessor[_keyField].GetValue(_newObject);
 
 				_dic[_keyValue] = _newObject;
 			}
@@ -61,7 +65,9 @@ namespace BLToolkit.Mapping
 
 			if (_fromSource)
 			{
-				_keyValue = (K)initContext.DataSource.GetValue(initContext.SourceObject, _keyFieldName);
+				_keyValue = (K)(_keyField.ByName ?
+					initContext.DataSource.GetValue(initContext.SourceObject, _keyField.Name) :
+					initContext.DataSource.GetValue(initContext.SourceObject, _keyField.Index));
 
 				if (_keyValue is string)
 					_keyValue = (K)(object)_keyValue.ToString().TrimEnd(_trim);

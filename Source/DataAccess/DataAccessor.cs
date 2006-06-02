@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlTypes;
 using System.Text;
-
+using BLToolkit.Common;
 using BLToolkit.Data;
 using BLToolkit.Data.DataProvider;
 using BLToolkit.Mapping;
@@ -242,13 +242,13 @@ namespace BLToolkit.DataAccess
 		}
 
 		protected void ExecuteDictionary(
-			DbManager   db,
-			IDictionary dictionary,
-			Type        objectType,
-			Type        keyType,
-			string      methodName,
-			string      scalarFieldName,
-			Type        elementType)
+			DbManager             db,
+			IDictionary           dictionary,
+			Type                  objectType,
+			Type                  keyType,
+			string                methodName,
+			NameOrIndexParameter  scalarField,
+			Type                  elementType)
 		{
 			bool           isIndex = TypeHelper.IsSameOrParent(typeof(IndexValue), keyType);
 			MemberMapper[] mms     = GetKeyFieldList(db, objectType);
@@ -267,26 +267,26 @@ namespace BLToolkit.DataAccess
 			{
 				string[] fields = new string[mms.Length];
 
-				if (scalarFieldName.Length == 0)
+				if (scalarField.Name.Length == 0)
 					for (int i = 0; i < mms.Length; i++)
 						fields[i] = mms[i].MemberName;
 				else
 					for (int i = 0; i < mms.Length; i++)
 						fields[i] = mms[i].Name;
 
-				if (scalarFieldName.Length > 0)
-					db.ExecuteScalarDictionary(dictionary, new MapIndex(fields), scalarFieldName, elementType);
+				if (scalarField.Name.Length > 0)
+					db.ExecuteScalarDictionary(dictionary, new MapIndex(fields), scalarField, elementType);
 				else
 					db.ExecuteDictionary(dictionary, new MapIndex(fields), objectType, null);
 			}
 			else
 			{
-				if (scalarFieldName.Length > 0)
+				if (scalarField.Name.Length > 0)
 					db.ExecuteScalarDictionary(
 						dictionary,
-						scalarFieldName.Length == 0? mms[0].MemberName: mms[0].Name,
+						scalarField.Name.Length == 0? mms[0].MemberName: mms[0].Name,
 						keyType,
-						scalarFieldName,
+						scalarField.Name,
 						elementType);
 				else
 					db.ExecuteDictionary(dictionary, mms[0].MemberName, objectType, null);

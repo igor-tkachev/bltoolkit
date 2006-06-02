@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 
+using BLToolkit.Common;
 using BLToolkit.Reflection;
 
 namespace BLToolkit.Mapping
@@ -8,26 +9,28 @@ namespace BLToolkit.Mapping
 	public class DictionaryIndexListMapper<T> : IMapDataDestinationList
 	{
 		public DictionaryIndexListMapper(
-			IDictionary<IndexValue,T> dic, MapIndex index, ObjectMapper objectMapper)
+			IDictionary<IndexValue,T> dic,
+			MapIndex                  index,
+			ObjectMapper              objectMapper)
 		{
 			_dic    = dic;
 			_mapper = objectMapper;
 
-			_fields     = new string[index.Fields.Length];
+			_fields = new NameOrIndexParameter[index.Fields.Length];
 			_fromSource = new bool  [index.Fields.Length];
 
 			for (int i = 0; i < _fields.Length; i++)
 			{
-				bool fromSource = index.Fields[i][0] == '@';
+				bool fromSource = index.Fields[i].ByName && index.Fields[i].Name[0] == '@';
 
-				_fields    [i] = fromSource? index.Fields[i].Substring(1): index.Fields[i];
+				_fields[i]     = fromSource ? index.Fields[i].Name.Substring(1) : index.Fields[i];
 				_fromSource[i] = fromSource;
 				_isFromSource  = _isFromSource ||  fromSource;
 				_isFromDest    = _isFromDest   || !fromSource;
 			}
 		}
 
-		private string[]                   _fields;
+		private NameOrIndexParameter[]     _fields;
 		private IDictionary<IndexValue,T>  _dic;
 		private ObjectMapper               _mapper;
 		private T                          _newObject;
@@ -78,8 +81,9 @@ namespace BLToolkit.Mapping
 			if (_isFromSource)
 				for (int i = 0; i < _fields.Length; i++)
 					if (_fromSource[i])
-						_indexValue[i] = initContext.DataSource.GetValue(
-							initContext.SourceObject, _fields[i]);
+						_indexValue[i] = _fields[i].ByName ?
+							initContext.DataSource.GetValue(initContext.SourceObject, _fields[i].Name) :
+							initContext.DataSource.GetValue(initContext.SourceObject, _fields[i].Index);
 
 			return _newObject = (T)_mapper.CreateInstance(initContext);
 		}

@@ -140,6 +140,16 @@
                     BuildAction = "Compile"
                 />
                 <File
+                    RelPath = "Data\ExecuteScalarDictionaryTest.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "Data\ExecuteDictionaryTest.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
                     RelPath = "Data\CompositeKeyTest.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
