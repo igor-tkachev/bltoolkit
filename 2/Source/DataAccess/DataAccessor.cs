@@ -247,7 +247,6 @@ namespace BLToolkit.DataAccess
 			Type                  objectType,
 			Type                  keyType,
 			string                methodName,
-			NameOrIndexParameter  scalarField,
 			Type                  elementType)
 		{
 			bool           isIndex = TypeHelper.IsSameOrParent(typeof(IndexValue), keyType);
@@ -267,29 +266,56 @@ namespace BLToolkit.DataAccess
 			{
 				string[] fields = new string[mms.Length];
 
-				if (scalarField.Name.Length == 0)
-					for (int i = 0; i < mms.Length; i++)
-						fields[i] = mms[i].MemberName;
-				else
-					for (int i = 0; i < mms.Length; i++)
-						fields[i] = mms[i].Name;
+				for (int i = 0; i < mms.Length; i++)
+					fields[i] = mms[i].MemberName;
 
-				if (scalarField.Name.Length > 0)
-					db.ExecuteScalarDictionary(dictionary, new MapIndex(fields), scalarField, elementType);
-				else
-					db.ExecuteDictionary(dictionary, new MapIndex(fields), objectType, null);
+				db.ExecuteDictionary(dictionary, new MapIndex(fields), objectType, null);
 			}
 			else
 			{
-				if (scalarField.Name.Length > 0)
-					db.ExecuteScalarDictionary(
-						dictionary,
-						scalarField.Name.Length == 0? mms[0].MemberName: mms[0].Name,
-						keyType,
-						scalarField.Name,
-						elementType);
-				else
-					db.ExecuteDictionary(dictionary, mms[0].MemberName, objectType, null);
+				db.ExecuteDictionary(dictionary, mms[0].MemberName, objectType, null);
+			}
+		}
+
+		protected void ExecuteScalarDictionary(
+			DbManager db,
+			IDictionary dictionary,
+			Type objectType,
+			Type keyType,
+			string methodName,
+			NameOrIndexParameter scalarField,
+			Type elementType)
+		{
+			bool isIndex = TypeHelper.IsSameOrParent(typeof(IndexValue), keyType);
+			MemberMapper[] mms = GetKeyFieldList(db, objectType);
+
+			if (mms.Length == 0)
+				throw new DataAccessException(string.Format(
+					"Index is not defined for the method '{0}.{1}'.",
+					GetType().Name, methodName));
+
+			if (mms.Length > 1 && keyType != typeof(object) && !isIndex)
+				throw new DataAccessException(string.Format(
+					"Key type for the method '{0}.{1}' can be of type object or IndexValue.",
+					GetType().Name, methodName));
+
+			if (isIndex || mms.Length > 1)
+			{
+				string[] fields = new string[mms.Length];
+
+				for (int i = 0; i < mms.Length; i++)
+					fields[i] = mms[i].Name;
+
+				db.ExecuteScalarDictionary(dictionary, new MapIndex(fields), scalarField, elementType);
+			}
+			else
+			{
+				db.ExecuteScalarDictionary(
+					dictionary,
+					mms[0].Name,
+					keyType,
+					scalarField,
+					elementType);
 			}
 		}
 

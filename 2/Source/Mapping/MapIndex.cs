@@ -12,19 +12,9 @@ namespace BLToolkit.Mapping
 				throw new ArgumentNullException("names");
 
 			if (names.Length == 0)
-				throw new ArgumentException("At least one field name or index must be specified", "names");
+				throw new ArgumentException("At least one field name must be specified", "names");
 
-#if FW2
-			_fields = Array.ConvertAll<string, NameOrIndexParameter>(names,
-						delegate(string name) { return name; });
-#else
-			_fields = new NameOrIndexParameter[names.Length];
-			for (int i = 0; i < _fields.Length; ++i)
-			{
-				_fields[i] = names[i];
-			}
-#endif
-			
+			_fields = NameOrIndexParameter.FromStringArray(names);
 		}
 
 		public MapIndex(int[] indices)
@@ -33,18 +23,9 @@ namespace BLToolkit.Mapping
 				throw new ArgumentNullException("indices");
 
 			if (indices.Length == 0)
-				throw new ArgumentException("At least one field name or index must be specified", "indices");
+				throw new ArgumentException("At least one field ndex must be specified", "indices");
 
-#if FW2
-			_fields = Array.ConvertAll<int, NameOrIndexParameter>(indices,
-						delegate(int index) { return index; });
-#else
-			_fields = new NameOrIndexParameter[indices.Length];
-			for (int i = 0; i < _fields.Length; ++i)
-			{
-				_fields[i] = indices[i];
-			}
-#endif
+			_fields = NameOrIndexParameter.FromIndexArray(indices);
 		}
 		
 		public MapIndex(params NameOrIndexParameter[] fields)
