@@ -47,6 +47,10 @@ namespace Data
 
 				Assert.IsNotNull(table);
 				Assert.IsTrue(table.Count > 0);
+
+				Person actualValue = (Person)table[1];
+				Assert.IsNotNull(actualValue);
+				Assert.AreEqual("John", actualValue.FirstName);
 			}
 		}
 
@@ -62,6 +66,10 @@ namespace Data
 
 				Assert.IsNotNull(table);
 				Assert.IsTrue(table.Count > 0);
+
+				Person actualValue = (Person)table[1];
+				Assert.IsNotNull(actualValue);
+				Assert.AreEqual("John", actualValue.FirstName);
 			}
 		}
 
@@ -76,6 +84,10 @@ namespace Data
 
 				Assert.IsNotNull(table);
 				Assert.IsTrue(table.Count > 0);
+
+				Person actualValue = (Person)table[1];
+				Assert.IsNotNull(actualValue);
+				Assert.AreEqual("John", actualValue.FirstName);
 			}
 		}
 
@@ -91,6 +103,10 @@ namespace Data
 
 				Assert.IsNotNull(table);
 				Assert.IsTrue(table.Count > 0);
+
+				Person actualValue = (Person)table[new IndexValue(1)];
+				Assert.IsNotNull(actualValue);
+				Assert.AreEqual("John", actualValue.FirstName);
 			}
 		}
 
@@ -105,6 +121,10 @@ namespace Data
 
 				Assert.IsNotNull(table);
 				Assert.IsTrue(table.Count > 0);
+
+				Person actualValue = (Person)table[new IndexValue(1)];
+				Assert.IsNotNull(actualValue);
+				Assert.AreEqual("John", actualValue.FirstName);
 			}
 		}
 
@@ -122,6 +142,10 @@ namespace Data
 
 				Assert.IsNotNull(table);
 				Assert.IsTrue(table.Count > 0);
+
+				Person actualValue = (Person)table[new IndexValue(1, "", "Pupkin")];
+				Assert.IsNotNull(actualValue);
+				Assert.AreEqual("John", actualValue.FirstName);
 			}
 		}
 
@@ -137,6 +161,10 @@ namespace Data
 
 				Assert.IsNotNull(dic);
 				Assert.IsTrue(dic.Count > 0);
+
+				Person actualValue = dic[1];
+				Assert.IsNotNull(actualValue);
+				Assert.AreEqual("John", actualValue.FirstName);
 			}
 		}
 
@@ -152,6 +180,10 @@ namespace Data
 
 				Assert.IsNotNull(dic);
 				Assert.IsTrue(dic.Count > 0);
+
+				Person actualValue = dic[1];
+				Assert.IsNotNull(actualValue);
+				Assert.AreEqual("John", actualValue.FirstName);
 			}
 		}
 
@@ -166,6 +198,10 @@ namespace Data
 
 				Assert.IsNotNull(dic);
 				Assert.IsTrue(dic.Count > 0);
+
+				Person actualValue = dic[1];
+				Assert.IsNotNull(actualValue);
+				Assert.AreEqual("John", actualValue.FirstName);
 			}
 		}
 
@@ -175,11 +211,15 @@ namespace Data
 			using (DbManager db = new DbManager())
 			{
 				Dictionary<IndexValue, Person> dic = db
-					.SetSpCommand("Person_SelectAll")
+					.SetCommand("SELECT * FROM Person WHERE PersonID < 3")
 					.ExecuteDictionary<Person>(new MapIndex("LastName"));
 
 				Assert.IsNotNull(dic);
 				Assert.IsTrue(dic.Count > 0);
+
+				Person actualValue = dic[new IndexValue("Pupkin")];
+				Assert.IsNotNull(actualValue);
+				Assert.AreEqual("John", actualValue.FirstName);
 			}
 		}
 
@@ -195,6 +235,10 @@ namespace Data
 
 				Assert.IsNotNull(dic);
 				Assert.IsTrue(dic.Count > 0);
+
+				Person actualValue = dic[new IndexValue(1)]; ;
+				Assert.IsNotNull(actualValue);
+				Assert.AreEqual("John", actualValue.FirstName);
 			}
 		}
 
@@ -206,10 +250,15 @@ namespace Data
 				Dictionary<IndexValue, Person> dic = new Dictionary<IndexValue, Person>();
 					db
 					.SetSpCommand("Person_SelectAll")
-					.ExecuteDictionary(dic, new MapIndex("@PersonID", 2, 3), "LastName");
+					.ExecuteDictionary(dic, new MapIndex("@PersonID", 2, 3));
 
 				Assert.IsNotNull(dic);
 				Assert.IsTrue(dic.Count > 0);
+
+				Person actualValue = dic[new IndexValue(1, "", "Pupkin")];
+				Assert.IsNotNull(actualValue);
+				Assert.AreEqual("John", actualValue.FirstName);
+				
 			}
 		}
 #endif

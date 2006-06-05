@@ -36,12 +36,42 @@ namespace Common
 			Assert.AreEqual(nip.Index, expectedValue);
 		}
 
+		[Test]
+		public void ArrayTest()
+		{
+			NameOrIndexParameter[] nips = new NameOrIndexParameter[]{ 12345, "54321" };
+			Assert.AreEqual(nips[0].Index, 12345);
+			Assert.AreEqual(nips[1].Name, "54321");
+		}
+
+		[Test]
+		public void StringArrayTest()
+		{
+			NameOrIndexParameter[] nips = NameOrIndexParameter.FromStringArray(new string[] { "98765", "54321" });
+			Assert.AreEqual(nips[0].Name, "98765");
+			Assert.AreEqual(nips[1].Name, "54321");
+		}
+
+		[Test]
+		public void IntArrayTest()
+		{
+			NameOrIndexParameter[] nips = NameOrIndexParameter.FromIndexArray(new int[] { 12345, 56789 });
+			Assert.AreEqual(nips[0].Index, 12345);
+			Assert.AreEqual(nips[1].Index, 56789);
+		}
+		
 		[Test, ExpectedException(typeof(ArgumentNullException))]
 		public void IllegalStringTest()
 		{
 			NameOrIndexParameter nip = null;
 		}
 
+		[Test, ExpectedException(typeof(ArgumentException))]
+		public void IllegalStringTest2()
+		{
+			NameOrIndexParameter nip = string.Empty;
+		}
+		
 		[Test, ExpectedException(typeof(ArgumentException))]
 		public void IllegalIntTest()
 		{
