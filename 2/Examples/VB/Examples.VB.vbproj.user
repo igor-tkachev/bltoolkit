@@ -1,7 +1,7 @@
 <VisualStudioProject>
     <VisualBasic LastOpenVersion = "7.10.3077" >
         <Build>
-            <Settings ReferencePath = "" >
+            <Settings ReferencePath = "C:\Program Files\NUnit 2.2.8\bin\" >
                 <Config
                     Name = "Debug"
                     EnableASPDebugging = "false"

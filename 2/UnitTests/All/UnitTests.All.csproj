@@ -95,22 +95,14 @@
                     Package = "{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}"
                 />
                 <Reference
-                    Name = "nunit.framework"
-                    AssemblyName = "nunit.framework"
-                    HintPath = "..\..\..\..\Program Files\NUnit\bin\nunit.framework.dll"
-                    AssemblyFolderKey = "hklm\dn\nunit.framework"
-                    Private = "True"
-                />
-                <Reference
-                    Name = "nunit.uikit"
-                    AssemblyName = "nunit.uikit"
-                    HintPath = "..\..\..\..\Program Files\NUnit\bin\nunit.uikit.dll"
-                    AssemblyFolderKey = "hklm\dn\nunit.framework"
-                />
-                <Reference
                     Name = "BLToolkit"
                     Project = "{C8B3F401-4634-4742-A266-4BD9ED7565E5}"
                     Package = "{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}"
+                />
+                <Reference
+                    Name = "nunit.framework"
+                    AssemblyName = "nunit.framework"
+                    HintPath = "..\..\..\..\..\..\..\Program Files\NUnit 2.2.8\bin\nunit.framework.dll"
                 />
             </References>
         </Build>
