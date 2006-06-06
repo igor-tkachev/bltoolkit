@@ -24,7 +24,7 @@ namespace BLToolkit.Data
 			: base("An BLToolkit Data error has occurred.")
 		{
 		}
-        
+
 		/// <summary>
 		/// Initializes a new instance of the <b>DataException</b> class 
 		/// with the specified error message.
@@ -34,7 +34,7 @@ namespace BLToolkit.Data
 			: base(message) 
 		{
 		}
-    	
+
 		/// <summary>
 		/// Initializes a new instance of the <b>DataException</b> class 
 		/// with the specified error message and InnerException property.

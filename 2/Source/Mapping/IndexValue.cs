@@ -7,14 +7,32 @@ namespace BLToolkit.Mapping
 	{
 		public IndexValue(params object[] values)
 		{
-			if (values == null) throw new ArgumentNullException("values");
+			if (values == null)
+				throw new ArgumentNullException("values");
 
 			_values = values;
-
-			CalcHashCode();
+			_hash = CalcHashCode(values);
 		}
 
-		private object[] _values;
+		private readonly object[] _values;
+		private readonly int      _hash;
+
+		private static int CalcHashCode(object[] values)
+		{
+			if (values.Length == 0)
+				return 0;
+
+			object o = values[0];
+			int hash = o == null ? 0 : o.GetHashCode();
+
+			for (int i = 1; i < values.Length; i++)
+			{
+				o = values[i];
+				hash = ((hash << 5) + hash) ^ (o == null ? 0 : o.GetHashCode());
+			}
+
+			return hash;
+		}
 
 		#region IComparable Members
 
@@ -40,27 +58,6 @@ namespace BLToolkit.Mapping
 
 		#region Object Overrides
 
-		private int _hash;
-
-		private void CalcHashCode()
-		{
-			if (_values.Length == 0)
-			{
-				_hash = 0;
-			}
-			else
-			{
-				object  o = _values[0];
-				_hash = o == null ? 0 : o.GetHashCode();
-
-				for (int i = 1; i < _values.Length; i++)
-				{
-					o = _values[i];
-					_hash = ((_hash << 5) + _hash) ^ (o == null ? 0 : o.GetHashCode());
-				}
-			}
-		}
-
 		public override int GetHashCode()
 		{
 			return _hash;
@@ -68,6 +65,9 @@ namespace BLToolkit.Mapping
 
 		public override bool Equals(object obj)
 		{
+			if (!(obj is IndexValue) || _hash != ((IndexValue)obj)._hash)
+				return false;
+
 			object[] values = ((IndexValue)obj)._values;
 
 			if (_values.Length != values.Length)
