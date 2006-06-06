@@ -9,7 +9,7 @@ namespace BLToolkit.Common
 	[System.Diagnostics.DebuggerStepThrough]
 	public struct NameOrIndexParameter
 	{
-		public static implicit operator NameOrIndexParameter(string name)
+		public NameOrIndexParameter(string name)
 		{
 			if (null == name)
 				throw new ArgumentNullException("name");
@@ -17,21 +17,28 @@ namespace BLToolkit.Common
 			if (name.Length == 0)
 				throw new ArgumentException("Name must be a valid string.", "name");
 			
-			NameOrIndexParameter p = new NameOrIndexParameter();
-			p._name = name;
-			return p;
+			_name  = name;
+			_index = 0;
+		}
+
+		public NameOrIndexParameter(int index)
+		{
+			if (index < 0)
+				throw new ArgumentException(
+					"The index parameter must be greater or equal to zero.", "index");
+
+			_name  = null;
+			_index = index;
+		}
+
+		public static implicit operator NameOrIndexParameter(string name)
+		{
+			return new NameOrIndexParameter(name);
 		}
 
 		public static implicit operator NameOrIndexParameter(int index)
 		{
-			if (index < 0)
-				throw new ArgumentException(
-					"The index parameter must be greater or equal to zero.",
-					"index");
-
-			NameOrIndexParameter p = new NameOrIndexParameter();
-			p._index = index;
-			return p;
+			return new NameOrIndexParameter(index);
 		}
 
 		#region Public properties
@@ -41,8 +48,8 @@ namespace BLToolkit.Common
 			get { return null != _name; }
 		}
 
-		private string _name;
-		public  string  Name
+		private readonly string _name;
+		public           string  Name
 		{
 			get
 			{
@@ -54,8 +61,8 @@ namespace BLToolkit.Common
 			}
 		}
 
-		private int _index;
-		public  int  Index
+		private readonly int _index;
+		public           int  Index
 		{
 			get
 			{
@@ -75,12 +82,12 @@ namespace BLToolkit.Common
 		{
 #if FW2
 			return Array.ConvertAll<string, NameOrIndexParameter>(names,
-						delegate(string name) { return name; });
+						delegate(string name) { return new NameOrIndexParameter(name); });
 #else
 			NameOrIndexParameter[] nips = new NameOrIndexParameter[names.Length];
 			for (int i = 0; i < nips.Length; ++i)
 			{
-				nips[i] = names[i];
+				nips[i] = new NameOrIndexParameter(names[i]);
 			}
 			return nips;
 #endif
@@ -90,12 +97,12 @@ namespace BLToolkit.Common
 		{
 #if FW2
 			return Array.ConvertAll<int, NameOrIndexParameter>(indices,
-						delegate(int index) { return index; });
+						delegate(int index) { return new NameOrIndexParameter(index); });
 #else
 			NameOrIndexParameter[] nips =  new NameOrIndexParameter[indices.Length];
 			for (int i = 0; i < nips.Length; ++i)
 			{
-				nips[i] = indices[i];
+				nips[i] = new NameOrIndexParameter(indices[i]);
 			}
 			return nips;
 #endif
