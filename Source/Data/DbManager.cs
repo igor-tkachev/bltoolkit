@@ -3115,7 +3115,7 @@ namespace BLToolkit.Data
 		/// <returns>The <see cref="DataSet"/>.</returns>
 		public DataSet ExecuteDataSet()
 		{
-			return ExecuteDataSet(null, 0, 0, null);
+			return ExecuteDataSet(null, 0, 0, "Table");
 		}
 
 		/// <summary>
@@ -3129,7 +3129,7 @@ namespace BLToolkit.Data
 		public DataSet ExecuteDataSet(
 			DataSet dataSet)
 		{
-			return ExecuteDataSet(dataSet, 0, 0, null);
+			return ExecuteDataSet(dataSet, 0, 0, "Table");
 		}
 
 		/// <summary>
@@ -3138,40 +3138,40 @@ namespace BLToolkit.Data
 		/// <remarks>
 		/// See the <see cref="ExecuteDataSet(string)"/> method to find an example.
 		/// </remarks>
-		/// <param name="tableName">The name of the populating table.</param>
+		/// <param name="table">The name or index of the populating table.</param>
 		/// <returns>The <see cref="DataSet"/>.</returns>
 		public DataSet ExecuteDataSet(
-			string tableName)
+			NameOrIndexParameter table)
 		{
-			return ExecuteDataSet(null, 0, 0, tableName);
+			return ExecuteDataSet(null, 0, 0, table);
 		}
 
 		/// <summary>
 		/// Executes a SQL statement using the provided parameters.
 		/// </summary>
 		/// <param name="dataSet">The DataSet object to populate.</param>
-		/// <param name="tableName">The name of the populating table.</param>
+		/// <param name="table">The name or index of the populating table.</param>
 		/// <returns>The <see cref="DataSet"/>.</returns>
 		public DataSet ExecuteDataSet(
-			DataSet dataSet,
-			string  tableName)
+			DataSet              dataSet,
+			NameOrIndexParameter table)
 		{
-			return ExecuteDataSet(dataSet, 0, 0, tableName);
+			return ExecuteDataSet(dataSet, 0, 0, table);
 		}
 
 		/// <summary>
 		/// Executes a SQL statement using the provided parameters.
 		/// </summary>
 		/// <param name="dataSet">The DataSet object to populate.</param>
-		/// <param name="tableName">The name of the populating table.</param>
+		/// <param name="table">The name or index of the populating table.</param>
 		/// <param name="startRecord">The zero-based record number to start with.</param>
 		/// <param name="maxRecords">The maximum number of records to retrieve.</param>
 		/// <returns>The <see cref="DataSet"/>.</returns>
 		public DataSet ExecuteDataSet(
-			DataSet dataSet,
-			int     startRecord,
-			int     maxRecords,
-			string  tableName)
+			DataSet              dataSet,
+			int                  startRecord,
+			int                  maxRecords,
+			NameOrIndexParameter table)
 		{
 			if (_prepared)
 				InitParameters(CommandAction.Select);
@@ -3186,20 +3186,10 @@ namespace BLToolkit.Data
 			try
 			{
 				OnBeforeOperation(OperationType.Fill);
-
-				if (tableName == null)
-				{
-					da.Fill(dataSet);
-				}
-				else if (maxRecords != 0)
-				{
-					da.Fill(dataSet, startRecord, maxRecords, tableName);
-				}
+				if (table.ByName)
+					da.Fill(dataSet, startRecord, maxRecords, table.Name);
 				else
-				{
-					da.Fill(dataSet, tableName);
-				}
-
+					da.Fill(startRecord, maxRecords, dataSet.Tables[table.Index]);
 				OnAfterOperation(OperationType.Fill);
 
 				return dataSet;
@@ -3287,6 +3277,9 @@ namespace BLToolkit.Data
 		/// <returns>A business object.</returns>
 		public object ExecuteObject(object entity)
 		{
+			if (null == entity)
+				throw new ArgumentNullException("entity");
+
 			return ExecuteObjectInternal(entity, entity.GetType());
 		}
 
@@ -3699,7 +3692,7 @@ namespace BLToolkit.Data
 		/// <returns>The number of rows successfully updated from the <see cref="DataSet"/>.</returns>
 		public int Update(DataSet dataSet)
 		{
-			return Update(dataSet, null);
+			return Update(dataSet, "Table");
 		}
 
 		/// <summary>
@@ -3707,9 +3700,11 @@ namespace BLToolkit.Data
 		/// deleted row in the <see cref="DataSet"/> with the specified <see cref="DataTable"/> name.
 		/// </summary>
 		/// <param name="dataSet">The <see cref="DataSet"/> used to update the data source.</param>
-		/// <param name="tableName">The name of the source table to use for table mapping.</param>
+		/// <param name="table">The name or index of the source table to use for table mapping.</param>
 		/// <returns>The number of rows successfully updated from the <see cref="DataSet"/>.</returns>
-		public int Update(DataSet dataSet, string tableName)
+		public int Update(
+			DataSet              dataSet,
+			NameOrIndexParameter table)
 		{
 			if (dataSet == null)
 				throw new ArgumentNullException(
@@ -3721,11 +3716,9 @@ namespace BLToolkit.Data
 			try
 			{
 				OnBeforeOperation(OperationType.Update);
-
-				int result = tableName == null?
-					da.Update(dataSet):
-					da.Update(dataSet, tableName);
-
+				int result = (table.ByName) ?
+					da.Update(dataSet, table.Name) :
+					da.Update(dataSet.Tables[table.Index]);
 				OnAfterOperation(OperationType.Update);
 
 				return result;
@@ -3747,9 +3740,7 @@ namespace BLToolkit.Data
 			try
 			{
 				OnBeforeOperation(OperationType.Update);
-
 				int result = CreateDataAdapter().Update(dataTable);
-
 				OnAfterOperation(OperationType.Update);
 
 				return result;

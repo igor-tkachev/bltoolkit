@@ -7,6 +7,7 @@ namespace BLToolkit.DataAccess
 	public class DataAccessException : Exception
 	{
 		public DataAccessException()
+			: base("A Data Access exception has occurred.")
 		{
 		}
 

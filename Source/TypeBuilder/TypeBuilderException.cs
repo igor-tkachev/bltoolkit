@@ -24,7 +24,7 @@ namespace BLToolkit.TypeBuilder
 			: base("A Build Type exception has occurred.")
 		{
 		}
-        
+
 		/// <summary>
 		/// Initializes a new instance of the <b>TypeBuilderException</b> class 
 		/// with the specified error message.
@@ -34,7 +34,7 @@ namespace BLToolkit.TypeBuilder
 			: base(message) 
 		{
 		}
-    	
+
 		/// <summary>
 		/// Initializes a new instance of the <b>TypeBuilderException</b> class 
 		/// with the specified error message and InnerException property.

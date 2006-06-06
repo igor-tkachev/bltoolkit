@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlTypes;
 using System.Text;
+
 using BLToolkit.Common;
 using BLToolkit.Data;
 using BLToolkit.Data.DataProvider;
@@ -67,6 +68,14 @@ namespace BLToolkit.DataAccess
 				throw new InvalidOperationException("DbManager object is not provided.");
 
 			_dbManager.CommitTransaction();
+		}
+
+		public virtual void RollbackTransaction()
+		{
+			if (_dbManager == null)
+				throw new InvalidOperationException("DbManager object is not provided.");
+
+			_dbManager.RollbackTransaction();
 		}
 
 		private ExtensionList _extensions;

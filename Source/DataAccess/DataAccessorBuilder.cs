@@ -372,7 +372,8 @@ namespace BLToolkit.DataAccess
 					.ldc_i4_0
 					.callvirt  (typeof(DataTableCollection), "get_Item", typeof(int))
 					.callvirt  (typeof(DataTable).GetProperty("TableName").GetGetMethod())
-					.callvirt  (typeof(DbManager), "ExecuteDataSet", typeof(DataSet), typeof(string))
+					.call(typeof(NameOrIndexParameter), "op_Implicit", typeof(string))
+					.callvirt(typeof(DbManager), "ExecuteDataSet", typeof(DataSet), typeof(NameOrIndexParameter))
 					.pop
 					.br_s      (l2)
 					.MarkLabel (l1)
@@ -464,7 +465,7 @@ namespace BLToolkit.DataAccess
 		public FieldBuilder GetIndexField(NameOrIndexParameter[] index)
 		{
 #if FW2
-			string id = "index$" + string.Join(".",
+			string id = "index$" + string.Join("%",
 				Array.ConvertAll<NameOrIndexParameter, string>(index,
 					delegate(NameOrIndexParameter nip)
 					{
@@ -476,7 +477,7 @@ namespace BLToolkit.DataAccess
 
 			for (int i = 0; i < index.Length; ++i)
 			{
-				sb.Append('.');
+				sb.Append('%');
 				sb.Append(index[i]);
 			}
 
