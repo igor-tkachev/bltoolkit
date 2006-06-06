@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using NUnit.Framework;
 
 using BLToolkit.Data;
+using BLToolkit.DataAccess;
 using BLToolkit.Mapping;
 
 namespace Data
@@ -14,6 +15,25 @@ namespace Data
 	[TestFixture]
 	public class ExecuteScalarDictionaryTest
 	{
+		public class Person
+		{
+			[MapField("PersonID"), PrimaryKey]
+			public int    ID;
+			public string LastName;
+			public string FirstName;
+			public string MiddleName;
+		}
+
+		[TestFixtureSetUp]
+		public void SetUp()
+		{
+			DataAccessor da = new DataAccessor();
+
+			foreach (Person p in da.SelectAllSql(typeof(Person)))
+				if (p.FirstName == "Crazy")
+					da.DeleteByKeySql(typeof(Person), p.ID);
+		}
+
 		[Test]
 		public void ScalarDictionaryTest()
 		{

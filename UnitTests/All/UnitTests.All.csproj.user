@@ -1,7 +1,7 @@
 <VisualStudioProject>
     <CSHARP LastOpenVersion = "7.10.3077" >
         <Build>
-            <Settings ReferencePath = "" >
+            <Settings ReferencePath = "C:\Program Files\NUnit 2.2.8\bin\" >
                 <Config
                     Name = "Debug"
                     EnableASPDebugging = "false"
@@ -13,7 +13,7 @@
                     StartAction = "Program"
                     StartArguments = "..\..\..\BLToolkit.nunit /config=Debug /run /framework=v1.1.4322"
                     StartPage = ""
-                    StartProgram = "C:\Program Files\NUnit\bin\nunit-gui.exe"
+                    StartProgram = "C:\Program Files\NUnit 2.2.8\bin\nunit-gui.exe"
                     StartURL = ""
                     StartWorkingDirectory = ""
                     StartWithIE = "false"

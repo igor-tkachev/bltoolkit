@@ -80,15 +80,14 @@
                     HintPath = "..\..\..\WINDOWS\Microsoft.NET\Framework\v1.1.4322\System.XML.dll"
                 />
                 <Reference
-                    Name = "nunit.framework"
-                    AssemblyName = "nunit.framework"
-                    HintPath = "..\..\..\..\Program Files\NUnit\bin\nunit.framework.dll"
-                    AssemblyFolderKey = "hklm\dn\nunit.framework"
-                />
-                <Reference
                     Name = "BLToolkit"
                     Project = "{C8B3F401-4634-4742-A266-4BD9ED7565E5}"
                     Package = "{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}"
+                />
+                <Reference
+                    Name = "nunit.framework"
+                    AssemblyName = "nunit.framework"
+                    HintPath = "..\..\..\..\..\..\..\Program Files\NUnit 2.2.8\bin\nunit.framework.dll"
                 />
             </References>
         </Build>
@@ -130,26 +129,6 @@
                     BuildAction = "Compile"
                 />
                 <File
-                    RelPath = "Data\ExecuteScalarTest.cs"
-                    SubType = "Code"
-                    BuildAction = "Compile"
-                />
-                <File
-                    RelPath = "Data\ExecuteScalarListTest.cs"
-                    SubType = "Code"
-                    BuildAction = "Compile"
-                />
-                <File
-                    RelPath = "Data\ExecuteScalarDictionaryTest.cs"
-                    SubType = "Code"
-                    BuildAction = "Compile"
-                />
-                <File
-                    RelPath = "Data\ExecuteDictionaryTest.cs"
-                    SubType = "Code"
-                    BuildAction = "Compile"
-                />
-                <File
                     RelPath = "Data\CompositeKeyTest.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
@@ -160,22 +139,32 @@
                     BuildAction = "Compile"
                 />
                 <File
+                    RelPath = "Data\ExecuteDictionaryTest.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "Data\ExecuteScalarDictionaryTest.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "Data\ExecuteScalarListTest.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "Data\ExecuteScalarTest.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
                     RelPath = "Data\NullableParameter.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
                 />
                 <File
                     RelPath = "DataAccess\DataAccessorTest.cs"
-                    SubType = "Code"
-                    BuildAction = "Compile"
-                />
-                <File
-                    RelPath = "DataAccess\ScalarTest.cs"
-                    SubType = "Code"
-                    BuildAction = "Compile"
-                />
-                <File
-                    RelPath = "DataAccess\ScalarListTest.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
                 />
@@ -213,6 +202,16 @@
                     RelPath = "DataAccess\PersonDataSet.xsx"
                     DependentUpon = "PersonDataSet.xsd"
                     BuildAction = "None"
+                />
+                <File
+                    RelPath = "DataAccess\ScalarListTest.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "DataAccess\ScalarTest.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
                 />
                 <File
                     RelPath = "DataAccess\SqlQueryTest.cs"
