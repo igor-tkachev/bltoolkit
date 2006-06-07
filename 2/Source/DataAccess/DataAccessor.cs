@@ -255,8 +255,7 @@ namespace BLToolkit.DataAccess
 			IDictionary           dictionary,
 			Type                  objectType,
 			Type                  keyType,
-			string                methodName,
-			Type                  elementType)
+			string                methodName)
 		{
 			bool           isIndex = TypeHelper.IsSameOrParent(typeof(IndexValue), keyType);
 			MemberMapper[] mms     = GetKeyFieldList(db, objectType);
@@ -287,13 +286,13 @@ namespace BLToolkit.DataAccess
 		}
 
 		protected void ExecuteScalarDictionary(
-			DbManager db,
-			IDictionary dictionary,
-			Type objectType,
-			Type keyType,
-			string methodName,
-			NameOrIndexParameter scalarField,
-			Type elementType)
+			DbManager             db,
+			IDictionary           dictionary,
+			Type                  objectType,
+			Type                  keyType,
+			string                methodName,
+			NameOrIndexParameter  scalarField,
+			Type                  elementType)
 		{
 			bool isIndex = TypeHelper.IsSameOrParent(typeof(IndexValue), keyType);
 			MemberMapper[] mms = GetKeyFieldList(db, objectType);
