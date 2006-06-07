@@ -163,7 +163,7 @@ namespace BLToolkit.DataAccess
 				}
 				else
 				{
-					if (fields.Length == 0) 
+					if (fields.Length == 0)
 						ExecuteDictionaryWithPK(keyType, elementType);
 					else if (isIndex || fields.Length > 1)
 						ExecuteDictionaryWithMapIndex(fields, elementType);
@@ -632,10 +632,10 @@ namespace BLToolkit.DataAccess
 		/// Maps primary keys(s) to an object of the specified type.
 		/// </summary>
 		private void ExecuteDictionaryWithPK(
-			Type                 keyType,
-			Type                 elementType)
+			Type keyType,
+			Type elementType)
 		{
-			//_objectType = elementType;
+			_objectType = elementType;
 
 			CreateReturnTypeInstance();
 			InitObjectType();
@@ -653,10 +653,9 @@ namespace BLToolkit.DataAccess
 				.ldloc    (_locObjType)
 				.LoadType (keyType)
 				.ldstr    (Context.CurrentMethod.Name)
-				.LoadType(elementType)
 				.callvirt (typeof(DataAccessor), "ExecuteDictionary", _bindingFlags,
 					typeof(DbManager), typeof(IDictionary), typeof(Type),
-					typeof(Type), typeof(string), typeof(Type))
+					typeof(Type), typeof(string))
 				;
 		}
 
@@ -667,7 +666,7 @@ namespace BLToolkit.DataAccess
 			NameOrIndexParameter[] index,
 			Type                   elementType)
 		{
-			//_objectType = elementType;
+			_objectType = elementType;
 
 			CreateReturnTypeInstance();
 			InitObjectType();
@@ -693,7 +692,7 @@ namespace BLToolkit.DataAccess
 			NameOrIndexParameter keyField,
 			Type                 elementType)
 		{
-			//_objectType = elementType;
+			_objectType = elementType;
 
 			CreateReturnTypeInstance();
 			InitObjectType();

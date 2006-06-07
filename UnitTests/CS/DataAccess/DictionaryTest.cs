@@ -139,6 +139,14 @@ namespace DataAccess
 			[SqlQuery("SELECT * FROM Person WHERE PersonID < 3")]
 			[Index(0, 1), ScalarFieldName(1)]
 			public abstract Dictionary<IndexValue, string> FW2ScalarDictionaryByMapIndex();
+
+			[SqlQuery("SELECT * FROM Person WHERE PersonID < 3")]
+			[Index(0)]
+			public abstract Dictionary<int, PersonNoPK> FW2ScalarDictionaryByPKWithCustomType();
+
+			[SqlQuery("SELECT * FROM Person WHERE PersonID < 3")]
+			[ObjectType(typeof(PersonMultiPK))] // Generic type will override ObjectType
+			public abstract Dictionary<int, Person> FW2ScalarDictionaryByPKWithIgnoredObjectType();
 #endif
 		}
 
@@ -330,6 +338,36 @@ namespace DataAccess
 			Assert.IsNotNull(actualValue);
 			Assert.AreEqual("John", actualValue);
 		}
+
+		[Test]
+		public void FW2ScalarDictionaryByPKWithCustomTypeTest()
+		{
+			TestAccessor da = DataAccessor.CreateInstance<TestAccessor>();
+			Dictionary<int, PersonNoPK> persons = da.FW2ScalarDictionaryByPKWithCustomType();
+
+			Assert.IsNotNull(persons);
+			Assert.IsTrue(persons.Count > 0);
+
+			PersonNoPK actualValue = persons[1];
+			Assert.IsNotNull(actualValue);
+			Assert.AreEqual("John", actualValue.FirstName);
+		}
+
+		[Test]
+		public void FW2ScalarDictionaryByPKWithIgnoredObjectTypeTest()
+		{
+			TestAccessor da = DataAccessor.CreateInstance<TestAccessor>();
+			Dictionary<int, Person> persons = da.FW2ScalarDictionaryByPKWithIgnoredObjectType();
+
+			Assert.IsNotNull(persons);
+			Assert.IsTrue(persons.Count > 0);
+
+			Person actualValue = persons[1];
+			Assert.IsNotNull(actualValue);
+			Assert.AreEqual("John", actualValue.FirstName);
+		}
+
+		
 #endif
 	}
 }
