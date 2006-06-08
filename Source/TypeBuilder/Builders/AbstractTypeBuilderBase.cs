@@ -303,7 +303,7 @@ namespace BLToolkit.TypeBuilder.Builders
 
 		protected FieldBuilder GetTypeAccessorField()
 		{
-			string       fieldName = "_" + GetObjectType().Name + "_$typeAccessor";
+			string       fieldName = "_" + GetObjectType().FullName + "_$typeAccessor";
 			FieldBuilder field     = Context.GetField(fieldName);
 
 			if (field == null)
@@ -324,7 +324,7 @@ namespace BLToolkit.TypeBuilder.Builders
 
 		protected FieldBuilder GetArrayInitializer(Type arrayType)
 		{
-			string       fieldName = "_array_of_$_" + arrayType.Name;
+			string       fieldName = "_array_of_$_" + arrayType.FullName;
 			FieldBuilder field     = Context.GetField(fieldName);
 
 			if (field == null)
