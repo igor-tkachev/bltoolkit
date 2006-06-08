@@ -265,6 +265,14 @@ namespace BLToolkit.Reflection
 		}
 
 		/// <summary>
+		/// Gets a value indicating whether the System.Type is an array.
+		/// </summary>
+		public bool IsArray
+		{
+			get { return _type.IsArray; }
+		}
+
+		/// <summary>
 		/// Gets a value indicating whether the Type is a value type.
 		/// </summary>
 		public bool IsValueType

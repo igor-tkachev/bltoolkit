@@ -97,6 +97,7 @@
     <Compile Include="Reflection\TypeHelperTest.cs" />
     <Compile Include="TestFixtureBase.cs" />
     <Compile Include="TestObject.cs" />
+    <Compile Include="TypeBuilder\Builders\ArrayBuilderTest.cs" />
     <Compile Include="TypeBuilder\Builders\IAbstractTypeBuilderTest.cs" />
     <Compile Include="TypeBuilder\Builders\DefaultTypeBuilderTest.cs" />
     <Compile Include="TypeBuilder\Builders\ImplemetInterfaceBuilderTest.cs" />
