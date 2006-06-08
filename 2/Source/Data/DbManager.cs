@@ -3189,7 +3189,11 @@ namespace BLToolkit.Data
 				if (table.ByName)
 					da.Fill(dataSet, startRecord, maxRecords, table.Name);
 				else
+#if FW2
 					da.Fill(startRecord, maxRecords, dataSet.Tables[table.Index]);
+#else
+					da.Fill(dataSet, startRecord, maxRecords, dataSet.Tables[table.Index].TableName);
+#endif
 				OnAfterOperation(OperationType.Fill);
 
 				return dataSet;

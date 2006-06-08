@@ -333,11 +333,33 @@ namespace BLToolkit.TypeBuilder.Builders
 
 				EmitHelper emit = Context.TypeBuilder.TypeInitializer.Emitter;
 
-				emit
-					.ldc_i4_0
-					.newarr   (arrayType.GetElementType())
-					.stsfld   (field)
-					;
+				int rank = arrayType.GetArrayRank();
+
+				if (rank > 1)
+				{
+					Type[] parameters = new Type[rank];
+
+					for (int i = 0; i < parameters.Length; i++)
+					{
+						parameters[i] = typeof(int);
+						emit.ldc_i4_0.end();
+					}
+
+					ConstructorInfo ci = TypeHelper.GetConstructor(arrayType, parameters);
+
+					emit
+						.newobj (ci)
+						.stsfld (field)
+						;
+				}
+				else
+				{
+					emit
+						.ldc_i4_0
+						.newarr   (arrayType.GetElementType())
+						.stsfld   (field)
+						;
+				}
 			}
 
 			return field;

@@ -289,7 +289,7 @@ namespace BLToolkit.TypeBuilder.Builders
 
 		private static ConstructorBuilderHelper BuildNestedTypeConstructor(TypeBuilderHelper nestedType)
 		{
-			Type[] parameters = new Type[] { typeof(TypeAccessor), typeof(MemberInfo) };
+			Type[] parameters = { typeof(TypeAccessor), typeof(MemberInfo) };
 
 			ConstructorBuilderHelper ctorBuilder = nestedType.DefinePublicConstructor(parameters);
 
