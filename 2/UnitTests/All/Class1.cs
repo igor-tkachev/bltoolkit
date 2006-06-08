@@ -49,10 +49,20 @@ namespace UnitTests.All
 	[TestFixture]
 	public class GetValueTest
 	{
+		static byte[]   _arr1 = new byte[0];
+		static byte[][] _arr2 = new byte[0][];
+		static byte[,]  _arr3 = new byte[0,0];
 		[Test]
 		public void Test()
 		{
+			Arr1 = _arr1;
+			Arr2 = _arr2;
+			Arr3 = _arr3;
 		}
+
+		byte[]   Arr1;
+		byte[][] Arr2;
+		byte[,]  Arr3;
 
 		public void Foo(string toWhom)
 		{

@@ -213,6 +213,15 @@ namespace BLToolkit.TypeBuilder.Builders
 					.LoadInitValue (objectType)
 					;
 			}
+			else if (objectType.IsArray)
+			{
+				FieldBuilder initializer = GetArrayInitializer(objectType);
+
+				emit
+					.ldarg_0
+					.ldsfld  (initializer)
+					;
+			}
 			else
 			{
 				ConstructorInfo ci = objectType.GetPublicDefaultConstructor();

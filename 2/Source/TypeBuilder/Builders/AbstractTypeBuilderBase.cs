@@ -322,6 +322,32 @@ namespace BLToolkit.TypeBuilder.Builders
 			return field;
 		}
 
+		protected FieldBuilder GetArrayInitializer(Type arrayType)
+		{
+			string       fieldName = "_array_of_$_" + arrayType.Name;
+			FieldBuilder field     = Context.GetField(fieldName);
+
+			if (field == null)
+			{
+				field = Context.CreatePrivateStaticField(fieldName, arrayType);
+
+				EmitHelper emit = Context.TypeBuilder.TypeInitializer.Emitter;
+
+				emit
+					.ldc_i4_0
+					.newarr   (arrayType.GetElementType())
+					.stsfld   (field)
+					;
+			}
+
+			return field;
+		}
+
+		protected FieldBuilder GetArrayInitializer()
+		{
+			return GetArrayInitializer(Context.CurrentProperty.PropertyType);
+		}
+
 		protected virtual Type GetFieldType()
 		{
 			PropertyInfo    pi    = Context.CurrentProperty;

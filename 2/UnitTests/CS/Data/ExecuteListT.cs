@@ -5,7 +5,7 @@ using NUnit.Framework;
 
 using BLToolkit.Data;
 
-namespace A.Data
+namespace Data
 {
 	[TestFixture]
 	public class ExecuteListT
