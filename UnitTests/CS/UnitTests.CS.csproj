@@ -348,6 +348,11 @@
                     BuildAction = "Compile"
                 />
                 <File
+                    RelPath = "TypeBuilder\Builders\ArrayBuilderTest.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
                     RelPath = "TypeBuilder\Builders\DefaultTypeBuilderTest.cs"
                     SubType = "Code"
                     BuildAction = "Compile"

@@ -75,6 +75,17 @@ namespace BLToolkit.Reflection.Emit
 			return new MethodBuilderHelper(this, _typeBuilder.DefineMethod(name, attributes, returnType, parameterTypes));
 		}
 
+		public MethodBuilderHelper DefineMethod(
+			string             name,
+			MethodAttributes   attributes,
+			CallingConventions callingConvention,
+			Type               returnType,
+			Type[]             parameterTypes)
+		{
+			return new MethodBuilderHelper(this, _typeBuilder.DefineMethod(
+				name, attributes, callingConvention, returnType, parameterTypes));
+		}
+
 		/// <summary>
 		/// Adds a new method to the class, with the given name and method signature.
 		/// </summary>
@@ -117,7 +128,11 @@ namespace BLToolkit.Reflection.Emit
 				parameters[i] = pi[i].ParameterType;
 
 			MethodBuilderHelper method = DefineMethod(
-				name, attributes, methodInfoDeclaration.ReturnType, parameters);
+				name,
+				attributes, 
+				methodInfoDeclaration.CallingConvention,
+				methodInfoDeclaration.ReturnType,
+				parameters);
 
 			// Compiler overrides methods only for interfaces. We do the same.
 			// If we wanted to override virtual methods, then methods should've had 

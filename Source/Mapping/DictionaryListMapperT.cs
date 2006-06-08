@@ -57,7 +57,7 @@ namespace BLToolkit.Mapping
 			return _mapper;
 		}
 
-		static char[] _trim = new char[] { ' ' };
+		static char[] _trim = { ' ' };
 
 		public virtual object GetNextObject(InitContext initContext)
 		{

@@ -1461,7 +1461,7 @@ namespace BLToolkit.Mapping
 			return MapFrom(value, _mapMemberInfo);
 		}
 
-		static char[] _trim = new char[] { ' ' };
+		static char[] _trim = { ' ' };
 
 		protected static object MapFrom(object value, MapMemberInfo mapInfo)
 		{
