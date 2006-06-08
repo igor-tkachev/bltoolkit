@@ -390,13 +390,13 @@ namespace BLToolkit.ComponentModel
 
 		public string Filter
 		{
-			get { throw new Exception("The method or operation is not implemented."); }
-			set { throw new Exception("The method or operation is not implemented."); }
+			get { throw new NotImplementedException("The method 'BindingListImpl.get_Filter' is not implemented."); }
+			set { throw new NotImplementedException("The method 'BindingListImpl.set_Filter' is not implemented."); }
 		}
 
 		public void RemoveFilter()
 		{
-			throw new Exception("The method or operation is not implemented.");
+			throw new NotImplementedException("The method 'BindingListImpl.RemoveFilter()' is not implemented.");
 		}
 
 		#endregion
