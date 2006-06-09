@@ -599,6 +599,112 @@ namespace BLToolkit.Mapping
 
 		#endregion
 
+		#region General case
+
+		public virtual object ConvertChangeType(object value, Type conversionType)
+		{
+			if (conversionType.IsArray)
+			{
+				if (null == value)
+					return null;
+				
+				Type srcType = value.GetType();
+				if (srcType == conversionType)
+					return value;
+
+				Type srcElementType = srcType.GetElementType();
+				Type dstElementType = conversionType.GetElementType();
+
+				if (srcElementType.IsArray != dstElementType.IsArray
+					|| (srcElementType.IsArray &&
+						srcElementType.GetArrayRank() != dstElementType.GetArrayRank()))
+				{
+					throw new InvalidCastException(string.Format("Can not convert {0} to {1}",
+						srcType.Name, conversionType.Name));
+				}
+
+				Array srcArray = (Array)value;
+				Array dstArray;
+
+				int rank = srcArray.Rank;
+				
+				if (rank == 1)
+				{
+					dstArray = Array.CreateInstance(dstElementType, srcArray.Length);
+					for (int i = 0; i < srcArray.Length; ++i)
+					{
+						dstArray.SetValue(ConvertChangeType(srcArray.GetValue(i), dstElementType), i);
+					}
+				}
+				else
+				{
+					int   arrayLength = 1;
+					int[] dimensions  = new int[rank];
+					int[] indices     = new int[rank];
+
+					for (int i = 0; i < rank; ++i)
+						arrayLength *= (dimensions[i] = srcArray.GetLength(i));
+
+					dstArray = Array.CreateInstance(dstElementType, dimensions);
+
+					for (int i = 0; i < arrayLength; ++i)
+					{
+						int index = i;
+						for (int j = rank - 1; j >= 0; --j)
+						{
+							indices[j] = index % dimensions[j];
+							index /= dimensions[j];
+						}
+
+						dstArray.SetValue(ConvertChangeType(srcArray.GetValue(indices), dstElementType), indices);
+					}
+				}
+
+				return dstArray;
+			}
+			
+			switch (Type.GetTypeCode(conversionType))
+			{
+				case TypeCode.Boolean:
+					return ConvertToBoolean(value);
+				case TypeCode.Byte:
+					return ConvertToByte(value);
+				case TypeCode.Char:
+					return ConvertToChar(value);
+				case TypeCode.DateTime:
+					return ConvertToDateTime(value);
+				case TypeCode.Decimal:
+					return ConvertToDecimal(value);
+				case TypeCode.Double:
+					return ConvertToDouble(value);
+				case TypeCode.Int16:
+					return ConvertToInt16(value);
+				case TypeCode.Int32:
+					return ConvertToInt32(value);
+				case TypeCode.Int64:
+					return ConvertToInt64(value);
+				case TypeCode.SByte:
+					return ConvertToSByte(value);
+				case TypeCode.Single:
+					return ConvertToSingle(value);
+				case TypeCode.String:
+					return ConvertToString(value);
+				case TypeCode.UInt16:
+					return ConvertToUInt16(value);
+				case TypeCode.UInt32:
+					return ConvertToUInt32(value);
+				case TypeCode.UInt64:
+					return ConvertToUInt64(value);
+			}
+
+			if (typeof(Guid) == conversionType)
+				return ConvertToGuid(value);
+				
+			return Convert.ChangeType(value, conversionType);
+		}
+
+		#endregion
+		
 		#endregion
 
 		#region Protected Members

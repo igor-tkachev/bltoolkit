@@ -773,7 +773,10 @@ namespace BLToolkit.Reflection
 
 		public static bool IsScalar(Type type)
 		{
-			return type.IsValueType || type == typeof(string) || type == typeof(byte[]);
+			while (type.IsArray)
+				type = type.GetElementType();
+			
+			return type.IsValueType || type == typeof(string);
 		}
 
 		public static Type[] GetGenericArguments(Type type, string baseTypeName)

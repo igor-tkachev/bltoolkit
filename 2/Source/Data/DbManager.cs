@@ -864,7 +864,7 @@ namespace BLToolkit.Data
 			{
 				// Create a command object.
 				//
-				command = Connection.CreateCommand();
+				command = _dataProvider.CreateCommandObject(Connection);
 
 				// If an active transaction exists.
 				//
@@ -2700,7 +2700,7 @@ namespace BLToolkit.Data
 						object value = dr.GetValue(index);
 
 						if (value == null || value.GetType() != type)
-							value = value is DBNull ? null : Convert.ChangeType(value, type);
+							value = value is DBNull ? null : _mappingSchema.ConvertChangeType(value, type);
 
 						list.Add(value);
 					}
@@ -2792,7 +2792,7 @@ namespace BLToolkit.Data
 						object value = dr.GetValue(index);
 
 						if (value == null || value.GetType() != type)
-							value = value is DBNull ? null : Convert.ChangeType(value, type);
+							value = value is DBNull ? null : _mappingSchema.ConvertChangeType(value, type);
 
 						list.Add((T)value);
 					}
@@ -2886,10 +2886,10 @@ namespace BLToolkit.Data
 						object key = dr[keyIndex];
 
 						if (key == null || key.GetType() != keyFieldType)
-							key = key is DBNull ? null : Convert.ChangeType(key, keyFieldType);
+							key = key is DBNull ? null : _mappingSchema.ConvertChangeType(key, keyFieldType);
 
 						if (value == null || value.GetType() != valueFieldType)
-							value = value is DBNull ? null : Convert.ChangeType(value, valueFieldType);
+							value = value is DBNull ? null : _mappingSchema.ConvertChangeType(value, valueFieldType);
 
 						dic.Add(key, value);
 					}
@@ -2938,10 +2938,10 @@ namespace BLToolkit.Data
 						object key = dr[keyIndex];
 
 						if (key == null || key.GetType() != keyFieldType)
-							key = key is DBNull ? null : Convert.ChangeType(key, keyFieldType);
+							key = key is DBNull ? null : _mappingSchema.ConvertChangeType(key, keyFieldType);
 
 						if (value == null || value.GetType() != valueFieldType)
-							value = value is DBNull ? null : Convert.ChangeType(value, valueFieldType);
+							value = value is DBNull ? null : _mappingSchema.ConvertChangeType(value, valueFieldType);
 
 						dic.Add((K)key, (T)value);
 					}
@@ -2993,7 +2993,7 @@ namespace BLToolkit.Data
 						object value = dr[valueIndex];
 
 						if (value == null || value.GetType() != valueFieldType)
-							value = value is DBNull ? null : Convert.ChangeType(value, valueFieldType);
+							value = value is DBNull ? null : _mappingSchema.ConvertChangeType(value, valueFieldType);
 
 						object[] key = new object[keyIndex.Length];
 
@@ -3046,7 +3046,7 @@ namespace BLToolkit.Data
 						object value = dr[valueIndex];
 
 						if (value == null || value.GetType() != valueFieldType)
-							value = value is DBNull ? null : Convert.ChangeType(value, valueFieldType);
+							value = value is DBNull ? null : _mappingSchema.ConvertChangeType(value, valueFieldType);
 
 						object[] key = new object[keyIndex.Length];
 
