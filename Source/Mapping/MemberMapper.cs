@@ -1463,7 +1463,7 @@ namespace BLToolkit.Mapping
 
 		static char[] _trim = { ' ' };
 
-		protected static object MapFrom(object value, MapMemberInfo mapInfo)
+		protected object MapFrom(object value, MapMemberInfo mapInfo)
 		{
 			if (mapInfo == null) throw new ArgumentNullException("mapInfo");
 
@@ -1517,14 +1517,14 @@ namespace BLToolkit.Mapping
 					Type underlyingType = mapInfo.MemberAccessor.UnderlyingType;
 
 					if (valueType != underlyingType)
-						value = Convert.ChangeType(value, underlyingType);
+						value = _mappingSchema.ConvertChangeType(value, underlyingType);
 
 					//value = Enum.Parse(type, Enum.GetName(type, value));
 					value = Enum.ToObject(memberType, value);
 				}
 				else
 				{
-					value = Convert.ChangeType(value, memberType);
+					value = _mappingSchema.ConvertChangeType(value, memberType);
 				}
 			}
 

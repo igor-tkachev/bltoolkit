@@ -1211,7 +1211,7 @@ namespace BLToolkit.DataAccess
 		{
 			return db.MappingSchema.ConvertToGuid(value);
 		}
-
+		
 		#endregion
 
 #if FW2
@@ -1359,6 +1359,19 @@ namespace BLToolkit.DataAccess
 
 		#endregion
 
+		#region General case
+
+		protected virtual object ConvertChangeType(
+			DbManager db,
+			object    value,
+			Type      conversionType,
+			object    parameter)
+		{
+			return db.MappingSchema.ConvertChangeType(value, conversionType);
+		}
+
+		#endregion
+		
 		#endregion
 	}
 }

@@ -78,7 +78,8 @@ namespace BLToolkit.DataAccess
 			{
 				ExecuteDataTable();
 			}
-			else if (IsInterfaceOf(returnType, typeof(IList)))
+			else if (IsInterfaceOf(returnType, typeof(IList))
+				&& Context.CurrentMethod.GetCustomAttributes(typeof(ScalarSourceAttribute), true).Length == 0)
 			{
 				Type elementType = TypeHelper.GetListItemType(returnType);
 
@@ -756,31 +757,39 @@ namespace BLToolkit.DataAccess
 			GetSprocName();
 			CallSetCommand();
 
-			string converterName = GetConverterMethodName(Context.CurrentMethod.ReturnType);
-			object[] attrs = Context.CurrentMethod.GetCustomAttributes(typeof(ScalarSourceAttribute), true);
+			EmitHelper emit = Context.MethodBuilder.Emitter;
+			object[] attrs  = Context.CurrentMethod.GetCustomAttributes(typeof(ScalarSourceAttribute), true);
 
 			if (attrs.Length == 0)
 			{
-				Context.MethodBuilder.Emitter
-					.callvirtNoGenerics(typeof(DbManager), "ExecuteScalar")
-					.ldnull
-					.callvirt(typeof(DataAccessor), converterName, _bindingFlags, typeof(DbManager), typeof(object), typeof(object))
-					//.CastFromObject     (Context.CurrentMethod.ReturnType)
-					.stloc(Context.ReturnValue)
-					;
+				emit.callvirtNoGenerics(typeof(DbManager), "ExecuteScalar");
 			}
 			else
 			{
 				ScalarSourceAttribute attr = (ScalarSourceAttribute)attrs[0];
 
-				Context.MethodBuilder.Emitter
-					.ldc_i4((int)attr.ScalarType);
+				emit.ldc_i4((int)attr.ScalarType);
 				SetNameOrIndexParameter(attr.NameOrIndex);
-				Context.MethodBuilder
-					.Emitter.callvirtNoGenerics(typeof(DbManager), "ExecuteScalar", typeof(ScalarSourceType), typeof(NameOrIndexParameter))
+				emit.callvirtNoGenerics(typeof(DbManager), "ExecuteScalar", typeof(ScalarSourceType), typeof(NameOrIndexParameter));
+			}
+
+			string converterName = GetConverterMethodName(Context.CurrentMethod.ReturnType);
+
+			if (converterName == null)
+			{
+				emit
+					.LoadType(Context.CurrentMethod.ReturnType)
+					.ldnull
+					.callvirt(typeof (DataAccessor), "ConvertChangeType", _bindingFlags, typeof (DbManager), typeof (object), typeof (Type), typeof (object))
+					.stloc(Context.ReturnValue)
+					;
+				
+			}
+			else
+			{
+				emit
 					.ldnull
 					.callvirt(typeof(DataAccessor), converterName, _bindingFlags, typeof(DbManager), typeof(object), typeof(object))
-					//.CastFromObject     (Context.CurrentMethod.ReturnType)
 					.stloc(Context.ReturnValue)
 					;
 			}
@@ -1260,33 +1269,30 @@ namespace BLToolkit.DataAccess
 					}
 					else
 					{
+						emit
+							.ldarg_0
+							.ldloc(_locManager)
+								.ldloc(_locManager)
+								.callvirt(typeof(DbManager).GetProperty("DataProvider").GetGetMethod())
+									.ldloc(param)
+									.callvirt(typeof(IDataParameter).GetProperty("Value").GetGetMethod())
+								.ldc_i4((int)ConvertType.OutputParameter)
+								.callvirt(typeof(DataProviderBase), "Convert", typeof(object), typeof(ConvertType))
+								;
+						
 						string converterName = GetConverterMethodName(type);
 
 						if (converterName == null)
 						{
 							emit
-									.ldloc        (_locManager)
-									.callvirt     (typeof(DbManager).GetProperty("DataProvider").GetGetMethod())
-										.ldloc    (param)
-										.callvirt (typeof(IDataParameter).GetProperty("Value").GetGetMethod())
-									.ldc_i4       ((int)ConvertType.OutputParameter)
-									.callvirt     (typeof(DataProviderBase), "Convert", typeof(object), typeof(ConvertType))
-								.LoadType         (type)
-								.call             (typeof(Convert), "ChangeType", typeof(object), typeof(Type))
-								.CastFromObject   (type)
+								.LoadType(type)
+								.ldloc(param)
+								.callvirt(typeof(DataAccessor), "ConvertChangeType", _bindingFlags, typeof(DbManager), typeof(object), typeof(Type), typeof(object))
 								;
 						}
 						else
 						{
 							emit
-								.ldarg_0
-								.ldloc            (_locManager)
-									.ldloc        (_locManager)
-									.callvirt     (typeof(DbManager).GetProperty("DataProvider").GetGetMethod())
-										.ldloc    (param)
-										.callvirt (typeof(IDataParameter).GetProperty("Value").GetGetMethod())
-									.ldc_i4       ((int)ConvertType.OutputParameter)
-									.callvirt     (typeof(DataProviderBase), "Convert", typeof(object), typeof(ConvertType))
 								.ldloc            (param)
 								.callvirt         (typeof(DataAccessor), converterName, _bindingFlags, typeof(DbManager), typeof(object), typeof(object))
 								;

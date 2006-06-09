@@ -236,6 +236,66 @@ namespace Mapping
 
 		#endregion
 
+		#region Arrays
+
+		public class ArrayTypes
+		{
+			public class SourceObject
+			{
+				public int[,]   DimArray = new int[2, 2] { {1,2}, {3,4} };
+				public string[] StrArray = new string[]  {"5","4","3","2","1"};
+				public int[]    IntArray = new int[]     {1,2,3,4,5};
+				public Enum1[]  EnmArray = new Enum1[]   {Enum1.Value1,Enum1.Value2,Enum1.Value3};
+
+				public byte[][,][][,] ComplexArray = InitComplexArray();
+				public static byte[][,][][,] InitComplexArray()
+				{
+					byte[][,][][,] ret = new byte[1][,][][,];
+					ret[0]             = new byte[1,1][][,];
+					ret[0][0,0]        = new byte[1][,];
+					ret[0][0,0][0]     = new byte[,] { {1,2}, {3,4} };
+
+					return ret;
+				}
+			}
+
+			public class DestObject
+			{
+				public float[,] DimArray;
+				public string[] StrArray;
+				public string[] IntArray;
+				public string[] EnmArray;
+				public sbyte[][,][][,] ComplexArray;
+			}
+
+			public class IncompatibleObject
+			{
+				public int[][] DimArray;
+			}
+		}
+
+		[Test]
+		public void ArrayTypesTest()
+		{
+			ArrayTypes.SourceObject so = new ArrayTypes.SourceObject();
+			ArrayTypes.DestObject o = (ArrayTypes.DestObject)Map.ObjectToObject(so, typeof(ArrayTypes.DestObject));
+
+			Console.WriteLine(o.DimArray); Assert.AreEqual(so.DimArray[0,0], (int)o.DimArray[0,0]);
+			Console.WriteLine(o.StrArray); Assert.AreEqual(so.StrArray, o.StrArray);
+			Console.WriteLine(o.IntArray); Assert.AreEqual(so.IntArray[0].ToString(), o.IntArray[0]);
+
+			Console.WriteLine(o.ComplexArray); Assert.IsTrue(o.ComplexArray[0][0,0][0][1,1] == 4);
+		}
+
+		[Test, ExpectedException(typeof(InvalidCastException))]
+		public void IncompatibleArrayTypesTest()
+		{
+			ArrayTypes.SourceObject so = new ArrayTypes.SourceObject();
+			Map.ObjectToObject(so, typeof(ArrayTypes.IncompatibleObject));
+		}
+		
+		#endregion
+
 		#region SourceListToDestList
 
 		[Test]
