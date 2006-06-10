@@ -59,6 +59,7 @@ namespace BLToolkit.TypeBuilder.Builders
 
 		private BuildContext            _context;
 		private AbstractTypeBuilderList _builders;
+		private AbstractTypeBuilderList _usedBuilders = new AbstractTypeBuilderList();
 
 		private Type Build()
 		{
@@ -270,7 +271,14 @@ namespace BLToolkit.TypeBuilder.Builders
 			_context.TypeBuilders.Sort(new BuilderComparer(_context));
 
 			for (int i = 0; i < _context.TypeBuilders.Count; i++)
-				_context.TypeBuilders[i].Build(_context);
+			{
+				IAbstractTypeBuilder builder = _context.TypeBuilders[i];
+
+				builder.Build(_context);
+
+				if (!_usedBuilders.Contains(builder))
+					_usedBuilders.Add(builder);
+			}
 		}
 
 		private void BeginEmitMethod(MethodInfo method)
@@ -278,33 +286,117 @@ namespace BLToolkit.TypeBuilder.Builders
 			_context.CurrentMethod = method;
 			_context.MethodBuilder = _context.TypeBuilder.DefineMethod(method);
 
-			BeginEmitMethod(method.ReturnType, method.GetParameters());
-		}
-
-		private void BeginEmitMethod(Type returnType, ParameterInfo[] parameters)
-		{
 			EmitHelper emit = _context.MethodBuilder.Emitter;
 
-			// Label right before return.
+			// Label right before return and catch block.
 			//
 			_context.ReturnLabel = emit.DefineLabel();
 
 			// Create return value.
 			//
-			if (returnType != typeof(void))
+			if (method.ReturnType != typeof(void))
 			{
-				_context.ReturnValue = _context.MethodBuilder.Emitter.DeclareLocal(returnType);
+				_context.ReturnValue = _context.MethodBuilder.Emitter.DeclareLocal(method.ReturnType);
 				emit.Init(_context.ReturnValue);
 			}
 
 			// Initialize out parameters.
 			//
+			ParameterInfo[] parameters = method.GetParameters();
+
 			if (parameters != null)
 				emit.InitOutParameters(parameters);
+
+			_usedBuilders.Clear();
+		}
+
+		private void EmitMethod(
+			AbstractTypeBuilderList builders, MethodInfo methdoInfo, BuildElement buildElement)
+		{
+			_context.BuildElement = buildElement;
+
+			bool isCatchBlockRequired   = false;
+			bool isFinallyBlockRequired = false;
+
+			foreach (IAbstractTypeBuilder builder in builders)
+			{
+				isCatchBlockRequired   = isCatchBlockRequired   || IsApplied(builder, BuildStep.Catch);
+				isFinallyBlockRequired = isFinallyBlockRequired || IsApplied(builder, BuildStep.Finally);
+			}
+
+			BeginEmitMethod(methdoInfo);
+
+			Build(BuildStep.Begin,  builders);
+
+			EmitHelper emit        = _context.MethodBuilder.Emitter;
+			Label      returnLabel = _context.ReturnLabel;
+
+			// Begin catch block.
+			//
+
+			if (isCatchBlockRequired || isFinallyBlockRequired)
+			{
+				_context.ReturnLabel = emit.DefineLabel();
+				emit.BeginExceptionBlock();
+			}
+
+			Build(BuildStep.Before, builders);
+			Build(BuildStep.Build,  builders);
+			Build(BuildStep.After,  builders);
+
+			if (isCatchBlockRequired || isFinallyBlockRequired)
+			{
+				emit.MarkLabel(_context.ReturnLabel);
+				_context.ReturnLabel = returnLabel;
+			}
+
+			// End catch block.
+			//
+			if (isCatchBlockRequired)
+			{
+				emit
+					.BeginCatchBlock(typeof(Exception));
+
+				_context.ReturnLabel = emit.DefineLabel();
+				_context.Exception   = emit.DeclareLocal(typeof(Exception));
+
+				emit
+					.stloc (_context.Exception);
+
+				Build(BuildStep.Catch, builders);
+
+				emit
+					.rethrow
+					.end();
+
+				emit.MarkLabel(_context.ReturnLabel);
+				_context.ReturnLabel = returnLabel;
+				_context.Exception   = null;
+			}
+
+			if (isFinallyBlockRequired)
+			{
+				emit.BeginFinallyBlock();
+				_context.ReturnLabel = emit.DefineLabel();
+
+				Build(BuildStep.Finally, builders);
+
+				emit.MarkLabel(_context.ReturnLabel);
+				_context.ReturnLabel = returnLabel;
+			}
+
+			if (isCatchBlockRequired || isFinallyBlockRequired)
+				emit.EndExceptionBlock();
+
+			Build(BuildStep.End, _usedBuilders);
+
+			EndEmitMethod();
 		}
 
 		private void EndEmitMethod()
 		{
+			_usedBuilders.Clear();
+
 			EmitHelper emit = _context.MethodBuilder.Emitter;
 
 			// Prepare return.
@@ -380,26 +472,23 @@ namespace BLToolkit.TypeBuilder.Builders
 			return list;
 		}
 
+		private bool IsApplied(IAbstractTypeBuilder builder, BuildStep buildStep)
+		{
+			_context.Step = buildStep;
+			return builder.IsApplied(_context);
+		}
+
 		private bool IsApplied(BuildElement element, AbstractTypeBuilderList builders)
 		{
 			_context.BuildElement = element;
 
 			foreach (IAbstractTypeBuilder builder in builders)
 			{
-				_context.Step = BuildStep.Before;
-
-				if (builder.IsApplied(_context))
-					return true;
-
-				_context.Step = BuildStep.Build;
-
-				if (builder.IsApplied(_context))
-					return true;
-
-				_context.Step = BuildStep.After;
-
-				if (builder.IsApplied(_context))
-					return true;
+				if (IsApplied(builder, BuildStep.Before))    return true;
+				if (IsApplied(builder, BuildStep.Build))     return true;
+				if (IsApplied(builder, BuildStep.After))     return true;
+				if (IsApplied(builder, BuildStep.Catch)) return true;
+				if (IsApplied(builder, BuildStep.Finally))   return true;
 			}
 
 			return false;
@@ -451,15 +540,7 @@ namespace BLToolkit.TypeBuilder.Builders
 				propertyBuilders,
 				_builders);
 
-			BeginEmitMethod(getter);
-
-			_context.BuildElement = BuildElement.AbstractGetter;
-
-			Build(BuildStep.Before, builders);
-			Build(BuildStep.Build,  builders);
-			Build(BuildStep.After,  builders);
-
-			EndEmitMethod();
+			EmitMethod(builders, getter, BuildElement.AbstractGetter);
 		}
 
 		private void DefineAbstractSetter(
@@ -485,15 +566,7 @@ namespace BLToolkit.TypeBuilder.Builders
 				propertyBuilders,
 				_builders);
 
-			BeginEmitMethod(setter);
-
-			_context.BuildElement = BuildElement.AbstractSetter;
-
-			Build(BuildStep.Before, builders);
-			Build(BuildStep.Build,  builders);
-			Build(BuildStep.After,  builders);
-
-			EndEmitMethod();
+			EmitMethod(builders, setter, BuildElement.AbstractSetter);
 		}
 
 		private void DefineAbstractMethods()
@@ -515,21 +588,7 @@ namespace BLToolkit.TypeBuilder.Builders
 						GetBuilders(method),
 						_builders);
 
-					BeginEmitMethod(method);
-
-					_context.BuildElement = BuildElement.AbstractMethod;
-
-					Build(BuildStep.Before, builders);
-					Build(BuildStep.Build,  builders);
-					Build(BuildStep.After,  builders);
-
-					//_context.BuildElement = BuildElement.VirtualMethod;
-
-					//Build(BuildStep.Before, builders);
-					//Build(BuildStep.Build,  builders);
-					//Build(BuildStep.After,  builders);
-
-					EndEmitMethod();
+					EmitMethod(builders, method, BuildElement.AbstractMethod);
 				}
 			}
 		}
@@ -573,15 +632,7 @@ namespace BLToolkit.TypeBuilder.Builders
 				_builders);
 
 			if (IsApplied(BuildElement.VirtualGetter, builders))
-			{
-				BeginEmitMethod(getter);
-
-				Build(BuildStep.Before, builders);
-				Build(BuildStep.Build,  builders);
-				Build(BuildStep.After,  builders);
-
-				EndEmitMethod();
-			}
+				EmitMethod(builders, getter, BuildElement.VirtualGetter);
 		}
 
 		private void OverrideSetter(MethodInfo setter, AbstractTypeBuilderList propertyBuilders)
@@ -598,15 +649,7 @@ namespace BLToolkit.TypeBuilder.Builders
 				_builders);
 
 			if (IsApplied(BuildElement.VirtualSetter, builders))
-			{
-				BeginEmitMethod(setter);
-
-				Build(BuildStep.Before, builders);
-				Build(BuildStep.Build,  builders);
-				Build(BuildStep.After,  builders);
-
-				EndEmitMethod();
-			}
+				EmitMethod(builders, setter, BuildElement.VirtualSetter);
 		}
 
 		private void OverrideVirtualMethods()
@@ -632,15 +675,7 @@ namespace BLToolkit.TypeBuilder.Builders
 						_builders);
 
 					if (IsApplied(BuildElement.VirtualMethod, builders))
-					{
-						BeginEmitMethod(method);
-
-						Build(BuildStep.Before, builders);
-						Build(BuildStep.Build,  builders);
-						Build(BuildStep.After,  builders);
-
-						EndEmitMethod();
-					}
+						EmitMethod(builders, method, BuildElement.VirtualMethod);
 				}
 			}
 		}

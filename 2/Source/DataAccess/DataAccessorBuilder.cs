@@ -1138,26 +1138,8 @@ namespace BLToolkit.DataAccess
 					;
 			}
 
-			if (pi.ParameterType.IsByRef)
-			{
-				emit
-					.ldarg(pi)
-					;
-
-				if (type.IsValueType && type.IsPrimitive == false)
-					emit.ldobj(type);
-				else
-					emit.ldind(type);
-			}
-			else
-			{
-				emit
-					.ldarg (pi)
-					;
-			}
-
 			emit
-				.boxIfValueType (type)
+				.ldargEx(pi, true)
 				;
 
 			if (type.IsEnum)

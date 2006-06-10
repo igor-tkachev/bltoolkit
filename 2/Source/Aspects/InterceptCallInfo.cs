@@ -1,9 +1,11 @@
 using System;
+using System.Diagnostics;
 using System.Reflection;
 
 namespace BLToolkit.Aspects
 {
-	public class InterceptCallInfo
+	[DebuggerStepThrough] 
+	public sealed class InterceptCallInfo
 	{
 		private MethodInfo _methodInfo;
 		public  MethodInfo  MethodInfo
@@ -32,11 +34,25 @@ namespace BLToolkit.Aspects
 			set { _returnValue = value; }
 		}
 
-		private bool _skipCall;
-		public  bool  SkipCall
+		private InterceptResult _interceptResult = InterceptResult.Continue;
+		public  InterceptResult  InterceptResult
 		{
-			get { return _skipCall;  }
-			set { _skipCall = value; }
+			get { return _interceptResult;  }
+			set { _interceptResult = value; }
+		}
+
+		private InterceptType _interceptType;
+		public  InterceptType  InterceptType
+		{
+			get { return _interceptType;  }
+			set { _interceptType = value; }
+		}
+
+		private Exception _exception;
+		public  Exception  Exception
+		{
+			get { return _exception;  }
+			set { _exception = value; }
 		}
 	}
 }

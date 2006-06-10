@@ -59,14 +59,28 @@ namespace BLToolkit.TypeBuilder.Builders
 
 			Context = context;
 
+			switch (context.Step)
+			{
+				case BuildStep.Begin: BeginMethodBuild(); return;
+				case BuildStep.End:   EndMethodBuild();   return;
+			}
+
+			if (context.Step == BuildStep.End)
+			{
+				EndMethodBuild();
+				return;
+			}
+
 			switch (context.BuildElement)
 			{
 				case BuildElement.Type:
 					switch (context.Step)
 					{
-						case BuildStep.Before: BeforeBuildType(); break;
-						case BuildStep.Build:        BuildType(); break;
-						case BuildStep.After:   AfterBuildType(); break;
+						case BuildStep.Before:   BeforeBuildType(); break;
+						case BuildStep.Build:          BuildType(); break;
+						case BuildStep.After:     AfterBuildType(); break;
+						case BuildStep.Catch:     CatchBuildType(); break;
+						case BuildStep.Finally: FinallyBuildType(); break;
 					}
 
 					break;
@@ -74,9 +88,11 @@ namespace BLToolkit.TypeBuilder.Builders
 				case BuildElement.AbstractGetter:
 					switch (context.Step)
 					{
-						case BuildStep.Before: BeforeBuildAbstractGetter(); break;
-						case BuildStep.Build:        BuildAbstractGetter(); break;
-						case BuildStep.After:   AfterBuildAbstractGetter(); break;
+						case BuildStep.Before:   BeforeBuildAbstractGetter(); break;
+						case BuildStep.Build:          BuildAbstractGetter(); break;
+						case BuildStep.After:     AfterBuildAbstractGetter(); break;
+						case BuildStep.Catch:     CatchBuildAbstractGetter(); break;
+						case BuildStep.Finally: FinallyBuildAbstractGetter(); break;
 					}
 
 					break;
@@ -84,9 +100,11 @@ namespace BLToolkit.TypeBuilder.Builders
 				case BuildElement.AbstractSetter:
 					switch (context.Step)
 					{
-						case BuildStep.Before: BeforeBuildAbstractSetter(); break;
-						case BuildStep.Build:        BuildAbstractSetter(); break;
-						case BuildStep.After:   AfterBuildAbstractSetter(); break;
+						case BuildStep.Before:   BeforeBuildAbstractSetter(); break;
+						case BuildStep.Build:          BuildAbstractSetter(); break;
+						case BuildStep.After:     AfterBuildAbstractSetter(); break;
+						case BuildStep.Catch:     CatchBuildAbstractSetter(); break;
+						case BuildStep.Finally: FinallyBuildAbstractSetter(); break;
 					}
 
 					break;
@@ -94,9 +112,11 @@ namespace BLToolkit.TypeBuilder.Builders
 				case BuildElement.AbstractMethod:
 					switch (context.Step)
 					{
-						case BuildStep.Before: BeforeBuildAbstractMethod(); break;
-						case BuildStep.Build:        BuildAbstractMethod(); break;
-						case BuildStep.After:   AfterBuildAbstractMethod(); break;
+						case BuildStep.Before:   BeforeBuildAbstractMethod(); break;
+						case BuildStep.Build:          BuildAbstractMethod(); break;
+						case BuildStep.After:     AfterBuildAbstractMethod(); break;
+						case BuildStep.Catch:     CatchBuildAbstractMethod(); break;
+						case BuildStep.Finally: FinallyBuildAbstractMethod(); break;
 					}
 
 					break;
@@ -104,9 +124,11 @@ namespace BLToolkit.TypeBuilder.Builders
 				case BuildElement.VirtualGetter:
 					switch (context.Step)
 					{
-						case BuildStep.Before: BeforeBuildVirtualGetter(); break;
-						case BuildStep.Build:        BuildVirtualGetter(); break;
-						case BuildStep.After:   AfterBuildVirtualGetter(); break;
+						case BuildStep.Before:   BeforeBuildVirtualGetter(); break;
+						case BuildStep.Build:          BuildVirtualGetter(); break;
+						case BuildStep.After:     AfterBuildVirtualGetter(); break;
+						case BuildStep.Catch:     CatchBuildVirtualGetter(); break;
+						case BuildStep.Finally: FinallyBuildVirtualGetter(); break;
 					}
 
 					break;
@@ -114,9 +136,11 @@ namespace BLToolkit.TypeBuilder.Builders
 				case BuildElement.VirtualSetter:
 					switch (context.Step)
 					{
-						case BuildStep.Before: BeforeBuildVirtualSetter(); break;
-						case BuildStep.Build:        BuildVirtualSetter(); break;
-						case BuildStep.After:   AfterBuildVirtualSetter(); break;
+						case BuildStep.Before:   BeforeBuildVirtualSetter(); break;
+						case BuildStep.Build:          BuildVirtualSetter(); break;
+						case BuildStep.After:     AfterBuildVirtualSetter(); break;
+						case BuildStep.Catch:     CatchBuildVirtualSetter(); break;
+						case BuildStep.Finally: FinallyBuildVirtualSetter(); break;
 					}
 
 					break;
@@ -124,9 +148,11 @@ namespace BLToolkit.TypeBuilder.Builders
 				case BuildElement.VirtualMethod:
 					switch (context.Step)
 					{
-						case BuildStep.Before: BeforeBuildVirtualMethod(); break;
-						case BuildStep.Build:        BuildVirtualMethod(); break;
-						case BuildStep.After:   AfterBuildVirtualMethod(); break;
+						case BuildStep.Before:   BeforeBuildVirtualMethod(); break;
+						case BuildStep.Build:          BuildVirtualMethod(); break;
+						case BuildStep.After:     AfterBuildVirtualMethod(); break;
+						case BuildStep.Catch:     CatchBuildVirtualMethod(); break;
+						case BuildStep.Finally: FinallyBuildVirtualMethod(); break;
 					}
 
 					break;
@@ -137,35 +163,52 @@ namespace BLToolkit.TypeBuilder.Builders
 			}
 		}
 
-		protected virtual void BeforeBuildType          () {}
-		protected virtual void       BuildType          () {}
-		protected virtual void  AfterBuildType          () {}
+		protected virtual void  BeforeBuildType          () {}
+		protected virtual void        BuildType          () {}
+		protected virtual void   AfterBuildType          () {}
+		protected virtual void   CatchBuildType          () {}
+		protected virtual void FinallyBuildType          () {}
 
-		protected virtual void BeforeBuildAbstractGetter() {}
-		protected virtual void       BuildAbstractGetter() {}
-		protected virtual void  AfterBuildAbstractGetter() {}
+		protected virtual void  BeforeBuildAbstractGetter() {}
+		protected virtual void        BuildAbstractGetter() {}
+		protected virtual void   AfterBuildAbstractGetter() {}
+		protected virtual void   CatchBuildAbstractGetter() {}
+		protected virtual void FinallyBuildAbstractGetter() {}
 
-		protected virtual void BeforeBuildAbstractSetter() {}
-		protected virtual void       BuildAbstractSetter() {}
-		protected virtual void  AfterBuildAbstractSetter() {}
+		protected virtual void  BeforeBuildAbstractSetter() {}
+		protected virtual void        BuildAbstractSetter() {}
+		protected virtual void   AfterBuildAbstractSetter() {}
+		protected virtual void   CatchBuildAbstractSetter() {}
+		protected virtual void FinallyBuildAbstractSetter() {}
 
-		protected virtual void BeforeBuildAbstractMethod() {}
-		protected virtual void       BuildAbstractMethod() {}
-		protected virtual void  AfterBuildAbstractMethod() {}
+		protected virtual void  BeforeBuildAbstractMethod() {}
+		protected virtual void        BuildAbstractMethod() {}
+		protected virtual void   AfterBuildAbstractMethod() {}
+		protected virtual void   CatchBuildAbstractMethod() {}
+		protected virtual void FinallyBuildAbstractMethod() {}
 
-		protected virtual void BeforeBuildVirtualGetter () {}
-		protected virtual void       BuildVirtualGetter () {}
-		protected virtual void  AfterBuildVirtualGetter () {}
+		protected virtual void  BeforeBuildVirtualGetter () {}
+		protected virtual void        BuildVirtualGetter () {}
+		protected virtual void   AfterBuildVirtualGetter () {}
+		protected virtual void   CatchBuildVirtualGetter () {}
+		protected virtual void FinallyBuildVirtualGetter () {}
 
-		protected virtual void BeforeBuildVirtualSetter () {}
-		protected virtual void       BuildVirtualSetter () {}
-		protected virtual void  AfterBuildVirtualSetter () {}
+		protected virtual void  BeforeBuildVirtualSetter () {}
+		protected virtual void        BuildVirtualSetter () {}
+		protected virtual void   AfterBuildVirtualSetter () {}
+		protected virtual void   CatchBuildVirtualSetter () {}
+		protected virtual void FinallyBuildVirtualSetter () {}
 
-		protected virtual void BeforeBuildVirtualMethod () {}
-		protected virtual void       BuildVirtualMethod () {}
-		protected virtual void  AfterBuildVirtualMethod () {}
+		protected virtual void  BeforeBuildVirtualMethod () {}
+		protected virtual void        BuildVirtualMethod () {}
+		protected virtual void   AfterBuildVirtualMethod () {}
+		protected virtual void   CatchBuildVirtualMethod () {}
+		protected virtual void FinallyBuildVirtualMethod () {}
 
-		protected virtual void BuildInterfaceMethod     () {}
+		protected virtual void BuildInterfaceMethod      () {}
+
+		protected virtual void BeginMethodBuild          () {}
+		protected virtual void   EndMethodBuild          () {}
 
 		#region Helpers
 

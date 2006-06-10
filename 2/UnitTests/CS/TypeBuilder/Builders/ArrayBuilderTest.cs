@@ -17,7 +17,7 @@ namespace A.TypeBuilder.Builders
 
 		public abstract class TestObject
 		{
-			public abstract int[,]   DimArray  { get; set; }
+			//public abstract int[,]   DimArray  { get; set; }
 			public abstract int[]    IntArray1 { get; set; }
 			[LazyInstance]
 			public abstract int[]    IntArray2 { get; set; }

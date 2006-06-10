@@ -1387,6 +1387,29 @@ namespace BLToolkit.Reflection.Emit
 			_ilGenerator.Emit(OpCodes.Ldarg, index); return this;
 		}
 
+		public EmitHelper ldargEx(ParameterInfo parameterInfo, bool box)
+		{
+			ldarg(parameterInfo);
+
+			Type type = parameterInfo.ParameterType;
+
+			if (parameterInfo.ParameterType.IsByRef)
+				type = parameterInfo.ParameterType.GetElementType();
+
+			if (parameterInfo.ParameterType.IsByRef)
+			{
+				if (type.IsValueType && type.IsPrimitive == false)
+					ldobj(type);
+				else
+					ldind(type);
+			}
+
+			if (box)
+				boxIfValueType(type);
+
+			return this;
+		}
+
 		/// <summary>
 		/// Calls ILGenerator.Emit(<see cref="OpCodes.Ldarg"/>, short) or 
 		/// ILGenerator.Emit(<see cref="OpCodes.Ldarg_S"/>, byte) that
