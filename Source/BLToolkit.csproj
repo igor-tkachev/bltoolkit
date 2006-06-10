@@ -99,6 +99,36 @@
                     BuildAction = "Compile"
                 />
                 <File
+                    RelPath = "Aspects\IInterceptor.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "Aspects\InterceptCallInfo.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "Aspects\InterceptorAspectBuilder.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "Aspects\InterceptorAttribute.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "Aspects\InterceptResult.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "Aspects\InterceptType.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
                     RelPath = "Aspects\MixinAspectBuilder.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
@@ -124,12 +154,12 @@
                     BuildAction = "Compile"
                 />
                 <File
-                    RelPath = "ComponentModel\BindingListImpl.cs"
+                    RelPath = "Common\NameOrIndexParameter.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
                 />
                 <File
-                    RelPath = "Common\NameOrIndexParameter.cs"
+                    RelPath = "ComponentModel\BindingListImpl.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
                 />
@@ -208,17 +238,17 @@
                     BuildAction = "Compile"
                 />
                 <File
-                    RelPath = "Data\ScalarSourceType.cs"
-                    SubType = "Code"
-                    BuildAction = "Compile"
-                />
-                <File
                     RelPath = "Data\DbManager.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
                 />
                 <File
                     RelPath = "Data\OperationType.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "Data\ScalarSourceType.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
                 />
@@ -343,6 +373,11 @@
                     BuildAction = "Compile"
                 />
                 <File
+                    RelPath = "DataAccess\ScalarSourceAttribute.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
                     RelPath = "DataAccess\SprocNameAttribute.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
@@ -359,11 +394,6 @@
                 />
                 <File
                     RelPath = "DataAccess\SqlQueryParameterInfo.cs"
-                    SubType = "Code"
-                    BuildAction = "Compile"
-                />
-                <File
-                    RelPath = "DataAccess\ScalarSourceAttribute.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
                 />

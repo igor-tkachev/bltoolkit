@@ -4,8 +4,12 @@ namespace BLToolkit.TypeBuilder.Builders
 {
 	public enum BuildStep
 	{
+		Begin,
 		Before,
 		Build,
-		After
+		After,
+		Catch,
+		Finally,
+		End
 	}
 }
