@@ -11,6 +11,9 @@ namespace BLToolkit.Aspects
 	{
 		protected override void BeforeCall(InterceptCallInfo info)
 		{
+			if (!IsEnabled)
+				return;
+
 			CompoundValue key  = GetKey(info);
 			CacheItem     item = GetItem(info.MethodInfo, key);
 
@@ -37,6 +40,9 @@ namespace BLToolkit.Aspects
 
 		protected override void AfterCall(InterceptCallInfo info)
 		{
+			if (!IsEnabled)
+				return;
+
 			CompoundValue key = (CompoundValue)info.Items["CacheKey"];
 
 			if (key == null)
@@ -127,9 +133,23 @@ namespace BLToolkit.Aspects
 			set { _maxCacheTime = value; }
 		}
 
+		private bool _isEnabled = true;
+		public  bool  IsEnabled
+		{
+			get { return _isEnabled;  }
+			set { _isEnabled = value; }
+		}
+
 		#endregion
 
 		#region Cache
+
+		class CacheItem
+		{
+			public DateTime MaxCacheTime;
+			public object   ReturnValue;
+			public object[] RefValues;
+		}
 
 		private CompoundValue GetKey(InterceptCallInfo info)
 		{
@@ -160,16 +180,9 @@ namespace BLToolkit.Aspects
 			Hashtable keys = (Hashtable)_methodCache[methodInfo];
 
 			if (keys == null)
-				_methodCache[methodInfo] = keys = new Hashtable();
+				_methodCache[methodInfo] = keys = Hashtable.Synchronized(new Hashtable());
 
 			keys[key] = item;
-		}
-
-		class CacheItem
-		{
-			public DateTime MaxCacheTime;
-			public object   ReturnValue;
-			public object[] RefValues;
 		}
 
 		#endregion

@@ -4,6 +4,12 @@ using BLToolkit.TypeBuilder.Builders;
 
 namespace BLToolkit.Aspects
 {
+	[AttributeUsage(
+		AttributeTargets.Class |
+		AttributeTargets.Interface |
+		AttributeTargets.Property |
+		AttributeTargets.Method,
+		AllowMultiple=true)]
 	public class LogAttribute : InterceptorAttribute
 	{
 		public LogAttribute()

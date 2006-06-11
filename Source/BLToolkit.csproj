@@ -109,6 +109,16 @@
                     BuildAction = "Compile"
                 />
                 <File
+                    RelPath = "Aspects\CounterAspect.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "Aspects\CounterAttribute.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
                     RelPath = "Aspects\IInterceptor.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
@@ -170,6 +180,11 @@
                 />
                 <File
                     RelPath = "Aspects\NoCacheAttribute.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "Aspects\NoCounterAttribute.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
                 />

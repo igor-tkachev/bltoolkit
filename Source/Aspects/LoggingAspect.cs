@@ -12,7 +12,8 @@ namespace BLToolkit.Aspects
 	{
 		protected override void OnFinally(InterceptCallInfo info)
 		{
-			LogOperation(info);
+			if (IsEnabled)
+				LogOperation(info);
 		}
 
 		#region Config Support
@@ -87,6 +88,13 @@ namespace BLToolkit.Aspects
 		{
 			get { return _fileName;  }
 			set { _fileName = value; }
+		}
+
+		private bool _isEnabled = true;
+		public  bool  IsEnabled
+		{
+			get { return _isEnabled;  }
+			set { _isEnabled = value; }
 		}
 
 		#endregion
