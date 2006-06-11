@@ -50,7 +50,7 @@ namespace BLToolkit.Mapping
 						if (!_fromSource[i])
 							_indexValue[i] = _mapper.TypeAccessor[_fields[i]].GetValue(_newObject);
 
-				_dic[new IndexValue(_indexValue)] = _newObject;
+				_dic[new CompoundValue(_indexValue)] = _newObject;
 			}
 		}
 

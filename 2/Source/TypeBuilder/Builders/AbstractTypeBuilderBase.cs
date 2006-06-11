@@ -50,7 +50,7 @@ namespace BLToolkit.TypeBuilder.Builders
 
 		public virtual int GetPriority(BuildContext context)
 		{
-			return TypeBuilderConsts.NormalBuilderPriority;
+			return TypeBuilderConsts.Priority.Normal;
 		}
 
 		public virtual void Build(BuildContext context)

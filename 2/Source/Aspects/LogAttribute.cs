@@ -1,5 +1,7 @@
 using System;
 
+using BLToolkit.TypeBuilder.Builders;
+
 namespace BLToolkit.Aspects
 {
 	public class LogAttribute : InterceptorAttribute
@@ -15,7 +17,11 @@ namespace BLToolkit.Aspects
 		}
 
 		protected LogAttribute(Type interceptorType, string parameters)
-			: base(interceptorType, InterceptType.OnCatch | InterceptType.OnFinally, parameters)
+			: base(
+				interceptorType,
+				InterceptType.OnCatch | InterceptType.OnFinally,
+				parameters,
+				TypeBuilderConsts.Priority.LoggingAspect)
 		{
 		}
 	}

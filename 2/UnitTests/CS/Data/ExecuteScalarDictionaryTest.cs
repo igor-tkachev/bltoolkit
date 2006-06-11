@@ -6,6 +6,7 @@ using System.Collections.Generic;
 
 using NUnit.Framework;
 
+using BLToolkit.Common;
 using BLToolkit.Data;
 using BLToolkit.DataAccess;
 using BLToolkit.Mapping;
@@ -268,7 +269,7 @@ namespace Data
 		{
 			using (DbManager db = new DbManager())
 			{
-				Dictionary<IndexValue, string> dic = db
+				Dictionary<CompoundValue, string> dic = db
 					.SetSpCommand("Person_SelectAll")
 					.ExecuteScalarDictionary<string>(new MapIndex("LastName"), "FirstName");
 
@@ -282,7 +283,7 @@ namespace Data
 		{
 			using (DbManager db = new DbManager())
 			{
-				Dictionary<IndexValue, string> dic = new Dictionary<IndexValue, string>();
+				Dictionary<CompoundValue, string> dic = new Dictionary<CompoundValue, string>();
 					db
 					.SetSpCommand("Person_SelectAll")
 					.ExecuteScalarDictionary(dic, new MapIndex("LastName"), 1);
@@ -297,7 +298,7 @@ namespace Data
 		{
 			using (DbManager db = new DbManager())
 			{
-				Dictionary<IndexValue, string> dic = db
+				Dictionary<CompoundValue, string> dic = db
 					.SetSpCommand("Person_SelectAll")
 					.ExecuteScalarDictionary<string>(new MapIndex(2), "FirstName");
 
@@ -311,7 +312,7 @@ namespace Data
 		{
 			using (DbManager db = new DbManager())
 			{
-				Dictionary<IndexValue, string> dic = new Dictionary<IndexValue, string>();
+				Dictionary<CompoundValue, string> dic = new Dictionary<CompoundValue, string>();
 				db
 				.SetSpCommand("Person_SelectAll")
 				.ExecuteScalarDictionary(dic, new MapIndex(0), 2);
@@ -326,7 +327,7 @@ namespace Data
 		{
 			using (DbManager db = new DbManager())
 			{
-				Dictionary<IndexValue, string> dic = new Dictionary<IndexValue, string>();
+				Dictionary<CompoundValue, string> dic = new Dictionary<CompoundValue, string>();
 				db
 				.SetSpCommand("Person_SelectAll")
 				.ExecuteScalarDictionary(dic, new MapIndex(0, 1, 2), 2);
@@ -341,7 +342,7 @@ namespace Data
 		{
 			using (DbManager db = new DbManager())
 			{
-				Dictionary<IndexValue, string> dic = new Dictionary<IndexValue, string>();
+				Dictionary<CompoundValue, string> dic = new Dictionary<CompoundValue, string>();
 				db
 				.SetSpCommand("Person_SelectAll")
 				.ExecuteScalarDictionary(dic, new MapIndex("PersonID", "FirstName", "LastName"), 2);
@@ -356,7 +357,7 @@ namespace Data
 		{
 			using (DbManager db = new DbManager())
 			{
-				Dictionary<IndexValue, string> dic = new Dictionary<IndexValue, string>();
+				Dictionary<CompoundValue, string> dic = new Dictionary<CompoundValue, string>();
 				db
 				.SetSpCommand("Person_SelectAll")
 				.ExecuteScalarDictionary(dic, new MapIndex("PersonID", 2, 3), "LastName");
