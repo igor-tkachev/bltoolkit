@@ -109,7 +109,17 @@
                     BuildAction = "Compile"
                 />
                 <File
+                    RelPath = "Aspects\CacheAspectTest.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
                     RelPath = "Aspects\InterceptorAspectTest.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "Aspects\LoggingAspectTest.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
                 />

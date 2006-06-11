@@ -74,8 +74,19 @@ namespace BLToolkit.Common
 				return false;
 
 			for (int i = 0; i < _values.Length; i++)
-				if (_values[i].Equals(values[i]) == false)
+			{
+				object x = _values[i];
+				object y =  values[i];
+
+				if (x == null && y == null)
+					return true;
+
+				if (x == null || y == null)
 					return false;
+
+				if (x.Equals(y) == false)
+					return false;
+			}
 
 			return true;
 		}

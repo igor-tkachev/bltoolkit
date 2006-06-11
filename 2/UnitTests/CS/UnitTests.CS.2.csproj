@@ -37,6 +37,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Aspects\CacheAspectTest.cs" />
     <Compile Include="Aspects\InterceptorAspectTest.cs" />
     <Compile Include="Aspects\LoggingAspectTest.cs" />
     <Compile Include="Aspects\MixinAspectTest.cs" />

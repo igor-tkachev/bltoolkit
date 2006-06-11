@@ -249,7 +249,7 @@ namespace BLToolkit.TypeBuilder.Builders
 				IAbstractTypeBuilder bx = (IAbstractTypeBuilder)x;
 				IAbstractTypeBuilder by = (IAbstractTypeBuilder)y;
 
-				return bx.GetPriority(_context) - by.GetPriority(_context);
+				return by.GetPriority(_context) - bx.GetPriority(_context);
 			}
 		}
 #endif

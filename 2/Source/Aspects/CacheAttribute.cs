@@ -11,6 +11,11 @@ namespace BLToolkit.Aspects
 		{
 		}
 
+		public CacheAttribute(int maxCacheTime)
+			: this(typeof(CacheAspect), "MaxCacheTime=" + maxCacheTime)
+		{
+		}
+
 		public CacheAttribute(string configString)
 			: this(typeof(CacheAspect), configString)
 		{
