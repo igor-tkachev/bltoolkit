@@ -43,14 +43,18 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Aspects\IInterceptor.cs" />
+    <Compile Include="Aspects\Interceptor.cs" />
     <Compile Include="Aspects\InterceptorAspectBuilder.cs" />
     <Compile Include="Aspects\InterceptCallInfo.cs" />
     <Compile Include="Aspects\InterceptorAttribute.cs" />
     <Compile Include="Aspects\InterceptResult.cs" />
     <Compile Include="Aspects\InterceptType.cs" />
+    <Compile Include="Aspects\LogAttribute.cs" />
+    <Compile Include="Aspects\LoggingAspect.cs" />
     <Compile Include="Aspects\MixinAspectBuilder.cs" />
     <Compile Include="Aspects\MixinAttribute.cs" />
     <Compile Include="Aspects\MixinOverrideAttribute.cs" />
+    <Compile Include="Aspects\NoInterceptionAttribute.cs" />
     <Compile Include="Aspects\NotNullAttribute.cs" />
     <Compile Include="ComponentModel\BindingListImpl.cs" />
     <Compile Include="ComponentModel\CustomTypeDescriptorImpl.cs" />

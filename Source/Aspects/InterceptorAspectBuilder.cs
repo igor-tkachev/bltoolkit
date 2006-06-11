@@ -11,18 +11,28 @@ namespace BLToolkit.Aspects
 {
 	public class InterceptorAspectBuilder : AbstractTypeBuilderBase
 	{
-		public InterceptorAspectBuilder(Type interceptorType, InterceptType interceptType)
+		public InterceptorAspectBuilder(
+			Type interceptorType, InterceptType interceptType, string parameters, int priority)
 		{
 			_interceptorType = interceptorType;
 			_interceptType   = interceptType;
+			_parameters      = parameters;
+			_priority        = priority;
 		}
 
 		private readonly Type          _interceptorType;
 		private readonly InterceptType _interceptType;
+		private readonly string        _parameters;
+		private readonly int           _priority;
+
+		public override int GetPriority(BuildContext context)
+		{
+			return _priority;
+		}
 
 		public override bool IsApplied(BuildContext context)
 		{
-			if (context.IsMethod) switch (context.Step)
+			if (context.IsMethodOrProperty) switch (context.Step)
 			{
 				case BuildStep.Begin:   return true;
 				case BuildStep.Before:  return (_interceptType & InterceptType.BeforeCall) != 0;
@@ -33,6 +43,13 @@ namespace BLToolkit.Aspects
 			}
 
 			return false;
+		}
+
+		public override bool IsCompatible(BuildContext context, IAbstractTypeBuilder typeBuilder)
+		{
+			InterceptorAspectBuilder builder = typeBuilder as InterceptorAspectBuilder;
+
+			return builder == null || _interceptorType != builder._interceptorType;
 		}
 
 		public override void Build(BuildContext context)
@@ -76,15 +93,52 @@ namespace BLToolkit.Aspects
 			{
 				emit
 					.ldloc          (info)
-					.boxIfValueType (Context.CurrentMethod.ReturnType)
 					.ldloc          (Context.ReturnValue)
+					.boxIfValueType (Context.CurrentMethod.ReturnType)
 					.callvirt       (typeof(InterceptCallInfo).GetProperty("ReturnValue").GetSetMethod())
 					;
 			}
 
-			// Call interceptor.
+			// Set Exception.
+			//
+			if (Context.Step == BuildStep.Catch)
+			{
+				emit
+					.ldloc(info)
+					.ldloc(Context.Exception)
+					.callvirt(typeof(InterceptCallInfo).GetProperty("Exception").GetSetMethod())
+					;
+			}
+
+			// Set parameters.
 			//
 			emit
+				.ldloc    (info)
+				.ldstrEx  (_parameters)
+				.callvirt (typeof(InterceptCallInfo).GetProperty("Parameters").GetSetMethod())
+				;
+
+			// Set inercept type.
+			//
+			InterceptType interceptType;
+
+			switch (Context.Step)
+			{
+				case BuildStep.Before:  interceptType = InterceptType.BeforeCall; break;
+				case BuildStep.After:   interceptType = InterceptType.AfterCall;  break;
+				case BuildStep.Catch:   interceptType = InterceptType.OnCatch;    break;
+				case BuildStep.Finally: interceptType = InterceptType.OnFinally;  break;
+				default:
+					throw new InvalidOperationException();
+			}
+
+			emit
+				.ldloc    (info)
+				.ldc_i4   ((int)interceptType)
+				.callvirt (typeof(InterceptCallInfo).GetProperty("InterceptType").GetSetMethod())
+
+				// Call interceptor.
+				//
 				.ldsfld   (interceptor)
 				.ldloc    (info)
 				.callvirt (typeof(IInterceptor), "Intercept", typeof(InterceptCallInfo))
@@ -126,7 +180,7 @@ namespace BLToolkit.Aspects
 
 			// Check InterceptResult
 			emit
-				.ldloc_1
+				.ldloc    (info)
 				.callvirt (typeof(InterceptCallInfo).GetProperty("InterceptResult").GetGetMethod())
 				.ldc_i4   ((int)InterceptResult.Return)
 				.beq      (Context.ReturnLabel)
