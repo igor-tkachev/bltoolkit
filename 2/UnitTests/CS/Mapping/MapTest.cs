@@ -287,7 +287,7 @@ namespace Mapping
 			Console.WriteLine(o.ComplexArray); Assert.IsTrue(o.ComplexArray[0][0,0][0][1,1] == 4);
 		}
 
-		[Test, ExpectedException(typeof(InvalidCastException))]
+		[Test, ExpectedException(typeof(ArrayTypeMismatchException))]
 		public void IncompatibleArrayTypesTest()
 		{
 			ArrayTypes.SourceObject so = new ArrayTypes.SourceObject();

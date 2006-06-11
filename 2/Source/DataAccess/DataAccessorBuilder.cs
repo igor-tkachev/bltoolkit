@@ -79,7 +79,8 @@ namespace BLToolkit.DataAccess
 				ExecuteDataTable();
 			}
 			else if (IsInterfaceOf(returnType, typeof(IList))
-				&& Context.CurrentMethod.GetCustomAttributes(typeof(ScalarSourceAttribute), true).Length == 0)
+				&& !returnType.IsArray // Arrays are ILists w/o Add() method.
+				)
 			{
 				Type elementType = TypeHelper.GetListItemType(returnType);
 
