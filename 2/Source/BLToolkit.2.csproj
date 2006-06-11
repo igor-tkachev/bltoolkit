@@ -36,7 +36,6 @@
     <Reference Include="System.Data.OracleClient" />
     <Reference Include="System.Design" />
     <Reference Include="System.Drawing" />
-    <Reference Include="System.Drawing.Design" />
     <Reference Include="System.Web" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
@@ -44,6 +43,8 @@
   <ItemGroup>
     <Compile Include="Aspects\CacheAspect.cs" />
     <Compile Include="Aspects\CacheAttribute.cs" />
+    <Compile Include="Aspects\CounterAspect.cs" />
+    <Compile Include="Aspects\CounterAttribute.cs" />
     <Compile Include="Aspects\NoCacheAttribute.cs" />
     <Compile Include="Aspects\IInterceptor.cs" />
     <Compile Include="Aspects\Interceptor.cs" />
@@ -57,6 +58,7 @@
     <Compile Include="Aspects\MixinAspectBuilder.cs" />
     <Compile Include="Aspects\MixinAttribute.cs" />
     <Compile Include="Aspects\MixinOverrideAttribute.cs" />
+    <Compile Include="Aspects\NoCounterAttribute.cs" />
     <Compile Include="Aspects\NoInterceptionAttribute.cs" />
     <Compile Include="Aspects\NoLogAttribute.cs" />
     <Compile Include="Aspects\NotNullAttribute.cs" />
