@@ -99,12 +99,27 @@
                     BuildAction = "Compile"
                 />
                 <File
+                    RelPath = "Aspects\CacheAspect.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "Aspects\CacheAttribute.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
                     RelPath = "Aspects\IInterceptor.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
                 />
                 <File
                     RelPath = "Aspects\InterceptCallInfo.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "Aspects\Interceptor.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
                 />
@@ -129,6 +144,16 @@
                     BuildAction = "Compile"
                 />
                 <File
+                    RelPath = "Aspects\LogAttribute.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "Aspects\LoggingAspect.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
                     RelPath = "Aspects\MixinAspectBuilder.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
@@ -144,12 +169,32 @@
                     BuildAction = "Compile"
                 />
                 <File
+                    RelPath = "Aspects\NoCacheAttribute.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "Aspects\NoInterceptionAttribute.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "Aspects\NoLogAttribute.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
                     RelPath = "Aspects\NotNullAspectBuilder.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
                 />
                 <File
                     RelPath = "Aspects\NotNullAttribute.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "Common\CompoundValue.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
                 />

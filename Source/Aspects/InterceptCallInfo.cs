@@ -17,10 +17,15 @@ namespace BLToolkit.Aspects
 				if (_methodInfo != null)
 					throw new InvalidOperationException("MethodInfo can not be changed.");
 
-				_methodInfo      = value;
-				_parameterValues = new object[value.GetParameters().Length];
+				_methodInfo = value;
+
+				int len = value.GetParameters().Length;
+
+				_parameterValues = len == 0? _emptyValues: new object[len];
 			}
 		}
+
+		private object[] _emptyValues = new object[0];
 
 		private object[] _parameterValues;
 		public  object[]  ParameterValues
