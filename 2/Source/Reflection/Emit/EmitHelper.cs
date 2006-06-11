@@ -2239,6 +2239,11 @@ namespace BLToolkit.Reflection.Emit
 			_ilGenerator.Emit(OpCodes.Ldsflda, fieldInfo); return this;
 		}
 
+		public EmitHelper ldstrEx(string str)
+		{
+			return str == null ? ldnull : ldstr(str);
+		}
+
 		/// <summary>
 		/// Calls ILGenerator.Emit(<see cref="OpCodes.Ldstr"/>, string) that
 		/// pushes a new object reference to a string literal stored in the metadata.

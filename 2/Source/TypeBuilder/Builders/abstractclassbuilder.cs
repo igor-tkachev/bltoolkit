@@ -231,7 +231,7 @@ namespace BLToolkit.TypeBuilder.Builders
 			[SuppressMessage("Microsoft.Design", "CA1062:ValidateArgumentsOfPublicMethods")]
 			public int Compare(IAbstractTypeBuilder x, IAbstractTypeBuilder y)
 			{
-				return x.GetPriority(_context) - y.GetPriority(_context);
+				return y.GetPriority(_context) - x.GetPriority(_context);
 			}
 		}
 #else
@@ -484,11 +484,11 @@ namespace BLToolkit.TypeBuilder.Builders
 
 			foreach (IAbstractTypeBuilder builder in builders)
 			{
-				if (IsApplied(builder, BuildStep.Before))    return true;
-				if (IsApplied(builder, BuildStep.Build))     return true;
-				if (IsApplied(builder, BuildStep.After))     return true;
-				if (IsApplied(builder, BuildStep.Catch)) return true;
-				if (IsApplied(builder, BuildStep.Finally))   return true;
+				if (IsApplied(builder, BuildStep.Before))  return true;
+				if (IsApplied(builder, BuildStep.Build))   return true;
+				if (IsApplied(builder, BuildStep.After))   return true;
+				if (IsApplied(builder, BuildStep.Catch))   return true;
+				if (IsApplied(builder, BuildStep.Finally)) return true;
 			}
 
 			return false;

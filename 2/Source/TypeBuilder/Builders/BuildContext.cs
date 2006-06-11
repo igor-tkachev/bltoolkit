@@ -186,7 +186,7 @@ namespace BLToolkit.TypeBuilder.Builders
 			get { return IsAbstractMethod || IsVirtualMethod; }
 		}
 
-		public bool IsAnyMethod
+		public bool IsMethodOrProperty
 		{
 			get { return IsMethod || IsProperty; }
 		}

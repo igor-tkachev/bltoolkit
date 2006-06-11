@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Diagnostics;
 using System.Reflection;
 
@@ -24,7 +25,8 @@ namespace BLToolkit.Aspects
 		private object[] _parameterValues;
 		public  object[]  ParameterValues
 		{
-			get { return _parameterValues; }
+			get { return _parameterValues;  }
+			set { _parameterValues = value; }
 		}
 
 		private object _returnValue;
@@ -53,6 +55,31 @@ namespace BLToolkit.Aspects
 		{
 			get { return _exception;  }
 			set { _exception = value; }
+		}
+
+		private string _parameters;
+		public  string  Parameters
+		{
+			get { return _parameters;  }
+			set { _parameters = value; }
+		}
+
+		private Hashtable  _items;
+		public  IDictionary Items
+		{
+			get
+			{
+				if (_items == null)
+					_items = new Hashtable();
+
+				return _items;
+			}
+		}
+
+		private DateTime _beginCallTime = DateTime.Now;
+		public  DateTime  BeginCallTime
+		{
+			get { return _beginCallTime; }
 		}
 	}
 }
