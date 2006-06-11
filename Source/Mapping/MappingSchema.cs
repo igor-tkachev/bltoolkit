@@ -619,7 +619,7 @@ namespace BLToolkit.Mapping
 					|| (srcElementType.IsArray &&
 						srcElementType.GetArrayRank() != dstElementType.GetArrayRank()))
 				{
-					throw new InvalidCastException(string.Format("Can not convert {0} to {1}",
+					throw new ArrayTypeMismatchException(string.Format("Can not convert {0} to {1}",
 						srcType.Name, conversionType.Name));
 				}
 
@@ -628,31 +628,40 @@ namespace BLToolkit.Mapping
 
 				int rank = srcArray.Rank;
 				
-				if (rank == 1)
+				if (rank == 1 && 0 == srcArray.GetLowerBound(0))
 				{
-					dstArray = Array.CreateInstance(dstElementType, srcArray.Length);
-					for (int i = 0; i < srcArray.Length; ++i)
-					{
-						dstArray.SetValue(ConvertChangeType(srcArray.GetValue(i), dstElementType), i);
-					}
+					int   arrayLength = srcArray.Length;
+
+					dstArray = Array.CreateInstance(dstElementType, arrayLength);
+
+					// Int32 is assignable from Int16, SByte from Byte and so on.
+					//
+					if (dstElementType.IsAssignableFrom(srcElementType))
+						Array.Copy(srcArray, dstArray, arrayLength);
+					else
+						for (int i = 0; i < arrayLength; ++i)
+							dstArray.SetValue(ConvertChangeType(srcArray.GetValue(i), dstElementType), i);
 				}
 				else
 				{
 					int   arrayLength = 1;
 					int[] dimensions  = new int[rank];
 					int[] indices     = new int[rank];
+					int[] lbounds     = new int[rank];
 
 					for (int i = 0; i < rank; ++i)
+					{
 						arrayLength *= (dimensions[i] = srcArray.GetLength(i));
+						lbounds[i] = srcArray.GetLowerBound(i);
+					}
 
-					dstArray = Array.CreateInstance(dstElementType, dimensions);
-
+					dstArray = Array.CreateInstance(dstElementType, dimensions, lbounds);
 					for (int i = 0; i < arrayLength; ++i)
 					{
 						int index = i;
 						for (int j = rank - 1; j >= 0; --j)
 						{
-							indices[j] = index % dimensions[j];
+							indices[j] = index % dimensions[j] + lbounds[j];
 							index /= dimensions[j];
 						}
 
