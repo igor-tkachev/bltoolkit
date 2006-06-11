@@ -103,7 +103,7 @@ namespace BLToolkit.Aspects
 			}
 		}
 
-		private static bool _logParameters;
+		private static bool _logParameters = true;
 		public  static bool  LogParameters
 		{
 			get { return _logParameters;  }
