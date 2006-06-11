@@ -57,11 +57,11 @@ namespace BLToolkit.Aspects
 			set { _exception = value; }
 		}
 
-		private string _parameters;
-		public  string  Parameters
+		private string _configString;
+		public  string  ConfigString
 		{
-			get { return _parameters;  }
-			set { _parameters = value; }
+			get { return _configString;  }
+			set { _configString = value; }
 		}
 
 		private Hashtable  _items;

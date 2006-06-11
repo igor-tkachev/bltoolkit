@@ -755,7 +755,7 @@ namespace BLToolkit.Mapping
 		}
 
 		protected virtual DictionaryIndexListMapper<T> CreateDictionaryListMapper<T>(
-			IDictionary<IndexValue,T> dic, MapIndex index, ObjectMapper objectMapper)
+			IDictionary<CompoundValue,T> dic, MapIndex index, ObjectMapper objectMapper)
 		{
 			return new DictionaryIndexListMapper<T>(dic, index, objectMapper);
 		}
@@ -2057,11 +2057,11 @@ namespace BLToolkit.Mapping
 		}
 
 #if FW2
-		public IDictionary<IndexValue,T> MapListToDictionary<T>(
-			ICollection               sourceList,
-			IDictionary<IndexValue,T> destDictionary,
-			MapIndex                  index,
-			params object[]           parameters)
+		public IDictionary<CompoundValue,T> MapListToDictionary<T>(
+			ICollection                  sourceList,
+			IDictionary<CompoundValue,T> destDictionary,
+			MapIndex                     index,
+			params object[]              parameters)
 		{
 			MapSourceListToDestinationList(
 				CreateEnumeratorMapper       (sourceList.GetEnumerator()),
@@ -2071,12 +2071,12 @@ namespace BLToolkit.Mapping
 			return destDictionary;
 		}
 
-		public Dictionary<IndexValue,T> MapListToDictionary<T>(
+		public Dictionary<CompoundValue,T> MapListToDictionary<T>(
 			ICollection     sourceList,
 			MapIndex        index,
 			params object[] parameters)
 		{
-			Dictionary<IndexValue, T> destDictionary = new Dictionary<IndexValue,T>();
+			Dictionary<CompoundValue, T> destDictionary = new Dictionary<CompoundValue,T>();
 
 			MapSourceListToDestinationList(
 				CreateEnumeratorMapper       (sourceList.GetEnumerator()),
@@ -2350,11 +2350,11 @@ namespace BLToolkit.Mapping
 		}
 
 #if FW2
-		public IDictionary<IndexValue,T> MapDataTableToDictionary<T>(
-			DataTable                 sourceTable,
-			IDictionary<IndexValue,T> destDictionary,
-			MapIndex                  index,
-			params object[]           parameters)
+		public IDictionary<CompoundValue,T> MapDataTableToDictionary<T>(
+			DataTable                    sourceTable,
+			IDictionary<CompoundValue,T> destDictionary,
+			MapIndex                     index,
+			params object[]              parameters)
 		{
 			MapSourceListToDestinationList(
 				CreateDataTableMapper        (sourceTable,    DataRowVersion.Default),
@@ -2364,12 +2364,12 @@ namespace BLToolkit.Mapping
 			return destDictionary;
 		}
 
-		public Dictionary<IndexValue,T> MapDataTableToDictionary<T>(
+		public Dictionary<CompoundValue,T> MapDataTableToDictionary<T>(
 			DataTable       sourceTable,
 			MapIndex        index,
 			params object[] parameters)
 		{
-			Dictionary<IndexValue,T> destDictionary = new Dictionary<IndexValue,T>();
+			Dictionary<CompoundValue,T> destDictionary = new Dictionary<CompoundValue,T>();
 
 			MapSourceListToDestinationList(
 				CreateDataTableMapper        (sourceTable,    DataRowVersion.Default),
@@ -2567,11 +2567,11 @@ namespace BLToolkit.Mapping
 		}
 
 #if FW2
-		public IDictionary<IndexValue,T> MapDataReaderToDictionary<T>(
-			IDataReader               reader,
-			IDictionary<IndexValue,T> destDictionary,
-			MapIndex                  index,
-			params object[]           parameters)
+		public IDictionary<CompoundValue,T> MapDataReaderToDictionary<T>(
+			IDataReader                  reader,
+			IDictionary<CompoundValue,T> destDictionary,
+			MapIndex                     index,
+			params object[]              parameters)
 		{
 			MapSourceListToDestinationList(
 				CreateDataReaderListMapper(reader),
@@ -2581,12 +2581,12 @@ namespace BLToolkit.Mapping
 			return destDictionary;
 		}
 
-		public Dictionary<IndexValue,T> MapDataReaderToDictionary<T>(
+		public Dictionary<CompoundValue,T> MapDataReaderToDictionary<T>(
 			IDataReader     reader,
 			MapIndex        index,
 			params object[] parameters)
 		{
-			Dictionary<IndexValue,T> destDictionary = new Dictionary<IndexValue,T>();
+			Dictionary<CompoundValue,T> destDictionary = new Dictionary<CompoundValue,T>();
 
 			MapSourceListToDestinationList(
 				CreateDataReaderListMapper   (reader),
@@ -2816,11 +2816,11 @@ namespace BLToolkit.Mapping
 		}
 
 #if FW2
-		public IDictionary<IndexValue,T> MapDictionaryToDictionary<T>(
-			IDictionary               sourceDictionary,
-			IDictionary<IndexValue,T> destDictionary,
-			MapIndex                  index,
-			params object[]           parameters)
+		public IDictionary<CompoundValue,T> MapDictionaryToDictionary<T>(
+			IDictionary                  sourceDictionary,
+			IDictionary<CompoundValue,T> destDictionary,
+			MapIndex                     index,
+			params object[]              parameters)
 		{
 			if (sourceDictionary == null) throw new ArgumentNullException("sourceDictionary");
 
@@ -2832,14 +2832,14 @@ namespace BLToolkit.Mapping
 			return destDictionary;
 		}
 
-		public Dictionary<IndexValue,T> MapDictionaryToDictionary<T>(
+		public Dictionary<CompoundValue,T> MapDictionaryToDictionary<T>(
 			IDictionary     sourceDictionary,
 			MapIndex        index,
 			params object[] parameters)
 		{
 			if (sourceDictionary == null) throw new ArgumentNullException("sourceDictionary");
 
-			Dictionary<IndexValue,T> destDictionary = new Dictionary<IndexValue,T>();
+			Dictionary<CompoundValue,T> destDictionary = new Dictionary<CompoundValue,T>();
 
 			MapSourceListToDestinationList(
 				CreateEnumeratorMapper       (sourceDictionary.Values.GetEnumerator()),

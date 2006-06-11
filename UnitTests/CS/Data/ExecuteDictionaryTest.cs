@@ -6,6 +6,7 @@ using System.Collections.Generic;
 
 using NUnit.Framework;
 
+using BLToolkit.Common;
 using BLToolkit.Data;
 using BLToolkit.Mapping;
 
@@ -104,7 +105,7 @@ namespace Data
 				Assert.IsNotNull(table);
 				Assert.IsTrue(table.Count > 0);
 
-				Person actualValue = (Person)table[new IndexValue(1)];
+				Person actualValue = (Person)table[new CompoundValue(1)];
 				Assert.IsNotNull(actualValue);
 				Assert.AreEqual("John", actualValue.FirstName);
 			}
@@ -122,7 +123,7 @@ namespace Data
 				Assert.IsNotNull(table);
 				Assert.IsTrue(table.Count > 0);
 
-				Person actualValue = (Person)table[new IndexValue(1)];
+				Person actualValue = (Person)table[new CompoundValue(1)];
 				Assert.IsNotNull(actualValue);
 				Assert.AreEqual("John", actualValue.FirstName);
 			}
@@ -143,7 +144,7 @@ namespace Data
 				Assert.IsNotNull(table);
 				Assert.IsTrue(table.Count > 0);
 
-				Person actualValue = (Person)table[new IndexValue(1, "", "Pupkin")];
+				Person actualValue = (Person)table[new CompoundValue(1, "", "Pupkin")];
 				Assert.IsNotNull(actualValue);
 				Assert.AreEqual("John", actualValue.FirstName);
 			}
@@ -210,14 +211,14 @@ namespace Data
 		{
 			using (DbManager db = new DbManager())
 			{
-				Dictionary<IndexValue, Person> dic = db
+				Dictionary<CompoundValue, Person> dic = db
 					.SetCommand("SELECT * FROM Person WHERE PersonID < 3")
 					.ExecuteDictionary<Person>(new MapIndex("LastName"));
 
 				Assert.IsNotNull(dic);
 				Assert.IsTrue(dic.Count > 0);
 
-				Person actualValue = dic[new IndexValue("Pupkin")];
+				Person actualValue = dic[new CompoundValue("Pupkin")];
 				Assert.IsNotNull(actualValue);
 				Assert.AreEqual("John", actualValue.FirstName);
 			}
@@ -228,7 +229,7 @@ namespace Data
 		{
 			using (DbManager db = new DbManager())
 			{
-				Dictionary<IndexValue, Person> dic = new Dictionary<IndexValue, Person>();
+				Dictionary<CompoundValue, Person> dic = new Dictionary<CompoundValue, Person>();
 					db
 					.SetSpCommand("Person_SelectAll")
 					.ExecuteDictionary(dic, new MapIndex(0));
@@ -236,7 +237,7 @@ namespace Data
 				Assert.IsNotNull(dic);
 				Assert.IsTrue(dic.Count > 0);
 
-				Person actualValue = dic[new IndexValue(1)]; ;
+				Person actualValue = dic[new CompoundValue(1)]; ;
 				Assert.IsNotNull(actualValue);
 				Assert.AreEqual("John", actualValue.FirstName);
 			}
@@ -247,7 +248,7 @@ namespace Data
 		{
 			using (DbManager db = new DbManager())
 			{
-				Dictionary<IndexValue, Person> dic = new Dictionary<IndexValue, Person>();
+				Dictionary<CompoundValue, Person> dic = new Dictionary<CompoundValue, Person>();
 					db
 					.SetSpCommand("Person_SelectAll")
 					.ExecuteDictionary(dic, new MapIndex("@PersonID", 2, 3));
@@ -255,7 +256,7 @@ namespace Data
 				Assert.IsNotNull(dic);
 				Assert.IsTrue(dic.Count > 0);
 
-				Person actualValue = dic[new IndexValue(1, "", "Pupkin")];
+				Person actualValue = dic[new CompoundValue(1, "", "Pupkin")];
 				Assert.IsNotNull(actualValue);
 				Assert.AreEqual("John", actualValue.FirstName);
 				

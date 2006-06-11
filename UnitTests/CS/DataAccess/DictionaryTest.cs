@@ -6,6 +6,7 @@ using System.Collections.Generic;
 
 using NUnit.Framework;
 
+using BLToolkit.Common;
 using BLToolkit.DataAccess;
 using BLToolkit.TypeBuilder;
 using BLToolkit.Mapping;
@@ -107,7 +108,7 @@ namespace DataAccess
 
 			[SqlQuery("SELECT * FROM Person")]
 			[Index("@PersonID", "LastName")]
-			public abstract Dictionary<IndexValue, Person> SelectAllT2();
+			public abstract Dictionary<CompoundValue, Person> SelectAllT2();
 
 			[SqlQuery("SELECT * FROM Person")]
 			[Index("@PersonID")]
@@ -117,12 +118,12 @@ namespace DataAccess
 			[SqlQuery("SELECT * FROM Person")]
 			[Index("PersonID", "LastName")]
 			[ScalarFieldName("FirstName")]
-			public abstract Dictionary<IndexValue, string> SelectAllT4();
+			public abstract Dictionary<CompoundValue, string> SelectAllT4();
 
 			[SqlQuery("SELECT * FROM Person")]
 			[Index("PersonID", "LastName")]
 			[ScalarFieldName(1)]
-			public abstract Dictionary<IndexValue, string> SelectAllT5();
+			public abstract Dictionary<CompoundValue, string> SelectAllT5();
 
 			[SqlQuery("SELECT * FROM Person WHERE PersonID < 3")]
 			[ScalarFieldName("FirstName")]
@@ -138,7 +139,7 @@ namespace DataAccess
 
 			[SqlQuery("SELECT * FROM Person WHERE PersonID < 3")]
 			[Index(0, 1), ScalarFieldName(1)]
-			public abstract Dictionary<IndexValue, string> FW2ScalarDictionaryByMapIndex();
+			public abstract Dictionary<CompoundValue, string> FW2ScalarDictionaryByMapIndex();
 
 			[SqlQuery("SELECT * FROM Person WHERE PersonID < 3")]
 			[Index(0)]
@@ -166,32 +167,32 @@ namespace DataAccess
 			Assert.AreEqual("John", ((Person)dic1[1]).FirstName);
 
 			Hashtable dic2 = _da.SelectAll2();
-			Assert.AreEqual("John", ((Person)dic2[new IndexValue(1, "Pupkin")]).FirstName);
+			Assert.AreEqual("John", ((Person)dic2[new CompoundValue(1, "Pupkin")]).FirstName);
 
 			Hashtable dic3 = _da.SelectAll3();
 			Assert.AreEqual("John", dic3[1]);
 
 			Hashtable dic4 = _da.SelectAll4();
-			Assert.AreEqual("John", dic4[new IndexValue(1, "Pupkin")]);
+			Assert.AreEqual("John", dic4[new CompoundValue(1, "Pupkin")]);
 
 			Hashtable dic5 = _da.SelectAll5();
-			Assert.AreEqual("John", dic5[new IndexValue(1, "Pupkin")]);
+			Assert.AreEqual("John", dic5[new CompoundValue(1, "Pupkin")]);
 			
 #if FW2
 			Dictionary<int, Person> dict1 = _da.SelectAllT1();
 			Assert.AreEqual("John", dict1[1].FirstName);
 
-			Dictionary<IndexValue, Person> dict2 = _da.SelectAllT2();
-			Assert.AreEqual("John", dict2[new IndexValue(1, "Pupkin")].FirstName);
+			Dictionary<CompoundValue, Person> dict2 = _da.SelectAllT2();
+			Assert.AreEqual("John", dict2[new CompoundValue(1, "Pupkin")].FirstName);
 
 			Dictionary<int, string> dict3 = _da.SelectAllT3();
 			Assert.AreEqual("John", dict3[1]);
 
-			Dictionary<IndexValue, string> dict4 = _da.SelectAllT4();
-			Assert.AreEqual("John", dict4[new IndexValue(1, "Pupkin")]);
+			Dictionary<CompoundValue, string> dict4 = _da.SelectAllT4();
+			Assert.AreEqual("John", dict4[new CompoundValue(1, "Pupkin")]);
 
-			Dictionary<IndexValue, string> dict5 = _da.SelectAllT5();
-			Assert.AreEqual("John", dict5[new IndexValue(1, "Pupkin")]);
+			Dictionary<CompoundValue, string> dict5 = _da.SelectAllT5();
+			Assert.AreEqual("John", dict5[new CompoundValue(1, "Pupkin")]);
 #endif
 		}
 		
@@ -248,7 +249,7 @@ namespace DataAccess
 			Assert.IsTrue(persons.Count > 0);
 			Assert.IsNull(persons[-1]);
 
-			Person actualValue = (Person)persons[new IndexValue(1, "Pupkin")];
+			Person actualValue = (Person)persons[new CompoundValue(1, "Pupkin")];
 			Assert.IsNotNull(actualValue);
 			Assert.AreEqual("John", actualValue.FirstName);
 		}
@@ -272,9 +273,9 @@ namespace DataAccess
 			
 			Assert.IsNotNull(persons);
 			Assert.IsTrue(persons.Count > 0);
-			Assert.IsNull(persons[new IndexValue(-1, "NoSuchPerson")]);
+			Assert.IsNull(persons[new CompoundValue(-1, "NoSuchPerson")]);
 
-			PersonMultiPK actualValue = (PersonMultiPK)persons[new IndexValue(1, "Pupkin")];
+			PersonMultiPK actualValue = (PersonMultiPK)persons[new CompoundValue(1, "Pupkin")];
 			Assert.IsNotNull(actualValue);
 			Assert.AreEqual("John", actualValue.FirstName);
 		}
@@ -329,12 +330,12 @@ namespace DataAccess
 		public void FW2ScalarDictionaryByMapIndexTest()
 		{
 			TestAccessor da = DataAccessor.CreateInstance<TestAccessor>();
-			Dictionary<IndexValue, string> persons = da.FW2ScalarDictionaryByMapIndex();
+			Dictionary<CompoundValue, string> persons = da.FW2ScalarDictionaryByMapIndex();
 
 			Assert.IsNotNull(persons);
 			Assert.IsTrue(persons.Count > 0);
 
-			string actualValue = persons[new IndexValue(1, "John")];
+			string actualValue = persons[new CompoundValue(1, "John")];
 			Assert.IsNotNull(actualValue);
 			Assert.AreEqual("John", actualValue);
 		}

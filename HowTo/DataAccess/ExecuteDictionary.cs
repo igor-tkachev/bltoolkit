@@ -3,6 +3,7 @@ using System.Collections.Generic;
 
 using NUnit.Framework;
 
+using BLToolkit.Common;
 using BLToolkit.DataAccess;
 using BLToolkit.Mapping;
 
@@ -98,14 +99,14 @@ namespace HowTo.DataAccess
 			// It is required if the index consists of more than one element.
 			//
 			[ActionName("SelectAll")]
-			public abstract /*[a]*/Dictionary<IndexValue,Person>/*[/a]*/ GetPersonDictionary();
+			public abstract /*[a]*/Dictionary<CompoundValue,Person>/*[/a]*/ GetPersonDictionary();
 
 			// This method reads a dictionary containing scalar values.
 			//
 			[SqlQuery("SELECT PersonID, LastName, FirstName FROM Person")]
 			[/*[a]*/Index("PersonID", "LastName")/*[/a]*/]
 			[/*[a]*/ScalarFieldName("FirstName")/*[/a]*/]
-			public abstract /*[a]*/Dictionary<IndexValue,string>/*[/a]*/ GetPersonNameDictionary();
+			public abstract /*[a]*/Dictionary<CompoundValue,string>/*[/a]*/ GetPersonNameDictionary();
 		}
 
 		[Test]
@@ -115,16 +116,16 @@ namespace HowTo.DataAccess
 
 			// ExecuteDictionary.
 			//
-			Dictionary<IndexValue,Person> dic = pa.GetPersonDictionary();
+			Dictionary<CompoundValue,Person> dic = pa.GetPersonDictionary();
 
-			foreach (IndexValue idx in dic.Keys)
+			foreach (CompoundValue idx in dic.Keys)
 				Console.WriteLine("{0}: {1} {2}", dic[idx].ID, dic[idx].FirstName, dic[idx].LastName);
 
 			// ExecuteScalarDictionary.
 			//
-			Dictionary<IndexValue,string> sdic = pa.GetPersonNameDictionary();
+			Dictionary<CompoundValue,string> sdic = pa.GetPersonNameDictionary();
 
-			string firstName = sdic[new IndexValue(1, "Pupkin")];
+			string firstName = sdic[new CompoundValue(1, "Pupkin")];
 
 			Assert.AreEqual("John", firstName);
 		}

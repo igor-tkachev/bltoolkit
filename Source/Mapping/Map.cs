@@ -446,16 +446,16 @@ namespace BLToolkit.Mapping
 		}
 
 #if FW2
-		public static IDictionary<IndexValue,T> ListToDictionary<T>(
-			ICollection               sourceList,
-			IDictionary<IndexValue,T> destDictionary,
-			MapIndex                  index,
-			params object[]           parameters)
+		public static IDictionary<CompoundValue,T> ListToDictionary<T>(
+			ICollection                  sourceList,
+			IDictionary<CompoundValue,T> destDictionary,
+			MapIndex                     index,
+			params object[]              parameters)
 		{
 			return _defaultSchema.MapListToDictionary<T>(sourceList, destDictionary, index, parameters);
 		}
 
-		public static Dictionary<IndexValue,T> ListToDictionary<T>(
+		public static Dictionary<CompoundValue,T> ListToDictionary<T>(
 			ICollection     sourceList,
 			MapIndex        index,
 			params object[] parameters)
@@ -618,17 +618,17 @@ namespace BLToolkit.Mapping
 		}
 
 #if FW2
-		public static IDictionary<IndexValue,T> DataTableToDictionary<T>(
-			DataTable                 sourceTable,
-			IDictionary<IndexValue,T> destDictionary,
-			MapIndex                  index,
-			params object[]           parameters)
+		public static IDictionary<CompoundValue,T> DataTableToDictionary<T>(
+			DataTable                    sourceTable,
+			IDictionary<CompoundValue,T> destDictionary,
+			MapIndex                     index,
+			params object[]              parameters)
 		{
 			return _defaultSchema.MapDataTableToDictionary<T>(
 				sourceTable, destDictionary, index, parameters);
 		}
 
-		public static Dictionary<IndexValue,T> DataTableToDictionary<T>(
+		public static Dictionary<CompoundValue,T> DataTableToDictionary<T>(
 			DataTable       sourceTable,
 			MapIndex        index,
 			params object[] parameters)
@@ -754,17 +754,17 @@ namespace BLToolkit.Mapping
 		}
 
 #if FW2
-		public static IDictionary<IndexValue,T> DataReaderToDictionary<T>(
-			IDataReader               dataReader,
-			IDictionary<IndexValue,T> destDictionary,
-			MapIndex                  index,
-			params object[]           parameters)
+		public static IDictionary<CompoundValue,T> DataReaderToDictionary<T>(
+			IDataReader                  dataReader,
+			IDictionary<CompoundValue,T> destDictionary,
+			MapIndex                     index,
+			params object[]              parameters)
 		{
 			return _defaultSchema.MapDataReaderToDictionary<T>(
 				dataReader, destDictionary, index, parameters);
 		}
 
-		public static Dictionary<IndexValue,T> DataReaderToDictionary<T>(
+		public static Dictionary<CompoundValue,T> DataReaderToDictionary<T>(
 			IDataReader     dataReader,
 			MapIndex        index,
 			params object[] parameters)
@@ -898,17 +898,17 @@ namespace BLToolkit.Mapping
 		}
 
 #if FW2
-		public static IDictionary<IndexValue,T> DictionaryToDictionary<T>(
-			IDictionary               sourceDictionary,
-			IDictionary<IndexValue,T> destDictionary,
-			MapIndex                  index,
-			params object[]           parameters)
+		public static IDictionary<CompoundValue,T> DictionaryToDictionary<T>(
+			IDictionary                  sourceDictionary,
+			IDictionary<CompoundValue,T> destDictionary,
+			MapIndex                     index,
+			params object[]              parameters)
 		{
 			return _defaultSchema.MapDictionaryToDictionary<T>(
 				sourceDictionary, destDictionary, index, parameters);
 		}
 
-		public static Dictionary<IndexValue,T> DictionaryToDictionary<T>(
+		public static Dictionary<CompoundValue,T> DictionaryToDictionary<T>(
 			IDictionary     sourceDictionary,
 			MapIndex        index,
 			params object[] parameters)

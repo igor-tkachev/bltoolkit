@@ -18,7 +18,7 @@ namespace BLToolkit.Aspects
 
 		public override int GetPriority(BuildContext context)
 		{
-			return TypeBuilderConsts.NotNullAspectPriority;
+			return TypeBuilderConsts.Priority.NotNullAspect;
 		}
 
 		public override bool IsApplied(BuildContext context)

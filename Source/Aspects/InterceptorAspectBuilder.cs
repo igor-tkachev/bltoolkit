@@ -12,17 +12,17 @@ namespace BLToolkit.Aspects
 	public class InterceptorAspectBuilder : AbstractTypeBuilderBase
 	{
 		public InterceptorAspectBuilder(
-			Type interceptorType, InterceptType interceptType, string parameters, int priority)
+			Type interceptorType, InterceptType interceptType, string configString, int priority)
 		{
 			_interceptorType = interceptorType;
 			_interceptType   = interceptType;
-			_parameters      = parameters;
+			_configString    = configString;
 			_priority        = priority;
 		}
 
 		private readonly Type          _interceptorType;
 		private readonly InterceptType _interceptType;
-		private readonly string        _parameters;
+		private readonly string        _configString;
 		private readonly int           _priority;
 
 		public override int GetPriority(BuildContext context)
@@ -110,12 +110,12 @@ namespace BLToolkit.Aspects
 					;
 			}
 
-			// Set parameters.
+			// Set config string.
 			//
 			emit
 				.ldloc    (info)
-				.ldstrEx  (_parameters)
-				.callvirt (typeof(InterceptCallInfo).GetProperty("Parameters").GetSetMethod())
+				.ldstrEx  (_configString)
+				.callvirt (typeof(InterceptCallInfo).GetProperty("ConfigString").GetSetMethod())
 				;
 
 			// Set inercept type.

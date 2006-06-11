@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Diagnostics;
 using System.IO;
 
@@ -14,31 +15,27 @@ namespace BLToolkit.Aspects
 			LogOperation(info);
 		}
 
-		private static LogOperation _logOperation = new LogOperation(LogOperationInternal);
-		public  static LogOperation  LogOperation
+		#region Config Support
+
+		class ConfigParameters
 		{
-			get
-			{
-				if (_logOperation == null)
-					_logOperation = new LogOperation(LogOperationInternal);
-
-				return _logOperation;
-			}
-
-			set { _logOperation = value; }
+			public object FileName;
+			public object MinCallTime;
+			public object LogExceptions;
+			public object LogParameters;
 		}
 
-		private static void LogOperationInternal(InterceptCallInfo info)
-		{
-			string   fileName      = FileName;
-			int      minCallTime   = MinCallTime;
-			bool     logExceptions = LogExceptions;
-			bool     logParameters = LogParameters;
-			DateTime end           = DateTime.Now;
+		private static Hashtable _configParameters = new Hashtable();
 
-			if (info.Parameters != null && info.Parameters.Length > 0)
+		private static ConfigParameters GetConfigParameters(string configString)
+		{
+			ConfigParameters cp = (ConfigParameters)_configParameters[configString];
+
+			if (cp == null)
 			{
-				string[] ps = info.Parameters.Split(';');
+				cp = new ConfigParameters();
+
+				string[] ps = configString.Split(';');
 
 				foreach (string p in ps)
 				{
@@ -48,60 +45,21 @@ namespace BLToolkit.Aspects
 					{
 						switch (vs[0].ToLower().Trim())
 						{
-							case "filename":      fileName      = vs[1].Trim();             break;
-							case "mincalltime":   minCallTime   = int. Parse(vs[1].Trim()); break;
-							case "logexceptions": logExceptions = bool.Parse(vs[1].Trim()); break;
-							case "logparameters": logParameters = bool.Parse(vs[1].Trim()); break;
+							case "filename":      cp.FileName      =            vs[1].Trim();  break;
+							case "mincalltime":   cp.MinCallTime   = int. Parse(vs[1].Trim()); break;
+							case "logexceptions": cp.LogExceptions = bool.Parse(vs[1].Trim()); break;
+							case "logparameters": cp.LogParameters = bool.Parse(vs[1].Trim()); break;
 						}
 					}
 				}
 			}
 
-			string parameters = null;
-			int    plen       = info.ParameterValues.Length;
-
-			if (logParameters && plen > 0)
-			{
-				string[] pvs    = new string[plen];
-				object[] values = info.ParameterValues;
-
-				for (int i = 0; i < plen; i++)
-				{
-					object o = values[i];
-					pvs[i] =
-						o == null?   "<null>":
-						o is string? "\"" + o + "\"":
-						o is char?   "'"  + o + "'":
-						o.ToString();
-				}
-
-				parameters = string.Join(", ", pvs);
-			}
-
-			int time = (int)((end - info.BeginCallTime).TotalMilliseconds);
-
-			if (info.Exception != null && logExceptions ||
-				info.Exception == null && time >= minCallTime)
-			{
-				string exText = null;
-
-				if (info.Exception != null)
-					exText = string.Format(
-						" with exception '{0}' - \"{1}\"",
-						info.Exception.GetType().FullName,
-						info.Exception.Message);
-
-				LogOutput(
-					string.Format("{0}: {1}.{2}({3}) - {4} ms{5}.",
-						end,
-						info.MethodInfo.DeclaringType.FullName,
-						info.MethodInfo.Name,
-						parameters,
-						time,
-						exText),
-					fileName);
-			}
+			return cp;
 		}
+
+		#endregion
+
+		#region Parameters
 
 		private static bool _logParameters = true;
 		public  static bool  LogParameters
@@ -131,6 +89,92 @@ namespace BLToolkit.Aspects
 			set { _fileName = value; }
 		}
 
+		#endregion
+
+		#region LogOparation
+
+		private static LogOperation _logOperation = new LogOperation(LogOperationInternal);
+		public  static LogOperation  LogOperation
+		{
+			get
+			{
+				if (_logOperation == null)
+					_logOperation = new LogOperation(LogOperationInternal);
+
+				return _logOperation;
+			}
+
+			set { _logOperation = value; }
+		}
+
+		private static void LogOperationInternal(InterceptCallInfo info)
+		{
+			string   fileName      = FileName;
+			int      minCallTime   = MinCallTime;
+			bool     logExceptions = LogExceptions;
+			bool     logParameters = LogParameters;
+
+			if (info.ConfigString != null && info.ConfigString.Length > 0)
+			{
+				ConfigParameters cp = GetConfigParameters(info.ConfigString);
+
+				if (cp.FileName      != null) fileName      =       cp.FileName.ToString();
+				if (cp.MinCallTime   != null) minCallTime   = (int) cp.MinCallTime;
+				if (cp.LogExceptions != null) logExceptions = (bool)cp.LogExceptions;
+				if (cp.LogParameters != null) logParameters = (bool)cp.LogParameters;
+			}
+
+			string parameters = null;
+			int    plen       = info.ParameterValues.Length;
+
+			if (logParameters && plen > 0)
+			{
+				string[] pvs    = new string[plen];
+				object[] values = info.ParameterValues;
+
+				for (int i = 0; i < plen; i++)
+				{
+					object o = values[i];
+					pvs[i] =
+						o == null?   "<null>":
+						o is string? "\"" + o + "\"":
+						o is char?   "'"  + o + "'":
+						o.ToString();
+				}
+
+				parameters = string.Join(", ", pvs);
+			}
+
+			DateTime end  = DateTime.Now;
+			int      time = (int)((end - info.BeginCallTime).TotalMilliseconds);
+
+			if (info.Exception != null && logExceptions ||
+				info.Exception == null && time >= minCallTime)
+			{
+				string exText = null;
+
+				if (info.Exception != null)
+					exText = string.Format(
+						" with exception '{0}' - \"{1}\"",
+						info.Exception.GetType().FullName,
+						info.Exception.Message);
+
+				LogOutput(
+					string.Format("{0}: {1}.{2}({3}) - {4} ms{5}.",
+						end,
+						info.MethodInfo.DeclaringType.FullName,
+						info.MethodInfo.Name,
+						parameters,
+						time,
+						exText),
+					fileName);
+			}
+		}
+
+		#endregion
+
+		#region LogOuput
+
 		private static LogOutput _logOutput = new LogOutput(LogOutputInternal);
 		public  static LogOutput  LogOutput
 		{
@@ -153,5 +197,7 @@ namespace BLToolkit.Aspects
 				using (StreamWriter sw = new StreamWriter(fileName)) 
 					sw.WriteLine(logText);
 		}
+
+		#endregion
 	}
 }

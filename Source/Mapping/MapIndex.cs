@@ -107,14 +107,14 @@ namespace BLToolkit.Mapping
 			return GetIndexValue(source, obj);
 		}
 
-		public IndexValue GetIndexValue(IMapDataSource source, object obj)
+		public CompoundValue GetIndexValue(IMapDataSource source, object obj)
 		{
 			object[] values = new string[Fields.Length];
 
 			for (int i = 0; i < values.Length; i++)
 				values[i] = GetValue(source, obj, i);
 
-			return new IndexValue(values);
+			return new CompoundValue(values);
 		}
 	}
 }

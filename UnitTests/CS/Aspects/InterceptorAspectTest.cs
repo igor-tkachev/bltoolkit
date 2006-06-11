@@ -49,7 +49,7 @@ namespace Aspects
 
 			[Interceptor(
 				typeof(PropInterceptor), InterceptType.BeforeCall | InterceptType.AfterCall,
-				TypeBuilderConsts.NormalBuilderPriority - 100)]
+				TypeBuilderConsts.Priority.Normal - 100)]
 			public virtual int Prop { get { return 50; } }
 		}
 

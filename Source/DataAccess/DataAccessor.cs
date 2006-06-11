@@ -257,7 +257,7 @@ namespace BLToolkit.DataAccess
 			Type                  keyType,
 			string                methodName)
 		{
-			bool           isIndex = TypeHelper.IsSameOrParent(typeof(IndexValue), keyType);
+			bool           isIndex = TypeHelper.IsSameOrParent(typeof(CompoundValue), keyType);
 			MemberMapper[] mms     = GetKeyFieldList(db, objectType);
 
 			if (mms.Length == 0)
@@ -267,7 +267,7 @@ namespace BLToolkit.DataAccess
 
 			if (mms.Length > 1 && keyType != typeof(object) && !isIndex)
 				throw new DataAccessException(string.Format(
-					"Key type for the method '{0}.{1}' can be of type object or IndexValue.",
+					"Key type for the method '{0}.{1}' can be of type object or CompoundValue.",
 					GetType().Name, methodName));
 
 			if (isIndex || mms.Length > 1)
@@ -294,7 +294,7 @@ namespace BLToolkit.DataAccess
 			NameOrIndexParameter  scalarField,
 			Type                  elementType)
 		{
-			bool isIndex = TypeHelper.IsSameOrParent(typeof(IndexValue), keyType);
+			bool isIndex = TypeHelper.IsSameOrParent(typeof(CompoundValue), keyType);
 			MemberMapper[] mms = GetKeyFieldList(db, objectType);
 
 			if (mms.Length == 0)
@@ -304,7 +304,7 @@ namespace BLToolkit.DataAccess
 
 			if (mms.Length > 1 && keyType != typeof(object) && !isIndex)
 				throw new DataAccessException(string.Format(
-					"Key type for the method '{0}.{1}' can be of type object or IndexValue.",
+					"Key type for the method '{0}.{1}' can be of type object or CompoundValue.",
 					GetType().Name, methodName));
 
 			if (isIndex || mms.Length > 1)

@@ -19,7 +19,7 @@ namespace BLToolkit.DataAccess
 	{
 		public override int GetPriority(BuildContext context)
 		{
-			return TypeBuilderConsts.DataAccessorPriority;
+			return TypeBuilderConsts.Priority.DataAccessor;
 		}
 
 		public override bool IsApplied(BuildContext context)
@@ -121,11 +121,11 @@ namespace BLToolkit.DataAccess
 						Context.CurrentMethod.DeclaringType.Name,
 						Context.CurrentMethod.Name));
 
-				bool isIndex = TypeHelper.IsSameOrParent(typeof(IndexValue), keyType);
+				bool isIndex = TypeHelper.IsSameOrParent(typeof(CompoundValue), keyType);
 
 				if (keyType != typeof(object) && !isIndex && !TypeHelper.IsScalar(keyType))
 					throw new TypeBuilderException(string.Format(
-						"Key type for the method '{0}.{1}' can be of type object, IndexValue, or a scalar type.",
+						"Key type for the method '{0}.{1}' can be of type object, CompoundValue, or a scalar type.",
 						Context.CurrentMethod.DeclaringType.Name,
 						Context.CurrentMethod.Name));
 
@@ -139,7 +139,7 @@ namespace BLToolkit.DataAccess
 
 				if (fields.Length > 1 && keyType != typeof(object) && !isIndex)
 					throw new TypeBuilderException(string.Format(
-						"Key type for the method '{0}.{1}' can be of type object or IndexValue.",
+						"Key type for the method '{0}.{1}' can be of type object or CompoundValue.",
 						Context.CurrentMethod.DeclaringType.Name,
 						Context.CurrentMethod.Name));
 

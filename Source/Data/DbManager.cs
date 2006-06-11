@@ -3000,7 +3000,7 @@ namespace BLToolkit.Data
 						for (int i = 0; i < keyIndex.Length; i++)
 							key[i] = dr[keyIndex[i]];
 
-						dic.Add(new IndexValue(key), value);
+						dic.Add(new CompoundValue(key), value);
 					}
 					while (dr.Read());
 				}
@@ -3020,8 +3020,8 @@ namespace BLToolkit.Data
 		}
 
 #if FW2
-		public IDictionary<IndexValue,T> ExecuteScalarDictionary<T>(
-			IDictionary<IndexValue, T> dic, MapIndex index, NameOrIndexParameter valueField)
+		public IDictionary<CompoundValue,T> ExecuteScalarDictionary<T>(
+			IDictionary<CompoundValue, T> dic, MapIndex index, NameOrIndexParameter valueField)
 		{
 			if (_prepared)
 				InitParameters(CommandAction.Select);
@@ -3053,7 +3053,7 @@ namespace BLToolkit.Data
 						for (int i = 0; i < keyIndex.Length; i++)
 							key[i] = dr[keyIndex[i]];
 
-						dic.Add(new IndexValue(key), (T)value);
+						dic.Add(new CompoundValue(key), (T)value);
 					}
 					while (dr.Read());
 				}
@@ -3062,10 +3062,10 @@ namespace BLToolkit.Data
 			return dic;
 		}
 
-		public Dictionary<IndexValue,T> ExecuteScalarDictionary<T>(
+		public Dictionary<CompoundValue,T> ExecuteScalarDictionary<T>(
 			MapIndex index, NameOrIndexParameter valueField)
 		{
-			Dictionary<IndexValue,T> dic = new Dictionary<IndexValue,T>();
+			Dictionary<CompoundValue,T> dic = new Dictionary<CompoundValue,T>();
 
 			ExecuteScalarDictionary<T>(dic, index, valueField);
 
@@ -3621,7 +3621,7 @@ namespace BLToolkit.Data
 		/// </summary>
 		/// <typeparam name="TValue">Value's type.</typeparam>
 		/// <returns>An instance of the dictionary.</returns>
-		public Dictionary<IndexValue, TValue> ExecuteDictionary<TValue>(
+		public Dictionary<CompoundValue, TValue> ExecuteDictionary<TValue>(
 			MapIndex        index,
 			params object[] parameters)
 		{
@@ -3634,10 +3634,10 @@ namespace BLToolkit.Data
 			}
 		}
 
-		public IDictionary<IndexValue, TValue> ExecuteDictionary<TValue>(
-			IDictionary<IndexValue, TValue> dictionary,
-			MapIndex                        index,
-			params object[]                 parameters)
+		public IDictionary<CompoundValue, TValue> ExecuteDictionary<TValue>(
+			IDictionary<CompoundValue, TValue> dictionary,
+			MapIndex                           index,
+			params object[]                    parameters)
 		{
 			if (_prepared)
 				InitParameters(CommandAction.Select);

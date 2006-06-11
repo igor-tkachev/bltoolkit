@@ -9,9 +9,9 @@ namespace BLToolkit.Mapping
 	public class DictionaryIndexListMapper<T> : IMapDataDestinationList
 	{
 		public DictionaryIndexListMapper(
-			IDictionary<IndexValue,T> dic,
-			MapIndex                  index,
-			ObjectMapper              objectMapper)
+			IDictionary<CompoundValue,T> dic,
+			MapIndex                     index,
+			ObjectMapper                 objectMapper)
 		{
 			_dic    = dic;
 			_mapper = objectMapper;
@@ -30,14 +30,14 @@ namespace BLToolkit.Mapping
 			}
 		}
 
-		private NameOrIndexParameter[]     _fields;
-		private IDictionary<IndexValue,T>  _dic;
-		private ObjectMapper               _mapper;
-		private T                          _newObject;
-		private bool[]                     _fromSource;
-		private bool                       _isFromSource;
-		private bool                       _isFromDest;
-		private object[]                   _indexValue;
+		private NameOrIndexParameter[]       _fields;
+		private IDictionary<CompoundValue,T> _dic;
+		private ObjectMapper                 _mapper;
+		private T                            _newObject;
+		private bool[]                       _fromSource;
+		private bool                         _isFromSource;
+		private bool                         _isFromDest;
+		private object[]                     _indexValue;
 
 		#region IMapDataDestinationList Members
 
@@ -50,7 +50,7 @@ namespace BLToolkit.Mapping
 						if (!_fromSource[i])
 							_indexValue[i] = _mapper.TypeAccessor[_fields[i]].GetValue(_newObject);
 
-				_dic[new IndexValue(_indexValue)] = _newObject;
+				_dic[new CompoundValue(_indexValue)] = _newObject;
 			}
 		}
 

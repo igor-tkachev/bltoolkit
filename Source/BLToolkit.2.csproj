@@ -42,6 +42,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Aspects\CacheAspect.cs" />
+    <Compile Include="Aspects\CacheAttribute.cs" />
+    <Compile Include="Aspects\NoCacheAttribute.cs" />
     <Compile Include="Aspects\IInterceptor.cs" />
     <Compile Include="Aspects\Interceptor.cs" />
     <Compile Include="Aspects\InterceptorAspectBuilder.cs" />
@@ -55,7 +58,9 @@
     <Compile Include="Aspects\MixinAttribute.cs" />
     <Compile Include="Aspects\MixinOverrideAttribute.cs" />
     <Compile Include="Aspects\NoInterceptionAttribute.cs" />
+    <Compile Include="Aspects\NoLogAttribute.cs" />
     <Compile Include="Aspects\NotNullAttribute.cs" />
+    <Compile Include="Common\CompoundValue.cs" />
     <Compile Include="ComponentModel\BindingListImpl.cs" />
     <Compile Include="ComponentModel\CustomTypeDescriptorImpl.cs" />
     <Compile Include="ComponentModel\Design\ObjectViewTypeEditor.cs" />

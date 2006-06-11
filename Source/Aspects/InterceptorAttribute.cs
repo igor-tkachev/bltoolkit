@@ -13,7 +13,7 @@ namespace BLToolkit.Aspects
 	public class InterceptorAttribute : AbstractTypeBuilderAttribute
 	{
 		public InterceptorAttribute(Type interceptorType, InterceptType interceptType)
-			: this(interceptorType, interceptType, null, TypeBuilderConsts.NormalBuilderPriority)
+			: this(interceptorType, interceptType, null, TypeBuilderConsts.Priority.Normal)
 		{
 		}
 
@@ -23,18 +23,18 @@ namespace BLToolkit.Aspects
 		}
 
 		public InterceptorAttribute(Type interceptorType, InterceptType interceptType, string parameters)
-			: this(interceptorType, interceptType, parameters, TypeBuilderConsts.NormalBuilderPriority)
+			: this(interceptorType, interceptType, parameters, TypeBuilderConsts.Priority.Normal)
 		{
 		}
 
 		public InterceptorAttribute(
-			Type interceptorType, InterceptType interceptType, string parameters, int priority)
+			Type interceptorType, InterceptType interceptType, string configString, int priority)
 		{
 			if (interceptorType == null) throw new ArgumentNullException("interceptorType");
 
 			_interceptorType = interceptorType;
 			_interceptType   = interceptType;
-			_parameters      = parameters;
+			_configString    = configString;
 			_priority        = priority;
 		}
 
@@ -56,10 +56,10 @@ namespace BLToolkit.Aspects
 			get { return _priority; }
 		}
 
-		private readonly string _parameters;
-		public           string  Parameters
+		private readonly string _configString;
+		public           string  ConfigString
 		{
-			get { return _parameters; }
+			get { return _configString; }
 		}
 
 		public override IAbstractTypeBuilder TypeBuilder
@@ -67,7 +67,7 @@ namespace BLToolkit.Aspects
 			get
 			{
 				 return new InterceptorAspectBuilder(
-					 InterceptorType, InterceptType, Parameters, Priority);
+					 InterceptorType, InterceptType, ConfigString, Priority);
 			}
 		}
 	}
