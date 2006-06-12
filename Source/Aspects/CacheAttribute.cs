@@ -22,6 +22,16 @@ namespace BLToolkit.Aspects
 		{
 		}
 
+		public CacheAttribute(bool isWeak)
+			: this(typeof(CacheAspect), "IsWeak=" + isWeak)
+		{
+		}
+
+		public CacheAttribute(int maxCacheTime, bool isWeak)
+			: this(typeof(CacheAspect), "MaxCacheTime=" + maxCacheTime + ";IsWeak=" + isWeak)
+		{
+		}
+
 		public CacheAttribute(string configString)
 			: this(typeof(CacheAspect), configString)
 		{

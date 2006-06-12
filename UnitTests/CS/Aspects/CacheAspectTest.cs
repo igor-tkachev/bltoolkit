@@ -15,7 +15,7 @@ namespace Aspects
 		{
 			public static int Value;
 
-			[Cache(100)]
+			[Cache(100, false)]
 			public virtual int Test(int i1, int i2)
 			{
 				return Value;

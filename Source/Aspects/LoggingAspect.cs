@@ -18,7 +18,7 @@ namespace BLToolkit.Aspects
 
 		#region Config Support
 
-		class ConfigParameters
+		internal class ConfigParameters
 		{
 			public object FileName;
 			public object MinCallTime;
@@ -26,17 +26,15 @@ namespace BLToolkit.Aspects
 			public object LogParameters;
 		}
 
-		private static Hashtable _configParameters = new Hashtable();
-
-		private static ConfigParameters GetConfigParameters(string configString)
+		private static ConfigParameters GetConfigParameters(InterceptCallInfo info)
 		{
-			ConfigParameters cp = (ConfigParameters)_configParameters[configString];
+			ConfigParameters cp = info.CallMethodInfo.LogParameters;
 
 			if (cp == null)
 			{
-				cp = new ConfigParameters();
+				info.CallMethodInfo.LogParameters = cp = new ConfigParameters();
 
-				string[] ps = configString.Split(';');
+				string[] ps = info.ConfigString.Split(';');
 
 				foreach (string p in ps)
 				{
@@ -124,7 +122,7 @@ namespace BLToolkit.Aspects
 
 			if (info.ConfigString != null && info.ConfigString.Length > 0)
 			{
-				ConfigParameters cp = GetConfigParameters(info.ConfigString);
+				ConfigParameters cp = GetConfigParameters(info);
 
 				if (cp.FileName      != null) fileName      =       cp.FileName.ToString();
 				if (cp.MinCallTime   != null) minCallTime   = (int) cp.MinCallTime;
@@ -170,8 +168,8 @@ namespace BLToolkit.Aspects
 				LogOutput(
 					string.Format("{0}: {1}.{2}({3}) - {4} ms{5}.",
 						end,
-						info.MethodInfo.DeclaringType.FullName,
-						info.MethodInfo.Name,
+						info.CallMethodInfo.MethodInfo.DeclaringType.FullName,
+						info.CallMethodInfo.MethodInfo.Name,
 						parameters,
 						time,
 						exText),

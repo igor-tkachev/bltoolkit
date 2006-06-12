@@ -3,7 +3,6 @@ using System.Collections;
 using System.Reflection;
 using System.Reflection.Emit;
 using System.Diagnostics.CodeAnalysis;
-using System.Xml.Serialization;
 
 #if FW2
 using System.Collections.Generic;
@@ -65,16 +64,26 @@ namespace BLToolkit.TypeBuilder.Builders
 		{
 			DefineNonAbstractType();
 
+			SetID(_builders);
+
 			_context.BuildElement = BuildElement.Type;
 
 			Build(BuildStep.Before, _builders);
 			Build(BuildStep.Build,  _builders);
+
+			Hashtable ids = new Hashtable();
+
+			foreach (IAbstractTypeBuilder builder in _builders)
+				ids[builder] = builder.ID;
 
 			DefineAbstractProperties();
 			DefineAbstractMethods();
 			OverrideVirtualProperties();
 			OverrideVirtualMethods();
 			DefineInterfaces();
+
+			foreach (IAbstractTypeBuilder builder in ids.Keys)
+				builder.ID = (int)ids[builder];
 
 			_context.BuildElement = BuildElement.Type;
 
@@ -114,6 +123,14 @@ namespace BLToolkit.TypeBuilder.Builders
 			// Create the type.
 			//
 			return _context.TypeBuilder.Create();
+		}
+
+		private static int _idCounter;
+
+		private void SetID(AbstractTypeBuilderList _builders)
+		{
+			foreach (IAbstractTypeBuilder builder in _builders)
+				builder.ID = ++_idCounter;
 		}
 
 		private static void CheckCompatibility(BuildContext context, AbstractTypeBuilderList builders)
@@ -313,6 +330,8 @@ namespace BLToolkit.TypeBuilder.Builders
 		private void EmitMethod(
 			AbstractTypeBuilderList builders, MethodInfo methdoInfo, BuildElement buildElement)
 		{
+			SetID(builders);
+
 			_context.BuildElement = buildElement;
 
 			bool isCatchBlockRequired   = false;
@@ -695,6 +714,8 @@ namespace BLToolkit.TypeBuilder.Builders
 					// Call builder to build the method.
 					//
 					IAbstractTypeBuilder builder = (IAbstractTypeBuilder)de.Value;
+
+					builder.ID = ++_idCounter;
 
 					_context.BuildElement = BuildElement.InterfaceMethod;
 					_context.Step         = BuildStep.Build;

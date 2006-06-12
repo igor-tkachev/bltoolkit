@@ -109,6 +109,11 @@
                     BuildAction = "Compile"
                 />
                 <File
+                    RelPath = "Aspects\CallMethodInfo.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
                     RelPath = "Aspects\CounterAspect.cs"
                     SubType = "Code"
                     BuildAction = "Compile"

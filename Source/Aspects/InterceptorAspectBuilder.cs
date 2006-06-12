@@ -118,6 +118,14 @@ namespace BLToolkit.Aspects
 				.callvirt (typeof(InterceptCallInfo).GetProperty("ConfigString").GetSetMethod())
 				;
 
+			// Set interceptor ID.
+			//
+			emit
+				.ldloc    (info)
+				.ldc_i4   (ID)
+				.callvirt (typeof(InterceptCallInfo).GetProperty("InterceptorID").GetSetMethod())
+				;
+
 			// Set inercept type.
 			//
 			InterceptType interceptType;
@@ -198,7 +206,7 @@ namespace BLToolkit.Aspects
 				// Create MethodInfo field.
 				//
 				FieldBuilder methodInfo = Context.CreatePrivateStaticField(
-					"_methodInfo$" + Context.CurrentMethod.Name + ++_methodCounter, typeof(MethodInfo));
+					"_methodInfo$" + Context.CurrentMethod.Name + ++_methodCounter, typeof(CallMethodInfo));
 
 				EmitHelper emit = Context.MethodBuilder.Emitter;
 
@@ -213,6 +221,7 @@ namespace BLToolkit.Aspects
 					.callvirt  (typeof(StackTrace), "GetFrame", typeof(int))
 					.callvirt  (typeof(StackFrame), "GetMethod")
 					.castclass (typeof(MethodInfo))
+					.newobj    (TypeHelper.GetConstructor(typeof(CallMethodInfo), typeof(MethodInfo)))
 					.stsfld    (methodInfo)
 					.MarkLabel (checkMethodInfo)
 					;
@@ -227,7 +236,7 @@ namespace BLToolkit.Aspects
 
 					.ldloc    (field)
 					.ldsfld   (methodInfo)
-					.callvirt (typeof(InterceptCallInfo).GetProperty("MethodInfo").GetSetMethod())
+					.callvirt (typeof(InterceptCallInfo).GetProperty("CallMethodInfo").GetSetMethod())
 					;
 
 				ParameterInfo[] parameters = Context.CurrentMethod.GetParameters();

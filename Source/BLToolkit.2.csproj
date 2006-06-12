@@ -43,6 +43,7 @@
   <ItemGroup>
     <Compile Include="Aspects\CacheAspect.cs" />
     <Compile Include="Aspects\CacheAttribute.cs" />
+    <Compile Include="Aspects\CallMethodInfo.cs" />
     <Compile Include="Aspects\CounterAspect.cs" />
     <Compile Include="Aspects\CounterAttribute.cs" />
     <Compile Include="Aspects\NoCacheAttribute.cs" />

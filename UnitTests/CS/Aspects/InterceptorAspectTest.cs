@@ -21,7 +21,7 @@ namespace Aspects
 		{
 			public void Intercept(InterceptCallInfo info)
 			{
-				if (info.MethodInfo.ReturnType == typeof(int))
+				if (info.CallMethodInfo.MethodInfo.ReturnType == typeof(int))
 					info.ReturnValue = 10;
 			}
 		}

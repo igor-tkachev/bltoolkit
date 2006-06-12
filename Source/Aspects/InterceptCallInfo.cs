@@ -8,18 +8,18 @@ namespace BLToolkit.Aspects
 	[DebuggerStepThrough] 
 	public sealed class InterceptCallInfo
 	{
-		private MethodInfo _methodInfo;
-		public  MethodInfo  MethodInfo
+		private CallMethodInfo _callmethodInfo;
+		public  CallMethodInfo  CallMethodInfo
 		{
-			get { return _methodInfo;  }
+			get { return _callmethodInfo;  }
 			set
 			{
-				if (_methodInfo != null)
+				if (_callmethodInfo != null)
 					throw new InvalidOperationException("MethodInfo can not be changed.");
 
-				_methodInfo = value;
+				_callmethodInfo = value;
 
-				int len = value.GetParameters().Length;
+				int len = value.MethodInfo.GetParameters().Length;
 
 				_parameterValues = len == 0? _emptyValues: new object[len];
 			}
@@ -67,6 +67,13 @@ namespace BLToolkit.Aspects
 		{
 			get { return _configString;  }
 			set { _configString = value; }
+		}
+
+		private int _interceptorID;
+		public  int  InterceptorID
+		{
+			get { return _interceptorID;  }
+			set { _interceptorID = value; }
 		}
 
 		private Hashtable  _items;
