@@ -1,5 +1,4 @@
 using System;
-using System.Collections;
 using System.Reflection;
 
 using BLToolkit.Common;
@@ -14,27 +13,30 @@ namespace BLToolkit.Aspects
 			if (!IsEnabled)
 				return;
 
-			CompoundValue key  = GetKey(info);
-			CacheItem     item = GetItem(info.MethodInfo, key);
-
-			if (item != null && item.MaxCacheTime > DateTime.Now)
+			lock (info.CallMethodInfo.MethodCallCache)
 			{
-				info.InterceptResult = InterceptResult.Return;
-				info.ReturnValue     = item.ReturnValue;
+				CompoundValue key  = GetKey(info);
+				CacheItem     item = GetItem(key, info);
 
-				if (item.RefValues != null)
+				if (item != null && item.MaxCacheTime > DateTime.Now)
 				{
-					ParameterInfo[] pis = info.MethodInfo.GetParameters();
-					int             n   = 0;
+					info.InterceptResult = InterceptResult.Return;
+					info.ReturnValue     = item.ReturnValue;
 
-					for (int i = 0; i < pis.Length; i++)
-						if (pis[i].ParameterType.IsByRef)
-							info.ParameterValues[i] = item.RefValues[n++];
+					if (item.RefValues != null)
+					{
+						ParameterInfo[] pis = info.CallMethodInfo.MethodInfo.GetParameters();
+						int             n   = 0;
+
+						for (int i = 0; i < pis.Length; i++)
+							if (pis[i].ParameterType.IsByRef)
+								info.ParameterValues[i] = item.RefValues[n++];
+					}
 				}
-			}
-			else
-			{
-				info.Items["CacheKey"] = key;
+				else 
+				{
+					info.Items["CacheKey"] = key;
+				}
 			}
 		}
 
@@ -43,67 +45,71 @@ namespace BLToolkit.Aspects
 			if (!IsEnabled)
 				return;
 
-			CompoundValue key = (CompoundValue)info.Items["CacheKey"];
-
-			if (key == null)
-				return;
-
-			int maxCacheTime = MaxCacheTime;
-
-			if (info.ConfigString != null && info.ConfigString.Length > 0)
+			lock (info.CallMethodInfo.MethodCallCache)
 			{
-				ConfigParameters cp = GetConfigParameters(info.ConfigString);
+				CompoundValue key = (CompoundValue)info.Items["CacheKey"];
 
-				if (cp.MaxCacheTime != null) maxCacheTime = (int)cp.MaxCacheTime;
+				if (key == null)
+					return;
+
+				int  maxCacheTime = MaxCacheTime;
+				bool isWeak       = IsWeak;
+
+				if (info.ConfigString != null && info.ConfigString.Length > 0)
+				{
+					ConfigParameters cp = GetConfigParameters(info);
+
+					if (cp.MaxCacheTime != null) maxCacheTime = (int) cp.MaxCacheTime;
+					if (cp.IsWeak       != null) isWeak       = (bool)cp.IsWeak;
+				}
+
+				CacheItem item = new CacheItem();
+
+				item.ReturnValue  = info.ReturnValue;
+				item.MaxCacheTime = maxCacheTime == int.MaxValue || maxCacheTime < 0?
+					DateTime.MaxValue:
+					DateTime.Now.AddMilliseconds(maxCacheTime);
+
+				ParameterInfo[] pis = info.CallMethodInfo.MethodInfo.GetParameters();
+
+				int n = 0;
+
+				foreach (ParameterInfo pi in pis)
+					if (pi.ParameterType.IsByRef)
+						n++;
+
+				if (n > 0)
+				{
+					item.RefValues = new object[n];
+
+					n = 0;
+
+					for (int i = 0; i < pis.Length; i++)
+						if (pis[i].ParameterType.IsByRef)
+							item.RefValues[n++] = info.ParameterValues[i];
+				}
+
+				info.CallMethodInfo.MethodCallCache[key] = isWeak? (object)new WeakReference(item): item;
 			}
-
-			CacheItem item = new CacheItem();
-
-			item.ReturnValue  = info.ReturnValue;
-			item.MaxCacheTime = maxCacheTime == int.MaxValue || maxCacheTime < 0?
-				DateTime.MaxValue:
-				DateTime.Now.AddMilliseconds(maxCacheTime);
-
-			ParameterInfo[] pis = info.MethodInfo.GetParameters();
-
-			int n = 0;
-
-			foreach (ParameterInfo pi in pis)
-				if (pi.ParameterType.IsByRef)
-					n++;
-
-			if (n > 0)
-			{
-				item.RefValues = new object[n];
-
-				n = 0;
-
-				for (int i = 0; i < pis.Length; i++)
-					if (pis[i].ParameterType.IsByRef)
-						item.RefValues[n++] = info.ParameterValues[i];
-			}
-
-			AddItem(info.MethodInfo, key, item);
 		}
 
 		#region Config Support
 
-		class ConfigParameters
+		internal class ConfigParameters
 		{
 			public object MaxCacheTime;
+			public object IsWeak;
 		}
 
-		private static Hashtable _configParameters = new Hashtable();
-
-		private static ConfigParameters GetConfigParameters(string configString)
+		private static ConfigParameters GetConfigParameters(InterceptCallInfo info)
 		{
-			ConfigParameters cp = (ConfigParameters)_configParameters[configString];
+			ConfigParameters cp = info.CallMethodInfo.CacheParameters;
 
 			if (cp == null)
 			{
-				cp = new ConfigParameters();
+				info.CallMethodInfo.CacheParameters = cp = new ConfigParameters();
 
-				string[] ps = configString.Split(';');
+				string[] ps = info.ConfigString.Split(';');
 
 				foreach (string p in ps)
 				{
@@ -113,7 +119,8 @@ namespace BLToolkit.Aspects
 					{
 						switch (vs[0].ToLower().Trim())
 						{
-							case "maxcachetime": cp.MaxCacheTime = int.Parse(vs[1].Trim()); break;
+							case "maxcachetime": cp.MaxCacheTime = int. Parse(vs[1].Trim()); break;
+							case "isweak":       cp.IsWeak       = bool.Parse(vs[1].Trim()); break;
 						}
 					}
 				}
@@ -126,6 +133,13 @@ namespace BLToolkit.Aspects
 
 		#region Parameters
 
+		private bool _isEnabled = true;
+		public  bool  IsEnabled
+		{
+			get { return _isEnabled;  }
+			set { _isEnabled = value; }
+		}
+
 		private int _maxCacheTime = int.MaxValue;
 		public  int  MaxCacheTime
 		{
@@ -133,11 +147,11 @@ namespace BLToolkit.Aspects
 			set { _maxCacheTime = value; }
 		}
 
-		private bool _isEnabled = true;
-		public  bool  IsEnabled
+		private bool _isWeak = true;
+		public  bool  IsWeak
 		{
-			get { return _isEnabled;  }
-			set { _isEnabled = value; }
+			get { return _isWeak;  }
+			set { _isWeak = value; }
 		}
 
 		#endregion
@@ -153,7 +167,7 @@ namespace BLToolkit.Aspects
 
 		private CompoundValue GetKey(InterceptCallInfo info)
 		{
-			ParameterInfo[] parInfo   = info.MethodInfo.GetParameters();
+			ParameterInfo[] parInfo   = info.CallMethodInfo.MethodInfo.GetParameters();
 			object[]        parValues = info.ParameterValues;
 			object[]        keyValues = new object[parValues.Length];
 
@@ -163,26 +177,19 @@ namespace BLToolkit.Aspects
 			return new CompoundValue(keyValues);
 		}
 
-		private static Hashtable _methodCache = Hashtable.Synchronized(new Hashtable());
-
-		private static CacheItem GetItem(MethodInfo methodInfo, CompoundValue key)
+		private static CacheItem GetItem(CompoundValue key, InterceptCallInfo info)
 		{
-			Hashtable keys = (Hashtable)_methodCache[methodInfo];
+			object obj = info.CallMethodInfo.MethodCallCache[key];
 
-			if (keys == null)
+			if (obj == null)
 				return null;
 
-			return (CacheItem)keys[key];
-		}
+			WeakReference wr = obj as WeakReference;
 
-		private static void AddItem(MethodInfo methodInfo, CompoundValue key, CacheItem item)
-		{
-			Hashtable keys = (Hashtable)_methodCache[methodInfo];
+			if (wr == null)
+				return (CacheItem)obj;
 
-			if (keys == null)
-				_methodCache[methodInfo] = keys = Hashtable.Synchronized(new Hashtable());
-
-			keys[key] = item;
+			return wr.IsAlive ? (CacheItem)wr.Target : null;
 		}
 
 		#endregion

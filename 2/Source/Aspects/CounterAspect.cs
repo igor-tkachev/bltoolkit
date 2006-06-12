@@ -12,7 +12,7 @@ namespace BLToolkit.Aspects
 			if (!IsEnabled)
 				return;
 
-			Counter counter = GetCounterInternal(info.MethodInfo);
+			Counter counter = GetCounter(info.CallMethodInfo);
 
 			counter.CurrentCalls.Add(info);
 
@@ -24,52 +24,12 @@ namespace BLToolkit.Aspects
 			if (!IsEnabled)
 				return;
 
-			Counter counter = GetCounterInternal(info.MethodInfo);
+			Counter counter = GetCounter(info.CallMethodInfo);
 
 			counter.TotalTime += DateTime.Now - info.BeginCallTime;
 			counter.TotalCount++;
 			counter.CurrentCalls.Remove(info);
 		}
-
-		#region Config Support
-
-		/*
-		class ConfigParameters
-		{
-			public object MinCallTime;
-		}
-
-		private static Hashtable _configParameters = new Hashtable();
-
-		private static ConfigParameters GetConfigParameters(string configString)
-		{
-			ConfigParameters cp = (ConfigParameters)_configParameters[configString];
-
-			if (cp == null)
-			{
-				cp = new ConfigParameters();
-
-				string[] ps = configString.Split(';');
-
-				foreach (string p in ps)
-				{
-					string[] vs = p.Split('=');
-
-					if (vs.Length == 2)
-					{
-						switch (vs[0].ToLower().Trim())
-						{
-							case "mincalltime": cp.MinCallTime = int.Parse(vs[1].Trim()); break;
-						}
-					}
-				}
-			}
-
-			return cp;
-		}
-		*/
-
-		#endregion
 
 		#region Parameters
 
@@ -80,36 +40,32 @@ namespace BLToolkit.Aspects
 			set { _isEnabled = value; }
 		}
 
-		/*
-		private static int _minCallTime;
-		public  static int  MinCallTime
-		{
-			get { return _minCallTime;  }
-			set { _minCallTime = value; }
-		}
-		*/
-
 		#endregion
 
 		#region Counter
 
 		public class Counter
 		{
+			public Counter(MethodInfo methodInfo)
+			{
+				MethodInfo = methodInfo;
+			}
+
 			public MethodInfo MethodInfo;
 			public TimeSpan   TotalTime;
 			public int        TotalCount;
 			public ArrayList  CurrentCalls = ArrayList.Synchronized(new ArrayList());
 		}
 
-		private static Hashtable _counters = Hashtable.Synchronized(new Hashtable());
-		public  static Hashtable  Counters
+		private static ArrayList _counters = ArrayList.Synchronized(new ArrayList());
+		public  static ArrayList  Counters
 		{
 			get { return _counters; }
 		}
 
 		public static Counter GetCounter(MethodInfo methodInfo)
 		{
-			foreach (Counter c in _counters.Values)
+			foreach (Counter c in _counters)
 			{
 				if ((methodInfo.DeclaringType == c.MethodInfo.DeclaringType ||
 					 methodInfo.DeclaringType == c.MethodInfo.DeclaringType.BaseType) &&
@@ -134,18 +90,14 @@ namespace BLToolkit.Aspects
 			return null;
 		}
 
-		private static Counter GetCounterInternal(MethodInfo methodInfo)
+		private static Counter GetCounter(CallMethodInfo methodInfo)
 		{
-			Counter counter = (Counter)_counters[methodInfo];
+			if (methodInfo.Counter == null)
+				lock (_counters.SyncRoot)
+					if (methodInfo.Counter == null)
+						_counters.Add(methodInfo.Counter = new Counter(methodInfo.MethodInfo));
 
-			if (counter == null)
-			{
-				_counters[methodInfo] = counter = new Counter();
-
-				counter.MethodInfo = methodInfo;
-			}
-
-			return counter;
+			return methodInfo.Counter;
 		}
 
 		#endregion

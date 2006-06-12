@@ -17,6 +17,13 @@ namespace BLToolkit.TypeBuilder.Builders
 			return null;
 		}
 
+		private int _id;
+		public  int  ID
+		{
+			get { return _id;  }
+			set { _id = value; }
+		}
+
 		private object _targetElement;
 		public  object  TargetElement
 		{
