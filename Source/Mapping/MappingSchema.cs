@@ -603,6 +603,11 @@ namespace BLToolkit.Mapping
 
 		public virtual object ConvertChangeType(object value, Type conversionType)
 		{
+			return ConvertChangeType(value, conversionType, false);
+		}
+
+		public virtual object ConvertChangeType(object value, Type conversionType, bool isNullable)
+		{
 			if (conversionType.IsArray)
 			{
 				if (null == value)
@@ -634,7 +639,7 @@ namespace BLToolkit.Mapping
 
 					dstArray = Array.CreateInstance(dstElementType, arrayLength);
 
-					// Int32 is assignable from Int16, SByte from Byte and so on.
+					// Int32 is assignable from UInt32, SByte from Byte and so on.
 					//
 					if (dstElementType.IsAssignableFrom(srcElementType))
 						Array.Copy(srcArray, dstArray, arrayLength);
@@ -671,43 +676,43 @@ namespace BLToolkit.Mapping
 
 				return dstArray;
 			}
-			
+
 			switch (Type.GetTypeCode(conversionType))
 			{
 				case TypeCode.Boolean:
-					return ConvertToBoolean(value);
+					return isNullable ? ConvertToNullableBoolean(value)  : ConvertToBoolean(value);
 				case TypeCode.Byte:
-					return ConvertToByte(value);
+					return isNullable ? ConvertToNullableByte(value)     : ConvertToByte(value);
 				case TypeCode.Char:
-					return ConvertToChar(value);
+					return isNullable ? ConvertToNullableChar(value)     : ConvertToChar(value);
 				case TypeCode.DateTime:
-					return ConvertToDateTime(value);
+					return isNullable ? ConvertToNullableDateTime(value) : ConvertToDateTime(value);
 				case TypeCode.Decimal:
-					return ConvertToDecimal(value);
+					return isNullable ? ConvertToNullableDecimal(value)  : ConvertToDecimal(value);
 				case TypeCode.Double:
-					return ConvertToDouble(value);
+					return isNullable ? ConvertToNullableDouble(value)   : ConvertToDouble(value);
 				case TypeCode.Int16:
-					return ConvertToInt16(value);
+					return isNullable ? ConvertToNullableInt16(value)    : ConvertToInt16(value);
 				case TypeCode.Int32:
-					return ConvertToInt32(value);
+					return isNullable ? ConvertToNullableInt32(value)    : ConvertToInt32(value);
 				case TypeCode.Int64:
-					return ConvertToInt64(value);
+					return isNullable ? ConvertToNullableInt64(value)    : ConvertToInt64(value);
 				case TypeCode.SByte:
-					return ConvertToSByte(value);
+					return isNullable ? ConvertToNullableSByte(value)    : ConvertToSByte(value);
 				case TypeCode.Single:
-					return ConvertToSingle(value);
+					return isNullable ? ConvertToNullableSingle(value)   : ConvertToSingle(value);
 				case TypeCode.String:
 					return ConvertToString(value);
 				case TypeCode.UInt16:
-					return ConvertToUInt16(value);
+					return isNullable ? ConvertToNullableUInt16(value)   : ConvertToUInt16(value);
 				case TypeCode.UInt32:
-					return ConvertToUInt32(value);
+					return isNullable ? ConvertToNullableUInt32(value)   : ConvertToUInt32(value);
 				case TypeCode.UInt64:
-					return ConvertToUInt64(value);
+					return isNullable ? ConvertToNullableUInt64(value)   : ConvertToUInt64(value);
 			}
 
 			if (typeof(Guid) == conversionType)
-				return ConvertToGuid(value);
+				return     isNullable ? ConvertToGuid(value)             : ConvertToNullableGuid(value);
 				
 			return Convert.ChangeType(value, conversionType);
 		}

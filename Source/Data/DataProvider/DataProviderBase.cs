@@ -4,6 +4,10 @@ using System.Data.Common;
 
 namespace BLToolkit.Data.DataProvider
 {
+#if EXPERIMENTAL
+	public delegate T ValueAccessor<T>(IDataReader r, int column);
+#endif
+
 	/// <summary>
 	/// The <b>DataProviderBase</b> is a class that provides specific data provider information
 	/// for the <see cref="DbManager"/> class. 
@@ -144,5 +148,35 @@ namespace BLToolkit.Data.DataProvider
 		{
 			return connection.CreateCommand();
 		}
+
+#if EXPERIMENTAL
+		private static Int32 Int32ValueAccessor(IDataReader r, int column)
+		{
+			return r.GetInt32(column);
+		}
+
+		private static Int32? NullableInt32ValueAccessor(IDataReader r, int column)
+		{
+			return r.IsDBNull(column) ? (int?)null : r.GetInt32(column);
+		}
+
+		private static T DefaultValueAccessor<T>(IDataReader r, int column)
+		{
+			return (T)r.GetValue(column);
+		}
+
+		public ValueAccessor<T> GetValueAccessor<T>(Type type, bool isNullable)
+		{
+			switch (Type.GetTypeCode(type))
+			{
+				case TypeCode.Int32:
+					return (ValueAccessor<T>)(isNullable ?
+						(object)new ValueAccessor<Int32?>(NullableInt32ValueAccessor) :
+						(object)new ValueAccessor<Int32>(Int32ValueAccessor));
+			}
+
+			return DefaultValueAccessor<T>;
+		}
+#endif
 	}
 }

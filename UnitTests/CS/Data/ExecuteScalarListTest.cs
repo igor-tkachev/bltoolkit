@@ -76,12 +76,13 @@ namespace Data
 		{
 			using (DbManager db = new DbManager())
 			{
-				List<int> array = db
-					.SetSpCommand("Person_SelectAll")
-					.ExecuteScalarList<int>();
+				List<int?> array = db
+					.SetCommand("SELECT PersonID FROM Person UNION ALL SELECT NULL")
+					.ExecuteScalarList<int?>();
 
 				Assert.IsNotNull(array);
 				Assert.IsTrue(array.Count > 0);
+				Assert.IsNull(array[array.Count - 1]);
 			}
 		}
 
@@ -123,6 +124,36 @@ namespace Data
 				db
 				.SetSpCommand("Person_SelectAll")
 				.ExecuteScalarList(array, "LastName");
+
+				Assert.IsNotNull(array);
+				Assert.IsTrue(array.Count > 0);
+			}
+		}
+
+		[Test]
+		public void FW2ScalarListTest5()
+		{
+			using (DbManager db = new DbManager())
+			{
+				List<uint?> array = db
+					.SetCommand("SELECT PersonID FROM Person UNION ALL SELECT NULL")
+					.ExecuteScalarList<uint?>();
+
+				Assert.IsNotNull(array);
+				Assert.IsTrue(array.Count > 0);
+				Assert.IsNull(array[array.Count - 1]);
+			}
+		}
+
+		[Test]
+		public void FW2ScalarListTest6()
+		{
+			using (DbManager db = new DbManager())
+			{
+				List<uint> array = new List<uint>();
+				db
+				.SetSpCommand("Person_SelectAll")
+				.ExecuteScalarList(array);
 
 				Assert.IsNotNull(array);
 				Assert.IsTrue(array.Count > 0);

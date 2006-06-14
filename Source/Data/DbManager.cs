@@ -2779,6 +2779,10 @@ namespace BLToolkit.Data
 				InitParameters(CommandAction.Select);
 
 			Type type = typeof(T);
+			bool isNullable = (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>));
+
+			if (isNullable)
+				type = Nullable.GetUnderlyingType(type);
 
 			//object nullValue = _mappingSchema.GetNullValue(type);
 
@@ -2786,13 +2790,25 @@ namespace BLToolkit.Data
 			{
 				if (dr.Read())
 				{
-					int index = nip.ByName ? dr.GetOrdinal(nip.Name) : nip.Index;
+					int  index = nip.ByName ? dr.GetOrdinal(nip.Name) : nip.Index;
+#if EXPERIMENTAL
+
+					if (dr.GetFieldType(index) == type)
+					{
+						ValueAccessor<T> va = _dataProvider.GetValueAccessor<T>(type, isNullable);
+
+						do
+							list.Add(va(dr, index));
+						while(dr.Read());
+					}
+					else
+#endif
 					do
 					{
 						object value = dr.GetValue(index);
 
 						if (value == null || value.GetType() != type)
-							value = value is DBNull ? null : _mappingSchema.ConvertChangeType(value, type);
+							value = value is DBNull ? null : _mappingSchema.ConvertChangeType(value, type, isNullable);
 
 						list.Add((T)value);
 					}
