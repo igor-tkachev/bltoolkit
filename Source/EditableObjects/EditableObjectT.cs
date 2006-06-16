@@ -2,11 +2,11 @@ using System;
 
 using BLToolkit.Reflection;
 
-namespace BLToolkit.Common
+namespace BLToolkit.EditableObjects
 {
 	[Serializable]
-	public abstract class EntityBase<T> : EntityBase
-		where T : EntityBase<T>
+	public abstract class EditableObject<T> : EditableObject
+		where T : EditableObject<T>
 	{
 		#region CreateInstance
 

@@ -5,12 +5,11 @@ using System.Data.SqlTypes;
 using System.Reflection;
 
 using BLToolkit.Common;
+using BLToolkit.ComponentModel;
 using BLToolkit.Mapping;
 using BLToolkit.Reflection;
 using BLToolkit.TypeBuilder;
-using BLToolkit.ComponentModel;
 using BLToolkit.Validation;
-using BLToolkit.Aspects;
 
 namespace BLToolkit.EditableObjects
 {
@@ -109,8 +108,9 @@ namespace BLToolkit.EditableObjects
 	[ImplementInterface(typeof(IPrintDebugState))]
 	[ImplementInterface(typeof(ISetParent))]
 	[Serializable]
-	public abstract class EditableObject
-		: EntityBase, IEditableObject, IValidatable, INotifyPropertyChanged, ISupportMapping, IPropertyChanged, INotifyObjectEdit
+	public abstract class EditableObject : EntityBase,
+		IEditableObject, INotifyPropertyChanged,
+		ISupportMapping, IValidatable, IPropertyChanged, INotifyObjectEdit
 	{
 		#region Constructor
 

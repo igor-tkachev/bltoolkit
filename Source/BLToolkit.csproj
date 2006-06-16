@@ -219,6 +219,11 @@
                     BuildAction = "Compile"
                 />
                 <File
+                    RelPath = "Common\EntityBase.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
                     RelPath = "Common\NameOrIndexParameter.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
