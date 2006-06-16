@@ -13,7 +13,7 @@ namespace BLToolkit.Aspects
 			if (!IsEnabled)
 				return;
 
-			lock (info.CallMethodInfo.MethodCallCache)
+			lock (info.CallMethodInfo.MethodCallCache.SyncRoot)
 			{
 				CompoundValue key  = GetKey(info);
 				CacheItem     item = GetItem(key, info);
@@ -45,7 +45,7 @@ namespace BLToolkit.Aspects
 			if (!IsEnabled)
 				return;
 
-			lock (info.CallMethodInfo.MethodCallCache)
+			lock (info.CallMethodInfo.MethodCallCache.SyncRoot)
 			{
 				CompoundValue key = (CompoundValue)info.Items["CacheKey"];
 
