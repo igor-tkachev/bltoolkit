@@ -1,5 +1,4 @@
 using System;
-using System.ComponentModel;
 
 using BLToolkit.Mapping;
 using BLToolkit.Validation;
