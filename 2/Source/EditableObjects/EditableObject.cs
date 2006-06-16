@@ -4,11 +4,13 @@ using System.ComponentModel;
 using System.Data.SqlTypes;
 using System.Reflection;
 
+using BLToolkit.Common;
 using BLToolkit.Mapping;
 using BLToolkit.Reflection;
 using BLToolkit.TypeBuilder;
 using BLToolkit.ComponentModel;
 using BLToolkit.Validation;
+using BLToolkit.Aspects;
 
 namespace BLToolkit.EditableObjects
 {
@@ -108,7 +110,7 @@ namespace BLToolkit.EditableObjects
 	[ImplementInterface(typeof(ISetParent))]
 	[Serializable]
 	public abstract class EditableObject
-		: IEditableObject, IValidatable, INotifyPropertyChanged, ISupportMapping, IPropertyChanged, INotifyObjectEdit
+		: EntityBase, IEditableObject, IValidatable, INotifyPropertyChanged, ISupportMapping, IPropertyChanged, INotifyObjectEdit
 	{
 		#region Constructor
 
@@ -283,25 +285,6 @@ namespace BLToolkit.EditableObjects
 		#region INotifyObjectEdit Members
 
 		public event ObjectEditEventHandler ObjectEdit;
-
-		#endregion
-
-		#region Validation
-
-		public virtual void Validate()
-		{
-			Validator.Validate(this);
-		}
-
-		public virtual bool IsValid(string fieldName)
-		{
-			return Validator.IsValid(this, fieldName);
-		}
-
-		public virtual string[] GetErrorMessages(string fieldName)
-		{
-			return Validator.GetErrorMessages(this, fieldName);
-		}
 
 		#endregion
 	}

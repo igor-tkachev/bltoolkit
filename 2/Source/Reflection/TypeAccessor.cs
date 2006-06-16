@@ -101,7 +101,7 @@ namespace BLToolkit.Reflection
 			Type         sType = source.GetType();
 			Type         dType = dest.  GetType();
 
-			if (TypeHelper.IsSameOrParent(sType, dType))      ta = GetAccessor(sType);
+			if      (TypeHelper.IsSameOrParent(sType, dType)) ta = GetAccessor(sType);
 			else if (TypeHelper.IsSameOrParent(dType, sType)) ta = GetAccessor(dType);
 			else
 				throw new ArgumentException();
@@ -780,7 +780,7 @@ namespace BLToolkit.Reflection
 			protected IsNullHandler      _isNull;
 
 			protected string               _prefixedName;
-			protected string               _namePrefix;
+			//protected string               _namePrefix;
 			protected PropertyDescriptor[] _chainAccessors;
 
 			public StandardPropertyDescriptor(
@@ -793,7 +793,7 @@ namespace BLToolkit.Reflection
 				_descriptor     = pd;
 				_isNull         = isNull;
 				_prefixedName   = namePrefix + pd.Name;
-				_namePrefix     = namePrefix;
+				//_namePrefix     = namePrefix;
 				_chainAccessors = chainAccessors;
 			}
 

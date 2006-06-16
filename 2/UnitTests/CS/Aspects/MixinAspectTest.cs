@@ -37,7 +37,7 @@ namespace Aspects
 		}
 
 		[Mixin(typeof(ICustomTypeDescriptor), "_typeDescriptor")]
-		[Mixin(typeof(ITestInterface),        "_testInterface", "'{0}.{1}' is null.")]
+		[Mixin(typeof(ITestInterface),        "TestInterface", "'{0}.{1}' is null.")]
 		public abstract class TestClass
 		{
 			public TestClass()
@@ -46,7 +46,17 @@ namespace Aspects
 			}
 
 			protected object _typeDescriptor;
-			protected object _testInterface = new TestInterfaceImpl();
+
+			private ITestInterface _testInterface;
+			public  ITestInterface  TestInterface
+			{
+				get
+				{
+					if (_testInterface == null)
+						_testInterface = new TestInterfaceImpl();
+					return _testInterface;
+				}
+			}
 
 			public string Code = "code";
 
