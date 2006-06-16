@@ -8,17 +8,24 @@ namespace BLToolkit.Common
 
 		private static CV Conv<T1,P1>(Convert<T1,P1>.CV op)
 		{
-			return (CV)(object)(Convert<T1,P1>.CV)op;
+			return (CV)(object)op;
 		}
 
 		private static CV Conv<T1>(Convert<T1,P>.CV op)
 		{
-			return (CV)(object)(Convert<T1,P>.CV)op;
+			return (CV)(object)op;
 		}
 
 		public  static CV From = GetConverter();
 		private static CV GetConverter()
 		{
+			if (typeof(T).IsAssignableFrom(typeof(P)))
+			{
+				// Convert to same type
+				//
+				return Conv<P>(delegate(P p) { return p; });
+			}
+
 			if (typeof(T) == typeof(SByte))
 			{
 				return Conv<SByte>(delegate(P p) { return System.Convert.ToSByte(p); });
@@ -36,8 +43,6 @@ namespace BLToolkit.Common
 
 			if (typeof(T) == typeof(Int32))
 			{
-				if (typeof(P) == typeof(Int32)) return Conv<Int32,Int32>(delegate(Int32 p) { return p; });
-
 				return Conv<Int32>(delegate(P p) { return System.Convert.ToInt32(p); });
 			}
 
