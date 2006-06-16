@@ -151,18 +151,18 @@ namespace BLToolkit.Mapping
 			bool n = mi.Nullable;
 
 			Type type = mi.MemberAccessor.UnderlyingType;
-
-			if (type == typeof(SByte))   return n? new SByteMapper.Nullable(): new SByteMapper();
-			if (type == typeof(Int16))   return n? new Int16Mapper.Nullable(): new Int16Mapper();
-			if (type == typeof(Int32))   return n? new Int32Mapper.Nullable(): new Int32Mapper();
-			if (type == typeof(Int64))   return n? new Int64Mapper.Nullable(): new Int64Mapper();
-			if (type == typeof(Byte))    return n? new ByteMapper.Nullable(): new ByteMapper();
-			if (type == typeof(UInt16))  return n? new UInt16Mapper.Nullable(): new UInt16Mapper();
-			if (type == typeof(UInt32))  return n? new UInt32Mapper.Nullable(): new UInt32Mapper();
-			if (type == typeof(UInt64))  return n? new UInt64Mapper.Nullable(): new UInt64Mapper();
-			if (type == typeof(Single))  return n? new SingleMapper.Nullable(): new SingleMapper();
-			if (type == typeof(Double))  return n? new DoubleMapper.Nullable(): new DoubleMapper();
-			if (type == typeof(Char))    return n? new CharMapper.Nullable(): new CharMapper();
+ 
+			if (type == typeof(SByte))   return n? new SByteMapper.  Nullable(): new SByteMapper();
+			if (type == typeof(Int16))   return n? new Int16Mapper.  Nullable(): new Int16Mapper();
+			if (type == typeof(Int32))   return n? new Int32Mapper.  Nullable(): new Int32Mapper();
+			if (type == typeof(Int64))   return n? new Int64Mapper.  Nullable(): new Int64Mapper();
+			if (type == typeof(Byte))    return n? new ByteMapper.   Nullable(): new ByteMapper();
+			if (type == typeof(UInt16))  return n? new UInt16Mapper. Nullable(): new UInt16Mapper();
+			if (type == typeof(UInt32))  return n? new UInt32Mapper. Nullable(): new UInt32Mapper();
+			if (type == typeof(UInt64))  return n? new UInt64Mapper. Nullable(): new UInt64Mapper();
+			if (type == typeof(Single))  return n? new SingleMapper. Nullable(): new SingleMapper();
+			if (type == typeof(Double))  return n? new DoubleMapper. Nullable(): new DoubleMapper();
+			if (type == typeof(Char))    return n? new CharMapper.   Nullable(): new CharMapper();
 			if (type == typeof(Boolean)) return n? new BooleanMapper.Nullable(): new BooleanMapper();
 
 			throw new InvalidOperationException();

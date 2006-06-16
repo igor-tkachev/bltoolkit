@@ -4,49 +4,75 @@ namespace BLToolkit.Common
 {
 	public class Convert<T,P>
 	{
-		public delegate T CV(P p);
+		public delegate T ConvertMethod(P p);
 
-		private static CV Conv<T1,P1>(Convert<T1,P1>.CV op)
+		private static ConvertMethod Conv<T1,P1>(Convert<T1,P1>.ConvertMethod op)
 		{
-			return (CV)(object)op;
+			return (ConvertMethod)(object)op;
 		}
 
-		private static CV Conv<T1>(Convert<T1,P>.CV op)
+		private static ConvertMethod Conv<T1>(Convert<T1,P>.ConvertMethod op)
 		{
-			return (CV)(object)op;
+			return (ConvertMethod)(object)op;
 		}
 
-		public  static CV From = GetConverter();
-		private static CV GetConverter()
+		public static ConvertMethod From = GetConverter();
+		public static ConvertMethod GetConverter()
 		{
-			if (typeof(T).IsAssignableFrom(typeof(P)))
+			Type t = typeof(T);
+
+			if (t.IsAssignableFrom(typeof(P)))
 			{
 				// Convert to same type
 				//
 				return Conv<P>(delegate(P p) { return p; });
 			}
 
-			if (typeof(T) == typeof(SByte))
-			{
-				return Conv<SByte>(delegate(P p) { return System.Convert.ToSByte(p); });
-			}
+			if (t == typeof(SByte)) return GetSByteConverter();
+			if (t == typeof(Int16)) return GetInt16Converter();
+			if (t == typeof(Int32)) return GetInt32Converter();
+			if (t == typeof(Int64)) return GetInt64Converter();
 
-			if (typeof(T) == typeof(Byte))
-			{
-				return Conv<Byte>(delegate(P p) { return System.Convert.ToByte(p); });
-			}
+			if (t == typeof(Byte))  return GetByteConverter();
 
-			if (typeof(T) == typeof(Int16))
-			{
-				return Conv<Int16>(delegate(P p) { return System.Convert.ToInt16(p); });
-			}
+			return delegate(P o) { return (T)Convert.ChangeType(o, typeof(T)); };
+		}
 
-			if (typeof(T) == typeof(Int32))
-			{
-				return Conv<Int32>(delegate(P p) { return System.Convert.ToInt32(p); });
-			}
+		private static ConvertMethod GetSByteConverter()
+		{
+			return Conv<SByte>(delegate(P p) { return Convert.ToSByte(p); });
+		}
 
-			return delegate(P o) { return (T)System.Convert.ChangeType(o, typeof(T)); };
+		private static ConvertMethod GetInt16Converter()
+		{
+			return Conv<Int16>(delegate(P p) { return Convert.ToInt16(p); });
+		}
+
+		private static ConvertMethod GetInt32Converter()
+		{
+			Type t = typeof(P);
+
+			if (t == typeof(SByte))  return Conv<Int32,SByte> (delegate(SByte p)  { return        p; });
+			if (t == typeof(Int16))  return Conv<Int32,Int16> (delegate(Int16 p)  { return        p; });
+			if (t == typeof(Int32))  return Conv<Int32,Int32> (delegate(Int32 p)  { return        p; });
+			if (t == typeof(Int64))  return Conv<Int32,Int64> (delegate(Int64 p)  { return (Int32)p; });
+
+			if (t == typeof(Byte))   return Conv<Int32,Byte>  (delegate(Byte   p) { return        p; });
+			if (t == typeof(UInt16)) return Conv<Int32,UInt16>(delegate(UInt16 p) { return        p; });
+			if (t == typeof(UInt32)) return Conv<Int32,UInt32>(delegate(UInt32 p) { return (Int32)p; });
+			if (t == typeof(UInt64)) return Conv<Int32,UInt64>(delegate(UInt64 p) { return (Int32)p; });
+
+			return Conv<Int32>(delegate(P p) { return Convert.ToInt32(p); });
+		}
+
+		private static ConvertMethod GetInt64Converter()
+		{
+			return Conv<Int64>(delegate(P p) { return Convert.ToInt64(p); });
+		}
+
+		private static ConvertMethod GetByteConverter()
+		{
+			return Conv<Byte>(delegate(P p) { return Convert.ToByte(p); });
 		}
 	}
 

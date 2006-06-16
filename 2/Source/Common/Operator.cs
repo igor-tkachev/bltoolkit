@@ -5,29 +5,29 @@ namespace BLToolkit.Common
 {
 	public static class Operator<T>
 	{
-		public delegate T    Op (T op1, T op2);
-		public delegate bool Bop(T op1, T op2);
-		public delegate T    One(T op);
+		public delegate T    TwoArgOperation (T op1, T op2);
+		public delegate bool BoolRetOperation(T op1, T op2);
+		public delegate T    OneArgOperation (T op);
 
-		private static Op Conv<V>(Operator<V>.Op op)
+		private static TwoArgOperation Conv<V>(Operator<V>.TwoArgOperation op)
 		{
-			return (Op)(object)(Operator<V>.Op)op;
+			return (TwoArgOperation)(object)op;
 		}
 
-		private static Bop BConv<V>(Operator<V>.Bop op)
+		private static BoolRetOperation BConv<V>(Operator<V>.BoolRetOperation op)
 		{
-			return (Bop)(object)(Operator<V>.Bop)op;
+			return (BoolRetOperation)(object)op;
 		}
 
-		private static One OConv<V>(Operator<V>.One op)
+		private static OneArgOperation OConv<V>(Operator<V>.OneArgOperation op)
 		{
-			return (One)(object)(Operator<V>.One)op;
+			return (OneArgOperation)(object)op;
 		}
 
 		#region (a + b)  Addition
 
-		public  static Op Addition = GetAdditionOperator();
-		private static Op GetAdditionOperator()
+		public  static TwoArgOperation Addition = GetAdditionOperator();
+		private static TwoArgOperation GetAdditionOperator()
 		{
 			Type t = typeof(T);
 
@@ -95,8 +95,8 @@ namespace BLToolkit.Common
 
 		#region (a - b)  Subtraction
 
-		public  static Op Subtraction = GetSubtractionOperator();
-		private static Op GetSubtractionOperator()
+		public  static TwoArgOperation Subtraction = GetSubtractionOperator();
+		private static TwoArgOperation GetSubtractionOperator()
 		{
 			Type t = typeof(T);
 
@@ -158,8 +158,8 @@ namespace BLToolkit.Common
 
 		#region (a * b)  Multiply
 
-		public  static Op Multiply = GetMultiplyOperator();
-		private static Op GetMultiplyOperator()
+		public  static TwoArgOperation Multiply = GetMultiplyOperator();
+		private static TwoArgOperation GetMultiplyOperator()
 		{
 			Type t = typeof(T);
 
@@ -219,8 +219,8 @@ namespace BLToolkit.Common
 
 		#region (a / b)  Division
 
-		public  static Op Division = GetDivisionOperator();
-		private static Op GetDivisionOperator()
+		public  static TwoArgOperation Division = GetDivisionOperator();
+		private static TwoArgOperation GetDivisionOperator()
 		{
 			Type t = typeof(T);
 
@@ -280,8 +280,8 @@ namespace BLToolkit.Common
 
 		#region (a % b)  Modulus
 
-		public  static Op Modulus = GetModulusOperator();
-		private static Op GetModulusOperator()
+		public  static TwoArgOperation Modulus = GetModulusOperator();
+		private static TwoArgOperation GetModulusOperator()
 		{
 			Type t = typeof(T);
 
@@ -336,8 +336,8 @@ namespace BLToolkit.Common
 
 		#region (a & b)  BitwiseAnd
 
-		public  static Op BitwiseAnd = GetBitwiseAndOperator();
-		private static Op GetBitwiseAndOperator()
+		public  static TwoArgOperation BitwiseAnd = GetBitwiseAndOperator();
+		private static TwoArgOperation GetBitwiseAndOperator()
 		{
 			Type t = typeof(T);
 
@@ -386,8 +386,8 @@ namespace BLToolkit.Common
 
 		#region (a | b)  BitwiseOr
 
-		public  static Op BitwiseOr = GetBitwiseOrOperator();
-		private static Op GetBitwiseOrOperator()
+		public  static TwoArgOperation BitwiseOr = GetBitwiseOrOperator();
+		private static TwoArgOperation GetBitwiseOrOperator()
 		{
 			Type t = typeof(T);
 
@@ -436,8 +436,8 @@ namespace BLToolkit.Common
 
 		#region (a ^ b)  ExclusiveOr
 
-		public  static Op ExclusiveOr = GetExclusiveOrOperator();
-		private static Op GetExclusiveOrOperator()
+		public  static TwoArgOperation ExclusiveOr = GetExclusiveOrOperator();
+		private static TwoArgOperation GetExclusiveOrOperator()
 		{
 			Type t = typeof(T);
 
@@ -486,8 +486,8 @@ namespace BLToolkit.Common
 
 		#region (-a)     UnaryNegation
 
-		public  static One UnaryNegation = GetUnaryNegationOperator();
-		private static One GetUnaryNegationOperator()
+		public  static OneArgOperation UnaryNegation = GetUnaryNegationOperator();
+		private static OneArgOperation GetUnaryNegationOperator()
 		{
 			Type t = typeof(T);
 
@@ -518,8 +518,8 @@ namespace BLToolkit.Common
 
 		#region (~a)     OnesComplement
 
-		public  static One OnesComplement = GetOnesComplementOperator();
-		private static One GetOnesComplementOperator()
+		public  static OneArgOperation OnesComplement = GetOnesComplementOperator();
+		private static OneArgOperation GetOnesComplementOperator()
 		{
 			Type t = typeof(T);
 
@@ -568,8 +568,8 @@ namespace BLToolkit.Common
 
 		#region (a == b) Equality
 
-		public  static Bop Equality = GetEqualityOperator();
-		private static Bop GetEqualityOperator()
+		public  static BoolRetOperation Equality = GetEqualityOperator();
+		private static BoolRetOperation GetEqualityOperator()
 		{
 			Type t = typeof(T);
 
@@ -646,8 +646,8 @@ namespace BLToolkit.Common
 
 		#region (a != b) Inequality
 
-		public  static Bop Inequality = GetInequalityOperator();
-		private static Bop GetInequalityOperator()
+		public  static BoolRetOperation Inequality = GetInequalityOperator();
+		private static BoolRetOperation GetInequalityOperator()
 		{
 			Type t = typeof(T);
 
@@ -723,8 +723,8 @@ namespace BLToolkit.Common
 
 		#region (a > b)  GreaterThan
 
-		public  static Bop GreaterThan = GetGreaterThanOperator();
-		private static Bop GetGreaterThanOperator()
+		public  static BoolRetOperation GreaterThan = GetGreaterThanOperator();
+		private static BoolRetOperation GetGreaterThanOperator()
 		{
 			Type t = typeof(T);
 
@@ -794,8 +794,8 @@ namespace BLToolkit.Common
 
 		#region (a >= b) GreaterThanOrEqual
 
-		public  static Bop GreaterThanOrEqual = GetGreaterThanOrEqualOperator();
-		private static Bop GetGreaterThanOrEqualOperator()
+		public  static BoolRetOperation GreaterThanOrEqual = GetGreaterThanOrEqualOperator();
+		private static BoolRetOperation GetGreaterThanOrEqualOperator()
 		{
 			Type t = typeof(T);
 
@@ -865,8 +865,8 @@ namespace BLToolkit.Common
 
 		#region (a < b)  LessThan 
 
-		public  static Bop LessThan = GetLessThanOperator();
-		private static Bop GetLessThanOperator()
+		public  static BoolRetOperation LessThan = GetLessThanOperator();
+		private static BoolRetOperation GetLessThanOperator()
 		{
 			Type t = typeof(T);
 
@@ -936,8 +936,8 @@ namespace BLToolkit.Common
 
 		#region (a <= b) LessThanOrEqual 
 
-		public  static Bop LessThanOrEqual = GetLessThanOrEqualOperator();
-		private static Bop GetLessThanOrEqualOperator()
+		public  static BoolRetOperation LessThanOrEqual = GetLessThanOrEqualOperator();
+		private static BoolRetOperation GetLessThanOrEqualOperator()
 		{
 			Type t = typeof(T);
 
