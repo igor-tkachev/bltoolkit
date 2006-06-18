@@ -8,7 +8,7 @@ using BLToolkit.Reflection.Extension;
 
 namespace BLToolkit.Mapping
 {
-	public class ObjectMapper : IMapDataSource, IMapDataDestination, IEnumerable
+	public class ObjectMapper : MapDataSourceDestinationBase, IEnumerable
 	{
 		#region Constructor
 
@@ -602,22 +602,27 @@ namespace BLToolkit.Mapping
 
 		#region IMapDataSource Members
 
-		public virtual int Count
+		public override int Count
 		{
 			get { return _members.Count; }
 		}
 
-		public virtual string GetName(int index)
+		public override Type GetFieldType(int index)
+		{
+			return ((MemberMapper)_members[index]).Type;
+		}
+
+		public override string GetName(int index)
 		{
 			return ((MemberMapper)_members[index]).Name;
 		}
 
-		public virtual object GetValue(object o, int index)
+		public override object GetValue(object o, int index)
 		{
 			return ((MemberMapper)_members[index]).GetValue(o);
 		}
 
-		public virtual object GetValue(object o, string name)
+		public override object GetValue(object o, string name)
 		{
 			MemberMapper mm = (MemberMapper)_nameToMember[name];
 
@@ -627,11 +632,33 @@ namespace BLToolkit.Mapping
 			return mm == null? null: mm.GetValue(o);
 		}
 
+		public override bool    IsNull    (object o, int index) { return this[index].IsNull(o); }
+
+		[CLSCompliant(false)]
+		public override SByte   GetSByte  (object o, int index) { return this[index].GetSByte  (o); }
+		public override Int16   GetInt16  (object o, int index) { return this[index].GetInt16  (o); }
+		public override Int32   GetInt32  (object o, int index) { return this[index].GetInt32  (o); }
+		public override Int64   GetInt64  (object o, int index) { return this[index].GetInt64  (o); }
+
+		public override Byte    GetByte   (object o, int index) { return this[index].GetByte   (o); }
+		[CLSCompliant(false)]
+		public override UInt16  GetUInt16 (object o, int index) { return this[index].GetUInt16 (o); }
+		[CLSCompliant(false)]
+		public override UInt32  GetUInt32 (object o, int index) { return this[index].GetUInt32 (o); }
+		[CLSCompliant(false)]
+		public override UInt64  GetUInt64 (object o, int index) { return this[index].GetUInt64 (o); }
+
+		public override Boolean GetBoolean(object o, int index) { return this[index].GetBoolean(o); }
+		public override Char    GetChar   (object o, int index) { return this[index].GetChar   (o); }
+		public override Single  GetSingle (object o, int index) { return this[index].GetSingle (o); }
+		public override Double  GetDouble (object o, int index) { return this[index].GetDouble (o); }
+		public override Decimal GetDecimal(object o, int index) { return this[index].GetDecimal(o); }
+
 		#endregion
 
 		#region IMapDataDestination Members
 
-		public virtual int GetOrdinal(string name)
+		public override int GetOrdinal(string name)
 		{
 			MemberMapper mm = (MemberMapper)_nameToMember[name];
 
@@ -641,15 +668,37 @@ namespace BLToolkit.Mapping
 			return mm == null? -1: mm.Ordinal;
 		}
 
-		public virtual void SetValue(object o, int index, object value)
+		public override void SetValue(object o, int index, object value)
 		{
 			((MemberMapper)_members[index]).SetValue(o, value);
 		}
 
-		public virtual void SetValue(object o, string name, object value)
+		public override void SetValue(object o, string name, object value)
 		{
 			SetValue(o, GetOrdinal(name), value);
 		}
+
+		public override void SetNull   (object o, int index)                { this[index].SetNull  (o); }
+
+		[CLSCompliant(false)]
+		public override void SetSByte  (object o, int index, SByte   value) { this[index].SetSByte  (o, value); }
+		public override void SetInt16  (object o, int index, Int16   value) { this[index].SetInt16  (o, value); }
+		public override void SetInt32  (object o, int index, Int32   value) { this[index].SetInt32  (o, value); }
+		public override void SetInt64  (object o, int index, Int64   value) { this[index].SetInt64  (o, value); }
+
+		public override void SetByte   (object o, int index, Byte    value) { this[index].SetByte   (o, value); }
+		[CLSCompliant(false)]
+		public override void SetUInt16 (object o, int index, UInt16  value) { this[index].SetUInt16 (o, value); }
+		[CLSCompliant(false)]
+		public override void SetUInt32 (object o, int index, UInt32  value) { this[index].SetUInt32 (o, value); }
+		[CLSCompliant(false)]
+		public override void SetUInt64 (object o, int index, UInt64  value) { this[index].SetUInt64 (o, value); }
+
+		public override void SetBoolean(object o, int index, Boolean value) { this[index].SetBoolean(o, value); }
+		public override void SetChar   (object o, int index, Char    value) { this[index].SetChar   (o, value); }
+		public override void SetSingle (object o, int index, Single  value) { this[index].SetSingle (o, value); }
+		public override void SetDouble (object o, int index, Double  value) { this[index].SetDouble (o, value); }
+		public override void SetDecimal(object o, int index, Decimal value) { this[index].SetDecimal(o, value); }
 
 		#endregion
 

@@ -76,6 +76,7 @@ namespace BLToolkit.Mapping
 			}
 		}
 
+		[CLSCompliant(false)]
 		public object GetValue(IMapDataSource source, object obj, int index)
 		{
 			object value = _fields[index].ByName ?
@@ -99,6 +100,7 @@ namespace BLToolkit.Mapping
 			return value;
 		}
 
+		[CLSCompliant(false)]
 		public object GetValueOrIndex(IMapDataSource source, object obj)
 		{
 			if (Fields.Length == 1)
@@ -107,6 +109,7 @@ namespace BLToolkit.Mapping
 			return GetIndexValue(source, obj);
 		}
 
+		[CLSCompliant(false)]
 		public CompoundValue GetIndexValue(IMapDataSource source, object obj)
 		{
 			object[] values = new string[Fields.Length];

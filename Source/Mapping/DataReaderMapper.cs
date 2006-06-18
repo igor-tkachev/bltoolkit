@@ -23,6 +23,11 @@ namespace BLToolkit.Mapping
 			get { return _dataReader.FieldCount; }
 		}
 
+		public virtual Type GetFieldType(int index)
+		{
+			return _dataReader.GetFieldType(index);
+		}
+
 		public virtual string GetName(int index)
 		{
 			return _dataReader.GetName(index);
@@ -39,6 +44,28 @@ namespace BLToolkit.Mapping
 			object value = _dataReader[name];
 			return value is DBNull? null: value;
 		}
+
+		public virtual bool    IsNull    (object o, int index) { return _dataReader.IsDBNull(index);   }
+
+		[CLSCompliant(false)]
+		public virtual SByte   GetSByte  (object o, int index) { return Map.DefaultSchema.ConvertToSByte(GetValue(o, index)); }
+		public virtual Int16   GetInt16  (object o, int index) { return _dataReader.GetInt16  (index); }
+		public virtual Int32   GetInt32  (object o, int index) { return _dataReader.GetInt32  (index); }
+		public virtual Int64   GetInt64  (object o, int index) { return _dataReader.GetInt64  (index); }
+
+		public virtual Byte    GetByte   (object o, int index) { return _dataReader.GetByte   (index); }
+		[CLSCompliant(false)]
+		public virtual UInt16  GetUInt16 (object o, int index) { return Map.DefaultSchema.ConvertToUInt16(GetValue(o, index)); }
+		[CLSCompliant(false)]
+		public virtual UInt32  GetUInt32 (object o, int index) { return Map.DefaultSchema.ConvertToUInt32(GetValue(o, index)); }
+		[CLSCompliant(false)]
+		public virtual UInt64  GetUInt64 (object o, int index) { return Map.DefaultSchema.ConvertToUInt64(GetValue(o, index)); }
+
+		public virtual Boolean GetBoolean(object o, int index) { return _dataReader.GetBoolean(index); }
+		public virtual Char    GetChar   (object o, int index) { return _dataReader.GetChar   (index); }
+		public virtual Single  GetSingle (object o, int index) { return Map.DefaultSchema.ConvertToSingle(GetValue(o, index)); }
+		public virtual Double  GetDouble (object o, int index) { return _dataReader.GetDouble (index); }
+		public virtual Decimal GetDecimal(object o, int index) { return _dataReader.GetDecimal(index); }
 
 		#endregion
 	}

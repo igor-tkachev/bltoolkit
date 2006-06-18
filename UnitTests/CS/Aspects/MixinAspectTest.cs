@@ -1,12 +1,11 @@
 using System;
 using System.ComponentModel;
 
-using NUnit.Framework;
-
 using BLToolkit.Aspects;
 using BLToolkit.ComponentModel;
 using BLToolkit.Reflection;
-using BLToolkit.TypeBuilder;
+
+using NUnit.Framework;
 
 namespace Aspects
 {

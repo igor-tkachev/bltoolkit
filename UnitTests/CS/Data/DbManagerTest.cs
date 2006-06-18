@@ -1,13 +1,13 @@
 using System;
 using System.Collections;
-
-using NUnit.Framework;
+using System.Data.SqlClient;
 
 using BLToolkit.Data;
-using BLToolkit.Reflection;
-using BLToolkit.Mapping;
 using BLToolkit.EditableObjects;
-using System.Data.SqlClient;
+using BLToolkit.Mapping;
+using BLToolkit.Reflection;
+
+using NUnit.Framework;
 
 namespace Data
 {

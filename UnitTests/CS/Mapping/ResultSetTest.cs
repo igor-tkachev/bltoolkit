@@ -1,11 +1,10 @@
 using System;
-using System.Data;
 using System.Collections;
-
-using NUnit.Framework;
 
 using BLToolkit.Data;
 using BLToolkit.Mapping;
+
+using NUnit.Framework;
 
 namespace Mapping
 {

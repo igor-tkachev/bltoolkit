@@ -56,6 +56,7 @@ namespace BLToolkit.Mapping
 			_defaultSchema.MapSourceToDestination(sourceObject, destObject, parameters);
 		}
 
+		[CLSCompliant(false)]
 		public static void MapSourceToDestination(
 			IMapDataSource      source, object sourceObject, 
 			IMapDataDestination dest,   object destObject,
@@ -64,6 +65,7 @@ namespace BLToolkit.Mapping
 			_defaultSchema.MapSourceToDestination(source, sourceObject, dest, destObject, parameters);
 		}
 
+		[CLSCompliant(false)]
 		public static void SourceListToDestinationList(
 			IMapDataSourceList      dataSourceList,
 			IMapDataDestinationList dataDestinationList,

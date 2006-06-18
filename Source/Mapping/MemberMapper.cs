@@ -15,6 +15,7 @@ namespace BLToolkit.Mapping
 
 			_mapMemberInfo  = mapMemberInfo;
 			_name           = mapMemberInfo.Name;
+			_type           = mapMemberInfo.Type;
 			_memberName     = mapMemberInfo.MemberName;
 			_memberAccessor = mapMemberInfo.MemberAccessor;
 			_mappingSchema  = mapMemberInfo.MappingSchema;
@@ -90,9 +91,10 @@ namespace BLToolkit.Mapping
 			get { return _memberName; }
 		}
 
-		public  Type  Type
+		private Type  _type;
+		public  Type   Type
 		{
-			get { return _mapMemberInfo.Type; }
+			get { return _type; }
 		}
 
 		#endregion
@@ -108,6 +110,50 @@ namespace BLToolkit.Mapping
 		{
 			_memberAccessor.SetValue(o, value);
 		}
+
+		public virtual bool    IsNull    (object o) { return GetValue(o) == null; }
+
+		[CLSCompliant(false)]
+		public virtual SByte   GetSByte  (object o) { return _memberAccessor.GetSByte  (o); }
+		public virtual Int16   GetInt16  (object o) { return _memberAccessor.GetInt16  (o); }
+		public virtual Int32   GetInt32  (object o) { return _memberAccessor.GetInt32  (o); }
+		public virtual Int64   GetInt64  (object o) { return _memberAccessor.GetInt64  (o); }
+
+		public virtual Byte    GetByte   (object o) { return _memberAccessor.GetByte   (o); }
+		[CLSCompliant(false)]
+		public virtual UInt16  GetUInt16 (object o) { return _memberAccessor.GetUInt16 (o); }
+		[CLSCompliant(false)]
+		public virtual UInt32  GetUInt32 (object o) { return _memberAccessor.GetUInt32 (o); }
+		[CLSCompliant(false)]
+		public virtual UInt64  GetUInt64 (object o) { return _memberAccessor.GetUInt64 (o); }
+
+		public virtual Boolean GetBoolean(object o) { return _memberAccessor.GetBoolean(o); }
+		public virtual Char    GetChar   (object o) { return _memberAccessor.GetChar   (o); }
+		public virtual Single  GetSingle (object o) { return _memberAccessor.GetSingle (o); }
+		public virtual Double  GetDouble (object o) { return _memberAccessor.GetDouble (o); }
+		public virtual Decimal GetDecimal(object o) { return _memberAccessor.GetDecimal(o); }
+
+		public virtual void SetNull   (object o)                { SetValue(o, null); }
+
+		[CLSCompliant(false)]
+		public virtual void SetSByte  (object o, SByte   value) { _memberAccessor.SetSByte  (o, value); }
+		public virtual void SetInt16  (object o, Int16   value) { _memberAccessor.SetInt16  (o, value); }
+		public virtual void SetInt32  (object o, Int32   value) { _memberAccessor.SetInt32  (o, value); }
+		public virtual void SetInt64  (object o, Int64   value) { _memberAccessor.SetInt64  (o, value); }
+
+		public virtual void SetByte   (object o, Byte    value) { _memberAccessor.SetByte   (o, value); }
+		[CLSCompliant(false)]
+		public virtual void SetUInt16 (object o, UInt16  value) { _memberAccessor.SetUInt16 (o, value); }
+		[CLSCompliant(false)]
+		public virtual void SetUInt32 (object o, UInt32  value) { _memberAccessor.SetUInt32 (o, value); }
+		[CLSCompliant(false)]
+		public virtual void SetUInt64 (object o, UInt64  value) { _memberAccessor.SetUInt64 (o, value); }
+
+		public virtual void SetBoolean(object o, Boolean value) { _memberAccessor.SetBoolean(o, value); }
+		public virtual void SetChar   (object o, Char    value) { _memberAccessor.SetChar   (o, value); }
+		public virtual void SetSingle (object o, Single  value) { _memberAccessor.SetSingle (o, value); }
+		public virtual void SetDouble (object o, Double  value) { _memberAccessor.SetDouble (o, value); }
+		public virtual void SetDecimal(object o, Decimal value) { _memberAccessor.SetDecimal(o, value); }
 
 		#endregion
 
@@ -168,75 +214,16 @@ namespace BLToolkit.Mapping
 			throw new InvalidOperationException();
 		}
 
-		class Int16Mapper : MemberMapper
-		{
-			protected object _nullValue;
-
-			public override void SetValue(object o, object value)
-			{
-				_memberAccessor.SetValue(
-					o,
-					value is Int16? (Int16)value:
-					value == null?  _nullValue:
-					                _mappingSchema.ConvertToInt16(value));
-			}
-
-			public override void Init(MapMemberInfo mapMemberInfo)
-			{
-				if (mapMemberInfo == null) throw new ArgumentNullException("mapMemberInfo");
-
-				_nullValue = Convert.ToInt16(mapMemberInfo.NullValue);
-				base.Init(mapMemberInfo);
-			}
-
-			public class Nullable : Int16Mapper
-			{
-				public override object GetValue(object o)
-				{
-					object value = _memberAccessor.GetValue(o);
-					return (Int16)value == (Int16)_nullValue? null: value;
-				}
-			}
-		}
-
-		class Int32Mapper : MemberMapper
-		{
-			protected object _nullValue;
-
-			public override void SetValue(object o, object value)
-			{
-				_memberAccessor.SetValue(
-					o,
-					value is Int32? (Int32)value:
-					value == null?  _nullValue:
-					                _mappingSchema.ConvertToInt32(value));
-			}
-
-			public override void Init(MapMemberInfo mapMemberInfo)
-			{
-				if (mapMemberInfo == null) throw new ArgumentNullException("mapMemberInfo");
-
-				_nullValue = Convert.ToInt32(mapMemberInfo.NullValue);
-				base.Init(mapMemberInfo);
-			}
-
-			public class Nullable : Int32Mapper
-			{
-				public override object GetValue(object o)
-				{
-					object value = _memberAccessor.GetValue(o);
-					return (Int32)value == (Int32)_nullValue? null: value;
-				}
-			}
-		}
-
 		class SByteMapper : MemberMapper
 		{
-			protected object _nullValue;
+			protected SByte _nullValue;
+
+			public override bool IsNull (object o) { return false; }
+			public override void SetNull(object o) { _memberAccessor.SetSByte(o, _nullValue); }
 
 			public override void SetValue(object o, object value)
 			{
-				_memberAccessor.SetValue(
+				_memberAccessor.SetSByte(
 					o,
 					value is SByte? (SByte)value:
 					value == null?  _nullValue:
@@ -253,21 +240,98 @@ namespace BLToolkit.Mapping
 
 			public class Nullable : SByteMapper
 			{
+				public override bool IsNull(object o) { return GetSByte(o) == _nullValue; }
+
 				public override object GetValue(object o)
 				{
-					object value = _memberAccessor.GetValue(o);
-					return (SByte)value == (SByte)_nullValue? null: value;
+					SByte value = _memberAccessor.GetSByte(o);
+					return value == _nullValue? null: (object)value;
+				}
+			}
+		}
+
+		class Int16Mapper : MemberMapper
+		{
+			protected Int16 _nullValue;
+
+			public override bool IsNull (object o) { return false; }
+			public override void SetNull(object o) { _memberAccessor.SetInt16(o, _nullValue); }
+
+			public override void SetValue(object o, object value)
+			{
+				_memberAccessor.SetInt16(
+					o,
+					value is Int16? (Int16)value:
+					value == null?  _nullValue:
+					                _mappingSchema.ConvertToInt16(value));
+			}
+
+			public override void Init(MapMemberInfo mapMemberInfo)
+			{
+				if (mapMemberInfo == null) throw new ArgumentNullException("mapMemberInfo");
+
+				_nullValue = Convert.ToInt16(mapMemberInfo.NullValue);
+				base.Init(mapMemberInfo);
+			}
+
+			public class Nullable : Int16Mapper
+			{
+				public override bool IsNull(object o) { return GetInt16(o) == _nullValue; }
+
+				public override object GetValue(object o)
+				{
+					Int16 value = _memberAccessor.GetInt16(o);
+					return value == _nullValue? null: (object)value;
+				}
+			}
+		}
+
+		class Int32Mapper : MemberMapper
+		{
+			protected Int32 _nullValue;
+
+			public override bool IsNull(object o) { return false; }
+			public override void SetNull(object o) { _memberAccessor.SetInt32(o, _nullValue); }
+
+			public override void SetValue(object o, object value)
+			{
+				_memberAccessor.SetInt32(
+					o,
+					value is Int32? (Int32)value:
+					value == null?  _nullValue:
+					                _mappingSchema.ConvertToInt32(value));
+			}
+
+			public override void Init(MapMemberInfo mapMemberInfo)
+			{
+				if (mapMemberInfo == null) throw new ArgumentNullException("mapMemberInfo");
+
+				_nullValue = Convert.ToInt32(mapMemberInfo.NullValue);
+				base.Init(mapMemberInfo);
+			}
+
+			public class Nullable : Int32Mapper
+			{
+				public override bool IsNull(object o) { return GetInt32(o) == _nullValue; }
+
+				public override object GetValue(object o)
+				{
+					int value = _memberAccessor.GetInt32(o);
+					return value == _nullValue? null: (object)value;
 				}
 			}
 		}
 
 		class Int64Mapper : MemberMapper
 		{
-			protected object _nullValue;
+			protected Int64 _nullValue;
+
+			public override bool IsNull (object o) { return false; }
+			public override void SetNull(object o) { _memberAccessor.SetInt64(o, _nullValue); }
 
 			public override void SetValue(object o, object value)
 			{
-				_memberAccessor.SetValue(
+				_memberAccessor.SetInt64(
 					o,
 					value is Int64? (Int64)value:
 					value == null?  _nullValue:
@@ -284,21 +348,26 @@ namespace BLToolkit.Mapping
 
 			public class Nullable : Int64Mapper
 			{
+				public override bool IsNull(object o) { return GetInt64(o) == _nullValue; }
+
 				public override object GetValue(object o)
 				{
-					object value = _memberAccessor.GetValue(o);
-					return (Int64)value == (Int64)_nullValue? null: value;
+					Int64 value = _memberAccessor.GetInt64(o);
+					return value == _nullValue? null: (object)value;
 				}
 			}
 		}
 
 		class ByteMapper : MemberMapper
 		{
-			protected object _nullValue;
+			protected Byte _nullValue;
+
+			public override bool IsNull (object o) { return false; }
+			public override void SetNull(object o) { _memberAccessor.SetByte(o, _nullValue); }
 
 			public override void SetValue(object o, object value)
 			{
-				_memberAccessor.SetValue(
+				_memberAccessor.SetByte(
 					o,
 					value is Byte? (Byte)value:
 					value == null? _nullValue:
@@ -315,21 +384,26 @@ namespace BLToolkit.Mapping
 
 			public class Nullable : ByteMapper
 			{
+				public override bool IsNull(object o) { return GetByte(o) == _nullValue; }
+
 				public override object GetValue(object o)
 				{
-					object value = _memberAccessor.GetValue(o);
-					return (Byte)value == (Byte)_nullValue? null: value;
+					Byte value = _memberAccessor.GetByte(o);
+					return value == _nullValue? null: (object)value;
 				}
 			}
 		}
 
 		class UInt16Mapper : MemberMapper
 		{
-			protected object _nullValue;
+			protected UInt16 _nullValue;
+
+			public override bool IsNull (object o) { return false; }
+			public override void SetNull(object o) { _memberAccessor.SetUInt16(o, _nullValue); }
 
 			public override void SetValue(object o, object value)
 			{
-				_memberAccessor.SetValue(
+				_memberAccessor.SetUInt16(
 					o,
 					value is UInt16? (UInt16)value:
 					value == null?   _nullValue:
@@ -346,21 +420,26 @@ namespace BLToolkit.Mapping
 
 			public class Nullable : UInt16Mapper
 			{
+				public override bool IsNull(object o) { return GetUInt16(o) == _nullValue; }
+
 				public override object GetValue(object o)
 				{
-					object value = _memberAccessor.GetValue(o);
-					return (UInt16)value == (UInt16)_nullValue? null: value;
+					UInt16 value = _memberAccessor.GetUInt16(o);
+					return value == _nullValue? null: (object)value;
 				}
 			}
 		}
 
 		class UInt32Mapper : MemberMapper
 		{
-			protected object _nullValue;
+			protected UInt32 _nullValue;
+
+			public override bool IsNull (object o) { return false; }
+			public override void SetNull(object o) { _memberAccessor.SetUInt32(o, _nullValue); }
 
 			public override void SetValue(object o, object value)
 			{
-				_memberAccessor.SetValue(
+				_memberAccessor.SetUInt32(
 					o,
 					value is UInt32? (UInt32)value:
 					value == null?   _nullValue:
@@ -377,21 +456,26 @@ namespace BLToolkit.Mapping
 
 			public class Nullable : UInt32Mapper
 			{
+				public override bool IsNull(object o) { return GetUInt32(o) == _nullValue; }
+
 				public override object GetValue(object o)
 				{
-					object value = _memberAccessor.GetValue(o);
-					return (UInt32)value == (UInt32)_nullValue? null: value;
+					UInt32 value = _memberAccessor.GetUInt32(o);
+					return value == _nullValue? null: (object)value;
 				}
 			}
 		}
 
 		class UInt64Mapper : MemberMapper
 		{
-			protected object _nullValue;
+			protected UInt64 _nullValue;
+
+			public override bool IsNull (object o) { return false; }
+			public override void SetNull(object o) { _memberAccessor.SetUInt64(o, _nullValue); }
 
 			public override void SetValue(object o, object value)
 			{
-				_memberAccessor.SetValue(
+				_memberAccessor.SetUInt64(
 					o,
 					value is UInt64? (UInt64)value:
 					value == null?   _nullValue:
@@ -408,21 +492,26 @@ namespace BLToolkit.Mapping
 
 			public class Nullable : UInt64Mapper
 			{
+				public override bool IsNull(object o) { return GetUInt64(o) == _nullValue; }
+
 				public override object GetValue(object o)
 				{
-					object value = _memberAccessor.GetValue(o);
-					return (UInt64)value == (UInt64)_nullValue? null: value;
+					UInt64 value = _memberAccessor.GetUInt64(o);
+					return value == _nullValue? null: (object)value;
 				}
 			}
 		}
 
 		class CharMapper : MemberMapper
 		{
-			protected object _nullValue;
+			protected Char _nullValue;
+
+			public override bool IsNull (object o) { return false; }
+			public override void SetNull(object o) { _memberAccessor.SetChar(o, _nullValue); }
 
 			public override void SetValue(object o, object value)
 			{
-				_memberAccessor.SetValue(
+				_memberAccessor.SetChar(
 					o,
 					value is Char? (Char)value:
 					value == null? _nullValue:
@@ -439,52 +528,26 @@ namespace BLToolkit.Mapping
 
 			public class Nullable : CharMapper
 			{
+				public override bool IsNull(object o) { return GetChar(o) == _nullValue; }
+
 				public override object GetValue(object o)
 				{
-					object value = _memberAccessor.GetValue(o);
-					return (Char)value == (Char)_nullValue? null: value;
-				}
-			}
-		}
-
-		class DoubleMapper : MemberMapper
-		{
-			protected object _nullValue;
-
-			public override void SetValue(object o, object value)
-			{
-				_memberAccessor.SetValue(
-					o,
-					value is Double? (Double)value:
-					value == null?   _nullValue:
-					                 _mappingSchema.ConvertToDouble(value));
-			}
-
-			public override void Init(MapMemberInfo mapMemberInfo)
-			{
-				if (mapMemberInfo == null) throw new ArgumentNullException("mapMemberInfo");
-
-				_nullValue = Convert.ToDouble(mapMemberInfo.NullValue);
-				base.Init(mapMemberInfo);
-			}
-
-			public class Nullable : DoubleMapper
-			{
-				public override object GetValue(object o)
-				{
-					object value = _memberAccessor.GetValue(o);
-					return (Double)value == (Double)_nullValue? null: value;
+					Char value = _memberAccessor.GetChar(o);
+					return value == _nullValue? null: (object)value;
 				}
 			}
 		}
 
 		class SingleMapper : MemberMapper
 		{
-			protected object _nullValue;
+			protected Single _nullValue;
+
+			public override bool IsNull (object o) { return false; }
+			public override void SetNull(object o) { _memberAccessor.SetSingle(o, _nullValue); }
 
 			public override void SetValue(object o, object value)
 			{
-				_memberAccessor.SetValue(
+				_memberAccessor.SetSingle(
 					o,
 					value is Single? (Single)value:
 					value == null?   _nullValue:
@@ -501,17 +564,58 @@ namespace BLToolkit.Mapping
 
 			public class Nullable : SingleMapper
 			{
+				public override bool IsNull(object o) { return GetSingle(o) == _nullValue; }
+
 				public override object GetValue(object o)
 				{
-					object value = _memberAccessor.GetValue(o);
-					return (Single)value == (Single)_nullValue? null: value;
+					Single value = _memberAccessor.GetSingle(o);
+					return value == _nullValue? null: (object)value;
+				}
+			}
+		}
+
+		class DoubleMapper : MemberMapper
+		{
+			protected Double _nullValue;
+
+			public override bool IsNull (object o) { return false; }
+			public override void SetNull(object o) { _memberAccessor.SetDouble(o, _nullValue); }
+
+			public override void SetValue(object o, object value)
+			{
+				_memberAccessor.SetDouble(
+					o,
+					value is Double? (Double)value:
+					value == null?   _nullValue:
+					                 _mappingSchema.ConvertToDouble(value));
+			}
+
+			public override void Init(MapMemberInfo mapMemberInfo)
+			{
+				if (mapMemberInfo == null) throw new ArgumentNullException("mapMemberInfo");
+
+				_nullValue = Convert.ToDouble(mapMemberInfo.NullValue);
+				base.Init(mapMemberInfo);
+			}
+
+			public class Nullable : DoubleMapper
+			{
+				public override bool IsNull(object o) { return GetDouble(o) == _nullValue; }
+
+				public override object GetValue(object o)
+				{
+					Double value = _memberAccessor.GetDouble(o);
+					return value == _nullValue? null: (object)value;
 				}
 			}
 		}
 
 		class BooleanMapper : MemberMapper
 		{
-			protected object _nullValue;
+			protected Boolean _nullValue;
+
+			public override bool IsNull (object o) { return false; }
+			public override void SetNull(object o) { _memberAccessor.SetBoolean(o, _nullValue); }
 
 			public override void SetValue(object o, object value)
 			{
@@ -532,10 +636,12 @@ namespace BLToolkit.Mapping
 
 			public class Nullable : BooleanMapper
 			{
+				public override bool IsNull(object o) { return GetBoolean(o) == _nullValue; }
+
 				public override object GetValue(object o)
 				{
-					object value = _memberAccessor.GetValue(o);
-					return (bool)value == (bool)_nullValue? null: value;
+					Boolean value = _memberAccessor.GetBoolean(o);
+					return value == _nullValue? null: (object)value;
 				}
 			}
 		}
@@ -648,13 +754,15 @@ namespace BLToolkit.Mapping
 
 		class DecimalMapper : MemberMapper
 		{
-			protected object _nullValue;
+			protected Decimal _nullValue;
+
+			public override bool IsNull(object o) { return false; }
 
 			public override void SetValue(object o, object value)
 			{
-				_memberAccessor.SetValue(
+				_memberAccessor.SetDecimal(
 					o,
-					value is decimal? value:
+					value is Decimal? (Decimal)value:
 					value == null?    _nullValue:
 					                  _mappingSchema.ConvertToDecimal(value));
 			}
@@ -669,10 +777,12 @@ namespace BLToolkit.Mapping
 
 			public class Nullable : DecimalMapper
 			{
+				public override bool IsNull(object o) { return GetDecimal(o) == _nullValue; }
+
 				public override object GetValue(object o)
 				{
-					object value = _memberAccessor.GetValue(o);
-					return (decimal)value == (decimal)_nullValue? null: value;
+					Decimal value = _memberAccessor.GetDecimal(o);
+					return value == _nullValue? null: (object)value;
 				}
 			}
 		}

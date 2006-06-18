@@ -67,6 +67,7 @@ namespace BLToolkit.Mapping
 			}
 		}
 
+		[CLSCompliant(false)]
 		public virtual IMapDataDestination GetDataDestination(InitContext initContext)
 		{
 			return _mapper;

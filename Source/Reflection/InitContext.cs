@@ -68,6 +68,7 @@ namespace BLToolkit.Reflection
 		}
 
 		private IMapDataSource _dataSource;
+		[CLSCompliant(false)]
 		public  IMapDataSource  DataSource
 		{
 			[DebuggerStepThrough] get { return _dataSource;  }
