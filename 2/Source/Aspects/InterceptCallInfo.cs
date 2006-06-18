@@ -1,7 +1,6 @@
 using System;
 using System.Collections;
 using System.Diagnostics;
-using System.Reflection;
 
 namespace BLToolkit.Aspects
 {

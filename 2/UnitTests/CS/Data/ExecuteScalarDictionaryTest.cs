@@ -31,7 +31,7 @@ namespace Data
 			DataAccessor da = new DataAccessor();
 
 			foreach (Person p in da.SelectAllSql(typeof(Person)))
-				if (p.FirstName == "Crazy")
+				if (p.ID > 10 || p.FirstName == "Crazy")
 					da.DeleteByKeySql(typeof(Person), p.ID);
 		}
 

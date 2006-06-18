@@ -3,7 +3,7 @@ using System.Collections;
 
 namespace BLToolkit.Mapping
 {
-	public class DictionaryMapper : IMapDataSource, IMapDataDestination
+	public class DictionaryMapper : MapDataSourceDestinationBase
 	{
 		public DictionaryMapper(IDictionary dictionary)
 		{
@@ -42,24 +42,30 @@ namespace BLToolkit.Mapping
 
 		#region IMapDataSource Members
 
-		public virtual int Count
+		public override int Count
 		{
 			get { return _dictionary.Count; }
 		}
 
-		public virtual string GetName(int index)
+		public override Type GetFieldType(int index)
+		{
+			SetEnumerator(index);
+			return _enumerator.Value == null? typeof(object): _enumerator.Value.GetType();
+		}
+
+		public override string GetName(int index)
 		{
 			SetEnumerator(index);
 			return _enumerator.Key.ToString();
 		}
 
-		public virtual object GetValue(object o, int index)
+		public override object GetValue(object o, int index)
 		{
 			SetEnumerator(index);
 			return _enumerator.Value;
 		}
 
-		public virtual object GetValue(object o, string name)
+		public override object GetValue(object o, string name)
 		{
 			return _dictionary[name];
 		}
@@ -70,7 +76,7 @@ namespace BLToolkit.Mapping
 
 		private ArrayList _nameList;
 
-		public virtual int GetOrdinal(string name)
+		public override int GetOrdinal(string name)
 		{
 			if (_nameList == null)
 				_nameList = new ArrayList();
@@ -80,12 +86,12 @@ namespace BLToolkit.Mapping
 			return idx >= 0? idx: _nameList.Add(name);
 		}
 
-		public virtual void SetValue(object o, int index, object value)
+		public override void SetValue(object o, int index, object value)
 		{
 			_dictionary[_nameList[index]] = value;
 		}
 
-		public virtual void SetValue(object o, string name, object value)
+		public override void SetValue(object o, string name, object value)
 		{
 			_dictionary[name] = value;
 		}

@@ -149,9 +149,20 @@ namespace BLToolkit.TypeBuilder.Builders
 
 			ConstructorBuilderHelper ctorBuilder = BuildNestedTypeConstructor(nestedType);
 
-			BuildInitMember(mi, ctorBuilder);
-			BuildGetter    (mi, nestedType);
-			BuildSetter    (mi, nestedType);
+			BuildInitMember (mi, ctorBuilder);
+			BuildGetter     (mi, nestedType);
+			BuildSetter     (mi, nestedType);
+
+			Type   type =
+				mi is FieldInfo ? ((FieldInfo)mi).FieldType : ((PropertyInfo)mi).PropertyType;
+
+			string typedPropertyName = type.IsGenericType? null: type.Name;
+
+			if (typedPropertyName != null)
+			{
+				BuildTypedGetter(mi, nestedType, type, typedPropertyName);
+				BuildTypedSetter(mi, nestedType, type, typedPropertyName);
+			}
 
 			// FW 1.1 wants nested types to be created before parent.
 			//
@@ -283,6 +294,96 @@ namespace BLToolkit.TypeBuilder.Builders
 
 			nestedType.DefineMethod(_memberAccessor.GetProperty("HasSetter").GetGetMethod()).Emitter
 				.ldc_i4_1
+				.ret()
+				;
+		}
+
+		private void BuildTypedGetter(
+			MemberInfo        mi,
+			TypeBuilderHelper nestedType,
+			Type              memberType,
+			string            typedPropertyName)
+		{
+			MethodInfo getMethod = null;
+
+			if (mi is PropertyInfo)
+			{
+				getMethod = ((PropertyInfo)mi).GetGetMethod();
+
+				if (getMethod == null)
+				{
+					if (_type != _originalType)
+						getMethod = _type.GetMethod("get_" + mi.Name);
+
+					if (getMethod == null)
+						return;
+				}
+			}
+
+			MethodInfo methodInfo = _memberAccessor.GetMethod("Get" + typedPropertyName, memberType);
+
+			if (methodInfo == null)
+				return;
+
+			MethodBuilderHelper method = nestedType.DefineMethod(methodInfo);
+			
+			EmitHelper emit = method.Emitter;
+
+			emit
+				.ldarg_1
+				.castclass (_type)
+				.end();
+
+			if (mi is FieldInfo) emit.ldfld   ((FieldInfo)mi);
+			else                 emit.callvirt(getMethod);
+
+			emit
+				.ret()
+				;
+		}
+
+		private void BuildTypedSetter(
+			MemberInfo        mi,
+			TypeBuilderHelper nestedType,
+			Type              memberType,
+			string            typedPropertyName)
+		{
+			MethodInfo setMethod = null;
+
+			if (mi is PropertyInfo)
+			{
+				setMethod = ((PropertyInfo)mi).GetSetMethod();
+
+				if (setMethod == null)
+				{
+					if (_type != _originalType)
+						setMethod = _type.GetMethod("set_" + mi.Name);
+
+					if (setMethod == null)
+						return;
+				}
+			}
+
+			MethodInfo methodInfo =
+				_memberAccessor.GetMethod("Set" + typedPropertyName, typeof(object), memberType);
+
+			if (methodInfo == null)
+				return;
+
+			MethodBuilderHelper method = nestedType.DefineMethod(methodInfo);
+			
+			EmitHelper emit = method.Emitter;
+
+			emit
+				.ldarg_1
+				.castclass (_type)
+				.ldarg_2
+				.end();
+
+			if (mi is FieldInfo) emit.stfld   ((FieldInfo)mi);
+			else                 emit.callvirt(setMethod);
+
+			emit
 				.ret()
 				;
 		}

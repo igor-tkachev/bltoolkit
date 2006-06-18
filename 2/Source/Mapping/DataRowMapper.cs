@@ -4,7 +4,7 @@ using System.Collections;
 
 namespace BLToolkit.Mapping
 {
-	public class DataRowMapper : IMapDataSource, IMapDataDestination
+	public class DataRowMapper : MapDataSourceDestinationBase
 	{
 		bool           _createColumns;
 		DataRowVersion _version;
@@ -43,26 +43,37 @@ namespace BLToolkit.Mapping
 
 		#region IMapDataSource Members
 
-		public virtual int Count
+		public override int Count
 		{
 			get { return _dataRow.Table.Columns.Count; }
 		}
 
-		public virtual string GetName(int index)
+		public override Type GetFieldType(int index)
+		{
+			return index < _dataRow.Table.Columns.Count?
+				_dataRow.Table.Columns[index].DataType: null;
+		}
+
+		public override string GetName(int index)
 		{
 			return _dataRow.Table.Columns[index].ColumnName;
 		}
 
-		public virtual object GetValue(object o, int index)
+		public override object GetValue(object o, int index)
 		{
 			object value = _version == DataRowVersion.Default ? _dataRow[index] : _dataRow[index, _version];
 			return value is DBNull? null: value;
 		}
 
-		public virtual object GetValue(object o, string name)
+		public override object GetValue(object o, string name)
 		{
 			object value = _version == DataRowVersion.Default ? _dataRow[name] : _dataRow[name, _version];
 			return value is DBNull? null: value;
+		}
+
+		public override bool IsNull(object o, int index)
+		{
+			return _dataRow.IsNull(index);
 		}
 
 		#endregion
@@ -71,7 +82,7 @@ namespace BLToolkit.Mapping
 
 		private ArrayList _nameList;
 
-		public virtual int GetOrdinal(string name)
+		public override int GetOrdinal(string name)
 		{
 			if (_createColumns)
 			{
@@ -107,7 +118,7 @@ namespace BLToolkit.Mapping
 			}
 		}
 
-		public virtual void SetValue(object o, int index, object value)
+		public override void SetValue(object o, int index, object value)
 		{
 			if (_createColumns)
 				CreateColumn(index, value);
@@ -137,7 +148,7 @@ namespace BLToolkit.Mapping
 			}
 		}
 
-		public virtual void SetValue(object o, string name, object value)
+		public override void SetValue(object o, string name, object value)
 		{
 			if (_createColumns)
 				CreateColumn(GetOrdinal(name), value);
