@@ -113,6 +113,7 @@
     <Compile Include="DataAccess\SqlQueryParameterInfo.cs" />
     <Compile Include="DataAccess\TableNameAttribute.cs" />
     <Compile Include="Common\NameOrIndexParameter.cs" />
+    <Compile Include="Data\DataReader.cs" />
     <Compile Include="Data\ScalarSourceType.cs" />
     <Compile Include="Data\DataException.cs" />
     <Compile Include="Data\DataProvider\AccessDataProvider.cs" />

@@ -2695,12 +2695,22 @@ namespace BLToolkit.Data
 				if (dr.Read())
 				{
 					int index = nip.ByName ? dr.GetOrdinal(nip.Name) : nip.Index;
+
+#if FW2
+					bool isNullable = (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>));
+
+					if (isNullable)
+						type = Nullable.GetUnderlyingType(type);
+#else
+					const bool isNullable = false;
+#endif
+
 					do
 					{
 						object value = dr.GetValue(index);
 
 						if (value == null || value.GetType() != type)
-							value = value is DBNull ? null : _mappingSchema.ConvertChangeType(value, type);
+							value = value is DBNull ? null : _mappingSchema.ConvertChangeType(value, type, isNullable);
 
 						list.Add(value);
 					}
@@ -2778,12 +2788,6 @@ namespace BLToolkit.Data
 			if (_prepared)
 				InitParameters(CommandAction.Select);
 
-			Type type = typeof(T);
-			bool isNullable = (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>));
-
-			if (isNullable)
-				type = Nullable.GetUnderlyingType(type);
-
 			//object nullValue = _mappingSchema.GetNullValue(type);
 
 			using (IDataReader dr = ExecuteReaderInternal())
@@ -2792,17 +2796,22 @@ namespace BLToolkit.Data
 				{
 					int  index = nip.ByName ? dr.GetOrdinal(nip.Name) : nip.Index;
 #if EXPERIMENTAL
+					DataReader<T>.GetMethod get = _dataProvider.SelectDataReaderGetMethod<T>(dr, index);
 
-					if (dr.GetFieldType(index) == type)
-					{
-						ValueAccessor<T> va = _dataProvider.GetValueAccessor<T>(type, isNullable);
+					if (get == null)
+						throw new DataException(string.Format("Can not read elements of the type '{0}'", typeof(T).FullName));
 
-						do
-							list.Add(va(dr, index));
-						while(dr.Read());
-					}
-					else
-#endif
+					do
+						list.Add(get(dr, index));
+					while(dr.Read());
+#else
+
+					Type type = typeof(T);
+					bool isNullable = (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>));
+
+					if (isNullable)
+						type = Nullable.GetUnderlyingType(type);
+
 					do
 					{
 						object value = dr.GetValue(index);
@@ -2813,6 +2822,7 @@ namespace BLToolkit.Data
 						list.Add((T)value);
 					}
 					while (dr.Read());
+#endif
 				}
 			}
 

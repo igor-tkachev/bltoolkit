@@ -2,12 +2,10 @@ using System;
 using System.Data;
 using System.Data.Common;
 
+using BLToolkit.Common;
+
 namespace BLToolkit.Data.DataProvider
 {
-#if EXPERIMENTAL
-	public delegate T ValueAccessor<T>(IDataReader r, int column);
-#endif
-
 	/// <summary>
 	/// The <b>DataProviderBase</b> is a class that provides specific data provider information
 	/// for the <see cref="DbManager"/> class. 
@@ -82,45 +80,6 @@ namespace BLToolkit.Data.DataProvider
 
 		public virtual object Convert(object value, ConvertType convertType)
 		{
-			switch (convertType)
-			{
-				case ConvertType.NameToQueryParameter:
-				case ConvertType.NameToParameter:
-					return "@" + value;
-
-				case ConvertType.NameToQueryField:
-					{
-						string name = value.ToString();
-
-						if (name.Length > 0 && name[0] == '[')
-							return value;
-					}
-
-					return "[" + value + "]";
-
-				case ConvertType.NameToQueryTable:
-					{
-						string name = value.ToString();
-
-						if (name.Length > 0 && name[0] == '[')
-							return value;
-
-						if (name.IndexOf('.') > 0)
-							value = string.Join("].[", name.Split('.'));
-					}
-
-					return "[" + value + "]";
-
-				case ConvertType.ParameterToName:
-					if (value != null)
-					{
-						string str = value.ToString();
-						return str.Length > 0 && str[0] == '@'? str.Substring(1): str;
-					}
-
-					break;
-			}
-
 			return value;
 		}
 
@@ -150,32 +109,11 @@ namespace BLToolkit.Data.DataProvider
 		}
 
 #if EXPERIMENTAL
-		private static Int32 Int32ValueAccessor(IDataReader r, int column)
+		// This method must be overriden to provide access to specific data types such a 'Xml' data type
+		//
+		public virtual DataReader<T>.GetMethod SelectDataReaderGetMethod<T>(IDataReader dr, int index)
 		{
-			return r.GetInt32(column);
-		}
-
-		private static Int32? NullableInt32ValueAccessor(IDataReader r, int column)
-		{
-			return r.IsDBNull(column) ? (int?)null : r.GetInt32(column);
-		}
-
-		private static T DefaultValueAccessor<T>(IDataReader r, int column)
-		{
-			return (T)r.GetValue(column);
-		}
-
-		public ValueAccessor<T> GetValueAccessor<T>(Type type, bool isNullable)
-		{
-			switch (Type.GetTypeCode(type))
-			{
-				case TypeCode.Int32:
-					return (ValueAccessor<T>)(isNullable ?
-						(object)new ValueAccessor<Int32?>(NullableInt32ValueAccessor) :
-						(object)new ValueAccessor<Int32>(Int32ValueAccessor));
-			}
-
-			return DefaultValueAccessor<T>;
+			return DataReader<T>.Get;
 		}
 #endif
 	}
