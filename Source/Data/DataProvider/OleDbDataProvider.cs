@@ -55,6 +55,50 @@ namespace BLToolkit.Data.DataProvider
 			return true;
 		}
 
+		public override object Convert(object value, ConvertType convertType)
+		{
+			switch (convertType)
+			{
+				case ConvertType.NameToQueryParameter:
+				case ConvertType.NameToParameter:
+					return "@" + value;
+
+				case ConvertType.NameToQueryField:
+					{
+						string name = value.ToString();
+
+						if (name.Length > 0 && name[0] == '[')
+							return value;
+					}
+
+					return "[" + value + "]";
+
+				case ConvertType.NameToQueryTable:
+					{
+						string name = value.ToString();
+
+						if (name.Length > 0 && name[0] == '[')
+							return value;
+
+						if (name.IndexOf('.') > 0)
+							value = string.Join("].[", name.Split('.'));
+					}
+
+					return "[" + value + "]";
+
+				case ConvertType.ParameterToName:
+					if (value != null)
+					{
+						string str = value.ToString();
+						return str.Length > 0 && str[0] == '@'? str.Substring(1): str;
+					}
+
+					break;
+			}
+
+			return value;
+		}
+
 		/// <summary>
 		/// Returns connection type.
 		/// </summary>

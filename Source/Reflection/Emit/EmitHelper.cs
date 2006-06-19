@@ -763,7 +763,12 @@ namespace BLToolkit.Reflection.Emit
 		public EmitHelper callvirtNoGenerics(Type type, string methodName, params Type[] parameterTypes)
 		{
 #if FW2
-			MethodInfo method = TypeHelper.GetMethodNoGeneric(type, methodName, parameterTypes);
+			MethodInfo method = TypeHelper.GetMethod(
+				type,
+				false,
+				methodName,
+				BindingFlags.Instance | BindingFlags.Public,
+				parameterTypes);
 
 			return callvirt(method, parameterTypes.Length == 0? null: parameterTypes);
 #else

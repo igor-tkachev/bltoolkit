@@ -68,7 +68,7 @@ GO
 
 -- Person_SelectByKey
 
-IF EXISTS (SELECT * FROM sysobjects WHERE type = 'P' AND name = 'Person_SelectByKey')
+IF EXISTS (SELECT * FROM sys.objects WHERE type = 'P' AND name = 'Person_SelectByKey')
 BEGIN DROP Procedure Person_SelectByKey
 END
 GO
@@ -86,7 +86,7 @@ GO
 
 -- Person_SelectAll
 
-IF EXISTS (SELECT * FROM sysobjects WHERE type = 'P' AND name = 'Person_SelectAll')
+IF EXISTS (SELECT * FROM sys.objects WHERE type = 'P' AND name = 'Person_SelectAll')
 BEGIN DROP Procedure Person_SelectAll END
 GO
 
@@ -102,7 +102,7 @@ GO
 
 -- Person_SelectByName
 
-IF EXISTS (SELECT * FROM sysobjects WHERE type = 'P' AND name = 'Person_SelectByName')
+IF EXISTS (SELECT * FROM sys.objects WHERE type = 'P' AND name = 'Person_SelectByName')
 BEGIN DROP Procedure Person_SelectByName END
 GO
 
@@ -125,7 +125,7 @@ GO
 
 -- Person_SelectListByName
 
-IF EXISTS (SELECT * FROM sysobjects WHERE type = 'P' AND name = 'Person_SelectListByName')
+IF EXISTS (SELECT * FROM sys.objects WHERE type = 'P' AND name = 'Person_SelectListByName')
 BEGIN DROP Procedure Person_SelectListByName
 END
 GO
@@ -149,7 +149,7 @@ GO
 
 -- Person_Insert
 
-IF EXISTS (SELECT * FROM sysobjects WHERE type = 'P' AND name = 'Person_Insert')
+IF EXISTS (SELECT * FROM sys.objects WHERE type = 'P' AND name = 'Person_Insert')
 BEGIN DROP Procedure Person_Insert END
 GO
 
@@ -174,7 +174,7 @@ GO
 
 -- Person_Update
 
-IF EXISTS (SELECT * FROM sysobjects WHERE type = 'P' AND name = 'Person_Update')
+IF EXISTS (SELECT * FROM sys.objects WHERE type = 'P' AND name = 'Person_Update')
 BEGIN DROP Procedure Person_Update END
 GO
 
@@ -203,7 +203,7 @@ GO
 
 -- Person_Delete
 
-IF EXISTS (SELECT * FROM sysobjects WHERE type = 'P' AND name = 'Person_Delete')
+IF EXISTS (SELECT * FROM sys.objects WHERE type = 'P' AND name = 'Person_Delete')
 BEGIN DROP Procedure Person_Delete END
 GO
 
@@ -233,7 +233,7 @@ GO
 
 -- OutRefTest
 
-IF EXISTS (SELECT * FROM sysobjects WHERE type = 'P' AND name = 'OutRefTest')
+IF EXISTS (SELECT * FROM sys.objects WHERE type = 'P' AND name = 'OutRefTest')
 BEGIN DROP Procedure OutRefTest END
 GO
 
@@ -255,7 +255,7 @@ GO
 
 -- OutRefEnumTest
 
-IF EXISTS (SELECT * FROM sysobjects WHERE type = 'P' AND name = 'OutRefEnumTest')
+IF EXISTS (SELECT * FROM sys.objects WHERE type = 'P' AND name = 'OutRefEnumTest')
 BEGIN DROP Procedure OutRefEnumTest END
 GO
 
@@ -272,7 +272,7 @@ GO
 
 -- ExecuteScalarTest
 
-IF EXISTS (SELECT * FROM sysobjects WHERE type = 'P' AND name = 'Scalar_DataReader')
+IF EXISTS (SELECT * FROM sys.objects WHERE type = 'P' AND name = 'Scalar_DataReader')
 BEGIN DROP Procedure Scalar_DataReader END
 GO
 
@@ -282,7 +282,7 @@ SELECT Cast(12345 as int) AS intField, Cast('54321' as varchar(50)) AS stringFie
 
 GO
 
-IF EXISTS (SELECT * FROM sysobjects WHERE type = 'P' AND name = 'Scalar_OutputParameter')
+IF EXISTS (SELECT * FROM sys.objects WHERE type = 'P' AND name = 'Scalar_OutputParameter')
 BEGIN DROP Procedure Scalar_OutputParameter END
 GO
 
@@ -295,7 +295,7 @@ SET @outputString = '54321'
 
 GO
 
-IF EXISTS (SELECT * FROM sysobjects WHERE type in (N'FN', N'IF', N'TF', N'FS', N'FT') AND name = 'Scalar_ReturnParameter')
+IF EXISTS (SELECT * FROM sys.objects WHERE type in (N'FN', N'IF', N'TF', N'FS', N'FT') AND name = 'Scalar_ReturnParameter')
 BEGIN DROP Function Scalar_ReturnParameter END
 GO
 
@@ -307,3 +307,56 @@ BEGIN
 END
 
 GO
+
+-- Data Types test
+
+IF EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID('DataTypeTest') AND type in (N'U'))
+BEGIN DROP TABLE DataTypeTest END
+GO
+
+CREATE TABLE DataTypeTest
+(
+	DataTypeID      int          NOT NULL IDENTITY(1,1) CONSTRAINT PK_DataType PRIMARY KEY CLUSTERED,
+	Binary_         binary(50)       NULL,
+	Boolean_        bit              NULL,
+	Byte_           tinyint          NULL,
+	Bytes_          varbinary(50)    NULL,
+	Char_           char(1)          NULL,
+	DateTime_       datetime         NULL,
+	Decimal_        decimal(20,2)    NULL,
+	Double_         float            NULL,
+	Guid_           uniqueidentifier NULL,
+	Int16_          smallint         NULL,
+	Int32_          int              NULL,
+	Int64_          bigint           NULL,
+	Money_          money            NULL,
+	SByte_          tinyint          NULL,
+	Single_         real             NULL,
+	Stream_         varbinary(50)    NULL,
+	String_         nvarchar(50)     NULL,
+	UInt16_         smallint         NULL,
+	UInt32_         int              NULL,
+	UInt64_         bigint           NULL,
+	Xml_            xml              NULL
+) ON [PRIMARY]
+GO
+
+INSERT INTO DataTypeTest
+	(Binary_, Boolean_,   Byte_,  Bytes_,  Char_,  DateTime_, Decimal_,
+	 Double_,    Guid_,  Int16_,  Int32_,  Int64_,    Money_,   SByte_,
+	 Single_,  Stream_, String_, UInt16_, UInt32_,   UInt64_,     Xml_)
+VALUES
+	(   NULL,     NULL,    NULL,    NULL,    NULL,      NULL,     NULL,
+	    NULL,     NULL,    NULL,    NULL,    NULL,      NULL,     NULL,
+	    NULL,     NULL,    NULL,    NULL,    NULL,      NULL,     NULL)
+
+INSERT INTO DataTypeTest
+	(Binary_, Boolean_,   Byte_,  Bytes_,  Char_,  DateTime_, Decimal_,
+	 Double_,    Guid_,  Int16_,  Int32_,  Int64_,    Money_,   SByte_,
+	 Single_,  Stream_, String_, UInt16_, UInt32_,   UInt64_,
+	 Xml_)
+VALUES
+	(NewID(),        1,     255, NewID(),     'B', GetDate(), 12345.67,
+	1234.567,  NewID(),   32767,   32768, 1000000,   12.3456,      127,
+	1234.123,  NewID(), 'string',  32767,   32768, 200000000,
+	'<root><element strattr="strvalue" intattr="12345"/></root>')

@@ -69,7 +69,11 @@ namespace BLToolkit.TypeBuilder.Builders
 			// CreateInstance.
 			//
 			MethodBuilderHelper method = _typeBuilder.DefineMethod(
-				TypeHelper.GetMethodNoGeneric(_accessorType, "CreateInstance", Type.EmptyTypes));
+				_accessorType.GetMethod(
+#if FW2
+				false,
+#endif
+				"CreateInstance", Type.EmptyTypes));
 
 			if (baseDefCtor != null)
 			{
@@ -90,7 +94,11 @@ namespace BLToolkit.TypeBuilder.Builders
 			// CreateInstance(IniContext).
 			//
 			method = _typeBuilder.DefineMethod(
-				TypeHelper.GetMethodNoGeneric(_accessorType, "CreateInstance", typeof(InitContext)));
+				_accessorType.GetMethod(
+#if FW2
+				false,
+#endif
+				"CreateInstance", typeof(InitContext)));
 
 			if (baseInitCtor != null)
 			{

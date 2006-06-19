@@ -301,36 +301,92 @@ namespace BLToolkit.Reflection
 		#region GetMethods
 
 		/// <summary>
+		/// Returns all the methods of the current Type.
+		/// </summary>
+		/// <returns>An array of <see cref="MethodInfo"/> objects representing all methods 
+		/// defined for the current Type.</returns>
+		public MethodInfo[] GetMethods()
+		{
+			return _type.GetMethods(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+		}
+
+		/// <summary>
 		/// Returns all the public methods of the current Type.
 		/// </summary>
 		/// <returns>An array of <see cref="MethodInfo"/> objects representing all the public methods 
 		/// defined for the current Type.</returns>
-		public MethodInfo[] GetMethods()
+		public MethodInfo[] GetPublicMethods()
 		{
-			return _type.GetMethods();
+			return _type.GetMethods(BindingFlags.Instance | BindingFlags.Public);
 		}
 
 		/// <summary>
 		/// Searches for the methods defined for the current Type,
 		/// using the specified binding constraints.
 		/// </summary>
-		/// <param name="bindingAttr">A bitmask comprised of one or more <see cref="BindingFlags"/> 
+		/// <param name="flags">A bitmask comprised of one or more <see cref="BindingFlags"/> 
 		/// that specify how the search is conducted.</param>
 		/// <returns>An array of <see cref="MethodInfo"/> objects representing all methods defined 
 		/// for the current Type that match the specified binding constraints.</returns>
-		public MethodInfo[] GetMethods(BindingFlags bindingAttr)
+		public MethodInfo[] GetMethods(BindingFlags flags)
 		{
-			return _type.GetMethods(bindingAttr);
+			return _type.GetMethods(flags);
+		}
+
+#if FW2
+
+		/// <summary>
+		/// Returns all the generic or non-generic methods of the current Type.
+		/// </summary>
+		/// <param name="generic">True to return all generic methods, false to return all non-generic.</param>
+		/// <returns>An array of <see cref="MethodInfo"/> objects representing all methods 
+		/// defined for the current Type.</returns>
+		public MethodInfo[] GetMethods(bool generic)
+		{
+			return GetMethods(_type, generic, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+		}
+
+		/// <summary>
+		/// Returns all the public and non-generic methods of the current Type.
+		/// </summary>
+		/// <param name="generic">True to return all generic methods, false to return all non-generic.</param>
+		/// <returns>An array of <see cref="MethodInfo"/> objects representing all the public methods 
+		/// defined for the current Type.</returns>
+		public MethodInfo[] GetPublicMethods(bool generic)
+		{
+			return GetMethods(_type, generic, BindingFlags.Instance | BindingFlags.Public);
+		}
+
+		/// <summary>
+		/// Searches for the generic methods defined for the current Type,
+		/// using the specified binding constraints.
+		/// </summary>
+		/// <param name="generic">True to return all generic methods, false to return all non-generic.</param>
+		/// <param name="flags">A bitmask comprised of one or more <see cref="BindingFlags"/> 
+		/// that specify how the search is conducted.</param>
+		/// <returns>An array of <see cref="MethodInfo"/> objects representing all methods defined 
+		/// for the current Type that match the specified binding constraints.</returns>
+		public MethodInfo[] GetMethods(bool generic, BindingFlags flags)
+		{
+			return GetMethods(_type, generic, flags);
+		}
+
+#endif
+
+		#endregion
+
+		#region GetMethod
+
+		public MethodInfo GetMethod(string methodName)
+		{
+			return _type.GetMethod(methodName,
+				BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
 		}
 
 		public MethodInfo GetPublicMethod(string methodName)
 		{
-			return _type.GetMethod(methodName);
-		}
-
-		public MethodInfo GetMethod(string methodName)
-		{
-			return _type.GetMethod(methodName, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+			return _type.GetMethod(methodName,
+				BindingFlags.Instance | BindingFlags.Public);
 		}
 
 		public MethodInfo GetMethod(string methodName, BindingFlags flags)
@@ -340,7 +396,12 @@ namespace BLToolkit.Reflection
 
 		public MethodInfo GetPublicMethod(string methodName, params Type[] types)
 		{
-			return _type.GetMethod(methodName, types);
+			return _type.GetMethod(
+				methodName,
+				BindingFlags.Instance | BindingFlags.Public,
+				null,
+				types,
+				null);
 		}
 
 		public MethodInfo GetMethod(string methodName, params Type[] types)
@@ -358,6 +419,43 @@ namespace BLToolkit.Reflection
 			return _type.GetMethod(methodName, flags, null, types, null);
 		}
 
+#if FW2
+
+		public MethodInfo GetMethod(bool generic, string methodName)
+		{
+			return GetMethod(_type, generic, methodName,
+				BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+		}
+
+		public MethodInfo GetPublicMethod(bool generic, string methodName)
+		{
+			return GetMethod(_type, generic, methodName,
+				BindingFlags.Instance | BindingFlags.Public);
+		}
+
+		public MethodInfo GetMethod(bool generic, string methodName, BindingFlags flags)
+		{
+			return GetMethod(_type, generic, methodName, flags);
+		}
+
+		public MethodInfo GetPublicMethod(bool generic, string methodName, params Type[] types)
+		{
+			return GetMethod(_type, generic, methodName,
+				BindingFlags.Instance | BindingFlags.Public, types);
+		}
+
+		public MethodInfo GetMethod(bool generic, string methodName, params Type[] types)
+		{
+			return GetMethod(_type, generic, methodName,
+				BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic, types);
+		}
+
+		public MethodInfo GetMethod(bool generic, string methodName, BindingFlags flags, params Type[] types)
+		{
+			return GetMethod(_type, generic, methodName, flags, types);
+		}
+
+#endif
 		#endregion
 
 		#region GetFields
@@ -536,13 +634,8 @@ namespace BLToolkit.Reflection
 			if (type == null) throw new ArgumentNullException("type");
 
 #if FW2
-			if (type.IsGenericType)
-			{
-				Type t = Nullable.GetUnderlyingType(type);
-
-				if (t != null)
-					type = t;
-			}
+			if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>))
+				type = type.GetGenericArguments()[0];
 #endif
 
 			if (type.IsEnum)
@@ -575,15 +668,15 @@ namespace BLToolkit.Reflection
 			return false;
 		}
 
-		public static MethodInfo GetMethodNoGeneric(Type type, string methodName, params Type[] parameterTypes)
-		{
 #if FW2
 
+		public static MethodInfo GetMethod(Type type, bool generic, string methodName, BindingFlags flags, params Type[] parameterTypes)
+		{
 			if (type == null) throw new ArgumentNullException("type");
 
-			foreach (MethodInfo method in type.GetMethods())
+			foreach (MethodInfo method in type.GetMethods(flags))
 			{
-				if (method.IsGenericMethodDefinition == false && method.Name == methodName)
+				if (method.IsGenericMethodDefinition == generic && method.Name == methodName)
 				{
 					ParameterInfo[] pis = method.GetParameters();
 
@@ -601,11 +694,36 @@ namespace BLToolkit.Reflection
 				}
 			}
 
-			throw new TypeBuilderException(string.Format("Method '{0}' not found.", methodName));
-#else
-			return type.GetMethod(methodName, parameterTypes);
-#endif
+			return null;
 		}
+
+		public static MethodInfo GetMethod(Type type, bool generic, string methodName, BindingFlags flags)
+		{
+			if (type == null) throw new ArgumentNullException("type");
+
+			foreach (MethodInfo method in type.GetMethods(flags))
+			{
+				if (method.IsGenericMethodDefinition == generic && method.Name == methodName)
+					return method;
+			}
+
+			return null;
+		}
+
+		public static MethodInfo[] GetMethods(Type type, bool generic, BindingFlags flags)
+		{
+			if (type == null) throw new ArgumentNullException("type");
+
+			return Array.FindAll(
+				type.GetMethods(flags),
+				delegate(MethodInfo method)
+				{
+					return method.IsGenericMethodDefinition == generic;
+				});
+			
+		}
+
+#endif
 
 		[SuppressMessage("Microsoft.Design", "CA1011:ConsiderPassingBaseTypesAsParameters")]
 		public static object[] GetPropertyParameters(PropertyInfo propertyInfo)

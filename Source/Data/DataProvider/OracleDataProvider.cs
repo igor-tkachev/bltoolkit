@@ -57,6 +57,21 @@ namespace BLToolkit.Data.DataProvider
 
 		public override object Convert(object value, ConvertType convertType)
 		{
+			switch (convertType)
+			{
+				case ConvertType.NameToQueryParameter:
+					return ":" + value;
+
+				case ConvertType.ParameterToName:
+					if (value != null)
+					{
+						string str = value.ToString();
+						return str.Length > 0 && str[0] == ':'? str.Substring(1) : str;
+					}
+
+					break;
+			}
+
 			return value;
 		}
 
