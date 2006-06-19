@@ -138,13 +138,13 @@
     <Compile Include="EditableObjects\EditableObjectT.cs" />
     <Compile Include="EditableObjects\EditableValue.cs" />
     <Compile Include="EditableObjects\IEditable.cs" />
+    <Compile Include="Mapping\ValueMapping2.cs" />
     <Compile Include="Mapping\MapDataSourceDestinationBase.cs" />
     <Compile Include="Mapping\DefaultMappingSchema.cs" />
-    <Compile Include="Mapping\IValueTransferer.cs" />
+    <Compile Include="Mapping\IValueMapper.cs" />
     <Compile Include="Mapping\NullDateTimeAttribute.cs" />
     <Compile Include="Mapping\NullDecimalAttribute.cs" />
     <Compile Include="Mapping\NullGuidAttribute.cs" />
-    <Compile Include="Mapping\ValueTransfer.cs" />
     <Compile Include="TypeBuilder\ISetParent.cs" />
     <Compile Include="EditableObjects\IMemberwiseEditable.cs" />
     <Compile Include="ComponentModel\INotifyObjectEdit.cs" />

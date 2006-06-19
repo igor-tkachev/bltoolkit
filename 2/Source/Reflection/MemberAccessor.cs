@@ -17,7 +17,7 @@ namespace BLToolkit.Reflection
 		private MemberInfo _memberInfo;
 		public  MemberInfo  MemberInfo
 		{
-			get { return _memberInfo;  }
+			get { return _memberInfo; }
 		}
 
 		private TypeAccessor _typeAccessor;

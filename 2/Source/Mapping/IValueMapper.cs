@@ -3,10 +3,10 @@ using System;
 namespace BLToolkit.Mapping
 {
 	[CLSCompliant(false)]
-	public interface IValueTransferer
+	public interface IValueMapper
 	{
 		[CLSCompliant(false)]
-		void Transfer(
+		void Map(
 			IMapDataSource      source, object sourceObject, int sourceIndex,
 			IMapDataDestination dest,   object destObject,   int destIndex);
 	}
