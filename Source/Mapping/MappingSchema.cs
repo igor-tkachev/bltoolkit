@@ -1093,48 +1093,39 @@ namespace BLToolkit.Mapping
 
 		#endregion
 
-		#region ValueTransfer
+		#region ValueMapper
 
-		class BaseValueTransferer : IValueTransferer
+		private Hashtable _sameTypeMappers      = new Hashtable();
+		private Hashtable _differentTypeMappers = new Hashtable();
+
+		public void SetValueMapper(Type sourceType, Type destType, IValueMapper mapper)
 		{
-			public void Transfer(
-				IMapDataSource      source, object sourceObject, int sourceIndex,
-				IMapDataDestination dest,   object destObject,   int destIndex)
+			if (sourceType == null) sourceType = typeof(object);
+			if (destType   == null) destType   = typeof(object);
+
+			if (sourceType == destType)
 			{
-				dest.SetValue(destObject, destIndex, source.GetValue(sourceObject, sourceIndex));
+				if (mapper == null)
+					_sameTypeMappers.Remove(sourceType);
+				else
+					_sameTypeMappers[sourceType] = mapper;
+			}
+			else
+			{
+				KeyValuePair<Type,Type> key = new KeyValuePair<Type,Type>(sourceType, destType);
+
+				if (mapper == null)
+					_differentTypeMappers.Remove(sourceType);
+				else
+					_differentTypeMappers[sourceType] = mapper;
 			}
 		}
 
-		private static IValueTransferer _baseValueTransferer = new BaseValueTransferer();
-
-		private IValueTransferer _defaultValueTransferer = _baseValueTransferer;
 		[CLSCompliant(false)]
-		public  IValueTransferer  DefaultValueTransferer
-		{
-			get { return _defaultValueTransferer;  }
-			set { _defaultValueTransferer = value; }
-		}
-
-		private Hashtable _sameTypeTransferers = new Hashtable(ValueTransfer.SameTypeTransferers);
-		public  Hashtable  SameTypeTransferers
-		{
-			get { return _sameTypeTransferers;  }
-			set { _sameTypeTransferers = value; }
-		}
-
-		private Dictionary<KeyValuePair<Type,Type>,IValueTransferer> _differentTypeTransferers =
-			new Dictionary<KeyValuePair<Type,Type>,IValueTransferer>(ValueTransfer.TypeTransferers);
-		public  Dictionary<KeyValuePair<Type,Type>,IValueTransferer>  DifferentTypeTransferers
-		{
-			get { return _differentTypeTransferers;  }
-			set { _differentTypeTransferers = value; }
-		}
-
-		[CLSCompliant(false)]
-		protected IValueTransferer[] GetValueTransferers(
+		protected IValueMapper[] GetValueMappers(
 			IMapDataSource source, IMapDataDestination dest, int[] index)
 		{
-			IValueTransferer[] transferers = new IValueTransferer[index.Length];
+			IValueMapper[] mappers = new IValueMapper[index.Length];
 
 			for (int i = 0; i < index.Length; i++)
 			{
@@ -1146,31 +1137,32 @@ namespace BLToolkit.Mapping
 				Type sType = source.GetFieldType(i);
 				Type dType = dest.  GetFieldType(n);
 
+				if (sType == null) sType = typeof(object);
+				if (dType == null) dType = typeof(object);
+
 				if (sType == dType)
 				{
-					IValueTransferer t = (IValueTransferer)_sameTypeTransferers[sType];
+					IValueMapper t = (IValueMapper)_sameTypeMappers[sType];
 
-					if (t != null)
-					{
-						transferers[i] = t;
-						continue;
-					}
+					if (t == null)
+						_sameTypeMappers[sType] = t = ValueMapping.GetMapper(sType, dType);
+
+					mappers[i] = t;
 				}
-				else if (sType != null && dType != null)
+				else
 				{
-					IValueTransferer t;
+					KeyValuePair<Type,Type> key = new KeyValuePair<Type,Type>(sType, dType);
 
-					if (_differentTypeTransferers.TryGetValue(new KeyValuePair<Type, Type>(sType, dType), out t))
-					{
-						transferers[i] = t;
-						continue;
-					}
+					IValueMapper t = (IValueMapper)_differentTypeMappers[key];
+
+					if (t == null)
+						_differentTypeMappers[key] = t = ValueMapping.GetMapper(sType, dType);
+
+					mappers[i] = t;
 				}
-
-				transferers[i] = _defaultValueTransferer;
 			}
 
-			return transferers;
+			return mappers;
 		}
 
 		#endregion
@@ -1209,14 +1201,14 @@ namespace BLToolkit.Mapping
 			IMapDataSource      source, object sourceObject,
 			IMapDataDestination dest,   object destObject,
 			int[]               index,
-			IValueTransferer[]  transferers)
+			IValueMapper[]      mappers)
 		{
 			for (int i = 0; i < index.Length; i++)
 			{
 				int n = index[i];
 
 				if (n >= 0)
-					transferers[i].Transfer(source, sourceObject, i, dest, destObject, n);
+					mappers[i].Map(source, sourceObject, i, dest, destObject, n);
 			}
 		}
 
@@ -1337,11 +1329,11 @@ namespace BLToolkit.Mapping
 			dataSourceList.     InitMapping(ctx); if (ctx.StopMapping) return;
 			dataDestinationList.InitMapping(ctx); if (ctx.StopMapping) return;
 
-			int[]               index       = null;
-			IValueTransferer[]  transferers = null;
-			ObjectMapper        current     = _nullMapper;
-			IMapDataDestination dest        = dataDestinationList.GetDataDestination(ctx);
-			ObjectMapper        om          = dest as ObjectMapper;
+			int[]               index   = null;
+			IValueMapper[]      mappers = null;
+			ObjectMapper        current = _nullMapper;
+			IMapDataDestination dest    = dataDestinationList.GetDataDestination(ctx);
+			ObjectMapper        om      = dest as ObjectMapper;
 
 			while (dataSourceList.SetNextDataSource(ctx))
 			{
@@ -1379,7 +1371,7 @@ namespace BLToolkit.Mapping
 					current     = ctx.ObjectMapper;
 					currentDest = current != null ? current : dest;
 					index       = GetIndex(ctx.DataSource, currentDest);
-					transferers = GetValueTransferers(ctx.DataSource, currentDest, index);
+					mappers     = GetValueMappers(ctx.DataSource, currentDest, index);
 				}
 
 				MapInternal(
@@ -1388,7 +1380,7 @@ namespace BLToolkit.Mapping
 					currentDest,
 					destObject,
 					index,
-					transferers);
+					mappers);
 
 				if (smDest != null)
 					smDest.EndMapping(ctx);
