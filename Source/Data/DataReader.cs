@@ -1,5 +1,6 @@
 using System;
 using System.Data;
+
 using BLToolkit.Common;
 
 namespace BLToolkit.Data
@@ -13,10 +14,11 @@ namespace BLToolkit.Data
 			return (GetMethod)(object)m;
 		}
 
-		public static GetMethod Get = SelectMethod(typeof(T));
+		public static readonly GetMethod Get = SelectMethod(typeof(T));
 		public static GetMethod SelectMethod(Type type)
 		{
 			// Base data types
+			//
 			switch (Type.GetTypeCode(type))
 			{
 				case TypeCode.Boolean:
@@ -55,6 +57,7 @@ namespace BLToolkit.Data
 					return Conv<Guid>    (delegate(IDataReader dr, int index) { return         dr.GetGuid(index);     });
 
 			// Nullable types
+			//
 			if ((type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>)))
 			{
 				switch (Type.GetTypeCode(type.GetGenericArguments()[0]))
@@ -113,7 +116,7 @@ namespace BLToolkit.Data
 
 		public static T DefaultMethod(IDataReader dr, int index)
 		{
-			return ConvertTo<T>.From(dr.GetValue(index));
+			return Convert<T, object>.From(dr.GetValue(index));
 		}
 	}
 }

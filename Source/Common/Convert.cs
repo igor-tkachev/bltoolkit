@@ -7,7 +7,7 @@ namespace BLToolkit.Common
 	{
 		public delegate T ConvertMethod(P p);
 
-		public static ConvertMethod From = GetConverter();
+		public static readonly ConvertMethod From = GetConverter();
 		public static ConvertMethod GetConverter()
 		{
 			Type t = typeof(T);
