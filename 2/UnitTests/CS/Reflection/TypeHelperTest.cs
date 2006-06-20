@@ -3,7 +3,8 @@ using System.Collections;
 #if FW2
 using System.Collections.Generic;
 #endif
-
+using System.Reflection;
+using System.Reflection.Emit;
 using NUnit.Framework;
 
 using BLToolkit.Reflection;
@@ -71,6 +72,21 @@ namespace Reflection
 			public new void Method2() {}
 		}
 
+#if FW2
+
+		public class TestObject<T> : TestObject
+		{
+			public T Method2(T value)    { return value;      }
+			public V Method2<V>()        { return default(V); }
+			
+			public V Method3<V>(V value) where V : IConvertible, IFormattable, new()
+			{
+				 return value;
+			}
+		}
+
+#endif
+
 		[Test]
 		public void GetAttributes()
 		{
@@ -122,6 +138,43 @@ namespace Reflection
 			type = TypeHelper.GetUnderlyingType(typeof(IComparable<int>));
 			Assert.AreEqual(typeof(IComparable<int>), type);
 
+		}
+
+		[Test]
+		public void GenericsTest()
+		{
+			Type testType = typeof (TestObject<int>);
+			TypeHelper helper = new TypeHelper(testType);
+
+			Assert.IsNotNull(helper.GetMethod(true, "Method2"));  // Generic
+			Assert.IsNotNull(helper.GetMethod(false, "Method2")); // Non-generic
+
+			// TestObject<T>.Method2<V>() is a generic method
+			Assert.IsNotNull(helper.GetMethod(true, "Method2", Type.EmptyTypes));
+			// TestObject.Method2() is non
+			Assert.IsNotNull(helper.GetMethod(false, "Method2", Type.EmptyTypes));
+			// TestObject<T>.Method2(T value) is neither!
+			Assert.IsNotNull(helper.GetMethod(false, "Method2", testType.GetGenericArguments()[0]));
+			// typeof(int) is same as testType.GetGenericArguments()[0]
+			Assert.IsNotNull(helper.GetMethod(false, "Method2", typeof(int)));
+			// Get TestObject<T>.Method3<V>() with constraint type hack
+			Assert.IsNotNull(helper.GetMethod(true, "Method3", typeof(int)));
+			// Get TestObject<T>.Method3<V>() with constraint violation type will fail.
+			Assert.IsNull(helper.GetMethod(true, "Method3", typeof(object)));
+			// Get TestObject<T>.Method3<V>() with no types will fail
+			Assert.IsNull(helper.GetMethod(true, "Method3", Type.EmptyTypes));
+
+			Assert.AreEqual(helper.GetMethods().Length, 12);      // 12 total
+			Assert.AreEqual(helper.GetMethods(true).Length, 2);   // 2 generic
+			Assert.AreEqual(helper.GetMethods(false).Length, 10); // 10 non-generics
+
+		}
+
+		[Test, ExpectedException(typeof(AmbiguousMatchException))]
+		public void GenericsAmbigousMatchTest()
+		{
+			// There are 
+			new TypeHelper(typeof (TestObject<int>)).GetMethod("Method2");
 		}
 #endif
 

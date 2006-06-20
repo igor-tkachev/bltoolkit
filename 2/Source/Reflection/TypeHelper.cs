@@ -685,8 +685,14 @@ namespace BLToolkit.Reflection
 						bool match = true;
 
 						for (int i = 0; match && i < pis.Length; i++)
-							if (pis[i].ParameterType != parameterTypes[i])
-								match = false;
+							if (pis[i].ParameterType.IsGenericParameter && !parameterTypes[i].IsGenericParameter)
+							{
+								Type[] constraints = pis[i].ParameterType.GetGenericParameterConstraints();
+								for (int j = 0; match && j < constraints.Length; j++) 
+									match = constraints[j].IsAssignableFrom(parameterTypes[i]);
+							}
+							else
+								match = pis[i].ParameterType == parameterTypes[i];
 
 						if (match)
 							return method;
