@@ -4,7 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 #endif
 using System.Reflection;
-using System.Reflection.Emit;
+
 using NUnit.Framework;
 
 using BLToolkit.Reflection;
@@ -74,14 +74,46 @@ namespace Reflection
 
 #if FW2
 
+		public struct TestStruct<T,V>
+		{
+			public T _t;
+			public V _v;
+		}
+
 		public class TestObject<T> : TestObject
 		{
-			public T Method2(T value)    { return value;      }
-			public V Method2<V>()        { return default(V); }
-			
-			public V Method3<V>(V value) where V : IConvertible, IFormattable, new()
+			public T Method2(T value)
 			{
 				 return value;
+			}
+
+			public V Method2<V>()
+			{
+				 return default(V);
+			}
+			
+			public V Method3<V>(V value)
+				where V : IConvertible, IFormattable, new()
+			{
+				 return value;
+			}
+
+			public V Method3<V>(Nullable<V> value)
+				where V : struct, IFormattable
+			{
+				 return value.Value;
+			}
+
+			public V Method3<V, Q>(TestStruct<Nullable<V>, Q> value)
+				where V : struct
+				where Q : IFormattable
+			{
+				return default(V);
+			}
+
+			public V Method4<V, Q>(TestStruct<V, Q> value)
+			{
+				return default(V);
 			}
 		}
 
@@ -146,34 +178,43 @@ namespace Reflection
 			Type testType = typeof (TestObject<int>);
 			TypeHelper helper = new TypeHelper(testType);
 
-			Assert.IsNotNull(helper.GetMethod(true, "Method2"));  // Generic
+			Assert.IsNotNull(helper.GetMethod(true,  "Method2")); // Generic
 			Assert.IsNotNull(helper.GetMethod(false, "Method2")); // Non-generic
 
 			// TestObject<T>.Method2<V>() is a generic method
-			Assert.IsNotNull(helper.GetMethod(true, "Method2", Type.EmptyTypes));
-			// TestObject.Method2() is non
+			Assert.IsNotNull(helper.GetMethod(true,  "Method2", Type.EmptyTypes));
+			// TestObject.Method2() is not
 			Assert.IsNotNull(helper.GetMethod(false, "Method2", Type.EmptyTypes));
 			// TestObject<T>.Method2(T value) is neither!
 			Assert.IsNotNull(helper.GetMethod(false, "Method2", testType.GetGenericArguments()[0]));
 			// typeof(int) is same as testType.GetGenericArguments()[0]
 			Assert.IsNotNull(helper.GetMethod(false, "Method2", typeof(int)));
 			// Get TestObject<T>.Method3<V>() with constraint type hack
-			Assert.IsNotNull(helper.GetMethod(true, "Method3", typeof(int)));
-			// Get TestObject<T>.Method3<V>() with constraint violation type will fail.
-			Assert.IsNull(helper.GetMethod(true, "Method3", typeof(object)));
+			Assert.IsNotNull(helper.GetMethod(true,  "Method3", typeof(int)));
+			// Get TestObject<T>.Method3<V>() with constraint violation will fail.
+			Assert.IsNull   (helper.GetMethod(true,  "Method3", typeof(object)));
 			// Get TestObject<T>.Method3<V>() with no types will fail
-			Assert.IsNull(helper.GetMethod(true, "Method3", Type.EmptyTypes));
+			Assert.IsNull   (helper.GetMethod(true,  "Method3", Type.EmptyTypes));
+			// Nullable<> violates IFormattable constraint
+			Assert.IsNull   (helper.GetMethod(true,  "Method3", typeof(Nullable<>)));
+			// Method4 does not define a costraint
+			Assert.IsNotNull(helper.GetMethod(true,  "Method4", typeof(TestStruct<,>)));
 
-			Assert.AreEqual(helper.GetMethods().Length, 12);      // 12 total
-			Assert.AreEqual(helper.GetMethods(true).Length, 2);   // 2 generic
-			Assert.AreEqual(helper.GetMethods(false).Length, 10); // 10 non-generics
+			Assert.IsNotNull(helper.GetMethod(true,  "Method3", typeof(Nullable<int>)));
+			Assert.IsNotNull(helper.GetMethod(true,  "Method3", typeof(TestStruct<Nullable<int>, int>)));
+			Assert.IsNull   (helper.GetMethod(true,  "Method3", typeof(TestStruct<Nullable<int>, object>)));
+			Assert.IsNull   (helper.GetMethod(true,  "Method3", typeof(TestStruct<int, int>)));
+
+			Assert.AreEqual (helper.GetMethods().Length,     15);  // 15 total
+			Assert.AreEqual (helper.GetMethods(true).Length,  5);  //  5 generic
+			Assert.AreEqual (helper.GetMethods(false).Length, 10); // 10 non-generics
 
 		}
 
 		[Test, ExpectedException(typeof(AmbiguousMatchException))]
 		public void GenericsAmbigousMatchTest()
 		{
-			// There are 
+			// There are more then one Method2 in the TestObject<T> class
 			new TypeHelper(typeof (TestObject<int>)).GetMethod("Method2");
 		}
 #endif
