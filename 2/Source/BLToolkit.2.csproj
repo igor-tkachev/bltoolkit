@@ -146,6 +146,7 @@
     <Compile Include="Mapping\NullDateTimeAttribute.cs" />
     <Compile Include="Mapping\NullDecimalAttribute.cs" />
     <Compile Include="Mapping\NullGuidAttribute.cs" />
+    <Compile Include="Reflection\GenericBinder.cs" />
     <Compile Include="TypeBuilder\ISetParent.cs" />
     <Compile Include="EditableObjects\IMemberwiseEditable.cs" />
     <Compile Include="ComponentModel\INotifyObjectEdit.cs" />
