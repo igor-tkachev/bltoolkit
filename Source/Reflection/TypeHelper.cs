@@ -440,19 +440,26 @@ namespace BLToolkit.Reflection
 
 		public MethodInfo GetPublicMethod(bool generic, string methodName, params Type[] types)
 		{
-			return GetMethod(_type, generic, methodName,
-				BindingFlags.Instance | BindingFlags.Public, types);
+			return _type.GetMethod(methodName,
+				BindingFlags.Instance | BindingFlags.Public,
+				generic ? GenericBinder.Generic : GenericBinder.NonGeneric,
+				types, null);
 		}
 
 		public MethodInfo GetMethod(bool generic, string methodName, params Type[] types)
 		{
-			return GetMethod(_type, generic, methodName,
-				BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic, types);
+			return _type.GetMethod(methodName,
+				BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic,
+				generic ? GenericBinder.Generic : GenericBinder.NonGeneric,
+				types, null);
 		}
 
 		public MethodInfo GetMethod(bool generic, string methodName, BindingFlags flags, params Type[] types)
 		{
-			return GetMethod(_type, generic, methodName, flags, types);
+			return _type.GetMethod(methodName,
+				flags,
+				generic ? GenericBinder.Generic : GenericBinder.NonGeneric,
+				types, null);
 		}
 
 #endif
@@ -669,76 +676,6 @@ namespace BLToolkit.Reflection
 		}
 
 #if FW2
-
-		private static bool CheckGenericTypeConstraints(Type genType, Type parameterType)
-		{
-			Type[] constraints = genType.GetGenericParameterConstraints();
-
-			for (int i = 0; i < constraints.Length; i++) 
-				if (!constraints[i].IsAssignableFrom(parameterType))
-					return false;
-
-			return true;
-		}
-
-		private static bool CompareGenericTypesRecursive(Type genType, Type specType)
-		{
-			Type[] genArgs  =  genType.GetGenericArguments();
-			Type[] specArgs = specType.GetGenericArguments();
-
-			bool match = (genArgs.Length == specArgs.Length);
-
-			for (int i = 0; match && i < genArgs.Length; i++)
-			{
-				if (genArgs[i] == specArgs[i])
-					continue;
-
-				if (genArgs[i].IsGenericParameter)
-					match = CheckGenericTypeConstraints(genArgs[i], specArgs[i]);
-				else if (genArgs[i].IsGenericType && specArgs[i].IsGenericType)
-					match = CompareGenericTypesRecursive(genArgs[i], specArgs[i]);
-				else
-					match = false;
-			}
-
-			return match;
-		}
-
-		public static MethodInfo GetMethod(Type type, bool generic, string methodName, BindingFlags flags, params Type[] parameterTypes)
-		{
-			if (type == null) throw new ArgumentNullException("type");
-
-			foreach (MethodInfo method in type.GetMethods(flags))
-			{
-				if (method.IsGenericMethodDefinition == generic && method.Name == methodName)
-				{
-					ParameterInfo[] pis = method.GetParameters();
-
-					if (pis.Length == parameterTypes.Length)
-					{
-						bool match = true;
-
-						for (int i = 0; match && i < pis.Length; i++)
-						{
-							if (pis[i].ParameterType == parameterTypes[i])
-								continue;
-
-							if (pis[i].ParameterType.IsGenericParameter)
-								match = CheckGenericTypeConstraints(pis[i].ParameterType, parameterTypes[i]);
-							else if (pis[i].ParameterType.IsGenericType && parameterTypes[i].IsGenericType)
-								match = CompareGenericTypesRecursive(pis[i].ParameterType, parameterTypes[i]);
-							else
-								match = false;
-						}
-
-						if (match)
-							return method;
-					}
-				}
-			}
-
-			return null;
-		}
 
 		public static MethodInfo GetMethod(Type type, bool generic, string methodName, BindingFlags flags)
 		{
