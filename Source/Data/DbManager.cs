@@ -169,7 +169,14 @@ namespace BLToolkit.Data
 		#region Public Properties
 
 		private MappingSchema _mappingSchema = Map.DefaultSchema;
-		public  MappingSchema  MappingSchema
+		/// <summary>
+		/// Gets the <see cref="BLToolkit.Mapping.MappingSchema"/> 
+		/// used by this instance of the <see cref="DbManager"/>.
+		/// </summary>
+		/// <value>
+		/// A mapping schema.
+		/// </value>
+		public MappingSchema MappingSchema
 		{
 			get { return _mappingSchema; }
 			set { _mappingSchema = value != null? value: Map.DefaultSchema; }
@@ -418,6 +425,9 @@ namespace BLToolkit.Data
 			Close();
 		}
 
+		/// <summary>
+		/// Releases all resources used by the <see cref="DbManager"/>.
+		/// </summary>
 		public void Dispose()
 		{
 			Dispose(true);
@@ -1129,10 +1139,10 @@ namespace BLToolkit.Data
 		private const string ProviderNameDivider = ".";
 
 		/// <summary>
-		/// Adds a new data manager.
+		/// Adds a new data provider.
 		/// </summary>
 		/// <remarks>
-		/// The method can be used to register a new data manager for further use.
+		/// The method can be used to register a new data provider for further use.
 		/// </remarks>
 		/// <include file="Examples1.xml" path='examples/db[@name="AddDataProvider(DataProvider.IDataProvider)"]/*' />
 		/// <seealso cref="AddConnectionString(string)">AddConnectionString Method.</seealso>
@@ -1140,23 +1150,46 @@ namespace BLToolkit.Data
 		/// <param name="dataProvider">An instance of the <see cref="BLToolkit.Data.DataProvider.DataProviderBase"/> interface.</param>
 		public static void AddDataProvider(DataProviderBase dataProvider)
 		{
+			if (null == dataProvider)
+				throw new ArgumentNullException("dataProvider");
+
+			if (null == dataProvider.Name || 0 == dataProvider.Name.Length)
+				throw new ArgumentException("dataProvider.Name must be a valid string");
+
 			_dataProviderNameList[dataProvider.Name.ToUpper()] = dataProvider;
 			_dataProviderTypeList[dataProvider.ConnectionType] = dataProvider;
 		}
 
+		/// <summary>
+		/// Adds a new data provider witch a specified name.
+		/// </summary>
+		/// <remarks>
+		/// The method can be used to register a new data provider for further use.
+		/// </remarks>
+		/// <include file="Examples1.xml" path='examples/db[@name="AddDataProvider(DataProvider.IDataProvider)"]/*' />
+		/// <seealso cref="AddConnectionString(string)">AddConnectionString Method.</seealso>
+		/// <seealso cref="BLToolkit.Data.DataProvider.DataProviderBase.Name">DataProviderBase.Name Property.</seealso>
+		/// <param name="providerName">The data provider name.</param>
+		/// <param name="dataProvider">An instance of the <see cref="BLToolkit.Data.DataProvider.DataProviderBase"/> interface.</param>
 		public static void AddDataProvider(string providerName, DataProviderBase dataProvider)
 		{
-			_dataProviderNameList[providerName.ToUpper()]      = dataProvider;
+			if (null == dataProvider)
+				throw new ArgumentNullException("dataProvider");
+
+			if (null == providerName || 0 == providerName.Length)
+				throw new ArgumentException("providerName must be a valid string");
+
+			_dataProviderNameList[providerName.ToUpper()] = dataProvider;
 			_dataProviderTypeList[dataProvider.ConnectionType] = dataProvider;
 		}
 
-		[Obsolete]
+		[Obsolete("This method has been deprecated. Use the AddDataProvider(DataProviderBase dataProvider) method instead")]
 		public static void AddDataProvider(IDataProvider dataProvider)
 		{
 			AddDataProvider(new ObsoleteDataProvider(dataProvider));
 		}
 
-		[Obsolete]
+		[Obsolete("This method has been deprecated. Use the AddDataProvider(string providerName, DataProviderBase dataProvider) method instead")]
 		public static void AddDataProvider(string providerName, IDataProvider dataProvider)
 		{
 			AddDataProvider(providerName, new ObsoleteDataProvider(dataProvider));
@@ -1191,6 +1224,17 @@ namespace BLToolkit.Data
 			_connectionStringList[configurationString] = connectionString;
 		}
 
+		/// <summary>
+		/// Adds a new connection string or replaces existing one.
+		/// </summary>
+		/// <remarks>
+		/// Use this method when you use multiple configurations and 
+		/// you don't want to use a configuration file.
+		/// </remarks>
+		/// <include file="Examples.xml" path='examples/db[@name="AddConnectionString(string,string)"]/*' />
+		/// <param name="providerName">The data provider name.</param>
+		/// <param name="configurationString">The configuration string.</param>
+		/// <param name="connectionString">A valid database connection string.</param>
 		public static void AddConnectionString(
 			string providerName, string configurationString, string connectionString)
 		{
@@ -1517,6 +1561,22 @@ namespace BLToolkit.Data
 		public IDbDataParameter OutputParameter(string parameterName, object value)
 		{
 			return Parameter(ParameterDirection.Output, parameterName, value);
+		}
+
+		/// <summary>
+		/// Adds an output parameter to the <see cref="Command"/>.
+		/// </summary>
+		/// <remarks>
+		/// The method creates a parameter with the
+		/// <see cref="System.Data.ParameterDirection">ParameterDirection.Output</see> type.
+		/// </remarks>
+		/// <param name="parameterName">The name of the parameter.</param>
+		/// <param name="dbType">One of the <see cref="DbType"/> values.</param>
+		/// that is the value of the parameter.</param>
+		/// <returns>The <see cref="IDbDataParameter"/> object.</returns>
+		public IDbDataParameter OutputParameter(string parameterName, DbType dbType)
+		{
+			return Parameter(ParameterDirection.Output, parameterName, dbType);
 		}
 
 		/// <summary>
@@ -2405,9 +2465,9 @@ namespace BLToolkit.Data
 		/// <summary>
 		/// Executes the query, and returns the first column of the first row
 		/// in the resultset returned by the query. Extra columns or rows are
-		/// ignored.</summary>
-		/// <returns>
-		/// The first column of the first row in the resultset.</returns>
+		/// ignored.
+		/// </summary>
+		/// <returns>The first column of the first row in the resultset.</returns>
 		public object ExecuteScalar()
 		{
 			if (_prepared)
@@ -2430,7 +2490,8 @@ namespace BLToolkit.Data
 
 		/// <summary>
 		/// Executes the query, and returns the value with specified scalar
-		/// source type.</summary>
+		/// source type.
+		/// </summary>
 		/// <param name="sourceType">The method used to return the scalar
 		/// value.</param>
 		/// <returns><list type="table">
@@ -2466,7 +2527,8 @@ namespace BLToolkit.Data
 
 		/// <summary>
 		/// Executes the query, and returns the value with specified scalar
-		/// source type.</summary>
+		/// source type.
+		/// </summary>
 		/// <param name="sourceType">The method used to return the scalar
 		/// value.</param>
 		/// <param name="nip">The column name/index or output parameter
@@ -2582,7 +2644,8 @@ namespace BLToolkit.Data
 		/// <summary>
 		/// Executes the query, and returns the first column of the first row
 		/// in the resultset returned by the query. Extra columns or rows are
-		/// ignored.</summary>
+		/// ignored.
+		/// </summary>
 		/// <returns>
 		/// The first column of the first row in the resultset.</returns>
 		public T ExecuteScalar<T>()
@@ -2592,7 +2655,8 @@ namespace BLToolkit.Data
 
 		/// <summary>
 		/// Executes the query, and returns the value with specified scalar
-		/// source type.</summary>
+		/// source type.
+		/// </summary>
 		/// <param name="sourceType">The method used to return the scalar
 		/// value.</param>
 		/// <returns><list type="table">
@@ -2628,7 +2692,8 @@ namespace BLToolkit.Data
 
 		/// <summary>
 		/// Executes the query, and returns the value with specified scalar
-		/// source type.</summary>
+		/// source type.
+		/// </summary>
 		/// <param name="sourceType">The method used to return the scalar
 		/// value.</param>
 		/// <param name="nip">The column name/index or output parameter
@@ -2674,16 +2739,19 @@ namespace BLToolkit.Data
 
 		/// <summary>
 		/// Executes the query, and returns the array list of values of the
-		/// specified column of  the every row in the resultset returned by the query.
-		/// Extra columns are ignored.</summary>
+		/// specified column of  the every row in the resultset returned by the
+		/// query. Extra columns are ignored.
+		/// </summary>
 		/// <param name="list">The array to fill in.</param>
 		/// <param name="nip">The column name/index or output parameter
 		/// name/index.</param>
 		/// <param name="type">The type of the each element.</param>
-		/// <returns>
-		/// Array list of values of the specified column of the every row in the resultset.
-		/// </returns>
-		public IList ExecuteScalarList(IList list, Type type, NameOrIndexParameter nip)
+		/// <returns>Array list of values of the specified column of the every
+		/// row in the resultset.</returns>
+		public IList ExecuteScalarList(
+			IList                list,
+			Type                 type,
+			NameOrIndexParameter nip)
 		{
 			if (_prepared)
 				InitParameters(CommandAction.Select);
@@ -2697,7 +2765,8 @@ namespace BLToolkit.Data
 					int index = nip.ByName ? dr.GetOrdinal(nip.Name) : nip.Index;
 
 #if FW2
-					bool isNullable = (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>));
+					bool isNullable = (type.IsGenericType
+						&& type.GetGenericTypeDefinition() == typeof(Nullable<>));
 
 					if (isNullable)
 						type = Nullable.GetUnderlyingType(type);
@@ -2710,7 +2779,8 @@ namespace BLToolkit.Data
 						object value = dr.GetValue(index);
 
 						if (value == null || value.GetType() != type)
-							value = value is DBNull ? null : _mappingSchema.ConvertChangeType(value, type, isNullable);
+							value = value is DBNull ? null :
+								_mappingSchema.ConvertChangeType(value, type, isNullable);
 
 						list.Add(value);
 					}
@@ -2722,28 +2792,28 @@ namespace BLToolkit.Data
 		}
 
 		/// <summary>
-		/// Executes the query, and returns the array list of values of first column of
-		/// the every row in the resultset returned by the query.
-		/// Extra columns are ignored.</summary>
+		/// Executes the query, and returns the array list of values of first
+		/// column of the every row in the resultset returned by the query.
+		/// Extra columns are ignored.
+		/// </summary>
 		/// <param name="list">The array to fill in.</param>
 		/// <param name="type">The type of the each element.</param>
-		/// <returns>
-		/// Array list of values of first column of the every row in the resultset.
-		/// </returns>
+		/// <returns>Array list of values of first column of the every row in
+		/// the resultset.</returns>
 		public IList ExecuteScalarList(IList list, Type type)
 		{
 			return ExecuteScalarList(list, type, new NameOrIndexParameter());
 		}
 
 		/// <summary>
-		/// Executes the query, and returns the array list of values of the specified
-		/// column of  the every row in the resultset returned by the query.
-		/// Extra columns are ignored.</summary>
+		/// Executes the query, and returns the array list of values of the
+		/// specified column of  the every row in the resultset returned by the
+		/// query. Extra columns are ignored.
+		/// </summary>
 		/// <param name="nip">The column name/index.</param>
 		/// <param name="type">The type of the each element.</param>
-		/// <returns>
-		/// Array list of values of the specified column of the every row in the resultset.
-		/// </returns>
+		/// <returns>Array list of values of the specified column of the every
+		/// row in the resultset.</returns>
 		public ArrayList ExecuteScalarList(Type type, NameOrIndexParameter nip)
 		{
 			ArrayList list = new ArrayList();
@@ -2754,13 +2824,13 @@ namespace BLToolkit.Data
 		}
 
 		/// <summary>
-		/// Executes the query, and returns the array list of values of first column of
-		/// the every row in the resultset returned by the query.
-		/// Extra columns are ignored.</summary>
+		/// Executes the query, and returns the array list of values of first
+		/// column of the every row in the resultset returned by the query.
+		/// Extra columns are ignored.
+		/// </summary>
 		/// <param name="type">The type of the each element.</param>
-		/// <returns>
-		/// Array list of values of first column of the every row in the resultset.
-		/// </returns>
+		/// <returns>Array list of values of first column of the every row in
+		/// the resultset.</returns>
 		public ArrayList ExecuteScalarList(Type type)
 		{
 			ArrayList list = new ArrayList();
@@ -2773,17 +2843,19 @@ namespace BLToolkit.Data
 		
 #if FW2
 		/// <summary>
-		/// Executes the query, and returns the array list of values of the specified
-		/// column of  the every row in the resultset returned by the query.
-		/// Extra columns are ignored.</summary>
+		/// Executes the query, and returns the array list of values of the
+		/// specified column of  the every row in the resultset returned by the
+		/// query. Extra columns are ignored.
+		/// </summary>
 		/// <param name="list">The array to fill in.</param>
 		/// <param name="nip">The column name/index or output parameter
 		/// name/index.</param>
-		/// <typeparam name="T">The type of the each element.</param>
-		/// <returns>
-		/// Array list of values of the specified column of the every row in the resultset.
-		/// </returns>
-		public IList<T> ExecuteScalarList<T>(IList<T> list, NameOrIndexParameter nip)
+		/// <typeparam name="T">The type of the each element.</typeparam>
+		/// <returns>Array list of values of the specified column of the every
+		/// row in the resultset.</returns>
+		public IList<T> ExecuteScalarList<T>(
+			IList<T>             list,
+			NameOrIndexParameter nip)
 		{
 			if (_prepared)
 				InitParameters(CommandAction.Select);
@@ -2807,7 +2879,8 @@ namespace BLToolkit.Data
 #else
 
 					Type type = typeof(T);
-					bool isNullable = (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>));
+					bool isNullable = (type.IsGenericType &&
+						type.GetGenericTypeDefinition() == typeof(Nullable<>));
 
 					if (isNullable)
 						type = Nullable.GetUnderlyingType(type);
@@ -2817,7 +2890,8 @@ namespace BLToolkit.Data
 						object value = dr.GetValue(index);
 
 						if (value == null || value.GetType() != type)
-							value = value is DBNull ? null : _mappingSchema.ConvertChangeType(value, type, isNullable);
+							value = value is DBNull ? null :
+								_mappingSchema.ConvertChangeType(value, type, isNullable);
 
 						list.Add((T)value);
 					}
@@ -2830,30 +2904,29 @@ namespace BLToolkit.Data
 		}
 
 		/// <summary>
-		/// Executes the query, and returns the array list of values of first column of
-		/// the every row in the resultset returned by the query.
-		/// Extra columns are ignored.</summary>
+		/// Executes the query, and returns the array list of values of first
+		/// column of the every row in the resultset returned by the query.
+		/// Extra columns are ignored.
+		/// </summary>
 		/// <param name="list">The array to fill in.</param>
-		/// name/index.</param>
-		/// <typeparam name="T">The type of the each element.</param>
-		/// <returns>
-		/// Array list of values of first column of the every row in the resultset.
-		/// </returns>
+		/// <typeparam name="T">The type of the each element.</typeparam>
+		/// <returns>Array list of values of first column of the every row in
+		/// the resultset.</returns>
 		public IList<T> ExecuteScalarList<T>(IList<T> list)
 		{
 			return ExecuteScalarList(list, new NameOrIndexParameter());
 		}
 
 		/// <summary>
-		/// Executes the query, and returns the array list of values of the specified column of
-		/// the every row in the resultset returned by the query.
-		/// Extra columns are ignored.</summary>
+		/// Executes the query, and returns the array list of values of the
+		/// specified column of the every row in the resultset returned by the
+		/// query. Extra columns are ignored.
+		/// </summary>
 		/// <param name="nip">The column name/index or output parameter
 		/// name/index.</param>
-		/// <typeparam name="T">The type of the each element.</param>
-		/// <returns>
-		/// Array list of values of the specified column of the every row in the resultset.
-		/// </returns>
+		/// <typeparam name="T">The type of the each element.</typeparam>
+		/// <returns>Array list of values of the specified column of the every
+		/// row in the resultset.</returns>
 		public List<T> ExecuteScalarList<T>(NameOrIndexParameter nip)
 		{
 			List<T> list = new List<T>();
@@ -2864,14 +2937,13 @@ namespace BLToolkit.Data
 		}
 
 		/// <summary>
-		/// Executes the query, and returns the array list of values of first column of
-		/// the every row in the resultset returned by the query.
-		/// Extra columns are ignored.</summary>
-		/// name/index.</param>
-		/// <typeparam name="T">The type of the each element.</param>
-		/// <returns>
-		/// Array list of values of first column of the every row in the resultset.
-		/// </returns>
+		/// Executes the query, and returns the array list of values of first
+		/// column of the every row in the resultset returned by the query.
+		/// Extra columns are ignored.
+		/// </summary>
+		/// <typeparam name="T">The type of the each element.</typeparam>
+		/// <returns>Array list of values of first column of the every row in
+		/// the resultset.</returns>
 		public List<T> ExecuteScalarList<T>()
 		{
 			List<T> list = new List<T>();
@@ -3136,7 +3208,8 @@ namespace BLToolkit.Data
 		/// Executes a SQL statement using the provided parameters.
 		/// </summary>
 		/// <remarks>
-		/// See the <see cref="ExecuteDataSet(string)"/> method to find an example.
+		/// See the <see cref="ExecuteDataSet(NameOrIndexParameter)"/> method
+		/// to find an example.
 		/// </remarks>
 		/// <returns>The <see cref="DataSet"/>.</returns>
 		public DataSet ExecuteDataSet()
@@ -3148,7 +3221,8 @@ namespace BLToolkit.Data
 		/// Executes a SQL statement using the provided parameters.
 		/// </summary>
 		/// <remarks>
-		/// See the <see cref="ExecuteDataSet(string)"/> method to find an example.
+		/// See the <see cref="ExecuteDataSet(NameOrIndexParameter)"/> method
+		/// to find an example.
 		/// </remarks>
 		/// <param name="dataSet">The input DataSet object.</param>
 		/// <returns>The <see cref="DataSet"/>.</returns>
@@ -3162,7 +3236,8 @@ namespace BLToolkit.Data
 		/// Executes a SQL statement using the provided parameters.
 		/// </summary>
 		/// <remarks>
-		/// See the <see cref="ExecuteDataSet(string)"/> method to find an example.
+		/// See the <see cref="ExecuteDataSet(NameOrIndexParameter)"/> method
+		/// to find an example.
 		/// </remarks>
 		/// <param name="table">The name or index of the populating table.</param>
 		/// <returns>The <see cref="DataSet"/>.</returns>
@@ -3760,6 +3835,15 @@ namespace BLToolkit.Data
 			}
 		}
 
+		/// <summary>
+		/// Calls the corresponding INSERT, UPDATE, or DELETE statements for
+		/// each inserted, updated, or deleted row in the specified
+		/// <see cref="DataTable"/>.
+		/// </summary>
+		/// <param name="dataTable">The name or index of the source table to
+		/// use for table mapping.</param>
+		/// <returns>The number of rows successfully updated from the
+		/// <see cref="DataTable"/>.</returns>
 		public int Update(DataTable dataTable)
 		{
 			if (dataTable == null)
