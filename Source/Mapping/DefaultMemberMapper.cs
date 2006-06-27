@@ -4,6 +4,11 @@ namespace BLToolkit.Mapping
 {
 	class DefaultMemberMapper : MemberMapper
 	{
+		public override bool SupportsValue
+		{
+			get { return false; }
+		}
+
 		public override object GetValue(object o)
 		{
 			return MapTo(base.GetValue(o));

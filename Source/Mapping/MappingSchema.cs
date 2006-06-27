@@ -1108,6 +1108,12 @@ namespace BLToolkit.Mapping
 
 		#region ValueMapper
 
+		[CLSCompliant(false)]
+		public virtual IValueMapper DefaultValueMapper
+		{
+			get { return ValueMapping.DefaultMapper; }
+		}
+
 		private Hashtable _sameTypeMappers      = new Hashtable();
 		private Hashtable _differentTypeMappers = new Hashtable();
 
@@ -1147,6 +1153,12 @@ namespace BLToolkit.Mapping
 
 				if (n < 0)
 					continue;
+
+				if (!source.SupportsValue(i) || !dest.SupportsValue(n))
+				{
+					mappers[i] = DefaultValueMapper;
+					continue;
+				}
 
 				Type sourceType = source.GetFieldType(i);
 				Type destType   = dest.  GetFieldType(n);

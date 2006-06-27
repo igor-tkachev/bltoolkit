@@ -12,6 +12,38 @@ namespace Mapping
 	[TestFixture, Category("Mapping")]
 	public class MapTest : TestFixtureBase
 	{
+		#region Enum To Int
+
+		public class EnumClass
+		{
+			public enum Enum
+			{
+				Value1 = 1,
+				Value2 = 2
+			}
+
+			public Enum Value = Enum.Value1;
+		}
+
+		public class IntClass
+		{
+			public int Value;
+		}
+
+		[Test]
+		public void EnumToInt()
+		{
+			ArrayList list = new ArrayList();
+
+			list.Add(new EnumClass());
+
+			list = Map.ListToList(list, typeof(IntClass));
+
+			Assert.AreEqual(1, ((IntClass)list[0]).Value);
+		}
+
+		#endregion
+
 		#region ToEnum, FromEnum
 
 		[DefaultValue(Enum1.Value3)]

@@ -7,12 +7,13 @@ namespace BLToolkit.Mapping
 		#region IMapDataSource Members
 
 		public abstract int    Count { get; }
-		public abstract Type   GetFieldType(int index);
-		public abstract string GetName     (int index);
-		public abstract object GetValue    (object o, int index);
-		public abstract object GetValue    (object o, string name);
+		public abstract Type   GetFieldType (int index);
+		public abstract string GetName      (int index);
+		public abstract object GetValue     (object o, int index);
+		public abstract object GetValue     (object o, string name);
 
-		public virtual bool    IsNull    (object o, int index) { return GetValue(o, index) == null; }
+		public virtual bool    IsNull       (object o, int index) { return GetValue(o, index) == null; }
+		public virtual bool    SupportsValue(int index)           { return true; }
 
 		[CLSCompliant(false)]
 		public virtual SByte   GetSByte  (object o, int index) { return Map.DefaultSchema.ConvertToSByte  (GetValue(o, index)); }

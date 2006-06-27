@@ -45,7 +45,8 @@ namespace BLToolkit.Mapping
 			return value is DBNull? null: value;
 		}
 
-		public virtual bool    IsNull    (object o, int index) { return _dataReader.IsDBNull(index);   }
+		public virtual bool    IsNull       (object o, int index) { return _dataReader.IsDBNull(index);   }
+		public virtual bool    SupportsValue(int index)           { return true; }
 
 		[CLSCompliant(false)]
 		public virtual SByte   GetSByte  (object o, int index) { return Map.DefaultSchema.ConvertToSByte(GetValue(o, index)); }

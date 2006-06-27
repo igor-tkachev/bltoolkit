@@ -632,7 +632,8 @@ namespace BLToolkit.Mapping
 			return mm == null? null: mm.GetValue(o);
 		}
 
-		public override bool    IsNull    (object o, int index) { return this[index].IsNull(o); }
+		public override bool    IsNull        (object o, int index) { return this[index].IsNull(o);     }
+		public override bool    SupportsValue (int index)           { return this[index].SupportsValue; }
 
 		[CLSCompliant(false)]
 		public override SByte   GetSByte  (object o, int index) { return this[index].GetSByte  (o); }
