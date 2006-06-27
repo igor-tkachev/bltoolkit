@@ -33,5 +33,6 @@ namespace BLToolkit.Mapping
 		Single  GetSingle   (object o, int index);
 		Double  GetDouble   (object o, int index);
 		Decimal GetDecimal  (object o, int index);
+		Guid    GetGuid     (object o, int index);
 	}
 }

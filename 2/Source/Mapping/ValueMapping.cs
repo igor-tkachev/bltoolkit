@@ -1,36 +1,56 @@
 using System;
-using System.Collections;
+
+#if FW2
 using System.Collections.Generic;
+using KeyValue = System.Collections.Generic.KeyValuePair<System.Type, System.Type>;
+using Table    = System.Collections.Generic.Dictionary<System.Collections.Generic.KeyValuePair<System.Type, System.Type>, BLToolkit.Mapping.IValueMapper>;
+#else
+using KeyValue = BLToolkit.Common.CompoundValue;
+using Table    = System.Collections.Hashtable;
+#endif
 
 using BLToolkit.Common;
 
 namespace BLToolkit.Mapping
 {
-	internal class ValueMapping
+	public
+#if FW2
+		static
+#endif
+		class ValueMapping
 	{
-		private static Hashtable SameTypeMappers      = new Hashtable();
-		private static Hashtable DifferentTypeMappers = new Hashtable();
+		#region Init
+
+		private static Table _mappers = new Table();
+
+		private static void AddSameType(Type type, IValueMapper mapper)
+		{
+			_mappers.Add(new KeyValue(type, type), mapper);
+		}
 
 		static ValueMapping()
 		{
-			SameTypeMappers.Add(typeof(SByte),   new SByteToSByte());
-			SameTypeMappers.Add(typeof(Int16),   new Int16ToInt16());
-			SameTypeMappers.Add(typeof(Int32),   new Int32ToInt32());
-			SameTypeMappers.Add(typeof(Int64),   new Int64ToInt64());
-			SameTypeMappers.Add(typeof(Byte),    new ByteToByte());
-			SameTypeMappers.Add(typeof(UInt16),  new UInt16ToUInt16());
-			SameTypeMappers.Add(typeof(UInt32),  new UInt32ToUInt32());
-			SameTypeMappers.Add(typeof(UInt64),  new UInt64ToUInt64());
-			SameTypeMappers.Add(typeof(Boolean), new BooleanToBoolean());
-			SameTypeMappers.Add(typeof(Char),    new CharToChar());
-			SameTypeMappers.Add(typeof(Single),  new SingleToSingle());
-			SameTypeMappers.Add(typeof(Double),  new DoubleToDouble());
-			SameTypeMappers.Add(typeof(Decimal), new DecimalToDecimal());
+			AddSameType(typeof(SByte),   new SByteToSByte());
+			AddSameType(typeof(Int16),   new Int16ToInt16());
+			AddSameType(typeof(Int32),   new Int32ToInt32());
+			AddSameType(typeof(Int64),   new Int64ToInt64());
+			AddSameType(typeof(Byte),    new ByteToByte());
+			AddSameType(typeof(UInt16),  new UInt16ToUInt16());
+			AddSameType(typeof(UInt32),  new UInt32ToUInt32());
+			AddSameType(typeof(UInt64),  new UInt64ToUInt64());
+			AddSameType(typeof(Boolean), new BooleanToBoolean());
+			AddSameType(typeof(Char),    new CharToChar());
+			AddSameType(typeof(Single),  new SingleToSingle());
+			AddSameType(typeof(Double),  new DoubleToDouble());
+			AddSameType(typeof(Decimal), new DecimalToDecimal());
+			AddSameType(typeof(Guid),    new GuidToGuid());
 		}
+
+		#endregion
 
 		#region Default Mapper
 
-		class DefValueMapper : IValueMapper
+		class DefaultValueMapper : IValueMapper
 		{
 			public void Map(
 				IMapDataSource      source, object sourceObject, int sourceIndex,
@@ -40,11 +60,12 @@ namespace BLToolkit.Mapping
 			}
 		}
 
-		private static IValueMapper _defaultValueMapper = new DefValueMapper();
-		public  static IValueMapper  DefaultValueMapper
+		private static IValueMapper _defaultMapper = new DefaultValueMapper();
+		[CLSCompliant(false)]
+		public  static IValueMapper  DefaultMapper
 		{
-			get { return _defaultValueMapper;  }
-			set { _defaultValueMapper = value; }
+			get { return _defaultMapper;  }
+			set { _defaultMapper = value; }
 		}
 
 		#endregion
@@ -53,56 +74,45 @@ namespace BLToolkit.Mapping
 
 		private static object _sync = new object();
 
-		public static IValueMapper GetMapper(Type type)
-		{
-			IValueMapper t = (IValueMapper)SameTypeMappers[type];
-
-			if (t != null)
-				return t;
-
-			lock (_sync)
-			{
-				t = (IValueMapper)SameTypeMappers[type];
-
-				if (t != null)
-					return t;
-
-				SameTypeMappers[type] = t = DefaultValueMapper;
-
-				return t;
-			}
-		}
-
+		[CLSCompliant(false)]
 		public static IValueMapper GetMapper(Type t1, Type t2)
 		{
-			KeyValuePair<Type, Type> key = new KeyValuePair<Type, Type>(t1, t2);
-
-			IValueMapper t = (IValueMapper)DifferentTypeMappers[key];
-
-			if (t != null)
-				return t;
-
 			lock (_sync)
 			{
-				t = (IValueMapper)DifferentTypeMappers[key];
+				if (t1 == null) t1 = typeof(object);
+				if (t2 == null) t2 = typeof(object);
 
-				if (t != null)
+				KeyValue key = new KeyValue(t1, t2);
+
+				IValueMapper t;
+
+#if FW2
+				if (_mappers.TryGetValue(key, out t))
 					return t;
 
 				Type type = typeof(GetSetDataChecker<,>).MakeGenericType(t1, t2);
 
 				if (((IGetSetDataChecker)Activator.CreateInstance(type)).Check() == false)
 				{
-					t = DefaultValueMapper;
+					t = _defaultMapper;
 				}
 				else
 				{
-					type = typeof(ValueMapper<,>).MakeGenericType(t1, t2);
+					type = t1 == t2?
+						typeof(ValueMapper<>). MakeGenericType(t1):
+						typeof(ValueMapper<,>).MakeGenericType(t1, t2);
 
 					t = (IValueMapper)Activator.CreateInstance(type);
 				}
+#else
+				t = (IValueMapper)_mappers[key];
 
-				DifferentTypeMappers[key] = t;
+				if (t != null)
+					return t;
+
+				t = _defaultMapper;
+#endif
+				_mappers.Add(key, t);
 
 				return t;
 			}
@@ -281,9 +291,24 @@ namespace BLToolkit.Mapping
 			}
 		}
 
+		class GuidToGuid : IValueMapper
+		{
+			public void Map(
+				IMapDataSource      source, object sourceObject, int sourceIndex,
+				IMapDataDestination dest,   object destObject,   int destIndex)
+			{
+				if (source.IsNull(sourceObject, sourceIndex))
+					dest.SetNull(destObject, destIndex);
+				else
+					dest.SetGuid(destObject, destIndex, source.GetGuid(sourceObject, sourceIndex));
+			}
+		}
+
 		#endregion
 
-		#region Different Types
+#if FW2
+
+		#region Generic Mappers
 
 		static class GetData<T>
 		{
@@ -313,6 +338,7 @@ namespace BLToolkit.Mapping
 				if (t == typeof(Single))  return Conv<Single> (delegate(IMapDataSource s, object o, int i) { return s.GetSingle (o, i); });
 				if (t == typeof(Double))  return Conv<Double> (delegate(IMapDataSource s, object o, int i) { return s.GetDouble (o, i); });
 				if (t == typeof(Decimal)) return Conv<Decimal>(delegate(IMapDataSource s, object o, int i) { return s.GetDecimal(o, i); });
+				if (t == typeof(Guid))    return Conv<Guid>   (delegate(IMapDataSource s, object o, int i) { return s.GetGuid   (o, i); });
 
 				return null;
 			}
@@ -346,6 +372,7 @@ namespace BLToolkit.Mapping
 				if (t == typeof(Single))  return Conv<Single> (delegate(IMapDataDestination d, object o, int i, Single  v) { d.SetSingle (o, i, v); });
 				if (t == typeof(Double))  return Conv<Double> (delegate(IMapDataDestination d, object o, int i, Double  v) { d.SetDouble (o, i, v); });
 				if (t == typeof(Decimal)) return Conv<Decimal>(delegate(IMapDataDestination d, object o, int i, Decimal v) { d.SetDecimal(o, i, v); });
+				if (t == typeof(Guid))    return Conv<Guid>   (delegate(IMapDataDestination d, object o, int i, Guid    v) { d.SetGuid   (o, i, v); });
 
 				return null;
 			}
@@ -366,6 +393,28 @@ namespace BLToolkit.Mapping
 			}
 		}
 
+		class ValueMapper<T> : IValueMapper
+		{
+			public void Map(
+				IMapDataSource      source, object sourceObject, int sourceIndex,
+				IMapDataDestination dest,   object destObject,   int destIndex)
+			{
+				if (source.IsNull(sourceObject, sourceIndex))
+					dest.SetNull(destObject, destIndex);
+				else
+				{
+					SetData<T>.SetMethod set = SetData<T>.Set;
+					GetData<T>.GetMethod get = GetData<T>.Get;
+
+					set(dest, destObject, destIndex, get(source, sourceObject, sourceIndex));
+
+					//SetData<T>.Set(
+					//	dest, destObject, destIndex,
+					//	GetData<T>.Get(source, sourceObject, sourceIndex));
+				}
+			}
+		}
+
 		class ValueMapper<S,D> : IValueMapper
 		{
 			public void Map(
@@ -375,12 +424,22 @@ namespace BLToolkit.Mapping
 				if (source.IsNull(sourceObject, sourceIndex))
 					dest.SetNull(destObject, destIndex);
 				else
-					SetData<D>.Set(
-						dest, destObject, destIndex,
-						ConvertTo<D>.From(GetData<S>.Get(source, sourceObject, sourceIndex)));
+				{
+					SetData<D>.SetMethod       set  = SetData<D>.Set;
+					GetData<S>.GetMethod       get  = GetData<S>.Get;
+					Convert<D,S>.ConvertMethod conv = Convert<D, S>.From;
+
+					set(dest, destObject, destIndex, conv(get(source, sourceObject, sourceIndex)));
+
+					//SetData<D>.Set(
+					//	dest, destObject, destIndex,
+					//	ConvertTo<D>.From(GetData<S>.Get(source, sourceObject, sourceIndex)));
+				}
 			}
 		}
 
 		#endregion
+
+#endif
 	}
 }

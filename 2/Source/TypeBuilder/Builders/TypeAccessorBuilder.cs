@@ -161,10 +161,13 @@ namespace BLToolkit.TypeBuilder.Builders
 			BuildGetter     (mi, nestedType);
 			BuildSetter     (mi, nestedType);
 
-			Type   type =
-				mi is FieldInfo ? ((FieldInfo)mi).FieldType : ((PropertyInfo)mi).PropertyType;
+			Type type = mi is FieldInfo ? ((FieldInfo)mi).FieldType : ((PropertyInfo)mi).PropertyType;
 
-			string typedPropertyName = type.IsGenericType? null: type.Name;
+			string typedPropertyName =
+#if FW2
+				type.IsGenericType? null:
+#endif
+				type.Name;
 
 			if (typedPropertyName != null)
 			{

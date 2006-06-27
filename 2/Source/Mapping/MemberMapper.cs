@@ -132,6 +132,7 @@ namespace BLToolkit.Mapping
 		public virtual Single  GetSingle (object o) { return _memberAccessor.GetSingle (o); }
 		public virtual Double  GetDouble (object o) { return _memberAccessor.GetDouble (o); }
 		public virtual Decimal GetDecimal(object o) { return _memberAccessor.GetDecimal(o); }
+		public virtual Guid    GetGuid   (object o) { return _memberAccessor.GetGuid   (o); }
 
 		public virtual void SetNull   (object o)                { SetValue(o, null); }
 
@@ -154,6 +155,7 @@ namespace BLToolkit.Mapping
 		public virtual void SetSingle (object o, Single  value) { _memberAccessor.SetSingle (o, value); }
 		public virtual void SetDouble (object o, Double  value) { _memberAccessor.SetDouble (o, value); }
 		public virtual void SetDecimal(object o, Decimal value) { _memberAccessor.SetDecimal(o, value); }
+		public virtual void SetGuid   (object o, Guid    value) { _memberAccessor.SetGuid   (o, value); }
 
 		#endregion
 
@@ -789,13 +791,15 @@ namespace BLToolkit.Mapping
 
 		class GuidMapper : MemberMapper
 		{
-			protected object _nullValue;
+			protected Guid _nullValue;
+
+			public override bool IsNull(object o) { return false; }
 
 			public override void SetValue(object o, object value)
 			{
-				_memberAccessor.SetValue(
+				_memberAccessor.SetGuid(
 					o,
-					value is Guid? value:
+					value is Guid? (Guid)value:
 					value == null? _nullValue:
 					               _mappingSchema.ConvertToGuid(value));
 			}
@@ -806,17 +810,19 @@ namespace BLToolkit.Mapping
 
 				if (mapMemberInfo.NullValue != null)
 					_nullValue = mapMemberInfo.NullValue is Guid?
-						mapMemberInfo.NullValue: new Guid(mapMemberInfo.NullValue.ToString());
+						(Guid)mapMemberInfo.NullValue: new Guid(mapMemberInfo.NullValue.ToString());
 
 				base.Init(mapMemberInfo);
 			}
 
 			public class Nullable : GuidMapper
 			{
+				public override bool IsNull(object o) { return GetGuid(o) == _nullValue; }
+
 				public override object GetValue(object o)
 				{
-					object value = _memberAccessor.GetValue(o);
-					return (Guid)value == (Guid)_nullValue? null: value;
+					Guid value = _memberAccessor.GetGuid(o);
+					return (Guid)value == _nullValue? null: (object)value;
 				}
 			}
 		}
@@ -1208,18 +1214,18 @@ namespace BLToolkit.Mapping
 
 			bool d = mi.MapValues != null;
 
-			if (type == typeof(SqlByte))     return d? new SqlByteMapper.Default(): new SqlByteMapper();
-			if (type == typeof(SqlInt16))    return d? new SqlInt16Mapper.Default(): new SqlInt16Mapper();
-			if (type == typeof(SqlInt32))    return d? new SqlInt32Mapper.Default(): new SqlInt32Mapper();
-			if (type == typeof(SqlInt64))    return d? new SqlInt64Mapper.Default(): new SqlInt64Mapper();
-			if (type == typeof(SqlSingle))   return d? new SqlSingleMapper.Default(): new SqlSingleMapper();
-			if (type == typeof(SqlBoolean))  return d? new SqlBooleanMapper.Default(): new SqlBooleanMapper();
-			if (type == typeof(SqlDouble))   return d? new SqlDoubleMapper.Default(): new SqlDoubleMapper();
+			if (type == typeof(SqlByte))     return d? new SqlByteMapper.    Default(): new SqlByteMapper();
+			if (type == typeof(SqlInt16))    return d? new SqlInt16Mapper.   Default(): new SqlInt16Mapper();
+			if (type == typeof(SqlInt32))    return d? new SqlInt32Mapper.   Default(): new SqlInt32Mapper();
+			if (type == typeof(SqlInt64))    return d? new SqlInt64Mapper.   Default(): new SqlInt64Mapper();
+			if (type == typeof(SqlSingle))   return d? new SqlSingleMapper.  Default(): new SqlSingleMapper();
+			if (type == typeof(SqlBoolean))  return d? new SqlBooleanMapper. Default(): new SqlBooleanMapper();
+			if (type == typeof(SqlDouble))   return d? new SqlDoubleMapper.  Default(): new SqlDoubleMapper();
 			if (type == typeof(SqlDateTime)) return d? new SqlDateTimeMapper.Default(): new SqlDateTimeMapper();
-			if (type == typeof(SqlDecimal))  return d? new SqlDecimalMapper.Default(): new SqlDecimalMapper();
-			if (type == typeof(SqlMoney))    return d? new SqlMoneyMapper.Default(): new SqlMoneyMapper();
-			if (type == typeof(SqlGuid))     return d? new SqlGuidMapper.Default(): new SqlGuidMapper();
-			if (type == typeof(SqlString))   return d? new SqlStringMapper.Default(): new SqlStringMapper();
+			if (type == typeof(SqlDecimal))  return d? new SqlDecimalMapper. Default(): new SqlDecimalMapper();
+			if (type == typeof(SqlMoney))    return d? new SqlMoneyMapper.   Default(): new SqlMoneyMapper();
+			if (type == typeof(SqlGuid))     return d? new SqlGuidMapper.    Default(): new SqlGuidMapper();
+			if (type == typeof(SqlString))   return d? new SqlStringMapper.  Default(): new SqlStringMapper();
 
 			return null;
 		}
@@ -1487,7 +1493,7 @@ namespace BLToolkit.Mapping
 			public override void SetValue(object o, object value)
 			{
 				_memberAccessor.SetValue(
-					o, value is SqlMoney? value: _mappingSchema.ConvertToSqlDecimal(value));
+					o, value is SqlMoney? value: _mappingSchema.ConvertToSqlMoney(value));
 			}
 
 			public class Default : SqlMoneyMapper

@@ -66,6 +66,7 @@ namespace BLToolkit.Mapping
 		public virtual Single  GetSingle (object o, int index) { return Map.DefaultSchema.ConvertToSingle(GetValue(o, index)); }
 		public virtual Double  GetDouble (object o, int index) { return _dataReader.GetDouble (index); }
 		public virtual Decimal GetDecimal(object o, int index) { return _dataReader.GetDecimal(index); }
+		public virtual Guid    GetGuid   (object o, int index) { return _dataReader.GetGuid   (index); }
 
 		#endregion
 	}
