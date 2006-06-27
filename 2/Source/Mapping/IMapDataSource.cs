@@ -12,7 +12,8 @@ namespace BLToolkit.Mapping
 		object  GetValue    (object o, int index);
 		object  GetValue    (object o, string name);
 
-		bool    IsNull      (object o, int index);
+		bool IsNull         (object o, int index);
+		bool SupportsValue  (int index);
 
 		[CLSCompliant(false)]
 		SByte   GetSByte    (object o, int index);

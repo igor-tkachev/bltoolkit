@@ -163,6 +163,9 @@ namespace BLToolkit.TypeBuilder.Builders
 
 			Type type = mi is FieldInfo ? ((FieldInfo)mi).FieldType : ((PropertyInfo)mi).PropertyType;
 
+			if (type.IsEnum)
+				type = Enum.GetUnderlyingType(type);
+
 			string typedPropertyName =
 #if FW2
 				type.IsGenericType? null:

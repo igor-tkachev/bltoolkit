@@ -44,6 +44,11 @@ namespace BLToolkit.Mapping
 			AddSameType(typeof(Double),  new DoubleToDouble());
 			AddSameType(typeof(Decimal), new DecimalToDecimal());
 			AddSameType(typeof(Guid),    new GuidToGuid());
+
+			_mappers.Add(new KeyValue(typeof(Int32),   typeof(Double)),  new Int32ToDouble());
+			_mappers.Add(new KeyValue(typeof(Int32),   typeof(Decimal)), new Int32ToDecimal());
+			_mappers.Add(new KeyValue(typeof(Double),  typeof(Int32)),   new DoubleToInt32());
+			_mappers.Add(new KeyValue(typeof(Decimal), typeof(Int32)),   new DecimalToInt32());
 		}
 
 		#endregion
@@ -81,6 +86,9 @@ namespace BLToolkit.Mapping
 			{
 				if (t1 == null) t1 = typeof(object);
 				if (t2 == null) t2 = typeof(object);
+
+				if (t1.IsEnum) t1 = Enum.GetUnderlyingType(t1);
+				if (t2.IsEnum) t2 = Enum.GetUnderlyingType(t2);
 
 				KeyValue key = new KeyValue(t1, t2);
 
@@ -301,6 +309,62 @@ namespace BLToolkit.Mapping
 					dest.SetNull(destObject, destIndex);
 				else
 					dest.SetGuid(destObject, destIndex, source.GetGuid(sourceObject, sourceIndex));
+			}
+		}
+
+		#endregion
+
+		#region Different Types
+
+		class Int32ToDouble : IValueMapper
+		{
+			public void Map(
+				IMapDataSource      source, object sourceObject, int sourceIndex,
+				IMapDataDestination dest,   object destObject,   int destIndex)
+			{
+				if (source.IsNull(sourceObject, sourceIndex))
+					dest.SetNull(destObject, destIndex);
+				else
+					dest.SetDouble(destObject, destIndex, Convert.ToDouble(source.GetInt32(sourceObject, sourceIndex)));
+			}
+		}
+
+		class Int32ToDecimal : IValueMapper
+		{
+			public void Map(
+				IMapDataSource      source, object sourceObject, int sourceIndex,
+				IMapDataDestination dest,   object destObject,   int destIndex)
+			{
+				if (source.IsNull(sourceObject, sourceIndex))
+					dest.SetNull(destObject, destIndex);
+				else
+					dest.SetDecimal(destObject, destIndex, Convert.ToDecimal(source.GetInt32(sourceObject, sourceIndex)));
+			}
+		}
+
+		class DoubleToInt32 : IValueMapper
+		{
+			public void Map(
+				IMapDataSource      source, object sourceObject, int sourceIndex,
+				IMapDataDestination dest,   object destObject,   int destIndex)
+			{
+				if (source.IsNull(sourceObject, sourceIndex))
+					dest.SetNull(destObject, destIndex);
+				else
+					dest.SetInt32(destObject, destIndex, Convert.ToInt32(source.GetDouble(sourceObject, sourceIndex)));
+			}
+		}
+
+		class DecimalToInt32 : IValueMapper
+		{
+			public void Map(
+				IMapDataSource      source, object sourceObject, int sourceIndex,
+				IMapDataDestination dest,   object destObject,   int destIndex)
+			{
+				if (source.IsNull(sourceObject, sourceIndex))
+					dest.SetNull(destObject, destIndex);
+				else
+					dest.SetInt32(destObject, destIndex, Convert.ToInt32(source.GetDecimal(sourceObject, sourceIndex)));
 			}
 		}
 

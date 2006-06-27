@@ -99,16 +99,13 @@ namespace BLToolkit.Mapping
 
 		#endregion
 
-		#region Default GetValue, SetValue
+		#region Default Members (GetValue, SetValue)
+
+		public virtual bool SupportsValue { get { return true; } }
 
 		public virtual object GetValue(object o)
 		{
 			return _memberAccessor.GetValue(o);
-		}
-
-		public virtual void SetValue(object o, object value)
-		{
-			_memberAccessor.SetValue(o, value);
 		}
 
 		public virtual bool    IsNull    (object o) { return GetValue(o) == null; }
@@ -133,6 +130,11 @@ namespace BLToolkit.Mapping
 		public virtual Double  GetDouble (object o) { return _memberAccessor.GetDouble (o); }
 		public virtual Decimal GetDecimal(object o) { return _memberAccessor.GetDecimal(o); }
 		public virtual Guid    GetGuid   (object o) { return _memberAccessor.GetGuid   (o); }
+
+		public virtual void SetValue(object o, object value)
+		{
+			_memberAccessor.SetValue(o, value);
+		}
 
 		public virtual void SetNull   (object o)                { SetValue(o, null); }
 
