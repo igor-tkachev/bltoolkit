@@ -33,6 +33,7 @@ namespace BLToolkit.Mapping
 		public virtual Single  GetSingle (object o, int index) { return Map.DefaultSchema.ConvertToSingle (GetValue(o, index)); }
 		public virtual Double  GetDouble (object o, int index) { return Map.DefaultSchema.ConvertToDouble (GetValue(o, index)); }
 		public virtual Decimal GetDecimal(object o, int index) { return Map.DefaultSchema.ConvertToDecimal(GetValue(o, index)); }
+		public virtual Guid    GetGuid   (object o, int index) { return Map.DefaultSchema.ConvertToGuid   (GetValue(o, index)); }
 
 		#endregion
 
@@ -63,6 +64,7 @@ namespace BLToolkit.Mapping
 		public virtual void SetSingle (object o, int index, Single  value) { SetValue(o, index, value); }
 		public virtual void SetDouble (object o, int index, Double  value) { SetValue(o, index, value); }
 		public virtual void SetDecimal(object o, int index, Decimal value) { SetValue(o, index, value); }
+		public virtual void SetGuid   (object o, int index, Guid    value) { SetValue(o, index, value); }
 
 		#endregion
 	}

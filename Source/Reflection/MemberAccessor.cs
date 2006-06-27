@@ -69,6 +69,7 @@ namespace BLToolkit.Reflection
 		public virtual Single  GetSingle (object o) { return (Single) GetValue(o); }
 		public virtual Double  GetDouble (object o) { return (Double) GetValue(o); }
 		public virtual Decimal GetDecimal(object o) { return (Decimal)GetValue(o); }
+		public virtual Guid    GetGuid   (object o) { return (Guid)   GetValue(o); }
 
 		[CLSCompliant(false)]
 		public virtual void    SetSByte  (object o, SByte   value) { SetValue(o, value); }
@@ -89,6 +90,7 @@ namespace BLToolkit.Reflection
 		public virtual void    SetSingle (object o, Single  value) { SetValue(o, value); }
 		public virtual void    SetDouble (object o, Double  value) { SetValue(o, value); }
 		public virtual void    SetDecimal(object o, Decimal value) { SetValue(o, value); }
+		public virtual void    SetGuid   (object o, Guid    value) { SetValue(o, value); }
 
 		public Type Type
 		{

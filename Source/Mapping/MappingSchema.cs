@@ -4,8 +4,12 @@ using System.Data;
 using System.Data.SqlTypes;
 using System.Reflection;
 using System.Diagnostics.CodeAnalysis;
+
 #if FW2
 using System.Collections.Generic;
+using KeyValue = System.Collections.Generic.KeyValuePair<System.Type,System.Type>;
+#else
+using KeyValue = BLToolkit.Common.CompoundValue;
 #endif
 
 using BLToolkit.Common;
@@ -677,43 +681,52 @@ namespace BLToolkit.Mapping
 				return dstArray;
 			}
 
+#if FW2
+			if (isNullable) switch (Type.GetTypeCode(conversionType))
+			{
+				case TypeCode.Boolean:  return ConvertToNullableBoolean (value);
+				case TypeCode.Byte:     return ConvertToNullableByte    (value);
+				case TypeCode.Char:     return ConvertToNullableChar    (value);
+				case TypeCode.DateTime: return ConvertToNullableDateTime(value);
+				case TypeCode.Decimal:  return ConvertToNullableDecimal (value);
+				case TypeCode.Double:   return ConvertToNullableDouble  (value);
+				case TypeCode.Int16:    return ConvertToNullableInt16   (value);
+				case TypeCode.Int32:    return ConvertToNullableInt32   (value);
+				case TypeCode.Int64:    return ConvertToNullableInt64   (value);
+				case TypeCode.SByte:    return ConvertToNullableSByte   (value);
+				case TypeCode.Single:   return ConvertToNullableSingle  (value);
+				case TypeCode.UInt16:   return ConvertToNullableUInt16  (value);
+				case TypeCode.UInt32:   return ConvertToNullableUInt32  (value);
+				case TypeCode.UInt64:   return ConvertToNullableUInt64  (value);
+			}
+#endif
+
 			switch (Type.GetTypeCode(conversionType))
 			{
-				case TypeCode.Boolean:
-					return isNullable ? ConvertToNullableBoolean(value)  : ConvertToBoolean(value);
-				case TypeCode.Byte:
-					return isNullable ? ConvertToNullableByte(value)     : ConvertToByte(value);
-				case TypeCode.Char:
-					return isNullable ? ConvertToNullableChar(value)     : ConvertToChar(value);
-				case TypeCode.DateTime:
-					return isNullable ? ConvertToNullableDateTime(value) : ConvertToDateTime(value);
-				case TypeCode.Decimal:
-					return isNullable ? ConvertToNullableDecimal(value)  : ConvertToDecimal(value);
-				case TypeCode.Double:
-					return isNullable ? ConvertToNullableDouble(value)   : ConvertToDouble(value);
-				case TypeCode.Int16:
-					return isNullable ? ConvertToNullableInt16(value)    : ConvertToInt16(value);
-				case TypeCode.Int32:
-					return isNullable ? ConvertToNullableInt32(value)    : ConvertToInt32(value);
-				case TypeCode.Int64:
-					return isNullable ? ConvertToNullableInt64(value)    : ConvertToInt64(value);
-				case TypeCode.SByte:
-					return isNullable ? ConvertToNullableSByte(value)    : ConvertToSByte(value);
-				case TypeCode.Single:
-					return isNullable ? ConvertToNullableSingle(value)   : ConvertToSingle(value);
-				case TypeCode.String:
-					return ConvertToString(value);
-				case TypeCode.UInt16:
-					return isNullable ? ConvertToNullableUInt16(value)   : ConvertToUInt16(value);
-				case TypeCode.UInt32:
-					return isNullable ? ConvertToNullableUInt32(value)   : ConvertToUInt32(value);
-				case TypeCode.UInt64:
-					return isNullable ? ConvertToNullableUInt64(value)   : ConvertToUInt64(value);
+				case TypeCode.Boolean:  return ConvertToBoolean (value);
+				case TypeCode.Byte:     return ConvertToByte    (value);
+				case TypeCode.Char:     return ConvertToChar    (value);
+				case TypeCode.DateTime: return ConvertToDateTime(value);
+				case TypeCode.Decimal:  return ConvertToDecimal (value);
+				case TypeCode.Double:   return ConvertToDouble  (value);
+				case TypeCode.Int16:    return ConvertToInt16   (value);
+				case TypeCode.Int32:    return ConvertToInt32   (value);
+				case TypeCode.Int64:    return ConvertToInt64   (value);
+				case TypeCode.SByte:    return ConvertToSByte   (value);
+				case TypeCode.Single:   return ConvertToSingle  (value);
+				case TypeCode.String:   return ConvertToString  (value);
+				case TypeCode.UInt16:   return ConvertToUInt16  (value);
+				case TypeCode.UInt32:   return ConvertToUInt32  (value);
+				case TypeCode.UInt64:   return ConvertToUInt64  (value);
 			}
 
 			if (typeof(Guid) == conversionType)
-				return     isNullable ? ConvertToGuid(value)             : ConvertToNullableGuid(value);
-				
+				return
+#if FW2
+					isNullable ? ConvertToNullableGuid(value) :
+#endif
+					ConvertToGuid(value);
+
 			return Convert.ChangeType(value, conversionType);
 		}
 
@@ -1098,6 +1111,7 @@ namespace BLToolkit.Mapping
 		private Hashtable _sameTypeMappers      = new Hashtable();
 		private Hashtable _differentTypeMappers = new Hashtable();
 
+		[CLSCompliant(false)]
 		public void SetValueMapper(Type sourceType, Type destType, IValueMapper mapper)
 		{
 			if (sourceType == null) sourceType = typeof(object);
@@ -1112,7 +1126,7 @@ namespace BLToolkit.Mapping
 			}
 			else
 			{
-				KeyValuePair<Type,Type> key = new KeyValuePair<Type,Type>(sourceType, destType);
+				KeyValue key = new KeyValue(sourceType, destType);
 
 				if (mapper == null)
 					_differentTypeMappers.Remove(sourceType);
@@ -1134,29 +1148,28 @@ namespace BLToolkit.Mapping
 				if (n < 0)
 					continue;
 
-				Type sType = source.GetFieldType(i);
-				Type dType = dest.  GetFieldType(n);
+				Type sourceType = source.GetFieldType(i);
+				Type destType   = dest.  GetFieldType(n);
 
-				if (sType == null) sType = typeof(object);
-				if (dType == null) dType = typeof(object);
+				if (sourceType == null) sourceType = typeof(object);
+				if (destType   == null) destType   = typeof(object);
 
-				if (sType == dType)
+				if (sourceType == destType)
 				{
-					IValueMapper t = (IValueMapper)_sameTypeMappers[sType];
+					IValueMapper t = (IValueMapper)_sameTypeMappers[sourceType];
 
 					if (t == null)
-						_sameTypeMappers[sType] = t = ValueMapping.GetMapper(sType, dType);
+						_sameTypeMappers[sourceType] = t = ValueMapping.GetMapper(sourceType, destType);
 
 					mappers[i] = t;
 				}
 				else
 				{
-					KeyValuePair<Type,Type> key = new KeyValuePair<Type,Type>(sType, dType);
-
-					IValueMapper t = (IValueMapper)_differentTypeMappers[key];
+					KeyValue     key = new KeyValue(sourceType, destType);
+					IValueMapper t   = (IValueMapper)_differentTypeMappers[key];
 
 					if (t == null)
-						_differentTypeMappers[key] = t = ValueMapping.GetMapper(sType, dType);
+						_differentTypeMappers[key] = t = ValueMapping.GetMapper(sourceType, destType);
 
 					mappers[i] = t;
 				}

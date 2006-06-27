@@ -598,7 +598,17 @@
                     BuildAction = "Compile"
                 />
                 <File
+                    RelPath = "Mapping\IValueMapper.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
                     RelPath = "Mapping\Map.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "Mapping\MapDataSourceDestinationBase.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
                 />
@@ -703,6 +713,11 @@
                 />
                 <File
                     RelPath = "Mapping\TrimmableAttribute.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "Mapping\ValueMapping.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
                 />

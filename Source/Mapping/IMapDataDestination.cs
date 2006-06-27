@@ -31,5 +31,6 @@ namespace BLToolkit.Mapping
 		void SetSingle   (object o, int index, Single  value);
 		void SetDouble   (object o, int index, Double  value);
 		void SetDecimal  (object o, int index, Decimal value);
+		void SetGuid     (object o, int index, Guid    value);
 	}
 }

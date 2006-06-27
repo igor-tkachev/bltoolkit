@@ -653,6 +653,7 @@ namespace BLToolkit.Mapping
 		public override Single  GetSingle (object o, int index) { return this[index].GetSingle (o); }
 		public override Double  GetDouble (object o, int index) { return this[index].GetDouble (o); }
 		public override Decimal GetDecimal(object o, int index) { return this[index].GetDecimal(o); }
+		public override Guid    GetGuid   (object o, int index) { return this[index].GetGuid   (o); }
 
 		#endregion
 
@@ -699,6 +700,7 @@ namespace BLToolkit.Mapping
 		public override void SetSingle (object o, int index, Single  value) { this[index].SetSingle (o, value); }
 		public override void SetDouble (object o, int index, Double  value) { this[index].SetDouble (o, value); }
 		public override void SetDecimal(object o, int index, Decimal value) { this[index].SetDecimal(o, value); }
+		public override void SetGuid   (object o, int index, Guid    value) { this[index].SetGuid   (o, value); }
 
 		#endregion
 
