@@ -119,8 +119,6 @@
     <Compile Include="Data\DataProvider\AccessDataProvider.cs" />
     <Compile Include="Data\DataProvider\ConvertType.cs" />
     <Compile Include="Data\DataProvider\DataProviderBase.cs" />
-    <Compile Include="Data\DataProvider\IDataProvider.cs" />
-    <Compile Include="Data\DataProvider\ObsoleteDataProvider.cs" />
     <Compile Include="Data\DataProvider\OdbcDataProvider.cs" />
     <Compile Include="Data\DataProvider\OleDbDataProvider.cs" />
     <Compile Include="Data\DataProvider\OracleDataProvider.cs" />
@@ -172,7 +170,6 @@
     <Compile Include="Mapping\IMapDataDestinationList.cs" />
     <Compile Include="Mapping\IMapDataSource.cs" />
     <Compile Include="Mapping\IMapDataSourceList.cs" />
-    <Compile Include="Mapping\IndexValue.cs" />
     <Compile Include="Mapping\ISupportMapping.cs" />
     <Compile Include="Mapping\Map.cs" />
     <Compile Include="Mapping\MapFieldAttribute.cs" />

@@ -59,6 +59,11 @@ namespace BLToolkit.Mapping
 			return _enumerator.Key.ToString();
 		}
 
+		public override bool SupportsValue(int index)
+		{
+			return index < _dictionary.Count;
+		}
+
 		public override object GetValue(object o, int index)
 		{
 			SetEnumerator(index);

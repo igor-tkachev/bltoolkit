@@ -338,16 +338,6 @@
                     BuildAction = "Compile"
                 />
                 <File
-                    RelPath = "Data\DataProvider\IDataProvider.cs"
-                    SubType = "Code"
-                    BuildAction = "Compile"
-                />
-                <File
-                    RelPath = "Data\DataProvider\ObsoleteDataProvider.cs"
-                    SubType = "Code"
-                    BuildAction = "Compile"
-                />
-                <File
                     RelPath = "Data\DataProvider\OdbcDataProvider.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
@@ -584,11 +574,6 @@
                 />
                 <File
                     RelPath = "Mapping\IMapDataSourceList.cs"
-                    SubType = "Code"
-                    BuildAction = "Compile"
-                />
-                <File
-                    RelPath = "Mapping\IndexValue.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
                 />

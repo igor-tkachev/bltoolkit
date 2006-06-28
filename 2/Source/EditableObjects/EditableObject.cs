@@ -234,12 +234,25 @@ namespace BLToolkit.EditableObjects
 				PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
 		}
 
-		private bool _notifyChanges = true;
+		private int _notNotifyChangesCount = 0;
 		[MapIgnore, Bindable(false)]
 		public  bool  NotifyChanges
 		{
-			get { return _notifyChanges;  }
-			set { _notifyChanges = value; }
+			get { return _notNotifyChangesCount == 0;   }
+			set { _notNotifyChangesCount = value? 0: 1; }
+		}
+
+		public void LockNotifyChanges()
+		{
+			_notNotifyChangesCount++;
+		}
+
+		public void UnlockNotifyChanges()
+		{
+			_notNotifyChangesCount--;
+
+			if (_notNotifyChangesCount < 0)
+				throw new InvalidOperationException();
 		}
 
 		#endregion

@@ -1206,7 +1206,7 @@ namespace BLToolkit.Mapping
 			return index;
 		}
 
-		[CLSCompliant(false)]
+		[CLSCompliant(false), Obsolete]
 		protected static void MapInternal(
 			IMapDataSource      source, object sourceObject,
 			IMapDataDestination dest,   object destObject,
@@ -1290,7 +1290,12 @@ namespace BLToolkit.Mapping
 					dest = initContext.ObjectMapper;
 			}
 
-			MapInternal(source, sourceObject, dest, destObject, GetIndex(source, dest));
+			//MapInternal(source, sourceObject, dest, destObject, GetIndex(source, dest));
+
+			int[]          index   = GetIndex       (source, dest);
+			IValueMapper[] mappers = GetValueMappers(source, dest, index);
+
+			MapInternal(source, sourceObject, dest, destObject, index, mappers);
 
 			if (smDest != null)
 				smDest.EndMapping(initContext);

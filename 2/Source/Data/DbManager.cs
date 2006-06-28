@@ -1183,18 +1183,6 @@ namespace BLToolkit.Data
 			_dataProviderTypeList[dataProvider.ConnectionType] = dataProvider;
 		}
 
-		[Obsolete("This method has been deprecated. Use the AddDataProvider(DataProviderBase dataProvider) method instead")]
-		public static void AddDataProvider(IDataProvider dataProvider)
-		{
-			AddDataProvider(new ObsoleteDataProvider(dataProvider));
-		}
-
-		[Obsolete("This method has been deprecated. Use the AddDataProvider(string providerName, DataProviderBase dataProvider) method instead")]
-		public static void AddDataProvider(string providerName, IDataProvider dataProvider)
-		{
-			AddDataProvider(providerName, new ObsoleteDataProvider(dataProvider));
-		}
-
 		/// <summary>
 		/// Adds a new connection string or replaces existing one.
 		/// </summary>
