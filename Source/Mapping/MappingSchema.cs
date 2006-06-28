@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Data;
 using System.Data.SqlTypes;
+using System.IO;
 using System.Reflection;
 using System.Diagnostics.CodeAnalysis;
 
@@ -116,6 +117,7 @@ namespace BLToolkit.Mapping
 			_defaultDateTimeNullValue = (DateTime)GetNullValue(typeof(DateTime));
 			_defaultDecimalNullValue  = (Decimal) GetNullValue(typeof(Decimal));
 			_defaultGuidNullValue     = (Guid)    GetNullValue(typeof(Guid));
+			_defaultStreamNullValue   = (Stream)  GetNullValue(typeof(Stream));
 		}
 
 		#region Primitive Types
@@ -367,6 +369,33 @@ namespace BLToolkit.Mapping
 				value is Guid? (Guid)value:
 				value == null?  _defaultGuidNullValue:
 				                new Guid(value.ToString());
+		}
+
+		private Stream _defaultStreamNullValue;
+		public  Stream  DefaultStreamNullValue
+		{
+			get { return _defaultStreamNullValue; }
+			set { _defaultStreamNullValue = value; }
+		}
+
+		public virtual Stream ConvertToStream(object value)
+		{
+			return
+				value is Stream? (Stream)value:
+				value == null  ? _defaultStreamNullValue:
+#if FW2
+				value is byte[]?    Convert<Stream, byte[]>.   From((Byte[])value):
+				value is SqlBinary? Convert<Stream, SqlBinary>.From((SqlBinary)value):
+				value is SqlBytes?  Convert<Stream, SqlBytes>. From((SqlBytes)value):
+				// This will definitely fail.
+				Convert<Stream, object>.From(value);
+#else
+				value is byte[]?    new MemoryStream((Byte[])value):
+				value is SqlBinary? new MemoryStream(((SqlBinary)value).Value):
+				value is SqlBytes?  ((SqlBytes)value).Stream:
+				// This will definitely fail.
+				(Stream)Convert.ChangeType(value, typeof(Stream));
+#endif
 		}
 
 		#endregion
@@ -682,22 +711,27 @@ namespace BLToolkit.Mapping
 			}
 
 #if FW2
-			if (isNullable) switch (Type.GetTypeCode(conversionType))
+			if (isNullable)
 			{
-				case TypeCode.Boolean:  return ConvertToNullableBoolean (value);
-				case TypeCode.Byte:     return ConvertToNullableByte    (value);
-				case TypeCode.Char:     return ConvertToNullableChar    (value);
-				case TypeCode.DateTime: return ConvertToNullableDateTime(value);
-				case TypeCode.Decimal:  return ConvertToNullableDecimal (value);
-				case TypeCode.Double:   return ConvertToNullableDouble  (value);
-				case TypeCode.Int16:    return ConvertToNullableInt16   (value);
-				case TypeCode.Int32:    return ConvertToNullableInt32   (value);
-				case TypeCode.Int64:    return ConvertToNullableInt64   (value);
-				case TypeCode.SByte:    return ConvertToNullableSByte   (value);
-				case TypeCode.Single:   return ConvertToNullableSingle  (value);
-				case TypeCode.UInt16:   return ConvertToNullableUInt16  (value);
-				case TypeCode.UInt32:   return ConvertToNullableUInt32  (value);
-				case TypeCode.UInt64:   return ConvertToNullableUInt64  (value);
+				switch (Type.GetTypeCode(conversionType))
+				{
+					case TypeCode.Boolean:  return ConvertToNullableBoolean (value);
+					case TypeCode.Byte:     return ConvertToNullableByte    (value);
+					case TypeCode.Char:     return ConvertToNullableChar    (value);
+					case TypeCode.DateTime: return ConvertToNullableDateTime(value);
+					case TypeCode.Decimal:  return ConvertToNullableDecimal (value);
+					case TypeCode.Double:   return ConvertToNullableDouble  (value);
+					case TypeCode.Int16:    return ConvertToNullableInt16   (value);
+					case TypeCode.Int32:    return ConvertToNullableInt32   (value);
+					case TypeCode.Int64:    return ConvertToNullableInt64   (value);
+					case TypeCode.SByte:    return ConvertToNullableSByte   (value);
+					case TypeCode.Single:   return ConvertToNullableSingle  (value);
+					case TypeCode.UInt16:   return ConvertToNullableUInt16  (value);
+					case TypeCode.UInt32:   return ConvertToNullableUInt32  (value);
+					case TypeCode.UInt64:   return ConvertToNullableUInt64  (value);
+				}
+
+				if (typeof(Guid) == conversionType) return ConvertToNullableGuid(value);
 			}
 #endif
 
@@ -720,12 +754,8 @@ namespace BLToolkit.Mapping
 				case TypeCode.UInt64:   return ConvertToUInt64  (value);
 			}
 
-			if (typeof(Guid) == conversionType)
-				return
-#if FW2
-					isNullable ? ConvertToNullableGuid(value) :
-#endif
-					ConvertToGuid(value);
+			if (typeof(Guid)   == conversionType) return ConvertToGuid(value);
+			if (typeof(Stream) == conversionType) return ConvertToStream(value);
 
 			return Convert.ChangeType(value, conversionType);
 		}
@@ -1135,9 +1165,9 @@ namespace BLToolkit.Mapping
 				KeyValue key = new KeyValue(sourceType, destType);
 
 				if (mapper == null)
-					_differentTypeMappers.Remove(sourceType);
+					_differentTypeMappers.Remove(key);
 				else
-					_differentTypeMappers[sourceType] = mapper;
+					_differentTypeMappers[key] = mapper;
 			}
 		}
 

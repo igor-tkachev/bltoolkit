@@ -1,13 +1,15 @@
 using System;
 using System.Collections;
 using System.Data.SqlClient;
+using System.Data.SqlTypes;
+using System.IO;
+using System.Xml;
+using NUnit.Framework;
 
 using BLToolkit.Data;
 using BLToolkit.EditableObjects;
 using BLToolkit.Mapping;
 using BLToolkit.Reflection;
-
-using NUnit.Framework;
 
 namespace Data
 {
@@ -30,6 +32,59 @@ namespace Data
 			public string MiddleName;
 			public string LastName;
 			public Gender Gender;
+		}
+
+		public class DataTypeTest
+		{
+			[MapField("DataTypeID")]
+			public int       ID;
+			[MapIgnore(false)]
+			public Byte[]    Binary_;
+			public Boolean   Boolean_;
+			public Byte      Byte_;
+			[MapIgnore(false)]
+			public Byte[]    Bytes_;
+			public Char      Char_;
+			public DateTime  DateTime_;
+			public Decimal   Decimal_;
+			public Double    Double_;
+			public Guid      Guid_;
+			public Int16     Int16_;
+			public Int32     Int32_;
+			public Int64     Int64_;
+			public Decimal   Money_;
+			public SByte     SByte_;
+			public Single    Single_;
+			public Stream    Stream_;
+			public String    String_;
+			public UInt16    UInt16_;
+			public UInt32    UInt32_;
+			public UInt64    UInt64_;
+			//[MapIgnore(false)]
+			//public XmlReader Xml_;
+		}
+
+		public class DataTypeSqlTest
+		{
+			[MapField("DataTypeID")]
+			public int ID;
+			public SqlBinary   Binary_;
+			public SqlBoolean  Boolean_;
+			public SqlByte     Byte_;
+			[MapIgnore(false)]
+			public SqlBytes    Bytes_;
+			public SqlChars    Char_;
+			public SqlDateTime DateTime_;
+			public SqlDecimal  Decimal_;
+			public SqlDouble   Double_;
+			public SqlGuid     Guid_;
+			public SqlInt16    Int16_;
+			public SqlInt32    Int32_;
+			public SqlInt64    Int64_;
+			public SqlMoney    Money_;
+			public SqlSingle   Single_;
+			public SqlString   String_;
+			public SqlXml      Xml_;
 		}
 
 		[Test]
@@ -65,6 +120,34 @@ namespace Data
 					.ExecuteObject(typeof(Person));
 
 				TypeAccessor.WriteConsole(p);
+			}
+		}
+
+		[Test]
+		public void ExecuteObject2()
+		{
+			using (DbManager db = new DbManager())
+			{
+				DataTypeTest dt = (DataTypeTest)db
+					.SetCommand("SELECT * FROM DataTypeTest WHERE DataTypeID = @id",
+						db.Parameter("@id", 2))
+					.ExecuteObject(typeof(DataTypeTest));
+
+				TypeAccessor.WriteConsole(dt);
+			}
+		}
+
+		[Test]
+		public void ExecuteObject2Sql()
+		{
+			using (DbManager db = new DbManager())
+			{
+				DataTypeSqlTest dt = (DataTypeSqlTest)db
+					.SetCommand("SELECT * FROM DataTypeTest WHERE DataTypeID = @id",
+						db.Parameter("@id", 2))
+					.ExecuteObject(typeof(DataTypeSqlTest));
+
+				TypeAccessor.WriteConsole(dt);
 			}
 		}
 

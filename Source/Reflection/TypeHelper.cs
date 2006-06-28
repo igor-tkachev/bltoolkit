@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Diagnostics.CodeAnalysis;
+using System.IO;
 using System.Reflection;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -874,7 +875,7 @@ namespace BLToolkit.Reflection
 			while (type.IsArray)
 				type = type.GetElementType();
 			
-			return type.IsValueType || type == typeof(string);
+			return type.IsValueType || type == typeof(string) || type == typeof(Stream);
 		}
 
 		public static Type[] GetGenericArguments(Type type, string baseTypeName)

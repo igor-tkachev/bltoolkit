@@ -5,6 +5,7 @@ using System.Collections.Generic;
 #endif
 using System.Data;
 using System.Data.SqlTypes;
+using System.IO;
 using System.Text;
 
 using BLToolkit.Common;
@@ -1200,7 +1201,12 @@ namespace BLToolkit.DataAccess
 		{
 			return db.MappingSchema.ConvertToGuid(value);
 		}
-		
+
+		protected virtual Stream ConvertToStream(DbManager db, object value, object parameter)
+		{
+			return db.MappingSchema.ConvertToStream(value);
+		}
+
 		#endregion
 
 #if FW2
