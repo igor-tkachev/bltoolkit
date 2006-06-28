@@ -1,5 +1,6 @@
 using System;
 using System.Data.SqlTypes;
+using System.IO;
 
 namespace BLToolkit.Common
 {
@@ -40,6 +41,7 @@ namespace BLToolkit.Common
 			if (t == typeof(DateTime))    return GetDateTimeConverter();
 			if (t == typeof(TimeSpan))    return GetTimeSpanConverter();
 			if (t == typeof(Guid))        return GetGuidConverter();
+			if (t == typeof(Stream))      return GetStreamConverter();
 
 			// Nullable Types.
 			//
@@ -1229,6 +1231,33 @@ namespace BLToolkit.Common
 			{
 				if (p == null)
 					return Guid.Empty;
+
+				throw new InvalidCastException(string.Format(
+					"Invalid cast from {0} to {1}", typeof(P).FullName, typeof(T).FullName));
+			});
+		}
+
+		#endregion
+
+		#region Stream
+
+		private static ConvertMethod GetStreamConverter()
+		{
+			Type t = typeof(P);
+
+			// Scalar Types.
+			//
+			if (t == typeof(byte[]))    return (ConvertMethod)(object)(Convert<Stream, byte[]>.ConvertMethod)(delegate(byte[] p) { return p == null ? Stream.Null : new MemoryStream(p); });
+
+			// SqlTypes.
+			//
+			if (t == typeof(SqlBinary)) return (ConvertMethod)(object)(Convert<Stream, SqlBinary>.ConvertMethod)(delegate(SqlBinary p) { return p.IsNull ? Stream.Null : new MemoryStream(p.Value); });
+			if (t == typeof(SqlBytes))  return (ConvertMethod)(object)(Convert<Stream, SqlBytes>.ConvertMethod)(delegate(SqlBytes p) { return p.IsNull ? Stream.Null : p.Stream; });
+
+			return (ConvertMethod)(object)(Convert<Stream, P>.ConvertMethod)(delegate(P p)
+			{
+				if (p == null)
+					return Stream.Null;
 
 				throw new InvalidCastException(string.Format(
 					"Invalid cast from {0} to {1}", typeof(P).FullName, typeof(T).FullName));

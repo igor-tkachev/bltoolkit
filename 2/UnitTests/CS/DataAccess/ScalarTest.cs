@@ -1,5 +1,6 @@
 using System;
-
+using System.IO;
+using BLToolkit.Reflection;
 using NUnit.Framework;
 
 using BLToolkit.Data;
@@ -47,6 +48,9 @@ namespace DataAccess
 			[ActionName("Scalar_ReturnParameter")]
 			[ScalarSource(ScalarSourceType.AffectedRows)]
 			public abstract int Scalar_AffectedRows(DbManager db);
+
+			[SqlQuery("SELECT Stream_ FROM DataTypeTest WHERE DataTypeID = @id")]
+			public abstract Stream GetStream(DbManager db, int id);
 			
 			public static TestAccessor CreateInstance()
 			{
@@ -197,6 +201,24 @@ namespace DataAccess
 				int actualValue = ta.Scalar_AffectedRows(db);
 
 				Assert.AreEqual(expectedValue, actualValue);
+			}
+		}
+
+		[Test]
+		public void StreamTest()
+		{
+			using (DbManager db = new DbManager())
+			{
+				TestAccessor ta = TestAccessor.CreateInstance();
+
+				Stream s = ta.GetStream(db, 2);
+				Byte[] bytes = new byte[16];
+
+				Assert.IsNotNull(s);
+				Assert.AreEqual(s.Length, bytes.Length);
+
+				Assert.AreEqual(s.Read(bytes, 0, bytes.Length), bytes.Length);
+				TypeAccessor.WriteConsole(bytes);
 			}
 		}
 	}

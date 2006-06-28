@@ -5,6 +5,7 @@ using System.Data;
 using System.Data.SqlTypes;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using System.IO;
 using System.Reflection;
 
 using BLToolkit.Common;
@@ -296,7 +297,6 @@ namespace BLToolkit.Reflection
 					if (type == typeof(UInt16))      return (UInt16)0;
 					if (type == typeof(UInt32))      return (UInt32)0;
 					if (type == typeof(UInt64))      return (UInt64)0;
-					if (type == typeof(UInt64))      return (UInt64)0;
 					if (type == typeof(Single))      return (Single)0;
 					if (type == typeof(Char))        return new char();
 				}
@@ -325,6 +325,7 @@ namespace BLToolkit.Reflection
 			{
 				if (type == typeof(String)) return string.Empty;
 				if (type == typeof(DBNull)) return DBNull.Value;
+				if (type == typeof(Stream)) return Stream.Null;
 
 #if FW2
 				if (type == typeof(SqlXml)) return SqlXml.Null;

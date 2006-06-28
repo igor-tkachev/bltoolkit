@@ -1,5 +1,6 @@
 using System;
 using System.Data.SqlTypes;
+using System.IO;
 
 using BLToolkit.Reflection;
 
@@ -758,6 +759,7 @@ namespace BLToolkit.Mapping
 			if (type == typeof(DateTime)) return n? new DateTimeMapper.Nullable(): new DateTimeMapper();
 			if (type == typeof(Decimal))  return n? new DecimalMapper.Nullable(): new DecimalMapper();
 			if (type == typeof(Guid))     return n? new GuidMapper.Nullable(): new GuidMapper();
+			if (type == typeof(Stream))   return n? new StreamMapper.Nullable(): new StreamMapper();
 
 			return null;
 		}
@@ -919,7 +921,39 @@ namespace BLToolkit.Mapping
 				public override object GetValue(object o)
 				{
 					Guid value = _memberAccessor.GetGuid(o);
-					return (Guid)value == _nullValue? null: (object)value;
+					return value == _nullValue? null: (object)value;
+				}
+			}
+		}
+
+		class StreamMapper : MemberMapper
+		{
+			protected Stream _nullValue;
+
+			public override void SetValue(object o, object value)
+			{
+				_memberAccessor.SetValue(
+					o,
+					value is Stream? value:
+					value == null? _nullValue: _mappingSchema.ConvertToStream(value));
+			}
+
+			public override void Init(MapMemberInfo mapMemberInfo)
+			{
+				if (mapMemberInfo == null) throw new ArgumentNullException("mapMemberInfo");
+
+				if (mapMemberInfo.NullValue != null)
+					_nullValue = mapMemberInfo.MappingSchema.ConvertToStream(mapMemberInfo.NullValue);
+
+				base.Init(mapMemberInfo);
+			}
+
+			public class Nullable : StreamMapper
+			{
+				public override object GetValue(object o)
+				{
+					object value = _memberAccessor.GetValue(o);
+					return (Stream)value == _nullValue? null: value;
 				}
 			}
 		}

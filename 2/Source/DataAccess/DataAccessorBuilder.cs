@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Reflection;
 using System.Data;
 using System.Data.SqlTypes;
@@ -1351,6 +1352,7 @@ namespace BLToolkit.DataAccess
 			if (type == typeof(DateTime))    return "ConvertToDateTime";
 			if (type == typeof(Decimal))     return "ConvertToDecimal";
 			if (type == typeof(Guid))        return "ConvertToGuid";
+			if (type == typeof(Stream))      return "ConvertToStream";
 
 			if (type == typeof(SqlByte))     return "ConvertToSqlByte";
 			if (type == typeof(SqlInt16))    return "ConvertToSqlInt16";
