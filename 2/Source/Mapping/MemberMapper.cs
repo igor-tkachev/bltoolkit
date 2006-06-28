@@ -108,28 +108,72 @@ namespace BLToolkit.Mapping
 			return _memberAccessor.GetValue(o);
 		}
 
-		public virtual bool    IsNull    (object o) { return GetValue(o) == null; }
+		public virtual bool     IsNull     (object o) { return GetValue(o) == null; }
 
+		// Simple type getters.
+		//
 		[CLSCompliant(false)]
-		public virtual SByte   GetSByte  (object o) { return _memberAccessor.GetSByte  (o); }
-		public virtual Int16   GetInt16  (object o) { return _memberAccessor.GetInt16  (o); }
-		public virtual Int32   GetInt32  (object o) { return _memberAccessor.GetInt32  (o); }
-		public virtual Int64   GetInt64  (object o) { return _memberAccessor.GetInt64  (o); }
+		public virtual SByte    GetSByte   (object o) { return _memberAccessor.GetSByte   (o); }
+		public virtual Int16    GetInt16   (object o) { return _memberAccessor.GetInt16   (o); }
+		public virtual Int32    GetInt32   (object o) { return _memberAccessor.GetInt32   (o); }
+		public virtual Int64    GetInt64   (object o) { return _memberAccessor.GetInt64   (o); }
 
-		public virtual Byte    GetByte   (object o) { return _memberAccessor.GetByte   (o); }
+		public virtual Byte     GetByte    (object o) { return _memberAccessor.GetByte    (o); }
 		[CLSCompliant(false)]
-		public virtual UInt16  GetUInt16 (object o) { return _memberAccessor.GetUInt16 (o); }
+		public virtual UInt16   GetUInt16  (object o) { return _memberAccessor.GetUInt16  (o); }
 		[CLSCompliant(false)]
-		public virtual UInt32  GetUInt32 (object o) { return _memberAccessor.GetUInt32 (o); }
+		public virtual UInt32   GetUInt32  (object o) { return _memberAccessor.GetUInt32  (o); }
 		[CLSCompliant(false)]
-		public virtual UInt64  GetUInt64 (object o) { return _memberAccessor.GetUInt64 (o); }
+		public virtual UInt64   GetUInt64  (object o) { return _memberAccessor.GetUInt64  (o); }
 
-		public virtual Boolean GetBoolean(object o) { return _memberAccessor.GetBoolean(o); }
-		public virtual Char    GetChar   (object o) { return _memberAccessor.GetChar   (o); }
-		public virtual Single  GetSingle (object o) { return _memberAccessor.GetSingle (o); }
-		public virtual Double  GetDouble (object o) { return _memberAccessor.GetDouble (o); }
-		public virtual Decimal GetDecimal(object o) { return _memberAccessor.GetDecimal(o); }
-		public virtual Guid    GetGuid   (object o) { return _memberAccessor.GetGuid   (o); }
+		public virtual Boolean  GetBoolean (object o) { return _memberAccessor.GetBoolean (o); }
+		public virtual Char     GetChar    (object o) { return _memberAccessor.GetChar    (o); }
+		public virtual Single   GetSingle  (object o) { return _memberAccessor.GetSingle  (o); }
+		public virtual Double   GetDouble  (object o) { return _memberAccessor.GetDouble  (o); }
+		public virtual Decimal  GetDecimal (object o) { return _memberAccessor.GetDecimal (o); }
+		public virtual Guid     GetGuid    (object o) { return _memberAccessor.GetGuid    (o); }
+		public virtual DateTime GetDateTime(object o) { return _memberAccessor.GetDateTime(o); }
+
+#if FW2
+		// Nullable type getters.
+		//
+		[CLSCompliant(false)]
+		public virtual SByte?    GetNullableSByte   (object o) { return _memberAccessor.GetNullableSByte   (o); }
+		public virtual Int16?    GetNullableInt16   (object o) { return _memberAccessor.GetNullableInt16   (o); }
+		public virtual Int32?    GetNullableInt32   (object o) { return _memberAccessor.GetNullableInt32   (o); }
+		public virtual Int64?    GetNullableInt64   (object o) { return _memberAccessor.GetNullableInt64   (o); }
+
+		public virtual Byte?     GetNullableByte    (object o) { return _memberAccessor.GetNullableByte    (o); }
+		[CLSCompliant(false)]
+		public virtual UInt16?   GetNullableUInt16  (object o) { return _memberAccessor.GetNullableUInt16  (o); }
+		[CLSCompliant(false)]
+		public virtual UInt32?   GetNullableUInt32  (object o) { return _memberAccessor.GetNullableUInt32  (o); }
+		[CLSCompliant(false)]
+		public virtual UInt64?   GetNullableUInt64  (object o) { return _memberAccessor.GetNullableUInt64  (o); }
+
+		public virtual Boolean?  GetNullableBoolean (object o) { return _memberAccessor.GetNullableBoolean (o); }
+		public virtual Char?     GetNullableChar    (object o) { return _memberAccessor.GetNullableChar    (o); }
+		public virtual Single?   GetNullableSingle  (object o) { return _memberAccessor.GetNullableSingle  (o); }
+		public virtual Double?   GetNullableDouble  (object o) { return _memberAccessor.GetNullableDouble  (o); }
+		public virtual Decimal?  GetNullableDecimal (object o) { return _memberAccessor.GetNullableDecimal (o); }
+		public virtual Guid?     GetNullableGuid    (object o) { return _memberAccessor.GetNullableGuid    (o); }
+		public virtual DateTime? GetNullableDateTime(object o) { return _memberAccessor.GetNullableDateTime(o); }
+#endif
+
+		// SQL type getters.
+		//
+		public virtual SqlByte     GetSqlByte    (object o) { return _memberAccessor.GetSqlByte    (o); }
+		public virtual SqlInt16    GetSqlInt16   (object o) { return _memberAccessor.GetSqlInt16   (o); }
+		public virtual SqlInt32    GetSqlInt32   (object o) { return _memberAccessor.GetSqlInt32   (o); }
+		public virtual SqlInt64    GetSqlInt64   (object o) { return _memberAccessor.GetSqlInt64   (o); }
+		public virtual SqlSingle   GetSqlSingle  (object o) { return _memberAccessor.GetSqlSingle  (o); }
+		public virtual SqlBoolean  GetSqlBoolean (object o) { return _memberAccessor.GetSqlBoolean (o); }
+		public virtual SqlDouble   GetSqlDouble  (object o) { return _memberAccessor.GetSqlDouble  (o); }
+		public virtual SqlDateTime GetSqlDateTime(object o) { return _memberAccessor.GetSqlDateTime(o); }
+		public virtual SqlDecimal  GetSqlDecimal (object o) { return _memberAccessor.GetSqlDecimal (o); }
+		public virtual SqlMoney    GetSqlMoney   (object o) { return _memberAccessor.GetSqlMoney   (o); }
+		public virtual SqlGuid     GetSqlGuid    (object o) { return _memberAccessor.GetSqlGuid    (o); }
+		public virtual SqlString   GetSqlString  (object o) { return _memberAccessor.GetSqlString  (o); }
 
 		public virtual void SetValue(object o, object value)
 		{
@@ -138,26 +182,70 @@ namespace BLToolkit.Mapping
 
 		public virtual void SetNull   (object o)                { SetValue(o, null); }
 
+		// Simple type setters.
+		//
 		[CLSCompliant(false)]
-		public virtual void SetSByte  (object o, SByte   value) { _memberAccessor.SetSByte  (o, value); }
-		public virtual void SetInt16  (object o, Int16   value) { _memberAccessor.SetInt16  (o, value); }
-		public virtual void SetInt32  (object o, Int32   value) { _memberAccessor.SetInt32  (o, value); }
-		public virtual void SetInt64  (object o, Int64   value) { _memberAccessor.SetInt64  (o, value); }
+		public virtual void SetSByte   (object o, SByte    value) { _memberAccessor.SetSByte   (o, value); }
+		public virtual void SetInt16   (object o, Int16    value) { _memberAccessor.SetInt16   (o, value); }
+		public virtual void SetInt32   (object o, Int32    value) { _memberAccessor.SetInt32   (o, value); }
+		public virtual void SetInt64   (object o, Int64    value) { _memberAccessor.SetInt64   (o, value); }
 
-		public virtual void SetByte   (object o, Byte    value) { _memberAccessor.SetByte   (o, value); }
+		public virtual void SetByte    (object o, Byte     value) { _memberAccessor.SetByte    (o, value); }
 		[CLSCompliant(false)]
-		public virtual void SetUInt16 (object o, UInt16  value) { _memberAccessor.SetUInt16 (o, value); }
+		public virtual void SetUInt16  (object o, UInt16   value) { _memberAccessor.SetUInt16  (o, value); }
 		[CLSCompliant(false)]
-		public virtual void SetUInt32 (object o, UInt32  value) { _memberAccessor.SetUInt32 (o, value); }
+		public virtual void SetUInt32  (object o, UInt32   value) { _memberAccessor.SetUInt32  (o, value); }
 		[CLSCompliant(false)]
-		public virtual void SetUInt64 (object o, UInt64  value) { _memberAccessor.SetUInt64 (o, value); }
+		public virtual void SetUInt64  (object o, UInt64   value) { _memberAccessor.SetUInt64  (o, value); }
 
-		public virtual void SetBoolean(object o, Boolean value) { _memberAccessor.SetBoolean(o, value); }
-		public virtual void SetChar   (object o, Char    value) { _memberAccessor.SetChar   (o, value); }
-		public virtual void SetSingle (object o, Single  value) { _memberAccessor.SetSingle (o, value); }
-		public virtual void SetDouble (object o, Double  value) { _memberAccessor.SetDouble (o, value); }
-		public virtual void SetDecimal(object o, Decimal value) { _memberAccessor.SetDecimal(o, value); }
-		public virtual void SetGuid   (object o, Guid    value) { _memberAccessor.SetGuid   (o, value); }
+		public virtual void SetBoolean (object o, Boolean  value) { _memberAccessor.SetBoolean (o, value); }
+		public virtual void SetChar    (object o, Char     value) { _memberAccessor.SetChar    (o, value); }
+		public virtual void SetSingle  (object o, Single   value) { _memberAccessor.SetSingle  (o, value); }
+		public virtual void SetDouble  (object o, Double   value) { _memberAccessor.SetDouble  (o, value); }
+		public virtual void SetDecimal (object o, Decimal  value) { _memberAccessor.SetDecimal (o, value); }
+		public virtual void SetGuid    (object o, Guid     value) { _memberAccessor.SetGuid    (o, value); }
+		public virtual void SetDateTime(object o, DateTime value) { _memberAccessor.SetDateTime(o, value); }
+
+#if FW2
+		// Nullable type setters.
+		//
+		[CLSCompliant(false)]
+		public virtual void SetNullableSByte   (object o, SByte?    value) { _memberAccessor.SetNullableSByte   (o, value); }
+		public virtual void SetNullableInt16   (object o, Int16?    value) { _memberAccessor.SetNullableInt16   (o, value); }
+		public virtual void SetNullableInt32   (object o, Int32?    value) { _memberAccessor.SetNullableInt32   (o, value); }
+		public virtual void SetNullableInt64   (object o, Int64?    value) { _memberAccessor.SetNullableInt64   (o, value); }
+
+		public virtual void SetNullableByte    (object o, Byte?     value) { _memberAccessor.SetNullableByte    (o, value); }
+		[CLSCompliant(false)]
+		public virtual void SetNullableUInt16  (object o, UInt16?   value) { _memberAccessor.SetNullableUInt16  (o, value); }
+		[CLSCompliant(false)]
+		public virtual void SetNullableUInt32  (object o, UInt32?   value) { _memberAccessor.SetNullableUInt32  (o, value); }
+		[CLSCompliant(false)]
+		public virtual void SetNullableUInt64  (object o, UInt64?   value) { _memberAccessor.SetNullableUInt64  (o, value); }
+
+		public virtual void SetNullableBoolean (object o, Boolean?  value) { _memberAccessor.SetNullableBoolean (o, value); }
+		public virtual void SetNullableChar    (object o, Char?     value) { _memberAccessor.SetNullableChar    (o, value); }
+		public virtual void SetNullableSingle  (object o, Single?   value) { _memberAccessor.SetNullableSingle  (o, value); }
+		public virtual void SetNullableDouble  (object o, Double?   value) { _memberAccessor.SetNullableDouble  (o, value); }
+		public virtual void SetNullableDecimal (object o, Decimal?  value) { _memberAccessor.SetNullableDecimal (o, value); }
+		public virtual void SetNullableGuid    (object o, Guid?     value) { _memberAccessor.SetNullableGuid    (o, value); }
+		public virtual void SetNullableDateTime(object o, DateTime? value) { _memberAccessor.SetNullableDateTime(o, value); }
+#endif
+
+		// SQL type setters.
+		//
+		public virtual void SetSqlByte    (object o, SqlByte     value) { _memberAccessor.SetSqlByte    (o, value); }
+		public virtual void SetSqlInt16   (object o, SqlInt16    value) { _memberAccessor.SetSqlInt16   (o, value); }
+		public virtual void SetSqlInt32   (object o, SqlInt32    value) { _memberAccessor.SetSqlInt32   (o, value); }
+		public virtual void SetSqlInt64   (object o, SqlInt64    value) { _memberAccessor.SetSqlInt64   (o, value); }
+		public virtual void SetSqlSingle  (object o, SqlSingle   value) { _memberAccessor.SetSqlSingle  (o, value); }
+		public virtual void SetSqlBoolean (object o, SqlBoolean  value) { _memberAccessor.SetSqlBoolean (o, value); }
+		public virtual void SetSqlDouble  (object o, SqlDouble   value) { _memberAccessor.SetSqlDouble  (o, value); }
+		public virtual void SetSqlDateTime(object o, SqlDateTime value) { _memberAccessor.SetSqlDateTime(o, value); }
+		public virtual void SetSqlDecimal (object o, SqlDecimal  value) { _memberAccessor.SetSqlDecimal (o, value); }
+		public virtual void SetSqlMoney   (object o, SqlMoney    value) { _memberAccessor.SetSqlMoney   (o, value); }
+		public virtual void SetSqlGuid    (object o, SqlGuid     value) { _memberAccessor.SetSqlGuid    (o, value); }
+		public virtual void SetSqlString  (object o, SqlString   value) { _memberAccessor.SetSqlString  (o, value); }
 
 		#endregion
 
@@ -727,13 +815,16 @@ namespace BLToolkit.Mapping
 
 		class DateTimeMapper : MemberMapper
 		{
-			protected object _nullValue;
+			protected DateTime _nullValue;
+
+			public override bool IsNull (object o) { return false; }
+			public override void SetNull(object o) { _memberAccessor.SetDateTime(o, _nullValue); }
 
 			public override void SetValue(object o, object value)
 			{
-				_memberAccessor.SetValue(
+				_memberAccessor.SetDateTime(
 					o,
-					value is DateTime? value:
+					value is DateTime? (DateTime)value:
 					value == null?     _nullValue:
 					                   _mappingSchema.ConvertToDateTime(value));
 			}
@@ -748,10 +839,12 @@ namespace BLToolkit.Mapping
 
 			public class Nullable : DateTimeMapper
 			{
+				public override bool IsNull(object o) { return GetDateTime(o) == _nullValue; }
+
 				public override object GetValue(object o)
 				{
-					object value = _memberAccessor.GetValue(o);
-					return (DateTime)value == (DateTime)_nullValue? null: value;
+					DateTime value = _memberAccessor.GetDateTime(o);
+					return value == _nullValue? null: (object)value;
 				}
 			}
 		}
@@ -760,7 +853,8 @@ namespace BLToolkit.Mapping
 		{
 			protected Decimal _nullValue;
 
-			public override bool IsNull(object o) { return false; }
+			public override bool IsNull (object o) { return false; }
+			public override void SetNull(object o) { _memberAccessor.SetDecimal(o, _nullValue); }
 
 			public override void SetValue(object o, object value)
 			{
@@ -795,7 +889,8 @@ namespace BLToolkit.Mapping
 		{
 			protected Guid _nullValue;
 
-			public override bool IsNull(object o) { return false; }
+			public override bool IsNull (object o) { return false; }
+			public override void SetNull(object o) { _memberAccessor.SetGuid(o, _nullValue); }
 
 			public override void SetValue(object o, object value)
 			{
@@ -851,11 +946,11 @@ namespace BLToolkit.Mapping
 			{
 				underlyingType = Enum.GetUnderlyingType(underlyingType);
 
-				if (underlyingType == typeof(SByte))    return new NullableSByteMapper.Enum();
-				if (underlyingType == typeof(Int16))    return new NullableInt16Mapper.Enum();
-				if (underlyingType == typeof(Int32))    return new NullableInt32Mapper.Enum();
-				if (underlyingType == typeof(Int64))    return new NullableInt64Mapper.Enum();
-				if (underlyingType == typeof(Byte))     return new NullableByteMapper.Enum();
+				if (underlyingType == typeof(SByte))    return new NullableSByteMapper. Enum();
+				if (underlyingType == typeof(Int16))    return new NullableInt16Mapper. Enum();
+				if (underlyingType == typeof(Int32))    return new NullableInt32Mapper. Enum();
+				if (underlyingType == typeof(Int64))    return new NullableInt64Mapper. Enum();
+				if (underlyingType == typeof(Byte))     return new NullableByteMapper.  Enum();
 				if (underlyingType == typeof(UInt16))   return new NullableUInt16Mapper.Enum();
 				if (underlyingType == typeof(UInt32))   return new NullableUInt32Mapper.Enum();
 				if (underlyingType == typeof(UInt64))   return new NullableUInt64Mapper.Enum();
@@ -900,10 +995,13 @@ namespace BLToolkit.Mapping
 
 		class NullableInt16Mapper : MemberMapper
 		{
+			public override bool IsNull (object o) { return GetNullableInt16(o) == null; }
+			public override void SetNull(object o) { _memberAccessor.SetNullableInt16(o, null); }
+
 			public override void SetValue(object o, object value)
 			{
-				_memberAccessor.SetValue(
-					o, value == null || value is Int16? value: _mappingSchema.ConvertToNullableInt16(value));
+				_memberAccessor.SetNullableInt16(
+					o, value == null || value is Int16? (Int16?)value: _mappingSchema.ConvertToNullableInt16(value));
 			}
 
 			public class Enum : NullableEnumMapper
@@ -930,10 +1028,13 @@ namespace BLToolkit.Mapping
 
 		class NullableInt32Mapper : MemberMapper
 		{
+			public override bool IsNull (object o) { return GetNullableInt32(o) == null; }
+			public override void SetNull(object o) { _memberAccessor.SetNullableInt32(o, null); }
+
 			public override void SetValue(object o, object value)
 			{
-				_memberAccessor.SetValue(
-					o, value == null || value is Int32? value: _mappingSchema.ConvertToNullableInt32(value));
+				_memberAccessor.SetNullableInt32(
+					o, value == null || value is Int32? (Int32?)value: _mappingSchema.ConvertToNullableInt32(value));
 			}
 
 			public class Enum : NullableEnumMapper
@@ -960,10 +1061,13 @@ namespace BLToolkit.Mapping
 
 		class NullableSByteMapper : MemberMapper
 		{
+			public override bool IsNull (object o) { return GetNullableSByte(o) == null; }
+			public override void SetNull(object o) { _memberAccessor.SetNullableSByte(o, null); }
+
 			public override void SetValue(object o, object value)
 			{
-				_memberAccessor.SetValue(
-					o, value == null || value is SByte? value: _mappingSchema.ConvertToNullableSByte(value));
+				_memberAccessor.SetNullableSByte(
+					o, value == null || value is SByte? (SByte?)value: _mappingSchema.ConvertToNullableSByte(value));
 			}
 
 			public class Enum : NullableEnumMapper
@@ -990,10 +1094,13 @@ namespace BLToolkit.Mapping
 
 		class NullableInt64Mapper : MemberMapper
 		{
+			public override bool IsNull (object o) { return GetNullableInt64(o) == null; }
+			public override void SetNull(object o) { _memberAccessor.SetNullableInt64(o, null); }
+
 			public override void SetValue(object o, object value)
 			{
-				_memberAccessor.SetValue(
-					o, value == null || value is Int64? value: _mappingSchema.ConvertToNullableInt64(value));
+				_memberAccessor.SetNullableInt64(
+					o, value == null || value is Int64? (Int64?)value: _mappingSchema.ConvertToNullableInt64(value));
 			}
 
 			public class Enum : NullableEnumMapper
@@ -1020,10 +1127,13 @@ namespace BLToolkit.Mapping
 
 		class NullableByteMapper : MemberMapper
 		{
+			public override bool IsNull (object o) { return GetNullableByte(o) == null; }
+			public override void SetNull(object o) { _memberAccessor.SetNullableByte(o, null); }
+
 			public override void SetValue(object o, object value)
 			{
-				_memberAccessor.SetValue(
-					o, value == null || value is Byte? value: _mappingSchema.ConvertToNullableByte(value));
+				_memberAccessor.SetNullableByte(
+					o, value == null || value is Byte? (Byte?)value: _mappingSchema.ConvertToNullableByte(value));
 			}
 
 			public class Enum : NullableEnumMapper
@@ -1050,10 +1160,13 @@ namespace BLToolkit.Mapping
 
 		class NullableUInt16Mapper : MemberMapper
 		{
+			public override bool IsNull (object o) { return GetNullableUInt16(o) == null; }
+			public override void SetNull(object o) { _memberAccessor.SetNullableUInt16(o, null); }
+
 			public override void SetValue(object o, object value)
 			{
-				_memberAccessor.SetValue(
-					o, value == null || value is UInt16? value: _mappingSchema.ConvertToNullableUInt16(value));
+				_memberAccessor.SetNullableUInt16(
+					o, value == null || value is UInt16? (UInt16?)value: _mappingSchema.ConvertToNullableUInt16(value));
 			}
 
 			public class Enum : NullableEnumMapper
@@ -1080,10 +1193,13 @@ namespace BLToolkit.Mapping
 
 		class NullableUInt32Mapper : MemberMapper
 		{
+			public override bool IsNull (object o) { return GetNullableUInt32(o) == null; }
+			public override void SetNull(object o) { _memberAccessor.SetNullableUInt32(o, null); }
+
 			public override void SetValue(object o, object value)
 			{
-				_memberAccessor.SetValue(
-					o, value == null || value is UInt32? value: _mappingSchema.ConvertToNullableUInt32(value));
+				_memberAccessor.SetNullableUInt32(
+					o, value == null || value is UInt32? (UInt32?)value: _mappingSchema.ConvertToNullableUInt32(value));
 			}
 
 			public class Enum : NullableEnumMapper
@@ -1110,10 +1226,13 @@ namespace BLToolkit.Mapping
 
 		class NullableUInt64Mapper : MemberMapper
 		{
+			public override bool IsNull (object o) { return GetNullableUInt64(o) == null; }
+			public override void SetNull(object o) { _memberAccessor.SetNullableUInt64(o, null); }
+
 			public override void SetValue(object o, object value)
 			{
-				_memberAccessor.SetValue(
-					o, value == null || value is UInt64? value: _mappingSchema.ConvertToNullableUInt64(value));
+				_memberAccessor.SetNullableUInt64(
+					o, value == null || value is UInt64? (UInt64?)value: _mappingSchema.ConvertToNullableUInt64(value));
 			}
 
 			public class Enum : NullableEnumMapper
@@ -1140,64 +1259,85 @@ namespace BLToolkit.Mapping
 
 		class NullableCharMapper : MemberMapper
 		{
+			public override bool IsNull (object o) { return GetNullableChar(o) == null; }
+			public override void SetNull(object o) { _memberAccessor.SetNullableChar(o, null); }
+
 			public override void SetValue(object o, object value)
 			{
-				_memberAccessor.SetValue(
-					o, value == null || value is Char? value: _mappingSchema.ConvertToNullableChar(value));
+				_memberAccessor.SetNullableChar(
+					o, value == null || value is Char? (Char?)value: _mappingSchema.ConvertToNullableChar(value));
 			}
 		}
 
 		class NullableDoubleMapper : MemberMapper
 		{
+			public override bool IsNull (object o) { return GetNullableDouble(o) == null; }
+			public override void SetNull(object o) { _memberAccessor.SetNullableDouble(o, null); }
+
 			public override void SetValue(object o, object value)
 			{
-				_memberAccessor.SetValue(
-					o, value == null || value is Double? value: _mappingSchema.ConvertToNullableDouble(value));
+				_memberAccessor.SetNullableDouble(
+					o, value == null || value is Double? (Double?)value: _mappingSchema.ConvertToNullableDouble(value));
 			}
 		}
 
 		class NullableSingleMapper : MemberMapper
 		{
+			public override bool IsNull (object o) { return GetNullableSingle(o) == null; }
+			public override void SetNull(object o) { _memberAccessor.SetNullableSingle(o, null); }
+
 			public override void SetValue(object o, object value)
 			{
-				_memberAccessor.SetValue(
-					o, value == null || value is Single? value: _mappingSchema.ConvertToNullableSingle(value));
+				_memberAccessor.SetNullableSingle(
+					o, value == null || value is Single? (Single?)value: _mappingSchema.ConvertToNullableSingle(value));
 			}
 		}
 
 		class NullableBooleanMapper : MemberMapper
 		{
+			public override bool IsNull (object o) { return GetNullableBoolean(o) == null; }
+			public override void SetNull(object o) { _memberAccessor.SetNullableBoolean(o, null); }
+
 			public override void SetValue(object o, object value)
 			{
-				_memberAccessor.SetValue(
-					o, value == null || value is Boolean? value: _mappingSchema.ConvertToNullableBoolean(value));
+				_memberAccessor.SetNullableBoolean(
+					o, value == null || value is Boolean? (Boolean?)value: _mappingSchema.ConvertToNullableBoolean(value));
 			}
 		}
 
 		class NullableDateTimeMapper : MemberMapper
 		{
+			public override bool IsNull (object o) { return GetNullableDateTime(o) == null; }
+			public override void SetNull(object o) { _memberAccessor.SetNullableDateTime(o, null); }
+
 			public override void SetValue(object o, object value)
 			{
-				_memberAccessor.SetValue(
-					o, value == null || value is DateTime? value: _mappingSchema.ConvertToNullableDateTime(value));
+				_memberAccessor.SetNullableDateTime(
+					o, value == null || value is DateTime? (DateTime?)value: _mappingSchema.ConvertToNullableDateTime(value));
 			}
 		}
 
 		class NullableDecimalMapper : MemberMapper
 		{
+			public override bool IsNull (object o) { return GetNullableDecimal(o) == null; }
+			public override void SetNull(object o) { _memberAccessor.SetNullableDecimal(o, null); }
+
 			public override void SetValue(object o, object value)
 			{
-				_memberAccessor.SetValue(
-					o, value == null || value is Decimal? value: _mappingSchema.ConvertToNullableDecimal(value));
+				_memberAccessor.SetNullableDecimal(
+					o, value == null || value is Decimal? (Decimal?)value: _mappingSchema.ConvertToNullableDecimal(value));
 			}
 		}
 
 		class NullableGuidMapper : MemberMapper
 		{
+			public override bool IsNull (object o) { return GetNullableGuid(o) == null; }
+			public override void SetNull(object o) { _memberAccessor.SetNullableGuid(o, null); }
+
 			public override void SetValue(object o, object value)
 			{
-				_memberAccessor.SetValue(
-					o, value == null || value is Guid? value: _mappingSchema.ConvertToNullableGuid(value));
+				_memberAccessor.SetNullableGuid(
+					o, value == null || value is Guid? (Guid?)value: _mappingSchema.ConvertToNullableGuid(value));
 			}
 		}
 
@@ -1234,20 +1374,25 @@ namespace BLToolkit.Mapping
 
 		class SqlByteMapper : MemberMapper
 		{
+			public override bool IsNull (object o) { return GetSqlByte(o).IsNull; }
+			public override void SetNull(object o) { _memberAccessor.SetSqlByte(o, SqlByte.Null); }
+
 			public override object GetValue(object o)
 			{
-				SqlByte value = (SqlByte)_memberAccessor.GetValue(o);
+				SqlByte value = _memberAccessor.GetSqlByte(o);
 				return value.IsNull? null: (object)value.Value;
 			}
 
 			public override void SetValue(object o, object value)
 			{
-				_memberAccessor.SetValue(
-					o, value is SqlByte? value: _mappingSchema.ConvertToSqlByte(value));
+				_memberAccessor.SetSqlByte(
+					o, value is SqlByte? (SqlByte)value: _mappingSchema.ConvertToSqlByte(value));
 			}
 
 			public class Default : SqlByteMapper
 			{
+				public override bool SupportsValue { get { return false; } }
+
 				public override object GetValue(object o)
 				{
 					return MapTo(base.GetValue(o));
@@ -1262,20 +1407,25 @@ namespace BLToolkit.Mapping
 
 		class SqlInt16Mapper : MemberMapper
 		{
+			public override bool IsNull (object o) { return GetSqlInt16(o).IsNull; }
+			public override void SetNull(object o) { _memberAccessor.SetSqlInt16(o, SqlInt16.Null); }
+
 			public override object GetValue(object o)
 			{
-				SqlInt16 value = (SqlInt16)_memberAccessor.GetValue(o);
+				SqlInt16 value = _memberAccessor.GetSqlInt16(o);
 				return value.IsNull? null: (object)value.Value;
 			}
 
 			public override void SetValue(object o, object value)
 			{
-				_memberAccessor.SetValue(
-					o, value is SqlInt16? value: _mappingSchema.ConvertToSqlInt16(value));
+				_memberAccessor.SetSqlInt16(
+					o, value is SqlInt16? (SqlInt16)value: _mappingSchema.ConvertToSqlInt16(value));
 			}
 
 			public class Default : SqlInt16Mapper
 			{
+				public override bool SupportsValue { get { return false; } }
+
 				public override object GetValue(object o)
 				{
 					return MapTo(base.GetValue(o));
@@ -1290,20 +1440,25 @@ namespace BLToolkit.Mapping
 
 		class SqlInt32Mapper : MemberMapper
 		{
+			public override bool IsNull (object o) { return GetSqlInt32(o).IsNull; }
+			public override void SetNull(object o) { _memberAccessor.SetSqlInt32(o, SqlInt32.Null); }
+
 			public override object GetValue(object o)
 			{
-				SqlInt32 value = (SqlInt32)_memberAccessor.GetValue(o);
+				SqlInt32 value = _memberAccessor.GetSqlInt32(o);
 				return value.IsNull? null: (object)value.Value;
 			}
 
 			public override void SetValue(object o, object value)
 			{
-				_memberAccessor.SetValue(
-					o, value is SqlInt32? value: _mappingSchema.ConvertToSqlInt32(value));
+				_memberAccessor.SetSqlInt32(
+					o, value is SqlInt32? (SqlInt32)value: _mappingSchema.ConvertToSqlInt32(value));
 			}
 
 			public class Default : SqlInt32Mapper
 			{
+				public override bool SupportsValue { get { return false; } }
+
 				public override object GetValue(object o)
 				{
 					return MapTo(base.GetValue(o));
@@ -1318,20 +1473,25 @@ namespace BLToolkit.Mapping
 
 		class SqlInt64Mapper : MemberMapper
 		{
+			public override bool IsNull (object o) { return GetSqlInt64(o).IsNull; }
+			public override void SetNull(object o) { _memberAccessor.SetSqlInt64(o, SqlInt64.Null); }
+
 			public override object GetValue(object o)
 			{
-				SqlInt64 value = (SqlInt64)_memberAccessor.GetValue(o);
+				SqlInt64 value = _memberAccessor.GetSqlInt64(o);
 				return value.IsNull? null: (object)value.Value;
 			}
 
 			public override void SetValue(object o, object value)
 			{
-				_memberAccessor.SetValue(
-					o, value is SqlInt64? value: _mappingSchema.ConvertToSqlInt64(value));
+				_memberAccessor.SetSqlInt64(
+					o, value is SqlInt64? (SqlInt64)value: _mappingSchema.ConvertToSqlInt64(value));
 			}
 
 			public class Default : SqlInt64Mapper
 			{
+				public override bool SupportsValue { get { return false; } }
+
 				public override object GetValue(object o)
 				{
 					return MapTo(base.GetValue(o));
@@ -1346,20 +1506,25 @@ namespace BLToolkit.Mapping
 
 		class SqlSingleMapper : MemberMapper
 		{
+			public override bool IsNull (object o) { return GetSqlSingle(o).IsNull; }
+			public override void SetNull(object o) { _memberAccessor.SetSqlSingle(o, SqlSingle.Null); }
+
 			public override object GetValue(object o)
 			{
-				SqlSingle value = (SqlSingle)_memberAccessor.GetValue(o);
+				SqlSingle value = _memberAccessor.GetSqlSingle(o);
 				return value.IsNull? null: (object)value.Value;
 			}
 
 			public override void SetValue(object o, object value)
 			{
-				_memberAccessor.SetValue(
-					o, value is SqlSingle? value: _mappingSchema.ConvertToSqlSingle(value));
+				_memberAccessor.SetSqlSingle(
+					o, value is SqlSingle? (SqlSingle)value: _mappingSchema.ConvertToSqlSingle(value));
 			}
 
 			public class Default : SqlSingleMapper
 			{
+				public override bool SupportsValue { get { return false; } }
+
 				public override object GetValue(object o)
 				{
 					return MapTo(base.GetValue(o));
@@ -1374,20 +1539,25 @@ namespace BLToolkit.Mapping
 
 		class SqlBooleanMapper : MemberMapper
 		{
+			public override bool IsNull (object o) { return GetSqlBoolean(o).IsNull; }
+			public override void SetNull(object o) { _memberAccessor.SetSqlBoolean(o, SqlBoolean.Null); }
+
 			public override object GetValue(object o)
 			{
-				SqlBoolean value = (SqlBoolean)_memberAccessor.GetValue(o);
+				SqlBoolean value = _memberAccessor.GetSqlBoolean(o);
 				return value.IsNull? null: (object)value.Value;
 			}
 
 			public override void SetValue(object o, object value)
 			{
-				_memberAccessor.SetValue(
-					o, value is SqlBoolean? value: _mappingSchema.ConvertToSqlBoolean(value));
+				_memberAccessor.SetSqlBoolean(
+					o, value is SqlBoolean? (SqlBoolean)value: _mappingSchema.ConvertToSqlBoolean(value));
 			}
 
 			public class Default : SqlBooleanMapper
 			{
+				public override bool SupportsValue { get { return false; } }
+
 				public override object GetValue(object o)
 				{
 					return MapTo(base.GetValue(o));
@@ -1402,20 +1572,25 @@ namespace BLToolkit.Mapping
 
 		class SqlDoubleMapper : MemberMapper
 		{
+			public override bool IsNull (object o) { return GetSqlDouble(o).IsNull; }
+			public override void SetNull(object o) { _memberAccessor.SetSqlDouble(o, SqlDouble.Null); }
+
 			public override object GetValue(object o)
 			{
-				SqlDouble value = (SqlDouble)_memberAccessor.GetValue(o);
+				SqlDouble value = (SqlDouble)_memberAccessor.GetSqlDouble(o);
 				return value.IsNull? null: (object)value.Value;
 			}
 
 			public override void SetValue(object o, object value)
 			{
-				_memberAccessor.SetValue(
-					o, value is SqlDouble? value: _mappingSchema.ConvertToSqlDouble(value));
+				_memberAccessor.SetSqlDouble(
+					o, value is SqlDouble? (SqlDouble)value: _mappingSchema.ConvertToSqlDouble(value));
 			}
 
 			public class Default : SqlDoubleMapper
 			{
+				public override bool SupportsValue { get { return false; } }
+
 				public override object GetValue(object o)
 				{
 					return MapTo(base.GetValue(o));
@@ -1430,20 +1605,25 @@ namespace BLToolkit.Mapping
 
 		class SqlDateTimeMapper : MemberMapper
 		{
+			public override bool IsNull (object o) { return GetSqlDateTime(o).IsNull; }
+			public override void SetNull(object o) { _memberAccessor.SetSqlDateTime(o, SqlDateTime.Null); }
+
 			public override object GetValue(object o)
 			{
-				SqlDateTime value = (SqlDateTime)_memberAccessor.GetValue(o);
+				SqlDateTime value = (SqlDateTime)_memberAccessor.GetSqlDateTime(o);
 				return value.IsNull? null: (object)value.Value;
 			}
 
 			public override void SetValue(object o, object value)
 			{
-				_memberAccessor.SetValue(
-					o, value is SqlDateTime? value: _mappingSchema.ConvertToSqlDateTime(value));
+				_memberAccessor.SetSqlDateTime(
+					o, value is SqlDateTime? (SqlDateTime)value: _mappingSchema.ConvertToSqlDateTime(value));
 			}
 
 			public class Default : SqlDateTimeMapper
 			{
+				public override bool SupportsValue { get { return false; } }
+
 				public override object GetValue(object o)
 				{
 					return MapTo(base.GetValue(o));
@@ -1458,20 +1638,25 @@ namespace BLToolkit.Mapping
 
 		class SqlDecimalMapper : MemberMapper
 		{
+			public override bool IsNull (object o) { return GetSqlDecimal(o).IsNull; }
+			public override void SetNull(object o) { _memberAccessor.SetSqlDecimal(o, SqlDecimal.Null); }
+
 			public override object GetValue(object o)
 			{
-				SqlDecimal value = (SqlDecimal)_memberAccessor.GetValue(o);
+				SqlDecimal value = _memberAccessor.GetSqlDecimal(o);
 				return value.IsNull? null: (object)value.Value;
 			}
 
 			public override void SetValue(object o, object value)
 			{
-				_memberAccessor.SetValue(
-					o, value is SqlDecimal? value: _mappingSchema.ConvertToSqlDecimal(value));
+				_memberAccessor.SetSqlDecimal(
+					o, value is SqlDecimal? (SqlDecimal)value: _mappingSchema.ConvertToSqlDecimal(value));
 			}
 
 			public class Default : SqlDecimalMapper
 			{
+				public override bool SupportsValue { get { return false; } }
+
 				public override object GetValue(object o)
 				{
 					return MapTo(base.GetValue(o));
@@ -1486,20 +1671,25 @@ namespace BLToolkit.Mapping
 
 		class SqlMoneyMapper : MemberMapper
 		{
+			public override bool IsNull (object o) { return GetSqlMoney(o).IsNull; }
+			public override void SetNull(object o) { _memberAccessor.SetSqlMoney(o, SqlMoney.Null); }
+
 			public override object GetValue(object o)
 			{
-				SqlMoney value = (SqlMoney)_memberAccessor.GetValue(o);
+				SqlMoney value = _memberAccessor.GetSqlMoney(o);
 				return value.IsNull? null: (object)value.Value;
 			}
 
 			public override void SetValue(object o, object value)
 			{
-				_memberAccessor.SetValue(
-					o, value is SqlMoney? value: _mappingSchema.ConvertToSqlMoney(value));
+				_memberAccessor.SetSqlMoney(
+					o, value is SqlMoney? (SqlMoney)value: _mappingSchema.ConvertToSqlMoney(value));
 			}
 
 			public class Default : SqlMoneyMapper
 			{
+				public override bool SupportsValue { get { return false; } }
+
 				public override object GetValue(object o)
 				{
 					return MapTo(base.GetValue(o));
@@ -1514,20 +1704,25 @@ namespace BLToolkit.Mapping
 
 		class SqlGuidMapper : MemberMapper
 		{
+			public override bool IsNull (object o) { return GetSqlGuid(o).IsNull; }
+			public override void SetNull(object o) { _memberAccessor.SetSqlGuid(o, SqlGuid.Null); }
+
 			public override object GetValue(object o)
 			{
-				SqlGuid value = (SqlGuid)_memberAccessor.GetValue(o);
+				SqlGuid value = _memberAccessor.GetSqlGuid(o);
 				return value.IsNull? null: (object)value.Value;
 			}
 
 			public override void SetValue(object o, object value)
 			{
-				_memberAccessor.SetValue(
-					o, value is SqlGuid? value: _mappingSchema.ConvertToSqlGuid(value));
+				_memberAccessor.SetSqlGuid(
+					o, value is SqlGuid? (SqlGuid)value: _mappingSchema.ConvertToSqlGuid(value));
 			}
 
 			public class Default : SqlGuidMapper
 			{
+				public override bool SupportsValue { get { return false; } }
+
 				public override object GetValue(object o)
 				{
 					return MapTo(base.GetValue(o));
@@ -1542,20 +1737,25 @@ namespace BLToolkit.Mapping
 
 		class SqlStringMapper : MemberMapper
 		{
+			public override bool IsNull (object o) { return GetSqlString(o).IsNull; }
+			public override void SetNull(object o) { _memberAccessor.SetSqlString(o, SqlString.Null); }
+
 			public override object GetValue(object o)
 			{
-				SqlString value = (SqlString)_memberAccessor.GetValue(o);
+				SqlString value = _memberAccessor.GetSqlString(o);
 				return value.IsNull? null: value.Value;
 			}
 
 			public override void SetValue(object o, object value)
 			{
-				_memberAccessor.SetValue(
-					o, value is SqlString? value: _mappingSchema.ConvertToSqlString(value));
+				_memberAccessor.SetSqlString(
+					o, value is SqlString? (SqlString)value: _mappingSchema.ConvertToSqlString(value));
 			}
 
 			public class Default : SqlStringMapper
 			{
+				public override bool SupportsValue { get { return false; } }
+
 				public override object GetValue(object o)
 				{
 					return MapTo(base.GetValue(o));

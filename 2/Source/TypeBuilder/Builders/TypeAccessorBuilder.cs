@@ -166,11 +166,26 @@ namespace BLToolkit.TypeBuilder.Builders
 			if (type.IsEnum)
 				type = Enum.GetUnderlyingType(type);
 
-			string typedPropertyName =
+			string typedPropertyName = type.Name;
+
 #if FW2
-				type.IsGenericType? null:
+			if (type.IsGenericType)
+			{
+				Type underlyingType = Nullable.GetUnderlyingType(type);
+
+				if (underlyingType != null)
+				{
+					if (underlyingType.IsEnum)
+						underlyingType = Enum.GetUnderlyingType(underlyingType);
+
+					typedPropertyName = "Nullable" + underlyingType.Name;
+				}
+				else
+				{
+					typedPropertyName = null;
+				}
+			}
 #endif
-				type.Name;
 
 			if (typedPropertyName != null)
 			{
