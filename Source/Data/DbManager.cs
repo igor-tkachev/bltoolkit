@@ -666,6 +666,8 @@ namespace BLToolkit.Data
 					}
 				}
 			}
+
+			_dataProvider.InitDbManager(this);
 		}
 
 		protected virtual string GetConnectionString(string configurationString)
@@ -744,6 +746,8 @@ namespace BLToolkit.Data
 					"The '{0}' type of the connection could not be recognized.",
 					connection.GetType().FullName));
 			}
+
+			_dataProvider.InitDbManager(this);
 		}
 
 		private void OpenConnection()

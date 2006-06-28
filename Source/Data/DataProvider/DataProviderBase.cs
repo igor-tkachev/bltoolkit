@@ -78,6 +78,10 @@ namespace BLToolkit.Data.DataProvider
 
 		#endregion
 
+		public virtual void InitDbManager(DbManager dbManager)
+		{
+		}
+
 		public virtual object Convert(object value, ConvertType convertType)
 		{
 			return value;
