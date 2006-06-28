@@ -63,20 +63,6 @@ namespace BLToolkit.Reflection.Extension
 			}
 		}
 
-		[Obsolete]
-		public void Add(string attributeName, string valueName, string value)
-		{
-			if (this != _null)
-			{
-				AttributeExtension attributeExtension = new AttributeExtension();
-
-				attributeExtension.Name = attributeName;
-				attributeExtension.Values.Add(valueName, value);
-
-				Add(attributeExtension);
-			}
-		}
-
 		public void Add(string name, string value)
 		{
 			if (this != _null)

@@ -83,11 +83,6 @@ namespace BLToolkit.Data.DataProvider
 			return value;
 		}
 
-		[Obsolete]
-		public virtual void SetParameterType(IDbDataParameter parameter, object value)
-		{
-		}
-
 		public virtual void AttachParameter(IDbCommand command, IDbDataParameter parameter)
 		{
 			command.Parameters.Add(parameter);

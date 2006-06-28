@@ -642,17 +642,6 @@ namespace BLToolkit.DataAccess
 			return mmList;
 		}
 
-		[Obsolete]
-		protected string[] GetFieldNameList(MemberMapper[] mm)
-		{
-			string[] list = new string[mm.Length];
-
-			for (int i = 0; i < mm.Length; i++)
-				list[i] = mm[i].Name;
-
-			return list;
-		}
-
 		protected void AddWherePK(DbManager db, SqlQueryInfo query, StringBuilder sb)
 		{
 			sb.Append("WHERE\n");
