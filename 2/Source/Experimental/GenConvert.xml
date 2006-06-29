@@ -1,0 +1,49 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<code transformer="GenConvert.xslt">
+
+	<using namespace="System"/>
+	<using namespace="System.Data.SqlTypes"/>
+	<using namespace="System.IO"/>
+
+	<comment nullable="true">A comment for nullable SByte.</comment>
+	<converter type="SByte" nullable="true">
+		<from type="String">return p == null? null: (SByte?)Convert.ToSByte(p);</from>
+		<default>return Convert.ToSByte(p);</default>
+	</converter>
+
+	<comment nullable="false">A comment for SByte.</comment>
+	<converter type="SByte" nullable="false">
+		<from type="String">return Convert.ToSByte(p);</from>
+		<default>return Convert.ToSByte(p);</default>
+	</converter>
+
+	<comment>A comment for String.</comment>
+	<converter type="String">
+		<from type="SByte">return p.ToString();</from>
+		<comment>A meaningful comment for String-to-Byte converter.</comment>
+		<from type="Byte"/>
+		<!-- from Byte converter uses code from <default> section -->
+		<default>return p.ToString();</default>
+	</converter>
+
+	<converter type="Int32">
+		<from type="SByte"/>
+		<from type="Int16"/>
+		<from type="Int64"/>
+		<from type="UInt16"/>
+		<from type="UInt32"/>
+		<from type="UInt64"/>
+		<default>return Convert.ToInt32(p);</default>
+	</converter>
+
+	<region name="Guid">
+		<converter type="Guid">
+			<from type="String"   >return new Guid(p);                              </from>
+			<from type="Guid?"    >return p.HasValue? p.Value : Guid.Empty;         </from>
+			<from type="SqlString">return p.IsNull? Guid.Empty: new Guid(p.Value);  </from>
+			<from type="SqlGuid"  >return p.IsNull? Guid.Empty: p.Value;            </from>
+			<from type="SqlBinary">return p.IsNull? Guid.Empty: p.ToSqlGuid().Value;</from>
+			<default nullvalue="Guid.Empty"/>
+		</converter>
+	</region>
+</code>
