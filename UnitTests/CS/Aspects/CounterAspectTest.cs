@@ -44,7 +44,7 @@ namespace Aspects
 			new Thread(new ThreadStart(t.LongTest)).Start();
 			Thread.Sleep(20);
 
-			foreach (CounterAspect.Counter c in CounterAspect.Counters)
+			lock (CounterAspect.Counters) foreach (CounterAspect.Counter c in CounterAspect.Counters)
 			{
 				Console.WriteLine("{0}.{1,-10} | {2,2} | {3,2} | {4}",
 					c.MethodInfo.DeclaringType.Name,

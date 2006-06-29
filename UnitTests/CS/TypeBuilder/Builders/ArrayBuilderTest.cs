@@ -47,7 +47,7 @@ namespace TypeBuilder.Builders
 			//   }
 			// }
 			//
-			// As we can see, there is NO record for bounds. And we nothing can do with it.
+			// As we can see, there is NO record for bounds. And we can do nothing with it.
 			//
 			// To bite this CLR bug we need to do the sunset by our own hands.
 			//
