@@ -3,6 +3,7 @@ using System.Data;
 using System.Data.Common;
 
 using BLToolkit.Common;
+using BLToolkit.Mapping;
 
 namespace BLToolkit.Data.DataProvider
 {
@@ -80,6 +81,10 @@ namespace BLToolkit.Data.DataProvider
 
 		public virtual void InitDbManager(DbManager dbManager)
 		{
+			MappingSchema schema = MappingSchema;
+
+			if (schema != null)
+				dbManager.MappingSchema = schema;
 		}
 
 		public virtual object Convert(object value, ConvertType convertType)
@@ -105,6 +110,13 @@ namespace BLToolkit.Data.DataProvider
 		public virtual IDbCommand CreateCommandObject(IDbConnection connection)
 		{
 			return connection.CreateCommand();
+		}
+
+		private        MappingSchema _mappingSchema;
+		public virtual MappingSchema  MappingSchema
+		{
+			get { return _mappingSchema; }
+			set { _mappingSchema = value; }
 		}
 
 #if EXPERIMENTAL

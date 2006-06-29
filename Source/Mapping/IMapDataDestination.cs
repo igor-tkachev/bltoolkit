@@ -12,7 +12,8 @@ namespace BLToolkit.Mapping
 		void SetValue     (object o, string name, object value);
 
 		void SetNull      (object o, int index);
-		bool SupportsValue(int index);
+
+		bool SupportsTypedValues(int index);
 
 		// Simple type setters.
 		//

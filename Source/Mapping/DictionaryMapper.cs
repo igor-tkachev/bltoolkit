@@ -59,7 +59,7 @@ namespace BLToolkit.Mapping
 			return _enumerator.Key.ToString();
 		}
 
-		public override bool SupportsValue(int index)
+		public override bool SupportsTypedValues(int index)
 		{
 			return index < _dictionary.Count;
 		}

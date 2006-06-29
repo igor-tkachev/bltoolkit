@@ -633,8 +633,9 @@ namespace BLToolkit.Mapping
 			return mm == null? null: mm.GetValue(o);
 		}
 
-		public override bool     IsNull        (object o, int index) { return this[index].IsNull(o);     }
-		public override bool     SupportsValue (int index)           { return this[index].SupportsValue; }
+		public override bool     IsNull     (object o, int index) { return this[index].IsNull(o);     }
+
+		public override bool     SupportsTypedValues(int index)   { return this[index].SupportsValue; }
 
 		// Simple type getters.
 		//
