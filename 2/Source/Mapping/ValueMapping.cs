@@ -78,10 +78,13 @@ namespace BLToolkit.Mapping
 			AddSameType(typeof(SqlGuid),     new SqlGuidToSqlGuid());
 			AddSameType(typeof(SqlString),   new SqlStringToSqlString());
 
-			_mappers.Add(new KeyValue(typeof(Int32),   typeof(Double)),  new Int32ToDouble());
-			_mappers.Add(new KeyValue(typeof(Int32),   typeof(Decimal)), new Int32ToDecimal());
-			_mappers.Add(new KeyValue(typeof(Double),  typeof(Int32)),   new DoubleToInt32());
-			_mappers.Add(new KeyValue(typeof(Decimal), typeof(Int32)),   new DecimalToInt32());
+			_mappers.Add(new KeyValue(typeof(Int32),    typeof(Double)),  new Int32ToDouble());
+			_mappers.Add(new KeyValue(typeof(Int32),    typeof(Decimal)), new Int32ToDecimal());
+			_mappers.Add(new KeyValue(typeof(Double),   typeof(Int32)),   new DoubleToInt32());
+			_mappers.Add(new KeyValue(typeof(Decimal),  typeof(Int32)),   new DecimalToInt32());
+
+			_mappers.Add(new KeyValue(typeof(SqlInt32),   typeof(Int32)),   new SqlInt32ToInt32());
+			_mappers.Add(new KeyValue(typeof(SqlDecimal), typeof(Decimal)), new SqlDecimalToDecimal());
 		}
 
 		#endregion
@@ -776,6 +779,32 @@ namespace BLToolkit.Mapping
 					dest.SetNull(destObject, destIndex);
 				else
 					dest.SetInt32(destObject, destIndex, Convert.ToInt32(source.GetDecimal(sourceObject, sourceIndex)));
+			}
+		}
+
+		class SqlInt32ToInt32 : IValueMapper
+		{
+			public void Map(
+				IMapDataSource      source, object sourceObject, int sourceIndex,
+				IMapDataDestination dest,   object destObject,   int destIndex)
+			{
+				SqlInt32 value = source.GetSqlInt32(sourceObject, sourceIndex);
+
+				if (value.IsNull) dest.SetNull (destObject, destIndex);
+				else              dest.SetInt32(destObject, destIndex, value.Value);
+			}
+		}
+
+		class SqlDecimalToDecimal : IValueMapper
+		{
+			public void Map(
+				IMapDataSource      source, object sourceObject, int sourceIndex,
+				IMapDataDestination dest,   object destObject,   int destIndex)
+			{
+				SqlDecimal value = source.GetSqlDecimal(sourceObject, sourceIndex);
+
+				if (value.IsNull) dest.SetNull   (destObject, destIndex);
+				else              dest.SetDecimal(destObject, destIndex, value.Value);
 			}
 		}
 

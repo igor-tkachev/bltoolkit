@@ -6,6 +6,8 @@ using System.Data.SqlTypes;
 using System.IO;
 using System.Xml;
 
+using BLToolkit.Mapping;
+
 namespace BLToolkit.Data.DataProvider
 {
 #if EXPERIMENTAL
@@ -140,6 +142,11 @@ namespace BLToolkit.Data.DataProvider
 	/// <seealso cref="DbManager.AddDataProvider">AddDataManager Method</seealso>
 	public sealed class SqlDataProvider: DataProviderBase
 	{
+		public SqlDataProvider()
+		{
+			//MappingSchema = new SqlMappingSchema();
+		}
+
 		/// <summary>
 		/// Creates the database connection object.
 		/// </summary>
@@ -351,6 +358,48 @@ namespace BLToolkit.Data.DataProvider
 		public override string Name
 		{
 			get { return "Sql"; }
+		}
+
+		public class SqlMappingSchema : MappingSchema
+		{
+			protected override DataReaderMapper CreateDataReaderMapper(IDataReader dataReader)
+			{
+				return new SqlDataReaderMapper(dataReader);
+			}
+		}
+
+		public class SqlDataReaderMapper : DataReaderMapper
+		{
+			public SqlDataReaderMapper(IDataReader dataReader)
+				: base(dataReader)
+			{
+				_dataReader = (SqlDataReader)dataReader;
+			}
+
+			private SqlDataReader _dataReader;
+
+			public override Type GetFieldType(int index)
+			{
+				return _dataReader.GetProviderSpecificFieldType(index);
+			}
+
+			public override object GetValue(object o, int index)
+			{
+				return _dataReader.GetProviderSpecificValue(index);
+			}
+
+			public override SqlBoolean  GetSqlBoolean (object o, int index) { return _dataReader.GetSqlBoolean (index); }
+			public override SqlByte     GetSqlByte    (object o, int index) { return _dataReader.GetSqlByte    (index); }
+			public override SqlDateTime GetSqlDateTime(object o, int index) { return _dataReader.GetSqlDateTime(index); }
+			public override SqlDecimal  GetSqlDecimal (object o, int index) { return _dataReader.GetSqlDecimal (index); }
+			public override SqlDouble   GetSqlDouble  (object o, int index) { return _dataReader.GetSqlDouble  (index); }
+			public override SqlGuid     GetSqlGuid    (object o, int index) { return _dataReader.GetSqlGuid    (index); }
+			public override SqlInt16    GetSqlInt16   (object o, int index) { return _dataReader.GetSqlInt16   (index); }
+			public override SqlInt32    GetSqlInt32   (object o, int index) { return _dataReader.GetSqlInt32   (index); }
+			public override SqlInt64    GetSqlInt64   (object o, int index) { return _dataReader.GetSqlInt64   (index); }
+			public override SqlMoney    GetSqlMoney   (object o, int index) { return _dataReader.GetSqlMoney   (index); }
+			public override SqlSingle   GetSqlSingle  (object o, int index) { return _dataReader.GetSqlSingle  (index); }
+			public override SqlString   GetSqlString  (object o, int index) { return _dataReader.GetSqlString  (index); }
 		}
 	}
 }

@@ -274,6 +274,7 @@
     <Compile Include="Validation\ValidationContext.cs" />
     <Compile Include="Validation\Validator.cs" />
     <Compile Include="Validation\ValidatorBaseAttribute.cs" />
+    <Compile Include="Web\HttpReader.cs" />
     <Compile Include="Web\UI\Design\WebObjectBinderDesigner.cs" />
     <Compile Include="Web\UI\WebObjectBinder.cs" />
   </ItemGroup>

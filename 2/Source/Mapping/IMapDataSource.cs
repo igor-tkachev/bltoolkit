@@ -14,7 +14,8 @@ namespace BLToolkit.Mapping
 		object   GetValue     (object o, string name);
 
 		bool     IsNull       (object o, int index);
-		bool     SupportsValue(int index);
+
+		bool     SupportsTypedValues(int index);
 
 		// Simple type getters.
 		//

@@ -5,7 +5,7 @@ using NUnit.Framework;
 using BLToolkit.TypeBuilder;
 using BLToolkit.Reflection;
 
-namespace A.TypeBuilder.Builders
+namespace TypeBuilder.Builders
 {
 	[TestFixture]
 	public class ArrayBuilderTest

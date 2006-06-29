@@ -574,12 +574,37 @@ namespace BLToolkit.Mapping
 				                    new SqlSingle(Convert.ToSingle(value));
 		}
 
+		public virtual SqlBinary ConvertToSqlBinary(object value)
+		{
+			if (value == null)      return SqlBinary.Null;
+			if (value is SqlBinary) return (SqlBinary)value;
+			if (value is byte[])    return new SqlBinary((byte[])value);
+
+			throw new InvalidCastException(string.Format(
+				"Cant convert type '{0}' to '{1}'.",
+				value.GetType().FullName,
+				typeof(SqlBinary).FullName));
+		}
+
 		public virtual SqlBoolean ConvertToSqlBoolean(object value)
 		{
 			return
 				value == null?       SqlBoolean.Null:
 				value is SqlBoolean? (SqlBoolean)value:
 				                     new SqlBoolean(Convert.ToBoolean(value));
+		}
+
+		public virtual SqlBytes ConvertToSqlBytes(object value)
+		{
+			if (value == null)     return SqlBytes.Null;
+			if (value is SqlBytes) return (SqlBytes)value;
+			if (value is byte[])   return new SqlBytes((byte[])value);
+			if (value is Stream)   return new SqlBytes((Stream)value);
+
+			throw new InvalidCastException(string.Format(
+				"Cant convert type '{0}' to '{1}'.",
+				value.GetType().FullName,
+				typeof(SqlBytes).FullName));
 		}
 
 		public virtual SqlDouble ConvertToSqlDouble(object value)
@@ -754,8 +779,23 @@ namespace BLToolkit.Mapping
 				case TypeCode.UInt64:   return ConvertToUInt64  (value);
 			}
 
-			if (typeof(Guid)   == conversionType) return ConvertToGuid(value);
+			if (typeof(Guid)   == conversionType) return ConvertToGuid  (value);
 			if (typeof(Stream) == conversionType) return ConvertToStream(value);
+
+			if (typeof(SqlInt32)    == conversionType) return ConvertToSqlInt32   (value);
+			if (typeof(SqlString)   == conversionType) return ConvertToSqlString  (value);
+			if (typeof(SqlDecimal)  == conversionType) return ConvertToSqlDecimal (value);
+			if (typeof(SqlDateTime) == conversionType) return ConvertToSqlDateTime(value);
+			if (typeof(SqlBoolean)  == conversionType) return ConvertToSqlBoolean (value);
+			if (typeof(SqlMoney)    == conversionType) return ConvertToSqlMoney   (value);
+			if (typeof(SqlGuid)     == conversionType) return ConvertToSqlGuid    (value);
+			if (typeof(SqlDouble)   == conversionType) return ConvertToSqlDouble  (value);
+			if (typeof(SqlByte)     == conversionType) return ConvertToSqlByte    (value);
+			if (typeof(SqlInt16)    == conversionType) return ConvertToSqlInt16   (value);
+			if (typeof(SqlInt64)    == conversionType) return ConvertToSqlInt64   (value);
+			if (typeof(SqlSingle)   == conversionType) return ConvertToSqlSingle  (value);
+			if (typeof(SqlBinary)   == conversionType) return ConvertToSqlBinary  (value);
+			if (typeof(SqlBytes)    == conversionType) return ConvertToSqlBytes   (value);
 
 			return Convert.ChangeType(value, conversionType);
 		}
@@ -1184,7 +1224,7 @@ namespace BLToolkit.Mapping
 				if (n < 0)
 					continue;
 
-				if (!source.SupportsValue(i) || !dest.SupportsValue(n))
+				if (!source.SupportsTypedValues(i) || !dest.SupportsTypedValues(n))
 				{
 					mappers[i] = DefaultValueMapper;
 					continue;
