@@ -392,7 +392,6 @@ namespace BLToolkit.Mapping
 #else
 				value is byte[]?    new MemoryStream((Byte[])value):
 				value is SqlBinary? new MemoryStream(((SqlBinary)value).Value):
-				value is SqlBytes?  ((SqlBytes)value).Stream:
 				// This will definitely fail.
 				(Stream)Convert.ChangeType(value, typeof(Stream));
 #endif
@@ -594,6 +593,7 @@ namespace BLToolkit.Mapping
 				                     new SqlBoolean(Convert.ToBoolean(value));
 		}
 
+#if FW2
 		public virtual SqlBytes ConvertToSqlBytes(object value)
 		{
 			if (value == null)     return SqlBytes.Null;
@@ -606,6 +606,7 @@ namespace BLToolkit.Mapping
 				value.GetType().FullName,
 				typeof(SqlBytes).FullName));
 		}
+#endif
 
 		public virtual SqlDouble ConvertToSqlDouble(object value)
 		{
@@ -795,7 +796,9 @@ namespace BLToolkit.Mapping
 			if (typeof(SqlInt64)    == conversionType) return ConvertToSqlInt64   (value);
 			if (typeof(SqlSingle)   == conversionType) return ConvertToSqlSingle  (value);
 			if (typeof(SqlBinary)   == conversionType) return ConvertToSqlBinary  (value);
+#if FW2
 			if (typeof(SqlBytes)    == conversionType) return ConvertToSqlBytes   (value);
+#endif
 
 			return Convert.ChangeType(value, conversionType);
 		}
