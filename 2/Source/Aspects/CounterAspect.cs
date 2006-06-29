@@ -65,7 +65,7 @@ namespace BLToolkit.Aspects
 
 		public static Counter GetCounter(MethodInfo methodInfo)
 		{
-			foreach (Counter c in _counters)
+			lock (_counters.SyncRoot) foreach (Counter c in _counters)
 			{
 				if ((methodInfo.DeclaringType == c.MethodInfo.DeclaringType ||
 					 methodInfo.DeclaringType == c.MethodInfo.DeclaringType.BaseType) &&
