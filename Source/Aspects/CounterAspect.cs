@@ -14,7 +14,8 @@ namespace BLToolkit.Aspects
 
 			Counter counter = GetCounter(info.CallMethodInfo);
 
-			counter.CurrentCalls.Add(info);
+			lock (counter.CurrentCalls.SyncRoot)
+				counter.CurrentCalls.Add(info);
 
 			info.Items["CurrentPrincipal"] = Thread.CurrentPrincipal;
 		}
@@ -28,7 +29,9 @@ namespace BLToolkit.Aspects
 
 			counter.TotalTime += DateTime.Now - info.BeginCallTime;
 			counter.TotalCount++;
-			counter.CurrentCalls.Remove(info);
+
+			lock (counter.CurrentCalls.SyncRoot)
+				counter.CurrentCalls.Remove(info);
 		}
 
 		#region Parameters

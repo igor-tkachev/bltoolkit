@@ -378,6 +378,7 @@ namespace BLToolkit.Data.DataProvider
 
 			private SqlDataReader _dataReader;
 
+#if FW2
 			public override Type GetFieldType(int index)
 			{
 				return _dataReader.GetProviderSpecificFieldType(index);
@@ -387,6 +388,7 @@ namespace BLToolkit.Data.DataProvider
 			{
 				return _dataReader.GetProviderSpecificValue(index);
 			}
+#endif
 
 			public override SqlBoolean  GetSqlBoolean (object o, int index) { return _dataReader.GetSqlBoolean (index); }
 			public override SqlByte     GetSqlByte    (object o, int index) { return _dataReader.GetSqlByte    (index); }
