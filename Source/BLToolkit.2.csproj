@@ -67,6 +67,11 @@
     <Compile Include="Common\Convert.cs" />
     <Compile Include="Common\EntityBase.cs" />
     <Compile Include="Common\EntityBaseT.cs" />
+    <Compile Include="Experimental\GenConvert.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>GenConvert.xml</DependentUpon>
+    </Compile>
     <Compile Include="Common\Operator.cs" />
     <Compile Include="ComponentModel\BindingListImpl.cs" />
     <Compile Include="ComponentModel\CustomTypeDescriptorImpl.cs" />
@@ -320,6 +325,12 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Experimental\GenConvert.xml">
+      <Generator>TransformCodeGenerator</Generator>
+      <CustomToolNamespace>BLToolkit.Experimental</CustomToolNamespace>
+      <LastGenOutput>GenConvert.cs</LastGenOutput>
+    </Content>
+    <Content Include="Experimental\GenConvert.xslt" />
     <Content Include="Doc\License.txt" />
     <Content Include="Doc\OnlineDoc.txt" />
     <EmbeddedResource Include="Web\UI\WebObjectBinder.ico" />
