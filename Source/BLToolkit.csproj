@@ -707,6 +707,11 @@
                     BuildAction = "Compile"
                 />
                 <File
+                    RelPath = "Net\HttpReader.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
                     RelPath = "Reflection\InitContext.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
