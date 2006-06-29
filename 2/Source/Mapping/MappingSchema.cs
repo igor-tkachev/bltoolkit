@@ -8,6 +8,7 @@ using System.Diagnostics.CodeAnalysis;
 
 #if FW2
 using System.Collections.Generic;
+using System.Xml;
 using KeyValue = System.Collections.Generic.KeyValuePair<System.Type,System.Type>;
 #else
 using KeyValue = BLToolkit.Common.CompoundValue;
@@ -380,21 +381,38 @@ namespace BLToolkit.Mapping
 
 		public virtual Stream ConvertToStream(object value)
 		{
-			return
-				value is Stream? (Stream)value:
-				value == null  ? _defaultStreamNullValue:
+			if (value == null)      return _defaultStreamNullValue;
+			if (value is Stream)    return (Stream)value;
+			if (value is SqlBinary) return new MemoryStream(((SqlBinary)value).Value);
+			if (value is byte[])    return new MemoryStream((byte[])value);
 #if FW2
-				value is byte[]?    Convert<Stream, byte[]>.   From((Byte[])value):
-				value is SqlBinary? Convert<Stream, SqlBinary>.From((SqlBinary)value):
-				value is SqlBytes?  Convert<Stream, SqlBytes>. From((SqlBytes)value):
-				// This will definitely fail.
-				Convert<Stream, object>.From(value);
-#else
-				value is byte[]?    new MemoryStream((Byte[])value):
-				value is SqlBinary? new MemoryStream(((SqlBinary)value).Value):
-				// This will definitely fail.
-				(Stream)Convert.ChangeType(value, typeof(Stream));
+			if (value is SqlBytes)  return ((SqlBytes)value).Stream;
 #endif
+			throw new MappingException(value.GetType(), typeof(Stream));
+		}
+
+		public virtual byte[] ConvertToByteArray(object value)
+		{
+			if (value == null)      return null;
+			if (value is byte[])    return (byte[])value;
+			if (value is SqlBinary) return ((SqlBinary)value).Value;
+#if FW2
+			if (value is SqlBytes)  return ((SqlBytes)value).Buffer;
+#endif
+			throw new MappingException(value.GetType(), typeof(byte[]));
+		}
+
+		public virtual char[] ConvertToCharArray(object value)
+		{
+			if (value == null)      return null;
+			if (value is char[])    return (char[])value;
+			if (value is string)    return ((string)value).ToCharArray();
+#if FW2
+			if (value is SqlChars)  return ((SqlChars)value).Value;
+#endif
+			if (value is SqlString) return ((SqlString)value).Value.ToCharArray();
+
+			throw new MappingException(value.GetType(), typeof(char[]));
 		}
 
 		#endregion
@@ -536,9 +554,9 @@ namespace BLToolkit.Mapping
 		public virtual SqlByte ConvertToSqlByte(object value)
 		{
 			return
-				value == null?    SqlByte.Null:
+				value == null?    SqlByte.Null :
 				value is SqlByte? (SqlByte)value:
-				                  new SqlByte(Convert.ToByte(value));
+				                  new SqlByte(ConvertToByte(value));
 		}
 
 		public virtual SqlInt16 ConvertToSqlInt16(object value)
@@ -546,7 +564,7 @@ namespace BLToolkit.Mapping
 			return
 				value == null?     SqlInt16.Null:
 				value is SqlInt16? (SqlInt16)value:
-				                   new SqlInt16(Convert.ToInt16(value));
+				                   new SqlInt16(ConvertToInt16(value));
 		}
 
 		public virtual SqlInt32 ConvertToSqlInt32(object value)
@@ -554,7 +572,7 @@ namespace BLToolkit.Mapping
 			return
 				value == null?     SqlInt32.Null:
 				value is SqlInt32? (SqlInt32)value:
-				                   new SqlInt32(Convert.ToInt32(value));
+				                   new SqlInt32(ConvertToInt32(value));
 		}
 
 		public virtual SqlInt64 ConvertToSqlInt64(object value)
@@ -562,7 +580,7 @@ namespace BLToolkit.Mapping
 			return
 				value == null?     SqlInt64.Null:
 				value is SqlInt64? (SqlInt64)value:
-				                   new SqlInt64(Convert.ToInt64(value));
+				                   new SqlInt64(ConvertToInt64(value));
 		}
 
 		public virtual SqlSingle ConvertToSqlSingle(object value)
@@ -570,19 +588,7 @@ namespace BLToolkit.Mapping
 			return
 				value == null?      SqlSingle.Null:
 				value is SqlSingle? (SqlSingle)value:
-				                    new SqlSingle(Convert.ToSingle(value));
-		}
-
-		public virtual SqlBinary ConvertToSqlBinary(object value)
-		{
-			if (value == null)      return SqlBinary.Null;
-			if (value is SqlBinary) return (SqlBinary)value;
-			if (value is byte[])    return new SqlBinary((byte[])value);
-
-			throw new InvalidCastException(string.Format(
-				"Cant convert type '{0}' to '{1}'.",
-				value.GetType().FullName,
-				typeof(SqlBinary).FullName));
+				                    new SqlSingle(ConvertToSingle(value));
 		}
 
 		public virtual SqlBoolean ConvertToSqlBoolean(object value)
@@ -590,30 +596,15 @@ namespace BLToolkit.Mapping
 			return
 				value == null?       SqlBoolean.Null:
 				value is SqlBoolean? (SqlBoolean)value:
-				                     new SqlBoolean(Convert.ToBoolean(value));
+				                     new SqlBoolean(ConvertToBoolean(value));
 		}
-
-#if FW2
-		public virtual SqlBytes ConvertToSqlBytes(object value)
-		{
-			if (value == null)     return SqlBytes.Null;
-			if (value is SqlBytes) return (SqlBytes)value;
-			if (value is byte[])   return new SqlBytes((byte[])value);
-			if (value is Stream)   return new SqlBytes((Stream)value);
-
-			throw new InvalidCastException(string.Format(
-				"Cant convert type '{0}' to '{1}'.",
-				value.GetType().FullName,
-				typeof(SqlBytes).FullName));
-		}
-#endif
 
 		public virtual SqlDouble ConvertToSqlDouble(object value)
 		{
 			return
 				value == null?      SqlDouble.Null:
 				value is SqlDouble? (SqlDouble)value:
-				                    new SqlDouble(Convert.ToDouble(value));
+				                    new SqlDouble(ConvertToDouble(value));
 		}
 
 		public virtual SqlDateTime ConvertToSqlDateTime(object value)
@@ -621,7 +612,7 @@ namespace BLToolkit.Mapping
 			return
 				value == null?        SqlDateTime.Null:
 				value is SqlDateTime? (SqlDateTime)value:
-				                      new SqlDateTime(Convert.ToDateTime(value));
+				                      new SqlDateTime(ConvertToDateTime(value));
 		}
 
 		public virtual SqlDecimal ConvertToSqlDecimal(object value)
@@ -629,23 +620,17 @@ namespace BLToolkit.Mapping
 			return
 				value == null?       SqlDecimal.Null:
 				value is SqlDecimal? (SqlDecimal)value:
-				                     new SqlDecimal(Convert.ToDecimal(value));
+				value is SqlMoney?   ((SqlMoney)value).ToSqlDecimal():
+				                     new SqlDecimal(ConvertToDecimal(value));
 		}
 
 		public virtual SqlMoney ConvertToSqlMoney(object value)
 		{
 			return
-				value == null?     SqlMoney.Null:
-				value is SqlMoney? (SqlMoney)value:
-				                   new SqlMoney(Convert.ToDecimal(value));
-		}
-
-		public virtual SqlGuid ConvertToSqlGuid(object value)
-		{
-			return
-				value == null?    SqlGuid.Null:
-				value is SqlGuid? (SqlGuid)value:
-				                  new SqlGuid(new Guid(value.ToString()));
+				value == null?       SqlMoney.Null:
+				value is SqlMoney?   (SqlMoney)value:
+				value is SqlDecimal? ((SqlDecimal)value).ToSqlMoney():
+				                     new SqlMoney(ConvertToDecimal(value));
 		}
 
 		public virtual SqlString ConvertToSqlString(object value)
@@ -653,8 +638,70 @@ namespace BLToolkit.Mapping
 			return
 				value == null?      SqlString.Null:
 				value is SqlString? (SqlString)value:
-				                    new SqlString(Convert.ToString(value));
+#if FW2
+				value is SqlChars? ((SqlChars)value).ToSqlString():
+#endif
+				                    new SqlString(ConvertToString(value));
 		}
+
+		public virtual SqlBinary ConvertToSqlBinary(object value)
+		{
+			if (value == null)      return SqlBinary.Null;
+			if (value is SqlBinary) return (SqlBinary)value;
+			if (value is byte[])    return new SqlBinary((byte[])value);
+#if FW2
+			if (value is SqlBytes)  return ((SqlBytes)value).ToSqlBinary();
+#endif
+
+			throw new MappingException(value.GetType(), typeof(SqlBinary));
+		}
+
+		public virtual SqlGuid ConvertToSqlGuid(object value)
+		{
+			if (value == null)      return SqlGuid.Null;
+			if (value is SqlGuid)   return (SqlGuid)value;
+			if (value is Guid)      return new SqlGuid((Guid)value);
+			if (value is byte[])    return new SqlGuid((byte[])value);
+			if (value is string)    return new SqlGuid((string)value);
+			if (value is SqlBinary) return ((SqlBinary)value).ToSqlGuid();
+
+			throw new MappingException(value.GetType(), typeof(SqlGuid));
+		}
+
+#if FW2
+		public virtual SqlBytes ConvertToSqlBytes(object value)
+		{
+			if (value == null)      return SqlBytes.Null;
+			if (value is SqlBytes)  return (SqlBytes)value;
+			if (value is byte[])    return new SqlBytes((byte[])value);
+			if (value is Stream)    return new SqlBytes((Stream)value);
+			if (value is SqlBinary) return new SqlBytes((SqlBinary)value);
+
+			throw new MappingException(value.GetType(), typeof(SqlBytes));
+		}
+
+		public virtual SqlChars ConvertToSqlChars(object value)
+		{
+			if (value == null)      return SqlChars.Null;
+			if (value is SqlChars)  return (SqlChars)value;
+			if (value is char[])    return new SqlChars((char[])value);
+			if (value is string)    return new SqlChars((string)value);
+			if (value is SqlString) return new SqlChars((SqlString)value);
+
+			throw new MappingException(value.GetType(), typeof(SqlChars));
+		}
+
+		public virtual SqlXml ConvertToSqlXml(object value)
+		{
+			if (value == null)      return SqlXml.Null;
+			if (value is SqlXml)    return (SqlXml)value;
+			if (value is Stream)    return new SqlXml((Stream)value);
+			if (value is XmlReader) return new SqlXml((XmlReader)value);
+			if (value is string)    return new SqlXml(new XmlTextReader(new StringReader((string)value)));
+
+			throw new MappingException(value.GetType(), typeof(SqlXml));
+		}
+#endif
 
 		#endregion
 
@@ -676,64 +723,66 @@ namespace BLToolkit.Mapping
 				if (srcType == conversionType)
 					return value;
 
-				Type srcElementType = srcType.GetElementType();
-				Type dstElementType = conversionType.GetElementType();
-
-				if (srcElementType.IsArray != dstElementType.IsArray
-					|| (srcElementType.IsArray &&
-						srcElementType.GetArrayRank() != dstElementType.GetArrayRank()))
+				if (srcType.IsArray)
 				{
-					throw new ArrayTypeMismatchException(string.Format("Can not convert {0} to {1}",
-						srcType.Name, conversionType.Name));
-				}
+					Type srcElementType = srcType.GetElementType();
+					Type dstElementType = conversionType.GetElementType();
 
-				Array srcArray = (Array)value;
-				Array dstArray;
-
-				int rank = srcArray.Rank;
-				
-				if (rank == 1 && 0 == srcArray.GetLowerBound(0))
-				{
-					int   arrayLength = srcArray.Length;
-
-					dstArray = Array.CreateInstance(dstElementType, arrayLength);
-
-					// Int32 is assignable from UInt32, SByte from Byte and so on.
-					//
-					if (dstElementType.IsAssignableFrom(srcElementType))
-						Array.Copy(srcArray, dstArray, arrayLength);
-					else
-						for (int i = 0; i < arrayLength; ++i)
-							dstArray.SetValue(ConvertChangeType(srcArray.GetValue(i), dstElementType), i);
-				}
-				else
-				{
-					int   arrayLength = 1;
-					int[] dimensions  = new int[rank];
-					int[] indices     = new int[rank];
-					int[] lbounds     = new int[rank];
-
-					for (int i = 0; i < rank; ++i)
+					if (srcElementType.IsArray != dstElementType.IsArray
+						|| (srcElementType.IsArray &&
+							srcElementType.GetArrayRank() != dstElementType.GetArrayRank()))
 					{
-						arrayLength *= (dimensions[i] = srcArray.GetLength(i));
-						lbounds[i] = srcArray.GetLowerBound(i);
+						throw new MappingException(srcType, conversionType);
 					}
 
-					dstArray = Array.CreateInstance(dstElementType, dimensions, lbounds);
-					for (int i = 0; i < arrayLength; ++i)
+					Array srcArray = (Array)value;
+					Array dstArray;
+
+					int rank = srcArray.Rank;
+
+					if (rank == 1 && 0 == srcArray.GetLowerBound(0))
 					{
-						int index = i;
-						for (int j = rank - 1; j >= 0; --j)
+						int arrayLength = srcArray.Length;
+
+						dstArray = Array.CreateInstance(dstElementType, arrayLength);
+
+						// Int32 is assignable from UInt32, SByte from Byte and so on.
+						//
+						if (dstElementType.IsAssignableFrom(srcElementType))
+							Array.Copy(srcArray, dstArray, arrayLength);
+						else
+							for (int i = 0; i < arrayLength; ++i)
+								dstArray.SetValue(ConvertChangeType(srcArray.GetValue(i), dstElementType), i);
+					}
+					else
+					{
+						int arrayLength = 1;
+						int[] dimensions = new int[rank];
+						int[] indices = new int[rank];
+						int[] lbounds = new int[rank];
+
+						for (int i = 0; i < rank; ++i)
 						{
-							indices[j] = index % dimensions[j] + lbounds[j];
-							index /= dimensions[j];
+							arrayLength *= (dimensions[i] = srcArray.GetLength(i));
+							lbounds[i] = srcArray.GetLowerBound(i);
 						}
 
-						dstArray.SetValue(ConvertChangeType(srcArray.GetValue(indices), dstElementType), indices);
-					}
-				}
+						dstArray = Array.CreateInstance(dstElementType, dimensions, lbounds);
+						for (int i = 0; i < arrayLength; ++i)
+						{
+							int index = i;
+							for (int j = rank - 1; j >= 0; --j)
+							{
+								indices[j] = index % dimensions[j] + lbounds[j];
+								index /= dimensions[j];
+							}
 
-				return dstArray;
+							dstArray.SetValue(ConvertChangeType(srcArray.GetValue(indices), dstElementType), indices);
+						}
+					}
+
+					return dstArray;
+				}
 			}
 
 #if FW2
@@ -782,6 +831,8 @@ namespace BLToolkit.Mapping
 
 			if (typeof(Guid)   == conversionType) return ConvertToGuid  (value);
 			if (typeof(Stream) == conversionType) return ConvertToStream(value);
+			if (typeof(byte[]) == conversionType) return ConvertToByteArray(value);
+			if (typeof(char[]) == conversionType) return ConvertToCharArray(value);
 
 			if (typeof(SqlInt32)    == conversionType) return ConvertToSqlInt32   (value);
 			if (typeof(SqlString)   == conversionType) return ConvertToSqlString  (value);
@@ -798,9 +849,18 @@ namespace BLToolkit.Mapping
 			if (typeof(SqlBinary)   == conversionType) return ConvertToSqlBinary  (value);
 #if FW2
 			if (typeof(SqlBytes)    == conversionType) return ConvertToSqlBytes   (value);
+			if (typeof(SqlChars)    == conversionType) return ConvertToSqlChars   (value);
+			if (typeof(SqlXml)      == conversionType) return ConvertToSqlXml     (value);
 #endif
 
-			return Convert.ChangeType(value, conversionType);
+			try
+			{
+				return Convert.ChangeType(value, conversionType);
+			}
+			catch (InvalidCastException ex)
+			{
+				throw new MappingException(ex.Message, ex);
+			}
 		}
 
 		#endregion
