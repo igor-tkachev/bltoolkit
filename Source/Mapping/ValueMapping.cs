@@ -85,6 +85,9 @@ namespace BLToolkit.Mapping
 
 			_mappers.Add(new KeyValue(typeof(SqlInt32),   typeof(Int32)),   new SqlInt32ToInt32());
 			_mappers.Add(new KeyValue(typeof(SqlDecimal), typeof(Decimal)), new SqlDecimalToDecimal());
+
+			_mappers.Add(new KeyValue(typeof(SqlString),  typeof(Int32)),   new SqlStringToInt32());
+			_mappers.Add(new KeyValue(typeof(SqlString),  typeof(Boolean)), new SqlStringToBoolean());
 		}
 
 		#endregion
@@ -805,6 +808,32 @@ namespace BLToolkit.Mapping
 
 				if (value.IsNull) dest.SetNull   (destObject, destIndex);
 				else              dest.SetDecimal(destObject, destIndex, value.Value);
+			}
+		}
+
+		class SqlStringToInt32 : IValueMapper
+		{
+			public void Map(
+				IMapDataSource      source, object sourceObject, int sourceIndex,
+				IMapDataDestination dest,   object destObject,   int destIndex)
+			{
+				SqlString value = source.GetSqlString(sourceObject, sourceIndex);
+
+				if (value.IsNull) dest.SetNull(destObject, destIndex);
+				else dest.SetInt32(destObject, destIndex, value.ToSqlInt32().Value);
+			}
+		}
+
+		class SqlStringToBoolean : IValueMapper
+		{
+			public void Map(
+				IMapDataSource      source, object sourceObject, int sourceIndex,
+				IMapDataDestination dest,   object destObject,   int destIndex)
+			{
+				SqlString value = source.GetSqlString(sourceObject, sourceIndex);
+
+				if (value.IsNull) dest.SetNull(destObject, destIndex);
+				else dest.SetBoolean(destObject, destIndex, value.ToSqlBoolean().Value);
 			}
 		}
 

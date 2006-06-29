@@ -25,7 +25,7 @@ namespace BLToolkit.Mapping
 			: base("A mapping exception has occurred.")
 		{
 		}
-        
+
 		/// <summary>
 		/// Initializes a new instance of the <b>MappingException</b> class 
 		/// with the specified error message.
@@ -35,7 +35,7 @@ namespace BLToolkit.Mapping
 			: base(message) 
 		{
 		}
-    	
+
 		/// <summary>
 		/// Initializes a new instance of the <b>MappingException</b> class 
 		/// with the specified error message and InnerException property.
@@ -44,6 +44,19 @@ namespace BLToolkit.Mapping
 		/// <param name="innerException">The InnerException, if any, that threw the current exception.</param>
 		public MappingException(string message, Exception innerException) 
 			: base(message, innerException) 
+		{
+		}
+
+		/// <summary>
+		/// Initializes a new instance of the <b>MappingException</b> class 
+		/// with inner InvalidCastException with the specified types.
+		/// </summary>
+		/// <param name="valueType">A <see cref="System.Type"/> used as source type.</param>
+		/// <param name="conversionType">A <see cref="System.Type"/> used as destination type.</param>
+		public MappingException(Type valueType, Type conversionType)
+			: base("A mapping exception has occurred.", new InvalidCastException(
+				string.Format("Can not convert type '{0}' to '{1}'.",
+					valueType.FullName, conversionType.FullName)))
 		{
 		}
 

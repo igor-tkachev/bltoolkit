@@ -71,11 +71,6 @@ namespace Data
 			public SqlBinary   Binary_;
 			public SqlBoolean  Boolean_;
 			public SqlByte     Byte_;
-#if FW2
-			[MapIgnore(false)]
-			public SqlBytes    Bytes_;
-			public SqlChars    Char_;
-#endif
 			public SqlDateTime DateTime_;
 			public SqlDecimal  Decimal_;
 			public SqlDouble   Double_;
@@ -87,6 +82,11 @@ namespace Data
 			public SqlSingle   Single_;
 			public SqlString   String_;
 #if FW2
+			[MapIgnore(false)]
+			public SqlBytes    Bytes_;
+			[MapIgnore(false)]
+			public SqlChars    Char_;
+			[MapIgnore(false)]
 			public SqlXml      Xml_;
 #endif
 		}
