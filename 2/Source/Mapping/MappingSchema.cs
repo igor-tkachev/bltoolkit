@@ -1275,6 +1275,12 @@ namespace BLToolkit.Mapping
 		}
 
 		[CLSCompliant(false)]
+		protected virtual IValueMapper GetValueMapper(Type sourceType, Type destType)
+		{
+			return ValueMapping.GetMapper(sourceType, destType);
+		}
+
+		[CLSCompliant(false)]
 		protected IValueMapper[] GetValueMappers(
 			IMapDataSource source, IMapDataDestination dest, int[] index)
 		{
@@ -1304,7 +1310,7 @@ namespace BLToolkit.Mapping
 					IValueMapper t = (IValueMapper)_sameTypeMappers[sourceType];
 
 					if (t == null)
-						_sameTypeMappers[sourceType] = t = ValueMapping.GetMapper(sourceType, destType);
+						_sameTypeMappers[sourceType] = t = GetValueMapper(sourceType, destType);
 
 					mappers[i] = t;
 				}
@@ -1314,7 +1320,7 @@ namespace BLToolkit.Mapping
 					IValueMapper t   = (IValueMapper)_differentTypeMappers[key];
 
 					if (t == null)
-						_differentTypeMappers[key] = t = ValueMapping.GetMapper(sourceType, destType);
+						_differentTypeMappers[key] = t = GetValueMapper(sourceType, destType);
 
 					mappers[i] = t;
 				}

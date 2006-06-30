@@ -3,39 +3,43 @@ using System.Data.SqlTypes;
 
 namespace BLToolkit.Mapping
 {
-	public abstract class MapDataSourceDestinationBase : MapDataSourceBase, IMapDataDestination
+	public abstract class MapDataDestinationBase : IMapDataDestination
 	{
 		#region IMapDataDestination Members
 
-		public abstract int  GetOrdinal(string name);
-		public abstract void SetValue  (object o, int index, object value);
-		public abstract void SetValue  (object o, string name, object value);
+		public abstract Type GetFieldType(int index);
 
-		public virtual  void SetNull   (object o, int index)                { SetValue(o, index, null); }
+		public abstract int  GetOrdinal  (string name);
+		public abstract void SetValue    (object o, int index, object value);
+		public abstract void SetValue    (object o, string name, object value);
+
+		public virtual  void SetNull     (object o, int index) { SetValue(o, index, null); }
+
+		public virtual  bool SupportsTypedValues(int index)    { return true; }
 
 		// Simple types setters.
 		//
 		[CLSCompliant(false)]
-		public virtual void SetSByte   (object o, int index, SByte    value) { SetValue(o, index, value); }
-		public virtual void SetInt16   (object o, int index, Int16    value) { SetValue(o, index, value); }
-		public virtual void SetInt32   (object o, int index, Int32    value) { SetValue(o, index, value); }
-		public virtual void SetInt64   (object o, int index, Int64    value) { SetValue(o, index, value); }
+		public virtual  void SetSByte    (object o, int index, SByte    value) { SetValue(o, index, value); }
+		public virtual  void SetInt16    (object o, int index, Int16    value) { SetValue(o, index, value); }
+		public virtual  void SetInt32    (object o, int index, Int32    value) { SetValue(o, index, value); }
+		public virtual  void SetInt64    (object o, int index, Int64    value) { SetValue(o, index, value); }
 
-		public virtual void SetByte    (object o, int index, Byte     value) { SetValue(o, index, value); }
+		public virtual  void SetByte     (object o, int index, Byte     value) { SetValue(o, index, value); }
 		[CLSCompliant(false)]
-		public virtual void SetUInt16  (object o, int index, UInt16   value) { SetValue(o, index, value); }
+		public virtual  void SetUInt16   (object o, int index, UInt16   value) { SetValue(o, index, value); }
 		[CLSCompliant(false)]
-		public virtual void SetUInt32  (object o, int index, UInt32   value) { SetValue(o, index, value); }
+		public virtual  void SetUInt32   (object o, int index, UInt32   value) { SetValue(o, index, value); }
 		[CLSCompliant(false)]
-		public virtual void SetUInt64  (object o, int index, UInt64   value) { SetValue(o, index, value); }
+		public virtual  void SetUInt64   (object o, int index, UInt64   value) { SetValue(o, index, value); }
 
-		public virtual void SetBoolean (object o, int index, Boolean  value) { SetValue(o, index, value); }
-		public virtual void SetChar    (object o, int index, Char     value) { SetValue(o, index, value); }
-		public virtual void SetSingle  (object o, int index, Single   value) { SetValue(o, index, value); }
-		public virtual void SetDouble  (object o, int index, Double   value) { SetValue(o, index, value); }
-		public virtual void SetDecimal (object o, int index, Decimal  value) { SetValue(o, index, value); }
-		public virtual void SetGuid    (object o, int index, Guid     value) { SetValue(o, index, value); }
-		public virtual void SetDateTime(object o, int index, DateTime value) { SetValue(o, index, value); }
+		public virtual  void SetBoolean  (object o, int index, Boolean  value) { SetValue(o, index, value); }
+		public virtual  void SetChar     (object o, int index, Char     value) { SetValue(o, index, value); }
+		public virtual  void SetSingle   (object o, int index, Single   value) { SetValue(o, index, value); }
+		public virtual  void SetDouble   (object o, int index, Double   value) { SetValue(o, index, value); }
+		public virtual  void SetDecimal  (object o, int index, Decimal  value) { SetValue(o, index, value); }
+		public virtual  void SetGuid     (object o, int index, Guid     value) { SetValue(o, index, value); }
+		public virtual  void SetDateTime (object o, int index, DateTime value) { SetValue(o, index, value); }
 
 #if FW2
 		// Nullable types setters.
