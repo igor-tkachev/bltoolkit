@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<code transformer="GenConvert.xslt">
+<code transformer="GenConvert11.xslt">
 
 	<using namespace="System"/>
 	<using namespace="System.Data.SqlTypes"/>
@@ -36,7 +36,7 @@
 		<default>return Convert.ToInt32(p);</default>
 	</converter>
 
-	<region name="Guid">
+	<region name="TestRegion">
 		<converter type="Guid">
 			<from type="String"   >return new Guid(p);                              </from>
 			<from type="Guid?"    >return p.HasValue? p.Value : Guid.Empty;         </from>

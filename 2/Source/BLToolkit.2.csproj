@@ -325,12 +325,13 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Experimental\GenConvert11.xslt" />
+    <Content Include="Experimental\GenConvert20.xslt" />
     <Content Include="Experimental\GenConvert.xml">
       <Generator>TransformCodeGenerator</Generator>
       <CustomToolNamespace>BLToolkit.Experimental</CustomToolNamespace>
       <LastGenOutput>GenConvert.cs</LastGenOutput>
     </Content>
-    <Content Include="Experimental\GenConvert.xslt" />
     <Content Include="Doc\License.txt" />
     <Content Include="Doc\OnlineDoc.txt" />
     <EmbeddedResource Include="Web\UI\WebObjectBinder.ico" />
