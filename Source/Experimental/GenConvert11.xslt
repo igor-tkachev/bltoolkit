@@ -147,6 +147,7 @@
 		<xsl:value-of select="@type"/>
 		<xsl:value-of select="$lf"/>
 		<xsl:apply-templates select="from|comment"/>
+		<xsl:value-of select="$lf"/>
 		<xsl:apply-templates select="default"/>
 		<xsl:value-of select="$lf"/>
 		<xsl:value-of select="$lf"/>
