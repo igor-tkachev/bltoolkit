@@ -274,7 +274,7 @@ namespace BLToolkit.Common
 
 			if (t == typeof(Byte?))       return (ConvertMethod)(object)(Convert<Int16,Byte?>.ConvertMethod)      (delegate(Byte?       p) { return p.HasValue? Convert.ToInt16(p.Value) : (Int16)0; });
 			if (t == typeof(UInt16?))     return (ConvertMethod)(object)(Convert<Int16,UInt16?>.ConvertMethod)    (delegate(UInt16?     p) { return p.HasValue? Convert.ToInt16(p.Value) : (Int16)0; });
-			if (t == typeof(UInt16?))     return (ConvertMethod)(object)(Convert<Int16,UInt16?>.ConvertMethod)    (delegate(UInt16?     p) { return p.HasValue? Convert.ToInt16(p.Value) : (Int16)0; });
+			if (t == typeof(UInt32?))     return (ConvertMethod)(object)(Convert<Int16,UInt32?>.ConvertMethod)    (delegate(UInt16?     p) { return p.HasValue? Convert.ToInt16(p.Value) : (Int16)0; });
 			if (t == typeof(UInt64?))     return (ConvertMethod)(object)(Convert<Int16,UInt64?>.ConvertMethod)    (delegate(UInt64?     p) { return p.HasValue? Convert.ToInt16(p.Value) : (Int16)0; });
 
 			if (t == typeof(Char?))       return (ConvertMethod)(object)(Convert<Int16,Char?>.ConvertMethod)      (delegate(Char?       p) { return p.HasValue? Convert.ToInt16(p.Value) : (Int16)0; });
