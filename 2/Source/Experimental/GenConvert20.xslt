@@ -239,6 +239,11 @@
 		<xsl:param name="nullable"/>
 		<xsl:value-of select="$lf"/>
 		<xsl:value-of select="$t2"/>
+		<xsl:text>#region </xsl:text>
+		<xsl:value-of select="@type"/>
+		<xsl:value-of select="$lf"/>
+		<xsl:value-of select="$lf"/>
+		<xsl:value-of select="$t2"/>
 		<xsl:text>private static ConvertMethod Get</xsl:text>
 		<xsl:if test="$nullable">
 			<xsl:text>Nullable</xsl:text>
@@ -273,6 +278,10 @@
 		<xsl:value-of select="$lf"/>
 		<xsl:value-of select="$t2"/>
 		<xsl:text>}</xsl:text>
+		<xsl:value-of select="$lf"/>
+		<xsl:value-of select="$lf"/>
+		<xsl:value-of select="$t2"/>
+		<xsl:text>#endregion</xsl:text>
 		<xsl:value-of select="$lf"/>
 	</xsl:template>
 
