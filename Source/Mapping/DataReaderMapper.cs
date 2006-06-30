@@ -46,8 +46,7 @@ namespace BLToolkit.Mapping
 			return value is DBNull? null: value;
 		}
 
-		public virtual bool     IsNull     (object o, int index) { return _dataReader.IsDBNull(index);   }
-
+		public virtual bool     IsNull     (object o, int index) { return _dataReader.IsDBNull(index); }
 		public virtual bool     SupportsTypedValues(int index)   { return true; }
 
 		// Simple type getters.

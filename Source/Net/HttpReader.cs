@@ -12,13 +12,17 @@ using System.Net;
 using System.Text;
 using System.Security.Cryptography.X509Certificates;
 
-namespace BLToolkit.Net
+namespace BLToolkit.Web
 {
+	public delegate void ProcessStream(Stream stream);
+
 	/// <summary>
 	/// Encapsulates WebReader functions.
 	/// </summary>
 	public class HttpReader
 	{
+		#region Costructors
+
 		public HttpReader()
 		{
 		}
@@ -27,6 +31,10 @@ namespace BLToolkit.Net
 		{
 			BaseUri = baseUri;
 		}
+
+		#endregion
+
+		#region Public Properties
 
 		private X509Certificate _certificate;
 		public  X509Certificate  Certificate
@@ -137,8 +145,27 @@ namespace BLToolkit.Net
 			set { _timeout = value; }
 		}
 
-		public HttpStatusCode Request(string requestUri, string method, string postData)
+		#endregion
+
+		#region Public Methods
+
+		public void LoadCertificate(string fileName)
 		{
+			Certificate = X509Certificate.CreateFromCertFile(fileName);
+		}
+
+		#endregion
+
+		#region Request Methods
+
+		public HttpStatusCode Request(
+			string        requestUri,
+			string        method,
+			ProcessStream requestStreamProcessor,
+			ProcessStream responseStreamProcessor)
+		{
+			_html = "";
+
 			string uri = BaseUri + requestUri;
 
 			HttpWebRequest request = (HttpWebRequest)WebRequest.Create(uri);
@@ -170,6 +197,7 @@ namespace BLToolkit.Net
 			}
 
 			PreviousUri = uri;
+			RequestUri  = request.RequestUri;
 
 			if (Certificate != null)
 				request.ClientCertificates.Add(Certificate);
@@ -177,25 +205,15 @@ namespace BLToolkit.Net
 			if (Timeout != 0)
 				request.Timeout = Timeout;
 
-			if (postData != null)
-			{
+			if (requestStreamProcessor != null)
 				using (Stream st = request.GetRequestStream())
-				{
-					byte[] bytes = Encoding.ASCII.GetBytes(postData);
-					st.Write(bytes,0,bytes.Length);
-				}
-			}
-
-			_html = "";
+					requestStreamProcessor(st);
 
 			using (HttpWebResponse resp = (HttpWebResponse)request.GetResponse())
 			using (Stream          sm   = resp.GetResponseStream())
-			using (StreamReader    sr   = new StreamReader(sm, Encoding.Default))
 			{
 				_statusCode = resp.StatusCode;
 				_location   = resp.Headers["Location"];
-
-				_html = sr.ReadToEnd();
 
 				if (resp.ResponseUri.AbsoluteUri.StartsWith(BaseUri) == false)
 					BaseUri = resp.ResponseUri.Scheme + "://" + resp.ResponseUri.Host;
@@ -207,30 +225,97 @@ namespace BLToolkit.Net
 				// the HttpWebRequest class as the RequestUri.AbsolutePath value.
 				//
 				foreach (Cookie c in cc)
-				{
 					if (c.Path == request.RequestUri.AbsolutePath)
-					{
 						CookieContainer.Add(new Cookie(c.Name, c.Value, "/", c.Domain));
-					}
 
-					string d = c.Domain;
-					int    n = d.Length;
-				}
+				if (responseStreamProcessor != null)
+					responseStreamProcessor(sm);
 			}
-
-			RequestUri = request.RequestUri;
 
 			return StatusCode;
 		}
 
-		public HttpStatusCode Get(string requestUri)
+		class DefaultRequestStreamProcessor
 		{
-			return Request(requestUri, "GET", null);
+			public DefaultRequestStreamProcessor(string data)
+			{
+				_data = data;
+			}
+
+			string _data;
+
+			public void Process(Stream stream)
+			{
+				byte[] bytes = Encoding.ASCII.GetBytes(_data);
+				stream.Write(bytes, 0, bytes.Length);
+			}
 		}
 
-		public HttpStatusCode Post(string requestUri, string postData)
+		class DefaultResponseStreamProcessor
 		{
-			Request(requestUri, "POST", postData);
+			public DefaultResponseStreamProcessor(HttpReader reader)
+			{
+				_reader = reader;
+			}
+
+			HttpReader _reader;
+
+			public void Process(Stream stream)
+			{
+				using (StreamReader sr = new StreamReader(stream, Encoding.Default))
+					_reader._html = sr.ReadToEnd();
+			}
+		}
+
+		public HttpStatusCode Get(string requestUri)
+		{
+			DefaultResponseStreamProcessor rp = new DefaultResponseStreamProcessor(this);
+
+			return Request(requestUri, "GET", null, new ProcessStream(rp.Process));
+		}
+
+		public HttpStatusCode Get(string requestUri, ProcessStream responseStreamProcessor)
+		{
+			return Request(requestUri, "GET", null, responseStreamProcessor);
+		}
+
+		public HttpStatusCode Post(
+			string requestUri,
+			string postData)
+		{
+			return Post(
+				requestUri,
+				new ProcessStream(new DefaultRequestStreamProcessor(postData).Process),
+				new ProcessStream(new DefaultResponseStreamProcessor(this).Process));
+		}
+
+		public HttpStatusCode Post(
+			string        requestUri,
+			ProcessStream requestStreamProcessor)
+		{
+			return Post(
+				requestUri,
+				requestStreamProcessor,
+				new ProcessStream(new DefaultResponseStreamProcessor(this).Process));
+		}
+
+		public HttpStatusCode Post(
+			string        requestUri,
+			string        postData,
+			ProcessStream responseStreamProcessor)
+		{
+			return Post(
+				requestUri,
+				new ProcessStream(new DefaultRequestStreamProcessor(postData).Process),
+				responseStreamProcessor);
+		}
+
+		public HttpStatusCode Post(
+			string        requestUri,
+			ProcessStream requestStreamProcessor,
+			ProcessStream responseStreamProcessor)
+		{
+			Request(requestUri, "POST", requestStreamProcessor, responseStreamProcessor);
 
 			for (int i = 0; i < 10; i++)
 			{
@@ -260,15 +345,16 @@ namespace BLToolkit.Net
 				BaseUri    = uri.Scheme + "://" + uri.Host;
 				requestUri = uri.AbsolutePath + uri.Query;
 
-				Request(requestUri, post? "POST": "GET", post? postData: null);
+				Request(
+					requestUri,
+					post? "POST": "GET",
+					post? requestStreamProcessor: null,
+					responseStreamProcessor);
 			}
 
 			return StatusCode;
 		}
 
-		public void LoadCertificate(string fileName)
-		{
-			Certificate = X509Certificate.CreateFromCertFile(fileName);
-		}
+		#endregion
 	}
 }
