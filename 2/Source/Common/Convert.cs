@@ -1939,10 +1939,10 @@ namespace BLToolkit.Common
 			if (t == typeof(UInt64))      return (ConvertMethod)(object)(Convert<Single?,UInt64>.ConvertMethod)     (delegate(UInt64      p) { return Convert.ToSingle(p); });
 
 			if (t == typeof(Char))        return (ConvertMethod)(object)(Convert<Single?,Char>.ConvertMethod)       (delegate(Char        p) { return Convert.ToSingle(p); });
+			if (t == typeof(Single))      return (ConvertMethod)(object)(Convert<Single?,Single>.ConvertMethod)     (delegate(Single      p) { return                  p;  });
 			if (t == typeof(Double))      return (ConvertMethod)(object)(Convert<Single?,Double>.ConvertMethod)     (delegate(Double      p) { return Convert.ToSingle(p); });
 
 			if (t == typeof(Boolean))     return (ConvertMethod)(object)(Convert<Single?,Boolean>.ConvertMethod)    (delegate(Boolean     p) { return Convert.ToSingle(p); });
-			if (t == typeof(Single))      return (ConvertMethod)(object)(Convert<Single?,Single>.ConvertMethod)     (delegate(Single      p) { return                  p;  });
 			if (t == typeof(Decimal))     return (ConvertMethod)(object)(Convert<Single?,Decimal>.ConvertMethod)    (delegate(Decimal     p) { return Convert.ToSingle(p); });
 			if (t == typeof(DateTime))    return (ConvertMethod)(object)(Convert<Single?,DateTime>.ConvertMethod)   (delegate(DateTime    p) { return Convert.ToSingle(p); });
 
@@ -2159,7 +2159,7 @@ namespace BLToolkit.Common
 			if (t == typeof(Double))      return (ConvertMethod)(object)(Convert<Decimal?,Double>.ConvertMethod)     (delegate(Double      p) { return Convert.ToDecimal(p); });
 
 			if (t == typeof(Boolean))     return (ConvertMethod)(object)(Convert<Decimal?,Boolean>.ConvertMethod)    (delegate(Boolean     p) { return Convert.ToDecimal(p); });
-			if (t == typeof(Decimal?))    return (ConvertMethod)(object)(Convert<Decimal?,Decimal?>.ConvertMethod)   (delegate(Decimal?    p) { return                   p;  });
+			if (t == typeof(Decimal))     return (ConvertMethod)(object)(Convert<Decimal?,Decimal>.ConvertMethod)    (delegate(Decimal     p) { return                   p;  });
 			if (t == typeof(DateTime))    return (ConvertMethod)(object)(Convert<Decimal?,DateTime>.ConvertMethod)   (delegate(DateTime    p) { return Convert.ToDecimal(p); });
 
 			// Nullable Types.
@@ -2355,7 +2355,7 @@ namespace BLToolkit.Common
 
 			// Scalar Types.
 			//
-			if (t == typeof(String))      return (ConvertMethod)(object)(Convert<SqlString,String>.ConvertMethod)     (delegate(String      p) { return p == null? SqlString.Null: (SqlString)p.ToString(); });
+			if (t == typeof(String))      return (ConvertMethod)(object)(Convert<SqlString,String>.ConvertMethod)     (delegate(String      p) { return p == null? SqlString.Null: (SqlString)p; });
 
 			if (t == typeof(SByte))       return (ConvertMethod)(object)(Convert<SqlString,SByte>.ConvertMethod)      (delegate(SByte       p) { return p.ToString(); });
 			if (t == typeof(Int16))       return (ConvertMethod)(object)(Convert<SqlString,Int16>.ConvertMethod)      (delegate(Int16       p) { return p.ToString(); });
