@@ -1,0 +1,2661 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<code transformer="GenConvert20.xslt">
+
+	<using namespace="System"/>
+	<using namespace="System.Data.SqlTypes"/>
+	<using namespace="System.IO"/>
+	<using namespace="System.Xml"/>
+
+	<region name="Scalar Types">
+		<converter type="String">
+			<group name="Scalar Types.">
+				<from type="SByte"/>
+				<from type="Int16"/>
+				<from type="Int32"/>
+				<from type="Int64"/>
+				<br/>
+				<from type="Byte"/>
+				<from type="UInt16"/>
+				<from type="UInt32"/>
+				<from type="UInt64"/>
+				<br/>
+				<from type="Char"/>
+				<from type="Single"/>
+				<from type="Double"/>
+				<br/>
+				<from type="Boolean"/>
+				<from type="Decimal"/>
+				<from type="DateTime"/>
+				<from type="TimeSpan"/>
+				<from type="Guid"/>
+				<default>return p.ToString();</default>
+			</group>
+			<group name="Nullable Types.">
+				<from type="SByte?"/>
+				<from type="Int16?"/>
+				<from type="Int32?"/>
+				<from type="Int64?"/>
+				<br/>
+				<from type="Byte?"/>
+				<from type="UInt16?"/>
+				<from type="UInt32?"/>
+				<from type="UInt64?"/>
+				<br/>
+				<from type="Char?"/>
+				<from type="Single?"/>
+				<from type="Double?"/>
+				<br/>
+				<from type="Boolean?"/>
+				<from type="Decimal?"/>
+				<from type="DateTime?"/>
+				<from type="TimeSpan?"/>
+				<from type="Guid?"/>
+				<default>return p.ToString();</default>
+			</group>
+			<group name="SqlTypes.">
+				<from type="SqlString"/>
+				<br/>
+				<from type="SqlByte"/>
+				<from type="SqlInt16"/>
+				<from type="SqlInt32"/>
+				<from type="SqlInt64"/>
+				<br/>
+				<from type="SqlSingle"/>
+				<from type="SqlDouble"/>
+				<from type="SqlDecimal"/>
+				<from type="SqlMoney"/>
+				<br/>
+				<from type="SqlBoolean"/>
+				<from type="SqlDateTime"/>
+				<from type="SqlGuid"/>
+				<from type="SqlBinary"/>
+				<default>return p.ToString();</default>
+			</group>
+			<default>return Convert.ToString(p);</default>
+		</converter>
+		<br/>
+		<converter type="SByte"    nullable="false">
+			<group name="Scalar Types.">
+				<from type="String"/>
+				<br/>
+				<from type="Int16"/>
+				<from type="Int32"/>
+				<from type="Int64"/>
+				<br/>
+				<from type="Byte"/>
+				<from type="UInt16"/>
+				<from type="UInt32"/>
+				<from type="UInt64"/>
+				<br/>
+				<from type="Char"/>
+				<from type="Single"/>
+				<from type="Double"/>
+				<br/>
+				<from type="Boolean"/>
+				<from type="Decimal"/>
+				<from type="DateTime"/>
+			</group>
+			<group name="Nullable Types.">
+				<from type="SByte?"   >return p.HasValue?                 p.Value  : (SByte)0;</from>
+				<from type="Int16?"   >return p.HasValue? Convert.ToSByte(p.Value) : (SByte)0;</from>
+				<from type="Int32?"   >return p.HasValue? Convert.ToSByte(p.Value) : (SByte)0;</from>
+				<from type="Int64?"   >return p.HasValue? Convert.ToSByte(p.Value) : (SByte)0;</from>
+				<br/>
+				<from type="Byte?"    >return p.HasValue? Convert.ToSByte(p.Value) : (SByte)0;</from>
+				<from type="UInt16?"  >return p.HasValue? Convert.ToSByte(p.Value) : (SByte)0;</from>
+				<from type="UInt32?"  >return p.HasValue? Convert.ToSByte(p.Value) : (SByte)0;</from>
+				<from type="UInt64?"  >return p.HasValue? Convert.ToSByte(p.Value) : (SByte)0;</from>
+				<br/>
+				<from type="Char?"    >return p.HasValue? Convert.ToSByte(p.Value) : (SByte)0;</from>
+				<from type="Single?"  >return p.HasValue? Convert.ToSByte(p.Value) : (SByte)0;</from>
+				<from type="Double?"  >return p.HasValue? Convert.ToSByte(p.Value) : (SByte)0;</from>
+				<br/>
+				<from type="Boolean?" >return p.HasValue? Convert.ToSByte(p.Value) : (SByte)0;</from>
+				<from type="Decimal?" >return p.HasValue? Convert.ToSByte(p.Value) : (SByte)0;</from>
+				<from type="DateTime?">return p.HasValue? Convert.ToSByte(p.Value) : (SByte)0;</from>
+			</group>
+			<group name="SqlTypes.">
+				<from type="SqlString"  >return p.IsNull? (SByte)0: Convert.ToSByte(p.Value);</from>
+				<br/>
+				<from type="SqlByte"    >return p.IsNull? (SByte)0: Convert.ToSByte(p.Value);</from>
+				<from type="SqlInt16"   >return p.IsNull? (SByte)0: Convert.ToSByte(p.Value);</from>
+				<from type="SqlInt32"   >return p.IsNull? (SByte)0: Convert.ToSByte(p.Value);</from>
+				<from type="SqlInt64"   >return p.IsNull? (SByte)0: Convert.ToSByte(p.Value);</from>
+				<br/>
+				<from type="SqlSingle"  >return p.IsNull? (SByte)0: Convert.ToSByte(p.Value);</from>
+				<from type="SqlDouble"  >return p.IsNull? (SByte)0: Convert.ToSByte(p.Value);</from>
+				<from type="SqlDecimal" >return p.IsNull? (SByte)0: Convert.ToSByte(p.Value);</from>
+				<from type="SqlMoney"   >return p.IsNull? (SByte)0: Convert.ToSByte(p.Value);</from>
+				<br/>
+				<from type="SqlBoolean" >return p.IsNull? (SByte)0: Convert.ToSByte(p.Value);</from>
+				<from type="SqlDateTime">return p.IsNull? (SByte)0: Convert.ToSByte(p.Value);</from>
+			</group>
+			<default>return Convert.ToSByte(p);</default>
+		</converter>
+		<converter type="Int16"    nullable="false">
+			<group name="Scalar Types.">
+				<from type="String"/>
+				<br/>
+				<from type="SByte"/>
+				<from type="Int32"/>
+				<from type="Int64"/>
+				<br/>
+				<from type="Byte"/>
+				<from type="UInt16"/>
+				<from type="UInt32"/>
+				<from type="UInt64"/>
+				<br/>
+				<from type="Char"/>
+				<from type="Single"/>
+				<from type="Double"/>
+				<br/>
+				<from type="Boolean"/>
+				<from type="Decimal"/>
+				<from type="DateTime"/>
+			</group>
+			<group name="Nullable Types.">
+				<from type="SByte?"   >return p.HasValue? Convert.ToInt16(p.Value) : (Int16)0;</from>
+				<from type="Int16?"   >return p.HasValue?                 p.Value  : (Int16)0;</from>
+				<from type="Int32?"   >return p.HasValue? Convert.ToInt16(p.Value) : (Int16)0;</from>
+				<from type="Int64?"   >return p.HasValue? Convert.ToInt16(p.Value) : (Int16)0;</from>
+				<br/>
+				<from type="Byte?"    >return p.HasValue? Convert.ToInt16(p.Value) : (Int16)0;</from>
+				<from type="UInt16?"  >return p.HasValue? Convert.ToInt16(p.Value) : (Int16)0;</from>
+				<from type="UInt32?"  >return p.HasValue? Convert.ToInt16(p.Value) : (Int16)0;</from>
+				<from type="UInt64?"  >return p.HasValue? Convert.ToInt16(p.Value) : (Int16)0;</from>
+				<br/>
+				<from type="Char?"    >return p.HasValue? Convert.ToInt16(p.Value) : (Int16)0;</from>
+				<from type="Single?"  >return p.HasValue? Convert.ToInt16(p.Value) : (Int16)0;</from>
+				<from type="Double?"  >return p.HasValue? Convert.ToInt16(p.Value) : (Int16)0;</from>
+				<br/>
+				<from type="Boolean?" >return p.HasValue? Convert.ToInt16(p.Value) : (Int16)0;</from>
+				<from type="Decimal?" >return p.HasValue? Convert.ToInt16(p.Value) : (Int16)0;</from>
+				<from type="DateTime?">return p.HasValue? Convert.ToInt16(p.Value) : (Int16)0;</from>
+			</group>
+			<group name="SqlTypes.">
+				<from type="SqlString"  >return p.IsNull? (Int16)0: Convert.ToInt16(p.Value);</from>
+				<br/>
+				<from type="SqlByte"    >return p.IsNull? (Int16)0: Convert.ToInt16(p.Value);</from>
+				<from type="SqlInt16"   >return p.IsNull? (Int16)0:                 p.Value; </from>
+				<from type="SqlInt32"   >return p.IsNull? (Int16)0: Convert.ToInt16(p.Value);</from>
+				<from type="SqlInt64"   >return p.IsNull? (Int16)0: Convert.ToInt16(p.Value);</from>
+				<br/>
+				<from type="SqlSingle"  >return p.IsNull? (Int16)0: Convert.ToInt16(p.Value);</from>
+				<from type="SqlDouble"  >return p.IsNull? (Int16)0: Convert.ToInt16(p.Value);</from>
+				<from type="SqlDecimal" >return p.IsNull? (Int16)0: Convert.ToInt16(p.Value);</from>
+				<from type="SqlMoney"   >return p.IsNull? (Int16)0: Convert.ToInt16(p.Value);</from>
+				<br/>
+				<from type="SqlBoolean" >return p.IsNull? (Int16)0: Convert.ToInt16(p.Value);</from>
+				<from type="SqlDateTime">return p.IsNull? (Int16)0: Convert.ToInt16(p.Value);</from>
+			</group>
+			<default>return Convert.ToInt16(p);</default>
+		</converter>
+		<converter type="Int32"    nullable="false">
+			<group name="Scalar Types.">
+				<from type="String"/>
+				<br/>
+				<from type="SByte"/>
+				<from type="Int16"/>
+				<from type="Int64"/>
+				<br/>
+				<from type="Byte"/>
+				<from type="UInt16"/>
+				<from type="UInt32"/>
+				<from type="UInt64"/>
+				<br/>
+				<from type="Char"/>
+				<from type="Single"/>
+				<from type="Double"/>
+				<br/>
+				<from type="Boolean"/>
+				<from type="Decimal"/>
+				<from type="DateTime"/>
+			</group>
+			<group name="Nullable Types.">
+				<from type="SByte?"   >return p.HasValue? Convert.ToInt32(p.Value) : (Int32)0;</from>
+				<from type="Int16?"   >return p.HasValue? Convert.ToInt32(p.Value) : (Int32)0;</from>
+				<from type="Int32?"   >return p.HasValue?                 p.Value  : (Int32)0;</from>
+				<from type="Int64?"   >return p.HasValue? Convert.ToInt32(p.Value) : (Int32)0;</from>
+				<br/>
+				<from type="Byte?"    >return p.HasValue? Convert.ToInt32(p.Value) : (Int32)0;</from>
+				<from type="UInt16?"  >return p.HasValue? Convert.ToInt32(p.Value) : (Int32)0;</from>
+				<from type="UInt32?"  >return p.HasValue? Convert.ToInt32(p.Value) : (Int32)0;</from>
+				<from type="UInt64?"  >return p.HasValue? Convert.ToInt32(p.Value) : (Int32)0;</from>
+				<br/>
+				<from type="Char?"    >return p.HasValue? Convert.ToInt32(p.Value) : (Int32)0;</from>
+				<from type="Single?"  >return p.HasValue? Convert.ToInt32(p.Value) : (Int32)0;</from>
+				<from type="Double?"  >return p.HasValue? Convert.ToInt32(p.Value) : (Int32)0;</from>
+				<br/>
+				<from type="Boolean?" >return p.HasValue? Convert.ToInt32(p.Value) : (Int32)0;</from>
+				<from type="Decimal?" >return p.HasValue? Convert.ToInt32(p.Value) : (Int32)0;</from>
+				<from type="DateTime?">return p.HasValue? Convert.ToInt32(p.Value) : (Int32)0;</from>
+			</group>
+			<group name="SqlTypes.">
+				<from type="SqlString"  >return p.IsNull? (Int32)0: Convert.ToInt32(p.Value);</from>
+				<br/>
+				<from type="SqlByte"    >return p.IsNull? (Int32)0: Convert.ToInt32(p.Value);</from>
+				<from type="SqlInt16"   >return p.IsNull? (Int32)0: Convert.ToInt32(p.Value);</from>
+				<from type="SqlInt32"   >return p.IsNull? (Int32)0:                 p.Value; </from>
+				<from type="SqlInt64"   >return p.IsNull? (Int32)0: Convert.ToInt32(p.Value);</from>
+				<br/>
+				<from type="SqlSingle"  >return p.IsNull? (Int32)0: Convert.ToInt32(p.Value);</from>
+				<from type="SqlDouble"  >return p.IsNull? (Int32)0: Convert.ToInt32(p.Value);</from>
+				<from type="SqlDecimal" >return p.IsNull? (Int32)0: Convert.ToInt32(p.Value);</from>
+				<from type="SqlMoney"   >return p.IsNull? (Int32)0: Convert.ToInt32(p.Value);</from>
+				<br/>
+				<from type="SqlBoolean" >return p.IsNull? (Int32)0: Convert.ToInt32(p.Value);</from>
+				<from type="SqlDateTime">return p.IsNull? (Int32)0: Convert.ToInt32(p.Value);</from>
+			</group>
+			<default>return Convert.ToInt32(p);</default>
+		</converter>
+		<converter type="Int64"    nullable="false">
+			<group name="Scalar Types.">
+				<from type="String"/>
+				<br/>
+				<from type="SByte"/>
+				<from type="Int16"/>
+				<from type="Int32"/>
+				<br/>
+				<from type="Byte"/>
+				<from type="UInt16"/>
+				<from type="UInt32"/>
+				<from type="UInt64"/>
+				<br/>
+				<from type="Char"/>
+				<from type="Single"/>
+				<from type="Double"/>
+				<br/>
+				<from type="Boolean"/>
+				<from type="Decimal"/>
+				<from type="DateTime"/>
+			</group>
+			<group name="Nullable Types.">
+				<from type="SByte?"   >return p.HasValue? Convert.ToInt64(p.Value) : (Int64)0;</from>
+				<from type="Int16?"   >return p.HasValue? Convert.ToInt64(p.Value) : (Int64)0;</from>
+				<from type="Int32?"   >return p.HasValue? Convert.ToInt64(p.Value) : (Int64)0;</from>
+				<from type="Int64?"   >return p.HasValue?                 p.Value  : (Int64)0;</from>
+				<br/>
+				<from type="Byte?"    >return p.HasValue? Convert.ToInt64(p.Value) : (Int64)0;</from>
+				<from type="UInt16?"  >return p.HasValue? Convert.ToInt64(p.Value) : (Int64)0;</from>
+				<from type="UInt32?"  >return p.HasValue? Convert.ToInt64(p.Value) : (Int64)0;</from>
+				<from type="UInt64?"  >return p.HasValue? Convert.ToInt64(p.Value) : (Int64)0;</from>
+				<br/>
+				<from type="Char?"    >return p.HasValue? Convert.ToInt64(p.Value) : (Int64)0;</from>
+				<from type="Single?"  >return p.HasValue? Convert.ToInt64(p.Value) : (Int64)0;</from>
+				<from type="Double?"  >return p.HasValue? Convert.ToInt64(p.Value) : (Int64)0;</from>
+				<br/>
+				<from type="Boolean?" >return p.HasValue? Convert.ToInt64(p.Value) : (Int64)0;</from>
+				<from type="Decimal?" >return p.HasValue? Convert.ToInt64(p.Value) : (Int64)0;</from>
+				<from type="DateTime?">return p.HasValue? Convert.ToInt64(p.Value) : (Int64)0;</from>
+			</group>
+			<group name="SqlTypes.">
+				<from type="SqlString"  >return p.IsNull? (Int64)0: Convert.ToInt64(p.Value);</from>
+				<br/>
+				<from type="SqlByte"    >return p.IsNull? (Int64)0: Convert.ToInt64(p.Value);</from>
+				<from type="SqlInt16"   >return p.IsNull? (Int64)0: Convert.ToInt64(p.Value);</from>
+				<from type="SqlInt32"   >return p.IsNull? (Int64)0: Convert.ToInt64(p.Value);</from>
+				<from type="SqlInt64"   >return p.IsNull? (Int64)0:                 p.Value; </from>
+				<br/>
+				<from type="SqlSingle"  >return p.IsNull? (Int64)0: Convert.ToInt64(p.Value);</from>
+				<from type="SqlDouble"  >return p.IsNull? (Int64)0: Convert.ToInt64(p.Value);</from>
+				<from type="SqlDecimal" >return p.IsNull? (Int64)0: Convert.ToInt64(p.Value);</from>
+				<from type="SqlMoney"   >return p.IsNull? (Int64)0: Convert.ToInt64(p.Value);</from>
+				<br/>
+				<from type="SqlBoolean" >return p.IsNull? (Int64)0: Convert.ToInt64(p.Value);</from>
+				<from type="SqlDateTime">return p.IsNull? (Int64)0: Convert.ToInt64(p.Value);</from>
+			</group>
+			<default>return Convert.ToInt64(p);</default>
+		</converter>
+		<br/>
+		<converter type="Byte"     nullable="false">
+			<group name="Scalar Types.">
+				<from type="String"/>
+				<br/>
+				<from type="SByte"/>
+				<from type="Int16"/>
+				<from type="Int32"/>
+				<from type="Int64"/>
+				<br/>
+				<from type="UInt16"/>
+				<from type="UInt32"/>
+				<from type="UInt64"/>
+				<br/>
+				<from type="Char"/>
+				<from type="Single"/>
+				<from type="Double"/>
+				<br/>
+				<from type="Boolean"/>
+				<from type="Decimal"/>
+				<from type="DateTime"/>
+			</group>
+			<group name="Nullable Types.">
+				<from type="SByte?"   >return p.HasValue? Convert.ToByte(p.Value) : (Byte)0;</from>
+				<from type="Int16?"   >return p.HasValue? Convert.ToByte(p.Value) : (Byte)0;</from>
+				<from type="Int32?"   >return p.HasValue? Convert.ToByte(p.Value) : (Byte)0;</from>
+				<from type="Int64?"   >return p.HasValue? Convert.ToByte(p.Value) : (Byte)0;</from>
+				<br/>
+				<from type="Byte?"    >return p.HasValue?                p.Value  : (Byte)0;</from>
+				<from type="UInt16?"  >return p.HasValue? Convert.ToByte(p.Value) : (Byte)0;</from>
+				<from type="UInt32?"  >return p.HasValue? Convert.ToByte(p.Value) : (Byte)0;</from>
+				<from type="UInt64?"  >return p.HasValue? Convert.ToByte(p.Value) : (Byte)0;</from>
+				<br/>
+				<from type="Char?"    >return p.HasValue? Convert.ToByte(p.Value) : (Byte)0;</from>
+				<from type="Single?"  >return p.HasValue? Convert.ToByte(p.Value) : (Byte)0;</from>
+				<from type="Double?"  >return p.HasValue? Convert.ToByte(p.Value) : (Byte)0;</from>
+				<br/>
+				<from type="Boolean?" >return p.HasValue? Convert.ToByte(p.Value) : (Byte)0;</from>
+				<from type="Decimal?" >return p.HasValue? Convert.ToByte(p.Value) : (Byte)0;</from>
+				<from type="DateTime?">return p.HasValue? Convert.ToByte(p.Value) : (Byte)0;</from>
+			</group>
+			<group name="SqlTypes.">
+				<from type="SqlString"  >return p.IsNull? (Byte)0: Convert.ToByte(p.Value);</from>
+				<br/>
+				<from type="SqlByte"    >return p.IsNull? (Byte)0:                p.Value; </from>
+				<from type="SqlInt16"   >return p.IsNull? (Byte)0: Convert.ToByte(p.Value);</from>
+				<from type="SqlInt32"   >return p.IsNull? (Byte)0: Convert.ToByte(p.Value);</from>
+				<from type="SqlInt64"   >return p.IsNull? (Byte)0: Convert.ToByte(p.Value);</from>
+				<br/>
+				<from type="SqlSingle"  >return p.IsNull? (Byte)0: Convert.ToByte(p.Value);</from>
+				<from type="SqlDouble"  >return p.IsNull? (Byte)0: Convert.ToByte(p.Value);</from>
+				<from type="SqlDecimal" >return p.IsNull? (Byte)0: Convert.ToByte(p.Value);</from>
+				<from type="SqlMoney"   >return p.IsNull? (Byte)0: Convert.ToByte(p.Value);</from>
+				<br/>
+				<from type="SqlBoolean" >return p.IsNull? (Byte)0: Convert.ToByte(p.Value);</from>
+				<from type="SqlDateTime">return p.IsNull? (Byte)0: Convert.ToByte(p.Value);</from>
+			</group>
+			<default>return Convert.ToByte(p);</default>
+		</converter>
+		<converter type="UInt16"   nullable="false">
+			<group name="Scalar Types.">
+				<from type="String"/>
+				<br/>
+				<from type="SByte"/>
+				<from type="Int16"/>
+				<from type="Int32"/>
+				<from type="Int64"/>
+				<br/>
+				<from type="Byte"/>
+				<from type="UInt32"/>
+				<from type="UInt64"/>
+				<br/>
+				<from type="Char"/>
+				<from type="Single"/>
+				<from type="Double"/>
+				<br/>
+				<from type="Boolean"/>
+				<from type="Decimal"/>
+				<from type="DateTime"/>
+			</group>
+			<group name="Nullable Types.">
+				<from type="SByte?"   >return p.HasValue? Convert.ToUInt16(p.Value) : (UInt16)0;</from>
+				<from type="Int16?"   >return p.HasValue? Convert.ToUInt16(p.Value) : (UInt16)0;</from>
+				<from type="Int32?"   >return p.HasValue? Convert.ToUInt16(p.Value) : (UInt16)0;</from>
+				<from type="Int64?"   >return p.HasValue? Convert.ToUInt16(p.Value) : (UInt16)0;</from>
+				<br/>
+				<from type="Byte?"    >return p.HasValue? Convert.ToUInt16(p.Value) : (UInt16)0;</from>
+				<from type="UInt16?"  >return p.HasValue?                  p.Value  : (UInt16)0;</from>
+				<from type="UInt32?"  >return p.HasValue? Convert.ToUInt16(p.Value) : (UInt16)0;</from>
+				<from type="UInt64?"  >return p.HasValue? Convert.ToUInt16(p.Value) : (UInt16)0;</from>
+				<br/>
+				<from type="Char?"    >return p.HasValue? Convert.ToUInt16(p.Value) : (UInt16)0;</from>
+				<from type="Single?"  >return p.HasValue? Convert.ToUInt16(p.Value) : (UInt16)0;</from>
+				<from type="Double?"  >return p.HasValue? Convert.ToUInt16(p.Value) : (UInt16)0;</from>
+				<br/>
+				<from type="Boolean?" >return p.HasValue? Convert.ToUInt16(p.Value) : (UInt16)0;</from>
+				<from type="Decimal?" >return p.HasValue? Convert.ToUInt16(p.Value) : (UInt16)0;</from>
+				<from type="DateTime?">return p.HasValue? Convert.ToUInt16(p.Value) : (UInt16)0;</from>
+			</group>
+			<group name="SqlTypes.">
+				<from type="SqlString"  >return p.IsNull? (UInt16)0: Convert.ToUInt16(p.Value);</from>
+				<br/>
+				<from type="SqlByte"    >return p.IsNull? (UInt16)0: Convert.ToUInt16(p.Value);</from>
+				<from type="SqlInt16"   >return p.IsNull? (UInt16)0: Convert.ToUInt16(p.Value);</from>
+				<from type="SqlInt32"   >return p.IsNull? (UInt16)0: Convert.ToUInt16(p.Value);</from>
+				<from type="SqlInt64"   >return p.IsNull? (UInt16)0: Convert.ToUInt16(p.Value);</from>
+				<br/>
+				<from type="SqlSingle"  >return p.IsNull? (UInt16)0: Convert.ToUInt16(p.Value);</from>
+				<from type="SqlDouble"  >return p.IsNull? (UInt16)0: Convert.ToUInt16(p.Value);</from>
+				<from type="SqlDecimal" >return p.IsNull? (UInt16)0: Convert.ToUInt16(p.Value);</from>
+				<from type="SqlMoney"   >return p.IsNull? (UInt16)0: Convert.ToUInt16(p.Value);</from>
+				<br/>
+				<from type="SqlBoolean" >return p.IsNull? (UInt16)0: Convert.ToUInt16(p.Value);</from>
+				<from type="SqlDateTime">return p.IsNull? (UInt16)0: Convert.ToUInt16(p.Value);</from>
+			</group>
+			<default>return Convert.ToUInt16(p);</default>
+		</converter>
+		<converter type="UInt32"   nullable="false">
+			<group name="Scalar Types.">
+				<from type="String"/>
+				<br/>
+				<from type="SByte"/>
+				<from type="Int16"/>
+				<from type="Int32"/>
+				<from type="Int64"/>
+				<br/>
+				<from type="Byte"/>
+				<from type="UInt16"/>
+				<from type="UInt64"/>
+				<br/>
+				<from type="Char"/>
+				<from type="Single"/>
+				<from type="Double"/>
+				<br/>
+				<from type="Boolean"/>
+				<from type="Decimal"/>
+				<from type="DateTime"/>
+			</group>
+			<group name="Nullable Types.">
+				<from type="SByte?"   >return p.HasValue? Convert.ToUInt32(p.Value) : (UInt32)0;</from>
+				<from type="Int16?"   >return p.HasValue? Convert.ToUInt32(p.Value) : (UInt32)0;</from>
+				<from type="Int32?"   >return p.HasValue? Convert.ToUInt32(p.Value) : (UInt32)0;</from>
+				<from type="Int64?"   >return p.HasValue? Convert.ToUInt32(p.Value) : (UInt32)0;</from>
+				<br/>
+				<from type="Byte?"    >return p.HasValue? Convert.ToUInt32(p.Value) : (UInt32)0;</from>
+				<from type="UInt16?"  >return p.HasValue? Convert.ToUInt32(p.Value) : (UInt32)0;</from>
+				<from type="UInt32?"  >return p.HasValue?                  p.Value  : (UInt32)0;</from>
+				<from type="UInt64?"  >return p.HasValue? Convert.ToUInt32(p.Value) : (UInt32)0;</from>
+				<br/>
+				<from type="Char?"    >return p.HasValue? Convert.ToUInt32(p.Value) : (UInt32)0;</from>
+				<from type="Single?"  >return p.HasValue? Convert.ToUInt32(p.Value) : (UInt32)0;</from>
+				<from type="Double?"  >return p.HasValue? Convert.ToUInt32(p.Value) : (UInt32)0;</from>
+				<br/>
+				<from type="Boolean?" >return p.HasValue? Convert.ToUInt32(p.Value) : (UInt32)0;</from>
+				<from type="Decimal?" >return p.HasValue? Convert.ToUInt32(p.Value) : (UInt32)0;</from>
+				<from type="DateTime?">return p.HasValue? Convert.ToUInt32(p.Value) : (UInt32)0;</from>
+			</group>
+			<group name="SqlTypes.">
+				<from type="SqlString"  >return p.IsNull? (UInt32)0: Convert.ToUInt32(p.Value);</from>
+				<br/>
+				<from type="SqlByte"    >return p.IsNull? (UInt32)0: Convert.ToUInt32(p.Value);</from>
+				<from type="SqlInt16"   >return p.IsNull? (UInt32)0: Convert.ToUInt32(p.Value);</from>
+				<from type="SqlInt32"   >return p.IsNull? (UInt32)0: Convert.ToUInt32(p.Value);</from>
+				<from type="SqlInt64"   >return p.IsNull? (UInt32)0: Convert.ToUInt32(p.Value);</from>
+				<br/>
+				<from type="SqlSingle"  >return p.IsNull? (UInt32)0: Convert.ToUInt32(p.Value);</from>
+				<from type="SqlDouble"  >return p.IsNull? (UInt32)0: Convert.ToUInt32(p.Value);</from>
+				<from type="SqlDecimal" >return p.IsNull? (UInt32)0: Convert.ToUInt32(p.Value);</from>
+				<from type="SqlMoney"   >return p.IsNull? (UInt32)0: Convert.ToUInt32(p.Value);</from>
+				<br/>
+				<from type="SqlBoolean" >return p.IsNull? (UInt32)0: Convert.ToUInt32(p.Value);</from>
+				<from type="SqlDateTime">return p.IsNull? (UInt32)0: Convert.ToUInt32(p.Value);</from>
+			</group>
+			<default>return Convert.ToUInt32(p);</default>
+		</converter>
+		<converter type="UInt64"   nullable="false">
+			<group name="Scalar Types.">
+				<from type="String"/>
+				<br/>
+				<from type="SByte"/>
+				<from type="Int16"/>
+				<from type="Int32"/>
+				<from type="Int64"/>
+				<br/>
+				<from type="Byte"/>
+				<from type="UInt16"/>
+				<from type="UInt32"/>
+				<br/>
+				<from type="Char"/>
+				<from type="Single"/>
+				<from type="Double"/>
+				<br/>
+				<from type="Boolean"/>
+				<from type="Decimal"/>
+				<from type="DateTime"/>
+			</group>
+			<group name="Nullable Types.">
+				<from type="SByte?"   >return p.HasValue? Convert.ToUInt64(p.Value) : (UInt64)0;</from>
+				<from type="Int16?"   >return p.HasValue? Convert.ToUInt64(p.Value) : (UInt64)0;</from>
+				<from type="Int32?"   >return p.HasValue? Convert.ToUInt64(p.Value) : (UInt64)0;</from>
+				<from type="Int64?"   >return p.HasValue? Convert.ToUInt64(p.Value) : (UInt64)0;</from>
+				<br/>
+				<from type="Byte?"    >return p.HasValue? Convert.ToUInt64(p.Value) : (UInt64)0;</from>
+				<from type="UInt16?"  >return p.HasValue? Convert.ToUInt64(p.Value) : (UInt64)0;</from>
+				<from type="UInt32?"  >return p.HasValue? Convert.ToUInt64(p.Value) : (UInt64)0;</from>
+				<from type="UInt64?"  >return p.HasValue?                  p.Value  : (UInt64)0;</from>
+				<br/>
+				<from type="Char?"    >return p.HasValue? Convert.ToUInt64(p.Value) : (UInt64)0;</from>
+				<from type="Single?"  >return p.HasValue? Convert.ToUInt64(p.Value) : (UInt64)0;</from>
+				<from type="Double?"  >return p.HasValue? Convert.ToUInt64(p.Value) : (UInt64)0;</from>
+				<br/>
+				<from type="Boolean?" >return p.HasValue? Convert.ToUInt64(p.Value) : (UInt64)0;</from>
+				<from type="Decimal?" >return p.HasValue? Convert.ToUInt64(p.Value) : (UInt64)0;</from>
+				<from type="DateTime?">return p.HasValue? Convert.ToUInt64(p.Value) : (UInt64)0;</from>
+			</group>
+			<group name="SqlTypes.">
+				<from type="SqlString"  >return p.IsNull? (UInt64)0: Convert.ToUInt64(p.Value);</from>
+				<br/>
+				<from type="SqlByte"    >return p.IsNull? (UInt64)0: Convert.ToUInt64(p.Value);</from>
+				<from type="SqlInt16"   >return p.IsNull? (UInt64)0: Convert.ToUInt64(p.Value);</from>
+				<from type="SqlInt32"   >return p.IsNull? (UInt64)0: Convert.ToUInt64(p.Value);</from>
+				<from type="SqlInt64"   >return p.IsNull? (UInt64)0: Convert.ToUInt64(p.Value);</from>
+				<br/>
+				<from type="SqlSingle"  >return p.IsNull? (UInt64)0: Convert.ToUInt64(p.Value);</from>
+				<from type="SqlDouble"  >return p.IsNull? (UInt64)0: Convert.ToUInt64(p.Value);</from>
+				<from type="SqlDecimal" >return p.IsNull? (UInt64)0: Convert.ToUInt64(p.Value);</from>
+				<from type="SqlMoney"   >return p.IsNull? (UInt64)0: Convert.ToUInt64(p.Value);</from>
+				<br/>
+				<from type="SqlBoolean" >return p.IsNull? (UInt64)0: Convert.ToUInt64(p.Value);</from>
+				<from type="SqlDateTime">return p.IsNull? (UInt64)0: Convert.ToUInt64(p.Value);</from>
+			</group>
+			<default>return Convert.ToUInt64(p);</default>
+		</converter>
+		<br/>
+		<converter type="Char"     nullable="false">
+			<group name="Scalar Types.">
+				<from type="String"/>
+				<br/>
+				<from type="SByte"/>
+				<from type="Int16"/>
+				<from type="Int32"/>
+				<from type="Int64"/>
+				<br/>
+				<from type="Byte"/>
+				<from type="UInt16"/>
+				<from type="UInt32"/>
+				<from type="UInt64"/>
+				<br/>
+				<from type="Single"/>
+				<from type="Double"/>
+				<br/>
+				<from type="Boolean"/>
+				<from type="Decimal"/>
+				<from type="DateTime"/>
+			</group>
+			<group name="Nullable Types.">
+				<from type="SByte?"   >return p.HasValue? Convert.ToChar(p.Value) : (Char)0;</from>
+				<from type="Int16?"   >return p.HasValue? Convert.ToChar(p.Value) : (Char)0;</from>
+				<from type="Int32?"   >return p.HasValue? Convert.ToChar(p.Value) : (Char)0;</from>
+				<from type="Int64?"   >return p.HasValue? Convert.ToChar(p.Value) : (Char)0;</from>
+				<br/>
+				<from type="Byte?"    >return p.HasValue? Convert.ToChar(p.Value) : (Char)0;</from>
+				<from type="UInt16?"  >return p.HasValue? Convert.ToChar(p.Value) : (Char)0;</from>
+				<from type="UInt32?"  >return p.HasValue? Convert.ToChar(p.Value) : (Char)0;</from>
+				<from type="UInt64?"  >return p.HasValue? Convert.ToChar(p.Value) : (Char)0;</from>
+				<br/>
+				<from type="Char?"    >return p.HasValue?                p.Value  : (Char)0;</from>
+				<from type="Single?"  >return p.HasValue? Convert.ToChar(p.Value) : (Char)0;</from>
+				<from type="Double?"  >return p.HasValue? Convert.ToChar(p.Value) : (Char)0;</from>
+				<br/>
+				<from type="Boolean?" >return p.HasValue? Convert.ToChar(p.Value) : (Char)0;</from>
+				<from type="Decimal?" >return p.HasValue? Convert.ToChar(p.Value) : (Char)0;</from>
+				<from type="DateTime?">return p.HasValue? Convert.ToChar(p.Value) : (Char)0;</from>
+			</group>
+			<group name="SqlTypes.">
+				<from type="SqlString"  >return p.IsNull? (Char)0: Convert.ToChar(p.Value);</from>
+				<br/>
+				<from type="SqlByte"    >return p.IsNull? (Char)0: Convert.ToChar(p.Value);</from>
+				<from type="SqlInt16"   >return p.IsNull? (Char)0: Convert.ToChar(p.Value);</from>
+				<from type="SqlInt32"   >return p.IsNull? (Char)0: Convert.ToChar(p.Value);</from>
+				<from type="SqlInt64"   >return p.IsNull? (Char)0: Convert.ToChar(p.Value);</from>
+				<br/>
+				<from type="SqlSingle"  >return p.IsNull? (Char)0: Convert.ToChar(p.Value);</from>
+				<from type="SqlDouble"  >return p.IsNull? (Char)0: Convert.ToChar(p.Value);</from>
+				<from type="SqlDecimal" >return p.IsNull? (Char)0: Convert.ToChar(p.Value);</from>
+				<from type="SqlMoney"   >return p.IsNull? (Char)0: Convert.ToChar(p.Value);</from>
+				<br/>
+				<from type="SqlBoolean" >return p.IsNull? (Char)0: Convert.ToChar(p.Value);</from>
+				<from type="SqlDateTime">return p.IsNull? (Char)0: Convert.ToChar(p.Value);</from>
+			</group>
+			<default>return Convert.ToChar(p);</default>
+		</converter>
+		<converter type="Single"   nullable="false">
+			<group name="Scalar Types.">
+				<from type="String"/>
+				<br/>
+				<from type="SByte"/>
+				<from type="Int16"/>
+				<from type="Int32"/>
+				<from type="Int64"/>
+				<br/>
+				<from type="Byte"/>
+				<from type="UInt16"/>
+				<from type="UInt32"/>
+				<from type="UInt64"/>
+				<br/>
+				<from type="Char"/>
+				<from type="Double"/>
+				<br/>
+				<from type="Boolean"/>
+				<from type="Decimal"/>
+				<from type="DateTime"/>
+			</group>
+			<group name="Nullable Types.">
+				<from type="SByte?"   >return p.HasValue? Convert.ToSingle(p.Value) : (Single)0;</from>
+				<from type="Int16?"   >return p.HasValue? Convert.ToSingle(p.Value) : (Single)0;</from>
+				<from type="Int32?"   >return p.HasValue? Convert.ToSingle(p.Value) : (Single)0;</from>
+				<from type="Int64?"   >return p.HasValue? Convert.ToSingle(p.Value) : (Single)0;</from>
+				<br/>
+				<from type="Byte?"    >return p.HasValue? Convert.ToSingle(p.Value) : (Single)0;</from>
+				<from type="UInt16?"  >return p.HasValue? Convert.ToSingle(p.Value) : (Single)0;</from>
+				<from type="UInt32?"  >return p.HasValue? Convert.ToSingle(p.Value) : (Single)0;</from>
+				<from type="UInt64?"  >return p.HasValue? Convert.ToSingle(p.Value) : (Single)0;</from>
+				<br/>
+				<from type="Char?"    >return p.HasValue? Convert.ToSingle(p.Value) : (Single)0;</from>
+				<from type="Single?"  >return p.HasValue?                  p.Value  : (Single)0;</from>
+				<from type="Double?"  >return p.HasValue? Convert.ToSingle(p.Value) : (Single)0;</from>
+				<br/>
+				<from type="Boolean?" >return p.HasValue? Convert.ToSingle(p.Value) : (Single)0;</from>
+				<from type="Decimal?" >return p.HasValue? Convert.ToSingle(p.Value) : (Single)0;</from>
+				<from type="DateTime?">return p.HasValue? Convert.ToSingle(p.Value) : (Single)0;</from>
+			</group>
+			<group name="SqlTypes.">
+				<from type="SqlString"  >return p.IsNull? (Single)0: Convert.ToSingle(p.Value);</from>
+				<br/>
+				<from type="SqlByte"    >return p.IsNull? (Single)0: Convert.ToSingle(p.Value);</from>
+				<from type="SqlInt16"   >return p.IsNull? (Single)0: Convert.ToSingle(p.Value);</from>
+				<from type="SqlInt32"   >return p.IsNull? (Single)0: Convert.ToSingle(p.Value);</from>
+				<from type="SqlInt64"   >return p.IsNull? (Single)0: Convert.ToSingle(p.Value);</from>
+				<br/>
+				<from type="SqlSingle"  >return p.IsNull? (Single)0:                  p.Value; </from>
+				<from type="SqlDouble"  >return p.IsNull? (Single)0: Convert.ToSingle(p.Value);</from>
+				<from type="SqlDecimal" >return p.IsNull? (Single)0: Convert.ToSingle(p.Value);</from>
+				<from type="SqlMoney"   >return p.IsNull? (Single)0: Convert.ToSingle(p.Value);</from>
+				<br/>
+				<from type="SqlBoolean" >return p.IsNull? (Single)0: Convert.ToSingle(p.Value);</from>
+				<from type="SqlDateTime">return p.IsNull? (Single)0: Convert.ToSingle(p.Value);</from>
+			</group>
+			<default>return Convert.ToSingle(p);</default>
+		</converter>
+		<converter type="Double"   nullable="false">
+			<group name="Scalar Types.">
+				<from type="String"/>
+				<br/>
+				<from type="SByte"/>
+				<from type="Int16"/>
+				<from type="Int32"/>
+				<from type="Int64"/>
+				<br/>
+				<from type="Byte"/>
+				<from type="UInt16"/>
+				<from type="UInt32"/>
+				<from type="UInt64"/>
+				<br/>
+				<from type="Char"/>
+				<from type="Single"/>
+				<br/>
+				<from type="Boolean"/>
+				<from type="Decimal"/>
+				<from type="DateTime"/>
+			</group>
+			<group name="Nullable Types.">
+				<from type="SByte?"   >return p.HasValue? Convert.ToDouble(p.Value) : (Double)0;</from>
+				<from type="Int16?"   >return p.HasValue? Convert.ToDouble(p.Value) : (Double)0;</from>
+				<from type="Int32?"   >return p.HasValue? Convert.ToDouble(p.Value) : (Double)0;</from>
+				<from type="Int64?"   >return p.HasValue? Convert.ToDouble(p.Value) : (Double)0;</from>
+				<br/>
+				<from type="Byte?"    >return p.HasValue? Convert.ToDouble(p.Value) : (Double)0;</from>
+				<from type="UInt16?"  >return p.HasValue? Convert.ToDouble(p.Value) : (Double)0;</from>
+				<from type="UInt32?"  >return p.HasValue? Convert.ToDouble(p.Value) : (Double)0;</from>
+				<from type="UInt64?"  >return p.HasValue? Convert.ToDouble(p.Value) : (Double)0;</from>
+				<br/>
+				<from type="Char?"    >return p.HasValue? Convert.ToDouble(p.Value) : (Double)0;</from>
+				<from type="Single?"  >return p.HasValue? Convert.ToDouble(p.Value) : (Double)0;</from>
+				<from type="Double?"  >return p.HasValue?                  p.Value  : (Double)0;</from>
+				<br/>
+				<from type="Boolean?" >return p.HasValue? Convert.ToDouble(p.Value) : (Double)0;</from>
+				<from type="Decimal?" >return p.HasValue? Convert.ToDouble(p.Value) : (Double)0;</from>
+				<from type="DateTime?">return p.HasValue? Convert.ToDouble(p.Value) : (Double)0;</from>
+			</group>
+			<group name="SqlTypes.">
+				<from type="SqlString"  >return p.IsNull? (Double)0: Convert.ToDouble(p.Value);</from>
+				<br/>
+				<from type="SqlByte"    >return p.IsNull? (Double)0: Convert.ToDouble(p.Value);</from>
+				<from type="SqlInt16"   >return p.IsNull? (Double)0: Convert.ToDouble(p.Value);</from>
+				<from type="SqlInt32"   >return p.IsNull? (Double)0: Convert.ToDouble(p.Value);</from>
+				<from type="SqlInt64"   >return p.IsNull? (Double)0: Convert.ToDouble(p.Value);</from>
+				<br/>
+				<from type="SqlSingle"  >return p.IsNull? (Double)0: Convert.ToDouble(p.Value);</from>
+				<from type="SqlDouble"  >return p.IsNull? (Double)0:                  p.Value; </from>
+				<from type="SqlDecimal" >return p.IsNull? (Double)0: Convert.ToDouble(p.Value);</from>
+				<from type="SqlMoney"   >return p.IsNull? (Double)0: Convert.ToDouble(p.Value);</from>
+				<br/>
+				<from type="SqlBoolean" >return p.IsNull? (Double)0: Convert.ToDouble(p.Value);</from>
+				<from type="SqlDateTime">return p.IsNull? (Double)0: Convert.ToDouble(p.Value);</from>
+			</group>
+			<default>return Convert.ToDouble(p);</default>
+		</converter>
+		<br/>
+		<converter type="Boolean"  nullable="false">
+			<group name="Scalar Types.">
+				<from type="String"/>
+				<br/>
+				<from type="SByte"/>
+				<from type="Int16"/>
+				<from type="Int32"/>
+				<from type="Int64"/>
+				<br/>
+				<from type="Byte"/>
+				<from type="UInt16"/>
+				<from type="UInt32"/>
+				<from type="UInt64"/>
+				<br/>
+				<from type="Char"/>
+				<from type="Single"/>
+				<from type="Double"/>
+				<br/>
+				<from type="Decimal"/>
+				<from type="DateTime"/>
+			</group>
+			<group name="Nullable Types.">
+				<from type="SByte?"   >return p.HasValue? Convert.ToBoolean(p.Value) : false;</from>
+				<from type="Int16?"   >return p.HasValue? Convert.ToBoolean(p.Value) : false;</from>
+				<from type="Int32?"   >return p.HasValue? Convert.ToBoolean(p.Value) : false;</from>
+				<from type="Int64?"   >return p.HasValue? Convert.ToBoolean(p.Value) : false;</from>
+				<br/>
+				<from type="Byte?"    >return p.HasValue? Convert.ToBoolean(p.Value) : false;</from>
+				<from type="UInt16?"  >return p.HasValue? Convert.ToBoolean(p.Value) : false;</from>
+				<from type="UInt32?"  >return p.HasValue? Convert.ToBoolean(p.Value) : false;</from>
+				<from type="UInt64?"  >return p.HasValue? Convert.ToBoolean(p.Value) : false;</from>
+				<br/>
+				<from type="Char?"    >return p.HasValue? Convert.ToBoolean(p.Value) : false;</from>
+				<from type="Single?"  >return p.HasValue? Convert.ToBoolean(p.Value) : false;</from>
+				<from type="Double?"  >return p.HasValue? Convert.ToBoolean(p.Value) : false;</from>
+				<br/>
+				<from type="Boolean?" >return p.HasValue?                   p.Value  : false;</from>
+				<from type="Decimal?" >return p.HasValue? Convert.ToBoolean(p.Value) : false;</from>
+				<from type="DateTime?">return p.HasValue? Convert.ToBoolean(p.Value) : false;</from>
+			</group>
+			<group name="SqlTypes.">
+				<from type="SqlString"  >return p.IsNull? false: Convert.ToBoolean(p.Value);</from>
+				<br/>
+				<from type="SqlByte"    >return p.IsNull? false: Convert.ToBoolean(p.Value);</from>
+				<from type="SqlInt16"   >return p.IsNull? false: Convert.ToBoolean(p.Value);</from>
+				<from type="SqlInt32"   >return p.IsNull? false: Convert.ToBoolean(p.Value);</from>
+				<from type="SqlInt64"   >return p.IsNull? false: Convert.ToBoolean(p.Value);</from>
+				<br/>
+				<from type="SqlSingle"  >return p.IsNull? false: Convert.ToBoolean(p.Value);</from>
+				<from type="SqlDouble"  >return p.IsNull? false: Convert.ToBoolean(p.Value);</from>
+				<from type="SqlDecimal" >return p.IsNull? false: Convert.ToBoolean(p.Value);</from>
+				<from type="SqlMoney"   >return p.IsNull? false: Convert.ToBoolean(p.Value);</from>
+				<br/>
+				<from type="SqlBoolean" >return p.IsNull? false:                   p.Value; </from>
+				<from type="SqlDateTime">return p.IsNull? false: Convert.ToBoolean(p.Value);</from>
+			</group>
+			<default>return Convert.ToBoolean(p);</default>
+		</converter>
+		<converter type="Decimal"  nullable="false">
+			<group name="Scalar Types.">
+				<from type="String"/>
+				<br/>
+				<from type="SByte"/>
+				<from type="Int16"/>
+				<from type="Int32"/>
+				<from type="Int64"/>
+				<br/>
+				<from type="Byte"/>
+				<from type="UInt16"/>
+				<from type="UInt32"/>
+				<from type="UInt64"/>
+				<br/>
+				<from type="Char"/>
+				<from type="Single"/>
+				<from type="Double"/>
+				<br/>
+				<from type="Boolean"/>
+				<from type="DateTime"/>
+			</group>
+			<group name="Nullable Types.">
+				<from type="SByte?"   >return p.HasValue? Convert.ToDecimal(p.Value) : (Decimal)0;</from>
+				<from type="Int16?"   >return p.HasValue? Convert.ToDecimal(p.Value) : (Decimal)0;</from>
+				<from type="Int32?"   >return p.HasValue? Convert.ToDecimal(p.Value) : (Decimal)0;</from>
+				<from type="Int64?"   >return p.HasValue? Convert.ToDecimal(p.Value) : (Decimal)0;</from>
+				<br/>
+				<from type="Byte?"    >return p.HasValue? Convert.ToDecimal(p.Value) : (Decimal)0;</from>
+				<from type="UInt16?"  >return p.HasValue? Convert.ToDecimal(p.Value) : (Decimal)0;</from>
+				<from type="UInt32?"  >return p.HasValue? Convert.ToDecimal(p.Value) : (Decimal)0;</from>
+				<from type="UInt64?"  >return p.HasValue? Convert.ToDecimal(p.Value) : (Decimal)0;</from>
+				<br/>
+				<from type="Char?"    >return p.HasValue? Convert.ToDecimal(p.Value) : (Decimal)0;</from>
+				<from type="Single?"  >return p.HasValue? Convert.ToDecimal(p.Value) : (Decimal)0;</from>
+				<from type="Double?"  >return p.HasValue? Convert.ToDecimal(p.Value) : (Decimal)0;</from>
+				<br/>
+				<from type="Boolean?" >return p.HasValue? Convert.ToDecimal(p.Value) : (Decimal)0;</from>
+				<from type="Decimal?" >return p.HasValue?                   p.Value  : (Decimal)0;</from>
+				<from type="DateTime?">return p.HasValue? Convert.ToDecimal(p.Value) : (Decimal)0;</from>
+			</group>
+			<group name="SqlTypes.">
+				<from type="SqlString"  >return p.IsNull? (Decimal)0: Convert.ToDecimal(p.Value);</from>
+				<br/>
+				<from type="SqlByte"    >return p.IsNull? (Decimal)0: Convert.ToDecimal(p.Value);</from>
+				<from type="SqlInt16"   >return p.IsNull? (Decimal)0: Convert.ToDecimal(p.Value);</from>
+				<from type="SqlInt32"   >return p.IsNull? (Decimal)0: Convert.ToDecimal(p.Value);</from>
+				<from type="SqlInt64"   >return p.IsNull? (Decimal)0: Convert.ToDecimal(p.Value);</from>
+				<br/>
+				<from type="SqlSingle"  >return p.IsNull? (Decimal)0: Convert.ToDecimal(p.Value);</from>
+				<from type="SqlDouble"  >return p.IsNull? (Decimal)0: Convert.ToDecimal(p.Value);</from>
+				<from type="SqlDecimal" >return p.IsNull? (Decimal)0:                   p.Value; </from>
+				<from type="SqlMoney"   >return p.IsNull? (Decimal)0:                   p.Value; </from>
+				<br/>
+				<from type="SqlBoolean" >return p.IsNull? (Decimal)0: Convert.ToDecimal(p.Value);</from>
+				<from type="SqlDateTime">return p.IsNull? (Decimal)0: Convert.ToDecimal(p.Value);</from>
+			</group>
+			<default>return Convert.ToDecimal(p);</default>
+		</converter>
+		<converter type="DateTime" nullable="false">
+			<group name="Scalar Types.">
+				<from type="String"/>
+				<br/>
+				<from type="SByte"/>
+				<from type="Int16"/>
+				<from type="Int32"/>
+				<from type="Int64"/>
+				<br/>
+				<from type="Byte"/>
+				<from type="UInt16"/>
+				<from type="UInt32"/>
+				<from type="UInt64"/>
+				<br/>
+				<from type="Char"/>
+				<from type="Single"/>
+				<from type="Double"/>
+				<br/>
+				<from type="Boolean"/>
+				<from type="Decimal"/>
+			</group>
+			<group name="Nullable Types.">
+				<from type="SByte?"   >return p.HasValue? Convert.ToDateTime(p.Value) : DateTime.MinValue;</from>
+				<from type="Int16?"   >return p.HasValue? Convert.ToDateTime(p.Value) : DateTime.MinValue;</from>
+				<from type="Int32?"   >return p.HasValue? Convert.ToDateTime(p.Value) : DateTime.MinValue;</from>
+				<from type="Int64?"   >return p.HasValue? Convert.ToDateTime(p.Value) : DateTime.MinValue;</from>
+				<br/>
+				<from type="Byte?"    >return p.HasValue? Convert.ToDateTime(p.Value) : DateTime.MinValue;</from>
+				<from type="UInt16?"  >return p.HasValue? Convert.ToDateTime(p.Value) : DateTime.MinValue;</from>
+				<from type="UInt32?"  >return p.HasValue? Convert.ToDateTime(p.Value) : DateTime.MinValue;</from>
+				<from type="UInt64?"  >return p.HasValue? Convert.ToDateTime(p.Value) : DateTime.MinValue;</from>
+				<br/>
+				<from type="Char?"    >return p.HasValue? Convert.ToDateTime(p.Value) : DateTime.MinValue;</from>
+				<from type="Single?"  >return p.HasValue? Convert.ToDateTime(p.Value) : DateTime.MinValue;</from>
+				<from type="Double?"  >return p.HasValue? Convert.ToDateTime(p.Value) : DateTime.MinValue;</from>
+				<br/>
+				<from type="Boolean?" >return p.HasValue? Convert.ToDateTime(p.Value) : DateTime.MinValue;</from>
+				<from type="Decimal?" >return p.HasValue? Convert.ToDateTime(p.Value) : DateTime.MinValue;</from>
+				<from type="DateTime?">return p.HasValue?                    p.Value  : DateTime.MinValue;</from>
+			</group>
+			<group name="SqlTypes.">
+				<from type="SqlString"  >return p.IsNull? DateTime.MinValue: Convert.ToDateTime(p.Value);</from>
+				<br/>
+				<from type="SqlByte"    >return p.IsNull? DateTime.MinValue: Convert.ToDateTime(p.Value);</from>
+				<from type="SqlInt16"   >return p.IsNull? DateTime.MinValue: Convert.ToDateTime(p.Value);</from>
+				<from type="SqlInt32"   >return p.IsNull? DateTime.MinValue: Convert.ToDateTime(p.Value);</from>
+				<from type="SqlInt64"   >return p.IsNull? DateTime.MinValue: Convert.ToDateTime(p.Value);</from>
+				<br/>
+				<from type="SqlSingle"  >return p.IsNull? DateTime.MinValue: Convert.ToDateTime(p.Value);</from>
+				<from type="SqlDouble"  >return p.IsNull? DateTime.MinValue: Convert.ToDateTime(p.Value);</from>
+				<from type="SqlDecimal" >return p.IsNull? DateTime.MinValue: Convert.ToDateTime(p.Value);</from>
+				<from type="SqlMoney"   >return p.IsNull? DateTime.MinValue: Convert.ToDateTime(p.Value);</from>
+				<br/>
+				<from type="SqlBoolean" >return p.IsNull? DateTime.MinValue: Convert.ToDateTime(p.Value);</from>
+				<from type="SqlDateTime">return p.IsNull? DateTime.MinValue:                    p.Value; </from>
+			</group>
+			<default>return Convert.ToDateTime(p);</default>
+		</converter>
+		<converter type="TimeSpan" nullable="false">
+			<group name="Scalar Types.">
+				<from type="String"  >return p == null? TimeSpan.MinValue: TimeSpan.Parse(p);</from>
+				<from type="DateTime">return p - DateTime.MinValue;</from>
+			</group>
+			<group name="Nullable Types.">
+				<from type="DateTime?">return p.HasValue? p.Value - DateTime.MinValue: TimeSpan.MinValue;</from>
+				<from type="TimeSpan?">return p.HasValue? p.Value                    : TimeSpan.MinValue;</from>
+			</group>
+			<group name="SqlTypes.">
+				<from type="SqlString"  >return p.IsNull? TimeSpan.MinValue: TimeSpan.Parse(p.Value);    </from>
+				<from type="SqlDateTime">return p.IsNull? TimeSpan.MinValue: p.Value - DateTime.MinValue;</from>
+			</group>
+			<default nullvalue="TimeSpan.MinValue"/>
+		</converter>
+		<converter type="Guid"     nullable="false">
+			<group name="Scalar Types.">
+				<from type="String"   >return p == null? Guid.Empty: new Guid(p);</from>
+			</group>
+			<group name="Nullable Types.">
+				<from type="Guid?"    >return p.HasValue? p.Value : Guid.Empty;</from>
+			</group>
+			<group name="SqlTypes.">
+				<from type="SqlString">return p.IsNull? Guid.Empty: new Guid(p.Value);  </from>
+				<from type="SqlGuid"  >return p.IsNull? Guid.Empty: p.Value;            </from>
+				<from type="SqlBinary">return p.IsNull? Guid.Empty: p.ToSqlGuid().Value;</from>
+			</group>
+			<default nullvalue="Guid.Empty"/>
+		</converter>
+		<converter type="Stream">
+			<group name="Scalar Types.">
+				<from type="Byte[]"   >return p == null? Stream.Null: new MemoryStream(p);</from>
+			</group>
+			<group name="SqlTypes.">
+				<from type="SqlBinary">return p.IsNull? Stream.Null: new MemoryStream(p.Value);</from>
+				<from type="SqlBytes" >return p.IsNull? Stream.Null: p.Stream;                 </from>
+			</group>
+			<default nullvalue="Stream.Null"/>
+		</converter>
+	</region>
+	<region name="Nullable Types">
+		<converter type="SByte"    nullable="true">
+			<group name="Scalar Types.">
+				<from type="String">return p == null? null: (SByte?)Convert.ToSByte(p);</from>
+				<br/>
+				<from type="SByte" >return                 p; </from>
+				<from type="Int16"/>
+				<from type="Int32"/>
+				<from type="Int64"/>
+				<br/>
+				<from type="Byte" />
+				<from type="UInt16"/>
+				<from type="UInt32"/>
+				<from type="UInt64"/>
+				<br/>
+				<from type="Char"/>
+				<from type="Single"/>
+				<from type="Double"/>
+				<br/>
+				<from type="Boolean"/>
+				<from type="Decimal"/>
+				<from type="DateTime"/>
+			</group>
+			<group name="Nullable Types.">
+				<from type="Int16?"   />
+				<from type="Int32?"   />
+				<from type="Int64?"   />
+				<br/>
+				<from type="Byte?"    />
+				<from type="UInt16?"  />
+				<from type="UInt32?"  />
+				<from type="UInt64?"  />
+				<br/>
+				<from type="Char?"    />
+				<from type="Single?"  />
+				<from type="Double?"  />
+				<br/>
+				<from type="Boolean?" />
+				<from type="Decimal?" />
+				<from type="DateTime?"/>
+				<default>return p.HasValue? (SByte?)Convert.ToSByte(p.Value) : null;</default>
+			</group>
+			<group name="SqlTypes.">
+				<from type="SqlString"  />
+				<br/>
+				<from type="SqlByte"    />
+				<from type="SqlInt16"   />
+				<from type="SqlInt32"   />
+				<from type="SqlInt64"   />
+				<br/>
+				<from type="SqlSingle"  />
+				<from type="SqlDouble"  />
+				<from type="SqlDecimal" />
+				<from type="SqlMoney"   />
+				<br/>
+				<from type="SqlBoolean" />
+				<from type="SqlDateTime"/>
+				<default>return p.IsNull? null: (SByte?)Convert.ToSByte(p.Value);</default>
+			</group>
+			<default>return Convert.ToSByte(p);</default>
+		</converter>
+		<converter type="Int16"    nullable="true">
+			<group name="Scalar Types.">
+				<from type="String">return p == null? null: (Int16?)Convert.ToInt16(p);</from>
+				<br/>
+				<from type="SByte"/>
+				<from type="Int16" >return                 p; </from>
+				<from type="Int32"/>
+				<from type="Int64"/>
+				<br/>
+				<from type="Byte" />
+				<from type="UInt16"/>
+				<from type="UInt32"/>
+				<from type="UInt64"/>
+				<br/>
+				<from type="Char"/>
+				<from type="Single"/>
+				<from type="Double"/>
+				<br/>
+				<from type="Boolean"/>
+				<from type="Decimal"/>
+				<from type="DateTime"/>
+			</group>
+			<group name="Nullable Types.">
+				<from type="SByte?"   />
+				<from type="Int32?"   />
+				<from type="Int64?"   />
+				<br/>
+				<from type="Byte?"    />
+				<from type="UInt16?"  />
+				<from type="UInt32?"  />
+				<from type="UInt64?"  />
+				<br/>
+				<from type="Char?"    />
+				<from type="Single?"  />
+				<from type="Double?"  />
+				<br/>
+				<from type="Boolean?" />
+				<from type="Decimal?" />
+				<from type="DateTime?"/>
+				<default>return p.HasValue? (Int16?)Convert.ToInt16(p.Value) : null;</default>
+			</group>
+
+			<group name="SqlTypes.">
+				<from type="SqlString"  />
+				<br/>
+				<from type="SqlByte"    />
+				<from type="SqlInt16"   >return p.IsNull? null: (Int16?)                p.Value; </from>
+				<from type="SqlInt32"   />
+				<from type="SqlInt64"   />
+				<br/>
+				<from type="SqlSingle"  />
+				<from type="SqlDouble"  />
+				<from type="SqlDecimal" />
+				<from type="SqlMoney"   />
+				<br/>
+				<from type="SqlBoolean" />
+				<from type="SqlDateTime"/>
+				<default>return p.IsNull? null: (Int16?)Convert.ToInt16(p.Value);</default>
+			</group>
+			<default>return Convert.ToInt16(p);</default>
+		</converter>
+		<converter type="Int32"    nullable="true">
+			<group name="Scalar Types.">
+				<from type="String">return p == null? null: (Int32?)Convert.ToInt32(p);</from>
+				<br/>
+				<from type="SByte"/>
+				<from type="Int16"/>
+				<from type="Int32" >return                 p; </from>
+				<from type="Int64"/>
+				<br/>
+				<from type="Byte" />
+				<from type="UInt16"/>
+				<from type="UInt32"/>
+				<from type="UInt64"/>
+				<br/>
+				<from type="Char"/>
+				<from type="Single"/>
+				<from type="Double"/>
+				<br/>
+				<from type="Boolean"/>
+				<from type="Decimal"/>
+				<from type="DateTime"/>
+			</group>
+
+			<group name="Nullable Types.">
+				<from type="SByte?"   />
+				<from type="Int16?"   />
+				<from type="Int64?"   />
+				<br/>
+				<from type="Byte?"    />
+				<from type="UInt16?"  />
+				<from type="UInt32?"  />
+				<from type="UInt64?"  />
+				<br/>
+				<from type="Char?"    />
+				<from type="Single?"  />
+				<from type="Double?"  />
+				<br/>
+				<from type="Boolean?" />
+				<from type="Decimal?" />
+				<from type="DateTime?"/>
+				<default>return p.HasValue? (Int32?)Convert.ToInt32(p.Value) : null;</default>
+			</group>
+
+			<group name="SqlTypes.">
+				<from type="SqlString"  />
+				<br/>
+				<from type="SqlByte"    />
+				<from type="SqlInt16"   />
+				<from type="SqlInt32"   >return p.IsNull? null: (Int32?)                p.Value; </from>
+				<from type="SqlInt64"   />
+				<br/>
+				<from type="SqlSingle"  />
+				<from type="SqlDouble"  />
+				<from type="SqlDecimal" />
+				<from type="SqlMoney"   />
+				<br/>
+				<from type="SqlBoolean" />
+				<from type="SqlDateTime"/>
+				<default>return p.IsNull? null: (Int32?)Convert.ToInt32(p.Value);</default>
+			</group>
+			<default>return Convert.ToInt32(p);</default>
+		</converter>
+		<converter type="Int64"    nullable="true">
+			<group name="Scalar Types.">
+				<from type="String">return p == null? null: (Int64?)Convert.ToInt64(p);</from>
+				<br/>
+				<from type="SByte"/>
+				<from type="Int16"/>
+				<from type="Int32"/>
+				<from type="Int64" >return                 p; </from>
+				<br/>
+				<from type="Byte" />
+				<from type="UInt16"/>
+				<from type="UInt32"/>
+				<from type="UInt64"/>
+				<br/>
+				<from type="Char"/>
+				<from type="Single"/>
+				<from type="Double"/>
+				<br/>
+				<from type="Boolean"/>
+				<from type="Decimal"/>
+				<from type="DateTime"/>
+			</group>
+
+			<group name="Nullable Types.">
+				<from type="SByte?"   />
+				<from type="Int16?"   />
+				<from type="Int32?"   />
+				<br/>
+				<from type="Byte?"    />
+				<from type="UInt16?"  />
+				<from type="UInt32?"  />
+				<from type="UInt64?"  />
+				<br/>
+				<from type="Char?"    />
+				<from type="Single?"  />
+				<from type="Double?"  />
+				<br/>
+				<from type="Boolean?" />
+				<from type="Decimal?" />
+				<from type="DateTime?"/>
+				<default>return p.HasValue? (Int64?)Convert.ToInt64(p.Value) : null;</default>
+			</group>
+
+			<group name="SqlTypes.">
+				<from type="SqlString"  />
+				<br/>
+				<from type="SqlByte"    />
+				<from type="SqlInt16"   />
+				<from type="SqlInt32"   />
+				<from type="SqlInt64"    >return p.IsNull? null: (Int64?)                p.Value; </from>
+				<br/>
+				<from type="SqlSingle"  />
+				<from type="SqlDouble"  />
+				<from type="SqlDecimal" />
+				<from type="SqlMoney"   />
+				<br/>
+				<from type="SqlBoolean" />
+				<from type="SqlDateTime"/>
+				<default>return p.IsNull? null: (Int64?)Convert.ToInt64(p.Value);</default>
+			</group>
+			<default>return Convert.ToInt64(p);</default>
+		</converter>
+		<br/>
+		<converter type="Byte"     nullable="true">
+			<group name="Scalar Types.">
+				<from type="String">return p == null? null: (Byte?)Convert.ToByte(p);</from>
+				<br/>
+				<from type="SByte" />
+				<from type="Int16"/>
+				<from type="Int32"/>
+				<from type="Int64"/>
+				<br/>
+				<from type="Byte" >return                p; </from>
+				<from type="UInt16"/>
+				<from type="UInt32"/>
+				<from type="UInt64"/>
+				<br/>
+				<from type="Char"/>
+				<from type="Single"/>
+				<from type="Double"/>
+				<br/>
+				<from type="Boolean"/>
+				<from type="Decimal"/>
+				<from type="DateTime"/>
+			</group>
+
+			<group name="Nullable Types.">
+				<from type="SByte?"    />
+				<from type="Int16?"   />
+				<from type="Int32?"   />
+				<from type="Int64?"   />
+				<br/>
+				<from type="UInt16?"  />
+				<from type="UInt32?"  />
+				<from type="UInt64?"  />
+				<br/>
+				<from type="Char?"    />
+				<from type="Single?"  />
+				<from type="Double?"  />
+				<br/>
+				<from type="Boolean?" />
+				<from type="Decimal?" />
+				<from type="DateTime?"/>
+				<default>return p.HasValue? (Byte?)Convert.ToByte(p.Value) : null;</default>
+			</group>
+
+			<group name="SqlTypes.">
+				<from type="SqlString"  />
+				<br/>
+				<from type="SqlByte"     >return p.IsNull? null: (Byte?)               p.Value; </from>
+				<from type="SqlInt16"   />
+				<from type="SqlInt32"   />
+				<from type="SqlInt64"   />
+				<br/>
+				<from type="SqlSingle"  />
+				<from type="SqlDouble"  />
+				<from type="SqlDecimal" />
+				<from type="SqlMoney"   />
+				<br/>
+				<from type="SqlBoolean" />
+				<from type="SqlDateTime"/>
+				<default>return p.IsNull? null: (Byte?)Convert.ToByte(p.Value);</default>
+			</group>
+			<default>return Convert.ToByte(p);</default>
+		</converter>
+		<converter type="UInt16"   nullable="true">
+			<group name="Scalar Types.">
+				<from type="String">return p == null? null: (UInt16?)Convert.ToUInt16(p);</from>
+				<br/>
+				<from type="SByte"/>
+				<from type="Int16"/>
+				<from type="Int32"/>
+				<from type="Int64"/>
+				<br/>
+				<from type="Byte" />
+				<from type="UInt32"/>
+				<from type="UInt16" >return                  p; </from>
+				<from type="UInt64"/>
+				<br/>
+				<from type="Char"/>
+				<from type="Single"/>
+				<from type="Double"/>
+				<br/>
+				<from type="Boolean"/>
+				<from type="Decimal"/>
+				<from type="DateTime"/>
+			</group>
+
+			<group name="Nullable Types.">
+				<from type="SByte?"   />
+				<from type="Int16?"  />
+				<from type="Int32?"   />
+				<from type="Int64?"   />
+				<br/>
+				<from type="Byte?"    />
+				<from type="UInt32?"  />
+				<from type="UInt64?"  />
+				<br/>
+				<from type="Char?"    />
+				<from type="Single?"  />
+				<from type="Double?"  />
+				<br/>
+				<from type="Boolean?" />
+				<from type="Decimal?" />
+				<from type="DateTime?"/>
+				<default>return p.HasValue? (UInt16?)Convert.ToUInt16(p.Value) : null;</default>
+			</group>
+
+			<group name="SqlTypes.">
+				<from type="SqlString"  />
+				<br/>
+				<from type="SqlByte"    />
+				<from type="SqlInt16"   />
+				<from type="SqlInt32"   />
+				<from type="SqlInt64"   />
+				<br/>
+				<from type="SqlSingle"  />
+				<from type="SqlDouble"  />
+				<from type="SqlDecimal" />
+				<from type="SqlMoney"   />
+				<br/>
+				<from type="SqlBoolean" />
+				<from type="SqlDateTime"/>
+				<default>return p.IsNull? null: (UInt16?)Convert.ToUInt16(p.Value);</default>
+			</group>
+			<default>return Convert.ToUInt16(p);</default>
+		</converter>
+		<converter type="UInt32"   nullable="true">
+			<group name="Scalar Types.">
+				<from type="String">return p == null? null: (UInt32?)Convert.ToUInt32(p);</from>
+				<br/>
+				<from type="SByte"/>
+				<from type="Int16"/>
+				<from type="Int32"/>
+				<from type="Int64"/>
+				<br/>
+				<from type="Byte" />
+				<from type="UInt16"/>
+				<from type="UInt32" >return                  p; </from>
+				<from type="UInt64"/>
+				<br/>
+				<from type="Char"/>
+				<from type="Single"/>
+				<from type="Double"/>
+				<br/>
+				<from type="Boolean"/>
+				<from type="Decimal"/>
+				<from type="DateTime"/>
+			</group>
+
+			<group name="Nullable Types.">
+				<from type="SByte?"   />
+				<from type="Int16?"   />
+				<from type="Int32?"  />
+				<from type="Int64?"   />
+				<br/>
+				<from type="Byte?"    />
+				<from type="UInt16?"  />
+				<from type="UInt64?"  />
+				<br/>
+				<from type="Char?"    />
+				<from type="Single?"  />
+				<from type="Double?"  />
+				<br/>
+				<from type="Boolean?" />
+				<from type="Decimal?" />
+				<from type="DateTime?"/>
+				<default>return p.HasValue? (UInt32?)Convert.ToUInt32(p.Value) : null;</default>
+			</group>
+
+			<group name="SqlTypes.">
+				<from type="SqlString"  />
+				<br/>
+				<from type="SqlByte"    />
+				<from type="SqlInt16"   />
+				<from type="SqlInt32"   />
+				<from type="SqlInt64"   />
+				<br/>
+				<from type="SqlSingle"  />
+				<from type="SqlDouble"  />
+				<from type="SqlDecimal" />
+				<from type="SqlMoney"   />
+				<br/>
+				<from type="SqlBoolean" />
+				<from type="SqlDateTime"/>
+				<default>return p.IsNull? null: (UInt32?)Convert.ToUInt32(p.Value);</default>
+			</group>
+			<default>return Convert.ToUInt32(p);</default>
+		</converter>
+		<converter type="UInt64"   nullable="true">
+			<group name="Scalar Types.">
+				<from type="String">return p == null? null: (UInt64?)Convert.ToUInt64(p);</from>
+				<br/>
+				<from type="SByte"/>
+				<from type="Int16"/>
+				<from type="Int32"/>
+				<from type="Int64"/>
+				<br/>
+				<from type="Byte" />
+				<from type="UInt16"/>
+				<from type="UInt32"/>
+				<from type="UInt64" >return                  p; </from>
+				<br/>
+				<from type="Char"/>
+				<from type="Single"/>
+				<from type="Double"/>
+				<br/>
+				<from type="Boolean"/>
+				<from type="Decimal"/>
+				<from type="DateTime"/>
+			</group>
+
+			<group name="Nullable Types.">
+				<from type="SByte?"   />
+				<from type="Int16?"   />
+				<from type="Int32?"   />
+				<from type="Int64?"  />
+				<br/>
+				<from type="Byte?"    />
+				<from type="UInt16?"  />
+				<from type="UInt32?"  />
+				<br/>
+				<from type="Char?"    />
+				<from type="Single?"  />
+				<from type="Double?"  />
+				<br/>
+				<from type="Boolean?" />
+				<from type="Decimal?" />
+				<from type="DateTime?"/>
+				<default>return p.HasValue? (UInt64?)Convert.ToUInt64(p.Value) : null;</default>
+			</group>
+
+			<group name="SqlTypes.">
+				<from type="SqlString"  />
+				<br/>
+				<from type="SqlByte"    />
+				<from type="SqlInt16"   />
+				<from type="SqlInt32"   />
+				<from type="SqlInt64"   />
+				<br/>
+				<from type="SqlSingle"  />
+				<from type="SqlDouble"  />
+				<from type="SqlDecimal" />
+				<from type="SqlMoney"   />
+				<br/>
+				<from type="SqlBoolean" />
+				<from type="SqlDateTime"/>
+				<default>return p.IsNull? null: (UInt64?)Convert.ToUInt64(p.Value);</default>
+			</group>
+			<default>return Convert.ToUInt64(p);</default>
+		</converter>
+		<br/>
+		<converter type="Char"     nullable="true">
+			<group name="Scalar Types.">
+				<from type="String">return p == null? null: (Char?)Convert.ToChar(p);</from>
+				<br/>
+				<from type="SByte"/>
+				<from type="Int16"/>
+				<from type="Int32"/>
+				<from type="Int64"/>
+				<br/>
+				<from type="Byte" />
+				<from type="UInt16"/>
+				<from type="UInt32"/>
+				<from type="UInt64"/>
+				<br/>
+				<from type="Char" >return                p; </from>
+				<from type="Single"/>
+				<from type="Double"/>
+				<br/>
+				<from type="Boolean"/>
+				<from type="Decimal"/>
+				<from type="DateTime"/>
+			</group>
+
+			<group name="Nullable Types.">
+				<from type="SByte?"   />
+				<from type="Int16?"   />
+				<from type="Int32?"   />
+				<from type="Int64?"   />
+				<br/>
+				<from type="Byte?"    />
+				<from type="UInt16?"  />
+				<from type="UInt32?"  />
+				<from type="UInt64?"  />
+				<br/>
+				<from type="Single?"  />
+				<from type="Double?"  />
+				<br/>
+				<from type="Boolean?" />
+				<from type="Decimal?" />
+				<from type="DateTime?"/>
+				<default>return p.HasValue? (Char?)Convert.ToChar(p.Value) : null;</default>
+			</group>
+
+			<group name="SqlTypes.">
+				<from type="SqlString"  />
+				<br/>
+				<from type="SqlByte"    />
+				<from type="SqlInt16"   />
+				<from type="SqlInt32"   />
+				<from type="SqlInt64"   />
+				<br/>
+				<from type="SqlSingle"  />
+				<from type="SqlDouble"  />
+				<from type="SqlDecimal" />
+				<from type="SqlMoney"   />
+				<br/>
+				<from type="SqlBoolean" />
+				<from type="SqlDateTime"/>
+				<default>return p.IsNull? null: (Char?)Convert.ToChar(p.Value);</default>
+			</group>
+			<default>return Convert.ToChar(p);</default>
+		</converter>
+		<converter type="Single"   nullable="true">
+			<group name="Scalar Types.">
+				<from type="String">return p == null? null: (Single?)Convert.ToSingle(p);</from>
+				<br/>
+				<from type="SByte"/>
+				<from type="Int16"/>
+				<from type="Int32"/>
+				<from type="Int64"/>
+				<br/>
+				<from type="Byte" />
+				<from type="UInt16"/>
+				<from type="UInt32"/>
+				<from type="UInt64"/>
+				<br/>
+				<from type="Char"/>
+				<from type="Single" >return                  p; </from>
+				<from type="Double"/>
+				<br/>
+				<from type="Boolean"/>
+				<from type="Decimal"/>
+				<from type="DateTime"/>
+			</group>
+
+			<group name="Nullable Types.">
+				<from type="SByte?"   />
+				<from type="Int16?"   />
+				<from type="Int32?"   />
+				<from type="Int64?"  />
+				<br/>
+				<from type="Byte?"    />
+				<from type="UInt16?"  />
+				<from type="UInt32?"  />
+				<from type="UInt64?"  />
+				<br/>
+				<from type="Char?"    />
+				<from type="Double?"  />
+				<br/>
+				<from type="Boolean?" />
+				<from type="Decimal?" />
+				<from type="DateTime?"/>
+				<default>return p.HasValue? (Single?)Convert.ToSingle(p.Value) : null;</default>
+			</group>
+
+			<group name="SqlTypes.">
+				<from type="SqlString"  />
+				<br/>
+				<from type="SqlByte"    />
+				<from type="SqlInt16"   />
+				<from type="SqlInt32"   />
+				<from type="SqlInt64"   />
+				<br/>
+				<from type="SqlSingle"   >return p.IsNull? null: (Single?)                 p.Value; </from>
+				<from type="SqlDouble"  />
+				<from type="SqlDecimal" />
+				<from type="SqlMoney"   />
+				<br/>
+				<from type="SqlBoolean" />
+				<from type="SqlDateTime"/>
+				<default>return p.IsNull? null: (Single?)Convert.ToSingle(p.Value);</default>
+			</group>
+			<default>return Convert.ToSingle(p);</default>
+		</converter>
+		<converter type="Double"   nullable="true">
+			<group name="Scalar Types.">
+				<from type="String">return p == null? null: (Double?)Convert.ToDouble(p);</from>
+				<br/>
+				<from type="SByte"/>
+				<from type="Int16"/>
+				<from type="Int32"/>
+				<from type="Int64"/>
+				<br/>
+				<from type="Byte" />
+				<from type="UInt16"/>
+				<from type="UInt32"/>
+				<from type="UInt64"/>
+				<br/>
+				<from type="Char"/>
+				<from type="Single"/>
+				<from type="Double" >return                  p; </from>
+				<br/>
+				<from type="Boolean"/>
+				<from type="Decimal"/>
+				<from type="DateTime"/>
+			</group>
+
+			<group name="Nullable Types.">
+				<from type="SByte?"   />
+				<from type="Int16?"   />
+				<from type="Int32?"   />
+				<from type="Int64?"  />
+				<br/>
+				<from type="Byte?"    />
+				<from type="UInt16?"  />
+				<from type="UInt32?"  />
+				<from type="UInt64?"  />
+				<br/>
+				<from type="Char?"    />
+				<from type="Single?"  />
+				<br/>
+				<from type="Boolean?" />
+				<from type="Decimal?" />
+				<from type="DateTime?"/>
+				<default>return p.HasValue? (Double?)Convert.ToDouble(p.Value) : null;</default>
+			</group>
+
+			<group name="SqlTypes.">
+				<from type="SqlString"  />
+				<br/>
+				<from type="SqlByte"    />
+				<from type="SqlInt16"   />
+				<from type="SqlInt32"   />
+				<from type="SqlInt64"   />
+				<br/>
+				<from type="SqlSingle"  />
+				<from type="SqlDouble"   >return p.IsNull? null: (Double?)                 p.Value; </from>
+				<from type="SqlDecimal" />
+				<from type="SqlMoney"   />
+				<br/>
+				<from type="SqlBoolean" />
+				<from type="SqlDateTime"/>
+				<default>return p.IsNull? null: (Double?)Convert.ToDouble(p.Value);</default>
+			</group>
+			<default>return Convert.ToDouble(p);</default>
+		</converter>
+		<br/>
+		<converter type="Boolean"  nullable="true">
+			<group name="Scalar Types.">
+				<from type="String">return p == null? null: (Boolean?)Convert.ToBoolean(p);</from>
+				<br/>
+				<from type="SByte"/>
+				<from type="Int16"/>
+				<from type="Int32"/>
+				<from type="Int64"/>
+				<br/>
+				<from type="Byte" />
+				<from type="UInt16"/>
+				<from type="UInt32"/>
+				<from type="UInt64"/>
+				<br/>
+				<from type="Char"/>
+				<from type="Single"/>
+				<from type="Double"/>
+				<br/>
+				<from type="Boolean" >return                   p; </from>
+				<from type="Decimal"/>
+				<from type="DateTime"/>
+			</group>
+
+			<group name="Nullable Types.">
+				<from type="SByte?"   />
+				<from type="Int16?"   />
+				<from type="Int32?"   />
+				<from type="Int64?"  />
+				<br/>
+				<from type="Byte?"    />
+				<from type="UInt16?"  />
+				<from type="UInt32?"  />
+				<from type="UInt64?"  />
+				<br/>
+				<from type="Char?"    />
+				<from type="Single?"  />
+				<from type="Double?" />
+				<br/>
+				<from type="Decimal?" />
+				<from type="DateTime?"/>
+				<default>return p.HasValue? (Boolean?)Convert.ToBoolean(p.Value) : null;</default>
+			</group>
+
+			<group name="SqlTypes.">
+				<from type="SqlString"  />
+				<br/>
+				<from type="SqlByte"    />
+				<from type="SqlInt16"   />
+				<from type="SqlInt32"   />
+				<from type="SqlInt64"   />
+				<br/>
+				<from type="SqlSingle"  />
+				<from type="SqlDouble" />
+				<from type="SqlDecimal" />
+				<from type="SqlMoney"   />
+				<br/>
+				<from type="SqlBoolean"   >return p.IsNull? null: (Boolean?)                  p.Value; </from>
+				<from type="SqlDateTime"/>
+				<default>return p.IsNull? null: (Boolean?)Convert.ToBoolean(p.Value);</default>
+			</group>
+			<default>return Convert.ToBoolean(p);</default>
+		</converter>
+		<converter type="Decimal"  nullable="true">
+			<group name="Scalar Types.">
+				<from type="String">return p == null? null: (Decimal?)Convert.ToDecimal(p);</from>
+				<br/>
+				<from type="SByte"/>
+				<from type="Int16"/>
+				<from type="Int32"/>
+				<from type="Int64"/>
+				<br/>
+				<from type="Byte" />
+				<from type="UInt16"/>
+				<from type="UInt32"/>
+				<from type="UInt64"/>
+				<br/>
+				<from type="Char"/>
+				<from type="Single"/>
+				<from type="Double"/>
+				<br/>
+				<from type="Boolean"/>
+				<from type="Decimal" >return                   p; </from>
+				<from type="DateTime"/>
+			</group>
+
+			<group name="Nullable Types.">
+				<from type="SByte?"   />
+				<from type="Int16?"   />
+				<from type="Int32?"   />
+				<from type="Int64?"  />
+				<br/>
+				<from type="Byte?"    />
+				<from type="UInt16?"  />
+				<from type="UInt32?"  />
+				<from type="UInt64?"  />
+				<br/>
+				<from type="Char?"    />
+				<from type="Single?"  />
+				<from type="Double?" />
+				<br/>
+				<from type="Boolean?" />
+				<from type="DateTime?"/>
+				<default>return p.HasValue? (Decimal?)Convert.ToDecimal(p.Value) : null;</default>
+			</group>
+
+			<group name="SqlTypes.">
+				<from type="SqlString"  />
+				<br/>
+				<from type="SqlByte"    />
+				<from type="SqlInt16"   />
+				<from type="SqlInt32"   />
+				<from type="SqlInt64"   />
+				<br/>
+				<from type="SqlSingle"  />
+				<from type="SqlDouble"  />
+				<from type="SqlDecimal"  >return p.IsNull? null: (Decimal?)                  p.Value; </from>
+				<from type="SqlMoney"    >return p.IsNull? null: (Decimal?)                  p.Value; </from>
+				<br/>
+				<from type="SqlBoolean" />
+				<from type="SqlDateTime"/>
+				<default>return p.IsNull? null: (Decimal?)Convert.ToDecimal(p.Value);</default>
+			</group>
+			<default>return Convert.ToDecimal(p);</default>
+		</converter>
+		<converter type="DateTime" nullable="true">
+			<group name="Scalar Types.">
+				<from type="String">return p == null? null: (DateTime?)Convert.ToDateTime(p);</from>
+				<br/>
+				<from type="SByte"/>
+				<from type="Int16"/>
+				<from type="Int32"/>
+				<from type="Int64"/>
+				<br/>
+				<from type="Byte" />
+				<from type="UInt16"/>
+				<from type="UInt32"/>
+				<from type="UInt64"/>
+				<br/>
+				<from type="Char"/>
+				<from type="Single"/>
+				<from type="Double"/>
+				<br/>
+				<from type="Boolean"/>
+				<from type="Decimal"/>
+				<from type="DateTime" >return                    p; </from>
+			</group>
+
+			<group name="Nullable Types.">
+				<from type="SByte?"   />
+				<from type="Int16?"   />
+				<from type="Int32?"   />
+				<from type="Int64?"  />
+				<br/>
+				<from type="Byte?"    />
+				<from type="UInt16?"  />
+				<from type="UInt32?"  />
+				<from type="UInt64?"  />
+				<br/>
+				<from type="Char?"    />
+				<from type="Single?"  />
+				<from type="Double?" />
+				<br/>
+				<from type="Boolean?" />
+				<from type="Decimal?"/>
+				<default>return p.HasValue? (DateTime?)Convert.ToDateTime(p.Value) : null;</default>
+			</group>
+
+			<group name="SqlTypes.">
+				<from type="SqlString"  />
+				<br/>
+				<from type="SqlByte"    />
+				<from type="SqlInt16"   />
+				<from type="SqlInt32"   />
+				<from type="SqlInt64"   />
+				<br/>
+				<from type="SqlSingle"  />
+				<from type="SqlDouble"  />
+				<from type="SqlDecimal"/>
+				<from type="SqlMoney"/>
+				<br/>
+				<from type="SqlBoolean" />
+				<from type="SqlDateTime" >return p.IsNull? null: (DateTime?)                   p.Value; </from>
+				<default>return p.IsNull? null: (DateTime?)Convert.ToDateTime(p.Value);</default>
+			</group>
+			<default>return Convert.ToDateTime(p);</default>
+		</converter>
+		<converter type="TimeSpan" nullable="true">
+			<group name="Scalar Types.">
+				<from type="String"  >return p == null? null: (TimeSpan?)TimeSpan.Parse(p);</from>
+				<from type="DateTime">return p - DateTime.MinValue;</from>
+				<from type="TimeSpan">return p;</from>
+			</group>
+
+			<group name="Nullable Types.">
+				<from type="DateTime?">return p.HasValue? (TimeSpan?)(p.Value - DateTime.MinValue) : null;</from>
+			</group>
+
+			<group name="SqlTypes.">
+				<from type="SqlString"  >return p.IsNull? null: (TimeSpan?)TimeSpan.Parse(p.Value);      </from>
+				<from type="SqlDateTime">return p.IsNull? null: (TimeSpan?)(p.Value - DateTime.MinValue);</from>
+			</group>
+			<default nullvalue="null"/>
+		</converter>
+		<converter type="Guid"     nullable="true">
+			<group name="Scalar Types.">
+				<from type="String"   >return p == null? null: (Guid?)new Guid(p);</from>
+				<from type="Guid"     >return p;</from>
+			</group>
+			<group name="Nullable Types.">
+			</group>
+			<group name="SqlTypes.">
+				<from type="SqlString">return p.IsNull? null: (Guid?)new Guid(p.Value);  </from>
+				<from type="SqlGuid"  >return p.IsNull? null: (Guid?)p.Value;            </from>
+				<from type="SqlBinary">return p.IsNull? null: (Guid?)p.ToSqlGuid().Value;</from>
+			</group>
+			<default nullvalue="null"/>
+		</converter>
+	</region>
+	<region name="SqlTypes">
+		<converter type="SqlString">
+			<group name="Scalar Types.">
+				<from type="String"   >return p == null? SqlString.Null: (SqlString)p;</from>
+				<from type="Char[]"  />
+				<br/>
+				<from type="SByte"   />
+				<from type="Int16"   />
+				<from type="Int32"   />
+				<from type="Int64"   />
+				<br/>
+				<from type="Byte"    />
+				<from type="UInt16"  />
+				<from type="UInt32"  />
+				<from type="UInt64"  />
+				<br/>
+				<from type="Char"    />
+				<from type="Single"  />
+				<from type="Double"  />
+				<br/>
+				<from type="Boolean" />
+				<from type="Decimal" />
+				<from type="DateTime"/>
+				<from type="TimeSpan"/>
+				<from type="Guid"    />
+				<default>return p.ToString();</default>
+			</group>
+
+			<group name="Nullable Types.">
+				<from type="SByte?"   />
+				<from type="Int16?"   />
+				<from type="Int32?"   />
+				<from type="Int64?"   />
+				<br/>
+				<from type="Byte?"    />
+				<from type="UInt16?"  />
+				<from type="UInt32?"  />
+				<from type="UInt64?"  />
+				<br/>
+				<from type="Char?"    />
+				<from type="Single?"  />
+				<from type="Double?"  />
+				<br/>
+				<from type="Boolean?" />
+				<from type="Decimal?" />
+				<from type="DateTime?"/>
+				<from type="TimeSpan?"/>
+				<from type="Guid?"    />
+				<default>return p.HasValue? (SqlString)p.ToString(): SqlString.Null;</default>
+			</group>
+
+			<group name="SqlTypes.">
+				<from type="SqlChars"  />
+				<td/>
+				<from type="SqlByte"    />
+				<from type="SqlInt16"   />
+				<from type="SqlInt32"   />
+				<from type="SqlInt64"   />
+				<br/>
+				<from type="SqlSingle"  />
+				<from type="SqlDouble"  />
+				<from type="SqlDecimal" />
+				<from type="SqlMoney"   />
+				<br/>
+				<from type="SqlBoolean" />
+				<from type="SqlDateTime"/>
+				<from type="SqlGuid"    />
+				<from type="SqlBinary"   >return p.IsNull? SqlString.Null: (SqlString)p.ToString();</from>
+				<default>return p.ToSqlString();</default>
+			</group>
+			<default>return Convert.ToString(p);</default>
+		</converter>
+		<br/>
+		<converter type="SqlByte">
+			<group name="Scalar Types.">
+				<from type="String"   >return p == null? SqlByte.Null: SqlByte.Parse(p);</from>
+				<br/>
+				<from type="SByte"   />
+				<from type="Int16"   />
+				<from type="Int32"   />
+				<from type="Int64"   />
+				<br/>
+				<from type="Byte"     >return                p; </from>
+				<from type="UInt16"  />
+				<from type="UInt32"  />
+				<from type="UInt64"  />
+				<br/>
+				<from type="Char"    />
+				<from type="Single"  />
+				<from type="Double"  />
+				<br/>
+				<from type="Boolean" />
+				<from type="Decimal" />
+				<from type="DateTime"/>
+			</group>
+
+			<group name="Nullable Types.">
+				<from type="SByte?"   />
+				<from type="Int16?"   />
+				<from type="Int32?"   />
+				<from type="Int64?"   />
+				<br/>
+				<from type="Byte?"     >return p.HasValue?                p.Value  : SqlByte.Null;</from>
+				<from type="UInt16?"  />
+				<from type="UInt32?"  />
+				<from type="UInt64?"  />
+				<br/>
+				<from type="Char?"    />
+				<from type="Single?"  />
+				<from type="Double?"  />
+				<br/>
+				<from type="Boolean?" />
+				<from type="Decimal?" />
+				<from type="DateTime?"/>
+				<default>return p.HasValue? Convert.ToByte(p.Value) : SqlByte.Null;</default>
+			</group>
+
+			<group name="SqlTypes.">
+				<from type="SqlString"  />
+				<br/>
+				<from type="SqlInt16"   />
+				<from type="SqlInt32"   />
+				<from type="SqlInt64"   />
+				<br/>
+				<from type="SqlSingle"  />
+				<from type="SqlDouble"  />
+				<from type="SqlDecimal" />
+				<from type="SqlMoney"   />
+				<br/>
+				<from type="SqlBoolean" />
+				<from type="SqlDateTime">return p.IsNull? SqlByte.Null: Convert.ToByte(p.Value);</from>
+				<default>return p.ToSqlByte();</default>
+			</group>
+			<default>return Convert.ToByte(p);</default>
+		</converter>
+		<converter type="SqlInt16">
+			<group name="Scalar Types.">
+				<from type="String"   >return p == null? SqlInt16.Null: SqlInt16.Parse(p);</from>
+				<br/>
+				<from type="SByte"   />
+				<from type="Int16"    >return                 p; </from>
+				<from type="Int32"   />
+				<from type="Int64"   />
+				<br/>
+				<from type="Byte"    />
+				<from type="UInt16"  />
+				<from type="UInt32"  />
+				<from type="UInt64"  />
+				<br/>
+				<from type="Char"    />
+				<from type="Single"  />
+				<from type="Double"  />
+				<br/>
+				<from type="Boolean" />
+				<from type="Decimal" />
+				<from type="DateTime"/>
+			</group>
+
+			<group name="Nullable Types.">
+				<from type="SByte?"   />
+				<from type="Int16?"    >return p.HasValue?                 p.Value  : SqlInt16.Null;</from>
+				<from type="Int32?"   />
+				<from type="Int64?"   />
+				<br/>
+				<from type="Byte?"    />
+				<from type="UInt16?"  />
+				<from type="UInt32?"  />
+				<from type="UInt64?"  />
+				<br/>
+				<from type="Char?"    />
+				<from type="Single?"  />
+				<from type="Double?"  />
+				<br/>
+				<from type="Boolean?" />
+				<from type="Decimal?" />
+				<from type="DateTime?"/>
+				<default>return p.HasValue? Convert.ToInt16(p.Value) : SqlInt16.Null;</default>
+			</group>
+
+			<group name="SqlTypes.">
+				<from type="SqlString"  />
+				<br/>
+				<from type="SqlByte"    />
+				<from type="SqlInt32"   />
+				<from type="SqlInt64"   />
+				<br/>
+				<from type="SqlSingle"  />
+				<from type="SqlDouble"  />
+				<from type="SqlDecimal" />
+				<from type="SqlMoney"   />
+				<br/>
+				<from type="SqlBoolean" />
+				<from type="SqlDateTime">return p.IsNull? SqlInt16.Null: Convert.ToInt16(p.Value);</from>
+				<default>return p.ToSqlInt16();</default>
+			</group>
+			<default>return Convert.ToInt16(p);</default>
+		</converter>
+		<converter type="SqlInt32">
+			<group name="Scalar Types.">
+				<from type="String"   >return p == null? SqlInt32.Null: SqlInt32.Parse(p);</from>
+				<br/>
+				<from type="SByte"   />
+				<from type="Int16"   />
+				<from type="Int32"    >return                 p; </from>
+				<from type="Int64"   />
+				<br/>
+				<from type="Byte"    />
+				<from type="UInt16"  />
+				<from type="UInt32"  />
+				<from type="UInt64"  />
+				<br/>
+				<from type="Char"    />
+				<from type="Single"  />
+				<from type="Double"  />
+				<br/>
+				<from type="Boolean" />
+				<from type="Decimal" />
+				<from type="DateTime"/>
+			</group>
+
+			<group name="Nullable Types.">
+				<from type="SByte?"   />
+				<from type="Int16?"   />
+				<from type="Int32?"    >return p.HasValue?                 p.Value  : SqlInt32.Null;</from>
+				<from type="Int64?"   />
+				<br/>
+				<from type="Byte?"    />
+				<from type="UInt16?"  />
+				<from type="UInt32?"  />
+				<from type="UInt64?"  />
+				<br/>
+				<from type="Char?"    />
+				<from type="Single?"  />
+				<from type="Double?"  />
+				<br/>
+				<from type="Boolean?" />
+				<from type="Decimal?" />
+				<from type="DateTime?"/>
+				<default>return p.HasValue? Convert.ToInt32(p.Value) : SqlInt32.Null;</default>
+			</group>
+
+			<group name="SqlTypes.">
+				<from type="SqlString"  />
+				<br/>
+				<from type="SqlByte"    />
+				<from type="SqlInt16"   />
+				<from type="SqlInt64"   />
+				<br/>
+				<from type="SqlSingle"  />
+				<from type="SqlDouble"  />
+				<from type="SqlDecimal" />
+				<from type="SqlMoney"   />
+				<br/>
+				<from type="SqlBoolean" />
+				<from type="SqlDateTime">return p.IsNull? SqlInt32.Null: Convert.ToInt32(p.Value);</from>
+				<default>return p.ToSqlInt32();</default>
+			</group>
+			<default>return Convert.ToInt32(p);</default>
+		</converter>
+		<converter type="SqlInt64">
+			<group name="Scalar Types.">
+				<from type="String"   >return p == null? SqlInt64.Null: SqlInt64.Parse(p);</from>
+				<br/>
+				<from type="SByte"   />
+				<from type="Int16"   />
+				<from type="Int32"   />
+				<from type="Int64"    >return                 p; </from>
+				<br/>
+				<from type="Byte"    />
+				<from type="UInt16"  />
+				<from type="UInt32"  />
+				<from type="UInt64"  />
+				<br/>
+				<from type="Char"    />
+				<from type="Single"  />
+				<from type="Double"  />
+				<br/>
+				<from type="Boolean" />
+				<from type="Decimal" />
+				<from type="DateTime"/>
+			</group>
+
+			<group name="Nullable Types.">
+				<from type="SByte?"   />
+				<from type="Int16?"   />
+				<from type="Int32?"   />
+				<from type="Int64?"    >return p.HasValue?                 p.Value  : SqlInt64.Null;</from>
+				<br/>
+				<from type="Byte?"    />
+				<from type="UInt16?"  />
+				<from type="UInt32?"  />
+				<from type="UInt64?"  />
+				<br/>
+				<from type="Char?"    />
+				<from type="Single?"  />
+				<from type="Double?"  />
+				<br/>
+				<from type="Boolean?" />
+				<from type="Decimal?" />
+				<from type="DateTime?"/>
+				<default>return p.HasValue? Convert.ToInt64(p.Value) : SqlInt64.Null;</default>
+			</group>
+
+			<group name="SqlTypes.">
+				<from type="SqlString"  />
+				<br/>
+				<from type="SqlByte"    />
+				<from type="SqlInt16"   />
+				<from type="SqlInt32"   />
+				<br/>
+				<from type="SqlSingle"  />
+				<from type="SqlDouble"  />
+				<from type="SqlDecimal" />
+				<from type="SqlMoney"   />
+				<br/>
+				<from type="SqlBoolean" />
+				<from type="SqlDateTime">return p.IsNull? SqlInt64.Null: Convert.ToInt64(p.Value);</from>
+				<default>return p.ToSqlInt64();</default>
+			</group>
+			<default>return Convert.ToInt64(p);</default>
+		</converter>
+		<br/>
+		<converter type="SqlSingle">
+			<group name="Scalar Types.">
+				<from type="String"   >return p == null? SqlSingle.Null: SqlSingle.Parse(p);</from>
+				<br/>
+				<from type="SByte"   />
+				<from type="Int16"   />
+				<from type="Int32"   />
+				<from type="Int64"   />
+				<br/>
+				<from type="Byte"    />
+				<from type="UInt16"  />
+				<from type="UInt32"  />
+				<from type="UInt64"  />
+				<br/>
+				<from type="Char"    />
+				<from type="Single"    >return                  p; </from>
+				<from type="Double"  />
+				<br/>
+				<from type="Boolean" />
+				<from type="Decimal" />
+				<from type="DateTime"/>
+			</group>
+
+			<group name="Nullable Types.">
+				<from type="SByte?"   />
+				<from type="Int16?"   />
+				<from type="Int32?"   />
+				<from type="Int64?"   />
+				<br/>
+				<from type="Byte?"    />
+				<from type="UInt16?"  />
+				<from type="UInt32?"  />
+				<from type="UInt64?"  />
+				<br/>
+				<from type="Char?"    />
+				<from type="Single?"    >return p.HasValue?                  p.Value  : SqlSingle.Null;</from>
+				<from type="Double?"  />
+				<br/>
+				<from type="Boolean?" />
+				<from type="Decimal?" />
+				<from type="DateTime?"/>
+				<default>return p.HasValue? Convert.ToSingle(p.Value) : SqlSingle.Null;</default>
+			</group>
+
+			<group name="SqlTypes.">
+				<from type="SqlString"  />
+				<br/>
+				<from type="SqlByte"    />
+				<from type="SqlInt16"   />
+				<from type="SqlInt32"   />
+				<from type="SqlInt64"   />
+				<br/>
+				<from type="SqlDouble"  />
+				<from type="SqlDecimal" />
+				<from type="SqlMoney"   />
+				<br/>
+				<from type="SqlBoolean" />
+				<from type="SqlDateTime">return p.IsNull? SqlSingle.Null: Convert.ToSingle(p.Value);</from>
+				<default>return p.ToSqlSingle();</default>
+			</group>
+			<default>return Convert.ToSingle(p);</default>
+		</converter>
+		<converter type="SqlDouble">
+			<group name="Scalar Types.">
+				<from type="String"   >return p == null? SqlDouble.Null: SqlDouble.Parse(p);</from>
+				<br/>
+				<from type="SByte"   />
+				<from type="Int16"   />
+				<from type="Int32"   />
+				<from type="Int64"   />
+				<br/>
+				<from type="Byte"    />
+				<from type="UInt16"  />
+				<from type="UInt32"  />
+				<from type="UInt64"  />
+				<br/>
+				<from type="Char"    />
+				<from type="Single"  />
+				<from type="Double"    >return                  p; </from>
+				<br/>
+				<from type="Boolean" />
+				<from type="Decimal" />
+				<from type="DateTime"/>
+			</group>
+
+			<group name="Nullable Types.">
+				<from type="SByte?"   />
+				<from type="Int16?"   />
+				<from type="Int32?"   />
+				<from type="Int64?"   />
+				<br/>
+				<from type="Byte?"    />
+				<from type="UInt16?"  />
+				<from type="UInt32?"  />
+				<from type="UInt64?"  />
+				<br/>
+				<from type="Char?"    />
+				<from type="Single?"  />
+				<from type="Double?"    >return p.HasValue?                  p.Value  : SqlDouble.Null;</from>
+				<br/>
+				<from type="Boolean?" />
+				<from type="Decimal?" />
+				<from type="DateTime?"/>
+				<default>return p.HasValue? Convert.ToDouble(p.Value) : SqlDouble.Null;</default>
+			</group>
+
+			<group name="SqlTypes.">
+				<from type="SqlString"  />
+				<br/>
+				<from type="SqlByte"    />
+				<from type="SqlInt16"   />
+				<from type="SqlInt32"   />
+				<from type="SqlInt64"   />
+				<br/>
+				<from type="SqlSingle"  />
+				<from type="SqlDecimal" />
+				<from type="SqlMoney"   />
+				<br/>
+				<from type="SqlBoolean" />
+				<from type="SqlDateTime">return p.IsNull? SqlDouble.Null: Convert.ToDouble(p.Value);</from>
+				<default>return p.ToSqlDouble();</default>
+			</group>
+			<default>return Convert.ToDouble(p);</default>
+		</converter>
+		<converter type="SqlDecimal">
+			<group name="Scalar Types.">
+				<from type="String"   >return p == null? SqlDecimal.Null: SqlDecimal.Parse(p);</from>
+				<br/>
+				<from type="SByte"   />
+				<from type="Int16"   />
+				<from type="Int32"   />
+				<from type="Int64"   />
+				<br/>
+				<from type="Byte"    />
+				<from type="UInt16"  />
+				<from type="UInt32"  />
+				<from type="UInt64"  />
+				<br/>
+				<from type="Char"    />
+				<from type="Single"  />
+				<from type="Double"  />
+				<br/>
+				<from type="Boolean" />
+				<from type="Decimal"  >return                   p; </from>
+				<from type="DateTime"/>
+			</group>
+
+			<group name="Nullable Types.">
+				<from type="SByte?"   />
+				<from type="Int16?"   />
+				<from type="Int32?"   />
+				<from type="Int64?"   />
+				<br/>
+				<from type="Byte?"    />
+				<from type="UInt16?"  />
+				<from type="UInt32?"  />
+				<from type="UInt64?"  />
+				<br/>
+				<from type="Char?"    />
+				<from type="Single?"  />
+				<from type="Double?"  />
+				<br/>
+				<from type="Boolean?" />
+				<from type="Decimal?"  >return p.HasValue?                   p.Value  : SqlDecimal.Null;</from>
+				<from type="DateTime?"/>
+				<default>return p.HasValue? Convert.ToDecimal(p.Value) : SqlDecimal.Null;</default>
+			</group>
+
+			<group name="SqlTypes.">
+				<from type="SqlString"  />
+				<br/>
+				<from type="SqlByte"    />
+				<from type="SqlInt16"   />
+				<from type="SqlInt32"   />
+				<from type="SqlInt64"   />
+				<br/>
+				<from type="SqlSingle"  />
+				<from type="SqlDouble" />
+				<from type="SqlMoney"   />
+				<br/>
+				<from type="SqlBoolean" />
+				<from type="SqlDateTime">return p.IsNull? SqlDecimal.Null: Convert.ToDecimal(p.Value);</from>
+				<default>return p.ToSqlDecimal();</default>
+			</group>
+			<default>return Convert.ToDecimal(p);</default>
+		</converter>
+		<converter type="SqlMoney">
+			<group name="Scalar Types.">
+				<from type="String"   >return p == null? SqlMoney.Null: SqlMoney.Parse(p);</from>
+				<br/>
+				<from type="SByte"   />
+				<from type="Int16"   />
+				<from type="Int32"   />
+				<from type="Int64"   />
+				<br/>
+				<from type="Byte"    />
+				<from type="UInt16"  />
+				<from type="UInt32"  />
+				<from type="UInt64"  />
+				<br/>
+				<from type="Char"    />
+				<from type="Single"  />
+				<from type="Double"  />
+				<br/>
+				<from type="Boolean" />
+				<from type="Decimal"  >return                   p; </from>
+				<from type="DateTime"/>
+			</group>
+
+			<group name="Nullable Types.">
+				<from type="SByte?"   />
+				<from type="Int16?"   />
+				<from type="Int32?"   />
+				<from type="Int64?"   />
+				<br/>
+				<from type="Byte?"    />
+				<from type="UInt16?"  />
+				<from type="UInt32?"  />
+				<from type="UInt64?"  />
+				<br/>
+				<from type="Char?"    />
+				<from type="Single?"  />
+				<from type="Double?"  />
+				<br/>
+				<from type="Boolean?" />
+				<from type="Decimal?"  >return p.HasValue?                   p.Value  : SqlMoney.Null;</from>
+				<from type="DateTime?"/>
+				<default>return p.HasValue? Convert.ToDecimal(p.Value) : SqlMoney.Null;</default>
+			</group>
+
+			<group name="SqlTypes.">
+				<from type="SqlString"  />
+				<br/>
+				<from type="SqlByte"    />
+				<from type="SqlInt16"   />
+				<from type="SqlInt32"   />
+				<from type="SqlInt64"   />
+				<br/>
+				<from type="SqlSingle"  />
+				<from type="SqlDouble" />
+				<from type="SqlDecimal"   />
+				<br/>
+				<from type="SqlBoolean" />
+				<from type="SqlDateTime">return p.IsNull? SqlMoney.Null: Convert.ToDecimal(p.Value);</from>
+				<default>return p.ToSqlMoney();</default>
+			</group>
+			<default>return Convert.ToDecimal(p);</default>
+		</converter>
+		<br/>
+		<converter type="SqlBoolean">
+			<group name="Scalar Types.">
+				<from type="String"   >return p == null? SqlBoolean.Null: SqlBoolean.Parse(p);</from>
+				<br/>
+				<from type="SByte"   />
+				<from type="Int16"   />
+				<from type="Int32"   />
+				<from type="Int64"   />
+				<br/>
+				<from type="Byte"    />
+				<from type="UInt16"  />
+				<from type="UInt32"  />
+				<from type="UInt64"  />
+				<br/>
+				<from type="Char"    />
+				<from type="Single"  />
+				<from type="Double"  />
+				<br/>
+				<from type="Boolean"  >return                   p; </from>
+				<from type="Decimal" />
+				<from type="DateTime"/>
+			</group>
+
+			<group name="Nullable Types.">
+				<from type="SByte?"   />
+				<from type="Int16?"   />
+				<from type="Int32?"   />
+				<from type="Int64?"   />
+				<br/>
+				<from type="Byte?"    />
+				<from type="UInt16?"  />
+				<from type="UInt32?"  />
+				<from type="UInt64?"  />
+				<br/>
+				<from type="Char?"    />
+				<from type="Single?"  />
+				<from type="Double?"  />
+				<br/>
+				<from type="Boolean?"  >return p.HasValue?                   p.Value  : SqlBoolean.Null;</from>
+				<from type="Decimal?" />
+				<from type="DateTime?"/>
+				<default>return p.HasValue? Convert.ToBoolean(p.Value) : SqlBoolean.Null;</default>
+			</group>
+
+			<group name="SqlTypes.">
+				<from type="SqlString"  />
+				<br/>
+				<from type="SqlByte"    />
+				<from type="SqlInt16"   />
+				<from type="SqlInt32"   />
+				<from type="SqlInt64"   />
+				<br/>
+				<from type="SqlSingle"  />
+				<from type="SqlDouble" />
+				<from type="SqlDecimal" />
+				<from type="SqlMoney"   />
+				<br/>
+				<from type="SqlDateTime">return p.IsNull? SqlBoolean.Null: Convert.ToBoolean(p.Value);</from>
+				<default>return p.ToSqlBoolean();</default>
+			</group>
+			<default>return Convert.ToBoolean(p);</default>
+		</converter>
+		<converter type="SqlDateTime">
+			<group name="Scalar Types.">
+				<from type="String"   >return p == null? SqlDateTime.Null: SqlDateTime.Parse(p);</from>
+				<br/>
+				<from type="SByte"   />
+				<from type="Int16"   />
+				<from type="Int32"   />
+				<from type="Int64"   />
+				<br/>
+				<from type="Byte"    />
+				<from type="UInt16"  />
+				<from type="UInt32"  />
+				<from type="UInt64"  />
+				<br/>
+				<from type="Char"    />
+				<from type="Single"  />
+				<from type="Double"  />
+				<br/>
+				<from type="Boolean"/>
+				<from type="Decimal" />
+				<from type="DateTime"  >return                    p; </from>
+			</group>
+
+			<group name="Nullable Types.">
+				<from type="SByte?"   />
+				<from type="Int16?"   />
+				<from type="Int32?"   />
+				<from type="Int64?"   />
+				<br/>
+				<from type="Byte?"    />
+				<from type="UInt16?"  />
+				<from type="UInt32?"  />
+				<from type="UInt64?"  />
+				<br/>
+				<from type="Char?"    />
+				<from type="Single?"  />
+				<from type="Double?"  />
+				<br/>
+				<from type="Boolean?"/>
+				<from type="Decimal?" />
+				<from type="DateTime?"  >return p.HasValue?                    p.Value  : SqlDateTime.Null;</from>
+				<default>return p.HasValue? Convert.ToDateTime(p.Value) : SqlDateTime.Null;</default>
+			</group>
+
+			<group name="SqlTypes.">
+				<from type="SqlString"  >return p.ToSqlDateTime();</from>
+				<br/>
+				<from type="SqlByte"    />
+				<from type="SqlInt16"   />
+				<from type="SqlInt32"   />
+				<from type="SqlInt64"   />
+				<br/>
+				<from type="SqlSingle"  />
+				<from type="SqlDouble" />
+				<from type="SqlDecimal" />
+				<from type="SqlMoney"   />
+				<br/>
+				<from type="SqlBoolean"></from>
+				<default>return p.IsNull? SqlDateTime.Null: Convert.ToDateTime(p.Value);</default>
+			</group>
+			<default>return Convert.ToDateTime(p);</default>
+		</converter>
+		<converter type="SqlGuid">
+			<group name="Scalar Types.">
+				<from type="String"   >return p == null? SqlGuid.Null: SqlGuid.Parse(p);</from>
+				<from type="Guid"     >return p;</from>
+			</group>
+			<group name="Nullable Types.">
+				<from type="Guid?"    >return p.HasValue? p.Value : SqlGuid.Null;</from>
+			</group>
+			<group name="SqlTypes.">
+				<from type="SqlString"/>
+				<from type="SqlBinary"/>
+				<default>return p.ToSqlGuid();</default>
+			</group>
+			<default nullvalue="SqlGuid.Null"/>
+		</converter>
+		<converter type="SqlBinary">
+			<group name="Scalar Types.">
+				<from type="Guid"   >return p == Guid.Empty? SqlBinary.Null: new SqlGuid(p).ToSqlBinary();</from>
+				<from type="Byte[]"   >return p;</from>
+			</group>
+			<group name="Nullable Types.">
+				<from type="Guid?"  >return p.HasValue? new SqlGuid(p.Value).ToSqlBinary(): SqlBinary.Null;</from>
+			</group>
+			<group name="SqlTypes.">
+				<from type="SqlGuid"/>
+				<from type="SqlBytes"/>
+				<default>return p.ToSqlBinary();</default>
+			</group>
+			<default nullvalue="SqlBinary.Null"/>
+		</converter>
+		<converter type="SqlBytes">
+			<group name="Scalar Types.">
+				<from type="Guid"   >return p == Guid.Empty? SqlBytes.Null: new SqlBytes(p.ToByteArray());</from>
+				<from type="Byte[]" >return p == null? SqlBytes.Null: new SqlBytes(p);</from>
+				<from type="Stream" >return p == null? SqlBytes.Null: new SqlBytes(p);</from>
+			</group>
+			<group name="Nullable Types.">
+				<from type="Guid?"   >return p.HasValue? new SqlBytes(p.Value.ToByteArray()): SqlBytes.Null;</from>
+			</group>
+			<group name="SqlTypes.">
+				<from type="SqlGuid"  >return p.IsNull? SqlBytes.Null: new SqlBytes(p.ToByteArray());</from>
+				<from type="SqlBinary">return p.IsNull? SqlBytes.Null: new SqlBytes(p);</from>
+			</group>
+			<default nullvalue="SqlBytes.Null"/>
+		</converter>
+		<converter type="SqlChars">
+			<group name="Scalar Types.">
+				<from type="String">return p == null? SqlChars.Null: new SqlChars(p.ToCharArray());</from>
+				<from type="Char[]">return p == null? SqlChars.Null: new SqlChars(p);</from>
+				<br/>
+				<from type="SByte"   />
+				<from type="Int16"   />
+				<from type="Int32"   />
+				<from type="Int64"   />
+				<br/>
+				<from type="Byte"    />
+				<from type="UInt16"  />
+				<from type="UInt32"  />
+				<from type="UInt64"  />
+				<br/>
+				<from type="Char"    />
+				<from type="Single"  />
+				<from type="Double"  />
+				<br/>
+				<from type="Boolean" />
+				<from type="Decimal" />
+				<from type="DateTime"/>
+				<from type="TimeSpan"/>
+				<from type="Guid"    />
+			</group>
+
+			<group name="Nullable Types.">
+				<from type="SByte?"   />
+				<from type="Int16?"   />
+				<from type="Int32?"   />
+				<from type="Int64?"   />
+				<br/>
+				<from type="Byte?"    />
+				<from type="UInt16?"  />
+				<from type="UInt32?"  />
+				<from type="UInt64?"  />
+				<br/>
+				<from type="Char?"    />
+				<from type="Single?"  />
+				<from type="Double?"  />
+				<br/>
+				<from type="Boolean?" />
+				<from type="Decimal?" />
+				<from type="DateTime?"/>
+				<from type="TimeSpan?"/>
+				<from type="Guid?"    />
+				<default>return p.HasValue? new SqlChars(p.ToString().ToCharArray()): SqlChars.Null;</default>
+			</group>
+
+			<group name="SqlTypes.">
+				<from type="SqlByte"    />
+				<from type="SqlInt16"   />
+				<from type="SqlInt32"   />
+				<from type="SqlInt64"   />
+				<br/>
+				<from type="SqlSingle"  />
+				<from type="SqlDouble"  />
+				<from type="SqlDecimal" />
+				<from type="SqlMoney"   />
+				<br/>
+				<from type="SqlBoolean" />
+				<from type="SqlDateTime"/>
+				<from type="SqlGuid"    />
+				<from type="SqlBinary"   >return p.IsNull? SqlChars.Null: new SqlChars(p.ToString().ToCharArray());</from>
+				<default>return (SqlChars)p.ToSqlString();</default>
+			</group>
+			<default>return new SqlChars(p.ToString().ToCharArray());</default>
+		</converter>
+		<converter type="SqlXml">
+			<group name="Scalar Types.">
+				<from type="string"    >return p == null? SqlXml.Null: new SqlXml(new XmlTextReader(new StringReader(p)));</from>
+				<br/>
+				<from type="Stream"   />
+				<from type="XmlReader"/>
+				<br/>
+				<from type="Char[]"    >return p == null? SqlXml.Null: new SqlXml(new XmlTextReader(new StringReader(p.ToString())));</from>
+				<from type="Byte[]"    >return p == null? SqlXml.Null: new SqlXml(new MemoryStream(p));</from>
+				<default>return p == null? SqlXml.Null: new SqlXml(p);</default>
+			</group>
+			<group name="SqlTypes.">
+				<from type="SqlString">return p.IsNull? SqlXml.Null: new SqlXml(new XmlTextReader(new StringReader(p.Value)));</from>
+				<from type="SqlChars" >return p.IsNull? SqlXml.Null: new SqlXml(new XmlTextReader(new StringReader(p.ToSqlString().Value)));</from>
+				<from type="SqlBinary">return p.IsNull? SqlXml.Null: new SqlXml(new MemoryStream(p.Value));</from>
+				<from type="SqlBytes" >return p.IsNull? SqlXml.Null: new SqlXml(p.Stream);</from>
+			</group>
+			<default nullvalue="SqlXml.Null"/>
+		</converter>
+	</region>
+</code>
