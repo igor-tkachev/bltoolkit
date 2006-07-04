@@ -2656,7 +2656,7 @@ namespace BLToolkit.Common
 			if (t == typeof(Int64))       return (ConvertMethod)(object)(Convert<SqlInt64,Int64>.ConvertMethod)      (delegate(Int64       p) { return                 p;  });
 
 			if (t == typeof(Byte))        return (ConvertMethod)(object)(Convert<SqlInt64,Byte>.ConvertMethod)       (delegate(Byte        p) { return Convert.ToInt64(p); });
-			if (t == typeof(UInt64))      return (ConvertMethod)(object)(Convert<SqlInt64,UInt64>.ConvertMethod)     (delegate(UInt64      p) { return Convert.ToInt64(p); });
+			if (t == typeof(UInt16))      return (ConvertMethod)(object)(Convert<SqlInt64,UInt16>.ConvertMethod)     (delegate(UInt16      p) { return Convert.ToInt64(p); });
 			if (t == typeof(UInt32))      return (ConvertMethod)(object)(Convert<SqlInt64,UInt32>.ConvertMethod)     (delegate(UInt32      p) { return Convert.ToInt64(p); });
 			if (t == typeof(UInt64))      return (ConvertMethod)(object)(Convert<SqlInt64,UInt64>.ConvertMethod)     (delegate(UInt64      p) { return Convert.ToInt64(p); });
 
@@ -2676,7 +2676,7 @@ namespace BLToolkit.Common
 			if (t == typeof(Int64?))      return (ConvertMethod)(object)(Convert<SqlInt64,Int64?>.ConvertMethod)     (delegate(Int64?      p) { return p.HasValue?                 p.Value  : SqlInt64.Null; });
 
 			if (t == typeof(Byte?))       return (ConvertMethod)(object)(Convert<SqlInt64,Byte?>.ConvertMethod)      (delegate(Byte?       p) { return p.HasValue? Convert.ToInt64(p.Value) : SqlInt64.Null; });
-			if (t == typeof(UInt64?))     return (ConvertMethod)(object)(Convert<SqlInt64,UInt64?>.ConvertMethod)    (delegate(UInt64?     p) { return p.HasValue? Convert.ToInt64(p.Value) : SqlInt64.Null; });
+			if (t == typeof(UInt16?))     return (ConvertMethod)(object)(Convert<SqlInt64,UInt16?>.ConvertMethod)    (delegate(UInt16?     p) { return p.HasValue? Convert.ToInt64(p.Value) : SqlInt64.Null; });
 			if (t == typeof(UInt32?))     return (ConvertMethod)(object)(Convert<SqlInt64,UInt32?>.ConvertMethod)    (delegate(UInt32?     p) { return p.HasValue? Convert.ToInt64(p.Value) : SqlInt64.Null; });
 			if (t == typeof(UInt64?))     return (ConvertMethod)(object)(Convert<SqlInt64,UInt64?>.ConvertMethod)    (delegate(UInt64?     p) { return p.HasValue? Convert.ToInt64(p.Value) : SqlInt64.Null; });
 
