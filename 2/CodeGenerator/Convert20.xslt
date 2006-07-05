@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
 
-	<xsl:output method="text" version="1.0" encoding="UTF-8" indent="no" omit-xml-declaration="yes"/>
+	<xsl:output method="text" version="1.0" encoding="UTF-8" indent="yes" omit-xml-declaration="yes"/>
 
 	<!-- parameters passed in by the TransformCodeGenerator -->
 	<xsl:param name="generator"></xsl:param>
@@ -325,11 +325,44 @@
 		</xsl:call-template>
 	</xsl:template>
 
+	<xsl:template match="include">
+		<xsl:param name="totype"/>
+		<xsl:param name="nullable"/>
+		<xsl:param name="default"/>
+		<xsl:param name="group"/>
+		<xsl:variable name="template" select="@template"/>
+		<xsl:variable name="totypefull">
+			<xsl:value-of select="$totype"/>
+			<xsl:if test="$nullable">
+				<xsl:text>?</xsl:text>
+			</xsl:if>
+		</xsl:variable>
+		<xsl:for-each select="/code/template[@name=$template]/*">
+			<xsl:choose>
+				<xsl:when test="name()='type'">
+					<xsl:variable name ="tname" select="@name"/>
+					<xsl:if test="not($tname=$totypefull) and not($group/from[@type=$tname])">
+						<xsl:call-template name="from">
+							<xsl:with-param name="fromtype" select="$tname"/>
+							<xsl:with-param name="totype"   select="$totype"/>
+							<xsl:with-param name="nullable" select="$nullable"/>
+							<xsl:with-param name="code"     select="$default"/>
+						</xsl:call-template>
+					</xsl:if>
+				</xsl:when>
+				<xsl:when test="name()='br'">
+					<xsl:value-of select="$lf"/>
+				</xsl:when>
+			</xsl:choose>
+		</xsl:for-each>
+	</xsl:template>
+
 	<!-- group -->
 	<xsl:template match="group">
 		<xsl:param name="totype"/>
 		<xsl:param name="nullable"/>
 		<xsl:param name="default"/>
+		<xsl:variable name="name" select="@name"/>
 		<xsl:variable name="defaultcode">
 			<xsl:choose>
 				<xsl:when test="default/text()">
@@ -349,10 +382,11 @@
 			<xsl:text>//</xsl:text>
 		</xsl:if>
 		<xsl:value-of select="$lf"/>
-		<xsl:apply-templates select="group|from|comment|br">
-			<xsl:with-param name="totype" select="$totype"/>
+		<xsl:apply-templates select="group|from|comment|br|include">
+			<xsl:with-param name="totype"   select="$totype"/>
 			<xsl:with-param name="nullable" select="$nullable"/>
-			<xsl:with-param name="default" select="$defaultcode"/>
+			<xsl:with-param name="default"  select="$defaultcode"/>
+			<xsl:with-param name="group"    select="."/>
 		</xsl:apply-templates>
 		<xsl:value-of select="$lf"/>
 	</xsl:template>
@@ -362,10 +396,33 @@
 		<xsl:param name="totype"/>
 		<xsl:param name="nullable"/>
 		<xsl:param name="default"/>
-		<xsl:variable name="typepad" select="$padding - string-length(@type)"/>
+		<xsl:call-template name="from">
+			<xsl:with-param name="fromtype" select="@type"/>
+			<xsl:with-param name="totype"   select="$totype"/>
+			<xsl:with-param name="nullable" select="$nullable"/>
+			<xsl:with-param name="code">
+				<xsl:choose>
+					<xsl:when test="text()">
+						<xsl:value-of select="text()"/>
+					</xsl:when>
+					<xsl:otherwise>
+						<xsl:value-of select="$default"/>
+					</xsl:otherwise>
+				</xsl:choose>
+			</xsl:with-param>
+		</xsl:call-template>
+	</xsl:template>
+
+	<!-- from -->
+	<xsl:template name="from">
+		<xsl:param name="fromtype"/>
+		<xsl:param name="totype"/>
+		<xsl:param name="nullable"/>
+		<xsl:param name="code"/>
+		<xsl:variable name="typepad" select="$padding - string-length($fromtype)"/>
 		<xsl:value-of select="$t3"/>
 		<xsl:text>if (t == typeof(</xsl:text>
-		<xsl:value-of select="@type"/>
+		<xsl:value-of select="$fromtype"/>
 		<xsl:text>)) </xsl:text>
 		<xsl:call-template name ="writeSpaces">
 			<xsl:with-param name="count" select="$typepad"/>
@@ -378,28 +435,19 @@
 			<xsl:text>?</xsl:text>
 		</xsl:if>
 		<xsl:text>,</xsl:text>
-		<xsl:value-of select="@type"/>
+		<xsl:value-of select="$fromtype"/>
 		<xsl:text>&gt;.ConvertMethod)</xsl:text>
 		<xsl:call-template name ="writeSpaces">
 			<xsl:with-param name="count" select="$typepad"/>
 		</xsl:call-template>
 		<xsl:text>(delegate(</xsl:text>
-		<xsl:value-of select="@type"/>
+		<xsl:value-of select="$fromtype"/>
 		<xsl:call-template name ="writeSpaces">
 			<xsl:with-param name="count" select="$typepad"/>
 		</xsl:call-template>
 		<xsl:text> p)</xsl:text>
 		<xsl:call-template name="writeCode">
-			<xsl:with-param name="code">
-				<xsl:choose>
-					<xsl:when test="text()">
-						<xsl:value-of select="text()"/>
-					</xsl:when>
-					<xsl:otherwise>
-						<xsl:value-of select="$default"/>
-					</xsl:otherwise>
-				</xsl:choose>
-			</xsl:with-param>
+			<xsl:with-param name="code" select="$code"/>
 		</xsl:call-template>
 		<xsl:text>);</xsl:text>
 		<xsl:value-of select="$lf"/>
