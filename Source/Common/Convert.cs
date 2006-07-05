@@ -1,6 +1,7 @@
 using System;
 using System.Data.SqlTypes;
 using System.IO;
+using System.Xml;
 
 namespace BLToolkit.Common
 {
@@ -18,7 +19,7 @@ namespace BLToolkit.Common
 			if (t.IsAssignableFrom(typeof(P)))
 				return (ConvertMethod)(object)(Convert<P,P>.ConvertMethod)(delegate(P p) { return p; });
 
-			// Scalar Types.
+			// Scalar Types
 			//
 			if (t == typeof(String))      return GetStringConverter();
 
@@ -43,7 +44,7 @@ namespace BLToolkit.Common
 			if (t == typeof(Guid))        return GetGuidConverter();
 			if (t == typeof(Stream))      return GetStreamConverter();
 
-			// Nullable Types.
+			// Nullable Types
 			//
 			if (t == typeof(SByte?))      return GetNullableSByteConverter();
 			if (t == typeof(Int16?))      return GetNullableInt16Converter();
@@ -65,7 +66,7 @@ namespace BLToolkit.Common
 			if (t == typeof(TimeSpan?))   return GetNullableTimeSpanConverter();
 			if (t == typeof(Guid?))       return GetNullableGuidConverter();
 
-			// Sql Types.
+			// SqlTypes
 			//
 			if (t == typeof(SqlString))   return GetSqlStringConverter();
 
@@ -83,6 +84,9 @@ namespace BLToolkit.Common
 			if (t == typeof(SqlDateTime)) return GetSqlDateTimeConverter();
 			if (t == typeof(SqlGuid))     return GetSqlGuidConverter();
 			if (t == typeof(SqlBinary))   return GetSqlBinaryConverter();
+			if (t == typeof(SqlBytes))    return GetSqlBytesConverter();
+			if (t == typeof(SqlChars))    return GetSqlCharsConverter();
+			if (t == typeof(SqlXml))      return GetSqlXmlConverter();
 
 			return delegate(P o) { return (T)Convert.ChangeType(o, typeof(T)); };
 		}
@@ -97,6 +101,7 @@ namespace BLToolkit.Common
 
 			// Scalar Types.
 			//
+
 			if (t == typeof(SByte))       return (ConvertMethod)(object)(Convert<String,SByte>.ConvertMethod)      (delegate(SByte       p) { return p.ToString(); });
 			if (t == typeof(Int16))       return (ConvertMethod)(object)(Convert<String,Int16>.ConvertMethod)      (delegate(Int16       p) { return p.ToString(); });
 			if (t == typeof(Int32))       return (ConvertMethod)(object)(Convert<String,Int32>.ConvertMethod)      (delegate(Int32       p) { return p.ToString(); });
@@ -158,10 +163,9 @@ namespace BLToolkit.Common
 			if (t == typeof(SqlGuid))     return (ConvertMethod)(object)(Convert<String,SqlGuid>.ConvertMethod)    (delegate(SqlGuid     p) { return p.ToString(); });
 			if (t == typeof(SqlBinary))   return (ConvertMethod)(object)(Convert<String,SqlBinary>.ConvertMethod)  (delegate(SqlBinary   p) { return p.ToString(); });
 
-			return (ConvertMethod)(object)(Convert<String,P>.ConvertMethod)(delegate(P p)
-			{
-				return Convert.ToString(p);
-			});
+			if (t == typeof(object))      return (ConvertMethod)(object)(Convert<String,object>.ConvertMethod)     (delegate(object      p) { return Convert.ToString(p); });
+
+			return (ConvertMethod)(object)(Convert<String,T>.ConvertMethod)     (delegate(T p) { return Convert<String,object>.From((object)p); });
 		}
 
 		#endregion
@@ -196,6 +200,7 @@ namespace BLToolkit.Common
 			// Nullable Types.
 			//
 			if (t == typeof(SByte?))      return (ConvertMethod)(object)(Convert<SByte,SByte?>.ConvertMethod)     (delegate(SByte?      p) { return p.HasValue?                 p.Value  : (SByte)0; });
+
 			if (t == typeof(Int16?))      return (ConvertMethod)(object)(Convert<SByte,Int16?>.ConvertMethod)     (delegate(Int16?      p) { return p.HasValue? Convert.ToSByte(p.Value) : (SByte)0; });
 			if (t == typeof(Int32?))      return (ConvertMethod)(object)(Convert<SByte,Int32?>.ConvertMethod)     (delegate(Int32?      p) { return p.HasValue? Convert.ToSByte(p.Value) : (SByte)0; });
 			if (t == typeof(Int64?))      return (ConvertMethod)(object)(Convert<SByte,Int64?>.ConvertMethod)     (delegate(Int64?      p) { return p.HasValue? Convert.ToSByte(p.Value) : (SByte)0; });
@@ -230,10 +235,9 @@ namespace BLToolkit.Common
 			if (t == typeof(SqlBoolean))  return (ConvertMethod)(object)(Convert<SByte,SqlBoolean>.ConvertMethod) (delegate(SqlBoolean  p) { return p.IsNull? (SByte)0: Convert.ToSByte(p.Value); });
 			if (t == typeof(SqlDateTime)) return (ConvertMethod)(object)(Convert<SByte,SqlDateTime>.ConvertMethod)(delegate(SqlDateTime p) { return p.IsNull? (SByte)0: Convert.ToSByte(p.Value); });
 
-			return (ConvertMethod)(object)(Convert<SByte,P>.ConvertMethod)(delegate(P p)
-			{
-				return Convert.ToSByte(p);
-			});
+			if (t == typeof(object))      return (ConvertMethod)(object)(Convert<SByte,object>.ConvertMethod)     (delegate(object      p) { return Convert.ToSByte(p); });
+
+			return (ConvertMethod)(object)(Convert<SByte,T>.ConvertMethod)     (delegate(T p) { return Convert<SByte,object>.From((object)p); });
 		}
 
 		#endregion
@@ -267,8 +271,9 @@ namespace BLToolkit.Common
 
 			// Nullable Types.
 			//
-			if (t == typeof(SByte?))      return (ConvertMethod)(object)(Convert<Int16,SByte?>.ConvertMethod)     (delegate(SByte?      p) { return p.HasValue? Convert.ToInt16(p.Value) : (Int16)0; });
 			if (t == typeof(Int16?))      return (ConvertMethod)(object)(Convert<Int16,Int16?>.ConvertMethod)     (delegate(Int16?      p) { return p.HasValue?                 p.Value  : (Int16)0; });
+
+			if (t == typeof(SByte?))      return (ConvertMethod)(object)(Convert<Int16,SByte?>.ConvertMethod)     (delegate(SByte?      p) { return p.HasValue? Convert.ToInt16(p.Value) : (Int16)0; });
 			if (t == typeof(Int32?))      return (ConvertMethod)(object)(Convert<Int16,Int32?>.ConvertMethod)     (delegate(Int32?      p) { return p.HasValue? Convert.ToInt16(p.Value) : (Int16)0; });
 			if (t == typeof(Int64?))      return (ConvertMethod)(object)(Convert<Int16,Int64?>.ConvertMethod)     (delegate(Int64?      p) { return p.HasValue? Convert.ToInt16(p.Value) : (Int16)0; });
 
@@ -287,10 +292,10 @@ namespace BLToolkit.Common
 
 			// SqlTypes.
 			//
+			if (t == typeof(SqlInt16))    return (ConvertMethod)(object)(Convert<Int16,SqlInt16>.ConvertMethod)   (delegate(SqlInt16    p) { return p.IsNull? (Int16)0:                 p.Value;  });
 			if (t == typeof(SqlString))   return (ConvertMethod)(object)(Convert<Int16,SqlString>.ConvertMethod)  (delegate(SqlString   p) { return p.IsNull? (Int16)0: Convert.ToInt16(p.Value); });
 
 			if (t == typeof(SqlByte))     return (ConvertMethod)(object)(Convert<Int16,SqlByte>.ConvertMethod)    (delegate(SqlByte     p) { return p.IsNull? (Int16)0: Convert.ToInt16(p.Value); });
-			if (t == typeof(SqlInt16))    return (ConvertMethod)(object)(Convert<Int16,SqlInt16>.ConvertMethod)   (delegate(SqlInt16    p) { return p.IsNull? (Int16)0:                 p.Value;  });
 			if (t == typeof(SqlInt32))    return (ConvertMethod)(object)(Convert<Int16,SqlInt32>.ConvertMethod)   (delegate(SqlInt32    p) { return p.IsNull? (Int16)0: Convert.ToInt16(p.Value); });
 			if (t == typeof(SqlInt64))    return (ConvertMethod)(object)(Convert<Int16,SqlInt64>.ConvertMethod)   (delegate(SqlInt64    p) { return p.IsNull? (Int16)0: Convert.ToInt16(p.Value); });
 
@@ -302,10 +307,9 @@ namespace BLToolkit.Common
 			if (t == typeof(SqlBoolean))  return (ConvertMethod)(object)(Convert<Int16,SqlBoolean>.ConvertMethod) (delegate(SqlBoolean  p) { return p.IsNull? (Int16)0: Convert.ToInt16(p.Value); });
 			if (t == typeof(SqlDateTime)) return (ConvertMethod)(object)(Convert<Int16,SqlDateTime>.ConvertMethod)(delegate(SqlDateTime p) { return p.IsNull? (Int16)0: Convert.ToInt16(p.Value); });
 
-			return (ConvertMethod)(object)(Convert<Int16,P>.ConvertMethod)(delegate(P p)
-			{
-				return Convert.ToInt16(p);
-			});
+			if (t == typeof(object))      return (ConvertMethod)(object)(Convert<Int16,object>.ConvertMethod)     (delegate(object      p) { return Convert.ToInt16(p); });
+
+			return (ConvertMethod)(object)(Convert<Int16,T>.ConvertMethod)     (delegate(T p) { return Convert<Int16,object>.From((object)p); });
 		}
 
 		#endregion
@@ -339,9 +343,10 @@ namespace BLToolkit.Common
 
 			// Nullable Types.
 			//
+			if (t == typeof(Int32?))      return (ConvertMethod)(object)(Convert<Int32,Int32?>.ConvertMethod)     (delegate(Int32?      p) { return p.HasValue?                 p.Value  : (Int32)0; });
+
 			if (t == typeof(SByte?))      return (ConvertMethod)(object)(Convert<Int32,SByte?>.ConvertMethod)     (delegate(SByte?      p) { return p.HasValue? Convert.ToInt32(p.Value) : (Int32)0; });
 			if (t == typeof(Int16?))      return (ConvertMethod)(object)(Convert<Int32,Int16?>.ConvertMethod)     (delegate(Int16?      p) { return p.HasValue? Convert.ToInt32(p.Value) : (Int32)0; });
-			if (t == typeof(Int32?))      return (ConvertMethod)(object)(Convert<Int32,Int32?>.ConvertMethod)     (delegate(Int32?      p) { return p.HasValue?                 p.Value  : (Int32)0; });
 			if (t == typeof(Int64?))      return (ConvertMethod)(object)(Convert<Int32,Int64?>.ConvertMethod)     (delegate(Int64?      p) { return p.HasValue? Convert.ToInt32(p.Value) : (Int32)0; });
 
 			if (t == typeof(Byte?))       return (ConvertMethod)(object)(Convert<Int32,Byte?>.ConvertMethod)      (delegate(Byte?       p) { return p.HasValue? Convert.ToInt32(p.Value) : (Int32)0; });
@@ -359,11 +364,11 @@ namespace BLToolkit.Common
 
 			// SqlTypes.
 			//
+			if (t == typeof(SqlInt32))    return (ConvertMethod)(object)(Convert<Int32,SqlInt32>.ConvertMethod)   (delegate(SqlInt32    p) { return p.IsNull? (Int32)0:                 p.Value;  });
 			if (t == typeof(SqlString))   return (ConvertMethod)(object)(Convert<Int32,SqlString>.ConvertMethod)  (delegate(SqlString   p) { return p.IsNull? (Int32)0: Convert.ToInt32(p.Value); });
 
 			if (t == typeof(SqlByte))     return (ConvertMethod)(object)(Convert<Int32,SqlByte>.ConvertMethod)    (delegate(SqlByte     p) { return p.IsNull? (Int32)0: Convert.ToInt32(p.Value); });
 			if (t == typeof(SqlInt16))    return (ConvertMethod)(object)(Convert<Int32,SqlInt16>.ConvertMethod)   (delegate(SqlInt16    p) { return p.IsNull? (Int32)0: Convert.ToInt32(p.Value); });
-			if (t == typeof(SqlInt32))    return (ConvertMethod)(object)(Convert<Int32,SqlInt32>.ConvertMethod)   (delegate(SqlInt32    p) { return p.IsNull? (Int32)0:                 p.Value;  });
 			if (t == typeof(SqlInt64))    return (ConvertMethod)(object)(Convert<Int32,SqlInt64>.ConvertMethod)   (delegate(SqlInt64    p) { return p.IsNull? (Int32)0: Convert.ToInt32(p.Value); });
 
 			if (t == typeof(SqlSingle))   return (ConvertMethod)(object)(Convert<Int32,SqlSingle>.ConvertMethod)  (delegate(SqlSingle   p) { return p.IsNull? (Int32)0: Convert.ToInt32(p.Value); });
@@ -374,10 +379,9 @@ namespace BLToolkit.Common
 			if (t == typeof(SqlBoolean))  return (ConvertMethod)(object)(Convert<Int32,SqlBoolean>.ConvertMethod) (delegate(SqlBoolean  p) { return p.IsNull? (Int32)0: Convert.ToInt32(p.Value); });
 			if (t == typeof(SqlDateTime)) return (ConvertMethod)(object)(Convert<Int32,SqlDateTime>.ConvertMethod)(delegate(SqlDateTime p) { return p.IsNull? (Int32)0: Convert.ToInt32(p.Value); });
 
-			return (ConvertMethod)(object)(Convert<Int32,P>.ConvertMethod)(delegate(P p)
-			{
-				return Convert.ToInt32(p);
-			});
+			if (t == typeof(object))      return (ConvertMethod)(object)(Convert<Int32,object>.ConvertMethod)     (delegate(object      p) { return Convert.ToInt32(p); });
+
+			return (ConvertMethod)(object)(Convert<Int32,T>.ConvertMethod)     (delegate(T p) { return Convert<Int32,object>.From((object)p); });
 		}
 
 		#endregion
@@ -411,10 +415,11 @@ namespace BLToolkit.Common
 
 			// Nullable Types.
 			//
+			if (t == typeof(Int64?))      return (ConvertMethod)(object)(Convert<Int64,Int64?>.ConvertMethod)     (delegate(Int64?      p) { return p.HasValue?                 p.Value  : (Int64)0; });
+
 			if (t == typeof(SByte?))      return (ConvertMethod)(object)(Convert<Int64,SByte?>.ConvertMethod)     (delegate(SByte?      p) { return p.HasValue? Convert.ToInt64(p.Value) : (Int64)0; });
 			if (t == typeof(Int16?))      return (ConvertMethod)(object)(Convert<Int64,Int16?>.ConvertMethod)     (delegate(Int16?      p) { return p.HasValue? Convert.ToInt64(p.Value) : (Int64)0; });
 			if (t == typeof(Int32?))      return (ConvertMethod)(object)(Convert<Int64,Int32?>.ConvertMethod)     (delegate(Int32?      p) { return p.HasValue? Convert.ToInt64(p.Value) : (Int64)0; });
-			if (t == typeof(Int64?))      return (ConvertMethod)(object)(Convert<Int64,Int64?>.ConvertMethod)     (delegate(Int64?      p) { return p.HasValue?                 p.Value  : (Int64)0; });
 
 			if (t == typeof(Byte?))       return (ConvertMethod)(object)(Convert<Int64,Byte?>.ConvertMethod)      (delegate(Byte?       p) { return p.HasValue? Convert.ToInt64(p.Value) : (Int64)0; });
 			if (t == typeof(UInt16?))     return (ConvertMethod)(object)(Convert<Int64,UInt16?>.ConvertMethod)    (delegate(UInt16?     p) { return p.HasValue? Convert.ToInt64(p.Value) : (Int64)0; });
@@ -431,12 +436,12 @@ namespace BLToolkit.Common
 
 			// SqlTypes.
 			//
+			if (t == typeof(SqlInt64))    return (ConvertMethod)(object)(Convert<Int64,SqlInt64>.ConvertMethod)   (delegate(SqlInt64    p) { return p.IsNull? (Int64)0:                 p.Value;  });
 			if (t == typeof(SqlString))   return (ConvertMethod)(object)(Convert<Int64,SqlString>.ConvertMethod)  (delegate(SqlString   p) { return p.IsNull? (Int64)0: Convert.ToInt64(p.Value); });
 
 			if (t == typeof(SqlByte))     return (ConvertMethod)(object)(Convert<Int64,SqlByte>.ConvertMethod)    (delegate(SqlByte     p) { return p.IsNull? (Int64)0: Convert.ToInt64(p.Value); });
 			if (t == typeof(SqlInt16))    return (ConvertMethod)(object)(Convert<Int64,SqlInt16>.ConvertMethod)   (delegate(SqlInt16    p) { return p.IsNull? (Int64)0: Convert.ToInt64(p.Value); });
 			if (t == typeof(SqlInt32))    return (ConvertMethod)(object)(Convert<Int64,SqlInt32>.ConvertMethod)   (delegate(SqlInt32    p) { return p.IsNull? (Int64)0: Convert.ToInt64(p.Value); });
-			if (t == typeof(SqlInt64))    return (ConvertMethod)(object)(Convert<Int64,SqlInt64>.ConvertMethod)   (delegate(SqlInt64    p) { return p.IsNull? (Int64)0:                 p.Value;  });
 
 			if (t == typeof(SqlSingle))   return (ConvertMethod)(object)(Convert<Int64,SqlSingle>.ConvertMethod)  (delegate(SqlSingle   p) { return p.IsNull? (Int64)0: Convert.ToInt64(p.Value); });
 			if (t == typeof(SqlDouble))   return (ConvertMethod)(object)(Convert<Int64,SqlDouble>.ConvertMethod)  (delegate(SqlDouble   p) { return p.IsNull? (Int64)0: Convert.ToInt64(p.Value); });
@@ -446,10 +451,9 @@ namespace BLToolkit.Common
 			if (t == typeof(SqlBoolean))  return (ConvertMethod)(object)(Convert<Int64,SqlBoolean>.ConvertMethod) (delegate(SqlBoolean  p) { return p.IsNull? (Int64)0: Convert.ToInt64(p.Value); });
 			if (t == typeof(SqlDateTime)) return (ConvertMethod)(object)(Convert<Int64,SqlDateTime>.ConvertMethod)(delegate(SqlDateTime p) { return p.IsNull? (Int64)0: Convert.ToInt64(p.Value); });
 
-			return (ConvertMethod)(object)(Convert<Int64,P>.ConvertMethod)(delegate(P p)
-			{
-				return Convert.ToInt64(p);
-			});
+			if (t == typeof(object))      return (ConvertMethod)(object)(Convert<Int64,object>.ConvertMethod)     (delegate(object      p) { return Convert.ToInt64(p); });
+
+			return (ConvertMethod)(object)(Convert<Int64,T>.ConvertMethod)     (delegate(T p) { return Convert<Int64,object>.From((object)p); });
 		}
 
 		#endregion
@@ -483,12 +487,13 @@ namespace BLToolkit.Common
 
 			// Nullable Types.
 			//
+			if (t == typeof(Byte?))       return (ConvertMethod)(object)(Convert<Byte,Byte?>.ConvertMethod)      (delegate(Byte?       p) { return p.HasValue?                p.Value  : (Byte)0; });
+
 			if (t == typeof(SByte?))      return (ConvertMethod)(object)(Convert<Byte,SByte?>.ConvertMethod)     (delegate(SByte?      p) { return p.HasValue? Convert.ToByte(p.Value) : (Byte)0; });
 			if (t == typeof(Int16?))      return (ConvertMethod)(object)(Convert<Byte,Int16?>.ConvertMethod)     (delegate(Int16?      p) { return p.HasValue? Convert.ToByte(p.Value) : (Byte)0; });
 			if (t == typeof(Int32?))      return (ConvertMethod)(object)(Convert<Byte,Int32?>.ConvertMethod)     (delegate(Int32?      p) { return p.HasValue? Convert.ToByte(p.Value) : (Byte)0; });
 			if (t == typeof(Int64?))      return (ConvertMethod)(object)(Convert<Byte,Int64?>.ConvertMethod)     (delegate(Int64?      p) { return p.HasValue? Convert.ToByte(p.Value) : (Byte)0; });
 
-			if (t == typeof(Byte?))       return (ConvertMethod)(object)(Convert<Byte,Byte?>.ConvertMethod)      (delegate(Byte?       p) { return p.HasValue?                p.Value  : (Byte)0; });
 			if (t == typeof(UInt16?))     return (ConvertMethod)(object)(Convert<Byte,UInt16?>.ConvertMethod)    (delegate(UInt16?     p) { return p.HasValue? Convert.ToByte(p.Value) : (Byte)0; });
 			if (t == typeof(UInt32?))     return (ConvertMethod)(object)(Convert<Byte,UInt32?>.ConvertMethod)    (delegate(UInt32?     p) { return p.HasValue? Convert.ToByte(p.Value) : (Byte)0; });
 			if (t == typeof(UInt64?))     return (ConvertMethod)(object)(Convert<Byte,UInt64?>.ConvertMethod)    (delegate(UInt64?     p) { return p.HasValue? Convert.ToByte(p.Value) : (Byte)0; });
@@ -503,9 +508,9 @@ namespace BLToolkit.Common
 
 			// SqlTypes.
 			//
+			if (t == typeof(SqlByte))     return (ConvertMethod)(object)(Convert<Byte,SqlByte>.ConvertMethod)    (delegate(SqlByte     p) { return p.IsNull? (Byte)0:                p.Value;  });
 			if (t == typeof(SqlString))   return (ConvertMethod)(object)(Convert<Byte,SqlString>.ConvertMethod)  (delegate(SqlString   p) { return p.IsNull? (Byte)0: Convert.ToByte(p.Value); });
 
-			if (t == typeof(SqlByte))     return (ConvertMethod)(object)(Convert<Byte,SqlByte>.ConvertMethod)    (delegate(SqlByte     p) { return p.IsNull? (Byte)0:                p.Value;  });
 			if (t == typeof(SqlInt16))    return (ConvertMethod)(object)(Convert<Byte,SqlInt16>.ConvertMethod)   (delegate(SqlInt16    p) { return p.IsNull? (Byte)0: Convert.ToByte(p.Value); });
 			if (t == typeof(SqlInt32))    return (ConvertMethod)(object)(Convert<Byte,SqlInt32>.ConvertMethod)   (delegate(SqlInt32    p) { return p.IsNull? (Byte)0: Convert.ToByte(p.Value); });
 			if (t == typeof(SqlInt64))    return (ConvertMethod)(object)(Convert<Byte,SqlInt64>.ConvertMethod)   (delegate(SqlInt64    p) { return p.IsNull? (Byte)0: Convert.ToByte(p.Value); });
@@ -518,10 +523,9 @@ namespace BLToolkit.Common
 			if (t == typeof(SqlBoolean))  return (ConvertMethod)(object)(Convert<Byte,SqlBoolean>.ConvertMethod) (delegate(SqlBoolean  p) { return p.IsNull? (Byte)0: Convert.ToByte(p.Value); });
 			if (t == typeof(SqlDateTime)) return (ConvertMethod)(object)(Convert<Byte,SqlDateTime>.ConvertMethod)(delegate(SqlDateTime p) { return p.IsNull? (Byte)0: Convert.ToByte(p.Value); });
 
-			return (ConvertMethod)(object)(Convert<Byte,P>.ConvertMethod)(delegate(P p)
-			{
-				return Convert.ToByte(p);
-			});
+			if (t == typeof(object))      return (ConvertMethod)(object)(Convert<Byte,object>.ConvertMethod)     (delegate(object      p) { return Convert.ToByte(p); });
+
+			return (ConvertMethod)(object)(Convert<Byte,T>.ConvertMethod)     (delegate(T p) { return Convert<Byte,object>.From((object)p); });
 		}
 
 		#endregion
@@ -555,13 +559,14 @@ namespace BLToolkit.Common
 
 			// Nullable Types.
 			//
+			if (t == typeof(UInt16?))     return (ConvertMethod)(object)(Convert<UInt16,UInt16?>.ConvertMethod)    (delegate(UInt16?     p) { return p.HasValue?                  p.Value  : (UInt16)0; });
+
 			if (t == typeof(SByte?))      return (ConvertMethod)(object)(Convert<UInt16,SByte?>.ConvertMethod)     (delegate(SByte?      p) { return p.HasValue? Convert.ToUInt16(p.Value) : (UInt16)0; });
 			if (t == typeof(Int16?))      return (ConvertMethod)(object)(Convert<UInt16,Int16?>.ConvertMethod)     (delegate(Int16?      p) { return p.HasValue? Convert.ToUInt16(p.Value) : (UInt16)0; });
 			if (t == typeof(Int32?))      return (ConvertMethod)(object)(Convert<UInt16,Int32?>.ConvertMethod)     (delegate(Int32?      p) { return p.HasValue? Convert.ToUInt16(p.Value) : (UInt16)0; });
 			if (t == typeof(Int64?))      return (ConvertMethod)(object)(Convert<UInt16,Int64?>.ConvertMethod)     (delegate(Int64?      p) { return p.HasValue? Convert.ToUInt16(p.Value) : (UInt16)0; });
 
 			if (t == typeof(Byte?))       return (ConvertMethod)(object)(Convert<UInt16,Byte?>.ConvertMethod)      (delegate(Byte?       p) { return p.HasValue? Convert.ToUInt16(p.Value) : (UInt16)0; });
-			if (t == typeof(UInt16?))     return (ConvertMethod)(object)(Convert<UInt16,UInt16?>.ConvertMethod)    (delegate(UInt16?     p) { return p.HasValue?                  p.Value  : (UInt16)0; });
 			if (t == typeof(UInt32?))     return (ConvertMethod)(object)(Convert<UInt16,UInt32?>.ConvertMethod)    (delegate(UInt32?     p) { return p.HasValue? Convert.ToUInt16(p.Value) : (UInt16)0; });
 			if (t == typeof(UInt64?))     return (ConvertMethod)(object)(Convert<UInt16,UInt64?>.ConvertMethod)    (delegate(UInt64?     p) { return p.HasValue? Convert.ToUInt16(p.Value) : (UInt16)0; });
 
@@ -590,10 +595,9 @@ namespace BLToolkit.Common
 			if (t == typeof(SqlBoolean))  return (ConvertMethod)(object)(Convert<UInt16,SqlBoolean>.ConvertMethod) (delegate(SqlBoolean  p) { return p.IsNull? (UInt16)0: Convert.ToUInt16(p.Value); });
 			if (t == typeof(SqlDateTime)) return (ConvertMethod)(object)(Convert<UInt16,SqlDateTime>.ConvertMethod)(delegate(SqlDateTime p) { return p.IsNull? (UInt16)0: Convert.ToUInt16(p.Value); });
 
-			return (ConvertMethod)(object)(Convert<UInt16,P>.ConvertMethod)(delegate(P p)
-			{
-				return Convert.ToUInt16(p);
-			});
+			if (t == typeof(object))      return (ConvertMethod)(object)(Convert<UInt16,object>.ConvertMethod)     (delegate(object      p) { return Convert.ToUInt16(p); });
+
+			return (ConvertMethod)(object)(Convert<UInt16,T>.ConvertMethod)     (delegate(T p) { return Convert<UInt16,object>.From((object)p); });
 		}
 
 		#endregion
@@ -627,6 +631,8 @@ namespace BLToolkit.Common
 
 			// Nullable Types.
 			//
+			if (t == typeof(UInt32?))     return (ConvertMethod)(object)(Convert<UInt32,UInt32?>.ConvertMethod)    (delegate(UInt32?     p) { return p.HasValue?                  p.Value  : (UInt32)0; });
+
 			if (t == typeof(SByte?))      return (ConvertMethod)(object)(Convert<UInt32,SByte?>.ConvertMethod)     (delegate(SByte?      p) { return p.HasValue? Convert.ToUInt32(p.Value) : (UInt32)0; });
 			if (t == typeof(Int16?))      return (ConvertMethod)(object)(Convert<UInt32,Int16?>.ConvertMethod)     (delegate(Int16?      p) { return p.HasValue? Convert.ToUInt32(p.Value) : (UInt32)0; });
 			if (t == typeof(Int32?))      return (ConvertMethod)(object)(Convert<UInt32,Int32?>.ConvertMethod)     (delegate(Int32?      p) { return p.HasValue? Convert.ToUInt32(p.Value) : (UInt32)0; });
@@ -634,7 +640,6 @@ namespace BLToolkit.Common
 
 			if (t == typeof(Byte?))       return (ConvertMethod)(object)(Convert<UInt32,Byte?>.ConvertMethod)      (delegate(Byte?       p) { return p.HasValue? Convert.ToUInt32(p.Value) : (UInt32)0; });
 			if (t == typeof(UInt16?))     return (ConvertMethod)(object)(Convert<UInt32,UInt16?>.ConvertMethod)    (delegate(UInt16?     p) { return p.HasValue? Convert.ToUInt32(p.Value) : (UInt32)0; });
-			if (t == typeof(UInt32?))     return (ConvertMethod)(object)(Convert<UInt32,UInt32?>.ConvertMethod)    (delegate(UInt32?     p) { return p.HasValue?                  p.Value  : (UInt32)0; });
 			if (t == typeof(UInt64?))     return (ConvertMethod)(object)(Convert<UInt32,UInt64?>.ConvertMethod)    (delegate(UInt64?     p) { return p.HasValue? Convert.ToUInt32(p.Value) : (UInt32)0; });
 
 			if (t == typeof(Char?))       return (ConvertMethod)(object)(Convert<UInt32,Char?>.ConvertMethod)      (delegate(Char?       p) { return p.HasValue? Convert.ToUInt32(p.Value) : (UInt32)0; });
@@ -662,10 +667,9 @@ namespace BLToolkit.Common
 			if (t == typeof(SqlBoolean))  return (ConvertMethod)(object)(Convert<UInt32,SqlBoolean>.ConvertMethod) (delegate(SqlBoolean  p) { return p.IsNull? (UInt32)0: Convert.ToUInt32(p.Value); });
 			if (t == typeof(SqlDateTime)) return (ConvertMethod)(object)(Convert<UInt32,SqlDateTime>.ConvertMethod)(delegate(SqlDateTime p) { return p.IsNull? (UInt32)0: Convert.ToUInt32(p.Value); });
 
-			return (ConvertMethod)(object)(Convert<UInt32,P>.ConvertMethod)(delegate(P p)
-			{
-				return Convert.ToUInt32(p);
-			});
+			if (t == typeof(object))      return (ConvertMethod)(object)(Convert<UInt32,object>.ConvertMethod)     (delegate(object      p) { return Convert.ToUInt32(p); });
+
+			return (ConvertMethod)(object)(Convert<UInt32,T>.ConvertMethod)     (delegate(T p) { return Convert<UInt32,object>.From((object)p); });
 		}
 
 		#endregion
@@ -699,6 +703,8 @@ namespace BLToolkit.Common
 
 			// Nullable Types.
 			//
+			if (t == typeof(UInt64?))     return (ConvertMethod)(object)(Convert<UInt64,UInt64?>.ConvertMethod)    (delegate(UInt64?     p) { return p.HasValue?                  p.Value  : (UInt64)0; });
+
 			if (t == typeof(SByte?))      return (ConvertMethod)(object)(Convert<UInt64,SByte?>.ConvertMethod)     (delegate(SByte?      p) { return p.HasValue? Convert.ToUInt64(p.Value) : (UInt64)0; });
 			if (t == typeof(Int16?))      return (ConvertMethod)(object)(Convert<UInt64,Int16?>.ConvertMethod)     (delegate(Int16?      p) { return p.HasValue? Convert.ToUInt64(p.Value) : (UInt64)0; });
 			if (t == typeof(Int32?))      return (ConvertMethod)(object)(Convert<UInt64,Int32?>.ConvertMethod)     (delegate(Int32?      p) { return p.HasValue? Convert.ToUInt64(p.Value) : (UInt64)0; });
@@ -707,7 +713,6 @@ namespace BLToolkit.Common
 			if (t == typeof(Byte?))       return (ConvertMethod)(object)(Convert<UInt64,Byte?>.ConvertMethod)      (delegate(Byte?       p) { return p.HasValue? Convert.ToUInt64(p.Value) : (UInt64)0; });
 			if (t == typeof(UInt16?))     return (ConvertMethod)(object)(Convert<UInt64,UInt16?>.ConvertMethod)    (delegate(UInt16?     p) { return p.HasValue? Convert.ToUInt64(p.Value) : (UInt64)0; });
 			if (t == typeof(UInt32?))     return (ConvertMethod)(object)(Convert<UInt64,UInt32?>.ConvertMethod)    (delegate(UInt32?     p) { return p.HasValue? Convert.ToUInt64(p.Value) : (UInt64)0; });
-			if (t == typeof(UInt64?))     return (ConvertMethod)(object)(Convert<UInt64,UInt64?>.ConvertMethod)    (delegate(UInt64?     p) { return p.HasValue?                  p.Value  : (UInt64)0; });
 
 			if (t == typeof(Char?))       return (ConvertMethod)(object)(Convert<UInt64,Char?>.ConvertMethod)      (delegate(Char?       p) { return p.HasValue? Convert.ToUInt64(p.Value) : (UInt64)0; });
 			if (t == typeof(Single?))     return (ConvertMethod)(object)(Convert<UInt64,Single?>.ConvertMethod)    (delegate(Single?     p) { return p.HasValue? Convert.ToUInt64(p.Value) : (UInt64)0; });
@@ -734,10 +739,9 @@ namespace BLToolkit.Common
 			if (t == typeof(SqlBoolean))  return (ConvertMethod)(object)(Convert<UInt64,SqlBoolean>.ConvertMethod) (delegate(SqlBoolean  p) { return p.IsNull? (UInt64)0: Convert.ToUInt64(p.Value); });
 			if (t == typeof(SqlDateTime)) return (ConvertMethod)(object)(Convert<UInt64,SqlDateTime>.ConvertMethod)(delegate(SqlDateTime p) { return p.IsNull? (UInt64)0: Convert.ToUInt64(p.Value); });
 
-			return (ConvertMethod)(object)(Convert<UInt64,P>.ConvertMethod)(delegate(P p)
-			{
-				return Convert.ToUInt64(p);
-			});
+			if (t == typeof(object))      return (ConvertMethod)(object)(Convert<UInt64,object>.ConvertMethod)     (delegate(object      p) { return Convert.ToUInt64(p); });
+
+			return (ConvertMethod)(object)(Convert<UInt64,T>.ConvertMethod)     (delegate(T p) { return Convert<UInt64,object>.From((object)p); });
 		}
 
 		#endregion
@@ -771,6 +775,8 @@ namespace BLToolkit.Common
 
 			// Nullable Types.
 			//
+			if (t == typeof(Char?))       return (ConvertMethod)(object)(Convert<Char,Char?>.ConvertMethod)      (delegate(Char?       p) { return p.HasValue?                p.Value  : (Char)0; });
+
 			if (t == typeof(SByte?))      return (ConvertMethod)(object)(Convert<Char,SByte?>.ConvertMethod)     (delegate(SByte?      p) { return p.HasValue? Convert.ToChar(p.Value) : (Char)0; });
 			if (t == typeof(Int16?))      return (ConvertMethod)(object)(Convert<Char,Int16?>.ConvertMethod)     (delegate(Int16?      p) { return p.HasValue? Convert.ToChar(p.Value) : (Char)0; });
 			if (t == typeof(Int32?))      return (ConvertMethod)(object)(Convert<Char,Int32?>.ConvertMethod)     (delegate(Int32?      p) { return p.HasValue? Convert.ToChar(p.Value) : (Char)0; });
@@ -781,7 +787,6 @@ namespace BLToolkit.Common
 			if (t == typeof(UInt32?))     return (ConvertMethod)(object)(Convert<Char,UInt32?>.ConvertMethod)    (delegate(UInt32?     p) { return p.HasValue? Convert.ToChar(p.Value) : (Char)0; });
 			if (t == typeof(UInt64?))     return (ConvertMethod)(object)(Convert<Char,UInt64?>.ConvertMethod)    (delegate(UInt64?     p) { return p.HasValue? Convert.ToChar(p.Value) : (Char)0; });
 
-			if (t == typeof(Char?))       return (ConvertMethod)(object)(Convert<Char,Char?>.ConvertMethod)      (delegate(Char?       p) { return p.HasValue?                p.Value  : (Char)0; });
 			if (t == typeof(Single?))     return (ConvertMethod)(object)(Convert<Char,Single?>.ConvertMethod)    (delegate(Single?     p) { return p.HasValue? Convert.ToChar(p.Value) : (Char)0; });
 			if (t == typeof(Double?))     return (ConvertMethod)(object)(Convert<Char,Double?>.ConvertMethod)    (delegate(Double?     p) { return p.HasValue? Convert.ToChar(p.Value) : (Char)0; });
 
@@ -806,10 +811,9 @@ namespace BLToolkit.Common
 			if (t == typeof(SqlBoolean))  return (ConvertMethod)(object)(Convert<Char,SqlBoolean>.ConvertMethod) (delegate(SqlBoolean  p) { return p.IsNull? (Char)0: Convert.ToChar(p.Value); });
 			if (t == typeof(SqlDateTime)) return (ConvertMethod)(object)(Convert<Char,SqlDateTime>.ConvertMethod)(delegate(SqlDateTime p) { return p.IsNull? (Char)0: Convert.ToChar(p.Value); });
 
-			return (ConvertMethod)(object)(Convert<Char,P>.ConvertMethod)(delegate(P p)
-			{
-				return Convert.ToChar(p);
-			});
+			if (t == typeof(object))      return (ConvertMethod)(object)(Convert<Char,object>.ConvertMethod)     (delegate(object      p) { return Convert.ToChar(p); });
+
+			return (ConvertMethod)(object)(Convert<Char,T>.ConvertMethod)     (delegate(T p) { return Convert<Char,object>.From((object)p); });
 		}
 
 		#endregion
@@ -843,6 +847,8 @@ namespace BLToolkit.Common
 
 			// Nullable Types.
 			//
+			if (t == typeof(Single?))     return (ConvertMethod)(object)(Convert<Single,Single?>.ConvertMethod)    (delegate(Single?     p) { return p.HasValue?                  p.Value  : (Single)0; });
+
 			if (t == typeof(SByte?))      return (ConvertMethod)(object)(Convert<Single,SByte?>.ConvertMethod)     (delegate(SByte?      p) { return p.HasValue? Convert.ToSingle(p.Value) : (Single)0; });
 			if (t == typeof(Int16?))      return (ConvertMethod)(object)(Convert<Single,Int16?>.ConvertMethod)     (delegate(Int16?      p) { return p.HasValue? Convert.ToSingle(p.Value) : (Single)0; });
 			if (t == typeof(Int32?))      return (ConvertMethod)(object)(Convert<Single,Int32?>.ConvertMethod)     (delegate(Int32?      p) { return p.HasValue? Convert.ToSingle(p.Value) : (Single)0; });
@@ -854,7 +860,6 @@ namespace BLToolkit.Common
 			if (t == typeof(UInt64?))     return (ConvertMethod)(object)(Convert<Single,UInt64?>.ConvertMethod)    (delegate(UInt64?     p) { return p.HasValue? Convert.ToSingle(p.Value) : (Single)0; });
 
 			if (t == typeof(Char?))       return (ConvertMethod)(object)(Convert<Single,Char?>.ConvertMethod)      (delegate(Char?       p) { return p.HasValue? Convert.ToSingle(p.Value) : (Single)0; });
-			if (t == typeof(Single?))     return (ConvertMethod)(object)(Convert<Single,Single?>.ConvertMethod)    (delegate(Single?     p) { return p.HasValue?                  p.Value  : (Single)0; });
 			if (t == typeof(Double?))     return (ConvertMethod)(object)(Convert<Single,Double?>.ConvertMethod)    (delegate(Double?     p) { return p.HasValue? Convert.ToSingle(p.Value) : (Single)0; });
 
 			if (t == typeof(Boolean?))    return (ConvertMethod)(object)(Convert<Single,Boolean?>.ConvertMethod)   (delegate(Boolean?    p) { return p.HasValue? Convert.ToSingle(p.Value) : (Single)0; });
@@ -863,6 +868,7 @@ namespace BLToolkit.Common
 
 			// SqlTypes.
 			//
+			if (t == typeof(SqlSingle))   return (ConvertMethod)(object)(Convert<Single,SqlSingle>.ConvertMethod)  (delegate(SqlSingle   p) { return p.IsNull? (Single)0:                  p.Value;  });
 			if (t == typeof(SqlString))   return (ConvertMethod)(object)(Convert<Single,SqlString>.ConvertMethod)  (delegate(SqlString   p) { return p.IsNull? (Single)0: Convert.ToSingle(p.Value); });
 
 			if (t == typeof(SqlByte))     return (ConvertMethod)(object)(Convert<Single,SqlByte>.ConvertMethod)    (delegate(SqlByte     p) { return p.IsNull? (Single)0: Convert.ToSingle(p.Value); });
@@ -870,7 +876,6 @@ namespace BLToolkit.Common
 			if (t == typeof(SqlInt32))    return (ConvertMethod)(object)(Convert<Single,SqlInt32>.ConvertMethod)   (delegate(SqlInt32    p) { return p.IsNull? (Single)0: Convert.ToSingle(p.Value); });
 			if (t == typeof(SqlInt64))    return (ConvertMethod)(object)(Convert<Single,SqlInt64>.ConvertMethod)   (delegate(SqlInt64    p) { return p.IsNull? (Single)0: Convert.ToSingle(p.Value); });
 
-			if (t == typeof(SqlSingle))   return (ConvertMethod)(object)(Convert<Single,SqlSingle>.ConvertMethod)  (delegate(SqlSingle   p) { return p.IsNull? (Single)0:                  p.Value;  });
 			if (t == typeof(SqlDouble))   return (ConvertMethod)(object)(Convert<Single,SqlDouble>.ConvertMethod)  (delegate(SqlDouble   p) { return p.IsNull? (Single)0: Convert.ToSingle(p.Value); });
 			if (t == typeof(SqlDecimal))  return (ConvertMethod)(object)(Convert<Single,SqlDecimal>.ConvertMethod) (delegate(SqlDecimal  p) { return p.IsNull? (Single)0: Convert.ToSingle(p.Value); });
 			if (t == typeof(SqlMoney))    return (ConvertMethod)(object)(Convert<Single,SqlMoney>.ConvertMethod)   (delegate(SqlMoney    p) { return p.IsNull? (Single)0: Convert.ToSingle(p.Value); });
@@ -878,10 +883,9 @@ namespace BLToolkit.Common
 			if (t == typeof(SqlBoolean))  return (ConvertMethod)(object)(Convert<Single,SqlBoolean>.ConvertMethod) (delegate(SqlBoolean  p) { return p.IsNull? (Single)0: Convert.ToSingle(p.Value); });
 			if (t == typeof(SqlDateTime)) return (ConvertMethod)(object)(Convert<Single,SqlDateTime>.ConvertMethod)(delegate(SqlDateTime p) { return p.IsNull? (Single)0: Convert.ToSingle(p.Value); });
 
-			return (ConvertMethod)(object)(Convert<Single,P>.ConvertMethod)(delegate(P p)
-			{
-				return Convert.ToSingle(p);
-			});
+			if (t == typeof(object))      return (ConvertMethod)(object)(Convert<Single,object>.ConvertMethod)     (delegate(object      p) { return Convert.ToSingle(p); });
+
+			return (ConvertMethod)(object)(Convert<Single,T>.ConvertMethod)     (delegate(T p) { return Convert<Single,object>.From((object)p); });
 		}
 
 		#endregion
@@ -915,6 +919,8 @@ namespace BLToolkit.Common
 
 			// Nullable Types.
 			//
+			if (t == typeof(Double?))     return (ConvertMethod)(object)(Convert<Double,Double?>.ConvertMethod)    (delegate(Double?     p) { return p.HasValue?                  p.Value  : (Double)0; });
+
 			if (t == typeof(SByte?))      return (ConvertMethod)(object)(Convert<Double,SByte?>.ConvertMethod)     (delegate(SByte?      p) { return p.HasValue? Convert.ToDouble(p.Value) : (Double)0; });
 			if (t == typeof(Int16?))      return (ConvertMethod)(object)(Convert<Double,Int16?>.ConvertMethod)     (delegate(Int16?      p) { return p.HasValue? Convert.ToDouble(p.Value) : (Double)0; });
 			if (t == typeof(Int32?))      return (ConvertMethod)(object)(Convert<Double,Int32?>.ConvertMethod)     (delegate(Int32?      p) { return p.HasValue? Convert.ToDouble(p.Value) : (Double)0; });
@@ -927,7 +933,6 @@ namespace BLToolkit.Common
 
 			if (t == typeof(Char?))       return (ConvertMethod)(object)(Convert<Double,Char?>.ConvertMethod)      (delegate(Char?       p) { return p.HasValue? Convert.ToDouble(p.Value) : (Double)0; });
 			if (t == typeof(Single?))     return (ConvertMethod)(object)(Convert<Double,Single?>.ConvertMethod)    (delegate(Single?     p) { return p.HasValue? Convert.ToDouble(p.Value) : (Double)0; });
-			if (t == typeof(Double?))     return (ConvertMethod)(object)(Convert<Double,Double?>.ConvertMethod)    (delegate(Double?     p) { return p.HasValue?                  p.Value  : (Double)0; });
 
 			if (t == typeof(Boolean?))    return (ConvertMethod)(object)(Convert<Double,Boolean?>.ConvertMethod)   (delegate(Boolean?    p) { return p.HasValue? Convert.ToDouble(p.Value) : (Double)0; });
 			if (t == typeof(Decimal?))    return (ConvertMethod)(object)(Convert<Double,Decimal?>.ConvertMethod)   (delegate(Decimal?    p) { return p.HasValue? Convert.ToDouble(p.Value) : (Double)0; });
@@ -935,6 +940,7 @@ namespace BLToolkit.Common
 
 			// SqlTypes.
 			//
+			if (t == typeof(SqlDouble))   return (ConvertMethod)(object)(Convert<Double,SqlDouble>.ConvertMethod)  (delegate(SqlDouble   p) { return p.IsNull? (Double)0:                  p.Value;  });
 			if (t == typeof(SqlString))   return (ConvertMethod)(object)(Convert<Double,SqlString>.ConvertMethod)  (delegate(SqlString   p) { return p.IsNull? (Double)0: Convert.ToDouble(p.Value); });
 
 			if (t == typeof(SqlByte))     return (ConvertMethod)(object)(Convert<Double,SqlByte>.ConvertMethod)    (delegate(SqlByte     p) { return p.IsNull? (Double)0: Convert.ToDouble(p.Value); });
@@ -943,17 +949,15 @@ namespace BLToolkit.Common
 			if (t == typeof(SqlInt64))    return (ConvertMethod)(object)(Convert<Double,SqlInt64>.ConvertMethod)   (delegate(SqlInt64    p) { return p.IsNull? (Double)0: Convert.ToDouble(p.Value); });
 
 			if (t == typeof(SqlSingle))   return (ConvertMethod)(object)(Convert<Double,SqlSingle>.ConvertMethod)  (delegate(SqlSingle   p) { return p.IsNull? (Double)0: Convert.ToDouble(p.Value); });
-			if (t == typeof(SqlDouble))   return (ConvertMethod)(object)(Convert<Double,SqlDouble>.ConvertMethod)  (delegate(SqlDouble   p) { return p.IsNull? (Double)0:                  p.Value;  });
 			if (t == typeof(SqlDecimal))  return (ConvertMethod)(object)(Convert<Double,SqlDecimal>.ConvertMethod) (delegate(SqlDecimal  p) { return p.IsNull? (Double)0: Convert.ToDouble(p.Value); });
 			if (t == typeof(SqlMoney))    return (ConvertMethod)(object)(Convert<Double,SqlMoney>.ConvertMethod)   (delegate(SqlMoney    p) { return p.IsNull? (Double)0: Convert.ToDouble(p.Value); });
 
 			if (t == typeof(SqlBoolean))  return (ConvertMethod)(object)(Convert<Double,SqlBoolean>.ConvertMethod) (delegate(SqlBoolean  p) { return p.IsNull? (Double)0: Convert.ToDouble(p.Value); });
 			if (t == typeof(SqlDateTime)) return (ConvertMethod)(object)(Convert<Double,SqlDateTime>.ConvertMethod)(delegate(SqlDateTime p) { return p.IsNull? (Double)0: Convert.ToDouble(p.Value); });
 
-			return (ConvertMethod)(object)(Convert<Double,P>.ConvertMethod)(delegate(P p)
-			{
-				return Convert.ToDouble(p);
-			});
+			if (t == typeof(object))      return (ConvertMethod)(object)(Convert<Double,object>.ConvertMethod)     (delegate(object      p) { return Convert.ToDouble(p); });
+
+			return (ConvertMethod)(object)(Convert<Double,T>.ConvertMethod)     (delegate(T p) { return Convert<Double,object>.From((object)p); });
 		}
 
 		#endregion
@@ -987,6 +991,8 @@ namespace BLToolkit.Common
 
 			// Nullable Types.
 			//
+			if (t == typeof(Boolean?))    return (ConvertMethod)(object)(Convert<Boolean,Boolean?>.ConvertMethod)   (delegate(Boolean?    p) { return p.HasValue?                   p.Value  : false; });
+
 			if (t == typeof(SByte?))      return (ConvertMethod)(object)(Convert<Boolean,SByte?>.ConvertMethod)     (delegate(SByte?      p) { return p.HasValue? Convert.ToBoolean(p.Value) : false; });
 			if (t == typeof(Int16?))      return (ConvertMethod)(object)(Convert<Boolean,Int16?>.ConvertMethod)     (delegate(Int16?      p) { return p.HasValue? Convert.ToBoolean(p.Value) : false; });
 			if (t == typeof(Int32?))      return (ConvertMethod)(object)(Convert<Boolean,Int32?>.ConvertMethod)     (delegate(Int32?      p) { return p.HasValue? Convert.ToBoolean(p.Value) : false; });
@@ -1001,12 +1007,12 @@ namespace BLToolkit.Common
 			if (t == typeof(Single?))     return (ConvertMethod)(object)(Convert<Boolean,Single?>.ConvertMethod)    (delegate(Single?     p) { return p.HasValue? Convert.ToBoolean(p.Value) : false; });
 			if (t == typeof(Double?))     return (ConvertMethod)(object)(Convert<Boolean,Double?>.ConvertMethod)    (delegate(Double?     p) { return p.HasValue? Convert.ToBoolean(p.Value) : false; });
 
-			if (t == typeof(Boolean?))    return (ConvertMethod)(object)(Convert<Boolean,Boolean?>.ConvertMethod)   (delegate(Boolean?    p) { return p.HasValue?                   p.Value  : false; });
 			if (t == typeof(Decimal?))    return (ConvertMethod)(object)(Convert<Boolean,Decimal?>.ConvertMethod)   (delegate(Decimal?    p) { return p.HasValue? Convert.ToBoolean(p.Value) : false; });
 			if (t == typeof(DateTime?))   return (ConvertMethod)(object)(Convert<Boolean,DateTime?>.ConvertMethod)  (delegate(DateTime?   p) { return p.HasValue? Convert.ToBoolean(p.Value) : false; });
 
 			// SqlTypes.
 			//
+			if (t == typeof(SqlBoolean))  return (ConvertMethod)(object)(Convert<Boolean,SqlBoolean>.ConvertMethod) (delegate(SqlBoolean  p) { return p.IsNull? false:                   p.Value;  });
 			if (t == typeof(SqlString))   return (ConvertMethod)(object)(Convert<Boolean,SqlString>.ConvertMethod)  (delegate(SqlString   p) { return p.IsNull? false: Convert.ToBoolean(p.Value); });
 
 			if (t == typeof(SqlByte))     return (ConvertMethod)(object)(Convert<Boolean,SqlByte>.ConvertMethod)    (delegate(SqlByte     p) { return p.IsNull? false: Convert.ToBoolean(p.Value); });
@@ -1019,13 +1025,11 @@ namespace BLToolkit.Common
 			if (t == typeof(SqlDecimal))  return (ConvertMethod)(object)(Convert<Boolean,SqlDecimal>.ConvertMethod) (delegate(SqlDecimal  p) { return p.IsNull? false: Convert.ToBoolean(p.Value); });
 			if (t == typeof(SqlMoney))    return (ConvertMethod)(object)(Convert<Boolean,SqlMoney>.ConvertMethod)   (delegate(SqlMoney    p) { return p.IsNull? false: Convert.ToBoolean(p.Value); });
 
-			if (t == typeof(SqlBoolean))  return (ConvertMethod)(object)(Convert<Boolean,SqlBoolean>.ConvertMethod) (delegate(SqlBoolean  p) { return p.IsNull? false:                   p.Value;  });
 			if (t == typeof(SqlDateTime)) return (ConvertMethod)(object)(Convert<Boolean,SqlDateTime>.ConvertMethod)(delegate(SqlDateTime p) { return p.IsNull? false: Convert.ToBoolean(p.Value); });
 
-			return (ConvertMethod)(object)(Convert<Boolean,P>.ConvertMethod)(delegate(P p)
-			{
-				return Convert.ToBoolean(p);
-			});
+			if (t == typeof(object))      return (ConvertMethod)(object)(Convert<Boolean,object>.ConvertMethod)     (delegate(object      p) { return Convert.ToBoolean(p); });
+
+			return (ConvertMethod)(object)(Convert<Boolean,T>.ConvertMethod)     (delegate(T p) { return Convert<Boolean,object>.From((object)p); });
 		}
 
 		#endregion
@@ -1059,6 +1063,8 @@ namespace BLToolkit.Common
 
 			// Nullable Types.
 			//
+			if (t == typeof(Decimal?))    return (ConvertMethod)(object)(Convert<Decimal,Decimal?>.ConvertMethod)   (delegate(Decimal?    p) { return p.HasValue?                   p.Value  : (Decimal)0; });
+
 			if (t == typeof(SByte?))      return (ConvertMethod)(object)(Convert<Decimal,SByte?>.ConvertMethod)     (delegate(SByte?      p) { return p.HasValue? Convert.ToDecimal(p.Value) : (Decimal)0; });
 			if (t == typeof(Int16?))      return (ConvertMethod)(object)(Convert<Decimal,Int16?>.ConvertMethod)     (delegate(Int16?      p) { return p.HasValue? Convert.ToDecimal(p.Value) : (Decimal)0; });
 			if (t == typeof(Int32?))      return (ConvertMethod)(object)(Convert<Decimal,Int32?>.ConvertMethod)     (delegate(Int32?      p) { return p.HasValue? Convert.ToDecimal(p.Value) : (Decimal)0; });
@@ -1074,11 +1080,12 @@ namespace BLToolkit.Common
 			if (t == typeof(Double?))     return (ConvertMethod)(object)(Convert<Decimal,Double?>.ConvertMethod)    (delegate(Double?     p) { return p.HasValue? Convert.ToDecimal(p.Value) : (Decimal)0; });
 
 			if (t == typeof(Boolean?))    return (ConvertMethod)(object)(Convert<Decimal,Boolean?>.ConvertMethod)   (delegate(Boolean?    p) { return p.HasValue? Convert.ToDecimal(p.Value) : (Decimal)0; });
-			if (t == typeof(Decimal?))    return (ConvertMethod)(object)(Convert<Decimal,Decimal?>.ConvertMethod)   (delegate(Decimal?    p) { return p.HasValue?                   p.Value  : (Decimal)0; });
 			if (t == typeof(DateTime?))   return (ConvertMethod)(object)(Convert<Decimal,DateTime?>.ConvertMethod)  (delegate(DateTime?   p) { return p.HasValue? Convert.ToDecimal(p.Value) : (Decimal)0; });
 
 			// SqlTypes.
 			//
+			if (t == typeof(SqlDecimal))  return (ConvertMethod)(object)(Convert<Decimal,SqlDecimal>.ConvertMethod) (delegate(SqlDecimal  p) { return p.IsNull? (Decimal)0:                   p.Value;  });
+			if (t == typeof(SqlMoney))    return (ConvertMethod)(object)(Convert<Decimal,SqlMoney>.ConvertMethod)   (delegate(SqlMoney    p) { return p.IsNull? (Decimal)0:                   p.Value;  });
 			if (t == typeof(SqlString))   return (ConvertMethod)(object)(Convert<Decimal,SqlString>.ConvertMethod)  (delegate(SqlString   p) { return p.IsNull? (Decimal)0: Convert.ToDecimal(p.Value); });
 
 			if (t == typeof(SqlByte))     return (ConvertMethod)(object)(Convert<Decimal,SqlByte>.ConvertMethod)    (delegate(SqlByte     p) { return p.IsNull? (Decimal)0: Convert.ToDecimal(p.Value); });
@@ -1088,16 +1095,13 @@ namespace BLToolkit.Common
 
 			if (t == typeof(SqlSingle))   return (ConvertMethod)(object)(Convert<Decimal,SqlSingle>.ConvertMethod)  (delegate(SqlSingle   p) { return p.IsNull? (Decimal)0: Convert.ToDecimal(p.Value); });
 			if (t == typeof(SqlDouble))   return (ConvertMethod)(object)(Convert<Decimal,SqlDouble>.ConvertMethod)  (delegate(SqlDouble   p) { return p.IsNull? (Decimal)0: Convert.ToDecimal(p.Value); });
-			if (t == typeof(SqlDecimal))  return (ConvertMethod)(object)(Convert<Decimal,SqlDecimal>.ConvertMethod) (delegate(SqlDecimal  p) { return p.IsNull? (Decimal)0:                   p.Value;  });
-			if (t == typeof(SqlMoney))    return (ConvertMethod)(object)(Convert<Decimal,SqlMoney>.ConvertMethod)   (delegate(SqlMoney    p) { return p.IsNull? (Decimal)0:                   p.Value;  });
 
 			if (t == typeof(SqlBoolean))  return (ConvertMethod)(object)(Convert<Decimal,SqlBoolean>.ConvertMethod) (delegate(SqlBoolean  p) { return p.IsNull? (Decimal)0: Convert.ToDecimal(p.Value); });
 			if (t == typeof(SqlDateTime)) return (ConvertMethod)(object)(Convert<Decimal,SqlDateTime>.ConvertMethod)(delegate(SqlDateTime p) { return p.IsNull? (Decimal)0: Convert.ToDecimal(p.Value); });
 
-			return (ConvertMethod)(object)(Convert<Decimal,P>.ConvertMethod)(delegate(P p)
-			{
-				return Convert.ToDecimal(p);
-			});
+			if (t == typeof(object))      return (ConvertMethod)(object)(Convert<Decimal,object>.ConvertMethod)     (delegate(object      p) { return Convert.ToDecimal(p); });
+
+			return (ConvertMethod)(object)(Convert<Decimal,T>.ConvertMethod)     (delegate(T p) { return Convert<Decimal,object>.From((object)p); });
 		}
 
 		#endregion
@@ -1131,6 +1135,8 @@ namespace BLToolkit.Common
 
 			// Nullable Types.
 			//
+			if (t == typeof(DateTime?))   return (ConvertMethod)(object)(Convert<DateTime,DateTime?>.ConvertMethod)  (delegate(DateTime?   p) { return p.HasValue?                    p.Value  : DateTime.MinValue; });
+
 			if (t == typeof(SByte?))      return (ConvertMethod)(object)(Convert<DateTime,SByte?>.ConvertMethod)     (delegate(SByte?      p) { return p.HasValue? Convert.ToDateTime(p.Value) : DateTime.MinValue; });
 			if (t == typeof(Int16?))      return (ConvertMethod)(object)(Convert<DateTime,Int16?>.ConvertMethod)     (delegate(Int16?      p) { return p.HasValue? Convert.ToDateTime(p.Value) : DateTime.MinValue; });
 			if (t == typeof(Int32?))      return (ConvertMethod)(object)(Convert<DateTime,Int32?>.ConvertMethod)     (delegate(Int32?      p) { return p.HasValue? Convert.ToDateTime(p.Value) : DateTime.MinValue; });
@@ -1147,10 +1153,10 @@ namespace BLToolkit.Common
 
 			if (t == typeof(Boolean?))    return (ConvertMethod)(object)(Convert<DateTime,Boolean?>.ConvertMethod)   (delegate(Boolean?    p) { return p.HasValue? Convert.ToDateTime(p.Value) : DateTime.MinValue; });
 			if (t == typeof(Decimal?))    return (ConvertMethod)(object)(Convert<DateTime,Decimal?>.ConvertMethod)   (delegate(Decimal?    p) { return p.HasValue? Convert.ToDateTime(p.Value) : DateTime.MinValue; });
-			if (t == typeof(DateTime?))   return (ConvertMethod)(object)(Convert<DateTime,DateTime?>.ConvertMethod)  (delegate(DateTime?   p) { return p.HasValue?                    p.Value  : DateTime.MinValue; });
 
 			// SqlTypes.
 			//
+			if (t == typeof(SqlDateTime)) return (ConvertMethod)(object)(Convert<DateTime,SqlDateTime>.ConvertMethod)(delegate(SqlDateTime p) { return p.IsNull? DateTime.MinValue:                    p.Value;  });
 			if (t == typeof(SqlString))   return (ConvertMethod)(object)(Convert<DateTime,SqlString>.ConvertMethod)  (delegate(SqlString   p) { return p.IsNull? DateTime.MinValue: Convert.ToDateTime(p.Value); });
 
 			if (t == typeof(SqlByte))     return (ConvertMethod)(object)(Convert<DateTime,SqlByte>.ConvertMethod)    (delegate(SqlByte     p) { return p.IsNull? DateTime.MinValue: Convert.ToDateTime(p.Value); });
@@ -1164,12 +1170,10 @@ namespace BLToolkit.Common
 			if (t == typeof(SqlMoney))    return (ConvertMethod)(object)(Convert<DateTime,SqlMoney>.ConvertMethod)   (delegate(SqlMoney    p) { return p.IsNull? DateTime.MinValue: Convert.ToDateTime(p.Value); });
 
 			if (t == typeof(SqlBoolean))  return (ConvertMethod)(object)(Convert<DateTime,SqlBoolean>.ConvertMethod) (delegate(SqlBoolean  p) { return p.IsNull? DateTime.MinValue: Convert.ToDateTime(p.Value); });
-			if (t == typeof(SqlDateTime)) return (ConvertMethod)(object)(Convert<DateTime,SqlDateTime>.ConvertMethod)(delegate(SqlDateTime p) { return p.IsNull? DateTime.MinValue:                    p.Value;  });
 
-			return (ConvertMethod)(object)(Convert<DateTime,P>.ConvertMethod)(delegate(P p)
-			{
-				return Convert.ToDateTime(p);
-			});
+			if (t == typeof(object))      return (ConvertMethod)(object)(Convert<DateTime,object>.ConvertMethod)     (delegate(object      p) { return Convert.ToDateTime(p); });
+
+			return (ConvertMethod)(object)(Convert<DateTime,T>.ConvertMethod)     (delegate(T p) { return Convert<DateTime,object>.From((object)p); });
 		}
 
 		#endregion
@@ -1187,22 +1191,39 @@ namespace BLToolkit.Common
 
 			// Nullable Types.
 			//
-			if (t == typeof(DateTime?))   return (ConvertMethod)(object)(Convert<TimeSpan,DateTime?>.ConvertMethod)  (delegate(DateTime?   p) { return p.HasValue? p.Value - DateTime.MinValue : TimeSpan.MinValue; });
-			if (t == typeof(TimeSpan?))   return (ConvertMethod)(object)(Convert<TimeSpan,TimeSpan?>.ConvertMethod)  (delegate(TimeSpan?   p) { return p.HasValue? p.Value                     : TimeSpan.MinValue; });
+			if (t == typeof(TimeSpan?))   return (ConvertMethod)(object)(Convert<TimeSpan,TimeSpan?>.ConvertMethod)  (delegate(TimeSpan?   p) { return p.HasValue? p.Value                    : TimeSpan.MinValue; });
+			if (t == typeof(DateTime?))   return (ConvertMethod)(object)(Convert<TimeSpan,DateTime?>.ConvertMethod)  (delegate(DateTime?   p) { return p.HasValue? p.Value - DateTime.MinValue: TimeSpan.MinValue; });
 
 			// SqlTypes.
 			//
 			if (t == typeof(SqlString))   return (ConvertMethod)(object)(Convert<TimeSpan,SqlString>.ConvertMethod)  (delegate(SqlString   p) { return p.IsNull? TimeSpan.MinValue: TimeSpan.Parse(p.Value);     });
 			if (t == typeof(SqlDateTime)) return (ConvertMethod)(object)(Convert<TimeSpan,SqlDateTime>.ConvertMethod)(delegate(SqlDateTime p) { return p.IsNull? TimeSpan.MinValue: p.Value - DateTime.MinValue; });
 
-			return (ConvertMethod)(object)(Convert<TimeSpan,P>.ConvertMethod)(delegate(P p)
+			if (t == typeof(object))      return (ConvertMethod)(object)(Convert<TimeSpan,object>.ConvertMethod)     (delegate(object      p)
 			{
 				if (p == null)
 					return TimeSpan.MinValue;
 
+				// Scalar Types.
+				//
+				if (p is String)      return Convert<TimeSpan,String>     .From((String)p);
+				if (p is DateTime)    return Convert<TimeSpan,DateTime>   .From((DateTime)p);
+
+				// Nullable Types.
+				//
+				if (p is TimeSpan?)   return Convert<TimeSpan,TimeSpan?>  .From((TimeSpan?)p);
+				if (p is DateTime?)   return Convert<TimeSpan,DateTime?>  .From((DateTime?)p);
+
+				// SqlTypes.
+				//
+				if (p is SqlString)   return Convert<TimeSpan,SqlString>  .From((SqlString)p);
+				if (p is SqlDateTime) return Convert<TimeSpan,SqlDateTime>.From((SqlDateTime)p);
+
 				throw new InvalidCastException(string.Format(
 					"Invalid cast from {0} to {1}", typeof(P).FullName, typeof(T).FullName));
 			});
+
+			return (ConvertMethod)(object)(Convert<TimeSpan,T>.ConvertMethod)     (delegate(T p) { return Convert<TimeSpan,object>.From((object)p); });
 		}
 
 		#endregion
@@ -1215,7 +1236,7 @@ namespace BLToolkit.Common
 
 			// Scalar Types.
 			//
-			if (t == typeof(String))      return (ConvertMethod)(object)(Convert<Guid,String>.ConvertMethod)     (delegate(String      p) { return p == null ? Guid.Empty : new Guid(p); });
+			if (t == typeof(String))      return (ConvertMethod)(object)(Convert<Guid,String>.ConvertMethod)     (delegate(String      p) { return p == null? Guid.Empty: new Guid(p); });
 
 			// Nullable Types.
 			//
@@ -1223,18 +1244,34 @@ namespace BLToolkit.Common
 
 			// SqlTypes.
 			//
-			if (t == typeof(SqlString))   return (ConvertMethod)(object)(Convert<Guid,SqlString>.ConvertMethod)  (delegate(SqlString   p) { return p.IsNull? Guid.Empty: new Guid(p.Value); });
-			if (t == typeof(SqlGuid))     return (ConvertMethod)(object)(Convert<Guid,SqlGuid>.ConvertMethod)    (delegate(SqlGuid     p) { return p.IsNull? Guid.Empty: p.Value; });
+			if (t == typeof(SqlGuid))     return (ConvertMethod)(object)(Convert<Guid,SqlGuid>.ConvertMethod)    (delegate(SqlGuid     p) { return p.IsNull? Guid.Empty: p.Value;             });
+			if (t == typeof(SqlString))   return (ConvertMethod)(object)(Convert<Guid,SqlString>.ConvertMethod)  (delegate(SqlString   p) { return p.IsNull? Guid.Empty: new Guid(p.Value);   });
 			if (t == typeof(SqlBinary))   return (ConvertMethod)(object)(Convert<Guid,SqlBinary>.ConvertMethod)  (delegate(SqlBinary   p) { return p.IsNull? Guid.Empty: p.ToSqlGuid().Value; });
 
-			return (ConvertMethod)(object)(Convert<Guid,P>.ConvertMethod)(delegate(P p)
+			if (t == typeof(object))      return (ConvertMethod)(object)(Convert<Guid,object>.ConvertMethod)     (delegate(object      p)
 			{
 				if (p == null)
 					return Guid.Empty;
 
+				// Scalar Types.
+				//
+				if (p is String)      return Convert<Guid,String>     .From((String)p);
+
+				// Nullable Types.
+				//
+				if (p is Guid?)       return Convert<Guid,Guid?>      .From((Guid?)p);
+
+				// SqlTypes.
+				//
+				if (p is SqlGuid)     return Convert<Guid,SqlGuid>    .From((SqlGuid)p);
+				if (p is SqlString)   return Convert<Guid,SqlString>  .From((SqlString)p);
+				if (p is SqlBinary)   return Convert<Guid,SqlBinary>  .From((SqlBinary)p);
+
 				throw new InvalidCastException(string.Format(
 					"Invalid cast from {0} to {1}", typeof(P).FullName, typeof(T).FullName));
 			});
+
+			return (ConvertMethod)(object)(Convert<Guid,T>.ConvertMethod)     (delegate(T p) { return Convert<Guid,object>.From((object)p); });
 		}
 
 		#endregion
@@ -1247,21 +1284,32 @@ namespace BLToolkit.Common
 
 			// Scalar Types.
 			//
-			if (t == typeof(byte[]))    return (ConvertMethod)(object)(Convert<Stream, byte[]>.ConvertMethod)(delegate(byte[] p) { return p == null ? Stream.Null : new MemoryStream(p); });
+			if (t == typeof(Byte[]))      return (ConvertMethod)(object)(Convert<Stream,Byte[]>.ConvertMethod)     (delegate(Byte[]      p) { return p == null? Stream.Null: new MemoryStream(p); });
 
 			// SqlTypes.
 			//
-			if (t == typeof(SqlBinary)) return (ConvertMethod)(object)(Convert<Stream, SqlBinary>.ConvertMethod)(delegate(SqlBinary p) { return p.IsNull ? Stream.Null : new MemoryStream(p.Value); });
-			if (t == typeof(SqlBytes))  return (ConvertMethod)(object)(Convert<Stream, SqlBytes>.ConvertMethod)(delegate(SqlBytes p) { return p.IsNull ? Stream.Null : p.Stream; });
+			if (t == typeof(SqlBytes))    return (ConvertMethod)(object)(Convert<Stream,SqlBytes>.ConvertMethod)   (delegate(SqlBytes    p) { return p.IsNull? Stream.Null: p.Stream;                  });
+			if (t == typeof(SqlBinary))   return (ConvertMethod)(object)(Convert<Stream,SqlBinary>.ConvertMethod)  (delegate(SqlBinary   p) { return p.IsNull? Stream.Null: new MemoryStream(p.Value); });
 
-			return (ConvertMethod)(object)(Convert<Stream, P>.ConvertMethod)(delegate(P p)
+			if (t == typeof(object))      return (ConvertMethod)(object)(Convert<Stream,object>.ConvertMethod)     (delegate(object      p)
 			{
 				if (p == null)
 					return Stream.Null;
 
+				// Scalar Types.
+				//
+				if (p is Byte[])      return Convert<Stream,Byte[]>     .From((Byte[])p);
+
+				// SqlTypes.
+				//
+				if (p is SqlBytes)    return Convert<Stream,SqlBytes>   .From((SqlBytes)p);
+				if (p is SqlBinary)   return Convert<Stream,SqlBinary>  .From((SqlBinary)p);
+
 				throw new InvalidCastException(string.Format(
 					"Invalid cast from {0} to {1}", typeof(P).FullName, typeof(T).FullName));
 			});
+
+			return (ConvertMethod)(object)(Convert<Stream,T>.ConvertMethod)     (delegate(T p) { return Convert<Stream,object>.From((object)p); });
 		}
 
 		#endregion
@@ -1278,9 +1326,9 @@ namespace BLToolkit.Common
 
 			// Scalar Types.
 			//
+			if (t == typeof(SByte))       return (ConvertMethod)(object)(Convert<SByte?,SByte>.ConvertMethod)      (delegate(SByte       p) { return p; });
 			if (t == typeof(String))      return (ConvertMethod)(object)(Convert<SByte?,String>.ConvertMethod)     (delegate(String      p) { return p == null? null: (SByte?)Convert.ToSByte(p); });
 
-			if (t == typeof(SByte))       return (ConvertMethod)(object)(Convert<SByte?,SByte>.ConvertMethod)      (delegate(SByte       p) { return                 p; });
 			if (t == typeof(Int16))       return (ConvertMethod)(object)(Convert<SByte?,Int16>.ConvertMethod)      (delegate(Int16       p) { return Convert.ToSByte(p); });
 			if (t == typeof(Int32))       return (ConvertMethod)(object)(Convert<SByte?,Int32>.ConvertMethod)      (delegate(Int32       p) { return Convert.ToSByte(p); });
 			if (t == typeof(Int64))       return (ConvertMethod)(object)(Convert<SByte?,Int64>.ConvertMethod)      (delegate(Int64       p) { return Convert.ToSByte(p); });
@@ -1334,10 +1382,9 @@ namespace BLToolkit.Common
 			if (t == typeof(SqlBoolean))  return (ConvertMethod)(object)(Convert<SByte?,SqlBoolean>.ConvertMethod) (delegate(SqlBoolean  p) { return p.IsNull? null: (SByte?)Convert.ToSByte(p.Value); });
 			if (t == typeof(SqlDateTime)) return (ConvertMethod)(object)(Convert<SByte?,SqlDateTime>.ConvertMethod)(delegate(SqlDateTime p) { return p.IsNull? null: (SByte?)Convert.ToSByte(p.Value); });
 
-			return (ConvertMethod)(object)(Convert<SByte?,P>.ConvertMethod)(delegate(P p)
-			{
-				return Convert.ToSByte(p);
-			});
+			if (t == typeof(object))      return (ConvertMethod)(object)(Convert<SByte?,object>.ConvertMethod)     (delegate(object      p) { return Convert.ToSByte(p); });
+
+			return (ConvertMethod)(object)(Convert<SByte?,T>.ConvertMethod)     (delegate(T p) { return Convert<SByte?,object>.From((object)p); });
 		}
 
 		#endregion
@@ -1350,10 +1397,10 @@ namespace BLToolkit.Common
 
 			// Scalar Types.
 			//
+			if (t == typeof(Int16))       return (ConvertMethod)(object)(Convert<Int16?,Int16>.ConvertMethod)      (delegate(Int16       p) { return p; });
 			if (t == typeof(String))      return (ConvertMethod)(object)(Convert<Int16?,String>.ConvertMethod)     (delegate(String      p) { return p == null? null: (Int16?)Convert.ToInt16(p); });
 
 			if (t == typeof(SByte))       return (ConvertMethod)(object)(Convert<Int16?,SByte>.ConvertMethod)      (delegate(SByte       p) { return Convert.ToInt16(p); });
-			if (t == typeof(Int16))       return (ConvertMethod)(object)(Convert<Int16?,Int16>.ConvertMethod)      (delegate(Int16       p) { return                 p;  });
 			if (t == typeof(Int32))       return (ConvertMethod)(object)(Convert<Int16?,Int32>.ConvertMethod)      (delegate(Int32       p) { return Convert.ToInt16(p); });
 			if (t == typeof(Int64))       return (ConvertMethod)(object)(Convert<Int16?,Int64>.ConvertMethod)      (delegate(Int64       p) { return Convert.ToInt16(p); });
 
@@ -1391,10 +1438,10 @@ namespace BLToolkit.Common
 
 			// SqlTypes.
 			//
+			if (t == typeof(SqlInt16))    return (ConvertMethod)(object)(Convert<Int16?,SqlInt16>.ConvertMethod)   (delegate(SqlInt16    p) { return p.IsNull? null: (Int16?)                p.Value;  });
 			if (t == typeof(SqlString))   return (ConvertMethod)(object)(Convert<Int16?,SqlString>.ConvertMethod)  (delegate(SqlString   p) { return p.IsNull? null: (Int16?)Convert.ToInt16(p.Value); });
 
 			if (t == typeof(SqlByte))     return (ConvertMethod)(object)(Convert<Int16?,SqlByte>.ConvertMethod)    (delegate(SqlByte     p) { return p.IsNull? null: (Int16?)Convert.ToInt16(p.Value); });
-			if (t == typeof(SqlInt16))    return (ConvertMethod)(object)(Convert<Int16?,SqlInt16>.ConvertMethod)   (delegate(SqlInt16    p) { return p.IsNull? null: (Int16?)                p.Value;  });
 			if (t == typeof(SqlInt32))    return (ConvertMethod)(object)(Convert<Int16?,SqlInt32>.ConvertMethod)   (delegate(SqlInt32    p) { return p.IsNull? null: (Int16?)Convert.ToInt16(p.Value); });
 			if (t == typeof(SqlInt64))    return (ConvertMethod)(object)(Convert<Int16?,SqlInt64>.ConvertMethod)   (delegate(SqlInt64    p) { return p.IsNull? null: (Int16?)Convert.ToInt16(p.Value); });
 
@@ -1406,10 +1453,9 @@ namespace BLToolkit.Common
 			if (t == typeof(SqlBoolean))  return (ConvertMethod)(object)(Convert<Int16?,SqlBoolean>.ConvertMethod) (delegate(SqlBoolean  p) { return p.IsNull? null: (Int16?)Convert.ToInt16(p.Value); });
 			if (t == typeof(SqlDateTime)) return (ConvertMethod)(object)(Convert<Int16?,SqlDateTime>.ConvertMethod)(delegate(SqlDateTime p) { return p.IsNull? null: (Int16?)Convert.ToInt16(p.Value); });
 
-			return (ConvertMethod)(object)(Convert<Int16?,P>.ConvertMethod)(delegate(P p)
-			{
-				return Convert.ToInt16(p);
-			});
+			if (t == typeof(object))      return (ConvertMethod)(object)(Convert<Int16?,object>.ConvertMethod)     (delegate(object      p) { return Convert.ToInt16(p); });
+
+			return (ConvertMethod)(object)(Convert<Int16?,T>.ConvertMethod)     (delegate(T p) { return Convert<Int16?,object>.From((object)p); });
 		}
 
 		#endregion
@@ -1422,11 +1468,11 @@ namespace BLToolkit.Common
 
 			// Scalar Types.
 			//
+			if (t == typeof(Int32))       return (ConvertMethod)(object)(Convert<Int32?,Int32>.ConvertMethod)      (delegate(Int32       p) { return p; });
 			if (t == typeof(String))      return (ConvertMethod)(object)(Convert<Int32?,String>.ConvertMethod)     (delegate(String      p) { return p == null? null: (Int32?)Convert.ToInt32(p); });
 
 			if (t == typeof(SByte))       return (ConvertMethod)(object)(Convert<Int32?,SByte>.ConvertMethod)      (delegate(SByte       p) { return Convert.ToInt32(p); });
 			if (t == typeof(Int16))       return (ConvertMethod)(object)(Convert<Int32?,Int16>.ConvertMethod)      (delegate(Int16       p) { return Convert.ToInt32(p); });
-			if (t == typeof(Int32))       return (ConvertMethod)(object)(Convert<Int32?,Int32>.ConvertMethod)      (delegate(Int32       p) { return                 p;  });
 			if (t == typeof(Int64))       return (ConvertMethod)(object)(Convert<Int32?,Int64>.ConvertMethod)      (delegate(Int64       p) { return Convert.ToInt32(p); });
 
 			if (t == typeof(Byte))        return (ConvertMethod)(object)(Convert<Int32?,Byte>.ConvertMethod)       (delegate(Byte        p) { return Convert.ToInt32(p); });
@@ -1463,11 +1509,11 @@ namespace BLToolkit.Common
 
 			// SqlTypes.
 			//
+			if (t == typeof(SqlInt32))    return (ConvertMethod)(object)(Convert<Int32?,SqlInt32>.ConvertMethod)   (delegate(SqlInt32    p) { return p.IsNull? null: (Int32?)                p.Value;  });
 			if (t == typeof(SqlString))   return (ConvertMethod)(object)(Convert<Int32?,SqlString>.ConvertMethod)  (delegate(SqlString   p) { return p.IsNull? null: (Int32?)Convert.ToInt32(p.Value); });
 
 			if (t == typeof(SqlByte))     return (ConvertMethod)(object)(Convert<Int32?,SqlByte>.ConvertMethod)    (delegate(SqlByte     p) { return p.IsNull? null: (Int32?)Convert.ToInt32(p.Value); });
 			if (t == typeof(SqlInt16))    return (ConvertMethod)(object)(Convert<Int32?,SqlInt16>.ConvertMethod)   (delegate(SqlInt16    p) { return p.IsNull? null: (Int32?)Convert.ToInt32(p.Value); });
-			if (t == typeof(SqlInt32))    return (ConvertMethod)(object)(Convert<Int32?,SqlInt32>.ConvertMethod)   (delegate(SqlInt32    p) { return p.IsNull? null: (Int32?)                p.Value;  });
 			if (t == typeof(SqlInt64))    return (ConvertMethod)(object)(Convert<Int32?,SqlInt64>.ConvertMethod)   (delegate(SqlInt64    p) { return p.IsNull? null: (Int32?)Convert.ToInt32(p.Value); });
 
 			if (t == typeof(SqlSingle))   return (ConvertMethod)(object)(Convert<Int32?,SqlSingle>.ConvertMethod)  (delegate(SqlSingle   p) { return p.IsNull? null: (Int32?)Convert.ToInt32(p.Value); });
@@ -1478,10 +1524,9 @@ namespace BLToolkit.Common
 			if (t == typeof(SqlBoolean))  return (ConvertMethod)(object)(Convert<Int32?,SqlBoolean>.ConvertMethod) (delegate(SqlBoolean  p) { return p.IsNull? null: (Int32?)Convert.ToInt32(p.Value); });
 			if (t == typeof(SqlDateTime)) return (ConvertMethod)(object)(Convert<Int32?,SqlDateTime>.ConvertMethod)(delegate(SqlDateTime p) { return p.IsNull? null: (Int32?)Convert.ToInt32(p.Value); });
 
-			return (ConvertMethod)(object)(Convert<Int32?,P>.ConvertMethod)(delegate(P p)
-			{
-				return Convert.ToInt32(p);
-			});
+			if (t == typeof(object))      return (ConvertMethod)(object)(Convert<Int32?,object>.ConvertMethod)     (delegate(object      p) { return Convert.ToInt32(p); });
+
+			return (ConvertMethod)(object)(Convert<Int32?,T>.ConvertMethod)     (delegate(T p) { return Convert<Int32?,object>.From((object)p); });
 		}
 
 		#endregion
@@ -1494,12 +1539,12 @@ namespace BLToolkit.Common
 
 			// Scalar Types.
 			//
+			if (t == typeof(Int64))       return (ConvertMethod)(object)(Convert<Int64?,Int64>.ConvertMethod)      (delegate(Int64       p) { return p; });
 			if (t == typeof(String))      return (ConvertMethod)(object)(Convert<Int64?,String>.ConvertMethod)     (delegate(String      p) { return p == null? null: (Int64?)Convert.ToInt64(p); });
 
 			if (t == typeof(SByte))       return (ConvertMethod)(object)(Convert<Int64?,SByte>.ConvertMethod)      (delegate(SByte       p) { return Convert.ToInt64(p); });
 			if (t == typeof(Int16))       return (ConvertMethod)(object)(Convert<Int64?,Int16>.ConvertMethod)      (delegate(Int16       p) { return Convert.ToInt64(p); });
 			if (t == typeof(Int32))       return (ConvertMethod)(object)(Convert<Int64?,Int32>.ConvertMethod)      (delegate(Int32       p) { return Convert.ToInt64(p); });
-			if (t == typeof(Int64))       return (ConvertMethod)(object)(Convert<Int64?,Int64>.ConvertMethod)      (delegate(Int64       p) { return                 p;  });
 
 			if (t == typeof(Byte))        return (ConvertMethod)(object)(Convert<Int64?,Byte>.ConvertMethod)       (delegate(Byte        p) { return Convert.ToInt64(p); });
 			if (t == typeof(UInt16))      return (ConvertMethod)(object)(Convert<Int64?,UInt16>.ConvertMethod)     (delegate(UInt16      p) { return Convert.ToInt64(p); });
@@ -1535,12 +1580,12 @@ namespace BLToolkit.Common
 
 			// SqlTypes.
 			//
+			if (t == typeof(SqlInt64))    return (ConvertMethod)(object)(Convert<Int64?,SqlInt64>.ConvertMethod)   (delegate(SqlInt64    p) { return p.IsNull? null: (Int64?)                p.Value;  });
 			if (t == typeof(SqlString))   return (ConvertMethod)(object)(Convert<Int64?,SqlString>.ConvertMethod)  (delegate(SqlString   p) { return p.IsNull? null: (Int64?)Convert.ToInt64(p.Value); });
 
 			if (t == typeof(SqlByte))     return (ConvertMethod)(object)(Convert<Int64?,SqlByte>.ConvertMethod)    (delegate(SqlByte     p) { return p.IsNull? null: (Int64?)Convert.ToInt64(p.Value); });
 			if (t == typeof(SqlInt16))    return (ConvertMethod)(object)(Convert<Int64?,SqlInt16>.ConvertMethod)   (delegate(SqlInt16    p) { return p.IsNull? null: (Int64?)Convert.ToInt64(p.Value); });
 			if (t == typeof(SqlInt32))    return (ConvertMethod)(object)(Convert<Int64?,SqlInt32>.ConvertMethod)   (delegate(SqlInt32    p) { return p.IsNull? null: (Int64?)Convert.ToInt64(p.Value); });
-			if (t == typeof(SqlInt64))    return (ConvertMethod)(object)(Convert<Int64?,SqlInt64>.ConvertMethod)   (delegate(SqlInt64    p) { return p.IsNull? null: (Int64?)                p.Value;  });
 
 			if (t == typeof(SqlSingle))   return (ConvertMethod)(object)(Convert<Int64?,SqlSingle>.ConvertMethod)  (delegate(SqlSingle   p) { return p.IsNull? null: (Int64?)Convert.ToInt64(p.Value); });
 			if (t == typeof(SqlDouble))   return (ConvertMethod)(object)(Convert<Int64?,SqlDouble>.ConvertMethod)  (delegate(SqlDouble   p) { return p.IsNull? null: (Int64?)Convert.ToInt64(p.Value); });
@@ -1550,10 +1595,9 @@ namespace BLToolkit.Common
 			if (t == typeof(SqlBoolean))  return (ConvertMethod)(object)(Convert<Int64?,SqlBoolean>.ConvertMethod) (delegate(SqlBoolean  p) { return p.IsNull? null: (Int64?)Convert.ToInt64(p.Value); });
 			if (t == typeof(SqlDateTime)) return (ConvertMethod)(object)(Convert<Int64?,SqlDateTime>.ConvertMethod)(delegate(SqlDateTime p) { return p.IsNull? null: (Int64?)Convert.ToInt64(p.Value); });
 
-			return (ConvertMethod)(object)(Convert<Int64?,P>.ConvertMethod)(delegate(P p)
-			{
-				return Convert.ToInt64(p);
-			});
+			if (t == typeof(object))      return (ConvertMethod)(object)(Convert<Int64?,object>.ConvertMethod)     (delegate(object      p) { return Convert.ToInt64(p); });
+
+			return (ConvertMethod)(object)(Convert<Int64?,T>.ConvertMethod)     (delegate(T p) { return Convert<Int64?,object>.From((object)p); });
 		}
 
 		#endregion
@@ -1566,6 +1610,7 @@ namespace BLToolkit.Common
 
 			// Scalar Types.
 			//
+			if (t == typeof(Byte))        return (ConvertMethod)(object)(Convert<Byte?,Byte>.ConvertMethod)       (delegate(Byte        p) { return p; });
 			if (t == typeof(String))      return (ConvertMethod)(object)(Convert<Byte?,String>.ConvertMethod)     (delegate(String      p) { return p == null? null: (Byte?)Convert.ToByte(p); });
 
 			if (t == typeof(SByte))       return (ConvertMethod)(object)(Convert<Byte?,SByte>.ConvertMethod)      (delegate(SByte       p) { return Convert.ToByte(p); });
@@ -1573,7 +1618,6 @@ namespace BLToolkit.Common
 			if (t == typeof(Int32))       return (ConvertMethod)(object)(Convert<Byte?,Int32>.ConvertMethod)      (delegate(Int32       p) { return Convert.ToByte(p); });
 			if (t == typeof(Int64))       return (ConvertMethod)(object)(Convert<Byte?,Int64>.ConvertMethod)      (delegate(Int64       p) { return Convert.ToByte(p); });
 
-			if (t == typeof(Byte))        return (ConvertMethod)(object)(Convert<Byte?,Byte>.ConvertMethod)       (delegate(Byte        p) { return                p;  });
 			if (t == typeof(UInt16))      return (ConvertMethod)(object)(Convert<Byte?,UInt16>.ConvertMethod)     (delegate(UInt16      p) { return Convert.ToByte(p); });
 			if (t == typeof(UInt32))      return (ConvertMethod)(object)(Convert<Byte?,UInt32>.ConvertMethod)     (delegate(UInt32      p) { return Convert.ToByte(p); });
 			if (t == typeof(UInt64))      return (ConvertMethod)(object)(Convert<Byte?,UInt64>.ConvertMethod)     (delegate(UInt64      p) { return Convert.ToByte(p); });
@@ -1607,9 +1651,9 @@ namespace BLToolkit.Common
 
 			// SqlTypes.
 			//
+			if (t == typeof(SqlByte))     return (ConvertMethod)(object)(Convert<Byte?,SqlByte>.ConvertMethod)    (delegate(SqlByte     p) { return p.IsNull? null: (Byte?)               p.Value;  });
 			if (t == typeof(SqlString))   return (ConvertMethod)(object)(Convert<Byte?,SqlString>.ConvertMethod)  (delegate(SqlString   p) { return p.IsNull? null: (Byte?)Convert.ToByte(p.Value); });
 
-			if (t == typeof(SqlByte))     return (ConvertMethod)(object)(Convert<Byte?,SqlByte>.ConvertMethod)    (delegate(SqlByte     p) { return p.IsNull? null: (Byte?)               p.Value;  });
 			if (t == typeof(SqlInt16))    return (ConvertMethod)(object)(Convert<Byte?,SqlInt16>.ConvertMethod)   (delegate(SqlInt16    p) { return p.IsNull? null: (Byte?)Convert.ToByte(p.Value); });
 			if (t == typeof(SqlInt32))    return (ConvertMethod)(object)(Convert<Byte?,SqlInt32>.ConvertMethod)   (delegate(SqlInt32    p) { return p.IsNull? null: (Byte?)Convert.ToByte(p.Value); });
 			if (t == typeof(SqlInt64))    return (ConvertMethod)(object)(Convert<Byte?,SqlInt64>.ConvertMethod)   (delegate(SqlInt64    p) { return p.IsNull? null: (Byte?)Convert.ToByte(p.Value); });
@@ -1622,10 +1666,9 @@ namespace BLToolkit.Common
 			if (t == typeof(SqlBoolean))  return (ConvertMethod)(object)(Convert<Byte?,SqlBoolean>.ConvertMethod) (delegate(SqlBoolean  p) { return p.IsNull? null: (Byte?)Convert.ToByte(p.Value); });
 			if (t == typeof(SqlDateTime)) return (ConvertMethod)(object)(Convert<Byte?,SqlDateTime>.ConvertMethod)(delegate(SqlDateTime p) { return p.IsNull? null: (Byte?)Convert.ToByte(p.Value); });
 
-			return (ConvertMethod)(object)(Convert<Byte?,P>.ConvertMethod)(delegate(P p)
-			{
-				return Convert.ToByte(p);
-			});
+			if (t == typeof(object))      return (ConvertMethod)(object)(Convert<Byte?,object>.ConvertMethod)     (delegate(object      p) { return Convert.ToByte(p); });
+
+			return (ConvertMethod)(object)(Convert<Byte?,T>.ConvertMethod)     (delegate(T p) { return Convert<Byte?,object>.From((object)p); });
 		}
 
 		#endregion
@@ -1638,6 +1681,7 @@ namespace BLToolkit.Common
 
 			// Scalar Types.
 			//
+			if (t == typeof(UInt16))      return (ConvertMethod)(object)(Convert<UInt16?,UInt16>.ConvertMethod)     (delegate(UInt16      p) { return p; });
 			if (t == typeof(String))      return (ConvertMethod)(object)(Convert<UInt16?,String>.ConvertMethod)     (delegate(String      p) { return p == null? null: (UInt16?)Convert.ToUInt16(p); });
 
 			if (t == typeof(SByte))       return (ConvertMethod)(object)(Convert<UInt16?,SByte>.ConvertMethod)      (delegate(SByte       p) { return Convert.ToUInt16(p); });
@@ -1647,7 +1691,6 @@ namespace BLToolkit.Common
 
 			if (t == typeof(Byte))        return (ConvertMethod)(object)(Convert<UInt16?,Byte>.ConvertMethod)       (delegate(Byte        p) { return Convert.ToUInt16(p); });
 			if (t == typeof(UInt32))      return (ConvertMethod)(object)(Convert<UInt16?,UInt32>.ConvertMethod)     (delegate(UInt32      p) { return Convert.ToUInt16(p); });
-			if (t == typeof(UInt16))      return (ConvertMethod)(object)(Convert<UInt16?,UInt16>.ConvertMethod)     (delegate(UInt16      p) { return                  p; });
 			if (t == typeof(UInt64))      return (ConvertMethod)(object)(Convert<UInt16?,UInt64>.ConvertMethod)     (delegate(UInt64      p) { return Convert.ToUInt16(p); });
 
 			if (t == typeof(Char))        return (ConvertMethod)(object)(Convert<UInt16?,Char>.ConvertMethod)       (delegate(Char        p) { return Convert.ToUInt16(p); });
@@ -1694,10 +1737,9 @@ namespace BLToolkit.Common
 			if (t == typeof(SqlBoolean))  return (ConvertMethod)(object)(Convert<UInt16?,SqlBoolean>.ConvertMethod) (delegate(SqlBoolean  p) { return p.IsNull? null: (UInt16?)Convert.ToUInt16(p.Value); });
 			if (t == typeof(SqlDateTime)) return (ConvertMethod)(object)(Convert<UInt16?,SqlDateTime>.ConvertMethod)(delegate(SqlDateTime p) { return p.IsNull? null: (UInt16?)Convert.ToUInt16(p.Value); });
 
-			return (ConvertMethod)(object)(Convert<UInt16?,P>.ConvertMethod)(delegate(P p)
-			{
-				return Convert.ToUInt16(p);
-			});
+			if (t == typeof(object))      return (ConvertMethod)(object)(Convert<UInt16?,object>.ConvertMethod)     (delegate(object      p) { return Convert.ToUInt16(p); });
+
+			return (ConvertMethod)(object)(Convert<UInt16?,T>.ConvertMethod)     (delegate(T p) { return Convert<UInt16?,object>.From((object)p); });
 		}
 
 		#endregion
@@ -1710,6 +1752,7 @@ namespace BLToolkit.Common
 
 			// Scalar Types.
 			//
+			if (t == typeof(UInt32))      return (ConvertMethod)(object)(Convert<UInt32?,UInt32>.ConvertMethod)     (delegate(UInt32      p) { return p; });
 			if (t == typeof(String))      return (ConvertMethod)(object)(Convert<UInt32?,String>.ConvertMethod)     (delegate(String      p) { return p == null? null: (UInt32?)Convert.ToUInt32(p); });
 
 			if (t == typeof(SByte))       return (ConvertMethod)(object)(Convert<UInt32?,SByte>.ConvertMethod)      (delegate(SByte       p) { return Convert.ToUInt32(p); });
@@ -1719,7 +1762,6 @@ namespace BLToolkit.Common
 
 			if (t == typeof(Byte))        return (ConvertMethod)(object)(Convert<UInt32?,Byte>.ConvertMethod)       (delegate(Byte        p) { return Convert.ToUInt32(p); });
 			if (t == typeof(UInt16))      return (ConvertMethod)(object)(Convert<UInt32?,UInt16>.ConvertMethod)     (delegate(UInt16      p) { return Convert.ToUInt32(p); });
-			if (t == typeof(UInt32))      return (ConvertMethod)(object)(Convert<UInt32?,UInt32>.ConvertMethod)     (delegate(UInt32      p) { return                  p;  });
 			if (t == typeof(UInt64))      return (ConvertMethod)(object)(Convert<UInt32?,UInt64>.ConvertMethod)     (delegate(UInt64      p) { return Convert.ToUInt32(p); });
 
 			if (t == typeof(Char))        return (ConvertMethod)(object)(Convert<UInt32?,Char>.ConvertMethod)       (delegate(Char        p) { return Convert.ToUInt32(p); });
@@ -1766,10 +1808,9 @@ namespace BLToolkit.Common
 			if (t == typeof(SqlBoolean))  return (ConvertMethod)(object)(Convert<UInt32?,SqlBoolean>.ConvertMethod) (delegate(SqlBoolean  p) { return p.IsNull? null: (UInt32?)Convert.ToUInt32(p.Value); });
 			if (t == typeof(SqlDateTime)) return (ConvertMethod)(object)(Convert<UInt32?,SqlDateTime>.ConvertMethod)(delegate(SqlDateTime p) { return p.IsNull? null: (UInt32?)Convert.ToUInt32(p.Value); });
 
-			return (ConvertMethod)(object)(Convert<UInt32?,P>.ConvertMethod)(delegate(P p)
-			{
-				return Convert.ToUInt32(p);
-			});
+			if (t == typeof(object))      return (ConvertMethod)(object)(Convert<UInt32?,object>.ConvertMethod)     (delegate(object      p) { return Convert.ToUInt32(p); });
+
+			return (ConvertMethod)(object)(Convert<UInt32?,T>.ConvertMethod)     (delegate(T p) { return Convert<UInt32?,object>.From((object)p); });
 		}
 
 		#endregion
@@ -1782,6 +1823,7 @@ namespace BLToolkit.Common
 
 			// Scalar Types.
 			//
+			if (t == typeof(UInt64))      return (ConvertMethod)(object)(Convert<UInt64?,UInt64>.ConvertMethod)     (delegate(UInt64      p) { return p; });
 			if (t == typeof(String))      return (ConvertMethod)(object)(Convert<UInt64?,String>.ConvertMethod)     (delegate(String      p) { return p == null? null: (UInt64?)Convert.ToUInt64(p); });
 
 			if (t == typeof(SByte))       return (ConvertMethod)(object)(Convert<UInt64?,SByte>.ConvertMethod)      (delegate(SByte       p) { return Convert.ToUInt64(p); });
@@ -1792,7 +1834,6 @@ namespace BLToolkit.Common
 			if (t == typeof(Byte))        return (ConvertMethod)(object)(Convert<UInt64?,Byte>.ConvertMethod)       (delegate(Byte        p) { return Convert.ToUInt64(p); });
 			if (t == typeof(UInt16))      return (ConvertMethod)(object)(Convert<UInt64?,UInt16>.ConvertMethod)     (delegate(UInt16      p) { return Convert.ToUInt64(p); });
 			if (t == typeof(UInt32))      return (ConvertMethod)(object)(Convert<UInt64?,UInt32>.ConvertMethod)     (delegate(UInt32      p) { return Convert.ToUInt64(p); });
-			if (t == typeof(UInt64))      return (ConvertMethod)(object)(Convert<UInt64?,UInt64>.ConvertMethod)     (delegate(UInt64      p) { return                  p;  });
 
 			if (t == typeof(Char))        return (ConvertMethod)(object)(Convert<UInt64?,Char>.ConvertMethod)       (delegate(Char        p) { return Convert.ToUInt64(p); });
 			if (t == typeof(Single))      return (ConvertMethod)(object)(Convert<UInt64?,Single>.ConvertMethod)     (delegate(Single      p) { return Convert.ToUInt64(p); });
@@ -1838,10 +1879,9 @@ namespace BLToolkit.Common
 			if (t == typeof(SqlBoolean))  return (ConvertMethod)(object)(Convert<UInt64?,SqlBoolean>.ConvertMethod) (delegate(SqlBoolean  p) { return p.IsNull? null: (UInt64?)Convert.ToUInt64(p.Value); });
 			if (t == typeof(SqlDateTime)) return (ConvertMethod)(object)(Convert<UInt64?,SqlDateTime>.ConvertMethod)(delegate(SqlDateTime p) { return p.IsNull? null: (UInt64?)Convert.ToUInt64(p.Value); });
 
-			return (ConvertMethod)(object)(Convert<UInt64?,P>.ConvertMethod)(delegate(P p)
-			{
-				return Convert.ToUInt64(p);
-			});
+			if (t == typeof(object))      return (ConvertMethod)(object)(Convert<UInt64?,object>.ConvertMethod)     (delegate(object      p) { return Convert.ToUInt64(p); });
+
+			return (ConvertMethod)(object)(Convert<UInt64?,T>.ConvertMethod)     (delegate(T p) { return Convert<UInt64?,object>.From((object)p); });
 		}
 
 		#endregion
@@ -1854,6 +1894,7 @@ namespace BLToolkit.Common
 
 			// Scalar Types.
 			//
+			if (t == typeof(Char))        return (ConvertMethod)(object)(Convert<Char?,Char>.ConvertMethod)       (delegate(Char        p) { return p; });
 			if (t == typeof(String))      return (ConvertMethod)(object)(Convert<Char?,String>.ConvertMethod)     (delegate(String      p) { return p == null? null: (Char?)Convert.ToChar(p); });
 
 			if (t == typeof(SByte))       return (ConvertMethod)(object)(Convert<Char?,SByte>.ConvertMethod)      (delegate(SByte       p) { return Convert.ToChar(p); });
@@ -1866,7 +1907,6 @@ namespace BLToolkit.Common
 			if (t == typeof(UInt32))      return (ConvertMethod)(object)(Convert<Char?,UInt32>.ConvertMethod)     (delegate(UInt32      p) { return Convert.ToChar(p); });
 			if (t == typeof(UInt64))      return (ConvertMethod)(object)(Convert<Char?,UInt64>.ConvertMethod)     (delegate(UInt64      p) { return Convert.ToChar(p); });
 
-			if (t == typeof(Char))        return (ConvertMethod)(object)(Convert<Char?,Char>.ConvertMethod)       (delegate(Char        p) { return                p;  });
 			if (t == typeof(Single))      return (ConvertMethod)(object)(Convert<Char?,Single>.ConvertMethod)     (delegate(Single      p) { return Convert.ToChar(p); });
 			if (t == typeof(Double))      return (ConvertMethod)(object)(Convert<Char?,Double>.ConvertMethod)     (delegate(Double      p) { return Convert.ToChar(p); });
 
@@ -1910,10 +1950,9 @@ namespace BLToolkit.Common
 			if (t == typeof(SqlBoolean))  return (ConvertMethod)(object)(Convert<Char?,SqlBoolean>.ConvertMethod) (delegate(SqlBoolean  p) { return p.IsNull? null: (Char?)Convert.ToChar(p.Value); });
 			if (t == typeof(SqlDateTime)) return (ConvertMethod)(object)(Convert<Char?,SqlDateTime>.ConvertMethod)(delegate(SqlDateTime p) { return p.IsNull? null: (Char?)Convert.ToChar(p.Value); });
 
-			return (ConvertMethod)(object)(Convert<Char?,P>.ConvertMethod)(delegate(P p)
-			{
-				return Convert.ToChar(p);
-			});
+			if (t == typeof(object))      return (ConvertMethod)(object)(Convert<Char?,object>.ConvertMethod)     (delegate(object      p) { return Convert.ToChar(p); });
+
+			return (ConvertMethod)(object)(Convert<Char?,T>.ConvertMethod)     (delegate(T p) { return Convert<Char?,object>.From((object)p); });
 		}
 
 		#endregion
@@ -1926,6 +1965,7 @@ namespace BLToolkit.Common
 
 			// Scalar Types.
 			//
+			if (t == typeof(Single))      return (ConvertMethod)(object)(Convert<Single?,Single>.ConvertMethod)     (delegate(Single      p) { return p; });
 			if (t == typeof(String))      return (ConvertMethod)(object)(Convert<Single?,String>.ConvertMethod)     (delegate(String      p) { return p == null? null: (Single?)Convert.ToSingle(p); });
 
 			if (t == typeof(SByte))       return (ConvertMethod)(object)(Convert<Single?,SByte>.ConvertMethod)      (delegate(SByte       p) { return Convert.ToSingle(p); });
@@ -1939,7 +1979,6 @@ namespace BLToolkit.Common
 			if (t == typeof(UInt64))      return (ConvertMethod)(object)(Convert<Single?,UInt64>.ConvertMethod)     (delegate(UInt64      p) { return Convert.ToSingle(p); });
 
 			if (t == typeof(Char))        return (ConvertMethod)(object)(Convert<Single?,Char>.ConvertMethod)       (delegate(Char        p) { return Convert.ToSingle(p); });
-			if (t == typeof(Single))      return (ConvertMethod)(object)(Convert<Single?,Single>.ConvertMethod)     (delegate(Single      p) { return                  p;  });
 			if (t == typeof(Double))      return (ConvertMethod)(object)(Convert<Single?,Double>.ConvertMethod)     (delegate(Double      p) { return Convert.ToSingle(p); });
 
 			if (t == typeof(Boolean))     return (ConvertMethod)(object)(Convert<Single?,Boolean>.ConvertMethod)    (delegate(Boolean     p) { return Convert.ToSingle(p); });
@@ -1967,6 +2006,7 @@ namespace BLToolkit.Common
 
 			// SqlTypes.
 			//
+			if (t == typeof(SqlSingle))   return (ConvertMethod)(object)(Convert<Single?,SqlSingle>.ConvertMethod)  (delegate(SqlSingle   p) { return p.IsNull? null: (Single?)                 p.Value;  });
 			if (t == typeof(SqlString))   return (ConvertMethod)(object)(Convert<Single?,SqlString>.ConvertMethod)  (delegate(SqlString   p) { return p.IsNull? null: (Single?)Convert.ToSingle(p.Value); });
 
 			if (t == typeof(SqlByte))     return (ConvertMethod)(object)(Convert<Single?,SqlByte>.ConvertMethod)    (delegate(SqlByte     p) { return p.IsNull? null: (Single?)Convert.ToSingle(p.Value); });
@@ -1974,7 +2014,6 @@ namespace BLToolkit.Common
 			if (t == typeof(SqlInt32))    return (ConvertMethod)(object)(Convert<Single?,SqlInt32>.ConvertMethod)   (delegate(SqlInt32    p) { return p.IsNull? null: (Single?)Convert.ToSingle(p.Value); });
 			if (t == typeof(SqlInt64))    return (ConvertMethod)(object)(Convert<Single?,SqlInt64>.ConvertMethod)   (delegate(SqlInt64    p) { return p.IsNull? null: (Single?)Convert.ToSingle(p.Value); });
 
-			if (t == typeof(SqlSingle))   return (ConvertMethod)(object)(Convert<Single?,SqlSingle>.ConvertMethod)  (delegate(SqlSingle   p) { return p.IsNull? null: (Single?)                 p.Value;  });
 			if (t == typeof(SqlDouble))   return (ConvertMethod)(object)(Convert<Single?,SqlDouble>.ConvertMethod)  (delegate(SqlDouble   p) { return p.IsNull? null: (Single?)Convert.ToSingle(p.Value); });
 			if (t == typeof(SqlDecimal))  return (ConvertMethod)(object)(Convert<Single?,SqlDecimal>.ConvertMethod) (delegate(SqlDecimal  p) { return p.IsNull? null: (Single?)Convert.ToSingle(p.Value); });
 			if (t == typeof(SqlMoney))    return (ConvertMethod)(object)(Convert<Single?,SqlMoney>.ConvertMethod)   (delegate(SqlMoney    p) { return p.IsNull? null: (Single?)Convert.ToSingle(p.Value); });
@@ -1982,10 +2021,9 @@ namespace BLToolkit.Common
 			if (t == typeof(SqlBoolean))  return (ConvertMethod)(object)(Convert<Single?,SqlBoolean>.ConvertMethod) (delegate(SqlBoolean  p) { return p.IsNull? null: (Single?)Convert.ToSingle(p.Value); });
 			if (t == typeof(SqlDateTime)) return (ConvertMethod)(object)(Convert<Single?,SqlDateTime>.ConvertMethod)(delegate(SqlDateTime p) { return p.IsNull? null: (Single?)Convert.ToSingle(p.Value); });
 
-			return (ConvertMethod)(object)(Convert<Single?,P>.ConvertMethod)(delegate(P p)
-			{
-				return Convert.ToSingle(p);
-			});
+			if (t == typeof(object))      return (ConvertMethod)(object)(Convert<Single?,object>.ConvertMethod)     (delegate(object      p) { return Convert.ToSingle(p); });
+
+			return (ConvertMethod)(object)(Convert<Single?,T>.ConvertMethod)     (delegate(T p) { return Convert<Single?,object>.From((object)p); });
 		}
 
 		#endregion
@@ -1998,6 +2036,7 @@ namespace BLToolkit.Common
 
 			// Scalar Types.
 			//
+			if (t == typeof(Double))      return (ConvertMethod)(object)(Convert<Double?,Double>.ConvertMethod)     (delegate(Double      p) { return p; });
 			if (t == typeof(String))      return (ConvertMethod)(object)(Convert<Double?,String>.ConvertMethod)     (delegate(String      p) { return p == null? null: (Double?)Convert.ToDouble(p); });
 
 			if (t == typeof(SByte))       return (ConvertMethod)(object)(Convert<Double?,SByte>.ConvertMethod)      (delegate(SByte       p) { return Convert.ToDouble(p); });
@@ -2012,7 +2051,6 @@ namespace BLToolkit.Common
 
 			if (t == typeof(Char))        return (ConvertMethod)(object)(Convert<Double?,Char>.ConvertMethod)       (delegate(Char        p) { return Convert.ToDouble(p); });
 			if (t == typeof(Single))      return (ConvertMethod)(object)(Convert<Double?,Single>.ConvertMethod)     (delegate(Single      p) { return Convert.ToDouble(p); });
-			if (t == typeof(Double))      return (ConvertMethod)(object)(Convert<Double?,Double>.ConvertMethod)     (delegate(Double      p) { return                  p;  });
 
 			if (t == typeof(Boolean))     return (ConvertMethod)(object)(Convert<Double?,Boolean>.ConvertMethod)    (delegate(Boolean     p) { return Convert.ToDouble(p); });
 			if (t == typeof(Decimal))     return (ConvertMethod)(object)(Convert<Double?,Decimal>.ConvertMethod)    (delegate(Decimal     p) { return Convert.ToDouble(p); });
@@ -2039,6 +2077,7 @@ namespace BLToolkit.Common
 
 			// SqlTypes.
 			//
+			if (t == typeof(SqlDouble))   return (ConvertMethod)(object)(Convert<Double?,SqlDouble>.ConvertMethod)  (delegate(SqlDouble   p) { return p.IsNull? null: (Double?)                 p.Value;  });
 			if (t == typeof(SqlString))   return (ConvertMethod)(object)(Convert<Double?,SqlString>.ConvertMethod)  (delegate(SqlString   p) { return p.IsNull? null: (Double?)Convert.ToDouble(p.Value); });
 
 			if (t == typeof(SqlByte))     return (ConvertMethod)(object)(Convert<Double?,SqlByte>.ConvertMethod)    (delegate(SqlByte     p) { return p.IsNull? null: (Double?)Convert.ToDouble(p.Value); });
@@ -2047,17 +2086,15 @@ namespace BLToolkit.Common
 			if (t == typeof(SqlInt64))    return (ConvertMethod)(object)(Convert<Double?,SqlInt64>.ConvertMethod)   (delegate(SqlInt64    p) { return p.IsNull? null: (Double?)Convert.ToDouble(p.Value); });
 
 			if (t == typeof(SqlSingle))   return (ConvertMethod)(object)(Convert<Double?,SqlSingle>.ConvertMethod)  (delegate(SqlSingle   p) { return p.IsNull? null: (Double?)Convert.ToDouble(p.Value); });
-			if (t == typeof(SqlDouble))   return (ConvertMethod)(object)(Convert<Double?,SqlDouble>.ConvertMethod)  (delegate(SqlDouble   p) { return p.IsNull? null: (Double?)                 p.Value;  });
 			if (t == typeof(SqlDecimal))  return (ConvertMethod)(object)(Convert<Double?,SqlDecimal>.ConvertMethod) (delegate(SqlDecimal  p) { return p.IsNull? null: (Double?)Convert.ToDouble(p.Value); });
 			if (t == typeof(SqlMoney))    return (ConvertMethod)(object)(Convert<Double?,SqlMoney>.ConvertMethod)   (delegate(SqlMoney    p) { return p.IsNull? null: (Double?)Convert.ToDouble(p.Value); });
 
 			if (t == typeof(SqlBoolean))  return (ConvertMethod)(object)(Convert<Double?,SqlBoolean>.ConvertMethod) (delegate(SqlBoolean  p) { return p.IsNull? null: (Double?)Convert.ToDouble(p.Value); });
 			if (t == typeof(SqlDateTime)) return (ConvertMethod)(object)(Convert<Double?,SqlDateTime>.ConvertMethod)(delegate(SqlDateTime p) { return p.IsNull? null: (Double?)Convert.ToDouble(p.Value); });
 
-			return (ConvertMethod)(object)(Convert<Double?,P>.ConvertMethod)(delegate(P p)
-			{
-				return Convert.ToDouble(p);
-			});
+			if (t == typeof(object))      return (ConvertMethod)(object)(Convert<Double?,object>.ConvertMethod)     (delegate(object      p) { return Convert.ToDouble(p); });
+
+			return (ConvertMethod)(object)(Convert<Double?,T>.ConvertMethod)     (delegate(T p) { return Convert<Double?,object>.From((object)p); });
 		}
 
 		#endregion
@@ -2070,6 +2107,7 @@ namespace BLToolkit.Common
 
 			// Scalar Types.
 			//
+			if (t == typeof(Boolean))     return (ConvertMethod)(object)(Convert<Boolean?,Boolean>.ConvertMethod)    (delegate(Boolean     p) { return p; });
 			if (t == typeof(String))      return (ConvertMethod)(object)(Convert<Boolean?,String>.ConvertMethod)     (delegate(String      p) { return p == null? null: (Boolean?)Convert.ToBoolean(p); });
 
 			if (t == typeof(SByte))       return (ConvertMethod)(object)(Convert<Boolean?,SByte>.ConvertMethod)      (delegate(SByte       p) { return Convert.ToBoolean(p); });
@@ -2086,7 +2124,6 @@ namespace BLToolkit.Common
 			if (t == typeof(Single))      return (ConvertMethod)(object)(Convert<Boolean?,Single>.ConvertMethod)     (delegate(Single      p) { return Convert.ToBoolean(p); });
 			if (t == typeof(Double))      return (ConvertMethod)(object)(Convert<Boolean?,Double>.ConvertMethod)     (delegate(Double      p) { return Convert.ToBoolean(p); });
 
-			if (t == typeof(Boolean))     return (ConvertMethod)(object)(Convert<Boolean?,Boolean>.ConvertMethod)    (delegate(Boolean     p) { return                   p;  });
 			if (t == typeof(Decimal))     return (ConvertMethod)(object)(Convert<Boolean?,Decimal>.ConvertMethod)    (delegate(Decimal     p) { return Convert.ToBoolean(p); });
 			if (t == typeof(DateTime))    return (ConvertMethod)(object)(Convert<Boolean?,DateTime>.ConvertMethod)   (delegate(DateTime    p) { return Convert.ToBoolean(p); });
 
@@ -2111,6 +2148,7 @@ namespace BLToolkit.Common
 
 			// SqlTypes.
 			//
+			if (t == typeof(SqlBoolean))  return (ConvertMethod)(object)(Convert<Boolean?,SqlBoolean>.ConvertMethod) (delegate(SqlBoolean  p) { return p.IsNull? null: (Boolean?)                  p.Value;  });
 			if (t == typeof(SqlString))   return (ConvertMethod)(object)(Convert<Boolean?,SqlString>.ConvertMethod)  (delegate(SqlString   p) { return p.IsNull? null: (Boolean?)Convert.ToBoolean(p.Value); });
 
 			if (t == typeof(SqlByte))     return (ConvertMethod)(object)(Convert<Boolean?,SqlByte>.ConvertMethod)    (delegate(SqlByte     p) { return p.IsNull? null: (Boolean?)Convert.ToBoolean(p.Value); });
@@ -2123,13 +2161,11 @@ namespace BLToolkit.Common
 			if (t == typeof(SqlDecimal))  return (ConvertMethod)(object)(Convert<Boolean?,SqlDecimal>.ConvertMethod) (delegate(SqlDecimal  p) { return p.IsNull? null: (Boolean?)Convert.ToBoolean(p.Value); });
 			if (t == typeof(SqlMoney))    return (ConvertMethod)(object)(Convert<Boolean?,SqlMoney>.ConvertMethod)   (delegate(SqlMoney    p) { return p.IsNull? null: (Boolean?)Convert.ToBoolean(p.Value); });
 
-			if (t == typeof(SqlBoolean))  return (ConvertMethod)(object)(Convert<Boolean?,SqlBoolean>.ConvertMethod) (delegate(SqlBoolean  p) { return p.IsNull? null: (Boolean?)                  p.Value;  });
 			if (t == typeof(SqlDateTime)) return (ConvertMethod)(object)(Convert<Boolean?,SqlDateTime>.ConvertMethod)(delegate(SqlDateTime p) { return p.IsNull? null: (Boolean?)Convert.ToBoolean(p.Value); });
 
-			return (ConvertMethod)(object)(Convert<Boolean?,P>.ConvertMethod)(delegate(P p)
-			{
-				return Convert.ToBoolean(p);
-			});
+			if (t == typeof(object))      return (ConvertMethod)(object)(Convert<Boolean?,object>.ConvertMethod)     (delegate(object      p) { return Convert.ToBoolean(p); });
+
+			return (ConvertMethod)(object)(Convert<Boolean?,T>.ConvertMethod)     (delegate(T p) { return Convert<Boolean?,object>.From((object)p); });
 		}
 
 		#endregion
@@ -2142,6 +2178,7 @@ namespace BLToolkit.Common
 
 			// Scalar Types.
 			//
+			if (t == typeof(Decimal))     return (ConvertMethod)(object)(Convert<Decimal?,Decimal>.ConvertMethod)    (delegate(Decimal     p) { return p; });
 			if (t == typeof(String))      return (ConvertMethod)(object)(Convert<Decimal?,String>.ConvertMethod)     (delegate(String      p) { return p == null? null: (Decimal?)Convert.ToDecimal(p); });
 
 			if (t == typeof(SByte))       return (ConvertMethod)(object)(Convert<Decimal?,SByte>.ConvertMethod)      (delegate(SByte       p) { return Convert.ToDecimal(p); });
@@ -2159,7 +2196,6 @@ namespace BLToolkit.Common
 			if (t == typeof(Double))      return (ConvertMethod)(object)(Convert<Decimal?,Double>.ConvertMethod)     (delegate(Double      p) { return Convert.ToDecimal(p); });
 
 			if (t == typeof(Boolean))     return (ConvertMethod)(object)(Convert<Decimal?,Boolean>.ConvertMethod)    (delegate(Boolean     p) { return Convert.ToDecimal(p); });
-			if (t == typeof(Decimal))     return (ConvertMethod)(object)(Convert<Decimal?,Decimal>.ConvertMethod)    (delegate(Decimal     p) { return                   p;  });
 			if (t == typeof(DateTime))    return (ConvertMethod)(object)(Convert<Decimal?,DateTime>.ConvertMethod)   (delegate(DateTime    p) { return Convert.ToDecimal(p); });
 
 			// Nullable Types.
@@ -2183,6 +2219,8 @@ namespace BLToolkit.Common
 
 			// SqlTypes.
 			//
+			if (t == typeof(SqlDecimal))  return (ConvertMethod)(object)(Convert<Decimal?,SqlDecimal>.ConvertMethod) (delegate(SqlDecimal  p) { return p.IsNull? null: (Decimal?)                  p.Value;  });
+			if (t == typeof(SqlMoney))    return (ConvertMethod)(object)(Convert<Decimal?,SqlMoney>.ConvertMethod)   (delegate(SqlMoney    p) { return p.IsNull? null: (Decimal?)                  p.Value;  });
 			if (t == typeof(SqlString))   return (ConvertMethod)(object)(Convert<Decimal?,SqlString>.ConvertMethod)  (delegate(SqlString   p) { return p.IsNull? null: (Decimal?)Convert.ToDecimal(p.Value); });
 
 			if (t == typeof(SqlByte))     return (ConvertMethod)(object)(Convert<Decimal?,SqlByte>.ConvertMethod)    (delegate(SqlByte     p) { return p.IsNull? null: (Decimal?)Convert.ToDecimal(p.Value); });
@@ -2192,16 +2230,13 @@ namespace BLToolkit.Common
 
 			if (t == typeof(SqlSingle))   return (ConvertMethod)(object)(Convert<Decimal?,SqlSingle>.ConvertMethod)  (delegate(SqlSingle   p) { return p.IsNull? null: (Decimal?)Convert.ToDecimal(p.Value); });
 			if (t == typeof(SqlDouble))   return (ConvertMethod)(object)(Convert<Decimal?,SqlDouble>.ConvertMethod)  (delegate(SqlDouble   p) { return p.IsNull? null: (Decimal?)Convert.ToDecimal(p.Value); });
-			if (t == typeof(SqlDecimal))  return (ConvertMethod)(object)(Convert<Decimal?,SqlDecimal>.ConvertMethod) (delegate(SqlDecimal  p) { return p.IsNull? null: (Decimal?)                  p.Value;  });
-			if (t == typeof(SqlMoney))    return (ConvertMethod)(object)(Convert<Decimal?,SqlMoney>.ConvertMethod)   (delegate(SqlMoney    p) { return p.IsNull? null: (Decimal?)                  p.Value;  });
 
 			if (t == typeof(SqlBoolean))  return (ConvertMethod)(object)(Convert<Decimal?,SqlBoolean>.ConvertMethod) (delegate(SqlBoolean  p) { return p.IsNull? null: (Decimal?)Convert.ToDecimal(p.Value); });
 			if (t == typeof(SqlDateTime)) return (ConvertMethod)(object)(Convert<Decimal?,SqlDateTime>.ConvertMethod)(delegate(SqlDateTime p) { return p.IsNull? null: (Decimal?)Convert.ToDecimal(p.Value); });
 
-			return (ConvertMethod)(object)(Convert<Decimal?,P>.ConvertMethod)(delegate(P p)
-			{
-				return Convert.ToDecimal(p);
-			});
+			if (t == typeof(object))      return (ConvertMethod)(object)(Convert<Decimal?,object>.ConvertMethod)     (delegate(object      p) { return Convert.ToDecimal(p); });
+
+			return (ConvertMethod)(object)(Convert<Decimal?,T>.ConvertMethod)     (delegate(T p) { return Convert<Decimal?,object>.From((object)p); });
 		}
 
 		#endregion
@@ -2214,6 +2249,7 @@ namespace BLToolkit.Common
 
 			// Scalar Types.
 			//
+			if (t == typeof(DateTime))    return (ConvertMethod)(object)(Convert<DateTime?,DateTime>.ConvertMethod)   (delegate(DateTime    p) { return p; });
 			if (t == typeof(String))      return (ConvertMethod)(object)(Convert<DateTime?,String>.ConvertMethod)     (delegate(String      p) { return p == null? null: (DateTime?)Convert.ToDateTime(p); });
 
 			if (t == typeof(SByte))       return (ConvertMethod)(object)(Convert<DateTime?,SByte>.ConvertMethod)      (delegate(SByte       p) { return Convert.ToDateTime(p); });
@@ -2232,7 +2268,6 @@ namespace BLToolkit.Common
 
 			if (t == typeof(Boolean))     return (ConvertMethod)(object)(Convert<DateTime?,Boolean>.ConvertMethod)    (delegate(Boolean     p) { return Convert.ToDateTime(p); });
 			if (t == typeof(Decimal))     return (ConvertMethod)(object)(Convert<DateTime?,Decimal>.ConvertMethod)    (delegate(Decimal     p) { return Convert.ToDateTime(p); });
-			if (t == typeof(DateTime))    return (ConvertMethod)(object)(Convert<DateTime?,DateTime>.ConvertMethod)   (delegate(DateTime    p) { return                    p;  });
 
 			// Nullable Types.
 			//
@@ -2270,10 +2305,9 @@ namespace BLToolkit.Common
 			if (t == typeof(SqlBoolean))  return (ConvertMethod)(object)(Convert<DateTime?,SqlBoolean>.ConvertMethod) (delegate(SqlBoolean  p) { return p.IsNull? null: (DateTime?)Convert.ToDateTime(p.Value); });
 			if (t == typeof(SqlDateTime)) return (ConvertMethod)(object)(Convert<DateTime?,SqlDateTime>.ConvertMethod)(delegate(SqlDateTime p) { return p.IsNull? null: (DateTime?)                   p.Value;  });
 
-			return (ConvertMethod)(object)(Convert<DateTime?,P>.ConvertMethod)(delegate(P p)
-			{
-				return Convert.ToDateTime(p);
-			});
+			if (t == typeof(object))      return (ConvertMethod)(object)(Convert<DateTime?,object>.ConvertMethod)     (delegate(object      p) { return Convert.ToDateTime(p); });
+
+			return (ConvertMethod)(object)(Convert<DateTime?,T>.ConvertMethod)     (delegate(T p) { return Convert<DateTime?,object>.From((object)p); });
 		}
 
 		#endregion
@@ -2286,9 +2320,9 @@ namespace BLToolkit.Common
 
 			// Scalar Types.
 			//
+			if (t == typeof(TimeSpan))    return (ConvertMethod)(object)(Convert<TimeSpan?,TimeSpan>.ConvertMethod)   (delegate(TimeSpan    p) { return p; });
 			if (t == typeof(String))      return (ConvertMethod)(object)(Convert<TimeSpan?,String>.ConvertMethod)     (delegate(String      p) { return p == null? null: (TimeSpan?)TimeSpan.Parse(p); });
 			if (t == typeof(DateTime))    return (ConvertMethod)(object)(Convert<TimeSpan?,DateTime>.ConvertMethod)   (delegate(DateTime    p) { return p - DateTime.MinValue; });
-			if (t == typeof(TimeSpan))    return (ConvertMethod)(object)(Convert<TimeSpan?,TimeSpan>.ConvertMethod)   (delegate(TimeSpan    p) { return p; });
 
 			// Nullable Types.
 			//
@@ -2299,14 +2333,31 @@ namespace BLToolkit.Common
 			if (t == typeof(SqlString))   return (ConvertMethod)(object)(Convert<TimeSpan?,SqlString>.ConvertMethod)  (delegate(SqlString   p) { return p.IsNull? null: (TimeSpan?)TimeSpan.Parse(p.Value);       });
 			if (t == typeof(SqlDateTime)) return (ConvertMethod)(object)(Convert<TimeSpan?,SqlDateTime>.ConvertMethod)(delegate(SqlDateTime p) { return p.IsNull? null: (TimeSpan?)(p.Value - DateTime.MinValue); });
 
-			return (ConvertMethod)(object)(Convert<TimeSpan?,P>.ConvertMethod)(delegate(P p)
+			if (t == typeof(object))      return (ConvertMethod)(object)(Convert<TimeSpan?,object>.ConvertMethod)     (delegate(object      p)
 			{
 				if (p == null)
 					return null;
 
+				// Scalar Types.
+				//
+				if (p is TimeSpan)    return Convert<TimeSpan?,TimeSpan>   .From((TimeSpan)p);
+				if (p is String)      return Convert<TimeSpan?,String>     .From((String)p);
+				if (p is DateTime)    return Convert<TimeSpan?,DateTime>   .From((DateTime)p);
+
+				// Nullable Types.
+				//
+				if (p is DateTime?)   return Convert<TimeSpan?,DateTime?>  .From((DateTime?)p);
+
+				// SqlTypes.
+				//
+				if (p is SqlString)   return Convert<TimeSpan?,SqlString>  .From((SqlString)p);
+				if (p is SqlDateTime) return Convert<TimeSpan?,SqlDateTime>.From((SqlDateTime)p);
+
 				throw new InvalidCastException(string.Format(
 					"Invalid cast from {0} to {1}", typeof(P).FullName, typeof(T).FullName));
 			});
+
+			return (ConvertMethod)(object)(Convert<TimeSpan?,T>.ConvertMethod)     (delegate(T p) { return Convert<TimeSpan?,object>.From((object)p); });
 		}
 
 		#endregion
@@ -2319,33 +2370,49 @@ namespace BLToolkit.Common
 
 			// Scalar Types.
 			//
-			if (t == typeof(String))      return (ConvertMethod)(object)(Convert<Guid?,String>.ConvertMethod)     (delegate(String      p) { return p == null ? null : (Guid?)new Guid(p); });
 			if (t == typeof(Guid))        return (ConvertMethod)(object)(Convert<Guid?,Guid>.ConvertMethod)       (delegate(Guid        p) { return p; });
+			if (t == typeof(String))      return (ConvertMethod)(object)(Convert<Guid?,String>.ConvertMethod)     (delegate(String      p) { return p == null? null: (Guid?)new Guid(p); });
 
 			// Nullable Types.
 			//
 
 			// SqlTypes.
 			//
-			if (t == typeof(SqlString))   return (ConvertMethod)(object)(Convert<Guid?,SqlString>.ConvertMethod)  (delegate(SqlString   p) { return p.IsNull? null: (Guid?)new Guid(p.Value); });
-			if (t == typeof(SqlGuid))     return (ConvertMethod)(object)(Convert<Guid?,SqlGuid>.ConvertMethod)    (delegate(SqlGuid     p) { return p.IsNull? null: (Guid?)p.Value; });
+			if (t == typeof(SqlGuid))     return (ConvertMethod)(object)(Convert<Guid?,SqlGuid>.ConvertMethod)    (delegate(SqlGuid     p) { return p.IsNull? null: (Guid?)p.Value;             });
+			if (t == typeof(SqlString))   return (ConvertMethod)(object)(Convert<Guid?,SqlString>.ConvertMethod)  (delegate(SqlString   p) { return p.IsNull? null: (Guid?)new Guid(p.Value);   });
 			if (t == typeof(SqlBinary))   return (ConvertMethod)(object)(Convert<Guid?,SqlBinary>.ConvertMethod)  (delegate(SqlBinary   p) { return p.IsNull? null: (Guid?)p.ToSqlGuid().Value; });
 
-			return (ConvertMethod)(object)(Convert<Guid?,P>.ConvertMethod)(delegate(P p)
+			if (t == typeof(object))      return (ConvertMethod)(object)(Convert<Guid?,object>.ConvertMethod)     (delegate(object      p)
 			{
 				if (p == null)
 					return null;
 
+				// Scalar Types.
+				//
+				if (p is Guid)        return Convert<Guid?,Guid>       .From((Guid)p);
+				if (p is String)      return Convert<Guid?,String>     .From((String)p);
+
+				// Nullable Types.
+				//
+
+				// SqlTypes.
+				//
+				if (p is SqlGuid)     return Convert<Guid?,SqlGuid>    .From((SqlGuid)p);
+				if (p is SqlString)   return Convert<Guid?,SqlString>  .From((SqlString)p);
+				if (p is SqlBinary)   return Convert<Guid?,SqlBinary>  .From((SqlBinary)p);
+
 				throw new InvalidCastException(string.Format(
 					"Invalid cast from {0} to {1}", typeof(P).FullName, typeof(T).FullName));
 			});
+
+			return (ConvertMethod)(object)(Convert<Guid?,T>.ConvertMethod)     (delegate(T p) { return Convert<Guid?,object>.From((object)p); });
 		}
 
 		#endregion
 
 		#endregion
 
-		#region SQL Types
+		#region SqlTypes
 
 		#region SqlString
 
@@ -2374,6 +2441,7 @@ namespace BLToolkit.Common
 			if (t == typeof(Boolean))     return (ConvertMethod)(object)(Convert<SqlString,Boolean>.ConvertMethod)    (delegate(Boolean     p) { return p.ToString(); });
 			if (t == typeof(Decimal))     return (ConvertMethod)(object)(Convert<SqlString,Decimal>.ConvertMethod)    (delegate(Decimal     p) { return p.ToString(); });
 			if (t == typeof(DateTime))    return (ConvertMethod)(object)(Convert<SqlString,DateTime>.ConvertMethod)   (delegate(DateTime    p) { return p.ToString(); });
+			if (t == typeof(Char[]))      return (ConvertMethod)(object)(Convert<SqlString,Char[]>.ConvertMethod)     (delegate(Char[]      p) { return p.ToString(); });
 			if (t == typeof(TimeSpan))    return (ConvertMethod)(object)(Convert<SqlString,TimeSpan>.ConvertMethod)   (delegate(TimeSpan    p) { return p.ToString(); });
 			if (t == typeof(Guid))        return (ConvertMethod)(object)(Convert<SqlString,Guid>.ConvertMethod)       (delegate(Guid        p) { return p.ToString(); });
 
@@ -2401,6 +2469,7 @@ namespace BLToolkit.Common
 
 			// SqlTypes.
 			//
+
 			if (t == typeof(SqlByte))     return (ConvertMethod)(object)(Convert<SqlString,SqlByte>.ConvertMethod)    (delegate(SqlByte     p) { return p.ToSqlString(); });
 			if (t == typeof(SqlInt16))    return (ConvertMethod)(object)(Convert<SqlString,SqlInt16>.ConvertMethod)   (delegate(SqlInt16    p) { return p.ToSqlString(); });
 			if (t == typeof(SqlInt32))    return (ConvertMethod)(object)(Convert<SqlString,SqlInt32>.ConvertMethod)   (delegate(SqlInt32    p) { return p.ToSqlString(); });
@@ -2413,13 +2482,13 @@ namespace BLToolkit.Common
 
 			if (t == typeof(SqlBoolean))  return (ConvertMethod)(object)(Convert<SqlString,SqlBoolean>.ConvertMethod) (delegate(SqlBoolean  p) { return p.ToSqlString(); });
 			if (t == typeof(SqlDateTime)) return (ConvertMethod)(object)(Convert<SqlString,SqlDateTime>.ConvertMethod)(delegate(SqlDateTime p) { return p.ToSqlString(); });
+			if (t == typeof(SqlChars))    return (ConvertMethod)(object)(Convert<SqlString,SqlChars>.ConvertMethod)   (delegate(SqlChars    p) { return p.ToSqlString(); });
 			if (t == typeof(SqlGuid))     return (ConvertMethod)(object)(Convert<SqlString,SqlGuid>.ConvertMethod)    (delegate(SqlGuid     p) { return p.ToSqlString(); });
 			if (t == typeof(SqlBinary))   return (ConvertMethod)(object)(Convert<SqlString,SqlBinary>.ConvertMethod)  (delegate(SqlBinary   p) { return p.IsNull? SqlString.Null: (SqlString)p.ToString(); });
 
-			return (ConvertMethod)(object)(Convert<SqlString,P>.ConvertMethod)(delegate(P p)
-			{
-				return Convert.ToString(p);
-			});
+			if (t == typeof(object))      return (ConvertMethod)(object)(Convert<SqlString,object>.ConvertMethod)     (delegate(object      p) { return Convert.ToString(p); });
+
+			return (ConvertMethod)(object)(Convert<SqlString,T>.ConvertMethod)     (delegate(T p) { return Convert<SqlString,object>.From((object)p); });
 		}
 
 		#endregion
@@ -2432,14 +2501,14 @@ namespace BLToolkit.Common
 
 			// Scalar Types.
 			//
-			if (t == typeof(String))      return (ConvertMethod)(object)(Convert<SqlByte,String>.ConvertMethod)     (delegate(String      p) { return SqlByte.Parse(p); });
+			if (t == typeof(Byte))        return (ConvertMethod)(object)(Convert<SqlByte,Byte>.ConvertMethod)       (delegate(Byte        p) { return p; });
+			if (t == typeof(String))      return (ConvertMethod)(object)(Convert<SqlByte,String>.ConvertMethod)     (delegate(String      p) { return p == null? SqlByte.Null: SqlByte.Parse(p); });
 
 			if (t == typeof(SByte))       return (ConvertMethod)(object)(Convert<SqlByte,SByte>.ConvertMethod)      (delegate(SByte       p) { return Convert.ToByte(p); });
 			if (t == typeof(Int16))       return (ConvertMethod)(object)(Convert<SqlByte,Int16>.ConvertMethod)      (delegate(Int16       p) { return Convert.ToByte(p); });
 			if (t == typeof(Int32))       return (ConvertMethod)(object)(Convert<SqlByte,Int32>.ConvertMethod)      (delegate(Int32       p) { return Convert.ToByte(p); });
 			if (t == typeof(Int64))       return (ConvertMethod)(object)(Convert<SqlByte,Int64>.ConvertMethod)      (delegate(Int64       p) { return Convert.ToByte(p); });
 
-			if (t == typeof(Byte))        return (ConvertMethod)(object)(Convert<SqlByte,Byte>.ConvertMethod)       (delegate(Byte        p) { return                p; });
 			if (t == typeof(UInt16))      return (ConvertMethod)(object)(Convert<SqlByte,UInt16>.ConvertMethod)     (delegate(UInt16      p) { return Convert.ToByte(p); });
 			if (t == typeof(UInt32))      return (ConvertMethod)(object)(Convert<SqlByte,UInt32>.ConvertMethod)     (delegate(UInt32      p) { return Convert.ToByte(p); });
 			if (t == typeof(UInt64))      return (ConvertMethod)(object)(Convert<SqlByte,UInt64>.ConvertMethod)     (delegate(UInt64      p) { return Convert.ToByte(p); });
@@ -2454,12 +2523,12 @@ namespace BLToolkit.Common
 
 			// Nullable Types.
 			//
+			if (t == typeof(Byte?))       return (ConvertMethod)(object)(Convert<SqlByte,Byte?>.ConvertMethod)      (delegate(Byte?       p) { return p.HasValue?                p.Value  : SqlByte.Null; });
 			if (t == typeof(SByte?))      return (ConvertMethod)(object)(Convert<SqlByte,SByte?>.ConvertMethod)     (delegate(SByte?      p) { return p.HasValue? Convert.ToByte(p.Value) : SqlByte.Null; });
 			if (t == typeof(Int16?))      return (ConvertMethod)(object)(Convert<SqlByte,Int16?>.ConvertMethod)     (delegate(Int16?      p) { return p.HasValue? Convert.ToByte(p.Value) : SqlByte.Null; });
 			if (t == typeof(Int32?))      return (ConvertMethod)(object)(Convert<SqlByte,Int32?>.ConvertMethod)     (delegate(Int32?      p) { return p.HasValue? Convert.ToByte(p.Value) : SqlByte.Null; });
 			if (t == typeof(Int64?))      return (ConvertMethod)(object)(Convert<SqlByte,Int64?>.ConvertMethod)     (delegate(Int64?      p) { return p.HasValue? Convert.ToByte(p.Value) : SqlByte.Null; });
 
-			if (t == typeof(Byte?))       return (ConvertMethod)(object)(Convert<SqlByte,Byte?>.ConvertMethod)      (delegate(Byte?       p) { return p.HasValue?                p.Value  : SqlByte.Null; });
 			if (t == typeof(UInt16?))     return (ConvertMethod)(object)(Convert<SqlByte,UInt16?>.ConvertMethod)    (delegate(UInt16?     p) { return p.HasValue? Convert.ToByte(p.Value) : SqlByte.Null; });
 			if (t == typeof(UInt32?))     return (ConvertMethod)(object)(Convert<SqlByte,UInt32?>.ConvertMethod)    (delegate(UInt32?     p) { return p.HasValue? Convert.ToByte(p.Value) : SqlByte.Null; });
 			if (t == typeof(UInt64?))     return (ConvertMethod)(object)(Convert<SqlByte,UInt64?>.ConvertMethod)    (delegate(UInt64?     p) { return p.HasValue? Convert.ToByte(p.Value) : SqlByte.Null; });
@@ -2488,10 +2557,9 @@ namespace BLToolkit.Common
 			if (t == typeof(SqlBoolean))  return (ConvertMethod)(object)(Convert<SqlByte,SqlBoolean>.ConvertMethod) (delegate(SqlBoolean  p) { return p.ToSqlByte(); });
 			if (t == typeof(SqlDateTime)) return (ConvertMethod)(object)(Convert<SqlByte,SqlDateTime>.ConvertMethod)(delegate(SqlDateTime p) { return p.IsNull? SqlByte.Null: Convert.ToByte(p.Value); });
 
-			return (ConvertMethod)(object)(Convert<SqlByte,P>.ConvertMethod)(delegate(P p)
-			{
-				return Convert.ToByte(p);
-			});
+			if (t == typeof(object))      return (ConvertMethod)(object)(Convert<SqlByte,object>.ConvertMethod)     (delegate(object      p) { return Convert.ToByte(p); });
+
+			return (ConvertMethod)(object)(Convert<SqlByte,T>.ConvertMethod)     (delegate(T p) { return Convert<SqlByte,object>.From((object)p); });
 		}
 
 		#endregion
@@ -2504,10 +2572,10 @@ namespace BLToolkit.Common
 
 			// Scalar Types.
 			//
-			if (t == typeof(String))      return (ConvertMethod)(object)(Convert<SqlInt16,String>.ConvertMethod)     (delegate(String      p) { return Convert.ToInt16(p); });
+			if (t == typeof(Int16))       return (ConvertMethod)(object)(Convert<SqlInt16,Int16>.ConvertMethod)      (delegate(Int16       p) { return p; });
+			if (t == typeof(String))      return (ConvertMethod)(object)(Convert<SqlInt16,String>.ConvertMethod)     (delegate(String      p) { return p == null? SqlInt16.Null: SqlInt16.Parse(p); });
 
 			if (t == typeof(SByte))       return (ConvertMethod)(object)(Convert<SqlInt16,SByte>.ConvertMethod)      (delegate(SByte       p) { return Convert.ToInt16(p); });
-			if (t == typeof(Int16))       return (ConvertMethod)(object)(Convert<SqlInt16,Int16>.ConvertMethod)      (delegate(Int16       p) { return                 p; });
 			if (t == typeof(Int32))       return (ConvertMethod)(object)(Convert<SqlInt16,Int32>.ConvertMethod)      (delegate(Int32       p) { return Convert.ToInt16(p); });
 			if (t == typeof(Int64))       return (ConvertMethod)(object)(Convert<SqlInt16,Int64>.ConvertMethod)      (delegate(Int64       p) { return Convert.ToInt16(p); });
 
@@ -2526,8 +2594,8 @@ namespace BLToolkit.Common
 
 			// Nullable Types.
 			//
-			if (t == typeof(SByte?))      return (ConvertMethod)(object)(Convert<SqlInt16,SByte?>.ConvertMethod)     (delegate(SByte?      p) { return p.HasValue? Convert.ToInt16(p.Value) : SqlInt16.Null; });
 			if (t == typeof(Int16?))      return (ConvertMethod)(object)(Convert<SqlInt16,Int16?>.ConvertMethod)     (delegate(Int16?      p) { return p.HasValue?                 p.Value  : SqlInt16.Null; });
+			if (t == typeof(SByte?))      return (ConvertMethod)(object)(Convert<SqlInt16,SByte?>.ConvertMethod)     (delegate(SByte?      p) { return p.HasValue? Convert.ToInt16(p.Value) : SqlInt16.Null; });
 			if (t == typeof(Int32?))      return (ConvertMethod)(object)(Convert<SqlInt16,Int32?>.ConvertMethod)     (delegate(Int32?      p) { return p.HasValue? Convert.ToInt16(p.Value) : SqlInt16.Null; });
 			if (t == typeof(Int64?))      return (ConvertMethod)(object)(Convert<SqlInt16,Int64?>.ConvertMethod)     (delegate(Int64?      p) { return p.HasValue? Convert.ToInt16(p.Value) : SqlInt16.Null; });
 
@@ -2560,10 +2628,9 @@ namespace BLToolkit.Common
 			if (t == typeof(SqlBoolean))  return (ConvertMethod)(object)(Convert<SqlInt16,SqlBoolean>.ConvertMethod) (delegate(SqlBoolean  p) { return p.ToSqlInt16(); });
 			if (t == typeof(SqlDateTime)) return (ConvertMethod)(object)(Convert<SqlInt16,SqlDateTime>.ConvertMethod)(delegate(SqlDateTime p) { return p.IsNull? SqlInt16.Null: Convert.ToInt16(p.Value); });
 
-			return (ConvertMethod)(object)(Convert<SqlInt16,P>.ConvertMethod)(delegate(P p)
-			{
-				return Convert.ToInt16(p);
-			});
+			if (t == typeof(object))      return (ConvertMethod)(object)(Convert<SqlInt16,object>.ConvertMethod)     (delegate(object      p) { return Convert.ToInt16(p); });
+
+			return (ConvertMethod)(object)(Convert<SqlInt16,T>.ConvertMethod)     (delegate(T p) { return Convert<SqlInt16,object>.From((object)p); });
 		}
 
 		#endregion
@@ -2576,11 +2643,11 @@ namespace BLToolkit.Common
 
 			// Scalar Types.
 			//
-			if (t == typeof(String))      return (ConvertMethod)(object)(Convert<SqlInt32,String>.ConvertMethod)     (delegate(String      p) { return Convert.ToInt32(p); });
+			if (t == typeof(Int32))       return (ConvertMethod)(object)(Convert<SqlInt32,Int32>.ConvertMethod)      (delegate(Int32       p) { return p; });
+			if (t == typeof(String))      return (ConvertMethod)(object)(Convert<SqlInt32,String>.ConvertMethod)     (delegate(String      p) { return p == null? SqlInt32.Null: SqlInt32.Parse(p); });
 
 			if (t == typeof(SByte))       return (ConvertMethod)(object)(Convert<SqlInt32,SByte>.ConvertMethod)      (delegate(SByte       p) { return Convert.ToInt32(p); });
 			if (t == typeof(Int16))       return (ConvertMethod)(object)(Convert<SqlInt32,Int16>.ConvertMethod)      (delegate(Int16       p) { return Convert.ToInt32(p); });
-			if (t == typeof(Int32))       return (ConvertMethod)(object)(Convert<SqlInt32,Int32>.ConvertMethod)      (delegate(Int32       p) { return                 p;  });
 			if (t == typeof(Int64))       return (ConvertMethod)(object)(Convert<SqlInt32,Int64>.ConvertMethod)      (delegate(Int64       p) { return Convert.ToInt32(p); });
 
 			if (t == typeof(Byte))        return (ConvertMethod)(object)(Convert<SqlInt32,Byte>.ConvertMethod)       (delegate(Byte        p) { return Convert.ToInt32(p); });
@@ -2598,9 +2665,9 @@ namespace BLToolkit.Common
 
 			// Nullable Types.
 			//
+			if (t == typeof(Int32?))      return (ConvertMethod)(object)(Convert<SqlInt32,Int32?>.ConvertMethod)     (delegate(Int32?      p) { return p.HasValue?                 p.Value  : SqlInt32.Null; });
 			if (t == typeof(SByte?))      return (ConvertMethod)(object)(Convert<SqlInt32,SByte?>.ConvertMethod)     (delegate(SByte?      p) { return p.HasValue? Convert.ToInt32(p.Value) : SqlInt32.Null; });
 			if (t == typeof(Int16?))      return (ConvertMethod)(object)(Convert<SqlInt32,Int16?>.ConvertMethod)     (delegate(Int16?      p) { return p.HasValue? Convert.ToInt32(p.Value) : SqlInt32.Null; });
-			if (t == typeof(Int32?))      return (ConvertMethod)(object)(Convert<SqlInt32,Int32?>.ConvertMethod)     (delegate(Int32?      p) { return p.HasValue?                 p.Value  : SqlInt32.Null; });
 			if (t == typeof(Int64?))      return (ConvertMethod)(object)(Convert<SqlInt32,Int64?>.ConvertMethod)     (delegate(Int64?      p) { return p.HasValue? Convert.ToInt32(p.Value) : SqlInt32.Null; });
 
 			if (t == typeof(Byte?))       return (ConvertMethod)(object)(Convert<SqlInt32,Byte?>.ConvertMethod)      (delegate(Byte?       p) { return p.HasValue? Convert.ToInt32(p.Value) : SqlInt32.Null; });
@@ -2632,10 +2699,9 @@ namespace BLToolkit.Common
 			if (t == typeof(SqlBoolean))  return (ConvertMethod)(object)(Convert<SqlInt32,SqlBoolean>.ConvertMethod) (delegate(SqlBoolean  p) { return p.ToSqlInt32(); });
 			if (t == typeof(SqlDateTime)) return (ConvertMethod)(object)(Convert<SqlInt32,SqlDateTime>.ConvertMethod)(delegate(SqlDateTime p) { return p.IsNull? SqlInt32.Null: Convert.ToInt32(p.Value); });
 
-			return (ConvertMethod)(object)(Convert<SqlInt32,P>.ConvertMethod)(delegate(P p)
-			{
-				return Convert.ToInt32(p);
-			});
+			if (t == typeof(object))      return (ConvertMethod)(object)(Convert<SqlInt32,object>.ConvertMethod)     (delegate(object      p) { return Convert.ToInt32(p); });
+
+			return (ConvertMethod)(object)(Convert<SqlInt32,T>.ConvertMethod)     (delegate(T p) { return Convert<SqlInt32,object>.From((object)p); });
 		}
 
 		#endregion
@@ -2648,12 +2714,12 @@ namespace BLToolkit.Common
 
 			// Scalar Types.
 			//
-			if (t == typeof(String))      return (ConvertMethod)(object)(Convert<SqlInt64,String>.ConvertMethod)     (delegate(String      p) { return Convert.ToInt64(p); });
+			if (t == typeof(Int64))       return (ConvertMethod)(object)(Convert<SqlInt64,Int64>.ConvertMethod)      (delegate(Int64       p) { return p; });
+			if (t == typeof(String))      return (ConvertMethod)(object)(Convert<SqlInt64,String>.ConvertMethod)     (delegate(String      p) { return p == null? SqlInt64.Null: SqlInt64.Parse(p); });
 
 			if (t == typeof(SByte))       return (ConvertMethod)(object)(Convert<SqlInt64,SByte>.ConvertMethod)      (delegate(SByte       p) { return Convert.ToInt64(p); });
 			if (t == typeof(Int16))       return (ConvertMethod)(object)(Convert<SqlInt64,Int16>.ConvertMethod)      (delegate(Int16       p) { return Convert.ToInt64(p); });
 			if (t == typeof(Int32))       return (ConvertMethod)(object)(Convert<SqlInt64,Int32>.ConvertMethod)      (delegate(Int32       p) { return Convert.ToInt64(p); });
-			if (t == typeof(Int64))       return (ConvertMethod)(object)(Convert<SqlInt64,Int64>.ConvertMethod)      (delegate(Int64       p) { return                 p;  });
 
 			if (t == typeof(Byte))        return (ConvertMethod)(object)(Convert<SqlInt64,Byte>.ConvertMethod)       (delegate(Byte        p) { return Convert.ToInt64(p); });
 			if (t == typeof(UInt16))      return (ConvertMethod)(object)(Convert<SqlInt64,UInt16>.ConvertMethod)     (delegate(UInt16      p) { return Convert.ToInt64(p); });
@@ -2670,10 +2736,10 @@ namespace BLToolkit.Common
 
 			// Nullable Types.
 			//
+			if (t == typeof(Int64?))      return (ConvertMethod)(object)(Convert<SqlInt64,Int64?>.ConvertMethod)     (delegate(Int64?      p) { return p.HasValue?                 p.Value  : SqlInt64.Null; });
 			if (t == typeof(SByte?))      return (ConvertMethod)(object)(Convert<SqlInt64,SByte?>.ConvertMethod)     (delegate(SByte?      p) { return p.HasValue? Convert.ToInt64(p.Value) : SqlInt64.Null; });
 			if (t == typeof(Int16?))      return (ConvertMethod)(object)(Convert<SqlInt64,Int16?>.ConvertMethod)     (delegate(Int16?      p) { return p.HasValue? Convert.ToInt64(p.Value) : SqlInt64.Null; });
 			if (t == typeof(Int32?))      return (ConvertMethod)(object)(Convert<SqlInt64,Int32?>.ConvertMethod)     (delegate(Int32?      p) { return p.HasValue? Convert.ToInt64(p.Value) : SqlInt64.Null; });
-			if (t == typeof(Int64?))      return (ConvertMethod)(object)(Convert<SqlInt64,Int64?>.ConvertMethod)     (delegate(Int64?      p) { return p.HasValue?                 p.Value  : SqlInt64.Null; });
 
 			if (t == typeof(Byte?))       return (ConvertMethod)(object)(Convert<SqlInt64,Byte?>.ConvertMethod)      (delegate(Byte?       p) { return p.HasValue? Convert.ToInt64(p.Value) : SqlInt64.Null; });
 			if (t == typeof(UInt16?))     return (ConvertMethod)(object)(Convert<SqlInt64,UInt16?>.ConvertMethod)    (delegate(UInt16?     p) { return p.HasValue? Convert.ToInt64(p.Value) : SqlInt64.Null; });
@@ -2704,10 +2770,9 @@ namespace BLToolkit.Common
 			if (t == typeof(SqlBoolean))  return (ConvertMethod)(object)(Convert<SqlInt64,SqlBoolean>.ConvertMethod) (delegate(SqlBoolean  p) { return p.ToSqlInt64(); });
 			if (t == typeof(SqlDateTime)) return (ConvertMethod)(object)(Convert<SqlInt64,SqlDateTime>.ConvertMethod)(delegate(SqlDateTime p) { return p.IsNull? SqlInt64.Null: Convert.ToInt64(p.Value); });
 
-			return (ConvertMethod)(object)(Convert<SqlInt64,P>.ConvertMethod)(delegate(P p)
-			{
-				return Convert.ToInt64(p);
-			});
+			if (t == typeof(object))      return (ConvertMethod)(object)(Convert<SqlInt64,object>.ConvertMethod)     (delegate(object      p) { return Convert.ToInt64(p); });
+
+			return (ConvertMethod)(object)(Convert<SqlInt64,T>.ConvertMethod)     (delegate(T p) { return Convert<SqlInt64,object>.From((object)p); });
 		}
 
 		#endregion
@@ -2720,7 +2785,8 @@ namespace BLToolkit.Common
 
 			// Scalar Types.
 			//
-			if (t == typeof(String))      return (ConvertMethod)(object)(Convert<SqlSingle,String>.ConvertMethod)     (delegate(String      p) { return Convert.ToSingle(p); });
+			if (t == typeof(Single))      return (ConvertMethod)(object)(Convert<SqlSingle,Single>.ConvertMethod)     (delegate(Single      p) { return p; });
+			if (t == typeof(String))      return (ConvertMethod)(object)(Convert<SqlSingle,String>.ConvertMethod)     (delegate(String      p) { return p == null? SqlSingle.Null: SqlSingle.Parse(p); });
 
 			if (t == typeof(SByte))       return (ConvertMethod)(object)(Convert<SqlSingle,SByte>.ConvertMethod)      (delegate(SByte       p) { return Convert.ToSingle(p); });
 			if (t == typeof(Int16))       return (ConvertMethod)(object)(Convert<SqlSingle,Int16>.ConvertMethod)      (delegate(Int16       p) { return Convert.ToSingle(p); });
@@ -2733,7 +2799,6 @@ namespace BLToolkit.Common
 			if (t == typeof(UInt64))      return (ConvertMethod)(object)(Convert<SqlSingle,UInt64>.ConvertMethod)     (delegate(UInt64      p) { return Convert.ToSingle(p); });
 
 			if (t == typeof(Char))        return (ConvertMethod)(object)(Convert<SqlSingle,Char>.ConvertMethod)       (delegate(Char        p) { return Convert.ToSingle(p); });
-			if (t == typeof(Single))      return (ConvertMethod)(object)(Convert<SqlSingle,Single>.ConvertMethod)     (delegate(Single      p) { return                  p;  });
 			if (t == typeof(Double))      return (ConvertMethod)(object)(Convert<SqlSingle,Double>.ConvertMethod)     (delegate(Double      p) { return Convert.ToSingle(p); });
 
 			if (t == typeof(Boolean))     return (ConvertMethod)(object)(Convert<SqlSingle,Boolean>.ConvertMethod)    (delegate(Boolean     p) { return Convert.ToSingle(p); });
@@ -2742,6 +2807,7 @@ namespace BLToolkit.Common
 
 			// Nullable Types.
 			//
+			if (t == typeof(Single?))     return (ConvertMethod)(object)(Convert<SqlSingle,Single?>.ConvertMethod)    (delegate(Single?     p) { return p.HasValue?                  p.Value  : SqlSingle.Null; });
 			if (t == typeof(SByte?))      return (ConvertMethod)(object)(Convert<SqlSingle,SByte?>.ConvertMethod)     (delegate(SByte?      p) { return p.HasValue? Convert.ToSingle(p.Value) : SqlSingle.Null; });
 			if (t == typeof(Int16?))      return (ConvertMethod)(object)(Convert<SqlSingle,Int16?>.ConvertMethod)     (delegate(Int16?      p) { return p.HasValue? Convert.ToSingle(p.Value) : SqlSingle.Null; });
 			if (t == typeof(Int32?))      return (ConvertMethod)(object)(Convert<SqlSingle,Int32?>.ConvertMethod)     (delegate(Int32?      p) { return p.HasValue? Convert.ToSingle(p.Value) : SqlSingle.Null; });
@@ -2753,7 +2819,6 @@ namespace BLToolkit.Common
 			if (t == typeof(UInt64?))     return (ConvertMethod)(object)(Convert<SqlSingle,UInt64?>.ConvertMethod)    (delegate(UInt64?     p) { return p.HasValue? Convert.ToSingle(p.Value) : SqlSingle.Null; });
 
 			if (t == typeof(Char?))       return (ConvertMethod)(object)(Convert<SqlSingle,Char?>.ConvertMethod)      (delegate(Char?       p) { return p.HasValue? Convert.ToSingle(p.Value) : SqlSingle.Null; });
-			if (t == typeof(Single?))     return (ConvertMethod)(object)(Convert<SqlSingle,Single?>.ConvertMethod)    (delegate(Single?     p) { return p.HasValue?                  p.Value  : SqlSingle.Null; });
 			if (t == typeof(Double?))     return (ConvertMethod)(object)(Convert<SqlSingle,Double?>.ConvertMethod)    (delegate(Double?     p) { return p.HasValue? Convert.ToSingle(p.Value) : SqlSingle.Null; });
 
 			if (t == typeof(Boolean?))    return (ConvertMethod)(object)(Convert<SqlSingle,Boolean?>.ConvertMethod)   (delegate(Boolean?    p) { return p.HasValue? Convert.ToSingle(p.Value) : SqlSingle.Null; });
@@ -2776,10 +2841,9 @@ namespace BLToolkit.Common
 			if (t == typeof(SqlBoolean))  return (ConvertMethod)(object)(Convert<SqlSingle,SqlBoolean>.ConvertMethod) (delegate(SqlBoolean  p) { return p.ToSqlSingle(); });
 			if (t == typeof(SqlDateTime)) return (ConvertMethod)(object)(Convert<SqlSingle,SqlDateTime>.ConvertMethod)(delegate(SqlDateTime p) { return p.IsNull? SqlSingle.Null: Convert.ToSingle(p.Value); });
 
-			return (ConvertMethod)(object)(Convert<SqlSingle,P>.ConvertMethod)(delegate(P p)
-			{
-				return Convert.ToSingle(p);
-			});
+			if (t == typeof(object))      return (ConvertMethod)(object)(Convert<SqlSingle,object>.ConvertMethod)     (delegate(object      p) { return Convert.ToSingle(p); });
+
+			return (ConvertMethod)(object)(Convert<SqlSingle,T>.ConvertMethod)     (delegate(T p) { return Convert<SqlSingle,object>.From((object)p); });
 		}
 
 		#endregion
@@ -2792,7 +2856,8 @@ namespace BLToolkit.Common
 
 			// Scalar Types.
 			//
-			if (t == typeof(String))      return (ConvertMethod)(object)(Convert<SqlDouble,String>.ConvertMethod)     (delegate(String      p) { return Convert.ToDouble(p); });
+			if (t == typeof(Double))      return (ConvertMethod)(object)(Convert<SqlDouble,Double>.ConvertMethod)     (delegate(Double      p) { return p; });
+			if (t == typeof(String))      return (ConvertMethod)(object)(Convert<SqlDouble,String>.ConvertMethod)     (delegate(String      p) { return p == null? SqlDouble.Null: SqlDouble.Parse(p); });
 
 			if (t == typeof(SByte))       return (ConvertMethod)(object)(Convert<SqlDouble,SByte>.ConvertMethod)      (delegate(SByte       p) { return Convert.ToDouble(p); });
 			if (t == typeof(Int16))       return (ConvertMethod)(object)(Convert<SqlDouble,Int16>.ConvertMethod)      (delegate(Int16       p) { return Convert.ToDouble(p); });
@@ -2806,7 +2871,6 @@ namespace BLToolkit.Common
 
 			if (t == typeof(Char))        return (ConvertMethod)(object)(Convert<SqlDouble,Char>.ConvertMethod)       (delegate(Char        p) { return Convert.ToDouble(p); });
 			if (t == typeof(Single))      return (ConvertMethod)(object)(Convert<SqlDouble,Single>.ConvertMethod)     (delegate(Single      p) { return Convert.ToDouble(p); });
-			if (t == typeof(Double))      return (ConvertMethod)(object)(Convert<SqlDouble,Double>.ConvertMethod)     (delegate(Double      p) { return                  p;  });
 
 			if (t == typeof(Boolean))     return (ConvertMethod)(object)(Convert<SqlDouble,Boolean>.ConvertMethod)    (delegate(Boolean     p) { return Convert.ToDouble(p); });
 			if (t == typeof(Decimal))     return (ConvertMethod)(object)(Convert<SqlDouble,Decimal>.ConvertMethod)    (delegate(Decimal     p) { return Convert.ToDouble(p); });
@@ -2814,6 +2878,7 @@ namespace BLToolkit.Common
 
 			// Nullable Types.
 			//
+			if (t == typeof(Double?))     return (ConvertMethod)(object)(Convert<SqlDouble,Double?>.ConvertMethod)    (delegate(Double?     p) { return p.HasValue?                  p.Value  : SqlDouble.Null; });
 			if (t == typeof(SByte?))      return (ConvertMethod)(object)(Convert<SqlDouble,SByte?>.ConvertMethod)     (delegate(SByte?      p) { return p.HasValue? Convert.ToDouble(p.Value) : SqlDouble.Null; });
 			if (t == typeof(Int16?))      return (ConvertMethod)(object)(Convert<SqlDouble,Int16?>.ConvertMethod)     (delegate(Int16?      p) { return p.HasValue? Convert.ToDouble(p.Value) : SqlDouble.Null; });
 			if (t == typeof(Int32?))      return (ConvertMethod)(object)(Convert<SqlDouble,Int32?>.ConvertMethod)     (delegate(Int32?      p) { return p.HasValue? Convert.ToDouble(p.Value) : SqlDouble.Null; });
@@ -2826,7 +2891,6 @@ namespace BLToolkit.Common
 
 			if (t == typeof(Char?))       return (ConvertMethod)(object)(Convert<SqlDouble,Char?>.ConvertMethod)      (delegate(Char?       p) { return p.HasValue? Convert.ToDouble(p.Value) : SqlDouble.Null; });
 			if (t == typeof(Single?))     return (ConvertMethod)(object)(Convert<SqlDouble,Single?>.ConvertMethod)    (delegate(Single?     p) { return p.HasValue? Convert.ToDouble(p.Value) : SqlDouble.Null; });
-			if (t == typeof(Double?))     return (ConvertMethod)(object)(Convert<SqlDouble,Double?>.ConvertMethod)    (delegate(Double?     p) { return p.HasValue?                  p.Value  : SqlDouble.Null; });
 
 			if (t == typeof(Boolean?))    return (ConvertMethod)(object)(Convert<SqlDouble,Boolean?>.ConvertMethod)   (delegate(Boolean?    p) { return p.HasValue? Convert.ToDouble(p.Value) : SqlDouble.Null; });
 			if (t == typeof(Decimal?))    return (ConvertMethod)(object)(Convert<SqlDouble,Decimal?>.ConvertMethod)   (delegate(Decimal?    p) { return p.HasValue? Convert.ToDouble(p.Value) : SqlDouble.Null; });
@@ -2848,10 +2912,9 @@ namespace BLToolkit.Common
 			if (t == typeof(SqlBoolean))  return (ConvertMethod)(object)(Convert<SqlDouble,SqlBoolean>.ConvertMethod) (delegate(SqlBoolean  p) { return p.ToSqlDouble(); });
 			if (t == typeof(SqlDateTime)) return (ConvertMethod)(object)(Convert<SqlDouble,SqlDateTime>.ConvertMethod)(delegate(SqlDateTime p) { return p.IsNull? SqlDouble.Null: Convert.ToDouble(p.Value); });
 
-			return (ConvertMethod)(object)(Convert<SqlDouble,P>.ConvertMethod)(delegate(P p)
-			{
-				return Convert.ToDouble(p);
-			});
+			if (t == typeof(object))      return (ConvertMethod)(object)(Convert<SqlDouble,object>.ConvertMethod)     (delegate(object      p) { return Convert.ToDouble(p); });
+
+			return (ConvertMethod)(object)(Convert<SqlDouble,T>.ConvertMethod)     (delegate(T p) { return Convert<SqlDouble,object>.From((object)p); });
 		}
 
 		#endregion
@@ -2864,7 +2927,8 @@ namespace BLToolkit.Common
 
 			// Scalar Types.
 			//
-			if (t == typeof(String))      return (ConvertMethod)(object)(Convert<SqlDecimal,String>.ConvertMethod)     (delegate(String      p) { return Convert.ToDecimal(p); });
+			if (t == typeof(Decimal))     return (ConvertMethod)(object)(Convert<SqlDecimal,Decimal>.ConvertMethod)    (delegate(Decimal     p) { return p; });
+			if (t == typeof(String))      return (ConvertMethod)(object)(Convert<SqlDecimal,String>.ConvertMethod)     (delegate(String      p) { return p == null? SqlDecimal.Null: SqlDecimal.Parse(p); });
 
 			if (t == typeof(SByte))       return (ConvertMethod)(object)(Convert<SqlDecimal,SByte>.ConvertMethod)      (delegate(SByte       p) { return Convert.ToDecimal(p); });
 			if (t == typeof(Int16))       return (ConvertMethod)(object)(Convert<SqlDecimal,Int16>.ConvertMethod)      (delegate(Int16       p) { return Convert.ToDecimal(p); });
@@ -2881,11 +2945,11 @@ namespace BLToolkit.Common
 			if (t == typeof(Double))      return (ConvertMethod)(object)(Convert<SqlDecimal,Double>.ConvertMethod)     (delegate(Double      p) { return Convert.ToDecimal(p); });
 
 			if (t == typeof(Boolean))     return (ConvertMethod)(object)(Convert<SqlDecimal,Boolean>.ConvertMethod)    (delegate(Boolean     p) { return Convert.ToDecimal(p); });
-			if (t == typeof(Decimal))     return (ConvertMethod)(object)(Convert<SqlDecimal,Decimal>.ConvertMethod)    (delegate(Decimal     p) { return                   p;  });
 			if (t == typeof(DateTime))    return (ConvertMethod)(object)(Convert<SqlDecimal,DateTime>.ConvertMethod)   (delegate(DateTime    p) { return Convert.ToDecimal(p); });
 
 			// Nullable Types.
 			//
+			if (t == typeof(Decimal?))    return (ConvertMethod)(object)(Convert<SqlDecimal,Decimal?>.ConvertMethod)   (delegate(Decimal?    p) { return p.HasValue?                   p.Value  : SqlDecimal.Null; });
 			if (t == typeof(SByte?))      return (ConvertMethod)(object)(Convert<SqlDecimal,SByte?>.ConvertMethod)     (delegate(SByte?      p) { return p.HasValue? Convert.ToDecimal(p.Value) : SqlDecimal.Null; });
 			if (t == typeof(Int16?))      return (ConvertMethod)(object)(Convert<SqlDecimal,Int16?>.ConvertMethod)     (delegate(Int16?      p) { return p.HasValue? Convert.ToDecimal(p.Value) : SqlDecimal.Null; });
 			if (t == typeof(Int32?))      return (ConvertMethod)(object)(Convert<SqlDecimal,Int32?>.ConvertMethod)     (delegate(Int32?      p) { return p.HasValue? Convert.ToDecimal(p.Value) : SqlDecimal.Null; });
@@ -2901,7 +2965,6 @@ namespace BLToolkit.Common
 			if (t == typeof(Double?))     return (ConvertMethod)(object)(Convert<SqlDecimal,Double?>.ConvertMethod)    (delegate(Double?     p) { return p.HasValue? Convert.ToDecimal(p.Value) : SqlDecimal.Null; });
 
 			if (t == typeof(Boolean?))    return (ConvertMethod)(object)(Convert<SqlDecimal,Boolean?>.ConvertMethod)   (delegate(Boolean?    p) { return p.HasValue? Convert.ToDecimal(p.Value) : SqlDecimal.Null; });
-			if (t == typeof(Decimal?))    return (ConvertMethod)(object)(Convert<SqlDecimal,Decimal?>.ConvertMethod)   (delegate(Decimal?    p) { return p.HasValue?                   p.Value  : SqlDecimal.Null; });
 			if (t == typeof(DateTime?))   return (ConvertMethod)(object)(Convert<SqlDecimal,DateTime?>.ConvertMethod)  (delegate(DateTime?   p) { return p.HasValue? Convert.ToDecimal(p.Value) : SqlDecimal.Null; });
 
 			// SqlTypes.
@@ -2920,10 +2983,9 @@ namespace BLToolkit.Common
 			if (t == typeof(SqlBoolean))  return (ConvertMethod)(object)(Convert<SqlDecimal,SqlBoolean>.ConvertMethod) (delegate(SqlBoolean  p) { return p.ToSqlDecimal(); });
 			if (t == typeof(SqlDateTime)) return (ConvertMethod)(object)(Convert<SqlDecimal,SqlDateTime>.ConvertMethod)(delegate(SqlDateTime p) { return p.IsNull? SqlDecimal.Null: Convert.ToDecimal(p.Value); });
 
-			return (ConvertMethod)(object)(Convert<SqlDecimal,P>.ConvertMethod)(delegate(P p)
-			{
-				return Convert.ToDecimal(p);
-			});
+			if (t == typeof(object))      return (ConvertMethod)(object)(Convert<SqlDecimal,object>.ConvertMethod)     (delegate(object      p) { return Convert.ToDecimal(p); });
+
+			return (ConvertMethod)(object)(Convert<SqlDecimal,T>.ConvertMethod)     (delegate(T p) { return Convert<SqlDecimal,object>.From((object)p); });
 		}
 
 		#endregion
@@ -2936,7 +2998,8 @@ namespace BLToolkit.Common
 
 			// Scalar Types.
 			//
-			if (t == typeof(String))      return (ConvertMethod)(object)(Convert<SqlMoney,String>.ConvertMethod)     (delegate(String      p) { return Convert.ToDecimal(p); });
+			if (t == typeof(Decimal))     return (ConvertMethod)(object)(Convert<SqlMoney,Decimal>.ConvertMethod)    (delegate(Decimal     p) { return p; });
+			if (t == typeof(String))      return (ConvertMethod)(object)(Convert<SqlMoney,String>.ConvertMethod)     (delegate(String      p) { return p == null? SqlMoney.Null: SqlMoney.Parse(p); });
 
 			if (t == typeof(SByte))       return (ConvertMethod)(object)(Convert<SqlMoney,SByte>.ConvertMethod)      (delegate(SByte       p) { return Convert.ToDecimal(p); });
 			if (t == typeof(Int16))       return (ConvertMethod)(object)(Convert<SqlMoney,Int16>.ConvertMethod)      (delegate(Int16       p) { return Convert.ToDecimal(p); });
@@ -2953,11 +3016,11 @@ namespace BLToolkit.Common
 			if (t == typeof(Double))      return (ConvertMethod)(object)(Convert<SqlMoney,Double>.ConvertMethod)     (delegate(Double      p) { return Convert.ToDecimal(p); });
 
 			if (t == typeof(Boolean))     return (ConvertMethod)(object)(Convert<SqlMoney,Boolean>.ConvertMethod)    (delegate(Boolean     p) { return Convert.ToDecimal(p); });
-			if (t == typeof(Decimal))     return (ConvertMethod)(object)(Convert<SqlMoney,Decimal>.ConvertMethod)    (delegate(Decimal     p) { return                   p;  });
 			if (t == typeof(DateTime))    return (ConvertMethod)(object)(Convert<SqlMoney,DateTime>.ConvertMethod)   (delegate(DateTime    p) { return Convert.ToDecimal(p); });
 
 			// Nullable Types.
 			//
+			if (t == typeof(Decimal?))    return (ConvertMethod)(object)(Convert<SqlMoney,Decimal?>.ConvertMethod)   (delegate(Decimal?    p) { return p.HasValue?                   p.Value  : SqlMoney.Null; });
 			if (t == typeof(SByte?))      return (ConvertMethod)(object)(Convert<SqlMoney,SByte?>.ConvertMethod)     (delegate(SByte?      p) { return p.HasValue? Convert.ToDecimal(p.Value) : SqlMoney.Null; });
 			if (t == typeof(Int16?))      return (ConvertMethod)(object)(Convert<SqlMoney,Int16?>.ConvertMethod)     (delegate(Int16?      p) { return p.HasValue? Convert.ToDecimal(p.Value) : SqlMoney.Null; });
 			if (t == typeof(Int32?))      return (ConvertMethod)(object)(Convert<SqlMoney,Int32?>.ConvertMethod)     (delegate(Int32?      p) { return p.HasValue? Convert.ToDecimal(p.Value) : SqlMoney.Null; });
@@ -2973,7 +3036,6 @@ namespace BLToolkit.Common
 			if (t == typeof(Double?))     return (ConvertMethod)(object)(Convert<SqlMoney,Double?>.ConvertMethod)    (delegate(Double?     p) { return p.HasValue? Convert.ToDecimal(p.Value) : SqlMoney.Null; });
 
 			if (t == typeof(Boolean?))    return (ConvertMethod)(object)(Convert<SqlMoney,Boolean?>.ConvertMethod)   (delegate(Boolean?    p) { return p.HasValue? Convert.ToDecimal(p.Value) : SqlMoney.Null; });
-			if (t == typeof(Decimal?))    return (ConvertMethod)(object)(Convert<SqlMoney,Decimal?>.ConvertMethod)   (delegate(Decimal?    p) { return p.HasValue?                   p.Value  : SqlMoney.Null; });
 			if (t == typeof(DateTime?))   return (ConvertMethod)(object)(Convert<SqlMoney,DateTime?>.ConvertMethod)  (delegate(DateTime?   p) { return p.HasValue? Convert.ToDecimal(p.Value) : SqlMoney.Null; });
 
 			// SqlTypes.
@@ -2992,10 +3054,9 @@ namespace BLToolkit.Common
 			if (t == typeof(SqlBoolean))  return (ConvertMethod)(object)(Convert<SqlMoney,SqlBoolean>.ConvertMethod) (delegate(SqlBoolean  p) { return p.ToSqlMoney(); });
 			if (t == typeof(SqlDateTime)) return (ConvertMethod)(object)(Convert<SqlMoney,SqlDateTime>.ConvertMethod)(delegate(SqlDateTime p) { return p.IsNull? SqlMoney.Null: Convert.ToDecimal(p.Value); });
 
-			return (ConvertMethod)(object)(Convert<SqlMoney,P>.ConvertMethod)(delegate(P p)
-			{
-				return Convert.ToDecimal(p);
-			});
+			if (t == typeof(object))      return (ConvertMethod)(object)(Convert<SqlMoney,object>.ConvertMethod)     (delegate(object      p) { return Convert.ToDecimal(p); });
+
+			return (ConvertMethod)(object)(Convert<SqlMoney,T>.ConvertMethod)     (delegate(T p) { return Convert<SqlMoney,object>.From((object)p); });
 		}
 
 		#endregion
@@ -3008,7 +3069,8 @@ namespace BLToolkit.Common
 
 			// Scalar Types.
 			//
-			if (t == typeof(String))      return (ConvertMethod)(object)(Convert<SqlBoolean,String>.ConvertMethod)     (delegate(String      p) { return Convert.ToBoolean(p); });
+			if (t == typeof(Boolean))     return (ConvertMethod)(object)(Convert<SqlBoolean,Boolean>.ConvertMethod)    (delegate(Boolean     p) { return p; });
+			if (t == typeof(String))      return (ConvertMethod)(object)(Convert<SqlBoolean,String>.ConvertMethod)     (delegate(String      p) { return p == null? SqlBoolean.Null: SqlBoolean.Parse(p); });
 
 			if (t == typeof(SByte))       return (ConvertMethod)(object)(Convert<SqlBoolean,SByte>.ConvertMethod)      (delegate(SByte       p) { return Convert.ToBoolean(p); });
 			if (t == typeof(Int16))       return (ConvertMethod)(object)(Convert<SqlBoolean,Int16>.ConvertMethod)      (delegate(Int16       p) { return Convert.ToBoolean(p); });
@@ -3024,12 +3086,12 @@ namespace BLToolkit.Common
 			if (t == typeof(Single))      return (ConvertMethod)(object)(Convert<SqlBoolean,Single>.ConvertMethod)     (delegate(Single      p) { return Convert.ToBoolean(p); });
 			if (t == typeof(Double))      return (ConvertMethod)(object)(Convert<SqlBoolean,Double>.ConvertMethod)     (delegate(Double      p) { return Convert.ToBoolean(p); });
 
-			if (t == typeof(Boolean))     return (ConvertMethod)(object)(Convert<SqlBoolean,Boolean>.ConvertMethod)    (delegate(Boolean     p) { return                   p;  });
 			if (t == typeof(Decimal))     return (ConvertMethod)(object)(Convert<SqlBoolean,Decimal>.ConvertMethod)    (delegate(Decimal     p) { return Convert.ToBoolean(p); });
 			if (t == typeof(DateTime))    return (ConvertMethod)(object)(Convert<SqlBoolean,DateTime>.ConvertMethod)   (delegate(DateTime    p) { return Convert.ToBoolean(p); });
 
 			// Nullable Types.
 			//
+			if (t == typeof(Boolean?))    return (ConvertMethod)(object)(Convert<SqlBoolean,Boolean?>.ConvertMethod)   (delegate(Boolean?    p) { return p.HasValue?                   p.Value  : SqlBoolean.Null; });
 			if (t == typeof(SByte?))      return (ConvertMethod)(object)(Convert<SqlBoolean,SByte?>.ConvertMethod)     (delegate(SByte?      p) { return p.HasValue? Convert.ToBoolean(p.Value) : SqlBoolean.Null; });
 			if (t == typeof(Int16?))      return (ConvertMethod)(object)(Convert<SqlBoolean,Int16?>.ConvertMethod)     (delegate(Int16?      p) { return p.HasValue? Convert.ToBoolean(p.Value) : SqlBoolean.Null; });
 			if (t == typeof(Int32?))      return (ConvertMethod)(object)(Convert<SqlBoolean,Int32?>.ConvertMethod)     (delegate(Int32?      p) { return p.HasValue? Convert.ToBoolean(p.Value) : SqlBoolean.Null; });
@@ -3044,7 +3106,6 @@ namespace BLToolkit.Common
 			if (t == typeof(Single?))     return (ConvertMethod)(object)(Convert<SqlBoolean,Single?>.ConvertMethod)    (delegate(Single?     p) { return p.HasValue? Convert.ToBoolean(p.Value) : SqlBoolean.Null; });
 			if (t == typeof(Double?))     return (ConvertMethod)(object)(Convert<SqlBoolean,Double?>.ConvertMethod)    (delegate(Double?     p) { return p.HasValue? Convert.ToBoolean(p.Value) : SqlBoolean.Null; });
 
-			if (t == typeof(Boolean?))    return (ConvertMethod)(object)(Convert<SqlBoolean,Boolean?>.ConvertMethod)   (delegate(Boolean?    p) { return p.HasValue?                   p.Value  : SqlBoolean.Null; });
 			if (t == typeof(Decimal?))    return (ConvertMethod)(object)(Convert<SqlBoolean,Decimal?>.ConvertMethod)   (delegate(Decimal?    p) { return p.HasValue? Convert.ToBoolean(p.Value) : SqlBoolean.Null; });
 			if (t == typeof(DateTime?))   return (ConvertMethod)(object)(Convert<SqlBoolean,DateTime?>.ConvertMethod)  (delegate(DateTime?   p) { return p.HasValue? Convert.ToBoolean(p.Value) : SqlBoolean.Null; });
 
@@ -3064,10 +3125,9 @@ namespace BLToolkit.Common
 
 			if (t == typeof(SqlDateTime)) return (ConvertMethod)(object)(Convert<SqlBoolean,SqlDateTime>.ConvertMethod)(delegate(SqlDateTime p) { return p.IsNull? SqlBoolean.Null: Convert.ToBoolean(p.Value); });
 
-			return (ConvertMethod)(object)(Convert<SqlBoolean,P>.ConvertMethod)(delegate(P p)
-			{
-				return Convert.ToBoolean(p);
-			});
+			if (t == typeof(object))      return (ConvertMethod)(object)(Convert<SqlBoolean,object>.ConvertMethod)     (delegate(object      p) { return Convert.ToBoolean(p); });
+
+			return (ConvertMethod)(object)(Convert<SqlBoolean,T>.ConvertMethod)     (delegate(T p) { return Convert<SqlBoolean,object>.From((object)p); });
 		}
 
 		#endregion
@@ -3080,7 +3140,8 @@ namespace BLToolkit.Common
 
 			// Scalar Types.
 			//
-			if (t == typeof(String))      return (ConvertMethod)(object)(Convert<SqlDateTime,String>.ConvertMethod)     (delegate(String      p) { return Convert.ToDateTime(p); });
+			if (t == typeof(DateTime))    return (ConvertMethod)(object)(Convert<SqlDateTime,DateTime>.ConvertMethod)   (delegate(DateTime    p) { return p; });
+			if (t == typeof(String))      return (ConvertMethod)(object)(Convert<SqlDateTime,String>.ConvertMethod)     (delegate(String      p) { return p == null? SqlDateTime.Null: SqlDateTime.Parse(p); });
 
 			if (t == typeof(SByte))       return (ConvertMethod)(object)(Convert<SqlDateTime,SByte>.ConvertMethod)      (delegate(SByte       p) { return Convert.ToDateTime(p); });
 			if (t == typeof(Int16))       return (ConvertMethod)(object)(Convert<SqlDateTime,Int16>.ConvertMethod)      (delegate(Int16       p) { return Convert.ToDateTime(p); });
@@ -3098,10 +3159,10 @@ namespace BLToolkit.Common
 
 			if (t == typeof(Boolean))     return (ConvertMethod)(object)(Convert<SqlDateTime,Boolean>.ConvertMethod)    (delegate(Boolean     p) { return Convert.ToDateTime(p); });
 			if (t == typeof(Decimal))     return (ConvertMethod)(object)(Convert<SqlDateTime,Decimal>.ConvertMethod)    (delegate(Decimal     p) { return Convert.ToDateTime(p); });
-			if (t == typeof(DateTime))    return (ConvertMethod)(object)(Convert<SqlDateTime,DateTime>.ConvertMethod)   (delegate(DateTime    p) { return                    p;  });
 
 			// Nullable Types.
 			//
+			if (t == typeof(DateTime?))   return (ConvertMethod)(object)(Convert<SqlDateTime,DateTime?>.ConvertMethod)  (delegate(DateTime?   p) { return p.HasValue?                    p.Value  : SqlDateTime.Null; });
 			if (t == typeof(SByte?))      return (ConvertMethod)(object)(Convert<SqlDateTime,SByte?>.ConvertMethod)     (delegate(SByte?      p) { return p.HasValue? Convert.ToDateTime(p.Value) : SqlDateTime.Null; });
 			if (t == typeof(Int16?))      return (ConvertMethod)(object)(Convert<SqlDateTime,Int16?>.ConvertMethod)     (delegate(Int16?      p) { return p.HasValue? Convert.ToDateTime(p.Value) : SqlDateTime.Null; });
 			if (t == typeof(Int32?))      return (ConvertMethod)(object)(Convert<SqlDateTime,Int32?>.ConvertMethod)     (delegate(Int32?      p) { return p.HasValue? Convert.ToDateTime(p.Value) : SqlDateTime.Null; });
@@ -3118,7 +3179,6 @@ namespace BLToolkit.Common
 
 			if (t == typeof(Boolean?))    return (ConvertMethod)(object)(Convert<SqlDateTime,Boolean?>.ConvertMethod)   (delegate(Boolean?    p) { return p.HasValue? Convert.ToDateTime(p.Value) : SqlDateTime.Null; });
 			if (t == typeof(Decimal?))    return (ConvertMethod)(object)(Convert<SqlDateTime,Decimal?>.ConvertMethod)   (delegate(Decimal?    p) { return p.HasValue? Convert.ToDateTime(p.Value) : SqlDateTime.Null; });
-			if (t == typeof(DateTime?))   return (ConvertMethod)(object)(Convert<SqlDateTime,DateTime?>.ConvertMethod)  (delegate(DateTime?   p) { return p.HasValue?                    p.Value  : SqlDateTime.Null; });
 
 			// SqlTypes.
 			//
@@ -3136,10 +3196,9 @@ namespace BLToolkit.Common
 
 			if (t == typeof(SqlBoolean))  return (ConvertMethod)(object)(Convert<SqlDateTime,SqlBoolean>.ConvertMethod) (delegate(SqlBoolean  p) { return p.IsNull? SqlDateTime.Null: Convert.ToDateTime(p.Value); });
 
-			return (ConvertMethod)(object)(Convert<SqlDateTime,P>.ConvertMethod)(delegate(P p)
-			{
-				return Convert.ToDateTime(p);
-			});
+			if (t == typeof(object))      return (ConvertMethod)(object)(Convert<SqlDateTime,object>.ConvertMethod)     (delegate(object      p) { return Convert.ToDateTime(p); });
+
+			return (ConvertMethod)(object)(Convert<SqlDateTime,T>.ConvertMethod)     (delegate(T p) { return Convert<SqlDateTime,object>.From((object)p); });
 		}
 
 		#endregion
@@ -3152,8 +3211,8 @@ namespace BLToolkit.Common
 
 			// Scalar Types.
 			//
-			if (t == typeof(String))      return (ConvertMethod)(object)(Convert<SqlGuid,String>.ConvertMethod)     (delegate(String      p) { return new SqlGuid(p); });
 			if (t == typeof(Guid))        return (ConvertMethod)(object)(Convert<SqlGuid,Guid>.ConvertMethod)       (delegate(Guid        p) { return p; });
+			if (t == typeof(String))      return (ConvertMethod)(object)(Convert<SqlGuid,String>.ConvertMethod)     (delegate(String      p) { return p == null? SqlGuid.Null: SqlGuid.Parse(p); });
 
 			// Nullable Types.
 			//
@@ -3161,17 +3220,33 @@ namespace BLToolkit.Common
 
 			// SqlTypes.
 			//
-			if (t == typeof(SqlString))   return (ConvertMethod)(object)(Convert<SqlGuid,SqlString>.ConvertMethod)  (delegate(SqlString   p) { return p.ToSqlGuid(); });
 			if (t == typeof(SqlBinary))   return (ConvertMethod)(object)(Convert<SqlGuid,SqlBinary>.ConvertMethod)  (delegate(SqlBinary   p) { return p.ToSqlGuid(); });
+			if (t == typeof(SqlString))   return (ConvertMethod)(object)(Convert<SqlGuid,SqlString>.ConvertMethod)  (delegate(SqlString   p) { return p.ToSqlGuid(); });
 
-			return (ConvertMethod)(object)(Convert<SqlGuid,P>.ConvertMethod)(delegate(P p)
+			if (t == typeof(object))      return (ConvertMethod)(object)(Convert<SqlGuid,object>.ConvertMethod)     (delegate(object      p)
 			{
 				if (p == null)
 					return SqlGuid.Null;
 
+				// Scalar Types.
+				//
+				if (p is Guid)        return Convert<SqlGuid,Guid>       .From((Guid)p);
+				if (p is String)      return Convert<SqlGuid,String>     .From((String)p);
+
+				// Nullable Types.
+				//
+				if (p is Guid?)       return Convert<SqlGuid,Guid?>      .From((Guid?)p);
+
+				// SqlTypes.
+				//
+				if (p is SqlBinary)   return Convert<SqlGuid,SqlBinary>  .From((SqlBinary)p);
+				if (p is SqlString)   return Convert<SqlGuid,SqlString>  .From((SqlString)p);
+
 				throw new InvalidCastException(string.Format(
 					"Invalid cast from {0} to {1}", typeof(P).FullName, typeof(T).FullName));
 			});
+
+			return (ConvertMethod)(object)(Convert<SqlGuid,T>.ConvertMethod)     (delegate(T p) { return Convert<SqlGuid,object>.From((object)p); });
 		}
 
 		#endregion
@@ -3184,29 +3259,231 @@ namespace BLToolkit.Common
 
 			// Scalar Types.
 			//
-			if (t == typeof(Guid))        return (ConvertMethod)(object)(Convert<SqlBinary,Guid>.ConvertMethod)       (delegate(Guid        p) { return new SqlGuid(p).ToSqlBinary(); });
+			if (t == typeof(Byte[]))      return (ConvertMethod)(object)(Convert<SqlBinary,Byte[]>.ConvertMethod)     (delegate(Byte[]      p) { return p; });
+			if (t == typeof(Guid))        return (ConvertMethod)(object)(Convert<SqlBinary,Guid>.ConvertMethod)       (delegate(Guid        p) { return p == Guid.Empty? SqlBinary.Null: new SqlGuid(p).ToSqlBinary(); });
 
 			// Nullable Types.
 			//
-			if (t == typeof(Guid?))       return (ConvertMethod)(object)(Convert<SqlBinary,Guid?>.ConvertMethod)      (delegate(Guid?       p) { return p.HasValue? new SqlGuid(p.Value).ToSqlBinary() : SqlBinary.Null; });
+			if (t == typeof(Guid?))       return (ConvertMethod)(object)(Convert<SqlBinary,Guid?>.ConvertMethod)      (delegate(Guid?       p) { return p.HasValue? new SqlGuid(p.Value).ToSqlBinary(): SqlBinary.Null; });
 
 			// SqlTypes.
 			//
+			if (t == typeof(SqlBytes))    return (ConvertMethod)(object)(Convert<SqlBinary,SqlBytes>.ConvertMethod)   (delegate(SqlBytes    p) { return p.ToSqlBinary(); });
 			if (t == typeof(SqlGuid))     return (ConvertMethod)(object)(Convert<SqlBinary,SqlGuid>.ConvertMethod)    (delegate(SqlGuid     p) { return p.ToSqlBinary(); });
 
-			return (ConvertMethod)(object)(Convert<SqlBinary,P>.ConvertMethod)(delegate(P p)
+			if (t == typeof(object))      return (ConvertMethod)(object)(Convert<SqlBinary,object>.ConvertMethod)     (delegate(object      p)
 			{
 				if (p == null)
 					return SqlBinary.Null;
 
+				// Scalar Types.
+				//
+				if (p is Byte[])      return Convert<SqlBinary,Byte[]>     .From((Byte[])p);
+				if (p is Guid)        return Convert<SqlBinary,Guid>       .From((Guid)p);
+
+				// Nullable Types.
+				//
+				if (p is Guid?)       return Convert<SqlBinary,Guid?>      .From((Guid?)p);
+
+				// SqlTypes.
+				//
+				if (p is SqlBytes)    return Convert<SqlBinary,SqlBytes>   .From((SqlBytes)p);
+				if (p is SqlGuid)     return Convert<SqlBinary,SqlGuid>    .From((SqlGuid)p);
+
 				throw new InvalidCastException(string.Format(
 					"Invalid cast from {0} to {1}", typeof(P).FullName, typeof(T).FullName));
 			});
+
+			return (ConvertMethod)(object)(Convert<SqlBinary,T>.ConvertMethod)     (delegate(T p) { return Convert<SqlBinary,object>.From((object)p); });
+		}
+
+		#endregion
+
+		#region SqlBytes
+
+		private static ConvertMethod GetSqlBytesConverter()
+		{
+			Type t = typeof(P);
+
+			// Scalar Types.
+			//
+			if (t == typeof(Byte[]))      return (ConvertMethod)(object)(Convert<SqlBytes,Byte[]>.ConvertMethod)     (delegate(Byte[]      p) { return p == null? SqlBytes.Null: new SqlBytes(p); });
+			if (t == typeof(Stream))      return (ConvertMethod)(object)(Convert<SqlBytes,Stream>.ConvertMethod)     (delegate(Stream      p) { return p == null? SqlBytes.Null: new SqlBytes(p); });
+			if (t == typeof(Guid))        return (ConvertMethod)(object)(Convert<SqlBytes,Guid>.ConvertMethod)       (delegate(Guid        p) { return p == Guid.Empty? SqlBytes.Null: new SqlBytes(p.ToByteArray()); });
+
+			// Nullable Types.
+			//
+			if (t == typeof(Guid?))       return (ConvertMethod)(object)(Convert<SqlBytes,Guid?>.ConvertMethod)      (delegate(Guid?       p) { return p.HasValue? new SqlBytes(p.Value.ToByteArray()): SqlBytes.Null; });
+
+			// SqlTypes.
+			//
+			if (t == typeof(SqlBinary))   return (ConvertMethod)(object)(Convert<SqlBytes,SqlBinary>.ConvertMethod)  (delegate(SqlBinary   p) { return p.IsNull? SqlBytes.Null: new SqlBytes(p); });
+			if (t == typeof(SqlGuid))     return (ConvertMethod)(object)(Convert<SqlBytes,SqlGuid>.ConvertMethod)    (delegate(SqlGuid     p) { return p.IsNull? SqlBytes.Null: new SqlBytes(p.ToByteArray()); });
+
+			if (t == typeof(object))      return (ConvertMethod)(object)(Convert<SqlBytes,object>.ConvertMethod)     (delegate(object      p)
+			{
+				if (p == null)
+					return SqlBytes.Null;
+
+				// Scalar Types.
+				//
+				if (p is Byte[])      return Convert<SqlBytes,Byte[]>     .From((Byte[])p);
+				if (p is Stream)      return Convert<SqlBytes,Stream>     .From((Stream)p);
+				if (p is Guid)        return Convert<SqlBytes,Guid>       .From((Guid)p);
+
+				// Nullable Types.
+				//
+				if (p is Guid?)       return Convert<SqlBytes,Guid?>      .From((Guid?)p);
+
+				// SqlTypes.
+				//
+				if (p is SqlBinary)   return Convert<SqlBytes,SqlBinary>  .From((SqlBinary)p);
+				if (p is SqlGuid)     return Convert<SqlBytes,SqlGuid>    .From((SqlGuid)p);
+
+				throw new InvalidCastException(string.Format(
+					"Invalid cast from {0} to {1}", typeof(P).FullName, typeof(T).FullName));
+			});
+
+			return (ConvertMethod)(object)(Convert<SqlBytes,T>.ConvertMethod)     (delegate(T p) { return Convert<SqlBytes,object>.From((object)p); });
+		}
+
+		#endregion
+
+		#region SqlChars
+
+		private static ConvertMethod GetSqlCharsConverter()
+		{
+			Type t = typeof(P);
+
+			// Scalar Types.
+			//
+			if (t == typeof(String))      return (ConvertMethod)(object)(Convert<SqlChars,String>.ConvertMethod)     (delegate(String      p) { return p == null? SqlChars.Null: new SqlChars(p.ToCharArray()); });
+			if (t == typeof(Char[]))      return (ConvertMethod)(object)(Convert<SqlChars,Char[]>.ConvertMethod)     (delegate(Char[]      p) { return p == null? SqlChars.Null: new SqlChars(p); });
+
+			if (t == typeof(SByte))       return (ConvertMethod)(object)(Convert<SqlChars,SByte>.ConvertMethod)      (delegate(SByte       p) { return new SqlChars(Convert.ToString(p).ToCharArray()); });
+			if (t == typeof(Int16))       return (ConvertMethod)(object)(Convert<SqlChars,Int16>.ConvertMethod)      (delegate(Int16       p) { return new SqlChars(Convert.ToString(p).ToCharArray()); });
+			if (t == typeof(Int32))       return (ConvertMethod)(object)(Convert<SqlChars,Int32>.ConvertMethod)      (delegate(Int32       p) { return new SqlChars(Convert.ToString(p).ToCharArray()); });
+			if (t == typeof(Int64))       return (ConvertMethod)(object)(Convert<SqlChars,Int64>.ConvertMethod)      (delegate(Int64       p) { return new SqlChars(Convert.ToString(p).ToCharArray()); });
+
+			if (t == typeof(Byte))        return (ConvertMethod)(object)(Convert<SqlChars,Byte>.ConvertMethod)       (delegate(Byte        p) { return new SqlChars(Convert.ToString(p).ToCharArray()); });
+			if (t == typeof(UInt16))      return (ConvertMethod)(object)(Convert<SqlChars,UInt16>.ConvertMethod)     (delegate(UInt16      p) { return new SqlChars(Convert.ToString(p).ToCharArray()); });
+			if (t == typeof(UInt32))      return (ConvertMethod)(object)(Convert<SqlChars,UInt32>.ConvertMethod)     (delegate(UInt32      p) { return new SqlChars(Convert.ToString(p).ToCharArray()); });
+			if (t == typeof(UInt64))      return (ConvertMethod)(object)(Convert<SqlChars,UInt64>.ConvertMethod)     (delegate(UInt64      p) { return new SqlChars(Convert.ToString(p).ToCharArray()); });
+
+			if (t == typeof(Char))        return (ConvertMethod)(object)(Convert<SqlChars,Char>.ConvertMethod)       (delegate(Char        p) { return new SqlChars(Convert.ToString(p).ToCharArray()); });
+			if (t == typeof(Single))      return (ConvertMethod)(object)(Convert<SqlChars,Single>.ConvertMethod)     (delegate(Single      p) { return new SqlChars(Convert.ToString(p).ToCharArray()); });
+			if (t == typeof(Double))      return (ConvertMethod)(object)(Convert<SqlChars,Double>.ConvertMethod)     (delegate(Double      p) { return new SqlChars(Convert.ToString(p).ToCharArray()); });
+
+			if (t == typeof(Boolean))     return (ConvertMethod)(object)(Convert<SqlChars,Boolean>.ConvertMethod)    (delegate(Boolean     p) { return new SqlChars(Convert.ToString(p).ToCharArray()); });
+			if (t == typeof(Decimal))     return (ConvertMethod)(object)(Convert<SqlChars,Decimal>.ConvertMethod)    (delegate(Decimal     p) { return new SqlChars(Convert.ToString(p).ToCharArray()); });
+			if (t == typeof(DateTime))    return (ConvertMethod)(object)(Convert<SqlChars,DateTime>.ConvertMethod)   (delegate(DateTime    p) { return new SqlChars(Convert.ToString(p).ToCharArray()); });
+			if (t == typeof(TimeSpan))    return (ConvertMethod)(object)(Convert<SqlChars,TimeSpan>.ConvertMethod)   (delegate(TimeSpan    p) { return new SqlChars(Convert.ToString(p).ToCharArray()); });
+			if (t == typeof(Guid))        return (ConvertMethod)(object)(Convert<SqlChars,Guid>.ConvertMethod)       (delegate(Guid        p) { return new SqlChars(Convert.ToString(p).ToCharArray()); });
+
+			// Nullable Types.
+			//
+			if (t == typeof(SByte?))      return (ConvertMethod)(object)(Convert<SqlChars,SByte?>.ConvertMethod)     (delegate(SByte?      p) { return p.HasValue? new SqlChars(p.ToString().ToCharArray()): SqlChars.Null; });
+			if (t == typeof(Int16?))      return (ConvertMethod)(object)(Convert<SqlChars,Int16?>.ConvertMethod)     (delegate(Int16?      p) { return p.HasValue? new SqlChars(p.ToString().ToCharArray()): SqlChars.Null; });
+			if (t == typeof(Int32?))      return (ConvertMethod)(object)(Convert<SqlChars,Int32?>.ConvertMethod)     (delegate(Int32?      p) { return p.HasValue? new SqlChars(p.ToString().ToCharArray()): SqlChars.Null; });
+			if (t == typeof(Int64?))      return (ConvertMethod)(object)(Convert<SqlChars,Int64?>.ConvertMethod)     (delegate(Int64?      p) { return p.HasValue? new SqlChars(p.ToString().ToCharArray()): SqlChars.Null; });
+
+			if (t == typeof(Byte?))       return (ConvertMethod)(object)(Convert<SqlChars,Byte?>.ConvertMethod)      (delegate(Byte?       p) { return p.HasValue? new SqlChars(p.ToString().ToCharArray()): SqlChars.Null; });
+			if (t == typeof(UInt16?))     return (ConvertMethod)(object)(Convert<SqlChars,UInt16?>.ConvertMethod)    (delegate(UInt16?     p) { return p.HasValue? new SqlChars(p.ToString().ToCharArray()): SqlChars.Null; });
+			if (t == typeof(UInt32?))     return (ConvertMethod)(object)(Convert<SqlChars,UInt32?>.ConvertMethod)    (delegate(UInt32?     p) { return p.HasValue? new SqlChars(p.ToString().ToCharArray()): SqlChars.Null; });
+			if (t == typeof(UInt64?))     return (ConvertMethod)(object)(Convert<SqlChars,UInt64?>.ConvertMethod)    (delegate(UInt64?     p) { return p.HasValue? new SqlChars(p.ToString().ToCharArray()): SqlChars.Null; });
+
+			if (t == typeof(Char?))       return (ConvertMethod)(object)(Convert<SqlChars,Char?>.ConvertMethod)      (delegate(Char?       p) { return p.HasValue? new SqlChars(p.ToString().ToCharArray()): SqlChars.Null; });
+			if (t == typeof(Single?))     return (ConvertMethod)(object)(Convert<SqlChars,Single?>.ConvertMethod)    (delegate(Single?     p) { return p.HasValue? new SqlChars(p.ToString().ToCharArray()): SqlChars.Null; });
+			if (t == typeof(Double?))     return (ConvertMethod)(object)(Convert<SqlChars,Double?>.ConvertMethod)    (delegate(Double?     p) { return p.HasValue? new SqlChars(p.ToString().ToCharArray()): SqlChars.Null; });
+
+			if (t == typeof(Boolean?))    return (ConvertMethod)(object)(Convert<SqlChars,Boolean?>.ConvertMethod)   (delegate(Boolean?    p) { return p.HasValue? new SqlChars(p.ToString().ToCharArray()): SqlChars.Null; });
+			if (t == typeof(Decimal?))    return (ConvertMethod)(object)(Convert<SqlChars,Decimal?>.ConvertMethod)   (delegate(Decimal?    p) { return p.HasValue? new SqlChars(p.ToString().ToCharArray()): SqlChars.Null; });
+			if (t == typeof(DateTime?))   return (ConvertMethod)(object)(Convert<SqlChars,DateTime?>.ConvertMethod)  (delegate(DateTime?   p) { return p.HasValue? new SqlChars(p.ToString().ToCharArray()): SqlChars.Null; });
+			if (t == typeof(TimeSpan?))   return (ConvertMethod)(object)(Convert<SqlChars,TimeSpan?>.ConvertMethod)  (delegate(TimeSpan?   p) { return p.HasValue? new SqlChars(p.ToString().ToCharArray()): SqlChars.Null; });
+			if (t == typeof(Guid?))       return (ConvertMethod)(object)(Convert<SqlChars,Guid?>.ConvertMethod)      (delegate(Guid?       p) { return p.HasValue? new SqlChars(p.ToString().ToCharArray()): SqlChars.Null; });
+
+			// SqlTypes.
+			//
+			if (t == typeof(SqlString))   return (ConvertMethod)(object)(Convert<SqlChars,SqlString>.ConvertMethod)  (delegate(SqlString   p) { return (SqlChars)p; });
+
+			if (t == typeof(SqlByte))     return (ConvertMethod)(object)(Convert<SqlChars,SqlByte>.ConvertMethod)    (delegate(SqlByte     p) { return (SqlChars)p.ToSqlString(); });
+			if (t == typeof(SqlInt16))    return (ConvertMethod)(object)(Convert<SqlChars,SqlInt16>.ConvertMethod)   (delegate(SqlInt16    p) { return (SqlChars)p.ToSqlString(); });
+			if (t == typeof(SqlInt32))    return (ConvertMethod)(object)(Convert<SqlChars,SqlInt32>.ConvertMethod)   (delegate(SqlInt32    p) { return (SqlChars)p.ToSqlString(); });
+			if (t == typeof(SqlInt64))    return (ConvertMethod)(object)(Convert<SqlChars,SqlInt64>.ConvertMethod)   (delegate(SqlInt64    p) { return (SqlChars)p.ToSqlString(); });
+
+			if (t == typeof(SqlSingle))   return (ConvertMethod)(object)(Convert<SqlChars,SqlSingle>.ConvertMethod)  (delegate(SqlSingle   p) { return (SqlChars)p.ToSqlString(); });
+			if (t == typeof(SqlDouble))   return (ConvertMethod)(object)(Convert<SqlChars,SqlDouble>.ConvertMethod)  (delegate(SqlDouble   p) { return (SqlChars)p.ToSqlString(); });
+			if (t == typeof(SqlDecimal))  return (ConvertMethod)(object)(Convert<SqlChars,SqlDecimal>.ConvertMethod) (delegate(SqlDecimal  p) { return (SqlChars)p.ToSqlString(); });
+			if (t == typeof(SqlMoney))    return (ConvertMethod)(object)(Convert<SqlChars,SqlMoney>.ConvertMethod)   (delegate(SqlMoney    p) { return (SqlChars)p.ToSqlString(); });
+
+			if (t == typeof(SqlBoolean))  return (ConvertMethod)(object)(Convert<SqlChars,SqlBoolean>.ConvertMethod) (delegate(SqlBoolean  p) { return (SqlChars)p.ToSqlString(); });
+			if (t == typeof(SqlDateTime)) return (ConvertMethod)(object)(Convert<SqlChars,SqlDateTime>.ConvertMethod)(delegate(SqlDateTime p) { return (SqlChars)p.ToSqlString(); });
+			if (t == typeof(SqlGuid))     return (ConvertMethod)(object)(Convert<SqlChars,SqlGuid>.ConvertMethod)    (delegate(SqlGuid     p) { return (SqlChars)p.ToSqlString(); });
+			if (t == typeof(SqlBinary))   return (ConvertMethod)(object)(Convert<SqlChars,SqlBinary>.ConvertMethod)  (delegate(SqlBinary   p) { return p.IsNull? SqlChars.Null: new SqlChars(p.ToString().ToCharArray()); });
+
+			if (t == typeof(object))      return (ConvertMethod)(object)(Convert<SqlChars,object>.ConvertMethod)     (delegate(object      p) { return new SqlChars(Convert.ToString(p).ToCharArray()); });
+
+			return (ConvertMethod)(object)(Convert<SqlChars,T>.ConvertMethod)     (delegate(T p) { return Convert<SqlChars,object>.From((object)p); });
+		}
+
+		#endregion
+
+		#region SqlXml
+
+		private static ConvertMethod GetSqlXmlConverter()
+		{
+			Type t = typeof(P);
+
+			// Scalar Types.
+			//
+			if (t == typeof(string))      return (ConvertMethod)(object)(Convert<SqlXml,string>.ConvertMethod)     (delegate(string      p) { return p == null? SqlXml.Null: new SqlXml(new XmlTextReader(new StringReader(p))); });
+
+			if (t == typeof(Stream))      return (ConvertMethod)(object)(Convert<SqlXml,Stream>.ConvertMethod)     (delegate(Stream      p) { return p == null? SqlXml.Null: new SqlXml(p); });
+			if (t == typeof(XmlReader))   return (ConvertMethod)(object)(Convert<SqlXml,XmlReader>.ConvertMethod)  (delegate(XmlReader   p) { return p == null? SqlXml.Null: new SqlXml(p); });
+
+			if (t == typeof(Char[]))      return (ConvertMethod)(object)(Convert<SqlXml,Char[]>.ConvertMethod)     (delegate(Char[]      p) { return p == null? SqlXml.Null: new SqlXml(new XmlTextReader(new StringReader(p.ToString()))); });
+			if (t == typeof(Byte[]))      return (ConvertMethod)(object)(Convert<SqlXml,Byte[]>.ConvertMethod)     (delegate(Byte[]      p) { return p == null? SqlXml.Null: new SqlXml(new MemoryStream(p)); });
+
+			// SqlTypes.
+			//
+			if (t == typeof(SqlString))   return (ConvertMethod)(object)(Convert<SqlXml,SqlString>.ConvertMethod)  (delegate(SqlString   p) { return p.IsNull? SqlXml.Null: new SqlXml(new XmlTextReader(new StringReader(p.Value))); });
+			if (t == typeof(SqlChars))    return (ConvertMethod)(object)(Convert<SqlXml,SqlChars>.ConvertMethod)   (delegate(SqlChars    p) { return p.IsNull? SqlXml.Null: new SqlXml(new XmlTextReader(new StringReader(p.ToSqlString().Value))); });
+			if (t == typeof(SqlBinary))   return (ConvertMethod)(object)(Convert<SqlXml,SqlBinary>.ConvertMethod)  (delegate(SqlBinary   p) { return p.IsNull? SqlXml.Null: new SqlXml(new MemoryStream(p.Value)); });
+			if (t == typeof(SqlBytes))    return (ConvertMethod)(object)(Convert<SqlXml,SqlBytes>.ConvertMethod)   (delegate(SqlBytes    p) { return p.IsNull? SqlXml.Null: new SqlXml(p.Stream); });
+
+			if (t == typeof(object))      return (ConvertMethod)(object)(Convert<SqlXml,object>.ConvertMethod)     (delegate(object      p)
+			{
+				if (p == null)
+					return SqlXml.Null;
+
+				// Scalar Types.
+				//
+				if (p is string)      return Convert<SqlXml,string>     .From((string)p);
+
+				if (p is Stream)      return Convert<SqlXml,Stream>     .From((Stream)p);
+				if (p is XmlReader)   return Convert<SqlXml,XmlReader>  .From((XmlReader)p);
+
+				if (p is Char[])      return Convert<SqlXml,Char[]>     .From((Char[])p);
+				if (p is Byte[])      return Convert<SqlXml,Byte[]>     .From((Byte[])p);
+
+				// SqlTypes.
+				//
+				if (p is SqlString)   return Convert<SqlXml,SqlString>  .From((SqlString)p);
+				if (p is SqlChars)    return Convert<SqlXml,SqlChars>   .From((SqlChars)p);
+				if (p is SqlBinary)   return Convert<SqlXml,SqlBinary>  .From((SqlBinary)p);
+				if (p is SqlBytes)    return Convert<SqlXml,SqlBytes>   .From((SqlBytes)p);
+
+				throw new InvalidCastException(string.Format(
+					"Invalid cast from {0} to {1}", typeof(P).FullName, typeof(T).FullName));
+			});
+
+			return (ConvertMethod)(object)(Convert<SqlXml,T>.ConvertMethod)     (delegate(T p) { return Convert<SqlXml,object>.From((object)p); });
 		}
 
 		#endregion
 
 		#endregion
+
 	}
 
 	public static class ConvertTo<T>

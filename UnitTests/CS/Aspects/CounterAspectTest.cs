@@ -42,25 +42,28 @@ namespace Aspects
 			Console.WriteLine(counter.TotalTime);
 
 			new Thread(new ThreadStart(t.LongTest)).Start();
-			Thread.Sleep(20);
 
-			lock (CounterAspect.Counters) foreach (CounterAspect.Counter c in CounterAspect.Counters)
+			for (int j = 0; j < 5; j++)
 			{
-				Console.WriteLine("{0}.{1,-10} | {2,2} | {3,2} | {4}",
-					c.MethodInfo.DeclaringType.Name,
-					c.MethodInfo.Name,
-					c.TotalCount,
-					c.CurrentCalls.Count,
-					c.TotalTime);
-
-				lock (c.CurrentCalls.SyncRoot) for (int i = 0; i < c.CurrentCalls.Count; i++)
+				Thread.Sleep(20);
+				lock (CounterAspect.Counters.SyncRoot) foreach (CounterAspect.Counter c in CounterAspect.Counters)
 				{
-					InterceptCallInfo ci = (InterceptCallInfo)c.CurrentCalls[i];
-					IPrincipal        pr = (IPrincipal)ci.Items["CurrentPrincipal"];
+					Console.WriteLine("{0}.{1,-10} | {2,2} | {3,2} | {4}",
+						c.MethodInfo.DeclaringType.Name,
+						c.MethodInfo.Name,
+						c.TotalCount,
+						c.CurrentCalls.Count,
+						c.TotalTime);
 
-					Console.WriteLine("{0,15} | {1}",
-						pr == null? "***" : pr.Identity.Name,
-						DateTime.Now - ci.BeginCallTime);
+					lock (c.CurrentCalls.SyncRoot) for (int i = 0; i < c.CurrentCalls.Count; i++)
+					{
+						InterceptCallInfo ci = (InterceptCallInfo)c.CurrentCalls[i];
+						IPrincipal pr = (IPrincipal)ci.Items["CurrentPrincipal"];
+
+						Console.WriteLine("{0,15} | {1}",
+							pr == null ? "***" : pr.Identity.Name,
+							DateTime.Now - ci.BeginCallTime);
+					}
 				}
 			}
 		}
