@@ -1,51 +1,33 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<code transformer="Convert20.xslt">
+<code transformer="ConvertV.xslt">
 
 	<using namespace="System"/>
 	<using namespace="System.Data.SqlTypes"/>
 	<using namespace="System.IO"/>
 	<using namespace="System.Xml"/>
 
-	<template name="Scalar Types">
-		<type name="String"/>
+	<template name="Integer Types">
+		<type name="SByte"   />
+		<type name="Int16"   />
+		<type name="Int32"   />
+		<type name="Int64"   />
 		<br/>
-		<type name="SByte"/>
-		<type name="Int16"/>
-		<type name="Int32"/>
-		<type name="Int64"/>
-		<br/>
-		<type name="Byte"/>
-		<type name="UInt16"/>
-		<type name="UInt32"/>
-		<type name="UInt64"/>
-		<br/>
-		<type name="Char"/>
-		<type name="Single"/>
-		<type name="Double"/>
-		<br/>
-		<type name="Boolean"/>
-		<type name="Decimal"/>
-		<type name="DateTime"/>
+		<type name="Byte"    />
+		<type name="UInt16"  />
+		<type name="UInt32"  />
+		<type name="UInt64"  />
 	</template>
-	<template name="Nullable Types">
-		<type name="SByte?"/>
-		<type name="Int16?"/>
-		<type name="Int32?"/>
-		<type name="Int64?"/>
+
+	<template name="Numeric Types">
+		<include template="Integer Types"/>
 		<br/>
-		<type name="Byte?"/>
-		<type name="UInt16?"/>
-		<type name="UInt32?"/>
-		<type name="UInt64?"/>
+		<type name="Single"  />
+		<type name="Double"  />
 		<br/>
-		<type name="Char?"/>
-		<type name="Single?"/>
-		<type name="Double?"/>
-		<br/>
-		<type name="Boolean?"/>
-		<type name="Decimal?"/>
-		<type name="DateTime?"/>
+		<type name="Boolean" />
+		<type name="Decimal" />
 	</template>
+
 	<template name="SqlTypes">
 		<type name="SqlString"/>
 		<br/>
@@ -60,21 +42,25 @@
 		<type name="SqlMoney"/>
 		<br/>
 		<type name="SqlBoolean"/>
-		<type name="SqlDateTime"/>
 	</template>
 
 	<region name="Scalar Types">
 		<converter type="String">
+			<from type="Type">return p == null? null: p.FullName;</from>
 			<group name="Scalar Types.">
-				<include template ="Scalar Types"/>
+				<include template ="Numeric Types"/>
+				<from type="Char"/>
 				<from type="TimeSpan"/>
+				<from type="DateTime"/>
 				<from type="Guid"/>
 				<default              >return p.ToString();</default>
 			</group>
-			<group name="Nullable Types.">
-				<include template ="Nullable Types"/>
-				<from type="TimeSpan?"/>
-				<from type="Guid?"/>
+			<group name="Nullable Types." nullable="true">
+				<include template ="Numeric Types"/>
+				<from type="Char"/>
+				<from type="TimeSpan"/>
+				<from type="DateTime"/>
+				<from type="Guid"/>
 				<default              >return p.ToString();</default>
 			</group>
 			<group name="SqlTypes.">
@@ -88,13 +74,17 @@
 		<br/>
 		<converter type="SByte"    nullable="false">
 			<group name="Scalar Types.">
-				<include template ="Scalar Types"/>
-			</group>
-			<group name="Nullable Types.">
-				<from type="SByte?"   >return p.HasValue?                 p.Value  : (SByte)0;</from>
+				<from type="String"/>
 				<br/>
-				<include template ="Nullable Types"/>
-				<default              >return p.HasValue? Convert.ToSByte(p.Value) : (SByte)0;</default>
+				<include template ="Numeric Types"/>
+				<from type="Char"/>
+			</group>
+			<group name="Nullable Types." nullable="true">
+				<from type="SByte"    >return p.HasValue?                 p.Value : (SByte)0;</from>
+				<br/>
+				<include template ="Numeric Types"/>
+				<from type="Char"/>
+				<default              >return p.HasValue? Convert.ToSByte(p.Value): (SByte)0;</default>
 			</group>
 			<group name="SqlTypes.">
 				<include template ="SqlTypes"/>
@@ -104,13 +94,17 @@
 		</converter>
 		<converter type="Int16"    nullable="false">
 			<group name="Scalar Types.">
-				<include template ="Scalar Types"/>
-			</group>
-			<group name="Nullable Types.">
-				<from type="Int16?"   >return p.HasValue?                 p.Value  : (Int16)0;</from>
+				<from type="String"/>
 				<br/>
-				<include template ="Nullable Types"/>
-				<default              >return p.HasValue? Convert.ToInt16(p.Value) : (Int16)0;</default>
+				<include template ="Numeric Types"/>
+				<from type="Char"/>
+			</group>
+			<group name="Nullable Types." nullable="true">
+				<from type="Int16"    >return p.HasValue?                 p.Value : (Int16)0;</from>
+				<br/>
+				<include template ="Numeric Types"/>
+				<from type="Char"/>
+				<default              >return p.HasValue? Convert.ToInt16(p.Value): (Int16)0;</default>
 			</group>
 			<group name="SqlTypes.">
 				<from type="SqlInt16" >return p.IsNull? (Int16)0:                 p.Value; </from>
@@ -121,48 +115,60 @@
 		</converter>
 		<converter type="Int32"    nullable="false">
 			<group name="Scalar Types.">
-				<include template ="Scalar Types"/>
-			</group>
-			<group name="Nullable Types.">
-				<from type="Int32?"   >return p.HasValue?                 p.Value  : (Int32)0;</from>
+				<from type="String"/>
 				<br/>
-				<include template ="Nullable Types"/>
-				<default              >return p.HasValue? Convert.ToInt32(p.Value) : (Int32)0;</default>
+				<include template ="Numeric Types"/>
+				<from type="Char"/>
+			</group>
+			<group name="Nullable Types." nullable="true">
+				<from type="Int32"    >return p.HasValue?                 p.Value : 0;</from>
+				<br/>
+				<include template ="Numeric Types"/>
+				<from type="Char"/>
+				<default              >return p.HasValue? Convert.ToInt32(p.Value): 0;</default>
 			</group>
 			<group name="SqlTypes.">
-				<from type="SqlInt32" >return p.IsNull? (Int32)0:                 p.Value; </from>
+				<from type="SqlInt32" >return p.IsNull? 0:                 p.Value; </from>
 				<include template ="SqlTypes"/>
-				<default              >return p.IsNull? (Int32)0: Convert.ToInt32(p.Value);</default>
+				<default              >return p.IsNull? 0: Convert.ToInt32(p.Value);</default>
 			</group>
 			<default                  >return Convert.ToInt32(p);</default>
 		</converter>
 		<converter type="Int64"    nullable="false">
 			<group name="Scalar Types.">
-				<include template ="Scalar Types"/>
-			</group>
-			<group name="Nullable Types.">
-				<from type="Int64?"   >return p.HasValue?                 p.Value  : (Int64)0;</from>
+				<from type="String"/>
 				<br/>
-				<include template ="Nullable Types"/>
-				<default              >return p.HasValue? Convert.ToInt64(p.Value) : (Int64)0;</default>
+				<include template ="Numeric Types"/>
+				<from type="Char"/>
+			</group>
+			<group name="Nullable Types." nullable="true">
+				<from type="Int64"    >return p.HasValue?                 p.Value : 0;</from>
+				<br/>
+				<include template ="Numeric Types"/>
+				<from type="Char"/>
+				<default              >return p.HasValue? Convert.ToInt64(p.Value): 0;</default>
 			</group>
 			<group name="SqlTypes.">
-				<from type="SqlInt64" >return p.IsNull? (Int64)0:                 p.Value; </from>
+				<from type="SqlInt64" >return p.IsNull? 0:                 p.Value; </from>
 				<include template ="SqlTypes"/>
-				<default              >return p.IsNull? (Int64)0: Convert.ToInt64(p.Value);</default>
+				<default              >return p.IsNull? 0: Convert.ToInt64(p.Value);</default>
 			</group>
 			<default                  >return Convert.ToInt64(p);</default>
 		</converter>
 		<br/>
 		<converter type="Byte"     nullable="false">
 			<group name="Scalar Types.">
-				<include template ="Scalar Types"/>
-			</group>
-			<group name="Nullable Types.">
-				<from type="Byte?"    >return p.HasValue?                p.Value  : (Byte)0;</from>
+				<from type="String"/>
 				<br/>
-				<include template ="Nullable Types"/>
-				<default              >return p.HasValue? Convert.ToByte(p.Value) : (Byte)0;</default>
+				<include template ="Numeric Types"/>
+				<from type="Char"/>
+			</group>
+			<group name="Nullable Types." nullable="true">
+				<from type="Byte"     >return p.HasValue?                p.Value : (Byte)0;</from>
+				<br/>
+				<include template ="Numeric Types"/>
+				<from type="Char"/>
+				<default              >return p.HasValue? Convert.ToByte(p.Value): (Byte)0;</default>
 			</group>
 			<group name="SqlTypes.">
 				<from type="SqlByte"  >return p.IsNull? (Byte)0:                p.Value; </from>
@@ -173,13 +179,17 @@
 		</converter>
 		<converter type="UInt16"   nullable="false">
 			<group name="Scalar Types.">
-				<include template ="Scalar Types"/>
-			</group>
-			<group name="Nullable Types.">
-				<from type="UInt16?"  >return p.HasValue?                  p.Value  : (UInt16)0;</from>
+				<from type="String"/>
 				<br/>
-				<include template ="Nullable Types"/>
-				<default              >return p.HasValue? Convert.ToUInt16(p.Value) : (UInt16)0;</default>
+				<include template ="Numeric Types"/>
+				<from type="Char"/>
+			</group>
+			<group name="Nullable Types." nullable="true">
+				<from type="UInt16"   >return p.HasValue?                  p.Value : (UInt16)0;</from>
+				<br/>
+				<include template ="Numeric Types"/>
+				<from type="Char"/>
+				<default              >return p.HasValue? Convert.ToUInt16(p.Value): (UInt16)0;</default>
 			</group>
 			<group name="SqlTypes.">
 				<include template ="SqlTypes"/>
@@ -189,13 +199,17 @@
 		</converter>
 		<converter type="UInt32"   nullable="false">
 			<group name="Scalar Types.">
-				<include template ="Scalar Types"/>
-			</group>
-			<group name="Nullable Types.">
-				<from type="UInt32?"  >return p.HasValue?                  p.Value  : (UInt32)0;</from>
+				<from type="String"/>
 				<br/>
-				<include template ="Nullable Types"/>
-				<default              >return p.HasValue? Convert.ToUInt32(p.Value) : (UInt32)0;</default>
+				<include template ="Numeric Types"/>
+				<from type="Char"/>
+			</group>
+			<group name="Nullable Types." nullable="true">
+				<from type="UInt32"   >return p.HasValue?                  p.Value : (UInt32)0;</from>
+				<br/>
+				<include template ="Numeric Types"/>
+				<from type="Char"/>
+				<default              >return p.HasValue? Convert.ToUInt32(p.Value): (UInt32)0;</default>
 			</group>
 			<group name="SqlTypes.">
 				<include template ="SqlTypes"/>
@@ -205,13 +219,17 @@
 		</converter>
 		<converter type="UInt64"   nullable="false">
 			<group name="Scalar Types.">
-				<include template ="Scalar Types"/>
-			</group>
-			<group name="Nullable Types.">
-				<from type="UInt64?"  >return p.HasValue?                  p.Value  : (UInt64)0;</from>
+				<from type="String"/>
 				<br/>
-				<include template ="Nullable Types"/>
-				<default              >return p.HasValue? Convert.ToUInt64(p.Value) : (UInt64)0;</default>
+				<include template ="Numeric Types"/>
+				<from type="Char"/>
+			</group>
+			<group name="Nullable Types." nullable="true">
+				<from type="UInt64"   >return p.HasValue?                  p.Value : (UInt64)0;</from>
+				<br/>
+				<include template ="Numeric Types"/>
+				<from type="Char"/>
+				<default              >return p.HasValue? Convert.ToUInt64(p.Value): (UInt64)0;</default>
 			</group>
 			<group name="SqlTypes.">
 				<include template ="SqlTypes"/>
@@ -222,13 +240,17 @@
 		<br/>
 		<converter type="Char"     nullable="false">
 			<group name="Scalar Types.">
-				<include template ="Scalar Types"/>
-			</group>
-			<group name="Nullable Types.">
-				<from type="Char?"    >return p.HasValue?                p.Value  : (Char)0;</from>
+				<from type="String"/>
 				<br/>
-				<include template ="Nullable Types"/>
-				<default              >return p.HasValue? Convert.ToChar(p.Value) : (Char)0;</default>
+				<include template ="Integer Types"/>
+				<from type="Boolean"  >return p? '1':'0';</from>
+			</group>
+			<group name="Nullable Types." nullable="true">
+				<from type="Char"     >return p.HasValue?                p.Value : (Char)0;</from>
+				<br/>
+				<include template ="Integer Types"/>
+				<from type="Boolean"  >return p.HasValue? p.Value? '1':'0'       : (Char)0;</from>
+				<default              >return p.HasValue? Convert.ToChar(p.Value): (Char)0;</default>
 			</group>
 			<group name="SqlTypes.">
 				<include template ="SqlTypes"/>
@@ -238,48 +260,80 @@
 		</converter>
 		<converter type="Single"   nullable="false">
 			<group name="Scalar Types.">
-				<include template ="Scalar Types"/>
-			</group>
-			<group name="Nullable Types.">
-				<from type="Single?"  >return p.HasValue?                  p.Value  : (Single)0;</from>
+				<from type="String"/>
 				<br/>
-				<include template ="Nullable Types"/>
-				<default              >return p.HasValue? Convert.ToSingle(p.Value) : (Single)0;</default>
+				<include template ="Numeric Types"/>
+			</group>
+			<group name="Nullable Types." nullable="true">
+				<from type="Single"   >return p.HasValue?                  p.Value : 0;</from>
+				<br/>
+				<include template ="Numeric Types"/>
+				<default              >return p.HasValue? Convert.ToSingle(p.Value): 0;</default>
 			</group>
 			<group name="SqlTypes.">
-				<from type="SqlSingle">return p.IsNull? (Single)0:                  p.Value; </from>
+				<from type="SqlSingle">return p.IsNull? 0:                  p.Value; </from>
 				<include template ="SqlTypes"/>
-				<default              >return p.IsNull? (Single)0: Convert.ToSingle(p.Value);</default>
+				<default              >return p.IsNull? 0: Convert.ToSingle(p.Value);</default>
 			</group>
 			<default                  >return Convert.ToSingle(p);</default>
 		</converter>
 		<converter type="Double"   nullable="false">
 			<group name="Scalar Types.">
-				<include template ="Scalar Types"/>
-			</group>
-			<group name="Nullable Types.">
-				<from type="Double?"  >return p.HasValue?                  p.Value  : (Double)0;</from>
+				<from type="String"/>
 				<br/>
-				<include template ="Nullable Types"/>
-				<default              >return p.HasValue? Convert.ToDouble(p.Value) : (Double)0;</default>
+				<include template ="Numeric Types"/>
+			</group>
+			<group name="Nullable Types." nullable="true">
+				<from type="Double"   >return p.HasValue?                  p.Value : 0;</from>
+				<br/>
+				<include template ="Numeric Types"/>
+				<default              >return p.HasValue? Convert.ToDouble(p.Value): 0;</default>
 			</group>
 			<group name="SqlTypes.">
-				<from type="SqlDouble">return p.IsNull? (Double)0:                  p.Value; </from>
+				<from type="SqlDouble">return p.IsNull? 0:                  p.Value; </from>
 				<include template ="SqlTypes"/>
-				<default              >return p.IsNull? (Double)0: Convert.ToDouble(p.Value);</default>
+				<default              >return p.IsNull? 0: Convert.ToDouble(p.Value);</default>
 			</group>
 			<default                  >return Convert.ToDouble(p);</default>
 		</converter>
 		<br/>
 		<converter type="Boolean"  nullable="false">
 			<group name="Scalar Types.">
-				<include template ="Scalar Types"/>
-			</group>
-			<group name="Nullable Types.">
-				<from type="Boolean?"  >return p.HasValue?                   p.Value  : false;</from>
+				<from type="String"/>
 				<br/>
-				<include template ="Nullable Types"/>
-				<default               >return p.HasValue? Convert.ToBoolean(p.Value) : false;</default>
+				<include template ="Numeric Types"/>
+				<br/>
+				<from type="Char">
+					switch (p)
+					{
+					case (Char)0: return false; // Allow int &lt;=&gt; Char &lt;=&gt; Boolean
+					case     '0': return false;
+					case     'n': return false;
+					case     'N': return false;
+					case     'f': return false;
+					case     'F': return false;
+
+					case (Char)1: return true; // Allow int &lt;=&gt; Char &lt;=&gt; Boolean
+					case     '1': return true;
+					case     'y': return true;
+					case     'Y': return true;
+					case     't': return true;
+					case     'T': return true;
+					}
+
+					// Throw an InvalidCastException
+					//
+					return Convert.ToBoolean(p);
+				</from>
+				<default>return Convert.ToBoolean(p);</default>
+			</group>
+			<group name="Nullable Types." nullable="true">
+				<from type="Boolean"   >return p.HasValue? p.Value                   : false;</from>
+				<br/>
+				<include template ="Numeric Types"/>
+				<br/>
+				<from type="Char"      >return (p.HasValue)? Convert&lt;Boolean,Char&gt;.Instance.From(p.Value): false;</from>
+				<default               >return p.HasValue? Convert.ToBoolean(p.Value): false;</default>
 			</group>
 			<group name="SqlTypes.">
 				<from type="SqlBoolean">return p.IsNull? false:                   p.Value; </from>
@@ -290,47 +344,51 @@
 		</converter>
 		<converter type="Decimal"  nullable="false">
 			<group name="Scalar Types.">
-				<include template ="Scalar Types"/>
-			</group>
-			<group name="Nullable Types.">
-				<from type="Decimal?" >return p.HasValue?                   p.Value  : (Decimal)0;</from>
+				<from type="String"/>
 				<br/>
-				<include template ="Nullable Types"/>
-				<default              >return p.HasValue? Convert.ToDecimal(p.Value) : (Decimal)0;</default>
+				<include template ="Numeric Types"/>
+			</group>
+			<group name="Nullable Types." nullable="true">
+				<from type="Decimal"  >return p.HasValue?                   p.Value : 0;</from>
+				<br/>
+				<include template ="Numeric Types"/>
+				<default              >return p.HasValue? Convert.ToDecimal(p.Value): 0;</default>
 			</group>
 			<group name="SqlTypes.">
-				<from type="SqlDecimal">return p.IsNull? (Decimal)0:                   p.Value; </from>
-				<from type="SqlMoney"  >return p.IsNull? (Decimal)0:                   p.Value; </from>
+				<from type="SqlDecimal">return p.IsNull? 0:                   p.Value; </from>
+				<from type="SqlMoney"  >return p.IsNull? 0:                   p.Value; </from>
 				<include template ="SqlTypes"/>
-				<default              >return p.IsNull? (Decimal)0: Convert.ToDecimal(p.Value);</default>
+				<default               >return p.IsNull? 0: Convert.ToDecimal(p.Value);</default>
 			</group>
-			<default                  >return Convert.ToDecimal(p);</default>
+			<default                   >return Convert.ToDecimal(p);</default>
 		</converter>
 		<converter type="DateTime" nullable="false">
 			<group name="Scalar Types.">
-				<include template ="Scalar Types"/>
-			</group>
-			<group name="Nullable Types.">
-				<from type="DateTime?">return p.HasValue?                    p.Value  : DateTime.MinValue;</from>
+				<from type="String"/>
 				<br/>
-				<include template ="Nullable Types"/>
-				<default              >return p.HasValue? Convert.ToDateTime(p.Value) : DateTime.MinValue;</default>
+				<include template ="Numeric Types"/>
+			</group>
+			<group name="Nullable Types." nullable="true">
+				<from type="DateTime">return p.HasValue?                    p.Value : DateTime.MinValue;</from>
+				<br/>
+				<include template ="Numeric Types"/>
+				<default             >return p.HasValue? Convert.ToDateTime(p.Value): DateTime.MinValue;</default>
 			</group>
 			<group name="SqlTypes.">
 				<from type="SqlDateTime">return p.IsNull? DateTime.MinValue:                    p.Value; </from>
 				<include template ="SqlTypes"/>
-				<default              >return p.IsNull? DateTime.MinValue: Convert.ToDateTime(p.Value);</default>
+				<default                >return p.IsNull? DateTime.MinValue: Convert.ToDateTime(p.Value);</default>
 			</group>
-			<default                  >return Convert.ToDateTime(p);</default>
+			<default                 >return Convert.ToDateTime(p);</default>
 		</converter>
 		<converter type="TimeSpan" nullable="false">
 			<group name="Scalar Types.">
 				<from type="String"     >return p == null? TimeSpan.MinValue: TimeSpan.Parse(p);</from>
 				<from type="DateTime"   >return p - DateTime.MinValue;</from>
 			</group>
-			<group name="Nullable Types.">
-				<from type="TimeSpan?"  >return p.HasValue? p.Value                    : TimeSpan.MinValue;</from>
-				<from type="DateTime?"  >return p.HasValue? p.Value - DateTime.MinValue: TimeSpan.MinValue;</from>
+			<group name="Nullable Types." nullable="true">
+				<from type="TimeSpan"  >return p.HasValue? p.Value                    : TimeSpan.MinValue;</from>
+				<from type="DateTime"  >return p.HasValue? p.Value - DateTime.MinValue: TimeSpan.MinValue;</from>
 			</group>
 			<group name="SqlTypes.">
 				<from type="SqlString"  >return p.IsNull? TimeSpan.MinValue: TimeSpan.Parse(p.Value);    </from>
@@ -342,19 +400,20 @@
 			<group name="Scalar Types.">
 				<from type="String"   >return p == null? Guid.Empty: new Guid(p);</from>
 			</group>
-			<group name="Nullable Types.">
-				<from type="Guid?"    >return p.HasValue? p.Value : Guid.Empty;</from>
+			<group name="Nullable Types." nullable="true">
+				<from type="Guid"    >return p.HasValue? p.Value : Guid.Empty;</from>
 			</group>
 			<group name="SqlTypes.">
 				<from type="SqlGuid"  >return p.IsNull? Guid.Empty: p.Value;            </from>
 				<from type="SqlString">return p.IsNull? Guid.Empty: new Guid(p.Value);  </from>
 				<from type="SqlBinary">return p.IsNull? Guid.Empty: p.ToSqlGuid().Value;</from>
 			</group>
+			<from type="Type"         >return p == null? Guid.Empty: p.GUID;</from>
 			<default nullvalue="Guid.Empty"/>
 		</converter>
 		<converter type="Stream">
 			<group name="Scalar Types.">
-				<from type="Byte[]"   >return p == null? Stream.Null: new MemoryStream(p);</from>
+				<from type="Byte[]" name="ByteArray">return p == null? Stream.Null: new MemoryStream(p);</from>
 			</group>
 			<group name="SqlTypes.">
 				<from type="SqlBytes" >return p.IsNull? Stream.Null: p.Stream;                 </from>
@@ -368,10 +427,13 @@
 			<group name="Scalar Types.">
 				<from type="SByte" >return p;</from>
 				<from type="String">return p == null? null: (SByte?)Convert.ToSByte(p);</from>
-				<include template ="Scalar Types"/>
+				<br/>
+				<include template ="Numeric Types"/>
+				<from type="Char"/>
 			</group>
-			<group name="Nullable Types.">
-				<include template ="Nullable Types"/>
+			<group name="Nullable Types." nullable="true">
+				<include template ="Numeric Types"/>
+				<from type="Char"/>
 				<default              >return p.HasValue? (SByte?)Convert.ToSByte(p.Value) : null;</default>
 			</group>
 			<group name="SqlTypes.">
@@ -384,10 +446,13 @@
 			<group name="Scalar Types.">
 				<from type="Int16" >return p;</from>
 				<from type="String">return p == null? null: (Int16?)Convert.ToInt16(p);</from>
-				<include template ="Scalar Types"/>
+				<br/>
+				<include template ="Numeric Types"/>
+				<from type="Char"/>
 			</group>
-			<group name="Nullable Types.">
-				<include template ="Nullable Types"/>
+			<group name="Nullable Types." nullable="true">
+				<include template ="Numeric Types"/>
+				<from type="Char"/>
 				<default              >return p.HasValue? (Int16?)Convert.ToInt16(p.Value) : null;</default>
 			</group>
 
@@ -402,11 +467,14 @@
 			<group name="Scalar Types.">
 				<from type="Int32" >return p;</from>
 				<from type="String">return p == null? null: (Int32?)Convert.ToInt32(p);</from>
-				<include template ="Scalar Types"/>
+				<br/>
+				<include template ="Numeric Types"/>
+				<from type="Char"/>
 			</group>
 
-			<group name="Nullable Types.">
-				<include template ="Nullable Types"/>
+			<group name="Nullable Types." nullable="true">
+				<include template ="Numeric Types"/>
+				<from type="Char"/>
 				<default              >return p.HasValue? (Int32?)Convert.ToInt32(p.Value) : null;</default>
 			</group>
 
@@ -421,11 +489,14 @@
 			<group name="Scalar Types.">
 				<from type="Int64" >return p;</from>
 				<from type="String">return p == null? null: (Int64?)Convert.ToInt64(p);</from>
-				<include template ="Scalar Types"/>
+				<br/>
+				<include template ="Numeric Types"/>
+				<from type="Char"/>
 			</group>
 
-			<group name="Nullable Types.">
-				<include template ="Nullable Types"/>
+			<group name="Nullable Types." nullable="true">
+				<include template ="Numeric Types"/>
+				<from type="Char"/>
 				<default              >return p.HasValue? (Int64?)Convert.ToInt64(p.Value) : null;</default>
 			</group>
 
@@ -441,11 +512,14 @@
 			<group name="Scalar Types.">
 				<from type="Byte"  >return p;</from>
 				<from type="String">return p == null? null: (Byte?)Convert.ToByte(p);</from>
-				<include template ="Scalar Types"/>
+				<br/>
+				<include template ="Numeric Types"/>
+				<from type="Char"/>
 			</group>
 
-			<group name="Nullable Types.">
-				<include template ="Nullable Types"/>
+			<group name="Nullable Types." nullable="true">
+				<include template ="Numeric Types"/>
+				<from type="Char"/>
 				<default              >return p.HasValue? (Byte?)Convert.ToByte(p.Value) : null;</default>
 			</group>
 
@@ -460,11 +534,14 @@
 			<group name="Scalar Types.">
 				<from type="UInt16">return p;</from>
 				<from type="String">return p == null? null: (UInt16?)Convert.ToUInt16(p);</from>
-				<include template ="Scalar Types"/>
+				<br/>
+				<include template ="Numeric Types"/>
+				<from type="Char"/>
 			</group>
 
-			<group name="Nullable Types.">
-				<include template ="Nullable Types"/>
+			<group name="Nullable Types." nullable="true">
+				<include template ="Numeric Types"/>
+				<from type="Char"/>
 				<default              >return p.HasValue? (UInt16?)Convert.ToUInt16(p.Value) : null;</default>
 			</group>
 
@@ -478,11 +555,14 @@
 			<group name="Scalar Types.">
 				<from type="UInt32">return p;</from>
 				<from type="String">return p == null? null: (UInt32?)Convert.ToUInt32(p);</from>
-				<include template ="Scalar Types"/>
+				<br/>
+				<include template ="Numeric Types"/>
+				<from type="Char"/>
 			</group>
 
-			<group name="Nullable Types.">
-				<include template ="Nullable Types"/>
+			<group name="Nullable Types." nullable="true">
+				<include template ="Numeric Types"/>
+				<from type="Char"/>
 				<default              >return p.HasValue? (UInt32?)Convert.ToUInt32(p.Value) : null;</default>
 			</group>
 
@@ -496,12 +576,15 @@
 			<group name="Scalar Types.">
 				<from type="UInt64">return p;</from>
 				<from type="String">return p == null? null: (UInt64?)Convert.ToUInt64(p);</from>
-				<include template ="Scalar Types"/>
+				<br/>
+				<include template ="Numeric Types"/>
+				<from type="Char"/>
 			</group>
 
-			<group name="Nullable Types.">
-				<include template ="Nullable Types"/>
+			<group name="Nullable Types." nullable="true">
+				<include template ="Numeric Types"/>
 				<default              >return p.HasValue? (UInt64?)Convert.ToUInt64(p.Value) : null;</default>
+				<from type="Char"/>
 			</group>
 
 			<group name="SqlTypes.">
@@ -515,29 +598,37 @@
 			<group name="Scalar Types.">
 				<from type="Char"  >return p;</from>
 				<from type="String">return p == null? null: (Char?)Convert.ToChar(p);</from>
-				<include template ="Scalar Types"/>
+				<br/>
+				<include template ="Integer Types"/>
+				<from type="Boolean"  >return p? '1':'0';</from>
 			</group>
 
-			<group name="Nullable Types.">
-				<include template ="Nullable Types"/>
+			<group name="Nullable Types." nullable="true">
+				<include template ="Integer Types"/>
+				<from type="Boolean"  >return p.HasValue? (Char?)(p.Value? '1':'0')      : null;</from>
 				<default              >return p.HasValue? (Char?)Convert.ToChar(p.Value) : null;</default>
 			</group>
 
 			<group name="SqlTypes.">
-				<include template ="SqlTypes"/>
-				<default              >return p.IsNull? null: (Char?)Convert.ToChar(p.Value);</default>
+				<from type="SqlByte"  />
+				<from type="SqlInt16" />
+				<from type="SqlInt32" />
+				<from type="SqlInt64" />
+				<from type="SqlBoolean">return p.IsNull? null: (Char?)(p.Value? '1':'0');</from>
+				<default               >return p.IsNull? null: (Char?)Convert.ToChar(p.Value);</default>
 			</group>
-			<default                  >return Convert.ToChar(p);</default>
+			<default                   >return Convert.ToChar(p);</default>
 		</converter>
 		<converter type="Single"   nullable="true">
 			<group name="Scalar Types.">
 				<from type="Single">return p;</from>
 				<from type="String">return p == null? null: (Single?)Convert.ToSingle(p);</from>
-				<include template ="Scalar Types"/>
+				<br/>
+				<include template ="Numeric Types"/>
 			</group>
 
-			<group name="Nullable Types.">
-				<include template ="Nullable Types"/>
+			<group name="Nullable Types." nullable="true">
+				<include template ="Numeric Types"/>
 				<default              >return p.HasValue? (Single?)Convert.ToSingle(p.Value) : null;</default>
 			</group>
 
@@ -552,11 +643,12 @@
 			<group name="Scalar Types.">
 				<from type="Double">return p;</from>
 				<from type="String">return p == null? null: (Double?)Convert.ToDouble(p);</from>
-				<include template ="Scalar Types"/>
+				<br/>
+				<include template ="Numeric Types"/>
 			</group>
 
-			<group name="Nullable Types.">
-				<include template ="Nullable Types"/>
+			<group name="Nullable Types." nullable="true">
+				<include template ="Numeric Types"/>
 				<default              >return p.HasValue? (Double?)Convert.ToDouble(p.Value) : null;</default>
 			</group>
 
@@ -571,13 +663,19 @@
 		<converter type="Boolean"  nullable="true">
 			<group name="Scalar Types.">
 				<from type="Boolean">return p;</from>
-				<from type="String" >return p == null? null: (Boolean?)Convert.ToBoolean(p);</from>
-				<include template ="Scalar Types"/>
+				<from type="String"/>
+				<br/>
+				<include template ="Numeric Types"/>
+				<br/>
+				<from type="Char"      >return Convert&lt;Boolean,Char&gt;.Instance.From(p);</from>
+				<default>return Convert.ToBoolean(p);</default>
 			</group>
 
-			<group name="Nullable Types.">
-				<include template ="Nullable Types"/>
-				<default              >return p.HasValue? (Boolean?)Convert.ToBoolean(p.Value) : null;</default>
+			<group name="Nullable Types." nullable="true">
+				<include template ="Numeric Types"/>
+				<default               >return p.HasValue? (Boolean?)Convert.ToBoolean(p.Value): null;</default>
+				<br/>
+				<from type="Char"      >return p.HasValue? (Boolean?)Convert&lt;Boolean,Char&gt;.Instance.From(p.Value): null;</from>
 			</group>
 
 			<group name="SqlTypes.">
@@ -591,11 +689,12 @@
 			<group name="Scalar Types.">
 				<from type="Decimal">return p;</from>
 				<from type="String" >return p == null? null: (Decimal?)Convert.ToDecimal(p);</from>
-				<include template ="Scalar Types"/>
+				<br/>
+				<include template ="Numeric Types"/>
 			</group>
 
-			<group name="Nullable Types.">
-				<include template ="Nullable Types"/>
+			<group name="Nullable Types." nullable="true">
+				<include template ="Numeric Types"/>
 				<default              >return p.HasValue? (Decimal?)Convert.ToDecimal(p.Value) : null;</default>
 			</group>
 
@@ -611,11 +710,12 @@
 			<group name="Scalar Types.">
 				<from type="DateTime">return p;</from>
 				<from type="String"  >return p == null? null: (DateTime?)Convert.ToDateTime(p);</from>
-				<include template ="Scalar Types"/>
+				<br/>
+				<include template ="Numeric Types"/>
 			</group>
 
-			<group name="Nullable Types.">
-				<include template ="Nullable Types"/>
+			<group name="Nullable Types." nullable="true">
+				<include template ="Numeric Types"/>
 				<default              >return p.HasValue? (DateTime?)Convert.ToDateTime(p.Value) : null;</default>
 			</group>
 
@@ -633,8 +733,8 @@
 				<from type="DateTime"   >return p - DateTime.MinValue;</from>
 			</group>
 
-			<group name="Nullable Types.">
-				<from type="DateTime?"  >return p.HasValue? (TimeSpan?)(p.Value - DateTime.MinValue) : null;</from>
+			<group name="Nullable Types." nullable="true">
+				<from type="DateTime"  >return p.HasValue? (TimeSpan?)(p.Value - DateTime.MinValue) : null;</from>
 			</group>
 
 			<group name="SqlTypes.">
@@ -648,41 +748,49 @@
 				<from type="Guid"     >return p;</from>
 				<from type="String"   >return p == null? null: (Guid?)new Guid(p);</from>
 			</group>
-			<group name="Nullable Types.">
+			<group name="Nullable Types." nullable="true">
 			</group>
 			<group name="SqlTypes.">
 				<from type="SqlGuid"  >return p.IsNull? null: (Guid?)p.Value;            </from>
 				<from type="SqlString">return p.IsNull? null: (Guid?)new Guid(p.Value);  </from>
 				<from type="SqlBinary">return p.IsNull? null: (Guid?)p.ToSqlGuid().Value;</from>
 			</group>
+			<from type="Type"         >return p == null? null: p.GUID;</from>
 			<default nullvalue="null"/>
 		</converter>
 	</region>
 	<region name="SqlTypes">
 		<converter type="SqlString">
 			<group name="Scalar Types.">
-				<from type="String"   >return p == null? SqlString.Null: (SqlString)p;</from>
-				<include template="Scalar Types"/>
-				<from type="Char[]"  />
+				<from type="String"   >return p == null? SqlString.Null: p;</from>
+				<br/>
+				<include template ="Numeric Types"/>
+				<from type="Char"    />
 				<from type="TimeSpan"/>
+				<from type="DateTime"/>
 				<from type="Guid"    />
+				<from type="Char[]" name="CharArray">return new String(p);</from>
 				<default              >return p.ToString();</default>
 			</group>
 
-			<group name="Nullable Types.">
-				<include template="Nullable Types"/>
-				<from type="TimeSpan?"/>
-				<from type="Guid?"    />
-				<default              >return p.HasValue? (SqlString)p.ToString(): SqlString.Null;</default>
+			<group name="Nullable Types." nullable="true">
+				<include template ="Numeric Types"/>
+				<from type="Char"    />
+				<from type="TimeSpan"/>
+				<from type="DateTime"/>
+				<from type="Guid"    />
+				<default              >return p.HasValue? p.ToString(): SqlString.Null;</default>
 			</group>
 
 			<group name="SqlTypes.">
 				<include template="SqlTypes"/>
 				<from type="SqlChars"/>
 				<from type="SqlGuid" />
-				<from type="SqlBinary">return p.IsNull? SqlString.Null: (SqlString)p.ToString();</from>
+				<from type="SqlDateTime"/>
+				<from type="SqlBinary">return p.IsNull? SqlString.Null: p.ToString();</from>
 				<default              >return p.ToSqlString();</default>
 			</group>
+			<from type="Type"         >return p == null? SqlString.Null: p.FullName;</from>
 			<default                  >return Convert.ToString(p);</default>
 		</converter>
 		<br/>
@@ -690,12 +798,15 @@
 			<group name="Scalar Types.">
 				<from type="Byte"     >return p;</from>
 				<from type="String"   >return p == null? SqlByte.Null: SqlByte.Parse(p);</from>
-				<include template="Scalar Types"/>
+				<br/>
+				<include template ="Numeric Types"/>
+				<from type="Char"/>
 			</group>
 
-			<group name="Nullable Types.">
-				<from type="Byte?"    >return p.HasValue?                p.Value  : SqlByte.Null;</from>
-				<include template="Nullable Types"/>
+			<group name="Nullable Types." nullable="true">
+				<from type="Byte"    >return p.HasValue?                p.Value  : SqlByte.Null;</from>
+				<include template ="Numeric Types"/>
+				<from type="Char"/>
 				<default              >return p.HasValue? Convert.ToByte(p.Value) : SqlByte.Null;</default>
 			</group>
 
@@ -710,12 +821,15 @@
 			<group name="Scalar Types.">
 				<from type="Int16"    >return p;</from>
 				<from type="String"   >return p == null? SqlInt16.Null: SqlInt16.Parse(p);</from>
-				<include template="Scalar Types"/>
+				<br/>
+				<include template ="Numeric Types"/>
+				<from type="Char"/>
 			</group>
 
-			<group name="Nullable Types.">
-				<from type="Int16?"   >return p.HasValue?                 p.Value  : SqlInt16.Null;</from>
-				<include template="Nullable Types"/>
+			<group name="Nullable Types." nullable="true">
+				<from type="Int16"   >return p.HasValue?                 p.Value  : SqlInt16.Null;</from>
+				<include template ="Numeric Types"/>
+				<from type="Char"/>
 				<default              >return p.HasValue? Convert.ToInt16(p.Value) : SqlInt16.Null;</default>
 			</group>
 
@@ -730,12 +844,15 @@
 			<group name="Scalar Types.">
 				<from type="Int32"    >return p;</from>
 				<from type="String"   >return p == null? SqlInt32.Null: SqlInt32.Parse(p);</from>
-				<include template="Scalar Types"/>
+				<br/>
+				<include template ="Numeric Types"/>
+				<from type="Char"/>
 			</group>
 
-			<group name="Nullable Types.">
-				<from type="Int32?"   >return p.HasValue?                 p.Value  : SqlInt32.Null;</from>
-				<include template="Nullable Types"/>
+			<group name="Nullable Types." nullable="true">
+				<from type="Int32"   >return p.HasValue?                 p.Value  : SqlInt32.Null;</from>
+				<include template ="Numeric Types"/>
+				<from type="Char"/>
 				<default              >return p.HasValue? Convert.ToInt32(p.Value) : SqlInt32.Null;</default>
 			</group>
 
@@ -750,12 +867,15 @@
 			<group name="Scalar Types.">
 				<from type="Int64"    >return p;</from>
 				<from type="String"   >return p == null? SqlInt64.Null: SqlInt64.Parse(p);</from>
-				<include template="Scalar Types"/>
+				<br/>
+				<include template ="Numeric Types"/>
+				<from type="Char"/>
 			</group>
 
-			<group name="Nullable Types.">
-				<from type="Int64?"   >return p.HasValue?                 p.Value  : SqlInt64.Null;</from>
-				<include template="Nullable Types"/>
+			<group name="Nullable Types." nullable="true">
+				<from type="Int64"   >return p.HasValue?                 p.Value  : SqlInt64.Null;</from>
+				<include template ="Numeric Types"/>
+				<from type="Char"/>
 				<default              >return p.HasValue? Convert.ToInt64(p.Value) : SqlInt64.Null;</default>
 			</group>
 
@@ -771,12 +891,13 @@
 			<group name="Scalar Types.">
 				<from type="Single"   >return p;</from>
 				<from type="String"   >return p == null? SqlSingle.Null: SqlSingle.Parse(p);</from>
-				<include template="Scalar Types"/>
+				<br/>
+				<include template ="Numeric Types"/>
 			</group>
 
-			<group name="Nullable Types.">
-				<from type="Single?"  >return p.HasValue?                  p.Value  : SqlSingle.Null;</from>
-				<include template="Nullable Types"/>
+			<group name="Nullable Types." nullable="true">
+				<from type="Single"  >return p.HasValue?                  p.Value  : SqlSingle.Null;</from>
+				<include template ="Numeric Types"/>
 				<default              >return p.HasValue? Convert.ToSingle(p.Value) : SqlSingle.Null;</default>
 			</group>
 
@@ -791,12 +912,13 @@
 			<group name="Scalar Types.">
 				<from type="Double"   >return p;</from>
 				<from type="String"   >return p == null? SqlDouble.Null: SqlDouble.Parse(p);</from>
-				<include template="Scalar Types"/>
+				<br/>
+				<include template ="Numeric Types"/>
 			</group>
 
-			<group name="Nullable Types.">
-				<from type="Double?"  >return p.HasValue?                  p.Value  : SqlDouble.Null;</from>
-				<include template="Nullable Types"/>
+			<group name="Nullable Types." nullable="true">
+				<from type="Double"  >return p.HasValue?                  p.Value  : SqlDouble.Null;</from>
+				<include template ="Numeric Types"/>
 				<default              >return p.HasValue? Convert.ToDouble(p.Value) : SqlDouble.Null;</default>
 			</group>
 
@@ -811,12 +933,13 @@
 			<group name="Scalar Types.">
 				<from type="Decimal"  >return p;</from>
 				<from type="String"   >return p == null? SqlDecimal.Null: SqlDecimal.Parse(p);</from>
-				<include template="Scalar Types"/>
+				<br/>
+				<include template ="Numeric Types"/>
 			</group>
 
-			<group name="Nullable Types.">
-				<from type="Decimal?" >return p.HasValue?                   p.Value  : SqlDecimal.Null;</from>
-				<include template="Nullable Types"/>
+			<group name="Nullable Types." nullable="true">
+				<from type="Decimal" >return p.HasValue?                   p.Value  : SqlDecimal.Null;</from>
+				<include template ="Numeric Types"/>
 				<default              >return p.HasValue? Convert.ToDecimal(p.Value) : SqlDecimal.Null;</default>
 			</group>
 
@@ -831,12 +954,13 @@
 			<group name="Scalar Types.">
 				<from type="Decimal"  >return p;</from>
 				<from type="String"   >return p == null? SqlMoney.Null: SqlMoney.Parse(p);</from>
-				<include template="Scalar Types"/>
+				<br/>
+				<include template ="Numeric Types"/>
 			</group>
 
-			<group name="Nullable Types.">
-				<from type="Decimal?" >return p.HasValue?                   p.Value  : SqlMoney.Null;</from>
-				<include template="Nullable Types"/>
+			<group name="Nullable Types." nullable="true">
+				<from type="Decimal" >return p.HasValue?                   p.Value  : SqlMoney.Null;</from>
+				<include template ="Numeric Types"/>
 				<default              >return p.HasValue? Convert.ToDecimal(p.Value) : SqlMoney.Null;</default>
 			</group>
 
@@ -852,12 +976,15 @@
 			<group name="Scalar Types.">
 				<from type="Boolean"  >return p;</from>
 				<from type="String"   >return p == null? SqlBoolean.Null: SqlBoolean.Parse(p);</from>
-				<include template="Scalar Types"/>
+				<br/>
+				<include template ="Numeric Types"/>
+				<from type="Char"      >return Convert&lt;Boolean,Char&gt;.Instance.From(p);</from>
 			</group>
 
-			<group name="Nullable Types.">
-				<from type="Boolean?" >return p.HasValue?                   p.Value  : SqlBoolean.Null;</from>
-				<include template="Nullable Types"/>
+			<group name="Nullable Types." nullable="true">
+				<from type="Boolean" >return p.HasValue?                   p.Value  : SqlBoolean.Null;</from>
+				<include template ="Numeric Types"/>
+				<from type="Char"     >return (p.HasValue)? Convert&lt;Boolean,Char&gt;.Instance.From(p.Value): SqlBoolean.Null;</from>
 				<default              >return p.HasValue? Convert.ToBoolean(p.Value) : SqlBoolean.Null;</default>
 			</group>
 
@@ -872,18 +999,15 @@
 			<group name="Scalar Types.">
 				<from type="DateTime" >return p;</from>
 				<from type="String"   >return p == null? SqlDateTime.Null: SqlDateTime.Parse(p);</from>
-				<include template="Scalar Types"/>
 			</group>
 
-			<group name="Nullable Types.">
-				<from type="DateTime?">return p.HasValue?                    p.Value  : SqlDateTime.Null;</from>
-				<include template="Nullable Types"/>
+			<group name="Nullable Types." nullable="true">
+				<from type="DateTime">return p.HasValue?                    p.Value  : SqlDateTime.Null;</from>
 				<default              >return p.HasValue? Convert.ToDateTime(p.Value) : SqlDateTime.Null;</default>
 			</group>
 
 			<group name="SqlTypes.">
 				<from type="SqlString">return p.ToSqlDateTime();</from>
-				<include template="SqlTypes"/>
 				<default              >return p.IsNull? SqlDateTime.Null: Convert.ToDateTime(p.Value);</default>
 			</group>
 			<default                  >return Convert.ToDateTime(p);</default>
@@ -893,8 +1017,8 @@
 				<from type="Guid"     >return p;</from>
 				<from type="String"   >return p == null? SqlGuid.Null: SqlGuid.Parse(p);</from>
 			</group>
-			<group name="Nullable Types.">
-				<from type="Guid?"    >return p.HasValue? p.Value : SqlGuid.Null;</from>
+			<group name="Nullable Types." nullable="true">
+				<from type="Guid"    >return p.HasValue? p.Value : SqlGuid.Null;</from>
 			</group>
 			<group name="SqlTypes.">
 				<from type="SqlBinary"/>
@@ -902,14 +1026,15 @@
 				<default              >return p.ToSqlGuid();</default>
 			</group>
 			<default nullvalue="SqlGuid.Null"/>
+			<from type="Type"         >return p == null? SqlGuid.Null: p.GUID;</from>
 		</converter>
 		<converter type="SqlBinary">
 			<group name="Scalar Types.">
-				<from type="Byte[]"   >return p;</from>
+				<from type="Byte[]" name="ByteArray">return p;</from>
 				<from type="Guid"     >return p == Guid.Empty? SqlBinary.Null: new SqlGuid(p).ToSqlBinary();</from>
 			</group>
-			<group name="Nullable Types.">
-				<from type="Guid?"    >return p.HasValue? new SqlGuid(p.Value).ToSqlBinary(): SqlBinary.Null;</from>
+			<group name="Nullable Types." nullable="true">
+				<from type="Guid"    >return p.HasValue? new SqlGuid(p.Value).ToSqlBinary(): SqlBinary.Null;</from>
 			</group>
 			<group name="SqlTypes.">
 				<from type="SqlBytes"/>
@@ -920,12 +1045,12 @@
 		</converter>
 		<converter type="SqlBytes">
 			<group name="Scalar Types.">
-				<from type="Byte[]" >return p == null? SqlBytes.Null: new SqlBytes(p);</from>
+				<from type="Byte[]" name="ByteArray">return p == null? SqlBytes.Null: new SqlBytes(p);</from>
 				<from type="Stream" >return p == null? SqlBytes.Null: new SqlBytes(p);</from>
 				<from type="Guid"   >return p == Guid.Empty? SqlBytes.Null: new SqlBytes(p.ToByteArray());</from>
 			</group>
-			<group name="Nullable Types.">
-				<from type="Guid?"   >return p.HasValue? new SqlBytes(p.Value.ToByteArray()): SqlBytes.Null;</from>
+			<group name="Nullable Types." nullable="true">
+				<from type="Guid"   >return p.HasValue? new SqlBytes(p.Value.ToByteArray()): SqlBytes.Null;</from>
 			</group>
 			<group name="SqlTypes.">
 				<from type="SqlBinary">return p.IsNull? SqlBytes.Null: new SqlBytes(p);</from>
@@ -936,26 +1061,33 @@
 		<converter type="SqlChars">
 			<group name="Scalar Types.">
 				<from type="String">return p == null? SqlChars.Null: new SqlChars(p.ToCharArray());</from>
-				<from type="Char[]">return p == null? SqlChars.Null: new SqlChars(p);</from>
-				<include template="Scalar Types"/>
+				<from type="Char[]" name="CharArray">return p == null? SqlChars.Null: new SqlChars(p);</from>
+				<br/>
+				<include template ="Numeric Types"/>
+				<from type="Char"/>
 				<from type="TimeSpan"/>
+				<from type="DateTime"/>
 				<from type="Guid"    />
 			</group>
 
-			<group name="Nullable Types.">
-				<include template="Nullable Types"/>
-				<from type="TimeSpan?"/>
-				<from type="Guid?"    />
-				<default               >return p.HasValue? new SqlChars(p.ToString().ToCharArray()): SqlChars.Null;</default>
+			<group name="Nullable Types." nullable="true">
+				<include template ="Numeric Types"/>
+				<from type="Char"     >return p.HasValue? new SqlChars(new Char[]{p.Value})       : SqlChars.Null;</from>
+				<from type="TimeSpan"/>
+				<from type="DateTime"/>
+				<from type="Guid"    />
+				<default              >return p.HasValue? new SqlChars(p.ToString().ToCharArray()): SqlChars.Null;</default>
 			</group>
 
 			<group name="SqlTypes.">
 				<from type="SqlString">return (SqlChars)p;</from>
 				<include template="SqlTypes"/>
 				<from type="SqlGuid" />
+				<from type="SqlDateTime" />
 				<from type="SqlBinary">return p.IsNull? SqlChars.Null: new SqlChars(p.ToString().ToCharArray());</from>
 				<default              >return (SqlChars)p.ToSqlString();</default>
 			</group>
+			<from type="Type"         >return p == null? SqlChars.Null: p.FullName.ToCharArray();</from>
 			<default                  >return new SqlChars(Convert.ToString(p).ToCharArray());</default>
 		</converter>
 		<converter type="SqlXml">
@@ -965,8 +1097,10 @@
 				<from type="Stream"   />
 				<from type="XmlReader"/>
 				<br/>
-				<from type="Char[]"    >return p == null? SqlXml.Null: new SqlXml(new XmlTextReader(new StringReader(p.ToString())));</from>
-				<from type="Byte[]"    >return p == null? SqlXml.Null: new SqlXml(new MemoryStream(p));</from>
+				<from type="Char[]"
+				       name="CharArray">return p == null? SqlXml.Null: new SqlXml(new XmlTextReader(new StringReader(new string(p))));</from>
+				<from type="Byte[]"
+				       name="ByteArray">return p == null? SqlXml.Null: new SqlXml(new MemoryStream(p));</from>
 				<default               >return p == null? SqlXml.Null: new SqlXml(p);</default>
 			</group>
 			<group name="SqlTypes.">
@@ -978,4 +1112,20 @@
 			<default nullvalue="SqlXml.Null"/>
 		</converter>
 	</region>
+	<br/>
+	<converter type="Type">
+			<group name="Scalar Types.">
+			<from type="String"   >return p == null      ? null: Type.GetType(p);                  </from>
+			<from type="Char[]" name="CharArray">return p == null      ? null: Type.GetType(new string(p));      </from>
+			<from type="Guid"     >return p == Guid.Empty? null: Type.GetTypeFromCLSID(p);         </from>
+		</group>
+		<group name="Nullable Types." nullable="true">
+			<from type="Guid">return p.HasValue? Type.GetTypeFromCLSID(p): null;</from>
+		</group>
+		<group name="SqlTypes.">
+			<from type="SqlString">return p.IsNull       ? null: Type.GetType(p.Value);            </from>
+			<from type="SqlChars" >return p.IsNull       ? null: Type.GetType(new string(p.Value));</from>
+			<from type="SQlGuid"  >return p.IsNull       ? null: Type.GetTypeFromCLSID(p.value);   </from>
+		</group>
+	</converter>
 </code>

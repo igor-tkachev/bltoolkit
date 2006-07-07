@@ -39,9 +39,11 @@
     <Content Include="Convert.xml">
       <Generator>TransformCodeGenerator</Generator>
       <LastGenOutput>Convert.cs</LastGenOutput>
+      <CustomToolNamespace>BLToolkit.Common</CustomToolNamespace>
     </Content>
     <Content Include="Convert11.xslt" />
     <Content Include="Convert20.xslt" />
+    <Content Include="ConvertV.xslt" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Convert.cs">
