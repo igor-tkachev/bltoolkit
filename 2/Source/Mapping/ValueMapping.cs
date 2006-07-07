@@ -2,7 +2,6 @@ using System;
 using System.Data.SqlTypes;
 
 #if FW2
-using System.Collections.Generic;
 using KeyValue = System.Collections.Generic.KeyValuePair<System.Type, System.Type>;
 using Table    = System.Collections.Generic.Dictionary<System.Collections.Generic.KeyValuePair<System.Type, System.Type>, BLToolkit.Mapping.IValueMapper>;
 #else
@@ -1031,9 +1030,8 @@ namespace BLToolkit.Mapping
 				{
 					SetData<D>.SetMethod       set  = SetData<D>.Set;
 					GetData<S>.GetMethod       get  = GetData<S>.Get;
-					Convert<D,S>.ConvertMethod conv = Convert<D, S>.From;
 
-					set(dest, destObject, destIndex, conv(get(source, sourceObject, sourceIndex)));
+					set(dest, destObject, destIndex, Convert<D, S>.From(get(source, sourceObject, sourceIndex)));
 
 					//SetData<D>.Set(
 					//	dest, destObject, destIndex,
