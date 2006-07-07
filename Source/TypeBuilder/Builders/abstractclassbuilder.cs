@@ -277,7 +277,7 @@ namespace BLToolkit.TypeBuilder.Builders
 			_context.TypeBuilders.Clear();
 
 			foreach (IAbstractTypeBuilder builder in builders)
-				if (builder.IsApplied(_context))
+				if (builder.IsApplied(_context, builders))
 					_context.TypeBuilders.Add(builder);
 
 			if (_context.IsVirtualMethod || _context.IsVirtualProperty)
@@ -339,8 +339,8 @@ namespace BLToolkit.TypeBuilder.Builders
 
 			foreach (IAbstractTypeBuilder builder in builders)
 			{
-				isCatchBlockRequired   = isCatchBlockRequired   || IsApplied(builder, BuildStep.Catch);
-				isFinallyBlockRequired = isFinallyBlockRequired || IsApplied(builder, BuildStep.Finally);
+				isCatchBlockRequired   = isCatchBlockRequired   || IsApplied(builder, builders, BuildStep.Catch);
+				isFinallyBlockRequired = isFinallyBlockRequired || IsApplied(builder, builders, BuildStep.Finally);
 			}
 
 			BeginEmitMethod(methdoInfo);
@@ -491,10 +491,10 @@ namespace BLToolkit.TypeBuilder.Builders
 			return list;
 		}
 
-		private bool IsApplied(IAbstractTypeBuilder builder, BuildStep buildStep)
+		private bool IsApplied(IAbstractTypeBuilder builder, AbstractTypeBuilderList builders, BuildStep buildStep)
 		{
 			_context.Step = buildStep;
-			return builder.IsApplied(_context);
+			return builder.IsApplied(_context, builders);
 		}
 
 		private bool IsApplied(BuildElement element, AbstractTypeBuilderList builders)
@@ -503,11 +503,11 @@ namespace BLToolkit.TypeBuilder.Builders
 
 			foreach (IAbstractTypeBuilder builder in builders)
 			{
-				if (IsApplied(builder, BuildStep.Before))  return true;
-				if (IsApplied(builder, BuildStep.Build))   return true;
-				if (IsApplied(builder, BuildStep.After))   return true;
-				if (IsApplied(builder, BuildStep.Catch))   return true;
-				if (IsApplied(builder, BuildStep.Finally)) return true;
+				if (IsApplied(builder, builders, BuildStep.Before))  return true;
+				if (IsApplied(builder, builders, BuildStep.Build))   return true;
+				if (IsApplied(builder, builders, BuildStep.After))   return true;
+				if (IsApplied(builder, builders, BuildStep.Catch))   return true;
+				if (IsApplied(builder, builders, BuildStep.Finally)) return true;
 			}
 
 			return false;

@@ -1,12 +1,19 @@
 using System;
 using System.Collections;
 using System.Diagnostics;
+using System.Security.Principal;
+using System.Threading;
 
 namespace BLToolkit.Aspects
 {
 	[DebuggerStepThrough] 
 	public sealed class InterceptCallInfo
 	{
+		public InterceptCallInfo()
+		{
+			_currentPrincipal = Thread.CurrentPrincipal;
+		}
+
 		private CallMethodInfo _callmethodInfo;
 		public  CallMethodInfo  CallMethodInfo
 		{
@@ -91,6 +98,12 @@ namespace BLToolkit.Aspects
 		public  DateTime  BeginCallTime
 		{
 			get { return _beginCallTime; }
+		}
+
+		private IPrincipal _currentPrincipal;
+		public  IPrincipal  CurrentPrincipal
+		{
+			get { return _currentPrincipal;  }
 		}
 	}
 }

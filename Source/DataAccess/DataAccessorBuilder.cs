@@ -23,7 +23,7 @@ namespace BLToolkit.DataAccess
 			return TypeBuilderConsts.Priority.DataAccessor;
 		}
 
-		public override bool IsApplied(BuildContext context)
+		public override bool IsApplied(BuildContext context, AbstractTypeBuilderList builders)
 		{
 			return context.IsBuildStep && context.IsAbstractMethod;
 		}

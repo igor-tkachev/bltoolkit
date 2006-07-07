@@ -12,6 +12,11 @@ namespace BLToolkit.Aspects
 		AllowMultiple=true)]
 	public class NoInterceptionAttribute : InterceptorAttribute
 	{
+		public NoInterceptionAttribute()
+			: base(null, 0)
+		{
+		}
+
 		public NoInterceptionAttribute(Type interceptorType, InterceptType interceptType)
 			: base(interceptorType, interceptType)
 		{

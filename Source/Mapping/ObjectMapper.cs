@@ -97,6 +97,25 @@ namespace BLToolkit.Mapping
 			set { _extension = value; }
 		}
 
+		private string[] _fieldNames;
+		public  string[]  FieldNames
+		{
+			get
+			{
+				if (_fieldNames == null)
+				{
+					_fieldNames = new string[_members.Count];
+
+					for (int i = 0; i < _fieldNames.Length; i++)
+					{
+						_fieldNames[i] = ((MemberMapper)_members[i]).Name;
+					}
+				}
+
+				return _fieldNames;
+			}
+		}
+
 		private Hashtable _nameToMember;
 		public  MemberMapper this[string name]
 		{

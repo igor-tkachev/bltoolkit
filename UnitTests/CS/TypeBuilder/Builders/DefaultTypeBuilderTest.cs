@@ -48,7 +48,7 @@ namespace TypeBuilder.Builders
 
 		public class AbstractTypeBuilder : AbstractTypeBuilderBase
 		{
-			public override bool IsApplied(BuildContext context)
+			public override bool IsApplied(BuildContext context, AbstractTypeBuilderList builders)
 			{
 				return context.IsVirtualMethod && context.Step == BuildStep.After;
 			}

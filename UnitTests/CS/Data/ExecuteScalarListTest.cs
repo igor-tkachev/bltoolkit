@@ -10,7 +10,7 @@ using NUnit.Framework;
 
 using BLToolkit.Data;
 
-namespace Data
+namespace A.Data
 {
 	[TestFixture]
 	public class ExecuteScalarListTest
@@ -170,7 +170,7 @@ namespace Data
 
 			Assert.IsNotNull(array);
 			Assert.IsTrue   (array.Count > 1);
-			Assert.IsNull   (array[0]);
+			Assert.IsNotNull(array[0]);
 			Assert.IsNotNull(array[1]);
 
 			return array;

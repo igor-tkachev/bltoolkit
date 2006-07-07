@@ -2552,8 +2552,7 @@ namespace BLToolkit.Data
 		/// </item>
 		/// </list>
 		/// </returns>
-		public object ExecuteScalar(ScalarSourceType sourceType,
-			NameOrIndexParameter nip)
+		public object ExecuteScalar(ScalarSourceType sourceType, NameOrIndexParameter nip)
 		{
 			if (!Enum.IsDefined(typeof(ScalarSourceType), sourceType))
 				throw new InvalidEnumArgumentException("sourceType",
@@ -2567,8 +2566,7 @@ namespace BLToolkit.Data
 				case ScalarSourceType.DataReader:
 					using (IDataReader reader = ExecuteReaderInternal())
 						if (reader.Read())
-							return reader.GetValue(nip.ByName ?
-								reader.GetOrdinal(nip.Name) : nip.Index);
+							return reader.GetValue(nip.ByName ? reader.GetOrdinal(nip.Name) : nip.Index);
 
 					break;
 
@@ -2593,8 +2591,7 @@ namespace BLToolkit.Data
 							{
 								if (0 == index)
 								{
-									return _dataProvider.Convert(p.Value
-										, ConvertType.OutputParameter);
+									return _dataProvider.Convert(p.Value, ConvertType.OutputParameter);
 								}
 								else
 								{
@@ -2612,8 +2609,7 @@ namespace BLToolkit.Data
 
 					foreach (IDataParameter p in SelectCommand.Parameters)
 						if (p.Direction == ParameterDirection.ReturnValue)
-							return _dataProvider.Convert(p.Value
-								, ConvertType.OutputParameter);
+							return _dataProvider.Convert(p.Value, ConvertType.OutputParameter);
 
 					break;
 
@@ -2621,9 +2617,7 @@ namespace BLToolkit.Data
 					return ExecuteNonQueryInternal();
 
 				default:
-					System.Diagnostics.Debug.Fail(
-						"Not implemented case in DbManager.ExecuteScalar: "
-							+ sourceType);
+					System.Diagnostics.Debug.Fail("Not implemented case in DbManager.ExecuteScalar: " + sourceType);
 					break;
 			}
 
@@ -2748,39 +2742,10 @@ namespace BLToolkit.Data
 			if (_prepared)
 				InitParameters(CommandAction.Select);
 
-			//object nullValue = _mappingSchema.GetNullValue(type);
-
 			using (IDataReader dr = ExecuteReaderInternal())
 			{
-				if (dr.Read())
-				{
-					int index = nip.ByName ? dr.GetOrdinal(nip.Name) : nip.Index;
-
-#if FW2
-					bool isNullable = (type.IsGenericType
-						&& type.GetGenericTypeDefinition() == typeof(Nullable<>));
-
-					if (isNullable)
-						type = Nullable.GetUnderlyingType(type);
-#else
-					const bool isNullable = false;
-#endif
-
-					do
-					{
-						object value = dr.GetValue(index);
-
-						if (value == null || value.GetType() != type)
-							value = value is DBNull ? null :
-								_mappingSchema.ConvertChangeType(value, type, isNullable);
-
-						list.Add(value);
-					}
-					while (dr.Read());
-				}
+				return _mappingSchema.MapDataReaderToScalarList(dr, nip, list, type);
 			}
-
-			return list;
 		}
 
 		/// <summary>
@@ -2794,7 +2759,7 @@ namespace BLToolkit.Data
 		/// the resultset.</returns>
 		public IList ExecuteScalarList(IList list, Type type)
 		{
-			return ExecuteScalarList(list, type, new NameOrIndexParameter());
+			return ExecuteScalarList(list, type, 0);
 		}
 
 		/// <summary>
@@ -2827,7 +2792,7 @@ namespace BLToolkit.Data
 		{
 			ArrayList list = new ArrayList();
 
-			ExecuteScalarList(list, type, new NameOrIndexParameter());
+			ExecuteScalarList(list, type, 0);
 
 			return list;
 		}
@@ -2852,47 +2817,10 @@ namespace BLToolkit.Data
 			if (_prepared)
 				InitParameters(CommandAction.Select);
 
-			//object nullValue = _mappingSchema.GetNullValue(type);
-
 			using (IDataReader dr = ExecuteReaderInternal())
 			{
-				if (dr.Read())
-				{
-					int  index = nip.ByName ? dr.GetOrdinal(nip.Name) : nip.Index;
-#if EXPERIMENTAL
-					DataReader<T>.GetMethod get = _dataProvider.SelectDataReaderGetMethod<T>(dr, index);
-
-					if (get == null)
-						throw new DataException(string.Format("Can not read elements of the type '{0}'", typeof(T).FullName));
-
-					do
-						list.Add(get(dr, index));
-					while(dr.Read());
-#else
-
-					Type type = typeof(T);
-					bool isNullable = (type.IsGenericType &&
-						type.GetGenericTypeDefinition() == typeof(Nullable<>));
-
-					if (isNullable)
-						type = Nullable.GetUnderlyingType(type);
-
-					do
-					{
-						object value = dr.GetValue(index);
-
-						if (value == null || value.GetType() != type)
-							value = value is DBNull ? null :
-								_mappingSchema.ConvertChangeType(value, type, isNullable);
-
-						list.Add((T)value);
-					}
-					while (dr.Read());
-#endif
-				}
+				return _mappingSchema.MapDataReaderToScalarList<T>(dr, nip, list);
 			}
-
-			return list;
 		}
 
 		/// <summary>
@@ -2906,7 +2834,7 @@ namespace BLToolkit.Data
 		/// the resultset.</returns>
 		public IList<T> ExecuteScalarList<T>(IList<T> list)
 		{
-			return ExecuteScalarList(list, new NameOrIndexParameter());
+			return ExecuteScalarList(list, 0);
 		}
 
 		/// <summary>
@@ -2940,7 +2868,7 @@ namespace BLToolkit.Data
 		{
 			List<T> list = new List<T>();
 
-			ExecuteScalarList<T>(list, new NameOrIndexParameter());
+			ExecuteScalarList<T>(list, 0);
 
 			return list;
 		}

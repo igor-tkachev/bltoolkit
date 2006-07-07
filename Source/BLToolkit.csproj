@@ -169,6 +169,11 @@
                     BuildAction = "Compile"
                 />
                 <File
+                    RelPath = "Aspects\MethodCallCounter.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
                     RelPath = "Aspects\MixinAspectBuilder.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
@@ -279,6 +284,11 @@
                 />
                 <File
                     RelPath = "ComponentModel\ObjectEditType.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "ComponentModel\ObjectHolder.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
                 />
@@ -463,6 +473,18 @@
                     BuildAction = "Compile"
                 />
                 <File
+                    RelPath = "Doc\Development rules and regulations.doc"
+                    BuildAction = "None"
+                />
+                <File
+                    RelPath = "Doc\License.txt"
+                    BuildAction = "Content"
+                />
+                <File
+                    RelPath = "Doc\OnlineDoc.txt"
+                    BuildAction = "Content"
+                />
+                <File
                     RelPath = "EditableObjects\EditableArrayList.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
@@ -593,6 +615,11 @@
                     BuildAction = "Compile"
                 />
                 <File
+                    RelPath = "Mapping\MapDataDestinationBase.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
                     RelPath = "Mapping\MapDataSourceBase.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
@@ -682,6 +709,21 @@
                     BuildAction = "Compile"
                 />
                 <File
+                    RelPath = "Mapping\NullDateTimeAttribute.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "Mapping\NullDecimalAttribute.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "Mapping\NullGuidAttribute.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
                     RelPath = "Mapping\NullValueAttribute.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
@@ -702,7 +744,37 @@
                     BuildAction = "Compile"
                 />
                 <File
+                    RelPath = "Mapping\ScalarDataReaderMapper.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "Mapping\ScalarListMapper.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "Mapping\SimpleDestinationListMapper.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "Mapping\TextDataListMapper.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "Mapping\TextDataMapper.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
                     RelPath = "Mapping\TextDataReader.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "Mapping\TextDataWriter.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
                 />

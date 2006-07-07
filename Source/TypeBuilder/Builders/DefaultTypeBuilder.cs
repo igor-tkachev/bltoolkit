@@ -17,7 +17,7 @@ namespace BLToolkit.TypeBuilder.Builders
 			return IsRelative(typeBuilder) == false;
 		}
 
-		public override bool IsApplied(BuildContext context)
+		public override bool IsApplied(BuildContext context, AbstractTypeBuilderList builders)
 		{
 			if (context == null) throw new ArgumentNullException("context");
 

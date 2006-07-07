@@ -720,6 +720,7 @@ namespace BLToolkit.Mapping
 					return null;
 				
 				Type srcType = value.GetType();
+
 				if (srcType == conversionType)
 					return value;
 
@@ -871,12 +872,22 @@ namespace BLToolkit.Mapping
 
 		protected virtual DataReaderMapper CreateDataReaderMapper(IDataReader dataReader)
 		{
-			return new DataReaderMapper(dataReader);
+			return new DataReaderMapper(this, dataReader);
 		}
 
 		protected virtual DataReaderListMapper CreateDataReaderListMapper(IDataReader reader)
 		{
 			return new DataReaderListMapper(CreateDataReaderMapper(reader));
+		}
+
+		protected virtual DataReaderMapper CreateDataReaderMapper(IDataReader dataReader, NameOrIndexParameter nip)
+		{
+			return new ScalarDataReaderMapper(this, dataReader, nip);
+		}
+
+		protected virtual DataReaderListMapper CreateDataReaderListMapper(IDataReader reader, NameOrIndexParameter nip)
+		{
+			return new DataReaderListMapper(CreateDataReaderMapper(reader, nip));
 		}
 
 		protected virtual DataRowMapper CreateDataRowMapper(DataRow row, DataRowVersion version)
@@ -907,7 +918,6 @@ namespace BLToolkit.Mapping
 		}
 
 #if FW2
-
 		protected virtual DictionaryListMapper<K, T> CreateDictionaryListMapper<K, T>(
 			IDictionary<K, T> dic, NameOrIndexParameter keyField, ObjectMapper objectMapper)
 		{
@@ -919,7 +929,6 @@ namespace BLToolkit.Mapping
 		{
 			return new DictionaryIndexListMapper<T>(dic, index, objectMapper);
 		}
-
 #endif
 
 		protected virtual EnumeratorMapper CreateEnumeratorMapper(IEnumerator enumerator)
@@ -931,6 +940,28 @@ namespace BLToolkit.Mapping
 		{
 			return new ObjectListMapper(list, objectMapper);
 		}
+
+		protected virtual ScalarListMapper CreateScalarListMapper(IList list, Type type)
+		{
+			return new ScalarListMapper(list, type);
+		}
+
+		protected virtual SimpleDestinationListMapper CreateScalarListListMapper(IList list, Type type)
+		{
+			return new SimpleDestinationListMapper(CreateScalarListMapper(list, type));
+		}
+
+#if FW2
+		protected virtual ScalarListMapper<T> CreateScalarListMapper<T>(IList<T> list)
+		{
+			return new ScalarListMapper<T>(this, list);
+		}
+
+		protected virtual SimpleDestinationListMapper CreateScalarListListMapper<T>(IList<T> list)
+		{
+			return new SimpleDestinationListMapper(CreateScalarListMapper<T>(list));
+		}
+#endif
 
 		#endregion
 
@@ -2717,6 +2748,68 @@ namespace BLToolkit.Mapping
 				CreateDataReaderListMapper(reader),
 				CreateObjectListMapper    (list, GetObjectMapper(typeof(T))),
 				parameters);
+
+			return list;
+		}
+#endif
+
+		#endregion
+
+		#region MapDataReaderToScalarList
+
+		public IList MapDataReaderToScalarList(
+			IDataReader          reader,
+			NameOrIndexParameter nip,
+			IList                list,
+			Type                 type)
+		{
+			MapSourceListToDestinationList(
+				CreateDataReaderListMapper(reader, nip),
+				CreateScalarListListMapper(list,   type),
+				null);
+
+			return list;
+		}
+
+		public ArrayList MapDataReaderToScalarList(
+			IDataReader          reader,
+			NameOrIndexParameter nip,
+			Type                 type)
+		{
+			ArrayList list = new ArrayList();
+
+			MapSourceListToDestinationList(
+				CreateDataReaderListMapper(reader, nip),
+				CreateScalarListListMapper(list,   type),
+				null);
+
+			return list;
+		}
+
+#if FW2
+		public IList<T> MapDataReaderToScalarList<T>(
+			IDataReader          reader,
+			NameOrIndexParameter nip,
+			IList<T>             list)
+		{
+			MapSourceListToDestinationList(
+				CreateDataReaderListMapper(reader, nip),
+				CreateScalarListListMapper(list),
+				null);
+
+			return list;
+		}
+
+		public List<T> MapDataReaderToScalarList<T>(
+			IDataReader          reader,
+			NameOrIndexParameter nip)
+		{
+			List<T> list = new List<T>();
+
+			MapSourceListToDestinationList(
+				CreateDataReaderListMapper(reader, nip),
+				CreateScalarListListMapper(list),
+				null);
 
 			return list;
 		}

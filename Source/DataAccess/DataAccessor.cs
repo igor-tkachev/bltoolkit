@@ -8,6 +8,7 @@ using System.Data.SqlTypes;
 using System.IO;
 using System.Text;
 
+using BLToolkit.Aspects;
 using BLToolkit.Common;
 using BLToolkit.Data;
 using BLToolkit.Data.DataProvider;
@@ -37,16 +38,19 @@ namespace BLToolkit.DataAccess
 
 		#region Public Members
 
+		[NoInterception]
 		public virtual DbManager GetDbManager()
 		{
 			return _dbManager != null? _dbManager: CreateDbManager();
 		}
 
+		[NoInterception]
 		protected virtual DbManager CreateDbManager()
 		{
 			return new DbManager();
 		}
 
+		[NoInterception]
 		public virtual void BeginTransaction()
 		{
 			if (_dbManager == null)
@@ -55,6 +59,7 @@ namespace BLToolkit.DataAccess
 			_dbManager.BeginTransaction();
 		}
 
+		[NoInterception]
 		public virtual void BeginTransaction(IsolationLevel il)
 		{
 			if (_dbManager == null)
@@ -63,6 +68,7 @@ namespace BLToolkit.DataAccess
 			_dbManager.BeginTransaction(il);
 		}
 
+		[NoInterception]
 		public virtual void CommitTransaction()
 		{
 			if (_dbManager == null)
@@ -71,6 +77,7 @@ namespace BLToolkit.DataAccess
 			_dbManager.CommitTransaction();
 		}
 
+		[NoInterception]
 		public virtual void RollbackTransaction()
 		{
 			if (_dbManager == null)
@@ -131,11 +138,13 @@ namespace BLToolkit.DataAccess
 			_dbManager = dbManager;
 		}
 
+		[NoInterception]
 		protected virtual bool DisposeDbManager
 		{
 			get { return _dbManager == null; }
 		}
 
+		[NoInterception]
 		protected virtual string GetDefaultSpName(string typeName, string actionName)
 		{
 			return typeName == null?
@@ -145,6 +154,7 @@ namespace BLToolkit.DataAccess
 
 		private static Hashtable _actionSproc = new Hashtable();
 
+		[NoInterception]
 		protected virtual string GetSpName(Type type, string actionName)
 		{
 			if (type == null)
@@ -175,6 +185,7 @@ namespace BLToolkit.DataAccess
 			return sprocName;
 		}
 
+		[NoInterception]
 		protected virtual IDbDataParameter[] PrepareParameters(object[] parameters)
 		{
 			// Little optimization.
@@ -234,6 +245,7 @@ namespace BLToolkit.DataAccess
 			return retParams;
 		}
 
+		[NoInterception]
 		protected virtual string GetTableName(Type type)
 		{
 			TypeExtension typeExt = TypeExtension.GetTypeExtenstion(type, Extensions);
@@ -807,6 +819,7 @@ namespace BLToolkit.DataAccess
 			return query;
 		}
 
+		[NoInterception]
 		protected virtual SqlQueryInfo CreateSqlText(DbManager db, Type type, string actionName)
 		{
 			switch (actionName)
@@ -824,6 +837,7 @@ namespace BLToolkit.DataAccess
 
 		private static Hashtable _actionSqlQueryInfo = new Hashtable();
 
+		[NoInterception]
 		protected virtual SqlQueryInfo GetSqlQueryInfo(DbManager db, Type type, string actionName)
 		{
 			string       key   = type.FullName + "$" + actionName + "$" + db.DataProvider.Name;
@@ -1115,64 +1129,76 @@ namespace BLToolkit.DataAccess
 		#region Primitive Types
 
 		[CLSCompliant(false)]
+		[NoInterception]
 		protected virtual SByte ConvertToSByte(DbManager db, object value, object parameter)
 		{
 			return db.MappingSchema.ConvertToSByte(value);
 		}
 
+		[NoInterception]
 		protected virtual Int16 ConvertToInt16(DbManager db, object value, object parameter)
 		{
 			return db.MappingSchema.ConvertToInt16(value);
 		}
 
+		[NoInterception]
 		protected virtual Int32 ConvertToInt32(DbManager db, object value, object parameter)
 		{
 			return db.MappingSchema.ConvertToInt32(value);
 		}
 
+		[NoInterception]
 		protected virtual Int64 ConvertToInt64(DbManager db, object value, object parameter)
 		{
 			return db.MappingSchema.ConvertToInt64(value);
 		}
 
+		[NoInterception]
 		protected virtual Byte ConvertToByte(DbManager db, object value, object parameter)
 		{
 			return db.MappingSchema.ConvertToByte(value);
 		}
 
 		[CLSCompliant(false)]
+		[NoInterception]
 		protected virtual UInt16 ConvertToUInt16(DbManager db, object value, object parameter)
 		{
 			return db.MappingSchema.ConvertToUInt16(value);
 		}
 
 		[CLSCompliant(false)]
+		[NoInterception]
 		protected virtual UInt32 ConvertToUInt32(DbManager db, object value, object parameter)
 		{
 			return db.MappingSchema.ConvertToUInt32(value);
 		}
 
 		[CLSCompliant(false)]
+		[NoInterception]
 		protected virtual UInt64 ConvertToUInt64(DbManager db, object value, object parameter)
 		{
 			return db.MappingSchema.ConvertToUInt64(value);
 		}
 
+		[NoInterception]
 		protected virtual Char ConvertToChar(DbManager db, object value, object parameter)
 		{
 			return db.MappingSchema.ConvertToChar(value);
 		}
 
+		[NoInterception]
 		protected virtual Single ConvertToSingle(DbManager db, object value, object parameter)
 		{
 			return db.MappingSchema.ConvertToSingle(value);
 		}
 
+		[NoInterception]
 		protected virtual Double ConvertToDouble(DbManager db, object value, object parameter)
 		{
 			return db.MappingSchema.ConvertToDouble(value);
 		}
 
+		[NoInterception]
 		protected virtual Boolean ConvertToBoolean(DbManager db, object value, object parameter)
 		{
 			return db.MappingSchema.ConvertToBoolean(value);
@@ -1182,26 +1208,31 @@ namespace BLToolkit.DataAccess
 
 		#region Simple Types
 
+		[NoInterception]
 		protected virtual String ConvertToString(DbManager db, object value, object parameter)
 		{
 			return db.MappingSchema.ConvertToString(value);
 		}
 
+		[NoInterception]
 		protected virtual DateTime ConvertToDateTime(DbManager db, object value, object parameter)
 		{
 			return db.MappingSchema.ConvertToDateTime(value);
 		}
 
+		[NoInterception]
 		protected virtual Decimal ConvertToDecimal(DbManager db, object value, object parameter)
 		{
 			return db.MappingSchema.ConvertToDecimal(value);
 		}
 
+		[NoInterception]
 		protected virtual Guid ConvertToGuid(DbManager db, object value, object parameter)
 		{
 			return db.MappingSchema.ConvertToGuid(value);
 		}
 
+		[NoInterception]
 		protected virtual Stream ConvertToStream(DbManager db, object value, object parameter)
 		{
 			return db.MappingSchema.ConvertToStream(value);
@@ -1213,74 +1244,88 @@ namespace BLToolkit.DataAccess
 
 		#region Nullable Types
 
+		[NoInterception]
 		protected virtual Int16? ConvertToNullableInt16(DbManager db, object value, object parameter)
 		{
 			return db.MappingSchema.ConvertToNullableInt16(value);
 		}
 
+		[NoInterception]
 		protected virtual Int32? ConvertToNullableInt32(DbManager db, object value, object parameter)
 		{
 			return db.MappingSchema.ConvertToNullableInt32(value);
 		}
 
+		[NoInterception]
 		protected virtual Int64? ConvertToNullableInt64(DbManager db, object value, object parameter)
 		{
 			return db.MappingSchema.ConvertToNullableInt64(value);
 		}
 
+		[NoInterception]
 		protected virtual Byte? ConvertToNullableByte(DbManager db, object value, object parameter)
 		{
 			return db.MappingSchema.ConvertToNullableByte(value);
 		}
 
 		[CLSCompliant(false)]
+		[NoInterception]
 		protected virtual UInt16? ConvertToNullableUInt16(DbManager db, object value, object parameter)
 		{
 			return db.MappingSchema.ConvertToNullableUInt16(value);
 		}
 
 		[CLSCompliant(false)]
+		[NoInterception]
 		protected virtual UInt32? ConvertToNullableUInt32(DbManager db, object value, object parameter)
 		{
 			return db.MappingSchema.ConvertToNullableUInt32(value);
 		}
 
 		[CLSCompliant(false)]
+		[NoInterception]
 		protected virtual UInt64? ConvertToNullableUInt64(DbManager db, object value, object parameter)
 		{
 			return db.MappingSchema.ConvertToNullableUInt64(value);
 		}
 
+		[NoInterception]
 		protected virtual Char? ConvertToNullableChar(DbManager db, object value, object parameter)
 		{
 			return db.MappingSchema.ConvertToNullableChar(value);
 		}
 
+		[NoInterception]
 		protected virtual Double? ConvertToNullableDouble(DbManager db, object value, object parameter)
 		{
 			return db.MappingSchema.ConvertToNullableDouble(value);
 		}
 
+		[NoInterception]
 		protected virtual Single? ConvertToNullableSingle(DbManager db, object value, object parameter)
 		{
 			return db.MappingSchema.ConvertToNullableSingle(value);
 		}
 
+		[NoInterception]
 		protected virtual Boolean? ConvertToNullableBoolean(DbManager db, object value, object parameter)
 		{
 			return db.MappingSchema.ConvertToNullableBoolean(value);
 		}
 
+		[NoInterception]
 		protected virtual DateTime? ConvertToNullableDateTime(DbManager db, object value, object parameter)
 		{
 			return db.MappingSchema.ConvertToNullableDateTime(value);
 		}
 
+		[NoInterception]
 		protected virtual Decimal? ConvertToNullableDecimal(DbManager db, object value, object parameter)
 		{
 			return db.MappingSchema.ConvertToNullableDecimal(value);
 		}
 
+		[NoInterception]
 		protected virtual Guid? ConvertToNullableGuid(DbManager db, object value, object parameter)
 		{
 			return db.MappingSchema.ConvertToNullableGuid(value);
@@ -1292,61 +1337,73 @@ namespace BLToolkit.DataAccess
 
 		#region SqlTypes
 
+		[NoInterception]
 		protected virtual SqlByte ConvertToSqlByte(DbManager db, object value, object parameter)
 		{
 			return db.MappingSchema.ConvertToSqlByte(value);
 		}
 
+		[NoInterception]
 		protected virtual SqlInt16 ConvertToSqlInt16(DbManager db, object value, object parameter)
 		{
 			return db.MappingSchema.ConvertToSqlInt16(value);
 		}
 
+		[NoInterception]
 		protected virtual SqlInt32 ConvertToSqlInt32(DbManager db, object value, object parameter)
 		{
 			return db.MappingSchema.ConvertToSqlInt32(value);
 		}
 
+		[NoInterception]
 		protected virtual SqlInt64 ConvertToSqlInt64(DbManager db, object value, object parameter)
 		{
 			return db.MappingSchema.ConvertToSqlInt64(value);
 		}
 
+		[NoInterception]
 		protected virtual SqlSingle ConvertToSqlSingle(DbManager db, object value, object parameter)
 		{
 			return db.MappingSchema.ConvertToSqlSingle(value);
 		}
 
+		[NoInterception]
 		protected virtual SqlBoolean ConvertToSqlBoolean(DbManager db, object value, object parameter)
 		{
 			return db.MappingSchema.ConvertToSqlBoolean(value);
 		}
 
+		[NoInterception]
 		protected virtual SqlDouble ConvertToSqlDouble(DbManager db, object value, object parameter)
 		{
 			return db.MappingSchema.ConvertToSqlDouble(value);
 		}
 
+		[NoInterception]
 		protected virtual SqlDateTime ConvertToSqlDateTime(DbManager db, object value, object parameter)
 		{
 			return db.MappingSchema.ConvertToSqlDateTime(value);
 		}
 
+		[NoInterception]
 		protected virtual SqlDecimal ConvertToSqlDecimal(DbManager db, object value, object parameter)
 		{
 			return db.MappingSchema.ConvertToSqlDecimal(value);
 		}
 
+		[NoInterception]
 		protected virtual SqlMoney ConvertToSqlMoney(DbManager db, object value, object parameter)
 		{
 			return db.MappingSchema.ConvertToSqlMoney(value);
 		}
 
+		[NoInterception]
 		protected virtual SqlGuid ConvertToSqlGuid(DbManager db, object value, object parameter)
 		{
 			return db.MappingSchema.ConvertToSqlGuid(value);
 		}
 
+		[NoInterception]
 		protected virtual SqlString ConvertToSqlString(DbManager db, object value, object parameter)
 		{
 			return db.MappingSchema.ConvertToSqlString(value);
@@ -1356,6 +1413,7 @@ namespace BLToolkit.DataAccess
 
 		#region General case
 
+		[NoInterception]
 		protected virtual object ConvertChangeType(
 			DbManager db,
 			object    value,

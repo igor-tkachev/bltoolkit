@@ -30,8 +30,22 @@ namespace BLToolkit.Aspects
 			return _priority;
 		}
 
-		public override bool IsApplied(BuildContext context)
+		public override bool IsApplied(BuildContext context, AbstractTypeBuilderList builders)
 		{
+			if (_interceptorType == null && _interceptType == 0)
+				return false;
+
+			foreach (IAbstractTypeBuilder builder in builders)
+			{
+				InterceptorAspectBuilder interceptor = builder as InterceptorAspectBuilder;
+
+				if (interceptor != null)
+				{
+					if (interceptor._interceptorType == null && interceptor._interceptType == 0)
+						return false;
+				}
+			}
+
 			if (context.IsMethodOrProperty) switch (context.Step)
 			{
 				case BuildStep.Begin:   return true;
@@ -126,7 +140,7 @@ namespace BLToolkit.Aspects
 				.callvirt (typeof(InterceptCallInfo).GetProperty("InterceptorID").GetSetMethod())
 				;
 
-			// Set inercept type.
+			// Set intercept type.
 			//
 			InterceptType interceptType;
 

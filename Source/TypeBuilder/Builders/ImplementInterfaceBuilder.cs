@@ -22,7 +22,7 @@ namespace BLToolkit.TypeBuilder.Builders
 			return new Type[] { _type };
 		}
 
-		public override bool IsApplied(BuildContext context)
+		public override bool IsApplied(BuildContext context, AbstractTypeBuilderList builders)
 		{
 			if (context == null) throw new ArgumentNullException("context");
 

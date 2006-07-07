@@ -37,7 +37,7 @@ namespace BLToolkit.Aspects
 
 		internal CacheAspect.  ConfigParameters CacheParameters;
 		internal LoggingAspect.ConfigParameters LogParameters;
-		internal CounterAspect.Counter          Counter;
+		internal MethodCallCounter              Counter;
 
 		private  Hashtable _methodCallCache;
 		internal Hashtable  MethodCallCache

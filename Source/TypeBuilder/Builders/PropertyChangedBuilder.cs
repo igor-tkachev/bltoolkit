@@ -8,7 +8,7 @@ namespace BLToolkit.TypeBuilder.Builders
 {
 	public class PropertyChangedBuilder : AbstractTypeBuilderBase
 	{
-		public override bool IsApplied(BuildContext context)
+		public override bool IsApplied(BuildContext context, AbstractTypeBuilderList builders)
 		{
 			if (context == null) throw new ArgumentNullException("context");
 
