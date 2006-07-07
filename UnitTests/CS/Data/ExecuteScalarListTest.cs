@@ -15,6 +15,44 @@ namespace A.Data
 	[TestFixture]
 	public class ExecuteScalarListTest
 	{
+		//[TestFixtureSetUp]
+		public void SetUp()
+		{
+			using (DbManager db = new DbManager())
+			{
+				string query = "INSERT INTO Person(FirstName, LastName, Gender) SELECT FirstName, LastName, Gender FROM Person";
+				db.SetCommand(query).ExecuteNonQuery(); // 4
+				db.SetCommand(query).ExecuteNonQuery(); // 8
+				db.SetCommand(query).ExecuteNonQuery(); // 16
+				db.SetCommand(query).ExecuteNonQuery(); // 32
+				db.SetCommand(query).ExecuteNonQuery(); // 64
+				db.SetCommand(query).ExecuteNonQuery(); // 128
+				db.SetCommand(query).ExecuteNonQuery(); // 256
+				db.SetCommand(query).ExecuteNonQuery(); // 512
+				db.SetCommand(query).ExecuteNonQuery(); // 1024
+				db.SetCommand(query).ExecuteNonQuery(); // 2048
+				db.SetCommand(query).ExecuteNonQuery(); // 4096
+				db.SetCommand(query).ExecuteNonQuery(); // 8192
+				db.SetCommand(query).ExecuteNonQuery(); // 16384
+				db.SetCommand(query).ExecuteNonQuery(); // 32768
+				db.SetCommand(query).ExecuteNonQuery(); // 65536
+				db.SetCommand(query).ExecuteNonQuery(); // 128k
+				db.SetCommand(query).ExecuteNonQuery(); // 256k
+				db.SetCommand(query).ExecuteNonQuery(); // 512k
+				db.SetCommand(query).ExecuteNonQuery(); // 1m
+			}
+		}
+
+		//[TestFixtureTearDown]
+		public void TearDown()
+		{
+			using (DbManager db = new DbManager())
+			{
+				db.SetCommand("DELETE FROM Person WHERE PersonID > 2").ExecuteNonQuery();
+			}
+		}
+
+
 		[Test]
 		public void ScalarListTest()
 		{
@@ -95,11 +133,12 @@ namespace A.Data
 			{
 				List<int> array = new List<int>();
 				db
-				.SetSpCommand("Person_SelectAll")
-				.ExecuteScalarList(array);
+					.SetCommand("SELECT PersonID FROM Person UNION ALL SELECT NULL")
+					.ExecuteScalarList(array);
 
 				Assert.IsNotNull(array);
 				Assert.IsTrue(array.Count > 0);
+				Console.WriteLine("Records processed: {0}", array.Count);
 			}
 		}
 

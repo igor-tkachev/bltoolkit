@@ -6,6 +6,67 @@
 	<using namespace="System.IO"/>
 	<using namespace="System.Xml"/>
 
+	<!--
+	Short type names.
+	'A' => Arrays,
+	'N' => Nullable<>,
+	'I' => Integer types,
+	'U' => Unsigned integer types,
+	'R' => Real types,
+	'db' => Sql types.
+	-->
+	<nick type="Object"      name="O"/>
+	<nick type="String"      name="S"/>
+	<nick type="Char"        name="C"/>
+
+	<nick type="SByte"       name="I8"/>
+	<nick type="Int16"       name="I16"/>
+	<nick type="Int32"       name="I32"/>
+	<nick type="Int64"       name="I64"/>
+
+	<nick type="Byte"        name="U8"/>
+	<nick type="UInt16"      name="U16"/>
+	<nick type="UInt32"      name="U32"/>
+	<nick type="UInt64"      name="U64"/>
+
+	<nick type="Single"      name="R4"/>
+	<nick type="Double"      name="R8"/>
+
+	<nick type="Boolean"     name="B"/>
+	<nick type="Decimal"     name="D"/>
+
+	<nick type="Guid"        name="G"/>
+	<nick type="TimeSpan"    name="TS"/>
+	<nick type="DateTime"    name="DT"/>
+
+	<nick type="SqlString"   name="dbS"/>
+
+	<nick type="SqlByte"     name="dbU8"/>
+	<nick type="SqlInt16"    name="dbI16"/>
+	<nick type="SqlInt32"    name="dbI32"/>
+	<nick type="SqlInt64"    name="dbI64"/>
+
+	<nick type="SqlSingle"   name="dbR4"/>
+	<nick type="SqlDouble"   name="dbR8"/>
+	<nick type="SqlDecimal"  name="dbD"/>
+	<nick type="SqlMoney"    name="dbM"/>
+
+	<nick type="SqlBoolean"  name="dbB"/>
+	<nick type="SqlDateTime" name="dbDT"/>
+	<nick type="SqlGuid"     name="dbG"/>
+
+	<nick type="SqlBinary"   name="dbBin"/>
+	<nick type="SqlBytes"    name="dbAU8"/>
+	<nick type="SqlChars"    name="dbAC"/>
+	<nick type="SqlXml"      name="dbXml"/>
+
+	<nick type="Byte[]"      name="AU8"/>
+	<nick type="Char[]"      name="AC"/>
+
+	<nick type="Type"        name="T"/>
+	<nick type="Stream"      name="IOS"/>
+	<nick type="XmlReader"   name="Xml"/>
+
 	<template name="Integer Types">
 		<type name="SByte"   />
 		<type name="Int16"   />
@@ -332,7 +393,7 @@
 				<br/>
 				<include template ="Numeric Types"/>
 				<br/>
-				<from type="Char"      >return (p.HasValue)? Convert&lt;Boolean,Char&gt;.Instance.From(p.Value): false;</from>
+				<from type="Char"      >return (p.HasValue)? Convert&lt;Boolean,Char&gt;.I.C(p.Value): false;</from>
 				<default               >return p.HasValue? Convert.ToBoolean(p.Value): false;</default>
 			</group>
 			<group name="SqlTypes.">
@@ -413,7 +474,7 @@
 		</converter>
 		<converter type="Stream">
 			<group name="Scalar Types.">
-				<from type="Byte[]" name="ByteArray">return p == null? Stream.Null: new MemoryStream(p);</from>
+				<from type="Byte[]">return p == null? Stream.Null: new MemoryStream(p);</from>
 			</group>
 			<group name="SqlTypes.">
 				<from type="SqlBytes" >return p.IsNull? Stream.Null: p.Stream;                 </from>
@@ -667,7 +728,7 @@
 				<br/>
 				<include template ="Numeric Types"/>
 				<br/>
-				<from type="Char"      >return Convert&lt;Boolean,Char&gt;.Instance.From(p);</from>
+				<from type="Char"      >return Convert&lt;Boolean,Char&gt;.I.C(p);</from>
 				<default>return Convert.ToBoolean(p);</default>
 			</group>
 
@@ -675,7 +736,7 @@
 				<include template ="Numeric Types"/>
 				<default               >return p.HasValue? (Boolean?)Convert.ToBoolean(p.Value): null;</default>
 				<br/>
-				<from type="Char"      >return p.HasValue? (Boolean?)Convert&lt;Boolean,Char&gt;.Instance.From(p.Value): null;</from>
+				<from type="Char"      >return p.HasValue? (Boolean?)Convert&lt;Boolean,Char&gt;.I.C(p.Value): null;</from>
 			</group>
 
 			<group name="SqlTypes.">
@@ -755,7 +816,7 @@
 				<from type="SqlString">return p.IsNull? null: (Guid?)new Guid(p.Value);  </from>
 				<from type="SqlBinary">return p.IsNull? null: (Guid?)p.ToSqlGuid().Value;</from>
 			</group>
-			<from type="Type"         >return p == null? null: p.GUID;</from>
+			<from type="Type"         >return p == null? null: (Guid?)p.GUID;</from>
 			<default nullvalue="null"/>
 		</converter>
 	</region>
@@ -769,7 +830,7 @@
 				<from type="TimeSpan"/>
 				<from type="DateTime"/>
 				<from type="Guid"    />
-				<from type="Char[]" name="CharArray">return new String(p);</from>
+				<from type="Char[]"   >return new String(p);</from>
 				<default              >return p.ToString();</default>
 			</group>
 
@@ -978,13 +1039,13 @@
 				<from type="String"   >return p == null? SqlBoolean.Null: SqlBoolean.Parse(p);</from>
 				<br/>
 				<include template ="Numeric Types"/>
-				<from type="Char"      >return Convert&lt;Boolean,Char&gt;.Instance.From(p);</from>
+				<from type="Char"      >return Convert&lt;Boolean,Char&gt;.I.C(p);</from>
 			</group>
 
 			<group name="Nullable Types." nullable="true">
 				<from type="Boolean" >return p.HasValue?                   p.Value  : SqlBoolean.Null;</from>
 				<include template ="Numeric Types"/>
-				<from type="Char"     >return (p.HasValue)? Convert&lt;Boolean,Char&gt;.Instance.From(p.Value): SqlBoolean.Null;</from>
+				<from type="Char"     >return (p.HasValue)? Convert&lt;Boolean,Char&gt;.I.C(p.Value): SqlBoolean.Null;</from>
 				<default              >return p.HasValue? Convert.ToBoolean(p.Value) : SqlBoolean.Null;</default>
 			</group>
 
@@ -1030,7 +1091,7 @@
 		</converter>
 		<converter type="SqlBinary">
 			<group name="Scalar Types.">
-				<from type="Byte[]" name="ByteArray">return p;</from>
+				<from type="Byte[]"   >return p;</from>
 				<from type="Guid"     >return p == Guid.Empty? SqlBinary.Null: new SqlGuid(p).ToSqlBinary();</from>
 			</group>
 			<group name="Nullable Types." nullable="true">
@@ -1045,7 +1106,7 @@
 		</converter>
 		<converter type="SqlBytes">
 			<group name="Scalar Types.">
-				<from type="Byte[]" name="ByteArray">return p == null? SqlBytes.Null: new SqlBytes(p);</from>
+				<from type="Byte[]" >return p == null? SqlBytes.Null: new SqlBytes(p);</from>
 				<from type="Stream" >return p == null? SqlBytes.Null: new SqlBytes(p);</from>
 				<from type="Guid"   >return p == Guid.Empty? SqlBytes.Null: new SqlBytes(p.ToByteArray());</from>
 			</group>
@@ -1061,7 +1122,7 @@
 		<converter type="SqlChars">
 			<group name="Scalar Types.">
 				<from type="String">return p == null? SqlChars.Null: new SqlChars(p.ToCharArray());</from>
-				<from type="Char[]" name="CharArray">return p == null? SqlChars.Null: new SqlChars(p);</from>
+				<from type="Char[]">return p == null? SqlChars.Null: new SqlChars(p);</from>
 				<br/>
 				<include template ="Numeric Types"/>
 				<from type="Char"/>
@@ -1087,20 +1148,18 @@
 				<from type="SqlBinary">return p.IsNull? SqlChars.Null: new SqlChars(p.ToString().ToCharArray());</from>
 				<default              >return (SqlChars)p.ToSqlString();</default>
 			</group>
-			<from type="Type"         >return p == null? SqlChars.Null: p.FullName.ToCharArray();</from>
+			<from type="Type"         >return p == null? SqlChars.Null: new SqlChars(p.FullName.ToCharArray());</from>
 			<default                  >return new SqlChars(Convert.ToString(p).ToCharArray());</default>
 		</converter>
 		<converter type="SqlXml">
 			<group name="Scalar Types.">
-				<from type="string"    >return p == null? SqlXml.Null: new SqlXml(new XmlTextReader(new StringReader(p)));</from>
+				<from type="String"    >return p == null? SqlXml.Null: new SqlXml(new XmlTextReader(new StringReader(p)));</from>
 				<br/>
 				<from type="Stream"   />
 				<from type="XmlReader"/>
 				<br/>
-				<from type="Char[]"
-				       name="CharArray">return p == null? SqlXml.Null: new SqlXml(new XmlTextReader(new StringReader(new string(p))));</from>
-				<from type="Byte[]"
-				       name="ByteArray">return p == null? SqlXml.Null: new SqlXml(new MemoryStream(p));</from>
+				<from type="Char[]"    >return p == null? SqlXml.Null: new SqlXml(new XmlTextReader(new StringReader(new string(p))));</from>
+				<from type="Byte[]"    >return p == null? SqlXml.Null: new SqlXml(new MemoryStream(p));</from>
 				<default               >return p == null? SqlXml.Null: new SqlXml(p);</default>
 			</group>
 			<group name="SqlTypes.">
@@ -1116,16 +1175,17 @@
 	<converter type="Type">
 			<group name="Scalar Types.">
 			<from type="String"   >return p == null      ? null: Type.GetType(p);                  </from>
-			<from type="Char[]" name="CharArray">return p == null      ? null: Type.GetType(new string(p));      </from>
+			<from type="Char[]"   >return p == null      ? null: Type.GetType(new string(p));      </from>
 			<from type="Guid"     >return p == Guid.Empty? null: Type.GetTypeFromCLSID(p);         </from>
 		</group>
 		<group name="Nullable Types." nullable="true">
-			<from type="Guid">return p.HasValue? Type.GetTypeFromCLSID(p): null;</from>
+			<from type="Guid"     >return p.HasValue? Type.GetTypeFromCLSID(p.Value): null;</from>
 		</group>
 		<group name="SqlTypes.">
 			<from type="SqlString">return p.IsNull       ? null: Type.GetType(p.Value);            </from>
 			<from type="SqlChars" >return p.IsNull       ? null: Type.GetType(new string(p.Value));</from>
-			<from type="SQlGuid"  >return p.IsNull       ? null: Type.GetTypeFromCLSID(p.value);   </from>
+			<from type="SqlGuid"  >return p.IsNull       ? null: Type.GetTypeFromCLSID(p.Value);   </from>
 		</group>
+		<default nullvalue="null"/>
 	</converter>
 </code>

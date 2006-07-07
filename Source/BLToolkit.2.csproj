@@ -66,6 +66,18 @@
     <Compile Include="Aspects\NotNullAttribute.cs" />
     <Compile Include="Common\CompoundValue.cs" />
     <Compile Include="Common\Convert.cs" />
+    <Compile Include="Common\Convert.Nullable.cs">
+      <DependentUpon>Convert.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Common\Convert.Other.cs">
+      <DependentUpon>Convert.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Common\Convert.Scalar.cs">
+      <DependentUpon>Convert.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Common\Convert.SqlTypes.cs">
+      <DependentUpon>Convert.cs</DependentUpon>
+    </Compile>
     <Compile Include="Common\EntityBase.cs" />
     <Compile Include="Common\EntityBaseT.cs" />
     <Compile Include="Common\Operator.cs" />
