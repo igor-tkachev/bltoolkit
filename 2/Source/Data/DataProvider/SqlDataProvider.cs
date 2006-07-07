@@ -364,14 +364,14 @@ namespace BLToolkit.Data.DataProvider
 		{
 			protected override DataReaderMapper CreateDataReaderMapper(IDataReader dataReader)
 			{
-				return new SqlDataReaderMapper(dataReader);
+				return new SqlDataReaderMapper(this, dataReader);
 			}
 		}
 
 		public class SqlDataReaderMapper : DataReaderMapper
 		{
-			public SqlDataReaderMapper(IDataReader dataReader)
-				: base(dataReader)
+			public SqlDataReaderMapper(MappingSchema mappingSchema, IDataReader dataReader)
+				: base(mappingSchema, dataReader)
 			{
 				_dataReader = (SqlDataReader)dataReader;
 			}

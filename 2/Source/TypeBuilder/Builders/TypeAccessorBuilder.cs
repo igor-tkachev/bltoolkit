@@ -32,7 +32,11 @@ namespace BLToolkit.TypeBuilder.Builders
 		{
 			if (assemblyBuilder == null) throw new ArgumentNullException("assemblyBuilder");
 
-			string typeName = _type.FullName.Replace('+', '.') + ".TypeAccessor";
+			string typeName = _type.FullName.Replace('+', '.')
+#if !FW2
+				.Replace('[', '_').Replace(']', '_')
+#endif
+				+ ".TypeAccessor";
 
 			_typeBuilder = assemblyBuilder.DefineType(typeName, _accessorType);
 

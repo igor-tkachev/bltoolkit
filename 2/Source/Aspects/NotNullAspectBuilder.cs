@@ -21,7 +21,7 @@ namespace BLToolkit.Aspects
 			return TypeBuilderConsts.Priority.NotNullAspect;
 		}
 
-		public override bool IsApplied(BuildContext context)
+		public override bool IsApplied(BuildContext context, AbstractTypeBuilderList builders)
 		{
 			if (context == null) throw new ArgumentNullException("context");
 

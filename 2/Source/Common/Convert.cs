@@ -3,6 +3,8 @@ using System.Data.SqlTypes;
 using System.IO;
 using System.Xml;
 
+using BLToolkit.Reflection;
+
 namespace BLToolkit.Common
 {
 	public static class Convert<T,P>
@@ -14,9 +16,14 @@ namespace BLToolkit.Common
 		{
 			Type t = typeof(T);
 
+			// Convert to object.
+			//
+			if (typeof(P) == typeof(object))
+				return delegate(P o) { return (T)Convert.ChangeType(o, typeof(T)); };
+
 			// Convert to the same type.
 			//
-			if (t.IsAssignableFrom(typeof(P)))
+			if (TypeHelper.IsSameOrParent(typeof(P), t))
 				return (ConvertMethod)(object)(Convert<P,P>.ConvertMethod)(delegate(P p) { return p; });
 
 			// Scalar Types

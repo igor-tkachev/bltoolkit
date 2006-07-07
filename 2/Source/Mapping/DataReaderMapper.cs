@@ -6,15 +6,22 @@ namespace BLToolkit.Mapping
 {
 	public class DataReaderMapper : IMapDataSource
 	{
-		public DataReaderMapper(IDataReader dataReader)
+		public DataReaderMapper(MappingSchema mappingSchema, IDataReader dataReader)
 		{
-			_dataReader = dataReader;
+			_mappingSchema = mappingSchema;
+			_dataReader    = dataReader;
 		}
 
 		private IDataReader _dataReader;
 		public  IDataReader  DataReader
 		{
 			get { return _dataReader; }
+		}
+
+		private MappingSchema _mappingSchema;
+		public  MappingSchema  MappingSchema
+		{
+			get { return _mappingSchema; }
 		}
 
 		#region IMapDataSource Members
@@ -52,22 +59,22 @@ namespace BLToolkit.Mapping
 		// Simple type getters.
 		//
 		[CLSCompliant(false)]
-		public virtual SByte    GetSByte   (object o, int index) { return Map.DefaultSchema.ConvertToSByte(GetValue(o, index)); }
+		public virtual SByte    GetSByte   (object o, int index) { return _mappingSchema.ConvertToSByte(GetValue(o, index)); }
 		public virtual Int16    GetInt16   (object o, int index) { return _dataReader.GetInt16   (index); }
 		public virtual Int32    GetInt32   (object o, int index) { return _dataReader.GetInt32   (index); }
 		public virtual Int64    GetInt64   (object o, int index) { return _dataReader.GetInt64   (index); }
 
 		public virtual Byte     GetByte    (object o, int index) { return _dataReader.GetByte    (index); }
 		[CLSCompliant(false)]
-		public virtual UInt16   GetUInt16  (object o, int index) { return Map.DefaultSchema.ConvertToUInt16(GetValue(o, index)); }
+		public virtual UInt16   GetUInt16  (object o, int index) { return _mappingSchema.ConvertToUInt16(GetValue(o, index)); }
 		[CLSCompliant(false)]
-		public virtual UInt32   GetUInt32  (object o, int index) { return Map.DefaultSchema.ConvertToUInt32(GetValue(o, index)); }
+		public virtual UInt32   GetUInt32  (object o, int index) { return _mappingSchema.ConvertToUInt32(GetValue(o, index)); }
 		[CLSCompliant(false)]
-		public virtual UInt64   GetUInt64  (object o, int index) { return Map.DefaultSchema.ConvertToUInt64(GetValue(o, index)); }
+		public virtual UInt64   GetUInt64  (object o, int index) { return _mappingSchema.ConvertToUInt64(GetValue(o, index)); }
 
 		public virtual Boolean  GetBoolean (object o, int index) { return _dataReader.GetBoolean (index); }
 		public virtual Char     GetChar    (object o, int index) { return _dataReader.GetChar    (index); }
-		public virtual Single   GetSingle  (object o, int index) { return Map.DefaultSchema.ConvertToSingle(GetValue(o, index)); }
+		public virtual Single   GetSingle  (object o, int index) { return _mappingSchema.ConvertToSingle(GetValue(o, index)); }
 		public virtual Double   GetDouble  (object o, int index) { return _dataReader.GetDouble  (index); }
 		public virtual Decimal  GetDecimal (object o, int index) { return _dataReader.GetDecimal (index); }
 		public virtual Guid     GetGuid    (object o, int index) { return _dataReader.GetGuid    (index); }
@@ -77,22 +84,22 @@ namespace BLToolkit.Mapping
 		// Nullable type getters.
 		//
 		[CLSCompliant(false)]
-		public virtual SByte?    GetNullableSByte   (object o, int index) { return _dataReader.IsDBNull(index)? null: Map.DefaultSchema.ConvertToNullableSByte(GetValue(o, index)); }
+		public virtual SByte?    GetNullableSByte   (object o, int index) { return _dataReader.IsDBNull(index)? null: _mappingSchema.ConvertToNullableSByte(GetValue(o, index)); }
 		public virtual Int16?    GetNullableInt16   (object o, int index) { return _dataReader.IsDBNull(index)? null: (Int16?)_dataReader.GetInt16   (index); }
 		public virtual Int32?    GetNullableInt32   (object o, int index) { return _dataReader.IsDBNull(index)? null: (Int32?)_dataReader.GetInt32   (index); }
 		public virtual Int64?    GetNullableInt64   (object o, int index) { return _dataReader.IsDBNull(index)? null: (Int64?)_dataReader.GetInt64   (index); }
 
 		public virtual Byte?     GetNullableByte    (object o, int index) { return _dataReader.IsDBNull(index)? null: (Byte?) _dataReader.GetByte    (index); }
 		[CLSCompliant(false)]
-		public virtual UInt16?   GetNullableUInt16  (object o, int index) { return _dataReader.IsDBNull(index)? null: Map.DefaultSchema.ConvertToNullableUInt16(GetValue(o, index)); }
+		public virtual UInt16?   GetNullableUInt16  (object o, int index) { return _dataReader.IsDBNull(index)? null: _mappingSchema.ConvertToNullableUInt16(GetValue(o, index)); }
 		[CLSCompliant(false)]
-		public virtual UInt32?   GetNullableUInt32  (object o, int index) { return _dataReader.IsDBNull(index)? null: Map.DefaultSchema.ConvertToNullableUInt32(GetValue(o, index)); }
+		public virtual UInt32?   GetNullableUInt32  (object o, int index) { return _dataReader.IsDBNull(index)? null: _mappingSchema.ConvertToNullableUInt32(GetValue(o, index)); }
 		[CLSCompliant(false)]
-		public virtual UInt64?   GetNullableUInt64  (object o, int index) { return _dataReader.IsDBNull(index)? null: Map.DefaultSchema.ConvertToNullableUInt64(GetValue(o, index)); }
+		public virtual UInt64?   GetNullableUInt64  (object o, int index) { return _dataReader.IsDBNull(index)? null: _mappingSchema.ConvertToNullableUInt64(GetValue(o, index)); }
 
 		public virtual Boolean?  GetNullableBoolean (object o, int index) { return _dataReader.IsDBNull(index)? null: (Boolean?) _dataReader.GetBoolean (index); }
 		public virtual Char?     GetNullableChar    (object o, int index) { return _dataReader.IsDBNull(index)? null: (Char?)    _dataReader.GetChar    (index); }
-		public virtual Single?   GetNullableSingle  (object o, int index) { return _dataReader.IsDBNull(index)? null: Map.DefaultSchema.ConvertToNullableSingle(GetValue(o, index)); }
+		public virtual Single?   GetNullableSingle  (object o, int index) { return _dataReader.IsDBNull(index)? null: _mappingSchema.ConvertToNullableSingle(GetValue(o, index)); }
 		public virtual Double?   GetNullableDouble  (object o, int index) { return _dataReader.IsDBNull(index)? null: (Double?)  _dataReader.GetDouble  (index); }
 		public virtual Decimal?  GetNullableDecimal (object o, int index) { return _dataReader.IsDBNull(index)? null: (Decimal?) _dataReader.GetDecimal (index); }
 		public virtual Guid?     GetNullableGuid    (object o, int index) { return _dataReader.IsDBNull(index)? null: (Guid?)    _dataReader.GetGuid    (index); }
@@ -105,7 +112,7 @@ namespace BLToolkit.Mapping
 		public virtual SqlInt16    GetSqlInt16   (object o, int index) { return _dataReader.IsDBNull(index)? SqlInt16.   Null: _dataReader.GetInt16   (index); }
 		public virtual SqlInt32    GetSqlInt32   (object o, int index) { return _dataReader.IsDBNull(index)? SqlInt32.   Null: _dataReader.GetInt32   (index); }
 		public virtual SqlInt64    GetSqlInt64   (object o, int index) { return _dataReader.IsDBNull(index)? SqlInt64.   Null: _dataReader.GetInt64   (index); }
-		public virtual SqlSingle   GetSqlSingle  (object o, int index) { return _dataReader.IsDBNull(index)? SqlSingle.  Null: Map.DefaultSchema.ConvertToSingle(GetValue(o, index)); }
+		public virtual SqlSingle   GetSqlSingle  (object o, int index) { return _dataReader.IsDBNull(index)? SqlSingle.  Null: _mappingSchema.ConvertToSingle(GetValue(o, index)); }
 		public virtual SqlBoolean  GetSqlBoolean (object o, int index) { return _dataReader.IsDBNull(index)? SqlBoolean. Null: _dataReader.GetBoolean (index); }
 		public virtual SqlDouble   GetSqlDouble  (object o, int index) { return _dataReader.IsDBNull(index)? SqlDouble.  Null: _dataReader.GetDouble  (index); }
 		public virtual SqlDateTime GetSqlDateTime(object o, int index) { return _dataReader.IsDBNull(index)? SqlDateTime.Null: _dataReader.GetDateTime(index); }

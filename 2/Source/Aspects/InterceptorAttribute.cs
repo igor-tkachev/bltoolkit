@@ -30,7 +30,8 @@ namespace BLToolkit.Aspects
 		public InterceptorAttribute(
 			Type interceptorType, InterceptType interceptType, string configString, int priority)
 		{
-			if (interceptorType == null) throw new ArgumentNullException("interceptorType");
+			if (interceptorType == null && interceptType != 0)
+				throw new ArgumentNullException("interceptorType");
 
 			_interceptorType = interceptorType;
 			_interceptType   = interceptType;
@@ -39,25 +40,25 @@ namespace BLToolkit.Aspects
 		}
 
 		private readonly Type _interceptorType;
-		public           Type  InterceptorType
+		public  virtual  Type  InterceptorType
 		{
 			get { return _interceptorType; }
 		}
 
 		private readonly InterceptType _interceptType;
-		public           InterceptType  InterceptType
+		public  virtual  InterceptType  InterceptType
 		{
 			get { return _interceptType; }
 		}
 
 		private readonly int _priority;
-		public           int  Priority
+		public  virtual  int  Priority
 		{
 			get { return _priority; }
 		}
 
 		private readonly string _configString;
-		public           string  ConfigString
+		public  virtual  string  ConfigString
 		{
 			get { return _configString; }
 		}

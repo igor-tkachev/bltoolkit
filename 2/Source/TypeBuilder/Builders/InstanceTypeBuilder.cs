@@ -37,12 +37,12 @@ namespace BLToolkit.TypeBuilder.Builders
 			get { return _instanceType; }
 		}
 
-		public override bool IsApplied(BuildContext context)
+		public override bool IsApplied(BuildContext context, AbstractTypeBuilderList builders)
 		{
 			if (context == null) throw new ArgumentNullException("context");
 
 			return
-				base.IsApplied(context) &&
+				base.IsApplied(context, builders) &&
 				context.CurrentProperty != null &&
 				context.CurrentProperty.GetIndexParameters().Length == 0 &&
 				(PropertyType == null ||

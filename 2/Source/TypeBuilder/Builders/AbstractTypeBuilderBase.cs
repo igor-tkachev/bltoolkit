@@ -50,7 +50,7 @@ namespace BLToolkit.TypeBuilder.Builders
 			return GetType().IsInstanceOfType(typeBuilder) || typeBuilder.GetType().IsInstanceOfType(this);
 		}
 
-		public virtual bool IsApplied(BuildContext context)
+		public virtual bool IsApplied(BuildContext context, AbstractTypeBuilderList builders)
 		{
 			return false;
 		}

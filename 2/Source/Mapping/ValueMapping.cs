@@ -101,6 +101,11 @@ namespace BLToolkit.Mapping
 				IMapDataDestination dest,   object destObject,   int destIndex)
 			{
 				dest.SetValue(destObject, destIndex, source.GetValue(sourceObject, sourceIndex));
+
+				//object o = source.GetValue(sourceObject, sourceIndex);
+
+				//if (o == null) dest.SetNull (destObject, destIndex);
+				//else           dest.SetValue(destObject, destIndex, o);
 			}
 		}
 

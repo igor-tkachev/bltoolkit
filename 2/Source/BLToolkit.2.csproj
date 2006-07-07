@@ -44,6 +44,7 @@
     <Compile Include="Aspects\CacheAspect.cs" />
     <Compile Include="Aspects\CacheAttribute.cs" />
     <Compile Include="Aspects\CallMethodInfo.cs" />
+    <Compile Include="Aspects\MethodCallCounter.cs" />
     <Compile Include="Aspects\CounterAspect.cs" />
     <Compile Include="Aspects\CounterAttribute.cs" />
     <Compile Include="Aspects\NoCacheAttribute.cs" />
@@ -139,7 +140,16 @@
     <Compile Include="EditableObjects\IEditable.cs" />
     <Compile Include="Mapping\MapDataDestinationBase.cs" />
     <Compile Include="Mapping\MapDataSourceBase.cs" />
+    <Compile Include="Mapping\ScalarDataReaderMapper.cs" />
+    <Compile Include="Mapping\SimpleDestinationListMapper.cs" />
+    <Compile Include="Mapping\ScalarListMapper.cs" />
+    <Compile Include="Mapping\ScalarListMapperT.cs" />
+    <Compile Include="Mapping\TextDataListMapper.cs" />
+    <Compile Include="Mapping\TextDataMapper.cs" />
     <Compile Include="Mapping\TextDataReader.cs" />
+    <Compile Include="Mapping\TextDataWriter.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Mapping\ValueMapping.cs" />
     <Compile Include="Mapping\MapDataSourceDestinationBase.cs" />
     <Compile Include="Mapping\DefaultMappingSchema.cs" />

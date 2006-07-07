@@ -70,9 +70,9 @@ namespace BLToolkit.Mapping
 
 					for (int i = 0; i < _names.Length; i++)
 						_names[i] = _names[i].Trim();
-
-					break;
 				}
+				else if (_line.StartsWith("**"))
+					break;
 			}
 		}
 
@@ -94,7 +94,7 @@ namespace BLToolkit.Mapping
 						_values[i] =
 							value.Length == 0? null:
 							value[0] == '*'?   value.Substring(1):
-							value[0] == '+'?   Convert.ToBase64String(Encoding.Unicode.GetBytes(value)):
+							value[0] == '+'?   Encoding.Unicode.GetString(Convert.FromBase64String(value.Substring(1))):
 							                   value;
 					}
 

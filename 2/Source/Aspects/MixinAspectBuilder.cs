@@ -24,7 +24,7 @@ namespace BLToolkit.Aspects
 		private bool   _throwExceptionIfNull;
 		private string _exceptionMessage;
 
-		public override bool IsApplied(BuildContext context)
+		public override bool IsApplied(BuildContext context, AbstractTypeBuilderList builders)
 		{
 			return context.BuildElement == BuildElement.InterfaceMethod;
 		}
