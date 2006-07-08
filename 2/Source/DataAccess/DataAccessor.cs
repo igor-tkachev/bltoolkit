@@ -1005,8 +1005,8 @@ namespace BLToolkit.DataAccess
 			SqlQueryInfo query = GetSqlQueryInfo(db, obj.GetType(), "Insert");
 
 			db
-			  .SetCommand(query.QueryText, query.GetParameters(db, obj))
-			  .ExecuteNonQuery();
+				.SetCommand(query.QueryText, query.GetParameters(db, obj))
+				.ExecuteNonQuery();
 		}
 
 		public void InsertSql(object obj)
