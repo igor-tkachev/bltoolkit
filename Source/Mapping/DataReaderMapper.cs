@@ -41,6 +41,11 @@ namespace BLToolkit.Mapping
 			return _dataReader.GetName(index);
 		}
 
+		public virtual int GetOrdinal(string name)
+		{
+			return _dataReader.GetOrdinal(name);
+		}
+
 		public virtual object GetValue(object o, int index)
 		{
 			object value = _dataReader.GetValue(index);

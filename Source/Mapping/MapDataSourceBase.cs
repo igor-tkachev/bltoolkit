@@ -10,6 +10,7 @@ namespace BLToolkit.Mapping
 		public abstract int      Count { get; }
 		public abstract Type     GetFieldType(int index);
 		public abstract string   GetName     (int index);
+		public abstract int      GetOrdinal  (string name);
 		public abstract object   GetValue    (object o, int index);
 		public abstract object   GetValue    (object o, string name);
 

@@ -102,5 +102,11 @@ namespace BLToolkit.Reflection
 			[DebuggerStepThrough] get { return _isSource;  }
 			[DebuggerStepThrough] set { _isSource = value; }
 		}
+
+		public  bool  IsDestination
+		{
+			[DebuggerStepThrough] get { return !_isSource;  }
+			[DebuggerStepThrough] set { _isSource = !value; }
+		}
 	}
 }

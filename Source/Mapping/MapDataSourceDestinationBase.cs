@@ -7,7 +7,6 @@ namespace BLToolkit.Mapping
 	{
 		#region IMapDataDestination Members
 
-		public abstract int  GetOrdinal(string name);
 		public abstract void SetValue  (object o, int index, object value);
 		public abstract void SetValue  (object o, string name, object value);
 

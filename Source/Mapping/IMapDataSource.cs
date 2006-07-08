@@ -10,6 +10,7 @@ namespace BLToolkit.Mapping
 
 		Type     GetFieldType (int index);
 		string   GetName      (int index);
+		int      GetOrdinal   (string name);
 		object   GetValue     (object o, int index);
 		object   GetValue     (object o, string name);
 
