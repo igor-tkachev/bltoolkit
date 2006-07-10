@@ -15,7 +15,7 @@ namespace BLToolkit.Mapping
 {
 	public
 #if FW2
-		static
+		static partial
 #endif
 		class ValueMapping
 	{
@@ -30,57 +30,78 @@ namespace BLToolkit.Mapping
 
 		static ValueMapping()
 		{
-			AddSameType(typeof(SByte),    new SByteToSByte());
-			AddSameType(typeof(Int16),    new Int16ToInt16());
-			AddSameType(typeof(Int32),    new Int32ToInt32());
-			AddSameType(typeof(Int64),    new Int64ToInt64());
-			AddSameType(typeof(Byte),     new ByteToByte());
-			AddSameType(typeof(UInt16),   new UInt16ToUInt16());
-			AddSameType(typeof(UInt32),   new UInt32ToUInt32());
-			AddSameType(typeof(UInt64),   new UInt64ToUInt64());
-			AddSameType(typeof(Boolean),  new BooleanToBoolean());
-			AddSameType(typeof(Char),     new CharToChar());
-			AddSameType(typeof(Single),   new SingleToSingle());
-			AddSameType(typeof(Double),   new DoubleToDouble());
-			AddSameType(typeof(Decimal),  new DecimalToDecimal());
-			AddSameType(typeof(Guid),     new GuidToGuid());
-			AddSameType(typeof(DateTime), new DateTimeToDateTime());
+
+			// Scalar Types.
+			//
+			AddSameType(typeof(SByte),       new I8ToI8());
+			AddSameType(typeof(Int16),       new I16ToI16());
+			AddSameType(typeof(Int32),       new I32ToI32());
+			AddSameType(typeof(Int64),       new I64ToI64());
+
+			AddSameType(typeof(Byte),        new U8ToU8());
+			AddSameType(typeof(UInt16),      new U16ToU16());
+			AddSameType(typeof(UInt32),      new U32ToU32());
+			AddSameType(typeof(UInt64),      new U64ToU64());
+
+			AddSameType(typeof(Single),      new R4ToR4());
+			AddSameType(typeof(Double),      new R8ToR8());
+
+			AddSameType(typeof(Boolean),     new BToB());
+			AddSameType(typeof(Decimal),     new DToD());
+
+			AddSameType(typeof(Char),        new CToC());
+			AddSameType(typeof(Guid),        new GToG());
+			AddSameType(typeof(DateTime),    new DTToDT());
 
 #if FW2
-			AddSameType(typeof(SByte?),    new NullableSByteToNullableSByte());
-			AddSameType(typeof(Int16?),    new NullableInt16ToNullableInt16());
-			AddSameType(typeof(Int32?),    new NullableInt32ToNullableInt32());
-			AddSameType(typeof(Int64?),    new NullableInt64ToNullableInt64());
-			AddSameType(typeof(Byte?),     new NullableByteToNullableByte());
-			AddSameType(typeof(UInt16?),   new NullableUInt16ToNullableUInt16());
-			AddSameType(typeof(UInt32?),   new NullableUInt32ToNullableUInt32());
-			AddSameType(typeof(UInt64?),   new NullableUInt64ToNullableUInt64());
-			AddSameType(typeof(Boolean?),  new NullableBooleanToNullableBoolean());
-			AddSameType(typeof(Char?),     new NullableCharToNullableChar());
-			AddSameType(typeof(Single?),   new NullableSingleToNullableSingle());
-			AddSameType(typeof(Double?),   new NullableDoubleToNullableDouble());
-			AddSameType(typeof(Decimal?),  new NullableDecimalToNullableDecimal());
-			AddSameType(typeof(Guid?),     new NullableGuidToNullableGuid());
-			AddSameType(typeof(DateTime?), new NullableDateTimeToNullableDateTime());
+			// Nullable Types.
+			//
+			AddSameType(typeof(SByte?),      new NI8ToNI8());
+			AddSameType(typeof(Int16?),      new NI16ToNI16());
+			AddSameType(typeof(Int32?),      new NI32ToNI32());
+			AddSameType(typeof(Int64?),      new NI64ToNI64());
+
+			AddSameType(typeof(Byte?),       new NU8ToNU8());
+			AddSameType(typeof(UInt16?),     new NU16ToNU16());
+			AddSameType(typeof(UInt32?),     new NU32ToNU32());
+			AddSameType(typeof(UInt64?),     new NU64ToNU64());
+
+			AddSameType(typeof(Single?),     new NR4ToNR4());
+			AddSameType(typeof(Double?),     new NR8ToNR8());
+
+			AddSameType(typeof(Boolean?),    new NBToNB());
+			AddSameType(typeof(Decimal?),    new NDToND());
+
+			AddSameType(typeof(Char?),       new NCToNC());
+			AddSameType(typeof(Guid?),       new NGToNG());
+			AddSameType(typeof(DateTime?),   new NDTToNDT());
 #endif
 
-			AddSameType(typeof(SqlByte),     new SqlByteToSqlByte());
-			AddSameType(typeof(SqlInt16),    new SqlInt16ToSqlInt16());
-			AddSameType(typeof(SqlInt32),    new SqlInt32ToSqlInt32());
-			AddSameType(typeof(SqlInt64),    new SqlInt64ToSqlInt64());
-			AddSameType(typeof(SqlSingle),   new SqlSingleToSqlSingle());
-			AddSameType(typeof(SqlBoolean),  new SqlBooleanToSqlBoolean());
-			AddSameType(typeof(SqlDouble),   new SqlDoubleToSqlDouble());
-			AddSameType(typeof(SqlDateTime), new SqlDateTimeToSqlDateTime());
-			AddSameType(typeof(SqlDecimal),  new SqlDecimalToSqlDecimal());
-			AddSameType(typeof(SqlMoney),    new SqlMoneyToSqlMoney());
-			AddSameType(typeof(SqlGuid),     new SqlGuidToSqlGuid());
-			AddSameType(typeof(SqlString),   new SqlStringToSqlString());
+			// SqlTypes.
+			//
+			AddSameType(typeof(SqlString),   new dbSTodbS());
 
-			_mappers.Add(new KeyValue(typeof(Int32),    typeof(Double)),  new Int32ToDouble());
-			_mappers.Add(new KeyValue(typeof(Int32),    typeof(Decimal)), new Int32ToDecimal());
-			_mappers.Add(new KeyValue(typeof(Double),   typeof(Int32)),   new DoubleToInt32());
-			_mappers.Add(new KeyValue(typeof(Decimal),  typeof(Int32)),   new DecimalToInt32());
+			AddSameType(typeof(SqlByte),     new dbU8TodbU8());
+			AddSameType(typeof(SqlInt16),    new dbI16TodbI16());
+			AddSameType(typeof(SqlInt32),    new dbI32TodbI32());
+			AddSameType(typeof(SqlInt64),    new dbI64TodbI64());
+
+			AddSameType(typeof(SqlSingle),   new dbR4TodbR4());
+			AddSameType(typeof(SqlDouble),   new dbR8TodbR8());
+			AddSameType(typeof(SqlDecimal),  new dbDTodbD());
+			AddSameType(typeof(SqlMoney),    new dbMTodbM());
+
+			AddSameType(typeof(SqlBoolean),  new dbBTodbB());
+			AddSameType(typeof(SqlGuid),     new dbGTodbG());
+			AddSameType(typeof(SqlDateTime), new dbDTTodbDT());
+
+
+			// Different Types.
+			//
+			_mappers.Add(new KeyValue(typeof(Int32),      typeof(Double)),  new Int32ToDouble());
+			_mappers.Add(new KeyValue(typeof(Int32),      typeof(Decimal)), new Int32ToDecimal());
+			_mappers.Add(new KeyValue(typeof(Double),     typeof(Int32)),   new DoubleToInt32());
+			_mappers.Add(new KeyValue(typeof(Decimal),    typeof(Int32)),   new DecimalToInt32());
 
 			_mappers.Add(new KeyValue(typeof(SqlInt32),   typeof(Int32)),   new SqlInt32ToInt32());
 			_mappers.Add(new KeyValue(typeof(SqlDecimal), typeof(Decimal)), new SqlDecimalToDecimal());
@@ -173,9 +194,9 @@ namespace BLToolkit.Mapping
 
 		#region Same Types
 
-		#region Simple Types
+		#region Scalar Types
 
-		class SByteToSByte : IValueMapper
+		sealed class I8ToI8 : IValueMapper
 		{
 			public void Map(
 				IMapDataSource      source, object sourceObject, int sourceIndex,
@@ -184,11 +205,12 @@ namespace BLToolkit.Mapping
 				if (source.IsNull(sourceObject, sourceIndex))
 					dest.SetNull(destObject, destIndex);
 				else
-					dest.SetSByte(destObject, destIndex, source.GetSByte(sourceObject, sourceIndex));
+					dest.SetSByte(destObject, destIndex,
+						source.GetSByte(sourceObject, sourceIndex));
 			}
 		}
 
-		class Int16ToInt16 : IValueMapper
+		sealed class I16ToI16 : IValueMapper
 		{
 			public void Map(
 				IMapDataSource      source, object sourceObject, int sourceIndex,
@@ -197,11 +219,12 @@ namespace BLToolkit.Mapping
 				if (source.IsNull(sourceObject, sourceIndex))
 					dest.SetNull(destObject, destIndex);
 				else
-					dest.SetInt16(destObject, destIndex, source.GetInt16(sourceObject, sourceIndex));
+					dest.SetInt16(destObject, destIndex,
+						source.GetInt16(sourceObject, sourceIndex));
 			}
 		}
 
-		class Int32ToInt32 : IValueMapper
+		sealed class I32ToI32 : IValueMapper
 		{
 			public void Map(
 				IMapDataSource      source, object sourceObject, int sourceIndex,
@@ -210,11 +233,12 @@ namespace BLToolkit.Mapping
 				if (source.IsNull(sourceObject, sourceIndex))
 					dest.SetNull(destObject, destIndex);
 				else
-					dest.SetInt32(destObject, destIndex, source.GetInt32(sourceObject, sourceIndex));
+					dest.SetInt32(destObject, destIndex,
+						source.GetInt32(sourceObject, sourceIndex));
 			}
 		}
 
-		class Int64ToInt64 : IValueMapper
+		sealed class I64ToI64 : IValueMapper
 		{
 			public void Map(
 				IMapDataSource      source, object sourceObject, int sourceIndex,
@@ -223,11 +247,13 @@ namespace BLToolkit.Mapping
 				if (source.IsNull(sourceObject, sourceIndex))
 					dest.SetNull(destObject, destIndex);
 				else
-					dest.SetInt64(destObject, destIndex, source.GetInt64(sourceObject, sourceIndex));
+					dest.SetInt64(destObject, destIndex,
+						source.GetInt64(sourceObject, sourceIndex));
 			}
 		}
 
-		class ByteToByte : IValueMapper
+
+		sealed class U8ToU8 : IValueMapper
 		{
 			public void Map(
 				IMapDataSource      source, object sourceObject, int sourceIndex,
@@ -236,11 +262,12 @@ namespace BLToolkit.Mapping
 				if (source.IsNull(sourceObject, sourceIndex))
 					dest.SetNull(destObject, destIndex);
 				else
-					dest.SetByte(destObject, destIndex, source.GetByte(sourceObject, sourceIndex));
+					dest.SetByte(destObject, destIndex,
+						source.GetByte(sourceObject, sourceIndex));
 			}
 		}
 
-		class UInt16ToUInt16 : IValueMapper
+		sealed class U16ToU16 : IValueMapper
 		{
 			public void Map(
 				IMapDataSource      source, object sourceObject, int sourceIndex,
@@ -249,11 +276,12 @@ namespace BLToolkit.Mapping
 				if (source.IsNull(sourceObject, sourceIndex))
 					dest.SetNull(destObject, destIndex);
 				else
-					dest.SetUInt16(destObject, destIndex, source.GetUInt16(sourceObject, sourceIndex));
+					dest.SetUInt16(destObject, destIndex,
+						source.GetUInt16(sourceObject, sourceIndex));
 			}
 		}
 
-		class UInt32ToUInt32 : IValueMapper
+		sealed class U32ToU32 : IValueMapper
 		{
 			public void Map(
 				IMapDataSource      source, object sourceObject, int sourceIndex,
@@ -262,11 +290,12 @@ namespace BLToolkit.Mapping
 				if (source.IsNull(sourceObject, sourceIndex))
 					dest.SetNull(destObject, destIndex);
 				else
-					dest.SetUInt32(destObject, destIndex, source.GetUInt32(sourceObject, sourceIndex));
+					dest.SetUInt32(destObject, destIndex,
+						source.GetUInt32(sourceObject, sourceIndex));
 			}
 		}
 
-		class UInt64ToUInt64 : IValueMapper
+		sealed class U64ToU64 : IValueMapper
 		{
 			public void Map(
 				IMapDataSource      source, object sourceObject, int sourceIndex,
@@ -275,11 +304,13 @@ namespace BLToolkit.Mapping
 				if (source.IsNull(sourceObject, sourceIndex))
 					dest.SetNull(destObject, destIndex);
 				else
-					dest.SetUInt64(destObject, destIndex, source.GetUInt64(sourceObject, sourceIndex));
+					dest.SetUInt64(destObject, destIndex,
+						source.GetUInt64(sourceObject, sourceIndex));
 			}
 		}
 
-		class BooleanToBoolean : IValueMapper
+
+		sealed class R4ToR4 : IValueMapper
 		{
 			public void Map(
 				IMapDataSource      source, object sourceObject, int sourceIndex,
@@ -288,11 +319,56 @@ namespace BLToolkit.Mapping
 				if (source.IsNull(sourceObject, sourceIndex))
 					dest.SetNull(destObject, destIndex);
 				else
-					dest.SetBoolean(destObject, destIndex, source.GetBoolean(sourceObject, sourceIndex));
+					dest.SetSingle(destObject, destIndex,
+						source.GetSingle(sourceObject, sourceIndex));
 			}
 		}
 
-		class CharToChar : IValueMapper
+		sealed class R8ToR8 : IValueMapper
+		{
+			public void Map(
+				IMapDataSource      source, object sourceObject, int sourceIndex,
+				IMapDataDestination dest,   object destObject,   int destIndex)
+			{
+				if (source.IsNull(sourceObject, sourceIndex))
+					dest.SetNull(destObject, destIndex);
+				else
+					dest.SetDouble(destObject, destIndex,
+						source.GetDouble(sourceObject, sourceIndex));
+			}
+		}
+
+
+		sealed class BToB : IValueMapper
+		{
+			public void Map(
+				IMapDataSource      source, object sourceObject, int sourceIndex,
+				IMapDataDestination dest,   object destObject,   int destIndex)
+			{
+				if (source.IsNull(sourceObject, sourceIndex))
+					dest.SetNull(destObject, destIndex);
+				else
+					dest.SetBoolean(destObject, destIndex,
+						source.GetBoolean(sourceObject, sourceIndex));
+			}
+		}
+
+		sealed class DToD : IValueMapper
+		{
+			public void Map(
+				IMapDataSource      source, object sourceObject, int sourceIndex,
+				IMapDataDestination dest,   object destObject,   int destIndex)
+			{
+				if (source.IsNull(sourceObject, sourceIndex))
+					dest.SetNull(destObject, destIndex);
+				else
+					dest.SetDecimal(destObject, destIndex,
+						source.GetDecimal(sourceObject, sourceIndex));
+			}
+		}
+
+
+		sealed class CToC : IValueMapper
 		{
 			public void Map(
 				IMapDataSource      source, object sourceObject, int sourceIndex,
@@ -305,7 +381,7 @@ namespace BLToolkit.Mapping
 			}
 		}
 
-		class SingleToSingle : IValueMapper
+		sealed class GToG : IValueMapper
 		{
 			public void Map(
 				IMapDataSource      source, object sourceObject, int sourceIndex,
@@ -314,11 +390,12 @@ namespace BLToolkit.Mapping
 				if (source.IsNull(sourceObject, sourceIndex))
 					dest.SetNull(destObject, destIndex);
 				else
-					dest.SetSingle(destObject, destIndex, source.GetSingle(sourceObject, sourceIndex));
+					dest.SetGuid(destObject, destIndex,
+						source.GetGuid(sourceObject, sourceIndex));
 			}
 		}
 
-		class DoubleToDouble : IValueMapper
+		sealed class DTToDT : IValueMapper
 		{
 			public void Map(
 				IMapDataSource      source, object sourceObject, int sourceIndex,
@@ -327,55 +404,16 @@ namespace BLToolkit.Mapping
 				if (source.IsNull(sourceObject, sourceIndex))
 					dest.SetNull(destObject, destIndex);
 				else
-					dest.SetDouble(destObject, destIndex, source.GetDouble(sourceObject, sourceIndex));
-			}
-		}
-
-		class DecimalToDecimal : IValueMapper
-		{
-			public void Map(
-				IMapDataSource      source, object sourceObject, int sourceIndex,
-				IMapDataDestination dest,   object destObject,   int destIndex)
-			{
-				if (source.IsNull(sourceObject, sourceIndex))
-					dest.SetNull(destObject, destIndex);
-				else
-					dest.SetDecimal(destObject, destIndex, source.GetDecimal(sourceObject, sourceIndex));
-			}
-		}
-
-		class GuidToGuid : IValueMapper
-		{
-			public void Map(
-				IMapDataSource      source, object sourceObject, int sourceIndex,
-				IMapDataDestination dest,   object destObject,   int destIndex)
-			{
-				if (source.IsNull(sourceObject, sourceIndex))
-					dest.SetNull(destObject, destIndex);
-				else
-					dest.SetGuid(destObject, destIndex, source.GetGuid(sourceObject, sourceIndex));
-			}
-		}
-
-		class DateTimeToDateTime : IValueMapper
-		{
-			public void Map(
-				IMapDataSource      source, object sourceObject, int sourceIndex,
-				IMapDataDestination dest,   object destObject,   int destIndex)
-			{
-				if (source.IsNull(sourceObject, sourceIndex))
-					dest.SetNull(destObject, destIndex);
-				else
-					dest.SetDateTime(destObject, destIndex, source.GetDateTime(sourceObject, sourceIndex));
+					dest.SetDateTime(destObject, destIndex,
+						source.GetDateTime(sourceObject, sourceIndex));
 			}
 		}
 
 		#endregion
 
-#if FW2
-		#region Simple Types
+		#region SqlTypes
 
-		class NullableSByteToNullableSByte : IValueMapper
+		sealed class dbSTodbS : IValueMapper
 		{
 			public void Map(
 				IMapDataSource      source, object sourceObject, int sourceIndex,
@@ -384,11 +422,13 @@ namespace BLToolkit.Mapping
 				if (source.IsNull(sourceObject, sourceIndex))
 					dest.SetNull(destObject, destIndex);
 				else
-					dest.SetNullableSByte(destObject, destIndex, source.GetNullableSByte(sourceObject, sourceIndex));
+					dest.SetSqlString(destObject, destIndex,
+						source.GetSqlString(sourceObject, sourceIndex));
 			}
 		}
 
-		class NullableInt16ToNullableInt16 : IValueMapper
+
+		sealed class dbU8TodbU8 : IValueMapper
 		{
 			public void Map(
 				IMapDataSource      source, object sourceObject, int sourceIndex,
@@ -397,11 +437,12 @@ namespace BLToolkit.Mapping
 				if (source.IsNull(sourceObject, sourceIndex))
 					dest.SetNull(destObject, destIndex);
 				else
-					dest.SetNullableInt16(destObject, destIndex, source.GetNullableInt16(sourceObject, sourceIndex));
+					dest.SetSqlByte(destObject, destIndex,
+						source.GetSqlByte(sourceObject, sourceIndex));
 			}
 		}
 
-		class NullableInt32ToNullableInt32 : IValueMapper
+		sealed class dbI16TodbI16 : IValueMapper
 		{
 			public void Map(
 				IMapDataSource      source, object sourceObject, int sourceIndex,
@@ -410,11 +451,12 @@ namespace BLToolkit.Mapping
 				if (source.IsNull(sourceObject, sourceIndex))
 					dest.SetNull(destObject, destIndex);
 				else
-					dest.SetNullableInt32(destObject, destIndex, source.GetNullableInt32(sourceObject, sourceIndex));
+					dest.SetSqlInt16(destObject, destIndex,
+						source.GetSqlInt16(sourceObject, sourceIndex));
 			}
 		}
 
-		class NullableInt64ToNullableInt64 : IValueMapper
+		sealed class dbI32TodbI32 : IValueMapper
 		{
 			public void Map(
 				IMapDataSource      source, object sourceObject, int sourceIndex,
@@ -423,11 +465,12 @@ namespace BLToolkit.Mapping
 				if (source.IsNull(sourceObject, sourceIndex))
 					dest.SetNull(destObject, destIndex);
 				else
-					dest.SetNullableInt64(destObject, destIndex, source.GetNullableInt64(sourceObject, sourceIndex));
+					dest.SetSqlInt32(destObject, destIndex,
+						source.GetSqlInt32(sourceObject, sourceIndex));
 			}
 		}
 
-		class NullableByteToNullableByte : IValueMapper
+		sealed class dbI64TodbI64 : IValueMapper
 		{
 			public void Map(
 				IMapDataSource      source, object sourceObject, int sourceIndex,
@@ -436,11 +479,13 @@ namespace BLToolkit.Mapping
 				if (source.IsNull(sourceObject, sourceIndex))
 					dest.SetNull(destObject, destIndex);
 				else
-					dest.SetNullableByte(destObject, destIndex, source.GetNullableByte(sourceObject, sourceIndex));
+					dest.SetSqlInt64(destObject, destIndex,
+						source.GetSqlInt64(sourceObject, sourceIndex));
 			}
 		}
 
-		class NullableUInt16ToNullableUInt16 : IValueMapper
+
+		sealed class dbR4TodbR4 : IValueMapper
 		{
 			public void Map(
 				IMapDataSource      source, object sourceObject, int sourceIndex,
@@ -449,11 +494,12 @@ namespace BLToolkit.Mapping
 				if (source.IsNull(sourceObject, sourceIndex))
 					dest.SetNull(destObject, destIndex);
 				else
-					dest.SetNullableUInt16(destObject, destIndex, source.GetNullableUInt16(sourceObject, sourceIndex));
+					dest.SetSqlSingle(destObject, destIndex,
+						source.GetSqlSingle(sourceObject, sourceIndex));
 			}
 		}
 
-		class NullableUInt32ToNullableUInt32 : IValueMapper
+		sealed class dbR8TodbR8 : IValueMapper
 		{
 			public void Map(
 				IMapDataSource      source, object sourceObject, int sourceIndex,
@@ -462,11 +508,12 @@ namespace BLToolkit.Mapping
 				if (source.IsNull(sourceObject, sourceIndex))
 					dest.SetNull(destObject, destIndex);
 				else
-					dest.SetNullableUInt32(destObject, destIndex, source.GetNullableUInt32(sourceObject, sourceIndex));
+					dest.SetSqlDouble(destObject, destIndex,
+						source.GetSqlDouble(sourceObject, sourceIndex));
 			}
 		}
 
-		class NullableUInt64ToNullableUInt64 : IValueMapper
+		sealed class dbDTodbD : IValueMapper
 		{
 			public void Map(
 				IMapDataSource      source, object sourceObject, int sourceIndex,
@@ -475,11 +522,12 @@ namespace BLToolkit.Mapping
 				if (source.IsNull(sourceObject, sourceIndex))
 					dest.SetNull(destObject, destIndex);
 				else
-					dest.SetNullableUInt64(destObject, destIndex, source.GetNullableUInt64(sourceObject, sourceIndex));
+					dest.SetSqlDecimal(destObject, destIndex,
+						source.GetSqlDecimal(sourceObject, sourceIndex));
 			}
 		}
 
-		class NullableBooleanToNullableBoolean : IValueMapper
+		sealed class dbMTodbM : IValueMapper
 		{
 			public void Map(
 				IMapDataSource      source, object sourceObject, int sourceIndex,
@@ -488,11 +536,13 @@ namespace BLToolkit.Mapping
 				if (source.IsNull(sourceObject, sourceIndex))
 					dest.SetNull(destObject, destIndex);
 				else
-					dest.SetNullableBoolean(destObject, destIndex, source.GetNullableBoolean(sourceObject, sourceIndex));
+					dest.SetSqlMoney(destObject, destIndex,
+						source.GetSqlMoney(sourceObject, sourceIndex));
 			}
 		}
 
-		class NullableCharToNullableChar : IValueMapper
+
+		sealed class dbBTodbB : IValueMapper
 		{
 			public void Map(
 				IMapDataSource      source, object sourceObject, int sourceIndex,
@@ -501,11 +551,12 @@ namespace BLToolkit.Mapping
 				if (source.IsNull(sourceObject, sourceIndex))
 					dest.SetNull(destObject, destIndex);
 				else
-					dest.SetNullableChar(destObject, destIndex, source.GetNullableChar(sourceObject, sourceIndex));
+					dest.SetSqlBoolean(destObject, destIndex,
+						source.GetSqlBoolean(sourceObject, sourceIndex));
 			}
 		}
 
-		class NullableSingleToNullableSingle : IValueMapper
+		sealed class dbGTodbG : IValueMapper
 		{
 			public void Map(
 				IMapDataSource      source, object sourceObject, int sourceIndex,
@@ -514,11 +565,12 @@ namespace BLToolkit.Mapping
 				if (source.IsNull(sourceObject, sourceIndex))
 					dest.SetNull(destObject, destIndex);
 				else
-					dest.SetNullableSingle(destObject, destIndex, source.GetNullableSingle(sourceObject, sourceIndex));
+					dest.SetSqlGuid(destObject, destIndex,
+						source.GetSqlGuid(sourceObject, sourceIndex));
 			}
 		}
 
-		class NullableDoubleToNullableDouble : IValueMapper
+		sealed class dbDTTodbDT : IValueMapper
 		{
 			public void Map(
 				IMapDataSource      source, object sourceObject, int sourceIndex,
@@ -527,207 +579,8 @@ namespace BLToolkit.Mapping
 				if (source.IsNull(sourceObject, sourceIndex))
 					dest.SetNull(destObject, destIndex);
 				else
-					dest.SetNullableDouble(destObject, destIndex, source.GetNullableDouble(sourceObject, sourceIndex));
-			}
-		}
-
-		class NullableDecimalToNullableDecimal : IValueMapper
-		{
-			public void Map(
-				IMapDataSource      source, object sourceObject, int sourceIndex,
-				IMapDataDestination dest,   object destObject,   int destIndex)
-			{
-				if (source.IsNull(sourceObject, sourceIndex))
-					dest.SetNull(destObject, destIndex);
-				else
-					dest.SetNullableDecimal(destObject, destIndex, source.GetNullableDecimal(sourceObject, sourceIndex));
-			}
-		}
-
-		class NullableGuidToNullableGuid : IValueMapper
-		{
-			public void Map(
-				IMapDataSource      source, object sourceObject, int sourceIndex,
-				IMapDataDestination dest,   object destObject,   int destIndex)
-			{
-				if (source.IsNull(sourceObject, sourceIndex))
-					dest.SetNull(destObject, destIndex);
-				else
-					dest.SetNullableGuid(destObject, destIndex, source.GetNullableGuid(sourceObject, sourceIndex));
-			}
-		}
-
-		class NullableDateTimeToNullableDateTime : IValueMapper
-		{
-			public void Map(
-				IMapDataSource      source, object sourceObject, int sourceIndex,
-				IMapDataDestination dest,   object destObject,   int destIndex)
-			{
-				if (source.IsNull(sourceObject, sourceIndex))
-					dest.SetNull(destObject, destIndex);
-				else
-					dest.SetNullableDateTime(destObject, destIndex, source.GetNullableDateTime(sourceObject, sourceIndex));
-			}
-		}
-
-		#endregion
-#endif
-
-		#region SQL Types
-
-		class SqlByteToSqlByte : IValueMapper
-		{
-			public void Map(
-				IMapDataSource      source, object sourceObject, int sourceIndex,
-				IMapDataDestination dest,   object destObject,   int destIndex)
-			{
-				if (source.IsNull(sourceObject, sourceIndex))
-					dest.SetNull(destObject, destIndex);
-				else
-					dest.SetSqlByte(destObject, destIndex, source.GetSqlByte(sourceObject, sourceIndex));
-			}
-		}
-
-		class SqlInt16ToSqlInt16 : IValueMapper
-		{
-			public void Map(
-				IMapDataSource      source, object sourceObject, int sourceIndex,
-				IMapDataDestination dest,   object destObject,   int destIndex)
-			{
-				if (source.IsNull(sourceObject, sourceIndex))
-					dest.SetNull(destObject, destIndex);
-				else
-					dest.SetSqlInt16(destObject, destIndex, source.GetSqlInt16(sourceObject, sourceIndex));
-			}
-		}
-
-		class SqlInt32ToSqlInt32 : IValueMapper
-		{
-			public void Map(
-				IMapDataSource      source, object sourceObject, int sourceIndex,
-				IMapDataDestination dest,   object destObject,   int destIndex)
-			{
-				if (source.IsNull(sourceObject, sourceIndex))
-					dest.SetNull(destObject, destIndex);
-				else
-					dest.SetSqlInt32(destObject, destIndex, source.GetSqlInt32(sourceObject, sourceIndex));
-			}
-		}
-
-		class SqlInt64ToSqlInt64 : IValueMapper
-		{
-			public void Map(
-				IMapDataSource      source, object sourceObject, int sourceIndex,
-				IMapDataDestination dest,   object destObject,   int destIndex)
-			{
-				if (source.IsNull(sourceObject, sourceIndex))
-					dest.SetNull(destObject, destIndex);
-				else
-					dest.SetSqlInt64(destObject, destIndex, source.GetSqlInt64(sourceObject, sourceIndex));
-			}
-		}
-
-		class SqlSingleToSqlSingle : IValueMapper
-		{
-			public void Map(
-				IMapDataSource      source, object sourceObject, int sourceIndex,
-				IMapDataDestination dest,   object destObject,   int destIndex)
-			{
-				if (source.IsNull(sourceObject, sourceIndex))
-					dest.SetNull(destObject, destIndex);
-				else
-					dest.SetSqlSingle(destObject, destIndex, source.GetSqlSingle(sourceObject, sourceIndex));
-			}
-		}
-
-		class SqlBooleanToSqlBoolean : IValueMapper
-		{
-			public void Map(
-				IMapDataSource      source, object sourceObject, int sourceIndex,
-				IMapDataDestination dest,   object destObject,   int destIndex)
-			{
-				if (source.IsNull(sourceObject, sourceIndex))
-					dest.SetNull(destObject, destIndex);
-				else
-					dest.SetSqlBoolean(destObject, destIndex, source.GetSqlBoolean(sourceObject, sourceIndex));
-			}
-		}
-
-		class SqlDoubleToSqlDouble : IValueMapper
-		{
-			public void Map(
-				IMapDataSource      source, object sourceObject, int sourceIndex,
-				IMapDataDestination dest,   object destObject,   int destIndex)
-			{
-				if (source.IsNull(sourceObject, sourceIndex))
-					dest.SetNull(destObject, destIndex);
-				else
-					dest.SetSqlDouble(destObject, destIndex, source.GetSqlDouble(sourceObject, sourceIndex));
-			}
-		}
-
-		class SqlDateTimeToSqlDateTime : IValueMapper
-		{
-			public void Map(
-				IMapDataSource      source, object sourceObject, int sourceIndex,
-				IMapDataDestination dest,   object destObject,   int destIndex)
-			{
-				if (source.IsNull(sourceObject, sourceIndex))
-					dest.SetNull(destObject, destIndex);
-				else
-					dest.SetSqlDateTime(destObject, destIndex, source.GetSqlDateTime(sourceObject, sourceIndex));
-			}
-		}
-
-		class SqlDecimalToSqlDecimal : IValueMapper
-		{
-			public void Map(
-				IMapDataSource      source, object sourceObject, int sourceIndex,
-				IMapDataDestination dest,   object destObject,   int destIndex)
-			{
-				if (source.IsNull(sourceObject, sourceIndex))
-					dest.SetNull(destObject, destIndex);
-				else
-					dest.SetSqlDecimal(destObject, destIndex, source.GetSqlDecimal(sourceObject, sourceIndex));
-			}
-		}
-
-		class SqlMoneyToSqlMoney : IValueMapper
-		{
-			public void Map(
-				IMapDataSource      source, object sourceObject, int sourceIndex,
-				IMapDataDestination dest,   object destObject,   int destIndex)
-			{
-				if (source.IsNull(sourceObject, sourceIndex))
-					dest.SetNull(destObject, destIndex);
-				else
-					dest.SetSqlMoney(destObject, destIndex, source.GetSqlMoney(sourceObject, sourceIndex));
-			}
-		}
-
-		class SqlGuidToSqlGuid : IValueMapper
-		{
-			public void Map(
-				IMapDataSource      source, object sourceObject, int sourceIndex,
-				IMapDataDestination dest,   object destObject,   int destIndex)
-			{
-				if (source.IsNull(sourceObject, sourceIndex))
-					dest.SetNull(destObject, destIndex);
-				else
-					dest.SetSqlGuid(destObject, destIndex, source.GetSqlGuid(sourceObject, sourceIndex));
-			}
-		}
-
-		class SqlStringToSqlString : IValueMapper
-		{
-			public void Map(
-				IMapDataSource      source, object sourceObject, int sourceIndex,
-				IMapDataDestination dest,   object destObject,   int destIndex)
-			{
-				if (source.IsNull(sourceObject, sourceIndex))
-					dest.SetNull(destObject, destIndex);
-				else
-					dest.SetSqlString(destObject, destIndex, source.GetSqlString(sourceObject, sourceIndex));
+					dest.SetSqlDateTime(destObject, destIndex,
+						source.GetSqlDateTime(sourceObject, sourceIndex));
 			}
 		}
 
@@ -746,7 +599,9 @@ namespace BLToolkit.Mapping
 				if (source.IsNull(sourceObject, sourceIndex))
 					dest.SetNull(destObject, destIndex);
 				else
-					dest.SetDouble(destObject, destIndex, Convert.ToDouble(source.GetInt32(sourceObject, sourceIndex)));
+					dest.SetDouble(destObject, destIndex,
+						Convert.ToDouble(
+							source.GetInt32(sourceObject, sourceIndex)));
 			}
 		}
 
@@ -759,7 +614,9 @@ namespace BLToolkit.Mapping
 				if (source.IsNull(sourceObject, sourceIndex))
 					dest.SetNull(destObject, destIndex);
 				else
-					dest.SetDecimal(destObject, destIndex, Convert.ToDecimal(source.GetInt32(sourceObject, sourceIndex)));
+					dest.SetDecimal(destObject, destIndex,
+						Convert.ToDecimal(
+							source.GetInt32(sourceObject, sourceIndex)));
 			}
 		}
 
@@ -772,7 +629,9 @@ namespace BLToolkit.Mapping
 				if (source.IsNull(sourceObject, sourceIndex))
 					dest.SetNull(destObject, destIndex);
 				else
-					dest.SetInt32(destObject, destIndex, Convert.ToInt32(source.GetDouble(sourceObject, sourceIndex)));
+					dest.SetInt32(destObject, destIndex,
+						Convert.ToInt32(
+							source.GetDouble(sourceObject, sourceIndex)));
 			}
 		}
 
@@ -785,7 +644,9 @@ namespace BLToolkit.Mapping
 				if (source.IsNull(sourceObject, sourceIndex))
 					dest.SetNull(destObject, destIndex);
 				else
-					dest.SetInt32(destObject, destIndex, Convert.ToInt32(source.GetDecimal(sourceObject, sourceIndex)));
+					dest.SetInt32(destObject, destIndex,
+						Convert.ToInt32(
+							source.GetDecimal(sourceObject, sourceIndex)));
 			}
 		}
 
@@ -845,141 +706,225 @@ namespace BLToolkit.Mapping
 
 #if FW2
 
+		#region Nullable Types
+
+		sealed class NI8ToNI8 : IValueMapper
+		{
+			public void Map(
+				IMapDataSource      source, object sourceObject, int sourceIndex,
+				IMapDataDestination dest,   object destObject,   int destIndex)
+			{
+				if (source.IsNull(sourceObject, sourceIndex))
+					dest.SetNull(destObject, destIndex);
+				else
+					dest.SetNullableSByte(destObject, destIndex,
+						source.GetNullableSByte(sourceObject, sourceIndex));
+			}
+		}
+
+		sealed class NI16ToNI16 : IValueMapper
+		{
+			public void Map(
+				IMapDataSource      source, object sourceObject, int sourceIndex,
+				IMapDataDestination dest,   object destObject,   int destIndex)
+			{
+				if (source.IsNull(sourceObject, sourceIndex))
+					dest.SetNull(destObject, destIndex);
+				else
+					dest.SetNullableInt16(destObject, destIndex,
+						source.GetNullableInt16(sourceObject, sourceIndex));
+			}
+		}
+
+		sealed class NI32ToNI32 : IValueMapper
+		{
+			public void Map(
+				IMapDataSource      source, object sourceObject, int sourceIndex,
+				IMapDataDestination dest,   object destObject,   int destIndex)
+			{
+				if (source.IsNull(sourceObject, sourceIndex))
+					dest.SetNull(destObject, destIndex);
+				else
+					dest.SetNullableInt32(destObject, destIndex,
+						source.GetNullableInt32(sourceObject, sourceIndex));
+			}
+		}
+
+		sealed class NI64ToNI64 : IValueMapper
+		{
+			public void Map(
+				IMapDataSource      source, object sourceObject, int sourceIndex,
+				IMapDataDestination dest,   object destObject,   int destIndex)
+			{
+				if (source.IsNull(sourceObject, sourceIndex))
+					dest.SetNull(destObject, destIndex);
+				else
+					dest.SetNullableInt64(destObject, destIndex,
+						source.GetNullableInt64(sourceObject, sourceIndex));
+			}
+		}
+
+
+		sealed class NU8ToNU8 : IValueMapper
+		{
+			public void Map(
+				IMapDataSource      source, object sourceObject, int sourceIndex,
+				IMapDataDestination dest,   object destObject,   int destIndex)
+			{
+				if (source.IsNull(sourceObject, sourceIndex))
+					dest.SetNull(destObject, destIndex);
+				else
+					dest.SetNullableByte(destObject, destIndex,
+						source.GetNullableByte(sourceObject, sourceIndex));
+			}
+		}
+
+		sealed class NU16ToNU16 : IValueMapper
+		{
+			public void Map(
+				IMapDataSource      source, object sourceObject, int sourceIndex,
+				IMapDataDestination dest,   object destObject,   int destIndex)
+			{
+				if (source.IsNull(sourceObject, sourceIndex))
+					dest.SetNull(destObject, destIndex);
+				else
+					dest.SetNullableUInt16(destObject, destIndex,
+						source.GetNullableUInt16(sourceObject, sourceIndex));
+			}
+		}
+
+		sealed class NU32ToNU32 : IValueMapper
+		{
+			public void Map(
+				IMapDataSource      source, object sourceObject, int sourceIndex,
+				IMapDataDestination dest,   object destObject,   int destIndex)
+			{
+				if (source.IsNull(sourceObject, sourceIndex))
+					dest.SetNull(destObject, destIndex);
+				else
+					dest.SetNullableUInt32(destObject, destIndex,
+						source.GetNullableUInt32(sourceObject, sourceIndex));
+			}
+		}
+
+		sealed class NU64ToNU64 : IValueMapper
+		{
+			public void Map(
+				IMapDataSource      source, object sourceObject, int sourceIndex,
+				IMapDataDestination dest,   object destObject,   int destIndex)
+			{
+				if (source.IsNull(sourceObject, sourceIndex))
+					dest.SetNull(destObject, destIndex);
+				else
+					dest.SetNullableUInt64(destObject, destIndex,
+						source.GetNullableUInt64(sourceObject, sourceIndex));
+			}
+		}
+
+
+		sealed class NR4ToNR4 : IValueMapper
+		{
+			public void Map(
+				IMapDataSource      source, object sourceObject, int sourceIndex,
+				IMapDataDestination dest,   object destObject,   int destIndex)
+			{
+				if (source.IsNull(sourceObject, sourceIndex))
+					dest.SetNull(destObject, destIndex);
+				else
+					dest.SetNullableSingle(destObject, destIndex,
+						source.GetNullableSingle(sourceObject, sourceIndex));
+			}
+		}
+
+		sealed class NR8ToNR8 : IValueMapper
+		{
+			public void Map(
+				IMapDataSource      source, object sourceObject, int sourceIndex,
+				IMapDataDestination dest,   object destObject,   int destIndex)
+			{
+				if (source.IsNull(sourceObject, sourceIndex))
+					dest.SetNull(destObject, destIndex);
+				else
+					dest.SetNullableDouble(destObject, destIndex,
+						source.GetNullableDouble(sourceObject, sourceIndex));
+			}
+		}
+
+
+		sealed class NBToNB : IValueMapper
+		{
+			public void Map(
+				IMapDataSource      source, object sourceObject, int sourceIndex,
+				IMapDataDestination dest,   object destObject,   int destIndex)
+			{
+				if (source.IsNull(sourceObject, sourceIndex))
+					dest.SetNull(destObject, destIndex);
+				else
+					dest.SetNullableBoolean(destObject, destIndex,
+						source.GetNullableBoolean(sourceObject, sourceIndex));
+			}
+		}
+
+		sealed class NDToND : IValueMapper
+		{
+			public void Map(
+				IMapDataSource      source, object sourceObject, int sourceIndex,
+				IMapDataDestination dest,   object destObject,   int destIndex)
+			{
+				if (source.IsNull(sourceObject, sourceIndex))
+					dest.SetNull(destObject, destIndex);
+				else
+					dest.SetNullableDecimal(destObject, destIndex,
+						source.GetNullableDecimal(sourceObject, sourceIndex));
+			}
+		}
+
+
+		sealed class NCToNC : IValueMapper
+		{
+			public void Map(
+				IMapDataSource      source, object sourceObject, int sourceIndex,
+				IMapDataDestination dest,   object destObject,   int destIndex)
+			{
+				if (source.IsNull(sourceObject, sourceIndex))
+					dest.SetNull(destObject, destIndex);
+				else
+					dest.SetNullableChar(destObject, destIndex,
+						source.GetNullableChar(sourceObject, sourceIndex));
+			}
+		}
+
+		sealed class NGToNG : IValueMapper
+		{
+			public void Map(
+				IMapDataSource      source, object sourceObject, int sourceIndex,
+				IMapDataDestination dest,   object destObject,   int destIndex)
+			{
+				if (source.IsNull(sourceObject, sourceIndex))
+					dest.SetNull(destObject, destIndex);
+				else
+					dest.SetNullableGuid(destObject, destIndex,
+						source.GetNullableGuid(sourceObject, sourceIndex));
+			}
+		}
+
+		sealed class NDTToNDT : IValueMapper
+		{
+			public void Map(
+				IMapDataSource      source, object sourceObject, int sourceIndex,
+				IMapDataDestination dest,   object destObject,   int destIndex)
+			{
+				if (source.IsNull(sourceObject, sourceIndex))
+					dest.SetNull(destObject, destIndex);
+				else
+					dest.SetNullableDateTime(destObject, destIndex,
+						source.GetNullableDateTime(sourceObject, sourceIndex));
+			}
+		}
+
+		#endregion
+
 		#region Generic Mappers
-
-		static class GetData<T>
-		{
-			public delegate T GetMethod(IMapDataSource s, object o, int index);
-
-			private static GetMethod Conv<T1>(GetData<T1>.GetMethod op)
-			{
-				return (GetMethod)(object)op;
-			}
-
-			public  static GetMethod Get = GetGetter();
-			private static GetMethod GetGetter()
-			{
-				Type t = typeof(T);
-
-				if (t == typeof(SByte))       return Conv<SByte>      (delegate(IMapDataSource s, object o, int i) { return s.GetSByte      (o, i); });
-				if (t == typeof(Int16))       return Conv<Int16>      (delegate(IMapDataSource s, object o, int i) { return s.GetInt16      (o, i); });
-				if (t == typeof(Int32))       return Conv<Int32>      (delegate(IMapDataSource s, object o, int i) { return s.GetInt32      (o, i); });
-				if (t == typeof(Int64))       return Conv<Int64>      (delegate(IMapDataSource s, object o, int i) { return s.GetInt64      (o, i); });
-				if (t == typeof(Byte))        return Conv<Byte>       (delegate(IMapDataSource s, object o, int i) { return s.GetByte       (o, i); });
-				if (t == typeof(UInt16))      return Conv<UInt16>     (delegate(IMapDataSource s, object o, int i) { return s.GetUInt16     (o, i); });
-				if (t == typeof(UInt32))      return Conv<UInt32>     (delegate(IMapDataSource s, object o, int i) { return s.GetUInt32     (o, i); });
-				if (t == typeof(UInt64))      return Conv<UInt64>     (delegate(IMapDataSource s, object o, int i) { return s.GetUInt64     (o, i); });
-
-				if (t == typeof(Boolean))     return Conv<Boolean>    (delegate(IMapDataSource s, object o, int i) { return s.GetBoolean    (o, i); });
-				if (t == typeof(Char))        return Conv<Char>       (delegate(IMapDataSource s, object o, int i) { return s.GetChar       (o, i); });
-				if (t == typeof(Single))      return Conv<Single>     (delegate(IMapDataSource s, object o, int i) { return s.GetSingle     (o, i); });
-				if (t == typeof(Double))      return Conv<Double>     (delegate(IMapDataSource s, object o, int i) { return s.GetDouble     (o, i); });
-				if (t == typeof(Decimal))     return Conv<Decimal>    (delegate(IMapDataSource s, object o, int i) { return s.GetDecimal    (o, i); });
-				if (t == typeof(Guid))        return Conv<Guid>       (delegate(IMapDataSource s, object o, int i) { return s.GetGuid       (o, i); });
-				if (t == typeof(DateTime))    return Conv<DateTime>   (delegate(IMapDataSource s, object o, int i) { return s.GetDateTime   (o, i); });
-
-#if FW2
-				if (t == typeof(SByte?))      return Conv<SByte?>     (delegate(IMapDataSource s, object o, int i) { return s.GetNullableSByte   (o, i); });
-				if (t == typeof(Int16?))      return Conv<Int16?>     (delegate(IMapDataSource s, object o, int i) { return s.GetNullableInt16   (o, i); });
-				if (t == typeof(Int32?))      return Conv<Int32?>     (delegate(IMapDataSource s, object o, int i) { return s.GetNullableInt32   (o, i); });
-				if (t == typeof(Int64?))      return Conv<Int64?>     (delegate(IMapDataSource s, object o, int i) { return s.GetNullableInt64   (o, i); });
-				if (t == typeof(Byte?))       return Conv<Byte?>      (delegate(IMapDataSource s, object o, int i) { return s.GetNullableByte    (o, i); });
-				if (t == typeof(UInt16?))     return Conv<UInt16?>    (delegate(IMapDataSource s, object o, int i) { return s.GetNullableUInt16  (o, i); });
-				if (t == typeof(UInt32?))     return Conv<UInt32?>    (delegate(IMapDataSource s, object o, int i) { return s.GetNullableUInt32  (o, i); });
-				if (t == typeof(UInt64?))     return Conv<UInt64?>    (delegate(IMapDataSource s, object o, int i) { return s.GetNullableUInt64  (o, i); });
-
-				if (t == typeof(Boolean?))    return Conv<Boolean?>   (delegate(IMapDataSource s, object o, int i) { return s.GetNullableBoolean (o, i); });
-				if (t == typeof(Char?))       return Conv<Char?>      (delegate(IMapDataSource s, object o, int i) { return s.GetNullableChar    (o, i); });
-				if (t == typeof(Single?))     return Conv<Single?>    (delegate(IMapDataSource s, object o, int i) { return s.GetNullableSingle  (o, i); });
-				if (t == typeof(Double?))     return Conv<Double?>    (delegate(IMapDataSource s, object o, int i) { return s.GetNullableDouble  (o, i); });
-				if (t == typeof(Decimal?))    return Conv<Decimal?>   (delegate(IMapDataSource s, object o, int i) { return s.GetNullableDecimal (o, i); });
-				if (t == typeof(Guid?))       return Conv<Guid?>      (delegate(IMapDataSource s, object o, int i) { return s.GetNullableGuid    (o, i); });
-				if (t == typeof(DateTime?))   return Conv<DateTime?>  (delegate(IMapDataSource s, object o, int i) { return s.GetNullableDateTime(o, i); });
-#endif
-
-				if (t == typeof(SqlByte))     return Conv<SqlByte>    (delegate(IMapDataSource s, object o, int i) { return s.GetSqlByte    (o, i); });
-				if (t == typeof(SqlInt16))    return Conv<SqlInt16>   (delegate(IMapDataSource s, object o, int i) { return s.GetSqlInt16   (o, i); });
-				if (t == typeof(SqlInt32))    return Conv<SqlInt32>   (delegate(IMapDataSource s, object o, int i) { return s.GetSqlInt32   (o, i); });
-				if (t == typeof(SqlInt64))    return Conv<SqlInt64>   (delegate(IMapDataSource s, object o, int i) { return s.GetSqlInt64   (o, i); });
-				if (t == typeof(SqlSingle))   return Conv<SqlSingle>  (delegate(IMapDataSource s, object o, int i) { return s.GetSqlSingle  (o, i); });
-				if (t == typeof(SqlBoolean))  return Conv<SqlBoolean> (delegate(IMapDataSource s, object o, int i) { return s.GetSqlBoolean (o, i); });
-				if (t == typeof(SqlDouble))   return Conv<SqlDouble>  (delegate(IMapDataSource s, object o, int i) { return s.GetSqlDouble  (o, i); });
-				if (t == typeof(SqlDateTime)) return Conv<SqlDateTime>(delegate(IMapDataSource s, object o, int i) { return s.GetSqlDateTime(o, i); });
-				if (t == typeof(SqlDecimal))  return Conv<SqlDecimal> (delegate(IMapDataSource s, object o, int i) { return s.GetSqlDecimal (o, i); });
-				if (t == typeof(SqlMoney))    return Conv<SqlMoney>   (delegate(IMapDataSource s, object o, int i) { return s.GetSqlMoney   (o, i); });
-				if (t == typeof(SqlGuid))     return Conv<SqlGuid>    (delegate(IMapDataSource s, object o, int i) { return s.GetSqlGuid    (o, i); });
-				if (t == typeof(SqlString))   return Conv<SqlString>  (delegate(IMapDataSource s, object o, int i) { return s.GetSqlString  (o, i); });
-
-				return null;
-			}
-		}
-
-		static class SetData<T>
-		{
-			public delegate void SetMethod(IMapDataDestination d, object o, int index, T value);
-
-			private static SetMethod Conv<T1>(SetData<T1>.SetMethod op)
-			{
-				return (SetMethod)(object)op;
-			}
-
-			public  static SetMethod Set = GetSetter();
-			private static SetMethod GetSetter()
-			{
-				Type t = typeof(T);
-
-				if (t == typeof(SByte))       return Conv<SByte>      (delegate(IMapDataDestination d, object o, int i, SByte       v) { d.SetSByte      (o, i, v); });
-				if (t == typeof(Int16))       return Conv<Int16>      (delegate(IMapDataDestination d, object o, int i, Int16       v) { d.SetInt16      (o, i, v); });
-				if (t == typeof(Int32))       return Conv<Int32>      (delegate(IMapDataDestination d, object o, int i, Int32       v) { d.SetInt32      (o, i, v); });
-				if (t == typeof(Int64))       return Conv<Int64>      (delegate(IMapDataDestination d, object o, int i, Int64       v) { d.SetInt64      (o, i, v); });
-				if (t == typeof(Byte))        return Conv<Byte>       (delegate(IMapDataDestination d, object o, int i, Byte        v) { d.SetByte       (o, i, v); });
-				if (t == typeof(UInt16))      return Conv<UInt16>     (delegate(IMapDataDestination d, object o, int i, UInt16      v) { d.SetUInt16     (o, i, v); });
-				if (t == typeof(UInt32))      return Conv<UInt32>     (delegate(IMapDataDestination d, object o, int i, UInt32      v) { d.SetUInt32     (o, i, v); });
-				if (t == typeof(UInt64))      return Conv<UInt64>     (delegate(IMapDataDestination d, object o, int i, UInt64      v) { d.SetUInt64     (o, i, v); });
-
-				if (t == typeof(Boolean))     return Conv<Boolean>    (delegate(IMapDataDestination d, object o, int i, Boolean     v) { d.SetBoolean    (o, i, v); });
-				if (t == typeof(Char))        return Conv<Char>       (delegate(IMapDataDestination d, object o, int i, Char        v) { d.SetChar       (o, i, v); });
-				if (t == typeof(Single))      return Conv<Single>     (delegate(IMapDataDestination d, object o, int i, Single      v) { d.SetSingle     (o, i, v); });
-				if (t == typeof(Double))      return Conv<Double>     (delegate(IMapDataDestination d, object o, int i, Double      v) { d.SetDouble     (o, i, v); });
-				if (t == typeof(Decimal))     return Conv<Decimal>    (delegate(IMapDataDestination d, object o, int i, Decimal     v) { d.SetDecimal    (o, i, v); });
-				if (t == typeof(Guid))        return Conv<Guid>       (delegate(IMapDataDestination d, object o, int i, Guid        v) { d.SetGuid       (o, i, v); });
-				if (t == typeof(DateTime))    return Conv<DateTime>   (delegate(IMapDataDestination d, object o, int i, DateTime    v) { d.SetDateTime   (o, i, v); });
-
-#if FW2
-				if (t == typeof(SByte?))      return Conv<SByte?>     (delegate(IMapDataDestination d, object o, int i, SByte?      v) { d.SetNullableSByte   (o, i, v); });
-				if (t == typeof(Int16?))      return Conv<Int16?>     (delegate(IMapDataDestination d, object o, int i, Int16?      v) { d.SetNullableInt16   (o, i, v); });
-				if (t == typeof(Int32?))      return Conv<Int32?>     (delegate(IMapDataDestination d, object o, int i, Int32?      v) { d.SetNullableInt32   (o, i, v); });
-				if (t == typeof(Int64?))      return Conv<Int64?>     (delegate(IMapDataDestination d, object o, int i, Int64?      v) { d.SetNullableInt64   (o, i, v); });
-				if (t == typeof(Byte?))       return Conv<Byte?>      (delegate(IMapDataDestination d, object o, int i, Byte?       v) { d.SetNullableByte    (o, i, v); });
-				if (t == typeof(UInt16?))     return Conv<UInt16?>    (delegate(IMapDataDestination d, object o, int i, UInt16?     v) { d.SetNullableUInt16  (o, i, v); });
-				if (t == typeof(UInt32?))     return Conv<UInt32?>    (delegate(IMapDataDestination d, object o, int i, UInt32?     v) { d.SetNullableUInt32  (o, i, v); });
-				if (t == typeof(UInt64?))     return Conv<UInt64?>    (delegate(IMapDataDestination d, object o, int i, UInt64?     v) { d.SetNullableUInt64  (o, i, v); });
-
-				if (t == typeof(Boolean?))    return Conv<Boolean?>   (delegate(IMapDataDestination d, object o, int i, Boolean?    v) { d.SetNullableBoolean (o, i, v); });
-				if (t == typeof(Char?))       return Conv<Char?>      (delegate(IMapDataDestination d, object o, int i, Char?       v) { d.SetNullableChar    (o, i, v); });
-				if (t == typeof(Single?))     return Conv<Single?>    (delegate(IMapDataDestination d, object o, int i, Single?     v) { d.SetNullableSingle  (o, i, v); });
-				if (t == typeof(Double?))     return Conv<Double?>    (delegate(IMapDataDestination d, object o, int i, Double?     v) { d.SetNullableDouble  (o, i, v); });
-				if (t == typeof(Decimal?))    return Conv<Decimal?>   (delegate(IMapDataDestination d, object o, int i, Decimal?    v) { d.SetNullableDecimal (o, i, v); });
-				if (t == typeof(Guid?))       return Conv<Guid?>      (delegate(IMapDataDestination d, object o, int i, Guid?       v) { d.SetNullableGuid    (o, i, v); });
-				if (t == typeof(DateTime?))   return Conv<DateTime?>  (delegate(IMapDataDestination d, object o, int i, DateTime?   v) { d.SetNullableDateTime(o, i, v); });
-#endif
-
-				if (t == typeof(SqlByte))     return Conv<SqlByte>    (delegate(IMapDataDestination d, object o, int i, SqlByte     v) { d.SetSqlByte    (o, i, v); });
-				if (t == typeof(SqlInt16))    return Conv<SqlInt16>   (delegate(IMapDataDestination d, object o, int i, SqlInt16    v) { d.SetSqlInt16   (o, i, v); });
-				if (t == typeof(SqlInt32))    return Conv<SqlInt32>   (delegate(IMapDataDestination d, object o, int i, SqlInt32    v) { d.SetSqlInt32   (o, i, v); });
-				if (t == typeof(SqlInt64))    return Conv<SqlInt64>   (delegate(IMapDataDestination d, object o, int i, SqlInt64    v) { d.SetSqlInt64   (o, i, v); });
-				if (t == typeof(SqlSingle))   return Conv<SqlSingle>  (delegate(IMapDataDestination d, object o, int i, SqlSingle   v) { d.SetSqlSingle  (o, i, v); });
-				if (t == typeof(SqlBoolean))  return Conv<SqlBoolean> (delegate(IMapDataDestination d, object o, int i, SqlBoolean  v) { d.SetSqlBoolean (o, i, v); });
-				if (t == typeof(SqlDouble))   return Conv<SqlDouble>  (delegate(IMapDataDestination d, object o, int i, SqlDouble   v) { d.SetSqlDouble  (o, i, v); });
-				if (t == typeof(SqlDateTime)) return Conv<SqlDateTime>(delegate(IMapDataDestination d, object o, int i, SqlDateTime v) { d.SetSqlDateTime(o, i, v); });
-				if (t == typeof(SqlDecimal))  return Conv<SqlDecimal> (delegate(IMapDataDestination d, object o, int i, SqlDecimal  v) { d.SetSqlDecimal (o, i, v); });
-				if (t == typeof(SqlMoney))    return Conv<SqlMoney>   (delegate(IMapDataDestination d, object o, int i, SqlMoney    v) { d.SetSqlMoney   (o, i, v); });
-				if (t == typeof(SqlGuid))     return Conv<SqlGuid>    (delegate(IMapDataDestination d, object o, int i, SqlGuid     v) { d.SetSqlGuid    (o, i, v); });
-				if (t == typeof(SqlString))   return Conv<SqlString>  (delegate(IMapDataDestination d, object o, int i, SqlString   v) { d.SetSqlString  (o, i, v); });
-
-				return null;
-			}
-		}
 
 		interface IGetSetDataChecker
 		{
@@ -991,8 +936,8 @@ namespace BLToolkit.Mapping
 			public bool Check()
 			{
 				return
-					GetData<S>.Get != null && SetData<S>.Set != null &&
-					GetData<D>.Get != null && SetData<D>.Set != null;
+					GetData<S>.I != null && SetData<S>.I != null &&
+					GetData<D>.I != null && SetData<D>.I != null;
 			}
 		}
 
@@ -1006,14 +951,11 @@ namespace BLToolkit.Mapping
 					dest.SetNull(destObject, destIndex);
 				else
 				{
-					SetData<T>.SetMethod set = SetData<T>.Set;
-					GetData<T>.GetMethod get = GetData<T>.Get;
+					SetData<T>.MB<T> setter = SetData<T>.I;
+					GetData<T>.MB<T> getter = GetData<T>.I;
 
-					set(dest, destObject, destIndex, get(source, sourceObject, sourceIndex));
-
-					//SetData<T>.Set(
-					//	dest, destObject, destIndex,
-					//	GetData<T>.Get(source, sourceObject, sourceIndex));
+					setter.Set(dest, destObject, destIndex,
+						getter.Get(source, sourceObject, sourceIndex));
 				}
 			}
 		}
@@ -1028,14 +970,13 @@ namespace BLToolkit.Mapping
 					dest.SetNull(destObject, destIndex);
 				else
 				{
-					SetData<D>.SetMethod       set  = SetData<D>.Set;
-					GetData<S>.GetMethod       get  = GetData<S>.Get;
+					SetData<D>.MB<D>       setter    = SetData<D>.I;
+					GetData<S>.MB<S>       getter    = GetData<S>.I;
+					Convert<D, S>.CB<D, S> converter = Convert<D, S>.I;
 
-					set(dest, destObject, destIndex, Convert<D, S>.From(get(source, sourceObject, sourceIndex)));
-
-					//SetData<D>.Set(
-					//	dest, destObject, destIndex,
-					//	ConvertTo<D>.From(GetData<S>.Get(source, sourceObject, sourceIndex)));
+					setter.Set(dest, destObject, destIndex,
+						converter.C(
+							getter.Get(source, sourceObject, sourceIndex)));
 				}
 			}
 		}

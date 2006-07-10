@@ -2,7 +2,6 @@ using System;
 using System.Data;
 using System.Data.Common;
 
-using BLToolkit.Common;
 using BLToolkit.Mapping;
 
 namespace BLToolkit.Data.DataProvider
@@ -118,14 +117,5 @@ namespace BLToolkit.Data.DataProvider
 			get { return _mappingSchema; }
 			set { _mappingSchema = value; }
 		}
-
-#if EXPERIMENTAL
-		// This method must be overriden to provide access to specific data types such a 'Xml' data type
-		//
-		public virtual DataReader<T>.GetMethod SelectDataReaderGetMethod<T>(IDataReader dr, int index)
-		{
-			return DataReader<T>.Get;
-		}
-#endif
 	}
 }
