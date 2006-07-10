@@ -29,7 +29,7 @@ namespace BLToolkit.Common
 
 			// Convert to the same type.
 			//
-			if (TypeHelper.IsSameOrParent(typeof(P), t))
+			if (typeof(P) != typeof(object) && TypeHelper.IsSameOrParent(typeof(P), t))
 				return (CB<T, P>)(object)(new Assignable<T>());
 
 			// Scalar Types
@@ -55,7 +55,6 @@ namespace BLToolkit.Common
 			if (t == typeof(DateTime))    return GetDateTimeConverter();
 			if (t == typeof(TimeSpan))    return GetTimeSpanConverter();
 			if (t == typeof(Guid))        return GetGuidConverter();
-			if (t == typeof(Stream))      return GetStreamConverter();
 
 			// Nullable Types
 			//
@@ -104,6 +103,10 @@ namespace BLToolkit.Common
 			// Other Types
 			//
 			if (t == typeof(Type))        return GetTypeConverter();
+			if (t == typeof(Stream))      return GetStreamConverter();
+			if (t == typeof(XmlReader))   return GetXmlReaderConverter();
+			if (t == typeof(Byte[]))      return GetByteArrayConverter();
+			if (t == typeof(Char[]))      return GetCharArrayConverter();
 
 			return new Default<T,P>();
 		}

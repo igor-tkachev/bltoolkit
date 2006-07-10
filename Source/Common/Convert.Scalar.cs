@@ -2091,56 +2091,6 @@ namespace BLToolkit.Common
 
 		#endregion
 
-		#region Stream
-
-
-		// Scalar Types.
-		//
-		sealed class IOS_AU8     : CB<Stream,Byte[]>     { public override Stream C(Byte[] p)      { return p == null? Stream.Null: new MemoryStream(p); } }
-
-		// SqlTypes.
-		//
-		sealed class IOS_dbAU8   : CB<Stream,SqlBytes>   { public override Stream C(SqlBytes p)    { return p.IsNull? Stream.Null: p.Stream;                  } }
-		sealed class IOS_dbBin   : CB<Stream,SqlBinary>  { public override Stream C(SqlBinary p)   { return p.IsNull? Stream.Null: new MemoryStream(p.Value); } }
-
-		sealed class IOS_O         : CB<Stream ,object>    { public override Stream C(object p)  
-			{
-				if (p == null) return Stream.Null;
-
-				// Scalar Types.
-				//
-				if (p is Byte[])      return Convert<Stream,Byte[]>     .I.C((Byte[])p);
-
-				// SqlTypes.
-				//
-				if (p is SqlBytes)    return Convert<Stream,SqlBytes>   .I.C((SqlBytes)p);
-				if (p is SqlBinary)   return Convert<Stream,SqlBinary>  .I.C((SqlBinary)p);
-
-				throw new InvalidCastException(string.Format(
-					"Invalid cast from {0} to {1}", typeof(P).FullName, typeof(T).FullName));
-			} }
-
-		static CB<T, P> GetStreamConverter()
-		{
-			Type t = typeof(P);
-
-
-			// Scalar Types.
-			//
-			if (t == typeof(Byte[]))      return (CB<T, P>)(object)(new IOS_AU8     ());
-
-			// SqlTypes.
-			//
-			if (t == typeof(SqlBytes))    return (CB<T, P>)(object)(new IOS_dbAU8   ());
-			if (t == typeof(SqlBinary))   return (CB<T, P>)(object)(new IOS_dbBin   ());
-
-			if (t == typeof(object))      return (CB<T, P>)(object)(new IOS_O       ());
-
-			return (CB<T, P>)(object)Convert<Stream, object>.I;
-		}
-
-		#endregion
-
 		#endregion
 	}
 }

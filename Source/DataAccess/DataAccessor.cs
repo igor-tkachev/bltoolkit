@@ -7,7 +7,7 @@ using System.Data;
 using System.Data.SqlTypes;
 using System.IO;
 using System.Text;
-
+using System.Xml;
 using BLToolkit.Aspects;
 using BLToolkit.Common;
 using BLToolkit.Data;
@@ -1236,6 +1236,12 @@ namespace BLToolkit.DataAccess
 		protected virtual Stream ConvertToStream(DbManager db, object value, object parameter)
 		{
 			return db.MappingSchema.ConvertToStream(value);
+		}
+
+		[NoInterception]
+		protected virtual XmlReader ConvertToXmlReader(DbManager db, object value, object parameter)
+		{
+			return db.MappingSchema.ConvertToXmlReader(value);
 		}
 
 		#endregion

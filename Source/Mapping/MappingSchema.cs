@@ -5,10 +5,10 @@ using System.Data.SqlTypes;
 using System.IO;
 using System.Reflection;
 using System.Diagnostics.CodeAnalysis;
+using System.Xml;
 
 #if FW2
 using System.Collections.Generic;
-using System.Xml;
 using KeyValue = System.Collections.Generic.KeyValuePair<System.Type,System.Type>;
 #else
 using KeyValue = BLToolkit.Common.CompoundValue;
@@ -101,24 +101,25 @@ namespace BLToolkit.Mapping
 
 		public virtual void InitNullValues()
 		{
-			_defaultSByteNullValue    = (SByte)   GetNullValue(typeof(SByte));
-			_defaultInt16NullValue    = (Int16)   GetNullValue(typeof(Int16));
-			_defaultInt32NullValue    = (Int32)   GetNullValue(typeof(Int32));
-			_defaultInt64NullValue    = (Int64)   GetNullValue(typeof(Int64));
-			_defaultByteNullValue     = (Byte)    GetNullValue(typeof(Byte));
-			_defaultUInt16NullValue   = (UInt16)  GetNullValue(typeof(UInt16));
-			_defaultUInt32NullValue   = (UInt32)  GetNullValue(typeof(UInt32));
-			_defaultUInt64NullValue   = (UInt64)  GetNullValue(typeof(UInt64));
-			_defaultCharNullValue     = (Char)    GetNullValue(typeof(Char));
-			_defaultSingleNullValue   = (Single)  GetNullValue(typeof(Single));
-			_defaultDoubleNullValue   = (Double)  GetNullValue(typeof(Double));
-			_defaultBooleanNullValue  = (Boolean) GetNullValue(typeof(Boolean));
+			_defaultSByteNullValue     = (SByte)    GetNullValue(typeof(SByte));
+			_defaultInt16NullValue     = (Int16)    GetNullValue(typeof(Int16));
+			_defaultInt32NullValue     = (Int32)    GetNullValue(typeof(Int32));
+			_defaultInt64NullValue     = (Int64)    GetNullValue(typeof(Int64));
+			_defaultByteNullValue      = (Byte)     GetNullValue(typeof(Byte));
+			_defaultUInt16NullValue    = (UInt16)   GetNullValue(typeof(UInt16));
+			_defaultUInt32NullValue    = (UInt32)   GetNullValue(typeof(UInt32));
+			_defaultUInt64NullValue    = (UInt64)   GetNullValue(typeof(UInt64));
+			_defaultCharNullValue      = (Char)     GetNullValue(typeof(Char));
+			_defaultSingleNullValue    = (Single)   GetNullValue(typeof(Single));
+			_defaultDoubleNullValue    = (Double)   GetNullValue(typeof(Double));
+			_defaultBooleanNullValue   = (Boolean)  GetNullValue(typeof(Boolean));
 
-			_defaultStringNullValue   = (String)  GetNullValue(typeof(String));
-			_defaultDateTimeNullValue = (DateTime)GetNullValue(typeof(DateTime));
-			_defaultDecimalNullValue  = (Decimal) GetNullValue(typeof(Decimal));
-			_defaultGuidNullValue     = (Guid)    GetNullValue(typeof(Guid));
-			_defaultStreamNullValue   = (Stream)  GetNullValue(typeof(Stream));
+			_defaultStringNullValue    = (String)   GetNullValue(typeof(String));
+			_defaultDateTimeNullValue  = (DateTime) GetNullValue(typeof(DateTime));
+			_defaultDecimalNullValue   = (Decimal)  GetNullValue(typeof(Decimal));
+			_defaultGuidNullValue      = (Guid)     GetNullValue(typeof(Guid));
+			_defaultStreamNullValue    = (Stream)   GetNullValue(typeof(Stream));
+			_defaultXmlReaderNullValue = (XmlReader)GetNullValue(typeof(XmlReader));
 		}
 
 		#region Primitive Types
@@ -386,9 +387,28 @@ namespace BLToolkit.Mapping
 			if (value is SqlBinary) return new MemoryStream(((SqlBinary)value).Value);
 			if (value is byte[])    return new MemoryStream((byte[])value);
 #if FW2
-			if (value is SqlBytes)  return ((SqlBytes)value).Stream;
-#endif
+			return Convert<Stream, object>.From(value);
+#else
 			throw new MappingException(value.GetType(), typeof(Stream));
+#endif
+		}
+
+		private XmlReader _defaultXmlReaderNullValue;
+		public  XmlReader  DefaultXmlReaderNullValue
+		{
+			get { return _defaultXmlReaderNullValue; }
+			set { _defaultXmlReaderNullValue = value; }
+		}
+
+		public virtual XmlReader ConvertToXmlReader(object value)
+		{
+			if (value == null)      return _defaultXmlReaderNullValue;
+			if (value is XmlReader) return (XmlReader)value;
+#if FW2
+			return Convert<XmlReader, object>.From(value);
+#else
+			throw new MappingException(value.GetType(), typeof(XmlReader));
+#endif
 		}
 
 		public virtual byte[] ConvertToByteArray(object value)
@@ -397,9 +417,10 @@ namespace BLToolkit.Mapping
 			if (value is byte[])    return (byte[])value;
 			if (value is SqlBinary) return ((SqlBinary)value).Value;
 #if FW2
-			if (value is SqlBytes)  return ((SqlBytes)value).Buffer;
-#endif
+			return Convert<Byte[], object>.From(value);
+#else
 			throw new MappingException(value.GetType(), typeof(byte[]));
+#endif
 		}
 
 		public virtual char[] ConvertToCharArray(object value)
@@ -407,12 +428,12 @@ namespace BLToolkit.Mapping
 			if (value == null)      return null;
 			if (value is char[])    return (char[])value;
 			if (value is string)    return ((string)value).ToCharArray();
-#if FW2
-			if (value is SqlChars)  return ((SqlChars)value).Value;
-#endif
 			if (value is SqlString) return ((SqlString)value).Value.ToCharArray();
-
+#if FW2
+			return Convert<Char[], object>.From(value);
+#else
 			throw new MappingException(value.GetType(), typeof(char[]));
+#endif
 		}
 
 		#endregion
@@ -830,10 +851,11 @@ namespace BLToolkit.Mapping
 				case TypeCode.UInt64:   return ConvertToUInt64  (value);
 			}
 
-			if (typeof(Guid)   == conversionType) return ConvertToGuid  (value);
-			if (typeof(Stream) == conversionType) return ConvertToStream(value);
-			if (typeof(byte[]) == conversionType) return ConvertToByteArray(value);
-			if (typeof(char[]) == conversionType) return ConvertToCharArray(value);
+			if (typeof(Guid)   == conversionType)      return ConvertToGuid  (value);
+			if (typeof(Stream) == conversionType)      return ConvertToStream(value);
+			if (typeof(XmlReader) == conversionType)   return ConvertToXmlReader(value);
+			if (typeof(byte[]) == conversionType)      return ConvertToByteArray(value);
+			if (typeof(char[]) == conversionType)      return ConvertToCharArray(value);
 
 			if (typeof(SqlInt32)    == conversionType) return ConvertToSqlInt32   (value);
 			if (typeof(SqlString)   == conversionType) return ConvertToSqlString  (value);

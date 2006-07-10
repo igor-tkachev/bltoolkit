@@ -60,8 +60,8 @@ namespace Data
 			public UInt16    UInt16_;
 			public UInt32    UInt32_;
 			public UInt64    UInt64_;
-			//[MapIgnore(false)]
-			//public XmlReader Xml_;
+			[MapIgnore(false)]
+			public XmlReader Xml_;
 		}
 
 		public class DataTypeSqlTest

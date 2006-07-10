@@ -5,6 +5,7 @@ using System.Data;
 using System.Data.SqlTypes;
 using System.Collections;
 using System.Reflection.Emit;
+using System.Xml;
 using BLToolkit.Common;
 using BLToolkit.TypeBuilder.Builders;
 using BLToolkit.Data;
@@ -1353,6 +1354,9 @@ namespace BLToolkit.DataAccess
 			if (type == typeof(Decimal))     return "ConvertToDecimal";
 			if (type == typeof(Guid))        return "ConvertToGuid";
 			if (type == typeof(Stream))      return "ConvertToStream";
+			if (type == typeof(XmlReader))   return "ConvertToXmlReader";
+			if (type == typeof(Byte[]))      return "ConvertToByteArray";
+			if (type == typeof(Char[]))      return "ConvertToCharArray";
 
 			if (type == typeof(SqlByte))     return "ConvertToSqlByte";
 			if (type == typeof(SqlInt16))    return "ConvertToSqlInt16";

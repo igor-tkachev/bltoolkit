@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Xml;
 using BLToolkit.Reflection;
 using NUnit.Framework;
 
@@ -51,7 +52,10 @@ namespace DataAccess
 
 			[SqlQuery("SELECT Stream_ FROM DataTypeTest WHERE DataTypeID = @id")]
 			public abstract Stream GetStream(DbManager db, int id);
-			
+
+			[SqlQuery("SELECT Xml_ FROM DataTypeTest WHERE DataTypeID = @id")]
+			public abstract XmlReader GetXml(DbManager db, int id);
+
 			public static TestAccessor CreateInstance()
 			{
 				return (TestAccessor)CreateInstance(typeof(TestAccessor));
@@ -219,6 +223,20 @@ namespace DataAccess
 
 				Assert.AreEqual(s.Read(bytes, 0, bytes.Length), bytes.Length);
 				TypeAccessor.WriteConsole(bytes);
+			}
+		}
+
+		[Test]
+		public void XmlTest()
+		{
+			using (DbManager db = new DbManager())
+			{
+				TestAccessor ta = TestAccessor.CreateInstance();
+
+				XmlReader xml = ta.GetXml(db, 2);
+				xml.MoveToContent();
+				Assert.IsTrue(xml.ReadToDescendant("element"));
+				Console.WriteLine("{0}", xml.GetAttribute("strattr"));
 			}
 		}
 	}
