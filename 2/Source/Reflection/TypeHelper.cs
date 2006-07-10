@@ -5,7 +5,7 @@ using System.IO;
 using System.Reflection;
 using System.ComponentModel;
 using System.Diagnostics;
-
+using System.Xml;
 using BLToolkit.TypeBuilder;
 using BLToolkit.EditableObjects;
 
@@ -874,8 +874,11 @@ namespace BLToolkit.Reflection
 		{
 			while (type.IsArray)
 				type = type.GetElementType();
-			
-			return type.IsValueType || type == typeof(string) || type == typeof(Stream);
+
+			return type.IsValueType
+				|| type == typeof(string)
+				|| type == typeof(Stream)
+				|| type == typeof(XmlReader);
 		}
 
 		public static Type[] GetGenericArguments(Type type, string baseTypeName)

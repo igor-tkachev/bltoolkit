@@ -1,7 +1,7 @@
 using System;
 using System.Data.SqlTypes;
 using System.IO;
-
+using System.Xml;
 using BLToolkit.Reflection;
 
 namespace BLToolkit.Mapping
@@ -756,10 +756,11 @@ namespace BLToolkit.Mapping
 				if (mi.Trimmable) return n? new StringMapper.Trimmable.Nullable(): new StringMapper.Trimmable();
 				else              return n? new StringMapper.Nullable(): new StringMapper();
 
-			if (type == typeof(DateTime)) return n? new DateTimeMapper.Nullable(): new DateTimeMapper();
-			if (type == typeof(Decimal))  return n? new DecimalMapper.Nullable(): new DecimalMapper();
-			if (type == typeof(Guid))     return n? new GuidMapper.Nullable(): new GuidMapper();
-			if (type == typeof(Stream))   return n? new StreamMapper.Nullable(): new StreamMapper();
+			if (type == typeof(DateTime))  return n? new DateTimeMapper.Nullable()  : new DateTimeMapper();
+			if (type == typeof(Decimal))   return n? new DecimalMapper.Nullable()   : new DecimalMapper();
+			if (type == typeof(Guid))      return n? new GuidMapper.Nullable()      : new GuidMapper();
+			if (type == typeof(Stream))    return n? new StreamMapper.Nullable()    : new StreamMapper();
+			if (type == typeof(XmlReader)) return n ? new XmlReaderMapper.Nullable(): new XmlReaderMapper();
 
 			return null;
 		}
@@ -958,6 +959,37 @@ namespace BLToolkit.Mapping
 			}
 		}
 
+		class XmlReaderMapper : MemberMapper
+		{
+			protected XmlReader _nullValue;
+
+			public override void SetValue(object o, object value)
+			{
+				_memberAccessor.SetValue(
+					o,
+					value is XmlReader? value:
+					value == null? _nullValue: _mappingSchema.ConvertToXmlReader(value));
+			}
+
+			public override void Init(MapMemberInfo mapMemberInfo)
+			{
+				if (mapMemberInfo == null) throw new ArgumentNullException("mapMemberInfo");
+
+				if (mapMemberInfo.NullValue != null)
+					_nullValue = mapMemberInfo.MappingSchema.ConvertToXmlReader(mapMemberInfo.NullValue);
+
+				base.Init(mapMemberInfo);
+			}
+
+			public class Nullable : XmlReaderMapper
+			{
+				public override object GetValue(object o)
+				{
+					object value = _memberAccessor.GetValue(o);
+					return (XmlReader)value == _nullValue? null: value;
+				}
+			}
+		}
 		#endregion
 
 #if FW2

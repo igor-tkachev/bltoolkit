@@ -163,8 +163,8 @@ namespace A.Data
 			{
 				List<string> array = new List<string>();
 				db
-				.SetSpCommand("Person_SelectAll")
-				.ExecuteScalarList(array, "LastName");
+					.SetSpCommand("Person_SelectAll")
+					.ExecuteScalarList(array, "LastName");
 
 				Assert.IsNotNull(array);
 				Assert.IsTrue(array.Count > 0);
@@ -193,8 +193,8 @@ namespace A.Data
 			{
 				List<uint> array = new List<uint>();
 				db
-				.SetSpCommand("Person_SelectAll")
-				.ExecuteScalarList(array);
+					.SetSpCommand("Person_SelectAll")
+					.ExecuteScalarList(array);
 
 				Assert.IsNotNull(array);
 				Assert.IsTrue(array.Count > 0);
@@ -209,7 +209,6 @@ namespace A.Data
 
 			Assert.IsNotNull(array);
 			Assert.IsTrue   (array.Count > 1);
-			Assert.IsNotNull(array[0]);
 			Assert.IsNotNull(array[1]);
 
 			return array;
@@ -229,6 +228,20 @@ namespace A.Data
 			return array;
 		}
 
+		private List<Nullable<T>> TestINullableType<T>(DbManager db, string columnName) where T : struct, INullable
+		{
+			List<Nullable<T>> array = db
+				.SetCommand(string.Format("SELECT {0} FROM DataTypeTest ORDER BY DataTypeID", columnName))
+				.ExecuteScalarList<Nullable<T>>();
+
+			Assert.IsNotNull(array);
+			Assert.IsTrue(array.Count > 1);
+			Assert.IsTrue(array[0].HasValue);
+			Assert.IsTrue(array[0].Value.IsNull);
+			Assert.IsTrue(array[1].HasValue);
+
+			return array;
+		}
 
 		[Test]
 		public void FW2ScalarListDataTypesTest()
@@ -254,43 +267,41 @@ namespace A.Data
 				TestNullableType<UInt32>    (db, "UInt32_");
 				TestNullableType<UInt64>    (db, "UInt64_");
 
-#if EXPERIMENTAL
 				// Sql types
 				//
-				TestNullableType<SqlBinary>  (db, "Binary_");
-				TestNullableType<SqlBoolean> (db, "Boolean_");
-				TestNullableType<SqlByte>    (db, "Byte_");
-				TestType<SqlBytes>           (db, "Bytes_");
-				TestType<SqlChars>           (db, "String_");
-				TestNullableType<SqlDateTime>(db, "DateTime_");
-				TestNullableType<SqlDecimal> (db, "Decimal_");
-				TestNullableType<SqlDouble>  (db, "Double_");
-				TestNullableType<SqlGuid>    (db, "Guid_");
-				TestNullableType<SqlInt16>   (db, "Int16_");
-				TestNullableType<SqlInt32>   (db, "Int32_");
-				TestNullableType<SqlInt64>   (db, "Int64_");
-				TestNullableType<SqlMoney>   (db, "Money_");
-				TestNullableType<SqlString>  (db, "String_");
-				TestNullableType<SqlSingle>  (db, "Single_");
-				TestType<SqlXml>             (db, "Xml_");
+				TestINullableType<SqlBinary>  (db, "Binary_");
+				TestINullableType<SqlBoolean> (db, "Boolean_");
+				TestINullableType<SqlByte>    (db, "Byte_");
+				TestType<SqlBytes>            (db, "Bytes_");
+				TestType<SqlChars>            (db, "String_");
+				TestINullableType<SqlDateTime>(db, "DateTime_");
+				TestINullableType<SqlDecimal> (db, "Decimal_");
+				TestINullableType<SqlDouble>  (db, "Double_");
+				TestINullableType<SqlGuid>    (db, "Guid_");
+				TestINullableType<SqlInt16>   (db, "Int16_");
+				TestINullableType<SqlInt32>   (db, "Int32_");
+				TestINullableType<SqlInt64>   (db, "Int64_");
+				TestINullableType<SqlMoney>   (db, "Money_");
+				TestINullableType<SqlString>  (db, "String_");
+				TestINullableType<SqlSingle>  (db, "Single_");
+				TestType<SqlXml>              (db, "Xml_");
 
 				// BLToolkit extension
 				List<Byte[]> arrays =
-					TestType<Byte[]>         (db, "Binary_");
+					TestType<Byte[]>          (db, "Binary_");
 				Console.WriteLine("{0}", arrays[1][0]);
 				List<Stream> streams =
-					TestType<Stream>         (db, "Bytes_");
+					TestType<Stream>          (db, "Bytes_");
 				Console.WriteLine("{0}", streams[1].ReadByte());
 				List<Char[]> symbols =
-					TestType<Char[]>         (db, "String_");
+					TestType<Char[]>          (db, "String_");
 				Assert.AreEqual(symbols[1][0], 'B');
-				TestNullableType<SqlGuid>    (db, "Bytes_");
+				TestINullableType<SqlGuid>    (db, "Bytes_");
 				List<XmlReader> xmlReaders =
-					TestType<XmlReader>      (db, "Xml_");
+					TestType<XmlReader>       (db, "Xml_");
 				xmlReaders[1].MoveToContent();
 				Assert.IsTrue(xmlReaders[1].ReadToDescendant("element"));
 				Console.WriteLine("{0}", xmlReaders[1].GetAttribute("strattr"));
-#endif
 			}
 		}
 
