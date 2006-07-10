@@ -234,37 +234,4 @@ namespace BLToolkit.Reflection
 			return TypeHelper.GetAttributes(_typeAccessor.OriginalType, attributeType);
 		}
 	}
-
-#if EXPERIMENTAL
-
-	public abstract class MemberAccessorT<T> : MemberAccessor
-	{
-		protected MemberAccessorT(TypeAccessor typeAccessor, MemberInfo memberInfo)
-			: base (typeAccessor, memberInfo)
-		{
-		}
-
-		public override object GetValue(object o)
-		{
-			return GetValueT(o);
-		}
-
-		public override void SetValue(object o, object value)
-		{
-			SetValueT(o, (T)value);
-		}
-
-		public virtual T GetValueT(object o)
-		{
-			return default(T);
-		}
-
-		public virtual void SetValueT(object o, T value)
-		{
-		}
-
-	}
-
-#endif
-
 }

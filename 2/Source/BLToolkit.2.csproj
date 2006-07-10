@@ -163,6 +163,9 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Mapping\ValueMapping.cs" />
+    <Compile Include="Mapping\ValueMapping.Generic.cs">
+      <DependentUpon>ValueMapping.cs</DependentUpon>
+    </Compile>
     <Compile Include="Mapping\MapDataSourceDestinationBase.cs" />
     <Compile Include="Mapping\DefaultMappingSchema.cs" />
     <Compile Include="Mapping\IValueMapper.cs" />

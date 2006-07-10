@@ -1611,7 +1611,7 @@ namespace BLToolkit.Mapping
 
 			public override object GetValue(object o)
 			{
-				SqlDouble value = (SqlDouble)_memberAccessor.GetSqlDouble(o);
+				SqlDouble value = _memberAccessor.GetSqlDouble(o);
 				return value.IsNull? null: (object)value.Value;
 			}
 
@@ -1644,7 +1644,7 @@ namespace BLToolkit.Mapping
 
 			public override object GetValue(object o)
 			{
-				SqlDateTime value = (SqlDateTime)_memberAccessor.GetSqlDateTime(o);
+				SqlDateTime value = _memberAccessor.GetSqlDateTime(o);
 				return value.IsNull? null: (object)value.Value;
 			}
 

@@ -41,15 +41,24 @@
       <LastGenOutput>Convert.cs</LastGenOutput>
       <CustomToolNamespace>BLToolkit.Common</CustomToolNamespace>
     </Content>
-    <Content Include="Convert11.xslt" />
-    <Content Include="Convert20.xslt" />
-    <Content Include="ConvertV.xslt" />
+    <Content Include="Convert.xslt" />
+    <Content Include="ValueMapping.xml">
+      <Generator>TransformCodeGenerator</Generator>
+      <LastGenOutput>ValueMapping.cs</LastGenOutput>
+      <CustomToolNamespace>BLToolkit.Mapping</CustomToolNamespace>
+    </Content>
+    <Content Include="ValueMapping.xslt" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Convert.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>Convert.xml</DependentUpon>
+    </Compile>
+    <Compile Include="ValueMapping.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>ValueMapping.xml</DependentUpon>
     </Compile>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
