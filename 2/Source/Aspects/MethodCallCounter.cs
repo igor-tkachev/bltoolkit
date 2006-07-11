@@ -31,6 +31,12 @@ namespace BLToolkit.Aspects
 			get { return _exceptionCount; }
 		}
 
+		private int _cachedCount;
+		public  int  CachedCount
+		{
+			get { return _cachedCount; }
+		}
+
 		private TimeSpan _totalTime;
 		public  TimeSpan  TotalTime
 		{
@@ -70,13 +76,20 @@ namespace BLToolkit.Aspects
 
 		#region Protected Members
 
-		internal void AddCall(TimeSpan time, bool withException)
+		internal void AddCall(TimeSpan time, bool withException, bool cached)
 		{
-			_totalTime += time;
-			_totalCount++;
+			if (cached)
+			{
+				_cachedCount++;
+			}
+			else
+			{
+				_totalTime += time;
+				_totalCount++;
 
-			if (_minTime > time) _minTime = time;
-			if (_maxTime < time) _maxTime = time;
+				if (_minTime > time) _minTime = time;
+				if (_maxTime < time) _maxTime = time;
+			}
 
 			if (withException) _exceptionCount++;
 		}

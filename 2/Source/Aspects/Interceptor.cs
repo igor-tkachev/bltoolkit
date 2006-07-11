@@ -2,6 +2,7 @@ using System;
 
 namespace BLToolkit.Aspects
 {
+	[System.Diagnostics.DebuggerStepThrough]
 	public abstract class Interceptor : IInterceptor
 	{
 		public void Intercept(InterceptCallInfo info)

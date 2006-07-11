@@ -226,6 +226,7 @@ namespace DataAccess
 			}
 		}
 
+#if FW2
 		[Test]
 		public void XmlTest()
 		{
@@ -239,5 +240,6 @@ namespace DataAccess
 				Console.WriteLine("{0}", xml.GetAttribute("strattr"));
 			}
 		}
+#endif
 	}
 }

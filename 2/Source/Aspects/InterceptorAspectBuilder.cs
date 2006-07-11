@@ -43,6 +43,9 @@ namespace BLToolkit.Aspects
 				{
 					if (interceptor._interceptorType == null && interceptor._interceptType == 0)
 						return false;
+
+					if (builder == this)
+						break;
 				}
 			}
 

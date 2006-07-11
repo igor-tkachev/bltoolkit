@@ -10,7 +10,7 @@ using NUnit.Framework;
 
 using BLToolkit.Data;
 
-namespace A.Data
+namespace Data
 {
 	[TestFixture]
 	public class ExecuteScalarListTest
@@ -287,18 +287,18 @@ namespace A.Data
 				TestType<SqlXml>              (db, "Xml_");
 
 				// BLToolkit extension
-				List<Byte[]> arrays =
-					TestType<Byte[]>          (db, "Binary_");
+				List<Byte[]> arrays  = TestType<Byte[]>(db, "Binary_");
 				Console.WriteLine("{0}", arrays[1][0]);
-				List<Stream> streams =
-					TestType<Stream>          (db, "Bytes_");
+
+				List<Stream> streams = TestType<Stream>(db, "Bytes_");
 				Console.WriteLine("{0}", streams[1].ReadByte());
-				List<Char[]> symbols =
-					TestType<Char[]>          (db, "String_");
-				Assert.AreEqual(symbols[1][0], 'B');
-				TestINullableType<SqlGuid>    (db, "Bytes_");
-				List<XmlReader> xmlReaders =
-					TestType<XmlReader>       (db, "Xml_");
+
+				List<Char[]> symbols = TestType<Char[]>(db, "String_");
+
+				Assert.AreEqual(symbols[1][0], 's');
+				TestINullableType<SqlGuid>(db, "Bytes_");
+
+				List<XmlReader> xmlReaders = TestType<XmlReader>(db, "Xml_");
 				xmlReaders[1].MoveToContent();
 				Assert.IsTrue(xmlReaders[1].ReadToDescendant("element"));
 				Console.WriteLine("{0}", xmlReaders[1].GetAttribute("strattr"));
