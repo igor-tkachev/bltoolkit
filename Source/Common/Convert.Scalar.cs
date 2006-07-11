@@ -75,79 +75,80 @@ namespace BLToolkit.Common
 		sealed class S_dbG       : CB<String,SqlGuid>    { public override String C(SqlGuid p)     { return p.ToString(); } }
 		sealed class S_dbBin     : CB<String,SqlBinary>  { public override String C(SqlBinary p)   { return p.ToString(); } }
 
-		sealed class S_O         : CB<String ,object>    { public override String C(object p)   { return Convert.ToString(p); } }
+		sealed class S<Q>        : CB<String,Q>          { public override String C(Q p)           { return Convert<String,object>.From(p); } }
+		sealed class S_O         : CB<String,object>     { public override String C(object p)      { return Convert.ToString(p); } }
 
-		static CB<T, P> GetStringConverter()
+		static CB<T,P> GetStringConverter()
 		{
 			Type t = typeof(P);
 
-			if (t == typeof(Type))        return (CB<T, P>)(object)(new S_T         ());
+			if (t == typeof(Type))        return (CB<T,P>)(object)(new S_T         ());
 
 			// Scalar Types.
 			//
-			if (t == typeof(SByte))       return (CB<T, P>)(object)(new S_I8        ());
-			if (t == typeof(Int16))       return (CB<T, P>)(object)(new S_I16       ());
-			if (t == typeof(Int32))       return (CB<T, P>)(object)(new S_I32       ());
-			if (t == typeof(Int64))       return (CB<T, P>)(object)(new S_I64       ());
+			if (t == typeof(SByte))       return (CB<T,P>)(object)(new S_I8        ());
+			if (t == typeof(Int16))       return (CB<T,P>)(object)(new S_I16       ());
+			if (t == typeof(Int32))       return (CB<T,P>)(object)(new S_I32       ());
+			if (t == typeof(Int64))       return (CB<T,P>)(object)(new S_I64       ());
 
-			if (t == typeof(Byte))        return (CB<T, P>)(object)(new S_U8        ());
-			if (t == typeof(UInt16))      return (CB<T, P>)(object)(new S_U16       ());
-			if (t == typeof(UInt32))      return (CB<T, P>)(object)(new S_U32       ());
-			if (t == typeof(UInt64))      return (CB<T, P>)(object)(new S_U64       ());
+			if (t == typeof(Byte))        return (CB<T,P>)(object)(new S_U8        ());
+			if (t == typeof(UInt16))      return (CB<T,P>)(object)(new S_U16       ());
+			if (t == typeof(UInt32))      return (CB<T,P>)(object)(new S_U32       ());
+			if (t == typeof(UInt64))      return (CB<T,P>)(object)(new S_U64       ());
 
-			if (t == typeof(Single))      return (CB<T, P>)(object)(new S_R4        ());
-			if (t == typeof(Double))      return (CB<T, P>)(object)(new S_R8        ());
+			if (t == typeof(Single))      return (CB<T,P>)(object)(new S_R4        ());
+			if (t == typeof(Double))      return (CB<T,P>)(object)(new S_R8        ());
 
-			if (t == typeof(Boolean))     return (CB<T, P>)(object)(new S_B         ());
-			if (t == typeof(Decimal))     return (CB<T, P>)(object)(new S_D         ());
-			if (t == typeof(Char))        return (CB<T, P>)(object)(new S_C         ());
-			if (t == typeof(TimeSpan))    return (CB<T, P>)(object)(new S_TS        ());
-			if (t == typeof(DateTime))    return (CB<T, P>)(object)(new S_DT        ());
-			if (t == typeof(Guid))        return (CB<T, P>)(object)(new S_G         ());
+			if (t == typeof(Boolean))     return (CB<T,P>)(object)(new S_B         ());
+			if (t == typeof(Decimal))     return (CB<T,P>)(object)(new S_D         ());
+			if (t == typeof(Char))        return (CB<T,P>)(object)(new S_C         ());
+			if (t == typeof(TimeSpan))    return (CB<T,P>)(object)(new S_TS        ());
+			if (t == typeof(DateTime))    return (CB<T,P>)(object)(new S_DT        ());
+			if (t == typeof(Guid))        return (CB<T,P>)(object)(new S_G         ());
 
 			// Nullable Types.
 			//
-			if (t == typeof(SByte?))      return (CB<T, P>)(object)(new S_NI8       ());
-			if (t == typeof(Int16?))      return (CB<T, P>)(object)(new S_NI16      ());
-			if (t == typeof(Int32?))      return (CB<T, P>)(object)(new S_NI32      ());
-			if (t == typeof(Int64?))      return (CB<T, P>)(object)(new S_NI64      ());
+			if (t == typeof(SByte?))      return (CB<T,P>)(object)(new S_NI8       ());
+			if (t == typeof(Int16?))      return (CB<T,P>)(object)(new S_NI16      ());
+			if (t == typeof(Int32?))      return (CB<T,P>)(object)(new S_NI32      ());
+			if (t == typeof(Int64?))      return (CB<T,P>)(object)(new S_NI64      ());
 
-			if (t == typeof(Byte?))       return (CB<T, P>)(object)(new S_NU8       ());
-			if (t == typeof(UInt16?))     return (CB<T, P>)(object)(new S_NU16      ());
-			if (t == typeof(UInt32?))     return (CB<T, P>)(object)(new S_NU32      ());
-			if (t == typeof(UInt64?))     return (CB<T, P>)(object)(new S_NU64      ());
+			if (t == typeof(Byte?))       return (CB<T,P>)(object)(new S_NU8       ());
+			if (t == typeof(UInt16?))     return (CB<T,P>)(object)(new S_NU16      ());
+			if (t == typeof(UInt32?))     return (CB<T,P>)(object)(new S_NU32      ());
+			if (t == typeof(UInt64?))     return (CB<T,P>)(object)(new S_NU64      ());
 
-			if (t == typeof(Single?))     return (CB<T, P>)(object)(new S_NR4       ());
-			if (t == typeof(Double?))     return (CB<T, P>)(object)(new S_NR8       ());
+			if (t == typeof(Single?))     return (CB<T,P>)(object)(new S_NR4       ());
+			if (t == typeof(Double?))     return (CB<T,P>)(object)(new S_NR8       ());
 
-			if (t == typeof(Boolean?))    return (CB<T, P>)(object)(new S_NB        ());
-			if (t == typeof(Decimal?))    return (CB<T, P>)(object)(new S_ND        ());
-			if (t == typeof(Char?))       return (CB<T, P>)(object)(new S_NC        ());
-			if (t == typeof(TimeSpan?))   return (CB<T, P>)(object)(new S_NTS       ());
-			if (t == typeof(DateTime?))   return (CB<T, P>)(object)(new S_NDT       ());
-			if (t == typeof(Guid?))       return (CB<T, P>)(object)(new S_NG        ());
+			if (t == typeof(Boolean?))    return (CB<T,P>)(object)(new S_NB        ());
+			if (t == typeof(Decimal?))    return (CB<T,P>)(object)(new S_ND        ());
+			if (t == typeof(Char?))       return (CB<T,P>)(object)(new S_NC        ());
+			if (t == typeof(TimeSpan?))   return (CB<T,P>)(object)(new S_NTS       ());
+			if (t == typeof(DateTime?))   return (CB<T,P>)(object)(new S_NDT       ());
+			if (t == typeof(Guid?))       return (CB<T,P>)(object)(new S_NG        ());
 
 			// SqlTypes.
 			//
-			if (t == typeof(SqlString))   return (CB<T, P>)(object)(new S_dbS       ());
+			if (t == typeof(SqlString))   return (CB<T,P>)(object)(new S_dbS       ());
 
-			if (t == typeof(SqlByte))     return (CB<T, P>)(object)(new S_dbU8      ());
-			if (t == typeof(SqlInt16))    return (CB<T, P>)(object)(new S_dbI16     ());
-			if (t == typeof(SqlInt32))    return (CB<T, P>)(object)(new S_dbI32     ());
-			if (t == typeof(SqlInt64))    return (CB<T, P>)(object)(new S_dbI64     ());
+			if (t == typeof(SqlByte))     return (CB<T,P>)(object)(new S_dbU8      ());
+			if (t == typeof(SqlInt16))    return (CB<T,P>)(object)(new S_dbI16     ());
+			if (t == typeof(SqlInt32))    return (CB<T,P>)(object)(new S_dbI32     ());
+			if (t == typeof(SqlInt64))    return (CB<T,P>)(object)(new S_dbI64     ());
 
-			if (t == typeof(SqlSingle))   return (CB<T, P>)(object)(new S_dbR4      ());
-			if (t == typeof(SqlDouble))   return (CB<T, P>)(object)(new S_dbR8      ());
-			if (t == typeof(SqlDecimal))  return (CB<T, P>)(object)(new S_dbD       ());
-			if (t == typeof(SqlMoney))    return (CB<T, P>)(object)(new S_dbM       ());
+			if (t == typeof(SqlSingle))   return (CB<T,P>)(object)(new S_dbR4      ());
+			if (t == typeof(SqlDouble))   return (CB<T,P>)(object)(new S_dbR8      ());
+			if (t == typeof(SqlDecimal))  return (CB<T,P>)(object)(new S_dbD       ());
+			if (t == typeof(SqlMoney))    return (CB<T,P>)(object)(new S_dbM       ());
 
-			if (t == typeof(SqlBoolean))  return (CB<T, P>)(object)(new S_dbB       ());
-			if (t == typeof(SqlGuid))     return (CB<T, P>)(object)(new S_dbG       ());
-			if (t == typeof(SqlBinary))   return (CB<T, P>)(object)(new S_dbBin     ());
+			if (t == typeof(SqlBoolean))  return (CB<T,P>)(object)(new S_dbB       ());
+			if (t == typeof(SqlGuid))     return (CB<T,P>)(object)(new S_dbG       ());
+			if (t == typeof(SqlBinary))   return (CB<T,P>)(object)(new S_dbBin     ());
 
-			if (t == typeof(object))      return (CB<T, P>)(object)(new S_O         ());
+			if (t == typeof(object))      return (CB<T,P>)(object)(new S_O         ());
 
-			return (CB<T, P>)(object)Convert<String, object>.I;
+			return (CB<T,P>)(object)(new S<P>());
 		}
 
 		#endregion
@@ -211,72 +212,73 @@ namespace BLToolkit.Common
 
 		sealed class I8_dbB      : CB<SByte,SqlBoolean> { public override SByte C(SqlBoolean p)  { return p.IsNull? (SByte)0: Convert.ToSByte(p.Value); } }
 
-		sealed class I8_O         : CB<SByte ,object>    { public override SByte C(object p)   { return Convert.ToSByte(p); } }
+		sealed class I8<Q>       : CB<SByte,Q>          { public override SByte C(Q p)           { return Convert<SByte,object>.From(p); } }
+		sealed class I8_O        : CB<SByte,object>     { public override SByte C(object p)      { return Convert.ToSByte(p); } }
 
-		static CB<T, P> GetSByteConverter()
+		static CB<T,P> GetSByteConverter()
 		{
 			Type t = typeof(P);
 
 
 			// Scalar Types.
 			//
-			if (t == typeof(String))      return (CB<T, P>)(object)(new I8_S        ());
+			if (t == typeof(String))      return (CB<T,P>)(object)(new I8_S        ());
 
-			if (t == typeof(Int16))       return (CB<T, P>)(object)(new I8_I16      ());
-			if (t == typeof(Int32))       return (CB<T, P>)(object)(new I8_I32      ());
-			if (t == typeof(Int64))       return (CB<T, P>)(object)(new I8_I64      ());
+			if (t == typeof(Int16))       return (CB<T,P>)(object)(new I8_I16      ());
+			if (t == typeof(Int32))       return (CB<T,P>)(object)(new I8_I32      ());
+			if (t == typeof(Int64))       return (CB<T,P>)(object)(new I8_I64      ());
 
-			if (t == typeof(Byte))        return (CB<T, P>)(object)(new I8_U8       ());
-			if (t == typeof(UInt16))      return (CB<T, P>)(object)(new I8_U16      ());
-			if (t == typeof(UInt32))      return (CB<T, P>)(object)(new I8_U32      ());
-			if (t == typeof(UInt64))      return (CB<T, P>)(object)(new I8_U64      ());
+			if (t == typeof(Byte))        return (CB<T,P>)(object)(new I8_U8       ());
+			if (t == typeof(UInt16))      return (CB<T,P>)(object)(new I8_U16      ());
+			if (t == typeof(UInt32))      return (CB<T,P>)(object)(new I8_U32      ());
+			if (t == typeof(UInt64))      return (CB<T,P>)(object)(new I8_U64      ());
 
-			if (t == typeof(Single))      return (CB<T, P>)(object)(new I8_R4       ());
-			if (t == typeof(Double))      return (CB<T, P>)(object)(new I8_R8       ());
+			if (t == typeof(Single))      return (CB<T,P>)(object)(new I8_R4       ());
+			if (t == typeof(Double))      return (CB<T,P>)(object)(new I8_R8       ());
 
-			if (t == typeof(Boolean))     return (CB<T, P>)(object)(new I8_B        ());
-			if (t == typeof(Decimal))     return (CB<T, P>)(object)(new I8_D        ());
-			if (t == typeof(Char))        return (CB<T, P>)(object)(new I8_C        ());
+			if (t == typeof(Boolean))     return (CB<T,P>)(object)(new I8_B        ());
+			if (t == typeof(Decimal))     return (CB<T,P>)(object)(new I8_D        ());
+			if (t == typeof(Char))        return (CB<T,P>)(object)(new I8_C        ());
 
 			// Nullable Types.
 			//
-			if (t == typeof(SByte?))      return (CB<T, P>)(object)(new I8_NI8      ());
+			if (t == typeof(SByte?))      return (CB<T,P>)(object)(new I8_NI8      ());
 
-			if (t == typeof(Int16?))      return (CB<T, P>)(object)(new I8_NI16     ());
-			if (t == typeof(Int32?))      return (CB<T, P>)(object)(new I8_NI32     ());
-			if (t == typeof(Int64?))      return (CB<T, P>)(object)(new I8_NI64     ());
+			if (t == typeof(Int16?))      return (CB<T,P>)(object)(new I8_NI16     ());
+			if (t == typeof(Int32?))      return (CB<T,P>)(object)(new I8_NI32     ());
+			if (t == typeof(Int64?))      return (CB<T,P>)(object)(new I8_NI64     ());
 
-			if (t == typeof(Byte?))       return (CB<T, P>)(object)(new I8_NU8      ());
-			if (t == typeof(UInt16?))     return (CB<T, P>)(object)(new I8_NU16     ());
-			if (t == typeof(UInt32?))     return (CB<T, P>)(object)(new I8_NU32     ());
-			if (t == typeof(UInt64?))     return (CB<T, P>)(object)(new I8_NU64     ());
+			if (t == typeof(Byte?))       return (CB<T,P>)(object)(new I8_NU8      ());
+			if (t == typeof(UInt16?))     return (CB<T,P>)(object)(new I8_NU16     ());
+			if (t == typeof(UInt32?))     return (CB<T,P>)(object)(new I8_NU32     ());
+			if (t == typeof(UInt64?))     return (CB<T,P>)(object)(new I8_NU64     ());
 
-			if (t == typeof(Single?))     return (CB<T, P>)(object)(new I8_NR4      ());
-			if (t == typeof(Double?))     return (CB<T, P>)(object)(new I8_NR8      ());
+			if (t == typeof(Single?))     return (CB<T,P>)(object)(new I8_NR4      ());
+			if (t == typeof(Double?))     return (CB<T,P>)(object)(new I8_NR8      ());
 
-			if (t == typeof(Boolean?))    return (CB<T, P>)(object)(new I8_NB       ());
-			if (t == typeof(Decimal?))    return (CB<T, P>)(object)(new I8_ND       ());
-			if (t == typeof(Char?))       return (CB<T, P>)(object)(new I8_NC       ());
+			if (t == typeof(Boolean?))    return (CB<T,P>)(object)(new I8_NB       ());
+			if (t == typeof(Decimal?))    return (CB<T,P>)(object)(new I8_ND       ());
+			if (t == typeof(Char?))       return (CB<T,P>)(object)(new I8_NC       ());
 
 			// SqlTypes.
 			//
-			if (t == typeof(SqlString))   return (CB<T, P>)(object)(new I8_dbS      ());
+			if (t == typeof(SqlString))   return (CB<T,P>)(object)(new I8_dbS      ());
 
-			if (t == typeof(SqlByte))     return (CB<T, P>)(object)(new I8_dbU8     ());
-			if (t == typeof(SqlInt16))    return (CB<T, P>)(object)(new I8_dbI16    ());
-			if (t == typeof(SqlInt32))    return (CB<T, P>)(object)(new I8_dbI32    ());
-			if (t == typeof(SqlInt64))    return (CB<T, P>)(object)(new I8_dbI64    ());
+			if (t == typeof(SqlByte))     return (CB<T,P>)(object)(new I8_dbU8     ());
+			if (t == typeof(SqlInt16))    return (CB<T,P>)(object)(new I8_dbI16    ());
+			if (t == typeof(SqlInt32))    return (CB<T,P>)(object)(new I8_dbI32    ());
+			if (t == typeof(SqlInt64))    return (CB<T,P>)(object)(new I8_dbI64    ());
 
-			if (t == typeof(SqlSingle))   return (CB<T, P>)(object)(new I8_dbR4     ());
-			if (t == typeof(SqlDouble))   return (CB<T, P>)(object)(new I8_dbR8     ());
-			if (t == typeof(SqlDecimal))  return (CB<T, P>)(object)(new I8_dbD      ());
-			if (t == typeof(SqlMoney))    return (CB<T, P>)(object)(new I8_dbM      ());
+			if (t == typeof(SqlSingle))   return (CB<T,P>)(object)(new I8_dbR4     ());
+			if (t == typeof(SqlDouble))   return (CB<T,P>)(object)(new I8_dbR8     ());
+			if (t == typeof(SqlDecimal))  return (CB<T,P>)(object)(new I8_dbD      ());
+			if (t == typeof(SqlMoney))    return (CB<T,P>)(object)(new I8_dbM      ());
 
-			if (t == typeof(SqlBoolean))  return (CB<T, P>)(object)(new I8_dbB      ());
+			if (t == typeof(SqlBoolean))  return (CB<T,P>)(object)(new I8_dbB      ());
 
-			if (t == typeof(object))      return (CB<T, P>)(object)(new I8_O        ());
+			if (t == typeof(object))      return (CB<T,P>)(object)(new I8_O        ());
 
-			return (CB<T, P>)(object)Convert<SByte, object>.I;
+			return (CB<T,P>)(object)(new I8<P>());
 		}
 
 		#endregion
@@ -340,72 +342,73 @@ namespace BLToolkit.Common
 
 		sealed class I16_dbB     : CB<Int16,SqlBoolean> { public override Int16 C(SqlBoolean p)  { return p.IsNull? (Int16)0: Convert.ToInt16(p.Value); } }
 
-		sealed class I16_O         : CB<Int16 ,object>    { public override Int16 C(object p)   { return Convert.ToInt16(p); } }
+		sealed class I16<Q>      : CB<Int16,Q>          { public override Int16 C(Q p)           { return Convert<Int16,object>.From(p); } }
+		sealed class I16_O       : CB<Int16,object>     { public override Int16 C(object p)      { return Convert.ToInt16(p); } }
 
-		static CB<T, P> GetInt16Converter()
+		static CB<T,P> GetInt16Converter()
 		{
 			Type t = typeof(P);
 
 
 			// Scalar Types.
 			//
-			if (t == typeof(String))      return (CB<T, P>)(object)(new I16_S       ());
+			if (t == typeof(String))      return (CB<T,P>)(object)(new I16_S       ());
 
-			if (t == typeof(SByte))       return (CB<T, P>)(object)(new I16_I8      ());
-			if (t == typeof(Int32))       return (CB<T, P>)(object)(new I16_I32     ());
-			if (t == typeof(Int64))       return (CB<T, P>)(object)(new I16_I64     ());
+			if (t == typeof(SByte))       return (CB<T,P>)(object)(new I16_I8      ());
+			if (t == typeof(Int32))       return (CB<T,P>)(object)(new I16_I32     ());
+			if (t == typeof(Int64))       return (CB<T,P>)(object)(new I16_I64     ());
 
-			if (t == typeof(Byte))        return (CB<T, P>)(object)(new I16_U8      ());
-			if (t == typeof(UInt16))      return (CB<T, P>)(object)(new I16_U16     ());
-			if (t == typeof(UInt32))      return (CB<T, P>)(object)(new I16_U32     ());
-			if (t == typeof(UInt64))      return (CB<T, P>)(object)(new I16_U64     ());
+			if (t == typeof(Byte))        return (CB<T,P>)(object)(new I16_U8      ());
+			if (t == typeof(UInt16))      return (CB<T,P>)(object)(new I16_U16     ());
+			if (t == typeof(UInt32))      return (CB<T,P>)(object)(new I16_U32     ());
+			if (t == typeof(UInt64))      return (CB<T,P>)(object)(new I16_U64     ());
 
-			if (t == typeof(Single))      return (CB<T, P>)(object)(new I16_R4      ());
-			if (t == typeof(Double))      return (CB<T, P>)(object)(new I16_R8      ());
+			if (t == typeof(Single))      return (CB<T,P>)(object)(new I16_R4      ());
+			if (t == typeof(Double))      return (CB<T,P>)(object)(new I16_R8      ());
 
-			if (t == typeof(Boolean))     return (CB<T, P>)(object)(new I16_B       ());
-			if (t == typeof(Decimal))     return (CB<T, P>)(object)(new I16_D       ());
-			if (t == typeof(Char))        return (CB<T, P>)(object)(new I16_C       ());
+			if (t == typeof(Boolean))     return (CB<T,P>)(object)(new I16_B       ());
+			if (t == typeof(Decimal))     return (CB<T,P>)(object)(new I16_D       ());
+			if (t == typeof(Char))        return (CB<T,P>)(object)(new I16_C       ());
 
 			// Nullable Types.
 			//
-			if (t == typeof(Int16?))      return (CB<T, P>)(object)(new I16_NI16    ());
+			if (t == typeof(Int16?))      return (CB<T,P>)(object)(new I16_NI16    ());
 
-			if (t == typeof(SByte?))      return (CB<T, P>)(object)(new I16_NI8     ());
-			if (t == typeof(Int32?))      return (CB<T, P>)(object)(new I16_NI32    ());
-			if (t == typeof(Int64?))      return (CB<T, P>)(object)(new I16_NI64    ());
+			if (t == typeof(SByte?))      return (CB<T,P>)(object)(new I16_NI8     ());
+			if (t == typeof(Int32?))      return (CB<T,P>)(object)(new I16_NI32    ());
+			if (t == typeof(Int64?))      return (CB<T,P>)(object)(new I16_NI64    ());
 
-			if (t == typeof(Byte?))       return (CB<T, P>)(object)(new I16_NU8     ());
-			if (t == typeof(UInt16?))     return (CB<T, P>)(object)(new I16_NU16    ());
-			if (t == typeof(UInt32?))     return (CB<T, P>)(object)(new I16_NU32    ());
-			if (t == typeof(UInt64?))     return (CB<T, P>)(object)(new I16_NU64    ());
+			if (t == typeof(Byte?))       return (CB<T,P>)(object)(new I16_NU8     ());
+			if (t == typeof(UInt16?))     return (CB<T,P>)(object)(new I16_NU16    ());
+			if (t == typeof(UInt32?))     return (CB<T,P>)(object)(new I16_NU32    ());
+			if (t == typeof(UInt64?))     return (CB<T,P>)(object)(new I16_NU64    ());
 
-			if (t == typeof(Single?))     return (CB<T, P>)(object)(new I16_NR4     ());
-			if (t == typeof(Double?))     return (CB<T, P>)(object)(new I16_NR8     ());
+			if (t == typeof(Single?))     return (CB<T,P>)(object)(new I16_NR4     ());
+			if (t == typeof(Double?))     return (CB<T,P>)(object)(new I16_NR8     ());
 
-			if (t == typeof(Boolean?))    return (CB<T, P>)(object)(new I16_NB      ());
-			if (t == typeof(Decimal?))    return (CB<T, P>)(object)(new I16_ND      ());
-			if (t == typeof(Char?))       return (CB<T, P>)(object)(new I16_NC      ());
+			if (t == typeof(Boolean?))    return (CB<T,P>)(object)(new I16_NB      ());
+			if (t == typeof(Decimal?))    return (CB<T,P>)(object)(new I16_ND      ());
+			if (t == typeof(Char?))       return (CB<T,P>)(object)(new I16_NC      ());
 
 			// SqlTypes.
 			//
-			if (t == typeof(SqlInt16))    return (CB<T, P>)(object)(new I16_dbI16   ());
-			if (t == typeof(SqlString))   return (CB<T, P>)(object)(new I16_dbS     ());
+			if (t == typeof(SqlInt16))    return (CB<T,P>)(object)(new I16_dbI16   ());
+			if (t == typeof(SqlString))   return (CB<T,P>)(object)(new I16_dbS     ());
 
-			if (t == typeof(SqlByte))     return (CB<T, P>)(object)(new I16_dbU8    ());
-			if (t == typeof(SqlInt32))    return (CB<T, P>)(object)(new I16_dbI32   ());
-			if (t == typeof(SqlInt64))    return (CB<T, P>)(object)(new I16_dbI64   ());
+			if (t == typeof(SqlByte))     return (CB<T,P>)(object)(new I16_dbU8    ());
+			if (t == typeof(SqlInt32))    return (CB<T,P>)(object)(new I16_dbI32   ());
+			if (t == typeof(SqlInt64))    return (CB<T,P>)(object)(new I16_dbI64   ());
 
-			if (t == typeof(SqlSingle))   return (CB<T, P>)(object)(new I16_dbR4    ());
-			if (t == typeof(SqlDouble))   return (CB<T, P>)(object)(new I16_dbR8    ());
-			if (t == typeof(SqlDecimal))  return (CB<T, P>)(object)(new I16_dbD     ());
-			if (t == typeof(SqlMoney))    return (CB<T, P>)(object)(new I16_dbM     ());
+			if (t == typeof(SqlSingle))   return (CB<T,P>)(object)(new I16_dbR4    ());
+			if (t == typeof(SqlDouble))   return (CB<T,P>)(object)(new I16_dbR8    ());
+			if (t == typeof(SqlDecimal))  return (CB<T,P>)(object)(new I16_dbD     ());
+			if (t == typeof(SqlMoney))    return (CB<T,P>)(object)(new I16_dbM     ());
 
-			if (t == typeof(SqlBoolean))  return (CB<T, P>)(object)(new I16_dbB     ());
+			if (t == typeof(SqlBoolean))  return (CB<T,P>)(object)(new I16_dbB     ());
 
-			if (t == typeof(object))      return (CB<T, P>)(object)(new I16_O       ());
+			if (t == typeof(object))      return (CB<T,P>)(object)(new I16_O       ());
 
-			return (CB<T, P>)(object)Convert<Int16, object>.I;
+			return (CB<T,P>)(object)(new I16<P>());
 		}
 
 		#endregion
@@ -469,72 +472,73 @@ namespace BLToolkit.Common
 
 		sealed class I32_dbB     : CB<Int32,SqlBoolean> { public override Int32 C(SqlBoolean p)  { return p.IsNull? 0: Convert.ToInt32(p.Value); } }
 
-		sealed class I32_O         : CB<Int32 ,object>    { public override Int32 C(object p)   { return Convert.ToInt32(p); } }
+		sealed class I32<Q>      : CB<Int32,Q>          { public override Int32 C(Q p)           { return Convert<Int32,object>.From(p); } }
+		sealed class I32_O       : CB<Int32,object>     { public override Int32 C(object p)      { return Convert.ToInt32(p); } }
 
-		static CB<T, P> GetInt32Converter()
+		static CB<T,P> GetInt32Converter()
 		{
 			Type t = typeof(P);
 
 
 			// Scalar Types.
 			//
-			if (t == typeof(String))      return (CB<T, P>)(object)(new I32_S       ());
+			if (t == typeof(String))      return (CB<T,P>)(object)(new I32_S       ());
 
-			if (t == typeof(SByte))       return (CB<T, P>)(object)(new I32_I8      ());
-			if (t == typeof(Int16))       return (CB<T, P>)(object)(new I32_I16     ());
-			if (t == typeof(Int64))       return (CB<T, P>)(object)(new I32_I64     ());
+			if (t == typeof(SByte))       return (CB<T,P>)(object)(new I32_I8      ());
+			if (t == typeof(Int16))       return (CB<T,P>)(object)(new I32_I16     ());
+			if (t == typeof(Int64))       return (CB<T,P>)(object)(new I32_I64     ());
 
-			if (t == typeof(Byte))        return (CB<T, P>)(object)(new I32_U8      ());
-			if (t == typeof(UInt16))      return (CB<T, P>)(object)(new I32_U16     ());
-			if (t == typeof(UInt32))      return (CB<T, P>)(object)(new I32_U32     ());
-			if (t == typeof(UInt64))      return (CB<T, P>)(object)(new I32_U64     ());
+			if (t == typeof(Byte))        return (CB<T,P>)(object)(new I32_U8      ());
+			if (t == typeof(UInt16))      return (CB<T,P>)(object)(new I32_U16     ());
+			if (t == typeof(UInt32))      return (CB<T,P>)(object)(new I32_U32     ());
+			if (t == typeof(UInt64))      return (CB<T,P>)(object)(new I32_U64     ());
 
-			if (t == typeof(Single))      return (CB<T, P>)(object)(new I32_R4      ());
-			if (t == typeof(Double))      return (CB<T, P>)(object)(new I32_R8      ());
+			if (t == typeof(Single))      return (CB<T,P>)(object)(new I32_R4      ());
+			if (t == typeof(Double))      return (CB<T,P>)(object)(new I32_R8      ());
 
-			if (t == typeof(Boolean))     return (CB<T, P>)(object)(new I32_B       ());
-			if (t == typeof(Decimal))     return (CB<T, P>)(object)(new I32_D       ());
-			if (t == typeof(Char))        return (CB<T, P>)(object)(new I32_C       ());
+			if (t == typeof(Boolean))     return (CB<T,P>)(object)(new I32_B       ());
+			if (t == typeof(Decimal))     return (CB<T,P>)(object)(new I32_D       ());
+			if (t == typeof(Char))        return (CB<T,P>)(object)(new I32_C       ());
 
 			// Nullable Types.
 			//
-			if (t == typeof(Int32?))      return (CB<T, P>)(object)(new I32_NI32    ());
+			if (t == typeof(Int32?))      return (CB<T,P>)(object)(new I32_NI32    ());
 
-			if (t == typeof(SByte?))      return (CB<T, P>)(object)(new I32_NI8     ());
-			if (t == typeof(Int16?))      return (CB<T, P>)(object)(new I32_NI16    ());
-			if (t == typeof(Int64?))      return (CB<T, P>)(object)(new I32_NI64    ());
+			if (t == typeof(SByte?))      return (CB<T,P>)(object)(new I32_NI8     ());
+			if (t == typeof(Int16?))      return (CB<T,P>)(object)(new I32_NI16    ());
+			if (t == typeof(Int64?))      return (CB<T,P>)(object)(new I32_NI64    ());
 
-			if (t == typeof(Byte?))       return (CB<T, P>)(object)(new I32_NU8     ());
-			if (t == typeof(UInt16?))     return (CB<T, P>)(object)(new I32_NU16    ());
-			if (t == typeof(UInt32?))     return (CB<T, P>)(object)(new I32_NU32    ());
-			if (t == typeof(UInt64?))     return (CB<T, P>)(object)(new I32_NU64    ());
+			if (t == typeof(Byte?))       return (CB<T,P>)(object)(new I32_NU8     ());
+			if (t == typeof(UInt16?))     return (CB<T,P>)(object)(new I32_NU16    ());
+			if (t == typeof(UInt32?))     return (CB<T,P>)(object)(new I32_NU32    ());
+			if (t == typeof(UInt64?))     return (CB<T,P>)(object)(new I32_NU64    ());
 
-			if (t == typeof(Single?))     return (CB<T, P>)(object)(new I32_NR4     ());
-			if (t == typeof(Double?))     return (CB<T, P>)(object)(new I32_NR8     ());
+			if (t == typeof(Single?))     return (CB<T,P>)(object)(new I32_NR4     ());
+			if (t == typeof(Double?))     return (CB<T,P>)(object)(new I32_NR8     ());
 
-			if (t == typeof(Boolean?))    return (CB<T, P>)(object)(new I32_NB      ());
-			if (t == typeof(Decimal?))    return (CB<T, P>)(object)(new I32_ND      ());
-			if (t == typeof(Char?))       return (CB<T, P>)(object)(new I32_NC      ());
+			if (t == typeof(Boolean?))    return (CB<T,P>)(object)(new I32_NB      ());
+			if (t == typeof(Decimal?))    return (CB<T,P>)(object)(new I32_ND      ());
+			if (t == typeof(Char?))       return (CB<T,P>)(object)(new I32_NC      ());
 
 			// SqlTypes.
 			//
-			if (t == typeof(SqlInt32))    return (CB<T, P>)(object)(new I32_dbI32   ());
-			if (t == typeof(SqlString))   return (CB<T, P>)(object)(new I32_dbS     ());
+			if (t == typeof(SqlInt32))    return (CB<T,P>)(object)(new I32_dbI32   ());
+			if (t == typeof(SqlString))   return (CB<T,P>)(object)(new I32_dbS     ());
 
-			if (t == typeof(SqlByte))     return (CB<T, P>)(object)(new I32_dbU8    ());
-			if (t == typeof(SqlInt16))    return (CB<T, P>)(object)(new I32_dbI16   ());
-			if (t == typeof(SqlInt64))    return (CB<T, P>)(object)(new I32_dbI64   ());
+			if (t == typeof(SqlByte))     return (CB<T,P>)(object)(new I32_dbU8    ());
+			if (t == typeof(SqlInt16))    return (CB<T,P>)(object)(new I32_dbI16   ());
+			if (t == typeof(SqlInt64))    return (CB<T,P>)(object)(new I32_dbI64   ());
 
-			if (t == typeof(SqlSingle))   return (CB<T, P>)(object)(new I32_dbR4    ());
-			if (t == typeof(SqlDouble))   return (CB<T, P>)(object)(new I32_dbR8    ());
-			if (t == typeof(SqlDecimal))  return (CB<T, P>)(object)(new I32_dbD     ());
-			if (t == typeof(SqlMoney))    return (CB<T, P>)(object)(new I32_dbM     ());
+			if (t == typeof(SqlSingle))   return (CB<T,P>)(object)(new I32_dbR4    ());
+			if (t == typeof(SqlDouble))   return (CB<T,P>)(object)(new I32_dbR8    ());
+			if (t == typeof(SqlDecimal))  return (CB<T,P>)(object)(new I32_dbD     ());
+			if (t == typeof(SqlMoney))    return (CB<T,P>)(object)(new I32_dbM     ());
 
-			if (t == typeof(SqlBoolean))  return (CB<T, P>)(object)(new I32_dbB     ());
+			if (t == typeof(SqlBoolean))  return (CB<T,P>)(object)(new I32_dbB     ());
 
-			if (t == typeof(object))      return (CB<T, P>)(object)(new I32_O       ());
+			if (t == typeof(object))      return (CB<T,P>)(object)(new I32_O       ());
 
-			return (CB<T, P>)(object)Convert<Int32, object>.I;
+			return (CB<T,P>)(object)(new I32<P>());
 		}
 
 		#endregion
@@ -598,72 +602,73 @@ namespace BLToolkit.Common
 
 		sealed class I64_dbB     : CB<Int64,SqlBoolean> { public override Int64 C(SqlBoolean p)  { return p.IsNull? 0: Convert.ToInt64(p.Value); } }
 
-		sealed class I64_O         : CB<Int64 ,object>    { public override Int64 C(object p)   { return Convert.ToInt64(p); } }
+		sealed class I64<Q>      : CB<Int64,Q>          { public override Int64 C(Q p)           { return Convert<Int64,object>.From(p); } }
+		sealed class I64_O       : CB<Int64,object>     { public override Int64 C(object p)      { return Convert.ToInt64(p); } }
 
-		static CB<T, P> GetInt64Converter()
+		static CB<T,P> GetInt64Converter()
 		{
 			Type t = typeof(P);
 
 
 			// Scalar Types.
 			//
-			if (t == typeof(String))      return (CB<T, P>)(object)(new I64_S       ());
+			if (t == typeof(String))      return (CB<T,P>)(object)(new I64_S       ());
 
-			if (t == typeof(SByte))       return (CB<T, P>)(object)(new I64_I8      ());
-			if (t == typeof(Int16))       return (CB<T, P>)(object)(new I64_I16     ());
-			if (t == typeof(Int32))       return (CB<T, P>)(object)(new I64_I32     ());
+			if (t == typeof(SByte))       return (CB<T,P>)(object)(new I64_I8      ());
+			if (t == typeof(Int16))       return (CB<T,P>)(object)(new I64_I16     ());
+			if (t == typeof(Int32))       return (CB<T,P>)(object)(new I64_I32     ());
 
-			if (t == typeof(Byte))        return (CB<T, P>)(object)(new I64_U8      ());
-			if (t == typeof(UInt16))      return (CB<T, P>)(object)(new I64_U16     ());
-			if (t == typeof(UInt32))      return (CB<T, P>)(object)(new I64_U32     ());
-			if (t == typeof(UInt64))      return (CB<T, P>)(object)(new I64_U64     ());
+			if (t == typeof(Byte))        return (CB<T,P>)(object)(new I64_U8      ());
+			if (t == typeof(UInt16))      return (CB<T,P>)(object)(new I64_U16     ());
+			if (t == typeof(UInt32))      return (CB<T,P>)(object)(new I64_U32     ());
+			if (t == typeof(UInt64))      return (CB<T,P>)(object)(new I64_U64     ());
 
-			if (t == typeof(Single))      return (CB<T, P>)(object)(new I64_R4      ());
-			if (t == typeof(Double))      return (CB<T, P>)(object)(new I64_R8      ());
+			if (t == typeof(Single))      return (CB<T,P>)(object)(new I64_R4      ());
+			if (t == typeof(Double))      return (CB<T,P>)(object)(new I64_R8      ());
 
-			if (t == typeof(Boolean))     return (CB<T, P>)(object)(new I64_B       ());
-			if (t == typeof(Decimal))     return (CB<T, P>)(object)(new I64_D       ());
-			if (t == typeof(Char))        return (CB<T, P>)(object)(new I64_C       ());
+			if (t == typeof(Boolean))     return (CB<T,P>)(object)(new I64_B       ());
+			if (t == typeof(Decimal))     return (CB<T,P>)(object)(new I64_D       ());
+			if (t == typeof(Char))        return (CB<T,P>)(object)(new I64_C       ());
 
 			// Nullable Types.
 			//
-			if (t == typeof(Int64?))      return (CB<T, P>)(object)(new I64_NI64    ());
+			if (t == typeof(Int64?))      return (CB<T,P>)(object)(new I64_NI64    ());
 
-			if (t == typeof(SByte?))      return (CB<T, P>)(object)(new I64_NI8     ());
-			if (t == typeof(Int16?))      return (CB<T, P>)(object)(new I64_NI16    ());
-			if (t == typeof(Int32?))      return (CB<T, P>)(object)(new I64_NI32    ());
+			if (t == typeof(SByte?))      return (CB<T,P>)(object)(new I64_NI8     ());
+			if (t == typeof(Int16?))      return (CB<T,P>)(object)(new I64_NI16    ());
+			if (t == typeof(Int32?))      return (CB<T,P>)(object)(new I64_NI32    ());
 
-			if (t == typeof(Byte?))       return (CB<T, P>)(object)(new I64_NU8     ());
-			if (t == typeof(UInt16?))     return (CB<T, P>)(object)(new I64_NU16    ());
-			if (t == typeof(UInt32?))     return (CB<T, P>)(object)(new I64_NU32    ());
-			if (t == typeof(UInt64?))     return (CB<T, P>)(object)(new I64_NU64    ());
+			if (t == typeof(Byte?))       return (CB<T,P>)(object)(new I64_NU8     ());
+			if (t == typeof(UInt16?))     return (CB<T,P>)(object)(new I64_NU16    ());
+			if (t == typeof(UInt32?))     return (CB<T,P>)(object)(new I64_NU32    ());
+			if (t == typeof(UInt64?))     return (CB<T,P>)(object)(new I64_NU64    ());
 
-			if (t == typeof(Single?))     return (CB<T, P>)(object)(new I64_NR4     ());
-			if (t == typeof(Double?))     return (CB<T, P>)(object)(new I64_NR8     ());
+			if (t == typeof(Single?))     return (CB<T,P>)(object)(new I64_NR4     ());
+			if (t == typeof(Double?))     return (CB<T,P>)(object)(new I64_NR8     ());
 
-			if (t == typeof(Boolean?))    return (CB<T, P>)(object)(new I64_NB      ());
-			if (t == typeof(Decimal?))    return (CB<T, P>)(object)(new I64_ND      ());
-			if (t == typeof(Char?))       return (CB<T, P>)(object)(new I64_NC      ());
+			if (t == typeof(Boolean?))    return (CB<T,P>)(object)(new I64_NB      ());
+			if (t == typeof(Decimal?))    return (CB<T,P>)(object)(new I64_ND      ());
+			if (t == typeof(Char?))       return (CB<T,P>)(object)(new I64_NC      ());
 
 			// SqlTypes.
 			//
-			if (t == typeof(SqlInt64))    return (CB<T, P>)(object)(new I64_dbI64   ());
-			if (t == typeof(SqlString))   return (CB<T, P>)(object)(new I64_dbS     ());
+			if (t == typeof(SqlInt64))    return (CB<T,P>)(object)(new I64_dbI64   ());
+			if (t == typeof(SqlString))   return (CB<T,P>)(object)(new I64_dbS     ());
 
-			if (t == typeof(SqlByte))     return (CB<T, P>)(object)(new I64_dbU8    ());
-			if (t == typeof(SqlInt16))    return (CB<T, P>)(object)(new I64_dbI16   ());
-			if (t == typeof(SqlInt32))    return (CB<T, P>)(object)(new I64_dbI32   ());
+			if (t == typeof(SqlByte))     return (CB<T,P>)(object)(new I64_dbU8    ());
+			if (t == typeof(SqlInt16))    return (CB<T,P>)(object)(new I64_dbI16   ());
+			if (t == typeof(SqlInt32))    return (CB<T,P>)(object)(new I64_dbI32   ());
 
-			if (t == typeof(SqlSingle))   return (CB<T, P>)(object)(new I64_dbR4    ());
-			if (t == typeof(SqlDouble))   return (CB<T, P>)(object)(new I64_dbR8    ());
-			if (t == typeof(SqlDecimal))  return (CB<T, P>)(object)(new I64_dbD     ());
-			if (t == typeof(SqlMoney))    return (CB<T, P>)(object)(new I64_dbM     ());
+			if (t == typeof(SqlSingle))   return (CB<T,P>)(object)(new I64_dbR4    ());
+			if (t == typeof(SqlDouble))   return (CB<T,P>)(object)(new I64_dbR8    ());
+			if (t == typeof(SqlDecimal))  return (CB<T,P>)(object)(new I64_dbD     ());
+			if (t == typeof(SqlMoney))    return (CB<T,P>)(object)(new I64_dbM     ());
 
-			if (t == typeof(SqlBoolean))  return (CB<T, P>)(object)(new I64_dbB     ());
+			if (t == typeof(SqlBoolean))  return (CB<T,P>)(object)(new I64_dbB     ());
 
-			if (t == typeof(object))      return (CB<T, P>)(object)(new I64_O       ());
+			if (t == typeof(object))      return (CB<T,P>)(object)(new I64_O       ());
 
-			return (CB<T, P>)(object)Convert<Int64, object>.I;
+			return (CB<T,P>)(object)(new I64<P>());
 		}
 
 		#endregion
@@ -727,72 +732,73 @@ namespace BLToolkit.Common
 
 		sealed class U8_dbB      : CB<Byte,SqlBoolean> { public override Byte C(SqlBoolean p)  { return p.IsNull? (Byte)0: Convert.ToByte(p.Value); } }
 
-		sealed class U8_O         : CB<Byte ,object>    { public override Byte C(object p)   { return Convert.ToByte(p); } }
+		sealed class U8<Q>       : CB<Byte,Q>          { public override Byte C(Q p)           { return Convert<Byte,object>.From(p); } }
+		sealed class U8_O        : CB<Byte,object>     { public override Byte C(object p)      { return Convert.ToByte(p); } }
 
-		static CB<T, P> GetByteConverter()
+		static CB<T,P> GetByteConverter()
 		{
 			Type t = typeof(P);
 
 
 			// Scalar Types.
 			//
-			if (t == typeof(String))      return (CB<T, P>)(object)(new U8_S        ());
+			if (t == typeof(String))      return (CB<T,P>)(object)(new U8_S        ());
 
-			if (t == typeof(SByte))       return (CB<T, P>)(object)(new U8_I8       ());
-			if (t == typeof(Int16))       return (CB<T, P>)(object)(new U8_I16      ());
-			if (t == typeof(Int32))       return (CB<T, P>)(object)(new U8_I32      ());
-			if (t == typeof(Int64))       return (CB<T, P>)(object)(new U8_I64      ());
+			if (t == typeof(SByte))       return (CB<T,P>)(object)(new U8_I8       ());
+			if (t == typeof(Int16))       return (CB<T,P>)(object)(new U8_I16      ());
+			if (t == typeof(Int32))       return (CB<T,P>)(object)(new U8_I32      ());
+			if (t == typeof(Int64))       return (CB<T,P>)(object)(new U8_I64      ());
 
-			if (t == typeof(UInt16))      return (CB<T, P>)(object)(new U8_U16      ());
-			if (t == typeof(UInt32))      return (CB<T, P>)(object)(new U8_U32      ());
-			if (t == typeof(UInt64))      return (CB<T, P>)(object)(new U8_U64      ());
+			if (t == typeof(UInt16))      return (CB<T,P>)(object)(new U8_U16      ());
+			if (t == typeof(UInt32))      return (CB<T,P>)(object)(new U8_U32      ());
+			if (t == typeof(UInt64))      return (CB<T,P>)(object)(new U8_U64      ());
 
-			if (t == typeof(Single))      return (CB<T, P>)(object)(new U8_R4       ());
-			if (t == typeof(Double))      return (CB<T, P>)(object)(new U8_R8       ());
+			if (t == typeof(Single))      return (CB<T,P>)(object)(new U8_R4       ());
+			if (t == typeof(Double))      return (CB<T,P>)(object)(new U8_R8       ());
 
-			if (t == typeof(Boolean))     return (CB<T, P>)(object)(new U8_B        ());
-			if (t == typeof(Decimal))     return (CB<T, P>)(object)(new U8_D        ());
-			if (t == typeof(Char))        return (CB<T, P>)(object)(new U8_C        ());
+			if (t == typeof(Boolean))     return (CB<T,P>)(object)(new U8_B        ());
+			if (t == typeof(Decimal))     return (CB<T,P>)(object)(new U8_D        ());
+			if (t == typeof(Char))        return (CB<T,P>)(object)(new U8_C        ());
 
 			// Nullable Types.
 			//
-			if (t == typeof(Byte?))       return (CB<T, P>)(object)(new U8_NU8      ());
+			if (t == typeof(Byte?))       return (CB<T,P>)(object)(new U8_NU8      ());
 
-			if (t == typeof(SByte?))      return (CB<T, P>)(object)(new U8_NI8      ());
-			if (t == typeof(Int16?))      return (CB<T, P>)(object)(new U8_NI16     ());
-			if (t == typeof(Int32?))      return (CB<T, P>)(object)(new U8_NI32     ());
-			if (t == typeof(Int64?))      return (CB<T, P>)(object)(new U8_NI64     ());
+			if (t == typeof(SByte?))      return (CB<T,P>)(object)(new U8_NI8      ());
+			if (t == typeof(Int16?))      return (CB<T,P>)(object)(new U8_NI16     ());
+			if (t == typeof(Int32?))      return (CB<T,P>)(object)(new U8_NI32     ());
+			if (t == typeof(Int64?))      return (CB<T,P>)(object)(new U8_NI64     ());
 
-			if (t == typeof(UInt16?))     return (CB<T, P>)(object)(new U8_NU16     ());
-			if (t == typeof(UInt32?))     return (CB<T, P>)(object)(new U8_NU32     ());
-			if (t == typeof(UInt64?))     return (CB<T, P>)(object)(new U8_NU64     ());
+			if (t == typeof(UInt16?))     return (CB<T,P>)(object)(new U8_NU16     ());
+			if (t == typeof(UInt32?))     return (CB<T,P>)(object)(new U8_NU32     ());
+			if (t == typeof(UInt64?))     return (CB<T,P>)(object)(new U8_NU64     ());
 
-			if (t == typeof(Single?))     return (CB<T, P>)(object)(new U8_NR4      ());
-			if (t == typeof(Double?))     return (CB<T, P>)(object)(new U8_NR8      ());
+			if (t == typeof(Single?))     return (CB<T,P>)(object)(new U8_NR4      ());
+			if (t == typeof(Double?))     return (CB<T,P>)(object)(new U8_NR8      ());
 
-			if (t == typeof(Boolean?))    return (CB<T, P>)(object)(new U8_NB       ());
-			if (t == typeof(Decimal?))    return (CB<T, P>)(object)(new U8_ND       ());
-			if (t == typeof(Char?))       return (CB<T, P>)(object)(new U8_NC       ());
+			if (t == typeof(Boolean?))    return (CB<T,P>)(object)(new U8_NB       ());
+			if (t == typeof(Decimal?))    return (CB<T,P>)(object)(new U8_ND       ());
+			if (t == typeof(Char?))       return (CB<T,P>)(object)(new U8_NC       ());
 
 			// SqlTypes.
 			//
-			if (t == typeof(SqlByte))     return (CB<T, P>)(object)(new U8_dbU8     ());
-			if (t == typeof(SqlString))   return (CB<T, P>)(object)(new U8_dbS      ());
+			if (t == typeof(SqlByte))     return (CB<T,P>)(object)(new U8_dbU8     ());
+			if (t == typeof(SqlString))   return (CB<T,P>)(object)(new U8_dbS      ());
 
-			if (t == typeof(SqlInt16))    return (CB<T, P>)(object)(new U8_dbI16    ());
-			if (t == typeof(SqlInt32))    return (CB<T, P>)(object)(new U8_dbI32    ());
-			if (t == typeof(SqlInt64))    return (CB<T, P>)(object)(new U8_dbI64    ());
+			if (t == typeof(SqlInt16))    return (CB<T,P>)(object)(new U8_dbI16    ());
+			if (t == typeof(SqlInt32))    return (CB<T,P>)(object)(new U8_dbI32    ());
+			if (t == typeof(SqlInt64))    return (CB<T,P>)(object)(new U8_dbI64    ());
 
-			if (t == typeof(SqlSingle))   return (CB<T, P>)(object)(new U8_dbR4     ());
-			if (t == typeof(SqlDouble))   return (CB<T, P>)(object)(new U8_dbR8     ());
-			if (t == typeof(SqlDecimal))  return (CB<T, P>)(object)(new U8_dbD      ());
-			if (t == typeof(SqlMoney))    return (CB<T, P>)(object)(new U8_dbM      ());
+			if (t == typeof(SqlSingle))   return (CB<T,P>)(object)(new U8_dbR4     ());
+			if (t == typeof(SqlDouble))   return (CB<T,P>)(object)(new U8_dbR8     ());
+			if (t == typeof(SqlDecimal))  return (CB<T,P>)(object)(new U8_dbD      ());
+			if (t == typeof(SqlMoney))    return (CB<T,P>)(object)(new U8_dbM      ());
 
-			if (t == typeof(SqlBoolean))  return (CB<T, P>)(object)(new U8_dbB      ());
+			if (t == typeof(SqlBoolean))  return (CB<T,P>)(object)(new U8_dbB      ());
 
-			if (t == typeof(object))      return (CB<T, P>)(object)(new U8_O        ());
+			if (t == typeof(object))      return (CB<T,P>)(object)(new U8_O        ());
 
-			return (CB<T, P>)(object)Convert<Byte, object>.I;
+			return (CB<T,P>)(object)(new U8<P>());
 		}
 
 		#endregion
@@ -856,72 +862,73 @@ namespace BLToolkit.Common
 
 		sealed class U16_dbB     : CB<UInt16,SqlBoolean> { public override UInt16 C(SqlBoolean p)  { return p.IsNull? (UInt16)0: Convert.ToUInt16(p.Value); } }
 
-		sealed class U16_O         : CB<UInt16 ,object>    { public override UInt16 C(object p)   { return Convert.ToUInt16(p); } }
+		sealed class U16<Q>      : CB<UInt16,Q>          { public override UInt16 C(Q p)           { return Convert<UInt16,object>.From(p); } }
+		sealed class U16_O       : CB<UInt16,object>     { public override UInt16 C(object p)      { return Convert.ToUInt16(p); } }
 
-		static CB<T, P> GetUInt16Converter()
+		static CB<T,P> GetUInt16Converter()
 		{
 			Type t = typeof(P);
 
 
 			// Scalar Types.
 			//
-			if (t == typeof(String))      return (CB<T, P>)(object)(new U16_S       ());
+			if (t == typeof(String))      return (CB<T,P>)(object)(new U16_S       ());
 
-			if (t == typeof(SByte))       return (CB<T, P>)(object)(new U16_I8      ());
-			if (t == typeof(Int16))       return (CB<T, P>)(object)(new U16_I16     ());
-			if (t == typeof(Int32))       return (CB<T, P>)(object)(new U16_I32     ());
-			if (t == typeof(Int64))       return (CB<T, P>)(object)(new U16_I64     ());
+			if (t == typeof(SByte))       return (CB<T,P>)(object)(new U16_I8      ());
+			if (t == typeof(Int16))       return (CB<T,P>)(object)(new U16_I16     ());
+			if (t == typeof(Int32))       return (CB<T,P>)(object)(new U16_I32     ());
+			if (t == typeof(Int64))       return (CB<T,P>)(object)(new U16_I64     ());
 
-			if (t == typeof(Byte))        return (CB<T, P>)(object)(new U16_U8      ());
-			if (t == typeof(UInt32))      return (CB<T, P>)(object)(new U16_U32     ());
-			if (t == typeof(UInt64))      return (CB<T, P>)(object)(new U16_U64     ());
+			if (t == typeof(Byte))        return (CB<T,P>)(object)(new U16_U8      ());
+			if (t == typeof(UInt32))      return (CB<T,P>)(object)(new U16_U32     ());
+			if (t == typeof(UInt64))      return (CB<T,P>)(object)(new U16_U64     ());
 
-			if (t == typeof(Single))      return (CB<T, P>)(object)(new U16_R4      ());
-			if (t == typeof(Double))      return (CB<T, P>)(object)(new U16_R8      ());
+			if (t == typeof(Single))      return (CB<T,P>)(object)(new U16_R4      ());
+			if (t == typeof(Double))      return (CB<T,P>)(object)(new U16_R8      ());
 
-			if (t == typeof(Boolean))     return (CB<T, P>)(object)(new U16_B       ());
-			if (t == typeof(Decimal))     return (CB<T, P>)(object)(new U16_D       ());
-			if (t == typeof(Char))        return (CB<T, P>)(object)(new U16_C       ());
+			if (t == typeof(Boolean))     return (CB<T,P>)(object)(new U16_B       ());
+			if (t == typeof(Decimal))     return (CB<T,P>)(object)(new U16_D       ());
+			if (t == typeof(Char))        return (CB<T,P>)(object)(new U16_C       ());
 
 			// Nullable Types.
 			//
-			if (t == typeof(UInt16?))     return (CB<T, P>)(object)(new U16_NU16    ());
+			if (t == typeof(UInt16?))     return (CB<T,P>)(object)(new U16_NU16    ());
 
-			if (t == typeof(SByte?))      return (CB<T, P>)(object)(new U16_NI8     ());
-			if (t == typeof(Int16?))      return (CB<T, P>)(object)(new U16_NI16    ());
-			if (t == typeof(Int32?))      return (CB<T, P>)(object)(new U16_NI32    ());
-			if (t == typeof(Int64?))      return (CB<T, P>)(object)(new U16_NI64    ());
+			if (t == typeof(SByte?))      return (CB<T,P>)(object)(new U16_NI8     ());
+			if (t == typeof(Int16?))      return (CB<T,P>)(object)(new U16_NI16    ());
+			if (t == typeof(Int32?))      return (CB<T,P>)(object)(new U16_NI32    ());
+			if (t == typeof(Int64?))      return (CB<T,P>)(object)(new U16_NI64    ());
 
-			if (t == typeof(Byte?))       return (CB<T, P>)(object)(new U16_NU8     ());
-			if (t == typeof(UInt32?))     return (CB<T, P>)(object)(new U16_NU32    ());
-			if (t == typeof(UInt64?))     return (CB<T, P>)(object)(new U16_NU64    ());
+			if (t == typeof(Byte?))       return (CB<T,P>)(object)(new U16_NU8     ());
+			if (t == typeof(UInt32?))     return (CB<T,P>)(object)(new U16_NU32    ());
+			if (t == typeof(UInt64?))     return (CB<T,P>)(object)(new U16_NU64    ());
 
-			if (t == typeof(Single?))     return (CB<T, P>)(object)(new U16_NR4     ());
-			if (t == typeof(Double?))     return (CB<T, P>)(object)(new U16_NR8     ());
+			if (t == typeof(Single?))     return (CB<T,P>)(object)(new U16_NR4     ());
+			if (t == typeof(Double?))     return (CB<T,P>)(object)(new U16_NR8     ());
 
-			if (t == typeof(Boolean?))    return (CB<T, P>)(object)(new U16_NB      ());
-			if (t == typeof(Decimal?))    return (CB<T, P>)(object)(new U16_ND      ());
-			if (t == typeof(Char?))       return (CB<T, P>)(object)(new U16_NC      ());
+			if (t == typeof(Boolean?))    return (CB<T,P>)(object)(new U16_NB      ());
+			if (t == typeof(Decimal?))    return (CB<T,P>)(object)(new U16_ND      ());
+			if (t == typeof(Char?))       return (CB<T,P>)(object)(new U16_NC      ());
 
 			// SqlTypes.
 			//
-			if (t == typeof(SqlString))   return (CB<T, P>)(object)(new U16_dbS     ());
+			if (t == typeof(SqlString))   return (CB<T,P>)(object)(new U16_dbS     ());
 
-			if (t == typeof(SqlByte))     return (CB<T, P>)(object)(new U16_dbU8    ());
-			if (t == typeof(SqlInt16))    return (CB<T, P>)(object)(new U16_dbI16   ());
-			if (t == typeof(SqlInt32))    return (CB<T, P>)(object)(new U16_dbI32   ());
-			if (t == typeof(SqlInt64))    return (CB<T, P>)(object)(new U16_dbI64   ());
+			if (t == typeof(SqlByte))     return (CB<T,P>)(object)(new U16_dbU8    ());
+			if (t == typeof(SqlInt16))    return (CB<T,P>)(object)(new U16_dbI16   ());
+			if (t == typeof(SqlInt32))    return (CB<T,P>)(object)(new U16_dbI32   ());
+			if (t == typeof(SqlInt64))    return (CB<T,P>)(object)(new U16_dbI64   ());
 
-			if (t == typeof(SqlSingle))   return (CB<T, P>)(object)(new U16_dbR4    ());
-			if (t == typeof(SqlDouble))   return (CB<T, P>)(object)(new U16_dbR8    ());
-			if (t == typeof(SqlDecimal))  return (CB<T, P>)(object)(new U16_dbD     ());
-			if (t == typeof(SqlMoney))    return (CB<T, P>)(object)(new U16_dbM     ());
+			if (t == typeof(SqlSingle))   return (CB<T,P>)(object)(new U16_dbR4    ());
+			if (t == typeof(SqlDouble))   return (CB<T,P>)(object)(new U16_dbR8    ());
+			if (t == typeof(SqlDecimal))  return (CB<T,P>)(object)(new U16_dbD     ());
+			if (t == typeof(SqlMoney))    return (CB<T,P>)(object)(new U16_dbM     ());
 
-			if (t == typeof(SqlBoolean))  return (CB<T, P>)(object)(new U16_dbB     ());
+			if (t == typeof(SqlBoolean))  return (CB<T,P>)(object)(new U16_dbB     ());
 
-			if (t == typeof(object))      return (CB<T, P>)(object)(new U16_O       ());
+			if (t == typeof(object))      return (CB<T,P>)(object)(new U16_O       ());
 
-			return (CB<T, P>)(object)Convert<UInt16, object>.I;
+			return (CB<T,P>)(object)(new U16<P>());
 		}
 
 		#endregion
@@ -985,72 +992,73 @@ namespace BLToolkit.Common
 
 		sealed class U32_dbB     : CB<UInt32,SqlBoolean> { public override UInt32 C(SqlBoolean p)  { return p.IsNull? (UInt32)0: Convert.ToUInt32(p.Value); } }
 
-		sealed class U32_O         : CB<UInt32 ,object>    { public override UInt32 C(object p)   { return Convert.ToUInt32(p); } }
+		sealed class U32<Q>      : CB<UInt32,Q>          { public override UInt32 C(Q p)           { return Convert<UInt32,object>.From(p); } }
+		sealed class U32_O       : CB<UInt32,object>     { public override UInt32 C(object p)      { return Convert.ToUInt32(p); } }
 
-		static CB<T, P> GetUInt32Converter()
+		static CB<T,P> GetUInt32Converter()
 		{
 			Type t = typeof(P);
 
 
 			// Scalar Types.
 			//
-			if (t == typeof(String))      return (CB<T, P>)(object)(new U32_S       ());
+			if (t == typeof(String))      return (CB<T,P>)(object)(new U32_S       ());
 
-			if (t == typeof(SByte))       return (CB<T, P>)(object)(new U32_I8      ());
-			if (t == typeof(Int16))       return (CB<T, P>)(object)(new U32_I16     ());
-			if (t == typeof(Int32))       return (CB<T, P>)(object)(new U32_I32     ());
-			if (t == typeof(Int64))       return (CB<T, P>)(object)(new U32_I64     ());
+			if (t == typeof(SByte))       return (CB<T,P>)(object)(new U32_I8      ());
+			if (t == typeof(Int16))       return (CB<T,P>)(object)(new U32_I16     ());
+			if (t == typeof(Int32))       return (CB<T,P>)(object)(new U32_I32     ());
+			if (t == typeof(Int64))       return (CB<T,P>)(object)(new U32_I64     ());
 
-			if (t == typeof(Byte))        return (CB<T, P>)(object)(new U32_U8      ());
-			if (t == typeof(UInt16))      return (CB<T, P>)(object)(new U32_U16     ());
-			if (t == typeof(UInt64))      return (CB<T, P>)(object)(new U32_U64     ());
+			if (t == typeof(Byte))        return (CB<T,P>)(object)(new U32_U8      ());
+			if (t == typeof(UInt16))      return (CB<T,P>)(object)(new U32_U16     ());
+			if (t == typeof(UInt64))      return (CB<T,P>)(object)(new U32_U64     ());
 
-			if (t == typeof(Single))      return (CB<T, P>)(object)(new U32_R4      ());
-			if (t == typeof(Double))      return (CB<T, P>)(object)(new U32_R8      ());
+			if (t == typeof(Single))      return (CB<T,P>)(object)(new U32_R4      ());
+			if (t == typeof(Double))      return (CB<T,P>)(object)(new U32_R8      ());
 
-			if (t == typeof(Boolean))     return (CB<T, P>)(object)(new U32_B       ());
-			if (t == typeof(Decimal))     return (CB<T, P>)(object)(new U32_D       ());
-			if (t == typeof(Char))        return (CB<T, P>)(object)(new U32_C       ());
+			if (t == typeof(Boolean))     return (CB<T,P>)(object)(new U32_B       ());
+			if (t == typeof(Decimal))     return (CB<T,P>)(object)(new U32_D       ());
+			if (t == typeof(Char))        return (CB<T,P>)(object)(new U32_C       ());
 
 			// Nullable Types.
 			//
-			if (t == typeof(UInt32?))     return (CB<T, P>)(object)(new U32_NU32    ());
+			if (t == typeof(UInt32?))     return (CB<T,P>)(object)(new U32_NU32    ());
 
-			if (t == typeof(SByte?))      return (CB<T, P>)(object)(new U32_NI8     ());
-			if (t == typeof(Int16?))      return (CB<T, P>)(object)(new U32_NI16    ());
-			if (t == typeof(Int32?))      return (CB<T, P>)(object)(new U32_NI32    ());
-			if (t == typeof(Int64?))      return (CB<T, P>)(object)(new U32_NI64    ());
+			if (t == typeof(SByte?))      return (CB<T,P>)(object)(new U32_NI8     ());
+			if (t == typeof(Int16?))      return (CB<T,P>)(object)(new U32_NI16    ());
+			if (t == typeof(Int32?))      return (CB<T,P>)(object)(new U32_NI32    ());
+			if (t == typeof(Int64?))      return (CB<T,P>)(object)(new U32_NI64    ());
 
-			if (t == typeof(Byte?))       return (CB<T, P>)(object)(new U32_NU8     ());
-			if (t == typeof(UInt16?))     return (CB<T, P>)(object)(new U32_NU16    ());
-			if (t == typeof(UInt64?))     return (CB<T, P>)(object)(new U32_NU64    ());
+			if (t == typeof(Byte?))       return (CB<T,P>)(object)(new U32_NU8     ());
+			if (t == typeof(UInt16?))     return (CB<T,P>)(object)(new U32_NU16    ());
+			if (t == typeof(UInt64?))     return (CB<T,P>)(object)(new U32_NU64    ());
 
-			if (t == typeof(Single?))     return (CB<T, P>)(object)(new U32_NR4     ());
-			if (t == typeof(Double?))     return (CB<T, P>)(object)(new U32_NR8     ());
+			if (t == typeof(Single?))     return (CB<T,P>)(object)(new U32_NR4     ());
+			if (t == typeof(Double?))     return (CB<T,P>)(object)(new U32_NR8     ());
 
-			if (t == typeof(Boolean?))    return (CB<T, P>)(object)(new U32_NB      ());
-			if (t == typeof(Decimal?))    return (CB<T, P>)(object)(new U32_ND      ());
-			if (t == typeof(Char?))       return (CB<T, P>)(object)(new U32_NC      ());
+			if (t == typeof(Boolean?))    return (CB<T,P>)(object)(new U32_NB      ());
+			if (t == typeof(Decimal?))    return (CB<T,P>)(object)(new U32_ND      ());
+			if (t == typeof(Char?))       return (CB<T,P>)(object)(new U32_NC      ());
 
 			// SqlTypes.
 			//
-			if (t == typeof(SqlString))   return (CB<T, P>)(object)(new U32_dbS     ());
+			if (t == typeof(SqlString))   return (CB<T,P>)(object)(new U32_dbS     ());
 
-			if (t == typeof(SqlByte))     return (CB<T, P>)(object)(new U32_dbU8    ());
-			if (t == typeof(SqlInt16))    return (CB<T, P>)(object)(new U32_dbI16   ());
-			if (t == typeof(SqlInt32))    return (CB<T, P>)(object)(new U32_dbI32   ());
-			if (t == typeof(SqlInt64))    return (CB<T, P>)(object)(new U32_dbI64   ());
+			if (t == typeof(SqlByte))     return (CB<T,P>)(object)(new U32_dbU8    ());
+			if (t == typeof(SqlInt16))    return (CB<T,P>)(object)(new U32_dbI16   ());
+			if (t == typeof(SqlInt32))    return (CB<T,P>)(object)(new U32_dbI32   ());
+			if (t == typeof(SqlInt64))    return (CB<T,P>)(object)(new U32_dbI64   ());
 
-			if (t == typeof(SqlSingle))   return (CB<T, P>)(object)(new U32_dbR4    ());
-			if (t == typeof(SqlDouble))   return (CB<T, P>)(object)(new U32_dbR8    ());
-			if (t == typeof(SqlDecimal))  return (CB<T, P>)(object)(new U32_dbD     ());
-			if (t == typeof(SqlMoney))    return (CB<T, P>)(object)(new U32_dbM     ());
+			if (t == typeof(SqlSingle))   return (CB<T,P>)(object)(new U32_dbR4    ());
+			if (t == typeof(SqlDouble))   return (CB<T,P>)(object)(new U32_dbR8    ());
+			if (t == typeof(SqlDecimal))  return (CB<T,P>)(object)(new U32_dbD     ());
+			if (t == typeof(SqlMoney))    return (CB<T,P>)(object)(new U32_dbM     ());
 
-			if (t == typeof(SqlBoolean))  return (CB<T, P>)(object)(new U32_dbB     ());
+			if (t == typeof(SqlBoolean))  return (CB<T,P>)(object)(new U32_dbB     ());
 
-			if (t == typeof(object))      return (CB<T, P>)(object)(new U32_O       ());
+			if (t == typeof(object))      return (CB<T,P>)(object)(new U32_O       ());
 
-			return (CB<T, P>)(object)Convert<UInt32, object>.I;
+			return (CB<T,P>)(object)(new U32<P>());
 		}
 
 		#endregion
@@ -1114,72 +1122,73 @@ namespace BLToolkit.Common
 
 		sealed class U64_dbB     : CB<UInt64,SqlBoolean> { public override UInt64 C(SqlBoolean p)  { return p.IsNull? (UInt64)0: Convert.ToUInt64(p.Value); } }
 
-		sealed class U64_O         : CB<UInt64 ,object>    { public override UInt64 C(object p)   { return Convert.ToUInt64(p); } }
+		sealed class U64<Q>      : CB<UInt64,Q>          { public override UInt64 C(Q p)           { return Convert<UInt64,object>.From(p); } }
+		sealed class U64_O       : CB<UInt64,object>     { public override UInt64 C(object p)      { return Convert.ToUInt64(p); } }
 
-		static CB<T, P> GetUInt64Converter()
+		static CB<T,P> GetUInt64Converter()
 		{
 			Type t = typeof(P);
 
 
 			// Scalar Types.
 			//
-			if (t == typeof(String))      return (CB<T, P>)(object)(new U64_S       ());
+			if (t == typeof(String))      return (CB<T,P>)(object)(new U64_S       ());
 
-			if (t == typeof(SByte))       return (CB<T, P>)(object)(new U64_I8      ());
-			if (t == typeof(Int16))       return (CB<T, P>)(object)(new U64_I16     ());
-			if (t == typeof(Int32))       return (CB<T, P>)(object)(new U64_I32     ());
-			if (t == typeof(Int64))       return (CB<T, P>)(object)(new U64_I64     ());
+			if (t == typeof(SByte))       return (CB<T,P>)(object)(new U64_I8      ());
+			if (t == typeof(Int16))       return (CB<T,P>)(object)(new U64_I16     ());
+			if (t == typeof(Int32))       return (CB<T,P>)(object)(new U64_I32     ());
+			if (t == typeof(Int64))       return (CB<T,P>)(object)(new U64_I64     ());
 
-			if (t == typeof(Byte))        return (CB<T, P>)(object)(new U64_U8      ());
-			if (t == typeof(UInt16))      return (CB<T, P>)(object)(new U64_U16     ());
-			if (t == typeof(UInt32))      return (CB<T, P>)(object)(new U64_U32     ());
+			if (t == typeof(Byte))        return (CB<T,P>)(object)(new U64_U8      ());
+			if (t == typeof(UInt16))      return (CB<T,P>)(object)(new U64_U16     ());
+			if (t == typeof(UInt32))      return (CB<T,P>)(object)(new U64_U32     ());
 
-			if (t == typeof(Single))      return (CB<T, P>)(object)(new U64_R4      ());
-			if (t == typeof(Double))      return (CB<T, P>)(object)(new U64_R8      ());
+			if (t == typeof(Single))      return (CB<T,P>)(object)(new U64_R4      ());
+			if (t == typeof(Double))      return (CB<T,P>)(object)(new U64_R8      ());
 
-			if (t == typeof(Boolean))     return (CB<T, P>)(object)(new U64_B       ());
-			if (t == typeof(Decimal))     return (CB<T, P>)(object)(new U64_D       ());
-			if (t == typeof(Char))        return (CB<T, P>)(object)(new U64_C       ());
+			if (t == typeof(Boolean))     return (CB<T,P>)(object)(new U64_B       ());
+			if (t == typeof(Decimal))     return (CB<T,P>)(object)(new U64_D       ());
+			if (t == typeof(Char))        return (CB<T,P>)(object)(new U64_C       ());
 
 			// Nullable Types.
 			//
-			if (t == typeof(UInt64?))     return (CB<T, P>)(object)(new U64_NU64    ());
+			if (t == typeof(UInt64?))     return (CB<T,P>)(object)(new U64_NU64    ());
 
-			if (t == typeof(SByte?))      return (CB<T, P>)(object)(new U64_NI8     ());
-			if (t == typeof(Int16?))      return (CB<T, P>)(object)(new U64_NI16    ());
-			if (t == typeof(Int32?))      return (CB<T, P>)(object)(new U64_NI32    ());
-			if (t == typeof(Int64?))      return (CB<T, P>)(object)(new U64_NI64    ());
+			if (t == typeof(SByte?))      return (CB<T,P>)(object)(new U64_NI8     ());
+			if (t == typeof(Int16?))      return (CB<T,P>)(object)(new U64_NI16    ());
+			if (t == typeof(Int32?))      return (CB<T,P>)(object)(new U64_NI32    ());
+			if (t == typeof(Int64?))      return (CB<T,P>)(object)(new U64_NI64    ());
 
-			if (t == typeof(Byte?))       return (CB<T, P>)(object)(new U64_NU8     ());
-			if (t == typeof(UInt16?))     return (CB<T, P>)(object)(new U64_NU16    ());
-			if (t == typeof(UInt32?))     return (CB<T, P>)(object)(new U64_NU32    ());
+			if (t == typeof(Byte?))       return (CB<T,P>)(object)(new U64_NU8     ());
+			if (t == typeof(UInt16?))     return (CB<T,P>)(object)(new U64_NU16    ());
+			if (t == typeof(UInt32?))     return (CB<T,P>)(object)(new U64_NU32    ());
 
-			if (t == typeof(Single?))     return (CB<T, P>)(object)(new U64_NR4     ());
-			if (t == typeof(Double?))     return (CB<T, P>)(object)(new U64_NR8     ());
+			if (t == typeof(Single?))     return (CB<T,P>)(object)(new U64_NR4     ());
+			if (t == typeof(Double?))     return (CB<T,P>)(object)(new U64_NR8     ());
 
-			if (t == typeof(Boolean?))    return (CB<T, P>)(object)(new U64_NB      ());
-			if (t == typeof(Decimal?))    return (CB<T, P>)(object)(new U64_ND      ());
-			if (t == typeof(Char?))       return (CB<T, P>)(object)(new U64_NC      ());
+			if (t == typeof(Boolean?))    return (CB<T,P>)(object)(new U64_NB      ());
+			if (t == typeof(Decimal?))    return (CB<T,P>)(object)(new U64_ND      ());
+			if (t == typeof(Char?))       return (CB<T,P>)(object)(new U64_NC      ());
 
 			// SqlTypes.
 			//
-			if (t == typeof(SqlString))   return (CB<T, P>)(object)(new U64_dbS     ());
+			if (t == typeof(SqlString))   return (CB<T,P>)(object)(new U64_dbS     ());
 
-			if (t == typeof(SqlByte))     return (CB<T, P>)(object)(new U64_dbU8    ());
-			if (t == typeof(SqlInt16))    return (CB<T, P>)(object)(new U64_dbI16   ());
-			if (t == typeof(SqlInt32))    return (CB<T, P>)(object)(new U64_dbI32   ());
-			if (t == typeof(SqlInt64))    return (CB<T, P>)(object)(new U64_dbI64   ());
+			if (t == typeof(SqlByte))     return (CB<T,P>)(object)(new U64_dbU8    ());
+			if (t == typeof(SqlInt16))    return (CB<T,P>)(object)(new U64_dbI16   ());
+			if (t == typeof(SqlInt32))    return (CB<T,P>)(object)(new U64_dbI32   ());
+			if (t == typeof(SqlInt64))    return (CB<T,P>)(object)(new U64_dbI64   ());
 
-			if (t == typeof(SqlSingle))   return (CB<T, P>)(object)(new U64_dbR4    ());
-			if (t == typeof(SqlDouble))   return (CB<T, P>)(object)(new U64_dbR8    ());
-			if (t == typeof(SqlDecimal))  return (CB<T, P>)(object)(new U64_dbD     ());
-			if (t == typeof(SqlMoney))    return (CB<T, P>)(object)(new U64_dbM     ());
+			if (t == typeof(SqlSingle))   return (CB<T,P>)(object)(new U64_dbR4    ());
+			if (t == typeof(SqlDouble))   return (CB<T,P>)(object)(new U64_dbR8    ());
+			if (t == typeof(SqlDecimal))  return (CB<T,P>)(object)(new U64_dbD     ());
+			if (t == typeof(SqlMoney))    return (CB<T,P>)(object)(new U64_dbM     ());
 
-			if (t == typeof(SqlBoolean))  return (CB<T, P>)(object)(new U64_dbB     ());
+			if (t == typeof(SqlBoolean))  return (CB<T,P>)(object)(new U64_dbB     ());
 
-			if (t == typeof(object))      return (CB<T, P>)(object)(new U64_O       ());
+			if (t == typeof(object))      return (CB<T,P>)(object)(new U64_O       ());
 
-			return (CB<T, P>)(object)Convert<UInt64, object>.I;
+			return (CB<T,P>)(object)(new U64<P>());
 		}
 
 		#endregion
@@ -1233,62 +1242,63 @@ namespace BLToolkit.Common
 
 		sealed class C_dbB       : CB<Char,SqlBoolean> { public override Char C(SqlBoolean p)  { return p.IsNull? (Char)0: Convert.ToChar(p.Value); } }
 
-		sealed class C_O         : CB<Char ,object>    { public override Char C(object p)   { return Convert.ToChar(p); } }
+		sealed class C_<Q>       : CB<Char,Q>          { public override Char C(Q p)           { return Convert<Char,object>.From(p); } }
+		sealed class C_O         : CB<Char,object>     { public override Char C(object p)      { return Convert.ToChar(p); } }
 
-		static CB<T, P> GetCharConverter()
+		static CB<T,P> GetCharConverter()
 		{
 			Type t = typeof(P);
 
 
 			// Scalar Types.
 			//
-			if (t == typeof(String))      return (CB<T, P>)(object)(new C_S         ());
+			if (t == typeof(String))      return (CB<T,P>)(object)(new C_S         ());
 
-			if (t == typeof(SByte))       return (CB<T, P>)(object)(new C_I8        ());
-			if (t == typeof(Int16))       return (CB<T, P>)(object)(new C_I16       ());
-			if (t == typeof(Int32))       return (CB<T, P>)(object)(new C_I32       ());
-			if (t == typeof(Int64))       return (CB<T, P>)(object)(new C_I64       ());
+			if (t == typeof(SByte))       return (CB<T,P>)(object)(new C_I8        ());
+			if (t == typeof(Int16))       return (CB<T,P>)(object)(new C_I16       ());
+			if (t == typeof(Int32))       return (CB<T,P>)(object)(new C_I32       ());
+			if (t == typeof(Int64))       return (CB<T,P>)(object)(new C_I64       ());
 
-			if (t == typeof(Byte))        return (CB<T, P>)(object)(new C_U8        ());
-			if (t == typeof(UInt16))      return (CB<T, P>)(object)(new C_U16       ());
-			if (t == typeof(UInt32))      return (CB<T, P>)(object)(new C_U32       ());
-			if (t == typeof(UInt64))      return (CB<T, P>)(object)(new C_U64       ());
-			if (t == typeof(Boolean))     return (CB<T, P>)(object)(new C_B         ());
+			if (t == typeof(Byte))        return (CB<T,P>)(object)(new C_U8        ());
+			if (t == typeof(UInt16))      return (CB<T,P>)(object)(new C_U16       ());
+			if (t == typeof(UInt32))      return (CB<T,P>)(object)(new C_U32       ());
+			if (t == typeof(UInt64))      return (CB<T,P>)(object)(new C_U64       ());
+			if (t == typeof(Boolean))     return (CB<T,P>)(object)(new C_B         ());
 
 			// Nullable Types.
 			//
-			if (t == typeof(Char?))       return (CB<T, P>)(object)(new C_NC        ());
+			if (t == typeof(Char?))       return (CB<T,P>)(object)(new C_NC        ());
 
-			if (t == typeof(SByte?))      return (CB<T, P>)(object)(new C_NI8       ());
-			if (t == typeof(Int16?))      return (CB<T, P>)(object)(new C_NI16      ());
-			if (t == typeof(Int32?))      return (CB<T, P>)(object)(new C_NI32      ());
-			if (t == typeof(Int64?))      return (CB<T, P>)(object)(new C_NI64      ());
+			if (t == typeof(SByte?))      return (CB<T,P>)(object)(new C_NI8       ());
+			if (t == typeof(Int16?))      return (CB<T,P>)(object)(new C_NI16      ());
+			if (t == typeof(Int32?))      return (CB<T,P>)(object)(new C_NI32      ());
+			if (t == typeof(Int64?))      return (CB<T,P>)(object)(new C_NI64      ());
 
-			if (t == typeof(Byte?))       return (CB<T, P>)(object)(new C_NU8       ());
-			if (t == typeof(UInt16?))     return (CB<T, P>)(object)(new C_NU16      ());
-			if (t == typeof(UInt32?))     return (CB<T, P>)(object)(new C_NU32      ());
-			if (t == typeof(UInt64?))     return (CB<T, P>)(object)(new C_NU64      ());
-			if (t == typeof(Boolean?))    return (CB<T, P>)(object)(new C_NB        ());
+			if (t == typeof(Byte?))       return (CB<T,P>)(object)(new C_NU8       ());
+			if (t == typeof(UInt16?))     return (CB<T,P>)(object)(new C_NU16      ());
+			if (t == typeof(UInt32?))     return (CB<T,P>)(object)(new C_NU32      ());
+			if (t == typeof(UInt64?))     return (CB<T,P>)(object)(new C_NU64      ());
+			if (t == typeof(Boolean?))    return (CB<T,P>)(object)(new C_NB        ());
 
 			// SqlTypes.
 			//
-			if (t == typeof(SqlString))   return (CB<T, P>)(object)(new C_dbS       ());
+			if (t == typeof(SqlString))   return (CB<T,P>)(object)(new C_dbS       ());
 
-			if (t == typeof(SqlByte))     return (CB<T, P>)(object)(new C_dbU8      ());
-			if (t == typeof(SqlInt16))    return (CB<T, P>)(object)(new C_dbI16     ());
-			if (t == typeof(SqlInt32))    return (CB<T, P>)(object)(new C_dbI32     ());
-			if (t == typeof(SqlInt64))    return (CB<T, P>)(object)(new C_dbI64     ());
+			if (t == typeof(SqlByte))     return (CB<T,P>)(object)(new C_dbU8      ());
+			if (t == typeof(SqlInt16))    return (CB<T,P>)(object)(new C_dbI16     ());
+			if (t == typeof(SqlInt32))    return (CB<T,P>)(object)(new C_dbI32     ());
+			if (t == typeof(SqlInt64))    return (CB<T,P>)(object)(new C_dbI64     ());
 
-			if (t == typeof(SqlSingle))   return (CB<T, P>)(object)(new C_dbR4      ());
-			if (t == typeof(SqlDouble))   return (CB<T, P>)(object)(new C_dbR8      ());
-			if (t == typeof(SqlDecimal))  return (CB<T, P>)(object)(new C_dbD       ());
-			if (t == typeof(SqlMoney))    return (CB<T, P>)(object)(new C_dbM       ());
+			if (t == typeof(SqlSingle))   return (CB<T,P>)(object)(new C_dbR4      ());
+			if (t == typeof(SqlDouble))   return (CB<T,P>)(object)(new C_dbR8      ());
+			if (t == typeof(SqlDecimal))  return (CB<T,P>)(object)(new C_dbD       ());
+			if (t == typeof(SqlMoney))    return (CB<T,P>)(object)(new C_dbM       ());
 
-			if (t == typeof(SqlBoolean))  return (CB<T, P>)(object)(new C_dbB       ());
+			if (t == typeof(SqlBoolean))  return (CB<T,P>)(object)(new C_dbB       ());
 
-			if (t == typeof(object))      return (CB<T, P>)(object)(new C_O         ());
+			if (t == typeof(object))      return (CB<T,P>)(object)(new C_O         ());
 
-			return (CB<T, P>)(object)Convert<Char, object>.I;
+			return (CB<T,P>)(object)(new C_<P>());
 		}
 
 		#endregion
@@ -1350,70 +1360,71 @@ namespace BLToolkit.Common
 
 		sealed class R4_dbB      : CB<Single,SqlBoolean> { public override Single C(SqlBoolean p)  { return p.IsNull? 0: Convert.ToSingle(p.Value); } }
 
-		sealed class R4_O         : CB<Single ,object>    { public override Single C(object p)   { return Convert.ToSingle(p); } }
+		sealed class R4<Q>       : CB<Single,Q>          { public override Single C(Q p)           { return Convert<Single,object>.From(p); } }
+		sealed class R4_O        : CB<Single,object>     { public override Single C(object p)      { return Convert.ToSingle(p); } }
 
-		static CB<T, P> GetSingleConverter()
+		static CB<T,P> GetSingleConverter()
 		{
 			Type t = typeof(P);
 
 
 			// Scalar Types.
 			//
-			if (t == typeof(String))      return (CB<T, P>)(object)(new R4_S        ());
+			if (t == typeof(String))      return (CB<T,P>)(object)(new R4_S        ());
 
-			if (t == typeof(SByte))       return (CB<T, P>)(object)(new R4_I8       ());
-			if (t == typeof(Int16))       return (CB<T, P>)(object)(new R4_I16      ());
-			if (t == typeof(Int32))       return (CB<T, P>)(object)(new R4_I32      ());
-			if (t == typeof(Int64))       return (CB<T, P>)(object)(new R4_I64      ());
+			if (t == typeof(SByte))       return (CB<T,P>)(object)(new R4_I8       ());
+			if (t == typeof(Int16))       return (CB<T,P>)(object)(new R4_I16      ());
+			if (t == typeof(Int32))       return (CB<T,P>)(object)(new R4_I32      ());
+			if (t == typeof(Int64))       return (CB<T,P>)(object)(new R4_I64      ());
 
-			if (t == typeof(Byte))        return (CB<T, P>)(object)(new R4_U8       ());
-			if (t == typeof(UInt16))      return (CB<T, P>)(object)(new R4_U16      ());
-			if (t == typeof(UInt32))      return (CB<T, P>)(object)(new R4_U32      ());
-			if (t == typeof(UInt64))      return (CB<T, P>)(object)(new R4_U64      ());
+			if (t == typeof(Byte))        return (CB<T,P>)(object)(new R4_U8       ());
+			if (t == typeof(UInt16))      return (CB<T,P>)(object)(new R4_U16      ());
+			if (t == typeof(UInt32))      return (CB<T,P>)(object)(new R4_U32      ());
+			if (t == typeof(UInt64))      return (CB<T,P>)(object)(new R4_U64      ());
 
-			if (t == typeof(Double))      return (CB<T, P>)(object)(new R4_R8       ());
+			if (t == typeof(Double))      return (CB<T,P>)(object)(new R4_R8       ());
 
-			if (t == typeof(Boolean))     return (CB<T, P>)(object)(new R4_B        ());
-			if (t == typeof(Decimal))     return (CB<T, P>)(object)(new R4_D        ());
+			if (t == typeof(Boolean))     return (CB<T,P>)(object)(new R4_B        ());
+			if (t == typeof(Decimal))     return (CB<T,P>)(object)(new R4_D        ());
 
 			// Nullable Types.
 			//
-			if (t == typeof(Single?))     return (CB<T, P>)(object)(new R4_NR4      ());
+			if (t == typeof(Single?))     return (CB<T,P>)(object)(new R4_NR4      ());
 
-			if (t == typeof(SByte?))      return (CB<T, P>)(object)(new R4_NI8      ());
-			if (t == typeof(Int16?))      return (CB<T, P>)(object)(new R4_NI16     ());
-			if (t == typeof(Int32?))      return (CB<T, P>)(object)(new R4_NI32     ());
-			if (t == typeof(Int64?))      return (CB<T, P>)(object)(new R4_NI64     ());
+			if (t == typeof(SByte?))      return (CB<T,P>)(object)(new R4_NI8      ());
+			if (t == typeof(Int16?))      return (CB<T,P>)(object)(new R4_NI16     ());
+			if (t == typeof(Int32?))      return (CB<T,P>)(object)(new R4_NI32     ());
+			if (t == typeof(Int64?))      return (CB<T,P>)(object)(new R4_NI64     ());
 
-			if (t == typeof(Byte?))       return (CB<T, P>)(object)(new R4_NU8      ());
-			if (t == typeof(UInt16?))     return (CB<T, P>)(object)(new R4_NU16     ());
-			if (t == typeof(UInt32?))     return (CB<T, P>)(object)(new R4_NU32     ());
-			if (t == typeof(UInt64?))     return (CB<T, P>)(object)(new R4_NU64     ());
+			if (t == typeof(Byte?))       return (CB<T,P>)(object)(new R4_NU8      ());
+			if (t == typeof(UInt16?))     return (CB<T,P>)(object)(new R4_NU16     ());
+			if (t == typeof(UInt32?))     return (CB<T,P>)(object)(new R4_NU32     ());
+			if (t == typeof(UInt64?))     return (CB<T,P>)(object)(new R4_NU64     ());
 
-			if (t == typeof(Double?))     return (CB<T, P>)(object)(new R4_NR8      ());
+			if (t == typeof(Double?))     return (CB<T,P>)(object)(new R4_NR8      ());
 
-			if (t == typeof(Boolean?))    return (CB<T, P>)(object)(new R4_NB       ());
-			if (t == typeof(Decimal?))    return (CB<T, P>)(object)(new R4_ND       ());
+			if (t == typeof(Boolean?))    return (CB<T,P>)(object)(new R4_NB       ());
+			if (t == typeof(Decimal?))    return (CB<T,P>)(object)(new R4_ND       ());
 
 			// SqlTypes.
 			//
-			if (t == typeof(SqlSingle))   return (CB<T, P>)(object)(new R4_dbR4     ());
-			if (t == typeof(SqlString))   return (CB<T, P>)(object)(new R4_dbS      ());
+			if (t == typeof(SqlSingle))   return (CB<T,P>)(object)(new R4_dbR4     ());
+			if (t == typeof(SqlString))   return (CB<T,P>)(object)(new R4_dbS      ());
 
-			if (t == typeof(SqlByte))     return (CB<T, P>)(object)(new R4_dbU8     ());
-			if (t == typeof(SqlInt16))    return (CB<T, P>)(object)(new R4_dbI16    ());
-			if (t == typeof(SqlInt32))    return (CB<T, P>)(object)(new R4_dbI32    ());
-			if (t == typeof(SqlInt64))    return (CB<T, P>)(object)(new R4_dbI64    ());
+			if (t == typeof(SqlByte))     return (CB<T,P>)(object)(new R4_dbU8     ());
+			if (t == typeof(SqlInt16))    return (CB<T,P>)(object)(new R4_dbI16    ());
+			if (t == typeof(SqlInt32))    return (CB<T,P>)(object)(new R4_dbI32    ());
+			if (t == typeof(SqlInt64))    return (CB<T,P>)(object)(new R4_dbI64    ());
 
-			if (t == typeof(SqlDouble))   return (CB<T, P>)(object)(new R4_dbR8     ());
-			if (t == typeof(SqlDecimal))  return (CB<T, P>)(object)(new R4_dbD      ());
-			if (t == typeof(SqlMoney))    return (CB<T, P>)(object)(new R4_dbM      ());
+			if (t == typeof(SqlDouble))   return (CB<T,P>)(object)(new R4_dbR8     ());
+			if (t == typeof(SqlDecimal))  return (CB<T,P>)(object)(new R4_dbD      ());
+			if (t == typeof(SqlMoney))    return (CB<T,P>)(object)(new R4_dbM      ());
 
-			if (t == typeof(SqlBoolean))  return (CB<T, P>)(object)(new R4_dbB      ());
+			if (t == typeof(SqlBoolean))  return (CB<T,P>)(object)(new R4_dbB      ());
 
-			if (t == typeof(object))      return (CB<T, P>)(object)(new R4_O        ());
+			if (t == typeof(object))      return (CB<T,P>)(object)(new R4_O        ());
 
-			return (CB<T, P>)(object)Convert<Single, object>.I;
+			return (CB<T,P>)(object)(new R4<P>());
 		}
 
 		#endregion
@@ -1475,70 +1486,71 @@ namespace BLToolkit.Common
 
 		sealed class R8_dbB      : CB<Double,SqlBoolean> { public override Double C(SqlBoolean p)  { return p.IsNull? 0: Convert.ToDouble(p.Value); } }
 
-		sealed class R8_O         : CB<Double ,object>    { public override Double C(object p)   { return Convert.ToDouble(p); } }
+		sealed class R8<Q>       : CB<Double,Q>          { public override Double C(Q p)           { return Convert<Double,object>.From(p); } }
+		sealed class R8_O        : CB<Double,object>     { public override Double C(object p)      { return Convert.ToDouble(p); } }
 
-		static CB<T, P> GetDoubleConverter()
+		static CB<T,P> GetDoubleConverter()
 		{
 			Type t = typeof(P);
 
 
 			// Scalar Types.
 			//
-			if (t == typeof(String))      return (CB<T, P>)(object)(new R8_S        ());
+			if (t == typeof(String))      return (CB<T,P>)(object)(new R8_S        ());
 
-			if (t == typeof(SByte))       return (CB<T, P>)(object)(new R8_I8       ());
-			if (t == typeof(Int16))       return (CB<T, P>)(object)(new R8_I16      ());
-			if (t == typeof(Int32))       return (CB<T, P>)(object)(new R8_I32      ());
-			if (t == typeof(Int64))       return (CB<T, P>)(object)(new R8_I64      ());
+			if (t == typeof(SByte))       return (CB<T,P>)(object)(new R8_I8       ());
+			if (t == typeof(Int16))       return (CB<T,P>)(object)(new R8_I16      ());
+			if (t == typeof(Int32))       return (CB<T,P>)(object)(new R8_I32      ());
+			if (t == typeof(Int64))       return (CB<T,P>)(object)(new R8_I64      ());
 
-			if (t == typeof(Byte))        return (CB<T, P>)(object)(new R8_U8       ());
-			if (t == typeof(UInt16))      return (CB<T, P>)(object)(new R8_U16      ());
-			if (t == typeof(UInt32))      return (CB<T, P>)(object)(new R8_U32      ());
-			if (t == typeof(UInt64))      return (CB<T, P>)(object)(new R8_U64      ());
+			if (t == typeof(Byte))        return (CB<T,P>)(object)(new R8_U8       ());
+			if (t == typeof(UInt16))      return (CB<T,P>)(object)(new R8_U16      ());
+			if (t == typeof(UInt32))      return (CB<T,P>)(object)(new R8_U32      ());
+			if (t == typeof(UInt64))      return (CB<T,P>)(object)(new R8_U64      ());
 
-			if (t == typeof(Single))      return (CB<T, P>)(object)(new R8_R4       ());
+			if (t == typeof(Single))      return (CB<T,P>)(object)(new R8_R4       ());
 
-			if (t == typeof(Boolean))     return (CB<T, P>)(object)(new R8_B        ());
-			if (t == typeof(Decimal))     return (CB<T, P>)(object)(new R8_D        ());
+			if (t == typeof(Boolean))     return (CB<T,P>)(object)(new R8_B        ());
+			if (t == typeof(Decimal))     return (CB<T,P>)(object)(new R8_D        ());
 
 			// Nullable Types.
 			//
-			if (t == typeof(Double?))     return (CB<T, P>)(object)(new R8_NR8      ());
+			if (t == typeof(Double?))     return (CB<T,P>)(object)(new R8_NR8      ());
 
-			if (t == typeof(SByte?))      return (CB<T, P>)(object)(new R8_NI8      ());
-			if (t == typeof(Int16?))      return (CB<T, P>)(object)(new R8_NI16     ());
-			if (t == typeof(Int32?))      return (CB<T, P>)(object)(new R8_NI32     ());
-			if (t == typeof(Int64?))      return (CB<T, P>)(object)(new R8_NI64     ());
+			if (t == typeof(SByte?))      return (CB<T,P>)(object)(new R8_NI8      ());
+			if (t == typeof(Int16?))      return (CB<T,P>)(object)(new R8_NI16     ());
+			if (t == typeof(Int32?))      return (CB<T,P>)(object)(new R8_NI32     ());
+			if (t == typeof(Int64?))      return (CB<T,P>)(object)(new R8_NI64     ());
 
-			if (t == typeof(Byte?))       return (CB<T, P>)(object)(new R8_NU8      ());
-			if (t == typeof(UInt16?))     return (CB<T, P>)(object)(new R8_NU16     ());
-			if (t == typeof(UInt32?))     return (CB<T, P>)(object)(new R8_NU32     ());
-			if (t == typeof(UInt64?))     return (CB<T, P>)(object)(new R8_NU64     ());
+			if (t == typeof(Byte?))       return (CB<T,P>)(object)(new R8_NU8      ());
+			if (t == typeof(UInt16?))     return (CB<T,P>)(object)(new R8_NU16     ());
+			if (t == typeof(UInt32?))     return (CB<T,P>)(object)(new R8_NU32     ());
+			if (t == typeof(UInt64?))     return (CB<T,P>)(object)(new R8_NU64     ());
 
-			if (t == typeof(Single?))     return (CB<T, P>)(object)(new R8_NR4      ());
+			if (t == typeof(Single?))     return (CB<T,P>)(object)(new R8_NR4      ());
 
-			if (t == typeof(Boolean?))    return (CB<T, P>)(object)(new R8_NB       ());
-			if (t == typeof(Decimal?))    return (CB<T, P>)(object)(new R8_ND       ());
+			if (t == typeof(Boolean?))    return (CB<T,P>)(object)(new R8_NB       ());
+			if (t == typeof(Decimal?))    return (CB<T,P>)(object)(new R8_ND       ());
 
 			// SqlTypes.
 			//
-			if (t == typeof(SqlDouble))   return (CB<T, P>)(object)(new R8_dbR8     ());
-			if (t == typeof(SqlString))   return (CB<T, P>)(object)(new R8_dbS      ());
+			if (t == typeof(SqlDouble))   return (CB<T,P>)(object)(new R8_dbR8     ());
+			if (t == typeof(SqlString))   return (CB<T,P>)(object)(new R8_dbS      ());
 
-			if (t == typeof(SqlByte))     return (CB<T, P>)(object)(new R8_dbU8     ());
-			if (t == typeof(SqlInt16))    return (CB<T, P>)(object)(new R8_dbI16    ());
-			if (t == typeof(SqlInt32))    return (CB<T, P>)(object)(new R8_dbI32    ());
-			if (t == typeof(SqlInt64))    return (CB<T, P>)(object)(new R8_dbI64    ());
+			if (t == typeof(SqlByte))     return (CB<T,P>)(object)(new R8_dbU8     ());
+			if (t == typeof(SqlInt16))    return (CB<T,P>)(object)(new R8_dbI16    ());
+			if (t == typeof(SqlInt32))    return (CB<T,P>)(object)(new R8_dbI32    ());
+			if (t == typeof(SqlInt64))    return (CB<T,P>)(object)(new R8_dbI64    ());
 
-			if (t == typeof(SqlSingle))   return (CB<T, P>)(object)(new R8_dbR4     ());
-			if (t == typeof(SqlDecimal))  return (CB<T, P>)(object)(new R8_dbD      ());
-			if (t == typeof(SqlMoney))    return (CB<T, P>)(object)(new R8_dbM      ());
+			if (t == typeof(SqlSingle))   return (CB<T,P>)(object)(new R8_dbR4     ());
+			if (t == typeof(SqlDecimal))  return (CB<T,P>)(object)(new R8_dbD      ());
+			if (t == typeof(SqlMoney))    return (CB<T,P>)(object)(new R8_dbM      ());
 
-			if (t == typeof(SqlBoolean))  return (CB<T, P>)(object)(new R8_dbB      ());
+			if (t == typeof(SqlBoolean))  return (CB<T,P>)(object)(new R8_dbB      ());
 
-			if (t == typeof(object))      return (CB<T, P>)(object)(new R8_O        ());
+			if (t == typeof(object))      return (CB<T,P>)(object)(new R8_O        ());
 
-			return (CB<T, P>)(object)Convert<Double, object>.I;
+			return (CB<T,P>)(object)(new R8<P>());
 		}
 
 		#endregion
@@ -1627,74 +1639,75 @@ namespace BLToolkit.Common
 		sealed class B_dbM       : CB<Boolean,SqlMoney>   { public override Boolean C(SqlMoney p)    { return p.IsNull? false: Convert.ToBoolean(p.Value); } }
 
 
-		sealed class B_O         : CB<Boolean ,object>    { public override Boolean C(object p)   { return Convert.ToBoolean(p); } }
+		sealed class B<Q>        : CB<Boolean,Q>          { public override Boolean C(Q p)           { return Convert<Boolean,object>.From(p); } }
+		sealed class B_O         : CB<Boolean,object>     { public override Boolean C(object p)      { return Convert.ToBoolean(p); } }
 
-		static CB<T, P> GetBooleanConverter()
+		static CB<T,P> GetBooleanConverter()
 		{
 			Type t = typeof(P);
 
 
 			// Scalar Types.
 			//
-			if (t == typeof(String))      return (CB<T, P>)(object)(new B_S         ());
+			if (t == typeof(String))      return (CB<T,P>)(object)(new B_S         ());
 
-			if (t == typeof(SByte))       return (CB<T, P>)(object)(new B_I8        ());
-			if (t == typeof(Int16))       return (CB<T, P>)(object)(new B_I16       ());
-			if (t == typeof(Int32))       return (CB<T, P>)(object)(new B_I32       ());
-			if (t == typeof(Int64))       return (CB<T, P>)(object)(new B_I64       ());
+			if (t == typeof(SByte))       return (CB<T,P>)(object)(new B_I8        ());
+			if (t == typeof(Int16))       return (CB<T,P>)(object)(new B_I16       ());
+			if (t == typeof(Int32))       return (CB<T,P>)(object)(new B_I32       ());
+			if (t == typeof(Int64))       return (CB<T,P>)(object)(new B_I64       ());
 
-			if (t == typeof(Byte))        return (CB<T, P>)(object)(new B_U8        ());
-			if (t == typeof(UInt16))      return (CB<T, P>)(object)(new B_U16       ());
-			if (t == typeof(UInt32))      return (CB<T, P>)(object)(new B_U32       ());
-			if (t == typeof(UInt64))      return (CB<T, P>)(object)(new B_U64       ());
+			if (t == typeof(Byte))        return (CB<T,P>)(object)(new B_U8        ());
+			if (t == typeof(UInt16))      return (CB<T,P>)(object)(new B_U16       ());
+			if (t == typeof(UInt32))      return (CB<T,P>)(object)(new B_U32       ());
+			if (t == typeof(UInt64))      return (CB<T,P>)(object)(new B_U64       ());
 
-			if (t == typeof(Single))      return (CB<T, P>)(object)(new B_R4        ());
-			if (t == typeof(Double))      return (CB<T, P>)(object)(new B_R8        ());
+			if (t == typeof(Single))      return (CB<T,P>)(object)(new B_R4        ());
+			if (t == typeof(Double))      return (CB<T,P>)(object)(new B_R8        ());
 
-			if (t == typeof(Decimal))     return (CB<T, P>)(object)(new B_D         ());
+			if (t == typeof(Decimal))     return (CB<T,P>)(object)(new B_D         ());
 
-			if (t == typeof(Char))        return (CB<T, P>)(object)(new B_C         ());
+			if (t == typeof(Char))        return (CB<T,P>)(object)(new B_C         ());
 
 			// Nullable Types.
 			//
-			if (t == typeof(Boolean?))    return (CB<T, P>)(object)(new B_NB        ());
+			if (t == typeof(Boolean?))    return (CB<T,P>)(object)(new B_NB        ());
 
-			if (t == typeof(SByte?))      return (CB<T, P>)(object)(new B_NI8       ());
-			if (t == typeof(Int16?))      return (CB<T, P>)(object)(new B_NI16      ());
-			if (t == typeof(Int32?))      return (CB<T, P>)(object)(new B_NI32      ());
-			if (t == typeof(Int64?))      return (CB<T, P>)(object)(new B_NI64      ());
+			if (t == typeof(SByte?))      return (CB<T,P>)(object)(new B_NI8       ());
+			if (t == typeof(Int16?))      return (CB<T,P>)(object)(new B_NI16      ());
+			if (t == typeof(Int32?))      return (CB<T,P>)(object)(new B_NI32      ());
+			if (t == typeof(Int64?))      return (CB<T,P>)(object)(new B_NI64      ());
 
-			if (t == typeof(Byte?))       return (CB<T, P>)(object)(new B_NU8       ());
-			if (t == typeof(UInt16?))     return (CB<T, P>)(object)(new B_NU16      ());
-			if (t == typeof(UInt32?))     return (CB<T, P>)(object)(new B_NU32      ());
-			if (t == typeof(UInt64?))     return (CB<T, P>)(object)(new B_NU64      ());
+			if (t == typeof(Byte?))       return (CB<T,P>)(object)(new B_NU8       ());
+			if (t == typeof(UInt16?))     return (CB<T,P>)(object)(new B_NU16      ());
+			if (t == typeof(UInt32?))     return (CB<T,P>)(object)(new B_NU32      ());
+			if (t == typeof(UInt64?))     return (CB<T,P>)(object)(new B_NU64      ());
 
-			if (t == typeof(Single?))     return (CB<T, P>)(object)(new B_NR4       ());
-			if (t == typeof(Double?))     return (CB<T, P>)(object)(new B_NR8       ());
+			if (t == typeof(Single?))     return (CB<T,P>)(object)(new B_NR4       ());
+			if (t == typeof(Double?))     return (CB<T,P>)(object)(new B_NR8       ());
 
-			if (t == typeof(Decimal?))    return (CB<T, P>)(object)(new B_ND        ());
+			if (t == typeof(Decimal?))    return (CB<T,P>)(object)(new B_ND        ());
 
-			if (t == typeof(Char?))       return (CB<T, P>)(object)(new B_NC        ());
+			if (t == typeof(Char?))       return (CB<T,P>)(object)(new B_NC        ());
 
 			// SqlTypes.
 			//
-			if (t == typeof(SqlBoolean))  return (CB<T, P>)(object)(new B_dbB       ());
-			if (t == typeof(SqlString))   return (CB<T, P>)(object)(new B_dbS       ());
+			if (t == typeof(SqlBoolean))  return (CB<T,P>)(object)(new B_dbB       ());
+			if (t == typeof(SqlString))   return (CB<T,P>)(object)(new B_dbS       ());
 
-			if (t == typeof(SqlByte))     return (CB<T, P>)(object)(new B_dbU8      ());
-			if (t == typeof(SqlInt16))    return (CB<T, P>)(object)(new B_dbI16     ());
-			if (t == typeof(SqlInt32))    return (CB<T, P>)(object)(new B_dbI32     ());
-			if (t == typeof(SqlInt64))    return (CB<T, P>)(object)(new B_dbI64     ());
+			if (t == typeof(SqlByte))     return (CB<T,P>)(object)(new B_dbU8      ());
+			if (t == typeof(SqlInt16))    return (CB<T,P>)(object)(new B_dbI16     ());
+			if (t == typeof(SqlInt32))    return (CB<T,P>)(object)(new B_dbI32     ());
+			if (t == typeof(SqlInt64))    return (CB<T,P>)(object)(new B_dbI64     ());
 
-			if (t == typeof(SqlSingle))   return (CB<T, P>)(object)(new B_dbR4      ());
-			if (t == typeof(SqlDouble))   return (CB<T, P>)(object)(new B_dbR8      ());
-			if (t == typeof(SqlDecimal))  return (CB<T, P>)(object)(new B_dbD       ());
-			if (t == typeof(SqlMoney))    return (CB<T, P>)(object)(new B_dbM       ());
+			if (t == typeof(SqlSingle))   return (CB<T,P>)(object)(new B_dbR4      ());
+			if (t == typeof(SqlDouble))   return (CB<T,P>)(object)(new B_dbR8      ());
+			if (t == typeof(SqlDecimal))  return (CB<T,P>)(object)(new B_dbD       ());
+			if (t == typeof(SqlMoney))    return (CB<T,P>)(object)(new B_dbM       ());
 
 
-			if (t == typeof(object))      return (CB<T, P>)(object)(new B_O         ());
+			if (t == typeof(object))      return (CB<T,P>)(object)(new B_O         ());
 
-			return (CB<T, P>)(object)Convert<Boolean, object>.I;
+			return (CB<T,P>)(object)(new B<P>());
 		}
 
 		#endregion
@@ -1756,70 +1769,71 @@ namespace BLToolkit.Common
 
 		sealed class D_dbB       : CB<Decimal,SqlBoolean> { public override Decimal C(SqlBoolean p)  { return p.IsNull? 0: Convert.ToDecimal(p.Value); } }
 
-		sealed class D_O         : CB<Decimal ,object>    { public override Decimal C(object p)   { return Convert.ToDecimal(p); } }
+		sealed class D<Q>        : CB<Decimal,Q>          { public override Decimal C(Q p)           { return Convert<Decimal,object>.From(p); } }
+		sealed class D_O         : CB<Decimal,object>     { public override Decimal C(object p)      { return Convert.ToDecimal(p); } }
 
-		static CB<T, P> GetDecimalConverter()
+		static CB<T,P> GetDecimalConverter()
 		{
 			Type t = typeof(P);
 
 
 			// Scalar Types.
 			//
-			if (t == typeof(String))      return (CB<T, P>)(object)(new D_S         ());
+			if (t == typeof(String))      return (CB<T,P>)(object)(new D_S         ());
 
-			if (t == typeof(SByte))       return (CB<T, P>)(object)(new D_I8        ());
-			if (t == typeof(Int16))       return (CB<T, P>)(object)(new D_I16       ());
-			if (t == typeof(Int32))       return (CB<T, P>)(object)(new D_I32       ());
-			if (t == typeof(Int64))       return (CB<T, P>)(object)(new D_I64       ());
+			if (t == typeof(SByte))       return (CB<T,P>)(object)(new D_I8        ());
+			if (t == typeof(Int16))       return (CB<T,P>)(object)(new D_I16       ());
+			if (t == typeof(Int32))       return (CB<T,P>)(object)(new D_I32       ());
+			if (t == typeof(Int64))       return (CB<T,P>)(object)(new D_I64       ());
 
-			if (t == typeof(Byte))        return (CB<T, P>)(object)(new D_U8        ());
-			if (t == typeof(UInt16))      return (CB<T, P>)(object)(new D_U16       ());
-			if (t == typeof(UInt32))      return (CB<T, P>)(object)(new D_U32       ());
-			if (t == typeof(UInt64))      return (CB<T, P>)(object)(new D_U64       ());
+			if (t == typeof(Byte))        return (CB<T,P>)(object)(new D_U8        ());
+			if (t == typeof(UInt16))      return (CB<T,P>)(object)(new D_U16       ());
+			if (t == typeof(UInt32))      return (CB<T,P>)(object)(new D_U32       ());
+			if (t == typeof(UInt64))      return (CB<T,P>)(object)(new D_U64       ());
 
-			if (t == typeof(Single))      return (CB<T, P>)(object)(new D_R4        ());
-			if (t == typeof(Double))      return (CB<T, P>)(object)(new D_R8        ());
+			if (t == typeof(Single))      return (CB<T,P>)(object)(new D_R4        ());
+			if (t == typeof(Double))      return (CB<T,P>)(object)(new D_R8        ());
 
-			if (t == typeof(Boolean))     return (CB<T, P>)(object)(new D_B         ());
+			if (t == typeof(Boolean))     return (CB<T,P>)(object)(new D_B         ());
 
 			// Nullable Types.
 			//
-			if (t == typeof(Decimal?))    return (CB<T, P>)(object)(new D_ND        ());
+			if (t == typeof(Decimal?))    return (CB<T,P>)(object)(new D_ND        ());
 
-			if (t == typeof(SByte?))      return (CB<T, P>)(object)(new D_NI8       ());
-			if (t == typeof(Int16?))      return (CB<T, P>)(object)(new D_NI16      ());
-			if (t == typeof(Int32?))      return (CB<T, P>)(object)(new D_NI32      ());
-			if (t == typeof(Int64?))      return (CB<T, P>)(object)(new D_NI64      ());
+			if (t == typeof(SByte?))      return (CB<T,P>)(object)(new D_NI8       ());
+			if (t == typeof(Int16?))      return (CB<T,P>)(object)(new D_NI16      ());
+			if (t == typeof(Int32?))      return (CB<T,P>)(object)(new D_NI32      ());
+			if (t == typeof(Int64?))      return (CB<T,P>)(object)(new D_NI64      ());
 
-			if (t == typeof(Byte?))       return (CB<T, P>)(object)(new D_NU8       ());
-			if (t == typeof(UInt16?))     return (CB<T, P>)(object)(new D_NU16      ());
-			if (t == typeof(UInt32?))     return (CB<T, P>)(object)(new D_NU32      ());
-			if (t == typeof(UInt64?))     return (CB<T, P>)(object)(new D_NU64      ());
+			if (t == typeof(Byte?))       return (CB<T,P>)(object)(new D_NU8       ());
+			if (t == typeof(UInt16?))     return (CB<T,P>)(object)(new D_NU16      ());
+			if (t == typeof(UInt32?))     return (CB<T,P>)(object)(new D_NU32      ());
+			if (t == typeof(UInt64?))     return (CB<T,P>)(object)(new D_NU64      ());
 
-			if (t == typeof(Single?))     return (CB<T, P>)(object)(new D_NR4       ());
-			if (t == typeof(Double?))     return (CB<T, P>)(object)(new D_NR8       ());
+			if (t == typeof(Single?))     return (CB<T,P>)(object)(new D_NR4       ());
+			if (t == typeof(Double?))     return (CB<T,P>)(object)(new D_NR8       ());
 
-			if (t == typeof(Boolean?))    return (CB<T, P>)(object)(new D_NB        ());
+			if (t == typeof(Boolean?))    return (CB<T,P>)(object)(new D_NB        ());
 
 			// SqlTypes.
 			//
-			if (t == typeof(SqlDecimal))  return (CB<T, P>)(object)(new D_dbD       ());
-			if (t == typeof(SqlMoney))    return (CB<T, P>)(object)(new D_dbM       ());
-			if (t == typeof(SqlString))   return (CB<T, P>)(object)(new D_dbS       ());
+			if (t == typeof(SqlDecimal))  return (CB<T,P>)(object)(new D_dbD       ());
+			if (t == typeof(SqlMoney))    return (CB<T,P>)(object)(new D_dbM       ());
+			if (t == typeof(SqlString))   return (CB<T,P>)(object)(new D_dbS       ());
 
-			if (t == typeof(SqlByte))     return (CB<T, P>)(object)(new D_dbU8      ());
-			if (t == typeof(SqlInt16))    return (CB<T, P>)(object)(new D_dbI16     ());
-			if (t == typeof(SqlInt32))    return (CB<T, P>)(object)(new D_dbI32     ());
-			if (t == typeof(SqlInt64))    return (CB<T, P>)(object)(new D_dbI64     ());
+			if (t == typeof(SqlByte))     return (CB<T,P>)(object)(new D_dbU8      ());
+			if (t == typeof(SqlInt16))    return (CB<T,P>)(object)(new D_dbI16     ());
+			if (t == typeof(SqlInt32))    return (CB<T,P>)(object)(new D_dbI32     ());
+			if (t == typeof(SqlInt64))    return (CB<T,P>)(object)(new D_dbI64     ());
 
-			if (t == typeof(SqlSingle))   return (CB<T, P>)(object)(new D_dbR4      ());
-			if (t == typeof(SqlDouble))   return (CB<T, P>)(object)(new D_dbR8      ());
+			if (t == typeof(SqlSingle))   return (CB<T,P>)(object)(new D_dbR4      ());
+			if (t == typeof(SqlDouble))   return (CB<T,P>)(object)(new D_dbR8      ());
 
-			if (t == typeof(SqlBoolean))  return (CB<T, P>)(object)(new D_dbB       ());
+			if (t == typeof(SqlBoolean))  return (CB<T,P>)(object)(new D_dbB       ());
 
-			if (t == typeof(object))      return (CB<T, P>)(object)(new D_O         ());
+			if (t == typeof(object))      return (CB<T,P>)(object)(new D_O         ());
 
-			return (CB<T, P>)(object)Convert<Decimal, object>.I;
+			return (CB<T,P>)(object)(new D<P>());
 		}
 
 		#endregion
@@ -1884,73 +1898,74 @@ namespace BLToolkit.Common
 
 		sealed class DT_dbB      : CB<DateTime,SqlBoolean> { public override DateTime C(SqlBoolean p)  { return p.IsNull? DateTime.MinValue: Convert.ToDateTime(p.Value); } }
 
-		sealed class DT_O         : CB<DateTime ,object>    { public override DateTime C(object p)   { return Convert.ToDateTime(p); } }
+		sealed class DT<Q>       : CB<DateTime,Q>          { public override DateTime C(Q p)           { return Convert<DateTime,object>.From(p); } }
+		sealed class DT_O        : CB<DateTime,object>     { public override DateTime C(object p)      { return Convert.ToDateTime(p); } }
 
-		static CB<T, P> GetDateTimeConverter()
+		static CB<T,P> GetDateTimeConverter()
 		{
 			Type t = typeof(P);
 
 
 			// Scalar Types.
 			//
-			if (t == typeof(String))      return (CB<T, P>)(object)(new DT_S        ());
+			if (t == typeof(String))      return (CB<T,P>)(object)(new DT_S        ());
 
-			if (t == typeof(SByte))       return (CB<T, P>)(object)(new DT_I8       ());
-			if (t == typeof(Int16))       return (CB<T, P>)(object)(new DT_I16      ());
-			if (t == typeof(Int32))       return (CB<T, P>)(object)(new DT_I32      ());
-			if (t == typeof(Int64))       return (CB<T, P>)(object)(new DT_I64      ());
+			if (t == typeof(SByte))       return (CB<T,P>)(object)(new DT_I8       ());
+			if (t == typeof(Int16))       return (CB<T,P>)(object)(new DT_I16      ());
+			if (t == typeof(Int32))       return (CB<T,P>)(object)(new DT_I32      ());
+			if (t == typeof(Int64))       return (CB<T,P>)(object)(new DT_I64      ());
 
-			if (t == typeof(Byte))        return (CB<T, P>)(object)(new DT_U8       ());
-			if (t == typeof(UInt16))      return (CB<T, P>)(object)(new DT_U16      ());
-			if (t == typeof(UInt32))      return (CB<T, P>)(object)(new DT_U32      ());
-			if (t == typeof(UInt64))      return (CB<T, P>)(object)(new DT_U64      ());
+			if (t == typeof(Byte))        return (CB<T,P>)(object)(new DT_U8       ());
+			if (t == typeof(UInt16))      return (CB<T,P>)(object)(new DT_U16      ());
+			if (t == typeof(UInt32))      return (CB<T,P>)(object)(new DT_U32      ());
+			if (t == typeof(UInt64))      return (CB<T,P>)(object)(new DT_U64      ());
 
-			if (t == typeof(Single))      return (CB<T, P>)(object)(new DT_R4       ());
-			if (t == typeof(Double))      return (CB<T, P>)(object)(new DT_R8       ());
+			if (t == typeof(Single))      return (CB<T,P>)(object)(new DT_R4       ());
+			if (t == typeof(Double))      return (CB<T,P>)(object)(new DT_R8       ());
 
-			if (t == typeof(Boolean))     return (CB<T, P>)(object)(new DT_B        ());
-			if (t == typeof(Decimal))     return (CB<T, P>)(object)(new DT_D        ());
+			if (t == typeof(Boolean))     return (CB<T,P>)(object)(new DT_B        ());
+			if (t == typeof(Decimal))     return (CB<T,P>)(object)(new DT_D        ());
 
 			// Nullable Types.
 			//
-			if (t == typeof(DateTime?))   return (CB<T, P>)(object)(new DT_NDT      ());
+			if (t == typeof(DateTime?))   return (CB<T,P>)(object)(new DT_NDT      ());
 
-			if (t == typeof(SByte?))      return (CB<T, P>)(object)(new DT_NI8      ());
-			if (t == typeof(Int16?))      return (CB<T, P>)(object)(new DT_NI16     ());
-			if (t == typeof(Int32?))      return (CB<T, P>)(object)(new DT_NI32     ());
-			if (t == typeof(Int64?))      return (CB<T, P>)(object)(new DT_NI64     ());
+			if (t == typeof(SByte?))      return (CB<T,P>)(object)(new DT_NI8      ());
+			if (t == typeof(Int16?))      return (CB<T,P>)(object)(new DT_NI16     ());
+			if (t == typeof(Int32?))      return (CB<T,P>)(object)(new DT_NI32     ());
+			if (t == typeof(Int64?))      return (CB<T,P>)(object)(new DT_NI64     ());
 
-			if (t == typeof(Byte?))       return (CB<T, P>)(object)(new DT_NU8      ());
-			if (t == typeof(UInt16?))     return (CB<T, P>)(object)(new DT_NU16     ());
-			if (t == typeof(UInt32?))     return (CB<T, P>)(object)(new DT_NU32     ());
-			if (t == typeof(UInt64?))     return (CB<T, P>)(object)(new DT_NU64     ());
+			if (t == typeof(Byte?))       return (CB<T,P>)(object)(new DT_NU8      ());
+			if (t == typeof(UInt16?))     return (CB<T,P>)(object)(new DT_NU16     ());
+			if (t == typeof(UInt32?))     return (CB<T,P>)(object)(new DT_NU32     ());
+			if (t == typeof(UInt64?))     return (CB<T,P>)(object)(new DT_NU64     ());
 
-			if (t == typeof(Single?))     return (CB<T, P>)(object)(new DT_NR4      ());
-			if (t == typeof(Double?))     return (CB<T, P>)(object)(new DT_NR8      ());
+			if (t == typeof(Single?))     return (CB<T,P>)(object)(new DT_NR4      ());
+			if (t == typeof(Double?))     return (CB<T,P>)(object)(new DT_NR8      ());
 
-			if (t == typeof(Boolean?))    return (CB<T, P>)(object)(new DT_NB       ());
-			if (t == typeof(Decimal?))    return (CB<T, P>)(object)(new DT_ND       ());
+			if (t == typeof(Boolean?))    return (CB<T,P>)(object)(new DT_NB       ());
+			if (t == typeof(Decimal?))    return (CB<T,P>)(object)(new DT_ND       ());
 
 			// SqlTypes.
 			//
-			if (t == typeof(SqlDateTime)) return (CB<T, P>)(object)(new DT_dbDT     ());
-			if (t == typeof(SqlString))   return (CB<T, P>)(object)(new DT_dbS      ());
+			if (t == typeof(SqlDateTime)) return (CB<T,P>)(object)(new DT_dbDT     ());
+			if (t == typeof(SqlString))   return (CB<T,P>)(object)(new DT_dbS      ());
 
-			if (t == typeof(SqlByte))     return (CB<T, P>)(object)(new DT_dbU8     ());
-			if (t == typeof(SqlInt16))    return (CB<T, P>)(object)(new DT_dbI16    ());
-			if (t == typeof(SqlInt32))    return (CB<T, P>)(object)(new DT_dbI32    ());
-			if (t == typeof(SqlInt64))    return (CB<T, P>)(object)(new DT_dbI64    ());
+			if (t == typeof(SqlByte))     return (CB<T,P>)(object)(new DT_dbU8     ());
+			if (t == typeof(SqlInt16))    return (CB<T,P>)(object)(new DT_dbI16    ());
+			if (t == typeof(SqlInt32))    return (CB<T,P>)(object)(new DT_dbI32    ());
+			if (t == typeof(SqlInt64))    return (CB<T,P>)(object)(new DT_dbI64    ());
 
-			if (t == typeof(SqlSingle))   return (CB<T, P>)(object)(new DT_dbR4     ());
-			if (t == typeof(SqlDouble))   return (CB<T, P>)(object)(new DT_dbR8     ());
-			if (t == typeof(SqlDecimal))  return (CB<T, P>)(object)(new DT_dbD      ());
-			if (t == typeof(SqlMoney))    return (CB<T, P>)(object)(new DT_dbM      ());
+			if (t == typeof(SqlSingle))   return (CB<T,P>)(object)(new DT_dbR4     ());
+			if (t == typeof(SqlDouble))   return (CB<T,P>)(object)(new DT_dbR8     ());
+			if (t == typeof(SqlDecimal))  return (CB<T,P>)(object)(new DT_dbD      ());
+			if (t == typeof(SqlMoney))    return (CB<T,P>)(object)(new DT_dbM      ());
 
-			if (t == typeof(SqlBoolean))  return (CB<T, P>)(object)(new DT_dbB      ());
+			if (t == typeof(SqlBoolean))  return (CB<T,P>)(object)(new DT_dbB      ());
 
-			if (t == typeof(object))      return (CB<T, P>)(object)(new DT_O        ());
+			if (t == typeof(object))      return (CB<T,P>)(object)(new DT_O        ());
 
-			return (CB<T, P>)(object)Convert<DateTime, object>.I;
+			return (CB<T,P>)(object)(new DT<P>());
 		}
 
 		#endregion
@@ -1973,7 +1988,8 @@ namespace BLToolkit.Common
 		sealed class TS_dbS      : CB<TimeSpan,SqlString>  { public override TimeSpan C(SqlString p)   { return p.IsNull? TimeSpan.MinValue: TimeSpan.Parse(p.Value);     } }
 		sealed class TS_dbDT     : CB<TimeSpan,SqlDateTime>{ public override TimeSpan C(SqlDateTime p) { return p.IsNull? TimeSpan.MinValue: p.Value - DateTime.MinValue; } }
 
-		sealed class TS_O         : CB<TimeSpan ,object>    { public override TimeSpan C(object p)  
+		sealed class TS<Q>       : CB<TimeSpan,Q>          { public override TimeSpan C(Q p)           { return Convert<TimeSpan,object>.From(p); } }
+		sealed class TS_O        : CB<TimeSpan,object>     { public override TimeSpan C(object p)     
 			{
 				if (p == null) return TimeSpan.MinValue;
 
@@ -1984,8 +2000,8 @@ namespace BLToolkit.Common
 
 				// Nullable Types.
 				//
-				if (p is TimeSpan)    return Convert<TimeSpan,TimeSpan>   .I.C((TimeSpan)p);
-				if (p is DateTime)    return Convert<TimeSpan,DateTime>   .I.C((DateTime)p);
+				if (p is TimeSpan?)   return Convert<TimeSpan,TimeSpan?>  .I.C((TimeSpan?)p);
+				if (p is DateTime?)   return Convert<TimeSpan,DateTime?>  .I.C((DateTime?)p);
 
 				// SqlTypes.
 				//
@@ -1993,32 +2009,32 @@ namespace BLToolkit.Common
 				if (p is SqlDateTime) return Convert<TimeSpan,SqlDateTime>.I.C((SqlDateTime)p);
 
 				throw new InvalidCastException(string.Format(
-					"Invalid cast from {0} to {1}", typeof(P).FullName, typeof(T).FullName));
+					"Invalid cast from {0} to {1}", p.GetType().FullName, typeof(T).FullName));
 			} }
 
-		static CB<T, P> GetTimeSpanConverter()
+		static CB<T,P> GetTimeSpanConverter()
 		{
 			Type t = typeof(P);
 
 
 			// Scalar Types.
 			//
-			if (t == typeof(String))      return (CB<T, P>)(object)(new TS_S        ());
-			if (t == typeof(DateTime))    return (CB<T, P>)(object)(new TS_DT       ());
+			if (t == typeof(String))      return (CB<T,P>)(object)(new TS_S        ());
+			if (t == typeof(DateTime))    return (CB<T,P>)(object)(new TS_DT       ());
 
 			// Nullable Types.
 			//
-			if (t == typeof(TimeSpan?))   return (CB<T, P>)(object)(new TS_NTS      ());
-			if (t == typeof(DateTime?))   return (CB<T, P>)(object)(new TS_NDT      ());
+			if (t == typeof(TimeSpan?))   return (CB<T,P>)(object)(new TS_NTS      ());
+			if (t == typeof(DateTime?))   return (CB<T,P>)(object)(new TS_NDT      ());
 
 			// SqlTypes.
 			//
-			if (t == typeof(SqlString))   return (CB<T, P>)(object)(new TS_dbS      ());
-			if (t == typeof(SqlDateTime)) return (CB<T, P>)(object)(new TS_dbDT     ());
+			if (t == typeof(SqlString))   return (CB<T,P>)(object)(new TS_dbS      ());
+			if (t == typeof(SqlDateTime)) return (CB<T,P>)(object)(new TS_dbDT     ());
 
-			if (t == typeof(object))      return (CB<T, P>)(object)(new TS_O        ());
+			if (t == typeof(object))      return (CB<T,P>)(object)(new TS_O        ());
 
-			return (CB<T, P>)(object)Convert<TimeSpan, object>.I;
+			return (CB<T,P>)(object)(new TS<P>());
 		}
 
 		#endregion
@@ -2039,9 +2055,14 @@ namespace BLToolkit.Common
 		sealed class G_dbG       : CB<Guid,SqlGuid>    { public override Guid C(SqlGuid p)     { return p.IsNull? Guid.Empty: p.Value;             } }
 		sealed class G_dbS       : CB<Guid,SqlString>  { public override Guid C(SqlString p)   { return p.IsNull? Guid.Empty: new Guid(p.Value);   } }
 		sealed class G_dbBin     : CB<Guid,SqlBinary>  { public override Guid C(SqlBinary p)   { return p.IsNull? Guid.Empty: p.ToSqlGuid().Value; } }
+
+		// Other Types.
+		//
+		sealed class G_AU8       : CB<Guid,Byte[]>     { public override Guid C(Byte[] p)      { return p == null? Guid.Empty: new Guid(p); } }
 		sealed class G_T         : CB<Guid,Type>       { public override Guid C(Type p)        { return p == null? Guid.Empty: p.GUID; } }
 
-		sealed class G_O         : CB<Guid ,object>    { public override Guid C(object p)  
+		sealed class G<Q>        : CB<Guid,Q>          { public override Guid C(Q p)           { return Convert<Guid,object>.From(p); } }
+		sealed class G_O         : CB<Guid,object>     { public override Guid C(object p)     
 			{
 				if (p == null) return Guid.Empty;
 
@@ -2051,42 +2072,50 @@ namespace BLToolkit.Common
 
 				// Nullable Types.
 				//
-				if (p is Guid)        return Convert<Guid,Guid>       .I.C((Guid)p);
+				if (p is Guid?)       return Convert<Guid,Guid?>      .I.C((Guid?)p);
 
 				// SqlTypes.
 				//
 				if (p is SqlGuid)     return Convert<Guid,SqlGuid>    .I.C((SqlGuid)p);
 				if (p is SqlString)   return Convert<Guid,SqlString>  .I.C((SqlString)p);
 				if (p is SqlBinary)   return Convert<Guid,SqlBinary>  .I.C((SqlBinary)p);
+
+				// Other Types.
+				//
+				if (p is Byte[])      return Convert<Guid,Byte[]>     .I.C((Byte[])p);
 				if (p is Type)        return Convert<Guid,Type>       .I.C((Type)p);
 
 				throw new InvalidCastException(string.Format(
-					"Invalid cast from {0} to {1}", typeof(P).FullName, typeof(T).FullName));
+					"Invalid cast from {0} to {1}", p.GetType().FullName, typeof(T).FullName));
 			} }
 
-		static CB<T, P> GetGuidConverter()
+		static CB<T,P> GetGuidConverter()
 		{
 			Type t = typeof(P);
 
 
 			// Scalar Types.
 			//
-			if (t == typeof(String))      return (CB<T, P>)(object)(new G_S         ());
+			if (t == typeof(String))      return (CB<T,P>)(object)(new G_S         ());
 
 			// Nullable Types.
 			//
-			if (t == typeof(Guid?))       return (CB<T, P>)(object)(new G_NG        ());
+			if (t == typeof(Guid?))       return (CB<T,P>)(object)(new G_NG        ());
 
 			// SqlTypes.
 			//
-			if (t == typeof(SqlGuid))     return (CB<T, P>)(object)(new G_dbG       ());
-			if (t == typeof(SqlString))   return (CB<T, P>)(object)(new G_dbS       ());
-			if (t == typeof(SqlBinary))   return (CB<T, P>)(object)(new G_dbBin     ());
-			if (t == typeof(Type))        return (CB<T, P>)(object)(new G_T         ());
+			if (t == typeof(SqlGuid))     return (CB<T,P>)(object)(new G_dbG       ());
+			if (t == typeof(SqlString))   return (CB<T,P>)(object)(new G_dbS       ());
+			if (t == typeof(SqlBinary))   return (CB<T,P>)(object)(new G_dbBin     ());
 
-			if (t == typeof(object))      return (CB<T, P>)(object)(new G_O         ());
+			// Other Types.
+			//
+			if (t == typeof(Byte[]))      return (CB<T,P>)(object)(new G_AU8       ());
+			if (t == typeof(Type))        return (CB<T,P>)(object)(new G_T         ());
 
-			return (CB<T, P>)(object)Convert<Guid, object>.I;
+			if (t == typeof(object))      return (CB<T,P>)(object)(new G_O         ());
+
+			return (CB<T,P>)(object)(new G<P>());
 		}
 
 		#endregion

@@ -15,6 +15,10 @@ namespace BLToolkit.Mapping
 		}
 
 		private int _index;
+		public  int  Index
+		{
+			get { return _index; }
+		}
 
 		#region IMapDataSource Members
 

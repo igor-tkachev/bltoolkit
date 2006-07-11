@@ -3,7 +3,9 @@ using System.Data;
 using System.Data.Common;
 using System.Data.SqlClient;
 using System.Data.SqlTypes;
-
+using System.IO;
+using System.Xml;
+using BLToolkit.Common;
 using BLToolkit.Mapping;
 
 namespace BLToolkit.Data.DataProvider
@@ -139,6 +141,11 @@ namespace BLToolkit.Data.DataProvider
 			{
 				return new SqlDataReaderMapper(this, dataReader);
 			}
+
+			protected override DataReaderMapper CreateDataReaderMapper(IDataReader dataReader, NameOrIndexParameter nip)
+			{
+				return new SqlScalarDataReaderMapper(this, dataReader, nip);
+			}
 		}
 
 		public class SqlDataReaderMapper : DataReaderMapper
@@ -154,12 +161,33 @@ namespace BLToolkit.Data.DataProvider
 #if FW2
 			public override Type GetFieldType(int index)
 			{
-				return _dataReader.GetProviderSpecificFieldType(index);
+				Type fieldType = _dataReader.GetProviderSpecificFieldType(index);
+
+				if (fieldType == typeof(SqlXml))    return typeof(SqlXml);
+				if (fieldType == typeof(SqlBinary)) return typeof(SqlBytes);
+
+				return _dataReader.GetFieldType(index);
 			}
 
 			public override object GetValue(object o, int index)
 			{
-				return _dataReader.GetProviderSpecificValue(index);
+				Type fieldType = _dataReader.GetProviderSpecificFieldType(index);
+
+				if (fieldType == typeof(SqlXml))
+				{
+					SqlXml xml = _dataReader.GetSqlXml(index);
+					return xml.IsNull ? null : xml;
+				}
+				else if (fieldType == typeof(SqlBinary))
+				{
+					SqlBytes bytes = _dataReader.GetSqlBytes(index);
+					return bytes.IsNull ? null : bytes;
+				}
+				else
+				{
+					object value = _dataReader.GetValue(index);
+					return value is DBNull ? null : value;
+				}
 			}
 #endif
 
@@ -175,6 +203,65 @@ namespace BLToolkit.Data.DataProvider
 			public override SqlMoney    GetSqlMoney   (object o, int index) { return _dataReader.GetSqlMoney   (index); }
 			public override SqlSingle   GetSqlSingle  (object o, int index) { return _dataReader.GetSqlSingle  (index); }
 			public override SqlString   GetSqlString  (object o, int index) { return _dataReader.GetSqlString  (index); }
+		}
+
+		public class SqlScalarDataReaderMapper : ScalarDataReaderMapper
+		{
+			public SqlScalarDataReaderMapper(MappingSchema mappingSchema, IDataReader dataReader, NameOrIndexParameter nip)
+				: base(mappingSchema, dataReader, nip)
+			{
+				_dataReader = (SqlDataReader)dataReader;
+				_fieldType = _dataReader.GetProviderSpecificFieldType(Index);
+
+				if (_fieldType == typeof(SqlXml))
+					_fieldType = typeof(SqlXml);
+				else if (_fieldType == typeof(SqlBinary))
+					_fieldType = typeof(SqlBytes);
+				else
+					_fieldType = _dataReader.GetFieldType(Index);
+			}
+
+			private SqlDataReader _dataReader;
+			private Type          _fieldType;
+
+#if FW2
+			public override Type GetFieldType(int index)
+			{
+				return _fieldType;
+			}
+
+			public override object GetValue(object o, int index)
+			{
+				if (_fieldType == typeof(SqlXml))
+				{
+					SqlXml xml = _dataReader.GetSqlXml(Index);
+					return xml.IsNull ? null : xml;
+				}
+				else if (_fieldType == typeof(SqlBytes))
+				{
+					SqlBytes bytes = _dataReader.GetSqlBytes(Index);
+					return bytes.IsNull ? null : bytes;
+				}
+				else
+				{
+					object value = _dataReader.GetValue(index);
+					return value is DBNull ? null : value;
+				}
+			}
+#endif
+
+			public override SqlBoolean  GetSqlBoolean (object o, int index) { return _dataReader.GetSqlBoolean (Index); }
+			public override SqlByte     GetSqlByte    (object o, int index) { return _dataReader.GetSqlByte    (Index); }
+			public override SqlDateTime GetSqlDateTime(object o, int index) { return _dataReader.GetSqlDateTime(Index); }
+			public override SqlDecimal  GetSqlDecimal (object o, int index) { return _dataReader.GetSqlDecimal (Index); }
+			public override SqlDouble   GetSqlDouble  (object o, int index) { return _dataReader.GetSqlDouble  (Index); }
+			public override SqlGuid     GetSqlGuid    (object o, int index) { return _dataReader.GetSqlGuid    (Index); }
+			public override SqlInt16    GetSqlInt16   (object o, int index) { return _dataReader.GetSqlInt16   (Index); }
+			public override SqlInt32    GetSqlInt32   (object o, int index) { return _dataReader.GetSqlInt32   (Index); }
+			public override SqlInt64    GetSqlInt64   (object o, int index) { return _dataReader.GetSqlInt64   (Index); }
+			public override SqlMoney    GetSqlMoney   (object o, int index) { return _dataReader.GetSqlMoney   (Index); }
+			public override SqlSingle   GetSqlSingle  (object o, int index) { return _dataReader.GetSqlSingle  (Index); }
+			public override SqlString   GetSqlString  (object o, int index) { return _dataReader.GetSqlString  (Index); }
 		}
 	}
 }

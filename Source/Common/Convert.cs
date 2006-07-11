@@ -9,7 +9,7 @@ namespace BLToolkit.Common
 {
 	public static partial class Convert<T,P>
 	{
-		public abstract class CB<Q, V>
+		public abstract class CB<Q,V>
 		{
 			public abstract Q C(V p);
 		}
@@ -19,18 +19,18 @@ namespace BLToolkit.Common
 			return I.C(p);
 		}
 
-		sealed class Assignable<Q> : CB<Q, Q> { public override Q C(Q p) { return p; } }
-		sealed class Default<Q, V> : CB<Q, V> { public override Q C(V p) { return (Q)Convert.ChangeType(p, typeof(Q)); } }
+		sealed class Assignable<Q> : CB<Q,Q> { public override Q C(Q p) { return p; } }
+		sealed class Default<Q,V>  : CB<Q,V> { public override Q C(V p) { return (Q)Convert.ChangeType(p, typeof(Q)); } }
 
-		public static readonly CB<T, P> I = GetConverter();
-		static CB<T, P> GetConverter()
+		public static readonly CB<T,P> I = GetConverter();
+		static CB<T,P> GetConverter()
 		{
 			Type t = typeof(T);
 
 			// Convert to the same type.
 			//
-			if (typeof(P) != typeof(object) && TypeHelper.IsSameOrParent(typeof(P), t))
-				return (CB<T, P>)(object)(new Assignable<T>());
+			if (TypeHelper.IsSameOrParent(t, typeof(P)))
+				return (CB<T,P>)(object)(new Assignable<T>());
 
 			// Scalar Types
 			//

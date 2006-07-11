@@ -116,14 +116,14 @@
 		<xsl:value-of select="$t2"/>
 		<xsl:text>static readonly </xsl:text>
 		<xsl:value-of select="$baseclassname"/>
-		<xsl:text>&lt;T, P&gt; </xsl:text>
+		<xsl:text>&lt;T,P&gt; </xsl:text>
 		<xsl:value-of select="$instancename"/>
 		<xsl:text> = GetConverter();</xsl:text>
 		<xsl:value-of select="$lf"/>
 		<xsl:value-of select="$t2"/>
 		<xsl:text>static </xsl:text>
 		<xsl:value-of select="$baseclassname"/>
-		<xsl:text>&lt;T, P&gt; GetConverter()</xsl:text>
+		<xsl:text>&lt;T,P&gt; GetConverter()</xsl:text>
 		<xsl:value-of select="$lf"/>
 		<xsl:value-of select="$t2"/>
 		<xsl:text>{</xsl:text>
@@ -144,7 +144,7 @@
 		<xsl:value-of select="$t4"/>
 		<xsl:text>return (</xsl:text>
 		<xsl:value-of select="$baseclassname"/>
-		<xsl:text>&lt;T, P&gt;)(object)(new Assignable&lt;T&gt;());</xsl:text>
+		<xsl:text>&lt;T,P&gt;)(object)(new Assignable&lt;T&gt;());</xsl:text>
 		<xsl:value-of select="$lf"/>
 		<xsl:value-of select="$lf"/>
 		<xsl:apply-templates select="converter|comment" mode="def"/>
@@ -259,24 +259,51 @@
 			<xsl:with-param name="tonullable" select="$tonullable"/>
 			<xsl:with-param name="default" select="default/text()"/>
 		</xsl:apply-templates>
-
 		<xsl:value-of select="$lf"/>
+
 		<xsl:value-of select="$t2"/>
 		<xsl:text>sealed class </xsl:text>
 		<xsl:value-of select="$tonick"/>
-		<xsl:text>_O         : </xsl:text>
+		<xsl:text>_&lt;Q&gt;</xsl:text>
+		<xsl:call-template name ="writeSpaces">
+			<xsl:with-param name="count" select="$padding - string-length($tonick) - 4"/>
+		</xsl:call-template>
+		<xsl:text> : </xsl:text>
 		<xsl:value-of select="$baseclassname"/>
 		<xsl:text>&lt;</xsl:text>
 		<xsl:value-of select="$tofulltype"/>
-		<xsl:text> ,object>    </xsl:text>
+		<xsl:text>,Q>          </xsl:text>
 		<xsl:text>{ public override </xsl:text>
 		<xsl:value-of select="$tofulltype"/>
 		<xsl:value-of select="$s1"/>
 		<xsl:value-of select="$methodname"/>
-			<xsl:text>(object p)  </xsl:text>
+		<xsl:text>(Q p)           { return Convert&lt;</xsl:text>
+		<xsl:value-of select="$tofulltype"/>
+		<xsl:text>,object&gt;.From(p); } }</xsl:text>
+		<xsl:value-of select="$lf"/>
+
+		<xsl:value-of select="$t2"/>
+		<xsl:text>sealed class </xsl:text>
+		<xsl:value-of select="$tonick"/>
+		<xsl:text>_O</xsl:text>
+		<xsl:call-template name ="writeSpaces">
+			<xsl:with-param name="count" select="$padding - string-length($tonick) - 2"/>
+		</xsl:call-template>
+		<xsl:text> : </xsl:text>
+		<xsl:value-of select="$baseclassname"/>
+		<xsl:text>&lt;</xsl:text>
+		<xsl:value-of select="$tofulltype"/>
+		<xsl:text>,object>     </xsl:text>
+		<xsl:text>{ public override </xsl:text>
+		<xsl:value-of select="$tofulltype"/>
+		<xsl:value-of select="$s1"/>
+		<xsl:value-of select="$methodname"/>
+			<xsl:text>(object p)     </xsl:text>
 		<xsl:call-template name="writeCode">
 			<xsl:with-param name="code">
-				<xsl:apply-templates select="default"/>
+				<xsl:apply-templates select="default">
+					<xsl:with-param name="tonullable" select="$tonullable"/>
+					</xsl:apply-templates>
 			</xsl:with-param>
 		</xsl:call-template>
 		<xsl:text> }</xsl:text>
@@ -286,7 +313,7 @@
 		<xsl:value-of select="$t2"/>
 		<xsl:text>static </xsl:text>
 		<xsl:value-of select="$baseclassname"/>
-		<xsl:text>&lt;T, P&gt; Get</xsl:text>
+		<xsl:text>&lt;T,P&gt; Get</xsl:text>
 		<xsl:if test="$tonullable">
 			<xsl:text>Nullable</xsl:text>
 		</xsl:if>
@@ -310,7 +337,7 @@
 		<xsl:value-of select="$t3"/>
 		<xsl:text>if (t == typeof(object))      return (</xsl:text>
 		<xsl:value-of select="$baseclassname"/>
-		<xsl:text>&lt;T, P&gt;)(object)(new </xsl:text>
+		<xsl:text>&lt;T,P&gt;)(object)(new </xsl:text>
 		<xsl:value-of select="$tonick"/>
 		<xsl:text>_O</xsl:text>
 		<xsl:call-template name ="writeSpaces">
@@ -319,14 +346,13 @@
 		<xsl:text>());</xsl:text>
 		<xsl:value-of select="$lf"/>
 		<xsl:value-of select="$lf"/>
+		
 		<xsl:value-of select="$t3"/>
 		<xsl:text>return (</xsl:text>
 		<xsl:value-of select="$baseclassname"/>
-		<xsl:text>&lt;T, P&gt;)(object)Convert&lt;</xsl:text>
-		<xsl:value-of select="$tofulltype"/>
-		<xsl:text>, object&gt;.</xsl:text>
-		<xsl:value-of select="$instancename"/>
-		<xsl:text>;</xsl:text>
+		<xsl:text>&lt;T,P&gt;)(object)(new </xsl:text>
+		<xsl:value-of select="$tonick"/>
+		<xsl:text>_&lt;P&gt;());</xsl:text>
 		<xsl:value-of select="$lf"/>
 		<xsl:value-of select="$t2"/>
 		<xsl:text>}</xsl:text>
@@ -699,7 +725,7 @@
 		</xsl:call-template>
 		<xsl:text>return (</xsl:text>
 		<xsl:value-of select="$baseclassname"/>
-		<xsl:text>&lt;T, P&gt;)(object)(new </xsl:text>
+		<xsl:text>&lt;T,P&gt;)(object)(new </xsl:text>
 		<xsl:value-of select="$tonick"/>
 		<xsl:text>_</xsl:text>
 		<xsl:value-of select="$fromnick"/>
@@ -713,12 +739,20 @@
 	<xsl:template match="from" mode="runtime">
 		<xsl:param name="totype"/>
 		<xsl:param name="tonullable"/>
+		<xsl:param name="fromnullable"/>
 		<xsl:param name="default"/>
+		<xsl:variable name="fromfullname">
+			<xsl:value-of select="@type"/>
+			<xsl:if test="$fromnullable">
+				<xsl:text>?</xsl:text>
+			</xsl:if>
+		</xsl:variable>
+		
 		<xsl:if test="text() or $default">
-			<xsl:variable name="typepad" select="$padding - string-length(@type)"/>
+			<xsl:variable name="typepad" select="$padding - string-length($fromfullname)"/>
 			<xsl:value-of select="$t4"/>
 			<xsl:text>if (p is </xsl:text>
-			<xsl:value-of select="@type"/>
+			<xsl:value-of select="$fromfullname"/>
 			<xsl:text>) </xsl:text>
 			<xsl:call-template name ="writeSpaces">
 				<xsl:with-param name="count" select="$typepad"/>
@@ -730,7 +764,7 @@
 				<xsl:text>?</xsl:text>
 			</xsl:if>
 			<xsl:text>,</xsl:text>
-			<xsl:value-of select="@type"/>
+			<xsl:value-of select="$fromfullname"/>
 			<xsl:text>&gt;</xsl:text>
 			<xsl:call-template name ="writeSpaces">
 				<xsl:with-param name="count" select="$typepad"/>
@@ -740,7 +774,7 @@
 			<xsl:text>.</xsl:text>
 			<xsl:value-of select="$methodname"/>
 			<xsl:text>((</xsl:text>
-			<xsl:value-of select="@type"/>
+			<xsl:value-of select="$fromfullname"/>
 			<xsl:text>)p);</xsl:text>
 			<xsl:value-of select="$lf"/>
 		</xsl:if>
@@ -750,6 +784,7 @@
 	<xsl:template match="group" mode="runtime">
 		<xsl:param name="totype"/>
 		<xsl:param name="tonullable"/>
+		<xsl:param name="fromnullable"/>
 		<xsl:param name="default"/>
 		<xsl:variable name="defaultcode">
 			<xsl:choose>
@@ -774,12 +809,14 @@
 		<xsl:apply-templates select="group|from|br" mode ="runtime">
 			<xsl:with-param name="totype" select="$totype"/>
 			<xsl:with-param name="tonullable" select="$tonullable"/>
+			<xsl:with-param name="fromnullable" select="@nullable='true' or $fromnullable"/>
 			<xsl:with-param name="default" select="$defaultcode"/>
 		</xsl:apply-templates>
 	</xsl:template>
 
 	<!-- default -->
 	<xsl:template match="default">
+		<xsl:param name="tonullable"/>
 		<xsl:if test="@nullvalue">
 			<xsl:value-of select="$lf"/>
 			<xsl:value-of select="$t4"/>
@@ -791,17 +828,17 @@
 		<xsl:if test="not(@noruntime) and @nullvalue">
 			<xsl:apply-templates select="../from|../group|../br" mode="runtime">
 				<xsl:with-param name="totype" select="../@type"/>
-				<xsl:with-param name="tonullable" select="../@tonullable='true'"/>
+				<xsl:with-param name="tonullable" select="$tonullable"/>
 			</xsl:apply-templates>
 		</xsl:if>
 		<xsl:value-of select="text()"/>
-		<xsl:if test="not(@nothrow) and @nullvalue">
+		<xsl:if test="not(@nothrow) and not(text()) and @nullvalue">
 			<xsl:value-of select="$lf"/>
 			<xsl:value-of select="$t4"/>
 			<xsl:text>throw new InvalidCastException(string.Format(</xsl:text>
 			<xsl:value-of select="$lf"/>
 			<xsl:value-of select="$t5"/>
-			<xsl:text>"Invalid cast from {0} to {1}", typeof(P).FullName, typeof(T).FullName));</xsl:text>
+			<xsl:text>"Invalid cast from {0} to {1}", p.GetType().FullName, typeof(T).FullName));</xsl:text>
 		</xsl:if>
 	</xsl:template>
 

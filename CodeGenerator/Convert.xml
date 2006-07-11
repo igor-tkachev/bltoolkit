@@ -469,7 +469,10 @@
 				<from type="SqlString">return p.IsNull? Guid.Empty: new Guid(p.Value);  </from>
 				<from type="SqlBinary">return p.IsNull? Guid.Empty: p.ToSqlGuid().Value;</from>
 			</group>
-			<from type="Type"         >return p == null? Guid.Empty: p.GUID;</from>
+			<group name="Other Types.">
+				<from type="Byte[]"       >return p == null? Guid.Empty: new Guid(p);</from>
+				<from type="Type"         >return p == null? Guid.Empty: p.GUID;</from>
+			</group>
 			<default nullvalue="Guid.Empty"/>
 		</converter>
 	</region>
@@ -806,10 +809,13 @@
 				<from type="SqlString">return p.IsNull? null: (Guid?)new Guid(p.Value);  </from>
 				<from type="SqlBinary">return p.IsNull? null: (Guid?)p.ToSqlGuid().Value;</from>
 			</group>
-			<from type="Type"         >return p == null? null: (Guid?)p.GUID;</from>
+			<group name="Other Types.">
+				<from type="Type"         >return p == null? null: (Guid?)p.GUID;</from>
+				<from type="Byte[]"       >return p == null? null: (Guid?)new Guid(p);</from>
+			</group>
 			<default nullvalue="null"/>
 		</converter>
-	</region>
+	</region>-->
 	<region name="SqlTypes">
 		<converter type="SqlString">
 			<group name="Scalar Types.">
@@ -1073,11 +1079,15 @@
 			</group>
 			<group name="SqlTypes.">
 				<from type="SqlBinary"/>
+				<from type="SqlBytes" >return p.ToSqlBinary().ToSqlGuid();</from>
 				<from type="SqlString"/>
 				<default              >return p.ToSqlGuid();</default>
 			</group>
+			<group name="Other Types.">
+				<from type="Type"         >return p == null? SqlGuid.Null: p.GUID;</from>
+				<from type="Byte[]"       >return p == null? SqlGuid.Null: new SqlGuid(p);</from>
+			</group>
 			<default nullvalue="SqlGuid.Null"/>
-			<from type="Type"         >return p == null? SqlGuid.Null: p.GUID;</from>
 		</converter>
 		<converter type="SqlBinary">
 			<group name="Scalar Types.">
@@ -1160,7 +1170,7 @@
 			</group>
 			<default nullvalue="SqlXml.Null"/>
 		</converter>
-	</region>-->
+	</region>
 	<region name="Other types">
 		<converter type="Type">
 			<group name="Scalar Types.">
@@ -1196,7 +1206,7 @@
 		<converter type="Byte[]">
 			<group name="Scalar Types.">
 				<from type="Stream" >
-					if (p == null)         return NullBytes;
+					if (p == null)         return null;
 					if (p is MemoryStream) return ((MemoryStream)p).ToArray();
 
 					long   position = p.Seek(0, SeekOrigin.Begin);
@@ -1206,48 +1216,49 @@
 
 					return bytes;
 				</from>
-				<from type="Guid"   >return p == Guid.Empty? NullBytes: p.ToByteArray();</from>
+				<from type="Guid"   >return p == Guid.Empty? null: p.ToByteArray();</from>
 			</group>
 			<group name="Nullable Types." nullable="true">
-				<from type="Guid"   >return p.HasValue? p.Value.ToByteArray(): NullBytes;</from>
+				<from type="Guid"   >return p.HasValue? p.Value.ToByteArray(): null;</from>
 			</group>
 			<group name="SqlTypes.">
-				<from type="SqlBinary">return p.IsNull? NullBytes: p.Value;</from>
-				<from type="SqlBytes" >return p.IsNull? NullBytes: p.Value;</from>
-				<from type="SqlGuid"  >return p.IsNull? NullBytes: p.ToByteArray();</from>
+				<from type="SqlBinary">return p.IsNull? null: p.Value;</from>
+				<from type="SqlBytes" >return p.IsNull? null: p.Value;</from>
+				<from type="SqlGuid"  >return p.IsNull? null: p.ToByteArray();</from>
 			</group>
-			<default nullvalue="NullBytes"/>
+			<default nullvalue="null"/>
 		</converter>
 		<converter type="Char[]">
 			<group name="Scalar Types.">
-				<from type="String" >return p == null? NullChars: p.ToCharArray();</from>
+				<from type="String" >return p == null? null: p.ToCharArray();</from>
 			</group>
 			<group name="SqlTypes.">
-				<from type="SqlString" >return p.IsNull? NullChars: p.Value.ToCharArray();</from>
-				<from type="SqlChars"  >return p.IsNull? NullChars: p.Value;</from>
+				<from type="SqlString" >return p.IsNull? null: p.Value.ToCharArray();</from>
+				<from type="SqlChars"  >return p.IsNull? null: p.Value;</from>
 			</group>
-			<default nullvalue="NullChars" nothrow="true">
+			<default nullvalue="null" nothrow="true">
 				return Convert&lt;string,object&gt;.I.C(p).ToCharArray();</default>
 		</converter>
 		<converter type="XmlReader">
 			<group name="Scalar Types.">
-				<from type="String"    >return p == null? NullXmlReader: XmlReader.Create(new StringReader(p));</from>
-				<br/>
-				<from type="Stream"   />
-				<from type="TextReader"/>
-				<br/>
-				<from type="Char[]"    >return p == null? NullXmlReader: XmlReader.Create(new StringReader(new string(p)));</from>
-				<from type="Byte[]"    >return p == null? NullXmlReader: XmlReader.Create(new MemoryStream(p));</from>
-				<default               >return p == null? NullXmlReader: XmlReader.Create(p);</default>
+				<from type="String"    >return p == null? null: XmlReader.Create(new StringReader(p));</from>
 			</group>
 			<group name="SqlTypes.">
-				<from type="SqlXml"   >return p.IsNull? NullXmlReader: p.CreateReader();</from>
-				<from type="SqlString">return p.IsNull? NullXmlReader: XmlReader.Create(new StringReader(p.Value));</from>
-				<from type="SqlChars" >return p.IsNull? NullXmlReader: XmlReader.Create(new StringReader(p.ToSqlString().Value));</from>
-				<from type="SqlBinary">return p.IsNull? NullXmlReader: XmlReader.Create(new MemoryStream(p.Value));</from>
-				<default              >return p.IsNull? NullXmlReader: XmlReader.Create(p.Value);</default>
+				<from type="SqlXml"   >return p.IsNull? null: p.CreateReader();</from>
+				<from type="SqlString">return p.IsNull? null: XmlReader.Create(new StringReader(p.Value));</from>
+				<from type="SqlChars" >return p.IsNull? null: XmlReader.Create(new StringReader(p.ToSqlString().Value));</from>
+				<from type="SqlBinary">return p.IsNull? null: XmlReader.Create(new MemoryStream(p.Value));</from>
+				<default              >return p.IsNull? null: XmlReader.Create(p.Value);</default>
 			</group>
-			<default nullvalue="NullXmlReader"/>
+			<group name="Other Types.">
+				<from type="Stream"   />
+				<from type="TextReader" nick="TR"/>
+				<br/>
+				<from type="Char[]"    >return p == null? null: XmlReader.Create(new StringReader(new string(p)));</from>
+				<from type="Byte[]"    >return p == null? null: XmlReader.Create(new MemoryStream(p));</from>
+				<default               >return p == null? null: XmlReader.Create(p);</default>
+			</group>
+			<default nullvalue="null"/>
 		</converter>
 	</region>
 </code>
