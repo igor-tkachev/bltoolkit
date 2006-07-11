@@ -12,7 +12,7 @@ using System.Net;
 using System.Text;
 using System.Security.Cryptography.X509Certificates;
 
-namespace BLToolkit.Web
+namespace BLToolkit.Net
 {
 	public delegate void ProcessStream(Stream stream);
 
