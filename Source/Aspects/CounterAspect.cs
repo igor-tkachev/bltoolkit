@@ -25,7 +25,7 @@ namespace BLToolkit.Aspects
 
 			MethodCallCounter counter = GetCounter(info.CallMethodInfo);
 
-			counter.AddCall(DateTime.Now - info.BeginCallTime, info.Exception != null);
+			counter.AddCall(DateTime.Now - info.BeginCallTime, info.Exception != null, info.Cached);
 
 			lock (counter.CurrentCalls.SyncRoot)
 				counter.CurrentCalls.Remove(info);

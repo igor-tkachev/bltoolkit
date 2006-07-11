@@ -346,14 +346,16 @@ namespace BLToolkit.DataAccess
 
 			#region SelectByKey
 
-		public object SelectByKey(DbManager db, Type type, params object[] key)
+		[NoInterception]
+		public virtual object SelectByKey(DbManager db, Type type, params object[] key)
 		{
 			return db
 				.SetSpCommand(GetSpName(type, "SelectByKey"), key)
 				.ExecuteObject(type);
 		}
 
-		public object SelectByKey(Type type, params object[] key)
+		[NoInterception]
+		public virtual object SelectByKey(Type type, params object[] key)
 		{
 			DbManager db = GetDbManager();
 
@@ -369,12 +371,14 @@ namespace BLToolkit.DataAccess
 		}
 
 #if FW2
-		public T SelectByKey<T>(DbManager db, params object[] key)
+		[NoInterception]
+		public virtual T SelectByKey<T>(DbManager db, params object[] key)
 		{
 			return (T)SelectByKey(db, typeof(T), key);
 		}
 
-		public T SelectByKey<T>(params object[] key)
+		[NoInterception]
+		public virtual T SelectByKey<T>(params object[] key)
 		{
 			return (T)SelectByKey(typeof(T), key);
 		}
@@ -384,14 +388,16 @@ namespace BLToolkit.DataAccess
 
 			#region SelectAll
 
-		public ArrayList SelectAll(DbManager db, Type type)
+		[NoInterception]
+		public virtual ArrayList SelectAll(DbManager db, Type type)
 		{
 			return db
 				.SetSpCommand(GetSpName(type, "SelectAll"))
 				.ExecuteList(type);
 		}
 
-		public ArrayList SelectAll(Type type)
+		[NoInterception]
+		public virtual ArrayList SelectAll(Type type)
 		{
 			DbManager db = GetDbManager();
 
@@ -407,14 +413,16 @@ namespace BLToolkit.DataAccess
 		}
 
 #if FW2
-		public List<T> SelectAll<T>(DbManager db)
+		[NoInterception]
+		public virtual List<T> SelectAll<T>(DbManager db)
 		{
 			return db
 				.SetSpCommand(GetSpName(typeof(T), "SelectAll"))
 				.ExecuteList<T>();
 		}
 
-		public List<T> SelectAll<T>()
+		[NoInterception]
+		public virtual List<T> SelectAll<T>()
 		{
 			DbManager db = GetDbManager();
 
@@ -434,7 +442,8 @@ namespace BLToolkit.DataAccess
 
 			#region Insert
 
-		public void Insert(DbManager db, object obj)
+		[NoInterception]
+		public virtual void Insert(DbManager db, object obj)
 		{
 			db
 			  .SetSpCommand(
@@ -443,7 +452,8 @@ namespace BLToolkit.DataAccess
 			  .ExecuteNonQuery();
 		}
 
-		public void Insert(object obj)
+		[NoInterception]
+		public virtual void Insert(object obj)
 		{
 			DbManager db = GetDbManager();
 
@@ -462,7 +472,8 @@ namespace BLToolkit.DataAccess
 
 			#region Update
 
-		public int Update(DbManager db, object obj)
+		[NoInterception]
+		public virtual int Update(DbManager db, object obj)
 		{
 			return db
 				.SetSpCommand(
@@ -471,7 +482,8 @@ namespace BLToolkit.DataAccess
 				.ExecuteNonQuery();
 		}
 
-		public int Update(object obj)
+		[NoInterception]
+		public virtual int Update(object obj)
 		{
 			DbManager db = GetDbManager();
 
@@ -490,14 +502,16 @@ namespace BLToolkit.DataAccess
 
 			#region DeleteByKey
 
-		public int DeleteByKey(DbManager db, Type type, params object[] key)
+		[NoInterception]
+		public virtual int DeleteByKey(DbManager db, Type type, params object[] key)
 		{
 			return db
 				.SetSpCommand(GetSpName(type, "Delete"), key)
 				.ExecuteNonQuery();
 		}
 
-		public int DeleteByKey(Type type, params object[] key)
+		[NoInterception]
+		public virtual int DeleteByKey(Type type, params object[] key)
 		{
 			DbManager db = GetDbManager();
 
@@ -513,12 +527,14 @@ namespace BLToolkit.DataAccess
 		}
 
 #if FW2
-		public int DeleteByKey<T>(DbManager db, params object[] key)
+		[NoInterception]
+		public virtual int DeleteByKey<T>(DbManager db, params object[] key)
 		{
 			return DeleteByKey(db, typeof(T), key);
 		}
 
-		public int DeleteByKey<T>(params object[] key)
+		[NoInterception]
+		public virtual int DeleteByKey<T>(params object[] key)
 		{
 			return DeleteByKey(typeof(T), key);
 		}
@@ -528,7 +544,8 @@ namespace BLToolkit.DataAccess
 
 			#region Delete
 
-		public int Delete(DbManager db, object obj)
+		[NoInterception]
+		public virtual int Delete(DbManager db, object obj)
 		{
 			return db
 				.SetSpCommand(
@@ -537,7 +554,8 @@ namespace BLToolkit.DataAccess
 				.ExecuteNonQuery();
 		}
 
-		public int Delete(object obj)
+		[NoInterception]
+		public virtual int Delete(object obj)
 		{
 			DbManager db = GetDbManager();
 
@@ -856,7 +874,8 @@ namespace BLToolkit.DataAccess
 
 			#region SelectByKey
 
-		public object SelectByKeySql(DbManager db, Type type, params object[] keys)
+		[NoInterception]
+		public virtual object SelectByKeySql(DbManager db, Type type, params object[] keys)
 		{
 			SqlQueryInfo query = GetSqlQueryInfo(db, type, "SelectByKey");
 
@@ -865,7 +884,8 @@ namespace BLToolkit.DataAccess
 				.ExecuteObject(type);
 		}
 
-		public object SelectByKeySql(Type type, params object[] keys)
+		[NoInterception]
+		public virtual object SelectByKeySql(Type type, params object[] keys)
 		{
 			DbManager db = GetDbManager();
 
@@ -881,12 +901,14 @@ namespace BLToolkit.DataAccess
 		}
 
 #if FW2
-		public T SelectByKeySql<T>(DbManager db, params object[] keys)
+		[NoInterception]
+		public virtual T SelectByKeySql<T>(DbManager db, params object[] keys)
 		{
 			return (T)SelectByKeySql(db, typeof(T), keys);
 		}
 
-		public T SelectByKeySql<T>(params object[] keys)
+		[NoInterception]
+		public virtual T SelectByKeySql<T>(params object[] keys)
 		{
 			return (T)SelectByKeySql(typeof(T), keys);
 		}
@@ -896,7 +918,8 @@ namespace BLToolkit.DataAccess
 
 			#region SelectAll
 
-		public ArrayList SelectAllSql(DbManager db, Type type)
+		[NoInterception]
+		public virtual ArrayList SelectAllSql(DbManager db, Type type)
 		{
 			SqlQueryInfo query = GetSqlQueryInfo(db, type, "SelectAll");
 
@@ -905,7 +928,8 @@ namespace BLToolkit.DataAccess
 				.ExecuteList(type);
 		}
 
-		public IList SelectAllSql(DbManager db, IList list, Type type)
+		[NoInterception]
+		public virtual IList SelectAllSql(DbManager db, IList list, Type type)
 		{
 			SqlQueryInfo query = GetSqlQueryInfo(db, type, "SelectAll");
 
@@ -914,7 +938,8 @@ namespace BLToolkit.DataAccess
 				.ExecuteList(list, type);
 		}
 
-		public ArrayList SelectAllSql(Type type)
+		[NoInterception]
+		public virtual ArrayList SelectAllSql(Type type)
 		{
 			DbManager db = GetDbManager();
 
@@ -929,7 +954,8 @@ namespace BLToolkit.DataAccess
 			}
 		}
 
-		public IList SelectAllSql(IList list, Type type)
+		[NoInterception]
+		public virtual IList SelectAllSql(IList list, Type type)
 		{
 			DbManager db = GetDbManager();
 
@@ -945,7 +971,8 @@ namespace BLToolkit.DataAccess
 		}
 
 #if FW2
-		public List<T> SelectAllSql<T>(DbManager db)
+		[NoInterception]
+		public virtual List<T> SelectAllSql<T>(DbManager db)
 		{
 			SqlQueryInfo query = GetSqlQueryInfo(db, typeof(T), "SelectAll");
 
@@ -954,7 +981,8 @@ namespace BLToolkit.DataAccess
 				.ExecuteList<T>();
 		}
 
-		public L SelectAllSql<L, T>(DbManager db, L list)
+		[NoInterception]
+		public virtual L SelectAllSql<L, T>(DbManager db, L list)
 			where L : IList
 		{
 			SqlQueryInfo query = GetSqlQueryInfo(db, typeof(T), "SelectAll");
@@ -964,7 +992,8 @@ namespace BLToolkit.DataAccess
 				.ExecuteList<L,T>(list);
 		}
 
-		public List<T> SelectAllSql<T>()
+		[NoInterception]
+		public virtual List<T> SelectAllSql<T>()
 		{
 			DbManager db = GetDbManager();
 
@@ -979,7 +1008,8 @@ namespace BLToolkit.DataAccess
 			}
 		}
 
-		public L SelectAllSql<L, T>(L list)
+		[NoInterception]
+		public virtual L SelectAllSql<L, T>(L list)
 			where L : IList
 		{
 			DbManager db = GetDbManager();
@@ -1000,7 +1030,8 @@ namespace BLToolkit.DataAccess
 
 			#region Insert
 
-		public void InsertSql(DbManager db, object obj)
+		[NoInterception]
+		public virtual void InsertSql(DbManager db, object obj)
 		{
 			SqlQueryInfo query = GetSqlQueryInfo(db, obj.GetType(), "Insert");
 
@@ -1009,7 +1040,8 @@ namespace BLToolkit.DataAccess
 				.ExecuteNonQuery();
 		}
 
-		public void InsertSql(object obj)
+		[NoInterception]
+		public virtual void InsertSql(object obj)
 		{
 			DbManager db = GetDbManager();
 
@@ -1028,7 +1060,8 @@ namespace BLToolkit.DataAccess
 
 			#region Update
 
-		public int UpdateSql(DbManager db, object obj)
+		[NoInterception]
+		public virtual int UpdateSql(DbManager db, object obj)
 		{
 			SqlQueryInfo query = GetSqlQueryInfo(db, obj.GetType(), "Update");
 
@@ -1037,7 +1070,8 @@ namespace BLToolkit.DataAccess
 				.ExecuteNonQuery();
 		}
 
-		public int UpdateSql(object obj)
+		[NoInterception]
+		public virtual int UpdateSql(object obj)
 		{
 			DbManager db = GetDbManager();
 
@@ -1056,7 +1090,8 @@ namespace BLToolkit.DataAccess
 
 			#region DeleteByKey
 
-		public int DeleteByKeySql(DbManager db, Type type, params object[] key)
+		[NoInterception]
+		public virtual int DeleteByKeySql(DbManager db, Type type, params object[] key)
 		{
 			SqlQueryInfo query = GetSqlQueryInfo(db, type, "Delete");
 
@@ -1065,7 +1100,8 @@ namespace BLToolkit.DataAccess
 				.ExecuteNonQuery();
 		}
 
-		public int DeleteByKeySql(Type type, params object[] key)
+		[NoInterception]
+		public virtual int DeleteByKeySql(Type type, params object[] key)
 		{
 			DbManager db = GetDbManager();
 
@@ -1081,12 +1117,14 @@ namespace BLToolkit.DataAccess
 		}
 
 #if FW2
-		public int DeleteByKeySql<T>(DbManager db, params object[] key)
+		[NoInterception]
+		public virtual int DeleteByKeySql<T>(DbManager db, params object[] key)
 		{
 			return DeleteByKeySql(db, typeof(T), key);
 		}
 
-		public int DeleteByKeySql<T>(params object[] key)
+		[NoInterception]
+		public virtual int DeleteByKeySql<T>(params object[] key)
 		{
 			return DeleteByKeySql(typeof(T), key);
 		}
@@ -1096,7 +1134,8 @@ namespace BLToolkit.DataAccess
 
 			#region Delete
 
-		public int DeleteSql(DbManager db, object obj)
+		[NoInterception]
+		public virtual int DeleteSql(DbManager db, object obj)
 		{
 			SqlQueryInfo query = GetSqlQueryInfo(db, obj.GetType(), "Delete");
 
@@ -1105,7 +1144,8 @@ namespace BLToolkit.DataAccess
 				.ExecuteNonQuery();
 		}
 
-		public int DeleteSql(object obj)
+		[NoInterception]
+		public virtual int DeleteSql(object obj)
 		{
 			DbManager db = GetDbManager();
 

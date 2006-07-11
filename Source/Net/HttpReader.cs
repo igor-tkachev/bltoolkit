@@ -356,5 +356,26 @@ namespace BLToolkit.Net
 		}
 
 		#endregion
+
+		#region Download
+
+		public void Download(string requestUri, string fileName)
+		{
+			string uri = BaseUri + requestUri;
+
+			WebClient request = new WebClient();
+
+#if FW2
+			if (Proxy       != null) request.Proxy       = Proxy;
+#endif
+			if (Credentials != null) request.Credentials = Credentials;
+
+			foreach (string key in Headers.Keys)
+				request.Headers.Add(key, Headers[key].ToString());
+
+			request.DownloadFile(uri, fileName);
+		}
+
+		#endregion
 	}
 }

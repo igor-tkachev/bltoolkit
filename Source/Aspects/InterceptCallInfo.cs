@@ -105,5 +105,12 @@ namespace BLToolkit.Aspects
 		{
 			get { return _currentPrincipal;  }
 		}
+
+		private bool _cached;
+		public  bool  Cached
+		{
+			get { return _cached;  }
+			set { _cached = value; }
+		}
 	}
 }

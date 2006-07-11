@@ -32,6 +32,8 @@ namespace BLToolkit.Aspects
 							if (pis[i].ParameterType.IsByRef)
 								info.ParameterValues[i] = item.RefValues[n++];
 					}
+
+					info.Cached = true;
 				}
 				else 
 				{
