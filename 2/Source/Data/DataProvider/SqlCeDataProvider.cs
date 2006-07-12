@@ -1,8 +1,12 @@
 using System;
 using System.Data;
 using System.Data.Common;
-using System.Data.SqlClient;
 using System.Data.SqlTypes;
+
+// System.Data.SqlServerCe.dll must be referenced.
+// http://www.microsoft.com/sql/everywhere/
+//
+using System.Data.SqlServerCe;
 
 using BLToolkit.Common;
 using BLToolkit.Mapping;
@@ -10,17 +14,17 @@ using BLToolkit.Mapping;
 namespace BLToolkit.Data.DataProvider
 {
 	/// <summary>
-	/// Implements access to the Data Provider for SQL Server.
+	/// Implements access to the Data Provider for Microsoft SQL Server 2005 Everywhere Edition
 	/// </summary>
 	/// <remarks>
 	/// See the <see cref="DbManager.AddDataProvider"/> method to find an example.
 	/// </remarks>
 	/// <seealso cref="DbManager.AddDataProvider">AddDataManager Method</seealso>
-	public sealed class SqlDataProvider: DataProviderBase
+	public sealed class SqlCeDataProvider: DataProviderBase
 	{
-		public SqlDataProvider()
+		public SqlCeDataProvider()
 		{
-			//MappingSchema = new SqlMappingSchema();
+			//MappingSchema = new SqlCeMappingSchema();
 		}
 
 		/// <summary>
@@ -33,7 +37,7 @@ namespace BLToolkit.Data.DataProvider
 		/// <returns>The database connection object.</returns>
 		public override IDbConnection CreateConnectionObject()
 		{
-			return new SqlConnection();
+			return new SqlCeConnection();
 		}
 
 		/// <summary>
@@ -46,7 +50,7 @@ namespace BLToolkit.Data.DataProvider
 		/// <returns>A data adapter object.</returns>
 		public override DbDataAdapter CreateDataAdapterObject()
 		{
-			return new SqlDataAdapter();
+			return new SqlCeDataAdapter();
 		}
 
 		/// <summary>
@@ -60,8 +64,10 @@ namespace BLToolkit.Data.DataProvider
 		/// <param name="command">The IDbCommand referencing the stored procedure for which the parameter information is to be derived. The derived parameters will be populated into the Parameters of this command.</param>
 		public override bool DeriveParameters(IDbCommand command)
 		{
-			SqlCommandBuilder.DeriveParameters((SqlCommand)command);
-			return true;
+			// SqlCeCommandBuilder does not implement DeriveParameters.
+			// This is not surprising, since SQL/e has no support for stored procs.
+			//
+			return false;
 		}
 
 		public override object Convert(object value, ConvertType convertType)
@@ -118,7 +124,7 @@ namespace BLToolkit.Data.DataProvider
 		/// <value>An instance of the <see cref="Type"/> class.</value>
 		public override Type ConnectionType
 		{
-			get { return typeof(SqlConnection); }
+			get { return typeof(SqlCeConnection); }
 		}
 
 		/// <summary>
@@ -131,64 +137,31 @@ namespace BLToolkit.Data.DataProvider
 		/// <value>Data provider name.</value>
 		public override string Name
 		{
-			get { return "Sql"; }
+			get { return "SqlCe"; }
 		}
 
-		public class SqlMappingSchema : MappingSchema
+		public class SqlCeMappingSchema : MappingSchema
 		{
 			protected override DataReaderMapper CreateDataReaderMapper(IDataReader dataReader)
 			{
-				return new SqlDataReaderMapper(this, dataReader);
+				return new SqlCeDataReaderMapper(this, dataReader);
 			}
 
 			protected override DataReaderMapper CreateDataReaderMapper(IDataReader dataReader, NameOrIndexParameter nip)
 			{
-				return new SqlScalarDataReaderMapper(this, dataReader, nip);
+				return new SqlCeScalarDataReaderMapper(this, dataReader, nip);
 			}
 		}
 
-		public class SqlDataReaderMapper : DataReaderMapper
+		public class SqlCeDataReaderMapper : DataReaderMapper
 		{
-			public SqlDataReaderMapper(MappingSchema mappingSchema, IDataReader dataReader)
+			public SqlCeDataReaderMapper(MappingSchema mappingSchema, IDataReader dataReader)
 				: base(mappingSchema, dataReader)
 			{
-				_dataReader = (SqlDataReader)dataReader;
+				_dataReader = (SqlCeDataReader)dataReader;
 			}
 
-			private SqlDataReader _dataReader;
-
-#if FW2
-			public override Type GetFieldType(int index)
-			{
-				Type fieldType = _dataReader.GetProviderSpecificFieldType(index);
-
-				if (fieldType == typeof(SqlXml))    return typeof(SqlXml);
-				if (fieldType == typeof(SqlBinary)) return typeof(SqlBytes);
-
-				return _dataReader.GetFieldType(index);
-			}
-
-			public override object GetValue(object o, int index)
-			{
-				Type fieldType = _dataReader.GetProviderSpecificFieldType(index);
-
-				if (fieldType == typeof(SqlXml))
-				{
-					SqlXml xml = _dataReader.GetSqlXml(index);
-					return xml.IsNull ? null : xml;
-				}
-				else if (fieldType == typeof(SqlBinary))
-				{
-					SqlBytes bytes = _dataReader.GetSqlBytes(index);
-					return bytes.IsNull ? null : bytes;
-				}
-				else
-				{
-					object value = _dataReader.GetValue(index);
-					return value is DBNull ? null : value;
-				}
-			}
-#endif
+			private SqlCeDataReader _dataReader;
 
 			public override SqlBoolean  GetSqlBoolean (object o, int index) { return _dataReader.GetSqlBoolean (index); }
 			public override SqlByte     GetSqlByte    (object o, int index) { return _dataReader.GetSqlByte    (index); }
@@ -204,50 +177,15 @@ namespace BLToolkit.Data.DataProvider
 			public override SqlString   GetSqlString  (object o, int index) { return _dataReader.GetSqlString  (index); }
 		}
 
-		public class SqlScalarDataReaderMapper : ScalarDataReaderMapper
+		public class SqlCeScalarDataReaderMapper : ScalarDataReaderMapper
 		{
-			public SqlScalarDataReaderMapper(MappingSchema mappingSchema, IDataReader dataReader, NameOrIndexParameter nip)
+			public SqlCeScalarDataReaderMapper(MappingSchema mappingSchema, IDataReader dataReader, NameOrIndexParameter nip)
 				: base(mappingSchema, dataReader, nip)
 			{
-				_dataReader = (SqlDataReader)dataReader;
-				_fieldType = _dataReader.GetProviderSpecificFieldType(Index);
-
-				if (_fieldType == typeof(SqlXml))
-					_fieldType = typeof(SqlXml);
-				else if (_fieldType == typeof(SqlBinary))
-					_fieldType = typeof(SqlBytes);
-				else
-					_fieldType = _dataReader.GetFieldType(Index);
+				_dataReader = (SqlCeDataReader)dataReader;
 			}
 
-			private SqlDataReader _dataReader;
-			private Type          _fieldType;
-
-#if FW2
-			public override Type GetFieldType(int index)
-			{
-				return _fieldType;
-			}
-
-			public override object GetValue(object o, int index)
-			{
-				if (_fieldType == typeof(SqlXml))
-				{
-					SqlXml xml = _dataReader.GetSqlXml(Index);
-					return xml.IsNull ? null : xml;
-				}
-				else if (_fieldType == typeof(SqlBytes))
-				{
-					SqlBytes bytes = _dataReader.GetSqlBytes(Index);
-					return bytes.IsNull ? null : bytes;
-				}
-				else
-				{
-					object value = _dataReader.GetValue(index);
-					return value is DBNull ? null : value;
-				}
-			}
-#endif
+			private SqlCeDataReader _dataReader;
 
 			public override SqlBoolean  GetSqlBoolean (object o, int index) { return _dataReader.GetSqlBoolean (Index); }
 			public override SqlByte     GetSqlByte    (object o, int index) { return _dataReader.GetSqlByte    (Index); }
