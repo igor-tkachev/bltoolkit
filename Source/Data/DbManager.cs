@@ -717,19 +717,24 @@ namespace BLToolkit.Data
 
 		private static DataProviderBase GetDataProvider(string configurationString)
 		{
-			string cs  = configurationString.ToUpper();
-			string key = "SQL";
-
-			foreach (string k in _dataProviderNameList.Keys)
+			// configurationString can be:
+			// ''        : default provider, default configuration;
+			// '.'       : default provider, default configuration;
+			// 'foo.bar' : 'foo' provider, 'bar' configuration;
+			// 'foo.'    : 'foo' provider, default configuration;
+			// 'foo'     : default provider, 'foo' configuration;
+			// '.foo'    : default provider, 'foo' configuration;
+			// '.foo.bar': default provider, 'foo.bar' configuration;
+			//
+			int idx = configurationString.IndexOf(ProviderNameDivider);
+			if (idx > 0)
 			{
-				if (cs.StartsWith(k))
-				{
-					key = k;
-					break;
-				}
+				string providerName = configurationString.Substring(0, idx).ToUpper();
+				return (DataProviderBase)_dataProviderNameList[providerName];
 			}
 
-			return (DataProviderBase)_dataProviderNameList[key];
+			// Default provider is SqlDataProvider
+			return (DataProviderBase)_dataProviderNameList["SQL"];
 		}
 
 		private void Init(IDbConnection connection)
