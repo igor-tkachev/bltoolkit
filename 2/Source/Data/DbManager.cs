@@ -717,6 +717,7 @@ namespace BLToolkit.Data
 
 		private static DataProviderBase GetDataProvider(string configurationString)
 		{
+			/*
 			// configurationString can be:
 			// ''        : default provider, default configuration;
 			// '.'       : default provider, default configuration;
@@ -735,6 +736,26 @@ namespace BLToolkit.Data
 
 			// Default provider is SqlDataProvider
 			return (DataProviderBase)_dataProviderNameList["SQL"];
+			*/
+
+			string cs  = configurationString.ToUpper();
+			string key = "SQL";
+
+			if (cs.Length > 0)
+			{
+				cs += '.';
+
+				foreach (string k in _dataProviderNameList.Keys)
+				{
+					if (cs.StartsWith(k + '.'))
+					{
+						key = k;
+						break;
+					}
+				}
+			}
+
+			return (DataProviderBase)_dataProviderNameList[key];
 		}
 
 		private void Init(IDbConnection connection)
