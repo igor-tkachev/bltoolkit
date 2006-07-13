@@ -65,6 +65,7 @@
     <Compile Include="Data\BinaryTest.cs" />
     <Compile Include="Data\CompositeKeyTest.cs" />
     <Compile Include="Common\NameOrIndexParameterTest.cs" />
+    <Compile Include="Data\InnerTypesTest.cs" />
     <Compile Include="Data\ExecuteDictionaryTest.cs" />
     <Compile Include="Data\ExecuteScalarDictionaryTest.cs" />
     <Compile Include="Data\ExecuteScalarListTest.cs" />
