@@ -143,6 +143,14 @@ namespace BLToolkit.Aspects
 				.callvirt (typeof(InterceptCallInfo).GetProperty("InterceptorID").GetSetMethod())
 				;
 
+			// Set intercept result.
+			//
+			emit
+				.ldloc    (info)
+				.ldc_i4   ((int)InterceptResult.Continue)
+				.callvirt (typeof(InterceptCallInfo).GetProperty("InterceptResult").GetSetMethod())
+				;
+
 			// Set intercept type.
 			//
 			InterceptType interceptType;

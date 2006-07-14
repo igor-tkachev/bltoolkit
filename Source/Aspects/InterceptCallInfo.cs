@@ -12,6 +12,7 @@ namespace BLToolkit.Aspects
 		public InterceptCallInfo()
 		{
 			_currentPrincipal = Thread.CurrentPrincipal;
+			_currentThread    = Thread.CurrentThread;
 		}
 
 		private CallMethodInfo _callmethodInfo;
@@ -103,7 +104,13 @@ namespace BLToolkit.Aspects
 		private IPrincipal _currentPrincipal;
 		public  IPrincipal  CurrentPrincipal
 		{
-			get { return _currentPrincipal;  }
+			get { return _currentPrincipal; }
+		}
+
+		private Thread _currentThread;
+		public  Thread  CurrentThread
+		{
+			get { return _currentThread; }
 		}
 
 		private bool _cached;
