@@ -27,6 +27,7 @@ ON [PRIMARY]
 GO
 
 INSERT INTO Person (FirstName, LastName, Gender) VALUES ('John',   'Pupkin',    'M')
+GO
 INSERT INTO Person (FirstName, LastName, Gender) VALUES ('Tester', 'Testerson', 'M')
 GO
 
@@ -349,6 +350,7 @@ VALUES
 	(   NULL,     NULL,    NULL,    NULL,    NULL,      NULL,     NULL,
 	    NULL,     NULL,    NULL,    NULL,    NULL,      NULL,     NULL,
 	    NULL,     NULL,    NULL,    NULL,    NULL,      NULL,     NULL)
+GO
 
 INSERT INTO DataTypeTest
 	(Binary_, Boolean_,   Byte_,  Bytes_,  Char_,  DateTime_, Decimal_,
