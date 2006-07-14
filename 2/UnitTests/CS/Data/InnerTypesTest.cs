@@ -42,18 +42,21 @@ namespace A.Data
 			public abstract string Name { get; set; }
 		}
 
+		[MapField("FirstName",  "First.Name")]
+		[MapField("LastName",   "Last.Name")]
+		[MapField("MiddleName", "Middle.Name")]
 		public abstract class Person
 		{
 			[MapField("PersonID")]
 			public          int    ID;
 			public          First  First;
 			[MapIgnore(false)]
-			public Middle Middle = new Middle();
+			public          Middle Middle = new Middle();
 			[MapIgnore(false)]
 			public abstract Last   Last { get; set; }
 			public          string Name;
 			[MemberMapper(typeof(TypeMapper))]
-			public          Type Type;
+			public          Type   Type;
 		}
 
 		[Test]
