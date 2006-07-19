@@ -857,9 +857,6 @@ namespace BLToolkit.Data
 					{
 						if (string.Compare(name, p.ParameterName, true) == 0)
 						{
-							param.Value     = p.Value;
-							p.ParameterName = name;
-
 							if (param.Direction != p.Direction)
 							{
 								System.Diagnostics.Debug.WriteLine(string.Format(
@@ -869,6 +866,11 @@ namespace BLToolkit.Data
 
 								param.Direction = p.Direction;
 							}
+
+							if (param.Direction != ParameterDirection.Output)
+								param.Value = p.Value;
+
+							p.ParameterName = name;
 
 							found = true;
 

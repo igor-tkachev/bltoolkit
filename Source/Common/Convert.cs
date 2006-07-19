@@ -19,6 +19,18 @@ namespace BLToolkit.Common
 			return I.C(p);
 		}
 
+		public static T[] FromArray(P[] src)
+		{
+			T[] dst = new T[src.Length];
+
+			for (int i = 0; i < src.Length; ++i)
+			{
+				dst[i] = I.C(src[i]);
+			}
+
+			return dst;
+		}
+
 		sealed class Assignable<Q> : CB<Q,Q> { public override Q C(Q p) { return p; } }
 		sealed class Default<Q,V>  : CB<Q,V> { public override Q C(V p) { return (Q)Convert.ChangeType(p, typeof(Q)); } }
 

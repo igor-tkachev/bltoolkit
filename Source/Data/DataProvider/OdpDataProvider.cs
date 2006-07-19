@@ -1,12 +1,15 @@
 using System;
 using System.Collections;
-using System.Collections.Generic;
-using System.ComponentModel;
 using System.Data;
 using System.Data.Common;
+using System.Data.SqlTypes;
 using System.Diagnostics;
+using System.IO;
 using System.Reflection;
-using System.Reflection.Emit;
+using System.Xml;
+
+using BLToolkit.Common;
+using BLToolkit.Mapping;
 
 using Oracle.DataAccess.Client;
 using Oracle.DataAccess.Types;
@@ -17,143 +20,130 @@ namespace BLToolkit.Data.DataProvider
 	/// Implements access to the Data Provider for Oracle.
 	/// </summary>
 	/// <remarks>
-	/// See the <see cref="DbManager.AddDataProvider"/> method to find an example.
+	/// See the <see cref="DbManager.AddDataProvider(DataProviderBase)"/> method to find an example.
 	/// </remarks>
-	/// <seealso cref="DbManager.AddDataProvider">AddDataManager Method</seealso>
+	/// <seealso cref="DbManager.AddDataProvider(DataProviderBase)">AddDataManager Method</seealso>
 	public class OdpDataProvider : DataProviderBase
 	{
-		private delegate object GetValueDelegate(object obj);
-
-		private static Dictionary<Type, OracleDbType>     _dicOraDbTypes;
-		private static Dictionary<Type, Type>             _dicOraObjectTypes;
-		private static Dictionary<Type, GetValueDelegate> _dicOraObjectValueAccessors;
+		public OdpDataProvider()
+		{
+			MappingSchema = new OdpMappingSchema();
+		}
 
 		static OdpDataProvider()
 		{
-			_dicOraDbTypes = new Dictionary<Type, OracleDbType>(20);
-			_dicOraDbTypes.Add(typeof(bool),      OracleDbType.Char);
-			_dicOraDbTypes.Add(typeof(byte),      OracleDbType.Byte);
-			_dicOraDbTypes.Add(typeof(sbyte),     OracleDbType.Byte);
-			_dicOraDbTypes.Add(typeof(short),     OracleDbType.Int16);
-			_dicOraDbTypes.Add(typeof(ushort),    OracleDbType.Int16);
-			_dicOraDbTypes.Add(typeof(int),       OracleDbType.Int32);
-			_dicOraDbTypes.Add(typeof(uint),      OracleDbType.Int32);
-			_dicOraDbTypes.Add(typeof(long),      OracleDbType.Int64);
-			_dicOraDbTypes.Add(typeof(ulong),     OracleDbType.Int64);
-			_dicOraDbTypes.Add(typeof(float),     OracleDbType.Single);
-			_dicOraDbTypes.Add(typeof(double),    OracleDbType.Double);
-			_dicOraDbTypes.Add(typeof(decimal),   OracleDbType.Decimal);
-			_dicOraDbTypes.Add(typeof(char),      OracleDbType.Char);
-			_dicOraDbTypes.Add(typeof(string),    OracleDbType.NVarchar2);
-			_dicOraDbTypes.Add(typeof(DateTime),  OracleDbType.Date);
-			_dicOraDbTypes.Add(typeof(Guid),      OracleDbType.Raw);
-			_dicOraDbTypes.Add(typeof(byte[]),    OracleDbType.Raw);
-			_dicOraDbTypes.Add(typeof(char[]),    OracleDbType.NVarchar2);
+			// Fix Oracle bug #1: Array types are not handled.
+			//
+			Type OraDb_DbTypeTableType = typeof(OracleParameter).Assembly.GetType("Oracle.DataAccess.Client.OraDb_DbTypeTable");
 
-			_dicOraObjectTypes = new Dictionary<Type, Type>(20);
-			_dicOraObjectTypes.Add(typeof(OracleString),       typeof(string));
-			_dicOraObjectTypes.Add(typeof(OracleDate),         typeof(DateTime));
-			_dicOraObjectTypes.Add(typeof(OracleDecimal),      typeof(decimal));
-			_dicOraObjectTypes.Add(typeof(OracleIntervalDS),   typeof(TimeSpan));
-			_dicOraObjectTypes.Add(typeof(OracleIntervalYM),   typeof(long));
-			_dicOraObjectTypes.Add(typeof(OracleRefCursor),    typeof(OracleDataReader));
-			_dicOraObjectTypes.Add(typeof(OracleTimeStamp),    typeof(DateTime));
-			_dicOraObjectTypes.Add(typeof(OracleTimeStampTZ),  typeof(DateTime));
-			_dicOraObjectTypes.Add(typeof(OracleTimeStampLTZ), typeof(DateTime));
-			_dicOraObjectTypes.Add(typeof(OracleBFile),        typeof(byte[]));
-			_dicOraObjectTypes.Add(typeof(OracleBinary),       typeof(byte[]));
-			_dicOraObjectTypes.Add(typeof(OracleBlob),         typeof(byte[]));
-			_dicOraObjectTypes.Add(typeof(OracleXmlType),      typeof(string));
-			_dicOraObjectTypes.Add(typeof(OracleXmlStream),    typeof(string));
-			_dicOraObjectTypes.Add(typeof(OracleClob),         typeof(string));
+			if (null != OraDb_DbTypeTableType)
+			{
+				Hashtable typeTable = (Hashtable)OraDb_DbTypeTableType.InvokeMember(
+					"s_table", BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.GetField,
+					null, null, Type.EmptyTypes);
 
-			_dicOraObjectValueAccessors = new Dictionary<Type, GetValueDelegate>(20);
-			_dicOraObjectValueAccessors.Add(typeof(OracleString),       delegate(object obj) { return ((OracleString)obj).Value; });
-			_dicOraObjectValueAccessors.Add(typeof(OracleDate),         delegate(object obj) { return ((OracleDate)obj).Value; });
-			_dicOraObjectValueAccessors.Add(typeof(OracleDecimal),      delegate(object obj) { return ((OracleDecimal)obj).Value; });
-			_dicOraObjectValueAccessors.Add(typeof(OracleIntervalDS),   delegate(object obj) { return ((OracleIntervalDS)obj).Value; });
-			_dicOraObjectValueAccessors.Add(typeof(OracleIntervalYM),   delegate(object obj) { return ((OracleIntervalYM)obj).Value; });
-			_dicOraObjectValueAccessors.Add(typeof(OracleRefCursor),    delegate(object obj) { return ((OracleRefCursor)obj).GetDataReader(); });
-			_dicOraObjectValueAccessors.Add(typeof(OracleTimeStamp),    delegate(object obj) { return ((OracleTimeStamp)obj).Value; });
-			_dicOraObjectValueAccessors.Add(typeof(OracleTimeStampTZ),  delegate(object obj) { return ((OracleTimeStampTZ)obj).Value; });
-			_dicOraObjectValueAccessors.Add(typeof(OracleTimeStampLTZ), delegate(object obj) { return ((OracleTimeStampLTZ)obj).Value; });
-			_dicOraObjectValueAccessors.Add(typeof(OracleBFile),        delegate(object obj) { return ((OracleBFile)obj).Value; });
-			_dicOraObjectValueAccessors.Add(typeof(OracleBinary),       delegate(object obj) { return ((OracleBinary)obj).Value; });
-			_dicOraObjectValueAccessors.Add(typeof(OracleBlob),         delegate(object obj) { return ((OracleBlob)obj).Value; });
-			_dicOraObjectValueAccessors.Add(typeof(OracleXmlType),      delegate(object obj) { return ((OracleXmlType)obj).Value; });
-			_dicOraObjectValueAccessors.Add(typeof(OracleXmlStream),    delegate(object obj) { return ((OracleXmlStream)obj).Value; });
-			_dicOraObjectValueAccessors.Add(typeof(OracleClob),         delegate(object obj) { return ((OracleClob)obj).Value; });
+				if (null != typeTable)
+				{
+					typeTable.Add(typeof(DateTime[]),           OracleDbType.TimeStamp);
+					typeTable.Add(typeof(Int16[]),              OracleDbType.Int16);
+					typeTable.Add(typeof(Int32[]),              OracleDbType.Int32);
+					typeTable.Add(typeof(Int64[]),              OracleDbType.Int64);
+					typeTable.Add(typeof(Single[]),             OracleDbType.Single);
+					typeTable.Add(typeof(Double[]),             OracleDbType.Double);
+					typeTable.Add(typeof(Decimal[]),            OracleDbType.Decimal);
+					typeTable.Add(typeof(String[]),             OracleDbType.Varchar2);
+					typeTable.Add(typeof(TimeSpan[]),           OracleDbType.IntervalDS);
+					typeTable.Add(typeof(OracleBFile[]),        OracleDbType.BFile);
+					typeTable.Add(typeof(OracleBinary[]),       OracleDbType.Raw);
+					typeTable.Add(typeof(OracleBlob[]),         OracleDbType.Blob);
+					typeTable.Add(typeof(OracleClob[]),         OracleDbType.Clob);
+					typeTable.Add(typeof(OracleDate[]),         OracleDbType.Date);
+					typeTable.Add(typeof(OracleDecimal[]),      OracleDbType.Decimal);
+					typeTable.Add(typeof(OracleIntervalDS[]),   OracleDbType.IntervalDS);
+					typeTable.Add(typeof(OracleIntervalYM[]),   OracleDbType.IntervalYM);
+					typeTable.Add(typeof(OracleRefCursor[]),    OracleDbType.RefCursor);
+					typeTable.Add(typeof(OracleString[]),       OracleDbType.Varchar2);
+					typeTable.Add(typeof(OracleTimeStamp[]),    OracleDbType.TimeStamp);
+					typeTable.Add(typeof(OracleTimeStampLTZ[]), OracleDbType.TimeStampLTZ);
+					typeTable.Add(typeof(OracleTimeStampTZ[]),  OracleDbType.TimeStampTZ);
+					typeTable.Add(typeof(OracleXmlType[]),      OracleDbType.XmlType);
+
+					typeTable.Add(typeof(Boolean),              OracleDbType.Byte);
+					typeTable.Add(typeof(Guid),                 OracleDbType.Raw);
+					typeTable.Add(typeof(SByte),                OracleDbType.Decimal);
+					typeTable.Add(typeof(UInt16),               OracleDbType.Decimal);
+					typeTable.Add(typeof(UInt32),               OracleDbType.Decimal);
+					typeTable.Add(typeof(UInt64),               OracleDbType.Decimal);
+
+					typeTable.Add(typeof(Boolean[]),            OracleDbType.Byte);
+					typeTable.Add(typeof(Guid[]),               OracleDbType.Raw);
+					typeTable.Add(typeof(SByte[]),              OracleDbType.Decimal);
+					typeTable.Add(typeof(UInt16[]),             OracleDbType.Decimal);
+					typeTable.Add(typeof(UInt32[]),             OracleDbType.Decimal);
+					typeTable.Add(typeof(UInt64[]),             OracleDbType.Decimal);
+				}
+			}
 		}
 
-		private static OracleDbType ConvertToOracleDbType(Type parameterType)
-		{
-			if (parameterType.IsEnum)
-			{
-				// All enums are numeric values internally
-				return OracleDbType.Decimal;
-			}
-
-			OracleDbType ret;
-			if (_dicOraDbTypes.TryGetValue(parameterType, out ret))
-			{
-				return ret;
-			}
-				
-			// PB 01/09/2005 No MyVeryOwnObjectType please!
-			// Only strings, numeric values, dates & raw data
-			Debug.Fail("Unimplemented type: " + parameterType.ToString());
-			return OracleDbType.NVarchar2;
-		}
-
-		private static object ConvertFromOracleValue(object value)
-		{
-			GetValueDelegate ret;
-			if (null != value && _dicOraObjectValueAccessors.TryGetValue(value.GetType(), out ret))
-			{
-				return ret(value);
-			}
-
-			return value;
-		}
-
-		private static Type ConvertFromOracleType(Type elementType)
-		{
-			Type ret;
-			if (_dicOraObjectTypes.TryGetValue(elementType, out ret))
-			{
-				return ret;
-			}
-
-			// PB 01/09/2005 No MyVeryOwnObjectType please!
-			// Only strings, numeric values, dates & raw data
-			Debug.Fail("Unimplemented type: " + elementType.ToString());
-			return typeof(object);
-		}
-		
 		/// <summary>
 		/// Creates the database connection object.
 		/// </summary>
 		/// <remarks>
-		/// See the <see cref="DbManager.AddDataProvider"/> method to find an example.
+		/// See the <see cref="DbManager.AddDataProvider(DataProviderBase)"/> method to find an example.
 		/// </remarks>
-		/// <seealso cref="DbManager.AddDataProvider">AddDataManager Method</seealso>
+		/// <seealso cref="DbManager.AddDataProvider(DataProviderBase)">AddDataManager Method</seealso>
 		/// <returns>The database connection object.</returns>
 		public override IDbConnection CreateConnectionObject()
 		{
-			return new OracleConnectionWrap();
+			return new OracleConnection();
+		}
+
+		public override IDbCommand CreateCommandObject(IDbConnection connection)
+		{
+			OracleConnection oraConnection = connection as OracleConnection;
+			if (null != oraConnection)
+			{
+				OracleCommand oraCommand = oraConnection.CreateCommand();
+
+				// Fix Oracle bug #2: Empty arrays can not be sent to the server.
+				//
+				oraCommand.BindByName = true;
+
+				return oraCommand;
+			}
+
+			return base.CreateCommandObject(connection);
+		}
+
+		public override IDbDataParameter CloneParameter(IDbDataParameter parameter)
+		{
+			OracleParameter oraParameter = parameter as OracleParameter;
+
+			if (null != oraParameter)
+			{
+				OracleParameter oraParameterClone = (OracleParameter)oraParameter.Clone();
+
+				// Fix Oracle bug #3: CollectionType property is not cloned.
+				//
+				oraParameterClone.CollectionType = oraParameter.CollectionType;
+
+				return oraParameterClone;
+			}
+
+			return base.CloneParameter(parameter);
 		}
 
 		/// <summary>
 		/// Creates the data adapter object.
 		/// </summary>
 		/// <remarks>
-		/// See the <see cref="DbManager.AddDataProvider"/> method to find an example.
+		/// See the <see cref="DbManager.AddDataProvider(DataProviderBase)"/> method to find an example.
 		/// </remarks>
-		/// <seealso cref="DbManager.AddDataProvider">AddDataManager Method</seealso>
+		/// <seealso cref="DbManager.AddDataProvider(DataProviderBase)">AddDataManager Method</seealso>
 		/// <returns>A data adapter object.</returns>
 		public override DbDataAdapter CreateDataAdapterObject()
 		{
-			return new OracleDataAdapterWrap();
+			return new OracleDataAdapter();
 		}
 
 		/// <summary>
@@ -161,18 +151,20 @@ namespace BLToolkit.Data.DataProvider
 		/// parameter information for the stored procedure specified in the IDbCommand.
 		/// </summary>
 		/// <remarks>
-		/// See the <see cref="DbManager.AddDataProvider"/> method to find an example.
+		/// See the <see cref="DbManager.AddDataProvider(DataProviderBase)"/> method to find an example.
 		/// </remarks>
-		/// <seealso cref="DbManager.AddDataProvider">AddDataManager Method</seealso>
+		/// <seealso cref="DbManager.AddDataProvider(DataProviderBase)">AddDataManager Method</seealso>
 		/// <param name="command">The IDbCommand referencing the stored procedure for which the parameter information is to be derived. The derived parameters will be populated into the Parameters of this command.</param>
 		public override bool DeriveParameters(IDbCommand command)
 		{
-			if (command is OracleCommandWrap)
-				OracleCommandBuilder.DeriveParameters((command as OracleCommandWrap).InnerCommand);
-			else
-				OracleCommandBuilder.DeriveParameters((OracleCommand)command);
+			OracleCommand oraCommand = command as OracleCommand;
+			if (null != oraCommand)
+			{
+				OracleCommandBuilder.DeriveParameters(oraCommand);
+				return true;
+			}
 
-			return true;
+			return false;
 		}
 
 		public override object Convert(object value, ConvertType convertType)
@@ -186,24 +178,9 @@ namespace BLToolkit.Data.DataProvider
 					return String.Concat("p", (string)value);
 
 				case ConvertType.ParameterToName:
-					Debug.Assert(value is string, "OraDirectDataProvider.Convert: value is null");
-					Debug.Assert(Char.ToLower(((string)value).ToLower()[0]) == 'p', "OraDirectDataProvider.Convert: prefix 'p' not set?");
+					Debug.Assert(value is string, "OraDirectDataProvider.Convert: value is not a string???");
+					Debug.Assert(Char.ToLower(((string)value).ToLower()[0]) == 'p', "OraDirectDataProvider.Convert: prefix 'p' not set?\n\n" + value.ToString());
 					return ((string)value).Substring(1);
-				
-				case ConvertType.OutputParameter:
-					Array ar = value as Array;
-					if (null != ar && !(ar is byte[] || ar is char[]))
-					{
-						Array convertedArray = Array.CreateInstance(ConvertFromOracleType(ar.GetType().GetElementType()), ar.Length);
-						for (int i = 0; i < ar.Length; ++i)
-						{
-							convertedArray.SetValue(ConvertFromOracleValue(ar.GetValue(i)), i);
-						}
-
-						return convertedArray;
-					}
-
-					return ConvertFromOracleValue(value);
 				
 				default:
 					return base.Convert(value, convertType);
@@ -212,7 +189,7 @@ namespace BLToolkit.Data.DataProvider
 
 		public override void AttachParameter(IDbCommand command, IDbDataParameter parameter)
 		{
-			OracleParameter oraParameter = (parameter is OracleParameterWrap) ? (parameter as OracleParameterWrap).InnerParameter : parameter as OracleParameter;
+			OracleParameter oraParameter = parameter as OracleParameter;
 
 			if (null != oraParameter)
 			{
@@ -220,14 +197,24 @@ namespace BLToolkit.Data.DataProvider
 				{
 					if (oraParameter.Direction == ParameterDirection.Input || oraParameter.Direction == ParameterDirection.InputOutput)
 					{
+						Array ar = oraParameter.Value as Array;
+						if (null != ar && !(ar is byte[] || ar is char[]))
+						{
+							oraParameter.Size = ar.Length;
+						}
+
 						if (oraParameter.Size == 0)
 						{
-							// Skip this parameter
+							// Skip this parameter.
+							// Fix Oracle bug #2: Empty arrays can not be sent to the server.
+							//
 							return;
 						}
 					}
 					else if (oraParameter.Direction == ParameterDirection.Output)
 					{
+						// Fix Oracle bug #4: ArrayBindSize must be explicitly specified.
+						//
 						if (oraParameter.DbType == DbType.String)
 						{
 							oraParameter.Size = 1024;
@@ -252,7 +239,7 @@ namespace BLToolkit.Data.DataProvider
 
 		public override bool IsValueParameter(IDbDataParameter parameter)
 		{
-			OracleParameter oraParameter = (parameter is OracleParameterWrap) ? (parameter as OracleParameterWrap).InnerParameter : parameter as OracleParameter;
+			OracleParameter oraParameter = parameter as OracleParameter;
 			if (null != oraParameter)
 			{
 				if (oraParameter.OracleDbType == OracleDbType.RefCursor && oraParameter.Direction == ParameterDirection.Output)
@@ -269,9 +256,9 @@ namespace BLToolkit.Data.DataProvider
 		/// Returns connection type.
 		/// </summary>
 		/// <remarks>
-		/// See the <see cref="DbManager.AddDataProvider"/> method to find an example.
+		/// See the <see cref="DbManager.AddDataProvider(DataProviderBase)"/> method to find an example.
 		/// </remarks>
-		/// <seealso cref="DbManager.AddDataProvider">AddDataManager Method</seealso>
+		/// <seealso cref="DbManager.AddDataProvider(DataProviderBase)">AddDataManager Method</seealso>
 		/// <value>An instance of the <see cref="Type"/> class.</value>
 		public override Type ConnectionType
 		{
@@ -282,980 +269,537 @@ namespace BLToolkit.Data.DataProvider
 		/// Returns the data provider name.
 		/// </summary>
 		/// <remarks>
-		/// See the <see cref="DbManager.AddDataProvider"/> method to find an example.
+		/// See the <see cref="DbManager.AddDataProvider(DataProviderBase)"/> method to find an example.
 		/// </remarks>
-		/// <seealso cref="DbManager.AddDataProvider">AddDataProvider Method</seealso>
+		/// <seealso cref="DbManager.AddDataProvider(DataProviderBase)">AddDataProvider Method</seealso>
 		/// <value>Data provider name.</value>
 		public override string Name
 		{
 			get { return "ODP"; }
 		}
 
-		#region Wrappers
-
-		internal class OracleParameterWrap : IDbDataParameter, ICloneable, IDisposable
+		public class OdpMappingSchema : MappingSchema
 		{
-			protected OracleParameter _innerParameter;
 
-			private delegate bool IsTypeNotSetDelegate(OracleParameter oraParameter);
-			private static IsTypeNotSetDelegate IsTypeNotSet;
+#if FW2
 
-			static OracleParameterWrap()
+			protected override DataReaderMapper CreateDataReaderMapper(IDataReader dataReader)
 			{
-				FieldInfo fi = typeof (OracleParameter).GetField("m_enumType", BindingFlags.Instance | BindingFlags.NonPublic);
-
-				DynamicMethod dm = new DynamicMethod("xget_m_enumType", typeof(bool), new Type[] { typeof(OracleParameter) }, typeof(OracleParameter), true);
-				ILGenerator generator = dm.GetILGenerator();
-				generator.Emit(OpCodes.Ldarg_0);
-				generator.Emit(OpCodes.Ldfld, fi);
-				generator.Emit(OpCodes.Ldc_I4_1);
-				generator.Emit(OpCodes.Ceq);
-				generator.Emit(OpCodes.Ret);
-
-				IsTypeNotSet = (IsTypeNotSetDelegate)dm.CreateDelegate(typeof(IsTypeNotSetDelegate));
+				return new OracleDataReaderMapper(this, dataReader);
 			}
 
-			public OracleParameterWrap(OracleParameter oracleParameter)
+			protected override DataReaderMapper CreateDataReaderMapper(IDataReader dataReader, NameOrIndexParameter nip)
 			{
-				_innerParameter = oracleParameter;
+				return new SqlScalarDataReaderMapper(this, dataReader, nip);
 			}
 
-			internal OracleParameter InnerParameter
+#endif
+
+			#region Convert
+
+			#region Primitive Types
+
+			public override SByte ConvertToSByte(object value)
 			{
-				get { return _innerParameter; }
-			}
-
-			internal bool TypeNotSet
-			{
-				get { return IsTypeNotSet(_innerParameter); }
-			}
-
-			#region IDbDataParameter
-
-			public byte Precision
-			{
-				get { return _innerParameter.Precision; }
-				set { _innerParameter.Precision = value; }
-			}
-
-			public byte Scale
-			{
-				get { return _innerParameter.Scale; }
-				set { _innerParameter.Scale = value; }
-			}
-
-			public int Size
-			{
-				get { return _innerParameter.Size; }
-				set { _innerParameter.Size = value; }
-			}
-
-			#region IDataParameter
-
-			public DbType DbType
-			{
-				get { return _innerParameter.DbType; }
-				set { _innerParameter.DbType = value; }
-			}
-
-			public ParameterDirection Direction
-			{
-				get { return _innerParameter.Direction; }
-				set { _innerParameter.Direction = value; }
-			}
-
-			public bool IsNullable
-			{
-				get { return _innerParameter.IsNullable; }
-			}
-
-			public string ParameterName
-			{
-				get { return _innerParameter.ParameterName; }
-				set { _innerParameter.ParameterName = value; }
-			}
-
-			public string SourceColumn
-			{
-				get { return _innerParameter.SourceColumn; }
-				set { _innerParameter.SourceColumn = value; }
-			}
-
-			public DataRowVersion SourceVersion
-			{
-				get { return _innerParameter.SourceVersion; }
-				set { _innerParameter.SourceVersion = value; }
-			}
-
-			public object Value
-			{
-				get { return _innerParameter.Value; }
-				set
+				if (value is OracleDecimal)
 				{
-					Array ar = value as Array;
-					if (null != ar && !(ar is Byte[] || ar is Char[]))
-					{
-						if (TypeNotSet)
-						{
-							_innerParameter.OracleDbType = ConvertToOracleDbType(value.GetType().GetElementType());
-						}
-
-						_innerParameter.CollectionType = OracleCollectionType.PLSQLAssociativeArray;
-						_innerParameter.Size = ar.Length;
-					}
-					else if (null != value && DBNull.Value != value && TypeNotSet)
-					{
-						switch (Type.GetTypeCode(value.GetType()))
-						{
-							case TypeCode.Boolean:
-								value = ((Boolean)value) ? 'T' : 'F';
-								break;
-							case TypeCode.SByte:
-							case TypeCode.UInt16:
-							case TypeCode.UInt32:
-							case TypeCode.UInt64:
-								value = System.Convert.ToDecimal(value);
-								break;
-							case TypeCode.Object:
-								if (value is Guid)
-									value = ((Guid)value).ToByteArray();
-								break;
-						}
-
-						_innerParameter.CollectionType = OracleCollectionType.None;
-						_innerParameter.OracleDbType = ConvertToOracleDbType(value.GetType());
-					}
-					_innerParameter.Value = value;
-				}
-			}
-
-			#endregion
-
-			#endregion
-
-			#region ICloneable
-
-			public object Clone()
-			{
-				OracleParameterWrap clone = new OracleParameterWrap((OracleParameter)_innerParameter.Clone());
-				clone._innerParameter.CollectionType = _innerParameter.CollectionType;
-				return clone;
-			}
-
-			#endregion
-
-			#region IDisposable
-
-			public void Dispose()
-			{
-				_innerParameter.Dispose();
-			}
-
-			#endregion
-
-			#region Object
-
-			public override int GetHashCode()
-			{
-				return _innerParameter.GetHashCode();
-			}
-
-			public override bool Equals(object obj)
-			{
-				if (obj is OracleParameterWrap)
-				{
-					return _innerParameter.Equals((obj as OracleParameterWrap).InnerParameter);
+					OracleDecimal oraDecimal = (OracleDecimal)value;
+					return oraDecimal.IsNull ? DefaultSByteNullValue : (SByte)oraDecimal.Value;
 				}
 
-				return _innerParameter.Equals(obj);
+				return base.ConvertToSByte(value);
 			}
 
-			public override string ToString()
+			public override Int16 ConvertToInt16(object value)
 			{
-				return _innerParameter.ToString();
+				if (value is OracleDecimal)
+				{
+					OracleDecimal oraDecimal = (OracleDecimal)value;
+					return oraDecimal.IsNull ? DefaultInt16NullValue : oraDecimal.ToInt16();
+				}
+
+				return base.ConvertToInt16(value);
 			}
+
+			public override Int32 ConvertToInt32(object value)
+			{
+				if (value is OracleDecimal)
+				{
+					OracleDecimal oraDecimal = (OracleDecimal)value;
+					return oraDecimal.IsNull ? DefaultInt32NullValue : oraDecimal.ToInt32();
+				}
+
+				return base.ConvertToInt32(value);
+			}
+
+			public override Int64 ConvertToInt64(object value)
+			{
+				if (value is OracleDecimal)
+				{
+					OracleDecimal oraDecimal = (OracleDecimal)value;
+					return oraDecimal.IsNull ? DefaultInt64NullValue : oraDecimal.ToInt64();
+				}
+
+				return base.ConvertToInt64(value);
+			}
+
+			public override Byte ConvertToByte(object value)
+			{
+				if (value is OracleDecimal)
+				{
+					OracleDecimal oraDecimal = (OracleDecimal)value;
+					return oraDecimal.IsNull ? DefaultByteNullValue : oraDecimal.ToByte();
+				}
+
+				return base.ConvertToByte(value);
+			}
+
+			public override UInt16 ConvertToUInt16(object value)
+			{
+				if (value is OracleDecimal)
+				{
+					OracleDecimal oraDecimal = (OracleDecimal)value;
+					return oraDecimal.IsNull ? DefaultUInt16NullValue : (UInt16)oraDecimal.Value;
+				}
+
+				return base.ConvertToUInt16(value);
+			}
+
+			public override UInt32 ConvertToUInt32(object value)
+			{
+				if (value is OracleDecimal)
+				{
+					OracleDecimal oraDecimal = (OracleDecimal)value;
+					return oraDecimal.IsNull ? DefaultUInt32NullValue : (UInt32)oraDecimal.Value;
+				}
+
+				return base.ConvertToUInt32(value);
+			}
+
+			public override UInt64 ConvertToUInt64(object value)
+			{
+				if (value is OracleDecimal)
+				{
+					OracleDecimal oraDecimal = (OracleDecimal)value;
+					return oraDecimal.IsNull ? DefaultUInt64NullValue : (UInt64)oraDecimal.Value;
+				}
+
+				return base.ConvertToUInt64(value);
+			}
+
+			public override Single ConvertToSingle(object value)
+			{
+				if (value is OracleDecimal)
+				{
+					OracleDecimal oraDecimal = (OracleDecimal)value;
+					return oraDecimal.IsNull ? DefaultSingleNullValue : oraDecimal.ToSingle();
+				}
+
+				return base.ConvertToSingle(value);
+			}
+
+			public override Double ConvertToDouble(object value)
+			{
+				if (value is OracleDecimal)
+				{
+					OracleDecimal oraDecimal = (OracleDecimal)value;
+					return oraDecimal.IsNull ? DefaultDoubleNullValue : oraDecimal.ToDouble();
+				}
+
+				return base.ConvertToDouble(value);
+			}
+
+			public override Boolean ConvertToBoolean(object value)
+			{
+				if (value is OracleDecimal)
+				{
+					OracleDecimal oraDecimal = (OracleDecimal)value;
+					return oraDecimal.IsNull ? DefaultBooleanNullValue : (oraDecimal.Value != 0);
+				}
+
+				return base.ConvertToBoolean(value);
+			}
+
+			public override DateTime ConvertToDateTime(object value)
+			{
+				if (value is OracleDate)
+				{
+					OracleDate oraDate = (OracleDate)value;
+					return oraDate.IsNull ? DefaultDateTimeNullValue : oraDate.Value;
+				}
+
+				return base.ConvertToDateTime(value);
+			}
+
+			public override Decimal ConvertToDecimal(object value)
+			{
+				if (value is OracleDecimal)
+				{
+					OracleDecimal oraDecimal = (OracleDecimal)value;
+					return oraDecimal.IsNull ? DefaultDecimalNullValue : oraDecimal.Value;
+				}
+
+				return base.ConvertToDecimal(value);
+			}
+
+			public override Guid ConvertToGuid(object value)
+			{
+				if (value is OracleString)
+				{
+					OracleString oraString = (OracleString)value;
+					return oraString.IsNull ? DefaultGuidNullValue : new Guid(oraString.Value);
+				}
+
+				if (value is OracleBlob)
+				{
+					OracleBlob oraBlob = (OracleBlob)value;
+					return oraBlob.IsNull ? DefaultGuidNullValue : new Guid(oraBlob.Value);
+				}
+
+				return base.ConvertToGuid(value);
+			}
+
+			public override String ConvertToString(object value)
+			{
+				if (value is OracleString)
+				{
+					OracleString oraString = (OracleString)value;
+					return oraString.IsNull ? DefaultStringNullValue : oraString.Value;
+				}
+
+				if (value is OracleClob)
+				{
+					OracleClob oraClob = (OracleClob)value;
+					return oraClob.IsNull ? DefaultStringNullValue : oraClob.Value;
+				}
+
+				return base.ConvertToString(value);
+			}
+
+
+			public override Stream ConvertToStream(object value)
+			{
+				if (value is OracleXmlType)
+				{
+					OracleXmlType oraXml = (OracleXmlType)value;
+					return oraXml.IsNull ? DefaultStreamNullValue : oraXml.GetStream();
+				}
+
+				return base.ConvertToStream(value);
+			}
+
+			public override XmlReader ConvertToXmlReader(object value)
+			{
+				if (value is OracleXmlType)
+				{
+					OracleXmlType oraXml = (OracleXmlType)value;
+					return oraXml.IsNull ? DefaultXmlReaderNullValue : oraXml.GetXmlReader();
+				}
+
+				return base.ConvertToXmlReader(value);
+			}
+
+			public override Byte[] ConvertToByteArray(object value)
+			{
+				if (value is OracleBlob)
+				{
+					OracleBlob oraBlob = (OracleBlob)value;
+					return oraBlob.IsNull ? null : oraBlob.Value;
+				}
+
+				if (value is OracleBinary)
+				{
+					OracleBinary oraBinary = (OracleBinary)value;
+					return oraBinary.IsNull ? null : oraBinary.Value;
+				}
+				
+				if (value is OracleBFile)
+				{
+					OracleBFile oraBFile = (OracleBFile)value;
+					return oraBFile.IsNull ? null : oraBFile.Value;
+				}
+
+				return base.ConvertToByteArray(value);
+			}
+
+			public override Char[] ConvertToCharArray(object value)
+			{
+				if (value is OracleString)
+				{
+					OracleString oraString = (OracleString)value;
+					return oraString.IsNull ? null : oraString.Value.ToCharArray();
+				}
+
+				if (value is OracleClob)
+				{
+					OracleClob oraClob = (OracleClob)value;
+					return oraClob.IsNull ? null : oraClob.Value.ToCharArray();
+				}
+
+				return base.ConvertToCharArray(value);
+			}
+
+			#endregion
+
+#if FW2
+
+			#region Nullable Types
+
+			public override SByte? ConvertToNullableSByte(object value)
+			{
+				if (value is OracleDecimal)
+				{
+					OracleDecimal oraDecimal = (OracleDecimal)value;
+					return oraDecimal.IsNull ? null : (SByte?)oraDecimal.Value;
+				}
+
+				return base.ConvertToNullableSByte(value);
+			}
+
+			public override Int16? ConvertToNullableInt16(object value)
+			{
+				if (value is OracleDecimal)
+				{
+					OracleDecimal oraDecimal = (OracleDecimal)value;
+					return oraDecimal.IsNull ? null : (Int16?)oraDecimal.ToInt16();
+				}
+
+				return base.ConvertToNullableInt16(value);
+			}
+
+			public override Int32? ConvertToNullableInt32(object value)
+			{
+				if (value is OracleDecimal)
+				{
+					OracleDecimal oraDecimal = (OracleDecimal)value;
+					return oraDecimal.IsNull ? null : (Int32?)oraDecimal.ToInt32();
+				}
+
+				return base.ConvertToNullableInt32(value);
+			}
+
+			public override Int64? ConvertToNullableInt64(object value)
+			{
+				if (value is OracleDecimal)
+				{
+					OracleDecimal oraDecimal = (OracleDecimal)value;
+					return oraDecimal.IsNull ? null : (Int64?)oraDecimal.ToInt64();
+				}
+
+				return base.ConvertToNullableInt64(value);
+			}
+
+			public override Byte? ConvertToNullableByte(object value)
+			{
+				if (value is OracleDecimal)
+				{
+					OracleDecimal oraDecimal = (OracleDecimal)value;
+					return oraDecimal.IsNull ? null : (Byte?)oraDecimal.ToByte();
+				}
+
+				return base.ConvertToNullableByte(value);
+			}
+
+			public override UInt16? ConvertToNullableUInt16(object value)
+			{
+				if (value is OracleDecimal)
+				{
+					OracleDecimal oraDecimal = (OracleDecimal)value;
+					return oraDecimal.IsNull ? null : (UInt16?)oraDecimal.Value;
+				}
+
+				return base.ConvertToNullableUInt16(value);
+			}
+
+			public override UInt32? ConvertToNullableUInt32(object value)
+			{
+				if (value is OracleDecimal)
+				{
+					OracleDecimal oraDecimal = (OracleDecimal)value;
+					return oraDecimal.IsNull ? null : (UInt32?)oraDecimal.Value;
+				}
+
+				return base.ConvertToNullableUInt32(value);
+			}
+
+			public override UInt64? ConvertToNullableUInt64(object value)
+			{
+				if (value is OracleDecimal)
+				{
+					OracleDecimal oraDecimal = (OracleDecimal)value;
+					return oraDecimal.IsNull ? null : (UInt64?)oraDecimal.Value;
+				}
+
+				return base.ConvertToNullableUInt64(value);
+			}
+
+			public override Single? ConvertToNullableSingle(object value)
+			{
+				if (value is OracleDecimal)
+				{
+					OracleDecimal oraDecimal = (OracleDecimal)value;
+					return oraDecimal.IsNull ? null : (Single?)oraDecimal.ToSingle();
+				}
+
+				return base.ConvertToNullableSingle(value);
+			}
+
+			public override Double? ConvertToNullableDouble(object value)
+			{
+				if (value is OracleDecimal)
+				{
+					OracleDecimal oraDecimal = (OracleDecimal)value;
+					return oraDecimal.IsNull ? null : (Double?)oraDecimal.ToDouble();
+				}
+
+				return base.ConvertToNullableDouble(value);
+			}
+
+			public override Boolean? ConvertToNullableBoolean(object value)
+			{
+				if (value is OracleDecimal)
+				{
+					OracleDecimal oraDecimal = (OracleDecimal)value;
+					return oraDecimal.IsNull ? null : (Boolean?)(oraDecimal.Value != 0);
+				}
+
+				return base.ConvertToNullableBoolean(value);
+			}
+
+			public override DateTime? ConvertToNullableDateTime(object value)
+			{
+				if (value is OracleDate)
+				{
+					OracleDate oraDate = (OracleDate)value;
+					return oraDate.IsNull ? null : (DateTime?)oraDate.Value;
+				}
+
+				return base.ConvertToNullableDateTime(value);
+			}
+
+			public override Decimal? ConvertToNullableDecimal(object value)
+			{
+				if (value is OracleDecimal)
+				{
+					OracleDecimal oraDecimal = (OracleDecimal)value;
+					return oraDecimal.IsNull ? null : (Decimal?)oraDecimal.Value;
+				}
+
+				return base.ConvertToNullableDecimal(value);
+			}
+
+			public override Guid? ConvertToNullableGuid(object value)
+			{
+				if (value is OracleString)
+				{
+					OracleString oraString = (OracleString)value;
+					return oraString.IsNull ? null : (Guid?)new Guid(oraString.Value);
+				}
+
+				if (value is OracleBlob)
+				{
+					OracleBlob oraBlob = (OracleBlob)value;
+					return oraBlob.IsNull ? null : (Guid?)new Guid(oraBlob.Value);
+				}
+
+				return base.ConvertToNullableGuid(value);
+			}
+
+			#endregion
+#endif
 
 			#endregion
 		}
 
-		internal class OracleParameterCollectionWrap : IDataParameterCollection
+#if FW2
+
+		public class OracleDataReaderMapper : DataReaderMapper
 		{
-			protected IDataParameterCollection _IDataParameterCollection;
-			protected OracleParameterCollection _innerParameterCollection;
-
-			public OracleParameterCollectionWrap(OracleParameterCollection oracleParameterCollection)
+			public OracleDataReaderMapper(MappingSchema mappingSchema, IDataReader dataReader)
+				: base(mappingSchema, dataReader)
 			{
-				_innerParameterCollection = oracleParameterCollection;
-				_IDataParameterCollection = oracleParameterCollection;
+				_dataReader = (OracleDataReader)dataReader;
 			}
 
-			internal OracleParameterCollection InnerParameterCollection
+			private OracleDataReader _dataReader;
+
+			public override Type GetFieldType(int index)
 			{
-				get { return _innerParameterCollection; }
+				Type fieldType = _dataReader.GetProviderSpecificFieldType(index);
+
+				if (fieldType == typeof(SqlXml))    return typeof(SqlXml);
+				if (fieldType == typeof(SqlBinary)) return typeof(SqlBytes);
+
+				return _dataReader.GetFieldType(index);
 			}
 
-			#region IDataParameterCollection
-
-			public object this[string name]
+			public override object GetValue(object o, int index)
 			{
-				get
+				Type fieldType = _dataReader.GetProviderSpecificFieldType(index);
+
+				if (fieldType == typeof(OracleXmlType))
 				{
-					object oracleParameter = _IDataParameterCollection[name];
-					return (oracleParameter is OracleParameter)
-						?
-						new OracleParameterWrap(oracleParameter as OracleParameter)
-						: null;
+					OracleXmlType xml = _dataReader.GetOracleXmlType(index);
+					return xml.IsNull ? null : xml;
 				}
-				set
+				else if (fieldType == typeof(OracleBlob))
 				{
-					if (value is OracleParameterWrap)
-					{
-						_IDataParameterCollection[name] = (value as OracleParameterWrap).InnerParameter;
-					}
-					else
-					{
-						((IDataParameterCollection)_innerParameterCollection)[name] = value;
-					}
-				}
-			}
-
-			public bool Contains(string parameterName)
-			{
-				return _IDataParameterCollection.Contains(parameterName);
-			}
-
-
-			public int IndexOf(string parameterName)
-			{
-				return _IDataParameterCollection.IndexOf(parameterName);
-			}
-
-
-			public void RemoveAt(string parameterName)
-			{
-				_IDataParameterCollection.RemoveAt(parameterName);
-			}
-
-			#region IList
-
-			public bool IsFixedSize
-			{
-				get { return _IDataParameterCollection.IsFixedSize; }
-			}
-
-
-			public bool IsReadOnly
-			{
-				get { return _IDataParameterCollection.IsReadOnly; }
-			}
-
-			public object this[int index]
-			{
-				get
-				{
-					object oracleParameter = _IDataParameterCollection[index];
-					return (oracleParameter is OracleParameter)?
-						new OracleParameterWrap(oracleParameter as OracleParameter): null;
-				}
-				set
-				{
-					if (value is OracleParameterWrap)
-					{
-						_IDataParameterCollection[index] = (value as OracleParameterWrap).InnerParameter;
-					}
-					else
-					{
-						_IDataParameterCollection[index] = value;
-					}
-				}
-			}
-
-			public int Add(object value)
-			{
-				if (value is OracleParameterWrap)
-				{
-					return _IDataParameterCollection.Add((value as OracleParameterWrap).InnerParameter);
+					OracleBlob blob = _dataReader.GetOracleBlob(index);
+					return blob.IsNull ? null : blob;
 				}
 				else
 				{
-					return _IDataParameterCollection.Add(value);
+					object value = _dataReader.GetValue(index);
+					return value is DBNull ? null : value;
 				}
 			}
+		}
 
-			public void Clear()
+		public class SqlScalarDataReaderMapper : ScalarDataReaderMapper
+		{
+			public SqlScalarDataReaderMapper(MappingSchema mappingSchema, IDataReader dataReader, NameOrIndexParameter nip)
+				: base(mappingSchema, dataReader, nip)
 			{
-				_IDataParameterCollection.Clear();
+				_dataReader = (OracleDataReader)dataReader;
+				_fieldType = _dataReader.GetProviderSpecificFieldType(Index);
+
+				if (_fieldType == typeof(OracleXmlType))
+					_fieldType = typeof(OracleXmlType);
+				else if (_fieldType == typeof(OracleBlob))
+					_fieldType = typeof(OracleBlob);
+				else
+					_fieldType = _dataReader.GetFieldType(Index);
 			}
 
+			private OracleDataReader _dataReader;
+			private Type             _fieldType;
 
-			public bool Contains(object value)
+			public override Type GetFieldType(int index)
 			{
-				if (value is OracleParameterWrap)
+				return _fieldType;
+			}
+
+			public override object GetValue(object o, int index)
+			{
+				if (_fieldType == typeof(OracleXmlType))
 				{
-					return _IDataParameterCollection.Contains((value as OracleParameterWrap).InnerParameter);
+					OracleXmlType xml = _dataReader.GetOracleXmlType(Index);
+					return xml.IsNull ? null : xml;
+				}
+				else if (_fieldType == typeof(OracleBlob))
+				{
+					OracleBlob blob = _dataReader.GetOracleBlob(Index);
+					return blob.IsNull ? null : blob;
 				}
 				else
 				{
-					return _IDataParameterCollection.Contains(value);
+					object value = _dataReader.GetValue(index);
+					return value is DBNull ? null : value;
 				}
 			}
-
-			public int IndexOf(object value)
-			{
-				if (value is OracleParameterWrap)
-				{
-					return _IDataParameterCollection.IndexOf((value as OracleParameterWrap).InnerParameter);
-				}
-				else
-				{
-					return _IDataParameterCollection.IndexOf(value);
-				}
-			}
-
-			public void Insert(int index, object value)
-			{
-				if (value is OracleParameterWrap)
-				{
-					_IDataParameterCollection.Insert(index, (value as OracleParameterWrap).InnerParameter);
-				}
-				else
-				{
-					_IDataParameterCollection.Insert(index, value);
-				}
-			}
-
-			public void Remove(object value)
-			{
-				if (value is OracleParameterWrap)
-				{
-					_IDataParameterCollection.Remove((value as OracleParameterWrap).InnerParameter);
-				}
-				else
-				{
-					_IDataParameterCollection.Remove(value);
-				}
-			}
-
-			public void RemoveAt(int index)
-			{
-				_IDataParameterCollection.RemoveAt(index);
-			}
-
-			#region ICollection
-
-			public int Count
-			{
-				get { return _IDataParameterCollection.Count; }
-			}
-
-
-			public bool IsSynchronized
-			{
-				get { return _IDataParameterCollection.IsSynchronized; }
-			}
-
-
-			public object SyncRoot
-			{
-				get { return _IDataParameterCollection.SyncRoot; }
-			}
-
-			public void CopyTo(Array array, int index)
-			{
-				_IDataParameterCollection.CopyTo(array, index);
-				for (int i = index; i < _IDataParameterCollection.Count; ++i)
-				{
-					array.SetValue(new OracleParameterWrap((OracleParameter)array.GetValue(i)), i);
-				}
-			}
-
-			#region IEnumerable
-
-			public IEnumerator GetEnumerator()
-			{
-				return new OracleParameterCollectionEnumeratorWrap(_IDataParameterCollection.GetEnumerator());
-			}
-
-			#endregion
-
-			#endregion
-
-			#endregion
-
-			#endregion
-
-			#region Object
-
-			public override int GetHashCode()
-			{
-				return _innerParameterCollection.GetHashCode();
-			}
-
-			public override bool Equals(object obj)
-			{
-				if (obj is OracleParameterCollectionWrap)
-				{
-					return _innerParameterCollection.Equals((obj as OracleParameterCollectionWrap).InnerParameterCollection);
-				}
-
-				return _innerParameterCollection.Equals(obj);
-			}
-
-			public override string ToString()
-			{
-				return _innerParameterCollection.ToString();
-			}
-
-			#endregion
 		}
 
-		internal class OracleParameterCollectionEnumeratorWrap : IEnumerator
-		{
-			protected IEnumerator _IEnumerator;
+#endif
 
-			public OracleParameterCollectionEnumeratorWrap(IEnumerator enumerator)
-			{
-				_IEnumerator = enumerator;
-			}
-
-			#region Object
-
-			public override int GetHashCode()
-			{
-				return _IEnumerator.GetHashCode();
-			}
-
-
-			public override bool Equals(object obj)
-			{
-				if (obj is OracleParameterCollectionEnumeratorWrap)
-				{
-					return _IEnumerator.Equals((obj as OracleParameterCollectionEnumeratorWrap)._IEnumerator);
-				}
-
-				return _IEnumerator.Equals(obj);
-			}
-
-
-			public override string ToString()
-			{
-				return _IEnumerator.ToString();
-			}
-
-			#endregion
-
-			#region IEnumerator
-
-			public object Current
-			{
-				get
-				{
-					object oracleParameter = _IEnumerator.Current;
-					return (oracleParameter is OracleParameter)
-						? new OracleParameterWrap(oracleParameter as OracleParameter)
-						: oracleParameter;
-				}
-			}
-
-			public bool MoveNext()
-			{
-				return _IEnumerator.MoveNext();
-			}
-
-			public void Reset()
-			{
-				_IEnumerator.Reset();
-			}
-
-			#endregion
-		}
-
-		internal class OracleCommandWrap : IComponent, IDbCommand, ICloneable
-		{
-			protected OracleCommand _innerCommand;
-			protected IDbCommand _IDbCommand;
-
-			public OracleCommandWrap(OracleCommand oracleCommand)
-			{
-				oracleCommand.BindByName = true;
-
-				_innerCommand = oracleCommand;
-				_IDbCommand = oracleCommand;
-			}
-
-			internal OracleCommand InnerCommand
-			{
-				get { return _innerCommand; }
-			}
-
-			#region Object
-
-			public override int GetHashCode()
-			{
-				return _innerCommand.GetHashCode();
-			}
-
-
-			public override bool Equals(object obj)
-			{
-				if (obj is OracleCommandWrap)
-				{
-					return _innerCommand.Equals((obj as OracleCommandWrap)._innerCommand);
-				}
-
-				return _innerCommand.Equals(obj);
-			}
-
-
-			public override string ToString()
-			{
-				return _innerCommand.ToString();
-			}
-
-			#endregion
-
-			#region ICloneable
-
-			public object Clone()
-			{
-				return new OracleCommandWrap((OracleCommand)_innerCommand.Clone());
-			}
-
-			#endregion
-
-			#region IComponent
-
-			public ISite Site
-			{
-				get { return _innerCommand.Site; }
-				set { _innerCommand.Site = value; }
-			}
-
-			public event EventHandler Disposed
-			{
-				add { _innerCommand.Disposed += value; }
-				remove { _innerCommand.Disposed -= value; }
-			}
-
-			#region IDisposable
-
-			public void Dispose()
-			{
-				_innerCommand.Dispose();
-			}
-
-			#endregion
-
-			#endregion
-
-			#region IDbCommand
-
-			public string CommandText
-			{
-				get { return _IDbCommand.CommandText; }
-				set { _IDbCommand.CommandText = value; }
-			}
-
-			public int CommandTimeout
-			{
-				get { return _IDbCommand.CommandTimeout; }
-				set { _IDbCommand.CommandTimeout = value; }
-			}
-
-
-			public CommandType CommandType
-			{
-				get { return _IDbCommand.CommandType; }
-				set { _IDbCommand.CommandType = value; }
-			}
-
-
-			public IDbConnection Connection
-			{
-				get { return _IDbCommand.Connection; }
-				set { _IDbCommand.Connection = value; }
-			}
-
-			public IDataParameterCollection Parameters
-			{
-				get { return new OracleParameterCollectionWrap(_innerCommand.Parameters); }
-			}
-
-			public IDbTransaction Transaction
-			{
-				get { return _IDbCommand.Transaction; }
-				set { _IDbCommand.Transaction = value; }
-			}
-
-
-			public UpdateRowSource UpdatedRowSource
-			{
-				get { return _IDbCommand.UpdatedRowSource; }
-				set { _IDbCommand.UpdatedRowSource = value; }
-			}
-
-			public void Cancel()
-			{
-				_IDbCommand.Cancel();
-			}
-
-
-			public IDbDataParameter CreateParameter()
-			{
-				return new OracleParameterWrap(_innerCommand.CreateParameter());
-			}
-
-			public int ExecuteNonQuery()
-			{
-				return _IDbCommand.ExecuteNonQuery();
-			}
-
-
-			public IDataReader ExecuteReader(CommandBehavior behavior)
-			{
-				return _IDbCommand.ExecuteReader(behavior);
-			}
-
-
-			public IDataReader ExecuteReader()
-			{
-				return _IDbCommand.ExecuteReader();
-			}
-
-
-			public object ExecuteScalar()
-			{
-				return _IDbCommand.ExecuteScalar();
-			}
-
-
-			public void Prepare()
-			{
-				_IDbCommand.Prepare();
-			}
-
-			#endregion
-		}
-
-		internal class OracleConnectionWrap : IComponent, IDbConnection, ICloneable
-		{
-			protected OracleConnection _innerConnection;
-			protected IDbConnection _IDbConnection;
-
-			public OracleConnectionWrap() : this(new OracleConnection()) { }
-
-			public OracleConnectionWrap(OracleConnection oracleConnection)
-			{
-				_innerConnection = oracleConnection;
-				_IDbConnection = oracleConnection;
-			}
-
-			public OracleConnection InnerConnection
-			{
-				get { return _innerConnection; }
-			}
-
-			#region Object
-
-			public override int GetHashCode()
-			{
-				return _innerConnection.GetHashCode();
-			}
-
-			public override bool Equals(object obj)
-			{
-				if (obj is OracleConnectionWrap)
-				{
-					return _innerConnection.Equals((obj as OracleConnectionWrap)._innerConnection);
-				}
-
-				return _innerConnection.Equals(obj);
-			}
-
-
-			public override string ToString()
-			{
-				return _innerConnection.ToString();
-			}
-
-			#endregion
-
-			#region ICloneable
-
-			public object Clone()
-			{
-				return new OracleConnectionWrap((OracleConnection)_innerConnection.Clone());
-			}
-
-			#endregion
-
-			#region IComponent
-
-			public ISite Site
-			{
-				get { return _innerConnection.Site; }
-				set { _innerConnection.Site = value; }
-			}
-
-
-			public event EventHandler Disposed
-			{
-				add { _innerConnection.Disposed += value; }
-				remove { _innerConnection.Disposed -= value; }
-			}
-
-			#region IDisposable
-
-			public void Dispose()
-			{
-				_innerConnection.Dispose();
-			}
-
-			#endregion
-
-			#endregion
-
-			#region IDbConnection
-
-			public string ConnectionString
-			{
-				get { return _IDbConnection.ConnectionString; }
-				set { _IDbConnection.ConnectionString = value; }
-			}
-
-
-			public int ConnectionTimeout
-			{
-				get { return _IDbConnection.ConnectionTimeout; }
-			}
-
-
-			public string Database
-			{
-				get { return _IDbConnection.Database; }
-			}
-
-
-			public ConnectionState State
-			{
-				get { return _IDbConnection.State; }
-			}
-
-			public IDbCommand CreateCommand()
-			{
-				return new OracleCommandWrap(_innerConnection.CreateCommand());
-			}
-
-
-			public IDbTransaction BeginTransaction(IsolationLevel il)
-			{
-				return _IDbConnection.BeginTransaction(il);
-			}
-
-
-			public IDbTransaction BeginTransaction()
-			{
-				return _IDbConnection.BeginTransaction();
-			}
-
-
-			public void ChangeDatabase(string databaseName)
-			{
-				_IDbConnection.ChangeDatabase(databaseName);
-			}
-
-
-			public void Close()
-			{
-				_IDbConnection.Close();
-			}
-
-
-			public void Open()
-			{
-				_IDbConnection.Open();
-			}
-
-			#endregion
-		}
-
-		internal class OracleDataAdapterWrap : DbDataAdapter, IDbDataAdapter, ICloneable, IDisposable
-		{
-			private OracleDataAdapter _innerDataAdapter;
-
-			public OracleDataAdapterWrap() : this(new OracleDataAdapter()) { }
-
-			public OracleDataAdapterWrap(OracleDataAdapter oracleDataAdapter)
-			{
-				_innerDataAdapter = oracleDataAdapter;
-			}
-
-			public OracleDataAdapter InnerDataAdapter
-			{
-				get { return _innerDataAdapter; }
-			}
-
-			#region DbDataAdapter
-			public override int Fill(DataSet dataSet)
-			{
-				return _innerDataAdapter.Fill(dataSet);
-			}
-
-
-			protected override int Fill(DataSet dataSet, int startRecord, int maxRecords, string srcTable, IDbCommand command,
-				CommandBehavior behavior)
-			{
-				return _innerDataAdapter.Fill(dataSet, startRecord, maxRecords, srcTable);
-			}
-
-
-			protected override int Fill(DataTable[] dataTables, int startRecord, int maxRecords, IDbCommand command,
-				CommandBehavior behavior)
-			{
-				return _innerDataAdapter.Fill(dataTables[0]);
-			}
-			#endregion
-
-			#region ICloneable
-
-			object ICloneable.Clone()
-			{
-				return new OracleDataAdapterWrap((OracleDataAdapter)(_innerDataAdapter as ICloneable).Clone());
-			}
-			#endregion
-
-			#region IDisposable
-			void IDisposable.Dispose()
-			{
-				_innerDataAdapter.Dispose();
-				Dispose(true);
-				GC.SuppressFinalize(this);
-			}
-			#endregion
-
-			#region Object
-
-			public override int GetHashCode()
-			{
-				return _innerDataAdapter.GetHashCode();
-			}
-
-
-			public override bool Equals(object obj)
-			{
-				if (obj is OracleDataAdapterWrap)
-				{
-					return _innerDataAdapter.Equals((obj as OracleDataAdapterWrap)._innerDataAdapter);
-				}
-
-				return _innerDataAdapter.Equals(obj);
-			}
-
-
-			public override string ToString()
-			{
-				return _innerDataAdapter.ToString();
-			}
-			#endregion
-
-			#region IDbDataAdapter Members
-
-			public IDbDataAdapter _IDbDataAdapter
-			{
-				get { return _innerDataAdapter; }
-			}
-
-
-			IDbCommand IDbDataAdapter.DeleteCommand
-			{
-				get
-				{
-					IDbCommand cmd = _IDbDataAdapter.DeleteCommand;
-					return (cmd is OracleCommand) ? new OracleCommandWrap(cmd as OracleCommand) : cmd;
-				}
-				set { _IDbDataAdapter.DeleteCommand = (value is OracleCommandWrap) ? (value as OracleCommandWrap).InnerCommand : value; }
-			}
-
-			IDbCommand IDbDataAdapter.InsertCommand
-			{
-				get
-				{
-					IDbCommand cmd = _IDbDataAdapter.InsertCommand;
-					return (cmd is OracleCommand) ? new OracleCommandWrap(cmd as OracleCommand) : cmd;
-				}
-				set { _IDbDataAdapter.InsertCommand = (value is OracleCommandWrap) ? (value as OracleCommandWrap).InnerCommand : value; }
-			}
-
-			IDbCommand IDbDataAdapter.SelectCommand
-			{
-				get
-				{
-					IDbCommand cmd = _IDbDataAdapter.SelectCommand;
-					return (cmd is OracleCommand) ? new OracleCommandWrap(cmd as OracleCommand) : cmd;
-				}
-				set { _IDbDataAdapter.SelectCommand = (value is OracleCommandWrap) ? (value as OracleCommandWrap).InnerCommand : value; }
-			}
-
-			IDbCommand IDbDataAdapter.UpdateCommand
-			{
-				get
-				{
-					IDbCommand cmd = _IDbDataAdapter.SelectCommand;
-					return (cmd is OracleCommand) ? new OracleCommandWrap(cmd as OracleCommand) : cmd;
-				}
-				set { _IDbDataAdapter.UpdateCommand = (value is OracleCommandWrap) ? (value as OracleCommandWrap).InnerCommand : value; }
-			}
-
-			int IDataAdapter.Fill(DataSet dataSet)
-			{
-				return _IDbDataAdapter.Fill(dataSet);
-			}
-
-			DataTable[] IDataAdapter.FillSchema(DataSet dataSet, SchemaType schemaType)
-			{
-				return _IDbDataAdapter.FillSchema(dataSet, schemaType);
-			}
-
-			IDataParameter[] IDataAdapter.GetFillParameters()
-			{
-				IDataParameter[] array = _innerDataAdapter.GetFillParameters();
-
-				if (null != array)
-				{
-					for (int i = 0; i < array.Length; ++i)
-					{
-						array.SetValue(new OracleParameterWrap((OracleParameter)array.GetValue(i)), i);
-					}
-				}
-
-				return array;
-			}
-
-			MissingMappingAction IDataAdapter.MissingMappingAction
-			{
-				get { return _IDbDataAdapter.MissingMappingAction; }
-				set { _IDbDataAdapter.MissingMappingAction = value; }
-			}
-
-			MissingSchemaAction IDataAdapter.MissingSchemaAction
-			{
-				get { return _IDbDataAdapter.MissingSchemaAction; }
-				set { _IDbDataAdapter.MissingSchemaAction = value; }
-			}
-
-			ITableMappingCollection IDataAdapter.TableMappings
-			{
-				get { return _IDbDataAdapter.TableMappings; }
-			}
-
-			int IDataAdapter.Update(DataSet dataSet)
-			{
-				return _IDbDataAdapter.Update(dataSet);
-			}
-
-			#endregion
-		}
-
-		#endregion
 	}
 }
