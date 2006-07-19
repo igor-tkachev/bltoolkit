@@ -838,7 +838,27 @@ namespace BLToolkit.Mapping
 
 		public virtual object ConvertChangeType(object value, Type conversionType)
 		{
-			return ConvertChangeType(value, conversionType, false);
+			bool isNullable = false;
+#if FW2
+			if (conversionType.IsArray)
+			{
+				Type t = conversionType;
+
+				do
+				{
+					t = t.GetElementType();
+				}
+				while (t.IsArray);
+
+				isNullable = t.IsGenericType && t.GetGenericTypeDefinition() == typeof(Nullable<>);
+			}
+			else
+			{
+				isNullable = conversionType.IsGenericType &&
+					conversionType.GetGenericTypeDefinition() == typeof(Nullable<>);
+			}
+#endif
+			return ConvertChangeType(value, conversionType, isNullable);
 		}
 
 		public virtual object ConvertChangeType(object value, Type conversionType, bool isNullable)
@@ -882,7 +902,7 @@ namespace BLToolkit.Mapping
 							Array.Copy(srcArray, dstArray, arrayLength);
 						else
 							for (int i = 0; i < arrayLength; ++i)
-								dstArray.SetValue(ConvertChangeType(srcArray.GetValue(i), dstElementType), i);
+								dstArray.SetValue(ConvertChangeType(srcArray.GetValue(i), dstElementType, isNullable), i);
 					}
 					else
 					{
@@ -907,7 +927,7 @@ namespace BLToolkit.Mapping
 								index /= dimensions[j];
 							}
 
-							dstArray.SetValue(ConvertChangeType(srcArray.GetValue(indices), dstElementType), indices);
+							dstArray.SetValue(ConvertChangeType(srcArray.GetValue(indices), dstElementType, isNullable), indices);
 						}
 					}
 
