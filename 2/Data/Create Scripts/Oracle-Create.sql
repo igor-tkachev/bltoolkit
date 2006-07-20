@@ -285,6 +285,49 @@ WHERE
 END;
 /
 
+-- Patient_SelectAll
+
+CREATE OR REPLACE 
+FUNCTION Patient_SelectAll
+RETURN SYS_REFCURSOR IS
+	retCursor SYS_REFCURSOR;
+BEGIN
+OPEN retCursor FOR
+SELECT
+	Person.*, Patient.Diagnosis
+FROM
+	Patient, Person
+WHERE
+	Patient.PersonID = Person.PersonID;
+RETURN
+	retCursor;
+END;
+/
+
+
+-- Patient_SelectByName
+
+CREATE OR REPLACE 
+FUNCTION Patient_SelectByName
+	( pFirstName IN NVARCHAR2
+	, pLastName  IN NVARCHAR2
+	)
+RETURN SYS_REFCURSOR IS
+	retCursor SYS_REFCURSOR;
+BEGIN
+OPEN retCursor FOR
+SELECT
+	Person.*, Patient.Diagnosis
+FROM
+	Patient, Person
+WHERE
+	Patient.PersonID = Person.PersonID
+	AND FirstName = pFirstName AND LastName = pLastName;
+RETURN
+	retCursor;
+END;
+/
+
 -- BinaryData Table
 
 CREATE SEQUENCE BinaryDataSeq
@@ -404,4 +447,74 @@ BEGIN
 RETURN
 	12345;
 END;
+/
+
+-- Data Types test
+
+CREATE SEQUENCE DataTypeTestSeq
+/
+
+CREATE TABLE DataTypeTest
+(
+	DataTypeID      INTEGER      NOT NULL PRIMARY KEY,
+	Binary_         RAW(50)          NULL,
+	Boolean_        NUMBER(1,0)      NULL,
+	Byte_           NUMBER(3,0)      NULL,
+	Bytes_          BLOB             NULL,
+	Char_           NCHAR            NULL,
+	DateTime_       DATE             NULL,
+	Decimal_        NUMBER(19,5)     NULL,
+	Double_         DOUBLE PRECISION NULL,
+	Guid_           RAW(16)          NULL,
+	Int16_          NUMBER(5,0)      NULL,
+	Int32_          NUMBER(10,0)     NULL,
+	Int64_          NUMBER(20,0)     NULL,
+	Money_          NUMBER           NULL,
+	SByte_          NUMBER(3,0)      NULL,
+	Single_         FLOAT            NULL,
+	Stream_         BLOB             NULL,
+	String_         NVARCHAR2(50)    NULL,
+	UInt16_         NUMBER(5,0)      NULL,
+	UInt32_         NUMBER(10,0)     NULL,
+	UInt64_         NUMBER(20,0)     NULL,
+	Xml_            XMLTYPE          NULL
+)
+/
+
+-- Insert Trigger for DataTypeTest
+
+CREATE OR REPLACE TRIGGER DataTypeTest_Add
+BEFORE INSERT
+ON DataTypeTest
+FOR EACH ROW
+BEGIN
+SELECT
+	DataTypeTestSeq.NEXTVAL
+INTO
+	:NEW.DataTypeID
+FROM
+	dual;
+END;
+/
+
+INSERT INTO DataTypeTest
+	(Binary_,      Boolean_,    Byte_,     Bytes_,   Char_, DateTime_, Decimal_,
+	 Double_,         Guid_,   Int16_,     Int32_,  Int64_,    Money_,   SByte_,
+	 Single_,       Stream_,  String_,    UInt16_, UInt32_,   UInt64_,     Xml_)
+VALUES
+	(   NULL,          NULL,     NULL,       NULL,    NULL,      NULL,     NULL,
+	    NULL,          NULL,     NULL,       NULL,    NULL,      NULL,     NULL,
+	    NULL,          NULL,     NULL,       NULL,    NULL,      NULL,     NULL)
+/
+
+INSERT INTO DataTypeTest
+	(Binary_,      Boolean_,    Byte_,     Bytes_,   Char_, DateTime_, Decimal_,
+	 Double_,         Guid_,   Int16_,     Int32_,  Int64_,    Money_,   SByte_,
+	 Single_,       Stream_,  String_,    UInt16_, UInt32_,   UInt64_,
+	 Xml_)
+VALUES
+	(SYS_GUID(),          1,      255, SYS_GUID(),     'B',   SYSDATE, 12345.67,
+	   1234.567, SYS_GUID(),    32767,      32768, 1000000,   12.3456,      127,
+	   1234.123, SYS_GUID(), 'string',      32767,   32768, 200000000,
+	XMLTYPE('<root><element strattr="strvalue" intattr="12345"/></root>'))
 /

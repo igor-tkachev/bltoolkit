@@ -160,7 +160,7 @@ namespace BLToolkit.DataAccess
 			if (type == null)
 				return GetDefaultSpName(null, actionName);
 
-			string key       = type.Name + "$" + actionName;
+			string key       = type.FullName + "$" + actionName;
 			string sprocName = (string)_actionSproc[key];
 
 			if (sprocName == null)

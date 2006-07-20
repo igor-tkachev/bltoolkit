@@ -17,10 +17,17 @@ using BLToolkit.Validation;
 using BLToolkit.Reflection;
 using BLToolkit.TypeBuilder;
 
-using DataAccessTest;
-
 namespace DataAccess
 {
+	namespace Other
+	{
+		public abstract class Person : DataAccessorTest.Person
+		{
+			[MaxLength(256), Required]
+			public abstract string Diagnosis { get; set; }
+		}
+	}
+
 	[TestFixture]
 	public class DataAccessorTest
 	{
@@ -76,11 +83,12 @@ namespace DataAccess
 			[SprocName("Person_SelectAll")] public abstract DataSet       SelectAllDataSet();
 			[SprocName("Person_SelectAll")] public abstract PersonDataSet SelectAllTypedDataSet();
 			[SprocName("Person_SelectAll")] public abstract DataTable     SelectAllDataTable();
-		}
 
-		public abstract class PersonDataAccessor2 : DataAccessor
-		{
-			[SprocName("Person_SelectAll")] public abstract ArrayList SelectAllList();
+			[ActionName("SelectAll"), ObjectType(typeof(Person))]
+			public abstract ArrayList SameTypeName();
+
+			[ActionName("SelectByName")]
+			public abstract Person SameTypeName(string firstName, string lastName);
 		}
 
 		public abstract class PersonDataAccessor1 : PersonAccessor
@@ -101,6 +109,23 @@ namespace DataAccess
 					return ds;
 				}
 			}
+
+			[ActionName("SelectAll"), ObjectType(typeof(Other.Person))]
+			public abstract ArrayList SameTypeName1();
+
+			[ActionName("SelectByName")]
+			public abstract Other.Person SameTypeName1(string firstName, string lastName);
+
+			protected override string GetDefaultSpName(string typeName, string actionName)
+			{
+				return "Patient_" + actionName;
+			}
+		}
+
+		public abstract class PersonDataAccessor2 : DataAccessor
+		{
+			[SprocName("Person_SelectAll")]
+			public abstract ArrayList SelectAllList();
 		}
 
 		public class PersonList : ArrayList
@@ -276,6 +301,28 @@ namespace DataAccess
 			Assert.AreNotEqual(0, list.Count);
 		}
 
+		[Test]
+		public void Gen_SameTypeName()
+		{
+			Person e = _da.SameTypeName("Tester", "Testerson");
+			Assert.IsInstanceOfType(typeof(Person), e);
+			Assert.AreEqual(2, e.ID);
+
+			ArrayList list = _da.SameTypeName();
+			Assert.AreNotEqual(0, list.Count);
+			Assert.IsInstanceOfType(typeof(Person), list[0]);
+
+			PersonDataAccessor1 da1 = (PersonDataAccessor1)DataAccessor.CreateInstance(typeof(PersonDataAccessor1));
+
+			Other.Person e1 = da1.SameTypeName1("Tester", "Testerson");
+			Assert.IsInstanceOfType(typeof(Other.Person), e1);
+			Assert.IsNotEmpty(e1.Diagnosis);
+
+			list = da1.SameTypeName1();
+			Assert.AreNotEqual(0, list.Count);
+			Assert.IsInstanceOfType(typeof(Other.Person), list[0]);
+		}
+
 #if FW2
 		[Test]
 		public void Gen_SelectAllTypedDataTable()
@@ -293,3 +340,4 @@ namespace DataAccess
 #endif
 	}
 }
+

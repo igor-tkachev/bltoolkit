@@ -219,6 +219,51 @@ GO
 GRANT EXEC ON Person_Delete TO PUBLIC
 GO
 
+-- Patient_SelectAll
+
+IF EXISTS (SELECT * FROM sys.objects WHERE type = 'P' AND name = 'Patient_SelectAll')
+BEGIN DROP Procedure Patient_SelectAll END
+GO
+
+CREATE Procedure Patient_SelectAll
+AS
+
+SELECT
+	Person.*, Patient.Diagnosis
+FROM
+	Patient, Person
+WHERE
+	Patient.PersonID = Person.PersonID
+
+GO
+
+GRANT EXEC ON Patient_SelectAll TO PUBLIC
+GO
+
+-- Patient_SelectByName
+
+IF EXISTS (SELECT * FROM sys.objects WHERE type = 'P' AND name = 'Patient_SelectByName')
+BEGIN DROP Procedure Patient_SelectByName END
+GO
+
+CREATE Procedure Patient_SelectByName
+	@firstName nvarchar(50),
+	@lastName  nvarchar(50)
+AS
+
+SELECT
+	Person.*, Patient.Diagnosis
+FROM
+	Patient, Person
+WHERE
+	Patient.PersonID = Person.PersonID
+	AND FirstName = @firstName AND LastName = @lastName
+
+GO
+
+GRANT EXEC ON Person_SelectByName TO PUBLIC
+GO
+
 -- BinaryData Table
 
 IF EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID('BinaryData') AND type in (N'U'))
