@@ -8,10 +8,13 @@ namespace BLToolkit.Mapping
 {
 	public class ScalarDataReaderMapper : DataReaderMapper
 	{
-		public ScalarDataReaderMapper(MappingSchema mappingSchema, IDataReader dataReader, NameOrIndexParameter nip)
+		public ScalarDataReaderMapper(
+			MappingSchema        mappingSchema,
+			IDataReader          dataReader,
+			NameOrIndexParameter nameOrIndex)
 			: base(mappingSchema, dataReader)
 		{
-			_index = nip.ByName? dataReader.GetOrdinal(nip.Name): nip.Index;
+			_index = nameOrIndex.ByName? dataReader.GetOrdinal(nameOrIndex.Name): nameOrIndex.Index;
 		}
 
 		private int _index;

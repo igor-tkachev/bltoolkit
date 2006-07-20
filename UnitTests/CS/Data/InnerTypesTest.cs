@@ -49,6 +49,7 @@ namespace A.Data
 		{
 			[MapField("PersonID")]
 			public          int    ID;
+			[MapIgnore]
 			public          First  First;
 			[MapIgnore(false)]
 			public          Middle Middle = new Middle();
@@ -59,7 +60,7 @@ namespace A.Data
 			public          Type   Type;
 		}
 
-		[Test]
+		//[Test]
 		public void CreateParametersTest()
 		{
 			using (DbManager db = new DbManager())

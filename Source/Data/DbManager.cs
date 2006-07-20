@@ -2449,13 +2449,13 @@ namespace BLToolkit.Data
 		/// </remarks>
 		/// <include file="Examples1.xml" path='examples/db[@name="Execute(CommandType,string,DataSet,string)"]/*' />
 		/// <param name="dataSet">An instance of the <see cref="DataSet"/> class to execute the command.</param>
-		/// <param name="nip">The table name or index.
+		/// <param name="nameOrIndex">The table name or index.
 		/// name/index.</param>
 		/// <returns>The number of rows affected by the command.</returns>
-		public int ExecuteForEach(DataSet dataSet, NameOrIndexParameter nip)
+		public int ExecuteForEach(DataSet dataSet, NameOrIndexParameter nameOrIndex)
 		{
-			return nip.ByName ? ExecuteForEach(dataSet.Tables[nip.Name])
-				: ExecuteForEach(dataSet.Tables[nip.Index]);
+			return nameOrIndex.ByName ? ExecuteForEach(dataSet.Tables[nameOrIndex.Name])
+				: ExecuteForEach(dataSet.Tables[nameOrIndex.Index]);
 		}
 
 		#endregion
@@ -2549,10 +2549,8 @@ namespace BLToolkit.Data
 		/// Executes the query, and returns the value with specified scalar
 		/// source type.
 		/// </summary>
-		/// <param name="sourceType">The method used to return the scalar
-		/// value.</param>
-		/// <param name="nip">The column name/index or output parameter
-		/// name/index.</param>
+		/// <param name="sourceType">The method used to return the scalar value.</param>
+		/// <param name="nameOrIndex">The column name/index or output parameter name/index.</param>
 		/// <returns><list type="table">
 		/// <listheader>
 		///  <term>ScalarSourceType</term>
@@ -2580,7 +2578,7 @@ namespace BLToolkit.Data
 		/// </item>
 		/// </list>
 		/// </returns>
-		public object ExecuteScalar(ScalarSourceType sourceType, NameOrIndexParameter nip)
+		public object ExecuteScalar(ScalarSourceType sourceType, NameOrIndexParameter nameOrIndex)
 		{
 			if (!Enum.IsDefined(typeof(ScalarSourceType), sourceType))
 				throw new InvalidEnumArgumentException("sourceType",
@@ -2594,16 +2592,16 @@ namespace BLToolkit.Data
 				case ScalarSourceType.DataReader:
 					using (IDataReader reader = ExecuteReaderInternal())
 						if (reader.Read())
-							return reader.GetValue(nip.ByName ? reader.GetOrdinal(nip.Name) : nip.Index);
+							return reader.GetValue(nameOrIndex.ByName ? reader.GetOrdinal(nameOrIndex.Name) : nameOrIndex.Index);
 
 					break;
 
 				case ScalarSourceType.OutputParameter:
 					ExecuteNonQueryInternal();
 
-					if (nip.ByName)
+					if (nameOrIndex.ByName)
 					{
-						string name = (string)_dataProvider.Convert(nip.Name,
+						string name = (string)_dataProvider.Convert(nameOrIndex.Name,
 							ConvertType.NameToParameter);
 						
 						return _dataProvider.Convert(Parameter(name).Value,
@@ -2611,7 +2609,7 @@ namespace BLToolkit.Data
 					}
 					else
 					{
-						int index = nip.Index;
+						int index = nameOrIndex.Index;
 						foreach (IDataParameter p in SelectCommand.Parameters)
 						{
 							if (p.Direction == ParameterDirection.Output ||
@@ -2708,10 +2706,8 @@ namespace BLToolkit.Data
 		/// Executes the query, and returns the value with specified scalar
 		/// source type.
 		/// </summary>
-		/// <param name="sourceType">The method used to return the scalar
-		/// value.</param>
-		/// <param name="nip">The column name/index or output parameter
-		/// name/index.</param>
+		/// <param name="sourceType">The method used to return the scalar value.</param>
+		/// <param name="nip">The column name/index or output parameter name/index.</param>
 		/// <returns><list type="table">
 		/// <listheader>
 		///  <term>ScalarSourceType</term>
@@ -2739,10 +2735,9 @@ namespace BLToolkit.Data
 		/// </item>
 		/// </list>
 		/// </returns>
-		public T ExecuteScalar<T>(
-			ScalarSourceType sourceType, NameOrIndexParameter nip)
+		public T ExecuteScalar<T>(ScalarSourceType sourceType, NameOrIndexParameter nameOrIndex)
 		{
-			return (T)ExecuteScalar(sourceType, nip);
+			return (T)ExecuteScalar(sourceType, nameOrIndex);
 		}
 		
 #endif
@@ -2757,22 +2752,21 @@ namespace BLToolkit.Data
 		/// query. Extra columns are ignored.
 		/// </summary>
 		/// <param name="list">The array to fill in.</param>
-		/// <param name="nip">The column name/index or output parameter
-		/// name/index.</param>
+		/// <param name="nip">The column name/index or output parameter name/index.</param>
 		/// <param name="type">The type of the each element.</param>
 		/// <returns>Array list of values of the specified column of the every
 		/// row in the resultset.</returns>
 		public IList ExecuteScalarList(
 			IList                list,
 			Type                 type,
-			NameOrIndexParameter nip)
+			NameOrIndexParameter nameOrIndex)
 		{
 			if (_prepared)
 				InitParameters(CommandAction.Select);
 
 			using (IDataReader dr = ExecuteReaderInternal())
 			{
-				return _mappingSchema.MapDataReaderToScalarList(dr, nip, list, type);
+				return _mappingSchema.MapDataReaderToScalarList(dr, nameOrIndex, list, type);
 			}
 		}
 
@@ -2799,11 +2793,11 @@ namespace BLToolkit.Data
 		/// <param name="type">The type of the each element.</param>
 		/// <returns>Array list of values of the specified column of the every
 		/// row in the resultset.</returns>
-		public ArrayList ExecuteScalarList(Type type, NameOrIndexParameter nip)
+		public ArrayList ExecuteScalarList(Type type, NameOrIndexParameter nameOrIndex)
 		{
 			ArrayList list = new ArrayList();
 
-			ExecuteScalarList(list, type, nip);
+			ExecuteScalarList(list, type, nameOrIndex);
 
 			return list;
 		}
@@ -2840,14 +2834,14 @@ namespace BLToolkit.Data
 		/// row in the resultset.</returns>
 		public IList<T> ExecuteScalarList<T>(
 			IList<T>             list,
-			NameOrIndexParameter nip)
+			NameOrIndexParameter nameOrIndex)
 		{
 			if (_prepared)
 				InitParameters(CommandAction.Select);
 
 			using (IDataReader dr = ExecuteReaderInternal())
 			{
-				return _mappingSchema.MapDataReaderToScalarList<T>(dr, nip, list);
+				return _mappingSchema.MapDataReaderToScalarList<T>(dr, nameOrIndex, list);
 			}
 		}
 
@@ -2870,16 +2864,15 @@ namespace BLToolkit.Data
 		/// specified column of the every row in the resultset returned by the
 		/// query. Extra columns are ignored.
 		/// </summary>
-		/// <param name="nip">The column name/index or output parameter
-		/// name/index.</param>
+		/// <param name="nameOrIndex">The column name/index or output parameter name/index.</param>
 		/// <typeparam name="T">The type of the each element.</typeparam>
 		/// <returns>Array list of values of the specified column of the every
 		/// row in the resultset.</returns>
-		public List<T> ExecuteScalarList<T>(NameOrIndexParameter nip)
+		public List<T> ExecuteScalarList<T>(NameOrIndexParameter nameOrIndex)
 		{
 			List<T> list = new List<T>();
 
-			ExecuteScalarList<T>(list, nip);
+			ExecuteScalarList<T>(list, nameOrIndex);
 
 			return list;
 		}

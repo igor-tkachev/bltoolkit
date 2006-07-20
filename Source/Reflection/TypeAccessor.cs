@@ -151,12 +151,12 @@ namespace BLToolkit.Reflection
 			get { return (MemberAccessor)_members[index]; }
 		}
 
-		public MemberAccessor this[NameOrIndexParameter nip]
+		public MemberAccessor this[NameOrIndexParameter nameOrIndex]
 		{
 			get
 			{
 				return (MemberAccessor)
-					(nip.ByName ? _memberNames[nip.Name] : _members[nip.Index]);
+					(nameOrIndex.ByName ? _memberNames[nameOrIndex.Name] : _members[nameOrIndex.Index]);
 			}
 		}
 		

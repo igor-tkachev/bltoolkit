@@ -100,10 +100,10 @@ namespace BLToolkit.Common
 						delegate(int index) { return new NameOrIndexParameter(index); });
 #else
 			NameOrIndexParameter[] nips =  new NameOrIndexParameter[indices.Length];
+
 			for (int i = 0; i < nips.Length; ++i)
-			{
 				nips[i] = new NameOrIndexParameter(indices[i]);
-			}
+
 			return nips;
 #endif
 		}
@@ -117,6 +117,7 @@ namespace BLToolkit.Common
 			if (obj is NameOrIndexParameter)
 			{
 				NameOrIndexParameter nip = (NameOrIndexParameter)obj;
+
 				if (null != _name && null != nip._name && _name == nip._name)
 					return true; // Same name
 				
