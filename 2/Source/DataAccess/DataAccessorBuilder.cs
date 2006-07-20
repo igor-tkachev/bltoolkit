@@ -304,16 +304,16 @@ namespace BLToolkit.DataAccess
 #endif
 		}
 
-		private void SetNameOrIndexParameter(NameOrIndexParameter nip)
+		private void SetNameOrIndexParameter(NameOrIndexParameter nameOrIndex)
 		{
-			if (nip.ByName)
+			if (nameOrIndex.ByName)
 			{
-				Context.MethodBuilder.Emitter.ldstr(nip.Name)
+				Context.MethodBuilder.Emitter.ldstr(nameOrIndex.Name)
 					.call(typeof(NameOrIndexParameter), "op_Implicit", typeof(string));
 			}
 			else
 			{
-				Context.MethodBuilder.Emitter.ldc_i4(nip.Index)
+				Context.MethodBuilder.Emitter.ldc_i4(nameOrIndex.Index)
 					.call(typeof(NameOrIndexParameter), "op_Implicit", typeof(int));
 			}
 		}
@@ -466,23 +466,23 @@ namespace BLToolkit.DataAccess
 
 		#region ExecuteDictionary
 
-		public FieldBuilder GetIndexField(NameOrIndexParameter[] index)
+		public FieldBuilder GetIndexField(NameOrIndexParameter[] namesOrIndexes)
 		{
 #if FW2
 			string id = "index$" + string.Join("%",
-				Array.ConvertAll<NameOrIndexParameter, string>(index,
-					delegate(NameOrIndexParameter nip)
+				Array.ConvertAll<NameOrIndexParameter, string>(namesOrIndexes,
+					delegate(NameOrIndexParameter nameOrIndex)
 					{
-						return nip.ToString();
+						return nameOrIndex.ToString();
 					}));
 #else
 			System.Text.StringBuilder sb = new System.Text.StringBuilder();
 			sb.Append("index$");
 
-			for (int i = 0; i < index.Length; ++i)
+			for (int i = 0; i < namesOrIndexes.Length; ++i)
 			{
 				sb.Append('%');
-				sb.Append(index[i]);
+				sb.Append(namesOrIndexes[i]);
 			}
 
 			string id = sb.ToString();
@@ -498,26 +498,26 @@ namespace BLToolkit.DataAccess
 				LocalBuilder arr  = emit.DeclareLocal(typeof(NameOrIndexParameter[]));
 
 				emit
-					.ldc_i4_ (index.Length)
+					.ldc_i4_ (namesOrIndexes.Length)
 					.newarr  (typeof(NameOrIndexParameter))
 					.stloc   (arr)
 					;
 
-				for (int i = 0; i < index.Length; i++)
+				for (int i = 0; i < namesOrIndexes.Length; i++)
 				{
 					emit
 						.ldloc(arr)
 						.ldc_i4(i)
 						.ldelema(typeof(NameOrIndexParameter));
 
-					if (index[i].ByName)
+					if (namesOrIndexes[i].ByName)
 					{
-						emit.ldstr(index[i].Name)
+						emit.ldstr(namesOrIndexes[i].Name)
 							.call(typeof(NameOrIndexParameter), "op_Implicit", typeof(string));
 					}
 					else
 					{
-						emit.ldc_i4(index[i].Index)
+						emit.ldc_i4(namesOrIndexes[i].Index)
 							.call(typeof(NameOrIndexParameter), "op_Implicit", typeof(int));
 					}
 					emit

@@ -760,7 +760,7 @@ namespace BLToolkit.Mapping
 #if FW2
 					Convert<SqlMoney, object>.From(value);
 #else
-					new SqlMoney(ConvertToMoney(value));
+					new SqlMoney(ConvertToDecimal(value));
 #endif
 		}
 
@@ -1030,14 +1030,18 @@ namespace BLToolkit.Mapping
 			return new DataReaderListMapper(CreateDataReaderMapper(reader));
 		}
 
-		protected virtual DataReaderMapper CreateDataReaderMapper(IDataReader dataReader, NameOrIndexParameter nip)
+		protected virtual DataReaderMapper CreateDataReaderMapper(
+			IDataReader          dataReader,
+			NameOrIndexParameter nameOrIndex)
 		{
-			return new ScalarDataReaderMapper(this, dataReader, nip);
+			return new ScalarDataReaderMapper(this, dataReader, nameOrIndex);
 		}
 
-		protected virtual DataReaderListMapper CreateDataReaderListMapper(IDataReader reader, NameOrIndexParameter nip)
+		protected virtual DataReaderListMapper CreateDataReaderListMapper(
+			IDataReader          reader,
+			NameOrIndexParameter nameOrIndex)
 		{
-			return new DataReaderListMapper(CreateDataReaderMapper(reader, nip));
+			return new DataReaderListMapper(CreateDataReaderMapper(reader, nameOrIndex));
 		}
 
 		protected virtual DataRowMapper CreateDataRowMapper(DataRow row, DataRowVersion version)
@@ -2909,12 +2913,12 @@ namespace BLToolkit.Mapping
 
 		public IList MapDataReaderToScalarList(
 			IDataReader          reader,
-			NameOrIndexParameter nip,
+			NameOrIndexParameter nameOrIndex,
 			IList                list,
 			Type                 type)
 		{
 			MapSourceListToDestinationList(
-				CreateDataReaderListMapper(reader, nip),
+				CreateDataReaderListMapper(reader, nameOrIndex),
 				CreateScalarListListMapper(list,   type),
 				null);
 
@@ -2923,13 +2927,13 @@ namespace BLToolkit.Mapping
 
 		public ArrayList MapDataReaderToScalarList(
 			IDataReader          reader,
-			NameOrIndexParameter nip,
+			NameOrIndexParameter nameOrIndex,
 			Type                 type)
 		{
 			ArrayList list = new ArrayList();
 
 			MapSourceListToDestinationList(
-				CreateDataReaderListMapper(reader, nip),
+				CreateDataReaderListMapper(reader, nameOrIndex),
 				CreateScalarListListMapper(list,   type),
 				null);
 
@@ -2939,11 +2943,11 @@ namespace BLToolkit.Mapping
 #if FW2
 		public IList<T> MapDataReaderToScalarList<T>(
 			IDataReader          reader,
-			NameOrIndexParameter nip,
+			NameOrIndexParameter nameOrIndex,
 			IList<T>             list)
 		{
 			MapSourceListToDestinationList(
-				CreateDataReaderListMapper(reader, nip),
+				CreateDataReaderListMapper(reader, nameOrIndex),
 				CreateScalarListListMapper(list),
 				null);
 
@@ -2952,12 +2956,12 @@ namespace BLToolkit.Mapping
 
 		public List<T> MapDataReaderToScalarList<T>(
 			IDataReader          reader,
-			NameOrIndexParameter nip)
+			NameOrIndexParameter nameOrIndex)
 		{
 			List<T> list = new List<T>();
 
 			MapSourceListToDestinationList(
-				CreateDataReaderListMapper(reader, nip),
+				CreateDataReaderListMapper(reader, nameOrIndex),
 				CreateScalarListListMapper(list),
 				null);
 

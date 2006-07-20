@@ -54,9 +54,9 @@ namespace BLToolkit.Mapping
 				{
 #if FW2
 					_id = string.Join(".", Array.ConvertAll<NameOrIndexParameter, string>(_fields,
-						delegate(NameOrIndexParameter nip)
+						delegate(NameOrIndexParameter nameOrIndex)
 						{
-							return nip.ToString();
+							return nameOrIndex.ToString();
 						}));
 #else
 					System.Text.StringBuilder sb = new System.Text.StringBuilder();

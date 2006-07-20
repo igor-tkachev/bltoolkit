@@ -8,7 +8,7 @@ using BLToolkit.Reflection.Emit;
 using BLToolkit.TypeBuilder;
 using BLToolkit.TypeBuilder.Builders;
 
-namespace TypeBuilder.Builders
+namespace A.TypeBuilder.Builders
 {
 	[TestFixture]
 	public class TypeAccessorBuilderTest
@@ -134,6 +134,30 @@ namespace TypeBuilder.Builders
 			ic.Parameters = new object[] { 30 };
 			o = (TestObject4)TypeAccessor.CreateInstance(typeof(TestObject4), ic);
 			Assert.AreEqual(30, o.Value);
+		}
+
+		public struct TestStruct1
+		{
+			public string Name;
+		}
+
+		public class TestObject5
+		{
+			public TestStruct1 Value;
+		}
+
+		//[Test]
+		public void Test5()
+		{
+			TypeAccessor ta1 = TypeAccessor.GetAccessor(typeof(TestObject5));
+			TypeAccessor ta2 = TypeAccessor.GetAccessor(typeof(TestStruct1));
+
+			TestObject5 o = (TestObject5)ta1.CreateInstance();
+			TestStruct1 s = (TestStruct1)ta1["Value"].GetValue(o);
+
+			ta2["Name"].SetValue(s, "123");
+
+			Assert.AreEqual(o.Value.Name, "123");
 		}
 	}
 }

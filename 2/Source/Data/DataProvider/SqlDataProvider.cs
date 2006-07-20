@@ -134,6 +134,7 @@ namespace BLToolkit.Data.DataProvider
 			get { return "Sql"; }
 		}
 
+		/*
 		public class SqlMappingSchema : MappingSchema
 		{
 			protected override DataReaderMapper CreateDataReaderMapper(IDataReader dataReader)
@@ -262,5 +263,6 @@ namespace BLToolkit.Data.DataProvider
 			public override SqlSingle   GetSqlSingle  (object o, int index) { return _dataReader.GetSqlSingle  (Index); }
 			public override SqlString   GetSqlString  (object o, int index) { return _dataReader.GetSqlString  (Index); }
 		}
+		*/
 	}
 }
