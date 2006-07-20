@@ -146,18 +146,23 @@ namespace A.TypeBuilder.Builders
 			public TestStruct1 Value;
 		}
 
-		//[Test]
+#if FW2
+		[Test]
 		public void Test5()
 		{
 			TypeAccessor ta1 = TypeAccessor.GetAccessor(typeof(TestObject5));
 			TypeAccessor ta2 = TypeAccessor.GetAccessor(typeof(TestStruct1));
 
 			TestObject5 o = (TestObject5)ta1.CreateInstance();
-			TestStruct1 s = (TestStruct1)ta1["Value"].GetValue(o);
+			TestStruct1 s;
 
-			ta2["Name"].SetValue(s, "123");
+			ta1["Value"].GetValueT(ref o, out s);
+			ta2["Name" ].SetValueT(ref s, "123");
+			ta1["Value"].SetValue(o, s);
 
-			Assert.AreEqual(o.Value.Name, "123");
+			Assert.AreEqual("123", o.Value.Name);
 		}
+#endif
+
 	}
 }

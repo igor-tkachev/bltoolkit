@@ -51,6 +51,17 @@ namespace BLToolkit.Reflection
 		{
 		}
 
+#if FW2
+		public virtual void GetValueT<T,V>(ref T o, out V value)
+		{
+			value = default(V);
+		}
+
+		public virtual void SetValueT<T,V>(ref T o, V value)
+		{
+		}
+#endif
+
 		// Simple types getters.
 		//
 		[CLSCompliant(false)]

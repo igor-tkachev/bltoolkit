@@ -1,4 +1,7 @@
 using System;
+#if FW2
+using System.Collections.Generic;
+#endif
 using System.Reflection;
 using System.Reflection.Emit;
 
@@ -109,6 +112,22 @@ namespace BLToolkit.Reflection.Emit
 			return new MethodBuilderHelper(this, _typeBuilder.DefineMethod(name, attributes, typeof(void), Type.EmptyTypes));
 		}
 
+#if FW2
+		/// <summary>
+		/// Adds a new method to the class, with the given name and method signature.
+		/// </summary>
+		/// <param name="name">The name of the method. name cannot contain embedded nulls. </param>
+		/// <param name="attributes">The attributes of the method. </param>
+		/// <returns>The defined method.</returns>
+		public MethodBuilderHelper DefineMethod(
+			string             name,
+			MethodAttributes   attributes,
+			CallingConventions callingConvention)
+		{
+			return new MethodBuilderHelper(this, _typeBuilder.DefineMethod(name, attributes, callingConvention));
+		}
+#endif
+
 		/// <summary>
 		/// Adds a new method to the class, with the given name and method signature.
 		/// </summary>
@@ -122,8 +141,44 @@ namespace BLToolkit.Reflection.Emit
 			if (methodInfoDeclaration == null) throw new ArgumentNullException("methodInfoDeclaration");
 
 			ParameterInfo[] pi = methodInfoDeclaration.GetParameters();
-			Type[]  parameters = new Type[pi.Length];
+			Type[] parameters = new Type[pi.Length];
 
+#if FW2
+			List<string> genericParameterNames = new List<string>();
+
+			MethodBuilderHelper method = DefineMethod(
+				name,
+				attributes, 
+				methodInfoDeclaration.CallingConvention);
+
+			for (int i = 0; i < pi.Length; i++)
+			{
+				if (pi[i].ParameterType.ContainsGenericParameters)
+					genericParameterNames.Add(pi[i].Name);
+				else
+					parameters[i] = pi[i].ParameterType;
+			}
+
+			if (genericParameterNames.Count > 0)
+			{
+				GenericTypeParameterBuilder[] typeParameters =
+					method.MethodBuilder.DefineGenericParameters(genericParameterNames.ToArray());
+
+				for (int i = 0, j = 0; i < pi.Length; i++)
+				{
+					if (parameters[i] == null)
+					{
+						parameters[i] = typeParameters[j++];
+
+						if (pi[i].ParameterType.IsByRef)
+							parameters[i] = parameters[i].MakeByRefType();
+					}
+				}
+			}
+
+			method.MethodBuilder.SetReturnType(methodInfoDeclaration.ReturnType);
+			method.MethodBuilder.SetParameters(parameters);
+#else
 			for (int i = 0; i < pi.Length; i++)
 				parameters[i] = pi[i].ParameterType;
 
@@ -133,6 +188,8 @@ namespace BLToolkit.Reflection.Emit
 				methodInfoDeclaration.CallingConvention,
 				methodInfoDeclaration.ReturnType,
 				parameters);
+
+#endif
 
 			// Compiler overrides methods only for interfaces. We do the same.
 			// If we wanted to override virtual methods, then methods should've had 
