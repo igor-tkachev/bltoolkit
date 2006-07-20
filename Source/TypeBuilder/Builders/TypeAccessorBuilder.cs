@@ -173,6 +173,9 @@ namespace BLToolkit.TypeBuilder.Builders
 			string typedPropertyName = type.Name;
 
 #if FW2
+			BuildGetterT     (mi, nestedType);
+			BuildSetterT     (mi, nestedType);
+
 			if (type.IsGenericType)
 			{
 				Type underlyingType = Nullable.GetUnderlyingType(type);
@@ -414,6 +417,99 @@ namespace BLToolkit.TypeBuilder.Builders
 				.end();
 
 			if (mi is FieldInfo) emit.stfld   ((FieldInfo)mi);
+			else                 emit.callvirt(setMethod);
+
+			emit
+				.ret()
+				;
+		}
+
+		private void BuildGetterT(MemberInfo mi, TypeBuilderHelper nestedType)
+		{
+			MethodBuilderHelper method = nestedType.DefineMethod(
+				_memberAccessor.GetMethod("GetValueT"));
+
+			EmitHelper emit = method.Emitter;
+
+			emit
+				.ldarg_2
+				.ldarg_1
+				.ldind_ref
+				.end();
+
+			if (mi is FieldInfo)
+			{
+				FieldInfo fi = (FieldInfo)mi;
+				emit
+					
+					.ldfld(fi)
+					.stobj(fi.FieldType)
+					.ret()
+					;
+
+//				emit
+//					.ldfld(fi)
+//					.stind(fi.FieldType)
+//					.ret()
+//					;
+			}
+			else
+			{
+				PropertyInfo pi = (PropertyInfo)mi;
+				MethodInfo getMethod = (pi).GetGetMethod();
+
+				if (getMethod == null)
+				{
+					if (_type != _originalType)
+						getMethod = _type.GetMethod("get_" + mi.Name);
+
+					if (getMethod == null)
+						return;
+				}
+
+				emit
+					.callvirt(getMethod)
+					.stobj(pi.PropertyType)
+					.ret()
+					;
+
+//				emit
+//					.callvirt(getMethod)
+//					.stind(pi.PropertyType)
+//					.ret()
+//					;
+			}
+		}
+
+		private void BuildSetterT(MemberInfo mi, TypeBuilderHelper nestedType)
+		{
+			MethodInfo setMethod = null;
+
+			if (mi is PropertyInfo)
+			{
+				setMethod = ((PropertyInfo)mi).GetSetMethod();
+
+				if (setMethod == null)
+				{
+					if (_type != _originalType)
+						setMethod = _type.GetMethod("set_" + mi.Name);
+
+					if (setMethod == null)
+						return;
+				}
+			}
+
+			MethodBuilderHelper method = nestedType.DefineMethod(
+				_memberAccessor.GetMethod("SetValueT"));
+
+			EmitHelper emit = method.Emitter;
+
+			emit
+				.ldarg_1
+				.ldarg_2
+				.end();
+
+			if (mi is FieldInfo) emit.stfld((FieldInfo)mi);
 			else                 emit.callvirt(setMethod);
 
 			emit

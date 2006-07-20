@@ -24,7 +24,8 @@ namespace BLToolkit.Reflection.Emit
 			if (methodBuilder == null) throw new ArgumentNullException("methodBuilder");
 
 			_methodBuilder = methodBuilder;
-			_methodBuilder.SetCustomAttribute(Type.Assembly.BLToolkitAttribute);
+
+			//_methodBuilder.SetCustomAttribute(Type.Assembly.BLToolkitAttribute);
 		}
 
 		private MethodBuilder _methodBuilder;
