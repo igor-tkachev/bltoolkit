@@ -19,6 +19,18 @@ namespace BLToolkit.Reflection.Emit
 		/// Initializes a new instance of the <see cref="EmitHelper"/> class
 		/// with the specified <see cref="System.Reflection.Emit.ILGenerator"/>.
 		/// </summary>
+		/// <param name="ilGenerator">The <see cref="System.Reflection.Emit.ILGenerator"/> to use.</param>
+		public EmitHelper(ILGenerator ilGenerator)
+		{
+			if (ilGenerator == null) throw new ArgumentNullException("ilGenerator");
+
+			_ilGenerator = ilGenerator;
+		}
+
+		/// <summary>
+		/// Initializes a new instance of the <see cref="EmitHelper"/> class
+		/// with the specified <see cref="System.Reflection.Emit.ILGenerator"/>.
+		/// </summary>
 		/// <param name="methodBuilder">Associated <see cref="MethodBuilderBase"/>.</param>
 		/// <param name="ilGenerator">The <see cref="System.Reflection.Emit.ILGenerator"/> to use.</param>
 		public EmitHelper(MethodBuilderBase methodBuilder, ILGenerator ilGenerator)
