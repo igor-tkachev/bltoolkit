@@ -595,11 +595,11 @@
 					</xsl:otherwise>
 				</xsl:choose>
 			</xsl:with-param>
-			<xsl:with-param name="fromtype" select="$fromtype"/>
+			<xsl:with-param name="fromtype"     select="$fromtype"/>
 			<xsl:with-param name="fromnullable" select="@nullable='true' or $fromnullable"/>
-			<xsl:with-param name="totype"   select="$totype"/>
-			<xsl:with-param name="tonick"   select="$tonick"/>
-			<xsl:with-param name="tonullable" select="$tonullable"/>
+			<xsl:with-param name="totype"       select="$totype"/>
+			<xsl:with-param name="tonick"       select="$tonick"/>
+			<xsl:with-param name="tonullable"   select="$tonullable"/>
 			<xsl:with-param name="code">
 				<xsl:choose>
 					<xsl:when test="text()">
@@ -694,11 +694,11 @@
 					</xsl:otherwise>
 				</xsl:choose>
 			</xsl:with-param>
-			<xsl:with-param name="fromtype" select="$fromtype"/>
+			<xsl:with-param name="fromtype"     select="$fromtype"/>
 			<xsl:with-param name="fromnullable" select="@nullable='true' or $fromnullable"/>
-			<xsl:with-param name="totype"   select="$totype"/>
-			<xsl:with-param name="tonick"   select="$tonick"/>
-			<xsl:with-param name="tonullable" select="$tonullable"/>
+			<xsl:with-param name="totype"       select="$totype"/>
+			<xsl:with-param name="tonick"       select="$tonick"/>
+			<xsl:with-param name="tonullable"   select="$tonullable"/>
 		</xsl:call-template>
 	</xsl:template>
 
@@ -807,10 +807,10 @@
 		</xsl:if>
 		<xsl:value-of select="$lf"/>
 		<xsl:apply-templates select="group|from|br" mode ="runtime">
-			<xsl:with-param name="totype" select="$totype"/>
-			<xsl:with-param name="tonullable" select="$tonullable"/>
+			<xsl:with-param name="totype"       select="$totype"/>
+			<xsl:with-param name="tonullable"   select="$tonullable"/>
 			<xsl:with-param name="fromnullable" select="@nullable='true' or $fromnullable"/>
-			<xsl:with-param name="default" select="$defaultcode"/>
+			<xsl:with-param name="default"      select="$defaultcode"/>
 		</xsl:apply-templates>
 	</xsl:template>
 
@@ -827,7 +827,7 @@
 		</xsl:if>
 		<xsl:if test="not(@noruntime) and @nullvalue">
 			<xsl:apply-templates select="../from|../group|../br" mode="runtime">
-				<xsl:with-param name="totype" select="../@type"/>
+				<xsl:with-param name="totype"     select="../@type"/>
 				<xsl:with-param name="tonullable" select="$tonullable"/>
 			</xsl:apply-templates>
 		</xsl:if>

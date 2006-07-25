@@ -6,6 +6,7 @@ using System.Data.SqlTypes;
 using System.Collections;
 using System.Reflection.Emit;
 using System.Xml;
+
 using BLToolkit.Common;
 using BLToolkit.TypeBuilder.Builders;
 using BLToolkit.Data;
@@ -1241,12 +1242,12 @@ namespace BLToolkit.DataAccess
 							emit
 								.ldloc            (_locManager)
 								.callvirt         (typeof(DbManager).GetProperty("MappingSchema").GetGetMethod())
-									.ldloc        (_locManager)
-									.callvirt     (typeof(DbManager).GetProperty("DataProvider").GetGetMethod())
+							//		.ldloc        (_locManager)
+							//		.callvirt     (typeof(DbManager).GetProperty("DataProvider").GetGetMethod())
 										.ldloc    (param)
 										.callvirt (typeof(IDataParameter).GetProperty("Value").GetGetMethod())
-									.ldc_i4       ((int)ConvertType.OutputParameter)
-									.callvirt     (typeof(DataProviderBase), "Convert", typeof(object), typeof(ConvertType))
+							//		.ldc_i4       ((int)ConvertType.OutputParameter)
+							//		.callvirt     (typeof(DataProviderBase), "Convert", typeof(object), typeof(ConvertType))
 								.LoadType         (type)
 								.callvirt         (typeof(MappingSchema), "MapValueToEnum", typeof(object), typeof(Type))
 								.CastFromObject   (type)
@@ -1257,12 +1258,12 @@ namespace BLToolkit.DataAccess
 						emit
 							.ldarg_0
 							.ldloc(_locManager)
-								.ldloc(_locManager)
-								.callvirt(typeof(DbManager).GetProperty("DataProvider").GetGetMethod())
+							//	.ldloc(_locManager)
+							//	.callvirt(typeof(DbManager).GetProperty("DataProvider").GetGetMethod())
 									.ldloc(param)
 									.callvirt(typeof(IDataParameter).GetProperty("Value").GetGetMethod())
-								.ldc_i4((int)ConvertType.OutputParameter)
-								.callvirt(typeof(DataProviderBase), "Convert", typeof(object), typeof(ConvertType))
+							//	.ldc_i4((int)ConvertType.OutputParameter)
+							//	.callvirt(typeof(DataProviderBase), "Convert", typeof(object), typeof(ConvertType))
 								;
 						
 						string converterName = GetConverterMethodName(type);

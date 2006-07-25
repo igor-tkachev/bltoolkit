@@ -33,7 +33,6 @@
     <Reference Include="System" />
     <Reference Include="System.configuration" />
     <Reference Include="System.Data" />
-    <Reference Include="System.Data.OracleClient" />
     <Reference Include="System.Design" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Web" />
@@ -133,7 +132,6 @@
     <Compile Include="Data\DataProvider\DataProviderBase.cs" />
     <Compile Include="Data\DataProvider\OdbcDataProvider.cs" />
     <Compile Include="Data\DataProvider\OleDbDataProvider.cs" />
-    <Compile Include="Data\DataProvider\OracleDataProvider.cs" />
     <Compile Include="Data\DataProvider\SqlDataProvider.cs" />
     <Compile Include="Data\DataProvider\SybaseAdoDataProvider.cs" />
     <Compile Include="Data\DbManager.cs">

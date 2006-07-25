@@ -79,7 +79,7 @@ namespace BLToolkit.Mapping
 
 		public virtual Boolean  GetBoolean (object o, int index) { return _dataReader.GetBoolean (index); }
 		public virtual Char     GetChar    (object o, int index) { return _dataReader.GetChar    (index); }
-		public virtual Single   GetSingle  (object o, int index) { return _mappingSchema.ConvertToSingle(GetValue(o, index)); }
+		public virtual Single   GetSingle  (object o, int index) { return _dataReader.GetFloat   (index); }
 		public virtual Double   GetDouble  (object o, int index) { return _dataReader.GetDouble  (index); }
 		public virtual Decimal  GetDecimal (object o, int index) { return _dataReader.GetDecimal (index); }
 		public virtual Guid     GetGuid    (object o, int index) { return _dataReader.GetGuid    (index); }
@@ -104,7 +104,7 @@ namespace BLToolkit.Mapping
 
 		public virtual Boolean?  GetNullableBoolean (object o, int index) { return _dataReader.IsDBNull(index)? null: (Boolean?) _dataReader.GetBoolean (index); }
 		public virtual Char?     GetNullableChar    (object o, int index) { return _dataReader.IsDBNull(index)? null: (Char?)    _dataReader.GetChar    (index); }
-		public virtual Single?   GetNullableSingle  (object o, int index) { return _dataReader.IsDBNull(index)? null: _mappingSchema.ConvertToNullableSingle(GetValue(o, index)); }
+		public virtual Single?   GetNullableSingle  (object o, int index) { return _dataReader.IsDBNull(index)? null: (Single?)  _dataReader.GetFloat   (index); }
 		public virtual Double?   GetNullableDouble  (object o, int index) { return _dataReader.IsDBNull(index)? null: (Double?)  _dataReader.GetDouble  (index); }
 		public virtual Decimal?  GetNullableDecimal (object o, int index) { return _dataReader.IsDBNull(index)? null: (Decimal?) _dataReader.GetDecimal (index); }
 		public virtual Guid?     GetNullableGuid    (object o, int index) { return _dataReader.IsDBNull(index)? null: (Guid?)    _dataReader.GetGuid    (index); }
@@ -117,7 +117,7 @@ namespace BLToolkit.Mapping
 		public virtual SqlInt16    GetSqlInt16   (object o, int index) { return _dataReader.IsDBNull(index)? SqlInt16.   Null: _dataReader.GetInt16   (index); }
 		public virtual SqlInt32    GetSqlInt32   (object o, int index) { return _dataReader.IsDBNull(index)? SqlInt32.   Null: _dataReader.GetInt32   (index); }
 		public virtual SqlInt64    GetSqlInt64   (object o, int index) { return _dataReader.IsDBNull(index)? SqlInt64.   Null: _dataReader.GetInt64   (index); }
-		public virtual SqlSingle   GetSqlSingle  (object o, int index) { return _dataReader.IsDBNull(index)? SqlSingle.  Null: _mappingSchema.ConvertToSingle(GetValue(o, index)); }
+		public virtual SqlSingle   GetSqlSingle  (object o, int index) { return _dataReader.IsDBNull(index)? SqlSingle.  Null: _dataReader.GetFloat   (index); }
 		public virtual SqlBoolean  GetSqlBoolean (object o, int index) { return _dataReader.IsDBNull(index)? SqlBoolean. Null: _dataReader.GetBoolean (index); }
 		public virtual SqlDouble   GetSqlDouble  (object o, int index) { return _dataReader.IsDBNull(index)? SqlDouble.  Null: _dataReader.GetDouble  (index); }
 		public virtual SqlDateTime GetSqlDateTime(object o, int index) { return _dataReader.IsDBNull(index)? SqlDateTime.Null: _dataReader.GetDateTime(index); }

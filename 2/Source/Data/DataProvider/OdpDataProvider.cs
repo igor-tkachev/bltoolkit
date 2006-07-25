@@ -2,7 +2,6 @@ using System;
 using System.Collections;
 using System.Data;
 using System.Data.Common;
-using System.Data.SqlTypes;
 using System.Diagnostics;
 using System.IO;
 using System.Reflection;
@@ -44,43 +43,43 @@ namespace BLToolkit.Data.DataProvider
 
 				if (null != typeTable)
 				{
-					typeTable.Add(typeof(DateTime[]),           OracleDbType.TimeStamp);
-					typeTable.Add(typeof(Int16[]),              OracleDbType.Int16);
-					typeTable.Add(typeof(Int32[]),              OracleDbType.Int32);
-					typeTable.Add(typeof(Int64[]),              OracleDbType.Int64);
-					typeTable.Add(typeof(Single[]),             OracleDbType.Single);
-					typeTable.Add(typeof(Double[]),             OracleDbType.Double);
-					typeTable.Add(typeof(Decimal[]),            OracleDbType.Decimal);
-					typeTable.Add(typeof(String[]),             OracleDbType.Varchar2);
-					typeTable.Add(typeof(TimeSpan[]),           OracleDbType.IntervalDS);
-					typeTable.Add(typeof(OracleBFile[]),        OracleDbType.BFile);
-					typeTable.Add(typeof(OracleBinary[]),       OracleDbType.Raw);
-					typeTable.Add(typeof(OracleBlob[]),         OracleDbType.Blob);
-					typeTable.Add(typeof(OracleClob[]),         OracleDbType.Clob);
-					typeTable.Add(typeof(OracleDate[]),         OracleDbType.Date);
-					typeTable.Add(typeof(OracleDecimal[]),      OracleDbType.Decimal);
-					typeTable.Add(typeof(OracleIntervalDS[]),   OracleDbType.IntervalDS);
-					typeTable.Add(typeof(OracleIntervalYM[]),   OracleDbType.IntervalYM);
-					typeTable.Add(typeof(OracleRefCursor[]),    OracleDbType.RefCursor);
-					typeTable.Add(typeof(OracleString[]),       OracleDbType.Varchar2);
-					typeTable.Add(typeof(OracleTimeStamp[]),    OracleDbType.TimeStamp);
-					typeTable.Add(typeof(OracleTimeStampLTZ[]), OracleDbType.TimeStampLTZ);
-					typeTable.Add(typeof(OracleTimeStampTZ[]),  OracleDbType.TimeStampTZ);
-					typeTable.Add(typeof(OracleXmlType[]),      OracleDbType.XmlType);
+					typeTable[typeof(DateTime[])]          = OracleDbType.TimeStamp;
+					typeTable[typeof(Int16[])]             = OracleDbType.Int16;
+					typeTable[typeof(Int32[])]             = OracleDbType.Int32;
+					typeTable[typeof(Int64[])]             = OracleDbType.Int64;
+					typeTable[typeof(Single[])]            = OracleDbType.Single;
+					typeTable[typeof(Double[])]            = OracleDbType.Double;
+					typeTable[typeof(Decimal[])]           = OracleDbType.Decimal;
+					typeTable[typeof(String[])]            = OracleDbType.Varchar2;
+					typeTable[typeof(TimeSpan[])]          = OracleDbType.IntervalDS;
+					typeTable[typeof(OracleBFile[])]       = OracleDbType.BFile;
+					typeTable[typeof(OracleBinary[])]      = OracleDbType.Raw;
+					typeTable[typeof(OracleBlob[])]        = OracleDbType.Blob;
+					typeTable[typeof(OracleClob[])]        = OracleDbType.Clob;
+					typeTable[typeof(OracleDate[])]        = OracleDbType.Date;
+					typeTable[typeof(OracleDecimal[])]     = OracleDbType.Decimal;
+					typeTable[typeof(OracleIntervalDS[])]  = OracleDbType.IntervalDS;
+					typeTable[typeof(OracleIntervalYM[])]  = OracleDbType.IntervalYM;
+					typeTable[typeof(OracleRefCursor[])]   = OracleDbType.RefCursor;
+					typeTable[typeof(OracleString[])]      = OracleDbType.Varchar2;
+					typeTable[typeof(OracleTimeStamp[])]   = OracleDbType.TimeStamp;
+					typeTable[typeof(OracleTimeStampLTZ[])]= OracleDbType.TimeStampLTZ;
+					typeTable[typeof(OracleTimeStampTZ[])] = OracleDbType.TimeStampTZ;
+					typeTable[typeof(OracleXmlType[])]     = OracleDbType.XmlType;
 
-					typeTable.Add(typeof(Boolean),              OracleDbType.Byte);
-					typeTable.Add(typeof(Guid),                 OracleDbType.Raw);
-					typeTable.Add(typeof(SByte),                OracleDbType.Decimal);
-					typeTable.Add(typeof(UInt16),               OracleDbType.Decimal);
-					typeTable.Add(typeof(UInt32),               OracleDbType.Decimal);
-					typeTable.Add(typeof(UInt64),               OracleDbType.Decimal);
+					typeTable[typeof(Boolean)]             = OracleDbType.Byte;
+					typeTable[typeof(Guid)]                = OracleDbType.Raw;
+					typeTable[typeof(SByte)]               = OracleDbType.Decimal;
+					typeTable[typeof(UInt16)]              = OracleDbType.Decimal;
+					typeTable[typeof(UInt32)]              = OracleDbType.Decimal;
+					typeTable[typeof(UInt64)]              = OracleDbType.Decimal;
 
-					typeTable.Add(typeof(Boolean[]),            OracleDbType.Byte);
-					typeTable.Add(typeof(Guid[]),               OracleDbType.Raw);
-					typeTable.Add(typeof(SByte[]),              OracleDbType.Decimal);
-					typeTable.Add(typeof(UInt16[]),             OracleDbType.Decimal);
-					typeTable.Add(typeof(UInt32[]),             OracleDbType.Decimal);
-					typeTable.Add(typeof(UInt64[]),             OracleDbType.Decimal);
+					typeTable[typeof(Boolean[])]           = OracleDbType.Byte;
+					typeTable[typeof(Guid[])]              = OracleDbType.Raw;
+					typeTable[typeof(SByte[])]             = OracleDbType.Decimal;
+					typeTable[typeof(UInt16[])]            = OracleDbType.Decimal;
+					typeTable[typeof(UInt32[])]            = OracleDbType.Decimal;
+					typeTable[typeof(UInt64[])]            = OracleDbType.Decimal;
 				}
 			}
 		}
@@ -280,9 +279,6 @@ namespace BLToolkit.Data.DataProvider
 
 		public class OdpMappingSchema : MappingSchema
 		{
-
-#if FW2
-
 			protected override DataReaderMapper CreateDataReaderMapper(IDataReader dataReader)
 			{
 				return new OracleDataReaderMapper(this, dataReader);
@@ -292,8 +288,6 @@ namespace BLToolkit.Data.DataProvider
 			{
 				return new SqlScalarDataReaderMapper(this, dataReader, nip);
 			}
-
-#endif
 
 			#region Convert
 
@@ -542,7 +536,6 @@ namespace BLToolkit.Data.DataProvider
 			#endregion
 
 #if FW2
-
 			#region Nullable Types
 
 			public override SByte? ConvertToNullableSByte(object value)
@@ -711,24 +704,25 @@ namespace BLToolkit.Data.DataProvider
 			#endregion
 		}
 
-#if FW2
-
 		public class OracleDataReaderMapper : DataReaderMapper
 		{
 			public OracleDataReaderMapper(MappingSchema mappingSchema, IDataReader dataReader)
 				: base(mappingSchema, dataReader)
 			{
+#if FW2
 				_dataReader = (OracleDataReader)dataReader;
+#endif
 			}
 
 			private OracleDataReader _dataReader;
 
+#if FW2
 			public override Type GetFieldType(int index)
 			{
 				Type fieldType = _dataReader.GetProviderSpecificFieldType(index);
 
-				if (fieldType == typeof(SqlXml))    return typeof(SqlXml);
-				if (fieldType == typeof(SqlBinary)) return typeof(SqlBytes);
+				if (fieldType == typeof(OracleXmlType)) return typeof(OracleXmlType);
+				if (fieldType == typeof(OracleBlob))    return typeof(OracleBlob);
 
 				return _dataReader.GetFieldType(index);
 			}
@@ -753,6 +747,26 @@ namespace BLToolkit.Data.DataProvider
 					return value is DBNull ? null : value;
 				}
 			}
+#endif
+			public override Boolean  GetBoolean(object o, int index) { return MappingSchema.ConvertToBoolean(GetValue(o, index)); }
+			public override Char     GetChar   (object o, int index) { return MappingSchema.ConvertToChar   (GetValue(o, index)); }
+			public override Guid     GetGuid   (object o, int index) { return MappingSchema.ConvertToGuid   (GetValue(o, index)); }
+
+			public override SByte    GetSByte  (object o, int index) { return  (SByte)_dataReader.GetDecimal(index); }
+			public override UInt16   GetUInt16 (object o, int index) { return (UInt16)_dataReader.GetDecimal(index); }
+			public override UInt32   GetUInt32 (object o, int index) { return (UInt32)_dataReader.GetDecimal(index); }
+			public override UInt64   GetUInt64 (object o, int index) { return (UInt64)_dataReader.GetDecimal(index); }
+
+#if FW2
+			public override Boolean? GetNullableBoolean(object o, int index) { return MappingSchema.ConvertToNullableBoolean(GetValue(o, index)); }
+			public override Char?    GetNullableChar   (object o, int index) { return MappingSchema.ConvertToNullableChar   (GetValue(o, index)); }
+			public override Guid?    GetNullableGuid   (object o, int index) { return MappingSchema.ConvertToNullableGuid   (GetValue(o, index)); }
+
+			public override SByte?   GetNullableSByte  (object o, int index) { return _dataReader.IsDBNull(index)? null:  (SByte?)_dataReader.GetDecimal(index); }
+			public override UInt16?  GetNullableUInt16 (object o, int index) { return _dataReader.IsDBNull(index)? null: (UInt16?)_dataReader.GetDecimal(index); }
+			public override UInt32?  GetNullableUInt32 (object o, int index) { return _dataReader.IsDBNull(index)? null: (UInt32?)_dataReader.GetDecimal(index); }
+			public override UInt64?  GetNullableUInt64 (object o, int index) { return _dataReader.IsDBNull(index)? null: (UInt64?)_dataReader.GetDecimal(index); }
+#endif
 		}
 
 		public class SqlScalarDataReaderMapper : ScalarDataReaderMapper
@@ -760,6 +774,7 @@ namespace BLToolkit.Data.DataProvider
 			public SqlScalarDataReaderMapper(MappingSchema mappingSchema, IDataReader dataReader, NameOrIndexParameter nip)
 				: base(mappingSchema, dataReader, nip)
 			{
+#if FW2
 				_dataReader = (OracleDataReader)dataReader;
 				_fieldType = _dataReader.GetProviderSpecificFieldType(Index);
 
@@ -769,8 +784,10 @@ namespace BLToolkit.Data.DataProvider
 					_fieldType = typeof(OracleBlob);
 				else
 					_fieldType = _dataReader.GetFieldType(Index);
+#endif
 			}
 
+#if FW2
 			private OracleDataReader _dataReader;
 			private Type             _fieldType;
 
@@ -797,9 +814,26 @@ namespace BLToolkit.Data.DataProvider
 					return value is DBNull ? null : value;
 				}
 			}
-		}
-
 #endif
+			public override Boolean  GetBoolean(object o, int index) { return MappingSchema.ConvertToBoolean(GetValue(o, Index)); }
+			public override Char     GetChar   (object o, int index) { return MappingSchema.ConvertToChar   (GetValue(o, Index)); }
+			public override Guid     GetGuid   (object o, int index) { return MappingSchema.ConvertToGuid   (GetValue(o, Index)); }
 
+			public override SByte    GetSByte  (object o, int index) { return  (SByte)_dataReader.GetDecimal(Index); }
+			public override UInt16   GetUInt16 (object o, int index) { return (UInt16)_dataReader.GetDecimal(Index); }
+			public override UInt32   GetUInt32 (object o, int index) { return (UInt32)_dataReader.GetDecimal(Index); }
+			public override UInt64   GetUInt64 (object o, int index) { return (UInt64)_dataReader.GetDecimal(Index); }
+
+#if FW2
+			public override Boolean? GetNullableBoolean(object o, int index) { return MappingSchema.ConvertToNullableBoolean(GetValue(o, Index)); }
+			public override Char?    GetNullableChar   (object o, int index) { return MappingSchema.ConvertToNullableChar   (GetValue(o, Index)); }
+			public override Guid?    GetNullableGuid   (object o, int index) { return MappingSchema.ConvertToNullableGuid   (GetValue(o, Index)); }
+
+			public override SByte?   GetNullableSByte  (object o, int index) { return _dataReader.IsDBNull(index)? null:  (SByte?)_dataReader.GetDecimal(Index); }
+			public override UInt16?  GetNullableUInt16 (object o, int index) { return _dataReader.IsDBNull(index)? null: (UInt16?)_dataReader.GetDecimal(Index); }
+			public override UInt32?  GetNullableUInt32 (object o, int index) { return _dataReader.IsDBNull(index)? null: (UInt32?)_dataReader.GetDecimal(Index); }
+			public override UInt64?  GetNullableUInt64 (object o, int index) { return _dataReader.IsDBNull(index)? null: (UInt64?)_dataReader.GetDecimal(Index); }
+#endif
+		}
 	}
 }
