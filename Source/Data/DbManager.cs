@@ -627,7 +627,7 @@ namespace BLToolkit.Data
 			AddDataProvider(new AccessDataProvider());
 			AddDataProvider(new OleDbDataProvider());
 			AddDataProvider(new OdbcDataProvider());
-			AddDataProvider(new OracleDataProvider());
+			//AddDataProvider(new OracleDataProvider());
 			AddDataProvider(new SybaseAdoDataProvider());
 		}
 
@@ -2604,8 +2604,10 @@ namespace BLToolkit.Data
 						string name = (string)_dataProvider.Convert(nameOrIndex.Name,
 							ConvertType.NameToParameter);
 						
-						return _dataProvider.Convert(Parameter(name).Value,
-							ConvertType.OutputParameter);
+						//return _dataProvider.Convert(Parameter(name).Value,
+						//	ConvertType.OutputParameter);
+
+						return Parameter(name).Value;
 					}
 					else
 					{
@@ -2617,7 +2619,8 @@ namespace BLToolkit.Data
 							{
 								if (0 == index)
 								{
-									return _dataProvider.Convert(p.Value, ConvertType.OutputParameter);
+									//return _dataProvider.Convert(p.Value, ConvertType.OutputParameter);
+									return p.Value;
 								}
 								else
 								{
@@ -2635,7 +2638,7 @@ namespace BLToolkit.Data
 
 					foreach (IDataParameter p in SelectCommand.Parameters)
 						if (p.Direction == ParameterDirection.ReturnValue)
-							return _dataProvider.Convert(p.Value, ConvertType.OutputParameter);
+							return p.Value; // return _dataProvider.Convert(p.Value, ConvertType.OutputParameter);
 
 					break;
 
@@ -2662,7 +2665,7 @@ namespace BLToolkit.Data
 		/// The first column of the first row in the resultset.</returns>
 		public T ExecuteScalar<T>()
 		{
-			return (T)ExecuteScalar();
+			return (T)_mappingSchema.ConvertChangeType(ExecuteScalar(), typeof(T));
 		}
 
 		/// <summary>
@@ -2699,7 +2702,7 @@ namespace BLToolkit.Data
 		/// </returns>
 		public T ExecuteScalar<T>(ScalarSourceType sourceType)
 		{
-			return (T)ExecuteScalar(sourceType, new NameOrIndexParameter());
+			return ExecuteScalar<T>(sourceType, new NameOrIndexParameter());
 		}
 
 		/// <summary>
@@ -2707,7 +2710,7 @@ namespace BLToolkit.Data
 		/// source type.
 		/// </summary>
 		/// <param name="sourceType">The method used to return the scalar value.</param>
-		/// <param name="nip">The column name/index or output parameter name/index.</param>
+		/// <param name="nameOrIndex">The column name/index or output parameter name/index.</param>
 		/// <returns><list type="table">
 		/// <listheader>
 		///  <term>ScalarSourceType</term>
@@ -2737,7 +2740,7 @@ namespace BLToolkit.Data
 		/// </returns>
 		public T ExecuteScalar<T>(ScalarSourceType sourceType, NameOrIndexParameter nameOrIndex)
 		{
-			return (T)ExecuteScalar(sourceType, nameOrIndex);
+			return (T)_mappingSchema.ConvertChangeType(ExecuteScalar(sourceType, nameOrIndex), typeof(T));
 		}
 		
 #endif
@@ -2752,7 +2755,7 @@ namespace BLToolkit.Data
 		/// query. Extra columns are ignored.
 		/// </summary>
 		/// <param name="list">The array to fill in.</param>
-		/// <param name="nip">The column name/index or output parameter name/index.</param>
+		/// <param name="nameOrIndex">The column name/index or output parameter name/index.</param>
 		/// <param name="type">The type of the each element.</param>
 		/// <returns>Array list of values of the specified column of the every
 		/// row in the resultset.</returns>
@@ -2789,7 +2792,7 @@ namespace BLToolkit.Data
 		/// specified column of  the every row in the resultset returned by the
 		/// query. Extra columns are ignored.
 		/// </summary>
-		/// <param name="nip">The column name/index.</param>
+		/// <param name="nameOrIndex">The column name/index.</param>
 		/// <param name="type">The type of the each element.</param>
 		/// <returns>Array list of values of the specified column of the every
 		/// row in the resultset.</returns>
@@ -2827,7 +2830,7 @@ namespace BLToolkit.Data
 		/// query. Extra columns are ignored.
 		/// </summary>
 		/// <param name="list">The array to fill in.</param>
-		/// <param name="nip">The column name/index or output parameter
+		/// <param name="nameOrIndex">The column name/index or output parameter
 		/// name/index.</param>
 		/// <typeparam name="T">The type of the each element.</typeparam>
 		/// <returns>Array list of values of the specified column of the every

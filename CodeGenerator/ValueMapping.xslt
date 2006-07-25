@@ -293,7 +293,7 @@
 		<xsl:apply-templates select="group|type|comment|br|include" mode="def">
 			<xsl:with-param name="nullable" select="@nullable='true'"/>
 			<xsl:with-param name="group"    select="."/>
-			<xsl:with-param name="mode"   select="$mode"/>
+			<xsl:with-param name="mode"     select="$mode"/>
 		</xsl:apply-templates>
 	</xsl:template>
 
@@ -324,7 +324,7 @@
 							</xsl:with-param>
 							<xsl:with-param name="type"     select="$name"/>
 							<xsl:with-param name="nullable" select="$nullable"/>
-							<xsl:with-param name="mode"   select="$mode"/>
+							<xsl:with-param name="mode"     select="$mode"/>
 						</xsl:call-template>
 					</xsl:if>
 				</xsl:when>
@@ -333,7 +333,7 @@
 						<xsl:with-param name="nullable" select="$nullable"/>
 						<xsl:with-param name="group"    select="$group"/>
 						<xsl:with-param name="template" select="@template"/>
-						<xsl:with-param name="mode"   select="$mode"/>
+						<xsl:with-param name="mode"     select="$mode"/>
 					</xsl:call-template>
 				</xsl:when>
 				<xsl:when test="name()='br'">
@@ -352,7 +352,7 @@
 			<xsl:with-param name="nullable" select="$nullable"/>
 			<xsl:with-param name="group"    select="$group"/>
 			<xsl:with-param name="template" select="@template"/>
-			<xsl:with-param name="mode"   select="$mode"/>
+			<xsl:with-param name="mode"     select="$mode"/>
 		</xsl:call-template>
 	</xsl:template>
 
@@ -433,7 +433,7 @@
 			</xsl:with-param>
 			<xsl:with-param name="type"     select="@name"/>
 			<xsl:with-param name="nullable" select="@nullable='true' or $nullable"/>
-			<xsl:with-param name="mode"   select="$mode"/>
+			<xsl:with-param name="mode"     select="$mode"/>
 		</xsl:call-template>
 	</xsl:template>
 

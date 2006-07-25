@@ -9,9 +9,9 @@ namespace BLToolkit.Mapping
 	public class ScalarDataReaderMapper : DataReaderMapper
 	{
 		public ScalarDataReaderMapper(
-			MappingSchema        mappingSchema,
-			IDataReader          dataReader,
-			NameOrIndexParameter nameOrIndex)
+			MappingSchema         mappingSchema,
+			IDataReader           dataReader,
+			NameOrIndexParameter  nameOrIndex)
 			: base(mappingSchema, dataReader)
 		{
 			_index = nameOrIndex.ByName? dataReader.GetOrdinal(nameOrIndex.Name): nameOrIndex.Index;
@@ -70,7 +70,7 @@ namespace BLToolkit.Mapping
 
 		public override Boolean  GetBoolean (object o, int index) { return DataReader.GetBoolean (_index); }
 		public override Char     GetChar    (object o, int index) { return DataReader.GetChar    (_index); }
-		public override Single   GetSingle  (object o, int index) { return base.GetSingle(o, _index); }
+		public override Single   GetSingle  (object o, int index) { return DataReader.GetFloat   (_index); }
 		public override Double   GetDouble  (object o, int index) { return DataReader.GetDouble  (_index); }
 		public override Decimal  GetDecimal (object o, int index) { return DataReader.GetDecimal (_index); }
 		public override Guid     GetGuid    (object o, int index) { return DataReader.GetGuid    (_index); }
@@ -95,7 +95,7 @@ namespace BLToolkit.Mapping
 
 		public override Boolean?  GetNullableBoolean (object o, int index) { return DataReader.IsDBNull(_index)? null: (Boolean?) DataReader.GetBoolean (_index); }
 		public override Char?     GetNullableChar    (object o, int index) { return DataReader.IsDBNull(_index)? null: (Char?)    DataReader.GetChar    (_index); }
-		public override Single?   GetNullableSingle  (object o, int index) { return base.GetNullableSingle(o, _index); }
+		public override Single?   GetNullableSingle  (object o, int index) { return DataReader.IsDBNull(_index)? null: (Single?)  DataReader.GetFloat   (_index); }
 		public override Double?   GetNullableDouble  (object o, int index) { return DataReader.IsDBNull(_index)? null: (Double?)  DataReader.GetDouble  (_index); }
 		public override Decimal?  GetNullableDecimal (object o, int index) { return DataReader.IsDBNull(_index)? null: (Decimal?) DataReader.GetDecimal (_index); }
 		public override Guid?     GetNullableGuid    (object o, int index) { return DataReader.IsDBNull(_index)? null: (Guid?)    DataReader.GetGuid    (_index); }
@@ -108,7 +108,7 @@ namespace BLToolkit.Mapping
 		public override SqlInt16    GetSqlInt16   (object o, int index) { return DataReader.IsDBNull(_index)? SqlInt16.   Null: DataReader.GetInt16   (_index); }
 		public override SqlInt32    GetSqlInt32   (object o, int index) { return DataReader.IsDBNull(_index)? SqlInt32.   Null: DataReader.GetInt32   (_index); }
 		public override SqlInt64    GetSqlInt64   (object o, int index) { return DataReader.IsDBNull(_index)? SqlInt64.   Null: DataReader.GetInt64   (_index); }
-		public override SqlSingle   GetSqlSingle  (object o, int index) { return base.GetSqlSingle(o, _index); }
+		public override SqlSingle   GetSqlSingle  (object o, int index) { return DataReader.IsDBNull(_index)? SqlSingle.  Null: DataReader.GetFloat   (_index); }
 		public override SqlBoolean  GetSqlBoolean (object o, int index) { return DataReader.IsDBNull(_index)? SqlBoolean. Null: DataReader.GetBoolean (_index); }
 		public override SqlDouble   GetSqlDouble  (object o, int index) { return DataReader.IsDBNull(_index)? SqlDouble.  Null: DataReader.GetDouble  (_index); }
 		public override SqlDateTime GetSqlDateTime(object o, int index) { return DataReader.IsDBNull(_index)? SqlDateTime.Null: DataReader.GetDateTime(_index); }

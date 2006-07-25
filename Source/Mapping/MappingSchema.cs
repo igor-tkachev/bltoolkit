@@ -645,7 +645,7 @@ namespace BLToolkit.Mapping
 		public virtual SqlByte ConvertToSqlByte(object value)
 		{
 			return
-				value == null?    SqlByte.Null :
+				value == null?     SqlByte.Null :
 				value is SqlByte? (SqlByte)value:
 #if FW2
 					Convert<SqlByte, object>.From(value);
@@ -657,7 +657,7 @@ namespace BLToolkit.Mapping
 		public virtual SqlInt16 ConvertToSqlInt16(object value)
 		{
 			return
-				value == null?     SqlInt16.Null:
+				value == null?      SqlInt16.Null:
 				value is SqlInt16? (SqlInt16)value:
 #if FW2
 					Convert<SqlInt16, object>.From(value);
@@ -669,7 +669,7 @@ namespace BLToolkit.Mapping
 		public virtual SqlInt32 ConvertToSqlInt32(object value)
 		{
 			return
-				value == null?     SqlInt32.Null:
+				value == null?      SqlInt32.Null:
 				value is SqlInt32? (SqlInt32)value:
 #if FW2
 					Convert<SqlInt32, object>.From(value);
@@ -681,7 +681,7 @@ namespace BLToolkit.Mapping
 		public virtual SqlInt64 ConvertToSqlInt64(object value)
 		{
 			return
-				value == null?     SqlInt64.Null:
+				value == null?      SqlInt64.Null:
 				value is SqlInt64? (SqlInt64)value:
 #if FW2
 					Convert<SqlInt64, object>.From(value);
@@ -693,7 +693,7 @@ namespace BLToolkit.Mapping
 		public virtual SqlSingle ConvertToSqlSingle(object value)
 		{
 			return
-				value == null?      SqlSingle.Null:
+				value == null?       SqlSingle.Null:
 				value is SqlSingle? (SqlSingle)value:
 #if FW2
 					Convert<SqlSingle, object>.From(value);
@@ -705,7 +705,7 @@ namespace BLToolkit.Mapping
 		public virtual SqlBoolean ConvertToSqlBoolean(object value)
 		{
 			return
-				value == null?       SqlBoolean.Null:
+				value == null?        SqlBoolean.Null:
 				value is SqlBoolean? (SqlBoolean)value:
 #if FW2
 					Convert<SqlBoolean, object>.From(value);
@@ -717,7 +717,7 @@ namespace BLToolkit.Mapping
 		public virtual SqlDouble ConvertToSqlDouble(object value)
 		{
 			return
-				value == null?      SqlDouble.Null:
+				value == null?       SqlDouble.Null:
 				value is SqlDouble? (SqlDouble)value:
 #if FW2
 					Convert<SqlDouble, object>.From(value);
@@ -729,7 +729,7 @@ namespace BLToolkit.Mapping
 		public virtual SqlDateTime ConvertToSqlDateTime(object value)
 		{
 			return
-				value == null?        SqlDateTime.Null:
+				value == null?         SqlDateTime.Null:
 				value is SqlDateTime? (SqlDateTime)value:
 #if FW2
 					Convert<SqlDateTime, object>.From(value);
@@ -741,7 +741,7 @@ namespace BLToolkit.Mapping
 		public virtual SqlDecimal ConvertToSqlDecimal(object value)
 		{
 			return
-				value == null?       SqlDecimal.Null:
+				value == null?        SqlDecimal.Null:
 				value is SqlDecimal? (SqlDecimal)value:
 				value is SqlMoney?   ((SqlMoney)value).ToSqlDecimal():
 #if FW2
@@ -754,7 +754,7 @@ namespace BLToolkit.Mapping
 		public virtual SqlMoney ConvertToSqlMoney(object value)
 		{
 			return
-				value == null?       SqlMoney.Null:
+				value == null?        SqlMoney.Null:
 				value is SqlMoney?   (SqlMoney)value:
 				value is SqlDecimal? ((SqlDecimal)value).ToSqlMoney():
 #if FW2
@@ -767,7 +767,7 @@ namespace BLToolkit.Mapping
 		public virtual SqlString ConvertToSqlString(object value)
 		{
 			return
-				value == null?      SqlString.Null:
+				value == null?       SqlString.Null:
 				value is SqlString? (SqlString)value:
 #if FW2
 					Convert<SqlString, object>.From(value);
@@ -778,7 +778,7 @@ namespace BLToolkit.Mapping
 
 		public virtual SqlBinary ConvertToSqlBinary(object value)
 		{
-			if (value == null)      return SqlBinary.Null;
+			if (value == null)      return  SqlBinary.Null;
 			if (value is SqlBinary) return (SqlBinary)value;
 #if FW2
 			return Convert<SqlBinary, object>.From(value);
@@ -791,7 +791,7 @@ namespace BLToolkit.Mapping
 
 		public virtual SqlGuid ConvertToSqlGuid(object value)
 		{
-			if (value == null)      return SqlGuid.Null;
+			if (value == null)      return  SqlGuid.Null;
 			if (value is SqlGuid)   return (SqlGuid)value;
 
 #if FW2
@@ -809,7 +809,7 @@ namespace BLToolkit.Mapping
 #if FW2
 		public virtual SqlBytes ConvertToSqlBytes(object value)
 		{
-			if (value == null)      return SqlBytes.Null;
+			if (value == null)      return  SqlBytes.Null;
 			if (value is SqlBytes)  return (SqlBytes)value;
 
 			return Convert<SqlBytes, object>.From(value);
@@ -817,7 +817,7 @@ namespace BLToolkit.Mapping
 
 		public virtual SqlChars ConvertToSqlChars(object value)
 		{
-			if (value == null)      return SqlChars.Null;
+			if (value == null)      return  SqlChars.Null;
 			if (value is SqlChars)  return (SqlChars)value;
 
 			return Convert<SqlChars, object>.From(value);
@@ -825,7 +825,7 @@ namespace BLToolkit.Mapping
 
 		public virtual SqlXml ConvertToSqlXml(object value)
 		{
-			if (value == null)      return SqlXml.Null;
+			if (value == null)      return  SqlXml.Null;
 			if (value is SqlXml)    return (SqlXml)value;
 
 			return Convert<SqlXml, object>.From(value);
@@ -840,7 +840,7 @@ namespace BLToolkit.Mapping
 		{
 			bool isNullable = false;
 #if FW2
-			if (conversionType.IsArray)
+			if (conversionType.IsArray && conversionType.ContainsGenericParameters)
 			{
 				Type t = conversionType;
 
@@ -906,10 +906,10 @@ namespace BLToolkit.Mapping
 					}
 					else
 					{
-						int arrayLength = 1;
+						int arrayLength  = 1;
 						int[] dimensions = new int[rank];
-						int[] indices = new int[rank];
-						int[] lbounds = new int[rank];
+						int[] indices    = new int[rank];
+						int[] lbounds    = new int[rank];
 
 						for (int i = 0; i < rank; ++i)
 						{
@@ -979,11 +979,11 @@ namespace BLToolkit.Mapping
 				case TypeCode.UInt64:   return ConvertToUInt64  (value);
 			}
 
-			if (typeof(Guid)   == conversionType)      return ConvertToGuid  (value);
-			if (typeof(Stream) == conversionType)      return ConvertToStream(value);
-			if (typeof(XmlReader) == conversionType)   return ConvertToXmlReader(value);
-			if (typeof(byte[]) == conversionType)      return ConvertToByteArray(value);
-			if (typeof(char[]) == conversionType)      return ConvertToCharArray(value);
+			if (typeof(Guid)        == conversionType) return ConvertToGuid  (value);
+			if (typeof(Stream)      == conversionType) return ConvertToStream(value);
+			if (typeof(XmlReader)   == conversionType) return ConvertToXmlReader(value);
+			if (typeof(byte[])      == conversionType) return ConvertToByteArray(value);
+			if (typeof(char[])      == conversionType) return ConvertToCharArray(value);
 
 			if (typeof(SqlInt32)    == conversionType) return ConvertToSqlInt32   (value);
 			if (typeof(SqlString)   == conversionType) return ConvertToSqlString  (value);
@@ -1044,12 +1044,16 @@ namespace BLToolkit.Mapping
 			return new DataReaderListMapper(CreateDataReaderMapper(reader, nameOrIndex));
 		}
 
-		protected virtual DataRowMapper CreateDataRowMapper(DataRow row, DataRowVersion version)
+		protected virtual DataRowMapper CreateDataRowMapper(
+			DataRow        row,
+			DataRowVersion version)
 		{
 			return new DataRowMapper(row, version);
 		}
 
-		protected virtual DataTableMapper CreateDataTableMapper(DataTable dataTable, DataRowVersion version)
+		protected virtual DataTableMapper CreateDataTableMapper(
+			DataTable      dataTable,
+			DataRowVersion version)
 		{
 			return new DataTableMapper(dataTable, CreateDataRowMapper(null, version));
 		}
@@ -1060,26 +1064,34 @@ namespace BLToolkit.Mapping
 		}
 
 		protected virtual DictionaryListMapper CreateDictionaryListMapper(
-			IDictionary dic, NameOrIndexParameter keyField, ObjectMapper objectMapper)
+			IDictionary          dic,
+			NameOrIndexParameter keyFieldNameOrIndex,
+			ObjectMapper         objectMapper)
 		{
-			return new DictionaryListMapper(dic, keyField, objectMapper);
+			return new DictionaryListMapper(dic, keyFieldNameOrIndex, objectMapper);
 		}
 		
 		protected virtual DictionaryIndexListMapper CreateDictionaryListMapper(
-			IDictionary dic, MapIndex index, ObjectMapper objectMapper)
+			IDictionary  dic,
+			MapIndex     index,
+			ObjectMapper objectMapper)
 		{
 			return new DictionaryIndexListMapper(dic, index, objectMapper);
 		}
 
 #if FW2
-		protected virtual DictionaryListMapper<K, T> CreateDictionaryListMapper<K, T>(
-			IDictionary<K, T> dic, NameOrIndexParameter keyField, ObjectMapper objectMapper)
+		protected virtual DictionaryListMapper<K,T> CreateDictionaryListMapper<K,T>(
+			IDictionary<K,T>     dic,
+			NameOrIndexParameter keyFieldNameOrIndex,
+			ObjectMapper         objectMapper)
 		{
-			return new DictionaryListMapper<K, T>(dic, keyField, objectMapper);
+			return new DictionaryListMapper<K,T>(dic, keyFieldNameOrIndex, objectMapper);
 		}
 
 		protected virtual DictionaryIndexListMapper<T> CreateDictionaryListMapper<T>(
-			IDictionary<CompoundValue,T> dic, MapIndex index, ObjectMapper objectMapper)
+			IDictionary<CompoundValue,T> dic,
+			MapIndex                     index,
+			ObjectMapper                 objectMapper)
 		{
 			return new DictionaryIndexListMapper<T>(dic, index, objectMapper);
 		}
@@ -1436,7 +1448,10 @@ namespace BLToolkit.Mapping
 		private Hashtable _differentTypeMappers = new Hashtable();
 
 		[CLSCompliant(false)]
-		public void SetValueMapper(Type sourceType, Type destType, IValueMapper mapper)
+		public void SetValueMapper(
+			Type         sourceType,
+			Type         destType,
+			IValueMapper mapper)
 		{
 			if (sourceType == null) sourceType = typeof(object);
 			if (destType   == null) destType   = typeof(object);
@@ -1460,14 +1475,18 @@ namespace BLToolkit.Mapping
 		}
 
 		[CLSCompliant(false)]
-		protected virtual IValueMapper GetValueMapper(Type sourceType, Type destType)
+		protected virtual IValueMapper GetValueMapper(
+			Type sourceType,
+			Type destType)
 		{
 			return ValueMapping.GetMapper(sourceType, destType);
 		}
 
 		[CLSCompliant(false)]
 		protected IValueMapper[] GetValueMappers(
-			IMapDataSource source, IMapDataDestination dest, int[] index)
+			IMapDataSource      source,
+			IMapDataDestination dest,
+			int[]               index)
 		{
 			IValueMapper[] mappers = new IValueMapper[index.Length];
 
@@ -1519,7 +1538,9 @@ namespace BLToolkit.Mapping
 		#region Base Mapping
 
 		[CLSCompliant(false)]
-		protected static int[] GetIndex(IMapDataSource source, IMapDataDestination dest)
+		protected static int[] GetIndex(
+			IMapDataSource      source,
+			IMapDataDestination dest)
 		{
 			int   count = source.Count;
 			int[] index = new int[count];
@@ -1656,7 +1677,10 @@ namespace BLToolkit.Mapping
 			MapInternal(null, source, sourceObject, dest, destObject, parameters);
 		}
 
-		public void MapSourceToDestination(object sourceObject, object destObject, params object[] parameters)
+		public void MapSourceToDestination(
+			object          sourceObject,
+			object          destObject,
+			params object[] parameters)
 		{
 			IMapDataSource      source = GetDataSource     (sourceObject);
 			IMapDataDestination dest   = GetDataDestination(destObject);
@@ -1850,7 +1874,10 @@ namespace BLToolkit.Mapping
 
 		#region MapObjectToObject
 
-		public object MapObjectToObject(object sourceObject, object destObject, params object[] parameters)
+		public object MapObjectToObject(
+			object          sourceObject,
+			object          destObject,
+			params object[] parameters)
 		{
 			if (sourceObject == null) throw new ArgumentNullException("sourceObject");
 			if (destObject   == null) throw new ArgumentNullException("destObject");
@@ -1864,7 +1891,10 @@ namespace BLToolkit.Mapping
 			return destObject;
 		}
 
-		public object MapObjectToObject(object sourceObject, Type destObjectType, params object[] parameters)
+		public object MapObjectToObject(
+			object          sourceObject,
+			Type            destObjectType,
+			params object[] parameters)
 		{
 			if (sourceObject == null) throw new ArgumentNullException("sourceObject");
 
@@ -1880,7 +1910,9 @@ namespace BLToolkit.Mapping
 		}
 
 #if FW2
-		public T MapObjectToObject<T>(object sourceObject, params object[] parameters)
+		public T MapObjectToObject<T>(
+			object          sourceObject,
+			params object[] parameters)
 		{
 			return (T)MapObjectToObject(sourceObject, typeof(T), parameters);
 		}
@@ -1890,7 +1922,9 @@ namespace BLToolkit.Mapping
 
 		#region MapObjectToDataRow
 
-		public DataRow MapObjectToDataRow(object sourceObject, DataRow destRow)
+		public DataRow MapObjectToDataRow(
+			object  sourceObject,
+			DataRow destRow)
 		{
 			if (sourceObject == null) throw new ArgumentNullException("sourceObject");
 
@@ -1903,7 +1937,9 @@ namespace BLToolkit.Mapping
 			return destRow;
 		}
 
-		public DataRow MapObjectToDataRow(object sourceObject, DataTable destTable)
+		public DataRow MapObjectToDataRow(
+			object    sourceObject,
+			DataTable destTable)
 		{
 			if (destTable    == null) throw new ArgumentNullException("destTable");
 			if (sourceObject == null) throw new ArgumentNullException("sourceObject");
@@ -1925,7 +1961,9 @@ namespace BLToolkit.Mapping
 
 		#region MapObjectToDictionary
 
-		public IDictionary MapObjectToDictionary(object sourceObject, IDictionary destDictionary)
+		public IDictionary MapObjectToDictionary(
+			object      sourceObject,
+			IDictionary destDictionary)
 		{
 			if (sourceObject == null) throw new ArgumentNullException("sourceObject");
 
@@ -1963,7 +2001,10 @@ namespace BLToolkit.Mapping
 
 		#region MapDataRowToObject
 
-		public object MapDataRowToObject(DataRow dataRow, object destObject, params object[] parameters)
+		public object MapDataRowToObject(
+			DataRow         dataRow,
+			object          destObject,
+			params object[] parameters)
 		{
 			if (destObject == null) throw new ArgumentNullException("destObject");
 
@@ -1977,7 +2018,10 @@ namespace BLToolkit.Mapping
 		}
 
 		public object MapDataRowToObject(
-			DataRow dataRow, DataRowVersion version, object destObject, params object[] parameters)
+			DataRow         dataRow,
+			DataRowVersion  version,
+			object          destObject,
+			params object[] parameters)
 		{
 			if (destObject == null) throw new ArgumentNullException("destObject");
 
@@ -1990,7 +2034,10 @@ namespace BLToolkit.Mapping
 			return destObject;
 		}
 
-		public object MapDataRowToObject(DataRow dataRow, Type destObjectType, params object[] parameters)
+		public object MapDataRowToObject(
+			DataRow         dataRow,
+			Type            destObjectType,
+			params object[] parameters)
 		{
 			InitContext ctx = new InitContext();
 
@@ -2004,7 +2051,10 @@ namespace BLToolkit.Mapping
 		}
 
 		public object MapDataRowToObject(
-			DataRow dataRow, DataRowVersion version, Type destObjectType, params object[] parameters)
+			DataRow         dataRow,
+			DataRowVersion  version,
+			Type            destObjectType,
+			params object[] parameters)
 		{
 			InitContext ctx = new InitContext();
 
@@ -2018,12 +2068,17 @@ namespace BLToolkit.Mapping
 		}
 
 #if FW2
-		public T MapDataRowToObject<T>(DataRow dataRow, params object[] parameters)
+		public T MapDataRowToObject<T>(
+			DataRow         dataRow,
+			params object[] parameters)
 		{
 			return (T)MapDataRowToObject(dataRow, typeof(T), parameters);
 		}
 
-		public T MapDataRowToObject<T>(DataRow dataRow, DataRowVersion version, params object[] parameters)
+		public T MapDataRowToObject<T>(
+			DataRow         dataRow,
+			DataRowVersion  version,
+			params object[] parameters)
 		{
 			return (T)MapDataRowToObject(dataRow, version, typeof(T), parameters);
 		}
@@ -2033,7 +2088,9 @@ namespace BLToolkit.Mapping
 
 		#region MapDataRowToDataRow
 
-		public DataRow MapDataRowToDataRow(DataRow sourceRow, DataRow destRow)
+		public DataRow MapDataRowToDataRow(
+			DataRow sourceRow,
+			DataRow destRow)
 		{
 			MapInternal(
 				null,
@@ -2044,7 +2101,10 @@ namespace BLToolkit.Mapping
 			return destRow;
 		}
 
-		public DataRow MapDataRowToDataRow(DataRow sourceRow, DataRowVersion version, DataRow destRow)
+		public DataRow MapDataRowToDataRow(
+			DataRow        sourceRow,
+			DataRowVersion version,
+			DataRow        destRow)
 		{
 			MapInternal(
 				null,
@@ -2055,7 +2115,9 @@ namespace BLToolkit.Mapping
 			return destRow;
 		}
 
-		public DataRow MapDataRowToDataRow(DataRow sourceRow, DataTable destTable)
+		public DataRow MapDataRowToDataRow(
+			DataRow   sourceRow,
+			DataTable destTable)
 		{
 			if (destTable == null) throw new ArgumentNullException("destTable");
 
@@ -2072,7 +2134,10 @@ namespace BLToolkit.Mapping
 			return destRow;
 		}
 
-		public DataRow MapDataRowToDataRow(DataRow sourceRow, DataRowVersion version, DataTable destTable)
+		public DataRow MapDataRowToDataRow(
+			DataRow        sourceRow,
+			DataRowVersion version,
+			DataTable      destTable)
 		{
 			if (destTable == null) throw new ArgumentNullException("destTable");
 
@@ -2093,7 +2158,9 @@ namespace BLToolkit.Mapping
 
 		#region MapDataRowToDictionary
 
-		public IDictionary MapDataRowToDictionary(DataRow sourceRow, IDictionary destDictionary)
+		public IDictionary MapDataRowToDictionary(
+			DataRow sourceRow,
+			IDictionary destDictionary)
 		{
 			MapInternal(
 				null,
@@ -2119,7 +2186,10 @@ namespace BLToolkit.Mapping
 			return destDictionary;
 		}
 
-		public IDictionary MapDataRowToDictionary(DataRow sourceRow, DataRowVersion version, IDictionary destDictionary)
+		public IDictionary MapDataRowToDictionary(
+			DataRow        sourceRow,
+			DataRowVersion version,
+			IDictionary    destDictionary)
 		{
 			MapInternal(
 				null,
@@ -2130,7 +2200,9 @@ namespace BLToolkit.Mapping
 			return destDictionary;
 		}
 
-		public Hashtable MapDataRowToDictionary(DataRow sourceRow, DataRowVersion version)
+		public Hashtable MapDataRowToDictionary(
+			DataRow        sourceRow,
+			DataRowVersion version)
 		{
 			if (sourceRow == null) throw new ArgumentNullException("sourceRow");
 
@@ -2153,7 +2225,10 @@ namespace BLToolkit.Mapping
 
 		#region MapDataReaderToObject
 
-		public object MapDataReaderToObject(IDataReader dataReader, object destObject, params object[] parameters)
+		public object MapDataReaderToObject(
+			IDataReader     dataReader,
+			object          destObject,
+			params object[] parameters)
 		{
 			if (destObject == null) throw new ArgumentNullException("destObject");
 
@@ -2166,7 +2241,10 @@ namespace BLToolkit.Mapping
 			return destObject;
 		}
 
-		public object MapDataReaderToObject(IDataReader dataReader, Type destObjectType, params object[] parameters)
+		public object MapDataReaderToObject(
+			IDataReader     dataReader,
+			Type            destObjectType,
+			params object[] parameters)
 		{
 			InitContext ctx = new InitContext();
 
@@ -2180,7 +2258,9 @@ namespace BLToolkit.Mapping
 		}
 
 #if FW2
-		public T MapDataReaderToObject<T>(IDataReader dataReader, params object[] parameters)
+		public T MapDataReaderToObject<T>(
+			IDataReader     dataReader,
+			params object[] parameters)
 		{
 			return (T)MapDataReaderToObject(dataReader, typeof(T), parameters);
 		}
@@ -2201,7 +2281,9 @@ namespace BLToolkit.Mapping
 			return destRow;
 		}
 
-		public DataRow MapDataReaderToDataRow(IDataReader dataReader, DataTable destTable)
+		public DataRow MapDataReaderToDataRow(
+			IDataReader dataReader,
+			DataTable   destTable)
 		{
 			if (destTable == null) throw new ArgumentNullException("destTable");
 
@@ -2222,7 +2304,9 @@ namespace BLToolkit.Mapping
 
 		#region MapDataReaderToDictionary
 
-		public IDictionary MapDataReaderToDictionary(IDataReader dataReader, IDictionary destDictionary)
+		public IDictionary MapDataReaderToDictionary(
+			IDataReader dataReader,
+			IDictionary destDictionary)
 		{
 			MapInternal(
 				null,
@@ -2257,7 +2341,9 @@ namespace BLToolkit.Mapping
 		#region MapDictionaryToObject
 
 		public object MapDictionaryToObject(
-			IDictionary sourceDictionary, object destObject, params object[] parameters)
+			IDictionary     sourceDictionary,
+			object          destObject,
+			params object[] parameters)
 		{
 			if (destObject == null) throw new ArgumentNullException("destObject");
 
@@ -2271,7 +2357,9 @@ namespace BLToolkit.Mapping
 		}
 
 		public object MapDictionaryToObject(
-			IDictionary sourceDictionary, Type destObjectType, params object[] parameters)
+			IDictionary     sourceDictionary,
+			Type            destObjectType,
+			params object[] parameters)
 		{
 			InitContext ctx = new InitContext();
 
@@ -2295,7 +2383,9 @@ namespace BLToolkit.Mapping
 
 		#region MapDictionaryToDataRow
 
-		public DataRow MapDictionaryToDataRow(IDictionary sourceDictionary, DataRow destRow)
+		public DataRow MapDictionaryToDataRow(
+			IDictionary sourceDictionary,
+			DataRow     destRow)
 		{
 			MapInternal(
 				null,
@@ -2306,7 +2396,9 @@ namespace BLToolkit.Mapping
 			return destRow;
 		}
 
-		public DataRow MapDictionaryToDataRow(IDictionary sourceDictionary, DataTable destTable)
+		public DataRow MapDictionaryToDataRow(
+			IDictionary sourceDictionary,
+			DataTable   destTable)
 		{
 			if (destTable == null) throw new ArgumentNullException("destTable");
 
@@ -2347,7 +2439,10 @@ namespace BLToolkit.Mapping
 			return destList;
 		}
 
-		public ArrayList MapListToList(ICollection sourceList, Type destObjectType, params object[] parameters)
+		public ArrayList MapListToList(
+			ICollection     sourceList,
+			Type            destObjectType,
+			params object[] parameters)
 		{
 			if (sourceList == null) throw new ArgumentNullException("sourceList");
 
@@ -2362,7 +2457,10 @@ namespace BLToolkit.Mapping
 		}
 
 #if FW2
-		public List<T> MapListToList<T>(ICollection sourceList, List<T> destList, params object[] parameters)
+		public List<T> MapListToList<T>(
+			ICollection     sourceList,
+			List<T>         destList,
+			params object[] parameters)
 		{
 			MapSourceListToDestinationList(
 				CreateEnumeratorMapper(sourceList.GetEnumerator()),
@@ -2372,7 +2470,9 @@ namespace BLToolkit.Mapping
 			return destList;
 		}
 
-		public List<T> MapListToList<T>(ICollection sourceList, params object[] parameters)
+		public List<T> MapListToList<T>(
+			ICollection     sourceList,
+			params object[] parameters)
 		{
 			List<T> destList = new List<T>();
 
@@ -2389,7 +2489,9 @@ namespace BLToolkit.Mapping
 
 		#region MapListToDataTable
 
-		public DataTable MapListToDataTable(ICollection sourceList, DataTable destTable)
+		public DataTable MapListToDataTable(
+			ICollection sourceList,
+			DataTable   destTable)
 		{
 			if (sourceList == null) throw new ArgumentNullException("sourceList");
 
@@ -2423,7 +2525,7 @@ namespace BLToolkit.Mapping
 		public IDictionary MapListToDictionary(
 			ICollection          sourceList,
 			IDictionary          destDictionary,
-			NameOrIndexParameter keyField,
+			NameOrIndexParameter keyFieldNameOrIndex,
 			Type                 destObjectType,
 			params object[]      parameters)
 		{
@@ -2431,7 +2533,7 @@ namespace BLToolkit.Mapping
 
 			MapSourceListToDestinationList(
 				CreateEnumeratorMapper    (sourceList.GetEnumerator()),
-				CreateDictionaryListMapper(destDictionary, keyField, GetObjectMapper(destObjectType)),
+				CreateDictionaryListMapper(destDictionary, keyFieldNameOrIndex, GetObjectMapper(destObjectType)),
 				parameters);
 
 			return destDictionary;
@@ -2439,7 +2541,7 @@ namespace BLToolkit.Mapping
 
 		public Hashtable MapListToDictionary(
 			ICollection          sourceList,
-			NameOrIndexParameter keyField,
+			NameOrIndexParameter keyFieldNameOrIndex,
 			Type                 destObjectType,
 			params object[]      parameters)
 		{
@@ -2449,7 +2551,7 @@ namespace BLToolkit.Mapping
 
 			MapSourceListToDestinationList(
 				CreateEnumeratorMapper    (sourceList.GetEnumerator()),
-				CreateDictionaryListMapper(destDictionary, keyField, GetObjectMapper(destObjectType)),
+				CreateDictionaryListMapper(destDictionary, keyFieldNameOrIndex, GetObjectMapper(destObjectType)),
 				parameters);
 
 			return destDictionary;
@@ -2459,12 +2561,12 @@ namespace BLToolkit.Mapping
 		public IDictionary<K,T> MapListToDictionary<K,T>(
 			ICollection          sourceList,
 			IDictionary<K,T>     destDictionary,
-			NameOrIndexParameter keyField,
+			NameOrIndexParameter keyFieldNameOrIndex,
 			params object[]      parameters)
 		{
 			MapSourceListToDestinationList(
 				CreateEnumeratorMapper         (sourceList.GetEnumerator()),
-				CreateDictionaryListMapper<K,T>(destDictionary, keyField, GetObjectMapper(typeof(T))),
+				CreateDictionaryListMapper<K,T>(destDictionary, keyFieldNameOrIndex, GetObjectMapper(typeof(T))),
 				parameters);
 
 			return destDictionary;
@@ -2472,14 +2574,14 @@ namespace BLToolkit.Mapping
 
 		public Dictionary<K,T> MapListToDictionary<K,T>(
 			ICollection          sourceList,
-			NameOrIndexParameter keyField,
+			NameOrIndexParameter keyFieldNameOrIndex,
 			params object[]      parameters)
 		{
-			Dictionary<K, T> destDictionary = new Dictionary<K,T>();
+			Dictionary<K,T> destDictionary = new Dictionary<K,T>();
 
 			MapSourceListToDestinationList(
 				CreateEnumeratorMapper          (sourceList.GetEnumerator()),
-				CreateDictionaryListMapper<K,T>(destDictionary, keyField, GetObjectMapper(typeof(T))),
+				CreateDictionaryListMapper<K,T>(destDictionary, keyFieldNameOrIndex, GetObjectMapper(typeof(T))),
 				parameters);
 
 			return destDictionary;
@@ -2564,7 +2666,9 @@ namespace BLToolkit.Mapping
 
 		#region MapDataTableToDataTable
 
-		public DataTable MapDataTableToDataTable(DataTable sourceTable, DataTable destTable)
+		public DataTable MapDataTableToDataTable(
+			DataTable sourceTable,
+			DataTable destTable)
 		{
 			MapSourceListToDestinationList(
 				CreateDataTableMapper(sourceTable, DataRowVersion.Default),
@@ -2574,7 +2678,10 @@ namespace BLToolkit.Mapping
 			return destTable;
 		}
 
-		public DataTable MapDataTableToDataTable(DataTable sourceTable, DataRowVersion version, DataTable destTable)
+		public DataTable MapDataTableToDataTable(
+			DataTable      sourceTable,
+			DataRowVersion version,
+			DataTable      destTable)
 		{
 			MapSourceListToDestinationList(
 				CreateDataTableMapper(sourceTable, version),
@@ -2598,7 +2705,9 @@ namespace BLToolkit.Mapping
 			return destTable;
 		}
 
-		public DataTable MapDataTableToDataTable(DataTable sourceTable, DataRowVersion version)
+		public DataTable MapDataTableToDataTable(
+			DataTable      sourceTable,
+			DataRowVersion version)
 		{
 			if (sourceTable == null) throw new ArgumentNullException("sourceTable");
 
@@ -2617,7 +2726,10 @@ namespace BLToolkit.Mapping
 		#region MapDataTableToList
 
 		public IList MapDataTableToList(
-			DataTable sourceTable, IList list, Type destObjectType, params object[] parameters)
+			DataTable       sourceTable,
+			IList           list,
+			Type            destObjectType,
+			params object[] parameters)
 		{
 			MapSourceListToDestinationList(
 				CreateDataTableMapper (sourceTable, DataRowVersion.Default),
@@ -2642,7 +2754,10 @@ namespace BLToolkit.Mapping
 			return list;
 		}
 
-		public ArrayList MapDataTableToList(DataTable sourceTable, Type destObjectType, params object[] parameters)
+		public ArrayList MapDataTableToList(
+			DataTable       sourceTable,
+			Type            destObjectType,
+			params object[] parameters)
 		{
 			ArrayList list = new ArrayList();
 
@@ -2655,7 +2770,10 @@ namespace BLToolkit.Mapping
 		}
 
 		public ArrayList MapDataTableToList(
-			DataTable sourceTable, DataRowVersion version, Type destObjectType, params object[] parameters)
+			DataTable       sourceTable,
+			DataRowVersion  version,
+			Type            destObjectType,
+			params object[] parameters)
 		{
 			ArrayList list = new ArrayList();
 
@@ -2668,7 +2786,10 @@ namespace BLToolkit.Mapping
 		}
 
 #if FW2
-		public List<T> MapDataTableToList<T>(DataTable sourceTable, List<T> list, params object[] parameters)
+		public List<T> MapDataTableToList<T>(
+			DataTable       sourceTable,
+			List<T>         list,
+			params object[] parameters)
 		{
 			MapSourceListToDestinationList(
 				CreateDataTableMapper (sourceTable, DataRowVersion.Default),
@@ -2692,7 +2813,9 @@ namespace BLToolkit.Mapping
 			return list;
 		}
 
-		public List<T> MapDataTableToList<T>(DataTable sourceTable, params object[] parameters)
+		public List<T> MapDataTableToList<T>(
+			DataTable       sourceTable,
+			params object[] parameters)
 		{
 			List<T> list = new List<T>();
 
@@ -2704,7 +2827,10 @@ namespace BLToolkit.Mapping
 			return list;
 		}
 
-		public List<T> MapDataTableToList<T>(DataTable sourceTable, DataRowVersion version, params object[] parameters)
+		public List<T> MapDataTableToList<T>(
+			DataTable       sourceTable,
+			DataRowVersion  version,
+			params object[] parameters)
 		{
 			List<T> list = new List<T>();
 
@@ -2724,13 +2850,13 @@ namespace BLToolkit.Mapping
 		public IDictionary MapDataTableToDictionary(
 			DataTable            sourceTable,
 			IDictionary          destDictionary,
-			NameOrIndexParameter keyField,
+			NameOrIndexParameter keyFieldNameOrIndex,
 			Type                 destObjectType,
 			params object[]      parameters)
 		{
 			MapSourceListToDestinationList(
 				CreateDataTableMapper     (sourceTable,    DataRowVersion.Default),
-				CreateDictionaryListMapper(destDictionary, keyField, GetObjectMapper(destObjectType)),
+				CreateDictionaryListMapper(destDictionary, keyFieldNameOrIndex, GetObjectMapper(destObjectType)),
 				parameters);
 
 			return destDictionary;
@@ -2738,15 +2864,15 @@ namespace BLToolkit.Mapping
 
 		public Hashtable MapDataTableToDictionary(
 			DataTable            sourceTable,
-			NameOrIndexParameter keyField,
-			Type                destObjectType,
-			params object[]     parameters)
+			NameOrIndexParameter keyFieldNameOrIndex,
+			Type                 destObjectType,
+			params object[]      parameters)
 		{
 			Hashtable destDictionary = new Hashtable();
 
 			MapSourceListToDestinationList(
 				CreateDataTableMapper     (sourceTable,    DataRowVersion.Default),
-				CreateDictionaryListMapper(destDictionary, keyField, GetObjectMapper(destObjectType)),
+				CreateDictionaryListMapper(destDictionary, keyFieldNameOrIndex, GetObjectMapper(destObjectType)),
 				parameters);
 
 			return destDictionary;
@@ -2756,12 +2882,12 @@ namespace BLToolkit.Mapping
 		public IDictionary<K,T> MapDataTableToDictionary<K,T>(
 			DataTable            sourceTable,
 			IDictionary<K,T>     destDictionary,
-			NameOrIndexParameter keyField,
+			NameOrIndexParameter keyFieldNameOrIndex,
 			params object[]      parameters)
 		{
 			MapSourceListToDestinationList(
 				CreateDataTableMapper          (sourceTable,    DataRowVersion.Default),
-				CreateDictionaryListMapper<K,T>(destDictionary, keyField, GetObjectMapper(typeof(T))),
+				CreateDictionaryListMapper<K,T>(destDictionary, keyFieldNameOrIndex, GetObjectMapper(typeof(T))),
 				parameters);
 
 			return destDictionary;
@@ -2769,14 +2895,14 @@ namespace BLToolkit.Mapping
 
 		public Dictionary<K,T> MapDataTableToDictionary<K,T>(
 			DataTable            sourceTable,
-			NameOrIndexParameter keyField,
+			NameOrIndexParameter keyFieldNameOrIndex,
 			params object[]      parameters)
 		{
-			Dictionary<K, T> destDictionary = new Dictionary<K,T>();
+			Dictionary<K,T> destDictionary = new Dictionary<K,T>();
 
 			MapSourceListToDestinationList(
 				CreateDataTableMapper          (sourceTable,    DataRowVersion.Default),
-				CreateDictionaryListMapper<K,T>(destDictionary, keyField, GetObjectMapper(typeof(T))),
+				CreateDictionaryListMapper<K,T>(destDictionary, keyFieldNameOrIndex, GetObjectMapper(typeof(T))),
 				parameters);
 
 			return destDictionary;
@@ -2871,7 +2997,10 @@ namespace BLToolkit.Mapping
 			return list;
 		}
 
-		public ArrayList MapDataReaderToList(IDataReader reader, Type destObjectType, params object[] parameters)
+		public ArrayList MapDataReaderToList(
+			IDataReader     reader,
+			Type            destObjectType,
+			params object[] parameters)
 		{
 			ArrayList list = new ArrayList();
 
@@ -2884,7 +3013,10 @@ namespace BLToolkit.Mapping
 		}
 
 #if FW2
-		public IList<T> MapDataReaderToList<T>(IDataReader reader, IList<T> list, params object[] parameters)
+		public IList<T> MapDataReaderToList<T>(
+			IDataReader     reader,
+			IList<T>        list,
+			params object[] parameters)
 		{
 			MapSourceListToDestinationList(
 				CreateDataReaderListMapper(reader),
@@ -2894,7 +3026,9 @@ namespace BLToolkit.Mapping
 			return list;
 		}
 
-		public List<T> MapDataReaderToList<T>(IDataReader reader, params object[] parameters)
+		public List<T> MapDataReaderToList<T>(
+			IDataReader     reader,
+			params object[] parameters)
 		{
 			List<T> list = new List<T>();
 
@@ -2973,7 +3107,9 @@ namespace BLToolkit.Mapping
 
 		#region MapDataReaderToDataTable
 
-		public DataTable MapDataReaderToDataTable(IDataReader reader, DataTable destTable)
+		public DataTable MapDataReaderToDataTable(
+			IDataReader reader,
+			DataTable   destTable)
 		{
 			MapSourceListToDestinationList(
 				CreateDataReaderListMapper(reader),
@@ -3003,13 +3139,13 @@ namespace BLToolkit.Mapping
 		public IDictionary MapDataReaderToDictionary(
 			IDataReader          reader,
 			IDictionary          destDictionary,
-			NameOrIndexParameter keyField,
+			NameOrIndexParameter keyFieldNameOrIndex,
 			Type                 destObjectType,
 			params object[]      parameters)
 		{
 			MapSourceListToDestinationList(
 				CreateDataReaderListMapper(reader),
-				CreateDictionaryListMapper(destDictionary, keyField, GetObjectMapper(destObjectType)),
+				CreateDictionaryListMapper(destDictionary, keyFieldNameOrIndex, GetObjectMapper(destObjectType)),
 				parameters);
 
 			return destDictionary;
@@ -3017,7 +3153,7 @@ namespace BLToolkit.Mapping
 
 		public Hashtable MapDataReaderToDictionary(
 			IDataReader          reader,
-			NameOrIndexParameter keyField,
+			NameOrIndexParameter keyFieldNameOrIndex,
 			Type                 destObjectType,
 			params object[]      parameters)
 		{
@@ -3025,7 +3161,7 @@ namespace BLToolkit.Mapping
 
 			MapSourceListToDestinationList(
 				CreateDataReaderListMapper(reader),
-				CreateDictionaryListMapper(dest, keyField, GetObjectMapper(destObjectType)),
+				CreateDictionaryListMapper(dest, keyFieldNameOrIndex, GetObjectMapper(destObjectType)),
 				parameters);
 
 			return dest;
@@ -3035,12 +3171,12 @@ namespace BLToolkit.Mapping
 		public IDictionary<K,T> MapDataReaderToDictionary<K,T>(
 			IDataReader          reader,
 			IDictionary<K,T>     destDictionary,
-			NameOrIndexParameter keyField,
+			NameOrIndexParameter keyFieldNameOrIndex,
 			params object[]      parameters)
 		{
 			MapSourceListToDestinationList(
 				CreateDataReaderListMapper     (reader),
-				CreateDictionaryListMapper<K,T>(destDictionary, keyField, GetObjectMapper(typeof(T))),
+				CreateDictionaryListMapper<K,T>(destDictionary, keyFieldNameOrIndex, GetObjectMapper(typeof(T))),
 				parameters);
 
 			return destDictionary;
@@ -3048,14 +3184,14 @@ namespace BLToolkit.Mapping
 
 		public Dictionary<K,T> MapDataReaderToDictionary<K,T>(
 			IDataReader          reader,
-			NameOrIndexParameter keyField,
+			NameOrIndexParameter keyFieldNameOrIndex,
 			params object[]      parameters)
 		{
-			Dictionary<K, T> dest = new Dictionary<K,T>();
+			Dictionary<K,T> dest = new Dictionary<K,T>();
 
 			MapSourceListToDestinationList(
 				CreateDataReaderListMapper     (reader),
-				CreateDictionaryListMapper<K,T>(dest, keyField, GetObjectMapper(typeof(T))),
+				CreateDictionaryListMapper<K,T>(dest, keyFieldNameOrIndex, GetObjectMapper(typeof(T))),
 				parameters);
 
 			return dest;
@@ -3206,7 +3342,9 @@ namespace BLToolkit.Mapping
 
 		#region MapDictionaryToDataTable
 
-		public DataTable MapDictionaryToDataTable(IDictionary sourceDictionary, DataTable destTable)
+		public DataTable MapDictionaryToDataTable(
+			IDictionary sourceDictionary,
+			DataTable   destTable)
 		{
 			if (sourceDictionary == null) throw new ArgumentNullException("sourceDictionary");
 
@@ -3240,7 +3378,7 @@ namespace BLToolkit.Mapping
 		public IDictionary MapDictionaryToDictionary(
 			IDictionary          sourceDictionary,
 			IDictionary          destDictionary,
-			NameOrIndexParameter keyField,
+			NameOrIndexParameter keyFieldNameOrIndex,
 			Type                 destObjectType,
 			params object[]      parameters)
 		{
@@ -3248,7 +3386,7 @@ namespace BLToolkit.Mapping
 
 			MapSourceListToDestinationList(
 				CreateEnumeratorMapper    (sourceDictionary.Values.GetEnumerator()),
-				CreateDictionaryListMapper(destDictionary, keyField, GetObjectMapper(destObjectType)),
+				CreateDictionaryListMapper(destDictionary, keyFieldNameOrIndex, GetObjectMapper(destObjectType)),
 				parameters);
 
 			return destDictionary;
@@ -3256,7 +3394,7 @@ namespace BLToolkit.Mapping
 
 		public Hashtable MapDictionaryToDictionary(
 			IDictionary          sourceDictionary,
-			NameOrIndexParameter keyField,
+			NameOrIndexParameter keyFieldNameOrIndex,
 			Type                 destObjectType,
 			params object[]      parameters)
 		{
@@ -3266,7 +3404,7 @@ namespace BLToolkit.Mapping
 
 			MapSourceListToDestinationList(
 				CreateEnumeratorMapper    (sourceDictionary.Values.GetEnumerator()),
-				CreateDictionaryListMapper(dest, keyField, GetObjectMapper(destObjectType)),
+				CreateDictionaryListMapper(dest, keyFieldNameOrIndex, GetObjectMapper(destObjectType)),
 				parameters);
 
 			return dest;
@@ -3276,14 +3414,14 @@ namespace BLToolkit.Mapping
 		public IDictionary<K,T> MapDictionaryToDictionary<K,T>(
 			IDictionary          sourceDictionary,
 			IDictionary<K,T>     destDictionary,
-			NameOrIndexParameter keyField,
+			NameOrIndexParameter keyFieldNameOrIndex,
 			params object[]      parameters)
 		{
 			if (sourceDictionary == null) throw new ArgumentNullException("sourceDictionary");
 
 			MapSourceListToDestinationList(
 				CreateEnumeratorMapper         (sourceDictionary.Values.GetEnumerator()),
-				CreateDictionaryListMapper<K,T>(destDictionary, keyField, GetObjectMapper(typeof(T))),
+				CreateDictionaryListMapper<K,T>(destDictionary, keyFieldNameOrIndex, GetObjectMapper(typeof(T))),
 				parameters);
 
 			return destDictionary;
@@ -3291,16 +3429,16 @@ namespace BLToolkit.Mapping
 
 		public Dictionary<K,T> MapDictionaryToDictionary<K,T>(
 			IDictionary          sourceDictionary,
-			NameOrIndexParameter keyField,
+			NameOrIndexParameter keyFieldNameOrIndex,
 			params object[]      parameters)
 		{
 			if (sourceDictionary == null) throw new ArgumentNullException("sourceDictionary");
 
-			Dictionary<K, T> dest = new Dictionary<K,T>();
+			Dictionary<K,T> dest = new Dictionary<K,T>();
 
 			MapSourceListToDestinationList(
 				CreateEnumeratorMapper         (sourceDictionary.Values.GetEnumerator()),
-				CreateDictionaryListMapper<K,T>(dest, keyField, GetObjectMapper(typeof(T))),
+				CreateDictionaryListMapper<K,T>(dest, keyFieldNameOrIndex, GetObjectMapper(typeof(T))),
 				parameters);
 
 			return dest;
@@ -3478,7 +3616,9 @@ namespace BLToolkit.Mapping
 			}
 		}
 
-		public void MapDataReaderToResultSet(IDataReader reader, MapResultSet[] resultSets)
+		public void MapDataReaderToResultSet(
+			IDataReader    reader,
+			MapResultSet[] resultSets)
 		{
 			if (reader == null) throw new ArgumentNullException("reader");
 
@@ -3493,7 +3633,9 @@ namespace BLToolkit.Mapping
 			MapResultSets(resultSets);
 		}
 
-		public void MapDataSetToResultSet(DataSet dataSet, MapResultSet[] resultSets)
+		public void MapDataSetToResultSet(
+			DataSet        dataSet,
+			MapResultSet[] resultSets)
 		{
 			for (int i = 0; i < resultSets.Length && i < dataSet.Tables.Count; i++)
 			{
@@ -3526,7 +3668,10 @@ namespace BLToolkit.Mapping
 		}
 
 		private int GetResultSets(
-			int current, MapResultSet[] output, MapResultSet master, MapNextResult[] nextResults)
+			int             current,
+			MapResultSet[]  output,
+			MapResultSet    master,
+			MapNextResult[] nextResults)
 		{
 			foreach (MapNextResult nr in nextResults)
 			{
@@ -3540,7 +3685,9 @@ namespace BLToolkit.Mapping
 			return current;
 		}
 
-		public MapResultSet[] ConvertToResultSet(Type masterType, params MapNextResult[] nextResults)
+		public MapResultSet[] ConvertToResultSet(
+			Type                   masterType,
+			params MapNextResult[] nextResults)
 		{
 			MapResultSet[] output = new MapResultSet[1 + GetResultCount(nextResults)];
 

@@ -107,7 +107,6 @@
 
 	<region name="Scalar Types">
 		<converter type="String">
-			<from type="Type">return p == null? null: p.FullName;</from>
 			<group name="Scalar Types.">
 				<include template ="Numeric Types"/>
 				<from type="Char"/>
@@ -130,6 +129,7 @@
 				<from type="SqlBinary"/>
 				<default              >return p.ToString();</default>
 			</group>
+			<from type="Type"         >return p == null? null: p.FullName;</from>
 			<default                  >return Convert.ToString(p);</default>
 		</converter>
 		<br/>
@@ -815,7 +815,7 @@
 			</group>
 			<default nullvalue="null"/>
 		</converter>
-	</region>-->
+	</region>
 	<region name="SqlTypes">
 		<converter type="SqlString">
 			<group name="Scalar Types.">

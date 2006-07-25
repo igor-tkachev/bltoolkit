@@ -34,7 +34,7 @@ namespace BLToolkit.Common
 		sealed class Assignable<Q> : CB<Q,Q> { public override Q C(Q p) { return p; } }
 		sealed class Default<Q,V>  : CB<Q,V> { public override Q C(V p) { return (Q)Convert.ChangeType(p, typeof(Q)); } }
 
-		public static readonly CB<T,P> I = GetConverter();
+		public static CB<T,P> I = GetConverter();
 		static CB<T,P> GetConverter()
 		{
 			Type t = typeof(T);
