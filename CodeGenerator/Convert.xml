@@ -6,67 +6,6 @@
 	<using namespace="System.IO"/>
 	<using namespace="System.Xml"/>
 
-	<!--
-	Short type names.
-	'A' => Arrays,
-	'N' => Nullable<>,
-	'I' => Integer types,
-	'U' => Unsigned integer types,
-	'R' => Real types,
-	'db' => Sql types.
-	-->
-	<nick type="Object"      name="O"/>
-	<nick type="String"      name="S"/>
-	<nick type="Char"        name="C"/>
-
-	<nick type="SByte"       name="I8"/>
-	<nick type="Int16"       name="I16"/>
-	<nick type="Int32"       name="I32"/>
-	<nick type="Int64"       name="I64"/>
-
-	<nick type="Byte"        name="U8"/>
-	<nick type="UInt16"      name="U16"/>
-	<nick type="UInt32"      name="U32"/>
-	<nick type="UInt64"      name="U64"/>
-
-	<nick type="Single"      name="R4"/>
-	<nick type="Double"      name="R8"/>
-
-	<nick type="Boolean"     name="B"/>
-	<nick type="Decimal"     name="D"/>
-
-	<nick type="Guid"        name="G"/>
-	<nick type="TimeSpan"    name="TS"/>
-	<nick type="DateTime"    name="DT"/>
-
-	<nick type="SqlString"   name="dbS"/>
-
-	<nick type="SqlByte"     name="dbU8"/>
-	<nick type="SqlInt16"    name="dbI16"/>
-	<nick type="SqlInt32"    name="dbI32"/>
-	<nick type="SqlInt64"    name="dbI64"/>
-
-	<nick type="SqlSingle"   name="dbR4"/>
-	<nick type="SqlDouble"   name="dbR8"/>
-	<nick type="SqlDecimal"  name="dbD"/>
-	<nick type="SqlMoney"    name="dbM"/>
-
-	<nick type="SqlBoolean"  name="dbB"/>
-	<nick type="SqlDateTime" name="dbDT"/>
-	<nick type="SqlGuid"     name="dbG"/>
-
-	<nick type="SqlBinary"   name="dbBin"/>
-	<nick type="SqlBytes"    name="dbAU8"/>
-	<nick type="SqlChars"    name="dbAC"/>
-	<nick type="SqlXml"      name="dbXml"/>
-
-	<nick type="Byte[]"      name="AU8"/>
-	<nick type="Char[]"      name="AC"/>
-
-	<nick type="Type"        name="T"/>
-	<nick type="Stream"      name="IOS"/>
-	<nick type="XmlReader"   name="Xml"/>
-
 	<template name="Integer Types">
 		<type name="SByte"   />
 		<type name="Int16"   />
@@ -393,7 +332,7 @@
 				<br/>
 				<include template ="Numeric Types"/>
 				<br/>
-				<from type="Char"      >return (p.HasValue)? Convert&lt;Boolean,Char&gt;.I.C(p.Value): false;</from>
+				<from type="Char"      >return (p.HasValue)? Convert&lt;Boolean,Char&gt;.Instance.From(p.Value): false;</from>
 				<default               >return p.HasValue? Convert.ToBoolean(p.Value): false;</default>
 			</group>
 			<group name="SqlTypes.">
@@ -721,7 +660,7 @@
 				<br/>
 				<include template ="Numeric Types"/>
 				<br/>
-				<from type="Char"      >return Convert&lt;Boolean,Char&gt;.I.C(p);</from>
+				<from type="Char"      >return Convert&lt;Boolean,Char&gt;.Instance.From(p);</from>
 				<default>return Convert.ToBoolean(p);</default>
 			</group>
 
@@ -729,7 +668,7 @@
 				<include template ="Numeric Types"/>
 				<default               >return p.HasValue? (Boolean?)Convert.ToBoolean(p.Value): null;</default>
 				<br/>
-				<from type="Char"      >return p.HasValue? (Boolean?)Convert&lt;Boolean,Char&gt;.I.C(p.Value): null;</from>
+				<from type="Char"      >return p.HasValue? (Boolean?)Convert&lt;Boolean,Char&gt;.Instance.From(p.Value): null;</from>
 			</group>
 
 			<group name="SqlTypes.">
@@ -1035,13 +974,13 @@
 				<from type="String"   >return p == null? SqlBoolean.Null: SqlBoolean.Parse(p);</from>
 				<br/>
 				<include template ="Numeric Types"/>
-				<from type="Char"      >return Convert&lt;Boolean,Char&gt;.I.C(p);</from>
+				<from type="Char"      >return Convert&lt;Boolean,Char&gt;.Instance.From(p);</from>
 			</group>
 
 			<group name="Nullable Types." nullable="true">
 				<from type="Boolean" >return p.HasValue?                   p.Value  : SqlBoolean.Null;</from>
 				<include template ="Numeric Types"/>
-				<from type="Char"     >return (p.HasValue)? Convert&lt;Boolean,Char&gt;.I.C(p.Value): SqlBoolean.Null;</from>
+				<from type="Char"     >return (p.HasValue)? Convert&lt;Boolean,Char&gt;.Instance.From(p.Value): SqlBoolean.Null;</from>
 				<default              >return p.HasValue? Convert.ToBoolean(p.Value) : SqlBoolean.Null;</default>
 			</group>
 
@@ -1237,7 +1176,7 @@
 				<from type="SqlChars"  >return p.IsNull? null: p.Value;</from>
 			</group>
 			<default nullvalue="null" nothrow="true">
-				return Convert&lt;string,object&gt;.I.C(p).ToCharArray();</default>
+				return Convert&lt;string,object&gt;.Instance.From(p).ToCharArray();</default>
 		</converter>
 		<converter type="XmlReader">
 			<group name="Scalar Types.">

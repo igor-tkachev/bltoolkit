@@ -5,158 +5,175 @@ using System.Xml;
 
 namespace BLToolkit.Common
 {
-	public static partial class Convert<T,P>
+	#region Other types
+
+	#region Type
+
+	partial class ConvertPartial<T,P>: IConvertible<Type,P>
 	{
-		#region Other types
+		Type IConvertible<Type,P>.From(P p) { return Convert<Type,object>.Instance.From(p); }
+	}
 
-		#region Type
-
-
+	partial class ConvertExplicit<T,P>:
 		// Scalar Types.
-		//
-		sealed class T_S         : CB<Type,String>     { public override Type C(String p)      { return p == null      ? null: Type.GetType(p);                   } }
-		sealed class T_AC        : CB<Type,Char[]>     { public override Type C(Char[] p)      { return p == null      ? null: Type.GetType(new string(p));       } }
-		sealed class T_G         : CB<Type,Guid>       { public override Type C(Guid p)        { return p == Guid.Empty? null: Type.GetTypeFromCLSID(p);          } }
+		// 
+		IConvertible<Type,String>, 
+		IConvertible<Type,Char[]>, 
+		IConvertible<Type,Guid>, 
 
 		// Nullable Types.
-		//
-		sealed class T_NG        : CB<Type,Guid?>      { public override Type C(Guid? p)       { return p.HasValue? Type.GetTypeFromCLSID(p.Value): null; } }
+		// 
+		IConvertible<Type,Guid?>, 
 
 		// SqlTypes.
-		//
-		sealed class T_dbS       : CB<Type,SqlString>  { public override Type C(SqlString p)   { return p.IsNull       ? null: Type.GetType(p.Value);             } }
-		sealed class T_dbAC      : CB<Type,SqlChars>   { public override Type C(SqlChars p)    { return p.IsNull       ? null: Type.GetType(new string(p.Value)); } }
-		sealed class T_dbG       : CB<Type,SqlGuid>    { public override Type C(SqlGuid p)     { return p.IsNull       ? null: Type.GetTypeFromCLSID(p.Value);    } }
+		// 
+		IConvertible<Type,SqlString>, 
+		IConvertible<Type,SqlChars>, 
+		IConvertible<Type,SqlGuid>, 
 
-		sealed class T_<Q>       : CB<Type,Q>          { public override Type C(Q p)           { return Convert<Type,object>.From(p); } }
-		sealed class T_O         : CB<Type,object>     { public override Type C(object p)     
-			{
-				if (p == null) return null;
+		IConvertible<Type,object>
 
-				// Scalar Types.
-				//
-				if (p is String)      return Convert<Type,String>     .I.C((String)p);
-				if (p is Char[])      return Convert<Type,Char[]>     .I.C((Char[])p);
-				if (p is Guid)        return Convert<Type,Guid>       .I.C((Guid)p);
+	{
+		// Scalar Types.
+		// 
+		Type IConvertible<Type,String>.     From(String p)      { return p == null      ? null: Type.GetType(p);                   }
+		Type IConvertible<Type,Char[]>.     From(Char[] p)      { return p == null      ? null: Type.GetType(new string(p));       }
+		Type IConvertible<Type,Guid>.       From(Guid p)        { return p == Guid.Empty? null: Type.GetTypeFromCLSID(p);          }
 
-				// Nullable Types.
-				//
-				if (p is Guid?)       return Convert<Type,Guid?>      .I.C((Guid?)p);
+		// Nullable Types.
+		// 
+		Type IConvertible<Type,Guid?>.      From(Guid? p)       { return p.HasValue? Type.GetTypeFromCLSID(p.Value): null; }
 
-				// SqlTypes.
-				//
-				if (p is SqlString)   return Convert<Type,SqlString>  .I.C((SqlString)p);
-				if (p is SqlChars)    return Convert<Type,SqlChars>   .I.C((SqlChars)p);
-				if (p is SqlGuid)     return Convert<Type,SqlGuid>    .I.C((SqlGuid)p);
+		// SqlTypes.
+		// 
+		Type IConvertible<Type,SqlString>.  From(SqlString p)   { return p.IsNull       ? null: Type.GetType(p.Value);             }
+		Type IConvertible<Type,SqlChars>.   From(SqlChars p)    { return p.IsNull       ? null: Type.GetType(new string(p.Value)); }
+		Type IConvertible<Type,SqlGuid>.    From(SqlGuid p)     { return p.IsNull       ? null: Type.GetTypeFromCLSID(p.Value);    }
 
-				throw new InvalidCastException(string.Format(
-					"Invalid cast from {0} to {1}", p.GetType().FullName, typeof(T).FullName));
-			} }
-
-		static CB<T,P> GetTypeConverter()
+		Type IConvertible<Type,object>.     From(object p)     
 		{
-			Type t = typeof(P);
-
+			if (p == null) return null;
 
 			// Scalar Types.
 			//
-			if (t == typeof(String))      return (CB<T,P>)(object)(new T_S         ());
-			if (t == typeof(Char[]))      return (CB<T,P>)(object)(new T_AC        ());
-			if (t == typeof(Guid))        return (CB<T,P>)(object)(new T_G         ());
+			if (p is String)      return Convert<Type,String>     .Instance.From((String)p);
+			if (p is Char[])      return Convert<Type,Char[]>     .Instance.From((Char[])p);
+			if (p is Guid)        return Convert<Type,Guid>       .Instance.From((Guid)p);
 
 			// Nullable Types.
 			//
-			if (t == typeof(Guid?))       return (CB<T,P>)(object)(new T_NG        ());
+			if (p is Guid?)       return Convert<Type,Guid?>      .Instance.From((Guid?)p);
 
 			// SqlTypes.
 			//
-			if (t == typeof(SqlString))   return (CB<T,P>)(object)(new T_dbS       ());
-			if (t == typeof(SqlChars))    return (CB<T,P>)(object)(new T_dbAC      ());
-			if (t == typeof(SqlGuid))     return (CB<T,P>)(object)(new T_dbG       ());
+			if (p is SqlString)   return Convert<Type,SqlString>  .Instance.From((SqlString)p);
+			if (p is SqlChars)    return Convert<Type,SqlChars>   .Instance.From((SqlChars)p);
+			if (p is SqlGuid)     return Convert<Type,SqlGuid>    .Instance.From((SqlGuid)p);
 
-			if (t == typeof(object))      return (CB<T,P>)(object)(new T_O         ());
-
-			return (CB<T,P>)(object)(new T_<P>());
+			throw new InvalidCastException(string.Format(
+				"Invalid cast from {0} to {1}", p.GetType().FullName, typeof(T).FullName));
 		}
+	}
 
-		#endregion
+	#endregion
 
-		#region Stream
+	#region Stream
 
+	partial class ConvertPartial<T,P>: IConvertible<Stream,P>
+	{
+		Stream IConvertible<Stream,P>.From(P p) { return Convert<Stream,object>.Instance.From(p); }
+	}
 
+	partial class ConvertExplicit<T,P>:
 		// Scalar Types.
-		//
-		sealed class IOS_G       : CB<Stream,Guid>       { public override Stream C(Guid p)        { return p == Guid.Empty? Stream.Null: new MemoryStream(p.ToByteArray()); } }
-		sealed class IOS_AU8     : CB<Stream,Byte[]>     { public override Stream C(Byte[] p)      { return p == null? Stream.Null: new MemoryStream(p); } }
+		// 
+		IConvertible<Stream,Guid>, 
+		IConvertible<Stream,Byte[]>, 
 
 		// Nullable Types.
-		//
-		sealed class IOS_NG      : CB<Stream,Guid?>      { public override Stream C(Guid? p)       { return p.HasValue? new MemoryStream(p.Value.ToByteArray()): Stream.Null; } }
+		// 
+		IConvertible<Stream,Guid?>, 
 
 		// SqlTypes.
-		//
-		sealed class IOS_dbAU8   : CB<Stream,SqlBytes>   { public override Stream C(SqlBytes p)    { return p.IsNull? Stream.Null: p.Stream;                  } }
-		sealed class IOS_dbBin   : CB<Stream,SqlBinary>  { public override Stream C(SqlBinary p)   { return p.IsNull? Stream.Null: new MemoryStream(p.Value); } }
-		sealed class IOS_dbG     : CB<Stream,SqlGuid>    { public override Stream C(SqlGuid p)     { return p.IsNull? Stream.Null: new MemoryStream(p.Value.ToByteArray()); } }
+		// 
+		IConvertible<Stream,SqlBytes>, 
+		IConvertible<Stream,SqlBinary>, 
+		IConvertible<Stream,SqlGuid>, 
 
-		sealed class IOS_<Q>     : CB<Stream,Q>          { public override Stream C(Q p)           { return Convert<Stream,object>.From(p); } }
-		sealed class IOS_O       : CB<Stream,object>     { public override Stream C(object p)     
-			{
-				if (p == null) return Stream.Null;
+		IConvertible<Stream,object>
 
-				// Scalar Types.
-				//
-				if (p is Guid)        return Convert<Stream,Guid>       .I.C((Guid)p);
-				if (p is Byte[])      return Convert<Stream,Byte[]>     .I.C((Byte[])p);
+	{
+		// Scalar Types.
+		// 
+		Stream IConvertible<Stream,Guid>.       From(Guid p)        { return p == Guid.Empty? Stream.Null: new MemoryStream(p.ToByteArray()); }
+		Stream IConvertible<Stream,Byte[]>.     From(Byte[] p)      { return p == null? Stream.Null: new MemoryStream(p); }
 
-				// Nullable Types.
-				//
-				if (p is Guid?)       return Convert<Stream,Guid?>      .I.C((Guid?)p);
+		// Nullable Types.
+		// 
+		Stream IConvertible<Stream,Guid?>.      From(Guid? p)       { return p.HasValue? new MemoryStream(p.Value.ToByteArray()): Stream.Null; }
 
-				// SqlTypes.
-				//
-				if (p is SqlBytes)    return Convert<Stream,SqlBytes>   .I.C((SqlBytes)p);
-				if (p is SqlBinary)   return Convert<Stream,SqlBinary>  .I.C((SqlBinary)p);
-				if (p is SqlGuid)     return Convert<Stream,SqlGuid>    .I.C((SqlGuid)p);
+		// SqlTypes.
+		// 
+		Stream IConvertible<Stream,SqlBytes>.   From(SqlBytes p)    { return p.IsNull? Stream.Null: p.Stream;                  }
+		Stream IConvertible<Stream,SqlBinary>.  From(SqlBinary p)   { return p.IsNull? Stream.Null: new MemoryStream(p.Value); }
+		Stream IConvertible<Stream,SqlGuid>.    From(SqlGuid p)     { return p.IsNull? Stream.Null: new MemoryStream(p.Value.ToByteArray()); }
 
-				throw new InvalidCastException(string.Format(
-					"Invalid cast from {0} to {1}", p.GetType().FullName, typeof(T).FullName));
-			} }
-
-		static CB<T,P> GetStreamConverter()
+		Stream IConvertible<Stream,object>.     From(object p)     
 		{
-			Type t = typeof(P);
-
+			if (p == null) return Stream.Null;
 
 			// Scalar Types.
 			//
-			if (t == typeof(Guid))        return (CB<T,P>)(object)(new IOS_G       ());
-			if (t == typeof(Byte[]))      return (CB<T,P>)(object)(new IOS_AU8     ());
+			if (p is Guid)        return Convert<Stream,Guid>       .Instance.From((Guid)p);
+			if (p is Byte[])      return Convert<Stream,Byte[]>     .Instance.From((Byte[])p);
 
 			// Nullable Types.
 			//
-			if (t == typeof(Guid?))       return (CB<T,P>)(object)(new IOS_NG      ());
+			if (p is Guid?)       return Convert<Stream,Guid?>      .Instance.From((Guid?)p);
 
 			// SqlTypes.
 			//
-			if (t == typeof(SqlBytes))    return (CB<T,P>)(object)(new IOS_dbAU8   ());
-			if (t == typeof(SqlBinary))   return (CB<T,P>)(object)(new IOS_dbBin   ());
-			if (t == typeof(SqlGuid))     return (CB<T,P>)(object)(new IOS_dbG     ());
+			if (p is SqlBytes)    return Convert<Stream,SqlBytes>   .Instance.From((SqlBytes)p);
+			if (p is SqlBinary)   return Convert<Stream,SqlBinary>  .Instance.From((SqlBinary)p);
+			if (p is SqlGuid)     return Convert<Stream,SqlGuid>    .Instance.From((SqlGuid)p);
 
-			if (t == typeof(object))      return (CB<T,P>)(object)(new IOS_O       ());
-
-			return (CB<T,P>)(object)(new IOS_<P>());
+			throw new InvalidCastException(string.Format(
+				"Invalid cast from {0} to {1}", p.GetType().FullName, typeof(T).FullName));
 		}
+	}
 
-		#endregion
+	#endregion
 
-		#region Byte[]
+	#region Byte[]
 
+	partial class ConvertPartial<T,P>: IConvertible<Byte[],P>
+	{
+		Byte[] IConvertible<Byte[],P>.From(P p) { return Convert<Byte[],object>.Instance.From(p); }
+	}
 
+	partial class ConvertExplicit<T,P>:
 		// Scalar Types.
-		//
-		sealed class AU8_IOS     : CB<Byte[],Stream>     { public override Byte[] C(Stream p)     
-			{
+		// 
+		IConvertible<Byte[],Stream>, 
+		IConvertible<Byte[],Guid>, 
+
+		// Nullable Types.
+		// 
+		IConvertible<Byte[],Guid?>, 
+
+		// SqlTypes.
+		// 
+		IConvertible<Byte[],SqlBinary>, 
+		IConvertible<Byte[],SqlBytes>, 
+		IConvertible<Byte[],SqlGuid>, 
+
+		IConvertible<Byte[],object>
+
+	{
+		// Scalar Types.
+		// 
+		Byte[] IConvertible<Byte[],Stream>.     From(Stream p)     
+		{
 					if (p == null)         return null;
 					if (p is MemoryStream) return ((MemoryStream)p).ToArray();
 
@@ -167,201 +184,173 @@ namespace BLToolkit.Common
 
 					return bytes;
 				
-			} }
-		sealed class AU8_G       : CB<Byte[],Guid>       { public override Byte[] C(Guid p)        { return p == Guid.Empty? null: p.ToByteArray(); } }
+		}
+		Byte[] IConvertible<Byte[],Guid>.       From(Guid p)        { return p == Guid.Empty? null: p.ToByteArray(); }
 
 		// Nullable Types.
-		//
-		sealed class AU8_NG      : CB<Byte[],Guid?>      { public override Byte[] C(Guid? p)       { return p.HasValue? p.Value.ToByteArray(): null; } }
+		// 
+		Byte[] IConvertible<Byte[],Guid?>.      From(Guid? p)       { return p.HasValue? p.Value.ToByteArray(): null; }
 
 		// SqlTypes.
-		//
-		sealed class AU8_dbBin   : CB<Byte[],SqlBinary>  { public override Byte[] C(SqlBinary p)   { return p.IsNull? null: p.Value; } }
-		sealed class AU8_dbAU8   : CB<Byte[],SqlBytes>   { public override Byte[] C(SqlBytes p)    { return p.IsNull? null: p.Value; } }
-		sealed class AU8_dbG     : CB<Byte[],SqlGuid>    { public override Byte[] C(SqlGuid p)     { return p.IsNull? null: p.ToByteArray(); } }
+		// 
+		Byte[] IConvertible<Byte[],SqlBinary>.  From(SqlBinary p)   { return p.IsNull? null: p.Value; }
+		Byte[] IConvertible<Byte[],SqlBytes>.   From(SqlBytes p)    { return p.IsNull? null: p.Value; }
+		Byte[] IConvertible<Byte[],SqlGuid>.    From(SqlGuid p)     { return p.IsNull? null: p.ToByteArray(); }
 
-		sealed class AU8_<Q>     : CB<Byte[],Q>          { public override Byte[] C(Q p)           { return Convert<Byte[],object>.From(p); } }
-		sealed class AU8_O       : CB<Byte[],object>     { public override Byte[] C(object p)     
-			{
-				if (p == null) return null;
-
-				// Scalar Types.
-				//
-				if (p is Stream)      return Convert<Byte[],Stream>     .I.C((Stream)p);
-				if (p is Guid)        return Convert<Byte[],Guid>       .I.C((Guid)p);
-
-				// Nullable Types.
-				//
-				if (p is Guid?)       return Convert<Byte[],Guid?>      .I.C((Guid?)p);
-
-				// SqlTypes.
-				//
-				if (p is SqlBinary)   return Convert<Byte[],SqlBinary>  .I.C((SqlBinary)p);
-				if (p is SqlBytes)    return Convert<Byte[],SqlBytes>   .I.C((SqlBytes)p);
-				if (p is SqlGuid)     return Convert<Byte[],SqlGuid>    .I.C((SqlGuid)p);
-
-				throw new InvalidCastException(string.Format(
-					"Invalid cast from {0} to {1}", p.GetType().FullName, typeof(T).FullName));
-			} }
-
-		static CB<T,P> GetByteArrayConverter()
+		Byte[] IConvertible<Byte[],object>.     From(object p)     
 		{
-			Type t = typeof(P);
-
+			if (p == null) return null;
 
 			// Scalar Types.
 			//
-			if (t == typeof(Stream))      return (CB<T,P>)(object)(new AU8_IOS     ());
-			if (t == typeof(Guid))        return (CB<T,P>)(object)(new AU8_G       ());
+			if (p is Stream)      return Convert<Byte[],Stream>     .Instance.From((Stream)p);
+			if (p is Guid)        return Convert<Byte[],Guid>       .Instance.From((Guid)p);
 
 			// Nullable Types.
 			//
-			if (t == typeof(Guid?))       return (CB<T,P>)(object)(new AU8_NG      ());
+			if (p is Guid?)       return Convert<Byte[],Guid?>      .Instance.From((Guid?)p);
 
 			// SqlTypes.
 			//
-			if (t == typeof(SqlBinary))   return (CB<T,P>)(object)(new AU8_dbBin   ());
-			if (t == typeof(SqlBytes))    return (CB<T,P>)(object)(new AU8_dbAU8   ());
-			if (t == typeof(SqlGuid))     return (CB<T,P>)(object)(new AU8_dbG     ());
+			if (p is SqlBinary)   return Convert<Byte[],SqlBinary>  .Instance.From((SqlBinary)p);
+			if (p is SqlBytes)    return Convert<Byte[],SqlBytes>   .Instance.From((SqlBytes)p);
+			if (p is SqlGuid)     return Convert<Byte[],SqlGuid>    .Instance.From((SqlGuid)p);
 
-			if (t == typeof(object))      return (CB<T,P>)(object)(new AU8_O       ());
-
-			return (CB<T,P>)(object)(new AU8_<P>());
+			throw new InvalidCastException(string.Format(
+				"Invalid cast from {0} to {1}", p.GetType().FullName, typeof(T).FullName));
 		}
+	}
 
-		#endregion
+	#endregion
 
-		#region Char[]
+	#region Char[]
 
+	partial class ConvertPartial<T,P>: IConvertible<Char[],P>
+	{
+		Char[] IConvertible<Char[],P>.From(P p) { return Convert<Char[],object>.Instance.From(p); }
+	}
 
+	partial class ConvertExplicit<T,P>:
 		// Scalar Types.
-		//
-		sealed class AC_S        : CB<Char[],String>     { public override Char[] C(String p)      { return p == null? null: p.ToCharArray(); } }
+		// 
+		IConvertible<Char[],String>, 
 
 		// SqlTypes.
-		//
-		sealed class AC_dbS      : CB<Char[],SqlString>  { public override Char[] C(SqlString p)   { return p.IsNull? null: p.Value.ToCharArray(); } }
-		sealed class AC_dbAC     : CB<Char[],SqlChars>   { public override Char[] C(SqlChars p)    { return p.IsNull? null: p.Value; } }
+		// 
+		IConvertible<Char[],SqlString>, 
+		IConvertible<Char[],SqlChars>, 
 
-		sealed class AC_<Q>      : CB<Char[],Q>          { public override Char[] C(Q p)           { return Convert<Char[],object>.From(p); } }
-		sealed class AC_O        : CB<Char[],object>     { public override Char[] C(object p)     
-			{
-				if (p == null) return null;
+		IConvertible<Char[],object>
 
-				// Scalar Types.
-				//
-				if (p is String)      return Convert<Char[],String>     .I.C((String)p);
+	{
+		// Scalar Types.
+		// 
+		Char[] IConvertible<Char[],String>.     From(String p)      { return p == null? null: p.ToCharArray(); }
 
-				// SqlTypes.
-				//
-				if (p is SqlString)   return Convert<Char[],SqlString>  .I.C((SqlString)p);
-				if (p is SqlChars)    return Convert<Char[],SqlChars>   .I.C((SqlChars)p);
+		// SqlTypes.
+		// 
+		Char[] IConvertible<Char[],SqlString>.  From(SqlString p)   { return p.IsNull? null: p.Value.ToCharArray(); }
+		Char[] IConvertible<Char[],SqlChars>.   From(SqlChars p)    { return p.IsNull? null: p.Value; }
 
-				return Convert<string,object>.I.C(p).ToCharArray();
-			} }
-
-		static CB<T,P> GetCharArrayConverter()
+		Char[] IConvertible<Char[],object>.     From(object p)     
 		{
-			Type t = typeof(P);
-
+			if (p == null) return null;
 
 			// Scalar Types.
 			//
-			if (t == typeof(String))      return (CB<T,P>)(object)(new AC_S        ());
+			if (p is String)      return Convert<Char[],String>     .Instance.From((String)p);
 
 			// SqlTypes.
 			//
-			if (t == typeof(SqlString))   return (CB<T,P>)(object)(new AC_dbS      ());
-			if (t == typeof(SqlChars))    return (CB<T,P>)(object)(new AC_dbAC     ());
+			if (p is SqlString)   return Convert<Char[],SqlString>  .Instance.From((SqlString)p);
+			if (p is SqlChars)    return Convert<Char[],SqlChars>   .Instance.From((SqlChars)p);
 
-			if (t == typeof(object))      return (CB<T,P>)(object)(new AC_O        ());
-
-			return (CB<T,P>)(object)(new AC_<P>());
+				return Convert<string,object>.Instance.From(p).ToCharArray();
 		}
+	}
 
-		#endregion
+	#endregion
 
-		#region XmlReader
+	#region XmlReader
 
+	partial class ConvertPartial<T,P>: IConvertible<XmlReader,P>
+	{
+		XmlReader IConvertible<XmlReader,P>.From(P p) { return Convert<XmlReader,object>.Instance.From(p); }
+	}
 
+	partial class ConvertExplicit<T,P>:
 		// Scalar Types.
-		//
-		sealed class Xml_S       : CB<XmlReader,String>     { public override XmlReader C(String p)      { return p == null? null: XmlReader.Create(new StringReader(p)); } }
+		// 
+		IConvertible<XmlReader,String>, 
 
 		// SqlTypes.
-		//
-		sealed class Xml_dbXml   : CB<XmlReader,SqlXml>     { public override XmlReader C(SqlXml p)      { return p.IsNull? null: p.CreateReader(); } }
-		sealed class Xml_dbS     : CB<XmlReader,SqlString>  { public override XmlReader C(SqlString p)   { return p.IsNull? null: XmlReader.Create(new StringReader(p.Value)); } }
-		sealed class Xml_dbAC    : CB<XmlReader,SqlChars>   { public override XmlReader C(SqlChars p)    { return p.IsNull? null: XmlReader.Create(new StringReader(p.ToSqlString().Value)); } }
-		sealed class Xml_dbBin   : CB<XmlReader,SqlBinary>  { public override XmlReader C(SqlBinary p)   { return p.IsNull? null: XmlReader.Create(new MemoryStream(p.Value)); } }
+		// 
+		IConvertible<XmlReader,SqlXml>, 
+		IConvertible<XmlReader,SqlString>, 
+		IConvertible<XmlReader,SqlChars>, 
+		IConvertible<XmlReader,SqlBinary>, 
 
 		// Other Types.
-		//
-		sealed class Xml_IOS     : CB<XmlReader,Stream>     { public override XmlReader C(Stream p)      { return p == null? null: XmlReader.Create(p); } }
-		sealed class Xml_TR      : CB<XmlReader,TextReader> { public override XmlReader C(TextReader p)  { return p == null? null: XmlReader.Create(p); } }
+		// 
+		IConvertible<XmlReader,Stream>, 
+		IConvertible<XmlReader,TextReader>, 
 
-		sealed class Xml_AC      : CB<XmlReader,Char[]>     { public override XmlReader C(Char[] p)      { return p == null? null: XmlReader.Create(new StringReader(new string(p))); } }
-		sealed class Xml_AU8     : CB<XmlReader,Byte[]>     { public override XmlReader C(Byte[] p)      { return p == null? null: XmlReader.Create(new MemoryStream(p)); } }
+		IConvertible<XmlReader,Char[]>, 
+		IConvertible<XmlReader,Byte[]>, 
 
-		sealed class Xml_<Q>     : CB<XmlReader,Q>          { public override XmlReader C(Q p)           { return Convert<XmlReader,object>.From(p); } }
-		sealed class Xml_O       : CB<XmlReader,object>     { public override XmlReader C(object p)     
-			{
-				if (p == null) return null;
+		IConvertible<XmlReader,object>
 
-				// Scalar Types.
-				//
-				if (p is String)      return Convert<XmlReader,String>     .I.C((String)p);
+	{
+		// Scalar Types.
+		// 
+		XmlReader IConvertible<XmlReader,String>.     From(String p)      { return p == null? null: XmlReader.Create(new StringReader(p)); }
 
-				// SqlTypes.
-				//
-				if (p is SqlXml)      return Convert<XmlReader,SqlXml>     .I.C((SqlXml)p);
-				if (p is SqlString)   return Convert<XmlReader,SqlString>  .I.C((SqlString)p);
-				if (p is SqlChars)    return Convert<XmlReader,SqlChars>   .I.C((SqlChars)p);
-				if (p is SqlBinary)   return Convert<XmlReader,SqlBinary>  .I.C((SqlBinary)p);
+		// SqlTypes.
+		// 
+		XmlReader IConvertible<XmlReader,SqlXml>.     From(SqlXml p)      { return p.IsNull? null: p.CreateReader(); }
+		XmlReader IConvertible<XmlReader,SqlString>.  From(SqlString p)   { return p.IsNull? null: XmlReader.Create(new StringReader(p.Value)); }
+		XmlReader IConvertible<XmlReader,SqlChars>.   From(SqlChars p)    { return p.IsNull? null: XmlReader.Create(new StringReader(p.ToSqlString().Value)); }
+		XmlReader IConvertible<XmlReader,SqlBinary>.  From(SqlBinary p)   { return p.IsNull? null: XmlReader.Create(new MemoryStream(p.Value)); }
 
-				// Other Types.
-				//
-				if (p is Stream)      return Convert<XmlReader,Stream>     .I.C((Stream)p);
-				if (p is TextReader)  return Convert<XmlReader,TextReader> .I.C((TextReader)p);
+		// Other Types.
+		// 
+		XmlReader IConvertible<XmlReader,Stream>.     From(Stream p)      { return p == null? null: XmlReader.Create(p); }
+		XmlReader IConvertible<XmlReader,TextReader>. From(TextReader p)  { return p == null? null: XmlReader.Create(p); }
 
-				if (p is Char[])      return Convert<XmlReader,Char[]>     .I.C((Char[])p);
-				if (p is Byte[])      return Convert<XmlReader,Byte[]>     .I.C((Byte[])p);
+		XmlReader IConvertible<XmlReader,Char[]>.     From(Char[] p)      { return p == null? null: XmlReader.Create(new StringReader(new string(p))); }
+		XmlReader IConvertible<XmlReader,Byte[]>.     From(Byte[] p)      { return p == null? null: XmlReader.Create(new MemoryStream(p)); }
 
-				throw new InvalidCastException(string.Format(
-					"Invalid cast from {0} to {1}", p.GetType().FullName, typeof(T).FullName));
-			} }
-
-		static CB<T,P> GetXmlReaderConverter()
+		XmlReader IConvertible<XmlReader,object>.     From(object p)     
 		{
-			Type t = typeof(P);
-
+			if (p == null) return null;
 
 			// Scalar Types.
 			//
-			if (t == typeof(String))      return (CB<T,P>)(object)(new Xml_S       ());
+			if (p is String)      return Convert<XmlReader,String>     .Instance.From((String)p);
 
 			// SqlTypes.
 			//
-			if (t == typeof(SqlXml))      return (CB<T,P>)(object)(new Xml_dbXml   ());
-			if (t == typeof(SqlString))   return (CB<T,P>)(object)(new Xml_dbS     ());
-			if (t == typeof(SqlChars))    return (CB<T,P>)(object)(new Xml_dbAC    ());
-			if (t == typeof(SqlBinary))   return (CB<T,P>)(object)(new Xml_dbBin   ());
+			if (p is SqlXml)      return Convert<XmlReader,SqlXml>     .Instance.From((SqlXml)p);
+			if (p is SqlString)   return Convert<XmlReader,SqlString>  .Instance.From((SqlString)p);
+			if (p is SqlChars)    return Convert<XmlReader,SqlChars>   .Instance.From((SqlChars)p);
+			if (p is SqlBinary)   return Convert<XmlReader,SqlBinary>  .Instance.From((SqlBinary)p);
 
 			// Other Types.
 			//
-			if (t == typeof(Stream))      return (CB<T,P>)(object)(new Xml_IOS     ());
-			if (t == typeof(TextReader))  return (CB<T,P>)(object)(new Xml_TR      ());
+			if (p is Stream)      return Convert<XmlReader,Stream>     .Instance.From((Stream)p);
+			if (p is TextReader)  return Convert<XmlReader,TextReader> .Instance.From((TextReader)p);
 
-			if (t == typeof(Char[]))      return (CB<T,P>)(object)(new Xml_AC      ());
-			if (t == typeof(Byte[]))      return (CB<T,P>)(object)(new Xml_AU8     ());
+			if (p is Char[])      return Convert<XmlReader,Char[]>     .Instance.From((Char[])p);
+			if (p is Byte[])      return Convert<XmlReader,Byte[]>     .Instance.From((Byte[])p);
 
-			if (t == typeof(object))      return (CB<T,P>)(object)(new Xml_O       ());
-
-			return (CB<T,P>)(object)(new Xml_<P>());
+			throw new InvalidCastException(string.Format(
+				"Invalid cast from {0} to {1}", p.GetType().FullName, typeof(T).FullName));
 		}
-
-		#endregion
-
-		#endregion
 	}
+
+	#endregion
+
+	#endregion
+
+
 }
