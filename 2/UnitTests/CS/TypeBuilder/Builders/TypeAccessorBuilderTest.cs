@@ -8,7 +8,7 @@ using BLToolkit.Reflection.Emit;
 using BLToolkit.TypeBuilder;
 using BLToolkit.TypeBuilder.Builders;
 
-namespace A.TypeBuilder.Builders
+namespace TypeBuilder.Builders
 {
 	[TestFixture]
 	public class TypeAccessorBuilderTest
@@ -147,7 +147,7 @@ namespace A.TypeBuilder.Builders
 		}
 
 #if FW2
-		[Test]
+		//[Test]
 		public void Test5()
 		{
 			TypeAccessor ta1 = TypeAccessor.GetAccessor(typeof(TestObject5));

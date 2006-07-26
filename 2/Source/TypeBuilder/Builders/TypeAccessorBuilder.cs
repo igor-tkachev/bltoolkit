@@ -144,14 +144,29 @@ namespace BLToolkit.TypeBuilder.Builders
 				;
 		}
 
+		const BindingFlags _bindingFlags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
+
 		private void BuildMembers()
 		{
-			foreach (MemberInfo mi in _type.GetFields())
-				BuildMember(mi);
+			foreach (FieldInfo mi in _originalType.GetFields())
+				if (!mi.IsStatic)
+					BuildMember(mi);
 
-			foreach (PropertyInfo pi in _type.GetProperties())
+			foreach (PropertyInfo pi in _originalType.GetProperties(BindingFlags.Instance | BindingFlags.Public))
 				if (pi.GetIndexParameters().Length == 0)
 					BuildMember(pi);
+
+			foreach (PropertyInfo pi in _originalType.GetProperties(BindingFlags.Instance | BindingFlags.NonPublic))
+			{
+				if (pi.GetIndexParameters().Length == 0)
+				{
+					MethodInfo getter = pi.GetGetMethod(true);
+					MethodInfo setter = pi.GetSetMethod(true);
+
+					if (getter != null && getter.IsAbstract || setter != null && setter.IsAbstract)
+						BuildMember(pi);
+				}
+			}
 		}
 
 		private void BuildMember(MemberInfo mi)
@@ -161,9 +176,9 @@ namespace BLToolkit.TypeBuilder.Builders
 
 			ConstructorBuilderHelper ctorBuilder = BuildNestedTypeConstructor(nestedType);
 
-			BuildInitMember (mi, ctorBuilder);
-			BuildGetter     (mi, nestedType);
-			BuildSetter     (mi, nestedType);
+			BuildGetter    (mi, nestedType);
+			BuildSetter    (mi, nestedType);
+			BuildInitMember(mi, ctorBuilder);
 
 			Type type = mi is FieldInfo ? ((FieldInfo)mi).FieldType : ((PropertyInfo)mi).PropertyType;
 
@@ -173,9 +188,6 @@ namespace BLToolkit.TypeBuilder.Builders
 			string typedPropertyName = type.Name;
 
 #if FW2
-			BuildGetterT     (mi, nestedType);
-			BuildSetterT     (mi, nestedType);
-
 			if (type.IsGenericType)
 			{
 				Type underlyingType = Nullable.GetUnderlyingType(type);
@@ -221,7 +233,8 @@ namespace BLToolkit.TypeBuilder.Builders
 
 		private void BuildGetter(MemberInfo mi, TypeBuilderHelper nestedType)
 		{
-			MethodInfo getMethod = null;
+			Type       methodType = mi.DeclaringType;
+			MethodInfo getMethod  = null;
 
 			if (mi is PropertyInfo)
 			{
@@ -230,7 +243,10 @@ namespace BLToolkit.TypeBuilder.Builders
 				if (getMethod == null)
 				{
 					if (_type != _originalType)
-						getMethod = _type.GetMethod("get_" + mi.Name);
+					{
+						getMethod  = _type.GetMethod("get_" + mi.Name);
+						methodType = _type;
+					}
 
 					if (getMethod == null)
 						return;
@@ -244,7 +260,7 @@ namespace BLToolkit.TypeBuilder.Builders
 
 			emit
 				.ldarg_1
-				.castclass (_type)
+				.castclass (methodType)
 				.end();
 
 			if (mi is FieldInfo)
@@ -278,7 +294,8 @@ namespace BLToolkit.TypeBuilder.Builders
 
 		private void BuildSetter(MemberInfo mi, TypeBuilderHelper nestedType)
 		{
-			MethodInfo setMethod = null;
+			Type       methodType = mi.DeclaringType;
+			MethodInfo setMethod  = null;
 
 			if (mi is PropertyInfo)
 			{
@@ -287,7 +304,10 @@ namespace BLToolkit.TypeBuilder.Builders
 				if (setMethod == null)
 				{
 					if (_type != _originalType)
-						setMethod = _type.GetMethod("set_" + mi.Name);
+					{
+						setMethod  = _type.GetMethod("set_" + mi.Name);
+						methodType = _type;
+					}
 
 					if (setMethod == null)
 						return;
@@ -301,7 +321,7 @@ namespace BLToolkit.TypeBuilder.Builders
 
 			emit
 				.ldarg_1
-				.castclass (_type)
+				.castclass (methodType)
 				.ldarg_2
 				.end();
 
@@ -340,7 +360,8 @@ namespace BLToolkit.TypeBuilder.Builders
 			Type              memberType,
 			string            typedPropertyName)
 		{
-			MethodInfo getMethod = null;
+			Type       methodType = mi.DeclaringType;
+			MethodInfo getMethod  = null;
 
 			if (mi is PropertyInfo)
 			{
@@ -349,7 +370,10 @@ namespace BLToolkit.TypeBuilder.Builders
 				if (getMethod == null)
 				{
 					if (_type != _originalType)
-						getMethod = _type.GetMethod("get_" + mi.Name);
+					{
+						getMethod  = _type.GetMethod("get_" + mi.Name);
+						methodType = _type;
+					}
 
 					if (getMethod == null)
 						return;
@@ -367,7 +391,7 @@ namespace BLToolkit.TypeBuilder.Builders
 
 			emit
 				.ldarg_1
-				.castclass (_type)
+				.castclass (methodType)
 				.end();
 
 			if (mi is FieldInfo) emit.ldfld   ((FieldInfo)mi);
@@ -384,7 +408,8 @@ namespace BLToolkit.TypeBuilder.Builders
 			Type              memberType,
 			string            typedPropertyName)
 		{
-			MethodInfo setMethod = null;
+			Type       methodType = mi.DeclaringType;
+			MethodInfo setMethod  = null;
 
 			if (mi is PropertyInfo)
 			{
@@ -393,7 +418,10 @@ namespace BLToolkit.TypeBuilder.Builders
 				if (setMethod == null)
 				{
 					if (_type != _originalType)
-						setMethod = _type.GetMethod("set_" + mi.Name);
+					{
+						setMethod  = _type.GetMethod("set_" + mi.Name);
+						methodType = _type;
+					}
 
 					if (setMethod == null)
 						return;
@@ -412,104 +440,11 @@ namespace BLToolkit.TypeBuilder.Builders
 
 			emit
 				.ldarg_1
-				.castclass (_type)
+				.castclass (methodType)
 				.ldarg_2
 				.end();
 
 			if (mi is FieldInfo) emit.stfld   ((FieldInfo)mi);
-			else                 emit.callvirt(setMethod);
-
-			emit
-				.ret()
-				;
-		}
-
-		private void BuildGetterT(MemberInfo mi, TypeBuilderHelper nestedType)
-		{
-			MethodBuilderHelper method = nestedType.DefineMethod(
-				_memberAccessor.GetMethod("GetValueT"));
-
-			EmitHelper emit = method.Emitter;
-
-			emit
-				.ldarg_2
-				.ldarg_1
-				.ldind_ref
-				.end();
-
-			if (mi is FieldInfo)
-			{
-				FieldInfo fi = (FieldInfo)mi;
-				emit
-					
-					.ldfld(fi)
-					.stobj(fi.FieldType)
-					.ret()
-					;
-
-//				emit
-//					.ldfld(fi)
-//					.stind(fi.FieldType)
-//					.ret()
-//					;
-			}
-			else
-			{
-				PropertyInfo pi = (PropertyInfo)mi;
-				MethodInfo getMethod = (pi).GetGetMethod();
-
-				if (getMethod == null)
-				{
-					if (_type != _originalType)
-						getMethod = _type.GetMethod("get_" + mi.Name);
-
-					if (getMethod == null)
-						return;
-				}
-
-				emit
-					.callvirt(getMethod)
-					.stobj(pi.PropertyType)
-					.ret()
-					;
-
-//				emit
-//					.callvirt(getMethod)
-//					.stind(pi.PropertyType)
-//					.ret()
-//					;
-			}
-		}
-
-		private void BuildSetterT(MemberInfo mi, TypeBuilderHelper nestedType)
-		{
-			MethodInfo setMethod = null;
-
-			if (mi is PropertyInfo)
-			{
-				setMethod = ((PropertyInfo)mi).GetSetMethod();
-
-				if (setMethod == null)
-				{
-					if (_type != _originalType)
-						setMethod = _type.GetMethod("set_" + mi.Name);
-
-					if (setMethod == null)
-						return;
-				}
-			}
-
-			MethodBuilderHelper method = nestedType.DefineMethod(
-				_memberAccessor.GetMethod("SetValueT"));
-
-			EmitHelper emit = method.Emitter;
-
-			emit
-				.ldarg_1
-				.ldarg_2
-				.end();
-
-			if (mi is FieldInfo) emit.stfld((FieldInfo)mi);
 			else                 emit.callvirt(setMethod);
 
 			emit

@@ -12,18 +12,36 @@ namespace BLToolkit.Common
 	[Serializable, Trimmable]
 	public abstract class EntityBase : ICustomTypeDescriptor
 	{
+		#region Protected members
+
+		protected virtual ICustomTypeDescriptor CreateTypeDescriptor()
+		{
+			return new CustomTypeDescriptorImpl(GetType());
+		}
+
+		#endregion
+
 		#region ICustomTypeDescriptor Members
 
+		private static Hashtable _hashDescriptors = new Hashtable();
+
 		[NonSerialized]
-		private CustomTypeDescriptorImpl _typedescriptor;
-		private CustomTypeDescriptorImpl  TypeDescriptor
+		private ICustomTypeDescriptor _typeDescriptor;
+		private ICustomTypeDescriptor  TypeDescriptor
 		{
 			get
 			{
-				if (_typedescriptor == null)
-					_typedescriptor =  new CustomTypeDescriptorImpl(GetType());
+				if (_typeDescriptor == null)
+				{
+					Type key = GetType();
 
-				return _typedescriptor;
+					_typeDescriptor = (ICustomTypeDescriptor)_hashDescriptors[key];
+
+					if (_typeDescriptor == null)
+						_hashDescriptors[key] = _typeDescriptor = CreateTypeDescriptor();
+				}
+
+				return _typeDescriptor;
 			}
 		}
 
@@ -77,20 +95,9 @@ namespace BLToolkit.Common
 			return TypeDescriptor.GetProperties(attributes);
 		}
 
-		private static Hashtable _hashDescriptors = new Hashtable();
-
 		PropertyDescriptorCollection ICustomTypeDescriptor.GetProperties()
 		{
-			PropertyDescriptorCollection col = (PropertyDescriptorCollection)_hashDescriptors[GetType()];
-
-			if (col == null)
-			{
-				col = TypeDescriptor.GetProperties();
-
-				_hashDescriptors.Add(GetType(), col);
-			}
-
-			return col;
+			return TypeDescriptor.GetProperties();
 		}
 
 		object ICustomTypeDescriptor.GetPropertyOwner(PropertyDescriptor pd)

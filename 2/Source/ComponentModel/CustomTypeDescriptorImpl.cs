@@ -13,47 +13,56 @@ namespace BLToolkit.ComponentModel
 
 		public CustomTypeDescriptorImpl()
 		{
-			_typeAccessor = TypeAccessor.GetAccessor(GetType());
+			_typeDescriptionProvider = CreateTypeDescriptionProvider(GetType());
 		}
 
 		public CustomTypeDescriptorImpl(Type type)
 		{
-			_typeAccessor = TypeAccessor.GetAccessor(type);
+			_typeDescriptionProvider = CreateTypeDescriptionProvider(type);
 		}
 
-		private TypeAccessor _typeAccessor;
+		public CustomTypeDescriptorImpl(ITypeDescriptionProvider typeDescriptionProvider)
+		{
+			_typeDescriptionProvider = typeDescriptionProvider;
+		}
+
+		private ITypeDescriptionProvider _typeDescriptionProvider;
+
+		protected virtual ITypeDescriptionProvider CreateTypeDescriptionProvider(Type type)
+		{
+			return TypeAccessor.GetAccessor(type);
+		}
 
 		#endregion
 
 		#region ICustomTypeDescriptor Members
 
-		private         AttributeCollection   _attributes;
-		public virtual AttributeCollection GetAttributes()
+		AttributeCollection                      _attributes;
+		AttributeCollection ICustomTypeDescriptor.GetAttributes()
 		{
 			if (_attributes == null)
-				_attributes = new AttributeCollection(
-					(Attribute[])new TypeHelper(_typeAccessor.OriginalType).GetAttributes());
+				_attributes = _typeDescriptionProvider.GetAttributes();
 
 			return _attributes;
 		}
 
-		public virtual string GetClassName()
+		string ICustomTypeDescriptor.GetClassName()
 		{
-			return _typeAccessor.OriginalType.Name;
+			return _typeDescriptionProvider.ClassName;
 		}
 
-		public virtual string GetComponentName()
+		string ICustomTypeDescriptor.GetComponentName()
 		{
-			return _typeAccessor.OriginalType.Name;
+			return _typeDescriptionProvider.ComponentName;
 		}
 
-		private        TypeConverter   _converter;
-		public virtual TypeConverter GetConverter()
+		TypeConverter                         _converter;
+		TypeConverter ICustomTypeDescriptor.GetConverter()
 		{
 			if (_converter == null)
 			{
 				TypeConverterAttribute attr =
-					GetAttributes()[typeof(TypeConverterAttribute)] as TypeConverterAttribute;
+					_td.GetAttributes()[typeof(TypeConverterAttribute)] as TypeConverterAttribute;
 
 				if (attr != null && attr.ConverterTypeName != null && attr.ConverterTypeName.Length > 0)
 				{
@@ -70,49 +79,44 @@ namespace BLToolkit.ComponentModel
 			return _converter;
 		}
 
-		private        bool          _readDefaultEvent;
-		private        EventDescriptor   _defaultEvent;
-		public virtual EventDescriptor GetDefaultEvent()
+		bool                                _readDefaultEvent;
+		EventDescriptor                         _defaultEvent;
+		EventDescriptor ICustomTypeDescriptor.GetDefaultEvent()
 		{
 			if (_readDefaultEvent == false)
 			{
 				_readDefaultEvent = true;
 
 				DefaultEventAttribute attr =
-					GetAttributes()[typeof(DefaultEventAttribute)] as DefaultEventAttribute;
+					_td.GetAttributes()[typeof(DefaultEventAttribute)] as DefaultEventAttribute;
 
 				if (attr != null && attr.Name != null && attr.Name.Length > 0)
-					_defaultEvent = new CustomEventDescriptor(_typeAccessor.OriginalType.GetEvent(attr.Name));
+					_defaultEvent = _typeDescriptionProvider.GetEvent(attr.Name);
 			}
 
 			return _defaultEvent;
 		}
 
-		private        bool             _readDefaultProperty;
-		private        PropertyDescriptor   _defaultProperty;
-		public virtual PropertyDescriptor GetDefaultProperty()
+		bool                                   _readDefaultProperty;
+		PropertyDescriptor                         _defaultProperty;
+		PropertyDescriptor ICustomTypeDescriptor.GetDefaultProperty()
 		{
 			if (_readDefaultProperty == false)
 			{
 				_readDefaultProperty = true;
 
 				DefaultPropertyAttribute attr =
-					GetAttributes()[typeof(DefaultPropertyAttribute)] as DefaultPropertyAttribute;
+					_td.GetAttributes()[typeof(DefaultPropertyAttribute)] as DefaultPropertyAttribute;
 
 				if (attr != null && attr.Name != null && attr.Name.Length > 0)
-				{
-					MemberAccessor ma = _typeAccessor[attr.Name];
-
-					if (ma != null)
-						_defaultProperty = ma.PropertyDescriptor;
-				}
+					_defaultProperty = _typeDescriptionProvider.GetProperty(attr.Name);
 			}
 
 			return _defaultProperty;
 		}
 
-		private Hashtable _editors;
-		public virtual object GetEditor(Type editorBaseType)
+		Hashtable _editors;
+		object ICustomTypeDescriptor.GetEditor(Type editorBaseType)
 		{
 			if (_editors == null)
 				_editors = new Hashtable();
@@ -124,7 +128,7 @@ namespace BLToolkit.ComponentModel
 				if (_editors.Contains(editorBaseType))
 					return null;
 
-				foreach (Attribute attr in GetAttributes())
+				foreach (Attribute attr in _td.GetAttributes())
 				{
 					if (attr is EditorAttribute)
 					{
@@ -151,43 +155,35 @@ namespace BLToolkit.ComponentModel
 			return editor;
 		}
 
-		private        EventDescriptorCollection   _events;
-		public virtual EventDescriptorCollection GetEvents(Attribute[] attributes)
+		EventDescriptorCollection                         _events;
+		EventDescriptorCollection ICustomTypeDescriptor.GetEvents(Attribute[] attributes)
 		{
 			if (_events == null)
-			{
-				EventInfo[]       ei = _typeAccessor.OriginalType.GetEvents();
-				EventDescriptor[] ed = new EventDescriptor[ei.Length];
-
-				for (int i = 0; i < ei.Length; i++)
-					ed[i] = new CustomEventDescriptor(ei[i]);
-
-				_events = new EventDescriptorCollection(ed);
-			}
+				_events = _typeDescriptionProvider.GetEvents();
 
 			return _events;
 		}
 
-		public virtual EventDescriptorCollection GetEvents()
+		EventDescriptorCollection ICustomTypeDescriptor.GetEvents()
 		{
-			return GetEvents(null);
+			return _td.GetEvents(null);
 		}
 
-		private        PropertyDescriptorCollection   _properties;
-		public virtual PropertyDescriptorCollection GetProperties(Attribute[] attributes)
+		PropertyDescriptorCollection                         _properties;
+		PropertyDescriptorCollection ICustomTypeDescriptor.GetProperties(Attribute[] attributes)
 		{
 			if (_properties == null)
-				_properties = _typeAccessor.CreatePropertyDescriptors();
+				_properties = _typeDescriptionProvider.GetProperties();
 
 			return _properties;
 		}
 
-		public virtual PropertyDescriptorCollection GetProperties()
+		PropertyDescriptorCollection ICustomTypeDescriptor.GetProperties()
 		{
-			return GetProperties(null);
+			return _td.GetProperties(null);
 		}
 
-		public virtual object GetPropertyOwner(PropertyDescriptor pd)
+		object ICustomTypeDescriptor.GetPropertyOwner(PropertyDescriptor pd)
 		{
 			return this;
 		}
@@ -211,7 +207,7 @@ namespace BLToolkit.ComponentModel
 			if (idx != -1)
 				typeName = typeName.Substring(0, idx);
 
-			return _typeAccessor.OriginalType.Assembly.GetType(typeName);
+			return _typeDescriptionProvider.OriginalType.Assembly.GetType(typeName);
 		}
 
 		private object CreateInstance(Type type)
@@ -219,37 +215,13 @@ namespace BLToolkit.ComponentModel
 			ConstructorInfo ci = type.GetConstructor(new Type[]{ typeof(Type) });
 
 			return ci != null?
-				Activator.CreateInstance(type, new object[] { _typeAccessor.OriginalType }):
+				Activator.CreateInstance(type, new object[] { _typeDescriptionProvider.OriginalType }):
 				Activator.CreateInstance(type);
 		}
 
-		#endregion
-
-		#region CustomEventDescriptor
-
-		class CustomEventDescriptor : EventDescriptor
+		private ICustomTypeDescriptor _td
 		{
-			public CustomEventDescriptor(EventInfo eventInfo)
-				: base(eventInfo.Name, null)
-			{
-				_eventInfo = eventInfo;
-			}
-
-			private EventInfo _eventInfo;
-
-			public override void AddEventHandler(object component, Delegate value)
-			{
-				_eventInfo.AddEventHandler(component, value);
-			}
-
-			public override void RemoveEventHandler(object component, Delegate value)
-			{
-				_eventInfo.RemoveEventHandler(component, value);
-			}
-
-			public override Type ComponentType { get { return _eventInfo.DeclaringType;    } }
-			public override Type EventType     { get { return _eventInfo.EventHandlerType; } }
-			public override bool IsMulticast   { get { return _eventInfo.IsMulticast;      } }
+			get { return (ICustomTypeDescriptor)this; }
 		}
 
 		#endregion

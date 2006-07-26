@@ -99,7 +99,10 @@
     <Compile Include="ComponentModel\Design\ObjectViewTypeNameEditor.cs" />
     <Compile Include="ComponentModel\ISortable.cs" />
     <Compile Include="ComponentModel\IObjectView.cs" />
+    <Compile Include="ComponentModel\ITypeDescriptionProvider.cs" />
     <Compile Include="ComponentModel\ObjectHolder.cs" />
+    <Compile Include="ComponentModel\TypeDescriptorExtender.cs" />
+    <Compile Include="ComponentModel\TypeDescriptorExtenderT.cs" />
     <Compile Include="ComponentModel\TypedListImpl.cs" />
     <Compile Include="ComponentModel\Design\TypeEditor.cs" />
     <Compile Include="ComponentModel\TypeTypeConverter.cs" />

@@ -7,6 +7,8 @@ using NUnit.Framework;
 #if FW2
 using System.Collections.Generic;
 using PersonDataSet = DataAccessTest.PersonDataSet2;
+#else
+using PersonDataSet = DataAccessTest.PersonDataSet;
 #endif
 
 using BLToolkit.EditableObjects;
