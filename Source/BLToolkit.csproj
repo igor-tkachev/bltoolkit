@@ -84,11 +84,6 @@
                     AssemblyName = "System.Drawing"
                     HintPath = "..\..\..\..\..\..\WINDOWS\Microsoft.NET\Framework\v1.1.4322\System.Drawing.dll"
                 />
-                <Reference
-                    Name = "System.Data.OracleClient"
-                    AssemblyName = "System.Data.OracleClient"
-                    HintPath = "..\..\..\..\..\..\WINDOWS\Microsoft.NET\Framework\v1.1.4322\System.Data.OracleClient.dll"
-                />
             </References>
         </Build>
         <Files>
@@ -259,6 +254,11 @@
                     BuildAction = "Compile"
                 />
                 <File
+                    RelPath = "ComponentModel\ITypeDescriptionProvider.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
                     RelPath = "ComponentModel\MemberPropertyDescriptor.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
@@ -294,6 +294,11 @@
                 />
                 <File
                     RelPath = "ComponentModel\PropertyDescriptorWrapper.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "ComponentModel\TypeDescriptorExtender.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
                 />
@@ -354,11 +359,6 @@
                 />
                 <File
                     RelPath = "Data\DataProvider\OleDbDataProvider.cs"
-                    SubType = "Code"
-                    BuildAction = "Compile"
-                />
-                <File
-                    RelPath = "Data\DataProvider\OracleDataProvider.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
                 />

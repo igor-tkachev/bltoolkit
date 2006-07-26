@@ -7,7 +7,7 @@ using BLToolkit.Reflection;
 using BLToolkit.Data;
 using BLToolkit.Mapping;
 
-namespace A.Data
+namespace Data
 {
 	[TestFixture]
 	public class InnerTypesTest

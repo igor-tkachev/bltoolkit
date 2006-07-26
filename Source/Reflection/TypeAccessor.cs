@@ -20,7 +20,7 @@ namespace BLToolkit.Reflection
 	public delegate object NullValueProvider(Type type);
 	public delegate bool   IsNullHandler    (object obj);
 
-	public abstract class TypeAccessor : ICollection
+	public abstract class TypeAccessor : ICollection, ITypeDescriptionProvider
 	{
 		protected TypeAccessor()
 		{
@@ -28,16 +28,23 @@ namespace BLToolkit.Reflection
 
 		#region Protected Emit Helpers
 
+		const BindingFlags _bindingFlags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
+
 		protected MemberInfo GetMember(int memberType, string memberName)
 		{
 			MemberInfo mi;
 
 			switch (memberType)
 			{
-				case 1: mi = Type.GetField   (memberName); break;
-				case 2: mi = Type.GetProperty(memberName); break;
+				case 1: mi = Type.GetField   (memberName, _bindingFlags); break;
+				case 2: mi = Type.GetProperty(memberName, _bindingFlags); break;
 				default:
 					throw new InvalidOperationException();
+			}
+
+			if (mi == null)
+			{
+				mi = mi;
 			}
 
 			return mi;
@@ -862,6 +869,81 @@ namespace BLToolkit.Reflection
 
 				base.SetValue(_objectView, value);
 			}
+		}
+
+		#endregion
+
+		#endregion
+
+		#region ITypeDescriptionProvider Members
+
+		string ITypeDescriptionProvider.ClassName
+		{
+			get { return OriginalType.Name; }
+		}
+
+		string ITypeDescriptionProvider.ComponentName
+		{
+			get { return OriginalType.Name; }
+		}
+
+		EventDescriptor ITypeDescriptionProvider.GetEvent(string name)
+		{
+			return new CustomEventDescriptor(OriginalType.GetEvent(name));
+		}
+
+		PropertyDescriptor ITypeDescriptionProvider.GetProperty(string name)
+		{
+			MemberAccessor ma = this[name];
+			return ma != null ? ma.PropertyDescriptor : null;
+		}
+
+		AttributeCollection ITypeDescriptionProvider.GetAttributes()
+		{
+			return new AttributeCollection((Attribute[])new TypeHelper(OriginalType).GetAttributes());
+		}
+
+		EventDescriptorCollection ITypeDescriptionProvider.GetEvents()
+		{
+			EventInfo[]       ei = OriginalType.GetEvents();
+			EventDescriptor[] ed = new EventDescriptor[ei.Length];
+
+			for (int i = 0; i < ei.Length; i++)
+				ed[i] = new CustomEventDescriptor(ei[i]);
+
+			return new EventDescriptorCollection(ed);
+		}
+
+		PropertyDescriptorCollection ITypeDescriptionProvider.GetProperties()
+		{
+			return CreatePropertyDescriptors();
+		}
+
+		#region CustomEventDescriptor
+
+		class CustomEventDescriptor : EventDescriptor
+		{
+			public CustomEventDescriptor(EventInfo eventInfo)
+				: base(eventInfo.Name, null)
+			{
+				_eventInfo = eventInfo;
+			}
+
+			private EventInfo _eventInfo;
+
+			public override void AddEventHandler(object component, Delegate value)
+			{
+				_eventInfo.AddEventHandler(component, value);
+			}
+
+			public override void RemoveEventHandler(object component, Delegate value)
+			{
+				_eventInfo.RemoveEventHandler(component, value);
+			}
+
+			public override Type ComponentType { get { return _eventInfo.DeclaringType;    } }
+			public override Type EventType     { get { return _eventInfo.EventHandlerType; } }
+			public override bool IsMulticast   { get { return _eventInfo.IsMulticast;      } }
 		}
 
 		#endregion
