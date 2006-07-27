@@ -972,10 +972,10 @@ namespace BLToolkit.Mapping
 				{
 					SetData<D>.MB<D>     setter    = SetData<D>.I;
 					GetData<S>.MB<S>     getter    = GetData<S>.I;
-					IConvertible<D,S>    converter = Convert<D,S>.Instance;
+					Convert<D,S>.CB<D,S> converter = Convert<D,S>.I;
 
 					setter.Set(dest, destObject, destIndex,
-						converter.From(
+						converter.C(
 							getter.Get(source, sourceObject, sourceIndex)));
 				}
 			}

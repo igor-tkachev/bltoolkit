@@ -7,16 +7,16 @@ using BLToolkit.Reflection;
 
 namespace BLToolkit.Common
 {
-	public interface IConvertible<T,P>
+	public static partial class Convert<T,P>
 	{
-		T From(P p);
-	}
+		public abstract class CB<Q,V>
+		{
+			public abstract Q C(V p);
+		}
 
-	public static class Convert<T,P>
-	{
 		public static T From(P p)
 		{
-			return Instance.From(p);
+			return I.C(p);
 		}
 
 		public static T[] FromArray(P[] src)
@@ -25,22 +25,102 @@ namespace BLToolkit.Common
 
 			for (int i = 0; i < src.Length; ++i)
 			{
-				dst[i] = Instance.From(src[i]);
+				dst[i] = I.C(src[i]);
 			}
 
 			return dst;
 		}
 
-		public static IConvertible<T,P> Instance = GetConverter();
+		sealed class Assignable<Q> : CB<Q,Q> { public override Q C(Q p) { return p; } }
+		sealed class Default<Q,V>  : CB<Q,V> { public override Q C(V p) { return (Q)Convert.ChangeType(p, typeof(Q)); } }
 
-		private static IConvertible<T,P> GetConverter()
+		public static CB<T,P> I = GetConverter();
+		static CB<T,P> GetConverter()
 		{
-			if (TypeHelper.IsSameOrParent(typeof(T), typeof(P)))
-			{
-				return (IConvertible<T,P>)(object)(new ConvertAssignable<P,P>());
-			}
+			Type t = typeof(T);
 
-			return new ConvertExplicit<T,P>();
+			// Convert to the same type.
+			//
+			if (TypeHelper.IsSameOrParent(t, typeof(P)))
+				return (CB<T,P>)(object)(new Assignable<T>());
+
+			// Scalar Types
+			//
+			if (t == typeof(String))      return GetStringConverter();
+
+			if (t == typeof(SByte))       return GetSByteConverter();
+			if (t == typeof(Int16))       return GetInt16Converter();
+			if (t == typeof(Int32))       return GetInt32Converter();
+			if (t == typeof(Int64))       return GetInt64Converter();
+
+			if (t == typeof(Byte))        return GetByteConverter();
+			if (t == typeof(UInt16))      return GetUInt16Converter();
+			if (t == typeof(UInt32))      return GetUInt32Converter();
+			if (t == typeof(UInt64))      return GetUInt64Converter();
+
+			if (t == typeof(Char))        return GetCharConverter();
+			if (t == typeof(Single))      return GetSingleConverter();
+			if (t == typeof(Double))      return GetDoubleConverter();
+
+			if (t == typeof(Boolean))     return GetBooleanConverter();
+			if (t == typeof(Decimal))     return GetDecimalConverter();
+			if (t == typeof(DateTime))    return GetDateTimeConverter();
+			if (t == typeof(TimeSpan))    return GetTimeSpanConverter();
+			if (t == typeof(Guid))        return GetGuidConverter();
+
+			// Nullable Types
+			//
+			if (t == typeof(SByte?))      return GetNullableSByteConverter();
+			if (t == typeof(Int16?))      return GetNullableInt16Converter();
+			if (t == typeof(Int32?))      return GetNullableInt32Converter();
+			if (t == typeof(Int64?))      return GetNullableInt64Converter();
+
+			if (t == typeof(Byte?))       return GetNullableByteConverter();
+			if (t == typeof(UInt16?))     return GetNullableUInt16Converter();
+			if (t == typeof(UInt32?))     return GetNullableUInt32Converter();
+			if (t == typeof(UInt64?))     return GetNullableUInt64Converter();
+
+			if (t == typeof(Char?))       return GetNullableCharConverter();
+			if (t == typeof(Single?))     return GetNullableSingleConverter();
+			if (t == typeof(Double?))     return GetNullableDoubleConverter();
+
+			if (t == typeof(Boolean?))    return GetNullableBooleanConverter();
+			if (t == typeof(Decimal?))    return GetNullableDecimalConverter();
+			if (t == typeof(DateTime?))   return GetNullableDateTimeConverter();
+			if (t == typeof(TimeSpan?))   return GetNullableTimeSpanConverter();
+			if (t == typeof(Guid?))       return GetNullableGuidConverter();
+
+			// SqlTypes
+			//
+			if (t == typeof(SqlString))   return GetSqlStringConverter();
+
+			if (t == typeof(SqlByte))     return GetSqlByteConverter();
+			if (t == typeof(SqlInt16))    return GetSqlInt16Converter();
+			if (t == typeof(SqlInt32))    return GetSqlInt32Converter();
+			if (t == typeof(SqlInt64))    return GetSqlInt64Converter();
+
+			if (t == typeof(SqlSingle))   return GetSqlSingleConverter();
+			if (t == typeof(SqlDouble))   return GetSqlDoubleConverter();
+			if (t == typeof(SqlDecimal))  return GetSqlDecimalConverter();
+			if (t == typeof(SqlMoney))    return GetSqlMoneyConverter();
+
+			if (t == typeof(SqlBoolean))  return GetSqlBooleanConverter();
+			if (t == typeof(SqlDateTime)) return GetSqlDateTimeConverter();
+			if (t == typeof(SqlGuid))     return GetSqlGuidConverter();
+			if (t == typeof(SqlBinary))   return GetSqlBinaryConverter();
+			if (t == typeof(SqlBytes))    return GetSqlBytesConverter();
+			if (t == typeof(SqlChars))    return GetSqlCharsConverter();
+			if (t == typeof(SqlXml))      return GetSqlXmlConverter();
+
+			// Other Types
+			//
+			if (t == typeof(Type))        return GetTypeConverter();
+			if (t == typeof(Stream))      return GetStreamConverter();
+			if (t == typeof(XmlReader))   return GetXmlReaderConverter();
+			if (t == typeof(Byte[]))      return GetByteArrayConverter();
+			if (t == typeof(Char[]))      return GetCharArrayConverter();
+
+			return new Default<T,P>();
 		}
 	}
 
@@ -50,23 +130,5 @@ namespace BLToolkit.Common
 		{
 			return Convert<T,P>.From(p);
 		}
-	}
-
-	internal class ConvertAssignable<T,P>: IConvertible<T,P> where P: T
-	{
-		T IConvertible<T,P>.From(P p) { return p; }
-	}
-
-	internal class ConvertDefault<T,P>: IConvertible<T,P>
-	{
-		T IConvertible<T,P>.From(P p) { return (T)Convert.ChangeType(p, typeof(T)); }
-	}
-
-	internal partial class ConvertPartial<T,P>: ConvertDefault<T,P>
-	{
-	}
-
-	internal partial class ConvertExplicit<T,P>: ConvertPartial<T,P>
-	{
 	}
 }
