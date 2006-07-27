@@ -3,7 +3,7 @@ using System;
 namespace BLToolkit.Validation
 {
 	[AttributeUsage(AttributeTargets.Property | AttributeTargets.Field)]
-	public sealed class MaxLengthAttribute : ValidatorBaseAttribute
+	public class MaxLengthAttribute : ValidatorBaseAttribute
 	{
 		public MaxLengthAttribute(int maxLength)
 		{
