@@ -3,7 +3,7 @@ using System;
 namespace BLToolkit.Validation
 {
 	[AttributeUsage(AttributeTargets.Property | AttributeTargets.Field)]
-	public sealed class MinLengthAttribute : ValidatorBaseAttribute
+	public class MinLengthAttribute : ValidatorBaseAttribute
 	{
 		public MinLengthAttribute(int minLength)
 		{
