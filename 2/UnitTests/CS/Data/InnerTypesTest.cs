@@ -1,5 +1,6 @@
 using System;
 using System.Data;
+using System.Collections;
 
 using NUnit.Framework;
 
@@ -7,7 +8,7 @@ using BLToolkit.Reflection;
 using BLToolkit.Data;
 using BLToolkit.Mapping;
 
-namespace Data
+namespace A.Data
 {
 	[TestFixture]
 	public class InnerTypesTest
@@ -77,6 +78,38 @@ namespace Data
 				IDbDataParameter[] parameters = db.CreateParameters(p);
 				Assert.IsNotNull(parameters);
 				Assert.AreEqual(parameters.Length, 6);
+			}
+		}
+
+		public abstract class Template2
+		{
+			public abstract int    ID          { get; set; }
+			public abstract string DisplayName { get; set; }
+		}
+
+		[MapField("TPL_ID",          "tpl.ID")]
+		[MapField("TPL_DisplayName", "tpl.DisplayName")]
+		public abstract class Template1
+		{
+			public abstract int       ID          { get; set; }
+			public abstract string    DisplayName { get; set; }
+
+			public abstract Template2 tpl         { get; set; }
+		}
+
+		[Test]
+		public void TemplateTest()
+		{
+			using (DbManager db = new DbManager())
+			{
+				ArrayList list = db
+					.SetCommand(@"
+						SELECT
+							1   as ID,
+							'2' as DisplayName,
+							3   as TPL_ID, 
+							'4' as TPL_DisplayName")
+					.ExecuteList(typeof(Template1));
 			}
 		}
 	}

@@ -42,11 +42,6 @@ namespace BLToolkit.Reflection
 					throw new InvalidOperationException();
 			}
 
-			if (mi == null)
-			{
-				mi = mi;
-			}
-
 			return mi;
 		}
 

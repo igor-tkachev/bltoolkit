@@ -263,11 +263,74 @@ namespace BLToolkit.Mapping
 
 			MemberMapper _mapper;
 
+			#region GetValue
+
 			public override object GetValue(object o)
 			{
 				object obj = _memberAccessor.GetValue(o);
 				return obj == null? null: _mapper.GetValue(obj);
 			}
+
+			// Simple type getters.
+			//
+			public override SByte    GetSByte   (object o) { object obj = _memberAccessor.GetValue(o); return obj == null? MappingSchema.DefaultSByteNullValue:    _mapper.GetSByte   (obj); }
+			public override Int16    GetInt16   (object o) { object obj = _memberAccessor.GetValue(o); return obj == null? MappingSchema.DefaultInt16NullValue:    _mapper.GetInt16   (obj); }
+			public override Int32    GetInt32   (object o) { object obj = _memberAccessor.GetValue(o); return obj == null? MappingSchema.DefaultInt32NullValue:    _mapper.GetInt32   (obj); }
+			public override Int64    GetInt64   (object o) { object obj = _memberAccessor.GetValue(o); return obj == null? MappingSchema.DefaultInt64NullValue:    _mapper.GetInt64   (obj); }
+
+			public override Byte     GetByte    (object o) { object obj = _memberAccessor.GetValue(o); return obj == null? MappingSchema.DefaultByteNullValue:     _mapper.GetByte    (obj); }
+			public override UInt16   GetUInt16  (object o) { object obj = _memberAccessor.GetValue(o); return obj == null? MappingSchema.DefaultUInt16NullValue:   _mapper.GetUInt16  (obj); }
+			public override UInt32   GetUInt32  (object o) { object obj = _memberAccessor.GetValue(o); return obj == null? MappingSchema.DefaultUInt32NullValue:   _mapper.GetUInt32  (obj); }
+			public override UInt64   GetUInt64  (object o) { object obj = _memberAccessor.GetValue(o); return obj == null? MappingSchema.DefaultUInt64NullValue:   _mapper.GetUInt64  (obj); }
+
+			public override Boolean  GetBoolean (object o) { object obj = _memberAccessor.GetValue(o); return obj == null? MappingSchema.DefaultBooleanNullValue:  _mapper.GetBoolean (obj); }
+			public override Char     GetChar    (object o) { object obj = _memberAccessor.GetValue(o); return obj == null? MappingSchema.DefaultCharNullValue:     _mapper.GetChar    (obj); }
+			public override Single   GetSingle  (object o) { object obj = _memberAccessor.GetValue(o); return obj == null? MappingSchema.DefaultSingleNullValue:   _mapper.GetSingle  (obj); }
+			public override Double   GetDouble  (object o) { object obj = _memberAccessor.GetValue(o); return obj == null? MappingSchema.DefaultDoubleNullValue:   _mapper.GetDouble  (obj); }
+			public override Decimal  GetDecimal (object o) { object obj = _memberAccessor.GetValue(o); return obj == null? MappingSchema.DefaultDecimalNullValue:  _mapper.GetDecimal (obj); }
+			public override Guid     GetGuid    (object o) { object obj = _memberAccessor.GetValue(o); return obj == null? MappingSchema.DefaultGuidNullValue:     _mapper.GetGuid    (obj); }
+			public override DateTime GetDateTime(object o) { object obj = _memberAccessor.GetValue(o); return obj == null? MappingSchema.DefaultDateTimeNullValue: _mapper.GetDateTime(obj); }
+
+#if FW2
+			// Nullable type getters.
+			//
+			public override SByte?    GetNullableSByte   (object o) { object obj = _memberAccessor.GetValue(o); return obj == null? null: _mapper.GetNullableSByte   (obj); }
+			public override Int16?    GetNullableInt16   (object o) { object obj = _memberAccessor.GetValue(o); return obj == null? null: _mapper.GetNullableInt16   (obj); }
+			public override Int32?    GetNullableInt32   (object o) { object obj = _memberAccessor.GetValue(o); return obj == null? null: _mapper.GetNullableInt32   (obj); }
+			public override Int64?    GetNullableInt64   (object o) { object obj = _memberAccessor.GetValue(o); return obj == null? null: _mapper.GetNullableInt64   (obj); }
+
+			public override Byte?     GetNullableByte    (object o) { object obj = _memberAccessor.GetValue(o); return obj == null? null: _mapper.GetNullableByte    (obj); }
+			public override UInt16?   GetNullableUInt16  (object o) { object obj = _memberAccessor.GetValue(o); return obj == null? null: _mapper.GetNullableUInt16  (obj); }
+			public override UInt32?   GetNullableUInt32  (object o) { object obj = _memberAccessor.GetValue(o); return obj == null? null: _mapper.GetNullableUInt32  (obj); }
+			public override UInt64?   GetNullableUInt64  (object o) { object obj = _memberAccessor.GetValue(o); return obj == null? null: _mapper.GetNullableUInt64  (obj); }
+
+			public override Boolean?  GetNullableBoolean (object o) { object obj = _memberAccessor.GetValue(o); return obj == null? null: _mapper.GetNullableBoolean (obj); }
+			public override Char?     GetNullableChar    (object o) { object obj = _memberAccessor.GetValue(o); return obj == null? null: _mapper.GetNullableChar    (obj); }
+			public override Single?   GetNullableSingle  (object o) { object obj = _memberAccessor.GetValue(o); return obj == null? null: _mapper.GetNullableSingle  (obj); }
+			public override Double?   GetNullableDouble  (object o) { object obj = _memberAccessor.GetValue(o); return obj == null? null: _mapper.GetNullableDouble  (obj); }
+			public override Decimal?  GetNullableDecimal (object o) { object obj = _memberAccessor.GetValue(o); return obj == null? null: _mapper.GetNullableDecimal (obj); }
+			public override Guid?     GetNullableGuid    (object o) { object obj = _memberAccessor.GetValue(o); return obj == null? null: _mapper.GetNullableGuid    (obj); }
+			public override DateTime? GetNullableDateTime(object o) { object obj = _memberAccessor.GetValue(o); return obj == null? null: _mapper.GetNullableDateTime(obj); }
+#endif
+
+			// SQL type getters.
+			//
+			public override SqlByte     GetSqlByte    (object o) { object obj = _memberAccessor.GetValue(o); return obj == null? SqlByte.    Null: _mapper.GetSqlByte    (obj); }
+			public override SqlInt16    GetSqlInt16   (object o) { object obj = _memberAccessor.GetValue(o); return obj == null? SqlInt16.   Null: _mapper.GetSqlInt16   (obj); }
+			public override SqlInt32    GetSqlInt32   (object o) { object obj = _memberAccessor.GetValue(o); return obj == null? SqlInt32.   Null: _mapper.GetSqlInt32   (obj); }
+			public override SqlInt64    GetSqlInt64   (object o) { object obj = _memberAccessor.GetValue(o); return obj == null? SqlInt64.   Null: _mapper.GetSqlInt64   (obj); }
+			public override SqlSingle   GetSqlSingle  (object o) { object obj = _memberAccessor.GetValue(o); return obj == null? SqlSingle.  Null: _mapper.GetSqlSingle  (obj); }
+			public override SqlBoolean  GetSqlBoolean (object o) { object obj = _memberAccessor.GetValue(o); return obj == null? SqlBoolean. Null: _mapper.GetSqlBoolean (obj); }
+			public override SqlDouble   GetSqlDouble  (object o) { object obj = _memberAccessor.GetValue(o); return obj == null? SqlDouble.  Null: _mapper.GetSqlDouble  (obj); }
+			public override SqlDateTime GetSqlDateTime(object o) { object obj = _memberAccessor.GetValue(o); return obj == null? SqlDateTime.Null: _mapper.GetSqlDateTime(obj); }
+			public override SqlDecimal  GetSqlDecimal (object o) { object obj = _memberAccessor.GetValue(o); return obj == null? SqlDecimal. Null: _mapper.GetSqlDecimal (obj); }
+			public override SqlMoney    GetSqlMoney   (object o) { object obj = _memberAccessor.GetValue(o); return obj == null? SqlMoney.   Null: _mapper.GetSqlMoney   (obj); }
+			public override SqlGuid     GetSqlGuid    (object o) { object obj = _memberAccessor.GetValue(o); return obj == null? SqlGuid.    Null: _mapper.GetSqlGuid    (obj); }
+			public override SqlString   GetSqlString  (object o) { object obj = _memberAccessor.GetValue(o); return obj == null? SqlString.  Null: _mapper.GetSqlString  (obj); }
+
+			#endregion
+
+			#region SetValue
 
 			public override void SetValue(object o, object value)
 			{
@@ -276,6 +339,63 @@ namespace BLToolkit.Mapping
 				if (obj != null)
 					_mapper.SetValue(obj, value);
 			}
+
+			public override void SetSByte   (object o, SByte    value) { object obj = _memberAccessor.GetValue(o); if (obj != null) _mapper.SetSByte   (obj, value); }
+			public override void SetInt16   (object o, Int16    value) { object obj = _memberAccessor.GetValue(o); if (obj != null) _mapper.SetInt16   (obj, value); }
+			public override void SetInt32   (object o, Int32    value) { object obj = _memberAccessor.GetValue(o); if (obj != null) _mapper.SetInt32   (obj, value); }
+			public override void SetInt64   (object o, Int64    value) { object obj = _memberAccessor.GetValue(o); if (obj != null) _mapper.SetInt64   (obj, value); }
+
+			public override void SetByte    (object o, Byte     value) { object obj = _memberAccessor.GetValue(o); if (obj != null) _mapper.SetByte    (obj, value); }
+			public override void SetUInt16  (object o, UInt16   value) { object obj = _memberAccessor.GetValue(o); if (obj != null) _mapper.SetUInt16  (obj, value); }
+			public override void SetUInt32  (object o, UInt32   value) { object obj = _memberAccessor.GetValue(o); if (obj != null) _mapper.SetUInt32  (obj, value); }
+			public override void SetUInt64  (object o, UInt64   value) { object obj = _memberAccessor.GetValue(o); if (obj != null) _mapper.SetUInt64  (obj, value); }
+
+			public override void SetBoolean (object o, Boolean  value) { object obj = _memberAccessor.GetValue(o); if (obj != null) _mapper.SetBoolean (obj, value); }
+			public override void SetChar    (object o, Char     value) { object obj = _memberAccessor.GetValue(o); if (obj != null) _mapper.SetChar    (obj, value); }
+			public override void SetSingle  (object o, Single   value) { object obj = _memberAccessor.GetValue(o); if (obj != null) _mapper.SetSingle  (obj, value); }
+			public override void SetDouble  (object o, Double   value) { object obj = _memberAccessor.GetValue(o); if (obj != null) _mapper.SetDouble  (obj, value); }
+			public override void SetDecimal (object o, Decimal  value) { object obj = _memberAccessor.GetValue(o); if (obj != null) _mapper.SetDecimal (obj, value); }
+			public override void SetGuid    (object o, Guid     value) { object obj = _memberAccessor.GetValue(o); if (obj != null) _mapper.SetGuid    (obj, value); }
+			public override void SetDateTime(object o, DateTime value) { object obj = _memberAccessor.GetValue(o); if (obj != null) _mapper.SetDateTime(obj, value); }
+
+#if FW2
+			// Nullable type setters.
+			//
+			public override void SetNullableSByte   (object o, SByte?    value) { object obj = _memberAccessor.GetValue(o); if (obj != null) _mapper.SetNullableSByte   (obj, value); }
+			public override void SetNullableInt16   (object o, Int16?    value) { object obj = _memberAccessor.GetValue(o); if (obj != null) _mapper.SetNullableInt16   (obj, value); }
+			public override void SetNullableInt32   (object o, Int32?    value) { object obj = _memberAccessor.GetValue(o); if (obj != null) _mapper.SetNullableInt32   (obj, value); }
+			public override void SetNullableInt64   (object o, Int64?    value) { object obj = _memberAccessor.GetValue(o); if (obj != null) _mapper.SetNullableInt64   (obj, value); }
+
+			public override void SetNullableByte    (object o, Byte?     value) { object obj = _memberAccessor.GetValue(o); if (obj != null) _mapper.SetNullableByte    (obj, value); }
+			public override void SetNullableUInt16  (object o, UInt16?   value) { object obj = _memberAccessor.GetValue(o); if (obj != null) _mapper.SetNullableUInt16  (obj, value); }
+			public override void SetNullableUInt32  (object o, UInt32?   value) { object obj = _memberAccessor.GetValue(o); if (obj != null) _mapper.SetNullableUInt32  (obj, value); }
+			public override void SetNullableUInt64  (object o, UInt64?   value) { object obj = _memberAccessor.GetValue(o); if (obj != null) _mapper.SetNullableUInt64  (obj, value); }
+
+			public override void SetNullableBoolean (object o, Boolean?  value) { object obj = _memberAccessor.GetValue(o); if (obj != null) _mapper.SetNullableBoolean (obj, value); }
+			public override void SetNullableChar    (object o, Char?     value) { object obj = _memberAccessor.GetValue(o); if (obj != null) _mapper.SetNullableChar    (obj, value); }
+			public override void SetNullableSingle  (object o, Single?   value) { object obj = _memberAccessor.GetValue(o); if (obj != null) _mapper.SetNullableSingle  (obj, value); }
+			public override void SetNullableDouble  (object o, Double?   value) { object obj = _memberAccessor.GetValue(o); if (obj != null) _mapper.SetNullableDouble  (obj, value); }
+			public override void SetNullableDecimal (object o, Decimal?  value) { object obj = _memberAccessor.GetValue(o); if (obj != null) _mapper.SetNullableDecimal (obj, value); }
+			public override void SetNullableGuid    (object o, Guid?     value) { object obj = _memberAccessor.GetValue(o); if (obj != null) _mapper.SetNullableGuid    (obj, value); }
+			public override void SetNullableDateTime(object o, DateTime? value) { object obj = _memberAccessor.GetValue(o); if (obj != null) _mapper.SetNullableDateTime(obj, value); }
+#endif
+
+			// SQL type setters.
+			//
+			public override void SetSqlByte    (object o, SqlByte     value) { object obj = _memberAccessor.GetValue(o); if (obj != null) _mapper.SetSqlByte    (obj, value); }
+			public override void SetSqlInt16   (object o, SqlInt16    value) { object obj = _memberAccessor.GetValue(o); if (obj != null) _mapper.SetSqlInt16   (obj, value); }
+			public override void SetSqlInt32   (object o, SqlInt32    value) { object obj = _memberAccessor.GetValue(o); if (obj != null) _mapper.SetSqlInt32   (obj, value); }
+			public override void SetSqlInt64   (object o, SqlInt64    value) { object obj = _memberAccessor.GetValue(o); if (obj != null) _mapper.SetSqlInt64   (obj, value); }
+			public override void SetSqlSingle  (object o, SqlSingle   value) { object obj = _memberAccessor.GetValue(o); if (obj != null) _mapper.SetSqlSingle  (obj, value); }
+			public override void SetSqlBoolean (object o, SqlBoolean  value) { object obj = _memberAccessor.GetValue(o); if (obj != null) _mapper.SetSqlBoolean (obj, value); }
+			public override void SetSqlDouble  (object o, SqlDouble   value) { object obj = _memberAccessor.GetValue(o); if (obj != null) _mapper.SetSqlDouble  (obj, value); }
+			public override void SetSqlDateTime(object o, SqlDateTime value) { object obj = _memberAccessor.GetValue(o); if (obj != null) _mapper.SetSqlDateTime(obj, value); }
+			public override void SetSqlDecimal (object o, SqlDecimal  value) { object obj = _memberAccessor.GetValue(o); if (obj != null) _mapper.SetSqlDecimal (obj, value); }
+			public override void SetSqlMoney   (object o, SqlMoney    value) { object obj = _memberAccessor.GetValue(o); if (obj != null) _mapper.SetSqlMoney   (obj, value); }
+			public override void SetSqlGuid    (object o, SqlGuid     value) { object obj = _memberAccessor.GetValue(o); if (obj != null) _mapper.SetSqlGuid    (obj, value); }
+			public override void SetSqlString  (object o, SqlString   value) { object obj = _memberAccessor.GetValue(o); if (obj != null) _mapper.SetSqlString  (obj, value); }
+
+			#endregion
 		}
 
 		#endregion
