@@ -26,7 +26,6 @@ namespace Aspects
 			{
 				throw new ApplicationException("test exception");
 			}
-
 		}
 
 		[Test]
