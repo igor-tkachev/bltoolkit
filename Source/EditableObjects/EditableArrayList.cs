@@ -273,15 +273,19 @@ namespace BLToolkit.EditableObjects
 
 		#region ISupportMapping Members
 
-		public void BeginMapping(InitContext initContext)
+		public virtual void BeginMapping(InitContext initContext)
 		{
-			_noTrackingChangesCount++;
+			if (initContext.IsDestination)
+				_noTrackingChangesCount++;
 		}
 
-		public void EndMapping(InitContext initContext)
+		public virtual void EndMapping(InitContext initContext)
 		{
-			AcceptChanges();
-			_noTrackingChangesCount--;
+			if (initContext.IsDestination)
+			{
+				AcceptChanges();
+				_noTrackingChangesCount--;
+			}
 		}
 
 		#endregion
