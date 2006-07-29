@@ -203,25 +203,38 @@ namespace BLToolkit.EditableObjects
 
 		#region ISupportMapping Members
 
-		private bool _inMapping;
+		[Obsolete, MapIgnore, Bindable(false)]
+		public bool InMapping
+		{
+			get { return _isInMapping; }
+		}
+
+		private bool _isInMapping;
 		[MapIgnore, Bindable(false)]
-		public  bool  InMapping
+		public  bool  IsInMapping
 		{
-			get { return _inMapping; }
+			get { return _isInMapping; }
 		}
 
-		public void BeginMapping(InitContext initContext)
+		protected void SetIsInMapping(bool isInMapping)
 		{
-			_inMapping = true;
+			_isInMapping = isInMapping;
 		}
 
-		public void EndMapping(InitContext initContext)
+		public virtual void BeginMapping(InitContext initContext)
 		{
-			AcceptChanges();
+			_isInMapping = true;
+		}
 
-			_inMapping = false;
+		public virtual void EndMapping(InitContext initContext)
+		{
+			if (initContext.IsDestination)
+				AcceptChanges();
 
-			OnPropertyChanged("");
+			_isInMapping = false;
+
+			if (initContext.IsDestination)
+				OnPropertyChanged("");
 		}
 
 		#endregion
@@ -261,7 +274,7 @@ namespace BLToolkit.EditableObjects
 
 		void IPropertyChanged.OnPropertyChanged(PropertyInfo propertyInfo)
 		{
-			if (_inMapping == false)
+			if (_isInMapping == false)
 				OnPropertyChanged(propertyInfo.Name);
 		}
 
