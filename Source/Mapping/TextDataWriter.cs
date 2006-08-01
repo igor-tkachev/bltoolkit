@@ -67,6 +67,7 @@ namespace BLToolkit.Mapping
 		public virtual void WriteEnd()
 		{
 			_writer.WriteLine("*-");
+			_writer.Flush();
 		}
 
 		public virtual Type GetFieldType(int index)
