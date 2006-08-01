@@ -7,8 +7,10 @@ using System.IO;
 using System.Reflection;
 using System.Xml;
 
+using BLToolkit.Aspects;
 using BLToolkit.Common;
 using BLToolkit.Mapping;
+using BLToolkit.Reflection;
 
 using Oracle.DataAccess.Client;
 using Oracle.DataAccess.Types;
@@ -116,7 +118,8 @@ namespace BLToolkit.Data.DataProvider
 
 		public override IDbDataParameter CloneParameter(IDbDataParameter parameter)
 		{
-			OracleParameter oraParameter = parameter as OracleParameter;
+			OracleParameter oraParameter = (parameter is OracleParameterWrap) ?
+				(parameter as OracleParameterWrap).OracleParameter : parameter as OracleParameter;
 
 			if (null != oraParameter)
 			{
@@ -188,7 +191,8 @@ namespace BLToolkit.Data.DataProvider
 
 		public override void AttachParameter(IDbCommand command, IDbDataParameter parameter)
 		{
-			OracleParameter oraParameter = parameter as OracleParameter;
+			OracleParameter oraParameter = (parameter is OracleParameterWrap) ?
+				(parameter as OracleParameterWrap).OracleParameter : parameter as OracleParameter;
 
 			if (null != oraParameter)
 			{
@@ -238,7 +242,9 @@ namespace BLToolkit.Data.DataProvider
 
 		public override bool IsValueParameter(IDbDataParameter parameter)
 		{
-			OracleParameter oraParameter = parameter as OracleParameter;
+			OracleParameter oraParameter = (parameter is OracleParameterWrap) ?
+				(parameter as OracleParameterWrap).OracleParameter : parameter as OracleParameter;
+
 			if (null != oraParameter)
 			{
 				if (oraParameter.OracleDbType == OracleDbType.RefCursor && oraParameter.Direction == ParameterDirection.Output)
@@ -249,6 +255,26 @@ namespace BLToolkit.Data.DataProvider
 			}
 
 			return base.IsValueParameter(parameter);
+		}
+
+		public override IDbDataParameter CreateParameterObject(IDbCommand command)
+		{
+			IDbDataParameter parameter = base.CreateParameterObject(command);
+
+			if (parameter is OracleParameter)
+				parameter = OracleParameterWrap.CreateInstance(parameter as OracleParameter);
+
+			return parameter;
+		}
+
+		public override IDbDataParameter GetParameter(IDbCommand command, NameOrIndexParameter nameOrIndex)
+		{
+			IDbDataParameter parameter = base.GetParameter(command, nameOrIndex);
+
+			if (parameter is OracleParameter)
+				parameter = OracleParameterWrap.CreateInstance(parameter as OracleParameter);
+
+			return parameter;
 		}
 
 		/// <summary>
@@ -276,6 +302,8 @@ namespace BLToolkit.Data.DataProvider
 		{
 			get { return "ODP"; }
 		}
+
+		#region Inner types
 
 		public class OdpMappingSchema : MappingSchema
 		{
@@ -709,9 +737,7 @@ namespace BLToolkit.Data.DataProvider
 			public OracleDataReaderMapper(MappingSchema mappingSchema, IDataReader dataReader)
 				: base(mappingSchema, dataReader)
 			{
-#if FW2
 				_dataReader = (OracleDataReader)dataReader;
-#endif
 			}
 
 			private OracleDataReader _dataReader;
@@ -757,6 +783,8 @@ namespace BLToolkit.Data.DataProvider
 			public override UInt32   GetUInt32 (object o, int index) { return (UInt32)_dataReader.GetDecimal(index); }
 			public override UInt64   GetUInt64 (object o, int index) { return (UInt64)_dataReader.GetDecimal(index); }
 
+			public override Decimal  GetDecimal(object o, int index) { return OracleDecimal.SetPrecision(_dataReader.GetOracleDecimal(index), 28).Value; }
+
 #if FW2
 			public override Boolean? GetNullableBoolean(object o, int index) { return MappingSchema.ConvertToNullableBoolean(GetValue(o, index)); }
 			public override Char?    GetNullableChar   (object o, int index) { return MappingSchema.ConvertToNullableChar   (GetValue(o, index)); }
@@ -766,16 +794,20 @@ namespace BLToolkit.Data.DataProvider
 			public override UInt16?  GetNullableUInt16 (object o, int index) { return _dataReader.IsDBNull(index)? null: (UInt16?)_dataReader.GetDecimal(index); }
 			public override UInt32?  GetNullableUInt32 (object o, int index) { return _dataReader.IsDBNull(index)? null: (UInt32?)_dataReader.GetDecimal(index); }
 			public override UInt64?  GetNullableUInt64 (object o, int index) { return _dataReader.IsDBNull(index)? null: (UInt64?)_dataReader.GetDecimal(index); }
+
+			public override Decimal? GetNullableDecimal(object o, int index) { return _dataReader.IsDBNull(index)? (decimal?)null: OracleDecimal.SetPrecision(_dataReader.GetOracleDecimal(index), 28).Value; }
 #endif
 		}
 
 		public class SqlScalarDataReaderMapper : ScalarDataReaderMapper
 		{
+			private OracleDataReader _dataReader;
+
 			public SqlScalarDataReaderMapper(MappingSchema mappingSchema, IDataReader dataReader, NameOrIndexParameter nip)
 				: base(mappingSchema, dataReader, nip)
 			{
-#if FW2
 				_dataReader = (OracleDataReader)dataReader;
+#if FW2
 				_fieldType = _dataReader.GetProviderSpecificFieldType(Index);
 
 				if (_fieldType == typeof(OracleXmlType))
@@ -788,7 +820,6 @@ namespace BLToolkit.Data.DataProvider
 			}
 
 #if FW2
-			private OracleDataReader _dataReader;
 			private Type             _fieldType;
 
 			public override Type GetFieldType(int index)
@@ -824,6 +855,8 @@ namespace BLToolkit.Data.DataProvider
 			public override UInt32   GetUInt32 (object o, int index) { return (UInt32)_dataReader.GetDecimal(Index); }
 			public override UInt64   GetUInt64 (object o, int index) { return (UInt64)_dataReader.GetDecimal(Index); }
 
+			public override Decimal  GetDecimal(object o, int index) { return OracleDecimal.SetPrecision(_dataReader.GetOracleDecimal(Index), 28).Value; }
+
 #if FW2
 			public override Boolean? GetNullableBoolean(object o, int index) { return MappingSchema.ConvertToNullableBoolean(GetValue(o, Index)); }
 			public override Char?    GetNullableChar   (object o, int index) { return MappingSchema.ConvertToNullableChar   (GetValue(o, Index)); }
@@ -833,7 +866,93 @@ namespace BLToolkit.Data.DataProvider
 			public override UInt16?  GetNullableUInt16 (object o, int index) { return _dataReader.IsDBNull(index)? null: (UInt16?)_dataReader.GetDecimal(Index); }
 			public override UInt32?  GetNullableUInt32 (object o, int index) { return _dataReader.IsDBNull(index)? null: (UInt32?)_dataReader.GetDecimal(Index); }
 			public override UInt64?  GetNullableUInt64 (object o, int index) { return _dataReader.IsDBNull(index)? null: (UInt64?)_dataReader.GetDecimal(Index); }
+
+			public override Decimal? GetNullableDecimal(object o, int index) { return _dataReader.IsDBNull(index)? (decimal?)null: OracleDecimal.SetPrecision(_dataReader.GetOracleDecimal(Index), 28).Value; }
 #endif
 		}
+
+		[Mixin(typeof(IDbDataParameter), "_oracleParameter")]
+		[Mixin(typeof(IDataParameter),   "_oracleParameter")]
+		[Mixin(typeof(IDisposable),      "_oracleParameter")]
+		[Mixin(typeof(ICloneable),       "_oracleParameter")]
+		public abstract class OracleParameterWrap
+		{
+			protected OracleParameter _oracleParameter;
+			public    OracleParameter  OracleParameter
+			{
+				get { return _oracleParameter; }
+			}
+
+			public static IDbDataParameter CreateInstance(OracleParameter oraParameter)
+			{
+				OracleParameterWrap wrap = (OracleParameterWrap)TypeAccessor.CreateInstance(typeof (OracleParameterWrap));
+
+				wrap._oracleParameter = oraParameter;
+
+				return (IDbDataParameter)wrap;
+			}
+
+			///<summary>
+			///Gets or sets the value of the parameter.
+			///</summary>
+			///<returns>
+			///An <see cref="T:System.Object"/> that is the value of the parameter.
+			///The default value is null.
+			///</returns>
+			protected object Value
+			{
+				[MixinOverride]
+				set
+				{
+					if (null != value)
+					{
+						if (value is Guid)
+						{
+							// Fix Oracle bug #6: guid type is not handled
+							//
+							value = ((Guid)value).ToByteArray();
+						}
+						else if (value is IConvertible)
+						{
+							IConvertible convertible = (IConvertible)value;
+							TypeCode        typeCode = convertible.GetTypeCode();
+
+							switch (typeCode)
+							{
+								case TypeCode.Boolean:
+									// Fix Oracle bug #7: bool type is handled wrong
+									//
+									value = convertible.ToByte(null);
+									break;
+
+								case TypeCode.SByte:
+								case TypeCode.UInt16:
+								case TypeCode.UInt32:
+								case TypeCode.UInt64:
+									// Fix Oracle bug #8: some integer types are handled wrong
+									//
+									value = convertible.ToDecimal(null);
+									break;
+
+								default:
+									// Fix Oracle bug #5: Enum type is not handled
+									//
+									if (value is Enum)
+									{
+										// Convert a Enum value to it's underlying type.
+										//
+										value = System.Convert.ChangeType(value, typeCode);
+									}
+									break;
+							}
+						}
+					}
+
+					_oracleParameter.Value = value;
+				}
+			}
+		}
+
+		#endregion
 	}
 }

@@ -59,6 +59,7 @@ namespace BLToolkit.Data.DataProvider
 		/// For example:
 		///     OracleDecimal -> ((OracleDecimal)value).Value
 		/// </summary>
+		[Obsolete("Use MappingSchema methods directly.")]
 		OutputParameter
 	}
 }
