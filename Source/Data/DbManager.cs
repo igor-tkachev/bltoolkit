@@ -1471,7 +1471,7 @@ namespace BLToolkit.Data
 		/// <returns>The <see cref="IDbDataParameter"/> object.</returns>
 		public IDbDataParameter Parameter(string parameterName)
 		{
-			return (IDbDataParameter)Command.Parameters[parameterName];
+			return _dataProvider.GetParameter(Command, parameterName);
 		}
 
 		/// <summary>
@@ -1646,7 +1646,7 @@ namespace BLToolkit.Data
 			string parameterName,
 			object value)
 		{
-			IDbDataParameter parameter = Command.CreateParameter();
+			IDbDataParameter parameter = _dataProvider.CreateParameterObject(Command);
 
 			parameter.ParameterName = parameterName;
 			parameter.Direction     = parameterDirection;
@@ -1664,7 +1664,7 @@ namespace BLToolkit.Data
 			object value,
 			DbType dbType)
 		{
-			IDbDataParameter parameter = Command.CreateParameter();
+			IDbDataParameter parameter = _dataProvider.CreateParameterObject(Command);
 
 			parameter.ParameterName = parameterName;
 			parameter.Direction     = parameterDirection;
@@ -1689,7 +1689,7 @@ namespace BLToolkit.Data
 			DbType dbType,
 			int    size)
 		{
-			IDbDataParameter parameter = Command.CreateParameter();
+			IDbDataParameter parameter = _dataProvider.CreateParameterObject(Command);
 
 			parameter.ParameterName = parameterName;
 			parameter.Direction     = parameterDirection;
@@ -1725,7 +1725,7 @@ namespace BLToolkit.Data
 			string parameterName,
 			DbType dbType)
 		{
-			IDbDataParameter parameter = Command.CreateParameter();
+			IDbDataParameter parameter = _dataProvider.CreateParameterObject(Command);
 		
 			parameter.ParameterName = parameterName;
 			parameter.Direction     = parameterDirection;
@@ -1752,7 +1752,7 @@ namespace BLToolkit.Data
 			DbType dbType,
 			int    size)
 		{
-			IDbDataParameter parameter = Command.CreateParameter();
+			IDbDataParameter parameter = _dataProvider.CreateParameterObject(Command);
 		
 			parameter.ParameterName = parameterName;
 			parameter.Direction     = parameterDirection;

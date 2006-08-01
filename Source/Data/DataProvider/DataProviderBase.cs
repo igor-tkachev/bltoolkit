@@ -2,6 +2,7 @@ using System;
 using System.Data;
 using System.Data.Common;
 
+using BLToolkit.Common;
 using BLToolkit.Mapping;
 
 namespace BLToolkit.Data.DataProvider
@@ -78,20 +79,33 @@ namespace BLToolkit.Data.DataProvider
 
 		#endregion
 
-		public virtual void InitDbManager(DbManager dbManager)
-		{
-			MappingSchema schema = MappingSchema;
+		#region Factory methods
 
-			if (schema != null)
-				dbManager.MappingSchema = schema;
+		public virtual IDbCommand CreateCommandObject(IDbConnection connection)
+		{
+			return connection.CreateCommand();
 		}
 
-		public virtual object Convert(object value, ConvertType convertType)
+		public virtual IDbDataParameter CreateParameterObject(IDbCommand command)
 		{
-			return value;
+			return command.CreateParameter();
 		}
 
-		public virtual void AttachParameter(IDbCommand command, IDbDataParameter parameter)
+		#endregion
+
+		#region IDbDataParameter methods
+
+		public virtual IDbDataParameter GetParameter(
+			IDbCommand           command,
+			NameOrIndexParameter nameOrIndex)
+		{
+			return (IDbDataParameter)(nameOrIndex.ByName?
+				command.Parameters[nameOrIndex.Name]: command.Parameters[nameOrIndex.Index]);
+		}
+
+		public virtual void AttachParameter(
+			IDbCommand       command,
+			IDbDataParameter parameter)
 		{
 			command.Parameters.Add(parameter);
 		}
@@ -106,12 +120,22 @@ namespace BLToolkit.Data.DataProvider
 			return (IDbDataParameter)((ICloneable)parameter).Clone();
 		}
 
-		public virtual IDbCommand CreateCommandObject(IDbConnection connection)
+		#endregion
+
+		public virtual object Convert(object value, ConvertType convertType)
 		{
-			return connection.CreateCommand();
+			return value;
 		}
 
-		private        MappingSchema _mappingSchema;
+		public virtual void InitDbManager(DbManager dbManager)
+		{
+			MappingSchema schema = MappingSchema;
+
+			if (schema != null)
+				dbManager.MappingSchema = schema;
+		}
+
+		private MappingSchema _mappingSchema;
 		public virtual MappingSchema  MappingSchema
 		{
 			get { return _mappingSchema; }
