@@ -4,14 +4,11 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>8.0.50727</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{E7735874-6552-4B35-A9C1-1279A9E9C8B9}</ProjectGuid>
-    <OutputType>Library</OutputType>
+    <ProjectGuid>{65FC918C-FF12-4C75-96F5-180B552989E5}</ProjectGuid>
+    <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>CodeGenerator</RootNamespace>
-    <AssemblyName>CodeGenerator.2</AssemblyName>
-    <RunPostBuildEvent>OnOutputUpdated</RunPostBuildEvent>
-    <StartupObject>
-    </StartupObject>
+    <RootNamespace>BLTgen</RootNamespace>
+    <AssemblyName>BLTgen.2</AssemblyName>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -36,30 +33,22 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Convert.xml">
-      <Generator>TransformCodeGenerator</Generator>
-      <LastGenOutput>Convert.cs</LastGenOutput>
-      <CustomToolNamespace>BLToolkit.Common</CustomToolNamespace>
-    </Content>
-    <Content Include="Convert.xslt" />
-    <Content Include="ValueMapping.xml">
-      <Generator>TransformCodeGenerator</Generator>
-      <LastGenOutput>ValueMapping.cs</LastGenOutput>
-      <CustomToolNamespace>BLToolkit.Mapping</CustomToolNamespace>
-    </Content>
-    <Content Include="ValueMapping.xslt" />
+    <Compile Include="StringListMapper.cs" />
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Convert.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>Convert.xml</DependentUpon>
-    </Compile>
-    <Compile Include="ValueMapping.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>ValueMapping.xml</DependentUpon>
-    </Compile>
+    <ProjectReference Include="..\..\Source\BLToolkit.2.csproj">
+      <Project>{0C325F5D-E50E-4340-8724-D29896CCC583}</Project>
+      <Name>BLToolkit.2</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
 </Project>

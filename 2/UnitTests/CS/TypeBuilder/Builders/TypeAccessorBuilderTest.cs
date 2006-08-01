@@ -4,9 +4,7 @@ using System.Collections;
 using NUnit.Framework;
 
 using BLToolkit.Reflection;
-using BLToolkit.Reflection.Emit;
 using BLToolkit.TypeBuilder;
-using BLToolkit.TypeBuilder.Builders;
 
 namespace TypeBuilder.Builders
 {
@@ -147,21 +145,21 @@ namespace TypeBuilder.Builders
 		}
 
 #if FW2
-		//[Test]
-		public void Test5()
-		{
-			TypeAccessor ta1 = TypeAccessor.GetAccessor(typeof(TestObject5));
-			TypeAccessor ta2 = TypeAccessor.GetAccessor(typeof(TestStruct1));
-
-			TestObject5 o = (TestObject5)ta1.CreateInstance();
-			TestStruct1 s;
-
-			ta1["Value"].GetValueT(ref o, out s);
-			ta2["Name" ].SetValueT(ref s, "123");
-			ta1["Value"].SetValue(o, s);
-
-			Assert.AreEqual("123", o.Value.Name);
-		}
+//		[Test]
+//		public void Test5()
+//		{
+//			TypeAccessor ta1 = TypeAccessor.GetAccessor(typeof(TestObject5));
+//			TypeAccessor ta2 = TypeAccessor.GetAccessor(typeof(TestStruct1));
+//
+//			TestObject5 o = (TestObject5)ta1.CreateInstance();
+//			TestStruct1 s;
+//
+//			ta1["Value"].GetValueT(ref o, out s);
+//			ta2["Name" ].SetValueT(ref s, "123");
+//			ta1["Value"].SetValue(o, s);
+//
+//			Assert.AreEqual("123", o.Value.Name);
+//		}
 #endif
 
 	}

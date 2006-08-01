@@ -19,7 +19,11 @@ Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "Examples.VB", "Examples\VB\
 	ProjectSection(ProjectDependencies) = postProject
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExampleGenerator", "ExampleGenerator\ExampleGenerator.csproj", "{35BF068E-AC55-4E89-AE34-50881629338B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExampleGenerator", "Tools\ExampleGenerator\ExampleGenerator.csproj", "{35BF068E-AC55-4E89-AE34-50881629338B}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BLTgen", "Tools\BLTgen\BLTgen.csproj", "{AA4C0E2F-687D-4C7E-8F2B-39961C44F116}"
 	ProjectSection(ProjectDependencies) = postProject
 	EndProjectSection
 EndProject
@@ -27,6 +31,8 @@ Global
 	GlobalSection(SolutionConfiguration) = preSolution
 		Debug = Debug
 		Release = Release
+	EndGlobalSection
+	GlobalSection(ProjectDependencies) = postSolution
 	EndGlobalSection
 	GlobalSection(ProjectConfiguration) = postSolution
 		{C8B3F401-4634-4742-A266-4BD9ED7565E5}.Debug.ActiveCfg = Debug|.NET
@@ -53,6 +59,10 @@ Global
 		{35BF068E-AC55-4E89-AE34-50881629338B}.Debug.Build.0 = Debug|.NET
 		{35BF068E-AC55-4E89-AE34-50881629338B}.Release.ActiveCfg = Release|.NET
 		{35BF068E-AC55-4E89-AE34-50881629338B}.Release.Build.0 = Release|.NET
+		{AA4C0E2F-687D-4C7E-8F2B-39961C44F116}.Debug.ActiveCfg = Debug|.NET
+		{AA4C0E2F-687D-4C7E-8F2B-39961C44F116}.Debug.Build.0 = Debug|.NET
+		{AA4C0E2F-687D-4C7E-8F2B-39961C44F116}.Release.ActiveCfg = Release|.NET
+		{AA4C0E2F-687D-4C7E-8F2B-39961C44F116}.Release.Build.0 = Release|.NET
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 	EndGlobalSection
