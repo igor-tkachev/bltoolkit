@@ -28,15 +28,20 @@ namespace BLToolkit.TypeBuilder.Builders
 			get { return "TypeAccessor"; }
 		}
 
-		public Type Build(Type sourceType, AssemblyBuilderHelper assemblyBuilder)
+		public static string GetTypeAccessorClassName(Type originalType)
 		{
-			if (assemblyBuilder == null) throw new ArgumentNullException("assemblyBuilder");
-
-			string typeName = _type.FullName.Replace('+', '.')
+			return originalType.FullName.Replace('+', '.')
 #if !FW2
 				.Replace('[', '_').Replace(']', '_')
 #endif
 				+ ".TypeAccessor";
+		}
+
+		public Type Build(Type sourceType, AssemblyBuilderHelper assemblyBuilder)
+		{
+			if (assemblyBuilder == null) throw new ArgumentNullException("assemblyBuilder");
+
+			string typeName = GetTypeAccessorClassName(_type);
 
 			_typeBuilder = assemblyBuilder.DefineType(typeName, _accessorType);
 

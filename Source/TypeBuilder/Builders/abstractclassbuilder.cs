@@ -34,6 +34,16 @@ namespace BLToolkit.TypeBuilder.Builders
 			return Build();
 		}
 
+		public static string GetTypeName(Type type)
+		{
+			string typeName = type.FullName.Replace('+', '.');
+
+			typeName = typeName.Substring(0, typeName.Length - type.Name.Length);
+			typeName = typeName + "BLToolkitExtension." + type.Name;
+
+			return typeName;
+		}
+
 		private static AbstractTypeBuilderList GetBuilderList(TypeHelper type)
 		{
 			object[] attrs = type.GetAttributes(typeof(AbstractTypeBuilderAttribute));
@@ -188,10 +198,7 @@ namespace BLToolkit.TypeBuilder.Builders
 				}
 			}
 
-			string typeName = _context.Type.FullName.Replace('+', '.');
-
-			typeName = typeName.Substring(0, typeName.Length - _context.Type.Name.Length);
-			typeName = typeName + "BLToolkitExtension." + _context.Type.Name;
+			string typeName = GetTypeName(_context.Type);
 
 			_context.TypeBuilder = _context.AssemblyBuilder.DefineType(
 				typeName,
