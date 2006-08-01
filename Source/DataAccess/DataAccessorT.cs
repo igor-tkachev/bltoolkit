@@ -34,12 +34,17 @@ namespace BLToolkit.DataAccess
 		}
 
 		[NoInterception]
-		protected override SqlQueryInfo GetSqlQueryInfo(DbManager db, Type type, string actionName)
+		public override SqlQueryInfo GetSqlQueryInfo(DbManager db, Type type, string actionName)
 		{
 			if (type == null)
 				type = typeof(T);
 
 			return base.GetSqlQueryInfo(db, type, actionName);
+		}
+
+		public SqlQueryInfo GetSqlQueryInfo(DbManager db, string actionName)
+		{
+			return base.GetSqlQueryInfo(db, typeof(T), actionName);
 		}
 
 		#endregion

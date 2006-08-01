@@ -856,7 +856,7 @@ namespace BLToolkit.DataAccess
 		private static Hashtable _actionSqlQueryInfo = new Hashtable();
 
 		[NoInterception]
-		protected virtual SqlQueryInfo GetSqlQueryInfo(DbManager db, Type type, string actionName)
+		public virtual SqlQueryInfo GetSqlQueryInfo(DbManager db, Type type, string actionName)
 		{
 			string       key   = type.FullName + "$" + actionName + "$" + db.DataProvider.Name;
 			SqlQueryInfo query = (SqlQueryInfo)_actionSqlQueryInfo[key];
