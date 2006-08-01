@@ -166,7 +166,8 @@ namespace BLToolkit.Reflection
 
 		#region Static Members
 
-		private static Hashtable _accessors = new Hashtable(10);
+		private static Hashtable _accessors  = new Hashtable(10);
+		private static Hashtable _assemblies = new Hashtable(10);
 
 		public static TypeAccessor GetAccessor(Type originalType)
 		{
@@ -182,19 +183,42 @@ namespace BLToolkit.Reflection
 
 					if (accessor == null)
 					{
-						Type type = IsClassBulderNeeded(originalType)?
-							TypeFactory.GetType(originalType, new AbstractClassBuilder()):
-							originalType;
+						Type accessorType = null;
+						Type instanceType = originalType;
 
-						Type accessorType = 
-							TypeFactory.GetType(originalType, new TypeAccessorBuilder(type, originalType));
+						Assembly originalAssembly = originalType.Assembly;
+
+						if (!_assemblies.Contains(originalAssembly))
+							_assemblies[originalAssembly] = LoadExtensionAssembly(originalAssembly);
+
+						Assembly extensionAssembly = (Assembly)_assemblies[originalAssembly];
+
+						if (null != extensionAssembly)
+						{
+							if (IsClassBulderNeeded(originalType))
+								instanceType = extensionAssembly.GetType(AbstractClassBuilder.GetTypeName(originalType));
+
+							if (null != instanceType)
+							{
+								string typeAccessorTypeName = TypeAccessorBuilder.GetTypeAccessorClassName(instanceType);
+								accessorType = extensionAssembly.GetType(typeAccessorTypeName);
+							}
+						}
+
+						if (accessorType == null)
+						{
+							if (IsClassBulderNeeded(originalType))
+								instanceType = TypeFactory.GetType(originalType, new AbstractClassBuilder());
+
+							accessorType = TypeFactory.GetType(originalType, new TypeAccessorBuilder(instanceType, originalType));
+						}
 
 						accessor = (TypeAccessor)Activator.CreateInstance(accessorType);
 
 						_accessors[originalType] = accessor;
 
-						if (originalType != type)
-							_accessors[type] = accessor;
+						if (originalType != instanceType)
+							_accessors[instanceType] = accessor;
 					}
 				}
 			}
@@ -214,6 +238,26 @@ namespace BLToolkit.Reflection
 			}
 
 			return false;
+		}
+
+		private static Assembly LoadExtensionAssembly(Assembly originalAssembly)
+		{
+			try
+			{
+				string originalAssemblyLocation = originalAssembly.Location;
+				string extensionAssemblyLocation = Path.ChangeExtension(originalAssemblyLocation,
+					"BLToolkitExtension" + Path.GetExtension(originalAssemblyLocation));
+
+				if (File.GetCreationTime(originalAssemblyLocation) <= File.GetCreationTime(extensionAssemblyLocation))
+					return Assembly.LoadFile(extensionAssemblyLocation);
+			}
+			catch
+			{
+				// Extension exist, but can't be loaded for some reason.
+				// Switch back to code generation
+			}
+
+			return null;
 		}
 
 		public static object CreateInstance(Type type)
