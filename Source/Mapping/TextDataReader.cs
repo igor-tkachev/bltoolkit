@@ -65,13 +65,12 @@ namespace BLToolkit.Mapping
 			{
 				if (_line.StartsWith("*:"))
 				{
-					_names  = _line.Substring(2).Split(':');
-					_values = new string[_names.Length];
+					_names = _line.Substring(2).Split(':');
 
 					for (int i = 0; i < _names.Length; i++)
 						_names[i] = _names[i].Trim();
 				}
-				else if (_line.StartsWith("**"))
+				else if (_line.StartsWith("**") || _line.StartsWith("*-"))
 					break;
 			}
 		}
