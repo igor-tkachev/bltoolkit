@@ -61,17 +61,28 @@ namespace BLToolkit.Mapping
 			return _mapper;
 		}
 
+		private object _currentObject;
+
+		private void AddCurrent()
+		{
+			if (_currentObject != null)
+			{
+				_list.Add(_currentObject);
+				_currentObject = null;
+			}
+		}
+
 		object IMapDataDestinationList.GetNextObject(InitContext initContext)
 		{
-			object obj = _mapper.CreateInstance(initContext);
+			AddCurrent();
 
-			_list.Add(obj);
-
-			return obj;
+			return _currentObject = _mapper.CreateInstance(initContext);
 		}
 
 		void IMapDataDestinationList.EndMapping(InitContext initContext)
 		{
+			AddCurrent();
+
 			ISupportMapping sm = _list as ISupportMapping;
 
 			if (sm != null)
