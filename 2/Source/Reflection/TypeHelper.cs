@@ -637,12 +637,21 @@ namespace BLToolkit.Reflection
 
 		#region Static Members
 
+		public static bool IsNullable(Type type)
+		{
+#if FW2
+			return (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>));
+#else
+			return false;
+#endif
+		}
+
 		public static Type GetUnderlyingType(Type type)
 		{
 			if (type == null) throw new ArgumentNullException("type");
 
 #if FW2
-			if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>))
+			if (IsNullable(type))
 				type = type.GetGenericArguments()[0];
 #endif
 

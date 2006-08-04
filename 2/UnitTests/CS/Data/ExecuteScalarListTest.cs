@@ -52,7 +52,6 @@ namespace Data
 			}
 		}
 
-
 		[Test]
 		public void ScalarListTest()
 		{
