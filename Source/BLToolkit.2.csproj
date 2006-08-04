@@ -65,18 +65,7 @@
     <Compile Include="Aspects\NotNullAttribute.cs" />
     <Compile Include="Common\CompoundValue.cs" />
     <Compile Include="Common\Convert.cs" />
-    <Compile Include="Common\Convert.Nullable.cs">
-      <DependentUpon>Convert.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Common\Convert.Other.cs">
-      <DependentUpon>Convert.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Common\Convert.Scalar.cs">
-      <DependentUpon>Convert.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Common\Convert.SqlTypes.cs">
-      <DependentUpon>Convert.cs</DependentUpon>
-    </Compile>
+    <Compile Include="Common\ConvertT.cs" />
     <Compile Include="Common\EntityBase.cs" />
     <Compile Include="Common\EntityBaseT.cs" />
     <Compile Include="Common\Operator.cs" />
@@ -163,15 +152,18 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Mapping\ValueMapping.cs" />
-    <Compile Include="Mapping\ValueMapping.Generic.cs">
-      <DependentUpon>ValueMapping.cs</DependentUpon>
-    </Compile>
     <Compile Include="Mapping\MapDataSourceDestinationBase.cs" />
     <Compile Include="Mapping\DefaultMappingSchema.cs" />
     <Compile Include="Mapping\IValueMapper.cs" />
     <Compile Include="Mapping\NullDateTimeAttribute.cs" />
     <Compile Include="Mapping\NullDecimalAttribute.cs" />
     <Compile Include="Mapping\NullGuidAttribute.cs" />
+    <Compile Include="Mapping\ValueMappingInternal\MapperSelector.cs" />
+    <Compile Include="Mapping\ValueMappingInternal\NullableTypes.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Mapping\ValueMappingInternal\ScalarTypes.cs" />
+    <Compile Include="Mapping\ValueMappingInternal\SqlTypes.cs" />
     <Compile Include="Reflection\GenericBinder.cs" />
     <Compile Include="TypeBuilder\ISetParent.cs" />
     <Compile Include="EditableObjects\IMemberwiseEditable.cs" />

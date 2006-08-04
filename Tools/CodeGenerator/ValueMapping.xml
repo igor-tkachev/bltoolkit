@@ -58,7 +58,7 @@
 	<nick type="SqlChars"    name="dbAC"/>
 	<nick type="SqlXml"      name="dbXml"/>
 
-	<template name="Integer Types">
+	<group name="Scalar Types">
 		<type name="SByte"   />
 		<type name="Int16"   />
 		<type name="Int32"   />
@@ -68,51 +68,54 @@
 		<type name="UInt16"  />
 		<type name="UInt32"  />
 		<type name="UInt64"  />
-	</template>
-
-	<template name="Numeric Types">
-		<include template="Integer Types"/>
-		<br/>
-		<type name="Single"  />
-		<type name="Double"  />
 		<br/>
 		<type name="Boolean" />
+		<type name="Char"    />
+		<type name="Single"  />
+		<type name="Double"  />
 		<type name="Decimal" />
-	</template>
+		<br/>
+	<!--<type name="Guid"    />
+		<type name="DateTime"/>-->
+	</group>
 
-	<template name="Scalar Types">
-		<include template="Numeric Types"/>
+	<group name="Nullable Types" nullable="true">
+		<type name="SByte"   />
+		<type name="Int16"   />
+		<type name="Int32"   />
+		<type name="Int64"   />
 		<br/>
-		<type name="Char"  />
-		<type name="Guid"  />
-		<type name="DateTime" />
-	</template>
+		<type name="Byte"    />
+		<type name="UInt16"  />
+		<type name="UInt32"  />
+		<type name="UInt64"  />
+		<br/>
+		<type name="Boolean" />
+		<type name="Char"    />
+		<type name="Single"  />
+		<type name="Double"  />
+		<type name="Decimal" />
+		<br/>
+		<!--<type name="Guid"    />
+		<type name="DateTime"/>-->
+	</group>
 
-	<template name="SqlTypes">
-		<type name="SqlString"/>
+	<group name="SqlTypes">
+		<type name="SqlString"  />
 		<br/>
-		<type name="SqlByte"/>
-		<type name="SqlInt16"/>
-		<type name="SqlInt32"/>
-		<type name="SqlInt64"/>
+		<type name="SqlByte"    />
+		<type name="SqlInt16"   />
+		<type name="SqlInt32"   />
+		<type name="SqlInt64"   />
 		<br/>
-		<type name="SqlSingle"/>
-		<type name="SqlDouble"/>
-		<type name="SqlDecimal"/>
-		<type name="SqlMoney"/>
+		<type name="SqlSingle"  />
+		<type name="SqlDouble"  />
+		<type name="SqlDecimal" />
+		<type name="SqlMoney"   />
 		<br/>
-		<type name="SqlBoolean"/>
-		<type name="SqlGuid"/>
+		<type name="SqlBoolean" />
+	<type name="SqlGuid"    />
 		<type name="SqlDateTime"/>
-	</template>
+	</group>
 
-	<group name="Scalar Types.">
-		<include template ="Scalar Types"/>
-	</group>
-	<group name="Nullable Types." nullable="true">
-		<include template ="Scalar Types"/>
-	</group>
-	<group name="SqlTypes.">
-		<include template ="SqlTypes"/>
-	</group>
 </code>

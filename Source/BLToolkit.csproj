@@ -219,6 +219,11 @@
                     BuildAction = "Compile"
                 />
                 <File
+                    RelPath = "Common\Convert.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
                     RelPath = "Common\EntityBase.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
@@ -790,6 +795,21 @@
                 />
                 <File
                     RelPath = "Mapping\Compatibility\SchemaTableColumn.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "Mapping\ValueMappingInternal\MapperSelector.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "Mapping\ValueMappingInternal\ScalarTypes.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "Mapping\ValueMappingInternal\SqlTypes.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
                 />

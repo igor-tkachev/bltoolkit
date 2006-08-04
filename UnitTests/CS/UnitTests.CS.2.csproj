@@ -43,6 +43,8 @@
     <Compile Include="Aspects\LoggingAspectTest.cs" />
     <Compile Include="Aspects\MixinAspectTest.cs" />
     <Compile Include="Aspects\NotNullAspectTest.cs" />
+    <Compile Include="Common\ConvertTest.cs" />
+    <Compile Include="Common\NameOrIndexParameterTest.cs" />
     <Compile Include="DataAccess\DataAccessorBuilderTest.cs" />
     <Compile Include="DataAccess\ScalarListTest.cs" />
     <Compile Include="DataAccess\CreateEntityTest.cs" />
@@ -64,7 +66,6 @@
     <Compile Include="DataAccess\XmlExtension.cs" />
     <Compile Include="Data\BinaryTest.cs" />
     <Compile Include="Data\CompositeKeyTest.cs" />
-    <Compile Include="Common\NameOrIndexParameterTest.cs" />
     <Compile Include="Data\InnerTypesTest.cs" />
     <Compile Include="Data\ExecuteDictionaryTest.cs" />
     <Compile Include="Data\ExecuteScalarDictionaryTest.cs" />

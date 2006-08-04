@@ -1,5 +1,7 @@
 using System;
 
+[assembly: CLSCompliant(true)]
+
 namespace BLToolkit.Common
 {
 	public class TypeHelper
@@ -37,7 +39,7 @@ namespace BLToolkit.Common
 
 	internal class ConvertDefault<T,P>: IConvertible<T,P>
 	{
-		T IConvertible<T,P>.From(P p) { return (T)Convert.ChangeType(p, typeof(T)); }
+		T IConvertible<T,P>.From(P p) { return (T)System.Convert.ChangeType(p, typeof(T)); }
 	}
 
 	internal partial class ConvertPartial<T,P>: ConvertDefault<T,P>

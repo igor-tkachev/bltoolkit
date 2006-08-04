@@ -1,5 +1,6 @@
 using System;
 using System.Data.SqlTypes;
+using System.Globalization;
 
 using NUnit.Framework;
 
@@ -105,13 +106,13 @@ namespace Mapping
 			Object3 o = new Object3();
 
 			om.SetValue(o, "Int32",  123.56);
-			om.SetValue(o, "Single", 123.57.ToString());
+			om.SetValue(o, "Single", 123.57.ToString(CultureInfo.InvariantCulture));
 
 			Assert.AreEqual(124,    o.Int32. Value);
-			Assert.AreEqual(123.57, o.Single.Value);
+			Assert.AreEqual(123.57f, o.Single.Value);
 
 			Assert.AreEqual(124,    om.GetValue(o, "Int32"));
-			Assert.AreEqual(123.57, om.GetValue(o, "Single"));
+			Assert.AreEqual(123.57f, om.GetValue(o, "Single"));
 		}
 	}
 }
