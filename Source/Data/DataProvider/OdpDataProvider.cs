@@ -238,6 +238,8 @@ namespace BLToolkit.Data.DataProvider
 						}
 					}
 				}
+
+				parameter = oraParameter;
 			}
 			
 			base.AttachParameter(command, parameter);
