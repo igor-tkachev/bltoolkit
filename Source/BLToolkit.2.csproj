@@ -139,6 +139,8 @@
     <Compile Include="EditableObjects\EditableObjectT.cs" />
     <Compile Include="EditableObjects\EditableValue.cs" />
     <Compile Include="EditableObjects\IEditable.cs" />
+    <Compile Include="Mapping\MapSetDataT.cs" />
+    <Compile Include="Mapping\ValueMapping.cs" />
     <Compile Include="Mapping\MapDataDestinationBase.cs" />
     <Compile Include="Mapping\MapDataSourceBase.cs" />
     <Compile Include="Mapping\ScalarDataReaderMapper.cs" />
@@ -151,7 +153,7 @@
     <Compile Include="Mapping\TextDataWriter.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Mapping\ValueMapping.cs" />
+    <Compile Include="Mapping\MapGetDataT.cs" />
     <Compile Include="Mapping\MapDataSourceDestinationBase.cs" />
     <Compile Include="Mapping\DefaultMappingSchema.cs" />
     <Compile Include="Mapping\IValueMapper.cs" />
