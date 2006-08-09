@@ -408,6 +408,11 @@
                     BuildAction = "Compile"
                 />
                 <File
+                    RelPath = "DataAccess\DestinationAttribute.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
                     RelPath = "DataAccess\DiscoverParametersAttribute.cs"
                     SubType = "Code"
                     BuildAction = "Compile"

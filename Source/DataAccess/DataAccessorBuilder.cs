@@ -43,6 +43,7 @@ namespace BLToolkit.DataAccess
 		ArrayList       _outputParameters;
 		string          _sqlText;
 		ArrayList       _formatParamList;
+		ParameterInfo   _destination;
 
 		protected override void BuildAbstractMethod()
 		{
@@ -52,6 +53,7 @@ namespace BLToolkit.DataAccess
 			_paramList        = new ArrayList();
 			_refParamList     = new ArrayList();
 			_formatParamList  = new ArrayList();
+			_destination      = null;
 			_createManager    = true;
 			_objectType       = null;
 			_parameters       = Context.CurrentMethod.GetParameters();
@@ -87,6 +89,9 @@ namespace BLToolkit.DataAccess
 			{
 				Type elementType = TypeHelper.GetListItemType(returnType);
 
+				if (elementType == typeof(object) && _destination != null)
+					elementType = TypeHelper.GetListItemType(_destination.ParameterType);
+
 				if (elementType != typeof(object))
 					_objectType = elementType;
 
@@ -108,6 +113,9 @@ namespace BLToolkit.DataAccess
 
 #if FW2
 				Type[] gTypes = TypeHelper.GetGenericArguments(returnType, "IDictionary");
+
+				if ((gTypes == null || gTypes.Length != 2) && _destination != null)
+					gTypes = TypeHelper.GetGenericArguments(_destination.ParameterType, "IDictionary");
 
 				if (gTypes != null && gTypes.Length == 2)
 				{
@@ -213,12 +221,13 @@ namespace BLToolkit.DataAccess
 		{
 			for (int i = 0; i < _parameters.Length; i++)
 			{
-				ParameterInfo pi    = _parameters[i];
-				object[]      attrs = pi.GetCustomAttributes(typeof(FormatAttribute), true);
+				ParameterInfo pi               = _parameters[i];
+				object[]      formatAttrs      = pi.GetCustomAttributes(typeof(FormatAttribute),      true);
+				object[]      destinationAttrs = pi.GetCustomAttributes(typeof(DestinationAttribute), true);
 
-				if (attrs.Length != 0)
+				if (formatAttrs.Length != 0)
 				{
-					int index = ((FormatAttribute)attrs[0]).Index;
+					int index = ((FormatAttribute)formatAttrs[0]).Index;
 
 					if (index < 0)
 						index = 0;
@@ -226,6 +235,13 @@ namespace BLToolkit.DataAccess
 						index = _formatParamList.Count;
 
 					_formatParamList.Insert(index, pi);
+				}
+				else if (destinationAttrs.Length != 0)
+				{
+					if (_destination != null)
+						throw new TypeBuilderException("More then one parameter is marked as destination");
+
+					_destination = pi;
 				}
 				else
 				{
@@ -303,20 +319,6 @@ namespace BLToolkit.DataAccess
 					_objectType = types[0];
 			}
 #endif
-		}
-
-		private void SetNameOrIndexParameter(NameOrIndexParameter nameOrIndex)
-		{
-			if (nameOrIndex.ByName)
-			{
-				Context.MethodBuilder.Emitter.ldstr(nameOrIndex.Name)
-					.call(typeof(NameOrIndexParameter), "op_Implicit", typeof(string));
-			}
-			else
-			{
-				Context.MethodBuilder.Emitter.ldc_i4(nameOrIndex.Index)
-					.call(typeof(NameOrIndexParameter), "op_Implicit", typeof(int));
-			}
 		}
 
 		#region ExecuteReader
@@ -437,9 +439,8 @@ namespace BLToolkit.DataAccess
 			{
 				Context.MethodBuilder.Emitter
 					.ldloc(Context.ReturnValue)
-					.ldloc(_locObjType);
-				SetNameOrIndexParameter(((ScalarFieldNameAttribute)attrs[0]).NameOrIndex);
-				Context.MethodBuilder.Emitter
+					.ldloc(_locObjType)
+					.ldNameOrIndex(((ScalarFieldNameAttribute)attrs[0]).NameOrIndex)
 					.callvirt(typeof(DbManager), "ExecuteScalarList", typeof(IList), typeof(Type), typeof(NameOrIndexParameter))
 					.pop
 					.end()
@@ -560,10 +561,8 @@ namespace BLToolkit.DataAccess
 				.ldloc(Context.ReturnValue)
 				.ldloc(_locObjType)
 				.LoadType(keyType)
-				.ldstr(Context.CurrentMethod.Name);
-			//.ldstr    (scalarFieldName)
-			SetNameOrIndexParameter(scalarField);
-			Context.MethodBuilder.Emitter
+				.ldstr(Context.CurrentMethod.Name)
+				.ldNameOrIndex(scalarField)
 				.LoadType(elementType)
 				.callvirt(typeof(DataAccessor), "ExecuteScalarDictionary", _bindingFlags,
 					typeof(DbManager), typeof(IDictionary), typeof(Type),
@@ -588,11 +587,9 @@ namespace BLToolkit.DataAccess
 
 			Context.MethodBuilder.Emitter
 				.ldloc    (Context.ReturnValue)
-				.ldsfld   (GetIndexField(index));
-				//.ldstr    (scalarFieldName)
-			SetNameOrIndexParameter(scalarField);
-			Context.MethodBuilder.Emitter
-				.ldloc    (_locObjType)
+				.ldsfld   (GetIndexField(index))
+				.ldNameOrIndex(scalarField)
+				.ldloc(_locObjType)
 				.callvirt (typeof(DbManager), "ExecuteScalarDictionary",
 					typeof(IDictionary), typeof(MapIndex),
 					typeof(NameOrIndexParameter), typeof(Type))
@@ -616,14 +613,10 @@ namespace BLToolkit.DataAccess
 			CallSetCommand();
 
 			Context.MethodBuilder.Emitter
-				.ldloc(Context.ReturnValue);
-				//.ldstr    (keyFieldName)
-			SetNameOrIndexParameter(keyField);
-			Context.MethodBuilder.Emitter
-				.LoadType (keyType);
-				//.ldstr    (scalarFieldName)
-			SetNameOrIndexParameter(scalarField);
-			Context.MethodBuilder.Emitter
+				.ldloc(Context.ReturnValue)
+				.ldNameOrIndex(keyField)
+				.LoadType (keyType)
+				.ldNameOrIndex(scalarField)
 				.ldloc(_locObjType)
 				.callvirt (typeof(DbManager), "ExecuteScalarDictionary",
 					typeof(IDictionary), typeof(NameOrIndexParameter), typeof(Type),
@@ -705,10 +698,8 @@ namespace BLToolkit.DataAccess
 			CallSetCommand();
 
 			Context.MethodBuilder.Emitter
-				.ldloc    (Context.ReturnValue);
-				//.ldstr    (keyFieldName)
-			SetNameOrIndexParameter(keyField);
-			Context.MethodBuilder.Emitter
+				.ldloc    (Context.ReturnValue)
+				.ldNameOrIndex(keyField)
 				.ldloc(_locObjType)
 				.ldnull
 				.callvirt (typeof(DbManager), "ExecuteDictionary",
@@ -724,6 +715,9 @@ namespace BLToolkit.DataAccess
 
 		public void ExecuteNonQuery()
 		{
+			if (_destination != null)
+				throw new TypeBuilderException("ExecuteNonQuery does not support the Destination attribute");
+
 			InitObjectType();
 			GetSprocName();
 			CallSetCommand();
@@ -753,6 +747,9 @@ namespace BLToolkit.DataAccess
 		{
 			//InitObjectType();
 
+			if (_destination != null)
+				throw new TypeBuilderException("ExecuteScalar does not support the Destination attribute");
+
 			Context.MethodBuilder.Emitter
 				.ldarg_0
 				.ldloc   (_locManager)
@@ -772,9 +769,10 @@ namespace BLToolkit.DataAccess
 			{
 				ScalarSourceAttribute attr = (ScalarSourceAttribute)attrs[0];
 
-				emit.ldc_i4((int)attr.ScalarType);
-				SetNameOrIndexParameter(attr.NameOrIndex);
-				emit.callvirtNoGenerics(typeof(DbManager), "ExecuteScalar", typeof(ScalarSourceType), typeof(NameOrIndexParameter));
+				emit
+					.ldc_i4((int)attr.ScalarType)
+					.ldNameOrIndex(attr.NameOrIndex)
+					.callvirtNoGenerics(typeof(DbManager), "ExecuteScalar", typeof(ScalarSourceType), typeof(NameOrIndexParameter));
 			}
 
 			string converterName = GetConverterMethodName(Context.CurrentMethod.ReturnType);
@@ -809,11 +807,26 @@ namespace BLToolkit.DataAccess
 			GetSprocName();
 			CallSetCommand();
 
-			Context.MethodBuilder.Emitter
-				.ldloc     (_locObjType)
-				.callvirt  (typeof(DbManager), "ExecuteObject", typeof(Type))
-				.castclass (_objectType)
-				.stloc     (Context.ReturnValue)
+			EmitHelper emit = Context.MethodBuilder.Emitter;
+
+			if (_destination != null)
+			{
+				emit
+					.ldarg(_destination.Position + 1)
+					.callvirt(typeof(DbManager), "ExecuteObject", typeof(Object))
+					;
+			}
+			else
+			{
+				emit
+					.ldloc(_locObjType)
+					.callvirt(typeof(DbManager), "ExecuteObject", typeof(Type))
+					;
+			}
+
+			emit
+				.castclass(_objectType)
+				.stloc(Context.ReturnValue)
 				;
 		}
 
@@ -844,16 +857,26 @@ namespace BLToolkit.DataAccess
 
 		private void CreateReturnTypeInstance()
 		{
-			ConstructorInfo ci = TypeHelper.GetDefaultConstructor(Context.CurrentMethod.ReturnType);
+			if (null != _destination)
+			{
+				Context.MethodBuilder.Emitter
+					.ldarg(_destination.Position + 1) // Argument #0 is 'this'.
+					.stloc(Context.ReturnValue)
+					;
+			}
+			else
+			{
+				ConstructorInfo ci = TypeHelper.GetDefaultConstructor(Context.CurrentMethod.ReturnType);
 
-			if (ci == null)
-				throw new TypeBuilderException(string.Format("Cannot create an instance of the type '{0}'",
-					Context.CurrentMethod.ReturnType.FullName));
+				if (ci == null)
+					throw new TypeBuilderException(string.Format("Cannot create an instance of the type '{0}'",
+						Context.CurrentMethod.ReturnType.FullName));
 
-			Context.MethodBuilder.Emitter
-				.newobj (ci)
-				.stloc  (Context.ReturnValue)
-				;
+				Context.MethodBuilder.Emitter
+					.newobj(ci)
+					.stloc(Context.ReturnValue)
+					;
+			}
 		}
 
 		private void InitObjectType()

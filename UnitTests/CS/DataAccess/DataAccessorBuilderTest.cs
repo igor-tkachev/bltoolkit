@@ -11,6 +11,10 @@ namespace DataAccess
 	[TestFixture]
 	public class DataAccessorBuilderTest
 	{
+		public struct Person
+		{
+		}
+
 		public abstract class TypelessAccessor : DataAccessor
 		{
 			[SqlQuery("SELECT * FROM Person WHERE PersonID < 3")]
@@ -20,11 +24,73 @@ namespace DataAccess
 		[Test, ExpectedException(typeof(TypeBuilderException))]
 		public void TypelessTest()
 		{
-			// Exception here:
 			// Can not determine object type for the method 'TypelessAccessor.Typeless'
-			TypelessAccessor da = (TypelessAccessor)DataAccessor.CreateInstance(typeof(TypelessAccessor));
+			DataAccessor.CreateInstance(typeof(TypelessAccessor));
+		}
 
-			da.Typeless();
+		public abstract class TypelessAccessor2 : DataAccessor
+		{
+			[SprocName("Person_SelectAll")]
+			public abstract ArrayList Typeless();
+		}
+
+		[Test, ExpectedException(typeof(TypeBuilderException))]
+		public void Gen_SelectAllListException()
+		{
+			// Can not determine object type for the method 'TypelessAccessor2.Typeless'
+			DataAccessor.CreateInstance(typeof(TypelessAccessor2));
+		}
+
+		public abstract class IListDataAccessor : DataAccessor
+		{
+			[ObjectType(typeof(Person))]
+			public abstract IList SelectAllIList();
+		}
+
+		[Test, ExpectedException(typeof(TypeBuilderException))]
+		public void IListException()
+		{
+			// Can not create an instance of the type 'System.Collections.IList'
+			DataAccessor.CreateInstance(typeof(IListDataAccessor));
+		}
+
+		public abstract class MultiDestinationAccessor : DataAccessor
+		{
+			[ObjectType(typeof(Person))]
+			public abstract IList SelectAll([Destination] IList list1, [Destination] IList list2);
+		}
+
+		[Test, ExpectedException(typeof(TypeBuilderException))]
+		public void MultiDestinationException()
+		{
+			// More then one parameter is marked as destination.
+			DataAccessor.CreateInstance(typeof(MultiDestinationAccessor));
+		}
+
+		public abstract class ScalarDestinationAccessor : DataAccessor
+		{
+			[ObjectType(typeof(Person))]
+			public abstract int SelectAll([Destination] int p);
+		}
+
+		[Test, ExpectedException(typeof(TypeBuilderException))]
+		public void ScalarDestinationException()
+		{
+			// ExecuteScalar does not support the Destination attribute
+			DataAccessor.CreateInstance(typeof(ScalarDestinationAccessor));
+		}
+
+		public abstract class VoidDestinationAccessor : DataAccessor
+		{
+			[ObjectType(typeof(Person))]
+			public abstract void SelectAll([Destination] int p);
+		}
+
+		[Test, ExpectedException(typeof(TypeBuilderException))]
+		public void VoidDestinationException()
+		{
+			// ExecuteNonQuery does not support the Destination attribute
+			DataAccessor.CreateInstance(typeof(VoidDestinationAccessor));
 		}
 	}
 }
