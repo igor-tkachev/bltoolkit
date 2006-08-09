@@ -65,7 +65,8 @@ namespace BLToolkit.Mapping
 			{
 				if (_line.StartsWith("*:"))
 				{
-					_names = _line.Substring(2).Split(':');
+					_names  = _line.Substring(2).Split(':');
+					_values = new string[_names.Length];
 
 					for (int i = 0; i < _names.Length; i++)
 						_names[i] = _names[i].Trim();
