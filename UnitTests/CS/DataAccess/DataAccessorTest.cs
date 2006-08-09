@@ -130,6 +130,12 @@ namespace DataAccess
 			public abstract ArrayList SelectAllList();
 		}
 
+		public abstract class PersonDataAccessor3 : DataAccessor
+		{
+			[ObjectType(typeof(Person))]
+			public abstract IList SelectAllIList();
+		}
+
 		public class PersonList : ArrayList
 		{
 			public new Person this[int idx]
@@ -291,9 +297,15 @@ namespace DataAccess
 		}
 
 		[Test, ExpectedException(typeof(TypeBuilderException))]
-		public void Gen_SelectAllListexception()
+		public void Gen_SelectAllListException()
 		{
 			TypeAccessor.CreateInstance(typeof(PersonDataAccessor2));
+		}
+
+		[Test, ExpectedException(typeof(TypeBuilderException))]
+		public void IListException()
+		{
+			TypeAccessor.CreateInstance(typeof(PersonDataAccessor3));
 		}
 
 		[Test]
