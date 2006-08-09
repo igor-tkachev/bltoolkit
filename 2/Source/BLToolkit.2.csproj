@@ -140,6 +140,7 @@
     <Compile Include="EditableObjects\EditableObjectT.cs" />
     <Compile Include="EditableObjects\EditableValue.cs" />
     <Compile Include="EditableObjects\IEditable.cs" />
+    <Compile Include="Mapping\DbDataParameterListMapper.cs" />
     <Compile Include="Mapping\MapSetDataT.cs" />
     <Compile Include="Mapping\ValueMapping.cs" />
     <Compile Include="Mapping\MapDataDestinationBase.cs" />
