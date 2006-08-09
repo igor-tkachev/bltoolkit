@@ -846,6 +846,10 @@ namespace BLToolkit.DataAccess
 		{
 			ConstructorInfo ci = TypeHelper.GetDefaultConstructor(Context.CurrentMethod.ReturnType);
 
+			if (ci == null)
+				throw new TypeBuilderException(string.Format("Cannot create an instance of the type '{0}'",
+					Context.CurrentMethod.ReturnType.FullName));
+
 			Context.MethodBuilder.Emitter
 				.newobj (ci)
 				.stloc  (Context.ReturnValue)
@@ -1301,7 +1305,7 @@ namespace BLToolkit.DataAccess
 				if (t == interfaceType)
 					return true;
 
-			return false;
+			return type == interfaceType;
 		}
 
 		private string GetConverterMethodName(Type type)
