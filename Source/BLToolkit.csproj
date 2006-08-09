@@ -555,6 +555,11 @@
                     BuildAction = "Compile"
                 />
                 <File
+                    RelPath = "Mapping\DbDataParameterListMapper.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
                     RelPath = "Mapping\DefaultMappingSchema.cs"
                     SubType = "Code"
                     BuildAction = "Compile"

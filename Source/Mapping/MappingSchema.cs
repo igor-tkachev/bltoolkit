@@ -876,52 +876,52 @@ namespace BLToolkit.Mapping
 		
 		#endregion
 
-		#region Protected Members
+		#region Factory Members
 
-		protected virtual DataReaderMapper CreateDataReaderMapper(IDataReader dataReader)
+		public virtual DataReaderMapper CreateDataReaderMapper(IDataReader dataReader)
 		{
 			return new DataReaderMapper(this, dataReader);
 		}
 
-		protected virtual DataReaderListMapper CreateDataReaderListMapper(IDataReader reader)
+		public virtual DataReaderListMapper CreateDataReaderListMapper(IDataReader reader)
 		{
 			return new DataReaderListMapper(CreateDataReaderMapper(reader));
 		}
 
-		protected virtual DataReaderMapper CreateDataReaderMapper(
+		public virtual DataReaderMapper CreateDataReaderMapper(
 			IDataReader          dataReader,
 			NameOrIndexParameter nameOrIndex)
 		{
 			return new ScalarDataReaderMapper(this, dataReader, nameOrIndex);
 		}
 
-		protected virtual DataReaderListMapper CreateDataReaderListMapper(
+		public virtual DataReaderListMapper CreateDataReaderListMapper(
 			IDataReader          reader,
 			NameOrIndexParameter nameOrIndex)
 		{
 			return new DataReaderListMapper(CreateDataReaderMapper(reader, nameOrIndex));
 		}
 
-		protected virtual DataRowMapper CreateDataRowMapper(
+		public virtual DataRowMapper CreateDataRowMapper(
 			DataRow        row,
 			DataRowVersion version)
 		{
 			return new DataRowMapper(row, version);
 		}
 
-		protected virtual DataTableMapper CreateDataTableMapper(
+		public virtual DataTableMapper CreateDataTableMapper(
 			DataTable      dataTable,
 			DataRowVersion version)
 		{
 			return new DataTableMapper(dataTable, CreateDataRowMapper(null, version));
 		}
 
-		protected virtual DictionaryMapper CreateDictionaryMapper(IDictionary dictionary)
+		public virtual DictionaryMapper CreateDictionaryMapper(IDictionary dictionary)
 		{
 			return new DictionaryMapper(dictionary);
 		}
 
-		protected virtual DictionaryListMapper CreateDictionaryListMapper(
+		public virtual DictionaryListMapper CreateDictionaryListMapper(
 			IDictionary          dic,
 			NameOrIndexParameter keyFieldNameOrIndex,
 			ObjectMapper         objectMapper)
@@ -929,7 +929,7 @@ namespace BLToolkit.Mapping
 			return new DictionaryListMapper(dic, keyFieldNameOrIndex, objectMapper);
 		}
 		
-		protected virtual DictionaryIndexListMapper CreateDictionaryListMapper(
+		public virtual DictionaryIndexListMapper CreateDictionaryListMapper(
 			IDictionary  dic,
 			MapIndex     index,
 			ObjectMapper objectMapper)
@@ -938,7 +938,7 @@ namespace BLToolkit.Mapping
 		}
 
 #if FW2
-		protected virtual DictionaryListMapper<K,T> CreateDictionaryListMapper<K,T>(
+		public virtual DictionaryListMapper<K,T> CreateDictionaryListMapper<K,T>(
 			IDictionary<K,T>     dic,
 			NameOrIndexParameter keyFieldNameOrIndex,
 			ObjectMapper         objectMapper)
@@ -946,7 +946,7 @@ namespace BLToolkit.Mapping
 			return new DictionaryListMapper<K,T>(dic, keyFieldNameOrIndex, objectMapper);
 		}
 
-		protected virtual DictionaryIndexListMapper<T> CreateDictionaryListMapper<T>(
+		public virtual DictionaryIndexListMapper<T> CreateDictionaryListMapper<T>(
 			IDictionary<CompoundValue,T> dic,
 			MapIndex                     index,
 			ObjectMapper                 objectMapper)
@@ -955,37 +955,42 @@ namespace BLToolkit.Mapping
 		}
 #endif
 
-		protected virtual EnumeratorMapper CreateEnumeratorMapper(IEnumerator enumerator)
+		public virtual EnumeratorMapper CreateEnumeratorMapper(IEnumerator enumerator)
 		{
 			return new EnumeratorMapper(enumerator);
 		}
 
-		protected virtual ObjectListMapper CreateObjectListMapper(IList list, ObjectMapper objectMapper)
+		public virtual ObjectListMapper CreateObjectListMapper(IList list, ObjectMapper objectMapper)
 		{
 			return new ObjectListMapper(list, objectMapper);
 		}
 
-		protected virtual ScalarListMapper CreateScalarListMapper(IList list, Type type)
+		public virtual ScalarListMapper CreateScalarListMapper(IList list, Type type)
 		{
 			return new ScalarListMapper(list, type);
 		}
 
-		protected virtual SimpleDestinationListMapper CreateScalarListListMapper(IList list, Type type)
+		public virtual SimpleDestinationListMapper CreateScalarListListMapper(IList list, Type type)
 		{
 			return new SimpleDestinationListMapper(CreateScalarListMapper(list, type));
 		}
 
 #if FW2
-		protected virtual ScalarListMapper<T> CreateScalarListMapper<T>(IList<T> list)
+		public virtual ScalarListMapper<T> CreateScalarListMapper<T>(IList<T> list)
 		{
 			return new ScalarListMapper<T>(this, list);
 		}
 
-		protected virtual SimpleDestinationListMapper CreateScalarListListMapper<T>(IList<T> list)
+		public virtual SimpleDestinationListMapper CreateScalarListListMapper<T>(IList<T> list)
 		{
 			return new SimpleDestinationListMapper(CreateScalarListMapper<T>(list));
 		}
 #endif
+
+		public virtual DbDataParameterListMapper CreateDbDataParameterListMapper(IList parameters)
+		{
+			return new DbDataParameterListMapper(parameters);
+		}
 
 		#endregion
 
@@ -1257,7 +1262,24 @@ namespace BLToolkit.Mapping
 			if (obj is IDictionary)
 				return CreateDictionaryMapper((IDictionary)obj);
 
+			if (obj is IList && obj.GetType().GetElementType() == typeof(IDbDataParameter))
+				return CreateDbDataParameterListMapper((IList)obj);
+
 			return GetObjectMapper(obj.GetType());
+		}
+
+		[CLSCompliant(false)]
+		public virtual IMapDataSourceList GetDataSourceList(object obj)
+		{
+			if (obj == null) throw new ArgumentNullException("obj");
+
+			if (obj is IMapDataSourceList)
+				return (IMapDataSourceList)obj;
+
+			if (obj is IDataReader)
+				return CreateDataReaderListMapper((IDataReader)obj);
+
+			return CreateObjectListMapper((IList)obj, CreateObjectMapper(obj.GetType().GetElementType()));
 		}
 
 		[CLSCompliant(false)]
@@ -1289,7 +1311,21 @@ namespace BLToolkit.Mapping
 			if (obj is IDictionary)
 				return CreateDictionaryMapper((IDictionary)obj);
 
+			if (obj is IList && obj.GetType().GetElementType() == typeof(IDbDataParameter))
+				return CreateDbDataParameterListMapper((IList)obj);
+
 			return GetObjectMapper(obj.GetType());
+		}
+
+		[CLSCompliant(false)]
+		public virtual IMapDataDestinationList GetDataDestinationList(object obj)
+		{
+			if (obj == null) throw new ArgumentNullException("obj");
+
+			if (obj is IMapDataDestinationList)
+				return (IMapDataDestinationList)obj;
+
+			return CreateObjectListMapper((IList)obj, CreateObjectMapper(obj.GetType().GetElementType()));
 		}
 
 		#endregion
@@ -1851,6 +1887,23 @@ namespace BLToolkit.Mapping
 			return destDictionary;
 		}
 
+		public IList MapObjectToDbDataParameterList(
+			object sourceObject,
+			IList  destList)
+		{
+			if (sourceObject == null) throw new ArgumentNullException("sourceObject");
+
+			ObjectMapper om = GetObjectMapper(sourceObject.GetType());
+
+			MapInternal(
+				null,
+				om, sourceObject,
+				CreateDbDataParameterListMapper(destList), destList,
+				null);
+
+			return destList;
+		}
+
 		#endregion
 
 		#endregion
@@ -2189,6 +2242,55 @@ namespace BLToolkit.Mapping
 
 			return destDictionary;
 		}
+
+		#endregion
+
+		#endregion
+
+		#region DbDataParameterList
+
+		#region DbDataParameterListToObject
+
+		public object MapDbDataParameterListToObject(
+			IList           sourceList,
+			object          destObject,
+			params object[] parameters)
+		{
+			if (destObject == null) throw new ArgumentNullException("destObject");
+
+			MapInternal(
+				null,
+				CreateDbDataParameterListMapper(sourceList), sourceList,
+				GetObjectMapper(destObject.GetType()), destObject,
+				parameters);
+
+			return destObject;
+		}
+
+		public object MapDbDataParameterListToObject(
+			IList           sourceList,
+			Type            destObjectType,
+			params object[] parameters)
+		{
+			InitContext ctx = new InitContext();
+
+			ctx.MappingSchema = this;
+			ctx.DataSource = CreateDbDataParameterListMapper(sourceList);
+			ctx.SourceObject = sourceList;
+			ctx.ObjectMapper = GetObjectMapper(destObjectType);
+			ctx.Parameters = parameters;
+
+			return MapInternal(ctx);
+		}
+
+#if FW2
+		public T MapDbDataParameterListToObject<T>(
+			IList           sourceList,
+			params object[] parameters)
+		{
+			return (T)MapDbDataParameterListToObject(sourceList, typeof(T), parameters);
+		}
+#endif
 
 		#endregion
 

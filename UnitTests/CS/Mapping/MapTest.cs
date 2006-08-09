@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Data;
+using System.Data.SqlClient;
 using System.Data.SqlTypes;
 
 using NUnit.Framework;
@@ -429,6 +430,43 @@ namespace Mapping
 			IDictionary dic2  = Map.DictionaryToDictionary(dic1, new SortedList(), "@ID", typeof(TestObject));
 
 			CompareLists(table, Map.ListToList(dic2.Values, typeof(TestObject)));
+		}
+
+		#endregion
+
+		#region DbDataParameterList
+
+		[Test]
+		public void DbDataParameterListToObject()
+		{
+			SqlParameterCollection parameters = new SqlCommand().Parameters;
+
+			parameters.Add("Field1", SqlDbType.Int)      .Value = 12345;
+			parameters.Add("Field2", SqlDbType.NVarChar).Value = "str";
+			parameters.Add("Field3", SqlDbType.Float)    .Value = 12345.0f;
+
+			SourceObject o = (SourceObject)Map.DbDataParameterListToObject(parameters, typeof (SourceObject));
+
+			Assert.AreEqual(12345,     o.Field1);
+			Assert.AreEqual("str",     o.Field2);
+			Assert.AreEqual(12345.0f,  o.Field3);
+		}
+
+		[Test]
+		public void ObjectToDbDataParameterList()
+		{
+			SourceObject o = new SourceObject();
+			SqlParameterCollection parameters = new SqlCommand().Parameters;
+
+			parameters.Add("Field1", SqlDbType.Int);
+			parameters.Add("Field2", SqlDbType.NVarChar);
+			parameters.Add("Field3", SqlDbType.Float);
+
+			Map.ObjectToDbDataParameterList(o, parameters);
+
+			Assert.AreEqual(10,    parameters["Field1"].Value);
+			Assert.AreEqual("20",  parameters["Field2"].Value);
+			Assert.AreEqual(30.0f, parameters["Field3"].Value);
 		}
 
 		#endregion
