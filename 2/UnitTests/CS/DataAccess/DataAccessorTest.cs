@@ -75,6 +75,11 @@ namespace DataAccess
 			[ActionName("SelectAll"), ObjectType(typeof(Person))]
 			public abstract ArrayList SelectAllList();
 
+			[ActionName("SelectAll"), ObjectType(typeof(Person))]
+			public abstract IList SelectAllList([Destination] IList list);
+
+			public abstract Person SelectByName(string firstName, string lastName, [Destination] Person p);
+
 #if FW2
 			[ActionName("SelectAll")]
 			public abstract List<Person> SelectAllListT();
@@ -122,18 +127,6 @@ namespace DataAccess
 			{
 				return "Patient_" + actionName;
 			}
-		}
-
-		public abstract class PersonDataAccessor2 : DataAccessor
-		{
-			[SprocName("Person_SelectAll")]
-			public abstract ArrayList SelectAllList();
-		}
-
-		public abstract class PersonDataAccessor3 : DataAccessor
-		{
-			[ObjectType(typeof(Person))]
-			public abstract IList SelectAllIList();
 		}
 
 		public class PersonList : ArrayList
@@ -255,6 +248,14 @@ namespace DataAccess
 		}
 
 		[Test]
+		public void Gen_SelectByNameWithDestination()
+		{
+			Person e = (Person)TypeAccessor.CreateInstance(typeof (Person));
+			_da.SelectByName("John", "Pupkin", e);
+			Assert.AreEqual(1, e.ID);
+		}
+
+		[Test]
 		public void Gen_SprocName()
 		{
 			Person e = _da.AnySprocName("John", "Pupkin");
@@ -296,22 +297,18 @@ namespace DataAccess
 			Assert.AreNotEqual(0, dt.Rows.Count);
 		}
 
-		[Test, ExpectedException(typeof(TypeBuilderException))]
-		public void Gen_SelectAllListException()
-		{
-			TypeAccessor.CreateInstance(typeof(PersonDataAccessor2));
-		}
-
-		[Test, ExpectedException(typeof(TypeBuilderException))]
-		public void IListException()
-		{
-			TypeAccessor.CreateInstance(typeof(PersonDataAccessor3));
-		}
-
 		[Test]
 		public void Gen_SelectAllList()
 		{
 			ArrayList list = _da.SelectAllList();
+			Assert.AreNotEqual(0, list.Count);
+		}
+
+		[Test]
+		public void Gen_SelectAllListWithDestination()
+		{
+			ArrayList list = new ArrayList();
+			_da.SelectAllList(list);
 			Assert.AreNotEqual(0, list.Count);
 		}
 

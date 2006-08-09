@@ -5,6 +5,8 @@ using System.Runtime.InteropServices;
 using System.Diagnostics.SymbolStore;
 using System.Diagnostics.CodeAnalysis;
 
+using BLToolkit.Common;
+
 namespace BLToolkit.Reflection.Emit
 {
 	/// <summary>
@@ -2270,6 +2272,19 @@ namespace BLToolkit.Reflection.Emit
 		public EmitHelper ldstr(string str)
 		{
 			_ilGenerator.Emit(OpCodes.Ldstr, str); return this;
+		}
+
+		/// <summary>
+		/// Calls ILGenerator.Emit(<see cref="OpCodes.Ldstr"/>, string) that
+		/// pushes a new object reference to a string literal stored in the metadata.
+		/// </summary>
+		/// <param name="nameOrIndex">The NameOrIndexParameter to be emitted.</param>
+		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode,FieldInfo)">ILGenerator.Emit</seealso>
+		public EmitHelper ldNameOrIndex(NameOrIndexParameter nameOrIndex)
+		{
+			return nameOrIndex.ByName?
+				ldstr(nameOrIndex.Name)  .call(typeof(NameOrIndexParameter), "op_Implicit", typeof(string)):
+				ldc_i4(nameOrIndex.Index).call(typeof(NameOrIndexParameter), "op_Implicit", typeof(int));
 		}
 
 		/// <summary>
