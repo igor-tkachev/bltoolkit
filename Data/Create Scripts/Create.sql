@@ -166,7 +166,7 @@ INSERT INTO Person
 VALUES
 	(@LastName, @FirstName, @MiddleName, @Gender)
 
-SELECT Cast(SCOPE_IDENTITY() as int)
+SELECT Cast(SCOPE_IDENTITY() as int) PersonID
 
 GO
 

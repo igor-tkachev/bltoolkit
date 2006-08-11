@@ -987,11 +987,6 @@ namespace BLToolkit.Mapping
 		}
 #endif
 
-		public virtual DbDataParameterListMapper CreateDbDataParameterListMapper(IList parameters)
-		{
-			return new DbDataParameterListMapper(parameters);
-		}
-
 		#endregion
 
 		#region GetNullValue
@@ -1262,9 +1257,6 @@ namespace BLToolkit.Mapping
 			if (obj is IDictionary)
 				return CreateDictionaryMapper((IDictionary)obj);
 
-			if (obj is IList && obj.GetType().GetElementType() == typeof(IDbDataParameter))
-				return CreateDbDataParameterListMapper((IList)obj);
-
 			return GetObjectMapper(obj.GetType());
 		}
 
@@ -1310,9 +1302,6 @@ namespace BLToolkit.Mapping
 
 			if (obj is IDictionary)
 				return CreateDictionaryMapper((IDictionary)obj);
-
-			if (obj is IList && obj.GetType().GetElementType() == typeof(IDbDataParameter))
-				return CreateDbDataParameterListMapper((IList)obj);
 
 			return GetObjectMapper(obj.GetType());
 		}
@@ -1887,23 +1876,6 @@ namespace BLToolkit.Mapping
 			return destDictionary;
 		}
 
-		public IList MapObjectToDbDataParameterList(
-			object sourceObject,
-			IList  destList)
-		{
-			if (sourceObject == null) throw new ArgumentNullException("sourceObject");
-
-			ObjectMapper om = GetObjectMapper(sourceObject.GetType());
-
-			MapInternal(
-				null,
-				om, sourceObject,
-				CreateDbDataParameterListMapper(destList), destList,
-				null);
-
-			return destList;
-		}
-
 		#endregion
 
 		#endregion
@@ -2248,51 +2220,6 @@ namespace BLToolkit.Mapping
 		#endregion
 
 		#region DbDataParameterList
-
-		#region DbDataParameterListToObject
-
-		public object MapDbDataParameterListToObject(
-			IList           sourceList,
-			object          destObject,
-			params object[] parameters)
-		{
-			if (destObject == null) throw new ArgumentNullException("destObject");
-
-			MapInternal(
-				null,
-				CreateDbDataParameterListMapper(sourceList), sourceList,
-				GetObjectMapper(destObject.GetType()), destObject,
-				parameters);
-
-			return destObject;
-		}
-
-		public object MapDbDataParameterListToObject(
-			IList           sourceList,
-			Type            destObjectType,
-			params object[] parameters)
-		{
-			InitContext ctx = new InitContext();
-
-			ctx.MappingSchema = this;
-			ctx.DataSource = CreateDbDataParameterListMapper(sourceList);
-			ctx.SourceObject = sourceList;
-			ctx.ObjectMapper = GetObjectMapper(destObjectType);
-			ctx.Parameters = parameters;
-
-			return MapInternal(ctx);
-		}
-
-#if FW2
-		public T MapDbDataParameterListToObject<T>(
-			IList           sourceList,
-			params object[] parameters)
-		{
-			return (T)MapDbDataParameterListToObject(sourceList, typeof(T), parameters);
-		}
-#endif
-
-		#endregion
 
 		#endregion
 

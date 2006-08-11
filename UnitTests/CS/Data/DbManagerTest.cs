@@ -171,5 +171,81 @@ namespace Data
 					.ExecuteScalar();
 			}
 		}
+
+		public class OutRefTest
+		{
+			public int    ID             = 5;
+			public int    outputID;
+			public int    inputOutputID  = 10;
+			public string str            = "5";
+			public string outputStr;
+			public string inputOutputStr = "10";
+		}
+
+		[Test]
+		public void MapOutput()
+		{
+			OutRefTest o = new OutRefTest();
+
+			using (DbManager db = new DbManager())
+			{
+				db
+					.SetSpCommand("OutRefTest", db.CreateParameters(o,
+						new string[] {      "outputID",      "outputStr" },
+						new string[] { "inputOutputID", "inputOutputStr" }))
+					.ExecuteNonQuery();
+
+				db.MapOutputParameters(o);
+			}
+
+			Assert.AreEqual(5,     o.outputID);
+			Assert.AreEqual(15,    o.inputOutputID);
+			Assert.AreEqual("5",   o.outputStr);
+			Assert.AreEqual("510", o.inputOutputStr);
+		}
+
+		public class PeturnParameter
+		{
+			public int Value;
+		}
+
+		[Test]
+		public void MapReturnValue()
+		{
+			PeturnParameter e = new PeturnParameter();
+
+			using (DbManager db = new DbManager())
+			{
+				db
+					.SetSpCommand("Scalar_ReturnParameter")
+					.ExecuteNonQuery();
+
+				db.MapOutputParameters(e, "Value");
+
+				Assert.AreEqual(12345, e.Value);
+			}
+		}
+
+		[Test]
+		public void InsertAndMapBack()
+		{
+			Person e = new Person();
+			e.FirstName = "Crazy";
+			e.LastName  = "Frog";
+			e.Gender    =  Gender.Other;
+
+			using (DbManager db = new DbManager())
+			{
+				db
+					.SetSpCommand("Person_Insert", db.CreateParameters(e))
+					.ExecuteObject(e);
+
+				Assert.IsTrue(e.ID > 0);
+
+				db
+					.SetSpCommand("Person_Delete", db.CreateParameters(e))
+					.ExecuteNonQuery();
+			}
+		}
 	}
 }
