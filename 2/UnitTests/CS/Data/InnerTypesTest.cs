@@ -107,23 +107,27 @@ namespace A.Data
 			Assert.IsNull(p2.Last.Type);
 		}
 
-		//[Test]
+		[Test]
 		public void CreateParametersTest()
 		{
+			IDbDataParameter[] parameters;
+			Person p = (Person)TypeAccessor.CreateInstance(typeof(Person));
+			p.ID         = 12345;
+			p.First.Name = "Crazy";
+			p.Last.Name  = "Frog";
+			p.Name       = "Froggy";
+			p.Type       = typeof(DbManager);
+
 			using (DbManager db = new DbManager())
 			{
-				Person p = (Person)TypeAccessor.CreateInstance(typeof (Person));
-
-				p.ID         = 12345;
-				p.First.Name = "Crazy";
-				p.Last.Name  = "Frog";
-				p.Name       = "Froggy";
-				p.Type       = typeof(DbManager);
-
-				IDbDataParameter[] parameters = db.CreateParameters(p);
-				Assert.IsNotNull(parameters);
-				Assert.AreEqual(parameters.Length, 6);
+				parameters = db.CreateParameters(p);
 			}
+
+			Assert.IsNotNull(parameters);
+			Assert.AreEqual(7, parameters.Length);
+
+			foreach (IDbDataParameter parameter in parameters)
+				Console.WriteLine("{0}: {1}", parameter.ParameterName, parameter.Value);
 		}
 
 		public abstract class Template2

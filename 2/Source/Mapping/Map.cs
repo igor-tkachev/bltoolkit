@@ -135,15 +135,6 @@ namespace BLToolkit.Mapping
 
 		#endregion
 
-		#region ObjectToDbDataParameterList
-
-		public static IList ObjectToDbDataParameterList(object sourceObject, IList destList)
-		{
-			return _defaultSchema.MapObjectToDbDataParameterList(sourceObject, destList);
-		}
-
-		#endregion
-
 		#region ObjectToDictionary
 
 		public static IDictionary ObjectToDictionary(object sourceObject, IDictionary destDictionary)
@@ -299,31 +290,6 @@ namespace BLToolkit.Mapping
 		{
 			return _defaultSchema.MapDataReaderToDictionary(dataReader);
 		}
-
-		#endregion
-
-		#endregion
-
-		#region DbDataParameterList
-
-		#region DbDataParameterListToObject
-
-		public static object DbDataParameterListToObject(IList sourceList, object destObject, params object[] parameters)
-		{
-			return _defaultSchema.MapDbDataParameterListToObject(sourceList, destObject, parameters);
-		}
-
-		public static object DbDataParameterListToObject(IList sourceList, Type destObjectType, params object[] parameters)
-		{
-			return _defaultSchema.MapDbDataParameterListToObject(sourceList, destObjectType, parameters);
-		}
-
-#if FW2
-		public static T DbDataParameterListToObject<T>(IList sourceList, params object[] parameters)
-		{
-			return (T)_defaultSchema.MapDbDataParameterListToObject(sourceList, typeof(T), parameters);
-		}
-#endif
 
 		#endregion
 

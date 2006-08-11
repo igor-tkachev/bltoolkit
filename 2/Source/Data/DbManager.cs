@@ -1360,7 +1360,30 @@ namespace BLToolkit.Data
 		/// <param name="commandParameters">An array of paramters to be added to the result array.</param>
 		/// <returns>An array of parameters.</returns>
 		public IDbDataParameter[] CreateParameters(
-			object obj, params IDbDataParameter[] commandParameters)
+			object                    obj,
+			params IDbDataParameter[] commandParameters)
+		{
+			return CreateParameters(obj, null, null, commandParameters);
+		}
+
+		/// <summary>
+		/// Creates an array of parameters from a business object.
+		/// </summary>
+		/// <remarks>
+		/// The method can take an additional parameter list, 
+		/// which can be created by using the same method.
+		/// </remarks>
+		/// <include file="Examples.xml" path='examples/db[@name="CreateParameters(object,IDbDataParameter[])"]/*' />
+		/// <param name="obj">An object.</param>
+		/// <param name="outputParameters">Output parameters names.</param>
+		/// <param name="inputOutputParameters">InputOutput parameters names.</param>
+		/// <param name="commandParameters">An array of paramters to be added to the result array.</param>
+		/// <returns>An array of parameters.</returns>
+		public IDbDataParameter[] CreateParameters(
+			object                    obj,
+			string[]                  outputParameters,
+			string[]                  inputOutputParameters,
+			params IDbDataParameter[] commandParameters)
 		{
 /*
 			ParameterReader pr = CreateParameterReader();
@@ -1373,29 +1396,70 @@ namespace BLToolkit.Data
 
 			return pr.GetParameters();
 */
-			ArrayList    paramList = new ArrayList();
+			ArrayList paramList = new ArrayList();
 			ObjectMapper om        = _mappingSchema.GetObjectMapper(obj.GetType());
 
 			foreach (MemberMapper mm in om)
 			{
-				Type type = mm.Type;
+				object value = mm.GetValue(obj);
+				string name  = _dataProvider.Convert(mm.Name, ConvertType.NameToParameter).ToString();
 
-				if (TypeHelper.IsScalar(type))
-				{
-					object value = mm.GetValue(obj);
-					string name  = _dataProvider.Convert(mm.Name, ConvertType.NameToParameter).ToString();
+				IDbDataParameter parameter = mm.MapMemberInfo.Nullable || value == null?
+					NullParameter(name, value, mm.MapMemberInfo.NullValue):
+					Parameter    (name, value);
 
-					paramList.Add(mm.MapMemberInfo.Nullable || value == null?
-						NullParameter(name, value, mm.MapMemberInfo.NullValue):
-						Parameter    (name, value));
-				}
+				if (outputParameters != null && Array.IndexOf(outputParameters, mm.Name) >= 0)
+					parameter.Direction = ParameterDirection.Output;
+				else if (inputOutputParameters != null && Array.IndexOf(inputOutputParameters, mm.Name) >= 0)
+					parameter.Direction = ParameterDirection.InputOutput;
+
+				paramList.Add(parameter);
 			}
 
 			if (commandParameters != null)
-				foreach (IDbDataParameter p in commandParameters)
-					paramList.Add(p);
+				paramList.AddRange(commandParameters);
 
 			return (IDbDataParameter[])paramList.ToArray(typeof(IDbDataParameter));
+		}
+
+		/// <summary>
+		/// Maps all parameters returned from the server to an object.
+		/// </summary>
+		/// <param name="obj">An object.</param>
+		public void MapOutputParameters(object obj)
+		{
+			MapOutputParameters(obj, null);
+		}
+
+		/// <summary>
+		/// Maps all parameters returned from the server to an object.
+		/// </summary>
+		/// <param name="obj">An object.</param>
+		public void MapOutputParameters(object obj, string returnValueMember)
+		{
+			ObjectMapper om = _mappingSchema.GetObjectMapper(obj.GetType());
+
+			foreach (IDbDataParameter parameter in Command.Parameters)
+			{
+				MemberMapper mm = null;
+
+				if (parameter.Direction == ParameterDirection.ReturnValue &&
+					null != returnValueMember)
+				{
+					mm = om[returnValueMember];
+				}
+				else if (parameter.Direction == ParameterDirection.Output ||
+					parameter.Direction == ParameterDirection.InputOutput)
+				{
+					string     name = _dataProvider.Convert(parameter.ParameterName,
+						ConvertType.ParameterToName).ToString();
+
+					mm = om[name];
+				}
+
+				if (mm != null)
+					mm.SetValue(obj, parameter.Value);
+			}
 		}
 
 		/// <overloads>

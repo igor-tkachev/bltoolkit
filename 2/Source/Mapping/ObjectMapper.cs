@@ -64,8 +64,8 @@ namespace BLToolkit.Mapping
 
 			memberMapper.SetOrdinal(_members.Count);
 
-			_members.     Add(memberMapper);
-			_nameToMember.Add(memberMapper.Name.ToLower(),  memberMapper);
+			_members. Add(memberMapper);
+			_nameToMember[memberMapper.Name.ToLower()] = memberMapper;
 		}
 
 		private   object[] _mapFieldAttributes;
@@ -149,10 +149,8 @@ namespace BLToolkit.Mapping
 									Add(mm);
 								}
 							}
-							else
-							{
-								_nameToMember[name] = mm;
-							}
+
+							_nameToMember[name] = mm;
 						}
 					}
 				}
@@ -266,7 +264,7 @@ namespace BLToolkit.Mapping
 				{
 					if (m.MemberAccessor.Name.ToLower() == name)
 					{
-						_nameToMember.Add(name,  m);
+						_nameToMember[name] = m;
 						return m;
 					}
 				}
