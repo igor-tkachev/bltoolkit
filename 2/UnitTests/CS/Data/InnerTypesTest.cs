@@ -28,37 +28,83 @@ namespace A.Data
 			}
 		}
 
-		public struct First
-		{
-			public string Name;
-		}
-
-		public class Middle
+		public class First
 		{
 			public string Name;
 		}
 
 		public abstract class Last
 		{
-			public abstract string Name { get; set; }
+			public          string Name;
+			public abstract string Suffix { get; set; }
+
+			// Inner type of the inner type
+			//
+			[MapField("FirstName", "Name")]
+			public abstract First First { get; set; }
+
+			// This reference type field will be ignored
+			//
+			public          Type   Type;
 		}
 
-		[MapField("FirstName",  "First.Name")]
-		[MapField("LastName",   "Last.Name")]
-		[MapField("MiddleName", "Middle.Name")]
+		[MapField("FirstName",     "First.Name")]
+		[MapField("LastName",      "Last.Name")]
+		[MapField("LastSuffix",    "Last.Suffix")]
+		[MapField("LastFirstName", "Last.First.Name")]
 		public abstract class Person
 		{
 			[MapField("PersonID")]
 			public          int    ID;
-			[MapIgnore]
-			public          First  First;
-			[MapIgnore(false)]
-			public          Middle Middle = new Middle();
-			[MapIgnore(false)]
+			public          First  First = new First();
 			public abstract Last   Last { get; set; }
 			public          string Name;
 			[MemberMapper(typeof(TypeMapper))]
 			public          Type   Type;
+		}
+
+		public abstract class Person2
+		{
+			[MapField("PersonID")]
+			public          int    ID;
+
+			[MapField("FirstName",  "Name")]
+			public          First  First = new First();
+
+			[MapField(Format="Last{0}")]
+			public abstract Last   Last { get; set; }
+
+			public          string Name;
+			public          string Type;
+		}
+
+		[Test]
+		public void MapFieldTest()
+		{
+			Person p = (Person)TypeAccessor.CreateInstance(typeof(Person));
+
+			p.ID              = 12345;
+			p.First.Name      = "Crazy";
+			p.Last.Name       = "Frog";
+			p.Last.Suffix     = "Jr";
+			p.Last.Type       = typeof(DbManager);
+			p.Last.First.Name = "Crazy Frog";
+			p.Name            = "Froggy";
+			p.Type            = typeof(DbManager);
+
+			Person2 p2 = (Person2)Map.ObjectToObject(p, typeof(Person2));
+
+			Assert.AreEqual(p.ID,              p2.ID);
+			Assert.AreEqual(p.First.Name,      p2.First.Name);
+			Assert.AreEqual(p.Last.Name,       p2.Last.Name);
+			Assert.AreEqual(p.Last.Suffix,     p2.Last.Suffix);
+			Assert.AreEqual(p.Last.First.Name, p2.Last.First.Name);
+			Assert.AreEqual(p.Name,            p2.Name);
+			Assert.AreEqual(p.Type.FullName,   p2.Type);
+
+			// The 'Last.Type' field should be ignored by mapping process.
+			//
+			Assert.IsNull(p2.Last.Type);
 		}
 
 		//[Test]
@@ -68,12 +114,11 @@ namespace A.Data
 			{
 				Person p = (Person)TypeAccessor.CreateInstance(typeof (Person));
 
-				p.ID = 12345;
+				p.ID         = 12345;
 				p.First.Name = "Crazy";
-				p.Middle.Name = "jr";
-				p.Last.Name = "Grog";
-				p.Name = "Groggy";
-				p.Type = typeof(DbManager);
+				p.Last.Name  = "Frog";
+				p.Name       = "Froggy";
+				p.Type       = typeof(DbManager);
 
 				IDbDataParameter[] parameters = db.CreateParameters(p);
 				Assert.IsNotNull(parameters);
@@ -110,6 +155,8 @@ namespace A.Data
 							3   as TPL_ID, 
 							'4' as TPL_DisplayName")
 					.ExecuteList(typeof(Template1));
+
+				Assert.IsNotNull(list);
 			}
 		}
 	}

@@ -6,7 +6,7 @@ namespace BLToolkit.Mapping
 		AttributeTargets.Class    | AttributeTargets.Interface | 
 		AttributeTargets.Property | AttributeTargets.Field,
 		AllowMultiple=true)]
-	public class MemberMapperAttribute : Attribute
+	public class MemberMapperAttribute : MapIgnoreAttribute
 	{
 		public MemberMapperAttribute(Type memberMapperType)
 			: this(null, memberMapperType)
@@ -14,6 +14,7 @@ namespace BLToolkit.Mapping
 		}
 
 		public MemberMapperAttribute(Type memberType, Type memberMapperType)
+			: base(false)
 		{
 			if (memberMapperType == null) throw new ArgumentNullException("memberMapperType");
 
