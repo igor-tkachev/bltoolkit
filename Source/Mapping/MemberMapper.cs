@@ -1,5 +1,6 @@
 using System;
 using System.Data.SqlTypes;
+using System.Diagnostics;
 using System.IO;
 using System.Xml;
 using BLToolkit.Reflection;
@@ -60,6 +61,7 @@ namespace BLToolkit.Mapping
 		private int _ordinal;
 		public  int  Ordinal
 		{
+			[DebuggerStepThrough]
 			get { return _ordinal; }
 		}
 
@@ -71,30 +73,35 @@ namespace BLToolkit.Mapping
 		private MemberAccessor _memberAccessor;
 		public  MemberAccessor  MemberAccessor
 		{
+			[DebuggerStepThrough]
 			get { return _memberAccessor; }
 		}
 
 		private MappingSchema _mappingSchema;
 		public  MappingSchema  MappingSchema
 		{
+			[DebuggerStepThrough]
 			get { return _mappingSchema; }
 		}
 
 		private string _name;
 		public  string  Name
 		{
+			[DebuggerStepThrough]
 			get { return _name; }
 		}
 
 		private string _memberName;
 		public  string  MemberName
 		{
+			[DebuggerStepThrough]
 			get { return _memberName; }
 		}
 
 		private Type  _type;
 		public  Type   Type
 		{
+			[DebuggerStepThrough]
 			get { return _type; }
 		}
 

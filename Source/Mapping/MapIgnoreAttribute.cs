@@ -3,7 +3,7 @@ using System;
 namespace BLToolkit.Mapping
 {
 	[AttributeUsage(AttributeTargets.Field | AttributeTargets.Property)]
-	public sealed class MapIgnoreAttribute : Attribute
+	public class MapIgnoreAttribute : Attribute
 	{
 		public MapIgnoreAttribute()
 		{

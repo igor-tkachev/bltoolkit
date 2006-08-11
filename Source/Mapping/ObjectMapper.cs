@@ -208,21 +208,33 @@ namespace BLToolkit.Mapping
 				if (GetIgnore(ma))
 					continue;
 
-				MapMemberInfo mi = new MapMemberInfo();
+				MapFieldAttribute mapFieldAttr = (MapFieldAttribute)ma.GetAttribute(typeof(MapFieldAttribute));
 
-				mi.MemberAccessor  = ma;
-				mi.Type            = ma.Type;
-				mi.MappingSchema   = mappingSchema;
-				mi.MemberExtension = _extension[ma.Name];
-				mi.Name            = GetFieldName   (ma);
-				mi.MemberName      = ma.Name;
-				mi.Trimmable       = GetTrimmable   (ma);
-				mi.MapValues       = GetMapValues   (ma);
-				mi.DefaultValue    = GetDefaultValue(ma);
-				mi.Nullable        = GetNullable    (ma);
-				mi.NullValue       = GetNullValue   (ma, mi.Nullable);
+				if (mapFieldAttr == null || (mapFieldAttr.OrigName == null && mapFieldAttr.Format == null))
+				{
+					MapMemberInfo mi = new MapMemberInfo();
 
-				Add(CreateMemberMapper(mi));
+					mi.MemberAccessor = ma;
+					mi.Type = ma.Type;
+					mi.MappingSchema = mappingSchema;
+					mi.MemberExtension = _extension[ma.Name];
+					mi.Name = GetFieldName(ma);
+					mi.MemberName = ma.Name;
+					mi.Trimmable = GetTrimmable(ma);
+					mi.MapValues = GetMapValues(ma);
+					mi.DefaultValue = GetDefaultValue(ma);
+					mi.Nullable = GetNullable(ma);
+					mi.NullValue = GetNullValue(ma, mi.Nullable);
+
+					Add(CreateMemberMapper(mi));
+				}
+				else if (null != mapFieldAttr.OrigName)
+					EnsureMapper(mapFieldAttr.MapName, ma.Name + "." + mapFieldAttr.OrigName);
+				else if (null != mapFieldAttr.Format)
+				{
+					foreach (MemberMapper inner in _mappingSchema.GetObjectMapper(ma.Type))
+						EnsureMapper(string.Format(mapFieldAttr.Format, inner.Name), ma.Name + "." + inner.MemberName);
+				}
 			}
 
 			foreach (AttributeExtension ae in _extension.Attributes["MapField"])
@@ -357,9 +369,7 @@ namespace BLToolkit.Mapping
 
 			Type type = memberAccessor.Type;
 
-			return 
-				TypeHelper.IsScalar(type) == false &&
-				memberAccessor.GetAttribute(typeof(MemberMapperAttribute)) == null;
+			return !TypeHelper.IsScalar(type);
 		}
 
 		protected virtual bool GetTrimmable(MemberAccessor memberAccessor)
