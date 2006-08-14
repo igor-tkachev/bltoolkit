@@ -193,9 +193,7 @@ namespace Data
 					.SetSpCommand("OutRefTest", db.CreateParameters(o,
 						new string[] {      "outputID",      "outputStr" },
 						new string[] { "inputOutputID", "inputOutputStr" }))
-					.ExecuteNonQuery();
-
-				db.MapOutputParameters(o);
+					.ExecuteNonQuery(o);
 			}
 
 			Assert.AreEqual(5,     o.outputID);
@@ -218,9 +216,7 @@ namespace Data
 			{
 				db
 					.SetSpCommand("Scalar_ReturnParameter")
-					.ExecuteNonQuery();
-
-				db.MapOutputParameters(e, "Value");
+					.ExecuteNonQuery("Value", e);
 
 				Assert.AreEqual(12345, e.Value);
 			}

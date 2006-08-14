@@ -217,50 +217,61 @@ namespace BLToolkit.DataAccess
 			}
 		}
 
+		private void AddParameter(ParameterInfo pi)
+		{
+			Type pType = pi.ParameterType;
+
+			if (pType.IsByRef)
+				pType = pType.GetElementType();
+
+			if (TypeHelper.IsScalar(pType))
+			{
+				_paramList.Add(pi);
+			}
+			else if (pType == typeof(DbManager) || pType.IsSubclassOf(typeof(DbManager)))
+			{
+				_createManager = false;
+			}
+			else
+			{
+				_refParamList.Add(pi);
+			}
+		}
+
 		private void ProcessParameters()
 		{
 			for (int i = 0; i < _parameters.Length; i++)
 			{
-				ParameterInfo pi               = _parameters[i];
-				object[]      formatAttrs      = pi.GetCustomAttributes(typeof(FormatAttribute),      true);
-				object[]      destinationAttrs = pi.GetCustomAttributes(typeof(DestinationAttribute), true);
+				ParameterInfo       pi = _parameters[i];
+				NoMapAttribute[] attrs = (NoMapAttribute[])pi.GetCustomAttributes(typeof(NoMapAttribute), true);
 
-				if (formatAttrs.Length != 0)
-				{
-					int index = ((FormatAttribute)formatAttrs[0]).Index;
-
-					if (index < 0)
-						index = 0;
-					else if (index > _formatParamList.Count)
-						index = _formatParamList.Count;
-
-					_formatParamList.Insert(index, pi);
-				}
-				else if (destinationAttrs.Length != 0)
-				{
-					if (_destination != null)
-						throw new TypeBuilderException("More then one parameter is marked as destination");
-
-					_destination = pi;
-				}
+				if (attrs.Length == 0)
+					AddParameter(pi);
 				else
 				{
-					Type pType = pi.ParameterType;
+					for(int j = 0; j < attrs.Length; ++j)
+					{
+						if (!attrs[j].NoMap)
+							AddParameter(pi);
 
-					if (pType.IsByRef)
-						pType = pType.GetElementType();
+						if (attrs[j] is FormatAttribute)
+						{
+							int index = ((FormatAttribute)attrs[j]).Index;
 
-					if (TypeHelper.IsScalar(pType))
-					{
-						_paramList.Add(pi);
-					}
-					else if (pType == typeof(DbManager) || pType.IsSubclassOf(typeof(DbManager)))
-					{
-						_createManager = false;
-					}
-					else
-					{
-						_refParamList.Add(pi);
+							if (index < 0)
+								index = 0;
+							else if (index > _formatParamList.Count)
+								index = _formatParamList.Count;
+
+							_formatParamList.Insert(index, pi);
+						}
+						else if (attrs[j] is DestinationAttribute)
+						{
+							if (_destination != null)
+								throw new TypeBuilderException("More then one parameter is marked as destination");
+
+							_destination = pi;
+						}
 					}
 				}
 			}
@@ -722,7 +733,7 @@ namespace BLToolkit.DataAccess
 			GetSprocName();
 			CallSetCommand();
 
-			MethodInfo   mi      = typeof(DbManager).GetMethod("ExecuteNonQuery");
+			MethodInfo   mi      = typeof(DbManager).GetMethod("ExecuteNonQuery", Type.EmptyTypes);
 			LocalBuilder locExec = Context.MethodBuilder.Emitter.DeclareLocal(mi.ReturnType);
 
 			Context.MethodBuilder.Emitter

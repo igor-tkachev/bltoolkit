@@ -3,7 +3,7 @@ using System;
 namespace BLToolkit.DataAccess
 {
 	[AttributeUsage(AttributeTargets.Parameter)]
-	public class FormatAttribute : Attribute
+	public class FormatAttribute : NoMapAttribute
 	{
 		public FormatAttribute()
 		{

@@ -428,6 +428,11 @@
                     BuildAction = "Compile"
                 />
                 <File
+                    RelPath = "DataAccess\NoMapAttribute.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
                     RelPath = "DataAccess\NonUpdatableAttribute.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
