@@ -11,7 +11,6 @@ using System.Collections.Generic;
 
 using BLToolkit.Data.DataProvider;
 using BLToolkit.Mapping;
-using BLToolkit.Reflection;
 using BLToolkit.Common;
 
 namespace BLToolkit.Data
@@ -1423,43 +1422,67 @@ namespace BLToolkit.Data
 		}
 
 		/// <summary>
-		/// Maps all parameters returned from the server to an object.
+		/// Maps all parameters returned from the server to all given objects.
 		/// </summary>
-		/// <param name="obj">An object.</param>
-		public void MapOutputParameters(object obj)
-		{
-			MapOutputParameters(obj, null);
-		}
-
-		/// <summary>
-		/// Maps all parameters returned from the server to an object.
-		/// </summary>
-		/// <param name="obj">An object.</param>
-		public void MapOutputParameters(object obj, string returnValueMember)
+		/// <param name="returnValueMember">Name of a <see cref="MemberMapper"/> to map return value.</param>
+		/// <param name="obj">An <see cref="System.Object"/> to map from command parameters.</param>
+		public void MapOutputParameters(
+			string returnValueMember,
+			object obj)
 		{
 			ObjectMapper om = _mappingSchema.GetObjectMapper(obj.GetType());
 
 			foreach (IDbDataParameter parameter in Command.Parameters)
 			{
-				MemberMapper mm = null;
-
-				if (parameter.Direction == ParameterDirection.ReturnValue &&
-					null != returnValueMember)
-				{
-					mm = om[returnValueMember];
-				}
-				else if (parameter.Direction == ParameterDirection.Output ||
-					parameter.Direction == ParameterDirection.InputOutput)
-				{
-					string     name = _dataProvider.Convert(parameter.ParameterName,
-						ConvertType.ParameterToName).ToString();
-
-					mm = om[name];
-				}
+				MemberMapper mm =
+					parameter.Direction == ParameterDirection.ReturnValue && null != returnValueMember ?
+						om[returnValueMember] :
+					parameter.Direction == ParameterDirection.Output || parameter.Direction == ParameterDirection.InputOutput ?
+						om[_dataProvider.Convert(parameter.ParameterName, ConvertType.ParameterToName).ToString()] :
+					null;
 
 				if (mm != null)
 					mm.SetValue(obj, parameter.Value);
 			}
+		}
+
+		/// <summary>
+		/// Maps all parameters returned from the server to an object.
+		/// </summary>
+		/// <param name="obj">An <see cref="System.Object"/> to map from command parameters.</param>
+		/// from command parameters.</param>
+		public void MapOutputParameters(object obj)
+		{
+			MapOutputParameters(null, obj);
+		}
+
+		/// <summary>
+		/// Maps all parameters returned from the server to all given objects.
+		/// </summary>
+		/// <param name="objects">An array of <see cref="System.Object"/> to map
+		/// from command parameters.</param>
+		public void MapOutputParameters(
+			string returnValueMember,
+			params object[] objects)
+		{
+			foreach (object obj in objects)
+				MapOutputParameters(returnValueMember, obj);
+		}
+
+		/// <summary>
+		/// Maps all parameters returned from the server to an object.
+		/// </summary>
+		/// <param name="objects">An array of <see cref="System.Object"/> to map
+		/// from command parameters.</param>
+		public void MapOutputParameters(params object[] objects)
+		{
+			MapOutputParameters(null, objects);
+		}
+
+		[Obsolete("Use DbManager.MapOutputParameters(string, object) instead.")]
+		public void MapOutputParameters(object obj, string returnValueMember)
+		{
+			MapOutputParameters(returnValueMember, obj);
 		}
 
 		/// <overloads>
@@ -2409,7 +2432,7 @@ namespace BLToolkit.Data
 		/// </summary>
 		/// <remarks>
 		/// The method prepares the <see cref="Command"/> object 
-		/// and calls the <see cref="ExecuteNonQuery"/> method for each item of the list.
+		/// and calls the <see cref="ExecuteNonQuery()"/> method for each item of the list.
 		/// </remarks>
 		/// <include file="Examples1.xml" path='examples/db[@name="Execute(CommandType,string,IList)"]/*' />
 		/// <param name="collection">The list of objects used to execute the command.</param>
@@ -2454,7 +2477,7 @@ namespace BLToolkit.Data
 		/// </summary>
 		/// <remarks>
 		/// The method prepares the <see cref="Command"/> object 
-		/// and calls the <see cref="ExecuteNonQuery"/> method for each item 
+		/// and calls the <see cref="ExecuteNonQuery()"/> method for each item 
 		/// of the <see cref="DataTable"/>.
 		/// </remarks>
 		/// <include file="Examples1.xml" path='examples/db[@name="Execute(CommandType,string,DataTable)"]/*' />
@@ -2493,7 +2516,7 @@ namespace BLToolkit.Data
 		/// </summary>
 		/// <remarks>
 		/// The method prepares the <see cref="Command"/> object
-		/// and calls the <see cref="ExecuteNonQuery"/> method for each item of the first table.
+		/// and calls the <see cref="ExecuteNonQuery()"/> method for each item of the first table.
 		/// </remarks>
 		/// <include file="Examples1.xml" path='examples/db[@name="Execute(CommandType,string,DataSet)"]/*' />
 		/// <param name="dataSet">An instance of the <see cref="DataSet"/> class to execute the command.</param>
@@ -2509,7 +2532,7 @@ namespace BLToolkit.Data
 		/// </summary>
 		/// <remarks>
 		/// The method prepares the <see cref="Command"/> object
-		/// and calls the <see cref="ExecuteNonQuery"/> method for each item of the first table.
+		/// and calls the <see cref="ExecuteNonQuery()"/> method for each item of the first table.
 		/// </remarks>
 		/// <include file="Examples1.xml" path='examples/db[@name="Execute(CommandType,string,DataSet,string)"]/*' />
 		/// <param name="dataSet">An instance of the <see cref="DataSet"/> class to execute the command.</param>
@@ -2540,6 +2563,78 @@ namespace BLToolkit.Data
 				InitParameters(CommandAction.Select);
 
 			return ExecuteNonQueryInternal();
+		}
+
+		/// <summary>
+		/// Executes a SQL statement and returns the number of rows affected.
+		/// </summary>
+		/// <remarks>
+		/// The method can be used to execute the <i>INSERT</i>, <i>UPDATE</i>, and <i>DELETE</i> SQL statements.
+		/// </remarks>
+		/// <param name="returnValueMember">Name of a <see cref="MemberMapper"/> to map return value.</param>
+		/// <param name="obj">An <see cref="System.Object"/> to map from command parameters.</param>
+		/// <returns>The number of rows affected by the command.</returns>
+		public int ExecuteNonQuery(
+			string returnValueMember,
+			object obj)
+		{
+			int rowsAffected = ExecuteNonQuery();
+
+			MapOutputParameters(returnValueMember, obj);
+			return rowsAffected;
+		}
+
+		/// <summary>
+		/// Executes a SQL statement and returns the number of rows affected.
+		/// </summary>
+		/// <remarks>
+		/// The method can be used to execute the <i>INSERT</i>, <i>UPDATE</i>, and <i>DELETE</i> SQL statements.
+		/// </remarks>
+		/// <param name="obj">An <see cref="System.Object"/> to map from command parameters.</param>
+		/// <returns>The number of rows affected by the command.</returns>
+		public int ExecuteNonQuery(object obj)
+		{
+			int rowsAffected = ExecuteNonQuery();
+
+			MapOutputParameters(null, obj);
+			return rowsAffected;
+		}
+
+		/// <summary>
+		/// Executes a SQL statement and returns the number of rows affected.
+		/// </summary>
+		/// <remarks>
+		/// The method can be used to execute the <i>INSERT</i>, <i>UPDATE</i>, and <i>DELETE</i> SQL statements.
+		/// </remarks>
+		/// <param name="returnValueMember">Name of a <see cref="MemberMapper"/> to map return value.</param>
+		/// <param name="objects">An array of <see cref="System.Object"/> to map
+		/// from command parameters.</param>
+		/// <returns>The number of rows affected by the command.</returns>
+		public int ExecuteNonQuery(
+			string          returnValueMember,
+			params object[] objects)
+		{
+			int rowsAffected = ExecuteNonQuery();
+
+			MapOutputParameters(returnValueMember, objects);
+			return rowsAffected;
+		}
+
+		/// <summary>
+		/// Executes a SQL statement and returns the number of rows affected.
+		/// </summary>
+		/// <remarks>
+		/// The method can be used to execute the <i>INSERT</i>, <i>UPDATE</i>, and <i>DELETE</i> SQL statements.
+		/// </remarks>
+		/// <param name="objects">An array of <see cref="System.Object"/> to map
+		/// from command parameters.</param>
+		/// <returns>The number of rows affected by the command.</returns>
+		public int ExecuteNonQuery(params object[] objects)
+		{
+			int rowsAffected = ExecuteNonQuery();
+
+			MapOutputParameters(null, objects);
+			return rowsAffected;
 		}
 
 		#endregion
@@ -2688,7 +2783,7 @@ namespace BLToolkit.Data
 								}
 								else
 								{
-									// Skip this parameter and look for next one.
+									// Skip this output parameter and look for next one.
 									//
 									--index;
 								}

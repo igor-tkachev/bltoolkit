@@ -80,6 +80,8 @@ namespace DataAccess
 
 			public abstract Person SelectByName(string firstName, string lastName, [Destination] Person p);
 
+			public abstract Person Insert([Destination(NoMap = false)] Person e);
+
 #if FW2
 			[ActionName("SelectAll")]
 			public abstract List<Person> SelectAllListT();
@@ -253,6 +255,28 @@ namespace DataAccess
 			Person e = (Person)TypeAccessor.CreateInstance(typeof (Person));
 			_da.SelectByName("John", "Pupkin", e);
 			Assert.AreEqual(1, e.ID);
+		}
+
+		[Test]
+		public void Gen_InsertGetID()
+		{
+			Person    e = (Person)TypeAccessor.CreateInstance(typeof(Person));
+			e.FirstName = "Crazy";
+			e.LastName  = "Frog";
+			e.Gender    = Gender.Other;
+
+			_da.Insert(e);
+
+			// If you got an assertion here, make sure your Person_Insert sproc looks like
+			//
+			// INSERT INTO Person( LastName,  FirstName,  MiddleName,  Gender)
+			// VALUES            (@LastName, @FirstName, @MiddleName, @Gender)
+			//
+			// SELECT Cast(SCOPE_IDENTITY() as int) PersonID
+			// ^==important                         ^==important
+			//
+			Assert.IsTrue(e.ID > 0);
+			_da.Delete(e);
 		}
 
 		[Test]
