@@ -312,12 +312,12 @@ namespace BLToolkit.Data.DataProvider
 
 		public class OdpMappingSchema : MappingSchema
 		{
-			protected override DataReaderMapper CreateDataReaderMapper(IDataReader dataReader)
+			public override DataReaderMapper CreateDataReaderMapper(IDataReader dataReader)
 			{
 				return new OracleDataReaderMapper(this, dataReader);
 			}
 
-			protected override DataReaderMapper CreateDataReaderMapper(IDataReader dataReader, NameOrIndexParameter nip)
+			public override DataReaderMapper CreateDataReaderMapper(IDataReader dataReader, NameOrIndexParameter nip)
 			{
 				return new SqlScalarDataReaderMapper(this, dataReader, nip);
 			}

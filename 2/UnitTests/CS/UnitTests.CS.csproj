@@ -1,7 +1,7 @@
 <VisualStudioProject>
     <CSHARP
         ProjectType = "Local"
-        ProductVersion = "7.10.3077"
+        ProductVersion = "7.10.6030"
         SchemaVersion = "2.0"
         ProjectGuid = "{D258EBB5-8065-4292-9F07-B5A57042B435}"
     >
@@ -17,7 +17,7 @@
                 DelaySign = "false"
                 OutputType = "Library"
                 PreBuildEvent = ""
-                PostBuildEvent = ""
+                PostBuildEvent = "copy $(ProjectDir)app.config $(TargetPath).config"
                 RootNamespace = "UnitTests"
                 RunPostBuildEvent = "OnBuildSuccess"
                 StartupObject = ""
@@ -94,6 +94,10 @@
         <Files>
             <Include>
                 <File
+                    RelPath = "app.config"
+                    BuildAction = "None"
+                />
+                <File
                     RelPath = "AssemblyInfo.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
@@ -139,12 +143,12 @@
                     BuildAction = "Compile"
                 />
                 <File
-                    RelPath = "Common\NameOrIndexParameterTest.cs"
+                    RelPath = "Common\ConvertTest.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
                 />
                 <File
-                    RelPath = "Common\ConvertTest.cs"
+                    RelPath = "Common\NameOrIndexParameterTest.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
                 />
@@ -160,11 +164,6 @@
                 />
                 <File
                     RelPath = "Data\DbManagerTest.cs"
-                    SubType = "Code"
-                    BuildAction = "Compile"
-                />
-                <File
-                    RelPath = "Data\InnerTypesTest.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
                 />
@@ -185,6 +184,11 @@
                 />
                 <File
                     RelPath = "Data\ExecuteScalarTest.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "Data\InnerTypesTest.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
                 />
