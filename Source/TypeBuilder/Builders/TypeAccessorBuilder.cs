@@ -1,7 +1,7 @@
 using System;
 using System.Collections;
 using System.Reflection;
-using System.Diagnostics.CodeAnalysis;
+using System.Reflection.Emit;
 
 using BLToolkit.Reflection;
 using BLToolkit.Reflection.Emit;
@@ -69,10 +69,11 @@ namespace BLToolkit.TypeBuilder.Builders
 
 		private void BuildCreateInstanceMethods()
 		{
-			ConstructorInfo baseDefCtor  = _type.GetPublicDefaultConstructor();
+			bool            isValueType  = _type.IsValueType;
+			ConstructorInfo baseDefCtor  = isValueType? null: _type.GetPublicDefaultConstructor();
 			ConstructorInfo baseInitCtor = _type.GetPublicConstructor(typeof(InitContext));
 
-			if (baseDefCtor == null && baseInitCtor == null)
+			if (baseDefCtor == null && baseInitCtor == null && !isValueType)
 				return;
 
 			// CreateInstance.
@@ -88,6 +89,18 @@ namespace BLToolkit.TypeBuilder.Builders
 			{
 				method.Emitter
 					.newobj (baseDefCtor)
+					.ret()
+					;
+			}
+			else if (isValueType)
+			{
+				LocalBuilder    locObj = method.Emitter.DeclareLocal(_type);
+				
+				method.Emitter
+					.ldloca  (locObj)
+					.initobj (_type)
+					.ldloc   (locObj)
+					.box     (_type)
 					.ret()
 					;
 			}
@@ -114,6 +127,18 @@ namespace BLToolkit.TypeBuilder.Builders
 				method.Emitter
 					.ldarg_1
 					.newobj (baseInitCtor)
+					.ret()
+					;
+			}
+			else if (isValueType)
+			{
+				LocalBuilder    locObj = method.Emitter.DeclareLocal(_type);
+				
+				method.Emitter
+					.ldloca  (locObj)
+					.initobj (_type)
+					.ldloc   (locObj)
+					.box     (_type)
 					.ret()
 					;
 			}
@@ -148,8 +173,6 @@ namespace BLToolkit.TypeBuilder.Builders
 				.ret()
 				;
 		}
-
-		const BindingFlags _bindingFlags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
 
 		private void BuildMembers()
 		{
@@ -265,7 +288,7 @@ namespace BLToolkit.TypeBuilder.Builders
 
 			emit
 				.ldarg_1
-				.castclass (methodType)
+				.castType (methodType)
 				.end();
 
 			if (mi is FieldInfo)
@@ -326,7 +349,7 @@ namespace BLToolkit.TypeBuilder.Builders
 
 			emit
 				.ldarg_1
-				.castclass (methodType)
+				.castType (methodType)
 				.ldarg_2
 				.end();
 
@@ -396,7 +419,7 @@ namespace BLToolkit.TypeBuilder.Builders
 
 			emit
 				.ldarg_1
-				.castclass (methodType)
+				.castType (methodType)
 				.end();
 
 			if (mi is FieldInfo) emit.ldfld   ((FieldInfo)mi);
@@ -445,7 +468,7 @@ namespace BLToolkit.TypeBuilder.Builders
 
 			emit
 				.ldarg_1
-				.castclass (methodType)
+				.castType (methodType)
 				.ldarg_2
 				.end();
 
