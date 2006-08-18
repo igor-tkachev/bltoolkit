@@ -1,5 +1,4 @@
 using System;
-using System.Collections;
 
 using NUnit.Framework;
 
@@ -144,9 +143,26 @@ namespace TypeBuilder.Builders
 			public TestStruct1 Value;
 		}
 
+		[Test]
+		public void StructCreateInstanceTest()
+		{
+			TestStruct1 s = (TestStruct1)TypeAccessor.CreateInstance(typeof(TestStruct1));
+			Assert.IsNotNull(s);
+			
+			TestObject5 o = (TestObject5)TypeAccessor.CreateInstance(typeof(TestObject5));
+			Assert.IsNotNull(o);
+		}
+
+		[Test]
+		public void PrimitiveCreateInstanceTest()
+		{
+			int i = (int)TypeAccessor.CreateInstance(typeof(int));
+			Assert.IsNotNull(i);
+		}
+		
 #if FW2
 //		[Test]
-//		public void Test5()
+//		public void Test6()
 //		{
 //			TypeAccessor ta1 = TypeAccessor.GetAccessor(typeof(TestObject5));
 //			TypeAccessor ta2 = TypeAccessor.GetAccessor(typeof(TestStruct1));

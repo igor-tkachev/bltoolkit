@@ -1362,7 +1362,7 @@ namespace BLToolkit.Data
 			object                    obj,
 			params IDbDataParameter[] commandParameters)
 		{
-			return CreateParameters(obj, null, null, commandParameters);
+			return CreateParameters(obj, null, null, null, commandParameters);
 		}
 
 		/// <summary>
@@ -1382,6 +1382,7 @@ namespace BLToolkit.Data
 			object                    obj,
 			string[]                  outputParameters,
 			string[]                  inputOutputParameters,
+			string[]                  ignoreParameters,
 			params IDbDataParameter[] commandParameters)
 		{
 /*
@@ -1400,6 +1401,9 @@ namespace BLToolkit.Data
 
 			foreach (MemberMapper mm in om)
 			{
+				if (ignoreParameters != null && Array.IndexOf(ignoreParameters, mm.Name) >= 0)
+					continue;
+				
 				object value = mm.GetValue(obj);
 				string name  = _dataProvider.Convert(mm.Name, ConvertType.NameToParameter).ToString();
 
