@@ -1324,25 +1324,55 @@ namespace BLToolkit.Data
 		public IDbDataParameter[] CreateParameters(
 			DataRow dataRow, params IDbDataParameter[] commandParameters)
 		{
+			return CreateParameters(dataRow, null, null, null, commandParameters);
+		}
+
+		/// <summary>
+		/// Creates an array of parameters from the DataRow object.
+		/// </summary>
+		/// <remarks>
+		/// The method can take an additional parameter list, 
+		/// which can be created by using the same method.
+		/// </remarks>
+		/// <include file="Examples.xml" path='examples/db[@name="CreateParameters(DataRow,IDbDataParameter[])"]/*' />
+		/// <param name="dataRow">The <see cref="DataRow"/> to create parameters.</param>
+		/// <param name="outputParameters">Output parameters names.</param>
+		/// <param name="inputOutputParameters">InputOutput parameters names.</param>
+		/// <param name="ignoreParameters">Parameters names to skip.</param>
+		/// <param name="commandParameters">An array of paramters to be added to the result array.</param>
+		/// <returns>An array of parameters.</returns>
+		public IDbDataParameter[] CreateParameters(
+			DataRow                   dataRow,
+			string[]                  outputParameters,
+			string[]                  inputOutputParameters,
+			string[]                  ignoreParameters,
+			params IDbDataParameter[] commandParameters)
+		{
 			ArrayList paramList = new ArrayList();
 
 			foreach (DataColumn c in dataRow.Table.Columns)
 			{
-				if (c.AutoIncrement == false && c.ReadOnly == false)
-				{
-					paramList.Add(
-						c.AllowDBNull?
-						NullParameter(
-							_dataProvider.Convert(c.ColumnName, ConvertType.NameToParameter).ToString(),
-							dataRow[c.ColumnName]):
-						Parameter(
-							_dataProvider.Convert(c.ColumnName, ConvertType.NameToParameter).ToString(),
-							dataRow[c.ColumnName]));
-				}
+				if (ignoreParameters != null && Array.IndexOf(ignoreParameters, c.ColumnName) >= 0)
+					continue;
+
+				if (c.AutoIncrement || c.ReadOnly)
+					continue;
+
+				string           name      = _dataProvider.Convert(c.ColumnName, ConvertType.NameToParameter).ToString();
+				IDbDataParameter parameter = c.AllowDBNull?
+					NullParameter(name, dataRow[c.ColumnName]):
+					Parameter    (name, dataRow[c.ColumnName]);
+
+				if (outputParameters != null && Array.IndexOf(outputParameters, c.ColumnName) >= 0)
+					parameter.Direction = ParameterDirection.Output;
+				else if (inputOutputParameters != null && Array.IndexOf(inputOutputParameters, c.ColumnName) >= 0)
+					parameter.Direction = ParameterDirection.InputOutput;
+
+				paramList.Add(parameter);
 			}
 
-			foreach (IDbDataParameter p in commandParameters)
-				paramList.Add(p);
+			if (commandParameters != null)
+				paramList.AddRange(commandParameters);
 
 			return (IDbDataParameter[])paramList.ToArray(typeof(IDbDataParameter));
 		}
@@ -1376,6 +1406,7 @@ namespace BLToolkit.Data
 		/// <param name="obj">An object.</param>
 		/// <param name="outputParameters">Output parameters names.</param>
 		/// <param name="inputOutputParameters">InputOutput parameters names.</param>
+		/// <param name="ignoreParameters">Parameters names to skip.</param>
 		/// <param name="commandParameters">An array of paramters to be added to the result array.</param>
 		/// <returns>An array of parameters.</returns>
 		public IDbDataParameter[] CreateParameters(
@@ -1407,7 +1438,7 @@ namespace BLToolkit.Data
 				object value = mm.GetValue(obj);
 				string name  = _dataProvider.Convert(mm.Name, ConvertType.NameToParameter).ToString();
 
-				IDbDataParameter parameter = mm.MapMemberInfo.Nullable || value == null?
+				IDbDataParameter parameter   = mm.MapMemberInfo.Nullable || value == null?
 					NullParameter(name, value, mm.MapMemberInfo.NullValue):
 					Parameter    (name, value);
 
@@ -1434,19 +1465,19 @@ namespace BLToolkit.Data
 			string returnValueMember,
 			object obj)
 		{
-			ObjectMapper om = _mappingSchema.GetObjectMapper(obj.GetType());
+			IMapDataDestination dest = _mappingSchema.GetDataDestination(obj);
 
 			foreach (IDbDataParameter parameter in Command.Parameters)
 			{
-				MemberMapper mm =
-					parameter.Direction == ParameterDirection.ReturnValue && null != returnValueMember ?
-						om[returnValueMember] :
-					parameter.Direction == ParameterDirection.Output || parameter.Direction == ParameterDirection.InputOutput ?
-						om[_dataProvider.Convert(parameter.ParameterName, ConvertType.ParameterToName).ToString()] :
-					null;
+				int ordinal =
+					parameter.Direction == ParameterDirection.ReturnValue && null != returnValueMember?
+						dest.GetOrdinal(returnValueMember):
+					parameter.Direction == ParameterDirection.Output || parameter.Direction == ParameterDirection.InputOutput?
+						dest.GetOrdinal(_dataProvider.Convert(parameter.ParameterName, ConvertType.ParameterToName).ToString()):
+					-1;
 
-				if (mm != null)
-					mm.SetValue(obj, parameter.Value);
+				if (ordinal >= 0)
+					dest.SetValue(obj, ordinal, parameter.Value);
 			}
 		}
 

@@ -173,6 +173,32 @@ GO
 GRANT EXEC ON Person_Insert TO PUBLIC
 GO
 
+-- Person_Insert_OutputParameter
+
+IF EXISTS (SELECT * FROM sys.objects WHERE type = 'P' AND name = 'Person_Insert_OutputParameter')
+BEGIN DROP Procedure Person_Insert_OutputParameter END
+GO
+
+CREATE Procedure Person_Insert_OutputParameter
+	@FirstName  nvarchar(50),
+	@LastName   nvarchar(50),
+	@MiddleName nvarchar(50),
+	@Gender     char(1),
+	@PersonID   int output
+AS
+
+INSERT INTO Person
+	( LastName,  FirstName,  MiddleName,  Gender)
+VALUES
+	(@LastName, @FirstName, @MiddleName, @Gender)
+
+SET @PersonID = Cast(SCOPE_IDENTITY() as int)
+
+GO
+
+GRANT EXEC ON Person_Insert_OutputParameter TO PUBLIC
+GO
+
 -- Person_Update
 
 IF EXISTS (SELECT * FROM sys.objects WHERE type = 'P' AND name = 'Person_Update')
