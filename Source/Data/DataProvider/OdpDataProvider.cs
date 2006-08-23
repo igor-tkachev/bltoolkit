@@ -319,7 +319,7 @@ namespace BLToolkit.Data.DataProvider
 
 			public override DataReaderMapper CreateDataReaderMapper(IDataReader dataReader, NameOrIndexParameter nip)
 			{
-				return new SqlScalarDataReaderMapper(this, dataReader, nip);
+				return new OracleScalarDataReaderMapper(this, dataReader, nip);
 			}
 
 			#region Convert
@@ -804,11 +804,11 @@ namespace BLToolkit.Data.DataProvider
 #endif
 		}
 
-		public class SqlScalarDataReaderMapper : ScalarDataReaderMapper
+		public class OracleScalarDataReaderMapper : ScalarDataReaderMapper
 		{
 			private OracleDataReader _dataReader;
 
-			public SqlScalarDataReaderMapper(MappingSchema mappingSchema, IDataReader dataReader, NameOrIndexParameter nip)
+			public OracleScalarDataReaderMapper(MappingSchema mappingSchema, IDataReader dataReader, NameOrIndexParameter nip)
 				: base(mappingSchema, dataReader, nip)
 			{
 				_dataReader = (OracleDataReader)dataReader;

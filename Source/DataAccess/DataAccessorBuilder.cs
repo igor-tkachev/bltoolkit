@@ -13,7 +13,6 @@ using BLToolkit.Data;
 using BLToolkit.Reflection.Emit;
 using BLToolkit.Reflection;
 using BLToolkit.TypeBuilder;
-using BLToolkit.Data.DataProvider;
 using BLToolkit.Mapping;
 
 namespace BLToolkit.DataAccess
@@ -508,7 +507,7 @@ namespace BLToolkit.DataAccess
 			string id = sb.ToString();
 #endif
 
-			FieldBuilder fieldBuilder = (FieldBuilder)Context.Items["$BLToolkit.Field." + id];
+			FieldBuilder fieldBuilder = Context.GetField(id);
 
 			if (fieldBuilder == null)
 			{
@@ -1089,9 +1088,9 @@ namespace BLToolkit.DataAccess
 			// There a no limit for a filed name length, but Visual Studio Debugger
 			// may crash on fields with name longer then 256 symbols.
 			//
-			string key = "_string_array$" + string.Join("%", strings);
+			string       key          = "_string_array$" + string.Join("%", strings);
+			FieldBuilder fieldBuilder = Context.GetField(key);
 
-			FieldBuilder fieldBuilder = (FieldBuilder) Context.Fields[key];
 			if (null == fieldBuilder)
 			{
 				fieldBuilder = Context.CreatePrivateStaticField(key, typeof(string[]));
@@ -1242,13 +1241,19 @@ namespace BLToolkit.DataAccess
 
 			if (paramName[0] != '@')
 			{
+//				emit
+//					.ldloc     (_locManager)
+//					.callvirt  (typeof(DbManager).GetProperty("DataProvider").GetGetMethod())
+//					.ldstr     (paramName)
+//					.ldc_i4    ((int)ConvertType.NameToParameter)
+//					.callvirt  (typeof(DataProviderBase), "Convert", typeof(string), typeof(ConvertType))
+//					.castclass (typeof(string))
+//					;
 				emit
-					.ldloc     (_locManager)
-					.callvirt  (typeof(DbManager).GetProperty("DataProvider").GetGetMethod())
-					.ldstr     (paramName)
-					.ldc_i4    ((int)ConvertType.NameToParameter)
-					.callvirt  (typeof(DataProviderBase), "Convert", typeof(string), typeof(ConvertType))
-					.castclass (typeof(string))
+					.ldarg_0
+					.ldloc    (_locManager)
+					.ldstr    (paramName)
+					.callvirt (_baseType, "GetSpParameterName", _bindingFlags, typeof(DbManager), typeof(string))
 					;
 			}
 			else
@@ -1352,12 +1357,18 @@ namespace BLToolkit.DataAccess
 
 					if (paramName[0] != '@')
 					{
+//						emit
+//							.ldloc    (_locManager)
+//							.callvirt (typeof(DbManager).GetProperty("DataProvider").GetGetMethod())
+//							.ldstr    (paramName)
+//							.ldc_i4   ((int)ConvertType.NameToParameter)
+//							.callvirt (typeof(DataProviderBase), "Convert", typeof(object), typeof(ConvertType))
+//							;
 						emit
+							.ldarg_0
 							.ldloc    (_locManager)
-							.callvirt (typeof(DbManager).GetProperty("DataProvider").GetGetMethod())
 							.ldstr    (paramName)
-							.ldc_i4   ((int)ConvertType.NameToParameter)
-							.callvirt (typeof(DataProviderBase), "Convert", typeof(object), typeof(ConvertType))
+							.callvirt (_baseType, "GetSpParameterName", _bindingFlags, typeof(DbManager), typeof(string))
 							;
 					}
 					else

@@ -186,6 +186,12 @@ namespace BLToolkit.DataAccess
 		}
 
 		[NoInterception]
+		protected virtual string GetSpParameterName(DbManager dbManager, string parameterName)
+		{
+			return (string)dbManager.DataProvider.Convert(parameterName, ConvertType.NameToParameter);
+		}
+
+		[NoInterception]
 		protected virtual IDbDataParameter[] PrepareParameters(object[] parameters)
 		{
 			// Little optimization.
