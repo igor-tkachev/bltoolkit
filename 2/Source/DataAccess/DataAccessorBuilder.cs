@@ -20,6 +20,18 @@ namespace BLToolkit.DataAccess
 {
 	public class DataAccessorBuilder : AbstractTypeBuilderBase
 	{
+		private struct MapOutputParametersValue
+		{
+			public string           ReturnValueMember;
+			public ParameterInfo    ParameterInfo;
+
+			public MapOutputParametersValue(string returnValueMember, ParameterInfo parameterInfo)
+			{
+				ReturnValueMember = returnValueMember;
+				ParameterInfo     = parameterInfo;
+			}
+		}
+
 		public override int GetPriority(BuildContext context)
 		{
 			return TypeBuilderConsts.Priority.DataAccessor;
@@ -44,23 +56,25 @@ namespace BLToolkit.DataAccess
 		string          _sqlText;
 		ArrayList       _formatParamList;
 		ParameterInfo   _destination;
+		ArrayList       _mapOutputParameters;
 
 		protected override void BuildAbstractMethod()
 		{
 			// Any class variable must be initialized before use
 			// as the same instance of the class is utilized to build abstract methods.
 			//
-			_paramList        = new ArrayList();
-			_refParamList     = new ArrayList();
-			_formatParamList  = new ArrayList();
-			_destination      = null;
-			_createManager    = true;
-			_objectType       = null;
-			_parameters       = Context.CurrentMethod.GetParameters();
-			_locManager       = Context.MethodBuilder.Emitter.DeclareLocal(typeof(DbManager));
-			_locObjType       = Context.MethodBuilder.Emitter.DeclareLocal(typeof(Type));
-			_outputParameters = null;
-			_sqlText          = null;
+			_paramList           = new ArrayList();
+			_refParamList        = new ArrayList();
+			_formatParamList     = new ArrayList();
+			_mapOutputParameters = new ArrayList();
+			_destination         = null;
+			_createManager       = true;
+			_objectType          = null;
+			_parameters          = Context.CurrentMethod.GetParameters();
+			_locManager          = Context.MethodBuilder.Emitter.DeclareLocal(typeof(DbManager));
+			_locObjType          = Context.MethodBuilder.Emitter.DeclareLocal(typeof(Type));
+			_outputParameters    = null;
+			_sqlText             = null;
 
 			GetSqlQueryCommand();
 			ProcessParameters();
@@ -84,8 +98,7 @@ namespace BLToolkit.DataAccess
 				ExecuteDataTable();
 			}
 			else if (IsInterfaceOf(returnType, typeof(IList))
-				&& !returnType.IsArray // Arrays are ILists w/o Add() method.
-				)
+				&& !returnType.IsArray) // Arrays are ILists w/o Add() method.
 			{
 				Type elementType = TypeHelper.GetListItemType(returnType);
 
@@ -225,17 +238,11 @@ namespace BLToolkit.DataAccess
 				pType = pType.GetElementType();
 
 			if (TypeHelper.IsScalar(pType))
-			{
 				_paramList.Add(pi);
-			}
 			else if (pType == typeof(DbManager) || pType.IsSubclassOf(typeof(DbManager)))
-			{
 				_createManager = false;
-			}
 			else
-			{
 				_refParamList.Add(pi);
-			}
 		}
 
 		private void ProcessParameters()
@@ -299,7 +306,7 @@ namespace BLToolkit.DataAccess
 					if (pType == typeof(DbManager) || pType.IsSubclassOf(typeof(DbManager)))
 					{
 						emit
-							.ldarg_s ((byte)(_parameters[i].Position + 1))
+							.ldarg   (_parameters[i])
 							.stloc   (_locManager)
 							;
 
@@ -823,7 +830,7 @@ namespace BLToolkit.DataAccess
 			if (_destination != null)
 			{
 				emit
-					.ldarg(_destination.Position + 1)
+					.ldarg(_destination)
 					.callvirt(typeof(DbManager), "ExecuteObject", typeof(Object))
 					;
 			}
@@ -871,8 +878,8 @@ namespace BLToolkit.DataAccess
 			if (null != _destination)
 			{
 				Context.MethodBuilder.Emitter
-					.ldarg(_destination.Position + 1) // Argument #0 is 'this'.
-					.stloc(Context.ReturnValue)
+					.ldarg    (_destination)
+					.stloc    (Context.ReturnValue)
 					;
 			}
 			else
@@ -884,8 +891,8 @@ namespace BLToolkit.DataAccess
 						Context.CurrentMethod.ReturnType.FullName));
 
 				Context.MethodBuilder.Emitter
-					.newobj(ci)
-					.stloc(Context.ReturnValue)
+					.newobj   (ci)
+					.stloc    (Context.ReturnValue)
 					;
 			}
 		}
@@ -896,7 +903,7 @@ namespace BLToolkit.DataAccess
 			{
 				Context.MethodBuilder.Emitter
 					.ldnull
-					.stloc  (_locObjType)
+					.stloc    (_locObjType)
 					;
 			}
 			else
@@ -915,8 +922,8 @@ namespace BLToolkit.DataAccess
 			if (_sqlText != null)
 			{
 				emit
-					.ldloc (_locManager)
-					.ldstr (_sqlText)
+					.ldloc    (_locManager)
+					.ldstr    (_sqlText)
 					;
 			}
 			else
@@ -943,8 +950,8 @@ namespace BLToolkit.DataAccess
 				else
 				{
 					emit
-						.ldloc (_locManager)
-						.ldstr (((SprocNameAttribute)attrs[0]).Name)
+						.ldloc    (_locManager)
+						.ldstr    (((SprocNameAttribute)attrs[0]).Name)
 						;
 				}
 			}
@@ -956,9 +963,9 @@ namespace BLToolkit.DataAccess
 				LocalBuilder locParams = emit.DeclareLocal(typeof(object[]));
 
 				emit
-					.ldc_i4 (_formatParamList.Count)
-					.newarr (typeof(object))
-					.stloc  (locParams)
+					.ldc_i4       (_formatParamList.Count)
+					.newarr       (typeof(object))
+					.stloc        (locParams)
 					;
 
 				for (int i = 0; i < _formatParamList.Count; i++)
@@ -976,8 +983,8 @@ namespace BLToolkit.DataAccess
 				}
 
 				emit
-					.ldloc (locParams)
-					.call  (typeof(string), "Format", typeof(string), typeof(object[]))
+					.ldloc        (locParams)
+					.call         (typeof(string), "Format", typeof(string), typeof(object[]))
 					;
 			}
 		}
@@ -1061,6 +1068,61 @@ namespace BLToolkit.DataAccess
 			return locParams;
 		}
 
+		private FieldBuilder CreateStringArrayField(object[] attrs)
+		{
+			if (attrs.Length == 0)
+				return null;
+
+			ArrayList list = new ArrayList();
+
+			foreach (Direction attr in attrs)
+				if (attr.Members != null)
+					list.AddRange(attr.Members);
+
+			if (list.Count == 0)
+				return null;
+
+			list.Sort();
+
+			string[] strings = (string[]) list.ToArray(typeof(string));
+
+			// There a no limit for a filed name length, but Visual Studio Debugger
+			// may crash on fields with name longer then 256 symbols.
+			//
+			string key = "_string_array$" + string.Join("%", strings);
+
+			FieldBuilder fieldBuilder = (FieldBuilder) Context.Fields[key];
+			if (null == fieldBuilder)
+			{
+				fieldBuilder = Context.CreatePrivateStaticField(key, typeof(string[]));
+
+				EmitHelper   emit = Context.TypeBuilder.TypeInitializer.Emitter;
+				LocalBuilder arr  = emit.DeclareLocal(typeof(string[]));
+
+				emit
+					.ldc_i4_ (strings.Length)
+					.newarr  (typeof(string))
+					.stloc   (arr)
+					;
+
+				for (int i = 0; i < strings.Length; i++)
+				{
+					emit
+						.ldloc(arr)
+						.ldc_i4(i)
+						.ldstr(strings[i])
+						.stelem_ref.end();
+				}
+				
+				emit
+					.ldloc  (arr)
+					.stsfld (fieldBuilder)
+					;
+				}
+
+			return fieldBuilder;
+		}
+
 		private LocalBuilder BuildRefParameters()
 		{
 			EmitHelper emit = Context.MethodBuilder.Emitter;
@@ -1093,16 +1155,53 @@ namespace BLToolkit.DataAccess
 				}
 				else if (_refParamList.Contains(pi))
 				{
-					Type type =
+					bool         mapOutputParameters = false;
+					string       returnValueMember   = null;
+					FieldBuilder fieldBuilder;
+					Type         type =
 						pi.ParameterType == typeof(DataRow) || pi.ParameterType.IsSubclassOf(typeof(DataRow))?
 							typeof(DataRow): typeof(object);
 
 					emit
 						.ldloc    (_locManager)
-						.ldarg    (pi)
+						.ldarg    (pi);
+
+					fieldBuilder = CreateStringArrayField(pi.GetCustomAttributes(typeof(Direction.OutputAttribute),      true));
+					if (fieldBuilder != null)
+					{
+						emit.ldsfld(fieldBuilder);
+						mapOutputParameters = true;
+					}
+					else
+						emit.ldnull.end();
+
+					fieldBuilder = CreateStringArrayField(pi.GetCustomAttributes(typeof(Direction.InputOutputAttribute), true));
+					if (fieldBuilder != null)
+					{
+						emit.ldsfld(fieldBuilder);
+						mapOutputParameters = true;
+					}
+					else
+						emit.ldnull.end();
+
+					fieldBuilder = CreateStringArrayField(pi.GetCustomAttributes(typeof(Direction.IgnoreAttribute),      true));
+					if (fieldBuilder != null)
+						emit.ldsfld(fieldBuilder);
+					else
+						emit.ldnull.end();
+
+					emit
 						.ldnull
-						.callvirt (typeof(DbManager), "CreateParameters", type, typeof(IDbDataParameter[]))
+						.callvirt (typeof(DbManager), "CreateParameters", type,
+							typeof(string[]), typeof(string[]), typeof(string[]), typeof(IDbDataParameter[]))
 						;
+
+					object[] attrs = pi.GetCustomAttributes(typeof (Direction.ReturnValueAttribute), true);
+					if (attrs.Length != 0)
+						returnValueMember = ((Direction.ReturnValueAttribute)attrs[0]).Member;
+
+					if (null != returnValueMember || mapOutputParameters)
+						_mapOutputParameters.Add(new MapOutputParametersValue(returnValueMember, pi));
 				}
 				else
 				{
@@ -1226,10 +1325,10 @@ namespace BLToolkit.DataAccess
 
 		private void GetOutRefParameters()
 		{
+			EmitHelper emit = Context.MethodBuilder.Emitter;
+
 			if (_outputParameters != null)
 			{
-				EmitHelper emit = Context.MethodBuilder.Emitter;
-
 				LocalBuilder param = emit.DeclareLocal(typeof(IDataParameter));
 
 				foreach (ParameterInfo pi in _outputParameters)
@@ -1328,6 +1427,15 @@ namespace BLToolkit.DataAccess
 					else
 						emit.stind(type);
 				}
+			}
+
+			foreach (MapOutputParametersValue v in _mapOutputParameters)
+			{
+				emit
+					.ldloc     (_locManager)
+					.ldstrEx   (v.ReturnValueMember)
+					.ldarg     (v.ParameterInfo)
+					.callvirt  (typeof(DbManager), "MapOutputParameters", typeof(string), typeof(object));
 			}
 		}
 

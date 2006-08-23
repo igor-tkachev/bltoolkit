@@ -81,7 +81,13 @@ namespace DataAccess
 			public abstract Person SelectByName(string firstName, string lastName, [Destination] Person p);
 
 			public abstract Person Insert([Destination(NoMap = false)] Person e);
+			
+			[SprocName("Person_Insert_OutputParameter")]
+			public abstract void Insert_OutputParameter([Direction.Output("PersonID")] Person e);
 
+			[SprocName("Scalar_ReturnParameter")]
+			public abstract void Insert_ReturnParameter([Direction.ReturnValue("PersonID"),
+				Direction.Ignore("PersonID", "FirstName", "LastName", "MiddleName", "Gender")] Person e);
 #if FW2
 			[ActionName("SelectAll")]
 			public abstract List<Person> SelectAllListT();
@@ -275,6 +281,30 @@ namespace DataAccess
 			// SELECT Cast(SCOPE_IDENTITY() as int) PersonID
 			// ^==important                         ^==important
 			//
+			Assert.IsTrue(e.ID > 0);
+			_da.Delete(e);
+		}
+
+		[Test]
+		public void Gen_InsertGetIDReturnParameter()
+		{
+			Person    e = (Person)TypeAccessor.CreateInstance(typeof(Person));
+
+			_da.Insert_ReturnParameter(e);
+
+			Assert.AreEqual(12345, e.ID);
+		}
+
+		[Test]
+		public void Gen_InsertGetIDOutputParameter()
+		{
+			Person    e = (Person)TypeAccessor.CreateInstance(typeof(Person));
+			e.FirstName = "Crazy";
+			e.LastName  = "Frog";
+			e.Gender    = Gender.Other;
+
+			_da.Insert_OutputParameter(e);
+
 			Assert.IsTrue(e.ID > 0);
 			_da.Delete(e);
 		}
