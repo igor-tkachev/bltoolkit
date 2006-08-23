@@ -250,6 +250,11 @@ namespace BLToolkit.Reflection
 
 				if (File.GetCreationTime(originalAssemblyLocation) <= File.GetCreationTime(extensionAssemblyLocation))
 					return Assembly.LoadFile(extensionAssemblyLocation);
+
+				Debug.WriteLineIf(File.Exists(extensionAssemblyLocation),
+					string.Format("Extension assembly '{0}' is out of date. Please rebuild.",
+						extensionAssemblyLocation),
+					"BLToolkit.TypeAccessor");
 			}
 			catch
 			{
