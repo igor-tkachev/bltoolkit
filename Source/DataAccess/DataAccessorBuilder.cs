@@ -1042,9 +1042,9 @@ namespace BLToolkit.DataAccess
 				_sqlText == null? typeof(object[]): typeof(IDbDataParameter[]));
 
 			emit
-				.ldc_i4_ (_paramList.Count)
-				.newarr  (_sqlText == null? typeof(object): typeof(IDbDataParameter))
-				.stloc   (locParams)
+				.ldc_i4_      (_paramList.Count)
+				.newarr       (_sqlText == null? typeof(object): typeof(IDbDataParameter))
+				.stloc        (locParams)
 				;
 
 			for (int i = 0; i < _paramList.Count; i++)
@@ -1052,8 +1052,8 @@ namespace BLToolkit.DataAccess
 				ParameterInfo pi = (ParameterInfo)_paramList[i];
 
 				emit
-					.ldloc  (locParams)
-					.ldc_i4 (i)
+					.ldloc    (locParams)
+					.ldc_i4   (i)
 					;
 
 				BuildParameter(pi);
@@ -1081,41 +1081,43 @@ namespace BLToolkit.DataAccess
 			if (list.Count == 0)
 				return null;
 
-			list.Sort();
+			list.Sort(CaseInsensitiveComparer.Default);
 
 			string[] strings = (string[]) list.ToArray(typeof(string));
 
 			// There a no limit for a filed name length, but Visual Studio Debugger
 			// may crash on fields with name longer then 256 symbols.
 			//
-			string       key          = "_string_array$" + string.Join("%", strings);
-			FieldBuilder fieldBuilder = Context.GetField(key);
+			string       key            = "_string_array$" + string.Join("%", strings);
+			FieldBuilder fieldBuilder   = Context.GetField(key);
 
 			if (null == fieldBuilder)
 			{
 				fieldBuilder = Context.CreatePrivateStaticField(key, typeof(string[]));
 
-				EmitHelper   emit = Context.TypeBuilder.TypeInitializer.Emitter;
-				LocalBuilder arr  = emit.DeclareLocal(typeof(string[]));
+				EmitHelper   emit       = Context.TypeBuilder.TypeInitializer.Emitter;
+				LocalBuilder localArray = emit.DeclareLocal(typeof(string[]));
 
 				emit
-					.ldc_i4_ (strings.Length)
-					.newarr  (typeof(string))
-					.stloc   (arr)
+					.ldc_i4_           (strings.Length)
+					.newarr            (typeof(string))
+					.stloc             (localArray)
 					;
 
 				for (int i = 0; i < strings.Length; i++)
 				{
 					emit
-						.ldloc(arr)
-						.ldc_i4(i)
-						.ldstr(strings[i])
-						.stelem_ref.end();
+						.ldloc         (localArray)
+						.ldc_i4        (i)
+						.ldstr         (strings[i])
+						.stelem_ref
+						.end()
+						;
 				}
 				
 				emit
-					.ldloc  (arr)
-					.stsfld (fieldBuilder)
+					.ldloc             (localArray)
+					.stsfld            (fieldBuilder)
 					;
 				}
 
@@ -1124,19 +1126,16 @@ namespace BLToolkit.DataAccess
 
 		private LocalBuilder BuildRefParameters()
 		{
-			EmitHelper emit = Context.MethodBuilder.Emitter;
+			EmitHelper   emit      = Context.MethodBuilder.Emitter;
 
 			// Parameters.
 			//
-			LocalBuilder locParams = emit.DeclareLocal(
-				typeof(object[]));
-				//_sqlText == null? typeof(object[]): typeof(IDbDataParameter[]));
+			LocalBuilder locParams = emit.DeclareLocal(typeof(object[]));
 
 			emit
-				.ldc_i4_ (_parameters.Length)
-				.newarr  (typeof(object))
-				//.newarr  (_sqlText == null? typeof(object): typeof(IDbDataParameter))
-				.stloc   (locParams)
+				.ldc_i4_               (_parameters.Length)
+				.newarr                (typeof(object))
+				.stloc                 (locParams)
 				;
 
 			for (int i = 0; i < _parameters.Length; i++)
@@ -1144,8 +1143,8 @@ namespace BLToolkit.DataAccess
 				ParameterInfo pi = _parameters[i];
 
 				emit
-					.ldloc  (locParams)
-					.ldc_i4 (i)
+					.ldloc             (locParams)
+					.ldc_i4            (i)
 					;
 
 				if (_paramList.Contains(pi))
@@ -1162,13 +1161,14 @@ namespace BLToolkit.DataAccess
 							typeof(DataRow): typeof(object);
 
 					emit
-						.ldloc    (_locManager)
-						.ldarg    (pi);
+						.ldloc         (_locManager)
+						.ldarg         (pi)
+						;
 
 					fieldBuilder = CreateStringArrayField(pi.GetCustomAttributes(typeof(Direction.OutputAttribute),      true));
 					if (fieldBuilder != null)
 					{
-						emit.ldsfld(fieldBuilder);
+						emit.ldsfld    (fieldBuilder);
 						mapOutputParameters = true;
 					}
 					else
@@ -1177,7 +1177,7 @@ namespace BLToolkit.DataAccess
 					fieldBuilder = CreateStringArrayField(pi.GetCustomAttributes(typeof(Direction.InputOutputAttribute), true));
 					if (fieldBuilder != null)
 					{
-						emit.ldsfld(fieldBuilder);
+						emit.ldsfld    (fieldBuilder);
 						mapOutputParameters = true;
 					}
 					else
@@ -1185,13 +1185,13 @@ namespace BLToolkit.DataAccess
 
 					fieldBuilder = CreateStringArrayField(pi.GetCustomAttributes(typeof(Direction.IgnoreAttribute),      true));
 					if (fieldBuilder != null)
-						emit.ldsfld(fieldBuilder);
+						emit.ldsfld    (fieldBuilder);
 					else
 						emit.ldnull.end();
 
 					emit
 						.ldnull
-						.callvirt (typeof(DbManager), "CreateParameters", type,
+						.callvirt      (typeof(DbManager), "CreateParameters", type,
 							typeof(string[]), typeof(string[]), typeof(string[]), typeof(IDbDataParameter[]))
 						;
 
@@ -1236,19 +1236,10 @@ namespace BLToolkit.DataAccess
 			string paramName = attrs.Length == 0?
 				pi.Name: ((ParamNameAttribute)attrs[0]).Name;
 
-			emit
-				.ldloc(_locManager);
+			emit.ldloc        (_locManager);
 
 			if (paramName[0] != '@')
 			{
-//				emit
-//					.ldloc     (_locManager)
-//					.callvirt  (typeof(DbManager).GetProperty("DataProvider").GetGetMethod())
-//					.ldstr     (paramName)
-//					.ldc_i4    ((int)ConvertType.NameToParameter)
-//					.callvirt  (typeof(DataProviderBase), "Convert", typeof(string), typeof(ConvertType))
-//					.castclass (typeof(string))
-//					;
 				emit
 					.ldarg_0
 					.ldloc    (_locManager)
@@ -1257,10 +1248,7 @@ namespace BLToolkit.DataAccess
 					;
 			}
 			else
-			{
-				emit
-					.ldstr(paramName);
-			}
+				emit.ldstr    (paramName);
 
 			Type   type       = pi.ParameterType;
 			string methodName = "Parameter";
@@ -1284,20 +1272,12 @@ namespace BLToolkit.DataAccess
 					;
 			}
 
-			emit
-				.ldargEx(pi, true)
-				;
+			emit.ldargEx      (pi, true);
 
 			if (type.IsEnum)
-			{
-				emit
-					.callvirt (typeof(MappingSchema), "MapEnumToValue", typeof(object))
-					;
-			}
+				emit.callvirt (typeof(MappingSchema), "MapEnumToValue", typeof(object));
 
-			emit
-				.callvirt (typeof(DbManager), methodName, typeof(string), typeof(object))
-				;
+			emit.callvirt     (typeof(DbManager), methodName, typeof(string), typeof(object));
 		}
 
 		private LocalBuilder BuildParametersWithDiscoverParameters()
@@ -1306,9 +1286,9 @@ namespace BLToolkit.DataAccess
 			LocalBuilder locParams = emit.DeclareLocal(typeof(object[]));
 
 			emit
-				.ldc_i4 (_paramList.Count)
-				.newarr (typeof(object))
-				.stloc  (locParams)
+				.ldc_i4             (_paramList.Count)
+				.newarr             (typeof(object))
+				.stloc              (locParams)
 				;
 
 			for (int i = 0; i < _paramList.Count; i++)
@@ -1357,30 +1337,19 @@ namespace BLToolkit.DataAccess
 
 					if (paramName[0] != '@')
 					{
-//						emit
-//							.ldloc    (_locManager)
-//							.callvirt (typeof(DbManager).GetProperty("DataProvider").GetGetMethod())
-//							.ldstr    (paramName)
-//							.ldc_i4   ((int)ConvertType.NameToParameter)
-//							.callvirt (typeof(DataProviderBase), "Convert", typeof(object), typeof(ConvertType))
-//							;
 						emit
 							.ldarg_0
-							.ldloc    (_locManager)
-							.ldstr    (paramName)
-							.callvirt (_baseType, "GetSpParameterName", _bindingFlags, typeof(DbManager), typeof(string))
+							.ldloc                (_locManager)
+							.ldstr                (paramName)
+							.callvirt             (_baseType, "GetSpParameterName", _bindingFlags, typeof(DbManager), typeof(string))
 							;
 					}
 					else
-					{
-						emit
-							.ldstr (paramName)
-							;
-					}
+						emit.ldstr                (paramName);
 
 					emit
-						.callvirt (typeof(DbManager), "Parameter", typeof(string))
-						.stloc    (param)
+						.callvirt                 (typeof(DbManager), "Parameter", typeof(string))
+						.stloc                    (param)
 						;
 
 					// Process value.
@@ -1390,12 +1359,8 @@ namespace BLToolkit.DataAccess
 							emit
 								.ldloc            (_locManager)
 								.callvirt         (typeof(DbManager).GetProperty("MappingSchema").GetGetMethod())
-							//		.ldloc        (_locManager)
-							//		.callvirt     (typeof(DbManager).GetProperty("DataProvider").GetGetMethod())
-										.ldloc    (param)
-										.callvirt (typeof(IDataParameter).GetProperty("Value").GetGetMethod())
-							//		.ldc_i4       ((int)ConvertType.OutputParameter)
-							//		.callvirt     (typeof(DataProviderBase), "Convert", typeof(object), typeof(ConvertType))
+								.ldloc            (param)
+								.callvirt         (typeof(IDataParameter).GetProperty("Value").GetGetMethod())
 								.LoadType         (type)
 								.callvirt         (typeof(MappingSchema), "MapValueToEnum", typeof(object), typeof(Type))
 								.CastFromObject   (type)
@@ -1405,23 +1370,19 @@ namespace BLToolkit.DataAccess
 					{
 						emit
 							.ldarg_0
-							.ldloc(_locManager)
-							//	.ldloc(_locManager)
-							//	.callvirt(typeof(DbManager).GetProperty("DataProvider").GetGetMethod())
-									.ldloc(param)
-									.callvirt(typeof(IDataParameter).GetProperty("Value").GetGetMethod())
-							//	.ldc_i4((int)ConvertType.OutputParameter)
-							//	.callvirt(typeof(DataProviderBase), "Convert", typeof(object), typeof(ConvertType))
-								;
+							.ldloc                (_locManager)
+							.ldloc                (param)
+							.callvirt             (typeof(IDataParameter).GetProperty("Value").GetGetMethod())
+							;
 						
 						string converterName = GetConverterMethodName(type);
 
 						if (converterName == null)
 						{
 							emit
-								.LoadType(type)
-								.ldloc(param)
-								.callvirt(typeof(DataAccessor), "ConvertChangeType", _bindingFlags, typeof(DbManager), typeof(object), typeof(Type), typeof(object))
+								.LoadType         (type)
+								.ldloc            (param)
+								.callvirt         (typeof(DataAccessor), "ConvertChangeType", _bindingFlags, typeof(DbManager), typeof(object), typeof(Type), typeof(object))
 								;
 						}
 						else
@@ -1493,18 +1454,18 @@ namespace BLToolkit.DataAccess
 				if (type.IsEnum)
 					type = Enum.GetUnderlyingType(type);
 
-				if (type == typeof(SByte))    return "ConvertToSByte";
-				if (type == typeof(Int16))    return "ConvertToInt16";
-				if (type == typeof(Int32))    return "ConvertToInt32";
-				if (type == typeof(Int64))    return "ConvertToInt64";
-				if (type == typeof(Byte))     return "ConvertToByte";
-				if (type == typeof(UInt16))   return "ConvertToUInt16";
-				if (type == typeof(UInt32))   return "ConvertToUInt32";
-				if (type == typeof(UInt64))   return "ConvertToUInt64";
-				if (type == typeof(Char))     return "ConvertToChar";
-				if (type == typeof(Single))   return "ConvertToSingle";
-				if (type == typeof(Double))   return "ConvertToDouble";
-				if (type == typeof(Boolean))  return "ConvertToBoolean";
+				if (type == typeof(SByte))   return "ConvertToSByte";
+				if (type == typeof(Int16))   return "ConvertToInt16";
+				if (type == typeof(Int32))   return "ConvertToInt32";
+				if (type == typeof(Int64))   return "ConvertToInt64";
+				if (type == typeof(Byte))    return "ConvertToByte";
+				if (type == typeof(UInt16))  return "ConvertToUInt16";
+				if (type == typeof(UInt32))  return "ConvertToUInt32";
+				if (type == typeof(UInt64))  return "ConvertToUInt64";
+				if (type == typeof(Char))    return "ConvertToChar";
+				if (type == typeof(Single))  return "ConvertToSingle";
+				if (type == typeof(Double))  return "ConvertToDouble";
+				if (type == typeof(Boolean)) return "ConvertToBoolean";
 			}
 
 			if (type == typeof(String))      return "ConvertToString";

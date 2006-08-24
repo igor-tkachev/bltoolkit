@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlTypes;
 using System.IO;
-using System.Text;
 using System.Xml;
 
 using BLToolkit.Aspects;
@@ -15,7 +14,6 @@ using BLToolkit.Data;
 using BLToolkit.Data.DataProvider;
 using BLToolkit.Mapping;
 using BLToolkit.Reflection;
-using BLToolkit.Reflection.Extension;
 
 namespace BLToolkit.DataAccess
 {
