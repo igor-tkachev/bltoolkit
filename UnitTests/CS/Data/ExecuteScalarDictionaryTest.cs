@@ -28,11 +28,11 @@ namespace Data
 		[TestFixtureSetUp]
 		public void SetUp()
 		{
-			DataAccessor da = new DataAccessor();
+			SqlQuery da = new SqlQuery();
 
-			foreach (Person p in da.SelectAllSql(typeof(Person)))
+			foreach (Person p in da.SelectAll(typeof(Person)))
 				if (p.ID > 10 || p.FirstName == "Crazy")
-					da.DeleteByKeySql(typeof(Person), p.ID);
+					da.DeleteByKey(typeof(Person), p.ID);
 		}
 
 		[Test]

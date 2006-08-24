@@ -36,13 +36,13 @@ namespace HowTo.DataAccess
 		[Test]
 		public void Test1()
 		{
-			/*[a]*/DataAccessor da = new DataAccessor()/*[/a]*/;
+			/*[a]*/SqlQuery<Person> query = new SqlQuery<Person>()/*[/a]*/;
 
-			Person person = da.SelectByKeySql<Person>(_id);
+			Person person = query.SelectByKey(_id);
 
 			person.Gender = Gender.Other;
 
-			da./*[a]*/UpdateSql(person)/*[/a]*/;
+			query./*[a]*/Update(person)/*[/a]*/;
 		}
 
 		[Test]
@@ -50,13 +50,13 @@ namespace HowTo.DataAccess
 		{
 			using (DbManager db = new DbManager())
 			{
-				/*[a]*/DataAccessor da = new DataAccessor()/*[/a]*/;
+				/*[a]*/SqlQuery<Person> query = new SqlQuery<Person>()/*[/a]*/;
 
-				Person person = da.SelectByKeySql<Person>(db, _id);
+				Person person = query.SelectByKey(db, _id);
 
 				person.Gender = Gender.Other;
 
-				da./*[a]*/UpdateSql(db, person)/*[/a]*/;
+				query./*[a]*/Update(db, person)/*[/a]*/;
 			}
 		}
 

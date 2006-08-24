@@ -14,7 +14,7 @@ namespace HowTo.DataAccess
 		[Test]
 		public void Test1()
 		{
-			/*[a]*/DataAccessor da = new DataAccessor()/*[/a]*/;
+			/*[a]*/SprocQuery<Person> query = new SprocQuery<Person>()/*[/a]*/;
 
 			Person person = new Person();
 
@@ -22,7 +22,7 @@ namespace HowTo.DataAccess
 			person.LastName  = "Frog";
 			person.Gender    = Gender.Unknown;
 
-			da./*[a]*/Insert(person)/*[/a]*/;
+			query./*[a]*/Insert(person)/*[/a]*/;
 		}
 
 		[Test]
@@ -30,7 +30,7 @@ namespace HowTo.DataAccess
 		{
 			using (DbManager db = new DbManager())
 			{
-				/*[a]*/DataAccessor da = new DataAccessor()/*[/a]*/;
+				/*[a]*/SprocQuery<Person> query = new SprocQuery<Person>()/*[/a]*/;
 
 				Person person = new Person();
 
@@ -38,7 +38,7 @@ namespace HowTo.DataAccess
 				person.LastName  = "Frog";
 				person.Gender    = Gender.Other;
 
-				da./*[a]*/Insert(db, person)/*[/a]*/;
+				query./*[a]*/Insert(db, person)/*[/a]*/;
 			}
 		}
 	}

@@ -8,6 +8,7 @@ using System.Data.SqlTypes;
 using System.IO;
 using System.Text;
 using System.Xml;
+
 using BLToolkit.Aspects;
 using BLToolkit.Common;
 using BLToolkit.Data;
@@ -19,78 +20,17 @@ using BLToolkit.Reflection.Extension;
 namespace BLToolkit.DataAccess
 {
 	[DataAccessor]
-	public class DataAccessor
+	public /*abstract*/ class DataAccessor : DataAccessBase
 	{
 		#region Constructors
 
-		public DataAccessor()
+		public /*protected*/ DataAccessor()
 		{
 		}
 
-		public DataAccessor(DbManager dbManager)
+		public /*protected*/ DataAccessor(DbManager dbManager)
+			: base(dbManager)
 		{
-			SetDbManager(dbManager);
-
-			_extensions = dbManager.MappingSchema.Extensions;
-		}
-
-		#endregion
-
-		#region Public Members
-
-		[NoInterception]
-		public virtual DbManager GetDbManager()
-		{
-			return _dbManager != null? _dbManager: CreateDbManager();
-		}
-
-		[NoInterception]
-		protected virtual DbManager CreateDbManager()
-		{
-			return new DbManager();
-		}
-
-		[NoInterception]
-		public virtual void BeginTransaction()
-		{
-			if (_dbManager == null)
-				throw new InvalidOperationException("DbManager object is not provided.");
-
-			_dbManager.BeginTransaction();
-		}
-
-		[NoInterception]
-		public virtual void BeginTransaction(IsolationLevel il)
-		{
-			if (_dbManager == null)
-				throw new InvalidOperationException("DbManager object is not provided.");
-
-			_dbManager.BeginTransaction(il);
-		}
-
-		[NoInterception]
-		public virtual void CommitTransaction()
-		{
-			if (_dbManager == null)
-				throw new InvalidOperationException("DbManager object is not provided.");
-
-			_dbManager.CommitTransaction();
-		}
-
-		[NoInterception]
-		public virtual void RollbackTransaction()
-		{
-			if (_dbManager == null)
-				throw new InvalidOperationException("DbManager object is not provided.");
-
-			_dbManager.RollbackTransaction();
-		}
-
-		private ExtensionList _extensions;
-		public  ExtensionList  Extensions
-		{
-			get { return _extensions;  }
-			set { _extensions = value; }
 		}
 
 		#endregion
@@ -130,60 +70,6 @@ namespace BLToolkit.DataAccess
 		#endregion
 
 		#region Protected Members
-
-		private DbManager _dbManager;
-
-		protected internal void SetDbManager(DbManager dbManager)
-		{
-			_dbManager = dbManager;
-		}
-
-		[NoInterception]
-		protected virtual bool DisposeDbManager
-		{
-			get { return _dbManager == null; }
-		}
-
-		[NoInterception]
-		protected virtual string GetDefaultSpName(string typeName, string actionName)
-		{
-			return typeName == null?
-				actionName:
-				string.Format("{0}_{1}", typeName, actionName);
-		}
-
-		private static Hashtable _actionSproc = new Hashtable();
-
-		[NoInterception]
-		protected virtual string GetSpName(Type type, string actionName)
-		{
-			if (type == null)
-				return GetDefaultSpName(null, actionName);
-
-			string key       = type.FullName + "$" + actionName;
-			string sprocName = (string)_actionSproc[key];
-
-			if (sprocName == null)
-			{
-				object[] attrs = type.GetCustomAttributes(typeof(ActionSprocNameAttribute), true);
-
-				foreach (ActionSprocNameAttribute attr in attrs)
-				{
-					if (attr.ActionName == actionName)
-					{
-						sprocName = attr.ProcedureName;
-						break;
-					}
-				}
-
-				if (sprocName == null)
-					sprocName = GetDefaultSpName(GetTableName(type), actionName);
-
-				_actionSproc[key] = sprocName;
-			}
-
-			return sprocName;
-		}
 
 		[NoInterception]
 		protected virtual string GetSpParameterName(DbManager dbManager, string parameterName)
@@ -251,24 +137,6 @@ namespace BLToolkit.DataAccess
 			return retParams;
 		}
 
-		[NoInterception]
-		protected virtual string GetTableName(Type type)
-		{
-			TypeExtension typeExt = TypeExtension.GetTypeExtenstion(type, Extensions);
-
-			object value = typeExt.Attributes["TableName"].Value;
-
-			if (value != null)
-				return value.ToString();
-
-			object[] attrs = type.GetCustomAttributes(typeof(TableNameAttribute), true);
-
-			if (attrs.Length > 0)
-				return ((TableNameAttribute)attrs[0]).Name;
-
-			return type.Name;
-		}
-
 		protected void ExecuteDictionary(
 			DbManager             db,
 			IDictionary           dictionary,
@@ -276,8 +144,8 @@ namespace BLToolkit.DataAccess
 			Type                  keyType,
 			string                methodName)
 		{
-			bool           isIndex = TypeHelper.IsSameOrParent(typeof(CompoundValue), keyType);
-			MemberMapper[] mms     = GetKeyFieldList(db, objectType);
+			bool       isIndex = TypeHelper.IsSameOrParent(typeof(CompoundValue), keyType);
+			MemberMapper[] mms = new SqlQuery(Extensions).GetKeyFieldList(db, objectType);
 
 			if (mms.Length == 0)
 				throw new DataAccessException(string.Format(
@@ -313,8 +181,8 @@ namespace BLToolkit.DataAccess
 			NameOrIndexParameter  scalarField,
 			Type                  elementType)
 		{
-			bool isIndex = TypeHelper.IsSameOrParent(typeof(CompoundValue), keyType);
-			MemberMapper[] mms = GetKeyFieldList(db, objectType);
+			bool       isIndex = TypeHelper.IsSameOrParent(typeof(CompoundValue), keyType);
+			MemberMapper[] mms = new SqlQuery(Extensions).GetKeyFieldList(db, objectType);
 
 			if (mms.Length == 0)
 				throw new DataAccessException(string.Format(
@@ -345,828 +213,6 @@ namespace BLToolkit.DataAccess
 					elementType);
 			}
 		}
-
-		#endregion
-
-		#region CRUDL (SP)
-
-			#region SelectByKey
-
-		[NoInterception]
-		public virtual object SelectByKey(DbManager db, Type type, params object[] key)
-		{
-			return db
-				.SetSpCommand(GetSpName(type, "SelectByKey"), key)
-				.ExecuteObject(type);
-		}
-
-		[NoInterception]
-		public virtual object SelectByKey(Type type, params object[] key)
-		{
-			DbManager db = GetDbManager();
-
-			try
-			{
-				return SelectByKey(db, type, key);
-			}
-			finally
-			{
-				if (DisposeDbManager)
-					db.Dispose();
-			}
-		}
-
-#if FW2
-		[NoInterception]
-		public virtual T SelectByKey<T>(DbManager db, params object[] key)
-		{
-			return (T)SelectByKey(db, typeof(T), key);
-		}
-
-		[NoInterception]
-		public virtual T SelectByKey<T>(params object[] key)
-		{
-			return (T)SelectByKey(typeof(T), key);
-		}
-#endif
-
-			#endregion
-
-			#region SelectAll
-
-		[NoInterception]
-		public virtual ArrayList SelectAll(DbManager db, Type type)
-		{
-			return db
-				.SetSpCommand(GetSpName(type, "SelectAll"))
-				.ExecuteList(type);
-		}
-
-		[NoInterception]
-		public virtual ArrayList SelectAll(Type type)
-		{
-			DbManager db = GetDbManager();
-
-			try
-			{
-				return SelectAll(db, type);
-			}
-			finally
-			{
-				if (DisposeDbManager)
-					db.Dispose();
-			}
-		}
-
-#if FW2
-		[NoInterception]
-		public virtual List<T> SelectAll<T>(DbManager db)
-		{
-			return db
-				.SetSpCommand(GetSpName(typeof(T), "SelectAll"))
-				.ExecuteList<T>();
-		}
-
-		[NoInterception]
-		public virtual List<T> SelectAll<T>()
-		{
-			DbManager db = GetDbManager();
-
-			try
-			{
-				return SelectAll<T>(db);
-			}
-			finally
-			{
-				if (DisposeDbManager)
-					db.Dispose();
-			}
-		}
-#endif
-
-			#endregion
-
-			#region Insert
-
-		[NoInterception]
-		public virtual void Insert(DbManager db, object obj)
-		{
-			db
-			  .SetSpCommand(
-					GetSpName(obj.GetType(), "Insert"),
-					db.CreateParameters(obj))
-			  .ExecuteNonQuery();
-		}
-
-		[NoInterception]
-		public virtual void Insert(object obj)
-		{
-			DbManager db = GetDbManager();
-
-			try
-			{
-				Insert(db, obj);
-			}
-			finally
-			{
-				if (DisposeDbManager)
-					db.Dispose();
-			}
-		}
-
-			#endregion
-
-			#region Update
-
-		[NoInterception]
-		public virtual int Update(DbManager db, object obj)
-		{
-			return db
-				.SetSpCommand(
-					GetSpName(obj.GetType(), "Update"),
-					db.CreateParameters(obj))
-				.ExecuteNonQuery();
-		}
-
-		[NoInterception]
-		public virtual int Update(object obj)
-		{
-			DbManager db = GetDbManager();
-
-			try
-			{
-				return Update(db, obj);
-			}
-			finally
-			{
-				if (DisposeDbManager)
-					db.Dispose();
-			}
-		}
-
-			#endregion
-
-			#region DeleteByKey
-
-		[NoInterception]
-		public virtual int DeleteByKey(DbManager db, Type type, params object[] key)
-		{
-			return db
-				.SetSpCommand(GetSpName(type, "Delete"), key)
-				.ExecuteNonQuery();
-		}
-
-		[NoInterception]
-		public virtual int DeleteByKey(Type type, params object[] key)
-		{
-			DbManager db = GetDbManager();
-
-			try
-			{
-				return DeleteByKey(db, type, key);
-			}
-			finally
-			{
-				if (DisposeDbManager)
-					db.Dispose();
-			}
-		}
-
-#if FW2
-		[NoInterception]
-		public virtual int DeleteByKey<T>(DbManager db, params object[] key)
-		{
-			return DeleteByKey(db, typeof(T), key);
-		}
-
-		[NoInterception]
-		public virtual int DeleteByKey<T>(params object[] key)
-		{
-			return DeleteByKey(typeof(T), key);
-		}
-#endif
-
-			#endregion
-
-			#region Delete
-
-		[NoInterception]
-		public virtual int Delete(DbManager db, object obj)
-		{
-			return db
-				.SetSpCommand(
-					GetSpName(obj.GetType(), "Delete"), 
-					db.CreateParameters(obj))
-				.ExecuteNonQuery();
-		}
-
-		[NoInterception]
-		public virtual int Delete(object obj)
-		{
-			DbManager db = GetDbManager();
-
-			try
-			{
-				return Delete(db, obj);
-			}
-			finally
-			{
-				if (DisposeDbManager)
-					db.Dispose();
-			}
-		}
-
-			#endregion
-
-		#endregion
-
-		#region CRUDL (SQL)
-
-			#region Protected Members
-
-		protected MemberMapper[] GetFieldList(ObjectMapper om)
-		{
-			ArrayList list = new ArrayList();
-
-			foreach (MemberMapper mm in om)
-				list.Add(mm);
-
-			return (MemberMapper[])list.ToArray(typeof(MemberMapper));
-		}
-
-		protected MemberMapper[] GetNonKeyFieldList(ObjectMapper om)
-		{
-			TypeExtension typeExt = TypeExtension.GetTypeExtenstion(om.TypeAccessor.OriginalType, Extensions);
-			ArrayList     list    = new ArrayList();
-
-			foreach (MemberMapper mm in om)
-			{
-				MemberAccessor ma = mm.MemberAccessor;
-
-				if (typeExt[ma.Name]["PrimaryKey"].Value          == null &&
-					ma.GetAttributes(typeof(PrimaryKeyAttribute)) == null)
-				{
-					list.Add(mm);
-				}
-			}
-
-			return (MemberMapper[])list.ToArray(typeof(MemberMapper));
-		}
-
-		class MemberOrder
-		{
-			public MemberOrder(MemberMapper memberMapper, int order)
-			{
-				MemberMapper = memberMapper;
-				Order        = order;
-			}
-
-			public MemberMapper MemberMapper;
-			public int          Order;
-		}
-
-		class PrimaryKeyComparer : IComparer
-		{
-			public int Compare(object x, object y)
-			{
-				return ((MemberOrder)x).Order - ((MemberOrder)y).Order;
-			}
-		}
-
-		private static PrimaryKeyComparer _primaryKeyComparer = new PrimaryKeyComparer();
-		private static Hashtable          _keyList            = new Hashtable();
-
-		protected MemberMapper[] GetKeyFieldList(DbManager db, Type type)
-		{
-			string         key    = type.FullName + "$" + db.DataProvider.Name;
-			MemberMapper[] mmList = (MemberMapper[])_keyList[key];
-
-			if (mmList == null)
-			{
-				TypeExtension typeExt = TypeExtension.GetTypeExtenstion(type, Extensions);
-				ArrayList     list    = new ArrayList();
-
-				foreach (MemberMapper mm in db.MappingSchema.GetObjectMapper(type))
-				{
-					MemberAccessor ma = mm.MemberAccessor;
-
-					if (TypeHelper.IsScalar(ma.Type))
-					{
-						object value = typeExt[ma.Name]["PrimaryKey"].Value;
-
-						if (value != null)
-						{
-							list.Add(new MemberOrder(mm, (int)TypeExtension.ChangeType(value, typeof(int))));
-						}
-						else
-						{
-							object[] attrs = ma.GetAttributes(typeof(PrimaryKeyAttribute));
-
-							if (attrs != null)
-								list.Add(new MemberOrder(mm, ((PrimaryKeyAttribute)attrs[0]).Order));
-						}
-					}
-				}
-
-				list.Sort(_primaryKeyComparer);
-
-				_keyList[key] = mmList = new MemberMapper[list.Count];
-
-				for (int i = 0; i < list.Count; i++)
-					mmList[i] = ((MemberOrder)list[i]).MemberMapper;
-			}
-
-			return mmList;
-		}
-
-		protected void AddWherePK(DbManager db, SqlQueryInfo query, StringBuilder sb)
-		{
-			sb.Append("WHERE\n");
-
-			MemberMapper[] memberMappers = GetKeyFieldList(db, query.ObjectType);
-
-			foreach (MemberMapper mm in memberMappers)
-			{
-				SqlQueryParameterInfo p = query.AddParameter(
-					db.DataProvider.Convert(mm.Name + "_W", ConvertType.NameToQueryParameter).ToString(),
-					mm.Name);
-
-				sb.AppendFormat("\t{0} = {1} AND\n",
-					db.DataProvider.Convert(p.FieldName, ConvertType.NameToQueryField),
-					p.ParameterName);
-			}
-
-			sb.Remove(sb.Length - 5, 5);
-		}
-
-		protected SqlQueryInfo CreateSelectByKeySqlText(DbManager db, Type type)
-		{
-			ObjectMapper  om    = db.MappingSchema.GetObjectMapper(type);
-			StringBuilder sb    = new StringBuilder();
-			SqlQueryInfo  query = new SqlQueryInfo(om);
-
-			sb.Append("SELECT\n");
-
-			foreach (MemberMapper mm in GetFieldList(om))
-				sb.AppendFormat("\t{0},\n",
-					db.DataProvider.Convert(mm.Name, ConvertType.NameToQueryField));
-			
-			sb.Remove(sb.Length - 2, 1);
-
-			sb.AppendFormat("FROM\n\t{0}\n",
-				db.DataProvider.Convert(GetTableName(type), ConvertType.NameToQueryTable));
-
-			AddWherePK(db, query, sb);
-
-			query.QueryText = sb.ToString();
-
-			return query;
-		}
-
-		protected SqlQueryInfo CreateSelectAllSqlText(DbManager db, Type type)
-		{
-			ObjectMapper  om    = db.MappingSchema.GetObjectMapper(type);
-			StringBuilder sb    = new StringBuilder();
-			SqlQueryInfo  query = new SqlQueryInfo(om);
-
-			sb.Append("SELECT\n");
-
-			foreach (MemberMapper mm in GetFieldList(om))
-				sb.AppendFormat("\t{0},\n",
-					db.DataProvider.Convert(mm.Name, ConvertType.NameToQueryField));
-
-			sb.Remove(sb.Length - 2, 1);
-
-			sb.AppendFormat("FROM\n\t{0}",
-				db.DataProvider.Convert(GetTableName(type), ConvertType.NameToQueryTable));
-
-			query.QueryText = sb.ToString();
-
-			return query;
-		}
-
-		protected SqlQueryInfo CreateInsertSqlText(DbManager db, Type type)
-		{
-			TypeExtension typeExt = TypeExtension.GetTypeExtenstion(type, Extensions);
-			ObjectMapper  om      = db.MappingSchema.GetObjectMapper(type);
-			ArrayList     list    = new ArrayList();
-			StringBuilder sb      = new StringBuilder();
-			SqlQueryInfo  query   = new SqlQueryInfo(om);
-
-			sb.AppendFormat("INSERT INTO {0} (\n",
-				db.DataProvider.Convert(GetTableName(type), ConvertType.NameToQueryTable));
-
-			foreach (MemberMapper mm in GetFieldList(om))
-			{
-				object value = typeExt[mm.MemberAccessor.Name]["NonUpdatable"].Value;
-
-				if ((value != null && (bool)TypeExtension.ChangeType(value, typeof(bool)) == false) ||
-					(value == null && mm.MemberAccessor.GetAttributes(typeof(NonUpdatableAttribute)) == null))
-				{
-					sb.AppendFormat("\t{0},\n",
-						db.DataProvider.Convert(mm.Name, ConvertType.NameToQueryField));
-					list.Add(mm);
-				}
-			}
-
-			sb.Remove(sb.Length - 2, 1);
-
-			sb.Append(") VALUES (\n");
-
-			foreach (MemberMapper mm in list)
-			{
-				SqlQueryParameterInfo p = query.AddParameter(
-					db.DataProvider.Convert(mm.Name, ConvertType.NameToQueryParameter).ToString(),
-					mm.Name);
-
-				sb.AppendFormat("\t{0},\n", p.ParameterName);
-			}
-
-			sb.Remove(sb.Length - 2, 1);
-
-			sb.Append(")");
-
-			query.QueryText = sb.ToString();
-
-			return query;
-		}
-
-		protected SqlQueryInfo CreateUpdateSqlText(DbManager db, Type type)
-		{
-			TypeExtension typeExt = TypeExtension.GetTypeExtenstion(type, Extensions);
-			ObjectMapper  om      = db.MappingSchema.GetObjectMapper(type);
-			StringBuilder sb      = new StringBuilder();
-			SqlQueryInfo  query   = new SqlQueryInfo(om);
-
-			sb.AppendFormat("UPDATE\n\t{0}\nSET\n",
-				db.DataProvider.Convert(GetTableName(type), ConvertType.NameToQueryTable));
-
-			foreach (MemberMapper mm in GetFieldList(om))
-			{
-				object value = typeExt[mm.MemberAccessor.Name]["NonUpdatable"].Value;
-
-				if ((value != null && (bool)TypeExtension.ChangeType(value, typeof(bool)) == false) ||
-					(value == null && mm.MemberAccessor.GetAttributes(typeof(NonUpdatableAttribute)) == null))
-				{
-					SqlQueryParameterInfo p = query.AddParameter(
-						db.DataProvider.Convert(mm.Name, ConvertType.NameToQueryParameter).ToString(),
-						mm.Name);
-
-					sb.AppendFormat("\t{0} = {1},\n",
-						db.DataProvider.Convert(p.FieldName, ConvertType.NameToQueryField),
-						p.ParameterName);
-				}
-			}
-
-			sb.Remove(sb.Length - 2, 1);
-
-			AddWherePK(db, query, sb);
-
-			query.QueryText = sb.ToString();
-
-			return query;
-		}
-
-		protected SqlQueryInfo CreateDeleteSqlText(DbManager db, Type type)
-		{
-			ObjectMapper  om    = db.MappingSchema.GetObjectMapper(type);
-			StringBuilder sb    = new StringBuilder();
-			SqlQueryInfo  query = new SqlQueryInfo(om);
-
-			sb.AppendFormat("DELETE FROM\n\t{0}\n",
-				db.DataProvider.Convert(GetTableName(type), ConvertType.NameToQueryTable));
-
-			AddWherePK(db, query, sb);
-
-			query.QueryText = sb.ToString();
-
-			return query;
-		}
-
-		[NoInterception]
-		protected virtual SqlQueryInfo CreateSqlText(DbManager db, Type type, string actionName)
-		{
-			switch (actionName)
-			{
-				case "SelectByKey": return CreateSelectByKeySqlText(db, type);
-				case "SelectAll":   return CreateSelectAllSqlText  (db, type);
-				case "Insert":      return CreateInsertSqlText     (db, type);
-				case "Update":      return CreateUpdateSqlText     (db, type);
-				case "Delete":      return CreateDeleteSqlText     (db, type);
-				default:
-					throw new DataAccessException(
-						string.Format("Unknown action '{0}'.", actionName));
-			}
-		}
-
-		private static Hashtable _actionSqlQueryInfo = new Hashtable();
-
-		[NoInterception]
-		public virtual SqlQueryInfo GetSqlQueryInfo(DbManager db, Type type, string actionName)
-		{
-			string       key   = type.FullName + "$" + actionName + "$" + db.DataProvider.Name;
-			SqlQueryInfo query = (SqlQueryInfo)_actionSqlQueryInfo[key];
-
-			if (query == null)
-			{
-				query = CreateSqlText(db, type, actionName);
-				_actionSqlQueryInfo[key] = query;
-			}
-
-			return query;
-		}
-
-			#endregion
-
-			#region SelectByKey
-
-		[NoInterception]
-		public virtual object SelectByKeySql(DbManager db, Type type, params object[] keys)
-		{
-			SqlQueryInfo query = GetSqlQueryInfo(db, type, "SelectByKey");
-
-			return db
-				.SetCommand(query.QueryText, query.GetParameters(db, keys))
-				.ExecuteObject(type);
-		}
-
-		[NoInterception]
-		public virtual object SelectByKeySql(Type type, params object[] keys)
-		{
-			DbManager db = GetDbManager();
-
-			try
-			{
-				return SelectByKeySql(db, type, keys);
-			}
-			finally
-			{
-				if (DisposeDbManager)
-					db.Dispose();
-			}
-		}
-
-#if FW2
-		[NoInterception]
-		public virtual T SelectByKeySql<T>(DbManager db, params object[] keys)
-		{
-			return (T)SelectByKeySql(db, typeof(T), keys);
-		}
-
-		[NoInterception]
-		public virtual T SelectByKeySql<T>(params object[] keys)
-		{
-			return (T)SelectByKeySql(typeof(T), keys);
-		}
-#endif
-
-			#endregion
-
-			#region SelectAll
-
-		[NoInterception]
-		public virtual ArrayList SelectAllSql(DbManager db, Type type)
-		{
-			SqlQueryInfo query = GetSqlQueryInfo(db, type, "SelectAll");
-
-			return db
-				.SetCommand(query.QueryText)
-				.ExecuteList(type);
-		}
-
-		[NoInterception]
-		public virtual IList SelectAllSql(DbManager db, IList list, Type type)
-		{
-			SqlQueryInfo query = GetSqlQueryInfo(db, type, "SelectAll");
-
-			return db
-				.SetCommand(query.QueryText)
-				.ExecuteList(list, type);
-		}
-
-		[NoInterception]
-		public virtual ArrayList SelectAllSql(Type type)
-		{
-			DbManager db = GetDbManager();
-
-			try
-			{
-				return SelectAllSql(db, type);
-			}
-			finally
-			{
-				if (DisposeDbManager)
-					db.Dispose();
-			}
-		}
-
-		[NoInterception]
-		public virtual IList SelectAllSql(IList list, Type type)
-		{
-			DbManager db = GetDbManager();
-
-			try
-			{
-				return SelectAllSql(db, list, type);
-			}
-			finally
-			{
-				if (DisposeDbManager)
-					db.Dispose();
-			}
-		}
-
-#if FW2
-		[NoInterception]
-		public virtual List<T> SelectAllSql<T>(DbManager db)
-		{
-			SqlQueryInfo query = GetSqlQueryInfo(db, typeof(T), "SelectAll");
-
-			return db
-				.SetCommand(query.QueryText)
-				.ExecuteList<T>();
-		}
-
-		[NoInterception]
-		public virtual L SelectAllSql<L, T>(DbManager db, L list)
-			where L : IList
-		{
-			SqlQueryInfo query = GetSqlQueryInfo(db, typeof(T), "SelectAll");
-
-			return db
-				.SetCommand(query.QueryText)
-				.ExecuteList<L,T>(list);
-		}
-
-		[NoInterception]
-		public virtual List<T> SelectAllSql<T>()
-		{
-			DbManager db = GetDbManager();
-
-			try
-			{
-				return SelectAllSql<T>(db);
-			}
-			finally
-			{
-				if (DisposeDbManager)
-					db.Dispose();
-			}
-		}
-
-		[NoInterception]
-		public virtual L SelectAllSql<L, T>(L list)
-			where L : IList
-		{
-			DbManager db = GetDbManager();
-
-			try
-			{
-				return SelectAllSql<L,T>(db, list);
-			}
-			finally
-			{
-				if (DisposeDbManager)
-					db.Dispose();
-			}
-		}
-#endif
-
-			#endregion
-
-			#region Insert
-
-		[NoInterception]
-		public virtual void InsertSql(DbManager db, object obj)
-		{
-			SqlQueryInfo query = GetSqlQueryInfo(db, obj.GetType(), "Insert");
-
-			db
-				.SetCommand(query.QueryText, query.GetParameters(db, obj))
-				.ExecuteNonQuery();
-		}
-
-		[NoInterception]
-		public virtual void InsertSql(object obj)
-		{
-			DbManager db = GetDbManager();
-
-			try
-			{
-				InsertSql(db, obj);
-			}
-			finally
-			{
-				if (DisposeDbManager)
-					db.Dispose();
-			}
-		}
-
-			#endregion
-
-			#region Update
-
-		[NoInterception]
-		public virtual int UpdateSql(DbManager db, object obj)
-		{
-			SqlQueryInfo query = GetSqlQueryInfo(db, obj.GetType(), "Update");
-
-			return db
-				.SetCommand(query.QueryText, query.GetParameters(db, obj))
-				.ExecuteNonQuery();
-		}
-
-		[NoInterception]
-		public virtual int UpdateSql(object obj)
-		{
-			DbManager db = GetDbManager();
-
-			try
-			{
-				return UpdateSql(db, obj);
-			}
-			finally
-			{
-				if (DisposeDbManager)
-					db.Dispose();
-			}
-		}
-
-			#endregion
-
-			#region DeleteByKey
-
-		[NoInterception]
-		public virtual int DeleteByKeySql(DbManager db, Type type, params object[] key)
-		{
-			SqlQueryInfo query = GetSqlQueryInfo(db, type, "Delete");
-
-			return db
-				.SetCommand(query.QueryText, query.GetParameters(db, key))
-				.ExecuteNonQuery();
-		}
-
-		[NoInterception]
-		public virtual int DeleteByKeySql(Type type, params object[] key)
-		{
-			DbManager db = GetDbManager();
-
-			try
-			{
-				return DeleteByKeySql(db, type, key);
-			}
-			finally
-			{
-				if (DisposeDbManager)
-					db.Dispose();
-			}
-		}
-
-#if FW2
-		[NoInterception]
-		public virtual int DeleteByKeySql<T>(DbManager db, params object[] key)
-		{
-			return DeleteByKeySql(db, typeof(T), key);
-		}
-
-		[NoInterception]
-		public virtual int DeleteByKeySql<T>(params object[] key)
-		{
-			return DeleteByKeySql(typeof(T), key);
-		}
-#endif
-
-			#endregion
-
-			#region Delete
-
-		[NoInterception]
-		public virtual int DeleteSql(DbManager db, object obj)
-		{
-			SqlQueryInfo query = GetSqlQueryInfo(db, obj.GetType(), "Delete");
-
-			return db
-				.SetCommand(query.QueryText, query.GetParameters(db, obj))
-				.ExecuteNonQuery();
-		}
-
-		[NoInterception]
-		public virtual int DeleteSql(object obj)
-		{
-			DbManager db = GetDbManager();
-
-			try
-			{
-				return DeleteSql(db, obj);
-			}
-			finally
-			{
-				if (DisposeDbManager)
-					db.Dispose();
-			}
-		}
-
-			#endregion
 
 		#endregion
 
@@ -1477,6 +523,320 @@ namespace BLToolkit.DataAccess
 
 		#endregion
 		
+		#endregion
+
+		#region Obsolete
+
+		#region CRUDL (SP)
+
+			#region SelectByKey
+
+		[NoInterception, Obsolete("Use SprocQuery.SelectByKey instead.")]
+		public virtual object SelectByKey(DbManager db, Type type, params object[] key)
+		{
+			return new SprocQuery(DbManager).SelectByKey(db, type, key);
+		}
+
+		[NoInterception, Obsolete("Use SprocQuery.SelectByKey instead.")]
+		public virtual object SelectByKey(Type type, params object[] key)
+		{
+			return new SprocQuery(DbManager).SelectByKey(type, key);
+		}
+
+#if FW2
+		[NoInterception, Obsolete("Use SprocQuery<T>.SelectByKey instead.")]
+		public virtual T SelectByKey<T>(DbManager db, params object[] key)
+		{
+			return new SprocQuery<T>(DbManager).SelectByKey(db, key);
+		}
+
+		[NoInterception, Obsolete("Use SprocQuery<T>.SelectByKey instead.")]
+		public virtual T SelectByKey<T>(params object[] key)
+		{
+			return new SprocQuery<T>(DbManager).SelectByKey(key);
+		}
+#endif
+
+			#endregion
+
+			#region SelectAll
+
+		[NoInterception, Obsolete("Use SprocQuery.SelectAll instead.")]
+		public virtual ArrayList SelectAll(DbManager db, Type type)
+		{
+			return new SprocQuery(DbManager).SelectAll(db, type);
+		}
+
+		[NoInterception, Obsolete("Use SprocQuery.SelectAll instead.")]
+		public virtual ArrayList SelectAll(Type type)
+		{
+			return new SprocQuery(DbManager).SelectAll(type);
+		}
+
+#if FW2
+		[NoInterception, Obsolete("Use SprocQuery<T>.SelectAll instead.")]
+		public virtual List<T> SelectAll<T>(DbManager db)
+		{
+			return new SprocQuery<T>(DbManager).SelectAll(db);
+		}
+
+		[NoInterception, Obsolete("Use SprocQuery<T>.SelectAll instead.")]
+		public virtual List<T> SelectAll<T>()
+		{
+			return new SprocQuery<T>(DbManager).SelectAll();
+		}
+#endif
+
+			#endregion
+
+			#region Insert
+
+		[NoInterception, Obsolete("Use SprocQuery.Insert instead.")]
+		public virtual void Insert(DbManager db, object obj)
+		{
+			new SprocQuery(DbManager).Insert(db, obj);
+		}
+
+		[NoInterception, Obsolete("Use SprocQuery.Insert instead.")]
+		public virtual void Insert(object obj)
+		{
+			new SprocQuery(DbManager).Insert(obj);
+		}
+
+			#endregion
+
+			#region Update
+
+		[NoInterception, Obsolete("Use SprocQuery.Update instead.")]
+		public virtual int Update(DbManager db, object obj)
+		{
+			return new SprocQuery(DbManager).Update(db, obj);
+		}
+
+		[NoInterception, Obsolete("Use SprocQuery.Update instead.")]
+		public virtual int Update(object obj)
+		{
+			return new SprocQuery(DbManager).Update(obj);
+		}
+
+			#endregion
+
+			#region DeleteByKey
+
+		[NoInterception, Obsolete("Use SprocQuery.DeleteByKey instead.")]
+		public virtual int DeleteByKey(DbManager db, Type type, params object[] key)
+		{
+			return new SprocQuery(DbManager).DeleteByKey(db, type, key);
+		}
+
+		[NoInterception, Obsolete("Use SprocQuery.DeleteByKey instead.")]
+		public virtual int DeleteByKey(Type type, params object[] key)
+		{
+			return new SprocQuery(DbManager).DeleteByKey(type, key);
+		}
+
+#if FW2
+		[NoInterception, Obsolete("Use SprocQuery<T>.DeleteByKey instead.")]
+		public virtual int DeleteByKey<T>(DbManager db, params object[] key)
+		{
+			return new SprocQuery<T>(DbManager).DeleteByKey(db, key);
+		}
+
+		[NoInterception, Obsolete("Use SprocQuery<T>.DeleteByKey instead.")]
+		public virtual int DeleteByKey<T>(params object[] key)
+		{
+			return new SprocQuery<T>(DbManager).DeleteByKey(key);
+		}
+#endif
+
+			#endregion
+
+			#region Delete
+
+		[NoInterception, Obsolete("Use SprocQuery.Delete instead.")]
+		public virtual int Delete(DbManager db, object obj)
+		{
+			return new SprocQuery(DbManager).Delete(db, obj);
+		}
+
+		[NoInterception, Obsolete("Use SprocQuery.Delete instead.")]
+		public virtual int Delete(object obj)
+		{
+			return new SprocQuery(DbManager).Delete(obj);
+		}
+
+			#endregion
+
+		#endregion
+
+		#region CRUDL (SQL)
+
+			#region SelectByKey
+
+		[NoInterception, Obsolete("Use SqlQuery.SelectByKey instead.")]
+		public virtual object SelectByKeySql(DbManager db, Type type, params object[] keys)
+		{
+			return new SqlQuery(DbManager).SelectByKey(db, type, keys);
+		}
+
+		[NoInterception, Obsolete("Use SqlQuery.SelectByKey instead.")]
+		public virtual object SelectByKeySql(Type type, params object[] keys)
+		{
+			return new SqlQuery(DbManager).SelectByKey(type, keys);
+		}
+
+#if FW2
+		[NoInterception, Obsolete("Use SqlQuery<T>.SelectByKey instead.")]
+		public virtual T SelectByKeySql<T>(DbManager db, params object[] keys)
+		{
+			return new SqlQuery<T>(DbManager).SelectByKey(db, keys);
+		}
+
+		[NoInterception, Obsolete("Use SqlQuery<T>.SelectByKey instead.")]
+		public virtual T SelectByKeySql<T>(params object[] keys)
+		{
+			return new SqlQuery<T>(DbManager).SelectByKey(keys);
+		}
+#endif
+
+			#endregion
+
+			#region SelectAll
+
+		[NoInterception, Obsolete("Use SqlQuery.SelectAll instead.")]
+		public virtual ArrayList SelectAllSql(DbManager db, Type type)
+		{
+			return new SqlQuery(DbManager).SelectAll(db, type);
+		}
+
+		[NoInterception, Obsolete("Use SqlQuery.SelectAll instead.")]
+		public virtual IList SelectAllSql(DbManager db, IList list, Type type)
+		{
+			return new SqlQuery(DbManager).SelectAll(db, list, type);
+		}
+
+		[NoInterception, Obsolete("Use SqlQuery.SelectAll instead.")]
+		public virtual ArrayList SelectAllSql(Type type)
+		{
+			return new SqlQuery(DbManager).SelectAll(type);
+		}
+
+		[NoInterception, Obsolete("Use SqlQuery.SelectAll instead.")]
+		public virtual IList SelectAllSql(IList list, Type type)
+		{
+			return new SqlQuery(DbManager).SelectAll(list, type);
+		}
+
+#if FW2
+		[NoInterception, Obsolete("Use SqlQuery<T>.SelectAll instead.")]
+		public virtual List<T> SelectAllSql<T>(DbManager db)
+		{
+			return new SqlQuery<T>(DbManager).SelectAll(db);
+		}
+
+		[NoInterception, Obsolete("Use SqlQuery<T>.SelectAll instead.")]
+		public virtual L SelectAllSql<L, T>(DbManager db, L list)
+			where L : IList<T>
+		{
+			return new SqlQuery<T>(DbManager).SelectAll(db, list);
+		}
+
+		[NoInterception, Obsolete("Use SqlQuery<T>.SelectAll instead.")]
+		public virtual List<T> SelectAllSql<T>()
+		{
+			return new SqlQuery<T>(DbManager).SelectAll();
+		}
+
+		[NoInterception, Obsolete("Use SqlQuery<T>.SelectAll instead.")]
+		public virtual L SelectAllSql<L, T>(L list)
+			where L : IList<T>
+		{
+			return new SqlQuery<T>(DbManager).SelectAll(list);
+		}
+#endif
+
+			#endregion
+
+			#region Insert
+
+		[NoInterception, Obsolete("Use SqlQuery.Insert instead.")]
+		public virtual void InsertSql(DbManager db, object obj)
+		{
+			new SqlQuery(DbManager).Insert(db, obj);
+		}
+
+		[NoInterception, Obsolete("Use SqlQuery.Insert instead.")]
+		public virtual void InsertSql(object obj)
+		{
+			new SqlQuery(DbManager).Insert(obj);
+		}
+
+			#endregion
+
+			#region Update
+
+		[NoInterception, Obsolete("Use SqlQuery.Update instead.")]
+		public virtual int UpdateSql(DbManager db, object obj)
+		{
+			return new SprocQuery(DbManager).Update(db, obj);
+		}
+
+		[NoInterception, Obsolete("Use SqlQuery.Update instead.")]
+		public virtual int UpdateSql(object obj)
+		{
+			return new SprocQuery(DbManager).Update(obj);
+		}
+
+			#endregion
+
+			#region DeleteByKey
+
+		[NoInterception, Obsolete("Use SqlQuery.DeleteByKey instead.")]
+		public virtual int DeleteByKeySql(DbManager db, Type type, params object[] key)
+		{
+			return new SprocQuery(DbManager).DeleteByKey(db, type, key);
+		}
+
+		[NoInterception, Obsolete("Use SqlQuery.DeleteByKey instead.")]
+		public virtual int DeleteByKeySql(Type type, params object[] key)
+		{
+			return new SprocQuery(DbManager).DeleteByKey(type, key);
+		}
+
+#if FW2
+		[NoInterception, Obsolete("Use SqlQuery<T>.DeleteByKey instead.")]
+		public virtual int DeleteByKeySql<T>(DbManager db, params object[] key)
+		{
+			return DeleteByKeySql(db, typeof(T), key);
+		}
+
+		[NoInterception, Obsolete("Use SqlQuery<T>.DeleteByKey instead.")]
+		public virtual int DeleteByKeySql<T>(params object[] key)
+		{
+			return DeleteByKeySql(typeof(T), key);
+		}
+#endif
+
+			#endregion
+
+			#region Delete
+
+		[NoInterception, Obsolete("Use SqlQuery.Delete instead.")]
+		public virtual int DeleteSql(DbManager db, object obj)
+		{
+			return new SprocQuery(DbManager).Delete(db, obj);
+		}
+
+		[NoInterception, Obsolete("Use SqlQuery.Delete instead.")]
+		public virtual int DeleteSql(object obj)
+		{
+			return new SprocQuery(DbManager).Delete(obj);
+		}
+
+			#endregion
+
+		#endregion
+
 		#endregion
 	}
 }

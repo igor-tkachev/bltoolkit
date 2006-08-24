@@ -97,6 +97,7 @@
     <Compile Include="ComponentModel\TypeTypeConverter.cs" />
     <Compile Include="DataAccess\ActionNameAttribute.cs" />
     <Compile Include="DataAccess\ActionSprocNameAttribute.cs" />
+    <Compile Include="DataAccess\DataAccessBase.cs" />
     <Compile Include="DataAccess\Direction.cs" />
     <Compile Include="DataAccess\DestinationAttribute.cs" />
     <Compile Include="DataAccess\NoMapAttribute.cs" />
@@ -115,9 +116,14 @@
     <Compile Include="DataAccess\DataAccessException.cs" />
     <Compile Include="DataAccess\ScalarFieldNameAttribute.cs" />
     <Compile Include="DataAccess\SprocNameAttribute.cs" />
+    <Compile Include="DataAccess\SprocQuery.cs" />
+    <Compile Include="DataAccess\SprocQueryT.cs" />
+    <Compile Include="DataAccess\SqlQuery.cs" />
     <Compile Include="DataAccess\SqlQueryAttribute.cs" />
+    <Compile Include="DataAccess\SqlQueryBase.cs" />
     <Compile Include="DataAccess\SqlQueryInfo.cs" />
     <Compile Include="DataAccess\SqlQueryParameterInfo.cs" />
+    <Compile Include="DataAccess\SqlQueryT.cs" />
     <Compile Include="DataAccess\TableNameAttribute.cs" />
     <Compile Include="Common\NameOrIndexParameter.cs" />
     <Compile Include="Data\ScalarSourceType.cs" />

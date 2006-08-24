@@ -23,6 +23,17 @@ namespace HowTo.DataAccess
 			[/*[a]*/SqlQuery(/*[/a]*/"SELECT Top /*[a]*/{0}/*[/a]*/ * FROM Person ORDER BY PersonID"/*[a]*/)]/*[/a]*/
 			[/*[a]*/Index("ID")/*[/a]*/]
 			public /*[a]*/abstract/*[/a]*/ Dictionary<int,Person> /*[a]*/SelectTop/*[/a]*/([/*[a]*/Format(0)/*[/a]*/] int top);
+
+			private SprocQuery<Person> _query;
+			public  SprocQuery<Person>  Query
+			{
+				get
+				{
+					if (_query == null)
+						_query = new SprocQuery<Person>(DbManager);
+					return _query;
+				}
+			}
 		}
 
 		[Test]
@@ -60,7 +71,7 @@ namespace HowTo.DataAccess
 
 				// Delete.
 				//
-				pa.Delete(person);
+				pa.Query.Delete(person);
 
 				pa.CommitTransaction();
 			}

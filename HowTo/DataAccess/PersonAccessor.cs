@@ -54,6 +54,8 @@ namespace HowTo.DataAccess
 			public abstract Person  SelectByName(DbManager db, string firstName, string lastName);
 
 			new public abstract int Insert      (DbManager db, Person person);
+
+			public readonly SprocQuery<Person> Query = new SprocQuery<Person>();
 		}
 
 		[Test]
@@ -82,7 +84,7 @@ namespace HowTo.DataAccess
 			//
 			person.Gender = Gender.Other;
 
-			pa.Update(person);
+			pa.Query.Update(person);
 
 			person = pa.SelectByID(person.ID);
 
@@ -91,7 +93,7 @@ namespace HowTo.DataAccess
 
 			// Delete.
 			//
-			pa.Delete(person);
+			pa.Query.Delete(person);
 
 			person = pa.SelectByID(person.ID);
 
@@ -99,7 +101,7 @@ namespace HowTo.DataAccess
 
 			// Get All.
 			//
-			List<Person> list = pa.SelectAll();
+			List<Person> list = pa.Query.SelectAll();
 
 			foreach (Person p in list)
 				TypeAccessor.WriteConsole(p);
@@ -133,7 +135,7 @@ namespace HowTo.DataAccess
 				//
 				person.Gender = Gender.Other;
 
-				pa.Update(db, person);
+				pa.Query.Update(db, person);
 
 				person = pa.SelectByID(db, person.ID);
 
@@ -142,7 +144,7 @@ namespace HowTo.DataAccess
 
 				// Delete.
 				//
-				pa.Delete(db, person);
+				pa.Query.Delete(db, person);
 
 				person = pa.SelectByID(db, person.ID);
 
@@ -152,7 +154,7 @@ namespace HowTo.DataAccess
 
 				// Get All.
 				//
-				List<Person> list = pa.SelectAll(db);
+				List<Person> list = pa.Query.SelectAll(db);
 
 				foreach (Person p in list)
 					TypeAccessor.WriteConsole(p);

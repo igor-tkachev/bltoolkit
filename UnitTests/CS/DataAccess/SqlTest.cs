@@ -30,9 +30,9 @@ namespace DataAccess
 		[Test]
 		public void Test()
 		{
-			DataAccessor da = new DataAccessor();
+			SqlQuery da = new SqlQuery();
 
-			Person p = (Person)da.SelectByKeySql(typeof(Person), 1);
+			Person p = (Person)da.SelectByKey(typeof(Person), 1);
 
 			Assert.AreEqual("Pupkin", p.Name.LastName);
 		}

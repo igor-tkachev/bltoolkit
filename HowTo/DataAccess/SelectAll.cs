@@ -15,9 +15,9 @@ namespace HowTo.DataAccess
 		[Test]
 		public void Test1()
 		{
-			/*[a]*/DataAccessor da = new DataAccessor()/*[/a]*/;
+			/*[a]*/SprocQuery<Person> query = new SprocQuery<Person>()/*[/a]*/;
 
-			List<Person> list = da./*[a]*/SelectAll<Person>()/*[/a]*/;
+			List<Person> list = query./*[a]*/SelectAll()/*[/a]*/;
 		}
 
 		[Test]
@@ -25,18 +25,10 @@ namespace HowTo.DataAccess
 		{
 			using (DbManager db = new DbManager())
 			{
-				/*[a]*/DataAccessor da = new DataAccessor()/*[/a]*/;
+				/*[a]*/SprocQuery<Person> query = new SprocQuery<Person>()/*[/a]*/;
 
-				List<Person> list = da./*[a]*/SelectAll<Person>(db)/*[/a]*/;
+				List<Person> list = query./*[a]*/SelectAll(db)/*[/a]*/;
 			}
-		}
-
-		[Test]
-		public void Test3()
-		{
-			/*[a]*/DataAccessor<Person> da = new DataAccessor<Person>()/*[/a]*/;
-
-			List<Person> list = da./*[a]*/SelectAll()/*[/a]*/;
 		}
 	}
 }

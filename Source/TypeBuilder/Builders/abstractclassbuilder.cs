@@ -34,14 +34,58 @@ namespace BLToolkit.TypeBuilder.Builders
 			return Build();
 		}
 
+#if FW2
+		internal static string GetTypeFullName(Type type)
+		{
+			string name = type.FullName;
+
+			if (type.IsGenericType)
+			{
+				name = name.Split('`')[0];
+
+				foreach (Type t in type.GetGenericArguments())
+					name += "_" + GetTypeFullName(t).Replace('+', '_').Replace('.', '_');
+			}
+
+			return name;
+		}
+
+		internal static string GetTypeShortName(Type type)
+		{
+			string name = type.Name;
+
+			if (type.IsGenericType)
+			{
+				name = name.Split('`')[0];
+
+				foreach (Type t in type.GetGenericArguments())
+					name += "_" + GetTypeFullName(t).Replace('+', '_').Replace('.', '_');
+			}
+
+			return name;
+		}
+#endif
+
 		public static string GetTypeName(Type type)
 		{
-			string typeName = type.FullName.Replace('+', '.');
+			string typeFullName  = type.FullName;
+			string typeShortName = type.Name;
 
-			typeName = typeName.Substring(0, typeName.Length - type.Name.Length);
-			typeName = typeName + "BLToolkitExtension." + type.Name;
+#if FW2
+			if (type.IsGenericType)
+			{
+				typeFullName  = GetTypeFullName (type);
+				typeShortName = GetTypeShortName(type);
+			}
+#endif
 
-			return typeName;
+			typeFullName  = typeFullName. Replace('+', '.');
+			typeShortName = typeShortName.Replace('+', '.');
+
+			typeFullName = typeFullName.Substring(0, typeFullName.Length - typeShortName.Length);
+			typeFullName = typeFullName + "BLToolkitExtension." + typeShortName;
+
+			return typeFullName;
 		}
 
 		private static AbstractTypeBuilderList GetBuilderList(TypeHelper type)

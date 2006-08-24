@@ -24,11 +24,11 @@ namespace HowTo.DataAccess
 		[Test]
 		public void Test()
 		{
-			DataAccessor da = new DataAccessor();
+			SqlQuery<MyPersonObject> query = new SqlQuery<MyPersonObject>();
 
-			/*[a]*/da.Extensions = TypeExtension.GetExtenstions("XmlExtension.xml")/*[/a]*/;
+			/*[a]*/query.Extensions = TypeExtension.GetExtenstions("XmlExtension.xml")/*[/a]*/;
 
-			MyPersonObject person = da.SelectByKeySql<MyPersonObject>(1);
+			MyPersonObject person = query.SelectByKey(1);
 
 			Assert.IsNotNull(person);
 		}

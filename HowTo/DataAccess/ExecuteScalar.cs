@@ -42,7 +42,7 @@ namespace HowTo.DataAccess
 
 			Assert.IsFalse(id == 0);
 
-			pa.DeleteByKey(id);
+			new SprocQuery<Person>().DeleteByKey(id);
 		}
 	}
 }
