@@ -24,9 +24,9 @@ namespace HowTo.DataAccess
 		[Test]
 		public void Test1()
 		{
-			DataAccessor da = new DataAccessor();
+			SqlQuery<MyPersonObject> query = new SqlQuery<MyPersonObject>();
 
-			MyPersonObject person = da./*[a]*/SelectByKeySql<MyPersonObject>(1)/*[/a]*/;
+			MyPersonObject person = query./*[a]*/SelectByKey(1)/*[/a]*/;
 
 			Assert.IsNotNull(person);
 		}
@@ -34,9 +34,9 @@ namespace HowTo.DataAccess
 		[Test]
 		public void Test2()
 		{
-			DataAccessor da = new DataAccessor();
+			SprocQuery<MyPersonObject> query = new SprocQuery<MyPersonObject>();
 
-			MyPersonObject person = da./*[a]*/SelectByKey<MyPersonObject>(1)/*[/a]*/;
+			MyPersonObject person = query./*[a]*/SelectByKey(1)/*[/a]*/;
 
 			Assert.IsNotNull(person);
 		}

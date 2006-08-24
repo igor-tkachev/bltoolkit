@@ -7,15 +7,19 @@ namespace BLToolkit.Aspects
 {
 	public class CounterAspect : Interceptor
 	{
+		static LocalDataStoreSlot counterSlot = Thread.AllocateDataSlot();
+
 		protected override void BeforeCall(InterceptCallInfo info)
 		{
-			if (!IsEnabled)
+			if (!IsEnabled || Thread.GetData(counterSlot) != null)
 				return;
 
 			MethodCallCounter counter = GetCounter(info.CallMethodInfo);
 
 			lock (counter.CurrentCalls.SyncRoot)
 				counter.CurrentCalls.Add(info);
+
+			Thread.SetData(counterSlot, counter);
 		}
 
 		protected override void OnFinally(InterceptCallInfo info)
@@ -24,11 +28,17 @@ namespace BLToolkit.Aspects
 				return;
 
 			MethodCallCounter counter = GetCounter(info.CallMethodInfo);
+			MethodCallCounter prev    = (MethodCallCounter)Thread.GetData(counterSlot);
 
-			counter.AddCall(DateTime.Now - info.BeginCallTime, info.Exception != null, info.Cached);
+			if (counter == prev)
+			{
+				counter.AddCall(DateTime.Now - info.BeginCallTime, info.Exception != null, info.Cached);
 
-			lock (counter.CurrentCalls.SyncRoot)
-				counter.CurrentCalls.Remove(info);
+				lock (counter.CurrentCalls.SyncRoot)
+					counter.CurrentCalls.Remove(info);
+
+				Thread.SetData(counterSlot, null);
+			}
 		}
 
 		#region Parameters

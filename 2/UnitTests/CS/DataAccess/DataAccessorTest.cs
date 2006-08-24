@@ -147,6 +147,8 @@ namespace DataAccess
 		}
 
 		private PersonAccessor _da;
+		private SprocQuery     _sproc = new SprocQuery();
+		private SqlQuery       _sql   = new SqlQuery();
 
 		public DataAccessorTest()
 		{
@@ -160,13 +162,13 @@ namespace DataAccess
 		[Test]
 		public void Sql_Select()
 		{
-			Person e = (Person)_da.SelectByKeySql(typeof(Person), 1);
+			Person e = (Person)_sql.SelectByKey(typeof(Person), 1);
 		}
 
 		[Test]
 		public void Sql_SelectAll()
 		{
-			ArrayList list = _da.SelectAllSql(typeof(Person));
+			ArrayList list = _sql.SelectAll(typeof(Person));
 
 			Console.WriteLine(list.Count);
 		}
@@ -174,7 +176,7 @@ namespace DataAccess
 		[Test]
 		public void Sql_Insert()
 		{
-			ArrayList list = _da.SelectAllSql(typeof(Person));
+			ArrayList list = _sql.SelectAll(typeof(Person));
 			Hashtable tbl  = new Hashtable();
 
 			foreach (Person e in list)
@@ -185,21 +187,21 @@ namespace DataAccess
 			em.FirstName = "1";
 			em.LastName  = "2";
 
-			_da.InsertSql(em);
+			_sql.Insert(em);
 
-			list = _da.SelectAllSql(typeof(Person));
+			list = _sql.SelectAll(typeof(Person));
 
 			foreach (Person e in list)
 				if (tbl.ContainsKey(e.ID) == false)
-					_da.DeleteSql(e);
+					_sql.Delete(e);
 		}
 
 		[Test]
 		public void Sql_Update()
 		{
-			Person e = (Person)_da.SelectByKeySql(typeof(Person), 1);
+			Person e = (Person)_sql.SelectByKey(typeof(Person), 1);
 
-			int n = _da.UpdateSql(e);
+			int n = _sql.Update(e);
 
 			Assert.AreEqual(1, n);
 		}
@@ -207,7 +209,7 @@ namespace DataAccess
 		[Test]
 		public void Sql_DeleteByKey()
 		{
-			ArrayList list = _da.SelectAllSql(typeof(Person));
+			ArrayList list = _sql.SelectAll(typeof(Person));
 			Hashtable tbl = new Hashtable();
 
 			foreach (Person e in list)
@@ -218,19 +220,19 @@ namespace DataAccess
 			em.FirstName = "1";
 			em.LastName  = "2";
 
-			_da.InsertSql(em);
+			_sql.Insert(em);
 
-			list = _da.SelectAllSql(typeof(Person));
+			list = _sql.SelectAll(typeof(Person));
 
 			foreach (Person e in list)
 				if (tbl.ContainsKey(e.ID) == false)
-					_da.DeleteByKeySql(typeof(Person), e.ID);
+					_sql.DeleteByKey(typeof(Person), e.ID);
 		}
 
 		[Test]
 		public void Sproc_SelectAll()
 		{
-			ArrayList list = _da.SelectAll(typeof(Person));
+			ArrayList list = _sproc.SelectAll(typeof(Person));
 			Console.WriteLine(list.Count);
 		}
 
@@ -282,7 +284,7 @@ namespace DataAccess
 			// ^==important                         ^==important
 			//
 			Assert.IsTrue(e.ID > 0);
-			_da.Delete(e);
+			_sproc.Delete(e);
 		}
 
 		[Test]

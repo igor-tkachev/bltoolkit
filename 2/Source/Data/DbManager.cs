@@ -3716,7 +3716,7 @@ namespace BLToolkit.Data
 		}
 
 		public L ExecuteList<L, T>(L list, params object[] parameters)
-			where L : IList
+			where L : IList<T>
 		{
 			ExecuteListInternal(list, typeof(T), parameters);
 

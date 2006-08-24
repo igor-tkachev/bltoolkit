@@ -28,9 +28,9 @@ namespace HowTo.DataAccess
 		[Test]
 		public void Test()
 		{
-			DataAccessor<Person> da = new DataAccessor<Person>();
+			SqlQuery<Person> query = new SqlQuery<Person>();
 
-			Person person = da./*[a]*/SelectByKeySql("John", "Pupkin")/*[/a]*/;
+			Person person = query./*[a]*/SelectByKey("John", "Pupkin")/*[/a]*/;
 
 			Assert.IsNotNull(person);
 		}

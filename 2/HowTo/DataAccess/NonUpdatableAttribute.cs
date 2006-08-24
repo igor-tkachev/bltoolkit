@@ -33,7 +33,7 @@ namespace HowTo.DataAccess
 		[Test]
 		public void Test()
 		{
-			DataAccessor da = new DataAccessor();
+			SqlQuery<Person> query = new SqlQuery<Person>();
 
 			Person person = new Person();
 
@@ -41,7 +41,7 @@ namespace HowTo.DataAccess
 			person.LastName  = "Frog";
 			person.Gender    = Gender.Other;
 
-			da./*[a]*/InsertSql(person)/*[/a]*/;
+			query./*[a]*/Insert(person)/*[/a]*/;
 		}
 	}
 }

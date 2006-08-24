@@ -35,9 +35,9 @@ namespace HowTo.DataAccess
 		{
 			int id = Insert();
 
-			/*[a]*/DataAccessor da = new DataAccessor()/*[/a]*/;
+			/*[a]*/SqlQuery<Person> query = new SqlQuery<Person>()/*[/a]*/;
 
-			da./*[a]*/DeleteByKeySql<Person>(id)/*[/a]*/;
+			query./*[a]*/DeleteByKey(id)/*[/a]*/;
 		}
 
 		[Test]
@@ -45,23 +45,13 @@ namespace HowTo.DataAccess
 		{
 			int id = Insert();
 
-			/*[a]*/DataAccessor<Person> da = new DataAccessor<Person>()/*[/a]*/;
-
-			da./*[a]*/DeleteByKeySql(id)/*[/a]*/;
-		}
-
-		[Test]
-		public void Test3()
-		{
-			int id = Insert();
-
 			using (DbManager db = new DbManager())
 			{
-				/*[a]*/DataAccessor da = new DataAccessor()/*[/a]*/;
+				/*[a]*/SqlQuery<Person> query = new SqlQuery<Person>()/*[/a]*/;
 
-				Person person = da.SelectByKeySql<Person>(db, id);
+				Person person = query.SelectByKey(db, id);
 
-				da./*[a]*/DeleteSql(db, person)/*[/a]*/;
+				query./*[a]*/Delete(db, person)/*[/a]*/;
 			}
 		}
 	}

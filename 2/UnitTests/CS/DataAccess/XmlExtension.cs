@@ -25,8 +25,8 @@ namespace DataAccess
 
 			using (DbManager db = new DbManager())
 			{
-				DataAccessor da = new DataAccessor(db);
-				Person1       ps = da.SelectByKeySql<Person1>(1);
+				SqlQuery<Person1> sq = new SqlQuery<Person1>(db);
+				Person1           ps = sq.SelectByKey(1);
 
 				Assert.IsNotNull(ps);
 			}

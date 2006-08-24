@@ -35,19 +35,9 @@ namespace HowTo.DataAccess
 		{
 			int id = Insert();
 
-			/*[a]*/DataAccessor da = new DataAccessor()/*[/a]*/;
+			/*[a]*/SprocQuery<Person> query = new SprocQuery<Person>()/*[/a]*/;
 
-			da./*[a]*/DeleteByKey<Person>(id)/*[/a]*/;
-		}
-
-		[Test]
-		public void Test2()
-		{
-			int id = Insert();
-
-			/*[a]*/DataAccessor<Person> da = new DataAccessor<Person>()/*[/a]*/;
-
-			da./*[a]*/DeleteByKey(id)/*[/a]*/;
+			query./*[a]*/DeleteByKey(id)/*[/a]*/;
 		}
 
 		[Test]
@@ -57,11 +47,11 @@ namespace HowTo.DataAccess
 
 			using (DbManager db = new DbManager())
 			{
-				/*[a]*/DataAccessor da = new DataAccessor()/*[/a]*/;
+				/*[a]*/SqlQuery<Person> query = new SqlQuery<Person>()/*[/a]*/;
 
-				Person person = da.SelectByKeySql<Person>(db, id);
+				Person person = query.SelectByKey(db, id);
 
-				da./*[a]*/Delete(db, person)/*[/a]*/;
+				query./*[a]*/Delete(db, person)/*[/a]*/;
 			}
 		}
 	}

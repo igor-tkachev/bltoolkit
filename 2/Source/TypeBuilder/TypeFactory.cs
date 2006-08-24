@@ -90,7 +90,14 @@ namespace BLToolkit.TypeBuilder
 				{
 				}
 
-				ab = new AssemblyBuilderHelper(assemblyDir + "\\" + type.FullName + "." + suffix + ".dll");
+				string fullName = type.FullName;
+
+#if FW2
+				if (type.IsGenericType)
+					fullName = AbstractClassBuilder.GetTypeFullName(type);
+#endif
+
+				ab = new AssemblyBuilderHelper(assemblyDir + "\\" + fullName + "." + suffix + ".dll");
 			}
 
 			return ab;
