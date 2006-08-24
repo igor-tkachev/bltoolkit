@@ -83,7 +83,7 @@ namespace DataAccess
 			public abstract Person Insert([Destination(NoMap = false)] Person e);
 			
 			[SprocName("Person_Insert_OutputParameter")]
-			public abstract void Insert_OutputParameter([Direction.Output("PersonID")] Person e);
+			public abstract void Insert_OutputParameter([Direction.Output("PERSONID")] Person e);
 
 			[SprocName("Scalar_ReturnParameter")]
 			public abstract void Insert_ReturnParameter([Direction.ReturnValue("PersonID"),
@@ -155,14 +155,19 @@ namespace DataAccess
 			TypeFactory.SaveTypes = true;
 
 			object o = TypeAccessor.CreateInstance(typeof(Person));
+			Assert.IsInstanceOfType(typeof(Person), o);
 
 			_da = (PersonAccessor)DataAccessor.CreateInstance(typeof(PersonAccessor));
+			Assert.IsInstanceOfType(typeof(PersonAccessor), _da);
 		}
 
 		[Test]
 		public void Sql_Select()
 		{
 			Person e = (Person)_sql.SelectByKey(typeof(Person), 1);
+
+			Assert.IsNotNull(e);
+			Assert.AreEqual(1, e.ID);
 		}
 
 		[Test]
@@ -308,7 +313,7 @@ namespace DataAccess
 			_da.Insert_OutputParameter(e);
 
 			Assert.IsTrue(e.ID > 0);
-			_da.Delete(e);
+			_sproc.Delete(e);
 		}
 
 		[Test]

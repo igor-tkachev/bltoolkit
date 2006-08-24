@@ -1310,6 +1310,17 @@ namespace BLToolkit.Data
 
 		#region Parameters
 
+		private static Array SortArray(Array array, IComparer comparer)
+		{
+			if (array == null)
+				return null;
+
+			Array arrayClone = (Array)array.Clone();
+
+			Array.Sort(arrayClone, comparer);
+			return arrayClone;
+		}
+
 		/// <summary>
 		/// Creates an array of parameters from the DataRow object.
 		/// </summary>
@@ -1349,10 +1360,15 @@ namespace BLToolkit.Data
 			params IDbDataParameter[] commandParameters)
 		{
 			ArrayList paramList = new ArrayList();
+			IComparer comparer  = CaseInsensitiveComparer.Default;
+
+			outputParameters      = (string[])SortArray(outputParameters,      comparer);
+			inputOutputParameters = (string[])SortArray(inputOutputParameters, comparer);
+			ignoreParameters      = (string[])SortArray(ignoreParameters,      comparer);
 
 			foreach (DataColumn c in dataRow.Table.Columns)
 			{
-				if (ignoreParameters != null && Array.IndexOf(ignoreParameters, c.ColumnName) >= 0)
+				if (ignoreParameters != null && Array.BinarySearch(ignoreParameters, c.ColumnName, comparer) >= 0)
 					continue;
 
 				if (c.AutoIncrement || c.ReadOnly)
@@ -1363,9 +1379,9 @@ namespace BLToolkit.Data
 					NullParameter(name, dataRow[c.ColumnName]):
 					Parameter    (name, dataRow[c.ColumnName]);
 
-				if (outputParameters != null && Array.IndexOf(outputParameters, c.ColumnName) >= 0)
+				if (outputParameters != null && Array.BinarySearch(outputParameters, c.ColumnName, comparer) >= 0)
 					parameter.Direction = ParameterDirection.Output;
-				else if (inputOutputParameters != null && Array.IndexOf(inputOutputParameters, c.ColumnName) >= 0)
+				else if (inputOutputParameters != null && Array.BinarySearch(inputOutputParameters, c.ColumnName, comparer) >= 0)
 					parameter.Direction = ParameterDirection.InputOutput;
 
 				paramList.Add(parameter);
@@ -1416,23 +1432,17 @@ namespace BLToolkit.Data
 			string[]                  ignoreParameters,
 			params IDbDataParameter[] commandParameters)
 		{
-/*
-			ParameterReader pr = CreateParameterReader();
-			ObjectMapper    om = _mappingSchema.GetObjectMapper(obj.GetType());
-
-			_mappingSchema.MapSourceToDestination(om, obj, pr, this);
-
-			foreach (IDbDataParameter p in commandParameters)
-				pr.AddParameter(p);
-
-			return pr.GetParameters();
-*/
-			ArrayList paramList = new ArrayList();
 			ObjectMapper om        = _mappingSchema.GetObjectMapper(obj.GetType());
+			ArrayList    paramList = new ArrayList();
+			IComparer    comparer  = CaseInsensitiveComparer.Default;
+
+			outputParameters       = (string[])SortArray(outputParameters,      comparer);
+			inputOutputParameters  = (string[])SortArray(inputOutputParameters, comparer);
+			ignoreParameters       = (string[])SortArray(ignoreParameters,      comparer);
 
 			foreach (MemberMapper mm in om)
 			{
-				if (ignoreParameters != null && Array.IndexOf(ignoreParameters, mm.Name) >= 0)
+				if (ignoreParameters != null && Array.BinarySearch(ignoreParameters, mm.Name, comparer) >= 0)
 					continue;
 				
 				object value = mm.GetValue(obj);
@@ -1442,9 +1452,9 @@ namespace BLToolkit.Data
 					NullParameter(name, value, mm.MapMemberInfo.NullValue):
 					Parameter    (name, value);
 
-				if (outputParameters != null && Array.IndexOf(outputParameters, mm.Name) >= 0)
+				if (outputParameters != null && Array.BinarySearch(outputParameters, mm.Name, comparer) >= 0)
 					parameter.Direction = ParameterDirection.Output;
-				else if (inputOutputParameters != null && Array.IndexOf(inputOutputParameters, mm.Name) >= 0)
+				else if (inputOutputParameters != null && Array.BinarySearch(inputOutputParameters, mm.Name, comparer) >= 0)
 					parameter.Direction = ParameterDirection.InputOutput;
 
 				paramList.Add(parameter);
