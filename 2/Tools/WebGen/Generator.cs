@@ -285,7 +285,7 @@ namespace WebGen
 ",
 					@class,
 					DateTime.Parse(item.SelectSingleNode("pubDate").InnerText),
-					item.SelectSingleNode("link").      InnerText,
+					item.SelectSingleNode("link").       InnerText,
 					item.SelectSingleNode("title").      InnerText,
 					item.SelectSingleNode("description").InnerText);
 
