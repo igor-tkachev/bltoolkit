@@ -2692,6 +2692,7 @@ namespace BLToolkit.Data
 		/// ignored.
 		/// </summary>
 		/// <returns>The first column of the first row in the resultset.</returns>
+		/// <seealso cref="ExecuteScalar(ScalarSourceType, NameOrIndexParameter)"/>
 		public object ExecuteScalar()
 		{
 			if (_prepared)
@@ -2744,6 +2745,7 @@ namespace BLToolkit.Data
 		/// </item>
 		/// </list>
 		/// </returns>
+		/// <seealso cref="ExecuteScalar(ScalarSourceType, NameOrIndexParameter)"/>
 		public object ExecuteScalar(ScalarSourceType sourceType)
 		{
 			return ExecuteScalar(sourceType, new NameOrIndexParameter());
@@ -2784,10 +2786,6 @@ namespace BLToolkit.Data
 		/// </returns>
 		public object ExecuteScalar(ScalarSourceType sourceType, NameOrIndexParameter nameOrIndex)
 		{
-			if (!Enum.IsDefined(typeof(ScalarSourceType), sourceType))
-				throw new InvalidEnumArgumentException("sourceType",
-					(int)sourceType, typeof(ScalarSourceType));
-			
 			if (_prepared)
 				InitParameters(CommandAction.Select);
 
@@ -2808,9 +2806,6 @@ namespace BLToolkit.Data
 						string name = (string)_dataProvider.Convert(nameOrIndex.Name,
 							ConvertType.NameToParameter);
 						
-						//return _dataProvider.Convert(Parameter(name).Value,
-						//	ConvertType.OutputParameter);
-
 						return Parameter(name).Value;
 					}
 					else
@@ -2818,21 +2813,15 @@ namespace BLToolkit.Data
 						int index = nameOrIndex.Index;
 						foreach (IDataParameter p in SelectCommand.Parameters)
 						{
-							if (p.Direction == ParameterDirection.Output ||
-								p.Direction == ParameterDirection.InputOutput)
-							{
-								if (0 == index)
-								{
-									//return _dataProvider.Convert(p.Value, ConvertType.OutputParameter);
-									return p.Value;
-								}
-								else
-								{
-									// Skip this output parameter and look for next one.
-									//
-									--index;
-								}
-							}
+							// Skip the return value parameter.
+							//
+							if (p.Direction == ParameterDirection.ReturnValue)
+								continue;
+
+							if (0 == index)
+								return p.Value;
+
+							--index;
 						}
 					}
 					break;
@@ -2842,7 +2831,7 @@ namespace BLToolkit.Data
 
 					foreach (IDataParameter p in SelectCommand.Parameters)
 						if (p.Direction == ParameterDirection.ReturnValue)
-							return p.Value; // return _dataProvider.Convert(p.Value, ConvertType.OutputParameter);
+							return p.Value;
 
 					break;
 
@@ -2850,8 +2839,8 @@ namespace BLToolkit.Data
 					return ExecuteNonQueryInternal();
 
 				default:
-					System.Diagnostics.Debug.Fail("Not implemented case in DbManager.ExecuteScalar: " + sourceType);
-					break;
+					throw new InvalidEnumArgumentException("sourceType",
+						(int)sourceType, typeof(ScalarSourceType));
 			}
 
 			return null;
@@ -2867,6 +2856,7 @@ namespace BLToolkit.Data
 		/// </summary>
 		/// <returns>
 		/// The first column of the first row in the resultset.</returns>
+		/// <seealso cref="ExecuteScalar{T}(ScalarSourceType, NameOrIndexParameter)"/>
 		public T ExecuteScalar<T>()
 		{
 			return (T)_mappingSchema.ConvertChangeType(ExecuteScalar(), typeof(T));
@@ -2904,6 +2894,7 @@ namespace BLToolkit.Data
 		/// </item>
 		/// </list>
 		/// </returns>
+		/// <seealso cref="ExecuteScalar{T}(ScalarSourceType, NameOrIndexParameter)"/>
 		public T ExecuteScalar<T>(ScalarSourceType sourceType)
 		{
 			return ExecuteScalar<T>(sourceType, new NameOrIndexParameter());

@@ -740,7 +740,9 @@ namespace BLToolkit.Mapping
 						|| (srcElementType.IsArray &&
 							srcElementType.GetArrayRank() != dstElementType.GetArrayRank()))
 					{
-						throw new MappingException(srcType, conversionType);
+						throw new InvalidCastException(string.Format(
+							"Can not convert array of type '{0}' to array of '{1}'.",
+							srcType.FullName, conversionType.FullName));
 					}
 
 					Array srcArray = (Array)value;
@@ -862,14 +864,7 @@ namespace BLToolkit.Mapping
 			if (typeof(SqlXml)      == conversionType) return ConvertToSqlXml     (value);
 #endif
 
-			try
-			{
-				return System.Convert.ChangeType(value, conversionType);
-			}
-			catch (InvalidCastException ex)
-			{
-				throw new MappingException(ex.Message, ex);
-			}
+			return System.Convert.ChangeType(value, conversionType);
 		}
 
 		#endregion

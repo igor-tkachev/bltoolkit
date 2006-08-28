@@ -1,5 +1,6 @@
 using System;
 
+using BLToolkit.DataAccess;
 using BLToolkit.EditableObjects;
 
 using BLToolkit.Demo.ObjectModel;
@@ -25,19 +26,19 @@ namespace BLToolkit.Demo.BusinessLogic
 		{
 			obj.Validate();
 			
-			DataAccessor.UpdateSql(obj);
+			Query.Update(obj);
 
 			obj.AcceptChanges();
 		}
 
 		public void Delete(T obj)
 		{
-			DataAccessor.DeleteSql(obj);
+			Query.Delete(obj);
 		}
 
 		public void Delete(int id)
 		{
-			DataAccessor.DeleteByKeySql(id);
+			Query.DeleteByKey(id);
 		}
 
 		#endregion
@@ -48,7 +49,7 @@ namespace BLToolkit.Demo.BusinessLogic
 		{
 			EditableList<T> list = new EditableList<T>();
 
-			return DataAccessor.SelectAllSql(list);
+			return Query.SelectAll(list);
 		}
 
 		#endregion
@@ -56,6 +57,18 @@ namespace BLToolkit.Demo.BusinessLogic
 		#region Protected Members
 
 		protected abstract AccessorBase<T> DataAccessor { get; }
+
+		private            SqlQuery<T>   _query;
+		protected virtual  SqlQuery<T>    Query
+		{
+			get
+			{
+				if (null == _query)
+					_query = new SqlQuery<T>();
+
+				return _query;
+			}
+		}
 
 		#endregion
 	}
