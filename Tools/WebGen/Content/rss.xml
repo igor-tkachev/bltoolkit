@@ -4,7 +4,11 @@
 		<title>Business Logic Toolkit for .NET</title>
 		<link>http://www.bltoolkit.net</link>
 		<description />
-		<lastBuildDate>2006-06-10</lastBuildDate>
+		<lastBuildDate>2006-08-27</lastBuildDate>
+		<item>
+			<title>v2.0.1 released</title>
+			<pubDate>2006-08-27</pubDate>
+		</item>
 		<item>
 			<title>How to map one object to another</title>
 			<link>http://www.bltoolkit.net/Doc/Mapping/ObjectToObject.htm</link>
