@@ -17,10 +17,14 @@ namespace WebGen
 		FileActionHandler _fileAction;
 
 		public void Generate(
-			List<string> createdFiles,
-			string templateFileName, string[] path,
-			string destFolder, string sourcePath,
-			bool cleanUp, bool createIndex, FileActionHandler fileAction)
+			List<string>      createdFiles,
+			string            templateFileName,
+			string[]          path,
+			string            destFolder,
+			string            sourcePath,
+			bool              cleanUp,
+			bool              createIndex,
+			FileActionHandler fileAction)
 		{
 			_sourcePath = Path.GetFullPath(sourcePath);
 			_destFolder = Path.GetFullPath(destFolder);
