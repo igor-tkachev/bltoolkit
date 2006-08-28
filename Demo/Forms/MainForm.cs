@@ -1,8 +1,6 @@
 using System;
 using System.Windows.Forms;
 
-using BLToolkit.Reflection;
-
 using BLToolkit.Demo.ObjectModel;
 using BLToolkit.Demo.BusinessLogic;
 

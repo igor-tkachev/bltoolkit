@@ -805,13 +805,13 @@ namespace BLToolkit.DataAccess
 		[NoInterception, Obsolete("Use SqlQuery<T>.DeleteByKey instead.")]
 		public virtual int DeleteByKeySql<T>(DbManager db, params object[] key)
 		{
-			return DeleteByKeySql(db, typeof(T), key);
+			return new SqlQuery<T>(DbManager).DeleteByKey(db, key);
 		}
 
 		[NoInterception, Obsolete("Use SqlQuery<T>.DeleteByKey instead.")]
 		public virtual int DeleteByKeySql<T>(params object[] key)
 		{
-			return DeleteByKeySql(typeof(T), key);
+			return new SqlQuery<T>(DbManager).DeleteByKey(key);
 		}
 #endif
 
