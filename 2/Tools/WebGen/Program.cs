@@ -42,7 +42,7 @@ namespace WebGen
 //return;
 			new Generator().Generate(
 				files,
-				template, new string[] { "Source" }, destPath, @"..\..\..\", false, true,
+				template, new string[] { "Source" }, destPath, @"..\..\..\..\", false, true,
 				delegate(string fileName)
 				{
 					string name = Path.GetFileName(fileName).ToLower();

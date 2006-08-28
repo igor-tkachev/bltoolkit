@@ -107,7 +107,7 @@
     <None Include="Content\Doc\Data\App.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\..\..\..\Rsdn\trunk\source\Framework\Format\Rsdn.Framework.Formatting.csproj">
+    <ProjectReference Include="..\..\..\..\..\..\..\Rsdn\trunk\source\Framework\Format\Rsdn.Framework.Formatting.csproj">
       <Project>{5D93361E-3F17-4553-91F0-B6C24DEBB4CC}</Project>
       <Name>Rsdn.Framework.Formatting</Name>
     </ProjectReference>
