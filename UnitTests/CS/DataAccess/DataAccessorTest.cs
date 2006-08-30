@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.ComponentModel;
 using System.Data;
 
 using NUnit.Framework;
@@ -21,6 +22,7 @@ using BLToolkit.TypeBuilder;
 
 namespace DataAccess
 {
+#if FW2
 	namespace Other
 	{
 		public abstract class Person : DataAccessorTest.Person
@@ -29,6 +31,7 @@ namespace DataAccess
 			public abstract string Diagnosis { get; set; }
 		}
 	}
+#endif
 
 	[TestFixture]
 	public class DataAccessorTest
@@ -41,8 +44,17 @@ namespace DataAccess
 			[MapValue("O")] Other
 		}
 
+		public interface IPerson
+		{
+			int    ID          { get; set; }
+			string LastName    { get; set; }
+			string FirstName   { get; set; }
+			string MiddleName  { get; set; }
+			IList  Territories { get; set; }
+		}
+
 		[TableName("Person")]
-		public abstract class Person : EditableObject
+		public abstract class Person : EditableObject, IPerson
 		{
 			[Required]                     public abstract Gender Gender     { get; set; }
 
@@ -52,7 +64,7 @@ namespace DataAccess
 			[MaxLength(50), Required]      public abstract string FirstName  { get; set; }
 			[MaxLength(50), NullValue("")] public abstract string MiddleName { get; set; }
 
-			public abstract ArrayList Territories { get; set; }
+			public abstract IList Territories { get; set; }
 		}
 
 		public abstract class PersonAccessor : DataAccessor
@@ -62,7 +74,7 @@ namespace DataAccess
 			public abstract Person SelectByName(string firstName, string lastName);
 
 			[SprocName("Person_SelectByName"), DiscoverParameters]
-			public abstract Person AnySprocName(string firstName, string lastName);
+			public abstract Person AnySprocName(string anyParameterName, string otherParameterName);
 
 			[ActionName("SelectByName")]
 			public abstract Person AnyActionName(string firstName, string lastName);
@@ -72,14 +84,14 @@ namespace DataAccess
 				[ParamName("FirstName")] string name1,
 				[ParamName("@LastName")] string name2);
 
-			[ActionName("SelectAll"), ObjectType(typeof(Person))]
-			public abstract ArrayList SelectAllList();
+			[ActionName("SelectByName"), ObjectType(typeof(Person))]
+			public abstract IPerson SelectByNameReturnInterface(string firstName, string lastName);
 
-			[ActionName("SelectAll"), ObjectType(typeof(Person))]
-			public abstract IList SelectAllList([Destination] IList list);
+			[ActionName("SelectByName"), ObjectType(typeof(Person))]
+			public abstract void SelectByNameReturnVoid(string firstName, string lastName, [Destination] object p);
 
-			public abstract Person SelectByName(string firstName, string lastName, [Destination] Person p);
-
+			public abstract IPerson SelectByName(string firstName, string lastName, [Destination] Person p);
+			
 			public abstract Person Insert([Destination(NoMap = false)] Person e);
 			
 			[SprocName("Person_Insert_OutputParameter")]
@@ -88,22 +100,95 @@ namespace DataAccess
 			[SprocName("Scalar_ReturnParameter")]
 			public abstract void Insert_ReturnParameter([Direction.ReturnValue("PersonID"),
 				Direction.Ignore("PersonID", "FirstName", "LastName", "MiddleName", "Gender")] Person e);
-#if FW2
-			[ActionName("SelectAll")]
-			public abstract List<Person> SelectAllListT();
-			[SprocName("Person_SelectAll")]
-			public abstract PersonDataSet.PersonDataTable SelectAllTypedDataTable();
-#endif
-
-			[SprocName("Person_SelectAll")] public abstract DataSet       SelectAllDataSet();
-			[SprocName("Person_SelectAll")] public abstract PersonDataSet SelectAllTypedDataSet();
-			[SprocName("Person_SelectAll")] public abstract DataTable     SelectAllDataTable();
 
 			[ActionName("SelectAll"), ObjectType(typeof(Person))]
 			public abstract ArrayList SameTypeName();
 
 			[ActionName("SelectByName")]
 			public abstract Person SameTypeName(string firstName, string lastName);
+
+			#region IDataReader
+
+			[SprocName("Person_SelectAll")]
+			public abstract IDataReader   SelectAllIDataReader(DbManager db);
+
+			[SprocName("Person_SelectAll"), CommandBehavior(CommandBehavior.SchemaOnly)]
+			public abstract IDataReader   SelectAllIDataReaderSchemaOnly(DbManager db);
+
+			#endregion
+
+			#region DataSet
+
+			[SprocName("Person_SelectAll")]
+			public abstract DataSet       SelectAllDataSet();
+
+			[SprocName("Person_SelectAll")]
+			public abstract IListSource   SelectAllDataSetWithDestination([Destination] DataSet ds);
+
+			[SprocName("Person_SelectAll")]
+			public abstract void          SelectAllDataSetReturnVoid     ([Destination] DataSet ds);
+
+			[SprocName("Person_SelectAll")]
+			public abstract PersonDataSet SelectAllTypedDataSet();
+
+			[SprocName("Person_SelectAll")]
+			public abstract object        SelectAllTypedDataSetWithDestination([Destination] PersonDataSet ds);
+
+			[SprocName("Person_SelectAll")]
+			public abstract void          SelectAllTypedDataSetReturnVoid     ([Destination] PersonDataSet ds);
+
+			#endregion
+
+			#region DataTable
+
+			[SprocName("Person_SelectAll")]
+			public abstract DataTable     SelectAllDataTable();
+
+			[SprocName("Person_SelectAll")]
+			public abstract DataTable     SelectAllDataTableWithDestination([Destination] DataTable dt);
+
+			[SprocName("Person_SelectAll")]
+			public abstract void          SelectAllDataTableReturnVoid     ([Destination] DataTable dt);
+
+#if FW2
+			[SprocName("Person_SelectAll")]
+			public abstract PersonDataSet.PersonDataTable SelectAllTypedDataTable();
+
+			[SprocName("Person_SelectAll")]
+			public abstract void          SelectAllTypedDataTableReturnVoid     ([Destination] PersonDataSet.PersonDataTable dt);
+#endif
+
+			#endregion
+
+			#region List
+
+			[ActionName("SelectAll"), ObjectType(typeof(Person))]
+			public abstract ArrayList SelectAllList();
+
+			[ActionName("SelectAll"), ObjectType(typeof(Person))]
+			public abstract IList SelectAllListWithDestination([Destination] IList list);
+
+			[ActionName("SelectAll"), ObjectType(typeof(Person))]
+			public abstract void SelectAllListReturnVoid      ([Destination] IList list);
+
+#if FW2
+			[ActionName("SelectAll")]
+			public abstract List<Person> SelectAllListT();
+
+			[ActionName("SelectAll"), ObjectType(typeof(Person))]
+			public abstract List<IPerson> SelectAllListTWithObjectType();
+
+			[ActionName("SelectAll"), ObjectType(typeof(Person))]
+			public abstract List<IPerson> SelectAllListTWithDestination([Destination] IList list);
+
+			[ActionName("SelectAll"), ObjectType(typeof(Person))]
+			public abstract void SelectAllListTWithObjectTypeReturnVoid([Destination] IList list);
+
+			[ActionName("SelectAll")]
+			public abstract void SelectAllListTReturnVoid              ([Destination] IList<Person> list);
+#endif
+
+			#endregion
 		}
 
 		public abstract class PersonDataAccessor1 : PersonAccessor
@@ -125,11 +210,13 @@ namespace DataAccess
 				}
 			}
 
+#if FW2
 			[ActionName("SelectAll"), ObjectType(typeof(Other.Person))]
 			public abstract ArrayList SameTypeName1();
 
 			[ActionName("SelectByName")]
 			public abstract Other.Person SameTypeName1(string firstName, string lastName);
+#endif
 
 			protected override string GetDefaultSpName(string typeName, string actionName)
 			{
@@ -263,11 +350,32 @@ namespace DataAccess
 		}
 
 		[Test]
+		public void Gen_SelectByNameReturnInterface()
+		{
+			IPerson i = _da.SelectByNameReturnInterface("John", "Pupkin");
+
+			Assert.IsNotNull(i);
+			Assert.AreEqual (1, i.ID);
+		}
+
+		[Test]
+		public void Gen_SelectByNameReturnVoid()
+		{
+			Person e = (Person)TypeAccessor.CreateInstance(typeof (Person));
+			Assert.IsNotNull(e);
+
+			_da.SelectByNameReturnVoid("John", "Pupkin", e);
+			Assert.AreEqual (1, e.ID);
+		}
+
+		[Test]
 		public void Gen_SelectByNameWithDestination()
 		{
 			Person e = (Person)TypeAccessor.CreateInstance(typeof (Person));
-			_da.SelectByName("John", "Pupkin", e);
-			Assert.AreEqual(1, e.ID);
+			IPerson i = _da.SelectByName("John", "Pupkin", e);
+
+			Assert.AreSame (i, e);
+			Assert.AreEqual(1, i.ID);
 		}
 
 		[Test]
@@ -338,9 +446,85 @@ namespace DataAccess
 		}
 
 		[Test]
+		public void Gen_SameTypeName()
+		{
+			Person e = _da.SameTypeName("Tester", "Testerson");
+			Assert.IsInstanceOfType(typeof(Person), e);
+			Assert.AreEqual(2, e.ID);
+
+			ArrayList list = _da.SameTypeName();
+			Assert.AreNotEqual(0, list.Count);
+			Assert.IsInstanceOfType(typeof(Person), list[0]);
+
+#if FW2
+			PersonDataAccessor1 da1 = (PersonDataAccessor1)DataAccessor.CreateInstance(typeof(PersonDataAccessor1));
+			Other.Person         e1 = da1.SameTypeName1("Tester", "Testerson");
+
+			Assert.IsInstanceOfType(typeof(Other.Person), e1);
+			Assert.IsNotEmpty(e1.Diagnosis);
+
+			list = da1.SameTypeName1();
+			Assert.AreNotEqual(0, list.Count);
+			Assert.IsInstanceOfType(typeof(Other.Person), list[0]);
+#endif
+		}
+
+		#region IDataReader
+
+		[Test]
+		public void Gen_SelectAllIDataReader()
+		{
+			// Keep connection open for IDataReader
+			//
+			using (DbManager db = _da.GetDbManager())
+			{
+				IDataReader dr = _da.SelectAllIDataReader(db);
+
+				Assert.IsNotNull(dr);
+				Assert.AreNotEqual(0, dr.FieldCount);
+				Assert.IsTrue(dr.Read());
+				Assert.AreNotEqual(0, dr.GetInt32(dr.GetOrdinal("PersonID")));
+			}
+		}
+
+		[Test]
+		public void Gen_SelectAllIDataReaderSchemaOnly()
+		{
+			// Keep connection open for IDataReader
+			//
+			using (DbManager db = _da.GetDbManager())
+			{
+				IDataReader dr = _da.SelectAllIDataReaderSchemaOnly(db);
+
+				Assert.IsNotNull(dr);
+				Assert.AreNotEqual(0, dr.FieldCount);
+				Assert.IsFalse(dr.Read());
+			}
+		}
+
+		#endregion
+
+		#region DataSet
+
+		[Test]
 		public void Gen_SelectAllDataSet()
 		{
 			DataSet ds = _da.SelectAllDataSet();
+			Assert.AreNotEqual(0, ds.Tables[0].Rows.Count);
+		}
+
+		[Test]
+		public void Gen_SelectAllDataSetWithDestination()
+		{
+			IListSource ls = _da.SelectAllDataSetWithDestination(new DataSet());
+			Assert.AreNotEqual(0, ls.GetList().Count);
+		}
+
+		[Test]
+		public void Gen_SelectAllDataSetReturnVoid()
+		{
+			DataSet ds = new DataSet();
+			_da.SelectAllDataSetReturnVoid(ds);
 			Assert.AreNotEqual(0, ds.Tables[0].Rows.Count);
 		}
 
@@ -352,6 +536,29 @@ namespace DataAccess
 		}
 
 		[Test]
+		public void Gen_SelectAllTypedDataSetWithObjectType()
+		{
+			object o = _da.SelectAllTypedDataSetWithDestination(new PersonDataSet());
+			Assert.IsInstanceOfType(typeof(PersonDataSet), o);
+
+			PersonDataSet ds = (PersonDataSet)o;
+			Assert.AreNotEqual(0, ds.Person.Rows.Count);
+		}
+
+		[Test]
+		public void Gen_SelectAllTypedDataSetReturnVoid()
+		{
+			PersonDataSet ds = new PersonDataSet();
+			_da.SelectAllTypedDataSetReturnVoid(ds);
+
+			Assert.AreNotEqual(0, ds.Person.Rows.Count);
+		}
+
+		#endregion
+
+		#region DataTable
+
+		[Test]
 		public void Gen_SelectAllDataTable()
 		{
 			DataTable dt = _da.SelectAllDataTable();
@@ -359,40 +566,18 @@ namespace DataAccess
 		}
 
 		[Test]
-		public void Gen_SelectAllList()
+		public void Gen_SelectAllDataTableWithDestination()
 		{
-			ArrayList list = _da.SelectAllList();
-			Assert.AreNotEqual(0, list.Count);
+			DataTable dt = _da.SelectAllDataTableWithDestination(new DataTable());
+			Assert.AreNotEqual(0, dt.Rows.Count);
 		}
 
 		[Test]
-		public void Gen_SelectAllListWithDestination()
+		public void Gen_SelectAllDataTableReturnVoid()
 		{
-			ArrayList list = new ArrayList();
-			_da.SelectAllList(list);
-			Assert.AreNotEqual(0, list.Count);
-		}
-
-		[Test]
-		public void Gen_SameTypeName()
-		{
-			Person e = _da.SameTypeName("Tester", "Testerson");
-			Assert.IsInstanceOfType(typeof(Person), e);
-			Assert.AreEqual(2, e.ID);
-
-			ArrayList list = _da.SameTypeName();
-			Assert.AreNotEqual(0, list.Count);
-			Assert.IsInstanceOfType(typeof(Person), list[0]);
-
-			PersonDataAccessor1 da1 = (PersonDataAccessor1)DataAccessor.CreateInstance(typeof(PersonDataAccessor1));
-
-			Other.Person e1 = da1.SameTypeName1("Tester", "Testerson");
-			Assert.IsInstanceOfType(typeof(Other.Person), e1);
-			Assert.IsNotEmpty(e1.Diagnosis);
-
-			list = da1.SameTypeName1();
-			Assert.AreNotEqual(0, list.Count);
-			Assert.IsInstanceOfType(typeof(Other.Person), list[0]);
+			DataTable dt = new DataTable();
+			_da.SelectAllDataTableReturnVoid(dt);
+			Assert.AreNotEqual(0, dt.Rows.Count);
 		}
 
 #if FW2
@@ -404,12 +589,83 @@ namespace DataAccess
 		}
 
 		[Test]
+		public void Gen_SelectAllTypedDataTableReturnVoid()
+		{
+			PersonDataSet.PersonDataTable dt = new PersonDataSet.PersonDataTable();
+
+			_da.SelectAllTypedDataTableReturnVoid(dt);
+			Assert.AreNotEqual(0, dt.Rows.Count);
+		}
+#endif
+
+		#endregion
+
+		#region List
+
+		[Test]
+		public void Gen_SelectAllList()
+		{
+			ArrayList list = _da.SelectAllList();
+			Assert.AreNotEqual(0, list.Count);
+		}
+
+		[Test]
+		public void Gen_SelectAllListWithDestination()
+		{
+			IList list = _da.SelectAllListWithDestination(new ArrayList());
+			Assert.AreNotEqual(0, list.Count);
+		}
+
+		[Test]
+		public void Gen_SelectAllListReturnVoid()
+		{
+			ArrayList list = new ArrayList();
+			_da.SelectAllListReturnVoid(list);
+			Assert.AreNotEqual(0, list.Count);
+		}
+
+#if FW2
+
+		[Test]
 		public void Gen_SelectAllListT()
 		{
 			List<Person> list = _da.SelectAllListT();
 			Assert.AreNotEqual(0, list.Count);
 		}
+
+		[Test]
+		public void Gen_SelectAllListTWithObjectType()
+		{
+			List<IPerson> list = _da.SelectAllListTWithObjectType();
+			Assert.AreNotEqual(0, list.Count);
+		}
+
+		[Test]
+		public void Gen_SelectAllListTReturnVoid()
+		{
+			List<Person> list = new List<Person>();
+			_da.SelectAllListTReturnVoid(list);
+			Assert.AreNotEqual(0, list.Count);
+		}
+
+		[Test]
+		public void Gen_SelectAllListTWithObjectTypeReturnVoid()
+		{
+			List<IPerson> list = new List<IPerson>();
+			_da.SelectAllListTWithObjectTypeReturnVoid(list);
+			Assert.AreNotEqual(0, list.Count);
+		}
+
+		[Test]
+		public void Gen_SelectAllListTWithDestination()
+		{
+			List<IPerson> list = _da.SelectAllListTWithDestination(new List<IPerson>());
+			Assert.AreNotEqual(0, list.Count);
+		}
+
 #endif
+
+		#endregion
 	}
 }
 

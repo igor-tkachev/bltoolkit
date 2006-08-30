@@ -51,60 +51,72 @@ namespace DataAccess
 		{
 			[SqlQuery("SELECT * FROM Person")]
 			[Index("ID")]
-			public abstract Hashtable SelectAll1();
+			public abstract Hashtable   SelectAll1();
 
 			[SqlQuery("SELECT * FROM Person WHERE PersonID < 3")]
 			[Index("@PersonID", "LastName")]
-			public abstract Hashtable SelectAll2();
+			public abstract Hashtable   SelectAll2();
 
 			[SqlQuery("SELECT * FROM Person WHERE PersonID < 3")]
 			[Index("@PersonID")]
 			[ScalarFieldName("FirstName")]
 			[ObjectType(typeof(string))]
-			public abstract Hashtable SelectAll3();
+			public abstract Hashtable   SelectAll3();
 
 			[SqlQuery("SELECT * FROM Person WHERE PersonID < 3")]
 			[Index("PersonID", "LastName")]
 			[ScalarFieldName("FirstName")]
 			[ObjectType(typeof(string))]
-			public abstract Hashtable SelectAll4();
+			public abstract Hashtable   SelectAll4();
 
 			[SqlQuery("SELECT * FROM Person WHERE PersonID < 3")]
 			[Index("PersonID", "LastName")]
 			[ScalarFieldName(1)]
 			[ObjectType(typeof(string))]
-			public abstract Hashtable SelectAll5();
+			public abstract Hashtable   SelectAll5();
 
 			// Primary Key(s) => scalar filed. This will fail, since
 			// we can not figure out both key type and scalar object type.
 			// Note that version with generics works just fine.
 			[SqlQuery("SELECT * FROM Person WHERE PersonID < 3")]
 			[ScalarFieldName("FirstName"), ObjectType(typeof(string))]
-			public abstract Hashtable ScalarDictionaryByPK();
+			public abstract Hashtable   ScalarDictionaryByPK();
 
 			[SqlQuery("SELECT * FROM Person WHERE PersonID < 3")]
 			[ObjectType(typeof(PersonNoPK))]
-			public abstract Hashtable Keyless();
+			public abstract Hashtable   Keyless();
 
 			[SqlQuery("SELECT * FROM Person WHERE PersonID < 3")]
 			[ObjectType(typeof(PersonMultiPK))]
-			public abstract Hashtable MultiPK();
+			public abstract Hashtable   MultiPK();
 
 			[SqlQuery("SELECT * FROM Person WHERE PersonID < 3")]
-			public abstract Hashtable DictionaryByPK();
+			[ObjectType(typeof(PersonMultiPK))]
+			public abstract void        MultiPKReturnVoid([Destination] Hashtable dictionary);
+
+			[SqlQuery("SELECT * FROM Person WHERE PersonID < 3")]
+			public abstract Hashtable   DictionaryByPK();
 
 			[SqlQuery("SELECT * FROM Person WHERE PersonID < 3")]
 			[Index("@PersonID")]
-			public abstract Hashtable DictionaryByIndex();
+			public abstract Hashtable   DictionaryByIndex();
 
 			[SqlQuery("SELECT * FROM Person WHERE PersonID < 3")]
 			[Index(0, 1)]
-			public abstract Hashtable DictionaryByMapIndex();
+			public abstract Hashtable   DictionaryByMapIndex();
+
+			[SqlQuery("SELECT * FROM Person WHERE PersonID < 3")]
+			[Index(0, 1)]
+			public abstract IDictionary DictionaryByMapIndexWithDestination([Destination] Hashtable dictionary);
 
 #if FW2
+			[SqlQuery("SELECT * FROM Person WHERE PersonID < 3")]
+			[Index(0), ScalarFieldName(1)]
+			public abstract void                              FW2ScalarDictionaryByIndexReturnVoid1([Destination] IDictionary<int, string> dictionary);
+
 			[SqlQuery("SELECT * FROM Person")]
 			[Index(new string[] { "ID" })]
-			public abstract Dictionary<int, Person> SelectAllT1();
+			public abstract Dictionary<int, Person>           SelectAllT1();
 
 			[SqlQuery("SELECT * FROM Person")]
 			[Index("@PersonID", "LastName")]
@@ -113,7 +125,7 @@ namespace DataAccess
 			[SqlQuery("SELECT * FROM Person")]
 			[Index("@PersonID")]
 			[ScalarFieldName("FirstName")]
-			public abstract Dictionary<int, string> SelectAllT3();
+			public abstract Dictionary<int, string>           SelectAllT3();
 
 			[SqlQuery("SELECT * FROM Person")]
 			[Index("PersonID", "LastName")]
@@ -127,15 +139,19 @@ namespace DataAccess
 
 			[SqlQuery("SELECT * FROM Person WHERE PersonID < 3")]
 			[ScalarFieldName("FirstName")]
-			public abstract Dictionary<object, string> FW2ScalarDictionaryByPK();
+			public abstract Dictionary<object, string>        FW2ScalarDictionaryByPK();
 
 			[SqlQuery("SELECT * FROM Person WHERE PersonID < 3")]
 			[ScalarFieldName(1)] // Index from Db table Person, not type Person!
-			public abstract Dictionary<int, string> FW2ScalarDictionaryByPK2();
+			public abstract Dictionary<int, string>           FW2ScalarDictionaryByPK2();
 
 			[SqlQuery("SELECT * FROM Person WHERE PersonID < 3")]
 			[Index(0), ScalarFieldName(1)]
-			public abstract Dictionary<int, string> FW2ScalarDictionaryByIndex();
+			public abstract Dictionary<int, string>           FW2ScalarDictionaryByIndex();
+
+			[SqlQuery("SELECT * FROM Person WHERE PersonID < 3")]
+			[Index(0), ScalarFieldName(1)]
+			public abstract void                              FW2ScalarDictionaryByIndexReturnVoid([Destination] IDictionary<int, string> dictionary);
 
 			[SqlQuery("SELECT * FROM Person WHERE PersonID < 3")]
 			[Index(0, 1), ScalarFieldName(1)]
@@ -143,11 +159,11 @@ namespace DataAccess
 
 			[SqlQuery("SELECT * FROM Person WHERE PersonID < 3")]
 			[Index(0)]
-			public abstract Dictionary<int, PersonNoPK> FW2ScalarDictionaryByPKWithCustomType();
+			public abstract Dictionary<int, PersonNoPK>       FW2ScalarDictionaryByPKWithCustomType();
 
 			[SqlQuery("SELECT * FROM Person WHERE PersonID < 3")]
-			[ObjectType(typeof(PersonMultiPK))] // Generic type will override ObjectType
-			public abstract Dictionary<int, Person> FW2ScalarDictionaryByPKWithIgnoredObjectType();
+			[ObjectType(typeof(Person))]
+			public abstract Dictionary<int, object>           Fw2ScalarDictionaryByPKWithObjectType();
 #endif
 		}
 
@@ -253,7 +269,23 @@ namespace DataAccess
 			Assert.IsNotNull(actualValue);
 			Assert.AreEqual("John", actualValue.FirstName);
 		}
-		
+
+		[Test]
+		public void DictionaryByMapIndexTestWithDestionation()
+		{
+			TestAccessor da = (TestAccessor)DataAccessor.CreateInstance(typeof(TestAccessor));
+
+			IDictionary persons = da.DictionaryByMapIndexWithDestination(new Hashtable());
+
+			Assert.IsNotNull(persons);
+			Assert.IsTrue(persons.Count > 0);
+			Assert.IsNull(persons[-1]);
+
+			Person actualValue = (Person)persons[new CompoundValue(1, "Pupkin")];
+			Assert.IsNotNull(actualValue);
+			Assert.AreEqual("John", actualValue.FirstName);
+		}
+
 		[Test, ExpectedException(typeof(DataAccessException))]
 		public void ScalarDictionaryByPKTest()
 		{
@@ -270,6 +302,23 @@ namespace DataAccess
 			TestAccessor da = (TestAccessor)DataAccessor.CreateInstance(typeof(TestAccessor));
 
 			Hashtable persons =  da.MultiPK();
+			
+			Assert.IsNotNull(persons);
+			Assert.IsTrue(persons.Count > 0);
+			Assert.IsNull(persons[new CompoundValue(-1, "NoSuchPerson")]);
+
+			PersonMultiPK actualValue = (PersonMultiPK)persons[new CompoundValue(1, "Pupkin")];
+			Assert.IsNotNull(actualValue);
+			Assert.AreEqual("John", actualValue.FirstName);
+		}
+		
+		[Test]
+		public void MultiPKTestReturnVoid()
+		{
+			TestAccessor da = (TestAccessor)DataAccessor.CreateInstance(typeof(TestAccessor));
+
+			Hashtable persons = new Hashtable();
+			da.MultiPKReturnVoid(persons);
 			
 			Assert.IsNotNull(persons);
 			Assert.IsTrue(persons.Count > 0);
@@ -327,6 +376,22 @@ namespace DataAccess
 		}
 
 		[Test]
+		public void FW2ScalarDictionaryByIndexReturnVoidTest()
+		{
+			TestAccessor da = DataAccessor.CreateInstance<TestAccessor>();
+
+			IDictionary<int, string> persons = new Dictionary<int, string>();
+			da.FW2ScalarDictionaryByIndexReturnVoid(persons);
+
+			Assert.IsNotNull(persons);
+			Assert.IsTrue(persons.Count > 0);
+
+			string actualValue = persons[1];
+			Assert.IsNotNull(actualValue);
+			Assert.AreEqual("John", actualValue);
+		}
+
+		[Test]
 		public void FW2ScalarDictionaryByMapIndexTest()
 		{
 			TestAccessor da = DataAccessor.CreateInstance<TestAccessor>();
@@ -355,15 +420,15 @@ namespace DataAccess
 		}
 
 		[Test]
-		public void FW2ScalarDictionaryByPKWithIgnoredObjectTypeTest()
+		public void FW2ScalarDictionaryByPKWithObjectTypeTest()
 		{
 			TestAccessor da = DataAccessor.CreateInstance<TestAccessor>();
-			Dictionary<int, Person> persons = da.FW2ScalarDictionaryByPKWithIgnoredObjectType();
+			Dictionary<int, object> persons = da.Fw2ScalarDictionaryByPKWithObjectType();
 
 			Assert.IsNotNull(persons);
 			Assert.IsTrue(persons.Count > 0);
 
-			Person actualValue = persons[1];
+			Person actualValue = (Person) persons[1];
 			Assert.IsNotNull(actualValue);
 			Assert.AreEqual("John", actualValue.FirstName);
 		}

@@ -45,6 +45,7 @@ namespace BLToolkit.DataAccess
 
 		Type            _baseType = typeof(DataAccessor);
 		Type            _objectType;
+		bool            _explicitObjectType;
 		ParameterInfo[] _parameters;
 		ArrayList       _paramList;
 		ArrayList       _refParamList;
@@ -69,6 +70,7 @@ namespace BLToolkit.DataAccess
 			_destination         = null;
 			_createManager       = true;
 			_objectType          = null;
+			_explicitObjectType  = false;
 			_parameters          = Context.CurrentMethod.GetParameters();
 			_locManager          = Context.MethodBuilder.Emitter.DeclareLocal(typeof(DbManager));
 			_locObjType          = Context.MethodBuilder.Emitter.DeclareLocal(typeof(Type));
@@ -82,7 +84,7 @@ namespace BLToolkit.DataAccess
 
 			// Define execute method type.
 			//
-			Type returnType = Context.CurrentMethod.ReturnType;
+			Type returnType = _destination != null? _destination.ParameterType: Context.CurrentMethod.ReturnType;
 
 			if (returnType == typeof(IDataReader))
 			{
@@ -90,22 +92,28 @@ namespace BLToolkit.DataAccess
 			}
 			else if (returnType == typeof(DataSet) || returnType.IsSubclassOf(typeof(DataSet)))
 			{
-				ExecuteDataSet();
+				ExecuteDataSet(returnType);
 			}
 			else if (returnType == typeof(DataTable) || returnType.IsSubclassOf(typeof(DataTable)))
 			{
 				ExecuteDataTable();
 			}
-			else if (IsInterfaceOf(returnType, typeof(IList))
-				&& !returnType.IsArray) // Arrays are ILists w/o Add() method.
+			else if (!returnType.IsArray && (IsInterfaceOf(returnType, typeof(IList))
+#if FW2
+				|| returnType.IsGenericType && returnType.GetGenericTypeDefinition() == typeof(System.Collections.Generic.IList<>)
+#endif
+				))
 			{
-				Type elementType = TypeHelper.GetListItemType(returnType);
+				if (!_explicitObjectType)
+				{
+					Type elementType = TypeHelper.GetListItemType(returnType);
 
-				if (elementType == typeof(object) && _destination != null)
-					elementType = TypeHelper.GetListItemType(_destination.ParameterType);
+					if (elementType == typeof(object) && _destination != null)
+						elementType = TypeHelper.GetListItemType(Context.CurrentMethod.ReturnType);
 
-				if (elementType != typeof(object))
-					_objectType = elementType;
+					if (elementType != typeof(object))
+						_objectType = elementType;
+				}
 
 				if (_objectType == null || _objectType == typeof(object))
 					throw new TypeBuilderException(string.Format(
@@ -118,11 +126,14 @@ namespace BLToolkit.DataAccess
 				else
 					ExecuteList();
 			}
-			else if (IsInterfaceOf(returnType, typeof(IDictionary)))
+			else if (IsInterfaceOf(returnType, typeof(IDictionary))
+#if FW2
+				|| returnType.IsGenericType && returnType.GetGenericTypeDefinition() == typeof(System.Collections.Generic.IDictionary<,>)
+#endif
+				)
 			{
 				Type elementType = null;
 				Type keyType     = typeof(object);
-
 #if FW2
 				Type[] gTypes = TypeHelper.GetGenericArguments(returnType, "IDictionary");
 
@@ -136,7 +147,7 @@ namespace BLToolkit.DataAccess
 				}
 #endif
 
-				if (elementType == null)
+				if (elementType == null || _explicitObjectType)
 					elementType = _objectType;
 
 				if (elementType == null || elementType == typeof(object))
@@ -155,7 +166,7 @@ namespace BLToolkit.DataAccess
 
 				MethodInfo mi = Context.CurrentMethod;
 
-				object[] attrs  = mi.GetCustomAttributes(typeof(IndexAttribute), true);
+				object[] attrs = mi.GetCustomAttributes(typeof(IndexAttribute), true);
 				NameOrIndexParameter[] fields = new NameOrIndexParameter[0];
 
 				if (attrs.Length != 0)
@@ -321,7 +332,9 @@ namespace BLToolkit.DataAccess
 
 			object[] attrs = mi.GetCustomAttributes(typeof(ObjectTypeAttribute), true);
 
-			if (attrs.Length == 0)
+			if (attrs.Length != 0)
+				_explicitObjectType = true;
+			else
 				attrs = mi.DeclaringType.GetCustomAttributes(typeof(ObjectTypeAttribute), true);
 
 			if (attrs.Length != 0)
@@ -346,17 +359,30 @@ namespace BLToolkit.DataAccess
 			GetSprocName();
 			CallSetCommand();
 
-			Context.MethodBuilder.Emitter
-				.callvirt (typeof(DbManager).GetMethod("ExecuteReader", Type.EmptyTypes))
-				.stloc    (Context.ReturnValue)
-				;
+			object[] attrs = Context.CurrentMethod.GetCustomAttributes(typeof(CommandBehaviorAttribute), true);
+
+			if (attrs.Length == 0)
+			{
+				Context.MethodBuilder.Emitter
+					.callvirt (typeof(DbManager).GetMethod("ExecuteReader", Type.EmptyTypes))
+					.stloc    (Context.ReturnValue)
+					;
+			}
+			else
+			{
+				Context.MethodBuilder.Emitter
+					.ldc_i4_  ((int)((CommandBehaviorAttribute)attrs[0]).CommandBehavior)
+					.callvirt (typeof(DbManager), "ExecuteReader", typeof(CommandBehavior))
+					.stloc    (Context.ReturnValue)
+					;
+			}
 		}
 
 		#endregion
 
 		#region ExecuteDataSet
 
-		private void ExecuteDataSet()
+		private void ExecuteDataSet(Type returnType)
 		{
 			CreateReturnTypeInstance();
 			InitObjectType();
@@ -365,11 +391,12 @@ namespace BLToolkit.DataAccess
 
 			EmitHelper emit = Context.MethodBuilder.Emitter;
 
-			if (Context.CurrentMethod.ReturnType == typeof(DataSet))
+			if (returnType == typeof(DataSet))
 			{
+				LoadDestinationOrReturnValue();
+
 				emit
-					.ldloc    (Context.ReturnValue)
-					.callvirt (typeof(DbManager), "ExecuteDataSet", typeof(DataSet))
+					.callvirt  (typeof(DbManager), "ExecuteDataSet", typeof(DataSet))
 					.pop
 					.end()
 					;
@@ -378,8 +405,10 @@ namespace BLToolkit.DataAccess
 			{
 				emit
 					.pop
-					.ldloc (Context.ReturnValue)
+					.end()
 					;
+
+				LoadDestinationOrReturnValue();
 
 				Label l1 = emit.DefineLabel();
 				Label l2 = emit.DefineLabel();
@@ -389,20 +418,26 @@ namespace BLToolkit.DataAccess
 					.callvirt  (typeof(InternalDataCollectionBase).GetProperty("Count").GetGetMethod())
 					.ldc_i4_0
 					.ble_s(l1)
-					.ldloc     (_locManager)
-					.ldloc     (Context.ReturnValue)
-					.ldloc     (Context.ReturnValue)
+					.ldloc     (_locManager);
+
+				LoadDestinationOrReturnValue();
+				LoadDestinationOrReturnValue();
+
+				emit
 					.callvirt  (typeof(DataSet).GetProperty("Tables").GetGetMethod())
 					.ldc_i4_0
 					.callvirt  (typeof(DataTableCollection), "get_Item", typeof(int))
 					.callvirt  (typeof(DataTable).GetProperty("TableName").GetGetMethod())
-					.call(typeof(NameOrIndexParameter), "op_Implicit", typeof(string))
-					.callvirt(typeof(DbManager), "ExecuteDataSet", typeof(DataSet), typeof(NameOrIndexParameter))
+					.call      (typeof(NameOrIndexParameter), "op_Implicit", typeof(string))
+					.callvirt  (typeof(DbManager), "ExecuteDataSet", typeof(DataSet), typeof(NameOrIndexParameter))
 					.pop
 					.br_s      (l2)
 					.MarkLabel (l1)
-					.ldloc     (_locManager)
-					.ldloc     (Context.ReturnValue)
+					.ldloc     (_locManager);
+
+				LoadDestinationOrReturnValue();
+
+				emit
 					.callvirt  (typeof(DbManager), "ExecuteDataSet", typeof(DataSet))
 					.pop
 					.MarkLabel (l2)
@@ -420,9 +455,9 @@ namespace BLToolkit.DataAccess
 			InitObjectType();
 			GetSprocName();
 			CallSetCommand();
+			LoadDestinationOrReturnValue();
 
 			Context.MethodBuilder.Emitter
-				.ldloc    (Context.ReturnValue)
 				.callvirt (typeof(DbManager), "ExecuteDataTable", typeof(DataTable))
 				.pop
 				.end()
@@ -439,13 +474,13 @@ namespace BLToolkit.DataAccess
 			InitObjectType();
 			GetSprocName();
 			CallSetCommand();
+			LoadDestinationOrReturnValue();
 
 			object[] attrs = Context.CurrentMethod.GetCustomAttributes(typeof(ScalarFieldNameAttribute), true);
 
 			if (attrs.Length == 0)
 			{
 				Context.MethodBuilder.Emitter
-					.ldloc(Context.ReturnValue)
 					.ldloc(_locObjType)
 					.callvirt(typeof(DbManager), "ExecuteScalarList", typeof(IList), typeof(Type))
 					.pop
@@ -455,7 +490,6 @@ namespace BLToolkit.DataAccess
 			else
 			{
 				Context.MethodBuilder.Emitter
-					.ldloc(Context.ReturnValue)
 					.ldloc(_locObjType)
 					.ldNameOrIndex(((ScalarFieldNameAttribute)attrs[0]).NameOrIndex)
 					.callvirt(typeof(DbManager), "ExecuteScalarList", typeof(IList), typeof(Type), typeof(NameOrIndexParameter))
@@ -471,9 +505,9 @@ namespace BLToolkit.DataAccess
 			InitObjectType();
 			GetSprocName();
 			CallSetCommand();
+			LoadDestinationOrReturnValue();
 
 			Context.MethodBuilder.Emitter
-				.ldloc    (Context.ReturnValue)
 				.ldloc    (_locObjType)
 				.callvirt (typeof(DbManager), "ExecuteList", typeof(IList), typeof(Type))
 				.pop
@@ -526,7 +560,7 @@ namespace BLToolkit.DataAccess
 				{
 					emit
 						.ldloc(arr)
-						.ldc_i4(i)
+						.ldc_i4_(i)
 						.ldelema(typeof(NameOrIndexParameter));
 
 					if (namesOrIndexes[i].ByName)
@@ -536,7 +570,7 @@ namespace BLToolkit.DataAccess
 					}
 					else
 					{
-						emit.ldc_i4(namesOrIndexes[i].Index)
+						emit.ldc_i4_(namesOrIndexes[i].Index)
 							.call(typeof(NameOrIndexParameter), "op_Implicit", typeof(int));
 					}
 					emit
@@ -573,17 +607,17 @@ namespace BLToolkit.DataAccess
 
 			GetSprocName();
 			CallSetCommand();
+			LoadDestinationOrReturnValue();
 
 			Context.MethodBuilder.Emitter
-				.ldloc(Context.ReturnValue)
-				.ldloc(_locObjType)
-				.LoadType(keyType)
-				.ldstr(Context.CurrentMethod.Name)
-				.ldNameOrIndex(scalarField)
-				.LoadType(elementType)
-				.callvirt(typeof(DataAccessor), "ExecuteScalarDictionary", _bindingFlags,
-					typeof(DbManager), typeof(IDictionary), typeof(Type),
-					typeof(Type), typeof(string), typeof(NameOrIndexParameter), typeof(Type))
+				.ldloc         (_locObjType)
+				.LoadType      (keyType)
+				.ldstr         (Context.CurrentMethod.Name)
+				.ldNameOrIndex (scalarField)
+				.LoadType      (elementType)
+				.callvirt      (typeof(DataAccessor), "ExecuteScalarDictionary", _bindingFlags,
+					            typeof(DbManager), typeof(IDictionary), typeof(Type),
+					            typeof(Type), typeof(string), typeof(NameOrIndexParameter), typeof(Type))
 				;
 		}
 
@@ -601,15 +635,15 @@ namespace BLToolkit.DataAccess
 			InitObjectType();
 			GetSprocName();
 			CallSetCommand();
+			LoadDestinationOrReturnValue();
 
 			Context.MethodBuilder.Emitter
-				.ldloc    (Context.ReturnValue)
-				.ldsfld   (GetIndexField(index))
-				.ldNameOrIndex(scalarField)
-				.ldloc(_locObjType)
-				.callvirt (typeof(DbManager), "ExecuteScalarDictionary",
-					typeof(IDictionary), typeof(MapIndex),
-					typeof(NameOrIndexParameter), typeof(Type))
+				.ldsfld        (GetIndexField(index))
+				.ldNameOrIndex (scalarField)
+				.ldloc         (_locObjType)
+				.callvirt      (typeof(DbManager), "ExecuteScalarDictionary",
+					            typeof(IDictionary), typeof(MapIndex),
+					            typeof(NameOrIndexParameter), typeof(Type))
 				.pop
 				.end()
 				;
@@ -628,16 +662,16 @@ namespace BLToolkit.DataAccess
 			InitObjectType();
 			GetSprocName();
 			CallSetCommand();
+			LoadDestinationOrReturnValue();
 
 			Context.MethodBuilder.Emitter
-				.ldloc(Context.ReturnValue)
-				.ldNameOrIndex(keyField)
-				.LoadType (keyType)
-				.ldNameOrIndex(scalarField)
-				.ldloc(_locObjType)
-				.callvirt (typeof(DbManager), "ExecuteScalarDictionary",
-					typeof(IDictionary), typeof(NameOrIndexParameter), typeof(Type),
-					typeof(NameOrIndexParameter), typeof(Type))
+				.ldNameOrIndex (keyField)
+				.LoadType      (keyType)
+				.ldNameOrIndex (scalarField)
+				.ldloc         (_locObjType)
+				.callvirt      (typeof(DbManager), "ExecuteScalarDictionary",
+					            typeof(IDictionary), typeof(NameOrIndexParameter), typeof(Type),
+					            typeof(NameOrIndexParameter), typeof(Type))
 				.pop
 				.end()
 				;
@@ -662,15 +696,15 @@ namespace BLToolkit.DataAccess
 
 			GetSprocName();
 			CallSetCommand();
+			LoadDestinationOrReturnValue();
 
 			Context.MethodBuilder.Emitter
-				.ldloc    (Context.ReturnValue)
 				.ldloc    (_locObjType)
 				.LoadType (keyType)
 				.ldstr    (Context.CurrentMethod.Name)
 				.callvirt (typeof(DataAccessor), "ExecuteDictionary", _bindingFlags,
-					typeof(DbManager), typeof(IDictionary), typeof(Type),
-					typeof(Type), typeof(string))
+					       typeof(DbManager), typeof(IDictionary), typeof(Type),
+					       typeof(Type), typeof(string))
 				;
 		}
 
@@ -687,14 +721,14 @@ namespace BLToolkit.DataAccess
 			InitObjectType();
 			GetSprocName();
 			CallSetCommand();
+			LoadDestinationOrReturnValue();
 
 			Context.MethodBuilder.Emitter
-				.ldloc    (Context.ReturnValue)
 				.ldsfld   (GetIndexField(index))
 				.ldloc    (_locObjType)
 				.ldnull
 				.callvirt (typeof(DbManager), "ExecuteDictionary",
-					typeof(IDictionary), typeof(MapIndex), typeof(Type), typeof(object[]))
+					       typeof(IDictionary), typeof(MapIndex), typeof(Type), typeof(object[]))
 				.pop
 				.end()
 				;
@@ -713,14 +747,14 @@ namespace BLToolkit.DataAccess
 			InitObjectType();
 			GetSprocName();
 			CallSetCommand();
+			LoadDestinationOrReturnValue();
 
 			Context.MethodBuilder.Emitter
-				.ldloc    (Context.ReturnValue)
 				.ldNameOrIndex(keyField)
-				.ldloc(_locObjType)
+				.ldloc        (_locObjType)
 				.ldnull
-				.callvirt (typeof(DbManager), "ExecuteDictionary",
-					typeof(IDictionary), typeof(NameOrIndexParameter), typeof(Type), typeof(object[]))
+				.callvirt     (typeof(DbManager), "ExecuteDictionary",
+					           typeof(IDictionary), typeof(NameOrIndexParameter), typeof(Type), typeof(object[]))
 				.pop
 				.end()
 				;
@@ -762,8 +796,6 @@ namespace BLToolkit.DataAccess
 
 		public void ExecuteScalar()
 		{
-			//InitObjectType();
-
 			if (_destination != null)
 				throw new TypeBuilderException("ExecuteScalar does not support the Destination attribute");
 
@@ -787,7 +819,7 @@ namespace BLToolkit.DataAccess
 				ScalarSourceAttribute attr = (ScalarSourceAttribute)attrs[0];
 
 				emit
-					.ldc_i4((int)attr.ScalarType)
+					.ldc_i4_((int)attr.ScalarType)
 					.ldNameOrIndex(attr.NameOrIndex)
 					.callvirtNoGenerics(typeof(DbManager), "ExecuteScalar", typeof(ScalarSourceType), typeof(NameOrIndexParameter));
 			}
@@ -841,10 +873,20 @@ namespace BLToolkit.DataAccess
 					;
 			}
 
-			emit
-				.castclass(_objectType)
-				.stloc(Context.ReturnValue)
-				;
+			if (null != Context.ReturnValue)
+			{
+				emit
+					.castclass(_objectType)
+					.stloc(Context.ReturnValue)
+					;
+			}
+			else
+			{
+				emit
+					.pop
+					.end()
+					;
+			}
 		}
 
 		#endregion
@@ -874,6 +916,9 @@ namespace BLToolkit.DataAccess
 
 		private void CreateReturnTypeInstance()
 		{
+			if (null == Context.ReturnValue)
+				return;
+
 			if (null != _destination)
 			{
 				Context.MethodBuilder.Emitter
@@ -894,6 +939,14 @@ namespace BLToolkit.DataAccess
 					.stloc    (Context.ReturnValue)
 					;
 			}
+		}
+
+		private void LoadDestinationOrReturnValue()
+		{
+			if (_destination != null)
+				Context.MethodBuilder.Emitter.ldarg(_destination);
+			else
+				Context.MethodBuilder.Emitter.ldloc(Context.ReturnValue);
 		}
 
 		private void InitObjectType()
@@ -962,7 +1015,7 @@ namespace BLToolkit.DataAccess
 				LocalBuilder locParams = emit.DeclareLocal(typeof(object[]));
 
 				emit
-					.ldc_i4       (_formatParamList.Count)
+					.ldc_i4_      (_formatParamList.Count)
 					.newarr       (typeof(object))
 					.stloc        (locParams)
 					;
@@ -973,7 +1026,7 @@ namespace BLToolkit.DataAccess
 
 					emit
 						.ldloc          (locParams)
-						.ldc_i4         (i)
+						.ldc_i4_        (i)
 						.ldarg          (pi)
 						.boxIfValueType (pi.ParameterType)
 						.stelem_ref
@@ -1053,7 +1106,7 @@ namespace BLToolkit.DataAccess
 
 				emit
 					.ldloc    (locParams)
-					.ldc_i4   (i)
+					.ldc_i4_  (i)
 					;
 
 				BuildParameter(pi);
@@ -1108,7 +1161,7 @@ namespace BLToolkit.DataAccess
 				{
 					emit
 						.ldloc         (localArray)
-						.ldc_i4        (i)
+						.ldc_i4_       (i)
 						.ldstr         (strings[i])
 						.stelem_ref
 						.end()
@@ -1144,7 +1197,7 @@ namespace BLToolkit.DataAccess
 
 				emit
 					.ldloc             (locParams)
-					.ldc_i4            (i)
+					.ldc_i4_           (i)
 					;
 
 				if (_paramList.Contains(pi))
@@ -1286,7 +1339,7 @@ namespace BLToolkit.DataAccess
 			LocalBuilder locParams = emit.DeclareLocal(typeof(object[]));
 
 			emit
-				.ldc_i4             (_paramList.Count)
+				.ldc_i4_            (_paramList.Count)
 				.newarr             (typeof(object))
 				.stloc              (locParams)
 				;
@@ -1297,7 +1350,7 @@ namespace BLToolkit.DataAccess
 
 				emit
 					.ldloc          (locParams)
-					.ldc_i4         (i)
+					.ldc_i4_        (i)
 					.ldarg          (pi)
 					.boxIfValueType (pi.ParameterType)
 					.stelem_ref
