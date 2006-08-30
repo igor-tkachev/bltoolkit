@@ -1,7 +1,7 @@
 <VisualStudioProject>
     <CSHARP
         ProjectType = "Local"
-        ProductVersion = "7.10.6030"
+        ProductVersion = "7.10.3077"
         SchemaVersion = "2.0"
         ProjectGuid = "{C8B3F401-4634-4742-A266-4BD9ED7565E5}"
     >
@@ -830,6 +830,26 @@
                 />
                 <File
                     RelPath = "Mapping\Compatibility\SchemaTableColumn.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "Mapping\MetadataProvider\MapAttributeMetadataProvider.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "Mapping\MetadataProvider\MapExtensionMetadataProvider.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "Mapping\MetadataProvider\MapMetadataProvider.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "Mapping\MetadataProvider\MapMetadataProviderList.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
                 />

@@ -4,6 +4,7 @@ using System.Data.SqlTypes;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 
+using BLToolkit.Mapping.MetadataProvider;
 using BLToolkit.Reflection;
 using BLToolkit.Reflection.Extension;
 
@@ -68,16 +69,9 @@ namespace BLToolkit.Mapping
 			_nameToMember.Add(memberMapper.Name.ToLower(), memberMapper);
 		}
 
-		private   object[] _mapFieldAttributes;
-		protected object[]  MapFieldAttributes
+		protected virtual MapMetadataProvider CreateMetadataProvider()
 		{
-			get
-			{
-				if (_mapFieldAttributes == null)
-					_mapFieldAttributes = TypeHelper.GetAttributes(_typeAccessor.Type, typeof(MapFieldAttribute));
-
-				return _mapFieldAttributes;
-			}
+			return MapMetadataProvider.CreateProvider();
 		}
 
 		#endregion
@@ -95,6 +89,18 @@ namespace BLToolkit.Mapping
 		{
 			get { return _extension;  }
 			set { _extension = value; }
+		}
+
+		private MapMetadataProvider _metadataProvider;
+		public  MapMetadataProvider  MetadataProvider
+		{
+			get
+			{
+				if (_metadataProvider == null)
+					_metadataProvider = CreateMetadataProvider();
+				return _metadataProvider;
+			}
+			set { _metadataProvider = value; }
 		}
 
 		private string[] _fieldNames;
@@ -203,7 +209,9 @@ namespace BLToolkit.Mapping
 
 			foreach (MemberAccessor ma in _typeAccessor)
 			{
-				if (GetIgnore(ma))
+				bool isSet;
+
+				if (MetadataProvider.GetIgnore(this, ma, out isSet))
 					continue;
 
 				MapFieldAttribute mapFieldAttr = (MapFieldAttribute)ma.GetAttribute(typeof(MapFieldAttribute));
@@ -212,22 +220,24 @@ namespace BLToolkit.Mapping
 				{
 					MapMemberInfo mi = new MapMemberInfo();
 
-					mi.MemberAccessor = ma;
-					mi.Type = ma.Type;
-					mi.MappingSchema = mappingSchema;
+					mi.MemberAccessor  = ma;
+					mi.Type            = ma.Type;
+					mi.MappingSchema   = mappingSchema;
 					mi.MemberExtension = _extension[ma.Name];
-					mi.Name = GetFieldName(ma);
-					mi.MemberName = ma.Name;
-					mi.Trimmable = GetTrimmable(ma);
-					mi.MapValues = GetMapValues(ma);
-					mi.DefaultValue = GetDefaultValue(ma);
-					mi.Nullable = GetNullable(ma);
-					mi.NullValue = GetNullValue(ma, mi.Nullable);
+					mi.Name            = MetadataProvider.GetFieldName(this, ma, out isSet);
+					mi.MemberName      = ma.Name;
+					mi.Trimmable       = MetadataProvider.GetTrimmable(this, ma, out isSet);
+					mi.MapValues       = GetMapValues(ma);
+					mi.DefaultValue    = GetDefaultValue(ma);
+					mi.Nullable        = GetNullable(ma);
+					mi.NullValue       = GetNullValue(ma, mi.Nullable);
 
 					Add(CreateMemberMapper(mi));
 				}
 				else if (null != mapFieldAttr.OrigName)
+				{
 					EnsureMapper(mapFieldAttr.MapName, ma.Name + "." + mapFieldAttr.OrigName);
+				}
 				else if (null != mapFieldAttr.Format)
 				{
 					foreach (MemberMapper inner in _mappingSchema.GetObjectMapper(ma.Type))
@@ -248,8 +258,7 @@ namespace BLToolkit.Mapping
 				EnsureMapper(mapName, origName);
 			}
 
-			foreach (MapFieldAttribute attr in MapFieldAttributes)
-				EnsureMapper(attr.MapName, attr.OrigName);
+			MetadataProvider.EnsureMapper(this, new EnsureMapperHandler(EnsureMapper));
 		}
 
 		private MemberMapper EnsureMapper(string mapName, string origName)
@@ -331,6 +340,8 @@ namespace BLToolkit.Mapping
 			return null;
 		}
 
+		/*
+		[Obsolete]
 		protected virtual string GetFieldName(MemberAccessor memberAccessor)
 		{
 			object extValue = Extension[memberAccessor.Name]["MapField"].Value;
@@ -352,6 +363,7 @@ namespace BLToolkit.Mapping
 			return memberAccessor.Name;
 		}
 
+		[Obsolete]
 		protected virtual bool GetIgnore(MemberAccessor memberAccessor)
 		{
 			object extValue = Extension[memberAccessor.Name]["MapIgnore"].Value;
@@ -394,6 +406,7 @@ namespace BLToolkit.Mapping
 
 			return TrimmableAttribute.Default.IsTrimmable;
 		}
+		*/
 
 		private ArrayList GetExtensionMapValues(MemberAccessor memberAccessor)
 		{
