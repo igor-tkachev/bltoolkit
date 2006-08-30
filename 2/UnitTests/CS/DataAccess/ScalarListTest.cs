@@ -18,7 +18,7 @@ namespace DataAccess
 		{
 			[SprocName("Person_SelectAll")]
 			[ObjectType(typeof(int))]
-			public abstract ArrayList SelectIDs(DbManager db);
+			public abstract ArrayList SelectIDs       (DbManager db);
 
 			[SprocName("Person_SelectAll")]
 			[ObjectType(typeof(string)), ScalarFieldName(1)]
@@ -26,20 +26,29 @@ namespace DataAccess
 
 			[SprocName("Person_SelectAll")]
 			[ObjectType(typeof(string)), ScalarFieldName("LastName")]
-			public abstract ArrayList SelectLastNames(DbManager db);
+			public abstract ArrayList SelectLastNames (DbManager db);
 
 #if FW2
+
 			[SprocName("Person_SelectAll")]
-			public abstract List<int> FW2SelectIDs(DbManager db);
+			public abstract List<int>          FW2SelectIDs              (DbManager db);
 
 			[SprocName("Person_SelectAll")]
 			[ScalarFieldName(1)]
-			public abstract List<string> FW2SelectFirstNames(DbManager db);
+			public abstract List<string>       FW2SelectFirstNames       (DbManager db);
 
 			[SprocName("Person_SelectAll")]
 			[ScalarFieldName("LastName")]
-			public abstract List<string> FW2SelectLastNames(DbManager db);
+			public abstract List<string>       FW2SelectLastNames        (DbManager db);
+
+			[SprocName("Person_SelectAll"), ObjectType(typeof(int))]
+			public abstract List<IConvertible> FW2SelectIDsAsIConvertible(DbManager db);
+
+			[SprocName("Person_SelectAll")]
+			public abstract void               FW2SelectIDsReturnVoid    (DbManager db, [Destination] List<int> list);
+
 #endif
+
 			public static TestAccessor CreateInstance()
 			{
 				return (TestAccessor)CreateInstance(typeof(TestAccessor));
@@ -52,11 +61,11 @@ namespace DataAccess
 			using (DbManager db = new DbManager())
 			{
 				TestAccessor ta = TestAccessor.CreateInstance();
-				ArrayList array = ta.SelectIDs(db);
+				ArrayList list = ta.SelectIDs(db);
 
-				Assert.IsNotNull(array);
-				Assert.IsTrue(array.Count > 0);
-				Assert.IsTrue(array[0] is int);
+				Assert.IsNotNull (list);
+				Assert.IsNotEmpty(list);
+				Assert.IsTrue(list[0] is int);
 			}
 		}
 
@@ -66,11 +75,11 @@ namespace DataAccess
 			using (DbManager db = new DbManager())
 			{
 				TestAccessor ta = TestAccessor.CreateInstance();
-				ArrayList array = ta.SelectFirstNames(db);
+				ArrayList list = ta.SelectFirstNames(db);
 
-				Assert.IsNotNull(array);
-				Assert.IsTrue(array.Count > 0);
-				Assert.IsTrue(array[0] is string);
+				Assert.IsNotNull (list);
+				Assert.IsNotEmpty(list);
+				Assert.IsTrue(list[0] is string);
 			}
 		}
 
@@ -80,11 +89,11 @@ namespace DataAccess
 			using (DbManager db = new DbManager())
 			{
 				TestAccessor ta = TestAccessor.CreateInstance();
-				ArrayList array = ta.SelectLastNames(db);
+				ArrayList list = ta.SelectLastNames(db);
 
-				Assert.IsNotNull(array);
-				Assert.IsTrue(array.Count > 0);
-				Assert.IsTrue(array[0] is string);
+				Assert.IsNotNull (list);
+				Assert.IsNotEmpty(list);
+				Assert.IsTrue(list[0] is string);
 			}
 		}
 #if FW2
@@ -94,10 +103,37 @@ namespace DataAccess
 			using (DbManager db = new DbManager())
 			{
 				TestAccessor ta = TestAccessor.CreateInstance();
-				List<int> array = ta.FW2SelectIDs(db);
+				List<int> list = ta.FW2SelectIDs(db);
 
-				Assert.IsNotNull(array);
-				Assert.IsTrue(array.Count > 0);
+				Assert.IsNotNull (list);
+				Assert.IsNotEmpty(list);
+			}
+		}
+
+		[Test]
+		public void FW2SelectIDsAsIConvertibleTest()
+		{
+			using (DbManager db = new DbManager())
+			{
+				TestAccessor ta = TestAccessor.CreateInstance();
+				List<IConvertible> list = ta.FW2SelectIDsAsIConvertible(db);
+
+				Assert.IsNotNull (list);
+				Assert.IsNotEmpty(list);
+			}
+		}
+
+		[Test]
+		public void FW2SelectIDsReturnVoidTest()
+		{
+			using (DbManager db = new DbManager())
+			{
+				TestAccessor ta = TestAccessor.CreateInstance();
+				List<int> list = new List<int>();
+				ta.FW2SelectIDsReturnVoid(db, list);
+
+				Assert.IsNotNull (list);
+				Assert.IsNotEmpty(list);
 			}
 		}
 
@@ -107,10 +143,10 @@ namespace DataAccess
 			using (DbManager db = new DbManager())
 			{
 				TestAccessor ta = TestAccessor.CreateInstance();
-				List<string> array = ta.FW2SelectFirstNames(db);
+				List<string> list = ta.FW2SelectFirstNames(db);
 
-				Assert.IsNotNull(array);
-				Assert.IsTrue(array.Count > 0);
+				Assert.IsNotNull (list);
+				Assert.IsNotEmpty(list);
 			}
 		}
 
@@ -120,10 +156,10 @@ namespace DataAccess
 			using (DbManager db = new DbManager())
 			{
 				TestAccessor ta = TestAccessor.CreateInstance();
-				List<string> array = ta.FW2SelectLastNames(db);
+				List<string> list = ta.FW2SelectLastNames(db);
 
-				Assert.IsNotNull(array);
-				Assert.IsTrue(array.Count > 0);
+				Assert.IsNotNull (list);
+				Assert.IsNotEmpty(list);
 			}
 		}
 #endif

@@ -97,6 +97,7 @@
     <Compile Include="ComponentModel\TypeTypeConverter.cs" />
     <Compile Include="DataAccess\ActionNameAttribute.cs" />
     <Compile Include="DataAccess\ActionSprocNameAttribute.cs" />
+    <Compile Include="DataAccess\CommandBehaviorAttribute.cs" />
     <Compile Include="DataAccess\DataAccessBase.cs" />
     <Compile Include="DataAccess\Direction.cs" />
     <Compile Include="DataAccess\DestinationAttribute.cs" />

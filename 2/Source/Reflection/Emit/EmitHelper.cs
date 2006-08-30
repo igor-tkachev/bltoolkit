@@ -2283,8 +2283,8 @@ namespace BLToolkit.Reflection.Emit
 		public EmitHelper ldNameOrIndex(NameOrIndexParameter nameOrIndex)
 		{
 			return nameOrIndex.ByName?
-				ldstr(nameOrIndex.Name)  .call(typeof(NameOrIndexParameter), "op_Implicit", typeof(string)):
-				ldc_i4(nameOrIndex.Index).call(typeof(NameOrIndexParameter), "op_Implicit", typeof(int));
+				ldstr  (nameOrIndex.Name) .call(typeof(NameOrIndexParameter), "op_Implicit", typeof(string)):
+				ldc_i4_(nameOrIndex.Index).call(typeof(NameOrIndexParameter), "op_Implicit", typeof(int));
 		}
 
 		/// <summary>

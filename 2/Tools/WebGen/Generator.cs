@@ -3,7 +3,6 @@ using System.IO;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Xml;
-
 using Rsdn.Framework.Formatting;
 
 namespace WebGen
@@ -35,7 +34,7 @@ namespace WebGen
 
 			CreateDestFolder();
 
-			string template = null;
+			string template;
 
 			using (StreamReader sr = File.OpenText(templateFileName))
 				template = sr.ReadToEnd();
@@ -172,7 +171,9 @@ namespace WebGen
 				string[] dirList = dir.Split('/', '\\');
 				string   dirName = dirList[dirList.Length - 1];
 
-				if (dirName == "_svn")
+				// Skip Subversion folders.
+				//
+				if (dirName == "_svn" || dirName == ".svn")
 					continue;
 
 				newPath[path.Length] = dirName;

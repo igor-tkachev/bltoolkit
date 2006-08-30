@@ -840,6 +840,15 @@ namespace BLToolkit.Reflection
 
 		public static Type GetListItemType(Type listType)
 		{
+#if FW2
+			if (listType.IsGenericType)
+			{
+				Type[] elementTypes = GetGenericArguments(listType, "IList");
+
+				if (elementTypes != null)
+					return elementTypes[0];
+			}
+#endif
 			if (IsSameOrParent(typeof(IList),       listType) ||
 				IsSameOrParent(typeof(ITypedList),  listType) ||
 				IsSameOrParent(typeof(IListSource), listType))
@@ -848,16 +857,6 @@ namespace BLToolkit.Reflection
 
 				if (elementType != null)
 					return elementType;
-
-#if FW2
-				if (listType.IsGenericType)
-				{
-					elementType = listType.GetGenericArguments()[0];
-
-					if (elementType != null)
-						return elementType;
-				}
-#endif
 
 				PropertyInfo last = null;
 
@@ -893,7 +892,7 @@ namespace BLToolkit.Reflection
 		public static Type[] GetGenericArguments(Type type, string baseTypeName)
 		{
 #if FW2
-			for (Type t = type; t != typeof(object); t = t.BaseType)
+			for (Type t = type; t != typeof(object) && t != null; t = t.BaseType)
 				if (t.IsGenericType && (baseTypeName == null || t.Name.Split('`')[0] == baseTypeName))
 					return t.GetGenericArguments();
 
