@@ -149,6 +149,10 @@
     <Compile Include="EditableObjects\EditableValue.cs" />
     <Compile Include="EditableObjects\IEditable.cs" />
     <Compile Include="Mapping\MapSetDataT.cs" />
+    <Compile Include="Mapping\MetadataProvider\MapAttributeMetadataProvider.cs" />
+    <Compile Include="Mapping\MetadataProvider\MapExtensionMetadataProvider.cs" />
+    <Compile Include="Mapping\MetadataProvider\MapMetadataProvider.cs" />
+    <Compile Include="Mapping\MetadataProvider\MapMetadataProviderList.cs" />
     <Compile Include="Mapping\ValueMapping.cs" />
     <Compile Include="Mapping\MapDataDestinationBase.cs" />
     <Compile Include="Mapping\MapDataSourceBase.cs" />
