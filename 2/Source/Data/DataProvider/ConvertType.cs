@@ -53,13 +53,5 @@ namespace BLToolkit.Data.DataProvider
 		///                   ^ at has to be removed
 		/// </summary>
 		ParameterToName,
-
-		/// <summary>
-		/// For some native providers output parameter value needs to be converted from its internal format.
-		/// For example:
-		///     OracleDecimal -> ((OracleDecimal)value).Value
-		/// </summary>
-		[Obsolete("Use MappingSchema methods directly.")]
-		OutputParameter
 	}
 }

@@ -17,9 +17,9 @@ namespace BLToolkit.Data.DataProvider
 	/// Implements access to the Data Provider for Microsoft SQL Server 2005 Everywhere Edition
 	/// </summary>
 	/// <remarks>
-	/// See the <see cref="DbManager.AddDataProvider"/> method to find an example.
+	/// See the <see cref="DbManager.AddDataProvider(DataProviderBase)"/> method to find an example.
 	/// </remarks>
-	/// <seealso cref="DbManager.AddDataProvider">AddDataManager Method</seealso>
+	/// <seealso cref="DbManager.AddDataProvider(DataProviderBase)">AddDataManager Method</seealso>
 	public sealed class SqlCeDataProvider: DataProviderBase
 	{
 		public SqlCeDataProvider()
@@ -31,9 +31,9 @@ namespace BLToolkit.Data.DataProvider
 		/// Creates the database connection object.
 		/// </summary>
 		/// <remarks>
-		/// See the <see cref="DbManager.AddDataProvider"/> method to find an example.
+		/// See the <see cref="DbManager.AddDataProvider(DataProviderBase)"/> method to find an example.
 		/// </remarks>
-		/// <seealso cref="DbManager.AddDataProvider">AddDataManager Method</seealso>
+		/// <seealso cref="DbManager.AddDataProvider(DataProviderBase)">AddDataManager Method</seealso>
 		/// <returns>The database connection object.</returns>
 		public override IDbConnection CreateConnectionObject()
 		{
@@ -44,9 +44,9 @@ namespace BLToolkit.Data.DataProvider
 		/// Creates the data adapter object.
 		/// </summary>
 		/// <remarks>
-		/// See the <see cref="DbManager.AddDataProvider"/> method to find an example.
+		/// See the <see cref="DbManager.AddDataProvider(DataProviderBase)"/> method to find an example.
 		/// </remarks>
-		/// <seealso cref="DbManager.AddDataProvider">AddDataManager Method</seealso>
+		/// <seealso cref="DbManager.AddDataProvider(DataProviderBase)">AddDataManager Method</seealso>
 		/// <returns>A data adapter object.</returns>
 		public override DbDataAdapter CreateDataAdapterObject()
 		{
@@ -58,9 +58,9 @@ namespace BLToolkit.Data.DataProvider
 		/// parameter information for the stored procedure specified in the IDbCommand.
 		/// </summary>
 		/// <remarks>
-		/// See the <see cref="DbManager.AddDataProvider"/> method to find an example.
+		/// See the <see cref="DbManager.AddDataProvider(DataProviderBase)"/> method to find an example.
 		/// </remarks>
-		/// <seealso cref="DbManager.AddDataProvider">AddDataManager Method</seealso>
+		/// <seealso cref="DbManager.AddDataProvider(DataProviderBase)">AddDataManager Method</seealso>
 		/// <param name="command">The IDbCommand referencing the stored procedure for which the parameter information is to be derived. The derived parameters will be populated into the Parameters of this command.</param>
 		public override bool DeriveParameters(IDbCommand command)
 		{
@@ -118,9 +118,9 @@ namespace BLToolkit.Data.DataProvider
 		/// Returns connection type.
 		/// </summary>
 		/// <remarks>
-		/// See the <see cref="DbManager.AddDataProvider"/> method to find an example.
+		/// See the <see cref="DbManager.AddDataProvider(DataProviderBase)"/> method to find an example.
 		/// </remarks>
-		/// <seealso cref="DbManager.AddDataProvider">AddDataManager Method</seealso>
+		/// <seealso cref="DbManager.AddDataProvider(DataProviderBase)">AddDataManager Method</seealso>
 		/// <value>An instance of the <see cref="Type"/> class.</value>
 		public override Type ConnectionType
 		{
@@ -131,9 +131,9 @@ namespace BLToolkit.Data.DataProvider
 		/// Returns the data provider name.
 		/// </summary>
 		/// <remarks>
-		/// See the <see cref="DbManager.AddDataProvider"/> method to find an example.
+		/// See the <see cref="DbManager.AddDataProvider(DataProviderBase)"/> method to find an example.
 		/// </remarks>
-		/// <seealso cref="DbManager.AddDataProvider">AddDataProvider Method</seealso>
+		/// <seealso cref="DbManager.AddDataProvider(DataProviderBase)">AddDataProvider Method</seealso>
 		/// <value>Data provider name.</value>
 		public override string Name
 		{

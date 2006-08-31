@@ -181,9 +181,9 @@ namespace BLToolkit.TypeBuilder.Builders
 
 		private static int _idCounter;
 
-		private void SetID(AbstractTypeBuilderList _builders)
+		private void SetID(AbstractTypeBuilderList builders)
 		{
-			foreach (IAbstractTypeBuilder builder in _builders)
+			foreach (IAbstractTypeBuilder builder in builders)
 				builder.ID = ++_idCounter;
 		}
 
@@ -493,7 +493,7 @@ namespace BLToolkit.TypeBuilder.Builders
 			{
 				IAbstractTypeBuilder builder = attr.TypeBuilder;
 
-				((IAbstractTypeBuilder)builder).TargetElement = target;
+				builder.TargetElement = target;
 				builders.Add(builder);
 			}
 
@@ -524,7 +524,7 @@ namespace BLToolkit.TypeBuilder.Builders
 				{
 					IAbstractTypeBuilder builder = attr.TypeBuilder;
 
-					((IAbstractTypeBuilder)builder).TargetElement = pi;
+					builder.TargetElement = pi;
 					builders.Add(builder);
 				}
 			}

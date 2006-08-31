@@ -22,7 +22,7 @@ namespace BLTgen
 
 		public override Type GetFieldType(int index)
 		{
-			return (index > 0 && index < _list.Length) ? typeof(string) : null;
+			return (index > 0 && index < _list.Length)? typeof(string): null;
 		}
 
 		public override string GetName(int index)
@@ -32,7 +32,7 @@ namespace BLTgen
 
 		public override int GetOrdinal(string name)
 		{
-			throw new NotImplementedException();
+			throw new NotImplementedException("IMapDataSource.GetOrdinal(string)");
 		}
 
 		public override object GetValue(object o, int index)
@@ -42,7 +42,7 @@ namespace BLTgen
 
 		public override object GetValue(object o, string name)
 		{
-			throw new NotImplementedException();
+			throw new NotImplementedException("IMapDataSource.GetValue(object, string)");
 		}
 
 		#endregion
@@ -52,9 +52,7 @@ namespace BLTgen
 		private static string GetNameOrValue(string str, bool name)
 		{
 			if (str.StartsWith("\"") && str.EndsWith("\""))
-			{
 				str = str.Substring(1, str.Length - 2);
-			}
 
 			// Option
 			//
@@ -62,9 +60,7 @@ namespace BLTgen
 			{
 				int colon = str.IndexOf(':', 1);
 				if (colon > 0)
-				{
 					return name ? str.Substring(1, colon - 1) : str.Substring(colon + 1);
-				}
 
 				return name ? str.Substring(1) : string.Empty;
 			}

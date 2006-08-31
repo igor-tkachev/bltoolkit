@@ -127,13 +127,6 @@ namespace BLToolkit.ComponentModel
 					{
 						list = (EditableArrayList)value;
 					}
-					else if (value is ArrayList)
-					{
-						if (value.Count != 0 || _itemType == null)
-							list = EditableArrayList.Adapter((ArrayList)value);
-						else
-							list = EditableArrayList.Adapter(_itemType, (ArrayList)value);
-					}
 					else
 					{
 						if (value.Count != 0 && _itemType == null)
