@@ -7,7 +7,7 @@ using NUnit.Framework;
 
 using BLToolkit.Mapping;
 
-namespace Mapping
+namespace A.Mapping
 {
 	[TestFixture, Category("Mapping")]
 	public class MapTest : TestFixtureBase
@@ -429,6 +429,40 @@ namespace Mapping
 			IDictionary dic2  = Map.DictionaryToDictionary(dic1, new SortedList(), "@ID", typeof(TestObject));
 
 			CompareLists(table, Map.ListToList(dic2.Values, typeof(TestObject)));
+		}
+
+		#endregion
+
+		#region ObjectToDataRow
+
+		public class DataRowTestType
+		{
+			public Int32      Int32Column  = 12345;
+			public String    StringColumn  = "string";
+			public Byte[] ByteArrayColumn  = new Byte[]{1,2,3,4,5};
+			//public Byte[] ByteArrayColumn2 = null;
+		}
+
+		[Test]
+		public void ObjectToDataRowTest()
+		{
+			DataTable       table = new DataTable();
+			DataRowTestType obj   = new DataRowTestType();
+
+			Map.ObjectToDataRow(obj, table);
+
+			Assert.IsNotEmpty(table.Rows);
+			DataRow dr      = table.Rows[0];
+
+			Assert.AreEqual(table.Columns["Int32Column"]     .DataType, typeof(Int32));
+			Assert.AreEqual(table.Columns["StringColumn"]    .DataType, typeof(String));
+			Assert.AreEqual(table.Columns["ByteArrayColumn"] .DataType, typeof(Byte[]));
+			//Assert.AreEqual(table.Columns["ByteArrayColumn2"].DataType, typeof(Byte[]));
+
+			Assert.AreEqual(obj.Int32Column,      dr["Int32Column"]);
+			Assert.AreEqual(obj.StringColumn,     dr["StringColumn"]);
+			Assert.AreEqual(obj.ByteArrayColumn,  dr["ByteArrayColumn"]);
+			//Assert.AreEqual(obj.ByteArrayColumn2, dr["ByteArrayColumn2"]);
 		}
 
 		#endregion

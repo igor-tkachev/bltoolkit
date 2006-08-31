@@ -12,9 +12,9 @@ namespace BLToolkit.Data.DataProvider
 	/// for the <see cref="DbManager"/> class. 
 	/// </summary>
 	/// <remarks>
-	/// See the <see cref="DbManager.AddDataProvider"/> method to find an example.
+	/// See the <see cref="DbManager.AddDataProvider(DataProviderBase)"/> method to find an example.
 	/// </remarks>
-	/// <seealso cref="DbManager.AddDataProvider">AddDataManager Method</seealso>
+	/// <seealso cref="DbManager.AddDataProvider(DataProviderBase)">AddDataManager Method</seealso>
 	public abstract class DataProviderBase
 	{
 		#region Abstract Properties
@@ -23,9 +23,9 @@ namespace BLToolkit.Data.DataProvider
 		/// Returns an actual type of the connection object used by this instance of the <see cref="DbManager"/>.
 		/// </summary>
 		/// <remarks>
-		/// See the <see cref="DbManager.AddDataProvider"/> method to find an example.
+		/// See the <see cref="DbManager.AddDataProvider(DataProviderBase)"/> method to find an example.
 		/// </remarks>
-		/// <seealso cref="DbManager.AddDataProvider">AddDataManager Method</seealso>
+		/// <seealso cref="DbManager.AddDataProvider(DataProviderBase)">AddDataManager Method</seealso>
 		/// <value>An instance of the <see cref="Type"/> class.</value>
 		public abstract Type ConnectionType { get; }
 
@@ -33,9 +33,9 @@ namespace BLToolkit.Data.DataProvider
 		/// Returns the data manager name.
 		/// </summary>
 		/// <remarks>
-		/// See the <see cref="DbManager.AddDataProvider"/> method to find an example.
+		/// See the <see cref="DbManager.AddDataProvider(DataProviderBase)"/> method to find an example.
 		/// </remarks>
-		/// <seealso cref="DbManager.AddDataProvider">AddDataManager Method</seealso>
+		/// <seealso cref="DbManager.AddDataProvider(DataProviderBase)">AddDataManager Method</seealso>
 		/// <value>The data manager name.</value>
 		public abstract string Name { get; }
 
@@ -47,9 +47,9 @@ namespace BLToolkit.Data.DataProvider
 		/// Creates a new instance of the <see cref="IDbConnection"/>.
 		/// </summary>
 		/// <remarks>
-		/// See the <see cref="DbManager.AddDataProvider"/> method to find an example.
+		/// See the <see cref="DbManager.AddDataProvider(DataProviderBase)"/> method to find an example.
 		/// </remarks>
-		/// <seealso cref="DbManager.AddDataProvider">AddDataManager Method</seealso>
+		/// <seealso cref="DbManager.AddDataProvider(DataProviderBase)">AddDataManager Method</seealso>
 		/// <returns>The <see cref="IDbConnection"/> object.</returns>
 		public abstract IDbConnection CreateConnectionObject();
 
@@ -57,9 +57,9 @@ namespace BLToolkit.Data.DataProvider
 		/// Creates an instance of the <see cref="DbDataAdapter"/>.
 		/// </summary>
 		/// <remarks>
-		/// See the <see cref="DbManager.AddDataProvider"/> method to find an example.
+		/// See the <see cref="DbManager.AddDataProvider(DataProviderBase)"/> method to find an example.
 		/// </remarks>
-		/// <seealso cref="DbManager.AddDataProvider">AddDataManager Method</seealso>
+		/// <seealso cref="DbManager.AddDataProvider(DataProviderBase)">AddDataManager Method</seealso>
 		/// <returns>The <see cref="DbDataAdapter"/> object.</returns>
 		public abstract DbDataAdapter CreateDataAdapterObject();
 
@@ -68,9 +68,9 @@ namespace BLToolkit.Data.DataProvider
 		/// parameter information for the stored procedure specified in the <see cref="IDbCommand"/>.
 		/// </summary>
 		/// <remarks>
-		/// See the <see cref="DbManager.AddDataProvider"/> method to find an example.
+		/// See the <see cref="DbManager.AddDataProvider(DataProviderBase)"/> method to find an example.
 		/// </remarks>
-		/// <seealso cref="DbManager.AddDataProvider">AddDataManager Method</seealso>
+		/// <seealso cref="DbManager.AddDataProvider(DataProviderBase)">AddDataManager Method</seealso>
 		/// <param name="command">The <see cref="IDbCommand"/> referencing the stored procedure 
 		/// for which the parameter information is to be derived.
 		/// The derived parameters will be populated into the Parameters of this command.</param>
@@ -135,7 +135,7 @@ namespace BLToolkit.Data.DataProvider
 				dbManager.MappingSchema = schema;
 		}
 
-		private MappingSchema _mappingSchema;
+		private        MappingSchema _mappingSchema;
 		public virtual MappingSchema  MappingSchema
 		{
 			get { return _mappingSchema; }

@@ -69,7 +69,7 @@ namespace BLToolkit.ComponentModel
 
 		public object AddNew()
 		{
-			if (((IBindingList)this).AllowNew == false)
+			if (AllowNew == false)
 				throw new NotSupportedException();
 
 			EndNew();

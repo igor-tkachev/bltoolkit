@@ -10,10 +10,6 @@ namespace BLToolkit.ComponentModel.Design
 {
 	public class TypeEditor : UITypeEditor
 	{
-		public TypeEditor()
-		{
-		}
-
 		public override object EditValue(
 			ITypeDescriptorContext context, IServiceProvider provider, object value)
 		{

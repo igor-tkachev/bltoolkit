@@ -1,11 +1,9 @@
 using System;
-using System.Collections;
 
 using NUnit.Framework;
 
 using BLToolkit.Reflection;
 using BLToolkit.TypeBuilder;
-using BLToolkit.TypeBuilder.Builders;
 
 namespace TypeBuilder
 {
