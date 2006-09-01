@@ -332,10 +332,10 @@ namespace BLToolkit.DataAccess
 
 			object[] attrs = mi.GetCustomAttributes(typeof(ObjectTypeAttribute), true);
 
-			if (attrs.Length != 0)
-				_explicitObjectType = true;
-			else
+			if (attrs.Length == 0)
 				attrs = mi.DeclaringType.GetCustomAttributes(typeof(ObjectTypeAttribute), true);
+			else
+				_explicitObjectType = true;
 
 			if (attrs.Length != 0)
 				_objectType = ((ObjectTypeAttribute)attrs[0]).ObjectType;
@@ -804,6 +804,7 @@ namespace BLToolkit.DataAccess
 				.ldloc   (_locManager)
 				;
 
+			InitObjectType();
 			GetSprocName();
 			CallSetCommand();
 

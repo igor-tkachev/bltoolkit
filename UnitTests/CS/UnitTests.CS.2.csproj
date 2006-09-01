@@ -62,6 +62,7 @@
       <DependentUpon>PersonDataSet2.xsd</DependentUpon>
     </Compile>
     <Compile Include="DataAccess\SqlQueryTest.cs" />
+    <Compile Include="DataAccess\SqlQueryTest2.cs" />
     <Compile Include="DataAccess\SqlTest.cs" />
     <Compile Include="DataAccess\XmlExtension.cs" />
     <Compile Include="Data\BinaryTest.cs" />

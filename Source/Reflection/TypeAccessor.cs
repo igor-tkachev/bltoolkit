@@ -242,10 +242,12 @@ namespace BLToolkit.Reflection
 
 		private static Assembly LoadExtensionAssembly(Assembly originalAssembly)
 		{
+			if (!(originalAssembly is System.Reflection.Emit.AssemblyBuilder))
 			try
 			{
-				string originalAssemblyLocation = originalAssembly.Location;
-				string extensionAssemblyLocation = Path.ChangeExtension(originalAssemblyLocation,
+				string originalAssemblyLocation  = originalAssembly.Location;
+				string extensionAssemblyLocation = Path.ChangeExtension(
+					originalAssemblyLocation,
 					"BLToolkitExtension" + Path.GetExtension(originalAssemblyLocation));
 
 				if (File.GetCreationTime(originalAssemblyLocation) <= File.GetCreationTime(extensionAssemblyLocation))
