@@ -184,7 +184,7 @@ namespace BLToolkit.DataAccess
 
 			try
 			{
-				return DeleteByKey(db, typeof(T), key);
+				return DeleteByKey(db, key);
 			}
 			finally
 			{
