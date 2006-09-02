@@ -8,8 +8,9 @@ using BLToolkit.Demo.BusinessLogic.DataAccess;
 
 namespace BLToolkit.Demo.BusinessLogic
 {
-	public abstract class ManagerBase<T>
+	public abstract class ManagerBase<T,A>
 		where T : BizEntity
+		where A : AccessorBase<T,A>
 	{
 		#region Insert, Update, Delete
 
@@ -17,7 +18,7 @@ namespace BLToolkit.Demo.BusinessLogic
 		{
 			obj.Validate();
 
-			obj.ID = DataAccessor.Insert(obj);
+			obj.ID = Accessor.Insert(obj);
 
 			obj.AcceptChanges();
 		}
@@ -56,7 +57,10 @@ namespace BLToolkit.Demo.BusinessLogic
 
 		#region Protected Members
 
-		protected abstract AccessorBase<T> DataAccessor { get; }
+		protected A Accessor
+		{
+			get { return AccessorBase<T,A>.CreateInstance(); }
+		}
 
 		private            SqlQuery<T>   _query;
 		protected virtual  SqlQuery<T>    Query

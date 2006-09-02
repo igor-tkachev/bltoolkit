@@ -403,7 +403,7 @@ namespace DataAccess
 		[Test]
 		public void Gen_InsertGetIDReturnParameter()
 		{
-			Person    e = (Person)TypeAccessor.CreateInstance(typeof(Person));
+			Person e = (Person)TypeAccessor.CreateInstance(typeof(Person));
 
 			_da.Insert_ReturnParameter(e);
 

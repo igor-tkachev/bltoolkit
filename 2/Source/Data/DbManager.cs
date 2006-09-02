@@ -9,9 +9,10 @@ using System.Data.Common;
 using System.Collections.Generic;
 #endif
 
+using BLToolkit.Common;
 using BLToolkit.Data.DataProvider;
 using BLToolkit.Mapping;
-using BLToolkit.Common;
+using BLToolkit.Reflection;
 
 namespace BLToolkit.Data
 {
@@ -1479,12 +1480,41 @@ namespace BLToolkit.Data
 
 			foreach (IDbDataParameter parameter in Command.Parameters)
 			{
-				int ordinal =
-					parameter.Direction == ParameterDirection.ReturnValue && null != returnValueMember?
-						dest.GetOrdinal(returnValueMember):
-					parameter.Direction == ParameterDirection.Output || parameter.Direction == ParameterDirection.InputOutput?
-						dest.GetOrdinal(_dataProvider.Convert(parameter.ParameterName, ConvertType.ParameterToName).ToString()):
-					-1;
+				int ordinal = -1;
+
+				switch (parameter.Direction)
+				{
+					case ParameterDirection.InputOutput:
+					case ParameterDirection.Output:
+						ordinal = dest.GetOrdinal(
+							_dataProvider.Convert(parameter.ParameterName, ConvertType.ParameterToName).ToString());
+						break;
+
+					case ParameterDirection.ReturnValue:
+
+						if (returnValueMember != null)
+						{
+							if (!returnValueMember.StartsWith("@"))
+							{
+								TypeAccessor   ta = TypeAccessor.GetAccessor(obj.GetType());
+								MemberAccessor ma = ta[returnValueMember];
+
+								if (ma != null)
+								{
+									ma.SetValue(obj, parameter.Value);
+									return;
+								}
+							}
+							else
+							{
+								returnValueMember = returnValueMember.Substring(1);
+							}
+
+							ordinal = dest.GetOrdinal(returnValueMember);
+						}
+
+						break;
+				}
 
 				if (ordinal >= 0)
 					dest.SetValue(obj, ordinal, parameter.Value);

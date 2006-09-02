@@ -1,0 +1,11 @@
+v 2.0.2
+
+Bug fixes
+
+-
+
+Enhancement
+
+- New DataAccessor<T,A> class.
+- Direction.ReturnValueAttribute takes the Member parameter in '@fieldName' format.
+

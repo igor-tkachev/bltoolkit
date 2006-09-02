@@ -5,11 +5,7 @@ using BLToolkit.Demo.ObjectModel;
 
 namespace BLToolkit.Demo.BusinessLogic
 {
-	public class PersonManager : ManagerBase<Person>
+	public class PersonManager : ManagerBase<Person, PersonAccessor>
 	{
-		protected override AccessorBase<Person> DataAccessor
-		{
-			get { return PersonAccessor.CreateInstance(); }
-		}
 	}
 }

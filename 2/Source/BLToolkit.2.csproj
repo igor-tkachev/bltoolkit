@@ -98,6 +98,7 @@
     <Compile Include="DataAccess\ActionNameAttribute.cs" />
     <Compile Include="DataAccess\ActionSprocNameAttribute.cs" />
     <Compile Include="DataAccess\CommandBehaviorAttribute.cs" />
+    <Compile Include="DataAccess\DataAccessorTA.cs" />
     <Compile Include="DataAccess\DataAccessBase.cs" />
     <Compile Include="DataAccess\Direction.cs" />
     <Compile Include="DataAccess\DestinationAttribute.cs" />
@@ -356,6 +357,7 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Doc\ChangeLog.txt" />
     <Content Include="Doc\License.txt" />
     <Content Include="Doc\OnlineDoc.txt" />
     <EmbeddedResource Include="Web\UI\WebObjectBinder.ico" />

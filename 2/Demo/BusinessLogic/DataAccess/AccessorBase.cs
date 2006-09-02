@@ -6,8 +6,9 @@ using BLToolkit.Demo.ObjectModel;
 
 namespace BLToolkit.Demo.BusinessLogic.DataAccess
 {
-	public abstract class AccessorBase<T> : DataAccessor<T>
+	public abstract class AccessorBase<T,A> : DataAccessor<T,A>
 		where T : BizEntity
+		where A : DataAccessor<T,A>
 	{
 		public new abstract int Insert(T obj);
 	}

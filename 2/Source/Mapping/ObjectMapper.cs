@@ -149,7 +149,7 @@ namespace BLToolkit.Mapping
 								{
 									if (_members.Contains(mm))
 										throw new MappingException(string.Format(
-											"Wrong mapping field name: '{0}', type: '{1}'. Use name '{2}' instead",
+											"Wrong mapping field name: '{0}', type: '{1}'. Use field name '{2}' instead.",
 											name, _typeAccessor.OriginalType.Name, mm.Name));
 
 									Add(mm);
