@@ -518,6 +518,10 @@
                     BuildAction = "Compile"
                 />
                 <File
+                    RelPath = "Doc\ChangeLog.txt"
+                    BuildAction = "Content"
+                />
+                <File
                     RelPath = "Doc\Development rules and regulations.doc"
                     BuildAction = "None"
                 />

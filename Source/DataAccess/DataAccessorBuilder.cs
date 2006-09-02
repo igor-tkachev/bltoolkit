@@ -1250,6 +1250,7 @@ namespace BLToolkit.DataAccess
 						;
 
 					object[] attrs = pi.GetCustomAttributes(typeof (Direction.ReturnValueAttribute), true);
+
 					if (attrs.Length != 0)
 						returnValueMember = ((Direction.ReturnValueAttribute)attrs[0]).Member;
 

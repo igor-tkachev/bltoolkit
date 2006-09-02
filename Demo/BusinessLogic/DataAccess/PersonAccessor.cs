@@ -6,11 +6,7 @@ using BLToolkit.Demo.ObjectModel;
 
 namespace BLToolkit.Demo.BusinessLogic.DataAccess
 {
-	public abstract class PersonAccessor : AccessorBase<Person>
+	public abstract class PersonAccessor : AccessorBase<Person, PersonAccessor>
 	{
-		public static PersonAccessor CreateInstance()
-		{
-			return CreateInstance<PersonAccessor>();
-		}
 	}
 }
