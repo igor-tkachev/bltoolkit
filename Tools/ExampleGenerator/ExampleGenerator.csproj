@@ -1,7 +1,7 @@
 <VisualStudioProject>
     <CSHARP
         ProjectType = "Local"
-        ProductVersion = "7.10.3077"
+        ProductVersion = "7.10.6030"
         SchemaVersion = "2.0"
         ProjectGuid = "{35BF068E-AC55-4E89-AE34-50881629338B}"
     >
@@ -17,7 +17,7 @@
                 DelaySign = "false"
                 OutputType = "Exe"
                 PreBuildEvent = ""
-                PostBuildEvent = "$(TargetPath) /path:$(SolutionDir)Examples\CS\Reflection.Emit /xml:$(SolutionDir)Source\Reflection\Emit\Examples.CS.xml&#xd;&#xa;$(TargetPath) /path:$(SolutionDir)Examples\VB\Reflection.Emit /xml:$(SolutionDir)Source\Reflection\Emit\Examples.VB.xml"
+                PostBuildEvent = '"$(TargetPath)" /path:"$(SolutionDir)Examples\CS\Reflection.Emit" /xml:"$(SolutionDir)Source\Reflection\Emit\Examples.CS.xml"&#xd;&#xa;"$(TargetPath)" /path:"$(SolutionDir)Examples\VB\Reflection.Emit" /xml:"$(SolutionDir)Source\Reflection\Emit\Examples.VB.xml"'
                 RootNamespace = "ExampleGenerator"
                 RunPostBuildEvent = "OnOutputUpdated"
                 StartupObject = ""
