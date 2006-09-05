@@ -166,6 +166,13 @@ namespace BLToolkit.Reflection
 
 		#region Static Members
 
+		private static bool _loadTypes;
+		public  static bool  LoadTypes
+		{
+			get { return _loadTypes;  }
+			set { _loadTypes = value; }
+		}
+
 		private static Hashtable _accessors  = new Hashtable(10);
 		private static Hashtable _assemblies = new Hashtable(10);
 
@@ -183,31 +190,37 @@ namespace BLToolkit.Reflection
 
 					if (accessor == null)
 					{
+						Type instanceType = IsClassBulderNeeded(originalType)? null: originalType;
 						Type accessorType = null;
-						Type instanceType = originalType;
 
-						Assembly originalAssembly = originalType.Assembly;
-
-						if (!_assemblies.Contains(originalAssembly))
-							_assemblies[originalAssembly] = LoadExtensionAssembly(originalAssembly);
-
-						Assembly extensionAssembly = (Assembly)_assemblies[originalAssembly];
-
-						if (null != extensionAssembly)
+						if (_loadTypes)
 						{
-							if (IsClassBulderNeeded(originalType))
-								instanceType = extensionAssembly.GetType(AbstractClassBuilder.GetTypeName(originalType));
+							Assembly originalAssembly = originalType.Assembly;
+							Assembly extensionAssembly;
 
-							if (null != instanceType)
+							if (_assemblies.Contains(originalAssembly))
+								extensionAssembly = (Assembly)_assemblies[originalAssembly];
+							else
 							{
-								string typeAccessorTypeName = TypeAccessorBuilder.GetTypeAccessorClassName(instanceType);
-								accessorType = extensionAssembly.GetType(typeAccessorTypeName);
+								extensionAssembly = LoadExtensionAssembly(originalAssembly);
+								_assemblies.Add(originalAssembly, extensionAssembly);
+							}
+
+							if (extensionAssembly != null)
+							{
+								if (instanceType == null)
+									instanceType = extensionAssembly.GetType(
+										AbstractClassBuilder.GetTypeName(originalType));
+
+								if (instanceType != null)
+									accessorType = extensionAssembly.GetType(
+										TypeAccessorBuilder.GetTypeAccessorClassName(instanceType));
 							}
 						}
 
 						if (accessorType == null)
 						{
-							if (IsClassBulderNeeded(originalType))
+							if (instanceType == null)
 								instanceType = TypeFactory.GetType(originalType, new AbstractClassBuilder());
 
 							accessorType = TypeFactory.GetType(originalType, new TypeAccessorBuilder(instanceType, originalType));
@@ -242,21 +255,26 @@ namespace BLToolkit.Reflection
 
 		private static Assembly LoadExtensionAssembly(Assembly originalAssembly)
 		{
-			if (!(originalAssembly is System.Reflection.Emit.AssemblyBuilder))
+			if (originalAssembly is System.Reflection.Emit.AssemblyBuilder)
+			{
+				// This is a generated assembly. Even if it has a valid Location,
+				// there is definitelly no extension assembly at this path.
+				//
+				return null;
+			}
+
 			try
 			{
-				string originalAssemblyLocation  = originalAssembly.Location;
+				string  originalAssemblyLocation = originalAssembly.Location;
 				string extensionAssemblyLocation = Path.ChangeExtension(
-					originalAssemblyLocation,
-					"BLToolkitExtension" + Path.GetExtension(originalAssemblyLocation));
+					originalAssemblyLocation, "BLToolkitExtension" + Path.GetExtension(originalAssemblyLocation));
 
-				if (File.GetCreationTime(originalAssemblyLocation) <= File.GetCreationTime(extensionAssemblyLocation))
-					return Assembly.LoadFile(extensionAssemblyLocation);
+				if (File.GetLastWriteTime(originalAssemblyLocation) <= File.GetLastWriteTime(extensionAssemblyLocation))
+					return Assembly.LoadFrom(extensionAssemblyLocation);
 
 				Debug.WriteLineIf(File.Exists(extensionAssemblyLocation),
 					string.Format("Extension assembly '{0}' is out of date. Please rebuild.",
-						extensionAssemblyLocation),
-					"BLToolkit.TypeAccessor");
+						extensionAssemblyLocation), "BLToolkit.TypeAccessor");
 			}
 			catch
 			{

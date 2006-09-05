@@ -17,7 +17,7 @@ namespace BLToolkit.TypeBuilder.Builders
 		{
 		}
 
-        public AbstractTypeBuilderList(int capacity)
+		public AbstractTypeBuilderList(int capacity)
 			: base(capacity)
 		{
 		}
@@ -38,7 +38,7 @@ namespace BLToolkit.TypeBuilder.Builders
 		public new IAbstractTypeBuilder this[int i]
 		{
 			get { return (IAbstractTypeBuilder)base[i]; }
-			set { base[i] = value;              }
+			set { base[i] = value;                      }
 		}
 	}
 #endif
