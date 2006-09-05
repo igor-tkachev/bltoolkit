@@ -2,7 +2,6 @@ using System;
 using System.Collections;
 
 using BLToolkit.Reflection;
-using BLToolkit.Reflection.Extension;
 
 namespace BLToolkit.Mapping.MetadataProvider
 {

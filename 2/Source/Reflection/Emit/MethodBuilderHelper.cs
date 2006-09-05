@@ -25,7 +25,7 @@ namespace BLToolkit.Reflection.Emit
 
 			_methodBuilder = methodBuilder;
 
-			//_methodBuilder.SetCustomAttribute(Type.Assembly.BLToolkitAttribute);
+			_methodBuilder.SetCustomAttribute(Type.Assembly.BLToolkitAttribute);
 		}
 
 		private MethodBuilder _methodBuilder;

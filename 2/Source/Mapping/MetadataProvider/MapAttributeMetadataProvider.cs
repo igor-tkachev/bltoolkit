@@ -18,8 +18,6 @@ namespace BLToolkit.Mapping.MetadataProvider
 
 		public override string GetFieldName(ObjectMapper mapper, MemberAccessor member, out bool isSet)
 		{
-			isSet = false;
-
 			MapFieldAttribute a = (MapFieldAttribute)member.GetAttribute(typeof(MapFieldAttribute));
 
 			if (a != null)
@@ -50,8 +48,6 @@ namespace BLToolkit.Mapping.MetadataProvider
 
 		public override bool GetIgnore(ObjectMapper mapper, MemberAccessor member, out bool isSet)
 		{
-			isSet = false;
-
 			MapIgnoreAttribute attr = 
 				(MapIgnoreAttribute)member.GetAttribute(typeof(MapIgnoreAttribute));
 
@@ -68,8 +64,6 @@ namespace BLToolkit.Mapping.MetadataProvider
 		{
 			if (member.Type == typeof(string))
 			{
-				isSet = false;
-
 				TrimmableAttribute attr =
 					(TrimmableAttribute)member.GetAttribute(typeof(TrimmableAttribute));
 

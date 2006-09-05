@@ -250,7 +250,9 @@ namespace BLToolkit.TypeBuilder.Builders
 				{
 					emit
 						.ldarg_0
+#if !FW2
 						.nop     // without nop def ctor inserts two ldarg.0, no idea why :xz:
+#endif
 						.newobj  (ci)
 						;
 				}
@@ -633,7 +635,9 @@ namespace BLToolkit.TypeBuilder.Builders
 			{
 				emit
 					.ldarg_0
-					.nop
+#if !FW2
+					.nop     // without nop def ctor inserts two ldarg.0, no idea why :xz:
+#endif
 					.ldloc   (initField)
 					.newobj  (objectType.GetPublicConstructor(typeof(InitContext)))
 					;
