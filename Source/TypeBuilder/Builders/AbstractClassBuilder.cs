@@ -676,12 +676,12 @@ namespace BLToolkit.TypeBuilder.Builders
 
 				MethodInfo getter = pi.GetGetMethod(true);
 
-				if (getter != null && getter.IsVirtual && getter.IsAbstract == false)
+				if (getter != null && getter.IsVirtual && !getter.IsAbstract && !getter.IsFamily)
 					OverrideGetter(getter, propertyBuilders);
 
 				MethodInfo setter = pi.GetSetMethod(true);
 
-				if (setter != null && setter.IsVirtual && setter.IsAbstract == false)
+				if (setter != null && setter.IsVirtual && !setter.IsAbstract && !getter.IsFamily)
 					OverrideSetter(setter, propertyBuilders);
 			}
 
@@ -731,6 +731,7 @@ namespace BLToolkit.TypeBuilder.Builders
 			{
 				if (method.IsVirtual &&
 					method.IsAbstract == false &&
+					method.IsFinal    == false &&
 					(method.Attributes & MethodAttributes.SpecialName) == 0 &&
 					method.DeclaringType != typeof(object))
 				{

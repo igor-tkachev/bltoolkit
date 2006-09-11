@@ -2,7 +2,7 @@ v 2.0.2
 
 Bug fixes
 
--
+- Abstract class builder overrode virtual final methods.
 
 Enhancement
 
