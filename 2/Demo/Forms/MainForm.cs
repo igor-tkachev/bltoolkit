@@ -17,7 +17,7 @@ namespace BLToolkit.Demo.Forms
 
 		private void Edit(Person person)
 		{
-			BizEntityForm.Edit<EditPersonForm, Person>(person, delegate(Person p)
+			EditPersonForm.Edit(person, delegate(Person p)
 			{
 				new PersonManager().Update(p);
 			});
@@ -38,7 +38,7 @@ namespace BLToolkit.Demo.Forms
 
 		private void new_Click(object sender, EventArgs e)
 		{
-			Person person = BizEntityForm.EditNew<EditPersonForm, Person>(delegate(Person p)
+			Person person = EditPersonForm.EditNew(delegate(Person p)
 			{
 				new PersonManager().Insert(p);
 			});
