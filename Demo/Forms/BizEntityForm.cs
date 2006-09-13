@@ -14,13 +14,13 @@ using BLToolkit.Demo.ObjectModel;
 
 namespace BLToolkit.Demo.Forms
 {
-	public class BizEntityForm : Form
+	public class BizEntityForm<F,T> : Form
+		where F : BizEntityForm<F,T>, new()
+		where T : BizEntity
 	{
 		#region Static Members
 
-		public static bool Edit<F, T>(T entity, Action<T> saveAction)
-			where F : BizEntityForm, IBizEntityForm<T>, new()
-			where T : BizEntity
+		public static bool Edit(T entity, Action<T> saveAction)
 		{
 			T clone = (T)entity.Clone();
 			F form  = new F();
@@ -37,9 +37,7 @@ namespace BLToolkit.Demo.Forms
 			return form.ShowDialog() == DialogResult.OK;
 		}
 
-		public static T EditNew<F, T>(Action<T> saveAction)
-			where F : BizEntityForm, IBizEntityForm<T>, new()
-			where T : BizEntity
+		public static T EditNew(Action<T> saveAction)
 		{
 			T entity = TypeAccessor<T>.CreateInstanceEx();
 			F form   = new F();
@@ -61,6 +59,15 @@ namespace BLToolkit.Demo.Forms
 
 			_entity      = entity;
 			_saveHandler = saveHandler;
+		}
+
+		#endregion
+
+		#region Abstracts
+
+		protected virtual void SetBizEntity(T entity)
+		{
+			throw new NotImplementedException();
 		}
 
 		#endregion
