@@ -260,6 +260,10 @@ namespace BLToolkit.Aspects
 					.stloc    (field)
 
 					.ldloc    (field)
+					.ldarg_0
+					.callvirt (typeof(InterceptCallInfo).GetProperty("Object").GetSetMethod())
+
+					.ldloc    (field)
 					.ldsfld   (methodInfo)
 					.callvirt (typeof(InterceptCallInfo).GetProperty("CallMethodInfo").GetSetMethod())
 					;
