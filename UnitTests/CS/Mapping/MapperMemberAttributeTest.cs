@@ -21,6 +21,11 @@ namespace Mapping
 		{
 			[MemberMapper(typeof(MemberMapper1))]
 			public int Int;
+
+			[MemberMapper(typeof(MemberMapper1), Ignore = DebugSwitch)]
+			public int MapIgnore;
+
+			private const bool DebugSwitch = true;
 		}
 
 		[Test]
@@ -30,10 +35,11 @@ namespace Mapping
 
 			Object1 o = new Object1();
 
-			om.SetValue(o, "Int", 456);
+			om.SetValue(o, "Int",      456);
 
 			Assert.AreEqual(456, o.Int);
 			Assert.AreEqual(45,  om.GetValue(o, "Int"));
+			Assert.IsNull(om["MapIgnore"]);
 		}
 
 		[MemberMapper(typeof(int), typeof(MemberMapper1))]
