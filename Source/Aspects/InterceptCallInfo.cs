@@ -119,5 +119,12 @@ namespace BLToolkit.Aspects
 			get { return _cached;  }
 			set { _cached = value; }
 		}
+
+		private object _object;
+		public  object  Object
+		{
+			get { return _object;  }
+			set { _object = value; }
+		}
 	}
 }
