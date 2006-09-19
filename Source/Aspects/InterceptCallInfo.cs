@@ -15,16 +15,16 @@ namespace BLToolkit.Aspects
 			_currentThread    = Thread.CurrentThread;
 		}
 
-		private CallMethodInfo _callmethodInfo;
+		private CallMethodInfo _callMethodInfo;
 		public  CallMethodInfo  CallMethodInfo
 		{
-			get { return _callmethodInfo;  }
+			get { return _callMethodInfo;  }
 			set
 			{
-				if (_callmethodInfo != null)
+				if (_callMethodInfo != null)
 					throw new InvalidOperationException("MethodInfo can not be changed.");
 
-				_callmethodInfo = value;
+				_callMethodInfo = value;
 
 				int len = value.MethodInfo.GetParameters().Length;
 

@@ -199,7 +199,7 @@ namespace BLToolkit.Aspects
 			if (fileName == null || fileName.Length == 0)
 				Debug.WriteLine(logText);
 			else
-				using (StreamWriter sw = new StreamWriter(fileName)) 
+				using (StreamWriter sw = new StreamWriter(fileName, true)) 
 					sw.WriteLine(logText);
 		}
 

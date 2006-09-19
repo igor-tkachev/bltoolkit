@@ -73,6 +73,19 @@ namespace BLToolkit.Mapping.MetadataProvider
 			return base.GetTrimmable(mapper, member, out isSet);
 		}
 
+		public override MapValue[] GetMapValues(ObjectMapper mapper, MemberAccessor member, out bool isSet)
+		{
+			foreach (MapMetadataProvider p in _list)
+			{
+				MapValue[] value = p.GetMapValues(mapper, member, out isSet);
+
+				if (isSet)
+					return value;
+			}
+
+			return base.GetMapValues(mapper, member, out isSet);
+		}
+
 		#region ICollection Members
 
 		public void CopyTo(Array array, int index)

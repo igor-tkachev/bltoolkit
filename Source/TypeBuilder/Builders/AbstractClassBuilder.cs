@@ -676,12 +676,12 @@ namespace BLToolkit.TypeBuilder.Builders
 
 				MethodInfo getter = pi.GetGetMethod(true);
 
-				if (getter != null && getter.IsVirtual && !getter.IsAbstract && !getter.IsFamily)
+				if (getter != null && getter.IsVirtual && !getter.IsAbstract && !getter.IsFinal)
 					OverrideGetter(getter, propertyBuilders);
 
 				MethodInfo setter = pi.GetSetMethod(true);
 
-				if (setter != null && setter.IsVirtual && !setter.IsAbstract && !getter.IsFamily)
+				if (setter != null && setter.IsVirtual && !setter.IsAbstract && !getter.IsFinal)
 					OverrideSetter(setter, propertyBuilders);
 			}
 

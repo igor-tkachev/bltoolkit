@@ -17,6 +17,7 @@ using KeyValue = BLToolkit.Common.CompoundValue;
 using BLToolkit.Common;
 using BLToolkit.Reflection;
 using BLToolkit.Reflection.Extension;
+
 using Convert = BLToolkit.Common.Convert;
 
 namespace BLToolkit.Mapping

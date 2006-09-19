@@ -227,7 +227,7 @@ namespace BLToolkit.Mapping
 					mi.Name            = MetadataProvider.GetFieldName(this, ma, out isSet);
 					mi.MemberName      = ma.Name;
 					mi.Trimmable       = MetadataProvider.GetTrimmable(this, ma, out isSet);
-					mi.MapValues       = GetMapValues(ma);
+					mi.MapValues       = MetadataProvider.GetMapValues(this, ma, out isSet);
 					mi.DefaultValue    = GetDefaultValue(ma);
 					mi.Nullable        = GetNullable(ma);
 					mi.NullValue       = GetNullValue(ma, mi.Nullable);
@@ -296,7 +296,7 @@ namespace BLToolkit.Mapping
 			string name = origName.ToLower();
 			int    idx  = origName.IndexOf('.');
 
-			if (idx > 0 /*&& idx < origName.Length*/)
+			if (idx > 0)
 			{
 				name = name.Substring(0, idx);
 
@@ -338,144 +338,6 @@ namespace BLToolkit.Mapping
 						return m;
 
 			return null;
-		}
-
-		/*
-		[Obsolete]
-		protected virtual string GetFieldName(MemberAccessor memberAccessor)
-		{
-			object extValue = Extension[memberAccessor.Name]["MapField"].Value;
-
-			if (extValue != null)
-				return extValue.ToString();
-
-			MapFieldAttribute a = (MapFieldAttribute)memberAccessor.GetAttribute(typeof(MapFieldAttribute));
-
-			if (a != null)
-				return a.MapName;
-
-			string name = memberAccessor.Name.ToLower();
-
-			foreach (MapFieldAttribute attr in MapFieldAttributes)
-				if (attr.OrigName.ToLower() == name)
-					return attr.MapName;
-
-			return memberAccessor.Name;
-		}
-
-		[Obsolete]
-		protected virtual bool GetIgnore(MemberAccessor memberAccessor)
-		{
-			object extValue = Extension[memberAccessor.Name]["MapIgnore"].Value;
-
-			if (extValue != null)
-				return TypeExtension.ToBoolean(extValue);
-
-			MapIgnoreAttribute attr = 
-				(MapIgnoreAttribute)memberAccessor.GetAttribute(typeof(MapIgnoreAttribute));
-
-			if (attr != null)
-				return attr.Ignore;
-
-			Type type = memberAccessor.Type;
-
-			return !TypeHelper.IsScalar(type);
-		}
-
-		protected virtual bool GetTrimmable(MemberAccessor memberAccessor)
-		{
-			if (memberAccessor.Type != typeof(string))
-				return false;
-
-			object extValue = Extension[memberAccessor.Name]["Trimmable"].Value;
-
-			if (extValue != null)
-				return TypeExtension.ToBoolean(extValue);
-
-			TrimmableAttribute attr = 
-				(TrimmableAttribute)memberAccessor.GetAttribute(typeof(TrimmableAttribute));
-
-			if (attr != null)
-				return attr.IsTrimmable;
-
-			attr = (TrimmableAttribute)TypeHelper.GetFirstAttribute(
-				memberAccessor.MemberInfo.DeclaringType, typeof(TrimmableAttribute));
-
-			if (attr != null)
-				return attr.IsTrimmable;
-
-			return TrimmableAttribute.Default.IsTrimmable;
-		}
-		*/
-
-		private ArrayList GetExtensionMapValues(MemberAccessor memberAccessor)
-		{
-			AttributeExtensionCollection extList = Extension[memberAccessor.Name]["MapValue"];
-
-			ArrayList list = null;
-
-			if (extList == AttributeExtensionCollection.Null)
-			{
-				if (memberAccessor.Type.IsEnum)
-					list = MappingSchema.GetEnumMapValuesFromExtension(Extension, memberAccessor.Type);
-
-				return list != null? list: MappingSchema.GetExtensionMapValues(Extension, memberAccessor.Type);
-			}
-
-			list = new ArrayList(extList.Count);
-
-			foreach (AttributeExtension ext in extList)
-			{
-				object origValue = ext["OrigValue"];
-
-				if (origValue != null)
-				{
-					origValue = TypeExtension.ChangeType(origValue, memberAccessor.Type);
-					list.Add(new MapValue(origValue, ext.Value));
-				}
-			}
-
-			return list;
-		}
-
-		protected virtual MapValue[] GetMapValues(MemberAccessor memberAccessor)
-		{
-			ArrayList list = GetExtensionMapValues(memberAccessor);
-
-			if (list != null)
-				return (MapValue[])list.ToArray(typeof(MapValue));
-
-			object[] attrs = memberAccessor.GetAttributes(typeof(MapValueAttribute));
-
-			if (attrs != null)
-			{
-				list = new ArrayList(attrs.Length);
-
-				foreach (MapValueAttribute a in attrs)
-					list.Add(new MapValue(a.OrigValue, a.Values));
-			}
-
-			attrs = memberAccessor.GetTypeAttributes(typeof(MapValueAttribute));
-
-			if (attrs != null && attrs.Length > 0)
-			{
-				if (list == null)
-					list = new ArrayList(attrs.Length);
-
-				foreach (MapValueAttribute a in attrs)
-					if (a.Type == null && a.OrigValue != null && a.OrigValue.GetType() == memberAccessor.Type ||
-						a.Type != null && a.Type == memberAccessor.Type)
-						list.Add(new MapValue(a.OrigValue, a.Values));
-			}
-
-			MapValue[] typeMapValues = _mappingSchema.GetMapValues(memberAccessor.Type);
-
-			if (list == null) return typeMapValues;
-
-			if (typeMapValues != null)
-				list.AddRange(typeMapValues);
-
-			return (MapValue[])list.ToArray(typeof(MapValue));
 		}
 
 		private object GetExtensionDefaultValue(MemberAccessor memberAccessor)

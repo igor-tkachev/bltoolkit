@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 
 using BLToolkit.Reflection;
 using BLToolkit.Reflection.Extension;
@@ -47,6 +48,43 @@ namespace BLToolkit.Mapping.MetadataProvider
 			}
 
 			return base.GetTrimmable(mapper, member, out isSet);
+		}
+
+		public override MapValue[] GetMapValues(ObjectMapper mapper, MemberAccessor member, out bool isSet)
+		{
+			AttributeExtensionCollection extList = mapper.Extension[member.Name]["MapValue"];
+
+			ArrayList list = null;
+
+			if (extList == AttributeExtensionCollection.Null)
+			{
+				if (member.Type.IsEnum)
+					list = MappingSchema.GetEnumMapValuesFromExtension(mapper.Extension, member.Type);
+
+				if (list == null)
+					list = MappingSchema.GetExtensionMapValues(mapper.Extension, member.Type);
+
+				isSet = list != null;
+
+				return isSet? (MapValue[])list.ToArray(typeof(MapValue)): null;
+			}
+
+			list = new ArrayList(extList.Count);
+
+			foreach (AttributeExtension ext in extList)
+			{
+				object origValue = ext["OrigValue"];
+
+				if (origValue != null)
+				{
+					origValue = TypeExtension.ChangeType(origValue, member.Type);
+					list.Add(new MapValue(origValue, ext.Value));
+				}
+			}
+
+			isSet = true;
+
+			return (MapValue[])list.ToArray(typeof(MapValue));
 		}
 	}
 }
