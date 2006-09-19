@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 
 using BLToolkit.Reflection;
 
@@ -84,6 +85,49 @@ namespace BLToolkit.Mapping.MetadataProvider
 			}
 
 			return base.GetTrimmable(mapper, member, out isSet);
+		}
+
+		public override MapValue[] GetMapValues(ObjectMapper mapper, MemberAccessor member, out bool isSet)
+		{
+			ArrayList list = null;
+
+			object[] attrs = member.GetAttributes(typeof(MapValueAttribute));
+
+			if (attrs != null)
+			{
+				list = new ArrayList(attrs.Length);
+
+				foreach (MapValueAttribute a in attrs)
+					list.Add(new MapValue(a.OrigValue, a.Values));
+			}
+
+			attrs = member.GetTypeAttributes(typeof(MapValueAttribute));
+
+			if (attrs != null && attrs.Length > 0)
+			{
+				if (list == null)
+					list = new ArrayList(attrs.Length);
+
+				foreach (MapValueAttribute a in attrs)
+					if (a.Type == null && a.OrigValue != null && a.OrigValue.GetType() == member.Type ||
+						a.Type != null && a.Type == member.Type)
+						list.Add(new MapValue(a.OrigValue, a.Values));
+			}
+
+			MapValue[] typeMapValues = mapper.MappingSchema.GetMapValues(member.Type);
+
+			if (list == null)
+			{
+				isSet = typeMapValues != null;
+				return typeMapValues;
+			}
+
+			if (typeMapValues != null)
+				list.AddRange(typeMapValues);
+
+			isSet = true;
+
+			return (MapValue[])list.ToArray(typeof(MapValue));
 		}
 	}
 }

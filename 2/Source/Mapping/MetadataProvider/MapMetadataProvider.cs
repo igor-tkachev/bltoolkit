@@ -40,6 +40,12 @@ namespace BLToolkit.Mapping.MetadataProvider
 			return isSet? false: TrimmableAttribute.Default.IsTrimmable;
 		}
 
+		public virtual MapValue[] GetMapValues(ObjectMapper mapper, MemberAccessor member, out bool isSet)
+		{
+			isSet = false;
+			return null;
+		}
+
 		#region Static Members
 
 		private static CreateProvider _createProvider = new CreateProvider(CreateInternal);
