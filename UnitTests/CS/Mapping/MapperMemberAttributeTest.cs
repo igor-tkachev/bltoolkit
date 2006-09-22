@@ -19,11 +19,25 @@ namespace Mapping
 
 		public class Object1
 		{
+			// MapIgnore set to false
+			//
 			[MemberMapper(typeof(MemberMapper1))]
 			public int Int;
 
+			// MapIgnore set to DebugSwitch value
+			//
 			[MemberMapper(typeof(MemberMapper1), Ignore = DebugSwitch)]
 			public int MapIgnore;
+
+			// MapIgnore set to true, since MapIgnore comes first
+			//
+			[MapIgnore, MemberMapper(typeof(MemberMapper1))]
+			public int MapIgnore2;
+
+			// MapIgnore set to false, since MemberMapper comes first
+			//
+			[MemberMapper(typeof(MemberMapper1)), MapIgnore]
+			public int MapNotIgnore;
 
 			private const bool DebugSwitch = true;
 		}
@@ -39,7 +53,10 @@ namespace Mapping
 
 			Assert.AreEqual(456, o.Int);
 			Assert.AreEqual(45,  om.GetValue(o, "Int"));
+
 			Assert.IsNull(om["MapIgnore"]);
+			Assert.IsNull(om["MapIgnore2"]);
+			Assert.IsNotNull(om["MapNotIgnore"]);
 		}
 
 		[MemberMapper(typeof(int), typeof(MemberMapper1))]
