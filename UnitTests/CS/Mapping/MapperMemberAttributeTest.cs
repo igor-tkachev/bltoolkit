@@ -26,17 +26,15 @@ namespace Mapping
 
 			// MapIgnore set to DebugSwitch value
 			//
-			[MemberMapper(typeof(MemberMapper1), Ignore = DebugSwitch)]
+			[MapIgnore(DebugSwitch), MemberMapper(typeof(MemberMapper1))]
 			public int MapIgnore;
 
-			// MapIgnore set to true, since MapIgnore comes first
-			//
-			[MapIgnore, MemberMapper(typeof(MemberMapper1))]
-			public int MapIgnore2;
-
-			// MapIgnore set to false, since MemberMapper comes first
+			// MapIgnore set to true
 			//
 			[MemberMapper(typeof(MemberMapper1)), MapIgnore]
+			public int MapIgnore2;
+
+			[MapIgnore(false), MemberMapper(typeof(MemberMapper1))]
 			public int MapNotIgnore;
 
 			private const bool DebugSwitch = true;

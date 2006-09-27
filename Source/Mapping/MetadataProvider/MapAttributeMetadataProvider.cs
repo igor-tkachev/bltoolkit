@@ -58,6 +58,12 @@ namespace BLToolkit.Mapping.MetadataProvider
 				return attr.Ignore;
 			}
 
+			if (member.GetAttribute(typeof(MapImplicitAttribute)) != null)
+			{
+				isSet = true;
+				return false;
+			}
+
 			return base.GetIgnore(mapper, member, out isSet);
 		}
 
