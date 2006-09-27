@@ -7,21 +7,18 @@ namespace BLToolkit.Mapping
 		AttributeTargets.Field | AttributeTargets.Property |
 		AttributeTargets.Class | AttributeTargets.Interface,
 		AllowMultiple=true)]
-	public sealed class MapFieldAttribute : MapIgnoreAttribute
+	public sealed class MapFieldAttribute : MapImplicitAttribute
 	{
 		public MapFieldAttribute()
-			: base(false)
 		{
 		}
 
 		public MapFieldAttribute(string mapName)
-			: base(false)
 		{
 			_mapName = mapName;
 		}
 
 		public MapFieldAttribute(string mapName, string origName)
-			: base(false)
 		{
 			_mapName  = mapName;
 			_origName = origName;
