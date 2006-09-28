@@ -477,6 +477,24 @@ namespace BLToolkit.Reflection
 			return _type.GetFields();
 		}
 
+		/// <summary>
+		/// Searches for the fields of the current Type, using the specified binding constraints.
+		/// </summary>
+		/// <param name="bindingFlags">A bitmask comprised of one or more <see cref="BindingFlags"/> 
+		/// that specify how the search is conducted.</param>
+		/// <returns>An array of FieldInfo objects representing all fields of the current Type
+		/// that match the specified binding constraints.</returns>
+		public FieldInfo[] GetFields(BindingFlags bindingFlags)
+		{
+			return _type.GetFields(bindingFlags);
+		}
+
+		/// <summary>
+		/// Searches for the public field with the specified name.
+		/// </summary>
+		/// <param name="name">The String containing the name of the public field to get.</param>
+		/// <returns>A <see cref="PropertyInfo"/> object representing the public field with the specified name,
+		/// if found; otherwise, a null reference.</returns>
 		public FieldInfo GetField(string name)
 		{
 			return _type.GetField(
