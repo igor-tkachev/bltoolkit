@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Specialized;
 using System.Reflection;
 using System.Reflection.Emit;
 
@@ -176,13 +177,14 @@ namespace BLToolkit.TypeBuilder.Builders
 
 		private void BuildMembers()
 		{
-			foreach (FieldInfo mi in _originalType.GetFields())
-				if (!mi.IsStatic)
-					BuildMember(mi);
+			ListDictionary members = new ListDictionary();
+
+			foreach (FieldInfo fi in _originalType.GetFields(BindingFlags.Instance | BindingFlags.Public))
+				AddMemberToDictionary(members, fi);
 
 			foreach (PropertyInfo pi in _originalType.GetProperties(BindingFlags.Instance | BindingFlags.Public))
 				if (pi.GetIndexParameters().Length == 0)
-					BuildMember(pi);
+					AddMemberToDictionary(members, pi);
 
 			foreach (PropertyInfo pi in _originalType.GetProperties(BindingFlags.Instance | BindingFlags.NonPublic))
 			{
@@ -192,8 +194,30 @@ namespace BLToolkit.TypeBuilder.Builders
 					MethodInfo setter = pi.GetSetMethod(true);
 
 					if (getter != null && getter.IsAbstract || setter != null && setter.IsAbstract)
-						BuildMember(pi);
+						AddMemberToDictionary(members, pi);
 				}
+			}
+
+			foreach (MemberInfo mi in members.Values)
+				BuildMember(mi);
+		}
+
+		private void AddMemberToDictionary(IDictionary members, MemberInfo mi)
+		{
+			string name = mi.Name;
+
+			if (!members.Contains(name))
+			{
+				members.Add(name, mi);
+				return;
+			}
+
+			MemberInfo existing = (MemberInfo) members[name];
+			if (mi.DeclaringType.IsSubclassOf(existing.DeclaringType))
+			{
+				// mi is a member of the most descendant type.
+				//
+				members[name] = mi;
 			}
 		}
 

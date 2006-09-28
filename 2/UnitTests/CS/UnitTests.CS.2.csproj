@@ -46,6 +46,7 @@
     <Compile Include="Common\ConvertTest.cs" />
     <Compile Include="Common\NameOrIndexParameterTest.cs" />
     <Compile Include="DataAccess\DataAccessorBuilderTest.cs" />
+    <Compile Include="DataAccess\PrimaryKeyAttributeTest.cs" />
     <Compile Include="DataAccess\ScalarListTest.cs" />
     <Compile Include="DataAccess\CreateEntityTest.cs" />
     <Compile Include="DataAccess\DataAccessorTest.cs" />
