@@ -79,7 +79,7 @@ namespace BLToolkit.Common
 				object y =  values[i];
 
 				if (x == null && y == null)
-					return true;
+					continue;
 
 				if (x == null || y == null)
 					return false;
