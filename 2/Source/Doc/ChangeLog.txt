@@ -4,6 +4,7 @@ Bug fixes
 
 - Abstract class builder overrode virtual final methods.
 - Append records to a log file.
+- ObjectBinder's AllowNew, AllowEdit, AllowRemove properties serialization.
 
 Enhancement
 
