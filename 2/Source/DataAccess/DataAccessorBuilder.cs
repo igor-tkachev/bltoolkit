@@ -135,10 +135,10 @@ namespace BLToolkit.DataAccess
 				Type elementType = null;
 				Type keyType     = typeof(object);
 #if FW2
-				Type[] gTypes = TypeHelper.GetGenericArguments(returnType, "IDictionary");
+				Type[] gTypes = TypeHelper.GetGenericArguments(returnType, typeof(IDictionary));
 
 				if ((gTypes == null || gTypes.Length != 2) && _destination != null)
-					gTypes = TypeHelper.GetGenericArguments(_destination.ParameterType, "IDictionary");
+					gTypes = TypeHelper.GetGenericArguments(_destination.ParameterType, typeof(IDictionary));
 
 				if (gTypes != null && gTypes.Length == 2)
 				{
@@ -343,7 +343,7 @@ namespace BLToolkit.DataAccess
 #if FW2
 			if (_objectType == null)
 			{
-				Type[] types = TypeHelper.GetGenericArguments(mi.DeclaringType, "DataAccessor");
+				Type[] types = TypeHelper.GetGenericArguments(mi.DeclaringType, typeof(DataAccessor));
 
 				if (types != null)
 					_objectType = types[0];
