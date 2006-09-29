@@ -861,7 +861,7 @@ namespace BLToolkit.Reflection
 #if FW2
 			if (listType.IsGenericType)
 			{
-				Type[] elementTypes = GetGenericArguments(listType, "IList");
+				Type[] elementTypes = GetGenericArguments(listType, typeof(IList));
 
 				if (elementTypes != null)
 					return elementTypes[0];
@@ -907,9 +907,11 @@ namespace BLToolkit.Reflection
 				|| type == typeof(XmlReader);
 		}
 
-		public static Type[] GetGenericArguments(Type type, string baseTypeName)
-		{
 #if FW2
+		public static Type[] GetGenericArguments(Type type, Type baseType)
+		{
+			string baseTypeName = baseType.Name;
+
 			for (Type t = type; t != typeof(object) && t != null; t = t.BaseType)
 				if (t.IsGenericType && (baseTypeName == null || t.Name.Split('`')[0] == baseTypeName))
 					return t.GetGenericArguments();
@@ -917,11 +919,10 @@ namespace BLToolkit.Reflection
 			foreach (Type t in type.GetInterfaces())
 				if (t.IsGenericType && (baseTypeName == null || t.Name.Split('`')[0] == baseTypeName))
 					return t.GetGenericArguments();
-#endif
 
 			return null;
 		}
-
+#endif
 
 		#endregion
 	}
