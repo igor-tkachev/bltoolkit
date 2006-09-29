@@ -198,6 +198,10 @@ namespace BLToolkit.ComponentModel
 			set { _isNull = value; }
 		}
 
+		bool IBindingList.AllowNew    { get { return AllowNew;    } }
+		bool IBindingList.AllowEdit   { get { return AllowEdit;   } }
+		bool IBindingList.AllowRemove { get { return AllowRemove; } }
+
 		#endregion
 
 		#region Protected Members
