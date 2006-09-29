@@ -326,6 +326,7 @@ namespace BLToolkit.Data.DataProvider
 
 			#region Primitive Types
 
+			[CLSCompliant(false)]
 			public override SByte ConvertToSByte(object value)
 			{
 				if (value is OracleDecimal)
@@ -381,6 +382,7 @@ namespace BLToolkit.Data.DataProvider
 				return base.ConvertToByte(value);
 			}
 
+			[CLSCompliant(false)]
 			public override UInt16 ConvertToUInt16(object value)
 			{
 				if (value is OracleDecimal)
@@ -392,6 +394,7 @@ namespace BLToolkit.Data.DataProvider
 				return base.ConvertToUInt16(value);
 			}
 
+			[CLSCompliant(false)]
 			public override UInt32 ConvertToUInt32(object value)
 			{
 				if (value is OracleDecimal)
@@ -403,6 +406,7 @@ namespace BLToolkit.Data.DataProvider
 				return base.ConvertToUInt32(value);
 			}
 
+			[CLSCompliant(false)]
 			public override UInt64 ConvertToUInt64(object value)
 			{
 				if (value is OracleDecimal)
@@ -571,6 +575,7 @@ namespace BLToolkit.Data.DataProvider
 #if FW2
 			#region Nullable Types
 
+			[CLSCompliant(false)]
 			public override SByte? ConvertToNullableSByte(object value)
 			{
 				if (value is OracleDecimal)
@@ -626,6 +631,7 @@ namespace BLToolkit.Data.DataProvider
 				return base.ConvertToNullableByte(value);
 			}
 
+			[CLSCompliant(false)]
 			public override UInt16? ConvertToNullableUInt16(object value)
 			{
 				if (value is OracleDecimal)
@@ -637,6 +643,7 @@ namespace BLToolkit.Data.DataProvider
 				return base.ConvertToNullableUInt16(value);
 			}
 
+			[CLSCompliant(false)]
 			public override UInt32? ConvertToNullableUInt32(object value)
 			{
 				if (value is OracleDecimal)
@@ -648,6 +655,7 @@ namespace BLToolkit.Data.DataProvider
 				return base.ConvertToNullableUInt32(value);
 			}
 
+			[CLSCompliant(false)]
 			public override UInt64? ConvertToNullableUInt64(object value)
 			{
 				if (value is OracleDecimal)
@@ -783,9 +791,13 @@ namespace BLToolkit.Data.DataProvider
 			public override Char     GetChar   (object o, int index) { return MappingSchema.ConvertToChar   (GetValue(o, index)); }
 			public override Guid     GetGuid   (object o, int index) { return MappingSchema.ConvertToGuid   (GetValue(o, index)); }
 
+			[CLSCompliant(false)]
 			public override SByte    GetSByte  (object o, int index) { return  (SByte)_dataReader.GetDecimal(index); }
+			[CLSCompliant(false)]
 			public override UInt16   GetUInt16 (object o, int index) { return (UInt16)_dataReader.GetDecimal(index); }
+			[CLSCompliant(false)]
 			public override UInt32   GetUInt32 (object o, int index) { return (UInt32)_dataReader.GetDecimal(index); }
+			[CLSCompliant(false)]
 			public override UInt64   GetUInt64 (object o, int index) { return (UInt64)_dataReader.GetDecimal(index); }
 
 			public override Decimal  GetDecimal(object o, int index) { return OracleDecimal.SetPrecision(_dataReader.GetOracleDecimal(index), 28).Value; }
@@ -795,9 +807,13 @@ namespace BLToolkit.Data.DataProvider
 			public override Char?    GetNullableChar   (object o, int index) { return MappingSchema.ConvertToNullableChar   (GetValue(o, index)); }
 			public override Guid?    GetNullableGuid   (object o, int index) { return MappingSchema.ConvertToNullableGuid   (GetValue(o, index)); }
 
+			[CLSCompliant(false)]
 			public override SByte?   GetNullableSByte  (object o, int index) { return _dataReader.IsDBNull(index)? null:  (SByte?)_dataReader.GetDecimal(index); }
+			[CLSCompliant(false)]
 			public override UInt16?  GetNullableUInt16 (object o, int index) { return _dataReader.IsDBNull(index)? null: (UInt16?)_dataReader.GetDecimal(index); }
+			[CLSCompliant(false)]
 			public override UInt32?  GetNullableUInt32 (object o, int index) { return _dataReader.IsDBNull(index)? null: (UInt32?)_dataReader.GetDecimal(index); }
+			[CLSCompliant(false)]
 			public override UInt64?  GetNullableUInt64 (object o, int index) { return _dataReader.IsDBNull(index)? null: (UInt64?)_dataReader.GetDecimal(index); }
 
 			public override Decimal? GetNullableDecimal(object o, int index) { return _dataReader.IsDBNull(index)? (decimal?)null: OracleDecimal.SetPrecision(_dataReader.GetOracleDecimal(index), 28).Value; }
@@ -855,9 +871,13 @@ namespace BLToolkit.Data.DataProvider
 			public override Char     GetChar   (object o, int index) { return MappingSchema.ConvertToChar   (GetValue(o, Index)); }
 			public override Guid     GetGuid   (object o, int index) { return MappingSchema.ConvertToGuid   (GetValue(o, Index)); }
 
+			[CLSCompliant(false)]
 			public override SByte    GetSByte  (object o, int index) { return  (SByte)_dataReader.GetDecimal(Index); }
+			[CLSCompliant(false)]
 			public override UInt16   GetUInt16 (object o, int index) { return (UInt16)_dataReader.GetDecimal(Index); }
+			[CLSCompliant(false)]
 			public override UInt32   GetUInt32 (object o, int index) { return (UInt32)_dataReader.GetDecimal(Index); }
+			[CLSCompliant(false)]
 			public override UInt64   GetUInt64 (object o, int index) { return (UInt64)_dataReader.GetDecimal(Index); }
 
 			public override Decimal  GetDecimal(object o, int index) { return OracleDecimal.SetPrecision(_dataReader.GetOracleDecimal(Index), 28).Value; }
@@ -867,9 +887,13 @@ namespace BLToolkit.Data.DataProvider
 			public override Char?    GetNullableChar   (object o, int index) { return MappingSchema.ConvertToNullableChar   (GetValue(o, Index)); }
 			public override Guid?    GetNullableGuid   (object o, int index) { return MappingSchema.ConvertToNullableGuid   (GetValue(o, Index)); }
 
+			[CLSCompliant(false)]
 			public override SByte?   GetNullableSByte  (object o, int index) { return _dataReader.IsDBNull(index)? null:  (SByte?)_dataReader.GetDecimal(Index); }
+			[CLSCompliant(false)]
 			public override UInt16?  GetNullableUInt16 (object o, int index) { return _dataReader.IsDBNull(index)? null: (UInt16?)_dataReader.GetDecimal(Index); }
+			[CLSCompliant(false)]
 			public override UInt32?  GetNullableUInt32 (object o, int index) { return _dataReader.IsDBNull(index)? null: (UInt32?)_dataReader.GetDecimal(Index); }
+			[CLSCompliant(false)]
 			public override UInt64?  GetNullableUInt64 (object o, int index) { return _dataReader.IsDBNull(index)? null: (UInt64?)_dataReader.GetDecimal(Index); }
 
 			public override Decimal? GetNullableDecimal(object o, int index) { return _dataReader.IsDBNull(index)? (decimal?)null: OracleDecimal.SetPrecision(_dataReader.GetOracleDecimal(Index), 28).Value; }
@@ -880,6 +904,7 @@ namespace BLToolkit.Data.DataProvider
 		[Mixin(typeof(IDataParameter),   "_oracleParameter")]
 		[Mixin(typeof(IDisposable),      "_oracleParameter")]
 		[Mixin(typeof(ICloneable),       "_oracleParameter")]
+		[CLSCompliant(false)]
 		public abstract class OracleParameterWrap
 		{
 			protected OracleParameter _oracleParameter;
