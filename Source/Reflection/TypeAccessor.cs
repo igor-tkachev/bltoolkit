@@ -20,6 +20,9 @@ namespace BLToolkit.Reflection
 	public delegate object NullValueProvider(Type type);
 	public delegate bool   IsNullHandler    (object obj);
 
+#if FW2
+	[DebuggerDisplay("Type = {Type}, OriginalType = {OriginalType}")]
+#endif
 	public abstract class TypeAccessor : ICollection, ITypeDescriptionProvider
 	{
 		protected TypeAccessor()
