@@ -84,6 +84,11 @@
                     AssemblyName = "System.Drawing"
                     HintPath = "..\..\..\..\..\..\WINDOWS\Microsoft.NET\Framework\v1.1.4322\System.Drawing.dll"
                 />
+                <Reference
+                    Name = "System.Data.OracleClient"
+                    AssemblyName = "System.Data.OracleClient"
+                    HintPath = "..\..\..\..\..\..\..\..\WINDOWS\Microsoft.NET\Framework\v1.1.4322\System.Data.OracleClient.dll"
+                />
             </References>
         </Build>
         <Files>
@@ -329,7 +334,7 @@
                 />
                 <File
                     RelPath = "Data\DbManager.cs"
-                    SubType = "Code"
+                    SubType = "Component"
                     BuildAction = "Compile"
                 />
                 <File
@@ -364,6 +369,11 @@
                 />
                 <File
                     RelPath = "Data\DataProvider\OleDbDataProvider.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "Data\DataProvider\OracleDataProvider.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
                 />

@@ -35,8 +35,16 @@ namespace BLToolkit.Common
 				methodName = "To" + to.Name;
 
 			MethodInfo     mi = typeof(Convert).GetMethod(methodName,
-				BindingFlags.Public | BindingFlags.Static,
+				BindingFlags.Public | BindingFlags.Static | BindingFlags.ExactBinding,
 				null, new Type[] {from}, null);
+
+			if (null == mi)
+			{
+				mi = FindTypeCastOperator(to);
+
+				if (null == mi)
+					mi = FindTypeCastOperator(from);
+			}
 
 			if (null != mi)
 				return (ConvertMethod)(object)Delegate.CreateDelegate(typeof(ConvertMethod), mi);
@@ -44,8 +52,24 @@ namespace BLToolkit.Common
 			return Default;
 		}
 
+		private static MethodInfo FindTypeCastOperator(Type t)
+		{
+			foreach (MethodInfo mi in t.GetMethods(BindingFlags.Public | BindingFlags.Static))
+			{
+				if (mi.IsSpecialName && mi.ReturnType == typeof(T) && (mi.Name == "op_Implicit" || mi.Name == "op_Explicit"))
+				{
+					ParameterInfo[] parameters = mi.GetParameters();
+
+					if (1 == parameters.Length && parameters[0].ParameterType == typeof(P))
+						return mi;
+				}
+			}
+
+			return null;
+		}
+
 		private static P SameType(P p) { return p; }
-		private static T Default(P p)  { return (T)System.Convert.ChangeType(p, typeof(T)); }
+		private static T Default (P p) { return (T)System.Convert.ChangeType(p, typeof(T)); }
 	}
 
 	public static class ConvertTo<T>

@@ -33,6 +33,7 @@
     <Reference Include="System" />
     <Reference Include="System.configuration" />
     <Reference Include="System.Data" />
+    <Reference Include="System.Data.OracleClient" />
     <Reference Include="System.Design" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Web" />
@@ -128,6 +129,7 @@
     <Compile Include="DataAccess\SqlQueryT.cs" />
     <Compile Include="DataAccess\TableNameAttribute.cs" />
     <Compile Include="Common\NameOrIndexParameter.cs" />
+    <Compile Include="Data\DataProvider\OracleDataProvider.cs" />
     <Compile Include="Data\ScalarSourceType.cs" />
     <Compile Include="Data\DataException.cs" />
     <Compile Include="Data\DataProvider\AccessDataProvider.cs" />
@@ -138,6 +140,7 @@
     <Compile Include="Data\DataProvider\SqlDataProvider.cs" />
     <Compile Include="Data\DataProvider\SybaseAdoDataProvider.cs" />
     <Compile Include="Data\DbManager.cs">
+      <SubType>Component</SubType>
     </Compile>
     <Compile Include="Data\OperationType.cs" />
     <Compile Include="EditableObjects\EditableList.cs" />

@@ -1,6 +1,7 @@
 using System;
+using System.Data.OracleClient;
 using System.Reflection;
-
+using BLToolkit.Common;
 using BLToolkit.Reflection;
 
 using NUnit.Framework;
@@ -124,5 +125,29 @@ namespace Common
 			Assert.AreEqual(DateTime.MinValue + TimeSpan.FromTicks(1), Convert.ToDateTime(1L));
 			Assert.AreEqual(TimeSpan.FromTicks(1), Convert.ToTimeSpan(1L));
 		}
+
+#if FW2
+		[Test]
+		public void ConvertT()
+		{
+			decimal d = ConvertTo<decimal>.From(123);
+			Assert.AreEqual(123.0m, d);
+		}
+
+		[Test]
+		public void TypeCast()
+		{
+			// Note that method BLToolkit.Common.Convert.ToDecimal(OracleNumber p) does not exist.
+			//
+			decimal d = ConvertTo<decimal>.From(new OracleNumber(123));
+			Assert.AreEqual(123.0m, d);
+
+			// Method BLToolkit.Common.Convert.ToOracleString(string p) does not exist too.
+			//
+			OracleString s = ConvertTo<OracleString>.From("test");
+			Assert.AreEqual("test", s.Value);
+		}
+#endif
+
 	}
 }
