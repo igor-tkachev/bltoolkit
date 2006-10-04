@@ -15,6 +15,7 @@ using KeyValue = BLToolkit.Common.CompoundValue;
 #endif
 
 using BLToolkit.Common;
+using BLToolkit.Mapping.MetadataProvider;
 using BLToolkit.Reflection;
 using BLToolkit.Reflection.Extension;
 
@@ -88,6 +89,27 @@ namespace BLToolkit.Mapping
 
 		#endregion
 
+		#region MetadataProvider
+
+		private MapMetadataProvider _metadataProvider;
+		public  MapMetadataProvider  MetadataProvider
+		{
+			get
+			{
+				if (_metadataProvider == null)
+					_metadataProvider = CreateMetadataProvider();
+				return _metadataProvider;
+			}
+			set { _metadataProvider = value; }
+		}
+
+		protected virtual MapMetadataProvider CreateMetadataProvider()
+		{
+			return MapMetadataProvider.CreateProvider();
+		}
+
+		#endregion
+
 		#region Public Members
 
 		private ExtensionList _extensions;
@@ -96,7 +118,7 @@ namespace BLToolkit.Mapping
 			get { return _extensions;  }
 			set { _extensions = value; }
 		}
-	
+
 		#endregion
 
 		#region Convert
@@ -1003,71 +1025,6 @@ namespace BLToolkit.Mapping
 
 		private Hashtable _mapValues = new Hashtable();
 
-		internal static ArrayList GetExtensionMapValues(TypeExtension typeExt, Type type)
-		{
-			AttributeExtensionCollection extList = typeExt.Attributes["MapValue"];
-
-			if (extList == AttributeExtensionCollection.Null)
-				return null;
-
-			ArrayList attrs = new ArrayList(extList.Count);
-
-			foreach (AttributeExtension ext in extList)
-			{
-				object origValue = ext["OrigValue"];
-
-				if (origValue != null)
-				{
-					origValue = TypeExtension.ChangeType(origValue, type);
-					attrs.Add(new MapValue(origValue, ext.Value));
-				}
-			}
-
-			return attrs;
-		}
-
-		private MapValue[] GetMapValuesFromExtension(Type type)
-		{
-			TypeExtension typeExt = TypeExtension.GetTypeExtenstion(type, Extensions);
-
-			if (typeExt == TypeExtension.Null)
-				return null;
-
-			ArrayList list = null;
-
-			if (type.IsEnum)
-				list = GetEnumMapValuesFromExtension(typeExt, type);
-
-			if (list == null)
-				list = GetExtensionMapValues(typeExt, type);
-
-			return list != null? (MapValue[])list.ToArray(typeof(MapValue)): null;
-		}
-
-		private MapValue[] GetMapValuesFromType(Type type)
-		{
-			ArrayList list = null;
-
-			if (type.IsEnum)
-				list = GetEnumMapValuesFromType(type);
-
-			object[] attrs = TypeHelper.GetAttributes(type, typeof(MapValueAttribute));
-
-			if (attrs != null && attrs.Length != 0)
-			{
-				if (list == null)
-					list = new ArrayList(attrs.Length);
-
-				for (int i = 0; i < attrs.Length; i++)
-				{
-					MapValueAttribute a = (MapValueAttribute)attrs[i];
-					list.Add(new MapValue(a.OrigValue, a.Values));
-				}
-			}
-
-			return list != null? (MapValue[])list.ToArray(typeof(MapValue)): null;
-		}
-
 		public virtual MapValue[] GetMapValues(Type type)
 		{
 			if (type == null) throw new ArgumentNullException("type");
@@ -1077,71 +1034,12 @@ namespace BLToolkit.Mapping
 			if (mapValues != null || _mapValues.Contains(type))
 				return mapValues;
 
-			mapValues = GetMapValuesFromExtension(type);
+			TypeExtension typeExt = TypeExtension.GetTypeExtenstion(type, Extensions);
+			bool          isSet;
 
-			if (mapValues == null)
-				mapValues = GetMapValuesFromType(type);
+			mapValues = MetadataProvider.GetMapValues(typeExt, type, out isSet);
 
 			_mapValues[type] = mapValues;
-
-			return mapValues;
-		}
-
-		const FieldAttributes EnumField = FieldAttributes.Public | FieldAttributes.Static | FieldAttributes.Literal;
-
-		internal static ArrayList GetEnumMapValuesFromExtension(TypeExtension typeExt, Type type)
-		{
-			ArrayList   mapValues = null;
-			FieldInfo[] fields    = type.GetFields();
-
-			foreach (FieldInfo fi in fields)
-			{
-				if ((fi.Attributes & EnumField) == EnumField)
-				{
-					AttributeExtensionCollection attrExt = typeExt[fi.Name]["MapValue"];
-
-					ArrayList list      = new ArrayList(attrExt.Count);
-					object    origValue = Enum.Parse(type, fi.Name);
-
-					foreach (AttributeExtension ae in attrExt)
-						if (ae.Value != null)
-							list.Add(ae.Value);
-
-					if (list.Count > 0)
-					{
-						if (mapValues == null)
-							mapValues = new ArrayList(fields.Length);
-
-						mapValues.Add(new MapValue(origValue, list.ToArray()));
-					}
-				}
-			}
-
-			return mapValues;
-		}
-
-		private ArrayList GetEnumMapValuesFromType(Type type)
-		{
-			ArrayList   mapValues = null;
-			FieldInfo[] fields    = type.GetFields();
-
-			foreach (FieldInfo fi in fields)
-			{
-				if ((fi.Attributes & EnumField) == EnumField)
-				{
-					Attribute[] enumAttributes = Attribute.GetCustomAttributes(fi, typeof(MapValueAttribute));
-
-					foreach (MapValueAttribute attr in enumAttributes)
-					{
-						if (mapValues == null)
-							mapValues = new ArrayList(fields.Length);
-
-						object origValue = Enum.Parse(type, fi.Name);
-
-						mapValues.Add(new MapValue(origValue, attr.Values));
-					}
-				}
-			}
 
 			return mapValues;
 		}
@@ -1193,6 +1091,8 @@ namespace BLToolkit.Mapping
 
 			return defaultValue;
 		}
+
+		const FieldAttributes EnumField = FieldAttributes.Public | FieldAttributes.Static | FieldAttributes.Literal;
 
 		private static object GetEnumDefaultValueFromExtension(TypeExtension typeExt, Type type)
 		{

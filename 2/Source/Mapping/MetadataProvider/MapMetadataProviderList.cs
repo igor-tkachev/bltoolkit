@@ -2,11 +2,14 @@ using System;
 using System.Collections;
 
 using BLToolkit.Reflection;
+using BLToolkit.Reflection.Extension;
 
 namespace BLToolkit.Mapping.MetadataProvider
 {
 	public class MapMetadataProviderList : MapMetadataProvider, ICollection
 	{
+		#region Init
+
 		public MapMetadataProviderList()
 		{
 			AddProvider(new MapExtensionMetadataProvider());
@@ -14,6 +17,10 @@ namespace BLToolkit.Mapping.MetadataProvider
 		}
 
 		private ArrayList _list = new ArrayList();
+
+		#endregion
+
+		#region Provider Support
 
 		public override void AddProvider(MapMetadataProvider provider)
 		{
@@ -24,6 +31,10 @@ namespace BLToolkit.Mapping.MetadataProvider
 		{
 			_list.Insert(index, provider);
 		}
+
+		#endregion
+
+		#region GetFieldName
 
 		public override string GetFieldName(ObjectMapper mapper, MemberAccessor member, out bool isSet)
 		{
@@ -38,11 +49,19 @@ namespace BLToolkit.Mapping.MetadataProvider
 			return base.GetFieldName(mapper, member, out isSet);
 		}
 
+		#endregion
+
+		#region EnsureMapper
+
 		public override void EnsureMapper(ObjectMapper mapper, EnsureMapperHandler handler)
 		{
 			foreach (MapMetadataProvider p in _list)
 				p.EnsureMapper(mapper, handler);
 		}
+
+		#endregion
+
+		#region GetIgnore
 
 		public override bool GetIgnore(ObjectMapper mapper, MemberAccessor member, out bool isSet)
 		{
@@ -56,6 +75,10 @@ namespace BLToolkit.Mapping.MetadataProvider
 
 			return base.GetIgnore(mapper, member, out isSet);
 		}
+
+		#endregion
+
+		#region GetTrimmable
 
 		public override bool GetTrimmable(ObjectMapper mapper, MemberAccessor member, out bool isSet)
 		{
@@ -73,6 +96,10 @@ namespace BLToolkit.Mapping.MetadataProvider
 			return base.GetTrimmable(mapper, member, out isSet);
 		}
 
+		#endregion
+
+		#region GetMapValues
+
 		public override MapValue[] GetMapValues(ObjectMapper mapper, MemberAccessor member, out bool isSet)
 		{
 			foreach (MapMetadataProvider p in _list)
@@ -85,6 +112,38 @@ namespace BLToolkit.Mapping.MetadataProvider
 
 			return base.GetMapValues(mapper, member, out isSet);
 		}
+
+		public override MapValue[] GetMapValues(TypeExtension typeExt, Type type, out bool isSet)
+		{
+			foreach (MapMetadataProvider p in _list)
+			{
+				MapValue[] value = p.GetMapValues(typeExt, type, out isSet);
+
+				if (isSet)
+					return value;
+			}
+
+			return base.GetMapValues(typeExt, type, out isSet);
+		}
+
+		#endregion
+
+		#region GetDefaultValue
+
+		public override object GetDefaultValue(ObjectMapper mapper, MemberAccessor member, out bool isSet)
+		{
+			foreach (MapMetadataProvider p in _list)
+			{
+				object value = p.GetDefaultValue(mapper, member, out isSet);
+
+				if (isSet)
+					return value;
+			}
+
+			return base.GetDefaultValue(mapper, member, out isSet);
+		}
+
+		#endregion
 
 		#region ICollection Members
 
