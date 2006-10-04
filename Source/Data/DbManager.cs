@@ -1,12 +1,14 @@
 using System;
 using System.Collections;
 using System.ComponentModel;
-using System.Configuration;
 using System.Data;
 using System.Data.Common;
 
 #if FW2
 using System.Collections.Generic;
+using ConfigManager = System.Configuration.ConfigurationManager;
+#else
+using ConfigManager = System.Configuration.ConfigurationSettings;
 #endif
 
 using BLToolkit.Common;
@@ -23,10 +25,10 @@ namespace BLToolkit.Data
 	/// <remarks>
 	/// When the <b>DbManager</b> goes out of scope, it does not close the internal connection object.
 	/// Therefore, you must explicitly close the connection by calling <see cref="Close"/> or 
-	/// <see cref="Dispose()"/>. Also, you can use the C# <b>using</b> statement.
+	/// <see cref="Dispose(bool)"/>. Also, you can use the C# <b>using</b> statement.
 	/// </remarks>
 	/// <include file="Examples.xml" path='examples/db[@name="DbManager"]/*' />
-	public class DbManager : IDisposable
+	public class DbManager : Component
 	{
 		#region Public Constructors
 
@@ -409,7 +411,7 @@ namespace BLToolkit.Data
 
 		#endregion
 
-		#region IDisposable interface
+		#region System.ComponentModel.Component members
 
 		/// <summary>
 		/// Releases the unmanaged resources used by the <see cref="DbManager"/> and 
@@ -420,23 +422,12 @@ namespace BLToolkit.Data
 		/// and the <see cref="Component.Finalize"/> method.
 		/// </remarks>
 		/// <param name="disposing"><b>true</b> to release both managed and unmanaged resources; <b>false</b> to release only unmanaged resources.</param>
-		protected virtual void Dispose(bool disposing)
+		protected override void Dispose(bool disposing)
 		{
-			Close();
-		}
+			if (disposing)
+				Close();
 
-		/// <summary>
-		/// Releases all resources used by the <see cref="DbManager"/>.
-		/// </summary>
-		public void Dispose()
-		{
-			Dispose(true);
-			GC.SuppressFinalize(this);
-		}
-
-		~DbManager()
-		{
-			Dispose(false);
+			base.Dispose(disposing);
 		}
 
 		#endregion
@@ -451,7 +442,7 @@ namespace BLToolkit.Data
 		/// and then closes the connection.
 		/// </remarks>
 		/// <include file="Examples.xml" path='examples/db[@name="Close()"]/*' />
-		/// <seealso cref="Dispose()">Dispose Method</seealso>
+		/// <seealso cref="Dispose(bool)">Dispose Method</seealso>
 		public void Close()
 		{
 			if (_selectCommand != null) { _selectCommand.Dispose(); _selectCommand = null; }
@@ -621,14 +612,22 @@ namespace BLToolkit.Data
 
 		#region Protected Methods
 
-		static DbManager ()
+		static DbManager()
 		{
 			AddDataProvider(new SqlDataProvider());
 			AddDataProvider(new AccessDataProvider());
 			AddDataProvider(new OleDbDataProvider());
 			AddDataProvider(new OdbcDataProvider());
-			//AddDataProvider(new OracleDataProvider());
 			AddDataProvider(new SybaseAdoDataProvider());
+
+			string dataProviders = ConfigManager.AppSettings.Get("BLToolkit.DataProviders");
+			if (null != dataProviders)
+			{
+				foreach (string dataProviderTypeName in dataProviders.Split(';'))
+					AddDataProvider(Type.GetType(dataProviderTypeName, true));
+			}
+
+			_defaultConfiguration = ConfigManager.AppSettings.Get("BLToolkit.DefaultConfiguration");
 		}
 
 		private static string           _firstConfiguration;
@@ -690,11 +689,7 @@ namespace BLToolkit.Data
 					configurationString.Length == 0? "": ".",
 					configurationString);
 
-#if FW2
-				o = ConfigurationManager.AppSettings.Get(key);
-#else
-				o = ConfigurationSettings.AppSettings.Get(key);
-#endif
+				o = ConfigManager.AppSettings.Get(key);
 
 				if (o == null)
 				{
@@ -717,37 +712,27 @@ namespace BLToolkit.Data
 
 		private static DataProviderBase GetDataProvider(string configurationString)
 		{
-			/*
 			// configurationString can be:
-			// ''        : default provider, default configuration;
-			// '.'       : default provider, default configuration;
-			// 'foo.bar' : 'foo' provider, 'bar' configuration;
-			// 'foo.'    : 'foo' provider, default configuration;
-			// 'foo'     : default provider, 'foo' configuration;
-			// '.foo'    : default provider, 'foo' configuration;
+			// ''        : default provider,   default configuration;
+			// '.'       : default provider,   default configuration;
+			// 'foo.bar' :   'foo' provider,     'bar' configuration;
+			// 'foo.'    :   'foo' provider,   default configuration;
+			// 'foo'     : default provider,     'foo' configuration;
+			// '.foo'    : default provider,     'foo' configuration;
 			// '.foo.bar': default provider, 'foo.bar' configuration;
 			//
-			int idx = configurationString.IndexOf(ProviderNameDivider);
-			if (idx > 0)
-			{
-				string providerName = configurationString.Substring(0, idx).ToUpper();
-				return (DataProviderBase)_dataProviderNameList[providerName];
-			}
-
 			// Default provider is SqlDataProvider
-			return (DataProviderBase)_dataProviderNameList["SQL"];
-			*/
-
+			//
 			string cs  = configurationString.ToUpper();
 			string key = "SQL";
 
 			if (cs.Length > 0)
 			{
-				cs += '.';
+				cs += ProviderNameDivider;
 
 				foreach (string k in _dataProviderNameList.Keys)
 				{
-					if (cs.StartsWith(k + '.'))
+					if (cs.StartsWith(k + ProviderNameDivider))
 					{
 						key = k;
 						break;
@@ -1213,6 +1198,35 @@ namespace BLToolkit.Data
 
 			_dataProviderNameList[providerName.ToUpper()] = dataProvider;
 			_dataProviderTypeList[dataProvider.ConnectionType] = dataProvider;
+		}
+
+		/// <summary>
+		/// Adds a new data provider.
+		/// </summary>
+		/// <remarks>
+		/// The method can be used to register a new data provider for further use.
+		/// </remarks>
+		/// <seealso cref="AddConnectionString(string)">AddConnectionString Method.</seealso>
+		/// <seealso cref="BLToolkit.Data.DataProvider.DataProviderBase.Name">DataProviderBase.Name Property.</seealso>
+		/// <param name="dataProviderType">A data provider type.</param>
+		public static void AddDataProvider(Type dataProviderType)
+		{
+			AddDataProvider((DataProviderBase)Activator.CreateInstance(dataProviderType));
+		}
+
+		/// <summary>
+		/// Adds a new data provider witch a specified name.
+		/// </summary>
+		/// <remarks>
+		/// The method can be used to register a new data provider for further use.
+		/// </remarks>
+		/// <seealso cref="AddConnectionString(string)">AddConnectionString Method.</seealso>
+		/// <seealso cref="BLToolkit.Data.DataProvider.DataProviderBase.Name">DataProviderBase.Name Property.</seealso>
+		/// <param name="providerName">The data provider name.</param>
+		/// <param name="dataProviderType">A data provider type.</param>
+		public static void AddDataProvider(string providerName, Type dataProviderType)
+		{
+			AddDataProvider(providerName, (DataProviderBase)Activator.CreateInstance(dataProviderType));
 		}
 
 		/// <summary>

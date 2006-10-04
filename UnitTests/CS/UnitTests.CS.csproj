@@ -89,6 +89,11 @@
                     AssemblyName = "nunit.framework"
                     HintPath = "..\..\..\..\..\..\..\Program Files\NUnit 2.2.8\bin\nunit.framework.dll"
                 />
+                <Reference
+                    Name = "System.Data.OracleClient"
+                    AssemblyName = "System.Data.OracleClient"
+                    HintPath = "..\..\..\..\..\..\..\..\..\WINDOWS\Microsoft.NET\Framework\v1.1.4322\System.Data.OracleClient.dll"
+                />
             </References>
         </Build>
         <Files>
