@@ -7,7 +7,6 @@ Bug fixes
 Enhancement
 
 - Convert<T,P> uses type cast operators when available.
-- DbManager is a System.ComponentModel.Component now.
 - Third party DataProvider registration via appsettings.
 
 v 2.0.2
