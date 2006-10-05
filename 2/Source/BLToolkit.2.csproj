@@ -140,7 +140,6 @@
     <Compile Include="Data\DataProvider\SqlDataProvider.cs" />
     <Compile Include="Data\DataProvider\SybaseAdoDataProvider.cs" />
     <Compile Include="Data\DbManager.cs">
-      <SubType>Component</SubType>
     </Compile>
     <Compile Include="Data\OperationType.cs" />
     <Compile Include="EditableObjects\EditableList.cs" />

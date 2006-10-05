@@ -334,7 +334,7 @@
                 />
                 <File
                     RelPath = "Data\DbManager.cs"
-                    SubType = "Component"
+                    SubType = "Code"
                     BuildAction = "Compile"
                 />
                 <File

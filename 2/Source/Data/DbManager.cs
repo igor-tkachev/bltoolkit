@@ -28,7 +28,7 @@ namespace BLToolkit.Data
 	/// <see cref="Dispose(bool)"/>. Also, you can use the C# <b>using</b> statement.
 	/// </remarks>
 	/// <include file="Examples.xml" path='examples/db[@name="DbManager"]/*' />
-	public class DbManager : Component
+	public class DbManager : IDisposable
 	{
 		#region Public Constructors
 
@@ -411,23 +411,35 @@ namespace BLToolkit.Data
 
 		#endregion
 
-		#region System.ComponentModel.Component members
+		#region IDisposable interface
 
 		/// <summary>
 		/// Releases the unmanaged resources used by the <see cref="DbManager"/> and 
 		/// optionally releases the managed resources.
 		/// </summary>
 		/// <remarks>
-		/// This method is called by the public <see cref="Component.Dispose()"/> method 
-		/// and the <see cref="Component.Finalize"/> method.
+		/// This method is called by the public <see cref="IDisposable.Dispose()"/> method 
+		/// and the <see cref="Finalize"/> method.
 		/// </remarks>
 		/// <param name="disposing"><b>true</b> to release both managed and unmanaged resources; <b>false</b> to release only unmanaged resources.</param>
-		protected override void Dispose(bool disposing)
+		protected virtual void Dispose(bool disposing)
 		{
 			if (disposing)
 				Close();
+		}
 
-			base.Dispose(disposing);
+		/// <summary>
+		/// Releases all resources used by the <see cref="DbManager"/>.
+		/// </summary>
+		public void Dispose()
+		{
+			Dispose(true);
+			GC.SuppressFinalize(this);
+		}
+
+		~DbManager()
+		{
+			Dispose(false);
 		}
 
 		#endregion
