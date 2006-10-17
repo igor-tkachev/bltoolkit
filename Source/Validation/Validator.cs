@@ -15,12 +15,12 @@ namespace BLToolkit.Validation
 		{
 			foreach (MemberAccessor ma in context.TypeAccessor)
 			{
-				context.MemberAccessor = ma;
-
 				object[] attrs = ma.GetAttributes(typeof(ValidatorBaseAttribute));
 
 				if (attrs == null)
 					continue;
+
+				context.MemberAccessor = ma;
 
 				foreach (ValidatorBaseAttribute attr in attrs)
 				{

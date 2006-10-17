@@ -2,10 +2,11 @@ v 2.0.3
 
 Bug fixes
 
-- DbManager will not try to close the connection and the rest in the finalizer anymore.
+- DbManager will not try to close the connection in the finalizer anymore.
 
 Enhancement
 
+- HttpReader SOAP support.
 - Convert<T,P> uses type cast operators when available.
 - Third party DataProvider registration via appsettings.
 

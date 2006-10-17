@@ -166,7 +166,10 @@ namespace BLToolkit.Net
 		{
 			_html = "";
 
-			string uri = BaseUri + requestUri;
+			string uri = BaseUri;
+			
+			if (method != "SOAP")
+				method += requestUri;
 
 			HttpWebRequest request = (HttpWebRequest)WebRequest.Create(uri);
 
@@ -176,7 +179,7 @@ namespace BLToolkit.Net
 			request.CookieContainer = CookieContainer;
 			request.UserAgent       = UserAgent;
 			request.Accept          = Accept;
-			request.Method          = method;
+			request.Method          = method == "SOAP"? "POST" : method;
 			request.KeepAlive       = true;
 
 			if (SendReferer)
@@ -189,6 +192,13 @@ namespace BLToolkit.Net
 			{
 				request.ContentType       = "application/x-www-form-urlencoded";
 				request.AllowAutoRedirect = false;
+			}
+			else if (method == "SOAP")
+			{
+				request.ContentType       = "text/xml; charset=utf-8";
+				request.AllowAutoRedirect = false;
+
+				request.Headers.Add("SOAPAction", requestUri);
 			}
 			else
 			{
@@ -353,6 +363,13 @@ namespace BLToolkit.Net
 			}
 
 			return StatusCode;
+		}
+
+		public HttpStatusCode Soap(string soapAction, string postData)
+		{
+			return Request("\"" + soapAction + "\"", "SOAP",
+				new ProcessStream(new DefaultRequestStreamProcessor(postData).Process),
+				new ProcessStream(new DefaultResponseStreamProcessor(this).Process));
 		}
 
 		#endregion
