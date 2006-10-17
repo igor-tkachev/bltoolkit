@@ -138,10 +138,13 @@ namespace BLToolkit.EditableObjects
 
 		public void Move(int newIndex, object item)
 		{
-			int index = IndexOf(item);
+			lock (SyncRoot)
+			{
+				int index = IndexOf(item);
 
-			if (index >= 0)
-				Move(newIndex, index);
+				if (index >= 0)
+					Move(newIndex, index);
+			}
 		}
 
 		#endregion
@@ -195,7 +198,7 @@ namespace BLToolkit.EditableObjects
 			}
 
 			if (value is INotifyPropertyChanged)
-				((INotifyPropertyChanged)value).PropertyChanged += 
+				((INotifyPropertyChanged)value).PropertyChanged +=
 					new PropertyChangedEventHandler(ItemPropertyChanged);
 
 			OnAdd(value);
