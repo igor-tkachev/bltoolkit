@@ -48,76 +48,76 @@ namespace BLToolkit.Validation
 			object contextValue = context.Value;
 			object testValue    = GetValue(context);
 
-			if (testValue is Int32)
+			if (contextValue is Int32)
 			{
-				Int32 v = Convert.ToInt32(contextValue);
-				return (Int32)testValue < v || !IsExclusive && (Int32)testValue == v;
+				Int32 tv = Convert.ToInt32(testValue);
+				return tv < (Int32)contextValue || !IsExclusive && tv == (Int32)contextValue;
 			}
 
-			if (testValue is decimal)
+			if (contextValue is decimal)
 			{
-				decimal v = Convert.ToDecimal(contextValue);
-				return (decimal)testValue < v || !IsExclusive && (decimal)testValue == v;
+				decimal tv = Convert.ToDecimal(testValue);
+				return tv < (decimal)contextValue || !IsExclusive && tv == (decimal)contextValue;
 			}
 
-			if (testValue is double)
+			if (contextValue is double)
 			{
-				double v = Convert.ToDouble(contextValue);
-				return (double)testValue < v || !IsExclusive && (double)testValue == v;
+				double tv = Convert.ToDouble(testValue);
+				return tv < (double)contextValue || !IsExclusive && tv == (double)contextValue;
 			}
 
-			if (testValue is Int64)
+			if (contextValue is float)
 			{
-				Int64 v = Convert.ToInt64(contextValue);
-				return (Int64)testValue < v || !IsExclusive && (Int64)testValue == v;
+				float tv = Convert.ToSingle(testValue);
+				return tv < (float)contextValue || !IsExclusive && tv == (float)contextValue;
 			}
 
-			if (testValue is float)
+			if (contextValue is byte)
 			{
-				float v = Convert.ToSingle(contextValue);
-				return (float)testValue < v || !IsExclusive && (float)testValue == v;
+				byte tv = Convert.ToByte(testValue);
+				return tv < (byte)contextValue || !IsExclusive && tv == (byte)contextValue;
 			}
 
-			if (testValue is byte)
+			if (contextValue is char)
 			{
-				byte v = Convert.ToByte(contextValue);
-				return (byte)testValue < v || !IsExclusive && (byte)testValue == v;
+				char tv = Convert.ToChar(testValue);
+				return tv < (char)contextValue || !IsExclusive && tv == (char)contextValue;
 			}
 
-			if (testValue is char)
+			if (contextValue is Int16)
 			{
-				char v = Convert.ToChar(contextValue);
-				return (char)testValue < v || !IsExclusive && (char)testValue == v;
+				Int16 tv = Convert.ToInt16(testValue);
+				return tv < (Int16)contextValue || !IsExclusive && tv == (Int16)contextValue;
 			}
 
-			if (testValue is Int16)
+			if (contextValue is sbyte)
 			{
-				Int16 v = Convert.ToInt16(contextValue);
-				return (Int16)testValue < v || !IsExclusive && (Int16)testValue == v;
+				sbyte tv = Convert.ToSByte(testValue);
+				return tv < (sbyte)contextValue || !IsExclusive && tv == (sbyte)contextValue;
 			}
 
-			if (testValue is sbyte)
+			if (contextValue is UInt16)
 			{
-				sbyte v = Convert.ToSByte(contextValue);
-				return (sbyte)testValue < v || !IsExclusive && (sbyte)testValue == v;
+				UInt16 tv = Convert.ToUInt16(testValue);
+				return tv < (UInt16)contextValue || !IsExclusive && tv == (UInt16)contextValue;
 			}
 
-			if (testValue is UInt16)
+			if (contextValue is UInt32)
 			{
-				UInt16 v = Convert.ToUInt16(contextValue);
-				return (UInt16)testValue < v || !IsExclusive && (UInt16)testValue == v;
+				UInt32 tv = Convert.ToUInt32(testValue);
+				return tv < (UInt32)contextValue || !IsExclusive && tv == (UInt32)contextValue;
 			}
 
-			if (testValue is UInt32)
+			if (contextValue is Int64)
 			{
-				UInt32 v = Convert.ToUInt32(contextValue);
-				return (Int32)testValue < v || !IsExclusive && (Int32)testValue == v;
+				Int64 tv = Convert.ToInt64(testValue);
+				return tv < (Int64)contextValue || !IsExclusive && tv == (Int64)contextValue;
 			}
 
-			if (testValue is UInt64)
+			if (contextValue is UInt64)
 			{
-				UInt64 v = Convert.ToUInt64(contextValue);
-				return (UInt64)testValue < v || !IsExclusive && (UInt64)testValue == v;
+				UInt64 tv = Convert.ToUInt64(testValue);
+				return tv < (UInt64)contextValue || !IsExclusive && tv == (UInt64)contextValue;
 			}
 
 			return true;
@@ -125,7 +125,7 @@ namespace BLToolkit.Validation
 
 		public override string ErrorMessage
 		{
-			get { return base.ErrorMessage != null? base.ErrorMessage: "Minimum '{0}' value is {1}{2}."; }
+			get { return base.ErrorMessage != null? base.ErrorMessage: "Minimum value for '{0}' is {1}{2}."; }
 			set { base.ErrorMessage = value; }
 		}
 

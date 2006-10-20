@@ -32,9 +32,10 @@ namespace BLToolkit.Validation
 			if (context.IsNull(context))
 				return true;
 
-			DateTime v = Convert.ToDateTime(context.Value);
+			DateTime contextValue = Convert.ToDateTime(context.Value);
+			DateTime testValue    = (DateTime)GetValue(context);
 
-			return (DateTime)Value > v || !IsExclusive && (DateTime)Value == v;
+			return testValue > contextValue || !IsExclusive && testValue == contextValue;
 		}
 	}
 }

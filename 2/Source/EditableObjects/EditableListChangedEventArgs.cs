@@ -15,6 +15,11 @@ namespace BLToolkit.EditableObjects
 		{
 		}
 
+		public EditableListChangedEventArgs(ListChangedType listChangedType)
+			: base(listChangedType, -1)
+		{
+		}
+
 #if FW2
 		public EditableListChangedEventArgs(int index, PropertyDescriptor propDesc)
 			: base(ListChangedType.ItemChanged, index, propDesc)
