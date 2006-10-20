@@ -3,12 +3,20 @@ v 2.0.3
 Bug fixes
 
 - DbManager will not try to close the connection in the finalizer anymore.
+- MinValue/MaxValue attributes now determine value type by object property/field instead of test value.
+- Fixed obscure case when object is removed from EditableArrayList/BindingListImpl while ItemPropertyChanged 
+  delegate is in process of being executed and collection handler was not yet invoked.
 
 Enhancement
 
 - HttpReader SOAP support.
 - Convert<T,P> uses type cast operators when available.
 - Third party DataProvider registration via appsettings.
+- More specification adherent sorting behavior implementation of IBindingList/IBindingListView in BindingListImpl. 
+- EditableArrayList (potentially breaking changes) heavily relies on BindingListImpl for IBindingList/IBindingListView 
+  and their base interfaces implementation. 
+- BindingListImpl is changed to be fully specification adherent binding wrapper for other object lists/collection types.
+
 
 v 2.0.2
 

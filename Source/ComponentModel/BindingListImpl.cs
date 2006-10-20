@@ -24,8 +24,6 @@ namespace BLToolkit.ComponentModel
 
 			_list     = list;
 			_itemType = itemType;
-
-			_supportsChangeNotification = _list is EditableArrayList || _list is IBindingList;
 		}
 
 		#endregion
@@ -34,7 +32,6 @@ namespace BLToolkit.ComponentModel
 
 		private IList _list;
 		private Type  _itemType;
-		private bool  _supportsChangeNotification;
 
 		private void ApplySort(IComparer comparer)
 		{
@@ -119,19 +116,64 @@ namespace BLToolkit.ComponentModel
 
 			#region Change Notification
 
+		private bool _notifyChanges = true;
+		public  bool  NotifyChanges
+		{
+			get { return _notifyChanges; }
+			set { _notifyChanges = value; }
+		}
+
 		public bool SupportsChangeNotification
 		{
-			get { return _supportsChangeNotification; }
+			get { return true; }
 		}
 
 		public event ListChangedEventHandler ListChanged;
 
-		public void FireListChangedEvent(object sender, EditableListChangedEventArgs e)
+		private void FireListChangedEvent(object sender, EditableListChangedEventArgs e)
 		{
-			if (ListChanged != null)
+			if (_notifyChanges && ListChanged != null)
 				ListChanged(sender, e);
 		}
+		
+		public virtual void OnListChanged(EditableListChangedEventArgs e)
+		{
+			FireListChangedEvent(this, e);
+		}
 
+		protected void OnListChanged(ListChangedType listChangedType, int index)
+		{
+			OnListChanged(new EditableListChangedEventArgs(listChangedType, index));
+		}
+
+		private void ItemPropertyChanged(object sender, PropertyChangedEventArgs e)
+		{
+			if (_notifyChanges && sender != null)
+			{
+				int indexOfSender = _list.IndexOf(sender);
+
+				if (indexOfSender >= 0)
+				{
+					MemberAccessor ma = TypeAccessor.GetAccessor(sender.GetType())[e.PropertyName];
+
+					if (ma != null)
+						OnListChanged(new EditableListChangedEventArgs(indexOfSender, ma.PropertyDescriptor));
+
+					if (_isSorted && _list.Count > 1)
+					{
+						int newIndex = GetItemSortedPosition(indexOfSender, sender);
+
+						if (newIndex != indexOfSender)
+						{
+							_list.RemoveAt(indexOfSender);
+							_list.Insert(newIndex, sender);
+
+							OnListChanged(new EditableListChangedEventArgs(newIndex, indexOfSender));
+						}
+					}
+				}
+			}
+		}
 			#endregion
 
 			#region Sorting
@@ -168,8 +210,15 @@ namespace BLToolkit.ComponentModel
 
 			_sortProperty  = property;
 			_sortDirection = direction;
+			
+#if FW2
+			_sortDescriptions = null;
+#endif
 
 			ApplySort(new SortPropertyComparer(property, direction));
+			
+			if (_list.Count > 0)
+				OnListChanged(new EditableListChangedEventArgs(ListChangedType.Reset));
 
 			Debug.WriteLine(string.Format("End   ApplySort(\"{0}\", {1})", property.Name, direction));
 		}
@@ -178,6 +227,10 @@ namespace BLToolkit.ComponentModel
 		{
 			_isSorted     = false;
 			_sortProperty = null;
+			
+#if FW2
+			_sortDescriptions = null;
+#endif
 		}
 
 			#endregion
@@ -250,12 +303,32 @@ namespace BLToolkit.ComponentModel
 
 		public int Add(object value)
 		{
-			return _list.Add(value);
+			int index;
+			
+			if (!_isSorted)
+				index = _list.Add(value);
+			else
+			{
+				index = GetSortedInsertIndex(value);
+				_list.Insert(index, value);
+			}
+
+			AddInternal(value);
+			OnListChanged(new EditableListChangedEventArgs(ListChangedType.ItemAdded, index));
+			
+			return index;
 		}
 
 		public void Clear()
 		{
-			_list.Clear();
+			if (_list.Count > 0)
+			{
+				RemoveInternal(_list);
+				
+				_list.Clear();
+				
+				OnListChanged(new EditableListChangedEventArgs(ListChangedType.Reset));
+			}
 		}
 
 		public bool Contains(object value)
@@ -270,7 +343,13 @@ namespace BLToolkit.ComponentModel
 
 		public void Insert(int index, object value)
 		{
+			if (_isSorted)
+				index = GetSortedInsertIndex(value);
+			
 			_list.Insert(index, value);
+			AddInternal(value);
+			
+			OnListChanged(new EditableListChangedEventArgs(ListChangedType.ItemAdded, index));
 		}
 
 		public bool IsFixedSize
@@ -285,18 +364,59 @@ namespace BLToolkit.ComponentModel
 
 		public void Remove(object value)
 		{
+			int removalIndex = IndexOf(value);
+			
+			if (removalIndex >= 0)
+				RemoveInternal(value);
+
 			_list.Remove(value);
+			
+			if (removalIndex >= 0)
+			OnListChanged(new EditableListChangedEventArgs(ListChangedType.ItemDeleted, removalIndex));
 		}
 
 		public void RemoveAt(int index)
 		{
+			object o = this[index];
+
+			RemoveInternal(o);
+			
 			_list.RemoveAt(index);
+			
+			OnListChanged(new EditableListChangedEventArgs(ListChangedType.ItemDeleted, index));
 		}
 
 		public object this[int index]
 		{
-			get { return _list[index];  }
-			set { _list[index] = value; }
+			get { return _list[index]; }
+			set 
+			{
+				object o = _list[index];
+
+				if (o != value)
+				{
+					RemoveInternal(o);
+					
+					_list[index] = value;
+
+					AddInternal(o);
+
+					OnListChanged(new EditableListChangedEventArgs(ListChangedType.ItemChanged, index));
+					
+					if (_isSorted)
+					{
+						int newIndex = GetItemSortedPosition(index, value);
+						
+						if (newIndex != index)
+						{
+							_list.RemoveAt(index);
+							_list.Insert(newIndex, value);
+						}
+						
+						OnListChanged(new EditableListChangedEventArgs(newIndex, index));
+					}
+				}
+			}
 		}
 
 		#endregion
@@ -360,6 +480,24 @@ namespace BLToolkit.ComponentModel
 
 		#endregion
 
+		#region IComparer Accessor
+		
+		public IComparer GetSortComparer()
+		{
+			if (_isSorted)
+			{
+#if FW2
+				if (_sortDescriptions != null)
+					return new SortListPropertyComparer(_sortDescriptions);
+#endif
+				return new SortPropertyComparer(_sortProperty, _sortDirection);
+			}
+
+			return null;
+		}
+		
+		#endregion
+
 #if FW2
 
 		#region IBindingListView Members
@@ -371,9 +509,15 @@ namespace BLToolkit.ComponentModel
 
 		public void ApplySort(ListSortDescriptionCollection sorts)
 		{
-			ApplySort(new SortListPropertyComparer(sorts));
-
 			_sortDescriptions = sorts;
+
+			_isSorted = true;
+			_sortProperty = null;
+			
+			ApplySort(new SortListPropertyComparer(sorts));
+			
+			if (_list.Count > 0)
+				OnListChanged(new EditableListChangedEventArgs(ListChangedType.Reset));
 		}
 
 		[NonSerialized]
@@ -434,5 +578,194 @@ namespace BLToolkit.ComponentModel
 		#endregion
 
 #endif
+
+
+		#region Sort enforcement
+
+		public int GetItemSortedPosition(int index, object sender)
+		{
+			IComparer comparer = GetSortComparer();
+
+			if (comparer == null)
+				return index;
+
+			int result     = index > 0 ? comparer.Compare(_list[index - 1], sender) : -1;
+			int nextResult = index < _list.Count - 1 ? comparer.Compare(_list[index + 1], sender) : 1;
+
+			if (result > 0 || nextResult < 0)
+			{
+				bool placed = false;
+
+				for (int i = 0; i < _list.Count; i++)
+				{
+					if (i == index)
+						continue;
+
+					result = comparer.Compare(_list[i], sender);
+
+					if (result > 0)
+					{
+						if (index == i - 1)
+							return index;
+								
+						return i;
+					}
+				}
+
+				if (!placed)
+					return _list.Count - 1;
+			}
+
+			return index;
+		}
+
+		public int GetSortedInsertIndex(object value)
+		{
+			IComparer comparer = GetSortComparer();
+			int result;
+
+			if (comparer == null)
+				return -1;
+
+			for (int i = 0; i < _list.Count; i++)
+			{
+				result = comparer.Compare(_list[i], value);
+
+				if (result > 0)
+					return i;
+			}
+
+			return _list.Count;
+		}
+
+		#endregion
+
+		#region Misc/Range Operations
+		
+		public void Move(int newIndex, int oldIndex)
+		{
+			if (oldIndex != newIndex)
+			{
+				EndNew();
+
+				object o = _list[oldIndex];
+
+				_list.RemoveAt(oldIndex);
+				if (!_isSorted)
+					_list.Insert(newIndex, o);
+				else
+					_list.Insert(newIndex = GetSortedInsertIndex(o), o);
+
+				OnListChanged(new EditableListChangedEventArgs(newIndex, oldIndex));
+			}
+		}
+		
+		public void AddRange(ICollection c)
+		{
+			foreach (object o in c)
+			{
+				if (!_isSorted)
+					_list.Add(o);
+				else
+					_list.Insert(GetSortedInsertIndex(o), o);
+			}
+
+			AddInternal(c);
+
+			OnListChanged(new EditableListChangedEventArgs(ListChangedType.Reset, -1));
+		}
+		
+		public void InsertRange(int index, ICollection c)
+		{
+			if (c.Count == 0)
+				return;
+			
+			foreach (object o in c)
+			{
+				if (!_isSorted)
+					_list.Insert(index++, o);
+				else
+					_list.Insert(GetSortedInsertIndex(o), o);
+			}
+
+			AddInternal(c);
+
+			OnListChanged(new EditableListChangedEventArgs(ListChangedType.Reset, -1));
+		}
+		
+		public void RemoveRange(int index, int count)
+		{
+			object[] toRemove = new object[count];
+
+			for (int i = index; i < _list.Count && i < index + count; i++)
+				toRemove[i - index] = _list[i];
+			
+			RemoveInternal(toRemove);
+
+			foreach (object o in toRemove)
+				_list.Remove(o);
+
+			OnListChanged(new EditableListChangedEventArgs(ListChangedType.Reset, -1));
+		}
+		
+		public void SetRange(int index, ICollection c)
+		{
+			int cCount = c.Count;
+			
+			if (index < 0 || index >= _list.Count - cCount)
+				throw new ArgumentOutOfRangeException("index");
+
+			bool oldNotifyChanges = _notifyChanges;
+			_notifyChanges = false;
+
+			int i = index;
+			foreach (object newObject in c)
+			{
+				RemoveInternal(_list[i + index]);
+				_list[i + index] = newObject;
+			}
+			
+			AddInternal(c);
+			
+			if (_isSorted)
+				ApplySort(GetSortComparer());
+
+			_notifyChanges = oldNotifyChanges;
+			OnListChanged(new EditableListChangedEventArgs(ListChangedType.Reset));
+		}
+		
+		#endregion
+
+		#region Add/Remove Internal
+		private void AddInternal(object value)
+		{
+			EndNew();
+
+			if (value is INotifyPropertyChanged)
+				((INotifyPropertyChanged)value).PropertyChanged += 
+					new PropertyChangedEventHandler(ItemPropertyChanged);
+		}
+
+		private void RemoveInternal(object value)
+		{
+			EndNew();
+
+			if (value is INotifyPropertyChanged)
+				((INotifyPropertyChanged)value).PropertyChanged -=
+					new PropertyChangedEventHandler(ItemPropertyChanged);
+		}
+
+		private void AddInternal(IEnumerable e)
+		{
+			foreach (object o in e)
+				AddInternal(o);
+		}
+
+		private void RemoveInternal(IEnumerable e)
+		{
+			foreach (object o in e)
+				RemoveInternal(o);
+		}
+		#endregion
 	}
 }

@@ -32,7 +32,7 @@ namespace BLToolkit.EditableObjects
 			_itemType        = itemType;
 			_list            = list;
 			_typedListImpl   = new TypedListImpl(itemType);
-			_bindingListImpl = new BindingListImpl(this, itemType);
+			_bindingListImpl = new BindingListImpl(list, itemType);
 
 			AddInternal(_list);
 		}
@@ -122,18 +122,7 @@ namespace BLToolkit.EditableObjects
 
 		public void Move(int newIndex, int oldIndex)
 		{
-			if (oldIndex != newIndex)
-			{
-				_bindingListImpl.EndNew();
-
-				object o = _list[oldIndex];
-
-				_list.RemoveAt(oldIndex);
-				_list.Insert  (newIndex, o);
-
-				if (_notifyChanges)
-					OnListChanged(new EditableListChangedEventArgs(newIndex, oldIndex));
-			}
+			_bindingListImpl.Move(newIndex, oldIndex);
 		}
 
 		public void Move(int newIndex, object item)
@@ -151,34 +140,20 @@ namespace BLToolkit.EditableObjects
 
 		#region Change Notification
 
-		private bool _notifyChanges = true;
-		public  bool  NotifyChanges
+		public bool NotifyChanges
 		{
-			get { return _notifyChanges;  }
-			set { _notifyChanges = value; }
+			get { return _bindingListImpl.NotifyChanges;  }
+			set { _bindingListImpl.NotifyChanges = value; }
 		}
 
 		protected virtual void OnListChanged(EditableListChangedEventArgs e)
 		{
-			if (_notifyChanges)
-				_bindingListImpl.FireListChangedEvent(this, e);
+			_bindingListImpl.OnListChanged(e);
 		}
 
 		protected void OnListChanged(ListChangedType listChangedType, int index)
 		{
-			if (_notifyChanges)
-				OnListChanged(new EditableListChangedEventArgs(listChangedType, index));
-		}
-
-		private void ItemPropertyChanged(object sender, PropertyChangedEventArgs e)
-		{
-			if (_notifyChanges && sender != null)
-			{
-				MemberAccessor ma = TypeAccessor.GetAccessor(sender.GetType())[e.PropertyName];
-
-				if (ma != null)
-					OnListChanged(new EditableListChangedEventArgs(_list.IndexOf(sender), ma.PropertyDescriptor));
-			}
+			OnListChanged(new EditableListChangedEventArgs(listChangedType, index));
 		}
 
 		#endregion
@@ -187,8 +162,6 @@ namespace BLToolkit.EditableObjects
 
 		void AddInternal(object value)
 		{
-			_bindingListImpl.EndNew();
-
 			if (IsTrackingChanges)
 			{
 				if (DelItems.Contains(value))
@@ -197,17 +170,11 @@ namespace BLToolkit.EditableObjects
 					NewItems.Add(value);
 			}
 
-			if (value is INotifyPropertyChanged)
-				((INotifyPropertyChanged)value).PropertyChanged +=
-					new PropertyChangedEventHandler(ItemPropertyChanged);
-
 			OnAdd(value);
 		}
 
 		private void RemoveInternal(object value)
 		{
-			_bindingListImpl.EndNew();
-
 			if (IsTrackingChanges)
 			{
 				if (NewItems.Contains(value))
@@ -215,10 +182,6 @@ namespace BLToolkit.EditableObjects
 				else
 					DelItems.Add(value);
 			}
-
-			if (value is INotifyPropertyChanged)
-				((INotifyPropertyChanged)value).PropertyChanged -=
-					new PropertyChangedEventHandler(ItemPropertyChanged);
 
 			OnRemove(value);
 		}
@@ -356,17 +319,119 @@ namespace BLToolkit.EditableObjects
 
 		#endregion
 
-		#region Overridden Methods
+		#region IList Members
+
+		public override bool IsFixedSize
+		{
+			get { return _bindingListImpl.IsFixedSize; }
+		}
+
+		public override bool IsReadOnly
+		{
+			get { return _bindingListImpl.IsReadOnly; }
+		}
+
+		public override object this[int index]
+		{
+			get { return _bindingListImpl[index];  }
+			set
+			{
+				object o = _bindingListImpl[index];
+				
+				_bindingListImpl[index] = value;
+
+				if (o != value)
+				{
+					RemoveInternal(o);
+					AddInternal(o);
+				}
+			}
+		} 
 
 		public override int Add(object value)
 		{
-			int idx = _list.Add(value);
+			int index = _bindingListImpl.Add(value);
 
 			AddInternal(value);
-			OnListChanged(ListChangedType.ItemAdded, idx);
 
-			return idx;
+			return index;
 		}
+
+		public override void Clear()
+		{
+			if (_list.Count > 0)
+				RemoveInternal(_list);
+			
+			_bindingListImpl.Clear();
+		}
+
+		public override bool Contains(object item)
+		{
+			return _bindingListImpl.Contains(item);
+		}
+
+		public override int IndexOf(object value)
+		{
+			return _bindingListImpl.IndexOf(value);
+		}
+
+		public override void Insert(int index, object value)
+		{
+			_bindingListImpl.Insert(index, value);
+
+			AddInternal(value);
+		}
+
+		public override void Remove(object value)
+		{
+			RemoveInternal(value);
+
+			_bindingListImpl.Remove(value);
+		}
+
+		public override void RemoveAt(int index)
+		{
+			RemoveInternal(_bindingListImpl[index]);
+			
+			_bindingListImpl.RemoveAt(index);
+		}
+		
+		#endregion
+
+		#region ICollection Members
+
+		public override int Count
+		{
+			get { return _bindingListImpl.Count; }
+		}
+
+		public override bool IsSynchronized
+		{
+			get { return _bindingListImpl.IsSynchronized; }
+		}
+
+		public override object SyncRoot
+		{
+			get { return _bindingListImpl.SyncRoot; }
+		}
+
+		public override void CopyTo(Array array, int arrayIndex)
+		{
+			_bindingListImpl.CopyTo(array, arrayIndex);
+		}
+		
+		#endregion
+
+		#region IEnumerable Members
+
+		public override IEnumerator GetEnumerator()
+		{
+			return _bindingListImpl.GetEnumerator();
+		}
+		
+		#endregion
+
+		#region Overridden Methods
 
 		public int Add(object value, bool trackChanges)
 		{
@@ -379,12 +444,9 @@ namespace BLToolkit.EditableObjects
 
 		public override void AddRange(ICollection c)
 		{
-			int idx = Count;
-
-			_list.AddRange(c);
-
+			_bindingListImpl.AddRange(c);
+			
 			AddInternal(c);
-			OnListChanged(ListChangedType.Reset, idx);
 		}
 
 		public void AddRange(ICollection c, bool trackChanges)
@@ -415,16 +477,6 @@ namespace BLToolkit.EditableObjects
 			set { _list.Capacity = value; }
 		}
 
-		public override void Clear()
-		{
-			if (_list.Count > 0)
-			{
-				RemoveInternal(_list);
-				_list.Clear();
-				OnListChanged(ListChangedType.Reset, -1);
-			}
-		}
-
 		public void Clear(bool trackChanges)
 		{
 			if (!trackChanges) _noTrackingChangesCount++;
@@ -437,7 +489,7 @@ namespace BLToolkit.EditableObjects
 			if (_newItems != null) el._newItems = (ArrayList)_newItems.Clone();
 			if (_delItems != null) el._delItems = (ArrayList)_delItems.Clone();
 
-			el._notifyChanges          = _notifyChanges;
+			el.NotifyChanges           = NotifyChanges;
 			el._noTrackingChangesCount = _noTrackingChangesCount;
 
 			return el;
@@ -446,11 +498,6 @@ namespace BLToolkit.EditableObjects
 		public override object Clone()
 		{
 			return Clone(new EditableArrayList(ItemType, (ArrayList)_list.Clone()));
-		}
-
-		public override bool Contains(object item)
-		{
-			return _list.Contains(item);
 		}
 
 		public override void CopyTo(int index, Array array, int arrayIndex, int count)
@@ -463,24 +510,9 @@ namespace BLToolkit.EditableObjects
 			_list.CopyTo(array);
 		}
 
-		public override void CopyTo(Array array, int arrayIndex)
-		{
-			_list.CopyTo(array, arrayIndex);
-		}
-
-		public override int Count
-		{
-			get { return _list.Count; }
-		}
-
 		public override bool Equals(object obj)
 		{
 			return _list.Equals(obj);
-		}
-
-		public override IEnumerator GetEnumerator()
-		{
-			return _list.GetEnumerator();
 		}
 
 		public override IEnumerator GetEnumerator(int index, int count)
@@ -498,11 +530,6 @@ namespace BLToolkit.EditableObjects
 			return _list.GetRange(index, count);
 		}
 
-		public override int IndexOf(object value)
-		{
-			return _list.IndexOf(value);
-		}
-
 		public override int IndexOf(object value, int startIndex)
 		{
 			return _list.IndexOf(value, startIndex);
@@ -511,14 +538,6 @@ namespace BLToolkit.EditableObjects
 		public override int IndexOf(object value, int startIndex, int count)
 		{
 			return _list.IndexOf(value, startIndex, count);
-		}
-
-		public override void Insert(int index, object value)
-		{
-			_list.Insert(index, value);
-
-			AddInternal(value);
-			OnListChanged(ListChangedType.ItemAdded, index);
 		}
 
 		public void Insert(int index, object value, bool trackChanges)
@@ -530,13 +549,7 @@ namespace BLToolkit.EditableObjects
 
 		public override void InsertRange(int index, ICollection c)
 		{
-			if (c.Count > 0)
-			{
-				_list.InsertRange(index, c);
-
-				AddInternal(c);
-				OnListChanged(ListChangedType.Reset, index);
-			}
+			_bindingListImpl.InsertRange(index, c);
 		}
 
 		public void InsertRange(int index, ICollection c, bool trackChanges)
@@ -544,21 +557,6 @@ namespace BLToolkit.EditableObjects
 			if (!trackChanges) _noTrackingChangesCount++;
 			InsertRange(index, c);
 			if (!trackChanges) _noTrackingChangesCount--;
-		}
-
-		public override bool IsFixedSize
-		{
-			get { return _list.IsFixedSize; }
-		}
-
-		public override bool IsReadOnly
-		{
-			get { return _list.IsReadOnly; }
-		}
-
-		public override bool IsSynchronized
-		{
-			get { return _list.IsSynchronized; }
 		}
 
 		public override int LastIndexOf(object value)
@@ -576,35 +574,11 @@ namespace BLToolkit.EditableObjects
 			return _list.LastIndexOf(value, startIndex, count);
 		}
 
-		public override void Remove(object obj)
-		{
-			int n = IndexOf(obj);
-
-			if (n >= 0)
-				RemoveInternal(obj);
-
-			_list.Remove(obj);
-
-			if (n >= 0)
-				OnListChanged(ListChangedType.ItemDeleted, n);
-		}
-
 		public void Remove(object obj, bool trackChanges)
 		{
 			if (!trackChanges) _noTrackingChangesCount++;
 			Remove(obj);
 			if (!trackChanges) _noTrackingChangesCount--;
-		}
-
-		public override void RemoveAt(int index)
-		{
-			object o = this[index];
-
-			RemoveInternal(o);
-
-			_list.RemoveAt(index);
-			
-			OnListChanged(ListChangedType.ItemDeleted, index);
 		}
 
 		public void RemoveAt(int index, bool trackChanges)
@@ -616,12 +590,7 @@ namespace BLToolkit.EditableObjects
 
 		public override void RemoveRange(int index, int count)
 		{
-			for (int i = index; i < _list.Count && i < index + count; i++)
-				RemoveInternal(_list[i]);
-
-			_list.RemoveRange(index, count);
-
-			OnListChanged(ListChangedType.Reset, index);
+			_bindingListImpl.RemoveRange(index, count);
 		}
 
 		public void RemoveRange(int index, int count, bool trackChanges)
@@ -635,86 +604,83 @@ namespace BLToolkit.EditableObjects
 		{
 			_bindingListImpl.EndNew();
 
-			_list.Reverse();
+			if (!_bindingListImpl.IsSorted)
+				_list.Reverse();
+			else
+				throw new InvalidOperationException("Reverse is not supported for already sorted arrays. Invoke IBindingList.RemoveSort() first or provide revese sort direction.");
 
 			if (_list.Count > 1)
-				OnListChanged(ListChangedType.Reset, 0);
+				OnListChanged(ListChangedType.Reset, -1);
 		}
 
 		public override void Reverse(int index, int count)
 		{
 			_bindingListImpl.EndNew();
 
-			_list.Reverse(index, count);
+			if (!_bindingListImpl.IsSorted)
+				_list.Reverse(index, count);
+			else
+				throw new InvalidOperationException("Range Reverse is not supported for already sorted arrays. Invoke IBindingList.RemoveSort() first.");
 
 			if (count > 1)
-				OnListChanged(ListChangedType.Reset, 0);
+				OnListChanged(ListChangedType.Reset, -1);
 		}
 
 		public override void SetRange(int index, ICollection c)
 		{
-			_list.SetRange(index, c);
+			_bindingListImpl.SetRange(index, c);
 
-			if (_list.Count > 1)
-			{
-				AddInternal(c);
-				OnListChanged(ListChangedType.Reset, index);
-			}
+			AddInternal(c);
 		}
 
 		public override void Sort()
 		{
 			_bindingListImpl.EndNew();
 
-			_list.Sort();
+			if (!_bindingListImpl.IsSorted)
+			{
+				_list.Sort();
 
-			if (_list.Count > 1)
-				OnListChanged(ListChangedType.Reset, 0);
+				if (_list.Count > 1)
+					OnListChanged(ListChangedType.Reset, -1);
+			}
+			else
+			{
+				if (_bindingListImpl.SortProperty != null)
+					_bindingListImpl.ApplySort(_bindingListImpl.SortProperty, _bindingListImpl.SortDirection);
+#if FW2
+				else if (_bindingListImpl.SortDescriptions != null)
+					_bindingListImpl.ApplySort(_bindingListImpl.SortDescriptions);
+#endif
+				else
+					throw new InvalidOperationException("Currntly applied sort method is not recognised/supported by EditableArrayList.");
+			}
 		}
 
 		public override void Sort(int index, int count, IComparer comparer)
 		{
 			_bindingListImpl.EndNew();
 
-			_list.Sort(index, count, comparer);
+			if (!_bindingListImpl.IsSorted)
+				_list.Sort(index, count, comparer);
+			else
+				throw new InvalidOperationException("Custom sorting is not supported on already sorted arrays. Invoke IBindingList.RemoveSort first.");
 
 			if (count > 1)
-				OnListChanged(ListChangedType.Reset, 0);
+				OnListChanged(ListChangedType.Reset, -1);
 		}
 
 		public override void Sort(IComparer comparer)
 		{
 			_bindingListImpl.EndNew();
 
-			_list.Sort(comparer);
+			if (!_bindingListImpl.IsSorted)
+				_list.Sort(comparer);
+			else
+				throw new InvalidOperationException("Custom sorting is not supported on already sorted arrays. Invoke IBindingList.RemoveSort first.");
 
 			if (_list.Count > 1)
-				OnListChanged(ListChangedType.Reset, 0);
-		}
-
-		public override object SyncRoot
-		{
-			get { return _list.SyncRoot; }
-		}
-
-		public override object this[int index]
-		{
-			get { return _list[index];  }
-			set
-			{
-				object o = _list[index];
-
-				if (o != value)
-				{
-					RemoveInternal(o);
-
-					_list[index] = value;
-
-					AddInternal(value);
-					
-					OnListChanged(ListChangedType.ItemChanged, index);
-				}
-			}
+				OnListChanged(ListChangedType.Reset, -1);
 		}
 
 		public override object[] ToArray()

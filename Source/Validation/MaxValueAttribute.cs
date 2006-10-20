@@ -27,10 +27,10 @@ namespace BLToolkit.Validation
 			ErrorMessage = errorMessage;
 		}
 
-		private         object _value;
-		public  virtual object  Value
+		private object _value;
+		public virtual object GetValue(ValidationContext context)
 		{
-			get { return _value;}
+			return _value;
 		}
 
 		private bool _isExclusive;
@@ -45,78 +45,79 @@ namespace BLToolkit.Validation
 			if (context.IsNull(context))
 				return true;
 
-			object value = context.Value;
+			object contextValue = context.Value;
+			object testValue    = GetValue(context);
 
-			if (Value is Int32)
+			if (contextValue is Int32)
 			{
-				Int32 v = Convert.ToInt32(value);
-				return (Int32)Value > v || !IsExclusive && (Int32)Value == v;
+				Int32 tv = Convert.ToInt32(testValue);
+				return tv > (Int32)contextValue || !IsExclusive && tv == (Int32)contextValue;
 			}
 
-			if (Value is decimal)
+			if (contextValue is decimal)
 			{
-				decimal v = Convert.ToDecimal(value);
-				return (decimal)Value > v || !IsExclusive && (decimal)Value == v;
+				decimal tv = Convert.ToDecimal(testValue);
+				return tv > (decimal)contextValue || !IsExclusive && tv == (decimal)contextValue;
 			}
 
-			if (Value is double)
+			if (contextValue is double)
 			{
-				double v = Convert.ToDouble(value);
-				return (double)Value > v || !IsExclusive && (double)Value == v;
+				double tv = Convert.ToDouble(testValue);
+				return tv > (double)contextValue || !IsExclusive && tv == (double)contextValue;
 			}
 
-			if (Value is Int64)
+			if (contextValue is float)
 			{
-				Int64 v = Convert.ToInt64(value);
-				return (Int64)Value > v || !IsExclusive && (Int64)Value == v;
+				float tv = Convert.ToSingle(testValue);
+				return tv > (float)contextValue || !IsExclusive && tv == (float)contextValue;
 			}
 
-			if (Value is float)
+			if (contextValue is byte)
 			{
-				float v = Convert.ToSingle(value);
-				return (float)Value > v || !IsExclusive && (float)Value == v;
+				byte tv = Convert.ToByte(testValue);
+				return tv > (byte)contextValue || !IsExclusive && tv == (byte)contextValue;
 			}
 
-			if (Value is byte)
+			if (contextValue is char)
 			{
-				byte v = Convert.ToByte(value);
-				return (byte)Value > v || !IsExclusive && (byte)Value == v;
+				char tv = Convert.ToChar(testValue);
+				return tv > (char)contextValue || !IsExclusive && tv == (char)contextValue;
 			}
 
-			if (Value is char)
+			if (contextValue is Int16)
 			{
-				char v = Convert.ToChar(value);
-				return (char)Value > v || !IsExclusive && (char)Value == v;
+				Int16 tv = Convert.ToInt16(testValue);
+				return tv > (Int16)contextValue || !IsExclusive && tv == (Int16)contextValue;
 			}
 
-			if (Value is Int16)
+			if (contextValue is sbyte)
 			{
-				Int16 v = Convert.ToInt16(value);
-				return (Int16)Value > v || !IsExclusive && (Int16)Value == v;
+				sbyte tv = Convert.ToSByte(testValue);
+				return tv > (sbyte)contextValue || !IsExclusive && tv == (sbyte)contextValue;
 			}
 
-			if (Value is sbyte)
+			if (contextValue is UInt16)
 			{
-				sbyte v = Convert.ToSByte(value);
-				return (sbyte)Value > v || !IsExclusive && (sbyte)Value == v;
+				UInt16 tv = Convert.ToUInt16(testValue);
+				return tv > (UInt16)contextValue || !IsExclusive && tv == (UInt16)contextValue;
 			}
 
-			if (Value is UInt16)
+			if (contextValue is UInt32)
 			{
-				UInt16 v = Convert.ToUInt16(value);
-				return (UInt16)Value > v || !IsExclusive && (UInt16)Value == v;
+				UInt32 tv = Convert.ToUInt32(testValue);
+				return tv > (UInt32)contextValue || !IsExclusive && tv == (UInt32)contextValue;
 			}
 
-			if (Value is UInt32)
+			if (contextValue is Int64)
 			{
-				UInt32 v = Convert.ToUInt32(value);
-				return (Int32)Value > v || !IsExclusive && (Int32)Value == v;
+				Int64 tv = Convert.ToInt64(testValue);
+				return tv > (Int64)contextValue || !IsExclusive && tv == (Int64)contextValue;
 			}
 
-			if (Value is UInt64)
+			if (contextValue is UInt64)
 			{
-				UInt64 v = Convert.ToUInt64(value);
-				return (UInt64)Value > v || !IsExclusive && (UInt64)Value == v;
+				UInt64 tv = Convert.ToUInt64(testValue);
+				return tv > (UInt64)contextValue || !IsExclusive && tv == (UInt64)contextValue;
 			}
 
 			return true;
@@ -124,7 +125,7 @@ namespace BLToolkit.Validation
 
 		public override string ErrorMessage
 		{
-			get { return base.ErrorMessage != null? base.ErrorMessage: "Maximum '{0}' value is {1}{2}."; }
+			get { return base.ErrorMessage != null? base.ErrorMessage: "Maximum value for '{0}' is {1}{2}."; }
 			set { base.ErrorMessage = value; }
 		}
 
@@ -132,7 +133,7 @@ namespace BLToolkit.Validation
 		{
 			return string.Format(ErrorMessage,
 				GetPropertyFriendlyName(context),
-				Value,
+				GetValue(context),
 				IsExclusive? " exclusive": string.Empty);
 		}
 	}
