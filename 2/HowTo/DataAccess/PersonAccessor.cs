@@ -45,7 +45,7 @@ namespace HowTo.DataAccess
 			public abstract Person  SelectByName(Person person);
 			public abstract Person  SelectByName(string firstName, string lastName);
 
-			new public abstract int Insert      (Person person);
+			public abstract int     Insert      (Person person);
 
 			[ActionName("SelectByKey")]
 			public abstract Person  SelectByID  (DbManager db, int id);
@@ -53,7 +53,7 @@ namespace HowTo.DataAccess
 			public abstract Person  SelectByName(DbManager db, Person person);
 			public abstract Person  SelectByName(DbManager db, string firstName, string lastName);
 
-			new public abstract int Insert      (DbManager db, Person person);
+			public abstract int     Insert      (DbManager db, Person person);
 
 			public readonly SprocQuery<Person> Query = new SprocQuery<Person>();
 		}

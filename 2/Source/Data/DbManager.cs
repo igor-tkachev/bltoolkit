@@ -1580,12 +1580,6 @@ namespace BLToolkit.Data
 			MapOutputParameters(null, objects);
 		}
 
-		[Obsolete("Use DbManager.MapOutputParameters(string, object) instead.")]
-		public void MapOutputParameters(object obj, string returnValueMember)
-		{
-			MapOutputParameters(returnValueMember, obj);
-		}
-
 		/// <overloads>
 		/// Assigns a business object to command parameters.
 		/// </overloads>

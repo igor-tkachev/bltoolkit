@@ -203,12 +203,6 @@ namespace BLToolkit.EditableObjects
 
 		#region ISupportMapping Members
 
-		[Obsolete, MapIgnore, Bindable(false)]
-		public bool InMapping
-		{
-			get { return _isInMapping; }
-		}
-
 		private bool _isInMapping;
 		[MapIgnore, Bindable(false)]
 		public  bool  IsInMapping

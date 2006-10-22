@@ -23,7 +23,7 @@ namespace DataAccess
 		public abstract class EntityAccessor : DataAccessor<Entity>
 		{
 			[SprocName("Person_SelectAll")]
-			public new abstract int Insert(Entity entity);
+			public abstract int Insert(Entity entity);
 
 			public static EntityAccessor CreateInstance(DbManager dbManager)
 			{

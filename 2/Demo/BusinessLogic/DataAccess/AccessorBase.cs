@@ -10,6 +10,6 @@ namespace BLToolkit.Demo.BusinessLogic.DataAccess
 		where T : BizEntity
 		where A : DataAccessor<T,A>
 	{
-		public new abstract int Insert(T obj);
+		public abstract int Insert(T obj);
 	}
 }

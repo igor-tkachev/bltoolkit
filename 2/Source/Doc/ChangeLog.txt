@@ -17,6 +17,7 @@ Enhancement
 - EditableArrayList (potentially breaking changes) heavily relies on BindingListImpl for IBindingList/IBindingListView 
   and their base interfaces implementation. 
 - BindingListImpl is changed to be fully specification adherent binding wrapper for other object lists/collection types.
+- 2.0.1 version obsolete methods have been removed.
 
 
 v 2.0.2
