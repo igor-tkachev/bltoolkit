@@ -18,7 +18,7 @@ namespace HowTo.DataAccess
 			// The Person_Insert sproc returns an id of the created record.
 			//
 			[SprocName("Person_Insert")]
-			/*[a]*/new/*[/a]*/ public abstract /*[a]*/int/*[/a]*/ Insert(Person person);
+			public abstract /*[a]*/int/*[/a]*/ Insert(Person person);
 		}
 
 		[Test]

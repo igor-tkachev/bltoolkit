@@ -18,7 +18,7 @@ namespace HowTo.DataAccess
 			public /*[a]*/abstract/*[/a]*/ Person  /*[a]*/SelectByName/*[/a]*/(Person person);
 			public /*[a]*/abstract/*[/a]*/ Person  /*[a]*/SelectByName/*[/a]*/(string firstName, string lastName);
 
-			/*[a]*/new/*[/a]*/ public /*[a]*/abstract/*[/a]*/ int /*[a]*/Insert/*[/a]*/      (Person person);
+			public /*[a]*/abstract/*[/a]*/ int     /*[a]*/Insert/*[/a]*/      (Person person);
 
 			[/*[a]*/SqlQuery(/*[/a]*/"SELECT Top /*[a]*/{0}/*[/a]*/ * FROM Person ORDER BY PersonID"/*[a]*/)]/*[/a]*/
 			[/*[a]*/Index("ID")/*[/a]*/]
