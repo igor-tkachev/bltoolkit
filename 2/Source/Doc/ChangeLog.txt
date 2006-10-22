@@ -2,6 +2,7 @@ v 2.0.3
 
 Bug fixes
 
+- Race condition in MappingSchema.GetObjectMapper.
 - DbManager will not try to close the connection in the finalizer anymore.
 - MinValue/MaxValue attributes now determine value type by object property/field instead of test value.
 - Fixed obscure case when object is removed from EditableArrayList/BindingListImpl while ItemPropertyChanged 

@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Specialized;
 using System.Data;
 using System.Data.SqlTypes;
 using System.IO;
@@ -36,7 +37,8 @@ namespace BLToolkit.Mapping
 
 		#region ObjectMapper Support
 
-		private Hashtable _mappers = new Hashtable();
+		private Hashtable      _mappers        = new Hashtable();
+		private ListDictionary _pendingMappers = new ListDictionary();
 
 		public ObjectMapper GetObjectMapper(Type type)
 		{
@@ -48,6 +50,12 @@ namespace BLToolkit.Mapping
 				{
 					om = (ObjectMapper)_mappers[type];
 
+					// This object mapper is initializing right now.
+					// Note that only one thread can access to _pendingMappers each time.
+					//
+					if (om == null)
+						om = (ObjectMapper)_pendingMappers[type];
+
 					if (om == null)
 					{
 						om = CreateObjectMapper(type);
@@ -56,9 +64,20 @@ namespace BLToolkit.Mapping
 							throw new MappingException(
 								string.Format("Cannot create object mapper for the '{0}' type.", type.FullName));
 
-						SetObjectMapper(type, om);
+						_pendingMappers[type] = om;
 
-						om.Init(this, type);
+						try
+						{
+							om.Init(this, type);
+						}
+						finally
+						{
+							_pendingMappers.Remove(type);
+						}
+
+						// Officially publish this ready to use object mapper.
+						//
+						SetObjectMapperInternal(type, om);
 					}
 				}
 			}
@@ -66,14 +85,20 @@ namespace BLToolkit.Mapping
 			return om;
 		}
 
-		public void SetObjectMapper(Type type, ObjectMapper om)
+		private void SetObjectMapperInternal(Type type, ObjectMapper om)
 		{
-			if (type == null) throw new ArgumentNullException("type");
-
 			_mappers[type] = om;
 
 			if (type.IsAbstract)
 				_mappers[TypeAccessor.GetAccessor(type).Type] = om;
+		}
+
+		public void SetObjectMapper(Type type, ObjectMapper om)
+		{
+			if (type == null) throw new ArgumentNullException("type");
+
+			lock (_mappers.SyncRoot)
+				SetObjectMapperInternal(type, om);
 		}
 
 		protected virtual ObjectMapper CreateObjectMapper(Type type)
