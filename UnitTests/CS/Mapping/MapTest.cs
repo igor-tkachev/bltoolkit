@@ -7,7 +7,7 @@ using NUnit.Framework;
 
 using BLToolkit.Mapping;
 
-namespace A.Mapping
+namespace Mapping
 {
 	[TestFixture, Category("Mapping")]
 	public class MapTest : TestFixtureBase
