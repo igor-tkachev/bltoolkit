@@ -69,7 +69,10 @@
     <Compile Include="Common\ConvertT.cs" />
     <Compile Include="Common\EntityBase.cs" />
     <Compile Include="Common\EntityBaseT.cs" />
-    <Compile Include="Common\Operator.cs" />
+    <Compile Include="Common\IOperable.cs" />
+    <Compile Include="Common\Operator.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="ComponentModel\BindingListImpl.cs" />
     <Compile Include="ComponentModel\CustomTypeDescriptorImpl.cs" />
     <Compile Include="ComponentModel\Design\ObjectViewTypeEditor.cs" />

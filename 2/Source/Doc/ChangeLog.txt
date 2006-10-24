@@ -6,7 +6,7 @@ Bug fixes
 
 Enhancement
 
--
+- Operator<T> is extensible now.
 
 
 v 2.0.3
