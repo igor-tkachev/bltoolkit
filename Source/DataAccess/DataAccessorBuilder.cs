@@ -1330,7 +1330,9 @@ namespace BLToolkit.DataAccess
 			emit.ldargEx      (pi, true);
 
 			if (type.IsEnum)
-				emit.callvirt (typeof(MappingSchema), "MapEnumToValue", typeof(object));
+				emit
+					.ldc_i4_1
+					.callvirt (typeof(MappingSchema), "MapEnumToValue", typeof(object), typeof(bool));
 
 			emit.callvirt     (typeof(DbManager), methodName, typeof(string), typeof(object));
 		}

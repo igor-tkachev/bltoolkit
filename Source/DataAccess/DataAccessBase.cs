@@ -12,10 +12,12 @@ namespace BLToolkit.DataAccess
 	{
 		#region Constructors
 
+		[System.Diagnostics.DebuggerStepThrough]
 		protected DataAccessBase()
 		{
 		}
 
+		[System.Diagnostics.DebuggerStepThrough]
 		protected DataAccessBase(DbManager dbManager)
 		{
 			SetDbManager(dbManager);
@@ -25,7 +27,7 @@ namespace BLToolkit.DataAccess
 
 		#region Public Members
 
-		[NoInterception]
+		[NoInterception, System.Diagnostics.DebuggerStepThrough]
 		public virtual DbManager GetDbManager()
 		{
 			return _dbManager != null? _dbManager: CreateDbManager();

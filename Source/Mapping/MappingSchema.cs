@@ -1620,7 +1620,7 @@ namespace BLToolkit.Mapping
 		}
 
 		[SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
-		public object MapEnumToValue(object value)
+		public object MapEnumToValue(object value, bool convertToUnderlyingType)
 		{
 			if (value == null)
 				return null;
@@ -1662,7 +1662,14 @@ namespace BLToolkit.Mapping
 				}
 			}
 
-			return value;
+			return convertToUnderlyingType?
+				System.Convert.ChangeType(value, Enum.GetUnderlyingType(value.GetType())):
+				value;
+		}
+
+		public object MapEnumToValue(object value)
+		{
+			return MapEnumToValue(value, false);
 		}
 
 #if FW2

@@ -1,4 +1,5 @@
 using System;
+using System.Reflection;
 
 using BLToolkit.Reflection;
 using BLToolkit.Reflection.Extension;
@@ -45,7 +46,10 @@ namespace BLToolkit.Mapping.MetadataProvider
 		public virtual bool GetIgnore(ObjectMapper mapper, MemberAccessor member, out bool isSet)
 		{
 			isSet = false;
-			return TypeHelper.IsScalar(member.Type) == false;
+
+			return
+				TypeHelper.IsScalar(member.Type) == false;// ||
+				//(member.MemberInfo is FieldInfo && ((FieldInfo)member.MemberInfo).IsLiteral);
 		}
 
 		#endregion

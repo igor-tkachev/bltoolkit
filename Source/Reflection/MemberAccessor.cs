@@ -15,6 +15,8 @@ namespace BLToolkit.Reflection
 			_memberInfo   = memberInfo;
 		}
 
+		#region Public Properties
+
 		private MemberInfo _memberInfo;
 		public  MemberInfo  MemberInfo
 		{
@@ -41,6 +43,67 @@ namespace BLToolkit.Reflection
 
 		public virtual bool HasGetter { get { return false; } }
 		public virtual bool HasSetter { get { return false; } }
+
+		public Type Type
+		{
+			get
+			{
+				return _memberInfo is PropertyInfo?
+					((PropertyInfo)_memberInfo).PropertyType:
+					((FieldInfo)   _memberInfo).FieldType;
+			}
+		}
+
+		public string Name
+		{
+			get { return _memberInfo.Name; }
+		}
+
+		private Type _underlyingType;
+		public  Type  UnderlyingType
+		{
+			get
+			{
+				if (_underlyingType == null)
+					_underlyingType = TypeHelper.GetUnderlyingType(Type);
+
+				return _underlyingType;
+			}
+		}
+
+		#endregion
+
+		#region Public Methods
+
+		public Attribute GetAttribute(Type attributeType)
+		{
+			object[] attrs = _memberInfo.GetCustomAttributes(attributeType, true);
+
+			return attrs.Length > 0? (Attribute)attrs[0]: null;
+		}
+
+		public object[] GetAttributes(Type attributeType)
+		{
+			object[] attrs = _memberInfo.GetCustomAttributes(attributeType, true);
+
+			return attrs.Length > 0? attrs: null;
+		}
+
+		public object[] GetAttributes()
+		{
+			object[] attrs = _memberInfo.GetCustomAttributes(true);
+
+			return attrs.Length > 0? attrs: null;
+		}
+
+		public object[] GetTypeAttributes(Type attributeType)
+		{
+			return TypeHelper.GetAttributes(_typeAccessor.OriginalType, attributeType);
+		}
+
+		#endregion
+
+		#region Set/Get Value
 
 		public virtual object GetValue(object o)
 		{
@@ -181,57 +244,6 @@ namespace BLToolkit.Reflection
 		public virtual void SetSqlGuid    (object o, SqlGuid     value) { SetValue(o, value); }
 		public virtual void SetSqlString  (object o, SqlString   value) { SetValue(o, value); }
 
-		public Type Type
-		{
-			get
-			{
-				return _memberInfo is PropertyInfo?
-					((PropertyInfo)_memberInfo).PropertyType:
-					((FieldInfo)   _memberInfo).FieldType;
-			}
-		}
-
-		public string Name
-		{
-			get { return _memberInfo.Name; }
-		}
-
-		private Type _underlyingType;
-		public  Type  UnderlyingType
-		{
-			get
-			{
-				if (_underlyingType == null)
-					_underlyingType = TypeHelper.GetUnderlyingType(Type);
-
-				return _underlyingType;
-			}
-		}
-
-		public Attribute GetAttribute(Type attributeType)
-		{
-			object[] attrs = _memberInfo.GetCustomAttributes(attributeType, true);
-
-			return attrs.Length > 0? (Attribute)attrs[0]: null;
-		}
-
-		public object[] GetAttributes(Type attributeType)
-		{
-			object[] attrs = _memberInfo.GetCustomAttributes(attributeType, true);
-
-			return attrs.Length > 0? attrs: null;
-		}
-
-		public object[] GetAttributes()
-		{
-			object[] attrs = _memberInfo.GetCustomAttributes(true);
-
-			return attrs.Length > 0? attrs: null;
-		}
-
-		public object[] GetTypeAttributes(Type attributeType)
-		{
-			return TypeHelper.GetAttributes(_typeAccessor.OriginalType, attributeType);
-		}
+		#endregion
 	}
 }

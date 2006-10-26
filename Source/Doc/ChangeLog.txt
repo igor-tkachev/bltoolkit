@@ -2,7 +2,9 @@ v 2.0.4
 
 Bug fixes
 
--
+- By default, the mapper included const fields into map list (???).
+- If enum does not have explicit mapping, data accessor builder 
+  does not convert it to underlying type.
 
 Enhancement
 

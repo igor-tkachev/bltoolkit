@@ -4,6 +4,7 @@ using System.Reflection;
 
 namespace BLToolkit.Aspects
 {
+	[System.Diagnostics.DebuggerStepThrough]
 	public class MethodCallCounter
 	{
 		public MethodCallCounter(MethodInfo methodInfo)
