@@ -60,6 +60,7 @@ namespace BLToolkit.Reflection
 
 		#region CreateInstance
 
+		[System.Diagnostics.DebuggerStepThrough]
 		public virtual object CreateInstance()
 		{
 			throw new TypeBuilderException(string.Format(
@@ -67,17 +68,20 @@ namespace BLToolkit.Reflection
 				OriginalType.Name));
 		}
 
+		[System.Diagnostics.DebuggerStepThrough]
 		public virtual object CreateInstance(InitContext context)
 		{
 			return CreateInstance();
 		}
 
+		[System.Diagnostics.DebuggerStepThrough]
 		public object CreateInstanceEx()
 		{
 			return _objectFactory != null?
 				_objectFactory.CreateInstance(this, null): CreateInstance((InitContext)null);
 		}
 
+		[System.Diagnostics.DebuggerStepThrough]
 		public object CreateInstanceEx(InitContext context)
 		{
 			return _objectFactory != null? _objectFactory.CreateInstance(this, context): CreateInstance(context);

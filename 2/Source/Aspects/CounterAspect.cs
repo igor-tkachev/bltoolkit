@@ -5,6 +5,7 @@ using System.Threading;
 
 namespace BLToolkit.Aspects
 {
+	[System.Diagnostics.DebuggerStepThrough]
 	public class CounterAspect : Interceptor
 	{
 		static LocalDataStoreSlot counterSlot = Thread.AllocateDataSlot();

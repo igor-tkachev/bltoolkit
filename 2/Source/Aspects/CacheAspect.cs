@@ -6,6 +6,7 @@ using BLToolkit.Reflection;
 
 namespace BLToolkit.Aspects
 {
+	[System.Diagnostics.DebuggerStepThrough]
 	public class CacheAspect : Interceptor
 	{
 		protected override void BeforeCall(InterceptCallInfo info)

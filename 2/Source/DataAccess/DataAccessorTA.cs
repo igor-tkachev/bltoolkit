@@ -12,10 +12,12 @@ namespace BLToolkit.DataAccess
 	{
 		#region Constructors
 
+		[System.Diagnostics.DebuggerStepThrough]
 		protected DataAccessor()
 		{
 		}
 
+		[System.Diagnostics.DebuggerStepThrough]
 		protected DataAccessor(DbManager dbManager)
 			: base(dbManager)
 		{

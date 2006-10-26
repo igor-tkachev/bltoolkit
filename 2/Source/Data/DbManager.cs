@@ -49,6 +49,7 @@ namespace BLToolkit.Data
 		/// <include file="Examples.xml" path='examples/db[@name="ctor"]/*' />
 		/// <seealso cref="AddConnectionString(string)">AddConnectionString Method</seealso>
 		/// <returns>An instance of the database manager class.</returns>
+		[System.Diagnostics.DebuggerStepThrough]
 		public DbManager() : this((IDbConnection)null, null)
 		{
 		}
@@ -64,6 +65,7 @@ namespace BLToolkit.Data
 		/// <include file="Examples.xml" path='examples/db[@name="ctor(string)"]/*' />
 		/// <param name="configurationString">Configuration string.</param>
 		/// <returns>An instance of the <see cref="DbManager"/> class.</returns>
+		[System.Diagnostics.DebuggerStepThrough]
 		public DbManager(string configurationString)
 			: this((IDbConnection)null, configurationString)
 		{
@@ -80,6 +82,7 @@ namespace BLToolkit.Data
 		/// <param name="configuration">Configuration string not containing provider name.</param>
 		/// <param name="providerName">Provider configuration name.</param>
 		/// <returns>An instance of the <see cref="DbManager"/> class.</returns>
+		[System.Diagnostics.DebuggerStepThrough]
 		public DbManager(string providerName, string configuration)
 			: this((IDbConnection)null, providerName + ProviderNameDivider + configuration)
 		{
@@ -101,6 +104,7 @@ namespace BLToolkit.Data
 		/// <include file="Examples.xml" path='examples/db[@name="ctor(IDbConnection)"]/*' />
 		/// <param name="connection">An instance of the <see cref="IDbConnection"/> class.</param>
 		/// <returns>An instance of the <see cref="DbManager"/> class.</returns>
+		[System.Diagnostics.DebuggerStepThrough]
 		public DbManager(IDbConnection connection)
 		{
 			if (connection != null)
@@ -117,6 +121,7 @@ namespace BLToolkit.Data
 		/// </summary>
 		/// <include file="Examples.xml" path='examples/db[@name="ctor(IDbTransaction)"]/*' />
 		/// <param name="transaction"></param>
+		[System.Diagnostics.DebuggerStepThrough]
 		public DbManager(IDbTransaction transaction)
 			: this(transaction != null? transaction.Connection: null)
 		{
@@ -143,6 +148,7 @@ namespace BLToolkit.Data
 		/// <param name="connection">An instance of the <see cref="IDbConnection"/>.</param>
 		/// <param name="configurationString">The configuration string.</param>
 		/// <returns>An instance of the <see cref="DbManager"/> class.</returns>
+		[System.Diagnostics.DebuggerStepThrough]
 		public DbManager(
 			IDbConnection connection,
 			string        configurationString)

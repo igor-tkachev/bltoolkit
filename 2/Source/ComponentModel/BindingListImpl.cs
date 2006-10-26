@@ -579,7 +579,6 @@ namespace BLToolkit.ComponentModel
 
 #endif
 
-
 		#region Sort enforcement
 
 		public int GetItemSortedPosition(int index, object sender)

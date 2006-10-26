@@ -365,6 +365,8 @@ namespace BLToolkit.TypeBuilder.Builders
 						return;
 				}
 			}
+			//else if (((FieldInfo)mi).IsLiteral)
+			//	return;
 
 			MethodBuilderHelper method = nestedType.DefineMethod(
 				_memberAccessor.GetMethod("SetValue", typeof(object), typeof(object)));

@@ -22,10 +22,12 @@ namespace BLToolkit.DataAccess
 	{
 		#region Constructors
 
+		[System.Diagnostics.DebuggerStepThrough]
 		protected DataAccessor()
 		{
 		}
 
+		[System.Diagnostics.DebuggerStepThrough]
 		protected DataAccessor(DbManager dbManager)
 			: base(dbManager)
 		{
@@ -50,11 +52,13 @@ namespace BLToolkit.DataAccess
 		}
 
 #if FW2
+		[System.Diagnostics.DebuggerStepThrough]
 		public static T CreateInstance<T>() where T : DataAccessor
 		{
 			return TypeAccessor<T>.CreateInstanceEx();
 		}
 
+		[System.Diagnostics.DebuggerStepThrough]
 		public static T CreateInstance<T>(DbManager dbManager) where T : DataAccessor
 		{
 			T da = TypeAccessor<T>.CreateInstanceEx();
