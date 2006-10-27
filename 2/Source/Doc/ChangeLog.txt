@@ -5,6 +5,7 @@ Bug fixes
 - By default, the mapper included const fields into map list (???).
 - If enum does not have explicit mapping, data accessor builder 
   does not convert it to underlying type.
+- MemberMapper fails to convert an object to its base type.
 
 Enhancement
 
