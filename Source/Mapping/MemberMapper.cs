@@ -3,6 +3,7 @@ using System.Data.SqlTypes;
 using System.Diagnostics;
 using System.IO;
 using System.Xml;
+
 using BLToolkit.Reflection;
 
 namespace BLToolkit.Mapping
@@ -2010,7 +2011,7 @@ namespace BLToolkit.Mapping
 			Type valueType  = value.GetType();
 			Type memberType = mapInfo.Type;
 
-			if (valueType != memberType)
+			if (!TypeHelper.IsSameOrParent(memberType, valueType))
 			{
 #if FW2
 				if (memberType.IsGenericType)

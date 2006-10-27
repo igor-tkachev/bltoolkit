@@ -114,5 +114,31 @@ namespace Mapping
 			Assert.AreEqual(124,    om.GetValue(o, "Int32"));
 			Assert.AreEqual(123.57f, om.GetValue(o, "Single"));
 		}
+
+		public interface IClassInterface
+		{
+			IClassInterface classInterface { get; set;}
+		}
+
+		public class ClassInterface : IClassInterface
+		{
+			private IClassInterface _ici;
+
+			[MapIgnore(false)]
+			public IClassInterface classInterface
+			{
+				get { return _ici; }
+				set { _ici = value; }
+			}
+		}
+
+		[Test]
+		public void DerivedTypeTest()
+		{
+			IClassInterface ici = new ClassInterface();
+			ObjectMapper om = Map.GetObjectMapper(ici.GetType());
+			MemberMapper mm = om["classInterface"];
+			mm.SetValue(ici, new ClassInterface());
+		}
 	}
 }
