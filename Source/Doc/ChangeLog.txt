@@ -7,6 +7,8 @@ Bug fixes
   does not convert it to underlying type.
 - MemberMapper fails to convert an object to its base type.
 - BindingListImpl.RemoveSort was not firing ListChange event.
+- TypeAccessor.CreateExtendedPropertyDescriptors did not work properly
+  with 3rd+ level nested properties.
 
 Enhancement
 

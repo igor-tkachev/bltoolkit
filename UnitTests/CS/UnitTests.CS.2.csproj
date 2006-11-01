@@ -102,6 +102,7 @@
     <Compile Include="Reflection\Emit\MethodBuilderHelperTest.cs" />
     <Compile Include="Reflection\Extension\DefaultValueTest.cs" />
     <Compile Include="Reflection\ObjectFactoryAttributeTest.cs" />
+    <Compile Include="Reflection\ExtendedPropertyDescriptorTest.cs" />
     <Compile Include="Reflection\TypeAccessorTest.cs" />
     <Compile Include="Reflection\TypeAccessorTest2.cs" />
     <Compile Include="Reflection\TypeHelperTest.cs" />
