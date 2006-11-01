@@ -6,10 +6,12 @@ Bug fixes
 - If enum does not have explicit mapping, data accessor builder 
   does not convert it to underlying type.
 - MemberMapper fails to convert an object to its base type.
+- BindingListImpl.RemoveSort was not firing ListChange event.
 
 Enhancement
 
 - Operator<T> is extensible now.
+- ObjectBinder can now control lifetime (Disposal) of underlying collection.
 
 
 v 2.0.3
