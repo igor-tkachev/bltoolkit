@@ -115,6 +115,7 @@
     <Compile Include="TypeBuilder\GetSetValueAttributeTest.cs" />
     <Compile Include="TypeBuilder\InstanceTypeAttributeTest.cs" />
     <Compile Include="TypeBuilder\LazyInstanceAttributeTest.cs" />
+    <Compile Include="TypeBuilder\NoInstanceAttributeTest.cs" />
     <Compile Include="TypeBuilder\ParameterAttributeTest.cs" />
     <Compile Include="TypeBuilder\Builders\PropertyChangeBuilderTest.cs" />
     <Compile Include="TypeBuilder\TypeFactoryTest.cs" />
