@@ -231,6 +231,7 @@ namespace BLToolkit.ComponentModel
 #if FW2
 			_sortDescriptions = null;
 #endif
+			OnListChanged(new EditableListChangedEventArgs(ListChangedType.Reset));
 		}
 
 			#endregion

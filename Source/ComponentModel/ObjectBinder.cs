@@ -103,6 +103,7 @@ namespace BLToolkit.ComponentModel
 			}
 		}
 
+		private bool              _isListCreatedInternally = false;
 		private EditableArrayList _list = _empty;
 		[Browsable(false)]
 		[RefreshProperties(RefreshProperties.Repaint)]
@@ -118,6 +119,7 @@ namespace BLToolkit.ComponentModel
 						_list.ListChanged -= new ListChangedEventHandler(ListChangedHandler);
 
 					_list = _itemType == null? _empty: new EditableArrayList(_itemType);
+					_isListCreatedInternally = true;
 				}
 				else
 				{
@@ -126,6 +128,8 @@ namespace BLToolkit.ComponentModel
 					if (value is EditableArrayList)
 					{
 						list = (EditableArrayList)value;
+
+						_isListCreatedInternally = false;
 					}
 					else
 					{
@@ -133,6 +137,8 @@ namespace BLToolkit.ComponentModel
 							list = EditableArrayList.Adapter(value);
 						else
 							list = EditableArrayList.Adapter(_itemType, value);
+
+						_isListCreatedInternally = true;
 					}
 
 					if (_itemType == null)
@@ -149,7 +155,12 @@ namespace BLToolkit.ComponentModel
 					}
 
 					if (_list != _empty)
+					{
 						_list.ListChanged -= new ListChangedEventHandler(ListChangedHandler);
+						
+						if (_disposeList || (_isListCreatedInternally && _disposeCreatedList))
+							_list.Dispose();
+					}
 
 					_list = list;
 				}
@@ -160,10 +171,30 @@ namespace BLToolkit.ComponentModel
 			}
 		}
 
+		private bool _disposeList = false;
+		[DefaultValue(false)]
+		[Category("Behavior")]
+		[Description("Determines whether ObjectBinder will invoke underlying List's dispose when being itself disposed.")]
+		public bool DisposeList
+		{
+			get { return _disposeList;  }
+			set { _disposeList = value; }
+		}
+
+		private bool _disposeCreatedList = true;
+		[DefaultValue(true)]
+		[Category("Behavior")]
+		[Description("Determines whether ObjectBinder will invoke underlying internally created List's dispose when being itself disposed")]
+		public bool DisposeCreatedList
+		{
+			get { return _disposeCreatedList;  }
+			set { _disposeCreatedList = value; }
+		}
+
 		private bool _allowNew = true;
 		[DefaultValue(true)]
 		[Category("Behavior")]
-		[Description("Determines whether the TypedBindingList allows new items to be added to the list.")]
+		[Description("Determines whether new items can be added to the list.")]
 		public  bool  AllowNew
 		{
 			get { return _allowNew && _list.AllowNew;  }
@@ -225,10 +256,15 @@ namespace BLToolkit.ComponentModel
 		protected override void Dispose(bool disposing)
 		{
 			if (_list != _empty)
+			{
 				_list.ListChanged -= new ListChangedEventHandler(ListChangedHandler);
 
-			_list = _empty;
+				if (_disposeList || (_isListCreatedInternally && _disposeCreatedList))
+					_list.Dispose();
+			}
 
+			_list = _empty;
+			
 			base.Dispose(disposing);
 		}
 
