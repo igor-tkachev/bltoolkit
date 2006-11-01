@@ -25,9 +25,13 @@ namespace BLToolkit.Reflection
 #endif
 	public abstract class TypeAccessor : ICollection, ITypeDescriptionProvider
 	{
+		#region Init
+
 		protected TypeAccessor()
 		{
 		}
+
+		#endregion
 
 		#region Protected Emit Helpers
 
@@ -767,8 +771,6 @@ namespace BLToolkit.Reflection
 					isList = true;
 					pd     = new ListPropertyDescriptor(pd);
 				}
-				else if (propertyPrefix.Length != 0 || isNull != null)
-					pd = new StandardPropertyDescriptor(pd, propertyPrefix, parentAccessors, isNull);
 
 				if (!isList                   &&
 					!propertyType.IsValueType &&
@@ -793,17 +795,24 @@ namespace BLToolkit.Reflection
 					parentAccessors.CopyTo(childParentAccessors, 0);
 					childParentAccessors[parentAccessors.Length] = pd;
 
-					PropertyDescriptorCollection pdch =
-						GetAccessor(propertyType).PropertyDescriptors;
+					PropertyDescriptorCollection pdch = GetAccessor(propertyType).PropertyDescriptors;
 
 					pdch = pdch.Sort(new PropertyDescriptorComparer());
 					pdch = GetExtendedProperties(
-						pdch, propertyType, pd.Name + "+", childParentTypes, childParentAccessors, isNull);
+						pdch,
+						propertyType,
+						propertyPrefix + pd.Name + "+",
+						childParentTypes,
+						childParentAccessors,
+						isNull);
 
 					objects.AddRange(pdch);
 				}
 				else
 				{
+					if (propertyPrefix.Length != 0 || isNull != null)
+						pd = new StandardPropertyDescriptor(pd, propertyPrefix, parentAccessors, isNull);
+
 					list.Add(pd);
 				}
 			}

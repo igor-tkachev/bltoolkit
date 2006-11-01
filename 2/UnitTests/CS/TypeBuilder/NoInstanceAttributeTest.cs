@@ -14,7 +14,7 @@ namespace TypeBuilder
 		{
 		}
 
-		public abstract partial class Person
+		public abstract class Person
 		{
 			[NoInstance]
 			public abstract PersonCitizenship Citizenship { get; set; }
