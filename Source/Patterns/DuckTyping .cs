@@ -8,6 +8,13 @@ using BLToolkit.TypeBuilder.Builders;
 
 namespace BLToolkit.Patterns
 {
+	/// <summary>
+	/// Duck typing implementation.
+	/// In computer science, duck typing is a term for dynamic typing typical of some programming languages,
+	/// such as Smalltalk, Python or ColdFusion, where a variable's value itself determines what the variable can do.
+	/// Thus an object having all the methods described in an interface can be made to implement that interface
+	/// dynamically at runtime, even if the object’s class does not include the interface in its implements clause.
+	/// </summary>
 	public
 #if FW2
 		static
@@ -16,10 +23,18 @@ namespace BLToolkit.Patterns
 	{
 		private static Hashtable _duckTypes = new Hashtable();
 
+		/// <summary>
+		/// Build a proxy type which implements the requested interface by redirecting all calls to the supplied object type.
+		/// </summary>
+		/// <param name="interfaceType">An interface type to implement.</param>
+		/// <param name="objectType">Any type which has all members of the given interface.</param>
+		/// <returns>The duck object type.</returns>
 		public static Type GetDuckType(Type interfaceType, Type objectType)
 		{
-			if (!interfaceType.IsInterface) throw new ArgumentException("'interfaceType' must be an interface.");
-			if (interfaceType.IsNotPublic)  throw new ArgumentException("The interface muat be public.");
+			if (interfaceType == null)      throw new ArgumentNullException("interfaceType");
+			if (!interfaceType.IsInterface) throw new ArgumentException("'interfaceType' must be an interface.", "interfaceType");
+			if (!interfaceType.IsPublic && !interfaceType.IsNestedPublic)
+				throw new ArgumentException("The interface must be public.", "interfaceType");
 
 			Hashtable types = (Hashtable)_duckTypes[interfaceType];
 
@@ -57,71 +72,144 @@ namespace BLToolkit.Patterns
 			return type;
 		}
 
+		/// <summary>
+		/// Implements the requested interface for supplied object.
+		/// If the supplied object implements the interface, the object itself will be returned.
+		/// Otherwise a convenient duck object will be created.
+		/// </summary>
+		/// <param name="interfaceType">An interface type to implement.</param>
+		/// <param name="baseObjectType">Any type which has all members of the given interface.
+		/// When this parameter is set to null, the object type will be used.</param>
+		/// <param name="obj">An object which type has all members of the given interface.</param>
+		/// <returns>An object which implements the interface.</returns>
 		public static object Implement(Type interfaceType, Type baseObjectType, object obj)
 		{
 			if (obj == null) throw new ArgumentNullException("obj");
 
-			Type duckType = GetDuckType(interfaceType, baseObjectType);
+			Type objType = obj.GetType();
 
-			if (!TypeHelper.IsSameOrParent(baseObjectType, obj.GetType()))
+			if (TypeHelper.IsSameOrParent(interfaceType, objType))
+				return obj;
+
+			if (typeof(DuckType).IsAssignableFrom(objType))
+			{
+				// Switch to underlying object when a duck object was passed.
+				//
+				obj     = ((DuckType)obj).Object;
+				objType = obj.GetType();
+
+				if (TypeHelper.IsSameOrParent(interfaceType, objType))
+					return obj;
+			}
+
+			if (null == baseObjectType)
+				baseObjectType = objType;
+			else if (!TypeHelper.IsSameOrParent(baseObjectType, objType))
 				throw new ArgumentException(
-					string.Format("'obj' must be a type of '{0}'.", baseObjectType.FullName));
+					string.Format("'{0}' is not a subtype of '{1}'.", objType.FullName, baseObjectType.FullName), "obj");
 
-			object duck = TypeAccessor.CreateInstanceEx(duckType);
+
+			Type   duckType = GetDuckType(interfaceType, baseObjectType);
+			object duck     = TypeAccessor.CreateInstanceEx(duckType);
 
 			((DuckType)duck).SetObject(obj);
 
 			return duck;
 		}
 
+		/// <summary>
+		/// Implements the requested interface.
+		/// If the supplied object implements the interface, the object itself will be returned.
+		/// Otherwise a convenient duck object will be created.
+		/// </summary>
+		/// <param name="interfaceType">An interface type to implement.</param>
+		/// <param name="obj">An object which type has all members of the given interface.</param>
+		/// <returns>An object which implements the interface.</returns>
 		public static object Implement(Type interfaceType, object obj)
 		{
-			if (obj == null) throw new ArgumentNullException("obj");
-
-			return Implement(interfaceType, obj.GetType(), obj);
+			return Implement(interfaceType, null, obj);
 		}
 
+		/// <summary>
+		/// Implements the requested interface for all supplied objects.
+		/// If any of supplied object implements the interface, the object itself will be returned.
+		/// Otherwise a convenient duck object will be created.
+		/// </summary>
+		/// <param name="interfaceType">An interface type to implement.</param>
+		/// <param name="baseObjectType">Any type which has all members of the given interface.
+		/// When this parameter is set to null, the object type will be used.</param>
+		/// <param name="objects">An object array which types has all members of the given interface.
+		/// All objects may have different types.</param>
+		/// <returns>An array of object which implements the interface.</returns>
 		public static object[] Implement(Type interfaceType, Type baseObjectType, params object[] objects)
 		{
 			if (objects == null) throw new ArgumentNullException("objects");
-
+#if FW2
 			object[] result = new object[objects.Length];
-
+#else
+			object[] result = (object[])Array.CreateInstance(interfaceType, objects.Length);
+#endif
 			for (int i = 0; i < objects.Length; i++)
 				result[i] = Implement(interfaceType, baseObjectType, objects[i]);
 
 			return result;
 		}
 
+		/// <summary>
+		/// Implements the requested interface for all supplied objects.
+		/// If any of supplied object implements the interface, the object itself will be returned.
+		/// Otherwise a convenient duck object will be created.
+		/// </summary>
+		/// <param name="interfaceType">An interface type to implement.</param>
+		/// <param name="objects">An object array which types has all members of the given interface.
+		/// All objects may have different types.</param>
+		/// <returns>An array of object which implements the interface.</returns>
 		public static object[] Implement(Type interfaceType, params object[] objects)
 		{
-			if (objects == null) throw new ArgumentNullException("objects");
-
-			object[] result = new object[objects.Length];
-
-			for (int i = 0; i < objects.Length; i++)
-				result[i] = Implement(interfaceType, objects[i].GetType(), objects[i]);
-
-			return result;
+			return Implement(interfaceType, null, objects);
 		}
 
 #if FW2
 
+		/// <summary>
+		/// Implements the requested interface for supplied object.
+		/// If the supplied object implements the interface, the object itself will be returned.
+		/// Otherwise a convenient duck object will be created.
+		/// </summary>
+		/// <typeparam name="I">An interface type to implement.</typeparam>
+		/// <param name="obj">An object which type has all members of the given interface.</param>
+		/// <returns>An object which implements the interface.</returns>
 		public static I Implement<I>(object obj)
 			where I : class
 		{
-			if (obj == null) throw new ArgumentNullException("obj");
-
-			return (I)Implement(typeof(I), obj.GetType(), obj);
+			return (I)Implement(typeof(I), null, obj);
 		}
 
-		public static I Implement<I,T>(object obj)
+		/// <summary>
+		/// Implements the requested interface for supplied object.
+		/// If the supplied object implements the interface, the object itself will be returned.
+		/// Otherwise a convenient duck object will be created.
+		/// </summary>
+		/// <typeparam name="I">An interface type to implement.</typeparam>
+		/// <typeparam name="T">Any type which has all members of the given interface.</typeparam>
+		/// <param name="obj">An object which type has all members of the given interface.</param>
+		/// <returns>An object which implements the interface.</returns>
+		public static I Implement<I,T>(T obj)
 			where I : class
 			where T : class
 		{
 			return (I)Implement(typeof(I), typeof(T), obj);
 		}
 
+		/// <summary>
+		/// Implements the requested interface for all supplied objects.
+		/// If any of supplied object implements the interface, the object itself will be returned.
+		/// Otherwise a convenient duck object will be created.
+		/// </summary>
+		/// <typeparam name="I">An interface type to implement.</typeparam>
+		/// <param name="objects">An object array which types has all members of the given interface.
+		/// All objects may have different types.</param>
+		/// <returns>An array of object which implements the interface.</returns>
 		public static I[] Implement<I>(params object[] objects)
 			where I : class
 		{
@@ -135,7 +223,17 @@ namespace BLToolkit.Patterns
 			return result;
 		}
 
-		public static I[] Implement<I,T>(params object[] objects)
+		/// <summary>
+		/// Implements the requested interface for all supplied objects.
+		/// If any of supplied object implements the interface, the object itself will be returned.
+		/// Otherwise a convenient duck object will be created.
+		/// </summary>
+		/// <typeparam name="I">An interface type to implement.</typeparam>
+		/// <typeparam name="T">Any type which has all members of the given interface.</typeparam>
+		/// <param name="objects">An object array which types has all members of the given interface.
+		/// All objects may have different types.</param>
+		/// <returns>An array of object which implements the interface.</returns>
+		public static I[] Implement<I,T>(params T[] objects)
 			where I : class
 			where T : class
 		{

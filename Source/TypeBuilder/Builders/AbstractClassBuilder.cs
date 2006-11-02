@@ -34,11 +34,11 @@ namespace BLToolkit.TypeBuilder.Builders
 			return Build();
 		}
 
-#if FW2
 		internal static string GetTypeFullName(Type type)
 		{
 			string name = type.FullName;
 
+#if FW2
 			if (type.IsGenericType)
 			{
 				name = name.Split('`')[0];
@@ -46,6 +46,7 @@ namespace BLToolkit.TypeBuilder.Builders
 				foreach (Type t in type.GetGenericArguments())
 					name += "_" + GetTypeFullName(t).Replace('+', '_').Replace('.', '_');
 			}
+#endif
 
 			return name;
 		}
@@ -54,6 +55,7 @@ namespace BLToolkit.TypeBuilder.Builders
 		{
 			string name = type.Name;
 
+#if FW2
 			if (type.IsGenericType)
 			{
 				name = name.Split('`')[0];
@@ -61,10 +63,10 @@ namespace BLToolkit.TypeBuilder.Builders
 				foreach (Type t in type.GetGenericArguments())
 					name += "_" + GetTypeFullName(t).Replace('+', '_').Replace('.', '_');
 			}
+#endif
 
 			return name;
 		}
-#endif
 
 		public static string GetTypeName(Type type)
 		{
