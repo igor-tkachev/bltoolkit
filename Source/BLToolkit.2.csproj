@@ -187,7 +187,10 @@
     </Compile>
     <Compile Include="Mapping\ValueMappingInternal\ScalarTypes.cs" />
     <Compile Include="Mapping\ValueMappingInternal\SqlTypes.cs" />
+    <Compile Include="Patterns\DuckTyping .cs" />
+    <Compile Include="Patterns\DuckTypeBase.cs" />
     <Compile Include="Reflection\GenericBinder.cs" />
+    <Compile Include="TypeBuilder\Builders\DuckTypeBuilder.cs" />
     <Compile Include="TypeBuilder\ISetParent.cs" />
     <Compile Include="EditableObjects\IMemberwiseEditable.cs" />
     <Compile Include="ComponentModel\INotifyObjectEdit.cs" />

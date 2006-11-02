@@ -5,7 +5,7 @@ using NUnit.Framework;
 
 using BLToolkit.Reflection;
 
-namespace A.Reflection
+namespace Reflection
 {
 	[TestFixture]
 	public class ExtendedPropertyDescriptorTest

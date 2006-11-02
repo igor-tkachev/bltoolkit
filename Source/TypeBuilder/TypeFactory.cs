@@ -135,8 +135,9 @@ namespace BLToolkit.TypeBuilder
 
 		private static Hashtable _builtTypes = new Hashtable(10);
 
-		public static Type GetType(Type sourceType, ITypeBuilder typeBuilder)
+		public static Type GetType(object hashKey, Type sourceType, ITypeBuilder typeBuilder)
 		{
+			if (hashKey     == null) throw new ArgumentNullException("hashKey");
 			if (sourceType  == null) throw new ArgumentNullException("sourceType");
 			if (typeBuilder == null) throw new ArgumentNullException("typeBuilder");
 
@@ -147,7 +148,7 @@ namespace BLToolkit.TypeBuilder
 
 				if (builderTable != null)
 				{
-					type = (Type)builderTable[sourceType];
+					type = (Type)builderTable[hashKey];
 
 					if (type != null)
 						return type;
@@ -159,7 +160,7 @@ namespace BLToolkit.TypeBuilder
 
 					if (builderTable != null)
 					{
-						type = (Type)builderTable[sourceType];
+						type = (Type)builderTable[hashKey];
 
 						if (type != null)
 							return type;
@@ -174,7 +175,7 @@ namespace BLToolkit.TypeBuilder
 
 					type = typeBuilder.Build(sourceType, assemblyBuilder);
 
-					builderTable.Add(sourceType, type);
+					builderTable.Add(hashKey, type);
 
 					SaveAssembly(assemblyBuilder, type);
 
@@ -190,6 +191,11 @@ namespace BLToolkit.TypeBuilder
 				throw new TypeBuilderException(string.Format(
 					"Could not build the '{0}' type: {1}", sourceType.FullName, ex.Message), ex);
 			}
+		}
+
+		public static Type GetType(Type sourceType, ITypeBuilder typeBuilder)
+		{
+			return GetType(sourceType, sourceType, typeBuilder);
 		}
 
 		#endregion
