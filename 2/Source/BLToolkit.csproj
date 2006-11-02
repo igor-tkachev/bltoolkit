@@ -1,7 +1,7 @@
 <VisualStudioProject>
     <CSHARP
         ProjectType = "Local"
-        ProductVersion = "7.10.6030"
+        ProductVersion = "7.10.3077"
         SchemaVersion = "2.0"
         ProjectGuid = "{C8B3F401-4634-4742-A266-4BD9ED7565E5}"
     >
@@ -898,6 +898,16 @@
                     BuildAction = "Compile"
                 />
                 <File
+                    RelPath = "Patterns\DuckTypeBase.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "Patterns\DuckTyping .cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
                     RelPath = "Reflection\InitContext.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
@@ -1168,6 +1178,11 @@
                 />
                 <File
                     RelPath = "TypeBuilder\Builders\DefaultTypeBuilder.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "TypeBuilder\Builders\DuckTypeBuilder.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
                 />

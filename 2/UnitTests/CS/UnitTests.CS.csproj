@@ -347,6 +347,11 @@
                     BuildAction = "Compile"
                 />
                 <File
+                    RelPath = "Patterns\DuckTypingTest.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
                     RelPath = "Reflection\ExtendedPropertyDescriptorTest.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
