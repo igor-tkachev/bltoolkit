@@ -22,7 +22,7 @@ namespace BLToolkit.TypeBuilder.Builders
 
 		public string AssemblyNameSuffix
 		{
-			get { return "DuckType." + _interfaceType.FullName.Replace('+', '.'); }
+			get { return "DuckType." + AbstractClassBuilder.GetTypeFullName(_interfaceType).Replace('+', '.'); }
 		}
 
 		public Type Build(Type sourceType, AssemblyBuilderHelper assemblyBuilder)
@@ -38,7 +38,7 @@ namespace BLToolkit.TypeBuilder.Builders
 
 		private string GetClassName()
 		{
-			return _objectType.FullName.Replace('+', '.')
+			return AbstractClassBuilder.GetTypeFullName(_objectType).Replace('+', '.')
 #if !FW2
 				.Replace('[', '_').Replace(']', '_')
 #endif

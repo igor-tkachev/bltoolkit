@@ -1,6 +1,5 @@
 using System;
 using System.Reflection;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Diagnostics.CodeAnalysis;
 
@@ -34,7 +33,7 @@ using System.Diagnostics.CodeAnalysis;
 // You can specify all the values or you can default the Revision and Build Numbers 
 // by using the '*' as shown below:
 [assembly: AssemblyVersion("2.0.4.0")]
-[assembly: AssemblyFileVersion("2.0.4.61027")]
+[assembly: AssemblyFileVersion("2.0.4.61102")]
 
 // FxCop
 
