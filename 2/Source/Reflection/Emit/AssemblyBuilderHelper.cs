@@ -45,6 +45,22 @@ namespace BLToolkit.Reflection.Emit
 
 			path = path.Replace("+", ".");
 
+			if (path.Length >= 260)
+			{
+				path = path.Substring(0, 248);
+
+				for (int i = 0; i < int.MaxValue; i++)
+				{
+					string newPath = string.Format("{0}_{1:0000}.dll", path, i);
+
+					if (!System.IO.File.Exists(newPath))
+					{
+						path = newPath;
+						break;
+					}
+				}
+			}
+
 			string assemblyName = System.IO.Path.GetFileName     (path);
 			string assemblyDir  = System.IO.Path.GetDirectoryName(path);
 
