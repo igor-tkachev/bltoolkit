@@ -4,7 +4,7 @@ using NUnit.Framework;
 
 using BLToolkit.Patterns;
 
-namespace A.Patterns
+namespace Patterns
 {
 	[TestFixture]
 	public class DuckTypingTest

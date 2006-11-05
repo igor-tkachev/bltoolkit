@@ -18,12 +18,14 @@ namespace BLToolkit.Mapping
 		private static MappingSchema _defaultSchema = new DefaultMappingSchema();
 		public  static MappingSchema  DefaultSchema
 		{
+			[System.Diagnostics.DebuggerStepThrough]
 			get { return _defaultSchema;  }
 			set { _defaultSchema = value; }
 		}
 
 		public static ExtensionList Extensions
 		{
+			[System.Diagnostics.DebuggerStepThrough]
 			get { return _defaultSchema.Extensions;  }
 			set { _defaultSchema.Extensions = value; }
 		}

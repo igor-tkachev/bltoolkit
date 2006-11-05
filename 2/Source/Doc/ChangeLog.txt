@@ -9,6 +9,7 @@ Bug fixes
 - BindingListImpl.RemoveSort was not firing ListChange event.
 - TypeAccessor.CreateExtendedPropertyDescriptors did not work properly
   with 3rd+ level nested properties.
+- Object holder ignored NoInstanceAttribute.
 
 Enhancement
 

@@ -89,6 +89,7 @@
     <Compile Include="Mapping\MapTest.cs" />
     <Compile Include="Mapping\MapValueAttributeTest.cs" />
     <Compile Include="Mapping\MemberMapperTest.cs" />
+    <Compile Include="Mapping\MetadataProvider\MetadataProviderTest.cs" />
     <Compile Include="Mapping\NullableAttributeTest.cs" />
     <Compile Include="Mapping\ObjectMapperAttributeTest.cs" />
     <Compile Include="Mapping\ResultSetTest.cs" />
@@ -102,6 +103,7 @@
     </Compile>
     <Compile Include="Reflection\Emit\MethodBuilderHelperTest.cs" />
     <Compile Include="Reflection\Extension\DefaultValueTest.cs" />
+    <Compile Include="Mapping\Person.mapping.cs" />
     <Compile Include="Reflection\ObjectFactoryAttributeTest.cs" />
     <Compile Include="Reflection\ExtendedPropertyDescriptorTest.cs" />
     <Compile Include="Reflection\TypeAccessorTest.cs" />
@@ -118,6 +120,7 @@
     <Compile Include="TypeBuilder\InstanceTypeAttributeTest.cs" />
     <Compile Include="TypeBuilder\LazyInstanceAttributeTest.cs" />
     <Compile Include="TypeBuilder\NoInstanceAttributeTest.cs" />
+    <Compile Include="TypeBuilder\NoInstanceAttributeTest2.cs" />
     <Compile Include="TypeBuilder\ParameterAttributeTest.cs" />
     <Compile Include="TypeBuilder\Builders\PropertyChangeBuilderTest.cs" />
     <Compile Include="TypeBuilder\TypeFactoryTest.cs" />
@@ -157,6 +160,9 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="DataAccess\XmlExtension.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Mapping\Person.mapping.xml" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>

@@ -14,8 +14,6 @@ namespace BLToolkit.EditableObjects
 		{
 			_original     = obj;
 			_current      = obj;
-			//_parent       = null;
-			//_propertyInfo = null;
 
 			if (_current != null)
 				_current.PropertyChanged += new PropertyChangedEventHandler(_current_PropertyChanged);

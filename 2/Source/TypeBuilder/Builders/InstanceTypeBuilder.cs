@@ -55,9 +55,12 @@ namespace BLToolkit.TypeBuilder.Builders
 
 		protected override Type GetObjectType()
 		{
-			return _isObjectHolder && Context.CurrentProperty.PropertyType.IsClass?
-				Context.CurrentProperty.PropertyType:
-				base.GetObjectType();
+			return IsObjectHolder? Context.CurrentProperty.PropertyType: base.GetObjectType();
+		}
+
+		protected override bool IsObjectHolder
+		{
+			get { return _isObjectHolder && Context.CurrentProperty.PropertyType.IsClass; }
 		}
 
 		protected override void BuildAbstractGetter()
