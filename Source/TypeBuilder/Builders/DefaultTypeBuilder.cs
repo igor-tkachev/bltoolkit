@@ -178,17 +178,25 @@ namespace BLToolkit.TypeBuilder.Builders
 			{
 				field = Context.CreatePrivateField(propertyInfo, fieldName, fieldType);
 
-				if (fieldType.IsInterface == false &&
-					propertyInfo.GetCustomAttributes(typeof(NoInstanceAttribute), true).Length == 0)
+				if (fieldType.IsInterface == false)
 				{
-					if (fieldType.IsClass && IsLazyInstance(fieldType))
+					bool noInstance = propertyInfo.GetCustomAttributes(typeof(NoInstanceAttribute), true).Length > 0;
+
+					if (IsObjectHolder && noInstance)
 					{
-						BuildLazyInstanceEnsurer();
+						BuildHolderInstance();
 					}
-					else
+					else if (!noInstance)
 					{
-						BuildDefaultInstance();
-						BuildInitContextInstance();
+						if (fieldType.IsClass && IsLazyInstance(fieldType))
+						{
+							BuildLazyInstanceEnsurer();
+						}
+						else
+						{
+							BuildDefaultInstance();
+							BuildInitContextInstance();
+						}
 					}
 				}
 			}
@@ -199,6 +207,38 @@ namespace BLToolkit.TypeBuilder.Builders
 		#endregion
 
 		#region Build
+
+		private void BuildHolderInstance()
+		{
+			string       fieldName  = GetFieldName();
+			FieldBuilder field      = Context.GetField(fieldName);
+			TypeHelper   fieldType  = new TypeHelper(field.FieldType);
+			TypeHelper   objectType = new TypeHelper(GetObjectType());
+
+			EmitHelper      emit = Context.TypeBuilder.DefaultConstructor.Emitter;
+			ConstructorInfo ci   = fieldType.GetPublicDefaultConstructor();
+
+			if (ci != null)
+			{
+				emit
+					.ldarg_0
+					.newobj (ci)
+					.stfld  (field)
+					;
+			}
+			else
+			{
+				if (!CheckObjectHolderCtor(fieldType, objectType))
+					return;
+
+				emit
+					.ldarg_0
+					.ldnull
+					.newobj (fieldType, objectType)
+					.stfld  (field)
+					;
+			}
+		}
 
 		private void CreateDefaultInstance(
 			FieldBuilder field, TypeHelper fieldType, TypeHelper objectType, EmitHelper emit)
@@ -258,12 +298,12 @@ namespace BLToolkit.TypeBuilder.Builders
 				}
 			}
 
-			// Object holder.
-			//
-			if (objectType.Type != fieldType.Type)
+			if (IsObjectHolder)
+			{
 				emit
 					.newobj (fieldType, objectType)
 					;
+			}
 
 			emit
 				.stfld (field)
@@ -289,12 +329,12 @@ namespace BLToolkit.TypeBuilder.Builders
 							.end()
 							;
 
-					// Object holder.
-					//
-					if (objectType.Type != fieldType.Type)
+					if (IsObjectHolder)
+					{
 						emit
 							.newobj (fieldType, objectType)
 							;
+					}
 
 					emit
 						.stfld (field)
@@ -397,12 +437,12 @@ namespace BLToolkit.TypeBuilder.Builders
 				.newobj (ci)
 				;
 
-			// Object holder.
-			//
-			if (objectType.Type != fieldType.Type)
+			if (IsObjectHolder)
+			{
 				emit
 					.newobj (fieldType, objectType)
 					;
+			}
 
 			emit
 				.stfld  (field)
@@ -517,12 +557,12 @@ namespace BLToolkit.TypeBuilder.Builders
 					;
 			}
 
-			// Object holder.
-			//
-			if (objectType.Type != fieldType.Type)
+			if (IsObjectHolder)
+			{
 				emit
 					.newobj (fieldType, objectType)
 					;
+			}
 
 			emit
 				.stfld (field)
@@ -558,10 +598,8 @@ namespace BLToolkit.TypeBuilder.Builders
 
 		private bool CheckObjectHolderCtor(TypeHelper fieldType, TypeHelper objectType)
 		{
-			if (objectType.Type != fieldType.Type)
+			if (IsObjectHolder)
 			{
-				// Check object holder.
-				//
 				ConstructorInfo holderCi = fieldType.GetPublicConstructor(objectType);
 
 				if (holderCi == null)
@@ -643,12 +681,12 @@ namespace BLToolkit.TypeBuilder.Builders
 					;
 			}
 
-			// Object holder.
-			//
-			if (objectType.Type != fieldType.Type)
+			if (IsObjectHolder)
+			{
 				emit
 					.newobj (fieldType, objectType)
 					;
+			}
 
 			emit
 				.stfld (field)
@@ -798,12 +836,12 @@ namespace BLToolkit.TypeBuilder.Builders
 					;
 			}
 
-			// Object holder.
-			//
-			if (objectType.Type != fieldType.Type)
+			if (IsObjectHolder)
+			{
 				emit
 					.newobj (fieldType, objectType)
 					;
+			}
 
 			emit
 				.stfld (field)

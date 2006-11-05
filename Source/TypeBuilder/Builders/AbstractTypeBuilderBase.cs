@@ -439,6 +439,11 @@ namespace BLToolkit.TypeBuilder.Builders
 			return GetFieldType();
 		}
 
+		protected virtual bool IsObjectHolder
+		{
+			get { return false; }
+		}
+
 		#endregion
 	}
 }

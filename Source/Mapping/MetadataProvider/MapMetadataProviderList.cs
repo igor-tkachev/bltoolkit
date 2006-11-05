@@ -32,6 +32,11 @@ namespace BLToolkit.Mapping.MetadataProvider
 			_list.Insert(index, provider);
 		}
 
+		public override MapMetadataProvider[] GetProviders()
+		{
+			return (MapMetadataProvider[])_list.ToArray(typeof(MapMetadataProvider));
+		}
+
 		#endregion
 
 		#region GetFieldName

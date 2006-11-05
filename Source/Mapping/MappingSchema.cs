@@ -119,6 +119,7 @@ namespace BLToolkit.Mapping
 		private MapMetadataProvider _metadataProvider;
 		public  MapMetadataProvider  MetadataProvider
 		{
+			[System.Diagnostics.DebuggerStepThrough]
 			get
 			{
 				if (_metadataProvider == null)

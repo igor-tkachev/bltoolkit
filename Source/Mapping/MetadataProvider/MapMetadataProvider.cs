@@ -6,6 +6,7 @@ using BLToolkit.Reflection.Extension;
 
 namespace BLToolkit.Mapping.MetadataProvider
 {
+	public delegate void                OnCreateProvider(MapMetadataProvider parentProvider);
 	public delegate MapMetadataProvider CreateProvider();
 	public delegate MemberMapper        EnsureMapperHandler(string mapName, string origName);
 
@@ -19,6 +20,11 @@ namespace BLToolkit.Mapping.MetadataProvider
 
 		public virtual void InsertProvider(int index, MapMetadataProvider provider)
 		{
+		}
+
+		public virtual MapMetadataProvider[] GetProviders()
+		{
+			return new MapMetadataProvider[0];
 		}
 
 		#endregion
@@ -92,6 +98,8 @@ namespace BLToolkit.Mapping.MetadataProvider
 
 		#region Static Members
 
+		public static event OnCreateProvider OnCreateProvider;
+
 		private static CreateProvider _createProvider = new CreateProvider(CreateInternal);
 		public  static CreateProvider  CreateProvider
 		{
@@ -101,7 +109,12 @@ namespace BLToolkit.Mapping.MetadataProvider
 
 		private static MapMetadataProvider CreateInternal()
 		{
-			return new MapMetadataProviderList();
+			MapMetadataProviderList list = new MapMetadataProviderList();
+
+			if (OnCreateProvider != null)
+				OnCreateProvider(list);
+
+			return list;
 		}
 
 		#endregion
