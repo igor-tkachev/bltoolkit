@@ -1,7 +1,7 @@
 <VisualStudioProject>
     <CSHARP
         ProjectType = "Local"
-        ProductVersion = "7.10.3077"
+        ProductVersion = "7.10.6030"
         SchemaVersion = "2.0"
         ProjectGuid = "{D258EBB5-8065-4292-9F07-B5A57042B435}"
     >
@@ -348,6 +348,11 @@
                 />
                 <File
                     RelPath = "Patterns\DuckTypingTest.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "Patterns\MustImplementAttributeTest.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
                 />

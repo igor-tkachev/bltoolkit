@@ -76,6 +76,7 @@
     <Compile Include="Mapping\MapValueAttribute1.cs" />
     <Compile Include="Mapping\ValueToEnum.cs" />
     <Compile Include="Mapping\EnumToValue.cs" />
+    <Compile Include="Patterns\DuckTyping.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Reflection\ObjectFactory.cs" />
   </ItemGroup>
