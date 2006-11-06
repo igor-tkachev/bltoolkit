@@ -4,7 +4,7 @@ using NUnit.Framework;
 
 using BLToolkit.Patterns;
 
-namespace Patterns
+namespace A.Patterns
 {
 	[TestFixture]
 	public class DuckTypingTest
@@ -225,36 +225,24 @@ namespace Patterns
 #endif
 		}
 
-		[Test, ExpectedException(typeof(TypeBuilderException))]
-		public void InvalidArgTest2()
-		{
-			TestInterface duck  = (TestInterface) DuckTyping.Implement(typeof(IFormattable), new TestClass());
-		}
-
 		interface NonPublicInterface
 		{
 		}
 
 		[Test, ExpectedException(typeof(ArgumentException))]
-		public void InvalidArgTest3()
+		public void InvalidArgTest2()
 		{
 			NonPublicInterface duck  = (NonPublicInterface) DuckTyping.Implement(typeof(NonPublicInterface), new TestClass());
 		}
 
-		[Test, ExpectedException(typeof(TypeBuilderException))]
-		public void InvalidArgTest4()
-		{
-			IFormattable duck  = (IFormattable) DuckTyping.Implement(typeof(IFormattable), IntPtr.Zero);
-		}
-
 		[Test, ExpectedException(typeof(ArgumentException))]
-		public void InvalidArgTest5()
+		public void InvalidArgTest3()
 		{
 			Child1 duck  = (Child1) DuckTyping.Implement(typeof(Child1), new Child2());
 		}
 
 		[Test, ExpectedException(typeof(ArgumentException))]
-		public void InvalidArgTest6()
+		public void InvalidArgTest4()
 		{
 			TestInterface duck  = (TestInterface)DuckTyping.Implement(typeof(TestInterface), typeof(TestInterface), new TestClass());
 		}

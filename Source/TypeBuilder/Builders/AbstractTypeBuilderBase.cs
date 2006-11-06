@@ -72,12 +72,6 @@ namespace BLToolkit.TypeBuilder.Builders
 				case BuildStep.End:   EndMethodBuild();   return;
 			}
 
-			if (context.Step == BuildStep.End)
-			{
-				EndMethodBuild();
-				return;
-			}
-
 			switch (context.BuildElement)
 			{
 				case BuildElement.Type:
