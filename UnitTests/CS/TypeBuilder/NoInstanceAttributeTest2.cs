@@ -6,7 +6,7 @@ using BLToolkit.EditableObjects;
 using BLToolkit.Reflection;
 using BLToolkit.TypeBuilder;
 
-namespace A.TypeBuilder
+namespace TypeBuilder
 {
 	[TestFixture]
 	public class NoInstanceAttributeTest2

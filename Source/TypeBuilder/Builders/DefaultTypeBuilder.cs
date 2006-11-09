@@ -184,7 +184,8 @@ namespace BLToolkit.TypeBuilder.Builders
 
 					if (IsObjectHolder && noInstance)
 					{
-						BuildHolderInstance();
+						BuildHolderInstance(Context.TypeBuilder.DefaultConstructor.Emitter);
+						BuildHolderInstance(Context.TypeBuilder.InitConstructor.Emitter);
 					}
 					else if (!noInstance)
 					{
@@ -208,15 +209,14 @@ namespace BLToolkit.TypeBuilder.Builders
 
 		#region Build
 
-		private void BuildHolderInstance()
+		private void BuildHolderInstance(EmitHelper emit)
 		{
 			string       fieldName  = GetFieldName();
 			FieldBuilder field      = Context.GetField(fieldName);
 			TypeHelper   fieldType  = new TypeHelper(field.FieldType);
 			TypeHelper   objectType = new TypeHelper(GetObjectType());
 
-			EmitHelper      emit = Context.TypeBuilder.DefaultConstructor.Emitter;
-			ConstructorInfo ci   = fieldType.GetPublicDefaultConstructor();
+			ConstructorInfo ci = fieldType.GetPublicDefaultConstructor();
 
 			if (ci != null)
 			{

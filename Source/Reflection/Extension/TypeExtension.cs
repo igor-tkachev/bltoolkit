@@ -209,7 +209,7 @@ namespace BLToolkit.Reflection.Extension
 			return CreateTypeInfo(doc);
 		}
 
-		public static TypeExtension GetTypeExtenstion(Type type, ExtensionList typeExtensions)
+		public static TypeExtension GetTypeExtension(Type type, ExtensionList typeExtensions)
 		{
 			object[] attrs = type.GetCustomAttributes(typeof(TypeExtensionAttribute), true);
 

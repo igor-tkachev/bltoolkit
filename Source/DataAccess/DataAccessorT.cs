@@ -21,6 +21,12 @@ namespace BLToolkit.DataAccess
 		{
 		}
 
+		[System.Diagnostics.DebuggerStepThrough]
+		protected DataAccessor(DbManager dbManager, bool dispose)
+			: base(dbManager, dispose)
+		{
+		}
+
 		#endregion
 	}
 }

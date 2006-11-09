@@ -18,6 +18,11 @@ namespace BLToolkit.DataAccess
 		{
 		}
 
+		public SqlQuery(DbManager dbManager, bool dispose)
+			: base(dbManager, dispose)
+		{
+		}
+
 		#endregion
 
 		#region Overrides

@@ -24,6 +24,11 @@ namespace BLToolkit.DataAccess
 		{
 		}
 
+		protected SqlQueryBase(DbManager dbManager, bool dispose)
+			: base(dbManager, dispose)
+		{
+		}
+
 		#endregion
 
 		#region Protected Members
@@ -40,7 +45,7 @@ namespace BLToolkit.DataAccess
 
 		protected MemberMapper[] GetNonKeyFieldList(ObjectMapper om)
 		{
-			TypeExtension typeExt = TypeExtension.GetTypeExtenstion(om.TypeAccessor.OriginalType, Extensions);
+			TypeExtension typeExt = TypeExtension.GetTypeExtension(om.TypeAccessor.OriginalType, Extensions);
 			ArrayList     list    = new ArrayList();
 
 			foreach (MemberMapper mm in om)
@@ -87,7 +92,7 @@ namespace BLToolkit.DataAccess
 
 			if (mmList == null)
 			{
-				TypeExtension typeExt = TypeExtension.GetTypeExtenstion(type, Extensions);
+				TypeExtension typeExt = TypeExtension.GetTypeExtension(type, Extensions);
 				ArrayList     list    = new ArrayList();
 
 				foreach (MemberMapper mm in db.MappingSchema.GetObjectMapper(type))
@@ -191,7 +196,7 @@ namespace BLToolkit.DataAccess
 
 		protected SqlQueryInfo CreateInsertSqlText(DbManager db, Type type)
 		{
-			TypeExtension typeExt = TypeExtension.GetTypeExtenstion(type, Extensions);
+			TypeExtension typeExt = TypeExtension.GetTypeExtension(type, Extensions);
 			ObjectMapper  om      = db.MappingSchema.GetObjectMapper(type);
 			ArrayList     list    = new ArrayList();
 			StringBuilder sb      = new StringBuilder();
@@ -237,7 +242,7 @@ namespace BLToolkit.DataAccess
 
 		protected SqlQueryInfo CreateUpdateSqlText(DbManager db, Type type)
 		{
-			TypeExtension typeExt = TypeExtension.GetTypeExtenstion(type, Extensions);
+			TypeExtension typeExt = TypeExtension.GetTypeExtension(type, Extensions);
 			ObjectMapper  om      = db.MappingSchema.GetObjectMapper(type);
 			StringBuilder sb      = new StringBuilder();
 			SqlQueryInfo  query   = new SqlQueryInfo(om);

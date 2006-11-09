@@ -208,7 +208,7 @@ namespace BLToolkit.Mapping
 
 			_typeAccessor  = TypeAccessor.GetAccessor(type);
 			_mappingSchema = mappingSchema;
-			_extension     = TypeExtension.GetTypeExtenstion(
+			_extension     = TypeExtension.GetTypeExtension(
 				_typeAccessor.OriginalType, mappingSchema.Extensions);
 
 			foreach (MemberAccessor ma in _typeAccessor)
