@@ -898,7 +898,7 @@ namespace BLToolkit.DataAccess
 			{
 				Label        fin = Context.MethodBuilder.Emitter.DefineLabel();
 				PropertyInfo pi  = typeof(DataAccessor)
-					.GetProperty("DisposeDbManager", BindingFlags.NonPublic | BindingFlags.Instance);
+					.GetProperty("DisposeDbManager", BindingFlags.Public | BindingFlags.Instance);
 
 				Context.MethodBuilder.Emitter
 					.BeginFinallyBlock()
