@@ -20,7 +20,13 @@ namespace BLToolkit.DataAccess
 		[System.Diagnostics.DebuggerStepThrough]
 		protected DataAccessBase(DbManager dbManager)
 		{
-			SetDbManager(dbManager);
+			SetDbManager(dbManager, false);
+		}
+
+		[System.Diagnostics.DebuggerStepThrough]
+		protected DataAccessBase(DbManager dbManager, bool dispose)
+		{
+			SetDbManager(dbManager, dispose);
 		}
 
 		#endregion
@@ -88,6 +94,14 @@ namespace BLToolkit.DataAccess
 			set { _extensions = value; }
 		}
 
+		private        bool _disposeDbManager = true;
+		[NoInterception]
+		public virtual bool  DisposeDbManager
+		{
+			get { return _disposeDbManager;  }
+			set { _disposeDbManager = value; }
+		}
+
 		#endregion
 
 		#region Protected Members
@@ -98,15 +112,10 @@ namespace BLToolkit.DataAccess
 			get { return _dbManager; }
 		}
 
-		protected internal void SetDbManager(DbManager dbManager)
+		protected internal void SetDbManager(DbManager dbManager, bool dispose)
 		{
-			_dbManager = dbManager;
-		}
-
-		[NoInterception]
-		protected virtual bool DisposeDbManager
-		{
-			get { return _dbManager == null; }
+			_dbManager        = dbManager;
+			_disposeDbManager = dispose;
 		}
 
 		[NoInterception]
@@ -153,7 +162,7 @@ namespace BLToolkit.DataAccess
 		[NoInterception]
 		protected virtual string GetTableName(Type type)
 		{
-			TypeExtension typeExt = TypeExtension.GetTypeExtenstion(type, Extensions);
+			TypeExtension typeExt = TypeExtension.GetTypeExtension(type, Extensions);
 
 			object value = typeExt.Attributes["TableName"].Value;
 

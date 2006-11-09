@@ -1060,7 +1060,7 @@ namespace BLToolkit.Mapping
 			if (mapValues != null || _mapValues.Contains(type))
 				return mapValues;
 
-			TypeExtension typeExt = TypeExtension.GetTypeExtenstion(type, Extensions);
+			TypeExtension typeExt = TypeExtension.GetTypeExtension(type, Extensions);
 			bool          isSet;
 
 			mapValues = MetadataProvider.GetMapValues(typeExt, type, out isSet);
@@ -1095,7 +1095,7 @@ namespace BLToolkit.Mapping
 			if (defaultValue != null || _defaultValues.Contains(type))
 				return defaultValue;
 
-			TypeExtension typeExt = TypeExtension.GetTypeExtenstion(type, Extensions);
+			TypeExtension typeExt = TypeExtension.GetTypeExtension(type, Extensions);
 
 			defaultValue = GetExtensionDefaultValue(typeExt, type);
 

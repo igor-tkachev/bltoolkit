@@ -7,13 +7,14 @@ using BLToolkit.Reflection.Extension;
 
 namespace A.Mapping
 {
+	[TestFixture]
 	public class PersonMappingTest
 	{
-		[TypeExtension("Person.mapping.xml")]
-		public class Person
+		[TypeExtension(FileName="Person.mapping.xml")]
+		public abstract class Person : BLToolkit.EditableObjects.EditableObject
 		{
-			public string FirstName;
-			public string LastName;
+			public abstract string FirstName { get; set; }
+			public abstract string LastName  { get; set; }
 		}
 
 		[Test]

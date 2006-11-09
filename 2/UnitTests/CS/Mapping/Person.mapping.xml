@@ -1,9 +1,9 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <Types>
 
-	<Type Name="Person">
-		<MapField OrigName="FirstName" MapName="FIRST_NAME" />
-		<MapField OrigName="LastName"  MapName="LAST_NAME" />
+	<Type Name="A.Mapping.PersonMappingTest+Person">
+		<Member Name="FirstName" MapField="FIRST_NAME" />
+		<Member Name="LastName"  MapField="LAST_NAME" />
 	</Type>
 
 </Types>

@@ -34,9 +34,14 @@ namespace BLToolkit.DataAccess
 
 		public static A CreateInstance(DbManager dbManager)
 		{
+			return CreateInstance(dbManager, false);
+		}
+
+		public static A CreateInstance(DbManager dbManager, bool dispose)
+		{
 			A da = TypeAccessor<A>.CreateInstanceEx();
 
-			da.SetDbManager(dbManager);
+			da.SetDbManager(dbManager, dispose);
 
 			return da;
 		}

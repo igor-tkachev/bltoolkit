@@ -18,6 +18,11 @@ namespace BLToolkit.DataAccess
 		{
 		}
 
+		public SprocQuery(DbManager dbManager, bool dispose)
+			: base(dbManager, dispose)
+		{
+		}
+
 		#endregion
 
 		#region SelectByKey

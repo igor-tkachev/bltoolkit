@@ -33,6 +33,12 @@ namespace BLToolkit.DataAccess
 		{
 		}
 
+		[System.Diagnostics.DebuggerStepThrough]
+		protected DataAccessor(DbManager dbManager, bool dispose)
+			: base(dbManager, dispose)
+		{
+		}
+
 		#endregion
 
 		#region CreateInstance
@@ -44,9 +50,14 @@ namespace BLToolkit.DataAccess
 
 		public static DataAccessor CreateInstance(Type type, DbManager dbManager)
 		{
+			return CreateInstance(type, dbManager, false);
+		}
+
+		public static DataAccessor CreateInstance(Type type, DbManager dbManager, bool dispose)
+		{
 			DataAccessor da = CreateInstance(type);
 
-			da.SetDbManager(dbManager);
+			da.SetDbManager(dbManager, dispose);
 
 			return da;
 		}
@@ -59,11 +70,19 @@ namespace BLToolkit.DataAccess
 		}
 
 		[System.Diagnostics.DebuggerStepThrough]
-		public static T CreateInstance<T>(DbManager dbManager) where T : DataAccessor
+		public static T CreateInstance<T>(DbManager dbManager)
+			where T : DataAccessor
+		{
+			return CreateInstance<T>(dbManager, false);
+		}
+
+		[System.Diagnostics.DebuggerStepThrough]
+		public static T CreateInstance<T>(DbManager dbManager, bool dispose)
+			where T : DataAccessor
 		{
 			T da = TypeAccessor<T>.CreateInstanceEx();
 
-			da.SetDbManager(dbManager);
+			da.SetDbManager(dbManager, dispose);
 
 			return da;
 		}
