@@ -107,6 +107,15 @@ namespace DataAccess
 			[ActionName("SelectByName")]
 			public abstract Person SameTypeName(string firstName, string lastName);
 
+			[ActionName("SelectByKey")]
+			public abstract Person ParamNull([ParamNullValue(1)]int id);
+
+			[ActionName("SelectByKey")]
+			public abstract Person ParamNullGuid([ParamNullValue("49F74716-C6DE-4b3e-A753-E40CFE6C6EA0")] Guid id);
+
+			[ActionName("SelectByKey")]
+			public abstract Person ParamNullString([ParamNullValue("SomeString")] string id);
+
 			#region IDataReader
 
 			[SprocName("Person_SelectAll")]
@@ -467,6 +476,20 @@ namespace DataAccess
 			Assert.AreNotEqual(0, list.Count);
 			Assert.IsInstanceOfType(typeof(Other.Person), list[0]);
 #endif
+		}
+
+		[Test]
+		public void ParamNullValueTest()
+		{
+			// Parameter id == 1 will be replaced with NULL
+			//
+			Person e1 = _da.ParamNull(1);
+			Assert.IsNull(e1);
+
+			// Parameter id == 2 will be send as is
+			//
+			Person e2 = _da.ParamNull(2);
+			Assert.IsNotNull(e2);
 		}
 
 		#region IDataReader

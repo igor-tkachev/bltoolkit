@@ -247,5 +247,12 @@ namespace BLToolkit.Patterns
 		}
 
 #endif
+
+		private static bool _allowStaticMembers;
+		public  static bool  AllowStaticMembers
+		{
+			get { return _allowStaticMembers;  }
+			set { _allowStaticMembers = value; }
+		}
 	}
 }

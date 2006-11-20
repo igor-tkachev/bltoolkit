@@ -179,6 +179,27 @@ namespace Patterns
 			Assert.AreEqual(42, duck2.Method(40));
 		}
 
+		public class StaticClass
+		{
+			public static int Method(int value)
+			{
+				return value + 3;
+			}
+		}
+
+		[Test]
+		public void StaticTest()
+		{
+			DuckTyping.AllowStaticMembers = true;
+#if FW2
+			TestInterface duck = DuckTyping.Implement<TestInterface, StaticClass> (new StaticClass());
+#else
+			TestInterface duck = (TestInterface) DuckTyping.Implement(typeof(TestInterface), typeof(StaticClass), new StaticClass());
+#endif
+			Assert.AreEqual(43, duck.Method(40));
+		}
+
+
 #if FW2
 		public interface GenericInterface<T>
 		{
@@ -246,5 +267,6 @@ namespace Patterns
 		{
 			TestInterface duck  = (TestInterface)DuckTyping.Implement(typeof(TestInterface), typeof(TestInterface), new TestClass());
 		}
+
 	}
 }

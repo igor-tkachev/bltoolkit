@@ -3138,7 +3138,6 @@ namespace BLToolkit.Reflection.Emit
 			_ilGenerator.Emit(OpCodes.Unbox, type); return this;
 		}
 
-#if FW2
 		/// <summary>
 		/// Calls ILGenerator.Emit(<see cref="OpCodes.Unbox_Any"/>, type) that
 		/// converts the boxed representation of a value type to its unboxed form.
@@ -3148,9 +3147,22 @@ namespace BLToolkit.Reflection.Emit
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode,Type)">ILGenerator.Emit</seealso>
 		public EmitHelper unbox_any(Type type)
 		{
-			_ilGenerator.Emit(OpCodes.Unbox_Any, type); return this;
-		}
+#if FW2
+			_ilGenerator.Emit(OpCodes.Unbox_Any, type);
+#else
+			// This is what exactly Unbox.Any does.
+			//
+			if (type.IsValueType)
+			{
+				_ilGenerator.Emit(OpCodes.Unbox, type);
+				_ilGenerator.Emit(OpCodes.Ldobj, type);
+			}
+			else
+				_ilGenerator.Emit(OpCodes.Castclass, type);
 #endif
+
+			return this;
+		}
 
 		public EmitHelper unboxIfValueType(Type type)
 		{

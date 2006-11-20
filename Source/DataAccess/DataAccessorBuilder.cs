@@ -1,4 +1,5 @@
 using System;
+using System.ComponentModel;
 using System.IO;
 using System.Reflection;
 using System.Data;
@@ -1139,7 +1140,7 @@ namespace BLToolkit.DataAccess
 
 			string[] strings = (string[]) list.ToArray(typeof(string));
 
-			// There a no limit for a filed name length, but Visual Studio Debugger
+			// There a no limit for a field name length, but Visual Studio Debugger
 			// may crash on fields with name longer then 256 symbols.
 			//
 			string       key            = "_string_array$" + string.Join("%", strings);
@@ -1173,7 +1174,31 @@ namespace BLToolkit.DataAccess
 					.ldloc             (localArray)
 					.stsfld            (fieldBuilder)
 					;
-				}
+			}
+
+			return fieldBuilder;
+		}
+
+		private FieldBuilder CreateNullValueField(Type type, string value)
+		{
+			string       key          = "_null_value$" + type.FullName + "%" + value;
+			FieldBuilder fieldBuilder = Context.GetField(key);
+
+			if (null == fieldBuilder)
+			{
+				fieldBuilder = Context.CreatePrivateStaticField(key, type);
+
+				EmitHelper   emit     = Context.TypeBuilder.TypeInitializer.Emitter;
+
+				emit
+					.LoadType         (type)
+					.call             (typeof(TypeDescriptor), "GetConverter", typeof(Type))
+					.ldstr            (value)
+					.callvirt         (typeof(TypeConverter), "ConvertFromInvariantString", typeof(string))
+					.unbox_any        (type)
+					.stsfld           (fieldBuilder)
+					;
+			}
 
 			return fieldBuilder;
 		}
@@ -1285,11 +1310,15 @@ namespace BLToolkit.DataAccess
 
 		private void BuildParameter(ParameterInfo pi)
 		{
-			EmitHelper emit  = Context.MethodBuilder.Emitter;
-			object[]   attrs = pi.GetCustomAttributes(typeof(ParamNameAttribute), true);
+			EmitHelper emit           = Context.MethodBuilder.Emitter;
+			object[]   attrsName      = pi.GetCustomAttributes(typeof(ParamNameAttribute),      true);
+			object[]   attrsNullValue = pi.GetCustomAttributes(typeof(ParamNullValueAttribute), true);
 
-			string paramName = attrs.Length == 0?
-				pi.Name: ((ParamNameAttribute)attrs[0]).Name;
+			string paramName = attrsName.Length == 0?
+				pi.Name: ((ParamNameAttribute)attrsName[0]).Name;
+
+			object nullValue = attrsNullValue.Length == 0?
+				null: ((ParamNullValueAttribute)attrsNullValue[0]).Value;
 
 			emit.ldloc        (_locManager);
 
@@ -1319,22 +1348,70 @@ namespace BLToolkit.DataAccess
 				methodName = pi.IsOut? "OutputParameter": "InputOutputParameter";
 			}
 
-			if (type.IsEnum)
+			if (attrsNullValue.Length == 0 || null == nullValue)
 			{
+				if (type.IsEnum)
+					emit
+						.ldloc(_locManager)
+						.callvirt(typeof (DbManager).GetProperty("MappingSchema").GetGetMethod())
+						;
+
+				emit.ldargEx(pi, true);
+
+				if (type.IsEnum)
+					emit
+						.ldc_i4_1
+						.callvirt(typeof (MappingSchema), "MapEnumToValue", typeof (object), typeof (bool));
+			}
+			else
+			{
+				Label        labelNull  = emit.DefineLabel();
+				Label        labelEndIf = emit.DefineLabel();
+
+				if (type.IsEnum)
+				{
+					emit
+						.ldloc     (_locManager)
+						.callvirt  (typeof (DbManager).GetProperty("MappingSchema").GetGetMethod())
+						.ldargEx   (pi, true)
+						.ldc_i4_1
+						.callvirt  (typeof (MappingSchema), "MapEnumToValue", typeof (object), typeof (bool))
+						.unbox_any (type)
+						;
+				}
+				else
+					emit
+						.ldarg     (pi)
+						;
+
+				if (nullValue.GetType() != type || !emit.LoadWellKnownValue(nullValue))
+				{
+					if (nullValue is string)
+					{
+						FieldBuilder staticField = CreateNullValueField(type, (string)nullValue);
+
+						emit
+							.ldsfld(staticField)
+							;
+					}
+					else
+						throw new TypeBuilderException(string.Format(
+							"Can not convert null value of type '{0}' to parameter type '{1}'",
+							nullValue.GetType().FullName, type.FullName));
+				}
+
 				emit
-					.ldloc    (_locManager)
-					.callvirt (typeof(DbManager).GetProperty("MappingSchema").GetGetMethod())
+					.beq           (labelNull)
+					.ldargEx       (pi, true)
+					.br            (labelEndIf)
+					.MarkLabel     (labelNull)
+					.ldnull
+					.MarkLabel     (labelEndIf)
 					;
 			}
 
-			emit.ldargEx      (pi, true);
-
-			if (type.IsEnum)
-				emit
-					.ldc_i4_1
-					.callvirt (typeof(MappingSchema), "MapEnumToValue", typeof(object), typeof(bool));
-
-			emit.callvirt     (typeof(DbManager), methodName, typeof(string), typeof(object));
+			emit
+				.callvirt          (typeof(DbManager), methodName, typeof(string), typeof(object));
 		}
 
 		private LocalBuilder BuildParametersWithDiscoverParameters()
@@ -1468,7 +1545,7 @@ namespace BLToolkit.DataAccess
 			}
 		}
 
-		private bool IsInterfaceOf(Type type, Type interfaceType)
+		private static bool IsInterfaceOf(Type type, Type interfaceType)
 		{
 			Type[] types = type.GetInterfaces();
 
@@ -1479,7 +1556,7 @@ namespace BLToolkit.DataAccess
 			return type == interfaceType;
 		}
 
-		private string GetConverterMethodName(Type type)
+		private static string GetConverterMethodName(Type type)
 		{
 #if FW2
 			Type underlyingType = Nullable.GetUnderlyingType(type);
