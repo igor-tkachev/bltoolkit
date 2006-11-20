@@ -73,7 +73,12 @@ namespace BLToolkit.Mapping
 
 		public override bool IsNull(object o, int index)
 		{
-			return _dataRow.IsNull(index);
+			if (_version == DataRowVersion.Default)
+				return _dataRow.IsNull(index);
+
+			DataColumn col = _dataRow.Table.Columns[index];
+
+			return _dataRow.IsNull(col, _version);
 		}
 
 		#endregion
