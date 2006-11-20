@@ -3,14 +3,19 @@ using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.IO;
+using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
-using BLToolkit.TypeBuilder;
+
 using NUnit.Framework;
+
+using BLToolkit.TypeBuilder;
 using BLToolkit.EditableObjects;
 using BLToolkit.Reflection;
-using TestObject_1=TestObject;
 
-namespace UnitTests.CS.EditableObjects
+using TestObject_1 = TestObject;
+
+namespace A.EditableObjects
 {
 	[TestFixture]
 	public class EditableArrayListTest
@@ -45,11 +50,11 @@ namespace UnitTests.CS.EditableObjects
 		
 		private static EditableTestObject[] _testObjects = new EditableTestObject[6]
 			{
-				EditableTestObject.CreateInstance(0, "Smith", 24),
-				EditableTestObject.CreateInstance(1, "John", 22),
-				EditableTestObject.CreateInstance(2, "Anna", 48),
-				EditableTestObject.CreateInstance(3, "Tim", 56),
-				EditableTestObject.CreateInstance(4, "Xiniu", 39),
+				EditableTestObject.CreateInstance(0, "Smith",  24),
+				EditableTestObject.CreateInstance(1, "John",   22),
+				EditableTestObject.CreateInstance(2, "Anna",   48),
+				EditableTestObject.CreateInstance(3, "Tim",    56),
+				EditableTestObject.CreateInstance(4, "Xiniu",  39),
 				EditableTestObject.CreateInstance(5, "Kirill", 30)
 			};
 		
@@ -300,6 +305,27 @@ namespace UnitTests.CS.EditableObjects
 			Console.WriteLine("--- Print List ---");
 			foreach (EditableTestObject o in _testList)
 				Console.WriteLine(o.ToString());
+		}
+
+		[Serializable]
+		public abstract class SerializableObject : EditableObject
+		{
+			public abstract int    ID   { get; set; }
+			public abstract Guid   UUID { get; set; }
+			public abstract string Name { get; set; }
+		    
+			public abstract EditableList<string> Array { get; set; }
+		}
+
+		[Test]
+		public void SerializationTest()
+		{
+			SerializableObject test = TypeAccessor<SerializableObject>.CreateInstance();
+
+			MemoryStream    stream = new MemoryStream();
+			BinaryFormatter bf     = new BinaryFormatter();
+
+			bf.Serialize(stream, test);
 		}
 	}
 }
