@@ -50,14 +50,16 @@ namespace BLToolkit.TypeBuilder.Builders
 
 		private void BuildMembers(Type interfaceType)
 		{
-			FieldInfo objectField = typeof(DuckType).GetField("_object", BindingFlags.NonPublic | BindingFlags.Instance);
+			FieldInfo    objectField = typeof(DuckType).GetField("_object", BindingFlags.NonPublic | BindingFlags.Instance);
+			BindingFlags flags       = BindingFlags.Public | BindingFlags.Instance
+				| (DuckTyping.AllowStaticMembers? BindingFlags.Static | BindingFlags.FlattenHierarchy: 0);
 
 			foreach (MethodInfo interfaceMethod in interfaceType.GetMethods(BindingFlags.Public | BindingFlags.Instance))
 			{
 				ParameterInfo[] ips = interfaceMethod.GetParameters();
 				MethodInfo      targetMethod = null;
 
-				foreach (MethodInfo mi in _objectType.GetMethods(BindingFlags.Public | BindingFlags.Instance))
+				foreach (MethodInfo mi in _objectType.GetMethods(flags))
 				{
 					ParameterInfo[] ops = mi.GetParameters();
 
@@ -90,18 +92,24 @@ namespace BLToolkit.TypeBuilder.Builders
 
 				if (targetMethod != null)
 				{
-					emit
-						.ldarg_0
-						.ldfld    (objectField)
-						.castclass(_objectType)
-						;
+					if (!targetMethod.IsStatic)
+						emit
+							.ldarg_0
+							.ldfld(objectField)
+							.castclass(_objectType)
+							;
 
 					foreach (ParameterInfo p in interfaceMethod.GetParameters())
 						emit.ldarg(p);
 
-					emit
-						.callvirt(targetMethod)
-						.ret();
+					if (targetMethod.IsStatic)
+						emit
+							.call(targetMethod)
+							.ret();
+					else
+						emit
+							.callvirt(targetMethod)
+							.ret();
 				}
 				else
 				{

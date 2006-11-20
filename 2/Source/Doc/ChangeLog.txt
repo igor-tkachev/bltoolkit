@@ -16,7 +16,7 @@ Enhancement
 - Operator<T> is extensible now.
 - ObjectBinder can now control lifetime (Disposal) of underlying collection.
 - DuckTyping (the idea was shamelessly stolen from http://www.codeproject.com/cs/library/nduck.asp)
-
+- ParamNullValue attribute.
 
 v 2.0.3
 
