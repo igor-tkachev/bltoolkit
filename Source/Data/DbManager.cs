@@ -397,10 +397,10 @@ namespace BLToolkit.Data
 		/// using the <see cref="AddConnectionString(string)"/> method.
 		/// </para>
 		/// <para>
-		/// The configuration string may have a postfix used to define a data provider. The following table
-		/// contains postfixes for all supported data providers:
+		/// The configuration string may have a prefix used to define a data provider. The following table
+		/// contains prefixes for all supported data providers:
 		/// <list type="table">
-		/// <listheader><term>Postfix</term><description>Provider</description></listheader>
+		/// <listheader><term>Prefix</term><description>Provider</description></listheader>
 		/// <item><term>.Sql</term><description>Data Provider for SQL Server</description></item>
 		/// <item><term>.OleDb</term><description>Data Provider for OLE DB</description></item>
 		/// <item><term>.Odbc</term><description>Data Provider for ODBC</description></item>
