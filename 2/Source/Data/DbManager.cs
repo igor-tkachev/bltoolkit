@@ -401,10 +401,10 @@ namespace BLToolkit.Data
 		/// contains prefixes for all supported data providers:
 		/// <list type="table">
 		/// <listheader><term>Prefix</term><description>Provider</description></listheader>
-		/// <item><term>.Sql</term><description>Data Provider for SQL Server</description></item>
-		/// <item><term>.OleDb</term><description>Data Provider for OLE DB</description></item>
-		/// <item><term>.Odbc</term><description>Data Provider for ODBC</description></item>
-		/// <item><term>.Oracle</term><description>Data Provider for Oracle</description></item>
+		/// <item><term>Sql</term><description>Data Provider for SQL Server</description></item>
+		/// <item><term>OleDb</term><description>Data Provider for OLE DB</description></item>
+		/// <item><term>Odbc</term><description>Data Provider for ODBC</description></item>
+		/// <item><term>Oracle</term><description>Data Provider for Oracle</description></item>
 		/// </list>
 		/// </para>
 		/// </remarks>
