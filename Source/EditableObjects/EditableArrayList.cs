@@ -31,8 +31,6 @@ namespace BLToolkit.EditableObjects
 
 			_itemType        = itemType;
 			_list            = list;
-			_typedListImpl   = new TypedListImpl(itemType);
-			_bindingListImpl = new BindingListImpl(list, itemType);
 
 			AddInternal(_list);
 		}
@@ -122,7 +120,7 @@ namespace BLToolkit.EditableObjects
 
 		public void Move(int newIndex, int oldIndex)
 		{
-			_bindingListImpl.Move(newIndex, oldIndex);
+			BindingListImpl.Move(newIndex, oldIndex);
 		}
 
 		public void Move(int newIndex, object item)
@@ -142,13 +140,13 @@ namespace BLToolkit.EditableObjects
 
 		public bool NotifyChanges
 		{
-			get { return _bindingListImpl.NotifyChanges;  }
-			set { _bindingListImpl.NotifyChanges = value; }
+			get { return BindingListImpl.NotifyChanges;  }
+			set { BindingListImpl.NotifyChanges = value; }
 		}
 
 		protected virtual void OnListChanged(EditableListChangedEventArgs e)
 		{
-			_bindingListImpl.OnListChanged(e);
+			BindingListImpl.OnListChanged(e);
 		}
 
 		protected void OnListChanged(ListChangedType listChangedType, int index)
@@ -323,22 +321,22 @@ namespace BLToolkit.EditableObjects
 
 		public override bool IsFixedSize
 		{
-			get { return _bindingListImpl.IsFixedSize; }
+			get { return BindingListImpl.IsFixedSize; }
 		}
 
 		public override bool IsReadOnly
 		{
-			get { return _bindingListImpl.IsReadOnly; }
+			get { return BindingListImpl.IsReadOnly; }
 		}
 
 		public override object this[int index]
 		{
-			get { return _bindingListImpl[index];  }
+			get { return BindingListImpl[index];  }
 			set
 			{
-				object o = _bindingListImpl[index];
+				object o = BindingListImpl[index];
 				
-				_bindingListImpl[index] = value;
+				BindingListImpl[index] = value;
 
 				if (o != value)
 				{
@@ -350,7 +348,7 @@ namespace BLToolkit.EditableObjects
 
 		public override int Add(object value)
 		{
-			int index = _bindingListImpl.Add(value);
+			int index = BindingListImpl.Add(value);
 
 			AddInternal(value);
 
@@ -362,22 +360,22 @@ namespace BLToolkit.EditableObjects
 			if (_list.Count > 0)
 				RemoveInternal(_list);
 			
-			_bindingListImpl.Clear();
+			BindingListImpl.Clear();
 		}
 
 		public override bool Contains(object item)
 		{
-			return _bindingListImpl.Contains(item);
+			return BindingListImpl.Contains(item);
 		}
 
 		public override int IndexOf(object value)
 		{
-			return _bindingListImpl.IndexOf(value);
+			return BindingListImpl.IndexOf(value);
 		}
 
 		public override void Insert(int index, object value)
 		{
-			_bindingListImpl.Insert(index, value);
+			BindingListImpl.Insert(index, value);
 
 			AddInternal(value);
 		}
@@ -386,14 +384,14 @@ namespace BLToolkit.EditableObjects
 		{
 			RemoveInternal(value);
 
-			_bindingListImpl.Remove(value);
+			BindingListImpl.Remove(value);
 		}
 
 		public override void RemoveAt(int index)
 		{
-			RemoveInternal(_bindingListImpl[index]);
+			RemoveInternal(BindingListImpl[index]);
 			
-			_bindingListImpl.RemoveAt(index);
+			BindingListImpl.RemoveAt(index);
 		}
 		
 		#endregion
@@ -402,22 +400,22 @@ namespace BLToolkit.EditableObjects
 
 		public override int Count
 		{
-			get { return _bindingListImpl.Count; }
+			get { return BindingListImpl.Count; }
 		}
 
 		public override bool IsSynchronized
 		{
-			get { return _bindingListImpl.IsSynchronized; }
+			get { return BindingListImpl.IsSynchronized; }
 		}
 
 		public override object SyncRoot
 		{
-			get { return _bindingListImpl.SyncRoot; }
+			get { return BindingListImpl.SyncRoot; }
 		}
 
 		public override void CopyTo(Array array, int arrayIndex)
 		{
-			_bindingListImpl.CopyTo(array, arrayIndex);
+			BindingListImpl.CopyTo(array, arrayIndex);
 		}
 		
 		#endregion
@@ -426,7 +424,7 @@ namespace BLToolkit.EditableObjects
 
 		public override IEnumerator GetEnumerator()
 		{
-			return _bindingListImpl.GetEnumerator();
+			return BindingListImpl.GetEnumerator();
 		}
 		
 		#endregion
@@ -444,7 +442,7 @@ namespace BLToolkit.EditableObjects
 
 		public override void AddRange(ICollection c)
 		{
-			_bindingListImpl.AddRange(c);
+			BindingListImpl.AddRange(c);
 			
 			AddInternal(c);
 		}
@@ -549,7 +547,7 @@ namespace BLToolkit.EditableObjects
 
 		public override void InsertRange(int index, ICollection c)
 		{
-			_bindingListImpl.InsertRange(index, c);
+			BindingListImpl.InsertRange(index, c);
 		}
 
 		public void InsertRange(int index, ICollection c, bool trackChanges)
@@ -590,7 +588,7 @@ namespace BLToolkit.EditableObjects
 
 		public override void RemoveRange(int index, int count)
 		{
-			_bindingListImpl.RemoveRange(index, count);
+			BindingListImpl.RemoveRange(index, count);
 		}
 
 		public void RemoveRange(int index, int count, bool trackChanges)
@@ -602,9 +600,9 @@ namespace BLToolkit.EditableObjects
 
 		public override void Reverse()
 		{
-			_bindingListImpl.EndNew();
+			BindingListImpl.EndNew();
 
-			if (!_bindingListImpl.IsSorted)
+			if (!BindingListImpl.IsSorted)
 				_list.Reverse();
 			else
 				throw new InvalidOperationException("Reverse is not supported for already sorted arrays. Invoke IBindingList.RemoveSort() first or provide revese sort direction.");
@@ -615,9 +613,9 @@ namespace BLToolkit.EditableObjects
 
 		public override void Reverse(int index, int count)
 		{
-			_bindingListImpl.EndNew();
+			BindingListImpl.EndNew();
 
-			if (!_bindingListImpl.IsSorted)
+			if (!BindingListImpl.IsSorted)
 				_list.Reverse(index, count);
 			else
 				throw new InvalidOperationException("Range Reverse is not supported for already sorted arrays. Invoke IBindingList.RemoveSort() first.");
@@ -628,16 +626,16 @@ namespace BLToolkit.EditableObjects
 
 		public override void SetRange(int index, ICollection c)
 		{
-			_bindingListImpl.SetRange(index, c);
+			BindingListImpl.SetRange(index, c);
 
 			AddInternal(c);
 		}
 
 		public override void Sort()
 		{
-			_bindingListImpl.EndNew();
+			BindingListImpl.EndNew();
 
-			if (!_bindingListImpl.IsSorted)
+			if (!BindingListImpl.IsSorted)
 			{
 				_list.Sort();
 
@@ -646,11 +644,11 @@ namespace BLToolkit.EditableObjects
 			}
 			else
 			{
-				if (_bindingListImpl.SortProperty != null)
-					_bindingListImpl.ApplySort(_bindingListImpl.SortProperty, _bindingListImpl.SortDirection);
+				if (BindingListImpl.SortProperty != null)
+					BindingListImpl.ApplySort(BindingListImpl.SortProperty, BindingListImpl.SortDirection);
 #if FW2
-				else if (_bindingListImpl.SortDescriptions != null)
-					_bindingListImpl.ApplySort(_bindingListImpl.SortDescriptions);
+				else if (BindingListImpl.SortDescriptions != null)
+					BindingListImpl.ApplySort(BindingListImpl.SortDescriptions);
 #endif
 				else
 					throw new InvalidOperationException("Currntly applied sort method is not recognised/supported by EditableArrayList.");
@@ -659,9 +657,9 @@ namespace BLToolkit.EditableObjects
 
 		public override void Sort(int index, int count, IComparer comparer)
 		{
-			_bindingListImpl.EndNew();
+			BindingListImpl.EndNew();
 
-			if (!_bindingListImpl.IsSorted)
+			if (!BindingListImpl.IsSorted)
 				_list.Sort(index, count, comparer);
 			else
 				throw new InvalidOperationException("Custom sorting is not supported on already sorted arrays. Invoke IBindingList.RemoveSort first.");
@@ -672,9 +670,9 @@ namespace BLToolkit.EditableObjects
 
 		public override void Sort(IComparer comparer)
 		{
-			_bindingListImpl.EndNew();
+			BindingListImpl.EndNew();
 
-			if (!_bindingListImpl.IsSorted)
+			if (!BindingListImpl.IsSorted)
 				_list.Sort(comparer);
 			else
 				throw new InvalidOperationException("Custom sorting is not supported on already sorted arrays. Invoke IBindingList.RemoveSort first.");
@@ -790,7 +788,17 @@ namespace BLToolkit.EditableObjects
 
 		#region ITypedList Members
 
+		[NonSerialized]
 		private TypedListImpl _typedListImpl;
+		private TypedListImpl  TypedListImpl
+		{
+			get
+			{
+				if (_typedListImpl == null)
+					_typedListImpl = new TypedListImpl(_itemType);
+				return _typedListImpl;
+			}
+		}
 
 		public PropertyDescriptorCollection GetItemProperties(PropertyDescriptor[] listAccessors)
 		{
@@ -803,99 +811,109 @@ namespace BLToolkit.EditableObjects
 			IsNullHandler        isNull,
 			bool                 cache)
 		{
-			return _typedListImpl.GetItemProperties(listAccessors, objectViewType, isNull, cache);
+			return TypedListImpl.GetItemProperties(listAccessors, objectViewType, isNull, cache);
 		}
 
 		public string GetListName(PropertyDescriptor[] listAccessors)
 		{
-			return _typedListImpl.GetListName(listAccessors);
+			return TypedListImpl.GetListName(listAccessors);
 		}
 
 		#endregion
 
 		#region IBindingList Members
 
+		[NonSerialized]
 		private BindingListImpl _bindingListImpl;
+		private BindingListImpl  BindingListImpl
+		{
+			get
+			{
+				if (_bindingListImpl == null)
+					_bindingListImpl = new BindingListImpl(_list, _itemType);
+				return _bindingListImpl;
+			}
+		}
 
 		public void AddIndex(PropertyDescriptor property)
 		{
-			_bindingListImpl.AddIndex(property);
+			BindingListImpl.AddIndex(property);
 		}
 
 		public object AddNew()
 		{
-			return _bindingListImpl.AddNew();
+			return BindingListImpl.AddNew();
 		}
 
 		public bool AllowEdit
 		{
-			get { return _bindingListImpl.AllowEdit; }
+			get { return BindingListImpl.AllowEdit; }
 		}
 
 		public bool AllowNew
 		{
-			get { return _bindingListImpl.AllowNew; }
+			get { return BindingListImpl.AllowNew; }
 		}
 
 		public bool AllowRemove
 		{
-			get { return _bindingListImpl.AllowRemove; }
+			get { return BindingListImpl.AllowRemove; }
 		}
 
 		public void ApplySort(PropertyDescriptor property, ListSortDirection direction)
 		{
-			_bindingListImpl.ApplySort(property, direction);
+			BindingListImpl.ApplySort(property, direction);
 		}
 
 		public int Find(PropertyDescriptor property, object key)
 		{
-			return _bindingListImpl.Find(property, key);
+			return BindingListImpl.Find(property, key);
 		}
 
 		public bool IsSorted
 		{
-			get { return _bindingListImpl.IsSorted; }
+			get { return BindingListImpl.IsSorted; }
 		}
 
 		public void RemoveIndex(PropertyDescriptor property)
 		{
-			_bindingListImpl.RemoveIndex(property);
+			BindingListImpl.RemoveIndex(property);
 		}
 
 		public void RemoveSort()
 		{
-			_bindingListImpl.RemoveSort();
+			BindingListImpl.RemoveSort();
 		}
 
 		public ListSortDirection SortDirection
 		{
-			get { return _bindingListImpl.SortDirection; }
+			get { return BindingListImpl.SortDirection; }
 		}
 
 		public PropertyDescriptor SortProperty
 		{
-			get { return _bindingListImpl.SortProperty; }
+			get { return BindingListImpl.SortProperty; }
 		}
 
 		public bool SupportsChangeNotification
 		{
-			get { return _bindingListImpl.SupportsChangeNotification; }
+			get { return BindingListImpl.SupportsChangeNotification; }
 		}
 
 		public event ListChangedEventHandler ListChanged
 		{
-			add    { _bindingListImpl.ListChanged += value; }
-			remove { _bindingListImpl.ListChanged -= value; }
+			add    { BindingListImpl.ListChanged += value; }
+			remove { BindingListImpl.ListChanged -= value; }
 		}
 
 		public bool SupportsSearching
 		{
-			get { return _bindingListImpl.SupportsSearching; }
+			get { return BindingListImpl.SupportsSearching; }
 		}
 
 		public bool SupportsSorting
 		{
-			get { return _bindingListImpl.SupportsSorting; }
+			get { return BindingListImpl.SupportsSorting; }
 		}
 
 		#endregion
@@ -906,33 +924,33 @@ namespace BLToolkit.EditableObjects
 
 		public void ApplySort(ListSortDescriptionCollection sorts)
 		{
-			_bindingListImpl.ApplySort(sorts);
+			BindingListImpl.ApplySort(sorts);
 		}
 
 		public string Filter
 		{
-			get { return _bindingListImpl.Filter;  }
-			set { _bindingListImpl.Filter = value; }
+			get { return BindingListImpl.Filter;  }
+			set { BindingListImpl.Filter = value; }
 		}
 
 		public void RemoveFilter()
 		{
-			_bindingListImpl.RemoveFilter();
+			BindingListImpl.RemoveFilter();
 		}
 
 		public ListSortDescriptionCollection SortDescriptions
 		{
-			get { return _bindingListImpl.SortDescriptions; }
+			get { return BindingListImpl.SortDescriptions; }
 		}
 
 		public bool SupportsAdvancedSorting
 		{
-			get { return _bindingListImpl.SupportsAdvancedSorting; }
+			get { return BindingListImpl.SupportsAdvancedSorting; }
 		}
 
 		public bool SupportsFiltering
 		{
-			get { return _bindingListImpl.SupportsFiltering; }
+			get { return BindingListImpl.SupportsFiltering; }
 		}
 
 		#endregion
@@ -941,12 +959,12 @@ namespace BLToolkit.EditableObjects
 
 		public void CancelNew(int itemIndex)
 		{
-			_bindingListImpl.CancelNew(itemIndex);
+			BindingListImpl.CancelNew(itemIndex);
 		}
 
 		public void EndNew(int itemIndex)
 		{
-			_bindingListImpl.EndNew(itemIndex);
+			BindingListImpl.EndNew(itemIndex);
 		}
 
 		#endregion

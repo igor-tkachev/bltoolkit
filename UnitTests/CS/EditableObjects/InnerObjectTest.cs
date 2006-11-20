@@ -6,7 +6,7 @@ using BLToolkit.EditableObjects;
 using BLToolkit.Reflection;
 using BLToolkit.TypeBuilder;
 
-namespace A.EditableObjects
+namespace EditableObjects
 {
 	[TestFixture]
 	public class InnerObjectTest
