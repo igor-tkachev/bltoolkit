@@ -1308,17 +1308,84 @@ namespace BLToolkit.DataAccess
 			return retParams;
 		}
 
+		private void LoadParameterOrNull(ParameterInfo pi, Type type)
+		{
+			EmitHelper emit  = Context.MethodBuilder.Emitter;
+			object[]   attrs = pi.GetCustomAttributes(typeof(ParamNullValueAttribute), true);
+
+			object nullValue = attrs.Length == 0?
+				null: ((ParamNullValueAttribute)attrs[0]).Value;
+
+			Label  labelNull  = emit.DefineLabel();
+			Label  labelEndIf = emit.DefineLabel();
+
+			if (nullValue != null)
+			{
+				if (type.IsEnum)
+				{
+					nullValue = System.Convert.ChangeType(nullValue, Enum.GetUnderlyingType(type));
+					
+					if (!emit.LoadWellKnownValue(nullValue))
+						throw new TypeBuilderException(string.Format(
+							"Can not convert value '{0}' to enum type '{1}'",
+							nullValue, type.FullName));
+				}
+				else if (nullValue.GetType() != type || !emit.LoadWellKnownValue(nullValue))
+				{
+					if (nullValue is string)
+					{
+						FieldBuilder staticField = CreateNullValueField(type, (string)nullValue);
+
+						emit
+							.ldsfld(staticField)
+							;
+					}
+					else 
+						throw new TypeBuilderException(string.Format(
+							"Can not convert null value of type '{0}' to parameter type '{1}'",
+							nullValue.GetType().FullName, type.FullName));
+				}
+
+				emit
+					.ldarg         (pi)
+					.beq           (labelNull)
+					;
+			}
+
+			if (type.IsEnum)
+				emit
+					.ldloc(_locManager)
+					.callvirt(typeof (DbManager).GetProperty("MappingSchema").GetGetMethod())
+					;
+
+			emit
+				.ldargEx(pi, true)
+				;
+
+			if (type.IsEnum)
+				emit
+					.ldc_i4_1
+					.callvirt(typeof (MappingSchema), "MapEnumToValue", typeof (object), typeof (bool))
+					;
+
+			if (nullValue != null)
+			{
+				emit
+					.br            (labelEndIf)
+					.MarkLabel     (labelNull)
+					.ldnull
+					.MarkLabel     (labelEndIf)
+					;
+			}
+		}
+
 		private void BuildParameter(ParameterInfo pi)
 		{
-			EmitHelper emit           = Context.MethodBuilder.Emitter;
-			object[]   attrsName      = pi.GetCustomAttributes(typeof(ParamNameAttribute),      true);
-			object[]   attrsNullValue = pi.GetCustomAttributes(typeof(ParamNullValueAttribute), true);
+			EmitHelper emit  = Context.MethodBuilder.Emitter;
+			object[]   attrs = pi.GetCustomAttributes(typeof(ParamNameAttribute),      true);
 
-			string paramName = attrsName.Length == 0?
-				pi.Name: ((ParamNameAttribute)attrsName[0]).Name;
-
-			object nullValue = attrsNullValue.Length == 0?
-				null: ((ParamNullValueAttribute)attrsNullValue[0]).Value;
+			string paramName = attrs.Length == 0?
+				pi.Name: ((ParamNameAttribute)attrs[0]).Name;
 
 			emit.ldloc        (_locManager);
 
@@ -1337,81 +1404,22 @@ namespace BLToolkit.DataAccess
 			Type   type       = pi.ParameterType;
 			string methodName = "Parameter";
 
-			if (pi.ParameterType.IsByRef)
+			if (type.IsByRef)
 			{
 				if (_outputParameters == null)
 					_outputParameters = new ArrayList();
 
 				_outputParameters.Add(pi);
 
-				type       = pi.ParameterType.GetElementType();
+				type       = type.GetElementType();
 				methodName = pi.IsOut? "OutputParameter": "InputOutputParameter";
 			}
 
-			if (attrsNullValue.Length == 0 || null == nullValue)
-			{
-				if (type.IsEnum)
-					emit
-						.ldloc(_locManager)
-						.callvirt(typeof (DbManager).GetProperty("MappingSchema").GetGetMethod())
-						;
-
-				emit.ldargEx(pi, true);
-
-				if (type.IsEnum)
-					emit
-						.ldc_i4_1
-						.callvirt(typeof (MappingSchema), "MapEnumToValue", typeof (object), typeof (bool));
-			}
-			else
-			{
-				Label        labelNull  = emit.DefineLabel();
-				Label        labelEndIf = emit.DefineLabel();
-
-				if (type.IsEnum)
-				{
-					emit
-						.ldloc     (_locManager)
-						.callvirt  (typeof (DbManager).GetProperty("MappingSchema").GetGetMethod())
-						.ldargEx   (pi, true)
-						.ldc_i4_1
-						.callvirt  (typeof (MappingSchema), "MapEnumToValue", typeof (object), typeof (bool))
-						.unbox_any (type)
-						;
-				}
-				else
-					emit
-						.ldarg     (pi)
-						;
-
-				if (nullValue.GetType() != type || !emit.LoadWellKnownValue(nullValue))
-				{
-					if (nullValue is string)
-					{
-						FieldBuilder staticField = CreateNullValueField(type, (string)nullValue);
-
-						emit
-							.ldsfld(staticField)
-							;
-					}
-					else
-						throw new TypeBuilderException(string.Format(
-							"Can not convert null value of type '{0}' to parameter type '{1}'",
-							nullValue.GetType().FullName, type.FullName));
-				}
-
-				emit
-					.beq           (labelNull)
-					.ldargEx       (pi, true)
-					.br            (labelEndIf)
-					.MarkLabel     (labelNull)
-					.ldnull
-					.MarkLabel     (labelEndIf)
-					;
-			}
+			LoadParameterOrNull(pi, type);
 
 			emit
-				.callvirt          (typeof(DbManager), methodName, typeof(string), typeof(object));
+				.callvirt          (typeof(DbManager), methodName, typeof(string), typeof(object))
+				;
 		}
 
 		private LocalBuilder BuildParametersWithDiscoverParameters()
@@ -1420,9 +1428,9 @@ namespace BLToolkit.DataAccess
 			LocalBuilder locParams = emit.DeclareLocal(typeof(object[]));
 
 			emit
-				.ldc_i4_            (_paramList.Count)
-				.newarr             (typeof(object))
-				.stloc              (locParams)
+				.ldc_i4_           (_paramList.Count)
+				.newarr            (typeof(object))
+				.stloc             (locParams)
 				;
 
 			for (int i = 0; i < _paramList.Count; i++)
@@ -1430,10 +1438,13 @@ namespace BLToolkit.DataAccess
 				ParameterInfo pi = (ParameterInfo)_paramList[i];
 
 				emit
-					.ldloc          (locParams)
-					.ldc_i4_        (i)
-					.ldarg          (pi)
-					.boxIfValueType (pi.ParameterType)
+					.ldloc         (locParams)
+					.ldc_i4_       (i)
+					;
+
+				LoadParameterOrNull(pi, pi.ParameterType);
+
+				emit
 					.stelem_ref
 					.end()
 					;
@@ -1479,7 +1490,9 @@ namespace BLToolkit.DataAccess
 							;
 					}
 					else
-						emit.ldstr                (paramName);
+						emit
+							.ldstr                (paramName)
+							;
 
 					emit
 						.callvirt                 (typeof(DbManager), "Parameter", typeof(string))
