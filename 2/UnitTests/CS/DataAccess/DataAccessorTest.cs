@@ -108,13 +108,13 @@ namespace DataAccess
 			public abstract Person SameTypeName(string firstName, string lastName);
 
 			[ActionName("SelectByKey")]
-			public abstract Person ParamNull([ParamNullValue(1)]int id);
+			public abstract Person ParamNullID    ([ParamNullValue(1)] int id);
 
-			[ActionName("SelectByKey")]
-			public abstract Person ParamNullGuid([ParamNullValue("49F74716-C6DE-4b3e-A753-E40CFE6C6EA0")] Guid id);
+			[ActionName("SelectByName")]
+			public abstract Person ParamNullString([ParamNullValue("John")] string firstName, string lastName);
 
-			[ActionName("SelectByKey")]
-			public abstract Person ParamNullString([ParamNullValue("SomeString")] string id);
+			public abstract Person ParamNullGuid  ([ParamNullValue("49F74716-C6DE-4b3e-A753-E40CFE6C6EA0")] Guid guid);
+			public abstract Person ParamNullEnum  ([ParamNullValue(Gender.Unknown)] Gender gender);
 
 			#region IDataReader
 
@@ -479,16 +479,30 @@ namespace DataAccess
 		}
 
 		[Test]
-		public void ParamNullValueTest()
+		public void ParamNullValueIDTest()
 		{
 			// Parameter id == 1 will be replaced with NULL
 			//
-			Person e1 = _da.ParamNull(1);
+			Person e1 = _da.ParamNullID(1);
 			Assert.IsNull(e1);
 
 			// Parameter id == 2 will be send as is
 			//
-			Person e2 = _da.ParamNull(2);
+			Person e2 = _da.ParamNullID(2);
+			Assert.IsNotNull(e2);
+		}
+
+		[Test]
+		public void ParamNullValueStrTest()
+		{
+			// Parameter firstName == 'John' will be replaced with NULL
+			//
+			Person e1 = _da.ParamNullString("John", "Pupkin");
+			Assert.IsNull(e1);
+
+			// Parameter firstName == 'Tester' will be send as is
+			//
+			Person e2 = _da.ParamNullString("Tester", "Testerson");
 			Assert.IsNotNull(e2);
 		}
 
