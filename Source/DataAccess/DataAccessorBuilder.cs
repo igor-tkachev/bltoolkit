@@ -1321,41 +1321,95 @@ namespace BLToolkit.DataAccess
 
 			if (nullValue != null)
 			{
+				Type nullValueType = type;
+#if FW2
+				bool isNullable    = TypeHelper.IsNullable(type);
+#endif
+
 				if (type.IsEnum)
 				{
-					nullValue = System.Convert.ChangeType(nullValue, Enum.GetUnderlyingType(type));
-					
-					if (!emit.LoadWellKnownValue(nullValue))
-						throw new TypeBuilderException(string.Format(
-							"Can not convert value '{0}' to enum type '{1}'",
-							nullValue, type.FullName));
+					nullValueType = Enum.GetUnderlyingType(type);
+					nullValue     = System.Convert.ChangeType(nullValue, nullValueType);
 				}
-				else if (nullValue.GetType() != type || !emit.LoadWellKnownValue(nullValue))
+#if FW2
+				else if (isNullable)
 				{
-					if (nullValue is string)
-					{
-						FieldBuilder staticField = CreateNullValueField(type, (string)nullValue);
+					nullValueType = type.GetGenericArguments()[0];
 
-						emit
-							.ldsfld(staticField)
-							;
-					}
-					else 
-						throw new TypeBuilderException(string.Format(
-							"Can not convert null value of type '{0}' to parameter type '{1}'",
-							nullValue.GetType().FullName, type.FullName));
+					emit
+						.ldarga    (pi)
+						.call      (type, "get_HasValue")
+						.brfalse   (labelNull)
+						;
 				}
+#endif
 
-				emit
-					.ldarg         (pi)
-					.beq           (labelNull)
-					;
+				if (nullValueType == nullValue.GetType() && emit.LoadWellKnownValue(nullValue))
+				{
+					if (nullValueType == typeof(string))
+						emit
+							.ldarg (pi)
+							.call  (nullValueType, "Equals", nullValueType)
+							.brtrue(labelNull)
+							;
+#if FW2
+					else if (isNullable)
+						emit
+							.ldarga(pi)
+							.call  (type, "get_Value")
+							.beq   (labelNull)
+							;
+#endif
+					else
+						emit
+							.ldarg (pi)
+							.beq   (labelNull)
+						;
+				}
+				else
+				{
+					string       nullString  = TypeDescriptor.GetConverter(nullValue).ConvertToInvariantString(nullValue);
+					FieldBuilder staticField = CreateNullValueField(nullValueType, nullString);
+					MethodInfo   miEquals    = new TypeHelper(nullValueType).GetPublicMethod("Equals", nullValueType);
+
+					if (miEquals == null)
+					{
+						// Is it possible?
+						//
+						throw new TypeBuilderException(string.Format(
+							"The type '{0}' does not have 'Equals' method", type.FullName));
+					}
+
+#if FW2
+					if (isNullable)
+						emit
+							.ldsflda   (staticField)
+							.ldarga    (pi)
+							.call      (pi.ParameterType, "get_Value")
+							;
+					else
+#endif
+						emit
+							.ldsflda   (staticField)
+							.ldarg     (pi)
+						;
+
+					if (miEquals.GetParameters()[0].ParameterType.IsClass)
+						emit
+							.boxIfValueType(nullValueType)
+							;
+
+					emit
+						.call      (miEquals)
+						.brtrue    (labelNull)
+						;
+				}
 			}
 
 			if (type.IsEnum)
 				emit
-					.ldloc(_locManager)
-					.callvirt(typeof (DbManager).GetProperty("MappingSchema").GetGetMethod())
+					.ldloc         (_locManager)
+					.callvirt      (typeof (DbManager).GetProperty("MappingSchema").GetGetMethod())
 					;
 
 			emit
@@ -1365,7 +1419,7 @@ namespace BLToolkit.DataAccess
 			if (type.IsEnum)
 				emit
 					.ldc_i4_1
-					.callvirt(typeof (MappingSchema), "MapEnumToValue", typeof (object), typeof (bool))
+					.callvirt      (typeof (MappingSchema), "MapEnumToValue", typeof (object), typeof (bool))
 					;
 
 			if (nullValue != null)

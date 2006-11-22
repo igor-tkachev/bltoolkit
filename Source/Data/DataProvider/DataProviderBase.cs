@@ -54,6 +54,29 @@ namespace BLToolkit.Data.DataProvider
 		public abstract IDbConnection CreateConnectionObject();
 
 		/// <summary>
+		/// Creates a new connection object with same connection string.</summary>
+		/// </summary>
+		/// <param name="connection">A connection object used as prototype.</param>
+		/// <returns>New connection instance.</returns>
+		public virtual IDbConnection CloneConnection(IDbConnection connection)
+		{
+			if (connection == null)
+				throw new ArgumentNullException("connection");
+
+			ICloneable cloneable = connection as ICloneable;
+			if (cloneable != null)
+				return (IDbConnection)cloneable.Clone();
+
+			IDbConnection newConnection    = CreateConnectionObject();
+
+			// This is definitelly not enought when PersistSecurityInfo set to false.
+			//
+			newConnection.ConnectionString = connection.ConnectionString;
+			return newConnection;
+		}
+
+
+		/// <summary>
 		/// Creates an instance of the <see cref="DbDataAdapter"/>.
 		/// </summary>
 		/// <remarks>

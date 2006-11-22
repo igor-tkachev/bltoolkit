@@ -1509,6 +1509,21 @@ namespace BLToolkit.Reflection.Emit
 		}
 
 		/// <summary>
+		/// Loads an argument address onto the stack.
+		/// </summary>
+		/// <param name="parameterInfo">A ParameterInfo representing a parameter.</param>
+		public EmitHelper ldarga(ParameterInfo parameterInfo)
+		{
+			if (parameterInfo == null) throw new ArgumentNullException("parameterInfo");
+
+			bool isStatic = 
+				Method is MethodBuilderHelper && ((MethodBuilderHelper)Method).MethodBuilder.IsStatic;
+
+			return ldarga(parameterInfo.Position + (isStatic? 0: 1));
+		}
+
+
+		/// <summary>
 		/// Calls ILGenerator.Emit(<see cref="OpCodes.Ldarg_0"/>) that
 		/// loads the argument at index 0 onto the evaluation stack.
 		/// </summary>
