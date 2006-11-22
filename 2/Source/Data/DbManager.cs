@@ -467,7 +467,7 @@ namespace BLToolkit.Data
 				catch (Exception ex)
 				{
 					OnOperationException(OperationType.DisposeTransaction, ex);
-					throw ex;
+					throw;
 				}
 			}
 
@@ -483,7 +483,7 @@ namespace BLToolkit.Data
 				catch (Exception ex)
 				{
 					OnOperationException(OperationType.CloseConnection, ex);
-					throw ex;
+					throw;
 				}
 			}
 		}
@@ -530,7 +530,7 @@ namespace BLToolkit.Data
 				catch (Exception ex)
 				{
 					OnOperationException(OperationType.DisposeTransaction, ex);
-					throw ex;
+					throw;
 				}
 			}
 
@@ -546,7 +546,7 @@ namespace BLToolkit.Data
 			catch (Exception ex)
 			{
 				OnOperationException(OperationType.BeginTransaction, ex);
-				throw ex;
+				throw;
 			}
 
 			// If the active command exists.
@@ -576,7 +576,7 @@ namespace BLToolkit.Data
 				catch (Exception ex)
 				{
 					OnOperationException(OperationType.CommitTransaction, ex);
-					throw ex;
+					throw;
 				}
 
 				if (_closeTransaction)
@@ -603,7 +603,7 @@ namespace BLToolkit.Data
 				catch (Exception ex)
 				{
 					OnOperationException(OperationType.RollbackTransaction, ex);
-					throw ex;
+					throw;
 				}
 
 				if (_closeTransaction)
@@ -777,7 +777,7 @@ namespace BLToolkit.Data
 			catch (Exception ex)
 			{
 				OnOperationException(OperationType.OpenConnection, ex);
-				throw ex;
+				throw;
 			}
 
 			_closeConnection = true;
@@ -952,12 +952,20 @@ namespace BLToolkit.Data
 		/// <returns></returns>
 		protected virtual IDbDataParameter[] DiscoverSpParameters(string spName, bool includeReturnValueParameter)
 		{
-			using (IDbConnection con = _dataProvider.CreateConnectionObject())
-			{
-				con.ConnectionString = _connection == null || !_isExternalConnection?
-					GetConnectionString(ConfigurationString): 
-					GetConnectionString(_connection);
+			IDbConnection con;
 
+			if (_isExternalConnection)
+				con = _dataProvider.CloneConnection(_connection);
+			else
+			{
+				con = _dataProvider.CreateConnectionObject();
+				con.ConnectionString = _connection == null?
+					GetConnectionString(ConfigurationString):
+					GetConnectionString(_connection);
+			}
+
+			using (con)
+			{
 				try
 				{
 					OnBeforeOperation(OperationType.OpenConnection);
@@ -967,7 +975,7 @@ namespace BLToolkit.Data
 				catch (Exception ex)
 				{
 					OnOperationException(OperationType.OpenConnection, ex);
-					throw ex;
+					throw;
 				}
 
 				using (IDbCommand cmd = con.CreateCommand())
@@ -986,7 +994,7 @@ namespace BLToolkit.Data
 					catch (Exception ex)
 					{
 						OnOperationException(OperationType.DeriveParameters, ex);
-						throw ex;
+						throw;
 					}
 
 					if (res == false)
@@ -1115,7 +1123,7 @@ namespace BLToolkit.Data
 					dr.Dispose();
 
 				OnOperationException(OperationType.ExecuteReader, ex);
-				throw ex;
+				throw;
 			}
 
 			return dr;
@@ -1134,7 +1142,7 @@ namespace BLToolkit.Data
 			catch (Exception ex)
 			{
 				OnOperationException(OperationType.ExecuteNonQuery, ex);
-				throw ex;
+				throw;
 			}
 		}
 
@@ -2451,7 +2459,7 @@ namespace BLToolkit.Data
 				catch (Exception ex)
 				{
 					OnOperationException(OperationType.PrepareCommand, ex);
-					throw ex;
+					throw;
 				}
 			}
 
@@ -2752,7 +2760,7 @@ namespace BLToolkit.Data
 			catch (Exception ex)
 			{
 				OnOperationException(OperationType.ExecuteScalar, ex);
-				throw ex;
+				throw;
 			}
 		}
 
@@ -3484,7 +3492,7 @@ namespace BLToolkit.Data
 			catch (Exception ex)
 			{
 				OnOperationException(OperationType.Fill, ex);
-				throw ex;
+				throw;
 			}
 		}
 
@@ -3528,7 +3536,7 @@ namespace BLToolkit.Data
 			catch (Exception ex)
 			{
 				OnOperationException(OperationType.Fill, ex);
-				throw ex;
+				throw;
 			}
 		}
 
@@ -4013,7 +4021,7 @@ namespace BLToolkit.Data
 			catch (Exception ex)
 			{
 				OnOperationException(OperationType.Update, ex);
-				throw ex;
+				throw;
 			}
 		}
 
@@ -4044,7 +4052,7 @@ namespace BLToolkit.Data
 			catch (Exception ex)
 			{
 				OnOperationException(OperationType.Update, ex);
-				throw ex;
+				throw;
 			}
 		}
 
