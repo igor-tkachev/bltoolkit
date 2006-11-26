@@ -52,7 +52,7 @@ namespace BLToolkit.TypeBuilder
 			if (_globalAssembly != null)
 				SaveGlobalAssembly();
 
-			if (path != null || path.Length > 0)
+			if (path != null && path.Length > 0)
 				_globalAssemblyPath = path;
 		}
 

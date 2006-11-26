@@ -388,6 +388,7 @@ namespace BLToolkit.Mapping
 			return _mappingSchema.GetDefaultValue(memberAccessor.Type);
 		}
 
+/*
 		private object GetExtensionIsNullable(MemberAccessor memberAccessor)
 		{
 			object value = Extension[memberAccessor.Name]["Nullable"].Value;
@@ -399,6 +400,7 @@ namespace BLToolkit.Mapping
 
 			return value != null;
 		}
+*/
 
 		protected virtual bool GetNullable(MemberAccessor memberAccessor)
 		{

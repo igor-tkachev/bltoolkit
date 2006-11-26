@@ -30,7 +30,7 @@ namespace BLToolkit.Web.UI.Design
 			return _view;
 		}
 
-		public override void Initialize(System.ComponentModel.IComponent component)
+		public override void Initialize(IComponent component)
 		{
 			_component = (WebObjectBinder)component;
 

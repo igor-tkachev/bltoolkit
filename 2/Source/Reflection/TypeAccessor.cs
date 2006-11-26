@@ -64,7 +64,7 @@ namespace BLToolkit.Reflection
 
 		#region CreateInstance
 
-		[System.Diagnostics.DebuggerStepThrough]
+		[DebuggerStepThrough]
 		public virtual object CreateInstance()
 		{
 			throw new TypeBuilderException(string.Format(
@@ -72,20 +72,20 @@ namespace BLToolkit.Reflection
 				OriginalType.Name));
 		}
 
-		[System.Diagnostics.DebuggerStepThrough]
+		[DebuggerStepThrough]
 		public virtual object CreateInstance(InitContext context)
 		{
 			return CreateInstance();
 		}
 
-		[System.Diagnostics.DebuggerStepThrough]
+		[DebuggerStepThrough]
 		public object CreateInstanceEx()
 		{
 			return _objectFactory != null?
 				_objectFactory.CreateInstance(this, null): CreateInstance((InitContext)null);
 		}
 
-		[System.Diagnostics.DebuggerStepThrough]
+		[DebuggerStepThrough]
 		public object CreateInstanceEx(InitContext context)
 		{
 			return _objectFactory != null? _objectFactory.CreateInstance(this, context): CreateInstance(context);
@@ -287,10 +287,11 @@ namespace BLToolkit.Reflection
 					string.Format("Extension assembly '{0}' is out of date. Please rebuild.",
 						extensionAssemblyLocation), "BLToolkit.TypeAccessor");
 			}
-			catch
+			catch (Exception ex)
 			{
 				// Extension exist, but can't be loaded for some reason.
 				// Switch back to code generation
+				Debug.WriteLine("LoadExtensionAssembly: " + ex);
 			}
 
 			return null;
@@ -738,7 +739,7 @@ namespace BLToolkit.Reflection
 			return pdc;
 		}
 
-		private PropertyDescriptorCollection GetExtendedProperties(
+		private static PropertyDescriptorCollection GetExtendedProperties(
 			PropertyDescriptorCollection pdc,
 			Type                         itemType,
 			string                       propertyPrefix,

@@ -1,8 +1,5 @@
 using System;
 using System.Collections;
-#if FW2
-using System.Collections.Generic;
-#endif
 using System.Data;
 using System.Data.SqlTypes;
 using System.IO;

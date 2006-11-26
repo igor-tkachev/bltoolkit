@@ -105,7 +105,7 @@ namespace BLToolkit.DataAccess
 
 			try
 			{
-				return SelectAll<L>(db, list);
+				return SelectAll(db, list);
 			}
 			finally
 			{

@@ -594,8 +594,6 @@ namespace BLToolkit.ComponentModel
 
 			if (result > 0 || nextResult < 0)
 			{
-				bool placed = false;
-
 				for (int i = 0; i < _list.Count; i++)
 				{
 					if (i == index)
@@ -612,8 +610,7 @@ namespace BLToolkit.ComponentModel
 					}
 				}
 
-				if (!placed)
-					return _list.Count - 1;
+				return _list.Count - 1;
 			}
 
 			return index;
@@ -622,18 +619,13 @@ namespace BLToolkit.ComponentModel
 		public int GetSortedInsertIndex(object value)
 		{
 			IComparer comparer = GetSortComparer();
-			int result;
 
 			if (comparer == null)
 				return -1;
 
 			for (int i = 0; i < _list.Count; i++)
-			{
-				result = comparer.Compare(_list[i], value);
-
-				if (result > 0)
+				if (comparer.Compare(_list[i], value) > 0)
 					return i;
-			}
 
 			return _list.Count;
 		}
