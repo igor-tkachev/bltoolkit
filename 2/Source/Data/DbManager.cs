@@ -959,9 +959,7 @@ namespace BLToolkit.Data
 			else
 			{
 				con = _dataProvider.CreateConnectionObject();
-				con.ConnectionString = _connection == null?
-					GetConnectionString(ConfigurationString):
-					GetConnectionString(_connection);
+				con.ConnectionString = GetConnectionString(ConfigurationString);
 			}
 
 			using (con)

@@ -10,6 +10,7 @@ Bug fixes
 - TypeAccessor.CreateExtendedPropertyDescriptors did not work properly
   with 3rd+ level nested properties.
 - Object holder ignored NoInstanceAttribute.
+- ValidatorContext caches NullValue.
 
 Enhancement
 

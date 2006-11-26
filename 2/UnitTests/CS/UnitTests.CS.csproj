@@ -273,7 +273,26 @@
                     BuildAction = "Compile"
                 />
                 <File
+                    RelPath = "DataAccess\XmlExtension.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "DataAccess\XmlExtension.xml"
+                    BuildAction = "EmbeddedResource"
+                />
+                <File
+                    RelPath = "DataAccess\XmlTypeTest.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
                     RelPath = "EditableObjects\EditableObjectTest.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "EditableObjects\InnerObjectTest.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
                 />
@@ -337,12 +356,26 @@
                     BuildAction = "Compile"
                 />
                 <File
+                    RelPath = "Mapping\Person.mapping.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "Mapping\Person.mapping.xml"
+                    BuildAction = "EmbeddedResource"
+                />
+                <File
                     RelPath = "Mapping\ResultSetTest.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
                 />
                 <File
                     RelPath = "Mapping\TrimmableAttributeTest.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "Mapping\MetadataProvider\MetadataProviderTest.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
                 />
@@ -382,6 +415,11 @@
                     BuildAction = "Compile"
                 />
                 <File
+                    RelPath = "Reflection\Extension\DefaultValueTest.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
                     RelPath = "Reflection\Extension\ExtensionTest.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
@@ -403,6 +441,11 @@
                 />
                 <File
                     RelPath = "TypeBuilder\NoInstanceAttributeTest.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "TypeBuilder\NoInstanceAttributeTest2.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
                 />
@@ -443,6 +486,11 @@
                 />
                 <File
                     RelPath = "TypeBuilder\Builders\TypeAccessorBuilderTest.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "Validation\NullValue.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
                 />

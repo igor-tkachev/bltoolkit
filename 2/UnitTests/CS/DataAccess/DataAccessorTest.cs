@@ -20,7 +20,7 @@ using BLToolkit.Validation;
 using BLToolkit.Reflection;
 using BLToolkit.TypeBuilder;
 
-namespace DataAccess
+namespace A.DataAccess
 {
 #if FW2
 	namespace Other
@@ -109,6 +109,14 @@ namespace DataAccess
 
 			[ActionName("SelectByKey")]
 			public abstract Person ParamNullID    ([ParamNullValue(1)] int id);
+
+#if FW2
+			[ActionName("SelectByKey")]
+			public abstract Person ParamNullableID([ParamNullValue(1)] int? id);
+
+			[ActionName("SelectByKey")]
+			public abstract Person ParamNullableID2([ParamNullValue("1")] int? id);
+#endif
 
 			[ActionName("SelectByName")]
 			public abstract Person ParamNullString([ParamNullValue("John")] string firstName, string lastName);
@@ -491,6 +499,24 @@ namespace DataAccess
 			Person e2 = _da.ParamNullID(2);
 			Assert.IsNotNull(e2);
 		}
+
+#if FW2
+		[Test]
+		public void ParamNullValueNullableIDTest()
+		{
+			// Parameter id == 1 will be replaced with NULL
+			//
+			Person e1 = _da.ParamNullableID(1);
+			Assert.IsNull(e1);
+			e1  = _da.ParamNullableID2(1);
+			Assert.IsNull(e1);
+
+			// Parameter id == 2 will be send as is
+			//
+			Person e2 = _da.ParamNullableID(2);
+			Assert.IsNotNull(e2);
+		}
+#endif
 
 		[Test]
 		public void ParamNullValueStrTest()

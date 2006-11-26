@@ -1,7 +1,7 @@
 using System;
 using System.ComponentModel;
 using System.Reflection;
-
+using BLToolkit.Mapping;
 using BLToolkit.Reflection;
 
 namespace BLToolkit.Validation
@@ -52,7 +52,11 @@ namespace BLToolkit.Validation
 		public  object  Value
 		{
 			get { return _value;  }
-			set { _value = value; }
+			set
+			{
+				_value     = value;
+				_nullValue = null;
+			}
 		}
 
 		private MemberAccessor _memberAccessor;
@@ -75,8 +79,28 @@ namespace BLToolkit.Validation
 		private object _nullValue;
 		public  object  NullValue
 		{
-			get { return _nullValue;  }
-			set { _nullValue = value; }
+			get
+			{
+				if (_nullValue == null)
+				{
+					if (_value == null)
+						throw new InvalidOperationException("NullValue is undefined when Value == null");
+
+					ObjectMapper om = Map.GetObjectMapper(Object.GetType());
+					MemberMapper mm = om[MemberName, true];
+
+					_nullValue =
+						mm != null && mm.MapMemberInfo.Nullable && mm.MapMemberInfo.NullValue != null?
+							mm.MapMemberInfo.NullValue:
+							TypeAccessor.GetNullValue(Value.GetType());
+
+					if (_nullValue == null)
+						_nullValue = DBNull.Value;
+				}
+
+				return _nullValue;
+
+			}
 		}
 
 		public string MemberName
