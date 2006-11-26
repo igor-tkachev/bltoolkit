@@ -21,11 +21,10 @@ namespace BLToolkit.Validation
 					continue;
 
 				context.MemberAccessor = ma;
+				context.Value          = ma.GetValue(context.Object);
 
 				foreach (ValidatorBaseAttribute attr in attrs)
 				{
-					context.Value = ma.GetValue(context.Object);
-
 					if (attr.IsValid(context) == false)
 						throw new ValidationException(
 							attr.GetErrorMessage(context));
@@ -51,20 +50,6 @@ namespace BLToolkit.Validation
 		{
 			if (context.Value == null)
 				return true;
-
-			if (context.NullValue == null)
-			{
-				ObjectMapper om = Map.GetObjectMapper(context.Object.GetType());
-				MemberMapper mm = om[context.MemberName, true];
-
-				context.NullValue =
-					mm != null && mm.MapMemberInfo.Nullable && mm.MapMemberInfo.NullValue != null?
-						mm.MapMemberInfo.NullValue:
-						TypeAccessor.GetNullValue(context.Value.GetType());
-
-				if (context.NullValue == null)
-					context.NullValue = DBNull.Value;
-			}
 
 			if (context.NullValue is DBNull)
 				return false;
@@ -133,13 +118,11 @@ namespace BLToolkit.Validation
 
 			if (attrs != null)
 			{
-				foreach (ValidatorBaseAttribute attr in attrs)
-				{
-					context.Value = value;
+				context.Value = value;
 
+				foreach (ValidatorBaseAttribute attr in attrs)
 					if (attr.IsValid(context) == false)
 						return false;
-				}
 			}
 
 			return true;
@@ -180,11 +163,10 @@ namespace BLToolkit.Validation
 
 				if (attrs != null)
 				{
+					context.Value = context.MemberAccessor.GetValue(context.Object);
+
 					foreach (ValidatorBaseAttribute attr in attrs)
-					{
-						context.Value = context.MemberAccessor.GetValue(context.Object);
 						messages.Add(attr.GetErrorMessage(context));
-					}
 
 					return (string[])messages.ToArray(typeof(string));
 				}
