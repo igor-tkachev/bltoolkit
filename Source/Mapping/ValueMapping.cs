@@ -1,9 +1,10 @@
 using System;
-using System.Data.SqlTypes;
 
-using BLToolkit.Common;
 using BLToolkit.Mapping.ValueMappingInternal;
+
 #if FW2
+using BLToolkit.Common;
+
 using KeyValue = System.Collections.Generic.KeyValuePair<System.Type, System.Type>;
 using Table    = System.Collections.Generic.Dictionary<System.Collections.Generic.KeyValuePair<System.Type, System.Type>, BLToolkit.Mapping.IValueMapper>;
 #else
@@ -67,10 +68,9 @@ namespace BLToolkit.Mapping
 
 			KeyValue key = new KeyValue(t1, t2);
 
-			IValueMapper t;
-
 			lock (_sync)
 			{
+				IValueMapper t;
 #if FW2
 				if (_mappers.TryGetValue(key, out t))
 					return t;
@@ -127,9 +127,9 @@ namespace BLToolkit.Mapping
 			public bool Check()
 			{
 				return
-					!(MapGetData<S>.I      is MapGetData<S>.Default<S>)      &&
+					!(MapGetData<S>.I is MapGetData<S>.Default<S>) &&
 					!(MapSetData<S>.I is MapSetData<S>.Default<S>) &&
-					!(MapGetData<D>.I      is MapGetData<D>.Default<D>)      &&
+					!(MapGetData<D>.I is MapGetData<D>.Default<D>) &&
 					!(MapSetData<D>.I is MapSetData<D>.Default<D>);
 			}
 		}
@@ -145,7 +145,7 @@ namespace BLToolkit.Mapping
 				else
 				{
 					MapSetData<T>.MB<T> setter    = MapSetData<T>.I;
-					MapGetData<T>.MB<T>      getter    = MapGetData<T>.I;
+					MapGetData<T>.MB<T> getter    = MapGetData<T>.I;
 
 					setter.To(dest, destObject, destIndex,
 						getter.From(source, sourceObject, sourceIndex));
@@ -163,9 +163,9 @@ namespace BLToolkit.Mapping
 					dest.SetNull(destObject, destIndex);
 				else
 				{
-					MapSetData<D>.MB<D> setter    = MapSetData<D>.I;
-					MapGetData<S>.MB<S>      getter    = MapGetData<S>.I;
-					Convert<D,S>.ConvertMethod  converter = Convert<D,S>.From;
+					MapSetData<D>.MB<D>        setter    = MapSetData<D>.I;
+					MapGetData<S>.MB<S>        getter    = MapGetData<S>.I;
+					Convert<D,S>.ConvertMethod converter = Convert<D,S>.From;
 
 					setter.To(dest, destObject, destIndex,
 						converter(getter.From(source, sourceObject, sourceIndex)));

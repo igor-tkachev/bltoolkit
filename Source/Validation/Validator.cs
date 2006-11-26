@@ -2,7 +2,6 @@ using System;
 using System.Collections;
 using System.ComponentModel;
 
-using BLToolkit.Mapping;
 using BLToolkit.Reflection;
 
 namespace BLToolkit.Validation

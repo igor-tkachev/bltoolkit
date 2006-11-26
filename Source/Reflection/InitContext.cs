@@ -8,10 +8,6 @@ namespace BLToolkit.Reflection
 {
 	public class InitContext
 	{
-		public InitContext()
-		{
-		}
-
 		private object[] _memberParameters;
 		public  object[]  MemberParameters
 		{

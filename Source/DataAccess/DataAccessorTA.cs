@@ -1,8 +1,6 @@
 using System;
-using System.Collections.Generic;
 
 using BLToolkit.Data;
-using BLToolkit.Aspects;
 using BLToolkit.Reflection;
 
 namespace BLToolkit.DataAccess

@@ -783,7 +783,7 @@ namespace BLToolkit.Common
 		// Scalar Types.
 		// 
 		[CLSCompliant(false)]
-		public static UInt32 ToUInt32(String p)      { return p == null? (UInt32)0: UInt32.Parse(p); }
+		public static UInt32 ToUInt32(String p)      { return p == null? 0: UInt32.Parse(p); }
 
 		[CLSCompliant(false)]
 		public static UInt32 ToUInt32(SByte p)       { return      checked((UInt32)p); }
@@ -817,62 +817,62 @@ namespace BLToolkit.Common
 		// Nullable Types.
 		// 
 		[CLSCompliant(false)]
-		public static UInt32 ToUInt32(UInt32? p)     { return p.HasValue?                 p.Value:  (UInt32)0; }
+		public static UInt32 ToUInt32(UInt32? p)     { return p.HasValue?                 p.Value:  0; }
 
 		[CLSCompliant(false)]
-		public static UInt32 ToUInt32(SByte? p)      { return p.HasValue? checked((UInt32)p.Value): (UInt32)0; }
+		public static UInt32 ToUInt32(SByte? p)      { return p.HasValue? checked((UInt32)p.Value): 0; }
 		[CLSCompliant(false)]
-		public static UInt32 ToUInt32(Int16? p)      { return p.HasValue? checked((UInt32)p.Value): (UInt32)0; }
+		public static UInt32 ToUInt32(Int16? p)      { return p.HasValue? checked((UInt32)p.Value): 0; }
 		[CLSCompliant(false)]
-		public static UInt32 ToUInt32(Int32? p)      { return p.HasValue? checked((UInt32)p.Value): (UInt32)0; }
+		public static UInt32 ToUInt32(Int32? p)      { return p.HasValue? checked((UInt32)p.Value): 0; }
 		[CLSCompliant(false)]
-		public static UInt32 ToUInt32(Int64? p)      { return p.HasValue? checked((UInt32)p.Value): (UInt32)0; }
+		public static UInt32 ToUInt32(Int64? p)      { return p.HasValue? checked((UInt32)p.Value): 0; }
 
 		[CLSCompliant(false)]
-		public static UInt32 ToUInt32(Byte? p)       { return p.HasValue? checked((UInt32)p.Value): (UInt32)0; }
+		public static UInt32 ToUInt32(Byte? p)       { return p.HasValue? checked((UInt32)p.Value): 0; }
 		[CLSCompliant(false)]
-		public static UInt32 ToUInt32(UInt16? p)     { return p.HasValue? checked((UInt32)p.Value): (UInt32)0; }
+		public static UInt32 ToUInt32(UInt16? p)     { return p.HasValue? checked((UInt32)p.Value): 0; }
 		[CLSCompliant(false)]
-		public static UInt32 ToUInt32(UInt64? p)     { return p.HasValue? checked((UInt32)p.Value): (UInt32)0; }
+		public static UInt32 ToUInt32(UInt64? p)     { return p.HasValue? checked((UInt32)p.Value): 0; }
 
 		[CLSCompliant(false)]
-		public static UInt32 ToUInt32(Single? p)     { return p.HasValue? checked((UInt32)p.Value): (UInt32)0; }
+		public static UInt32 ToUInt32(Single? p)     { return p.HasValue? checked((UInt32)p.Value): 0; }
 		[CLSCompliant(false)]
-		public static UInt32 ToUInt32(Double? p)     { return p.HasValue? checked((UInt32)p.Value): (UInt32)0; }
+		public static UInt32 ToUInt32(Double? p)     { return p.HasValue? checked((UInt32)p.Value): 0; }
 
 		[CLSCompliant(false)]
-		public static UInt32 ToUInt32(Decimal? p)    { return p.HasValue? checked((UInt32)p.Value): (UInt32)0; }
+		public static UInt32 ToUInt32(Decimal? p)    { return p.HasValue? checked((UInt32)p.Value): 0; }
 		[CLSCompliant(false)]
-		public static UInt32 ToUInt32(Char? p)       { return p.HasValue? checked((UInt32)p.Value): (UInt32)0; }
+		public static UInt32 ToUInt32(Char? p)       { return p.HasValue? checked((UInt32)p.Value): 0; }
 		[CLSCompliant(false)]
-		public static UInt32 ToUInt32(Boolean? p)    { return (p.HasValue && p.Value)?   (UInt32)1: (UInt32)0; }
+		public static UInt32 ToUInt32(Boolean? p)    { return (p.HasValue && p.Value)?   (UInt32)1: 0; }
 
 #endif
 		// SqlTypes.
 		// 
 		[CLSCompliant(false)]
-		public static UInt32 ToUInt32(SqlString p)   { return p.IsNull? (UInt32)0:        ToUInt32(p.Value); }
+		public static UInt32 ToUInt32(SqlString p)   { return p.IsNull? 0:        ToUInt32(p.Value); }
 
 		[CLSCompliant(false)]
-		public static UInt32 ToUInt32(SqlByte p)     { return p.IsNull? (UInt32)0:        ToUInt32(p.Value); }
+		public static UInt32 ToUInt32(SqlByte p)     { return p.IsNull? 0:        ToUInt32(p.Value); }
 		[CLSCompliant(false)]
-		public static UInt32 ToUInt32(SqlInt16 p)    { return p.IsNull? (UInt32)0:        ToUInt32(p.Value); }
+		public static UInt32 ToUInt32(SqlInt16 p)    { return p.IsNull? 0:        ToUInt32(p.Value); }
 		[CLSCompliant(false)]
-		public static UInt32 ToUInt32(SqlInt32 p)    { return p.IsNull? (UInt32)0:        ToUInt32(p.Value); }
+		public static UInt32 ToUInt32(SqlInt32 p)    { return p.IsNull? 0:        ToUInt32(p.Value); }
 		[CLSCompliant(false)]
-		public static UInt32 ToUInt32(SqlInt64 p)    { return p.IsNull? (UInt32)0:        ToUInt32(p.Value); }
+		public static UInt32 ToUInt32(SqlInt64 p)    { return p.IsNull? 0:        ToUInt32(p.Value); }
 
 		[CLSCompliant(false)]
-		public static UInt32 ToUInt32(SqlSingle p)   { return p.IsNull? (UInt32)0:        ToUInt32(p.Value); }
+		public static UInt32 ToUInt32(SqlSingle p)   { return p.IsNull? 0:        ToUInt32(p.Value); }
 		[CLSCompliant(false)]
-		public static UInt32 ToUInt32(SqlDouble p)   { return p.IsNull? (UInt32)0:        ToUInt32(p.Value); }
+		public static UInt32 ToUInt32(SqlDouble p)   { return p.IsNull? 0:        ToUInt32(p.Value); }
 		[CLSCompliant(false)]
-		public static UInt32 ToUInt32(SqlDecimal p)  { return p.IsNull? (UInt32)0:        ToUInt32(p.Value); }
+		public static UInt32 ToUInt32(SqlDecimal p)  { return p.IsNull? 0:        ToUInt32(p.Value); }
 		[CLSCompliant(false)]
-		public static UInt32 ToUInt32(SqlMoney p)    { return p.IsNull? (UInt32)0:        ToUInt32(p.Value); }
+		public static UInt32 ToUInt32(SqlMoney p)    { return p.IsNull? 0:        ToUInt32(p.Value); }
 
 		[CLSCompliant(false)]
-		public static UInt32 ToUInt32(SqlBoolean p)  { return p.IsNull? (UInt32)0:        ToUInt32(p.Value); }
+		public static UInt32 ToUInt32(SqlBoolean p)  { return p.IsNull? 0:        ToUInt32(p.Value); }
 
 		[CLSCompliant(false)]
 		public static UInt32 ToUInt32(object p)     
@@ -910,7 +910,7 @@ namespace BLToolkit.Common
 		// Scalar Types.
 		// 
 		[CLSCompliant(false)]
-		public static UInt64 ToUInt64(String p)      { return p == null? (UInt64)0: UInt64.Parse(p); }
+		public static UInt64 ToUInt64(String p)      { return p == null? 0: UInt64.Parse(p); }
 
 		[CLSCompliant(false)]
 		public static UInt64 ToUInt64(SByte p)       { return checked((UInt64)p); }
@@ -944,62 +944,62 @@ namespace BLToolkit.Common
 		// Nullable Types.
 		// 
 		[CLSCompliant(false)]
-		public static UInt64 ToUInt64(UInt64? p)     { return p.HasValue?                 p.Value:  (UInt64)0; }
+		public static UInt64 ToUInt64(UInt64? p)     { return p.HasValue?                 p.Value:  0; }
 
 		[CLSCompliant(false)]
-		public static UInt64 ToUInt64(SByte? p)      { return p.HasValue? checked((UInt64)p.Value): (UInt64)0; }
+		public static UInt64 ToUInt64(SByte? p)      { return p.HasValue? checked((UInt64)p.Value): 0; }
 		[CLSCompliant(false)]
-		public static UInt64 ToUInt64(Int16? p)      { return p.HasValue? checked((UInt64)p.Value): (UInt64)0; }
+		public static UInt64 ToUInt64(Int16? p)      { return p.HasValue? checked((UInt64)p.Value): 0; }
 		[CLSCompliant(false)]
-		public static UInt64 ToUInt64(Int32? p)      { return p.HasValue? checked((UInt64)p.Value): (UInt64)0; }
+		public static UInt64 ToUInt64(Int32? p)      { return p.HasValue? checked((UInt64)p.Value): 0; }
 		[CLSCompliant(false)]
-		public static UInt64 ToUInt64(Int64? p)      { return p.HasValue? checked((UInt64)p.Value): (UInt64)0; }
+		public static UInt64 ToUInt64(Int64? p)      { return p.HasValue? checked((UInt64)p.Value): 0; }
 
 		[CLSCompliant(false)]
-		public static UInt64 ToUInt64(Byte? p)       { return p.HasValue? checked((UInt64)p.Value): (UInt64)0; }
+		public static UInt64 ToUInt64(Byte? p)       { return p.HasValue? checked((UInt64)p.Value): 0; }
 		[CLSCompliant(false)]
-		public static UInt64 ToUInt64(UInt16? p)     { return p.HasValue? checked((UInt64)p.Value): (UInt64)0; }
+		public static UInt64 ToUInt64(UInt16? p)     { return p.HasValue? checked((UInt64)p.Value): 0; }
 		[CLSCompliant(false)]
-		public static UInt64 ToUInt64(UInt32? p)     { return p.HasValue? checked((UInt64)p.Value): (UInt64)0; }
+		public static UInt64 ToUInt64(UInt32? p)     { return p.HasValue? checked((UInt64)p.Value): 0; }
 
 		[CLSCompliant(false)]
-		public static UInt64 ToUInt64(Single? p)     { return p.HasValue? checked((UInt64)p.Value): (UInt64)0; }
+		public static UInt64 ToUInt64(Single? p)     { return p.HasValue? checked((UInt64)p.Value): 0; }
 		[CLSCompliant(false)]
-		public static UInt64 ToUInt64(Double? p)     { return p.HasValue? checked((UInt64)p.Value): (UInt64)0; }
+		public static UInt64 ToUInt64(Double? p)     { return p.HasValue? checked((UInt64)p.Value): 0; }
 
 		[CLSCompliant(false)]
-		public static UInt64 ToUInt64(Decimal? p)    { return p.HasValue? checked((UInt64)p.Value): (UInt64)0; }
+		public static UInt64 ToUInt64(Decimal? p)    { return p.HasValue? checked((UInt64)p.Value): 0; }
 		[CLSCompliant(false)]
-		public static UInt64 ToUInt64(Char? p)       { return p.HasValue? checked((UInt64)p.Value): (UInt64)0; }
+		public static UInt64 ToUInt64(Char? p)       { return p.HasValue? checked((UInt64)p.Value): 0; }
 		[CLSCompliant(false)]
-		public static UInt64 ToUInt64(Boolean? p)    { return (p.HasValue && p.Value)?   (UInt64)1: (UInt64)0; }
+		public static UInt64 ToUInt64(Boolean? p)    { return (p.HasValue && p.Value)?   (UInt64)1: 0; }
 
 #endif
 		// SqlTypes.
 		// 
 		[CLSCompliant(false)]
-		public static UInt64 ToUInt64(SqlString p)   { return p.IsNull? (UInt64)0:        ToUInt64(p.Value); }
+		public static UInt64 ToUInt64(SqlString p)   { return p.IsNull? 0:        ToUInt64(p.Value); }
 
 		[CLSCompliant(false)]
-		public static UInt64 ToUInt64(SqlByte p)     { return p.IsNull? (UInt64)0:        ToUInt64(p.Value); }
+		public static UInt64 ToUInt64(SqlByte p)     { return p.IsNull? 0:        ToUInt64(p.Value); }
 		[CLSCompliant(false)]
-		public static UInt64 ToUInt64(SqlInt16 p)    { return p.IsNull? (UInt64)0:        ToUInt64(p.Value); }
+		public static UInt64 ToUInt64(SqlInt16 p)    { return p.IsNull? 0:        ToUInt64(p.Value); }
 		[CLSCompliant(false)]
-		public static UInt64 ToUInt64(SqlInt32 p)    { return p.IsNull? (UInt64)0:        ToUInt64(p.Value); }
+		public static UInt64 ToUInt64(SqlInt32 p)    { return p.IsNull? 0:        ToUInt64(p.Value); }
 		[CLSCompliant(false)]
-		public static UInt64 ToUInt64(SqlInt64 p)    { return p.IsNull? (UInt64)0:        ToUInt64(p.Value); }
+		public static UInt64 ToUInt64(SqlInt64 p)    { return p.IsNull? 0:        ToUInt64(p.Value); }
 
 		[CLSCompliant(false)]
-		public static UInt64 ToUInt64(SqlSingle p)   { return p.IsNull? (UInt64)0:        ToUInt64(p.Value); }
+		public static UInt64 ToUInt64(SqlSingle p)   { return p.IsNull? 0:        ToUInt64(p.Value); }
 		[CLSCompliant(false)]
-		public static UInt64 ToUInt64(SqlDouble p)   { return p.IsNull? (UInt64)0:        ToUInt64(p.Value); }
+		public static UInt64 ToUInt64(SqlDouble p)   { return p.IsNull? 0:        ToUInt64(p.Value); }
 		[CLSCompliant(false)]
-		public static UInt64 ToUInt64(SqlDecimal p)  { return p.IsNull? (UInt64)0:        ToUInt64(p.Value); }
+		public static UInt64 ToUInt64(SqlDecimal p)  { return p.IsNull? 0:        ToUInt64(p.Value); }
 		[CLSCompliant(false)]
-		public static UInt64 ToUInt64(SqlMoney p)    { return p.IsNull? (UInt64)0:        ToUInt64(p.Value); }
+		public static UInt64 ToUInt64(SqlMoney p)    { return p.IsNull? 0:        ToUInt64(p.Value); }
 
 		[CLSCompliant(false)]
-		public static UInt64 ToUInt64(SqlBoolean p)  { return p.IsNull? (UInt64)0:        ToUInt64(p.Value); }
+		public static UInt64 ToUInt64(SqlBoolean p)  { return p.IsNull? 0:        ToUInt64(p.Value); }
 
 		[CLSCompliant(false)]
 		public static UInt64 ToUInt64(object p)     

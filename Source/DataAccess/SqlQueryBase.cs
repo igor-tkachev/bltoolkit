@@ -33,7 +33,7 @@ namespace BLToolkit.DataAccess
 
 		#region Protected Members
 
-		protected MemberMapper[] GetFieldList(ObjectMapper om)
+		protected static MemberMapper[] GetFieldList(ObjectMapper om)
 		{
 			ArrayList list = new ArrayList();
 
