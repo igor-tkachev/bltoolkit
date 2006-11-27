@@ -15,7 +15,7 @@ using BLToolkit.Reflection;
 
 using TestObject_1 = TestObject;
 
-namespace A.EditableObjects
+namespace EditableObjects
 {
 	[TestFixture]
 	public class EditableArrayListTest

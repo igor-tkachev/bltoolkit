@@ -31,10 +31,30 @@ namespace BLToolkit.Reflection.Extension
 			get { return this == _null? null: _values[valueName]; }
 		}
 
+		public object this[string valueName, object defaultValue]
+		{
+			get
+			{
+				object value = this[valueName];
+				return this == null? defaultValue: value;
+			}
+		}
+
 		private ValueCollection _values;
 		public  ValueCollection  Values
 		{
 			get { return _values; }
+		}
+
+		private AttributeNameCollection _attributes;
+		public  AttributeNameCollection  Attributes
+		{
+			get
+			{
+				if (_attributes == null)
+					_attributes = new AttributeNameCollection();
+				return _attributes;
+			}
 		}
 
 		private static AttributeExtension _null = new AttributeExtension(0);

@@ -24,7 +24,7 @@ using Convert = BLToolkit.Common.Convert;
 
 namespace BLToolkit.Mapping
 {
-	public abstract class MappingSchema
+	public class MappingSchema
 	{
 		#region Constructors
 
