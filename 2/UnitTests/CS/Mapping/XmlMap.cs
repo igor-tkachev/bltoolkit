@@ -7,7 +7,7 @@ using BLToolkit.DataAccess;
 using BLToolkit.Mapping;
 using BLToolkit.Reflection.Extension;
 
-namespace A.Mapping
+namespace Mapping
 {
 	[TestFixture]
 	public class XmlMap
