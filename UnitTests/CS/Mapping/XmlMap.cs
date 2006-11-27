@@ -33,9 +33,7 @@ namespace Mapping
 
 			map.Extensions = TypeExtension.GetExtenstions("XmlMap.xml");
 
-			DataTable table = new DataTable();
-
-			DataRow dr = map.MapObjectToDataRow(p, table);
+			DataRow dr = map.MapObjectToDataRow(p, new DataTable());
 
 			Assert.AreEqual(1,        dr["PERSON_ID"]);
 			Assert.AreEqual("John",   dr["FIRST_NAME"]);
