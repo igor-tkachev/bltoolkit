@@ -308,6 +308,9 @@ namespace BLToolkit.Reflection.Extension
 				}
 			}
 
+			foreach (XmlNode node in attributeNode.ChildNodes)
+				ext.Attributes.Add(ParseAttribute(node));
+
 			return ext;
 		}
 

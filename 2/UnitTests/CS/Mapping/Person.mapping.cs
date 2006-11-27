@@ -5,7 +5,7 @@ using NUnit.Framework;
 using BLToolkit.Data;
 using BLToolkit.Reflection.Extension;
 
-namespace A.Mapping
+namespace Mapping
 {
 	[TestFixture]
 	public class PersonMappingTest

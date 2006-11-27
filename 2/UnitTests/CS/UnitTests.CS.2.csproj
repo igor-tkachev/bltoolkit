@@ -96,6 +96,7 @@
     <Compile Include="Mapping\ObjectMapperAttributeTest.cs" />
     <Compile Include="Mapping\ResultSetTest.cs" />
     <Compile Include="Mapping\TrimmableAttributeTest.cs" />
+    <Compile Include="Mapping\XmlMap.cs" />
     <Compile Include="Patterns\MustImplementAttributeTest.cs" />
     <Compile Include="Patterns\DuckTypingTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -166,6 +167,9 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Mapping\Person.mapping.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Mapping\XmlMap.xml" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>

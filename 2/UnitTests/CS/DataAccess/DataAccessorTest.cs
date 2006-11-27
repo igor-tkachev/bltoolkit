@@ -20,7 +20,7 @@ using BLToolkit.Validation;
 using BLToolkit.Reflection;
 using BLToolkit.TypeBuilder;
 
-namespace A.DataAccess
+namespace DataAccess
 {
 #if FW2
 	namespace Other
