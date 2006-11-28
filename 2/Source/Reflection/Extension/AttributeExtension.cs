@@ -36,7 +36,7 @@ namespace BLToolkit.Reflection.Extension
 			get
 			{
 				object value = this[valueName];
-				return this == null? defaultValue: value;
+				return value == null? defaultValue: value;
 			}
 		}
 

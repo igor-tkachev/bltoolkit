@@ -80,6 +80,7 @@
     <Compile Include="Data\ExecuteScalarTest.cs" />
     <Compile Include="Data\NullableParameter.cs" />
     <Compile Include="EditableObjects\EditableArrayListTest.cs" />
+    <Compile Include="EditableObjects\EditableList_AcceptChanges.cs" />
     <Compile Include="EditableObjects\EditableObjectTest.cs" />
     <Compile Include="EditableObjects\InnerObjectTest.cs" />
     <Compile Include="EditableObjects\NestedObjectTest.cs" />
