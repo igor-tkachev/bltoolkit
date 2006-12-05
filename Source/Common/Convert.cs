@@ -84,9 +84,9 @@ namespace BLToolkit.Common
 		public static String ToString(SqlBinary p)   { return p.ToString(); }
 
 		public static String ToString(Type p)        { return p == null? null: p.FullName; }
-		public static String ToString(object p)     
+		public static String ToString(object p)
 		{
-			if (p == null) return String.Empty;
+			if (p == null || p is DBNull) return String.Empty;
 
 			// Scalar Types.
 			//
@@ -215,9 +215,9 @@ namespace BLToolkit.Common
 		public static SByte ToSByte(SqlBoolean p)  { return p.IsNull? (SByte)0:        ToSByte(p.Value); }
 
 		[CLSCompliant(false)]
-		public static SByte ToSByte(object p)     
+		public static SByte ToSByte(object p)
 		{
-			if (p == null) return 0;
+			if (p == null || p is DBNull) return 0;
 
 			// Scalar Types.
 			//
@@ -313,9 +313,9 @@ namespace BLToolkit.Common
 
 		public static Int16 ToInt16(SqlBoolean p)  { return p.IsNull? (Int16)0:        ToInt16(p.Value); }
 
-		public static Int16 ToInt16(object p)     
+		public static Int16 ToInt16(object p)
 		{
-			if (p == null) return 0;
+			if (p == null || p is DBNull) return 0;
 
 			// Scalar Types.
 			//
@@ -412,9 +412,9 @@ namespace BLToolkit.Common
 
 		public static Int32 ToInt32(SqlBoolean p)  { return p.IsNull? 0: ToInt32(p.Value); }
 
-		public static Int32 ToInt32(object p)     
+		public static Int32 ToInt32(object p)
 		{
-			if (p == null) return 0;
+			if (p == null || p is DBNull) return 0;
 
 			// Scalar Types.
 			//
@@ -516,9 +516,9 @@ namespace BLToolkit.Common
 		public static Int64 ToInt64(SqlBoolean p)  { return p.IsNull? 0: ToInt64(p.Value); }
 		public static Int64 ToInt64(SqlDateTime p) { return p.IsNull? 0: ToInt64(p.Value); }
 
-		public static Int64 ToInt64(object p)     
+		public static Int64 ToInt64(object p)
 		{
-			if (p == null) return 0;
+			if (p == null || p is DBNull) return 0;
 
 			// Scalar Types.
 			//
@@ -620,9 +620,9 @@ namespace BLToolkit.Common
 
 		public static Byte ToByte(SqlBoolean p)  { return p.IsNull? (Byte)0:        ToByte(p.Value); }
 
-		public static Byte ToByte(object p)     
+		public static Byte ToByte(object p)
 		{
-			if (p == null) return Byte.MinValue;
+			if (p == null || p is DBNull) return 0;
 
 			// Scalar Types.
 			//
@@ -748,9 +748,9 @@ namespace BLToolkit.Common
 		public static UInt16 ToUInt16(SqlBoolean p)  { return p.IsNull? (UInt16)0:        ToUInt16(p.Value); }
 
 		[CLSCompliant(false)]
-		public static UInt16 ToUInt16(object p)     
+		public static UInt16 ToUInt16(object p)
 		{
-			if (p == null) return 0;
+			if (p == null || p is DBNull) return 0;
 
 			// Scalar Types.
 			//
@@ -875,9 +875,9 @@ namespace BLToolkit.Common
 		public static UInt32 ToUInt32(SqlBoolean p)  { return p.IsNull? 0:        ToUInt32(p.Value); }
 
 		[CLSCompliant(false)]
-		public static UInt32 ToUInt32(object p)     
+		public static UInt32 ToUInt32(object p)
 		{
-			if (p == null) return UInt32.MinValue;
+			if (p == null || p is DBNull) return 0;
 
 			// Scalar Types.
 			//
@@ -1002,9 +1002,9 @@ namespace BLToolkit.Common
 		public static UInt64 ToUInt64(SqlBoolean p)  { return p.IsNull? 0:        ToUInt64(p.Value); }
 
 		[CLSCompliant(false)]
-		public static UInt64 ToUInt64(object p)     
+		public static UInt64 ToUInt64(object p)
 		{
-			if (p == null) return UInt64.MinValue;
+			if (p == null || p is DBNull) return 0;
 
 			// Scalar Types.
 			//
@@ -1100,9 +1100,9 @@ namespace BLToolkit.Common
 
 		public static Char ToChar(SqlBoolean p)  { return p.IsNull? (Char)0:        ToChar(p.Value); }
 
-		public static Char ToChar(object p)     
+		public static Char ToChar(object p)
 		{
-			if (p == null) return Char.MinValue;
+			if (p == null || p is DBNull) return '\x0';
 
 			// Scalar Types.
 			//
@@ -1196,9 +1196,9 @@ namespace BLToolkit.Common
 
 		public static Single ToSingle(SqlBoolean p)  { return p.IsNull? 0.0f:        ToSingle(p.Value); }
 
-		public static Single ToSingle(object p)     
+		public static Single ToSingle(object p)
 		{
-			if (p == null) return 0.0f;
+			if (p == null || p is DBNull) return 0.0f;
 
 			// Scalar Types.
 			//
@@ -1300,9 +1300,9 @@ namespace BLToolkit.Common
 		public static Double ToDouble(SqlBoolean p)  { return p.IsNull? 0.0:        ToDouble(p.Value); }
 		public static Double ToDouble(SqlDateTime p) { return p.IsNull? 0.0:        ToDouble(p.Value); }
 
-		public static Double ToDouble(object p)     
+		public static Double ToDouble(object p)
 		{
-			if (p == null) return 0.0;
+			if (p == null || p is DBNull) return 0.0;
 
 			// Scalar Types.
 			//
@@ -1428,9 +1428,9 @@ namespace BLToolkit.Common
 		public static Boolean ToBoolean(SqlMoney p)    { return p.IsNull? false: ToBoolean(p.Value); }
 
 
-		public static Boolean ToBoolean(object p)     
+		public static Boolean ToBoolean(object p)
 		{
-			if (p == null) return false;
+			if (p == null || p is DBNull) return false;
 
 			// Scalar Types.
 			//
@@ -1527,9 +1527,9 @@ namespace BLToolkit.Common
 
 		public static Decimal ToDecimal(SqlBoolean p)  { return p.IsNull? 0.0m: ToDecimal(p.Value); }
 
-		public static Decimal ToDecimal(object p)     
+		public static Decimal ToDecimal(object p)
 		{
-			if (p == null) return 0.0m;
+			if (p == null || p is DBNull) return 0.0m;
 
 			// Scalar Types.
 			//
@@ -1584,9 +1584,9 @@ namespace BLToolkit.Common
 		public static DateTime ToDateTime(SqlInt64 p)    { return p.IsNull? DateTime.MinValue: DateTime.MinValue +        TimeSpan.FromTicks(p.Value); }
 		public static DateTime ToDateTime(SqlDouble p)   { return p.IsNull? DateTime.MinValue: DateTime.MinValue + TimeSpan.FromDays(p.Value); }
 
-		public static DateTime ToDateTime(object p)     
+		public static DateTime ToDateTime(object p)
 		{
-			if (p == null) return DateTime.MinValue;
+			if (p == null || p is DBNull) return DateTime.MinValue;
 
 			// Scalar Types.
 			//
@@ -1641,11 +1641,11 @@ namespace BLToolkit.Common
 		public static TimeSpan ToTimeSpan(SqlString p)   { return p.IsNull? TimeSpan.MinValue: TimeSpan.Parse(p.Value);     }
 		public static TimeSpan ToTimeSpan(SqlDateTime p) { return p.IsNull? TimeSpan.MinValue: p.Value - DateTime.MinValue; }
 		public static TimeSpan ToTimeSpan(SqlInt64 p)    { return p.IsNull? TimeSpan.MinValue: TimeSpan.FromTicks(p.Value); }
-		public static TimeSpan ToTimeSpan(SqlDouble p)   { return p.IsNull? TimeSpan.MinValue: TimeSpan.FromDays(p.Value); }
+		public static TimeSpan ToTimeSpan(SqlDouble p)   { return p.IsNull? TimeSpan.MinValue: TimeSpan.FromDays(p.Value);  }
 
-		public static TimeSpan ToTimeSpan(object p)     
+		public static TimeSpan ToTimeSpan(object p)
 		{
-			if (p == null) return TimeSpan.MinValue;
+			if (p == null || p is DBNull) return TimeSpan.MinValue;
 
 			// Scalar Types.
 			//
@@ -1698,9 +1698,9 @@ namespace BLToolkit.Common
 		public static Guid ToGuid(Byte[] p)      { return p == null? Guid.Empty: new Guid(p); }
 		public static Guid ToGuid(Type p)        { return p == null? Guid.Empty: p.GUID; }
 
-		public static Guid ToGuid(object p)     
+		public static Guid ToGuid(object p)
 		{
-			if (p == null) return Guid.Empty;
+			if (p == null || p is DBNull) return Guid.Empty;
 
 			// Scalar Types.
 			//
@@ -1829,9 +1829,9 @@ namespace BLToolkit.Common
 		public static SByte? ToNullableSByte(SqlBoolean p)  { return p.IsNull? null: ToNullableSByte(p.Value); }
 
 		[CLSCompliant(false)]
-		public static SByte? ToNullableSByte(object p)     
+		public static SByte? ToNullableSByte(object p)
 		{
-			if (p == null) return null;
+			if (p == null || p is DBNull) return null;
 
 			// Scalar Types.
 			//
@@ -1925,9 +1925,9 @@ namespace BLToolkit.Common
 
 		public static Int16? ToNullableInt16(SqlBoolean p)  { return p.IsNull? null: ToNullableInt16(p.Value); }
 
-		public static Int16? ToNullableInt16(object p)     
+		public static Int16? ToNullableInt16(object p)
 		{
-			if (p == null) return null;
+			if (p == null || p is DBNull) return null;
 
 			// Scalar Types.
 			//
@@ -2022,9 +2022,9 @@ namespace BLToolkit.Common
 
 		public static Int32? ToNullableInt32(SqlBoolean p)  { return p.IsNull? null: ToNullableInt32(p.Value); }
 
-		public static Int32? ToNullableInt32(object p)     
+		public static Int32? ToNullableInt32(object p)
 		{
-			if (p == null) return null;
+			if (p == null || p is DBNull) return null;
 
 			// Scalar Types.
 			//
@@ -2124,9 +2124,9 @@ namespace BLToolkit.Common
 		public static Int64? ToNullableInt64(SqlBoolean p)  { return p.IsNull? null: ToNullableInt64(p.Value); }
 		public static Int64? ToNullableInt64(SqlDateTime p) { return p.IsNull? null: ToNullableInt64(p.Value); }
 
-		public static Int64? ToNullableInt64(object p)     
+		public static Int64? ToNullableInt64(object p)
 		{
-			if (p == null) return null;
+			if (p == null || p is DBNull) return null;
 
 			// Scalar Types.
 			//
@@ -2226,9 +2226,9 @@ namespace BLToolkit.Common
 
 		public static Byte? ToNullableByte(SqlBoolean p)  { return p.IsNull? null: ToNullableByte(p.Value); }
 
-		public static Byte? ToNullableByte(object p)     
+		public static Byte? ToNullableByte(object p)
 		{
-			if (p == null) return null;
+			if (p == null || p is DBNull) return null;
 
 			// Scalar Types.
 			//
@@ -2352,9 +2352,9 @@ namespace BLToolkit.Common
 		public static UInt16? ToNullableUInt16(SqlBoolean p)  { return p.IsNull? null: ToNullableUInt16(p.Value); }
 
 		[CLSCompliant(false)]
-		public static UInt16? ToNullableUInt16(object p)     
+		public static UInt16? ToNullableUInt16(object p)
 		{
-			if (p == null) return null;
+			if (p == null || p is DBNull) return null;
 
 			// Scalar Types.
 			//
@@ -2477,9 +2477,9 @@ namespace BLToolkit.Common
 		public static UInt32? ToNullableUInt32(SqlBoolean p)  { return p.IsNull? null: ToNullableUInt32(p.Value); }
 
 		[CLSCompliant(false)]
-		public static UInt32? ToNullableUInt32(object p)     
+		public static UInt32? ToNullableUInt32(object p)
 		{
-			if (p == null) return null;
+			if (p == null || p is DBNull) return null;
 
 			// Scalar Types.
 			//
@@ -2602,9 +2602,9 @@ namespace BLToolkit.Common
 		public static UInt64? ToNullableUInt64(SqlBoolean p)  { return p.IsNull? null: ToNullableUInt64(p.Value); }
 
 		[CLSCompliant(false)]
-		public static UInt64? ToNullableUInt64(object p)     
+		public static UInt64? ToNullableUInt64(object p)
 		{
-			if (p == null) return null;
+			if (p == null || p is DBNull) return null;
 
 			// Scalar Types.
 			//
@@ -2698,9 +2698,9 @@ namespace BLToolkit.Common
 
 		public static Char? ToNullableChar(SqlBoolean p)  { return p.IsNull? null: ToNullableChar(p.Value); }
 
-		public static Char? ToNullableChar(object p)     
+		public static Char? ToNullableChar(object p)
 		{
-			if (p == null) return null;
+			if (p == null || p is DBNull) return null;
 
 			// Scalar Types.
 			//
@@ -2792,9 +2792,9 @@ namespace BLToolkit.Common
 
 		public static Single? ToNullableSingle(SqlBoolean p)  { return p.IsNull? null: ToNullableSingle(p.Value); }
 
-		public static Single? ToNullableSingle(object p)     
+		public static Single? ToNullableSingle(object p)
 		{
-			if (p == null) return null;
+			if (p == null || p is DBNull) return null;
 
 			// Scalar Types.
 			//
@@ -2894,9 +2894,9 @@ namespace BLToolkit.Common
 		public static Double? ToNullableDouble(SqlBoolean p)  { return p.IsNull? null: ToNullableDouble(p.Value); }
 		public static Double? ToNullableDouble(SqlDateTime p) { return p.IsNull? null: (Double?)(p.Value - DateTime.MinValue).TotalDays; }
 
-		public static Double? ToNullableDouble(object p)     
+		public static Double? ToNullableDouble(object p)
 		{
-			if (p == null) return null;
+			if (p == null || p is DBNull) return null;
 
 			// Scalar Types.
 			//
@@ -2996,9 +2996,9 @@ namespace BLToolkit.Common
 		public static Boolean? ToNullableBoolean(SqlMoney p)    { return p.IsNull? null: (Boolean?)ToBoolean(p.Value); }
 
 
-		public static Boolean? ToNullableBoolean(object p)     
+		public static Boolean? ToNullableBoolean(object p)
 		{
-			if (p == null) return null;
+			if (p == null || p is DBNull) return null;
 
 			// Scalar Types.
 			//
@@ -3091,9 +3091,9 @@ namespace BLToolkit.Common
 
 		public static Decimal? ToNullableDecimal(SqlBoolean p)  { return p.IsNull? null: ToNullableDecimal(p.Value); }
 
-		public static Decimal? ToNullableDecimal(object p)     
+		public static Decimal? ToNullableDecimal(object p)
 		{
-			if (p == null) return null;
+			if (p == null || p is DBNull) return null;
 
 			// Scalar Types.
 			//
@@ -3148,9 +3148,9 @@ namespace BLToolkit.Common
 		public static DateTime? ToNullableDateTime(SqlInt64 p)    { return p.IsNull? (DateTime?)null: DateTime.MinValue +        TimeSpan.FromTicks(p.Value); }
 		public static DateTime? ToNullableDateTime(SqlDouble p)   { return p.IsNull? (DateTime?)null: DateTime.MinValue + TimeSpan.FromDays(p.Value); }
 
-		public static DateTime? ToNullableDateTime(object p)     
+		public static DateTime? ToNullableDateTime(object p)
 		{
-			if (p == null) return null;
+			if (p == null || p is DBNull) return null;
 
 			// Scalar Types.
 			//
@@ -3208,9 +3208,9 @@ namespace BLToolkit.Common
 		public static TimeSpan? ToNullableTimeSpan(SqlInt64 p)    { return p.IsNull? (TimeSpan?)null: TimeSpan.FromTicks(p.Value); }
 		public static TimeSpan? ToNullableTimeSpan(SqlDouble p)   { return p.IsNull? (TimeSpan?)null: TimeSpan.FromDays(p.Value); }
 
-		public static TimeSpan? ToNullableTimeSpan(object p)     
+		public static TimeSpan? ToNullableTimeSpan(object p)
 		{
-			if (p == null) return null;
+			if (p == null || p is DBNull) return null;
 
 			// Scalar Types.
 			//
@@ -3258,9 +3258,9 @@ namespace BLToolkit.Common
 		public static Guid? ToNullableGuid(Type p)        { return p == null? null: (Guid?)p.GUID; }
 		public static Guid? ToNullableGuid(Byte[] p)      { return p == null? null: (Guid?)new Guid(p); }
 
-		public static Guid? ToNullableGuid(object p)     
+		public static Guid? ToNullableGuid(object p)
 		{
-			if (p == null) return null;
+			if (p == null || p is DBNull) return null;
 
 			// Scalar Types.
 			//
@@ -3369,9 +3369,9 @@ namespace BLToolkit.Common
 		public static SqlString ToSqlString(SqlBinary p)   { return p.IsNull? SqlString.Null: p.ToString(); }
 
 		public static SqlString ToSqlString(Type p)        { return p == null? SqlString.Null: p.FullName; }
-		public static SqlString ToSqlString(object p)     
+		public static SqlString ToSqlString(object p)
 		{
-			if (p == null) return SqlString.Null;
+			if (p == null || p is DBNull) return SqlString.Null;
 
 			// Scalar Types.
 			//
@@ -3475,9 +3475,9 @@ namespace BLToolkit.Common
 		public static SqlByte ToSqlByte(SqlBoolean p)  { return p.ToSqlByte(); }
 		public static SqlByte ToSqlByte(SqlDateTime p) { return p.IsNull? SqlByte.Null: ToByte(p.Value); }
 
-		public static SqlByte ToSqlByte(object p)     
+		public static SqlByte ToSqlByte(object p)
 		{
-			if (p == null) return SqlByte.Null;
+			if (p == null || p is DBNull) return SqlByte.Null;
 
 			// Scalar Types.
 			//
@@ -3571,9 +3571,9 @@ namespace BLToolkit.Common
 		public static SqlInt16 ToSqlInt16(SqlBoolean p)  { return p.ToSqlInt16(); }
 		public static SqlInt16 ToSqlInt16(SqlDateTime p) { return p.IsNull? SqlInt16.Null: ToInt16(p.Value); }
 
-		public static SqlInt16 ToSqlInt16(object p)     
+		public static SqlInt16 ToSqlInt16(object p)
 		{
-			if (p == null) return SqlInt16.Null;
+			if (p == null || p is DBNull) return SqlInt16.Null;
 
 			// Scalar Types.
 			//
@@ -3667,9 +3667,9 @@ namespace BLToolkit.Common
 		public static SqlInt32 ToSqlInt32(SqlBoolean p)  { return p.ToSqlInt32(); }
 		public static SqlInt32 ToSqlInt32(SqlDateTime p) { return p.IsNull? SqlInt32.Null: ToInt32(p.Value); }
 
-		public static SqlInt32 ToSqlInt32(object p)     
+		public static SqlInt32 ToSqlInt32(object p)
 		{
-			if (p == null) return SqlInt32.Null;
+			if (p == null || p is DBNull) return SqlInt32.Null;
 
 			// Scalar Types.
 			//
@@ -3767,9 +3767,9 @@ namespace BLToolkit.Common
 		public static SqlInt64 ToSqlInt64(SqlBoolean p)  { return p.ToSqlInt64(); }
 		public static SqlInt64 ToSqlInt64(SqlDateTime p) { return p.IsNull? SqlInt64.Null: ToInt64(p.Value); }
 
-		public static SqlInt64 ToSqlInt64(object p)     
+		public static SqlInt64 ToSqlInt64(object p)
 		{
-			if (p == null) return SqlInt64.Null;
+			if (p == null || p is DBNull) return SqlInt64.Null;
 
 			// Scalar Types.
 			//
@@ -3865,9 +3865,9 @@ namespace BLToolkit.Common
 
 		public static SqlSingle ToSqlSingle(SqlBoolean p)  { return p.ToSqlSingle(); }
 
-		public static SqlSingle ToSqlSingle(object p)     
+		public static SqlSingle ToSqlSingle(object p)
 		{
-			if (p == null) return SqlSingle.Null;
+			if (p == null || p is DBNull) return SqlSingle.Null;
 
 			// Scalar Types.
 			//
@@ -3962,9 +3962,9 @@ namespace BLToolkit.Common
 		public static SqlDouble ToSqlDouble(SqlBoolean p)  { return p.ToSqlDouble(); }
 		public static SqlDouble ToSqlDouble(SqlDateTime p) { return p.IsNull? SqlDouble.Null: ToDouble(p.Value); }
 
-		public static SqlDouble ToSqlDouble(object p)     
+		public static SqlDouble ToSqlDouble(object p)
 		{
-			if (p == null) return SqlDouble.Null;
+			if (p == null || p is DBNull) return SqlDouble.Null;
 
 			// Scalar Types.
 			//
@@ -4059,9 +4059,9 @@ namespace BLToolkit.Common
 
 		public static SqlDecimal ToSqlDecimal(SqlBoolean p)  { return p.ToSqlDecimal(); }
 
-		public static SqlDecimal ToSqlDecimal(object p)     
+		public static SqlDecimal ToSqlDecimal(object p)
 		{
-			if (p == null) return SqlDecimal.Null;
+			if (p == null || p is DBNull) return SqlDecimal.Null;
 
 			// Scalar Types.
 			//
@@ -4151,9 +4151,9 @@ namespace BLToolkit.Common
 
 		public static SqlMoney ToSqlMoney(SqlBoolean p)  { return p.ToSqlMoney(); }
 
-		public static SqlMoney ToSqlMoney(object p)     
+		public static SqlMoney ToSqlMoney(object p)
 		{
-			if (p == null) return SqlMoney.Null;
+			if (p == null || p is DBNull) return SqlMoney.Null;
 
 			// Scalar Types.
 			//
@@ -4244,9 +4244,9 @@ namespace BLToolkit.Common
 		public static SqlBoolean ToSqlBoolean(SqlMoney p)    { return p.ToSqlBoolean(); }
 
 
-		public static SqlBoolean ToSqlBoolean(object p)     
+		public static SqlBoolean ToSqlBoolean(object p)
 		{
-			if (p == null) return SqlBoolean.Null;
+			if (p == null || p is DBNull) return SqlBoolean.Null;
 
 			// Scalar Types.
 			//
@@ -4295,9 +4295,9 @@ namespace BLToolkit.Common
 		public static SqlDateTime ToSqlDateTime(SqlInt64 p)    { return p.IsNull? SqlDateTime.Null: ToDateTime(p); }
 		public static SqlDateTime ToSqlDateTime(SqlDouble p)   { return p.IsNull? SqlDateTime.Null: ToDateTime(p); }
 
-		public static SqlDateTime ToSqlDateTime(object p)     
+		public static SqlDateTime ToSqlDateTime(object p)
 		{
-			if (p == null) return SqlDateTime.Null;
+			if (p == null || p is DBNull) return SqlDateTime.Null;
 
 			// Scalar Types.
 			//
@@ -4353,9 +4353,9 @@ namespace BLToolkit.Common
 		public static SqlGuid ToSqlGuid(Type p)        { return p == null? SqlGuid.Null: p.GUID; }
 		public static SqlGuid ToSqlGuid(Byte[] p)      { return p == null? SqlGuid.Null: new SqlGuid(p); }
 
-		public static SqlGuid ToSqlGuid(object p)     
+		public static SqlGuid ToSqlGuid(object p)
 		{
-			if (p == null) return SqlGuid.Null;
+			if (p == null || p is DBNull) return SqlGuid.Null;
 
 			// Scalar Types.
 			//
@@ -4406,9 +4406,9 @@ namespace BLToolkit.Common
 #endif
 		public static SqlBinary ToSqlBinary(SqlGuid p)     { return p.ToSqlBinary(); }
 
-		public static SqlBinary ToSqlBinary(object p)     
+		public static SqlBinary ToSqlBinary(object p)
 		{
-			if (p == null) return SqlBinary.Null;
+			if (p == null || p is DBNull) return SqlBinary.Null;
 
 			// Scalar Types.
 			//
@@ -4451,9 +4451,9 @@ namespace BLToolkit.Common
 		public static SqlBytes ToSqlBytes(SqlBinary p)   { return p.IsNull? SqlBytes.Null: new SqlBytes(p); }
 		public static SqlBytes ToSqlBytes(SqlGuid p)     { return p.IsNull? SqlBytes.Null: new SqlBytes(p.ToByteArray()); }
 
-		public static SqlBytes ToSqlBytes(object p)     
+		public static SqlBytes ToSqlBytes(object p)
 		{
-			if (p == null) return SqlBytes.Null;
+			if (p == null || p is DBNull) return SqlBytes.Null;
 
 			// Scalar Types.
 			//
@@ -4575,9 +4575,9 @@ namespace BLToolkit.Common
 		public static SqlXml ToSqlXml(SqlBinary p)   { return p.IsNull? SqlXml.Null: new SqlXml(new MemoryStream(p.Value)); }
 		public static SqlXml ToSqlXml(SqlBytes p)    { return p.IsNull? SqlXml.Null: new SqlXml(p.Stream); }
 
-		public static SqlXml ToSqlXml(object p)     
+		public static SqlXml ToSqlXml(object p)
 		{
-			if (p == null) return SqlXml.Null;
+			if (p == null || p is DBNull) return SqlXml.Null;
 
 			// Scalar Types.
 			//
@@ -4628,9 +4628,9 @@ namespace BLToolkit.Common
 #endif
 		public static Type ToType(SqlGuid p)     { return p.IsNull       ? null: Type.GetTypeFromCLSID(p.Value);    }
 
-		public static Type ToType(object p)     
+		public static Type ToType(object p)
 		{
-			if (p == null) return null;
+			if (p == null || p is DBNull) return null;
 
 			// Scalar Types.
 			//
@@ -4678,9 +4678,9 @@ namespace BLToolkit.Common
 		public static Stream ToStream(SqlBinary p)   { return p.IsNull? Stream.Null: new MemoryStream(p.Value); }
 		public static Stream ToStream(SqlGuid p)     { return p.IsNull? Stream.Null: new MemoryStream(p.Value.ToByteArray()); }
 
-		public static Stream ToStream(object p)     
+		public static Stream ToStream(object p)
 		{
-			if (p == null) return Stream.Null;
+			if (p == null || p is DBNull) return Stream.Null;
 
 			// Scalar Types.
 			//
@@ -4739,9 +4739,9 @@ namespace BLToolkit.Common
 #endif
 		public static Byte[] ToByteArray(SqlGuid p)     { return p.IsNull? null: p.ToByteArray(); }
 
-		public static Byte[] ToByteArray(object p)     
+		public static Byte[] ToByteArray(object p)
 		{
-			if (p == null) return null;
+			if (p == null || p is DBNull) return null;
 
 			// Scalar Types.
 			//
@@ -4779,9 +4779,9 @@ namespace BLToolkit.Common
 #if FW2
 		public static Char[] ToCharArray(SqlChars p)    { return p.IsNull? null: p.Value; }
 #endif
-		public static Char[] ToCharArray(object p)     
+		public static Char[] ToCharArray(object p)
 		{
-			if (p == null) return null;
+			if (p == null || p is DBNull) return null;
 
 			// Scalar Types.
 			//
@@ -4821,9 +4821,9 @@ namespace BLToolkit.Common
 		public static XmlReader ToXmlReader(Char[] p)      { return p == null? null: new XmlTextReader(new StringReader(new string(p))); }
 		public static XmlReader ToXmlReader(Byte[] p)      { return p == null? null: new XmlTextReader(new MemoryStream(p)); }
 
-		public static XmlReader ToXmlReader(object p)     
+		public static XmlReader ToXmlReader(object p)
 		{
-			if (p == null) return null;
+			if (p == null || p is DBNull) return null;
 
 			// Scalar Types.
 			//
