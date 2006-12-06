@@ -5,7 +5,7 @@ using NUnit.Framework;
 using BLToolkit.DataAccess;
 using BLToolkit.TypeBuilder;
 
-namespace A.DataAccess
+namespace DataAccess
 {
 	[TestFixture]
 	public class OutRefTest
@@ -33,10 +33,12 @@ namespace A.DataAccess
 
 			[SprocName("OutRefTest")]
 			public abstract void OutRefTest2(
-				[ParamNullValue(-1)] int     @ID,
-				[ParamNullValue(-2)] out int @outputID,
-				[ParamNullValue(-3)] ref int @inputOutputID,
-				string @str, out string @outputStr, ref string @inputOutputStr);
+				[ParamNullValue(-1)]      int               @ID,
+				[ParamNullValue(-2)]  out int         @outputID,
+				[ParamNullValue(-3)]  ref int    @inputOutputID,
+				[ParamNullValue("A")]     string            @str,
+				[ParamNullValue("B")] out string      @outputStr,
+				[ParamNullValue("C")] ref string @inputOutputStr);
 
 			public abstract void OutRefTest(
 				out int @outputID, Entity entity, ref string @inputOutputStr);
@@ -77,22 +79,22 @@ namespace A.DataAccess
 			Assert.AreEqual("10", @inputOutputStr);
 		}
 
-		//PB61205: TBD. Implement ParamNullValue for output parameters
-		//
-		//[Test] 
+		[Test] 
 		public void NullValueTest()
 		{
 			int    @outputID;
 			int    @inputOutputID = 10;
 			string @outputStr;
-			string @inputOutputStr = "10";
+			string @inputOutputStr = "NotNullValue";
 
 			((TestAccessor)DataAccessor.CreateInstance(typeof(TestAccessor)))
 				.OutRefTest2(-1, out @outputID,  ref @inputOutputID,
-				            "5", out @outputStr, ref @inputOutputStr);
+				            "A", out @outputStr, ref @inputOutputStr);
 
-			Assert.AreEqual(-2, @outputID);
-			Assert.AreEqual(-3, @inputOutputID);
+			Assert.AreEqual(-2,        @outputID);
+			Assert.AreEqual(-3,   @inputOutputID);
+			Assert.AreEqual("B",      @outputStr);
+			Assert.AreEqual("C", @inputOutputStr);
 		}
 
 #if FW2

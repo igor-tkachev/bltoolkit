@@ -542,5 +542,21 @@ namespace BLToolkit.DataAccess
 		#endregion
 		
 		#endregion
+
+		[NoInterception]
+		protected virtual bool IsNull(
+			DbManager db,
+			object    value,
+			object    parameter)
+		{
+			if (value == null || value is DBNull)
+				return true;
+
+			// Oracle has it's own INullable for some unknown reason.
+			//
+			INullable nullable = (INullable)Patterns.DuckTyping.Implement(typeof (INullable), value);
+
+			return nullable.IsNull;
+		}
 	}
 }
