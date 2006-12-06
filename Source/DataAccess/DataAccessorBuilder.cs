@@ -814,16 +814,18 @@ namespace BLToolkit.DataAccess
 
 			if (attrs.Length == 0)
 			{
-				emit.callvirtNoGenerics(typeof(DbManager), "ExecuteScalar");
+				emit
+					.callvirtNoGenerics   (typeof(DbManager), "ExecuteScalar")
+					;
 			}
 			else
 			{
 				ScalarSourceAttribute attr = (ScalarSourceAttribute)attrs[0];
 
 				emit
-					.ldc_i4_((int)attr.ScalarType)
-					.ldNameOrIndex(attr.NameOrIndex)
-					.callvirtNoGenerics(typeof(DbManager), "ExecuteScalar", typeof(ScalarSourceType), typeof(NameOrIndexParameter));
+					.ldc_i4_              ((int)attr.ScalarType)
+					.ldNameOrIndex        (attr.NameOrIndex)
+					.callvirtNoGenerics   (typeof(DbManager), "ExecuteScalar", typeof(ScalarSourceType), typeof(NameOrIndexParameter));
 			}
 
 			string converterName = GetConverterMethodName(Context.CurrentMethod.ReturnType);
@@ -831,10 +833,10 @@ namespace BLToolkit.DataAccess
 			if (converterName == null)
 			{
 				emit
-					.LoadType(Context.CurrentMethod.ReturnType)
+					.LoadType             (Context.CurrentMethod.ReturnType)
 					.ldnull
-					.callvirt(typeof (DataAccessor), "ConvertChangeType", _bindingFlags, typeof (DbManager), typeof (object), typeof (Type), typeof (object))
-					.stloc(Context.ReturnValue)
+					.callvirt             (typeof (DataAccessor), "ConvertChangeType", _bindingFlags, typeof (DbManager), typeof (object), typeof (Type), typeof (object))
+					.stloc                (Context.ReturnValue)
 					;
 				
 			}
@@ -842,8 +844,8 @@ namespace BLToolkit.DataAccess
 			{
 				emit
 					.ldnull
-					.callvirt(typeof(DataAccessor), converterName, _bindingFlags, typeof(DbManager), typeof(object), typeof(object))
-					.stloc(Context.ReturnValue)
+					.callvirt             (typeof(DataAccessor), converterName, _bindingFlags, typeof(DbManager), typeof(object), typeof(object))
+					.stloc                (Context.ReturnValue)
 					;
 			}
 		}
@@ -1319,6 +1321,16 @@ namespace BLToolkit.DataAccess
 			Label  labelNull  = emit.DefineLabel();
 			Label  labelEndIf = emit.DefineLabel();
 
+			if (pi.Attributes == ParameterAttributes.Out)
+			{
+				emit
+					.ldnull
+					.end()
+					;
+
+				return;
+			}
+
 			if (nullValue != null)
 			{
 				Type nullValueType = type;
@@ -1507,6 +1519,96 @@ namespace BLToolkit.DataAccess
 			return locParams;
 		}
 
+		private void StoreParameterValue(LocalBuilder param, ParameterInfo pi, Type type)
+		{
+			EmitHelper emit       = Context.MethodBuilder.Emitter;
+			Label      labelNull  = emit.DefineLabel();
+			Label      labelEndIf = emit.DefineLabel();
+
+			object[]   attrs      = pi.GetCustomAttributes(typeof(ParamNullValueAttribute), true);
+			object     nullValue  = attrs.Length == 0?
+				null: ((ParamNullValueAttribute)attrs[0]).Value;
+
+			if (nullValue != null)
+			{
+				emit
+					.ldarg_0
+					.ldloc                (_locManager)
+					.ldloc                (param)
+					.callvirt             (typeof(IDataParameter).GetProperty("Value").GetGetMethod())
+					.ldloc                (param)
+					.callvirt             (typeof(DataAccessor), "IsNull", _bindingFlags, typeof(DbManager), typeof(object), typeof(object))
+					.brtrue               (labelNull)
+					;
+			}
+
+			if (type.IsEnum)
+			{
+					emit
+						.ldloc            (_locManager)
+						.callvirt         (typeof(DbManager).GetProperty("MappingSchema").GetGetMethod())
+						.ldloc            (param)
+						.callvirt         (typeof(IDataParameter).GetProperty("Value").GetGetMethod())
+						.LoadType         (type)
+						.callvirt         (typeof(MappingSchema), "MapValueToEnum", typeof(object), typeof(Type))
+						.CastFromObject   (type)
+						;
+			}
+			else
+			{
+				emit
+					.ldarg_0
+					.ldloc                (_locManager)
+					.ldloc                (param)
+					.callvirt             (typeof(IDataParameter).GetProperty("Value").GetGetMethod())
+					;
+				
+				string converterName = GetConverterMethodName(type);
+
+				if (converterName == null)
+				{
+					emit
+						.LoadType         (type)
+						.ldloc            (param)
+						.callvirt         (typeof(DataAccessor), "ConvertChangeType", _bindingFlags, typeof(DbManager), typeof(object), typeof(Type), typeof(object))
+						;
+				}
+				else
+				{
+					emit
+						.ldloc            (param)
+						.callvirt         (typeof(DataAccessor), converterName, _bindingFlags, typeof(DbManager), typeof(object), typeof(object))
+						;
+				}
+			}
+
+			if (nullValue != null)
+			{
+				emit
+					.br                   (labelEndIf)
+					.MarkLabel            (labelNull);
+
+				if (nullValue.GetType() != type || !emit.LoadWellKnownValue(nullValue))
+				{
+					string       nullString  = TypeDescriptor.GetConverter(type).ConvertToInvariantString(nullValue);
+					FieldBuilder staticField = CreateNullValueField(type, nullString);
+
+					emit
+						.ldsfld           (staticField)
+						;
+				}
+
+				emit
+					.MarkLabel            (labelEndIf);
+					;
+			}
+
+			if (type.IsValueType && type.IsPrimitive == false)
+				emit.stobj(type);
+			else
+				emit.stind(type);
+		}
+
 		private void GetOutRefParameters()
 		{
 			EmitHelper emit = Context.MethodBuilder.Emitter;
@@ -1553,52 +1655,7 @@ namespace BLToolkit.DataAccess
 						.stloc                    (param)
 						;
 
-					// Process value.
-					//
-					if (type.IsEnum)
-					{
-							emit
-								.ldloc            (_locManager)
-								.callvirt         (typeof(DbManager).GetProperty("MappingSchema").GetGetMethod())
-								.ldloc            (param)
-								.callvirt         (typeof(IDataParameter).GetProperty("Value").GetGetMethod())
-								.LoadType         (type)
-								.callvirt         (typeof(MappingSchema), "MapValueToEnum", typeof(object), typeof(Type))
-								.CastFromObject   (type)
-								;
-					}
-					else
-					{
-						emit
-							.ldarg_0
-							.ldloc                (_locManager)
-							.ldloc                (param)
-							.callvirt             (typeof(IDataParameter).GetProperty("Value").GetGetMethod())
-							;
-						
-						string converterName = GetConverterMethodName(type);
-
-						if (converterName == null)
-						{
-							emit
-								.LoadType         (type)
-								.ldloc            (param)
-								.callvirt         (typeof(DataAccessor), "ConvertChangeType", _bindingFlags, typeof(DbManager), typeof(object), typeof(Type), typeof(object))
-								;
-						}
-						else
-						{
-							emit
-								.ldloc            (param)
-								.callvirt         (typeof(DataAccessor), converterName, _bindingFlags, typeof(DbManager), typeof(object), typeof(object))
-								;
-						}
-					}
-
-					if (type.IsValueType && type.IsPrimitive == false)
-						emit.stobj(type);
-					else
-						emit.stind(type);
+					StoreParameterValue(param, pi, type);
 				}
 			}
 
