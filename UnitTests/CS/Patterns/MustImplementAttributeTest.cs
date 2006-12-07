@@ -45,7 +45,13 @@ namespace Patterns
 			int OtherOptionalMethod();
 		}
 
-		public class TestClass
+		[MustImplement(true, ThrowException = false)]
+		public interface IOtherOptionalInterface
+		{
+			int SameMethodName();
+		}
+
+		public struct TestClass
 		{
 			public int RequiredMethod()
 			{
@@ -56,7 +62,10 @@ namespace Patterns
 			{
 				return 2;
 			}
+		}
 
+		public class EmptyClass
+		{
 		}
 
 		[Test]
@@ -99,6 +108,20 @@ namespace Patterns
 #else
 			OptionalInterface duck = (OptionalInterface)DuckTyping.Implement(typeof(OptionalInterface), string.Empty);
 #endif
+		}
+
+		[Test]
+		public void AsLikeBehaviourTest()
+		{
+#if FW2
+			IOtherOptionalInterface duck1 = DuckTyping.Implement<IOtherOptionalInterface>(new TestClass());
+			IOtherOptionalInterface duck2 = DuckTyping.Implement<IOtherOptionalInterface>(new EmptyClass());
+#else
+			IOtherOptionalInterface duck1 = (IOtherOptionalInterface)DuckTyping.Implement(typeof(IOtherOptionalInterface), new TestClass());
+			IOtherOptionalInterface duck2 = (IOtherOptionalInterface)DuckTyping.Implement(typeof(IOtherOptionalInterface), new EmptyClass());
+#endif
+			Assert.IsNotNull(duck1);
+			Assert.IsNull   (duck2);
 		}
 	}
 }

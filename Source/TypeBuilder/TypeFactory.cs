@@ -175,9 +175,11 @@ namespace BLToolkit.TypeBuilder
 
 					type = typeBuilder.Build(sourceType, assemblyBuilder);
 
-					builderTable.Add(hashKey, type);
-
-					SaveAssembly(assemblyBuilder, type);
+					if (type != null)
+					{
+						builderTable.Add(hashKey, type);
+						SaveAssembly(assemblyBuilder, type);
+					}
 
 					return type;
 				}

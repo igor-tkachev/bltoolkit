@@ -29,10 +29,12 @@ namespace BLToolkit.TypeBuilder.Builders
 		{
 			_typeBuilder = assemblyBuilder.DefineType(GetClassName(), typeof(DuckType), _interfaceType);
 
-			BuildMembers(_interfaceType);
+			if (!BuildMembers(_interfaceType))
+				return null;
 
 			foreach (Type t in _interfaceType.GetInterfaces())
-				BuildMembers(t);
+				if (!BuildMembers(t))
+					return null;
 
 			return _typeBuilder.Create();
 		}
@@ -48,7 +50,7 @@ namespace BLToolkit.TypeBuilder.Builders
 				+ "." + AssemblyNameSuffix;
 		}
 
-		private void BuildMembers(Type interfaceType)
+		private bool BuildMembers(Type interfaceType)
 		{
 			FieldInfo    objectField = typeof(DuckType).GetField("_object", BindingFlags.NonPublic | BindingFlags.Instance);
 			BindingFlags flags       = BindingFlags.Public | BindingFlags.Instance
@@ -93,11 +95,29 @@ namespace BLToolkit.TypeBuilder.Builders
 				if (targetMethod != null)
 				{
 					if (!targetMethod.IsStatic)
+					{
 						emit
 							.ldarg_0
-							.ldfld(objectField)
-							.castclass(_objectType)
+							.ldfld          (objectField)
 							;
+
+						if (_objectType.IsValueType)
+						{
+							// For value types we have to use stack.
+							//
+							LocalBuilder obj = emit.DeclareLocal(_objectType);
+
+							emit
+								.unbox_any  (_objectType)
+								.stloc      (obj)
+								.ldloca     (obj)
+								;
+						}
+						else
+							emit
+								.castclass(_objectType)
+								;
+					}
 
 					foreach (ParameterInfo p in interfaceMethod.GetParameters())
 						emit.ldarg(p);
@@ -127,8 +147,19 @@ namespace BLToolkit.TypeBuilder.Builders
 					// When the member is marked as 'Required' throw a build-time exception.
 					//
 					if (attr.Implement)
-						throw new TypeBuilderException(string.Format(
-							"Type '{0}' must implement required public method '{1}'", _objectType.FullName, interfaceMethod));
+					{
+						if (attr.ThrowException)
+							throw new TypeBuilderException(string.Format(
+								"Type '{0}' must implement required public method '{1}'", _objectType.FullName, interfaceMethod));
+						else
+						{
+							// Implement == true, but ThrowException == false.
+							// In this case the null pointer will be returned.
+							// This mimics the 'as' operator behaviour.
+							//
+							return false;
+						}
+					}
 
 					if (attr.ThrowException)
 					{
@@ -168,6 +199,8 @@ namespace BLToolkit.TypeBuilder.Builders
 					}
 				}
 			}
+
+			return true;
 		}
 	}
 }
