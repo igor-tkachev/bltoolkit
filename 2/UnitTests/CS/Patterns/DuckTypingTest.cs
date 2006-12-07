@@ -199,6 +199,26 @@ namespace Patterns
 			Assert.AreEqual(43, duck.Method(40));
 		}
 
+		public struct TestStruct
+		{
+			public int Method(int value)
+			{
+				return value + 3;
+			}
+		}
+
+		[Test]
+		public void StructTest()
+		{
+			DuckTyping.AllowStaticMembers = true;
+#if FW2
+			TestInterface duck = DuckTyping.Implement<TestInterface> (new TestStruct());
+#else
+			TestInterface duck = (TestInterface) DuckTyping.Implement(typeof(TestInterface), new TestStruct());
+#endif
+			Assert.AreEqual(43, duck.Method(40));
+		}
+
 
 #if FW2
 		public interface GenericInterface<T>

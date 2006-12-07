@@ -109,6 +109,10 @@ namespace BLToolkit.Patterns
 					string.Format("'{0}' is not a subtype of '{1}'.", objType.FullName, baseObjectType.FullName), "obj");
 
 			Type   duckType = GetDuckType(interfaceType, baseObjectType);
+
+			if (duckType == null)
+				return null;
+
 			object duck     = TypeAccessor.CreateInstanceEx(duckType);
 
 			((DuckType)duck).SetObject(obj);
@@ -195,7 +199,6 @@ namespace BLToolkit.Patterns
 		/// <returns>An object which implements the interface.</returns>
 		public static I Implement<I,T>(T obj)
 			where I : class
-			where T : class
 		{
 			return (I)Implement(typeof(I), typeof(T), obj);
 		}
@@ -234,7 +237,6 @@ namespace BLToolkit.Patterns
 		/// <returns>An array of object which implements the interface.</returns>
 		public static I[] Implement<I,T>(params T[] objects)
 			where I : class
-			where T : class
 		{
 			if (objects == null) throw new ArgumentNullException("objects");
 

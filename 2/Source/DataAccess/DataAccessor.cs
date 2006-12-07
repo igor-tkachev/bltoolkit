@@ -10,6 +10,7 @@ using BLToolkit.Common;
 using BLToolkit.Data;
 using BLToolkit.Data.DataProvider;
 using BLToolkit.Mapping;
+using BLToolkit.Patterns;
 using BLToolkit.Reflection;
 
 namespace BLToolkit.DataAccess
@@ -543,20 +544,62 @@ namespace BLToolkit.DataAccess
 		
 		#endregion
 
+		#region IsNull
+
+		/// <summary>
+		/// Reserved for internal BLToolkit use.
+		/// </summary>
+		public interface INullableInternal
+		{
+			bool IsNull { [MustImplement(false, false)] get; }
+		}
+
 		[NoInterception]
 		protected virtual bool IsNull(
 			DbManager db,
 			object    value,
 			object    parameter)
 		{
-			if (value == null || value is DBNull)
+			if (value == null)
 				return true;
 
-			// Oracle has it's own INullable for some unknown reason.
+			// Speed up for Scalar types.
 			//
-			INullable nullable = (INullable)Patterns.DuckTyping.Implement(typeof (INullable), value);
+			IConvertible convertible = value as IConvertible;
+			if (convertible != null)
+				switch (convertible.GetTypeCode())
+				{
+					case TypeCode.Empty:
+					case TypeCode.DBNull:
+						return true;
 
-			return nullable.IsNull;
+					case TypeCode.Object:
+						break;
+
+					// int, byte, string, DateTime and other primitives except Guid.
+					//
+					default:
+						return false;
+				}
+
+			// Speed up for SqlTypes
+			//
+			INullable nullable = value as INullable;
+			if (nullable != null)
+				return nullable.IsNull;
+
+			// All other types which have IsNull property but does not implement INullable interface.
+			// For example: Oracle.DataAccess.Types.OracleDecimal.
+			//
+			// For types without IsNull property the return value is always false.
+			//
+			INullableInternal nullableInternal = 
+				(INullableInternal)DuckTyping.Implement(typeof (INullableInternal), value);
+
+			return nullableInternal.IsNull;
 		}
+
+		#endregion
+
 	}
 }
