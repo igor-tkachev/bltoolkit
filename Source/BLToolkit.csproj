@@ -908,7 +908,7 @@
                     BuildAction = "Compile"
                 />
                 <File
-                    RelPath = "Patterns\DuckTyping .cs"
+                    RelPath = "Patterns\DuckTyping.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
                 />
