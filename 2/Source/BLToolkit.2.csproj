@@ -188,7 +188,7 @@
     </Compile>
     <Compile Include="Mapping\ValueMappingInternal\ScalarTypes.cs" />
     <Compile Include="Mapping\ValueMappingInternal\SqlTypes.cs" />
-    <Compile Include="Patterns\DuckTyping .cs" />
+    <Compile Include="Patterns\DuckTyping.cs" />
     <Compile Include="Patterns\DuckTypeBase.cs" />
     <Compile Include="Patterns\MustImplementAttribute.cs" />
     <Compile Include="Reflection\GenericBinder.cs" />
