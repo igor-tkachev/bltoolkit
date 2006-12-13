@@ -169,7 +169,7 @@ namespace BLToolkit.Net
 			string uri = BaseUri;
 			
 			if (method != "SOAP")
-				method += requestUri;
+				uri += requestUri;
 
 			HttpWebRequest request = (HttpWebRequest)WebRequest.Create(uri);
 
