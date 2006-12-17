@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Data;
 using System.Data.SqlTypes;
+using System.Diagnostics;
 using System.IO;
 using System.Xml;
 
@@ -15,23 +16,20 @@ using BLToolkit.Reflection;
 
 namespace BLToolkit.DataAccess
 {
-	[DataAccessor]
+	[DataAccessor, DebuggerStepThrough]
 	public abstract class DataAccessor : DataAccessBase
 	{
 		#region Constructors
 
-		[System.Diagnostics.DebuggerStepThrough]
 		protected DataAccessor()
 		{
 		}
 
-		[System.Diagnostics.DebuggerStepThrough]
 		protected DataAccessor(DbManager dbManager)
 			: base(dbManager)
 		{
 		}
 
-		[System.Diagnostics.DebuggerStepThrough]
 		protected DataAccessor(DbManager dbManager, bool dispose)
 			: base(dbManager, dispose)
 		{
@@ -61,20 +59,17 @@ namespace BLToolkit.DataAccess
 		}
 
 #if FW2
-		[System.Diagnostics.DebuggerStepThrough]
 		public static T CreateInstance<T>() where T : DataAccessor
 		{
 			return TypeAccessor<T>.CreateInstanceEx();
 		}
 
-		[System.Diagnostics.DebuggerStepThrough]
 		public static T CreateInstance<T>(DbManager dbManager)
 			where T : DataAccessor
 		{
 			return CreateInstance<T>(dbManager, false);
 		}
 
-		[System.Diagnostics.DebuggerStepThrough]
 		public static T CreateInstance<T>(DbManager dbManager, bool dispose)
 			where T : DataAccessor
 		{
@@ -90,10 +85,14 @@ namespace BLToolkit.DataAccess
 
 		#region Protected Members
 
+		#region Parameters
+
 		[NoInterception]
-		protected virtual string GetSpParameterName(DbManager dbManager, string parameterName)
+		protected virtual string GetSpParameterName(
+			DbManager db,
+			string    paramName)
 		{
-			return (string)dbManager.DataProvider.Convert(parameterName, ConvertType.NameToParameter);
+			return (string)db.DataProvider.Convert(paramName, ConvertType.NameToParameter);
 		}
 
 		[NoInterception]
@@ -155,6 +154,34 @@ namespace BLToolkit.DataAccess
 
 			return retParams;
 		}
+
+		[NoInterception]
+		protected virtual IDbDataParameter GetParameter(
+			DbManager db,
+			string    paramName)
+		{
+			IDbDataParameter p = db.Parameter(paramName);
+
+			if (p == null)
+			{
+				// This usually means that the parameter name is incorrect.
+				//
+				throw new DataAccessException(string.Format(
+					"No such parameter: '{0}'", paramName));
+			}
+
+			// Input parameter mapping make no sence.
+			//
+			Debug.WriteLineIf(p.Direction == ParameterDirection.Input,
+				string.Format("'{0}.{1}' is an input parameter.",
+					db.Command.CommandText, paramName));
+
+			return p;
+		}
+
+		#endregion
+
+		#region ExecuteDictionary
 
 		protected void ExecuteDictionary(
 			DbManager             db,
@@ -560,38 +587,36 @@ namespace BLToolkit.DataAccess
 			object    value,
 			object    parameter)
 		{
-			if (value == null)
-				return true;
-
-			// Speed up for Scalar types.
+			// Speed up for scalar and nullable types.
 			//
-			IConvertible convertible = value as IConvertible;
-			if (convertible != null)
-				switch (convertible.GetTypeCode())
-				{
-					case TypeCode.Empty:
-					case TypeCode.DBNull:
-						return true;
+			switch (System.Convert.GetTypeCode(value))
+			{
+				// null, DBNull.Value, Nullable<T> without a value.
+				//
+				case TypeCode.Empty:
+				case TypeCode.DBNull:
+					return true;
 
-					case TypeCode.Object:
-						break;
+				case TypeCode.Object:
+					break;
 
-					// int, byte, string, DateTime and other primitives except Guid.
-					//
-					default:
-						return false;
-				}
+				// int, byte, string, DateTime and other primitives except Guid.
+				// Also Nullable<T> with a value.
+				//
+				default:
+					return false;
+			}
 
-			// Speed up for SqlTypes
+			// Speed up for SqlTypes.
 			//
 			INullable nullable = value as INullable;
 			if (nullable != null)
 				return nullable.IsNull;
 
-			// All other types which have IsNull property but does not implement INullable interface.
-			// For example: Oracle.DataAccess.Types.OracleDecimal.
+			// All other types which have 'IsNull' property but does not implement 'INullable' interface.
+			// For example: 'Oracle.DataAccess.Types.OracleDecimal'.
 			//
-			// For types without IsNull property the return value is always false.
+			// For types without 'IsNull' property the return value is always false.
 			//
 			INullableInternal nullableInternal = 
 				(INullableInternal)DuckTyping.Implement(typeof (INullableInternal), value);
@@ -601,5 +626,6 @@ namespace BLToolkit.DataAccess
 
 		#endregion
 
+		#endregion
 	}
 }

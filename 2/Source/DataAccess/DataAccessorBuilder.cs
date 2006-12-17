@@ -1633,26 +1633,25 @@ namespace BLToolkit.DataAccess
 						pi.Name : ((ParamNameAttribute)attrs[0]).Name;
 
 					emit
-						.ldloc (_locManager)
+						.ldarg_0
+						.ldloc         (_locManager)
 						;
 
 					if (paramName[0] != '@')
 					{
 						emit
 							.ldarg_0
-							.ldloc                (_locManager)
-							.ldstr                (paramName)
-							.callvirt             (_baseType, "GetSpParameterName", _bindingFlags, typeof(DbManager), typeof(string))
+							.ldloc     (_locManager)
+							.ldstr     (paramName)
+							.callvirt  (_baseType, "GetSpParameterName", _bindingFlags, typeof(DbManager), typeof(string))
 							;
 					}
 					else
-						emit
-							.ldstr                (paramName)
-							;
+						emit.ldstr     (paramName);
 
 					emit
-						.callvirt                 (typeof(DbManager), "Parameter", typeof(string))
-						.stloc                    (param)
+						.callvirt      (_baseType, "GetParameter", _bindingFlags, typeof(DbManager), typeof(string))
+						.stloc         (param)
 						;
 
 					StoreParameterValue(param, pi, type);
