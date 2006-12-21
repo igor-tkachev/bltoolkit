@@ -88,21 +88,14 @@ namespace BLToolkit.Common
 		{
 			if (p == null || p is DBNull) return String.Empty;
 
+			if (p is String)      return (String)p;
+
 			// Scalar Types.
 			//
 			if (p is Char)        return ToString((Char)p);
 			if (p is TimeSpan)    return ToString((TimeSpan)p);
 			if (p is DateTime)    return ToString((DateTime)p);
 			if (p is Guid)        return ToString((Guid)p);
-#if FW2
-
-			// Nullable Types.
-			//
-			if (p is Char?)       return ToString((Char?)p);
-			if (p is TimeSpan?)   return ToString((TimeSpan?)p);
-			if (p is DateTime?)   return ToString((DateTime?)p);
-			if (p is Guid?)       return ToString((Guid?)p);
-#endif
 
 			// SqlTypes.
 			//
@@ -219,21 +212,14 @@ namespace BLToolkit.Common
 		{
 			if (p == null || p is DBNull) return 0;
 
+			if (p is SByte)       return (SByte)p;
+
 			// Scalar Types.
 			//
 			if (p is String)      return ToSByte((String)p);
 
 			if (p is Boolean)     return ToSByte((Boolean)p);
 			if (p is Char)        return ToSByte((Char)p);
-#if FW2
-
-			// Nullable Types.
-			//
-			if (p is SByte?)      return ToSByte((SByte?)p);
-
-			if (p is Char?)       return ToSByte((Char?)p);
-			if (p is Boolean?)    return ToSByte((Boolean?)p);
-#endif
 
 			// SqlTypes.
 			//
@@ -317,21 +303,14 @@ namespace BLToolkit.Common
 		{
 			if (p == null || p is DBNull) return 0;
 
+			if (p is Int16)       return (Int16)p;
+
 			// Scalar Types.
 			//
 			if (p is String)      return ToInt16((String)p);
 
 			if (p is Boolean)     return ToInt16((Boolean)p);
 			if (p is Char)        return ToInt16((Char)p);
-#if FW2
-
-			// Nullable Types.
-			//
-			if (p is Int16?)      return ToInt16((Int16?)p);
-
-			if (p is Char?)       return ToInt16((Char?)p);
-			if (p is Boolean?)    return ToInt16((Boolean?)p);
-#endif
 
 			// SqlTypes.
 			//
@@ -416,21 +395,14 @@ namespace BLToolkit.Common
 		{
 			if (p == null || p is DBNull) return 0;
 
+			if (p is Int32)       return (Int32)p;
+
 			// Scalar Types.
 			//
 			if (p is String)      return ToInt32((String)p);
 
 			if (p is Boolean)     return ToInt32((Boolean)p);
 			if (p is Char)        return ToInt32((Char)p);
-#if FW2
-
-			// Nullable Types.
-			//
-			if (p is Int32?)      return ToInt32((Int32?)p);
-
-			if (p is Char?)       return ToInt32((Char?)p);
-			if (p is Boolean?)    return ToInt32((Boolean?)p);
-#endif
 
 			// SqlTypes.
 			//
@@ -520,6 +492,8 @@ namespace BLToolkit.Common
 		{
 			if (p == null || p is DBNull) return 0;
 
+			if (p is Int64)       return (Int64)p;
+
 			// Scalar Types.
 			//
 			if (p is String)      return ToInt64((String)p);
@@ -528,17 +502,6 @@ namespace BLToolkit.Common
 			if (p is Boolean)     return ToInt64((Boolean)p);
 			if (p is DateTime)    return ToInt64((DateTime)p);
 			if (p is TimeSpan)    return ToInt64((TimeSpan)p);
-#if FW2
-
-			// Nullable Types.
-			//
-			if (p is Int64?)      return ToInt64((Int64?)p);
-
-			if (p is Char?)       return ToInt64((Char?)p);
-			if (p is Boolean?)    return ToInt64((Boolean?)p);
-			if (p is DateTime?)   return ToInt64((DateTime?)p);
-			if (p is TimeSpan?)   return ToInt64((TimeSpan?)p);
-#endif
 
 			// SqlTypes.
 			//
@@ -624,21 +587,14 @@ namespace BLToolkit.Common
 		{
 			if (p == null || p is DBNull) return 0;
 
+			if (p is Byte)        return (Byte)p;
+
 			// Scalar Types.
 			//
 			if (p is String)      return ToByte((String)p);
 
 			if (p is Boolean)     return ToByte((Boolean)p);
 			if (p is Char)        return ToByte((Char)p);
-#if FW2
-
-			// Nullable Types.
-			//
-			if (p is Byte?)       return ToByte((Byte?)p);
-
-			if (p is Char?)       return ToByte((Char?)p);
-			if (p is Boolean?)    return ToByte((Boolean?)p);
-#endif
 
 			// SqlTypes.
 			//
@@ -752,24 +708,14 @@ namespace BLToolkit.Common
 		{
 			if (p == null || p is DBNull) return 0;
 
+			if (p is UInt16)      return (UInt16)p;
+
 			// Scalar Types.
 			//
 			if (p is String)      return ToUInt16((String)p);
 
 			if (p is Boolean)     return ToUInt16((Boolean)p);
 			if (p is Char)        return ToUInt16((Char)p);
-#if FW2
-
-			// Nullable Types.
-			//
-			if (p is UInt16?)     return ToUInt16((UInt16?)p);
-
-			if (p is Char?)       return ToUInt16((Char?)p);
-			if (p is Boolean?)    return ToUInt16((Boolean?)p);
-#endif
-
-			// SqlTypes.
-			//
 
 			if (p is IConvertible) return ((IConvertible)p).ToUInt16(null);
 			
@@ -879,24 +825,14 @@ namespace BLToolkit.Common
 		{
 			if (p == null || p is DBNull) return 0;
 
+			if (p is UInt32)      return (UInt32)p;
+
 			// Scalar Types.
 			//
 			if (p is String)      return ToUInt32((String)p);
 
 			if (p is Boolean)     return ToUInt32((Boolean)p);
 			if (p is Char)        return ToUInt32((Char)p);
-#if FW2
-
-			// Nullable Types.
-			//
-			if (p is UInt32?)     return ToUInt32((UInt32?)p);
-
-			if (p is Char?)       return ToUInt32((Char?)p);
-			if (p is Boolean?)    return ToUInt32((Boolean?)p);
-#endif
-
-			// SqlTypes.
-			//
 
 			if (p is IConvertible) return ((IConvertible)p).ToUInt32(null);
 			
@@ -1006,26 +942,16 @@ namespace BLToolkit.Common
 		{
 			if (p == null || p is DBNull) return 0;
 
+			if (p is UInt64)       return (UInt64)p;
+
 			// Scalar Types.
 			//
 			if (p is String)      return ToUInt64((String)p);
 
 			if (p is Boolean)     return ToUInt64((Boolean)p);
 			if (p is Char)        return ToUInt64((Char)p);
-#if FW2
 
-			// Nullable Types.
-			//
-			if (p is UInt64?)     return ToUInt64((UInt64?)p);
-
-			if (p is Char?)       return ToUInt64((Char?)p);
-			if (p is Boolean?)    return ToUInt64((Boolean?)p);
-#endif
-
-			// SqlTypes.
-			//
-
-				if (p is IConvertible) return ((IConvertible)p).ToUInt64(null);
+			if (p is IConvertible) return ((IConvertible)p).ToUInt64(null);
 			
 			throw CreateInvalidCastException(p.GetType(), typeof(UInt64));
 		}
@@ -1104,22 +1030,12 @@ namespace BLToolkit.Common
 		{
 			if (p == null || p is DBNull) return '\x0';
 
+			if (p is Char)        return (Char)p;
+
 			// Scalar Types.
 			//
 			if (p is String)      return ToChar((String)p);
-
 			if (p is Boolean)     return ToChar((Boolean)p);
-#if FW2
-
-			// Nullable Types.
-			//
-			if (p is Char?)       return ToChar((Char?)p);
-
-			if (p is Boolean?)    return ToChar((Boolean?)p);
-#endif
-
-			// SqlTypes.
-			//
 
 			if (p is IConvertible) return ((IConvertible)p).ToChar(null);
 			
@@ -1200,21 +1116,14 @@ namespace BLToolkit.Common
 		{
 			if (p == null || p is DBNull) return 0.0f;
 
+			if (p is Single)      return (Single)p;
+
 			// Scalar Types.
 			//
 			if (p is String)      return ToSingle((String)p);
 
 			if (p is Boolean)     return ToSingle((Boolean)p);
 			if (p is Char)        return ToSingle((Char)p);
-#if FW2
-
-			// Nullable Types.
-			//
-			if (p is Single?)     return ToSingle((Single?)p);
-
-			if (p is Char?)       return ToSingle((Char?)p);
-			if (p is Boolean?)    return ToSingle((Boolean?)p);
-#endif
 
 			// SqlTypes.
 			//
@@ -1304,6 +1213,8 @@ namespace BLToolkit.Common
 		{
 			if (p == null || p is DBNull) return 0.0;
 
+			if (p is Double)      return (Double)p;
+
 			// Scalar Types.
 			//
 			if (p is String)      return ToDouble((String)p);
@@ -1312,17 +1223,6 @@ namespace BLToolkit.Common
 			if (p is Char)        return ToDouble((Char)p);
 			if (p is DateTime)    return ToDouble((DateTime)p);
 			if (p is TimeSpan)    return ToDouble((TimeSpan)p);
-#if FW2
-
-			// Nullable Types.
-			//
-			if (p is Double?)     return ToDouble((Double?)p);
-
-			if (p is Char?)       return ToDouble((Char?)p);
-			if (p is Boolean?)    return ToDouble((Boolean?)p);
-			if (p is DateTime?)   return ToDouble((DateTime?)p);
-			if (p is TimeSpan?)   return ToDouble((TimeSpan?)p);
-#endif
 
 			// SqlTypes.
 			//
@@ -1361,7 +1261,7 @@ namespace BLToolkit.Common
 
 		public static Boolean ToBoolean(Decimal p)     { return p != 0; }
 
-		public static Boolean ToBoolean(Char p)       
+		public static Boolean ToBoolean(Char p)
 		{
 			switch (p)
 			{
@@ -1432,21 +1332,13 @@ namespace BLToolkit.Common
 		{
 			if (p == null || p is DBNull) return false;
 
+			if (p is Boolean)     return (Boolean)p;
+
 			// Scalar Types.
 			//
 			if (p is String)      return ToBoolean((String)p);
 
-
 			if (p is Char)        return ToBoolean((Char)p);
-#if FW2
-
-			// Nullable Types.
-			//
-			if (p is Boolean?)    return ToBoolean((Boolean?)p);
-
-
-			if (p is Char?)       return ToBoolean((Char?)p);
-#endif
 
 			// SqlTypes.
 			//
@@ -1531,21 +1423,14 @@ namespace BLToolkit.Common
 		{
 			if (p == null || p is DBNull) return 0.0m;
 
+			if (p is Decimal)     return (Decimal)p;
+
 			// Scalar Types.
 			//
 			if (p is String)      return ToDecimal((String)p);
 
 			if (p is Boolean)     return ToDecimal((Boolean)p);
 			if (p is Char)        return ToDecimal((Char)p);
-#if FW2
-
-			// Nullable Types.
-			//
-			if (p is Decimal?)    return ToDecimal((Decimal?)p);
-
-			if (p is Char?)       return ToDecimal((Char?)p);
-			if (p is Boolean?)    return ToDecimal((Boolean?)p);
-#endif
 
 			// SqlTypes.
 			//
@@ -1588,21 +1473,14 @@ namespace BLToolkit.Common
 		{
 			if (p == null || p is DBNull) return DateTime.MinValue;
 
+			if (p is DateTime)    return (DateTime)p;
+
 			// Scalar Types.
 			//
 			if (p is String)      return ToDateTime((String)p);
 			if (p is TimeSpan)    return ToDateTime((TimeSpan)p);
 			if (p is Int64)       return ToDateTime((Int64)p);
 			if (p is Double)      return ToDateTime((Double)p);
-#if FW2
-
-			// Nullable Types.
-			//
-			if (p is DateTime?)   return ToDateTime((DateTime?)p);
-			if (p is TimeSpan?)   return ToDateTime((TimeSpan?)p);
-			if (p is Int64?)      return ToDateTime((Int64?)p);
-			if (p is Double?)     return ToDateTime((Double?)p);
-#endif
 
 			// SqlTypes.
 			//
@@ -1647,21 +1525,14 @@ namespace BLToolkit.Common
 		{
 			if (p == null || p is DBNull) return TimeSpan.MinValue;
 
+			if (p is TimeSpan)    return (TimeSpan)p;
+
 			// Scalar Types.
 			//
 			if (p is String)      return ToTimeSpan((String)p);
 			if (p is DateTime)    return ToTimeSpan((DateTime)p);
 			if (p is Int64)       return ToTimeSpan((Int64)p);
 			if (p is Double)      return ToTimeSpan((Double)p);
-#if FW2
-
-			// Nullable Types.
-			//
-			if (p is TimeSpan?)   return ToTimeSpan((TimeSpan?)p);
-			if (p is DateTime?)   return ToTimeSpan((DateTime?)p);
-			if (p is Int64?)      return ToTimeSpan((Int64?)p);
-			if (p is Double?)     return ToTimeSpan((Double?)p);
-#endif
 
 			// SqlTypes.
 			//
@@ -1702,15 +1573,11 @@ namespace BLToolkit.Common
 		{
 			if (p == null || p is DBNull) return Guid.Empty;
 
+			if (p is Guid)        return (Guid)p;
+
 			// Scalar Types.
 			//
 			if (p is String)      return ToGuid((String)p);
-#if FW2
-
-			// Nullable Types.
-			//
-			if (p is Guid?)       return ToGuid((Guid?)p);
-#endif
 
 			// SqlTypes.
 			//
@@ -1840,16 +1707,6 @@ namespace BLToolkit.Common
 
 			if (p is Char)        return ToNullableSByte((Char)p);
 			if (p is Boolean)     return ToNullableSByte((Boolean)p);
-#if FW2
-
-			// Nullable Types.
-			//
-			if (p is Char?)       return ToNullableSByte((Char?)p);
-			if (p is Boolean?)    return ToNullableSByte((Boolean?)p);
-#endif
-
-			// SqlTypes.
-			//
 
 			if (p is IConvertible) return ((IConvertible)p).ToSByte(null);
 			
@@ -1936,13 +1793,6 @@ namespace BLToolkit.Common
 
 			if (p is Char)        return ToNullableInt16((Char)p);
 			if (p is Boolean)     return ToNullableInt16((Boolean)p);
-#if FW2
-
-			// Nullable Types.
-			//
-			if (p is Char?)       return ToNullableInt16((Char?)p);
-			if (p is Boolean?)    return ToNullableInt16((Boolean?)p);
-#endif
 
 			// SqlTypes.
 			//
@@ -2033,13 +1883,6 @@ namespace BLToolkit.Common
 
 			if (p is Char)        return ToNullableInt32((Char)p);
 			if (p is Boolean)     return ToNullableInt32((Boolean)p);
-#if FW2
-
-			// Nullable Types.
-			//
-			if (p is Char?)       return ToNullableInt32((Char?)p);
-			if (p is Boolean?)    return ToNullableInt32((Boolean?)p);
-#endif
 
 			// SqlTypes.
 			//
@@ -2137,15 +1980,6 @@ namespace BLToolkit.Common
 			if (p is Boolean)     return ToNullableInt64((Boolean)p);
 			if (p is DateTime)    return ToNullableInt64((DateTime)p);
 			if (p is TimeSpan)    return ToNullableInt64((TimeSpan)p);
-#if FW2
-
-			// Nullable Types.
-			//
-			if (p is Char?)       return ToNullableInt64((Char?)p);
-			if (p is Boolean?)    return ToNullableInt64((Boolean?)p);
-			if (p is DateTime?)   return ToNullableInt64((DateTime?)p);
-			if (p is TimeSpan?)   return ToNullableInt64((TimeSpan?)p);
-#endif
 
 			// SqlTypes.
 			//
@@ -2237,19 +2071,12 @@ namespace BLToolkit.Common
 
 			if (p is Char)        return ToNullableByte((Char)p);
 			if (p is Boolean)     return ToNullableByte((Boolean)p);
-#if FW2
-
-			// Nullable Types.
-			//
-			if (p is Char?)       return ToNullableByte((Char?)p);
-			if (p is Boolean?)    return ToNullableByte((Boolean?)p);
-#endif
 
 			// SqlTypes.
 			//
 			if (p is SqlByte)     return ToNullableByte((SqlByte)p);
 
-				if (p is IConvertible) return ((IConvertible)p).ToByte(null);
+			if (p is IConvertible) return ((IConvertible)p).ToByte(null);
 			
 			throw CreateInvalidCastException(p.GetType(), typeof(Byte?));
 		}
@@ -2363,18 +2190,8 @@ namespace BLToolkit.Common
 
 			if (p is Char)        return ToNullableUInt16((Char)p);
 			if (p is Boolean)     return ToNullableUInt16((Boolean)p);
-#if FW2
 
-			// Nullable Types.
-			//
-			if (p is Char?)       return ToNullableUInt16((Char?)p);
-			if (p is Boolean?)    return ToNullableUInt16((Boolean?)p);
-#endif
-
-			// SqlTypes.
-			//
-
-				if (p is IConvertible) return ((IConvertible)p).ToUInt16(null);
+			if (p is IConvertible) return ((IConvertible)p).ToUInt16(null);
 			
 			throw CreateInvalidCastException(p.GetType(), typeof(UInt16?));
 		}
@@ -2488,18 +2305,8 @@ namespace BLToolkit.Common
 
 			if (p is Char)        return ToNullableUInt32((Char)p);
 			if (p is Boolean)     return ToNullableUInt32((Boolean)p);
-#if FW2
 
-			// Nullable Types.
-			//
-			if (p is Char?)       return ToNullableUInt32((Char?)p);
-			if (p is Boolean?)    return ToNullableUInt32((Boolean?)p);
-#endif
-
-			// SqlTypes.
-			//
-
-				if (p is IConvertible) return ((IConvertible)p).ToUInt32(null);
+			if (p is IConvertible) return ((IConvertible)p).ToUInt32(null);
 			
 			throw CreateInvalidCastException(p.GetType(), typeof(UInt32?));
 		}
@@ -2613,16 +2420,6 @@ namespace BLToolkit.Common
 
 			if (p is Char)        return ToNullableUInt64((Char)p);
 			if (p is Boolean)     return ToNullableUInt64((Boolean)p);
-#if FW2
-
-			// Nullable Types.
-			//
-			if (p is Char?)       return ToNullableUInt64((Char?)p);
-			if (p is Boolean?)    return ToNullableUInt64((Boolean?)p);
-#endif
-
-			// SqlTypes.
-			//
 
 			if (p is IConvertible) return ((IConvertible)p).ToUInt64(null);
 			
@@ -2708,15 +2505,6 @@ namespace BLToolkit.Common
 			if (p is String)      return ToNullableChar((String)p);
 
 			if (p is Boolean)     return ToNullableChar((Boolean)p);
-#if FW2
-
-			// Nullable Types.
-			//
-			if (p is Boolean?)    return ToNullableChar((Boolean?)p);
-#endif
-
-			// SqlTypes.
-			//
 
 			if (p is IConvertible) return ((IConvertible)p).ToChar(null);
 			
@@ -2803,13 +2591,6 @@ namespace BLToolkit.Common
 
 			if (p is Char)        return ToNullableSingle((Char)p);
 			if (p is Boolean)     return ToNullableSingle((Boolean)p);
-#if FW2
-
-			// Nullable Types.
-			//
-			if (p is Char?)       return ToNullableSingle((Char?)p);
-			if (p is Boolean?)    return ToNullableSingle((Boolean?)p);
-#endif
 
 			// SqlTypes.
 			//
@@ -2907,15 +2688,6 @@ namespace BLToolkit.Common
 			if (p is Boolean)     return ToNullableDouble((Boolean)p);
 			if (p is DateTime)    return ToNullableDouble((DateTime)p);
 			if (p is TimeSpan)    return ToNullableDouble((TimeSpan)p);
-#if FW2
-
-			// Nullable Types.
-			//
-			if (p is Char?)       return ToNullableDouble((Char?)p);
-			if (p is Boolean?)    return ToNullableDouble((Boolean?)p);
-			if (p is DateTime?)   return ToNullableDouble((DateTime?)p);
-			if (p is TimeSpan?)   return ToNullableDouble((TimeSpan?)p);
-#endif
 
 			// SqlTypes.
 			//
@@ -3006,12 +2778,6 @@ namespace BLToolkit.Common
 			if (p is String)      return ToNullableBoolean((String)p);
 
 			if (p is Char)        return ToNullableBoolean((Char)p);
-#if FW2
-
-			// Nullable Types.
-			//
-			if (p is Char?)       return ToNullableBoolean((Char?)p);
-#endif
 
 			// SqlTypes.
 			//
@@ -3102,13 +2868,6 @@ namespace BLToolkit.Common
 
 			if (p is Char)        return ToNullableDecimal((Char)p);
 			if (p is Boolean)     return ToNullableDecimal((Boolean)p);
-#if FW2
-
-			// Nullable Types.
-			//
-			if (p is Char?)       return ToNullableDecimal((Char?)p);
-			if (p is Boolean?)    return ToNullableDecimal((Boolean?)p);
-#endif
 
 			// SqlTypes.
 			//
@@ -3160,14 +2919,6 @@ namespace BLToolkit.Common
 			if (p is TimeSpan)    return ToNullableDateTime((TimeSpan)p);
 			if (p is Int64)       return ToNullableDateTime((Int64)p);
 			if (p is Double)      return ToNullableDateTime((Double)p);
-#if FW2
-
-			// Nullable Types.
-			//
-			if (p is TimeSpan?)   return ToNullableDateTime((TimeSpan?)p);
-			if (p is Int64?)      return ToNullableDateTime((Int64?)p);
-			if (p is Double?)     return ToNullableDateTime((Double?)p);
-#endif
 
 			// SqlTypes.
 			//
@@ -3219,14 +2970,6 @@ namespace BLToolkit.Common
 			if (p is DateTime)    return ToNullableTimeSpan((DateTime)p);
 			if (p is Int64)       return ToNullableTimeSpan((Int64)p);
 			if (p is Double)      return ToNullableTimeSpan((Double)p);
-#if FW2
-
-			// Nullable Types.
-			//
-			if (p is DateTime?)   return ToNullableTimeSpan((DateTime?)p);
-			if (p is Int64?)      return ToNullableTimeSpan((Int64?)p);
-			if (p is Double?)     return ToNullableTimeSpan((Double?)p);
-#endif
 
 			// SqlTypes.
 			//
@@ -3373,6 +3116,8 @@ namespace BLToolkit.Common
 		{
 			if (p == null || p is DBNull) return SqlString.Null;
 
+			if (p is SqlString)   return (SqlString)p;
+
 			// Scalar Types.
 			//
 			if (p is String)      return ToSqlString((String)p);
@@ -3382,15 +3127,6 @@ namespace BLToolkit.Common
 			if (p is DateTime)    return ToSqlString((DateTime)p);
 			if (p is Guid)        return ToSqlString((Guid)p);
 			if (p is Char[])      return ToSqlString((Char[])p);
-#if FW2
-
-			// Nullable Types.
-			//
-			if (p is Char?)       return ToSqlString((Char?)p);
-			if (p is TimeSpan?)   return ToSqlString((TimeSpan?)p);
-			if (p is DateTime?)   return ToSqlString((DateTime?)p);
-			if (p is Guid?)       return ToSqlString((Guid?)p);
-#endif
 
 			// SqlTypes.
 			//
@@ -3479,6 +3215,8 @@ namespace BLToolkit.Common
 		{
 			if (p == null || p is DBNull) return SqlByte.Null;
 
+			if (p is SqlByte)     return (SqlByte)p;
+
 			// Scalar Types.
 			//
 			if (p is Byte)        return ToSqlByte((Byte)p);
@@ -3486,13 +3224,6 @@ namespace BLToolkit.Common
 
 			if (p is Char)        return ToSqlByte((Char)p);
 			if (p is Boolean)     return ToSqlByte((Boolean)p);
-#if FW2
-
-			// Nullable Types.
-			//
-			if (p is Byte?)       return ToSqlByte((Byte?)p);
-			if (p is Char?)       return ToSqlByte((Char?)p);
-#endif
 
 			// SqlTypes.
 			//
@@ -3575,6 +3306,8 @@ namespace BLToolkit.Common
 		{
 			if (p == null || p is DBNull) return SqlInt16.Null;
 
+			if (p is SqlInt16)    return (SqlInt16)p;
+
 			// Scalar Types.
 			//
 			if (p is Int16)       return ToSqlInt16((Int16)p);
@@ -3582,13 +3315,6 @@ namespace BLToolkit.Common
 
 			if (p is Char)        return ToSqlInt16((Char)p);
 			if (p is Boolean)     return ToSqlInt16((Boolean)p);
-#if FW2
-
-			// Nullable Types.
-			//
-			if (p is Int16?)      return ToSqlInt16((Int16?)p);
-			if (p is Char?)       return ToSqlInt16((Char?)p);
-#endif
 
 			// SqlTypes.
 			//
@@ -3671,6 +3397,8 @@ namespace BLToolkit.Common
 		{
 			if (p == null || p is DBNull) return SqlInt32.Null;
 
+			if (p is SqlInt32)    return (SqlInt32)p;
+
 			// Scalar Types.
 			//
 			if (p is Int32)       return ToSqlInt32((Int32)p);
@@ -3678,13 +3406,6 @@ namespace BLToolkit.Common
 
 			if (p is Char)        return ToSqlInt32((Char)p);
 			if (p is Boolean)     return ToSqlInt32((Boolean)p);
-#if FW2
-
-			// Nullable Types.
-			//
-			if (p is Int32?)      return ToSqlInt32((Int32?)p);
-			if (p is Char?)       return ToSqlInt32((Char?)p);
-#endif
 
 			// SqlTypes.
 			//
@@ -3771,6 +3492,8 @@ namespace BLToolkit.Common
 		{
 			if (p == null || p is DBNull) return SqlInt64.Null;
 
+			if (p is SqlInt64)    return (SqlInt64)p;
+
 			// Scalar Types.
 			//
 			if (p is Int64)       return ToSqlInt64((Int64)p);
@@ -3780,15 +3503,6 @@ namespace BLToolkit.Common
 			if (p is Boolean)     return ToSqlInt64((Boolean)p);
 			if (p is DateTime)    return ToSqlInt64((DateTime)p);
 			if (p is TimeSpan)    return ToSqlInt64((TimeSpan)p);
-#if FW2
-
-			// Nullable Types.
-			//
-			if (p is Int64?)      return ToSqlInt64((Int64?)p);
-			if (p is Char?)       return ToSqlInt64((Char?)p);
-			if (p is DateTime?)   return ToSqlInt64((DateTime?)p);
-			if (p is TimeSpan?)   return ToSqlInt64((TimeSpan?)p);
-#endif
 
 			// SqlTypes.
 			//
@@ -3869,6 +3583,8 @@ namespace BLToolkit.Common
 		{
 			if (p == null || p is DBNull) return SqlSingle.Null;
 
+			if (p is SqlSingle)   return (SqlSingle)p;
+
 			// Scalar Types.
 			//
 			if (p is Single)      return ToSqlSingle((Single)p);
@@ -3876,15 +3592,6 @@ namespace BLToolkit.Common
 
 			if (p is Char)        return ToSqlSingle((Char)p);
 			if (p is Boolean)     return ToSqlSingle((Boolean)p);
-#if FW2
-
-			// Nullable Types.
-			//
-			if (p is Single?)     return ToSqlSingle((Single?)p);
-#endif
-
-			// SqlTypes.
-			//
 
 			return ToSingle(p);
 		}
@@ -3966,6 +3673,8 @@ namespace BLToolkit.Common
 		{
 			if (p == null || p is DBNull) return SqlDouble.Null;
 
+			if (p is SqlDouble)   return (SqlDouble)p;
+
 			// Scalar Types.
 			//
 			if (p is Double)      return ToSqlDouble((Double)p);
@@ -3975,14 +3684,6 @@ namespace BLToolkit.Common
 			if (p is Boolean)     return ToSqlDouble((Boolean)p);
 			if (p is DateTime)    return ToSqlDouble((DateTime)p);
 			if (p is TimeSpan)    return ToSqlDouble((TimeSpan)p);
-#if FW2
-
-			// Nullable Types.
-			//
-			if (p is Double?)     return ToSqlDouble((Double?)p);
-			if (p is DateTime?)   return ToSqlDouble((DateTime?)p);
-			if (p is TimeSpan?)   return ToSqlDouble((TimeSpan?)p);
-#endif
 
 			// SqlTypes.
 			//
@@ -4063,6 +3764,8 @@ namespace BLToolkit.Common
 		{
 			if (p == null || p is DBNull) return SqlDecimal.Null;
 
+			if (p is SqlDecimal)  return (SqlDecimal)p;
+
 			// Scalar Types.
 			//
 			if (p is Decimal)     return ToSqlDecimal((Decimal)p);
@@ -4070,15 +3773,6 @@ namespace BLToolkit.Common
 
 			if (p is Char)        return ToSqlDecimal((Char)p);
 			if (p is Boolean)     return ToSqlDecimal((Boolean)p);
-#if FW2
-
-			// Nullable Types.
-			//
-			if (p is Decimal?)    return ToSqlDecimal((Decimal?)p);
-#endif
-
-			// SqlTypes.
-			//
 
 			return ToDecimal(p);
 		}
@@ -4155,6 +3849,8 @@ namespace BLToolkit.Common
 		{
 			if (p == null || p is DBNull) return SqlMoney.Null;
 
+			if (p is SqlMoney)    return (SqlMoney)p;
+
 			// Scalar Types.
 			//
 			if (p is Decimal)     return ToSqlMoney((Decimal)p);
@@ -4162,15 +3858,6 @@ namespace BLToolkit.Common
 
 			if (p is Char)        return ToSqlMoney((Char)p);
 			if (p is Boolean)     return ToSqlMoney((Boolean)p);
-#if FW2
-
-			// Nullable Types.
-			//
-			if (p is Decimal?)    return ToSqlMoney((Decimal?)p);
-#endif
-
-			// SqlTypes.
-			//
 
 			return ToDecimal(p);
 		}
@@ -4248,22 +3935,14 @@ namespace BLToolkit.Common
 		{
 			if (p == null || p is DBNull) return SqlBoolean.Null;
 
+			if (p is SqlBoolean)  return (SqlBoolean)p;
+
 			// Scalar Types.
 			//
 			if (p is Boolean)     return ToSqlBoolean((Boolean)p);
 			if (p is String)      return ToSqlBoolean((String)p);
 
 			if (p is Char)        return ToSqlBoolean((Char)p);
-#if FW2
-
-			// Nullable Types.
-			//
-			if (p is Boolean?)    return ToSqlBoolean((Boolean?)p);
-			if (p is Char?)       return ToSqlBoolean((Char?)p);
-#endif
-
-			// SqlTypes.
-			//
 
 			return ToBoolean(p);
 		}
@@ -4299,6 +3978,8 @@ namespace BLToolkit.Common
 		{
 			if (p == null || p is DBNull) return SqlDateTime.Null;
 
+			if (p is SqlDateTime) return (SqlDateTime)p;
+
 			// Scalar Types.
 			//
 			if (p is String)      return ToSqlDateTime((String)p);
@@ -4306,15 +3987,6 @@ namespace BLToolkit.Common
 			if (p is TimeSpan)    return ToSqlDateTime((TimeSpan)p);
 			if (p is Int64)       return ToSqlDateTime((Int64)p);
 			if (p is Double)      return ToSqlDateTime((Double)p);
-#if FW2
-
-			// Nullable Types.
-			//
-			if (p is DateTime?)   return ToSqlDateTime((DateTime?)p);
-			if (p is TimeSpan?)   return ToSqlDateTime((TimeSpan?)p);
-			if (p is Int64?)      return ToSqlDateTime((Int64?)p);
-			if (p is Double?)     return ToSqlDateTime((Double?)p);
-#endif
 
 			// SqlTypes.
 			//
@@ -4357,16 +4029,12 @@ namespace BLToolkit.Common
 		{
 			if (p == null || p is DBNull) return SqlGuid.Null;
 
+			if (p is SqlGuid)     return (SqlGuid)p;
+
 			// Scalar Types.
 			//
 			if (p is Guid)        return ToSqlGuid((Guid)p);
 			if (p is String)      return ToSqlGuid((String)p);
-#if FW2
-
-			// Nullable Types.
-			//
-			if (p is Guid?)       return ToSqlGuid((Guid?)p);
-#endif
 
 			// SqlTypes.
 			//
@@ -4410,16 +4078,12 @@ namespace BLToolkit.Common
 		{
 			if (p == null || p is DBNull) return SqlBinary.Null;
 
+			if (p is SqlBinary)   return (SqlBinary)p;
+
 			// Scalar Types.
 			//
 			if (p is Byte[])      return ToSqlBinary((Byte[])p);
 			if (p is Guid)        return ToSqlBinary((Guid)p);
-#if FW2
-
-			// Nullable Types.
-			//
-			if (p is Guid?)       return ToSqlBinary((Guid?)p);
-#endif
 
 			// SqlTypes.
 			//
@@ -4455,15 +4119,13 @@ namespace BLToolkit.Common
 		{
 			if (p == null || p is DBNull) return SqlBytes.Null;
 
+			if (p is SqlBytes)    return (SqlBytes)p;
+
 			// Scalar Types.
 			//
 			if (p is Byte[])      return ToSqlBytes((Byte[])p);
 			if (p is Stream)      return ToSqlBytes((Stream)p);
 			if (p is Guid)        return ToSqlBytes((Guid)p);
-
-			// Nullable Types.
-			//
-			if (p is Guid?)       return ToSqlBytes((Guid?)p);
 
 			// SqlTypes.
 			//
@@ -4579,6 +4241,8 @@ namespace BLToolkit.Common
 		{
 			if (p == null || p is DBNull) return SqlXml.Null;
 
+			if (p is SqlXml)      return (SqlXml)p;
+
 			// Scalar Types.
 			//
 			if (p is String)      return ToSqlXml((String)p);
@@ -4632,17 +4296,13 @@ namespace BLToolkit.Common
 		{
 			if (p == null || p is DBNull) return null;
 
+			if (p is Type)        return (Type)p;
+
 			// Scalar Types.
 			//
 			if (p is String)      return ToType((String)p);
 			if (p is Char[])      return ToType((Char[])p);
 			if (p is Guid)        return ToType((Guid)p);
-#if FW2
-
-			// Nullable Types.
-			//
-			if (p is Guid?)       return ToType((Guid?)p);
-#endif
 
 			// SqlTypes.
 			//
@@ -4682,16 +4342,12 @@ namespace BLToolkit.Common
 		{
 			if (p == null || p is DBNull) return Stream.Null;
 
+			if (p is Stream)      return (Stream)p;
+
 			// Scalar Types.
 			//
 			if (p is Guid)        return ToStream((Guid)p);
 			if (p is Byte[])      return ToStream((Byte[])p);
-#if FW2
-
-			// Nullable Types.
-			//
-			if (p is Guid?)       return ToStream((Guid?)p);
-#endif
 
 			// SqlTypes.
 			//
@@ -4710,7 +4366,7 @@ namespace BLToolkit.Common
 
 		// Scalar Types.
 		// 
-		public static Byte[] ToByteArray(Stream p)     
+		public static Byte[] ToByteArray(Stream p)
 		{
 			if (p == null)         return null;
 			if (p is MemoryStream) return ((MemoryStream)p).ToArray();
@@ -4743,16 +4399,12 @@ namespace BLToolkit.Common
 		{
 			if (p == null || p is DBNull) return null;
 
+			if (p is Byte[])      return (Byte[])p;
+
 			// Scalar Types.
 			//
 			if (p is Stream)      return ToByteArray((Stream)p);
 			if (p is Guid)        return ToByteArray((Guid)p);
-#if FW2
-
-			// Nullable Types.
-			//
-			if (p is Guid?)       return ToByteArray((Guid?)p);
-#endif
 
 			// SqlTypes.
 			//
@@ -4783,6 +4435,8 @@ namespace BLToolkit.Common
 		{
 			if (p == null || p is DBNull) return null;
 
+			if (p is Char[])      return (Char[])p;
+
 			// Scalar Types.
 			//
 			if (p is String)      return ToCharArray((String)p);
@@ -4793,7 +4447,7 @@ namespace BLToolkit.Common
 #if FW2
 			if (p is SqlChars)    return ToCharArray((SqlChars)p);
 #endif
-				return ToString(p).ToCharArray();
+			return ToString(p).ToCharArray();
 		}
 
 		#endregion
@@ -4824,6 +4478,8 @@ namespace BLToolkit.Common
 		public static XmlReader ToXmlReader(object p)
 		{
 			if (p == null || p is DBNull) return null;
+
+			if (p is XmlReader)   return (XmlReader)p;
 
 			// Scalar Types.
 			//
