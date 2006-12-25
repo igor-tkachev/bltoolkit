@@ -35,7 +35,7 @@ namespace Rsdn.Framework.EditableObject
 			: this(itemType, new ArrayList(c))
 		{
 		}
-
+		
 		private  ArrayList _list;
 		internal ArrayList  List
 		{
@@ -77,12 +77,12 @@ namespace Rsdn.Framework.EditableObject
 			set { _isNull = value; }
 		}
 
-		public void Sort(string memberName)
+		public virtual void Sort(string memberName)
 		{
 			Sort(memberName, ListSortDirection.Ascending);
 		}
 
-		public void Sort(string memberName, ListSortDirection direction)
+		public virtual void Sort(string memberName, ListSortDirection direction)
 		{
 			Sort(new SortMemberComparer(Map.Descriptor(ItemType)[memberName], direction));
 		}
@@ -91,10 +91,13 @@ namespace Rsdn.Framework.EditableObject
 		{
 			if (oldIndex != newIndex)
 			{
-				object o = _list[oldIndex];
+				lock (_list.SyncRoot)
+				{
+					object o = _list[oldIndex];
 
-				_list.RemoveAt(oldIndex);
-				_list.Insert  (newIndex, o);
+					_list.RemoveAt(oldIndex);
+					_list.Insert  (newIndex, o);
+				}
 
 				OnListChanged(new ListChangedEventArgs(ListChangedType.ItemMoved, newIndex, oldIndex));
 			}
@@ -102,10 +105,13 @@ namespace Rsdn.Framework.EditableObject
 
 		public void Move(int newIndex, object item)
 		{
-			int index = IndexOf(item);
+			lock (_list.SyncRoot)
+			{
+				int index = IndexOf(item);
 
-			if (index >= 0)
-				Move(newIndex, index);
+				if (index >= 0)
+					Move(newIndex, index);
+			}
 		}
 
 		#endregion
@@ -132,8 +138,6 @@ namespace Rsdn.Framework.EditableObject
 
 		protected virtual void OnListChanged(ListChangedEventArgs e)
 		{
-			_isSorted = false;
-
 			if (IsTrackingChanges)
 			{
 				_isChanged = true;
@@ -145,22 +149,84 @@ namespace Rsdn.Framework.EditableObject
 
 		protected void OnListChanged(ListChangedType listChangedType, int newIndex)
 		{
-			_isSorted = false;
-
 			if (IsTrackingChanges)
 				OnListChanged(new ListChangedEventArgs(listChangedType, newIndex));
 		}
 
 		private void ItemPropertyChanged(object sender, PropertyChangedEventArgs e)
 		{
-			OnListChanged(new ListChangedEventArgs(ListChangedType.ItemChanged, _list.IndexOf(sender)));
+			int index;
+			
+			lock (_list.SyncRoot)
+			{
+				index = _list.IndexOf(sender);
+
+				if (_isSorted && index >= 0 && _list.Count > 1)
+					index = EnsureItemPosition(index, sender);
+			}
+
+			if (index >= 0)
+				OnListChanged(new ListChangedEventArgs(ListChangedType.ItemChanged, index));
+		}
+
+		private int EnsureItemPosition(int index, object sender)
+		{
+			SortPropertyComparer comparer = new SortPropertyComparer(_sortProperty, _sortDirection);
+			
+			int result     = index > 0 ? comparer.Compare(_list[index - 1], sender) : -1;
+			int nextResult = index < _list.Count - 1 ? comparer.Compare(_list[index + 1], sender) : 1;
+			
+			if (result > 0 || nextResult < 0)
+			{
+				bool placed = false;
+					
+				for (int i = 0; i < _list.Count; i++)
+				{
+					if (i == index)
+						continue;
+					
+					result = comparer.Compare(_list[i], sender);
+					
+					if (result > 0)
+					{
+						Move(i, index);
+						index = i;
+						placed = true;
+						break;
+					}
+				}
+
+				if (!placed)
+				{
+					Move(_list.Count - 1, index);
+					index = _list.Count - 1;
+				}
+			}
+
+			return index;
 		}
 
 		#endregion
 
 		#region Add/Remove Internal
 
-		void AddInternal(object value)
+		private int GetSortedInsertIndex(object value)
+		{
+			SortPropertyComparer comparer = new SortPropertyComparer(_sortProperty, _sortDirection);
+			int                  result;
+				
+			for (int i = 0; i < _list.Count; i++)
+			{
+				result = comparer.Compare(_list[i], value);
+					
+				if (result > 0)
+					return i;
+			}
+			
+			return _list.Count;
+		}
+		
+		private void AddInternal(object value)
 		{
 			if (IsTrackingChanges)
 			{
@@ -272,7 +338,6 @@ namespace Rsdn.Framework.EditableObject
 
 			EndInit();
 
-			_isSorted  = false;
 			_isChanged = false;
 			_newItems  = null;
 			_delItems  = null;
@@ -315,7 +380,7 @@ namespace Rsdn.Framework.EditableObject
 		public void GetDirtyMembers([MapPropertyInfo] MapPropertyInfo propertyInfo, ArrayList list)
 		{
 		}
-
+		
 		public void PrintDebugState([MapPropertyInfo] MapPropertyInfo propertyInfo, ref string str)
 		{
 		}
@@ -412,6 +477,8 @@ namespace Rsdn.Framework.EditableObject
 		{
 			_isSorted     = false;
 			_sortProperty = null;
+			
+			OnListChanged(ListChangedType.Reset, -1);
 		}
 
 			#endregion
@@ -575,9 +642,21 @@ namespace Rsdn.Framework.EditableObject
 
 		public override int Add(object value)
 		{
-			int idx = _list.Add(value);
+			int idx;
+				
+			lock (_list.SyncRoot)
+			{
+				if (!_isSorted)
+					idx = _list.Add(value);
+				else
+				{
+					idx = GetSortedInsertIndex(value);
+					_list.Insert(idx, value);
+				}
 
-			AddInternal(value);
+				AddInternal(value);
+			}
+
 			OnListChanged(ListChangedType.ItemAdded, idx);
 
 			return idx;
@@ -586,10 +665,18 @@ namespace Rsdn.Framework.EditableObject
 		public override void AddRange(ICollection c)
 		{
 			int idx = Count;
+			
+			lock (_list.SyncRoot)
+			{
+				if (!_isSorted)
+					_list.AddRange(c);
+				else
+					foreach (object o in c)
+						_list.Insert(GetSortedInsertIndex(o), o);
 
-			_list.AddRange(c);
-
-			AddInternal(c);
+				AddInternal(c);
+			}
+			
 			OnListChanged(ListChangedType.Reset, idx);
 		}
 
@@ -616,12 +703,16 @@ namespace Rsdn.Framework.EditableObject
 
 		public override void Clear()
 		{
-			if (_list.Count > 0)
+			lock (_list.SyncRoot)
 			{
-				RemoveInternal(_list);
-				_list.Clear();
-				OnListChanged(ListChangedType.Reset, -1);
+				if (_list.Count > 0)
+				{
+					RemoveInternal(_list);
+					_list.Clear();
+				}
 			}
+
+			OnListChanged(ListChangedType.Reset, -1);
 		}
 
 		public override object Clone()
@@ -696,9 +787,16 @@ namespace Rsdn.Framework.EditableObject
 
 		public override void Insert(int index, object value)
 		{
-			_list.Insert(index, value);
+			lock (_list.SyncRoot)
+			{
+				if (_isSorted)
+					index = GetSortedInsertIndex(value);
 
-			AddInternal(value);
+				_list.Insert(index, value);
+
+				AddInternal(value);
+			}
+
 			OnListChanged(ListChangedType.ItemAdded, index);
 		}
 
@@ -706,9 +804,17 @@ namespace Rsdn.Framework.EditableObject
 		{
 			if (c.Count > 0)
 			{
-				_list.InsertRange(index, c);
+				lock (_list.SyncRoot)
+				{
+					if (!_isSorted)
+						_list.InsertRange(index, c);
+					else
+						foreach (object o in c)
+							_list.Insert(GetSortedInsertIndex(o), o);
 
-				AddInternal(c);
+					AddInternal(c);
+				}
+
 				OnListChanged(ListChangedType.Reset, index);
 			}
 		}
@@ -745,12 +851,17 @@ namespace Rsdn.Framework.EditableObject
 
 		public override void Remove(object obj)
 		{
-			int n = IndexOf(obj);
+			int n;
+			
+			lock (_list.SyncRoot)
+			{
+				n = IndexOf(obj);
 
-			if (n >= 0)
-				RemoveInternal(obj);
+				if (n >= 0)
+					RemoveInternal(obj);
 
-			_list.Remove(obj);
+				_list.Remove(obj);
+			}
 
 			if (n >= 0)
 				OnListChanged(ListChangedType.ItemDeleted, n);
@@ -758,21 +869,27 @@ namespace Rsdn.Framework.EditableObject
 
 		public override void RemoveAt(int index)
 		{
-			object o = this[index];
+			lock (_list.SyncRoot)
+			{
+				object o = this[index];
 
-			RemoveInternal(o);
+				RemoveInternal(o);
 
-			_list.RemoveAt(index);
+				_list.RemoveAt(index);
+			}
 			
 			OnListChanged(ListChangedType.ItemDeleted, index);
 		}
 
 		public override void RemoveRange(int index, int count)
 		{
-			for (int i = index; i < _list.Count && i < index + count; i++)
-				RemoveInternal(_list[i]);
+			lock (_list.SyncRoot)
+			{
+				for (int i = index; i < _list.Count && i < index + count; i++)
+					RemoveInternal(_list[i]);
 
-			_list.RemoveRange(index, count);
+				_list.RemoveRange(index, count);
+			}
 
 			OnListChanged(ListChangedType.Reset, index);
 		}
@@ -838,17 +955,23 @@ namespace Rsdn.Framework.EditableObject
 			get { return _list[index];  }
 			set
 			{
-				object o = _list[index];
-
-				if (o != value)
+				lock (_list.SyncRoot)
 				{
-					RemoveInternal(o);
+					object o = _list[index];
 
-					_list[index] = value;
+					if (o != value)
+					{
+						RemoveInternal(o);
 
-					AddInternal(value);
-					
-					OnListChanged(ListChangedType.ItemChanged, index);
+						_list[index] = value;
+
+						AddInternal(value);
+
+						OnListChanged(ListChangedType.ItemChanged, index);
+						
+						if (_isSorted)
+							index = EnsureItemPosition(index, value);
+					}
 				}
 			}
 		}
