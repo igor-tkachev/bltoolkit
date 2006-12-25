@@ -4,7 +4,6 @@ using NUnit.Framework;
 
 using BLToolkit.Data;
 using BLToolkit.DataAccess;
-using BLToolkit.Mapping;
 
 namespace HowTo.DataAccess
 {

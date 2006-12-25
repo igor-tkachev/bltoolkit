@@ -29,7 +29,8 @@ namespace Aspects
 
 			DateTime begin = DateTime.Now;
 
-			for (TestClass.Value = 777; t.Test(2, 2) == 777; TestClass.Value++);
+			for (TestClass.Value = 777; t.Test(2, 2) == 777; TestClass.Value++)
+				continue;
 
 			Assert.IsTrue((DateTime.Now - begin).TotalMilliseconds >= 100);
 

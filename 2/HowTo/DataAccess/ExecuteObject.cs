@@ -3,7 +3,6 @@ using System;
 using NUnit.Framework;
 
 using BLToolkit.DataAccess;
-using BLToolkit.Mapping;
 
 namespace HowTo.DataAccess
 {

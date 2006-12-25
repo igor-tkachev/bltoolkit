@@ -747,6 +747,7 @@ namespace BLToolkit.Reflection.Emit
 		/// calls a late-bound method on an object, pushing the return value onto the evaluation stack.
 		/// </summary>
 		/// <param name="methodName">The method to be called.</param>
+		/// <param name="type">The declaring type of the method.</param>
 		/// <param name="parameterTypes">The types of the optional arguments if the method is a varargs method.</param>
 		/// <seealso cref="OpCodes.Callvirt">OpCodes.Callvirt</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.EmitCall(OpCode,MethodInfo,Type[])">ILGenerator.EmitCall</seealso>

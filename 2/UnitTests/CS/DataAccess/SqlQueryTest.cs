@@ -4,7 +4,6 @@ using System.Collections;
 using NUnit.Framework;
 
 using BLToolkit.DataAccess;
-using BLToolkit.TypeBuilder;
 
 namespace DataAccess
 {

@@ -26,12 +26,12 @@ namespace BLToolkit.Mapping
 			return _mapper;
 		}
 
-		public virtual object GetNextObject(BLToolkit.Reflection.InitContext initContext)
+		public virtual object GetNextObject(InitContext initContext)
 		{
 			return _mapper;
 		}
 
-		public virtual void EndMapping(BLToolkit.Reflection.InitContext initContext)
+		public virtual void EndMapping(InitContext initContext)
 		{
 		}
 

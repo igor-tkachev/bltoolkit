@@ -9,9 +9,9 @@ namespace BLToolkit.Reflection.Extension
 			_attributes = new AttributeNameCollection();
 		}
 
-		private MemberExtension(int i)
+		private MemberExtension(AttributeNameCollection attributes)
 		{
-			_attributes = AttributeNameCollection.Null;
+			_attributes = attributes;
 		}
 
 		private string _name;
@@ -32,7 +32,7 @@ namespace BLToolkit.Reflection.Extension
 			get { return _attributes; }
 		}
 
-		private static MemberExtension _null = new MemberExtension(0);
+		private static MemberExtension _null = new MemberExtension(AttributeNameCollection.Null);
 		public  static MemberExtension  Null
 		{
 			get { return _null; }

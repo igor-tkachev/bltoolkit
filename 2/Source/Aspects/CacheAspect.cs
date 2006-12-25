@@ -168,7 +168,7 @@ namespace BLToolkit.Aspects
 			public object[] RefValues;
 		}
 
-		private CompoundValue GetKey(InterceptCallInfo info)
+		private static CompoundValue GetKey(InterceptCallInfo info)
 		{
 			ParameterInfo[] parInfo   = info.CallMethodInfo.MethodInfo.GetParameters();
 			object[]        parValues = info.ParameterValues;

@@ -53,7 +53,7 @@ namespace BLToolkit.EditableObjects
 
 		public T Find(Predicate<T> match)
 		{
-			if (match == null) new ArgumentNullException("match");
+			if (match == null) throw new ArgumentNullException("match");
 
 			foreach (T t in List)
 				if (match(t))
@@ -64,7 +64,7 @@ namespace BLToolkit.EditableObjects
 
 		public EditableList<T> FindAll(Predicate<T> match)
 		{
-			if (match == null) new ArgumentNullException("match");
+			if (match == null) throw new ArgumentNullException("match");
 
 			EditableList<T> list = new EditableList<T>();
 
@@ -94,7 +94,7 @@ namespace BLToolkit.EditableObjects
 				throw new ArgumentOutOfRangeException("count");
 
 			if (match == null)
-				new ArgumentNullException("match");
+				throw new ArgumentNullException("match");
 
 			for (int i = startIndex; i < startIndex + count; i++)
 				if (match((T)List[i]))
@@ -105,7 +105,7 @@ namespace BLToolkit.EditableObjects
 
 		public T FindLast(Predicate<T> match)
 		{
-			if (match == null) new ArgumentNullException("match");
+			if (match == null) throw new ArgumentNullException("match");
 
 			for (int i = List.Count - 1; i >= 0; i--)
 			{

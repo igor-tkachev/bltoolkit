@@ -25,14 +25,6 @@ namespace BLToolkit.Reflection
 #endif
 	public abstract class TypeAccessor : ICollection, ITypeDescriptionProvider
 	{
-		#region Init
-
-		protected TypeAccessor()
-		{
-		}
-
-		#endregion
-
 		#region Protected Emit Helpers
 
 		const BindingFlags _bindingFlags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;

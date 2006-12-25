@@ -11,7 +11,7 @@ namespace BLToolkit.Mapping.MetadataProvider
 	{
 		#region Helpers
 
-		private object GetValue(ObjectMapper mapper, MemberAccessor member, string elemName, out bool isSet)
+		private static object GetValue(ObjectMapper mapper, MemberAccessor member, string elemName, out bool isSet)
 		{
 			object value = mapper.Extension[member.Name][elemName].Value;
 
@@ -73,12 +73,10 @@ namespace BLToolkit.Mapping.MetadataProvider
 		{
 			AttributeExtensionCollection extList = mapper.Extension[member.Name]["MapValue"];
 
-			ArrayList list = null;
-
 			if (extList == AttributeExtensionCollection.Null)
 				return GetMapValues(mapper.Extension, member.Type, out isSet);
 
-			list = new ArrayList(extList.Count);
+			ArrayList list = new ArrayList(extList.Count);
 
 			foreach (AttributeExtension ext in extList)
 			{

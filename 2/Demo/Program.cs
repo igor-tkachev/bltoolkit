@@ -17,7 +17,7 @@ namespace BLToolkit.Demo
 
 			ToolStripManager.LoadSettings(form, "BLToolkit.Demo");
 
-			form.FormClosing += delegate(object sender, FormClosingEventArgs e)
+			form.FormClosing += delegate
 			{
 				ToolStripManager.SaveSettings(form, "BLToolkit.Demo");
 			};

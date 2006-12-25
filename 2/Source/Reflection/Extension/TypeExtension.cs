@@ -45,10 +45,12 @@ namespace BLToolkit.Reflection.Extension
 			_attributes = new AttributeNameCollection();
 		}
 
-		private TypeExtension(int i)
+		private TypeExtension(
+			MemberExtensionCollection  members,
+			AttributeNameCollection    attributes)
 		{
-			_members    = MemberExtensionCollection.Null;
-			_attributes = AttributeNameCollection.  Null;
+			_members    = members;
+			_attributes = attributes;
 		}
 
 		private string _name;
@@ -75,7 +77,7 @@ namespace BLToolkit.Reflection.Extension
 			get { return _attributes; }
 		}
 
-		private static TypeExtension _null = new TypeExtension(0);
+		private static TypeExtension _null = new TypeExtension(MemberExtensionCollection.Null, AttributeNameCollection.Null);
 		public  static TypeExtension  Null
 		{
 			get { return _null; }

@@ -1,9 +1,6 @@
 using System;
 using System.Collections;
 using System.ComponentModel;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Text;
 using System.Windows.Forms;
 using System.Drawing.Design;
 
@@ -99,7 +96,7 @@ namespace BLToolkit.Demo.Controls
 			}
 		}
 
-		class EnumEditor : BLToolkit.ComponentModel.Design.TypeEditor
+		class EnumEditor : ComponentModel.Design.TypeEditor
 		{
 			protected override bool FilterTypeList(Type type)
 			{

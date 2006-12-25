@@ -9,9 +9,9 @@ namespace BLToolkit.Reflection.Extension
 			_values = new ValueCollection();
 		}
 
-		private AttributeExtension(int i)
+		private AttributeExtension(ValueCollection values)
 		{
-			_values = ValueCollection.Null;
+			_values = values;
 		}
 
 		private string _name;
@@ -57,7 +57,7 @@ namespace BLToolkit.Reflection.Extension
 			}
 		}
 
-		private static AttributeExtension _null = new AttributeExtension(0);
+		private static AttributeExtension _null = new AttributeExtension(ValueCollection.Null);
 		public  static AttributeExtension  Null
 		{
 			get { return _null;  }

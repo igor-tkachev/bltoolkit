@@ -268,10 +268,6 @@ namespace BLToolkit.ComponentModel.Design
 
 		class NewLink : LinkLabel
 		{
-			public NewLink()
-			{
-			}
-
 			protected override bool IsInputKey(Keys key)
 			{
 				return key == Keys.Return? true: base.IsInputKey(key);

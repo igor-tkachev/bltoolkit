@@ -93,7 +93,7 @@ namespace BLToolkit.Mapping
 
 					if (mm == null)
 						throw new MappingException(string.Format("Type '{0}' does not contain field '{1}'.",
-							objectMapper.TypeAccessor.OriginalType.Name, Fields[index].ToString()));
+							objectMapper.TypeAccessor.OriginalType.Name, Fields[index]));
 				}
 			}
 

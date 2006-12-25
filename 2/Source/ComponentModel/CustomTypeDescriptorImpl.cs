@@ -221,7 +221,7 @@ namespace BLToolkit.ComponentModel
 
 		private ICustomTypeDescriptor _td
 		{
-			get { return (ICustomTypeDescriptor)this; }
+			get { return this; }
 		}
 
 		#endregion

@@ -29,7 +29,7 @@ namespace BLToolkit.Mapping
 			return _mapper;
 		}
 
-		object IMapDataDestinationList.GetNextObject(BLToolkit.Reflection.InitContext initContext)
+		object IMapDataDestinationList.GetNextObject(InitContext initContext)
 		{
 			return _mapper.Writer;
 		}

@@ -116,6 +116,7 @@ namespace BLToolkit.Reflection.Emit
 		/// <param name="name">The name of the method. name cannot contain embedded nulls. </param>
 		/// <param name="attributes">The attributes of the method. </param>
 		/// <returns>The defined method.</returns>
+		/// <param name="callingConvention">The calling convention of the method.</param>
 		public MethodBuilderHelper DefineMethod(
 			string             name,
 			MethodAttributes   attributes,
@@ -133,7 +134,9 @@ namespace BLToolkit.Reflection.Emit
 		/// <param name="attributes">The attributes of the method. </param>
 		/// <returns>The defined method.</returns>
 		public MethodBuilderHelper DefineMethod(
-			string name, MethodInfo methodInfoDeclaration, MethodAttributes attributes)
+			string           name,
+			MethodInfo       methodInfoDeclaration,
+			MethodAttributes attributes)
 		{
 			if (methodInfoDeclaration == null) throw new ArgumentNullException("methodInfoDeclaration");
 
