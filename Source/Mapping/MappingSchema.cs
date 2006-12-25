@@ -1263,19 +1263,25 @@ namespace BLToolkit.Mapping
 
 			if (sourceType == destType)
 			{
-				if (mapper == null)
-					_sameTypeMappers.Remove(sourceType);
-				else
-					_sameTypeMappers[sourceType] = mapper;
+				lock (_sameTypeMappers.SyncRoot)
+				{
+					if (mapper == null)
+						_sameTypeMappers.Remove(sourceType);
+					else
+						_sameTypeMappers[sourceType] = mapper;
+				}
 			}
 			else
 			{
 				KeyValue key = new KeyValue(sourceType, destType);
 
-				if (mapper == null)
-					_differentTypeMappers.Remove(key);
-				else
-					_differentTypeMappers[key] = mapper;
+				lock (_differentTypeMappers.SyncRoot)
+				{
+					if (mapper == null)
+						_differentTypeMappers.Remove(key);
+					else
+						_differentTypeMappers[key] = mapper;
+				}
 			}
 		}
 
@@ -1317,9 +1323,15 @@ namespace BLToolkit.Mapping
 				if (sourceType == destType)
 				{
 					IValueMapper t = (IValueMapper)_sameTypeMappers[sourceType];
-
 					if (t == null)
-						_sameTypeMappers[sourceType] = t = GetValueMapper(sourceType, destType);
+					{
+						lock (_sameTypeMappers.SyncRoot)
+						{
+							t = (IValueMapper)_sameTypeMappers[sourceType];
+							if (t == null)
+								_sameTypeMappers[sourceType] = t = GetValueMapper(sourceType, destType);
+						}
+					}
 
 					mappers[i] = t;
 				}
@@ -1329,7 +1341,14 @@ namespace BLToolkit.Mapping
 					IValueMapper t   = (IValueMapper)_differentTypeMappers[key];
 
 					if (t == null)
-						_differentTypeMappers[key] = t = GetValueMapper(sourceType, destType);
+					{
+						lock (_differentTypeMappers.SyncRoot)
+						{
+							t = (IValueMapper)_differentTypeMappers[key];
+							if (t == null)
+								_differentTypeMappers[key] = t = GetValueMapper(sourceType, destType);
+						}
+					}
 
 					mappers[i] = t;
 				}
@@ -3473,7 +3492,7 @@ namespace BLToolkit.Mapping
 			return output;
 		}
 
-		private int GetResultCount(MapNextResult[] nextResults)
+		private static int GetResultCount(MapNextResult[] nextResults)
 		{
 			int n = nextResults.Length;
 
@@ -3483,7 +3502,7 @@ namespace BLToolkit.Mapping
 			return n;
 		}
 
-		private int GetResultSets(
+		private static int GetResultSets(
 			int             current,
 			MapResultSet[]  output,
 			MapResultSet    master,

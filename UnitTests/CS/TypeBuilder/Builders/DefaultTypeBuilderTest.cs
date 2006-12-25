@@ -71,7 +71,7 @@ namespace TypeBuilder.Builders
 
 		public class TestTypeBuilderAttribute : AbstractTypeBuilderAttribute
 		{
-			public override BLToolkit.TypeBuilder.Builders.IAbstractTypeBuilder TypeBuilder
+			public override IAbstractTypeBuilder TypeBuilder
 			{
 				get { return new AbstractTypeBuilder(); }
 			}

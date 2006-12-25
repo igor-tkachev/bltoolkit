@@ -1,5 +1,5 @@
 using System;
-
+using BLToolkit.TypeBuilder;
 using NUnit.Framework;
 
 using BLToolkit.EditableObjects;
@@ -42,6 +42,8 @@ namespace A.EditableObjects
 		[Test]
 		public void Test_EditableList_AcceptChanges()
 		{
+			TypeFactory.SaveTypes = true;
+
 			_Person person = TypeAccessor<_Person>.CreateInstance();
 
 			person.Phones.AddRange(new _PersonPhone[]

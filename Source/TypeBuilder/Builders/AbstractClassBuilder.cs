@@ -183,7 +183,7 @@ namespace BLToolkit.TypeBuilder.Builders
 
 		private static int _idCounter;
 
-		private void SetID(AbstractTypeBuilderList builders)
+		private static void SetID(AbstractTypeBuilderList builders)
 		{
 			foreach (IAbstractTypeBuilder builder in builders)
 				builder.ID = ++_idCounter;
@@ -653,7 +653,7 @@ namespace BLToolkit.TypeBuilder.Builders
 
 				MethodInfo setter = pi.GetSetMethod(true);
 
-				if (setter != null && setter.IsVirtual && !setter.IsAbstract && !getter.IsFinal)
+				if (setter != null && setter.IsVirtual && !setter.IsAbstract && !setter.IsFinal)
 					OverrideSetter(setter, propertyBuilders);
 			}
 

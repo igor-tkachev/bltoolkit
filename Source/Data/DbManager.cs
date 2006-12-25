@@ -1559,6 +1559,8 @@ namespace BLToolkit.Data
 		/// <summary>
 		/// Maps all parameters returned from the server to all given objects.
 		/// </summary>
+		/// <param name="returnValueMember">Name of the member used to map the
+		/// return value. Can be null.</param>
 		/// <param name="objects">An array of <see cref="System.Object"/> to map
 		/// from command parameters.</param>
 		public void MapOutputParameters(
@@ -3785,6 +3787,7 @@ namespace BLToolkit.Data
 		/// <include file="Examples.xml" path='examples/db[@name="ExecuteDictionary(string,Type)"]/*' />
 		/// <param name="keyField">The field name or index that is used as a key to populate <see cref="Hashtable"/>.</param>
 		/// <param name="keyFieldType">Business object type.</param>
+		/// <param name="parameters">Any additional parameters passed to the constructor with <see cref="InitContext"/> parameter.</param>
 		/// <returns>An instance of the <see cref="Hashtable"/> class.</returns>
 		public Hashtable ExecuteDictionary(
 			NameOrIndexParameter keyField,
@@ -3805,6 +3808,7 @@ namespace BLToolkit.Data
 		/// <param name="dictionary">A dictionary of mapped business objects to populate.</param>
 		/// <param name="keyField">The field name or index that is used as a key to populate <see cref="IDictionary"/>.</param>
 		/// <param name="type">Business object type.</param>
+		/// <param name="parameters">Any additional parameters passed to the constructor with <see cref="InitContext"/> parameter.</param>
 		/// <returns>An instance of the <see cref="IDictionary"/>.</returns>
 		public IDictionary ExecuteDictionary(
 			IDictionary          dictionary,
@@ -3828,6 +3832,7 @@ namespace BLToolkit.Data
 		/// <typeparam name="TKey">Key's type.</typeparam>
 		/// <typeparam name="TValue">Value's type.</typeparam>
 		/// <param name="keyField">The field name or index that is used as a key to populate the dictionary.</param>
+		/// <param name="parameters">Any additional parameters passed to the constructor with <see cref="InitContext"/> parameter.</param>
 		/// <returns>An instance of the dictionary.</returns>
 		public Dictionary<TKey, TValue> ExecuteDictionary<TKey, TValue>(
 			NameOrIndexParameter keyField,
@@ -3869,6 +3874,7 @@ namespace BLToolkit.Data
 		/// </summary>
 		/// <include file="Examples.xml" path='examples/db[@name="ExecuteDictionary(string,Type)"]/*' />
 		/// <param name="type">Business object type.</param>
+		/// <param name="parameters">Any additional parameters passed to the constructor with <see cref="InitContext"/> parameter.</param>
 		/// <returns>An instance of the <see cref="Hashtable"/> class.</returns>
 		public Hashtable ExecuteDictionary(
 			MapIndex        index,
@@ -3888,6 +3894,7 @@ namespace BLToolkit.Data
 		/// <include file="Examples.xml" path='examples/db[@name="ExecuteDictionary(Hashtable,string,Type)"]/*' />
 		/// <param name="dictionary">A dictionary of mapped business objects to populate.</param>
 		/// <param name="type">Business object type.</param>
+		/// <param name="parameters">Any additional parameters passed to the constructor with <see cref="InitContext"/> parameter.</param>
 		/// <returns>An instance of the <see cref="IDictionary"/>.</returns>
 		public IDictionary ExecuteDictionary(
 			IDictionary     dictionary,

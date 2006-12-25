@@ -411,7 +411,7 @@ namespace BLToolkit.TypeBuilder.Builders
 
 				if (emit.LoadWellKnownValue(o))
 				{
-					if (o != null && oType.IsValueType)
+					if (oType.IsValueType)
 					{
 						if (!pi[i].ParameterType.IsValueType)
 							emit.box(oType);

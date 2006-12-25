@@ -57,7 +57,7 @@ namespace BLToolkit.Demo.BusinessLogic
 
 		#region Protected Members
 
-		protected A Accessor
+		protected virtual A Accessor
 		{
 			get { return AccessorBase<T,A>.CreateInstance(); }
 		}

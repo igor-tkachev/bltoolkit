@@ -3,7 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
-using System.Reflection;
 using System.Windows.Forms;
 using Microsoft.Win32;
 
@@ -26,7 +25,7 @@ namespace BLToolkit.Demo.Forms
 			F form  = new F();
 
 			form.SetBizEntity(clone);
-			form.Init(clone, delegate()
+			form.Init(clone, delegate
 			{
 				saveAction(clone);
 
@@ -43,7 +42,7 @@ namespace BLToolkit.Demo.Forms
 			F form   = new F();
 
 			form.SetBizEntity(entity);
-			form.Init(entity, delegate()
+			form.Init(entity, delegate
 			{
 				saveAction(entity);
 				entity.AcceptChanges();
@@ -112,7 +111,7 @@ namespace BLToolkit.Demo.Forms
 
 		#region Scan Controls
 
-		private void ForEach(Control control, Hashtable scanedControls, Predicate<Control> controlHandler)
+		private static void ForEach(Control control, Hashtable scanedControls, Predicate<Control> controlHandler)
 		{
 			if (control != null && !scanedControls.ContainsKey(control))
 			{
@@ -124,12 +123,12 @@ namespace BLToolkit.Demo.Forms
 			}
 		}
 
-		protected void ScanControls(Predicate<Control> controlHandler)
+		protected virtual void ScanControls(Predicate<Control> controlHandler)
 		{
 			ForEach(this, new Hashtable(), controlHandler);
 		}
 
-		protected void ScanControls(Control control, Predicate<Control> controlHandler)
+		protected virtual void ScanControls(Control control, Predicate<Control> controlHandler)
 		{
 			ForEach(control, new Hashtable(), controlHandler);
 		}

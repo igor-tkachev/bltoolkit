@@ -202,7 +202,7 @@ namespace BLToolkit.TypeBuilder.Builders
 				BuildMember(mi);
 		}
 
-		private void AddMemberToDictionary(IDictionary members, MemberInfo mi)
+		private static void AddMemberToDictionary(IDictionary members, MemberInfo mi)
 		{
 			string name = mi.Name;
 

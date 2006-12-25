@@ -1,5 +1,4 @@
 using System;
-using System.Reflection;
 
 using BLToolkit.Reflection;
 using BLToolkit.Reflection.Extension;

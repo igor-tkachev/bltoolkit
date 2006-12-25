@@ -1,11 +1,7 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.Diagnostics;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
-using System.Text;
 
 using NUnit.Framework;
 
@@ -304,7 +300,7 @@ namespace EditableObjects
 		{
 			Console.WriteLine("--- Print List ---");
 			foreach (EditableTestObject o in _testList)
-				Console.WriteLine(o.ToString());
+				Console.WriteLine(o);
 		}
 
 		[Serializable]

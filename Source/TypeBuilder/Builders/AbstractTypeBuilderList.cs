@@ -1,5 +1,4 @@
 using System;
-using System.Diagnostics.CodeAnalysis;
 
 #if FW2
 using System.Collections.Generic;
@@ -13,7 +12,6 @@ namespace BLToolkit.TypeBuilder.Builders
 	public class AbstractTypeBuilderList : List<IAbstractTypeBuilder>
 	{
 		public AbstractTypeBuilderList()
-			: base()
 		{
 		}
 
@@ -25,12 +23,11 @@ namespace BLToolkit.TypeBuilder.Builders
 #else
 	public class AbstractTypeBuilderList : ArrayList
 	{
-		public AbstractTypeBuilderList() 
-			: base()
+		public AbstractTypeBuilderList()
 		{
 		}
 
-		public AbstractTypeBuilderList(int capacity) 
+		public AbstractTypeBuilderList(int capacity)
 			: base(capacity)
 		{
 		}

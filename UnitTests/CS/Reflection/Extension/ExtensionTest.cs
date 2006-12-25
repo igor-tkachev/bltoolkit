@@ -4,7 +4,6 @@ using System.IO;
 using NUnit.Framework;
 
 using BLToolkit.Mapping;
-using BLToolkit.Reflection;
 using BLToolkit.Reflection.Extension;
 
 namespace Reflection.Extension
