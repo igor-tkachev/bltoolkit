@@ -485,8 +485,12 @@ namespace Rsdn.Framework.Data.Mapping
 			lock (_typeList.SyncRoot)
 			{
 				foreach (MapDescriptor desc in _typeList.Values)
-					if (desc.MappedType.Assembly.FullName == args.Name)
-						return desc.MappedType.Assembly;
+				{
+					Assembly mappedTypeAssembly = desc.MappedType.Assembly;
+					
+					if (mappedTypeAssembly.FullName.Length == args.Name.Length && mappedTypeAssembly.FullName == args.Name)
+						return mappedTypeAssembly;
+				}
 			}
 
 			int idx = args.Name.IndexOf(".MappingExtension.");

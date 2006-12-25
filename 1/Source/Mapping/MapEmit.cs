@@ -1028,7 +1028,8 @@ namespace Rsdn.Framework.Data.Mapping
 				ctx.IniCtorGen
 					.LoadType(ctx.Type)
 					.ldstr(ctx.PropertyInfo.Name)
-					.call(typeof(Type), "GetProperty", typeof(string))
+					.ldc_i4((int)(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance))
+					.call(typeof(Type), "GetProperty", typeof(string), typeof(BindingFlags))
 					.newobj(ci)
 					.stsfld(createdObject.InitFieldBuilder);
 			}
