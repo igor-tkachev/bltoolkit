@@ -1,5 +1,8 @@
 using System;
 using System.Collections;
+#if FW2
+using System.Collections.Generic;
+#endif
 using System.Data;
 using System.Data.SqlTypes;
 using System.Diagnostics;
@@ -217,6 +220,51 @@ namespace BLToolkit.DataAccess
 				db.ExecuteDictionary(dictionary, mms[0].MemberName, objectType, null);
 			}
 		}
+
+#if FW2
+		protected void ExecuteDictionary<TValue>(
+			DbManager                          db,
+			IDictionary<CompoundValue, TValue> dictionary,
+			Type                               objectType,
+			string                             methodName)
+		{
+			MemberMapper[] mms = new SqlQuery(Extensions).GetKeyFieldList(db, objectType);
+
+			if (mms.Length == 0)
+				throw new DataAccessException(string.Format(
+					"Index is not defined for the method '{0}.{1}'.",
+					GetType().Name, methodName));
+
+			string[] fields = new string[mms.Length];
+
+			for (int i = 0; i < mms.Length; i++)
+				fields[i] = mms[i].MemberName;
+
+			db.ExecuteDictionary<TValue>(dictionary, new MapIndex(fields), objectType, null);
+		}
+
+		protected void ExecuteDictionary<TKey, TValue>(
+			DbManager                 db,
+			IDictionary<TKey, TValue> dictionary,
+			Type                      objectType,
+			string                    methodName)
+		{
+			MemberMapper[] mms = new SqlQuery(Extensions).GetKeyFieldList(db, objectType);
+
+			if (mms.Length == 0)
+				throw new DataAccessException(string.Format(
+					"Index is not defined for the method '{0}.{1}'.",
+					GetType().Name, methodName));
+
+			if (mms.Length != 1)
+				throw new DataAccessException(string.Format(
+					"Index hax more then one field for the method '{0}.{1}'. Use CompoundValue as the Key type",
+					GetType().Name, methodName));
+
+			db.ExecuteDictionary<TKey, TValue>(dictionary, mms[0].MemberName, objectType, null);
+		}
+
+#endif
 
 		protected void ExecuteScalarDictionary(
 			DbManager             db,

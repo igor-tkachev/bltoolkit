@@ -1,20 +1,23 @@
 using System;
+using System.Collections;
+#if FW2
+using System.Collections.Generic;
+#endif
 using System.ComponentModel;
-using System.IO;
-using System.Reflection;
 using System.Data;
 using System.Data.SqlTypes;
-using System.Collections;
+using System.IO;
+using System.Reflection;
 using System.Reflection.Emit;
 using System.Xml;
 
 using BLToolkit.Common;
-using BLToolkit.TypeBuilder.Builders;
 using BLToolkit.Data;
-using BLToolkit.Reflection.Emit;
-using BLToolkit.Reflection;
-using BLToolkit.TypeBuilder;
 using BLToolkit.Mapping;
+using BLToolkit.Reflection;
+using BLToolkit.Reflection.Emit;
+using BLToolkit.TypeBuilder;
+using BLToolkit.TypeBuilder.Builders;
 
 namespace BLToolkit.DataAccess
 {
@@ -101,7 +104,7 @@ namespace BLToolkit.DataAccess
 			}
 			else if (!returnType.IsArray && (IsInterfaceOf(returnType, typeof(IList))
 #if FW2
-				|| returnType.IsGenericType && returnType.GetGenericTypeDefinition() == typeof(System.Collections.Generic.IList<>)
+				|| returnType.IsGenericType && returnType.GetGenericTypeDefinition() == typeof(IList<>)
 #endif
 				))
 			{
@@ -129,7 +132,7 @@ namespace BLToolkit.DataAccess
 			}
 			else if (IsInterfaceOf(returnType, typeof(IDictionary))
 #if FW2
-				|| returnType.IsGenericType && returnType.GetGenericTypeDefinition() == typeof(System.Collections.Generic.IDictionary<,>)
+				|| returnType.IsGenericType && returnType.GetGenericTypeDefinition() == typeof(IDictionary<,>)
 #endif
 				)
 			{
@@ -685,12 +688,14 @@ namespace BLToolkit.DataAccess
 			Type keyType,
 			Type elementType)
 		{
-			_objectType = elementType;
+			EmitHelper emit = Context.MethodBuilder.Emitter;
 
+			_objectType = elementType;
+			
 			CreateReturnTypeInstance();
 			InitObjectType();
 
-			Context.MethodBuilder.Emitter
+			emit
 				.ldarg_0
 				.end()
 				;
@@ -699,14 +704,41 @@ namespace BLToolkit.DataAccess
 			CallSetCommand();
 			LoadDestinationOrReturnValue();
 
-			Context.MethodBuilder.Emitter
-				.ldloc    (_locObjType)
-				.LoadType (keyType)
-				.ldstr    (Context.CurrentMethod.Name)
-				.callvirt (typeof(DataAccessor), "ExecuteDictionary", _bindingFlags,
-					       typeof(DbManager), typeof(IDictionary), typeof(Type),
-					       typeof(Type), typeof(string))
-				;
+#if FW2
+			if (IsGenericDestinationOrReturnValue())
+			{
+				Type[]     genericArgs = Context.ReturnValue.LocalType.GetGenericArguments();
+				Type[]     types       = new Type[]
+					{
+						typeof(DbManager),
+						typeof(IDictionary<,>).MakeGenericType(genericArgs),
+						typeof(Type),
+						typeof(string),
+					};
+				MethodInfo method = _baseType.GetMethod("ExecuteDictionary",
+					_bindingFlags, GenericBinder.Generic, types, null);
+
+				if (TypeHelper.IsSameOrParent(typeof(CompoundValue), genericArgs[0]))
+					method = method.MakeGenericMethod(genericArgs[1]);
+				else
+					method = method.MakeGenericMethod(genericArgs);
+
+				emit
+					.ldloc    (_locObjType)
+					.ldstr    (Context.CurrentMethod.Name)
+					.callvirt (method)
+					;
+			}
+			else
+#endif
+				emit
+					.ldloc    (_locObjType)
+					.LoadType (keyType)
+					.ldstr    (Context.CurrentMethod.Name)
+					.callvirt (_baseType, "ExecuteDictionary", _bindingFlags,
+							   typeof(DbManager), typeof(IDictionary), typeof(Type),
+							   typeof(Type), typeof(string))
+					;
 		}
 
 		/// <summary>
@@ -742,6 +774,8 @@ namespace BLToolkit.DataAccess
 			NameOrIndexParameter keyField,
 			Type                 elementType)
 		{
+			EmitHelper emit = Context.MethodBuilder.Emitter;
+
 			_objectType = elementType;
 
 			CreateReturnTypeInstance();
@@ -750,15 +784,40 @@ namespace BLToolkit.DataAccess
 			CallSetCommand();
 			LoadDestinationOrReturnValue();
 
-			Context.MethodBuilder.Emitter
-				.ldNameOrIndex(keyField)
-				.ldloc        (_locObjType)
-				.ldnull
-				.callvirt     (typeof(DbManager), "ExecuteDictionary",
-					           typeof(IDictionary), typeof(NameOrIndexParameter), typeof(Type), typeof(object[]))
-				.pop
-				.end()
-				;
+#if FW2
+			if (IsGenericDestinationOrReturnValue())
+			{
+				Type[]     genericArgs = Context.ReturnValue.LocalType.GetGenericArguments();
+				Type[]     types       = new Type[]
+					{
+						typeof(IDictionary<,>).MakeGenericType(genericArgs),
+						typeof(NameOrIndexParameter),
+						typeof(Type),
+						typeof(object[]),
+					};
+				MethodInfo method = typeof(DbManager).GetMethod("ExecuteDictionary", _bindingFlags, GenericBinder.Generic, types, null)
+					.MakeGenericMethod(genericArgs);
+
+				emit
+					.ldNameOrIndex(keyField)
+					.ldloc        (_locObjType)
+					.ldnull
+					.callvirt     (method)
+					.pop
+					.end()
+					;
+			}
+			else
+#endif
+
+				emit
+					.ldNameOrIndex(keyField)
+					.ldloc        (_locObjType)
+					.ldnull
+					.callvirt     (typeof(DbManager), "ExecuteDictionary", typeof(IDictionary), typeof(NameOrIndexParameter), typeof(Type), typeof(object[]))
+					.pop
+					.end()
+					;
 		}
 
 		#endregion
@@ -952,6 +1011,16 @@ namespace BLToolkit.DataAccess
 			else
 				Context.MethodBuilder.Emitter.ldloc(Context.ReturnValue);
 		}
+
+#if FW2
+		private bool IsGenericDestinationOrReturnValue()
+		{
+			if (_destination != null)
+				return _destination.ParameterType.IsGenericType;
+			else
+				return Context.ReturnValue.LocalType.IsGenericType;
+		}
+#endif
 
 		private void InitObjectType()
 		{

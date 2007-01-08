@@ -493,6 +493,11 @@ namespace BLToolkit.Reflection
 			get { return _members.SyncRoot; }
 		}
 
+		public int IndexOf(MemberAccessor ma)
+		{
+			return _members.IndexOf(ma);
+		}
+
 		#endregion
 
 		#region IEnumerable Members

@@ -164,6 +164,17 @@ namespace DataAccess
 			[SqlQuery("SELECT * FROM Person WHERE PersonID < 3")]
 			[ObjectType(typeof(Person))]
 			public abstract Dictionary<int, object>           Fw2ScalarDictionaryByPKWithObjectType();
+
+			[ActionName("SelectAll")]
+			[Index("ID")]
+			public abstract Dictionary<uint, Person> SelectAllT7();
+
+			[ActionName("SelectAll")]
+			public abstract Dictionary<long, Person> SelectAllT8();
+
+			[SprocName("Person_SelectAll")]
+			public abstract Dictionary<CompoundValue, PersonMultiPK> SelectAllT9();
+
 #endif
 		}
 
@@ -433,7 +444,47 @@ namespace DataAccess
 			Assert.AreEqual("John", actualValue.FirstName);
 		}
 
-		
+		[Test]
+		public void FW2DictionaryMismatchKeyTypeTest()
+		{
+			TestAccessor da = DataAccessor.CreateInstance<TestAccessor>();
+			Dictionary<uint, Person> persons = da.SelectAllT7();
+
+			Assert.IsNotNull(persons);
+			Assert.IsTrue(persons.Count > 0);
+
+			Person actualValue = persons[1];
+			Assert.IsNotNull(actualValue);
+			Assert.AreEqual("John", actualValue.FirstName);
+		}
+
+		[Test]
+		public void FW2DictionaryMismatchKeyTypeTest2()
+		{
+			TestAccessor da = DataAccessor.CreateInstance<TestAccessor>();
+			Dictionary<long, Person> persons = da.SelectAllT8();
+
+			Assert.IsNotNull(persons);
+			Assert.IsTrue(persons.Count > 0);
+
+			Person actualValue = persons[1];
+			Assert.IsNotNull(actualValue);
+			Assert.AreEqual("John", actualValue.FirstName);
+		}
+
+		[Test]
+		public void FW2DictionaryMismatchKeyTypeCompoundValueTest()
+		{
+			TestAccessor da = DataAccessor.CreateInstance<TestAccessor>();
+			Dictionary<CompoundValue, PersonMultiPK> persons = da.SelectAllT9();
+
+			Assert.IsNotNull(persons);
+			Assert.IsTrue(persons.Count > 0);
+
+			PersonMultiPK actualValue = persons[new CompoundValue(1, "Pupkin")];
+			Assert.IsNotNull(actualValue);
+			Assert.AreEqual("John", actualValue.FirstName);
+		}
 #endif
 	}
 }
