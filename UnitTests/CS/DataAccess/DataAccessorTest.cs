@@ -98,7 +98,11 @@ namespace DataAccess
 			public abstract void Insert_OutputParameter([Direction.Output("PERSONID")] Person e);
 
 			[SprocName("Scalar_ReturnParameter")]
-			public abstract void Insert_ReturnParameter([Direction.ReturnValue("PersonID"),
+			public abstract void Insert_ReturnParameter([Direction.ReturnValue("@PersonID"),
+				Direction.Ignore("PersonID", "FirstName", "LastName", "MiddleName", "Gender")] Person e);
+
+			[SprocName("Scalar_ReturnParameter")]
+			public abstract void Insert_ReturnParameter2([Direction.ReturnValue("ID"),
 				Direction.Ignore("PersonID", "FirstName", "LastName", "MiddleName", "Gender")] Person e);
 
 			[ActionName("SelectAll"), ObjectType(typeof(Person))]
@@ -416,13 +420,23 @@ namespace DataAccess
 			Assert.IsTrue(e.ID > 0);
 			_sproc.Delete(e);
 		}
-
 		[Test]
 		public void Gen_InsertGetIDReturnParameter()
 		{
 			Person e = (Person)TypeAccessor.CreateInstance(typeof(Person));
 
 			_da.Insert_ReturnParameter(e);
+
+			Assert.AreEqual(12345, e.ID);
+		}
+
+
+		[Test]
+		public void Gen_InsertGetIDReturnParameter2()
+		{
+			Person e = (Person)TypeAccessor.CreateInstance(typeof(Person));
+
+			_da.Insert_ReturnParameter2(e);
 
 			Assert.AreEqual(12345, e.ID);
 		}

@@ -1519,15 +1519,15 @@ namespace BLToolkit.Data
 
 						if (returnValueMember != null)
 						{
-							if (!returnValueMember.StartsWith("@"))
+							if (!returnValueMember.StartsWith("@") && dest is ObjectMapper)
 							{
-								TypeAccessor   ta = TypeAccessor.GetAccessor(obj.GetType());
-								MemberAccessor ma = ta[returnValueMember];
+								ObjectMapper   om = (ObjectMapper)dest;
+								MemberAccessor ma = om.TypeAccessor[returnValueMember];
 
 								if (ma != null)
 								{
 									ma.SetValue(obj, parameter.Value);
-									return;
+									continue;
 								}
 							}
 							else
@@ -3851,6 +3851,22 @@ namespace BLToolkit.Data
 		public IDictionary<TKey, TValue> ExecuteDictionary<TKey, TValue>(
 			IDictionary<TKey, TValue> dictionary,
 			NameOrIndexParameter      keyField,
+			Type                      destObjectType,
+			params object[]           parameters)
+		{
+			if (_prepared)
+				InitParameters(CommandAction.Select);
+
+			using (IDataReader dr = ExecuteReaderInternal())
+			{
+				return _mappingSchema.MapDataReaderToDictionary<TKey,TValue>(
+					dr, dictionary, keyField, destObjectType, parameters);
+			}
+		}
+
+		public IDictionary<TKey, TValue> ExecuteDictionary<TKey, TValue>(
+			IDictionary<TKey, TValue> dictionary,
+			NameOrIndexParameter      keyField,
 			params object[]           parameters)
 		{
 			if (_prepared)
@@ -3927,6 +3943,22 @@ namespace BLToolkit.Data
 			using (IDataReader dr = ExecuteReaderInternal())
 			{
 				return _mappingSchema.MapDataReaderToDictionary<TValue>(dr, index, parameters);
+			}
+		}
+
+		public IDictionary<CompoundValue, TValue> ExecuteDictionary<TValue>(
+			IDictionary<CompoundValue, TValue> dictionary,
+			MapIndex                           index,
+			Type                               destObjectType,
+			params object[]                    parameters)
+		{
+			if (_prepared)
+				InitParameters(CommandAction.Select);
+
+			using (IDataReader dr = ExecuteReaderInternal())
+			{
+				return _mappingSchema.MapDataReaderToDictionary<TValue>(
+					dr, dictionary, index, destObjectType, parameters);
 			}
 		}
 
