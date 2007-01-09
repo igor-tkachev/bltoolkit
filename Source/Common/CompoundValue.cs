@@ -17,6 +17,16 @@ namespace BLToolkit.Common
 		private readonly object[] _values;
 		private readonly int      _hash;
 
+		public int Count
+		{
+			get { return _values == null ? 0 : _values.Length; }
+		}
+
+		public object this[int index]
+		{
+			get { return _values == null ? null : _values[index]; }
+		}
+
 		private static int CalcHashCode(object[] values)
 		{
 			if (values.Length == 0)
