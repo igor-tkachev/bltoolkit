@@ -1,5 +1,6 @@
 using System;
-
+using System.Collections;
+using System.Reflection;
 using NUnit.Framework;
 
 using BLToolkit.EditableObjects;
@@ -114,6 +115,61 @@ namespace EditableObjects
 			o.AcceptChanges();
 			Assert.IsFalse (o.IsDirty);
 #endif
+		}
+
+
+		[Test]
+		public void TestRejectChangesNotification()
+		{
+			Object1 o = Object1.CreateInstance();
+
+			Console.WriteLine("o is dirty: " + o.IsDirty);
+
+			o.PropertyChanged += new System.ComponentModel.PropertyChangedEventHandler(object_PropertyChanged);
+
+			Console.WriteLine("Changing 3 fields");
+
+			o.Field1 = 10;
+			o.Field2 = !o.Field2;
+			o.Field3 = DateTime.Now;
+
+			Console.WriteLine("Dirty Members");
+
+			PropertyInfo[] dirtyMembers = o.GetDirtyMembers();
+
+			Assert.AreEqual(dirtyMembers.Length, 3);
+
+			foreach (PropertyInfo dirtyMember in dirtyMembers)
+				Console.WriteLine(dirtyMember.Name);
+
+			Console.WriteLine("Rejecting field 1");
+
+			o.RejectMemberChanges("Field1");
+
+			Console.WriteLine("Dirty Members");
+
+			dirtyMembers = o.GetDirtyMembers();
+			Assert.AreEqual(dirtyMembers.Length, 2);
+
+			foreach (PropertyInfo dirtyMember in dirtyMembers)
+				Console.WriteLine(dirtyMember.Name);
+
+			Console.WriteLine("Rejecting all changes");
+
+			o.RejectChanges();
+
+			Console.WriteLine("Dirty Members");
+
+			dirtyMembers = o.GetDirtyMembers();
+			Assert.AreEqual(dirtyMembers.Length, 0);
+
+			foreach (PropertyInfo dirtyMember in dirtyMembers)
+				Console.WriteLine(dirtyMember.Name);
+		}
+
+		private static void object_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+		{
+			Console.WriteLine("Property Changed: " + e.PropertyName);
 		}
 	}
 }
