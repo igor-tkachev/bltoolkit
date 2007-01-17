@@ -134,8 +134,13 @@ namespace BLToolkit.EditableObjects
 
 		public virtual void RejectChanges()
 		{
+			PropertyInfo[] dirtyMembers = GetDirtyMembers();
+
 			if (this is IEditable)
 				((IEditable)this).RejectChanges();
+
+			foreach (PropertyInfo dirtyMember in dirtyMembers)
+				OnPropertyChanged(dirtyMember.Name);
 		}
 
 		[MapIgnore, Bindable(false)]
@@ -152,8 +157,13 @@ namespace BLToolkit.EditableObjects
 
 		public virtual void RejectMemberChanges(string memberName)
 		{
+			bool notifyChange = IsDirtyMember(memberName);
+
 			if (this is IMemberwiseEditable)
 				((IMemberwiseEditable)this).RejectMemberChanges(null, memberName);
+
+			if (notifyChange)
+				OnPropertyChanged(memberName);
 		}
 
 		public virtual bool IsDirtyMember(string memberName)

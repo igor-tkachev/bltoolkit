@@ -11,6 +11,7 @@ Bug fixes
   with 3rd+ level nested properties.
 - Object holder ignored NoInstanceAttribute.
 - ValidatorContext caches NullValue.
+- EditableObject.RejectChanges/RejectMemberChanges were not firing PropertyChanged event for reverted fields.
 
 Enhancement
 
