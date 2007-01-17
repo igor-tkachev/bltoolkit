@@ -76,8 +76,13 @@ namespace Rsdn.Framework.EditableObject
 		{
 			if (this is IEditable)
 			{
+				ArrayList dirtyMembers = GetDirtyMembers();
+
 				((IEditable)this).RejectChanges();
 				_editingCount = 0;
+
+				foreach (MapPropertyInfo dirtyMember in dirtyMembers)
+					OnPropertyChanged(dirtyMember);
 			}
 		}
 
@@ -88,7 +93,12 @@ namespace Rsdn.Framework.EditableObject
 
 		public virtual void RejectChanges(string memberName)
 		{
+			bool notifyChange = IsDirtyMember(memberName);
+
 			((IEditable)this).RejectChanges(memberName, null);
+
+			if (notifyChange)
+				OnPropertyChanged(memberName);
 		}
 
 		[MapIgnore]
