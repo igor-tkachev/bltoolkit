@@ -9,7 +9,7 @@ using BLToolkit.Reflection;
 
 namespace A.EditableObjects
 {
-	[TestFixture]
+	//[TestFixture]
 	public class EditableList_AcceptChanges
 	{
 		public static bool IsAcceptChangesCallForPersonPhone = false;

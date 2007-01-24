@@ -27,5 +27,16 @@ namespace UnitTests.All
 				throw;
 			}
 		}
+
+		public void Test(out int i3, out decimal d4)
+		{
+			object o = (decimal)123;
+
+			d4 = (decimal)o;
+
+			o = (int)123;
+
+			i3 = (int)o;
+		}
 	}
 }

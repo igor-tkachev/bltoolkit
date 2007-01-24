@@ -1672,10 +1672,7 @@ namespace BLToolkit.DataAccess
 					;
 			}
 
-			if (type.IsValueType && type.IsPrimitive == false)
-				emit.stobj(type);
-			else
-				emit.stind(type);
+			emit.stind(type);
 		}
 
 		private void GetOutRefParameters()

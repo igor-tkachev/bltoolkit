@@ -2914,6 +2914,7 @@ namespace BLToolkit.Reflection.Emit
 			else if (type == typeof(float))  stind_r4.end();
 			else if (type == typeof(long)  ||
 			         type == typeof(ulong))  stind_i8.end();
+			else if (type.IsValueType)       stobj(type);
 			else
 				throw new InvalidOperationException();
 
