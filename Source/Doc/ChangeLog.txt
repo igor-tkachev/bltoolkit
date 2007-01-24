@@ -12,6 +12,7 @@ Bug fixes
 - Object holder ignored NoInstanceAttribute.
 - ValidatorContext caches NullValue.
 - EditableObject.RejectChanges/RejectMemberChanges were not firing PropertyChanged event for reverted fields.
+- Fixed the generating IsValueType && !IsPrimitive ref/out parameters.
 
 Enhancement
 

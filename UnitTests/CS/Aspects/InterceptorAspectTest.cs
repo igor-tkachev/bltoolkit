@@ -29,7 +29,7 @@ namespace Aspects
 		[Interceptor(typeof(TestInterceptor), InterceptType.BeforeCall | InterceptType.OnCatch)]
 		public abstract class TestClass
 		{
-			public abstract int Test(int i1, ref int i2, out int i3);
+			public abstract int Test(int i1, ref int i2, out int i3, out decimal d4);
 
 			[NoInterception(typeof(TestInterceptor), InterceptType.BeforeCall | InterceptType.OnCatch)]
 			public abstract int TestNo();
@@ -58,10 +58,11 @@ namespace Aspects
 		{
 			TestClass t = (TestClass)TypeAccessor.CreateInstance(typeof(TestClass));
 
-			int i2 = 2;
-			int i3;
+			int     i2 = 2;
+			int     i3;
+			decimal d4;
 
-			Assert.AreEqual(10, t.Test(1, ref i2, out i3));
+			Assert.AreEqual(10, t.Test(1, ref i2, out i3, out d4));
 			Assert.AreEqual(0,  t.TestNo());
 			Assert.AreEqual(60, t.Prop);
 		}
