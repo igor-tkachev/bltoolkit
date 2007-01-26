@@ -22,13 +22,24 @@ namespace BLToolkit.Mapping
 				_keyField = keyField.Name.Substring(1);
 			else
 			{
-				MemberAccessor ma = _mapper.TypeAccessor[keyField];
-				_keyField         = _mapper.TypeAccessor.IndexOf(ma);
-				_typeMismatch     = !TypeHelper.IsSameOrParent(typeof(K), ma.Type);
+				MemberMapper mm;
+
+				if (keyField.ByName)
+				{
+					mm = _mapper[keyField.Name, true];
+					_keyField = _mapper.IndexOf(mm);
+				}
+				else
+				{
+					mm = _mapper[keyField.Index];
+					_keyField = keyField;
+				}
+
+				_typeMismatch     = !TypeHelper.IsSameOrParent(typeof(K), mm.Type);
 
 				Debug.WriteLineIf(_typeMismatch, string.Format(
 					"Member {0} type '{1}' does not match dictionary key type '{2}'.",
-						ma.Name, ma.Type.Name, (typeof(K).Name)));
+						mm.Name, mm.Type.Name, (typeof(K).Name)));
 			}
 		}
 
