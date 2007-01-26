@@ -25,6 +25,13 @@ namespace DataAccess
 			public string MiddleName;
 		}
 
+		public class Derived : Person
+		{
+			[MapIgnore]
+			public string Ignore;
+			public DateTime Date;
+		}
+
 		// Same as Person, but does not have any primary keys.
 		public class PersonNoPK
 		{
@@ -171,6 +178,9 @@ namespace DataAccess
 
 			[ActionName("SelectAll")]
 			public abstract Dictionary<long, Person> SelectAllT8();
+
+			[SprocName("Person_SelectAll")]
+			public abstract Dictionary<long, Derived> SelectAllDerived();
 
 			[SprocName("Person_SelectAll")]
 			public abstract Dictionary<CompoundValue, PersonMultiPK> SelectAllT9();
@@ -463,6 +473,20 @@ namespace DataAccess
 		{
 			TestAccessor da = DataAccessor.CreateInstance<TestAccessor>();
 			Dictionary<long, Person> persons = da.SelectAllT8();
+
+			Assert.IsNotNull(persons);
+			Assert.IsTrue(persons.Count > 0);
+
+			Person actualValue = persons[1];
+			Assert.IsNotNull(actualValue);
+			Assert.AreEqual("John", actualValue.FirstName);
+		}
+
+		[Test]
+		public void FW2DictionaryMismatchKeyTypeWithHierarchyTest()
+		{
+			TestAccessor da = DataAccessor.CreateInstance<TestAccessor>();
+			Dictionary<long, Derived> persons = da.SelectAllDerived();
 
 			Assert.IsNotNull(persons);
 			Assert.IsTrue(persons.Count > 0);

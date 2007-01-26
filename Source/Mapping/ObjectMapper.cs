@@ -186,6 +186,11 @@ namespace BLToolkit.Mapping
 			}
 		}
 
+		public int IndexOf(MemberMapper mm)
+		{
+			return _members.IndexOf(mm);
+		}
+
 		private TypeAccessor _typeAccessor;
 		public  TypeAccessor  TypeAccessor
 		{
