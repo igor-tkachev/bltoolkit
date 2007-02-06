@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Data;
 using System.Data.Common;
 
@@ -89,6 +90,40 @@ namespace BLToolkit.Data.DataProvider
 		public override string Name
 		{
 			get { return "Sybase"; }
+		}
+
+		public override void PrepareCommand(ref CommandType commandType, ref string commandText, ref IDbDataParameter[] commandParameters)
+		{
+			base.PrepareCommand(ref commandType, ref commandText, ref commandParameters);
+
+			if (commandType == CommandType.Text && commandParameters != null)
+			{
+				ArrayList list = null;
+
+				for (int i = 0; i < commandParameters.Length; i++)
+				{
+					IDbDataParameter p = commandParameters[i];
+
+					if (commandText.IndexOf(p.ParameterName) < 0)
+					{
+						if (list == null)
+						{
+							list = new ArrayList(commandParameters.Length);
+
+							for (int j = 0; j < i; j++)
+								list.Add(commandParameters[j]);
+						}
+					}
+					else
+					{
+						if (list != null)
+							list.Add(p);
+					}
+				}
+
+				if (list != null)
+					commandParameters = (IDbDataParameter[])list.ToArray(typeof(IDbDataParameter));
+			}
 		}
 	}
 }

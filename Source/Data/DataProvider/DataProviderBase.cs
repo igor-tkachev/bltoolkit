@@ -164,5 +164,9 @@ namespace BLToolkit.Data.DataProvider
 			get { return _mappingSchema; }
 			set { _mappingSchema = value; }
 		}
+
+		public virtual void PrepareCommand(ref CommandType commandType, ref string commandText, ref IDbDataParameter[] commandParameters)
+		{
+		}
 	}
 }
