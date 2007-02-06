@@ -2427,6 +2427,8 @@ namespace BLToolkit.Data
 			string             commandText,
 			IDbDataParameter[] commandParameters)
 		{
+			DataProvider.PrepareCommand(ref commandType, ref commandText, ref commandParameters);
+
 			IDbCommand command = GetCommand(commandAction, commandType, commandText);
 
 			SetCommand          (commandAction, command);
