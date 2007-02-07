@@ -186,6 +186,20 @@ namespace BLToolkit.Mapping
 			}
 		}
 
+		public int GetOrdinal(string name, bool byPropertyName)
+		{
+			if (byPropertyName)
+			{
+				for (int i = 0; i < _members.Count; ++i)
+					if (((MemberMapper)_members[i]).MemberName == name)
+						return i;
+
+				return -1;
+			}
+
+			return GetOrdinal(name);
+		}
+
 		private TypeAccessor _typeAccessor;
 		public  TypeAccessor  TypeAccessor
 		{

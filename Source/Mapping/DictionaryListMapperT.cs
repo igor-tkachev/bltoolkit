@@ -21,18 +21,11 @@ namespace BLToolkit.Mapping
 			if (_fromSource)
 				_keyField = keyField.Name.Substring(1);
 			else
-			{
-				MemberAccessor ma = _mapper.TypeAccessor[keyField];
-				_keyField         = _mapper.TypeAccessor.IndexOf(ma);
-				_typeMismatch     = !TypeHelper.IsSameOrParent(typeof(K), ma.Type);
-
-				Debug.WriteLineIf(_typeMismatch, string.Format(
-					"Member {0} type '{1}' does not match dictionary key type '{2}'.",
-						ma.Name, ma.Type.Name, (typeof(K).Name)));
-			}
+				_keyField = keyField;
 		}
 
 		private NameOrIndexParameter _keyField;
+		private int                  _index;
 		private IDictionary<K,T>     _dic;
 		private ObjectMapper         _mapper;
 		private T                    _newObject;
@@ -48,9 +41,9 @@ namespace BLToolkit.Mapping
 			if (_newObject != null)
 			{
 				if (_typeMismatch)
-					_keyValue = _mapper.MappingSchema.ConvertTo<K, object>(_mapper[_keyField.Index].GetValue(_newObject));
+					_keyValue = _mapper.MappingSchema.ConvertTo<K,object>(_mapper[_index].GetValue(_newObject));
 				else if (!_fromSource)
-					_keyValue = _keyGetter.From(_mapper, _newObject, _keyField.Index);
+					_keyValue = _keyGetter.From(_mapper, _newObject, _index);
 
 				_dic[_keyValue] = _newObject;
 			}
@@ -68,9 +61,19 @@ namespace BLToolkit.Mapping
 					_mapper = initContext.ObjectMapper;
 			}
 
-			if (_fromSource && _keyField.ByName)
-				_keyField = initContext.DataSource.GetOrdinal(_keyField.Name);
+			if (_fromSource)
+				_index = _keyField.ByName? initContext.DataSource.GetOrdinal(_keyField.Name): _keyField.Index;
+			else
+			{
+				_index = _keyField.ByName? _mapper.GetOrdinal(_keyField.Name, true): _keyField.Index;
 
+				MemberMapper mm = _mapper[_index];
+				_typeMismatch = !TypeHelper.IsSameOrParent(typeof(K), mm.Type);
+
+				Debug.WriteLineIf(_typeMismatch, string.Format(
+					"Member {0} type '{1}' does not match dictionary key type '{2}'.",
+						mm.Name, mm.Type.Name, (typeof(K).Name)));
+			}
 		}
 
 		[CLSCompliant(false)]
@@ -87,7 +90,7 @@ namespace BLToolkit.Mapping
 
 			if (_fromSource)
 			{
-				_keyValue = _keyGetter.From(initContext.DataSource, initContext.SourceObject, _keyField.Index);
+				_keyValue = _keyGetter.From(initContext.DataSource, initContext.SourceObject, _index);
 
 				if (_keyValue is string)
 					_keyValue = (K)(object)_keyValue.ToString().TrimEnd(_trim);
