@@ -498,6 +498,12 @@ namespace BLToolkit.Data.DataProvider
 					return oraString.IsNull? DefaultStringNullValue: oraString.Value;
 				}
 
+				if (value is OracleXmlType)
+				{
+					OracleXmlType oraXmlType = (OracleXmlType)value;
+					return oraXmlType.IsNull ? DefaultStringNullValue : oraXmlType.Value;
+				}
+
 				if (value is OracleClob)
 				{
 					OracleClob oraClob = (OracleClob)value;
