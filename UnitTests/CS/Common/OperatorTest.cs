@@ -6,6 +6,8 @@ using BLToolkit.Common;
 
 namespace Common
 {
+#if ORACLE
+
 	[TestFixture]
 	public class OperatorTest
 	{
@@ -89,4 +91,6 @@ namespace Common
 			Assert.IsTrue(Operator<OracleNumber>.LessThanOrEqual   ((OracleNumber)123, (OracleNumber)123));
 		}
 	}
+
+#endif
 }

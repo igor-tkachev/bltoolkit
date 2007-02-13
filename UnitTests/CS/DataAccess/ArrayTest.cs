@@ -8,6 +8,8 @@ using BLToolkit.TypeBuilder;
 
 namespace DataAccess
 {
+#if ORACLE
+
 	[TestFixture]
 	public class ArrayTest
 	{
@@ -62,4 +64,6 @@ namespace DataAccess
 			Assert.AreEqual(new int[] { 1, 2, 3, 4, 5 }, @outputIntArray);
 		}
 	}
+
+#endif
 }

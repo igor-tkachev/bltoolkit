@@ -134,6 +134,7 @@ namespace Common
 			Assert.AreEqual(123.0m, d);
 		}
 
+#if ORACLE
 		[Test]
 		public void TypeCast()
 		{
@@ -147,6 +148,8 @@ namespace Common
 			OracleString s = ConvertTo<OracleString>.From("test");
 			Assert.AreEqual("test", s.Value);
 		}
+#endif
+
 #endif
 
 	}
