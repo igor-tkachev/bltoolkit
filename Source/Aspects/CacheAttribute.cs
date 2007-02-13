@@ -1,5 +1,6 @@
 using System;
 
+using BLToolkit.Reflection;
 using BLToolkit.TypeBuilder.Builders;
 
 namespace BLToolkit.Aspects
@@ -12,9 +13,46 @@ namespace BLToolkit.Aspects
 		AllowMultiple=true)]
 	public class CacheAttribute : InterceptorAttribute
 	{
+		#region Constructors
+
 		public CacheAttribute()
 			: this(typeof(CacheAspect), null)
 		{
+		}
+
+		public CacheAttribute(Type cacheAspectType, string configString)
+			: base(
+				cacheAspectType,
+				InterceptType.BeforeCall | InterceptType.AfterCall,
+				configString,
+				TypeBuilderConsts.Priority.CacheAspect)
+		{
+			if (!TypeHelper.IsSameOrParent(typeof(CacheAspect), cacheAspectType))
+				throw new ArgumentException("Parameter 'cacheAspectType' must be of CacheAspect type");
+		}
+
+		public CacheAttribute(Type interceptorType)
+			: this(interceptorType, null)
+		{
+		}
+
+		public CacheAttribute(Type interceptorType, int maxCacheTime)
+			: this(interceptorType, null)
+		{
+			MaxCacheTime = maxCacheTime;
+		}
+
+		public CacheAttribute(Type interceptorType, bool isWeak)
+			: this(interceptorType, null)
+		{
+			IsWeak = isWeak;
+		}
+
+		public CacheAttribute(Type interceptorType, int maxCacheTime, bool isWeak)
+			: this(interceptorType, null)
+		{
+			MaxCacheTime = maxCacheTime;
+			IsWeak       = isWeak;
 		}
 
 		public CacheAttribute(string configString)
@@ -23,32 +61,23 @@ namespace BLToolkit.Aspects
 		}
 
 		public CacheAttribute(int maxCacheTime)
-			: this(typeof(CacheAspect), null)
+			: this(typeof(CacheAspect), maxCacheTime)
 		{
-			MaxCacheTime = maxCacheTime;
 		}
 
 		public CacheAttribute(bool isWeak)
-			: this(typeof(CacheAspect), null)
+			: this(typeof(CacheAspect), isWeak)
 		{
-			IsWeak = isWeak;
 		}
 
 		public CacheAttribute(int maxCacheTime, bool isWeak)
-			: this(typeof(CacheAspect), null)
+			: this(typeof(CacheAspect), maxCacheTime, isWeak)
 		{
-			MaxCacheTime = maxCacheTime;
-			IsWeak       = isWeak;
 		}
 
-		protected CacheAttribute(Type interceptorType, string configString)
-			: base(
-				interceptorType,
-				InterceptType.BeforeCall | InterceptType.AfterCall,
-				configString,
-				TypeBuilderConsts.Priority.CacheAspect)
-		{
-		}
+		#endregion
+
+		#region Properties
 
 		private bool _hasMaxCacheTime;
 		private int  _maxCacheTime;
@@ -60,13 +89,13 @@ namespace BLToolkit.Aspects
 
 		public  int   MaxSeconds
 		{
-			get { return MaxCacheTime / 1000; }
+			get { return MaxCacheTime / 1000;  }
 			set { MaxCacheTime = value * 1000; }
 		}
 
 		public  int   MaxMinutes
 		{
-			get { return MaxCacheTime / 60 / 1000; }
+			get { return MaxCacheTime / 60 / 1000;  }
 			set { MaxCacheTime = value * 60 * 1000; }
 		}
 
@@ -93,5 +122,7 @@ namespace BLToolkit.Aspects
 				return s;
 			}
 		}
+
+		#endregion
 	}
 }

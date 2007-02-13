@@ -21,6 +21,7 @@ Enhancement
 - DuckTyping (the idea was shamelessly stolen from http://www.codeproject.com/cs/library/nduck.asp)
 - ParamNullValue attribute.
 - Virtual method DataProviderBase.PrepareCommand to let a data provider modify SQL statement befory query.
+- Virtual method CacheAspect.GetCache. Can be used to provide a custom hashtable.
 
 v 2.0.3
 

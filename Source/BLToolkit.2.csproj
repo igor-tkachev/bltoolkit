@@ -42,6 +42,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Aspects\CacheAspect.cs" />
+    <Compile Include="Aspects\CacheAspectItem.cs" />
+    <Compile Include="Aspects\CacheAspectT.cs" />
     <Compile Include="Aspects\CacheAttribute.cs" />
     <Compile Include="Aspects\CallMethodInfo.cs" />
     <Compile Include="Aspects\MethodCallCounter.cs" />

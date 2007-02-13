@@ -17,9 +17,9 @@ namespace BLToolkit.Patterns
 	/// </summary>
 	public
 #if FW2
-		static
+	static
 #endif
-		class	DuckTyping
+	class DuckTyping
 	{
 		private static Hashtable _duckTypes = new Hashtable();
 
