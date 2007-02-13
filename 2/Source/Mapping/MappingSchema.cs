@@ -1123,6 +1123,20 @@ namespace BLToolkit.Mapping
 			return value != null? value: typeExt.Attributes["DefaultValue"].Value;
 		}
 
+		const FieldAttributes EnumField = FieldAttributes.Public | FieldAttributes.Static | FieldAttributes.Literal;
+
+		private static object GetEnumDefaultValueFromExtension(TypeExtension typeExt, Type type)
+		{
+			FieldInfo[] fields = type.GetFields();
+
+			foreach (FieldInfo fi in fields)
+				if ((fi.Attributes & EnumField) == EnumField)
+					if (typeExt[fi.Name]["DefaultValue"].Value != null)
+						return Enum.Parse(type, fi.Name);
+
+			return null;
+		}
+
 		public virtual object GetDefaultValue(Type type)
 		{
 			if (type == null) throw new ArgumentNullException("type");
@@ -1153,20 +1167,6 @@ namespace BLToolkit.Mapping
 			_defaultValues[type] = defaultValue = TypeExtension.ChangeType(defaultValue, type);
 
 			return defaultValue;
-		}
-
-		const FieldAttributes EnumField = FieldAttributes.Public | FieldAttributes.Static | FieldAttributes.Literal;
-
-		private static object GetEnumDefaultValueFromExtension(TypeExtension typeExt, Type type)
-		{
-			FieldInfo[] fields = type.GetFields();
-
-			foreach (FieldInfo fi in fields)
-				if ((fi.Attributes & EnumField) == EnumField)
-					if (typeExt[fi.Name]["DefaultValue"].Value != null)
-						return Enum.Parse(type, fi.Name);
-
-			return null;
 		}
 
 		private static object GetEnumDefaultValueFromType(Type type)

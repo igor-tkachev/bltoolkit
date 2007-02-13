@@ -212,5 +212,11 @@ namespace BLToolkit.Mapping.MetadataProvider
 		}
 
 		#endregion
+
+		#region GetDefaultValue
+
+		
+
+		#endregion
 	}
 }

@@ -245,7 +245,7 @@ namespace BLToolkit.Mapping
 					mi.Name            = MetadataProvider.GetFieldName(this, ma, out isSet);
 					mi.MemberName      = ma.Name;
 					mi.Trimmable       = MetadataProvider.GetTrimmable(this, ma, out isSet);
-					mi.MapValues       = GetMapValues(ma, out isSet);
+					mi.MapValues       = GetMapValues(ma);
 					mi.DefaultValue    = GetDefaultValue(ma);
 					mi.Nullable        = GetNullable(ma);
 					mi.NullValue       = GetNullValue(ma, mi.Nullable);
@@ -358,11 +358,13 @@ namespace BLToolkit.Mapping
 			return null;
 		}
 
-		private MapValue[] GetMapValues(MemberAccessor member, out bool isSet)
+		private MapValue[] GetMapValues(MemberAccessor member)
 		{
+			bool isSet;
+
 			MapValue[] values = MetadataProvider.GetMapValues(this, member, out isSet);
 
-			return values != null? values: _mappingSchema.GetMapValues(member.Type);
+			return isSet? values: _mappingSchema.GetMapValues(member.Type);
 		}
 
 		private object GetExtensionDefaultValue(MemberAccessor memberAccessor)

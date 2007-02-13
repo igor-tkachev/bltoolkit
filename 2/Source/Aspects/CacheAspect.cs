@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Reflection;
 
 using BLToolkit.Common;
@@ -14,12 +15,14 @@ namespace BLToolkit.Aspects
 			if (!IsEnabled)
 				return;
 
-			lock (info.CallMethodInfo.MethodCallCache.SyncRoot)
-			{
-				CompoundValue key  = GetKey(info);
-				CacheItem     item = GetItem(key, info);
+			IDictionary cache = GetCache(info);
 
-				if (item != null && item.MaxCacheTime > DateTime.Now)
+			lock (cache.SyncRoot)
+			{
+				CompoundValue   key  = GetKey(info);
+				CacheAspectItem item = GetItem(cache, key, info);
+
+				if (item != null && !item.IsExpired)
 				{
 					info.InterceptResult = InterceptResult.Return;
 					info.ReturnValue     = item.ReturnValue;
@@ -48,7 +51,9 @@ namespace BLToolkit.Aspects
 			if (!IsEnabled)
 				return;
 
-			lock (info.CallMethodInfo.MethodCallCache.SyncRoot)
+			IDictionary cache = GetCache(info);
+
+			lock (cache.SyncRoot)
 			{
 				CompoundValue key = (CompoundValue)info.Items["CacheKey"];
 
@@ -66,7 +71,7 @@ namespace BLToolkit.Aspects
 					if (cp.IsWeak       != null) isWeak       = (bool)cp.IsWeak;
 				}
 
-				CacheItem item = new CacheItem();
+				CacheAspectItem item = new CacheAspectItem();
 
 				item.ReturnValue  = info.ReturnValue;
 				item.MaxCacheTime = maxCacheTime == int.MaxValue || maxCacheTime < 0?
@@ -92,7 +97,7 @@ namespace BLToolkit.Aspects
 							item.RefValues[n++] = info.ParameterValues[i];
 				}
 
-				info.CallMethodInfo.MethodCallCache[key] = isWeak? (object)new WeakReference(item): item;
+				cache[key] = isWeak? (object)new WeakReference(item): item;
 			}
 		}
 
@@ -161,11 +166,14 @@ namespace BLToolkit.Aspects
 
 		#region Cache
 
-		class CacheItem
+		protected virtual CacheAspectItem CreateCacheItem(InterceptCallInfo info)
 		{
-			public DateTime MaxCacheTime;
-			public object   ReturnValue;
-			public object[] RefValues;
+			return new CacheAspectItem();
+		}
+
+		protected virtual IDictionary GetCache(InterceptCallInfo info)
+		{
+			return info.CallMethodInfo.MethodCallCache;
 		}
 
 		private static CompoundValue GetKey(InterceptCallInfo info)
@@ -180,9 +188,9 @@ namespace BLToolkit.Aspects
 			return new CompoundValue(keyValues);
 		}
 
-		private static CacheItem GetItem(CompoundValue key, InterceptCallInfo info)
+		private CacheAspectItem GetItem(IDictionary cache, CompoundValue key, InterceptCallInfo info)
 		{
-			object obj = info.CallMethodInfo.MethodCallCache[key];
+			object obj = cache[key];
 
 			if (obj == null)
 				return null;
@@ -190,9 +198,16 @@ namespace BLToolkit.Aspects
 			WeakReference wr = obj as WeakReference;
 
 			if (wr == null)
-				return (CacheItem)obj;
+				return (CacheAspectItem)obj;
 
-			return wr.IsAlive ? (CacheItem)wr.Target : null;
+			obj = wr.Target;
+
+			if (obj != null)
+				return (CacheAspectItem)obj;
+
+			cache.Remove(key);
+
+			return null;
 		}
 
 		#endregion
