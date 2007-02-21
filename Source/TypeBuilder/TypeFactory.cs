@@ -3,6 +3,7 @@ using System.Collections;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Reflection;
+using System.Reflection.Emit;
 using System.Security.Permissions;
 
 using BLToolkit.Reflection.Emit;
@@ -251,10 +252,15 @@ namespace BLToolkit.TypeBuilder
 
 				if (type == null)
 				{
-					foreach (Assembly a in ((AppDomain)sender).GetAssemblies())
+					Assembly[] ass = ((AppDomain)sender).GetAssemblies();
+
+					for (int i = ass.Length - 1; i >= 0; i--)
 					{
-						if (a.CodeBase.IndexOf("Microsoft.NET/Framework") > 0)
-							continue;
+						Assembly a = ass[i];
+
+						if (!(a is AssemblyBuilder))
+							if (a.CodeBase.IndexOf("Microsoft.NET/Framework") > 0 || a.FullName.StartsWith("System."))
+								continue;
 
 						type = a.GetType(typeName);
 
