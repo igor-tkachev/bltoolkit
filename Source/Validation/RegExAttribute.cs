@@ -6,26 +6,59 @@ namespace BLToolkit.Validation
 	[AttributeUsage(AttributeTargets.Property | AttributeTargets.Field)]
 	public class RegExAttribute : ValidatorBaseAttribute 
 	{
-		public RegExAttribute(string regex)
+		public RegExAttribute(string pattern)
+			:this(pattern, RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled)
 		{
-			_value = regex;
 		}
 
-		public RegExAttribute(string regex, string errorMessage)
-			: this(regex)
+		public RegExAttribute(string pattern, RegexOptions options)
+		{
+			_pattern = pattern;
+			_options = options;
+		}
+
+		public RegExAttribute(string pattern, string errorMessage)
+			: this(pattern)
 		{
 			ErrorMessage = errorMessage;
 		}
 
-		private string _value;
-		public  string  Value
+		public RegExAttribute(string pattern, RegexOptions options, string errorMessage)
+			:this(pattern, options)
 		{
-			get { return _value; }
+			ErrorMessage = errorMessage;
+		}
+
+		[Obsolete("Use RegExAttribute.Pattern instead.")]
+		public string Value { get { return Pattern; } }
+
+		private string _pattern;
+		public  string  Pattern { get { return _pattern; } }
+
+		private RegexOptions _options;
+		public  RegexOptions  Options { get { return _options; } }
+
+		[NonSerialized]
+		private Regex _validator;
+		public  Regex  Validator
+		{
+			get
+			{
+				if (_validator == null)
+					_validator = new Regex(_pattern, _options);
+
+				return _validator;
+			}
 		}
 
 		public override bool IsValid(ValidationContext context)
 		{
-			return context.IsNull(context) || Regex.IsMatch(context.Value.ToString(), Value);
+			if (context.IsNull(context))
+				return true;
+
+			Match match = Validator.Match(context.Value.ToString());
+
+			return match.Success && match.Value == context.Value.ToString();
 		}
 
 		public override string ErrorMessage
