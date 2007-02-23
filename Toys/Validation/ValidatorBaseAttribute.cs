@@ -22,7 +22,11 @@ namespace Rsdn.Framework.Validation
 		}
 
 		public abstract bool   IsValid        (ValidationContext context);
-		public abstract string GetErrorMessage(ValidationContext context);
+
+		public virtual string GetErrorMessage(ValidationContext context)
+		{
+			return string.Format(ErrorMessage, GetPropertyFriendlyName(context));
+		}
 
 		protected string GetPropertyFriendlyName(ValidationContext context)
 		{
