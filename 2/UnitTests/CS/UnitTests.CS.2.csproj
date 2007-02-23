@@ -140,6 +140,7 @@
     <Compile Include="TypeBuilder\TypeFactoryTest.cs" />
     <Compile Include="Reflection\Extension\ExtensionTest.cs" />
     <Compile Include="Validation\NullValue.cs" />
+    <Compile Include="Validation\RegExValidationTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Source\BLToolkit.2.csproj">

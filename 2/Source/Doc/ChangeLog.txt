@@ -3,10 +3,11 @@ v 2.0.5
 Bug fixes
 
 - System.Reflection.Emit.AssemblyBuilder assemblies are processed properly.
+- RegExAttribute - now properly returns valid==true only when whole value is equal to match
 
 Enhancement
 
-- 
+- Ability to specify RegexOptions for RegExAttribute. Regex not being created on every call to IsValid
 
 v 2.0.4
 
