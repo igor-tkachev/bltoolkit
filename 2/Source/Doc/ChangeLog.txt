@@ -4,6 +4,7 @@ Bug fixes
 
 - System.Reflection.Emit.AssemblyBuilder assemblies are processed properly.
 - RegExAttribute - now properly returns valid==true only when whole value is equal to match
+-
 
 Enhancement
 
