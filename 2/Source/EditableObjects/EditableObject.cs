@@ -286,6 +286,7 @@ namespace BLToolkit.EditableObjects
 
 		#region INotifyPropertyChanged Members
 
+		[field : NonSerialized]
 		public virtual event PropertyChangedEventHandler PropertyChanged;
 
 		#endregion

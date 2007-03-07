@@ -24,6 +24,8 @@ namespace BLToolkit.ComponentModel
 
 			_list     = list;
 			_itemType = itemType;
+
+			AddInternal(_list);
 		}
 
 		#endregion

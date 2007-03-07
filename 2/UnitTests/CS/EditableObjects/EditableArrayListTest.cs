@@ -323,5 +323,36 @@ namespace EditableObjects
 
 			bf.Serialize(stream, test);
 		}
+
+		[Test]
+		public void SerializationTest2()
+		{
+			EditableList<SerializableObject> list = new EditableList<SerializableObject>();
+
+			list.Add(TypeAccessor<SerializableObject>.CreateInstance());
+
+			BinaryFormatter formatter = new BinaryFormatter();
+
+			using (MemoryStream stream = new MemoryStream())
+			{
+				formatter.Serialize(stream, list);
+				stream.Position = 0;
+
+				object result = formatter.Deserialize(stream);
+
+				Assert.IsNotNull(result);
+
+				EditableList<SerializableObject> eal = (EditableList<SerializableObject>)result;
+
+				eal.ListChanged += new ListChangedEventHandler(eal_ListChanged);
+
+				eal[0].ID = -100;
+			}
+		}
+
+		static void eal_ListChanged(object sender, ListChangedEventArgs e)
+		{
+			Console.WriteLine(e.ListChangedType);
+		}
 	}
 }
