@@ -25,6 +25,7 @@ namespace DataAccess
 		public void TypelessTest()
 		{
 			// Can not determine object type for the method 'TypelessAccessor.Typeless'
+			//
 			DataAccessor.CreateInstance(typeof(TypelessAccessor));
 		}
 
@@ -38,6 +39,7 @@ namespace DataAccess
 		public void Gen_SelectAllListException()
 		{
 			// Can not determine object type for the method 'TypelessAccessor2.Typeless'
+			//
 			DataAccessor.CreateInstance(typeof(TypelessAccessor2));
 		}
 
@@ -51,6 +53,7 @@ namespace DataAccess
 		public void IListException()
 		{
 			// Can not create an instance of the type 'System.Collections.IList'
+			//
 			DataAccessor.CreateInstance(typeof(IListDataAccessor));
 		}
 
@@ -64,6 +67,7 @@ namespace DataAccess
 		public void MultiDestinationException()
 		{
 			// More then one parameter is marked as destination.
+			//
 			DataAccessor.CreateInstance(typeof(MultiDestinationAccessor));
 		}
 
@@ -76,8 +80,24 @@ namespace DataAccess
 		[Test, ExpectedException(typeof(TypeBuilderException))]
 		public void ScalarDestinationException()
 		{
-			// ExecuteScalar does not support the Destination attribute
+			// ExecuteScalar destination must be an out or a ref parameter
+			//
 			DataAccessor.CreateInstance(typeof(ScalarDestinationAccessor));
+		}
+
+		public abstract class IncompatibleScalarDestinationAccessor : DataAccessor
+		{
+			[ObjectType(typeof(Person))]
+			public abstract int SelectAll([Destination] out string p);
+		}
+
+		[Test, ExpectedException(typeof(TypeBuilderException))]
+		public void IncompatibleScalarDestinationException()
+		{
+			// The return type 'System.Int32' of the method 'SelectAll'
+			// is incompatible with the destination parameter type 'System.String'
+			//
+			DataAccessor.CreateInstance(typeof(IncompatibleScalarDestinationAccessor));
 		}
 
 		public abstract class VoidDestinationAccessor : DataAccessor
@@ -90,6 +110,7 @@ namespace DataAccess
 		public void VoidDestinationException()
 		{
 			// ExecuteNonQuery does not support the Destination attribute
+			//
 			DataAccessor.CreateInstance(typeof(VoidDestinationAccessor));
 		}
 	}

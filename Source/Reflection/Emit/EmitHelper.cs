@@ -3328,6 +3328,8 @@ namespace BLToolkit.Reflection.Emit
 		{
 			if (type == null) throw new ArgumentNullException("type");
 
+			if (type == typeof(object)) return this;
+
 #if FW2
 			return type.IsValueType? unbox_any(type): castclass(type);
 #else

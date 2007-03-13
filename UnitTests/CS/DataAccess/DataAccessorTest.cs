@@ -36,6 +36,7 @@ namespace DataAccess
 	[TestFixture]
 	public class DataAccessorTest
 	{
+
 		public enum Gender
 		{
 			[MapValue("F")] Female,
@@ -530,6 +531,7 @@ namespace DataAccess
 			Person e2 = _da.ParamNullableID(2);
 			Assert.IsNotNull(e2);
 		}
+
 #endif
 
 		[Test]

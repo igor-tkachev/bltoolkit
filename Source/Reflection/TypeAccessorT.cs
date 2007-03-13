@@ -67,6 +67,7 @@ namespace BLToolkit.Reflection
 		private static TypeAccessor _instance = TypeAccessor.GetAccessor(typeof(T));
 		public  static TypeAccessor  Instance
 		{
+			[System.Diagnostics.DebuggerStepThrough]
 			get { return _instance; }
 		}
 	}

@@ -215,7 +215,7 @@ namespace BLToolkit.DataAccess
 			{
 				ExecuteNonQuery();
 			}
-			else if (TypeHelper.IsScalar(returnType))
+			else if (TypeHelper.IsScalar(returnType.IsByRef? returnType.GetElementType(): returnType))
 			{
 				ExecuteScalar();
 			}
@@ -856,19 +856,45 @@ namespace BLToolkit.DataAccess
 
 		public void ExecuteScalar()
 		{
-			if (_destination != null)
-				throw new TypeBuilderException("ExecuteScalar does not support the Destination attribute");
+			EmitHelper emit       = Context.MethodBuilder.Emitter;
+			Type       returnType = Context.CurrentMethod.ReturnType;
+			Type       scalarType;
 
-			Context.MethodBuilder.Emitter
+			if (_destination != null)
+			{
+				if (_destination.ParameterType.IsByRef)
+					scalarType = _destination.ParameterType.GetElementType();
+				else
+					throw new TypeBuilderException("ExecuteScalar destination must be an out or a ref parameter.");
+
+				if (returnType != typeof(void) && !TypeHelper.IsSameOrParent(returnType, scalarType))
+				{
+					// object Foo(out int num) is valid,
+					// IConvertible Foo(ref int num) is also ok,
+					// but string Bar(out DateTime dt) is not
+					//
+					throw new TypeBuilderException(string.Format(
+						"The return type '{0}' of the method '{1}' is incompatible with the destination parameter type '{2}'.",
+						returnType.FullName, Context.CurrentMethod.Name, scalarType.FullName));
+				}
+			}
+			else
+				scalarType = returnType;
+
+			if (_destination != null)
+				emit
+					.ldarg (_destination)
+					;
+
+			emit
 				.ldarg_0
-				.ldloc   (_locManager)
+				.ldloc     (_locManager)
 				;
 
 			InitObjectType();
 			GetSprocName();
 			CallSetCommand();
 
-			EmitHelper emit = Context.MethodBuilder.Emitter;
 			object[] attrs  = Context.CurrentMethod.GetCustomAttributes(typeof(ScalarSourceAttribute), true);
 
 			if (attrs.Length == 0)
@@ -887,15 +913,14 @@ namespace BLToolkit.DataAccess
 					.callvirtNoGenerics   (typeof(DbManager), "ExecuteScalar", typeof(ScalarSourceType), typeof(NameOrIndexParameter));
 			}
 
-			string converterName = GetConverterMethodName(Context.CurrentMethod.ReturnType);
+			string converterName = GetConverterMethodName(scalarType);
 
 			if (converterName == null)
 			{
 				emit
-					.LoadType             (Context.CurrentMethod.ReturnType)
+					.LoadType             (scalarType)
 					.ldnull
 					.callvirt             (typeof (DataAccessor), "ConvertChangeType", _bindingFlags, typeof (DbManager), typeof (object), typeof (Type), typeof (object))
-					.stloc                (Context.ReturnValue)
 					;
 				
 			}
@@ -904,9 +929,37 @@ namespace BLToolkit.DataAccess
 				emit
 					.ldnull
 					.callvirt             (typeof(DataAccessor), converterName, _bindingFlags, typeof(DbManager), typeof(object), typeof(object))
-					.stloc                (Context.ReturnValue)
 					;
 			}
+
+			if (_destination != null)
+			{
+				emit
+					.stind                (scalarType)
+					;
+
+				// The return value and a destination both are present
+				//
+				if (Context.ReturnValue != null)
+				{
+					emit
+						.ldargEx          (_destination, false)
+						;
+
+					if (scalarType != returnType)
+						emit
+							.boxIfValueType (scalarType)
+							.CastFromObject (returnType)
+							;
+
+					emit.stloc            (Context.ReturnValue)
+					;
+				}
+			}
+			else
+				emit
+					.stloc                (Context.ReturnValue)
+					;
 		}
 
 		#endregion
