@@ -679,6 +679,16 @@ namespace BLToolkit.Reflection
 			return type;
 		}
 
+		/// <summary>
+		/// Determines whether the specified types are considered equal.
+		/// </summary>
+		/// <param name="parent">A type.</param>
+		/// <param name="child">A type possible derived from the <c>parent</c> type</param>
+		/// <returns>True, when an object instance of the type <c>child</c>
+		/// can be used as an object of the type <c>parent</c>; otherwise, false.</returns>
+#if FW2
+		/// <remarks>Note that 'int?' (nullable int) and 'int' types are different.</remarks>
+#endif
 		public static bool IsSameOrParent(Type parent, Type child)
 		{
 			if (parent == null) throw new ArgumentNullException("parent");
@@ -788,11 +798,8 @@ namespace BLToolkit.Reflection
 
 			Type type = list.GetType();
 
-#if FW2
-			if (type.IsGenericType)
-			{
-			}
-#endif
+			// object[] attrs = type.GetCustomAttributes(typeof(DefaultMemberAttribute), true);
+			// string   itemMemberName = (attrs.Length == 0)? "Item": ((DefaultMemberAttribute)attrs[0]).MemberName;
 
 			if (list is IList || list is ITypedList || list is IListSource)
 			{
@@ -813,44 +820,31 @@ namespace BLToolkit.Reflection
 					return last.PropertyType;
 			}
 
-			if (list is IList)
+			try
 			{
-				IList l = (IList)list;
-
-				for (int i = 0; i < l.Count; i++)
+				if (list is IList)
 				{
-					object o = l[i];
+					IList l = (IList)list;
 
-					if (o != null && o.GetType() != typeOfObject)
-						return o.GetType();
-				}
-			}
-			else if (list is IEnumerable)
-			{
-				try
-				{
-					IEnumerator e = ((IEnumerable)list).GetEnumerator();
-
-					// Yield return does not support Reset.
-					//
-					try { e.Reset(); } catch {}
-
-					while (e.MoveNext())
+					for (int i = 0; i < l.Count; i++)
 					{
-						object o = e.Current;
+						object o = l[i];
 
 						if (o != null && o.GetType() != typeOfObject)
-						{
-							try { e.Reset(); } catch {}
 							return o.GetType();
-						}
 					}
-
-					try { e.Reset(); } catch {}
 				}
-				catch
+				else if (list is IEnumerable)
 				{
+					foreach (object o in (IEnumerable)list)
+					{
+						if (o != null && o.GetType() != typeOfObject)
+							return o.GetType();
+					}
 				}
+			}
+			catch
+			{
 			}
 
 			return typeOfObject;

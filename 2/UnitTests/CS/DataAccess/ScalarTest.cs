@@ -56,6 +56,29 @@ namespace DataAccess
 			[SqlQuery("SELECT Xml_ FROM DataTypeTest WHERE DataTypeID = @id")]
 			public abstract XmlReader GetXml(DbManager db, int id);
 
+			[SprocName("Scalar_DataReader")]
+			public abstract int    ScalarDestination1([Destination] out int id);
+
+			[SprocName("Scalar_DataReader")]
+			public abstract void   ScalarDestination2([Destination] out int id);
+
+			[SprocName("Scalar_DataReader")]
+			public abstract object ScalarDestination3([Destination] out int id);
+
+			[SprocName("Scalar_DataReader")]
+			public abstract int    ScalarDestination4([Destination] ref int id);
+
+			[SprocName("Scalar_DataReader")]
+			public abstract void   ScalarDestination5([Destination] ref int id);
+
+			[SprocName("Scalar_DataReader")]
+			public abstract object ScalarDestination6([Destination] ref int id);
+
+#if FW2
+			[SprocName("Scalar_DataReader")]
+			public abstract int? ScalarNullableDestination([Destination] ref int? id);
+#endif
+
 			public static TestAccessor CreateInstance()
 			{
 				return (TestAccessor)CreateInstance(typeof(TestAccessor));
@@ -226,6 +249,40 @@ namespace DataAccess
 			}
 		}
 
+		[Test]
+		public void ScalarDestinationTest()
+		{
+			TestAccessor ta = TestAccessor.CreateInstance();
+
+			int id1;
+			int id2;
+
+			id1 = ta.ScalarDestination1(out id2);
+			Assert.AreEqual(id1, 12345);
+			Assert.AreEqual(id2, 12345);
+
+			ta.ScalarDestination2(out id2);
+			Assert.AreEqual(id2, 12345);
+
+			id1 = (int)ta.ScalarDestination3(out id2);
+			Assert.AreEqual(id1, 12345);
+			Assert.AreEqual(id2, 12345);
+
+			id2 = 0;
+			id1 = ta.ScalarDestination4(ref id2);
+			Assert.AreEqual(id1, 12345);
+			Assert.AreEqual(id2, 12345);
+
+			id2 = 0;
+			ta.ScalarDestination5(ref id2);
+			Assert.AreEqual(id2, 12345);
+
+			id2 = 0;
+			id1 = (int)ta.ScalarDestination6(ref id2);
+			Assert.AreEqual(id1, 12345);
+			Assert.AreEqual(id2, 12345);
+		}
+
 #if FW2
 		[Test]
 		public void XmlTest()
@@ -240,6 +297,18 @@ namespace DataAccess
 				Console.WriteLine("{0}", xml.GetAttribute("strattr"));
 			}
 		}
+
+		[Test]
+		public void ScalarNullableDestinationTest()
+		{
+			TestAccessor ta = TestAccessor.CreateInstance();
+
+			int? id1;
+			int? id2 = -1;
+			id1 = ta.ScalarNullableDestination(ref id2);
+			Assert.AreEqual(id1, id2);
+		}
+
 #endif
 	}
 }
