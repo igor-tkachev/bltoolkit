@@ -42,7 +42,19 @@ namespace BLToolkit.DataAccess
 
 		public override bool IsApplied(BuildContext context, AbstractTypeBuilderList builders)
 		{
-			return context.IsBuildStep && context.IsAbstractMethod;
+			if (context.IsBuildStep)
+			{
+				if (context.IsAbstractMethod)
+					return true;
+
+				// Treat an abstract getter/setter as a regular method
+				// when the property has [NoInstance] attribute 
+				//
+				if (context.IsAbstractGetter || context.IsAbstractSetter)
+					return context.CurrentProperty.IsDefined(typeof(NoInstanceAttribute), true);
+			}
+
+			return false;
 		}
 
 		const BindingFlags _bindingFlags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
@@ -229,6 +241,16 @@ namespace BLToolkit.DataAccess
 
 			GetOutRefParameters();
 			Finally();
+		}
+
+		protected override void BuildAbstractGetter()
+		{
+			BuildAbstractMethod();
+		}
+
+		protected override void BuildAbstractSetter()
+		{
+			BuildAbstractMethod();
 		}
 
 		private void GetSqlQueryCommand()

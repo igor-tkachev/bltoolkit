@@ -44,7 +44,7 @@ namespace BLToolkit.TypeBuilder.Builders
 			if (attributeType == null) throw new ArgumentNullException("attributeType");
 
 			if (_attributes.Length == 0)
-				return _attributes;
+				return (object[]) Array.CreateInstance(attributeType, 0);
 
 			ArrayList list = new ArrayList();
 
@@ -52,7 +52,7 @@ namespace BLToolkit.TypeBuilder.Builders
 				if (o.GetType() == attributeType || attributeType.IsInstanceOfType(o))
 					list.Add(o);
 
-			return list.ToArray();
+			return (object[]) list.ToArray(attributeType);
 		}
 
 		public override bool IsDefined(Type attributeType, bool inherit)

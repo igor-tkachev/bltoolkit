@@ -60,6 +60,14 @@ namespace DataAccess
 			[Index("ID")]
 			public abstract Hashtable   SelectAll1();
 
+			[NoInstance]
+			public abstract Hashtable Persons
+			{
+				[SqlQuery("SELECT * FROM Person")]
+				[Index("ID")]
+				get;
+			}
+
 			[SqlQuery("SELECT * FROM Person WHERE PersonID < 3")]
 			[Index("@PersonID", "LastName")]
 			public abstract Hashtable   SelectAll2();
@@ -232,7 +240,14 @@ namespace DataAccess
 			Assert.AreEqual("John", dict5[new CompoundValue(1, "Pupkin")]);
 #endif
 		}
-		
+
+		[Test]
+		public void AbstractGetterTest()
+		{
+			Hashtable dic = _da.Persons;
+			Assert.AreEqual("John", ((Person)dic[1]).FirstName);
+		}
+
 		[Test, ExpectedException(typeof(DataAccessException))]
 		public void KeylessTest()
 		{

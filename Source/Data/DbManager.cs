@@ -3891,6 +3891,7 @@ namespace BLToolkit.Data
 		/// using the provided parameters.
 		/// </summary>
 		/// <include file="Examples.xml" path='examples/db[@name="ExecuteDictionary(string,Type)"]/*' />
+		/// <param name="index">Dictionary key fields.</param>
 		/// <param name="type">Business object type.</param>
 		/// <param name="parameters">Any additional parameters passed to the constructor with <see cref="InitContext"/> parameter.</param>
 		/// <returns>An instance of the <see cref="Hashtable"/> class.</returns>
@@ -3911,6 +3912,7 @@ namespace BLToolkit.Data
 		/// </summary>
 		/// <include file="Examples.xml" path='examples/db[@name="ExecuteDictionary(Hashtable,string,Type)"]/*' />
 		/// <param name="dictionary">A dictionary of mapped business objects to populate.</param>
+		/// <param name="index">Dictionary key fields.</param>
 		/// <param name="type">Business object type.</param>
 		/// <param name="parameters">Any additional parameters passed to the constructor with <see cref="InitContext"/> parameter.</param>
 		/// <returns>An instance of the <see cref="IDictionary"/>.</returns>
