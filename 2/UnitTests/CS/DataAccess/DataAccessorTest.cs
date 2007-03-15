@@ -115,6 +115,16 @@ namespace DataAccess
 			[ActionName("SelectByKey")]
 			public abstract Person ParamNullID    ([ParamNullValue(1)] int id);
 
+			[NoInstance]
+			public abstract Person this[DbManager db, int id]
+			{
+				[ActionName("SelectByKey")]
+				get;
+				[ActionName("Update")]
+				[ObjectType(typeof(Person))]
+				set;
+			}
+
 #if FW2
 			[ActionName("SelectByKey")]
 			public abstract Person ParamNullableID([ParamNullValue(1)] int? id);
@@ -547,6 +557,26 @@ namespace DataAccess
 			Person e2 = _da.ParamNullString("Tester", "Testerson");
 			Assert.IsNotNull(e2);
 		}
+
+		[Test]
+		public void AbstractIndexerTest()
+		{
+			using (DbManager db = new DbManager())
+			{
+				Person p = _da[db, 1];
+				Assert.AreEqual("John", p.FirstName);
+
+				p.FirstName = "Frog";
+				_da[db, 1] = p;
+
+				p = _da[db, 1];
+				Assert.AreEqual("Frog", p.FirstName);
+
+				p.FirstName = "John";
+				_da[db, 1] = p;
+			}
+		}
+
 
 		#region IDataReader
 

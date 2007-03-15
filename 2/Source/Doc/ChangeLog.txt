@@ -10,6 +10,7 @@ Enhancement
 
 - Ability to specify RegexOptions for RegExAttribute. Regex not being created on every call to IsValid
 - Destination attribute works with scalar types.
+- DataAccessorBuilder generates getters/setters for abstract properties & indexers.
 
 v 2.0.4
 

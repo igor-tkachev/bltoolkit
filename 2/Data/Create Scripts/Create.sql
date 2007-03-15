@@ -380,6 +380,20 @@ END
 
 GO
 
+IF EXISTS (SELECT * FROM sys.objects WHERE type ='P' AND name = 'Scalar_ReturnParameterWithObject')
+BEGIN DROP Procedure Scalar_ReturnParameterWithObject END
+GO
+
+CREATE Procedure Scalar_ReturnParameterWithObject
+	@id int
+AS
+BEGIN
+	SELECT * FROM Person WHERE PersonID = @id
+	RETURN @id
+END
+
+GO
+
 -- Data Types test
 
 IF EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID('DataTypeTest') AND type in (N'U'))
