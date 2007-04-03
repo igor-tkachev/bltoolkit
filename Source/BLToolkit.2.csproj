@@ -67,6 +67,7 @@
     <Compile Include="Aspects\NoLogAttribute.cs" />
     <Compile Include="Aspects\NotNullAttribute.cs" />
     <Compile Include="Common\CompoundValue.cs" />
+    <Compile Include="Common\Configuration.cs" />
     <Compile Include="Common\Convert.cs" />
     <Compile Include="Common\ConvertT.cs" />
     <Compile Include="Common\EntityBase.cs" />

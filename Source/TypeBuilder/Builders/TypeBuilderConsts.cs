@@ -15,6 +15,7 @@ namespace BLToolkit.TypeBuilder.Builders
 			public const int LoggingAspect = Normal;
 			public const int DataAccessor  = int.MinValue / 2;
 			public const int CacheAspect   = int.MinValue / 2;
+			public const int PropChange    = int.MinValue + 1000000;
 		}
 
 		public const string AssemblyNameSuffix = "TypeBuilder";

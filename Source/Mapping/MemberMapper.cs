@@ -3,9 +3,10 @@ using System.Data.SqlTypes;
 using System.Diagnostics;
 using System.IO;
 using System.Xml;
-
+using BLToolkit.Common;
 using BLToolkit.Reflection;
 using BLToolkit.TypeBuilder;
+using Convert=System.Convert;
 
 namespace BLToolkit.Mapping
 {
@@ -916,7 +917,7 @@ namespace BLToolkit.Mapping
 
 			if (type == typeof(String))
 				if (mi.Trimmable) return n? new StringMapper.Trimmable.Nullable(): new StringMapper.Trimmable();
-				else              return n? new StringMapper.Nullable(): new StringMapper();
+				else              return n? new StringMapper.Nullable()          : new StringMapper();
 
 			if (type == typeof(DateTime))  return n? new DateTimeMapper.Nullable()  : new DateTimeMapper();
 			if (type == typeof(Decimal))   return n? new DecimalMapper.Nullable()   : new DecimalMapper();

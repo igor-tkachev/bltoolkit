@@ -92,7 +92,7 @@ namespace BLToolkit.Mapping
 			{
 				_keyValue = _keyGetter.From(initContext.DataSource, initContext.SourceObject, _index);
 
-				if (_keyValue is string)
+				if (Configuration.TrimDictionaryKey && _keyValue is string)
 					_keyValue = (K)(object)_keyValue.ToString().TrimEnd(_trim);
 			}
 
