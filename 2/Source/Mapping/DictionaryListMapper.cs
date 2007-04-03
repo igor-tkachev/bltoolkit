@@ -70,7 +70,7 @@ namespace BLToolkit.Mapping
 					initContext.DataSource.GetValue(initContext.SourceObject, _keyField.Name) :
 					initContext.DataSource.GetValue(initContext.SourceObject, _keyField.Index);
 
-				if (_keyValue is string)
+				if (Configuration.TrimDictionaryKey && _keyValue is string)
 					_keyValue = _keyValue.ToString().TrimEnd(_trim);
 			}
 

@@ -11,6 +11,9 @@ Enhancement
 - Ability to specify RegexOptions for RegExAttribute. Regex not being created on every call to IsValid
 - Destination attribute works with scalar types.
 - DataAccessorBuilder generates getters/setters for abstract properties & indexers.
+- Ability to specify globaly whether strings should be trimed when mapping
+- Ability to specify whether PropertyChange notification should only be fired when underlying value is changed
+  and not when setter is called
 
 v 2.0.4
 
