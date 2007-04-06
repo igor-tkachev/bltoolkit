@@ -1,6 +1,6 @@
 using System;
 using System.Reflection;
-
+using BLToolkit.Common;
 using NUnit.Framework;
 
 using BLToolkit.TypeBuilder;
@@ -32,11 +32,15 @@ namespace TypeBuilder.Builders
 		[Test]
 		public void TestPublic()
 		{
+			//Configuration.NotifyOnEqualSet = true;
+
 			TestObject1 o = (TestObject1)TypeAccessor.CreateInstance(typeof(TestObject1));
 
 			o.ID = 1;
 
 			Assert.AreEqual("ID", o.NotifiedName);
+
+			//Configuration.NotifyOnChangesOnly = false;
 		}
 
 		public abstract class TestObject2 : IPropertyChanged
@@ -60,6 +64,72 @@ namespace TypeBuilder.Builders
 			o.ID = 1;
 
 			Assert.AreEqual("ID", o.NotifiedName);
+		}
+
+		[PropertyChanged()]
+		public abstract class TestObject_Notification : IPropertyChanged
+		{
+			public abstract int ID { get; set; }
+			public abstract string Name { get; set; }
+			public abstract object Info { get; set; }
+
+			void IPropertyChanged.OnPropertyChanged(PropertyInfo propertyInfo)
+			{
+			}
+		}
+
+		[PropertyChanged(false)]
+		public abstract class TestObject_NoNotification : IPropertyChanged
+		{
+			public abstract int ID { get; set; }
+			public abstract string Name { get; set; }
+			public abstract object Info { get; set; }
+
+			void IPropertyChanged.OnPropertyChanged(PropertyInfo propertyInfo)
+			{
+			}
+		}
+
+		[PropertyChanged(false, false)]
+		public abstract class TestObject_NoNotificationEquals : IPropertyChanged
+		{
+			public abstract int ID { get; set; }
+			public abstract string Name { get; set; }
+			public abstract object Info { get; set; }
+
+			void IPropertyChanged.OnPropertyChanged(PropertyInfo propertyInfo)
+			{
+			}
+		}
+
+		[PropertyChanged(false, false, false)]
+		public abstract class TestObject_NoNotificationEqualsNoSkip : IPropertyChanged
+		{
+			public abstract int ID { get; set; }
+			public abstract string Name { get; set; }
+			public abstract object Info { get; set; }
+
+			protected abstract decimal Dec { get; set; }
+
+			void IPropertyChanged.OnPropertyChanged(PropertyInfo propertyInfo)
+			{
+			}
+		}
+
+		public abstract class Derived_TONNENS : TestObject_NoNotificationEqualsNoSkip
+		{
+			public abstract decimal NewVal { get; set; }
+		}
+
+		[Test]
+		public void TestGeneration()
+		{
+			TestObject_Notification ton = TypeAccessor<TestObject_Notification>.CreateInstance();
+			TestObject_NoNotification tonn = TypeAccessor<TestObject_NoNotification>.CreateInstance();
+			TestObject_NoNotificationEquals tonne = TypeAccessor<TestObject_NoNotificationEquals>.CreateInstance();
+			TestObject_NoNotificationEqualsNoSkip tonnes = TypeAccessor<TestObject_NoNotificationEqualsNoSkip>.CreateInstance();
+
+			Derived_TONNENS derived_TONNENS = TypeAccessor<Derived_TONNENS>.CreateInstance();
 		}
 	}
 }

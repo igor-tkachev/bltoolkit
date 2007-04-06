@@ -5,6 +5,9 @@ Bug fixes
 - System.Reflection.Emit.AssemblyBuilder assemblies are processed properly.
 - RegExAttribute - now properly returns valid==true only when whole value is equal to match
 - EditableObject serialization issue
+- StandardPropertyDescriptor.CheckNull was always returning DBNull.Value if _isNull handler
+  was returning null. Now configurable via Configuration.CheckNullReturnIfNull.
+- PropertyChangedBuilder was crashing when property was not public
 
 Enhancement
 

@@ -916,7 +916,22 @@ namespace BLToolkit.Reflection
 
 			protected object CheckNull(object value)
 			{
-				return _isNull != null && _isNull(value)? DBNull.Value: value;
+				if (_isNull != null && _isNull(value))
+				{
+					switch (Configuration.CheckNullReturnIfNull)
+					{
+						case Configuration.NullEquivalent.DBNull:
+							return DBNull.Value;
+						case Configuration.NullEquivalent.Null:
+							return null;
+						case Configuration.NullEquivalent.Value:
+							return value;
+					}
+
+					return DBNull.Value;
+				}
+
+				return value;
 			}
 		}
 

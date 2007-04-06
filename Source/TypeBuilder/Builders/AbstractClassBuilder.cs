@@ -98,10 +98,10 @@ namespace BLToolkit.TypeBuilder.Builders
 
 			foreach (AbstractTypeBuilderAttribute attr in attrs)
 			{
-				if (attr.TypeBuilder != null)
-				{
-					IAbstractTypeBuilder builder = attr.TypeBuilder;
+				IAbstractTypeBuilder builder = attr.TypeBuilder;
 
+				if (builder != null)
+				{
 					builder.TargetElement = type;
 					builders.Add(builder);
 				}

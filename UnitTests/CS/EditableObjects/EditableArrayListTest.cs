@@ -2,7 +2,7 @@ using System;
 using System.ComponentModel;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
-
+using BLToolkit.Common;
 using NUnit.Framework;
 
 using BLToolkit.TypeBuilder;
@@ -316,17 +316,23 @@ namespace EditableObjects
 		[Test]
 		public void SerializationTest()
 		{
+			//Configuration.NotifyOnEqualSet = true;
+
 			SerializableObject test = TypeAccessor<SerializableObject>.CreateInstance();
 
 			MemoryStream    stream = new MemoryStream();
 			BinaryFormatter bf     = new BinaryFormatter();
 
 			bf.Serialize(stream, test);
+
+			//Configuration.NotifyOnChangesOnly = false;
 		}
 
 		[Test]
 		public void SerializationTest2()
 		{
+			//Configuration.NotifyOnChangesOnly = true;
+
 			EditableList<SerializableObject> list = new EditableList<SerializableObject>();
 
 			list.Add(TypeAccessor<SerializableObject>.CreateInstance());
@@ -344,15 +350,33 @@ namespace EditableObjects
 
 				EditableList<SerializableObject> eal = (EditableList<SerializableObject>)result;
 
+				Console.WriteLine(eal.Count);
+
 				eal.ListChanged += new ListChangedEventHandler(eal_ListChanged);
 
+				eal[0].ID = 0;
+				_notificationCount = 0;
 				eal[0].ID = -100;
+				eal[0].ID = -100;
+				eal[0].ID = -100;
+				eal[0].ID = -100;
+				eal[0].ID = -100;
+				eal[0].ID = -100;
+
+				Console.WriteLine(eal.Count);
+
+				//Assert.AreEqual(_notificationCount, 1);
 			}
+
+			//Configuration.NotifyOnChangesOnly = false;
 		}
+
+		private static int _notificationCount = 0;
 
 		static void eal_ListChanged(object sender, ListChangedEventArgs e)
 		{
 			Console.WriteLine(e.ListChangedType);
+			_notificationCount++;
 		}
 	}
 }
