@@ -33,13 +33,13 @@ namespace BLToolkit.TypeBuilder.Builders
 
 		protected override void BeforeBuildAbstractSetter()
 		{
-			if (_notifyOnEqualSet && Context.CurrentProperty.CanRead)
+			if (!_notifyOnEqualSet && Context.CurrentProperty.CanRead)
 				GenerateIsSameValueComparison();
 		}
 
 		protected override void BeforeBuildVirtualSetter()
 		{
-			if (_notifyOnEqualSet && Context.CurrentProperty.CanRead)
+			if (!_notifyOnEqualSet && Context.CurrentProperty.CanRead)
 				GenerateIsSameValueComparison();
 		}
 
@@ -83,7 +83,7 @@ namespace BLToolkit.TypeBuilder.Builders
 			{
 				emit
 					.ldarg_0
-					.callvirt(Context.CurrentProperty.GetGetMethod())
+					.callvirt(Context.CurrentProperty.GetGetMethod(true))
 					.ldarg_1.end();
 
 				if (!Context.CurrentProperty.PropertyType.Equals(typeof(string)))
@@ -105,7 +105,7 @@ namespace BLToolkit.TypeBuilder.Builders
 			{
 				emit
 					.ldarg_0
-					.callvirt(Context.CurrentProperty.GetGetMethod())
+					.callvirt(Context.CurrentProperty.GetGetMethod(true))
 					.ldarg_1
 					.ceq.end();
 
@@ -123,7 +123,7 @@ namespace BLToolkit.TypeBuilder.Builders
 			FieldBuilder     ifb  = GetPropertyInfoField();
 			EmitHelper       emit = Context.MethodBuilder.Emitter;
 
-			if (_notifyOnEqualSet && Context.CurrentProperty.CanRead && !_skipSetterOnNoChange)
+			if (!_notifyOnEqualSet && Context.CurrentProperty.CanRead && !_skipSetterOnNoChange)
 			{
 				_afterNotificationLabel = emit.DefineLabel();
 				emit
@@ -149,7 +149,7 @@ namespace BLToolkit.TypeBuilder.Builders
 					;
 			}
 
-			if (_notifyOnEqualSet && Context.CurrentProperty.CanRead)
+			if (!_notifyOnEqualSet && Context.CurrentProperty.CanRead)
 				emit.MarkLabel(_afterNotificationLabel);
 		}
 	}
