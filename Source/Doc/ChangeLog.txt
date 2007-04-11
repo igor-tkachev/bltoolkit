@@ -8,6 +8,7 @@ Bug fixes
 - StandardPropertyDescriptor.CheckNull was always returning DBNull.Value if _isNull handler
   was returning null. Now configurable via Configuration.CheckNullReturnIfNull.
 - PropertyChangedBuilder was crashing when property was not public
+- ObjectBinder.IsNull was serialized to resources
 
 Enhancement
 
