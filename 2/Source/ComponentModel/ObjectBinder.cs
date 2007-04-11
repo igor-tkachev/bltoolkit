@@ -223,6 +223,7 @@ namespace BLToolkit.ComponentModel
 
 		private IsNullHandler _isNull;
 		[Browsable(false)]
+		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		public  IsNullHandler  IsNull
 		{
 			get { return _isNull;  }
