@@ -55,8 +55,8 @@ namespace BLToolkit.Data.DataProvider
 					typeTable[typeof(Single[])]            = OracleDbType.Single;
 					typeTable[typeof(Double[])]            = OracleDbType.Double;
 					typeTable[typeof(Decimal[])]           = OracleDbType.Decimal;
-					typeTable[typeof(String[])]            = OracleDbType.Varchar2;
 					typeTable[typeof(TimeSpan[])]          = OracleDbType.IntervalDS;
+					typeTable[typeof(String[])]            = OracleDbType.Varchar2;
 					typeTable[typeof(OracleBFile[])]       = OracleDbType.BFile;
 					typeTable[typeof(OracleBinary[])]      = OracleDbType.Raw;
 					typeTable[typeof(OracleBlob[])]        = OracleDbType.Blob;
@@ -85,6 +85,29 @@ namespace BLToolkit.Data.DataProvider
 					typeTable[typeof(UInt16[])]            = OracleDbType.Decimal;
 					typeTable[typeof(UInt32[])]            = OracleDbType.Decimal;
 					typeTable[typeof(UInt64[])]            = OracleDbType.Decimal;
+
+#if FW2
+					typeTable[typeof(Boolean?)]            = OracleDbType.Byte;
+					typeTable[typeof(Guid?)]               = OracleDbType.Raw;
+					typeTable[typeof(SByte?)]              = OracleDbType.Decimal;
+					typeTable[typeof(UInt16?)]             = OracleDbType.Decimal;
+					typeTable[typeof(UInt32?)]             = OracleDbType.Decimal;
+					typeTable[typeof(UInt64?)]             = OracleDbType.Decimal;
+					typeTable[typeof(DateTime?[])]         = OracleDbType.TimeStamp;
+					typeTable[typeof(Int16?[])]            = OracleDbType.Int16;
+					typeTable[typeof(Int32?[])]            = OracleDbType.Int32;
+					typeTable[typeof(Int64?[])]            = OracleDbType.Int64;
+					typeTable[typeof(Single?[])]           = OracleDbType.Single;
+					typeTable[typeof(Double?[])]           = OracleDbType.Double;
+					typeTable[typeof(Decimal?[])]          = OracleDbType.Decimal;
+					typeTable[typeof(TimeSpan?[])]         = OracleDbType.IntervalDS;
+					typeTable[typeof(Boolean?[])]          = OracleDbType.Byte;
+					typeTable[typeof(Guid?[])]             = OracleDbType.Raw;
+					typeTable[typeof(SByte?[])]            = OracleDbType.Decimal;
+					typeTable[typeof(UInt16?[])]           = OracleDbType.Decimal;
+					typeTable[typeof(UInt32?[])]           = OracleDbType.Decimal;
+					typeTable[typeof(UInt64?[])]           = OracleDbType.Decimal;
+#endif
 				}
 			}
 		}
@@ -207,6 +230,17 @@ namespace BLToolkit.Data.DataProvider
 						if (null != ar && !(ar is byte[] || ar is char[]))
 						{
 							oraParameter.Size = ar.Length;
+
+							if (oraParameter.DbType == DbType.String && oraParameter.Direction == ParameterDirection.InputOutput)
+							{
+								int[] arrayBindSize = new int[oraParameter.Size];
+								for (int i = 0; i < oraParameter.Size; ++i)
+								{
+									arrayBindSize[i] = 1024;
+								}
+								
+								oraParameter.ArrayBindSize = arrayBindSize;
+							}
 						}
 
 						if (oraParameter.Size == 0)

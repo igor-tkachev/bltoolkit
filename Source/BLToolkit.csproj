@@ -1,7 +1,7 @@
 <VisualStudioProject>
     <CSHARP
         ProjectType = "Local"
-        ProductVersion = "7.10.3077"
+        ProductVersion = "7.10.6030"
         SchemaVersion = "2.0"
         ProjectGuid = "{C8B3F401-4634-4742-A266-4BD9ED7565E5}"
     >
@@ -225,6 +225,11 @@
                 />
                 <File
                     RelPath = "Common\CompoundValue.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "Common\Configuration.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
                 />

@@ -783,26 +783,7 @@ namespace BLToolkit.Mapping
 
 		public virtual object ConvertChangeType(object value, Type conversionType)
 		{
-			bool isNullable = false;
-#if FW2
-			if (conversionType.IsArray && conversionType.ContainsGenericParameters)
-			{
-				Type t = conversionType;
-
-				do
-				{
-					t = t.GetElementType();
-				}
-				while (t.IsArray);
-
-				isNullable = TypeHelper.IsNullable(t);
-			}
-			else
-			{
-				isNullable = TypeHelper.IsNullable(conversionType);
-			}
-#endif
-			return ConvertChangeType(value, conversionType, isNullable);
+			return ConvertChangeType(value, conversionType, TypeHelper.IsNullable(conversionType));
 		}
 
 		public virtual object ConvertChangeType(object value, Type conversionType, bool isNullable)
@@ -884,7 +865,7 @@ namespace BLToolkit.Mapping
 #if FW2
 			if (isNullable)
 			{
-				switch (Type.GetTypeCode(conversionType))
+				switch (Type.GetTypeCode(TypeHelper.GetUnderlyingType(conversionType)))
 				{
 					case TypeCode.Boolean:  return ConvertToNullableBoolean (value);
 					case TypeCode.Byte:     return ConvertToNullableByte    (value);

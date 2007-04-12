@@ -1,6 +1,12 @@
 namespace BLToolkit.Common
 {
-	public static class Configuration
+	public
+#if FW2
+	static
+#else
+	abstract
+#endif
+	class Configuration
 	{
 		public enum NullEquivalent { DBNull, Null, Value }
 

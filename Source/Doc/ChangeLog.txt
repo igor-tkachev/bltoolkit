@@ -9,6 +9,7 @@ Bug fixes
   was returning null. Now configurable via Configuration.CheckNullReturnIfNull.
 - PropertyChangedBuilder was crashing when property was not public
 - ObjectBinder.IsNull was serialized to resources
+- Oracle provider now handles arrays of nullable types correctly.
 
 Enhancement
 

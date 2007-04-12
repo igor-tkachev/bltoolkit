@@ -658,6 +658,9 @@ namespace BLToolkit.Reflection
 		public static bool IsNullable(Type type)
 		{
 #if FW2
+			while (type.IsArray)
+				type = type.GetElementType();
+
 			return (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>));
 #else
 			return false;
