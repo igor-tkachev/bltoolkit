@@ -124,12 +124,12 @@ namespace TypeBuilder.Builders
 		[Test]
 		public void TestGeneration()
 		{
-			TestObject_Notification ton = TypeAccessor<TestObject_Notification>.CreateInstance();
-			TestObject_NoNotification tonn = TypeAccessor<TestObject_NoNotification>.CreateInstance();
-			TestObject_NoNotificationEquals tonne = TypeAccessor<TestObject_NoNotificationEquals>.CreateInstance();
-			TestObject_NoNotificationEqualsNoSkip tonnes = TypeAccessor<TestObject_NoNotificationEqualsNoSkip>.CreateInstance();
+			TestObject_Notification ton = (TestObject_Notification) TypeAccessor.CreateInstance(typeof(TestObject_Notification));
+			TestObject_NoNotification tonn = (TestObject_NoNotification) TypeAccessor.CreateInstance(typeof(TestObject_NoNotification));
+			TestObject_NoNotificationEquals tonne = (TestObject_NoNotificationEquals) TypeAccessor.CreateInstance(typeof(TestObject_NoNotificationEquals));
+			TestObject_NoNotificationEqualsNoSkip tonnes = (TestObject_NoNotificationEqualsNoSkip) TypeAccessor.CreateInstance(typeof(TestObject_NoNotificationEqualsNoSkip));
 
-			Derived_TONNENS derived_TONNENS = TypeAccessor<Derived_TONNENS>.CreateInstance();
+			Derived_TONNENS derived_TONNENS = (Derived_TONNENS) TypeAccessor.CreateInstance(typeof(Derived_TONNENS));
 		}
 	}
 }
