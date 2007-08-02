@@ -7,11 +7,8 @@ namespace BLToolkit.DataAccess
 	[AttributeUsage(AttributeTargets.Method)]
 	public class ScalarSourceAttribute : ScalarFieldNameAttribute
 	{
-		public ScalarSourceAttribute()
-		{
-		}
-
 		public ScalarSourceAttribute(ScalarSourceType scalarType)
+			: base(0)
 		{
 			_scalarType = scalarType;
 		}

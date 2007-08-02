@@ -126,7 +126,7 @@ namespace BLToolkit.DataAccess
 				string.Format("{0}_{1}", typeName, actionName);
 		}
 
-		private static Hashtable _actionSproc = new Hashtable();
+		private static readonly Hashtable _actionSproc = new Hashtable();
 
 		[NoInterception]
 		protected virtual string GetSpName(Type type, string actionName)

@@ -49,7 +49,11 @@ namespace Mapping
 			using (DbManager db = new DbManager())
 			{
 				db
+#if ORACLE
+					.SetSpCommand("ResultSetTest")
+#else
 					.SetCommand(SqlResultSet)
+#endif
 					.ExecuteResultSet(sets);
 			}
 
@@ -70,7 +74,11 @@ namespace Mapping
 			using (DbManager db = new DbManager())
 			{
 				db
+#if ORACLE
+					.SetSpCommand("ResultSetTest")
+#else
 					.SetCommand(SqlResultSet)
+#endif
 					.ExecuteResultSet(sets);
 			}
 		}
@@ -89,7 +97,11 @@ namespace Mapping
 			using (DbManager db = new DbManager())
 			{
 				db
+#if ORACLE
+					.SetSpCommand("ResultSetTest")
+#else
 					.SetCommand(SqlResultSet)
+#endif
 					.ExecuteResultSet(sets);
 			}
 		}
@@ -108,7 +120,11 @@ namespace Mapping
 			using (DbManager db = new DbManager())
 			{
 				db
+#if ORACLE
+					.SetSpCommand("ResultSetTest")
+#else
 					.SetCommand(SqlResultSet)
+#endif
 					.ExecuteResultSet(sets);
 			}
 		}
@@ -119,7 +135,11 @@ namespace Mapping
 			using (DbManager db = new DbManager())
 			{
 				MapResultSet[] sets = db
-					.SetCommand(SqlResultSet)	
+#if ORACLE
+					.SetSpCommand("ResultSetTest")
+#else
+					.SetCommand(SqlResultSet)
+#endif
 					.ExecuteResultSet(typeof(Master),
 						new MapNextResult(typeof(Slave), "MasterID", "MasterID", "Slaves"));
 

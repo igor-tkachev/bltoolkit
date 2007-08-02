@@ -3,7 +3,7 @@ using System.Collections;
 
 namespace BLToolkit.Mapping
 {
-	public class ScalarListMapper : MapDataDestinationBase
+	public class ScalarListMapper : MapDataSourceDestinationBase
 	{
 		public ScalarListMapper(IList list, Type type)
 		{
@@ -11,8 +11,11 @@ namespace BLToolkit.Mapping
 			_type = type;
 		}
 
-		private IList _list;
-		private Type  _type;
+		private readonly IList _list;
+		private readonly Type  _type;
+		private          int   _index;
+
+		#region Destination
 
 		public override Type GetFieldType(int index)
 		{
@@ -33,5 +36,31 @@ namespace BLToolkit.Mapping
 		{
 			_list.Add(value);
 		}
+
+		#endregion
+
+		#region Source
+
+		public override int Count
+		{
+			get { return _index < _list.Count? 1: 0; }
+		}
+
+		public override string GetName(int index)
+		{
+			return string.Empty;
+		}
+
+		public override object GetValue(object o, int index)
+		{
+			return _list[_index++];
+		}
+
+		public override object GetValue(object o, string name)
+		{
+			return _list[_index++];
+		}
+
+		#endregion
 	}
 }

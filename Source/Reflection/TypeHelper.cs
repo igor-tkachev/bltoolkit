@@ -4,15 +4,15 @@ using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Reflection;
 using System.ComponentModel;
-using System.Diagnostics;
 using System.Xml;
+using BLToolkit.Common;
 using BLToolkit.TypeBuilder;
 using BLToolkit.EditableObjects;
 
 namespace BLToolkit.Reflection
 {
 #if FW2
-	[DebuggerDisplay("Type = {Type}")]
+	[System.Diagnostics.DebuggerDisplay("Type = {Type}")]
 #endif
 	/// <summary>
 	/// A wrapper around the <see cref="Type"/> class.
@@ -30,11 +30,11 @@ namespace BLToolkit.Reflection
 			_type = type;
 		}
 
-		private Type _type;
+		private readonly Type _type;
 		/// <summary>
 		/// Gets associated Type.
 		/// </summary>
-		public  Type  Type
+		public           Type  Type
 		{
 			get { return _type; }
 		}
@@ -138,6 +138,8 @@ namespace BLToolkit.Reflection
 			return GetAttributesInternal();
 		}
 
+		#region Attributes cache
+
 		private object[] GetAttributesInternal()
 		{
 			string key = _type.FullName;
@@ -156,13 +158,39 @@ namespace BLToolkit.Reflection
 			return attrs;
 		}
 
+		private static readonly Hashtable _typeAttributesTopInternal = new Hashtable(10);
 		private static void GetAttributesInternal(ArrayList list, Type type)
 		{
-			object[] attrs = type.GetCustomAttributes(false);
+			object[] attrs = (object[])_typeAttributesTopInternal[type];
 
-			foreach (object a in attrs)
-				if (list.Contains(a) == false)
-					list.Add(a);
+			if (attrs != null)
+			{
+				list.AddRange(attrs);
+			}
+			else
+			{
+				GetAttributesTreeInternal(list, type);
+
+				_typeAttributesTopInternal[type] = list.ToArray();
+			}
+		}
+
+		private static readonly Hashtable _typeAttributesInternal = new Hashtable(10);
+		private static void GetAttributesTreeInternal(ArrayList list, Type type)
+		{
+			object[] attrs = (object[])_typeAttributesInternal[type];
+
+			if (attrs == null)
+				_typeAttributesInternal[type] = attrs = type.GetCustomAttributes(false);
+
+			if (Configuration.FilterOutBaseEqualAttributes)
+			{
+				for (int i = 0; i < attrs.Length; i++)
+					if (!list.Contains(attrs[i]))
+						list.Add(attrs[i]);
+			}
+			else
+				list.AddRange(attrs);
 
 			if (type.IsInterface == false)
 			{
@@ -195,22 +223,32 @@ namespace BLToolkit.Reflection
 							continue;
 					}
 
-					GetAttributesInternal(list, intf);
+					GetAttributesTreeInternal(list, intf);
 				}
 
 				if (type.BaseType != null && type.BaseType != typeof(object))
-					GetAttributesInternal(list, type.BaseType);
+					GetAttributesTreeInternal(list, type.BaseType);
 			}
 		}
 
-		private static Hashtable _typeAttributes = new Hashtable(10);
+		private static readonly Hashtable _typeAttributes = new Hashtable(10);
 
+		#endregion
+
+		/// <summary>
+		/// Returns an array of custom attributes applied to a type.
+		/// </summary>
+		/// <param name="type">A type instance.</param>
+		/// <param name="attributeType">The type of attribute to search for.
+		/// Only attributes that are assignable to this type are returned.</param>
+		/// <returns>An array of custom attributes applied to this type,
+		/// or an array with zero (0) elements if no attributes have been applied.</returns>
 		public static object[] GetAttributes(Type type, Type attributeType)
 		{
 			if (type          == null) throw new ArgumentNullException("type");
 			if (attributeType == null) throw new ArgumentNullException("attributeType");
 
-			string key = type.FullName + "." + attributeType.FullName;
+			string key = type.FullName + "#" + attributeType.FullName;
 
 			object[] attrs = (object[])_typeAttributes[key];
 
@@ -230,12 +268,37 @@ namespace BLToolkit.Reflection
 			return attrs;
 		}
 
+		/// <summary>
+		/// Retrieves a custom attribute applied to a type.
+		/// </summary>
+		/// <param name="type">A type instance.</param>
+		/// <param name="attributeType">The type of attribute to search for.
+		/// Only attributes that are assignable to this type are returned.</param>
+		/// <returns>A reference to the first custom attribute of type attributeType
+		/// that is applied to element, or null if there is no such attribute.</returns>
 		public static Attribute GetFirstAttribute(Type type, Type attributeType)
 		{
 			object[] attrs = new TypeHelper(type).GetAttributes(attributeType);
 
 			return attrs.Length > 0? (Attribute)attrs[0]: null;
 		}
+
+#if FW2
+		/// <summary>
+		/// Retrieves a custom attribute applied to a type.
+		/// </summary>
+		/// <param name="type">A type instance.</param>
+		/// <typeparam name="T">The type of attribute to search for.
+		/// Only attributes that are assignable to this type are returned.</param>
+		/// <returns>A reference to the first custom attribute of type attributeType
+		/// that is applied to element, or null if there is no such attribute.</returns>
+		public static T GetFirstAttribute<T>(Type type) where T : Attribute
+		{
+			object[] attrs = new TypeHelper(type).GetAttributes(typeof(T));
+
+			return attrs.Length > 0? (T)attrs[0]: null;
+		}
+#endif
 
 		#endregion
 
@@ -378,23 +441,53 @@ namespace BLToolkit.Reflection
 
 		#region GetMethod
 
+		/// <summary>
+		/// Searches for the specified instance method (public or non-public), using the specified name.
+		/// </summary>
+		/// <param name="methodName">The String containing the name of the method to get.</param>
+		/// <returns>A <see cref="MethodInfo"/> object representing the method
+		/// that matches the specified name, if found; otherwise, null.</returns>
 		public MethodInfo GetMethod(string methodName)
 		{
 			return _type.GetMethod(methodName,
 				BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
 		}
 
+		/// <summary>
+		/// Searches for the specified public instance method, using the specified name.
+		/// </summary>
+		/// <param name="methodName">The String containing the name of the method to get.</param>
+		/// <returns>A <see cref="MethodInfo"/> object representing the method
+		/// that matches the specified name, if found; otherwise, null.</returns>
 		public MethodInfo GetPublicMethod(string methodName)
 		{
 			return _type.GetMethod(methodName,
 				BindingFlags.Instance | BindingFlags.Public);
 		}
 
+		/// <summary>
+		/// Searches for the specified method, using the specified name and binding flags.
+		/// </summary>
+		/// <param name="methodName">The String containing the name of the method to get.</param>
+		/// <param name="flags">A bitmask comprised of one or more <see cref="BindingFlags"/> 
+		/// that specify how the search is conducted.</param>
+		/// <returns>A <see cref="MethodInfo"/> object representing the method
+		/// that matches the specified requirements, if found; otherwise, null.</returns>
 		public MethodInfo GetMethod(string methodName, BindingFlags flags)
 		{
 			return _type.GetMethod(methodName, flags);
 		}
 
+		/// <summary>
+		/// Searches for the specified public instance method, using the specified name.
+		/// </summary>
+		/// <param name="methodName">The String containing the name of the method to get.</param>
+		/// <param name="types">An array of <see cref="System.Type"/> objects representing
+		/// the number, order, and type of the parameters for the method to get.-or-
+		/// An empty array of the type <see cref="System.Type"/> (for example, <see cref="System.Type.EmptyTypes"/>)
+		/// to get a method that takes no parameters.</param>
+		/// <returns>A <see cref="MethodInfo"/> object representing the method
+		/// that matches the specified requirements, if found; otherwise, null.</returns>
 		public MethodInfo GetPublicMethod(string methodName, params Type[] types)
 		{
 			return _type.GetMethod(
@@ -405,6 +498,17 @@ namespace BLToolkit.Reflection
 				null);
 		}
 
+		/// <summary>
+		/// Searches for the specified instance method (public or non-public),
+		/// using the specified name and argument types.
+		/// </summary>
+		/// <param name="methodName">The String containing the name of the method to get.</param>
+		/// <param name="types">An array of <see cref="System.Type"/> objects representing
+		/// the number, order, and type of the parameters for the method to get.-or-
+		/// An empty array of the type <see cref="System.Type"/> (for example, <see cref="System.Type.EmptyTypes"/>)
+		/// to get a method that takes no parameters.</param>
+		/// <returns>A <see cref="MethodInfo"/> object representing the method
+		/// that matches the specified requirements, if found; otherwise, null.</returns>
 		public MethodInfo GetMethod(string methodName, params Type[] types)
 		{
 			return _type.GetMethod(
@@ -415,6 +519,19 @@ namespace BLToolkit.Reflection
 				null);
 		}
 
+		/// <summary>
+		/// Searches for the specified method, using the specified name,
+		/// binding flags and argument types.
+		/// </summary>
+		/// <param name="methodName">The String containing the name of the method to get.</param>
+		/// <param name="types">An array of <see cref="System.Type"/> objects representing
+		/// the number, order, and type of the parameters for the method to get.-or-
+		/// An empty array of the type <see cref="System.Type"/> (for example, <see cref="System.Type.EmptyTypes"/>)
+		/// to get a method that takes no parameters.</param>
+		/// <param name="flags">A bitmask comprised of one or more <see cref="BindingFlags"/> 
+		/// that specify how the search is conducted.</param>
+		/// <returns>A <see cref="MethodInfo"/> object representing the method
+		/// that matches the specified requirements, if found; otherwise, null.</returns>
 		public MethodInfo GetMethod(string methodName, BindingFlags flags, params Type[] types)
 		{
 			return _type.GetMethod(methodName, flags, null, types, null);
@@ -422,23 +539,61 @@ namespace BLToolkit.Reflection
 
 #if FW2
 
+		/// <summary>
+		/// Searches for the specified instance method (public or non-public), using the specified name.
+		/// </summary>
+		/// <param name="methodName">The String containing the name of the method to get.</param>
+		/// <param name="generic">True to search only for a generic method, or
+		/// False to search only for non-generic method.</param>
+		/// <returns>A <see cref="MethodInfo"/> object representing the method
+		/// that matches the specified requirements, if found; otherwise, null.</returns>
 		public MethodInfo GetMethod(bool generic, string methodName)
 		{
 			return GetMethod(_type, generic, methodName,
 				BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
 		}
 
+		/// <summary>
+		/// Searches for the specified public instance method, using the specified name.
+		/// </summary>
+		/// <param name="methodName">The String containing the name of the method to get.</param>
+		/// <param name="generic">True to search only for a generic method, or
+		/// False to search only for non-generic method.</param>
+		/// <returns>A <see cref="MethodInfo"/> object representing the method
+		/// that matches the specified requirements, if found; otherwise, null.</returns>
 		public MethodInfo GetPublicMethod(bool generic, string methodName)
 		{
 			return GetMethod(_type, generic, methodName,
 				BindingFlags.Instance | BindingFlags.Public);
 		}
 
+		/// <summary>
+		/// Searches for the specified method, using the specified name and binding flags.
+		/// </summary>
+		/// <param name="methodName">The String containing the name of the method to get.</param>
+		/// <param name="generic">True to search only for a generic method, or
+		/// False to search only for non-generic method.</param>
+		/// <param name="flags">A bitmask comprised of one or more <see cref="BindingFlags"/> 
+		/// that specify how the search is conducted.</param>
+		/// <returns>A <see cref="MethodInfo"/> object representing the method
+		/// that matches the specified requirements, if found; otherwise, null.</returns>
 		public MethodInfo GetMethod(bool generic, string methodName, BindingFlags flags)
 		{
 			return GetMethod(_type, generic, methodName, flags);
 		}
 
+		/// <summary>
+		/// Searches for the specified public instance method, using the specified name and argument types.
+		/// </summary>
+		/// <param name="methodName">The String containing the name of the method to get.</param>
+		/// <param name="generic">True to search only for a generic method, or
+		/// False to search only for non-generic method.</param>
+		/// <param name="types">An array of <see cref="System.Type"/> objects representing
+		/// the number, order, and type of the parameters for the method to get.-or-
+		/// An empty array of the type <see cref="System.Type"/> (for example, <see cref="System.Type.EmptyTypes"/>)
+		/// to get a method that takes no parameters.</param>
+		/// <returns>A <see cref="MethodInfo"/> object representing the method
+		/// that matches the specified requirements, if found; otherwise, null.</returns>
 		public MethodInfo GetPublicMethod(bool generic, string methodName, params Type[] types)
 		{
 			return _type.GetMethod(methodName,
@@ -447,6 +602,19 @@ namespace BLToolkit.Reflection
 				types, null);
 		}
 
+		/// <summary>
+		/// Searches for the specified instance method (public or non-public),
+		/// using the specified name and argument types.
+		/// </summary>
+		/// <param name="methodName">The String containing the name of the method to get.</param>
+		/// <param name="generic">True to search only for a generic method, or
+		/// False to search only for non-generic method.</param>
+		/// <param name="types">An array of <see cref="System.Type"/> objects representing
+		/// the number, order, and type of the parameters for the method to get.-or-
+		/// An empty array of the type <see cref="System.Type"/> (for example, <see cref="System.Type.EmptyTypes"/>)
+		/// to get a method that takes no parameters.</param>
+		/// <returns>A <see cref="MethodInfo"/> object representing the method
+		/// that matches the specified requirements, if found; otherwise, null.</returns>
 		public MethodInfo GetMethod(bool generic, string methodName, params Type[] types)
 		{
 			return _type.GetMethod(methodName,
@@ -455,6 +623,20 @@ namespace BLToolkit.Reflection
 				types, null);
 		}
 
+		/// <summary>
+		/// Searches for the specified method using the specified name, binding flags and argument types.
+		/// </summary>
+		/// <param name="methodName">The String containing the name of the method to get.</param>
+		/// <param name="generic">True to search only for a generic method, or
+		/// False to search only for non-generic method.</param>
+		/// <param name="types">An array of <see cref="System.Type"/> objects representing
+		/// the number, order, and type of the parameters for the method to get.-or-
+		/// An empty array of the type <see cref="System.Type"/> (for example, <see cref="System.Type.EmptyTypes"/>)
+		/// to get a method that takes no parameters.</param>
+		/// <param name="flags">A bitmask comprised of one or more <see cref="BindingFlags"/> 
+		/// that specify how the search is conducted.</param>
+		/// <returns>A <see cref="MethodInfo"/> object representing the method
+		/// that matches the specified requirements, if found; otherwise, null.</returns>
 		public MethodInfo GetMethod(bool generic, string methodName, BindingFlags flags, params Type[] types)
 		{
 			return _type.GetMethod(methodName,
@@ -577,9 +759,16 @@ namespace BLToolkit.Reflection
 		}
 		*/
 
-		public InterfaceMapping GetInterfaceMap(Type type)
+		/// <summary>
+		/// Returns an interface mapping for the current <see cref="Type"/>.
+		/// </summary>
+		/// <param name="interfaceType">The <see cref="System.Type"/>
+		/// of the interface of which to retrieve a mapping.</param>
+		/// <returns>An <see cref="InterfaceMapping"/> object representing the interface
+		/// mapping for interfaceType.</returns>
+		public InterfaceMapping GetInterfaceMap(Type interfaceType)
 		{
-			return _type.GetInterfaceMap(type);
+			return _type.GetInterfaceMap(interfaceType);
 		}
 
 		#endregion
@@ -587,20 +776,43 @@ namespace BLToolkit.Reflection
 		#region GetConstructor
 
 		/// <summary>
-		/// Searches for a public instance constructor whose parameters match the types in the specified array.
+		/// Searches for a public instance constructor whose parameters match
+		/// the types in the specified array.
 		/// </summary>
-		/// <param name="types">An array of Type objects representing the number, order, and type of the parameters for the constructor to get.</param>
-		/// <returns>A <see cref="ConstructorInfo"/> object representing the public instance constructor whose parameters match the types in the parameter type array, if found; otherwise, a null reference.</returns>
+		/// <param name="types">An array of Type objects representing the number,
+		/// order, and type of the parameters for the constructor to get.</param>
+		/// <returns>A <see cref="ConstructorInfo"/> object representing the
+		/// public instance constructor whose parameters match the types in
+		/// the parameter type array, if found; otherwise, a null reference.</returns>
 		public ConstructorInfo GetPublicConstructor(params Type[] types)
 		{
 			return _type.GetConstructor(types);
 		}
 
-		public ConstructorInfo GetConstructor(Type type1)
+		/// <summary>
+		/// Searches for an instance constructor (public or non-public) whose
+		/// parameters match the types in the specified array.
+		/// </summary>
+		/// <param name="parameterType">Type object representing type of the
+		/// parameter for the constructor to get.</param>
+		/// <returns>A <see cref="ConstructorInfo"/> object representing the constructor
+		///  whose parameters match the types in the parameter type array, if found;
+		/// otherwise, a null reference.</returns>
+		public ConstructorInfo GetConstructor(Type parameterType)
 		{
-			return GetConstructor(_type, type1);
+			return GetConstructor(_type, parameterType);
 		}
 
+		/// <summary>
+		/// Searches for an instance constructor (public or non-public) whose
+		/// parameters match the types in the specified array.
+		/// </summary>
+		/// <param name="type">An instance of <see cref="System.Type"/> to search constructor for.</param>
+		/// <param name="types">An array of Type objects representing the number,
+		/// order, and type of the parameters for the constructor to get.</param>
+		/// <returns>A <see cref="ConstructorInfo"/> object representing the constructor
+		///  whose parameters match the types in the parameter type array, if found;
+		/// otherwise, a null reference.</returns>
 		public static ConstructorInfo GetConstructor(Type type, params Type[] types)
 		{
 			if (type == null) throw new ArgumentNullException("type");
@@ -630,6 +842,11 @@ namespace BLToolkit.Reflection
 			return GetDefaultConstructor(_type);
 		}
 
+		/// <summary>
+		/// Searches for a default constructor.
+		/// </summary>
+		/// <param name="type">An instance of <see cref="System.Type"/> to search constructor for.</param>
+		/// <returns>A <see cref="ConstructorInfo"/> object representing the constructor.</returns>
 		public static ConstructorInfo GetDefaultConstructor(Type type)
 		{
 			if (type == null) throw new ArgumentNullException("type");
@@ -641,11 +858,21 @@ namespace BLToolkit.Reflection
 				null);
 		}
 
+		/// <summary>
+		/// Searches for a public constructors.
+		/// </summary>
+		/// <returns>An array of <see cref="ConstructorInfo"/> objects
+		/// representing all the type public constructors, if found; otherwise, an empty array.</returns>
 		public ConstructorInfo[] GetPublicConstructors()
 		{
 			return _type.GetConstructors();
 		}
 
+		/// <summary>
+		/// Searches for all constructors (except type constructors).
+		/// </summary>
+		/// <returns>An array of <see cref="ConstructorInfo"/> objects
+		/// representing all the type constructors, if found; otherwise, an empty array.</returns>
 		public ConstructorInfo[] GetConstructors()
 		{
 			return _type.GetConstructors(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
@@ -655,6 +882,13 @@ namespace BLToolkit.Reflection
 
 		#region Static Members
 
+		/// <summary>
+		/// Gets a value indicating whether a type (or type's element type)
+		/// instance can be null in the underlying data store.
+		/// </summary>
+		/// <param name="type">A <see cref="System.Type"/> instance. </param>
+		/// <returns> True, if the type parameter is a closed generic nullable type; otherwise, False.</returns>
+		/// <remarks>Arrays of Nullable types are treated as Nullable types.</remarks>
 		public static bool IsNullable(Type type)
 		{
 #if FW2
@@ -667,6 +901,17 @@ namespace BLToolkit.Reflection
 #endif
 		}
 
+		/// <summary>
+		/// Returns the underlying type argument of the specified type.
+		/// </summary>
+		/// <param name="type">A <see cref="System.Type"/> instance. </param>
+		/// <returns><list>
+		/// <item>The type argument of the type parameter,
+		/// if the type parameter is a closed generic nullable type.</item>
+		/// <item>The underlying Type of enumType, if the type parameter is an enum type.</item>
+		/// <item>Otherwise, the type itself.</item>
+		/// </list>
+		/// </returns>
 		public static Type GetUnderlyingType(Type type)
 		{
 			if (type == null) throw new ArgumentNullException("type");
@@ -685,12 +930,14 @@ namespace BLToolkit.Reflection
 		/// <summary>
 		/// Determines whether the specified types are considered equal.
 		/// </summary>
-		/// <param name="parent">A type.</param>
+		/// <param name="type">A <see cref="System.Type"/> instance. </param>
 		/// <param name="child">A type possible derived from the <c>parent</c> type</param>
 		/// <returns>True, when an object instance of the type <c>child</c>
 		/// can be used as an object of the type <c>parent</c>; otherwise, false.</returns>
 #if FW2
-		/// <remarks>Note that 'int?' (nullable int) and 'int' types are different.</remarks>
+		/// <remarks>Note that nullable types does not have a parent-child relation to it's underlying type.
+		/// For example, the 'int?' type (nullable int) and the 'int' type
+		/// aren't a parent and it's child.</remarks>
 #endif
 		public static bool IsSameOrParent(Type parent, Type child)
 		{
@@ -718,6 +965,18 @@ namespace BLToolkit.Reflection
 
 #if FW2
 
+		/// <summary>
+		/// Searches for the method defined for a <see cref="System.Type"/>,
+		/// using the specified name and binding flags.
+		/// </summary>
+		/// <param name="methodName">The String containing the name of the method to get.</param>
+		/// <param name="generic">True to search only for a generic method, or
+		/// False to search only for non-generic method.</param>
+		/// <param name="type">A <see cref="System.Type"/> instance. </param>
+		/// <param name="flags">A bitmask comprised of one or more <see cref="BindingFlags"/> 
+		/// that specify how the search is conducted.</param>
+		/// <returns>A <see cref="MethodInfo"/> object representing the method
+		/// that matches the specified requirements, if found; otherwise, null.</returns>
 		public static MethodInfo GetMethod(Type type, bool generic, string methodName, BindingFlags flags)
 		{
 			if (type == null) throw new ArgumentNullException("type");
@@ -731,6 +990,16 @@ namespace BLToolkit.Reflection
 			return null;
 		}
 
+		/// <summary>
+		/// Searches for the methods defined for a <see cref="System.Type"/>,
+		/// using the specified name and binding flags.
+		/// </summary>
+		/// <param name="type">A <see cref="System.Type"/> instance. </param>
+		/// <param name="generic">True to return all generic methods, false to return all non-generic.</param>
+		/// <param name="flags">A bitmask comprised of one or more <see cref="BindingFlags"/> 
+		/// that specify how the search is conducted.</param>
+		/// <returns>An array of <see cref="MethodInfo"/> objects representing all methods defined 
+		/// for the current Type that match the specified binding constraints.</returns>
 		public static MethodInfo[] GetMethods(Type type, bool generic, BindingFlags flags)
 		{
 			if (type == null) throw new ArgumentNullException("type");
@@ -772,6 +1041,17 @@ namespace BLToolkit.Reflection
 			return null;
 		}
 
+		/// <summary>
+		/// Searches for the property defined for a <see cref="System.Type"/>,
+		/// using the specified name and parameter types.
+		/// </summary>
+		/// <param name="type">A <see cref="System.Type"/> instance. </param>
+		/// <param name="propertyName">The String containing the name of the method to get.</param>
+		/// <param name="types">An array of Type objects representing the number,
+		/// order, and type of the parameters for the constructor to get.</param>
+		/// <param name="returnType">The property return <see cref="System.Type"/>. </param>
+		/// <returns>A <see cref="MethodInfo"/> object representing the method
+		/// that matches the specified requirements, if found; otherwise, null.</returns>
 		public static PropertyInfo GetPropertyInfo(
 			Type type, string propertyName, Type returnType, Type[] types)
 		{
@@ -893,6 +1173,14 @@ namespace BLToolkit.Reflection
 			return typeof(object);
 		}
 
+		/// <summary>
+		/// Gets a value indicating whether a type can be used as a db primitive.
+		/// </summary>
+		/// <param name="type">A <see cref="System.Type"/> instance. </param>
+		/// <returns> True, if the type parameter is a primitive type; otherwise, False.</returns>
+		/// <remarks><see cref="System.String"/>. <see cref="Stream"/>. 
+		/// <see cref="XmlReader"/>. <see cref="XmlDocument"/>. are specially handled by the library
+		/// and, therefore, can be treated as scalar types.</remarks>
 		public static bool IsScalar(Type type)
 		{
 			while (type.IsArray)
@@ -901,7 +1189,8 @@ namespace BLToolkit.Reflection
 			return type.IsValueType
 				|| type == typeof(string)
 				|| type == typeof(Stream)
-				|| type == typeof(XmlReader);
+				|| type == typeof(XmlReader)
+				|| type == typeof(XmlDocument);
 		}
 
 #if FW2
@@ -919,6 +1208,31 @@ namespace BLToolkit.Reflection
 
 			return null;
 		}
+
+		public static Type TranslateGenericParameters(Type type, Type[] genParams)
+		{
+			// 'T paramName' case
+			//
+			if (type.IsGenericParameter)
+				return genParams[type.GenericParameterPosition];
+
+			// 'List<T> paramName' or something like that.
+			//
+			if (type.IsGenericType && type.ContainsGenericParameters)
+			{
+				Type[] genArgs = type.GetGenericArguments();
+
+				for (int i = 0; i < genArgs.Length; ++i)
+					genArgs[i] = TranslateGenericParameters(genArgs[i], genParams);
+
+				return type.GetGenericTypeDefinition().MakeGenericType(genArgs);
+			}
+
+			// Non-generic type.
+			//
+			return type;
+		}
+
 #endif
 
 		#endregion

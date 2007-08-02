@@ -21,6 +21,7 @@ using BLToolkit.Reflection;
 using BLToolkit.Reflection.Extension;
 
 using Convert = BLToolkit.Common.Convert;
+using System.Diagnostics;
 
 namespace BLToolkit.Mapping
 {
@@ -37,8 +38,8 @@ namespace BLToolkit.Mapping
 
 		#region ObjectMapper Support
 
-		private Hashtable      _mappers        = new Hashtable();
-		private ListDictionary _pendingMappers = new ListDictionary();
+		private readonly Hashtable      _mappers        = new Hashtable();
+		private readonly ListDictionary _pendingMappers = new ListDictionary();
 
 		public ObjectMapper GetObjectMapper(Type type)
 		{
@@ -119,7 +120,7 @@ namespace BLToolkit.Mapping
 		private MapMetadataProvider _metadataProvider;
 		public  MapMetadataProvider  MetadataProvider
 		{
-			[System.Diagnostics.DebuggerStepThrough]
+			[DebuggerStepThrough]
 			get
 			{
 				if (_metadataProvider == null)
@@ -151,25 +152,26 @@ namespace BLToolkit.Mapping
 
 		public virtual void InitNullValues()
 		{
-			_defaultSByteNullValue     = (SByte)    GetNullValue(typeof(SByte));
-			_defaultInt16NullValue     = (Int16)    GetNullValue(typeof(Int16));
-			_defaultInt32NullValue     = (Int32)    GetNullValue(typeof(Int32));
-			_defaultInt64NullValue     = (Int64)    GetNullValue(typeof(Int64));
-			_defaultByteNullValue      = (Byte)     GetNullValue(typeof(Byte));
-			_defaultUInt16NullValue    = (UInt16)   GetNullValue(typeof(UInt16));
-			_defaultUInt32NullValue    = (UInt32)   GetNullValue(typeof(UInt32));
-			_defaultUInt64NullValue    = (UInt64)   GetNullValue(typeof(UInt64));
-			_defaultCharNullValue      = (Char)     GetNullValue(typeof(Char));
-			_defaultSingleNullValue    = (Single)   GetNullValue(typeof(Single));
-			_defaultDoubleNullValue    = (Double)   GetNullValue(typeof(Double));
-			_defaultBooleanNullValue   = (Boolean)  GetNullValue(typeof(Boolean));
+			_defaultSByteNullValue       = (SByte)      GetNullValue(typeof(SByte));
+			_defaultInt16NullValue       = (Int16)      GetNullValue(typeof(Int16));
+			_defaultInt32NullValue       = (Int32)      GetNullValue(typeof(Int32));
+			_defaultInt64NullValue       = (Int64)      GetNullValue(typeof(Int64));
+			_defaultByteNullValue        = (Byte)       GetNullValue(typeof(Byte));
+			_defaultUInt16NullValue      = (UInt16)     GetNullValue(typeof(UInt16));
+			_defaultUInt32NullValue      = (UInt32)     GetNullValue(typeof(UInt32));
+			_defaultUInt64NullValue      = (UInt64)     GetNullValue(typeof(UInt64));
+			_defaultCharNullValue        = (Char)       GetNullValue(typeof(Char));
+			_defaultSingleNullValue      = (Single)     GetNullValue(typeof(Single));
+			_defaultDoubleNullValue      = (Double)     GetNullValue(typeof(Double));
+			_defaultBooleanNullValue     = (Boolean)    GetNullValue(typeof(Boolean));
 
-			_defaultStringNullValue    = (String)   GetNullValue(typeof(String));
-			_defaultDateTimeNullValue  = (DateTime) GetNullValue(typeof(DateTime));
-			_defaultDecimalNullValue   = (Decimal)  GetNullValue(typeof(Decimal));
-			_defaultGuidNullValue      = (Guid)     GetNullValue(typeof(Guid));
-			_defaultStreamNullValue    = (Stream)   GetNullValue(typeof(Stream));
-			_defaultXmlReaderNullValue = (XmlReader)GetNullValue(typeof(XmlReader));
+			_defaultStringNullValue      = (String)     GetNullValue(typeof(String));
+			_defaultDateTimeNullValue    = (DateTime)   GetNullValue(typeof(DateTime));
+			_defaultDecimalNullValue     = (Decimal)    GetNullValue(typeof(Decimal));
+			_defaultGuidNullValue        = (Guid)       GetNullValue(typeof(Guid));
+			_defaultStreamNullValue      = (Stream)     GetNullValue(typeof(Stream));
+			_defaultXmlReaderNullValue   = (XmlReader)  GetNullValue(typeof(XmlReader));
+			_defaultXmlDocumentNullValue = (XmlDocument)GetNullValue(typeof(XmlDocument));
 		}
 
 		#region Primitive Types
@@ -454,6 +456,21 @@ namespace BLToolkit.Mapping
 				value is XmlReader? (XmlReader)value:
 				value == null?      _defaultXmlReaderNullValue:
 					Convert.ToXmlReader(value);
+		}
+
+		private XmlDocument _defaultXmlDocumentNullValue;
+		public  XmlDocument  DefaultXmlDocumentNullValue
+		{
+			get { return _defaultXmlDocumentNullValue; }
+			set { _defaultXmlDocumentNullValue = value; }
+		}
+
+		public virtual XmlDocument ConvertToXmlDocument(object value)
+		{
+			return
+				value is XmlDocument? (XmlDocument)value:
+				value == null?        _defaultXmlDocumentNullValue:
+					Convert.ToXmlDocument(value);
 		}
 
 		public virtual byte[] ConvertToByteArray(object value)
@@ -766,16 +783,17 @@ namespace BLToolkit.Mapping
 				case TypeCode.UInt64:   return (T)(object)_defaultUInt64NullValue;
 			}
 
-			if (typeof(Guid)      == typeof(T)) return (T)(object)_defaultGuidNullValue;
-			if (typeof(Stream)    == typeof(T)) return (T)(object)_defaultStreamNullValue;
-			if (typeof(XmlReader) == typeof(T)) return (T)(object)_defaultXmlReaderNullValue;
+			if (typeof(Guid)        == typeof(T)) return (T)(object)_defaultGuidNullValue;
+			if (typeof(Stream)      == typeof(T)) return (T)(object)_defaultStreamNullValue;
+			if (typeof(XmlReader)   == typeof(T)) return (T)(object)_defaultXmlReaderNullValue;
+			if (typeof(XmlDocument) == typeof(T)) return (T)(object)_defaultXmlDocumentNullValue;
 
 			return default(T);
 		}
 
 		public virtual T ConvertTo<T, P>(P value)
 		{
-			if (value == null) return GetDefaultNullValue<T>();
+			if (Equals(value, default(P))) return GetDefaultNullValue<T>();
 
 			return Convert<T, P>.From(value);
 		}
@@ -861,6 +879,8 @@ namespace BLToolkit.Mapping
 					return dstArray;
 				}
 			}
+			else if (conversionType.IsEnum)
+				return Enum.ToObject(conversionType, value);
 
 #if FW2
 			if (isNullable)
@@ -909,6 +929,7 @@ namespace BLToolkit.Mapping
 			if (typeof(Guid)        == conversionType) return ConvertToGuid       (value);
 			if (typeof(Stream)      == conversionType) return ConvertToStream     (value);
 			if (typeof(XmlReader)   == conversionType) return ConvertToXmlReader  (value);
+			if (typeof(XmlDocument) == conversionType) return ConvertToXmlDocument(value);
 			if (typeof(byte[])      == conversionType) return ConvertToByteArray  (value);
 			if (typeof(char[])      == conversionType) return ConvertToCharArray  (value);
 
@@ -1032,9 +1053,14 @@ namespace BLToolkit.Mapping
 			return new ScalarListMapper(list, type);
 		}
 
-		public virtual SimpleDestinationListMapper CreateScalarListListMapper(IList list, Type type)
+		public virtual SimpleDestinationListMapper CreateScalarDistinationListMapper(IList list, Type type)
 		{
 			return new SimpleDestinationListMapper(CreateScalarListMapper(list, type));
+		}
+
+		public virtual SimpleSourceListMapper CreateScalarSourceListMapper(IList list, Type type)
+		{
+			return new SimpleSourceListMapper(CreateScalarListMapper(list, type));
 		}
 
 #if FW2
@@ -1043,7 +1069,7 @@ namespace BLToolkit.Mapping
 			return new ScalarListMapper<T>(this, list);
 		}
 
-		public virtual SimpleDestinationListMapper CreateScalarListListMapper<T>(IList<T> list)
+		public virtual SimpleDestinationListMapper CreateScalarDistinationListMapper<T>(IList<T> list)
 		{
 			return new SimpleDestinationListMapper(CreateScalarListMapper<T>(list));
 		}
@@ -1067,7 +1093,7 @@ namespace BLToolkit.Mapping
 
 		#region GetMapValues
 
-		private Hashtable _mapValues = new Hashtable();
+		private readonly Hashtable _mapValues = new Hashtable();
 
 		public virtual MapValue[] GetMapValues(Type type)
 		{
@@ -1092,31 +1118,7 @@ namespace BLToolkit.Mapping
 
 		#region GetDefaultValue
 
-		private Hashtable _defaultValues = new Hashtable();
-
-		internal static object GetExtensionDefaultValue(TypeExtension typeExt, Type type)
-		{
-			object value = null;
-
-			if (type.IsEnum)
-				value = GetEnumDefaultValueFromExtension(typeExt, type);
-
-			return value != null? value: typeExt.Attributes["DefaultValue"].Value;
-		}
-
-		const FieldAttributes EnumField = FieldAttributes.Public | FieldAttributes.Static | FieldAttributes.Literal;
-
-		private static object GetEnumDefaultValueFromExtension(TypeExtension typeExt, Type type)
-		{
-			FieldInfo[] fields = type.GetFields();
-
-			foreach (FieldInfo fi in fields)
-				if ((fi.Attributes & EnumField) == EnumField)
-					if (typeExt[fi.Name]["DefaultValue"].Value != null)
-						return Enum.Parse(type, fi.Name);
-
-			return null;
-		}
+		private readonly Hashtable _defaultValues = new Hashtable();
 
 		public virtual object GetDefaultValue(Type type)
 		{
@@ -1128,44 +1130,13 @@ namespace BLToolkit.Mapping
 				return defaultValue;
 
 			TypeExtension typeExt = TypeExtension.GetTypeExtension(type, Extensions);
+			bool          isSet;
 
-			defaultValue = GetExtensionDefaultValue(typeExt, type);
-
-			if (defaultValue == null)
-			{
-				if (type.IsEnum)
-					defaultValue = GetEnumDefaultValueFromType(type);
-
-				if (defaultValue == null)
-				{
-					object[] attrs = TypeHelper.GetAttributes(type, typeof(DefaultValueAttribute));
-
-					if (attrs != null && attrs.Length != 0)
-						defaultValue = ((DefaultValueAttribute)attrs[0]).Value;
-				}
-			}
+			defaultValue = MetadataProvider.GetDefaultValue(typeExt, type, out isSet);
 
 			_defaultValues[type] = defaultValue = TypeExtension.ChangeType(defaultValue, type);
 
 			return defaultValue;
-		}
-
-		private static object GetEnumDefaultValueFromType(Type type)
-		{
-			FieldInfo[] fields = type.GetFields();
-
-			foreach (FieldInfo fi in fields)
-			{
-				if ((fi.Attributes & EnumField) == EnumField)
-				{
-					Attribute[] attrs = Attribute.GetCustomAttributes(fi, typeof(DefaultValueAttribute));
-
-					if (attrs.Length > 0)
-						return Enum.Parse(type, fi.Name);
-				}
-			}
-
-			return null;
 		}
 
 		#endregion
@@ -1211,7 +1182,11 @@ namespace BLToolkit.Mapping
 			if (obj is IDataReader)
 				return CreateDataReaderListMapper((IDataReader)obj);
 
-			return CreateObjectListMapper((IList)obj, CreateObjectMapper(obj.GetType().GetElementType()));
+			Type type = obj.GetType().GetElementType();
+
+			return TypeHelper.IsScalar(type)?
+				(IMapDataSourceList)CreateScalarSourceListMapper((IList)obj, type):
+				CreateObjectListMapper((IList)obj, CreateObjectMapper(type));
 		}
 
 		[CLSCompliant(false)]
@@ -1254,7 +1229,11 @@ namespace BLToolkit.Mapping
 			if (obj is IMapDataDestinationList)
 				return (IMapDataDestinationList)obj;
 
-			return CreateObjectListMapper((IList)obj, CreateObjectMapper(obj.GetType().GetElementType()));
+			Type type = obj.GetType().GetElementType();
+
+			return TypeHelper.IsScalar(type)?
+				(IMapDataDestinationList)CreateScalarDistinationListMapper((IList)obj, type):
+				CreateObjectListMapper((IList)obj, CreateObjectMapper(type));
 		}
 
 		#endregion
@@ -1267,8 +1246,8 @@ namespace BLToolkit.Mapping
 			get { return ValueMapping.DefaultMapper; }
 		}
 
-		private Hashtable _sameTypeMappers      = new Hashtable();
-		private Hashtable _differentTypeMappers = new Hashtable();
+		private readonly Hashtable _sameTypeMappers      = new Hashtable();
+		private readonly Hashtable _differentTypeMappers = new Hashtable();
 
 		[CLSCompliant(false)]
 		public void SetValueMapper(
@@ -1530,7 +1509,7 @@ namespace BLToolkit.Mapping
 			MapInternal(null, source, sourceObject, dest, destObject, parameters);
 		}
 
-		private static ObjectMapper _nullMapper = new ObjectMapper();
+		private static readonly ObjectMapper _nullMapper = new ObjectMapper();
 
 		[CLSCompliant(false)]
 		public virtual void MapSourceListToDestinationList(
@@ -1622,7 +1601,7 @@ namespace BLToolkit.Mapping
 		#region ValueToEnum, EnumToValue
 
 		[SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
-		public object MapValueToEnum(object value, Type type)
+		public virtual object MapValueToEnum(object value, Type type)
 		{
 			if (value == null)
 				return GetNullValue(type);
@@ -1641,24 +1620,51 @@ namespace BLToolkit.Mapping
 						if (comp.CompareTo(mapValue) == 0)
 							return mv.OrigValue;
 					}
-					catch
+					catch (ArgumentException ex)
 					{
+						Debug.WriteLine(ex.Message, MethodBase.GetCurrentMethod().Name);
 					}
 				}
-
-				// Default value.
-				//
-				object defaultValue = GetDefaultValue(type);
-
-				if (defaultValue != null)
-					return defaultValue;
 			}
 
-			return value;
+			InvalidCastException exInvalidCast = null;
+			try
+			{
+				value = ConvertChangeType(value, Enum.GetUnderlyingType(type));
+
+				if (Enum.IsDefined(type, value))
+				{
+					// Regular (known) enum field w/o explicit mapping defined.
+					//
+					return Enum.ToObject(type, value);
+				}
+			}
+			catch (InvalidCastException ex)
+			{
+				exInvalidCast = ex;
+			}
+
+			// Default value.
+			//
+			object defaultValue = GetDefaultValue(type);
+
+			if (defaultValue != null)
+				return defaultValue;
+
+			if (exInvalidCast != null)
+			{
+				// Rethrow an InvalidCastException when no default value specified.
+				//
+				throw exInvalidCast;
+			}
+
+			// At this point we have an undefined enum value.
+			//
+			return Enum.ToObject(type, value);
 		}
 
 		[SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
-		public object MapEnumToValue(object value, bool convertToUnderlyingType)
+		public virtual object MapEnumToValue(object value, bool convertToUnderlyingType)
 		{
 			if (value == null)
 				return null;
@@ -2182,10 +2188,6 @@ namespace BLToolkit.Mapping
 		}
 
 		#endregion
-
-		#endregion
-
-		#region DbDataParameterList
 
 		#endregion
 
@@ -2906,7 +2908,7 @@ namespace BLToolkit.Mapping
 		{
 			MapSourceListToDestinationList(
 				CreateDataReaderListMapper(reader, nameOrIndex),
-				CreateScalarListListMapper(list,   type),
+				CreateScalarDistinationListMapper(list,   type),
 				null);
 
 			return list;
@@ -2921,7 +2923,7 @@ namespace BLToolkit.Mapping
 
 			MapSourceListToDestinationList(
 				CreateDataReaderListMapper(reader, nameOrIndex),
-				CreateScalarListListMapper(list,   type),
+				CreateScalarDistinationListMapper(list,   type),
 				null);
 
 			return list;
@@ -2935,7 +2937,7 @@ namespace BLToolkit.Mapping
 		{
 			MapSourceListToDestinationList(
 				CreateDataReaderListMapper(reader, nameOrIndex),
-				CreateScalarListListMapper(list),
+				CreateScalarDistinationListMapper(list),
 				null);
 
 			return list;
@@ -2949,7 +2951,7 @@ namespace BLToolkit.Mapping
 
 			MapSourceListToDestinationList(
 				CreateDataReaderListMapper(reader, nameOrIndex),
-				CreateScalarListListMapper(list),
+				CreateScalarDistinationListMapper(list),
 				null);
 
 			return list;
@@ -3429,6 +3431,12 @@ namespace BLToolkit.Mapping
 
 					foreach (MapRelation r in rs.Relations)
 					{
+						MemberAccessor ma = masterMapper.TypeAccessor[r.ContainerName];
+
+						if (ma == null)
+							throw new MappingException(string.Format("Type '{0}' does not contain field '{1}'.",
+								masterMapper.TypeAccessor.OriginalType.Name, r.ContainerName));
+
 						// Create hash.
 						//
 						if (rs.IndexID != r.MasterIndex.ID)
@@ -3439,7 +3447,12 @@ namespace BLToolkit.Mapping
 							foreach (object o in rs.List)
 							{
 								object key = r.MasterIndex.GetValueOrIndex(masterMapper, o);
-								rs.Hashtable[key] = o;
+								ArrayList matches = (ArrayList) rs.Hashtable[key];
+
+								if (matches == null)
+									rs.Hashtable[key] = matches = new ArrayList();
+
+								matches.Add(o);
 							}
 						}
 
@@ -3449,43 +3462,38 @@ namespace BLToolkit.Mapping
 
 						foreach (object o in slave.List)
 						{
-							object key    = r.SlaveIndex.GetValueOrIndex(slave.ObjectMapper, o);
-							object master = rs.Hashtable[key];
-
-							MemberAccessor ma = masterMapper.TypeAccessor[r.ContainerName];
-
-							if (ma == null)
-								throw new MappingException(string.Format("Type '{0}' does not contain field '{1}'.",
-									masterMapper.TypeAccessor.OriginalType.Name, r.ContainerName));
-
-							object container = ma.GetValue(master);
-
-							if (container is IList)
+							object key = r.SlaveIndex.GetValueOrIndex(slave.ObjectMapper, o);
+							foreach (object master in (ArrayList)rs.Hashtable[key])
 							{
-								if (lastContainer != container)
+								object container = ma.GetValue(master);
+
+								if (container is IList)
 								{
-									lastContainer = container;
-
-									ISupportMapping sm = container as ISupportMapping;
-
-									if (sm != null)
+									if (lastContainer != container)
 									{
-										if (initTable == null)
-											initTable = new Hashtable();
+										lastContainer = container;
 
-										if (initTable.ContainsKey(container) == false)
+										ISupportMapping sm = container as ISupportMapping;
+
+										if (sm != null)
 										{
-											sm.BeginMapping(context);
-											initTable[container] = sm;
+											if (initTable == null)
+												initTable = new Hashtable();
+
+											if (initTable.ContainsKey(container) == false)
+											{
+												sm.BeginMapping(context);
+												initTable[container] = sm;
+											}
 										}
 									}
-								}
 
-								((IList)container).Add(o);
-							}
-							else
-							{
-								masterMapper.TypeAccessor[r.ContainerName].SetValue(o, master);
+									((IList)container).Add(o);
+								}
+								else
+								{
+									ma.SetValue(master, o);
+								}
 							}
 						}
 					}

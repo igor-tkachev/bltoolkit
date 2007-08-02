@@ -12,8 +12,8 @@ namespace BLToolkit.Mapping
 			_enumerator = enumerator;
 		}
 
-		private IEnumerator _enumerator;
-		private Type        _objectType;
+		private readonly IEnumerator _enumerator;
+		private          Type        _objectType;
 
 		#region IMapDataSourceList Members
 

@@ -14,8 +14,8 @@ namespace BLToolkit.ComponentModel
 			_memberAccessor = TypeAccessor.GetAccessor(componentType)[memberName];
 		}
 
-		private         Type _componentType;
-		public override Type  ComponentType
+		private readonly Type _componentType;
+		public  override Type  ComponentType
 		{
 			get { return _componentType; }
 		}
@@ -25,8 +25,8 @@ namespace BLToolkit.ComponentModel
 			get { return _memberAccessor.Type; }
 		}
 
-		private MemberAccessor _memberAccessor;
-		public  MemberAccessor  MemberAccessor
+		private readonly MemberAccessor _memberAccessor;
+		public           MemberAccessor  MemberAccessor
 		{
 			get { return _memberAccessor; }
 		}

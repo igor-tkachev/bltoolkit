@@ -102,10 +102,10 @@ namespace BLToolkit.Reflection.Extension
 			}
 		}
 
-		private Hashtable _attributes = new Hashtable();
+		private readonly Hashtable _attributes = new Hashtable();
 
-		private static AttributeNameCollection _null = new AttributeNameCollection();
-		public  static AttributeNameCollection  Null
+		private static readonly AttributeNameCollection _null = new AttributeNameCollection();
+		public  static          AttributeNameCollection  Null
 		{
 			get { return _null; }
 		}

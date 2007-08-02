@@ -6,8 +6,8 @@ namespace BLToolkit.Mapping
 {
 	public class DataRowMapper : MapDataSourceDestinationBase
 	{
-		bool           _createColumns;
-		DataRowVersion _version;
+		bool                    _createColumns;
+		readonly DataRowVersion _version;
 
 		public DataRowMapper(DataRow dataRow)
 			: this(dataRow, DataRowVersion.Default)

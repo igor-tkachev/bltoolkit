@@ -146,7 +146,7 @@ END;
 -- Person_Insert
 
 CREATE OR REPLACE 
-PROCEDURE Person_Insert
+PROCEDURE Person_Insert_OutputParameter
 	( pFirstName  IN NVARCHAR2
 	, pLastName   IN NVARCHAR2
 	, pMiddleName IN NVARCHAR2
@@ -165,6 +165,38 @@ INTO
 END;
 /
 
+CREATE OR REPLACE 
+FUNCTION Person_Insert
+	( pFirstName  IN NVARCHAR2
+	, pLastName   IN NVARCHAR2
+	, pMiddleName IN NVARCHAR2
+	, pGender     IN CHAR
+	)
+RETURN SYS_REFCURSOR IS
+	retCursor SYS_REFCURSOR;
+	lPersonID NUMBER
+BEGIN
+INSERT INTO Person
+	( LastName,  FirstName,  MiddleName,  Gender)
+VALUES
+	(pLastName, pFirstName, pMiddleName, pGender)
+RETURNING
+	PersonID
+INTO
+	lPersonID;
+
+OPEN retCursor FOR
+	SELECT
+		PersonID, Firstname, Lastname, Middlename, Gender     
+	FROM
+		Person
+	WHERE
+		PersonID = lPersonID;
+RETURN
+	retCursor;
+END;
+/
+
 -- Person_SelectAll
 
 CREATE OR REPLACE 
@@ -174,7 +206,7 @@ RETURN SYS_REFCURSOR IS
 BEGIN
 OPEN retCursor FOR
 	SELECT
-		*
+		PersonID, Firstname, Lastname, Middlename, Gender     
 	FROM
 		Person;
 RETURN
@@ -191,7 +223,7 @@ RETURN SYS_REFCURSOR IS
 BEGIN
 OPEN retCursor FOR
 	SELECT
-		*
+		PersonID, Firstname, Lastname, Middlename, Gender     
 	FROM
 		Person
 	WHERE
@@ -204,17 +236,17 @@ END;
 -- Person_SelectByKey
 
 CREATE OR REPLACE 
-FUNCTION Person_SelectByKey(pPersonID IN NUMBER)
+FUNCTION Person_SelectByKey(pID IN NUMBER)
 RETURN SYS_REFCURSOR IS
 	retCursor SYS_REFCURSOR;
 BEGIN
 OPEN retCursor FOR
 	SELECT
-		*
+		PersonID, Firstname, Lastname, Middlename, Gender     
 	FROM
 		Person
 	WHERE
-		PersonID = pPersonID;
+		PersonID = pID;
 RETURN
 	retCursor;
 END;
@@ -232,7 +264,7 @@ RETURN SYS_REFCURSOR IS
 BEGIN
 OPEN retCursor FOR
 	SELECT
-		*
+		PersonID, Firstname, Lastname, Middlename, Gender     
 	FROM
 		Person
 	WHERE
@@ -254,7 +286,7 @@ RETURN SYS_REFCURSOR IS
 BEGIN
 OPEN retCursor FOR
 	SELECT
-		*
+		PersonID, Firstname, Lastname, Middlename, Gender     
 	FROM
 		Person
 	WHERE
@@ -375,6 +407,18 @@ BEGIN
 END;
 /
 
+CREATE OR REPLACE 
+PROCEDURE OutRefEnumTest
+	( pStr            IN     NVARCHAR2
+	, pOutputStr      OUT    NVARCHAR2
+	, pInputOutputStr IN OUT NVARCHAR2
+	) IS
+BEGIN
+	pOutputStr      := pStr;
+	pInputOutputStr := pStr || pInputOutputStr;
+END;
+/
+
 -- ArrayTest
 
 CREATE OR REPLACE 
@@ -411,6 +455,22 @@ FOR i IN 1..5 LOOP
 END LOOP;
 END;
 
+-- ResultSetTest
+
+PROCEDURE RESULTSETTEST
+	( mr OUT SYS_REFCURSOR
+	, sr OUT SYS_REFCURSOR
+	) IS
+BEGIN
+OPEN mr FOR
+	SELECT       1 as MasterID FROM dual
+	UNION SELECT 2 as MasterID FROM dual;
+OPEN sr FOR
+	SELECT       4 SlaveID, 1 as MasterID FROM dual
+	UNION SELECT 5 SlaveID, 2 as MasterID FROM dual
+	UNION SELECT 6 SlaveID, 2 as MasterID FROM dual
+	UNION SELECT 7 SlaveID, 1 as MasterID FROM dual;
+END;
 -- ExecuteScalarTest
 
 CREATE OR REPLACE 

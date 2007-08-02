@@ -67,6 +67,8 @@ namespace BLToolkit.Mapping.MetadataProvider
 		{
 			MapIgnoreAttribute attr = 
 				(MapIgnoreAttribute)member.GetAttribute(typeof(MapIgnoreAttribute));
+			if (attr == null)
+				attr = (MapIgnoreAttribute)TypeHelper.GetFirstAttribute(member.Type, typeof(MapIgnoreAttribute));
 
 			if (attr != null)
 			{
@@ -74,7 +76,8 @@ namespace BLToolkit.Mapping.MetadataProvider
 				return attr.Ignore;
 			}
 
-			if (member.GetAttribute(typeof(MapImplicitAttribute)) != null)
+			if (member.GetAttribute(typeof(MapImplicitAttribute)) != null ||
+				TypeHelper.GetFirstAttribute(member.Type, typeof(MapImplicitAttribute)) != null)
 			{
 				isSet = true;
 				return false;
@@ -215,7 +218,182 @@ namespace BLToolkit.Mapping.MetadataProvider
 
 		#region GetDefaultValue
 
-		
+		public override object GetDefaultValue(ObjectMapper mapper, MemberAccessor member, out bool isSet)
+		{
+			// Check member [DefaultValue(0)]
+			//
+			DefaultValueAttribute attr =
+				(DefaultValueAttribute)member.GetAttribute(typeof(DefaultValueAttribute));
+
+			if (attr != null)
+			{
+				isSet = true;
+				return attr.Value;
+			}
+
+			// Check type [DefaultValues(typeof(int), 0)]
+			//
+			object[] attrs = member.GetTypeAttributes(typeof(DefaultValueAttribute));
+
+			foreach (DefaultValueAttribute a in attrs)
+				if (a.Type == null && a.Value != null && a.Value.GetType() == member.Type ||
+					a.Type != null && a.Type == member.Type)
+				{
+					isSet = true;
+					return a.Value;
+				}
+
+			return GetDefaultValue(mapper.Extension, member.Type, out isSet);
+		}
+
+		public override object GetDefaultValue(TypeExtension typeExt, Type type, out bool isSet)
+		{
+			object value = null;
+
+			if (type.IsEnum)
+				value = GetEnumDefaultValueFromType(type);
+
+			if (value == null)
+			{
+				object[] attrs = TypeHelper.GetAttributes(type, typeof(DefaultValueAttribute));
+
+				if (attrs != null && attrs.Length != 0)
+					value = ((DefaultValueAttribute)attrs[0]).Value;
+			}
+
+			isSet = value != null;
+
+			return TypeExtension.ChangeType(value, type);
+		}
+
+		private static object GetEnumDefaultValueFromType(Type type)
+		{
+			FieldInfo[] fields = type.GetFields();
+
+			foreach (FieldInfo fi in fields)
+			{
+				if ((fi.Attributes & EnumField) == EnumField)
+				{
+					Attribute[] attrs = Attribute.GetCustomAttributes(fi, typeof(DefaultValueAttribute));
+
+					if (attrs.Length > 0)
+						return Enum.Parse(type, fi.Name);
+				}
+			}
+
+			return null;
+		}
+
+		#endregion
+
+		#region GetNullable
+
+		public override bool GetNullable(ObjectMapper mapper, MemberAccessor member, out bool isSet)
+		{
+			// Check member [Nullable(true | false)]
+			//
+			NullableAttribute attr1 =
+				(NullableAttribute)member.GetAttribute(typeof(NullableAttribute));
+
+			if (attr1 != null)
+			{
+				isSet = true;
+				return attr1.IsNullable;
+			}
+
+			// Check member [NullValue(0)]
+			//
+			NullValueAttribute attr2 =
+				(NullValueAttribute)member.GetAttribute(typeof(NullValueAttribute));
+
+			if (attr2 != null)
+				return isSet = true;
+
+			// Check type [Nullable(true || false)]
+			//
+			attr1 = (NullableAttribute)TypeHelper.GetFirstAttribute(
+				member.MemberInfo.DeclaringType, typeof(NullableAttribute));
+
+			if (attr1 != null)
+			{
+				isSet = true;
+				return attr1.IsNullable;
+			}
+
+			// Check type [NullValues(typeof(int), 0)]
+			//
+			object[] attrs = member.GetTypeAttributes(typeof(NullValueAttribute));
+
+			foreach (NullValueAttribute a in attrs)
+				if (a.Type == null && a.Value != null && a.Value.GetType() == member.Type ||
+					a.Type != null && a.Type == member.Type)
+					return isSet = true;
+
+			if (member.Type.IsEnum)
+				return isSet = mapper.MappingSchema.GetNullValue(member.Type) != null;
+
+			isSet = false;
+			return false;
+		}
+
+		#endregion
+
+		#region GetNullable
+
+		private static object CheckNullValue(object value, MemberAccessor member)
+		{
+			if (value is Type && (Type)value == typeof(DBNull))
+			{
+				value = DBNull.Value;
+
+				if (member.Type == typeof(string))
+					value = null;
+			}
+
+			return value;
+		}
+
+		public override object GetNullValue(ObjectMapper mapper, MemberAccessor member, out bool isSet)
+		{
+			// Check member [NullValue(0)]
+			//
+			NullValueAttribute attr =
+				(NullValueAttribute)member.GetAttribute(typeof(NullValueAttribute));
+
+			if (attr != null)
+			{
+				isSet = true;
+				return CheckNullValue(attr.Value, member);
+			}
+
+			// Check type [NullValues(typeof(int), 0)]
+			//
+			object[] attrs = member.GetTypeAttributes(typeof(NullValueAttribute));
+
+			foreach (NullValueAttribute a in attrs)
+			{
+				if (a.Type == null && a.Value != null && a.Value.GetType() == member.Type ||
+					a.Type != null && a.Type == member.Type)
+				{
+					isSet = true;
+					return CheckNullValue(a.Value, member);
+				}
+			}
+
+			if (member.Type.IsEnum)
+			{
+				object value = CheckNullValue(mapper.MappingSchema.GetNullValue(member.Type), member);
+
+				if (value != null)
+				{
+					isSet = true;
+					return value;
+				}
+			}
+
+			isSet = false;
+			return null;
+		}
 
 		#endregion
 	}

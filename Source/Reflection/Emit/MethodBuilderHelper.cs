@@ -28,7 +28,26 @@ namespace BLToolkit.Reflection.Emit
 			_methodBuilder.SetCustomAttribute(Type.Assembly.BLToolkitAttribute);
 		}
 
-		private MethodBuilder _methodBuilder;
+		/// <summary>
+		/// Initializes a new instance of the <see cref="MethodBuilderHelper"/> class
+		/// with the specified parameters.
+		/// </summary>
+		/// <param name="typeBuilder">Associated <see cref="TypeBuilderHelper"/>.</param>
+		/// <param name="methodBuilder">A <see cref="MethodBuilder"/></param>
+		/// <param name="dummy">A dummpy parameter to alter the signature</param>
+		internal MethodBuilderHelper(TypeBuilderHelper typeBuilder, MethodBuilder methodBuilder, bool dummy)
+			: base(typeBuilder)
+		{
+			if (methodBuilder == null) throw new ArgumentNullException("methodBuilder");
+
+			_methodBuilder = methodBuilder;
+
+			// There is a bug related to generic parameters, so we add this attribute later.
+			//
+			// _methodBuilder.SetCustomAttribute(Type.Assembly.BLToolkitAttribute);
+		}
+
+		private readonly MethodBuilder _methodBuilder;
 		/// <summary>
 		/// Gets MethodBuilder.
 		/// </summary>

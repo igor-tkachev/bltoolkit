@@ -7,7 +7,7 @@ using BLToolkit.Data;
 
 namespace HowTo.Data
 {
-	//[TestFixture]
+	[TestFixture]
 	public class ComplexMapping
 	{
 		const string TestQuery = @"
@@ -47,19 +47,34 @@ namespace HowTo.Data
 			public int ID;
 
 			public Parent Parent = new Parent();
+
+			public List<Grandchild> Grandchildren = new List<Grandchild>();
+		}
+
+		[MapField("ChildID", "Child.ID")]
+		public class Grandchild
+		{
+			[MapField("GrandchildID")]
+			public int ID;
+
+			public Child Child = new Child();
 		}
 
 		[Test]
 		public void Test()
 		{
 			List<Parent>   parents = new List<Parent>();
-			MapResultSet[] sets    = new MapResultSet[2];
+			MapResultSet[] sets    = new MapResultSet[3];
 
 			sets[0] = new MapResultSet(typeof(Parent), parents);
 			sets[1] = new MapResultSet(typeof(Child));
+			sets[2] = new MapResultSet(typeof(Grandchild));
 
 			sets[0].AddRelation(sets[1], "ParentID", "ParentID", "Children");
 			sets[1].AddRelation(sets[0], "ParentID", "ParentID", "Parent");
+
+			sets[1].AddRelation(sets[2], "ChildID", "ChildID", "Grandchildren");
+			sets[2].AddRelation(sets[1], "ChildID", "ChildID", "Child");
 
 			using (DbManager db = new DbManager())
 			{
@@ -68,7 +83,24 @@ namespace HowTo.Data
 					.ExecuteResultSet(sets);
 			}
 
-			Assert.AreEqual(7, parents[0].Children[1].ID);
+			Assert.IsNotEmpty(parents);
+			foreach (Parent parent in parents)
+			{
+				Assert.IsNotNull(parent);
+				Assert.IsNotEmpty(parent.Children);
+
+				foreach (Child child in parent.Children)
+				{
+					Assert.AreEqual(parent, child.Parent);
+					Assert.IsNotEmpty(child.Grandchildren);
+
+					foreach (Grandchild grandchild in child.Grandchildren)
+					{
+						Assert.AreEqual(child, grandchild.Child);
+						Assert.AreEqual(parent, grandchild.Child.Parent);
+					}
+				}
+			}
 		}
 	}
 }

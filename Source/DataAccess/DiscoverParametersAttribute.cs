@@ -15,8 +15,8 @@ namespace BLToolkit.DataAccess
 			_discover = discover;
 		}
 
-		private bool _discover;
-		public  bool  Discover
+		private readonly bool _discover;
+		public  bool           Discover
 		{
 			get { return _discover; }
 		}

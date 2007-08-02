@@ -39,8 +39,8 @@ namespace BLToolkit.Mapping
 			_fields = fields;
 		}
 
-		private NameOrIndexParameter[] _fields;
-		public  NameOrIndexParameter[]  Fields
+		private readonly NameOrIndexParameter[] _fields;
+		public           NameOrIndexParameter[]  Fields
 		{
 			get { return _fields; }
 		}

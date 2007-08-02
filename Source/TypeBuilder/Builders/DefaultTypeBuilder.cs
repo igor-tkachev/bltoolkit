@@ -704,15 +704,16 @@ namespace BLToolkit.TypeBuilder.Builders
 
 				emit
 					.newobj   (InitContextType.GetPublicDefaultConstructor())
-					.stloc    (initField)
 
-					.ldloc    (initField)
+					.dup
 					.ldarg_0
 					.callvirt (InitContextType.GetProperty("Parent").GetSetMethod())
 
-					.ldloc    (initField)
+					.dup
 					.ldc_i4_1
 					.callvirt (InitContextType.GetProperty("IsInternal").GetSetMethod())
+
+					.stloc    (initField)
 					;
 
 				Context.Items.Add("$BLToolkit.Default.DirtyParameters", false);
@@ -793,29 +794,32 @@ namespace BLToolkit.TypeBuilder.Builders
 
 			emit
 				.newobj   (InitContextType.GetPublicDefaultConstructor())
-				.stloc    (initField)
 
-				.ldloc    (initField)
+				.dup
 				.ldarg_0
 				.callvirt (InitContextType.GetProperty("Parent").GetSetMethod())
 
-				.ldloc    (initField)
+				.dup
 				.ldc_i4_1
 				.callvirt (InitContextType.GetProperty("IsInternal").GetSetMethod())
 
-				.ldloc    (initField)
+				.dup
 				.ldc_i4_1
 				.callvirt (InitContextType.GetProperty("IsLazyInstance").GetSetMethod())
+
 				;
 
 			if (parameters != null)
 			{
 				emit
-					.ldloc    (initField)
+					.dup
 					.ldsfld   (GetParameterField())
 					.callvirt (InitContextType.GetProperty("MemberParameters").GetSetMethod())
 					;
 			}
+
+			emit
+				.stloc    (initField);
 
 			if (objectType.IsAbstract)
 			{

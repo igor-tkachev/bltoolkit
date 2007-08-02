@@ -32,11 +32,11 @@ namespace BLToolkit.Validation
 		[Obsolete("Use RegExAttribute.Pattern instead.")]
 		public string Value { get { return Pattern; } }
 
-		private string _pattern;
-		public  string  Pattern { get { return _pattern; } }
+		private readonly string _pattern;
+		public           string  Pattern { get { return _pattern; } }
 
-		private RegexOptions _options;
-		public  RegexOptions  Options { get { return _options; } }
+		private readonly RegexOptions _options;
+		public           RegexOptions  Options { get { return _options; } }
 
 		[NonSerialized]
 		private Regex _validator;

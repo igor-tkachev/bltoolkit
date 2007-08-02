@@ -25,7 +25,7 @@ namespace BLToolkit.Aspects
 		protected CounterAttribute(Type interceptorType, string configString)
 			: base(
 				interceptorType,
-				InterceptType.BeforeCall | InterceptType.OnFinally,
+				InterceptType.BeforeCall | InterceptType.OnCatch | InterceptType.OnFinally,
 				configString,
 				TypeBuilderConsts.Priority.Normal)
 		{

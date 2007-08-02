@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 
 using BLToolkit.Data;
+using BLToolkit.Reflection.Extension;
 
 namespace BLToolkit.DataAccess
 {
@@ -21,6 +22,11 @@ namespace BLToolkit.DataAccess
 		public SqlQuery(DbManager dbManager, bool dispose)
 			: base(dbManager, dispose)
 		{
+		}
+
+		public SqlQuery(ExtensionList extensions)
+		{
+			Extensions = extensions;
 		}
 
 		#endregion
@@ -83,6 +89,12 @@ namespace BLToolkit.DataAccess
 				.ExecuteList<L,T>(list);
 		}
 
+		public virtual L SelectAll<L>(DbManager db)
+			where L : IList<T>, new()
+		{
+			return SelectAll<L>(db, new L());
+		}
+
 		public virtual List<T> SelectAll()
 		{
 			DbManager db = GetDbManager();
@@ -114,26 +126,32 @@ namespace BLToolkit.DataAccess
 			}
 		}
 
+		public virtual L SelectAll<L>()
+			where L : IList<T>, new()
+		{
+			return SelectAll<L>(new L());
+		}
+
 		#endregion
 
 		#region Insert
 
-		public virtual void Insert(DbManager db, T obj)
+		public virtual int Insert(DbManager db, T obj)
 		{
 			SqlQueryInfo query = GetSqlQueryInfo(db, obj.GetType(), "Insert");
 
-			db
+			return db
 				.SetCommand(query.QueryText, query.GetParameters(db, obj))
 				.ExecuteNonQuery();
 		}
 
-		public virtual void Insert(T obj)
+		public virtual int Insert(T obj)
 		{
 			DbManager db = GetDbManager();
 
 			try
 			{
-				Insert(db, obj);
+				return Insert(db, obj);
 			}
 			finally
 			{

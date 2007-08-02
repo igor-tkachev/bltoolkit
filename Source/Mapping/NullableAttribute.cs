@@ -36,8 +36,8 @@ namespace BLToolkit.Mapping
 			set { _isNullable = value; }
 		}
 
-		private Type _type;
-		public  Type  Type
+		private readonly Type _type;
+		public           Type  Type
 		{
 			get { return _type; }
 		}

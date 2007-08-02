@@ -29,7 +29,7 @@ namespace BLToolkit.Reflection.Emit
 			_typeBuilder.SetCustomAttribute(_assembly.BLToolkitAttribute);
 		}
 
-		private AssemblyBuilderHelper _assembly;
+		private readonly AssemblyBuilderHelper _assembly;
 		/// <summary>
 		/// Gets associated AssemblyBuilderHelper.
 		/// </summary>
@@ -38,7 +38,7 @@ namespace BLToolkit.Reflection.Emit
 			get { return _assembly; }
 		}
 
-		private System.Reflection.Emit.TypeBuilder _typeBuilder;
+		private readonly System.Reflection.Emit.TypeBuilder _typeBuilder;
 		/// <summary>
 		/// Gets TypeBuilder.
 		/// </summary>
@@ -70,7 +70,7 @@ namespace BLToolkit.Reflection.Emit
 		/// <param name="parameterTypes">The types of the parameters of the method.</param>
 		/// <returns>The defined method.</returns>
 		public MethodBuilderHelper DefineMethod(
-			string name, MethodAttributes attributes, Type returnType, Type[] parameterTypes)
+			string name, MethodAttributes attributes, Type returnType, params Type[] parameterTypes)
 		{
 			return new MethodBuilderHelper(this, _typeBuilder.DefineMethod(name, attributes, returnType, parameterTypes));
 		}
@@ -140,18 +140,72 @@ namespace BLToolkit.Reflection.Emit
 		{
 			if (methodInfoDeclaration == null) throw new ArgumentNullException("methodInfoDeclaration");
 
-			ParameterInfo[] pi = methodInfoDeclaration.GetParameters();
-			Type[]  parameters = new Type[pi.Length];
+			MethodBuilderHelper method;
+			ParameterInfo[]     pi         = methodInfoDeclaration.GetParameters();
+			Type[]              parameters = new Type[pi.Length];
 
-			for (int i = 0; i < pi.Length; i++)
-				parameters[i] = pi[i].ParameterType;
+#if FW2
+			// When a method contains a generic parameter we need to replace all
+			// generic types from methodInfoDeclaration with local ones.
+			//
+			if (methodInfoDeclaration.ContainsGenericParameters)
+			{
+				method = new MethodBuilderHelper(this, _typeBuilder.DefineMethod(name, attributes, methodInfoDeclaration.CallingConvention), false);
 
-			MethodBuilderHelper method = DefineMethod(
-				name,
-				attributes,
-				methodInfoDeclaration.CallingConvention,
-				methodInfoDeclaration.ReturnType,
-				parameters);
+				Type[]                        genArgs   = methodInfoDeclaration.GetGenericArguments();
+				GenericTypeParameterBuilder[] genParams = method.MethodBuilder.DefineGenericParameters(
+					Array.ConvertAll<Type, string>(genArgs, delegate (Type t) { return t.Name; }));
+
+				// Copy parameter constraints.
+				//
+				System.Collections.Generic.List<Type> interfaceConstraints = null;
+				for (int i = 0; i < genParams.Length; i++)
+				{
+					genParams[i].SetGenericParameterAttributes(genArgs[i].GenericParameterAttributes);
+
+					foreach (Type constraint in genArgs[i].GetGenericParameterConstraints())
+					{
+						if (constraint.IsClass)
+							genParams[i].SetBaseTypeConstraint(constraint);
+						else
+						{
+							if (interfaceConstraints == null)
+								interfaceConstraints = new System.Collections.Generic.List<Type>();
+							interfaceConstraints.Add(constraint);
+						}
+					}
+
+					if (interfaceConstraints != null && interfaceConstraints.Count > 0)
+					{
+						genParams[i].SetInterfaceConstraints(interfaceConstraints.ToArray());
+						interfaceConstraints.Clear();
+					}
+				}
+
+				for (int i = 0; i < pi.Length; i++)
+					parameters[i] = TypeHelper.TranslateGenericParameters(pi[i].ParameterType, genParams);
+
+				method.MethodBuilder.SetParameters(parameters);
+				method.MethodBuilder.SetReturnType(TypeHelper.TranslateGenericParameters(
+					methodInfoDeclaration.ReturnType, genParams));
+
+				// Now its safe to add a custom attribute.
+				//
+				method.MethodBuilder.SetCustomAttribute(method.Type.Assembly.BLToolkitAttribute);
+			}
+			else
+#endif
+			{
+				for (int i = 0; i < pi.Length; i++)
+					parameters[i] = pi[i].ParameterType;
+
+				method = DefineMethod(
+					name,
+					attributes,
+					methodInfoDeclaration.CallingConvention,
+					methodInfoDeclaration.ReturnType,
+					parameters);
+			}
 
 			// Compiler overrides methods only for interfaces. We do the same.
 			// If we wanted to override virtual methods, then methods should've had
@@ -439,5 +493,6 @@ namespace BLToolkit.Reflection.Emit
 		}
 
 		#endregion
+
 	}
 }

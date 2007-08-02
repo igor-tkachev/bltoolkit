@@ -17,22 +17,18 @@ namespace BLToolkit.Mapping
 			_mapper     = objectMapper;
 			_keyGetter  = MapGetData<K>.I;
 			_fromSource = keyField.ByName && keyField.Name[0] == '@';
-
-			if (_fromSource)
-				_keyField = keyField.Name.Substring(1);
-			else
-				_keyField = keyField;
+			_keyField   = _fromSource? keyField.Name.Substring(1): keyField;
 		}
 
-		private NameOrIndexParameter _keyField;
-		private int                  _index;
-		private IDictionary<K,T>     _dic;
-		private ObjectMapper         _mapper;
-		private T                    _newObject;
-		private bool                 _typeMismatch;
-		private bool                 _fromSource;
-		private K                    _keyValue;
-		private MapGetData<K>.MB<K>  _keyGetter;
+		private readonly IDictionary<K,T>     _dic;
+		private readonly bool                 _fromSource;
+		private readonly MapGetData<K>.MB<K>  _keyGetter;
+		private          NameOrIndexParameter _keyField;
+		private          int                  _index;
+		private          ObjectMapper         _mapper;
+		private          object               _newObject;
+		private          bool                 _typeMismatch;
+		private          K                    _keyValue;
 
 		#region IMapDataDestinationList Members
 
@@ -45,7 +41,7 @@ namespace BLToolkit.Mapping
 				else if (!_fromSource)
 					_keyValue = _keyGetter.From(_mapper, _newObject, _index);
 
-				_dic[_keyValue] = _newObject;
+				_dic[_keyValue] = (T)_newObject;
 			}
 		}
 
@@ -66,6 +62,12 @@ namespace BLToolkit.Mapping
 			else
 			{
 				_index = _keyField.ByName? _mapper.GetOrdinal(_keyField.Name, true): _keyField.Index;
+
+				if (_index < 0)
+					throw new MappingException(
+						_keyField.ByName?
+						string.Format("Field '{0}' not found.", _keyField.Name):
+						string.Format("Index '{0}' is invalid.", _keyField.Index));
 
 				MemberMapper mm = _mapper[_index];
 				_typeMismatch = !TypeHelper.IsSameOrParent(typeof(K), mm.Type);
@@ -96,7 +98,7 @@ namespace BLToolkit.Mapping
 					_keyValue = (K)(object)_keyValue.ToString().TrimEnd(_trim);
 			}
 
-			return _newObject = (T)_mapper.CreateInstance(initContext);
+			return _newObject = _mapper.CreateInstance(initContext);
 		}
 
 		public virtual void EndMapping(InitContext initContext)

@@ -22,16 +22,16 @@ namespace BLToolkit.TypeBuilder.Builders
 			_isObjectHolder = isObjectHolder;
 		}
 
-		private bool _isObjectHolder;
+		private readonly bool _isObjectHolder;
 
-		private Type _propertyType;
-		public  Type  PropertyType
+		private readonly Type _propertyType;
+		public           Type  PropertyType
 		{
 			get { return _propertyType; }
 		}
 
-		private Type _instanceType;
-		public  Type  InstanceType
+		private readonly Type _instanceType;
+		public           Type  InstanceType
 		{
 			get { return _instanceType; }
 		}

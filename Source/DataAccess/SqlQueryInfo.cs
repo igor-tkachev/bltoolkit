@@ -21,10 +21,10 @@ namespace BLToolkit.DataAccess
 			set { _queryText = value; }
 		}
 
-		private ObjectMapper _objectMapper;
-		public  ObjectMapper  ObjectMapper
+		private readonly ObjectMapper _objectMapper;
+		public           ObjectMapper  ObjectMapper
 		{
-			get { return _objectMapper;  }
+			get { return _objectMapper; }
 		}
 
 		public Type ObjectType
@@ -32,7 +32,7 @@ namespace BLToolkit.DataAccess
 			get { return _objectMapper.TypeAccessor.OriginalType; }
 		}
 
-		private ArrayList _parameters = new ArrayList();
+		private readonly ArrayList _parameters = new ArrayList();
 
 		public SqlQueryParameterInfo AddParameter(string parameterName, string fieldName)
 		{

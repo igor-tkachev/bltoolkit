@@ -7,7 +7,7 @@ using System.Data.SqlTypes;
 using System.IO;
 using System.Xml;
 #endif
-
+using BLToolkit.Data.DataProvider;
 using NUnit.Framework;
 
 using BLToolkit.Data;
@@ -66,7 +66,10 @@ namespace Data
 			public UInt16    UInt16_;
 			public UInt32    UInt32_;
 			public UInt64    UInt64_;
+			[MapIgnore]
 			public XmlReader Xml_;
+			[MapField("Xml_")]
+			public XmlDocument XmlDoc_;
 #endif
 		}
 
@@ -100,7 +103,7 @@ namespace Data
 		[Test]
 		public void ExecuteList1()
 		{
-			using (DbManager db = new DbManager("Sql"))
+			using (DbManager db = new DbManager())
 			{
 				ArrayList list = db
 					.SetCommand("SELECT * FROM Person")
@@ -113,7 +116,7 @@ namespace Data
 		[Test]
 		public void ExecuteList2()
 		{
-			using (DbManager db = new DbManager("Sql"))
+			using (DbManager db = new DbManager())
 			{
 				IList list = db
 					.SetCommand("SELECT * FROM Person")
@@ -129,8 +132,12 @@ namespace Data
 			using (DbManager db = new DbManager())
 			{
 				Person p = (Person)db
-					.SetCommand("SELECT * FROM Person WHERE PersonID = @id",
-						db.Parameter("@id", 1))
+					.SetCommand("SELECT * FROM Person WHERE PersonID = " + db.DataProvider.Convert("id", ConvertType.NameToQueryParameter),
+#if FW2
+					db.Parameter("id", 1))
+#else
+					db.Parameter("@id", 1))
+#endif
 					.ExecuteObject(typeof(Person));
 
 				TypeAccessor.WriteConsole(p);
@@ -143,29 +150,41 @@ namespace Data
 			using (DbManager db = new DbManager())
 			{
 				DataTypeTest dt = (DataTypeTest)db
-					.SetCommand("SELECT * FROM DataTypeTest WHERE DataTypeID = @id",
-						db.Parameter("@id", 2))
+					.SetCommand("SELECT * FROM DataTypeTest WHERE DataTypeID = " + db.DataProvider.Convert("id", ConvertType.NameToQueryParameter),
+#if FW2
+					db.Parameter("id", 2))
+#else
+					db.Parameter("@id", 2))
+#endif
 					.ExecuteObject(typeof(DataTypeTest));
 
 				TypeAccessor.WriteConsole(dt);
 			}
 		}
 
+#if !ORACLE
 		[Test]
+#endif
 		public void ExecuteObject2Sql()
 		{
 			using (DbManager db = new DbManager())
 			{
 				DataTypeSqlTest dt = (DataTypeSqlTest)db
-					.SetCommand("SELECT * FROM DataTypeTest WHERE DataTypeID = @id",
-						db.Parameter("@id", 2))
+					.SetCommand("SELECT * FROM DataTypeTest WHERE DataTypeID = " + db.DataProvider.Convert("id", ConvertType.NameToQueryParameter),
+#if FW2
+					db.Parameter("id", 2))
+#else
+					db.Parameter("@id", 2))
+#endif
 					.ExecuteObject(typeof(DataTypeSqlTest));
 
 				TypeAccessor.WriteConsole(dt);
 			}
 		}
 
+#if MSSQL
 		[Test]
+#endif
 		public void NewConnection()
 		{
 			string connectionString = "Server=.;Database=BLToolkitData;Integrated Security=SSPI";
@@ -190,6 +209,7 @@ namespace Data
 			public string inputOutputStr = "10";
 		}
 
+#if !ACCESS
 		[Test]
 		public void MapOutput()
 		{
@@ -242,7 +262,7 @@ namespace Data
 			using (DbManager db = new DbManager())
 			{
 				db
-					.SetSpCommand("Person_Insert", db.CreateParameters(e))
+					.SetSpCommand("Person_Insert", db.CreateParameters(e, new string[] { "PersonID" }, null, null))
 					.ExecuteObject(e);
 
 				Assert.IsTrue(e.ID > 0);
@@ -252,6 +272,7 @@ namespace Data
 					.ExecuteNonQuery();
 			}
 		}
+#endif
 		
 		[Test]
 		public void CreateParametersTest()
@@ -283,8 +304,9 @@ namespace Data
 				dt.UInt32_   = 4000000000;
 				dt.UInt64_   = 12345678901234567890;
 				dt.Xml_      = new XmlTextReader(new StringReader("<xml/>"));
+				dt.XmlDoc_   = new XmlDocument(); dt.XmlDoc_.LoadXml("<xmldoc/>");
 #endif
-				
+
 				IDbDataParameter[] parameters = db.CreateParameters(dt);
 
 				foreach (IDbDataParameter parameter in parameters)
@@ -294,7 +316,9 @@ namespace Data
 			}
 		}
 
+#if!ORACLE
 		[Test]
+#endif
 		public void CreateParametersSqlTest()
 		{
 			using (DbManager db = new DbManager())
@@ -349,6 +373,35 @@ namespace Data
 				Assert.AreEqual(1, parameters.Length);
 				Assert.AreEqual(dbInfo.TimeValue, parameters[0].Value);
 				
+			}
+		}
+
+		public class FirstPart
+		{
+			public string FirstName;
+		}
+
+		public class SecondPart
+		{
+			public string LastName;
+		}
+
+		[Test]
+		public void CreateManyParametersTest()
+		{
+			FirstPart  f = new FirstPart();
+			SecondPart s = new SecondPart();
+
+			f.FirstName = "John";
+			s.LastName = "Pupkin";
+
+			using (DbManager db = new DbManager())
+			{
+				Person p = (Person)db
+					.SetSpCommand ("Person_SelectByName", db.CreateParameters(f), db.CreateParameters(s))
+					.ExecuteObject(typeof(Person));
+				
+				Assert.IsNotNull(p);
 			}
 		}
 	}

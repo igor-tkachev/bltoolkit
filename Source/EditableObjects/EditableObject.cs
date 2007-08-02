@@ -10,6 +10,7 @@ using BLToolkit.Mapping;
 using BLToolkit.Reflection;
 using BLToolkit.TypeBuilder;
 using BLToolkit.Validation;
+using System.Xml;
 
 namespace BLToolkit.EditableObjects
 {
@@ -101,6 +102,7 @@ namespace BLToolkit.EditableObjects
 	[SqlDoubleInstance,  SqlGuidInstance,  SqlInt16Instance,    SqlInt32Instance]
 	[SqlInt64Instance,   SqlMoneyInstance, SqlSingleInstance,   SqlStringInstance]
 #endif
+	[GlobalInstanceType(typeof(XmlDocument),    typeof(EditableXmlDocument))]
 	[GlobalInstanceType(typeof(EditableObject), typeof(EditableObjectHolder), IsObjectHolder=true)]
 	#endregion
 	[ImplementInterface(typeof(IEditable))]

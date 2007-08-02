@@ -12,8 +12,8 @@ namespace BLToolkit.Mapping
 			_dictionary = dictionary;
 		}
 
-		private IDictionary _dictionary;
-		public  IDictionary  Dictionary
+		private readonly IDictionary _dictionary;
+		public           IDictionary  Dictionary
 		{
 			get { return _dictionary; }
 		}

@@ -5,7 +5,11 @@ Begin DataProject = "Data"
    Begin Folder = "Change Scripts"
    End
    Begin Folder = "Create Scripts"
-      Script = "Create.sql"
+      Script = "Access.sql"
+      Script = "Firebird2.sql"
+      Script = "MsSql.sql"
+      Script = "Oracle.sql"
+      Script = "SqlCe.sql"
    End
    Begin DBRefFolder = "Database References"
       Begin DBRefNode = "BLToolkitData.dbo"

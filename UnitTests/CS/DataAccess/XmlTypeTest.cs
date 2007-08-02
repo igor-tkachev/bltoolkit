@@ -30,7 +30,11 @@ namespace DataAccess
 			public abstract List<TestObject> LoadAll();
 #endif
 
+#if ORACLE
+			[SqlQuery("SELECT * FROM DataTypeTest WHERE DataTypeID=:pID")]
+#else
 			[SqlQuery("SELECT * FROM DataTypeTest WHERE DataTypeID=@ID")]
+#endif
 			public abstract TestObject       LoadById(int ID); 
 
 		}

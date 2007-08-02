@@ -124,8 +124,11 @@ namespace Reflection
 		{
 			object[] attrs = new TypeHelper(typeof(TestObject)).GetAttributes();
 
-			foreach (object attr in attrs)
-				Console.WriteLine("{0} {1}", attr, attr.GetHashCode());
+			for (int i = 0; i < attrs.Length; i++)
+			{
+				object attr = attrs[i];
+				Console.WriteLine("{0}: {1} {2}", i, attr, attr.GetHashCode());
+			}
 
 			Assert.AreEqual(typeof(Attribute5), attrs[0].GetType());
 			Assert.AreEqual(typeof(Attribute5), attrs[1].GetType());
@@ -136,7 +139,11 @@ namespace Reflection
 				typeof(Attribute2) == attrs[4].GetType() && typeof(Attribute5) == attrs[5].GetType() ||
 				typeof(Attribute2) == attrs[5].GetType() && typeof(Attribute5) == attrs[4].GetType());
 
-			Assert.AreEqual(typeof(Attribute1), attrs[6].GetType());
+			Assert.IsTrue(
+				typeof(Attribute1) == attrs[6].GetType() && typeof(Attribute5) == attrs[7].GetType() ||
+				typeof(Attribute1) == attrs[7].GetType() && typeof(Attribute5) == attrs[6].GetType());
+
+			Assert.AreEqual(typeof(Attribute5), attrs[8].GetType());
 		}
 
 		[Test]
@@ -219,7 +226,7 @@ namespace Reflection
 		}
 #endif
 
-		class MyArrayList : ArrayList
+		public class MyArrayList : ArrayList
 		{
 			public new TestObject this[int i]
 			{

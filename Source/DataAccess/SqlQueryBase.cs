@@ -70,8 +70,8 @@ namespace BLToolkit.DataAccess
 				Order        = order;
 			}
 
-			public MemberMapper MemberMapper;
-			public int          Order;
+			public readonly MemberMapper MemberMapper;
+			public readonly int          Order;
 		}
 
 		class PrimaryKeyComparer : IComparer
@@ -82,8 +82,8 @@ namespace BLToolkit.DataAccess
 			}
 		}
 
-		private static PrimaryKeyComparer _primaryKeyComparer = new PrimaryKeyComparer();
-		private static Hashtable          _keyList            = new Hashtable();
+		private static readonly PrimaryKeyComparer _primaryKeyComparer = new PrimaryKeyComparer();
+		private static readonly Hashtable          _keyList            = new Hashtable();
 
 		public MemberMapper[] GetKeyFieldList(DbManager db, Type type)
 		{
@@ -134,6 +134,10 @@ namespace BLToolkit.DataAccess
 
 			MemberMapper[] memberMappers = GetKeyFieldList(db, query.ObjectType);
 
+			if (memberMappers.Length == 0)
+				throw new DataAccessException(
+						string.Format("No primary key field(s) in the type '{0}'.", query.ObjectType.FullName));
+
 			foreach (MemberMapper mm in memberMappers)
 			{
 				SqlQueryParameterInfo p = query.AddParameter(
@@ -159,7 +163,7 @@ namespace BLToolkit.DataAccess
 			foreach (MemberMapper mm in GetFieldList(om))
 				sb.AppendFormat("\t{0},\n",
 					db.DataProvider.Convert(mm.Name, ConvertType.NameToQueryField));
-			
+
 			sb.Remove(sb.Length - 2, 1);
 
 			sb.AppendFormat("FROM\n\t{0}\n",
@@ -308,7 +312,7 @@ namespace BLToolkit.DataAccess
 			}
 		}
 
-		private static Hashtable _actionSqlQueryInfo = new Hashtable();
+		private static readonly Hashtable _actionSqlQueryInfo = new Hashtable();
 
 		[NoInterception]
 		public virtual SqlQueryInfo GetSqlQueryInfo(DbManager db, Type type, string actionName)

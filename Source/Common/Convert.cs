@@ -81,9 +81,12 @@ namespace BLToolkit.Common
 
 		public static String ToString(SqlBoolean p)  { return p.ToString(); }
 		public static String ToString(SqlGuid p)     { return p.ToString(); }
-		public static String ToString(SqlBinary p)   { return p.ToString(); }
-
+#if FW2
+		public static String ToString(SqlChars p)    { return p.IsNull?  null : p.ToSqlString().Value; }
+		public static String ToString(SqlXml p)      { return p.IsNull?  null : p.Value; }
+#endif
 		public static String ToString(Type p)        { return p == null? null: p.FullName; }
+		public static String ToString(XmlDocument p) { return p == null? null: p.InnerXml; }
 		public static String ToString(object p)
 		{
 			if (p == null || p is DBNull) return String.Empty;
@@ -100,8 +103,12 @@ namespace BLToolkit.Common
 			// SqlTypes.
 			//
 			if (p is SqlGuid)     return ToString((SqlGuid)p);
-			if (p is SqlBinary)   return ToString((SqlBinary)p);
+#if FW2
+			if (p is SqlChars)    return ToString((SqlChars)p);
+			if (p is SqlXml)      return ToString((SqlXml)p);
+#endif
 			if (p is Type)        return ToString((Type)p);
+			if (p is XmlDocument) return ToString((XmlDocument)p);
 
 			if (p is IConvertible) return ((IConvertible)p).ToString(null);
 			if (p is IFormattable) return ((IFormattable)p).ToString(null, null);
@@ -3106,12 +3113,15 @@ namespace BLToolkit.Common
 		public static SqlString ToSqlString(SqlBoolean p)  { return p.ToSqlString(); }
 #if FW2
 		public static SqlString ToSqlString(SqlChars p)    { return p.ToSqlString(); }
+		public static SqlString ToSqlString(SqlXml p)      { return p.IsNull? SqlString.Null: p.Value; }
 #endif
 		public static SqlString ToSqlString(SqlGuid p)     { return p.ToSqlString(); }
 		public static SqlString ToSqlString(SqlDateTime p) { return p.ToSqlString(); }
 		public static SqlString ToSqlString(SqlBinary p)   { return p.IsNull? SqlString.Null: p.ToString(); }
 
 		public static SqlString ToSqlString(Type p)        { return p == null? SqlString.Null: p.FullName; }
+		public static SqlString ToSqlString(XmlDocument p) { return p == null? SqlString.Null: p.InnerXml; }
+
 		public static SqlString ToSqlString(object p)
 		{
 			if (p == null || p is DBNull) return SqlString.Null;
@@ -3132,11 +3142,14 @@ namespace BLToolkit.Common
 			//
 #if FW2
 			if (p is SqlChars)    return ToSqlString((SqlChars)p);
+			if (p is SqlXml)      return ToSqlString((SqlXml)p);
 #endif
 			if (p is SqlGuid)     return ToSqlString((SqlGuid)p);
 			if (p is SqlDateTime) return ToSqlString((SqlDateTime)p);
 			if (p is SqlBinary)   return ToSqlString((SqlBinary)p);
+
 			if (p is Type)        return ToSqlString((Type)p);
+			if (p is XmlDocument) return ToSqlString((XmlDocument)p);
 
 			return ToString(p);
 		}
@@ -4226,6 +4239,7 @@ namespace BLToolkit.Common
 
 		public static SqlXml ToSqlXml(Stream p)      { return p == null? SqlXml.Null: new SqlXml(p); }
 		public static SqlXml ToSqlXml(XmlReader p)   { return p == null? SqlXml.Null: new SqlXml(p); }
+		public static SqlXml ToSqlXml(XmlDocument p) { return p == null? SqlXml.Null: new SqlXml(new XmlTextReader(new StringReader(p.InnerXml))); }
 
 		public static SqlXml ToSqlXml(Char[] p)      { return p == null? SqlXml.Null: new SqlXml(new XmlTextReader(new StringReader(new string(p)))); }
 		public static SqlXml ToSqlXml(Byte[] p)      { return p == null? SqlXml.Null: new SqlXml(new MemoryStream(p)); }
@@ -4249,6 +4263,7 @@ namespace BLToolkit.Common
 
 			if (p is Stream)      return ToSqlXml((Stream)p);
 			if (p is XmlReader)   return ToSqlXml((XmlReader)p);
+			if (p is XmlDocument) return ToSqlXml((XmlDocument)p);
 
 			if (p is Char[])      return ToSqlXml((Char[])p);
 			if (p is Byte[])      return ToSqlXml((Byte[])p);
@@ -4366,6 +4381,42 @@ namespace BLToolkit.Common
 
 		// Scalar Types.
 		// 
+		public static Byte[] ToByteArray(string p)      { return p == null? null: System.Text.Encoding.UTF8.GetBytes(p); }
+		[CLSCompliant(false)]
+		public static Byte[] ToByteArray(SByte  p)      { return new byte[]{checked((Byte)p)}; }
+		public static Byte[] ToByteArray(Int16  p)      { return BitConverter.GetBytes(p); }
+		public static Byte[] ToByteArray(Int32  p)      { return BitConverter.GetBytes(p); }
+		public static Byte[] ToByteArray(Int64  p)      { return BitConverter.GetBytes(p); }
+		public static Byte[] ToByteArray(Byte   p)      { return new byte[]{p}; }
+		[CLSCompliant(false)]
+		public static Byte[] ToByteArray(UInt16 p)      { return BitConverter.GetBytes(p); }
+		[CLSCompliant(false)]
+		public static Byte[] ToByteArray(UInt32 p)      { return BitConverter.GetBytes(p); }
+		[CLSCompliant(false)]
+		public static Byte[] ToByteArray(UInt64 p)      { return BitConverter.GetBytes(p); }
+		public static Byte[] ToByteArray(Char   p)      { return BitConverter.GetBytes(p); }
+		public static Byte[] ToByteArray(Single p)      { return BitConverter.GetBytes(p); }
+		public static Byte[] ToByteArray(Double p)      { return BitConverter.GetBytes(p); }
+		public static Byte[] ToByteArray(Boolean p)     { return BitConverter.GetBytes(p); }
+#if FW2
+		public static Byte[] ToByteArray(DateTime p)    { return ToByteArray(p.ToBinary()); }
+#else
+		public static Byte[] ToByteArray(DateTime p)    { return ToByteArray(p.ToOADate()); }
+#endif
+		public static Byte[] ToByteArray(TimeSpan p)    { return ToByteArray(p.Ticks); }
+		public static Byte[] ToByteArray(Guid p)        { return p == Guid.Empty? null: p.ToByteArray(); }
+
+		public static Byte[] ToByteArray(Decimal p)
+		{
+			int[]  bits  = Decimal.GetBits(p);
+			byte[] bytes = new byte[bits.Length << 2];
+
+			for (int i = 0; i < bits.Length; ++i)
+				Buffer.BlockCopy(BitConverter.GetBytes(bits[i]), 0, bytes, i * 4, 4);
+
+			return bytes;
+		}
+
 		public static Byte[] ToByteArray(Stream p)
 		{
 			if (p == null)         return null;
@@ -4377,18 +4428,50 @@ namespace BLToolkit.Common
 			p.Position = position;
 
 			return bytes;
-				
 		}
-		public static Byte[] ToByteArray(Guid p)        { return p == Guid.Empty? null: p.ToByteArray(); }
 
 #if FW2
 		// Nullable Types.
 		// 
 		public static Byte[] ToByteArray(Guid? p)       { return p.HasValue? p.Value.ToByteArray(): null; }
+		[CLSCompliant(false)]
+		public static Byte[] ToByteArray(SByte?  p)     { return p.HasValue? new byte[]{checked((Byte)p.Value)}: null; }
+		public static Byte[] ToByteArray(Int16?  p)     { return p.HasValue? BitConverter.GetBytes(p.Value): null; }
+		public static Byte[] ToByteArray(Int32?  p)     { return p.HasValue? BitConverter.GetBytes(p.Value): null; }
+		public static Byte[] ToByteArray(Int64?  p)     { return p.HasValue? BitConverter.GetBytes(p.Value): null; }
+		public static Byte[] ToByteArray(Byte?   p)     { return p.HasValue? new byte[]{p.Value}: null; }
+		[CLSCompliant(false)]
+		public static Byte[] ToByteArray(UInt16? p)     { return p.HasValue? BitConverter.GetBytes(p.Value): null; }
+		[CLSCompliant(false)]
+		public static Byte[] ToByteArray(UInt32? p)     { return p.HasValue? BitConverter.GetBytes(p.Value): null; }
+		[CLSCompliant(false)]
+		public static Byte[] ToByteArray(UInt64? p)     { return p.HasValue? BitConverter.GetBytes(p.Value): null; }
+		public static Byte[] ToByteArray(Char?   p)     { return p.HasValue? BitConverter.GetBytes(p.Value): null; }
+		public static Byte[] ToByteArray(Single? p)     { return p.HasValue? BitConverter.GetBytes(p.Value): null; }
+		public static Byte[] ToByteArray(Double? p)     { return p.HasValue? BitConverter.GetBytes(p.Value): null; }
+		public static Byte[] ToByteArray(Boolean? p)    { return p.HasValue? BitConverter.GetBytes(p.Value): null; }
+		public static Byte[] ToByteArray(DateTime? p)   { return p.HasValue? ToByteArray(p.Value.ToBinary()): null; }
+		public static Byte[] ToByteArray(TimeSpan? p)   { return p.HasValue? ToByteArray(p.Value.Ticks): null; }
+		public static Byte[] ToByteArray(Decimal? p)    { return p.HasValue? ToByteArray(p.Value): null; }
 
 #endif
 		// SqlTypes.
 		// 
+		public static Byte[] ToByteArray(SqlString p)   { return p.IsNull? null: ToByteArray(p.Value); }
+
+		public static Byte[] ToByteArray(SqlByte p)     { return p.IsNull? null: ToByteArray(p.Value); }
+		public static Byte[] ToByteArray(SqlInt16 p)    { return p.IsNull? null: ToByteArray(p.Value); }
+		public static Byte[] ToByteArray(SqlInt32 p)    { return p.IsNull? null: ToByteArray(p.Value); }
+		public static Byte[] ToByteArray(SqlInt64 p)    { return p.IsNull? null: ToByteArray(p.Value); }
+
+		public static Byte[] ToByteArray(SqlSingle p)   { return p.IsNull? null: ToByteArray(p.Value); }
+		public static Byte[] ToByteArray(SqlDouble p)   { return p.IsNull? null: ToByteArray(p.Value); }
+		public static Byte[] ToByteArray(SqlDecimal p)  { return p.IsNull? null: ToByteArray(p.Value); }
+		public static Byte[] ToByteArray(SqlMoney p)    { return p.IsNull? null: ToByteArray(p.Value); }
+
+		public static Byte[] ToByteArray(SqlBoolean p)  { return p.IsNull? null: ToByteArray(p.Value); }
+		public static Byte[] ToByteArray(SqlDateTime p) { return p.IsNull? null: ToByteArray(p.Value); }
+
 		public static Byte[] ToByteArray(SqlBinary p)   { return p.IsNull? null: p.Value; }
 #if FW2
 		public static Byte[] ToByteArray(SqlBytes p)    { return p.IsNull? null: p.Value; }
@@ -4403,11 +4486,47 @@ namespace BLToolkit.Common
 
 			// Scalar Types.
 			//
+			if (p is String)      return ToByteArray((String)p);
+
+			if (p is SByte)       return ToByteArray((SByte)p);
+			if (p is Int16)       return ToByteArray((Int16)p);
+			if (p is Int32)       return ToByteArray((Int32)p);
+			if (p is Int64)       return ToByteArray((Int64)p);
+
+			if (p is Byte)        return ToByteArray((Byte)p);
+			if (p is UInt16)      return ToByteArray((UInt16)p);
+			if (p is UInt32)      return ToByteArray((UInt32)p);
+			if (p is UInt64)      return ToByteArray((UInt64)p);
+
+			if (p is Char)        return ToByteArray((Char)p);
+			if (p is Single)      return ToByteArray((Single)p);
+			if (p is Double)      return ToByteArray((Double)p);
+			if (p is Boolean)     return ToByteArray((Boolean)p);
+			if (p is Decimal)     return ToByteArray((Decimal)p);
+
+			if (p is DateTime)    return ToByteArray((DateTime)p);
+			if (p is TimeSpan)    return ToByteArray((TimeSpan)p);
+
 			if (p is Stream)      return ToByteArray((Stream)p);
 			if (p is Guid)        return ToByteArray((Guid)p);
 
 			// SqlTypes.
 			//
+			if (p is SqlString)   return ToByteArray((SqlString)p);
+
+			if (p is SqlByte)     return ToByteArray((SqlByte)p);
+			if (p is SqlInt16)    return ToByteArray((SqlInt16)p);
+			if (p is SqlInt32)    return ToByteArray((SqlInt32)p);
+			if (p is SqlInt64)    return ToByteArray((SqlInt64)p);
+
+			if (p is SqlSingle)   return ToByteArray((SqlSingle)p);
+			if (p is SqlDouble)   return ToByteArray((SqlDouble)p);
+			if (p is SqlDecimal)  return ToByteArray((SqlDecimal)p);
+			if (p is SqlMoney)    return ToByteArray((SqlMoney)p);
+
+			if (p is SqlBoolean)  return ToByteArray((SqlBoolean)p);
+			if (p is SqlDateTime) return ToByteArray((SqlDateTime)p);
+
 			if (p is SqlBinary)   return ToByteArray((SqlBinary)p);
 #if FW2
 			if (p is SqlBytes)    return ToByteArray((SqlBytes)p);
@@ -4471,6 +4590,7 @@ namespace BLToolkit.Common
 		// 
 		public static XmlReader ToXmlReader(Stream p)      { return p == null? null: new XmlTextReader(p); }
 		public static XmlReader ToXmlReader(TextReader p)  { return p == null? null: new XmlTextReader(p); }
+		public static XmlReader ToXmlReader(XmlDocument p) { return p == null? null: new XmlTextReader(new StringReader(p.InnerXml)); }
 
 		public static XmlReader ToXmlReader(Char[] p)      { return p == null? null: new XmlTextReader(new StringReader(new string(p))); }
 		public static XmlReader ToXmlReader(Byte[] p)      { return p == null? null: new XmlTextReader(new MemoryStream(p)); }
@@ -4498,11 +4618,99 @@ namespace BLToolkit.Common
 			//
 			if (p is Stream)      return ToXmlReader((Stream)p);
 			if (p is TextReader)  return ToXmlReader((TextReader)p);
+			if (p is XmlDocument) return ToXmlReader((XmlDocument)p);
 
 			if (p is Char[])      return ToXmlReader((Char[])p);
 			if (p is Byte[])      return ToXmlReader((Byte[])p);
 
 			throw CreateInvalidCastException(p.GetType(), typeof(XmlReader));
+		}
+
+		#endregion
+
+		#region XmlDocument
+
+		// Scalar Types.
+		// 
+		public static XmlDocument ToXmlDocument(String p)
+		{
+			if (p == null) return null;
+
+			XmlDocument doc = new XmlDocument();
+			doc.LoadXml(p);
+			return doc;
+		}
+
+		// SqlTypes.
+		// 
+		public static XmlDocument ToXmlDocument(SqlString p)   { return p.IsNull? null: ToXmlDocument(p.Value); }
+#if FW2
+		public static XmlDocument ToXmlDocument(SqlXml p)      { return p.IsNull? null: ToXmlDocument(p.Value); }
+		public static XmlDocument ToXmlDocument(SqlChars p)    { return p.IsNull? null: ToXmlDocument(p.ToSqlString().Value); }
+#endif
+		public static XmlDocument ToXmlDocument(SqlBinary p)   { return p.IsNull? null: ToXmlDocument(new MemoryStream(p.Value)); }
+
+		// Other Types.
+		// 
+		public static XmlDocument ToXmlDocument(Stream p)
+		{
+			if (p == null) return null;
+
+			XmlDocument doc = new XmlDocument();
+			doc.Load(p);
+			return doc;
+		}
+
+		public static XmlDocument ToXmlDocument(TextReader p)
+		{
+			if (p == null) return null;
+
+			XmlDocument doc = new XmlDocument();
+			doc.Load(p);
+			return doc;
+		}
+
+		public static XmlDocument ToXmlDocument(Char[] p)      { return p == null? null: ToXmlDocument(new string(p)); }
+		public static XmlDocument ToXmlDocument(Byte[] p)      { return p == null? null: ToXmlDocument(new MemoryStream(p)); }
+
+		public static XmlDocument ToXmlDocument(XmlReader p)
+		{
+			if (p == null) return null;
+
+			XmlDocument doc = new XmlDocument();
+			doc.Load(p);
+			return doc;
+		}
+
+		public static XmlDocument ToXmlDocument(object p)
+		{
+			if (p == null || p is DBNull) return null;
+
+			if (p is XmlDocument)   return (XmlDocument)p;
+
+			// Scalar Types.
+			//
+			if (p is String)      return ToXmlDocument((String)p);
+
+			// SqlTypes.
+			//
+			if (p is SqlString)   return ToXmlDocument((SqlString)p);
+#if FW2
+			if (p is SqlXml)      return ToXmlDocument((SqlXml)p);
+			if (p is SqlChars)    return ToXmlDocument((SqlChars)p);
+#endif
+			if (p is SqlBinary)   return ToXmlDocument((SqlBinary)p);
+
+			// Other Types.
+			//
+			if (p is Stream)      return ToXmlDocument((Stream)p);
+			if (p is TextReader)  return ToXmlDocument((TextReader)p);
+			if (p is XmlReader)   return ToXmlDocument((XmlReader)p);
+
+			if (p is Char[])      return ToXmlDocument((Char[])p);
+			if (p is Byte[])      return ToXmlDocument((Byte[])p);
+
+			throw CreateInvalidCastException(p.GetType(), typeof(XmlDocument));
 		}
 
 		#endregion

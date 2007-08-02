@@ -2,10 +2,6 @@ using System;
 using System.Data;
 using System.Data.Common;
 using System.Data.SqlClient;
-using System.Data.SqlTypes;
-
-using BLToolkit.Common;
-using BLToolkit.Mapping;
 
 namespace BLToolkit.Data.DataProvider
 {
@@ -18,11 +14,6 @@ namespace BLToolkit.Data.DataProvider
 	/// <seealso cref="DbManager.AddDataProvider(DataProviderBase)">AddDataManager Method</seealso>
 	public sealed class SqlDataProvider: DataProviderBase
 	{
-		public SqlDataProvider()
-		{
-			//MappingSchema = new SqlMappingSchema();
-		}
-
 		/// <summary>
 		/// Creates the database connection object.
 		/// </summary>

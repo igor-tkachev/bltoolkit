@@ -65,20 +65,20 @@ namespace BLToolkit.Reflection.Extension
 			get { return _members[memberName]; }
 		}
 
-		private MemberExtensionCollection _members;
-		public  MemberExtensionCollection  Members
+		private readonly MemberExtensionCollection _members;
+		public           MemberExtensionCollection  Members
 		{
 			get { return _members; }
 		}
 
-		private AttributeNameCollection _attributes;
-		public  AttributeNameCollection  Attributes
+		private readonly AttributeNameCollection _attributes;
+		public           AttributeNameCollection  Attributes
 		{
 			get { return _attributes; }
 		}
 
-		private static TypeExtension _null = new TypeExtension(MemberExtensionCollection.Null, AttributeNameCollection.Null);
-		public  static TypeExtension  Null
+		private static readonly TypeExtension _null = new TypeExtension(MemberExtensionCollection.Null, AttributeNameCollection.Null);
+		public           static TypeExtension  Null
 		{
 			get { return _null; }
 		}
@@ -111,7 +111,7 @@ namespace BLToolkit.Reflection.Extension
 
 					s = s.ToLower();
 
-					if (s == "true" || s == "yes")
+					if (s == "true" || s == "yes" || s == "on")
 						return true;
 				}
 
@@ -177,6 +177,10 @@ namespace BLToolkit.Reflection.Extension
 				if (embedded && stream == null)
 				{
 					string[] names = assembly.GetManifestResourceNames();
+
+					// Prepend file anme with a dot to avoid partial name matching.
+					//
+					xmlFile = "." + xmlFile;
 
 					foreach (string name in names)
 					{

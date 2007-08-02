@@ -15,7 +15,7 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>TRACE;DEBUG;FW2</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;FW2;MSSQL</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
@@ -23,7 +23,7 @@
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE;FW2</DefineConstants>
+    <DefineConstants>TRACE;FW2;MSSQL</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
@@ -47,6 +47,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Aspects\CacheAspectTest.cs" />
+    <Compile Include="Aspects\AsyncAspectTest.cs" />
     <Compile Include="Aspects\CounterAspectTest.cs" />
     <Compile Include="Aspects\InterceptorAspectTest.cs" />
     <Compile Include="Aspects\LoggingAspectTest.cs" />
@@ -68,6 +69,7 @@
     <Compile Include="DataAccess\OutRefTest.cs" />
     <Compile Include="DataAccess\PersonDataSet2.cs">
       <DependentUpon>PersonDataSet2.xsd</DependentUpon>
+      <SubType>Component</SubType>
     </Compile>
     <Compile Include="DataAccess\PersonDataSet2.Designer.cs">
       <AutoGen>True</AutoGen>
@@ -80,6 +82,8 @@
     <Compile Include="DataAccess\XmlExtension.cs" />
     <Compile Include="Data\BinaryTest.cs" />
     <Compile Include="Data\CompositeKeyTest.cs" />
+    <Compile Include="Data\EventsTest.cs" />
+    <Compile Include="Data\ExecuteForEach.cs" />
     <Compile Include="Data\InnerTypesTest.cs" />
     <Compile Include="Data\ExecuteDictionaryTest.cs" />
     <Compile Include="Data\ExecuteScalarDictionaryTest.cs" />
@@ -88,6 +92,7 @@
     <Compile Include="Data\ExecuteListT.cs" />
     <Compile Include="Data\ExecuteScalarTest.cs" />
     <Compile Include="Data\NullableParameter.cs" />
+    <Compile Include="Data\OutputParameter.cs" />
     <Compile Include="EditableObjects\EditableArrayListTest.cs" />
     <Compile Include="EditableObjects\EditableList_AcceptChanges.cs" />
     <Compile Include="EditableObjects\EditableObjectTest.cs" />
@@ -130,6 +135,8 @@
     <Compile Include="TypeBuilder\Builders\DefaultTypeBuilderTest.cs" />
     <Compile Include="TypeBuilder\Builders\ImplemetInterfaceBuilderTest.cs" />
     <Compile Include="TypeBuilder\Builders\TypeAccessorBuilderTest.cs" />
+    <Compile Include="TypeBuilder\GenericMethodTest.cs" />
+    <Compile Include="TypeBuilder\InternalTypesTest.cs" />
     <Compile Include="TypeBuilder\GetSetValueAttributeTest.cs" />
     <Compile Include="TypeBuilder\InstanceTypeAttributeTest.cs" />
     <Compile Include="TypeBuilder\LazyInstanceAttributeTest.cs" />
@@ -169,6 +176,9 @@
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
+    <None Include="TypeBuilder\InternalTypesTest.snk">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Mapping\Map.xml" />
@@ -181,6 +191,9 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Mapping\XmlMap.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Service Include="{B4F97281-0DBD-4835-9ED8-7DFB966E87FF}" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>

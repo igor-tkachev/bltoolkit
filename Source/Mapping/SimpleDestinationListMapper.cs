@@ -12,7 +12,7 @@ namespace BLToolkit.Mapping
 			_mapper = mapper;
 		}
 
-		private IMapDataDestination _mapper;
+		private readonly IMapDataDestination _mapper;
 
 		#region IMapDataDestinationList Members
 

@@ -60,6 +60,20 @@ namespace BLToolkit.DataAccess
 				.ExecuteList<T>();
 		}
 
+		public virtual L SelectAll<L>(DbManager db, L list)
+			where L : IList<T>
+		{
+			return db
+				.SetSpCommand(GetSpName(typeof(T), "SelectAll"))
+				.ExecuteList<L,T>(list);
+		}
+
+		public virtual L SelectAll<L>(DbManager db)
+			where L : IList<T>, new()
+		{
+			return SelectAll<L>(db, new L());
+		}
+
 		public virtual List<T> SelectAll()
 		{
 			DbManager db = GetDbManager();
@@ -73,6 +87,28 @@ namespace BLToolkit.DataAccess
 				if (DisposeDbManager)
 					db.Dispose();
 			}
+		}
+
+		public virtual L SelectAll<L>(L list)
+			where L : IList<T>
+		{
+			DbManager db = GetDbManager();
+
+			try
+			{
+				return SelectAll(db, list);
+			}
+			finally
+			{
+				if (DisposeDbManager)
+					db.Dispose();
+			}
+		}
+
+		public virtual L SelectAll<L>()
+			where L : IList<T>, new()
+		{
+			return SelectAll<L>(new L());
 		}
 
 		#endregion

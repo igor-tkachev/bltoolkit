@@ -1,12 +1,14 @@
 using System;
 using System.Collections;
 using System.Reflection;
+using System.Threading;
 
 using BLToolkit.Common;
-using BLToolkit.Reflection;
 
 namespace BLToolkit.Aspects
 {
+	public delegate bool IsCacheableParameterType(Type parameterType);
+
 	[System.Diagnostics.DebuggerStepThrough]
 	public class CacheAspect : Interceptor
 	{
@@ -20,7 +22,7 @@ namespace BLToolkit.Aspects
 			lock (cache.SyncRoot)
 			{
 				CompoundValue   key  = GetKey(info);
-				CacheAspectItem item = GetItem(cache, key, info);
+				CacheAspectItem item = GetItem(cache, key);
 
 				if (item != null && !item.IsExpired)
 				{
@@ -29,7 +31,7 @@ namespace BLToolkit.Aspects
 
 					if (item.RefValues != null)
 					{
-						ParameterInfo[] pis = info.CallMethodInfo.MethodInfo.GetParameters();
+						ParameterInfo[] pis = info.CallMethodInfo.Parameters;
 						int             n   = 0;
 
 						for (int i = 0; i < pis.Length; i++)
@@ -78,7 +80,7 @@ namespace BLToolkit.Aspects
 					DateTime.MaxValue:
 					DateTime.Now.AddMilliseconds(maxCacheTime);
 
-				ParameterInfo[] pis = info.CallMethodInfo.MethodInfo.GetParameters();
+				ParameterInfo[] pis = info.CallMethodInfo.Parameters;
 
 				int n = 0;
 
@@ -155,11 +157,34 @@ namespace BLToolkit.Aspects
 			set { _maxCacheTime = value; }
 		}
 
-		private bool _isWeak = true;
+		private bool _isWeak;
 		public  bool  IsWeak
 		{
 			get { return _isWeak;  }
 			set { _isWeak = value; }
+		}
+
+		#endregion
+
+		#region IsCacheableParameterType
+
+		private static IsCacheableParameterType _isCacheableParameterType =
+			new IsCacheableParameterType(IsCacheableParameterTypeInternal);
+
+		public  static IsCacheableParameterType  IsCacheableParameterType
+		{
+			get { return _isCacheableParameterType; }
+			set
+			{
+				_isCacheableParameterType = value == null ?
+					new IsCacheableParameterType(IsCacheableParameterTypeInternal):
+					value;
+			}
+		}
+
+		private static bool IsCacheableParameterTypeInternal(Type parameterType)
+		{
+			return parameterType.IsValueType || parameterType == typeof(string);
 		}
 
 		#endregion
@@ -176,19 +201,28 @@ namespace BLToolkit.Aspects
 			return info.CallMethodInfo.MethodCallCache;
 		}
 
-		private static CompoundValue GetKey(InterceptCallInfo info)
+		protected static CompoundValue GetKey(InterceptCallInfo info)
 		{
-			ParameterInfo[] parInfo   = info.CallMethodInfo.MethodInfo.GetParameters();
-			object[]        parValues = info.ParameterValues;
-			object[]        keyValues = new object[parValues.Length];
+			ParameterInfo[] parInfo     = info.CallMethodInfo.Parameters;
+			object[]        parValues   = info.ParameterValues;
+			object[]        keyValues   = new object[parValues.Length];
+			bool[]          cacheParams = info.CallMethodInfo.CacheableParameters;
+
+			if (cacheParams == null)
+			{
+				info.CallMethodInfo.CacheableParameters = cacheParams = new bool[parInfo.Length];
+
+				for (int i = 0; i < parInfo.Length; i++)
+					cacheParams[i] = IsCacheableParameterType(parInfo[i].ParameterType);
+			}
 
 			for (int i = 0; i < parValues.Length; i++)
-				keyValues[i] = TypeHelper.IsScalar(parInfo[i].ParameterType) ? parValues[i] : null;
+				keyValues[i] = cacheParams[i] ? parValues[i] : null;
 
 			return new CompoundValue(keyValues);
 		}
 
-		private CacheAspectItem GetItem(IDictionary cache, CompoundValue key, InterceptCallInfo info)
+		protected static CacheAspectItem GetItem(IDictionary cache, CompoundValue key)
 		{
 			object obj = cache[key];
 
@@ -208,6 +242,243 @@ namespace BLToolkit.Aspects
 			cache.Remove(key);
 
 			return null;
+		}
+
+		/// <summary>
+		/// Clear a method call cache.
+		/// </summary>
+		/// <param name="methodInfo">The <see cref="MethodInfo"/> representing cached method.</param>
+		public static void ClearCache(MethodInfo methodInfo)
+		{
+			if (methodInfo == null)
+				throw new ArgumentNullException("methodInfo");
+
+			FieldInfo[] fields = methodInfo.DeclaringType.GetFields(BindingFlags.NonPublic | BindingFlags.Static);
+
+			foreach (FieldInfo fieldInfo in fields)
+			{
+				if (fieldInfo.FieldType != typeof(CallMethodInfo))
+					continue;
+
+				CallMethodInfo cmi = (CallMethodInfo) fieldInfo.GetValue(null);
+				if (cmi.MethodInfo == methodInfo)
+				{
+					CleanupThread.ClearCache(cmi.MethodCallCache);
+					break;
+				}
+			}
+		}
+
+		/// <summary>
+		/// Clear a method call cache.
+		/// </summary>
+		/// <param name="declaringType">The method declaring type.</param>
+		/// <param name="methodName">The method name.</param>
+		/// <param name="types">An array of <see cref="System.Type"/> objects representing
+		/// the number, order, and type of the parameters for the method to get.-or-
+		/// An empty array of the type <see cref="System.Type"/> (for example, <see cref="System.Type.EmptyTypes"/>)
+		/// to get a method that takes no parameters.</param>
+		public static void ClearCache(Type declaringType, string methodName, params Type[] types)
+		{
+			if (declaringType == null)
+				throw new ArgumentNullException("declaringType");
+
+			if (declaringType.IsAbstract)
+				declaringType = BLToolkit.Reflection.TypeAccessor.GetAccessor(declaringType).Type;
+
+			if (types == null)
+				types = Type.EmptyTypes;
+
+			MethodInfo methodInfo = declaringType.GetMethod(
+				methodName, BindingFlags.Instance | BindingFlags.Public, null, types, null);
+
+			if (methodInfo == null)
+				throw new ArgumentException(string.Format("Method '{0}.{1}' not found.",
+					declaringType.FullName, methodName));
+
+			ClearCache(methodInfo);
+		}
+
+		/// <summary>
+		/// Clear all cached method calls.
+		/// </summary>
+		public static void ClearCache()
+		{
+			CleanupThread.ClearCache();
+		}
+
+		#endregion
+
+		#region Cleanup Thread
+
+		public class CleanupThread
+		{
+			private CleanupThread() {}
+
+			internal static void Init()
+			{
+				AppDomain.CurrentDomain.DomainUnload += new EventHandler(CurrentDomain_DomainUnload);
+				Start();
+			}
+
+			static void CurrentDomain_DomainUnload(object sender, EventArgs e)
+			{
+				Stop();
+			}
+
+			static Timer  _timer;
+			static readonly object _syncTimer = new object();
+
+			private static void Start()
+			{
+				if (_timer == null)
+					lock (_syncTimer)
+						if (_timer == null)
+						{
+							TimeSpan interval = TimeSpan.FromSeconds(10);
+							_timer = new Timer(new TimerCallback(Cleanup), null, interval, interval);
+						}
+			}
+
+			private static void Stop()
+			{
+				if (_timer != null)
+					lock (_syncTimer)
+						if (_timer != null)
+						{
+							_timer.Dispose();
+							_timer = null;
+						}
+			}
+
+			private static void Cleanup(object state)
+			{
+				if (!Monitor.TryEnter(_caches.SyncRoot, 10))
+				{
+					// The Cache is busy, skip this turn.
+					//
+					return;
+				}
+
+				DateTime start = DateTime.Now;
+				int objectsInCache = 0;
+
+				try
+				{
+					_workTimes++;
+
+					ArrayList list = new ArrayList();
+
+					foreach (IDictionary cache in _caches)
+					{
+						lock (cache.SyncRoot)
+						{
+							foreach (DictionaryEntry de in cache)
+							{
+								WeakReference wr = de.Value as WeakReference;
+
+								bool isExpired;
+
+								if (wr != null)
+								{
+									CacheAspectItem ca = wr.Target as CacheAspectItem;
+
+									isExpired = ca == null || ca.IsExpired;
+								}
+								else
+								{
+									isExpired = ((CacheAspectItem)de.Value).IsExpired;
+								}
+
+								if (isExpired)
+									list.Add(de);
+							}
+
+							foreach (DictionaryEntry de in list)
+							{
+								cache.Remove(de.Key);
+								_objectsExpired++;
+							}
+
+							list.Clear();
+
+							objectsInCache += cache.Count;
+						}
+					}
+
+					_objectsInCache = objectsInCache;
+				}
+				finally
+				{
+					_workTime += DateTime.Now - start;
+
+					Monitor.Exit(_caches.SyncRoot);
+				}
+			}
+
+			private static int _workTimes;
+			public  static int  WorkTimes
+			{
+				get { return _workTimes; }
+			}
+
+			private static TimeSpan _workTime;
+			public  static TimeSpan  WorkTime
+			{
+				get { return _workTime; }
+			}
+
+			private static int _objectsExpired;
+			public  static int  ObjectsExpired
+			{
+				get { return _objectsExpired; }
+			}
+
+			private static int _objectsInCache;
+			public  static int  ObjectsInCache
+			{
+				get { return _objectsInCache; }
+			}
+
+			static readonly ArrayList _caches = new ArrayList();
+
+			public static void RegisterCache(IDictionary cache)
+			{
+				lock (_caches.SyncRoot)
+					_caches.Add(cache);
+			}
+
+			public static void UnregisterCache(IDictionary cache)
+			{
+				lock (_caches.SyncRoot)
+					_caches.Remove(cache);
+			}
+
+			public static void ClearCache(IDictionary cache)
+			{
+				lock (_caches.SyncRoot)
+				{
+					_objectsExpired += cache.Count;
+					cache.Clear();
+				}
+			}
+
+			public static void ClearCache()
+			{
+				lock (_caches.SyncRoot)
+				{
+					foreach (IDictionary cache in _caches)
+					{
+						_objectsExpired += cache.Count;
+						cache.Clear();
+					}
+				}
+			}
+		}
+
+		static CacheAspect()
+		{
+			CleanupThread.Init();
 		}
 
 		#endregion

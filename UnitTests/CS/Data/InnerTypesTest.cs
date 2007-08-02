@@ -151,13 +151,17 @@ namespace Data
 		{
 			using (DbManager db = new DbManager())
 			{
-				ArrayList list = db
-					.SetCommand(@"
+				string cmd = @"
 						SELECT
 							1   as ID,
 							'2' as DisplayName,
 							3   as TPL_ID, 
-							'4' as TPL_DisplayName")
+							'4' as TPL_DisplayName";
+#if ORACLE || FIREBIRD
+				cmd += " FROM dual";
+#endif
+				ArrayList list = db
+					.SetCommand(cmd)
 					.ExecuteList(typeof(Template1));
 
 				Assert.IsNotNull(list);

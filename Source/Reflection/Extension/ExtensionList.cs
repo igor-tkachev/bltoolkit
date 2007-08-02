@@ -7,7 +7,7 @@ namespace BLToolkit.Reflection.Extension
 	{
 		#region ExtensionList
 		
-		private Hashtable _types = new Hashtable();
+		private readonly Hashtable _types = new Hashtable();
 
 		public TypeExtension this[string typeName]
 		{

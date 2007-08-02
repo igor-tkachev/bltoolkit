@@ -32,8 +32,8 @@ namespace BLToolkit.Patterns
 		{
 		}
 
-		private bool _implement;
-		public  bool  Implement
+		private readonly bool _implement;
+		public           bool  Implement
 		{
 			get { return _implement;  }
 		}

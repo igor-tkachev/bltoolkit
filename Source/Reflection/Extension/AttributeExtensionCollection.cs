@@ -25,10 +25,10 @@ namespace BLToolkit.Reflection.Extension
 				_attributes.Add(attributeExtension);
 		}
 
-		private ArrayList _attributes = new ArrayList();
+		private readonly ArrayList _attributes = new ArrayList();
 
-		private static AttributeExtensionCollection _null = new AttributeExtensionCollection();
-		public  static AttributeExtensionCollection  Null
+		private static readonly AttributeExtensionCollection _null = new AttributeExtensionCollection();
+		public  static          AttributeExtensionCollection  Null
 		{
 			get { return _null;  }
 		}

@@ -31,8 +31,8 @@ namespace BLToolkit.ComponentModel
 
 		#region Public Members
 
-		private object _baseObject;
-		public  object  BaseObject
+		private readonly object _baseObject;
+		public           object  BaseObject
 		{
 			get { return _baseObject; }
 		}
@@ -41,7 +41,7 @@ namespace BLToolkit.ComponentModel
 
 		#region Protected Members
 
-		private static Hashtable _hashDescriptors = new Hashtable();
+		private static readonly Hashtable _hashDescriptors = new Hashtable();
 
 		[NonSerialized]
 		private ICustomTypeDescriptor _typeDescriptor;
@@ -148,7 +148,7 @@ namespace BLToolkit.ComponentModel
 		{
 			get
 			{
-				if (_baseObject == null)
+				if (_baseTypeDescriptor == null)
 				{
 					_baseTypeDescriptor = _baseObject as ICustomTypeDescriptor;
 

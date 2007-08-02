@@ -11,7 +11,7 @@ namespace BLToolkit.Reflection
 	[Serializable]
 	public class GenericBinder : Binder
 	{
-		private bool _genericMethodDefinition;
+		private readonly bool _genericMethodDefinition;
 		public GenericBinder(bool genericMethodDefinition)
 		{
 			_genericMethodDefinition = genericMethodDefinition;

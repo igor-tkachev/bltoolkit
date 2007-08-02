@@ -16,7 +16,7 @@ namespace BLToolkit.Mapping
 		{
 		}
 
-		private TextDataMapper _mapper;
+		private readonly TextDataMapper _mapper;
 
 		#region IMapDataDestinationList Members
 

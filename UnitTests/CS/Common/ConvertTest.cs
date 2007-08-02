@@ -1,5 +1,7 @@
 using System;
-using System.Data.OracleClient;
+#if ORACLE
+using Oracle.DataAccess.Types;
+#endif
 using System.Reflection;
 using BLToolkit.Common;
 using BLToolkit.Reflection;
@@ -140,7 +142,7 @@ namespace Common
 		{
 			// Note that method BLToolkit.Common.Convert.ToDecimal(OracleNumber p) does not exist.
 			//
-			decimal d = ConvertTo<decimal>.From(new OracleNumber(123));
+			decimal d = ConvertTo<decimal>.From(new OracleDecimal(123));
 			Assert.AreEqual(123.0m, d);
 
 			// Method BLToolkit.Common.Convert.ToOracleString(string p) does not exist too.

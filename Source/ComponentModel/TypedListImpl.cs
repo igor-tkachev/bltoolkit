@@ -23,8 +23,8 @@ namespace BLToolkit.ComponentModel
 //			}
 		}
 
-		private Type         _itemType;
-		private TypeAccessor _typeAccessor;
+		private readonly Type         _itemType;
+		private readonly TypeAccessor _typeAccessor;
 
 		private NullValueProvider _getNullValue;
 		public  NullValueProvider  GetNullValue

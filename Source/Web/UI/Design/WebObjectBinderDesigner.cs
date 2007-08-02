@@ -56,7 +56,7 @@ namespace BLToolkit.Web.UI.Design
 				_owner = owner;
 			}
 
-			private WebObjectBinderDesigner _owner;
+			private readonly WebObjectBinderDesigner _owner;
 
 			public override IDataSourceViewSchema Schema
 			{
@@ -77,7 +77,7 @@ namespace BLToolkit.Web.UI.Design
 					_owner = owner;
 				}
 
-				private WebObjectBinderDesigner _owner;
+				private readonly WebObjectBinderDesigner _owner;
 
 				public IDataSourceViewSchema[] GetChildren()
 				{
@@ -125,11 +125,11 @@ namespace BLToolkit.Web.UI.Design
 						}
 					}
 
-					private PropertyDescriptor _propertyDescriptor;
-					private int                _length = -1;
-					private bool               _isIdentity;
-					private bool               _isNullable;
-					private bool               _primaryKey;
+					private readonly PropertyDescriptor _propertyDescriptor;
+					private readonly int                _length = -1;
+					private readonly bool               _isIdentity;
+					private readonly bool               _isNullable;
+					private readonly bool               _primaryKey;
 
 					public Type   DataType   { get { return _propertyDescriptor.PropertyType; } }
 					public bool   Identity   { get { return _isIdentity;                      } }

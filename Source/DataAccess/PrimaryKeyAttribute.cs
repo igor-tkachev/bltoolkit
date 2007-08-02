@@ -15,8 +15,8 @@ namespace BLToolkit.DataAccess
 			_order = order;
 		}
 
-		private int _order;
-		public  int  Order
+		private readonly int _order;
+		public           int  Order
 		{
 			get { return _order; }
 		}

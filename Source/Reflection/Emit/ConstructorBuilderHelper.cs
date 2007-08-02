@@ -23,11 +23,11 @@ namespace BLToolkit.Reflection.Emit
 			_constructorBuilder.SetCustomAttribute(Type.Assembly.BLToolkitAttribute);
 		}
 
-		private ConstructorBuilder _constructorBuilder;
+		private readonly ConstructorBuilder _constructorBuilder;
 		/// <summary>
 		/// Gets ConstructorBuilder.
 		/// </summary>
-		public  ConstructorBuilder  ConstructorBuilder
+		public           ConstructorBuilder  ConstructorBuilder
 		{
 			get { return _constructorBuilder; }
 		}

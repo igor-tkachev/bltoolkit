@@ -45,7 +45,7 @@ namespace BLToolkit.Reflection
 
 		public static T Copy(T source)
 		{
-			if (source == null) throw new ArgumentNullException("source");
+			if (source == null) return source;
 
 			T dest = CreateInstanceEx();
 
@@ -64,8 +64,8 @@ namespace BLToolkit.Reflection
 		public static Type Type         { get { return _instance.Type; } }
 		public static Type OriginalType { get { return _instance.OriginalType; } }
 
-		private static TypeAccessor _instance = TypeAccessor.GetAccessor(typeof(T));
-		public  static TypeAccessor  Instance
+		private static readonly TypeAccessor _instance = TypeAccessor.GetAccessor(typeof(T));
+		public  static          TypeAccessor  Instance
 		{
 			[System.Diagnostics.DebuggerStepThrough]
 			get { return _instance; }

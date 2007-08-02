@@ -110,11 +110,11 @@ namespace BLToolkit.TypeBuilder.Builders
 			return builders;
 		}
 
-		private static DefaultTypeBuilder _defaultTypeBuilder = new DefaultTypeBuilder();
+		private static readonly DefaultTypeBuilder _defaultTypeBuilder = new DefaultTypeBuilder();
 
-		private BuildContext            _context;
-		private AbstractTypeBuilderList _builders;
-		private AbstractTypeBuilderList _usedBuilders = new AbstractTypeBuilderList();
+		private readonly AbstractTypeBuilderList _usedBuilders = new AbstractTypeBuilderList();
+		private          BuildContext            _context;
+		private          AbstractTypeBuilderList _builders;
 
 		private Type Build()
 		{
@@ -266,7 +266,7 @@ namespace BLToolkit.TypeBuilder.Builders
 				_context = context;
 			}
 
-			BuildContext _context;
+			readonly BuildContext _context;
 
 			[SuppressMessage("Microsoft.Design", "CA1062:ValidateArgumentsOfPublicMethods")]
 			public int Compare(IAbstractTypeBuilder x, IAbstractTypeBuilder y)

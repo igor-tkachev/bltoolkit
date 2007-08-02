@@ -34,7 +34,7 @@
                     FileAlignment = "4096"
                     IncrementalBuild = "false"
                     NoStdLib = "false"
-                    NoWarn = ""
+                    NoWarn = "618"
                     Optimize = "false"
                     OutputPath = "bin\Debug\"
                     RegisterForComInterop = "false"
@@ -54,7 +54,7 @@
                     FileAlignment = "4096"
                     IncrementalBuild = "false"
                     NoStdLib = "false"
-                    NoWarn = ""
+                    NoWarn = "618"
                     Optimize = "true"
                     OutputPath = "bin\Release\"
                     RegisterForComInterop = "false"
@@ -95,6 +95,16 @@
             <Include>
                 <File
                     RelPath = "AssemblyInfo.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "Aspects\AsyncAspectBuilder.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "Aspects\AsyncAttribute.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
                 />
@@ -348,7 +358,22 @@
                     BuildAction = "Compile"
                 />
                 <File
+                    RelPath = "Data\InitCommandEventArgs.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "Data\OperationExceptionEventArgs.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
                     RelPath = "Data\OperationType.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "Data\OperationTypeEventArgs.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
                 />
@@ -438,6 +463,11 @@
                     BuildAction = "Compile"
                 />
                 <File
+                    RelPath = "DataAccess\DataSetTableAttribute.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
                     RelPath = "DataAccess\DestinationAttribute.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
@@ -478,12 +508,22 @@
                     BuildAction = "Compile"
                 />
                 <File
+                    RelPath = "DataAccess\ParamDbTypeAttribute.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
                     RelPath = "DataAccess\ParamNameAttribute.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
                 />
                 <File
                     RelPath = "DataAccess\ParamNullValue.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "DataAccess\ParamSizeAttribute.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
                 />
@@ -580,6 +620,11 @@
                 />
                 <File
                     RelPath = "EditableObjects\EditableValue.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "EditableObjects\EditableXmlDocument.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
                 />
@@ -834,6 +879,11 @@
                 />
                 <File
                     RelPath = "Mapping\SimpleDestinationListMapper.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "Mapping\SimpleSourceListMapper.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
                 />

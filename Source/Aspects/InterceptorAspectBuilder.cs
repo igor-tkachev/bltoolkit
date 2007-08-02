@@ -1,5 +1,4 @@
 using System;
-using System.Diagnostics;
 using System.Reflection;
 using System.Reflection.Emit;
 
@@ -237,14 +236,24 @@ namespace BLToolkit.Aspects
 
 				Label checkMethodInfo = emit.DefineLabel();
 
+//				emit
+//					.ldsfld    (methodInfo)
+//					.brtrue_s  (checkMethodInfo)
+//					.ldc_i4_0
+//					.newobj    (TypeHelper.GetConstructor(typeof(StackTrace), typeof(int)))
+//					.ldc_i4_0
+//					.callvirt  (typeof(StackTrace), "GetFrame", typeof(int))
+//					.callvirt  (typeof(StackFrame), "GetMethod")
+//					.castclass (typeof(MethodInfo))
+//					.newobj    (TypeHelper.GetConstructor(typeof(CallMethodInfo), typeof(MethodInfo)))
+//					.stsfld    (methodInfo)
+//					.MarkLabel (checkMethodInfo)
+//					;
+
 				emit
 					.ldsfld    (methodInfo)
 					.brtrue_s  (checkMethodInfo)
-					.ldc_i4_0
-					.newobj    (TypeHelper.GetConstructor(typeof(StackTrace), typeof(int)))
-					.ldc_i4_0
-					.callvirt  (typeof(StackTrace), "GetFrame", typeof(int))
-					.callvirt  (typeof(StackFrame), "GetMethod")
+					.call      (typeof(MethodBase), "GetCurrentMethod")
 					.castclass (typeof(MethodInfo))
 					.newobj    (TypeHelper.GetConstructor(typeof(CallMethodInfo), typeof(MethodInfo)))
 					.stsfld    (methodInfo)
@@ -257,13 +266,11 @@ namespace BLToolkit.Aspects
 
 				emit
 					.newobj   (TypeHelper.GetDefaultConstructor(typeof(InterceptCallInfo)))
-					.stloc    (field)
-
-					.ldloc    (field)
+					.dup
 					.ldarg_0
 					.callvirt (typeof(InterceptCallInfo).GetProperty("Object").GetSetMethod())
 
-					.ldloc    (field)
+					.dup
 					.ldsfld   (methodInfo)
 					.callvirt (typeof(InterceptCallInfo).GetProperty("CallMethodInfo").GetSetMethod())
 					;
@@ -278,7 +285,7 @@ namespace BLToolkit.Aspects
 						continue;
 
 					emit
-						.ldloc      (field)
+						.dup
 						.callvirt   (typeof(InterceptCallInfo).GetProperty("ParameterValues").GetGetMethod())
 						.ldc_i4     (i)
 						.ldargEx    (p, true)
@@ -287,6 +294,7 @@ namespace BLToolkit.Aspects
 						;
 				}
 
+				emit.stloc(field);
 				Context.Items.Add("$BLToolkit.InfoField", field);
 			}
 

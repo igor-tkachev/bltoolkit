@@ -47,6 +47,7 @@ namespace Mapping
 		#region ToEnum, FromEnum
 
 		[DefaultValue(Enum1.Value3)]
+		[MapValue(Enum1.Value2, "2")]
 		public enum Enum1
 		{
 			[MapValue("1")] Value1,
@@ -57,9 +58,9 @@ namespace Mapping
 		[Test]
 		public void ToEnum()
 		{
-			Assert.AreEqual(Enum1.Value1, Map.ValueToEnum("1",         typeof(Enum1)));
-			Assert.AreEqual(Enum1.Value2, Map.ValueToEnum(null,        typeof(Enum1)));
-			Assert.AreEqual(Enum1.Value3, Map.ValueToEnum((Enum1)2727, typeof(Enum1)));
+			Assert.AreEqual(Enum1.Value1, Map.ValueToEnum("1",    typeof(Enum1)));
+			Assert.AreEqual(Enum1.Value2, Map.ValueToEnum(null,   typeof(Enum1)));
+			Assert.AreEqual(Enum1.Value3, Map.ValueToEnum("2727", typeof(Enum1)));
 		}
 
 		[Test]
@@ -70,6 +71,54 @@ namespace Mapping
 			Assert.AreEqual("3", Map.EnumToValue(Enum1.Value3));
 		}
 
+		public enum Enum2 : short
+		{
+			Value1 = 1,
+			[NullValue] Value2,
+			[DefaultValue]Value3
+		}
+
+		[Test]
+		public void ToShortEnum()
+		{
+			Assert.AreEqual(Enum2.Value1, Map.ValueToEnum(1,    typeof(Enum2)));
+			Assert.AreEqual(Enum2.Value2, Map.ValueToEnum(null, typeof(Enum2)));
+			Assert.AreEqual(Enum2.Value3, Map.ValueToEnum(3,    typeof(Enum2)));
+			Assert.AreEqual(Enum2.Value3, Map.ValueToEnum(2727, typeof(Enum2)));
+
+			// DateTime.Now can't converted to Enum2.
+			// Expected result in this case is default value.
+			//
+			Assert.AreEqual(Enum2.Value3, Map.ValueToEnum(DateTime.Now, typeof(Enum2)));
+		}
+
+		public enum Enum3 : long
+		{
+			Value1 = 1,
+		}
+
+		[Test, ExpectedException(typeof(InvalidCastException))]
+		public void ToEnumwWithIncompatibleValue()
+		{
+			// An object can't be converted to Enum3.
+			// Expected result is an exception, since Enum3 does not have
+			// a default value defined.
+			//
+			Map.ValueToEnum(new object(), typeof(Enum3));
+		}
+
+		[Test]
+		public void ToEnumwWithCompatibleValue()
+		{
+			// 123 is not defined for this enum, but can be converted to.
+			// Enum3 does not have a default value defined, so just cast 123 to Enum3
+			//
+			Assert.AreEqual((Enum3)123, Map.ValueToEnum(123, typeof(Enum3)));
+
+			// DateTime.Now also can be converted to Enum3 (as ticks).
+			//
+			Map.ValueToEnum(DateTime.Now, typeof(Enum3));
+		}
 		#endregion
 
 		#region ObjectToObject

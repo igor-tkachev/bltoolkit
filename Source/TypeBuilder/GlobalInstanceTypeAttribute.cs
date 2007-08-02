@@ -57,8 +57,8 @@ namespace BLToolkit.TypeBuilder
 			_propertyType = propertyType;
 		}
 
-		private Type _propertyType;
-		public  Type  PropertyType
+		private readonly Type _propertyType;
+		public           Type  PropertyType
 		{
 			get { return _propertyType; }
 		}

@@ -46,15 +46,30 @@ namespace DataAccess
 			[ScalarSource(ScalarSourceType.ReturnValue)]
 			public abstract int Scalar_ReturnParameter(DbManager db);
 
-			[ActionName("Scalar_ReturnParameter")]
+			[ActionName("Scalar_DataReader")]
 			[ScalarSource(ScalarSourceType.AffectedRows)]
 			public abstract int Scalar_AffectedRows(DbManager db);
 
+#if ORACLE
+			[SqlQuery("SELECT Stream_ FROM DataTypeTest WHERE DataTypeID = :pid")]
+#else
 			[SqlQuery("SELECT Stream_ FROM DataTypeTest WHERE DataTypeID = @id")]
+#endif
 			public abstract Stream GetStream(DbManager db, int id);
 
+#if ORACLE
+			[SqlQuery("SELECT Xml_ FROM DataTypeTest WHERE DataTypeID = :pid")]
+#else
 			[SqlQuery("SELECT Xml_ FROM DataTypeTest WHERE DataTypeID = @id")]
+#endif
 			public abstract XmlReader GetXml(DbManager db, int id);
+
+#if ORACLE
+			[SqlQuery("SELECT Xml_ FROM DataTypeTest WHERE DataTypeID = :pid")]
+#else
+			[SqlQuery("SELECT Xml_ FROM DataTypeTest WHERE DataTypeID = @id")]
+#endif
+			public abstract XmlDocument GetXmlDoc(DbManager db, int id);
 
 			[SprocName("Scalar_DataReader")]
 			public abstract int    ScalarDestination1([Destination] out int id);
@@ -141,6 +156,7 @@ namespace DataAccess
 			}
 		}
 
+#if !ACCESS
 		[Test]
 		public void OutputParameterRegressionTest()
 		{
@@ -216,6 +232,7 @@ namespace DataAccess
 				Assert.AreEqual(expectedValue, actualValue);
 			}
 		}
+#endif
 
 		[Test]
 		public void AffectedRowsTest()
@@ -224,7 +241,11 @@ namespace DataAccess
 			{
 				TestAccessor ta = TestAccessor.CreateInstance();
 
-				int expectedValue = -1;
+#if ACCESS
+				int expectedValue = 0;
+#else
+ 				int expectedValue = -1;
+#endif
 				int actualValue = ta.Scalar_AffectedRows(db);
 
 				Assert.AreEqual(expectedValue, actualValue);
@@ -295,6 +316,19 @@ namespace DataAccess
 				xml.MoveToContent();
 				Assert.IsTrue(xml.ReadToDescendant("element"));
 				Console.WriteLine("{0}", xml.GetAttribute("strattr"));
+			}
+		}
+
+		public void XmlDocTest()
+		{
+			using (DbManager db = new DbManager())
+			{
+				TestAccessor ta = TestAccessor.CreateInstance();
+
+				XmlDocument xmlDocument= ta.GetXmlDoc(db, 2);
+				Assert.IsNotNull(xmlDocument);
+				Assert.IsNotNull(xmlDocument.DocumentElement);
+				Console.WriteLine("{0}", xmlDocument.DocumentElement.GetAttribute("strattr"));
 			}
 		}
 

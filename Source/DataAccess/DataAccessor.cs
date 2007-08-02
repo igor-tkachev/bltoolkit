@@ -98,64 +98,24 @@ namespace BLToolkit.DataAccess
 			return (string)db.DataProvider.Convert(paramName, ConvertType.NameToParameter);
 		}
 
-		[NoInterception]
+		[NoInterception, Obsolete("This method is obsolete and will be removed on next release. Override PrepareParameters(db, parameters) instead")]
 		protected virtual IDbDataParameter[] PrepareParameters(object[] parameters)
 		{
+			return (IDbDataParameter[]) parameters;
+		}
+
+		[NoInterception]
+		protected virtual IDbDataParameter[] PrepareParameters(
+			DbManager db,
+			object[]  parameters)
+		{
 			// Little optimization.
-			// Check if we have only one single ref parameter.
+			// Check if we don't have any parameters.
 			//
-			object refParam = null;
+			if (parameters.Length == 0)
+				parameters = EmptyParametersArray;
 
-			for (int i = 0; i < parameters.Length; i++)
-			{
-				if (parameters[i] != null)
-				{
-					if (refParam != null)
-					{
-						refParam = null;
-						break;
-					}
-
-					refParam = parameters[i];
-				}
-			}
-
-			if (refParam != null)
-				return (IDbDataParameter[])refParam;
-
-			ArrayList list = new ArrayList(parameters.Length);
-			Hashtable hash = new Hashtable(parameters.Length);
-
-			foreach (object o in parameters)
-			{
-				IDbDataParameter p = o as IDbDataParameter;
-
-				if (p != null)
-				{
-					if (!hash.Contains(p.ParameterName))
-					{
-						list.Add(p);
-						hash.Add(p.ParameterName, p);
-					}
-				}
-				else if (o is IDbDataParameter[])
-				{
-					foreach (IDbDataParameter dbp in (IDbDataParameter[])o)
-					{
-						if (!hash.Contains(dbp.ParameterName))
-						{
-							list.Add(dbp);
-							hash.Add(dbp.ParameterName, dbp);
-						}
-					}
-				}
-			}
-
-			IDbDataParameter[] retParams = new IDbDataParameter[list.Count];
-
-			list.CopyTo(retParams);
-
-			return retParams;
+			return PrepareParameters(db.PrepareParameters(parameters));
 		}
 
 		[NoInterception]
@@ -430,6 +390,12 @@ namespace BLToolkit.DataAccess
 			return db.MappingSchema.ConvertToXmlReader(value);
 		}
 
+		[NoInterception]
+		protected virtual XmlDocument ConvertToXmlDocument(DbManager db, object value, object parameter)
+		{
+			return db.MappingSchema.ConvertToXmlDocument(value);
+		}
+
 		#endregion
 
 #if FW2
@@ -675,5 +641,7 @@ namespace BLToolkit.DataAccess
 		#endregion
 
 		#endregion
+
+		protected static readonly IDbDataParameter[] EmptyParametersArray = new IDbDataParameter[0];
 	}
 }

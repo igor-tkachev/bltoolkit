@@ -16,7 +16,7 @@ namespace BLTgen
 		[MapField(""), Description("source assembly location")]
 		public string SourceAssembly;
 
-		[MapField("O"), Description("Output directory name (default: target assembly location). Example: /O:c:\\Temp")]
+		[MapField("O"), Description("Output directory name (default: target assembly location). Example: /O:C:\\Temp")]
 		public string OutputDirectory;
 
 		[MapField("I"), Description("Type names to include (default: all). Example: /I:*Accessor;SomeNamespace.*;OtherNamespace.*")]
@@ -25,8 +25,14 @@ namespace BLTgen
 		[MapField("X"), Description("Type names to exclude (default: none). Example: /X:SomeNamespace.SomeType")]
 		public string Exclude;
 
-		[MapField("V"), Description("Verbose output (default: false). Example: /V")]
-		public string Verbose;
+		[MapField("K"), Description("The key pair that is used to create a strong name signature for the output assembly (default: none). Example: /K:C:\\SomePath\\key.snk")]
+		public string KeyPairFile;
+
+		[MapField("V"), Description("The version of the output assembly (same as source assembly by default). Example: /V:1.2.3.4")]
+		public string Version;
+
+		[MapField("D"), Description("Detailed output (default: false). Example: /D")]
+		public string Debug;
 	}
 
 	class Program
@@ -40,7 +46,7 @@ namespace BLTgen
 
 			WriteBanner();
 
-			if (null == parsedArgs.SourceAssembly || 0 == parsedArgs.SourceAssembly.Length)
+			if (parsedArgs.SourceAssembly == null || parsedArgs.SourceAssembly.Length == 0)
 				Usage();
 			else
 				GenerateExtensionAssembly(parsedArgs);
@@ -48,15 +54,16 @@ namespace BLTgen
 
 		private static void GenerateExtensionAssembly(Arguments parsedArgs)
 		{
-			bool     verbose               = null != parsedArgs.Verbose;
-			Assembly sourceAsm             = Assembly.LoadFrom(parsedArgs.SourceAssembly);
-			string   extensionAssemblyPath = GetOutputAssemblyLocation(sourceAsm.Location, parsedArgs.OutputDirectory);
+			bool     verbose                  = parsedArgs.Debug != null;
+			Assembly sourceAsm                = Assembly.LoadFrom(parsedArgs.SourceAssembly);
+			string   extensionAssemblyPath    = GetOutputAssemblyLocation(sourceAsm.Location, parsedArgs.OutputDirectory);
+			Version  extensionAssemblyVersion = parsedArgs.Version != null? new Version(parsedArgs.Version): sourceAsm.GetName().Version;
 
 			if (verbose)
 				Console.WriteLine("{0} =>{1}{2}", sourceAsm.Location, Environment.NewLine, extensionAssemblyPath);
 
 			TypeFactory.SaveTypes = true;
-			TypeFactory.SetGlobalAssembly(extensionAssemblyPath);
+			TypeFactory.SetGlobalAssembly(extensionAssemblyPath, extensionAssemblyVersion, parsedArgs.KeyPairFile);
 
 			Type[] typesToProcess = sourceAsm.GetExportedTypes();
 			typesToProcess = FilterTypes(typesToProcess, parsedArgs.Include, true);
@@ -67,9 +74,32 @@ namespace BLTgen
 				foreach (Type t in typesToProcess)
 				{
 					if (verbose)
-						Console.WriteLine(t.FullName);
+						Console.Write(t.FullName);
 
-					TypeAccessor.GetAccessor(t);
+#if FW2
+					// We cannot create accessors for generic definitions
+					//
+					if (t.IsGenericTypeDefinition)
+					{
+						if (verbose)
+							Console.WriteLine(" - skipping. Generic Definition");
+
+						continue;
+					}
+
+#endif
+					if (verbose)
+						Console.WriteLine();
+
+					try
+					{
+						TypeAccessor.GetAccessor(t);
+					}
+					catch (Exception e)
+					{
+						if (verbose)
+							Console.WriteLine(e);
+					}
 				}
 
 				TypeFactory.SaveGlobalAssembly();
@@ -100,9 +130,7 @@ namespace BLTgen
 			if (null == outputDirectory || 0 == outputDirectory.Length)
 				outputDirectory = Path.GetDirectoryName(sourceAssembly);
 
-			string fileName = Path.GetFileNameWithoutExtension(sourceAssembly) +
-					".BLToolkitExtension" + Path.GetExtension(sourceAssembly);
-
+			string fileName = Path.ChangeExtension(sourceAssembly, "BLToolkitExtension.dll");
 			return Path.Combine(outputDirectory, fileName);
 		}
 

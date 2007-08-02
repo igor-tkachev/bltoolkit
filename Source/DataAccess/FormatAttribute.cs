@@ -15,8 +15,8 @@ namespace BLToolkit.DataAccess
 			_index = index;
 		}
 
-		private int _index;
-		public  int  Index
+		private readonly int _index;
+		public           int  Index
 		{
 			get { return _index; }
 		}

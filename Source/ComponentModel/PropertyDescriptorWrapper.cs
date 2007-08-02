@@ -14,7 +14,7 @@ namespace BLToolkit.ComponentModel
 			_pd = propertyDescriptor;
 		}
 
-		PropertyDescriptor _pd;
+		private readonly PropertyDescriptor _pd;
 
 		public override AttributeCollection Attributes      { get { return _pd.Attributes;     } }
 		public override string              Category        { get { return _pd.Category;       } }

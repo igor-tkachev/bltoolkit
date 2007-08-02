@@ -93,6 +93,46 @@ namespace BLToolkit.Mapping.MetadataProvider
 			return null;
 		}
 
+		public virtual object GetDefaultValue(TypeExtension typeExt, Type type, out bool isSet)
+		{
+			isSet = false;
+			return null;
+		}
+
+		#endregion
+
+		#region GetNullable
+
+		public virtual bool GetNullable(ObjectMapper mapper, MemberAccessor member, out bool isSet)
+		{
+			isSet = false;
+			return false;
+		}
+
+		#endregion
+
+		#region GetNullValue
+
+		public virtual object GetNullValue(ObjectMapper mapper, MemberAccessor member, out bool isSet)
+		{
+			isSet = false;
+
+			if (member.Type.IsEnum)
+				return null;
+
+			object value = mapper.MappingSchema.GetNullValue(member.Type);
+
+			if (value is Type && (Type)value == typeof(DBNull))
+			{
+				value = DBNull.Value;
+
+				if (member.Type == typeof(string))
+					value = null;
+			}
+
+			return value;
+		}
+
 		#endregion
 
 		#region Static Members

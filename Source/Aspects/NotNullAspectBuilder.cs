@@ -14,7 +14,7 @@ namespace BLToolkit.Aspects
 			_message = message;
 		}
 
-		private string _message;
+		private readonly string _message;
 
 		public override int GetPriority(BuildContext context)
 		{

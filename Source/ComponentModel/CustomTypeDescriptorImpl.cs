@@ -26,7 +26,7 @@ namespace BLToolkit.ComponentModel
 			_typeDescriptionProvider = typeDescriptionProvider;
 		}
 
-		private ITypeDescriptionProvider _typeDescriptionProvider;
+		private readonly ITypeDescriptionProvider _typeDescriptionProvider;
 
 		protected virtual ITypeDescriptionProvider CreateTypeDescriptionProvider(Type type)
 		{

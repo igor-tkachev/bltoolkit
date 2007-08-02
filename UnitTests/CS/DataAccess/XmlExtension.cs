@@ -21,21 +21,32 @@ namespace DataAccess
 		[Test]
 		public void Test()
 		{
-			Map.Extensions = TypeExtension.GetExtenstions(@"XmlExtension.xml");
-
 			using (DbManager db = new DbManager())
 			{
-#if FW2
-				SqlQuery<Person1> sq = new SqlQuery<Person1>(db);
-				Person1           ps = sq.SelectByKey(1);
-#else
 				SqlQuery          sq = new SqlQuery(db);
-				Person1           ps = (Person1)sq.SelectByKey(typeof(Person1), 1);
-#endif
+				sq.Extensions = TypeExtension.GetExtenstions(@"XmlExtension.xml");
+				Assert.IsNotNull(sq.Extensions["Person1"]);
 
+				Person1           ps = (Person1)sq.SelectByKey(typeof(Person1), 1);
 				Assert.IsNotNull(ps);
 			}
 		}
+
+#if FW2
+		[Test]
+		public void FW2Test()
+		{
+			using (DbManager db = new DbManager())
+			{
+				SqlQuery<Person1> sq = new SqlQuery<Person1>(db);
+				sq.Extensions = TypeExtension.GetExtenstions(@"XmlExtension.xml");
+				Assert.IsNotNull(sq.Extensions["Person1"]);
+
+				Person1           ps = sq.SelectByKey(1);
+				Assert.IsNotNull(ps);
+			}
+		}
+#endif
 	}
 }
 

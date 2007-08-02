@@ -10,14 +10,14 @@ namespace BLToolkit.Mapping
 			_mapValues = mapValues;
 		}
 
-		private object _origValue;
-		public  object  OrigValue
+		private readonly object _origValue;
+		public           object  OrigValue
 		{
 			get { return _origValue;  }
 		}
 
-		private object[] _mapValues;
-		public  object[]  MapValues
+		private readonly object[] _mapValues;
+		public           object[]  MapValues
 		{
 			get { return _mapValues;  }
 		}

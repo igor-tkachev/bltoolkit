@@ -19,8 +19,8 @@ namespace BLToolkit.Mapping
 			_isTrimmable = isTrimmable;
 		}
 
-		private bool _isTrimmable;
-		public  bool  IsTrimmable
+		private readonly bool _isTrimmable;
+		public           bool  IsTrimmable
 		{
 			get { return _isTrimmable;  }
 		}

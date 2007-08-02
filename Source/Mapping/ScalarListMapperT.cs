@@ -17,12 +17,12 @@ namespace BLToolkit.Mapping
 			_underlyingType = _isNullable? Nullable.GetUnderlyingType(_type): _type;
 		}
 
-		private IList<T>      _list;
-		private MappingSchema _mappingSchema;
-		private T             _nullValue;
-		private bool          _isNullable;
-		private Type          _type = typeof(T);
-		private Type          _underlyingType;
+		private readonly IList<T>      _list;
+		private readonly MappingSchema _mappingSchema;
+		private readonly T             _nullValue;
+		private readonly bool          _isNullable;
+		private readonly Type          _type = typeof(T);
+		private readonly Type          _underlyingType;
 
 		#region IMapDataDestination Members
 

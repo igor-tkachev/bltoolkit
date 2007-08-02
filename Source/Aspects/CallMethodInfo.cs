@@ -12,12 +12,19 @@ namespace BLToolkit.Aspects
 		public CallMethodInfo(MethodInfo methodInfo)
 		{
 			_methodInfo = methodInfo;
+			_parameters = methodInfo.GetParameters();
 		}
 
 		private readonly MethodInfo _methodInfo;
 		public           MethodInfo  MethodInfo
 		{
 			get { return _methodInfo; }
+		}
+
+		private readonly ParameterInfo[] _parameters;
+		public           ParameterInfo[]  Parameters
+		{
+			get { return _parameters; }
 		}
 
 		private Hashtable  _items;
@@ -40,16 +47,24 @@ namespace BLToolkit.Aspects
 		internal LoggingAspect.ConfigParameters LogParameters;
 		internal MethodCallCounter              Counter;
 
-		private  Hashtable _methodCallCache;
-		internal Hashtable  MethodCallCache
+		private IDictionary _methodCallCache;
+		public  IDictionary  MethodCallCache
 		{
 			get
 			{
 				if (_methodCallCache == null) lock (this) if (_methodCallCache == null)
-					_methodCallCache = new Hashtable();
+					CacheAspect.CleanupThread.RegisterCache(_methodCallCache = new Hashtable());
 
 				return _methodCallCache;
 			}
+			set { _methodCallCache = value; }
+		}
+
+		private  bool[] _cacheableParameters;
+		internal bool[]  CacheableParameters
+		{
+			get { return _cacheableParameters;  }
+			set { _cacheableParameters = value; }
 		}
 
 		#endregion

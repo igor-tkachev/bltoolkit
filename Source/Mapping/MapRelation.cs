@@ -28,26 +28,26 @@ namespace BLToolkit.Mapping
 			_containerName   = containerName;
 		}
 
-		private MapIndex _masterIndex;
-		public  MapIndex  MasterIndex
+		private readonly MapIndex _masterIndex;
+		public           MapIndex  MasterIndex
 		{
 			get { return _masterIndex; }
 		}
 
-		private MapResultSet _slaveResultSet;
-		public  MapResultSet  SlaveResultSet
+		private readonly MapResultSet _slaveResultSet;
+		public           MapResultSet  SlaveResultSet
 		{
 			get { return _slaveResultSet; }
 		}
 
-		private MapIndex _slaveIndex;
-		public  MapIndex  SlaveIndex
+		private readonly MapIndex _slaveIndex;
+		public           MapIndex  SlaveIndex
 		{
 			get { return _slaveIndex; }
 		}
 
-		private string _containerName;
-		public  string  ContainerName
+		private readonly string _containerName;
+		public           string  ContainerName
 		{
 			get { return _containerName; }
 		}

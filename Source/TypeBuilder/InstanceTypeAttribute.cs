@@ -68,8 +68,8 @@ namespace BLToolkit.TypeBuilder
 			get { return _parameters;  }
 		}
 
-		private   Type _instanceType;
-		protected Type  InstanceType
+		private readonly Type _instanceType;
+		protected        Type  InstanceType
 		{
 			get { return _instanceType; }
 		}

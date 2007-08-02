@@ -16,15 +16,15 @@ namespace BLToolkit.Mapping
 			_dic        = dic;
 			_mapper     = objectMapper;
 			_fromSource = keyField.ByName && keyField.Name[0] == '@';
-			_keyField   = _fromSource ? keyField.Name.Substring(1): keyField;
+			_keyField   = _fromSource? keyField.Name.Substring(1): keyField;
 		}
 
-		private NameOrIndexParameter _keyField;
-		private IDictionary          _dic;
-		private ObjectMapper         _mapper;
-		private object               _newObject;
-		private bool                 _fromSource;
-		private object               _keyValue;
+		private readonly IDictionary          _dic;
+		private readonly bool                 _fromSource;
+		private          NameOrIndexParameter _keyField;
+		private          ObjectMapper         _mapper;
+		private          object               _newObject;
+		private          object               _keyValue;
 
 		#region IMapDataDestinationList Members
 
@@ -58,7 +58,7 @@ namespace BLToolkit.Mapping
 			return _mapper;
 		}
 
-		static char[] _trim = { ' ' };
+		static readonly char[] _trim = { ' ' };
 
 		public virtual object GetNextObject(InitContext initContext)
 		{

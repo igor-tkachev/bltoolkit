@@ -1,37 +1,36 @@
+#if ORACLE
 using System;
-using System.Data.OracleClient;
+using Oracle.DataAccess.Types;
 using NUnit.Framework;
 
 using BLToolkit.Common;
 
 namespace Common
 {
-#if ORACLE
-
 	[TestFixture]
 	public class OperatorTest
 	{
-		private class OracleNumberOp : IOperable<OracleNumber>
+		private class OracleDecimalOp : IOperable<OracleDecimal>
 		{
-			public OracleNumber Addition         (OracleNumber op1, OracleNumber op2) { return (op1 + op2); }
-			public OracleNumber Subtraction      (OracleNumber op1, OracleNumber op2) { return (op1 - op2); }
-			public OracleNumber Multiply         (OracleNumber op1, OracleNumber op2) { return (op1 * op2); }
-			public OracleNumber Division         (OracleNumber op1, OracleNumber op2) { return (op1 / op2); }
-			public OracleNumber Modulus          (OracleNumber op1, OracleNumber op2) { return (op1 % op2); }
+			public OracleDecimal Addition         (OracleDecimal op1, OracleDecimal op2) { return (op1 + op2); }
+			public OracleDecimal Subtraction      (OracleDecimal op1, OracleDecimal op2) { return (op1 - op2); }
+			public OracleDecimal Multiply         (OracleDecimal op1, OracleDecimal op2) { return (op1 * op2); }
+			public OracleDecimal Division         (OracleDecimal op1, OracleDecimal op2) { return (op1 / op2); }
+			public OracleDecimal Modulus          (OracleDecimal op1, OracleDecimal op2) { return (op1 % op2); }
 
-			public OracleNumber BitwiseAnd       (OracleNumber op1, OracleNumber op2) { throw new InvalidOperationException(); }
-			public OracleNumber BitwiseOr        (OracleNumber op1, OracleNumber op2) { throw new InvalidOperationException(); }
-			public OracleNumber ExclusiveOr      (OracleNumber op1, OracleNumber op2) { throw new InvalidOperationException(); }
+			public OracleDecimal BitwiseAnd       (OracleDecimal op1, OracleDecimal op2) { throw new InvalidOperationException(); }
+			public OracleDecimal BitwiseOr        (OracleDecimal op1, OracleDecimal op2) { throw new InvalidOperationException(); }
+			public OracleDecimal ExclusiveOr      (OracleDecimal op1, OracleDecimal op2) { throw new InvalidOperationException(); }
 
-			public OracleNumber UnaryNegation    (OracleNumber op)             { return (-op); }
-			public OracleNumber OnesComplement   (OracleNumber op)             { throw new InvalidOperationException(); }
+			public OracleDecimal UnaryNegation    (OracleDecimal op)             { return (-op); }
+			public OracleDecimal OnesComplement   (OracleDecimal op)             { throw new InvalidOperationException(); }
 
-			public bool Equality          (OracleNumber op1, OracleNumber op2) { return (op1 == op2).IsTrue; }
-			public bool Inequality        (OracleNumber op1, OracleNumber op2) { return (op1 != op2).IsTrue; }
-			public bool GreaterThan       (OracleNumber op1, OracleNumber op2) { return (op1 >  op2).IsTrue; }
-			public bool GreaterThanOrEqual(OracleNumber op1, OracleNumber op2) { return (op1 >= op2).IsTrue; }
-			public bool LessThan          (OracleNumber op1, OracleNumber op2) { return (op1 <  op2).IsTrue; }
-			public bool LessThanOrEqual   (OracleNumber op1, OracleNumber op2) { return (op1 <= op2).IsTrue; }
+			public bool Equality          (OracleDecimal op1, OracleDecimal op2) { return op1 == op2; }
+			public bool Inequality        (OracleDecimal op1, OracleDecimal op2) { return op1 != op2; }
+			public bool GreaterThan       (OracleDecimal op1, OracleDecimal op2) { return op1 >  op2; }
+			public bool GreaterThanOrEqual(OracleDecimal op1, OracleDecimal op2) { return op1 >= op2; }
+			public bool LessThan          (OracleDecimal op1, OracleDecimal op2) { return op1 <  op2; }
+			public bool LessThanOrEqual   (OracleDecimal op1, OracleDecimal op2) { return op1 <= op2; }
 		}
 
 		[Test]
@@ -71,26 +70,25 @@ namespace Common
 		[Test]
 		public void ExtensionTest()
 		{
-			Operator<OracleNumber>.Op = new OracleNumberOp();
+			Operator<OracleDecimal>.Op = new OracleDecimalOp();
 
-			Assert.AreEqual((OracleNumber)579,   Operator<OracleNumber>.Addition   ((OracleNumber)123, (OracleNumber)456));
-			Assert.AreEqual((OracleNumber)(-333),Operator<OracleNumber>.Subtraction((OracleNumber)123, (OracleNumber)456));
+			Assert.AreEqual((OracleDecimal)579,   Operator<OracleDecimal>.Addition   (123, 456));
+			Assert.AreEqual((OracleDecimal)(-333),Operator<OracleDecimal>.Subtraction(123, 456));
 
-			Assert.AreEqual((OracleNumber)56088, Operator<OracleNumber>.Multiply((OracleNumber)123, (OracleNumber)456));
-			Assert.AreEqual((OracleNumber)41,    Operator<OracleNumber>.Division((OracleNumber)123, (OracleNumber)3));
-			Assert.AreEqual((OracleNumber)123,   Operator<OracleNumber>.Modulus ((OracleNumber)123, (OracleNumber)456));
+			Assert.AreEqual((OracleDecimal)56088, Operator<OracleDecimal>.Multiply(123, 456));
+			Assert.AreEqual((OracleDecimal)41,    Operator<OracleDecimal>.Division(123, 3));
+			Assert.AreEqual((OracleDecimal)123,   Operator<OracleDecimal>.Modulus (123, 456));
 
 
-			Assert.AreEqual(-(OracleNumber)123,  Operator<OracleNumber>.UnaryNegation ((OracleNumber)123));
+			Assert.AreEqual(-(OracleDecimal)123,  Operator<OracleDecimal>.UnaryNegation (123));
 
-			Assert.IsTrue(Operator<OracleNumber>.Equality          ((OracleNumber)123, (OracleNumber)123));
-			Assert.IsTrue(Operator<OracleNumber>.Inequality        ((OracleNumber)123, (OracleNumber)456));
-			Assert.IsTrue(Operator<OracleNumber>.GreaterThan       ((OracleNumber)123, (OracleNumber)(-5)));
-			Assert.IsTrue(Operator<OracleNumber>.GreaterThanOrEqual((OracleNumber)123, (OracleNumber)123));
-			Assert.IsTrue(Operator<OracleNumber>.LessThan          ((OracleNumber)123, (OracleNumber)456));
-			Assert.IsTrue(Operator<OracleNumber>.LessThanOrEqual   ((OracleNumber)123, (OracleNumber)123));
+			Assert.IsTrue(Operator<OracleDecimal>.Equality          (123, 123));
+			Assert.IsTrue(Operator<OracleDecimal>.Inequality        (123, 456));
+			Assert.IsTrue(Operator<OracleDecimal>.GreaterThan       (123, (-5)));
+			Assert.IsTrue(Operator<OracleDecimal>.GreaterThanOrEqual(123, 123));
+			Assert.IsTrue(Operator<OracleDecimal>.LessThan          (123, 456));
+			Assert.IsTrue(Operator<OracleDecimal>.LessThanOrEqual   (123, 123));
 		}
 	}
-
-#endif
 }
+#endif

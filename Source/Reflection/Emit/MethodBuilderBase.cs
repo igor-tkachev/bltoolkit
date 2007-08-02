@@ -19,11 +19,11 @@ namespace BLToolkit.Reflection.Emit
 			_type = typeBuilder;
 		}
 
-		private TypeBuilderHelper _type;
+		private readonly TypeBuilderHelper _type;
 		/// <summary>
 		/// Gets associated TypeBuilderHelper.
 		/// </summary>
-		public  TypeBuilderHelper  Type
+		public           TypeBuilderHelper  Type
 		{
 			get { return _type; }
 		}

@@ -31,14 +31,14 @@ namespace BLToolkit.Aspects
 		{
 		}
 
-		private Type _targetInterface;
-		public  Type  TargetInterface
+		private readonly Type _targetInterface;
+		public           Type  TargetInterface
 		{
 			get { return _targetInterface;  }
 		}
 
-		private string _memberName;
-		public  string  MemberName
+		private readonly string _memberName;
+		public           string  MemberName
 		{
 			get { return _memberName;  }
 		}

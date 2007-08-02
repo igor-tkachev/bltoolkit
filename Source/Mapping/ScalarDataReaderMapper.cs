@@ -17,8 +17,8 @@ namespace BLToolkit.Mapping
 			_index = nameOrIndex.ByName? dataReader.GetOrdinal(nameOrIndex.Name): nameOrIndex.Index;
 		}
 
-		private int _index;
-		public  int  Index
+		private readonly int _index;
+		public           int  Index
 		{
 			get { return _index; }
 		}

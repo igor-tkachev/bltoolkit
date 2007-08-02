@@ -174,12 +174,76 @@ namespace BLToolkit.Mapping.MetadataProvider
 
 		public override object GetDefaultValue(ObjectMapper mapper, MemberAccessor member, out bool isSet)
 		{
-			object value = GetValue(mapper, member, "DefaultValue", out isSet);
+			object value = mapper.Extension[member.Name]["DefaultValue"].Value;
 
 			if (value != null)
+			{
+				isSet = value != null;
 				return TypeExtension.ChangeType(value, member.Type);
+			}
+
+			return GetDefaultValue(mapper.Extension, member.Type, out isSet);
+		}
+
+		public override object GetDefaultValue(TypeExtension typeExt, Type type, out bool isSet)
+		{
+			object value = null;
+
+			if (type.IsEnum)
+				value = GetEnumDefaultValueFromExtension(typeExt, type);
+
+			if (value == null)
+				value = typeExt.Attributes["DefaultValue"].Value;
+
+			isSet = value != null;
+
+			return TypeExtension.ChangeType(value, type);
+		}
+
+		private static object GetEnumDefaultValueFromExtension(TypeExtension typeExt, Type type)
+		{
+			FieldInfo[] fields = type.GetFields();
+
+			foreach (FieldInfo fi in fields)
+				if ((fi.Attributes & EnumField) == EnumField)
+					if (typeExt[fi.Name]["DefaultValue"].Value != null)
+						return Enum.Parse(type, fi.Name);
 
 			return null;
+		}
+
+		#endregion
+
+		#region GetNullable
+
+		public override bool GetNullable(ObjectMapper mapper, MemberAccessor member, out bool isSet)
+		{
+			// Check extension <Member1 Nullable='true' />
+			//
+			object value = GetValue(mapper, member, "Nullable", out isSet);
+
+			if (isSet)
+				return TypeExtension.ToBoolean(value);
+
+			// Check extension <Member1 NullValue='-1' />
+			//
+			if (GetValue(mapper, member, "NullValue", out isSet) != null)
+				return true;
+
+			return false;
+		}
+
+		#endregion
+
+		#region GetNullable
+
+		public override object GetNullValue(ObjectMapper mapper, MemberAccessor member, out bool isSet)
+		{
+			// Check extension <Member1 NullValue='-1' />
+			//
+			object value = GetValue(mapper, member, "NullValue", out isSet);
+
+			return isSet? TypeExtension.ChangeType(value, member.Type): null;
 		}
 
 		#endregion

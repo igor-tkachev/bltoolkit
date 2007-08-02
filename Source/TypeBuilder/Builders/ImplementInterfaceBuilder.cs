@@ -15,7 +15,7 @@ namespace BLToolkit.TypeBuilder.Builders
 			_type = type;
 		}
 
-		private Type _type;
+		private readonly Type _type;
 
 		public override Type[] GetInterfaces()
 		{

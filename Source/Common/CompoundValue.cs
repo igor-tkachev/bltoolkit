@@ -10,8 +10,12 @@ namespace BLToolkit.Common
 			if (values == null)
 				throw new ArgumentNullException("values");
 
-			_values = values;
+			// Note that the compound hash is precalculated.
+			// This means that CompoundValue can be used only with immutable values.
+			// Otherwise the behaviour is undefined.
+			//
 			_hash   = CalcHashCode(values);
+			_values = values;
 		}
 
 		private readonly object[] _values;

@@ -13,9 +13,9 @@ namespace BLToolkit.Mapping
 			_mapper = objectMapper;
 		}
 
-		private IList        _list;
-		private ObjectMapper _mapper;
-		private int          _currentItem;
+		private readonly IList        _list;
+		private          ObjectMapper _mapper;
+		private          int          _currentItem;
 
 		#region IMapDataSourceList Members
 

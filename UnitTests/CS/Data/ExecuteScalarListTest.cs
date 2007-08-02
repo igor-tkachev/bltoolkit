@@ -113,10 +113,15 @@ namespace Data
 		[Test]
 		public void FW2ScalarListTest()
 		{
+			string cmd = "SELECT PersonID FROM Person UNION ALL SELECT NULL";
+#if !MSSQL
+			cmd += " FROM dual";
+#endif
+
 			using (DbManager db = new DbManager())
 			{
 				List<int?> array = db
-					.SetCommand("SELECT PersonID FROM Person UNION ALL SELECT NULL")
+					.SetCommand(cmd)
 					.ExecuteScalarList<int?>();
 
 				Assert.IsNotNull(array);
@@ -128,11 +133,15 @@ namespace Data
 		[Test]
 		public void FW2ScalarListTest2()
 		{
+			string cmd = "SELECT PersonID FROM Person UNION ALL SELECT NULL";
+#if !MSSQL
+			cmd += " FROM dual";
+#endif
 			using (DbManager db = new DbManager())
 			{
 				List<int> array = new List<int>();
 				db
-					.SetCommand("SELECT PersonID FROM Person UNION ALL SELECT NULL")
+					.SetCommand(cmd)
 					.ExecuteScalarList(array);
 
 				Assert.IsNotNull(array);
@@ -175,8 +184,12 @@ namespace Data
 		{
 			using (DbManager db = new DbManager())
 			{
+				string cmd = "SELECT PersonID FROM Person UNION ALL SELECT NULL";
+#if !MSSQL
+				cmd += " FROM dual";
+#endif
 				List<uint?> array = db
-					.SetCommand("SELECT PersonID FROM Person UNION ALL SELECT NULL")
+					.SetCommand(cmd)
 					.ExecuteScalarList<uint?>();
 
 				Assert.IsNotNull(array);
@@ -266,6 +279,7 @@ namespace Data
 				TestNullableType<UInt32>    (db, "UInt32_");
 				TestNullableType<UInt64>    (db, "UInt64_");
 
+#if !ORACLE
 				// Sql types
 				//
 				TestINullableType<SqlBinary>  (db, "Binary_");
@@ -276,6 +290,9 @@ namespace Data
 				TestINullableType<SqlDateTime>(db, "DateTime_");
 				TestINullableType<SqlDecimal> (db, "Decimal_");
 				TestINullableType<SqlDouble>  (db, "Double_");
+#if !ACCESS
+				TestINullableType<SqlGuid>    (db, "Bytes_");
+#endif
 				TestINullableType<SqlGuid>    (db, "Guid_");
 				TestINullableType<SqlInt16>   (db, "Int16_");
 				TestINullableType<SqlInt32>   (db, "Int32_");
@@ -284,7 +301,7 @@ namespace Data
 				TestINullableType<SqlString>  (db, "String_");
 				TestINullableType<SqlSingle>  (db, "Single_");
 				TestType<SqlXml>              (db, "Xml_");
-
+#endif
 				// BLToolkit extension
 				List<Byte[]> arrays  = TestType<Byte[]>(db, "Binary_");
 				Console.WriteLine("{0}", arrays[1][0]);
@@ -293,14 +310,17 @@ namespace Data
 				Console.WriteLine("{0}", streams[1].ReadByte());
 
 				List<Char[]> symbols = TestType<Char[]>(db, "String_");
-
 				Assert.AreEqual(symbols[1][0], 's');
-				TestINullableType<SqlGuid>(db, "Bytes_");
 
 				List<XmlReader> xmlReaders = TestType<XmlReader>(db, "Xml_");
 				xmlReaders[1].MoveToContent();
 				Assert.IsTrue(xmlReaders[1].ReadToDescendant("element"));
 				Console.WriteLine("{0}", xmlReaders[1].GetAttribute("strattr"));
+
+				List<XmlDocument> xmlDocs = TestType<XmlDocument>(db, "Xml_");
+				Assert.IsNotNull(xmlDocs[1]);
+				Assert.IsNotNull(xmlDocs[1].DocumentElement);
+				Console.WriteLine("{0}", xmlDocs[1].DocumentElement.GetAttribute("strattr"));
 			}
 		}
 

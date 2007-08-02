@@ -290,7 +290,7 @@ namespace BLToolkit.Data
 		public IDbCommand SelectCommand
 		{
 			[System.Diagnostics.DebuggerStepThrough]
-			get { return _selectCommand = InitCommand(_selectCommand); }
+			get { return _selectCommand = OnInitCommand(_selectCommand); }
 		}
 
 		private IDbCommand _insertCommand;
@@ -307,7 +307,7 @@ namespace BLToolkit.Data
 		public IDbCommand InsertCommand
 		{
 			[System.Diagnostics.DebuggerStepThrough]
-			get { return _insertCommand = InitCommand(_insertCommand); }
+			get { return _insertCommand = OnInitCommand(_insertCommand); }
 		}
 
 		private IDbCommand _updateCommand;
@@ -324,7 +324,7 @@ namespace BLToolkit.Data
 		public IDbCommand UpdateCommand
 		{
 			[System.Diagnostics.DebuggerStepThrough]
-			get { return _updateCommand = InitCommand(_updateCommand); }
+			get { return _updateCommand = OnInitCommand(_updateCommand); }
 		}
 
 		private IDbCommand _deleteCommand;
@@ -341,7 +341,7 @@ namespace BLToolkit.Data
 		public IDbCommand DeleteCommand
 		{
 			[System.Diagnostics.DebuggerStepThrough]
-			get { return _deleteCommand = InitCommand(_deleteCommand); }
+			get { return _deleteCommand = OnInitCommand(_deleteCommand); }
 		}
 
 		private bool           _closeTransaction = true;
@@ -418,22 +418,53 @@ namespace BLToolkit.Data
 
 		#endregion
 
-		#region IDisposable interface
+		#region Public Events
 
+		private static readonly object EventBeforeOperation = new object();
 		/// <summary>
-		/// Releases the unmanaged resources used by the <see cref="DbManager"/> and 
-		/// optionally releases the managed resources.
+		/// Occurs when a server-side operation is about to start.
 		/// </summary>
-		/// <remarks>
-		/// This method is called by the public <see cref="IDisposable.Dispose()"/> method 
-		/// and the Finalize method.
-		/// </remarks>
-		/// <param name="disposing"><b>true</b> to release both managed and unmanaged resources; <b>false</b> to release only unmanaged resources.</param>
-		protected override void Dispose(bool disposing)
+		public event OperationTypeEventHandler BeforeOperation
 		{
-			if (disposing)
-				Close();
+			add    { Events.AddHandler   (EventBeforeOperation, value); }
+			remove { Events.RemoveHandler(EventBeforeOperation, value); }
 		}
+
+		private static readonly object EventAfterOperation = new object();
+		/// <summary>
+		/// Occurs when a server-side operation is complete.
+		/// </summary>
+		public event OperationTypeEventHandler AfterOperation
+		{
+			add    { Events.AddHandler   (EventAfterOperation, value); }
+			remove { Events.RemoveHandler(EventAfterOperation, value); }
+		}
+
+		private static readonly object EventOperationException = new object();
+		/// <summary>
+		/// Occurs when a server-side operation is failed to execute.
+		/// </summary>
+		public event OperationExceptionEventHandler OperationException
+		{
+			add    { Events.AddHandler   (EventOperationException, value); }
+			remove { Events.RemoveHandler(EventOperationException, value); }
+		}
+
+		private static readonly object EventInitCommand = new object();
+		/// <summary>
+		/// Occurs when the <see cref="Command"/> is initializing.
+		/// </summary>
+		public event InitCommandEventHandler InitCommand
+		{
+			add    { Events.AddHandler   (EventInitCommand, value); }
+			remove { Events.RemoveHandler(EventInitCommand, value); }
+		}
+
+#if !FW2
+		// CanRaiseEvents is absent in the Framework 1.1
+		//
+		private const bool CanRaiseEvents = true;
+#endif
 
 		#endregion
 
@@ -623,7 +654,6 @@ namespace BLToolkit.Data
 			AddDataProvider(new AccessDataProvider());
 			AddDataProvider(new OleDbDataProvider());
 			AddDataProvider(new OdbcDataProvider());
-			AddDataProvider(new SybaseAdoDataProvider());
 
 			string dataProviders = ConfigManager.AppSettings.Get("BLToolkit.DataProviders");
 			if (null != dataProviders)
@@ -635,9 +665,9 @@ namespace BLToolkit.Data
 			_defaultConfiguration = ConfigManager.AppSettings.Get("BLToolkit.DefaultConfiguration");
 		}
 
-		private static string           _firstConfiguration;
-		private static DataProviderBase _firstProvider;
-		private static Hashtable        _configurationList = Hashtable.Synchronized(new Hashtable());
+		private static string             _firstConfiguration;
+		private static DataProviderBase   _firstProvider;
+		private static readonly Hashtable _configurationList = Hashtable.Synchronized(new Hashtable());
 
 		private void Init(string configurationString)
 		{
@@ -694,7 +724,16 @@ namespace BLToolkit.Data
 					configurationString.Length == 0? "": ".",
 					configurationString);
 
+#if FW2
+				System.Configuration.ConnectionStringSettings css = ConfigManager.ConnectionStrings[configurationString];
+
+				if (css != null)
+					o = css.ConnectionString;
+				else
+					o = ConfigManager.AppSettings.Get(key);
+#else
 				o = ConfigManager.AppSettings.Get(key);
+#endif
 
 				if (o == null)
 				{
@@ -717,6 +756,13 @@ namespace BLToolkit.Data
 
 		private static DataProviderBase GetDataProvider(string configurationString)
 		{
+#if FW2
+			System.Configuration.ConnectionStringSettings css = ConfigManager.ConnectionStrings[configurationString];
+
+			if (css != null)
+				return (DataProviderBase)_dataProviderNameList[css.ProviderName];
+#endif
+
 			// configurationString can be:
 			// ''        : default provider,   default configuration;
 			// '.'       : default provider,   default configuration;
@@ -812,14 +858,27 @@ namespace BLToolkit.Data
 			//
 			IDbDataParameter[] commandParameters = GetSpParameters(spName, true);
 
-			if (parameterValues == null || parameterValues.Length == 0)
-				return commandParameters;
+			// DbParameters are bound by name, plain parameters by order
+			//
+			bool dbParameters = false;
+
+			if (parameterValues == null || parameterValues.Length == 0 ||
+				parameterValues[0] is IDbDataParameter || parameterValues[0] is IDbDataParameter[])
+			{
+				// The PrepareParameters method may add some additional parameters.
+				//
+				parameterValues = PrepareParameters(parameterValues);
+
+				if (parameterValues == null || parameterValues.Length == 0)
+					return commandParameters;
+
+				dbParameters = true;
+			}
 
 			if (commandParameters == null)
 			{
 				commandParameters = new IDbDataParameter[parameterValues.Length];
-
-				if (parameterValues[0] is IDbDataParameter)
+				if (dbParameters)
 				{
 					parameterValues.CopyTo(commandParameters, 0);
 				}
@@ -832,7 +891,7 @@ namespace BLToolkit.Data
 				return commandParameters;
 			}
 
-			if (parameterValues[0] is IDbDataParameter)
+			if (dbParameters)
 			{
 				// If we receive an array of IDbDataParameter, 
 				// we need to copy parameters to the IDbDataParameter[].
@@ -890,7 +949,72 @@ namespace BLToolkit.Data
 			return commandParameters;
 		}
 
-		protected virtual IDbCommand InitCommand(IDbCommand command)
+		public virtual IDbDataParameter[] PrepareParameters(object[] parameters)
+		{
+			// Little optimization.
+			// Check if we have only one single ref parameter.
+			//
+			object refParam = null;
+
+			for (int i = 0; i < parameters.Length; i++)
+			{
+				if (parameters[i] != null)
+				{
+					if (refParam != null)
+					{
+						refParam = null;
+						break;
+					}
+
+					refParam = parameters[i];
+				}
+			}
+
+			if (refParam is IDbDataParameter[])
+				return (IDbDataParameter[])refParam;
+			else if (refParam is IDbDataParameter)
+			{
+				IDbDataParameter[] oneParameterArray = new IDbDataParameter[1];
+				oneParameterArray[0] = (IDbDataParameter) refParam;
+				return oneParameterArray;
+			}
+
+			ArrayList list = new ArrayList(parameters.Length);
+			Hashtable hash = new Hashtable(parameters.Length);
+
+			foreach (object o in parameters)
+			{
+				IDbDataParameter p = o as IDbDataParameter;
+
+				if (p != null)
+				{
+					if (!hash.Contains(p.ParameterName))
+					{
+						list.Add(p);
+						hash.Add(p.ParameterName, p);
+					}
+				}
+				else if (o is IDbDataParameter[])
+				{
+					foreach (IDbDataParameter dbp in (IDbDataParameter[])o)
+					{
+						if (!hash.Contains(dbp.ParameterName))
+						{
+							list.Add(dbp);
+							hash.Add(dbp.ParameterName, dbp);
+						}
+					}
+				}
+			}
+
+			IDbDataParameter[] retParams = new IDbDataParameter[list.Count];
+
+			list.CopyTo(retParams);
+
+			return retParams;
+		}
+
+		protected virtual IDbCommand OnInitCommand(IDbCommand command)
 		{
 			if (command == null) 
 			{
@@ -904,6 +1028,13 @@ namespace BLToolkit.Data
 				{
 					command.Transaction = Transaction;
 				}
+			}
+
+			if (CanRaiseEvents)
+			{
+				InitCommandEventHandler handler = (InitCommandEventHandler)Events[EventInitCommand];
+				if (handler != null)
+					handler(this, new InitCommandEventArgs(command));
 			}
 
 			return command;
@@ -942,7 +1073,7 @@ namespace BLToolkit.Data
 			}
 		}
 
-		private static Hashtable _paramCache = Hashtable.Synchronized(new Hashtable());
+		private static readonly Hashtable _paramCache = Hashtable.Synchronized(new Hashtable());
 
 		/// <summary>
 		/// Resolve at run time the appropriate set of parameters for a stored procedure.
@@ -1144,16 +1275,48 @@ namespace BLToolkit.Data
 			}
 		}
 
+		/// <summary>
+		/// Raises the <see cref="BeforeOperation"/> event.
+		/// </summary>
+		/// <param name="op">The <see cref="OperationType"/>.</param>
 		protected virtual void OnBeforeOperation(OperationType op)
 		{
+			if (CanRaiseEvents)
+			{
+				OperationTypeEventHandler handler = (OperationTypeEventHandler)Events[EventBeforeOperation];
+				if (handler != null)
+					handler(this, new OperationTypeEventArgs(op));
+			}
 		}
 
+		/// <summary>
+		/// Raises the <see cref="AfterOperation"/> event.
+		/// </summary>
+		/// <param name="op">The <see cref="OperationType"/>.</param>
 		protected virtual void OnAfterOperation(OperationType op)
 		{
+			if (CanRaiseEvents)
+			{
+				OperationTypeEventHandler handler = (OperationTypeEventHandler)Events[EventAfterOperation];
+				if (handler != null)
+					handler(this, new OperationTypeEventArgs(op));
+			}
 		}
 
+		/// <summary>
+		/// Raises the <see cref="OperationException"/> event.
+		/// </summary>
+		/// <param name="op">The <see cref="OperationType"/>.</param>
+		/// <param name="ex">The <see cref="Exception"/> occured.</param>
 		protected virtual void OnOperationException(OperationType op, Exception ex)
 		{
+			if (CanRaiseEvents)
+			{
+				OperationExceptionEventHandler handler = (OperationExceptionEventHandler)Events[EventOperationException];
+				if (handler != null)
+					handler(this, new OperationExceptionEventArgs(op, ex));
+			}
+
 			throw new DataException(ex);
 		}
 
@@ -1161,8 +1324,8 @@ namespace BLToolkit.Data
 
 		#region Public Static Methods
 
-		private static Hashtable _dataProviderNameList = Hashtable.Synchronized(new Hashtable(4));
-		private static Hashtable _dataProviderTypeList = Hashtable.Synchronized(new Hashtable(4));
+		private static readonly Hashtable _dataProviderNameList = Hashtable.Synchronized(new Hashtable(8));
+		private static readonly Hashtable _dataProviderTypeList = Hashtable.Synchronized(new Hashtable(4));
 
 		private const string ProviderNameDivider = ".";
 
@@ -1185,6 +1348,7 @@ namespace BLToolkit.Data
 				throw new ArgumentException("dataProvider.Name must be a valid string");
 
 			_dataProviderNameList[dataProvider.Name.ToUpper()] = dataProvider;
+			_dataProviderNameList[dataProvider.ProviderName]   = dataProvider;
 			_dataProviderTypeList[dataProvider.ConnectionType] = dataProvider;
 		}
 
@@ -1207,7 +1371,7 @@ namespace BLToolkit.Data
 			if (null == providerName || 0 == providerName.Length)
 				throw new ArgumentException("providerName must be a valid string");
 
-			_dataProviderNameList[providerName.ToUpper()] = dataProvider;
+			_dataProviderNameList[providerName.ToUpper()]      = dataProvider;
 			_dataProviderTypeList[dataProvider.ConnectionType] = dataProvider;
 		}
 
@@ -1293,7 +1457,7 @@ namespace BLToolkit.Data
 		/// <summary>
 		/// This table caches connection strings which were already read.
 		/// </summary>
-		private static Hashtable _connectionStringList = Hashtable.Synchronized(new Hashtable());
+		private static readonly Hashtable _connectionStringList = Hashtable.Synchronized(new Hashtable());
 		private static string    _defaultConfiguration;
 
 		/// <summary>
@@ -1320,7 +1484,20 @@ namespace BLToolkit.Data
 					}
 
 					if (_defaultConfiguration == null)
+					{
 						_defaultConfiguration = string.Empty;
+
+#if FW2
+						foreach (System.Configuration.ConnectionStringSettings css in ConfigManager.ConnectionStrings)
+						{
+							if (css.Name != "LocalSqlServer")
+							{
+								_defaultConfiguration = css.Name;
+								break;
+							}
+						}
+#endif
+					}
 				}
 
 				return _defaultConfiguration;
@@ -1526,7 +1703,7 @@ namespace BLToolkit.Data
 
 								if (ma != null)
 								{
-									ma.SetValue(obj, parameter.Value);
+									ma.SetValue(obj, _mappingSchema.ConvertChangeType(parameter.Value, ma.Type));
 									continue;
 								}
 							}
@@ -1542,7 +1719,7 @@ namespace BLToolkit.Data
 				}
 
 				if (ordinal >= 0)
-					dest.SetValue(obj, ordinal, parameter.Value);
+					dest.SetValue(obj, ordinal, _mappingSchema.ConvertChangeType(parameter.Value, dest.GetFieldType(ordinal)));
 			}
 		}
 
@@ -1607,6 +1784,9 @@ namespace BLToolkit.Data
 				}
 			}
 
+			if (_prepared)
+				InitParameters(CommandAction.Select);
+
 			return this;
 		}
 
@@ -1636,6 +1816,9 @@ namespace BLToolkit.Data
 							DBNull.Value: value;
 				}
 			}
+
+			if (_prepared)
+				InitParameters(CommandAction.Select);
 
 			return this;
 		}
@@ -1780,6 +1963,23 @@ namespace BLToolkit.Data
 		public IDbDataParameter OutputParameter(string parameterName, DbType dbType)
 		{
 			return Parameter(ParameterDirection.Output, parameterName, dbType);
+		}
+
+		/// <summary>
+		/// Adds an output parameter to the <see cref="Command"/>.
+		/// </summary>
+		/// <remarks>
+		/// The method creates a parameter with the
+		/// <see cref="System.Data.ParameterDirection">ParameterDirection.Output</see> type.
+		/// </remarks>
+		/// <param name="parameterName">The name of the parameter.</param>
+		/// <param name="dbType">One of the <see cref="DbType"/> values.</param>
+		/// <param name="size">Size of the parameter.</param>
+		/// that is the value of the parameter.</param>
+		/// <returns>The <see cref="IDbDataParameter"/> object.</returns>
+		public IDbDataParameter OutputParameter(string parameterName, DbType dbType, int size)
+		{
+			return Parameter(ParameterDirection.Output, parameterName, dbType, size);
 		}
 
 		/// <summary>
@@ -2182,7 +2382,7 @@ namespace BLToolkit.Data
 			string commandText)
 		{
 			return SetCommand(
-				CommandAction.Select, CommandType.Text, commandText, (IDbDataParameter[])null);
+				CommandAction.Select, CommandType.Text, commandText, null);
 		}
 
 		/// <summary>
@@ -2196,7 +2396,7 @@ namespace BLToolkit.Data
 			string      commandText)
 		{
 			return SetCommand(
-				CommandAction.Select, commandType, commandText, (IDbDataParameter[])null);
+				CommandAction.Select, commandType, commandText, null);
 		}
 
 		/// <summary>
@@ -2421,7 +2621,7 @@ namespace BLToolkit.Data
 
 		#region Prepare
 
-		private IDbCommand PrepareCommand(
+		private void PrepareCommand(
 			CommandAction      commandAction,
 			CommandType        commandType,
 			string             commandText,
@@ -2438,8 +2638,6 @@ namespace BLToolkit.Data
 			{
 				AttachParameters(command, commandParameters);
 			}
-
-			return command;
 		}
 
 		/// <summary>
@@ -2480,8 +2678,12 @@ namespace BLToolkit.Data
 			{
 				foreach (IDbDataParameter p in commandParameters)
 				{
+					// This mysterious line of code required to fix a bug in MsSql.
+					// It forces parameter's filed 'MetaType' to be set.
+					// Same for p.Size = p.Size below.
+					//
 					p.DbType = p.DbType;
-			
+
 					if (p.Value is string)
 					{
 						int len = ((string)p.Value).Length;
@@ -2491,6 +2693,8 @@ namespace BLToolkit.Data
 							p.Size  = len;
 							prepare = true;
 						}
+						else
+							p.Size = p.Size;
 					}
 					else if (p.Value is DBNull)
 					{
@@ -2505,9 +2709,44 @@ namespace BLToolkit.Data
 							p.Size  = len;
 							prepare = true;
 						}
+						else
+							p.Size  = p.Size;
+					}
+					else if (p.Value is char[])
+					{
+						int len = ((char[])p.Value).Length;
+
+						if (p.Size < len)
+						{
+							p.Size  = len;
+							prepare = true;
+						}
+						else
+							p.Size  = p.Size;
+					}
+					else if (p.Value is decimal)
+					{
+						System.Data.SqlTypes.SqlDecimal d = (decimal)p.Value;
+						if (p.Precision < d.Precision)
+						{
+							p.Precision = d.Precision;
+							prepare = true;
+						}
+						else
+							p.Precision = p.Precision;
+
+						if (p.Scale < d.Scale)
+						{
+							p.Scale = d.Scale;
+							prepare = true;
+						}
+						else
+							p.Scale = p.Scale;
 					}
 				}
 
+				// Re-prepare command to avoid truncation.
+				//
 				if (prepare)
 				{
 					IDbCommand command = GetCommand(commandAction);
@@ -2537,7 +2776,7 @@ namespace BLToolkit.Data
 		/// <returns>The number of rows affected by the command.</returns>
 		public int ExecuteForEach(ICollection collection)
 		{
-			int rows = 0;
+			int rowsTotal = 0;
 
 			if (collection != null && collection.Count != 0)
 			{
@@ -2562,11 +2801,13 @@ namespace BLToolkit.Data
 					}
 
 					AssignParameterValues(o);
-					rows += ExecuteNonQueryInternal();
+					int rows = ExecuteNonQueryInternal();
+					if (rows > 0)
+						rowsTotal += rows;
 				}
 			}
 		
-			return rows;
+			return rowsTotal;
 		}
 
 		/// <summary>
@@ -2583,7 +2824,7 @@ namespace BLToolkit.Data
 		/// <returns>The number of rows affected by the command.</returns>
 		public int ExecuteForEach(DataTable table)
 		{
-			int rows = 0;
+			int rowsTotal = 0;
 
 			if (table != null && table.Rows.Count != 0)
 			{
@@ -2601,11 +2842,13 @@ namespace BLToolkit.Data
 				foreach (DataRow dr in table.Rows)
 				{
 					AssignParameterValues(dr);
-					rows += ExecuteNonQueryInternal();
+					int rows = ExecuteNonQueryInternal();
+					if (rows > 0)
+						rowsTotal += rows;
 				}
 			}
 		
-			return rows;
+			return rowsTotal;
 		}
 
 		/// <summary>
@@ -3642,14 +3885,14 @@ namespace BLToolkit.Data
 		}
 
 #if FW2
-		private IList<T> ExecuteListInternal<T>(IList<T> list, params object[] parameters)
+		private void ExecuteListInternal<T>(IList<T> list, params object[] parameters)
 		{
 			if (_prepared)
 				InitParameters(CommandAction.Select);
 
 			using (IDataReader dr = ExecuteReaderInternal())
 			{
-				return _mappingSchema.MapDataReaderToList<T>(dr, list, parameters);
+				_mappingSchema.MapDataReaderToList<T>(dr, list, parameters);
 			}
 		}
 #endif
@@ -3663,7 +3906,7 @@ namespace BLToolkit.Data
 		{
 			ArrayList arrayList = new ArrayList();
 
-			ExecuteListInternal(arrayList, type, (object[])null);
+			ExecuteListInternal(arrayList, type, null);
 
 			return arrayList;
 		}
@@ -3678,7 +3921,7 @@ namespace BLToolkit.Data
 		{
 			List<T> list = new List<T>();
 
-			ExecuteListInternal(list, typeof(T), (object[])null);
+			ExecuteListInternal<T>(list, typeof(T), null);
 
 			return list;
 		}
@@ -3710,7 +3953,7 @@ namespace BLToolkit.Data
 		{
 			List<T> list = new List<T>();
 
-			ExecuteListInternal(list, typeof(T), parameters);
+			ExecuteListInternal<T>(list, typeof(T), parameters);
 
 			return list;
 		}
@@ -3724,7 +3967,7 @@ namespace BLToolkit.Data
 		/// <returns>Populated list of mapped business objects.</returns>
 		public IList ExecuteList(IList list, Type type)
 		{
-			return ExecuteListInternal(list, type, (object[])null);
+			return ExecuteListInternal(list, type, null);
 		}
 
 #if FW2
@@ -3736,7 +3979,7 @@ namespace BLToolkit.Data
 		/// <returns>Populated list of mapped business objects.</returns>
 		public IList<T> ExecuteList<T>(IList<T> list) 
 		{
-			ExecuteListInternal<T>(list, (object[])null);
+			ExecuteListInternal<T>(list, null);
 
 			return list;
 		}
@@ -3769,9 +4012,19 @@ namespace BLToolkit.Data
 			return list;
 		}
 
-		public L ExecuteList<L, T>(L list, params object[] parameters)
+		public L ExecuteList<L,T>(L list, params object[] parameters)
 			where L : IList<T>
 		{
+			ExecuteListInternal(list, typeof(T), parameters);
+
+			return list;
+		}
+
+		public L ExecuteList<L,T>(params object[] parameters)
+			where L : IList<T>, new()
+		{
+			L list = new L();
+
 			ExecuteListInternal(list, typeof(T), parameters);
 
 			return list;
@@ -4095,6 +4348,25 @@ namespace BLToolkit.Data
 				OnOperationException(OperationType.Update, ex);
 				throw;
 			}
+		}
+
+		#endregion
+
+		#region IDisposable interface
+
+		/// <summary>
+		/// Releases the unmanaged resources used by the <see cref="DbManager"/> and 
+		/// optionally releases the managed resources.
+		/// </summary>
+		/// <remarks>
+		/// This method is called by the public <see cref="IDisposable.Dispose()"/> method 
+		/// and the Finalize method.
+		/// </remarks>
+		/// <param name="disposing"><b>true</b> to release both managed and unmanaged resources; <b>false</b> to release only unmanaged resources.</param>
+		protected override void Dispose(bool disposing)
+		{
+			if (disposing)
+				Close();
 		}
 
 		#endregion

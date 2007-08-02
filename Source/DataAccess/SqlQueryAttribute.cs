@@ -10,8 +10,8 @@ namespace BLToolkit.DataAccess
 			_sqlText = sqlText;
 		}
 
-		private string _sqlText;
-		public  string  SqlText
+		private readonly string _sqlText;
+		public           string  SqlText
 		{
 			get { return _sqlText; }
 		}

@@ -27,6 +27,31 @@ namespace BLToolkit.EditableObjects
 		{
 		}
 
+		public EditableList(bool trackChanges)
+			: base(typeof(T), trackChanges)
+		{
+		}
+
+		public EditableList(int capacity, bool trackChanges)
+			: base(typeof(T), capacity, trackChanges)
+		{
+		}
+
+		public EditableList(ICollection c, bool trackChanges)
+			: base(typeof(T), c, trackChanges)
+		{
+		}
+
+		public EditableList(EditableList<T> list) 
+			: base(list, true)
+		{
+		}
+
+		public EditableList(EditableList<T> list, bool trackChanges)
+			: base(list, trackChanges)
+		{
+		}
+
 		#endregion
 
 		#region Typed Methods
@@ -275,7 +300,7 @@ namespace BLToolkit.EditableObjects
 				_enumerator = enumerator;
 			}
 
-			private IEnumerator _enumerator;
+			private readonly IEnumerator _enumerator;
 
 			#region IEnumerator<T> Members
 

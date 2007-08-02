@@ -10,8 +10,8 @@ namespace BLToolkit.DataAccess
 			_objectType = objectType;
 		}
 
-		private Type _objectType;
-		public  Type  ObjectType
+		private readonly Type _objectType;
+		public           Type  ObjectType
 		{
 			get { return _objectType; }
 		}

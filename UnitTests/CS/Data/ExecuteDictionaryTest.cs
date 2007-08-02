@@ -15,6 +15,13 @@ namespace Data
 	[TestFixture]
 	public class ExecuteDictionaryTest
 	{
+
+#if ORACLE
+		private const decimal _id = 1m;
+#else
+		private const int     _id = 1;
+#endif
+
 		public enum Gender
 		{
 			[MapValue("F")]
@@ -68,7 +75,7 @@ namespace Data
 				Assert.IsNotNull(table);
 				Assert.IsTrue(table.Count > 0);
 
-				Person actualValue = (Person)table[1];
+				Person actualValue = (Person)table[_id];
 				Assert.IsNotNull(actualValue);
 				Assert.AreEqual("John", actualValue.FirstName);
 			}
@@ -144,7 +151,7 @@ namespace Data
 				Assert.IsNotNull(table);
 				Assert.IsTrue(table.Count > 0);
 
-				Person actualValue = (Person)table[new CompoundValue(1, "", "Pupkin")];
+				Person actualValue = (Person)table[new CompoundValue(_id, "", "Pupkin")];
 				Assert.IsNotNull(actualValue);
 				Assert.AreEqual("John", actualValue.FirstName);
 			}
@@ -174,7 +181,11 @@ namespace Data
 		{
 			using (DbManager db = new DbManager())
 			{
+#if ORACLE
+				Dictionary<decimal, Person> dic = new Dictionary<decimal, Person>();
+#else
 				Dictionary<int, Person> dic = new Dictionary<int, Person>();
+#endif
 					db
 					.SetSpCommand("Person_SelectAll")
 					.ExecuteDictionary(dic, "@PersonID");
@@ -182,7 +193,7 @@ namespace Data
 				Assert.IsNotNull(dic);
 				Assert.IsTrue(dic.Count > 0);
 
-				Person actualValue = dic[1];
+				Person actualValue = dic[_id];
 				Assert.IsNotNull(actualValue);
 				Assert.AreEqual("John", actualValue.FirstName);
 			}
@@ -256,7 +267,7 @@ namespace Data
 				Assert.IsNotNull(dic);
 				Assert.IsTrue(dic.Count > 0);
 
-				Person actualValue = dic[new CompoundValue(1, "", "Pupkin")];
+				Person actualValue = dic[new CompoundValue(_id, "", "Pupkin")];
 				Assert.IsNotNull(actualValue);
 				Assert.AreEqual("John", actualValue.FirstName);
 				
