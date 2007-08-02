@@ -246,9 +246,9 @@ namespace Data
 				db
 					.SetSpCommand("Scalar_ReturnParameter")
 					.ExecuteNonQuery("Value", e);
-
-				Assert.AreEqual(12345, e.Value);
 			}
+
+			Assert.AreEqual(12345, e.Value);
 		}
 
 		[Test]
@@ -271,6 +271,35 @@ namespace Data
 					.SetSpCommand("Person_Delete", db.CreateParameters(e))
 					.ExecuteNonQuery();
 			}
+		}
+
+		[Test]
+		public void MapDataRow()
+		{
+			DataTable dataTable = new DataTable();
+			dataTable.Columns.Add("ID",             typeof(int));
+			dataTable.Columns.Add("outputID",       typeof(int));
+			dataTable.Columns.Add("inputOutputID",  typeof(int));
+			dataTable.Columns.Add("str",            typeof(string));
+			dataTable.Columns.Add("outputStr",      typeof(string));
+			dataTable.Columns.Add("inputOutputStr", typeof(string));
+
+			DataRow dataRow = dataTable.Rows.Add(new object[]{5, 0, 10, "5", null, "10"});
+
+			using (DbManager db = new DbManager())
+			{
+				db
+					.SetSpCommand("OutRefTest", db.CreateParameters(dataRow,
+						new string[] {      "outputID",      "outputStr" },
+						new string[] { "inputOutputID", "inputOutputStr" },
+						null))
+					.ExecuteNonQuery(dataRow);
+			}
+
+			Assert.AreEqual(5,     dataRow["outputID"]);
+			Assert.AreEqual(15,    dataRow["inputOutputID"]);
+			Assert.AreEqual("5",   dataRow["outputStr"]);
+			Assert.AreEqual("510", dataRow["inputOutputStr"]);
 		}
 #endif
 		

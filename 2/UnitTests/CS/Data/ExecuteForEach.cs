@@ -91,7 +91,7 @@ namespace UnitTests.CS.Data
 				db
 					.SetCommand(CommandType.Text,
 						"insert into _tmp ( [Length], [name] ) VALUES ( @Length, @name )")
-					.ExecuteForEach(test);
+					.ExecuteForEach<Item>(test);
 
 				List<Item> actial = db
 					.SetCommand("select [Length], [name] from _tmp order by [Name]")
@@ -115,11 +115,8 @@ namespace UnitTests.CS.Data
 			{
 				db
 					.SetCommand(@"SELECT @Value as 'value'")
-					.ExecuteForEach(col);
+					.ExecuteForEach<TypeWrapper<T>>(col);
 			}
-
 		}
-
-
 	}
 }

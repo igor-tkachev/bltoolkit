@@ -176,13 +176,13 @@
 			RelativePath="System.XML.dll"
 			AssemblyName="System.Xml, Version=2.0.0.0, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL"
 		/>
-		<AssemblyReference
-			RelativePath="nunit.framework.dll"
-			AssemblyName="nunit.framework, Version=2.2.8.0, PublicKeyToken=96d09a1eb7f44a77, processorArchitecture=MSIL"
-		/>
 		<ProjectReference
 			ReferencedProjectIdentifier="{0C325F5D-E50E-4340-8724-D29896CCC583}"
 			RelativePathToProject=".\Source\BLToolkit.2.csproj"
+		/>
+		<AssemblyReference
+			RelativePath="c:\Program Files\NUnit 2.4.1\bin\nunit.framework.dll"
+			AssemblyName="nunit.framework, Version=2.4.1.0, PublicKeyToken=96d09a1eb7f44a77, processorArchitecture=MSIL"
 		/>
 	</References>
 	<Files>

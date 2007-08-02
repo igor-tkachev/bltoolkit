@@ -1635,7 +1635,9 @@ namespace BLToolkit.Data
 			string[]                  ignoreParameters,
 			params IDbDataParameter[] commandParameters)
 		{
-			ObjectMapper om        = _mappingSchema.GetObjectMapper(obj.GetType());
+			bool         isType    = obj is Type;
+			Type         type      = isType? (Type)obj: obj.GetType();
+			ObjectMapper om        = _mappingSchema.GetObjectMapper(type);
 			ArrayList    paramList = new ArrayList();
 			IComparer    comparer  = CaseInsensitiveComparer.Default;
 
@@ -1648,7 +1650,7 @@ namespace BLToolkit.Data
 				if (ignoreParameters != null && Array.BinarySearch(ignoreParameters, mm.Name, comparer) >= 0)
 					continue;
 				
-				object value = mm.GetValue(obj);
+				object value = isType? null: mm.GetValue(obj);
 				string name  = _dataProvider.Convert(mm.Name, ConvertType.NameToParameter).ToString();
 
 				IDbDataParameter parameter   = mm.MapMemberInfo.Nullable || value == null?
@@ -2809,6 +2811,46 @@ namespace BLToolkit.Data
 		
 			return rowsTotal;
 		}
+
+#if FW2
+
+		public int ExecuteForEach<T>(ICollection<T> collection)
+		{
+			int rowsTotal = 0;
+
+			if (collection != null && collection.Count != 0)
+			{
+				bool initParameters = true;
+
+				foreach (object o in collection)
+				{
+					if (initParameters)
+					{
+						initParameters = false;
+
+						IDbDataParameter[] parameters = GetCommandParameters(CommandAction.Select);
+
+						if (parameters == null || parameters.Length == 0)
+						{
+							parameters = CreateParameters(o);
+
+							SetCommandParameters(CommandAction.Select, parameters);
+							AttachParameters(SelectCommand, parameters);
+							Prepare();
+						}
+					}
+
+					AssignParameterValues(o);
+					int rows = ExecuteNonQueryInternal();
+					if (rows > 0)
+						rowsTotal += rows;
+				}
+			}
+
+			return rowsTotal;
+		}
+
+#endif
 
 		/// <summary>
 		/// Executes a SQL statement for the <see cref="DataTable"/> and 

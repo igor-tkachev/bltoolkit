@@ -1,4 +1,18 @@
+v 2.0.7 (working)
+
+Bug fixes
+
+- 
+
+Enhancement
+
+- 
+
 v 2.0.6
+
+Demo
+
+- MS PetShop 4.0 powered by BLToolkit (see the dev version of the project).
 
 Bug fixes
 
@@ -20,6 +34,7 @@ Enhancement
 - AsyncAspect to execute any method asynchronously.
 - Added support for ConnectionStrings config settings.
 - Editable XmlDocuments.
+- Added support for IDictionary, IDictionary<,>, IList, and IList<> abstract data accessor return types.
 
 v 2.0.5
 

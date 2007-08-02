@@ -1115,7 +1115,23 @@ namespace BLToolkit.DataAccess
 			}
 			else
 			{
-				ConstructorInfo ci = TypeHelper.GetDefaultConstructor(Context.CurrentMethod.ReturnType);
+				Type returnType = Context.CurrentMethod.ReturnType;
+
+				if (returnType.IsInterface)
+				{
+					if (IsInterfaceOf(returnType, typeof(IList)))
+						returnType = typeof(ArrayList);
+					else if (IsInterfaceOf(returnType, typeof(IDictionary)))
+						returnType = typeof(Hashtable);
+#if FW2
+					else if (returnType.GetGenericTypeDefinition() == typeof(IList<>))
+						returnType = typeof(List<>).MakeGenericType(returnType.GetGenericArguments());
+					else if (returnType.GetGenericTypeDefinition() == typeof(IDictionary<,>))
+						returnType = typeof(Dictionary<,>).MakeGenericType(returnType.GetGenericArguments());
+#endif
+				}
+
+				ConstructorInfo ci = TypeHelper.GetDefaultConstructor(returnType);
 
 				if (ci == null)
 					throw new TypeBuilderException(string.Format("Cannot create an instance of the type '{0}'",

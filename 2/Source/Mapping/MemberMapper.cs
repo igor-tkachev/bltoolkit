@@ -17,12 +17,13 @@ namespace BLToolkit.Mapping
 		{
 			if (mapMemberInfo == null) throw new ArgumentNullException("mapMemberInfo");
 
-			_mapMemberInfo  = mapMemberInfo;
-			_name           = mapMemberInfo.Name;
-			_type           = mapMemberInfo.Type;
-			_memberName     = mapMemberInfo.MemberName;
-			_memberAccessor = mapMemberInfo.MemberAccessor;
-			_mappingSchema  = mapMemberInfo.MappingSchema;
+			_mapMemberInfo         = mapMemberInfo;
+			_name                  = mapMemberInfo.Name;
+			_type                  = mapMemberInfo.Type;
+			_memberName            = mapMemberInfo.MemberName;
+			_memberAccessor        = mapMemberInfo.MemberAccessor;
+			_complexMemberAccessor = mapMemberInfo.ComplexMemberAccessor;
+			_mappingSchema         = mapMemberInfo.MappingSchema;
 		}
 
 		internal static MemberMapper CreateMemberMapper(MapMemberInfo mi)
@@ -77,6 +78,13 @@ namespace BLToolkit.Mapping
 		{
 			[DebuggerStepThrough]
 			get { return _memberAccessor; }
+		}
+
+		private MemberAccessor _complexMemberAccessor;
+		public  MemberAccessor  ComplexMemberAccessor
+		{
+			[DebuggerStepThrough]
+			get { return _complexMemberAccessor == null ? _memberAccessor : _complexMemberAccessor; }
 		}
 
 		private MappingSchema _mappingSchema;

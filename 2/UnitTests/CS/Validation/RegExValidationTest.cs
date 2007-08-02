@@ -1,7 +1,5 @@
-using System;
-using System.Collections.Generic;
-using System.Text;
 using BLToolkit.EditableObjects;
+using BLToolkit.Reflection;
 using BLToolkit.Validation;
 using NUnit.Framework;
 
@@ -10,7 +8,7 @@ namespace UnitTests.CS.Validation
 	[TestFixture]
 	public class RegExValidationTest
 	{
-		public abstract class Entity : EditableObject<Entity>
+		public abstract class Entity : EditableObject
 		{
 			[RegEx("[a-zA-Z0-9]*")]
 			public string AlphaNumeric;
@@ -19,7 +17,7 @@ namespace UnitTests.CS.Validation
 		[Test]
 		public void Test()
 		{
-			Entity entity = Entity.CreateInstance();
+			Entity entity = (Entity)TypeAccessor.CreateInstance(typeof(Entity));
 
 			entity.AlphaNumeric = null; Assert.IsTrue(entity.IsValid("AlphaNumeric"));
 			entity.AlphaNumeric = ""; Assert.IsTrue(entity.IsValid("AlphaNumeric"));
