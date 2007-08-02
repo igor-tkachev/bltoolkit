@@ -1,8 +1,9 @@
 using System;
 using System.ComponentModel;
+#if FW2
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
-using BLToolkit.Common;
+#endif
 using NUnit.Framework;
 
 using BLToolkit.TypeBuilder;
@@ -24,12 +25,12 @@ namespace EditableObjects
 
 			public static EditableTestObject CreateInstance()
 			{
-				return TypeAccessor.CreateInstance<EditableTestObject>();
+				return (EditableTestObject)TypeAccessor.CreateInstance(typeof(EditableTestObject));
 			}
 			
 			public static EditableTestObject CreateInstance(int id, string name, int seconds)
 			{
-				EditableTestObject instance = TypeAccessor.CreateInstance<EditableTestObject>();
+				EditableTestObject instance = CreateInstance();
 
 				instance.ID = id;
 				instance.Name = name;
@@ -303,6 +304,8 @@ namespace EditableObjects
 				Console.WriteLine(o);
 		}
 
+#if FW2
+
 		[Serializable]
 		public abstract class SerializableObject : EditableObject
 		{
@@ -378,5 +381,8 @@ namespace EditableObjects
 			Console.WriteLine(e.ListChangedType);
 			_notificationCount++;
 		}
+
+#endif
+
 	}
 }

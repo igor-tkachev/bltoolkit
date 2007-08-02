@@ -85,7 +85,7 @@ namespace DataAccess
 			DataAccessor.CreateInstance(typeof(IListDataAccessor));
 		}
 
-		[Test, ExpectedException(typeof(TypeBuilderException))]
+		[Test]
 		public void IListExceptionTest()
 		{
 			AppDomain.CurrentDomain.DoCallBack(new CrossAppDomainDelegate(_localTest.IListException));

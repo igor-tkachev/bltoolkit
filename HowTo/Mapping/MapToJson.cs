@@ -1,6 +1,7 @@
 using System;
 using System.Globalization;
 using System.Text;
+using System.Xml;
 using NUnit.Framework;
 
 using BLToolkit.Mapping;
@@ -8,26 +9,28 @@ using BLToolkit.Reflection;
 
 namespace HowTo.Mapping
 {
-	public class JsonWriter : MapDataDestinationBase, IMapDataDestinationList , ISupportMapping
+	public class JsonMapper : MapDataDestinationBase, IMapDataDestinationList, ISupportMapping
 	{
+		private static readonly long   InitialJavaScriptDateTicks = new DateTime(1970, 1, 1).Ticks;
+
 		private string[]               _fieldNames;
 		private readonly StringBuilder _sb;
 		private MappingSchema          _mappingSchema;
 		private bool                   _scalar;
 		private bool                   _first;
+		private bool                   _firstElement;
 		private int                    _indent;
 
-		public JsonWriter() : this(new StringBuilder(), 0)
+		public JsonMapper() : this(new StringBuilder(), 0)
 		{
 		}
 
-		public JsonWriter(StringBuilder sb) : this(sb, 0)
+		public JsonMapper(StringBuilder sb) : this(sb, 0)
 		{
 		}
 
-		public JsonWriter(StringBuilder sb, int indent)
+		public JsonMapper(StringBuilder sb, int indent)
 		{
-			_first  = true;
 			_sb     = sb;
 			_indent = indent;
 		}
@@ -53,6 +56,11 @@ namespace HowTo.Mapping
 		{
 			if (!_scalar)
 			{
+				// Do not Json null values until it's an array
+				//
+				if (value == null || (value is XmlNode && IsEmptyNode((XmlNode)value)))
+					return;
+
 				if (_first)
 					_first = false;
 				else
@@ -107,39 +115,188 @@ namespace HowTo.Mapping
 					case TypeCode.DateTime:
 						_sb
 							.Append("new Date(")
-							.Append(((DateTime)value - new DateTime(1970, 1, 1)).Ticks)
+							.Append((((DateTime)value).Ticks - InitialJavaScriptDateTicks)/10000)
 							.Append(")");
 						break;
 					case TypeCode.String:
 						_sb
 							.Append('"')
-							.Append(((string)value).Replace("\r\n", "\\r")
-								.Replace("\n\r", "\\r")
-								.Replace("\n", "\\r")
-								.Replace("\r", "\\r")
-								.Replace("\"","\\\""))
+							.Append(encode((string)value))
 							.Append('"')
 							;
 						break;
 					default:
-						JsonWriter inner = new JsonWriter(_sb, _indent + 1);
-
-						if (value.GetType().IsArray)
-							_mappingSchema.MapSourceListToDestinationList(
-								_mappingSchema.GetDataSourceList(value), inner);
+						if (value is XmlNode)
+						{
+							if (IsEmptyNode((XmlNode) value))
+								_sb.Append("null");
+							else
+								WriteXmlJson((XmlNode)value);
+						}
 						else
-							_mappingSchema.MapSourceToDestination(
-								_mappingSchema.GetDataSource(value), value, inner, inner);
+						{
+							JsonMapper inner = new JsonMapper(_sb, _indent + 1);
 
+							if (value.GetType().IsArray)
+								_mappingSchema.MapSourceListToDestinationList(
+									_mappingSchema.GetDataSourceList(value), inner);
+							else
+								_mappingSchema.MapSourceToDestination(
+									_mappingSchema.GetDataSource(value), value, inner, inner);
+						}
 						break;
 				}
 			}
+		}
+
+		private static string encode(string value)
+		{
+			return value.Replace("\r\n", "\\r")
+				.Replace("\n\r", "\\r")
+				.Replace("\n", "\\r")
+				.Replace("\r", "\\r")
+				.Replace("\"","\\\"");
+		}
+
+		private void WriteXmlJson(XmlNode node)
+		{
+			XmlNode textNode = GetTextNode(node);
+			if (textNode != null)
+			{
+				_sb
+					.Append("\"")
+					.Append(encode(textNode.Value))
+					.Append('\"')
+					;
+			}
+			else
+			{
+
+				bool first = true;
+
+				_sb.Append('{');
+
+				if (node.Attributes != null)
+				{
+					foreach (XmlAttribute attr in node.Attributes)
+					{
+						if (first)
+							first = false;
+						else
+							_sb.Append(',');
+
+						_sb
+							.Append("\"@")
+							.Append(attr.Name)
+							.Append("\":\"")
+							.Append(encode(attr.Value))
+							.Append('\"')
+							;
+					}
+				}
+
+				foreach (XmlNode child in node.ChildNodes)
+				{
+					if (IsWhitespace(child) || IsEmptyNode(child))
+						continue;
+
+					if (first)
+						first = false;
+					else
+						_sb.Append(',');
+
+					if (child is XmlText)
+						_sb
+							.Append("\"#text\":\"")
+							.Append(encode(child.Value))
+							.Append('\"')
+							;
+					else if (child is XmlElement)
+					{
+						_sb
+							.Append('"')
+							.Append(child.Name)
+							.Append("\":")
+							;
+						WriteXmlJson(child);
+					}
+					else
+						System.Diagnostics.Debug.Fail("Unexpected node type " + child.GetType().FullName);
+				}
+				_sb.Append('}');
+			}
+		}
+
+		private static bool IsWhitespace(XmlNode node)
+		{
+			switch (node.NodeType)
+			{
+				case XmlNodeType.Comment:
+				case XmlNodeType.Whitespace:
+				case XmlNodeType.SignificantWhitespace:
+					return true;
+			}
+			return false;
+		}
+
+		private static bool IsEmptyNode(XmlNode node)
+		{
+			if (node.Attributes != null && node.Attributes.Count > 0)
+				return false;
+
+			if (node.HasChildNodes)
+				foreach (XmlNode childNode in node.ChildNodes)
+				{
+					if (IsWhitespace(childNode) || IsEmptyNode(childNode))
+						continue;
+
+					// Not a whitespace, nor inner empty node.
+					//
+					return false;
+				}
+
+			return node.Value == null;
+		}
+
+		private static XmlNode GetTextNode(XmlNode node)
+		{
+			if (node.Attributes != null && node.Attributes.Count > 0)
+				return null;
+
+			XmlNode textNode = null;
+
+			foreach (XmlNode childNode in node.ChildNodes)
+			{
+				// Ignore all whitespace.
+				//
+				if (IsWhitespace(childNode))
+					continue;
+
+				if (childNode is XmlText)
+				{
+					// More then one text node.
+					//
+					if (textNode != null)
+						return null;
+
+					// First text node.
+					//
+					textNode = childNode;
+				}
+				else
+					// Not a text node - break;
+					//
+					return null;
+			}
+
+			return textNode;
 		}
 
 		#region ISupportMapping Members
 
 		void ISupportMapping.BeginMapping(InitContext initContext)
 		{
+			_first         = true;
 			_mappingSchema = initContext.MappingSchema;
 			_fieldNames    = new string[initContext.DataSource.Count];
 
@@ -192,6 +349,7 @@ namespace HowTo.Mapping
 
 		void IMapDataDestinationList.InitMapping(InitContext initContext)
 		{
+			_firstElement = true;
 			_sb.Append('[');
 		}
 
@@ -202,8 +360,8 @@ namespace HowTo.Mapping
 
 		object IMapDataDestinationList.GetNextObject(InitContext initContext)
 		{
-			if (_first)
-				_first = false;
+			if (_firstElement)
+				_firstElement = false;
 			else
 				_sb.Append(',');
 
@@ -252,10 +410,10 @@ namespace HowTo.Mapping
 		[Test]
 		public void Test()
 		{
-			JsonWriter    jw = new JsonWriter(new StringBuilder(256));
+			JsonMapper    jm = new JsonMapper(new StringBuilder(256));
 
-			Map./*[a]*/MapSourceToDestination/*[/a]*/(Map.GetObjectMapper(typeof(SourceObject)), new SourceObject(), jw, jw);
-			Console.Write(jw.ToString());
+			Map./*[a]*/MapSourceToDestination/*[/a]*/(Map.GetObjectMapper(typeof(SourceObject)), new SourceObject(), jm, jm);
+			Console.Write(jm.ToString());
 
 			// Expected output:
 			//

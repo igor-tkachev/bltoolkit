@@ -9,12 +9,14 @@ namespace UnitTests.All
 	[TestFixture]
 	public class GetValueTest
 	{
+		[ExpectedException(typeof(ApplicationException))]
 		public void Test()
 		{
 			try
 			{
 				InterceptCallInfo info = new InterceptCallInfo();
 
+				info.ParameterValues = new object[2];
 				info.ParameterValues[0] = "123";
 				info.ParameterValues[1] = 123;
 

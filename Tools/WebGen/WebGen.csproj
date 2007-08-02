@@ -108,10 +108,13 @@
     <None Include="Content\Doc\Data\App.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\..\..\Rsdn\trunk\source\Framework\Format\Rsdn.Framework.Formatting.csproj">
+    <ProjectReference Include="..\..\..\..\Rsdn\trunk\source\Framework\Format\Rsdn.Framework.Formatting.csproj">
       <Project>{5D93361E-3F17-4553-91F0-B6C24DEBB4CC}</Project>
       <Name>Rsdn.Framework.Formatting</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Service Include="{B4F97281-0DBD-4835-9ED8-7DFB966E87FF}" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

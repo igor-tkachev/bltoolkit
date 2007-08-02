@@ -327,6 +327,11 @@
                     BuildAction = "Compile"
                 />
                 <File
+                    RelPath = "EditableObjects\EditableArrayListTest.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
                     RelPath = "EditableObjects\EditableObjectTest.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
@@ -413,6 +418,15 @@
                     RelPath = "Mapping\TrimmableAttributeTest.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "Mapping\XmlMap.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "Mapping\XmlMap.xml"
+                    BuildAction = "EmbeddedResource"
                 />
                 <File
                     RelPath = "Mapping\MetadataProvider\MetadataProviderTest.cs"
@@ -531,6 +545,11 @@
                 />
                 <File
                     RelPath = "Validation\NullValue.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "Validation\RegExValidationTest.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
                 />

@@ -16,6 +16,13 @@ namespace BLToolkit.Mapping
 			set { _memberAccessor = value; }
 		}
 
+		private MemberAccessor _complexMemberAccessor;
+		public  MemberAccessor  ComplexMemberAccessor
+		{
+			get { return _complexMemberAccessor;  }
+			set { _complexMemberAccessor = value; }
+		}
+
 		private string _name;
 		public  string  Name
 		{

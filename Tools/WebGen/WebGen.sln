@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 9.00
 # Visual Studio 2005
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebGen", "WebGen.csproj", "{06353283-C802-4706-BB18-5BBC49B03D59}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rsdn.Framework.Formatting", "..\..\..\..\..\Rsdn\trunk\source\Framework\Format\Rsdn.Framework.Formatting.csproj", "{5D93361E-3F17-4553-91F0-B6C24DEBB4CC}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rsdn.Framework.Formatting", "..\..\..\..\Rsdn\trunk\source\Framework\Format\Rsdn.Framework.Formatting.csproj", "{5D93361E-3F17-4553-91F0-B6C24DEBB4CC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rsdn.Framework.Common", "..\..\..\..\..\Rsdn\trunk\source\Framework\Common\Rsdn.Framework.Common.csproj", "{DF742233-47DC-46D8-8343-2F0C65E91FD1}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rsdn.Framework.Common", "..\..\..\..\Rsdn\trunk\source\Framework\Common\Rsdn.Framework.Common.csproj", "{DF742233-47DC-46D8-8343-2F0C65E91FD1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

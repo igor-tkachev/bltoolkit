@@ -4,6 +4,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Reflection;
 using System.Reflection.Emit;
+using System.Runtime.InteropServices;
 using System.Security.Permissions;
 
 using BLToolkit.Reflection.Emit;
@@ -91,18 +92,12 @@ namespace BLToolkit.TypeBuilder
 			{
 				string assemblyDir = AppDomain.CurrentDomain.BaseDirectory;
 
-				try
-				{
-					if (type.Module.FullyQualifiedName != null &&
-						type.Module.FullyQualifiedName.Length > 0 &&
-						type.Module.FullyQualifiedName != "<Unknown>")
-					{
-						assemblyDir = Path.GetDirectoryName(type.Module.FullyQualifiedName);
-					}
-				}
-				catch
-				{
-				}
+				// Dynamic modules are locationless, so ignore them.
+				// _ModuleBuilder is the base type for both
+				// ModuleBuilder and InternalModuleBuilder classes.
+				//
+				if (!(type.Module is _ModuleBuilder))
+					assemblyDir = Path.GetDirectoryName(type.Module.FullyQualifiedName);
 
 				string fullName = type.FullName;
 

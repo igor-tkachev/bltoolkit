@@ -211,10 +211,12 @@ namespace BLToolkit.DataAccess
 
 			foreach (MemberMapper mm in GetFieldList(om))
 			{
-				object value = typeExt[mm.MemberAccessor.Name]["NonUpdatable"].Value;
+				// IT: This works incorrectly for complex mappers.
+				//
+				object value = typeExt[mm.ComplexMemberAccessor.Name]["NonUpdatable"].Value;
 
 				if ((value != null && (bool)TypeExtension.ChangeType(value, typeof(bool)) == false) ||
-					(value == null && mm.MemberAccessor.GetAttributes(typeof(NonUpdatableAttribute)) == null))
+					(value == null && mm.ComplexMemberAccessor.GetAttributes(typeof(NonUpdatableAttribute)) == null))
 				{
 					sb.AppendFormat("\t{0},\n",
 						db.DataProvider.Convert(mm.Name, ConvertType.NameToQueryField));

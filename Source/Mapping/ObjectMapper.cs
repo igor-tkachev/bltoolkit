@@ -345,11 +345,12 @@ namespace BLToolkit.Mapping
 							{
 								MapMemberInfo mi = new MapMemberInfo();
 
-								mi.MemberAccessor = ma;
-								mi.Type           = mm.Type;
-								mi.MappingSchema  = MappingSchema;
-								mi.Name           = mapName;
-								mi.MemberName     = origName;
+								mi.MemberAccessor        = ma;
+								mi.ComplexMemberAccessor = mm.ComplexMemberAccessor;
+								mi.Type                  = mm.Type;
+								mi.MappingSchema         = MappingSchema;
+								mi.Name                  = mapName;
+								mi.MemberName            = origName;
 
 								MemberMapper mapper = new MemberMapper.ComplexMapper(mm);
 
