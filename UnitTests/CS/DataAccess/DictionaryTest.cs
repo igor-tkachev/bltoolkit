@@ -90,9 +90,16 @@ namespace DataAccess
 			[ObjectType(typeof(string))]
 			public abstract Hashtable   SelectAll5();
 
+			[SqlQuery("SELECT * FROM Person WHERE PersonID < 3")]
+			[Index("PersonID", "LastName")]
+			[ScalarFieldName(1)]
+			[ObjectType(typeof(string))]
+			public abstract IDictionary   SelectAllAsIDictionary();
+
 			// Primary Key(s) => scalar filed. This will fail, since
 			// we can not figure out both key type and scalar object type.
 			// Note that version with generics works just fine.
+			//
 			[SqlQuery("SELECT * FROM Person WHERE PersonID < 3")]
 			[ScalarFieldName("FirstName"), ObjectType(typeof(string))]
 			public abstract Hashtable   ScalarDictionaryByPK();
@@ -151,6 +158,11 @@ namespace DataAccess
 			[Index("PersonID", "LastName")]
 			[ScalarFieldName(1)]
 			public abstract Dictionary<CompoundValue, string> SelectAllT5();
+
+			[SqlQuery("SELECT * FROM Person")]
+			[Index("PersonID", "LastName")]
+			[ScalarFieldName(1)]
+			public abstract IDictionary<CompoundValue, string> SelectAllAsIDictionaryT();
 
 			[SqlQuery("SELECT * FROM Person WHERE PersonID < 3")]
 			[ScalarFieldName("FirstName")]
@@ -228,7 +240,10 @@ namespace DataAccess
 
 			Hashtable dic5 = _da.SelectAll5();
 			Assert.AreEqual("John", dic5[new CompoundValue(_id, "Pupkin")]);
-			
+
+			IDictionary dic6 = _da.SelectAllAsIDictionary();
+			Assert.AreEqual("John", dic6[new CompoundValue(_id, "Pupkin")]);
+
 #if FW2
 			Dictionary<int, Person> dict1 = _da.SelectAllT1();
 			Assert.AreEqual("John", dict1[1].FirstName);
@@ -244,6 +259,10 @@ namespace DataAccess
 
 			Dictionary<CompoundValue, string> dict5 = _da.SelectAllT5();
 			Assert.AreEqual("John", dict5[new CompoundValue(_id, "Pupkin")]);
+
+			IDictionary<CompoundValue, string> dict6 = _da.SelectAllAsIDictionaryT();
+			Assert.AreEqual("John", dict6[new CompoundValue(_id, "Pupkin")]);
+
 #endif
 		}
 

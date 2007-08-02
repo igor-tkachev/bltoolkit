@@ -6,7 +6,7 @@ using NUnit.Framework;
 using BLToolkit.Validation;
 using BLToolkit.Mapping;
 
-namespace UnitTests.CS.Validation
+namespace Validation
 {
 	[TestFixture]
 	public class NullValue

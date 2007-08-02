@@ -951,6 +951,9 @@ namespace BLToolkit.Data
 
 		public virtual IDbDataParameter[] PrepareParameters(object[] parameters)
 		{
+			if (parameters == null || parameters.Length == 0)
+				return null;
+
 			// Little optimization.
 			// Check if we have only one single ref parameter.
 			//

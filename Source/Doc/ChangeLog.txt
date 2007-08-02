@@ -2,11 +2,11 @@ v 2.0.7 (working)
 
 Bug fixes
 
-- 
+- Oracle/Odp does not handle colon (':') in ConvertType.ParameterToName.
 
 Enhancement
 
-- 
+- FdpDataProvider.QuoteIdentifiers option for FB data provier.
 
 v 2.0.6
 

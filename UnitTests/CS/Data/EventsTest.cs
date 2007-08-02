@@ -2,7 +2,7 @@
 using BLToolkit.Data;
 using NUnit.Framework;
 
-namespace UnitTests.CS.Data
+namespace Data
 {
 	[TestFixture]
 	public class EventsTest

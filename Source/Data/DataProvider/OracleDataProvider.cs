@@ -2,6 +2,7 @@ using System;
 using System.Data;
 using System.Data.Common;
 using System.Data.OracleClient;
+using System.Globalization;
 
 namespace BLToolkit.Data.DataProvider
 {
@@ -14,6 +15,17 @@ namespace BLToolkit.Data.DataProvider
 	/// <seealso cref="DbManager.AddDataProvider(DataProviderBase)">AddDataManager Method</seealso>
 	public sealed class OracleDataProvider: DataProviderBase
 	{
+		private string _parameterPrefix = "P";
+		public  string  ParameterPrefix
+		{
+			get { return _parameterPrefix;  }
+			set
+			{
+				_parameterPrefix = (value == null || value.Length == 0)? null:
+					value.ToUpper(CultureInfo.InvariantCulture);
+			}
+		}
+
 		/// <summary>
 		/// Creates the database connection object.
 		/// </summary>
@@ -62,11 +74,21 @@ namespace BLToolkit.Data.DataProvider
 				case ConvertType.NameToQueryParameter:
 					return ":" + value;
 
+				case ConvertType.NameToParameter:
+					return ParameterPrefix == null? value: ParameterPrefix + value;
+
 				case ConvertType.ParameterToName:
-					if (value != null)
+					string name = (string)value;
+					if (name.Length > 0)
 					{
-						string str = value.ToString();
-						return str.Length > 0 && str[0] == ':'? str.Substring(1) : str;
+						if (name[0] == ':')
+							return name.Substring(1);
+
+						if (ParameterPrefix != null &&
+							name.ToUpper(CultureInfo.InvariantCulture).StartsWith(ParameterPrefix))
+						{
+							return name.Substring(ParameterPrefix.Length);
+						}
 					}
 
 					break;

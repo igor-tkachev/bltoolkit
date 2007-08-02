@@ -10,8 +10,6 @@ using BLToolkit.TypeBuilder;
 using BLToolkit.EditableObjects;
 using BLToolkit.Reflection;
 
-using TestObject_1 = TestObject;
-
 namespace EditableObjects
 {
 	[TestFixture]

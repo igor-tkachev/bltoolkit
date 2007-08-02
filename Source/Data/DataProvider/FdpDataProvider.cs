@@ -43,8 +43,9 @@ namespace BLToolkit.Data.DataProvider
 		public static string InOutInputParameterPrefix = "in_";
 		public static string ReturnParameterName = "RETURN_VALUE";
 
-		public static bool IsReturnValueEmulation = true;
+		public static bool IsReturnValueEmulation    = true;
 		public static bool IsInOutParameterEmulation = true;
+		public static bool QuoteIdentifiers          = false;
 
 		#endregion
 
@@ -84,6 +85,19 @@ namespace BLToolkit.Data.DataProvider
 		{
 			switch (convertType)
 			{
+				case ConvertType.NameToQueryField:
+				case ConvertType.NameToQueryTable:
+					if (QuoteIdentifiers)
+					{
+						string name = value.ToString();
+
+						if (name.Length > 0 && name[0] == '"')
+							return value;
+
+						return '"' + name + '"';
+					}
+					break;
+
 				case ConvertType.NameToQueryParameter:
 				case ConvertType.NameToParameter:
 					return "@" + value;
