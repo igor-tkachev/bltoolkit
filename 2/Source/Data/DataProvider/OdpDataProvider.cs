@@ -34,14 +34,6 @@ namespace BLToolkit.Data.DataProvider
 			MappingSchema = new OdpMappingSchema();
 		}
 
-		private string _parameterPrefix = "p";
-		public  string  ParameterPrefix
-		{
-			get { return _parameterPrefix;  }
-			set { _parameterPrefix = value; }
-		}
-
-
 		static OdpDataProvider()
 		{
 			// Fix Oracle bug #1: Array types are not handled.
@@ -228,24 +220,29 @@ namespace BLToolkit.Data.DataProvider
 			switch (convertType)
 			{
 				case ConvertType.NameToQueryParameter:
-					return String.Concat(":", (string)value);
+					return ":" + value;
 
 				case ConvertType.NameToParameter:
-					return ParameterPrefix == null? value: string.Concat(ParameterPrefix, (string)value);
+					return ParameterPrefix == null? value: ParameterPrefix + value;
 
 				case ConvertType.ParameterToName:
-					if (ParameterPrefix == null)
-						return value;
+					string name = (string)value;
+					if (name.Length > 0)
+					{
+						if (name[0] == ':')
+							return name.Substring(1);
 
-					Debug.Assert(value is string, "OraDirectDataProvider.Convert: value is not a string???");
-					Debug.Assert(((string)value).ToLower().StartsWith(ParameterPrefix.ToLower()),
-						"OraDirectDataProvider.Convert: prefix '" + ParameterPrefix + "' not set?\n\n" + value);
+						if (ParameterPrefix != null &&
+							name.ToUpper(CultureInfo.InvariantCulture).StartsWith(ParameterPrefix))
+						{
+							return name.Substring(ParameterPrefix.Length);
+						}
+					}
 
-					return ((string)value).Substring(ParameterPrefix.Length);
-
-				default:
-					return base.Convert(value, convertType);
+					break;
 			}
+
+			return value;
 		}
 
 		public override void AttachParameter(IDbCommand command, IDbDataParameter parameter)
@@ -514,6 +511,17 @@ namespace BLToolkit.Data.DataProvider
 		public override string Name
 		{
 			get { return "ODP"; }
+		}
+
+		private string _parameterPrefix = "P";
+		public  string  ParameterPrefix
+		{
+			get { return _parameterPrefix;  }
+			set
+			{
+				_parameterPrefix = (value == null || value.Length == 0)? null:
+					value.ToUpper(CultureInfo.InvariantCulture);
+			}
 		}
 
 		#region Inner types

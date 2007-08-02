@@ -7,7 +7,7 @@ using BLToolkit.DataAccess;
 
 using NUnit.Framework;
 
-namespace UnitTests.CS.Data
+namespace Data
 {
 	[TestFixture]
 	public class OutputParameter

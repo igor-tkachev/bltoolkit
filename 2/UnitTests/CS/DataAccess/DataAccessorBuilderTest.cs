@@ -25,7 +25,7 @@ namespace DataAccess
 			_localDomain = AppDomain.CreateDomain("NewDomain");
 			_localDomain.Load(typeof(DataAccessor).Assembly.GetName());
 			_localTest = (DataAccessorBuilderTest)_localDomain
-				.CreateInstanceFromAndUnwrap(Assembly.GetExecutingAssembly().Location, GetType().FullName);
+			                                      	.CreateInstanceFromAndUnwrap(Assembly.GetExecutingAssembly().Location, GetType().FullName);
 		}
 
 		[TestFixtureTearDown]
@@ -70,25 +70,6 @@ namespace DataAccess
 		public void Gen_SelectAllListException()
 		{
 			AppDomain.CurrentDomain.DoCallBack(new CrossAppDomainDelegate(_localTest.Typeless2));
-		}
-
-		public abstract class IListDataAccessor : DataAccessor
-		{
-			[ObjectType(typeof(Person))]
-			public abstract IList SelectAllIList();
-		}
-
-		private void IListException()
-		{
-			// Can not create an instance of the type 'System.Collections.IList'
-			//
-			DataAccessor.CreateInstance(typeof(IListDataAccessor));
-		}
-
-		[Test]
-		public void IListExceptionTest()
-		{
-			AppDomain.CurrentDomain.DoCallBack(new CrossAppDomainDelegate(_localTest.IListException));
 		}
 
 		public abstract class MultiDestinationAccessor : DataAccessor

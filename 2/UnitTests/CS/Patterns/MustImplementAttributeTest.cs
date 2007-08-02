@@ -116,12 +116,15 @@ namespace Patterns
 #if FW2
 			IOtherOptionalInterface duck1 = DuckTyping.Implement<IOtherOptionalInterface>(new TestClass());
 			IOtherOptionalInterface duck2 = DuckTyping.Implement<IOtherOptionalInterface>(new EmptyClass());
+			IOtherOptionalInterface duck3 = DuckTyping.Implement<IOtherOptionalInterface>(new EmptyClass());
 #else
 			IOtherOptionalInterface duck1 = (IOtherOptionalInterface)DuckTyping.Implement(typeof(IOtherOptionalInterface), new TestClass());
 			IOtherOptionalInterface duck2 = (IOtherOptionalInterface)DuckTyping.Implement(typeof(IOtherOptionalInterface), new EmptyClass());
+			IOtherOptionalInterface duck3 = (IOtherOptionalInterface)DuckTyping.Implement(typeof(IOtherOptionalInterface), new EmptyClass());
 #endif
 			Assert.IsNotNull(duck1);
 			Assert.IsNull   (duck2);
+			Assert.IsNull   (duck3);
 		}
 	}
 }

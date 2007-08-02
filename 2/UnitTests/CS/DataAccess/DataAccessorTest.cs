@@ -113,6 +113,9 @@ namespace DataAccess
 			[ActionName("SelectAll"), ObjectType(typeof(Person))]
 			public abstract ArrayList SameTypeName();
 
+			[ActionName("SelectAll"), ObjectType(typeof(Person))]
+			public abstract IList SelectAllAsIList();
+
 			[ActionName("SelectByName")]
 			public abstract Person SameTypeName(string firstName, string lastName);
 
@@ -135,6 +138,10 @@ namespace DataAccess
 
 			[ActionName("SelectByKey")]
 			public abstract Person ParamNullableID2([ParamNullValue("1")] int? id);
+
+			[ActionName("SelectAll")]
+			public abstract IList<Person> SelectAllAsIListT();
+
 #endif
 
 			[ActionName("SelectByName")]
@@ -799,6 +806,13 @@ namespace DataAccess
 			Assert.AreNotEqual(0, list.Count);
 		}
 
+		[Test]
+		public void Gen_SelectAllIList()
+		{
+			IList list = _da.SelectAllAsIList();
+			Assert.IsNotEmpty(list);
+		}
+
 #if FW2
 
 		[Test]
@@ -838,6 +852,13 @@ namespace DataAccess
 			Assert.AreNotEqual(0, list.Count);
 		}
 
+		[Test]
+		public void Gen_SelectAllIListT()
+		{
+			IList<Person> list = _da.SelectAllAsIListT();
+			Assert.IsNotEmpty((ICollection)list);
+		}
+
 #endif
 
 		#endregion
@@ -852,9 +873,16 @@ namespace DataAccess
 				DbManager db,
 				object[]  parameters)
 			{
-				ArrayList retParams = new ArrayList(parameters.Length + 1);
+				ArrayList retParams;
+				if (parameters != null && parameters.Length != 0)
+				{
+					parameters = base.PrepareParameters(db, parameters);
+					retParams = new ArrayList(parameters.Length + 1);
+					retParams.AddRange(parameters);
+				}
+				else
+					retParams = new ArrayList(1);
 
-				retParams.AddRange(base.PrepareParameters(db, parameters));
 				retParams.Add(db.Parameter((string)db.DataProvider.Convert("ID", ConvertType.NameToParameter), 1));
 
 				return (IDbDataParameter[]) retParams.ToArray(typeof(IDbDataParameter));

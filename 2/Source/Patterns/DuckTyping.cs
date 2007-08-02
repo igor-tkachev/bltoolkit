@@ -57,15 +57,15 @@ namespace BLToolkit.Patterns
 				{
 					type = (Type)types[objectType];
 
-					if (type == null)
-					{
-						type = TypeFactory.GetType(
-							new CompoundValue(interfaceType, objectType),
-							objectType,
-							new DuckTypeBuilder(interfaceType, objectType));
+					if (type != null || types.ContainsKey(objectType))
+						return type;
 
-						types.Add(objectType, type);
-					}
+					type = TypeFactory.GetType(
+						new CompoundValue(interfaceType, objectType),
+						objectType,
+						new DuckTypeBuilder(interfaceType, objectType));
+
+					types.Add(objectType, type);
 				}
 			}
 

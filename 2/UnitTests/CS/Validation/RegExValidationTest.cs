@@ -3,7 +3,7 @@ using BLToolkit.Reflection;
 using BLToolkit.Validation;
 using NUnit.Framework;
 
-namespace UnitTests.CS.Validation
+namespace Validation
 {
 	[TestFixture]
 	public class RegExValidationTest

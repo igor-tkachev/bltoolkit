@@ -98,24 +98,12 @@ namespace BLToolkit.DataAccess
 			return (string)db.DataProvider.Convert(paramName, ConvertType.NameToParameter);
 		}
 
-		[NoInterception, Obsolete("This method is obsolete and will be removed on next release. Override PrepareParameters(db, parameters) instead")]
-		protected virtual IDbDataParameter[] PrepareParameters(object[] parameters)
-		{
-			return (IDbDataParameter[]) parameters;
-		}
-
 		[NoInterception]
 		protected virtual IDbDataParameter[] PrepareParameters(
 			DbManager db,
 			object[]  parameters)
 		{
-			// Little optimization.
-			// Check if we don't have any parameters.
-			//
-			if (parameters.Length == 0)
-				parameters = EmptyParametersArray;
-
-			return PrepareParameters(db.PrepareParameters(parameters));
+			return db.PrepareParameters(parameters);
 		}
 
 		[NoInterception]
@@ -641,7 +629,5 @@ namespace BLToolkit.DataAccess
 		#endregion
 
 		#endregion
-
-		protected static readonly IDbDataParameter[] EmptyParametersArray = new IDbDataParameter[0];
 	}
 }
