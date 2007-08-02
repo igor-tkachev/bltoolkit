@@ -11,8 +11,8 @@ namespace BLToolkit.Mapping
 			_writer = writer;
 		}
 
-		private TextDataWriter _writer;
-		public  TextDataWriter  Writer
+		private readonly TextDataWriter _writer;
+		public           TextDataWriter  Writer
 		{
 			get { return _writer; }
 		}

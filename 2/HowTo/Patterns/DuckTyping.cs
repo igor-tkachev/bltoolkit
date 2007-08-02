@@ -6,7 +6,7 @@ using BLToolkit.Patterns;
 
 namespace HowTo.Patterns
 {
-	[TestFixture]
+	//[TestFixture]
 	class DuckTyping
 	{
 		// By default, all interface methods are optional.
@@ -67,7 +67,7 @@ namespace HowTo.Patterns
 		[Test]
 		public void Test()
 		{
-			InterfaceMix      duck = /*[a]*/BLToolkit.Patterns.DuckTyping.Implement/*[/a]*/<InterfaceMix> (new TestClass());
+			InterfaceMix      duck = /*[a]*/BLToolkit.Patterns.DuckTyping.Implement/*[/a]*/<InterfaceMix>(new TestClass());
 			RequiredInterface duck1 = duck;
 			OptionalInterface duck2 = duck;
 

@@ -23,7 +23,7 @@ namespace BLToolkit.Common
 
 		#region ICustomTypeDescriptor Members
 
-		private static Hashtable _hashDescriptors = new Hashtable();
+		private static readonly Hashtable _hashDescriptors = new Hashtable();
 
 		[NonSerialized]
 		private ICustomTypeDescriptor _typeDescriptor;

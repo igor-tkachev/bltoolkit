@@ -16,8 +16,8 @@ namespace BLToolkit.DataAccess
 			_value = TypeDescriptor.GetConverter(type).ConvertFromInvariantString(value);
 		}
 
-		private object _value;
-		public  object  Value
+		private readonly object _value;
+		public           object  Value
 		{
 			get { return _value; }
 		}

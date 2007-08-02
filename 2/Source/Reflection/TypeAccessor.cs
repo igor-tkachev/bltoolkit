@@ -143,8 +143,8 @@ namespace BLToolkit.Reflection
 
 		#region Items
 
-		private ArrayList _members = new ArrayList();
-		private Hashtable _memberNames = new Hashtable();
+		private readonly ArrayList _members     = new ArrayList();
+		private readonly Hashtable _memberNames = new Hashtable();
 
 		public MemberAccessor this[string memberName]
 		{
@@ -176,8 +176,8 @@ namespace BLToolkit.Reflection
 			set { _loadTypes = value; }
 		}
 
-		private static Hashtable _accessors  = new Hashtable(10);
-		private static Hashtable _assemblies = new Hashtable(10);
+		private static readonly Hashtable _accessors  = new Hashtable(10);
+		private static readonly Hashtable _assemblies = new Hashtable(10);
 
 		public static TypeAccessor GetAccessor(Type originalType)
 		{
@@ -270,20 +270,20 @@ namespace BLToolkit.Reflection
 			{
 				string  originalAssemblyLocation = originalAssembly.Location;
 				string extensionAssemblyLocation = Path.ChangeExtension(
-					originalAssemblyLocation, "BLToolkitExtension" + Path.GetExtension(originalAssemblyLocation));
+					originalAssemblyLocation, "BLToolkitExtension.dll");
 
 				if (File.GetLastWriteTime(originalAssemblyLocation) <= File.GetLastWriteTime(extensionAssemblyLocation))
 					return Assembly.LoadFrom(extensionAssemblyLocation);
 
 				Debug.WriteLineIf(File.Exists(extensionAssemblyLocation),
 					string.Format("Extension assembly '{0}' is out of date. Please rebuild.",
-						extensionAssemblyLocation), "BLToolkit.TypeAccessor");
+						extensionAssemblyLocation), typeof(TypeAccessor).FullName);
 			}
 			catch (Exception ex)
 			{
 				// Extension exist, but can't be loaded for some reason.
 				// Switch back to code generation
-				Debug.WriteLine("LoadExtensionAssembly: " + ex);
+				Debug.WriteLine(ex, typeof(TypeAccessor).FullName);
 			}
 
 			return null;
@@ -412,7 +412,7 @@ namespace BLToolkit.Reflection
 
 		const FieldAttributes EnumField = FieldAttributes.Public | FieldAttributes.Static | FieldAttributes.Literal;
 
-		private static Hashtable _nullValues = new Hashtable();
+		private static readonly Hashtable _nullValues = new Hashtable();
 
 		private static object GetEnumNullValue(Type type)
 		{
@@ -633,7 +633,7 @@ namespace BLToolkit.Reflection
 
 		#region CustomTypeDescriptor
 
-		private static Hashtable _descriptors = new Hashtable();
+		private static readonly Hashtable _descriptors = new Hashtable();
 
 		public static ICustomTypeDescriptor GetCustomTypeDescriptor(Type type)
 		{
@@ -862,12 +862,11 @@ namespace BLToolkit.Reflection
 
 		class StandardPropertyDescriptor : PropertyDescriptorWrapper
 		{
-			protected PropertyDescriptor _descriptor = null;
-			protected IsNullHandler      _isNull;
+			protected readonly PropertyDescriptor   _descriptor = null;
+			protected readonly IsNullHandler        _isNull;
 
-			protected string               _prefixedName;
-			//protected string               _namePrefix;
-			protected PropertyDescriptor[] _chainAccessors;
+			protected readonly string               _prefixedName;
+			protected readonly PropertyDescriptor[] _chainAccessors;
 
 			public StandardPropertyDescriptor(
 				PropertyDescriptor   pd,
@@ -879,7 +878,6 @@ namespace BLToolkit.Reflection
 				_descriptor     = pd;
 				_isNull         = isNull;
 				_prefixedName   = namePrefix + pd.Name;
-				//_namePrefix     = namePrefix;
 				_chainAccessors = chainAccessors;
 			}
 
@@ -947,7 +945,7 @@ namespace BLToolkit.Reflection
 				_objectView = objectView;
 			}
 
-			private IObjectView _objectView;
+			private readonly IObjectView _objectView;
 
 			public override object GetValue(object component)
 			{
@@ -1022,7 +1020,7 @@ namespace BLToolkit.Reflection
 				_eventInfo = eventInfo;
 			}
 
-			private EventInfo _eventInfo;
+			private readonly EventInfo _eventInfo;
 
 			public override void AddEventHandler(object component, Delegate value)
 			{

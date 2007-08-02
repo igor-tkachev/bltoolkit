@@ -38,8 +38,8 @@ namespace BLToolkit.Reflection.Extension
 			}
 		}
 
-		private ValueCollection _values;
-		public  ValueCollection  Values
+		private readonly ValueCollection _values;
+		public           ValueCollection  Values
 		{
 			get { return _values; }
 		}
@@ -55,8 +55,8 @@ namespace BLToolkit.Reflection.Extension
 			}
 		}
 
-		private static AttributeExtension _null = new AttributeExtension(ValueCollection.Null);
-		public  static AttributeExtension  Null
+		private static readonly AttributeExtension _null = new AttributeExtension(ValueCollection.Null);
+		public  static          AttributeExtension  Null
 		{
 			get { return _null;  }
 		}

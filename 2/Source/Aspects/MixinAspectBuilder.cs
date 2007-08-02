@@ -19,10 +19,10 @@ namespace BLToolkit.Aspects
 			_exceptionMessage     = exceptionMessage;
 		}
 
-		private Type   _targetInterface;
-		private string _memberName;
-		private bool   _throwExceptionIfNull;
-		private string _exceptionMessage;
+		private readonly Type   _targetInterface;
+		private readonly string _memberName;
+		private readonly bool   _throwExceptionIfNull;
+		private readonly string _exceptionMessage;
 
 		public override bool IsApplied(BuildContext context, AbstractTypeBuilderList builders)
 		{

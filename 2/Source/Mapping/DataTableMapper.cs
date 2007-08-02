@@ -13,9 +13,9 @@ namespace BLToolkit.Mapping
 			_mapper = mapper;
 		}
 
-		private DataTable     _table;
-		private DataRowMapper _mapper;
-		private int           _currentRow;
+		private readonly DataTable     _table;
+		private readonly DataRowMapper _mapper;
+		private int                    _currentRow;
 
 		#region IMapDataSourceList Members
 

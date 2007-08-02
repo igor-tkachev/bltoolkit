@@ -30,14 +30,14 @@ namespace BLToolkit.Mapping
 			}
 		}
 
-		private NameOrIndexParameter[] _fields;
-		private IDictionary            _dic;
-		private ObjectMapper           _mapper;
-		private object                 _newObject;
-		private bool[]                 _fromSource;
-		private bool                   _isFromSource;
-		private bool                   _isFromDest;
-		private object[]               _indexValue;
+		private readonly NameOrIndexParameter[] _fields;
+		private readonly IDictionary            _dic;
+		private readonly bool[]                 _fromSource;
+		private readonly bool                   _isFromSource;
+		private readonly bool                   _isFromDest;
+		private          ObjectMapper           _mapper;
+		private          object                 _newObject;
+		private          object[]               _indexValue;
 
 		#region IMapDataDestinationList Members
 

@@ -58,7 +58,7 @@ namespace BLTgen
 			//
 			if (str.StartsWith("-") || str.StartsWith("/"))
 			{
-				int colon = str.IndexOf(':', 1);
+				int colon = str.IndexOfAny(new char[] { ':', '=' }, 1);
 				if (colon > 0)
 					return name ? str.Substring(1, colon - 1) : str.Substring(colon + 1);
 

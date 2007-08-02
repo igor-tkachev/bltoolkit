@@ -21,7 +21,7 @@ namespace BLToolkit.ComponentModel
 	{
 		#region Constructors
 
-		static EditableArrayList _empty = new EditableArrayList(typeof(object));
+		static readonly EditableArrayList _empty = new EditableArrayList(typeof(object));
 
 		public ObjectBinder()
 		{
@@ -273,7 +273,7 @@ namespace BLToolkit.ComponentModel
 
 		#region ITypedList Members
 
-		private static Hashtable _descriptors = new Hashtable();
+		private static readonly Hashtable _descriptors = new Hashtable();
 
 		PropertyDescriptorCollection ITypedList.GetItemProperties(PropertyDescriptor[] listAccessors)
 		{

@@ -39,8 +39,8 @@ namespace BLToolkit.TypeBuilder.Builders
 			set { _typeBuilder = value; }
 		}
 
-		private Hashtable  _items = new Hashtable(100);
-		public  IDictionary Items
+		private readonly Hashtable  _items = new Hashtable(100);
+		public           IDictionary Items
 		{
 			get { return _items; }
 		}
@@ -56,7 +56,7 @@ namespace BLToolkit.TypeBuilder.Builders
 			}
 		}
 
-		private static PropertyInfoComparer _piComparer = new PropertyInfoComparer();
+		private static readonly PropertyInfoComparer _piComparer = new PropertyInfoComparer();
 
 		private SortedList  _fields;
 		public  IDictionary  Fields

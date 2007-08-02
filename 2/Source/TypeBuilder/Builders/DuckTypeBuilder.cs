@@ -14,9 +14,9 @@ namespace BLToolkit.TypeBuilder.Builders
 			_objectType    = objectType;
 		}
 
-		Type              _interfaceType;
-		Type              _objectType;
-		TypeBuilderHelper _typeBuilder;
+		private readonly Type              _interfaceType;
+		private readonly Type              _objectType;
+		private          TypeBuilderHelper _typeBuilder;
 
 		#region ITypeBuilder Members
 

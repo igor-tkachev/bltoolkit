@@ -11,7 +11,7 @@ namespace BLToolkit.Mapping
 			_mapper = mapper;
 		}
 
-		private DataReaderMapper _mapper;
+		private readonly DataReaderMapper _mapper;
 
 		public virtual void InitMapping(InitContext initContext)
 		{

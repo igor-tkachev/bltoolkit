@@ -16,8 +16,8 @@ namespace BLToolkit.Validation
 			ErrorMessage = errorMessage;
 		}
 
-		private int _value;
-		public  int  Value
+		private readonly int _value;
+		public           int  Value
 		{
 			get { return _value; }
 		}

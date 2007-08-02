@@ -13,11 +13,11 @@ namespace BLToolkit.ComponentModel
 			_originalProperties = ((ITypedList)objectBinder).GetItemProperties(null);
 		}
 
-		private PropertyDescriptorCollection _originalProperties;
-		private PropertyDescriptorCollection _customProperties;
+		private readonly PropertyDescriptorCollection _originalProperties;
+		private          PropertyDescriptorCollection _customProperties;
 
-		private object _object;
-		public  object  Object
+		private readonly object _object;
+		public           object  Object
 		{
 			get { return _object; }
 		}

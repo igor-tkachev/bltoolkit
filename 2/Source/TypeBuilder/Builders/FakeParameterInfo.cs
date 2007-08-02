@@ -32,7 +32,7 @@ namespace BLToolkit.TypeBuilder.Builders
 			get { return DBNull.Value; }
 		}
 
-		private object[] _attributes;
+		private readonly object[] _attributes;
 
 		public override object[] GetCustomAttributes(bool inherit)
 		{
@@ -66,20 +66,20 @@ namespace BLToolkit.TypeBuilder.Builders
 			return false;
 		}
 
-		private         MemberInfo _memberInfo;
-		public override MemberInfo Member
+		private readonly MemberInfo _memberInfo;
+		public  override MemberInfo  Member
 		{
 			get { return _memberInfo; }
 		}
 
-		private         string _name;
-		public override string  Name
+		private readonly string _name;
+		public  override string  Name
 		{
 			get { return _name; }
 		}
 
-		private         Type _type;
-		public override Type  ParameterType
+		private readonly Type _type;
+		public  override Type  ParameterType
 		{
 			get { return _type; }
 		}

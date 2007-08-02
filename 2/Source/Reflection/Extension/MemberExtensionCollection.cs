@@ -23,10 +23,10 @@ namespace BLToolkit.Reflection.Extension
 				_members[memberInfo.Name] = memberInfo;
 		}
 
-		private Hashtable _members = new Hashtable();
+		private readonly Hashtable _members = new Hashtable();
 
-		private static MemberExtensionCollection _null = new MemberExtensionCollection();
-		public  static MemberExtensionCollection  Null
+		private static readonly MemberExtensionCollection _null = new MemberExtensionCollection();
+		public  static          MemberExtensionCollection  Null
 		{
 			get { return _null; }
 		}

@@ -30,14 +30,14 @@ namespace BLToolkit.Mapping
 			}
 		}
 
-		private NameOrIndexParameter[]       _fields;
-		private IDictionary<CompoundValue,T> _dic;
-		private ObjectMapper                 _mapper;
-		private T                            _newObject;
-		private bool[]                       _fromSource;
-		private bool                         _isFromSource;
-		private bool                         _isFromDest;
-		private object[]                     _indexValue;
+		private readonly NameOrIndexParameter[]       _fields;
+		private readonly IDictionary<CompoundValue,T> _dic;
+		private readonly bool[]                       _fromSource;
+		private readonly bool                         _isFromSource;
+		private readonly bool                         _isFromDest;
+		private          ObjectMapper                 _mapper;
+		private          object                       _newObject;
+		private          object[]                     _indexValue;
 
 		#region IMapDataDestinationList Members
 
@@ -50,7 +50,7 @@ namespace BLToolkit.Mapping
 						if (!_fromSource[i])
 							_indexValue[i] = _mapper.TypeAccessor[_fields[i]].GetValue(_newObject);
 
-				_dic[new CompoundValue(_indexValue)] = _newObject;
+				_dic[new CompoundValue(_indexValue)] = (T)_newObject;
 			}
 		}
 
@@ -86,7 +86,7 @@ namespace BLToolkit.Mapping
 							initContext.DataSource.GetValue(initContext.SourceObject, _fields[i].Name) :
 							initContext.DataSource.GetValue(initContext.SourceObject, _fields[i].Index);
 
-			return _newObject = (T)_mapper.CreateInstance(initContext);
+			return _newObject = _mapper.CreateInstance(initContext);
 		}
 
 		public virtual void EndMapping(InitContext initContext)

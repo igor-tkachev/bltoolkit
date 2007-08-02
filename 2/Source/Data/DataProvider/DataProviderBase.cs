@@ -145,6 +145,8 @@ namespace BLToolkit.Data.DataProvider
 
 		#endregion
 
+		#region Virtual Members
+
 		public virtual object Convert(object value, ConvertType convertType)
 		{
 			return value;
@@ -168,5 +170,12 @@ namespace BLToolkit.Data.DataProvider
 		public virtual void PrepareCommand(ref CommandType commandType, ref string commandText, ref IDbDataParameter[] commandParameters)
 		{
 		}
+
+		public virtual string ProviderName
+		{
+			get { return ConnectionType.Namespace; }
+		}
+
+		#endregion
 	}
 }

@@ -44,20 +44,20 @@ namespace BLToolkit.Reflection.Emit
 			_ilGenerator = ilGenerator;
 		}
 
-		private MethodBuilderBase _method;
+		private readonly MethodBuilderBase _method;
 		/// <summary>
 		/// Gets MethodBuilderHelper.
 		/// </summary>
-		public  MethodBuilderBase  Method
+		public           MethodBuilderBase  Method
 		{
 			get { return _method; }
 		}
 
-		private ILGenerator _ilGenerator;
+		private readonly ILGenerator _ilGenerator;
 		/// <summary>
 		/// Gets MSIL generator.
 		/// </summary>
-		public  ILGenerator  ILGenerator
+		public           ILGenerator  ILGenerator
 		{
 			get { return _ilGenerator; }
 		}
@@ -3257,8 +3257,8 @@ namespace BLToolkit.Reflection.Emit
 			else if (o is sbyte)  ldc_i4((sbyte)o);
 			else if (o is char)   ldc_i4((char)o);
 			else if (o is ushort) ldc_i4((ushort)o);
-			else if (o is uint)   ldc_i4((int)(uint)o);
-			else if (o is ulong)  ldc_i8((long)(ulong)o);
+			else if (o is uint)   ldc_i4(unchecked ((int)(uint)o));
+			else if (o is ulong)  ldc_i8(unchecked ((long)(ulong)o));
 			else if (o is bool)   ldc_i4((bool)o? 1: 0);
 			else if (o is short)  ldc_i4((short)o);
 			else if (o is long)   ldc_i8((long)o);

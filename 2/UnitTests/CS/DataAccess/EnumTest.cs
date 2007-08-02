@@ -1,5 +1,5 @@
 using System;
-
+using BLToolkit.Data;
 using NUnit.Framework;
 
 using BLToolkit.DataAccess;
@@ -28,8 +28,12 @@ namespace DataAccess
 		public abstract class TestAccessor : DataAccessor
 		{
 			public abstract int Person_Insert(
-				string @FirstName, string @LastName, string @MiddleName, Gender @Gender);
+				string @FirstName, string @MiddleName, string @LastName, Gender @Gender);
 
+#if ACCESS
+			public abstract int Person_SelectByName(
+				string @FirstName, string @MiddleName);
+#endif
 			public abstract void Person_Delete(int @personID);
 
 			public abstract void OutRefEnumTest(
@@ -42,12 +46,18 @@ namespace DataAccess
 		{
 			TestAccessor ta = (TestAccessor)DataAccessor.CreateInstance(typeof(TestAccessor));
 
-			int id = ta.Person_Insert("Crazy", "Frog", null, Gender.E_Unknown);
+			int id = ta.Person_Insert("Crazy", null, "Frog", Gender.E_Unknown);
+
+#if ACCESS
+			Assert.AreEqual(0, id);
+			id = ta.Person_SelectByName("Crazy", "Frog");
+#endif
 
 			Assert.IsTrue(id > 0);
 			ta.Person_Delete(id);
 		}
 
+#if !ACCESS
 		[Test]
 		public void RefTest()
 		{
@@ -61,5 +71,6 @@ namespace DataAccess
 			Assert.AreEqual(RefEnum.E_B,  a);
 			Assert.AreEqual(RefEnum.E_BB, b);
 		}
+#endif
 	}
 }

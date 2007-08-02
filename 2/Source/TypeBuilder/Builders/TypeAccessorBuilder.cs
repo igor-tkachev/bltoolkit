@@ -17,12 +17,12 @@ namespace BLToolkit.TypeBuilder.Builders
 			_originalType = originalType;
 		}
 
-		TypeHelper        _type;
-		TypeHelper        _originalType;
-		TypeHelper        _accessorType   = new TypeHelper(typeof(TypeAccessor));
-		TypeHelper        _memberAccessor = new TypeHelper(typeof(MemberAccessor));
-		ArrayList         _nestedTypes    = new ArrayList();
-		TypeBuilderHelper _typeBuilder;
+		readonly TypeHelper        _type;
+		readonly TypeHelper        _originalType;
+		readonly TypeHelper        _accessorType   = new TypeHelper(typeof(TypeAccessor));
+		readonly TypeHelper        _memberAccessor = new TypeHelper(typeof(MemberAccessor));
+		readonly ArrayList         _nestedTypes    = new ArrayList();
+		         TypeBuilderHelper _typeBuilder;
 
 		public string AssemblyNameSuffix
 		{
@@ -533,7 +533,7 @@ namespace BLToolkit.TypeBuilder.Builders
 					.ldarg_0
 					.LoadType  (_type)
 					.LoadType  (typeof(ObjectFactoryAttribute))
-					.call      (typeof(TypeHelper).            GetMethod("GetFirstAttribute"))
+					.call      (typeof(TypeHelper), "GetFirstAttribute", typeof(Type), typeof(Type))
 					.castclass (typeof(ObjectFactoryAttribute))
 					.call      (typeof(ObjectFactoryAttribute).GetProperty("ObjectFactory").GetGetMethod())
 					.call      (typeof(TypeAccessor).          GetProperty("ObjectFactory").GetSetMethod())

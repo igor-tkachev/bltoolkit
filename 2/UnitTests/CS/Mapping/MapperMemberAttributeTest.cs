@@ -1,8 +1,8 @@
 using System;
-
-using NUnit.Framework;
-
+using BLToolkit.Mapping.MetadataProvider;
+using BLToolkit.Reflection;
 using BLToolkit.Mapping;
+using NUnit.Framework;
 
 namespace Mapping
 {
@@ -75,5 +75,153 @@ namespace Mapping
 			Assert.AreEqual(456, o.Int);
 			Assert.AreEqual(45,  om.GetValue(o, "Int"));
 		}
+
+		[MemberMapper(typeof(CustomNum.Mapper))]
+		public class CustomNum
+		{
+			public int Num;
+
+			public CustomNum(int num)
+			{
+				Num = num;
+			}
+
+			public CustomNum()
+			{
+			}
+
+			public class Mapper : MemberMapper
+			{
+				public override object GetValue(object o)
+				{
+					object value = MemberAccessor.GetValue(o);
+					return value is CustomNum? ((CustomNum)value).Num: 0;
+				}
+
+				public override void SetValue(object o, object value)
+				{
+					value = (value is int)? new CustomNum((int)value) : new CustomNum();
+					MemberAccessor.SetValue(o, value);
+				}
+			}
+		}
+
+		public class Object3
+		{
+			public CustomNum Num;
+		}
+
+		[Test]
+		public void TestNumberString()
+		{
+			ObjectMapper om = Map.GetObjectMapper(typeof(Object3));
+			Object3      o  = new Object3();
+
+			om.SetValue(o, "Num", 123);
+
+			Assert.AreEqual(123, o.Num.Num);
+		}
+
+		#region Custom mapping schema test
+
+		public class CustomString
+		{
+			public string Str;
+
+			public CustomString(string str)
+			{
+				Str = str;
+			}
+
+			public CustomString()
+			{
+				Str = string.Empty;
+			}
+
+			public class Mapper : MemberMapper
+			{
+				public override object GetValue(object o)
+				{
+					object value = MemberAccessor.GetValue(o);
+					return value is CustomString? ((CustomString)value).Str: null;
+				}
+
+				public override void SetValue(object o, object value)
+				{
+					value = (value is string)? new CustomString((string)value) : new CustomString();
+					MemberAccessor.SetValue(o, value);
+				}
+			}
+		}
+
+		public class Object4
+		{
+			public CustomString Str;
+		}
+
+		public class TestMappingSchema : MappingSchema
+		{
+			private class TestMapMetadataProvider : MapMetadataProvider
+			{
+				public override bool GetIgnore(ObjectMapper mapper, MemberAccessor member, out bool isSet)
+				{
+					if (member.Type == typeof(CustomString))
+					{
+						isSet = true;
+						return false;
+					}
+
+					return base.GetIgnore(mapper, member, out isSet);
+				}
+			}
+
+			private class TestObjectMapper : ObjectMapper
+			{
+				protected override  MemberMapper CreateMemberMapper(MapMemberInfo mapMemberInfo)
+				{
+					if (mapMemberInfo.Type == typeof(CustomString))
+					{
+						MemberMapper mm = new CustomString.Mapper();
+						mm.Init(mapMemberInfo);
+						return mm;
+					}
+
+					return base.CreateMemberMapper(mapMemberInfo);
+				}
+
+				protected override MapMetadataProvider CreateMetadataProvider()
+				{
+					MapMetadataProvider provider = base.CreateMetadataProvider();
+					provider.AddProvider(new TestMapMetadataProvider());
+					return provider;
+				}
+
+			}
+
+			protected override ObjectMapper CreateObjectMapperInstance(Type type)
+			{
+				return new TestObjectMapper();
+			}
+		}
+
+		[Test]
+		public void TestCustomString()
+		{
+			MappingSchema save = Map.DefaultSchema;
+
+			Map.DefaultSchema = new TestMappingSchema();
+			
+			ObjectMapper om = Map.GetObjectMapper(typeof(Object4));
+
+			Object4 o = new Object4();
+
+			om.SetValue(o, "Str", "Test");
+
+			Assert.AreEqual("Test", o.Str.Str);
+			
+			Map.DefaultSchema = save;
+		}
+
+		#endregion
 	}
 }

@@ -44,14 +44,14 @@ namespace BLToolkit.Mapping
 			}
 		}
 
-		private  Type _objectType;
-		internal Type  ObjectType
+		private readonly Type _objectType;
+		internal         Type  ObjectType
 		{
 			get { return _objectType; }
 		}
 
-		private  ObjectMapper _objectMapper;
-		internal ObjectMapper  ObjectMapper
+		private readonly ObjectMapper _objectMapper;
+		internal         ObjectMapper  ObjectMapper
 		{
 			get { return _objectMapper;  }
 		}

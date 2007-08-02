@@ -98,10 +98,10 @@ namespace BLToolkit.Mapping
 
 		#region Protected Members
 
-		private TextWriter    _writer;
-		private string[]      _names;
-		private string[]      _values;
-		private MappingSchema _mappingSchema;
+		private readonly TextWriter    _writer;
+		private readonly string[]      _names;
+		private readonly string[]      _values;
+		private readonly MappingSchema _mappingSchema;
 
 		private void WriteHeader()
 		{

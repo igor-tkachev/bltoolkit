@@ -47,7 +47,7 @@ namespace BLToolkit.Common
 			}
 
 			if (null != mi)
-				return (ConvertMethod)(object)Delegate.CreateDelegate(typeof(ConvertMethod), mi);
+				return (ConvertMethod)Delegate.CreateDelegate(typeof(ConvertMethod), mi);
 
 			return Default;
 		}

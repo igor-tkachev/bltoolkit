@@ -24,10 +24,16 @@ namespace BLToolkit.EditableObjects
 	{
 		#region Constructors
 
-		public EditableArrayList(Type itemType, ArrayList list)
+		public EditableArrayList(Type itemType, ArrayList list, bool trackChanges)
 		{
 			if (itemType == null) throw new ArgumentNullException("itemType");
 			if (list     == null) throw new ArgumentNullException("list");
+
+			if (!trackChanges)
+			{
+				SetTrackingChanges(trackChanges);
+				_minTrackingChangesCount = 1;
+			}
 
 			_itemType        = itemType;
 			_list            = list;
@@ -36,32 +42,77 @@ namespace BLToolkit.EditableObjects
 		}
 
 		public EditableArrayList(Type itemType)
-			: this(itemType, new ArrayList())
+			: this(itemType, new ArrayList(), true)
+		{
+		}
+
+		public EditableArrayList(Type itemType, bool trackChanges)
+			: this(itemType, new ArrayList(), trackChanges)
 		{
 		}
 
 		public EditableArrayList(Type itemType, int capacity)
-			: this(itemType, new ArrayList(capacity))
+			: this(itemType, new ArrayList(capacity), true)
+		{
+		}
+
+		public EditableArrayList(Type itemType, int capacity, bool trackChanges)
+			: this(itemType, new ArrayList(capacity), trackChanges)
 		{
 		}
 
 		public EditableArrayList(Type itemType, ICollection c)
-			: this(itemType, new ArrayList(c))
+			: this(itemType, new ArrayList(c), true)
 		{
+		}
+
+		public EditableArrayList(Type itemType, ICollection c, bool trackChanges)
+			: this(itemType, new ArrayList(c), trackChanges)
+		{
+		}
+
+		public EditableArrayList(Type itemType, ArrayList list)
+			: this(itemType, list, true)
+		{
+
+		}
+
+		public EditableArrayList(EditableArrayList list)
+			: this(list.ItemType, new ArrayList(list), true)
+		{
+
+		}
+
+		public EditableArrayList(EditableArrayList list, bool trackChanges)
+			: this(list.ItemType, new ArrayList(list), trackChanges)
+		{
+
+		}
+
+		public EditableArrayList(Type itemType, EditableArrayList list)
+			: this(itemType, new ArrayList(list), true)
+		{
+			
+		}
+
+		public EditableArrayList(Type itemType, EditableArrayList list, bool trackChanges)
+			: this(itemType, new ArrayList(list), trackChanges)
+		{
+
 		}
 
 		#endregion
 
 		#region Public Members
 
-		private  ArrayList _list;
-		internal ArrayList  List
+		private readonly ArrayList _list;
+		internal         ArrayList  List
 		{
 			get { return _list; }
 		}
 
-		private Type _itemType;
-		public  Type  ItemType
+		private readonly Type _itemType;
+		public           Type  ItemType
 		{
 			get { return _itemType; }
 		}
@@ -209,6 +260,7 @@ namespace BLToolkit.EditableObjects
 		#region Track Changes
 
 		private int _noTrackingChangesCount;
+		private int _minTrackingChangesCount = 0;
 
 		public  bool IsTrackingChanges
 		{
@@ -221,9 +273,9 @@ namespace BLToolkit.EditableObjects
 			{
 				_noTrackingChangesCount--;
 
-				if (_noTrackingChangesCount < 0)
+				if (_noTrackingChangesCount < _minTrackingChangesCount)
 				{
-					_noTrackingChangesCount = 0;
+					_noTrackingChangesCount = _minTrackingChangesCount;
 					throw new InvalidOperationException("Tracking Changes Counter con not be negative.");
 				}
 			}
@@ -709,6 +761,9 @@ namespace BLToolkit.EditableObjects
 		{
 			if (list == null) throw new ArgumentNullException("list");
 
+			if (list.IsFixedSize)
+				return new EditableArrayList(itemType, new ArrayList(list));
+
 			return list is ArrayList?
 				new EditableArrayList(itemType, (ArrayList)list):
 				new EditableArrayList(itemType, ArrayList.Adapter(list));
@@ -734,11 +789,11 @@ namespace BLToolkit.EditableObjects
 
 		class SortMemberComparer : IComparer
 		{
-			ListSortDirection  _direction;
-			string[]           _memberNames;
-			TypeAccessor       _typeAccessor;
-			MemberAccessor[]   _members;
-			MemberAccessor     _member;
+			readonly ListSortDirection  _direction;
+			readonly string[]           _memberNames;
+			readonly TypeAccessor       _typeAccessor;
+			readonly MemberAccessor[]   _members;
+			readonly MemberAccessor     _member;
 
 			public SortMemberComparer(TypeAccessor typeAccessor, ListSortDirection direction, string[] memberNames)
 			{

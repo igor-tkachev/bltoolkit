@@ -4,10 +4,10 @@ using BLToolkit.Common;
 
 namespace BLToolkit.DataAccess
 {
-	[AttributeUsage(AttributeTargets.Method)]
+	[AttributeUsage(AttributeTargets.Method), CLSCompliant(false)]
 	public class IndexAttribute : Attribute
 	{
-		public IndexAttribute(string[] names)
+		public IndexAttribute(params string[] names)
 		{
 			if (null == names)
 				throw new ArgumentNullException("names");
@@ -18,7 +18,7 @@ namespace BLToolkit.DataAccess
 			_fields = NameOrIndexParameter.FromStringArray(names);
 		}
 
-		public IndexAttribute(int[] indices)
+		public IndexAttribute(params int[] indices)
 		{
 			if (null == indices)
 				throw new ArgumentNullException("indices");
@@ -40,58 +40,8 @@ namespace BLToolkit.DataAccess
 			_fields = fields;
 		}
 
-		public IndexAttribute(string field1)
-			: this(new NameOrIndexParameter[] { field1 })
-		{
-		}
-
-		public IndexAttribute(string field1, string field2)
-			: this(new NameOrIndexParameter[] { field1, field2 })
-		{
-		}
-
-		public IndexAttribute(string field1, string field2, string field3)
-			: this(new NameOrIndexParameter[] { field1, field2, field3 })
-		{
-		}
-
-		public IndexAttribute(string field1, string field2, string field3, string field4)
-			: this(new NameOrIndexParameter[] { field1, field2, field3, field4 })
-		{
-		}
-
-		public IndexAttribute(string field1, string field2, string field3, string field4, string field5)
-			: this(new NameOrIndexParameter[] { field1, field2, field3, field4, field5 })
-		{
-		}
-
-		public IndexAttribute(int field1)
-			: this(new NameOrIndexParameter[] { field1 })
-		{
-		}
-
-		public IndexAttribute(int field1, int field2)
-			: this(new NameOrIndexParameter[] { field1, field2 })
-		{
-		}
-
-		public IndexAttribute(int field1, int field2, int field3)
-			: this(new NameOrIndexParameter[] { field1, field2, field3 })
-		{
-		}
-
-		public IndexAttribute(int field1, int field2, int field3, int field4)
-			: this(new NameOrIndexParameter[] { field1, field2, field3, field4 })
-		{
-		}
-
-		public IndexAttribute(int field1, int field2, int field3, int field4, int field5)
-			: this(new NameOrIndexParameter[] { field1, field2, field3, field4, field5 })
-		{
-		}
-
-		private NameOrIndexParameter[] _fields;
-		public  NameOrIndexParameter[]  Fields
+		private readonly NameOrIndexParameter[] _fields;
+		public           NameOrIndexParameter[]  Fields
 		{
 			get { return _fields; }
 		}

@@ -54,10 +54,14 @@ namespace Mapping.MetadataProvider
 		{
 			MapMetadataProvider.OnCreateProvider += new OnCreateProvider(MapMetadataProvider_OnCreateProvider);
 
+			string cmd = "SELECT '1' as FIRST_NAME, '2' as LAST_NAME";
+#if ORACLE || FIREBIRD
+			cmd += " FROM dual";
+#endif
 			using (DbManager db = new DbManager())
 			{
 				Person p = (Person)db
-					.SetCommand("SELECT '1' as FIRST_NAME, '2' as 'LAST_NAME'")
+					.SetCommand(cmd)
 					.ExecuteObject(typeof(Person));
 
 				Assert.AreEqual("1", p.FirstName);

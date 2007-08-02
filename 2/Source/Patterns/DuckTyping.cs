@@ -21,7 +21,7 @@ namespace BLToolkit.Patterns
 #endif
 	class DuckTyping
 	{
-		private static Hashtable _duckTypes = new Hashtable();
+		private static readonly Hashtable _duckTypes = new Hashtable();
 
 		/// <summary>
 		/// Build a proxy type which implements the requested interface by redirecting all calls to the supplied object type.

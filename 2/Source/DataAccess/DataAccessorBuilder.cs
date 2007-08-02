@@ -25,8 +25,8 @@ namespace BLToolkit.DataAccess
 	{
 		private struct MapOutputParametersValue
 		{
-			public string           ReturnValueMember;
-			public ParameterInfo    ParameterInfo;
+			public readonly string        ReturnValueMember;
+			public readonly ParameterInfo ParameterInfo;
 
 			public MapOutputParametersValue(string returnValueMember, ParameterInfo parameterInfo)
 			{
@@ -59,7 +59,7 @@ namespace BLToolkit.DataAccess
 
 		const BindingFlags _bindingFlags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
 
-		Type            _baseType = typeof(DataAccessor);
+		readonly Type   _baseType = typeof(DataAccessor);
 		Type            _objectType;
 		bool            _explicitObjectType;
 		ParameterInfo[] _parameters;
@@ -421,11 +421,25 @@ namespace BLToolkit.DataAccess
 			{
 				LoadDestinationOrReturnValue();
 
-				emit
-					.callvirt  (typeof(DbManager), "ExecuteDataSet", typeof(DataSet))
-					.pop
-					.end()
-					;
+				object[] attrs = Context.CurrentMethod.GetCustomAttributes(typeof(DataSetTableAttribute), true);
+
+				if (attrs.Length == 0)
+				{
+					emit
+						.callvirt (typeof(DbManager), "ExecuteDataSet", typeof(DataSet))
+						.pop
+						.end()
+						;
+				}
+				else
+				{
+					emit
+						.ldNameOrIndex(((DataSetTableAttribute)attrs[0]).NameOrIndex)
+						.callvirt (typeof(DbManager), "ExecuteDataSet", typeof(DataSet), typeof(NameOrIndexParameter))
+						.pop
+						.end()
+						;
+				}
 			}
 			else
 			{
@@ -447,14 +461,29 @@ namespace BLToolkit.DataAccess
 					.ldloc     (_locManager);
 
 				LoadDestinationOrReturnValue();
-				LoadDestinationOrReturnValue();
+
+				object[] attrs = Context.CurrentMethod.GetCustomAttributes(typeof(DataSetTableAttribute), true);
+
+				if (attrs.Length == 0)
+				{
+					LoadDestinationOrReturnValue();
+
+					emit
+						.callvirt (typeof(DataSet).GetProperty("Tables").GetGetMethod())
+						.ldc_i4_0
+						.callvirt (typeof(DataTableCollection), "get_Item", typeof(int))
+						.callvirt (typeof(DataTable).GetProperty("TableName").GetGetMethod())
+						.call     (typeof(NameOrIndexParameter), "op_Implicit", typeof(string))
+						;
+				}
+				else
+				{
+					emit
+						.ldNameOrIndex(((DataSetTableAttribute)attrs[0]).NameOrIndex)
+						;
+				}
 
 				emit
-					.callvirt  (typeof(DataSet).GetProperty("Tables").GetGetMethod())
-					.ldc_i4_0
-					.callvirt  (typeof(DataTableCollection), "get_Item", typeof(int))
-					.callvirt  (typeof(DataTable).GetProperty("TableName").GetGetMethod())
-					.call      (typeof(NameOrIndexParameter), "op_Implicit", typeof(string))
 					.callvirt  (typeof(DbManager), "ExecuteDataSet", typeof(DataSet), typeof(NameOrIndexParameter))
 					.pop
 					.br_s      (l2)
@@ -483,11 +512,34 @@ namespace BLToolkit.DataAccess
 			CallSetCommand();
 			LoadDestinationOrReturnValue();
 
-			Context.MethodBuilder.Emitter
+			EmitHelper emit = Context.MethodBuilder.Emitter;
+
+			emit
 				.callvirt (typeof(DbManager), "ExecuteDataTable", typeof(DataTable))
 				.pop
 				.end()
 				;
+
+			// When DataSetTableAttribute is present, simply set table name to the name specified.
+			//
+			object[] attrs = Context.CurrentMethod.GetCustomAttributes(typeof(DataSetTableAttribute), true);
+
+			if (attrs.Length != 0)
+			{
+				DataSetTableAttribute attr = (DataSetTableAttribute)attrs[0];
+
+				if (!attr.NameOrIndex.ByName)
+					throw new TypeBuilderException(string.Format(
+						"DataSetTable attribute for method '{0}.{1}' may not be an index",
+						Context.CurrentMethod.DeclaringType.Name, Context.CurrentMethod.Name));
+
+				LoadDestinationOrReturnValue();
+
+				emit
+					.ldstr(attr.NameOrIndex.Name)
+					.callvirt (typeof(DataTable), "set_TableName", typeof(string))
+					;
+			}
 		}
 
 		#endregion
@@ -574,18 +626,16 @@ namespace BLToolkit.DataAccess
 				fieldBuilder = Context.CreatePrivateStaticField(id, typeof(MapIndex));
 
 				EmitHelper   emit = Context.TypeBuilder.TypeInitializer.Emitter;
-				LocalBuilder arr  = emit.DeclareLocal(typeof(NameOrIndexParameter[]));
 
 				emit
 					.ldc_i4_ (namesOrIndexes.Length)
 					.newarr  (typeof(NameOrIndexParameter))
-					.stloc   (arr)
 					;
 
 				for (int i = 0; i < namesOrIndexes.Length; i++)
 				{
 					emit
-						.ldloc(arr)
+						.dup
 						.ldc_i4_(i)
 						.ldelema(typeof(NameOrIndexParameter));
 
@@ -606,7 +656,6 @@ namespace BLToolkit.DataAccess
 				}
 				
 				emit
-					.ldloc  (arr)
 					.newobj (typeof(MapIndex), typeof(NameOrIndexParameter[]))
 					.stsfld (fieldBuilder)
 					;
@@ -668,8 +717,8 @@ namespace BLToolkit.DataAccess
 				.ldNameOrIndex (scalarField)
 				.ldloc         (_locObjType)
 				.callvirt      (typeof(DbManager), "ExecuteScalarDictionary",
-					            typeof(IDictionary), typeof(MapIndex),
-					            typeof(NameOrIndexParameter), typeof(Type))
+				                typeof(IDictionary), typeof(MapIndex),
+				                typeof(NameOrIndexParameter), typeof(Type))
 				.pop
 				.end()
 				;
@@ -1160,12 +1209,9 @@ namespace BLToolkit.DataAccess
 			//
 			if (_formatParamList.Count > 0)
 			{
-				LocalBuilder locParams = emit.DeclareLocal(typeof(object[]));
-
 				emit
 					.ldc_i4_      (_formatParamList.Count)
 					.newarr       (typeof(object))
-					.stloc        (locParams)
 					;
 
 				for (int i = 0; i < _formatParamList.Count; i++)
@@ -1173,7 +1219,7 @@ namespace BLToolkit.DataAccess
 					ParameterInfo pi = (ParameterInfo)_formatParamList[i];
 
 					emit
-						.ldloc          (locParams)
+						.dup
 						.ldc_i4_        (i)
 						.ldarg          (pi)
 						.boxIfValueType (pi.ParameterType)
@@ -1183,7 +1229,6 @@ namespace BLToolkit.DataAccess
 				}
 
 				emit
-					.ldloc        (locParams)
 					.call         (typeof(string), "Format", typeof(string), typeof(object[]))
 					;
 			}
@@ -1228,9 +1273,24 @@ namespace BLToolkit.DataAccess
 
 		private LocalBuilder BuildParameters()
 		{
-			return _refParamList.Count > 0?
+			EmitHelper emit = Context.MethodBuilder.Emitter;
+
+			LocalBuilder retParams = emit
+				.DeclareLocal(typeof(IDbDataParameter[]));
+
+			LocalBuilder locParams = _refParamList.Count > 0?
 				BuildRefParameters():
 				BuildSimpleParameters();
+
+			emit
+				.ldarg_0
+				.ldloc    (_locManager)
+				.ldloc    (locParams)
+				.callvirt (_baseType, "PrepareParameters", _bindingFlags, typeof(DbManager), typeof(object[]))
+				.stloc    (retParams)
+				;
+
+			return retParams;
 		}
 
 		private LocalBuilder BuildSimpleParameters()
@@ -1245,7 +1305,6 @@ namespace BLToolkit.DataAccess
 			emit
 				.ldc_i4_      (_paramList.Count)
 				.newarr       (_sqlText == null? typeof(object): typeof(IDbDataParameter))
-				.stloc        (locParams)
 				;
 
 			for (int i = 0; i < _paramList.Count; i++)
@@ -1253,7 +1312,7 @@ namespace BLToolkit.DataAccess
 				ParameterInfo pi = (ParameterInfo)_paramList[i];
 
 				emit
-					.ldloc    (locParams)
+					.dup
 					.ldc_i4_  (i)
 					;
 
@@ -1265,6 +1324,7 @@ namespace BLToolkit.DataAccess
 					;
 			}
 
+			emit.stloc(locParams);
 			return locParams;
 		}
 
@@ -1297,18 +1357,16 @@ namespace BLToolkit.DataAccess
 				fieldBuilder = Context.CreatePrivateStaticField(key, typeof(string[]));
 
 				EmitHelper   emit       = Context.TypeBuilder.TypeInitializer.Emitter;
-				LocalBuilder localArray = emit.DeclareLocal(typeof(string[]));
 
 				emit
 					.ldc_i4_           (strings.Length)
 					.newarr            (typeof(string))
-					.stloc             (localArray)
 					;
 
 				for (int i = 0; i < strings.Length; i++)
 				{
 					emit
-						.ldloc         (localArray)
+						.dup
 						.ldc_i4_       (i)
 						.ldstr         (strings[i])
 						.stelem_ref
@@ -1317,7 +1375,6 @@ namespace BLToolkit.DataAccess
 				}
 				
 				emit
-					.ldloc             (localArray)
 					.stsfld            (fieldBuilder)
 					;
 			}
@@ -1360,7 +1417,6 @@ namespace BLToolkit.DataAccess
 			emit
 				.ldc_i4_               (_parameters.Length)
 				.newarr                (typeof(object))
-				.stloc                 (locParams)
 				;
 
 			for (int i = 0; i < _parameters.Length; i++)
@@ -1368,7 +1424,7 @@ namespace BLToolkit.DataAccess
 				ParameterInfo pi = _parameters[i];
 
 				emit
-					.ldloc             (locParams)
+					.dup
 					.ldc_i4_           (i)
 					;
 
@@ -1442,16 +1498,8 @@ namespace BLToolkit.DataAccess
 					;
 			}
 
-			LocalBuilder retParams = emit.DeclareLocal(typeof(IDbDataParameter[]));
-
-			emit
-				.ldarg_0
-				.ldloc    (locParams)
-				.callvirt (_baseType, "PrepareParameters", _bindingFlags, typeof(object[]))
-				.stloc    (retParams)
-				;
-
-			return retParams;
+			emit.stloc(locParams);
+			return locParams;
 		}
 
 		private void LoadParameterOrNull(ParameterInfo pi, Type type)
@@ -1592,7 +1640,7 @@ namespace BLToolkit.DataAccess
 		private void BuildParameter(ParameterInfo pi)
 		{
 			EmitHelper emit  = Context.MethodBuilder.Emitter;
-			object[]   attrs = pi.GetCustomAttributes(typeof(ParamNameAttribute),      true);
+			object[]   attrs = pi.GetCustomAttributes(typeof(ParamNameAttribute), true);
 
 			string paramName = attrs.Length == 0?
 				pi.Name: ((ParamNameAttribute)attrs[0]).Name;
@@ -1630,6 +1678,28 @@ namespace BLToolkit.DataAccess
 			emit
 				.callvirt          (typeof(DbManager), methodName, typeof(string), typeof(object))
 				;
+
+			// Check if parameter type/size is specified.
+			//
+			attrs = pi.GetCustomAttributes(typeof(ParamDbTypeAttribute), true);
+			if (attrs.Length > 0)
+			{
+				emit
+					.dup
+					.ldc_i4_       ((int)((ParamDbTypeAttribute)attrs[0]).DbType)
+					.callvirt      (typeof(IDataParameter), "set_DbType", typeof(DbType))
+					;
+			}
+
+			attrs = pi.GetCustomAttributes(typeof(ParamSizeAttribute), true);
+			if (attrs.Length > 0)
+			{
+				emit
+					.dup
+					.ldc_i4_       (((ParamSizeAttribute)attrs[0]).Size)
+					.callvirt      (typeof(IDbDataParameter), "set_Size", typeof(int))
+					;
+			}
 		}
 
 		private LocalBuilder BuildParametersWithDiscoverParameters()
@@ -1640,7 +1710,6 @@ namespace BLToolkit.DataAccess
 			emit
 				.ldc_i4_           (_paramList.Count)
 				.newarr            (typeof(object))
-				.stloc             (locParams)
 				;
 
 			for (int i = 0; i < _paramList.Count; i++)
@@ -1648,7 +1717,7 @@ namespace BLToolkit.DataAccess
 				ParameterInfo pi = (ParameterInfo)_paramList[i];
 
 				emit
-					.ldloc         (locParams)
+					.dup
 					.ldc_i4_       (i)
 					;
 
@@ -1660,6 +1729,7 @@ namespace BLToolkit.DataAccess
 					;
 			}
 
+			emit.stloc(locParams);
 			return locParams;
 		}
 
@@ -1872,6 +1942,7 @@ namespace BLToolkit.DataAccess
 			if (type == typeof(Guid))        return "ConvertToGuid";
 			if (type == typeof(Stream))      return "ConvertToStream";
 			if (type == typeof(XmlReader))   return "ConvertToXmlReader";
+			if (type == typeof(XmlDocument)) return "ConvertToXmlDocument";
 			if (type == typeof(Byte[]))      return "ConvertToByteArray";
 			if (type == typeof(Char[]))      return "ConvertToCharArray";
 

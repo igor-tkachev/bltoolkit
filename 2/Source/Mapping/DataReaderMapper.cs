@@ -12,14 +12,14 @@ namespace BLToolkit.Mapping
 			_dataReader    = dataReader;
 		}
 
-		private IDataReader _dataReader;
-		public  IDataReader  DataReader
+		private readonly IDataReader _dataReader;
+		public           IDataReader  DataReader
 		{
 			get { return _dataReader; }
 		}
 
-		private MappingSchema _mappingSchema;
-		public  MappingSchema  MappingSchema
+		private readonly MappingSchema _mappingSchema;
+		public           MappingSchema  MappingSchema
 		{
 			get { return _mappingSchema; }
 		}

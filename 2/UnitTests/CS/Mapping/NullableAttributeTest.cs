@@ -177,5 +177,26 @@ namespace Mapping
 			Assert.IsNull   (om.GetValue(o, "Int2"));
 			Assert.IsNull   (om.GetValue(o, "Int3"));
 		}
+
+		[NullValue("(null)")]
+		public class Object6
+		{
+			public string String1;
+		}
+
+		[NullValue("(derived null)")]
+		public class Object6Derived : Object6
+		{
+		}
+
+		[Test]
+		public void TestDerivedNull()
+		{
+			ObjectMapper   om = Map.GetObjectMapper(typeof(Object6Derived));
+			Object6Derived o = (Object6Derived) om.CreateInstance();
+
+			om.SetValue(o, "String1", null);
+			Console.WriteLine(o.String1);
+		}
 	}
 }

@@ -4,7 +4,22 @@
 		<title>Business Logic Toolkit for .NET</title>
 		<link>http://www.bltoolkit.net</link>
 		<description />
-		<lastBuildDate>2007-02-12</lastBuildDate>
+		<lastBuildDate>2007-06-05</lastBuildDate>
+		<item>
+			<title>How to map into internal object</title>
+			<link>http://www.bltoolkit.net/Doc/Mapping/MapFieldAttribute.htm</link>
+			<description>
+				&lt;a href="http://www.bltoolkit.net/Doc/Mapping/MapFieldAttribute.htm"&gt;Map.MapFieldAttribute&lt;/a&gt;
+			</description>
+			<category>Examples</category>
+			<pubDate>2006-06-05</pubDate>
+		</item>
+		<item>
+			<title>Version 2.0.5 released</title>
+			<link>http://www.bltoolkit.net/Download.htm</link>
+			<description>See &lt;a href="http://www.bltoolkit.net/Download.htm"&gt;change log&lt;/a&gt;</description>
+			<pubDate>2007-05-17</pubDate>
+		</item>
 		<item>
 			<title>Version 2.0.4 released</title>
 			<link>http://www.bltoolkit.net/Download.htm</link>

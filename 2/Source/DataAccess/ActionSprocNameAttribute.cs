@@ -11,14 +11,14 @@ namespace BLToolkit.DataAccess
 			_procedureName = procedureName;
 		}
 
-		private string _actionName;
-		public  string  ActionName
+		private readonly string _actionName;
+		public           string  ActionName
 		{
 			get { return _actionName; }
 		}
 
-		private string _procedureName;
-		public  string  ProcedureName
+		private readonly string _procedureName;
+		public           string  ProcedureName
 		{
 			get { return _procedureName; }
 		}

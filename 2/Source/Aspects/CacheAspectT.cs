@@ -1,12 +1,14 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
+using BLToolkit.Common;
 
 namespace BLToolkit.Aspects
 {
 	public class CacheAspect<T> : CacheAspect
 	{
-		private static IDictionary _cache = new Hashtable();
-		public  static IDictionary  Cache
+		private static readonly IDictionary _cache = new Dictionary<CompoundValue, object>();
+		public  static          IDictionary  Cache
 		{
 			get { return _cache; }
 		}

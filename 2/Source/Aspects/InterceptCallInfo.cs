@@ -32,7 +32,7 @@ namespace BLToolkit.Aspects
 			}
 		}
 
-		private object[] _emptyValues = new object[0];
+		private readonly object[] _emptyValues = new object[0];
 
 		private object[] _parameterValues;
 		public  object[]  ParameterValues
@@ -95,20 +95,20 @@ namespace BLToolkit.Aspects
 			}
 		}
 
-		private DateTime _beginCallTime = DateTime.Now;
-		public  DateTime  BeginCallTime
+		private readonly DateTime _beginCallTime = DateTime.Now;
+		public           DateTime  BeginCallTime
 		{
 			get { return _beginCallTime; }
 		}
 
-		private IPrincipal _currentPrincipal;
-		public  IPrincipal  CurrentPrincipal
+		private readonly IPrincipal _currentPrincipal;
+		public           IPrincipal  CurrentPrincipal
 		{
 			get { return _currentPrincipal; }
 		}
 
-		private Thread _currentThread;
-		public  Thread  CurrentThread
+		private readonly Thread _currentThread;
+		public           Thread  CurrentThread
 		{
 			get { return _currentThread; }
 		}

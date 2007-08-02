@@ -198,6 +198,12 @@ namespace DataAccess
 
 		private TestAccessor _da;
 
+#if ORACLE
+		private const decimal _id = 1m;
+#else
+		private const int     _id = 1;
+#endif
+
 		public DictionaryTest()
 		{
 			TypeFactory.SaveTypes = true;
@@ -212,32 +218,32 @@ namespace DataAccess
 			Assert.AreEqual("John", ((Person)dic1[1]).FirstName);
 
 			Hashtable dic2 = _da.SelectAll2();
-			Assert.AreEqual("John", ((Person)dic2[new CompoundValue(1, "Pupkin")]).FirstName);
+			Assert.AreEqual("John", ((Person)dic2[new CompoundValue(_id, "Pupkin")]).FirstName);
 
 			Hashtable dic3 = _da.SelectAll3();
-			Assert.AreEqual("John", dic3[1]);
+			Assert.AreEqual("John", dic3[_id]);
 
 			Hashtable dic4 = _da.SelectAll4();
-			Assert.AreEqual("John", dic4[new CompoundValue(1, "Pupkin")]);
+			Assert.AreEqual("John", dic4[new CompoundValue(_id, "Pupkin")]);
 
 			Hashtable dic5 = _da.SelectAll5();
-			Assert.AreEqual("John", dic5[new CompoundValue(1, "Pupkin")]);
+			Assert.AreEqual("John", dic5[new CompoundValue(_id, "Pupkin")]);
 			
 #if FW2
 			Dictionary<int, Person> dict1 = _da.SelectAllT1();
 			Assert.AreEqual("John", dict1[1].FirstName);
 
 			Dictionary<CompoundValue, Person> dict2 = _da.SelectAllT2();
-			Assert.AreEqual("John", dict2[new CompoundValue(1, "Pupkin")].FirstName);
+			Assert.AreEqual("John", dict2[new CompoundValue(_id, "Pupkin")].FirstName);
 
 			Dictionary<int, string> dict3 = _da.SelectAllT3();
 			Assert.AreEqual("John", dict3[1]);
 
 			Dictionary<CompoundValue, string> dict4 = _da.SelectAllT4();
-			Assert.AreEqual("John", dict4[new CompoundValue(1, "Pupkin")]);
+			Assert.AreEqual("John", dict4[new CompoundValue(_id, "Pupkin")]);
 
 			Dictionary<CompoundValue, string> dict5 = _da.SelectAllT5();
-			Assert.AreEqual("John", dict5[new CompoundValue(1, "Pupkin")]);
+			Assert.AreEqual("John", dict5[new CompoundValue(_id, "Pupkin")]);
 #endif
 		}
 
@@ -285,7 +291,7 @@ namespace DataAccess
 			Assert.IsTrue(persons.Count > 0);
 			Assert.IsNull(persons[-1]);
 
-			Person actualValue = (Person)persons[1];
+			Person actualValue = (Person)persons[_id];
 			Assert.IsNotNull(actualValue);
 			Assert.AreEqual("John", actualValue.FirstName);
 		}
@@ -376,7 +382,7 @@ namespace DataAccess
 			Assert.IsNotNull(persons);
 			Assert.IsTrue(persons.Count > 0);
 
-			string actualValue = persons[1];
+			string actualValue = persons[_id];
 			Assert.IsNotNull(actualValue);
 			Assert.AreEqual("John", actualValue);
 		}
@@ -436,7 +442,7 @@ namespace DataAccess
 			Assert.IsNotNull(persons);
 			Assert.IsTrue(persons.Count > 0);
 
-			string actualValue = persons[new CompoundValue(1, "John")];
+			string actualValue = persons[new CompoundValue(_id, "John")];
 			Assert.IsNotNull(actualValue);
 			Assert.AreEqual("John", actualValue);
 		}

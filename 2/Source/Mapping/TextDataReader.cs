@@ -31,14 +31,14 @@ namespace BLToolkit.Mapping
 
 		#region Protected Members
 
-		private StreamReader  _reader;
-		private string        _line       = string.Empty;
-		private string[]      _names      = _empty;
-		private string[]      _values     = _empty;
-		private int           _lineNumber = 0;
-		private MappingSchema _mappingSchema;
+		private readonly StreamReader  _reader;
+		private readonly MappingSchema _mappingSchema;
+		private          string        _line       = string.Empty;
+		private          string[]      _names      = _empty;
+		private          string[]      _values     = _empty;
+		private          int           _lineNumber = 0;
 
-		private static string[] _empty = new string[0];
+		private static readonly string[] _empty = new string[0];
 
 		private bool IsEof
 		{

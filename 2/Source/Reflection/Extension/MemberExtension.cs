@@ -24,14 +24,14 @@ namespace BLToolkit.Reflection.Extension
 			get { return _attributes[attributeName]; }
 		}
 
-		private AttributeNameCollection _attributes;
-		public  AttributeNameCollection  Attributes
+		private readonly AttributeNameCollection _attributes;
+		public           AttributeNameCollection  Attributes
 		{
 			get { return _attributes; }
 		}
 
-		private static MemberExtension _null = new MemberExtension(AttributeNameCollection.Null);
-		public  static MemberExtension  Null
+		private static readonly MemberExtension _null = new MemberExtension(AttributeNameCollection.Null);
+		public  static          MemberExtension  Null
 		{
 			get { return _null; }
 		}

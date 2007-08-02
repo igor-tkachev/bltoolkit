@@ -28,7 +28,7 @@
                     BaseAddress = "285212672"
                     CheckForOverflowUnderflow = "false"
                     ConfigurationOverrideFile = ""
-                    DefineConstants = "DEBUG;TRACE"
+                    DefineConstants = "DEBUG;TRACE;MSSQL"
                     DocumentationFile = ""
                     DebugSymbols = "true"
                     FileAlignment = "4096"
@@ -48,7 +48,7 @@
                     BaseAddress = "285212672"
                     CheckForOverflowUnderflow = "false"
                     ConfigurationOverrideFile = ""
-                    DefineConstants = "TRACE"
+                    DefineConstants = "TRACE;MSSQL"
                     DocumentationFile = ""
                     DebugSymbols = "false"
                     FileAlignment = "4096"
@@ -138,6 +138,11 @@
                     BuildAction = "Compile"
                 />
                 <File
+                    RelPath = "Aspects\AsyncAspectTest.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
                     RelPath = "Aspects\CacheAspectTest.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
@@ -193,6 +198,11 @@
                     BuildAction = "Compile"
                 />
                 <File
+                    RelPath = "Data\EventsTest.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
                     RelPath = "Data\ExecuteDictionaryTest.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
@@ -219,6 +229,11 @@
                 />
                 <File
                     RelPath = "Data\NullableParameter.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "Data\OutputParameter.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
                 />

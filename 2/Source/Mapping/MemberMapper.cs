@@ -3,10 +3,9 @@ using System.Data.SqlTypes;
 using System.Diagnostics;
 using System.IO;
 using System.Xml;
-using BLToolkit.Common;
 using BLToolkit.Reflection;
 using BLToolkit.TypeBuilder;
-using Convert=System.Convert;
+using Convert=BLToolkit.Common.Convert;
 
 namespace BLToolkit.Mapping
 {
@@ -271,7 +270,7 @@ namespace BLToolkit.Mapping
 				_mapper = memberMapper;
 			}
 
-			MemberMapper _mapper;
+			private readonly MemberMapper _mapper;
 
 			public override void Init(MapMemberInfo mapMemberInfo)
 			{
@@ -919,11 +918,12 @@ namespace BLToolkit.Mapping
 				if (mi.Trimmable) return n? new StringMapper.Trimmable.Nullable(): new StringMapper.Trimmable();
 				else              return n? new StringMapper.Nullable()          : new StringMapper();
 
-			if (type == typeof(DateTime))  return n? new DateTimeMapper.Nullable()  : new DateTimeMapper();
-			if (type == typeof(Decimal))   return n? new DecimalMapper.Nullable()   : new DecimalMapper();
-			if (type == typeof(Guid))      return n? new GuidMapper.Nullable()      : new GuidMapper();
-			if (type == typeof(Stream))    return n? new StreamMapper.Nullable()    : new StreamMapper();
-			if (type == typeof(XmlReader)) return n ? new XmlReaderMapper.Nullable(): new XmlReaderMapper();
+			if (type == typeof(DateTime))    return n? new DateTimeMapper.Nullable()   : new DateTimeMapper();
+			if (type == typeof(Decimal))     return n? new DecimalMapper.Nullable()    : new DecimalMapper();
+			if (type == typeof(Guid))        return n? new GuidMapper.Nullable()       : new GuidMapper();
+			if (type == typeof(Stream))      return n? new StreamMapper.Nullable()     : new StreamMapper();
+			if (type == typeof(XmlReader))   return n? new XmlReaderMapper.Nullable()  : new XmlReaderMapper();
+			if (type == typeof(XmlDocument)) return n? new XmlDocumentMapper.Nullable(): new XmlDocumentMapper();
 
 			return null;
 		}
@@ -1153,6 +1153,39 @@ namespace BLToolkit.Mapping
 				}
 			}
 		}
+
+		class XmlDocumentMapper : MemberMapper
+		{
+			protected XmlDocument _nullValue;
+
+			public override void SetValue(object o, object value)
+			{
+				_memberAccessor.SetValue(
+					o,
+					value is XmlDocument? value:
+					value == null? _nullValue: _mappingSchema.ConvertToXmlDocument(value));
+			}
+
+			public override void Init(MapMemberInfo mapMemberInfo)
+			{
+				if (mapMemberInfo == null) throw new ArgumentNullException("mapMemberInfo");
+
+				if (mapMemberInfo.NullValue != null)
+					_nullValue = mapMemberInfo.MappingSchema.ConvertToXmlDocument(mapMemberInfo.NullValue);
+
+				base.Init(mapMemberInfo);
+			}
+
+			public class Nullable : XmlDocumentMapper
+			{
+				public override object GetValue(object o)
+				{
+					object value = _memberAccessor.GetValue(o);
+					return (XmlDocument)value == _nullValue? null: value;
+				}
+			}
+		}
+
 		#endregion
 
 #if FW2
@@ -2008,7 +2041,7 @@ namespace BLToolkit.Mapping
 			return MapFrom(value, _mapMemberInfo);
 		}
 
-		static char[] _trim = { ' ' };
+		static readonly char[] _trim = { ' ' };
 
 		protected object MapFrom(object value, MapMemberInfo mapInfo)
 		{

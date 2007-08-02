@@ -10,8 +10,8 @@ namespace BLToolkit.DataAccess
 			_name = name;
 		}
 
-		private string _name;
-		public  string  Name
+		private readonly string _name;
+		public           string  Name
 		{
 			get { return _name; }
 		}

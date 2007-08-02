@@ -78,7 +78,7 @@ namespace BLToolkit.TypeBuilder.Builders
 
 		class CustomAttributeProvider : ICustomAttributeProvider
 		{
-			static object[] _object = new object[0];
+			static readonly object[] _object = new object[0];
 
 			public object[] GetCustomAttributes(bool inherit)
 			{
@@ -96,7 +96,7 @@ namespace BLToolkit.TypeBuilder.Builders
 			}
 		}
 
-		static CustomAttributeProvider _customAttributeProvider = new CustomAttributeProvider();
+		static readonly CustomAttributeProvider _customAttributeProvider = new CustomAttributeProvider();
 
 		public override ICustomAttributeProvider ReturnTypeCustomAttributes
 		{

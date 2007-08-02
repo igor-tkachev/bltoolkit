@@ -21,14 +21,14 @@ namespace BLToolkit.Mapping
 			_memberMapperType = memberMapperType;
 		}
 
-		private Type _memberType;
-		public  Type  MemberType
+		private readonly Type _memberType;
+		public           Type  MemberType
 		{
 			get { return _memberType; }
 		}
 
-		private Type _memberMapperType;
-		public  Type  MemberMapperType
+		private readonly Type _memberMapperType;
+		public           Type  MemberMapperType
 		{
 			get { return _memberMapperType; }
 		}

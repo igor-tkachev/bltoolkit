@@ -21,13 +21,27 @@ namespace DataAccess
 		[ObjectType(typeof(Person))]
 		public abstract class PersonAccessor : DataAccessor
 		{
+#if ORACLE
+			[SqlQuery("SELECT * FROM Person WHERE LastName = :pLastName")]
+#else
 			[SqlQuery("SELECT * FROM Person WHERE LastName = @lastName")]
+#endif
 			public abstract ArrayList SelectByLastName(string lastName);
 
+#if ORACLE
+			[SqlQuery("SELECT * FROM Person WHERE {0} = :pvalue")]
+#else
 			[SqlQuery("SELECT * FROM Person WHERE {0} = @value")]
+#endif
 			public abstract ArrayList SelectBy([Format] string fieldName, string value);
 
+#if ORACLE
+			[SqlQuery("SELECT * FROM Person WHERE LastName = :plastName AND rownum <= {0}")]
+#elif FIREBIRD
+			[SqlQuery("SELECT FIRST {0} * FROM Person WHERE LastName = @lastName")]
+#else
 			[SqlQuery("SELECT TOP {0} * FROM Person WHERE LastName = @lastName")]
+#endif
 			public abstract ArrayList SelectByLastName(string lastName, [Format(0)] int top);
 		}
 

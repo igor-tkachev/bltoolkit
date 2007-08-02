@@ -161,7 +161,7 @@ namespace BLToolkit.Web.UI
 				_owner = owner;
 			}
 
-			WebObjectBinder _owner;
+			readonly WebObjectBinder _owner;
 
 			protected override IEnumerable ExecuteSelect(DataSourceSelectArguments arguments)
 			{
@@ -188,8 +188,8 @@ namespace BLToolkit.Web.UI
 				_arguments    = arguments;
 			}
 
-			private ObjectBinder              _objectBinder;
-			private DataSourceSelectArguments _arguments;
+			private readonly ObjectBinder              _objectBinder;
+			private readonly DataSourceSelectArguments _arguments;
 
 			#region ICollection Members
 

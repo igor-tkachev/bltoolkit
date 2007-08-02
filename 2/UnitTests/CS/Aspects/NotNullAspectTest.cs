@@ -8,7 +8,7 @@ using BLToolkit.TypeBuilder;
 
 namespace Aspects
 {
-	//[TestFixture]
+	[TestFixture]
 	public class NotNullAspectTest
 	{
 		public NotNullAspectTest()
@@ -23,8 +23,7 @@ namespace Aspects
 			public virtual void Foo3(string str1, [NotNull("Null: {0}")] string str2, string str3) { }
 		}
 
-		[Test]
-		[ExpectedException(typeof(ArgumentNullException), "Value cannot be null.\r\nParameter name: str2")]
+		[Test, ExpectedException(typeof(ArgumentNullException))] // Error message is localized by framework.
 		public void Test1()
 		{
 			TestObject1 o = (TestObject1)TypeAccessor.CreateInstance(typeof(TestObject1));

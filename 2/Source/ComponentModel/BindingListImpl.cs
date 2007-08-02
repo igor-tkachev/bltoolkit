@@ -32,8 +32,8 @@ namespace BLToolkit.ComponentModel
 
 		#region Protected Members
 
-		private IList _list;
-		private Type  _itemType;
+		private readonly IList _list;
+		private readonly Type  _itemType;
 
 		private void ApplySort(IComparer comparer)
 		{
@@ -461,8 +461,8 @@ namespace BLToolkit.ComponentModel
 
 		class SortPropertyComparer : IComparer
 		{
-			PropertyDescriptor _property;
-			ListSortDirection  _direction;
+			readonly PropertyDescriptor _property;
+			readonly ListSortDirection  _direction;
 
 			public SortPropertyComparer(PropertyDescriptor property, ListSortDirection direction)
 			{
@@ -552,7 +552,7 @@ namespace BLToolkit.ComponentModel
 
 		class SortListPropertyComparer : IComparer
 		{
-			ListSortDescriptionCollection _sorts;
+			readonly ListSortDescriptionCollection _sorts;
 
 			public SortListPropertyComparer(ListSortDescriptionCollection sorts)
 			{

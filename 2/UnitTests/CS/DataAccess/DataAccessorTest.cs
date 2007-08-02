@@ -2,7 +2,7 @@ using System;
 using System.Collections;
 using System.ComponentModel;
 using System.Data;
-
+using BLToolkit.Data.DataProvider;
 using NUnit.Framework;
 
 #if FW2
@@ -57,13 +57,12 @@ namespace DataAccess
 		[TableName("Person")]
 		public abstract class Person : EditableObject, IPerson
 		{
-			[Required]                     public abstract Gender Gender     { get; set; }
-
 			[PrimaryKey, NonUpdatable]
 			[MapField("PersonID")]         public abstract int    ID         { get; set; }
-			[MaxLength(50), Required]      public abstract string LastName   { get; set; }
 			[MaxLength(50), Required]      public abstract string FirstName  { get; set; }
 			[MaxLength(50), NullValue("")] public abstract string MiddleName { get; set; }
+			[MaxLength(50), Required]      public abstract string LastName   { get; set; }
+			[Required]                     public abstract Gender Gender     { get; set; }
 
 			public abstract IList Territories { get; set; }
 		}
@@ -83,7 +82,12 @@ namespace DataAccess
 			[ActionName("SelectByName")]
 			public abstract Person AnyParamName(
 				[ParamName("FirstName")] string name1,
-				[ParamName("@LastName")] string name2);
+#if ORACLE
+				[ParamName("LastName")] string name2
+#else
+				[ParamName("@LastName")] string name2
+#endif
+				);
 
 			[ActionName("SelectByName"), ObjectType(typeof(Person))]
 			public abstract IPerson SelectByNameReturnInterface(string firstName, string lastName);
@@ -94,7 +98,7 @@ namespace DataAccess
 			public abstract IPerson SelectByName(string firstName, string lastName, [Destination] Person p);
 			
 			public abstract Person Insert([Destination(NoMap = false)] Person e);
-			
+
 			[SprocName("Person_Insert_OutputParameter")]
 			public abstract void Insert_OutputParameter([Direction.Output("PERSONID")] Person e);
 
@@ -169,6 +173,18 @@ namespace DataAccess
 			[SprocName("Person_SelectAll")]
 			public abstract void          SelectAllTypedDataSetReturnVoid     ([Destination] PersonDataSet ds);
 
+			[ObjectType(typeof(Person)), ActionName("SelectAll"), DataSetTable("First")]
+			public abstract void          SelectFirstTable  ([Destination] DataSet ds);
+
+			[SprocName("Person_SelectAll"), DataSetTable("Second")]
+			public abstract void          SelectSecondTable ([Destination] DataSet ds);
+
+			[ObjectType(typeof(Person)), ActionName("SelectAll"), DataSetTable(0)]
+			public abstract void          SelectFirstTable2 ([Destination] PersonDataSet ds);
+
+			[SprocName("Person_SelectAll"), DataSetTable("Second")]
+			public abstract void          SelectSecondTable2([Destination] PersonDataSet ds);
+
 			#endregion
 
 			#region DataTable
@@ -181,6 +197,9 @@ namespace DataAccess
 
 			[SprocName("Person_SelectAll")]
 			public abstract void          SelectAllDataTableReturnVoid     ([Destination] DataTable dt);
+
+			[SprocName("Person_SelectAll"), DataSetTable("Person")]
+			public abstract DataTable     SelectAllToTablePerson();
 
 #if FW2
 			[SprocName("Person_SelectAll")]
@@ -410,6 +429,8 @@ namespace DataAccess
 			Assert.AreEqual(1, i.ID);
 		}
 
+#if !ACCESS
+#if !FIREBIRD
 		[Test]
 		public void Gen_InsertGetID()
 		{
@@ -431,6 +452,7 @@ namespace DataAccess
 			Assert.IsTrue(e.ID > 0);
 			_sproc.Delete(e);
 		}
+#endif
 		[Test]
 		public void Gen_InsertGetIDReturnParameter()
 		{
@@ -465,6 +487,7 @@ namespace DataAccess
 			Assert.IsTrue(e.ID > 0);
 			_sproc.Delete(e);
 		}
+#endif
 
 		[Test]
 		public void Gen_SprocName()
@@ -592,10 +615,15 @@ namespace DataAccess
 				Assert.IsNotNull(dr);
 				Assert.AreNotEqual(0, dr.FieldCount);
 				Assert.IsTrue(dr.Read());
+#if ORACLE
+				Assert.AreNotEqual(0, dr.GetDecimal(dr.GetOrdinal("PersonID")));
+#else
 				Assert.AreNotEqual(0, dr.GetInt32(dr.GetOrdinal("PersonID")));
+#endif
 			}
 		}
 
+#if !ACCESS
 		[Test]
 		public void Gen_SelectAllIDataReaderSchemaOnly()
 		{
@@ -610,6 +638,7 @@ namespace DataAccess
 				Assert.IsFalse(dr.Read());
 			}
 		}
+#endif
 
 		#endregion
 
@@ -663,6 +692,34 @@ namespace DataAccess
 			Assert.AreNotEqual(0, ds.Person.Rows.Count);
 		}
 
+		[Test]
+		public void DataSetTableAttributeTest()
+		{
+			DataSet ds = new DataSet();
+
+			_da.SelectFirstTable (ds);
+			_da.SelectSecondTable(ds);
+
+			Assert.IsTrue (ds.Tables.Contains("First"),  "Table 'First'  not found");
+			Assert.IsTrue (ds.Tables.Contains("Second"), "Table 'Second' not found");
+			Assert.IsFalse(ds.Tables.Contains("Table"),  "Table 'Table'  was found");
+		}
+
+		[Test]
+		public void DataSetTableAttributeTest2()
+		{
+			PersonDataSet ds = new PersonDataSet();
+
+			_da.SelectFirstTable2 (ds);
+			_da.SelectSecondTable2(ds);
+
+			// Table 'Person' is dataset own table.
+			//
+			Assert.IsTrue (ds.Tables.Contains("Person"), "Table 'Person' not found");
+			Assert.IsTrue (ds.Tables.Contains("Second"), "Table 'Second' not found");
+			Assert.IsFalse(ds.Tables.Contains("Table"),  "Table 'Table'  was found");
+		}
+
 		#endregion
 
 		#region DataTable
@@ -686,6 +743,15 @@ namespace DataAccess
 		{
 			DataTable dt = new DataTable();
 			_da.SelectAllDataTableReturnVoid(dt);
+			Assert.AreNotEqual(0, dt.Rows.Count);
+		}
+
+		[Test]
+		public void DataSetTableAttributeTest3()
+		{
+			DataTable dt = _da.SelectAllToTablePerson();
+
+			Assert.AreEqual("Person", dt.TableName);
 			Assert.AreNotEqual(0, dt.Rows.Count);
 		}
 
@@ -774,6 +840,43 @@ namespace DataAccess
 
 #endif
 
+		#endregion
+
+		#region PrepareParameters
+
+		public abstract class MyAssessorBase : DataAccessor
+		{
+			// This method will inject an additional parameter into each sproc call
+			//
+			protected override IDbDataParameter[] PrepareParameters(
+				DbManager db,
+				object[]  parameters)
+			{
+				ArrayList retParams = new ArrayList(parameters.Length + 1);
+
+				retParams.AddRange(base.PrepareParameters(db, parameters));
+				retParams.Add(db.Parameter((string)db.DataProvider.Convert("ID", ConvertType.NameToParameter), 1));
+
+				return (IDbDataParameter[]) retParams.ToArray(typeof(IDbDataParameter));
+			}
+		}
+
+		public abstract class MyAssessor : MyAssessorBase
+		{
+			public abstract Person SelectByKey();
+		}
+
+		[Test]
+		public void PrepareParametersTest()
+		{
+			IPerson i = ((MyAssessor)TypeAccessor
+				.CreateInstance(typeof (MyAssessor)))
+				.SelectByKey();
+
+			Assert.IsNotNull(i);
+			Assert.AreEqual("John", i.FirstName);
+			Assert.AreEqual("Pupkin", i.LastName);
+		}
 		#endregion
 	}
 }

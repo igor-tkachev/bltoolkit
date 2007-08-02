@@ -1,4 +1,5 @@
 using System;
+using System.Configuration.Assemblies;
 using System.Reflection;
 using System.Reflection.Emit;
 using System.Threading;
@@ -19,7 +20,18 @@ namespace BLToolkit.Reflection.Emit
 		/// with the specified parameters.
 		/// </summary>
 		/// <param name="path">The path where the assembly will be saved.</param>
-		public AssemblyBuilderHelper(string path)
+		public AssemblyBuilderHelper(string path) : this(path, null, null)
+		{
+		}
+
+		/// <summary>
+		/// Initializes a new instance of the <see cref="AssemblyBuilderHelper"/> class
+		/// with the specified parameters.
+		/// </summary>
+		/// <param name="path">The path where the assembly will be saved.</param>
+		/// <param name="version">The assembly version.</param>
+		/// <param name="keyFile">The key pair file to sign the assembly.</param>
+		public AssemblyBuilderHelper(string path, Version version, string keyFile)
 		{
 			if (path == null) throw new ArgumentNullException("path");
 
@@ -67,6 +79,23 @@ namespace BLToolkit.Reflection.Emit
 			_path              = path;
 			_assemblyName.Name = assemblyName;
 
+			if (version != null)
+				_assemblyName.Version = version;
+
+			if (keyFile != null && keyFile.Length > 0)
+			{
+				_assemblyName.Flags        |= AssemblyNameFlags.PublicKey;
+				_assemblyName.KeyPair       = new StrongNameKeyPair(System.IO.File.OpenRead(keyFile));
+				_assemblyName.HashAlgorithm = AssemblyHashAlgorithm.SHA1;
+			}
+#if FW2
+#if DEBUG
+			_assemblyName.Flags |= AssemblyNameFlags.EnableJITcompileTracking;
+#else
+			_assemblyName.Flags |= AssemblyNameFlags.EnableJITcompileOptimizer;
+#endif
+#endif
+
 			_assemblyBuilder =
 				assemblyDir == null || assemblyDir.Length == 0?
 				Thread.GetDomain().DefineDynamicAssembly(_assemblyName, AssemblyBuilderAccess.RunAndSave):
@@ -75,7 +104,7 @@ namespace BLToolkit.Reflection.Emit
 			_assemblyBuilder.SetCustomAttribute(BLToolkitAttribute);
 		}
 
-		private string _path;
+		private readonly string _path;
 		/// <summary>
 		/// Gets the path where the assembly will be saved.
 		/// </summary>
@@ -84,20 +113,20 @@ namespace BLToolkit.Reflection.Emit
 			get { return _path; }
 		}
 
-		private AssemblyName _assemblyName = new AssemblyName();
+		private readonly AssemblyName _assemblyName = new AssemblyName();
 		/// <summary>
 		/// Gets AssemblyName.
 		/// </summary>
-		public  AssemblyName  AssemblyName
+		public           AssemblyName  AssemblyName
 		{
 			get { return _assemblyName; }
 		}
 
-		private AssemblyBuilder _assemblyBuilder;
+		private readonly AssemblyBuilder _assemblyBuilder;
 		/// <summary>
 		/// Gets AssemblyBuilder.
 		/// </summary>
-		public  AssemblyBuilder  AssemblyBuilder
+		public           AssemblyBuilder  AssemblyBuilder
 		{
 			get { return _assemblyBuilder; }
 		}

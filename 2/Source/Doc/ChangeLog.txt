@@ -1,4 +1,31 @@
+v 2.0.6
+
+Bug fixes
+
+- DbManager.OutputParameter lacks overload with 'size' parameters.
+- CacheAspect hungs a desktop application on exit.
+- ExecuteResultSet fails on many-to-one relations.
+- TypeBuilder fails to override a method with generic parameters or generic return type.
+
+Enhancement
+
+- ParamSize & ParamDbType attributes to tweak DataAccessor parameters. Especially output ones.
+- All 'emit.stloc' immediately followed by 'emit.ldloc' were replaced with simple 'emit.dup' command.
+  Lots of redundant local variables were removed.
+- UnitTests for Oracle, Firebird & Access (Jet)
+- DataSetTableAttribute is handled by all DataSet/DataTable related methods of DataAccessBuilder.
+- ClearCache method for CacheAspect.
+- Metadata provider for mapping.
+- Ability to specify global assembly version & strong name key pair.
+- AsyncAspect to execute any method asynchronously.
+- Added support for ConnectionStrings config settings.
+- Editable XmlDocuments.
+
 v 2.0.5
+
+Breaking changes
+
+- DbManager.InitCommand renamed to OnInitCommand.
 
 Bug fixes
 
@@ -10,6 +37,12 @@ Bug fixes
 - PropertyChangedBuilder was crashing when property was not public
 - ObjectBinder.IsNull was serialized to resources
 - Oracle provider now handles arrays of nullable types correctly.
+- DataAccessor.PrepareParameters was invoked only to ref parameters.
+- DataAccessor.PrepareParameters lacks DbManager which may be external.
+- DbManager.InitParameters did hot handle decimal type.
+- MappingSchema.ValueToEnum fails with underlying type other then Int32. 
+- CounterAspect catches the OnCatch event now to count exceptions.
+- DbManager.ExecuteForEach does not call InitParameters in the loop.
 
 Enhancement
 
@@ -19,6 +52,13 @@ Enhancement
 - Ability to specify globaly whether strings should be trimed when mapping
 - Ability to specify whether PropertyChange notification should only be fired when underlying value is changed
   and not when setter is called
+- XmlDocument type support.
+- DbManager.SetParameters() accepts arrays of IDbDataParameter.
+- DataSetTableAttribute for DataAccessorBuilder to explicitly specify DataSet table name.
+- Default CacheAspect.IsWeak value changed to false.
+- Cleanup thread for CacheAspect.
+- MemberMapper type can be specified directly in the target type declaration.
+- Events for DbManager.OnBeforeOperation, OnAfterOperation, OnOperationException & OnInitCommand.
 
 v 2.0.4
 

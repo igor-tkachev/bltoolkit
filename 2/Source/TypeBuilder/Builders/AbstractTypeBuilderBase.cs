@@ -263,19 +263,6 @@ namespace BLToolkit.TypeBuilder.Builders
 				EmitHelper emit = Context.TypeBuilder.TypeInitializer.Emitter;
 
 				ParameterInfo[] index      = property.GetIndexParameters();
-				LocalBuilder    parameters = null;
-
-				if (index.Length > 0)
-				{
-					parameters = (LocalBuilder)Context.Items["$BLToolkit.ParameterLocalBuilder."];
-
-					if (parameters == null)
-					{
-						parameters = emit.DeclareLocal(typeof(Type[]));
-
-						Context.Items["$BLToolkit.ParameterLocalBuilder."] = parameters;
-					}
-				}
 
 				emit
 					.LoadType (Context.Type)
@@ -294,19 +281,16 @@ namespace BLToolkit.TypeBuilder.Builders
 					emit
 						.ldc_i4 (index.Length) 
 						.newarr (typeof(Type))
-						.stloc  (parameters)
 						;
 
 					for (int i = 0; i < index.Length; i++)
 						emit
-							.ldloc      (parameters)
+							.dup
 							.ldc_i4     (i) 
 							.LoadType   (index[i].ParameterType)
 							.stelem_ref
 							.end()
 							;
-
-					emit.ldloc(parameters);
 				}
 
 				emit

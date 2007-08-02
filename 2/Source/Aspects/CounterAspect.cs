@@ -5,17 +5,19 @@ using System.Threading;
 
 namespace BLToolkit.Aspects
 {
+	public delegate MethodCallCounter CreateCounter(CallMethodInfo methodInfo);
+
 	[System.Diagnostics.DebuggerStepThrough]
 	public class CounterAspect : Interceptor
 	{
-		static LocalDataStoreSlot counterSlot = Thread.AllocateDataSlot();
+		static readonly LocalDataStoreSlot counterSlot = Thread.AllocateDataSlot();
 
 		protected override void BeforeCall(InterceptCallInfo info)
 		{
 			if (!IsEnabled || Thread.GetData(counterSlot) != null)
 				return;
 
-			MethodCallCounter counter = GetCounter(info.CallMethodInfo);
+			MethodCallCounter counter = GetCounter(info);
 
 			lock (counter.CurrentCalls.SyncRoot)
 				counter.CurrentCalls.Add(info);
@@ -28,7 +30,7 @@ namespace BLToolkit.Aspects
 			if (!IsEnabled)
 				return;
 
-			MethodCallCounter counter = GetCounter(info.CallMethodInfo);
+			MethodCallCounter counter = GetCounter(info);
 			MethodCallCounter prev    = (MethodCallCounter)Thread.GetData(counterSlot);
 
 			if (counter == prev)
@@ -55,8 +57,8 @@ namespace BLToolkit.Aspects
 
 		#region Counter
 
-		private static ArrayList _counters = ArrayList.Synchronized(new ArrayList());
-		public  static ArrayList  Counters
+		private static readonly ArrayList _counters = ArrayList.Synchronized(new ArrayList());
+		public  static          ArrayList  Counters
 		{
 			get { return _counters; }
 		}
@@ -88,14 +90,39 @@ namespace BLToolkit.Aspects
 			return null;
 		}
 
-		private static MethodCallCounter GetCounter(CallMethodInfo methodInfo)
-		{
-			if (methodInfo.Counter == null)
-				lock (_counters.SyncRoot)
-					if (methodInfo.Counter == null)
-						_counters.Add(methodInfo.Counter = new MethodCallCounter(methodInfo.MethodInfo));
+		#region CreateCounter
 
-			return methodInfo.Counter;
+		private static CreateCounter _createCounter = new CreateCounter(CreateCounterInternal);
+
+		public static CreateCounter CreateCounter
+		{
+			get { return _createCounter; }
+			set { _createCounter = value == null ? new CreateCounter(CreateCounterInternal) : value; }
+		}
+
+		private static MethodCallCounter CreateCounterInternal(CallMethodInfo methodInfo)
+		{
+			return new MethodCallCounter(methodInfo);
+		}
+
+		#endregion
+
+		private static MethodCallCounter GetCounter(InterceptCallInfo info)
+		{
+			if (info.CallMethodInfo.Counter == null)
+				lock (_counters.SyncRoot)
+					if (info.CallMethodInfo.Counter == null)
+					{
+						foreach (MethodCallCounter c in _counters)
+							if (c.InterceptorID == info.InterceptorID)
+								return info.CallMethodInfo.Counter = c;
+
+						_counters.Add(info.CallMethodInfo.Counter = CreateCounter(info.CallMethodInfo));
+
+						info.CallMethodInfo.Counter.InterceptorID = info.InterceptorID;
+					}
+
+			return info.CallMethodInfo.Counter;
 		}
 
 		#endregion

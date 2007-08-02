@@ -55,11 +55,11 @@ namespace BLToolkit.Reflection.Extension
 			}
 		}
 
-		private object    _value;
-		private Hashtable _values = new Hashtable();
+		private          object    _value;
+		private readonly Hashtable _values = new Hashtable();
 
-		private static ValueCollection _null = new ValueCollection();
-		public  static ValueCollection  Null
+		private static readonly ValueCollection _null = new ValueCollection();
+		public  static          ValueCollection  Null
 		{
 			get { return _null;  }
 		}

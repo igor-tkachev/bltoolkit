@@ -18,8 +18,8 @@ namespace BLToolkit.Reflection
 					string.Format("Type '{0}' does not implement IObjectFactroty interface.", type));
 		}
 
-		private IObjectFactory _objectFactory;
-		public  IObjectFactory  ObjectFactory
+		private readonly IObjectFactory _objectFactory;
+		public           IObjectFactory  ObjectFactory
 		{
 			get { return _objectFactory; }
 		}

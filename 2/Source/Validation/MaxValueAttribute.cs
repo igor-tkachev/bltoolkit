@@ -27,8 +27,8 @@ namespace BLToolkit.Validation
 			ErrorMessage = errorMessage;
 		}
 
-		private object _value;
-		public virtual object GetValue(ValidationContext context)
+		private readonly object _value;
+		public  virtual  object GetValue(ValidationContext context)
 		{
 			return _value;
 		}

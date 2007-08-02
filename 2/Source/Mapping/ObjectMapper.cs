@@ -35,8 +35,20 @@ namespace BLToolkit.Mapping
 			MemberMapper mm = null;
 
 			Attribute attr = mapMemberInfo.MemberAccessor.GetAttribute(typeof(MemberMapperAttribute));
+			if (attr == null)
+			{
+				object[] attrs = TypeHelper.GetAttributes(mapMemberInfo.Type, typeof(MemberMapperAttribute));
 
-			if (attr != null)
+				foreach (MemberMapperAttribute a in attrs)
+				{
+					if (a.MemberType == null)
+					{
+						mm = a.MemberMapper;
+						break;
+					}
+				}
+			}
+			else
 				mm = ((MemberMapperAttribute)attr).MemberMapper;
 
 			if (mm == null)
@@ -82,7 +94,7 @@ namespace BLToolkit.Mapping
 
 		#region Public Members
 
-		private ArrayList _members;
+		private readonly ArrayList _members;
 		public  MemberMapper this[int index]
 		{
 			get { return (MemberMapper)_members[index]; }
@@ -126,7 +138,7 @@ namespace BLToolkit.Mapping
 			}
 		}
 
-		private Hashtable _nameToMember;
+		private readonly Hashtable _nameToMember;
 		public  MemberMapper this[string name]
 		{
 			get
@@ -227,9 +239,7 @@ namespace BLToolkit.Mapping
 
 			foreach (MemberAccessor ma in _typeAccessor)
 			{
-				bool isSet;
-
-				if (MetadataProvider.GetIgnore(this, ma, out isSet))
+				if (GetIgnore(ma))
 					continue;
 
 				MapFieldAttribute mapFieldAttr = (MapFieldAttribute)ma.GetAttribute(typeof(MapFieldAttribute));
@@ -242,21 +252,21 @@ namespace BLToolkit.Mapping
 					mi.Type            = ma.Type;
 					mi.MappingSchema   = mappingSchema;
 					mi.MemberExtension = _extension[ma.Name];
-					mi.Name            = MetadataProvider.GetFieldName(this, ma, out isSet);
+					mi.Name            = GetFieldName   (ma);
 					mi.MemberName      = ma.Name;
-					mi.Trimmable       = MetadataProvider.GetTrimmable(this, ma, out isSet);
-					mi.MapValues       = GetMapValues(ma);
+					mi.Trimmable       = GetTrimmable   (ma);
+					mi.MapValues       = GetMapValues   (ma);
 					mi.DefaultValue    = GetDefaultValue(ma);
-					mi.Nullable        = GetNullable(ma);
-					mi.NullValue       = GetNullValue(ma, mi.Nullable);
+					mi.Nullable        = GetNullable    (ma);
+					mi.NullValue       = GetNullValue   (ma, mi.Nullable);
 
 					Add(CreateMemberMapper(mi));
 				}
-				else if (null != mapFieldAttr.OrigName)
+				else if (mapFieldAttr.OrigName != null)
 				{
 					EnsureMapper(mapFieldAttr.MapName, ma.Name + "." + mapFieldAttr.OrigName);
 				}
-				else if (null != mapFieldAttr.Format)
+				else if (mapFieldAttr.Format != null)
 				{
 					foreach (MemberMapper inner in _mappingSchema.GetObjectMapper(ma.Type))
 						EnsureMapper(string.Format(mapFieldAttr.Format, inner.Name), ma.Name + "." + inner.MemberName);
@@ -305,6 +315,9 @@ namespace BLToolkit.Mapping
 			return mm;
 		}
 
+		private readonly Hashtable _nameToComplexMapper          = new Hashtable();
+		private readonly Hashtable _nameToNotFoundComplexMappers = new Hashtable();
+
 		[SuppressMessage("Microsoft.Performance", "CA1807:AvoidUnnecessaryStringCreation", MessageId = "stack0")]
 		[SuppressMessage("Microsoft.Performance", "CA1807:AvoidUnnecessaryStringCreation", MessageId = "origName")]
 		protected MemberMapper GetComplexMapper(string mapName, string origName)
@@ -320,7 +333,7 @@ namespace BLToolkit.Mapping
 
 				foreach (MemberAccessor ma in TypeAccessor)
 				{
-					if (ma.Name.ToLower() == name)
+					if (ma.Name.Length == name.Length && ma.Name.ToLower() == name)
 					{
 						ObjectMapper om = MappingSchema.GetObjectMapper(ma.Type);
 
@@ -351,9 +364,29 @@ namespace BLToolkit.Mapping
 				}
 			}
 			else
+			{
+				MemberMapper mm = (MemberMapper)_nameToComplexMapper[name];
+
+				if (mm != null)
+					return mm;
+
+				if (_nameToNotFoundComplexMappers.ContainsKey(name))
+					return null;
+
 				foreach (MemberMapper m in _members)
-					if (m.MemberAccessor.Name.ToLower() == name)
+					if (m.MemberAccessor.Name.Length == name.Length && m.MemberAccessor.Name.ToLower() == name)
+					{
+						_nameToComplexMapper[name] = m;
 						return m;
+					}
+
+				// Under some conditions, this way lead to memory leaks.
+				// In other hand, shaking mappers up every time lead to performance loss.
+				// So we cache failed requests.
+				// If this optimization is a memory leak for you, just comment out next line.
+				//
+				_nameToNotFoundComplexMappers.Add(name, null);
+			}
 
 			return null;
 		}
@@ -367,153 +400,48 @@ namespace BLToolkit.Mapping
 			return isSet? values: _mappingSchema.GetMapValues(member.Type);
 		}
 
-		private object GetExtensionDefaultValue(MemberAccessor memberAccessor)
-		{
-			object value = Extension[memberAccessor.Name]["DefaultValue"].Value;
-
-			if (value == null)
-				value = MappingSchema.GetExtensionDefaultValue(Extension, memberAccessor.Type);
-
-			return TypeExtension.ChangeType(value, memberAccessor.Type);
-		}
-
 		protected virtual object GetDefaultValue(MemberAccessor memberAccessor)
 		{
-			object value = GetExtensionDefaultValue(memberAccessor);
+			bool isSet;
 
-			if (value != null)
-				return value;
+			object value = MetadataProvider.GetDefaultValue(this, memberAccessor, out isSet);
 
-			// Check member [DefaultValue(0)]
-			//
-			DefaultValueAttribute attr =
-				(DefaultValueAttribute)memberAccessor.GetAttribute(typeof(DefaultValueAttribute));
-
-			if (attr != null)
-				return attr.Value;
-
-			// Check type [DefaultValues(typeof(int), 0)]
-			//
-			object[] attrs = memberAccessor.GetTypeAttributes(typeof(DefaultValueAttribute));
-
-			foreach (DefaultValueAttribute a in attrs)
-				if (a.Type == null && a.Value != null && a.Value.GetType() == memberAccessor.Type ||
-					a.Type != null && a.Type == memberAccessor.Type)
-					return a.Value;
-
-			return _mappingSchema.GetDefaultValue(memberAccessor.Type);
+			return isSet? value: _mappingSchema.GetDefaultValue(memberAccessor.Type);
 		}
-
-/*
-		private object GetExtensionIsNullable(MemberAccessor memberAccessor)
-		{
-			object value = Extension[memberAccessor.Name]["Nullable"].Value;
-
-			if (value != null)
-				return TypeExtension.ToBoolean(value);
-
-			value = Extension[memberAccessor.Name]["NullValue"].Value;
-
-			return value != null;
-		}
-*/
 
 		protected virtual bool GetNullable(MemberAccessor memberAccessor)
 		{
-			// Check extension <Member1 Nullable='true' />
-			//
-			object value = Extension[memberAccessor.Name]["Nullable"].Value;
-
-			if (value != null)
-				return TypeExtension.ToBoolean(value);
-
-			// Check extension <Member1 NullValue='-1' />
-			//
-			if (Extension[memberAccessor.Name]["NullValue"].Value != null)
-				return true;
-
-			// Check member [Nullable(true | false)]
-			//
-			NullableAttribute attr1 =
-				(NullableAttribute)memberAccessor.GetAttribute(typeof(NullableAttribute));
-
-			if (attr1 != null)
-				return attr1.IsNullable;
-
-			// Check member [NullValue(0)]
-			//
-			NullValueAttribute attr2 =
-				(NullValueAttribute)memberAccessor.GetAttribute(typeof(NullValueAttribute));
-
-			if (attr2 != null)
-				return true;
-
-			// Check type [Nullable(true || false)]
-			//
-			attr1 = (NullableAttribute)TypeHelper.GetFirstAttribute(
-				memberAccessor.MemberInfo.DeclaringType, typeof(NullableAttribute));
-
-			if (attr1 != null)
-				return attr1.IsNullable;
-
-			// Check type [NullValues(typeof(int), 0)]
-			//
-			object[] attrs = memberAccessor.GetTypeAttributes(typeof(NullValueAttribute));
-
-			foreach (NullValueAttribute a in attrs)
-				if (a.Type == null && a.Value != null && a.Value.GetType() == memberAccessor.Type ||
-					a.Type != null && a.Type == memberAccessor.Type)
-					return true;
-
-			if (memberAccessor.Type.IsEnum)
-				return MappingSchema.GetNullValue(memberAccessor.Type) != null;
-
-			return false;
+			bool isSet;
+			return MetadataProvider.GetNullable(this, memberAccessor, out isSet);
 		}
 
-		private static object CheckNullValue(object value, MemberAccessor memberAccessor)
+		protected virtual bool GetIgnore(MemberAccessor memberAccessor)
 		{
-			if (value is Type && (Type)value == typeof(DBNull))
-			{
-				value = DBNull.Value;
+			bool isSet;
+			return MetadataProvider.GetIgnore(this, memberAccessor, out isSet);
+		}
 
-				if (memberAccessor.Type == typeof(string))
-					value = null;
-			}
+		protected virtual string GetFieldName(MemberAccessor memberAccessor)
+		{
+			bool isSet;
+			return MetadataProvider.GetFieldName(this, memberAccessor, out isSet);
+		}
 
-			return value;
+		protected virtual bool GetTrimmable(MemberAccessor memberAccessor)
+		{
+			bool isSet;
+			return MetadataProvider.GetTrimmable(this, memberAccessor, out isSet);
 		}
 
 		protected virtual object GetNullValue(MemberAccessor memberAccessor, bool isNullable)
 		{
 			if (isNullable)
 			{
-				// Check extension <Member1 NullValue='-1' />
-				//
-				object value = Extension[memberAccessor.Name]["NullValue"].Value;
-
-				if (value != null)
-					return TypeExtension.ChangeType(value, memberAccessor.Type);
-
-				// Check member [NullValue(0)]
-				//
-				NullValueAttribute attr =
-					(NullValueAttribute)memberAccessor.GetAttribute(typeof(NullValueAttribute));
-
-				if (attr != null)
-					return CheckNullValue(attr.Value, memberAccessor);
-
-				// Check type [NullValues(typeof(int), 0)]
-				//
-				object[] attrs = memberAccessor.GetTypeAttributes(typeof(NullValueAttribute));
-
-				foreach (NullValueAttribute a in attrs)
-					if (a.Type == null && a.Value != null && a.Value.GetType() == memberAccessor.Type ||
-						a.Type != null && a.Type == memberAccessor.Type)
-						return CheckNullValue(a.Value, memberAccessor);
+				bool isSet;
+				return MetadataProvider.GetNullValue(this, memberAccessor, out isSet);
 			}
 
-			return CheckNullValue(MappingSchema.GetNullValue(memberAccessor.Type), memberAccessor);
+			return MappingSchema.GetNullValue(memberAccessor.Type);
 		}
 
 		#endregion

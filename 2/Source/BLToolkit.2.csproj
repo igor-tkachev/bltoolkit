@@ -19,6 +19,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <CodeAnalysisRules>-Microsoft.Design#CA1019;-Microsoft.Design#CA1000;-Microsoft.Design#CA1002;-Microsoft.Design#CA1004;-Microsoft.Design#CA1035;-Microsoft.Design#CA1039;-Microsoft.Design#CA1024;-Microsoft.Globalization#CA1303;-Microsoft.Globalization#CA1304;-Microsoft.Globalization#CA1305;-Microsoft.Maintainability#CA1502;-Microsoft.Naming#CA1720;-Microsoft.Naming#CA1709;-Microsoft.Naming#CA1710;-Microsoft.Naming#CA1707;-Microsoft.Naming#CA1706;-Microsoft.Performance#CA1800;-Microsoft.Performance#CA1819;-Microsoft.Usage#CA2223;-Microsoft.Usage#CA2225</CodeAnalysisRules>
+    <NoWarn>618</NoWarn>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -28,6 +29,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <CodeAnalysisRules>-Microsoft.Design#CA1019;-Microsoft.Design#CA1000;-Microsoft.Design#CA1004;-Microsoft.Design#CA1035;-Microsoft.Design#CA1033;-Microsoft.Design#CA1039;-Microsoft.Design#CA1024;-Microsoft.Globalization#CA1303;-Microsoft.Globalization#CA1304;-Microsoft.Globalization#CA1305;-Microsoft.Naming#CA1720;-Microsoft.Naming#CA1709;-Microsoft.Naming#CA1710;-Microsoft.Naming#CA1707;-Microsoft.Naming#CA1706;-Microsoft.Performance#CA1819;-Microsoft.Usage#CA2223;-Microsoft.Usage#CA2225</CodeAnalysisRules>
+    <NoWarn>618</NoWarn>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -46,6 +48,8 @@
     <Compile Include="Aspects\CacheAspectT.cs" />
     <Compile Include="Aspects\CacheAttribute.cs" />
     <Compile Include="Aspects\CallMethodInfo.cs" />
+    <Compile Include="Aspects\AsyncAspectBuilder.cs" />
+    <Compile Include="Aspects\AsyncAttribute.cs" />
     <Compile Include="Aspects\MethodCallCounter.cs" />
     <Compile Include="Aspects\CounterAspect.cs" />
     <Compile Include="Aspects\CounterAttribute.cs" />
@@ -105,6 +109,9 @@
     <Compile Include="DataAccess\ActionNameAttribute.cs" />
     <Compile Include="DataAccess\ActionSprocNameAttribute.cs" />
     <Compile Include="DataAccess\CommandBehaviorAttribute.cs" />
+    <Compile Include="DataAccess\ParamDbTypeAttribute.cs" />
+    <Compile Include="DataAccess\ParamSizeAttribute.cs" />
+    <Compile Include="DataAccess\DataSetTableAttribute.cs" />
     <Compile Include="DataAccess\ParamNullValue.cs" />
     <Compile Include="DataAccess\DataAccessorTA.cs" />
     <Compile Include="DataAccess\DataAccessBase.cs" />
@@ -136,7 +143,10 @@
     <Compile Include="DataAccess\SqlQueryT.cs" />
     <Compile Include="DataAccess\TableNameAttribute.cs" />
     <Compile Include="Common\NameOrIndexParameter.cs" />
+    <Compile Include="Data\InitCommandEventArgs.cs" />
+    <Compile Include="Data\OperationExceptionEventArgs.cs" />
     <Compile Include="Data\DataProvider\OracleDataProvider.cs" />
+    <Compile Include="Data\OperationTypeEventArgs.cs" />
     <Compile Include="Data\ScalarSourceType.cs" />
     <Compile Include="Data\DataException.cs" />
     <Compile Include="Data\DataProvider\AccessDataProvider.cs" />
@@ -145,10 +155,10 @@
     <Compile Include="Data\DataProvider\OdbcDataProvider.cs" />
     <Compile Include="Data\DataProvider\OleDbDataProvider.cs" />
     <Compile Include="Data\DataProvider\SqlDataProvider.cs" />
-    <Compile Include="Data\DataProvider\SybaseAdoDataProvider.cs" />
     <Compile Include="Data\DbManager.cs">
     </Compile>
     <Compile Include="Data\OperationType.cs" />
+    <Compile Include="EditableObjects\EditableXmlDocument.cs" />
     <Compile Include="EditableObjects\EditableList.cs" />
     <Compile Include="EditableObjects\EditableListChangedEventArgs.cs" />
     <Compile Include="ComponentModel\MemberPropertyDescriptor.cs" />
@@ -159,6 +169,7 @@
     <Compile Include="EditableObjects\EditableObjectT.cs" />
     <Compile Include="EditableObjects\EditableValue.cs" />
     <Compile Include="EditableObjects\IEditable.cs" />
+    <Compile Include="Mapping\SimpleSourceListMapper.cs" />
     <Compile Include="Mapping\MapImplicitAttribute.cs" />
     <Compile Include="Mapping\MapSetDataT.cs" />
     <Compile Include="Mapping\MetadataProvider\MapAttributeMetadataProvider.cs" />
@@ -375,6 +386,9 @@
     <Content Include="Doc\License.txt" />
     <Content Include="Doc\OnlineDoc.txt" />
     <EmbeddedResource Include="Web\UI\WebObjectBinder.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <Service Include="{B4F97281-0DBD-4835-9ED8-7DFB966E87FF}" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>

@@ -16,13 +16,13 @@ namespace BLToolkit.Mapping
 {
 	public
 #if FW2
-		static partial
+		static
 #endif
 		class ValueMapping
 	{
 		#region Init
 
-		private static Table _mappers = new Table();
+		private static readonly Table _mappers = new Table();
 
 		#endregion
 
@@ -55,7 +55,7 @@ namespace BLToolkit.Mapping
 
 		#region GetMapper
 
-		private static object _sync = new object();
+		private static readonly object _sync = new object();
 
 		[CLSCompliant(false)]
 		public static IValueMapper GetMapper(Type t1, Type t2)

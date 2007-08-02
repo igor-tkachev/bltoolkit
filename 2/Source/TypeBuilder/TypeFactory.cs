@@ -20,6 +20,8 @@ namespace BLToolkit.TypeBuilder
 		#region Create Assembly
 
 		private static string                _globalAssemblyPath;
+		private static string                _globalAssemblyKeyFile;
+		private static Version               _globalAssemblyVersion;
 		private static AssemblyBuilderHelper _globalAssembly;
 
 		private static AssemblyBuilderHelper GlobalAssemblyBuilder
@@ -27,7 +29,7 @@ namespace BLToolkit.TypeBuilder
 			get
 			{
 				if (_globalAssembly == null && _globalAssemblyPath != null)
-					_globalAssembly = new AssemblyBuilderHelper(_globalAssemblyPath);
+					_globalAssembly = new AssemblyBuilderHelper(_globalAssemblyPath, _globalAssemblyVersion, _globalAssemblyKeyFile);
 
 				return _globalAssembly;
 			}
@@ -50,11 +52,20 @@ namespace BLToolkit.TypeBuilder
 		[SuppressMessage("Microsoft.Design", "CA1062:ValidateArgumentsOfPublicMethods")]
 		public static void SetGlobalAssembly(string path)
 		{
+			SetGlobalAssembly(path, null, null);
+		}
+
+		[SuppressMessage("Microsoft.Design", "CA1062:ValidateArgumentsOfPublicMethods")]
+		public static void SetGlobalAssembly(string path, Version version, string keyFile)
+		{
 			if (_globalAssembly != null)
 				SaveGlobalAssembly();
 
 			if (path != null && path.Length > 0)
 				_globalAssemblyPath = path;
+
+			_globalAssemblyVersion = version;
+			_globalAssemblyKeyFile = keyFile;
 		}
 
 		public static void SaveGlobalAssembly()
@@ -65,8 +76,10 @@ namespace BLToolkit.TypeBuilder
 
 				WriteDebug("The global assembly saved in '{0}'.", _globalAssembly.Path);
 
-				_globalAssembly     = null;
-				_globalAssemblyPath = null;
+				_globalAssembly        = null;
+				_globalAssemblyPath    = null;
+				_globalAssemblyVersion = null;
+				_globalAssemblyKeyFile = null;
 			}
 		}
 
@@ -134,7 +147,7 @@ namespace BLToolkit.TypeBuilder
 
 		#region GetType
 
-		private static Hashtable _builtTypes = new Hashtable(10);
+		private static readonly Hashtable _builtTypes = new Hashtable(10);
 
 		public static Type GetType(object hashKey, Type sourceType, ITypeBuilder typeBuilder)
 		{

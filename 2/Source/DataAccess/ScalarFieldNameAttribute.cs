@@ -7,10 +7,6 @@ namespace BLToolkit.DataAccess
 	[AttributeUsage(AttributeTargets.Method)]
 	public class ScalarFieldNameAttribute : Attribute
 	{
-		public ScalarFieldNameAttribute()
-		{
-		}
-
 		public ScalarFieldNameAttribute(string name)
 		{
 			_nameOrIndex = name;

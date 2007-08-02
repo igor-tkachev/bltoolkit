@@ -33,16 +33,16 @@ namespace DataAccess
 
 			[SprocName("OutRefTest")]
 			public abstract void OutRefTest2(
-				[ParamNullValue(-1)]      int               @ID,
-				[ParamNullValue(-2)]  out int         @outputID,
-				[ParamNullValue(-3)]  ref int    @inputOutputID,
-				[ParamNullValue("A")]     string            @str,
-				[ParamNullValue("B")] out string      @outputStr,
-				[ParamNullValue("C")] ref string @inputOutputStr);
+				[ParamNullValue(-1)]      int               ID,
+				[ParamNullValue(-2)]  out int         outputID,
+				[ParamNullValue(-3)]  ref int    inputOutputID,
+				[ParamNullValue("A")]     string            str,
+				[ParamNullValue("B")] out string      outputStr,
+				[ParamNullValue("C")] ref string inputOutputStr);
 
-			public abstract void OutRefTest(
-				out int @outputID, Entity entity, ref string @inputOutputStr);
-
+			public abstract void OutRefTest(out int outputID,
+				[Direction.InputOutput("inputOutputID", "inputOutputStr"), Direction.Output("outputStr", "outputID")] Entity entity,
+				ref string inputOutputStr);
 		}
 
 		[Test]
@@ -73,10 +73,12 @@ namespace DataAccess
 			((TestAccessor)DataAccessor.CreateInstance(typeof(TestAccessor)))
 				.OutRefTest(out @outputID, e, ref @inputOutputStr);
 
-			Assert.AreEqual(5,    @outputID);
-			Assert.AreEqual(10,   e.inputOutputID);
-			Assert.AreEqual(null, e.outputStr);
-			Assert.AreEqual("10", @inputOutputStr);
+			Assert.AreEqual(5,     e.outputID);
+			Assert.AreEqual(5,     @outputID);
+			Assert.AreEqual(15,    e.inputOutputID);
+			Assert.AreEqual("5",   e.outputStr);
+			Assert.AreEqual("510", e.inputOutputStr);
+			Assert.AreEqual("510", @inputOutputStr);
 		}
 
 		[Test] 
@@ -85,7 +87,7 @@ namespace DataAccess
 			int    @outputID;
 			int    @inputOutputID = 10;
 			string @outputStr;
-			string @inputOutputStr = "NotNullValue";
+			string @inputOutputStr = "C";
 
 			((TestAccessor)DataAccessor.CreateInstance(typeof(TestAccessor)))
 				.OutRefTest2(-1, out @outputID,  ref @inputOutputID,
@@ -117,7 +119,7 @@ namespace DataAccess
 
 			public abstract void OutRefTest(
 				out int? @outputID,
-				[Direction.Output("outputStr"), Direction.InputOutput("inputOutputID")] NullableEntity entity,
+				[Direction.InputOutput("inputOutputID", "inputOutputStr"), Direction.Output("outputStr", "outputID")] NullableEntity entity,
 				ref string @inputOutputStr);
 
 		}
@@ -128,7 +130,7 @@ namespace DataAccess
 			int?   @outputID;
 			int?   @inputOutputID = 10;
 			string @outputStr;
-			string @inputOutputStr = "10";
+			string @inputOutputStr = "";
 
 			DataAccessor.CreateInstance<TestNullableAccessor>()
 				.OutRefTest(null, out @outputID,  ref @inputOutputID,
@@ -146,17 +148,15 @@ namespace DataAccess
 			NullableEntity e = new NullableEntity();
 			int?   @outputID;
 			string @inputOutputStr = "20";
+			e.str = "20";
 
 			DataAccessor.CreateInstance<TestNullableAccessor>()
 				.OutRefTest(out @outputID, e, ref @inputOutputStr);
 
 			Assert.IsNull  (@outputID);
-			Assert.IsEmpty (e.outputStr);
+			Assert.AreEqual("20", e.outputStr);
 			Assert.IsNull  (e.inputOutputID);
-
-			// No error here. The 'inputOutputStr' field was initialized from 'e'.
-			//
-			Assert.AreEqual("40", @inputOutputStr);
+			Assert.AreEqual("2040", @inputOutputStr);
 		}
 #endif
 

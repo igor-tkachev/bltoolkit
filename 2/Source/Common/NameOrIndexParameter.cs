@@ -16,7 +16,7 @@ namespace BLToolkit.Common
 
 			if (name.Length == 0)
 				throw new ArgumentException("Name must be a valid string.", "name");
-			
+
 			_name  = name;
 			_index = 0;
 		}
@@ -138,8 +138,7 @@ namespace BLToolkit.Common
 				int index = (int)obj;
 				return (null == _name && _index == index);
 			}
-			
-			//return base.Equals(obj);
+
 			return false;
 		}
 

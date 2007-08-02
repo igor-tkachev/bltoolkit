@@ -28,32 +28,32 @@ namespace BLToolkit.Mapping
 		{
 		}
 
-		private  Type _objectType;
-		internal Type  ObjectType
+		private readonly Type _objectType;
+		internal         Type  ObjectType
 		{
 			get { return _objectType;  }
 		}
 
-		private  MapIndex _slaveIndex;
-		internal MapIndex  SlaveIndex
+		private readonly MapIndex _slaveIndex;
+		internal         MapIndex  SlaveIndex
 		{
 			get { return _slaveIndex;  }
 		}
 
-		private  MapIndex _masterIndex;
-		internal MapIndex  MasterIndex
+		private readonly MapIndex _masterIndex;
+		internal         MapIndex  MasterIndex
 		{
 			get { return _masterIndex;  }
 		}
 
-		private  string _containerName;
-		internal string  ContainerName
+		private readonly string _containerName;
+		internal string          ContainerName
 		{
 			get { return _containerName;  }
 		}
 
-		private  MapNextResult[] _nextResults;
-		internal MapNextResult[]  NextResults
+		private readonly MapNextResult[] _nextResults;
+		internal         MapNextResult[]  NextResults
 		{
 			get { return _nextResults; }
 		}

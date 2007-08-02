@@ -16,7 +16,7 @@ namespace BLToolkit.Mapping.MetadataProvider
 			AddProvider(new MapAttributeMetadataProvider());
 		}
 
-		private ArrayList _list = new ArrayList();
+		private readonly ArrayList _list = new ArrayList();
 
 		#endregion
 
@@ -146,6 +146,53 @@ namespace BLToolkit.Mapping.MetadataProvider
 			}
 
 			return base.GetDefaultValue(mapper, member, out isSet);
+		}
+
+		public override object GetDefaultValue(TypeExtension typeExt, Type type, out bool isSet)
+		{
+			foreach (MapMetadataProvider p in _list)
+			{
+				object value = p.GetDefaultValue(typeExt, type, out isSet);
+
+				if (isSet)
+					return value;
+			}
+
+			return base.GetDefaultValue(typeExt, type, out isSet);
+		}
+
+		#endregion
+
+		#region GetNullable
+
+		public override bool GetNullable(ObjectMapper mapper, MemberAccessor member, out bool isSet)
+		{
+			foreach (MapMetadataProvider p in _list)
+			{
+				bool value = p.GetNullable(mapper, member, out isSet);
+
+				if (isSet)
+					return value;
+			}
+
+			return base.GetNullable(mapper, member, out isSet);
+		}
+
+		#endregion
+
+		#region GetNullValue
+
+		public override object GetNullValue(ObjectMapper mapper, MemberAccessor member, out bool isSet)
+		{
+			foreach (MapMetadataProvider p in _list)
+			{
+				object value = p.GetNullValue(mapper, member, out isSet);
+
+				if (isSet)
+					return value;
+			}
+
+			return base.GetNullValue(mapper, member, out isSet);
 		}
 
 		#endregion

@@ -9,7 +9,7 @@ namespace BLToolkit.TypeBuilder.Builders
 	public class PropertyChangedBuilder : AbstractTypeBuilderBase
 	{
 		public PropertyChangedBuilder()
-			:this(Configuration.NotifyOnEqualSet, true, true)
+			: this(Configuration.NotifyOnEqualSet, true, true)
 		{
 		}
 
@@ -20,15 +20,15 @@ namespace BLToolkit.TypeBuilder.Builders
 			_skipSetterOnNoChange = skipSetterOnNoChange;
 		}
 
-		private bool _notifyOnEqualSet;
-		private bool _useReferenceEquals;
-		private bool _skipSetterOnNoChange;
+		private readonly bool _notifyOnEqualSet;
+		private readonly bool _useReferenceEquals;
+		private readonly bool _skipSetterOnNoChange;
 
 		public override bool IsApplied(BuildContext context, AbstractTypeBuilderList builders)
 		{
 			if (context == null) throw new ArgumentNullException("context");
 
-			return context.IsBeforeStep || context.IsAfterStep || context.IsSetter;
+			return context.IsSetter && (context.IsBeforeStep || context.IsAfterStep);
 		}
 
 		protected override void BeforeBuildAbstractSetter()
@@ -52,7 +52,6 @@ namespace BLToolkit.TypeBuilder.Builders
 		{
 			BuildSetter();
 		}
-
 
 		public override bool IsCompatible(BuildContext context, IAbstractTypeBuilder typeBuilder)
 		{

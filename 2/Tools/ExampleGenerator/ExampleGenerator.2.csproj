@@ -37,6 +37,9 @@
     <Compile Include="Generator.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
+  <ItemGroup>
+    <Service Include="{B4F97281-0DBD-4835-9ED8-7DFB966E87FF}" />
+  </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>"$(TargetPath)" /path:"$(SolutionDir)Examples\CS\Reflection.Emit" /xml:"$(SolutionDir)Source\Reflection\Emit\Examples.CS.xml"

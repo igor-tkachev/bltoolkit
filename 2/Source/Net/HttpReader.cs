@@ -113,8 +113,8 @@ namespace BLToolkit.Net
 			get { return _html; }
 		}
 
-		private Hashtable _headers = new Hashtable();
-		public  Hashtable  Headers
+		private readonly Hashtable _headers = new Hashtable();
+		public           Hashtable  Headers
 		{
 			get { return _headers; }
 		}
@@ -252,7 +252,7 @@ namespace BLToolkit.Net
 				_data = data;
 			}
 
-			string _data;
+			readonly string _data;
 
 			public void Process(Stream stream)
 			{
@@ -268,7 +268,7 @@ namespace BLToolkit.Net
 				_reader = reader;
 			}
 
-			HttpReader _reader;
+			readonly HttpReader _reader;
 
 			public void Process(Stream stream)
 			{

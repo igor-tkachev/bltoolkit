@@ -14,8 +14,8 @@ namespace BLToolkit.TypeBuilder
 			_type = type;
 		}
 
-		private Type _type;
-		public  Type  Type
+		private readonly Type _type;
+		public           Type  Type
 		{
 			get { return _type;  }
 		}

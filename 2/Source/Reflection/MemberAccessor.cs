@@ -17,14 +17,14 @@ namespace BLToolkit.Reflection
 
 		#region Public Properties
 
-		private MemberInfo _memberInfo;
-		public  MemberInfo  MemberInfo
+		private readonly MemberInfo _memberInfo;
+		public           MemberInfo  MemberInfo
 		{
 			get { return _memberInfo; }
 		}
 
-		private TypeAccessor _typeAccessor;
-		public  TypeAccessor  TypeAccessor
+		private readonly TypeAccessor _typeAccessor;
+		public           TypeAccessor  TypeAccessor
 		{
 			get { return _typeAccessor; }
 		}

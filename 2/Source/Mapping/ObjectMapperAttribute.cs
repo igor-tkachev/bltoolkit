@@ -16,8 +16,8 @@ namespace BLToolkit.Mapping
 					string.Format("Type '{0}' does not implement IObjectMapper interface.", objectMapperType));
 		}
 
-		private ObjectMapper _objectMapper;
-		public  ObjectMapper  ObjectMapper
+		private readonly ObjectMapper _objectMapper;
+		public           ObjectMapper  ObjectMapper
 		{
 			get { return _objectMapper; }
 		}
