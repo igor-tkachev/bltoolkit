@@ -75,30 +75,35 @@ namespace BLToolkit.TypeBuilder.Builders
 
 			if (_skipSetterOnNoChange)
 				_afterNotificationLabel = emit.DefineLabel();
-			else 
+			else
 				_isSameValueBuilder = emit.DeclareLocal(typeof(bool));
 
-			if (!Context.CurrentProperty.PropertyType.IsValueType)
-			{
-				emit
-					.ldarg_0
-					.callvirt(Context.CurrentProperty.GetGetMethod(true))
-					.ldarg_1.end();
+			MethodInfo op_InequalityMethod =
+				Context.CurrentProperty.PropertyType.GetMethod("op_Inequality",
+															   new Type[]
+				                                               	{
+				                                               		Context.CurrentProperty.PropertyType,
+				                                               		Context.CurrentProperty.PropertyType
+				                                               	});
 
-				if (!Context.CurrentProperty.PropertyType.Equals(typeof(string)))
+			if (op_InequalityMethod == null)
+			{
+				if (Context.CurrentProperty.PropertyType.IsValueType || !_useReferenceEquals)
 				{
-					if (_useReferenceEquals)
-						emit.call(typeof(object), "ReferenceEquals", typeof(object), typeof(object));
-					else
-						emit.call(typeof(object), "Equals", typeof(object), typeof(object));
+					emit
+						.ldarg_0
+						.callvirt(Context.CurrentProperty.GetGetMethod(true))
+							.ldarg_1
+							.ceq.end();
 				}
 				else
-					emit.call(typeof(string), "Equals", typeof(string), typeof(string));
-
-				if (_skipSetterOnNoChange)
-					emit.brtrue(_afterNotificationLabel);
-				else 
-					emit.stloc(_isSameValueBuilder);
+				{
+					emit
+						.ldarg_0
+						.callvirt(Context.CurrentProperty.GetGetMethod(true))
+						.ldarg_1
+						.call(typeof(object), "ReferenceEquals", typeof(object), typeof(object)).end();
+				}
 			}
 			else
 			{
@@ -106,13 +111,15 @@ namespace BLToolkit.TypeBuilder.Builders
 					.ldarg_0
 					.callvirt(Context.CurrentProperty.GetGetMethod(true))
 					.ldarg_1
+					.call(op_InequalityMethod)
+					.ldc_i4_0
 					.ceq.end();
-
-				if (_skipSetterOnNoChange)
-					emit.brtrue(_afterNotificationLabel);
-				else
-					emit.stloc(_isSameValueBuilder);
 			}
+
+			if (_skipSetterOnNoChange)
+				emit.brtrue(_afterNotificationLabel);
+			else
+				emit.stloc(_isSameValueBuilder);
 		}
 
 		private void BuildSetter()

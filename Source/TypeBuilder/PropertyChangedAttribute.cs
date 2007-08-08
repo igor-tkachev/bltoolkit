@@ -65,7 +65,7 @@ namespace BLToolkit.TypeBuilder
 		private bool _useReferenceEquals;
 		/// <summary>
 		/// Specifies if <see cref="Object.ReferenceEquals">Object.ReferenceEquals</see> should be used for equality comparison of current and new value
-		/// for reference types. Doesn't affect string comparison which is always performed by using <see cref="String.Equals(string a, string b)">String.Equals</see>
+		/// for reference types. If value type implements op_Inequality, UseReferenceEquals is ignored.
 		/// </summary>
 		public  bool  UseReferenceEquals
 		{
