@@ -3,6 +3,7 @@ v 2.0.7 (working)
 Bug fixes
 
 - Oracle/Odp does not handle colon (':') in ConvertType.ParameterToName.
+- Property change builder will use op_Inequality operation if it is available to compare property values
 
 Enhancement
 
