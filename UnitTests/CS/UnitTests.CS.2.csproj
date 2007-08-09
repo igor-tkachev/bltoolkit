@@ -135,6 +135,7 @@
     <Compile Include="TypeBuilder\Builders\DefaultTypeBuilderTest.cs" />
     <Compile Include="TypeBuilder\Builders\ImplemetInterfaceBuilderTest.cs" />
     <Compile Include="TypeBuilder\Builders\TypeAccessorBuilderTest.cs" />
+    <Compile Include="TypeBuilder\GenerateAtributeTest.cs" />
     <Compile Include="TypeBuilder\GenericMethodTest.cs" />
     <Compile Include="TypeBuilder\InternalTypesTest.cs" />
     <Compile Include="TypeBuilder\GetSetValueAttributeTest.cs" />

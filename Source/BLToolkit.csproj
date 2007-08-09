@@ -1107,6 +1107,11 @@
                     BuildAction = "Compile"
                 />
                 <File
+                    RelPath = "TypeBuilder\GenerateAttributeAttribute.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
                     RelPath = "TypeBuilder\GetValueAttribute.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
@@ -1273,6 +1278,11 @@
                 />
                 <File
                     RelPath = "TypeBuilder\Builders\FakeSetter.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "TypeBuilder\Builders\GeneratedAttributeBuilder.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
                 />
