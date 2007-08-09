@@ -8,6 +8,7 @@ Bug fixes
 Enhancement
 
 - FdpDataProvider.QuoteIdentifiers option for FB data provier.
+- GenerateAtribute attribute to specify any custom attribute for a generated type or member.
 
 v 2.0.6
 

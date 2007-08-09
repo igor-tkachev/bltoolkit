@@ -479,6 +479,11 @@
                     BuildAction = "Compile"
                 />
                 <File
+                    RelPath = "TypeBuilder\GenerateAtributeTest.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
                     RelPath = "TypeBuilder\GetSetValueAttributeTest.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
