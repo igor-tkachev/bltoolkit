@@ -3966,7 +3966,7 @@ namespace BLToolkit.Data
 		{
 			List<T> list = new List<T>();
 
-			ExecuteListInternal<T>(list, typeof(T), null);
+			ExecuteListInternal<T>(list, null);
 
 			return list;
 		}
@@ -3998,7 +3998,7 @@ namespace BLToolkit.Data
 		{
 			List<T> list = new List<T>();
 
-			ExecuteListInternal<T>(list, typeof(T), parameters);
+			ExecuteListInternal<T>(list, parameters);
 
 			return list;
 		}
