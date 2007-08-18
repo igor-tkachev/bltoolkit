@@ -21,9 +21,9 @@ namespace BLToolkit.EditableObjects
 
 		public virtual T Clone()
 		{
-			return (T)TypeAccessor.Copy(this);
+			return TypeAccessor<T>.Copy((T)this);
 		}
-
+			
 		#endregion
 	}
 }

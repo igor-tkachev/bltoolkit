@@ -5,7 +5,7 @@ using System;
 using System.Collections;
 using System.Data;
 using System.Data.Common;
-using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Reflection;
 using System.Xml;
@@ -36,7 +36,7 @@ namespace BLToolkit.Data.DataProvider
 
 		static OdpDataProvider()
 		{
-			// Fix Oracle bug #1: Array types are not handled.
+			// Fix Oracle.Net bug #1: Array types are not handled.
 			//
 			Type OraDb_DbTypeTableType = typeof(OracleParameter).Assembly
 				.GetType("Oracle.DataAccess.Client.OraDb_DbTypeTable");
@@ -140,7 +140,7 @@ namespace BLToolkit.Data.DataProvider
 			{
 				OracleCommand oraCommand = oraConnection.CreateCommand();
 
-				// Fix Oracle bug #2: Empty arrays can not be sent to the server.
+				// Fix Oracle.Net bug #2: Empty arrays can not be sent to the server.
 				//
 				oraCommand.BindByName = true;
 
@@ -159,7 +159,7 @@ namespace BLToolkit.Data.DataProvider
 			{
 				OracleParameter oraParameterClone = (OracleParameter)oraParameter.Clone();
 
-				// Fix Oracle bug #3: CollectionType property is not cloned.
+				// Fix Oracle.Net bug #3: CollectionType property is not cloned.
 				//
 				oraParameterClone.CollectionType = oraParameter.CollectionType;
 
@@ -278,7 +278,7 @@ namespace BLToolkit.Data.DataProvider
 						if (oraParameter.Size == 0)
 						{
 							// Skip this parameter.
-							// Fix Oracle bug #2: Empty arrays can not be sent to the server.
+							// Fix Oracle.Net bug #2: Empty arrays can not be sent to the server.
 							//
 							return;
 						}
@@ -316,7 +316,7 @@ namespace BLToolkit.Data.DataProvider
 									oraParameter.Value = values;
 									break;
 
-								// Fix Oracle bug #9: XmlDocument.ToString() returns System.Xml.XmlDocument,
+								// Fix Oracle.Net bug #9: XmlDocument.ToString() returns System.Xml.XmlDocument,
 								// so m_value.ToString() is not enought.
 								//
 								case OracleDbType.Clob:
@@ -359,7 +359,7 @@ namespace BLToolkit.Data.DataProvider
 					}
 					else if (oraParameter.Direction == ParameterDirection.Output)
 					{
-						// Fix Oracle bug #4: ArrayBindSize must be explicitly specified.
+						// Fix Oracle.Net bug #4: ArrayBindSize must be explicitly specified.
 						//
 						if (oraParameter.DbType == DbType.String)
 						{
@@ -402,7 +402,7 @@ namespace BLToolkit.Data.DataProvider
 								oraParameter.Value = new OracleXmlType((OracleConnection)command.Connection, xmlDocument);
 								break;
 
-							// Fix Oracle bug #9: XmlDocument.ToString() returns System.Xml.XmlDocument,
+							// Fix Oracle.Net bug #9: XmlDocument.ToString() returns System.Xml.XmlDocument,
 							// so m_value.ToString() is not enought.
 							//
 							case OracleDbType.Clob:
@@ -1006,7 +1006,7 @@ namespace BLToolkit.Data.DataProvider
 				_dataReader = (OracleDataReader)dataReader;
 			}
 
-			private OracleDataReader _dataReader;
+			private readonly OracleDataReader _dataReader;
 
 #if FW2
 			public override Type GetFieldType(int index)
@@ -1075,7 +1075,7 @@ namespace BLToolkit.Data.DataProvider
 
 		public class OracleScalarDataReaderMapper : ScalarDataReaderMapper
 		{
-			private OracleDataReader _dataReader;
+			private readonly OracleDataReader _dataReader;
 
 			public OracleScalarDataReaderMapper(
 				MappingSchema        mappingSchema,
@@ -1093,7 +1093,7 @@ namespace BLToolkit.Data.DataProvider
 			}
 
 #if FW2
-			private Type             _fieldType;
+			private readonly Type _fieldType;
 
 			public override Type GetFieldType(int index)
 			{
@@ -1264,7 +1264,7 @@ namespace BLToolkit.Data.DataProvider
 					{
 						if (value is Guid)
 						{
-							// Fix Oracle bug #6: guid type is not handled
+							// Fix Oracle.Net bug #6: guid type is not handled
 							//
 							value = ((Guid)value).ToByteArray();
 						}
@@ -1276,7 +1276,7 @@ namespace BLToolkit.Data.DataProvider
 							switch (typeCode)
 							{
 								case TypeCode.Boolean:
-									// Fix Oracle bug #7: bool type is handled wrong
+									// Fix Oracle.Net bug #7: bool type is handled wrong
 									//
 									value = convertible.ToByte(null);
 									break;
@@ -1285,13 +1285,21 @@ namespace BLToolkit.Data.DataProvider
 								case TypeCode.UInt16:
 								case TypeCode.UInt32:
 								case TypeCode.UInt64:
-									// Fix Oracle bug #8: some integer types are handled wrong
+									// Fix Oracle.Net bug #8: some integer types are handled wrong
 									//
 									value = convertible.ToDecimal(null);
 									break;
 
+									// Fix Oracle.Net bug #10: zero-length string can not be converted to
+									// ORAXML type, but null value can be.
+									//
+								case TypeCode.String:
+									if (((string)value).Length == 0)
+										value = null;
+									break;
+
 								default:
-									// Fix Oracle bug #5: Enum type is not handled
+									// Fix Oracle.Net bug #5: Enum type is not handled
 									//
 									if (value is Enum)
 									{

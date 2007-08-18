@@ -32,13 +32,15 @@ namespace BLToolkit.Reflection
 
 		#endregion
 
+		#region Copy & AreEqual
+
 		public static T Copy(T source, T dest)
 		{
 			if (source == null) throw new ArgumentNullException("source");
 			if (dest   == null) throw new ArgumentNullException("dest");
 
 			foreach (MemberAccessor ma in _instance)
-				ma.SetValue(dest, ma.GetValue(source));
+				ma.SetValue(dest, TypeAccessor.CloneOrCopy(ma.GetValue(source)));
 
 			return dest;
 		}
@@ -50,10 +52,27 @@ namespace BLToolkit.Reflection
 			T dest = CreateInstanceEx();
 
 			foreach (MemberAccessor ma in _instance)
-				ma.SetValue(dest, ma.GetValue(source));
+				ma.SetValue(dest, TypeAccessor.CloneOrCopy(ma.GetValue(source)));
 
 			return dest;
 		}
+
+		public static int Compare(T obj1, T obj2)
+		{
+			if (ReferenceEquals(obj1, obj2)) return 0;
+
+			if (obj1 == null) return -1;
+			if (obj2 == null) return +1;
+
+			int          relation;
+			foreach (MemberAccessor ma in _instance)
+				if ((relation = TypeAccessor.CompareOrEquals(ma.GetValue(obj1), ma.GetValue(obj2))) != 0)
+					return relation;
+
+			return 0;
+		}
+
+		#endregion
 
 		public static IObjectFactory ObjectFactory
 		{
