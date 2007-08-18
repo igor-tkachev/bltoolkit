@@ -96,7 +96,17 @@ namespace BLToolkit.Reflection
 
 		#endregion
 
-		#region Copy
+		#region Copy & AreEqual
+
+		internal static object CloneOrCopy(object source)
+		{
+			return source is ICloneable? ((ICloneable)source).Clone(): source;
+		}
+
+		internal static int CompareOrEquals(object obj1, object obj2)
+		{
+			return obj1 is IComparable? ((IComparable)obj1).CompareTo(obj2): Equals(obj1, obj2)? 0: 1;
+		}
 
 		public static object Copy(object source, object dest)
 		{
@@ -113,7 +123,7 @@ namespace BLToolkit.Reflection
 				throw new ArgumentException();
 
 			foreach (MemberAccessor ma in ta)
-				ma.SetValue(dest, ma.GetValue(source));
+				ma.SetValue(dest, CloneOrCopy(ma.GetValue(source)));
 
 			return dest;
 		}
@@ -127,9 +137,33 @@ namespace BLToolkit.Reflection
 			object dest = ta.CreateInstanceEx();
 
 			foreach (MemberAccessor ma in ta)
-				ma.SetValue(dest, ma.GetValue(source));
+				ma.SetValue(dest, CloneOrCopy(ma.GetValue(source)));
 
 			return dest;
+		}
+
+		public static int Compare(object obj1, object obj2)
+		{
+			if (ReferenceEquals(obj1, obj2)) return 0;
+
+			if (obj1 == null) return -1;
+			if (obj2 == null) return +1;
+
+			int          relation;
+			TypeAccessor ta;
+			Type         sType = obj1.GetType();
+			Type         dType = obj2.GetType();
+
+			if      (TypeHelper.IsSameOrParent(sType, dType)) ta = GetAccessor(sType);
+			else if (TypeHelper.IsSameOrParent(dType, sType)) ta = GetAccessor(dType);
+			else
+				throw new ArgumentException();
+
+			foreach (MemberAccessor ma in ta)
+				if ((relation = CompareOrEquals(ma.GetValue(obj1), ma.GetValue(obj2))) != 0)
+					return relation;
+
+			return 0;
 		}
 
 		#endregion

@@ -4634,7 +4634,7 @@ namespace BLToolkit.Common
 		// 
 		public static XmlDocument ToXmlDocument(String p)
 		{
-			if (p == null) return null;
+			if (p == null || p.Length == 0) return null;
 
 			XmlDocument doc = new XmlDocument();
 			doc.LoadXml(p);
@@ -4670,8 +4670,8 @@ namespace BLToolkit.Common
 			return doc;
 		}
 
-		public static XmlDocument ToXmlDocument(Char[] p)      { return p == null? null: ToXmlDocument(new string(p)); }
-		public static XmlDocument ToXmlDocument(Byte[] p)      { return p == null? null: ToXmlDocument(new MemoryStream(p)); }
+		public static XmlDocument ToXmlDocument(Char[] p)      { return p == null || p.Length == 0? null: ToXmlDocument(new string(p)); }
+		public static XmlDocument ToXmlDocument(Byte[] p)      { return p == null || p.Length == 0? null: ToXmlDocument(new MemoryStream(p)); }
 
 		public static XmlDocument ToXmlDocument(XmlReader p)
 		{

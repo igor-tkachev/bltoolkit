@@ -108,8 +108,8 @@ namespace BLToolkit.Mapping
 			get { return _memberName; }
 		}
 
-		private Type  _type;
-		public  Type   Type
+		private         Type  _type;
+		public  virtual Type   Type
 		{
 			[DebuggerStepThrough]
 			get { return _type; }

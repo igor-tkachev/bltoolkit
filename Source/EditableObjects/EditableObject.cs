@@ -112,7 +112,8 @@ namespace BLToolkit.EditableObjects
 	[Serializable]
 	public abstract class EditableObject : EntityBase,
 		IEditableObject, INotifyPropertyChanged,
-		ISupportMapping, IValidatable, IPropertyChanged, INotifyObjectEdit
+		ISupportMapping, IValidatable, IPropertyChanged, INotifyObjectEdit,
+		ICloneable, IComparable
 	{
 		#region Constructor
 
@@ -318,6 +319,38 @@ namespace BLToolkit.EditableObjects
 		#region INotifyObjectEdit Members
 
 		public event ObjectEditEventHandler ObjectEdit;
+
+		#endregion
+
+		#region ICloneable Members
+
+		///<summary>
+		///Creates a new object that is a copy of the current instance.
+		///</summary>
+		///<returns>
+		///A new object that is a copy of this instance.
+		///</returns>
+		object ICloneable.Clone()
+		{
+			return TypeAccessor.Copy(this);
+		}
+
+		#endregion
+
+		#region IComparable Members
+
+		///<summary>
+		///Compares the current instance with another object of the same type.
+		///</summary>
+		///<returns>
+		///A 32-bit signed integer that indicates the relative order of the objects being compared. The return value has these meanings: Value Meaning Less than zero This instance is less than obj. Zero This instance is equal to obj. Greater than zero This instance is greater than obj. 
+		///</returns>
+		///<param name="obj">An object to compare with this instance. </param>
+		///<exception cref="T:System.ArgumentException">obj is not the same type as this instance. </exception><filterpriority>2</filterpriority>
+		int IComparable.CompareTo(object obj)
+		{
+			return TypeAccessor.Compare(this, obj);
+		}
 
 		#endregion
 	}
