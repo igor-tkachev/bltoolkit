@@ -1,12 +1,8 @@
 using System;
-using System.Reflection;
-using System.Xml;
 using NUnit.Framework;
 
 using BLToolkit.EditableObjects;
-using BLToolkit.Mapping;
 using BLToolkit.TypeBuilder;
-using BLToolkit.Reflection;
 
 namespace EditableObjects
 {
@@ -18,7 +14,7 @@ namespace EditableObjects
 			TypeFactory.SaveTypes = true;
 		}
 
-		public abstract class TestObjectBase: EditableObject<TestObjectBase>
+		public abstract class TestObject: EditableObject<TestObject>
 		{
 			public abstract int         ID    { get; set; }
 			public abstract string      Name  { get; set; }
@@ -30,26 +26,16 @@ namespace EditableObjects
 			}
 		}
 
-		public abstract class Derived1: TestObjectBase
-		{
-			public abstract int         Some  { get; set; }
-		}
-
-		public abstract class Derived2: TestObjectBase
-		{
-			public abstract string      Some  { get; set; }
-		}
-
 		[Test]
 		public void CloneTest()
 		{
-			TestObjectBase o = Derived1.CreateInstance();
+			TestObject o = TestObject.CreateInstance();
 
 			o.ID   = 1;
 			o.Name = "str";
 			o.Inner.Some = 2;
 
-			TestObjectBase clone = o.Clone();
+			TestObject clone = o.Clone();
 
 			// Make sure this one is cloned, not copied.
 			//
@@ -59,14 +45,14 @@ namespace EditableObjects
 			Assert.AreEqual(o.Name, clone.Name);
 
 			Assert.AreNotEqual(o.Inner.Some, clone.Inner.Some);
-			Assert.IsFalse(((IEquatable<TestObjectBase>)o).Equals(clone));
+			Assert.IsFalse(((IEquatable<TestObject>)o).Equals(clone));
 
 			// Now make it the same as original value.
 			//
 			clone.Inner = o.Inner.Clone();
 
 			Assert.AreEqual(o.Inner.Some, clone.Inner.Some);
-			Assert.IsTrue(((IEquatable<TestObjectBase>)o).Equals(clone));
+			Assert.IsTrue(((IEquatable<TestObject>)o).Equals(clone));
 		}
 	}
 }
