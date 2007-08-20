@@ -152,7 +152,7 @@ namespace BLToolkit.Reflection
 			if      (TypeHelper.IsSameOrParent(sType, dType)) ta = GetAccessor(sType);
 			else if (TypeHelper.IsSameOrParent(dType, sType)) ta = GetAccessor(dType);
 			else
-				throw new ArgumentException();
+				return false;
 
 			foreach (MemberAccessor ma in ta)
 				if ((!Equals(ma.GetValue(obj1), ma.GetValue(obj2))))
