@@ -111,9 +111,8 @@ namespace BLToolkit.EditableObjects
 	[ImplementInterface(typeof(ISetParent))]
 	[Serializable]
 	public abstract class EditableObject : EntityBase,
-		IEditableObject, INotifyPropertyChanged,
-		ISupportMapping, IValidatable, IPropertyChanged, INotifyObjectEdit,
-		ICloneable, IComparable
+		ICloneable, IEditableObject, INotifyPropertyChanged,
+		ISupportMapping, IValidatable, IPropertyChanged, INotifyObjectEdit
 	{
 		#region Constructor
 
@@ -337,19 +336,33 @@ namespace BLToolkit.EditableObjects
 
 		#endregion
 
-		#region IComparable Members
+		#region Object Members
 
-		///<summary>
-		///Compares the current instance with another object of the same type.
-		///</summary>
-		///<returns>
-		///A 32-bit signed integer that indicates the relative order of the objects being compared. The return value has these meanings: Value Meaning Less than zero This instance is less than obj. Zero This instance is equal to obj. Greater than zero This instance is greater than obj. 
-		///</returns>
-		///<param name="obj">An object to compare with this instance. </param>
-		///<exception cref="T:System.ArgumentException">obj is not the same type as this instance. </exception><filterpriority>2</filterpriority>
-		int IComparable.CompareTo(object obj)
+		/// <summary>
+		/// Serves as a hash function for a particular type.
+		/// <see cref="M:System.Object.GetHashCode"/> is suitable for use
+		/// in hashing algorithms and data structures like a hash table.
+		/// </summary>
+		/// <returns>
+		/// A hash code for the current <see cref="T:System.Object"></see>.
+		/// </returns>
+		public override int GetHashCode()
 		{
-			return TypeAccessor.Compare(this, obj);
+			return TypeAccessor.GetHashCode(this);
+		}
+
+		/// <summary>
+		/// Determines whether the specified <see cref="T:System.Object"/> is equal
+		/// to the current <see cref="T:System.Object"/>.
+		/// </summary>
+		/// <returns>
+		/// true if the specified object is equal to the current object; otherwise, false.
+		/// </returns>
+		/// <param name="obj">The <see cref="T:System.Object"></see> to compare
+		/// with the current <see cref="T:System.Object"/>.
+		public override bool Equals(object obj)
+		{
+			return TypeAccessor.AreEqual(this, obj);
 		}
 
 		#endregion

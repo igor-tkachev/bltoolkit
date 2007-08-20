@@ -103,11 +103,6 @@ namespace BLToolkit.Reflection
 			return source is ICloneable? ((ICloneable)source).Clone(): source;
 		}
 
-		internal static int CompareOrEquals(object obj1, object obj2)
-		{
-			return obj1 is IComparable? ((IComparable)obj1).CompareTo(obj2): Equals(obj1, obj2)? 0: 1;
-		}
-
 		public static object Copy(object source, object dest)
 		{
 			if (source == null) throw new ArgumentNullException("source");
@@ -142,14 +137,14 @@ namespace BLToolkit.Reflection
 			return dest;
 		}
 
-		public static int Compare(object obj1, object obj2)
+		public static bool AreEqual(object obj1, object obj2)
 		{
-			if (ReferenceEquals(obj1, obj2)) return 0;
+			if (ReferenceEquals(obj1, obj2))
+				return true;
 
-			if (obj1 == null) return -1;
-			if (obj2 == null) return +1;
+			if (obj1 == null || obj2 == null)
+				return false;
 
-			int          relation;
 			TypeAccessor ta;
 			Type         sType = obj1.GetType();
 			Type         dType = obj2.GetType();
@@ -160,10 +155,27 @@ namespace BLToolkit.Reflection
 				throw new ArgumentException();
 
 			foreach (MemberAccessor ma in ta)
-				if ((relation = CompareOrEquals(ma.GetValue(obj1), ma.GetValue(obj2))) != 0)
-					return relation;
+				if ((!Equals(ma.GetValue(obj1), ma.GetValue(obj2))))
+					return false;
 
-			return 0;
+			return true;
+		}
+
+		public static int GetHashCode(object obj)
+		{
+			if (obj == null)
+				throw new ArgumentNullException("obj");
+
+			int    hash = 0;
+			object value;
+
+			foreach (MemberAccessor ma in GetAccessor(obj.GetType()))
+			{
+				value = ma.GetValue(obj);
+				hash = ((hash << 5) + hash) ^ (value == null ? 0 : value.GetHashCode());
+			}
+
+			return hash;
 		}
 
 		#endregion

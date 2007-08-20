@@ -59,14 +59,14 @@ namespace EditableObjects
 			Assert.AreEqual(o.Name, clone.Name);
 
 			Assert.AreNotEqual(o.Inner.Some, clone.Inner.Some);
-			Assert.AreNotEqual(0, ((IComparable)o).CompareTo(clone));
+			Assert.IsFalse(((IEquatable<TestObjectBase>)o).Equals(clone));
 
 			// Now make it the same as original value.
 			//
 			clone.Inner = o.Inner.Clone();
 
 			Assert.AreEqual(o.Inner.Some, clone.Inner.Some);
-			Assert.AreEqual(0, ((IComparable)o).CompareTo(clone));
+			Assert.IsTrue(((IEquatable<TestObjectBase>)o).Equals(clone));
 		}
 	}
 }
