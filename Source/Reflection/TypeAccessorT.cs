@@ -57,19 +57,19 @@ namespace BLToolkit.Reflection
 			return dest;
 		}
 
-		public static int Compare(T obj1, T obj2)
+		public static bool AreEqual(T obj1, T obj2)
 		{
-			if (ReferenceEquals(obj1, obj2)) return 0;
+			if (ReferenceEquals(obj1, obj2))
+				return true;
 
-			if (obj1 == null) return -1;
-			if (obj2 == null) return +1;
+			if (obj1 == null || obj2 == null)
+				return false;
 
-			int          relation;
 			foreach (MemberAccessor ma in _instance)
-				if ((relation = TypeAccessor.CompareOrEquals(ma.GetValue(obj1), ma.GetValue(obj2))) != 0)
-					return relation;
+				if ((!Equals(ma.GetValue(obj1), ma.GetValue(obj2))))
+					return false;
 
-			return 0;
+			return true;
 		}
 
 		#endregion
