@@ -39,22 +39,14 @@ namespace BLToolkit.Reflection
 			if (source == null) throw new ArgumentNullException("source");
 			if (dest   == null) throw new ArgumentNullException("dest");
 
-			foreach (MemberAccessor ma in _instance)
-				ma.SetValue(dest, TypeAccessor.CloneOrCopy(ma.GetValue(source)));
-
-			return dest;
+			return (T)TypeAccessor.CopyInternal(source, dest, _instance);
 		}
 
 		public static T Copy(T source)
 		{
 			if (source == null) return source;
 
-			T dest = CreateInstanceEx();
-
-			foreach (MemberAccessor ma in _instance)
-				ma.SetValue(dest, TypeAccessor.CloneOrCopy(ma.GetValue(source)));
-
-			return dest;
+			return (T)TypeAccessor.CopyInternal(source, CreateInstanceEx(), _instance);
 		}
 
 		public static bool AreEqual(T obj1, T obj2)

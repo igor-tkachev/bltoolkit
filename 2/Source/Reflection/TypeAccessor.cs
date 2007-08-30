@@ -103,6 +103,30 @@ namespace BLToolkit.Reflection
 			return source is ICloneable? ((ICloneable)source).Clone(): source;
 		}
 
+		internal static object CopyInternal(object source, object dest, TypeAccessor ta)
+		{
+			bool                       isDirty = false;
+			IMemberwiseEditable sourceEditable = source as IMemberwiseEditable;
+			IMemberwiseEditable   destEditable = dest   as IMemberwiseEditable;
+
+			if (sourceEditable != null && destEditable != null)
+			{
+				foreach (MemberAccessor ma in ta)
+				{
+					ma.SetValue(dest, CloneOrCopy(ma.GetValue(source)));
+					if (sourceEditable.IsDirtyMember(null, ma.MemberInfo.Name, ref isDirty) && !isDirty)
+						destEditable.AcceptMemberChanges(null, ma.MemberInfo.Name);
+				}
+			}
+			else
+			{
+				foreach (MemberAccessor ma in ta)
+					ma.SetValue(dest, CloneOrCopy(ma.GetValue(source)));
+			}
+
+			return dest;
+		}
+
 		public static object Copy(object source, object dest)
 		{
 			if (source == null) throw new ArgumentNullException("source");
@@ -117,10 +141,7 @@ namespace BLToolkit.Reflection
 			else
 				throw new ArgumentException();
 
-			foreach (MemberAccessor ma in ta)
-				ma.SetValue(dest, CloneOrCopy(ma.GetValue(source)));
-
-			return dest;
+			return CopyInternal(source, dest, ta);
 		}
 
 		public static object Copy(object source)
@@ -129,12 +150,7 @@ namespace BLToolkit.Reflection
 
 			TypeAccessor ta = GetAccessor(source.GetType());
 
-			object dest = ta.CreateInstanceEx();
-
-			foreach (MemberAccessor ma in ta)
-				ma.SetValue(dest, CloneOrCopy(ma.GetValue(source)));
-
-			return dest;
+			return CopyInternal(source, ta.CreateInstanceEx(), ta);
 		}
 
 		public static bool AreEqual(object obj1, object obj2)

@@ -54,5 +54,21 @@ namespace EditableObjects
 			Assert.AreEqual(o.Inner.Some, clone.Inner.Some);
 			Assert.IsTrue(((IEquatable<TestObject>)o).Equals(clone));
 		}
+
+		[Test]
+		public void IsDirtyTest()
+		{
+			TestObject o = TestObject.CreateInstance();
+
+			o.ID   = 1;
+			o.Name = "str";
+			o.Inner.Some = 2;
+			o.AcceptChanges();
+
+			TestObject clone = o.Clone();
+
+			Assert.IsFalse(o.IsDirty);
+			Assert.IsFalse(clone.IsDirty);
+		}
 	}
 }
