@@ -37,7 +37,7 @@ namespace BLToolkit.EditableObjects
 		///<param name="other">An object to compare with this object.</param>
 		bool IEquatable<T>.Equals(T other)
 		{
-			return TypeAccessor<T>.AreEqual((T)this, other);
+			return TypeAccessor.AreEqual(this, other);
 		}
 
 		#endregion

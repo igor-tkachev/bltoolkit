@@ -198,5 +198,33 @@ namespace EditableObjects
 		{
 			Console.WriteLine("Property Changed: " + e.PropertyName);
 		}
+
+		[Test]
+		public void IsDirtyTest()
+		{
+			Object1 o = Object1.CreateInstance();
+
+			o.Field1 = 10;
+			o.Field2 = !o.Field2;
+			o.Field3 = DateTime.Now;
+			o.AcceptChanges();
+
+			Object1 c = (Object1)((ICloneable)o).Clone();
+
+			Assert.IsFalse(o.IsDirty);
+			Assert.IsFalse(c.IsDirty);
+
+			o.Field1 = 100;
+			c = (Object1)((ICloneable)o).Clone();
+
+			Assert.IsTrue(o.IsDirty);
+			Assert.IsTrue(c.IsDirty);
+
+			Assert.IsTrue(o.IsDirtyMember("Field1"));
+			Assert.IsTrue(c.IsDirtyMember("Field1"));
+
+			Assert.IsFalse(o.IsDirtyMember("Field2"));
+			Assert.IsFalse(c.IsDirtyMember("Field2"));
+		}
 	}
 }
