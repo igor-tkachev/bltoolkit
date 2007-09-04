@@ -204,7 +204,7 @@ namespace BLToolkit.Data.DataProvider
 				}
 				catch (Exception ex)
 				{
-					// Make Oracle lass laconic.
+					// Make Oracle less laconic.
 					//
 					throw new DataException(string.Format("{0}\nCommandText: {1}", ex.Message, oraCommand.CommandText), ex);
 				}
@@ -1267,6 +1267,10 @@ namespace BLToolkit.Data.DataProvider
 							// Fix Oracle.Net bug #6: guid type is not handled
 							//
 							value = ((Guid)value).ToByteArray();
+						}
+						else if (value is Array && !(value is byte[] || value is char[]))
+						{
+							_oracleParameter.CollectionType = OracleCollectionType.PLSQLAssociativeArray;
 						}
 						else if (value is IConvertible)
 						{
