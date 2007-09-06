@@ -1053,7 +1053,7 @@ namespace BLToolkit.Mapping
 			return new ScalarListMapper(list, type);
 		}
 
-		public virtual SimpleDestinationListMapper CreateScalarDistinationListMapper(IList list, Type type)
+		public virtual SimpleDestinationListMapper CreateScalarDestinationListMapper(IList list, Type type)
 		{
 			return new SimpleDestinationListMapper(CreateScalarListMapper(list, type));
 		}
@@ -1069,7 +1069,7 @@ namespace BLToolkit.Mapping
 			return new ScalarListMapper<T>(this, list);
 		}
 
-		public virtual SimpleDestinationListMapper CreateScalarDistinationListMapper<T>(IList<T> list)
+		public virtual SimpleDestinationListMapper CreateScalarDestinationListMapper<T>(IList<T> list)
 		{
 			return new SimpleDestinationListMapper(CreateScalarListMapper<T>(list));
 		}
@@ -1232,7 +1232,7 @@ namespace BLToolkit.Mapping
 			Type type = obj.GetType().GetElementType();
 
 			return TypeHelper.IsScalar(type)?
-				(IMapDataDestinationList)CreateScalarDistinationListMapper((IList)obj, type):
+				(IMapDataDestinationList)CreateScalarDestinationListMapper((IList)obj, type):
 				CreateObjectListMapper((IList)obj, CreateObjectMapper(type));
 		}
 
@@ -2908,7 +2908,7 @@ namespace BLToolkit.Mapping
 		{
 			MapSourceListToDestinationList(
 				CreateDataReaderListMapper(reader, nameOrIndex),
-				CreateScalarDistinationListMapper(list,   type),
+				CreateScalarDestinationListMapper(list,   type),
 				null);
 
 			return list;
@@ -2923,7 +2923,7 @@ namespace BLToolkit.Mapping
 
 			MapSourceListToDestinationList(
 				CreateDataReaderListMapper(reader, nameOrIndex),
-				CreateScalarDistinationListMapper(list,   type),
+				CreateScalarDestinationListMapper(list,   type),
 				null);
 
 			return list;
@@ -2937,7 +2937,7 @@ namespace BLToolkit.Mapping
 		{
 			MapSourceListToDestinationList(
 				CreateDataReaderListMapper(reader, nameOrIndex),
-				CreateScalarDistinationListMapper(list),
+				CreateScalarDestinationListMapper(list),
 				null);
 
 			return list;
@@ -2951,7 +2951,7 @@ namespace BLToolkit.Mapping
 
 			MapSourceListToDestinationList(
 				CreateDataReaderListMapper(reader, nameOrIndex),
-				CreateScalarDistinationListMapper(list),
+				CreateScalarDestinationListMapper(list),
 				null);
 
 			return list;
