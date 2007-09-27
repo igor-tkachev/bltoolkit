@@ -32,7 +32,7 @@ namespace DataAccess
 
 #if ACCESS
 			public abstract int Person_SelectByName(
-				string @FirstName, string @MiddleName);
+				string @FirstName, string @LastName	);
 #endif
 			public abstract void Person_Delete(int @personID);
 

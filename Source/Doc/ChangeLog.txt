@@ -13,6 +13,7 @@ Enhancement
 - FdpDataProvider.QuoteIdentifiers option for FB data provier.
 - GenerateAtribute attribute to specify any custom attribute for a generated type or member.
 - SQLite data provider.
+- DeriveParameters implemented for MsAccess data provider.
 
 v 2.0.6
 
