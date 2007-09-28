@@ -1,5 +1,4 @@
 using System;
-using System.Collections;
 using System.Data;
 using System.Data.OleDb;
 using System.Text.RegularExpressions;
@@ -50,7 +49,7 @@ namespace BLToolkit.Data.DataProvider
 				}
 
 				if (_paramsExp == null)
-					_paramsExp = new Regex(@"PARAMETERS ((\[(?<name>.+?)\]|(?<name>[^\s]+))\s+(?<type>.+?),\s*)*(\[(?<name>.+?)\]|(?<name>[^\s]+))\s+(?<type>.+?);", RegexOptions.Compiled | RegexOptions.ExplicitCapture);
+					_paramsExp = new Regex(@"PARAMETERS ((\[(?<name>[^\]]+)\]|(?<name>[^\s]+))\s(?<type>[^,;\s]+(\s\([^\)]+\))?)[,;]\s)*", RegexOptions.Compiled | RegexOptions.ExplicitCapture);
 
 				Match match = _paramsExp.Match((string)dt.Rows[0][col.Ordinal]);
 				CaptureCollection names = match.Groups["name"].Captures;
@@ -63,15 +62,17 @@ namespace BLToolkit.Data.DataProvider
 					return false;
 				}
 
+				char[] separators = new char[]{' ', '(', ',', ')'};
+
 				for (int i = 0; i < names.Count; ++i)
 				{
 					string paramName = names[i].Value;
 #if FW2
-					string[] rawType = types[i].Value.Split(new char[]{' ', '(', ')'}, StringSplitOptions.RemoveEmptyEntries);
+					string[] rawType = types[i].Value.Split(separators, StringSplitOptions.RemoveEmptyEntries);
 #else
-					ArrayList rawTypeList = new ArrayList();
+					System.Collections.ArrayList rawTypeList = new System.Collections.ArrayList();
 
-					foreach (string s in types[i].Value.Split(' ', '(', ')'))
+					foreach (string s in types[i].Value.Split(separators))
 						if (s.Length > 0)
 							rawTypeList.Add(s);
 
@@ -86,7 +87,7 @@ namespace BLToolkit.Data.DataProvider
 					}
 					else if (rawType.Length > 1)
 					{
-						p.Size = BLToolkit.Common.Convert.ToInt32(rawType[1]);
+						p.Size      = BLToolkit.Common.Convert.ToInt32(rawType[1]);
 					}
 
 					command.Parameters.Add(p);
@@ -122,7 +123,7 @@ namespace BLToolkit.Data.DataProvider
 				case "single":
 				case "real":
 				case "float4":
-				case "IEEESingle":
+				case "ieeesingle":
 					return OleDbType.Single;
 
 
@@ -131,7 +132,7 @@ namespace BLToolkit.Data.DataProvider
 				case "double precision":
 				case "float":
 				case "float8":
-				case "IEEEDouble":
+				case "ieeedouble":
 					return OleDbType.Double;
 
 				case "currency":
@@ -192,6 +193,9 @@ namespace BLToolkit.Data.DataProvider
 					return OleDbType.Guid;
 
 				default:
+					// Each release of Jet brings many new aliases to existing types.
+					// This list may be outdated, please send a report to us.
+					//
 					throw new NotSupportedException("Unknown DB type '" + jetType + "'");
 			}
 		}
