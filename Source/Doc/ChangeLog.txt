@@ -7,6 +7,8 @@ Bug fixes
 - DbManager.ExecuteList<T>(params object[]) add an extra typeof(T)
 - EditableObject.Clone does reference cloning of its inner objects.
 - EditableObject.Clone does not track dirty state if its members.
+- Generated assembly name ends with '.dll'.
+  As result, System.Reflection.Assembly.Load() tries to load 'SomeAssembly.dll.DLL' and fails.
 
 Enhancement
 
