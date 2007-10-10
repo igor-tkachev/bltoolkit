@@ -73,7 +73,7 @@ namespace BLToolkit.Reflection.Emit
 				}
 			}
 
-			string assemblyName = System.IO.Path.GetFileName     (path);
+			string assemblyName = System.IO.Path.GetFileNameWithoutExtension(path);
 			string assemblyDir  = System.IO.Path.GetDirectoryName(path);
 
 			_path              = path;
@@ -131,6 +131,14 @@ namespace BLToolkit.Reflection.Emit
 			get { return _assemblyBuilder; }
 		}
 
+		/// <summary>
+		/// Gets the path where the assembly will be saved.
+		/// </summary>
+		public  string  ModulePath
+		{
+			get { return System.IO.Path.GetFileName(Path); }
+		}
+
 		private ModuleBuilder _moduleBuilder;
 		/// <summary>
 		/// Gets ModuleBuilder.
@@ -141,7 +149,7 @@ namespace BLToolkit.Reflection.Emit
 			{
 				if (_moduleBuilder == null)
 				{
-					_moduleBuilder = _assemblyBuilder.DefineDynamicModule(_assemblyName.Name);
+					_moduleBuilder = _assemblyBuilder.DefineDynamicModule(ModulePath);
 					_moduleBuilder.SetCustomAttribute(BLToolkitAttribute);
 
 				}
@@ -196,7 +204,7 @@ namespace BLToolkit.Reflection.Emit
 		/// </summary>
 		public void Save()
 		{
-			_assemblyBuilder.Save(_assemblyName.Name);
+			_assemblyBuilder.Save(ModulePath);
 		}
 
 		#region DefineType Overrides
