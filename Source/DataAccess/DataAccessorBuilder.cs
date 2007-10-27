@@ -1658,25 +1658,27 @@ namespace BLToolkit.DataAccess
 			EmitHelper emit  = Context.MethodBuilder.Emitter;
 			object[]   attrs = pi.GetCustomAttributes(typeof(ParamNameAttribute), true);
 
+			string methodName;
 			string paramName = attrs.Length == 0?
 				pi.Name: ((ParamNameAttribute)attrs[0]).Name;
 
 			emit.ldloc        (_locManager);
 
-			if (_sqlText == null && paramName[0] != '@')
+			if (paramName[0] != '@')
 			{
+				methodName = _sqlText == null? "GetSpParameterName": "GetQueryParameterName";
 				emit
 					.ldarg_0
 					.ldloc    (_locManager)
 					.ldstr    (paramName)
-					.callvirt (_baseType, "GetSpParameterName", _bindingFlags, typeof(DbManager), typeof(string))
+					.callvirt (_baseType, methodName, _bindingFlags, typeof(DbManager), typeof(string))
 					;
 			}
 			else
 				emit.ldstr    (paramName);
 
-			Type   type       = pi.ParameterType;
-			string methodName = "Parameter";
+			Type type  = pi.ParameterType;
+			methodName = "Parameter";
 
 			if (type.IsByRef)
 			{
@@ -1864,13 +1866,15 @@ namespace BLToolkit.DataAccess
 						.ldloc         (_locManager)
 						;
 
-					if (_sqlText == null && paramName[0] != '@')
+					if (paramName[0] != '@')
 					{
+						string methodName = _sqlText == null? "GetSpParameterName": "GetQueryParameterName";
+
 						emit
 							.ldarg_0
 							.ldloc     (_locManager)
 							.ldstr     (paramName)
-							.callvirt  (_baseType, "GetSpParameterName", _bindingFlags, typeof(DbManager), typeof(string))
+							.callvirt  (_baseType, methodName, _bindingFlags, typeof(DbManager), typeof(string))
 							;
 					}
 					else
