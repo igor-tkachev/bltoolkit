@@ -31,7 +31,7 @@ namespace DataAccess
 #endif
 
 #if ORACLE
-			[SqlQuery("SELECT * FROM DataTypeTest WHERE DataTypeID=:pID")]
+			[SqlQuery("SELECT * FROM DataTypeTest WHERE DataTypeID=:ID")]
 #else
 			[SqlQuery("SELECT * FROM DataTypeTest WHERE DataTypeID=@ID")]
 #endif

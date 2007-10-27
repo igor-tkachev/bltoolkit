@@ -9,7 +9,7 @@ using BLToolkit.Mapping;
 namespace DataAccess
 {
 	[TestFixture]
-	public class PrimaryKeyAttributeTest
+	public class PrimaryKeyAttributeTest : SqlQuery
 	{
 		public class Base
 		{
@@ -26,19 +26,18 @@ namespace DataAccess
 			}
 		}
 
+
 		[Test]
 		public void PrimaryKeyOverrideTest()
 		{
 			using (DbManager db = new DbManager())
 			{
-				SqlQuery q = new SqlQuery();
-
-				MemberMapper[] personPrimaryKeys = q.GetKeyFieldList(db, typeof (Base));
+				MemberMapper[] personPrimaryKeys = GetKeyFieldList(db, typeof (Base));
 				Assert.IsNotNull(personPrimaryKeys);
 				Assert.AreEqual(1, personPrimaryKeys.Length);
 				Assert.AreEqual("ID", personPrimaryKeys[0].MemberName);
 
-				MemberMapper[] derivedPrimaryKeys = q.GetKeyFieldList(db, typeof (Derived));
+				MemberMapper[] derivedPrimaryKeys = GetKeyFieldList(db, typeof (Derived));
 				Assert.IsNotNull(derivedPrimaryKeys);
 				Assert.AreEqual(0, derivedPrimaryKeys.Length);
 			}
@@ -70,14 +69,12 @@ namespace DataAccess
 		{
 			using (DbManager db = new DbManager())
 			{
-				SqlQuery q = new SqlQuery();
-
-				MemberMapper[] personPrimaryKeys = q.GetKeyFieldList(db, typeof (Base2));
+				MemberMapper[] personPrimaryKeys = GetKeyFieldList(db, typeof (Base2));
 				Assert.IsNotNull(personPrimaryKeys);
 				Assert.AreEqual(1, personPrimaryKeys.Length);
 				Assert.AreEqual("ID", personPrimaryKeys[0].MemberName);
 
-				MemberMapper[] derivedPrimaryKeys = q.GetKeyFieldList(db, typeof (Derived2));
+				MemberMapper[] derivedPrimaryKeys = GetKeyFieldList(db, typeof (Derived2));
 				Assert.IsNotNull(derivedPrimaryKeys);
 				Assert.AreEqual(0, derivedPrimaryKeys.Length);
 			}
@@ -99,14 +96,12 @@ namespace DataAccess
 		{
 			using (DbManager db = new DbManager())
 			{
-				SqlQuery q = new SqlQuery();
-
-				MemberMapper[] personPrimaryKeys = q.GetKeyFieldList(db, typeof (Base3));
+				MemberMapper[] personPrimaryKeys = GetKeyFieldList(db, typeof (Base3));
 				Assert.IsNotNull(personPrimaryKeys);
 				Assert.AreEqual(1, personPrimaryKeys.Length);
 				Assert.AreEqual("ID", personPrimaryKeys[0].MemberName);
 
-				MemberMapper[] derivedPrimaryKeys = q.GetKeyFieldList(db, typeof (Derived3));
+				MemberMapper[] derivedPrimaryKeys = GetKeyFieldList(db, typeof (Derived3));
 				Assert.IsNotNull(derivedPrimaryKeys);
 				Assert.AreEqual(0, derivedPrimaryKeys.Length);
 			}

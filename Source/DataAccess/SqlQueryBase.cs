@@ -85,7 +85,7 @@ namespace BLToolkit.DataAccess
 		private static readonly PrimaryKeyComparer _primaryKeyComparer = new PrimaryKeyComparer();
 		private static readonly Hashtable          _keyList            = new Hashtable();
 
-		public MemberMapper[] GetKeyFieldList(DbManager db, Type type)
+		protected internal MemberMapper[] GetKeyFieldList(DbManager db, Type type)
 		{
 			string         key    = type.FullName + "$" + db.DataProvider.Name;
 			MemberMapper[] mmList = (MemberMapper[])_keyList[key];
@@ -319,7 +319,7 @@ namespace BLToolkit.DataAccess
 		[NoInterception]
 		public virtual SqlQueryInfo GetSqlQueryInfo(DbManager db, Type type, string actionName)
 		{
-			string       key   = type.FullName + "$" + actionName + "$" + db.DataProvider.Name;
+			string       key   = type.FullName + "$" + actionName + "$" + db.DataProvider.Name + "$" + GetTableName(type);
 			SqlQueryInfo query = (SqlQueryInfo)_actionSqlQueryInfo[key];
 
 			if (query == null)

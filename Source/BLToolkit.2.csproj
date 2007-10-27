@@ -206,6 +206,7 @@
     <Compile Include="Patterns\DuckTypeBase.cs" />
     <Compile Include="Patterns\MustImplementAttribute.cs" />
     <Compile Include="Reflection\GenericBinder.cs" />
+    <Compile Include="Reflection\XmlIncludeAbstractAttribute.cs" />
     <Compile Include="TypeBuilder\Builders\GeneratedAttributeBuilder.cs" />
     <Compile Include="TypeBuilder\Builders\DuckTypeBuilder.cs" />
     <Compile Include="TypeBuilder\GenerateAttributeAttribute.cs" />
@@ -388,9 +389,6 @@
     <Content Include="Doc\License.txt" />
     <Content Include="Doc\OnlineDoc.txt" />
     <EmbeddedResource Include="Web\UI\WebObjectBinder.ico" />
-  </ItemGroup>
-  <ItemGroup>
-    <Service Include="{B4F97281-0DBD-4835-9ED8-7DFB966E87FF}" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>
