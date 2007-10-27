@@ -245,6 +245,18 @@ namespace BLToolkit.Data.DataProvider
 			return value;
 		}
 
+		public override void PrepareCommand(ref CommandType commandType, ref string commandText, ref IDbDataParameter[] commandParameters)
+		{
+			base.PrepareCommand(ref commandType, ref commandText, ref commandParameters);
+
+			if (commandType == CommandType.Text)
+			{
+				// Fix Oracle bug #11 '\r' is not a valid character!
+				//
+				commandText = commandText.Replace('\r', ' ');
+			}
+		}
+
 		public override void AttachParameter(IDbCommand command, IDbDataParameter parameter)
 		{
 			OracleParameter oraParameter = (parameter is OracleParameterWrap)?
@@ -1013,10 +1025,10 @@ namespace BLToolkit.Data.DataProvider
 			{
 				Type fieldType = _dataReader.GetProviderSpecificFieldType(index);
 
-				if (fieldType == typeof(OracleXmlType)) return typeof(OracleXmlType);
-				if (fieldType == typeof(OracleBlob))    return typeof(OracleBlob);
+				if (fieldType != typeof(OracleXmlType) && fieldType != typeof(OracleBlob))
+					fieldType = _dataReader.GetFieldType(index);
 
-				return _dataReader.GetFieldType(index);
+				return fieldType;
 			}
 
 			public override object GetValue(object o, int index)
@@ -1026,12 +1038,12 @@ namespace BLToolkit.Data.DataProvider
 				if (fieldType == typeof(OracleXmlType))
 				{
 					OracleXmlType xml = _dataReader.GetOracleXmlType(index);
-					return xml.IsNull? null: xml.GetXmlDocument();
+					return MappingSchema.ConvertToXmlDocument(xml);
 				}
 				else if (fieldType == typeof(OracleBlob))
 				{
 					OracleBlob blob = _dataReader.GetOracleBlob(index);
-					return blob.IsNull? null: blob;
+					return MappingSchema.ConvertToStream(blob);
 				}
 				else
 				{
@@ -1105,12 +1117,12 @@ namespace BLToolkit.Data.DataProvider
 				if (_fieldType == typeof(OracleXmlType))
 				{
 					OracleXmlType xml = _dataReader.GetOracleXmlType(Index);
-					return xml.IsNull? null: xml.GetXmlDocument();
+					return MappingSchema.ConvertToXmlDocument(xml);
 				}
 				else if (_fieldType == typeof(OracleBlob))
 				{
 					OracleBlob blob = _dataReader.GetOracleBlob(Index);
-					return blob.IsNull? null: blob;
+					return MappingSchema.ConvertToStream(blob);
 				}
 				else
 				{

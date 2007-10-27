@@ -1663,7 +1663,7 @@ namespace BLToolkit.DataAccess
 
 			emit.ldloc        (_locManager);
 
-			if (paramName[0] != '@')
+			if (_sqlText == null && paramName[0] != '@')
 			{
 				emit
 					.ldarg_0
@@ -1864,7 +1864,7 @@ namespace BLToolkit.DataAccess
 						.ldloc         (_locManager)
 						;
 
-					if (paramName[0] != '@')
+					if (_sqlText == null && paramName[0] != '@')
 					{
 						emit
 							.ldarg_0

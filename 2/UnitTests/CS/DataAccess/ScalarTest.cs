@@ -51,21 +51,21 @@ namespace DataAccess
 			public abstract int Scalar_AffectedRows(DbManager db);
 
 #if ORACLE
-			[SqlQuery("SELECT Stream_ FROM DataTypeTest WHERE DataTypeID = :pid")]
+			[SqlQuery("SELECT Stream_ FROM DataTypeTest WHERE DataTypeID = :id")]
 #else
 			[SqlQuery("SELECT Stream_ FROM DataTypeTest WHERE DataTypeID = @id")]
 #endif
 			public abstract Stream GetStream(DbManager db, int id);
 
 #if ORACLE
-			[SqlQuery("SELECT Xml_ FROM DataTypeTest WHERE DataTypeID = :pid")]
+			[SqlQuery("SELECT Xml_ FROM DataTypeTest WHERE DataTypeID = :id")]
 #else
 			[SqlQuery("SELECT Xml_ FROM DataTypeTest WHERE DataTypeID = @id")]
 #endif
 			public abstract XmlReader GetXml(DbManager db, int id);
 
 #if ORACLE
-			[SqlQuery("SELECT Xml_ FROM DataTypeTest WHERE DataTypeID = :pid")]
+			[SqlQuery("SELECT Xml_ FROM DataTypeTest WHERE DataTypeID = :id")]
 #else
 			[SqlQuery("SELECT Xml_ FROM DataTypeTest WHERE DataTypeID = @id")]
 #endif

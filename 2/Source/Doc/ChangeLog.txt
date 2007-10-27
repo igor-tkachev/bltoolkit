@@ -6,9 +6,12 @@ Bug fixes
 - Property change builder will use op_Inequality operation if it is available to compare property values
 - DbManager.ExecuteList<T>(params object[]) add an extra typeof(T)
 - EditableObject.Clone does reference cloning of its inner objects.
-- EditableObject.Clone does not track dirty state if its members.
+- EditableObject.Clone does not track dirty state of its members.
 - Generated assembly name ends with '.dll'.
   As result, System.Reflection.Assembly.Load() tries to load 'SomeAssembly.dll.DLL' and fails.
+- Oracle treat '\r' as an invalid character.
+- DataAccessorBuilder calls DbProvider.Convert(NameToParameter) for text query parameters.
+- SqlQueryBase.GetKeyFieldList was incorrectly marked as public.
 
 Enhancement
 
@@ -16,6 +19,8 @@ Enhancement
 - GenerateAtribute attribute to specify any custom attribute for a generated type or member.
 - SQLite data provider.
 - DeriveParameters implemented for MsAccess data provider.
+- XmlIncludeAbstractAttribute.to simplify the xml serialization of a BLToolkit generated type.
+
 
 v 2.0.6
 

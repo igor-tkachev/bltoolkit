@@ -16,7 +16,8 @@ namespace BLToolkit.EditableObjects
 		private          IPropertyChanged           _parent;
 		private          PropertyInfo               _propertyInfo;
 
-		public EditableXmlDocument() : this (new XmlDocument())
+		public EditableXmlDocument()
+			: this(new XmlDocument())
 		{
 		}
 
@@ -78,6 +79,13 @@ namespace BLToolkit.EditableObjects
 		{
 			if (_changedNodes == null)
 				_changedNodes = new Stack();
+
+			if (ea.Action == XmlNodeChangedAction.Change && ea.NewValue == ea.OldValue)
+			{
+				// A void change can be ignored.
+				//
+				return;
+			}
 
 			_changedNodes.Push(new XmlNodeTrackBack(ea));
 
@@ -145,7 +153,16 @@ namespace BLToolkit.EditableObjects
 
 		public bool IsDirty
 		{
-			get { return _current != _original || (_changedNodes != null && _changedNodes.Count > 0); }
+			get
+			{
+				if (_current == _original)
+					return _changedNodes != null && _changedNodes.Count > 0;
+
+				if (_current == null || _original == null)
+					return true;
+
+				return _current.InnerXml.TrimEnd() != _original.InnerXml.TrimEnd();
+			}
 		}
 
 		#endregion

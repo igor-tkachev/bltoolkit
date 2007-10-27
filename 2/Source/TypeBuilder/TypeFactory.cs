@@ -250,7 +250,7 @@ namespace BLToolkit.TypeBuilder
 						return type.Assembly;
 			}
 
-			int idx = args.Name.IndexOf("." + TypeBuilderConsts.AssemblyNameSuffix + ".dll");
+			int idx = args.Name.IndexOf("." + TypeBuilderConsts.AssemblyNameSuffix);
 
 			if (idx > 0)
 			{
