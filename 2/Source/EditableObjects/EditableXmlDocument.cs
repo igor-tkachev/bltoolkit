@@ -77,15 +77,16 @@ namespace BLToolkit.EditableObjects
 
 		private void HandleNodeChanged(object sender, XmlNodeChangedEventArgs ea)
 		{
-			if (_changedNodes == null)
-				_changedNodes = new Stack();
-
+#if FW2
 			if (ea.Action == XmlNodeChangedAction.Change && ea.NewValue == ea.OldValue)
 			{
 				// A void change can be ignored.
 				//
 				return;
 			}
+#endif
+			if (_changedNodes == null)
+				_changedNodes = new Stack();
 
 			_changedNodes.Push(new XmlNodeTrackBack(ea));
 
