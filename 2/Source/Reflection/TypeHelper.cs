@@ -152,7 +152,7 @@ namespace BLToolkit.Reflection
 
 				GetAttributesInternal(list, _type);
 
-				_typeAttributes[key] = attrs = list.ToArray();
+				_typeAttributes[key] = attrs = (object[])list.ToArray(typeof(Attribute));
 			}
 
 			return attrs;
@@ -171,7 +171,7 @@ namespace BLToolkit.Reflection
 			{
 				GetAttributesTreeInternal(list, type);
 
-				_typeAttributesTopInternal[type] = list.ToArray();
+				_typeAttributesTopInternal[type] = (object[])list.ToArray(typeof(Attribute));
 			}
 		}
 
@@ -262,7 +262,7 @@ namespace BLToolkit.Reflection
 					if (attributeType.IsInstanceOfType(list[i]) == false)
 						list.RemoveAt(i--);
 
-				_typeAttributes[key] = attrs = list.ToArray();
+				_typeAttributes[key] = attrs = (object[])list.ToArray(typeof(Attribute));
 			}
 
 			return attrs;

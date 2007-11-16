@@ -21,10 +21,28 @@ namespace Reflection
 			public int    IntField = 10;
 			public string StrField = "10";
 
-			public int    IntProperty { get { return IntField * 2;   } }
+			public int    IntProperty
+			{
+				get { return IntField * 2;  }
+				set { IntField = value / 2; }
+			}
 			public string StrProperty { get { return StrField + "2"; } }
 
 			public int    SetProperty { set {} }
+
+			protected int ProtectedProperty
+			{
+				get { return IntField * 2;  }
+				set { IntField = value / 2; }
+			}
+
+#if FW2
+			public int    ProtectedSetter
+			{
+				          get { return IntField; }
+				protected set { IntField = value;}
+			}
+#endif
 		}
 
 		[Test]
@@ -32,12 +50,33 @@ namespace Reflection
 		{
 			TypeAccessor ta = TypeAccessor.GetAccessor(typeof(TestObject1));
 
-			Assert.IsTrue(ta["IntField"].   HasGetter);
-			Assert.IsTrue(ta["IntProperty"].HasGetter);
-			Assert.IsTrue(ta["StrField"].   HasGetter);
-			Assert.IsTrue(ta["StrProperty"].HasGetter);
+			Assert.IsTrue (ta["IntField"].   HasGetter);
+			Assert.IsTrue (ta["IntProperty"].HasGetter);
+			Assert.IsTrue (ta["StrField"].   HasGetter);
+			Assert.IsTrue (ta["StrProperty"].HasGetter);
 			
 			Assert.IsFalse(ta["SetProperty"].HasGetter);
+			Assert.IsNull(ta["ProtectedProperty"]);
+#if FW2
+			Assert.IsTrue (ta["ProtectedSetter"].HasGetter);
+#endif
+		}
+
+		[Test]
+		public void HasSetter()
+		{
+			TypeAccessor ta = TypeAccessor.GetAccessor(typeof(TestObject1));
+
+			Assert.IsTrue (ta["IntField"].   HasSetter);
+			Assert.IsTrue (ta["IntProperty"].HasSetter);
+			Assert.IsTrue (ta["StrField"].   HasSetter);
+			Assert.IsFalse(ta["StrProperty"].HasSetter);
+			
+			Assert.IsTrue (ta["SetProperty"].HasSetter);
+			Assert.IsNull(ta["ProtectedProperty"]);
+#if FW2
+			Assert.IsFalse(ta["ProtectedSetter"].HasSetter);
+#endif
 		}
 
 		[Test]

@@ -12,9 +12,22 @@ namespace TypeBuilder
 	[TestFixture]
 	public class InternalTypesTest
 	{
-		internal abstract class TestObject
+		internal abstract class InternalObject
 		{
-			public abstract string Value { get; set; }
+			public abstract string PublicValue { get; set; }
+		}
+
+		public abstract class PublicObject
+		{
+			internal string InternalField;
+			internal abstract string InternalValue { get; set; }
+			internal protected abstract string ProtectedInternalValue { get; set; }
+			public abstract string PublicValue { get; internal set; }
+			public string NonAbstractValue
+			{
+				         get { return InternalField;  }
+				internal set { InternalField = value; }
+			}
 		}
 
 		[Test]
@@ -23,8 +36,29 @@ namespace TypeBuilder
 			TypeFactory.SaveTypes = true;
 			TypeFactory.SetGlobalAssembly("InternalTypesTest.dll", new Version(1,2,3,4), "TypeBuilder/InternalTypesTest.snk");
 
-			TestObject o = TypeAccessor.CreateInstance<TestObject>();
+			InternalObject o = TypeAccessor.CreateInstance<InternalObject>();
 			Assert.IsNotNull(o);
+
+			PublicObject o2 = TypeAccessor.CreateInstance<PublicObject>();
+			Assert.IsNotNull(o2);
+
+			TypeAccessor ta = TypeAccessor<PublicObject>.Instance;
+			Assert.IsNotNull(ta["InternalField"]);
+			Assert.IsTrue(ta["InternalField"].HasGetter);
+			Assert.IsTrue(ta["InternalField"].HasSetter);
+			Assert.IsNotNull(ta["PublicValue"]);
+			Assert.IsTrue(ta["PublicValue"].HasGetter);
+			Assert.IsTrue(ta["PublicValue"].HasSetter);
+			Assert.IsNotNull(ta["InternalValue"]);
+			Assert.IsTrue(ta["InternalValue"].HasGetter);
+			Assert.IsTrue(ta["InternalValue"].HasSetter);
+			Assert.IsNotNull(ta["ProtectedInternalValue"]);
+			Assert.IsTrue(ta["ProtectedInternalValue"].HasGetter);
+			Assert.IsTrue(ta["ProtectedInternalValue"].HasSetter);
+			Assert.IsNotNull(ta["NonAbstractValue"]);
+			Assert.IsTrue(ta["NonAbstractValue"].HasGetter);
+			Assert.IsTrue(ta["NonAbstractValue"].HasSetter);
+
 
 			TypeFactory.SaveGlobalAssembly();
 		}

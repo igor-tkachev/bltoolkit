@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Specialized;
 using System.Reflection;
 using System.Reflection.Emit;
-
+using System.Runtime.CompilerServices;
 using BLToolkit.Reflection;
 using BLToolkit.Reflection.Emit;
 
@@ -23,6 +23,9 @@ namespace BLToolkit.TypeBuilder.Builders
 		readonly TypeHelper        _memberAccessor = new TypeHelper(typeof(MemberAccessor));
 		readonly ArrayList         _nestedTypes    = new ArrayList();
 		         TypeBuilderHelper _typeBuilder;
+#if FW2
+		         bool              _friendlyAssembly;
+#endif
 
 		public string AssemblyNameSuffix
 		{
@@ -41,6 +44,20 @@ namespace BLToolkit.TypeBuilder.Builders
 		public Type Build(Type sourceType, AssemblyBuilderHelper assemblyBuilder)
 		{
 			if (assemblyBuilder == null) throw new ArgumentNullException("assemblyBuilder");
+
+#if FW2
+			_friendlyAssembly = false;
+			object[] attributes = sourceType.Assembly.GetCustomAttributes(typeof(InternalsVisibleToAttribute), true);
+			foreach (InternalsVisibleToAttribute visibleToAttribute in attributes)
+			{
+				if (AssemblyName.ReferenceMatchesDefinition(assemblyBuilder.AssemblyName,
+					new AssemblyName(visibleToAttribute.AssemblyName)))
+				{
+					_friendlyAssembly = true;
+					break;
+				}
+			}
+#endif
 
 			string typeName = GetTypeAccessorClassName(_type);
 
@@ -182,6 +199,15 @@ namespace BLToolkit.TypeBuilder.Builders
 			foreach (FieldInfo fi in _originalType.GetFields(BindingFlags.Instance | BindingFlags.Public))
 				AddMemberToDictionary(members, fi);
 
+#if FW2
+			if (_friendlyAssembly)
+			{
+				foreach (FieldInfo fi in _originalType.GetFields(BindingFlags.Instance | BindingFlags.NonPublic))
+					if (fi.IsAssembly || fi.IsFamilyOrAssembly)
+						AddMemberToDictionary(members, fi);
+			}
+#endif
+
 			foreach (PropertyInfo pi in _originalType.GetProperties(BindingFlags.Instance | BindingFlags.Public))
 				if (pi.GetIndexParameters().Length == 0)
 					AddMemberToDictionary(members, pi);
@@ -283,6 +309,22 @@ namespace BLToolkit.TypeBuilder.Builders
 				;
 		}
 
+		/// <summary>
+		/// Figure out is base type method is accessible by extension type method.
+		/// </summary>
+		/// <param name="method">A <see cref="MethodInfo"/> instance.</param>
+		/// <returns>True if the method access is Public or Family and it's assembly is friendly.</returns>
+		private bool IsMethodAccessible(MethodInfo method)
+		{
+			if (method == null) throw new ArgumentNullException("method");
+
+			return method.IsPublic
+#if FW2
+				|| (_friendlyAssembly && (method.IsAssembly || method.IsFamilyOrAssembly))
+#endif
+				;
+		}
+
 		private void BuildGetter(MemberInfo mi, TypeBuilderHelper nestedType)
 		{
 			Type       methodType = mi.DeclaringType;
@@ -300,7 +342,7 @@ namespace BLToolkit.TypeBuilder.Builders
 						methodType = _type;
 					}
 
-					if (getMethod == null)
+					if (getMethod == null || !IsMethodAccessible(getMethod))
 						return;
 				}
 			}
@@ -361,7 +403,7 @@ namespace BLToolkit.TypeBuilder.Builders
 						methodType = _type;
 					}
 
-					if (setMethod == null)
+					if (setMethod == null || !IsMethodAccessible(setMethod))
 						return;
 				}
 			}
@@ -429,7 +471,7 @@ namespace BLToolkit.TypeBuilder.Builders
 						methodType = _type;
 					}
 
-					if (getMethod == null)
+					if (getMethod == null || !IsMethodAccessible(getMethod))
 						return;
 				}
 			}
@@ -477,7 +519,7 @@ namespace BLToolkit.TypeBuilder.Builders
 						methodType = _type;
 					}
 
-					if (setMethod == null)
+					if (setMethod == null || !IsMethodAccessible(setMethod))
 						return;
 				}
 			}

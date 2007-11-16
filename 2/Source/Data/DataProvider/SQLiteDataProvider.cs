@@ -168,8 +168,14 @@ namespace BLToolkit.Data.DataProvider
 		{
 			public override object Invoke(object[] args)
 			{
-				Debug.Assert(args != null && args.Length == 1 && (args[0] is string || args[0] is DBNull));
-				return args[0] is DBNull? args[0]: ((string)args[0]).ToLower();
+				Debug.Assert(args != null && args.Length == 1);
+				object arg = args[0];
+
+				Debug.Assert(arg is string || arg is DBNull || arg is byte[]);
+				return
+					arg is string? ((string)arg).ToLower():
+					arg is byte[]? Encoding.UTF8.GetString((byte[])arg).ToLower():
+					arg;
 			}
 		}
 
@@ -181,8 +187,14 @@ namespace BLToolkit.Data.DataProvider
 		{
 			public override object Invoke(object[] args)
 			{
-				Debug.Assert(args != null && args.Length == 1 && (args[0] is string || args[0] is DBNull));
-				return args[0] is DBNull? args[0]: ((string)args[0]).ToUpper();
+				Debug.Assert(args != null && args.Length == 1);
+				object arg = args[0];
+
+				Debug.Assert(arg is string || arg is DBNull || arg is byte[]);
+				return
+					arg is string? ((string)arg).ToUpper():
+					arg is byte[]? Encoding.UTF8.GetString((byte[])arg).ToUpper():
+					arg;
 			}
 		}
 	}
