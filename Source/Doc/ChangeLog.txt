@@ -12,6 +12,7 @@ Bug fixes
 - Oracle treat '\r' as an invalid character.
 - DataAccessorBuilder calls DbProvider.Convert(NameToParameter) for text query parameters.
 - SqlQueryBase.GetKeyFieldList was incorrectly marked as public.
+- TypeAccessorBuilder fails to build a getter/setter if base method is protected.
 
 Enhancement
 
@@ -20,7 +21,7 @@ Enhancement
 - SQLite data provider.
 - DeriveParameters implemented for MsAccess data provider.
 - XmlIncludeAbstractAttribute.to simplify the xml serialization of a BLToolkit generated type.
-
+- Better support for internal types/members.
 
 v 2.0.6
 

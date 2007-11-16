@@ -102,7 +102,9 @@ namespace BLToolkit.Common
 
 		object ICustomTypeDescriptor.GetPropertyOwner(PropertyDescriptor pd)
 		{
-			return TypeDescriptor.GetPropertyOwner(pd);
+			// Do not relay this call to TypeDescriptor. We are the owner.
+			//
+			return this;
 		}
 
 		#endregion
