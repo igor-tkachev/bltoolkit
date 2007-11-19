@@ -159,7 +159,27 @@ namespace TypeBuilder.Builders
 			int i = (int)TypeAccessor.CreateInstance(typeof(int));
 			Assert.IsNotNull(i);
 		}
-		
+
+		private class PrivateType
+		{
+		}
+
+		[Test, ExpectedException(typeof(TypeBuilderException))]
+		public void PrivateTypeTest()
+		{
+			TypeAccessor.CreateInstance(typeof(PrivateType));
+		}
+
+		internal class InternalType
+		{
+		}
+
+		[Test, ExpectedException(typeof(TypeBuilderException))]
+		public void InternalTypeTest()
+		{
+			TypeAccessor.CreateInstance(typeof(InternalType));
+		}
+
 #if FW2
 //		[Test]
 //		public void Test6()
