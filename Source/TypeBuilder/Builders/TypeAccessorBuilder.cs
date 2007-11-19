@@ -43,10 +43,18 @@ namespace BLToolkit.TypeBuilder.Builders
 
 		public Type Build(Type sourceType, AssemblyBuilderHelper assemblyBuilder)
 		{
+			if (sourceType == null)      throw new ArgumentNullException("sourceType");
 			if (assemblyBuilder == null) throw new ArgumentNullException("assemblyBuilder");
 
 #if FW2
+			// Check InternalsVisibleToAttributes of the source type's assembly.
+			// Even if the sourceType is public, it may have internal fields and props.
+			//
 			_friendlyAssembly = false;
+
+			// Usually, there is no such attribute in the source assembly.
+			// Therefore we do not cache the result.
+			//
 			object[] attributes = sourceType.Assembly.GetCustomAttributes(typeof(InternalsVisibleToAttribute), true);
 			foreach (InternalsVisibleToAttribute visibleToAttribute in attributes)
 			{
@@ -57,6 +65,12 @@ namespace BLToolkit.TypeBuilder.Builders
 					break;
 				}
 			}
+
+			if (!sourceType.IsVisible && !_friendlyAssembly)
+				throw new TypeBuilderException(string.Format("Can not build type accessor for non-public type '{0}'.", sourceType.FullName));
+#else
+			if (!sourceType.IsPublic && !sourceType.IsNestedPublic)
+				throw new TypeBuilderException(string.Format("Can not build type accessor for non-public type '{0}'.", sourceType.FullName));
 #endif
 
 			string typeName = GetTypeAccessorClassName(_type);
