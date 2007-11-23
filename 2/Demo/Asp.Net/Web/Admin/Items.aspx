@@ -1,5 +1,5 @@
 <%@ Page Language="C#" MasterPageFile="~/Admin/MasterPage.master" AutoEventWireup="true" CodeFile="Items.aspx.cs" Inherits="Admin_Items" Title="Items" %>
-<%@ Register Assembly="BLToolkit.2" Namespace="BLToolkit.Web.UI" TagPrefix="cc1" %>
+<%@ Register Assembly="BLToolkit.3" Namespace="BLToolkit.Web.UI" TagPrefix="cc1" %>
 
 <asp:Content ID="Content" ContentPlaceHolderID="cph" Runat="Server">
 
