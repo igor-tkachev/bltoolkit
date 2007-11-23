@@ -22,6 +22,7 @@ Enhancement
 - DeriveParameters implemented for MsAccess data provider.
 - XmlIncludeAbstractAttribute.to simplify the xml serialization of a BLToolkit generated type.
 - Better support for internal types/members.
+- VS 2008 support.
 
 v 2.0.6
 
