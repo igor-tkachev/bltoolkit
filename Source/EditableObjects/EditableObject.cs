@@ -344,11 +344,39 @@ namespace BLToolkit.EditableObjects
 		/// in hashing algorithms and data structures like a hash table.
 		/// </summary>
 		/// <returns>
-		/// A hash code for the current <see cref="T:System.Object"></see>.
+		/// A hash code for the current <see cref="EditableObject"/>.
+		/// </returns>
+		public virtual int MemberwiseGetHashCode()
+		{
+			return TypeAccessor.GetHashCode(this);
+		}
+
+		/// <summary>
+		/// Serves as a hash function for a particular type.
+		/// <see cref="M:System.Object.GetHashCode"/> is suitable for use
+		/// in hashing algorithms and data structures like a hash table.
+		/// </summary>
+		/// <returns>
+		/// A hash code for the current <see cref="EditableObject"/>.
 		/// </returns>
 		public override int GetHashCode()
 		{
-			return TypeAccessor.GetHashCode(this);
+			return Configuration.EditableObjectUsesMemberwiseEquals?
+				MemberwiseGetHashCode(): base.GetHashCode();
+		}
+
+		/// <summary>
+		/// Determines whether the specified <see cref="T:System.Object"/> is equal
+		/// to the current <see cref="T:System.Object"/>.
+		/// </summary>
+		/// <returns>
+		/// true if the specified object is equal to the current object; otherwise, false.
+		/// </returns>
+		/// <param name="obj">The <see cref="T:System.Object"></see> to compare
+		/// with the current <see cref="T:System.Object"/>.
+		public virtual bool MemberwiseEquals(object obj)
+		{
+			return TypeAccessor.AreEqual(this, obj);
 		}
 
 		/// <summary>
@@ -362,7 +390,8 @@ namespace BLToolkit.EditableObjects
 		/// with the current <see cref="T:System.Object"/>.
 		public override bool Equals(object obj)
 		{
-			return TypeAccessor.AreEqual(this, obj);
+			return Configuration.EditableObjectUsesMemberwiseEquals?
+				MemberwiseEquals(obj): base.Equals(obj);
 		}
 
 		#endregion

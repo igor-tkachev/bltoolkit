@@ -1,4 +1,5 @@
 using System;
+using BLToolkit.Common;
 using NUnit.Framework;
 
 using BLToolkit.EditableObjects;
@@ -45,14 +46,16 @@ namespace EditableObjects
 			Assert.AreEqual(o.Name, clone.Name);
 
 			Assert.AreNotEqual(o.Inner.Some, clone.Inner.Some);
-			Assert.IsFalse(((IEquatable<TestObject>)o).Equals(clone));
+			Assert.IsFalse(o.Equals(clone));
 
 			// Now make it the same as original value.
 			//
 			clone.Inner = o.Inner.Clone();
 
 			Assert.AreEqual(o.Inner.Some, clone.Inner.Some);
-			Assert.IsTrue(((IEquatable<TestObject>)o).Equals(clone));
+			Configuration.EditableObjectUsesMemberwiseEquals = true;
+			Assert.IsTrue(o.Equals(clone));
+			Configuration.EditableObjectUsesMemberwiseEquals = false;
 		}
 
 		[Test]
