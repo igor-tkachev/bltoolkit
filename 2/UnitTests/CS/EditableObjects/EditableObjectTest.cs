@@ -1,6 +1,7 @@
 using System;
 using System.Reflection;
 using System.Xml;
+using BLToolkit.Common;
 using NUnit.Framework;
 
 using BLToolkit.EditableObjects;
@@ -227,59 +228,79 @@ namespace EditableObjects
 			Assert.IsFalse(c.IsDirtyMember("Field2"));
 		}
 
-		public struct EO1
+		public class TestClass
 		{
 			public int    ID;
 			public string Str;
 		}
 
-		public abstract class EO2 : EditableObject<EO2>
+		public struct TestStruct
+		{
+			public int    ID;
+			public string Str;
+		}
+
+		public abstract class TestEditableObject : EditableObject
 		{
 			public abstract int ID { get; set; }
 
-			//Uncomment this to make test below work.
-			//public override bool Equals(object obj)
-			//{
-			//    if (!ReferenceEquals(this, obj))
-			//        return false;
-			//    return base.Equals(obj);
-			//}
+			public static TestEditableObject CreateInstance()
+			{
+				return (TestEditableObject)
+					TypeAccessor.CreateInstanceEx(typeof(TestEditableObject), null);
+			}
 		}
 
 		[Test]
 		public void EqualsTest()
 		{
-			EO1 eo1Inst1 = new EO1();
-			EO1 eo1Inst2 = new EO1();
+			TestClass classInst1 = new TestClass();
+			TestClass classInst2 = new TestClass();
 
-			EO2 eo2Inst1 = EO2.CreateInstance();
-			EO2 eo2Inst2 = EO2.CreateInstance();
-			EO2 eo2Inst3 = eo2Inst1;
+			TestStruct structInst1 = new TestStruct();
+			TestStruct structInst2 = new TestStruct();
 
-			eo1Inst1.ID = eo1Inst2.ID = 1;
-			eo2Inst1.ID = eo2Inst2.ID = 1;
-			EO1 eo1Inst3 = eo1Inst1;
+			TestEditableObject editableInst1 = TestEditableObject.CreateInstance();
+			TestEditableObject editableInst2 = TestEditableObject.CreateInstance();
+			TestEditableObject editableInst3 = editableInst1;
 
-			Console.WriteLine("eo1Inst1 equals eo1Inst2: " + Equals(eo1Inst1, eo1Inst2));
-			Console.WriteLine("eo2Inst1 equals eo2Inst2: " + Equals(eo2Inst1, eo2Inst2));
-			Assert.IsTrue(Equals(eo1Inst1, eo1Inst2) == Equals(eo2Inst1, eo2Inst2));
+			classInst1   .ID = classInst2   .ID = 1;
+			structInst1  .ID = structInst2  .ID = 1;
+			editableInst1.ID = editableInst2.ID = 1;
 
-			Console.WriteLine("eo1Inst1 equals eo1Inst3: " + Equals(eo1Inst1, eo1Inst3));
-			Console.WriteLine("eo2Inst1 equals eo2Inst3: " + Equals(eo2Inst1, eo2Inst3));
-			Assert.IsTrue(Equals(eo1Inst1, eo1Inst3) == Equals(eo2Inst1, eo2Inst3));
+			TestStruct structInst3 = structInst1;
+			TestClass   classInst3 = classInst1;
 
-			Console.WriteLine("eo1Inst2 equals eo1Inst3: " + Equals(eo1Inst2, eo1Inst3));
-			Console.WriteLine("eo2Inst2 equals eo2Inst3: " + Equals(eo2Inst2, eo2Inst3));
+			Assert.IsTrue(Equals(structInst1,   structInst2));
+			Assert.IsTrue(Equals(structInst1,   structInst3));
+			Assert.IsTrue(Equals(structInst2,   structInst3));
+
+			Configuration.EditableObjectUsesMemberwiseEquals = true;
+
+			Assert.IsTrue(Equals(editableInst1, editableInst2));
+			Assert.IsTrue(Equals(editableInst1, editableInst3));
+			Assert.IsTrue(Equals(editableInst2, editableInst3));
+
+			Configuration.EditableObjectUsesMemberwiseEquals = false;
+
+			Assert.IsFalse(Equals(classInst1,    classInst2));
+			Assert.IsFalse(Equals(editableInst1, editableInst2));
+
+			Assert.IsTrue (Equals(classInst1,    classInst3));
+			Assert.IsTrue (Equals(editableInst1, editableInst3));
+
+			Assert.IsFalse(Equals(classInst2,    classInst3));
+			Assert.IsFalse(Equals(editableInst2, editableInst3));
 		}
 
 		[Test]
 		public void EqualsSpeedTest()
 		{
-			EO1 eo1Inst1 = new EO1();
-			EO1 eo1Inst3 = eo1Inst1;
+			TestClass eo1Inst1 = new TestClass();
+			TestClass eo1Inst3 = eo1Inst1;
 
-			EO2 eo2Inst1 = EO2.CreateInstance();
-			EO2 eo2Inst3 = eo2Inst1;
+			TestEditableObject eo2Inst1 = TestEditableObject.CreateInstance();
+			TestEditableObject eo2Inst3 = eo2Inst1;
 
 			eo1Inst1.ID = 1; eo1Inst1.Equals(eo1Inst3);
 			eo2Inst1.ID = 1; eo2Inst1.Equals(eo2Inst3);
@@ -298,8 +319,8 @@ namespace EditableObjects
 		[Test]
 		public void GetHashCodeSpeedTest()
 		{
-			EO1 eo1Inst1 = new EO1();
-			EO2 eo2Inst1 = EO2.CreateInstance();
+			TestClass eo1Inst1 = new TestClass();
+			TestEditableObject eo2Inst1 = TestEditableObject.CreateInstance();
 
 			eo1Inst1.ID = 1; eo1Inst1.GetHashCode();
 			eo2Inst1.ID = 1; eo2Inst1.GetHashCode();

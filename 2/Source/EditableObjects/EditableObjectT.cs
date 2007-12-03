@@ -5,7 +5,7 @@ using BLToolkit.Reflection;
 namespace BLToolkit.EditableObjects
 {
 	[Serializable]
-	public abstract class EditableObject<T> : EditableObject, IEquatable<T>
+	public abstract class EditableObject<T> : EditableObject
 		where T : EditableObject<T>
 	{
 		#region CreateInstance
@@ -24,22 +24,6 @@ namespace BLToolkit.EditableObjects
 			return (T)TypeAccessor.Copy(this);
 		}
 			
-		#endregion
-
-		#region IEquatable<T> Members
-
-		///<summary>
-		///Indicates whether the current object is equal to another object of the same type.
-		///</summary>
-		///<returns>
-		///true if the current object is equal to the other parameter; otherwise, false.
-		///</returns>
-		///<param name="other">An object to compare with this object.</param>
-		bool IEquatable<T>.Equals(T other)
-		{
-			return TypeAccessor.AreEqual(this, other);
-		}
-
 		#endregion
 	}
 }
