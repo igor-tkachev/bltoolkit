@@ -53,9 +53,6 @@ namespace EditableObjects
 			clone.Inner = o.Inner.Clone();
 
 			Assert.AreEqual(o.Inner.Some, clone.Inner.Some);
-			Configuration.EditableObjectUsesMemberwiseEquals = true;
-			Assert.IsTrue(o.Equals(clone));
-			Configuration.EditableObjectUsesMemberwiseEquals = false;
 		}
 
 		[Test]
