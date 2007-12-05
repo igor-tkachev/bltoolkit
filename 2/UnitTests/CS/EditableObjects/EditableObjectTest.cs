@@ -275,14 +275,6 @@ namespace EditableObjects
 			Assert.IsTrue(Equals(structInst1,   structInst3));
 			Assert.IsTrue(Equals(structInst2,   structInst3));
 
-			Configuration.EditableObjectUsesMemberwiseEquals = true;
-
-			Assert.IsTrue(Equals(editableInst1, editableInst2));
-			Assert.IsTrue(Equals(editableInst1, editableInst3));
-			Assert.IsTrue(Equals(editableInst2, editableInst3));
-
-			Configuration.EditableObjectUsesMemberwiseEquals = false;
-
 			Assert.IsFalse(Equals(classInst1,    classInst2));
 			Assert.IsFalse(Equals(editableInst1, editableInst2));
 

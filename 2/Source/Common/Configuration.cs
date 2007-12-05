@@ -77,16 +77,5 @@ namespace BLToolkit.Common
 			get { return _filterOutBaseEqualAttributes; }
 			set { _filterOutBaseEqualAttributes = value; }
 		}
-
-		private static bool _editableObjectUsesMemberwiseEquals = false;
-		/// <summary>
-		/// Controls whether EditableObject.Equals() &amp; EditableObject&lt;T&gt;.Equals()
-		/// will compare values of their members instead of checking for reference equality.
-		/// </summary>
-		public  static bool  EditableObjectUsesMemberwiseEquals
-		{
-			get { return _editableObjectUsesMemberwiseEquals; }
-			set { _editableObjectUsesMemberwiseEquals = value; }
-		}
 	}
 }
