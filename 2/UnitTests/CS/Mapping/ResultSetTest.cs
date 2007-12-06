@@ -1,6 +1,6 @@
 using System;
 using System.Collections;
-
+using System.Data;
 using BLToolkit.Data;
 using BLToolkit.Mapping;
 
@@ -146,5 +146,25 @@ namespace Mapping
 				Assert.AreEqual(7, ((Slave)(((Master)sets[0].List[0]).Slaves[1])).ID);
 			}
 		}
+
+		[Test]
+		public void TestDataSet()
+		{
+			using (DbManager db = new DbManager())
+			{
+				DataSet set = db
+#if ORACLE
+					.SetSpCommand("ResultSetTest")
+#else
+					.SetCommand(SqlResultSet)
+#endif
+					.ExecuteDataSet();
+
+				Assert.IsNotNull(set);
+				Assert.AreEqual(2, set.Tables.Count);
+			}
+
+		}
+
 	}
 }
