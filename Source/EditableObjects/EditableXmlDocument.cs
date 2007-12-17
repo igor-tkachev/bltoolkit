@@ -134,12 +134,18 @@ namespace BLToolkit.EditableObjects
 					switch (nodeTrackBack.Action)
 					{
 						case XmlNodeChangedAction.Insert:
-							((XmlNode)nodeTrackBack.Value).RemoveChild(nodeTrackBack.Node);
+							if (nodeTrackBack.Node.NodeType == XmlNodeType.Attribute)
+								((XmlElement)nodeTrackBack.Value).Attributes.Remove((XmlAttribute)nodeTrackBack.Node);
+							else
+								((XmlNode)nodeTrackBack.Value).RemoveChild(nodeTrackBack.Node);
 							break;
 						case XmlNodeChangedAction.Remove:
 							// NB: The order of children nodes may change.
 							//
-							((XmlNode)nodeTrackBack.Value).AppendChild(nodeTrackBack.Node);
+							if (nodeTrackBack.Node.NodeType == XmlNodeType.Attribute)
+								((XmlElement)nodeTrackBack.Value).Attributes.Append((XmlAttribute)nodeTrackBack.Node);
+							else
+								((XmlNode)nodeTrackBack.Value).AppendChild(nodeTrackBack.Node);
 							break;
 						case XmlNodeChangedAction.Change:
 							nodeTrackBack.Node.Value = (string)nodeTrackBack.Value;

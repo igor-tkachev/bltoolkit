@@ -4,9 +4,9 @@ using NUnit.Framework;
 
 using BLToolkit.Reflection;
 
-// typeof(TargetType).FullName + "." + TypeBuilderConsts.AssemblyNameSuffix + ".dll"
+// typeof(TargetType).FullName + "." + TypeBuilderConsts.AssemblyNameSuffix
 //
-/*[a]*/[assembly: InternalsVisibleTo("TypeBuilder.InternalTypesTest.TestObject.TypeBuilder.dll")]/*[/a]*/
+/*[a]*/[assembly: InternalsVisibleTo("TypeBuilder.InternalTypesTest.TestObject.TypeBuilder")]/*[/a]*/
 
 namespace TypeBuilder
 {

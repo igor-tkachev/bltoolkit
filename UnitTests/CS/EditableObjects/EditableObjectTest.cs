@@ -158,7 +158,9 @@ namespace EditableObjects
 			o.Field1 = 10;
 			o.Field2 = !o.Field2;
 			o.Field3 = DateTime.Now;
-			o.XmlField.LoadXml("<root/>");
+			o.XmlField.LoadXml("<root foo=\"bar\"/>");
+			o.XmlField.DocumentElement.Attributes.RemoveAll();
+			o.XmlField.DocumentElement.Attributes.Append(o.XmlField.CreateAttribute("attr"));
 
 			Console.WriteLine("Dirty Members");
 
