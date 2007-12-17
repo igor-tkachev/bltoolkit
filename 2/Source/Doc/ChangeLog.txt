@@ -13,6 +13,7 @@ Bug fixes
 - DataAccessorBuilder calls DbProvider.Convert(NameToParameter) for text query parameters.
 - SqlQueryBase.GetKeyFieldList was incorrectly marked as public.
 - TypeAccessorBuilder fails to build a getter/setter if base method is protected.
+- EditableXmlDocument fails to reject changes if there was an attribute insertion or deletion.
 
 Enhancement
 
