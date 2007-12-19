@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xsd:schema id="Mapping"
+	xmlns:tns="urn:schemas-bltoolkit-net:mapping"
+	xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+	targetNamespace="urn:schemas-bltoolkit-net:mapping">
+
+	<xsd:attribute name="MapField"                type="xsd:string" />
+	<xsd:attribute name="MapIgnore"               type="xsd:boolean" />
+	<xsd:attribute name="Trimmable"               type="xsd:boolean" />
+	<xsd:attribute name="Nullable"                type="xsd:boolean" />
+	<xsd:attribute name="MapValue"                type="xsd:string" />
+	<xsd:attribute name="MapValue-Type"           type="xsd:string" />
+	<xsd:attribute name="MapValue-OrigValue"      type="xsd:string" />
+	<xsd:attribute name="MapValue-OrigValue-Type" type="xsd:string" />
+	<xsd:attribute name="DefaultValue"            type="xsd:string" />
+	<xsd:attribute name="DefaultValue-Type"       type="xsd:string" />
+	<xsd:attribute name="NullValue"               type="xsd:string" />
+	<xsd:attribute name="NullValue-Type"          type="xsd:string" />
+
+	<xsd:complexType name="MapValue" id="MapValue">
+		<xsd:sequence>
+			<xsd:any maxOccurs="unbounded" />
+		</xsd:sequence>
+		<xsd:attribute name="Value"           type="xsd:string" use="optional" />
+		<xsd:attribute name="Type"            type="xsd:string" use="required" />
+		<xsd:attribute name="OrigValue"       type="xsd:string" use="optional" />
+		<xsd:attribute name="OrigValue-Type"  type="xsd:string" use="optional" />
+	</xsd:complexType>
+
+	<xsd:complexType name="DefaultValue" id="DefaultValue">
+		<xsd:attribute name="Value"           type="xsd:string" use="optional" />
+		<xsd:attribute name="Type"            type="xsd:string" use="optional" />
+	</xsd:complexType>
+
+	<xsd:complexType name="NullValue" id="NullValue">
+		<xsd:attribute name="Value"           type="xsd:string" use="optional" />
+		<xsd:attribute name="Type"            type="xsd:string" use="optional" />
+	</xsd:complexType>
+
+	<xsd:complexType name="MapField" id="MapField">
+		<xsd:attribute name="MapName"  type="xsd:string" use="required" />
+		<xsd:attribute name="OrigName" type="xsd:string" use="required" />
+	</xsd:complexType>
+</xsd:schema>
