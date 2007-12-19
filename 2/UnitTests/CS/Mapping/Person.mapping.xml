@@ -1,9 +1,0 @@
-﻿<?xml version="1.0" encoding="utf-8" ?>
-<Types>
-
-	<Type Name="Mapping.PersonMappingTest+Person">
-		<Member Name="FirstName" MapField="FIRST_NAME" />
-		<Member Name="LastName"  MapField="LAST_NAME" />
-	</Type>
-
-</Types>
