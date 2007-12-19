@@ -1,0 +1,80 @@
+﻿<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.50727</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{6AE74A35-B337-4B17-8092-E1B98DEF06AF}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>UnitTests.All._2</RootNamespace>
+    <AssemblyName>UnitTests.All.2</AssemblyName>
+    <RunPostBuildEvent>OnOutputUpdated</RunPostBuildEvent>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="nunit.framework, Version=2.2.8.0, Culture=neutral, PublicKeyToken=96d09a1eb7f44a77, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\..\..\Program Files\NUnit-Net-2.0 2.2.8\bin\nunit.framework.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Class1.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\Examples\Cpp\Examples.Cpp.2.vcproj">
+      <Project>{1710C5C2-0416-4981-81FC-BBBDFDA0B24D}</Project>
+      <Name>Examples.Cpp.2</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Examples\CS\Examples.CS.2.csproj">
+      <Project>{34989C73-F82A-4905-9349-D0CF1419CD1C}</Project>
+      <Name>Examples.CS.2</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Examples\VB\Examples.VB.2.vbproj">
+      <Project>{308A4189-53AB-460D-B2B1-0EB4B9219654}</Project>
+      <Name>Examples.VB.2</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\HowTo\HowTo.csproj">
+      <Project>{8DA66999-005A-49AB-86A9-2C1F62905B50}</Project>
+      <Name>HowTo</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Source\BLToolkit.2.csproj">
+      <Project>{0C325F5D-E50E-4340-8724-D29896CCC583}</Project>
+      <Name>BLToolkit.2</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\CS\UnitTests.CS.2.csproj">
+      <Project>{2BB4AD77-190F-4D7E-A83E-7B254A0A1FCA}</Project>
+      <Name>UnitTests.CS.2</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Service Include="{B4F97281-0DBD-4835-9ED8-7DFB966E87FF}" />
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>copy "$(ProjectDir)App.config" "$(ProjectDir)$(OutDir)"</PostBuildEvent>
+  </PropertyGroup>
+</Project>
