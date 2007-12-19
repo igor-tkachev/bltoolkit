@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="utf-8" ?>
-<mapping xmlns="http://www.rsdn.ru/mapping.xsd">
-	<type name="DestAttr">
-		<field name="ixx1" source="i1" nullable="true" />
-	</type>
-</mapping>
