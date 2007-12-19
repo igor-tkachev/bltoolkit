@@ -1,0 +1,121 @@
+body 
+{
+	background  : White;
+	font-family : Verdana;
+}
+
+a:link    { text-decoration: none;      color : #338899; }
+a:visited { text-decoration: none;      color : #55AABB; }
+a:hover   { text-decoration: underline; color : #338899; }
+
+a.m:link    { text-decoration: underline; color : Black; }
+a.m:visited { text-decoration: underline; color : Black; }
+a.m:hover   { text-decoration: underline; color : Black; }
+
+.title
+{
+	font-size   : x-large;
+	color       : #116677;
+	font-family : Arial;
+}
+
+.homeurl
+{
+	font-size : small;
+	color     : #338899;
+}
+
+.hr
+{
+	height           : 1px;
+	background-color : #338899;
+}
+
+.sp
+{
+	height : 7px;
+}
+
+th
+{
+	font-size        : small;
+	vertical-align   : top;
+	background-color : #EEEEEE;
+	text-align       : center;
+}
+
+td
+{
+	font-size      : small;
+	vertical-align : top;
+}
+
+td.p
+{
+	font-size      : small;
+	vertical-align : top;
+	padding-top    : 7px;
+}
+
+td.pj
+{
+	font-size      : small;
+	vertical-align : top;
+	padding-top    : 7px;
+	text-align     : justify;
+}
+
+.j
+{
+	text-align : justify;
+}
+
+.kw
+{
+	color : blue;
+}
+
+.com
+{
+	color : green;
+}
+
+.str
+{
+	color : DarkCyan;
+}
+
+.a
+{
+	color       : DarkRed;
+	font-weight : bold;
+}
+
+table.code
+{
+	border-color  : #116677;
+	border-style  : solid;
+	border-width  : 1px;
+	margin-top    : .6em;
+	margin-bottom : .6em;
+}
+
+pre.code
+{
+	font    : 100% Monospace, Courier New, Courier;
+	margin  : 0;
+	padding : 5px;
+}
+
+a.rss
+{
+	color            : White;
+	background-color : DarkOrange;
+	font-weight      : bold;
+	font-size        : 85%;
+	font-family      : Arial;
+}
+
+a.rss:link    { text-decoration: none; color : White; }
+a.rss:visited { text-decoration: none; color : White; }
+a.rss:hover   { text-decoration: nonr; color : White; }

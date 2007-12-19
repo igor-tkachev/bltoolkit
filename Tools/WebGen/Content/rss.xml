@@ -1,0 +1,91 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<rss version="2.0">
+	<channel>
+		<title>Business Logic Toolkit for .NET</title>
+		<link>http://www.bltoolkit.net</link>
+		<description />
+		<lastBuildDate>2007-07-21</lastBuildDate>
+		<item>
+			<title>New web demo project</title>
+			<link>http://www.bltoolkit.net/Download.htm</link>
+			<description>MS PetShop 4.0 powered by BLToolkit. See the dev version of the project.</description>
+			<pubDate>2007-07-21</pubDate>
+		</item>
+		<item>
+			<title>Version 2.0.6 released</title>
+			<link>http://www.bltoolkit.net/Download.htm</link>
+			<description>See &lt;a href="http://www.bltoolkit.net/Download.htm"&gt;change log&lt;/a&gt;</description>
+			<pubDate>2007-07-21</pubDate>
+		</item>
+		<item>
+			<title>How to map into internal object</title>
+			<link>http://www.bltoolkit.net/Doc/Mapping/MapFieldAttribute.htm</link>
+			<description>
+				&lt;a href="http://www.bltoolkit.net/Doc/Mapping/MapFieldAttribute.htm"&gt;Map.MapFieldAttribute&lt;/a&gt;
+			</description>
+			<category>Examples</category>
+			<pubDate>2006-06-05</pubDate>
+		</item>
+		<item>
+			<title>Version 2.0.5 released</title>
+			<link>http://www.bltoolkit.net/Download.htm</link>
+			<description>See &lt;a href="http://www.bltoolkit.net/Download.htm"&gt;change log&lt;/a&gt;</description>
+			<pubDate>2007-05-17</pubDate>
+		</item>
+		<item>
+			<title>Version 2.0.4 released</title>
+			<link>http://www.bltoolkit.net/Download.htm</link>
+			<description>See &lt;a href="http://www.bltoolkit.net/Download.htm"&gt;change log&lt;/a&gt;</description>
+			<pubDate>2007-02-12</pubDate>
+		</item>
+		<item>
+			<title>Version 2.0.3 released</title>
+			<link>http://www.bltoolkit.net/Download.htm</link>
+			<description>See &lt;a href="http://www.bltoolkit.net/Download.htm"&gt;change log&lt;/a&gt;</description>
+			<pubDate>2006-10-22</pubDate>
+		</item>
+		<item>
+			<title>Version 2.0.1 released</title>
+			<link>http://www.bltoolkit.net/Download.htm</link>
+			<description></description>
+			<pubDate>2006-08-27</pubDate>
+		</item>
+		<item>
+			<title>How to map one object to another</title>
+			<link>http://www.bltoolkit.net/Doc/Mapping/ObjectToObject.htm</link>
+			<description>
+				&lt;a href="http://www.bltoolkit.net/Doc/Mapping/ObjectToObject.htm"&gt;Map.ObjectToObject&lt;/a&gt;
+			</description>
+			<category>Examples</category>
+			<pubDate>2006-05-21</pubDate>
+		</item>
+		<item>
+			<title>How to emit with BLToolkit</title>
+			<link>http://www.bltoolkit.net/Doc/Reflection/Emit/HelloWorld.htm</link>
+			<description>
+				&lt;a href="http://www.bltoolkit.net/Doc/Reflection/Emit/HelloWorld.htm"&gt;Hello, World!&lt;/a&gt;
+			</description>
+			<category>Examples</category>
+			<pubDate>2006-05-10</pubDate>
+		</item>
+		<item>
+			<title>DataAccessor examples</title>
+			<link>http://www.bltoolkit.net/Doc/DataAccess/index.htm</link>
+			<description>
+				&lt;a href="http://www.bltoolkit.net/Doc/DataAccess/ExecuteList.htm"&gt;ExecuteList&lt;/a&gt;&lt;br&gt;
+				&lt;a href="http://www.bltoolkit.net/Doc/DataAccess/ExecuteDictionary.htm"&gt;ExecuteDictionary&lt;/a&gt;&lt;br&gt;
+				&lt;a href="http://www.bltoolkit.net/Doc/DataAccess/ExecuteObject.htm"&gt;ExecuteObject&lt;/a&gt;&lt;br&gt;
+				&lt;a href="http://www.bltoolkit.net/Doc/DataAccess/ExecuteScalar.htm"&gt;ExecuteScalar&lt;/a&gt;
+			</description>
+			<category>Examples</category>
+			<pubDate>2006-04-30</pubDate>
+		</item>
+		<item>
+			<title>IDictionary support for abstract accessors</title>
+			<link>http://www.bltoolkit.net/Doc/DataAccess/ExecuteDictionary.htm</link>
+			<description>Now abstract accessor can return an object that implemens IDictionary interface.</description>
+			<category>Features</category>
+			<pubDate>2006-04-26</pubDate>
+		</item>
+	</channel>
+</rss>
