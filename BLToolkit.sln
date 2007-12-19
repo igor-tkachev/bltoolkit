@@ -1,0 +1,71 @@
+Microsoft Visual Studio Solution File, Format Version 8.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BLToolkit", "Source\BLToolkit.csproj", "{C8B3F401-4634-4742-A266-4BD9ED7565E5}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnitTests.CS", "UnitTests\CS\UnitTests.CS.csproj", "{D258EBB5-8065-4292-9F07-B5A57042B435}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnitTests.All", "UnitTests\All\UnitTests.All.csproj", "{E15A3B3C-A2CD-478E-AECD-F00337FAA281}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Examples.CS", "Examples\CS\Examples.CS.csproj", "{7879AA7E-B39E-4201-961B-9BEA52DC3848}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
+Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "Examples.VB", "Examples\VB\Examples.VB.vbproj", "{151A42F5-F79F-4AAF-B101-F181BAF19677}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExampleGenerator", "Tools\ExampleGenerator\ExampleGenerator.csproj", "{35BF068E-AC55-4E89-AE34-50881629338B}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BLTgen", "Tools\BLTgen\BLTgen.csproj", "{AA4C0E2F-687D-4C7E-8F2B-39961C44F116}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfiguration) = preSolution
+		Debug = Debug
+		Release = Release
+	EndGlobalSection
+	GlobalSection(ProjectDependencies) = postSolution
+	EndGlobalSection
+	GlobalSection(ProjectConfiguration) = postSolution
+		{C8B3F401-4634-4742-A266-4BD9ED7565E5}.Debug.ActiveCfg = Debug|.NET
+		{C8B3F401-4634-4742-A266-4BD9ED7565E5}.Debug.Build.0 = Debug|.NET
+		{C8B3F401-4634-4742-A266-4BD9ED7565E5}.Release.ActiveCfg = Release|.NET
+		{C8B3F401-4634-4742-A266-4BD9ED7565E5}.Release.Build.0 = Release|.NET
+		{D258EBB5-8065-4292-9F07-B5A57042B435}.Debug.ActiveCfg = Debug|.NET
+		{D258EBB5-8065-4292-9F07-B5A57042B435}.Debug.Build.0 = Debug|.NET
+		{D258EBB5-8065-4292-9F07-B5A57042B435}.Release.ActiveCfg = Release|.NET
+		{D258EBB5-8065-4292-9F07-B5A57042B435}.Release.Build.0 = Release|.NET
+		{E15A3B3C-A2CD-478E-AECD-F00337FAA281}.Debug.ActiveCfg = Debug|.NET
+		{E15A3B3C-A2CD-478E-AECD-F00337FAA281}.Debug.Build.0 = Debug|.NET
+		{E15A3B3C-A2CD-478E-AECD-F00337FAA281}.Release.ActiveCfg = Release|.NET
+		{E15A3B3C-A2CD-478E-AECD-F00337FAA281}.Release.Build.0 = Release|.NET
+		{7879AA7E-B39E-4201-961B-9BEA52DC3848}.Debug.ActiveCfg = Debug|.NET
+		{7879AA7E-B39E-4201-961B-9BEA52DC3848}.Debug.Build.0 = Debug|.NET
+		{7879AA7E-B39E-4201-961B-9BEA52DC3848}.Release.ActiveCfg = Release|.NET
+		{7879AA7E-B39E-4201-961B-9BEA52DC3848}.Release.Build.0 = Release|.NET
+		{151A42F5-F79F-4AAF-B101-F181BAF19677}.Debug.ActiveCfg = Debug|.NET
+		{151A42F5-F79F-4AAF-B101-F181BAF19677}.Debug.Build.0 = Debug|.NET
+		{151A42F5-F79F-4AAF-B101-F181BAF19677}.Release.ActiveCfg = Release|.NET
+		{151A42F5-F79F-4AAF-B101-F181BAF19677}.Release.Build.0 = Release|.NET
+		{35BF068E-AC55-4E89-AE34-50881629338B}.Debug.ActiveCfg = Debug|.NET
+		{35BF068E-AC55-4E89-AE34-50881629338B}.Debug.Build.0 = Debug|.NET
+		{35BF068E-AC55-4E89-AE34-50881629338B}.Release.ActiveCfg = Release|.NET
+		{35BF068E-AC55-4E89-AE34-50881629338B}.Release.Build.0 = Release|.NET
+		{AA4C0E2F-687D-4C7E-8F2B-39961C44F116}.Debug.ActiveCfg = Debug|.NET
+		{AA4C0E2F-687D-4C7E-8F2B-39961C44F116}.Debug.Build.0 = Debug|.NET
+		{AA4C0E2F-687D-4C7E-8F2B-39961C44F116}.Release.ActiveCfg = Release|.NET
+		{AA4C0E2F-687D-4C7E-8F2B-39961C44F116}.Release.Build.0 = Release|.NET
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+	EndGlobalSection
+	GlobalSection(ExtensibilityAddIns) = postSolution
+	EndGlobalSection
+EndGlobal
