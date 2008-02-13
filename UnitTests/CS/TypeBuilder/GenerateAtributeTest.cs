@@ -24,6 +24,13 @@ namespace TypeBuilder
 			public NonInheritedAttribute(Type t, string s, int i, AttributeTargets e)
 			{
 			}
+
+			private string _namedArgument;
+			public  string  NamedArgument
+			{
+				get { return _namedArgument;  }
+				set { _namedArgument = value; }
+			}
 		}
 
 		public abstract class TestObject
@@ -39,6 +46,11 @@ namespace TypeBuilder
 
 			[GenerateAttribute(typeof (NonInheritedAttribute))]
 			public virtual void Method4(){}
+
+			[GenerateAttribute(typeof(NonInheritedAttribute),
+				NamedArgumentNames  = new string[] { "NamedArgument"},
+				NamedArgumentValues = new object[] { "SomeValue"})]
+			public virtual void Method5() { }
 
 			public abstract int Prop1
 			{
@@ -77,6 +89,12 @@ namespace TypeBuilder
 			Assert.IsNotNull(Attribute.GetCustomAttribute(type.GetProperty("Prop2").GetSetMethod(), typeof(NonInheritedAttribute)));
 
 			Assert.IsNotNull(Attribute.GetCustomAttribute(type.GetField("_prop3", BindingFlags.Instance | BindingFlags.NonPublic), typeof(NonInheritedAttribute)));
+
+			NonInheritedAttribute attribute = (NonInheritedAttribute)
+				Attribute.GetCustomAttribute(type.GetMethod("Method5"), typeof(NonInheritedAttribute));
+
+			Assert.IsNotNull(attribute);
+			Assert.AreEqual("SomeValue", attribute.NamedArgument);
 		}
 
 		public abstract class BadObject

@@ -1,6 +1,8 @@
 using System;
+using System.Collections.Generic;
 using System.Reflection;
 using System.Reflection.Emit;
+using BLToolkit.Reflection;
 
 namespace BLToolkit.TypeBuilder.Builders
 {
@@ -8,34 +10,76 @@ namespace BLToolkit.TypeBuilder.Builders
 	{
 		private CustomAttributeBuilder _attributeBuilder;
 
-		public GeneratedAttributeBuilder(Type attributeType, object[] arguments)
+		public GeneratedAttributeBuilder(Type attributeType, object[] arguments, string[] names, object[] values)
 		{
 			if (attributeType == null)
 				throw new ArgumentNullException("attributeType");
 
-			if (arguments != null && arguments.Length > 0)
+			ConstructorInfo constructor = null;
+
+			if (arguments == null || arguments.Length == 0)
+			{
+				constructor = attributeType.GetConstructor(Type.EmptyTypes);
+				arguments   = Type.EmptyTypes;
+			}
+			else
 			{
 				// Some arguments may be null. We can not infer a type from the null reference.
 				// So we must iterate all of them and got a suitable one.
 				//
-				foreach (ConstructorInfo constructor in attributeType.GetConstructors())
+				foreach (ConstructorInfo ci in attributeType.GetConstructors())
 				{
-					if (CheckParameters(constructor.GetParameters(), arguments))
+					if (CheckParameters(ci.GetParameters(), arguments))
 					{
-						_attributeBuilder = new CustomAttributeBuilder(constructor, arguments);
+						constructor = ci;
 						break;
 					}
 				}
 			}
+
+			if (constructor == null)
+				throw new TypeBuilderException(string.Format("No suitable constructors found for the type '{0}'.", attributeType.FullName));
+
+			if (names == null || names.Length == 0)
+			{
+				_attributeBuilder = new CustomAttributeBuilder(constructor, arguments);
+			}
+			else if (values == null || names.Length != values.Length)
+			{
+				throw new TypeBuilderException(string.Format("Named argument names count should match named argument values count."));
+			}
 			else
 			{
-				ConstructorInfo constructor = attributeType.GetConstructor(Type.EmptyTypes);
-				if (constructor != null)
-					_attributeBuilder = new CustomAttributeBuilder(constructor, Type.EmptyTypes);
-			}
+				List<PropertyInfo> namedProperties = new List<PropertyInfo>();
+				List<object>       propertyValues  = new List<object>();
+				List<FieldInfo>    namedFields     = new List<FieldInfo>();
+				List<object>       fieldValues     = new List<object>();
 
-			if (_attributeBuilder == null)
-				throw new TypeBuilderException(string.Format("No suitable constructors found for type '{0}'.", attributeType.FullName));
+				for (int i = 0; i < names.Length; i++)
+				{
+					string name = names[i];
+					MemberInfo[] mi = attributeType.GetMember(name);
+
+					if (mi.Length == 0)
+						throw new TypeBuilderException(string.Format("The type '{0}' does not have a public member '{1}'.", attributeType.FullName, name));
+
+					if (mi[0].MemberType == MemberTypes.Property)
+					{
+						namedProperties.Add((PropertyInfo)mi[0]);
+						propertyValues.Add(values[i]);
+					}
+					else if (mi[0].MemberType == MemberTypes.Field)
+					{
+						namedFields.Add((FieldInfo)mi[0]);
+						fieldValues.Add(values[i]);
+					}
+					else
+						throw new TypeBuilderException(string.Format("The member '{1}' of the type '{0}' is not a filed nor a property.", name, attributeType.FullName));
+				}
+
+				_attributeBuilder = new CustomAttributeBuilder(constructor, arguments,
+					namedProperties.ToArray(), propertyValues.ToArray(), namedFields.ToArray(), fieldValues.ToArray());
+			}
 		}
 
 		private static bool CheckParameters(ParameterInfo[] argumentTypes, object[] arguments)
@@ -61,12 +105,12 @@ namespace BLToolkit.TypeBuilder.Builders
 
 		public override bool IsApplied(BuildContext context, AbstractTypeBuilderList builders)
 		{
-			return context.IsAfterStep;
+			return context.IsAfterStep && context.BuildElement == BuildElement.Type == TargetElement is TypeHelper;
 		}
 
 		public override void Build(BuildContext context)
 		{
-			if (TargetElement is Type)
+			if (context.BuildElement == BuildElement.Type)
 			{
 				context.TypeBuilder.TypeBuilder.SetCustomAttribute(_attributeBuilder);
 			}

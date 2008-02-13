@@ -10,6 +10,7 @@ Bug fixes
 Enhancement
 - DateTimeOffset type support.
 - MemberAccessor.CloneValue to avoid boxing.
+- Named arguments support for GenerateAttributeTypeBuilder.
 
 v 2.0.7
 

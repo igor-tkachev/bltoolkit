@@ -701,6 +701,9 @@ namespace BLToolkit.Data
 				}
 			}
 
+			if (_dataProvider == null)
+				throw new DataException("A suitable data provider is not available.");
+
 			_dataProvider.InitDbManager(this);
 		}
 
@@ -1062,7 +1065,7 @@ namespace BLToolkit.Data
 		}
 
 		/// <summary>
-		/// This method is used to attach array of IDbDataParameter to a IDbCommand.
+		/// This method is used to attach array of <see cref="IDbDataParameter"/> to a <see cref="IDbCommand"/>.
 		/// </summary>
 		/// <param name="command">The command to which the parameters will be added</param>
 		/// <param name="commandParameters">An array of IDbDataParameters tho be added to command</param>
@@ -1172,7 +1175,8 @@ namespace BLToolkit.Data
 		/// and then store it in a cache for future requests.
 		/// </remarks>
 		/// <param name="spName">The name of the stored procedure.</param>
-		/// <param name="includeReturnValueParameter">A bool value indicating whether the return value parameter should be included in the results.</param>
+		/// <param name="includeReturnValueParameter">A boolean value indicating
+		/// whether the return value parameter should be included in the results.</param>
 		/// <returns>An array of the <see cref="IDbDataParameter"/>.</returns>
 		public IDbDataParameter[] GetSpParameters(string spName, bool includeReturnValueParameter)
 		{
@@ -1339,7 +1343,7 @@ namespace BLToolkit.Data
 		/// The method can be used to register a new data provider for further use.
 		/// </remarks>
 		/// <include file="Examples1.xml" path='examples/db[@name="AddDataProvider(DataProvider.IDataProvider)"]/*' />
-		/// <seealso cref="AddConnectionString(string)">AddConnectionString Method.</seealso>
+		/// <seealso cref="AddConnectionString(string)">AddConnectionString</seealso> Method.
 		/// <seealso cref="BLToolkit.Data.DataProvider.DataProviderBase.Name">DataProviderBase.Name Property.</seealso>
 		/// <param name="dataProvider">An instance of the <see cref="BLToolkit.Data.DataProvider.DataProviderBase"/> interface.</param>
 		public static void AddDataProvider(DataProviderBase dataProvider)
@@ -1528,7 +1532,7 @@ namespace BLToolkit.Data
 		}
 
 		/// <summary>
-		/// Creates an array of parameters from the DataRow object.
+		/// Creates an array of parameters from the <see cref="DataRow"/> object.
 		/// </summary>
 		/// <remarks>
 		/// The method can take an additional parameter list, 
@@ -1536,7 +1540,7 @@ namespace BLToolkit.Data
 		/// </remarks>
 		/// <include file="Examples.xml" path='examples/db[@name="CreateParameters(DataRow,IDbDataParameter[])"]/*' />
 		/// <param name="dataRow">The <see cref="DataRow"/> to create parameters.</param>
-		/// <param name="commandParameters">An array of paramters to be added to the result array.</param>
+		/// <param name="commandParameters">An array of parameters to be added to the result array.</param>
 		/// <returns>An array of parameters.</returns>
 		public IDbDataParameter[] CreateParameters(
 			DataRow dataRow, params IDbDataParameter[] commandParameters)
@@ -1545,7 +1549,7 @@ namespace BLToolkit.Data
 		}
 
 		/// <summary>
-		/// Creates an array of parameters from the DataRow object.
+		/// Creates an array of parameters from the <see cref="DataRow"/> object.
 		/// </summary>
 		/// <remarks>
 		/// The method can take an additional parameter list, 
@@ -1556,7 +1560,7 @@ namespace BLToolkit.Data
 		/// <param name="outputParameters">Output parameters names.</param>
 		/// <param name="inputOutputParameters">InputOutput parameters names.</param>
 		/// <param name="ignoreParameters">Parameters names to skip.</param>
-		/// <param name="commandParameters">An array of paramters to be added to the result array.</param>
+		/// <param name="commandParameters">An array of parameters to be added to the result array.</param>
 		/// <returns>An array of parameters.</returns>
 		public IDbDataParameter[] CreateParameters(
 			DataRow                   dataRow,
@@ -1608,7 +1612,7 @@ namespace BLToolkit.Data
 		/// </remarks>
 		/// <include file="Examples.xml" path='examples/db[@name="CreateParameters(object,IDbDataParameter[])"]/*' />
 		/// <param name="obj">An object.</param>
-		/// <param name="commandParameters">An array of paramters to be added to the result array.</param>
+		/// <param name="commandParameters">An array of parameters to be added to the result array.</param>
 		/// <returns>An array of parameters.</returns>
 		public IDbDataParameter[] CreateParameters(
 			object                    obj,
@@ -1629,7 +1633,7 @@ namespace BLToolkit.Data
 		/// <param name="outputParameters">Output parameters names.</param>
 		/// <param name="inputOutputParameters">InputOutput parameters names.</param>
 		/// <param name="ignoreParameters">Parameters names to skip.</param>
-		/// <param name="commandParameters">An array of paramters to be added to the result array.</param>
+		/// <param name="commandParameters">An array of parameters to be added to the result array.</param>
 		/// <returns>An array of parameters.</returns>
 		public IDbDataParameter[] CreateParameters(
 			object                    obj,
@@ -2151,7 +2155,7 @@ namespace BLToolkit.Data
 		}
 
 		/// <summary>
-		/// Cretes an input parameter to the <see cref="Command"/>.
+		/// Creates an input parameter to the <see cref="Command"/>.
 		/// </summary>
 		/// <remarks>
 		/// The method creates a parameter with the
@@ -2161,7 +2165,7 @@ namespace BLToolkit.Data
 		/// <param name="parameterName">The name of the parameter.</param>
 		/// <param name="dbType">One of the <see cref="DbType"/> values.</param>
 		/// <param name="size">Size of the parameter.</param>
-		/// <param name="sourceColumn">Source column for a parameter in DataTable.</param>
+		/// <param name="sourceColumn">Source column for a parameter in the <see cref="DataTable"/>.</param>
 		/// <returns>The <see cref="IDbDataParameter"/> object.</returns>
 		public IDbDataParameter Parameter(
 			string parameterName,
@@ -2178,7 +2182,7 @@ namespace BLToolkit.Data
 		}
 
 		/// <summary>
-		/// Cretes an input parameter to the <see cref="Command"/>.
+		/// Creates an input parameter to the <see cref="Command"/>.
 		/// </summary>
 		/// <remarks>
 		/// The method creates a parameter with the
@@ -2187,7 +2191,7 @@ namespace BLToolkit.Data
 		/// </remarks>
 		/// <param name="parameterName">The name of the parameter.</param>
 		/// <param name="dbType">One of the <see cref="DbType"/> values.</param>
-		/// <param name="sourceColumn">Source column for a parameter in DataTable.</param>
+		/// <param name="sourceColumn">Source column for a parameter in the <see cref="DataTable"/>.</param>
 		/// <returns>The <see cref="IDbDataParameter"/> object.</returns>
 		public IDbDataParameter Parameter(
 			string parameterName,
@@ -2203,7 +2207,7 @@ namespace BLToolkit.Data
 		}
 
 		/// <summary>
-		/// Cretes an input parameter to the <see cref="Command"/>.
+		/// Creates an input parameter to the <see cref="Command"/>.
 		/// </summary>
 		/// <remarks>
 		/// The method creates a parameter with the
@@ -2213,8 +2217,8 @@ namespace BLToolkit.Data
 		/// <param name="parameterName">The name of the parameter.</param>
 		/// <param name="dbType">One of the <see cref="DbType"/> values.</param>
 		/// <param name="size">Size of the parameter.</param>
-		/// <param name="sourceColumn">Source column for a parameter in DataTable.</param>
-		/// <param name="dataRowVersion">Version of data to use for a parameter in DataTable.</param>
+		/// <param name="sourceColumn">Source column for a parameter in the <see cref="DataTable"/>.</param>
+		/// <param name="dataRowVersion">Version of data to use for a parameter in the <see cref="DataTable"/>.</param>
 		/// <returns>The <see cref="IDbDataParameter"/> object.</returns>
 		public IDbDataParameter Parameter(
 			string parameterName,
@@ -2232,7 +2236,7 @@ namespace BLToolkit.Data
 		}
 
 		/// <summary>
-		/// Cretes an input parameter to the <see cref="Command"/>.
+		/// Creates an input parameter to the <see cref="Command"/>.
 		/// </summary>
 		/// <remarks>
 		/// The method creates a parameter with the
@@ -2241,8 +2245,8 @@ namespace BLToolkit.Data
 		/// </remarks>
 		/// <param name="parameterName">The name of the parameter.</param>
 		/// <param name="dbType">One of the <see cref="DbType"/> values.</param>
-		/// <param name="sourceColumn">Source column for a parameter in DataTable.</param>
-		/// <param name="dataRowVersion">Version of data to use for a parameter in DataTable.</param>
+		/// <param name="sourceColumn">Source column for a parameter in the <see cref="DataTable"/>.</param>
+		/// <param name="dataRowVersion">Version of data to use for a parameter in the <see cref="DataTable"/>.</param>
 		/// <returns>The <see cref="IDbDataParameter"/> object.</returns>
 		public IDbDataParameter Parameter(
 			string parameterName,
@@ -2411,7 +2415,7 @@ namespace BLToolkit.Data
 		/// The method can be used to create the <i>INSERT</i>, <i>UPDATE</i>, and <i>DELETE</i> SQL statements.
 		/// </remarks>
 		/// <param name="commandText">The command text to execute.</param>
-		/// <param name="commandParameters">An array of paramters used to executes the command.</param>
+		/// <param name="commandParameters">An array of parameters used to executes the command.</param>
 		/// <returns>Current instance.</returns>
 		public DbManager SetCommand(
 			string commandText,
@@ -2426,7 +2430,7 @@ namespace BLToolkit.Data
 		/// </summary>
 		/// <param name="commandType">The <see cref="System.Data.CommandType">CommandType</see> (stored procedure, text, etc.)</param>
 		/// <param name="commandText">The command text to execute.</param>
-		/// <param name="commandParameters">An array of paramters used to executes the command.</param>
+		/// <param name="commandParameters">An array of parameters used to executes the command.</param>
 		/// <returns>Current instance.</returns>
 		public DbManager SetCommand(
 			CommandType commandType,
@@ -2445,7 +2449,7 @@ namespace BLToolkit.Data
 		/// (the first time each stored procedure is called), 
 		/// and assign the values based on parameter order.
 		/// </remarks>
-		/// <param name="spName">The name of the stored prcedure</param>
+		/// <param name="spName">The name of the stored procedure</param>
 		/// <param name="parameterValues">An array of objects to be assigned as the input values of the stored procedure</param>
 		/// <returns>Current instance.</returns>
 		public DbManager SetSpCommand(
@@ -2466,7 +2470,7 @@ namespace BLToolkit.Data
 		/// The method can be used to create the <i>INSERT</i>, <i>UPDATE</i>, and <i>DELETE</i> SQL statements.
 		/// </remarks>
 		/// <param name="commandText">The command text to execute.</param>
-		/// <param name="commandParameters">An array of paramters used to executes the command.</param>
+		/// <param name="commandParameters">An array of parameters used to executes the command.</param>
 		/// <returns>Current instance.</returns>
 		public DbManager SetInsertCommand(
 			string commandText,
@@ -2481,7 +2485,7 @@ namespace BLToolkit.Data
 		/// </summary>
 		/// <param name="commandType">The <see cref="System.Data.CommandType">CommandType</see> (stored procedure, text, etc.)</param>
 		/// <param name="commandText">The command text to execute.</param>
-		/// <param name="commandParameters">An array of paramters used to executes the command.</param>
+		/// <param name="commandParameters">An array of parameters used to executes the command.</param>
 		/// <returns>Current instance.</returns>
 		public DbManager SetInsertCommand(
 			CommandType commandType,
@@ -2500,7 +2504,7 @@ namespace BLToolkit.Data
 		/// (the first time each stored procedure is called), 
 		/// and assign the values based on parameter order.
 		/// </remarks>
-		/// <param name="spName">The name of the stored prcedure</param>
+		/// <param name="spName">The name of the stored procedure</param>
 		/// <param name="parameterValues">An array of objects to be assigned as the input values of the stored procedure</param>
 		/// <returns>Current instance.</returns>
 		public DbManager SetInsertSpCommand(
@@ -2521,7 +2525,7 @@ namespace BLToolkit.Data
 		/// The method can be used to create the <i>INSERT</i>, <i>UPDATE</i>, and <i>DELETE</i> SQL statements.
 		/// </remarks>
 		/// <param name="commandText">The command text to execute.</param>
-		/// <param name="commandParameters">An array of paramters used to executes the command.</param>
+		/// <param name="commandParameters">An array of parameters used to executes the command.</param>
 		/// <returns>Current instance.</returns>
 		public DbManager SetUpdateCommand(
 			string commandText,
@@ -2536,7 +2540,7 @@ namespace BLToolkit.Data
 		/// </summary>
 		/// <param name="commandType">The <see cref="System.Data.CommandType">CommandType</see> (stored procedure, text, etc.)</param>
 		/// <param name="commandText">The command text to execute.</param>
-		/// <param name="commandParameters">An array of paramters used to executes the command.</param>
+		/// <param name="commandParameters">An array of parameters used to executes the command.</param>
 		/// <returns>Current instance.</returns>
 		public DbManager SetUpdateCommand(
 			CommandType commandType,
@@ -2555,7 +2559,7 @@ namespace BLToolkit.Data
 		/// (the first time each stored procedure is called), 
 		/// and assign the values based on parameter order.
 		/// </remarks>
-		/// <param name="spName">The name of the stored prcedure</param>
+		/// <param name="spName">The name of the stored procedure</param>
 		/// <param name="parameterValues">An array of objects to be assigned as the input values of the stored procedure</param>
 		/// <returns>Current instance.</returns>
 		public DbManager SetUpdateSpCommand(
@@ -2576,7 +2580,7 @@ namespace BLToolkit.Data
 		/// The method can be used to create the <i>INSERT</i>, <i>UPDATE</i>, and <i>DELETE</i> SQL statements.
 		/// </remarks>
 		/// <param name="commandText">The command text to execute.</param>
-		/// <param name="commandParameters">An array of paramters used to executes the command.</param>
+		/// <param name="commandParameters">An array of parameters used to executes the command.</param>
 		/// <returns>Current instance.</returns>
 		public DbManager SetDeleteCommand(
 			string commandText,
@@ -2591,7 +2595,7 @@ namespace BLToolkit.Data
 		/// </summary>
 		/// <param name="commandType">The <see cref="System.Data.CommandType">CommandType</see> (stored procedure, text, etc.)</param>
 		/// <param name="commandText">The command text to execute.</param>
-		/// <param name="commandParameters">An array of paramters used to executes the command.</param>
+		/// <param name="commandParameters">An array of parameters used to executes the command.</param>
 		/// <returns>Current instance.</returns>
 		public DbManager SetDeleteCommand(
 			CommandType commandType,
@@ -2610,7 +2614,7 @@ namespace BLToolkit.Data
 		/// (the first time each stored procedure is called), 
 		/// and assign the values based on parameter order.
 		/// </remarks>
-		/// <param name="spName">The name of the stored prcedure</param>
+		/// <param name="spName">The name of the stored procedure</param>
 		/// <param name="parameterValues">An array of objects to be assigned as the input values of the stored procedure</param>
 		/// <returns>Current instance.</returns>
 		public DbManager SetDeleteSpCommand(
@@ -3278,7 +3282,7 @@ namespace BLToolkit.Data
 		{
 			return (T)_mappingSchema.ConvertChangeType(ExecuteScalar(sourceType, nameOrIndex), typeof(T));
 		}
-		
+
 #endif
 
 		#endregion
@@ -3730,7 +3734,7 @@ namespace BLToolkit.Data
 		/// <summary>
 		/// Executes a SQL statement using the provided parameters.
 		/// </summary>
-		/// <param name="dataSet">The DataSet object to populate.</param>
+		/// <param name="dataSet">The <see cref="DataSet"/> object to populate.</param>
 		/// <param name="table">The name or index of the populating table.</param>
 		/// <returns>The <see cref="DataSet"/>.</returns>
 		public DataSet ExecuteDataSet(
@@ -3743,7 +3747,7 @@ namespace BLToolkit.Data
 		/// <summary>
 		/// Executes a SQL statement using the provided parameters.
 		/// </summary>
-		/// <param name="dataSet">The DataSet object to populate.</param>
+		/// <param name="dataSet">The <see cref="DataSet"/> object to populate.</param>
 		/// <param name="table">The name or index of the populating table.</param>
 		/// <param name="startRecord">The zero-based record number to start with.</param>
 		/// <param name="maxRecords">The maximum number of records to retrieve.</param>
