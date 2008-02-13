@@ -520,8 +520,9 @@ namespace BLToolkit.Mapping
 		public override Decimal  GetDecimal (object o, int index) { return this[index].GetDecimal (o); }
 		public override Guid     GetGuid    (object o, int index) { return this[index].GetGuid    (o); }
 		public override DateTime GetDateTime(object o, int index) { return this[index].GetDateTime(o); }
-
-#if FW2
+#if FW3
+		public override DateTimeOffset GetDateTimeOffset(object o, int index) { return this[index].GetDateTimeOffset(o); }
+#endif
 		// Nullable type getters.
 		//
 		[CLSCompliant(false)]
@@ -545,6 +546,8 @@ namespace BLToolkit.Mapping
 		public override Decimal?  GetNullableDecimal (object o, int index) { return this[index].GetNullableDecimal (o); }
 		public override Guid?     GetNullableGuid    (object o, int index) { return this[index].GetNullableGuid    (o); }
 		public override DateTime? GetNullableDateTime(object o, int index) { return this[index].GetNullableDateTime(o); }
+#if FW3
+		public override DateTimeOffset? GetNullableDateTimeOffset(object o, int index) { return this[index].GetNullableDateTimeOffset(o); }
 #endif
 		// SQL type getters.
 		//
@@ -610,8 +613,10 @@ namespace BLToolkit.Mapping
 		public override void SetDecimal (object o, int index, Decimal  value) { this[index].SetDecimal (o, value); }
 		public override void SetGuid    (object o, int index, Guid     value) { this[index].SetGuid    (o, value); }
 		public override void SetDateTime(object o, int index, DateTime value) { this[index].SetDateTime(o, value); }
+#if FW3
+		public override void SetDateTimeOffset(object o, int index, DateTimeOffset value) { this[index].SetDateTimeOffset(o, value); }
+#endif
 
-#if FW2
 		// Simple types setters.
 		//
 		[CLSCompliant(false)]
@@ -635,6 +640,8 @@ namespace BLToolkit.Mapping
 		public override void SetNullableDecimal (object o, int index, Decimal?  value) { this[index].SetNullableDecimal (o, value); }
 		public override void SetNullableGuid    (object o, int index, Guid?     value) { this[index].SetNullableGuid    (o, value); }
 		public override void SetNullableDateTime(object o, int index, DateTime? value) { this[index].SetNullableDateTime(o, value); }
+#if FW3
+		public override void SetNullableDateTimeOffset(object o, int index, DateTimeOffset? value) { this[index].SetNullableDateTimeOffset(o, value); }
 #endif
 
 		// SQL type setters.

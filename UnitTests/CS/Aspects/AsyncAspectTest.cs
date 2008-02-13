@@ -1,5 +1,5 @@
 using System;
-
+using System.Diagnostics;
 using NUnit.Framework;
 
 using BLToolkit.Aspects;
@@ -41,17 +41,19 @@ namespace Aspects
 		public void AsyncTest()
 		{
 			TestObject o = (TestObject)TypeAccessor.CreateInstance(typeof(TestObject));
+			Stopwatch sw = Stopwatch.StartNew();
 
-			DateTime begin = DateTime.Now;
 			Assert.AreEqual(1, o.Test(1, null));
-			Assert.IsTrue((DateTime.Now - begin).TotalMilliseconds >= ExecutionTime);
+			Assert.IsTrue(sw.ElapsedMilliseconds >= ExecutionTime);
 
-			begin = DateTime.Now;
+			sw.Reset();
+			sw.Start();
+
 			IAsyncResult ar = o.BeginTest(2, "12");
-			Assert.IsTrue((DateTime.Now - begin).TotalMilliseconds < ExecutionTime);
+			Assert.IsTrue(sw.ElapsedMilliseconds <= ExecutionTime);
 
 			Assert.AreEqual(2, o.EndTest(ar));
-			Assert.IsTrue((DateTime.Now - begin).TotalMilliseconds >= ExecutionTime);
+			Assert.IsTrue(sw.ElapsedMilliseconds >= ExecutionTime);
 		}
 
 		private static void CallBack(IAsyncResult ar)

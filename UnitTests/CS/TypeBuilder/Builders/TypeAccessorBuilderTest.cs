@@ -1,5 +1,5 @@
 using System;
-
+using System.Xml;
 using NUnit.Framework;
 
 using BLToolkit.Reflection;
@@ -197,6 +197,51 @@ namespace TypeBuilder.Builders
 //			Assert.AreEqual("123", o.Value.Name);
 //		}
 #endif
+
+		public class CloneTestObject
+		{
+			public struct CloneableStruct : ICloneable
+			{
+				public int         Value;
+
+				public object Clone()
+				{
+					return this;
+				}
+			}
+
+			public struct SimpleStruct
+			{
+				public int         Value;
+			}
+
+			public int             IntValue;
+			public string          StrValue;
+			public XmlDocument     XmlValue;
+			public SimpleStruct    SimpleValue;
+			public CloneableStruct CloneableValue;
+		}
+
+		[Test]
+		public void CloneValueTest()
+		{
+			CloneTestObject o      = new CloneTestObject();
+			CloneTestObject c      = new CloneTestObject();
+			o.IntValue             = 12345;
+			o.StrValue             = "str";
+			o.XmlValue             = new XmlDocument(); o.XmlValue.LoadXml("<root/>");
+			o.SimpleValue.Value    = 321;
+			o.CloneableValue.Value = 123;
+
+			foreach (MemberAccessor ma in TypeAccessor<CloneTestObject>.Instance)
+				ma.CloneValue(o, c);
+
+			Assert.AreEqual(o.IntValue,             c.IntValue);
+			Assert.AreEqual(o.StrValue,             c.StrValue);
+			Assert.AreEqual(o.XmlValue.InnerXml,    c.XmlValue.InnerXml);
+			Assert.AreEqual(o.SimpleValue.Value,    c.SimpleValue.Value);
+			Assert.AreEqual(o.CloneableValue.Value, c.CloneableValue.Value);
+		}
 
 	}
 }

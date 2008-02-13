@@ -328,7 +328,7 @@ namespace BLToolkit.DataAccess
 			{
 				emit
 					.ldarg_0
-					.callvirt              (typeof(DataAccessor), "GetDbManager")
+					.callvirt              (_baseType, "GetDbManager")
 					.stloc                 (_locManager)
 					.BeginExceptionBlock()
 					;
@@ -690,7 +690,7 @@ namespace BLToolkit.DataAccess
 				.ldstr         (Context.CurrentMethod.Name)
 				.ldNameOrIndex (scalarField)
 				.LoadType      (elementType)
-				.callvirt      (typeof(DataAccessor), "ExecuteScalarDictionary", _bindingFlags,
+				.callvirt      (_baseType, "ExecuteScalarDictionary", _bindingFlags,
 					            typeof(DbManager), typeof(IDictionary), typeof(Type),
 					            typeof(Type), typeof(string), typeof(NameOrIndexParameter), typeof(Type))
 				;
@@ -991,7 +991,7 @@ namespace BLToolkit.DataAccess
 				emit
 					.LoadType             (scalarType)
 					.ldnull
-					.callvirt             (typeof (DataAccessor), "ConvertChangeType", _bindingFlags, typeof (DbManager), typeof (object), typeof (Type), typeof (object))
+					.callvirt             (_baseType, "ConvertChangeType", _bindingFlags, typeof (DbManager), typeof (object), typeof (Type), typeof (object))
 					;
 				
 			}
@@ -999,7 +999,7 @@ namespace BLToolkit.DataAccess
 			{
 				emit
 					.ldnull
-					.callvirt             (typeof(DataAccessor), converterName, _bindingFlags, typeof(DbManager), typeof(object), typeof(object))
+					.callvirt             (_baseType, converterName, _bindingFlags, typeof(DbManager), typeof(object), typeof(object))
 					;
 			}
 
@@ -1083,8 +1083,8 @@ namespace BLToolkit.DataAccess
 			if (_createManager)
 			{
 				Label        fin = Context.MethodBuilder.Emitter.DefineLabel();
-				PropertyInfo pi  = typeof(DataAccessor)
-					.GetProperty("DisposeDbManager", BindingFlags.Public | BindingFlags.Instance);
+				PropertyInfo pi  = _baseType.GetProperty("DisposeDbManager",
+					BindingFlags.Public | BindingFlags.Instance);
 
 				Context.MethodBuilder.Emitter
 					.BeginFinallyBlock()
@@ -1458,6 +1458,7 @@ namespace BLToolkit.DataAccess
 							typeof(DataRow): typeof(object);
 
 					emit
+						.ldarg_0
 						.ldloc         (_locManager)
 						.ldarg         (pi)
 						;
@@ -1480,7 +1481,7 @@ namespace BLToolkit.DataAccess
 					else
 						emit.ldnull.end();
 
-					fieldBuilder = CreateStringArrayField(pi.GetCustomAttributes(typeof(Direction.IgnoreAttribute),      true));
+					fieldBuilder = CreateStringArrayField(pi.GetCustomAttributes(typeof(Direction.IgnoreAttribute), true));
 					if (fieldBuilder != null)
 						emit.ldsfld    (fieldBuilder);
 					else
@@ -1488,8 +1489,8 @@ namespace BLToolkit.DataAccess
 
 					emit
 						.ldnull
-						.callvirt      (typeof(DbManager), "CreateParameters", type,
-							typeof(string[]), typeof(string[]), typeof(string[]), typeof(IDbDataParameter[]))
+						.callvirt      (_baseType, "CreateParameters", _bindingFlags,
+							typeof(DbManager), type, typeof(string[]), typeof(string[]), typeof(string[]), typeof(IDbDataParameter[]))
 						;
 
 					object[] attrs = pi.GetCustomAttributes(typeof (Direction.ReturnValueAttribute), true);
@@ -1769,7 +1770,7 @@ namespace BLToolkit.DataAccess
 					.ldloc                (param)
 					.callvirt             (typeof(IDataParameter).GetProperty("Value").GetGetMethod())
 					.ldloc                (param)
-					.callvirt             (typeof(DataAccessor), "IsNull", _bindingFlags, typeof(DbManager), typeof(object), typeof(object))
+					.callvirt             (_baseType, "IsNull", _bindingFlags, typeof(DbManager), typeof(object), typeof(object))
 					.brtrue               (labelNull)
 					;
 			}
@@ -1802,14 +1803,14 @@ namespace BLToolkit.DataAccess
 					emit
 						.LoadType         (type)
 						.ldloc            (param)
-						.callvirt         (typeof(DataAccessor), "ConvertChangeType", _bindingFlags, typeof(DbManager), typeof(object), typeof(Type), typeof(object))
+						.callvirt         (_baseType, "ConvertChangeType", _bindingFlags, typeof(DbManager), typeof(object), typeof(Type), typeof(object))
 						;
 				}
 				else
 				{
 					emit
 						.ldloc            (param)
-						.callvirt         (typeof(DataAccessor), converterName, _bindingFlags, typeof(DbManager), typeof(object), typeof(object))
+						.callvirt         (_baseType, converterName, _bindingFlags, typeof(DbManager), typeof(object), typeof(object))
 						;
 				}
 			}

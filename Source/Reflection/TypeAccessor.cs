@@ -98,11 +98,6 @@ namespace BLToolkit.Reflection
 
 		#region Copy & AreEqual
 
-		internal static object CloneOrCopy(object source)
-		{
-			return source is ICloneable? ((ICloneable)source).Clone(): source;
-		}
-
 		internal static object CopyInternal(object source, object dest, TypeAccessor ta)
 		{
 			bool                       isDirty = false;
@@ -113,7 +108,7 @@ namespace BLToolkit.Reflection
 			{
 				foreach (MemberAccessor ma in ta)
 				{
-					ma.SetValue(dest, CloneOrCopy(ma.GetValue(source)));
+					ma.CloneValue(source, dest);
 					if (sourceEditable.IsDirtyMember(null, ma.MemberInfo.Name, ref isDirty) && !isDirty)
 						destEditable.AcceptMemberChanges(null, ma.MemberInfo.Name);
 				}
@@ -121,7 +116,7 @@ namespace BLToolkit.Reflection
 			else
 			{
 				foreach (MemberAccessor ma in ta)
-					ma.SetValue(dest, CloneOrCopy(ma.GetValue(source)));
+					ma.CloneValue(source, dest);
 			}
 
 			return dest;
@@ -440,6 +435,9 @@ namespace BLToolkit.Reflection
 				else
 				{
 					if (type == typeof(DateTime))    return DateTime.MinValue;
+#if FW3
+					if (type == typeof(DateTimeOffset))    return DateTimeOffset.MinValue;
+#endif
 					if (type == typeof(Decimal))     return 0m;
 					if (type == typeof(Guid))        return Guid.Empty;
 

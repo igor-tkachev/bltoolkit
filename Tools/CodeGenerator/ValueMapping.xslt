@@ -13,23 +13,23 @@
 	<xsl:param name="output"></xsl:param>
 
 	<!-- support variables -->
-	<xsl:variable name="lf">&#13;</xsl:variable>
-	<xsl:variable name="t1">&#9;</xsl:variable>
-	<xsl:variable name="t2">&#9;&#9;</xsl:variable>
-	<xsl:variable name="t3">&#9;&#9;&#9;</xsl:variable>
-	<xsl:variable name="t4">&#9;&#9;&#9;&#9;</xsl:variable>
-	<xsl:variable name="t5">&#9;&#9;&#9;&#9;&#9;</xsl:variable>
-	<xsl:variable name="t6">&#9;&#9;&#9;&#9;&#9;&#9;</xsl:variable>
-	<xsl:variable name="t7">&#9;&#9;&#9;&#9;&#9;&#9;&#9;</xsl:variable>
-	<xsl:variable name="t8">&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;</xsl:variable>
-	<xsl:variable name="s1">&#32;</xsl:variable>
-	<xsl:variable name="s2">&#32;&#32;</xsl:variable>
-	<xsl:variable name="s3">&#32;&#32;&#32;</xsl:variable>
-	<xsl:variable name="s4">&#32;&#32;&#32;&#32;</xsl:variable>
-	<xsl:variable name="s5">&#32;&#32;&#32;&#32;&#32;</xsl:variable>
-	<xsl:variable name="s6">&#32;&#32;&#32;&#32;&#32;&#32;</xsl:variable>
-	<xsl:variable name="s7">&#32;&#32;&#32;&#32;&#32;&#32;&#32;</xsl:variable>
-	<xsl:variable name="s8">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;</xsl:variable>
+	<xsl:variable name="lf" xml:space="preserve">&#13;</xsl:variable>
+	<xsl:variable name="t1" xml:space="preserve">&#9;</xsl:variable>
+	<xsl:variable name="t2" xml:space="preserve">&#9;&#9;</xsl:variable>
+	<xsl:variable name="t3" xml:space="preserve">&#9;&#9;&#9;</xsl:variable>
+	<xsl:variable name="t4" xml:space="preserve">&#9;&#9;&#9;&#9;</xsl:variable>
+	<xsl:variable name="t5" xml:space="preserve">&#9;&#9;&#9;&#9;&#9;</xsl:variable>
+	<xsl:variable name="t6" xml:space="preserve">&#9;&#9;&#9;&#9;&#9;&#9;</xsl:variable>
+	<xsl:variable name="t7" xml:space="preserve">&#9;&#9;&#9;&#9;&#9;&#9;&#9;</xsl:variable>
+	<xsl:variable name="t8" xml:space="preserve">&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;</xsl:variable>
+	<xsl:variable name="s1" xml:space="preserve">&#32;</xsl:variable>
+	<xsl:variable name="s2" xml:space="preserve">&#32;&#32;</xsl:variable>
+	<xsl:variable name="s3" xml:space="preserve">&#32;&#32;&#32;</xsl:variable>
+	<xsl:variable name="s4" xml:space="preserve">&#32;&#32;&#32;&#32;</xsl:variable>
+	<xsl:variable name="s5" xml:space="preserve">&#32;&#32;&#32;&#32;&#32;</xsl:variable>
+	<xsl:variable name="s6" xml:space="preserve">&#32;&#32;&#32;&#32;&#32;&#32;</xsl:variable>
+	<xsl:variable name="s7" xml:space="preserve">&#32;&#32;&#32;&#32;&#32;&#32;&#32;</xsl:variable>
+	<xsl:variable name="s8" xml:space="preserve">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;</xsl:variable>
 
 	<!-- customization -->
 	<xsl:variable name="baseclassname"  select="'MB'"/>
@@ -37,7 +37,7 @@
 	<xsl:variable name="instancename"   select="'I'"/>
 	<xsl:variable name="getmethodspec"  select="'Get(IMapDataSource s, object o, int i'"/>
 	<xsl:variable name="setmethodspec"  select="'Set(IMapDataDestination d, object o, int i'"/>
-	<xsl:variable name="padding"        select="string-length('SqlDateTime') + 1"/>
+	<xsl:variable name="padding"        select="string-length('DateTimeOffset?') + 1"/>
 
 	<!-- the root of all evil -->
 	<xsl:template match="/">

@@ -84,8 +84,10 @@ namespace BLToolkit.Mapping
 		public virtual Decimal  GetDecimal (object o, int index) { return _dataReader.GetDecimal (index); }
 		public virtual Guid     GetGuid    (object o, int index) { return _dataReader.GetGuid    (index); }
 		public virtual DateTime GetDateTime(object o, int index) { return _dataReader.GetDateTime(index); }
+#if FW3
+		public virtual DateTimeOffset GetDateTimeOffset(object o, int index) { return _dataReader.GetDateTime(index); }
+#endif
 
-#if FW2
 		// Nullable type getters.
 		//
 		[CLSCompliant(false)]
@@ -109,6 +111,8 @@ namespace BLToolkit.Mapping
 		public virtual Decimal?  GetNullableDecimal (object o, int index) { return _dataReader.IsDBNull(index)? null: (Decimal?) _dataReader.GetDecimal (index); }
 		public virtual Guid?     GetNullableGuid    (object o, int index) { return _dataReader.IsDBNull(index)? null: (Guid?)    _dataReader.GetGuid    (index); }
 		public virtual DateTime? GetNullableDateTime(object o, int index) { return _dataReader.IsDBNull(index)? null: (DateTime?)_dataReader.GetDateTime(index); }
+#if FW3
+		public virtual DateTimeOffset? GetNullableDateTimeOffset(object o, int index) { return _dataReader.IsDBNull(index)? null: (DateTime?)_dataReader.GetDateTime(index); }
 #endif
 
 		// SQL type getters.

@@ -138,6 +138,32 @@ namespace BLToolkit.DataAccess
 			return p;
 		}
 
+		[NoInterception]
+		protected virtual IDbDataParameter[] CreateParameters(
+			DbManager                 db,
+			object                    obj,
+			string[]                  outputParameters,
+			string[]                  inputOutputParameters,
+			string[]                  ignoreParameters,
+			params IDbDataParameter[] commandParameters)
+		{
+			return db.CreateParameters(obj, outputParameters,
+				inputOutputParameters, ignoreParameters, commandParameters);
+		}
+
+		[NoInterception]
+		protected virtual IDbDataParameter[] CreateParameters(
+			DbManager                 db,
+			DataRow                   dataRow,
+			string[]                  outputParameters,
+			string[]                  inputOutputParameters,
+			string[]                  ignoreParameters,
+			params IDbDataParameter[] commandParameters)
+		{
+			return db.CreateParameters(dataRow, outputParameters,
+				inputOutputParameters, ignoreParameters, commandParameters);
+		}
+
 		#endregion
 
 		#region ExecuteDictionary

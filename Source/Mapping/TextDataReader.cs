@@ -270,6 +270,13 @@ namespace BLToolkit.Mapping
 			return _mappingSchema.ConvertToDateTime(_values[i]);
 		}
 
+#if FW3
+		public virtual DateTimeOffset GetDateTimeOffset(int i)
+		{
+			return _mappingSchema.ConvertToDateTimeOffset(_values[i]);
+		}
+#endif
+
 		public virtual decimal GetDecimal(int i)
 		{
 			return _mappingSchema.ConvertToDecimal(_values[i]);

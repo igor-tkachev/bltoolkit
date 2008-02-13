@@ -40,9 +40,11 @@ namespace BLToolkit.Mapping
 		Double   GetDouble    (object o, int index);
 		Decimal  GetDecimal   (object o, int index);
 		DateTime GetDateTime  (object o, int index);
+#if FW3
+		DateTimeOffset GetDateTimeOffset(object o, int index);
+#endif
 		Guid     GetGuid      (object o, int index);
 
-#if FW2
 		// Simple type getters.
 		//
 		[CLSCompliant(false)]
@@ -65,8 +67,10 @@ namespace BLToolkit.Mapping
 		Double?   GetNullableDouble  (object o, int index);
 		Decimal?  GetNullableDecimal (object o, int index);
 		DateTime? GetNullableDateTime(object o, int index);
-		Guid?     GetNullableGuid    (object o, int index);
+#if FW3
+		DateTimeOffset? GetNullableDateTimeOffset(object o, int index);
 #endif
+		Guid?     GetNullableGuid    (object o, int index);
 
 		// SQL type getters.
 		//

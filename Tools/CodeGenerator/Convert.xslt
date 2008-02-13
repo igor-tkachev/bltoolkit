@@ -13,28 +13,28 @@
 	<xsl:param name="output"></xsl:param>
 
 	<!-- support variables -->
-	<xsl:variable name="lf">&#13;</xsl:variable>
-	<xsl:variable name="t1">&#9;</xsl:variable>
-	<xsl:variable name="t2">&#9;&#9;</xsl:variable>
-	<xsl:variable name="t3">&#9;&#9;&#9;</xsl:variable>
-	<xsl:variable name="t4">&#9;&#9;&#9;&#9;</xsl:variable>
-	<xsl:variable name="t5">&#9;&#9;&#9;&#9;&#9;</xsl:variable>
-	<xsl:variable name="t6">&#9;&#9;&#9;&#9;&#9;&#9;</xsl:variable>
-	<xsl:variable name="t7">&#9;&#9;&#9;&#9;&#9;&#9;&#9;</xsl:variable>
-	<xsl:variable name="t8">&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;</xsl:variable>
-	<xsl:variable name="s1">&#32;</xsl:variable>
-	<xsl:variable name="s2">&#32;&#32;</xsl:variable>
-	<xsl:variable name="s3">&#32;&#32;&#32;</xsl:variable>
-	<xsl:variable name="s4">&#32;&#32;&#32;&#32;</xsl:variable>
-	<xsl:variable name="s5">&#32;&#32;&#32;&#32;&#32;</xsl:variable>
-	<xsl:variable name="s6">&#32;&#32;&#32;&#32;&#32;&#32;</xsl:variable>
-	<xsl:variable name="s7">&#32;&#32;&#32;&#32;&#32;&#32;&#32;</xsl:variable>
-	<xsl:variable name="s8">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;</xsl:variable>
+	<xsl:variable name="lf" xml:space="preserve">&#13;</xsl:variable>
+	<xsl:variable name="t1" xml:space="preserve">&#9;</xsl:variable>
+	<xsl:variable name="t2" xml:space="preserve">&#9;&#9;</xsl:variable>
+	<xsl:variable name="t3" xml:space="preserve">&#9;&#9;&#9;</xsl:variable>
+	<xsl:variable name="t4" xml:space="preserve">&#9;&#9;&#9;&#9;</xsl:variable>
+	<xsl:variable name="t5" xml:space="preserve">&#9;&#9;&#9;&#9;&#9;</xsl:variable>
+	<xsl:variable name="t6" xml:space="preserve">&#9;&#9;&#9;&#9;&#9;&#9;</xsl:variable>
+	<xsl:variable name="t7" xml:space="preserve">&#9;&#9;&#9;&#9;&#9;&#9;&#9;</xsl:variable>
+	<xsl:variable name="t8" xml:space="preserve">&#9;&#9;&#9;&#9;&#9;&#9;&#9;&#9;</xsl:variable>
+	<xsl:variable name="s1" xml:space="preserve">&#32;</xsl:variable>
+	<xsl:variable name="s2" xml:space="preserve">&#32;&#32;</xsl:variable>
+	<xsl:variable name="s3" xml:space="preserve">&#32;&#32;&#32;</xsl:variable>
+	<xsl:variable name="s4" xml:space="preserve">&#32;&#32;&#32;&#32;</xsl:variable>
+	<xsl:variable name="s5" xml:space="preserve">&#32;&#32;&#32;&#32;&#32;</xsl:variable>
+	<xsl:variable name="s6" xml:space="preserve">&#32;&#32;&#32;&#32;&#32;&#32;</xsl:variable>
+	<xsl:variable name="s7" xml:space="preserve">&#32;&#32;&#32;&#32;&#32;&#32;&#32;</xsl:variable>
+	<xsl:variable name="s8" xml:space="preserve">&#32;&#32;&#32;&#32;&#32;&#32;&#32;&#32;</xsl:variable>
 
 	<!-- customization -->
 	<xsl:variable name="methodname"     select="'To'"/>
 
-	<xsl:variable name="padding"        select="string-length('SqlDateTime')"/>
+	<xsl:variable name="padding"        select="string-length('DateTimeOffset?')"/>
 	<xsl:variable name="objectpad"      select="$padding - string-length('object')"/>
 
 	<!-- the root of all evil -->
@@ -97,10 +97,19 @@
 	</xsl:template>
 
 	<xsl:template match="using">
-		<xsl:text>using </xsl:text>
+    <xsl:if test="@condition">
+      <xsl:text>#if </xsl:text>
+      <xsl:value-of select="@condition"/>
+      <xsl:value-of select="$lf"/>
+    </xsl:if>
+    <xsl:text>using </xsl:text>
 		<xsl:value-of select="@namespace"/>
 		<xsl:text>;</xsl:text>
-		<xsl:value-of select="$lf"/>
+    <xsl:if test="@condition">
+      <xsl:value-of select="$lf"/>
+      <xsl:text>#endif</xsl:text>
+    </xsl:if>
+    <xsl:value-of select="$lf"/>
 	</xsl:template>
 
 	<!-- the class definition -->
@@ -111,6 +120,10 @@
 		<xsl:value-of select="$t1"/>
 		<xsl:text>{</xsl:text>
 		<xsl:value-of select="$lf"/>
+		<xsl:value-of select="$lf"/>
+		<xsl:apply-templates select="converter|comment"/>
+		<xsl:apply-templates select="region"/>
+
 		<xsl:value-of select="$lf"/>
 		<xsl:value-of select="$t2"/>
 		<xsl:text>private static InvalidCastException CreateInvalidCastException(Type originalType, Type conversionType)</xsl:text>
@@ -125,10 +138,6 @@
 		<xsl:text>}</xsl:text>
 		<xsl:value-of select="$lf"/>
 
-		<xsl:value-of select="$lf"/>
-		<xsl:apply-templates select="converter|comment"/>
-		<xsl:apply-templates select="region"/>
-		
 		<xsl:value-of select="$t1"/>
 		<xsl:text>}</xsl:text>
 		<xsl:value-of select="$lf"/>
@@ -160,6 +169,14 @@
 		</xsl:variable>
 		<xsl:variable name="typepad" select="$padding - string-length($fulltype)"/>
 		<xsl:variable name="notclscompliant" select="/code/type[@name=current()/@type]/@clscompliant='false'"/>
+		<xsl:variable name="condition" select="/code/type[@name=current()/@type]/@condition"/>
+
+		<xsl:if test="$condition">
+			<xsl:value-of select="$t2"/>
+			<xsl:text>#if </xsl:text>
+			<xsl:value-of select="$condition"/>
+			<xsl:value-of select="$lf"/>
+		</xsl:if>
 
 		<xsl:value-of select="$t2"/>
 		<xsl:text>#region </xsl:text>
@@ -216,14 +233,21 @@
 				</xsl:apply-templates>
 			</xsl:with-param>
 		</xsl:call-template>
+
 		<xsl:value-of select="$lf"/>
 
 		<xsl:value-of select="$lf"/>
 		<xsl:value-of select="$t2"/>
 		<xsl:text>#endregion</xsl:text>
 		<xsl:value-of select="$lf"/>
-		<xsl:value-of select="$lf"/>
 
+		<xsl:if test="$condition">
+			<xsl:value-of select="$lf"/>
+			<xsl:value-of select="$t2"/>
+			<xsl:text>#endif</xsl:text>
+		</xsl:if>
+
+		<xsl:value-of select="$lf"/>
 	</xsl:template>
 
 	<!-- body -->
@@ -233,10 +257,12 @@
 		<xsl:param name="tonullable"/>
 		<xsl:param name="code"/>
 
+<!--
 		<xsl:if test="@nullable='true'">
 			<xsl:text>#if FW2</xsl:text>
 			<xsl:value-of select="$lf"/>
 		</xsl:if>
+-->
 
 		<xsl:if test="@name">
 			<xsl:value-of select="$t2"/>
@@ -266,11 +292,12 @@
 		</xsl:apply-templates>
 		<xsl:value-of select="$lf"/>
 
+<!--
 		<xsl:if test="@nullable='true'">
 			<xsl:text>#endif</xsl:text>
 			<xsl:value-of select="$lf"/>
 		</xsl:if>
-
+-->
 	</xsl:template>
 
 	<xsl:template match="from" mode="body">
@@ -358,6 +385,9 @@
 		<xsl:param name="code"/>
 
 		<xsl:variable name="notclscompliant" select="/code/type[@name=$totype]/@clscompliant='false' or /code/type[@name=$fromtype]/@clscompliant='false'"/>
+		<xsl:variable name="fromcondition" select="/code/type[@name=$fromtype]/@condition"/>
+		<xsl:variable name="tocondition" select="/code/type[@name=$totype]/@condition"/>
+
 		<xsl:variable name="fromfulltype">
 			<xsl:value-of select="$fromtype"/>
 			<xsl:if test="$fromnullable">
@@ -372,6 +402,12 @@
 			</xsl:if>
 		</xsl:variable>
 
+		<xsl:if test="$fromcondition and not ($fromcondition = $tocondition)">
+			<xsl:value-of select="$t2"/>
+			<xsl:text>#if </xsl:text>
+			<xsl:value-of select="$fromcondition"/>
+			<xsl:value-of select="$lf"/>
+		</xsl:if>
 		<xsl:if test="$notclscompliant">
 			<xsl:value-of select="$t2"/>
 			<xsl:text>[CLSCompliant(false)]</xsl:text>
@@ -406,6 +442,11 @@
 			</xsl:choose>
 		</xsl:with-param>
 		</xsl:call-template>
+		<xsl:if test="$fromcondition and not ($fromcondition = $tocondition)">
+			<xsl:value-of select="$lf"/>
+			<xsl:value-of select="$t2"/>
+			<xsl:text>#endif</xsl:text>
+		</xsl:if>
 		<xsl:value-of select="$lf"/>
 	</xsl:template>
 
@@ -425,6 +466,15 @@
 
 		<xsl:if test="text() or $default">
 			<xsl:variable name="typepad" select="$padding - string-length($fromfullname)"/>
+			<xsl:variable name="fromcondition" select="/code/type[@name=current()/@type]/@condition"/>
+			<xsl:variable name="tocondition" select="/code/type[@name=$totype]/@condition"/>
+
+			<xsl:if test="$fromcondition and not ($fromcondition = $tocondition)">
+				<xsl:value-of select="$t3"/>
+				<xsl:text>#if </xsl:text>
+				<xsl:value-of select="$fromcondition"/>
+				<xsl:value-of select="$lf"/>
+			</xsl:if>
 			<xsl:value-of select="$t3"/>
 			<xsl:text>if (p is </xsl:text>
 			<xsl:value-of select="$fromfullname"/>
@@ -441,6 +491,11 @@
 			<xsl:text>((</xsl:text>
 			<xsl:value-of select="$fromfullname"/>
 			<xsl:text>)p);</xsl:text>
+			<xsl:if test="$fromcondition and not ($fromcondition = $tocondition)">
+				<xsl:value-of select="$lf"/>
+				<xsl:value-of select="$t3"/>
+				<xsl:text>#endif</xsl:text>
+			</xsl:if>
 			<xsl:value-of select="$lf"/>
 		</xsl:if>
 	</xsl:template>
@@ -464,10 +519,7 @@
 			</xsl:choose>
 		</xsl:variable>
 
-		<xsl:if test="$fromnullablelocal">
-			<xsl:text>#if FW2</xsl:text>
-			<xsl:value-of select="$lf"/>
-		</xsl:if>
+		<xsl:if test="not($fromnullablelocal)">
 
 		<xsl:if test="@name">
 			<xsl:value-of select="$lf"/>
@@ -486,11 +538,7 @@
 			<xsl:with-param name="fromnullable" select="$fromnullablelocal"/>
 			<xsl:with-param name="default"      select="$defaultcode"/>
 		</xsl:apply-templates>
-
-		<xsl:if test="$fromnullablelocal">
-			<xsl:text>#endif</xsl:text>
-			<xsl:value-of select="$lf"/>
-		</xsl:if>
+    </xsl:if>
 
 	</xsl:template>
 
@@ -500,12 +548,20 @@
 		<xsl:if test="@nullvalue">
 			<xsl:value-of select="$lf"/>
 			<xsl:value-of select="$t3"/>
-			<xsl:text>if (p == null) return </xsl:text>
+			<xsl:text>if (p == null || p is DBNull) return </xsl:text>
 			<xsl:value-of select="@nullvalue"/>
 			<xsl:text>;</xsl:text>
 			<xsl:value-of select="$lf"/>
 		</xsl:if>
-		<xsl:if test="not(@noruntime) and @nullvalue">
+    <xsl:value-of select="$lf"/>
+    <xsl:value-of select="$t3"/>
+    <xsl:text>if (p is </xsl:text>
+    <xsl:value-of select="../@type"/>
+    <xsl:text>) return (</xsl:text>
+    <xsl:value-of select="../@type"/>
+    <xsl:text>)p;</xsl:text>
+    <xsl:value-of select="$lf"/>
+    <xsl:if test="not(@noruntime) and @nullvalue">
 			<xsl:apply-templates select="../from|../group|../br" mode="runtime">
 				<xsl:with-param name="totype"     select="../@type"/>
 				<xsl:with-param name="toname">

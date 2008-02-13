@@ -38,8 +38,10 @@ namespace BLToolkit.Mapping
 		void SetDecimal   (object o, int index, Decimal  value);
 		void SetGuid      (object o, int index, Guid     value);
 		void SetDateTime  (object o, int index, DateTime value);
+#if FW3
+		void SetDateTimeOffset(object o, int index, DateTimeOffset value);
+#endif
 
-#if FW2
 		// Simple type setters.
 		//
 		[CLSCompliant(false)]
@@ -63,6 +65,8 @@ namespace BLToolkit.Mapping
 		void SetNullableDecimal   (object o, int index, Decimal?  value);
 		void SetNullableGuid      (object o, int index, Guid?     value);
 		void SetNullableDateTime  (object o, int index, DateTime? value);
+#if FW3
+		void SetNullableDateTimeOffset(object o, int index, DateTimeOffset? value);
 #endif
 
 		// SQL type setters.

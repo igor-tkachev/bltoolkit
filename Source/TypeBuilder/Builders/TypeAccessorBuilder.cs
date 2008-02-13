@@ -304,6 +304,8 @@ namespace BLToolkit.TypeBuilder.Builders
 				BuildTypedSetter(mi, nestedType, type, typedPropertyName);
 			}
 
+			BuildCloneValueMethod(mi, nestedType, type);
+
 			// FW 1.1 wants nested types to be created before parent.
 			//
 			_nestedTypes.Add(nestedType);
@@ -556,6 +558,96 @@ namespace BLToolkit.TypeBuilder.Builders
 
 			if (mi is FieldInfo) emit.stfld   ((FieldInfo)mi);
 			else                 emit.callvirt(setMethod);
+
+			emit
+				.ret()
+				;
+		}
+
+		private void BuildCloneValueMethod(
+			MemberInfo        mi,
+			TypeBuilderHelper nestedType,
+			Type              memberType
+			)
+		{
+			Type       methodType = mi.DeclaringType;
+			MethodInfo getMethod  = null;
+			MethodInfo setMethod  = null;
+
+			if (mi is PropertyInfo)
+			{
+				getMethod = ((PropertyInfo)mi).GetGetMethod();
+
+				if (getMethod == null)
+				{
+					if (_type != _originalType)
+					{
+						getMethod  = _type.GetMethod("get_" + mi.Name);
+						methodType = _type;
+					}
+
+					if (getMethod == null || !IsMethodAccessible(getMethod))
+						return;
+				}
+
+				setMethod = ((PropertyInfo)mi).GetSetMethod();
+
+				if (setMethod == null)
+				{
+					if (_type != _originalType)
+					{
+						setMethod  = _type.GetMethod("set_" + mi.Name);
+						methodType = _type;
+					}
+
+					if (setMethod == null || !IsMethodAccessible(setMethod))
+						return;
+				}
+			}
+
+			MethodBuilderHelper method = nestedType.DefineMethod(
+				_memberAccessor.GetMethod("CloneValue", typeof(object), typeof(object)));
+
+			EmitHelper emit = method.Emitter;
+
+			emit
+				.ldarg_2
+				.castType (methodType)
+				.ldarg_1
+				.castType (methodType)
+				.end();
+
+			if (mi is FieldInfo)
+				emit.ldfld   ((FieldInfo)mi);
+			else
+				emit.callvirt(getMethod);
+
+			if (typeof(string) != memberType && TypeHelper.IsSameOrParent(typeof(ICloneable), memberType))
+			{
+				if (memberType.IsValueType)
+					emit
+						.box       (memberType)
+						.callvirt  (typeof(ICloneable), "Clone")
+						.unbox_any (memberType)
+						;
+				else
+				{
+					Label valueIsNull = emit.DefineLabel();
+
+					emit
+						.dup
+						.brfalse_s (valueIsNull)
+						.callvirt  (typeof(ICloneable), "Clone")
+						.castclass (memberType)
+						.MarkLabel (valueIsNull)
+						;
+				}
+			}
+
+			if (mi is FieldInfo)
+				emit.stfld   ((FieldInfo)mi);
+			else
+				emit.callvirt(setMethod);
 
 			emit
 				.ret()

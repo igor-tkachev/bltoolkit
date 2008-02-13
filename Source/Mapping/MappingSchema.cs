@@ -167,6 +167,9 @@ namespace BLToolkit.Mapping
 
 			_defaultStringNullValue      = (String)     GetNullValue(typeof(String));
 			_defaultDateTimeNullValue    = (DateTime)   GetNullValue(typeof(DateTime));
+#if FW3
+			_defaultDateTimeOffsetNullValue = (DateTimeOffset) GetNullValue(typeof(DateTimeOffset));
+#endif
 			_defaultDecimalNullValue     = (Decimal)    GetNullValue(typeof(Decimal));
 			_defaultGuidNullValue        = (Guid)       GetNullValue(typeof(Guid));
 			_defaultStreamNullValue      = (Stream)     GetNullValue(typeof(Stream));
@@ -398,6 +401,22 @@ namespace BLToolkit.Mapping
 					Convert.ToDateTime(value);
 		}
 
+#if FW3
+		private DateTimeOffset _defaultDateTimeOffsetNullValue;
+		public  DateTimeOffset  DefaultDateTimeOffsetNullValue
+		{
+			get { return _defaultDateTimeOffsetNullValue;  }
+			set { _defaultDateTimeOffsetNullValue = value; }
+		}
+
+		public virtual DateTimeOffset ConvertToDateTimeOffset(object value)
+		{
+			return
+				value is DateTimeOffset? (DateTimeOffset)value:
+				value == null?     _defaultDateTimeOffsetNullValue:
+					Convert.ToDateTimeOffset(value);
+		}
+#endif
 		private decimal _defaultDecimalNullValue;
 		public  decimal  DefaultDecimalNullValue
 		{
@@ -603,6 +622,16 @@ namespace BLToolkit.Mapping
 			return Convert.ToNullableDateTime(value);
 		}
 
+#if FW3
+		public virtual DateTimeOffset? ConvertToNullableDateTimeOffset(object value)
+		{
+			if (value is DateTimeOffset) return (DateTimeOffset?)value;
+			if (value == null)           return null;
+
+			return Convert.ToNullableDateTimeOffset(value);
+		}
+#endif
+
 		public virtual Decimal? ConvertToNullableDecimal(object value)
 		{
 			if (value is Decimal) return (Decimal?)value;
@@ -761,7 +790,6 @@ namespace BLToolkit.Mapping
 
 		#region General case
 
-#if FW2
 		public virtual T GetDefaultNullValue<T>()
 		{
 			switch (Type.GetTypeCode(typeof(T)))
@@ -783,10 +811,13 @@ namespace BLToolkit.Mapping
 				case TypeCode.UInt64:   return (T)(object)_defaultUInt64NullValue;
 			}
 
-			if (typeof(Guid)        == typeof(T)) return (T)(object)_defaultGuidNullValue;
-			if (typeof(Stream)      == typeof(T)) return (T)(object)_defaultStreamNullValue;
-			if (typeof(XmlReader)   == typeof(T)) return (T)(object)_defaultXmlReaderNullValue;
-			if (typeof(XmlDocument) == typeof(T)) return (T)(object)_defaultXmlDocumentNullValue;
+			if (typeof(Guid)           == typeof(T)) return (T)(object)_defaultGuidNullValue;
+			if (typeof(Stream)         == typeof(T)) return (T)(object)_defaultStreamNullValue;
+			if (typeof(XmlReader)      == typeof(T)) return (T)(object)_defaultXmlReaderNullValue;
+			if (typeof(XmlDocument)    == typeof(T)) return (T)(object)_defaultXmlDocumentNullValue;
+#if FW3
+			if (typeof(DateTimeOffset) == typeof(T)) return (T)(object)_defaultDateTimeOffsetNullValue;
+#endif
 
 			return default(T);
 		}
@@ -797,7 +828,6 @@ namespace BLToolkit.Mapping
 
 			return Convert<T, P>.From(value);
 		}
-#endif
 
 		public virtual object ConvertChangeType(object value, Type conversionType)
 		{

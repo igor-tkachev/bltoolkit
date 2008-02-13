@@ -6,10 +6,12 @@
 	<using namespace="System.IO"/>
 	<using namespace="System.Xml"/>
 
-	<type name="SByte"    clscompliant="false"/>
-	<type name="UInt16"   clscompliant="false"/>
-	<type name="UInt32"   clscompliant="false"/>
-	<type name="UInt64"   clscompliant="false"/>
+	<type name="SByte"  clscompliant="false"/>
+	<type name="UInt16" clscompliant="false"/>
+	<type name="UInt32" clscompliant="false"/>
+	<type name="UInt64" clscompliant="false"/>
+
+	<type name="DateTimeOffset" condition="FW3"/>
 
 	<template name="Integer Types">
 		<type name="SByte"   />
@@ -56,6 +58,7 @@
 				<from type="Char"/>
 				<from type="TimeSpan"/>
 				<from type="DateTime"/>
+				<from type="DateTimeOffset"/>
 				<from type="Guid"/>
 				<default              >return p.ToString();</default>
 			</group>
@@ -64,20 +67,23 @@
 				<from type="Char"/>
 				<from type="TimeSpan"/>
 				<from type="DateTime"/>
+				<from type="DateTimeOffset"/>
 				<from type="Guid"/>
 				<default              >return p.ToString();</default>
 			</group>
 			<group name="SqlTypes.">
 				<include template ="SqlTypes"/>
 				<from type="SqlGuid"/>
-				<from type="SqlBinary"/>
+				<from type="SqlChars" >return p.IsNull?  null : p.ToSqlString().Value;</from>
+				<from type="SqlXml"   >return p.IsNull?  null : p.Value;</from>
 				<default              >return p.ToString();</default>
 			</group>
 			<from type="Type"         >return p == null? null: p.FullName;</from>
+			<from type="XmlDocument"  >return p == null? null: p.InnerXml;</from>
 			<default nullvalue="String.Empty" nothrow="true">
 			if (p is IConvertible) return ((IConvertible)p).ToString(null);
 			if (p is IFormattable) return ((IFormattable)p).ToString(null, null);
-			
+
 			return p.ToString();</default>
 		</converter>
 		<br/>
@@ -166,6 +172,7 @@
 				<from type="Char"/>
 				<from type="Boolean"  >return p? 1: 0;</from>
 				<from type="DateTime" >return (p - DateTime.MinValue).Ticks;</from>
+				<from type="DateTimeOffset" >return (p - DateTime.MinValue).Ticks;</from>
 				<from type="TimeSpan" >return p.Ticks;</from>
 				<default              >return checked((Int64)p);</default>
 			</group>
@@ -176,6 +183,7 @@
 				<from type="Char"/>
 				<from type="Boolean"  >return (p.HasValue &amp;&amp; p.Value)? 1: 0;</from>
 				<from type="DateTime" >return p.HasValue? (p.Value - DateTime.MinValue).Ticks: 0;</from>
+				<from type="DateTimeOffset" >return p.HasValue? (p.Value - DateTime.MinValue).Ticks: 0;</from>
 				<from type="TimeSpan" >return p.HasValue? p.Value.Ticks: 0;</from>
 				<default              >return p.HasValue? checked((Int64)p.Value): 0;</default>
 			</group>
@@ -212,7 +220,7 @@
 				<include template ="SqlTypes"/>
 				<default              >return p.IsNull? (Byte)0:        ToByte(p.Value);</default>
 			</group>
-			<default nullvalue="Byte.MinValue">
+			<default nullvalue="0">
 			if (p is IConvertible) return ((IConvertible)p).ToByte(null);
 			</default>
 		</converter>
@@ -243,7 +251,7 @@
 		</converter>
 		<converter type="UInt32"    nullable="false">
 			<group name="Scalar Types.">
-				<from type="String"   >return p == null? (UInt32)0: UInt32.Parse(p);</from>
+				<from type="String"   >return p == null? 0: UInt32.Parse(p);</from>
 				<br/>
 				<include template ="Numeric Types"/>
 				<from type="Boolean"  >return       (UInt32)(p? 1: 0);</from>
@@ -251,24 +259,24 @@
 				<default              >return      checked((UInt32)p);</default>
 			</group>
 			<group name="Nullable Types." nullable="true">
-				<from type="UInt32"    >return p.HasValue?                 p.Value:  (UInt32)0;</from>
+				<from type="UInt32"    >return p.HasValue?                 p.Value:  0;</from>
 				<br/>
 				<include template ="Numeric Types"/>
 				<from type="Char"/>
-				<from type="Boolean"  >return (p.HasValue &amp;&amp; p.Value)?   (UInt32)1: (UInt32)0;</from>
-				<default              >return p.HasValue? checked((UInt32)p.Value): (UInt32)0;</default>
+				<from type="Boolean"  >return (p.HasValue &amp;&amp; p.Value)?   (UInt32)1: 0;</from>
+				<default              >return p.HasValue? checked((UInt32)p.Value): 0;</default>
 			</group>
 			<group name="SqlTypes.">
 				<include template ="SqlTypes"/>
-				<default              >return p.IsNull? (UInt32)0:        ToUInt32(p.Value);</default>
+				<default              >return p.IsNull? 0:        ToUInt32(p.Value);</default>
 			</group>
-			<default nullvalue="UInt32.MinValue">
+			<default nullvalue="0">
 			if (p is IConvertible) return ((IConvertible)p).ToUInt32(null);
 			</default>
 		</converter>
 		<converter type="UInt64"    nullable="false">
 			<group name="Scalar Types.">
-				<from type="String"   >return p == null? (UInt64)0: UInt64.Parse(p);</from>
+				<from type="String"   >return p == null? 0: UInt64.Parse(p);</from>
 				<br/>
 				<include template ="Numeric Types"/>
 				<from type="Boolean"  >return (UInt64)(p? 1: 0);</from>
@@ -276,19 +284,19 @@
 				<default              >return checked((UInt64)p);</default>
 			</group>
 			<group name="Nullable Types." nullable="true">
-				<from type="UInt64"    >return p.HasValue?                 p.Value:  (UInt64)0;</from>
+				<from type="UInt64"    >return p.HasValue?                 p.Value:  0;</from>
 				<br/>
 				<include template ="Numeric Types"/>
 				<from type="Char"/>
-				<from type="Boolean"  >return (p.HasValue &amp;&amp; p.Value)?   (UInt64)1: (UInt64)0;</from>
-				<default              >return p.HasValue? checked((UInt64)p.Value): (UInt64)0;</default>
+				<from type="Boolean"  >return (p.HasValue &amp;&amp; p.Value)?   (UInt64)1: 0;</from>
+				<default              >return p.HasValue? checked((UInt64)p.Value): 0;</default>
 			</group>
 			<group name="SqlTypes.">
 				<include template ="SqlTypes"/>
-				<default              >return p.IsNull? (UInt64)0:        ToUInt64(p.Value);</default>
+				<default              >return p.IsNull? 0:        ToUInt64(p.Value);</default>
 			</group>
-			<default nullvalue="UInt64.MinValue">
-				if (p is IConvertible) return ((IConvertible)p).ToUInt64(null);
+			<default nullvalue="0">
+			if (p is IConvertible) return ((IConvertible)p).ToUInt64(null);
 			</default>
 		</converter>
 		<br/>
@@ -311,7 +319,7 @@
 				<include template ="SqlTypes"/>
 				<default              >return p.IsNull? (Char)0:        ToChar(p.Value);</default>
 			</group>
-			<default nullvalue="Char.MinValue">
+			<default nullvalue="'\x0'">
 			if (p is IConvertible) return ((IConvertible)p).ToChar(null);
 			</default>
 		</converter>
@@ -349,6 +357,7 @@
 				<from type="Boolean"  >return      p?      1.0: 0.0;</from>
 				<from type="Char"/>
 				<from type="DateTime" >return (p - DateTime.MinValue).TotalDays;</from>
+				<from type="DateTimeOffset" >return (p - DateTime.MinValue).TotalDays;</from>
 				<from type="TimeSpan" >return p.TotalDays;</from>
 				<default              >return      checked((Double)p);</default>
 			</group>
@@ -359,6 +368,7 @@
 				<from type="Char"/>
 				<from type="Boolean"  >return (p.HasValue &amp;&amp; p.Value)?         1.0: 0.0;</from>
 				<from type="DateTime" >return p.HasValue? (p.Value - DateTime.MinValue).TotalDays: 0.0;</from>
+				<from type="DateTimeOffset" >return p.HasValue? (p.Value - DateTime.MinValue).TotalDays: 0.0;</from>
 				<from type="TimeSpan" >return p.HasValue? p.Value.TotalDays: 0.0;</from>
 				<default              >return p.HasValue? checked((Double)p.Value):  0.0;</default>
 			</group>
@@ -397,9 +407,7 @@
 			case     'T': return true;
 			}
 
-			throw new InvalidCastException(string.Format(
-				"Invalid cast from {0} to {1}", typeof(Char).FullName, typeof(Boolean).FullName));
-				</from>
+			throw CreateInvalidCastException(typeof(Char), typeof(Boolean));</from>
 				<default              >return p != 0;</default>
 			</group>
 			<group name="Nullable Types." nullable="true">
@@ -452,12 +460,14 @@
 				<from type="TimeSpan" >return DateTime.MinValue + p;</from>
 				<from type="Int64"    >return DateTime.MinValue + TimeSpan.FromTicks(p);</from>
 				<from type="Double"   >return DateTime.MinValue + TimeSpan.FromDays(p);</from>
+				<from type="DateTimeOffset" >return p.LocalDateTime;</from>
 			</group>
 			<group name="Nullable Types." nullable="true">
-				<from type="DateTime" >return p.HasValue?                                               p.Value:  DateTime.MinValue;</from>
-				<from type="TimeSpan" >return p.HasValue? DateTime.MinValue +                           p.Value:  DateTime.MinValue;</from>
-				<from type="Int64"    >return p.HasValue? DateTime.MinValue +        TimeSpan.FromTicks(p.Value): DateTime.MinValue;</from>
-				<from type="Double"   >return p.HasValue? DateTime.MinValue + TimeSpan.FromDays(p.Value): DateTime.MinValue;</from>
+				<from type="DateTime"       >return p.HasValue?                                               p.Value:  DateTime.MinValue;</from>
+				<from type="DateTimeOffset" >return p.HasValue?                                   p.Value.LocalDateTime:  DateTime.MinValue;</from>
+				<from type="TimeSpan"       >return p.HasValue? DateTime.MinValue +                           p.Value:  DateTime.MinValue;</from>
+				<from type="Int64"          >return p.HasValue? DateTime.MinValue +        TimeSpan.FromTicks(p.Value): DateTime.MinValue;</from>
+				<from type="Double"         >return p.HasValue? DateTime.MinValue + TimeSpan.FromDays(p.Value): DateTime.MinValue;</from>
 			</group>
 			<group name="SqlTypes.">
 				<from type="SqlDateTime">return p.IsNull? DateTime.MinValue:                                               p.Value; </from>
@@ -469,16 +479,43 @@
 			if (p is IConvertible) return ((IConvertible)p).ToDateTime(null);
 			</default>
 		</converter>
+		<converter type="DateTimeOffset" nullable="false">
+			<group name="Scalar Types.">
+				<from type="String"   >return p == null? DateTimeOffset.MinValue: DateTimeOffset.Parse(p);</from>
+				<from type="TimeSpan" >return DateTimeOffset.MinValue + p;</from>
+				<from type="Int64"    >return DateTimeOffset.MinValue + TimeSpan.FromTicks(p);</from>
+				<from type="Double"   >return DateTimeOffset.MinValue + TimeSpan.FromDays(p);</from>
+				<from type="DateTime" >return p;</from>
+			</group>
+			<group name="Nullable Types." nullable="true">
+				<from type="DateTimeOffset" >return p.HasValue?                                         p.Value:  DateTimeOffset.MinValue;</from>
+				<from type="DateTime" >return p.HasValue?                                               p.Value:  DateTimeOffset.MinValue;</from>
+				<from type="TimeSpan" >return p.HasValue? DateTimeOffset.MinValue +                           p.Value:  DateTimeOffset.MinValue;</from>
+				<from type="Int64"    >return p.HasValue? DateTimeOffset.MinValue +        TimeSpan.FromTicks(p.Value): DateTimeOffset.MinValue;</from>
+				<from type="Double"   >return p.HasValue? DateTimeOffset.MinValue + TimeSpan.FromDays(p.Value): DateTimeOffset.MinValue;</from>
+			</group>
+			<group name="SqlTypes.">
+				<from type="SqlDateTime">return p.IsNull? DateTimeOffset.MinValue:                                               p.Value; </from>
+				<from type="SqlString"  >return p.IsNull? DateTimeOffset.MinValue:                                    ToDateTimeOffset(p.Value);</from>
+				<from type="SqlInt64"   >return p.IsNull? DateTimeOffset.MinValue: DateTimeOffset.MinValue +        TimeSpan.FromTicks(p.Value);</from>
+				<from type="SqlDouble"  >return p.IsNull? DateTimeOffset.MinValue: DateTimeOffset.MinValue + TimeSpan.FromDays(p.Value);</from>
+			</group>
+			<default nullvalue="DateTimeOffset.MinValue">
+			if (p is IConvertible) return ToDateTimeOffset(((IConvertible)p).ToDateTime(null));
+			</default>
+		</converter>
 		<converter type="TimeSpan" nullable="false">
 			<group name="Scalar Types.">
 				<from type="String"     >return p == null? TimeSpan.MinValue: TimeSpan.Parse(p);</from>
 				<from type="DateTime"   >return p - DateTime.MinValue;</from>
+				<from type="DateTimeOffset">return p - DateTimeOffset.MinValue;</from>
 				<from type="Int64"      >return TimeSpan.FromTicks(p);</from>
 				<from type="Double"     >return TimeSpan.FromDays(p);</from>
 			</group>
 			<group name="Nullable Types." nullable="true">
 				<from type="TimeSpan"   >return p.HasValue? p.Value:                            TimeSpan.MinValue;</from>
 				<from type="DateTime"   >return p.HasValue? p.Value - DateTime.MinValue:        TimeSpan.MinValue;</from>
+				<from type="DateTimeOffset"   >return p.HasValue? p.Value - DateTimeOffset.MinValue:        TimeSpan.MinValue;</from>
 				<from type="Int64"      >return p.HasValue? TimeSpan.FromTicks(p.Value):        TimeSpan.MinValue;</from>
 				<from type="Double"     >return p.HasValue? TimeSpan.FromDays(p.Value): TimeSpan.MinValue;</from>
 			</group>
@@ -593,6 +630,7 @@
 				<from type="Char"/>
 				<from type="Boolean" >return p? 1: 0;</from>
 				<from type="DateTime">return (p - DateTime.MinValue).Ticks;</from>
+				<from type="DateTimeOffset">return (p - DateTimeOffset.MinValue).Ticks;</from>
 				<from type="TimeSpan">return p.Ticks;</from>
 				<default             >return checked((Int64?)p);</default>
 			</group>
@@ -601,6 +639,7 @@
 				<from type="Char"/>
 				<from type="Boolean">return p.HasValue? (Int64?)(p.Value? 1: 0):  null;</from>
 				<from type="DateTime">return p.HasValue? (Int64?)(p.Value - DateTime.MinValue).Ticks: null;</from>
+				<from type="DateTimeOffset">return p.HasValue? (Int64?)(p.Value - DateTimeOffset.MinValue).Ticks: null;</from>
 				<from type="TimeSpan">return p.HasValue? (Int64?)p.Value.Ticks: null;</from>
 				<default             >return p.HasValue? checked((Int64?)p.Value): null;</default>
 			</group>
@@ -611,7 +650,7 @@
 				<default             >return p.IsNull? null: ToNullableInt64(p.Value);</default>
 			</group>
 			<default nullvalue="null">
-				if (p is IConvertible) return ((IConvertible)p).ToInt64(null);
+			if (p is IConvertible) return ((IConvertible)p).ToInt64(null);
 			</default>
 		</converter>
 		<br/>
@@ -637,7 +676,7 @@
 				<default             >return p.IsNull? null: ToNullableByte(p.Value);</default>
 			</group>
 			<default nullvalue="null">
-				if (p is IConvertible) return ((IConvertible)p).ToByte(null);
+			if (p is IConvertible) return ((IConvertible)p).ToByte(null);
 			</default>
 		</converter>
 		<converter type="UInt16"    nullable="true">
@@ -661,7 +700,7 @@
 				<default            >return p.IsNull? null: ToNullableUInt16(p.Value);</default>
 			</group>
 			<default nullvalue="null">
-				if (p is IConvertible) return ((IConvertible)p).ToUInt16(null);
+			if (p is IConvertible) return ((IConvertible)p).ToUInt16(null);
 			</default>
 		</converter>
 		<converter type="UInt32"    nullable="true">
@@ -685,7 +724,7 @@
 				<default            >return p.IsNull? null: ToNullableUInt32(p.Value);</default>
 			</group>
 			<default nullvalue="null">
-				if (p is IConvertible) return ((IConvertible)p).ToUInt32(null);
+			if (p is IConvertible) return ((IConvertible)p).ToUInt32(null);
 			</default>
 		</converter>
 		<converter type="UInt64"    nullable="true">
@@ -769,6 +808,7 @@
 				<from type="Char"/>
 				<from type="Boolean"  >return p? 1.0: 0.0;</from>
 				<from type="DateTime" >return (p - DateTime.MinValue).TotalDays;</from>
+				<from type="DateTimeOffset" >return (p - DateTimeOffset.MinValue).TotalDays;</from>
 				<from type="TimeSpan" >return p.TotalDays;</from>
 				<default              >return checked((Double?)p);</default>
 			</group>
@@ -777,6 +817,7 @@
 				<from type="Char"/>
 				<from type="Boolean"  >return p.HasValue? (Double?)(p.Value? 1.0: 0.0):  null;</from>
 				<from type="DateTime" >return p.HasValue? (Double?)(p.Value - DateTime.MinValue).TotalDays: null;</from>
+				<from type="DateTimeOffset" >return p.HasValue? (Double?)(p.Value - DateTimeOffset.MinValue).TotalDays: null;</from>
 				<from type="TimeSpan" >return p.HasValue? (Double?)p.Value.TotalDays: null;</from>
 				<default              >return p.HasValue? checked((Double?)p.Value): null;</default>
 			</group>
@@ -843,6 +884,7 @@
 		<converter type="DateTime" nullable="true">
 			<group name="Scalar Types.">
 				<from type="DateTime">return p;</from>
+				<from type="DateTimeOffset">return p.LocalDateTime;</from>
 				<from type="String"  >return p == null? null: (DateTime?)DateTime.Parse(p);</from>
 				<br/>
 				<from type="TimeSpan" >return DateTime.MinValue + p;</from>
@@ -853,6 +895,7 @@
 				<from type="TimeSpan" >return p.HasValue? DateTime.MinValue +                           p.Value:  (DateTime?)null;</from>
 				<from type="Int64"    >return p.HasValue? DateTime.MinValue +        TimeSpan.FromTicks(p.Value): (DateTime?)null;</from>
 				<from type="Double"   >return p.HasValue? DateTime.MinValue + TimeSpan.FromDays(p.Value): (DateTime?)null;</from>
+				<from type="DateTimeOffset">return p.HasValue? p.Value.LocalDateTime: (DateTime?)null;</from>
 			</group>
 			<group name="SqlTypes.">
 				<from type="SqlDateTime">return p.IsNull? (DateTime?)null:                                               p.Value; </from>
@@ -864,17 +907,45 @@
 			if (p is IConvertible) return ((IConvertible)p).ToDateTime(null);
 			</default>
 		</converter>
+		<converter type="DateTimeOffset" nullable="true">
+			<group name="Scalar Types.">
+				<from type="DateTime">return p;</from>
+				<from type="DateTimeOffset">return p;</from>
+				<from type="String"  >return p == null? null: (DateTimeOffset?)DateTimeOffset.Parse(p);</from>
+				<br/>
+				<from type="TimeSpan" >return DateTimeOffset.MinValue + p;</from>
+				<from type="Int64"    >return DateTimeOffset.MinValue + TimeSpan.FromTicks(p);</from>
+				<from type="Double"   >return DateTimeOffset.MinValue + TimeSpan.FromDays(p);</from>
+			</group>
+			<group name="Nullable Types." nullable="true">
+				<from type="TimeSpan" >return p.HasValue? DateTimeOffset.MinValue +                           p.Value:  (DateTimeOffset?)null;</from>
+				<from type="Int64"    >return p.HasValue? DateTimeOffset.MinValue +        TimeSpan.FromTicks(p.Value): (DateTimeOffset?)null;</from>
+				<from type="Double"   >return p.HasValue? DateTimeOffset.MinValue + TimeSpan.FromDays(p.Value): (DateTimeOffset?)null;</from>
+				<from type="DateTime">return p.HasValue? p: (DateTimeOffset?)null;</from>
+			</group>
+			<group name="SqlTypes.">
+				<from type="SqlDateTime">return p.IsNull? (DateTimeOffset?)null:                                               p.Value; </from>
+				<from type="SqlString"  >return p.IsNull? (DateTimeOffset?)null:                                    ToDateTimeOffset(p.Value);</from>
+				<from type="SqlInt64"   >return p.IsNull? (DateTimeOffset?)null: DateTimeOffset.MinValue +        TimeSpan.FromTicks(p.Value);</from>
+				<from type="SqlDouble"  >return p.IsNull? (DateTimeOffset?)null: DateTimeOffset.MinValue + TimeSpan.FromDays(p.Value);</from>
+			</group>
+			<default nullvalue="null">
+			if (p is IConvertible) return ToDateTimeOffset(((IConvertible)p).ToDateTime(null));
+			</default>
+		</converter>
 		<converter type="TimeSpan" nullable="true">
 			<group name="Scalar Types.">
 				<from type="TimeSpan"   >return p;</from>
 				<from type="String"     >return p == null? null: (TimeSpan?)TimeSpan.Parse(p);</from>
 				<from type="DateTime"   >return p - DateTime.MinValue;</from>
+				<from type="DateTimeOffset">return p - DateTimeOffset.MinValue;</from>
 				<from type="Int64"      >return TimeSpan.FromTicks(p);</from>
 				<from type="Double"     >return TimeSpan.FromDays(p);</from>
 			</group>
 
 			<group name="Nullable Types." nullable="true">
 				<from type="DateTime"   >return p.HasValue? p.Value - DateTime.MinValue: (TimeSpan?)null;</from>
+				<from type="DateTimeOffset"   >return p.HasValue? p.Value - DateTimeOffset.MinValue: (TimeSpan?)null;</from>
 				<from type="Int64"      >return p.HasValue? TimeSpan.FromTicks(p.Value): (TimeSpan?)null;</from>
 				<from type="Double"     >return p.HasValue? TimeSpan.FromDays(p.Value): (TimeSpan?)null;</from>
 			</group>
@@ -913,6 +984,7 @@
 				<from type="Char"    />
 				<from type="TimeSpan"/>
 				<from type="DateTime"/>
+				<from type="DateTimeOffset"/>
 				<from type="Guid"    />
 				<from type="Char[]"   >return new String(p);</from>
 				<default              >return p.ToString();</default>
@@ -923,6 +995,7 @@
 				<from type="Char"    />
 				<from type="TimeSpan"/>
 				<from type="DateTime"/>
+				<from type="DateTimeOffset"/>
 				<from type="Guid"    />
 				<default              >return p.HasValue? p.ToString(): SqlString.Null;</default>
 			</group>
@@ -930,13 +1003,14 @@
 			<group name="SqlTypes.">
 				<include template="SqlTypes"/>
 				<from type="SqlChars"/>
+				<from type="SqlXml">return p.IsNull? SqlString.Null: p.Value;</from>
 				<from type="SqlGuid" />
 				<from type="SqlDateTime"/>
-				<from type="SqlBinary">return p.IsNull? SqlString.Null: p.ToString();</from>
 				<default              >return p.ToSqlString();</default>
 			</group>
 			<from type="Type"         >return p == null? SqlString.Null: p.FullName;</from>
-			<default nullvalue="SqlString.Null" nothrow="true">
+      <from type="XmlDocument"  >return p == null? SqlString.Null: p.InnerXml;</from>
+      <default nullvalue="SqlString.Null" nothrow="true">
 			return ToString(p);</default>
 		</converter>
 		<br/>
@@ -1027,6 +1101,7 @@
 				<from type="Char"/>
 				<from type="Boolean"  >return p? 1: 0;</from>
 				<from type="DateTime" >return (p - DateTime.MinValue).Ticks;</from>
+				<from type="DateTimeOffset" >return (p - DateTimeOffset.MinValue).Ticks;</from>
 				<from type="TimeSpan" >return p.Ticks;</from>
 				<default              >return checked((Int64)p);</default>
 			</group>
@@ -1036,6 +1111,7 @@
 				<include template ="Numeric Types"/>
 				<from type="Char"/>
 				<from type="DateTime"/>
+				<from type="DateTimeOffset"/>
 				<from type="TimeSpan"/>
 				<default             >return p.HasValue? ToInt64(p.Value): SqlInt64.Null;</default>
 			</group>
@@ -1082,6 +1158,7 @@
 				<from type="Char"/>
 				<from type="Boolean"  >return p? 1.0: 0.0;</from>
 				<from type="DateTime" >return (p - DateTime.MinValue).TotalDays;</from>
+				<from type="DateTimeOffset" >return (p - DateTimeOffset.MinValue).TotalDays;</from>
 				<from type="TimeSpan" >return p.TotalDays;</from>
 				<default              >return checked((Double)p);</default>
 			</group>
@@ -1090,6 +1167,7 @@
 				<from type="Double"  >return p.HasValue?          p.Value:  SqlDouble.Null;</from>
 				<include template ="Numeric Types"/>
 				<from type="DateTime"/>
+				<from type="DateTimeOffset"/>
 				<from type="TimeSpan"/>
 				<default             >return p.HasValue? ToDouble(p.Value): SqlDouble.Null;</default>
 			</group>
@@ -1179,6 +1257,7 @@
 			<group name="Scalar Types.">
 				<from type="String"   >return p == null? SqlDateTime.Null: SqlDateTime.Parse(p);</from>
 				<from type="DateTime" >return p;</from>
+				<from type="DateTimeOffset" >return p.LocalDateTime;</from>
 				<from type="TimeSpan"/>
 				<from type="Int64"/>
 				<from type="Double"/>
@@ -1187,6 +1266,7 @@
 
 			<group name="Nullable Types." nullable="true">
 				<from type="DateTime">return p.HasValue?            p.Value:  SqlDateTime.Null;</from>
+				<from type="DateTimeOffset">return p.HasValue?            p.Value.LocalDateTime:  SqlDateTime.Null;</from>
 				<from type="TimeSpan"/>
 				<from type="Int64"/>
 				<from type="Double"/>
@@ -1264,7 +1344,9 @@
 				<from type="Char"/>
 				<from type="TimeSpan"/>
 				<from type="DateTime"/>
+				<from type="DateTimeOffset"/>
 				<from type="Guid"    />
+				<default>return new SqlChars(ToString(p).ToCharArray());</default>
 			</group>
 
 			<group name="Nullable Types." nullable="true">
@@ -1272,6 +1354,7 @@
 				<from type="Char"     >return p.HasValue? new SqlChars(new Char[]{p.Value})       : SqlChars.Null;</from>
 				<from type="TimeSpan"/>
 				<from type="DateTime"/>
+				<from type="DateTimeOffset"/>
 				<from type="Guid"    />
 				<default              >return p.HasValue? new SqlChars(p.ToString().ToCharArray()): SqlChars.Null;</default>
 			</group>
@@ -1285,7 +1368,8 @@
 				<default              >return (SqlChars)p.ToSqlString();</default>
 			</group>
 			<from type="Type"         >return p == null? SqlChars.Null: new SqlChars(p.FullName.ToCharArray());</from>
-			<default                  >return new SqlChars(ToString(p).ToCharArray());</default>
+			<default nullvalue="SqlChars.Null" nothrow="true">
+			return new SqlChars(ToString(p).ToCharArray());</default>
 		</converter>
 		<converter type="SqlXml">
 			<group name="Scalar Types.">
@@ -1293,6 +1377,7 @@
 				<br/>
 				<from type="Stream"   />
 				<from type="XmlReader"/>
+        <from type="XmlDocument">return p == null? SqlXml.Null: new SqlXml(new XmlTextReader(new StringReader(p.InnerXml)));</from>
 				<br/>
 				<from type="Char[]"    >return p == null? SqlXml.Null: new SqlXml(new XmlTextReader(new StringReader(new string(p))));</from>
 				<from type="Byte[]"    >return p == null? SqlXml.Null: new SqlXml(new MemoryStream(p));</from>
@@ -1341,6 +1426,20 @@
 		</converter>
 		<converter type="Byte[]" name="ByteArray">
 			<group name="Scalar Types.">
+				<from type="String" >return p == null? null: System.Text.Encoding.UTF8.GetBytes(p);</from>
+				<from type="Byte"   >return new byte[]{p};</from>
+				<from type="SByte"  >return new byte[]{checked((Byte)p)};</from>
+				<from type="Decimal">
+			int[]  bits  = Decimal.GetBits(p);
+			Byte[] bytes = new Byte[Buffer.ByteLength(bits)];
+
+			Buffer.BlockCopy(bits, 0, bytes, 0, bytes.Length);
+			return bytes;</from>
+				<include template="Numeric Types"/>
+				<from type="Char" />
+				<from type="DateTime"   >return ToByteArray(p.ToBinary());</from>
+				<from type="DateTimeOffset"   >return ToByteArray(p.LocalDateTime.ToBinary());</from>
+				<from type="TimeSpan"   >return ToByteArray(p.Ticks);</from>
 				<from type="Stream" >
 			if (p == null)         return null;
 			if (p is MemoryStream) return ((MemoryStream)p).ToArray();
@@ -1350,17 +1449,28 @@
 			p.Read(bytes, 0, bytes.Length);
 			p.Position = position;
 
-			return bytes;
-				</from>
+			return bytes;</from>
 				<from type="Guid"   >return p == Guid.Empty? null: p.ToByteArray();</from>
+				<default              >return BitConverter.GetBytes(p);</default>
 			</group>
 			<group name="Nullable Types." nullable="true">
-				<from type="Guid"   >return p.HasValue? p.Value.ToByteArray(): null;</from>
+				<from type="Byte"   />
+				<from type="SByte"  />
+				<from type="Decimal"/>
+				<include template="Numeric Types"/>
+				<from type="Char" />
+				<from type="DateTime" />
+				<from type="DateTimeOffset" />
+				<from type="TimeSpan" />
+				<from type="Guid"     />
+				<default              >return p.HasValue? ToByteArray(p.Value): null;</default>
 			</group>
 			<group name="SqlTypes.">
 				<from type="SqlBinary">return p.IsNull? null: p.Value;</from>
 				<from type="SqlBytes" >return p.IsNull? null: p.Value;</from>
 				<from type="SqlGuid"  >return p.IsNull? null: p.ToByteArray();</from>
+				<include template="SqlTypes"/>
+				<default              >return p.IsNull? null: ToByteArray(p.Value);</default>
 			</group>
 			<default nullvalue="null"/>
 		</converter>
@@ -1373,11 +1483,11 @@
 				<from type="SqlChars"  >return p.IsNull? null: p.Value;</from>
 			</group>
 			<default nullvalue="null" nothrow="true">
-				return ToString(p).ToCharArray();</default>
+			return ToString(p).ToCharArray();</default>
 		</converter>
 		<converter type="XmlReader">
 			<group name="Scalar Types.">
-				<from type="String"    >return p == null? null: XmlReader.Create(new StringReader(p));</from>
+				<from type="String"    >return p == null? null: new XmlTextReader(new StringReader(p));</from>
 			</group>
 			<group name="SqlTypes.">
 				<from type="SqlXml"   >return p.IsNull? null: p.CreateReader();</from>
@@ -1389,10 +1499,44 @@
 			<group name="Other Types.">
 				<from type="Stream"   />
 				<from type="TextReader" nick="TR"/>
+				<from type="XmlDocument">return p == null? null: new XmlTextReader(new StringReader(p.InnerXml));</from>
 				<br/>
-				<from type="Char[]"    >return p == null? null: new XmlTextReader(new StringReader(new string(p)));</from>
-				<from type="Byte[]"    >return p == null? null: new XmlTextReader(new MemoryStream(p));</from>
-				<default               >return p == null? null: new XmlTextReader(p);</default>
+				<from type="Char[]"     >return p == null? null: new XmlTextReader(new StringReader(new string(p)));</from>
+				<from type="Byte[]"     >return p == null? null: new XmlTextReader(new MemoryStream(p));</from>
+				<default                >return p == null? null: new XmlTextReader(p);</default>
+			</group>
+			<default nullvalue="null"/>
+		</converter>
+		<converter type="XmlDocument">
+			<group name="Scalar Types.">
+				<from type="String"    >
+			if (p == null || p.Length == 0) return null;
+
+			XmlDocument doc = new XmlDocument();
+			doc.LoadXml(p);
+			return doc;</from>
+			</group>
+			<group name="SqlTypes.">
+				<from type="SqlString"/>
+				<from type="SqlXml"   />
+				<from type="SqlChars" >return p.IsNull? null: ToXmlDocument(p.ToSqlString().Value);</from>
+				<from type="SqlBinary">return p.IsNull? null: ToXmlDocument(new MemoryStream(p.Value));</from>
+				<default              >return p.IsNull? null: ToXmlDocument(p.Value);</default>
+			</group>
+			<group name="Other Types.">
+				<from type="Stream"   />
+				<from type="TextReader" nick="TR"/>
+				<from type="XmlReader"/>
+				<br/>
+				<from type="Char[]"     >return p == null || p.Length == 0? null: ToXmlDocument(new string(p));</from>
+				<from type="Byte[]"     >return p == null || p.Length == 0? null: ToXmlDocument(new MemoryStream(p));</from>
+				<default                >
+					if (p == null) return null;
+
+					XmlDocument doc = new XmlDocument();
+					doc.Load(p);
+					return doc;
+				</default>
 			</group>
 			<default nullvalue="null"/>
 		</converter>

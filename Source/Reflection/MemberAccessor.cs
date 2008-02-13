@@ -114,6 +114,12 @@ namespace BLToolkit.Reflection
 		{
 		}
 
+		public virtual void CloneValue(object source, object dest)
+		{
+			object value = GetValue(source);
+			SetValue(dest, value is ICloneable? ((ICloneable)value).Clone(): value);
+		}
+
 		// Simple types getters.
 		//
 		[CLSCompliant(false)]
@@ -137,8 +143,9 @@ namespace BLToolkit.Reflection
 		public virtual Decimal  GetDecimal (object o) { return (Decimal) GetValue(o); }
 		public virtual Guid     GetGuid    (object o) { return (Guid)    GetValue(o); }
 		public virtual DateTime GetDateTime(object o) { return (DateTime)GetValue(o); }
-
-#if FW2
+#if FW3
+		public virtual DateTimeOffset GetDateTimeOffset(object o) { return (DateTimeOffset)GetValue(o); }
+#endif
 		// Nullable types getters.
 		//
 		[CLSCompliant(false)]
@@ -162,6 +169,8 @@ namespace BLToolkit.Reflection
 		public virtual Decimal?  GetNullableDecimal (object o) { return (Decimal?) GetValue(o); }
 		public virtual Guid?     GetNullableGuid    (object o) { return (Guid?)    GetValue(o); }
 		public virtual DateTime? GetNullableDateTime(object o) { return (DateTime?)GetValue(o); }
+#if FW3
+		public virtual DateTimeOffset? GetNullableDateTimeOffset(object o) { return (DateTimeOffset?)GetValue(o); }
 #endif
 
 		// SQL type getters.
@@ -202,8 +211,10 @@ namespace BLToolkit.Reflection
 		public virtual void    SetDecimal (object o, Decimal  value) { SetValue(o, value); }
 		public virtual void    SetGuid    (object o, Guid     value) { SetValue(o, value); }
 		public virtual void    SetDateTime(object o, DateTime value) { SetValue(o, value); }
+#if FW3
+		public virtual void    SetDateTimeOffset(object o, DateTimeOffset value) { SetValue(o, value); }
+#endif
 
-#if FW2
 		// Simple type setters.
 		//
 		[CLSCompliant(false)]
@@ -227,6 +238,8 @@ namespace BLToolkit.Reflection
 		public virtual void    SetNullableDecimal (object o, Decimal?  value) { SetValue(o, value); }
 		public virtual void    SetNullableGuid    (object o, Guid?     value) { SetValue(o, value); }
 		public virtual void    SetNullableDateTime(object o, DateTime? value) { SetValue(o, value); }
+#if FW3
+		public virtual void    SetNullableDateTimeOffset(object o, DateTimeOffset? value) { SetValue(o, value); }
 #endif
 
 		// SQL type setters.

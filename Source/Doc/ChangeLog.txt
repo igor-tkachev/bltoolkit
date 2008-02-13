@@ -5,8 +5,8 @@ Bug fixes
 -
 
 Enhancement
-
--
+- DateTimeOffset type support
+- MemberAccessor.CloneValue to avoid boxing
 
 v 2.0.7
 

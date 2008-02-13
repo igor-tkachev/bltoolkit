@@ -43,6 +43,9 @@ namespace BLToolkit.Mapping
 			if (t == typeof(Char))         return (MB<T>)(object)(new C());
 			if (t == typeof(Guid))         return (MB<T>)(object)(new G());
 			if (t == typeof(DateTime))     return (MB<T>)(object)(new DT());
+#if FW3
+			if (t == typeof(DateTimeOffset)) return (MB<T>)(object)(new DTO());
+#endif
 
 			// Nullable Types.
 			//
@@ -65,6 +68,9 @@ namespace BLToolkit.Mapping
 			if (t == typeof(Char?))        return (MB<T>)(object)(new NC());
 			if (t == typeof(Guid?))        return (MB<T>)(object)(new NG());
 			if (t == typeof(DateTime?))    return (MB<T>)(object)(new NDT());
+#if FW3
+			if (t == typeof(DateTimeOffset?)) return (MB<T>)(object)(new NDTO());
+#endif
 
 			// SqlTypes.
 			//
@@ -112,7 +118,9 @@ namespace BLToolkit.Mapping
 		sealed class C           : MB<Char>        { public override  void To(IMapDataDestination d, object o, int i, Char        v) { d.SetChar        (o, i, v); } }
 		sealed class G           : MB<Guid>        { public override  void To(IMapDataDestination d, object o, int i, Guid        v) { d.SetGuid        (o, i, v); } }
 		sealed class DT          : MB<DateTime>    { public override  void To(IMapDataDestination d, object o, int i, DateTime    v) { d.SetDateTime    (o, i, v); } }
-
+#if FW3
+		sealed class DTO         : MB<DateTimeOffset>    { public override  void To(IMapDataDestination d, object o, int i, DateTimeOffset    v) { d.SetDateTimeOffset    (o, i, v); } }
+#endif
 		// Nullable Types.
 		//
 		sealed class NI8         : MB<SByte?>      { public override  void To(IMapDataDestination d, object o, int i, SByte?      v) { d.SetNullableSByte      (o, i, v); } }
@@ -134,7 +142,9 @@ namespace BLToolkit.Mapping
 		sealed class NC          : MB<Char?>       { public override  void To(IMapDataDestination d, object o, int i, Char?       v) { d.SetNullableChar       (o, i, v); } }
 		sealed class NG          : MB<Guid?>       { public override  void To(IMapDataDestination d, object o, int i, Guid?       v) { d.SetNullableGuid       (o, i, v); } }
 		sealed class NDT         : MB<DateTime?>   { public override  void To(IMapDataDestination d, object o, int i, DateTime?   v) { d.SetNullableDateTime   (o, i, v); } }
-
+#if FW3
+		sealed class NDTO        : MB<DateTimeOffset?>    { public override  void To(IMapDataDestination d, object o, int i, DateTimeOffset?    v) { d.SetNullableDateTimeOffset    (o, i, v); } }
+#endif
 		// SqlTypes.
 		//
 		sealed class dbS         : MB<SqlString>   { public override  void To(IMapDataDestination d, object o, int i, SqlString   v) { d.SetSqlString   (o, i, v); } }
