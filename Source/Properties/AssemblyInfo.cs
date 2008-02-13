@@ -8,11 +8,8 @@ using System.Diagnostics.CodeAnalysis;
 // associated with an assembly.
 [assembly: AssemblyTitle("Business Logic Toolkit")]
 [assembly: AssemblyDescription("Business Logic Toolkit")]
-[assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("Business Logic Toolkit")]
 [assembly: AssemblyCopyright("\xA9 2002-2008 www.bltoolkit.net")]
-[assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
 // Setting ComVisible to false makes the types in this assembly not visible 
@@ -32,8 +29,8 @@ using System.Diagnostics.CodeAnalysis;
 //
 // You can specify all the values or you can default the Revision and Build Numbers 
 // by using the '*' as shown below:
-[assembly: AssemblyVersion("3.0.0.0")]
-[assembly: AssemblyFileVersion("3.0.0.462")]
+[assembly: AssemblyVersion    ("3.0.0.0")]
+[assembly: AssemblyFileVersion("3.0.0.0")]
 
 // FxCop
 

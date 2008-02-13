@@ -180,24 +180,6 @@ namespace TypeBuilder.Builders
 			TypeAccessor.CreateInstance(typeof(InternalType));
 		}
 
-#if FW2
-//		[Test]
-//		public void Test6()
-//		{
-//			TypeAccessor ta1 = TypeAccessor.GetAccessor(typeof(TestObject5));
-//			TypeAccessor ta2 = TypeAccessor.GetAccessor(typeof(TestStruct1));
-//
-//			TestObject5 o = (TestObject5)ta1.CreateInstance();
-//			TestStruct1 s;
-//
-//			ta1["Value"].GetValueT(ref o, out s);
-//			ta2["Name" ].SetValueT(ref s, "123");
-//			ta1["Value"].SetValue(o, s);
-//
-//			Assert.AreEqual("123", o.Value.Name);
-//		}
-#endif
-
 		public class CloneTestObject
 		{
 			public struct CloneableStruct : ICloneable

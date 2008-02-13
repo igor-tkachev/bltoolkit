@@ -62,6 +62,8 @@ namespace BLTgen
 			if (verbose)
 				Console.WriteLine("{0} =>{1}{2}", sourceAsm.Location, Environment.NewLine, extensionAssemblyPath);
 
+			AppDomain.CurrentDomain.AssemblyResolve += new ResolveEventHandler(CurrentDomain_AssemblyResolve);
+
 			TypeFactory.SaveTypes = true;
 			TypeFactory.SetGlobalAssembly(extensionAssemblyPath, extensionAssemblyVersion, parsedArgs.KeyPairFile);
 
@@ -108,6 +110,17 @@ namespace BLTgen
 				Console.WriteLine("No types to process.");
 		}
 
+		static Assembly CurrentDomain_AssemblyResolve(object sender, ResolveEventArgs args)
+		{
+			foreach (Assembly assembly in AppDomain.CurrentDomain.GetAssemblies())
+			{
+				if (assembly.GetName(false).FullName == args.Name)
+					return assembly;
+			}
+
+			return null;
+		}
+
 		private static Type[] FilterTypes(Type[] types, string pattern, bool include)
 		{
 			if (null == pattern || 0 == pattern.Length)
@@ -130,7 +143,7 @@ namespace BLTgen
 			if (null == outputDirectory || 0 == outputDirectory.Length)
 				outputDirectory = Path.GetDirectoryName(sourceAssembly);
 
-			string fileName = Path.ChangeExtension(sourceAssembly, "BLToolkitExtension.dll");
+			string fileName = Path.ChangeExtension(Path.GetFileName(sourceAssembly), "BLToolkitExtension.dll");
 			return Path.Combine(outputDirectory, fileName);
 		}
 

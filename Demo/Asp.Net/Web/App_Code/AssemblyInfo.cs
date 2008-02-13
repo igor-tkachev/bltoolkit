@@ -8,6 +8,6 @@ using System.Reflection;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Microsoft Corporation")]
 [assembly: AssemblyProduct(".NET Pet Shop 4.0")]
-[assembly: AssemblyCopyright("Copyright © 2005 Microsoft Corporation")]
+[assembly: AssemblyCopyright("Copyright \xA9 2005 Microsoft Corporation")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
