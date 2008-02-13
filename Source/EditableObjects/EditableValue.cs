@@ -4,18 +4,10 @@ using System.Reflection;
 
 using BLToolkit.TypeBuilder;
 
-#if !FW2
-using T = System.Object;
-#endif
-
 namespace BLToolkit.EditableObjects
 {
 	[Serializable]
-	public struct EditableValue
-#if FW2
-	<T>
-#endif
-	: IEditable, IMemberwiseEditable, IPrintDebugState
+	public struct EditableValue<T>: IEditable, IMemberwiseEditable, IPrintDebugState
 	{
 		private T _original;
 		private T _current;

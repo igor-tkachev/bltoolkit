@@ -34,11 +34,11 @@ namespace BLToolkit.TypeBuilder.Builders
 
 		public static string GetTypeAccessorClassName(Type originalType)
 		{
-			return originalType.FullName.Replace('+', '.')
-#if !FW2
-				.Replace('[', '_').Replace(']', '_')
-#endif
-				+ ".TypeAccessor";
+ 			// It's bad idea to use '.TypeAccessor' here since we got
+ 			// a class and a namespace with the same full name.
+ 			// The sgen utility fill fail in such case.
+ 			//
+ 			return originalType.FullName.Replace('+', '.')	+ "$TypeAccessor";
 		}
 
 		public Type Build(Type sourceType, AssemblyBuilderHelper assemblyBuilder)
@@ -274,6 +274,8 @@ namespace BLToolkit.TypeBuilder.Builders
 
 			Type type = mi is FieldInfo ? ((FieldInfo)mi).FieldType : ((PropertyInfo)mi).PropertyType;
 
+			BuildIsNull    (mi, nestedType, type);
+
 			if (type.IsEnum)
 				type = Enum.GetUnderlyingType(type);
 
@@ -286,9 +288,14 @@ namespace BLToolkit.TypeBuilder.Builders
 
 				if (underlyingType != null)
 				{
-					if (underlyingType.IsEnum)
-						underlyingType = Enum.GetUnderlyingType(underlyingType);
+					BuildTypedGetterForNullable(mi, nestedType, underlyingType);
+					BuildTypedSetterForNullable(mi, nestedType, underlyingType);
 
+					if (underlyingType.IsEnum)
+					{
+						underlyingType = Enum.GetUnderlyingType(underlyingType);
+						type = typeof(Nullable<>).MakeGenericType(underlyingType);
+					}
 					typedPropertyName = "Nullable" + underlyingType.Name;
 				}
 				else
@@ -466,6 +473,89 @@ namespace BLToolkit.TypeBuilder.Builders
 				;
 		}
 
+		private void BuildIsNull(
+			MemberInfo        mi,
+			TypeBuilderHelper nestedType,
+			Type              memberType)
+		{
+			Type       methodType = mi.DeclaringType;
+			MethodInfo getMethod  = null;
+#if FW2
+			Boolean    isNullable = TypeHelper.IsNullable(memberType);
+			Boolean    isValueType = (!isNullable && memberType.IsValueType);
+#else
+			Boolean    isValueType = methodType.IsValueType;
+#endif
+			if (!isValueType && mi is PropertyInfo)
+			{
+				getMethod = ((PropertyInfo)mi).GetGetMethod();
+
+				if (getMethod == null)
+				{
+					if (_type != _originalType)
+					{
+						getMethod  = _type.GetMethod("get_" + mi.Name);
+						methodType = _type;
+					}
+
+					if (getMethod == null)
+						return;
+				}
+			}
+
+			MethodInfo methodInfo = _memberAccessor.GetMethod("IsNull");
+
+			if (methodInfo == null)
+				return;
+
+			MethodBuilderHelper method = nestedType.DefineMethod(methodInfo);
+			EmitHelper emit = method.Emitter;
+
+			if (isValueType)
+			{
+				emit
+					.ldc_i4_0
+					.end()
+					;
+			}
+			else
+			{
+#if FW2
+				LocalBuilder locObj = null;
+
+				if (isNullable)
+					locObj = method.Emitter.DeclareLocal(memberType);
+#endif
+
+				emit
+					.ldarg_1
+					.castType (methodType)
+					.end();
+
+				if (mi is FieldInfo) emit.ldfld   ((FieldInfo)mi);
+				else                 emit.callvirt(getMethod);
+
+#if FW2
+				if (isNullable)
+				{
+					emit
+						.stloc(locObj)
+						.ldloca(locObj)
+						.call(memberType, "get_HasValue");
+				}
+				else
+#endif
+					emit
+						.ldnull
+						.ceq
+						.end();
+			}
+
+			emit
+				.ret()
+				;
+		}
+
 		private void BuildTypedGetter(
 			MemberInfo        mi,
 			TypeBuilderHelper nestedType,
@@ -492,7 +582,7 @@ namespace BLToolkit.TypeBuilder.Builders
 				}
 			}
 
-			MethodInfo methodInfo = _memberAccessor.GetMethod("Get" + typedPropertyName, memberType);
+			MethodInfo methodInfo = _memberAccessor.GetMethod("Get" + typedPropertyName, typeof(object));
 
 			if (methodInfo == null)
 				return;
@@ -653,6 +743,112 @@ namespace BLToolkit.TypeBuilder.Builders
 				.ret()
 				;
 		}
+
+#if FW2
+		private void BuildTypedGetterForNullable(
+			MemberInfo        mi,
+			TypeBuilderHelper nestedType,
+			Type              memberType)
+		{
+			Type       methodType = mi.DeclaringType;
+			MethodInfo getMethod  = null;
+
+			if (mi is PropertyInfo)
+			{
+				getMethod = ((PropertyInfo)mi).GetGetMethod();
+
+				if (getMethod == null)
+				{
+					if (_type != _originalType)
+					{
+						getMethod  = _type.GetMethod("get_" + mi.Name);
+						methodType = _type;
+					}
+
+					if (getMethod == null || !IsMethodAccessible(getMethod))
+						return;
+				}
+			}
+
+			Type setterType = (memberType.IsEnum ? Enum.GetUnderlyingType(memberType) : memberType);
+			MethodInfo methodInfo = _memberAccessor.GetMethod("Get" + setterType.Name, typeof(object));
+
+			if (methodInfo == null)
+				return;
+
+			MethodBuilderHelper method = nestedType.DefineMethod(methodInfo);
+			Type nullableType = typeof(Nullable<>).MakeGenericType(memberType);
+			LocalBuilder locObj = method.Emitter.DeclareLocal(nullableType);
+			
+			EmitHelper emit = method.Emitter;
+
+			emit
+				.ldarg_1
+				.castType (methodType)
+				.end();
+
+			if (mi is FieldInfo) emit.ldfld   ((FieldInfo)mi);
+			else                 emit.callvirt(getMethod);
+
+			emit
+				.stloc(locObj)
+				.ldloca(locObj)
+				.call(nullableType, "get_Value")
+				.ret()
+				;
+		}
+
+		private void BuildTypedSetterForNullable(
+			MemberInfo        mi,
+			TypeBuilderHelper nestedType,
+			Type              memberType)
+		{
+			Type       methodType = mi.DeclaringType;
+			MethodInfo setMethod  = null;
+
+			if (mi is PropertyInfo)
+			{
+				setMethod = ((PropertyInfo)mi).GetSetMethod();
+
+				if (setMethod == null)
+				{
+					if (_type != _originalType)
+					{
+						setMethod  = _type.GetMethod("set_" + mi.Name);
+						methodType = _type;
+					}
+
+					if (setMethod == null || !IsMethodAccessible(setMethod))
+						return;
+				}
+			}
+
+			Type setterType = (memberType.IsEnum ? Enum.GetUnderlyingType(memberType) : memberType);
+			MethodInfo methodInfo =
+				_memberAccessor.GetMethod("Set" + setterType.Name, typeof(object), setterType);
+
+			if (methodInfo == null)
+				return;
+
+			MethodBuilderHelper method = nestedType.DefineMethod(methodInfo);
+			
+			EmitHelper emit = method.Emitter;
+
+			emit
+				.ldarg_1
+				.castType (methodType)
+				.ldarg_2
+				.newobj   (typeof(Nullable<>).MakeGenericType(memberType), memberType)
+				.end();
+
+			if (mi is FieldInfo) emit.stfld   ((FieldInfo)mi);
+			else                 emit.callvirt(setMethod);
+
+			emit
+				.ret()
+				;
+		}
+#endif
 
 		private static ConstructorBuilderHelper BuildNestedTypeConstructor(TypeBuilderHelper nestedType)
 		{

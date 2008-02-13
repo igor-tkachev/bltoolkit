@@ -20,23 +20,21 @@ namespace BLToolkit.Reflection
 	public delegate object NullValueProvider(Type type);
 	public delegate bool   IsNullHandler    (object obj);
 
-#if FW2
 	[DebuggerDisplay("Type = {Type}, OriginalType = {OriginalType}")]
-#endif
 	public abstract class TypeAccessor : ICollection, ITypeDescriptionProvider
 	{
 		#region Protected Emit Helpers
 
-		const BindingFlags _bindingFlags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
-
 		protected MemberInfo GetMember(int memberType, string memberName)
 		{
+			const BindingFlags allInstaceMembers = BindingFlags.Instance |
+				BindingFlags.Public | BindingFlags.NonPublic;
 			MemberInfo mi;
 
 			switch (memberType)
 			{
-				case 1: mi = Type.GetField   (memberName, _bindingFlags); break;
-				case 2: mi = Type.GetProperty(memberName, _bindingFlags); break;
+				case 1: mi = Type.GetField   (memberName, allInstaceMembers); break;
+				case 2: mi = Type.GetProperty(memberName, allInstaceMembers); break;
 				default:
 					throw new InvalidOperationException();
 			}
@@ -315,7 +313,7 @@ namespace BLToolkit.Reflection
 
 		private static Assembly LoadExtensionAssembly(Assembly originalAssembly)
 		{
-			if (originalAssembly is System.Reflection.Emit.AssemblyBuilder)
+			if (originalAssembly is System.Runtime.InteropServices._AssemblyBuilder)
 			{
 				// This is a generated assembly. Even if it has a valid Location,
 				// there is definitelly no extension assembly at this path.
@@ -335,11 +333,24 @@ namespace BLToolkit.Reflection
 				Debug.WriteLineIf(File.Exists(extensionAssemblyLocation),
 					string.Format("Extension assembly '{0}' is out of date. Please rebuild.",
 						extensionAssemblyLocation), typeof(TypeAccessor).FullName);
+
+				// Some good man may load this assembly already. Like IIS does it.
+				//
+				AssemblyName extensionAssemblyName = originalAssembly.GetName(true);
+				extensionAssemblyName.Name += ".BLToolkitExtension";
+				foreach (Assembly assembly in AppDomain.CurrentDomain.GetAssemblies())
+				{
+					// Note that assembly version and strong name are compared too.
+					//
+					if (AssemblyName.ReferenceMatchesDefinition(assembly.GetName(false), extensionAssemblyName))
+						return assembly;
+				}
 			}
 			catch (Exception ex)
 			{
 				// Extension exist, but can't be loaded for some reason.
 				// Switch back to code generation
+				//
 				Debug.WriteLine(ex, typeof(TypeAccessor).FullName);
 			}
 
@@ -366,8 +377,6 @@ namespace BLToolkit.Reflection
 			return GetAccessor(type).CreateInstance(context);
 		}
 
-#if FW2
-
 		public static T CreateInstance<T>()
 		{
 			return TypeAccessor<T>.CreateInstance();
@@ -388,23 +397,14 @@ namespace BLToolkit.Reflection
 			return TypeAccessor<T>.CreateInstance(context);
 		}
 
-#endif
-
 		#endregion
 
 		#region GetNullValue
 
-		private static NullValueProvider _getNullValue = new NullValueProvider(GetNullInternal);
+		private static NullValueProvider _getNullValue = GetNullInternal;
 		public  static NullValueProvider  GetNullValue
 		{
-			get
-			{
-				if (_getNullValue == null)
-					_getNullValue = new NullValueProvider(GetNullInternal);
-
-				return _getNullValue;
-			}
-
+			get { return _getNullValue ?? (_getNullValue = GetNullInternal);}
 			set { _getNullValue = value; }
 		}
 
@@ -461,10 +461,7 @@ namespace BLToolkit.Reflection
 				if (type == typeof(String)) return string.Empty;
 				if (type == typeof(DBNull)) return DBNull.Value;
 				if (type == typeof(Stream)) return Stream.Null;
-
-#if FW2
 				if (type == typeof(SqlXml)) return SqlXml.Null;
-#endif
 			}
 
 			return null;
@@ -502,17 +499,10 @@ namespace BLToolkit.Reflection
 			return nullValue;
 		}
 
-		private static IsNullHandler _isNull = new IsNullHandler(IsNullInternal);
+		private static IsNullHandler _isNull = IsNullInternal;
 		public  static IsNullHandler  IsNull
 		{
-			get
-			{
-				if (_isNull == null)
-					_isNull = new IsNullHandler(IsNullInternal);
-
-				return _isNull;
-			}
-
+			get { return _isNull ?? (_isNull = IsNullInternal); }
 			set { _isNull = value; }
 		}
 
@@ -574,7 +564,7 @@ namespace BLToolkit.Reflection
 		public static void WriteDebug(object o)
 		{
 #if DEBUG
-			Write(o, new WriteLine(DebugWriteLine));
+			Write(o, DebugWriteLine);
 #endif
 		}
 
@@ -585,13 +575,12 @@ namespace BLToolkit.Reflection
 
 		public static void WriteConsole(object o)
 		{
-			Write(o, new WriteLine(Console.WriteLine));
+			Write(o, Console.WriteLine);
 		}
 
 		[SuppressMessage("Microsoft.Performance", "CA1818:DoNotConcatenateStringsInsideLoops")]
 		private static string MapTypeName(Type type)
 		{
-#if FW2
 			if (type.IsGenericType)
 			{
 				if (type.GetGenericTypeDefinition() == typeof(Nullable<>))
@@ -616,7 +605,7 @@ namespace BLToolkit.Reflection
 
 				return name;
 			}
-#endif
+
 			if (type.IsPrimitive ||
 				type == typeof(string) ||
 				type == typeof(object) ||
@@ -834,10 +823,7 @@ namespace BLToolkit.Reflection
 					!propertyType.IsValueType &&
 					!propertyType.IsArray     &&
 					(!propertyType.FullName.StartsWith("System.") || explicitlyBound
-#if FW2
-					|| propertyType.IsGenericType
-#endif
-					 ) &&
+					|| propertyType.IsGenericType) &&
 					 propertyType != typeof(Type)   &&
 					 propertyType != typeof(string) &&
 					 propertyType != typeof(object) &&
@@ -944,9 +930,11 @@ namespace BLToolkit.Reflection
 			protected object GetNestedComponent(object component)
 			{
 				for (int i = 0;
-				     i < _chainAccessors.Length && component != null && !(component is DBNull);
-				     i++)
+					i < _chainAccessors.Length && component != null && !(component is DBNull);
+					i++)
+				{
 					component = _chainAccessors[i].GetValue(component);
+				}
 
 				return component;
 			}

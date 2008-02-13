@@ -11,6 +11,7 @@ Enhancement
 - DateTimeOffset type support.
 - MemberAccessor.CloneValue to avoid boxing.
 - Named arguments support for GenerateAttributeTypeBuilder.
+- Extended support for IsNull & Nullable types in MemberAccessor.
 
 v 2.0.7
 

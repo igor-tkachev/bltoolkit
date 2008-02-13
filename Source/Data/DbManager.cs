@@ -460,12 +460,6 @@ namespace BLToolkit.Data
 			remove { Events.RemoveHandler(EventInitCommand, value); }
 		}
 
-#if !FW2
-		// CanRaiseEvents is absent in the Framework 1.1
-		//
-		private const bool CanRaiseEvents = true;
-#endif
-
 		#endregion
 
 		#region Public Methods

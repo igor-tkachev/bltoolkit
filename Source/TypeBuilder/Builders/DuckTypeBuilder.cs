@@ -43,11 +43,8 @@ namespace BLToolkit.TypeBuilder.Builders
 
 		private string GetClassName()
 		{
-			return AbstractClassBuilder.GetTypeFullName(_objectType).Replace('+', '.')
-#if !FW2
-				.Replace('[', '_').Replace(']', '_')
-#endif
-				+ "." + AssemblyNameSuffix;
+			return AbstractClassBuilder.GetTypeFullName(_objectType)
+				.Replace('+', '.') + "." + AssemblyNameSuffix;
 		}
 
 		private bool BuildMembers(Type interfaceType)

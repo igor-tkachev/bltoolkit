@@ -105,6 +105,11 @@ namespace BLToolkit.Reflection
 
 		#region Set/Get Value
 
+		public virtual Boolean IsNull(object o)
+		{
+			return true;
+		}
+
 		public virtual object GetValue(object o)
 		{
 			return null;
