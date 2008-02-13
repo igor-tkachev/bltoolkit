@@ -1,4 +1,14 @@
-v 2.0.7 (working)
+v 3.0.0
+
+Bug fixes
+
+-
+
+Enhancement
+
+-
+
+v 2.0.7
 
 Bug fixes
 
