@@ -1640,6 +1640,8 @@ namespace BLToolkit.Data
 
 				IDbDataParameter parameter   = mm.MapMemberInfo.Nullable || value == null?
 					NullParameter(name, value, mm.MapMemberInfo.NullValue):
+                        (mm.DbType != DbType.Object) ? 
+                            Parameter( name, value, mm.DbType ) : 
 					Parameter    (name, value);
 
 				if (outputParameters != null && Array.BinarySearch(outputParameters, mm.Name, comparer) >= 0)

@@ -1,4 +1,5 @@
 using System;
+using System.Data;
 using System.Diagnostics;
 
 using BLToolkit.Reflection;
@@ -85,6 +86,13 @@ namespace BLToolkit.Mapping
 			get { return _memberExtension;  }
 			set { _memberExtension = value; }
 		}
+
+	    private DbType _dbType = DbType.Object;
+	    public DbType DbType
+        {
+            get { return _dbType; }
+            set { _dbType = value; }
+        }
 
 		private Type _type;
 		public  Type  Type

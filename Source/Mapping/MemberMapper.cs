@@ -1,4 +1,5 @@
 using System;
+using System.Data;
 using System.Data.SqlTypes;
 using System.Diagnostics;
 using System.IO;
@@ -19,6 +20,7 @@ namespace BLToolkit.Mapping
 
 			_mapMemberInfo         = mapMemberInfo;
 			_name                  = mapMemberInfo.Name;
+		    _dbType                = mapMemberInfo.DbType;
 			_type                  = mapMemberInfo.Type;
 			_memberName            = mapMemberInfo.MemberName;
 			_memberAccessor        = mapMemberInfo.MemberAccessor;
@@ -105,6 +107,13 @@ namespace BLToolkit.Mapping
 			[DebuggerStepThrough]
 			get { return _memberName; }
 		}
+
+	    private DbType _dbType;
+	    public  DbType DbType
+        {
+            [DebuggerStepThrough]
+            get { return _dbType; }
+        }
 
 		private         Type  _type;
 		public  virtual Type   Type

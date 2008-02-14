@@ -1,7 +1,8 @@
 using System;
+using System.Data;
 using System.Data.SqlTypes;
 using System.Globalization;
-
+using BLToolkit.Data;
 using NUnit.Framework;
 
 using BLToolkit.Mapping;
@@ -41,6 +42,41 @@ namespace Mapping
 
 			Assert.IsNull(om.GetValue(o, "blah-blah-blah"));
 		}
+
+
+
+        public class AnsiStringObject
+		{
+            [MemberMapper(typeof(AnsiStringNumberMapper))]
+			public string       ansi;
+			public string       unicode;
+		}
+
+        internal class AnsiStringNumberMapper : MemberMapper
+        {
+        public override void Init( MapMemberInfo mapMemberInfo )
+            {
+            mapMemberInfo.DbType = DbType.AnsiString;
+            base.Init( mapMemberInfo );
+            }
+        }
+
+
+        [Test]
+		public void ProvideCustomDBTypeTest()
+		{
+            AnsiStringObject obj = new AnsiStringObject();
+            obj.ansi = "aaa";
+            obj.unicode = "bbb";
+
+            IDbDataParameter[] parametrs = new DbManager().CreateParameters( obj );
+
+            Assert.AreEqual(2, parametrs.Length );
+			Assert.AreEqual(DbType.AnsiString, parametrs[0].DbType );
+            Assert.AreEqual(DbType.String, parametrs[1].DbType );
+
+		}
+
 
 		public class Object2
 		{
