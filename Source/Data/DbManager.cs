@@ -3616,7 +3616,6 @@ namespace BLToolkit.Data
 
 			return dic;
 		}
-#endif
 
 		#endregion
 
