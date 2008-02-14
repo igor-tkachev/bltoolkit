@@ -128,7 +128,6 @@ namespace Common
 			Assert.AreEqual(TimeSpan.FromTicks(1), Convert.ToTimeSpan(1L));
 		}
 
-#if FW2
 		[Test]
 		public void ConvertT()
 		{
@@ -151,8 +150,5 @@ namespace Common
 			Assert.AreEqual("test", s.Value);
 		}
 #endif
-
-#endif
-
 	}
 }

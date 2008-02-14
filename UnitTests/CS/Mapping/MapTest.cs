@@ -161,7 +161,6 @@ namespace Mapping
 			Assert.AreEqual(30, o.Field3);
 		}
 
-#if FW2
 		[Test]
 		public void ObjectToObjectTO()
 		{
@@ -172,7 +171,6 @@ namespace Mapping
 			Assert.AreEqual(20, o.Field2);
 			Assert.AreEqual(30, o.Field3);
 		}
-#endif
 
 		public class DefaultNullType
 		{

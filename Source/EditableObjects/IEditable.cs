@@ -1,5 +1,3 @@
-using System;
-
 using BLToolkit.TypeBuilder;
 
 namespace BLToolkit.EditableObjects

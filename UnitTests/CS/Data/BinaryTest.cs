@@ -59,11 +59,7 @@ namespace Data
 				BinaryData bd = (BinaryData)db
 					.SetCommand(
 						"SELECT * FROM BinaryData WHERE BinaryDataID = " + db.DataProvider.Convert("id", ConvertType.NameToQueryParameter),
-#if FW2
 					db.Parameter("id", id))
-#else
-					db.Parameter("@id", id))
-#endif
 					.ExecuteObject(typeof(BinaryData));
 
 				Assert.IsNotNull(bd);

@@ -99,8 +99,6 @@ namespace DataAccess
 			Assert.AreEqual("C", @inputOutputStr);
 		}
 
-#if FW2
-
 		public class NullableEntity
 		{
 			public int?   ID             = null;
@@ -158,7 +156,5 @@ namespace DataAccess
 			Assert.IsNull  (e.inputOutputID);
 			Assert.AreEqual("2040", @inputOutputStr);
 		}
-#endif
-
 	}
 }

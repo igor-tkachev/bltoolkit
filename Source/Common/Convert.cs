@@ -3076,7 +3076,7 @@ namespace BLToolkit.Common
 		public static DateTimeOffset? ToNullableDateTimeOffset(TimeSpan? p)       { return p.HasValue? DateTimeOffset.MinValue +                           p.Value:  (DateTimeOffset?)null; }
 		public static DateTimeOffset? ToNullableDateTimeOffset(Int64? p)          { return p.HasValue? DateTimeOffset.MinValue +        TimeSpan.FromTicks(p.Value): (DateTimeOffset?)null; }
 		public static DateTimeOffset? ToNullableDateTimeOffset(Double? p)         { return p.HasValue? DateTimeOffset.MinValue + TimeSpan.FromDays(p.Value): (DateTimeOffset?)null; }
-		public static DateTimeOffset? ToNullableDateTimeOffset(DateTime? p)       { return p.HasValue? p: (DateTimeOffset?)null; }
+		public static DateTimeOffset? ToNullableDateTimeOffset(DateTime? p)       { return p.HasValue? p: null; }
 
 		// SqlTypes.
 		// 
@@ -3227,7 +3227,7 @@ namespace BLToolkit.Common
 
 		// Scalar Types.
 		// 
-		public static SqlString ToSqlString(String p)          { return p == null? SqlString.Null: p; }
+		public static SqlString ToSqlString(String p)          { return p ?? SqlString.Null; }
 
 		[CLSCompliant(false)]
 		public static SqlString ToSqlString(SByte p)           { return p.ToString(); }

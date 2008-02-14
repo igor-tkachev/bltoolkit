@@ -11,9 +11,7 @@ using BLToolkit.Reflection.Extension;
 
 namespace BLToolkit.Mapping
 {
-#if FW2
 	[DebuggerDisplay("Type = {TypeAccessor.Type}, OriginalType = {TypeAccessor.OriginalType}")]
-#endif
 	public class ObjectMapper : MapDataSourceDestinationBase, IEnumerable
 	{
 		#region Constructor
@@ -286,7 +284,7 @@ namespace BLToolkit.Mapping
 				EnsureMapper(mapName, origName);
 			}
 
-			MetadataProvider.EnsureMapper(this, new EnsureMapperHandler(EnsureMapper));
+			MetadataProvider.EnsureMapper(this, EnsureMapper);
 		}
 
 		private MemberMapper EnsureMapper(string mapName, string origName)

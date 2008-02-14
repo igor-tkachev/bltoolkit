@@ -921,7 +921,7 @@
 				<from type="TimeSpan" >return p.HasValue? DateTimeOffset.MinValue +                           p.Value:  (DateTimeOffset?)null;</from>
 				<from type="Int64"    >return p.HasValue? DateTimeOffset.MinValue +        TimeSpan.FromTicks(p.Value): (DateTimeOffset?)null;</from>
 				<from type="Double"   >return p.HasValue? DateTimeOffset.MinValue + TimeSpan.FromDays(p.Value): (DateTimeOffset?)null;</from>
-				<from type="DateTime">return p.HasValue? p: (DateTimeOffset?)null;</from>
+				<from type="DateTime">return p.HasValue? p: null;</from>
 			</group>
 			<group name="SqlTypes.">
 				<from type="SqlDateTime">return p.IsNull? (DateTimeOffset?)null:                                               p.Value; </from>
@@ -978,7 +978,7 @@
 	<region name="SqlTypes">
 		<converter type="SqlString">
 			<group name="Scalar Types.">
-				<from type="String"   >return p == null? SqlString.Null: p;</from>
+				<from type="String"   >return p ?? SqlString.Null;</from>
 				<br/>
 				<include template ="Numeric Types"/>
 				<from type="Char"    />

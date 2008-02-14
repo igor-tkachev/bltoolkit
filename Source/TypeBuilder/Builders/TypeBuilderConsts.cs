@@ -1,15 +1,9 @@
-using System;
-
 namespace BLToolkit.TypeBuilder.Builders
 {
-	public sealed class TypeBuilderConsts
+	public static class TypeBuilderConsts
 	{
-		public sealed class Priority
+		public static class Priority
 		{
-			private Priority()
-			{
-			}
-
 			public const int Normal        = 0;
 			public const int NotNullAspect = int.MaxValue / 2;
 			public const int AsyncAspect   = Normal;
@@ -20,9 +14,5 @@ namespace BLToolkit.TypeBuilder.Builders
 		}
 
 		public const string AssemblyNameSuffix = "TypeBuilder";
-
-		private TypeBuilderConsts()
-		{
-		}
 	}
 }

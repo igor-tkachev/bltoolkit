@@ -169,16 +169,15 @@ namespace BLToolkit.Aspects
 		#region IsCacheableParameterType
 
 		private static IsCacheableParameterType _isCacheableParameterType =
-			new IsCacheableParameterType(IsCacheableParameterTypeInternal);
+			IsCacheableParameterTypeInternal;
 
 		public  static IsCacheableParameterType  IsCacheableParameterType
 		{
 			get { return _isCacheableParameterType; }
 			set
 			{
-				_isCacheableParameterType = value == null ?
-					new IsCacheableParameterType(IsCacheableParameterTypeInternal):
-					value;
+				_isCacheableParameterType = value ??
+					new IsCacheableParameterType(IsCacheableParameterTypeInternal);
 			}
 		}
 
@@ -317,7 +316,7 @@ namespace BLToolkit.Aspects
 
 			internal static void Init()
 			{
-				AppDomain.CurrentDomain.DomainUnload += new EventHandler(CurrentDomain_DomainUnload);
+				AppDomain.CurrentDomain.DomainUnload += CurrentDomain_DomainUnload;
 				Start();
 			}
 
@@ -336,7 +335,7 @@ namespace BLToolkit.Aspects
 						if (_timer == null)
 						{
 							TimeSpan interval = TimeSpan.FromSeconds(10);
-							_timer = new Timer(new TimerCallback(Cleanup), null, interval, interval);
+							_timer = new Timer(Cleanup, null, interval, interval);
 						}
 			}
 

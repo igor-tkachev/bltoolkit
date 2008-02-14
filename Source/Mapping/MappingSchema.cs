@@ -1,27 +1,22 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Data;
 using System.Data.SqlTypes;
+using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using System.Diagnostics.CodeAnalysis;
 using System.Xml;
-
-#if FW2
-using System.Collections.Generic;
-using KeyValue = System.Collections.Generic.KeyValuePair<System.Type,System.Type>;
-#else
-using KeyValue = BLToolkit.Common.CompoundValue;
-#endif
 
 using BLToolkit.Common;
 using BLToolkit.Mapping.MetadataProvider;
 using BLToolkit.Reflection;
 using BLToolkit.Reflection.Extension;
 
-using Convert = BLToolkit.Common.Convert;
-using System.Diagnostics;
+using KeyValue = System.Collections.Generic.KeyValuePair<System.Type,System.Type>;
+using Convert  = BLToolkit.Common.Convert;
 
 namespace BLToolkit.Mapping
 {
@@ -510,8 +505,6 @@ namespace BLToolkit.Mapping
 
 		#endregion
 
-#if FW2
-
 		#region Nullable Types
 
 		[CLSCompliant(false)]
@@ -650,8 +643,6 @@ namespace BLToolkit.Mapping
 
 		#endregion
 
-#endif
-
 		#region SqlTypes
 
 		public virtual SqlByte ConvertToSqlByte(object value)
@@ -760,7 +751,6 @@ namespace BLToolkit.Mapping
 					Convert.ToSqlGuid(value);
 		}
 
-#if FW2
 		public virtual SqlBytes ConvertToSqlBytes(object value)
 		{
 			return
@@ -784,7 +774,6 @@ namespace BLToolkit.Mapping
 				value is SqlXml? (SqlXml)value:
 					Convert.ToSqlXml(value);
 		}
-#endif
 
 		#endregion
 
@@ -912,7 +901,6 @@ namespace BLToolkit.Mapping
 			else if (conversionType.IsEnum)
 				return Enum.ToObject(conversionType, value);
 
-#if FW2
 			if (isNullable)
 			{
 				switch (Type.GetTypeCode(TypeHelper.GetUnderlyingType(conversionType)))
@@ -935,7 +923,6 @@ namespace BLToolkit.Mapping
 
 				if (typeof(Guid) == conversionType) return ConvertToNullableGuid(value);
 			}
-#endif
 
 			switch (Type.GetTypeCode(conversionType))
 			{
@@ -976,11 +963,9 @@ namespace BLToolkit.Mapping
 			if (typeof(SqlInt64)    == conversionType) return ConvertToSqlInt64   (value);
 			if (typeof(SqlSingle)   == conversionType) return ConvertToSqlSingle  (value);
 			if (typeof(SqlBinary)   == conversionType) return ConvertToSqlBinary  (value);
-#if FW2
 			if (typeof(SqlBytes)    == conversionType) return ConvertToSqlBytes   (value);
 			if (typeof(SqlChars)    == conversionType) return ConvertToSqlChars   (value);
 			if (typeof(SqlXml)      == conversionType) return ConvertToSqlXml     (value);
-#endif
 
 			return System.Convert.ChangeType(value, conversionType);
 		}
@@ -1050,7 +1035,6 @@ namespace BLToolkit.Mapping
 			return new DictionaryIndexListMapper(dic, index, objectMapper);
 		}
 
-#if FW2
 		public virtual DictionaryListMapper<K,T> CreateDictionaryListMapper<K,T>(
 			IDictionary<K,T>     dic,
 			NameOrIndexParameter keyFieldNameOrIndex,
@@ -1066,7 +1050,6 @@ namespace BLToolkit.Mapping
 		{
 			return new DictionaryIndexListMapper<T>(dic, index, objectMapper);
 		}
-#endif
 
 		public virtual EnumeratorMapper CreateEnumeratorMapper(IEnumerator enumerator)
 		{
@@ -1093,7 +1076,6 @@ namespace BLToolkit.Mapping
 			return new SimpleSourceListMapper(CreateScalarListMapper(list, type));
 		}
 
-#if FW2
 		public virtual ScalarListMapper<T> CreateScalarListMapper<T>(IList<T> list)
 		{
 			return new ScalarListMapper<T>(this, list);
@@ -1103,7 +1085,6 @@ namespace BLToolkit.Mapping
 		{
 			return new SimpleDestinationListMapper(CreateScalarListMapper<T>(list));
 		}
-#endif
 
 		#endregion
 
@@ -1593,12 +1574,12 @@ namespace BLToolkit.Mapping
 						continue;
 				}
 
-				IMapDataDestination currentDest = current != null ? current : dest;
+				IMapDataDestination currentDest = current ?? dest;
 
 				if (current != ctx.ObjectMapper)
 				{
 					current     = ctx.ObjectMapper;
-					currentDest = current != null ? current : dest;
+					currentDest = current ?? dest;
 					index       = GetIndex(ctx.DataSource, currentDest);
 					mappers     = GetValueMappers(ctx.DataSource, currentDest, index);
 				}
@@ -1746,12 +1727,10 @@ namespace BLToolkit.Mapping
 			return MapEnumToValue(value, false);
 		}
 
-#if FW2
 		public T MapValueToEnum<T>(object value)
 		{
 			return (T)MapValueToEnum(value, typeof(T));
 		}
-#endif
 
 		#endregion
 
@@ -1794,14 +1773,12 @@ namespace BLToolkit.Mapping
 			return MapInternal(ctx);
 		}
 
-#if FW2
 		public T MapObjectToObject<T>(
 			object          sourceObject,
 			params object[] parameters)
 		{
 			return (T)MapObjectToObject(sourceObject, typeof(T), parameters);
 		}
-#endif
 
 		#endregion
 
@@ -1952,7 +1929,6 @@ namespace BLToolkit.Mapping
 			return MapInternal(ctx);
 		}
 
-#if FW2
 		public T MapDataRowToObject<T>(
 			DataRow         dataRow,
 			params object[] parameters)
@@ -1967,7 +1943,6 @@ namespace BLToolkit.Mapping
 		{
 			return (T)MapDataRowToObject(dataRow, version, typeof(T), parameters);
 		}
-#endif
 
 		#endregion
 
@@ -2142,14 +2117,12 @@ namespace BLToolkit.Mapping
 			return MapInternal(ctx);
 		}
 
-#if FW2
 		public T MapDataReaderToObject<T>(
 			IDataReader     dataReader,
 			params object[] parameters)
 		{
 			return (T)MapDataReaderToObject(dataReader, typeof(T), parameters);
 		}
-#endif
 
 		#endregion
 
@@ -2257,12 +2230,10 @@ namespace BLToolkit.Mapping
 			return MapInternal(ctx);
 		}
 
-#if FW2
 		public T MapDictionaryToObject<T>(IDictionary sourceDictionary, params object[] parameters)
 		{
 			return (T)MapDictionaryToObject(sourceDictionary, typeof(T), parameters);
 		}
-#endif
 
 		#endregion
 
@@ -2341,7 +2312,6 @@ namespace BLToolkit.Mapping
 			return destList;
 		}
 
-#if FW2
 		public List<T> MapListToList<T>(
 			ICollection     sourceList,
 			List<T>         destList,
@@ -2368,7 +2338,6 @@ namespace BLToolkit.Mapping
 
 			return destList;
 		}
-#endif
 
 		#endregion
 
@@ -2442,7 +2411,6 @@ namespace BLToolkit.Mapping
 			return destDictionary;
 		}
 
-#if FW2
 		public IDictionary<K,T> MapListToDictionary<K,T>(
 			ICollection          sourceList,
 			IDictionary<K,T>     destDictionary,
@@ -2471,7 +2439,6 @@ namespace BLToolkit.Mapping
 
 			return destDictionary;
 		}
-#endif
 
 		#endregion
 
@@ -2512,7 +2479,6 @@ namespace BLToolkit.Mapping
 			return destDictionary;
 		}
 
-#if FW2
 		public IDictionary<CompoundValue,T> MapListToDictionary<T>(
 			ICollection                  sourceList,
 			IDictionary<CompoundValue,T> destDictionary,
@@ -2541,7 +2507,6 @@ namespace BLToolkit.Mapping
 
 			return destDictionary;
 		}
-#endif
 
 		#endregion
 
@@ -2670,7 +2635,6 @@ namespace BLToolkit.Mapping
 			return list;
 		}
 
-#if FW2
 		public List<T> MapDataTableToList<T>(
 			DataTable       sourceTable,
 			List<T>         list,
@@ -2726,7 +2690,6 @@ namespace BLToolkit.Mapping
 
 			return list;
 		}
-#endif
 
 		#endregion
 
@@ -2763,7 +2726,6 @@ namespace BLToolkit.Mapping
 			return destDictionary;
 		}
 
-#if FW2
 		public IDictionary<K,T> MapDataTableToDictionary<K,T>(
 			DataTable            sourceTable,
 			IDictionary<K,T>     destDictionary,
@@ -2792,7 +2754,6 @@ namespace BLToolkit.Mapping
 
 			return destDictionary;
 		}
-#endif
 
 		#endregion
 
@@ -2829,7 +2790,6 @@ namespace BLToolkit.Mapping
 			return destDictionary;
 		}
 
-#if FW2
 		public IDictionary<CompoundValue,T> MapDataTableToDictionary<T>(
 			DataTable                    sourceTable,
 			IDictionary<CompoundValue,T> destDictionary,
@@ -2858,7 +2818,6 @@ namespace BLToolkit.Mapping
 
 			return destDictionary;
 		}
-#endif
 
 		#endregion
 
@@ -2897,7 +2856,6 @@ namespace BLToolkit.Mapping
 			return list;
 		}
 
-#if FW2
 		public IList<T> MapDataReaderToList<T>(
 			IDataReader     reader,
 			IList<T>        list,
@@ -2924,7 +2882,6 @@ namespace BLToolkit.Mapping
 
 			return list;
 		}
-#endif
 
 		#endregion
 
@@ -2959,7 +2916,6 @@ namespace BLToolkit.Mapping
 			return list;
 		}
 
-#if FW2
 		public IList<T> MapDataReaderToScalarList<T>(
 			IDataReader          reader,
 			NameOrIndexParameter nameOrIndex,
@@ -2986,7 +2942,6 @@ namespace BLToolkit.Mapping
 
 			return list;
 		}
-#endif
 
 		#endregion
 
@@ -3052,7 +3007,6 @@ namespace BLToolkit.Mapping
 			return dest;
 		}
 
-#if FW2
 		public IDictionary<K,T> MapDataReaderToDictionary<K,T>(
 			IDataReader          reader,
 			IDictionary<K,T>     destDictionary,
@@ -3096,7 +3050,6 @@ namespace BLToolkit.Mapping
 
 			return dest;
 		}
-#endif
 
 		#endregion
 
@@ -3133,7 +3086,6 @@ namespace BLToolkit.Mapping
 			return destDictionary;
 		}
 
-#if FW2
 		public IDictionary<CompoundValue,T> MapDataReaderToDictionary<T>(
 			IDataReader                  reader,
 			IDictionary<CompoundValue,T> destDictionary,
@@ -3177,7 +3129,6 @@ namespace BLToolkit.Mapping
 
 			return destDictionary;
 		}
-#endif
 
 		#endregion
 
@@ -3220,7 +3171,6 @@ namespace BLToolkit.Mapping
 			return destList;
 		}
 
-#if FW2
 		public List<T> MapDictionaryToList<T>(
 			IDictionary     sourceDictionary,
 			List<T>         destList,
@@ -3251,7 +3201,6 @@ namespace BLToolkit.Mapping
 
 			return destList;
 		}
-#endif
 
 		#endregion
 
@@ -3325,7 +3274,6 @@ namespace BLToolkit.Mapping
 			return dest;
 		}
 
-#if FW2
 		public IDictionary<K,T> MapDictionaryToDictionary<K,T>(
 			IDictionary          sourceDictionary,
 			IDictionary<K,T>     destDictionary,
@@ -3358,7 +3306,6 @@ namespace BLToolkit.Mapping
 
 			return dest;
 		}
-#endif
 
 		#endregion
 
@@ -3399,7 +3346,6 @@ namespace BLToolkit.Mapping
 			return destDictionary;
 		}
 
-#if FW2
 		public IDictionary<CompoundValue,T> MapDictionaryToDictionary<T>(
 			IDictionary                  sourceDictionary,
 			IDictionary<CompoundValue,T> destDictionary,
@@ -3432,7 +3378,6 @@ namespace BLToolkit.Mapping
 
 			return destDictionary;
 		}
-#endif
 
 		#endregion
 

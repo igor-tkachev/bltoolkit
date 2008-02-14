@@ -15,7 +15,6 @@ using System.Xml;
 namespace BLToolkit.EditableObjects
 {
 	#region Instance Types
-#if FW2
 	[GlobalInstanceType(typeof(byte),     typeof(EditableValue<byte>))]
 	[GlobalInstanceType(typeof(char),     typeof(EditableValue<char>))]
 	[GlobalInstanceType(typeof(ushort),   typeof(EditableValue<ushort>))]
@@ -62,46 +61,6 @@ namespace BLToolkit.EditableObjects
 	[GlobalInstanceType(typeof(SqlSingle),   typeof(EditableValue<SqlSingle>))]
 	[GlobalInstanceType(typeof(SqlString),   typeof(EditableValue<SqlString>), "")]
 
-#else
-	[AttributeUsage(AttributeTargets.Class)]
-	class Instance : GlobalInstanceTypeAttribute
-	{ public Instance(object value) : base(value.GetType(), typeof(EditableValue), value) {} }
-
-	class DateTimeInstance : Instance { public DateTimeInstance() : base(DateTime.MinValue) {} }
-	class DecimalInstance  : Instance { public DecimalInstance()  : base(0m)                {} }
-	class GuidInstance     : Instance { public GuidInstance()     : base(Guid.Empty)        {} }
-
-	class SqlBooleanInstance     : Instance { public SqlBooleanInstance()     : base(SqlBoolean.Null)  {} }
-	class SqlByteInstance        : Instance { public SqlByteInstance()        : base(SqlByte.Null)     {} }
-	class SqlDateTimeInstance    : Instance { public SqlDateTimeInstance()    : base(SqlDateTime.Null) {} }
-	class SqlDecimalTimeInstance : Instance { public SqlDecimalTimeInstance() : base(SqlDecimal.Null)  {} }
-	class SqlDoubleInstance      : Instance { public SqlDoubleInstance()      : base(SqlDouble.Null)   {} }
-	class SqlGuidInstance        : Instance { public SqlGuidInstance()        : base(SqlGuid.Null)     {} }
-	class SqlInt16Instance       : Instance { public SqlInt16Instance()       : base(SqlInt16.Null)    {} }
-	class SqlInt32Instance       : Instance { public SqlInt32Instance()       : base(SqlInt32.Null)    {} }
-	class SqlInt64Instance       : Instance { public SqlInt64Instance()       : base(SqlInt64.Null)    {} }
-	class SqlMoneyInstance       : Instance { public SqlMoneyInstance()       : base(SqlMoney.Null)    {} }
-	class SqlSingleInstance      : Instance { public SqlSingleInstance()      : base(SqlSingle.Null)   {} }
-	class SqlStringInstance      : Instance { public SqlStringInstance()      : base(SqlString.Null)   {} }
-
-	[GlobalInstanceType(typeof(byte),   typeof(EditableValue), (byte)0)]
-	[GlobalInstanceType(typeof(char),   typeof(EditableValue), (char)0)]
-	[GlobalInstanceType(typeof(ushort), typeof(EditableValue), (ushort)0)]
-	[GlobalInstanceType(typeof(uint),   typeof(EditableValue), (uint)0)]
-	[GlobalInstanceType(typeof(ulong),  typeof(EditableValue), (ulong)0)]
-	[GlobalInstanceType(typeof(bool),   typeof(EditableValue), false)]
-	[GlobalInstanceType(typeof(sbyte),  typeof(EditableValue), (sbyte)0)]
-	[GlobalInstanceType(typeof(short),  typeof(EditableValue), (short)0)]
-	[GlobalInstanceType(typeof(int),    typeof(EditableValue), (int)0)]
-	[GlobalInstanceType(typeof(long),   typeof(EditableValue), (long)0)]
-	[GlobalInstanceType(typeof(float),  typeof(EditableValue), (float)0)]
-	[GlobalInstanceType(typeof(double), typeof(EditableValue), (double)0)]
-	[GlobalInstanceType(typeof(string), typeof(EditableValue), "")]
-	[DateTimeInstance,   DecimalInstance,  GuidInstance]
-	[SqlBooleanInstance, SqlByteInstance,  SqlDateTimeInstance, SqlDecimalTimeInstance]
-	[SqlDoubleInstance,  SqlGuidInstance,  SqlInt16Instance,    SqlInt32Instance]
-	[SqlInt64Instance,   SqlMoneyInstance, SqlSingleInstance,   SqlStringInstance]
-#endif
 	[GlobalInstanceType(typeof(XmlDocument),    typeof(EditableXmlDocument))]
 	[GlobalInstanceType(typeof(EditableObject), typeof(EditableObjectHolder), IsObjectHolder=true)]
 	#endregion

@@ -88,12 +88,10 @@ namespace BLToolkit.Reflection.Emit
 				_assemblyName.KeyPair       = new StrongNameKeyPair(System.IO.File.OpenRead(keyFile));
 				_assemblyName.HashAlgorithm = AssemblyHashAlgorithm.SHA1;
 			}
-#if FW2
 #if DEBUG
 			_assemblyName.Flags |= AssemblyNameFlags.EnableJITcompileTracking;
 #else
 			_assemblyName.Flags |= AssemblyNameFlags.EnableJITcompileOptimizer;
-#endif
 #endif
 
 			_assemblyBuilder =

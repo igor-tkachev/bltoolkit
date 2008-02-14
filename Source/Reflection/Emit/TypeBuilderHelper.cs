@@ -109,7 +109,6 @@ namespace BLToolkit.Reflection.Emit
 			return new MethodBuilderHelper(this, _typeBuilder.DefineMethod(name, attributes, typeof(void), Type.EmptyTypes));
 		}
 
-#if FW2
 		/// <summary>
 		/// Adds a new method to the class, with the given name and method signature.
 		/// </summary>
@@ -124,7 +123,6 @@ namespace BLToolkit.Reflection.Emit
 		{
 			return new MethodBuilderHelper(this, _typeBuilder.DefineMethod(name, attributes, callingConvention));
 		}
-#endif
 
 		/// <summary>
 		/// Adds a new method to the class, with the given name and method signature.
@@ -144,7 +142,6 @@ namespace BLToolkit.Reflection.Emit
 			ParameterInfo[]     pi         = methodInfoDeclaration.GetParameters();
 			Type[]              parameters = new Type[pi.Length];
 
-#if FW2
 			// When a method contains a generic parameter we need to replace all
 			// generic types from methodInfoDeclaration with local ones.
 			//
@@ -194,7 +191,6 @@ namespace BLToolkit.Reflection.Emit
 				method.MethodBuilder.SetCustomAttribute(method.Type.Assembly.BLToolkitAttribute);
 			}
 			else
-#endif
 			{
 				for (int i = 0; i < pi.Length; i++)
 					parameters[i] = pi[i].ParameterType;

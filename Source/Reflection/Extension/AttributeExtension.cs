@@ -31,11 +31,7 @@ namespace BLToolkit.Reflection.Extension
 
 		public object this[string valueName, object defaultValue]
 		{
-			get
-			{
-				object value = this[valueName];
-				return value == null? defaultValue: value;
-			}
+			get { return this[valueName] ?? defaultValue; }
 		}
 
 		private readonly ValueCollection _values;
@@ -47,12 +43,7 @@ namespace BLToolkit.Reflection.Extension
 		private AttributeNameCollection _attributes;
 		public  AttributeNameCollection  Attributes
 		{
-			get
-			{
-				if (_attributes == null)
-					_attributes = new AttributeNameCollection();
-				return _attributes;
-			}
+			get { return _attributes ?? (_attributes = new AttributeNameCollection()); }
 		}
 
 		private static readonly AttributeExtension _null = new AttributeExtension(ValueCollection.Null);

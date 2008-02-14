@@ -24,7 +24,7 @@ namespace BLToolkit.EditableObjects
 		public EditableXmlDocument(XmlDocument value)
 		{
 			_changedNodes = null;
-			_handler      = new XmlNodeChangedEventHandler(HandleNodeChanged);
+			_handler      = HandleNodeChanged;
 			_current      = value;
 			_original     = value;
 
@@ -77,14 +77,13 @@ namespace BLToolkit.EditableObjects
 
 		private void HandleNodeChanged(object sender, XmlNodeChangedEventArgs ea)
 		{
-#if FW2
 			if (ea.Action == XmlNodeChangedAction.Change && ea.NewValue == ea.OldValue)
 			{
 				// A void change can be ignored.
 				//
 				return;
 			}
-#endif
+
 			if (_changedNodes == null)
 				_changedNodes = new Stack();
 
@@ -255,11 +254,7 @@ namespace BLToolkit.EditableObjects
 						Value = ea.OldParent;
 						break;
 					case XmlNodeChangedAction.Change:
-#if FW2
 						Value = ea.OldValue;
-#else
-						Value = ea.Node.Value;
-#endif
 						break;
 					default:
 						throw new ArgumentOutOfRangeException("ea", ea.Action, string.Format("Unknown XmlNodeChangedAction"));

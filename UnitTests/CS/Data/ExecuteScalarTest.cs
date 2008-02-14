@@ -140,7 +140,6 @@ namespace Data
 			}
 		}
 
-#if FW2
 		[Test]
 		public void FW2RegressionTest()
 		{
@@ -181,6 +180,5 @@ namespace Data
 				Assert.AreEqual(expectedValue, actualValue);
 			}
 		}
-#endif
 	}
 }

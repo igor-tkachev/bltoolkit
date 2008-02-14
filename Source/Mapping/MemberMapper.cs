@@ -34,7 +34,6 @@ namespace BLToolkit.Mapping
 			if (type.IsPrimitive || type.IsEnum)
 				mm = GetPrimitiveMemberMapper(mi);
 
-#if FW2
 			if (mm == null)
 			{
 				mm = GetNullableMemberMapper(mi);
@@ -42,7 +41,6 @@ namespace BLToolkit.Mapping
 				//if (mm != null)
 				//    mi.IsNullable = true;
 			}
-#endif
 
 			if (mm == null) mm = GetSimpleMemberMapper(mi);
 			if (mm == null) mm = GetSqlTypeMemberMapper(mi);
@@ -84,7 +82,7 @@ namespace BLToolkit.Mapping
 		public  MemberAccessor  ComplexMemberAccessor
 		{
 			[DebuggerStepThrough]
-			get { return _complexMemberAccessor == null ? _memberAccessor : _complexMemberAccessor; }
+			get { return _complexMemberAccessor ?? _memberAccessor; }
 		}
 
 		private MappingSchema _mappingSchema;
@@ -1184,7 +1182,7 @@ namespace BLToolkit.Mapping
 				public override object GetValue(object o)
 				{
 					object value = _memberAccessor.GetValue(o);
-					return (Stream)value == _nullValue? null: value;
+					return value == _nullValue? null: value;
 				}
 			}
 		}
@@ -1216,7 +1214,7 @@ namespace BLToolkit.Mapping
 				public override object GetValue(object o)
 				{
 					object value = _memberAccessor.GetValue(o);
-					return (XmlReader)value == _nullValue? null: value;
+					return value == _nullValue? null: value;
 				}
 			}
 		}
@@ -1248,14 +1246,12 @@ namespace BLToolkit.Mapping
 				public override object GetValue(object o)
 				{
 					object value = _memberAccessor.GetValue(o);
-					return (XmlDocument)value == _nullValue? null: value;
+					return value == _nullValue? null: value;
 				}
 			}
 		}
 
 		#endregion
-
-#if FW2
 
 		#region Nullable Mappers
 
@@ -1671,8 +1667,6 @@ namespace BLToolkit.Mapping
 		}
 
 		#endregion
-
-#endif
 
 		#region SqlTypes
 
@@ -2148,7 +2142,6 @@ namespace BLToolkit.Mapping
 
 			if (!TypeHelper.IsSameOrParent(memberType, valueType))
 			{
-#if FW2
 				if (memberType.IsGenericType)
 				{
 					Type underlyingType = Nullable.GetUnderlyingType(memberType);
@@ -2158,7 +2151,7 @@ namespace BLToolkit.Mapping
 
 					memberType = underlyingType;
 				}
-#endif
+
 				if (memberType.IsEnum)
 				{
 					Type underlyingType = mapInfo.MemberAccessor.UnderlyingType;

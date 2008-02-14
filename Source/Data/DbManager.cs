@@ -1,15 +1,10 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.ComponentModel;
+using System.Configuration;
 using System.Data;
 using System.Data.Common;
-
-#if FW2
-using System.Collections.Generic;
-using ConfigManager = System.Configuration.ConfigurationManager;
-#else
-using ConfigManager = System.Configuration.ConfigurationSettings;
-#endif
 
 using BLToolkit.Common;
 using BLToolkit.Data.DataProvider;
@@ -188,7 +183,7 @@ namespace BLToolkit.Data
 		public MappingSchema MappingSchema
 		{
 			get { return _mappingSchema; }
-			set { _mappingSchema = value != null? value: Map.DefaultSchema; }
+			set { _mappingSchema = value ?? Map.DefaultSchema; }
 		}
 
 		private DataProviderBase _dataProvider;
@@ -649,14 +644,14 @@ namespace BLToolkit.Data
 			AddDataProvider(new OleDbDataProvider());
 			AddDataProvider(new OdbcDataProvider());
 
-			string dataProviders = ConfigManager.AppSettings.Get("BLToolkit.DataProviders");
+			string dataProviders = ConfigurationManager.AppSettings.Get("BLToolkit.DataProviders");
 			if (null != dataProviders)
 			{
 				foreach (string dataProviderTypeName in dataProviders.Split(';'))
 					AddDataProvider(Type.GetType(dataProviderTypeName, true));
 			}
 
-			_defaultConfiguration = ConfigManager.AppSettings.Get("BLToolkit.DefaultConfiguration");
+			_defaultConfiguration = ConfigurationManager.AppSettings.Get("BLToolkit.DefaultConfiguration");
 		}
 
 		private static string             _firstConfiguration;
@@ -721,16 +716,9 @@ namespace BLToolkit.Data
 					configurationString.Length == 0? "": ".",
 					configurationString);
 
-#if FW2
-				System.Configuration.ConnectionStringSettings css = ConfigManager.ConnectionStrings[configurationString];
+				ConnectionStringSettings css = ConfigurationManager.ConnectionStrings[configurationString];
 
-				if (css != null)
-					o = css.ConnectionString;
-				else
-					o = ConfigManager.AppSettings.Get(key);
-#else
-				o = ConfigManager.AppSettings.Get(key);
-#endif
+				o = css != null? css.ConnectionString: ConfigurationManager.AppSettings.Get(key);
 
 				if (o == null)
 				{
@@ -753,12 +741,10 @@ namespace BLToolkit.Data
 
 		private static DataProviderBase GetDataProvider(string configurationString)
 		{
-#if FW2
-			System.Configuration.ConnectionStringSettings css = ConfigManager.ConnectionStrings[configurationString];
+			ConnectionStringSettings css = ConfigurationManager.ConnectionStrings[configurationString];
 
 			if (css != null)
 				return (DataProviderBase)_dataProviderNameList[css.ProviderName];
-#endif
 
 			// configurationString can be:
 			// ''        : default provider,   default configuration;
@@ -1221,7 +1207,7 @@ namespace BLToolkit.Data
 
 					object value = parameterValues[nValues++];
 
-					parameter.Value = value == null ? DBNull.Value : value;
+					parameter.Value = value ?? DBNull.Value;
 					//_dataProvider.SetParameterType(parameter, value);
 				}
 			}
@@ -1488,8 +1474,7 @@ namespace BLToolkit.Data
 					{
 						_defaultConfiguration = string.Empty;
 
-#if FW2
-						foreach (System.Configuration.ConnectionStringSettings css in ConfigManager.ConnectionStrings)
+						foreach (ConnectionStringSettings css in ConfigurationManager.ConnectionStrings)
 						{
 							if (css.Name != "LocalSqlServer")
 							{
@@ -1497,7 +1482,6 @@ namespace BLToolkit.Data
 								break;
 							}
 						}
-#endif
 					}
 				}
 
@@ -2039,7 +2023,7 @@ namespace BLToolkit.Data
 
 			//_dataProvider.SetParameterType(parameter, value);
 
-			parameter.Value = value != null? value: DBNull.Value;
+			parameter.Value = value ?? DBNull.Value;
 
 			return parameter;
 		}
@@ -2813,8 +2797,6 @@ namespace BLToolkit.Data
 			return rowsTotal;
 		}
 
-#if FW2
-
 		public int ExecuteForEach<T>(ICollection<T> collection)
 		{
 			int rowsTotal = 0;
@@ -2850,8 +2832,6 @@ namespace BLToolkit.Data
 
 			return rowsTotal;
 		}
-
-#endif
 
 		/// <summary>
 		/// Executes a SQL statement for the <see cref="DataTable"/> and 
@@ -3185,9 +3165,6 @@ namespace BLToolkit.Data
 			return null;
 		}
 
-#if FW2
-		// I need partial specialization :crash:
-		
 		/// <summary>
 		/// Executes the query, and returns the first column of the first row
 		/// in the resultset returned by the query. Extra columns or rows are
@@ -3277,8 +3254,6 @@ namespace BLToolkit.Data
 			return (T)_mappingSchema.ConvertChangeType(ExecuteScalar(sourceType, nameOrIndex), typeof(T));
 		}
 
-#endif
-
 		#endregion
 
 		#region ExecuteScalarList
@@ -3356,8 +3331,6 @@ namespace BLToolkit.Data
 			return list;
 		}
 
-		
-#if FW2
 		/// <summary>
 		/// Executes the query, and returns the array list of values of the
 		/// specified column of  the every row in the resultset returned by the
@@ -3430,7 +3403,6 @@ namespace BLToolkit.Data
 
 			return list;
 		}
-#endif
 
 		#endregion
 
@@ -3487,7 +3459,6 @@ namespace BLToolkit.Data
 			return table;
 		}
 
-#if FW2
 		public IDictionary<K,T> ExecuteScalarDictionary<K,T>(
 			IDictionary<K, T> dic,
 			NameOrIndexParameter keyField,
@@ -3538,7 +3509,6 @@ namespace BLToolkit.Data
 
 			return dic;
 		}
-#endif
 
 		#endregion
 
@@ -3595,7 +3565,6 @@ namespace BLToolkit.Data
 			return table;
 		}
 
-#if FW2
 		public IDictionary<CompoundValue,T> ExecuteScalarDictionary<T>(
 			IDictionary<CompoundValue, T> dic, MapIndex index, NameOrIndexParameter valueField)
 		{
@@ -3768,11 +3737,7 @@ namespace BLToolkit.Data
 				if (table.ByName)
 					da.Fill(dataSet, startRecord, maxRecords, table.Name);
 				else
-#if FW2
 					da.Fill(startRecord, maxRecords, dataSet.Tables[table.Index]);
-#else
-					da.Fill(dataSet, startRecord, maxRecords, dataSet.Tables[table.Index].TableName);
-#endif
 				OnAfterOperation(OperationType.Fill);
 
 				return dataSet;
@@ -3900,7 +3865,6 @@ namespace BLToolkit.Data
 			return ExecuteObjectInternal(null, type);
 		}
 
-#if FW2
 		/// <summary>
 		/// Executes a SQL statement and maps resultset to an object.
 		/// </summary>
@@ -3910,7 +3874,6 @@ namespace BLToolkit.Data
 		{
 			return (T)ExecuteObjectInternal(null, typeof(T));
 		}
-#endif
 
 		#endregion
 
@@ -3927,7 +3890,6 @@ namespace BLToolkit.Data
 			}
 		}
 
-#if FW2
 		private void ExecuteListInternal<T>(IList<T> list, params object[] parameters)
 		{
 			if (_prepared)
@@ -3938,7 +3900,6 @@ namespace BLToolkit.Data
 				_mappingSchema.MapDataReaderToList<T>(dr, list, parameters);
 			}
 		}
-#endif
 
 		/// <summary>
 		/// Executes the query, and returns an array of business entities using the provided parameters.
@@ -3954,7 +3915,6 @@ namespace BLToolkit.Data
 			return arrayList;
 		}
 
-#if FW2
 		/// <summary>
 		/// Executes the query, and returns an array of business entities.
 		/// </summary>
@@ -3968,7 +3928,6 @@ namespace BLToolkit.Data
 
 			return list;
 		}
-#endif
 
 		/// <summary>
 		/// Executes the query, and returns an array of business entities using the provided parameters.
@@ -3985,7 +3944,6 @@ namespace BLToolkit.Data
 			return arrayList;
 		}
 
-#if FW2
 		/// <summary>
 		/// Executes the query, and returns an array of business entities.
 		/// </summary>
@@ -4000,7 +3958,6 @@ namespace BLToolkit.Data
 
 			return list;
 		}
-#endif
 
 		/// <summary>
 		/// Executes the query, and returns an array of business entities.
@@ -4013,7 +3970,6 @@ namespace BLToolkit.Data
 			return ExecuteListInternal(list, type, null);
 		}
 
-#if FW2
 		/// <summary>
 		/// Executes the query, and returns an array of business entities.
 		/// </summary>
@@ -4026,7 +3982,6 @@ namespace BLToolkit.Data
 
 			return list;
 		}
-#endif
 
 		/// <summary>
 		/// Executes the query, and returns an array of business entities.
@@ -4040,7 +3995,6 @@ namespace BLToolkit.Data
 			return ExecuteListInternal(list, type, parameters);
 		}
 
-#if FW2
 		/// <summary>
 		/// Executes the query, and returns an array of business entities.
 		/// </summary>
@@ -4072,7 +4026,6 @@ namespace BLToolkit.Data
 
 			return list;
 		}
-#endif
 
 		#endregion
 
@@ -4123,7 +4076,6 @@ namespace BLToolkit.Data
 			}
 		}
 
-#if FW2
 		/// <summary>
 		/// Executes the query, and returns a dictionary of business entities.
 		/// </summary>
@@ -4176,7 +4128,6 @@ namespace BLToolkit.Data
 					dr, dictionary, keyField, parameters);
 			}
 		}
-#endif
 
 		#endregion
 
@@ -4227,7 +4178,6 @@ namespace BLToolkit.Data
 			}
 		}
 
-#if FW2
 		/// <summary>
 		/// Executes the query, and returns a dictionary of business entities.
 		/// </summary>
@@ -4276,7 +4226,6 @@ namespace BLToolkit.Data
 					dr, dictionary, index, parameters);
 			}
 		}
-#endif
 
 		#endregion
 

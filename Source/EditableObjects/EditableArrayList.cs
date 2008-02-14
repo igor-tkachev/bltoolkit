@@ -10,17 +10,10 @@ using BLToolkit.ComponentModel;
 
 namespace BLToolkit.EditableObjects
 {
-#if FW2
 	[DebuggerDisplay("Count = {Count}, ItemType = {ItemType}")]
-#endif
 	[Serializable]
-	public class EditableArrayList :
-		ArrayList, IEditable, ISortable, ISupportMapping, IDisposable, IPrintDebugState, ITypedList,
-#if FW2
-		IBindingListView, ICancelAddNew
-#else
-		IBindingList
-#endif
+	public class EditableArrayList : ArrayList, IEditable, ISortable, ISupportMapping,
+		IDisposable, IPrintDebugState, ITypedList, IBindingListView, ICancelAddNew
 	{
 		#region Constructors
 
@@ -259,8 +252,8 @@ namespace BLToolkit.EditableObjects
 
 		#region Track Changes
 
-		private int _noTrackingChangesCount;
-		private int _minTrackingChangesCount = 0;
+		private          int _noTrackingChangesCount;
+		private readonly int _minTrackingChangesCount = 0;
 
 		public  bool IsTrackingChanges
 		{
@@ -698,10 +691,8 @@ namespace BLToolkit.EditableObjects
 			{
 				if (BindingListImpl.SortProperty != null)
 					BindingListImpl.ApplySort(BindingListImpl.SortProperty, BindingListImpl.SortDirection);
-#if FW2
 				else if (BindingListImpl.SortDescriptions != null)
 					BindingListImpl.ApplySort(BindingListImpl.SortDescriptions);
-#endif
 				else
 					throw new InvalidOperationException("Currntly applied sort method is not recognised/supported by EditableArrayList.");
 			}
@@ -973,8 +964,6 @@ namespace BLToolkit.EditableObjects
 
 		#endregion
 
-#if FW2
-
 		#region IBindingListView Members
 
 		public void ApplySort(ListSortDescriptionCollection sorts)
@@ -1023,7 +1012,5 @@ namespace BLToolkit.EditableObjects
 		}
 
 		#endregion
-
-#endif
 	}
 }

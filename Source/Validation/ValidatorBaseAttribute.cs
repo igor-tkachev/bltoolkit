@@ -43,12 +43,10 @@ namespace BLToolkit.Validation
 				className = ((FriendlyNameAttribute)attrs[0]).Name;
 			else
 			{
-#if FW2
 				attrs = mi.DeclaringType.GetCustomAttributes(typeof(DisplayNameAttribute), true);
 
 				if (attrs.Length > 0)
 					className = ((DisplayNameAttribute)attrs[0]).DisplayName;
-#endif
 			}
 
 			// Get field name.
@@ -59,12 +57,10 @@ namespace BLToolkit.Validation
 				fieldName = ((FriendlyNameAttribute)attrs[0]).Name;
 			else
 			{
-#if FW2
 				attrs = mi.GetCustomAttributes(typeof(DisplayNameAttribute), true);
 
 				if (attrs.Length > 0)
 					fieldName = ((DisplayNameAttribute)attrs[0]).DisplayName;
-#endif
 			}
 
 			return className == null || className.Length == 0? fieldName: className + "." + fieldName;

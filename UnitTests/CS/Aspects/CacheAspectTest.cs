@@ -87,7 +87,6 @@ namespace Aspects
 			CustomTestClass.Value = 4; Assert.AreEqual(4, t.Test(2, 1));
 		}
 
-#if FW2
 		public abstract class GenericTestClass
 		{
 			public static int Value;
@@ -118,7 +117,5 @@ namespace Aspects
 			CacheAspect<GenericTestClass>.Cache.Clear();
 			GenericTestClass.Value = 4; Assert.AreEqual(4, t.Test(2, 1));
 		}
-#endif
-
 	}
 }

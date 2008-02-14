@@ -42,7 +42,6 @@ namespace Mapping
 			Assert.IsNull(om.GetValue(o, "blah-blah-blah"));
 		}
 
-#if FW2
 		public class Object2
 		{
 			public short?     Int16;
@@ -90,7 +89,6 @@ namespace Mapping
 			Assert.AreEqual(de,     ObjectMapper<Object2>.GetValue(o, "Dow1"));
 			Assert.AreEqual(de,     ObjectMapper<Object2>.GetValue(o, "Dow2"));
 		}
-#endif
 
 		public class Object3
 		{

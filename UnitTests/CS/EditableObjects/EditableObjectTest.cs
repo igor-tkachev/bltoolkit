@@ -84,9 +84,7 @@ namespace EditableObjects
 			public abstract string      Field14 { get; set; }
 			public abstract Guid        Field15 { get; set; }
 			public abstract DayOfWeek   Field16 { get; set; }
-#if FW2
 			public abstract ulong?      Field17 { get; set; }
-#endif
 			public abstract XmlDocument XmlField { get; set; }
 
 			public static Object1 CreateInstance()
@@ -118,7 +116,6 @@ namespace EditableObjects
 			o.AcceptChanges();
 			Assert.IsFalse (o.IsDirty);
 
-#if FW2
 			o.Field17 = 5;
 
 			Assert.AreEqual(5, o.Field17);
@@ -126,7 +123,6 @@ namespace EditableObjects
 			Assert.IsTrue  (o.IsDirtyMember("Field17"));
 			o.AcceptChanges();
 			Assert.IsFalse (o.IsDirty);
-#endif
 
 			o.XmlField.LoadXml(@"<root><element attribute=""value""/></root>");
 			Assert.IsTrue  (o.IsDirty);

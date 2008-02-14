@@ -36,7 +36,7 @@ namespace BLToolkit.DataAccess
 		[NoInterception, System.Diagnostics.DebuggerStepThrough]
 		public virtual DbManager GetDbManager()
 		{
-			return _dbManager != null? _dbManager: CreateDbManager();
+			return _dbManager ?? CreateDbManager();
 		}
 
 		[NoInterception]

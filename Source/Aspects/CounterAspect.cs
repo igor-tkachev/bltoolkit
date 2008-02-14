@@ -92,12 +92,12 @@ namespace BLToolkit.Aspects
 
 		#region CreateCounter
 
-		private static CreateCounter _createCounter = new CreateCounter(CreateCounterInternal);
+		private static CreateCounter _createCounter = CreateCounterInternal;
 
 		public static CreateCounter CreateCounter
 		{
 			get { return _createCounter; }
-			set { _createCounter = value == null ? new CreateCounter(CreateCounterInternal) : value; }
+			set { _createCounter = value ?? new CreateCounter(CreateCounterInternal); }
 		}
 
 		private static MethodCallCounter CreateCounterInternal(CallMethodInfo methodInfo)

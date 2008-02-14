@@ -1,5 +1,3 @@
-using System;
-
 using BLToolkit.Mapping;
 
 namespace BLToolkit.DataAccess

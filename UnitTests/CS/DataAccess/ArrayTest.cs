@@ -39,14 +39,12 @@ END;"
 			)]
 			public abstract void Query(int[] @intArray, ref int[] @inputOutputIntArray);
 
-#if FW2
 			public abstract void ArrayTest(
 				int?[]   @intArray, out int?[]   @outputIntArray, ref int?[]   @inputOutputIntArray,
 				string[] @strArray, out string[] @outputStrArray, ref string[] @inputOutputStrArray);
 
 			[ScalarSource(ScalarSourceType.OutputParameter), SprocName("ScalarArray")]
 			public abstract int?[] NullableScalarArray();
-#endif
 		}
 
 		[Test]
@@ -75,7 +73,6 @@ END;"
 			Assert.AreEqual(new int[] { 1, 2, 3, 4, 5 }, @outputIntArray);
 		}
 
-#if FW2
 		[Test]
 		public void NullableTest()
 		{
@@ -101,7 +98,6 @@ END;"
 
 			Assert.AreEqual(new int?[] { 1, 2, 3, 4, 5 }, @outputIntArray);
 		}
-#endif
 
 		[Test]
 		public void QueryTest()

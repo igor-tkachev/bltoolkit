@@ -11,9 +11,7 @@ using BLToolkit.EditableObjects;
 
 namespace BLToolkit.Reflection
 {
-#if FW2
 	[System.Diagnostics.DebuggerDisplay("Type = {Type}")]
-#endif
 	/// <summary>
 	/// A wrapper around the <see cref="Type"/> class.
 	/// </summary>
@@ -171,7 +169,7 @@ namespace BLToolkit.Reflection
 			{
 				GetAttributesTreeInternal(list, type);
 
-				_typeAttributesTopInternal[type] = (object[])list.ToArray(typeof(Attribute));
+				_typeAttributesTopInternal[type] = list.ToArray(typeof(Attribute));
 			}
 		}
 
@@ -283,7 +281,6 @@ namespace BLToolkit.Reflection
 			return attrs.Length > 0? (Attribute)attrs[0]: null;
 		}
 
-#if FW2
 		/// <summary>
 		/// Retrieves a custom attribute applied to a type.
 		/// </summary>
@@ -298,7 +295,6 @@ namespace BLToolkit.Reflection
 
 			return attrs.Length > 0? (T)attrs[0]: null;
 		}
-#endif
 
 		#endregion
 
@@ -397,8 +393,6 @@ namespace BLToolkit.Reflection
 			return _type.GetMethods(flags);
 		}
 
-#if FW2
-
 		/// <summary>
 		/// Returns all the generic or non-generic methods of the current Type.
 		/// </summary>
@@ -434,8 +428,6 @@ namespace BLToolkit.Reflection
 		{
 			return GetMethods(_type, generic, flags);
 		}
-
-#endif
 
 		#endregion
 
@@ -536,8 +528,6 @@ namespace BLToolkit.Reflection
 		{
 			return _type.GetMethod(methodName, flags, null, types, null);
 		}
-
-#if FW2
 
 		/// <summary>
 		/// Searches for the specified instance method (public or non-public), using the specified name.
@@ -645,7 +635,6 @@ namespace BLToolkit.Reflection
 				types, null);
 		}
 
-#endif
 		#endregion
 
 		#region GetFields
@@ -891,14 +880,10 @@ namespace BLToolkit.Reflection
 		/// <remarks>Arrays of Nullable types are treated as Nullable types.</remarks>
 		public static bool IsNullable(Type type)
 		{
-#if FW2
 			while (type.IsArray)
 				type = type.GetElementType();
 
 			return (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>));
-#else
-			return false;
-#endif
 		}
 
 		/// <summary>
@@ -916,10 +901,8 @@ namespace BLToolkit.Reflection
 		{
 			if (type == null) throw new ArgumentNullException("type");
 
-#if FW2
 			if (IsNullable(type))
 				type = type.GetGenericArguments()[0];
-#endif
 
 			if (type.IsEnum)
 				type = Enum.GetUnderlyingType(type);
@@ -934,11 +917,9 @@ namespace BLToolkit.Reflection
 		/// <param name="child">A type possible derived from the <c>parent</c> type</param>
 		/// <returns>True, when an object instance of the type <c>child</c>
 		/// can be used as an object of the type <c>parent</c>; otherwise, false.</returns>
-#if FW2
 		/// <remarks>Note that nullable types does not have a parent-child relation to it's underlying type.
 		/// For example, the 'int?' type (nullable int) and the 'int' type
 		/// aren't a parent and it's child.</remarks>
-#endif
 		public static bool IsSameOrParent(Type parent, Type child)
 		{
 			if (parent == null) throw new ArgumentNullException("parent");
@@ -962,8 +943,6 @@ namespace BLToolkit.Reflection
 
 			return false;
 		}
-
-#if FW2
 
 		/// <summary>
 		/// Searches for the method defined for a <see cref="System.Type"/>,
@@ -1012,8 +991,6 @@ namespace BLToolkit.Reflection
 				});
 			
 		}
-
-#endif
 
 		[SuppressMessage("Microsoft.Design", "CA1011:ConsiderPassingBaseTypesAsParameters")]
 		public static object[] GetPropertyParameters(PropertyInfo propertyInfo)
@@ -1135,7 +1112,6 @@ namespace BLToolkit.Reflection
 
 		public static Type GetListItemType(Type listType)
 		{
-#if FW2
 			if (listType.IsGenericType)
 			{
 				Type[] elementTypes = GetGenericArguments(listType, typeof(IList));
@@ -1143,7 +1119,7 @@ namespace BLToolkit.Reflection
 				if (elementTypes != null)
 					return elementTypes[0];
 			}
-#endif
+
 			if (IsSameOrParent(typeof(IList),       listType) ||
 				IsSameOrParent(typeof(ITypedList),  listType) ||
 				IsSameOrParent(typeof(IListSource), listType))
@@ -1193,7 +1169,6 @@ namespace BLToolkit.Reflection
 				|| type == typeof(XmlDocument);
 		}
 
-#if FW2
 		public static Type[] GetGenericArguments(Type type, Type baseType)
 		{
 			string baseTypeName = baseType.Name;
@@ -1232,8 +1207,6 @@ namespace BLToolkit.Reflection
 			//
 			return type;
 		}
-
-#endif
 
 		#endregion
 	}

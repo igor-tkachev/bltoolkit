@@ -1,5 +1,3 @@
-using System;
-
 namespace BLToolkit.Data
 {
 	/// <summary>

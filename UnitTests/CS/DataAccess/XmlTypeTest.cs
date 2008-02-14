@@ -1,8 +1,4 @@
-using System;
-
-#if FW2
 using System.Collections.Generic;
-#endif
 
 using NUnit.Framework;
 
@@ -25,10 +21,8 @@ namespace DataAccess
 
 		public abstract class TestAccessor : DataAccessor
 		{
-#if FW2
 			[SqlQuery("Select * FROM DataTypeTest")]
 			public abstract List<TestObject> LoadAll();
-#endif
 
 #if ORACLE
 			[SqlQuery("SELECT * FROM DataTypeTest WHERE DataTypeID=:ID")]
@@ -48,12 +42,9 @@ namespace DataAccess
 			Assert.IsNotNull(o);
 			Assert.IsNotNull(o.Xml);
 
-#if FW2
 			List<TestObject> lst = ta.LoadAll();
 			Assert.IsNotEmpty(lst);
 			Assert.IsNotNull(lst[0].Xml);
-#endif
-
 		}
 	}
 }

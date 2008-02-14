@@ -89,10 +89,8 @@ namespace DataAccess
 			[SprocName("Scalar_DataReader")]
 			public abstract object ScalarDestination6([Destination] ref int id);
 
-#if FW2
 			[SprocName("Scalar_DataReader")]
 			public abstract int? ScalarNullableDestination([Destination] ref int? id);
-#endif
 
 			public static TestAccessor CreateInstance()
 			{
@@ -304,7 +302,6 @@ namespace DataAccess
 			Assert.AreEqual(id2, 12345);
 		}
 
-#if FW2
 		[Test]
 		public void XmlTest()
 		{
@@ -342,7 +339,5 @@ namespace DataAccess
 			id1 = ta.ScalarNullableDestination(ref id2);
 			Assert.AreEqual(id1, id2);
 		}
-
-#endif
 	}
 }

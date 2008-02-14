@@ -14,7 +14,7 @@ namespace BLToolkit.Reflection.Extension
 			get
 			{
 				TypeExtension value = (TypeExtension)_types[typeName];
-				return value != null? value: TypeExtension.Null;
+				return value ?? TypeExtension.Null;
 			}
 		}
 

@@ -98,17 +98,10 @@ namespace BLToolkit.Aspects
 
 		#region LogOparation
 
-		private static LogOperation _logOperation = new LogOperation(LogOperationInternal);
+		private static LogOperation _logOperation = LogOperationInternal;
 		public  static LogOperation  LogOperation
 		{
-			get
-			{
-				if (_logOperation == null)
-					_logOperation = new LogOperation(LogOperationInternal);
-
-				return _logOperation;
-			}
-
+			get { return _logOperation ?? (_logOperation = LogOperationInternal); }
 			set { _logOperation = value; }
 		}
 
@@ -180,17 +173,10 @@ namespace BLToolkit.Aspects
 
 		#region LogOuput
 
-		private static LogOutput _logOutput = new LogOutput(LogOutputInternal);
+		private static LogOutput _logOutput = LogOutputInternal;
 		public  static LogOutput  LogOutput
 		{
-			get
-			{
-				if (_logOutput == null)
-					_logOutput = new LogOutput(LogOutputInternal);
-
-				return _logOutput;
-			}
-
+			get { return _logOutput ?? (_logOutput = LogOutputInternal); }
 			set { _logOutput = value; }
 		}
 

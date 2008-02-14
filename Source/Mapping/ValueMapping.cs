@@ -1,24 +1,14 @@
 using System;
 
 using BLToolkit.Mapping.ValueMappingInternal;
-
-#if FW2
 using BLToolkit.Common;
 
 using KeyValue = System.Collections.Generic.KeyValuePair<System.Type, System.Type>;
 using Table    = System.Collections.Generic.Dictionary<System.Collections.Generic.KeyValuePair<System.Type, System.Type>, BLToolkit.Mapping.IValueMapper>;
-#else
-using KeyValue = BLToolkit.Common.CompoundValue;
-using Table    = System.Collections.Hashtable;
-#endif
 
 namespace BLToolkit.Mapping
 {
-	public
-#if FW2
-		static
-#endif
-		class ValueMapping
+	public static class ValueMapping
 	{
 		#region Init
 
@@ -113,8 +103,6 @@ namespace BLToolkit.Mapping
 
 		#endregion
 
-#if FW2
-
 		#region Generic Mappers
 
 		interface IGetSetDataChecker
@@ -174,7 +162,5 @@ namespace BLToolkit.Mapping
 		}
 
 		#endregion
-
-#endif
 	}
 }

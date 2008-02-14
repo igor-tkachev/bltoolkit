@@ -67,15 +67,10 @@ namespace Patterns
 		[Test]
 		public void Test()
 		{
-#if FW2
 			TestInterface   duck = DuckTyping.Implement<TestInterface> (new TestClass());
 			TestInterface   same = DuckTyping.Implement<TestInterface> (duck);
 			TestInterface2 duck2 = DuckTyping.Implement<TestInterface2>(same);
-#else
-			TestInterface  duck  = (TestInterface) DuckTyping.Implement(typeof(TestInterface),  new TestClass());
-			TestInterface  same  = (TestInterface) DuckTyping.Implement(typeof(TestInterface),  duck);
-			TestInterface2 duck2 = (TestInterface2)DuckTyping.Implement(typeof(TestInterface2), same);
-#endif
+
 			Assert.AreSame(duck, same);
 
 			int value;
@@ -125,11 +120,8 @@ namespace Patterns
 		[Test]
 		public void BulkTest()
 		{
-#if FW2
 			TestInterface[] ducks  = DuckTyping.Implement<TestInterface, TestClass> (new Child1(), new Child2());
-#else
-			TestInterface[] ducks  = (TestInterface[])DuckTyping.Implement(typeof(TestInterface), typeof(TestClass), new Child1(), new Child2());
-#endif
+
 			Assert.IsNotEmpty(ducks);
 			Assert.AreEqual(42, ducks[0].Method(40));
 			Assert.AreEqual(42, ducks[1].Method(40));
@@ -138,11 +130,8 @@ namespace Patterns
 		[Test]
 		public void BulkTest2()
 		{
-#if FW2
 			TestInterface[] ducks = DuckTyping.Implement<TestInterface>(new Child1(), new Child2());
-#else
-			TestInterface[] ducks = (TestInterface[])DuckTyping.Implement(typeof(TestInterface), new Child1(), new Child2());
-#endif
+
 			Assert.IsNotEmpty(ducks);
 			Assert.AreEqual(45, ducks[0].Method(40));
 			Assert.AreEqual(50, ducks[1].Method(40));
@@ -151,13 +140,9 @@ namespace Patterns
 		[Test]
 		public void InheritanceTest()
 		{
-#if FW2
 			TestInterface duck1 = DuckTyping.Implement<TestInterface> (new Child1());
 			TestInterface duck2 = DuckTyping.Implement<TestInterface> (new Child2());
-#else
-			TestInterface duck1 = (TestInterface) DuckTyping.Implement(typeof(TestInterface), new Child1());
-			TestInterface duck2 = (TestInterface) DuckTyping.Implement(typeof(TestInterface), new Child2());
-#endif
+
 			Assert.AreNotSame(duck1, duck2);
 			Assert.AreEqual(45, duck1.Method(40));
 			Assert.AreEqual(50, duck2.Method(40));
@@ -167,13 +152,9 @@ namespace Patterns
 		[Test]
 		public void InheritanceTest2()
 		{
-#if FW2
 			TestInterface duck1 = DuckTyping.Implement<TestInterface, TestClass> (new Child1());
 			TestInterface duck2 = DuckTyping.Implement<TestInterface, TestClass> (new Child2());
-#else
-			TestInterface duck1 = (TestInterface) DuckTyping.Implement(typeof(TestInterface), typeof(TestClass), new Child1());
-			TestInterface duck2 = (TestInterface) DuckTyping.Implement(typeof(TestInterface), typeof(TestClass), new Child2());
-#endif
+
 			Assert.AreNotSame(duck1, duck2);
 			Assert.AreEqual(42, duck1.Method(40));
 			Assert.AreEqual(42, duck2.Method(40));
@@ -191,11 +172,8 @@ namespace Patterns
 		public void StaticTest()
 		{
 			DuckTyping.AllowStaticMembers = true;
-#if FW2
 			TestInterface duck = DuckTyping.Implement<TestInterface, StaticClass> (new StaticClass());
-#else
-			TestInterface duck = (TestInterface) DuckTyping.Implement(typeof(TestInterface), typeof(StaticClass), new StaticClass());
-#endif
+
 			Assert.AreEqual(43, duck.Method(40));
 		}
 
@@ -211,11 +189,8 @@ namespace Patterns
 		public void StructTest()
 		{
 			DuckTyping.AllowStaticMembers = true;
-#if FW2
 			TestInterface duck = DuckTyping.Implement<TestInterface> (new TestStruct());
-#else
-			TestInterface duck = (TestInterface) DuckTyping.Implement(typeof(TestInterface), new TestStruct());
-#endif
+
 			Assert.AreEqual(43, duck.Method(40));
 		}
 

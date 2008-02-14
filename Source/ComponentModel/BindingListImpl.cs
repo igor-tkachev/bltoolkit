@@ -8,12 +8,7 @@ using System.Diagnostics;
 
 namespace BLToolkit.ComponentModel
 {
-	public class BindingListImpl :
-#if FW2
-		IBindingListView, ICancelAddNew
-#else
-		IBindingList
-#endif
+	public class BindingListImpl: IBindingListView, ICancelAddNew
 	{
 		#region Init
 
@@ -79,7 +74,7 @@ namespace BLToolkit.ComponentModel
 			_newObject    = o as INotifyObjectEdit;
 
 			if (_newObject != null)
-				_newObject.ObjectEdit += new ObjectEditEventHandler(NewObject_ObjectEdit);
+				_newObject.ObjectEdit += NewObject_ObjectEdit;
 
 			Debug.WriteLine(string.Format("AddNew - ({0})", o.GetType().Name));
 
@@ -212,10 +207,7 @@ namespace BLToolkit.ComponentModel
 
 			_sortProperty  = property;
 			_sortDirection = direction;
-			
-#if FW2
 			_sortDescriptions = null;
-#endif
 
 			ApplySort(new SortPropertyComparer(property, direction));
 			
@@ -229,10 +221,8 @@ namespace BLToolkit.ComponentModel
 		{
 			_isSorted     = false;
 			_sortProperty = null;
-			
-#if FW2
 			_sortDescriptions = null;
-#endif
+
 			OnListChanged(new EditableListChangedEventArgs(ListChangedType.Reset));
 		}
 
@@ -295,7 +285,7 @@ namespace BLToolkit.ComponentModel
 			_newItemIndex = -1;
 
 			if (_newObject != null)
-				_newObject.ObjectEdit -= new ObjectEditEventHandler(NewObject_ObjectEdit);
+				_newObject.ObjectEdit -= NewObject_ObjectEdit;
 
 			_newObject = null;
 		}
@@ -489,10 +479,9 @@ namespace BLToolkit.ComponentModel
 		{
 			if (_isSorted)
 			{
-#if FW2
 				if (_sortDescriptions != null)
 					return new SortListPropertyComparer(_sortDescriptions);
-#endif
+
 				return new SortPropertyComparer(_sortProperty, _sortDirection);
 			}
 
@@ -500,8 +489,6 @@ namespace BLToolkit.ComponentModel
 		}
 		
 		#endregion
-
-#if FW2
 
 		#region IBindingListView Members
 
@@ -579,8 +566,6 @@ namespace BLToolkit.ComponentModel
 		}
 
 		#endregion
-
-#endif
 
 		#region Sort enforcement
 
@@ -737,7 +722,7 @@ namespace BLToolkit.ComponentModel
 
 			if (value is INotifyPropertyChanged)
 				((INotifyPropertyChanged)value).PropertyChanged += 
-					new PropertyChangedEventHandler(ItemPropertyChanged);
+					ItemPropertyChanged;
 		}
 
 		private void RemoveInternal(object value)
@@ -746,7 +731,7 @@ namespace BLToolkit.ComponentModel
 
 			if (value is INotifyPropertyChanged)
 				((INotifyPropertyChanged)value).PropertyChanged -=
-					new PropertyChangedEventHandler(ItemPropertyChanged);
+					ItemPropertyChanged;
 		}
 
 		private void AddInternal(IEnumerable e)

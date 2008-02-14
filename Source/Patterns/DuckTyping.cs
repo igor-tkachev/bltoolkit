@@ -15,11 +15,7 @@ namespace BLToolkit.Patterns
 	/// Thus an object having all the methods described in an interface can be made to implement that interface
 	/// dynamically at runtime, even if the object’s class does not include the interface in its implements clause.
 	/// </summary>
-	public
-#if FW2
-	static
-#endif
-	class DuckTyping
+	public static class DuckTyping
 	{
 		private static readonly Hashtable _duckTypes = new Hashtable();
 
@@ -147,11 +143,9 @@ namespace BLToolkit.Patterns
 		public static object[] Implement(Type interfaceType, Type baseObjectType, params object[] objects)
 		{
 			if (objects == null) throw new ArgumentNullException("objects");
-#if FW2
+
 			object[] result = new object[objects.Length];
-#else
-			object[] result = (object[])Array.CreateInstance(interfaceType, objects.Length);
-#endif
+	
 			for (int i = 0; i < objects.Length; i++)
 				result[i] = Implement(interfaceType, baseObjectType, objects[i]);
 
@@ -171,8 +165,6 @@ namespace BLToolkit.Patterns
 		{
 			return Implement(interfaceType, null, objects);
 		}
-
-#if FW2
 
 		/// <summary>
 		/// Implements the requested interface for supplied object.
@@ -247,8 +239,6 @@ namespace BLToolkit.Patterns
 
 			return result;
 		}
-
-#endif
 
 		private static bool _allowStaticMembers;
 		public  static bool  AllowStaticMembers

@@ -13,7 +13,9 @@ namespace TypeBuilder
 	{
 		public TypeFactoryTest()
 		{
-			TypeFactory.Init();
+			// Force call to TypeFactory .cctor
+			//
+			TypeFactory.SealTypes = true;
 
 			Console.WriteLine("Domain name: {0}", AppDomain.CurrentDomain.FriendlyName);
 		}

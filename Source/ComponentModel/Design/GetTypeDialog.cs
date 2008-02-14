@@ -21,9 +21,9 @@ namespace BLToolkit.ComponentModel.Design
 			LoadTypes();
 		}
 
-		IServiceProvider _serviceProvider;
-		Type             _baseType;
-		Predicate<Type>  _filter;
+		private readonly IServiceProvider _serviceProvider;
+		private readonly Type             _baseType;
+		private readonly Predicate<Type>  _filter;
 
 		private Type _resultType;
 		public  Type  ResultType
@@ -75,7 +75,7 @@ namespace BLToolkit.ComponentModel.Design
 							treeView.Nodes.Add(assembly.FullName, assembly.GetName().Name, 1, 1);
 					}
 
-					string  @namespace     = type.Namespace == null? "": type.Namespace;
+					string  @namespace     = type.Namespace ?? string.Empty;
 					string   namespaceKey  = assembly.FullName + ", " + @namespace;
 					TreeNode namespaceNode = (TreeNode)namespaceNodes[namespaceKey];
 

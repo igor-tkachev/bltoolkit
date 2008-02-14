@@ -80,32 +80,14 @@ namespace BLToolkit.Common
 
 		public static NameOrIndexParameter[] FromStringArray(string[] names)
 		{
-#if FW2
 			return Array.ConvertAll<string, NameOrIndexParameter>(names,
 						delegate(string name) { return new NameOrIndexParameter(name); });
-#else
-			NameOrIndexParameter[] nips = new NameOrIndexParameter[names.Length];
-			for (int i = 0; i < nips.Length; ++i)
-			{
-				nips[i] = new NameOrIndexParameter(names[i]);
-			}
-			return nips;
-#endif
 		}
 
 		public static NameOrIndexParameter[] FromIndexArray(int[] indices)
 		{
-#if FW2
 			return Array.ConvertAll<int, NameOrIndexParameter>(indices,
 						delegate(int index) { return new NameOrIndexParameter(index); });
-#else
-			NameOrIndexParameter[] nips =  new NameOrIndexParameter[indices.Length];
-
-			for (int i = 0; i < nips.Length; ++i)
-				nips[i] = new NameOrIndexParameter(indices[i]);
-
-			return nips;
-#endif
 		}
 
 		#endregion
@@ -149,7 +131,7 @@ namespace BLToolkit.Common
 		
 		public override string ToString()
 		{
-			return (null != _name) ? _name : "#" + _index;
+			return _name ?? "#" + _index;
 		}
 
 		#endregion

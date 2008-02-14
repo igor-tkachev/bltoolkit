@@ -23,9 +23,7 @@ namespace BLToolkit.TypeBuilder.Builders
 		readonly TypeHelper        _memberAccessor = new TypeHelper(typeof(MemberAccessor));
 		readonly ArrayList         _nestedTypes    = new ArrayList();
 		         TypeBuilderHelper _typeBuilder;
-#if FW2
 		         bool              _friendlyAssembly;
-#endif
 
 		public string AssemblyNameSuffix
 		{
@@ -46,7 +44,6 @@ namespace BLToolkit.TypeBuilder.Builders
 			if (sourceType == null)      throw new ArgumentNullException("sourceType");
 			if (assemblyBuilder == null) throw new ArgumentNullException("assemblyBuilder");
 
-#if FW2
 			// Check InternalsVisibleToAttributes of the source type's assembly.
 			// Even if the sourceType is public, it may have internal fields and props.
 			//
@@ -68,10 +65,6 @@ namespace BLToolkit.TypeBuilder.Builders
 
 			if (!sourceType.IsVisible && !_friendlyAssembly)
 				throw new TypeBuilderException(string.Format("Can not build type accessor for non-public type '{0}'.", sourceType.FullName));
-#else
-			if (!sourceType.IsPublic && !sourceType.IsNestedPublic)
-				throw new TypeBuilderException(string.Format("Can not build type accessor for non-public type '{0}'.", sourceType.FullName));
-#endif
 
 			string typeName = GetTypeAccessorClassName(_type);
 
@@ -111,11 +104,7 @@ namespace BLToolkit.TypeBuilder.Builders
 			// CreateInstance.
 			//
 			MethodBuilderHelper method = _typeBuilder.DefineMethod(
-				_accessorType.GetMethod(
-#if FW2
-				false,
-#endif
-				"CreateInstance", Type.EmptyTypes));
+				_accessorType.GetMethod(false, "CreateInstance", Type.EmptyTypes));
 
 			if (baseDefCtor != null)
 			{
@@ -148,11 +137,7 @@ namespace BLToolkit.TypeBuilder.Builders
 			// CreateInstance(IniContext).
 			//
 			method = _typeBuilder.DefineMethod(
-				_accessorType.GetMethod(
-#if FW2
-				false,
-#endif
-				"CreateInstance", typeof(InitContext)));
+				_accessorType.GetMethod(false, "CreateInstance", typeof(InitContext)));
 
 			if (baseInitCtor != null)
 			{
@@ -213,14 +198,12 @@ namespace BLToolkit.TypeBuilder.Builders
 			foreach (FieldInfo fi in _originalType.GetFields(BindingFlags.Instance | BindingFlags.Public))
 				AddMemberToDictionary(members, fi);
 
-#if FW2
 			if (_friendlyAssembly)
 			{
 				foreach (FieldInfo fi in _originalType.GetFields(BindingFlags.Instance | BindingFlags.NonPublic))
 					if (fi.IsAssembly || fi.IsFamilyOrAssembly)
 						AddMemberToDictionary(members, fi);
 			}
-#endif
 
 			foreach (PropertyInfo pi in _originalType.GetProperties(BindingFlags.Instance | BindingFlags.Public))
 				if (pi.GetIndexParameters().Length == 0)
@@ -281,7 +264,6 @@ namespace BLToolkit.TypeBuilder.Builders
 
 			string typedPropertyName = type.Name;
 
-#if FW2
 			if (type.IsGenericType)
 			{
 				Type underlyingType = Nullable.GetUnderlyingType(type);
@@ -303,11 +285,10 @@ namespace BLToolkit.TypeBuilder.Builders
 					typedPropertyName = null;
 				}
 			}
-#endif
 
 			if (typedPropertyName != null)
 			{
-				BuildTypedGetter(mi, nestedType, type, typedPropertyName);
+				BuildTypedGetter(mi, nestedType, typedPropertyName);
 				BuildTypedSetter(mi, nestedType, type, typedPropertyName);
 			}
 
@@ -341,11 +322,7 @@ namespace BLToolkit.TypeBuilder.Builders
 		{
 			if (method == null) throw new ArgumentNullException("method");
 
-			return method.IsPublic
-#if FW2
-				|| (_friendlyAssembly && (method.IsAssembly || method.IsFamilyOrAssembly))
-#endif
-				;
+			return method.IsPublic || (_friendlyAssembly && (method.IsAssembly || method.IsFamilyOrAssembly));
 		}
 
 		private void BuildGetter(MemberInfo mi, TypeBuilderHelper nestedType)
@@ -480,12 +457,9 @@ namespace BLToolkit.TypeBuilder.Builders
 		{
 			Type       methodType = mi.DeclaringType;
 			MethodInfo getMethod  = null;
-#if FW2
 			Boolean    isNullable = TypeHelper.IsNullable(memberType);
 			Boolean    isValueType = (!isNullable && memberType.IsValueType);
-#else
-			Boolean    isValueType = methodType.IsValueType;
-#endif
+
 			if (!isValueType && mi is PropertyInfo)
 			{
 				getMethod = ((PropertyInfo)mi).GetGetMethod();
@@ -520,12 +494,10 @@ namespace BLToolkit.TypeBuilder.Builders
 			}
 			else
 			{
-#if FW2
 				LocalBuilder locObj = null;
 
 				if (isNullable)
 					locObj = method.Emitter.DeclareLocal(memberType);
-#endif
 
 				emit
 					.ldarg_1
@@ -535,7 +507,6 @@ namespace BLToolkit.TypeBuilder.Builders
 				if (mi is FieldInfo) emit.ldfld   ((FieldInfo)mi);
 				else                 emit.callvirt(getMethod);
 
-#if FW2
 				if (isNullable)
 				{
 					emit
@@ -544,11 +515,12 @@ namespace BLToolkit.TypeBuilder.Builders
 						.call(memberType, "get_HasValue");
 				}
 				else
-#endif
+				{
 					emit
 						.ldnull
 						.ceq
 						.end();
+				}
 			}
 
 			emit
@@ -559,7 +531,6 @@ namespace BLToolkit.TypeBuilder.Builders
 		private void BuildTypedGetter(
 			MemberInfo        mi,
 			TypeBuilderHelper nestedType,
-			Type              memberType,
 			string            typedPropertyName)
 		{
 			Type       methodType = mi.DeclaringType;
@@ -744,7 +715,6 @@ namespace BLToolkit.TypeBuilder.Builders
 				;
 		}
 
-#if FW2
 		private void BuildTypedGetterForNullable(
 			MemberInfo        mi,
 			TypeBuilderHelper nestedType,
@@ -848,7 +818,6 @@ namespace BLToolkit.TypeBuilder.Builders
 				.ret()
 				;
 		}
-#endif
 
 		private static ConstructorBuilderHelper BuildNestedTypeConstructor(TypeBuilderHelper nestedType)
 		{

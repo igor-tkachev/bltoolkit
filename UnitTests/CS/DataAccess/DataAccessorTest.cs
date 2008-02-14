@@ -1,16 +1,10 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using BLToolkit.Data.DataProvider;
 using NUnit.Framework;
-
-#if FW2
-using System.Collections.Generic;
-using PersonDataSet = DataAccessTest.PersonDataSet2;
-#else
-using PersonDataSet = DataAccessTest.PersonDataSet;
-#endif
 
 using BLToolkit.EditableObjects;
 using BLToolkit.Data;
@@ -20,9 +14,10 @@ using BLToolkit.Validation;
 using BLToolkit.Reflection;
 using BLToolkit.TypeBuilder;
 
+using PersonDataSet = DataAccessTest.PersonDataSet2;
+
 namespace DataAccess
 {
-#if FW2
 	namespace Other
 	{
 		public abstract class Person : DataAccessorTest.Person
@@ -31,7 +26,6 @@ namespace DataAccess
 			public abstract string Diagnosis { get; set; }
 		}
 	}
-#endif
 
 	[TestFixture]
 	public class DataAccessorTest
@@ -132,7 +126,6 @@ namespace DataAccess
 				set;
 			}
 
-#if FW2
 			[ActionName("SelectByKey")]
 			public abstract Person ParamNullableID([ParamNullValue(1)] int? id);
 
@@ -141,8 +134,6 @@ namespace DataAccess
 
 			[ActionName("SelectAll")]
 			public abstract IList<Person> SelectAllAsIListT();
-
-#endif
 
 			[ActionName("SelectByName")]
 			public abstract Person ParamNullString([ParamNullValue("John")] string firstName, string lastName);
@@ -208,13 +199,11 @@ namespace DataAccess
 			[SprocName("Person_SelectAll"), DataSetTable("Person")]
 			public abstract DataTable     SelectAllToTablePerson();
 
-#if FW2
 			[SprocName("Person_SelectAll")]
 			public abstract PersonDataSet.PersonDataTable SelectAllTypedDataTable();
 
 			[SprocName("Person_SelectAll")]
 			public abstract void          SelectAllTypedDataTableReturnVoid     ([Destination] PersonDataSet.PersonDataTable dt);
-#endif
 
 			#endregion
 
@@ -229,7 +218,6 @@ namespace DataAccess
 			[ActionName("SelectAll"), ObjectType(typeof(Person))]
 			public abstract void SelectAllListReturnVoid      ([Destination] IList list);
 
-#if FW2
 			[ActionName("SelectAll")]
 			public abstract List<Person> SelectAllListT();
 
@@ -244,7 +232,6 @@ namespace DataAccess
 
 			[ActionName("SelectAll")]
 			public abstract void SelectAllListTReturnVoid              ([Destination] IList<Person> list);
-#endif
 
 			#endregion
 		}
@@ -268,13 +255,11 @@ namespace DataAccess
 				}
 			}
 
-#if FW2
 			[ActionName("SelectAll"), ObjectType(typeof(Other.Person))]
 			public abstract ArrayList SameTypeName1();
 
 			[ActionName("SelectByName")]
 			public abstract Other.Person SameTypeName1(string firstName, string lastName);
-#endif
 
 			protected override string GetDefaultSpName(string typeName, string actionName)
 			{
@@ -528,7 +513,6 @@ namespace DataAccess
 			Assert.AreNotEqual(0, list.Count);
 			Assert.IsInstanceOfType(typeof(Person), list[0]);
 
-#if FW2
 			PersonDataAccessor1 da1 = (PersonDataAccessor1)DataAccessor.CreateInstance(typeof(PersonDataAccessor1));
 			Other.Person         e1 = da1.SameTypeName1("Tester", "Testerson");
 
@@ -538,7 +522,6 @@ namespace DataAccess
 			list = da1.SameTypeName1();
 			Assert.AreNotEqual(0, list.Count);
 			Assert.IsInstanceOfType(typeof(Other.Person), list[0]);
-#endif
 		}
 
 		[Test]
@@ -555,7 +538,6 @@ namespace DataAccess
 			Assert.IsNotNull(e2);
 		}
 
-#if FW2
 		[Test]
 		public void ParamNullValueNullableIDTest()
 		{
@@ -571,8 +553,6 @@ namespace DataAccess
 			Person e2 = _da.ParamNullableID(2);
 			Assert.IsNotNull(e2);
 		}
-
-#endif
 
 		[Test]
 		public void ParamNullValueStrTest()
@@ -762,7 +742,6 @@ namespace DataAccess
 			Assert.AreNotEqual(0, dt.Rows.Count);
 		}
 
-#if FW2
 		[Test]
 		public void Gen_SelectAllTypedDataTable()
 		{
@@ -778,7 +757,6 @@ namespace DataAccess
 			_da.SelectAllTypedDataTableReturnVoid(dt);
 			Assert.AreNotEqual(0, dt.Rows.Count);
 		}
-#endif
 
 		#endregion
 
@@ -812,8 +790,6 @@ namespace DataAccess
 			IList list = _da.SelectAllAsIList();
 			Assert.IsNotEmpty(list);
 		}
-
-#if FW2
 
 		[Test]
 		public void Gen_SelectAllListT()
@@ -858,8 +834,6 @@ namespace DataAccess
 			IList<Person> list = _da.SelectAllAsIListT();
 			Assert.IsNotEmpty((ICollection)list);
 		}
-
-#endif
 
 		#endregion
 

@@ -342,7 +342,7 @@ namespace BLToolkit.Mapping.MetadataProvider
 
 		private static object CheckNullValue(object value, MemberAccessor member)
 		{
-			if (value is Type && (Type)value == typeof(DBNull))
+			if (value is Type && value == typeof(DBNull))
 			{
 				value = DBNull.Value;
 

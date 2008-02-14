@@ -1,5 +1,3 @@
-using System;
-
 namespace BLToolkit.Validation
 {
 	public class ValidatableObjectBase

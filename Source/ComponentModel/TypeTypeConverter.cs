@@ -72,6 +72,7 @@ namespace BLToolkit.ComponentModel
 			}
 			catch
 			{
+				return null;
 			}
 
 			return null;

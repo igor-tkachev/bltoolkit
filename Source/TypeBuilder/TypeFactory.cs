@@ -5,7 +5,6 @@ using System.IO;
 using System.Reflection;
 using System.Reflection.Emit;
 using System.Runtime.InteropServices;
-using System.Security.Permissions;
 
 using BLToolkit.Reflection.Emit;
 using BLToolkit.TypeBuilder.Builders;
@@ -16,6 +15,11 @@ namespace BLToolkit.TypeBuilder
 	{
 		private TypeFactory()
 		{
+		}
+
+		static TypeFactory()
+		{
+			AppDomain.CurrentDomain.AssemblyResolve += CurrentDomain_AssemblyResolve;
 		}
 
 		#region Create Assembly
@@ -101,10 +105,8 @@ namespace BLToolkit.TypeBuilder
 
 				string fullName = type.FullName;
 
-#if FW2
 				if (type.IsGenericType)
 					fullName = AbstractClassBuilder.GetTypeFullName(type);
-#endif
 
 				ab = new AssemblyBuilderHelper(assemblyDir + "\\" + fullName + "." + suffix + ".dll");
 			}
@@ -228,17 +230,10 @@ namespace BLToolkit.TypeBuilder
 
 		#region Resolve Types
 
-		private static bool _isInit;
-
-		[EnvironmentPermission(SecurityAction.LinkDemand, Unrestricted = true)]
+		[Obsolete("Do not call this method directly.")]
 		public static void Init()
 		{
-			if (_isInit == false)
-			{
-				_isInit = true;
-
-				AppDomain.CurrentDomain.AssemblyResolve += new ResolveEventHandler(CurrentDomain_AssemblyResolve);
-			}
+			// The code has been moved to the type constructor.
 		}
 
 		private static Assembly CurrentDomain_AssemblyResolve(object sender, ResolveEventArgs args)
@@ -316,11 +311,6 @@ namespace BLToolkit.TypeBuilder
 			}
 
 			return null;
-		}
-
-		static TypeFactory()
-		{
-			Init();
 		}
 
 		#endregion

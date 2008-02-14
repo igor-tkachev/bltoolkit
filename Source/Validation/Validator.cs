@@ -66,7 +66,7 @@ namespace BLToolkit.Validation
 				context = new ValidationContext();
 
 			context.Object = obj;
-			context.IsNull = isNull != null? isNull: new ValidationContext.IsNullHandler(IsNullInternal);
+			context.IsNull = isNull ?? new ValidationContext.IsNullHandler(IsNullInternal);
 			context.PropertyDescriptor = pd;
 
 			return context;

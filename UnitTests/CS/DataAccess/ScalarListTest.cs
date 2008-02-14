@@ -1,8 +1,6 @@
 using System;
 using System.Collections;
-#if FW2
 using System.Collections.Generic;
-#endif
 
 using NUnit.Framework;
 
@@ -28,8 +26,6 @@ namespace DataAccess
 			[ObjectType(typeof(string)), ScalarFieldName("LastName")]
 			public abstract ArrayList SelectLastNames (DbManager db);
 
-#if FW2
-
 			[SprocName("Person_SelectAll")]
 			public abstract List<int>          FW2SelectIDs              (DbManager db);
 
@@ -46,8 +42,6 @@ namespace DataAccess
 
 			[SprocName("Person_SelectAll")]
 			public abstract void               FW2SelectIDsReturnVoid    (DbManager db, [Destination] List<int> list);
-
-#endif
 
 			public static TestAccessor CreateInstance()
 			{
@@ -96,7 +90,7 @@ namespace DataAccess
 				Assert.IsTrue(list[0] is string);
 			}
 		}
-#if FW2
+
 		[Test]
 		public void FW2SelectIDsTest()
 		{
@@ -162,6 +156,5 @@ namespace DataAccess
 				Assert.IsNotEmpty(list);
 			}
 		}
-#endif
 	}
 }

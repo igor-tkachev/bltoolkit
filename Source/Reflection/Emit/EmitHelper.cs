@@ -777,7 +777,6 @@ namespace BLToolkit.Reflection.Emit
 
 		public EmitHelper callvirtNoGenerics(Type type, string methodName, params Type[] parameterTypes)
 		{
-#if FW2
 			MethodInfo method = type.GetMethod(
 				methodName,
 				BindingFlags.Instance | BindingFlags.Public,
@@ -785,9 +784,6 @@ namespace BLToolkit.Reflection.Emit
 				parameterTypes, null);
 
 			return callvirt(method, parameterTypes.Length == 0? null: parameterTypes);
-#else
-			return callvirt(type, methodName, parameterTypes);
-#endif
 		}
 
 		/// <summary>
@@ -3164,20 +3160,7 @@ namespace BLToolkit.Reflection.Emit
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode,Type)">ILGenerator.Emit</seealso>
 		public EmitHelper unbox_any(Type type)
 		{
-#if FW2
 			_ilGenerator.Emit(OpCodes.Unbox_Any, type);
-#else
-			// This is what exactly Unbox.Any does.
-			//
-			if (type.IsValueType)
-			{
-				_ilGenerator.Emit(OpCodes.Unbox, type);
-				_ilGenerator.Emit(OpCodes.Ldobj, type);
-			}
-			else
-				_ilGenerator.Emit(OpCodes.Castclass, type);
-#endif
-
 			return this;
 		}
 
@@ -3330,32 +3313,7 @@ namespace BLToolkit.Reflection.Emit
 
 			if (type == typeof(object)) return this;
 
-#if FW2
 			return type.IsValueType? unbox_any(type): castclass(type);
-#else
-			unboxIfValueType(type);
-
-			if (type.IsEnum)
-				type = Enum.GetUnderlyingType(type);
-
-			if      (type == typeof(byte))   ldind_u1.end();
-			else if (type == typeof(char))   ldind_u2.end();
-			else if (type == typeof(ushort)) ldind_u2.end();
-			else if (type == typeof(uint))   ldind_u4.end();
-			else if (type == typeof(ulong))  ldind_i8.end();
-			else if (type == typeof(bool))   ldind_i1.end();
-			else if (type == typeof(sbyte))  ldind_i1.end();
-			else if (type == typeof(short))  ldind_i2.end();
-			else if (type == typeof(int))    ldind_i4.end();
-			else if (type == typeof(long))   ldind_i8.end();
-			else if (type == typeof(float))  ldind_r4.end();
-			else if (type == typeof(double)) ldind_r8.end();
-			else if (type.IsValueType)       ldobj(type);
-			else
-				castclass(type);
-
-			return this;
-#endif
 		}
 
 		public EmitHelper conv(Type type)
@@ -3385,7 +3343,6 @@ namespace BLToolkit.Reflection.Emit
 
 		public void AddMaxStackSize(int size)
 		{
-#if FW2
 			FieldInfo fi = _ilGenerator.GetType().GetField(
 				"m_maxStackSize", BindingFlags.Instance | BindingFlags.NonPublic);
 
@@ -3394,7 +3351,6 @@ namespace BLToolkit.Reflection.Emit
 				size += (int)fi.GetValue(_ilGenerator);
 				fi.SetValue(_ilGenerator, size);
 			}
-#endif
 		}
 	}
 }

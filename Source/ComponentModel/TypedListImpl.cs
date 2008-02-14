@@ -12,15 +12,7 @@ namespace BLToolkit.ComponentModel
 			if (itemType == null) throw new ArgumentNullException("itemType");
 
 			_itemType     = itemType;
-
-//			try
-//			{
-//				if (_itemType != typeof(object))
-					_typeAccessor = TypeAccessor.GetAccessor(itemType);
-//			}
-//			catch
-//			{
-//			}
+			_typeAccessor = TypeAccessor.GetAccessor(itemType);
 		}
 
 		private readonly Type         _itemType;

@@ -122,7 +122,7 @@ namespace BLToolkit.Mapping.MetadataProvider
 
 			object value = mapper.MappingSchema.GetNullValue(member.Type);
 
-			if (value is Type && (Type)value == typeof(DBNull))
+			if (value is Type && value == typeof(DBNull))
 			{
 				value = DBNull.Value;
 
@@ -139,11 +139,11 @@ namespace BLToolkit.Mapping.MetadataProvider
 
 		public static event OnCreateProvider OnCreateProvider;
 
-		private static CreateProvider _createProvider = new CreateProvider(CreateInternal);
+		private static CreateProvider _createProvider = CreateInternal;
 		public  static CreateProvider  CreateProvider
 		{
 			get { return _createProvider; }
-			set { _createProvider = value != null? value: new CreateProvider(CreateInternal); }
+			set { _createProvider = value ?? new CreateProvider(CreateInternal); }
 		}
 
 		private static MapMetadataProvider CreateInternal()

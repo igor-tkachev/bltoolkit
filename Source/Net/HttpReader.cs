@@ -183,7 +183,7 @@ namespace BLToolkit.Net
 			request.KeepAlive       = true;
 
 			if (SendReferer)
-				request.Referer = PreviousUri != null? PreviousUri: uri;
+				request.Referer = PreviousUri ?? uri;
 
 			foreach (string key in Headers.Keys)
 				request.Headers.Add(key, Headers[key].ToString());
@@ -281,7 +281,7 @@ namespace BLToolkit.Net
 		{
 			DefaultResponseStreamProcessor rp = new DefaultResponseStreamProcessor(this);
 
-			return Request(requestUri, "GET", null, new ProcessStream(rp.Process));
+			return Request(requestUri, "GET", null, rp.Process);
 		}
 
 		public HttpStatusCode Get(string requestUri, ProcessStream responseStreamProcessor)
@@ -295,8 +295,8 @@ namespace BLToolkit.Net
 		{
 			return Post(
 				requestUri,
-				new ProcessStream(new DefaultRequestStreamProcessor(postData).Process),
-				new ProcessStream(new DefaultResponseStreamProcessor(this).Process));
+				new DefaultRequestStreamProcessor(postData).Process,
+				new DefaultResponseStreamProcessor(this).Process);
 		}
 
 		public HttpStatusCode Post(
@@ -306,7 +306,7 @@ namespace BLToolkit.Net
 			return Post(
 				requestUri,
 				requestStreamProcessor,
-				new ProcessStream(new DefaultResponseStreamProcessor(this).Process));
+				new DefaultResponseStreamProcessor(this).Process);
 		}
 
 		public HttpStatusCode Post(
@@ -368,8 +368,8 @@ namespace BLToolkit.Net
 		public HttpStatusCode Soap(string soapAction, string postData)
 		{
 			return Request("\"" + soapAction + "\"", "SOAP",
-				new ProcessStream(new DefaultRequestStreamProcessor(postData).Process),
-				new ProcessStream(new DefaultResponseStreamProcessor(this).Process));
+				new DefaultRequestStreamProcessor(postData).Process,
+				new DefaultResponseStreamProcessor(this).Process);
 		}
 
 		#endregion
@@ -382,9 +382,7 @@ namespace BLToolkit.Net
 
 			WebClient request = new WebClient();
 
-#if FW2
 			if (Proxy       != null) request.Proxy       = Proxy;
-#endif
 			if (Credentials != null) request.Credentials = Credentials;
 
 			foreach (string key in Headers.Keys)

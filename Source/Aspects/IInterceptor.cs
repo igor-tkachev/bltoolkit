@@ -1,5 +1,3 @@
-using System;
-
 namespace BLToolkit.Aspects
 {
 	public interface IInterceptor

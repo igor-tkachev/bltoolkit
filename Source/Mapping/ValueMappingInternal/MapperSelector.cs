@@ -3,11 +3,7 @@ using System.Data.SqlTypes;
 
 namespace BLToolkit.Mapping.ValueMappingInternal
 {
-	internal
-#if FW2
-	static
-#endif
-	class MapperSelector
+	internal static class MapperSelector
 	{
 		public static IValueMapper GetMapper(Type from, Type to)
 		{

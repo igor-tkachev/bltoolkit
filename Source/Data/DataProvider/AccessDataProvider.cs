@@ -67,17 +67,7 @@ namespace BLToolkit.Data.DataProvider
 				for (int i = 0; i < names.Count; ++i)
 				{
 					string paramName = names[i].Value;
-#if FW2
 					string[] rawType = types[i].Value.Split(separators, StringSplitOptions.RemoveEmptyEntries);
-#else
-					System.Collections.ArrayList rawTypeList = new System.Collections.ArrayList();
-
-					foreach (string s in types[i].Value.Split(separators))
-						if (s.Length > 0)
-							rawTypeList.Add(s);
-
-					string[] rawType = (string[])rawTypeList.ToArray(typeof(string));
-#endif
 					OleDbParameter p = new OleDbParameter(paramName, GetOleDbType(rawType[0]));
 
 					if (rawType.Length > 2)

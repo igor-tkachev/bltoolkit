@@ -1,12 +1,9 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Reflection;
 using System.Reflection.Emit;
 using System.Diagnostics.CodeAnalysis;
-
-#if FW2
-using System.Collections.Generic;
-#endif
 
 using BLToolkit.Reflection;
 using BLToolkit.Reflection.Emit;
@@ -38,7 +35,6 @@ namespace BLToolkit.TypeBuilder.Builders
 		{
 			string name = type.FullName;
 
-#if FW2
 			if (type.IsGenericType)
 			{
 				name = name.Split('`')[0];
@@ -46,7 +42,6 @@ namespace BLToolkit.TypeBuilder.Builders
 				foreach (Type t in type.GetGenericArguments())
 					name += "_" + GetTypeFullName(t).Replace('+', '_').Replace('.', '_');
 			}
-#endif
 
 			return name;
 		}
@@ -55,7 +50,6 @@ namespace BLToolkit.TypeBuilder.Builders
 		{
 			string name = type.Name;
 
-#if FW2
 			if (type.IsGenericType)
 			{
 				name = name.Split('`')[0];
@@ -63,7 +57,6 @@ namespace BLToolkit.TypeBuilder.Builders
 				foreach (Type t in type.GetGenericArguments())
 					name += "_" + GetTypeFullName(t).Replace('+', '_').Replace('.', '_');
 			}
-#endif
 
 			return name;
 		}
@@ -73,13 +66,11 @@ namespace BLToolkit.TypeBuilder.Builders
 			string typeFullName  = type.FullName;
 			string typeShortName = type.Name;
 
-#if FW2
 			if (type.IsGenericType)
 			{
 				typeFullName  = GetTypeFullName (type);
 				typeShortName = GetTypeShortName(type);
 			}
-#endif
 
 			typeFullName  = typeFullName. Replace('+', '.');
 			typeShortName = typeShortName.Replace('+', '.');
@@ -258,7 +249,6 @@ namespace BLToolkit.TypeBuilder.Builders
 				_context.TypeBuilder.SetCustomAttribute(typeof(SerializableAttribute));
 		}
 
-#if FW2
 		class BuilderComparer : IComparer<IAbstractTypeBuilder>
 		{
 			public BuilderComparer(BuildContext context)
@@ -274,25 +264,6 @@ namespace BLToolkit.TypeBuilder.Builders
 				return y.GetPriority(_context) - x.GetPriority(_context);
 			}
 		}
-#else
-		class BuilderComparer : IComparer
-		{
-			public BuilderComparer(BuildContext context)
-			{
-				_context = context;
-			}
-
-			BuildContext _context;
-
-			public int Compare(object x, object y)
-			{
-				IAbstractTypeBuilder bx = (IAbstractTypeBuilder)x;
-				IAbstractTypeBuilder by = (IAbstractTypeBuilder)y;
-
-				return by.GetPriority(_context) - bx.GetPriority(_context);
-			}
-		}
-#endif
 
 		private void Build(BuildStep step, AbstractTypeBuilderList builders)
 		{
@@ -573,11 +544,7 @@ namespace BLToolkit.TypeBuilder.Builders
 
 			builders = Combine(
 				GetBuilders(getter.GetParameters()),
-#if FW2
 				GetBuilders(getter.ReturnParameter),
-#else
-				GetBuilders(new FakeParameterInfo(getter)),
-#endif
 				GetBuilders(getter),
 				propertyBuilders,
 				_builders);
@@ -599,11 +566,7 @@ namespace BLToolkit.TypeBuilder.Builders
 
 			builders = Combine(
 				GetBuilders(setter.GetParameters()),
-#if FW2
 				GetBuilders(setter.ReturnParameter),
-#else
-				GetBuilders(new FakeParameterInfo(setter)),
-#endif
 				GetBuilders(setter),
 				propertyBuilders,
 				_builders);
@@ -622,11 +585,7 @@ namespace BLToolkit.TypeBuilder.Builders
 				{
 					AbstractTypeBuilderList builders = Combine(
 						GetBuilders(method.GetParameters()),
-#if FW2
 						GetBuilders(method.ReturnParameter),
-#else
-						GetBuilders(new FakeParameterInfo(method)),
-#endif
 						GetBuilders(method),
 						_builders);
 
@@ -664,11 +623,7 @@ namespace BLToolkit.TypeBuilder.Builders
 		{
 			AbstractTypeBuilderList builders = Combine(
 				GetBuilders(getter.GetParameters()),
-#if FW2
 				GetBuilders(getter.ReturnParameter),
-#else
-				GetBuilders(new FakeParameterInfo(getter)),
-#endif
 				GetBuilders(getter),
 				propertyBuilders,
 				_builders);
@@ -681,11 +636,7 @@ namespace BLToolkit.TypeBuilder.Builders
 		{
 			AbstractTypeBuilderList builders = Combine(
 				GetBuilders(setter.GetParameters()),
-#if FW2
 				GetBuilders(setter.ReturnParameter),
-#else
-				GetBuilders(new FakeParameterInfo(setter)),
-#endif
 				GetBuilders(setter),
 				propertyBuilders,
 				_builders);
@@ -709,11 +660,7 @@ namespace BLToolkit.TypeBuilder.Builders
 				{
 					AbstractTypeBuilderList builders = Combine(
 						GetBuilders(method.GetParameters()),
-#if FW2
 						GetBuilders(method.ReturnParameter),
-#else
-						GetBuilders(new FakeParameterInfo(method)),
-#endif
 						GetBuilders(method),
 						_builders);
 

@@ -48,7 +48,6 @@ namespace BLToolkit.Mapping
 
 			_writer        = writer;
 			_names         = fieldNames;
-			_mappingSchema = mappingSchema;
 
 			_values = new string[_names.Length];
 
@@ -101,7 +100,6 @@ namespace BLToolkit.Mapping
 		private readonly TextWriter    _writer;
 		private readonly string[]      _names;
 		private readonly string[]      _values;
-		private readonly MappingSchema _mappingSchema;
 
 		private void WriteHeader()
 		{

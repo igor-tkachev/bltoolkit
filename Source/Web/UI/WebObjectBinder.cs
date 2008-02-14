@@ -26,7 +26,7 @@ namespace BLToolkit.Web.UI
 
 		public WebObjectBinder()
 		{
-			_objectBinder.ListChanged += new ListChangedEventHandler(_objectBinder_ListChanged);
+			_objectBinder.ListChanged += _objectBinder_ListChanged;
 		}
 
 		#endregion
@@ -36,9 +36,7 @@ namespace BLToolkit.Web.UI
 		[RefreshProperties(RefreshProperties.Repaint)]
 		[DefaultValue(null)]
 		[Category("Data")]
-#if FW2
 		[Editor(typeof(TypeNameEditor), typeof(UITypeEditor))]
-#endif
 		public string TypeName
 		{
 			get
@@ -56,9 +54,7 @@ namespace BLToolkit.Web.UI
 		[RefreshProperties(RefreshProperties.Repaint)]
 		[DefaultValue(null)]
 		[Category("Data")]
-#if FW2
 		[Editor(typeof(ObjectViewTypeNameEditor), typeof(UITypeEditor))]
-#endif
 		public string ObjectViewTypeName
 		{
 			get
@@ -180,7 +176,7 @@ namespace BLToolkit.Web.UI
 
 		#region ObjectEnumerator
 
-		class ObjectEnumerator : ICollection, IEnumerable
+		class ObjectEnumerator : ICollection
 		{
 			public ObjectEnumerator(ObjectBinder objectBinder, DataSourceSelectArguments arguments)
 			{

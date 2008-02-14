@@ -13,7 +13,7 @@ namespace BLToolkit.Reflection.Extension
 					return MemberExtension.Null;
 
 				MemberExtension value = (MemberExtension)_members[memberName];
-				return value != null? value: MemberExtension.Null;
+				return value ?? MemberExtension.Null;
 			}
 		}
 

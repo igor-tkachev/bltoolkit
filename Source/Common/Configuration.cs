@@ -5,13 +5,7 @@ using BLToolkit.TypeBuilder;
 
 namespace BLToolkit.Common
 {
-	public
-#if FW2
-	static
-#else
-	abstract
-#endif
-	class Configuration
+	public static class Configuration
 	{
 		public enum NullEquivalent { DBNull, Null, Value }
 

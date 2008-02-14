@@ -1,8 +1,6 @@
 using System;
 using System.Collections;
-#if FW2
 using System.Collections.Generic;
-#endif
 using System.Data.SqlTypes;
 using System.IO;
 using System.Xml;
@@ -109,7 +107,7 @@ namespace Data
 				Assert.IsTrue(array.Count > 0);
 			}
 		}
-#if FW2
+
 		[Test]
 		public void FW2ScalarListTest()
 		{
@@ -323,7 +321,5 @@ namespace Data
 				Console.WriteLine("{0}", xmlDocs[1].DocumentElement.GetAttribute("strattr"));
 			}
 		}
-
-#endif
 	}
 }

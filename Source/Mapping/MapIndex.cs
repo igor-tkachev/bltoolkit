@@ -52,24 +52,11 @@ namespace BLToolkit.Mapping
 			{
 				if (_id == null)
 				{
-#if FW2
 					_id = string.Join(".", Array.ConvertAll<NameOrIndexParameter, string>(_fields,
 						delegate(NameOrIndexParameter nameOrIndex)
 						{
 							return nameOrIndex.ToString();
 						}));
-#else
-					System.Text.StringBuilder sb = new System.Text.StringBuilder();
-					sb.Append(_fields[0]);
-					
-					for (int i = 1; i < _fields.Length; ++i)
-					{
-						sb.Append('.');
-						sb.Append(_fields[i]);
-					}
-					
-					_id = sb.ToString();
-#endif
 				}
 
 				return _id;

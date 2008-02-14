@@ -32,7 +32,6 @@ namespace DataAccess
 			}
 		}
 
-#if FW2
 		[Test]
 		public void FW2Test()
 		{
@@ -46,7 +45,6 @@ namespace DataAccess
 				Assert.IsNotNull(ps);
 			}
 		}
-#endif
 	}
 }
 

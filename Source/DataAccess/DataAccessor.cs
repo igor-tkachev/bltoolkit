@@ -1,8 +1,6 @@
 using System;
 using System.Collections;
-#if FW2
 using System.Collections.Generic;
-#endif
 using System.Data;
 using System.Data.SqlTypes;
 using System.Diagnostics;
@@ -61,7 +59,6 @@ namespace BLToolkit.DataAccess
 			return da;
 		}
 
-#if FW2
 		public static T CreateInstance<T>() where T : DataAccessor
 		{
 			return TypeAccessor<T>.CreateInstanceEx();
@@ -82,7 +79,6 @@ namespace BLToolkit.DataAccess
 
 			return da;
 		}
-#endif
 
 		#endregion
 
@@ -203,7 +199,6 @@ namespace BLToolkit.DataAccess
 			}
 		}
 
-#if FW2
 		protected void ExecuteDictionary<TValue>(
 			DbManager                          db,
 			IDictionary<CompoundValue, TValue> dictionary,
@@ -245,8 +240,6 @@ namespace BLToolkit.DataAccess
 
 			db.ExecuteDictionary<TKey, TValue>(dictionary, mms[0].MemberName, objectType, null);
 		}
-
-#endif
 
 		protected void ExecuteScalarDictionary(
 			DbManager             db,
@@ -420,8 +413,6 @@ namespace BLToolkit.DataAccess
 
 		#endregion
 
-#if FW2
-
 		#region Nullable Types
 
 		[NoInterception]
@@ -512,8 +503,6 @@ namespace BLToolkit.DataAccess
 		}
 
 		#endregion
-
-#endif
 
 		#region SqlTypes
 

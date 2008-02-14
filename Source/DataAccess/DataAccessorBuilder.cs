@@ -1,8 +1,6 @@
 using System;
 using System.Collections;
-#if FW2
 using System.Collections.Generic;
-#endif
 using System.ComponentModel;
 using System.Data;
 using System.Data.SqlTypes;
@@ -115,10 +113,7 @@ namespace BLToolkit.DataAccess
 				ExecuteDataTable();
 			}
 			else if (!returnType.IsArray && (IsInterfaceOf(returnType, typeof(IList))
-#if FW2
-				|| returnType.IsGenericType && returnType.GetGenericTypeDefinition() == typeof(IList<>)
-#endif
-				))
+				|| returnType.IsGenericType && returnType.GetGenericTypeDefinition() == typeof(IList<>)))
 			{
 				if (!_explicitObjectType)
 				{
@@ -143,15 +138,11 @@ namespace BLToolkit.DataAccess
 					ExecuteList();
 			}
 			else if (IsInterfaceOf(returnType, typeof(IDictionary))
-#if FW2
-				|| returnType.IsGenericType && returnType.GetGenericTypeDefinition() == typeof(IDictionary<,>)
-#endif
-				)
+				|| returnType.IsGenericType && returnType.GetGenericTypeDefinition() == typeof(IDictionary<,>))
 			{
-				Type elementType = null;
-				Type keyType     = typeof(object);
-#if FW2
-				Type[] gTypes = TypeHelper.GetGenericArguments(returnType, typeof(IDictionary));
+				Type   elementType = null;
+				Type   keyType     = typeof(object);
+				Type[] gTypes      = TypeHelper.GetGenericArguments(returnType, typeof(IDictionary));
 
 				if ((gTypes == null || gTypes.Length != 2) && _destination != null)
 					gTypes = TypeHelper.GetGenericArguments(_destination.ParameterType, typeof(IDictionary));
@@ -161,7 +152,6 @@ namespace BLToolkit.DataAccess
 					keyType     = gTypes[0];
 					elementType = gTypes[1];
 				}
-#endif
 
 				if (elementType == null || _explicitObjectType)
 					elementType = _objectType;
@@ -366,7 +356,6 @@ namespace BLToolkit.DataAccess
 			if (attrs.Length != 0)
 				_objectType = ((ObjectTypeAttribute)attrs[0]).ObjectType;
 
-#if FW2
 			if (_objectType == null)
 			{
 				Type[] types = TypeHelper.GetGenericArguments(mi.DeclaringType, typeof(DataAccessor));
@@ -374,7 +363,6 @@ namespace BLToolkit.DataAccess
 				if (types != null)
 					_objectType = types[0];
 			}
-#endif
 		}
 
 		#region ExecuteReader
@@ -599,25 +587,12 @@ namespace BLToolkit.DataAccess
 
 		public FieldBuilder GetIndexField(NameOrIndexParameter[] namesOrIndexes)
 		{
-#if FW2
 			string id = "index$" + string.Join("%",
 				Array.ConvertAll<NameOrIndexParameter, string>(namesOrIndexes,
 					delegate(NameOrIndexParameter nameOrIndex)
 					{
 						return nameOrIndex.ToString();
 					}));
-#else
-			System.Text.StringBuilder sb = new System.Text.StringBuilder();
-			sb.Append("index$");
-
-			for (int i = 0; i < namesOrIndexes.Length; ++i)
-			{
-				sb.Append('%');
-				sb.Append(namesOrIndexes[i]);
-			}
-
-			string id = sb.ToString();
-#endif
 
 			FieldBuilder fieldBuilder = Context.GetField(id);
 
@@ -775,7 +750,6 @@ namespace BLToolkit.DataAccess
 			CallSetCommand();
 			LoadDestinationOrReturnValue();
 
-#if FW2
 			if (IsGenericDestinationOrReturnValue())
 			{
 				Type[]     genericArgs = Context.ReturnValue.LocalType.GetGenericArguments();
@@ -801,7 +775,7 @@ namespace BLToolkit.DataAccess
 					;
 			}
 			else
-#endif
+
 				emit
 					.ldloc    (_locObjType)
 					.LoadType (keyType)
@@ -855,7 +829,6 @@ namespace BLToolkit.DataAccess
 			CallSetCommand();
 			LoadDestinationOrReturnValue();
 
-#if FW2
 			if (IsGenericDestinationOrReturnValue())
 			{
 				Type[]     genericArgs = Context.ReturnValue.LocalType.GetGenericArguments();
@@ -879,8 +852,7 @@ namespace BLToolkit.DataAccess
 					;
 			}
 			else
-#endif
-
+			{
 				emit
 					.ldNameOrIndex(keyField)
 					.ldloc        (_locObjType)
@@ -889,6 +861,7 @@ namespace BLToolkit.DataAccess
 					.pop
 					.end()
 					;
+			}
 		}
 
 		#endregion
@@ -1123,12 +1096,10 @@ namespace BLToolkit.DataAccess
 						returnType = typeof(ArrayList);
 					else if (IsInterfaceOf(returnType, typeof(IDictionary)))
 						returnType = typeof(Hashtable);
-#if FW2
 					else if (returnType.GetGenericTypeDefinition() == typeof(IList<>))
 						returnType = typeof(List<>).MakeGenericType(returnType.GetGenericArguments());
 					else if (returnType.GetGenericTypeDefinition() == typeof(IDictionary<,>))
 						returnType = typeof(Dictionary<,>).MakeGenericType(returnType.GetGenericArguments());
-#endif
 				}
 
 				ConstructorInfo ci = TypeHelper.GetDefaultConstructor(returnType);
@@ -1152,7 +1123,6 @@ namespace BLToolkit.DataAccess
 				Context.MethodBuilder.Emitter.ldloc(Context.ReturnValue);
 		}
 
-#if FW2
 		private bool IsGenericDestinationOrReturnValue()
 		{
 			if (_destination != null)
@@ -1160,7 +1130,6 @@ namespace BLToolkit.DataAccess
 			else
 				return Context.ReturnValue.LocalType.IsGenericType;
 		}
-#endif
 
 		private void InitObjectType()
 		{
@@ -1543,16 +1512,13 @@ namespace BLToolkit.DataAccess
 			if (nullValue != null)
 			{
 				Type nullValueType = type;
-#if FW2
 				bool isNullable    = TypeHelper.IsNullable(type);
-#endif
 
 				if (type.IsEnum)
 				{
 					nullValueType = Enum.GetUnderlyingType(type);
 					nullValue     = System.Convert.ChangeType(nullValue, nullValueType);
 				}
-#if FW2
 				else if (isNullable)
 				{
 					nullValueType = type.GetGenericArguments()[0];
@@ -1563,7 +1529,6 @@ namespace BLToolkit.DataAccess
 						.brfalse   (labelNull)
 						;
 				}
-#endif
 
 				if (nullValueType == nullValue.GetType() && emit.LoadWellKnownValue(nullValue))
 				{
@@ -1573,14 +1538,12 @@ namespace BLToolkit.DataAccess
 							.call  (nullValueType, "Equals", nullValueType)
 							.brtrue(labelNull)
 							;
-#if FW2
 					else if (isNullable)
 						emit
 							.ldarga(pi)
 							.call  (type, "get_Value")
 							.beq   (labelNull)
 							;
-#endif
 					else
 						emit
 							.ldarg (pi)
@@ -1601,7 +1564,6 @@ namespace BLToolkit.DataAccess
 							"The type '{0}' does not have 'Equals' method", type.FullName));
 					}
 
-#if FW2
 					if (isNullable)
 						emit
 							.ldsflda   (staticField)
@@ -1609,7 +1571,6 @@ namespace BLToolkit.DataAccess
 							.call      (pi.ParameterType, "get_Value")
 							;
 					else
-#endif
 						emit
 							.ldsflda   (staticField)
 							.ldarg     (pi)
@@ -1913,7 +1874,6 @@ namespace BLToolkit.DataAccess
 
 		private static string GetConverterMethodName(Type type)
 		{
-#if FW2
 			Type underlyingType = Nullable.GetUnderlyingType(type);
 
 			if (underlyingType != null)
@@ -1936,7 +1896,6 @@ namespace BLToolkit.DataAccess
 				if (underlyingType == typeof(Decimal))  return "ConvertToNullableDecimal";
 				if (underlyingType == typeof(Guid))     return "ConvertToNullableGuid";
 			}
-#endif
 
 			if (type.IsPrimitive)
 			{

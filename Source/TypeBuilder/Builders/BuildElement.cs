@@ -1,5 +1,3 @@
-using System;
-
 namespace BLToolkit.TypeBuilder.Builders
 {
 	public enum BuildElement

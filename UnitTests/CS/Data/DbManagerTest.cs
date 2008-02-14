@@ -3,10 +3,8 @@ using System.Collections;
 using System.Data;
 using System.Data.SqlClient;
 using System.Data.SqlTypes;
-#if FW2
 using System.IO;
 using System.Xml;
-#endif
 using BLToolkit.Data.DataProvider;
 using NUnit.Framework;
 
@@ -58,7 +56,7 @@ namespace Data
 			public Decimal   Money_;
 			public Single    Single_;
 			public String    String_;
-#if FW2
+
 			public Char      Char_;
 			public SByte     SByte_;
 			[MapIgnore(false)]
@@ -70,7 +68,6 @@ namespace Data
 			public XmlReader Xml_;
 			[MapField("Xml_")]
 			public XmlDocument XmlDoc_;
-#endif
 		}
 
 		public class DataTypeSqlTest
@@ -90,14 +87,12 @@ namespace Data
 			public SqlMoney    Money_;
 			public SqlSingle   Single_;
 			public SqlString   String_;
-#if FW2
 			[MapIgnore(false)]
 			public SqlBytes    Bytes_;
 			[MapIgnore(false)]
 			public SqlChars    Chars_;
 			[MapIgnore(false)]
 			public SqlXml      Xml_;
-#endif
 		}
 
 		[Test]
@@ -133,11 +128,7 @@ namespace Data
 			{
 				Person p = (Person)db
 					.SetCommand("SELECT * FROM Person WHERE PersonID = " + db.DataProvider.Convert("id", ConvertType.NameToQueryParameter),
-#if FW2
 					db.Parameter("id", 1))
-#else
-					db.Parameter("@id", 1))
-#endif
 					.ExecuteObject(typeof(Person));
 
 				TypeAccessor.WriteConsole(p);
@@ -151,11 +142,7 @@ namespace Data
 			{
 				DataTypeTest dt = (DataTypeTest)db
 					.SetCommand("SELECT * FROM DataTypeTest WHERE DataTypeID = " + db.DataProvider.Convert("id", ConvertType.NameToQueryParameter),
-#if FW2
 					db.Parameter("id", 2))
-#else
-					db.Parameter("@id", 2))
-#endif
 					.ExecuteObject(typeof(DataTypeTest));
 
 				TypeAccessor.WriteConsole(dt);
@@ -171,11 +158,7 @@ namespace Data
 			{
 				DataTypeSqlTest dt = (DataTypeSqlTest)db
 					.SetCommand("SELECT * FROM DataTypeTest WHERE DataTypeID = " + db.DataProvider.Convert("id", ConvertType.NameToQueryParameter),
-#if FW2
 					db.Parameter("id", 2))
-#else
-					db.Parameter("@id", 2))
-#endif
 					.ExecuteObject(typeof(DataTypeSqlTest));
 
 				TypeAccessor.WriteConsole(dt);
@@ -325,7 +308,7 @@ namespace Data
 				dt.Money_    = 99876543210.0m;
 				dt.Single_   = 1234.0f;
 				dt.String_   = "Crazy Frog";
-#if FW2
+
 				dt.Char_     = 'F';
 				dt.SByte_    = 123;
 				dt.Stream_   = new MemoryStream(5);
@@ -334,7 +317,6 @@ namespace Data
 				dt.UInt64_   = 12345678901234567890;
 				dt.Xml_      = new XmlTextReader(new StringReader("<xml/>"));
 				dt.XmlDoc_   = new XmlDocument(); dt.XmlDoc_.LoadXml("<xmldoc/>");
-#endif
 
 				IDbDataParameter[] parameters = db.CreateParameters(dt);
 
@@ -368,12 +350,11 @@ namespace Data
 				dt.Money_    = new SqlMoney(99876543210.0m);
 				dt.Single_   = new SqlSingle(1234.0f);
 				dt.String_   = new SqlString("Crazy Frog");
-#if FW2
+
 				dt.Bytes_    = new SqlBytes(new byte[2] {2, 1});
 				dt.Chars_    = new SqlChars(new char[2] {'B', 'L'});
 				dt.Xml_      = new SqlXml(new XmlTextReader(new StringReader("<xml/>")));
-#endif
-				
+
 				IDbDataParameter[] parameters = db.CreateParameters(dt);
 
 				foreach (IDbDataParameter parameter in parameters)

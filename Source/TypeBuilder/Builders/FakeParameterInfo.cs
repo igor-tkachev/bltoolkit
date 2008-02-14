@@ -11,7 +11,7 @@ namespace BLToolkit.TypeBuilder.Builders
 			_name       = name;
 			_type       = type;
 			_memberInfo = memberInfo;
-			_attributes = attributes == null? new object[0]: attributes;
+			_attributes = attributes ?? new object[0];
 		}
 
 		public FakeParameterInfo(MethodInfo method) : this(

@@ -1,8 +1,6 @@
 using System;
 using System.Collections;
-#if FW2
 using System.Collections.Generic;
-#endif
 
 using NUnit.Framework;
 
@@ -131,7 +129,6 @@ namespace DataAccess
 			[Index(0, 1)]
 			public abstract IDictionary DictionaryByMapIndexWithDestination([Destination] Hashtable dictionary);
 
-#if FW2
 			[SqlQuery("SELECT * FROM Person WHERE PersonID < 3")]
 			[Index(0), ScalarFieldName(1)]
 			public abstract void                              FW2ScalarDictionaryByIndexReturnVoid1([Destination] IDictionary<int, string> dictionary);
@@ -204,8 +201,6 @@ namespace DataAccess
 
 			[SprocName("Person_SelectAll")]
 			public abstract Dictionary<CompoundValue, PersonMultiPK> SelectAllT9();
-
-#endif
 		}
 
 		private TestAccessor _da;
@@ -244,7 +239,6 @@ namespace DataAccess
 			IDictionary dic6 = _da.SelectAllAsIDictionary();
 			Assert.AreEqual("John", dic6[new CompoundValue(_id, "Pupkin")]);
 
-#if FW2
 			Dictionary<int, Person> dict1 = _da.SelectAllT1();
 			Assert.AreEqual("John", dict1[1].FirstName);
 
@@ -262,8 +256,6 @@ namespace DataAccess
 
 			IDictionary<CompoundValue, string> dict6 = _da.SelectAllAsIDictionaryT();
 			Assert.AreEqual("John", dict6[new CompoundValue(_id, "Pupkin")]);
-
-#endif
 		}
 
 		[Test]
@@ -389,8 +381,7 @@ namespace DataAccess
 			Assert.IsNotNull(actualValue);
 			Assert.AreEqual("John", actualValue.FirstName);
 		}
-		
-#if FW2
+
 		[Test]
 		public void FW2ScalarDictionaryByPKTest()
 		{
@@ -549,6 +540,5 @@ namespace DataAccess
 			Assert.IsNotNull(actualValue);
 			Assert.AreEqual("John", actualValue.FirstName);
 		}
-#endif
 	}
 }

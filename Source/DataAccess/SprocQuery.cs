@@ -49,8 +49,6 @@ namespace BLToolkit.DataAccess
 			}
 		}
 
-#if FW2
-
 		public virtual T SelectByKey<T>(DbManager db, params object[] key)
 		{
 			return db
@@ -72,8 +70,6 @@ namespace BLToolkit.DataAccess
 					db.Dispose();
 			}
 		}
-
-#endif
 
 		#endregion
 
@@ -122,8 +118,6 @@ namespace BLToolkit.DataAccess
 					db.Dispose();
 			}
 		}
-
-#if FW2
 
 		public virtual System.Collections.Generic.List<T> SelectAll<T>(DbManager db)
 		{
@@ -182,8 +176,6 @@ namespace BLToolkit.DataAccess
 		{
 			return SelectAll<L,T>(new L());
 		}
-
-#endif
 
 		#endregion
 

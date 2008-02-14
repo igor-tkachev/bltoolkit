@@ -1,9 +1,7 @@
 using System;
 using System.Data;
 using System.Collections;
-#if FW2
 using System.Collections.Generic;
-#endif
 
 using BLToolkit.Common;
 using BLToolkit.Reflection;
@@ -89,14 +87,11 @@ namespace BLToolkit.Mapping
 		{
 			return _defaultSchema.MapEnumToValue(value);
 		}
-#if FW2
 
 		public static T ToEnum<T>(object value)
 		{
 			return (T)_defaultSchema.MapValueToEnum(value, typeof(T));
 		}
-
-#endif
 
 		#endregion
 
@@ -114,12 +109,10 @@ namespace BLToolkit.Mapping
 			return _defaultSchema.MapObjectToObject(sourceObject, destObjectType, parameters);
 		}
 
-#if FW2
 		public static T ObjectToObject<T>(object sourceObject, params object[] parameters)
 		{
 			return (T)_defaultSchema.MapObjectToObject(sourceObject, typeof(T), parameters);
 		}
-#endif
 
 		#endregion
 
@@ -179,7 +172,6 @@ namespace BLToolkit.Mapping
 			return _defaultSchema.MapDataRowToObject(dataRow, version, destObjectType, parameters);
 		}
 
-#if FW2
 		public static T DataRowToObject<T>(DataRow dataRow, params object[] parameters)
 		{
 			return (T)_defaultSchema.MapDataRowToObject(dataRow, typeof(T), parameters);
@@ -189,7 +181,6 @@ namespace BLToolkit.Mapping
 		{
 			return (T)_defaultSchema.MapDataRowToObject(dataRow, version, typeof(T), parameters);
 		}
-#endif
 
 		#endregion
 
@@ -258,12 +249,10 @@ namespace BLToolkit.Mapping
 			return _defaultSchema.MapDataReaderToObject(dataReader, destObjectType, parameters);
 		}
 
-#if FW2
 		public static T DataReaderToObject<T>(IDataReader dataReader, params object[] parameters)
 		{
 			return (T)_defaultSchema.MapDataReaderToObject(dataReader, typeof(T), parameters);
 		}
-#endif
 
 		#endregion
 
@@ -313,12 +302,10 @@ namespace BLToolkit.Mapping
 			return _defaultSchema.MapDictionaryToObject(sourceDictionary, destObjectType, parameters);
 		}
 
-#if FW2
 		public static T DictionaryToObject<T>(IDictionary sourceDictionary, params object[] parameters)
 		{
 			return (T)_defaultSchema.MapDictionaryToObject(sourceDictionary, typeof(T), parameters);
 		}
-#endif
 
 		#endregion
 
@@ -356,7 +343,6 @@ namespace BLToolkit.Mapping
 			return _defaultSchema.MapListToList(sourceList, destObjectType, parameters);
 		}
 
-#if FW2
 		public static List<T> ListToList<T>(ICollection sourceList, List<T> destList, params object[] parameters)
 		{
 			return _defaultSchema.MapListToList<T>(sourceList, destList, parameters);
@@ -366,7 +352,6 @@ namespace BLToolkit.Mapping
 		{
 			return _defaultSchema.MapListToList<T>(sourceList, parameters);
 		}
-#endif
 
 		#endregion
 
@@ -406,7 +391,6 @@ namespace BLToolkit.Mapping
 			return _defaultSchema.MapListToDictionary(sourceList, keyField, destObjectType, parameters);
 		}
 
-#if FW2
 		public static IDictionary<K,T> ListToDictionary<K,T>(
 			ICollection          sourceList,
 			IDictionary<K,T>     destDictionary,
@@ -423,7 +407,6 @@ namespace BLToolkit.Mapping
 		{
 			return _defaultSchema.MapListToDictionary<K,T>(sourceList, keyField, parameters);
 		}
-#endif
 
 		#endregion
 
@@ -449,7 +432,6 @@ namespace BLToolkit.Mapping
 			return _defaultSchema.MapListToDictionary(sourceList, index, destObjectType, parameters);
 		}
 
-#if FW2
 		public static IDictionary<CompoundValue,T> ListToDictionary<T>(
 			ICollection                  sourceList,
 			IDictionary<CompoundValue,T> destDictionary,
@@ -466,7 +448,6 @@ namespace BLToolkit.Mapping
 		{
 			return _defaultSchema.MapListToDictionary<T>(sourceList, index, parameters);
 		}
-#endif
 
 		#endregion
 
@@ -527,7 +508,6 @@ namespace BLToolkit.Mapping
 			return _defaultSchema.MapDataTableToList(sourceTable, version, destObjectType, parameters);
 		}
 
-#if FW2
 		public static List<T> DataTableToList<T>(DataTable sourceTable, List<T> list, params object[] parameters)
 		{
 			return _defaultSchema.MapDataTableToList<T>(sourceTable, list, parameters);
@@ -551,7 +531,6 @@ namespace BLToolkit.Mapping
 		{
 			return _defaultSchema.MapDataTableToList<T>(sourceTable, version, parameters);
 		}
-#endif
 
 		#endregion
 
@@ -577,7 +556,6 @@ namespace BLToolkit.Mapping
 			return _defaultSchema.MapDataTableToDictionary(sourceTable, keyField, destObjectType, parameters);
 		}
 
-#if FW2
 		public static IDictionary<K,T> DataTableToDictionary<K,T>(
 			DataTable            sourceTable,
 			IDictionary<K,T>     destDictionary,
@@ -595,7 +573,6 @@ namespace BLToolkit.Mapping
 		{
 			return _defaultSchema.MapDataTableToDictionary<K,T>(sourceTable, keyField, parameters);
 		}
-#endif
 
 		#endregion
 
@@ -621,7 +598,6 @@ namespace BLToolkit.Mapping
 			return _defaultSchema.MapDataTableToDictionary(sourceTable, index, destObjectType, parameters);
 		}
 
-#if FW2
 		public static IDictionary<CompoundValue,T> DataTableToDictionary<T>(
 			DataTable                    sourceTable,
 			IDictionary<CompoundValue,T> destDictionary,
@@ -639,7 +615,6 @@ namespace BLToolkit.Mapping
 		{
 			return _defaultSchema.MapDataTableToDictionary<T>(sourceTable, index, parameters);
 		}
-#endif
 
 		#endregion
 
@@ -663,7 +638,6 @@ namespace BLToolkit.Mapping
 			return _defaultSchema.MapDataReaderToList(reader, destObjectType, parameters);
 		}
 
-#if FW2
 		public static IList<T> DataReaderToList<T>(IDataReader reader, IList<T> list, params object[] parameters)
 		{
 			return _defaultSchema.MapDataReaderToList<T>(reader, list, parameters);
@@ -673,7 +647,6 @@ namespace BLToolkit.Mapping
 		{
 			return _defaultSchema.MapDataReaderToList<T>(reader, parameters);
 		}
-#endif
 
 		#endregion
 
@@ -713,7 +686,6 @@ namespace BLToolkit.Mapping
 			return _defaultSchema.MapDataReaderToDictionary(dataReader, keyField, destObjectType, parameters);
 		}
 
-#if FW2
 		public static IDictionary<K,T> DataReaderToDictionary<K,T>(
 			IDataReader          dataReader,
 			IDictionary<K,T>     destDictionary,
@@ -731,7 +703,6 @@ namespace BLToolkit.Mapping
 		{
 			return _defaultSchema.MapDataReaderToDictionary<K,T>(dataReader, keyField, parameters);
 		}
-#endif
 
 		#endregion
 
@@ -757,7 +728,6 @@ namespace BLToolkit.Mapping
 			return _defaultSchema.MapDataReaderToDictionary(dataReader, index, destObjectType, parameters);
 		}
 
-#if FW2
 		public static IDictionary<CompoundValue,T> DataReaderToDictionary<T>(
 			IDataReader                  dataReader,
 			IDictionary<CompoundValue,T> destDictionary,
@@ -775,7 +745,6 @@ namespace BLToolkit.Mapping
 		{
 			return _defaultSchema.MapDataReaderToDictionary<T>(dataReader, index, parameters);
 		}
-#endif
 
 		#endregion
 
@@ -802,7 +771,6 @@ namespace BLToolkit.Mapping
 			return _defaultSchema.MapDictionaryToList(sourceDictionary, destObjectType, parameters);
 		}
 
-#if FW2
 		public static List<T> DictionaryToList<T>(
 			IDictionary     sourceDictionary,
 			List<T>         destList,
@@ -815,7 +783,6 @@ namespace BLToolkit.Mapping
 		{
 			return _defaultSchema.MapDictionaryToList<T>(sourceDictionary, parameters);
 		}
-#endif
 
 		#endregion
 
@@ -856,7 +823,6 @@ namespace BLToolkit.Mapping
 				sourceDictionary, keyField, destObjectType, parameters);
 		}
 
-#if FW2
 		public static IDictionary<K,T> DictionaryToDictionary<K,T>(
 			IDictionary          sourceDictionary,
 			IDictionary<K,T>     destDictionary,
@@ -874,7 +840,6 @@ namespace BLToolkit.Mapping
 		{
 			return _defaultSchema.MapDictionaryToDictionary<K,T>(sourceDictionary, keyField, parameters);
 		}
-#endif
 
 		#endregion
 
@@ -901,7 +866,6 @@ namespace BLToolkit.Mapping
 				sourceDictionary, index, destObjectType, parameters);
 		}
 
-#if FW2
 		public static IDictionary<CompoundValue,T> DictionaryToDictionary<T>(
 			IDictionary                  sourceDictionary,
 			IDictionary<CompoundValue,T> destDictionary,
@@ -919,7 +883,6 @@ namespace BLToolkit.Mapping
 		{
 			return _defaultSchema.MapDictionaryToDictionary<T>(sourceDictionary, index, parameters);
 		}
-#endif
 
 		#endregion
 
@@ -978,12 +941,10 @@ namespace BLToolkit.Mapping
 			return TypeAccessor.CreateInstanceEx(type);
 		}
 
-#if FW2
 		public static T CreateInstance<T>()
 		{
 			return TypeAccessor<T>.CreateInstanceEx();
 		}
-#endif
 
 		#endregion
 	}

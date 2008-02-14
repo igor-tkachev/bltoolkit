@@ -16,7 +16,7 @@ namespace BLToolkit.EditableObjects
 			_current      = obj;
 
 			if (_current != null)
-				_current.PropertyChanged += new PropertyChangedEventHandler(_current_PropertyChanged);
+				_current.PropertyChanged += _current_PropertyChanged;
 		}
 
 		void _current_PropertyChanged(object sender, PropertyChangedEventArgs e)
@@ -39,12 +39,12 @@ namespace BLToolkit.EditableObjects
 			set
 			{
 				if (_current != null)
-					_current.PropertyChanged -= new PropertyChangedEventHandler(_current_PropertyChanged);
+					_current.PropertyChanged -= _current_PropertyChanged;
 
 				_current = value;
 
 				if (_current != null)
-					_current.PropertyChanged += new PropertyChangedEventHandler(_current_PropertyChanged);
+					_current.PropertyChanged += _current_PropertyChanged;
 			}
 		}
 

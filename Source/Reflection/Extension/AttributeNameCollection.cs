@@ -15,7 +15,7 @@ namespace BLToolkit.Reflection.Extension
 				AttributeExtensionCollection ext =
 					(AttributeExtensionCollection)_attributes[attributeName];
 
-				return ext != null? ext: AttributeExtensionCollection.Null;
+				return ext ?? AttributeExtensionCollection.Null;
 			}
 		}
 

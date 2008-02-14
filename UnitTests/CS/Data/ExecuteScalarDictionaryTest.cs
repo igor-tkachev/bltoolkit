@@ -1,8 +1,5 @@
-using System;
 using System.Collections;
-#if FW2
 using System.Collections.Generic;
-#endif
 
 using NUnit.Framework;
 
@@ -205,7 +202,6 @@ namespace Data
 			}
 		}
 
-#if FW2
 		[Test]
 		public void FW2ScalarDictionaryTest()
 		{
@@ -366,6 +362,5 @@ namespace Data
 				Assert.IsTrue(dic.Count > 0);
 			}
 		}
-#endif
 	}
 }

@@ -1,5 +1,3 @@
-using System;
-
 namespace BLToolkit.Mapping
 {
 	public class MapRelation

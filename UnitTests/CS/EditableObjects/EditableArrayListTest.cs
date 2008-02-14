@@ -1,9 +1,8 @@
 using System;
 using System.ComponentModel;
-#if FW2
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
-#endif
+
 using NUnit.Framework;
 
 using BLToolkit.TypeBuilder;
@@ -302,8 +301,6 @@ namespace EditableObjects
 				Console.WriteLine(o);
 		}
 
-#if FW2
-
 		[Serializable]
 		public abstract class SerializableObject : EditableObject
 		{
@@ -379,8 +376,6 @@ namespace EditableObjects
 			Console.WriteLine(e.ListChangedType);
 			_notificationCount++;
 		}
-
-#endif
 
 	}
 }

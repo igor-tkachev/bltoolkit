@@ -12,12 +12,7 @@ namespace BLToolkit.ComponentModel
 	[DefaultProperty("ItemType")]
 	[ToolboxItem(true)]
 	[ToolboxBitmap(typeof(ObjectBinder))]
-	public class ObjectBinder : Component, ITypedList,
-#if FW2
-		IBindingListView, ICancelAddNew
-#else
-		IBindingList
-#endif
+	public class ObjectBinder : Component, ITypedList, IBindingListView, ICancelAddNew
 	{
 		#region Constructors
 
@@ -43,9 +38,7 @@ namespace BLToolkit.ComponentModel
 		[DefaultValue(null)]
 		[Category("Data")]
 		[TypeConverter(typeof(TypeTypeConverter))]
-#if FW2
 		[Editor(typeof(Design.TypeEditor), typeof(UITypeEditor))]
-#endif
 		public  Type  ItemType
 		{
 			get { return _itemType; }
@@ -64,9 +57,7 @@ namespace BLToolkit.ComponentModel
 		[DefaultValue(null)]
 		[Category("Data")]
 		[TypeConverter(typeof(TypeTypeConverter))]
-#if FW2
 		[Editor(typeof(Design.ObjectViewTypeEditor), typeof(UITypeEditor))]
-#endif
 		public  Type  ObjectViewType
 		{
 			get { return _objectViewType; }
@@ -116,7 +107,7 @@ namespace BLToolkit.ComponentModel
 				if (value == null)
 				{
 					if (_list != _empty)
-						_list.ListChanged -= new ListChangedEventHandler(ListChangedHandler);
+						_list.ListChanged -= ListChangedHandler;
 
 					_list = _itemType == null? _empty: new EditableArrayList(_itemType);
 					_isListCreatedInternally = true;
@@ -156,7 +147,7 @@ namespace BLToolkit.ComponentModel
 
 					if (_list != _empty)
 					{
-						_list.ListChanged -= new ListChangedEventHandler(ListChangedHandler);
+						_list.ListChanged -= ListChangedHandler;
 						
 						if (_disposeList || (_isListCreatedInternally && _disposeCreatedList))
 							_list.Dispose();
@@ -166,7 +157,7 @@ namespace BLToolkit.ComponentModel
 				}
 
 				if (_list != _empty)
-					_list.ListChanged += new ListChangedEventHandler(ListChangedHandler);
+					_list.ListChanged += ListChangedHandler;
 				OnListChanged(ListChangedType.Reset, -1);
 			}
 		}
@@ -258,7 +249,7 @@ namespace BLToolkit.ComponentModel
 		{
 			if (_list != _empty)
 			{
-				_list.ListChanged -= new ListChangedEventHandler(ListChangedHandler);
+				_list.ListChanged -= ListChangedHandler;
 
 				if (_disposeList || (_isListCreatedInternally && _disposeCreatedList))
 					_list.Dispose();
@@ -281,8 +272,8 @@ namespace BLToolkit.ComponentModel
 				return new PropertyDescriptorCollection(new PropertyDescriptor[0]);
 
 			string key =
-				_itemType.ToString() + "." +
-				(_objectViewType == null? "": _objectViewType.ToString()) + "." +
+				_itemType + "." +
+				(_objectViewType == null? string.Empty: _objectViewType.ToString()) + "." +
 				(_isNull == null? "0": "1");
 
 			if (listAccessors != null)
@@ -308,8 +299,6 @@ namespace BLToolkit.ComponentModel
 		}
 
 		#endregion
-
-#if FW2
 
 		#region IBindingListView Members
 
@@ -359,8 +348,6 @@ namespace BLToolkit.ComponentModel
 		}
 
 		#endregion
-
-#endif
 
 		#region IBindingList Members
 

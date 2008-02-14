@@ -33,14 +33,10 @@ namespace BLToolkit.DataAccess
 
 		#region Overrides
 
-#if FW2
-
 		public SqlQueryInfo GetSqlQueryInfo<T>(DbManager db, string actionName)
 		{
 			return base.GetSqlQueryInfo(db, typeof(T), actionName);
 		}
-
-#endif
 
 		#endregion
 
@@ -70,8 +66,6 @@ namespace BLToolkit.DataAccess
 			}
 		}
 
-#if FW2
-
 		public virtual T SelectByKey<T>(DbManager db, params object[] keys)
 		{
 			SqlQueryInfo query = GetSqlQueryInfo(db, typeof(T), "SelectByKey");
@@ -95,8 +89,6 @@ namespace BLToolkit.DataAccess
 					db.Dispose();
 			}
 		}
-
-#endif
 
 		#endregion
 
@@ -149,8 +141,6 @@ namespace BLToolkit.DataAccess
 					db.Dispose();
 			}
 		}
-
-#if FW2
 
 		public virtual System.Collections.Generic.List<T> SelectAll<T>(DbManager db)
 		{
@@ -213,8 +203,6 @@ namespace BLToolkit.DataAccess
 		{
 			return SelectAll<L,T>(new L());
 		}
-
-#endif
 
 		#endregion
 
@@ -300,8 +288,6 @@ namespace BLToolkit.DataAccess
 			}
 		}
 
-#if FW2
-
 		public virtual int DeleteByKey<T>(DbManager db, params object[] key)
 		{
 			SqlQueryInfo query = GetSqlQueryInfo(db, typeof(T), "Delete");
@@ -325,8 +311,6 @@ namespace BLToolkit.DataAccess
 					db.Dispose();
 			}
 		}
-
-#endif
 
 		#endregion
 

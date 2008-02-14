@@ -71,8 +71,8 @@ namespace BLToolkit.Aspects
 			set { _maxTime = value; }
 		}
 
-		private ArrayList _currentCalls = ArrayList.Synchronized(new ArrayList());
-		public  ArrayList  CurrentCalls
+		private readonly ArrayList _currentCalls = ArrayList.Synchronized(new ArrayList());
+		public           ArrayList  CurrentCalls
 		{
 			get { return _currentCalls; }
 		}
