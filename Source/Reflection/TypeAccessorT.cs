@@ -75,11 +75,28 @@ namespace BLToolkit.Reflection
 		public static Type Type         { get { return _instance.Type; } }
 		public static Type OriginalType { get { return _instance.OriginalType; } }
 
-		private static readonly TypeAccessor _instance = TypeAccessor.GetAccessor(typeof(T));
+		private static readonly TypeAccessor _instance;
 		public  static          TypeAccessor  Instance
 		{
 			[System.Diagnostics.DebuggerStepThrough]
 			get { return _instance; }
+		}
+
+		static TypeAccessor()
+		{
+			// Explicitly typed type constructor to prevent 'BeforeFieldInit' jit optimization.
+			// See http://blogs.msdn.com/davidnotario/archive/2005/02/08/369593.aspx for details.
+			//
+			// For us, this means that
+			//
+			// SomeObject  o1 = TypeAccessor.CreateInstance<SomeObject>();
+			// OtherObject o2 = TypeAccessor.CreateInstance<OtherObject>();
+			//
+			// May be executed in reverse order. Usually, there is no problem,
+			// but sometimes the order is important.
+			// See UnitTests\CS\TypeBuilder\InternalTypesTest.cs for an example.
+			//
+			_instance = TypeAccessor.GetAccessor(typeof(T));
 		}
 	}
 }

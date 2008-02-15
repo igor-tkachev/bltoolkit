@@ -19,11 +19,11 @@ namespace TypeBuilder
 
 		public abstract class PublicObject
 		{
-			internal string InternalField;
-			internal abstract string InternalValue { get; set; }
+			internal                    string InternalField;
+			internal           abstract string InternalValue          { get; set; }
 			internal protected abstract string ProtectedInternalValue { get; set; }
-			public abstract string PublicValue { get; internal set; }
-			public string NonAbstractValue
+			public             abstract string PublicValue            { get; internal set; }
+			public                      string NonAbstractValue
 			{
 				         get { return InternalField;  }
 				internal set { InternalField = value; }
@@ -39,8 +39,11 @@ namespace TypeBuilder
 			InternalObject o = TypeAccessor.CreateInstance<InternalObject>();
 			Assert.IsNotNull(o);
 
-			PublicObject o2 = TypeAccessor.CreateInstance<PublicObject>();
+			PublicObject  o2 = TypeAccessor.CreateInstance<PublicObject>();
 			Assert.IsNotNull(o2);
+
+			TypeFactory.SaveGlobalAssembly();
+			TypeFactory.SaveTypes = false;
 
 			TypeAccessor ta = TypeAccessor<PublicObject>.Instance;
 			Assert.IsNotNull(ta["InternalField"]);
@@ -58,9 +61,6 @@ namespace TypeBuilder
 			Assert.IsNotNull(ta["NonAbstractValue"]);
 			Assert.IsTrue   (ta["NonAbstractValue"].HasGetter);
 			Assert.IsTrue   (ta["NonAbstractValue"].HasSetter);
-
-
-			TypeFactory.SaveGlobalAssembly();
 		}
 	}
 }
