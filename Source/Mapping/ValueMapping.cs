@@ -121,8 +121,8 @@ namespace BLToolkit.Mapping
 					dest.SetNull(destObject, destIndex);
 				else
 				{
-					MapSetData<T>.MB<T> setter    = MapSetData<T>.I;
-					MapGetData<T>.MB<T> getter    = MapGetData<T>.I;
+					MapSetData<T>.MB<T> setter = MapSetData<T>.I;
+					MapGetData<T>.MB<T> getter = MapGetData<T>.I;
 
 					setter.To(dest, destObject, destIndex,
 						getter.From(source, sourceObject, sourceIndex));
