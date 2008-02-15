@@ -203,7 +203,7 @@ namespace Data
 		}
 
 		[Test]
-		public void FW2ScalarDictionaryTest()
+		public void GenericsScalarDictionaryTest()
 		{
 			using (DbManager db = new DbManager())
 			{
@@ -217,7 +217,7 @@ namespace Data
 		}
 
 		[Test]
-		public void FW2ScalarDictionaryTest2()
+		public void GenericsScalarDictionaryTest2()
 		{
 			using (DbManager db = new DbManager())
 			{
@@ -232,7 +232,7 @@ namespace Data
 		}
 
 		[Test]
-		public void FW2ScalarDictionaryTest3()
+		public void GenericsScalarDictionaryTest3()
 		{
 			using (DbManager db = new DbManager())
 			{
@@ -246,7 +246,7 @@ namespace Data
 		}
 
 		[Test]
-		public void FW2ScalarDictionaryTest4()
+		public void GenericsScalarDictionaryTest4()
 		{
 			using (DbManager db = new DbManager())
 			{
@@ -261,7 +261,7 @@ namespace Data
 		}
 
 		[Test]
-		public void FW2ScalarDictionaryMapIndexTest()
+		public void GenericsScalarDictionaryMapIndexTest()
 		{
 			using (DbManager db = new DbManager())
 			{
@@ -275,7 +275,7 @@ namespace Data
 		}
 
 		[Test]
-		public void FW2ScalarDictionaryMapIndexTest2()
+		public void GenericsScalarDictionaryMapIndexTest2()
 		{
 			using (DbManager db = new DbManager())
 			{
@@ -290,7 +290,7 @@ namespace Data
 		}
 
 		[Test]
-		public void FW2ScalarDictionaryMapIndexTest3()
+		public void GenericsScalarDictionaryMapIndexTest3()
 		{
 			using (DbManager db = new DbManager())
 			{
@@ -304,7 +304,7 @@ namespace Data
 		}
 
 		[Test]
-		public void FW2ScalarDictionaryMapIndexTest4()
+		public void GenericsScalarDictionaryMapIndexTest4()
 		{
 			using (DbManager db = new DbManager())
 			{
@@ -319,7 +319,7 @@ namespace Data
 		}
 
 		[Test]
-		public void FW2ScalarDictionaryMapIndexTest5()
+		public void GenericsScalarDictionaryMapIndexTest5()
 		{
 			using (DbManager db = new DbManager())
 			{
@@ -334,7 +334,7 @@ namespace Data
 		}
 
 		[Test]
-		public void FW2ScalarDictionaryMapIndexTest6()
+		public void GenericsScalarDictionaryMapIndexTest6()
 		{
 			using (DbManager db = new DbManager())
 			{
@@ -349,7 +349,7 @@ namespace Data
 		}
 
 		[Test]
-		public void FW2ScalarDictionaryMapIndexTest7()
+		public void GenericsScalarDictionaryMapIndexTest7()
 		{
 			using (DbManager db = new DbManager())
 			{

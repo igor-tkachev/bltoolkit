@@ -203,8 +203,6 @@ namespace BLToolkit.Mapping.ValueMappingInternal
 		}
 	}
 
-
-#if FW2
 	internal sealed class NI8TodbS : IValueMapper
 	{
 		public void Map(
@@ -402,8 +400,6 @@ namespace BLToolkit.Mapping.ValueMappingInternal
 		}
 	}
 
-
-#endif
 	internal sealed class dbSTodbS : IValueMapper
 	{
 		public void Map(
@@ -417,7 +413,6 @@ namespace BLToolkit.Mapping.ValueMappingInternal
 					source.GetSqlString(sourceObject, sourceIndex));
 		}
 	}
-
 
 	internal sealed class dbU8TodbS : IValueMapper
 	{
@@ -759,8 +754,6 @@ namespace BLToolkit.Mapping.ValueMappingInternal
 		}
 	}
 
-
-#if FW2
 	internal sealed class NI8TodbU8 : IValueMapper
 	{
 		public void Map(
@@ -958,8 +951,6 @@ namespace BLToolkit.Mapping.ValueMappingInternal
 		}
 	}
 
-
-#endif
 	internal sealed class dbSTodbU8 : IValueMapper
 	{
 		public void Map(
@@ -1314,8 +1305,6 @@ namespace BLToolkit.Mapping.ValueMappingInternal
 		}
 	}
 
-
-#if FW2
 	internal sealed class NI8TodbI16 : IValueMapper
 	{
 		public void Map(
@@ -1513,8 +1502,6 @@ namespace BLToolkit.Mapping.ValueMappingInternal
 		}
 	}
 
-
-#endif
 	internal sealed class dbSTodbI16 : IValueMapper
 	{
 		public void Map(
@@ -1869,8 +1856,6 @@ namespace BLToolkit.Mapping.ValueMappingInternal
 		}
 	}
 
-
-#if FW2
 	internal sealed class NI8TodbI32 : IValueMapper
 	{
 		public void Map(
@@ -2068,8 +2053,6 @@ namespace BLToolkit.Mapping.ValueMappingInternal
 		}
 	}
 
-
-#endif
 	internal sealed class dbSTodbI32 : IValueMapper
 	{
 		public void Map(
@@ -2439,8 +2422,6 @@ namespace BLToolkit.Mapping.ValueMappingInternal
 		}
 	}
 
-
-#if FW2
 	internal sealed class NI8TodbI64 : IValueMapper
 	{
 		public void Map(
@@ -2562,7 +2543,6 @@ namespace BLToolkit.Mapping.ValueMappingInternal
 		}
 	}
 
-
 	internal sealed class NBTodbI64 : IValueMapper
 	{
 		public void Map(
@@ -2652,7 +2632,6 @@ namespace BLToolkit.Mapping.ValueMappingInternal
 						source.GetNullableDateTime(sourceObject, sourceIndex)));
 		}
 	}
-#endif
 
 	internal sealed class dbSTodbI64 : IValueMapper
 	{
@@ -2668,7 +2647,6 @@ namespace BLToolkit.Mapping.ValueMappingInternal
 						source.GetSqlString(sourceObject, sourceIndex)));
 		}
 	}
-
 
 	internal sealed class dbU8TodbI64 : IValueMapper
 	{
@@ -3023,8 +3001,6 @@ namespace BLToolkit.Mapping.ValueMappingInternal
 		}
 	}
 
-
-#if FW2
 	internal sealed class NI8TodbR4 : IValueMapper
 	{
 		public void Map(
@@ -3222,8 +3198,6 @@ namespace BLToolkit.Mapping.ValueMappingInternal
 		}
 	}
 
-
-#endif
 	internal sealed class dbSTodbR4 : IValueMapper
 	{
 		public void Map(
@@ -3593,7 +3567,6 @@ namespace BLToolkit.Mapping.ValueMappingInternal
 		}
 	}
 
-#if FW2
 	internal sealed class NI8TodbR8 : IValueMapper
 	{
 		public void Map(
@@ -3805,7 +3778,6 @@ namespace BLToolkit.Mapping.ValueMappingInternal
 						source.GetNullableDateTime(sourceObject, sourceIndex)));
 		}
 	}
-#endif
 
 	internal sealed class dbSTodbR8 : IValueMapper
 	{
@@ -4175,8 +4147,6 @@ namespace BLToolkit.Mapping.ValueMappingInternal
 		}
 	}
 
-
-#if FW2
 	internal sealed class NI8TodbD : IValueMapper
 	{
 		public void Map(
@@ -4374,8 +4344,6 @@ namespace BLToolkit.Mapping.ValueMappingInternal
 		}
 	}
 
-
-#endif
 	internal sealed class dbSTodbD : IValueMapper
 	{
 		public void Map(
@@ -4730,8 +4698,6 @@ namespace BLToolkit.Mapping.ValueMappingInternal
 		}
 	}
 
-
-#if FW2
 	internal sealed class NI8TodbM : IValueMapper
 	{
 		public void Map(
@@ -4929,8 +4895,6 @@ namespace BLToolkit.Mapping.ValueMappingInternal
 		}
 	}
 
-
-#endif
 	internal sealed class dbSTodbM : IValueMapper
 	{
 		public void Map(
@@ -5286,8 +5250,6 @@ namespace BLToolkit.Mapping.ValueMappingInternal
 		}
 	}
 
-
-#if FW2
 	internal sealed class NI8TodbB : IValueMapper
 	{
 		public void Map(
@@ -5485,8 +5447,6 @@ namespace BLToolkit.Mapping.ValueMappingInternal
 		}
 	}
 
-
-#endif
 	internal sealed class dbSTodbB : IValueMapper
 	{
 		public void Map(
@@ -5658,7 +5618,6 @@ namespace BLToolkit.Mapping.ValueMappingInternal
 		}
 	}
 
-#if FW2
 	internal sealed class NGTodbG : IValueMapper
 	{
 		public void Map(
@@ -5673,7 +5632,6 @@ namespace BLToolkit.Mapping.ValueMappingInternal
 						source.GetNullableGuid(sourceObject, sourceIndex)));
 		}
 	}
-#endif
 
 	internal sealed class dbSTodbG : IValueMapper
 	{
@@ -5753,8 +5711,6 @@ namespace BLToolkit.Mapping.ValueMappingInternal
 		}
 	}
 
-
-#if FW2
 	internal sealed class NI64TodbDT : IValueMapper
 	{
 		public void Map(
@@ -5800,8 +5756,6 @@ namespace BLToolkit.Mapping.ValueMappingInternal
 		}
 	}
 
-
-#endif
 	internal sealed class dbSTodbDT : IValueMapper
 	{
 		public void Map(

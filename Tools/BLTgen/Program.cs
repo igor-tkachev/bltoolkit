@@ -78,7 +78,6 @@ namespace BLTgen
 					if (verbose)
 						Console.Write(t.FullName);
 
-#if FW2
 					// We cannot create accessors for generic definitions
 					//
 					if (t.IsGenericTypeDefinition)
@@ -89,7 +88,6 @@ namespace BLTgen
 						continue;
 					}
 
-#endif
 					if (verbose)
 						Console.WriteLine();
 

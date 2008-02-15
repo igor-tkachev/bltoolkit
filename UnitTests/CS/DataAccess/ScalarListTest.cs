@@ -27,21 +27,21 @@ namespace DataAccess
 			public abstract ArrayList SelectLastNames (DbManager db);
 
 			[SprocName("Person_SelectAll")]
-			public abstract List<int>          FW2SelectIDs              (DbManager db);
+			public abstract List<int>          GenericsSelectIDs              (DbManager db);
 
 			[SprocName("Person_SelectAll")]
 			[ScalarFieldName(1)]
-			public abstract List<string>       FW2SelectFirstNames       (DbManager db);
+			public abstract List<string>       GenericsSelectFirstNames       (DbManager db);
 
 			[SprocName("Person_SelectAll")]
 			[ScalarFieldName("LastName")]
-			public abstract List<string>       FW2SelectLastNames        (DbManager db);
+			public abstract List<string>       GenericsSelectLastNames        (DbManager db);
 
 			[SprocName("Person_SelectAll"), ObjectType(typeof(int))]
-			public abstract List<IConvertible> FW2SelectIDsAsIConvertible(DbManager db);
+			public abstract List<IConvertible> GenericsSelectIDsAsIConvertible(DbManager db);
 
 			[SprocName("Person_SelectAll")]
-			public abstract void               FW2SelectIDsReturnVoid    (DbManager db, [Destination] List<int> list);
+			public abstract void               GenericsSelectIDsReturnVoid    (DbManager db, [Destination] List<int> list);
 
 			public static TestAccessor CreateInstance()
 			{
@@ -92,12 +92,12 @@ namespace DataAccess
 		}
 
 		[Test]
-		public void FW2SelectIDsTest()
+		public void GenericsSelectIDsTest()
 		{
 			using (DbManager db = new DbManager())
 			{
 				TestAccessor ta = TestAccessor.CreateInstance();
-				List<int> list = ta.FW2SelectIDs(db);
+				List<int> list = ta.GenericsSelectIDs(db);
 
 				Assert.IsNotNull (list);
 				Assert.IsNotEmpty(list);
@@ -105,12 +105,12 @@ namespace DataAccess
 		}
 
 		[Test]
-		public void FW2SelectIDsAsIConvertibleTest()
+		public void GenericsSelectIDsAsIConvertibleTest()
 		{
 			using (DbManager db = new DbManager())
 			{
 				TestAccessor ta = TestAccessor.CreateInstance();
-				List<IConvertible> list = ta.FW2SelectIDsAsIConvertible(db);
+				List<IConvertible> list = ta.GenericsSelectIDsAsIConvertible(db);
 
 				Assert.IsNotNull (list);
 				Assert.IsNotEmpty(list);
@@ -118,13 +118,13 @@ namespace DataAccess
 		}
 
 		[Test]
-		public void FW2SelectIDsReturnVoidTest()
+		public void GenericsSelectIDsReturnVoidTest()
 		{
 			using (DbManager db = new DbManager())
 			{
 				TestAccessor ta = TestAccessor.CreateInstance();
 				List<int> list = new List<int>();
-				ta.FW2SelectIDsReturnVoid(db, list);
+				ta.GenericsSelectIDsReturnVoid(db, list);
 
 				Assert.IsNotNull (list);
 				Assert.IsNotEmpty(list);
@@ -132,12 +132,12 @@ namespace DataAccess
 		}
 
 		[Test]
-		public void FW2SelectFirstNamesTest()
+		public void GenericsSelectFirstNamesTest()
 		{
 			using (DbManager db = new DbManager())
 			{
 				TestAccessor ta = TestAccessor.CreateInstance();
-				List<string> list = ta.FW2SelectFirstNames(db);
+				List<string> list = ta.GenericsSelectFirstNames(db);
 
 				Assert.IsNotNull (list);
 				Assert.IsNotEmpty(list);
@@ -145,12 +145,12 @@ namespace DataAccess
 		}
 
 		[Test]
-		public void FW2SelectLastNamesTest()
+		public void GenericsSelectLastNamesTest()
 		{
 			using (DbManager db = new DbManager())
 			{
 				TestAccessor ta = TestAccessor.CreateInstance();
-				List<string> list = ta.FW2SelectLastNames(db);
+				List<string> list = ta.GenericsSelectLastNames(db);
 
 				Assert.IsNotNull (list);
 				Assert.IsNotEmpty(list);

@@ -1,8 +1,6 @@
 using System;
 using System.Collections;
-#if FW2
 using System.Collections.Generic;
-#endif
 using System.Reflection;
 
 using NUnit.Framework;
@@ -72,8 +70,6 @@ namespace Reflection
 			public new void Method2() {}
 		}
 
-#if FW2
-
 		public struct TestStruct<T,V>
 		{
 			public T _t;
@@ -116,8 +112,6 @@ namespace Reflection
 				return default(V);
 			}
 		}
-
-#endif
 
 		[Test]
 		public void GetAttributes()
@@ -162,7 +156,6 @@ namespace Reflection
 				typeof(Attribute2) == attrs[3].GetType() && typeof(Attribute5) == attrs[2].GetType());
 		}
 
-#if FW2
 		[Test]
 		public void UnderlyingTypeTest()
 		{
@@ -224,7 +217,6 @@ namespace Reflection
 			// There are more then one Method2 in the TestObject<T> class
 			new TypeHelper(typeof (TestObject<int>)).GetMethod("Method2");
 		}
-#endif
 
 		public class MyArrayList : ArrayList
 		{
@@ -240,9 +232,7 @@ namespace Reflection
 			Assert.AreEqual(typeof(TestObject), TypeHelper.GetListItemType(new EditableArrayList(typeof(TestObject))));
 			Assert.AreEqual(typeof(TestObject), TypeHelper.GetListItemType(new TestObject[0]));
 			Assert.AreEqual(typeof(TestObject), TypeHelper.GetListItemType(new MyArrayList()));
-#if FW2
 			Assert.AreEqual(typeof(TestObject), TypeHelper.GetListItemType(new List<TestObject>()));
-#endif
 		}
 	}
 }

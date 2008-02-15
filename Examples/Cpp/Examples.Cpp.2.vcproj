@@ -2,7 +2,7 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="8.00"
-	Name="Examples.Cpp.2"
+	Name="Examples.Cpp.2005"
 	ProjectGUID="{1710C5C2-0416-4981-81FC-BBBDFDA0B24D}"
 	RootNamespace="ExamplesCpp2"
 	Keyword="ManagedCProj"
@@ -178,11 +178,11 @@
 		/>
 		<ProjectReference
 			ReferencedProjectIdentifier="{0C325F5D-E50E-4340-8724-D29896CCC583}"
-			RelativePathToProject=".\Source\BLToolkit.2.csproj"
+			RelativePathToProject=".\Source\BLToolkit.2005.csproj"
 		/>
 		<AssemblyReference
-			RelativePath="c:\Program Files\NUnit 2.4.1\bin\nunit.framework.dll"
-			AssemblyName="nunit.framework, Version=2.4.1.0, PublicKeyToken=96d09a1eb7f44a77, processorArchitecture=MSIL"
+			RelativePath="nunit.framework.dll"
+			AssemblyName="nunit.framework, Version=2.2.9.0, PublicKeyToken=96d09a1eb7f44a77, processorArchitecture=MSIL"
 		/>
 	</References>
 	<Files>

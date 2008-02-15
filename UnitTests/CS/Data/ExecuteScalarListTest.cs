@@ -109,7 +109,7 @@ namespace Data
 		}
 
 		[Test]
-		public void FW2ScalarListTest()
+		public void GenericsScalarListTest()
 		{
 			string cmd = "SELECT PersonID FROM Person UNION ALL SELECT NULL";
 #if !MSSQL
@@ -129,7 +129,7 @@ namespace Data
 		}
 
 		[Test]
-		public void FW2ScalarListTest2()
+		public void GenericsScalarListTest2()
 		{
 			string cmd = "SELECT PersonID FROM Person UNION ALL SELECT NULL";
 #if !MSSQL
@@ -149,7 +149,7 @@ namespace Data
 		}
 
 		[Test]
-		public void FW2ScalarListTest3()
+		public void GenericsScalarListTest3()
 		{
 			using (DbManager db = new DbManager())
 			{
@@ -163,7 +163,7 @@ namespace Data
 		}
 
 		[Test]
-		public void FW2ScalarListTest4()
+		public void GenericsScalarListTest4()
 		{
 			using (DbManager db = new DbManager())
 			{
@@ -178,7 +178,7 @@ namespace Data
 		}
 
 		[Test]
-		public void FW2ScalarListTest5()
+		public void GenericsScalarListTest5()
 		{
 			using (DbManager db = new DbManager())
 			{
@@ -197,7 +197,7 @@ namespace Data
 		}
 
 		[Test]
-		public void FW2ScalarListTest6()
+		public void GenericsScalarListTest6()
 		{
 			using (DbManager db = new DbManager())
 			{
@@ -254,7 +254,7 @@ namespace Data
 		}
 
 		[Test]
-		public void FW2ScalarListDataTypesTest()
+		public void GenericsScalarListDataTypesTest()
 		{
 			using (DbManager db = new DbManager())
 			{

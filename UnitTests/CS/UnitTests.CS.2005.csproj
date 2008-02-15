@@ -8,14 +8,14 @@
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>UnitTests.CS</RootNamespace>
-    <AssemblyName>UnitTests.CS.2</AssemblyName>
+    <AssemblyName>UnitTests.CS</AssemblyName>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>TRACE;DEBUG;FW2;MSSQL</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;MSSQL</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
@@ -23,7 +23,7 @@
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE;FW2;MSSQL</DefineConstants>
+    <DefineConstants>TRACE;MSSQL</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
@@ -152,9 +152,9 @@
     <Compile Include="Validation\RegExValidationTest.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Source\BLToolkit.2.csproj">
+    <ProjectReference Include="..\..\Source\BLToolkit.2005.csproj">
       <Project>{0C325F5D-E50E-4340-8724-D29896CCC583}</Project>
-      <Name>BLToolkit.2</Name>
+      <Name>BLToolkit.2005</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

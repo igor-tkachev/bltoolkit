@@ -8,7 +8,7 @@
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>UnitTests.CS</RootNamespace>
-    <AssemblyName>UnitTests.CS.2</AssemblyName>
+    <AssemblyName>UnitTests.CS</AssemblyName>
     <FileUpgradeFlags>
     </FileUpgradeFlags>
     <OldToolsVersion>2.0</OldToolsVersion>
@@ -29,14 +29,14 @@
     <IsWebBootstrapper>false</IsWebBootstrapper>
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>
-    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>TRACE;DEBUG;FW2;FW3;MSSQL</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;MSSQL</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
@@ -44,7 +44,7 @@
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE;FW2;MSSQL</DefineConstants>
+    <DefineConstants>TRACE;MSSQL</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
@@ -62,9 +62,6 @@
       <HintPath>..\..\..\..\..\..\..\Program Files\NUnit-Net-2.0 2.2.8\bin\nunit.framework.dll</HintPath>
     </Reference>
     <Reference Include="System" />
-    <Reference Include="System.Core">
-      <RequiredTargetFramework>3.5</RequiredTargetFramework>
-    </Reference>
     <Reference Include="System.Data" />
     <Reference Include="System.Data.OracleClient" />
     <Reference Include="System.Xml" />
@@ -176,9 +173,9 @@
     <Compile Include="Validation\RegExValidationTest.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Source\BLToolkit.3.csproj">
+    <ProjectReference Include="..\..\Source\BLToolkit.2008.csproj">
       <Project>{0C325F5D-E50E-4340-8724-D29896CCC583}</Project>
-      <Name>BLToolkit.3</Name>
+      <Name>BLToolkit.2008</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

@@ -23,7 +23,6 @@ namespace BLToolkit.Mapping.ValueMappingInternal
 			if (to == typeof(Double))      return GetR8Mapper(from);
 			if (to == typeof(Decimal))     return GetDMapper(from);
 
-#if FW2
 			if (to == typeof(SByte?))      return GetNI8Mapper(from);
 			if (to == typeof(Int16?))      return GetNI16Mapper(from);
 			if (to == typeof(Int32?))      return GetNI32Mapper(from);
@@ -40,7 +39,6 @@ namespace BLToolkit.Mapping.ValueMappingInternal
 			if (to == typeof(Double?))     return GetNR8Mapper(from);
 			if (to == typeof(Decimal?))    return GetNDMapper(from);
 
-#endif
 			if (to == typeof(SqlString))   return GetdbSMapper(from);
 
 			if (to == typeof(SqlByte))     return GetdbU8Mapper(from);
@@ -81,7 +79,6 @@ namespace BLToolkit.Mapping.ValueMappingInternal
 			if (t == typeof(Double))      return new R8ToI8();
 			if (t == typeof(Decimal))     return new DToI8();
 
-#if FW2
 			if (t == typeof(SByte?))      return new NI8ToI8();
 			if (t == typeof(Int16?))      return new NI16ToI8();
 			if (t == typeof(Int32?))      return new NI32ToI8();
@@ -98,7 +95,6 @@ namespace BLToolkit.Mapping.ValueMappingInternal
 			if (t == typeof(Double?))     return new NR8ToI8();
 			if (t == typeof(Decimal?))    return new NDToI8();
 
-#endif
 			if (t == typeof(SqlString))   return new dbSToI8();
 
 			if (t == typeof(SqlByte))     return new dbU8ToI8();
@@ -134,7 +130,6 @@ namespace BLToolkit.Mapping.ValueMappingInternal
 			if (t == typeof(Double))      return new R8ToI16();
 			if (t == typeof(Decimal))     return new DToI16();
 
-#if FW2
 			if (t == typeof(SByte?))      return new NI8ToI16();
 			if (t == typeof(Int16?))      return new NI16ToI16();
 			if (t == typeof(Int32?))      return new NI32ToI16();
@@ -151,7 +146,6 @@ namespace BLToolkit.Mapping.ValueMappingInternal
 			if (t == typeof(Double?))     return new NR8ToI16();
 			if (t == typeof(Decimal?))    return new NDToI16();
 
-#endif
 			if (t == typeof(SqlString))   return new dbSToI16();
 
 			if (t == typeof(SqlByte))     return new dbU8ToI16();
@@ -187,7 +181,6 @@ namespace BLToolkit.Mapping.ValueMappingInternal
 			if (t == typeof(Double))      return new R8ToI32();
 			if (t == typeof(Decimal))     return new DToI32();
 
-#if FW2
 			if (t == typeof(SByte?))      return new NI8ToI32();
 			if (t == typeof(Int16?))      return new NI16ToI32();
 			if (t == typeof(Int32?))      return new NI32ToI32();
@@ -204,7 +197,6 @@ namespace BLToolkit.Mapping.ValueMappingInternal
 			if (t == typeof(Double?))     return new NR8ToI32();
 			if (t == typeof(Decimal?))    return new NDToI32();
 
-#endif
 			if (t == typeof(SqlString))   return new dbSToI32();
 
 			if (t == typeof(SqlByte))     return new dbU8ToI32();
@@ -241,7 +233,6 @@ namespace BLToolkit.Mapping.ValueMappingInternal
 			if (t == typeof(Decimal))     return new DToI64();
 			if (t == typeof(DateTime))    return new DTToI64();
 
-#if FW2
 			if (t == typeof(SByte?))      return new NI8ToI64();
 			if (t == typeof(Int16?))      return new NI16ToI64();
 			if (t == typeof(Int32?))      return new NI32ToI64();
@@ -258,7 +249,7 @@ namespace BLToolkit.Mapping.ValueMappingInternal
 			if (t == typeof(Double?))     return new NR8ToI64();
 			if (t == typeof(Decimal?))    return new NDToI64();
 			if (t == typeof(DateTime?))   return new NDTToI64();
-#endif
+
 			if (t == typeof(SqlString))   return new dbSToI64();
 
 			if (t == typeof(SqlByte))     return new dbU8ToI64();
@@ -296,7 +287,6 @@ namespace BLToolkit.Mapping.ValueMappingInternal
 			if (t == typeof(Double))      return new R8ToU8();
 			if (t == typeof(Decimal))     return new DToU8();
 
-#if FW2
 			if (t == typeof(SByte?))      return new NI8ToU8();
 			if (t == typeof(Int16?))      return new NI16ToU8();
 			if (t == typeof(Int32?))      return new NI32ToU8();
@@ -313,7 +303,6 @@ namespace BLToolkit.Mapping.ValueMappingInternal
 			if (t == typeof(Double?))     return new NR8ToU8();
 			if (t == typeof(Decimal?))    return new NDToU8();
 
-#endif
 			if (t == typeof(SqlString))   return new dbSToU8();
 
 			if (t == typeof(SqlByte))     return new dbU8ToU8();
@@ -349,7 +338,6 @@ namespace BLToolkit.Mapping.ValueMappingInternal
 			if (t == typeof(Double))      return new R8ToU16();
 			if (t == typeof(Decimal))     return new DToU16();
 
-#if FW2
 			if (t == typeof(SByte?))      return new NI8ToU16();
 			if (t == typeof(Int16?))      return new NI16ToU16();
 			if (t == typeof(Int32?))      return new NI32ToU16();
@@ -366,7 +354,6 @@ namespace BLToolkit.Mapping.ValueMappingInternal
 			if (t == typeof(Double?))     return new NR8ToU16();
 			if (t == typeof(Decimal?))    return new NDToU16();
 
-#endif
 			if (t == typeof(SqlString))   return new dbSToU16();
 
 			if (t == typeof(SqlByte))     return new dbU8ToU16();
@@ -402,7 +389,6 @@ namespace BLToolkit.Mapping.ValueMappingInternal
 			if (t == typeof(Double))      return new R8ToU32();
 			if (t == typeof(Decimal))     return new DToU32();
 
-#if FW2
 			if (t == typeof(SByte?))      return new NI8ToU32();
 			if (t == typeof(Int16?))      return new NI16ToU32();
 			if (t == typeof(Int32?))      return new NI32ToU32();
@@ -419,7 +405,6 @@ namespace BLToolkit.Mapping.ValueMappingInternal
 			if (t == typeof(Double?))     return new NR8ToU32();
 			if (t == typeof(Decimal?))    return new NDToU32();
 
-#endif
 			if (t == typeof(SqlString))   return new dbSToU32();
 
 			if (t == typeof(SqlByte))     return new dbU8ToU32();
@@ -455,7 +440,6 @@ namespace BLToolkit.Mapping.ValueMappingInternal
 			if (t == typeof(Double))      return new R8ToU64();
 			if (t == typeof(Decimal))     return new DToU64();
 
-#if FW2
 			if (t == typeof(SByte?))      return new NI8ToU64();
 			if (t == typeof(Int16?))      return new NI16ToU64();
 			if (t == typeof(Int32?))      return new NI32ToU64();
@@ -472,7 +456,6 @@ namespace BLToolkit.Mapping.ValueMappingInternal
 			if (t == typeof(Double?))     return new NR8ToU64();
 			if (t == typeof(Decimal?))    return new NDToU64();
 
-#endif
 			if (t == typeof(SqlString))   return new dbSToU64();
 
 			if (t == typeof(SqlByte))     return new dbU8ToU64();
@@ -509,7 +492,6 @@ namespace BLToolkit.Mapping.ValueMappingInternal
 			if (t == typeof(Double))      return new R8ToB();
 			if (t == typeof(Decimal))     return new DToB();
 
-#if FW2
 			if (t == typeof(SByte?))      return new NI8ToB();
 			if (t == typeof(Int16?))      return new NI16ToB();
 			if (t == typeof(Int32?))      return new NI32ToB();
@@ -526,7 +508,6 @@ namespace BLToolkit.Mapping.ValueMappingInternal
 			if (t == typeof(Double?))     return new NR8ToB();
 			if (t == typeof(Decimal?))    return new NDToB();
 
-#endif
 			if (t == typeof(SqlString))   return new dbSToB();
 
 			if (t == typeof(SqlByte))     return new dbU8ToB();
@@ -562,7 +543,6 @@ namespace BLToolkit.Mapping.ValueMappingInternal
 			if (t == typeof(Double))      return new R8ToC();
 			if (t == typeof(Decimal))     return new DToC();
 
-#if FW2
 			if (t == typeof(SByte?))      return new NI8ToC();
 			if (t == typeof(Int16?))      return new NI16ToC();
 			if (t == typeof(Int32?))      return new NI32ToC();
@@ -579,7 +559,6 @@ namespace BLToolkit.Mapping.ValueMappingInternal
 			if (t == typeof(Double?))     return new NR8ToC();
 			if (t == typeof(Decimal?))    return new NDToC();
 
-#endif
 			if (t == typeof(SqlString))   return new dbSToC();
 
 			if (t == typeof(SqlByte))     return new dbU8ToC();
@@ -615,7 +594,6 @@ namespace BLToolkit.Mapping.ValueMappingInternal
 			if (t == typeof(Double))      return new R8ToR4();
 			if (t == typeof(Decimal))     return new DToR4();
 
-#if FW2
 			if (t == typeof(SByte?))      return new NI8ToR4();
 			if (t == typeof(Int16?))      return new NI16ToR4();
 			if (t == typeof(Int32?))      return new NI32ToR4();
@@ -632,7 +610,6 @@ namespace BLToolkit.Mapping.ValueMappingInternal
 			if (t == typeof(Double?))     return new NR8ToR4();
 			if (t == typeof(Decimal?))    return new NDToR4();
 
-#endif
 			if (t == typeof(SqlString))   return new dbSToR4();
 
 			if (t == typeof(SqlByte))     return new dbU8ToR4();
@@ -669,7 +646,6 @@ namespace BLToolkit.Mapping.ValueMappingInternal
 			if (t == typeof(Decimal))     return new DToR8();
 			if (t == typeof(DateTime))    return new DTToR8();
 
-#if FW2
 			if (t == typeof(SByte?))      return new NI8ToR8();
 			if (t == typeof(Int16?))      return new NI16ToR8();
 			if (t == typeof(Int32?))      return new NI32ToR8();
@@ -687,7 +663,6 @@ namespace BLToolkit.Mapping.ValueMappingInternal
 			if (t == typeof(Decimal?))    return new NDToR8();
 			if (t == typeof(DateTime?))   return new NDTToR8();
 
-#endif
 			if (t == typeof(SqlString))   return new dbSToR8();
 
 			if (t == typeof(SqlByte))     return new dbU8ToR8();
@@ -724,7 +699,6 @@ namespace BLToolkit.Mapping.ValueMappingInternal
 			if (t == typeof(Double))      return new R8ToD();
 			if (t == typeof(Decimal))     return new DToD();
 
-#if FW2
 			if (t == typeof(SByte?))      return new NI8ToD();
 			if (t == typeof(Int16?))      return new NI16ToD();
 			if (t == typeof(Int32?))      return new NI32ToD();
@@ -741,7 +715,6 @@ namespace BLToolkit.Mapping.ValueMappingInternal
 			if (t == typeof(Double?))     return new NR8ToD();
 			if (t == typeof(Decimal?))    return new NDToD();
 
-#endif
 			if (t == typeof(SqlString))   return new dbSToD();
 
 			if (t == typeof(SqlByte))     return new dbU8ToD();
@@ -761,7 +734,7 @@ namespace BLToolkit.Mapping.ValueMappingInternal
 
 
 		#endregion 
-#if FW2
+
 		#region Nullable Types
 
 		private static IValueMapper GetNI8Mapper(Type t)
@@ -782,7 +755,6 @@ namespace BLToolkit.Mapping.ValueMappingInternal
 			if (t == typeof(Double))      return new R8ToNI8();
 			if (t == typeof(Decimal))     return new DToNI8();
 
-#if FW2
 			if (t == typeof(SByte?))      return new NI8ToNI8();
 			if (t == typeof(Int16?))      return new NI16ToNI8();
 			if (t == typeof(Int32?))      return new NI32ToNI8();
@@ -799,7 +771,6 @@ namespace BLToolkit.Mapping.ValueMappingInternal
 			if (t == typeof(Double?))     return new NR8ToNI8();
 			if (t == typeof(Decimal?))    return new NDToNI8();
 
-#endif
 			if (t == typeof(SqlString))   return new dbSToNI8();
 
 			if (t == typeof(SqlByte))     return new dbU8ToNI8();
@@ -835,7 +806,6 @@ namespace BLToolkit.Mapping.ValueMappingInternal
 			if (t == typeof(Double))      return new R8ToNI16();
 			if (t == typeof(Decimal))     return new DToNI16();
 
-#if FW2
 			if (t == typeof(SByte?))      return new NI8ToNI16();
 			if (t == typeof(Int16?))      return new NI16ToNI16();
 			if (t == typeof(Int32?))      return new NI32ToNI16();
@@ -852,7 +822,6 @@ namespace BLToolkit.Mapping.ValueMappingInternal
 			if (t == typeof(Double?))     return new NR8ToNI16();
 			if (t == typeof(Decimal?))    return new NDToNI16();
 
-#endif
 			if (t == typeof(SqlString))   return new dbSToNI16();
 
 			if (t == typeof(SqlByte))     return new dbU8ToNI16();
@@ -888,7 +857,6 @@ namespace BLToolkit.Mapping.ValueMappingInternal
 			if (t == typeof(Double))      return new R8ToNI32();
 			if (t == typeof(Decimal))     return new DToNI32();
 
-#if FW2
 			if (t == typeof(SByte?))      return new NI8ToNI32();
 			if (t == typeof(Int16?))      return new NI16ToNI32();
 			if (t == typeof(Int32?))      return new NI32ToNI32();
@@ -905,7 +873,6 @@ namespace BLToolkit.Mapping.ValueMappingInternal
 			if (t == typeof(Double?))     return new NR8ToNI32();
 			if (t == typeof(Decimal?))    return new NDToNI32();
 
-#endif
 			if (t == typeof(SqlString))   return new dbSToNI32();
 
 			if (t == typeof(SqlByte))     return new dbU8ToNI32();
@@ -942,7 +909,6 @@ namespace BLToolkit.Mapping.ValueMappingInternal
 			if (t == typeof(Decimal))     return new DToNI64();
 			if (t == typeof(DateTime))    return new DTToNI64();
 
-#if FW2
 			if (t == typeof(SByte?))      return new NI8ToNI64();
 			if (t == typeof(Int16?))      return new NI16ToNI64();
 			if (t == typeof(Int32?))      return new NI32ToNI64();
@@ -959,7 +925,6 @@ namespace BLToolkit.Mapping.ValueMappingInternal
 			if (t == typeof(Double?))     return new NR8ToNI64();
 			if (t == typeof(Decimal?))    return new NDToNI64();
 			if (t == typeof(DateTime?))   return new NDTToNI64();
-#endif
 			if (t == typeof(SqlString))   return new dbSToNI64();
 
 			if (t == typeof(SqlByte))     return new dbU8ToNI64();
@@ -997,7 +962,6 @@ namespace BLToolkit.Mapping.ValueMappingInternal
 			if (t == typeof(Double))      return new R8ToNU8();
 			if (t == typeof(Decimal))     return new DToNU8();
 
-#if FW2
 			if (t == typeof(SByte?))      return new NI8ToNU8();
 			if (t == typeof(Int16?))      return new NI16ToNU8();
 			if (t == typeof(Int32?))      return new NI32ToNU8();
@@ -1014,7 +978,6 @@ namespace BLToolkit.Mapping.ValueMappingInternal
 			if (t == typeof(Double?))     return new NR8ToNU8();
 			if (t == typeof(Decimal?))    return new NDToNU8();
 
-#endif
 			if (t == typeof(SqlString))   return new dbSToNU8();
 
 			if (t == typeof(SqlByte))     return new dbU8ToNU8();
@@ -1050,7 +1013,6 @@ namespace BLToolkit.Mapping.ValueMappingInternal
 			if (t == typeof(Double))      return new R8ToNU16();
 			if (t == typeof(Decimal))     return new DToNU16();
 
-#if FW2
 			if (t == typeof(SByte?))      return new NI8ToNU16();
 			if (t == typeof(Int16?))      return new NI16ToNU16();
 			if (t == typeof(Int32?))      return new NI32ToNU16();
@@ -1067,7 +1029,6 @@ namespace BLToolkit.Mapping.ValueMappingInternal
 			if (t == typeof(Double?))     return new NR8ToNU16();
 			if (t == typeof(Decimal?))    return new NDToNU16();
 
-#endif
 			if (t == typeof(SqlString))   return new dbSToNU16();
 
 			if (t == typeof(SqlByte))     return new dbU8ToNU16();
@@ -1103,7 +1064,6 @@ namespace BLToolkit.Mapping.ValueMappingInternal
 			if (t == typeof(Double))      return new R8ToNU32();
 			if (t == typeof(Decimal))     return new DToNU32();
 
-#if FW2
 			if (t == typeof(SByte?))      return new NI8ToNU32();
 			if (t == typeof(Int16?))      return new NI16ToNU32();
 			if (t == typeof(Int32?))      return new NI32ToNU32();
@@ -1120,7 +1080,6 @@ namespace BLToolkit.Mapping.ValueMappingInternal
 			if (t == typeof(Double?))     return new NR8ToNU32();
 			if (t == typeof(Decimal?))    return new NDToNU32();
 
-#endif
 			if (t == typeof(SqlString))   return new dbSToNU32();
 
 			if (t == typeof(SqlByte))     return new dbU8ToNU32();
@@ -1156,7 +1115,6 @@ namespace BLToolkit.Mapping.ValueMappingInternal
 			if (t == typeof(Double))      return new R8ToNU64();
 			if (t == typeof(Decimal))     return new DToNU64();
 
-#if FW2
 			if (t == typeof(SByte?))      return new NI8ToNU64();
 			if (t == typeof(Int16?))      return new NI16ToNU64();
 			if (t == typeof(Int32?))      return new NI32ToNU64();
@@ -1173,7 +1131,6 @@ namespace BLToolkit.Mapping.ValueMappingInternal
 			if (t == typeof(Double?))     return new NR8ToNU64();
 			if (t == typeof(Decimal?))    return new NDToNU64();
 
-#endif
 			if (t == typeof(SqlString))   return new dbSToNU64();
 
 			if (t == typeof(SqlByte))     return new dbU8ToNU64();
@@ -1210,7 +1167,6 @@ namespace BLToolkit.Mapping.ValueMappingInternal
 			if (t == typeof(Double))      return new R8ToNB();
 			if (t == typeof(Decimal))     return new DToNB();
 
-#if FW2
 			if (t == typeof(SByte?))      return new NI8ToNB();
 			if (t == typeof(Int16?))      return new NI16ToNB();
 			if (t == typeof(Int32?))      return new NI32ToNB();
@@ -1227,7 +1183,6 @@ namespace BLToolkit.Mapping.ValueMappingInternal
 			if (t == typeof(Double?))     return new NR8ToNB();
 			if (t == typeof(Decimal?))    return new NDToNB();
 
-#endif
 			if (t == typeof(SqlString))   return new dbSToNB();
 
 			if (t == typeof(SqlByte))     return new dbU8ToNB();
@@ -1261,7 +1216,6 @@ namespace BLToolkit.Mapping.ValueMappingInternal
 			if (t == typeof(Char))        return new CToNC();
 			if (t == typeof(Decimal))     return new DToNC();
 
-#if FW2
 			if (t == typeof(SByte?))      return new NI8ToNC();
 			if (t == typeof(Int16?))      return new NI16ToNC();
 			if (t == typeof(Int32?))      return new NI32ToNC();
@@ -1278,7 +1232,6 @@ namespace BLToolkit.Mapping.ValueMappingInternal
 			if (t == typeof(Double?))     return new NR8ToNC();
 			if (t == typeof(Decimal?))    return new NDToNC();
 
-#endif
 			if (t == typeof(SqlString))   return new dbSToNC();
 
 			if (t == typeof(SqlByte))     return new dbU8ToNC();
@@ -1314,7 +1267,6 @@ namespace BLToolkit.Mapping.ValueMappingInternal
 			if (t == typeof(Double))      return new R8ToNR4();
 			if (t == typeof(Decimal))     return new DToNR4();
 
-#if FW2
 			if (t == typeof(SByte?))      return new NI8ToNR4();
 			if (t == typeof(Int16?))      return new NI16ToNR4();
 			if (t == typeof(Int32?))      return new NI32ToNR4();
@@ -1331,7 +1283,6 @@ namespace BLToolkit.Mapping.ValueMappingInternal
 			if (t == typeof(Double?))     return new NR8ToNR4();
 			if (t == typeof(Decimal?))    return new NDToNR4();
 
-#endif
 			if (t == typeof(SqlString))   return new dbSToNR4();
 
 			if (t == typeof(SqlByte))     return new dbU8ToNR4();
@@ -1368,7 +1319,6 @@ namespace BLToolkit.Mapping.ValueMappingInternal
 			if (t == typeof(Decimal))     return new DToNR8();
 			if (t == typeof(DateTime))    return new DTToNR8();
 
-#if FW2
 			if (t == typeof(SByte?))      return new NI8ToNR8();
 			if (t == typeof(Int16?))      return new NI16ToNR8();
 			if (t == typeof(Int32?))      return new NI32ToNR8();
@@ -1385,7 +1335,7 @@ namespace BLToolkit.Mapping.ValueMappingInternal
 			if (t == typeof(Double?))     return new NR8ToNR8();
 			if (t == typeof(Decimal?))    return new NDToNR8();
 			if (t == typeof(DateTime?))   return new NDTToNR8();
-#endif
+
 			if (t == typeof(SqlString))   return new dbSToNR8();
 
 			if (t == typeof(SqlByte))     return new dbU8ToNR8();
@@ -1422,7 +1372,6 @@ namespace BLToolkit.Mapping.ValueMappingInternal
 			if (t == typeof(Double))      return new R8ToND();
 			if (t == typeof(Decimal))     return new DToND();
 
-#if FW2
 			if (t == typeof(SByte?))      return new NI8ToND();
 			if (t == typeof(Int16?))      return new NI16ToND();
 			if (t == typeof(Int32?))      return new NI32ToND();
@@ -1439,7 +1388,6 @@ namespace BLToolkit.Mapping.ValueMappingInternal
 			if (t == typeof(Double?))     return new NR8ToND();
 			if (t == typeof(Decimal?))    return new NDToND();
 
-#endif
 			if (t == typeof(SqlString))   return new dbSToND();
 
 			if (t == typeof(SqlByte))     return new dbU8ToND();
@@ -1458,7 +1406,6 @@ namespace BLToolkit.Mapping.ValueMappingInternal
 		}
 
 		#endregion 
-#endif
 
 		#region SqlTypes
 
@@ -1480,7 +1427,6 @@ namespace BLToolkit.Mapping.ValueMappingInternal
 			if (t == typeof(Double))      return new R8TodbS();
 			if (t == typeof(Decimal))     return new DTodbS();
 
-#if FW2
 			if (t == typeof(SByte?))      return new NI8TodbS();
 			if (t == typeof(Int16?))      return new NI16TodbS();
 			if (t == typeof(Int32?))      return new NI32TodbS();
@@ -1497,7 +1443,6 @@ namespace BLToolkit.Mapping.ValueMappingInternal
 			if (t == typeof(Double?))     return new NR8TodbS();
 			if (t == typeof(Decimal?))    return new NDTodbS();
 
-#endif
 			if (t == typeof(SqlString))   return new dbSTodbS();
 
 			if (t == typeof(SqlByte))     return new dbU8TodbS();
@@ -1534,7 +1479,6 @@ namespace BLToolkit.Mapping.ValueMappingInternal
 			if (t == typeof(Double))      return new R8TodbU8();
 			if (t == typeof(Decimal))     return new DTodbU8();
 
-#if FW2
 			if (t == typeof(SByte?))      return new NI8TodbU8();
 			if (t == typeof(Int16?))      return new NI16TodbU8();
 			if (t == typeof(Int32?))      return new NI32TodbU8();
@@ -1551,7 +1495,6 @@ namespace BLToolkit.Mapping.ValueMappingInternal
 			if (t == typeof(Double?))     return new NR8TodbU8();
 			if (t == typeof(Decimal?))    return new NDTodbU8();
 
-#endif
 			if (t == typeof(SqlString))   return new dbSTodbU8();
 
 			if (t == typeof(SqlByte))     return new dbU8TodbU8();
@@ -1587,7 +1530,6 @@ namespace BLToolkit.Mapping.ValueMappingInternal
 			if (t == typeof(Double))      return new R8TodbI16();
 			if (t == typeof(Decimal))     return new DTodbI16();
 
-#if FW2
 			if (t == typeof(SByte?))      return new NI8TodbI16();
 			if (t == typeof(Int16?))      return new NI16TodbI16();
 			if (t == typeof(Int32?))      return new NI32TodbI16();
@@ -1604,7 +1546,6 @@ namespace BLToolkit.Mapping.ValueMappingInternal
 			if (t == typeof(Double?))     return new NR8TodbI16();
 			if (t == typeof(Decimal?))    return new NDTodbI16();
 
-#endif
 			if (t == typeof(SqlString))   return new dbSTodbI16();
 
 			if (t == typeof(SqlByte))     return new dbU8TodbI16();
@@ -1640,7 +1581,6 @@ namespace BLToolkit.Mapping.ValueMappingInternal
 			if (t == typeof(Double))      return new R8TodbI32();
 			if (t == typeof(Decimal))     return new DTodbI32();
 
-#if FW2
 			if (t == typeof(SByte?))      return new NI8TodbI32();
 			if (t == typeof(Int16?))      return new NI16TodbI32();
 			if (t == typeof(Int32?))      return new NI32TodbI32();
@@ -1657,7 +1597,6 @@ namespace BLToolkit.Mapping.ValueMappingInternal
 			if (t == typeof(Double?))     return new NR8TodbI32();
 			if (t == typeof(Decimal?))    return new NDTodbI32();
 
-#endif
 			if (t == typeof(SqlString))   return new dbSTodbI32();
 
 			if (t == typeof(SqlByte))     return new dbU8TodbI32();
@@ -1693,7 +1632,6 @@ namespace BLToolkit.Mapping.ValueMappingInternal
 			if (t == typeof(Double))      return new R8TodbI64();
 			if (t == typeof(Decimal))     return new DTodbI64();
 
-#if FW2
 			if (t == typeof(SByte?))      return new NI8TodbI64();
 			if (t == typeof(Int16?))      return new NI16TodbI64();
 			if (t == typeof(Int32?))      return new NI32TodbI64();
@@ -1710,7 +1648,6 @@ namespace BLToolkit.Mapping.ValueMappingInternal
 			if (t == typeof(Double?))     return new NR8TodbI64();
 			if (t == typeof(Decimal?))    return new NDTodbI64();
 
-#endif
 			if (t == typeof(SqlString))   return new dbSTodbI64();
 
 			if (t == typeof(SqlByte))     return new dbU8TodbI64();
@@ -1748,7 +1685,6 @@ namespace BLToolkit.Mapping.ValueMappingInternal
 			if (t == typeof(Double))      return new R8TodbR4();
 			if (t == typeof(Decimal))     return new DTodbR4();
 
-#if FW2
 			if (t == typeof(SByte?))      return new NI8TodbR4();
 			if (t == typeof(Int16?))      return new NI16TodbR4();
 			if (t == typeof(Int32?))      return new NI32TodbR4();
@@ -1765,7 +1701,6 @@ namespace BLToolkit.Mapping.ValueMappingInternal
 			if (t == typeof(Double?))     return new NR8TodbR4();
 			if (t == typeof(Decimal?))    return new NDTodbR4();
 
-#endif
 			if (t == typeof(SqlString))   return new dbSTodbR4();
 
 			if (t == typeof(SqlByte))     return new dbU8TodbR4();
@@ -1801,7 +1736,6 @@ namespace BLToolkit.Mapping.ValueMappingInternal
 			if (t == typeof(Double))      return new R8TodbR8();
 			if (t == typeof(Decimal))     return new DTodbR8();
 
-#if FW2
 			if (t == typeof(SByte?))      return new NI8TodbR8();
 			if (t == typeof(Int16?))      return new NI16TodbR8();
 			if (t == typeof(Int32?))      return new NI32TodbR8();
@@ -1818,7 +1752,6 @@ namespace BLToolkit.Mapping.ValueMappingInternal
 			if (t == typeof(Double?))     return new NR8TodbR8();
 			if (t == typeof(Decimal?))    return new NDTodbR8();
 
-#endif
 			if (t == typeof(SqlString))   return new dbSTodbR8();
 
 			if (t == typeof(SqlByte))     return new dbU8TodbR8();
@@ -1855,7 +1788,6 @@ namespace BLToolkit.Mapping.ValueMappingInternal
 			if (t == typeof(Double))      return new R8TodbD();
 			if (t == typeof(Decimal))     return new DTodbD();
 
-#if FW2
 			if (t == typeof(SByte?))      return new NI8TodbD();
 			if (t == typeof(Int16?))      return new NI16TodbD();
 			if (t == typeof(Int32?))      return new NI32TodbD();
@@ -1872,7 +1804,6 @@ namespace BLToolkit.Mapping.ValueMappingInternal
 			if (t == typeof(Double?))     return new NR8TodbD();
 			if (t == typeof(Decimal?))    return new NDTodbD();
 
-#endif
 			if (t == typeof(SqlString))   return new dbSTodbD();
 
 			if (t == typeof(SqlByte))     return new dbU8TodbD();
@@ -1908,7 +1839,6 @@ namespace BLToolkit.Mapping.ValueMappingInternal
 			if (t == typeof(Double))      return new R8TodbM();
 			if (t == typeof(Decimal))     return new DTodbM();
 
-#if FW2
 			if (t == typeof(SByte?))      return new NI8TodbM();
 			if (t == typeof(Int16?))      return new NI16TodbM();
 			if (t == typeof(Int32?))      return new NI32TodbM();
@@ -1925,7 +1855,6 @@ namespace BLToolkit.Mapping.ValueMappingInternal
 			if (t == typeof(Double?))     return new NR8TodbM();
 			if (t == typeof(Decimal?))    return new NDTodbM();
 
-#endif
 			if (t == typeof(SqlString))   return new dbSTodbM();
 
 			if (t == typeof(SqlByte))     return new dbU8TodbM();
@@ -1962,7 +1891,6 @@ namespace BLToolkit.Mapping.ValueMappingInternal
 			if (t == typeof(Double))      return new R8TodbB();
 			if (t == typeof(Decimal))     return new DTodbB();
 
-#if FW2
 			if (t == typeof(SByte?))      return new NI8TodbB();
 			if (t == typeof(Int16?))      return new NI16TodbB();
 			if (t == typeof(Int32?))      return new NI32TodbB();
@@ -1979,7 +1907,6 @@ namespace BLToolkit.Mapping.ValueMappingInternal
 			if (t == typeof(Double?))     return new NR8TodbB();
 			if (t == typeof(Decimal?))    return new NDTodbB();
 
-#endif
 			if (t == typeof(SqlString))   return new dbSTodbB();
 
 			if (t == typeof(SqlByte))     return new dbU8TodbB();
@@ -2001,10 +1928,8 @@ namespace BLToolkit.Mapping.ValueMappingInternal
 		{
 			if (t == typeof(Guid))     return new GTodbG();
 
-#if FW2
 			if (t == typeof(Guid?))    return new NGTodbG();
 
-#endif
 			if (t == typeof(SqlString))   return new dbSTodbG();
 			if (t == typeof(SqlGuid))     return new dbGTodbG();
 
@@ -2016,11 +1941,9 @@ namespace BLToolkit.Mapping.ValueMappingInternal
 			if (t == typeof(Int64))       return new I64TodbDT();
 			if (t == typeof(Double))      return new R8TodbDT();
 
-#if FW2
 			if (t == typeof(Int64?))      return new NI64TodbDT();
 			if (t == typeof(Double?))     return new NR8TodbDT();
 
-#endif
 			if (t == typeof(SqlString))   return new dbSTodbDT();
 			if (t == typeof(SqlInt64))    return new dbI64TodbDT();
 			if (t == typeof(SqlDouble))   return new dbR8TodbDT();

@@ -156,7 +156,7 @@ namespace Data
 		}
 
 		[Test]
-		public void FW2DictionaryTest()
+		public void GenericsDictionaryTest()
 		{
 			using (DbManager db = new DbManager())
 			{
@@ -174,7 +174,7 @@ namespace Data
 		}
 
 		[Test]
-		public void FW2DictionaryTest2()
+		public void GenericsDictionaryTest2()
 		{
 			using (DbManager db = new DbManager())
 			{
@@ -197,7 +197,7 @@ namespace Data
 		}
 
 		[Test]
-		public void FW2DictionaryTest3()
+		public void GenericsDictionaryTest3()
 		{
 			using (DbManager db = new DbManager())
 			{
@@ -215,7 +215,7 @@ namespace Data
 		}
 
 		[Test]
-		public void FW2DictionaryMapIndexTest()
+		public void GenericsDictionaryMapIndexTest()
 		{
 			using (DbManager db = new DbManager())
 			{
@@ -233,7 +233,7 @@ namespace Data
 		}
 
 		[Test]
-		public void FW2DictionaryMapIndexTest2()
+		public void GenericsDictionaryMapIndexTest2()
 		{
 			using (DbManager db = new DbManager())
 			{
@@ -252,7 +252,7 @@ namespace Data
 		}
 
 		[Test]
-		public void FW2DictionaryMapIndexTest3()
+		public void GenericsDictionaryMapIndexTest3()
 		{
 			using (DbManager db = new DbManager())
 			{

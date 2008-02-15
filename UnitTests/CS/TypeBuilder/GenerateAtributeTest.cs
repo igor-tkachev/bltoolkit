@@ -109,7 +109,6 @@ namespace TypeBuilder
 			TypeAccessor.CreateInstance(typeof(BadObject));
 		}
 
-#if FW2
 		// In FW1.1 an attribute argument may not be null, as stated in 17.2:
 		// "An attribute argument must be a constant expression,
 		// typeof expression or one-dimensional array creation expression."
@@ -125,6 +124,5 @@ namespace TypeBuilder
 		{
 			TypeAccessor.CreateInstance(typeof(NullArgObject));
 		}
-#endif
 	}
 }

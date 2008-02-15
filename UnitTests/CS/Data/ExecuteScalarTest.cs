@@ -141,7 +141,7 @@ namespace Data
 		}
 
 		[Test]
-		public void FW2RegressionTest()
+		public void GenericsRegressionTest()
 		{
 			using (DbManager db = new DbManager())
 			{
@@ -154,7 +154,7 @@ namespace Data
 		}
 
 		[Test]
-		public void FW2DataReaderTest()
+		public void GenericsDataReaderTest()
 		{
 			using (DbManager db = new DbManager())
 			{
@@ -168,7 +168,7 @@ namespace Data
 		}
 
 		[Test]
-		public void FW2DataReader2Test()
+		public void GenericsDataReader2Test()
 		{
 			using (DbManager db = new DbManager())
 			{

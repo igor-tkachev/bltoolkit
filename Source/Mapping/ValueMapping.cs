@@ -61,7 +61,7 @@ namespace BLToolkit.Mapping
 			lock (_sync)
 			{
 				IValueMapper t;
-#if FW2
+
 				if (_mappers.TryGetValue(key, out t))
 					return t;
 
@@ -84,17 +84,7 @@ namespace BLToolkit.Mapping
 						t = (IValueMapper)Activator.CreateInstance(type);
 					}
 				}
-#else
-				t = (IValueMapper)_mappers[key];
 
-				if (t != null)
-					return t;
-
-				t = MapperSelector.GetMapper(t1, t2);
-
-				if (null == t)
-					t = _defaultMapper;
-#endif
 				_mappers.Add(key, t);
 
 				return t;

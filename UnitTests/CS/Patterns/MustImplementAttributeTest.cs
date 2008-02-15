@@ -71,11 +71,7 @@ namespace Patterns
 		[Test]
 		public void Test()
 		{
-#if FW2
 			OptionalInterfaceNoException duck = DuckTyping.Implement<OptionalInterfaceNoException> (new TestClass());
-#else
-			OptionalInterfaceNoException duck = (OptionalInterfaceNoException)DuckTyping.Implement(typeof(OptionalInterfaceNoException), new TestClass());
-#endif
 
 			Assert.AreEqual(1, duck.RequiredMethod());
 			Assert.AreEqual(0, duck.OtherOptionalMethod());
@@ -85,11 +81,7 @@ namespace Patterns
 		[Test, ExpectedException(typeof(NotImplementedException))]
 		public void RuntimeExceptionTes()
 		{
-#if FW2
-			OptionalInterface duck = DuckTyping.Implement<OptionalInterface> (new TestClass());
-#else
-			OptionalInterface duck = (OptionalInterface)DuckTyping.Implement(typeof(OptionalInterface), new TestClass());
-#endif
+			OptionalInterface duck = DuckTyping.Implement<OptionalInterface>(new TestClass());
 
 			Assert.AreEqual(1, duck.RequiredMethod());
 
@@ -103,25 +95,17 @@ namespace Patterns
 		{
 			// Exception here.
 			//
-#if FW2
-			OptionalInterface duck = DuckTyping.Implement<OptionalInterface> (string.Empty);
-#else
-			OptionalInterface duck = (OptionalInterface)DuckTyping.Implement(typeof(OptionalInterface), string.Empty);
-#endif
+			OptionalInterface duck1 = DuckTyping.Implement<OptionalInterface> (string.Empty);
+			OptionalInterface duck2 = (OptionalInterface)DuckTyping.Implement(typeof(OptionalInterface), string.Empty);
 		}
 
 		[Test]
 		public void AsLikeBehaviourTest()
 		{
-#if FW2
 			IOtherOptionalInterface duck1 = DuckTyping.Implement<IOtherOptionalInterface>(new TestClass());
 			IOtherOptionalInterface duck2 = DuckTyping.Implement<IOtherOptionalInterface>(new EmptyClass());
 			IOtherOptionalInterface duck3 = DuckTyping.Implement<IOtherOptionalInterface>(new EmptyClass());
-#else
-			IOtherOptionalInterface duck1 = (IOtherOptionalInterface)DuckTyping.Implement(typeof(IOtherOptionalInterface), new TestClass());
-			IOtherOptionalInterface duck2 = (IOtherOptionalInterface)DuckTyping.Implement(typeof(IOtherOptionalInterface), new EmptyClass());
-			IOtherOptionalInterface duck3 = (IOtherOptionalInterface)DuckTyping.Implement(typeof(IOtherOptionalInterface), new EmptyClass());
-#endif
+
 			Assert.IsNotNull(duck1);
 			Assert.IsNull   (duck2);
 			Assert.IsNull   (duck3);

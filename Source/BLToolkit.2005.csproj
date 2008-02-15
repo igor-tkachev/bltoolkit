@@ -4,11 +4,11 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>8.0.50727</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{3C37A408-3A01-4568-99D1-ADFEDDFFF2BC}</ProjectGuid>
+    <ProjectGuid>{0C325F5D-E50E-4340-8724-D29896CCC583}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>BLToolkit</RootNamespace>
-    <AssemblyName>BLToolkit.2</AssemblyName>
+    <AssemblyName>BLToolkit.3</AssemblyName>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>

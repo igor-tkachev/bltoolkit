@@ -36,13 +36,11 @@ namespace Reflection
 				set { IntField = value / 2; }
 			}
 
-#if FW2
 			public int    ProtectedSetter
 			{
 				          get { return IntField; }
 				protected set { IntField = value;}
 			}
-#endif
 		}
 
 		[Test]
@@ -56,10 +54,8 @@ namespace Reflection
 			Assert.IsTrue (ta["StrProperty"].HasGetter);
 			
 			Assert.IsFalse(ta["SetProperty"].HasGetter);
-			Assert.IsNull(ta["ProtectedProperty"]);
-#if FW2
+			Assert.IsNull (ta["ProtectedProperty"]);
 			Assert.IsTrue (ta["ProtectedSetter"].HasGetter);
-#endif
 		}
 
 		[Test]
@@ -73,10 +69,8 @@ namespace Reflection
 			Assert.IsFalse(ta["StrProperty"].HasSetter);
 			
 			Assert.IsTrue (ta["SetProperty"].HasSetter);
-			Assert.IsNull(ta["ProtectedProperty"]);
-#if FW2
+			Assert.IsNull (ta["ProtectedProperty"]);
 			Assert.IsFalse(ta["ProtectedSetter"].HasSetter);
-#endif
 		}
 
 		[Test]

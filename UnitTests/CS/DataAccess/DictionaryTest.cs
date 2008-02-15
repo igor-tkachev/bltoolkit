@@ -131,7 +131,7 @@ namespace DataAccess
 
 			[SqlQuery("SELECT * FROM Person WHERE PersonID < 3")]
 			[Index(0), ScalarFieldName(1)]
-			public abstract void                              FW2ScalarDictionaryByIndexReturnVoid1([Destination] IDictionary<int, string> dictionary);
+			public abstract void                              GenericsScalarDictionaryByIndexReturnVoid1([Destination] IDictionary<int, string> dictionary);
 
 			[SqlQuery("SELECT * FROM Person")]
 			[Index(new string[] { "ID" })]
@@ -163,31 +163,31 @@ namespace DataAccess
 
 			[SqlQuery("SELECT * FROM Person WHERE PersonID < 3")]
 			[ScalarFieldName("FirstName")]
-			public abstract Dictionary<object, string>        FW2ScalarDictionaryByPK();
+			public abstract Dictionary<object, string>        GenericsScalarDictionaryByPK();
 
 			[SqlQuery("SELECT * FROM Person WHERE PersonID < 3")]
 			[ScalarFieldName(1)] // Index from Db table Person, not type Person!
-			public abstract Dictionary<int, string>           FW2ScalarDictionaryByPK2();
+			public abstract Dictionary<int, string>           GenericsScalarDictionaryByPK2();
 
 			[SqlQuery("SELECT * FROM Person WHERE PersonID < 3")]
 			[Index(0), ScalarFieldName(1)]
-			public abstract Dictionary<int, string>           FW2ScalarDictionaryByIndex();
+			public abstract Dictionary<int, string>           GenericsScalarDictionaryByIndex();
 
 			[SqlQuery("SELECT * FROM Person WHERE PersonID < 3")]
 			[Index(0), ScalarFieldName(1)]
-			public abstract void                              FW2ScalarDictionaryByIndexReturnVoid([Destination] IDictionary<int, string> dictionary);
+			public abstract void                              GenericsScalarDictionaryByIndexReturnVoid([Destination] IDictionary<int, string> dictionary);
 
 			[SqlQuery("SELECT * FROM Person WHERE PersonID < 3")]
 			[Index(0, 1), ScalarFieldName(1)]
-			public abstract Dictionary<CompoundValue, string> FW2ScalarDictionaryByMapIndex();
+			public abstract Dictionary<CompoundValue, string> GenericsScalarDictionaryByMapIndex();
 
 			[SqlQuery("SELECT * FROM Person WHERE PersonID < 3")]
 			[Index(0)]
-			public abstract Dictionary<int, PersonNoPK>       FW2ScalarDictionaryByPKWithCustomType();
+			public abstract Dictionary<int, PersonNoPK>       GenericsScalarDictionaryByPKWithCustomType();
 
 			[SqlQuery("SELECT * FROM Person WHERE PersonID < 3")]
 			[ObjectType(typeof(Person))]
-			public abstract Dictionary<int, object>           Fw2ScalarDictionaryByPKWithObjectType();
+			public abstract Dictionary<int, object>           GenericsScalarDictionaryByPKWithObjectType();
 
 			[ActionName("SelectAll")]
 			[Index("ID")]
@@ -383,11 +383,11 @@ namespace DataAccess
 		}
 
 		[Test]
-		public void FW2ScalarDictionaryByPKTest()
+		public void GenericsScalarDictionaryByPKTest()
 		{
 			TestAccessor da = DataAccessor.CreateInstance<TestAccessor>();
 
-			Dictionary<object, string> persons = da.FW2ScalarDictionaryByPK();
+			Dictionary<object, string> persons = da.GenericsScalarDictionaryByPK();
 
 			Assert.IsNotNull(persons);
 			Assert.IsTrue(persons.Count > 0);
@@ -398,11 +398,11 @@ namespace DataAccess
 		}
 
 		[Test]
-		public void FW2ScalarDictionaryByPKTest2()
+		public void GenericsScalarDictionaryByPKTest2()
 		{
 			TestAccessor da = DataAccessor.CreateInstance<TestAccessor>();
 
-			Dictionary<int, string> persons = da.FW2ScalarDictionaryByPK2();
+			Dictionary<int, string> persons = da.GenericsScalarDictionaryByPK2();
 
 			Assert.IsNotNull(persons);
 			Assert.IsTrue(persons.Count > 0);
@@ -413,11 +413,11 @@ namespace DataAccess
 		}
 
 		[Test]
-		public void FW2ScalarDictionaryByIndexTest()
+		public void GenericsScalarDictionaryByIndexTest()
 		{
 			TestAccessor da = DataAccessor.CreateInstance<TestAccessor>();
 
-			Dictionary<int, string> persons = da.FW2ScalarDictionaryByIndex();
+			Dictionary<int, string> persons = da.GenericsScalarDictionaryByIndex();
 
 			Assert.IsNotNull(persons);
 			Assert.IsTrue(persons.Count > 0);
@@ -428,12 +428,12 @@ namespace DataAccess
 		}
 
 		[Test]
-		public void FW2ScalarDictionaryByIndexReturnVoidTest()
+		public void GenericsScalarDictionaryByIndexReturnVoidTest()
 		{
 			TestAccessor da = DataAccessor.CreateInstance<TestAccessor>();
 
 			IDictionary<int, string> persons = new Dictionary<int, string>();
-			da.FW2ScalarDictionaryByIndexReturnVoid(persons);
+			da.GenericsScalarDictionaryByIndexReturnVoid(persons);
 
 			Assert.IsNotNull(persons);
 			Assert.IsTrue(persons.Count > 0);
@@ -444,10 +444,10 @@ namespace DataAccess
 		}
 
 		[Test]
-		public void FW2ScalarDictionaryByMapIndexTest()
+		public void GenericsScalarDictionaryByMapIndexTest()
 		{
 			TestAccessor da = DataAccessor.CreateInstance<TestAccessor>();
-			Dictionary<CompoundValue, string> persons = da.FW2ScalarDictionaryByMapIndex();
+			Dictionary<CompoundValue, string> persons = da.GenericsScalarDictionaryByMapIndex();
 
 			Assert.IsNotNull(persons);
 			Assert.IsTrue(persons.Count > 0);
@@ -458,10 +458,10 @@ namespace DataAccess
 		}
 
 		[Test]
-		public void FW2ScalarDictionaryByPKWithCustomTypeTest()
+		public void GenericsScalarDictionaryByPKWithCustomTypeTest()
 		{
 			TestAccessor da = DataAccessor.CreateInstance<TestAccessor>();
-			Dictionary<int, PersonNoPK> persons = da.FW2ScalarDictionaryByPKWithCustomType();
+			Dictionary<int, PersonNoPK> persons = da.GenericsScalarDictionaryByPKWithCustomType();
 
 			Assert.IsNotNull(persons);
 			Assert.IsTrue(persons.Count > 0);
@@ -472,10 +472,10 @@ namespace DataAccess
 		}
 
 		[Test]
-		public void FW2ScalarDictionaryByPKWithObjectTypeTest()
+		public void GenericsScalarDictionaryByPKWithObjectTypeTest()
 		{
 			TestAccessor da = DataAccessor.CreateInstance<TestAccessor>();
-			Dictionary<int, object> persons = da.Fw2ScalarDictionaryByPKWithObjectType();
+			Dictionary<int, object> persons = da.GenericsScalarDictionaryByPKWithObjectType();
 
 			Assert.IsNotNull(persons);
 			Assert.IsTrue(persons.Count > 0);
@@ -486,7 +486,7 @@ namespace DataAccess
 		}
 
 		[Test]
-		public void FW2DictionaryMismatchKeyTypeTest()
+		public void GenericsDictionaryMismatchKeyTypeTest()
 		{
 			TestAccessor da = DataAccessor.CreateInstance<TestAccessor>();
 			Dictionary<uint, Person> persons = da.SelectAllT7();
@@ -500,7 +500,7 @@ namespace DataAccess
 		}
 
 		[Test]
-		public void FW2DictionaryMismatchKeyTypeTest2()
+		public void GenericsDictionaryMismatchKeyTypeTest2()
 		{
 			TestAccessor da = DataAccessor.CreateInstance<TestAccessor>();
 			Dictionary<long, Person> persons = da.SelectAllT8();
@@ -514,7 +514,7 @@ namespace DataAccess
 		}
 
 		[Test]
-		public void FW2DictionaryMismatchKeyTypeWithHierarchyTest()
+		public void GenericsDictionaryMismatchKeyTypeWithHierarchyTest()
 		{
 			TestAccessor da = DataAccessor.CreateInstance<TestAccessor>();
 			Dictionary<long, Derived> persons = da.SelectAllDerived();
@@ -528,7 +528,7 @@ namespace DataAccess
 		}
 
 		[Test]
-		public void FW2DictionaryMismatchKeyTypeCompoundValueTest()
+		public void GenericsDictionaryMismatchKeyTypeCompoundValueTest()
 		{
 			TestAccessor da = DataAccessor.CreateInstance<TestAccessor>();
 			Dictionary<CompoundValue, PersonMultiPK> persons = da.SelectAllT9();

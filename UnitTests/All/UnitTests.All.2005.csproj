@@ -8,7 +8,7 @@
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>UnitTests.All._2</RootNamespace>
-    <AssemblyName>UnitTests.All.2</AssemblyName>
+    <AssemblyName>UnitTests.All</AssemblyName>
     <RunPostBuildEvent>OnOutputUpdated</RunPostBuildEvent>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -44,27 +44,27 @@
   <ItemGroup>
     <ProjectReference Include="..\..\Examples\Cpp\Examples.Cpp.2.vcproj">
       <Project>{1710C5C2-0416-4981-81FC-BBBDFDA0B24D}</Project>
-      <Name>Examples.Cpp.2</Name>
+      <Name>Examples.Cpp.2005</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\Examples\CS\Examples.CS.2.csproj">
+    <ProjectReference Include="..\..\Examples\CS\Examples.CS.2005.csproj">
       <Project>{34989C73-F82A-4905-9349-D0CF1419CD1C}</Project>
-      <Name>Examples.CS.2</Name>
+      <Name>Examples.CS.2005</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\Examples\VB\Examples.VB.2.vbproj">
+    <ProjectReference Include="..\..\Examples\VB\Examples.VB.2005.vbproj">
       <Project>{308A4189-53AB-460D-B2B1-0EB4B9219654}</Project>
-      <Name>Examples.VB.2</Name>
+      <Name>Examples.VB.2005</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\HowTo\HowTo.csproj">
+    <ProjectReference Include="..\..\HowTo\HowTo.2005.csproj">
       <Project>{8DA66999-005A-49AB-86A9-2C1F62905B50}</Project>
-      <Name>HowTo</Name>
+      <Name>HowTo.2005</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\Source\BLToolkit.2.csproj">
+    <ProjectReference Include="..\..\Source\BLToolkit.2005.csproj">
       <Project>{0C325F5D-E50E-4340-8724-D29896CCC583}</Project>
-      <Name>BLToolkit.2</Name>
+      <Name>BLToolkit.2005</Name>
     </ProjectReference>
-    <ProjectReference Include="..\CS\UnitTests.CS.2.csproj">
+    <ProjectReference Include="..\CS\UnitTests.CS.2005.csproj">
       <Project>{2BB4AD77-190F-4D7E-A83E-7B254A0A1FCA}</Project>
-      <Name>UnitTests.CS.2</Name>
+      <Name>UnitTests.CS.2005</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

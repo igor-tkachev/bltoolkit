@@ -15,7 +15,7 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>TRACE;DEBUG;FW2;ACCESS;OLEDB</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;ACCESS;OLEDB</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <NoWarn>3021</NoWarn>
@@ -24,7 +24,7 @@
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE;FW2;ACCESS;OLEDB</DefineConstants>
+    <DefineConstants>TRACE;ACCESS;OLEDB</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <NoWarn>3021</NoWarn>

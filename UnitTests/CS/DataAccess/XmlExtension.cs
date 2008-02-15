@@ -33,7 +33,7 @@ namespace DataAccess
 		}
 
 		[Test]
-		public void FW2Test()
+		public void GenericsTest()
 		{
 			using (DbManager db = new DbManager())
 			{

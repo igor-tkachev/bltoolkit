@@ -87,7 +87,6 @@ namespace BLToolkit.Data.DataProvider
 					typeTable[typeof(UInt32[])]            = OracleDbType.Decimal;
 					typeTable[typeof(UInt64[])]            = OracleDbType.Decimal;
 
-#if FW2
 					typeTable[typeof(Boolean?)]            = OracleDbType.Byte;
 					typeTable[typeof(Guid?)]               = OracleDbType.Raw;
 					typeTable[typeof(SByte?)]              = OracleDbType.Decimal;
@@ -108,7 +107,6 @@ namespace BLToolkit.Data.DataProvider
 					typeTable[typeof(UInt16?[])]           = OracleDbType.Decimal;
 					typeTable[typeof(UInt32?[])]           = OracleDbType.Decimal;
 					typeTable[typeof(UInt64?[])]           = OracleDbType.Decimal;
-#endif
 
 					typeTable[typeof(XmlReader)]           = OracleDbType.XmlType;
 					typeTable[typeof(XmlDocument)]         = OracleDbType.XmlType;
@@ -819,7 +817,6 @@ namespace BLToolkit.Data.DataProvider
 
 			#endregion
 
-#if FW2
 			#region Nullable Types
 
 			[CLSCompliant(false)]
@@ -987,7 +984,6 @@ namespace BLToolkit.Data.DataProvider
 			}
 
 			#endregion
-#endif
 
 			#endregion
 
@@ -1020,7 +1016,6 @@ namespace BLToolkit.Data.DataProvider
 
 			private readonly OracleDataReader _dataReader;
 
-#if FW2
 			public override Type GetFieldType(int index)
 			{
 				Type fieldType = _dataReader.GetProviderSpecificFieldType(index);
@@ -1051,7 +1046,7 @@ namespace BLToolkit.Data.DataProvider
 					return value is DBNull? null: value;
 				}
 			}
-#endif
+
 			public override Boolean  GetBoolean(object o, int index) { return MappingSchema.ConvertToBoolean(GetValue(o, index)); }
 			public override Char     GetChar   (object o, int index) { return MappingSchema.ConvertToChar   (GetValue(o, index)); }
 			public override Guid     GetGuid   (object o, int index) { return MappingSchema.ConvertToGuid   (GetValue(o, index)); }
@@ -1067,7 +1062,6 @@ namespace BLToolkit.Data.DataProvider
 
 			public override Decimal  GetDecimal(object o, int index) { return OracleDecimal.SetPrecision(_dataReader.GetOracleDecimal(index), 28).Value; }
 
-#if FW2
 			public override Boolean? GetNullableBoolean(object o, int index) { return MappingSchema.ConvertToNullableBoolean(GetValue(o, index)); }
 			public override Char?    GetNullableChar   (object o, int index) { return MappingSchema.ConvertToNullableChar   (GetValue(o, index)); }
 			public override Guid?    GetNullableGuid   (object o, int index) { return MappingSchema.ConvertToNullableGuid   (GetValue(o, index)); }
@@ -1082,7 +1076,6 @@ namespace BLToolkit.Data.DataProvider
 			public override UInt64?  GetNullableUInt64 (object o, int index) { return _dataReader.IsDBNull(index)? null: (UInt64?)_dataReader.GetDecimal(index); }
 
 			public override Decimal? GetNullableDecimal(object o, int index) { return _dataReader.IsDBNull(index)? (decimal?)null: OracleDecimal.SetPrecision(_dataReader.GetOracleDecimal(index), 28).Value; }
-#endif
 		}
 
 		public class OracleScalarDataReaderMapper : ScalarDataReaderMapper
@@ -1096,15 +1089,12 @@ namespace BLToolkit.Data.DataProvider
 				: base(mappingSchema, dataReader, nameOrIndex)
 			{
 				_dataReader = (OracleDataReader)dataReader;
-#if FW2
-				_fieldType = _dataReader.GetProviderSpecificFieldType(Index);
+				_fieldType  = _dataReader.GetProviderSpecificFieldType(Index);
 
 				if (_fieldType != typeof(OracleXmlType) && _fieldType != typeof(OracleBlob))
 					_fieldType = _dataReader.GetFieldType(Index);
-#endif
 			}
 
-#if FW2
 			private readonly Type _fieldType;
 
 			public override Type GetFieldType(int index)
@@ -1130,7 +1120,7 @@ namespace BLToolkit.Data.DataProvider
 					return value is DBNull? null: value;
 				}
 			}
-#endif
+
 			public override Boolean  GetBoolean(object o, int index) { return MappingSchema.ConvertToBoolean(GetValue(o, Index)); }
 			public override Char     GetChar   (object o, int index) { return MappingSchema.ConvertToChar   (GetValue(o, Index)); }
 			public override Guid     GetGuid   (object o, int index) { return MappingSchema.ConvertToGuid   (GetValue(o, Index)); }
@@ -1146,7 +1136,6 @@ namespace BLToolkit.Data.DataProvider
 
 			public override Decimal  GetDecimal(object o, int index) { return OracleDecimal.SetPrecision(_dataReader.GetOracleDecimal(Index), 28).Value; }
 
-#if FW2
 			public override Boolean? GetNullableBoolean(object o, int index) { return MappingSchema.ConvertToNullableBoolean(GetValue(o, Index)); }
 			public override Char?    GetNullableChar   (object o, int index) { return MappingSchema.ConvertToNullableChar   (GetValue(o, Index)); }
 			public override Guid?    GetNullableGuid   (object o, int index) { return MappingSchema.ConvertToNullableGuid   (GetValue(o, Index)); }
@@ -1161,7 +1150,6 @@ namespace BLToolkit.Data.DataProvider
 			public override UInt64?  GetNullableUInt64 (object o, int index) { return _dataReader.IsDBNull(index)? null: (UInt64?)_dataReader.GetDecimal(Index); }
 
 			public override Decimal? GetNullableDecimal(object o, int index) { return _dataReader.IsDBNull(index)? (decimal?)null: OracleDecimal.SetPrecision(_dataReader.GetOracleDecimal(Index), 28).Value; }
-#endif
 		}
 
 		[Mixin(typeof(IDbDataParameter), "_oracleParameter")]

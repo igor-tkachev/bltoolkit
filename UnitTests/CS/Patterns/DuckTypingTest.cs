@@ -1,7 +1,8 @@
 using System;
-using BLToolkit.TypeBuilder;
+
 using NUnit.Framework;
 
+using BLToolkit.TypeBuilder;
 using BLToolkit.Patterns;
 
 namespace Patterns
@@ -195,7 +196,6 @@ namespace Patterns
 		}
 
 
-#if FW2
 		public interface GenericInterface<T>
 		{
 			T Method(T value);
@@ -228,17 +228,14 @@ namespace Patterns
 			duck2.I2Method (33, out value);
 			Assert.AreEqual(35, value);
 		}
-#endif
 
 		[Test, ExpectedException(typeof(ArgumentNullException))]
 		public void InvalidArgTest1()
 		{
 			TestInterface o = null;
-#if FW2
-			TestInterface  duck  = DuckTyping.Implement<TestInterface>(o);
-#else
-			TestInterface  duck  = (TestInterface) DuckTyping.Implement(typeof(TestInterface), o);
-#endif
+
+			TestInterface duck1 = DuckTyping.Implement<TestInterface>(o);
+			TestInterface duck2 = (TestInterface)DuckTyping.Implement(typeof(TestInterface), o);
 		}
 
 		interface NonPublicInterface

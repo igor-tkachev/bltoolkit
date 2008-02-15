@@ -9,7 +9,7 @@
     <OutputType>Library</OutputType>
     <RootNamespace>
     </RootNamespace>
-    <AssemblyName>Examples.VB.2</AssemblyName>
+    <AssemblyName>Examples.VB</AssemblyName>
     <MyType>Windows</MyType>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -84,9 +84,9 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Source\BLToolkit.2.csproj">
+    <ProjectReference Include="..\..\Source\BLToolkit.2005.csproj">
       <Project>{0C325F5D-E50E-4340-8724-D29896CCC583}</Project>
-      <Name>BLToolkit.2</Name>
+      <Name>BLToolkit.2005</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

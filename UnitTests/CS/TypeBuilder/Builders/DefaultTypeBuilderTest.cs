@@ -177,7 +177,6 @@ namespace TypeBuilder.Builders
 			Assert.AreEqual(10, o.Value);
 		}
 
-#if FW2
 		public abstract class TestObject2
 		{
 			public abstract int  Int1 { get; set; }
@@ -205,6 +204,5 @@ namespace TypeBuilder.Builders
 			o.Int1 = 5;
 			o.Int2 = 6;
 		}
-#endif
 	}
 }

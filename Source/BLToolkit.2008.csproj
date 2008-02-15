@@ -29,14 +29,14 @@
     <IsWebBootstrapper>false</IsWebBootstrapper>
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>
-    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>TRACE;DEBUG;FW2;FW3</DefineConstants>
+    <DefineConstants>TRACE;DEBUG</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <CodeAnalysisRules>-Microsoft.Design#CA1019;-Microsoft.Design#CA1000;-Microsoft.Design#CA1002;-Microsoft.Design#CA1004;-Microsoft.Design#CA1035;-Microsoft.Design#CA1039;-Microsoft.Design#CA1024;-Microsoft.Globalization#CA1303;-Microsoft.Globalization#CA1304;-Microsoft.Globalization#CA1305;-Microsoft.Maintainability#CA1502;-Microsoft.Naming#CA1720;-Microsoft.Naming#CA1709;-Microsoft.Naming#CA1710;-Microsoft.Naming#CA1707;-Microsoft.Naming#CA1706;-Microsoft.Performance#CA1800;-Microsoft.Performance#CA1819;-Microsoft.Usage#CA2223;-Microsoft.Usage#CA2225</CodeAnalysisRules>
@@ -47,7 +47,7 @@
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE;FW2;FW3</DefineConstants>
+    <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <CodeAnalysisRules>-Microsoft.Design#CA1019;-Microsoft.Design#CA1000;-Microsoft.Design#CA1004;-Microsoft.Design#CA1035;-Microsoft.Design#CA1033;-Microsoft.Design#CA1039;-Microsoft.Design#CA1024;-Microsoft.Globalization#CA1303;-Microsoft.Globalization#CA1304;-Microsoft.Globalization#CA1305;-Microsoft.Naming#CA1720;-Microsoft.Naming#CA1709;-Microsoft.Naming#CA1710;-Microsoft.Naming#CA1707;-Microsoft.Naming#CA1706;-Microsoft.Performance#CA1819;-Microsoft.Usage#CA2223;-Microsoft.Usage#CA2225</CodeAnalysisRules>
@@ -57,9 +57,6 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.configuration" />
-    <Reference Include="System.Core">
-      <RequiredTargetFramework>3.5</RequiredTargetFramework>
-    </Reference>
     <Reference Include="System.Data" />
     <Reference Include="System.Data.OracleClient" />
     <Reference Include="System.Design" />

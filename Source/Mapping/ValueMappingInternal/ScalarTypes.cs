@@ -202,7 +202,6 @@ namespace BLToolkit.Mapping.ValueMappingInternal
 		}
 	}
 
-#if FW2
 	internal sealed class NI8ToI8 : IValueMapper
 	{
 		public void Map(
@@ -399,7 +398,6 @@ namespace BLToolkit.Mapping.ValueMappingInternal
 						source.GetNullableDecimal(sourceObject, sourceIndex)));
 		}
 	}
-#endif
 
 	internal sealed class dbSToI8 : IValueMapper
 	{
@@ -754,7 +752,6 @@ namespace BLToolkit.Mapping.ValueMappingInternal
 		}
 	}
 
-#if FW2
 	internal sealed class NI8ToI16 : IValueMapper
 	{
 		public void Map(
@@ -951,7 +948,6 @@ namespace BLToolkit.Mapping.ValueMappingInternal
 						source.GetNullableDecimal(sourceObject, sourceIndex)));
 		}
 	}
-#endif
 
 	internal sealed class dbSToI16 : IValueMapper
 	{
@@ -1306,7 +1302,6 @@ namespace BLToolkit.Mapping.ValueMappingInternal
 		}
 	}
 
-#if FW2
 	internal sealed class NI8ToI32 : IValueMapper
 	{
 		public void Map(
@@ -1503,7 +1498,6 @@ namespace BLToolkit.Mapping.ValueMappingInternal
 						source.GetNullableDecimal(sourceObject, sourceIndex)));
 		}
 	}
-#endif
 
 	internal sealed class dbSToI32 : IValueMapper
 	{
@@ -1873,7 +1867,6 @@ namespace BLToolkit.Mapping.ValueMappingInternal
 		}
 	}
 
-#if FW2
 	internal sealed class NI8ToI64 : IValueMapper
 	{
 		public void Map(
@@ -2085,7 +2078,6 @@ namespace BLToolkit.Mapping.ValueMappingInternal
 						source.GetNullableDateTime(sourceObject, sourceIndex)));
 		}
 	}
-#endif
 
 	internal sealed class dbSToI64 : IValueMapper
 	{
@@ -2455,7 +2447,6 @@ namespace BLToolkit.Mapping.ValueMappingInternal
 						source.GetDecimal(sourceObject, sourceIndex)));
 		}
 	}
-#if FW2
 
 	internal sealed class NI8ToU8 : IValueMapper
 	{
@@ -2653,7 +2644,6 @@ namespace BLToolkit.Mapping.ValueMappingInternal
 						source.GetNullableDecimal(sourceObject, sourceIndex)));
 		}
 	}
-#endif
 
 	internal sealed class dbSToU8 : IValueMapper
 	{
@@ -3006,7 +2996,6 @@ namespace BLToolkit.Mapping.ValueMappingInternal
 						source.GetDecimal(sourceObject, sourceIndex)));
 		}
 	}
-#if FW2
 
 	internal sealed class NI8ToU16 : IValueMapper
 	{
@@ -3204,7 +3193,6 @@ namespace BLToolkit.Mapping.ValueMappingInternal
 						source.GetNullableDecimal(sourceObject, sourceIndex)));
 		}
 	}
-#endif
 
 	internal sealed class dbSToU16 : IValueMapper
 	{
@@ -3558,7 +3546,6 @@ namespace BLToolkit.Mapping.ValueMappingInternal
 						source.GetDecimal(sourceObject, sourceIndex)));
 		}
 	}
-#if FW2
 
 	internal sealed class NI8ToU32 : IValueMapper
 	{
@@ -3756,7 +3743,6 @@ namespace BLToolkit.Mapping.ValueMappingInternal
 						source.GetNullableDecimal(sourceObject, sourceIndex)));
 		}
 	}
-#endif
 
 	internal sealed class dbSToU32 : IValueMapper
 	{
@@ -4110,7 +4096,6 @@ namespace BLToolkit.Mapping.ValueMappingInternal
 						source.GetDecimal(sourceObject, sourceIndex)));
 		}
 	}
-#if FW2
 
 	internal sealed class NI8ToU64 : IValueMapper
 	{
@@ -4308,7 +4293,6 @@ namespace BLToolkit.Mapping.ValueMappingInternal
 						source.GetNullableDecimal(sourceObject, sourceIndex)));
 		}
 	}
-#endif
 
 	internal sealed class dbSToU64 : IValueMapper
 	{
@@ -4664,7 +4648,6 @@ namespace BLToolkit.Mapping.ValueMappingInternal
 		}
 	}
 
-#if FW2
 	internal sealed class NI8ToB : IValueMapper
 	{
 		public void Map(
@@ -4861,7 +4844,6 @@ namespace BLToolkit.Mapping.ValueMappingInternal
 						source.GetNullableDecimal(sourceObject, sourceIndex)));
 		}
 	}
-#endif
 
 	internal sealed class dbSToB : IValueMapper
 	{
@@ -5216,7 +5198,6 @@ namespace BLToolkit.Mapping.ValueMappingInternal
 		}
 	}
 
-#if FW2
 	internal sealed class NI8ToC : IValueMapper
 	{
 		public void Map(
@@ -5413,7 +5394,6 @@ namespace BLToolkit.Mapping.ValueMappingInternal
 						source.GetNullableDecimal(sourceObject, sourceIndex)));
 		}
 	}
-#endif
 
 	internal sealed class dbSToC : IValueMapper
 	{
@@ -5767,7 +5747,6 @@ namespace BLToolkit.Mapping.ValueMappingInternal
 						source.GetDecimal(sourceObject, sourceIndex)));
 		}
 	}
-#if FW2
 
 	internal sealed class NI8ToR4 : IValueMapper
 	{
@@ -5965,7 +5944,6 @@ namespace BLToolkit.Mapping.ValueMappingInternal
 						source.GetNullableDecimal(sourceObject, sourceIndex)));
 		}
 	}
-#endif
 
 	internal sealed class dbSToR4 : IValueMapper
 	{
@@ -6335,7 +6313,6 @@ namespace BLToolkit.Mapping.ValueMappingInternal
 		}
 	}
 
-#if FW2
 	internal sealed class NI8ToR8 : IValueMapper
 	{
 		public void Map(
@@ -6548,7 +6525,6 @@ namespace BLToolkit.Mapping.ValueMappingInternal
 		}
 	}
 
-#endif
 	internal sealed class dbSToR8 : IValueMapper
 	{
 		public void Map(
@@ -6918,7 +6894,6 @@ namespace BLToolkit.Mapping.ValueMappingInternal
 		}
 	}
 
-#if FW2
 	internal sealed class NI8ToD : IValueMapper
 	{
 		public void Map(
@@ -7115,7 +7090,6 @@ namespace BLToolkit.Mapping.ValueMappingInternal
 						source.GetNullableDecimal(sourceObject, sourceIndex)));
 		}
 	}
-#endif
 
 	internal sealed class dbSToD : IValueMapper
 	{
@@ -7289,7 +7263,6 @@ namespace BLToolkit.Mapping.ValueMappingInternal
 		}
 	}
 
-#if FW2
 	internal sealed class NGToG : IValueMapper
 	{
 		public void Map(
@@ -7304,7 +7277,6 @@ namespace BLToolkit.Mapping.ValueMappingInternal
 						source.GetNullableGuid(sourceObject, sourceIndex)));
 		}
 	}
-#endif
 
 	internal sealed class dbSToG : IValueMapper
 	{
@@ -7384,7 +7356,6 @@ namespace BLToolkit.Mapping.ValueMappingInternal
 		}
 	}
 
-#if FW2
 	internal sealed class NI64ToDT : IValueMapper
 	{
 		public void Map(
@@ -7429,7 +7400,6 @@ namespace BLToolkit.Mapping.ValueMappingInternal
 						source.GetNullableDateTime(sourceObject, sourceIndex)));
 		}
 	}
-#endif
 
 	internal sealed class dbSToDT : IValueMapper
 	{

@@ -47,11 +47,8 @@ namespace Validation
 		[Test, ExpectedException(typeof(ValidationException))]
 		public void Test2()
 		{
-#if FW2
 			PersonDoc doc = TypeAccessor<PersonDoc>.CreateInstance();
-#else
-			PersonDoc doc = (PersonDoc)TypeAccessor.CreateInstance(typeof(PersonDoc));
-#endif
+
 			doc.Series_PersonDoc = "aaa";
 			doc.Validate();
 		}
