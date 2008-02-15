@@ -194,7 +194,7 @@ namespace BLToolkit.ComponentModel
 
 		private Type GetTypeByName(string typeName)
 		{
-			if (typeName == null || typeName.Length == 0)
+			if (string.IsNullOrEmpty(typeName))
 				return null;
 
 			Type type = Type.GetType(typeName);

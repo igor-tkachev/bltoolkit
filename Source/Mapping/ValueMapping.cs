@@ -1,6 +1,5 @@
 using System;
 
-using BLToolkit.Mapping.ValueMappingInternal;
 using BLToolkit.Common;
 
 using KeyValue = System.Collections.Generic.KeyValuePair<System.Type, System.Type>;
@@ -65,7 +64,7 @@ namespace BLToolkit.Mapping
 				if (_mappers.TryGetValue(key, out t))
 					return t;
 
-				t = MapperSelector.GetMapper(t1, t2);
+				//t = BLToolkit.Mapping.ValueMappingInternal.MapperSelector.GetMapper(t1, t2);
 
 				if (null == t)
 				{

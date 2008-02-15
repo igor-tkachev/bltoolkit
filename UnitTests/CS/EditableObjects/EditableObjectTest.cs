@@ -147,7 +147,7 @@ namespace EditableObjects
 
 			Console.WriteLine("o is dirty: " + o.IsDirty);
 
-			o.PropertyChanged += new System.ComponentModel.PropertyChangedEventHandler(object_PropertyChanged);
+			o.PropertyChanged += object_PropertyChanged;
 
 			Console.WriteLine("Changing 3 fields");
 

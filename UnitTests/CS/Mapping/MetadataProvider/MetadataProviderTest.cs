@@ -1,5 +1,3 @@
-using System;
-
 using NUnit.Framework;
 
 using BLToolkit.Mapping;
@@ -44,7 +42,7 @@ namespace Mapping.MetadataProvider
 			public string LastName;
 		}
 
-		void MapMetadataProvider_OnCreateProvider(MapMetadataProvider parentProvider)
+		static void MapMetadataProvider_OnCreateProvider(MapMetadataProvider parentProvider)
 		{
 			parentProvider.AddProvider(new CustomMetadataProvider());
 		}
@@ -52,7 +50,7 @@ namespace Mapping.MetadataProvider
 		[Test]
 		public void Test()
 		{
-			MapMetadataProvider.OnCreateProvider += new OnCreateProvider(MapMetadataProvider_OnCreateProvider);
+			MapMetadataProvider.OnCreateProvider += MapMetadataProvider_OnCreateProvider;
 
 			string cmd = "SELECT '1' as FIRST_NAME, '2' as LAST_NAME";
 #if ORACLE || FIREBIRD
@@ -72,7 +70,7 @@ namespace Mapping.MetadataProvider
 		[TearDown]
 		public void TearDown()
 		{
-			MapMetadataProvider.OnCreateProvider -= new OnCreateProvider(MapMetadataProvider_OnCreateProvider);
+			MapMetadataProvider.OnCreateProvider -= MapMetadataProvider_OnCreateProvider;
 		}
 	}
 }

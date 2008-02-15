@@ -115,8 +115,7 @@ namespace BLToolkit.Aspects
 
 		private void CheckNull(EmitHelper emit)
 		{
-			if (_throwExceptionIfNull == false &&
-				(_exceptionMessage == null || _exceptionMessage.Length == 0))
+			if (_throwExceptionIfNull == false && string.IsNullOrEmpty(_exceptionMessage))
 			{
 				emit
 					.brfalse (Context.ReturnLabel)
@@ -125,7 +124,7 @@ namespace BLToolkit.Aspects
 			else
 			{
 				string message = string.Format(
-					_exceptionMessage == null || _exceptionMessage.Length == 0?
+					string.IsNullOrEmpty(_exceptionMessage)?
 						"'{0}.{1}' is not initialized." : _exceptionMessage,
 					_targetInterface.Name, _memberName, _targetInterface.FullName);
 
@@ -165,7 +164,7 @@ namespace BLToolkit.Aspects
 						attr.TargetInterface != Context.CurrentInterface.Type)
 						continue;
 
-					string name = attr.MethodName == null || attr.MethodName.Length == 0?
+					string name = string.IsNullOrEmpty(attr.MethodName)?
 						mi.Name: attr.MethodName;
 
 					if (name != method.Name || mi.ReturnType != method.ReturnType)

@@ -46,7 +46,7 @@ namespace BLTgen
 
 			WriteBanner();
 
-			if (parsedArgs.SourceAssembly == null || parsedArgs.SourceAssembly.Length == 0)
+			if (string.IsNullOrEmpty(parsedArgs.SourceAssembly))
 				Usage();
 			else
 				GenerateExtensionAssembly(parsedArgs);
@@ -62,7 +62,7 @@ namespace BLTgen
 			if (verbose)
 				Console.WriteLine("{0} =>{1}{2}", sourceAsm.Location, Environment.NewLine, extensionAssemblyPath);
 
-			AppDomain.CurrentDomain.AssemblyResolve += new ResolveEventHandler(CurrentDomain_AssemblyResolve);
+			AppDomain.CurrentDomain.AssemblyResolve += CurrentDomain_AssemblyResolve;
 
 			TypeFactory.SaveTypes = true;
 			TypeFactory.SetGlobalAssembly(extensionAssemblyPath, extensionAssemblyVersion, parsedArgs.KeyPairFile);

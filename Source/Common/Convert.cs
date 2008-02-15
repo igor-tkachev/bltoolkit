@@ -4809,7 +4809,7 @@ namespace BLToolkit.Common
 		// 
 		public static XmlDocument ToXmlDocument(String p)         
 		{
-			if (p == null || p.Length == 0) return null;
+			if (string.IsNullOrEmpty(p)) return null;
 
 			XmlDocument doc = new XmlDocument();
 			doc.LoadXml(p);

@@ -46,7 +46,7 @@ namespace BLToolkit.Web.UI
 			}
 			set
 			{
-				_objectBinder.ItemType = value == null || value.Length == 0 || value == "(none)"?
+				_objectBinder.ItemType = string.IsNullOrEmpty(value) || value == "(none)"?
 					null: BuildManager.GetType(value, false, true);
 			}
 		}
@@ -64,7 +64,7 @@ namespace BLToolkit.Web.UI
 			}
 			set
 			{
-				_objectBinder.ObjectViewType = value == null || value.Length == 0 || value == "(none)"?
+				_objectBinder.ObjectViewType = string.IsNullOrEmpty(value) || value == "(none)"?
 					null: BuildManager.GetType(value, false, true);
 			}
 		}

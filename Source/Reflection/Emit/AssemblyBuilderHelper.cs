@@ -95,7 +95,7 @@ namespace BLToolkit.Reflection.Emit
 #endif
 
 			_assemblyBuilder =
-				assemblyDir == null || assemblyDir.Length == 0?
+				string.IsNullOrEmpty(assemblyDir)?
 				Thread.GetDomain().DefineDynamicAssembly(_assemblyName, AssemblyBuilderAccess.RunAndSave):
 				Thread.GetDomain().DefineDynamicAssembly(_assemblyName, AssemblyBuilderAccess.RunAndSave, assemblyDir);
 

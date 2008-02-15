@@ -81,7 +81,7 @@ namespace Patterns
 			Assert.AreEqual(42, duck.Method(40));
 			Assert.AreEqual(22, duck.Prop);
 
-			duck.Event += new EventHandler(duck_Event);
+			duck.Event += duck_Event;
 
 			duck.CallEvent();
 

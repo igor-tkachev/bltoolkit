@@ -46,7 +46,7 @@ namespace BLToolkit.Aspects
 					.brtrue_s (label)
 					;
 
-				if (message == null || message.Length == 0)
+				if (string.IsNullOrEmpty(message))
 				{
 					emit
 						.ldstr  (pi.Name)

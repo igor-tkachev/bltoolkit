@@ -21,7 +21,7 @@ namespace BLToolkit.Data.DataProvider
 			get { return _parameterPrefix;  }
 			set
 			{
-				_parameterPrefix = (value == null || value.Length == 0)? null:
+				_parameterPrefix = string.IsNullOrEmpty(value)? null:
 					value.ToUpper(CultureInfo.InvariantCulture);
 			}
 		}

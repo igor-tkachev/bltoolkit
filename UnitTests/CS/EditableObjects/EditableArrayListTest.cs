@@ -42,7 +42,7 @@ namespace EditableObjects
 			}
 		}
 		
-		private static EditableTestObject[] _testObjects = new EditableTestObject[6]
+		private static readonly EditableTestObject[] _testObjects = new EditableTestObject[6]
 			{
 				EditableTestObject.CreateInstance(0, "Smith",  24),
 				EditableTestObject.CreateInstance(1, "John",   22),
@@ -57,10 +57,10 @@ namespace EditableObjects
 			TypeFactory.SaveTypes = true;
 
 			_testList = new EditableArrayList(typeof(EditableTestObject));
-			_testList.ListChanged += new ListChangedEventHandler(TestList_ListChanged);
+			_testList.ListChanged += TestList_ListChanged;
 		}
 
-		private EditableArrayList _testList;
+		private readonly EditableArrayList _testList;
 		
 		private void TestList_ListChanged(object sender, ListChangedEventArgs e)
 		{
@@ -350,7 +350,7 @@ namespace EditableObjects
 
 				Console.WriteLine(eal.Count);
 
-				eal.ListChanged += new ListChangedEventHandler(eal_ListChanged);
+				eal.ListChanged += eal_ListChanged;
 
 				eal[0].ID = 0;
 				_notificationCount = 0;

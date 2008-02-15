@@ -17,7 +17,7 @@ namespace BLToolkit.Mapping
 			if (masterIndex.Fields.Length != slaveIndex.Fields.Length)
 				throw new MappingException("Master and slave indexes do not match.");
 
-			if (containerName == null || containerName.Length == 0)
+			if (string.IsNullOrEmpty(containerName))
 				throw new MappingException("Master container field name is wrong.");
 
 			_slaveResultSet  = slaveResultSet;

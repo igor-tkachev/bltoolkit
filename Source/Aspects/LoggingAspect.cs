@@ -182,7 +182,7 @@ namespace BLToolkit.Aspects
 
 		private static void LogOutputInternal(string logText, string fileName)
 		{
-			if (fileName == null || fileName.Length == 0)
+			if (string.IsNullOrEmpty(fileName))
 				Debug.WriteLine(logText);
 			else
 				using (StreamWriter sw = new StreamWriter(fileName, true)) 

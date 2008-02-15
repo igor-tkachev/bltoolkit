@@ -1510,7 +1510,7 @@
 		<converter type="XmlDocument">
 			<group name="Scalar Types.">
 				<from type="String"    >
-			if (p == null || p.Length == 0) return null;
+			if (string.IsNullOrEmpty(p)) return null;
 
 			XmlDocument doc = new XmlDocument();
 			doc.LoadXml(p);

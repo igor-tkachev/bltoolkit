@@ -12,9 +12,9 @@ namespace Data
 		{
 			using (DbManager db = new DbManager())
 			{
-				db.BeforeOperation += new OperationTypeEventHandler(HandleBeforeOperation);
-				db.AfterOperation  += new OperationTypeEventHandler(HandleAfterOperation);
-				db.InitCommand     += new InitCommandEventHandler  (HandleInitCommand);
+				db.BeforeOperation += HandleBeforeOperation;
+				db.AfterOperation  += HandleAfterOperation;
+				db.InitCommand     += HandleInitCommand;
 
 				db
 					.SetCommand("SELECT * FROM Person")
@@ -42,7 +42,7 @@ namespace Data
 		{
 			using (DbManager db = new DbManager())
 			{
-				db.OperationException += new OperationExceptionEventHandler(HandleOperationException);
+				db.OperationException += HandleOperationException;
 
 				db
 					.SetCommand("SELECT * FROM NoSuchTableEverExist")

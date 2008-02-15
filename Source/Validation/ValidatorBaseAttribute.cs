@@ -63,7 +63,7 @@ namespace BLToolkit.Validation
 					fieldName = ((DisplayNameAttribute)attrs[0]).DisplayName;
 			}
 
-			return className == null || className.Length == 0? fieldName: className + "." + fieldName;
+			return string.IsNullOrEmpty(className)? fieldName: className + "." + fieldName;
 		}
 	}
 }
