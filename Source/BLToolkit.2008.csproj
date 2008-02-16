@@ -66,6 +66,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
     <Compile Include="Aspects\CacheAspect.cs" />
     <Compile Include="Aspects\CacheAspectItem.cs" />
     <Compile Include="Aspects\CacheAspectT.cs" />
@@ -408,6 +413,11 @@
     <Content Include="Doc\ChangeLog.txt" />
     <Content Include="Doc\License.txt" />
     <Content Include="Doc\OnlineDoc.txt" />
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <SubType>Designer</SubType>
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
     <EmbeddedResource Include="Web\UI\WebObjectBinder.ico" />
   </ItemGroup>
   <ItemGroup>

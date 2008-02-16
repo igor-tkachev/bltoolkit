@@ -5,10 +5,12 @@ using System.ComponentModel;
 using System.Configuration;
 using System.Data;
 using System.Data.Common;
-
+using System.Data.SqlTypes;
+using System.Diagnostics;
 using BLToolkit.Common;
 using BLToolkit.Data.DataProvider;
 using BLToolkit.Mapping;
+using BLToolkit.Properties;
 using BLToolkit.Reflection;
 
 namespace BLToolkit.Data
@@ -43,9 +45,9 @@ namespace BLToolkit.Data
 		/// </para>
 		/// </remarks>
 		/// <include file="Examples.xml" path='examples/db[@name="ctor"]/*' />
-		/// <seealso cref="AddConnectionString(string)">AddConnectionString Method</seealso>
+		/// <seealso cref="AddConnectionString(string)"/>
 		/// <returns>An instance of the database manager class.</returns>
-		[System.Diagnostics.DebuggerStepThrough]
+		[DebuggerStepThrough]
 		public DbManager() : this((IDbConnection)null, null)
 		{
 		}
@@ -61,7 +63,7 @@ namespace BLToolkit.Data
 		/// <include file="Examples.xml" path='examples/db[@name="ctor(string)"]/*' />
 		/// <param name="configurationString">Configuration string.</param>
 		/// <returns>An instance of the <see cref="DbManager"/> class.</returns>
-		[System.Diagnostics.DebuggerStepThrough]
+		[DebuggerStepThrough]
 		public DbManager(string configurationString)
 			: this((IDbConnection)null, configurationString)
 		{
@@ -78,7 +80,7 @@ namespace BLToolkit.Data
 		/// <param name="configuration">Configuration string not containing provider name.</param>
 		/// <param name="providerName">Provider configuration name.</param>
 		/// <returns>An instance of the <see cref="DbManager"/> class.</returns>
-		[System.Diagnostics.DebuggerStepThrough]
+		[DebuggerStepThrough]
 		public DbManager(string providerName, string configuration)
 			: this((IDbConnection)null, providerName + ProviderNameDivider + configuration)
 		{
@@ -100,7 +102,7 @@ namespace BLToolkit.Data
 		/// <include file="Examples.xml" path='examples/db[@name="ctor(IDbConnection)"]/*' />
 		/// <param name="connection">An instance of the <see cref="IDbConnection"/> class.</param>
 		/// <returns>An instance of the <see cref="DbManager"/> class.</returns>
-		[System.Diagnostics.DebuggerStepThrough]
+		[DebuggerStepThrough]
 		public DbManager(IDbConnection connection)
 		{
 			if (connection != null)
@@ -117,7 +119,7 @@ namespace BLToolkit.Data
 		/// </summary>
 		/// <include file="Examples.xml" path='examples/db[@name="ctor(IDbTransaction)"]/*' />
 		/// <param name="transaction"></param>
-		[System.Diagnostics.DebuggerStepThrough]
+		[DebuggerStepThrough]
 		public DbManager(IDbTransaction transaction)
 			: this(transaction != null? transaction.Connection: null)
 		{
@@ -144,7 +146,7 @@ namespace BLToolkit.Data
 		/// <param name="connection">An instance of the <see cref="IDbConnection"/>.</param>
 		/// <param name="configurationString">The configuration string.</param>
 		/// <returns>An instance of the <see cref="DbManager"/> class.</returns>
-		[System.Diagnostics.DebuggerStepThrough]
+		[DebuggerStepThrough]
 		public DbManager(
 			IDbConnection connection,
 			string        configurationString)
@@ -182,6 +184,7 @@ namespace BLToolkit.Data
 		/// </value>
 		public MappingSchema MappingSchema
 		{
+			[DebuggerStepThrough]
 			get { return _mappingSchema; }
 			set { _mappingSchema = value ?? Map.DefaultSchema; }
 		}
@@ -197,7 +200,7 @@ namespace BLToolkit.Data
 		/// <include file="Examples.xml" path='examples/db[@name="DataProvider"]/*' />
 		public DataProviderBase DataProvider
 		{
-			[System.Diagnostics.DebuggerStepThrough]
+			[DebuggerStepThrough]
 			get { return _dataProvider; }
 		}
 
@@ -219,7 +222,7 @@ namespace BLToolkit.Data
 		/// <include file="Examples.xml" path='examples/db[@name="Connection"]/*' />
 		public IDbConnection Connection
 		{
-			[System.Diagnostics.DebuggerStepThrough]
+			[DebuggerStepThrough]
 			get
 			{
 				if (_connection == null)
@@ -241,7 +244,7 @@ namespace BLToolkit.Data
 					}
 					else
 					{
-						throw new DataException("The connection does not match the data provider type.");
+						throw new DataException(Resources.DbManager_ConnectionTypeMismatch);
 					}
 				}
 				else
@@ -268,7 +271,7 @@ namespace BLToolkit.Data
 		/// <include file="Examples.xml" path='examples/db[@name="Command"]/*' />
 		public IDbCommand Command
 		{
-			[System.Diagnostics.DebuggerStepThrough]
+			[DebuggerStepThrough]
 			get { return SelectCommand; }
 		}
 
@@ -284,7 +287,7 @@ namespace BLToolkit.Data
 		/// <include file="Examples.xml" path='examples/db[@name="Command"]/*' />
 		public IDbCommand SelectCommand
 		{
-			[System.Diagnostics.DebuggerStepThrough]
+			[DebuggerStepThrough]
 			get { return _selectCommand = OnInitCommand(_selectCommand); }
 		}
 
@@ -301,7 +304,7 @@ namespace BLToolkit.Data
 		/// <include file="Examples.xml" path='examples/db[@name="Command"]/*' />
 		public IDbCommand InsertCommand
 		{
-			[System.Diagnostics.DebuggerStepThrough]
+			[DebuggerStepThrough]
 			get { return _insertCommand = OnInitCommand(_insertCommand); }
 		}
 
@@ -318,7 +321,7 @@ namespace BLToolkit.Data
 		/// <include file="Examples.xml" path='examples/db[@name="Command"]/*' />
 		public IDbCommand UpdateCommand
 		{
-			[System.Diagnostics.DebuggerStepThrough]
+			[DebuggerStepThrough]
 			get { return _updateCommand = OnInitCommand(_updateCommand); }
 		}
 
@@ -335,7 +338,7 @@ namespace BLToolkit.Data
 		/// <include file="Examples.xml" path='examples/db[@name="Command"]/*' />
 		public IDbCommand DeleteCommand
 		{
-			[System.Diagnostics.DebuggerStepThrough]
+			[DebuggerStepThrough]
 			get { return _deleteCommand = OnInitCommand(_deleteCommand); }
 		}
 
@@ -351,10 +354,10 @@ namespace BLToolkit.Data
 		/// You have to call the <see cref="BeginTransaction()"/> method to begin a transaction.
 		/// </remarks>
 		/// <include file="Examples.xml" path='examples/db[@name="Transaction"]/*' />
-		/// <seealso cref="BeginTransaction()">BeginTransaction Method</seealso>
+		/// <seealso cref="BeginTransaction()"/>
 		public IDbTransaction Transaction
 		{
-			[System.Diagnostics.DebuggerStepThrough]
+			[DebuggerStepThrough]
 			get { return _transaction; }
 		}
 
@@ -404,10 +407,10 @@ namespace BLToolkit.Data
 		/// </list>
 		/// </para>
 		/// </remarks>
-		/// <seealso cref="AddConnectionString(string)">AddConnectionString Method</seealso>
+		/// <seealso cref="AddConnectionString(string)"/>
 		public string ConfigurationString
 		{
-			[System.Diagnostics.DebuggerStepThrough]
+			[DebuggerStepThrough]
 			get { return _configurationString; }
 		}
 
@@ -467,7 +470,7 @@ namespace BLToolkit.Data
 		/// and then closes the connection.
 		/// </remarks>
 		/// <include file="Examples.xml" path='examples/db[@name="Close()"]/*' />
-		/// <seealso cref="Dispose(bool)">Dispose Method</seealso>
+		/// <seealso cref="Dispose(bool)"/>
 		public void Close()
 		{
 			if (_selectCommand != null) { _selectCommand.Dispose(); _selectCommand = null; }
@@ -513,12 +516,12 @@ namespace BLToolkit.Data
 		/// </summary>
 		/// <remarks>
 		/// Once the transaction has completed, you must explicitly commit or roll back the transaction
-		/// by using the <see cref="System.Data.IDbTransaction.Commit">Commit</see> or 
-		/// <see cref="System.Data.IDbTransaction.Rollback">Rollback</see> methods.
+		/// by using the <see cref="System.Data.IDbTransaction.Commit"/>> or 
+		/// <see cref="System.Data.IDbTransaction.Rollback"/> methods.
 		/// </remarks>
 		/// <include file="Examples.xml" path='examples/db[@name="BeginTransaction()"]/*' />
 		/// <returns>This instance of the <see cref="DbManager"/>.</returns>
-		/// <seealso cref="Transaction">Transaction Property</seealso>
+		/// <seealso cref="Transaction"/>
 		public DbManager BeginTransaction()
 		{
 			return BeginTransaction(IsolationLevel.ReadCommitted);
@@ -529,8 +532,8 @@ namespace BLToolkit.Data
 		/// </summary>
 		/// <remarks>
 		/// Once the transaction has completed, you must explicitly commit or roll back the transaction
-		/// by using the <see cref="System.Data.IDbTransaction.Commit">Commit</see> or 
-		/// <see cref="System.Data.IDbTransaction.Rollback">Rollback</see> methods.
+		/// by using the <see cref="System.Data.IDbTransaction.Commit"/> or 
+		/// <see cref="System.Data.IDbTransaction.Rollback"/> methods.
 		/// </remarks>
 		/// <include file="Examples.xml" path='examples/db[@name="BeginTransaction(IsolationLevel)"]/*' />
 		/// <param name="il">One of the <see cref="IsolationLevel"/> values.</param>
@@ -654,6 +657,12 @@ namespace BLToolkit.Data
 			_defaultConfiguration = ConfigurationManager.AppSettings.Get("BLToolkit.DefaultConfiguration");
 		}
 
+		private  static TraceSwitch _ts;
+		internal static TraceSwitch  TS
+		{
+			get { return _ts ?? (_ts = new TraceSwitch("DbManager", "DbManager trace switch")); }
+		}
+
 		private static string             _firstConfiguration;
 		private static DataProviderBase   _firstProvider;
 		private static readonly Hashtable _configurationList = Hashtable.Synchronized(new Hashtable());
@@ -691,7 +700,8 @@ namespace BLToolkit.Data
 			}
 
 			if (_dataProvider == null)
-				throw new DataException("A suitable data provider is not available.");
+				throw new DataException(string.Format(
+					Resources.DbManager_UnknownDataProvider, configurationString));
 
 			_dataProvider.InitDbManager(this);
 		}
@@ -703,35 +713,36 @@ namespace BLToolkit.Data
 			if (configurationString == null) 
 				configurationString = DefaultConfiguration;
 
+			string str;
+
 			// Check cached strings first.
 			//
-			object o = _connectionStringList[configurationString];
-
-			// Connection string is not in cache.
-			//
-			if (o == null)
+			if (!_connectionStringList.TryGetValue(configurationString, out str))
 			{
-				string key = string.Format(
-					"ConnectionString{0}{1}",
-					configurationString.Length == 0? "": ".",
-					configurationString);
-
-				ConnectionStringSettings css = ConfigurationManager.ConnectionStrings[configurationString];
-
-				o = css != null? css.ConnectionString: ConfigurationManager.AppSettings.Get(key);
-
-				if (o == null)
+				lock (_dataProviderListLock)
 				{
-					throw new DataException(string.Format(
-						"The '{0}' key does not exist in the configuration file.", key));
-				}
+					// Connection string is not in the cache.
+					//
+					string key = string.Format("ConnectionString{0}{1}",
+						configurationString.Length == 0? String.Empty: ".", configurationString);
 
-				// Store the result in cache.
-				//
-				_connectionStringList[configurationString] = o;
+					ConnectionStringSettings css = ConfigurationManager.ConnectionStrings[configurationString];
+
+					str = css != null? css.ConnectionString: ConfigurationManager.AppSettings.Get(key);
+
+					if (string.IsNullOrEmpty(str))
+					{
+						throw new DataException(string.Format(
+							Resources.DbManager_UnknownConfiguration, key));
+					}
+
+					// Store the result in cache.
+					//
+					_connectionStringList[configurationString] = str;
+				}
 			}
 
-			return o.ToString();
+			return str;
 		}
 
 		protected virtual string GetConnectionString(IDbConnection connection)
@@ -744,7 +755,7 @@ namespace BLToolkit.Data
 			ConnectionStringSettings css = ConfigurationManager.ConnectionStrings[configurationString];
 
 			if (css != null)
-				return (DataProviderBase)_dataProviderNameList[css.ProviderName];
+				return _dataProviderNameList[css.ProviderName];
 
 			// configurationString can be:
 			// ''        : default provider,   default configuration;
@@ -774,12 +785,12 @@ namespace BLToolkit.Data
 				}
 			}
 
-			return (DataProviderBase)_dataProviderNameList[key];
+			return _dataProviderNameList[key];
 		}
 
 		private void Init(IDbConnection connection)
 		{
-			_dataProvider = (DataProviderBase)_dataProviderTypeList[connection.GetType()];
+			_dataProvider = _dataProviderTypeList[connection.GetType()];
 
 			if (_dataProvider != null)
 			{
@@ -788,8 +799,7 @@ namespace BLToolkit.Data
 			else
 			{
 				throw new DataException(string.Format(
-					"The '{0}' type of the connection could not be recognized.",
-					connection.GetType().FullName));
+					Resources.DbManager_UnknownConnectionType, connection.GetType().FullName));
 			}
 
 			_dataProvider.InitDbManager(this);
@@ -891,10 +901,10 @@ namespace BLToolkit.Data
 						{
 							if (param.Direction != p.Direction)
 							{
-								System.Diagnostics.Debug.WriteLine(string.Format(
+								Debug.WriteLineIf(TS.TraceWarning, string.Format(
 									"Stored Procedure '{0}'. Parameter '{1}' has different direction '{2}'. Should be '{3}'.",
 										spName, name, param.Direction, p.Direction),
-									typeof(DbManager).Namespace);
+									TS.DisplayName);
 
 								param.Direction = p.Direction;
 							}
@@ -914,9 +924,9 @@ namespace BLToolkit.Data
 						param.Direction == ParameterDirection.Input || 
 						param.Direction == ParameterDirection.InputOutput))
 					{
-						System.Diagnostics.Debug.WriteLine(string.Format(
+						Debug.WriteLineIf(TS.TraceWarning, string.Format(
 							"Stored Procedure '{0}'. Parameter '{1}' not assigned.", spName, name),
-							typeof(DbManager).Namespace);
+							TS.DisplayName);
 
 						param.SourceColumn = _dataProvider.Convert(name, ConvertType.ParameterToName).ToString();
 					}
@@ -932,6 +942,18 @@ namespace BLToolkit.Data
 			return commandParameters;
 		}
 
+		///<summary>
+		/// Creates an one-dimension array of <see cref="IDbDataParameter"/>
+		/// from any combination on IDbDataParameter, IDbDataParameter[] or null references.
+		/// Null references are stripped, arrays and single parameters are combined
+		/// into a new array.
+		///</summary>
+		/// <remarks>When two or more parameters has the same name,
+		/// the first parameter is used, all the rest are ignored.</remarks>
+		///<param name="parameters">Array of IDbDataParameter, IDbDataParameter[] or null references.</param>
+		///<returns>An normalized array of <see cref="IDbDataParameter"/> without null references.</returns>
+		///<exception cref="ArgumentException">The parameter <paramref name="parameters"/>
+		/// contains anything except IDbDataParameter, IDbDataParameter[] or null reference.</exception>
 		public virtual IDbDataParameter[] PrepareParameters(object[] parameters)
 		{
 			if (parameters == null || parameters.Length == 0)
@@ -965,16 +987,16 @@ namespace BLToolkit.Data
 				return oneParameterArray;
 			}
 
-			ArrayList list = new ArrayList(parameters.Length);
-			Hashtable hash = new Hashtable(parameters.Length);
+			List<IDbDataParameter>               list = new List<IDbDataParameter>(parameters.Length);
+			Dictionary<string, IDbDataParameter> hash = new Dictionary<string, IDbDataParameter>(parameters.Length);
 
 			foreach (object o in parameters)
 			{
-				IDbDataParameter p = o as IDbDataParameter;
-
-				if (p != null)
+				if (o is IDbDataParameter)
 				{
-					if (!hash.Contains(p.ParameterName))
+					IDbDataParameter p = (IDbDataParameter)o;
+
+					if (!hash.ContainsKey(p.ParameterName))
 					{
 						list.Add(p);
 						hash.Add(p.ParameterName, p);
@@ -982,24 +1004,28 @@ namespace BLToolkit.Data
 				}
 				else if (o is IDbDataParameter[])
 				{
-					foreach (IDbDataParameter dbp in (IDbDataParameter[])o)
+					foreach (IDbDataParameter p in (IDbDataParameter[])o)
 					{
-						if (!hash.Contains(dbp.ParameterName))
+						if (!hash.ContainsKey(p.ParameterName))
 						{
-							list.Add(dbp);
-							hash.Add(dbp.ParameterName, dbp);
+							list.Add(p);
+							hash.Add(p.ParameterName, p);
 						}
 					}
 				}
+				else if (o != null && o != DBNull.Value)
+				{
+					throw new ArgumentException(
+						Resources.DbManager_NotDbDataParameter, "parameters");
+				}
 			}
 
-			IDbDataParameter[] retParams = new IDbDataParameter[list.Count];
-
-			list.CopyTo(retParams);
-
-			return retParams;
+			return list.ToArray();
 		}
 
+		/// <summary>
+		/// Initializes a command and raises the <see cref="InitCommand"/> event.
+		/// </summary>
 		protected virtual IDbCommand OnInitCommand(IDbCommand command)
 		{
 			if (command == null) 
@@ -1030,7 +1056,8 @@ namespace BLToolkit.Data
 		/// Helper function. Creates the command object and sets command type and command text.
 		/// </summary>
 		/// <param name="commandAction">Command action.</param>
-		/// <param name="commandType">The <see cref="System.Data.CommandType">CommandType</see> (stored procedure, text, etc.)</param>
+		/// <param name="commandType">The <see cref="System.Data.CommandType"/>
+		/// (stored procedure, text, etc.)</param>
 		/// <param name="sql">The SQL statement.</param>
 		/// <returns>The command object.</returns>
 		private IDbCommand GetCommand(CommandAction commandAction, CommandType commandType, string sql)
@@ -1059,7 +1086,9 @@ namespace BLToolkit.Data
 			}
 		}
 
-		private static readonly Hashtable _paramCache = Hashtable.Synchronized(new Hashtable());
+		private static readonly Dictionary<string, IDbDataParameter[]> _paramCache =
+			new Dictionary<string, IDbDataParameter[]>();
+		private static readonly object _paramCacheLock = new object();
 
 		/// <summary>
 		/// Resolve at run time the appropriate set of parameters for a stored procedure.
@@ -1137,6 +1166,9 @@ namespace BLToolkit.Data
 		/// <returns>The result array.</returns>
 		private IDbDataParameter[] CloneParameters(IDbDataParameter[] originalParameters)
 		{
+			if (originalParameters == null)
+				return null;
+
 			IDbDataParameter[] clonedParameters = new IDbDataParameter[originalParameters.Length];
 
 			for (int i = 0, j = originalParameters.Length; i < j; i++)
@@ -1160,21 +1192,27 @@ namespace BLToolkit.Data
 		/// <returns>An array of the <see cref="IDbDataParameter"/>.</returns>
 		public IDbDataParameter[] GetSpParameters(string spName, bool includeReturnValueParameter)
 		{
-			string key = 
-				string.Format("{0}:{1}:{2}", ConfigurationString, spName, includeReturnValueParameter);
+			string key = string.Format("{0}:{1}:{2}", ConfigurationString, spName, includeReturnValueParameter);
 
-			IDbDataParameter[] cachedParameters = (IDbDataParameter[])_paramCache[key];
+			IDbDataParameter[] cachedParameters;
 
-			if (cachedParameters == null)
+			// It is thread safe enought to check for a key and get its value without a lock.
+			//
+			if (!_paramCache.TryGetValue(key, out cachedParameters))
 			{
-				if (_paramCache.ContainsKey(key))
-					return null;
-
-				cachedParameters = DiscoverSpParameters(spName, includeReturnValueParameter);
-				_paramCache[key] = cachedParameters;
+				lock (_paramCacheLock)
+				{
+					// There is a possible race condition since the operation may took a time.
+					//
+					if (!_paramCache.TryGetValue(key, out cachedParameters))
+					{
+						cachedParameters = DiscoverSpParameters(spName, includeReturnValueParameter);
+						_paramCache.Add(key, cachedParameters);
+					}
+				}
 			}
 		
-			return cachedParameters == null? null: CloneParameters(cachedParameters);
+			return CloneParameters(cachedParameters);
 		}
 
 		/// <summary>
@@ -1203,7 +1241,7 @@ namespace BLToolkit.Data
 				if (_dataProvider.IsValueParameter(parameter))
 				{
 					if (nValues >= parameterValues.Length)
-						throw new ArgumentException("Parameter count does not match Parameter Value count.");
+						throw new ArgumentException(Resources.DbManager_MismatchParameterCount);
 
 					object value = parameterValues[nValues++];
 
@@ -1215,7 +1253,7 @@ namespace BLToolkit.Data
 			// We must have the same number of values as we pave parameters to put them in.
 			//
 			if (nValues != parameterValues.Length)
-				throw new ArgumentException("Parameter count does not match Parameter Value count.");
+				throw new ArgumentException(Resources.DbManager_MismatchParameterCount);
 		}
 
 		private IDataReader ExecuteReaderInternal()
@@ -1294,7 +1332,7 @@ namespace BLToolkit.Data
 		/// Raises the <see cref="OperationException"/> event.
 		/// </summary>
 		/// <param name="op">The <see cref="OperationType"/>.</param>
-		/// <param name="ex">The <see cref="Exception"/> occured.</param>
+		/// <param name="ex">The <see cref="Exception"/> occurred.</param>
 		protected virtual void OnOperationException(OperationType op, Exception ex)
 		{
 			if (CanRaiseEvents)
@@ -1311,8 +1349,11 @@ namespace BLToolkit.Data
 
 		#region Public Static Methods
 
-		private static readonly Hashtable _dataProviderNameList = Hashtable.Synchronized(new Hashtable(8));
-		private static readonly Hashtable _dataProviderTypeList = Hashtable.Synchronized(new Hashtable(4));
+		private static readonly Dictionary<string, DataProviderBase> _dataProviderNameList =
+			new Dictionary<string, DataProviderBase>(8);
+		private static readonly Dictionary<Type,   DataProviderBase> _dataProviderTypeList =
+			new Dictionary<Type,   DataProviderBase>(4);
+		private static readonly object    _dataProviderListLock = new object();
 
 		private const string ProviderNameDivider = ".";
 
@@ -1323,20 +1364,29 @@ namespace BLToolkit.Data
 		/// The method can be used to register a new data provider for further use.
 		/// </remarks>
 		/// <include file="Examples1.xml" path='examples/db[@name="AddDataProvider(DataProvider.IDataProvider)"]/*' />
-		/// <seealso cref="AddConnectionString(string)">AddConnectionString</seealso> Method.
-		/// <seealso cref="BLToolkit.Data.DataProvider.DataProviderBase.Name">DataProviderBase.Name Property.</seealso>
+		/// <seealso cref="AddConnectionString(string)"/>
+		/// <seealso cref="BLToolkit.Data.DataProvider.DataProviderBase.Name"/>
 		/// <param name="dataProvider">An instance of the <see cref="BLToolkit.Data.DataProvider.DataProviderBase"/> interface.</param>
 		public static void AddDataProvider(DataProviderBase dataProvider)
 		{
 			if (null == dataProvider)
 				throw new ArgumentNullException("dataProvider");
 
-			if (null == dataProvider.Name || 0 == dataProvider.Name.Length)
-				throw new ArgumentException("dataProvider.Name must be a valid string");
+			if (string.IsNullOrEmpty(dataProvider.Name))
+				throw new ArgumentException(Resources.DbManager_InvalidDataProviderName, "dataProvider");
 
-			_dataProviderNameList[dataProvider.Name.ToUpper()] = dataProvider;
-			_dataProviderNameList[dataProvider.ProviderName]   = dataProvider;
-			_dataProviderTypeList[dataProvider.ConnectionType] = dataProvider;
+			if (string.IsNullOrEmpty(dataProvider.ProviderName))
+				throw new ArgumentException(Resources.DbManager_InvalidDataProviderProviderName, "dataProvider");
+
+			if (dataProvider.ConnectionType == null || !typeof(IDbConnection).IsAssignableFrom(dataProvider.ConnectionType))
+				throw new ArgumentException(Resources.DbManager_InvalidDataProviderConnectionType, "dataProvider");
+
+			lock (_dataProviderListLock)
+			{
+				_dataProviderNameList[dataProvider.Name.ToUpper()] = dataProvider;
+				_dataProviderNameList[dataProvider.ProviderName]   = dataProvider;
+				_dataProviderTypeList[dataProvider.ConnectionType] = dataProvider;
+			}
 		}
 
 		/// <summary>
@@ -1346,8 +1396,8 @@ namespace BLToolkit.Data
 		/// The method can be used to register a new data provider for further use.
 		/// </remarks>
 		/// <include file="Examples1.xml" path='examples/db[@name="AddDataProvider(DataProvider.IDataProvider)"]/*' />
-		/// <seealso cref="AddConnectionString(string)">AddConnectionString Method.</seealso>
-		/// <seealso cref="BLToolkit.Data.DataProvider.DataProviderBase.Name">DataProviderBase.Name Property.</seealso>
+		/// <seealso cref="AddConnectionString(string)"/>
+		/// <seealso cref="BLToolkit.Data.DataProvider.DataProviderBase.Name"/>
 		/// <param name="providerName">The data provider name.</param>
 		/// <param name="dataProvider">An instance of the <see cref="BLToolkit.Data.DataProvider.DataProviderBase"/> interface.</param>
 		public static void AddDataProvider(string providerName, DataProviderBase dataProvider)
@@ -1355,11 +1405,17 @@ namespace BLToolkit.Data
 			if (null == dataProvider)
 				throw new ArgumentNullException("dataProvider");
 
-			if (null == providerName || 0 == providerName.Length)
-				throw new ArgumentException("providerName must be a valid string");
+			if (string.IsNullOrEmpty(providerName))
+				throw new ArgumentException(Resources.DbManager_InvalidProviderName, "providerName");
 
-			_dataProviderNameList[providerName.ToUpper()]      = dataProvider;
-			_dataProviderTypeList[dataProvider.ConnectionType] = dataProvider;
+			if (dataProvider.ConnectionType == null || !typeof(IDbConnection).IsAssignableFrom(dataProvider.ConnectionType))
+				throw new ArgumentException(Resources.DbManager_InvalidDataProviderConnectionType, "dataProvider");
+
+			lock (_dataProviderListLock)
+			{
+				_dataProviderNameList[providerName.ToUpper()]      = dataProvider;
+				_dataProviderTypeList[dataProvider.ConnectionType] = dataProvider;
+			}
 		}
 
 		/// <summary>
@@ -1368,8 +1424,8 @@ namespace BLToolkit.Data
 		/// <remarks>
 		/// The method can be used to register a new data provider for further use.
 		/// </remarks>
-		/// <seealso cref="AddConnectionString(string)">AddConnectionString Method.</seealso>
-		/// <seealso cref="BLToolkit.Data.DataProvider.DataProviderBase.Name">DataProviderBase.Name Property.</seealso>
+		/// <seealso cref="AddConnectionString(string)"/>
+		/// <seealso cref="BLToolkit.Data.DataProvider.DataProviderBase.Name"/>
 		/// <param name="dataProviderType">A data provider type.</param>
 		public static void AddDataProvider(Type dataProviderType)
 		{
@@ -1382,8 +1438,8 @@ namespace BLToolkit.Data
 		/// <remarks>
 		/// The method can be used to register a new data provider for further use.
 		/// </remarks>
-		/// <seealso cref="AddConnectionString(string)">AddConnectionString Method.</seealso>
-		/// <seealso cref="BLToolkit.Data.DataProvider.DataProviderBase.Name">DataProviderBase.Name Property.</seealso>
+		/// <seealso cref="AddConnectionString(string)"/>
+		/// <seealso cref="BLToolkit.Data.DataProvider.DataProviderBase.Name"/>
 		/// <param name="providerName">The data provider name.</param>
 		/// <param name="dataProviderType">A data provider type.</param>
 		public static void AddDataProvider(string providerName, Type dataProviderType)
@@ -1444,7 +1500,8 @@ namespace BLToolkit.Data
 		/// <summary>
 		/// This table caches connection strings which were already read.
 		/// </summary>
-		private static readonly Hashtable _connectionStringList = Hashtable.Synchronized(new Hashtable());
+		private static readonly Dictionary<string, string> _connectionStringList =
+			new Dictionary<string, string>(4);
 		private static string    _defaultConfiguration;
 
 		/// <summary>
@@ -1457,16 +1514,18 @@ namespace BLToolkit.Data
 		/// <value>
 		/// A string containing default configuration settings.
 		/// </value>
-		/// <seealso cref="ConfigurationString">ConfigurationString Property</seealso>
+		/// <seealso cref="ConfigurationString"/>
 		public static string DefaultConfiguration
 		{
-			get 
+			get
 			{
 				if (_defaultConfiguration == null)
 				{
-					foreach (DictionaryEntry de in _connectionStringList)
+					// Grab first registered configuration.
+					//
+					foreach (KeyValuePair<string, string> de in _connectionStringList)
 					{
-						_defaultConfiguration = de.Key.ToString();
+						_defaultConfiguration = de.Key;
 						break;
 					}
 
@@ -1488,10 +1547,7 @@ namespace BLToolkit.Data
 				return _defaultConfiguration;
 			}
 
-			set 
-			{
-				_defaultConfiguration = value;
-			}
+			set { _defaultConfiguration = value; }
 		}
 
 		#endregion
@@ -1547,6 +1603,9 @@ namespace BLToolkit.Data
 			string[]                  ignoreParameters,
 			params IDbDataParameter[] commandParameters)
 		{
+			if (dataRow == null)
+				throw new ArgumentNullException("dataRow");
+
 			ArrayList paramList = new ArrayList();
 			IComparer comparer  = CaseInsensitiveComparer.Default;
 
@@ -1620,6 +1679,9 @@ namespace BLToolkit.Data
 			string[]                  ignoreParameters,
 			params IDbDataParameter[] commandParameters)
 		{
+			if (obj == null)
+				throw new ArgumentNullException("obj");
+
 			bool         isType    = obj is Type;
 			Type         type      = isType? (Type)obj: obj.GetType();
 			ObjectMapper om        = _mappingSchema.GetObjectMapper(type);
@@ -1639,9 +1701,8 @@ namespace BLToolkit.Data
 				string name  = _dataProvider.Convert(mm.Name, ConvertType.NameToParameter).ToString();
 
 				IDbDataParameter parameter   = mm.MapMemberInfo.Nullable || value == null?
-					NullParameter(name, value, mm.MapMemberInfo.NullValue):
-                        (mm.DbType != DbType.Object) ? 
-                            Parameter( name, value, mm.DbType ) : 
+					NullParameter(name, value, mm.MapMemberInfo.NullValue): (mm.DbType != DbType.Object)?
+					Parameter    (name, value, mm.DbType ):
 					Parameter    (name, value);
 
 				if (outputParameters != null && Array.BinarySearch(outputParameters, mm.Name, comparer) >= 0)
@@ -1733,6 +1794,9 @@ namespace BLToolkit.Data
 			string returnValueMember,
 			params object[] objects)
 		{
+			if (objects == null)
+				return;
+
 			foreach (object obj in objects)
 				MapOutputParameters(returnValueMember, obj);
 		}
@@ -1761,6 +1825,9 @@ namespace BLToolkit.Data
 		/// <returns>This instance of the <see cref="DbManager"/>.</returns>
 		public DbManager AssignParameterValues(DataRow dataRow)
 		{
+			if (dataRow == null)
+				throw new ArgumentNullException("dataRow");
+
 			foreach (DataColumn c in dataRow.Table.Columns)
 			{
 				if (c.AutoIncrement == false && c.ReadOnly == false)
@@ -1790,6 +1857,9 @@ namespace BLToolkit.Data
 		/// <returns>This instance of the <see cref="DbManager"/>.</returns>
 		public DbManager AssignParameterValues(object obj)
 		{
+			if (obj == null)
+				throw new ArgumentNullException("obj");
+
 			ObjectMapper om = _mappingSchema.GetObjectMapper(obj.GetType());
 
 			foreach (MemberMapper mm in om)
@@ -1838,7 +1908,7 @@ namespace BLToolkit.Data
 		/// </remarks>
 		/// <include file="Examples1.xml" path='examples/db[@name="Parameter(string,object)"]/*' />
 		/// <param name="parameterName">The name of the parameter.</param>
-		/// <param name="value">The <see cref="System.Object">System.Object.</see>
+		/// <param name="value">The <see cref="System.Object"/>
 		/// that is the value of the parameter.</param>
 		/// <returns>The <see cref="IDbDataParameter"/> object.</returns>
 		public IDbDataParameter Parameter(string parameterName, object value)
@@ -1883,11 +1953,11 @@ namespace BLToolkit.Data
 		/// <remarks>
 		/// The method creates a parameter with the
 		/// <see cref="System.Data.ParameterDirection">ParameterDirection.Input</see> type.
-		/// If the parameter is null, it's converted to <see cref="DBNull.Value">DBNull.Value</see>.
+		/// If the parameter is null, it's converted to <see cref="DBNull"/>.<see cref="DBNull.Value"/>.
 		/// </remarks>
 		/// <include file="Examples1.xml" path='examples/db[@name="NullParameter(string,object)"]/*' />
 		/// <param name="parameterName">The name of the parameter.</param>
-		/// <param name="value">The <see cref="System.Object">System.Object.</see>
+		/// <param name="value">The <see cref="System.Object"/>
 		/// that is the value of the parameter.</param>
 		/// <returns>The <see cref="IDbDataParameter"/> object.</returns>
 		public IDbDataParameter NullParameter(string parameterName, object value)
@@ -1898,6 +1968,18 @@ namespace BLToolkit.Data
 			return Parameter(ParameterDirection.Input, parameterName, value);
 		}
 
+		/// <summary>
+		/// Adds an input parameter to the <see cref="Command"/>.
+		/// </summary>
+		/// <remarks>
+		/// The method creates a parameter with the
+		/// <see cref="System.Data.ParameterDirection">ParameterDirection.Input</see> type.
+		/// </remarks>
+		/// <param name="parameterName">The name of the parameter.</param>
+		/// <param name="value">The <see cref="System.Object"/>
+		/// that is the value of the parameter.</param>
+		/// <param name="nullValue">The null equivalent to compare with the value.</param>
+		/// <returns>The <see cref="IDbDataParameter"/> object.</returns>
 		public IDbDataParameter NullParameter(string parameterName, object value, object nullValue)
 		{
 			if (value == null || value.Equals(nullValue))
@@ -1914,7 +1996,7 @@ namespace BLToolkit.Data
 		/// <see cref="System.Data.ParameterDirection">ParameterDirection.Input</see> type.
 		/// </remarks>
 		/// <param name="parameterName">The name of the parameter.</param>
-		/// <param name="value">The <see cref="System.Object">System.Object.</see>
+		/// <param name="value">The <see cref="System.Object"/>
 		/// that is the value of the parameter.</param>
 		/// <returns>The <see cref="IDbDataParameter"/> object.</returns>
 		public IDbDataParameter InputParameter(string parameterName, object value)
@@ -1930,7 +2012,7 @@ namespace BLToolkit.Data
 		/// <see cref="System.Data.ParameterDirection">ParameterDirection.Output</see> type.
 		/// </remarks>
 		/// <param name="parameterName">The name of the parameter.</param>
-		/// <param name="value">The <see cref="System.Object">System.Object.</see>
+		/// <param name="value">The <see cref="System.Object"/>
 		/// that is the value of the parameter.</param>
 		/// <returns>The <see cref="IDbDataParameter"/> object.</returns>
 		public IDbDataParameter OutputParameter(string parameterName, object value)
@@ -1979,7 +2061,7 @@ namespace BLToolkit.Data
 		/// <see cref="System.Data.ParameterDirection">ParameterDirection.InputOutput</see> type.
 		/// </remarks>
 		/// <param name="parameterName">The name of the parameter.</param>
-		/// <param name="value">The <see cref="System.Object">System.Object.</see>
+		/// <param name="value">The <see cref="System.Object"/>
 		/// that is the value of the parameter.</param>
 		/// <returns>The <see cref="IDbDataParameter"/> object.</returns>
 		public IDbDataParameter InputOutputParameter(string parameterName, object value)
@@ -2006,17 +2088,17 @@ namespace BLToolkit.Data
 		/// </summary>
 		/// <remarks>
 		/// The method creates a parameter with the specified
-		/// <see cref="System.Data.ParameterDirection">ParameterDirection</see> type.
+		/// <see cref="System.Data.ParameterDirection"/> type.
 		/// </remarks>
 		/// <param name="parameterDirection">One of the <see cref="System.Data.ParameterDirection"/> values.</param>
 		/// <param name="parameterName">The name of the parameter.</param>
-		/// <param name="value">The <see cref="System.Object">System.Object.</see>
+		/// <param name="value">The <see cref="System.Object"/>
 		/// that is the value of the parameter.</param>
 		/// <returns>The <see cref="IDbDataParameter"/> object.</returns>
 		public IDbDataParameter Parameter(
 			ParameterDirection parameterDirection,
-			string parameterName,
-			object value)
+			string             parameterName,
+			object             value)
 		{
 			IDbDataParameter parameter = _dataProvider.CreateParameterObject(Command);
 
@@ -2030,11 +2112,24 @@ namespace BLToolkit.Data
 			return parameter;
 		}
 
+		/// <summary>
+		/// Adds a parameter to the <see cref="Command"/>.
+		/// </summary>
+		/// <remarks>
+		/// The method creates a parameter with the specified
+		/// <see cref="System.Data.ParameterDirection"/> type.
+		/// </remarks>
+		/// <param name="parameterDirection">One of the <see cref="System.Data.ParameterDirection"/> values.</param>
+		/// <param name="parameterName">The name of the parameter.</param>
+		/// <param name="value">The <see cref="System.Object"/>
+		/// that is the value of the parameter.</param>
+		/// <param name="dbType">One of the <seealso cref="DbType"/> values.</param>
+		/// <returns>The <see cref="IDbDataParameter"/> object.</returns>
 		public IDbDataParameter Parameter(
 			ParameterDirection parameterDirection,
-			string parameterName,
-			object value,
-			DbType dbType)
+			string             parameterName,
+			object             value,
+			DbType             dbType)
 		{
 			IDbDataParameter parameter = _dataProvider.CreateParameterObject(Command);
 
@@ -2046,6 +2141,14 @@ namespace BLToolkit.Data
 			return parameter;
 		}
 
+		/// <summary>
+		/// Adds an input parameter to the <see cref="Command"/>.
+		/// </summary>
+		/// <param name="parameterName">The name of the parameter.</param>
+		/// <param name="value">The <see cref="System.Object"/>
+		/// that is the value of the parameter.</param>
+		/// <param name="dbType">One of the <seealso cref="DbType"/> values.</param>
+		/// <returns>The <see cref="IDbDataParameter"/> object.</returns>
 		public IDbDataParameter Parameter(
 			string parameterName,
 			object value,
@@ -2054,12 +2157,26 @@ namespace BLToolkit.Data
 			return Parameter(ParameterDirection.Input, parameterName, value, dbType);
 		}
 
+		/// <summary>
+		/// Adds a parameter to the <see cref="Command"/>.
+		/// </summary>
+		/// <remarks>
+		/// The method creates a parameter with the specified
+		/// <see cref="System.Data.ParameterDirection"/> type.
+		/// </remarks>
+		/// <param name="parameterDirection">One of the <see cref="System.Data.ParameterDirection"/> values.</param>
+		/// <param name="parameterName">The name of the parameter.</param>
+		/// <param name="value">The <see cref="System.Object"/>
+		/// that is the value of the parameter.</param>
+		/// <param name="dbType">One of the <seealso cref="DbType"/> values.</param>
+		/// <param name="size">Size of the parameter.</param>
+		/// <returns>The <see cref="IDbDataParameter"/> object.</returns>
 		public IDbDataParameter Parameter(
 			ParameterDirection parameterDirection,
-			string parameterName,
-			object value,
-			DbType dbType,
-			int    size)
+			string             parameterName,
+			object             value,
+			DbType             dbType,
+			int                size)
 		{
 			IDbDataParameter parameter = _dataProvider.CreateParameterObject(Command);
 
@@ -2072,6 +2189,15 @@ namespace BLToolkit.Data
 			return parameter;
 		}
 
+		/// <summary>
+		/// Adds an input parameter to the <see cref="Command"/>.
+		/// </summary>
+		/// <param name="parameterName">The name of the parameter.</param>
+		/// <param name="value">The <see cref="System.Object"/>
+		/// that is the value of the parameter.</param>
+		/// <param name="dbType">One of the <seealso cref="DbType"/> values.</param>
+		/// <param name="size">Size of the parameter.</param>
+		/// <returns>The <see cref="IDbDataParameter"/> object.</returns>
 		public IDbDataParameter Parameter(
 			string parameterName,
 			object value,
@@ -2086,7 +2212,7 @@ namespace BLToolkit.Data
 		/// </summary>
 		/// <remarks>
 		/// The method creates a parameter with the specified
-		/// <see cref="System.Data.ParameterDirection">ParameterDirection</see> type.
+		/// <see cref="System.Data.ParameterDirection"/> type.
 		/// </remarks>
 		/// <param name="parameterDirection">One of the <see cref="System.Data.ParameterDirection"/> values.</param>
 		/// <param name="parameterName">The name of the parameter.</param>
@@ -2094,8 +2220,8 @@ namespace BLToolkit.Data
 		/// <returns>The <see cref="IDbDataParameter"/> object.</returns>
 		public IDbDataParameter Parameter(
 			ParameterDirection parameterDirection,
-			string parameterName,
-			DbType dbType)
+			string             parameterName,
+			DbType             dbType)
 		{
 			IDbDataParameter parameter = _dataProvider.CreateParameterObject(Command);
 		
@@ -2111,7 +2237,7 @@ namespace BLToolkit.Data
 		/// </summary>
 		/// <remarks>
 		/// The method creates a parameter with the specified
-		/// <see cref="System.Data.ParameterDirection">ParameterDirection</see> type.
+		/// <see cref="System.Data.ParameterDirection"/> type.
 		/// </remarks>
 		/// <param name="parameterDirection">One of the <see cref="System.Data.ParameterDirection"/> values.</param>
 		/// <param name="parameterName">The name of the parameter.</param>
@@ -2335,29 +2461,8 @@ namespace BLToolkit.Data
 			string          spName,
 			params object[] parameterValues)
 		{
-			// http://rsdn.ru/?forum/message.1613538.aspx
-			//
-
-			//// If we receive parameter values, we need to figure out where they go.
-			////
-			//if (parameterValues != null && parameterValues.Length > 0)
-			//{
-				return SetCommand(
-					commandAction,
-					CommandType.StoredProcedure,
-					spName,
-					CreateSpParameters(spName, parameterValues));
-			//}
-			//// Otherwise we can just call the SP without params.
-			////
-			//else 
-			//{
-			//    return SetCommand(
-			//        commandAction,
-			//        CommandType.StoredProcedure,
-			//        spName,
-			//        (IDbDataParameter[])null);
-			//}
+			return SetCommand(commandAction,CommandType.StoredProcedure,
+					spName, CreateSpParameters(spName, parameterValues));
 		}
 
 		#region Select
@@ -2377,7 +2482,7 @@ namespace BLToolkit.Data
 		/// <summary>
 		/// Creates a SQL statement.
 		/// </summary>
-		/// <param name="commandType">The <see cref="System.Data.CommandType">CommandType</see> (stored procedure, text, etc.)</param>
+		/// <param name="commandType">The <see cref="System.Data.CommandType"/> (stored procedure, text, etc.)</param>
 		/// <param name="commandText">The command text to execute.</param>
 		/// <returns>Current instance.</returns>
 		public DbManager SetCommand(
@@ -2408,7 +2513,7 @@ namespace BLToolkit.Data
 		/// <summary>
 		/// Creates a SQL statement.
 		/// </summary>
-		/// <param name="commandType">The <see cref="System.Data.CommandType">CommandType</see> (stored procedure, text, etc.)</param>
+		/// <param name="commandType">The <see cref="System.Data.CommandType"/> (stored procedure, text, etc.)</param>
 		/// <param name="commandText">The command text to execute.</param>
 		/// <param name="commandParameters">An array of parameters used to executes the command.</param>
 		/// <returns>Current instance.</returns>
@@ -2463,7 +2568,7 @@ namespace BLToolkit.Data
 		/// <summary>
 		/// Creates an Insert SQL statement.
 		/// </summary>
-		/// <param name="commandType">The <see cref="System.Data.CommandType">CommandType</see> (stored procedure, text, etc.)</param>
+		/// <param name="commandType">The <see cref="System.Data.CommandType"/> (stored procedure, text, etc.)</param>
 		/// <param name="commandText">The command text to execute.</param>
 		/// <param name="commandParameters">An array of parameters used to executes the command.</param>
 		/// <returns>Current instance.</returns>
@@ -2518,7 +2623,7 @@ namespace BLToolkit.Data
 		/// <summary>
 		/// Creates an Update SQL statement.
 		/// </summary>
-		/// <param name="commandType">The <see cref="System.Data.CommandType">CommandType</see> (stored procedure, text, etc.)</param>
+		/// <param name="commandType">The <see cref="System.Data.CommandType"/> (stored procedure, text, etc.)</param>
 		/// <param name="commandText">The command text to execute.</param>
 		/// <param name="commandParameters">An array of parameters used to executes the command.</param>
 		/// <returns>Current instance.</returns>
@@ -2573,7 +2678,7 @@ namespace BLToolkit.Data
 		/// <summary>
 		/// Creates a Delete SQL statement.
 		/// </summary>
-		/// <param name="commandType">The <see cref="System.Data.CommandType">CommandType</see> (stored procedure, text, etc.)</param>
+		/// <param name="commandType">The <see cref="System.Data.CommandType"/> (stored procedure, text, etc.)</param>
 		/// <param name="commandText">The command text to execute.</param>
 		/// <param name="commandParameters">An array of parameters used to executes the command.</param>
 		/// <returns>Current instance.</returns>
@@ -2715,7 +2820,7 @@ namespace BLToolkit.Data
 					}
 					else if (p.Value is decimal)
 					{
-						System.Data.SqlTypes.SqlDecimal d = (decimal)p.Value;
+						SqlDecimal d = (decimal)p.Value;
 						if (p.Precision < d.Precision)
 						{
 							p.Precision = d.Precision;
@@ -2799,6 +2904,17 @@ namespace BLToolkit.Data
 			return rowsTotal;
 		}
 
+		/// <summary>
+		/// Executes a SQL statement for a given collection of objects and 
+		/// returns the number of rows affected.
+		/// </summary>
+		/// <remarks>
+		/// The method prepares the <see cref="Command"/> object 
+		/// and calls the <see cref="ExecuteNonQuery()"/> method for each item of the list.
+		/// </remarks>
+		/// <include file="Examples1.xml" path='examples/db[@name="Execute(CommandType,string,IList)"]/*' />
+		/// <param name="collection">The list of objects used to execute the command.</param>
+		/// <returns>The number of rows affected by the command.</returns>
 		public int ExecuteForEach<T>(ICollection<T> collection)
 		{
 			int rowsTotal = 0;
@@ -2807,7 +2923,7 @@ namespace BLToolkit.Data
 			{
 				bool initParameters = true;
 
-				foreach (object o in collection)
+				foreach (T o in collection)
 				{
 					if (initParameters)
 					{
@@ -2947,6 +3063,7 @@ namespace BLToolkit.Data
 			int rowsAffected = ExecuteNonQuery();
 
 			MapOutputParameters(returnValueMember, obj);
+
 			return rowsAffected;
 		}
 
@@ -2963,6 +3080,7 @@ namespace BLToolkit.Data
 			int rowsAffected = ExecuteNonQuery();
 
 			MapOutputParameters(null, obj);
+
 			return rowsAffected;
 		}
 
@@ -2983,6 +3101,7 @@ namespace BLToolkit.Data
 			int rowsAffected = ExecuteNonQuery();
 
 			MapOutputParameters(returnValueMember, objects);
+
 			return rowsAffected;
 		}
 
@@ -3000,6 +3119,7 @@ namespace BLToolkit.Data
 			int rowsAffected = ExecuteNonQuery();
 
 			MapOutputParameters(null, objects);
+
 			return rowsAffected;
 		}
 
@@ -3263,7 +3383,7 @@ namespace BLToolkit.Data
 		/// <summary>
 		/// Executes the query, and returns the array list of values of the
 		/// specified column of  the every row in the resultset returned by the
-		/// query. Extra columns are ignored.
+		/// query. Other columns are ignored.
 		/// </summary>
 		/// <param name="list">The array to fill in.</param>
 		/// <param name="nameOrIndex">The column name/index or output parameter name/index.</param>
@@ -3275,6 +3395,9 @@ namespace BLToolkit.Data
 			Type                 type,
 			NameOrIndexParameter nameOrIndex)
 		{
+			if (list == null)
+				list = new ArrayList();
+
 			if (_prepared)
 				InitParameters(CommandAction.Select);
 
@@ -3287,7 +3410,7 @@ namespace BLToolkit.Data
 		/// <summary>
 		/// Executes the query, and returns the array list of values of first
 		/// column of the every row in the resultset returned by the query.
-		/// Extra columns are ignored.
+		/// Other columns are ignored.
 		/// </summary>
 		/// <param name="list">The array to fill in.</param>
 		/// <param name="type">The type of the each element.</param>
@@ -3295,13 +3418,16 @@ namespace BLToolkit.Data
 		/// the resultset.</returns>
 		public IList ExecuteScalarList(IList list, Type type)
 		{
+			if (list == null)
+				list = new ArrayList();
+
 			return ExecuteScalarList(list, type, 0);
 		}
 
 		/// <summary>
 		/// Executes the query, and returns the array list of values of the
 		/// specified column of  the every row in the resultset returned by the
-		/// query. Extra columns are ignored.
+		/// query. Other columns are ignored.
 		/// </summary>
 		/// <param name="nameOrIndex">The column name/index.</param>
 		/// <param name="type">The type of the each element.</param>
@@ -3319,7 +3445,7 @@ namespace BLToolkit.Data
 		/// <summary>
 		/// Executes the query, and returns the array list of values of first
 		/// column of the every row in the resultset returned by the query.
-		/// Extra columns are ignored.
+		/// Other columns are ignored.
 		/// </summary>
 		/// <param name="type">The type of the each element.</param>
 		/// <returns>Array list of values of first column of the every row in
@@ -3336,7 +3462,7 @@ namespace BLToolkit.Data
 		/// <summary>
 		/// Executes the query, and returns the array list of values of the
 		/// specified column of  the every row in the resultset returned by the
-		/// query. Extra columns are ignored.
+		/// query. Other columns are ignored.
 		/// </summary>
 		/// <param name="list">The array to fill in.</param>
 		/// <param name="nameOrIndex">The column name/index or output parameter
@@ -3348,6 +3474,9 @@ namespace BLToolkit.Data
 			IList<T>             list,
 			NameOrIndexParameter nameOrIndex)
 		{
+			if (list == null)
+				list = new List<T>();
+
 			if (_prepared)
 				InitParameters(CommandAction.Select);
 
@@ -3360,7 +3489,7 @@ namespace BLToolkit.Data
 		/// <summary>
 		/// Executes the query, and returns the array list of values of first
 		/// column of the every row in the resultset returned by the query.
-		/// Extra columns are ignored.
+		/// Other columns are ignored.
 		/// </summary>
 		/// <param name="list">The array to fill in.</param>
 		/// <typeparam name="T">The type of the each element.</typeparam>
@@ -3374,7 +3503,7 @@ namespace BLToolkit.Data
 		/// <summary>
 		/// Executes the query, and returns the array list of values of the
 		/// specified column of the every row in the resultset returned by the
-		/// query. Extra columns are ignored.
+		/// query. Other columns are ignored.
 		/// </summary>
 		/// <param name="nameOrIndex">The column name/index or output parameter name/index.</param>
 		/// <typeparam name="T">The type of the each element.</typeparam>
@@ -3390,9 +3519,9 @@ namespace BLToolkit.Data
 		}
 
 		/// <summary>
-		/// Executes the query, and returns the array list of values of first
+		/// Executes the query, and returns the list of values of first
 		/// column of the every row in the resultset returned by the query.
-		/// Extra columns are ignored.
+		/// Other columns are ignored.
 		/// </summary>
 		/// <typeparam name="T">The type of the each element.</typeparam>
 		/// <returns>Array list of values of first column of the every row in
@@ -3410,11 +3539,26 @@ namespace BLToolkit.Data
 
 		#region ExecuteScalarDictionary
 
+		///<summary>
+		/// Executes the query, and returns the dictionary.
+		/// The keys are loaded from a column specified by <paramref name="keyField"/> and
+		/// values are loaded from a column specified by <paramref name="valueField"/>.
+		/// Other columns are ignored.
+		///</summary>
+		///<param name="dic">The dictionary to add values.</param>
+		///<param name="keyField">The column name/index to load keys.</param>
+		///<param name="keyFieldType">The key type.</param>
+		///<param name="valueField">The column name/index to load values.</param>
+		///<param name="valueFieldType">The value type.</param>
+		///<returns>The loaded dictionary.</returns>
 		public IDictionary ExecuteScalarDictionary(
 			IDictionary dic,
 			NameOrIndexParameter keyField,   Type keyFieldType,
 			NameOrIndexParameter valueField, Type valueFieldType)
 		{
+			if (dic == null)
+				dic = new Hashtable();
+
 			if (_prepared)
 				InitParameters(CommandAction.Select);
 
@@ -3450,8 +3594,19 @@ namespace BLToolkit.Data
 			return dic;
 		}
 
+		///<summary>
+		/// Executes the query, and returns the dictionary.
+		/// The keys are loaded from a column specified by <paramref name="keyField"/> and
+		/// values are loaded from a column specified by <paramref name="valueField"/>.
+		/// Other columns are ignored.
+		///</summary>
+		///<param name="keyField">The column name/index to load keys.</param>
+		///<param name="keyFieldType">The key type.</param>
+		///<param name="valueField">The column name/index to load values.</param>
+		///<param name="valueFieldType">The value type.</param>
+		///<returns>The loaded dictionary.</returns>
 		public Hashtable ExecuteScalarDictionary(
-			NameOrIndexParameter keyField, Type keyFieldType,
+			NameOrIndexParameter keyField,   Type keyFieldType,
 			NameOrIndexParameter valueField, Type valueFieldType)
 		{
 			Hashtable table = new Hashtable();
@@ -3461,11 +3616,26 @@ namespace BLToolkit.Data
 			return table;
 		}
 
+		///<summary>
+		/// Executes the query, and returns the dictionary.
+		/// The keys are loaded from a column specified by <paramref name="keyField"/> and
+		/// values are loaded from a column specified by <paramref name="valueField"/>.
+		/// Other columns are ignored.
+		///</summary>
+		///<typeparam name="K">The key type.</typeparam>
+		///<typeparam name="T">The value type.</typeparam>
+		///<param name="dic">The dictionary to add values.</param>
+		///<param name="keyField">The column name/index to load keys.</param>
+		///<param name="valueField">The column name/index to load values.</param>
+		///<returns>The loaded dictionary.</returns>
 		public IDictionary<K,T> ExecuteScalarDictionary<K,T>(
-			IDictionary<K, T> dic,
+			IDictionary<K,T>     dic,
 			NameOrIndexParameter keyField,
 			NameOrIndexParameter valueField)
 		{
+			if (dic == null)
+				dic = new Dictionary<K,T>();
+
 			if (_prepared)
 				InitParameters(CommandAction.Select);
 
@@ -3478,8 +3648,8 @@ namespace BLToolkit.Data
 			{
 				if (dr.Read())
 				{
-					int keyIndex = keyField.ByName ? dr.GetOrdinal(keyField.Name) : keyField.Index;
-					int valueIndex = valueField.ByName ? dr.GetOrdinal(valueField.Name) : valueField.Index;
+					int keyIndex   = keyField.ByName?   dr.GetOrdinal(keyField.Name):   keyField.Index;
+					int valueIndex = valueField.ByName? dr.GetOrdinal(valueField.Name): valueField.Index;
 
 					do
 					{
@@ -3501,6 +3671,17 @@ namespace BLToolkit.Data
 			return dic;
 		}
 
+		///<summary>
+		/// Executes the query, and returns the dictionary.
+		/// The keys are loaded from a column specified by <paramref name="keyField"/> and
+		/// values are loaded from a column specified by <paramref name="valueField"/>.
+		/// Other columns are ignored.
+		///</summary>
+		///<typeparam name="K">The key type.</typeparam>
+		///<typeparam name="T">The value type.</typeparam>
+		///<param name="keyField">The column name/index to load keys.</param>
+		///<param name="valueField">The column name/index to load values.</param>
+		///<returns>The loaded dictionary.</returns>
 		public Dictionary<K,T> ExecuteScalarDictionary<K,T>(
 			NameOrIndexParameter keyField,
 			NameOrIndexParameter valueField)
@@ -3516,10 +3697,26 @@ namespace BLToolkit.Data
 
 		#region ExecuteScalarDictionary (Index)
 
+		///<summary>
+		/// Executes the query, and returns the dictionary.
+		/// The keys are loaded from columns specified by <paramref name="index"/> and
+		/// values are loaded from a column specified by <paramref name="valueField"/>.
+		/// Other columns are ignored.
+		///</summary>
+		///<param name="dic">The dictionary to add values.</param>
+		///<param name="index">The <see cref="MapIndex"/> of the key columns.</param>
+		///<param name="valueField">The column name/index to load values.</param>
+		///<param name="valueFieldType">The value type.</param>
+		///<returns>The loaded dictionary.</returns>
 		public IDictionary ExecuteScalarDictionary(
-			IDictionary dic, MapIndex index,
-			NameOrIndexParameter valueField, Type valueFieldType)
+			IDictionary          dic,
+			MapIndex             index,
+			NameOrIndexParameter valueField,
+			Type                 valueFieldType)
 		{
+			if (dic == null)
+				dic = new Hashtable();
+
 			if (_prepared)
 				InitParameters(CommandAction.Select);
 
@@ -3557,6 +3754,16 @@ namespace BLToolkit.Data
 			return dic;
 		}
 
+		///<summary>
+		/// Executes the query, and returns the dictionary.
+		/// The keys are loaded from columns specified by <paramref name="index"/> and
+		/// values are loaded from a column specified by <paramref name="valueField"/>.
+		/// Other columns are ignored.
+		///</summary>
+		///<param name="index">The <see cref="MapIndex"/> of the key columns.</param>
+		///<param name="valueField">The column name/index to load values.</param>
+		///<param name="valueFieldType">The value type.</param>
+		///<returns>The loaded dictionary.</returns>
 		public Hashtable ExecuteScalarDictionary(
 			MapIndex index, NameOrIndexParameter valueField, Type valueFieldType)
 		{
@@ -3567,9 +3774,23 @@ namespace BLToolkit.Data
 			return table;
 		}
 
+		///<summary>
+		/// Executes the query, and returns the dictionary.
+		/// The keys are loaded from columns specified by <paramref name="index"/> and
+		/// values are loaded from a column specified by <paramref name="valueField"/>.
+		/// Other columns are ignored.
+		///</summary>
+		///<typeparam name="T">The value type.</typeparam>
+		///<param name="dic">The dictionary to add values.</param>
+		///<param name="index">The <see cref="MapIndex"/> of the key columns.</param>
+		///<param name="valueField">The column name/index to load values.</param>
+		///<returns>The loaded dictionary.</returns>
 		public IDictionary<CompoundValue,T> ExecuteScalarDictionary<T>(
 			IDictionary<CompoundValue, T> dic, MapIndex index, NameOrIndexParameter valueField)
 		{
+			if (dic == null)
+				dic = new Dictionary<CompoundValue, T>();
+
 			if (_prepared)
 				InitParameters(CommandAction.Select);
 
@@ -3609,6 +3830,16 @@ namespace BLToolkit.Data
 			return dic;
 		}
 
+		///<summary>
+		/// Executes the query, and returns the dictionary.
+		/// The keys are loaded from columns specified by <paramref name="index"/> and
+		/// values are loaded from a column specified by <paramref name="valueField"/>.
+		/// Other columns are ignored.
+		///</summary>
+		///<typeparam name="T">The value type.</typeparam>
+		///<param name="index">The <see cref="MapIndex"/> of the key columns.</param>
+		///<param name="valueField">The column name/index to load values.</param>
+		///<returns>The loaded dictionary.</returns>
 		public Dictionary<CompoundValue,T> ExecuteScalarDictionary<T>(
 			MapIndex index, NameOrIndexParameter valueField)
 		{
@@ -3672,7 +3903,7 @@ namespace BLToolkit.Data
 		/// See the <see cref="ExecuteDataSet(NameOrIndexParameter)"/> method
 		/// to find an example.
 		/// </remarks>
-		/// <param name="dataSet">The input DataSet object.</param>
+		/// <param name="dataSet">The input <see cref="DataSet"/> object.</param>
 		/// <returns>The <see cref="DataSet"/>.</returns>
 		public DataSet ExecuteDataSet(
 			DataSet dataSet)
@@ -3766,7 +3997,7 @@ namespace BLToolkit.Data
 		/// <summary>
 		/// Executes a SQL statement using the provided parameters.
 		/// </summary>
-		/// <param name="dataTable">The DataTable object to populate.</param>
+		/// <param name="dataTable">The <see cref="DataTable"/> object to populate.</param>
 		/// <returns>The <see cref="DataTable"/>.</returns>
 		public DataTable ExecuteDataTable(DataTable dataTable)
 		{
@@ -3794,25 +4025,50 @@ namespace BLToolkit.Data
 			}
 		}
 
-		public void ExecuteDataTables(params DataTable[] tableList)
+		/// <summary>Adds or refreshes rows in a <see cref="System.Data.DataTable"/>
+		/// to match those in the data source starting at the specified record
+		/// and retrieving up to the specified maximum number of records.
+		/// </summary>
+		/// <param name="startRecord">The zero-based record number to start with.</param>
+		/// <param name="maxRecords">The maximum number of records to retrieve.</param>
+		/// <param name="tableList">The <see cref="System.Data.DataTable"/> objects
+		/// to fill from the data source.</param>
+		public void ExecuteDataTables(
+			int                startRecord,
+			int                maxRecords,
+			params DataTable[] tableList)
 		{
 			if (tableList == null || tableList.Length == 0)
 				return;
 
-			using (IDataReader dr = ExecuteReader())
+			if (_prepared)
+				InitParameters(CommandAction.Select);
+
+			DbDataAdapter da = _dataProvider.CreateDataAdapterObject();
+			((IDbDataAdapter)da).SelectCommand = SelectCommand;
+
+			try
 			{
-				int i = 0;
-
-				do 
-				{
-					_mappingSchema.MapDataReaderToDataTable(dr, tableList[i]);
-
-					tableList[i].AcceptChanges();
-
-					i++;
-				}
-				while (dr.NextResult() && i < tableList.Length);
+				OnBeforeOperation(OperationType.Fill);
+				da.Fill(startRecord, maxRecords, tableList);
+				OnAfterOperation (OperationType.Fill);
 			}
+			catch (Exception ex)
+			{
+				OnOperationException(OperationType.Fill, ex);
+				throw;
+			}
+		}
+
+		/// <summary>Adds or refreshes rows in a <see cref="System.Data.DataTable"/>
+		/// to match those in the data source starting at the specified record
+		/// and retrieving up to the specified maximum number of records.
+		/// </summary>
+		/// <param name="tableList">The <see cref="System.Data.DataTable"/> objects
+		/// to fill from the data source.</param>
+		public void ExecuteDataTables(params DataTable[] tableList)
+		{
+			ExecuteDataTables(0, 0, tableList);
 		}
 
 		#endregion
@@ -3882,6 +4138,9 @@ namespace BLToolkit.Data
 
 		private IList ExecuteListInternal(IList list, Type type, params object[] parameters)
 		{
+			if (list == null)
+				list = new ArrayList();
+
 			if (_prepared)
 				InitParameters(CommandAction.Select);
 
@@ -3893,6 +4152,9 @@ namespace BLToolkit.Data
 
 		private void ExecuteListInternal<T>(IList<T> list, params object[] parameters)
 		{
+			if (list == null)
+				list = new List<T>();
+
 			if (_prepared)
 				InitParameters(CommandAction.Select);
 
@@ -3934,7 +4196,7 @@ namespace BLToolkit.Data
 		/// Executes the query, and returns an array of business entities using the provided parameters.
 		/// </summary>
 		/// <param name="type">Type of the business object.</param>
-		/// <param name="parameters"></param>
+		/// <param name="parameters">Additional parameters passed to object constructor through <see cref="InitContext"/>.</param>
 		/// <returns>An array of business objects.</returns>
 		public ArrayList ExecuteList(Type type, params object[] parameters)
 		{
@@ -3949,7 +4211,7 @@ namespace BLToolkit.Data
 		/// Executes the query, and returns an array of business entities.
 		/// </summary>
 		/// <typeparam name="T">Type of an object.</typeparam>
-		/// <param name="parameters"></param>
+		/// <param name="parameters">Additional parameters passed to object constructor through <see cref="InitContext"/>.</param>
 		/// <returns>Populated list of mapped business objects.</returns>
 		public List<T> ExecuteList<T>(params object[] parameters)
 		{
@@ -3989,7 +4251,7 @@ namespace BLToolkit.Data
 		/// </summary>
 		/// <param name="list">The list of mapped business objects to populate.</param>
 		/// <param name="type">Type of an object.</param>
-		/// <param name="parameters"></param>
+		/// <param name="parameters">Additional parameters passed to object constructor through <see cref="InitContext"/>.</param>
 		/// <returns>Populated list of mapped business objects.</returns>
 		public IList ExecuteList(IList list, Type type, params object[] parameters)
 		{
@@ -4001,7 +4263,7 @@ namespace BLToolkit.Data
 		/// </summary>
 		/// <typeparam name="T">Type of an object.</typeparam>
 		/// <param name="list">The list of mapped business objects to populate.</param>
-		/// <param name="parameters"></param>
+		/// <param name="parameters">Additional parameters passed to object constructor through <see cref="InitContext"/>.</param>
 		/// <returns>Populated list of mapped business objects.</returns>
 		public IList<T> ExecuteList<T>(IList<T> list, params object[] parameters)
 		{
@@ -4010,6 +4272,14 @@ namespace BLToolkit.Data
 			return list;
 		}
 
+		/// <summary>
+		/// Executes the query, and returns an array of business entities.
+		/// </summary>
+		/// <typeparam name="L">Type of a list.</typeparam>
+		/// <typeparam name="T">Type of an object.</typeparam>
+		/// <param name="list">The list of mapped business objects to populate.</param>
+		/// <param name="parameters">Additional parameters passed to object constructor through <see cref="InitContext"/>.</param>
+		/// <returns>Populated list of mapped business objects.</returns>
 		public L ExecuteList<L,T>(L list, params object[] parameters)
 			where L : IList<T>
 		{
@@ -4018,6 +4288,13 @@ namespace BLToolkit.Data
 			return list;
 		}
 
+		/// <summary>
+		/// Executes the query, and returns an array of business entities.
+		/// </summary>
+		/// <typeparam name="L">Type of a list.</typeparam>
+		/// <typeparam name="T">Type of an object.</typeparam>
+		/// <param name="parameters">Additional parameters passed to object constructor through <see cref="InitContext"/>.</param>
+		/// <returns>Populated list of mapped business objects.</returns>
 		public L ExecuteList<L,T>(params object[] parameters)
 			where L : IList<T>, new()
 		{
@@ -4068,6 +4345,9 @@ namespace BLToolkit.Data
 			Type                 type,
 			params object[]      parameters)
 		{
+			if (dictionary == null)
+				dictionary = new Hashtable();
+
 			if (_prepared)
 				InitParameters(CommandAction.Select);
 
@@ -4089,22 +4369,45 @@ namespace BLToolkit.Data
 			NameOrIndexParameter keyField,
 			params object[]      parameters)
 		{
-			if (_prepared)
-				InitParameters(CommandAction.Select);
+			Dictionary<TKey, TValue> dictionary = new Dictionary<TKey, TValue>();
 
-			using (IDataReader dr = ExecuteReaderInternal())
-			{
-				return _mappingSchema.MapDataReaderToDictionary<TKey,TValue>(
-					dr, keyField, parameters);
-			}
+			ExecuteDictionary<TKey, TValue>(dictionary, keyField, typeof(TValue), parameters);
+
+			return dictionary;
 		}
 
+		/// <summary>
+		/// Executes the query, and returns the <see cref="Hashtable"/> of business entities.
+		/// </summary>
+		/// <param name="dictionary">A dictionary of mapped business objects to populate.</param>
+		/// <param name="keyField">The field name or index that is used as a key to populate <see cref="IDictionary"/>.</param>
+		/// <param name="parameters">Any additional parameters passed to the constructor with <see cref="InitContext"/> parameter.</param>
+		/// <returns>An instance of the <see cref="IDictionary"/>.</returns>
+		public IDictionary<TKey, TValue> ExecuteDictionary<TKey, TValue>(
+			IDictionary<TKey, TValue> dictionary,
+			NameOrIndexParameter      keyField,
+			params object[]           parameters)
+		{
+			return ExecuteDictionary<TKey,TValue>(dictionary, keyField, typeof(TValue), parameters);
+		}
+
+		/// <summary>
+		/// Executes the query, and returns the <see cref="Hashtable"/> of business entities.
+		/// </summary>
+		/// <param name="dictionary">A dictionary of mapped business objects to populate.</param>
+		/// <param name="keyField">The field name or index that is used as a key to populate <see cref="IDictionary"/>.</param>
+		/// <param name="destObjectType">Business object type.</param>
+		/// <param name="parameters">Any additional parameters passed to the constructor with <see cref="InitContext"/> parameter.</param>
+		/// <returns>An instance of the <see cref="IDictionary"/>.</returns>
 		public IDictionary<TKey, TValue> ExecuteDictionary<TKey, TValue>(
 			IDictionary<TKey, TValue> dictionary,
 			NameOrIndexParameter      keyField,
 			Type                      destObjectType,
 			params object[]           parameters)
 		{
+			if (dictionary == null)
+				dictionary = new Dictionary<TKey, TValue>();
+
 			if (_prepared)
 				InitParameters(CommandAction.Select);
 
@@ -4112,21 +4415,6 @@ namespace BLToolkit.Data
 			{
 				return _mappingSchema.MapDataReaderToDictionary<TKey,TValue>(
 					dr, dictionary, keyField, destObjectType, parameters);
-			}
-		}
-
-		public IDictionary<TKey, TValue> ExecuteDictionary<TKey, TValue>(
-			IDictionary<TKey, TValue> dictionary,
-			NameOrIndexParameter      keyField,
-			params object[]           parameters)
-		{
-			if (_prepared)
-				InitParameters(CommandAction.Select);
-
-			using (IDataReader dr = ExecuteReaderInternal())
-			{
-				return _mappingSchema.MapDataReaderToDictionary<TKey,TValue>(
-					dr, dictionary, keyField, parameters);
 			}
 		}
 
@@ -4170,6 +4458,9 @@ namespace BLToolkit.Data
 			Type            type,
 			params object[] parameters)
 		{
+			if (dictionary == null)
+				dictionary = new Hashtable();
+
 			if (_prepared)
 				InitParameters(CommandAction.Select);
 
@@ -4183,26 +4474,54 @@ namespace BLToolkit.Data
 		/// Executes the query, and returns a dictionary of business entities.
 		/// </summary>
 		/// <typeparam name="TValue">Value's type.</typeparam>
+		/// <param name="index">Dictionary key fields.</param>
+		/// <param name="parameters">Any additional parameters passed to the constructor with <see cref="InitContext"/> parameter.</param>
 		/// <returns>An instance of the dictionary.</returns>
 		public Dictionary<CompoundValue, TValue> ExecuteDictionary<TValue>(
 			MapIndex        index,
 			params object[] parameters)
 		{
-			if (_prepared)
-				InitParameters(CommandAction.Select);
+			Dictionary<CompoundValue, TValue> dictionary = new Dictionary<CompoundValue, TValue>();
 
-			using (IDataReader dr = ExecuteReaderInternal())
-			{
-				return _mappingSchema.MapDataReaderToDictionary<TValue>(dr, index, parameters);
-			}
+			ExecuteDictionary<TValue>(dictionary, index, typeof(TValue), parameters);
+
+			return dictionary;
 		}
 
+		/// <summary>
+		/// Executes the query, and returns a dictionary of business entities.
+		/// </summary>
+		/// <typeparam name="TValue">Value's type.</typeparam>
+		/// <param name="dictionary">A dictionary of mapped business objects to populate.</param>
+		/// <param name="index">Dictionary key fields.</param>
+		/// <param name="parameters">Any additional parameters passed to the constructor with <see cref="InitContext"/> parameter.</param>
+		/// <returns>An instance of the dictionary.</returns>
+		public IDictionary<CompoundValue, TValue> ExecuteDictionary<TValue>(
+			IDictionary<CompoundValue, TValue> dictionary,
+			MapIndex                           index,
+			params object[]                    parameters)
+		{
+			return ExecuteDictionary<TValue>(dictionary, index, typeof(TValue), parameters);
+		}
+
+		/// <summary>
+		/// Executes the query, and returns a dictionary of business entities.
+		/// </summary>
+		/// <typeparam name="TValue">Value's type.</typeparam>
+		/// <param name="dictionary">A dictionary of mapped business objects to populate.</param>
+		/// <param name="index">Dictionary key fields.</param>
+		/// <param name="destObjectType">Business object type.</param>
+		/// <param name="parameters">Any additional parameters passed to the constructor with <see cref="InitContext"/> parameter.</param>
+		/// <returns>An instance of the dictionary.</returns>
 		public IDictionary<CompoundValue, TValue> ExecuteDictionary<TValue>(
 			IDictionary<CompoundValue, TValue> dictionary,
 			MapIndex                           index,
 			Type                               destObjectType,
 			params object[]                    parameters)
 		{
+			if (dictionary == null)
+				dictionary = new Dictionary<CompoundValue, TValue>();
+
 			if (_prepared)
 				InitParameters(CommandAction.Select);
 
@@ -4213,26 +4532,16 @@ namespace BLToolkit.Data
 			}
 		}
 
-		public IDictionary<CompoundValue, TValue> ExecuteDictionary<TValue>(
-			IDictionary<CompoundValue, TValue> dictionary,
-			MapIndex                           index,
-			params object[]                    parameters)
-		{
-			if (_prepared)
-				InitParameters(CommandAction.Select);
-
-			using (IDataReader dr = ExecuteReaderInternal())
-			{
-				return _mappingSchema.MapDataReaderToDictionary<TValue>(
-					dr, dictionary, index, parameters);
-			}
-		}
-
 		#endregion
 
 		#region ExecuteResultSet
 
-		public MapResultSet[] ExecuteResultSet(MapResultSet[] resultSets)
+		/// <summary>
+		/// Executes the query, and returns multiple results.
+		/// </summary>
+		/// <param name="resultSets">Array of <see cref="MapResultSet"/> to populate.</param>
+		/// <returns>The populated <see cref="MapResultSet"/>.</returns>
+		public MapResultSet[] ExecuteResultSet(params MapResultSet[] resultSets)
 		{
 			if (_prepared)
 				InitParameters(CommandAction.Select);
@@ -4245,10 +4554,27 @@ namespace BLToolkit.Data
 			return resultSets;
 		}
 
+		/// <summary>
+		/// Executes the query, and returns multiple results.
+		/// </summary>
+		/// <param name="masterType">The type of the master business object.</param>
+		/// <param name="nextResults">Array of <see cref="MapNextResult"/> to populate.</param>
+		/// <returns>The populated <see cref="MapResultSet"/>.</returns>
 		public MapResultSet[] ExecuteResultSet(
 			Type masterType, params MapNextResult[] nextResults)
 		{
 			return ExecuteResultSet(_mappingSchema.ConvertToResultSet(masterType, nextResults));
+		}
+
+		/// <summary>
+		/// Executes the query, and returns multiple results.
+		/// </summary>
+		/// <typeparam name="T">The type of the master business object.</typeparam>
+		/// <param name="nextResults">Array of <see cref="MapNextResult"/> to populate.</param>
+		/// <returns>The populated <see cref="MapResultSet"/>.</returns>
+		public MapResultSet[] ExecuteResultSet<T>(params MapNextResult[] nextResults)
+		{
+			return ExecuteResultSet(_mappingSchema.ConvertToResultSet(typeof(T), nextResults));
 		}
 
 		#endregion
@@ -4290,8 +4616,7 @@ namespace BLToolkit.Data
 		{
 			if (dataSet == null)
 				throw new ArgumentNullException(
-					"dataSet",
-					"DataSet must be initialized before calling Update routine. Cannot update database from a null dataset.");
+					"dataSet", Resources.DbManager_CannotUpdateNullDataset);
 
 			DbDataAdapter da = CreateDataAdapter();
 
@@ -4325,8 +4650,7 @@ namespace BLToolkit.Data
 		{
 			if (dataTable == null)
 				throw new ArgumentNullException(
-					"dataTable",
-					"DataTable must be initialized before calling Update routine. Cannot update database from a null data table.");
+					"dataTable", Resources.DbManager_CannotUpdateNullDataTable);
 
 			try
 			{
@@ -4360,6 +4684,8 @@ namespace BLToolkit.Data
 		{
 			if (disposing)
 				Close();
+
+			base.Dispose(disposing);
 		}
 
 		#endregion
