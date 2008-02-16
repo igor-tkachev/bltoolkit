@@ -183,8 +183,8 @@
 			RelativePathToProject=".\Source\BLToolkit.2008.csproj"
 		/>
 		<AssemblyReference
-			RelativePath="nunit.framework.dll"
-			AssemblyName="nunit.framework, Version=2.2.9.0, PublicKeyToken=96d09a1eb7f44a77, processorArchitecture=MSIL"
+			RelativePath="c:\Program Files\NUnit 2.4.6\bin\nunit.framework.dll"
+			AssemblyName="nunit.framework, Version=2.4.6.0, PublicKeyToken=96d09a1eb7f44a77, processorArchitecture=MSIL"
 			MinFrameworkVersion="131072"
 		/>
 	</References>

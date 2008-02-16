@@ -4,6 +4,7 @@ using System.Collections.Specialized;
 using System.Reflection;
 using System.Reflection.Emit;
 using System.Runtime.CompilerServices;
+
 using BLToolkit.Reflection;
 using BLToolkit.Reflection.Emit;
 
@@ -53,10 +54,12 @@ namespace BLToolkit.TypeBuilder.Builders
 			// Therefore we do not cache the result.
 			//
 			object[] attributes = sourceType.Assembly.GetCustomAttributes(typeof(InternalsVisibleToAttribute), true);
+
 			foreach (InternalsVisibleToAttribute visibleToAttribute in attributes)
 			{
-				if (AssemblyName.ReferenceMatchesDefinition(assemblyBuilder.AssemblyName,
-					new AssemblyName(visibleToAttribute.AssemblyName)))
+				var an = new AssemblyName(visibleToAttribute.AssemblyName);
+
+				if (AssemblyName.ReferenceMatchesDefinition(assemblyBuilder.AssemblyName, an))
 				{
 					_friendlyAssembly = true;
 					break;

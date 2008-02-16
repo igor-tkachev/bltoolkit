@@ -22,7 +22,7 @@ namespace Aspects
 		{
 			public int Test(int intVal, string strVal)
 			{
-				System.Threading.Thread.Sleep(ExecutionTime);
+				System.Threading.Thread.Sleep(ExecutionTime + 1);
 				return intVal;
 			}
 
@@ -44,16 +44,19 @@ namespace Aspects
 			Stopwatch sw = Stopwatch.StartNew();
 
 			Assert.AreEqual(1, o.Test(1, null));
-			Assert.IsTrue(sw.ElapsedMilliseconds >= ExecutionTime);
+			long mss = sw.ElapsedMilliseconds;
+			Assert.IsTrue(mss >= ExecutionTime);
 
 			sw.Reset();
 			sw.Start();
 
 			IAsyncResult ar = o.BeginTest(2, "12");
-			Assert.IsTrue(sw.ElapsedMilliseconds <= ExecutionTime);
+			mss = sw.ElapsedMilliseconds;
+			Assert.IsTrue(mss <= ExecutionTime);
 
 			Assert.AreEqual(2, o.EndTest(ar));
-			Assert.IsTrue(sw.ElapsedMilliseconds >= ExecutionTime);
+			mss = sw.ElapsedMilliseconds;
+			Assert.IsTrue(mss >= ExecutionTime);
 		}
 
 		private static void CallBack(IAsyncResult ar)

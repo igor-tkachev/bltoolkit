@@ -2,9 +2,10 @@ using System;
 using System.Data;
 using System.Data.SqlTypes;
 using System.Globalization;
-using BLToolkit.Data;
+
 using NUnit.Framework;
 
+using BLToolkit.Data;
 using BLToolkit.Mapping;
 
 namespace Mapping
@@ -36,47 +37,42 @@ namespace Mapping
 			om.SetValue(o, "Dow2",  di);
 
 			Assert.AreEqual(124,    om.GetValue(o, "Int32"));
-			Assert.AreEqual(123.57, om.GetValue(o, "Float"));
 			Assert.AreEqual(de,     om.GetValue(o, "Dow1"));
 			Assert.AreEqual(de,     om.GetValue(o, "Dow2"));
+			Assert.IsTrue  (Math.Abs(123.57 - (float)om.GetValue(o, "Float")) < 0.0001);
 
 			Assert.IsNull(om.GetValue(o, "blah-blah-blah"));
 		}
 
-
-
-        public class AnsiStringObject
+		public class AnsiStringObject
 		{
-            [MemberMapper(typeof(AnsiStringNumberMapper))]
+			[MemberMapper(typeof(AnsiStringNumberMapper))]
 			public string       ansi;
 			public string       unicode;
 		}
 
-        internal class AnsiStringNumberMapper : MemberMapper
-        {
-        public override void Init( MapMemberInfo mapMemberInfo )
-            {
-            mapMemberInfo.DbType = DbType.AnsiString;
-            base.Init( mapMemberInfo );
-            }
-        }
-
-
-        [Test]
-		public void ProvideCustomDBTypeTest()
+		internal class AnsiStringNumberMapper : MemberMapper
 		{
-            AnsiStringObject obj = new AnsiStringObject();
-            obj.ansi = "aaa";
-            obj.unicode = "bbb";
-
-            IDbDataParameter[] parametrs = new DbManager().CreateParameters( obj );
-
-            Assert.AreEqual(2, parametrs.Length );
-			Assert.AreEqual(DbType.AnsiString, parametrs[0].DbType );
-            Assert.AreEqual(DbType.String, parametrs[1].DbType );
-
+			public override void Init( MapMemberInfo mapMemberInfo )
+			{
+				mapMemberInfo.DbType = DbType.AnsiString;
+				base.Init( mapMemberInfo );
+			}
 		}
 
+		[Test]
+		public void ProvideCustomDBTypeTest()
+		{
+			AnsiStringObject obj = new AnsiStringObject();
+			obj.ansi = "aaa";
+			obj.unicode = "bbb";
+
+			IDbDataParameter[] parametrs = new DbManager().CreateParameters( obj );
+
+			Assert.AreEqual(2, parametrs.Length );
+			Assert.AreEqual(DbType.AnsiString, parametrs[0].DbType );
+			Assert.AreEqual(DbType.String, parametrs[1].DbType );
+		}
 
 		public class Object2
 		{
@@ -109,21 +105,21 @@ namespace Mapping
 			ObjectMapper<Object2>.SetValue(o, "Dow1",  (DayOfWeek?)de);
 			ObjectMapper<Object2>.SetValue(o, "Dow2",  di);
 
-			Assert.AreEqual(125,    o.Int16);
-			Assert.AreEqual(124,    o.Int32);
-			Assert.IsNull  (        o.Int64);
-			Assert.AreEqual(123.57, o.Float);
-			Assert.AreEqual(g,      o.Guid);
-			Assert.AreEqual(de,     o.Dow1);
-			Assert.AreEqual(de,     o.Dow2);
+			Assert.AreEqual(125, o.Int16);
+			Assert.AreEqual(124, o.Int32);
+			Assert.IsNull  (     o.Int64);
+			Assert.AreEqual(g,   o.Guid);
+			Assert.AreEqual(de,  o.Dow1);
+			Assert.AreEqual(de,  o.Dow2);
+			Assert.IsTrue  (Math.Abs(123.57 - o.Float.Value) < 0.0001);
 
 			Assert.AreEqual(125,    ObjectMapper<Object2>.GetValue(o, "Int16"));
 			Assert.AreEqual(124,    ObjectMapper<Object2>.GetValue(o, "Int32"));
 			Assert.IsNull  (        ObjectMapper<Object2>.GetValue(o, "Int64"));
-			Assert.AreEqual(123.57, ObjectMapper<Object2>.GetValue(o, "Float"));
 			Assert.AreEqual(g,      ObjectMapper<Object2>.GetValue(o, "Guid"));
 			Assert.AreEqual(de,     ObjectMapper<Object2>.GetValue(o, "Dow1"));
 			Assert.AreEqual(de,     ObjectMapper<Object2>.GetValue(o, "Dow2"));
+			Assert.IsTrue  (Math.Abs(123.57 - (float)ObjectMapper<Object2>.GetValue(o, "Float")) < 0.0001);
 		}
 
 		public class Object3
@@ -142,10 +138,10 @@ namespace Mapping
 			om.SetValue(o, "Int32",  123.56);
 			om.SetValue(o, "Single", 123.57.ToString(CultureInfo.InvariantCulture));
 
-			Assert.AreEqual(124,    o.Int32. Value);
+			Assert.AreEqual(124,     o.Int32. Value);
 			Assert.AreEqual(123.57f, o.Single.Value);
 
-			Assert.AreEqual(124,    om.GetValue(o, "Int32"));
+			Assert.AreEqual(124,     om.GetValue(o, "Int32"));
 			Assert.AreEqual(123.57f, om.GetValue(o, "Single"));
 		}
 

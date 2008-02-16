@@ -32,7 +32,7 @@ namespace Aspects
 		}
 
 		[Test]
-		[ExpectedException(typeof(ArgumentNullException), "Null")]
+		[ExpectedException(typeof(ArgumentNullException), ExpectedMessage="Null")]
 		public void Test2()
 		{
 			TestObject1 o = (TestObject1)TypeAccessor.CreateInstance(typeof(TestObject1));
@@ -41,7 +41,7 @@ namespace Aspects
 		}
 
 		[Test]
-		[ExpectedException(typeof(ArgumentNullException), "Null: str2")]
+		[ExpectedException(typeof(ArgumentNullException), ExpectedMessage="Null: str2")]
 		public void Test3()
 		{
 			TestObject1 o = (TestObject1)TypeAccessor.CreateInstance(typeof(TestObject1));
