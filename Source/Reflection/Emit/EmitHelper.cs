@@ -1,11 +1,11 @@
 using System;
+using System.Diagnostics.CodeAnalysis;
+using System.Diagnostics.SymbolStore;
 using System.Reflection;
 using System.Reflection.Emit;
 using System.Runtime.InteropServices;
-using System.Diagnostics.SymbolStore;
-using System.Diagnostics.CodeAnalysis;
-
 using BLToolkit.Common;
+using BLToolkit.Properties;
 
 namespace BLToolkit.Reflection.Emit
 {
@@ -674,8 +674,7 @@ namespace BLToolkit.Reflection.Emit
 			MethodInfo methodInfo = type.GetMethod(methodName, parameterTypes);
 
 			if (methodInfo == null)
-				throw new InvalidOperationException(
-					string.Format("Failed to query type '{0}' for method '{1}'", type.FullName, methodName));
+				throw CreateNoSuchMethodException(type, methodName);
 
 			return call(methodInfo);
 		}
@@ -687,8 +686,7 @@ namespace BLToolkit.Reflection.Emit
 			MethodInfo methodInfo = type.GetMethod(methodName, flags, null, parameterTypes, null);
 
 			if (methodInfo == null)
-				throw new InvalidOperationException(
-					string.Format("Failed to query type '{0}' for method '{1}'", type.FullName, methodName));
+				throw CreateNoSuchMethodException(type, methodName);
 
 			return call(methodInfo);
 		}
@@ -766,8 +764,7 @@ namespace BLToolkit.Reflection.Emit
 			MethodInfo methodInfo = type.GetMethod(methodName, parameterTypes);
 
 			if (methodInfo == null)
-				throw new InvalidOperationException(
-					string.Format("Failed to query type '{0}' for method '{1}'", type.FullName, methodName));
+				throw CreateNoSuchMethodException(type, methodName);
 
 			return callvirt(methodInfo);
 		}
@@ -780,8 +777,7 @@ namespace BLToolkit.Reflection.Emit
 					type.GetMethod(methodName, bindingAttr, null, optionalParameterTypes, null);
 
 			if (methodInfo == null)
-				throw new InvalidOperationException(
-					string.Format("Failed to query type '{0}' for method '{1}'", type.FullName, methodName));
+				throw CreateNoSuchMethodException(type, methodName);
 
 			return callvirt(methodInfo, null);
 		}
@@ -800,8 +796,7 @@ namespace BLToolkit.Reflection.Emit
 				parameterTypes, null);
 
 			if (methodInfo == null)
-				throw new InvalidOperationException(
-					string.Format("Failed to query type '{0}' for method '{1}'", type.FullName, methodName));
+				throw CreateNoSuchMethodException(type, methodName);
 
 			return callvirt(methodInfo, parameterTypes.Length == 0? null: parameterTypes);
 		}
@@ -866,6 +861,18 @@ namespace BLToolkit.Reflection.Emit
 		public EmitHelper cgt_un
 		{
 			get { _ilGenerator.Emit(OpCodes.Cgt_Un); return this; }
+		}
+
+		/// <summary>
+		/// Calls ILGenerator.Emit(<see cref="OpCodes.Constrained"/>) that
+		/// constrains the type on which a virtual method call is made.
+		/// </summary>
+		/// <param name="type">A Type</param>
+		/// <seealso cref="OpCodes.Cgt_Un">OpCodes.Constrained</seealso>
+		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode)">ILGenerator.Emit</seealso>
+		public EmitHelper constrained(Type type)
+		{
+			_ilGenerator.Emit(OpCodes.Constrained, type); return this;
 		}
 
 		/// <summary>
@@ -959,6 +966,39 @@ namespace BLToolkit.Reflection.Emit
 		{
 			get { _ilGenerator.Emit(OpCodes.Conv_I8); return this; }
 		}
+
+		/// <summary>
+		/// Converts the value on top of the evaluation stack to the specified type.
+		/// </summary>
+		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode)">ILGenerator.Emit</seealso>
+		public EmitHelper conv(Type type)
+		{
+			if (type == null) throw new ArgumentNullException("type");
+
+			switch (Type.GetTypeCode(type))
+			{
+				case TypeCode.Boolean:
+				case TypeCode.SByte:   conv_i1.end(); break;
+				case TypeCode.Int16:   conv_i2.end(); break;
+				case TypeCode.Int32:   conv_i4.end(); break;
+				case TypeCode.Int64:   conv_i8.end(); break;
+
+				case TypeCode.Byte:    conv_u1.end(); break;
+				case TypeCode.Char:
+				case TypeCode.UInt16:  conv_u2.end(); break;
+				case TypeCode.UInt32:  conv_u4.end(); break;
+				case TypeCode.UInt64:  conv_u8.end(); break;
+
+				case TypeCode.Single:  conv_r4.end(); break;
+				case TypeCode.Double:  conv_r8.end(); break;
+
+				default:
+					throw CreateNotExpectedTypeException(type);
+			}
+
+			return this;
+		}
+
 
 		/// <summary>
 		/// Calls ILGenerator.Emit(<see cref="OpCodes.Conv_Ovf_I"/>) that
@@ -1597,6 +1637,19 @@ namespace BLToolkit.Reflection.Emit
 		}
 
 		/// <summary>
+		/// Calls ILGenerator.Emit(<see cref="OpCodes.Ldc_I4_0"/> or <see cref="OpCodes.Ldc_I4_1"/>) that
+		/// pushes a supplied value of type int32 onto the evaluation stack as an int32.
+		/// </summary>
+		/// <param name="b">The value pushed onto the stack.</param>
+		/// <seealso cref="OpCodes.Ldc_I4">OpCodes.Ldc_I4_0</seealso>
+		/// <seealso cref="OpCodes.Ldc_I4">OpCodes.Ldc_I4_1</seealso>
+		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode,int)">ILGenerator.Emit</seealso>
+		public EmitHelper ldc_bool(bool b)
+		{
+			_ilGenerator.Emit(b? OpCodes.Ldc_I4_1: OpCodes.Ldc_I4_0); return this;
+		}
+
+		/// <summary>
 		/// Calls ILGenerator.Emit(<see cref="OpCodes.Ldc_I4"/>, int) that
 		/// pushes a supplied value of type int32 onto the evaluation stack as an int32.
 		/// </summary>
@@ -1733,8 +1786,8 @@ namespace BLToolkit.Reflection.Emit
 				case  7: ldc_i4_7. end(); break;
 				case  8: ldc_i4_8. end(); break;
 				default:
-					if (num >= byte.MinValue && num <= byte.MaxValue)
-						ldc_i4_s((byte)num);
+					if (num >= sbyte.MinValue && num <= sbyte.MaxValue)
+						ldc_i4_s((sbyte)num);
 					else
 						ldc_i4   (num);
 
@@ -1751,7 +1804,8 @@ namespace BLToolkit.Reflection.Emit
 		/// <param name="num">The value pushed onto the stack.</param>
 		/// <seealso cref="OpCodes.Ldc_I4_S">OpCodes.Ldc_I4_S</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode,byte)">ILGenerator.Emit</seealso>
-		public EmitHelper ldc_i4_s(byte num)
+		[CLSCompliant(false)]
+		public EmitHelper ldc_i4_s(sbyte num)
 		{
 			_ilGenerator.Emit(OpCodes.Ldc_I4_S, num); return this;
 		}
@@ -2096,22 +2150,34 @@ namespace BLToolkit.Reflection.Emit
 		{
 			if (type == null) throw new ArgumentNullException("type");
 
-			if      (type.IsClass)           ldind_ref.end();
-			else if (type == typeof(int))    ldind_i4.end();
-			else if (type == typeof(uint))   ldind_u4.end();
-			else if (type == typeof(bool)  ||
-			         type == typeof(byte))   ldind_u1.end();
-			else if (type == typeof(sbyte))  ldind_i1.end();
-			else if (type == typeof(char)  ||
-			         type == typeof(ushort)) ldind_u2.end();
-			else if (type == typeof(short))  ldind_i2.end();
-			else if (type == typeof(double)) ldind_r8.end();
-			else if (type == typeof(float))  ldind_r4.end();
-			else if (type == typeof(long)  ||
-			         type == typeof(ulong))  ldind_i8.end();
-			else
-				throw new InvalidOperationException(
-					string.Format("Type '{0}' is not expected", type.FullName));
+			switch (Type.GetTypeCode(type))
+			{
+				case TypeCode.Boolean:
+				case TypeCode.Byte:
+				case TypeCode.SByte:   ldind_i1.end(); break;
+
+				case TypeCode.Char:
+				case TypeCode.Int16:
+				case TypeCode.UInt16:  ldind_i2.end(); break;
+
+				case TypeCode.Int32:
+				case TypeCode.UInt32:  ldind_i4.end(); break;
+
+				case TypeCode.Int64:
+				case TypeCode.UInt64:  ldind_i8.end(); break;
+
+				case TypeCode.Single:  ldind_r4.end(); break;
+				case TypeCode.Double:  ldind_r8.end(); break;
+
+				default:
+					if (type.IsClass)
+						ldind_ref.end();
+					else if (type.IsValueType)
+						stobj(type);
+					else
+						throw CreateNotExpectedTypeException(type);
+					break;
+			}
 
 			return this;
 		}
@@ -2549,6 +2615,19 @@ namespace BLToolkit.Reflection.Emit
 
 		/// <summary>
 		/// Calls ILGenerator.Emit(<see cref="OpCodes.Refanytype"/>) that
+		/// specifies that the subsequent array address operation performs
+		/// no type check at run time, and that it returns a managed pointer
+		/// whose mutability is restricted.
+		/// </summary>
+		/// <seealso cref="OpCodes.Refanytype">OpCodes.Refanytype</seealso>
+		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode)">ILGenerator.Emit</seealso>
+		public EmitHelper @readonly
+		{
+			get { _ilGenerator.Emit(OpCodes.Readonly); return this; }
+		}
+
+		/// <summary>
+		/// Calls ILGenerator.Emit(<see cref="OpCodes.Refanytype"/>) that
 		/// retrieves the type token embedded in a typed reference.
 		/// </summary>
 		/// <seealso cref="OpCodes.Refanytype">OpCodes.Refanytype</seealso>
@@ -2703,22 +2782,6 @@ namespace BLToolkit.Reflection.Emit
 
 			return this;
 		}
-
-		///	switch (index)
-		///	{
-		///		case 0: stloc_0.end(); break;
-		///		case 1: stloc_1.end(); break;
-		///		case 2: stloc_2.end(); break;
-		///		case 3: stloc_3.end(); break;
-		///		default:
-		///			if (index < byte.MinValue) stloc_s((byte)index);
-		///			else                       stloc ((short)index);
-
-		///			break;
-		///	}
-
-		///	return this;
-		///}
 
 		/// <summary>
 		/// Calls ILGenerator.Emit(<see cref="OpCodes.Stelem_I"/>) that
@@ -2918,23 +2981,34 @@ namespace BLToolkit.Reflection.Emit
 		{
 			if (type == null) throw new ArgumentNullException("type");
 
-			if      (type.IsClass)           stind_ref.end();
-			else if (type == typeof(int)   ||
-			         type == typeof(uint))   stind_i4.end();
-			else if (type == typeof(bool)  ||
-			         type == typeof(byte)  ||
-			         type == typeof(sbyte))  stind_i1.end();
-			else if (type == typeof(char)  ||
-			         type == typeof(short) ||
-			         type == typeof(ushort)) stind_i2.end();
-			else if (type == typeof(double)) stind_r8.end();
-			else if (type == typeof(float))  stind_r4.end();
-			else if (type == typeof(long)  ||
-			         type == typeof(ulong))  stind_i8.end();
-			else if (type.IsValueType)       stobj(type);
+			switch (Type.GetTypeCode(type))
+			{
+				case TypeCode.Boolean:
+				case TypeCode.Byte:
+				case TypeCode.SByte:   stind_i1.end(); break;
+
+				case TypeCode.Char:
+				case TypeCode.Int16:
+				case TypeCode.UInt16:  stind_i2.end(); break;
+
+				case TypeCode.Int32:
+				case TypeCode.UInt32:  stind_i4.end(); break;
+
+				case TypeCode.Int64:
+				case TypeCode.UInt64:  stind_i8.end(); break;
+
+				case TypeCode.Single:  stind_r4.end(); break;
+				case TypeCode.Double:  stind_r8.end(); break;
+
+				default:
+					if (type.IsClass)
+						stind_ref.end();
+					else if (type.IsValueType)
+						stobj(type);
 			else
-				throw new InvalidOperationException(
-					string.Format("Type '{0}' is not expected", type.FullName));
+						throw CreateNotExpectedTypeException(type);
+					break;
+			}
 
 			return this;
 		}
@@ -2962,7 +3036,11 @@ namespace BLToolkit.Reflection.Emit
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode,short)">ILGenerator.Emit</seealso>
 		public EmitHelper stloc(short index)
 		{
-			_ilGenerator.Emit(OpCodes.Stloc, index); return this;
+			if (index >= byte.MinValue && index <= byte.MaxValue)
+				return stloc_s((byte)index);
+
+			_ilGenerator.Emit(OpCodes.Stloc, index);
+			return this;
 		}
 
 		/// <summary>
@@ -3036,7 +3114,18 @@ namespace BLToolkit.Reflection.Emit
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode,short)">ILGenerator.Emit</seealso>
 		public EmitHelper stloc_s(byte index)
 		{
-			_ilGenerator.Emit(OpCodes.Stloc_S, index); return this;
+			switch (index)
+			{
+				case 0: stloc_0.end(); break;
+				case 1: stloc_1.end(); break;
+				case 2: stloc_2.end(); break;
+				case 3: stloc_3.end(); break;
+
+				default:
+					_ilGenerator.Emit(OpCodes.Stloc_S, index); break;
+			}
+
+			return this;
 		}
 
 		/// <summary>
@@ -3186,6 +3275,12 @@ namespace BLToolkit.Reflection.Emit
 			return this;
 		}
 
+		/// <summary>
+		/// Calls <see cref="unbox(Type)"/> if given type is a value type.
+		/// </summary>
+		/// <param name="type">A Type</param>
+		/// <seealso cref="OpCodes.Unbox_Any">OpCodes.Unbox</seealso>
+		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode,Type)">ILGenerator.Emit</seealso>
 		public EmitHelper unboxIfValueType(Type type)
 		{
 			if (type == null) throw new ArgumentNullException("type");
@@ -3228,54 +3323,89 @@ namespace BLToolkit.Reflection.Emit
 
 		#endregion
 
+		/// <summary>
+		/// Loads default value of given type onto the evaluation stack.
+		/// </summary>
+		/// <param name="type">A Type</param>
 		public EmitHelper LoadInitValue(Type type)
 		{
 			if (type == null) throw new ArgumentNullException("type");
 
-			if      (type == typeof(string)) ldsfld(typeof(string).GetField("Empty"));
-			else if (type.IsClass ||
-			         type.IsInterface)       ldnull.end();
-			else if (type == typeof(bool)   ||
-			         type == typeof(byte)   ||
-			         type == typeof(int)    ||
-			         type == typeof(uint)   ||
-			         type == typeof(short)  ||
-			         type == typeof(ushort) ||
-			         type == typeof(sbyte)  ||
-			         type == typeof(char))   ldc_i4_0. end();
-			else if (type == typeof(double) ||
-			         type == typeof(float))  ldc_r4(0).end();
-			else if (type == typeof(long)   ||
-			         type == typeof(ulong))  ldc_i4_0. conv_i8.end();
-			else
-				throw new InvalidOperationException(
-					string.Format("Type '{0}' is not expected", type.FullName));
+			switch (Type.GetTypeCode(type))
+			{
+				case TypeCode.Boolean:
+				case TypeCode.Char:
+				case TypeCode.SByte:
+				case TypeCode.Int16:
+				case TypeCode.Int32:
+				case TypeCode.Byte:
+				case TypeCode.UInt16:
+				case TypeCode.UInt32:
+					ldc_i4_0.end();
+					break;
+
+				case TypeCode.Int64:
+				case TypeCode.UInt64:
+					ldc_i4_0.conv_i8.end();
+					break;
+
+				case TypeCode.Single:
+				case TypeCode.Double:
+					ldc_r4(0).end();
+					break;
+
+				case TypeCode.String:
+					ldsfld(typeof(string).GetField("Empty"));
+					break;
+
+				default:
+					if (type.IsClass || type.IsInterface)
+						ldnull.end();
+					else
+						throw CreateNotExpectedTypeException(type);
+					break;
+			}
 
 			return this;
 		}
 
+		/// <summary>
+		/// Loads supplied object value (if possible) onto the evaluation stack.
+		/// </summary>
+		/// <param name="o">Any object instance or null reference.</param>
+		/// <returns>True is a value was loaded, otherwise false.</returns>
 		public bool LoadWellKnownValue(object o)
 		{
-			if      (o == null)   ldnull.end();
-			else if (o is string) ldstr ((string)o);
-			else if (o is int)    ldc_i4((int)o);
-			else if (o is byte)   ldc_i4((byte)o);
-			else if (o is sbyte)  ldc_i4((sbyte)o);
-			else if (o is char)   ldc_i4((char)o);
-			else if (o is ushort) ldc_i4((ushort)o);
-			else if (o is uint)   ldc_i4(unchecked ((int)(uint)o));
-			else if (o is ulong)  ldc_i8(unchecked ((long)(ulong)o));
-			else if (o is bool)   ldc_i4((bool)o? 1: 0);
-			else if (o is short)  ldc_i4((short)o);
-			else if (o is long)   ldc_i8((long)o);
-			else if (o is float)  ldc_r4((float)o);
-			else if (o is double) ldc_r8((double)o);
+			if (o == null)
+				ldnull.end();
 			else
-				return false;
+				switch (Type.GetTypeCode(o.GetType()))
+				{
+					case TypeCode.Boolean:  ldc_bool((Boolean)o); break;
+					case TypeCode.Char:     ldc_i4_ ((Char)   o); break;
+					case TypeCode.Single:   ldc_r4  ((Single) o); break;
+					case TypeCode.Double:   ldc_r8  ((Double) o); break;
+					case TypeCode.String:   ldstr   ((String) o); break;
+					case TypeCode.SByte:    ldc_i4_ ((SByte)  o); break;
+					case TypeCode.Int16:    ldc_i4_ ((Int16)  o); break;
+					case TypeCode.Int32:    ldc_i4_ ((Int32)  o); break;
+					case TypeCode.Int64:    ldc_i8  ((Int64)  o); break;
+					case TypeCode.Byte:     ldc_i4_ ((Byte)   o); break;
+					case TypeCode.UInt16:   ldc_i4_ ((UInt16) o); break;
+					case TypeCode.UInt32:   ldc_i4_ (unchecked((Int32)(UInt32)o)); break;
+					case TypeCode.UInt64:   ldc_i8  (unchecked((Int64)(UInt64)o)); break;
+					default:
+						return false;
+				}
 
 			return true;
 		}
 
+		/// <summary>
+		/// Initialize parameter with some default value.
+		/// </summary>
+		/// <param name="parameterInfo">A method parameter.</param>
+		/// <param name="index">The parameter index.</param>
 		public EmitHelper Init(ParameterInfo parameterInfo, int index)
 		{
 			if (parameterInfo == null) throw new ArgumentNullException("parameterInfo");
@@ -3298,6 +3428,10 @@ namespace BLToolkit.Reflection.Emit
 			}
 		}
 
+		/// <summary>
+		/// Initialize all output parameters with some default value.
+		/// </summary>
+		/// <param name="parameters">A method parameters array.</param>
 		public EmitHelper InitOutParameters(ParameterInfo[] parameters)
 		{
 			for (int i = 0; i < parameters.Length; i++)
@@ -3311,6 +3445,10 @@ namespace BLToolkit.Reflection.Emit
 			return this;
 		}
 
+		/// <summary>
+		/// Initialize local variable with some default value.
+		/// </summary>
+		/// <param name="localBuilder">A method local variable.</param>
 		public EmitHelper Init(LocalBuilder localBuilder)
 		{
 			if (localBuilder == null) throw new ArgumentNullException("localBuilder");
@@ -3325,11 +3463,20 @@ namespace BLToolkit.Reflection.Emit
 				LoadInitValue(type).stloc(localBuilder);
 		}
 
+		/// <summary>
+		/// Loads a type instance at runtime.
+		/// </summary>
+		/// <param name="type">A type</param>
 		public EmitHelper LoadType(Type type)
 		{
 			return ldtoken(type).call(typeof(Type), "GetTypeFromHandle", typeof(RuntimeTypeHandle));
 		}
 
+		/// <summary>
+		/// Cast an object passed by reference to the specified type
+		/// or unbox a boxed value type.
+		/// </summary>
+		/// <param name="type">A type</param>
 		public EmitHelper CastFromObject(Type type)
 		{
 			if (type == null) throw new ArgumentNullException("type");
@@ -3339,36 +3486,14 @@ namespace BLToolkit.Reflection.Emit
 			return type.IsValueType? unbox_any(type): castclass(type);
 		}
 
-		public EmitHelper conv(Type type)
-		{
-			if      (type == typeof(byte))   conv_u1.end();
-			else if (type == typeof(char))   conv_u2.end();
-			else if (type == typeof(ushort)) conv_u2.end();
-			else if (type == typeof(uint))   conv_u4.end();
-			else if (type == typeof(ulong))  conv_i8.end();
-			else if (type == typeof(bool))   conv_i1.end();
-			else if (type == typeof(sbyte))  conv_i1.end();
-			else if (type == typeof(short))  conv_i2.end();
-			else if (type == typeof(int))    conv_i4.end();
-			else if (type == typeof(long))   conv_i8.end();
-			else if (type == typeof(float))  conv_r4.end();
-			else if (type == typeof(double)) conv_r8.end();
-			else
-				throw new InvalidOperationException(
-					string.Format("Type '{0}' is not expected", type.FullName));
-
-			return this;
-		}
-
-		public EmitHelper unboxOrCast(Type type)
-		{
-			if (type == null) throw new ArgumentNullException("type");
-
-			return type.IsValueType? unbox(type): castclass(type);
-		}
-
+		/// <summary>
+		/// Increase max stack size by specified delta.
+		/// </summary>
+		/// <param name="size">Number of bytes to enlarge max stack size.</param>
 		public void AddMaxStackSize(int size)
 		{
+			// m_maxStackSize isn't public so we need some hacking here.
+			//
 			FieldInfo fi = _ilGenerator.GetType().GetField(
 				"m_maxStackSize", BindingFlags.Instance | BindingFlags.NonPublic);
 
@@ -3377,6 +3502,18 @@ namespace BLToolkit.Reflection.Emit
 				size += (int)fi.GetValue(_ilGenerator);
 				fi.SetValue(_ilGenerator, size);
 			}
+		}
+
+		private static Exception CreateNoSuchMethodException(Type type, string methodName)
+		{
+			return new InvalidOperationException(
+				string.Format(Resources.EmitHelper_NoSuchMethod, type.FullName, methodName));
+		}
+
+		private static Exception CreateNotExpectedTypeException(Type type)
+		{
+			return new ArgumentException(
+				string.Format(Resources.EmitHelper_NotExpectedType, type.FullName));
 		}
 	}
 }

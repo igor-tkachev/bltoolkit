@@ -153,4 +153,10 @@
   <data name="DbManager_CannotUpdateNullDataTable" xml:space="preserve">
   <value>DataTable must be initialized before calling Update routine. Cannot update database from a null data table.</value>
 </data>
+  <data name="EmitHelper_NotExpectedType" xml:space="preserve">
+  <value>Type '{0}' is not expected.</value>
+</data>
+  <data name="EmitHelper_NoSuchMethod" xml:space="preserve">
+  <value>Failed to query type '{0}' for method '{1}'.</value>
+</data>
 </root>

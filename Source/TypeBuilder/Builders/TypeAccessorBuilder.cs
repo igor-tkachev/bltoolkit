@@ -57,7 +57,7 @@ namespace BLToolkit.TypeBuilder.Builders
 
 			foreach (InternalsVisibleToAttribute visibleToAttribute in attributes)
 			{
-				var an = new AssemblyName(visibleToAttribute.AssemblyName);
+				AssemblyName an = new AssemblyName(visibleToAttribute.AssemblyName);
 
 				if (AssemblyName.ReferenceMatchesDefinition(assemblyBuilder.AssemblyName, an))
 				{

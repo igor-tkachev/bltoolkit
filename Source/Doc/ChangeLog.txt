@@ -4,14 +4,15 @@ Breaking changes
 - No more support for .Net 1.1 Frramework.
 
 Bug fixes
-
--
+- EmitHelper.ldc_i4_ emits wrong opcode for numbers from 128 till 255 (bug in msdn)
+- Some opcodes were not implemented.
 
 Enhancement
 - DateTimeOffset type support.
 - MemberAccessor.CloneValue to avoid boxing.
 - Named arguments support for GenerateAttributeTypeBuilder.
 - Extended support for IsNull & Nullable types in MemberAccessor.
+- Support for enum values in EmitHelper.LoadWellKnownValue/LoadInitValue and so on.
 
 v 2.0.7
 

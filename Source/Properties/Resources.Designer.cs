@@ -167,5 +167,23 @@ namespace BLToolkit.Properties {
                 return ResourceManager.GetString("DbManager_UnknownDataProvider", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Failed to query type &apos;{0}&apos; for method &apos;{1}&apos;..
+        /// </summary>
+        internal static string EmitHelper_NoSuchMethod {
+            get {
+                return ResourceManager.GetString("EmitHelper_NoSuchMethod", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Type &apos;{0}&apos; is not expected..
+        /// </summary>
+        internal static string EmitHelper_NotExpectedType {
+            get {
+                return ResourceManager.GetString("EmitHelper_NotExpectedType", resourceCulture);
+            }
+        }
     }
 }
