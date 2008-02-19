@@ -671,18 +671,26 @@ namespace BLToolkit.Reflection.Emit
 		{
 			if (type == null) throw new ArgumentNullException("type");
 
-			MethodInfo mi = type.GetMethod(methodName, parameterTypes);
+			MethodInfo methodInfo = type.GetMethod(methodName, parameterTypes);
 
-			return call(mi);
+			if (methodInfo == null)
+				throw new InvalidOperationException(
+					string.Format("Failed to query type '{0}' for method '{1}'", type.FullName, methodName));
+
+			return call(methodInfo);
 		}
 
 		public EmitHelper call(Type type, string methodName, BindingFlags flags, params Type[] parameterTypes)
 		{
 			if (type == null) throw new ArgumentNullException("type");
 
-			MethodInfo mi = type.GetMethod(methodName, flags, null, parameterTypes, null);
+			MethodInfo methodInfo = type.GetMethod(methodName, flags, null, parameterTypes, null);
 
-			return call(mi);
+			if (methodInfo == null)
+				throw new InvalidOperationException(
+					string.Format("Failed to query type '{0}' for method '{1}'", type.FullName, methodName));
+
+			return call(methodInfo);
 		}
 
 		/// <summary>
@@ -755,9 +763,13 @@ namespace BLToolkit.Reflection.Emit
 		{
 			if (type == null) throw new ArgumentNullException("type");
 
-			MethodInfo mi = type.GetMethod(methodName, parameterTypes);
+			MethodInfo methodInfo = type.GetMethod(methodName, parameterTypes);
 
-			return callvirt(mi);
+			if (methodInfo == null)
+				throw new InvalidOperationException(
+					string.Format("Failed to query type '{0}' for method '{1}'", type.FullName, methodName));
+
+			return callvirt(methodInfo);
 		}
 
 		public EmitHelper callvirt(Type type, string methodName, BindingFlags bindingAttr, params Type[] optionalParameterTypes)
@@ -766,6 +778,10 @@ namespace BLToolkit.Reflection.Emit
 				optionalParameterTypes == null?
 					type.GetMethod(methodName, bindingAttr):
 					type.GetMethod(methodName, bindingAttr, null, optionalParameterTypes, null);
+
+			if (methodInfo == null)
+				throw new InvalidOperationException(
+					string.Format("Failed to query type '{0}' for method '{1}'", type.FullName, methodName));
 
 			return callvirt(methodInfo, null);
 		}
@@ -777,13 +793,17 @@ namespace BLToolkit.Reflection.Emit
 
 		public EmitHelper callvirtNoGenerics(Type type, string methodName, params Type[] parameterTypes)
 		{
-			MethodInfo method = type.GetMethod(
+			MethodInfo methodInfo = type.GetMethod(
 				methodName,
 				BindingFlags.Instance | BindingFlags.Public,
 				GenericBinder.NonGeneric,
 				parameterTypes, null);
 
-			return callvirt(method, parameterTypes.Length == 0? null: parameterTypes);
+			if (methodInfo == null)
+				throw new InvalidOperationException(
+					string.Format("Failed to query type '{0}' for method '{1}'", type.FullName, methodName));
+
+			return callvirt(methodInfo, parameterTypes.Length == 0? null: parameterTypes);
 		}
 
 		/// <summary>
@@ -2090,7 +2110,8 @@ namespace BLToolkit.Reflection.Emit
 			else if (type == typeof(long)  ||
 			         type == typeof(ulong))  ldind_i8.end();
 			else
-				throw new InvalidOperationException();
+				throw new InvalidOperationException(
+					string.Format("Type '{0}' is not expected", type.FullName));
 
 			return this;
 		}
@@ -2912,7 +2933,8 @@ namespace BLToolkit.Reflection.Emit
 			         type == typeof(ulong))  stind_i8.end();
 			else if (type.IsValueType)       stobj(type);
 			else
-				throw new InvalidOperationException();
+				throw new InvalidOperationException(
+					string.Format("Type '{0}' is not expected", type.FullName));
 
 			return this;
 		}
@@ -3226,7 +3248,8 @@ namespace BLToolkit.Reflection.Emit
 			else if (type == typeof(long)   ||
 			         type == typeof(ulong))  ldc_i4_0. conv_i8.end();
 			else
-				throw new InvalidOperationException();
+				throw new InvalidOperationException(
+					string.Format("Type '{0}' is not expected", type.FullName));
 
 			return this;
 		}
@@ -3330,6 +3353,9 @@ namespace BLToolkit.Reflection.Emit
 			else if (type == typeof(long))   conv_i8.end();
 			else if (type == typeof(float))  conv_r4.end();
 			else if (type == typeof(double)) conv_r8.end();
+			else
+				throw new InvalidOperationException(
+					string.Format("Type '{0}' is not expected", type.FullName));
 
 			return this;
 		}

@@ -89,8 +89,8 @@ namespace BLToolkit.Reflection
 			//
 			// For us, this means that
 			//
-			// SomeObject  o1 = TypeAccessor.CreateInstance<SomeObject>();
-			// OtherObject o2 = TypeAccessor.CreateInstance<OtherObject>();
+			// TypeFactory.SetGlobalAssembly();
+			// SomeObject o = TypeAccessor.CreateInstance<SomeObject>();
 			//
 			// May be executed in reverse order. Usually, there is no problem,
 			// but sometimes the order is important.

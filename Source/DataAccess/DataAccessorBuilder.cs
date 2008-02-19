@@ -1881,20 +1881,23 @@ namespace BLToolkit.DataAccess
 				if (underlyingType.IsEnum)
 					underlyingType = Enum.GetUnderlyingType(underlyingType);
 
-				if (underlyingType == typeof(Int16))    return "ConvertToNullableInt16";
-				if (underlyingType == typeof(Int32))    return "ConvertToNullableInt32";
-				if (underlyingType == typeof(Int64))    return "ConvertToNullableInt64";
-				if (underlyingType == typeof(Byte))     return "ConvertToNullableByte";
-				if (underlyingType == typeof(UInt16))   return "ConvertToNullableUInt16";
-				if (underlyingType == typeof(UInt32))   return "ConvertToNullableUInt32";
-				if (underlyingType == typeof(UInt64))   return "ConvertToNullableUInt64";
-				if (underlyingType == typeof(Char))     return "ConvertToNullableChar";
-				if (underlyingType == typeof(Double))   return "ConvertToNullableDouble";
-				if (underlyingType == typeof(Single))   return "ConvertToNullableSingle";
-				if (underlyingType == typeof(Boolean))  return "ConvertToNullableBoolean";
-				if (underlyingType == typeof(DateTime)) return "ConvertToNullableDateTime";
-				if (underlyingType == typeof(Decimal))  return "ConvertToNullableDecimal";
-				if (underlyingType == typeof(Guid))     return "ConvertToNullableGuid";
+				if (underlyingType == typeof(Int16))          return "ConvertToNullableInt16";
+				if (underlyingType == typeof(Int32))          return "ConvertToNullableInt32";
+				if (underlyingType == typeof(Int64))          return "ConvertToNullableInt64";
+				if (underlyingType == typeof(Byte))           return "ConvertToNullableByte";
+				if (underlyingType == typeof(UInt16))         return "ConvertToNullableUInt16";
+				if (underlyingType == typeof(UInt32))         return "ConvertToNullableUInt32";
+				if (underlyingType == typeof(UInt64))         return "ConvertToNullableUInt64";
+				if (underlyingType == typeof(Char))           return "ConvertToNullableChar";
+				if (underlyingType == typeof(Double))         return "ConvertToNullableDouble";
+				if (underlyingType == typeof(Single))         return "ConvertToNullableSingle";
+				if (underlyingType == typeof(Boolean))        return "ConvertToNullableBoolean";
+				if (underlyingType == typeof(DateTime))       return "ConvertToNullableDateTime";
+#if FW3
+				if (underlyingType == typeof(DateTimeOffset)) return "ConvertToNullableDateTimeOffset";
+#endif
+				if (underlyingType == typeof(Decimal))        return "ConvertToNullableDecimal";
+				if (underlyingType == typeof(Guid))           return "ConvertToNullableGuid";
 			}
 
 			if (type.IsPrimitive)
@@ -1902,42 +1905,45 @@ namespace BLToolkit.DataAccess
 				if (type.IsEnum)
 					type = Enum.GetUnderlyingType(type);
 
-				if (type == typeof(SByte))   return "ConvertToSByte";
-				if (type == typeof(Int16))   return "ConvertToInt16";
-				if (type == typeof(Int32))   return "ConvertToInt32";
-				if (type == typeof(Int64))   return "ConvertToInt64";
-				if (type == typeof(Byte))    return "ConvertToByte";
-				if (type == typeof(UInt16))  return "ConvertToUInt16";
-				if (type == typeof(UInt32))  return "ConvertToUInt32";
-				if (type == typeof(UInt64))  return "ConvertToUInt64";
-				if (type == typeof(Char))    return "ConvertToChar";
-				if (type == typeof(Single))  return "ConvertToSingle";
-				if (type == typeof(Double))  return "ConvertToDouble";
-				if (type == typeof(Boolean)) return "ConvertToBoolean";
+				if (type == typeof(SByte))      return "ConvertToSByte";
+				if (type == typeof(Int16))      return "ConvertToInt16";
+				if (type == typeof(Int32))      return "ConvertToInt32";
+				if (type == typeof(Int64))      return "ConvertToInt64";
+				if (type == typeof(Byte))       return "ConvertToByte";
+				if (type == typeof(UInt16))     return "ConvertToUInt16";
+				if (type == typeof(UInt32))     return "ConvertToUInt32";
+				if (type == typeof(UInt64))     return "ConvertToUInt64";
+				if (type == typeof(Char))       return "ConvertToChar";
+				if (type == typeof(Single))     return "ConvertToSingle";
+				if (type == typeof(Double))     return "ConvertToDouble";
+				if (type == typeof(Boolean))    return "ConvertToBoolean";
 			}
 
-			if (type == typeof(String))      return "ConvertToString";
-			if (type == typeof(DateTime))    return "ConvertToDateTime";
-			if (type == typeof(Decimal))     return "ConvertToDecimal";
-			if (type == typeof(Guid))        return "ConvertToGuid";
-			if (type == typeof(Stream))      return "ConvertToStream";
-			if (type == typeof(XmlReader))   return "ConvertToXmlReader";
-			if (type == typeof(XmlDocument)) return "ConvertToXmlDocument";
-			if (type == typeof(Byte[]))      return "ConvertToByteArray";
-			if (type == typeof(Char[]))      return "ConvertToCharArray";
+			if (type == typeof(String))         return "ConvertToString";
+			if (type == typeof(DateTime))       return "ConvertToDateTime";
+#if FW3
+			if (type == typeof(DateTimeOffset)) return "ConvertToDateTimeOffset";
+#endif
+			if (type == typeof(Decimal))        return "ConvertToDecimal";
+			if (type == typeof(Guid))           return "ConvertToGuid";
+			if (type == typeof(Stream))         return "ConvertToStream";
+			if (type == typeof(XmlReader))      return "ConvertToXmlReader";
+			if (type == typeof(XmlDocument))    return "ConvertToXmlDocument";
+			if (type == typeof(Byte[]))         return "ConvertToByteArray";
+			if (type == typeof(Char[]))         return "ConvertToCharArray";
 
-			if (type == typeof(SqlByte))     return "ConvertToSqlByte";
-			if (type == typeof(SqlInt16))    return "ConvertToSqlInt16";
-			if (type == typeof(SqlInt32))    return "ConvertToSqlInt32";
-			if (type == typeof(SqlInt64))    return "ConvertToSqlInt64";
-			if (type == typeof(SqlSingle))   return "ConvertToSqlSingle";
-			if (type == typeof(SqlBoolean))  return "ConvertToSqlBoolean";
-			if (type == typeof(SqlDouble))   return "ConvertToSqlDouble";
-			if (type == typeof(SqlDateTime)) return "ConvertToSqlDateTime";
-			if (type == typeof(SqlDecimal))  return "ConvertToSqlDecimal";
-			if (type == typeof(SqlMoney))    return "ConvertToSqlMoney";
-			if (type == typeof(SqlGuid))     return "ConvertToSqlGuid";
-			if (type == typeof(SqlString))   return "ConvertToSqlString";
+			if (type == typeof(SqlByte))        return "ConvertToSqlByte";
+			if (type == typeof(SqlInt16))       return "ConvertToSqlInt16";
+			if (type == typeof(SqlInt32))       return "ConvertToSqlInt32";
+			if (type == typeof(SqlInt64))       return "ConvertToSqlInt64";
+			if (type == typeof(SqlSingle))      return "ConvertToSqlSingle";
+			if (type == typeof(SqlBoolean))     return "ConvertToSqlBoolean";
+			if (type == typeof(SqlDouble))      return "ConvertToSqlDouble";
+			if (type == typeof(SqlDateTime))    return "ConvertToSqlDateTime";
+			if (type == typeof(SqlDecimal))     return "ConvertToSqlDecimal";
+			if (type == typeof(SqlMoney))       return "ConvertToSqlMoney";
+			if (type == typeof(SqlGuid))        return "ConvertToSqlGuid";
+			if (type == typeof(SqlString))      return "ConvertToSqlString";
 
 			return null;
 		}

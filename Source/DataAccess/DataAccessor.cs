@@ -381,6 +381,14 @@ namespace BLToolkit.DataAccess
 			return db.MappingSchema.ConvertToDateTime(value);
 		}
 
+#if FW3
+		[NoInterception]
+		protected virtual DateTimeOffset ConvertToDateTimeOffset(DbManager db, object value, object parameter)
+		{
+			return db.MappingSchema.ConvertToDateTimeOffset(value);
+		}
+#endif
+
 		[NoInterception]
 		protected virtual Decimal ConvertToDecimal(DbManager db, object value, object parameter)
 		{
@@ -409,6 +417,18 @@ namespace BLToolkit.DataAccess
 		protected virtual XmlDocument ConvertToXmlDocument(DbManager db, object value, object parameter)
 		{
 			return db.MappingSchema.ConvertToXmlDocument(value);
+		}
+
+		[NoInterception]
+		protected virtual Byte[] ConvertToByteArray(DbManager db, object value, object parameter)
+		{
+			return db.MappingSchema.ConvertToByteArray(value);
+		}
+
+		[NoInterception]
+		protected virtual Char[] ConvertToCharArray(DbManager db, object value, object parameter)
+		{
+			return db.MappingSchema.ConvertToCharArray(value);
 		}
 
 		#endregion
@@ -489,6 +509,14 @@ namespace BLToolkit.DataAccess
 		{
 			return db.MappingSchema.ConvertToNullableDateTime(value);
 		}
+
+#if FW3
+		[NoInterception]
+		protected virtual DateTimeOffset? ConvertToNullableDateTimeOffset(DbManager db, object value, object parameter)
+		{
+			return db.MappingSchema.ConvertToNullableDateTimeOffset(value);
+		}
+#endif
 
 		[NoInterception]
 		protected virtual Decimal? ConvertToNullableDecimal(DbManager db, object value, object parameter)
