@@ -1,15 +1,15 @@
 using System;
 using System.Collections;
 using System.ComponentModel;
+using System.Runtime.InteropServices;
 
 using BLToolkit.ComponentModel;
 using BLToolkit.Mapping;
 using BLToolkit.Validation;
 
-
 namespace BLToolkit.Common
 {
-	[Serializable, Trimmable]
+	[Serializable, Trimmable, ComVisible(true)]
 	public abstract class EntityBase : ICustomTypeDescriptor
 	{
 		#region Protected members

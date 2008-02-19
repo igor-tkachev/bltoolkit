@@ -3,6 +3,8 @@ using System.Collections;
 using System.ComponentModel;
 using System.Data.SqlTypes;
 using System.Reflection;
+using System.Runtime.InteropServices;
+using System.Xml;
 
 using BLToolkit.Common;
 using BLToolkit.ComponentModel;
@@ -10,7 +12,6 @@ using BLToolkit.Mapping;
 using BLToolkit.Reflection;
 using BLToolkit.TypeBuilder;
 using BLToolkit.Validation;
-using System.Xml;
 
 namespace BLToolkit.EditableObjects
 {
@@ -68,6 +69,7 @@ namespace BLToolkit.EditableObjects
 	[ImplementInterface(typeof(IMemberwiseEditable))]
 	[ImplementInterface(typeof(IPrintDebugState))]
 	[ImplementInterface(typeof(ISetParent))]
+	[ComVisible(true)]
 	[Serializable]
 	public abstract class EditableObject : EntityBase,
 		ICloneable, IEditableObject, INotifyPropertyChanged,

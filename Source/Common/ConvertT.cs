@@ -34,7 +34,7 @@ namespace BLToolkit.Common
 			else
 				methodName = "To" + to.Name;
 
-			MethodInfo     mi = typeof(Convert).GetMethod(methodName,
+			MethodInfo mi = typeof(Convert).GetMethod(methodName,
 				BindingFlags.Public | BindingFlags.Static | BindingFlags.ExactBinding,
 				null, new Type[] {from}, null);
 

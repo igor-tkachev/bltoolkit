@@ -194,12 +194,6 @@
     <Compile Include="Mapping\NullDateTimeAttribute.cs" />
     <Compile Include="Mapping\NullDecimalAttribute.cs" />
     <Compile Include="Mapping\NullGuidAttribute.cs" />
-    <Compile Include="Mapping\ValueMappingInternal\MapperSelector.cs" />
-    <Compile Include="Mapping\ValueMappingInternal\NullableTypes.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Mapping\ValueMappingInternal\ScalarTypes.cs" />
-    <Compile Include="Mapping\ValueMappingInternal\SqlTypes.cs" />
     <Compile Include="Patterns\DuckTyping.cs" />
     <Compile Include="Patterns\DuckTypeBase.cs" />
     <Compile Include="Patterns\MustImplementAttribute.cs" />

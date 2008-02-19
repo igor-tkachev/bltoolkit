@@ -7979,7 +7979,6 @@ namespace BLToolkit.Common
 
 		#endregion
 
-
 		private static Exception CreateInvalidCastException(Type originalType, Type conversionType)
 		{
 			return new InvalidCastException(string.Format(
