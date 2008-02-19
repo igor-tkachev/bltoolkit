@@ -5,6 +5,8 @@
 	<using namespace="System.Data.SqlTypes"/>
 	<using namespace="System.IO"/>
 	<using namespace="System.Xml"/>
+	<br/>
+	<using namespace="BLToolkit.Properties"/>
 
 	<type name="SByte"  clscompliant="false"/>
 	<type name="UInt16" clscompliant="false"/>
@@ -71,15 +73,18 @@
 				<from type="Guid"/>
 				<default              >return p.ToString();</default>
 			</group>
-			<group name="SqlTypes.">
+			<group name="SqlTypes">
 				<include template ="SqlTypes"/>
 				<from type="SqlGuid"/>
 				<from type="SqlChars" >return p.IsNull?  null : p.ToSqlString().Value;</from>
 				<from type="SqlXml"   >return p.IsNull?  null : p.Value;</from>
 				<default              >return p.ToString();</default>
 			</group>
-			<from type="Type"         >return p == null? null: p.FullName;</from>
-			<from type="XmlDocument"  >return p == null? null: p.InnerXml;</from>
+			<group name="Other Types">
+				<from type="Type"       >return p == null? null: p.FullName;</from>
+				<from type="XmlDocument">return p == null? null: p.InnerXml;</from>
+				<from type="Byte[]"     >return p == null? null: System.Text.Encoding.UTF8.GetString(p);</from>
+			</group>
 			<default nullvalue="String.Empty" nothrow="true">
 			if (p is IConvertible) return ((IConvertible)p).ToString(null);
 			if (p is IFormattable) return ((IFormattable)p).ToString(null, null);
@@ -104,9 +109,12 @@
 				<from type="Boolean"  >return (p.HasValue &amp;&amp; p.Value)?   (SByte)1: (SByte)0;</from>
 				<default              >return p.HasValue? checked((SByte)p.Value): (SByte)0;</default>
 			</group>
-			<group name="SqlTypes.">
+			<group name="SqlTypes">
 				<include template ="SqlTypes"/>
 				<default              >return p.IsNull? (SByte)0:        ToSByte(p.Value);</default>
+			</group>
+			<group name="Other Types">
+				<from type="Byte[]"   >return p == null || p.Length == 0? (SByte)0: checked((SByte)p[0]);</from>
 			</group>
 			<default nullvalue="0">
 			if (p is IConvertible) return ((IConvertible)p).ToSByte(null);
@@ -129,10 +137,13 @@
 				<from type="Boolean"  >return (p.HasValue &amp;&amp; p.Value)?   (Int16)1: (Int16)0;</from>
 				<default              >return p.HasValue? checked((Int16)p.Value): (Int16)0;</default>
 			</group>
-			<group name="SqlTypes.">
+			<group name="SqlTypes">
 				<from type="SqlInt16" >return p.IsNull? (Int16)0:                p.Value; </from>
 				<include template ="SqlTypes"/>
 				<default              >return p.IsNull? (Int16)0:        ToInt16(p.Value);</default>
+			</group>
+			<group name="Other Types">
+				<from type="Byte[]"   >return p == null || p.Length == 0? (Int16)0: BitConverter.ToInt16(p, 0);</from>
 			</group>
 			<default nullvalue="0">
 			if (p is IConvertible) return ((IConvertible)p).ToInt16(null);
@@ -155,10 +166,13 @@
 				<from type="Boolean"  >return (p.HasValue &amp;&amp; p.Value)?   1: 0;</from>
 				<default              >return p.HasValue? checked((Int32)p.Value): 0;</default>
 			</group>
-			<group name="SqlTypes.">
+			<group name="SqlTypes">
 				<from type="SqlInt32" >return p.IsNull? 0:         p.Value; </from>
 				<include template ="SqlTypes"/>
 				<default              >return p.IsNull? 0: ToInt32(p.Value);</default>
+			</group>
+			<group name="Other Types">
+				<from type="Byte[]"   >return p == null || p.Length == 0? 0: BitConverter.ToInt32(p, 0);</from>
 			</group>
 			<default nullvalue="0">
 			if (p is IConvertible) return ((IConvertible)p).ToInt32(null);
@@ -187,11 +201,14 @@
 				<from type="TimeSpan" >return p.HasValue? p.Value.Ticks: 0;</from>
 				<default              >return p.HasValue? checked((Int64)p.Value): 0;</default>
 			</group>
-			<group name="SqlTypes.">
+			<group name="SqlTypes">
 				<from type="SqlInt64" >return p.IsNull? 0:         p.Value; </from>
 				<include template ="SqlTypes"/>
 				<from type="SqlDateTime"/>
 				<default              >return p.IsNull? 0: ToInt64(p.Value);</default>
+			</group>
+			<group name="Other Types">
+				<from type="Byte[]"   >return p == null || p.Length == 0? 0: BitConverter.ToInt64(p, 0);</from>
 			</group>
 			<default nullvalue="0">
 			if (p is IConvertible) return ((IConvertible)p).ToInt64(null);
@@ -215,10 +232,13 @@
 				<from type="Boolean"  >return (p.HasValue &amp;&amp; p.Value)?   (Byte)1: (Byte)0;</from>
 				<default              >return p.HasValue? checked((Byte)p.Value): (Byte)0;</default>
 			</group>
-			<group name="SqlTypes.">
+			<group name="SqlTypes">
 				<from type="SqlByte"  >return p.IsNull? (Byte)0:               p.Value; </from>
 				<include template ="SqlTypes"/>
 				<default              >return p.IsNull? (Byte)0:        ToByte(p.Value);</default>
+			</group>
+			<group name="Other Types">
+				<from type="Byte[]"   >return p == null || p.Length == 0? (Byte)0: p[0];</from>
 			</group>
 			<default nullvalue="0">
 			if (p is IConvertible) return ((IConvertible)p).ToByte(null);
@@ -241,9 +261,12 @@
 				<from type="Boolean"  >return (p.HasValue &amp;&amp; p.Value)?   (UInt16)1: (UInt16)0;</from>
 				<default              >return p.HasValue? checked((UInt16)p.Value): (UInt16)0;</default>
 			</group>
-			<group name="SqlTypes.">
+			<group name="SqlTypes">
 				<include template ="SqlTypes"/>
 				<default              >return p.IsNull? (UInt16)0:        ToUInt16(p.Value);</default>
+			</group>
+			<group name="Other Types">
+				<from type="Byte[]"   >return p == null || p.Length == 0? (UInt16)0: BitConverter.ToUInt16(p, 0);</from>
 			</group>
 			<default nullvalue="0">
 			if (p is IConvertible) return ((IConvertible)p).ToUInt16(null);
@@ -266,9 +289,12 @@
 				<from type="Boolean"  >return (p.HasValue &amp;&amp; p.Value)?   (UInt32)1: 0;</from>
 				<default              >return p.HasValue? checked((UInt32)p.Value): 0;</default>
 			</group>
-			<group name="SqlTypes.">
+			<group name="SqlTypes">
 				<include template ="SqlTypes"/>
 				<default              >return p.IsNull? 0:        ToUInt32(p.Value);</default>
+			</group>
+			<group name="Other Types">
+				<from type="Byte[]"   >return p == null || p.Length == 0? 0: BitConverter.ToUInt32(p, 0);</from>
 			</group>
 			<default nullvalue="0">
 			if (p is IConvertible) return ((IConvertible)p).ToUInt32(null);
@@ -291,9 +317,12 @@
 				<from type="Boolean"  >return (p.HasValue &amp;&amp; p.Value)?   (UInt64)1: 0;</from>
 				<default              >return p.HasValue? checked((UInt64)p.Value): 0;</default>
 			</group>
-			<group name="SqlTypes.">
+			<group name="SqlTypes">
 				<include template ="SqlTypes"/>
 				<default              >return p.IsNull? 0:        ToUInt64(p.Value);</default>
+			</group>
+			<group name="Other Types">
+				<from type="Byte[]"   >return p == null || p.Length == 0? 0: BitConverter.ToUInt64(p, 0);</from>
 			</group>
 			<default nullvalue="0">
 			if (p is IConvertible) return ((IConvertible)p).ToUInt64(null);
@@ -315,9 +344,12 @@
 				<from type="Boolean"  >return (p.HasValue &amp;&amp; p.Value)?   (Char)1: (Char)0;</from>
 				<default              >return p.HasValue? checked((Char)p.Value): (Char)0;</default>
 			</group>
-			<group name="SqlTypes.">
+			<group name="SqlTypes">
 				<include template ="SqlTypes"/>
 				<default              >return p.IsNull? (Char)0:        ToChar(p.Value);</default>
+			</group>
+			<group name="Other Types">
+				<from type="Byte[]"   >return p == null || p.Length == 0? (Char)0: BitConverter.ToChar(p, 0);</from>
 			</group>
 			<default nullvalue="'\x0'">
 			if (p is IConvertible) return ((IConvertible)p).ToChar(null);
@@ -340,10 +372,13 @@
 				<from type="Boolean"  >return (p.HasValue &amp;&amp; p.Value)?        1.0f: 0.0f;</from>
 				<default              >return p.HasValue? checked((Single)p.Value): 0.0f;</default>
 			</group>
-			<group name="SqlTypes.">
+			<group name="SqlTypes">
 				<from type="SqlSingle">return p.IsNull? 0.0f:                 p.Value; </from>
 				<include template ="SqlTypes"/>
 				<default              >return p.IsNull? 0.0f:        ToSingle(p.Value);</default>
+			</group>
+			<group name="Other Types">
+				<from type="Byte[]"   >return p == null || p.Length == 0? 0.0f: BitConverter.ToSingle(p, 0);</from>
 			</group>
 			<default nullvalue="0.0f">
 			if (p is IConvertible) return ((IConvertible)p).ToSingle(null);
@@ -372,11 +407,14 @@
 				<from type="TimeSpan" >return p.HasValue? p.Value.TotalDays: 0.0;</from>
 				<default              >return p.HasValue? checked((Double)p.Value):  0.0;</default>
 			</group>
-			<group name="SqlTypes.">
+			<group name="SqlTypes">
 				<from type="SqlDouble">return p.IsNull? 0.0:                 p.Value; </from>
 				<include template ="SqlTypes"/>
 				<from type="SqlDateTime"/>
 				<default              >return p.IsNull? 0.0:        ToDouble(p.Value);</default>
+			</group>
+			<group name="Other Types">
+				<from type="Byte[]"   >return p == null || p.Length == 0? 0.0: BitConverter.ToDouble(p, 0);</from>
 			</group>
 			<default nullvalue="0.0">
 			if (p is IConvertible) return ((IConvertible)p).ToDouble(null);
@@ -418,10 +456,13 @@
 				<from type="Char"      >return p.HasValue? ToBoolean(p.Value): false;</from>
 				<default               >return p.HasValue? p.Value != 0: false;</default>
 			</group>
-			<group name="SqlTypes.">
+			<group name="SqlTypes">
 				<from type="SqlBoolean">return p.IsNull? false:           p.Value; </from>
 				<include template ="SqlTypes"/>
 				<default               >return p.IsNull? false: ToBoolean(p.Value);</default>
+			</group>
+			<group name="Other Types">
+				<from type="Byte[]"    >return p == null || p.Length == 0? false: BitConverter.ToBoolean(p, 0);</from>
 			</group>
 			<default nullvalue="false">
 			if (p is IConvertible) return ((IConvertible)p).ToBoolean(null);
@@ -444,11 +485,20 @@
 				<from type="Boolean"  >return (p.HasValue &amp;&amp; p.Value)?         1.0m: 0.0m;</from>
 				<default              >return p.HasValue? checked((Decimal)p.Value): 0.0m;</default>
 			</group>
-			<group name="SqlTypes.">
+			<group name="SqlTypes">
 				<from type="SqlDecimal">return p.IsNull? 0.0m:           p.Value; </from>
 				<from type="SqlMoney"  >return p.IsNull? 0.0m:           p.Value; </from>
 				<include template ="SqlTypes"/>
 				<default               >return p.IsNull? 0.0m: ToDecimal(p.Value);</default>
+			</group>
+			<group name="Other Types">
+				<from type="Byte[]">
+					if (p == null || p.Length == 0) return 0.0m;
+
+					int[] bits = new int[p.Length / sizeof(int)];
+
+					Buffer.BlockCopy(p, 0, bits, 0, p.Length);
+					return new Decimal(bits);</from>
 			</group>
 			<default nullvalue="0.0m">
 			if (p is IConvertible) return ((IConvertible)p).ToDecimal(null);
@@ -469,11 +519,14 @@
 				<from type="Int64"          >return p.HasValue? DateTime.MinValue +        TimeSpan.FromTicks(p.Value): DateTime.MinValue;</from>
 				<from type="Double"         >return p.HasValue? DateTime.MinValue + TimeSpan.FromDays(p.Value): DateTime.MinValue;</from>
 			</group>
-			<group name="SqlTypes.">
+			<group name="SqlTypes">
 				<from type="SqlDateTime">return p.IsNull? DateTime.MinValue:                                               p.Value; </from>
 				<from type="SqlString"  >return p.IsNull? DateTime.MinValue:                                    ToDateTime(p.Value);</from>
 				<from type="SqlInt64"   >return p.IsNull? DateTime.MinValue: DateTime.MinValue +        TimeSpan.FromTicks(p.Value);</from>
 				<from type="SqlDouble"  >return p.IsNull? DateTime.MinValue: DateTime.MinValue + TimeSpan.FromDays(p.Value);</from>
+			</group>
+			<group name="Other Types">
+				<from type="Byte[]"     >return p == null || p.Length == 0? DateTime.MinValue: DateTime.FromBinary(ToInt64(p));</from>
 			</group>
 			<default nullvalue="DateTime.MinValue">
 			if (p is IConvertible) return ((IConvertible)p).ToDateTime(null);
@@ -494,11 +547,14 @@
 				<from type="Int64"    >return p.HasValue? DateTimeOffset.MinValue +        TimeSpan.FromTicks(p.Value): DateTimeOffset.MinValue;</from>
 				<from type="Double"   >return p.HasValue? DateTimeOffset.MinValue + TimeSpan.FromDays(p.Value): DateTimeOffset.MinValue;</from>
 			</group>
-			<group name="SqlTypes.">
+			<group name="SqlTypes">
 				<from type="SqlDateTime">return p.IsNull? DateTimeOffset.MinValue:                                               p.Value; </from>
 				<from type="SqlString"  >return p.IsNull? DateTimeOffset.MinValue:                                    ToDateTimeOffset(p.Value);</from>
 				<from type="SqlInt64"   >return p.IsNull? DateTimeOffset.MinValue: DateTimeOffset.MinValue +        TimeSpan.FromTicks(p.Value);</from>
 				<from type="SqlDouble"  >return p.IsNull? DateTimeOffset.MinValue: DateTimeOffset.MinValue + TimeSpan.FromDays(p.Value);</from>
+			</group>
+			<group name="Other Types">
+				<from type="Byte[]"     >return p == null || p.Length == 0? DateTimeOffset.MinValue: new DateTimeOffset(ToDateTime(p));</from>
 			</group>
 			<default nullvalue="DateTimeOffset.MinValue">
 			if (p is IConvertible) return ToDateTimeOffset(((IConvertible)p).ToDateTime(null));
@@ -519,11 +575,14 @@
 				<from type="Int64"      >return p.HasValue? TimeSpan.FromTicks(p.Value):        TimeSpan.MinValue;</from>
 				<from type="Double"     >return p.HasValue? TimeSpan.FromDays(p.Value): TimeSpan.MinValue;</from>
 			</group>
-			<group name="SqlTypes.">
+			<group name="SqlTypes">
 				<from type="SqlString"  >return p.IsNull? TimeSpan.MinValue: TimeSpan.Parse(p.Value);    </from>
 				<from type="SqlDateTime">return p.IsNull? TimeSpan.MinValue: p.Value - DateTime.MinValue;</from>
 				<from type="SqlInt64"   >return p.IsNull? TimeSpan.MinValue: TimeSpan.FromTicks(p.Value);</from>
 				<from type="SqlDouble"  >return p.IsNull? TimeSpan.MinValue: TimeSpan.FromDays(p.Value);</from>
+			</group>
+			<group name="Other Types">
+				<from type="Byte[]"     >return p == null || p.Length == 0? TimeSpan.MinValue: TimeSpan.FromTicks(ToInt64(p));</from>
 			</group>
 			<default nullvalue="TimeSpan.MinValue"/>
 		</converter>
@@ -534,7 +593,7 @@
 			<group name="Nullable Types." nullable="true">
 				<from type="Guid"    >return p.HasValue? p.Value : Guid.Empty;</from>
 			</group>
-			<group name="SqlTypes.">
+			<group name="SqlTypes">
 				<from type="SqlGuid"  >return p.IsNull? Guid.Empty: p.Value;            </from>
 				<from type="SqlString">return p.IsNull? Guid.Empty: new Guid(p.Value);  </from>
 				<from type="SqlBinary">return p.IsNull? Guid.Empty: p.ToSqlGuid().Value;</from>
@@ -563,9 +622,12 @@
 				<from type="Boolean">return p.HasValue? (SByte?)(p.Value? 1: 0):  null;</from>
 				<default            >return p.HasValue? checked((SByte?)p.Value): null;</default>
 			</group>
-			<group name="SqlTypes.">
+			<group name="SqlTypes">
 				<include template ="SqlTypes"/>
 				<default              >return p.IsNull? null: ToNullableSByte(p.Value);</default>
+			</group>
+			<group name="Other Types">
+				<from type="Byte[]"   >return p == null || p.Length == 0? null: (SByte?)ToSByte(p);</from>
 			</group>
 			<default nullvalue="null">
 			if (p is IConvertible) return ((IConvertible)p).ToSByte(null);
@@ -587,10 +649,13 @@
 				<from type="Boolean">return p.HasValue? (Int16?)(p.Value? 1: 0):  null;</from>
 				<default            >return p.HasValue? checked((Int16?)p.Value): null;</default>
 			</group>
-			<group name="SqlTypes.">
+			<group name="SqlTypes">
 				<from type="SqlInt16" >return p.IsNull? null:         (Int16?)p.Value; </from>
 				<include template ="SqlTypes"/>
 				<default              >return p.IsNull? null: ToNullableInt16(p.Value);</default>
+			</group>
+			<group name="Other Types">
+				<from type="Byte[]"   >return p == null || p.Length == 0? null: (Int16?)ToInt16(p);</from>
 			</group>
 			<default nullvalue="null">
 			if (p is IConvertible) return ((IConvertible)p).ToInt16(null);
@@ -612,10 +677,13 @@
 				<from type="Boolean">return p.HasValue? (Int32?)(p.Value? 1: 0):  null;</from>
 				<default            >return p.HasValue? checked((Int32?)p.Value): null;</default>
 			</group>
-			<group name="SqlTypes.">
+			<group name="SqlTypes">
 				<from type="SqlInt32" >return p.IsNull? null:         (Int32?)p.Value; </from>
 				<include template ="SqlTypes"/>
 				<default              >return p.IsNull? null: ToNullableInt32(p.Value);</default>
+			</group>
+			<group name="Other Types">
+				<from type="Byte[]"   >return p == null || p.Length == 0? null: (Int32?)ToInt32(p);</from>
 			</group>
 			<default nullvalue="null">
 			if (p is IConvertible) return ((IConvertible)p).ToInt32(null);
@@ -643,11 +711,14 @@
 				<from type="TimeSpan">return p.HasValue? (Int64?)p.Value.Ticks: null;</from>
 				<default             >return p.HasValue? checked((Int64?)p.Value): null;</default>
 			</group>
-			<group name="SqlTypes.">
+			<group name="SqlTypes">
 				<from type="SqlInt64">return p.IsNull? null:         (Int64?)p.Value; </from>
 				<include template ="SqlTypes"/>
 				<from type="SqlDateTime"/>
 				<default             >return p.IsNull? null: ToNullableInt64(p.Value);</default>
+			</group>
+			<group name="Other Types">
+				<from type="Byte[]"  >return p == null || p.Length == 0? null: (Int64?)ToInt64(p);</from>
 			</group>
 			<default nullvalue="null">
 			if (p is IConvertible) return ((IConvertible)p).ToInt64(null);
@@ -670,10 +741,13 @@
 				<from type="Boolean">return p.HasValue? (Byte?)(p.Value? 1: 0):  null;</from>
 				<default            >return p.HasValue? checked((Byte?)p.Value): null;</default>
 			</group>
-			<group name="SqlTypes.">
+			<group name="SqlTypes">
 				<from type="SqlByte" >return p.IsNull? null:         (Byte?)p.Value; </from>
 				<include template ="SqlTypes"/>
 				<default             >return p.IsNull? null: ToNullableByte(p.Value);</default>
+			</group>
+			<group name="Other Types">
+				<from type="Byte[]"  >return p == null || p.Length == 0? null: (Byte?)ToByte(p);</from>
 			</group>
 			<default nullvalue="null">
 			if (p is IConvertible) return ((IConvertible)p).ToByte(null);
@@ -695,9 +769,12 @@
 				<from type="Boolean">return p.HasValue? (UInt16?)(p.Value? 1: 0):  null;</from>
 				<default            >return p.HasValue? checked((UInt16?)p.Value): null;</default>
 			</group>
-			<group name="SqlTypes.">
+			<group name="SqlTypes">
 				<include template ="SqlTypes"/>
 				<default            >return p.IsNull? null: ToNullableUInt16(p.Value);</default>
+			</group>
+			<group name="Other Types">
+				<from type="Byte[]" >return p == null || p.Length == 0? null: (UInt16?)ToUInt16(p);</from>
 			</group>
 			<default nullvalue="null">
 			if (p is IConvertible) return ((IConvertible)p).ToUInt16(null);
@@ -719,9 +796,12 @@
 				<from type="Boolean">return p.HasValue? (UInt32?)(p.Value? 1: 0):  null;</from>
 				<default            >return p.HasValue? checked((UInt32?)p.Value): null;</default>
 			</group>
-			<group name="SqlTypes.">
+			<group name="SqlTypes">
 				<include template ="SqlTypes"/>
 				<default            >return p.IsNull? null: ToNullableUInt32(p.Value);</default>
+			</group>
+			<group name="Other Types">
+				<from type="Byte[]" >return p == null || p.Length == 0? null: (UInt32?)ToUInt32(p);</from>
 			</group>
 			<default nullvalue="null">
 			if (p is IConvertible) return ((IConvertible)p).ToUInt32(null);
@@ -743,9 +823,12 @@
 				<from type="Boolean" >return p.HasValue? (UInt64?)(p.Value? 1: 0):  null;</from>
 				<default             >return p.HasValue? checked((UInt64?)p.Value): null;</default>
 			</group>
-			<group name="SqlTypes.">
+			<group name="SqlTypes">
 				<include template ="SqlTypes"/>
 				<default             >return p.IsNull? null: ToNullableUInt64(p.Value);</default>
+			</group>
+			<group name="Other Types">
+				<from type="Byte[]"  >return p == null || p.Length == 0? null: (UInt64?)ToUInt64(p);</from>
 			</group>
 			<default nullvalue="null">
 			if (p is IConvertible) return ((IConvertible)p).ToUInt64(null);
@@ -766,9 +849,12 @@
 				<from type="Boolean"  >return p.HasValue? (Char?)(p.Value? 1: 0)  : null;</from>
 				<default              >return p.HasValue? checked((Char?)p.Value) : null;</default>
 			</group>
-			<group name="SqlTypes.">
+			<group name="SqlTypes">
 				<include template ="SqlTypes"/>
 				<default               >return p.IsNull? null: ToNullableChar(p.Value);</default>
+			</group>
+			<group name="Other Types">
+				<from type="Byte[]"    >return p == null || p.Length == 0? null: (Char?)ToChar(p);</from>
 			</group>
 			<default nullvalue="null">
 			if (p is IConvertible) return ((IConvertible)p).ToChar(null);
@@ -790,10 +876,13 @@
 				<from type="Boolean">return p.HasValue? (Single?)(p.Value? 1.0f: 0.0f):  null;</from>
 				<default            >return p.HasValue? checked((Single?)p.Value): null;</default>
 			</group>
-			<group name="SqlTypes.">
+			<group name="SqlTypes">
 				<from type="SqlSingle" >return p.IsNull? null:         (Single?)p.Value; </from>
 				<include template ="SqlTypes"/>
 				<default             >return p.IsNull? null: ToNullableSingle(p.Value);</default>
+			</group>
+			<group name="Other Types">
+				<from type="Byte[]"  >return p == null || p.Length == 0? null: (Single?)ToSingle(p);</from>
 			</group>
 			<default nullvalue="null">
 			if (p is IConvertible) return ((IConvertible)p).ToSingle(null);
@@ -821,11 +910,14 @@
 				<from type="TimeSpan" >return p.HasValue? (Double?)p.Value.TotalDays: null;</from>
 				<default              >return p.HasValue? checked((Double?)p.Value): null;</default>
 			</group>
-			<group name="SqlTypes.">
+			<group name="SqlTypes">
 				<from type="SqlDouble">return p.IsNull? null:         (Double?)p.Value; </from>
 				<include template ="SqlTypes"/>
 				<from type="SqlDateTime">return p.IsNull? null: (Double?)(p.Value - DateTime.MinValue).TotalDays;</from>
 				<default              >return p.IsNull? null: ToNullableDouble(p.Value);</default>
+			</group>
+			<group name="Other Types">
+				<from type="Byte[]"   >return p == null || p.Length == 0? null: (Double?)ToDouble(p);</from>
 			</group>
 			<default nullvalue="null">
 			if (p is IConvertible) return ((IConvertible)p).ToDouble(null);
@@ -846,10 +938,13 @@
 				<from type="Char"     />
 				<default               >return p.HasValue? (Boolean?)ToBoolean(p.Value): null;</default>
 			</group>
-			<group name="SqlTypes.">
+			<group name="SqlTypes">
 				<from type="SqlBoolean">return p.IsNull? null: (Boolean?)          p.Value; </from>
 				<include template ="SqlTypes"/>
 				<default               >return p.IsNull? null: (Boolean?)ToBoolean(p.Value);</default>
+			</group>
+			<group name="Other Types">
+				<from type="Byte[]"    >return p == null || p.Length == 0? null: (Boolean?)ToBoolean(p);</from>
 			</group>
 			<default nullvalue="null">
 			if (p is IConvertible) return ((IConvertible)p).ToBoolean(null);
@@ -871,11 +966,14 @@
 				<from type="Boolean">return p.HasValue? (Decimal?)(p.Value? 1.0m: 0.0m):  null;</from>
 				<default            >return p.HasValue? checked((Decimal?)p.Value): null;</default>
 			</group>
-			<group name="SqlTypes.">
+			<group name="SqlTypes">
 				<from type="SqlDecimal">return p.IsNull? null:         (Decimal?)p.Value; </from>
 				<from type="SqlMoney"  >return p.IsNull? null:         (Decimal?)p.Value; </from>
 				<include template ="SqlTypes"/>
 				<default               >return p.IsNull? null: ToNullableDecimal(p.Value);</default>
+			</group>
+			<group name="Other Types">
+				<from type="Byte[]"    >return p == null || p.Length == 0? null: (Decimal?)ToDecimal(p);</from>
 			</group>
 			<default nullvalue="null">
 			if (p is IConvertible) return ((IConvertible)p).ToDecimal(null);
@@ -897,11 +995,14 @@
 				<from type="Double"   >return p.HasValue? DateTime.MinValue + TimeSpan.FromDays(p.Value): (DateTime?)null;</from>
 				<from type="DateTimeOffset">return p.HasValue? p.Value.LocalDateTime: (DateTime?)null;</from>
 			</group>
-			<group name="SqlTypes.">
+			<group name="SqlTypes">
 				<from type="SqlDateTime">return p.IsNull? (DateTime?)null:                                               p.Value; </from>
 				<from type="SqlString"  >return p.IsNull? (DateTime?)null:                                    ToDateTime(p.Value);</from>
 				<from type="SqlInt64"   >return p.IsNull? (DateTime?)null: DateTime.MinValue +        TimeSpan.FromTicks(p.Value);</from>
 				<from type="SqlDouble"  >return p.IsNull? (DateTime?)null: DateTime.MinValue + TimeSpan.FromDays(p.Value);</from>
+			</group>
+			<group name="Other Types">
+				<from type="Byte[]"     >return p == null || p.Length == 0? null: (DateTime?)ToDateTime(p);</from>
 			</group>
 			<default nullvalue="null">
 			if (p is IConvertible) return ((IConvertible)p).ToDateTime(null);
@@ -923,11 +1024,14 @@
 				<from type="Double"   >return p.HasValue? DateTimeOffset.MinValue + TimeSpan.FromDays(p.Value): (DateTimeOffset?)null;</from>
 				<from type="DateTime">return p.HasValue? p: null;</from>
 			</group>
-			<group name="SqlTypes.">
+			<group name="SqlTypes">
 				<from type="SqlDateTime">return p.IsNull? (DateTimeOffset?)null:                                               p.Value; </from>
 				<from type="SqlString"  >return p.IsNull? (DateTimeOffset?)null:                                    ToDateTimeOffset(p.Value);</from>
 				<from type="SqlInt64"   >return p.IsNull? (DateTimeOffset?)null: DateTimeOffset.MinValue +        TimeSpan.FromTicks(p.Value);</from>
 				<from type="SqlDouble"  >return p.IsNull? (DateTimeOffset?)null: DateTimeOffset.MinValue + TimeSpan.FromDays(p.Value);</from>
+			</group>
+			<group name="Other Types">
+				<from type="Byte[]"     >return p == null || p.Length == 0? null: (DateTimeOffset?)ToDateTimeOffset(p);</from>
 			</group>
 			<default nullvalue="null">
 			if (p is IConvertible) return ToDateTimeOffset(((IConvertible)p).ToDateTime(null));
@@ -950,11 +1054,14 @@
 				<from type="Double"     >return p.HasValue? TimeSpan.FromDays(p.Value): (TimeSpan?)null;</from>
 			</group>
 
-			<group name="SqlTypes.">
+			<group name="SqlTypes">
 				<from type="SqlString"  >return p.IsNull? (TimeSpan?)null: TimeSpan.Parse(p.Value);    </from>
 				<from type="SqlDateTime">return p.IsNull? (TimeSpan?)null: p.Value - DateTime.MinValue;</from>
 				<from type="SqlInt64"   >return p.IsNull? (TimeSpan?)null: TimeSpan.FromTicks(p.Value);</from>
 				<from type="SqlDouble"  >return p.IsNull? (TimeSpan?)null: TimeSpan.FromDays(p.Value);</from>
+			</group>
+			<group name="Other Types">
+				<from type="Byte[]"     >return p == null || p.Length == 0? null: (TimeSpan?)ToTimeSpan(p);</from>
 			</group>
 			<default nullvalue="null"/>
 		</converter>
@@ -963,7 +1070,7 @@
 				<from type="Guid"     >return p;</from>
 				<from type="String"   >return p == null? null: (Guid?)new Guid(p);</from>
 			</group>
-			<group name="SqlTypes.">
+			<group name="SqlTypes">
 				<from type="SqlGuid"  >return p.IsNull? null: (Guid?)p.Value;            </from>
 				<from type="SqlString">return p.IsNull? null: (Guid?)new Guid(p.Value);  </from>
 				<from type="SqlBinary">return p.IsNull? null: (Guid?)p.ToSqlGuid().Value;</from>
@@ -1000,7 +1107,7 @@
 				<default              >return p.HasValue? p.ToString(): SqlString.Null;</default>
 			</group>
 
-			<group name="SqlTypes.">
+			<group name="SqlTypes">
 				<include template="SqlTypes"/>
 				<from type="SqlChars"/>
 				<from type="SqlXml">return p.IsNull? SqlString.Null: p.Value;</from>
@@ -1008,9 +1115,12 @@
 				<from type="SqlDateTime"/>
 				<default              >return p.ToSqlString();</default>
 			</group>
-			<from type="Type"         >return p == null? SqlString.Null: p.FullName;</from>
-      <from type="XmlDocument"  >return p == null? SqlString.Null: p.InnerXml;</from>
-      <default nullvalue="SqlString.Null" nothrow="true">
+			<group name="Other Types">
+				<from type="Type"       >return p == null? SqlString.Null: p.FullName;</from>
+				<from type="XmlDocument">return p == null? SqlString.Null: p.InnerXml;</from>
+				<from type="Byte[]"     >return p == null || p.Length == 0? SqlString.Null: new SqlString(ToString(p));</from>
+			</group>
+			<default nullvalue="SqlString.Null" nothrow="true">
 			return ToString(p);</default>
 		</converter>
 		<br/>
@@ -1032,10 +1142,13 @@
 				<default              >return p.HasValue? ToByte(p.Value): SqlByte.Null;</default>
 			</group>
 
-			<group name="SqlTypes.">
+			<group name="SqlTypes">
 				<include template="SqlTypes"/>
 				<from type="SqlDateTime">return p.IsNull? SqlByte.Null: ToByte(p.Value);</from>
 				<default              >return p.ToSqlByte();</default>
+			</group>
+			<group name="Other Types">
+				<from type="Byte[]"   >return p == null || p.Length == 0? SqlByte.Null: new SqlByte(ToByte(p));</from>
 			</group>
 			<default nullvalue="SqlByte.Null" nothrow="true">
 			return ToByte(p);</default>
@@ -1058,10 +1171,13 @@
 				<default             >return p.HasValue? ToInt16(p.Value): SqlInt16.Null;</default>
 			</group>
 
-			<group name="SqlTypes.">
+			<group name="SqlTypes">
 				<include template="SqlTypes"/>
 				<from type="SqlDateTime">return p.IsNull? SqlInt16.Null: ToInt16(p.Value);</from>
 				<default                >return p.ToSqlInt16();</default>
+			</group>
+			<group name="Other Types">
+				<from type="Byte[]"     >return p == null || p.Length == 0? SqlInt16.Null: new SqlInt16(ToInt16(p));</from>
 			</group>
 			<default nullvalue="SqlInt16.Null" nothrow="true">
 			return ToInt16(p);</default>
@@ -1084,10 +1200,13 @@
 				<default             >return p.HasValue? ToInt32(p.Value): SqlInt32.Null;</default>
 			</group>
 
-			<group name="SqlTypes.">
+			<group name="SqlTypes">
 				<include template="SqlTypes"/>
 				<from type="SqlDateTime">return p.IsNull? SqlInt32.Null: ToInt32(p.Value);</from>
-				<default              >return p.ToSqlInt32();</default>
+				<default                >return p.ToSqlInt32();</default>
+			</group>
+			<group name="Other Types">
+				<from type="Byte[]"     >return p == null || p.Length == 0? SqlInt32.Null: new SqlInt32(ToInt32(p));</from>
 			</group>
 			<default nullvalue="SqlInt32.Null" nothrow="true">
 			return ToInt32(p);</default>
@@ -1116,10 +1235,13 @@
 				<default             >return p.HasValue? ToInt64(p.Value): SqlInt64.Null;</default>
 			</group>
 
-			<group name="SqlTypes.">
+			<group name="SqlTypes">
 				<include template="SqlTypes"/>
 				<from type="SqlDateTime">return p.IsNull? SqlInt64.Null: ToInt64(p.Value);</from>
 				<default              >return p.ToSqlInt64();</default>
+			</group>
+			<group name="Other Types">
+				<from type="Byte[]"   >return p == null || p.Length == 0? SqlInt64.Null: new SqlInt64(ToInt64(p));</from>
 			</group>
 			<default nullvalue="SqlInt64.Null" nothrow="true">
 			return ToInt64(p);</default>
@@ -1142,9 +1264,12 @@
 				<default             >return p.HasValue? ToSingle(p.Value): SqlSingle.Null;</default>
 			</group>
 
-			<group name="SqlTypes.">
+			<group name="SqlTypes">
 				<include template="SqlTypes"/>
 				<default              >return p.ToSqlSingle();</default>
+			</group>
+			<group name="Other Types">
+				<from type="Byte[]"   >return p == null || p.Length == 0? SqlSingle.Null: new SqlSingle(ToSingle(p));</from>
 			</group>
 			<default nullvalue="SqlSingle.Null" nothrow="true">
 			return ToSingle(p);</default>
@@ -1172,10 +1297,13 @@
 				<default             >return p.HasValue? ToDouble(p.Value): SqlDouble.Null;</default>
 			</group>
 
-			<group name="SqlTypes.">
+			<group name="SqlTypes">
 				<include template="SqlTypes"/>
 				<from type="SqlDateTime">return p.IsNull? SqlDouble.Null: ToDouble(p.Value);</from>
 				<default              >return p.ToSqlDouble();</default>
+			</group>
+			<group name="Other Types">
+				<from type="Byte[]"   >return p == null || p.Length == 0? SqlDouble.Null: new SqlDouble(ToDouble(p));</from>
 			</group>
 			<default nullvalue="SqlDouble.Null" nothrow="true">
 			return ToDouble(p);</default>
@@ -1197,9 +1325,12 @@
 				<default             >return p.HasValue? ToDecimal(p.Value): SqlDecimal.Null;</default>
 			</group>
 
-			<group name="SqlTypes.">
+			<group name="SqlTypes">
 				<include template="SqlTypes"/>
 				<default              >return p.ToSqlDecimal();</default>
+			</group>
+			<group name="Other Types">
+				<from type="Byte[]"   >return p == null || p.Length == 0? SqlDecimal.Null: new SqlDecimal(ToDecimal(p));</from>
 			</group>
 			<default nullvalue="SqlDecimal.Null" nothrow="true">
 			return ToDecimal(p);</default>
@@ -1221,9 +1352,12 @@
 				<default             >return p.HasValue? ToDecimal(p.Value): SqlMoney.Null;</default>
 			</group>
 
-			<group name="SqlTypes.">
+			<group name="SqlTypes">
 				<include template="SqlTypes"/>
 				<default              >return p.ToSqlMoney();</default>
+			</group>
+			<group name="Other Types">
+				<from type="Byte[]"   >return p == null || p.Length == 0? SqlMoney.Null: new SqlMoney(ToDecimal(p));</from>
 			</group>
 			<default nullvalue="SqlMoney.Null" nothrow="true">
 			return ToDecimal(p);</default>
@@ -1246,9 +1380,12 @@
 				<default             >return p.HasValue? ToBoolean(p.Value): SqlBoolean.Null;</default>
 			</group>
 
-			<group name="SqlTypes.">
+			<group name="SqlTypes">
 				<include template="SqlTypes"/>
 				<default              >return p.ToSqlBoolean();</default>
+			</group>
+			<group name="Other Types">
+				<from type="Byte[]"   >return p == null || p.Length == 0? SqlBoolean.Null: new SqlBoolean(ToBoolean(p));</from>
 			</group>
 			<default nullvalue="SqlBoolean.Null" nothrow="true">
 			return ToBoolean(p);</default>
@@ -1273,11 +1410,14 @@
 				<default             >return p.HasValue? ToDateTime(p.Value): SqlDateTime.Null;</default>
 			</group>
 
-			<group name="SqlTypes.">
+			<group name="SqlTypes">
 				<from type="SqlString">return p.ToSqlDateTime();</from>
 				<from type="SqlInt64"/>
 				<from type="SqlDouble"/>
 				<default              >return p.IsNull? SqlDateTime.Null: ToDateTime(p);</default>
+			</group>
+			<group name="Other Types">
+				<from type="Byte[]"   >return p == null || p.Length == 0? SqlDateTime.Null: new SqlDateTime(ToDateTime(p));</from>
 			</group>
 			<default nullvalue="SqlDateTime.Null" nothrow="true">
 			return ToDateTime(p);</default>
@@ -1290,7 +1430,7 @@
 			<group name="Nullable Types." nullable="true">
 				<from type="Guid"    >return p.HasValue? p.Value : SqlGuid.Null;</from>
 			</group>
-			<group name="SqlTypes.">
+			<group name="SqlTypes">
 				<from type="SqlBinary"/>
 				<from type="SqlBytes" >return p.ToSqlBinary().ToSqlGuid();</from>
 				<from type="SqlString"/>
@@ -1311,7 +1451,7 @@
 			<group name="Nullable Types." nullable="true">
 				<from type="Guid"    >return p.HasValue? new SqlGuid(p.Value).ToSqlBinary(): SqlBinary.Null;</from>
 			</group>
-			<group name="SqlTypes.">
+			<group name="SqlTypes">
 				<from type="SqlBytes"/>
 				<from type="SqlGuid"/>
 				<default              >return p.ToSqlBinary();</default>
@@ -1328,7 +1468,7 @@
 			<group name="Nullable Types." nullable="true">
 				<from type="Guid"   >return p.HasValue? new SqlBytes(p.Value.ToByteArray()): SqlBytes.Null;</from>
 			</group>
-			<group name="SqlTypes.">
+			<group name="SqlTypes">
 				<from type="SqlBinary">return p.IsNull? SqlBytes.Null: new SqlBytes(p);</from>
 				<from type="SqlGuid"  >return p.IsNull? SqlBytes.Null: new SqlBytes(p.ToByteArray());</from>
 			</group>
@@ -1339,6 +1479,7 @@
 			<group name="Scalar Types.">
 				<from type="String">return p == null? SqlChars.Null: new SqlChars(p.ToCharArray());</from>
 				<from type="Char[]">return p == null? SqlChars.Null: new SqlChars(p);</from>
+				<from type="Byte[]">return p == null? SqlChars.Null: new SqlChars(ToCharArray(p));</from>
 				<br/>
 				<include template ="Numeric Types"/>
 				<from type="Char"/>
@@ -1359,7 +1500,7 @@
 				<default              >return p.HasValue? new SqlChars(p.ToString().ToCharArray()): SqlChars.Null;</default>
 			</group>
 
-			<group name="SqlTypes.">
+			<group name="SqlTypes">
 				<from type="SqlString">return (SqlChars)p;</from>
 				<include template="SqlTypes"/>
 				<from type="SqlGuid" />
@@ -1383,7 +1524,7 @@
 				<from type="Byte[]"    >return p == null? SqlXml.Null: new SqlXml(new MemoryStream(p));</from>
 				<default               >return p == null? SqlXml.Null: new SqlXml(p);</default>
 			</group>
-			<group name="SqlTypes.">
+			<group name="SqlTypes">
 				<from type="SqlString">return p.IsNull? SqlXml.Null: new SqlXml(new XmlTextReader(new StringReader(p.Value)));</from>
 				<from type="SqlChars" >return p.IsNull? SqlXml.Null: new SqlXml(new XmlTextReader(new StringReader(p.ToSqlString().Value)));</from>
 				<from type="SqlBinary">return p.IsNull? SqlXml.Null: new SqlXml(new MemoryStream(p.Value));</from>
@@ -1392,17 +1533,18 @@
 			<default nullvalue="SqlXml.Null"/>
 		</converter>
 	</region>
-	<region name="Other types">
+	<region name="Other Types">
 		<converter type="Type">
 			<group name="Scalar Types.">
-				<from type="String"   >return p == null      ? null: Type.GetType(p);                  </from>
-				<from type="Char[]"   >return p == null      ? null: Type.GetType(new string(p));      </from>
+				<from type="String"   >return p == null?       null: Type.GetType(p);                  </from>
+				<from type="Char[]"   >return p == null?       null: Type.GetType(new string(p));      </from>
+				<from type="Byte[]"   >return p == null?       null: Type.GetTypeFromCLSID(ToGuid(p)); </from>
 				<from type="Guid"     >return p == Guid.Empty? null: Type.GetTypeFromCLSID(p);         </from>
 			</group>
 			<group name="Nullable Types." nullable="true">
 				<from type="Guid"     >return p.HasValue? Type.GetTypeFromCLSID(p.Value): null;</from>
 			</group>
-			<group name="SqlTypes.">
+			<group name="SqlTypes">
 				<from type="SqlString">return p.IsNull       ? null: Type.GetType(p.Value);            </from>
 				<from type="SqlChars" >return p.IsNull       ? null: Type.GetType(new string(p.Value));</from>
 				<from type="SqlGuid"  >return p.IsNull       ? null: Type.GetTypeFromCLSID(p.Value);   </from>
@@ -1417,7 +1559,7 @@
 			<group name="Nullable Types." nullable="true">
 				<from type="Guid"     >return p.HasValue? new MemoryStream(p.Value.ToByteArray()): Stream.Null;</from>
 			</group>
-			<group name="SqlTypes.">
+			<group name="SqlTypes">
 				<from type="SqlBytes" >return p.IsNull? Stream.Null: p.Stream;                 </from>
 				<from type="SqlBinary">return p.IsNull? Stream.Null: new MemoryStream(p.Value);</from>
 				<from type="SqlGuid"  >return p.IsNull? Stream.Null: new MemoryStream(p.Value.ToByteArray());</from>
@@ -1450,13 +1592,15 @@
 			p.Position = position;
 
 			return bytes;</from>
+				<from type="Char[]" >
+			Byte[] bytes = new Byte[Buffer.ByteLength(p)];
+
+			Buffer.BlockCopy(p, 0, bytes, 0, bytes.Length);
+			return bytes;</from>
 				<from type="Guid"   >return p == Guid.Empty? null: p.ToByteArray();</from>
 				<default              >return BitConverter.GetBytes(p);</default>
 			</group>
 			<group name="Nullable Types." nullable="true">
-				<from type="Byte"   />
-				<from type="SByte"  />
-				<from type="Decimal"/>
 				<include template="Numeric Types"/>
 				<from type="Char" />
 				<from type="DateTime" />
@@ -1465,7 +1609,7 @@
 				<from type="Guid"     />
 				<default              >return p.HasValue? ToByteArray(p.Value): null;</default>
 			</group>
-			<group name="SqlTypes.">
+			<group name="SqlTypes">
 				<from type="SqlBinary">return p.IsNull? null: p.Value;</from>
 				<from type="SqlBytes" >return p.IsNull? null: p.Value;</from>
 				<from type="SqlGuid"  >return p.IsNull? null: p.ToByteArray();</from>
@@ -1478,10 +1622,18 @@
 			<group name="Scalar Types.">
 				<from type="String" >return p == null? null: p.ToCharArray();</from>
 			</group>
-			<group name="SqlTypes.">
+			<group name="SqlTypes">
 				<from type="SqlString" >return p.IsNull? null: p.Value.ToCharArray();</from>
 				<from type="SqlChars"  >return p.IsNull? null: p.Value;</from>
 			</group>
+			<from type="Byte[]" >
+				if (p == null) return null;
+
+				Char[] chars = new Char[p.Length / sizeof(Char)];
+
+				Buffer.BlockCopy(p, 0, chars, 0, p.Length);
+				return chars;
+			</from>
 			<default nullvalue="null" nothrow="true">
 			return ToString(p).ToCharArray();</default>
 		</converter>
@@ -1489,7 +1641,7 @@
 			<group name="Scalar Types.">
 				<from type="String"    >return p == null? null: new XmlTextReader(new StringReader(p));</from>
 			</group>
-			<group name="SqlTypes.">
+			<group name="SqlTypes">
 				<from type="SqlXml"   >return p.IsNull? null: p.CreateReader();</from>
 				<from type="SqlString">return p.IsNull? null: new XmlTextReader(new StringReader(p.Value));</from>
 				<from type="SqlChars" >return p.IsNull? null: new XmlTextReader(new StringReader(p.ToSqlString().Value));</from>
@@ -1516,7 +1668,7 @@
 			doc.LoadXml(p);
 			return doc;</from>
 			</group>
-			<group name="SqlTypes.">
+			<group name="SqlTypes">
 				<from type="SqlString"/>
 				<from type="SqlXml"   />
 				<from type="SqlChars" >return p.IsNull? null: ToXmlDocument(p.ToSqlString().Value);</from>

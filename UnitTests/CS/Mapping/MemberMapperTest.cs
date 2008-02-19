@@ -36,7 +36,7 @@ namespace Mapping
 			om.SetValue(o, "Dow1",  de);
 			om.SetValue(o, "Dow2",  di);
 
-			Assert.AreEqual(124,    om.GetValue(o, "Int32"));
+			Assert.AreEqual(123,    om.GetValue(o, "Int32"));
 			Assert.AreEqual(de,     om.GetValue(o, "Dow1"));
 			Assert.AreEqual(de,     om.GetValue(o, "Dow2"));
 			Assert.IsTrue  (Math.Abs(123.57 - (float)om.GetValue(o, "Float")) < 0.0001);
@@ -106,7 +106,7 @@ namespace Mapping
 			ObjectMapper<Object2>.SetValue(o, "Dow2",  di);
 
 			Assert.AreEqual(125, o.Int16);
-			Assert.AreEqual(124, o.Int32);
+			Assert.AreEqual(123, o.Int32);
 			Assert.IsNull  (     o.Int64);
 			Assert.AreEqual(g,   o.Guid);
 			Assert.AreEqual(de,  o.Dow1);
@@ -114,7 +114,7 @@ namespace Mapping
 			Assert.IsTrue  (Math.Abs(123.57 - o.Float.Value) < 0.0001);
 
 			Assert.AreEqual(125,    ObjectMapper<Object2>.GetValue(o, "Int16"));
-			Assert.AreEqual(124,    ObjectMapper<Object2>.GetValue(o, "Int32"));
+			Assert.AreEqual(123,    ObjectMapper<Object2>.GetValue(o, "Int32"));
 			Assert.IsNull  (        ObjectMapper<Object2>.GetValue(o, "Int64"));
 			Assert.AreEqual(g,      ObjectMapper<Object2>.GetValue(o, "Guid"));
 			Assert.AreEqual(de,     ObjectMapper<Object2>.GetValue(o, "Dow1"));
@@ -138,10 +138,10 @@ namespace Mapping
 			om.SetValue(o, "Int32",  123.56);
 			om.SetValue(o, "Single", 123.57.ToString(CultureInfo.InvariantCulture));
 
-			Assert.AreEqual(124,     o.Int32. Value);
+			Assert.AreEqual(123,     o.Int32. Value);
 			Assert.AreEqual(123.57f, o.Single.Value);
 
-			Assert.AreEqual(124,     om.GetValue(o, "Int32"));
+			Assert.AreEqual(123,     om.GetValue(o, "Int32"));
 			Assert.AreEqual(123.57f, om.GetValue(o, "Single"));
 		}
 

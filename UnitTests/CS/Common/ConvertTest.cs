@@ -129,6 +129,53 @@ namespace Common
 		}
 
 		[Test]
+		public void ByteArrayTest()
+		{
+			Byte[] bytes;
+			object value;
+
+			bytes = new byte[] {123};
+			value = (byte)123;
+			Assert.AreEqual(bytes, Convert.ToByteArray(value));
+			Assert.AreEqual(value, Convert.ToByte(bytes));
+
+			bytes = new byte[] {123, 0};
+			value = (short)123;
+			Assert.AreEqual(bytes, Convert.ToByteArray(value));
+			Assert.AreEqual(value, Convert.ToInt16(bytes));
+
+			bytes = new byte[] {210, 2, 150, 73};
+			value = 1234567890;
+			Assert.AreEqual(bytes, Convert.ToByteArray(value));
+			Assert.AreEqual(value, Convert.ToInt32(bytes));
+
+			bytes = new byte[] {(byte) 't', (byte) 's', (byte) 't'};
+			value = "tst";
+			Assert.AreEqual(bytes, Convert.ToByteArray(value));
+			Assert.AreEqual(value, Convert.ToString(bytes));
+
+			bytes = new byte[] {12, 0, 0, 0, 0, 0, 0, 0, 192, 0, 0, 0, 0, 0, 0, 70};
+			value = typeof(System.Runtime.InteropServices.ComTypes.IStream).GUID;
+			Assert.AreEqual(bytes, Convert.ToByteArray(value));
+			Assert.AreEqual(value, Convert.ToGuid(bytes));
+
+			bytes = new byte[] {210, 10, 31, 235, 140, 169, 84, 171, 0, 0, 0, 0, 0, 0, 0, 0};
+			value = 12345678901234567890m;
+			Assert.AreEqual(bytes, Convert.ToByteArray(value));
+			Assert.AreEqual(value, Convert.ToDecimal(bytes));
+
+			bytes = new byte[] {121, 233, 246, 66};
+			value = 123.456f;
+			Assert.AreEqual(bytes, Convert.ToByteArray(value));
+			Assert.AreEqual(value, Convert.ToSingle(bytes));
+
+			bytes = new byte[] {119, 190, 159, 26, 47, 221, 94, 64};
+			value = 123.456;
+			Assert.AreEqual(bytes, Convert.ToByteArray(value));
+			Assert.AreEqual(value, Convert.ToDouble(bytes));
+		}
+
+		[Test]
 		public void ConvertT()
 		{
 			decimal d = ConvertTo<decimal>.From(123);

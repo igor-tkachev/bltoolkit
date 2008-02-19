@@ -84,7 +84,7 @@
 	</xsl:template>
 
 	<xsl:template match="code">
-		<xsl:apply-templates select="using"/>
+		<xsl:apply-templates select="using|br"/>
 		<xsl:value-of select="$lf"/>
 		<xsl:text>namespace </xsl:text>
 		<xsl:value-of select="$namespace"/>
@@ -115,6 +115,9 @@
 	<!-- the class definition -->
 	<xsl:template name="class">
 		<xsl:value-of select="$t1"/>
+		<xsl:text>/// &lt;summary&gt;Converts a base data type to another base data type.&lt;/summary&gt;</xsl:text>
+		<xsl:value-of select="$lf"/>
+		<xsl:value-of select="$t1"/>
 		<xsl:text>public class Convert</xsl:text>
 		<xsl:value-of select="$lf"/>
 		<xsl:value-of select="$t1"/>
@@ -126,13 +129,16 @@
 
 		<xsl:value-of select="$lf"/>
 		<xsl:value-of select="$t2"/>
-		<xsl:text>private static InvalidCastException CreateInvalidCastException(Type originalType, Type conversionType)</xsl:text>
+		<xsl:text>private static Exception CreateInvalidCastException(Type originalType, Type conversionType)</xsl:text>
 		<xsl:value-of select="$lf"/>
 		<xsl:value-of select="$t2"/>
 		<xsl:text>{</xsl:text>
 		<xsl:value-of select="$lf"/>
 		<xsl:value-of select="$t3"/>
-		<xsl:text>return new InvalidCastException(string.Format("Invalid cast from {0} to {1}", originalType.FullName, conversionType.FullName));</xsl:text>
+		<xsl:text>return new InvalidCastException(string.Format(</xsl:text>
+		<xsl:value-of select="$lf"/>
+		<xsl:value-of select="$t4"/>
+		<xsl:text>Resources.Convert_InvalidCast, originalType.FullName, conversionType.FullName));</xsl:text>
 		<xsl:value-of select="$lf"/>
 		<xsl:value-of select="$t2"/>
 		<xsl:text>}</xsl:text>
@@ -199,6 +205,12 @@
 			<xsl:with-param name="tonullable" select="$tonullable"/>
 			<xsl:with-param name="code" select="default/text()"/>
 		</xsl:apply-templates>
+
+		<xsl:value-of select="$t2"/>
+		<xsl:text>/// &lt;summary&gt;Converts the value of a specified object to an equivalent &lt;c&gt;</xsl:text>
+		<xsl:value-of select="$fulltype"/>
+		<xsl:text>&lt;/c&gt; value.&lt;/summary&gt;</xsl:text>
+		<xsl:value-of select="$lf"/>
 
 		<xsl:if test="$notclscompliant">
 			<xsl:value-of select="$t2"/>
@@ -335,6 +347,24 @@
 		</xsl:call-template>
 	</xsl:template>
 
+	<xsl:template match="include" mode="runtime">
+		<xsl:param name="totype"/>
+		<xsl:param name="toname"/>
+		<xsl:param name="tonullable"/>
+		<xsl:param name="fromnullable"/>
+		<xsl:param name="default"/>
+		<xsl:param name="group"/>
+		<xsl:call-template name="includeruntime">
+			<xsl:with-param name="totype"       select="$totype"/>
+			<xsl:with-param name="toname"       select="$toname"/>
+			<xsl:with-param name="tonullable"   select="$tonullable"/>
+			<xsl:with-param name="fromnullable" select="$fromnullable"/>
+			<xsl:with-param name="group"        select="$group"/>
+			<xsl:with-param name="default"      select="$default"/>
+			<xsl:with-param name="template"     select="@template"/>
+		</xsl:call-template>
+	</xsl:template>
+
 	<xsl:template name="includebody">
 		<xsl:param name="fromnullable"/>
 		<xsl:param name="totype"/>
@@ -366,6 +396,47 @@
 						<xsl:with-param name="tonullable"   select="$tonullable"/>
 						<xsl:with-param name="group"        select="$group"/>
 						<xsl:with-param name="code"         select="$code"/>
+						<xsl:with-param name="template"     select="@template"/>
+					</xsl:call-template>
+				</xsl:when>
+				<xsl:when test="name()='br'">
+					<xsl:value-of select="$lf"/>
+				</xsl:when>
+			</xsl:choose>
+		</xsl:for-each>
+	</xsl:template>
+
+	<xsl:template name="includeruntime">
+		<xsl:param name="totype"/>
+		<xsl:param name="toname"/>
+		<xsl:param name="tonullable"/>
+		<xsl:param name="fromnullable"/>
+		<xsl:param name="group"/>
+		<xsl:param name="default"/>
+		<xsl:param name="template"/>
+		<xsl:for-each select="/code/template[@name=$template]/*">
+			<xsl:choose>
+				<xsl:when test="name()='type'">
+					<xsl:variable name ="fromtype" select="@name"/>
+					<xsl:if test="not($fromtype=$totype and $fromnullable=$tonullable) and not($group/from[@type=$fromtype])">
+						<xsl:call-template name="fromruntime">
+							<xsl:with-param name="fromtype"     select="$fromtype"/>
+							<xsl:with-param name="fromnullable" select="$fromnullable"/>
+							<xsl:with-param name="totype"       select="$totype"/>
+							<xsl:with-param name="toname"       select="$toname"/>
+							<xsl:with-param name="tonullable"   select="$tonullable"/>
+							<xsl:with-param name="default"      select="$default"/>
+						</xsl:call-template>
+					</xsl:if>
+				</xsl:when>
+				<xsl:when test="name()='include'">
+					<xsl:call-template name="includeruntime">
+						<xsl:with-param name="fromnullable" select="$fromnullable"/>
+						<xsl:with-param name="totype"       select="$totype"/>
+						<xsl:with-param name="toname"       select="$toname"/>
+						<xsl:with-param name="tonullable"   select="$tonullable"/>
+						<xsl:with-param name="group"        select="$group"/>
+						<xsl:with-param name="default"      select="$default"/>
 						<xsl:with-param name="template"     select="@template"/>
 					</xsl:call-template>
 				</xsl:when>
@@ -408,6 +479,15 @@
 			<xsl:value-of select="$fromcondition"/>
 			<xsl:value-of select="$lf"/>
 		</xsl:if>
+
+		<xsl:value-of select="$t2"/>
+		<xsl:text>/// &lt;summary&gt;Converts the value from &lt;c&gt;</xsl:text>
+		<xsl:value-of select="$fromfulltype"/>
+		<xsl:text>&lt;/c&gt; to an equivalent &lt;c&gt;</xsl:text>
+		<xsl:value-of select="$tofulltype"/>
+		<xsl:text>&lt;/c&gt; value.&lt;/summary&gt;</xsl:text>
+		<xsl:value-of select="$lf"/>
+
 		<xsl:if test="$notclscompliant">
 			<xsl:value-of select="$t2"/>
 			<xsl:text>[CLSCompliant(false)]</xsl:text>
@@ -450,15 +530,34 @@
 		<xsl:value-of select="$lf"/>
 	</xsl:template>
 
-	<!-- runtime -->
 	<xsl:template match="from" mode="runtime">
 		<xsl:param name="totype"/>
 		<xsl:param name="toname"/>
 		<xsl:param name="tonullable"/>
 		<xsl:param name="fromnullable"/>
 		<xsl:param name="default"/>
+		<xsl:call-template name="fromruntime">
+			<xsl:with-param name="fromtype"     select="@type"/>
+			<xsl:with-param name="fromnullable" select="$fromnullable"/>
+			<xsl:with-param name="totype"       select="$totype"/>
+			<xsl:with-param name="toname"       select="$toname"/>
+			<xsl:with-param name="tonullable"   select="$tonullable"/>
+			<xsl:with-param name="template"     select="@template"/>
+			<xsl:with-param name="default"      select="@default"/>
+		</xsl:call-template>
+	</xsl:template>
+
+
+	<!-- runtime -->
+	<xsl:template name="fromruntime">
+		<xsl:param name="fromtype"/>
+		<xsl:param name="totype"/>
+		<xsl:param name="toname"/>
+		<xsl:param name="tonullable"/>
+		<xsl:param name="fromnullable"/>
+		<xsl:param name="default"/>
 		<xsl:variable name="fromfullname">
-			<xsl:value-of select="@type"/>
+			<xsl:value-of select="$fromtype"/>
 			<xsl:if test="$fromnullable">
 				<xsl:text>?</xsl:text>
 			</xsl:if>
@@ -531,12 +630,13 @@
 			<xsl:text>//</xsl:text>
 		</xsl:if>
 		<xsl:value-of select="$lf"/>
-		<xsl:apply-templates select="group|from|br" mode ="runtime">
+		<xsl:apply-templates select="group|from|br|include" mode ="runtime">
 			<xsl:with-param name="totype"       select="$totype"/>
 			<xsl:with-param name="toname"       select="$toname"/>
 			<xsl:with-param name="tonullable"   select="$tonullable"/>
 			<xsl:with-param name="fromnullable" select="$fromnullablelocal"/>
 			<xsl:with-param name="default"      select="$defaultcode"/>
+			<xsl:with-param name="group"        select="."/>
 		</xsl:apply-templates>
     </xsl:if>
 
@@ -562,7 +662,7 @@
     <xsl:text>)p;</xsl:text>
     <xsl:value-of select="$lf"/>
     <xsl:if test="not(@noruntime) and @nullvalue">
-			<xsl:apply-templates select="../from|../group|../br" mode="runtime">
+			<xsl:apply-templates select="../from|../group|../br|../include" mode="runtime">
 				<xsl:with-param name="totype"     select="../@type"/>
 				<xsl:with-param name="toname">
 					<xsl:choose>

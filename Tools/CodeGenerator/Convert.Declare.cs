@@ -50,3 +50,11 @@ namespace BLToolkit.Common
 	{
 	}
 }
+
+namespace BLToolkit.Properties
+{
+	public class Resources
+	{
+		public const string Convert_InvalidCast = "{0} {1}";
+	}
+}

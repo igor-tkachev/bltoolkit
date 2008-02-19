@@ -61,6 +61,15 @@ namespace BLToolkit.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Invalid cast from {0} to {1}.
+        /// </summary>
+        internal static string Convert_InvalidCast {
+            get {
+                return ResourceManager.GetString("Convert_InvalidCast", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to DataSet must be initialized before calling Update routine. Cannot update database from a null dataset..
         /// </summary>
         internal static string DbManager_CannotUpdateNullDataset {
