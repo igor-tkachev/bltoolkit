@@ -6,6 +6,7 @@ Breaking changes
 Bug fixes
 - EmitHelper.ldc_i4_ emits wrong opcode for numbers from 128 till 255 (bug in msdn)
 - Some opcodes were not implemented.
+- MappingSchema.MapResultSets fails with NullReferenceException when no data returned.
 
 Enhancement
 - DateTimeOffset type support.
@@ -13,6 +14,7 @@ Enhancement
 - Named arguments support for GenerateAttributeTypeBuilder.
 - Extended support for IsNull & Nullable types in MemberAccessor.
 - Support for enum values in EmitHelper.LoadWellKnownValue/LoadInitValue and so on.
+- Generic GetValue/SetValue methods for ValueHolders.
 
 v 2.0.7
 

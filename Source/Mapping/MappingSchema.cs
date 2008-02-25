@@ -3438,7 +3438,12 @@ namespace BLToolkit.Mapping
 						foreach (object o in slave.List)
 						{
 							object key = r.SlaveIndex.GetValueOrIndex(slave.ObjectMapper, o);
-							foreach (object master in (ArrayList)rs.Hashtable[key])
+
+							ArrayList masterList = (ArrayList)rs.Hashtable[key];
+							if (masterList == null)
+								continue;
+
+							foreach (object master in masterList)
 							{
 								object container = ma.GetValue(master);
 

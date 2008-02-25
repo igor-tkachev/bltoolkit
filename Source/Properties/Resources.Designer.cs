@@ -194,5 +194,23 @@ namespace BLToolkit.Properties {
                 return ResourceManager.GetString("EmitHelper_NotExpectedType", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The &apos;{0}&apos; type does not have appropriate getter. See &apos;{1}&apos; member &apos;{2}&apos; of &apos;{3}&apos; type..
+        /// </summary>
+        internal static string InstanceTypeBuilder_CannotGetGetter {
+            get {
+                return ResourceManager.GetString("InstanceTypeBuilder_CannotGetGetter", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The &apos;{0}&apos; type does not have appropriate setter. See &apos;{1}&apos; member &apos;{2}&apos; of &apos;{3}&apos; type..
+        /// </summary>
+        internal static string InstanceTypeBuilder_CannotGetSetter {
+            get {
+                return ResourceManager.GetString("InstanceTypeBuilder_CannotGetSetter", resourceCulture);
+            }
+        }
     }
 }

@@ -515,7 +515,10 @@ namespace BLToolkit.TypeBuilder.Builders
 					emit
 						.stloc(locObj)
 						.ldloca(locObj)
-						.call(memberType, "get_HasValue");
+						.call(memberType, "get_HasValue")
+						.ldc_i4_0
+						.ceq
+						.end();
 				}
 				else
 				{

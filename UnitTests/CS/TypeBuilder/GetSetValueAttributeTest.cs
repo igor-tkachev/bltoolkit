@@ -1,5 +1,5 @@
 using System;
-
+using System.Reflection;
 using NUnit.Framework;
 
 using BLToolkit.Reflection;
@@ -89,5 +89,63 @@ namespace TypeBuilder
 			o.DayValue = DayOfWeek.Thursday;
 			Assert.AreEqual(DayOfWeek.Thursday, o.DayValue);
 		}
+
+		public struct ValueBox<T>
+		{
+			public ValueBox(InitContext ctx)
+			{
+				_value = (T)ctx.MemberParameters[0];
+			}
+
+			private T _value;
+
+			[GetValue] public T    GetValue()        { return _value;  }
+			[SetValue] public void SetValue(T value) { _value = value; }
+		}
+
+		public struct ValueBox2<T>
+		{
+			private T _value;
+
+			[GetValue] public T    GetValue(TestObject2 parent)     { return _value;  }
+			[SetValue] public void SetValue(T value, object parent) { _value = value; }
+		}
+
+		public struct ValueBox3<T>
+		{
+			private T _value;
+
+			[GetValue] public T    GetValue(object parent, PropertyInfo pi)               { return _value;  }
+			[SetValue] public void SetValue(T value, TestObject2 parent, PropertyInfo pi) { _value = value; }
+		}
+
+		public abstract class TestObject2
+		{
+			[InstanceType(typeof(ValueBox<int>), 27)]
+			public abstract int    IntValue   { get; set; }
+			[InstanceType(typeof(ValueBox2<float>))]
+			public abstract float  FloatValue { get; set; }
+			[InstanceType(typeof(ValueBox3<string>))]
+			public abstract string StrValue   { get; set; }
+		}
+
+		[Test]
+		public void MethodTest()
+		{
+			TestObject2 o = TypeAccessor.CreateInstance<TestObject2>();
+
+			Assert.AreEqual(27, o.IntValue);
+			o.IntValue += 8;
+			Assert.AreEqual(35, o.IntValue);
+
+			o.FloatValue = 0.1f;
+			o.FloatValue *= 2.0f;
+			Assert.AreEqual(0.2f, o.FloatValue);
+
+			o.StrValue = "foo";
+			o.StrValue += "Bar";
+			Assert.AreEqual("fooBar", o.StrValue);
+		}
+
 	}
 }

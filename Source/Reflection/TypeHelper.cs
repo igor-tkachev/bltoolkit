@@ -11,10 +11,10 @@ using BLToolkit.EditableObjects;
 
 namespace BLToolkit.Reflection
 {
-	[System.Diagnostics.DebuggerDisplay("Type = {Type}")]
 	/// <summary>
 	/// A wrapper around the <see cref="Type"/> class.
 	/// </summary>
+	[System.Diagnostics.DebuggerDisplay("Type = {Type}")]
 	public class TypeHelper
 	{
 		/// <summary>
@@ -272,7 +272,7 @@ namespace BLToolkit.Reflection
 		/// <param name="type">A type instance.</param>
 		/// <param name="attributeType">The type of attribute to search for.
 		/// Only attributes that are assignable to this type are returned.</param>
-		/// <returns>A reference to the first custom attribute of type attributeType
+		/// <returns>A reference to the first custom attribute of type <paramref name="attributeType"/>
 		/// that is applied to element, or null if there is no such attribute.</returns>
 		public static Attribute GetFirstAttribute(Type type, Type attributeType)
 		{
@@ -642,7 +642,8 @@ namespace BLToolkit.Reflection
 		/// <summary>
 		/// Returns all the public fields of the current Type.
 		/// </summary>
-		/// <returns>An array of FieldInfo objects representing all the public fields defined for the current Type.</returns>
+		/// <returns>An array of <see cref="FieldInfo"/> objects representing
+		/// all the public fields defined for the current Type.</returns>
 		public FieldInfo[] GetFields()
 		{
 			return _type.GetFields();
@@ -653,7 +654,8 @@ namespace BLToolkit.Reflection
 		/// </summary>
 		/// <param name="bindingFlags">A bitmask comprised of one or more <see cref="BindingFlags"/> 
 		/// that specify how the search is conducted.</param>
-		/// <returns>An array of FieldInfo objects representing all fields of the current Type
+		/// <returns>An array of <see cref="FieldInfo"/> objects representing
+		/// all fields of the current Type
 		/// that match the specified binding constraints.</returns>
 		public FieldInfo[] GetFields(BindingFlags bindingFlags)
 		{
@@ -679,7 +681,8 @@ namespace BLToolkit.Reflection
 		/// <summary>
 		/// Returns all the public properties of the current Type.
 		/// </summary>
-		/// <returns>An array of PropertyInfo objects representing all public properties of the current Type.</returns>
+		/// <returns>An array of <see cref="PropertyInfo"/> objects representing
+		/// all public properties of the current Type.</returns>
 		public PropertyInfo[] GetProperties()
 		{
 			return _type.GetProperties();
@@ -690,7 +693,8 @@ namespace BLToolkit.Reflection
 		/// </summary>
 		/// <param name="bindingFlags">A bitmask comprised of one or more <see cref="BindingFlags"/> 
 		/// that specify how the search is conducted.</param>
-		/// <returns>An array of PropertyInfo objects representing all properties of the current Type
+		/// <returns>An array of <see cref="PropertyInfo"/> objects representing
+		/// all properties of the current Type
 		/// that match the specified binding constraints.</returns>
 		public PropertyInfo[] GetProperties(BindingFlags bindingFlags)
 		{
@@ -754,7 +758,7 @@ namespace BLToolkit.Reflection
 		/// <param name="interfaceType">The <see cref="System.Type"/>
 		/// of the interface of which to retrieve a mapping.</param>
 		/// <returns>An <see cref="InterfaceMapping"/> object representing the interface
-		/// mapping for interfaceType.</returns>
+		/// mapping for <paramref name="interfaceType"/>.</returns>
 		public InterfaceMapping GetInterfaceMap(Type interfaceType)
 		{
 			return _type.GetInterfaceMap(interfaceType);
@@ -893,7 +897,7 @@ namespace BLToolkit.Reflection
 		/// <returns><list>
 		/// <item>The type argument of the type parameter,
 		/// if the type parameter is a closed generic nullable type.</item>
-		/// <item>The underlying Type of enumType, if the type parameter is an enum type.</item>
+		/// <item>The underlying Type if the type parameter is an enum type.</item>
 		/// <item>Otherwise, the type itself.</item>
 		/// </list>
 		/// </returns>
@@ -913,7 +917,7 @@ namespace BLToolkit.Reflection
 		/// <summary>
 		/// Determines whether the specified types are considered equal.
 		/// </summary>
-		/// <param name="type">A <see cref="System.Type"/> instance. </param>
+		/// <param name="parent">A <see cref="System.Type"/> instance. </param>
 		/// <param name="child">A type possible derived from the <c>parent</c> type</param>
 		/// <returns>True, when an object instance of the type <c>child</c>
 		/// can be used as an object of the type <c>parent</c>; otherwise, false.</returns>
@@ -992,6 +996,44 @@ namespace BLToolkit.Reflection
 			
 		}
 
+		/// <summary>
+		/// Searches for the method defined for a <see cref="System.Type"/>,
+		/// using the specified name and binding flags.
+		/// </summary>
+		/// <param name="type">A <see cref="System.Type"/> instance. </param>
+		/// <param name="methodName">The String containing the name of the method to get.</param>
+		/// <param name="requiredParametersCount">Number of required (non optional)
+		/// parameter types.</param>
+		/// <param name="bindingFlags">A bitmask comprised of one or more <see cref="BindingFlags"/> 
+		/// that specify how the search is conducted.</param>
+		/// <param name="parameterTypes">An array of <see cref="System.Type"/> objects representing
+		/// the number, order, and type of the parameters for the method to get.-or-
+		/// An empty array of the type <see cref="System.Type"/> (for example, <see cref="System.Type.EmptyTypes"/>)
+		/// to get a method that takes no parameters.</param>
+		/// <returns>A <see cref="MethodInfo"/> object representing the method
+		/// that matches the specified requirements, if found; otherwise, null.</returns>
+		public static MethodInfo GetMethod(
+			Type          type,
+			string        methodName,
+			BindingFlags  bindingFlags,
+			int           requiredParametersCount,
+			params Type[] parameterTypes)
+		{
+			while (parameterTypes.Length >= requiredParametersCount)
+			{
+				MethodInfo method = type.GetMethod(methodName, parameterTypes);
+				if (null != method)
+					return method;
+
+				if (parameterTypes.Length == 0)
+					break;
+
+				Array.Resize(ref parameterTypes, parameterTypes.Length - 1);
+			}
+
+			return null;
+		}
+
 		[SuppressMessage("Microsoft.Design", "CA1011:ConsiderPassingBaseTypesAsParameters")]
 		public static object[] GetPropertyParameters(PropertyInfo propertyInfo)
 		{
@@ -1043,6 +1085,11 @@ namespace BLToolkit.Reflection
 				null);
 		}
 
+		///<summary>
+		/// Gets the Type of a list item.
+		///</summary>
+		/// <param name="list">A <see cref="System.Object"/> instance. </param>
+		///<returns>The Type instance that represents the exact runtime type of a list item.</returns>
 		public static Type GetListItemType(object list)
 		{
 			Type typeOfObject = typeof(object);
@@ -1110,6 +1157,11 @@ namespace BLToolkit.Reflection
 			return typeOfObject;
 		}
 
+		///<summary>
+		/// Gets the Type of a list item.
+		///</summary>
+		/// <param name="listType">A <see cref="System.Type"/> instance. </param>
+		///<returns>The Type instance that represents the exact runtime type of a list item.</returns>
 		public static Type GetListItemType(Type listType)
 		{
 			if (listType.IsGenericType)
@@ -1169,6 +1221,14 @@ namespace BLToolkit.Reflection
 				|| type == typeof(XmlDocument);
 		}
 
+		///<summary>
+		/// Returns an array of Type objects that represent the type arguments
+		/// of a generic type or the type parameters of a generic type definition.
+		///</summary>
+		/// <param name="type">A <see cref="System.Type"/> instance.</param>
+		///<param name="baseType">Non generic base type.</param>
+		///<returns>An array of Type objects that represent the type arguments
+		/// of a generic type. Returns an empty array if the current type is not a generic type.</returns>
 		public static Type[] GetGenericArguments(Type type, Type baseType)
 		{
 			string baseTypeName = baseType.Name;
@@ -1184,12 +1244,24 @@ namespace BLToolkit.Reflection
 			return null;
 		}
 
-		public static Type TranslateGenericParameters(Type type, Type[] genParams)
+		/// <summary>
+		/// Substitutes the elements of an array of types for the type parameters
+		/// of the current generic type definition and returns a Type object
+		/// representing the resulting constructed type.
+		/// </summary>
+		/// <param name="type">A <see cref="System.Type"/> instance.</param>
+		/// <param name="typeArguments">An array of types to be substituted for
+		/// the type parameters of the current generic type.</param>
+		/// <returns>A Type representing the constructed type formed by substituting
+		/// the elements of <paramref name="typeArguments"/> for the type parameters
+		/// of the current generic type.</returns>
+		/// <seealso cref="System.Type.MakeGenericType"/>
+		public static Type TranslateGenericParameters(Type type, Type[] typeArguments)
 		{
 			// 'T paramName' case
 			//
 			if (type.IsGenericParameter)
-				return genParams[type.GenericParameterPosition];
+				return typeArguments[type.GenericParameterPosition];
 
 			// 'List<T> paramName' or something like that.
 			//
@@ -1198,7 +1270,7 @@ namespace BLToolkit.Reflection
 				Type[] genArgs = type.GetGenericArguments();
 
 				for (int i = 0; i < genArgs.Length; ++i)
-					genArgs[i] = TranslateGenericParameters(genArgs[i], genParams);
+					genArgs[i] = TranslateGenericParameters(genArgs[i], typeArguments);
 
 				return type.GetGenericTypeDefinition().MakeGenericType(genArgs);
 			}

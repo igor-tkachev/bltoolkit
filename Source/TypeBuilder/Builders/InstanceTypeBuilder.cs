@@ -1,7 +1,7 @@
 using System;
 using System.Reflection;
 using System.Reflection.Emit;
-
+using BLToolkit.Properties;
 using BLToolkit.Reflection;
 using BLToolkit.Reflection.Emit;
 
@@ -84,13 +84,29 @@ namespace BLToolkit.TypeBuilder.Builders
 
 				memberType = pi.PropertyType;
 			}
-			else
+			else if (getter is FieldInfo)
 			{
 				FieldInfo fi = (FieldInfo)getter;
 
 				emit.ldfld(fi);
 
 				memberType = fi.FieldType;
+			}
+			else
+			{
+				MethodInfo      mi    = (MethodInfo)getter;
+				ParameterInfo[] parms = mi.GetParameters();
+
+				if (parms.Length > 0)
+					emit.ldarg_0.end();
+
+				if (parms.Length > 1)
+					emit.ldsfld(GetPropertyInfoField()).end();
+
+				if (InstanceType.IsValueType) emit.call    (mi);
+				else                          emit.callvirt(mi);
+
+				memberType = mi.ReturnType;
 			}
 
 			if (propertyType.IsValueType)
@@ -129,7 +145,7 @@ namespace BLToolkit.TypeBuilder.Builders
 				if (InstanceType.IsValueType) emit.call    (pi.GetSetMethod());
 				else                          emit.callvirt(pi.GetSetMethod());
 			}
-			else
+			else if (setter is FieldInfo)
 			{
 				FieldInfo fi = (FieldInfo)setter;
 
@@ -138,14 +154,32 @@ namespace BLToolkit.TypeBuilder.Builders
 
 				emit.stfld(fi);
 			}
+			else
+			{
+				MethodInfo      mi    = (MethodInfo)setter;
+				ParameterInfo[] parms = mi.GetParameters();
+
+				if (propertyType.IsValueType && !parms[0].ParameterType.IsValueType)
+					emit.box(propertyType);
+
+				if (parms.Length > 1)
+					emit.ldarg_0.end();
+
+				if (parms.Length > 2)
+					emit.ldsfld(GetPropertyInfoField()).end();
+
+				if (InstanceType.IsValueType) emit.call(mi);
+				else                          emit.callvirt(mi);
+			}
 		}
 
 		private MemberInfo GetGetter()
 		{
+			const BindingFlags bindingFlags = BindingFlags.Public | BindingFlags.Instance;
+
 			Type propertyType = Context.CurrentProperty.PropertyType;
 
-			FieldInfo[] fields = InstanceType.GetFields(
-				BindingFlags.Public | BindingFlags.Instance | BindingFlags.GetField);
+			FieldInfo[] fields = InstanceType.GetFields(bindingFlags);
 
 			foreach (FieldInfo field in fields)
 			{
@@ -155,8 +189,7 @@ namespace BLToolkit.TypeBuilder.Builders
 					return field;
 			}
 
-			PropertyInfo[] props = InstanceType.GetProperties(
-				BindingFlags.Public | BindingFlags.Instance | BindingFlags.GetProperty);
+			PropertyInfo[] props = InstanceType.GetProperties(bindingFlags);
 
 			foreach (PropertyInfo prop in props)
 			{
@@ -174,19 +207,24 @@ namespace BLToolkit.TypeBuilder.Builders
 				if (prop.Name == "Value" && TypeHelper.IsSameOrParent(prop.PropertyType, propertyType))
 					return prop;
 
+			MethodInfo method = TypeHelper.GetMethod(InstanceType, "GetValue", bindingFlags,
+				0, Context.Type.Type, typeof(PropertyInfo));
+
+			if (method != null && TypeHelper.IsSameOrParent(propertyType, method.ReturnType))
+				return method;
+
 			throw new TypeBuilderException(string.Format(
-				"The '{0}' type does not have appropriate getter. See '{1}' member of '{2}' type.",
-				InstanceType.FullName,
-				propertyType.FullName,
-				Context.Type.FullName));
+				Resources.InstanceTypeBuilder_CannotGetGetter, InstanceType.FullName,
+				propertyType.FullName, Context.CurrentProperty.Name, Context.Type.FullName));
 		}
 
 		private MemberInfo GetSetter()
 		{
+			const BindingFlags bindingFlags = BindingFlags.Public | BindingFlags.Instance;
+
 			Type propertyType = Context.CurrentProperty.PropertyType;
 
-			FieldInfo[] fields = InstanceType.GetFields(
-				BindingFlags.Public | BindingFlags.Instance | BindingFlags.SetField);
+			FieldInfo[] fields = InstanceType.GetFields(bindingFlags);
 
 			foreach (FieldInfo field in fields)
 			{
@@ -196,8 +234,7 @@ namespace BLToolkit.TypeBuilder.Builders
 					return field;
 			}
 
-			PropertyInfo[] props = InstanceType.GetProperties(
-				BindingFlags.Public | BindingFlags.Instance | BindingFlags.SetProperty);
+			PropertyInfo[] props = InstanceType.GetProperties(bindingFlags);
 
 			foreach (PropertyInfo prop in props)
 			{
@@ -215,11 +252,15 @@ namespace BLToolkit.TypeBuilder.Builders
 				if (prop.Name == "Value" && TypeHelper.IsSameOrParent(prop.PropertyType, propertyType))
 					return prop;
 
+			MethodInfo method = TypeHelper.GetMethod(InstanceType, "SetValue", bindingFlags,
+				1, propertyType, Context.Type.Type, typeof(PropertyInfo));
+
+			if (method != null && method.ReturnType == typeof(void))
+				return method;
+
 			throw new TypeBuilderException(string.Format(
-				"The '{0}' type does not have appropriate setter. See '{1}' member of '{2}' type.",
-				InstanceType.FullName,
-				propertyType.FullName,
-				Context.Type.FullName));
+				Resources.InstanceTypeBuilder_CannotGetSetter, InstanceType.FullName,
+				propertyType.FullName, Context.CurrentProperty.Name, Context.Type.FullName));
 		}
 	}
 }

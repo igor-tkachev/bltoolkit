@@ -2,7 +2,10 @@ using System;
 
 namespace BLToolkit.TypeBuilder
 {
-	[AttributeUsage(AttributeTargets.Field | AttributeTargets.Property)]
+	///<summary>
+	/// Indicates that a field, property or method can be treated as a value getter.
+	///</summary>
+	[AttributeUsage(AttributeTargets.Field | AttributeTargets.Property | AttributeTargets.Method)]
 	public sealed class GetValueAttribute : Attribute
 	{
 	}
