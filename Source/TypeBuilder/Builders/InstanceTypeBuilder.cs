@@ -95,13 +95,34 @@ namespace BLToolkit.TypeBuilder.Builders
 			else
 			{
 				MethodInfo      mi    = (MethodInfo)getter;
-				ParameterInfo[] parms = mi.GetParameters();
+				ParameterInfo[] pi = mi.GetParameters();
+				bool gotValueParam = false;
 
-				if (parms.Length > 0)
-					emit.ldarg_0.end();
+				for (int k = 0; k < pi.Length; k++)
+				{
+					ParameterInfo p = pi[k];
 
-				if (parms.Length > 1)
-					emit.ldsfld(GetPropertyInfoField()).end();
+					if (p.IsDefined(typeof (ParentAttribute), true))
+					{
+						// Parent - set this.
+						//
+						emit.ldarg_0.end();
+
+						if (!TypeHelper.IsSameOrParent(p.ParameterType, Context.Type))
+							emit.castclass(p.ParameterType);
+					}
+					else if (p.IsDefined(typeof (PropertyInfoAttribute), true))
+					{
+						// PropertyInfo.
+						//
+						emit.ldsfld(GetPropertyInfoField()).end();
+					}
+					else
+						throw new TypeBuilderException(string.Format(
+							Resources.InstanceTypeBuilder_UnknownParameterType,
+							mi.Name, mi.DeclaringType.FullName, p.Name));
+
+				}
 
 				if (InstanceType.IsValueType) emit.call    (mi);
 				else                          emit.callvirt(mi);
@@ -133,11 +154,11 @@ namespace BLToolkit.TypeBuilder.Builders
 			if (InstanceType.IsValueType) emit.ldarg_0.ldflda(field);
 			else                          emit.ldarg_0.ldfld (field);
 
-			emit.ldarg_1.end();
-
 			if (setter is PropertyInfo)
 			{
 				PropertyInfo pi = ((PropertyInfo)setter);
+
+				emit.ldarg_1.end();
 
 				if (propertyType.IsValueType && !pi.PropertyType.IsValueType)
 					emit.box(propertyType);
@@ -149,6 +170,8 @@ namespace BLToolkit.TypeBuilder.Builders
 			{
 				FieldInfo fi = (FieldInfo)setter;
 
+				emit.ldarg_1.end();
+
 				if (propertyType.IsValueType && !fi.FieldType.IsValueType)
 					emit.box(propertyType);
 
@@ -156,17 +179,45 @@ namespace BLToolkit.TypeBuilder.Builders
 			}
 			else
 			{
-				MethodInfo      mi    = (MethodInfo)setter;
-				ParameterInfo[] parms = mi.GetParameters();
+				MethodInfo      mi = (MethodInfo)setter;
+				ParameterInfo[] pi = mi.GetParameters();
+				bool gotValueParam = false;
 
-				if (propertyType.IsValueType && !parms[0].ParameterType.IsValueType)
-					emit.box(propertyType);
+				for (int k = 0; k < pi.Length; k++)
+				{
+					ParameterInfo p = pi[k];
 
-				if (parms.Length > 1)
-					emit.ldarg_0.end();
+					if (p.IsDefined(typeof (ParentAttribute), true))
+					{
+						// Parent - set this.
+						//
+						emit.ldarg_0.end();
 
-				if (parms.Length > 2)
-					emit.ldsfld(GetPropertyInfoField()).end();
+						if (!TypeHelper.IsSameOrParent(p.ParameterType, Context.Type))
+							emit.castclass(p.ParameterType);
+					}
+					else if (p.IsDefined(typeof (PropertyInfoAttribute), true))
+					{
+						// PropertyInfo.
+						//
+						emit.ldsfld(GetPropertyInfoField()).end();
+					}
+					else if (!gotValueParam)
+					{
+						// This must be a value.
+						//
+						emit.ldarg_1.end();
+
+						if (propertyType.IsValueType && !p.ParameterType.IsValueType)
+							emit.box(propertyType);
+
+						gotValueParam = true;
+					}
+					else
+						throw new TypeBuilderException(string.Format(
+							Resources.InstanceTypeBuilder_UnknownParameterType,
+							mi.Name, mi.DeclaringType.FullName, p.Name));
+				}
 
 				if (InstanceType.IsValueType) emit.call(mi);
 				else                          emit.callvirt(mi);
@@ -207,8 +258,7 @@ namespace BLToolkit.TypeBuilder.Builders
 				if (prop.Name == "Value" && TypeHelper.IsSameOrParent(prop.PropertyType, propertyType))
 					return prop;
 
-			MethodInfo method = TypeHelper.GetMethod(InstanceType, "GetValue", bindingFlags,
-				0, Context.Type.Type, typeof(PropertyInfo));
+			MethodInfo method = TypeHelper.GetMethod(InstanceType, false, "GetValue", bindingFlags);
 
 			if (method != null && TypeHelper.IsSameOrParent(propertyType, method.ReturnType))
 				return method;
@@ -252,8 +302,7 @@ namespace BLToolkit.TypeBuilder.Builders
 				if (prop.Name == "Value" && TypeHelper.IsSameOrParent(prop.PropertyType, propertyType))
 					return prop;
 
-			MethodInfo method = TypeHelper.GetMethod(InstanceType, "SetValue", bindingFlags,
-				1, propertyType, Context.Type.Type, typeof(PropertyInfo));
+			MethodInfo method = TypeHelper.GetMethod(InstanceType, false, "SetValue", bindingFlags);
 
 			if (method != null && method.ReturnType == typeof(void))
 				return method;

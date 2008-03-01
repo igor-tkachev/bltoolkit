@@ -168,4 +168,7 @@
   <data name="InstanceTypeBuilder_CannotGetSetter" xml:space="preserve">
     <value>The '{0}' type does not have appropriate setter. See '{1}' member '{2}' of '{3}' type.</value>
   </data>
+  <data name="InstanceTypeBuilder_UnknownParameterType" xml:space="preserve">
+    <value>The method '{0}' of '{1}' has parameter '{2}' wich can't be handled. Please specify attrbutes [Parent] or [PropertyInfo] to get access to them.</value>
+  </data>
 </root>

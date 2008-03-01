@@ -212,5 +212,14 @@ namespace BLToolkit.Properties {
                 return ResourceManager.GetString("InstanceTypeBuilder_CannotGetSetter", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The method &apos;{0}&apos; of &apos;{1}&apos; has parameter &apos;{2}&apos; wich can&apos;t be handled. Please specify attrbutes [Parent] or [PropertyInfo] to get access to them..
+        /// </summary>
+        internal static string InstanceTypeBuilder_UnknownParameterType {
+            get {
+                return ResourceManager.GetString("InstanceTypeBuilder_UnknownParameterType", resourceCulture);
+            }
+        }
     }
 }

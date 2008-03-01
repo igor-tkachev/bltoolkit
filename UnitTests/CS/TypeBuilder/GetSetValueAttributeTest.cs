@@ -107,16 +107,16 @@ namespace TypeBuilder
 		{
 			private T _value;
 
-			[GetValue] public T    GetValue(TestObject2 parent)     { return _value;  }
-			[SetValue] public void SetValue(T value, object parent) { _value = value; }
+			[GetValue] public T    GetValue([Parent] TestObject2 parent)     { return _value;  }
+			[SetValue] public void SetValue(T value, [Parent] object parent) { _value = value; }
 		}
 
 		public struct ValueBox3<T>
 		{
 			private T _value;
 
-			[GetValue] public T    GetValue(object parent, PropertyInfo pi)               { return _value;  }
-			[SetValue] public void SetValue(T value, TestObject2 parent, PropertyInfo pi) { _value = value; }
+			[GetValue] public T    GetValue([Parent] object parent, [PropertyInfo] PropertyInfo pi)               { return _value;  }
+			[SetValue] public void SetValue(T value, [PropertyInfo] PropertyInfo pi) { _value = value; }
 		}
 
 		public abstract class TestObject2
