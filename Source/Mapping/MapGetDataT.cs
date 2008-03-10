@@ -1,6 +1,8 @@
 using System;
 using System.Data.SqlTypes;
 
+using BLToolkit.Reflection;
+
 namespace BLToolkit.Mapping
 {
 	[CLSCompliant(false)]
@@ -20,7 +22,6 @@ namespace BLToolkit.Mapping
 		private static MB<T>     GetGetter()
 		{
 			Type t = typeof(T);
-
 
 			// Scalar Types.
 			//
@@ -43,10 +44,26 @@ namespace BLToolkit.Mapping
 			if (t == typeof(Char))         return (MB<T>)(object)(new C());
 			if (t == typeof(Guid))         return (MB<T>)(object)(new G());
 			if (t == typeof(DateTime))     return (MB<T>)(object)(new DT());
-
 #if FW3
 			if (t == typeof(DateTimeOffset)) return (MB<T>)(object)(new DTO());
 #endif
+
+			// Enums.
+			//
+			if (t.IsEnum)
+			{
+				t = Enum.GetUnderlyingType(t);
+
+				if (t == typeof(SByte))        return new EI8<T>();
+				if (t == typeof(Int16))        return new EI16<T>();
+				if (t == typeof(Int32))        return new EI32<T>();
+				if (t == typeof(Int64))        return new EI64<T>();
+
+				if (t == typeof(Byte))         return new EU8<T>();
+				if (t == typeof(UInt16))       return new EU16<T>();
+				if (t == typeof(UInt32))       return new EU32<T>();
+				if (t == typeof(UInt64))       return new EU64<T>();
+			}
 
 			// Nullable Types.
 			//
@@ -69,10 +86,27 @@ namespace BLToolkit.Mapping
 			if (t == typeof(Char?))        return (MB<T>)(object)(new NC());
 			if (t == typeof(Guid?))        return (MB<T>)(object)(new NG());
 			if (t == typeof(DateTime?))    return (MB<T>)(object)(new NDT());
-
 #if FW3
 			if (t == typeof(DateTimeOffset?)) return (MB<T>)(object)(new NDTO());
 #endif
+
+			// Nullable Enums.
+			//
+			if (TypeHelper.IsNullable(t) && Nullable.GetUnderlyingType(t).IsEnum)
+			{
+				Type enumType = Nullable.GetUnderlyingType(t);
+				t = Enum.GetUnderlyingType(enumType);
+
+				if (t == typeof(SByte))  return (MB<T>)Activator.CreateInstance(typeof(NEI8<>).MakeGenericType(typeof(T), enumType));
+				if (t == typeof(Int16))  return (MB<T>)Activator.CreateInstance(typeof(NEI16<>).MakeGenericType(typeof(T), enumType));
+				if (t == typeof(Int32))  return (MB<T>)Activator.CreateInstance(typeof(NEI32<>).MakeGenericType(typeof(T), enumType));
+				if (t == typeof(Int64))  return (MB<T>)Activator.CreateInstance(typeof(NEI64<>).MakeGenericType(typeof(T), enumType));
+
+				if (t == typeof(Byte))   return (MB<T>)Activator.CreateInstance(typeof(NEU8<>).MakeGenericType(typeof(T), enumType));
+				if (t == typeof(UInt16)) return (MB<T>)Activator.CreateInstance(typeof(NEU16<>).MakeGenericType(typeof(T), enumType));
+				if (t == typeof(UInt32)) return (MB<T>)Activator.CreateInstance(typeof(NEU32<>).MakeGenericType(typeof(T), enumType));
+				if (t == typeof(UInt64)) return (MB<T>)Activator.CreateInstance(typeof(NEU64<>).MakeGenericType(typeof(T), enumType));
+			}
 
 			// SqlTypes.
 			//
@@ -123,6 +157,18 @@ namespace BLToolkit.Mapping
 #if FW3
 		sealed class DTO         : MB<DateTimeOffset> { public override DateTimeOffset From(IMapDataSource s, object o, int i) { return s.GetDateTimeOffset    (o, i); } }
 #endif
+		// Enums.
+		//
+		sealed class EI8<E>      : MB<E>           { public override E           From(IMapDataSource s, object o, int i) { return (E)(object)s.GetSByte   (o, i); } }
+		sealed class EI16<E>     : MB<E>           { public override E           From(IMapDataSource s, object o, int i) { return (E)(object)s.GetInt16   (o, i); } }
+		sealed class EI32<E>     : MB<E>           { public override E           From(IMapDataSource s, object o, int i) { return (E)(object)s.GetInt32   (o, i); } }
+		sealed class EI64<E>     : MB<E>           { public override E           From(IMapDataSource s, object o, int i) { return (E)(object)s.GetInt64   (o, i); } }
+
+		sealed class EU8<E>      : MB<E>           { public override E           From(IMapDataSource s, object o, int i) { return (E)(object)s.GetByte    (o, i); } }
+		sealed class EU16<E>     : MB<E>           { public override E           From(IMapDataSource s, object o, int i) { return (E)(object)s.GetUInt16  (o, i); } }
+		sealed class EU32<E>     : MB<E>           { public override E           From(IMapDataSource s, object o, int i) { return (E)(object)s.GetUInt32  (o, i); } }
+		sealed class EU64<E>     : MB<E>           { public override E           From(IMapDataSource s, object o, int i) { return (E)(object)s.GetUInt64  (o, i); } }
+
 		// Nullable Types.
 		//
 		sealed class NI8         : MB<SByte?>      { public override SByte?      From(IMapDataSource s, object o, int i) { return s.GetNullableSByte      (o, i); } }
@@ -147,6 +193,17 @@ namespace BLToolkit.Mapping
 #if FW3
 		sealed class NDTO        : MB<DateTimeOffset?> { public override DateTimeOffset? From(IMapDataSource s, object o, int i) { return s.GetNullableDateTimeOffset    (o, i); } }
 #endif
+		// Nullable Enums.
+		//
+		sealed class NEI8<E>     : MB<E?> where E : struct { public override E?  From(IMapDataSource s, object o, int i) { return /*s.IsNull(o, i) ? (E?)null :*/ (E)(object)s.GetSByte (o, i); } }
+		sealed class NEI16<E>    : MB<E?> where E : struct { public override E?  From(IMapDataSource s, object o, int i) { return /*s.IsNull(o, i) ? (E?)null :*/ (E)(object)s.GetInt16 (o, i); } }
+		sealed class NEI32<E>    : MB<E?> where E : struct { public override E?  From(IMapDataSource s, object o, int i) { return /*s.IsNull(o, i) ? (E?)null :*/ (E)(object)s.GetInt32 (o, i); } }
+		sealed class NEI64<E>    : MB<E?> where E : struct { public override E?  From(IMapDataSource s, object o, int i) { return /*s.IsNull(o, i) ? (E?)null :*/ (E)(object)s.GetInt64 (o, i); } }
+
+		sealed class NEU8<E>     : MB<E?> where E : struct { public override E?  From(IMapDataSource s, object o, int i) { return /*s.IsNull(o, i) ? (E?)null :*/ (E)(object)s.GetByte  (o, i); } }
+		sealed class NEU16<E>    : MB<E?> where E : struct { public override E?  From(IMapDataSource s, object o, int i) { return /*s.IsNull(o, i) ? (E?)null :*/ (E)(object)s.GetUInt16(o, i); } }
+		sealed class NEU32<E>    : MB<E?> where E : struct { public override E?  From(IMapDataSource s, object o, int i) { return /*s.IsNull(o, i) ? (E?)null :*/ (E)(object)s.GetUInt32(o, i); } }
+		sealed class NEU64<E>    : MB<E?> where E : struct { public override E?  From(IMapDataSource s, object o, int i) { return /*s.IsNull(o, i) ? (E?)null :*/ (E)(object)s.GetUInt64(o, i); } }
 
 		// SqlTypes.
 		//

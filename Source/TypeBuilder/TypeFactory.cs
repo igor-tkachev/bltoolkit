@@ -3,7 +3,6 @@ using System.Collections;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Reflection;
-using System.Reflection.Emit;
 using System.Runtime.InteropServices;
 
 using BLToolkit.Reflection.Emit;
@@ -261,7 +260,7 @@ namespace BLToolkit.TypeBuilder
 					{
 						Assembly a = ass[i];
 
-						if (!(a is AssemblyBuilder))
+						if (!(a is _AssemblyBuilder))
 							if (a.CodeBase.IndexOf("Microsoft.NET/Framework") > 0 || a.FullName.StartsWith("System."))
 								continue;
 

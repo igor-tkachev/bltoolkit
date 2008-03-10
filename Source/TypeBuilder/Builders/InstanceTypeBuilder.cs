@@ -96,7 +96,6 @@ namespace BLToolkit.TypeBuilder.Builders
 			{
 				MethodInfo      mi    = (MethodInfo)getter;
 				ParameterInfo[] pi = mi.GetParameters();
-				bool gotValueParam = false;
 
 				for (int k = 0; k < pi.Length; k++)
 				{
@@ -119,7 +118,7 @@ namespace BLToolkit.TypeBuilder.Builders
 					}
 					else
 						throw new TypeBuilderException(string.Format(
-							Resources.InstanceTypeBuilder_UnknownParameterType,
+							Resources.TypeBuilder_UnknownParameterType,
 							mi.Name, mi.DeclaringType.FullName, p.Name));
 
 				}
@@ -215,7 +214,7 @@ namespace BLToolkit.TypeBuilder.Builders
 					}
 					else
 						throw new TypeBuilderException(string.Format(
-							Resources.InstanceTypeBuilder_UnknownParameterType,
+							Resources.TypeBuilder_UnknownParameterType,
 							mi.Name, mi.DeclaringType.FullName, p.Name));
 				}
 
@@ -264,7 +263,7 @@ namespace BLToolkit.TypeBuilder.Builders
 				return method;
 
 			throw new TypeBuilderException(string.Format(
-				Resources.InstanceTypeBuilder_CannotGetGetter, InstanceType.FullName,
+				Resources.TypeBuilder_CannotGetGetter, InstanceType.FullName,
 				propertyType.FullName, Context.CurrentProperty.Name, Context.Type.FullName));
 		}
 
@@ -308,7 +307,7 @@ namespace BLToolkit.TypeBuilder.Builders
 				return method;
 
 			throw new TypeBuilderException(string.Format(
-				Resources.InstanceTypeBuilder_CannotGetSetter, InstanceType.FullName,
+				Resources.TypeBuilder_CannotGetSetter, InstanceType.FullName,
 				propertyType.FullName, Context.CurrentProperty.Name, Context.Type.FullName));
 		}
 	}

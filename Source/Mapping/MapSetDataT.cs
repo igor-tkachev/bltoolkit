@@ -1,6 +1,8 @@
 using System;
 using System.Data.SqlTypes;
 
+using BLToolkit.Reflection;
+
 namespace BLToolkit.Mapping
 {
 	[CLSCompliant(false)]
@@ -20,7 +22,6 @@ namespace BLToolkit.Mapping
 		private static MB<T>     GetSetter()
 		{
 			Type t = typeof(T);
-
 
 			// Scalar Types.
 			//
@@ -47,6 +48,23 @@ namespace BLToolkit.Mapping
 			if (t == typeof(DateTimeOffset)) return (MB<T>)(object)(new DTO());
 #endif
 
+			// Enums.
+			//
+			if (t.IsEnum)
+			{
+				t = Enum.GetUnderlyingType(t);
+
+				if (t == typeof(SByte))        return new EI8<T>();
+				if (t == typeof(Int16))        return new EI16<T>();
+				if (t == typeof(Int32))        return new EI32<T>();
+				if (t == typeof(Int64))        return new EI64<T>();
+
+				if (t == typeof(Byte))         return new EU8<T>();
+				if (t == typeof(UInt16))       return new EU16<T>();
+				if (t == typeof(UInt32))       return new EU32<T>();
+				if (t == typeof(UInt64))       return new EU64<T>();
+			}
+
 			// Nullable Types.
 			//
 			if (t == typeof(SByte?))       return (MB<T>)(object)(new NI8());
@@ -71,6 +89,24 @@ namespace BLToolkit.Mapping
 #if FW3
 			if (t == typeof(DateTimeOffset?)) return (MB<T>)(object)(new NDTO());
 #endif
+
+			// Nullable Enums.
+			//
+			if (TypeHelper.IsNullable(t) && Nullable.GetUnderlyingType(t).IsEnum)
+			{
+				Type enumType = Nullable.GetUnderlyingType(t);
+				t = Enum.GetUnderlyingType(enumType);
+
+				if (t == typeof(SByte))  return (MB<T>)Activator.CreateInstance(typeof(NEI8<>).MakeGenericType(typeof(T), enumType));
+				if (t == typeof(Int16))  return (MB<T>)Activator.CreateInstance(typeof(NEI16<>).MakeGenericType(typeof(T), enumType));
+				if (t == typeof(Int32))  return (MB<T>)Activator.CreateInstance(typeof(NEI32<>).MakeGenericType(typeof(T), enumType));
+				if (t == typeof(Int64))  return (MB<T>)Activator.CreateInstance(typeof(NEI64<>).MakeGenericType(typeof(T), enumType));
+
+				if (t == typeof(Byte))   return (MB<T>)Activator.CreateInstance(typeof(NEU8<>).MakeGenericType(typeof(T), enumType));
+				if (t == typeof(UInt16)) return (MB<T>)Activator.CreateInstance(typeof(NEU16<>).MakeGenericType(typeof(T), enumType));
+				if (t == typeof(UInt32)) return (MB<T>)Activator.CreateInstance(typeof(NEU32<>).MakeGenericType(typeof(T), enumType));
+				if (t == typeof(UInt64)) return (MB<T>)Activator.CreateInstance(typeof(NEU64<>).MakeGenericType(typeof(T), enumType));
+			}
 
 			// SqlTypes.
 			//
@@ -121,6 +157,18 @@ namespace BLToolkit.Mapping
 #if FW3
 		sealed class DTO   : MB<DateTimeOffset>{ public override  void To(IMapDataDestination d, object o, int i, DateTimeOffset    v) { d.SetDateTimeOffset    (o, i, v); } }
 #endif
+		// Enums.
+		//
+		sealed class EI8<E>  : MB<E>         { public override  void To(IMapDataDestination d, object o, int i, E           v) { d.SetSByte       (o, i, (SByte)(object)v); } }
+		sealed class EI16<E> : MB<E>         { public override  void To(IMapDataDestination d, object o, int i, E           v) { d.SetInt16       (o, i, (Int16)(object)v); } }
+		sealed class EI32<E> : MB<E>         { public override  void To(IMapDataDestination d, object o, int i, E           v) { d.SetInt32       (o, i, (Int32)(object)v); } }
+		sealed class EI64<E> : MB<E>         { public override  void To(IMapDataDestination d, object o, int i, E           v) { d.SetInt64       (o, i, (Int64)(object)v); } }
+
+		sealed class EU8<E>  : MB<E>         { public override  void To(IMapDataDestination d, object o, int i, E           v) { d.SetByte        (o, i, (Byte)(object)v); } }
+		sealed class EU16<E> : MB<E>         { public override  void To(IMapDataDestination d, object o, int i, E           v) { d.SetUInt16      (o, i, (UInt16)(object)v); } }
+		sealed class EU32<E> : MB<E>         { public override  void To(IMapDataDestination d, object o, int i, E           v) { d.SetUInt32      (o, i, (UInt32)(object)v); } }
+		sealed class EU64<E> : MB<E>         { public override  void To(IMapDataDestination d, object o, int i, E           v) { d.SetUInt64      (o, i, (UInt64)(object)v); } }
+
 		// Nullable Types.
 		//
 		sealed class NI8   : MB<SByte?>      { public override  void To(IMapDataDestination d, object o, int i, SByte?      v) { d.SetNullableSByte      (o, i, v); } }
@@ -145,6 +193,18 @@ namespace BLToolkit.Mapping
 #if FW3
 		sealed class NDTO  : MB<DateTimeOffset?>{ public override  void To(IMapDataDestination d, object o, int i, DateTimeOffset?    v) { d.SetNullableDateTimeOffset    (o, i, v); } }
 #endif
+		// Nullable Enums.
+		//
+		sealed class NEI8<E>  : MB<E?> where E : struct { public override  void To(IMapDataDestination d, object o, int i, E? v) { /*if (null == v) d.SetNull(o, i); else*/ d.SetSByte (o, i, (SByte)(object)v.Value); } }
+		sealed class NEI16<E> : MB<E?> where E : struct { public override  void To(IMapDataDestination d, object o, int i, E? v) { /*if (null == v) d.SetNull(o, i); else*/ d.SetInt16 (o, i, (Int16)(object)v.Value); } }
+		sealed class NEI32<E> : MB<E?> where E : struct { public override  void To(IMapDataDestination d, object o, int i, E? v) { /*if (null == v) d.SetNull(o, i); else*/ d.SetInt32 (o, i, (Int32)(object)v.Value); } }
+		sealed class NEI64<E> : MB<E?> where E : struct { public override  void To(IMapDataDestination d, object o, int i, E? v) { /*if (null == v) d.SetNull(o, i); else*/ d.SetInt64 (o, i, (Int64)(object)v.Value); } }
+
+		sealed class NEU8<E>  : MB<E?> where E : struct { public override  void To(IMapDataDestination d, object o, int i, E? v) { /*if (null == v) d.SetNull(o, i); else*/ d.SetByte  (o, i, (Byte)(object)v.Value); } }
+		sealed class NEU16<E> : MB<E?> where E : struct { public override  void To(IMapDataDestination d, object o, int i, E? v) { /*if (null == v) d.SetNull(o, i); else*/ d.SetUInt16(o, i, (UInt16)(object)v.Value); } }
+		sealed class NEU32<E> : MB<E?> where E : struct { public override  void To(IMapDataDestination d, object o, int i, E? v) { /*if (null == v) d.SetNull(o, i); else*/ d.SetUInt32(o, i, (UInt32)(object)v.Value); } }
+		sealed class NEU64<E> : MB<E?> where E : struct { public override  void To(IMapDataDestination d, object o, int i, E? v) { /*if (null == v) d.SetNull(o, i); else*/ d.SetUInt64(o, i, (UInt64)(object)v.Value); } }
+
 		// SqlTypes.
 		//
 		sealed class dbS   : MB<SqlString>   { public override  void To(IMapDataDestination d, object o, int i, SqlString   v) { d.SetSqlString   (o, i, v); } }

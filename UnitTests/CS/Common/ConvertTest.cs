@@ -70,7 +70,7 @@ namespace Common
 			Assert.AreEqual(typeof(int).GUID, Convert.ToGuid(typeof(int).GUID.ToString()));
 			Assert.AreEqual(Guid.Empty, Convert.ToGuid((string)null));
 
-			Assert.AreEqual(typeof(int), Convert.ToType("System.Int32"));
+			Assert.AreEqual(typeof(int), Convert.ToType("System.Int32, mscorlib"));
 			Assert.IsNull(Convert.ToType((string)null));
 		}
 
@@ -126,6 +126,31 @@ namespace Common
 
 			Assert.AreEqual(DateTime.MinValue + TimeSpan.FromTicks(1), Convert.ToDateTime(1L));
 			Assert.AreEqual(TimeSpan.FromTicks(1), Convert.ToTimeSpan(1L));
+		}
+
+		[Test]
+		public void InterfaceTest()
+		{
+			Assert.AreEqual(123, ConvertTo<IConvertible>.From(123).ToByte(null));
+		}
+
+		[Test]
+		public void EnumTest()
+		{
+			// Enum-to-enum.
+			//
+			Assert.AreEqual(BindingFlags.DeclaredOnly,
+				ConvertTo<BindingFlags>.From(CallingConventions.VarArgs));
+
+			// Enum-to-nullable byte.
+			//
+			Assert.AreEqual((byte?)BindingFlags.DeclaredOnly,
+				ConvertTo<byte?>.From(BindingFlags.DeclaredOnly));
+
+			// Nullable Enum-to-nullable enum.
+			//
+			Assert.AreEqual((CallingConventions?)CallingConventions.VarArgs,
+				ConvertTo<CallingConventions?>.From((BindingFlags?)BindingFlags.DeclaredOnly));
 		}
 
 		[Test]

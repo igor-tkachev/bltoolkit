@@ -198,27 +198,81 @@ namespace BLToolkit.Properties {
         /// <summary>
         ///   Looks up a localized string similar to The &apos;{0}&apos; type does not have appropriate getter. See &apos;{1}&apos; member &apos;{2}&apos; of &apos;{3}&apos; type..
         /// </summary>
-        internal static string InstanceTypeBuilder_CannotGetGetter {
+        internal static string TypeBuilder_CannotGetGetter {
             get {
-                return ResourceManager.GetString("InstanceTypeBuilder_CannotGetGetter", resourceCulture);
+                return ResourceManager.GetString("TypeBuilder_CannotGetGetter", resourceCulture);
             }
         }
         
         /// <summary>
         ///   Looks up a localized string similar to The &apos;{0}&apos; type does not have appropriate setter. See &apos;{1}&apos; member &apos;{2}&apos; of &apos;{3}&apos; type..
         /// </summary>
-        internal static string InstanceTypeBuilder_CannotGetSetter {
+        internal static string TypeBuilder_CannotGetSetter {
             get {
-                return ResourceManager.GetString("InstanceTypeBuilder_CannotGetSetter", resourceCulture);
+                return ResourceManager.GetString("TypeBuilder_CannotGetSetter", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Could not build the &apos;{0}&apos; type: default constructor not found..
+        /// </summary>
+        internal static string TypeBuilder_NoDefaultCtor {
+            get {
+                return ResourceManager.GetString("TypeBuilder_NoDefaultCtor", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Could not build the &apos;{0}&apos; property of the &apos;{1}&apos; type: type &apos;{2}&apos; has to have constructor taking type &apos;{3}&apos;..
+        /// </summary>
+        internal static string TypeBuilder_PropertyTypeHasNoCtorWithParamType {
+            get {
+                return ResourceManager.GetString("TypeBuilder_PropertyTypeHasNoCtorWithParamType", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Could not build the &apos;{0}&apos; property of the &apos;{1}&apos; type: type &apos;{2}&apos; has to have public constructor..
+        /// </summary>
+        internal static string TypeBuilder_PropertyTypeHasNoPublicCtor {
+            get {
+                return ResourceManager.GetString("TypeBuilder_PropertyTypeHasNoPublicCtor", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Could not build the &apos;{0}&apos; property of the &apos;{1}&apos; type: type &apos;{2}&apos; has to have public default constructor..
+        /// </summary>
+        internal static string TypeBuilder_PropertyTypeHasNoPublicDefaultCtor {
+            get {
+                return ResourceManager.GetString("TypeBuilder_PropertyTypeHasNoPublicDefaultCtor", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Type &apos;{0}&apos; must implement required public method &apos;{1}&apos;.
+        /// </summary>
+        internal static string TypeBuilder_PublicMethodMustBeImplemented {
+            get {
+                return ResourceManager.GetString("TypeBuilder_PublicMethodMustBeImplemented", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Type &apos;{0}&apos; does not implement public method &apos;{1}&apos;.
+        /// </summary>
+        internal static string TypeBuilder_PublicMethodNotImplemented {
+            get {
+                return ResourceManager.GetString("TypeBuilder_PublicMethodNotImplemented", resourceCulture);
             }
         }
         
         /// <summary>
         ///   Looks up a localized string similar to The method &apos;{0}&apos; of &apos;{1}&apos; has parameter &apos;{2}&apos; wich can&apos;t be handled. Please specify attrbutes [Parent] or [PropertyInfo] to get access to them..
         /// </summary>
-        internal static string InstanceTypeBuilder_UnknownParameterType {
+        internal static string TypeBuilder_UnknownParameterType {
             get {
-                return ResourceManager.GetString("InstanceTypeBuilder_UnknownParameterType", resourceCulture);
+                return ResourceManager.GetString("TypeBuilder_UnknownParameterType", resourceCulture);
             }
         }
     }

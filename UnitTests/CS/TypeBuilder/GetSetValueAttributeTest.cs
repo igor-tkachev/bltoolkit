@@ -85,7 +85,7 @@ namespace TypeBuilder
 			o.StrValue = "test2";
 			Assert.AreEqual("test2", o.StrValue);
 
-			Assert.AreEqual(DayOfWeek.Sunday, o.DayValue);
+			Assert.AreEqual(DayOfWeek.Saturday, o.DayValue);
 			o.DayValue = DayOfWeek.Thursday;
 			Assert.AreEqual(DayOfWeek.Thursday, o.DayValue);
 		}

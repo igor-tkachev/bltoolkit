@@ -1,8 +1,9 @@
 using System;
+using System.Reflection;
 using System.Reflection.Emit;
 using BLToolkit.Patterns;
+using BLToolkit.Properties;
 using BLToolkit.Reflection.Emit;
-using System.Reflection;
 
 namespace BLToolkit.TypeBuilder.Builders
 {
@@ -44,7 +45,7 @@ namespace BLToolkit.TypeBuilder.Builders
 		private string GetClassName()
 		{
 			return AbstractClassBuilder.GetTypeFullName(_objectType)
-				.Replace('+', '.') + "." + AssemblyNameSuffix;
+				.Replace('+', '.') + "$" + AssemblyNameSuffix;
 		}
 
 		private bool BuildMembers(Type interfaceType)
@@ -121,11 +122,11 @@ namespace BLToolkit.TypeBuilder.Builders
 
 					if (targetMethod.IsStatic)
 						emit
-							.call(targetMethod)
+							.call     (targetMethod)
 							.ret();
 					else
 						emit
-							.callvirt(targetMethod)
+							.callvirt (targetMethod)
 							.ret();
 				}
 				else
@@ -133,10 +134,13 @@ namespace BLToolkit.TypeBuilder.Builders
 					// Method or property was not found.
 					// Insert an empty stub or stub that throws the NotImplementedException.
 					//
-					MustImplementAttribute attr = (MustImplementAttribute)Attribute.GetCustomAttribute(interfaceMethod, typeof (MustImplementAttribute));
+					MustImplementAttribute attr = (MustImplementAttribute)
+						Attribute.GetCustomAttribute(interfaceMethod, typeof (MustImplementAttribute));
+
 					if (attr == null)
 					{
-						attr = (MustImplementAttribute)Attribute.GetCustomAttribute(interfaceMethod.DeclaringType, typeof (MustImplementAttribute));
+						attr = (MustImplementAttribute)Attribute.GetCustomAttribute(
+							interfaceMethod.DeclaringType, typeof (MustImplementAttribute));
 						if (attr == null)
 							attr = MustImplementAttribute.Default;
 					}
@@ -147,7 +151,8 @@ namespace BLToolkit.TypeBuilder.Builders
 					{
 						if (attr.ThrowException)
 							throw new TypeBuilderException(string.Format(
-								"Type '{0}' must implement required public method '{1}'", _objectType.FullName, interfaceMethod));
+								Resources.TypeBuilder_PublicMethodMustBeImplemented,
+								_objectType.FullName, interfaceMethod));
 						else
 						{
 							// Implement == true, but ThrowException == false.
@@ -162,7 +167,8 @@ namespace BLToolkit.TypeBuilder.Builders
 					{
 						string message = attr.ExceptionMessage;
 						if (message == null)
-							message = string.Format("Type '{0}' does not implement public method '{1}'", _objectType.FullName, interfaceMethod);
+							message = string.Format(Resources.TypeBuilder_PublicMethodNotImplemented,
+								_objectType.FullName, interfaceMethod);
 
 						emit
 							.ldstr     (message)

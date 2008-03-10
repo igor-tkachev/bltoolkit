@@ -22,12 +22,14 @@ namespace Mapping
 				Value2 = 2
 			}
 
-			public Enum Value = Enum.Value1;
+			public Enum          Value = Enum.Value1;
+			public Enum? NullableValue = Enum.Value2;
 		}
 
 		public class IntClass
 		{
-			public int Value;
+			public int          Value;
+			public int? NullableValue;
 		}
 
 		[Test]
@@ -40,6 +42,7 @@ namespace Mapping
 			list = Map.ListToList(list, typeof(IntClass));
 
 			Assert.AreEqual(1, ((IntClass)list[0]).Value);
+			Assert.AreEqual(2, ((IntClass)list[0]).NullableValue);
 		}
 
 		#endregion

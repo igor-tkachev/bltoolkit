@@ -7,6 +7,7 @@ Bug fixes
 - EmitHelper.ldc_i4_ emits wrong opcode for numbers from 128 till 255 (bug in msdn)
 - Some opcodes were not implemented.
 - MappingSchema.MapResultSets fails with NullReferenceException when no data returned.
+- Nullable enums were not handled properly.
 
 Enhancement
 - DateTimeOffset type support.

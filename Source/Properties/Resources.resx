@@ -162,13 +162,31 @@
   <data name="Convert_InvalidCast" xml:space="preserve">
     <value>Invalid cast from {0} to {1}</value>
   </data>
-  <data name="InstanceTypeBuilder_CannotGetGetter" xml:space="preserve">
+  <data name="TypeBuilder_CannotGetGetter" xml:space="preserve">
     <value>The '{0}' type does not have appropriate getter. See '{1}' member '{2}' of '{3}' type.</value>
   </data>
-  <data name="InstanceTypeBuilder_CannotGetSetter" xml:space="preserve">
+  <data name="TypeBuilder_CannotGetSetter" xml:space="preserve">
     <value>The '{0}' type does not have appropriate setter. See '{1}' member '{2}' of '{3}' type.</value>
   </data>
-  <data name="InstanceTypeBuilder_UnknownParameterType" xml:space="preserve">
+  <data name="TypeBuilder_UnknownParameterType" xml:space="preserve">
     <value>The method '{0}' of '{1}' has parameter '{2}' wich can't be handled. Please specify attrbutes [Parent] or [PropertyInfo] to get access to them.</value>
   </data>
+  <data name="TypeBuilder_NoDefaultCtor" xml:space="preserve">
+    <value>Could not build the '{0}' type: default constructor not found.</value>
+  </data>
+  <data name="TypeBuilder_PropertyTypeHasNoPublicDefaultCtor" xml:space="preserve">
+    <value>Could not build the '{0}' property of the '{1}' type: type '{2}' has to have public default constructor.</value>
+  </data>
+  <data name="TypeBuilder_PropertyTypeHasNoPublicCtor" xml:space="preserve">
+    <value>Could not build the '{0}' property of the '{1}' type: type '{2}' has to have public constructor.</value>
+  </data>
+  <data name="TypeBuilder_PropertyTypeHasNoCtorWithParamType" xml:space="preserve">
+    <value>Could not build the '{0}' property of the '{1}' type: type '{2}' has to have constructor taking type '{3}'.</value>
+  </data>
+  <data name="TypeBuilder_PublicMethodMustBeImplemented" xml:space="preserve">
+    <value>Type '{0}' must implement required public method '{1}'</value>
+  </data>
+  <data name="TypeBuilder_PublicMethodNotImplemented" xml:space="preserve">
+  <value>Type '{0}' does not implement public method '{1}'</value>
+</data>
 </root>

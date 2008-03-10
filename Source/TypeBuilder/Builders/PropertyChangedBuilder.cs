@@ -80,11 +80,11 @@ namespace BLToolkit.TypeBuilder.Builders
 
 			MethodInfo op_InequalityMethod =
 				Context.CurrentProperty.PropertyType.GetMethod("op_Inequality",
-															   new Type[]
-				                                               	{
-				                                               		Context.CurrentProperty.PropertyType,
-				                                               		Context.CurrentProperty.PropertyType
-				                                               	});
+					new Type[]
+						{
+							Context.CurrentProperty.PropertyType,
+							Context.CurrentProperty.PropertyType
+						});
 
 			if (op_InequalityMethod == null)
 			{
@@ -92,28 +92,31 @@ namespace BLToolkit.TypeBuilder.Builders
 				{
 					emit
 						.ldarg_0
-						.callvirt(Context.CurrentProperty.GetGetMethod(true))
-							.ldarg_1
-							.ceq.end();
+						.callvirt  (Context.CurrentProperty.GetGetMethod(true))
+						.ldarg_1
+						.ceq
+						.end();
 				}
 				else
 				{
 					emit
 						.ldarg_0
-						.callvirt(Context.CurrentProperty.GetGetMethod(true))
+						.callvirt  (Context.CurrentProperty.GetGetMethod(true))
 						.ldarg_1
-						.call(typeof(object), "ReferenceEquals", typeof(object), typeof(object)).end();
+						.call      (typeof(object), "ReferenceEquals", typeof(object), typeof(object))
+						.end();
 				}
 			}
 			else
 			{
 				emit
 					.ldarg_0
-					.callvirt(Context.CurrentProperty.GetGetMethod(true))
+					.callvirt (Context.CurrentProperty.GetGetMethod(true))
 					.ldarg_1
-					.call(op_InequalityMethod)
+					.call     (op_InequalityMethod)
 					.ldc_i4_0
-					.ceq.end();
+					.ceq
+					.end();
 			}
 
 			if (_skipSetterOnNoChange)

@@ -2,7 +2,7 @@ using System;
 using System.Collections;
 using System.Reflection;
 using System.Reflection.Emit;
-
+using BLToolkit.Properties;
 using BLToolkit.Reflection;
 using BLToolkit.Reflection.Emit;
 
@@ -272,7 +272,7 @@ namespace BLToolkit.TypeBuilder.Builders
 						return;
 
 					string message = string.Format(
-						"Could not build the '{0}' property of the '{1}' type: type '{2}' has to have public default constructor.",
+						Resources.TypeBuilder_PropertyTypeHasNoPublicDefaultCtor,
 						Context.CurrentProperty.Name,
 						Context.Type.FullName,
 						objectType.FullName);
@@ -379,7 +379,16 @@ namespace BLToolkit.TypeBuilder.Builders
 			Type[] types = new Type[parameters.Length];
 
 			for (int i = 0; i < parameters.Length; i++)
-				types[i] = parameters[i] != null? parameters[i].GetType(): typeof(object);
+			{
+				if (parameters[i] != null)
+				{
+					Type t = parameters[i].GetType();
+
+					types[i] = (t.IsEnum) ? Enum.GetUnderlyingType(t) : t;
+				}
+				else
+					types[i] = typeof(object);
+			}
 
 			ConstructorInfo ci = objectType.GetPublicConstructor(types);
 
@@ -389,11 +398,11 @@ namespace BLToolkit.TypeBuilder.Builders
 					return;
 
 				throw new TypeBuilderException(
-					string.Format(
-						"Could not build the '{0}' property of the '{1}' type: {2}constructor not found for the '{3}' type.",
+					string.Format(types.Length == 0?
+							Resources.TypeBuilder_PropertyTypeHasNoPublicDefaultCtor:
+							Resources.TypeBuilder_PropertyTypeHasNoPublicCtor,
 						Context.CurrentProperty.Name,
 						Context.Type.FullName,
-						types.Length == 0? "default ": "",
 						objectType.FullName));
 			}
 
@@ -412,7 +421,7 @@ namespace BLToolkit.TypeBuilder.Builders
 					{
 						if (!pi[i].ParameterType.IsValueType)
 							emit.box(oType);
-						else if (oType != pi[i].ParameterType)
+						else if (Type.GetTypeCode(oType) != Type.GetTypeCode(pi[i].ParameterType))
 							emit.conv(pi[i].ParameterType);
 					}
 				}
@@ -602,8 +611,7 @@ namespace BLToolkit.TypeBuilder.Builders
 				if (holderCi == null)
 				{
 					string message = string.Format(
-						"Could not build the '{0}' property of the '{1}' type: " +
-						"type '{2}' has to have constructor taking type '{3}'.",
+						Resources.TypeBuilder_PropertyTypeHasNoCtorWithParamType,
 						Context.CurrentProperty.Name,
 						Context.Type.FullName,
 						fieldType.FullName,
@@ -906,10 +914,9 @@ namespace BLToolkit.TypeBuilder.Builders
 					else
 					{
 						if (Context.Type.GetConstructors().Length > 0)
-							throw new TypeBuilderException(
-								string.Format(
-									"Could not build the '{0}' type: default constructor not found.",
-									Context.Type.FullName));
+							throw new TypeBuilderException(string.Format(
+								Resources.TypeBuilder_NoDefaultCtor,
+								Context.Type.FullName));
 					}
 				}
 			}
@@ -942,8 +949,7 @@ namespace BLToolkit.TypeBuilder.Builders
 					{
 						if (Context.Type.GetConstructors().Length > 0)
 							throw new TypeBuilderException(
-								string.Format(
-									"Could not build the '{0}' type: default constructor not found.",
+								string.Format(Resources.TypeBuilder_NoDefaultCtor,
 									Context.Type.FullName));
 					}
 				}
