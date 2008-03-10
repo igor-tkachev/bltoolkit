@@ -5,6 +5,7 @@ using System.Data.SqlTypes;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Xml;
+using System.Xml.Serialization;
 
 using BLToolkit.Common;
 using BLToolkit.ComponentModel;
@@ -215,7 +216,7 @@ namespace BLToolkit.EditableObjects
 		}
 
 		private int _notNotifyChangesCount = 0;
-		[MapIgnore, Bindable(false)]
+		[MapIgnore, Bindable(false), XmlIgnore]
 		public  bool  NotifyChanges
 		{
 			get { return _notNotifyChangesCount == 0;   }

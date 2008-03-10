@@ -25,5 +25,15 @@ namespace BLToolkit.EditableObjects
 		}
 			
 		#endregion
+
+		#region Copy
+
+		public void CopyTo(T dest)
+		{
+			TypeAccessor.Copy(this, dest);
+		}
+
+		#endregion
+
 	}
 }
