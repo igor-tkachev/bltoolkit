@@ -306,7 +306,7 @@ namespace BLToolkit.Data.DataProvider
 									continue;
 								}
 
-								streams[i] = CopyStream(streams[i]);
+								streams[i] = CopyStream(streams[i], (OracleCommand)command);
 							}
 						}
 						else if (oraParameter.Value is XmlDocument[])
@@ -395,7 +395,7 @@ namespace BLToolkit.Data.DataProvider
 					if (!(stream is OracleBFile) && !(stream is OracleBlob) &&
 						!(stream is OracleClob) && !(stream is OracleXmlStream))
 					{
-						oraParameter.Value = CopyStream(stream);
+						oraParameter.Value = CopyStream(stream, (OracleCommand)command);
 					}
 				}
 				else if (oraParameter.Value is XmlDocument)
@@ -451,9 +451,9 @@ namespace BLToolkit.Data.DataProvider
 			base.AttachParameter(command, parameter);
 		}
 
-		private static Stream CopyStream(Stream stream)
+		private static Stream CopyStream(Stream stream, OracleCommand cmd)
 		{
-			OracleBlob ret = new OracleBlob();
+			OracleBlob ret = new OracleBlob(cmd.Connection);
 			Byte[] bytes = BLToolkit.Common.Convert.ToByteArray(stream);
 			ret.Write(bytes, 0, bytes.Length);
 			return ret;

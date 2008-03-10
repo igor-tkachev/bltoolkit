@@ -1535,7 +1535,7 @@ namespace BLToolkit.Data
 
 						foreach (ConnectionStringSettings css in ConfigurationManager.ConnectionStrings)
 						{
-							if (css.Name != "LocalSqlServer")
+							if (!css.ElementInformation.Source.EndsWith("machine.config", StringComparison.OrdinalIgnoreCase))
 							{
 								_defaultConfiguration = css.Name;
 								break;
