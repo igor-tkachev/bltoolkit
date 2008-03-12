@@ -1535,7 +1535,8 @@ namespace BLToolkit.Data
 
 						foreach (ConnectionStringSettings css in ConfigurationManager.ConnectionStrings)
 						{
-							if (!css.ElementInformation.Source.EndsWith("machine.config", StringComparison.OrdinalIgnoreCase))
+							if (css.ElementInformation.Source != null &&
+								!css.ElementInformation.Source.EndsWith("machine.config", StringComparison.OrdinalIgnoreCase))
 							{
 								_defaultConfiguration = css.Name;
 								break;
