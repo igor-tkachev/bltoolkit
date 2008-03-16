@@ -112,6 +112,8 @@ namespace BLToolkit.Data.DataProvider
 			get { return typeof(SqlConnection); }
 		}
 
+		public const string NameString = "Sql";
+
 		/// <summary>
 		/// Returns the data provider name.
 		/// </summary>
@@ -122,7 +124,7 @@ namespace BLToolkit.Data.DataProvider
 		/// <value>Data provider name.</value>
 		public override string Name
 		{
-			get { return "Sql"; }
+			get { return NameString; }
 		}
 	}
 }

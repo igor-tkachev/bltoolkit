@@ -110,6 +110,8 @@ namespace BLToolkit.Data.DataProvider
 			get { return typeof(OracleConnection); }
 		}
 
+		public const string NameString = "Oracle";
+
 		/// <summary>
 		/// Returns the data provider name.
 		/// </summary>
@@ -120,7 +122,7 @@ namespace BLToolkit.Data.DataProvider
 		/// <value>Data provider name.</value>
 		public override string Name
 		{
-			get { return "Oracle"; }
+			get { return NameString; }
 		}
 	}
 }

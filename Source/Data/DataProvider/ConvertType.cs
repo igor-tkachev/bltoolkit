@@ -8,7 +8,7 @@ namespace BLToolkit.Data.DataProvider
 		///     firstName -> @firstName
 		/// for the following query:
 		///     SELECT * FROM Person WHERE FirstName = @firstName
-		///                                            ^ here it go
+		///                                            ^ here
 		/// </summary>
 		NameToQueryParameter,
 
@@ -18,7 +18,7 @@ namespace BLToolkit.Data.DataProvider
 		///     firstName -> @firstName
 		/// for the following query:
 		///     db.Parameter("@firstName") = "John";
-		///                   ^ here it go
+		///                   ^ here
 		/// </summary>
 		NameToParameter,
 

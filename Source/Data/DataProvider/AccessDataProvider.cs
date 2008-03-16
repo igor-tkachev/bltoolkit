@@ -7,7 +7,7 @@ namespace BLToolkit.Data.DataProvider
 {
 	public sealed class AccessDataProvider : OleDbDataProvider
 	{
-		private static Regex     _paramsExp;
+		private static Regex _paramsExp;
 
 		// Based on idea from http://qapi.blogspot.com/2006/12/deriveparameters-oledbprovider-ii.html
 		//
@@ -198,9 +198,11 @@ namespace BLToolkit.Data.DataProvider
 			base.AttachParameter(command, parameter);
 		}
 
+		public new const string NameString = "Access";
+
 		public override string Name
 		{
-			get { return "Access"; }
+			get { return NameString; }
 		}
 	}
 }

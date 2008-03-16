@@ -112,6 +112,8 @@ namespace BLToolkit.Data.DataProvider
 			get { return typeof(OleDbConnection); }
 		}
 
+		public const string NameString = "OleDb";
+
 		/// <summary>
 		/// Returns the data provider name.
 		/// </summary>
@@ -122,7 +124,7 @@ namespace BLToolkit.Data.DataProvider
 		/// <value>Data provider name.</value>
 		public override string Name
 		{
-			get { return "OleDb"; }
+			get { return NameString; }
 		}
 	}
 }

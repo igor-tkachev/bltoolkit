@@ -1355,7 +1355,7 @@ namespace BLToolkit.Data
 			new Dictionary<Type,   DataProviderBase>(4);
 		private static readonly object    _dataProviderListLock = new object();
 
-		private const string ProviderNameDivider = ".";
+		public const string ProviderNameDivider = ".";
 
 		/// <summary>
 		/// Adds a new data provider.
