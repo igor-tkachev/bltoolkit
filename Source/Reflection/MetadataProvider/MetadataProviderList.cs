@@ -15,9 +15,8 @@ namespace BLToolkit.Reflection.MetadataProvider
 		{
 			AddProvider(new ExtensionMetadataProvider());
 			AddProvider(new AttributeMetadataProvider());
-
 #if FW3
-			AddProvider(new MapLinqMetadataProvider());
+			AddProvider(new LinqMetadataProvider());
 #endif
 		}
 
@@ -198,6 +197,57 @@ namespace BLToolkit.Reflection.MetadataProvider
 			}
 
 			return base.GetNullValue(mapper, member, out isSet);
+		}
+
+		#endregion
+
+		#region GetTableName
+
+		public override string GetTableName(Type type, ExtensionList extensions, out bool isSet)
+		{
+			foreach (MetadataProviderBase p in _list)
+			{
+				string value = p.GetTableName(type, extensions, out isSet);
+
+				if (isSet)
+					return value;
+			}
+
+			return base.GetTableName(type, extensions, out isSet);
+		}
+
+		#endregion
+
+		#region GetPrimaryKeyOrder
+
+		public override int GetPrimaryKeyOrder(Type type, TypeExtension typeExt, MemberAccessor member, out bool isSet)
+		{
+			foreach (MetadataProviderBase p in _list)
+			{
+				int value = p.GetPrimaryKeyOrder(type, typeExt, member, out isSet);
+
+				if (isSet)
+					return value;
+			}
+
+			return base.GetPrimaryKeyOrder(type, typeExt, member, out isSet);
+		}
+
+		#endregion
+
+		#region GetNonUpdatableFlag
+
+		public override bool GetNonUpdatableFlag(Type type, TypeExtension typeExt, MemberAccessor member, out bool isSet)
+		{
+			foreach (MetadataProviderBase p in _list)
+			{
+				bool value = p.GetNonUpdatableFlag(type, typeExt, member, out isSet);
+
+				if (isSet)
+					return value;
+			}
+
+			return base.GetNonUpdatableFlag(type, typeExt, member, out isSet);
 		}
 
 		#endregion

@@ -4,6 +4,7 @@ using System.Data;
 
 using BLToolkit.Aspects;
 using BLToolkit.Data;
+using BLToolkit.Mapping;
 using BLToolkit.Reflection.Extension;
 
 namespace BLToolkit.DataAccess
@@ -84,13 +85,7 @@ namespace BLToolkit.DataAccess
 		private ExtensionList _extensions;
 		public  ExtensionList  Extensions
 		{
-			get
-			{
-				return _extensions == null && _dbManager != null ?
-					_dbManager.MappingSchema.Extensions :
-					_extensions;
-			}
-
+			get { return _extensions ?? (_extensions = MappingSchema.Extensions); }
 			set { _extensions = value; }
 		}
 
@@ -100,6 +95,13 @@ namespace BLToolkit.DataAccess
 		{
 			get { return _disposeDbManager;  }
 			set { _disposeDbManager = value; }
+		}
+
+		private MappingSchema _mappingSchema;
+		public  MappingSchema  MappingSchema
+		{
+			get { return _mappingSchema ?? (_mappingSchema = _dbManager != null? _dbManager.MappingSchema: Map.DefaultSchema); }
+			set { _mappingSchema = value; }
 		}
 
 		#endregion
@@ -162,19 +164,8 @@ namespace BLToolkit.DataAccess
 		[NoInterception]
 		protected virtual string GetTableName(Type type)
 		{
-			TypeExtension typeExt = TypeExtension.GetTypeExtension(type, Extensions);
-
-			object value = typeExt.Attributes["TableName"].Value;
-
-			if (value != null)
-				return value.ToString();
-
-			object[] attrs = type.GetCustomAttributes(typeof(TableNameAttribute), true);
-
-			if (attrs.Length > 0)
-				return ((TableNameAttribute)attrs[0]).Name;
-
-			return type.Name;
+			bool isSet;
+			return MappingSchema.MetadataProvider.GetTableName(type, Extensions, out isSet);
 		}
 
 		#endregion

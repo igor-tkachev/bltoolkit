@@ -8,6 +8,7 @@ using BLToolkit.Data.DataProvider;
 using BLToolkit.Mapping;
 using BLToolkit.Reflection;
 using BLToolkit.Reflection.Extension;
+using BLToolkit.Reflection.MetadataProvider;
 
 namespace BLToolkit.DataAccess
 {
@@ -52,11 +53,11 @@ namespace BLToolkit.DataAccess
 			{
 				MemberAccessor ma = mm.MemberAccessor;
 
-				if (typeExt[ma.Name]["PrimaryKey"].Value          == null &&
-					ma.GetAttributes(typeof(PrimaryKeyAttribute)) == null)
-				{
+				bool isSet;
+				MappingSchema.MetadataProvider.GetPrimaryKeyOrder(om.TypeAccessor.OriginalType, typeExt, ma, out isSet);
+
+				if (!isSet)
 					list.Add(mm);
-				}
 			}
 
 			return (MemberMapper[])list.ToArray(typeof(MemberMapper));
@@ -101,19 +102,11 @@ namespace BLToolkit.DataAccess
 
 					if (TypeHelper.IsScalar(ma.Type))
 					{
-						object value = typeExt[ma.Name]["PrimaryKey"].Value;
+						bool isSet;
+						int order = MappingSchema.MetadataProvider.GetPrimaryKeyOrder(type, typeExt, ma, out isSet);
 
-						if (value != null)
-						{
-							list.Add(new MemberOrder(mm, (int)TypeExtension.ChangeType(value, typeof(int))));
-						}
-						else
-						{
-							object[] attrs = ma.GetAttributes(typeof(PrimaryKeyAttribute));
-
-							if (attrs != null)
-								list.Add(new MemberOrder(mm, ((PrimaryKeyAttribute)attrs[0]).Order));
-						}
+						if (isSet)
+							list.Add(new MemberOrder(mm, order));
 					}
 				}
 
@@ -200,11 +193,12 @@ namespace BLToolkit.DataAccess
 
 		protected SqlQueryInfo CreateInsertSqlText(DbManager db, Type type)
 		{
-			TypeExtension typeExt = TypeExtension.GetTypeExtension(type, Extensions);
-			ObjectMapper  om      = db.MappingSchema.GetObjectMapper(type);
-			ArrayList     list    = new ArrayList();
-			StringBuilder sb      = new StringBuilder();
-			SqlQueryInfo  query   = new SqlQueryInfo(om);
+			TypeExtension   typeExt = TypeExtension.GetTypeExtension(type, Extensions);
+			ObjectMapper    om      = db.MappingSchema.GetObjectMapper(type);
+			ArrayList       list    = new ArrayList();
+			StringBuilder   sb      = new StringBuilder();
+			SqlQueryInfo    query   = new SqlQueryInfo(om);
+			MetadataProviderBase mp = MappingSchema.MetadataProvider;
 
 			sb.AppendFormat("INSERT INTO {0} (\n",
 				db.DataProvider.Convert(GetTableName(type), ConvertType.NameToQueryTable));
@@ -213,10 +207,9 @@ namespace BLToolkit.DataAccess
 			{
 				// IT: This works incorrectly for complex mappers.
 				//
-				object value = typeExt[mm.ComplexMemberAccessor.Name]["NonUpdatable"].Value;
+				bool isSet;
 
-				if ((value != null && (bool)TypeExtension.ChangeType(value, typeof(bool)) == false) ||
-					(value == null && mm.ComplexMemberAccessor.GetAttributes(typeof(NonUpdatableAttribute)) == null))
+				if (!mp.GetNonUpdatableFlag(type, typeExt, mm.ComplexMemberAccessor, out isSet) || !isSet)
 				{
 					sb.AppendFormat("\t{0},\n",
 						db.DataProvider.Convert(mm.Name, ConvertType.NameToQueryField));
@@ -248,20 +241,20 @@ namespace BLToolkit.DataAccess
 
 		protected SqlQueryInfo CreateUpdateSqlText(DbManager db, Type type)
 		{
-			TypeExtension typeExt = TypeExtension.GetTypeExtension(type, Extensions);
-			ObjectMapper  om      = db.MappingSchema.GetObjectMapper(type);
-			StringBuilder sb      = new StringBuilder();
-			SqlQueryInfo  query   = new SqlQueryInfo(om);
+			TypeExtension   typeExt = TypeExtension.GetTypeExtension(type, Extensions);
+			ObjectMapper    om      = db.MappingSchema.GetObjectMapper(type);
+			StringBuilder   sb      = new StringBuilder();
+			SqlQueryInfo    query   = new SqlQueryInfo(om);
+			MetadataProviderBase mp = MappingSchema.MetadataProvider;
 
 			sb.AppendFormat("UPDATE\n\t{0}\nSET\n",
 				db.DataProvider.Convert(GetTableName(type), ConvertType.NameToQueryTable));
 
 			foreach (MemberMapper mm in GetFieldList(om))
 			{
-				object value = typeExt[mm.MemberAccessor.Name]["NonUpdatable"].Value;
+				bool isSet;
 
-				if ((value != null && (bool)TypeExtension.ChangeType(value, typeof(bool)) == false) ||
-					(value == null && mm.MemberAccessor.GetAttributes(typeof(NonUpdatableAttribute)) == null))
+				if (!mp.GetNonUpdatableFlag(type, typeExt, mm.MemberAccessor, out isSet) || !isSet)
 				{
 					SqlQueryParameterInfo p = query.AddParameter(
 						db.DataProvider.Convert(mm.Name, ConvertType.NameToQueryParameter).ToString(),

@@ -136,6 +136,36 @@ namespace BLToolkit.Reflection.MetadataProvider
 
 		#endregion
 
+		#region GetTableName
+
+		public virtual string GetTableName(Type type, ExtensionList extensions, out bool isSet)
+		{
+			isSet = false;
+			return type.Name;
+		}
+
+		#endregion
+
+		#region GetPrimaryKeyOrder
+
+		public virtual int GetPrimaryKeyOrder(Type type, TypeExtension typeExt, MemberAccessor member, out bool isSet)
+		{
+			isSet = false;
+			return 0;
+		}
+
+		#endregion
+
+		#region GetNonUpdatableFlag
+
+		public virtual bool GetNonUpdatableFlag(Type type, TypeExtension typeExt, MemberAccessor member, out bool isSet)
+		{
+			isSet = false;
+			return false;
+		}
+
+		#endregion
+
 		#region Static Members
 
 		public static event OnCreateProvider OnCreateProvider;

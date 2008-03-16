@@ -248,5 +248,58 @@ namespace BLToolkit.Reflection.MetadataProvider
 		}
 
 		#endregion
+
+		#region GetTableName
+
+		public override string GetTableName(Type type, ExtensionList extensions, out bool isSet)
+		{
+			TypeExtension typeExt = TypeExtension.GetTypeExtension(type, extensions);
+
+			object value = typeExt.Attributes["TableName"].Value;
+
+			if (value != null)
+			{
+				isSet = true;
+				return value.ToString();
+			}
+
+			return base.GetTableName(type, extensions, out isSet);
+		}
+
+		#endregion
+
+		#region GetPrimaryKeyOrder
+
+		public override int GetPrimaryKeyOrder(Type type, TypeExtension typeExt, MemberAccessor member, out bool isSet)
+		{
+			object value = typeExt[member.Name]["PrimaryKey"].Value;
+
+			if (value != null)
+			{
+				isSet = true;
+				return (int)TypeExtension.ChangeType(value, typeof(int));
+			}
+
+			return base.GetPrimaryKeyOrder(type, typeExt, member, out isSet);
+		}
+
+		#endregion
+
+		#region GetNonUpdatableFlag
+
+		public override bool GetNonUpdatableFlag(Type type, TypeExtension typeExt, MemberAccessor member, out bool isSet)
+		{
+			object value = typeExt[member.Name]["NonUpdatable"].Value;
+
+			if (value != null)
+			{
+				isSet = true;
+				return (bool)TypeExtension.ChangeType(value, typeof(bool));
+			}
+
+			return base.GetNonUpdatableFlag(type, typeExt, member, out isSet);
+		}
+
+		#endregion
 	}
 }

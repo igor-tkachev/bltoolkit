@@ -2,11 +2,11 @@ using System;
 using System.Collections;
 using System.Reflection;
 
-using BLToolkit.Mapping;
-
 namespace BLToolkit.Reflection.MetadataProvider
 {
+	using DataAccess;
 	using Extension;
+	using Mapping;
 
 	public class AttributeMetadataProvider : MetadataProviderBase
 	{
@@ -400,6 +400,55 @@ namespace BLToolkit.Reflection.MetadataProvider
 
 			isSet = false;
 			return null;
+		}
+
+		#endregion
+
+		#region GetTableName
+
+		public override string GetTableName(Type type, ExtensionList extensions, out bool isSet)
+		{
+			object[] attrs = type.GetCustomAttributes(typeof(TableNameAttribute), true);
+
+			if (attrs.Length > 0)
+			{
+				isSet = true;
+				return ((TableNameAttribute)attrs[0]).Name;
+			}
+
+			return base.GetTableName(type, extensions, out isSet);
+		}
+
+		#endregion
+
+		#region GetPrimaryKeyOrder
+
+		public override int GetPrimaryKeyOrder(Type type, TypeExtension typeExt, MemberAccessor member, out bool isSet)
+		{
+			object[] attrs = member.GetAttributes(typeof(PrimaryKeyAttribute));
+
+			if (attrs != null)
+			{
+				isSet = true;
+				return ((PrimaryKeyAttribute)attrs[0]).Order;
+			}
+
+			return base.GetPrimaryKeyOrder(type, typeExt, member, out isSet);
+		}
+
+		#endregion
+
+		#region GetNonUpdatableFlag
+
+		public override bool GetNonUpdatableFlag(Type type, TypeExtension typeExt, MemberAccessor member, out bool isSet)
+		{
+			if (member.GetAttributes(typeof(NonUpdatableAttribute)) == null)
+			{
+				isSet = true;
+				return true;
+			}
+
+			return base.GetNonUpdatableFlag(type, typeExt, member, out isSet);
 		}
 
 		#endregion
