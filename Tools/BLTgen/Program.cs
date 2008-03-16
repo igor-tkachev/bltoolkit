@@ -167,8 +167,7 @@ namespace BLTgen
 
 		private static string GetDescription(MemberMapper mm)
 		{
-			DescriptionAttribute desc = ((DescriptionAttribute)
-				mm.MemberAccessor.GetAttribute(typeof(DescriptionAttribute)));
+			DescriptionAttribute desc = mm.MemberAccessor.GetAttribute<DescriptionAttribute>();
 
 			return (null != desc) ? desc.Description : string.Empty;
 		}

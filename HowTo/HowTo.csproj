@@ -105,9 +105,9 @@
     <Compile Include="TypeBuilder\InternalTypes.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Source\BLToolkit.2008.csproj">
+    <ProjectReference Include="..\Source\BLToolkit.2008.FW3.csproj">
       <Project>{0C325F5D-E50E-4340-8724-D29896CCC583}</Project>
-      <Name>BLToolkit.2008</Name>
+      <Name>BLToolkit.2008.FW3</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

@@ -32,7 +32,8 @@ namespace BLToolkit.Mapping
 
 			MemberMapper mm = null;
 
-			Attribute attr = mapMemberInfo.MemberAccessor.GetAttribute(typeof(MemberMapperAttribute));
+			MemberMapperAttribute attr = mapMemberInfo.MemberAccessor.GetAttribute<MemberMapperAttribute>();
+
 			if (attr == null)
 			{
 				object[] attrs = TypeHelper.GetAttributes(mapMemberInfo.Type, typeof(MemberMapperAttribute));
@@ -47,7 +48,7 @@ namespace BLToolkit.Mapping
 				}
 			}
 			else
-				mm = ((MemberMapperAttribute)attr).MemberMapper;
+				mm = attr.MemberMapper;
 
 			if (mm == null)
 			{
@@ -240,7 +241,7 @@ namespace BLToolkit.Mapping
 				if (GetIgnore(ma))
 					continue;
 
-				MapFieldAttribute mapFieldAttr = (MapFieldAttribute)ma.GetAttribute(typeof(MapFieldAttribute));
+				MapFieldAttribute mapFieldAttr = ma.GetAttribute<MapFieldAttribute>();
 
 				if (mapFieldAttr == null || (mapFieldAttr.OrigName == null && mapFieldAttr.Format == null))
 				{

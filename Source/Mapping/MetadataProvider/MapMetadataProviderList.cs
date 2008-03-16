@@ -14,6 +14,10 @@ namespace BLToolkit.Mapping.MetadataProvider
 		{
 			AddProvider(new MapExtensionMetadataProvider());
 			AddProvider(new MapAttributeMetadataProvider());
+
+#if FW3
+			AddProvider(new MapLinqMetadataProvider());
+#endif
 		}
 
 		private readonly ArrayList _list = new ArrayList();

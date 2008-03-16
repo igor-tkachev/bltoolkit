@@ -230,7 +230,7 @@ namespace BLToolkit.Mapping.MetadataProvider
 			if (GetValue(mapper, member, "NullValue", out isSet) != null)
 				return true;
 
-			return false;
+			return base.GetNullable(mapper, member, out isSet);
 		}
 
 		#endregion

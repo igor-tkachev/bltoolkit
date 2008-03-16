@@ -79,9 +79,9 @@
       <Project>{8DA66999-005A-49AB-86A9-2C1F62905B50}</Project>
       <Name>HowTo</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\Source\BLToolkit.2008.csproj">
+    <ProjectReference Include="..\..\Source\BLToolkit.2008.FW3.csproj">
       <Project>{0C325F5D-E50E-4340-8724-D29896CCC583}</Project>
-      <Name>BLToolkit.2008</Name>
+      <Name>BLToolkit.2008.FW3</Name>
     </ProjectReference>
     <ProjectReference Include="..\CS\UnitTests.CS.csproj">
       <Project>{2BB4AD77-190F-4D7E-A83E-7B254A0A1FCA}</Project>

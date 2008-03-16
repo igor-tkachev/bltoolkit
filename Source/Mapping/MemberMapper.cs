@@ -301,8 +301,7 @@ namespace BLToolkit.Mapping
 			{
 				base.Init(mapMemberInfo);
 
-				NoInstanceAttribute attr = 
-					(NoInstanceAttribute)_memberAccessor.GetAttribute(typeof(NoInstanceAttribute));
+				NoInstanceAttribute attr = _memberAccessor.GetAttribute<NoInstanceAttribute>();
 
 				if (attr != null)
 				{

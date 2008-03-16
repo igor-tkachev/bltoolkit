@@ -11,10 +11,22 @@ namespace BLToolkit.Mapping.MetadataProvider
 	{
 		#region Helpers
 
-		private object[] _mapFieldAttributes;
+		private ObjectMapper _mapper;
+		private object[]     _mapFieldAttributes;
+
+		private void EnsureMapper(ObjectMapper mapper)
+		{
+			if (_mapper != mapper)
+			{
+				_mapper             = mapper;
+				_mapFieldAttributes = null;
+			}
+		}
 
 		private object[] GetMapFieldAttributes(ObjectMapper mapper)
 		{
+			EnsureMapper(mapper);
+
 			if (_mapFieldAttributes == null)
 				_mapFieldAttributes = TypeHelper.GetAttributes(mapper.TypeAccessor.Type, typeof(MapFieldAttribute));
 
@@ -27,7 +39,7 @@ namespace BLToolkit.Mapping.MetadataProvider
 
 		public override string GetFieldName(ObjectMapper mapper, MemberAccessor member, out bool isSet)
 		{
-			MapFieldAttribute a = (MapFieldAttribute)member.GetAttribute(typeof(MapFieldAttribute));
+			MapFieldAttribute a = member.GetAttribute<MapFieldAttribute>();
 
 			if (a != null)
 			{
@@ -65,8 +77,8 @@ namespace BLToolkit.Mapping.MetadataProvider
 
 		public override bool GetIgnore(ObjectMapper mapper, MemberAccessor member, out bool isSet)
 		{
-			MapIgnoreAttribute attr = 
-				(MapIgnoreAttribute)member.GetAttribute(typeof(MapIgnoreAttribute));
+			MapIgnoreAttribute attr = member.GetAttribute<MapIgnoreAttribute>();
+
 			if (attr == null)
 				attr = (MapIgnoreAttribute)TypeHelper.GetFirstAttribute(member.Type, typeof(MapIgnoreAttribute));
 
@@ -76,7 +88,7 @@ namespace BLToolkit.Mapping.MetadataProvider
 				return attr.Ignore;
 			}
 
-			if (member.GetAttribute(typeof(MapImplicitAttribute)) != null ||
+			if (member.GetAttribute<MapImplicitAttribute>() != null ||
 				TypeHelper.GetFirstAttribute(member.Type, typeof(MapImplicitAttribute)) != null)
 			{
 				isSet = true;
@@ -94,8 +106,7 @@ namespace BLToolkit.Mapping.MetadataProvider
 		{
 			if (member.Type == typeof(string))
 			{
-				TrimmableAttribute attr =
-					(TrimmableAttribute)member.GetAttribute(typeof(TrimmableAttribute));
+				TrimmableAttribute attr = member.GetAttribute<TrimmableAttribute>();
 
 				if (attr != null)
 				{
@@ -222,8 +233,7 @@ namespace BLToolkit.Mapping.MetadataProvider
 		{
 			// Check member [DefaultValue(0)]
 			//
-			DefaultValueAttribute attr =
-				(DefaultValueAttribute)member.GetAttribute(typeof(DefaultValueAttribute));
+			DefaultValueAttribute attr = member.GetAttribute<DefaultValueAttribute>();
 
 			if (attr != null)
 			{
@@ -292,8 +302,7 @@ namespace BLToolkit.Mapping.MetadataProvider
 		{
 			// Check member [Nullable(true | false)]
 			//
-			NullableAttribute attr1 =
-				(NullableAttribute)member.GetAttribute(typeof(NullableAttribute));
+			NullableAttribute attr1 = member.GetAttribute<NullableAttribute>();
 
 			if (attr1 != null)
 			{
@@ -303,8 +312,7 @@ namespace BLToolkit.Mapping.MetadataProvider
 
 			// Check member [NullValue(0)]
 			//
-			NullValueAttribute attr2 =
-				(NullValueAttribute)member.GetAttribute(typeof(NullValueAttribute));
+			NullValueAttribute attr2 = member.GetAttribute<NullValueAttribute>();
 
 			if (attr2 != null)
 				return isSet = true;
@@ -332,13 +340,12 @@ namespace BLToolkit.Mapping.MetadataProvider
 			if (member.Type.IsEnum)
 				return isSet = mapper.MappingSchema.GetNullValue(member.Type) != null;
 
-			isSet = false;
-			return false;
+			return base.GetNullable(mapper, member, out isSet);
 		}
 
 		#endregion
 
-		#region GetNullable
+		#region GetNullValue
 
 		private static object CheckNullValue(object value, MemberAccessor member)
 		{
@@ -357,8 +364,7 @@ namespace BLToolkit.Mapping.MetadataProvider
 		{
 			// Check member [NullValue(0)]
 			//
-			NullValueAttribute attr =
-				(NullValueAttribute)member.GetAttribute(typeof(NullValueAttribute));
+			NullValueAttribute attr = member.GetAttribute<NullValueAttribute>();
 
 			if (attr != null)
 			{

@@ -75,11 +75,19 @@ namespace BLToolkit.Reflection
 
 		#region Public Methods
 
+		[Obsolete]
 		public Attribute GetAttribute(Type attributeType)
 		{
 			object[] attrs = _memberInfo.GetCustomAttributes(attributeType, true);
 
 			return attrs.Length > 0? (Attribute)attrs[0]: null;
+		}
+
+		public T GetAttribute<T>()
+		{
+			object[] attrs = _memberInfo.GetCustomAttributes(typeof(T), true);
+
+			return (T)(attrs.Length > 0? attrs[0]: null);
 		}
 
 		public object[] GetAttributes(Type attributeType)

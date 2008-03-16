@@ -16,6 +16,8 @@ Enhancement
 - Extended support for IsNull & Nullable types in MemberAccessor.
 - Support for enum values in EmitHelper.LoadWellKnownValue/LoadInitValue and so on.
 - Generic GetValue/SetValue methods for ValueHolders.
+- Different projects to support FW 2.0 & FW 3.5.
+- MapLinqMetadataProvider to support Linq To SQL attributes.
 
 v 2.0.7
 
