@@ -11,9 +11,9 @@ using System.Diagnostics.CodeAnalysis;
 using System.Xml;
 
 using BLToolkit.Common;
-using BLToolkit.Mapping.MetadataProvider;
 using BLToolkit.Reflection;
 using BLToolkit.Reflection.Extension;
+using BLToolkit.Reflection.MetadataProvider;
 
 using KeyValue = System.Collections.Generic.KeyValuePair<System.Type,System.Type>;
 using Convert  = BLToolkit.Common.Convert;
@@ -112,8 +112,8 @@ namespace BLToolkit.Mapping
 
 		#region MetadataProvider
 
-		private MapMetadataProvider _metadataProvider;
-		public  MapMetadataProvider  MetadataProvider
+		private MetadataProviderBase _metadataProvider;
+		public  MetadataProviderBase  MetadataProvider
 		{
 			[DebuggerStepThrough]
 			get
@@ -125,9 +125,9 @@ namespace BLToolkit.Mapping
 			set { _metadataProvider = value; }
 		}
 
-		protected virtual MapMetadataProvider CreateMetadataProvider()
+		protected virtual MetadataProviderBase CreateMetadataProvider()
 		{
-			return MapMetadataProvider.CreateProvider();
+			return MetadataProviderBase.CreateProvider();
 		}
 
 		#endregion

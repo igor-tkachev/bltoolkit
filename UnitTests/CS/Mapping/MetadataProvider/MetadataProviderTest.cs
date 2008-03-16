@@ -1,8 +1,8 @@
 using NUnit.Framework;
 
 using BLToolkit.Mapping;
-using BLToolkit.Mapping.MetadataProvider;
 using BLToolkit.Reflection;
+using BLToolkit.Reflection.MetadataProvider;
 using BLToolkit.Data;
 
 namespace Mapping.MetadataProvider
@@ -10,7 +10,7 @@ namespace Mapping.MetadataProvider
 	[TestFixture]
 	public class MetadataProviderTest
 	{
-		class CustomMetadataProvider : MapMetadataProvider
+		class CustomMetadataProvider : MetadataProviderBase
 		{
 			public override string GetFieldName(ObjectMapper mapper, MemberAccessor member, out bool isSet)
 			{
@@ -42,7 +42,7 @@ namespace Mapping.MetadataProvider
 			public string LastName;
 		}
 
-		static void MapMetadataProvider_OnCreateProvider(MapMetadataProvider parentProvider)
+		static void MapMetadataProvider_OnCreateProvider(MetadataProviderBase parentProvider)
 		{
 			parentProvider.AddProvider(new CustomMetadataProvider());
 		}
@@ -50,7 +50,7 @@ namespace Mapping.MetadataProvider
 		[Test]
 		public void Test()
 		{
-			MapMetadataProvider.OnCreateProvider += MapMetadataProvider_OnCreateProvider;
+			MetadataProviderBase.OnCreateProvider += MapMetadataProvider_OnCreateProvider;
 
 			string cmd = "SELECT '1' as FIRST_NAME, '2' as LAST_NAME";
 #if ORACLE || FIREBIRD
@@ -70,7 +70,7 @@ namespace Mapping.MetadataProvider
 		[TearDown]
 		public void TearDown()
 		{
-			MapMetadataProvider.OnCreateProvider -= MapMetadataProvider_OnCreateProvider;
+			MetadataProviderBase.OnCreateProvider -= MapMetadataProvider_OnCreateProvider;
 		}
 	}
 }

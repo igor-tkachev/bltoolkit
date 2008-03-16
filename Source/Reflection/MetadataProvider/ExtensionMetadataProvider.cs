@@ -2,12 +2,13 @@ using System;
 using System.Collections;
 using System.Reflection;
 
-using BLToolkit.Reflection;
-using BLToolkit.Reflection.Extension;
+using BLToolkit.Mapping;
 
-namespace BLToolkit.Mapping.MetadataProvider
+namespace BLToolkit.Reflection.MetadataProvider
 {
-	public class MapExtensionMetadataProvider : MapMetadataProvider
+	using Extension;
+
+	public class ExtensionMetadataProvider : MetadataProviderBase
 	{
 		#region Helpers
 

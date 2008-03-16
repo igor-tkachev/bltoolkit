@@ -1,29 +1,30 @@
 using System;
 
-using BLToolkit.Reflection;
-using BLToolkit.Reflection.Extension;
+using BLToolkit.Mapping;
 
-namespace BLToolkit.Mapping.MetadataProvider
+namespace BLToolkit.Reflection.MetadataProvider
 {
-	public delegate void                OnCreateProvider(MapMetadataProvider parentProvider);
-	public delegate MapMetadataProvider CreateProvider();
+	using Extension;
+
+	public delegate void                OnCreateProvider(MetadataProviderBase parentProvider);
+	public delegate MetadataProviderBase CreateProvider();
 	public delegate MemberMapper        EnsureMapperHandler(string mapName, string origName);
 
-	public abstract class MapMetadataProvider
+	public abstract class MetadataProviderBase
 	{
 		#region Provider Support
 
-		public virtual void AddProvider(MapMetadataProvider provider)
+		public virtual void AddProvider(MetadataProviderBase provider)
 		{
 		}
 
-		public virtual void InsertProvider(int index, MapMetadataProvider provider)
+		public virtual void InsertProvider(int index, MetadataProviderBase provider)
 		{
 		}
 
-		public virtual MapMetadataProvider[] GetProviders()
+		public virtual MetadataProviderBase[] GetProviders()
 		{
-			return new MapMetadataProvider[0];
+			return new MetadataProviderBase[0];
 		}
 
 		#endregion
@@ -146,9 +147,9 @@ namespace BLToolkit.Mapping.MetadataProvider
 			set { _createProvider = value ?? new CreateProvider(CreateInternal); }
 		}
 
-		private static MapMetadataProvider CreateInternal()
+		private static MetadataProviderBase CreateInternal()
 		{
-			MapMetadataProviderList list = new MapMetadataProviderList();
+			MetadataProviderList list = new MetadataProviderList();
 
 			if (OnCreateProvider != null)
 				OnCreateProvider(list);

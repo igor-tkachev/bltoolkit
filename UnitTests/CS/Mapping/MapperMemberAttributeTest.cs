@@ -1,8 +1,10 @@
 using System;
-using BLToolkit.Mapping.MetadataProvider;
-using BLToolkit.Reflection;
-using BLToolkit.Mapping;
+
 using NUnit.Framework;
+
+using BLToolkit.Mapping;
+using BLToolkit.Reflection;
+using BLToolkit.Reflection.MetadataProvider;
 
 namespace Mapping
 {
@@ -161,7 +163,7 @@ namespace Mapping
 
 		public class TestMappingSchema : MappingSchema
 		{
-			private class TestMapMetadataProvider : MapMetadataProvider
+			private class TestMapMetadataProvider : MetadataProviderBase
 			{
 				public override bool GetIgnore(ObjectMapper mapper, MemberAccessor member, out bool isSet)
 				{
@@ -189,9 +191,9 @@ namespace Mapping
 					return base.CreateMemberMapper(mapMemberInfo);
 				}
 
-				protected override MapMetadataProvider CreateMetadataProvider()
+				protected override MetadataProviderBase CreateMetadataProvider()
 				{
-					MapMetadataProvider provider = base.CreateMetadataProvider();
+					MetadataProviderBase provider = base.CreateMetadataProvider();
 					provider.AddProvider(new TestMapMetadataProvider());
 					return provider;
 				}

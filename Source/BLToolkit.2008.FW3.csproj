@@ -72,7 +72,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Mapping\MetadataProvider\MapLinqMetadataProvider.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -207,10 +206,6 @@
     <Compile Include="Mapping\SimpleSourceListMapper.cs" />
     <Compile Include="Mapping\MapImplicitAttribute.cs" />
     <Compile Include="Mapping\MapSetDataT.cs" />
-    <Compile Include="Mapping\MetadataProvider\MapAttributeMetadataProvider.cs" />
-    <Compile Include="Mapping\MetadataProvider\MapExtensionMetadataProvider.cs" />
-    <Compile Include="Mapping\MetadataProvider\MapMetadataProvider.cs" />
-    <Compile Include="Mapping\MetadataProvider\MapMetadataProviderList.cs" />
     <Compile Include="Mapping\ValueMapping.cs" />
     <Compile Include="Mapping\MapDataDestinationBase.cs" />
     <Compile Include="Mapping\MapDataSourceBase.cs" />
@@ -235,6 +230,11 @@
     <Compile Include="Patterns\DuckTypeBase.cs" />
     <Compile Include="Patterns\MustImplementAttribute.cs" />
     <Compile Include="Reflection\GenericBinder.cs" />
+    <Compile Include="Reflection\MetadataProvider\AttributeMetadataProvider.cs" />
+    <Compile Include="Reflection\MetadataProvider\ExtensionMetadataProvider.cs" />
+    <Compile Include="Reflection\MetadataProvider\LinqMetadataProvider.cs" />
+    <Compile Include="Reflection\MetadataProvider\MetadataProviderBase.cs" />
+    <Compile Include="Reflection\MetadataProvider\MetadataProviderList.cs" />
     <Compile Include="Reflection\XmlIncludeAbstractAttribute.cs" />
     <Compile Include="TypeBuilder\Builders\GeneratedAttributeBuilder.cs" />
     <Compile Include="TypeBuilder\Builders\DuckTypeBuilder.cs" />

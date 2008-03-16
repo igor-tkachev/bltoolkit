@@ -1,11 +1,9 @@
 ﻿using System;
 using System.Data.Linq.Mapping;
 
-using BLToolkit.Reflection;
-
-namespace BLToolkit.Mapping.MetadataProvider
+namespace BLToolkit.Reflection.MetadataProvider
 {
-	public class MapLinqMetadataProvider : MapMetadataProvider
+	public class LinqMetadataProvider : MetadataProviderBase
 	{
 		#region Helpers
 

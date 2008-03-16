@@ -1,19 +1,20 @@
 using System;
 using System.Collections;
 
-using BLToolkit.Reflection;
-using BLToolkit.Reflection.Extension;
+using BLToolkit.Mapping;
 
-namespace BLToolkit.Mapping.MetadataProvider
+namespace BLToolkit.Reflection.MetadataProvider
 {
-	public class MapMetadataProviderList : MapMetadataProvider, ICollection
+	using Extension;
+
+	public class MetadataProviderList : MetadataProviderBase, ICollection
 	{
 		#region Init
 
-		public MapMetadataProviderList()
+		public MetadataProviderList()
 		{
-			AddProvider(new MapExtensionMetadataProvider());
-			AddProvider(new MapAttributeMetadataProvider());
+			AddProvider(new ExtensionMetadataProvider());
+			AddProvider(new AttributeMetadataProvider());
 
 #if FW3
 			AddProvider(new MapLinqMetadataProvider());
@@ -26,19 +27,19 @@ namespace BLToolkit.Mapping.MetadataProvider
 
 		#region Provider Support
 
-		public override void AddProvider(MapMetadataProvider provider)
+		public override void AddProvider(MetadataProviderBase provider)
 		{
 			_list.Add(provider);
 		}
 
-		public override void InsertProvider(int index, MapMetadataProvider provider)
+		public override void InsertProvider(int index, MetadataProviderBase provider)
 		{
 			_list.Insert(index, provider);
 		}
 
-		public override MapMetadataProvider[] GetProviders()
+		public override MetadataProviderBase[] GetProviders()
 		{
-			return (MapMetadataProvider[])_list.ToArray(typeof(MapMetadataProvider));
+			return (MetadataProviderBase[])_list.ToArray(typeof(MetadataProviderBase));
 		}
 
 		#endregion
@@ -47,7 +48,7 @@ namespace BLToolkit.Mapping.MetadataProvider
 
 		public override string GetFieldName(ObjectMapper mapper, MemberAccessor member, out bool isSet)
 		{
-			foreach (MapMetadataProvider p in _list)
+			foreach (MetadataProviderBase p in _list)
 			{
 				string name = p.GetFieldName(mapper, member, out isSet);
 
@@ -64,7 +65,7 @@ namespace BLToolkit.Mapping.MetadataProvider
 
 		public override void EnsureMapper(ObjectMapper mapper, EnsureMapperHandler handler)
 		{
-			foreach (MapMetadataProvider p in _list)
+			foreach (MetadataProviderBase p in _list)
 				p.EnsureMapper(mapper, handler);
 		}
 
@@ -74,7 +75,7 @@ namespace BLToolkit.Mapping.MetadataProvider
 
 		public override bool GetIgnore(ObjectMapper mapper, MemberAccessor member, out bool isSet)
 		{
-			foreach (MapMetadataProvider p in _list)
+			foreach (MetadataProviderBase p in _list)
 			{
 				bool ignore = p.GetIgnore(mapper, member, out isSet);
 
@@ -93,7 +94,7 @@ namespace BLToolkit.Mapping.MetadataProvider
 		{
 			if (member.Type == typeof(string))
 			{
-				foreach (MapMetadataProvider p in _list)
+				foreach (MetadataProviderBase p in _list)
 				{
 					bool trimmable = p.GetTrimmable(mapper, member, out isSet);
 
@@ -111,7 +112,7 @@ namespace BLToolkit.Mapping.MetadataProvider
 
 		public override MapValue[] GetMapValues(ObjectMapper mapper, MemberAccessor member, out bool isSet)
 		{
-			foreach (MapMetadataProvider p in _list)
+			foreach (MetadataProviderBase p in _list)
 			{
 				MapValue[] value = p.GetMapValues(mapper, member, out isSet);
 
@@ -124,7 +125,7 @@ namespace BLToolkit.Mapping.MetadataProvider
 
 		public override MapValue[] GetMapValues(TypeExtension typeExt, Type type, out bool isSet)
 		{
-			foreach (MapMetadataProvider p in _list)
+			foreach (MetadataProviderBase p in _list)
 			{
 				MapValue[] value = p.GetMapValues(typeExt, type, out isSet);
 
@@ -141,7 +142,7 @@ namespace BLToolkit.Mapping.MetadataProvider
 
 		public override object GetDefaultValue(ObjectMapper mapper, MemberAccessor member, out bool isSet)
 		{
-			foreach (MapMetadataProvider p in _list)
+			foreach (MetadataProviderBase p in _list)
 			{
 				object value = p.GetDefaultValue(mapper, member, out isSet);
 
@@ -154,7 +155,7 @@ namespace BLToolkit.Mapping.MetadataProvider
 
 		public override object GetDefaultValue(TypeExtension typeExt, Type type, out bool isSet)
 		{
-			foreach (MapMetadataProvider p in _list)
+			foreach (MetadataProviderBase p in _list)
 			{
 				object value = p.GetDefaultValue(typeExt, type, out isSet);
 
@@ -171,7 +172,7 @@ namespace BLToolkit.Mapping.MetadataProvider
 
 		public override bool GetNullable(ObjectMapper mapper, MemberAccessor member, out bool isSet)
 		{
-			foreach (MapMetadataProvider p in _list)
+			foreach (MetadataProviderBase p in _list)
 			{
 				bool value = p.GetNullable(mapper, member, out isSet);
 
@@ -188,7 +189,7 @@ namespace BLToolkit.Mapping.MetadataProvider
 
 		public override object GetNullValue(ObjectMapper mapper, MemberAccessor member, out bool isSet)
 		{
-			foreach (MapMetadataProvider p in _list)
+			foreach (MetadataProviderBase p in _list)
 			{
 				object value = p.GetNullValue(mapper, member, out isSet);
 

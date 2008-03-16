@@ -5,9 +5,9 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 
-using BLToolkit.Mapping.MetadataProvider;
 using BLToolkit.Reflection;
 using BLToolkit.Reflection.Extension;
+using BLToolkit.Reflection.MetadataProvider;
 
 namespace BLToolkit.Mapping
 {
@@ -84,9 +84,9 @@ namespace BLToolkit.Mapping
 			_nameToMember.Add(memberMapper.Name.ToLower(), memberMapper);
 		}
 
-		protected virtual MapMetadataProvider CreateMetadataProvider()
+		protected virtual MetadataProviderBase CreateMetadataProvider()
 		{
-			return MapMetadataProvider.CreateProvider();
+			return MetadataProviderBase.CreateProvider();
 		}
 
 		#endregion
@@ -106,8 +106,8 @@ namespace BLToolkit.Mapping
 			set { _extension = value; }
 		}
 
-		private MapMetadataProvider _metadataProvider;
-		public  MapMetadataProvider  MetadataProvider
+		private MetadataProviderBase _metadataProvider;
+		public  MetadataProviderBase  MetadataProvider
 		{
 			get
 			{
