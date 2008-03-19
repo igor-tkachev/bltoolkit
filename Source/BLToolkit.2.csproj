@@ -158,7 +158,7 @@
     <Compile Include="Data\DataProvider\OdbcDataProvider.cs" />
     <Compile Include="Data\DataProvider\OleDbDataProvider.cs" />
     <Compile Include="Data\DataProvider\SqlDataProvider.cs" />
-    <Compile Include="Data\DbManager.cs">
+    <Compile Include="Data\DbManagerBase.cs">
     </Compile>
     <Compile Include="Data\OperationType.cs" />
     <Compile Include="EditableObjects\EditableXmlDocument.cs" />
