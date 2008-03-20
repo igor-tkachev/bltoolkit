@@ -13,12 +13,12 @@ namespace BLToolkit.Data.DataProvider
 	/// See the <see cref="DbManager.AddDataProvider(DataProviderBase)"/> method to find an example.
 	/// </remarks>
 	/// <seealso cref="DbManager.AddDataProvider(DataProviderBase)">AddDataManager Method</seealso>
-	public sealed class OracleDataProvider: DataProviderBase
+	public sealed class OracleDataProvider : DataProviderBase
 	{
 		private string _parameterPrefix = "P";
 		public  string  ParameterPrefix
 		{
-			get { return _parameterPrefix;  }
+			get { return _parameterPrefix; }
 			set
 			{
 				_parameterPrefix = string.IsNullOrEmpty(value)? null:

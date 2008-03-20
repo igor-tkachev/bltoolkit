@@ -64,17 +64,18 @@ namespace BLToolkit.Data.DataProvider
 				throw new ArgumentNullException("connection");
 
 			ICloneable cloneable = connection as ICloneable;
+
 			if (cloneable != null)
 				return (IDbConnection)cloneable.Clone();
 
-			IDbConnection newConnection    = CreateConnectionObject();
+			IDbConnection newConnection = CreateConnectionObject();
 
 			// This is definitelly not enought when PersistSecurityInfo set to false.
 			//
 			newConnection.ConnectionString = connection.ConnectionString;
+
 			return newConnection;
 		}
-
 
 		/// <summary>
 		/// Creates an instance of the <see cref="DbDataAdapter"/>.
@@ -152,6 +153,8 @@ namespace BLToolkit.Data.DataProvider
 			return value;
 		}
 
+		/*
+		[Obsolete]
 		public virtual void InitDbManager(DbManager dbManager)
 		{
 			MappingSchema schema = MappingSchema;
@@ -161,11 +164,13 @@ namespace BLToolkit.Data.DataProvider
 		}
 
 		private        MappingSchema _mappingSchema;
+		[Obsolete]
 		public virtual MappingSchema  MappingSchema
 		{
-			get { return _mappingSchema; }
+			get { return _mappingSchema;  }
 			set { _mappingSchema = value; }
 		}
+		*/
 
 		public virtual void PrepareCommand(ref CommandType commandType, ref string commandText, ref IDbDataParameter[] commandParameters)
 		{

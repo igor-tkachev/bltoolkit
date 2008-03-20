@@ -1,14 +1,14 @@
 using System;
-using System.Data;
 using System.Collections;
 using System.Collections.Generic;
-
-using BLToolkit.Common;
-using BLToolkit.Reflection;
-using BLToolkit.Reflection.Extension;
+using System.Data;
 
 namespace BLToolkit.Mapping
 {
+	using Common;
+	using Reflection;
+	using Reflection.Extension;
+
 	public class Map
 	{
 		#region Public Members

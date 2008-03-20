@@ -2,19 +2,19 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Configuration;
 using System.Data;
 using System.Data.Common;
 using System.Data.SqlTypes;
 using System.Diagnostics;
-using BLToolkit.Common;
-using BLToolkit.Data.DataProvider;
-using BLToolkit.Mapping;
-using BLToolkit.Properties;
-using BLToolkit.Reflection;
 
 namespace BLToolkit.Data
 {
+	using Common;
+	using Data.DataProvider;
+	using Mapping;
+	using Properties;
+	using Reflection;
+
 	/// <summary>
 	/// The <b>DbManager</b> is a primary class of the <see cref="BLToolkit.Data"/> namespace
 	/// that can be used to execute commands of different database providers.
@@ -26,148 +26,45 @@ namespace BLToolkit.Data
 	/// </remarks>
 	/// <include file="Examples.xml" path='examples/db[@name="DbManager"]/*' />
 	[System.ComponentModel.DesignerCategory("Code")]
-	public class DbManager : Component
+	public partial class DbManager : Component
 	{
-		#region Public Constructors
+		#region Constructors
 
-		/// <summary>
-		/// Initializes a new instance of the <see cref="DbManager"/> class 
-		/// and opens a database connection.
-		/// </summary>
-		/// <remarks>
-		/// <para>
-		/// This constructor uses a configuration, which has been used first in your application. 
-		/// If there has been no connection used before, an empty string is applied as a default configuration.
-		/// </para>
-		/// <para>
-		/// See the <see cref="ConfigurationString"/> property 
-		/// for an explanation and use of the default configuration.
-		/// </para>
-		/// </remarks>
-		/// <include file="Examples.xml" path='examples/db[@name="ctor"]/*' />
-		/// <seealso cref="AddConnectionString(string)"/>
-		/// <returns>An instance of the database manager class.</returns>
-		[DebuggerStepThrough]
-		public DbManager() : this((IDbConnection)null, null)
+		public DbManager(DataProviderBase dataProvider, string connectionString)
 		{
+			if (dataProvider     == null) throw new ArgumentNullException("dataProvider");
+			if (connectionString == null) throw new ArgumentNullException("connectionString");
+
+			_dataProvider = dataProvider;
+			_connection   = dataProvider.CreateConnectionObject();
+
+			_connection.ConnectionString = connectionString;
+
+			//_dataProvider.InitDbManager(this);
 		}
 
-		/// <summary>
-		/// Initializes a new instance of the <see cref="DbManager"/> class 
-		/// and opens a database connection for the provided configuration.
-		/// </summary>
-		/// <remarks>
-		/// See the <see cref="ConfigurationString"/> property 
-		/// for an explanation and use of the configuration string.
-		/// </remarks>
-		/// <include file="Examples.xml" path='examples/db[@name="ctor(string)"]/*' />
-		/// <param name="configurationString">Configuration string.</param>
-		/// <returns>An instance of the <see cref="DbManager"/> class.</returns>
-		[DebuggerStepThrough]
-		public DbManager(string configurationString)
-			: this((IDbConnection)null, configurationString)
+		public DbManager(DataProviderBase dataProvider, IDbConnection connection)
 		{
+			if (dataProvider == null) throw new ArgumentNullException("dataProvider");
+			if (connection   == null) throw new ArgumentNullException("connection");
+
+			_dataProvider = dataProvider;
+			_connection   = connection;
+
+			//_dataProvider.InitDbManager(this);
 		}
 
-		/// <summary>
-		/// Initializes a new instance of the <see cref="DbManager"/> class 
-		/// and opens a database connection for the provided configuration.
-		/// </summary>
-		/// <remarks>
-		/// See the <see cref="ConfigurationString"/> property 
-		/// for an explanation and use of the configuration string.
-		/// </remarks>
-		/// <param name="configuration">Configuration string not containing provider name.</param>
-		/// <param name="providerName">Provider configuration name.</param>
-		/// <returns>An instance of the <see cref="DbManager"/> class.</returns>
-		[DebuggerStepThrough]
-		public DbManager(string providerName, string configuration)
-			: this((IDbConnection)null, providerName + ProviderNameDivider + configuration)
+		public DbManager(DataProviderBase dataProvider, IDbTransaction transaction)
 		{
-		}
+			if (dataProvider == null) throw new ArgumentNullException("dataProvider");
+			if (transaction  == null) throw new ArgumentNullException("transaction");
 
-		/// <summary>
-		/// Initializes a new instance of the <see cref="DbManager"/> class for the provided connection.
-		/// </summary>
-		/// <remarks>
-		/// This constructor tries to open the connection if the connection state equals 
-		/// <see cref="System.Data.ConnectionState">ConnectionState.Closed</see>. 
-		/// In this case the <see cref="IDbConnection.ConnectionString"/> property of the connection 
-		/// must be set before colling the constructor.
-		/// Otherwise, it neither opens nor closes the connection. 
-		/// </remarks>
-		/// <exception cref="DataException">
-		/// Type of the connection could not be recognized.
-		/// </exception>
-		/// <include file="Examples.xml" path='examples/db[@name="ctor(IDbConnection)"]/*' />
-		/// <param name="connection">An instance of the <see cref="IDbConnection"/> class.</param>
-		/// <returns>An instance of the <see cref="DbManager"/> class.</returns>
-		[DebuggerStepThrough]
-		public DbManager(IDbConnection connection)
-		{
-			if (connection != null)
-			{
-				Init(connection);
-		
-				if (_connection.State == ConnectionState.Closed)
-					OpenConnection();
-			}
-		}
-
-		/// <summary>
-		/// Initializes a new instance of the <see cref="DbManager"/> class for the provided transaction.
-		/// </summary>
-		/// <include file="Examples.xml" path='examples/db[@name="ctor(IDbTransaction)"]/*' />
-		/// <param name="transaction"></param>
-		[DebuggerStepThrough]
-		public DbManager(IDbTransaction transaction)
-			: this(transaction != null? transaction.Connection: null)
-		{
+			_dataProvider     = dataProvider;
+			_connection       = transaction.Connection;
 			_transaction      = transaction;
 			_closeTransaction = false;
-		}
 
-		/// <summary>
-		/// Initializes a new instance of the <see cref="DbManager"/> class 
-		/// and opens a database connection for the provided configuration and database connection.
-		/// </summary>
-		/// <remarks>
-		/// <para>
-		/// This constructor opens the connection only if the connection state equals 
-		/// <see cref="System.Data.ConnectionState">ConnectionState.Closed</see>. 
-		/// Otherwise, it neither opens nor closes the connection.
-		/// </para>
-		/// <para>
-		/// See the <see cref="ConfigurationString"/> property 
-		/// for an explanation and use of the configuration string.
-		/// </para>
-		/// </remarks>
-		/// <include file="Examples.xml" path='examples/db[@name="ctor(IDbConnection,string)"]/*' />
-		/// <param name="connection">An instance of the <see cref="IDbConnection"/>.</param>
-		/// <param name="configurationString">The configuration string.</param>
-		/// <returns>An instance of the <see cref="DbManager"/> class.</returns>
-		[DebuggerStepThrough]
-		public DbManager(
-			IDbConnection connection,
-			string        configurationString)
-		{
-			if (connection == null)
-			{
-				Init(configurationString);
-
-				if (configurationString != null)
-					OpenConnection(configurationString);
-			}
-			else
-			{
-				Init(connection);
-
-				_configurationString = configurationString;
-				_connection.ConnectionString = GetConnectionString(configurationString);
-
-				if (_connection.State == ConnectionState.Closed)
-					OpenConnection();
-			}
+			//_dataProvider.InitDbManager(this);
 		}
 
 		#endregion
@@ -201,261 +98,8 @@ namespace BLToolkit.Data
 		public DataProviderBase DataProvider
 		{
 			[DebuggerStepThrough]
-			get { return _dataProvider; }
-		}
-
-		private bool          _isExternalConnection;
-		private bool          _closeConnection;
-		private IDbConnection _connection;
-		/// <summary>
-		/// Gets or sets the <see cref="IDbConnection"/> used by this instance of the <see cref="DbManager"/>.
-		/// </summary>
-		/// <value>
-		/// The connection to the data source.
-		/// </value>
-		/// <remarks>
-		/// Then you set a connection object, it has to match the data source type.
-		/// </remarks>
-		/// <exception cref="DataException">
-		/// A connection does not match the data source type.
-		/// </exception>
-		/// <include file="Examples.xml" path='examples/db[@name="Connection"]/*' />
-		public IDbConnection Connection
-		{
-			[DebuggerStepThrough]
-			get
-			{
-				if (_connection == null)
-					OpenConnection(_configurationString);
-				return _connection;
-			}
-
-			set
-			{
-				if (value == null)
-				{
-					throw new ArgumentNullException("value");
-				}
-				else if (_dataProvider != null)
-				{
-					if (value.GetType() == _dataProvider.ConnectionType)
-					{
-						_connection = value;
-					}
-					else
-					{
-						throw new DataException(Resources.DbManager_ConnectionTypeMismatch);
-					}
-				}
-				else
-				{
-					Init(value);
-				}
-
-				
-				_isExternalConnection = true;
-				_closeConnection      = false;
-			}
-		}
-
-		private IDbCommand _selectCommand;
-		/// <summary>
-		/// Gets the <see cref="IDbCommand"/> used by this instance of the <see cref="DbManager"/>.
-		/// </summary>
-		/// <value>
-		/// A <see cref="IDbCommand"/> used during executing query.
-		/// </value>
-		/// <remarks>
-		/// The <b>Command</b> can be used to access command parameters.
-		/// </remarks>
-		/// <include file="Examples.xml" path='examples/db[@name="Command"]/*' />
-		public IDbCommand Command
-		{
-			[DebuggerStepThrough]
-			get { return SelectCommand; }
-		}
-
-		/// <summary>
-		/// Gets the select <see cref="IDbCommand"/> used by this instance of the <see cref="DbManager"/>.
-		/// </summary>
-		/// <value>
-		/// A <see cref="IDbCommand"/> used during executing query.
-		/// </value>
-		/// <remarks>
-		/// The <b>SelectCommand</b> can be used to access select command parameters.
-		/// </remarks>
-		/// <include file="Examples.xml" path='examples/db[@name="Command"]/*' />
-		public IDbCommand SelectCommand
-		{
-			[DebuggerStepThrough]
-			get { return _selectCommand = OnInitCommand(_selectCommand); }
-		}
-
-		private IDbCommand _insertCommand;
-		/// <summary>
-		/// Gets the insert <see cref="IDbCommand"/> used by this instance of the <see cref="DbManager"/>.
-		/// </summary>
-		/// <value>
-		/// A <see cref="IDbCommand"/> used during executing query.
-		/// </value>
-		/// <remarks>
-		/// The <b>InsertCommand</b> can be used to access insert command parameters.
-		/// </remarks>
-		/// <include file="Examples.xml" path='examples/db[@name="Command"]/*' />
-		public IDbCommand InsertCommand
-		{
-			[DebuggerStepThrough]
-			get { return _insertCommand = OnInitCommand(_insertCommand); }
-		}
-
-		private IDbCommand _updateCommand;
-		/// <summary>
-		/// Gets the update <see cref="IDbCommand"/> used by this instance of the <see cref="DbManager"/>.
-		/// </summary>
-		/// <value>
-		/// A <see cref="IDbCommand"/> used during executing query.
-		/// </value>
-		/// <remarks>
-		/// The <b>UpdateCommand</b> can be used to access update command parameters.
-		/// </remarks>
-		/// <include file="Examples.xml" path='examples/db[@name="Command"]/*' />
-		public IDbCommand UpdateCommand
-		{
-			[DebuggerStepThrough]
-			get { return _updateCommand = OnInitCommand(_updateCommand); }
-		}
-
-		private IDbCommand _deleteCommand;
-		/// <summary>
-		/// Gets the delete <see cref="IDbCommand"/> used by this instance of the <see cref="DbManager"/>.
-		/// </summary>
-		/// <value>
-		/// A <see cref="IDbCommand"/> used during executing query.
-		/// </value>
-		/// <remarks>
-		/// The <b>DeleteCommand</b> can be used to access delete command parameters.
-		/// </remarks>
-		/// <include file="Examples.xml" path='examples/db[@name="Command"]/*' />
-		public IDbCommand DeleteCommand
-		{
-			[DebuggerStepThrough]
-			get { return _deleteCommand = OnInitCommand(_deleteCommand); }
-		}
-
-		private bool           _closeTransaction = true;
-		private IDbTransaction _transaction;
-		/// <summary>
-		/// Gets the <see cref="IDbTransaction"/> used by this instance of the <see cref="DbManager"/>.
-		/// </summary>
-		/// <value>
-		/// The <see cref="IDbTransaction"/>. The default value is a null reference.
-		/// </value>
-		/// <remarks>
-		/// You have to call the <see cref="BeginTransaction()"/> method to begin a transaction.
-		/// </remarks>
-		/// <include file="Examples.xml" path='examples/db[@name="Transaction"]/*' />
-		/// <seealso cref="BeginTransaction()"/>
-		public IDbTransaction Transaction
-		{
-			[DebuggerStepThrough]
-			get { return _transaction; }
-		}
-
-		private string _configurationString;
-		/// <summary>
-		/// Gets the string used to open a database.
-		/// </summary>
-		/// <value>
-		/// A string containing configuration settings.
-		/// </value>
-		/// <remarks>
-		/// <para>
-		/// An actual database connection string is read from the <i>appSettings</i> section 
-		/// of application configuration file (App.config, Web.config, or Machine.config) 
-		/// according to the follow rule:
-		/// </para>
-		/// <code>
-		/// &lt;appSettings&gt;
-		///     &lt;add 
-		///         key   = "ConnectionString.<b>configurationString</b>" 
-		///         va<i></i>lue = "Server=(local);Database=Northwind;Integrated Security=SSPI" /&gt;
-		/// &lt;/appSettings&gt;
-		/// </code>
-		/// <para>
-		/// If the configuration string is empty, the following rule is applied:
-		/// </para>
-		/// <code>
-		/// &lt;appSettings&gt;
-		///     &lt;add 
-		///         key   = "ConnectionString" 
-		///         va<i></i>lue = "Server=(local);Database=Northwind;Integrated Security=SSPI" /&gt;
-		/// &lt;/appSettings&gt;
-		/// </code>
-		/// <para>
-		/// If you don't want to use a configuration file, you can add a database connection string 
-		/// using the <see cref="AddConnectionString(string)"/> method.
-		/// </para>
-		/// <para>
-		/// The configuration string may have a prefix used to define a data provider. The following table
-		/// contains prefixes for all supported data providers:
-		/// <list type="table">
-		/// <listheader><term>Prefix</term><description>Provider</description></listheader>
-		/// <item><term>Sql</term><description>Data Provider for SQL Server</description></item>
-		/// <item><term>OleDb</term><description>Data Provider for OLE DB</description></item>
-		/// <item><term>Odbc</term><description>Data Provider for ODBC</description></item>
-		/// <item><term>Oracle</term><description>Data Provider for Oracle</description></item>
-		/// </list>
-		/// </para>
-		/// </remarks>
-		/// <seealso cref="AddConnectionString(string)"/>
-		public string ConfigurationString
-		{
-			[DebuggerStepThrough]
-			get { return _configurationString; }
-		}
-
-		#endregion
-
-		#region Public Events
-
-		private static readonly object EventBeforeOperation = new object();
-		/// <summary>
-		/// Occurs when a server-side operation is about to start.
-		/// </summary>
-		public event OperationTypeEventHandler BeforeOperation
-		{
-			add    { Events.AddHandler   (EventBeforeOperation, value); }
-			remove { Events.RemoveHandler(EventBeforeOperation, value); }
-		}
-
-		private static readonly object EventAfterOperation = new object();
-		/// <summary>
-		/// Occurs when a server-side operation is complete.
-		/// </summary>
-		public event OperationTypeEventHandler AfterOperation
-		{
-			add    { Events.AddHandler   (EventAfterOperation, value); }
-			remove { Events.RemoveHandler(EventAfterOperation, value); }
-		}
-
-		private static readonly object EventOperationException = new object();
-		/// <summary>
-		/// Occurs when a server-side operation is failed to execute.
-		/// </summary>
-		public event OperationExceptionEventHandler OperationException
-		{
-			add    { Events.AddHandler   (EventOperationException, value); }
-			remove { Events.RemoveHandler(EventOperationException, value); }
-		}
-
-		private static readonly object EventInitCommand = new object();
-		/// <summary>
-		/// Occurs when the <see cref="Command"/> is initializing.
-		/// </summary>
-		public event InitCommandEventHandler InitCommand
-		{
-			add    { Events.AddHandler   (EventInitCommand, value); }
-			remove { Events.RemoveHandler(EventInitCommand, value); }
+			get           { return _dataProvider;  }
+			protected set { _dataProvider = value; }
 		}
 
 		#endregion
@@ -509,6 +153,94 @@ namespace BLToolkit.Data
 					throw;
 				}
 			}
+		}
+
+		#endregion
+
+		#region Connection
+
+		private bool          _closeConnection;
+		private IDbConnection _connection;
+		/// <summary>
+		/// Gets or sets the <see cref="IDbConnection"/> used by this instance of the <see cref="DbManager"/>.
+		/// </summary>
+		/// <value>
+		/// The connection to the data source.
+		/// </value>
+		/// <remarks>
+		/// Then you set a connection object, it has to match the data source type.
+		/// </remarks>
+		/// <exception cref="DataException">
+		/// A connection does not match the data source type.
+		/// </exception>
+		/// <include file="Examples.xml" path='examples/db[@name="Connection"]/*' />
+		public IDbConnection Connection
+		{
+			[DebuggerStepThrough]
+			get
+			{
+				if (_connection.State == ConnectionState.Closed)
+					OpenConnection();
+				return _connection;
+			}
+
+			set
+			{
+				if (value == null)
+					throw new ArgumentNullException("Connection");
+
+				if (value.GetType() != _dataProvider.ConnectionType)
+					InitDataProvider(value);
+
+				_connection      = value;
+				_closeConnection = false;
+			}
+		}
+
+		[Obsolete]
+		protected virtual string GetConnectionString(IDbConnection connection)
+		{
+			return connection.ConnectionString;
+		}
+
+		private void OpenConnection()
+		{
+			try
+			{
+				OnBeforeOperation(OperationType.OpenConnection);
+				_connection.Open();
+				OnAfterOperation (OperationType.OpenConnection);
+			}
+			catch (Exception ex)
+			{
+				OnOperationException(OperationType.OpenConnection, ex);
+				throw;
+			}
+
+			_closeConnection = true;
+		}
+
+		#endregion
+
+		#region Transactions
+
+		private bool           _closeTransaction = true;
+		private IDbTransaction _transaction;
+		/// <summary>
+		/// Gets the <see cref="IDbTransaction"/> used by this instance of the <see cref="DbManager"/>.
+		/// </summary>
+		/// <value>
+		/// The <see cref="IDbTransaction"/>. The default value is a null reference.
+		/// </value>
+		/// <remarks>
+		/// You have to call the <see cref="BeginTransaction()"/> method to begin a transaction.
+		/// </remarks>
+		/// <include file="Examples.xml" path='examples/db[@name="Transaction"]/*' />
+		/// <seealso cref="BeginTransaction()"/>
+		public IDbTransaction Transaction
+		{
+			[DebuggerStepThrough]
+			get { return _transaction; }
 		}
 
 		/// <summary>
@@ -638,24 +370,233 @@ namespace BLToolkit.Data
 
 		#endregion
 
-		#region Protected Methods
+		#region Commands
 
-		static DbManager()
+		private IDbCommand _selectCommand;
+		/// <summary>
+		/// Gets the <see cref="IDbCommand"/> used by this instance of the <see cref="DbManager"/>.
+		/// </summary>
+		/// <value>
+		/// A <see cref="IDbCommand"/> used during executing query.
+		/// </value>
+		/// <remarks>
+		/// The <b>Command</b> can be used to access command parameters.
+		/// </remarks>
+		/// <include file="Examples.xml" path='examples/db[@name="Command"]/*' />
+		public IDbCommand Command
 		{
-			AddDataProvider(new SqlDataProvider());
-			AddDataProvider(new AccessDataProvider());
-			AddDataProvider(new OleDbDataProvider());
-			AddDataProvider(new OdbcDataProvider());
+			[DebuggerStepThrough]
+			get { return SelectCommand; }
+		}
 
-			string dataProviders = ConfigurationManager.AppSettings.Get("BLToolkit.DataProviders");
-			if (null != dataProviders)
+		/// <summary>
+		/// Gets the select <see cref="IDbCommand"/> used by this instance of the <see cref="DbManager"/>.
+		/// </summary>
+		/// <value>
+		/// A <see cref="IDbCommand"/> used during executing query.
+		/// </value>
+		/// <remarks>
+		/// The <b>SelectCommand</b> can be used to access select command parameters.
+		/// </remarks>
+		/// <include file="Examples.xml" path='examples/db[@name="Command"]/*' />
+		public IDbCommand SelectCommand
+		{
+			[DebuggerStepThrough]
+			get { return _selectCommand = OnInitCommand(_selectCommand); }
+		}
+
+		private IDbCommand _insertCommand;
+		/// <summary>
+		/// Gets the insert <see cref="IDbCommand"/> used by this instance of the <see cref="DbManager"/>.
+		/// </summary>
+		/// <value>
+		/// A <see cref="IDbCommand"/> used during executing query.
+		/// </value>
+		/// <remarks>
+		/// The <b>InsertCommand</b> can be used to access insert command parameters.
+		/// </remarks>
+		/// <include file="Examples.xml" path='examples/db[@name="Command"]/*' />
+		public IDbCommand InsertCommand
+		{
+			[DebuggerStepThrough]
+			get { return _insertCommand = OnInitCommand(_insertCommand); }
+		}
+
+		private IDbCommand _updateCommand;
+		/// <summary>
+		/// Gets the update <see cref="IDbCommand"/> used by this instance of the <see cref="DbManager"/>.
+		/// </summary>
+		/// <value>
+		/// A <see cref="IDbCommand"/> used during executing query.
+		/// </value>
+		/// <remarks>
+		/// The <b>UpdateCommand</b> can be used to access update command parameters.
+		/// </remarks>
+		/// <include file="Examples.xml" path='examples/db[@name="Command"]/*' />
+		public IDbCommand UpdateCommand
+		{
+			[DebuggerStepThrough]
+			get { return _updateCommand = OnInitCommand(_updateCommand); }
+		}
+
+		private IDbCommand _deleteCommand;
+		/// <summary>
+		/// Gets the delete <see cref="IDbCommand"/> used by this instance of the <see cref="DbManager"/>.
+		/// </summary>
+		/// <value>
+		/// A <see cref="IDbCommand"/> used during executing query.
+		/// </value>
+		/// <remarks>
+		/// The <b>DeleteCommand</b> can be used to access delete command parameters.
+		/// </remarks>
+		/// <include file="Examples.xml" path='examples/db[@name="Command"]/*' />
+		public IDbCommand DeleteCommand
+		{
+			[DebuggerStepThrough]
+			get { return _deleteCommand = OnInitCommand(_deleteCommand); }
+		}
+
+		/// <summary>
+		/// Initializes a command and raises the <see cref="InitCommand"/> event.
+		/// </summary>
+		protected virtual IDbCommand OnInitCommand(IDbCommand command)
+		{
+			if (command == null) 
 			{
-				foreach (string dataProviderTypeName in dataProviders.Split(';'))
-					AddDataProvider(Type.GetType(dataProviderTypeName, true));
+				// Create a command object.
+				//
+				command = _dataProvider.CreateCommandObject(Connection);
+
+				// If an active transaction exists.
+				//
+				if (Transaction != null)
+				{
+					command.Transaction = Transaction;
+				}
 			}
 
-			_defaultConfiguration = ConfigurationManager.AppSettings.Get("BLToolkit.DefaultConfiguration");
+			if (CanRaiseEvents)
+			{
+				InitCommandEventHandler handler = (InitCommandEventHandler)Events[EventInitCommand];
+
+				if (handler != null)
+					handler(this, new InitCommandEventArgs(command));
+			}
+
+			return command;
 		}
+
+		/// <summary>
+		/// Helper function. Creates the command object and sets command type and command text.
+		/// </summary>
+		/// <param name="commandAction">Command action.</param>
+		/// <param name="commandType">The <see cref="System.Data.CommandType"/>
+		/// (stored procedure, text, etc.)</param>
+		/// <param name="sql">The SQL statement.</param>
+		/// <returns>The command object.</returns>
+		private IDbCommand GetCommand(CommandAction commandAction, CommandType commandType, string sql)
+		{
+			IDbCommand command = GetCommand(commandAction);
+
+			command.Parameters.Clear();
+			command.CommandType = commandType;
+			command.CommandText = sql;
+
+			return command;
+		}
+
+		#endregion
+
+		#region Events
+
+		private static readonly object EventBeforeOperation = new object();
+		/// <summary>
+		/// Occurs when a server-side operation is about to start.
+		/// </summary>
+		public event OperationTypeEventHandler BeforeOperation
+		{
+			add    { Events.AddHandler   (EventBeforeOperation, value); }
+			remove { Events.RemoveHandler(EventBeforeOperation, value); }
+		}
+
+		private static readonly object EventAfterOperation = new object();
+		/// <summary>
+		/// Occurs when a server-side operation is complete.
+		/// </summary>
+		public event OperationTypeEventHandler AfterOperation
+		{
+			add    { Events.AddHandler   (EventAfterOperation, value); }
+			remove { Events.RemoveHandler(EventAfterOperation, value); }
+		}
+
+		private static readonly object EventOperationException = new object();
+		/// <summary>
+		/// Occurs when a server-side operation is failed to execute.
+		/// </summary>
+		public event OperationExceptionEventHandler OperationException
+		{
+			add    { Events.AddHandler   (EventOperationException, value); }
+			remove { Events.RemoveHandler(EventOperationException, value); }
+		}
+
+		private static readonly object EventInitCommand = new object();
+		/// <summary>
+		/// Occurs when the <see cref="Command"/> is initializing.
+		/// </summary>
+		public event InitCommandEventHandler InitCommand
+		{
+			add    { Events.AddHandler   (EventInitCommand, value); }
+			remove { Events.RemoveHandler(EventInitCommand, value); }
+		}
+
+		/// <summary>
+		/// Raises the <see cref="BeforeOperation"/> event.
+		/// </summary>
+		/// <param name="op">The <see cref="OperationType"/>.</param>
+		protected virtual void OnBeforeOperation(OperationType op)
+		{
+			if (CanRaiseEvents)
+			{
+				OperationTypeEventHandler handler = (OperationTypeEventHandler)Events[EventBeforeOperation];
+				if (handler != null)
+					handler(this, new OperationTypeEventArgs(op));
+			}
+		}
+
+		/// <summary>
+		/// Raises the <see cref="AfterOperation"/> event.
+		/// </summary>
+		/// <param name="op">The <see cref="OperationType"/>.</param>
+		protected virtual void OnAfterOperation(OperationType op)
+		{
+			if (CanRaiseEvents)
+			{
+				OperationTypeEventHandler handler = (OperationTypeEventHandler)Events[EventAfterOperation];
+				if (handler != null)
+					handler(this, new OperationTypeEventArgs(op));
+			}
+		}
+
+		/// <summary>
+		/// Raises the <see cref="OperationException"/> event.
+		/// </summary>
+		/// <param name="op">The <see cref="OperationType"/>.</param>
+		/// <param name="ex">The <see cref="Exception"/> occurred.</param>
+		protected virtual void OnOperationException(OperationType op, Exception ex)
+		{
+			if (CanRaiseEvents)
+			{
+				OperationExceptionEventHandler handler = (OperationExceptionEventHandler)Events[EventOperationException];
+				if (handler != null)
+					handler(this, new OperationExceptionEventArgs(op, ex));
+			}
+
+			throw new DataException(ex);
+		}
+
+		#endregion
+
+		#region Protected Methods
 
 		private  static TraceSwitch _ts;
 		internal static TraceSwitch  TS
@@ -663,186 +604,53 @@ namespace BLToolkit.Data
 			get { return _ts ?? (_ts = new TraceSwitch("DbManager", "DbManager trace switch")); }
 		}
 
-		private static string             _firstConfiguration;
-		private static DataProviderBase   _firstProvider;
-		private static readonly Hashtable _configurationList = Hashtable.Synchronized(new Hashtable());
-
-		private void Init(string configurationString)
+		private IDataReader ExecuteReaderInternal()
 		{
-			if (configurationString == null)
-				configurationString = DefaultConfiguration;
-
-			if (configurationString == _firstConfiguration)
-			{
-				_dataProvider = _firstProvider;
-			}
-			else
-			{
-				_dataProvider = (DataProviderBase)_configurationList[configurationString];
-
-				if (_dataProvider == null)
-				{
-					_dataProvider = GetDataProvider(configurationString);
-					_configurationList[configurationString] = _dataProvider;
-				}
-
-				if (_firstConfiguration == null)
-				{
-					lock (_configurationList.SyncRoot)
-					{
-						if (_firstConfiguration == null)
-						{
-							_firstConfiguration = configurationString;
-							_firstProvider      = _dataProvider;
-						}
-					}
-				}
-			}
-
-			if (_dataProvider == null)
-				throw new DataException(string.Format(
-					Resources.DbManager_UnknownDataProvider, configurationString));
-
-			_dataProvider.InitDbManager(this);
+			return ExecuteReader(CommandBehavior.Default);
 		}
 
-		protected virtual string GetConnectionString(string configurationString)
+		private IDataReader ExecuteReaderInternal(CommandBehavior commandBehavior)
 		{
-			// Use default configuration.
-			//
-			if (configurationString == null) 
-				configurationString = DefaultConfiguration;
+			IDataReader dr = null;
 
-			string str;
-
-			// Check cached strings first.
-			//
-			if (!_connectionStringList.TryGetValue(configurationString, out str))
-			{
-				lock (_dataProviderListLock)
-				{
-					// Connection string is not in the cache.
-					//
-					string key = string.Format("ConnectionString{0}{1}",
-						configurationString.Length == 0? String.Empty: ".", configurationString);
-
-					ConnectionStringSettings css = ConfigurationManager.ConnectionStrings[configurationString];
-
-					str = css != null? css.ConnectionString: ConfigurationManager.AppSettings.Get(key);
-
-					if (string.IsNullOrEmpty(str))
-					{
-						throw new DataException(string.Format(
-							Resources.DbManager_UnknownConfiguration, key));
-					}
-
-					// Store the result in cache.
-					//
-					_connectionStringList[configurationString] = str;
-				}
-			}
-
-			return str;
-		}
-
-		protected virtual string GetConnectionString(IDbConnection connection)
-		{
-			return connection.ConnectionString;
-		}
-
-		private static DataProviderBase GetDataProvider(string configurationString)
-		{
-			ConnectionStringSettings css = ConfigurationManager.ConnectionStrings[configurationString];
-
-			if (css != null)
-				return _dataProviderNameList[css.ProviderName];
-
-			// configurationString can be:
-			// ''        : default provider,   default configuration;
-			// '.'       : default provider,   default configuration;
-			// 'foo.bar' :   'foo' provider,     'bar' configuration;
-			// 'foo.'    :   'foo' provider,   default configuration;
-			// 'foo'     : default provider,     'foo' configuration;
-			// '.foo'    : default provider,     'foo' configuration;
-			// '.foo.bar': default provider, 'foo.bar' configuration;
-			//
-			// Default provider is SqlDataProvider
-			//
-			string cs  = configurationString.ToUpper();
-			string key = "SQL";
-
-			if (cs.Length > 0)
-			{
-				cs += ProviderNameDivider;
-
-				foreach (string k in _dataProviderNameList.Keys)
-				{
-					if (cs.StartsWith(k + ProviderNameDivider))
-					{
-						key = k;
-						break;
-					}
-				}
-			}
-
-			return _dataProviderNameList[key];
-		}
-
-		private void Init(IDbConnection connection)
-		{
-			_dataProvider = _dataProviderTypeList[connection.GetType()];
-
-			if (_dataProvider != null)
-			{
-				Connection = connection;
-			}
-			else
-			{
-				throw new DataException(string.Format(
-					Resources.DbManager_UnknownConnectionType, connection.GetType().FullName));
-			}
-
-			_dataProvider.InitDbManager(this);
-		}
-
-		private void OpenConnection()
-		{
 			try
 			{
-				OnBeforeOperation(OperationType.OpenConnection);
-				_connection.Open();
-				OnAfterOperation (OperationType.OpenConnection);
+				OnBeforeOperation(OperationType.ExecuteReader);
+				dr = SelectCommand.ExecuteReader(commandBehavior);
+				OnAfterOperation (OperationType.ExecuteReader);
 			}
 			catch (Exception ex)
 			{
-				OnOperationException(OperationType.OpenConnection, ex);
+				if (dr != null)
+					dr.Dispose();
+
+				OnOperationException(OperationType.ExecuteReader, ex);
 				throw;
 			}
 
-			_closeConnection = true;
+			return dr;
 		}
 
-		private void OpenConnection(string configurationString)
+		private int ExecuteNonQueryInternal()
 		{
-			// If connection is already opened, we close it and open again.
-			//
-			if (_connection != null)
+			try
 			{
-				Dispose();
-				GC.ReRegisterForFinalize(this);
+				OnBeforeOperation(OperationType.ExecuteNonQuery);
+				int result = SelectCommand.ExecuteNonQuery();
+				OnAfterOperation (OperationType.ExecuteNonQuery);
+
+				return result;
 			}
-
-			// Store the configuration string.
-			//
-			_configurationString = configurationString;
-
-			// Create and open the connection object.
-			//
-			_connection = _dataProvider.CreateConnectionObject();
-			_connection.ConnectionString = GetConnectionString(ConfigurationString);
-
-			OpenConnection();
+			catch (Exception ex)
+			{
+				OnOperationException(OperationType.ExecuteNonQuery, ex);
+				throw;
+			}
 		}
+
+		#endregion
+
+		#region Parameters
 
 		private IDbDataParameter[] CreateSpParameters(string spName, object[] parameterValues)
 		{
@@ -979,11 +787,13 @@ namespace BLToolkit.Data
 			}
 
 			if (refParam is IDbDataParameter[])
+			{
 				return (IDbDataParameter[])refParam;
+			}
 			else if (refParam is IDbDataParameter)
 			{
 				IDbDataParameter[] oneParameterArray = new IDbDataParameter[1];
-				oneParameterArray[0] = (IDbDataParameter) refParam;
+				oneParameterArray[0] = (IDbDataParameter)refParam;
 				return oneParameterArray;
 			}
 
@@ -1024,54 +834,6 @@ namespace BLToolkit.Data
 		}
 
 		/// <summary>
-		/// Initializes a command and raises the <see cref="InitCommand"/> event.
-		/// </summary>
-		protected virtual IDbCommand OnInitCommand(IDbCommand command)
-		{
-			if (command == null) 
-			{
-				// Create a command object.
-				//
-				command = _dataProvider.CreateCommandObject(Connection);
-
-				// If an active transaction exists.
-				//
-				if (Transaction != null)
-				{
-					command.Transaction = Transaction;
-				}
-			}
-
-			if (CanRaiseEvents)
-			{
-				InitCommandEventHandler handler = (InitCommandEventHandler)Events[EventInitCommand];
-				if (handler != null)
-					handler(this, new InitCommandEventArgs(command));
-			}
-
-			return command;
-		}
-
-		/// <summary>
-		/// Helper function. Creates the command object and sets command type and command text.
-		/// </summary>
-		/// <param name="commandAction">Command action.</param>
-		/// <param name="commandType">The <see cref="System.Data.CommandType"/>
-		/// (stored procedure, text, etc.)</param>
-		/// <param name="sql">The SQL statement.</param>
-		/// <returns>The command object.</returns>
-		private IDbCommand GetCommand(CommandAction commandAction, CommandType commandType, string sql)
-		{
-			IDbCommand command = GetCommand(commandAction);
-
-			command.Parameters.Clear();
-			command.CommandType = commandType;
-			command.CommandText = sql;
-
-			return command;
-		}
-
-		/// <summary>
 		/// This method is used to attach array of <see cref="IDbDataParameter"/> to a <see cref="IDbCommand"/>.
 		/// </summary>
 		/// <param name="command">The command to which the parameters will be added</param>
@@ -1098,17 +860,7 @@ namespace BLToolkit.Data
 		/// <returns></returns>
 		protected virtual IDbDataParameter[] DiscoverSpParameters(string spName, bool includeReturnValueParameter)
 		{
-			IDbConnection con;
-
-			if (_isExternalConnection)
-				con = _dataProvider.CloneConnection(_connection);
-			else
-			{
-				con = _dataProvider.CreateConnectionObject();
-				con.ConnectionString = GetConnectionString(ConfigurationString);
-			}
-
-			using (con)
+			using (IDbConnection con = CloneConnection())
 			{
 				try
 				{
@@ -1192,7 +944,7 @@ namespace BLToolkit.Data
 		/// <returns>An array of the <see cref="IDbDataParameter"/>.</returns>
 		public IDbDataParameter[] GetSpParameters(string spName, bool includeReturnValueParameter)
 		{
-			string key = string.Format("{0}:{1}:{2}", ConfigurationString, spName, includeReturnValueParameter);
+			string key = string.Format("{0}:{1}:{2}", GetConnectionHash(), spName, includeReturnValueParameter);
 
 			IDbDataParameter[] cachedParameters;
 
@@ -1256,304 +1008,76 @@ namespace BLToolkit.Data
 				throw new ArgumentException(Resources.DbManager_MismatchParameterCount);
 		}
 
-		private IDataReader ExecuteReaderInternal()
-		{
-			return ExecuteReader(CommandBehavior.Default);
-		}
-
-		private IDataReader ExecuteReaderInternal(CommandBehavior commandBehavior)
-		{
-			IDataReader dr = null;
-
-			try
-			{
-				OnBeforeOperation(OperationType.ExecuteReader);
-				dr = SelectCommand.ExecuteReader(commandBehavior);
-				OnAfterOperation (OperationType.ExecuteReader);
-			}
-			catch (Exception ex)
-			{
-				if (dr != null)
-					dr.Dispose();
-
-				OnOperationException(OperationType.ExecuteReader, ex);
-				throw;
-			}
-
-			return dr;
-		}
-
-		private int ExecuteNonQueryInternal()
-		{
-			try
-			{
-				OnBeforeOperation(OperationType.ExecuteNonQuery);
-				int result = SelectCommand.ExecuteNonQuery();
-				OnAfterOperation (OperationType.ExecuteNonQuery);
-
-				return result;
-			}
-			catch (Exception ex)
-			{
-				OnOperationException(OperationType.ExecuteNonQuery, ex);
-				throw;
-			}
-		}
-
+		/// <overloads>
+		/// Assigns a business object to command parameters.
+		/// </overloads>
 		/// <summary>
-		/// Raises the <see cref="BeforeOperation"/> event.
+		/// Assigns the <see cref="DataRow"/> to command parameters.
 		/// </summary>
-		/// <param name="op">The <see cref="OperationType"/>.</param>
-		protected virtual void OnBeforeOperation(OperationType op)
-		{
-			if (CanRaiseEvents)
-			{
-				OperationTypeEventHandler handler = (OperationTypeEventHandler)Events[EventBeforeOperation];
-				if (handler != null)
-					handler(this, new OperationTypeEventArgs(op));
-			}
-		}
-
-		/// <summary>
-		/// Raises the <see cref="AfterOperation"/> event.
-		/// </summary>
-		/// <param name="op">The <see cref="OperationType"/>.</param>
-		protected virtual void OnAfterOperation(OperationType op)
-		{
-			if (CanRaiseEvents)
-			{
-				OperationTypeEventHandler handler = (OperationTypeEventHandler)Events[EventAfterOperation];
-				if (handler != null)
-					handler(this, new OperationTypeEventArgs(op));
-			}
-		}
-
-		/// <summary>
-		/// Raises the <see cref="OperationException"/> event.
-		/// </summary>
-		/// <param name="op">The <see cref="OperationType"/>.</param>
-		/// <param name="ex">The <see cref="Exception"/> occurred.</param>
-		protected virtual void OnOperationException(OperationType op, Exception ex)
-		{
-			if (CanRaiseEvents)
-			{
-				OperationExceptionEventHandler handler = (OperationExceptionEventHandler)Events[EventOperationException];
-				if (handler != null)
-					handler(this, new OperationExceptionEventArgs(op, ex));
-			}
-
-			throw new DataException(ex);
-		}
-
-		#endregion
-
-		#region Public Static Methods
-
-		private static readonly Dictionary<string, DataProviderBase> _dataProviderNameList =
-			new Dictionary<string, DataProviderBase>(8);
-		private static readonly Dictionary<Type,   DataProviderBase> _dataProviderTypeList =
-			new Dictionary<Type,   DataProviderBase>(4);
-		private static readonly object    _dataProviderListLock = new object();
-
-		public const string ProviderNameDivider = ".";
-
-		/// <summary>
-		/// Adds a new data provider.
-		/// </summary>
+		/// <include file="Examples1.xml" path='examples/db[@name="AssignParameterValues(DataRow)"]/*' />
 		/// <remarks>
-		/// The method can be used to register a new data provider for further use.
+		/// The method is used in addition to the <see cref="CreateParameters(object,IDbDataParameter[])"/> method.
 		/// </remarks>
-		/// <include file="Examples1.xml" path='examples/db[@name="AddDataProvider(DataProvider.IDataProvider)"]/*' />
-		/// <seealso cref="AddConnectionString(string)"/>
-		/// <seealso cref="BLToolkit.Data.DataProvider.DataProviderBase.Name"/>
-		/// <param name="dataProvider">An instance of the <see cref="BLToolkit.Data.DataProvider.DataProviderBase"/> interface.</param>
-		public static void AddDataProvider(DataProviderBase dataProvider)
+		/// <param name="dataRow">The <see cref="DataRow"/> to assign.</param>
+		/// <returns>This instance of the <see cref="DbManager"/>.</returns>
+		public DbManager AssignParameterValues(DataRow dataRow)
 		{
-			if (null == dataProvider)
-				throw new ArgumentNullException("dataProvider");
+			if (dataRow == null)
+				throw new ArgumentNullException("dataRow");
 
-			if (string.IsNullOrEmpty(dataProvider.Name))
-				throw new ArgumentException(Resources.DbManager_InvalidDataProviderName, "dataProvider");
-
-			if (string.IsNullOrEmpty(dataProvider.ProviderName))
-				throw new ArgumentException(Resources.DbManager_InvalidDataProviderProviderName, "dataProvider");
-
-			if (dataProvider.ConnectionType == null || !typeof(IDbConnection).IsAssignableFrom(dataProvider.ConnectionType))
-				throw new ArgumentException(Resources.DbManager_InvalidDataProviderConnectionType, "dataProvider");
-
-			lock (_dataProviderListLock)
+			foreach (DataColumn c in dataRow.Table.Columns)
 			{
-				_dataProviderNameList[dataProvider.Name.ToUpper()] = dataProvider;
-				_dataProviderNameList[dataProvider.ProviderName]   = dataProvider;
-				_dataProviderTypeList[dataProvider.ConnectionType] = dataProvider;
-			}
-		}
-
-		/// <summary>
-		/// Adds a new data provider witch a specified name.
-		/// </summary>
-		/// <remarks>
-		/// The method can be used to register a new data provider for further use.
-		/// </remarks>
-		/// <include file="Examples1.xml" path='examples/db[@name="AddDataProvider(DataProvider.IDataProvider)"]/*' />
-		/// <seealso cref="AddConnectionString(string)"/>
-		/// <seealso cref="BLToolkit.Data.DataProvider.DataProviderBase.Name"/>
-		/// <param name="providerName">The data provider name.</param>
-		/// <param name="dataProvider">An instance of the <see cref="BLToolkit.Data.DataProvider.DataProviderBase"/> interface.</param>
-		public static void AddDataProvider(string providerName, DataProviderBase dataProvider)
-		{
-			if (null == dataProvider)
-				throw new ArgumentNullException("dataProvider");
-
-			if (string.IsNullOrEmpty(providerName))
-				throw new ArgumentException(Resources.DbManager_InvalidProviderName, "providerName");
-
-			if (dataProvider.ConnectionType == null || !typeof(IDbConnection).IsAssignableFrom(dataProvider.ConnectionType))
-				throw new ArgumentException(Resources.DbManager_InvalidDataProviderConnectionType, "dataProvider");
-
-			lock (_dataProviderListLock)
-			{
-				_dataProviderNameList[providerName.ToUpper()]      = dataProvider;
-				_dataProviderTypeList[dataProvider.ConnectionType] = dataProvider;
-			}
-		}
-
-		/// <summary>
-		/// Adds a new data provider.
-		/// </summary>
-		/// <remarks>
-		/// The method can be used to register a new data provider for further use.
-		/// </remarks>
-		/// <seealso cref="AddConnectionString(string)"/>
-		/// <seealso cref="BLToolkit.Data.DataProvider.DataProviderBase.Name"/>
-		/// <param name="dataProviderType">A data provider type.</param>
-		public static void AddDataProvider(Type dataProviderType)
-		{
-			AddDataProvider((DataProviderBase)Activator.CreateInstance(dataProviderType));
-		}
-
-		/// <summary>
-		/// Adds a new data provider witch a specified name.
-		/// </summary>
-		/// <remarks>
-		/// The method can be used to register a new data provider for further use.
-		/// </remarks>
-		/// <seealso cref="AddConnectionString(string)"/>
-		/// <seealso cref="BLToolkit.Data.DataProvider.DataProviderBase.Name"/>
-		/// <param name="providerName">The data provider name.</param>
-		/// <param name="dataProviderType">A data provider type.</param>
-		public static void AddDataProvider(string providerName, Type dataProviderType)
-		{
-			AddDataProvider(providerName, (DataProviderBase)Activator.CreateInstance(dataProviderType));
-		}
-
-		/// <summary>
-		/// Adds a new connection string or replaces existing one.
-		/// </summary>
-		/// <remarks>
-		/// Use this method when you use only one configuration and 
-		/// you don't want to use a configuration file.
-		/// </remarks>
-		/// <include file="Examples.xml" path='examples/db[@name="AddConnectionString(string)"]/*' />
-		/// <param name="connectionString">A valid database connection string.</param>
-		public static void AddConnectionString(string connectionString)
-		{
-			AddConnectionString(string.Empty, connectionString);
-		}
-
-		/// <summary>
-		/// Adds a new connection string or replaces existing one.
-		/// </summary>
-		/// <remarks>
-		/// Use this method when you use multiple configurations and 
-		/// you don't want to use a configuration file.
-		/// </remarks>
-		/// <include file="Examples.xml" path='examples/db[@name="AddConnectionString(string,string)"]/*' />
-		/// <param name="configurationString">The configuration string.</param>
-		/// <param name="connectionString">A valid database connection string.</param>
-		public static void AddConnectionString(string configurationString, string connectionString)
-		{
-			_connectionStringList[configurationString] = connectionString;
-		}
-
-		/// <summary>
-		/// Adds a new connection string or replaces existing one.
-		/// </summary>
-		/// <remarks>
-		/// Use this method when you use multiple configurations and 
-		/// you don't want to use a configuration file.
-		/// </remarks>
-		/// <include file="Examples.xml" path='examples/db[@name="AddConnectionString(string,string)"]/*' />
-		/// <param name="providerName">The data provider name.</param>
-		/// <param name="configurationString">The configuration string.</param>
-		/// <param name="connectionString">A valid database connection string.</param>
-		public static void AddConnectionString(
-			string providerName, string configurationString, string connectionString)
-		{
-			AddConnectionString(providerName + ProviderNameDivider + configurationString, connectionString);
-		}
-
-		#endregion
-
-		#region Public Static Properties
-
-		/// <summary>
-		/// This table caches connection strings which were already read.
-		/// </summary>
-		private static readonly Dictionary<string, string> _connectionStringList =
-			new Dictionary<string, string>(4);
-		private static string    _defaultConfiguration;
-
-		/// <summary>
-		/// Gets and sets the default configuration string.
-		/// </summary>
-		/// <remarks>
-		/// See the <see cref="ConfigurationString"/> property 
-		/// for an explanation and use of the default configuration.
-		/// </remarks>
-		/// <value>
-		/// A string containing default configuration settings.
-		/// </value>
-		/// <seealso cref="ConfigurationString"/>
-		public static string DefaultConfiguration
-		{
-			get
-			{
-				if (_defaultConfiguration == null)
+				if (c.AutoIncrement == false && c.ReadOnly == false)
 				{
-					// Grab first registered configuration.
-					//
-					foreach (KeyValuePair<string, string> de in _connectionStringList)
-					{
-						_defaultConfiguration = de.Key;
-						break;
-					}
+					object o    = dataRow[c.ColumnName];
+					string name = _dataProvider.Convert(c.ColumnName, ConvertType.NameToParameter).ToString();
 
-					if (_defaultConfiguration == null)
-					{
-						_defaultConfiguration = string.Empty;
-
-						foreach (ConnectionStringSettings css in ConfigurationManager.ConnectionStrings)
-						{
-							if (css.ElementInformation.Source != null &&
-								!css.ElementInformation.Source.EndsWith("machine.config", StringComparison.OrdinalIgnoreCase))
-							{
-								_defaultConfiguration = css.Name;
-								break;
-							}
-						}
-					}
+					Parameter(name).Value =
+						c.AllowDBNull && _mappingSchema.IsNull(o)? DBNull.Value: o;
 				}
-
-				return _defaultConfiguration;
 			}
 
-			set { _defaultConfiguration = value; }
+			if (_prepared)
+				InitParameters(CommandAction.Select);
+
+			return this;
 		}
 
-		#endregion
+		/// <summary>
+		/// Assigns a business object to command parameters.
+		/// </summary>
+		/// <remarks>
+		/// The method is used in addition to the <see cref="CreateParameters(object,IDbDataParameter[])"/> method.
+		/// </remarks>
+		/// <include file="Examples1.xml" path='examples/db[@name="AssignParameterValues(object)"]/*' />
+		/// <param name="obj">An object to assign.</param>
+		/// <returns>This instance of the <see cref="DbManager"/>.</returns>
+		public DbManager AssignParameterValues(object obj)
+		{
+			if (obj == null)
+				throw new ArgumentNullException("obj");
 
-		#region Parameters
+			ObjectMapper om = _mappingSchema.GetObjectMapper(obj.GetType());
+
+			foreach (MemberMapper mm in om)
+			{
+				string name  = _dataProvider.Convert(mm.Name, ConvertType.NameToParameter).ToString();
+
+				if (Command.Parameters.Contains(name))
+				{
+					object value = mm.GetValue(obj);
+
+					Parameter(name).Value =
+						value == null || mm.MapMemberInfo.Nullable && _mappingSchema.IsNull(value)?
+							DBNull.Value: value;
+				}
+			}
+
+			if (_prepared)
+				InitParameters(CommandAction.Select);
+
+			return this;
+		}
 
 		private static Array SortArray(Array array, IComparer comparer)
 		{
@@ -1563,6 +1087,7 @@ namespace BLToolkit.Data
 			Array arrayClone = (Array)array.Clone();
 
 			Array.Sort(arrayClone, comparer);
+
 			return arrayClone;
 		}
 
@@ -1791,9 +1316,7 @@ namespace BLToolkit.Data
 		/// return value. Can be null.</param>
 		/// <param name="objects">An array of <see cref="System.Object"/> to map
 		/// from command parameters.</param>
-		public void MapOutputParameters(
-			string returnValueMember,
-			params object[] objects)
+		public void MapOutputParameters(string returnValueMember, params object[] objects)
 		{
 			if (objects == null)
 				return;
@@ -1810,77 +1333,6 @@ namespace BLToolkit.Data
 		public void MapOutputParameters(params object[] objects)
 		{
 			MapOutputParameters(null, objects);
-		}
-
-		/// <overloads>
-		/// Assigns a business object to command parameters.
-		/// </overloads>
-		/// <summary>
-		/// Assigns the <see cref="DataRow"/> to command parameters.
-		/// </summary>
-		/// <include file="Examples1.xml" path='examples/db[@name="AssignParameterValues(DataRow)"]/*' />
-		/// <remarks>
-		/// The method is used in addition to the <see cref="CreateParameters(object,IDbDataParameter[])"/> method.
-		/// </remarks>
-		/// <param name="dataRow">The <see cref="DataRow"/> to assign.</param>
-		/// <returns>This instance of the <see cref="DbManager"/>.</returns>
-		public DbManager AssignParameterValues(DataRow dataRow)
-		{
-			if (dataRow == null)
-				throw new ArgumentNullException("dataRow");
-
-			foreach (DataColumn c in dataRow.Table.Columns)
-			{
-				if (c.AutoIncrement == false && c.ReadOnly == false)
-				{
-					object o    = dataRow[c.ColumnName];
-					string name = _dataProvider.Convert(c.ColumnName, ConvertType.NameToParameter).ToString();
-
-					Parameter(name).Value =
-						c.AllowDBNull && _mappingSchema.IsNull(o)? DBNull.Value: o;
-				}
-			}
-
-			if (_prepared)
-				InitParameters(CommandAction.Select);
-
-			return this;
-		}
-
-		/// <summary>
-		/// Assigns a business object to command parameters.
-		/// </summary>
-		/// <remarks>
-		/// The method is used in addition to the <see cref="CreateParameters(object,IDbDataParameter[])"/> method.
-		/// </remarks>
-		/// <include file="Examples1.xml" path='examples/db[@name="AssignParameterValues(object)"]/*' />
-		/// <param name="obj">An object to assign.</param>
-		/// <returns>This instance of the <see cref="DbManager"/>.</returns>
-		public DbManager AssignParameterValues(object obj)
-		{
-			if (obj == null)
-				throw new ArgumentNullException("obj");
-
-			ObjectMapper om = _mappingSchema.GetObjectMapper(obj.GetType());
-
-			foreach (MemberMapper mm in om)
-			{
-				string name  = _dataProvider.Convert(mm.Name, ConvertType.NameToParameter).ToString();
-
-				if (Command.Parameters.Contains(name))
-				{
-					object value = mm.GetValue(obj);
-
-					Parameter(name).Value =
-						value == null || mm.MapMemberInfo.Nullable && _mappingSchema.IsNull(value)?
-							DBNull.Value: value;
-				}
-			}
-
-			if (_prepared)
-				InitParameters(CommandAction.Select);
-
-			return this;
 		}
 
 		/// <overloads>
@@ -2462,7 +1914,7 @@ namespace BLToolkit.Data
 			string          spName,
 			params object[] parameterValues)
 		{
-			return SetCommand(commandAction,CommandType.StoredProcedure,
+			return SetCommand(commandAction, CommandType.StoredProcedure,
 					spName, CreateSpParameters(spName, parameterValues));
 		}
 

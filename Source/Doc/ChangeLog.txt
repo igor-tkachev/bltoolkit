@@ -19,6 +19,7 @@ Enhancement
 - Different projects to support FW 2.0 & FW 3.5.
 - LinqMetadataProvider to support Linq To SQL attributes.
 - Relocated MetadataProvider's to BLToolkit.Reflection namespace.
+- New DbManager ctors to support manual/custom configuration.
 
 v 2.0.7
 
