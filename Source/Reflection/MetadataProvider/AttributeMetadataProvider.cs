@@ -442,7 +442,7 @@ namespace BLToolkit.Reflection.MetadataProvider
 
 		public override bool GetNonUpdatableFlag(Type type, TypeExtension typeExt, MemberAccessor member, out bool isSet)
 		{
-			if (member.GetAttributes(typeof(NonUpdatableAttribute)) == null)
+			if (member.GetAttributes(typeof(NonUpdatableAttribute)) != null)
 			{
 				isSet = true;
 				return true;
