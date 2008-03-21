@@ -320,11 +320,13 @@ namespace BLToolkit.Data
 					}
 				}
 
+				dp = _dataProviderNameList[key];
+
 				if (dp == null)
 					throw new DataException(string.Format(
 						Resources.DbManager_UnknownDataProvider, configurationString));
 
-				_configurationList[configurationString] = dp = _dataProviderNameList[key];
+				_configurationList[configurationString] = dp;
 			}
 
 			if (_firstConfiguration == null)
