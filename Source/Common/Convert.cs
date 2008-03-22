@@ -10,7 +10,6 @@ namespace BLToolkit.Common
 	/// <summary>Converts a base data type to another base data type.</summary>
 	public class Convert
 	{
-
 		#region Scalar Types
 
 		#region String

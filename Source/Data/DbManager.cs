@@ -3460,7 +3460,7 @@ namespace BLToolkit.Data
 			if (dataTable == null)
 				dataTable = new DataTable();
 
-			DbDataAdapter da = _dataProvider.CreateDataAdapterObject();
+			var da = _dataProvider.CreateDataAdapterObject();
 			((IDbDataAdapter)da).SelectCommand = SelectCommand;
 
 			try
