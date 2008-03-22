@@ -42,9 +42,9 @@
     <Compile Include="Reflection.Emit\HelloWorldNormal.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Source\BLToolkit.2005.csproj">
-      <Project>{0C325F5D-E50E-4340-8724-D29896CCC583}</Project>
-      <Name>BLToolkit.2005</Name>
+    <ProjectReference Include="..\..\Source\BLToolkit.2.csproj">
+      <Project>{F4DF7358-8EE6-49FD-AB13-EA5145058D79}</Project>
+      <Name>BLToolkit.2</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

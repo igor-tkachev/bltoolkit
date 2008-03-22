@@ -69,9 +69,9 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\Source\BLToolkit.2008.FW3.csproj">
+    <ProjectReference Include="..\..\..\Source\BLToolkit.3.csproj">
       <Project>{0C325F5D-E50E-4340-8724-D29896CCC583}</Project>
-      <Name>BLToolkit.2008.FW3</Name>
+      <Name>BLToolkit.3</Name>
     </ProjectReference>
     <ProjectReference Include="..\ObjectModel\PetShop.ObjectModel.csproj">
       <Project>{BF0811CA-4663-4778-8331-9BEEBCAAC8C8}</Project>

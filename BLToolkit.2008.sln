@@ -29,7 +29,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Asp.Net", "Asp.Net", "{C2C7
 		{B4F97281-0DBD-4835-9ED8-7DFB966E87FF} = {B4F97281-0DBD-4835-9ED8-7DFB966E87FF}
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BLToolkit.2008.FW3", "Source\BLToolkit.2008.FW3.csproj", "{0C325F5D-E50E-4340-8724-D29896CCC583}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BLToolkit.3", "Source\BLToolkit.3.csproj", "{0C325F5D-E50E-4340-8724-D29896CCC583}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExampleGenerator", "Tools\ExampleGenerator\ExampleGenerator.csproj", "{DE735B24-E20B-4440-BBBB-35AECC3F1124}"
 EndProject
@@ -82,8 +82,11 @@ Project("{E24C65DC-7377-472B-9ABA-BC803B73C61A}") = "Web", "Demo\Asp.Net\Web\", 
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "UnitTests", "UnitTests", "{3F0CB8D4-144B-457F-9FBD-5DFBC62594E5}"
+	ProjectSection(SolutionItems) = preProject
+		UnitTests\BLToolkit.nunit = UnitTests\BLToolkit.nunit
+	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BLToolkit.2008.FW2", "Source\BLToolkit.2008.FW2.csproj", "{C604DAEB-0188-4AD4-B00A-8BE943BF4ED4}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BLToolkit.2", "Source\BLToolkit.2.csproj", "{3C37A408-3A01-4568-99D1-ADFEDDFFF2BC}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -337,24 +340,24 @@ Global
 		{8CDD1CE4-8DAE-4746-A845-121C047BDBF8}.Release|Mixed Platforms.ActiveCfg = Debug|.NET
 		{8CDD1CE4-8DAE-4746-A845-121C047BDBF8}.Release|Mixed Platforms.Build.0 = Debug|.NET
 		{8CDD1CE4-8DAE-4746-A845-121C047BDBF8}.Release|Win32.ActiveCfg = Debug|.NET
-		{C604DAEB-0188-4AD4-B00A-8BE943BF4ED4}.Debug|.NET.ActiveCfg = Debug|Any CPU
-		{C604DAEB-0188-4AD4-B00A-8BE943BF4ED4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{C604DAEB-0188-4AD4-B00A-8BE943BF4ED4}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{C604DAEB-0188-4AD4-B00A-8BE943BF4ED4}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
-		{C604DAEB-0188-4AD4-B00A-8BE943BF4ED4}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
-		{C604DAEB-0188-4AD4-B00A-8BE943BF4ED4}.Debug|Win32.ActiveCfg = Debug|Any CPU
-		{C604DAEB-0188-4AD4-B00A-8BE943BF4ED4}.Oracle|.NET.ActiveCfg = Release|Any CPU
-		{C604DAEB-0188-4AD4-B00A-8BE943BF4ED4}.Oracle|Any CPU.ActiveCfg = Release|Any CPU
-		{C604DAEB-0188-4AD4-B00A-8BE943BF4ED4}.Oracle|Any CPU.Build.0 = Release|Any CPU
-		{C604DAEB-0188-4AD4-B00A-8BE943BF4ED4}.Oracle|Mixed Platforms.ActiveCfg = Release|Any CPU
-		{C604DAEB-0188-4AD4-B00A-8BE943BF4ED4}.Oracle|Mixed Platforms.Build.0 = Release|Any CPU
-		{C604DAEB-0188-4AD4-B00A-8BE943BF4ED4}.Oracle|Win32.ActiveCfg = Release|Any CPU
-		{C604DAEB-0188-4AD4-B00A-8BE943BF4ED4}.Release|.NET.ActiveCfg = Release|Any CPU
-		{C604DAEB-0188-4AD4-B00A-8BE943BF4ED4}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{C604DAEB-0188-4AD4-B00A-8BE943BF4ED4}.Release|Any CPU.Build.0 = Release|Any CPU
-		{C604DAEB-0188-4AD4-B00A-8BE943BF4ED4}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
-		{C604DAEB-0188-4AD4-B00A-8BE943BF4ED4}.Release|Mixed Platforms.Build.0 = Release|Any CPU
-		{C604DAEB-0188-4AD4-B00A-8BE943BF4ED4}.Release|Win32.ActiveCfg = Release|Any CPU
+		{3C37A408-3A01-4568-99D1-ADFEDDFFF2BC}.Debug|.NET.ActiveCfg = Debug|Any CPU
+		{3C37A408-3A01-4568-99D1-ADFEDDFFF2BC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3C37A408-3A01-4568-99D1-ADFEDDFFF2BC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3C37A408-3A01-4568-99D1-ADFEDDFFF2BC}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{3C37A408-3A01-4568-99D1-ADFEDDFFF2BC}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{3C37A408-3A01-4568-99D1-ADFEDDFFF2BC}.Debug|Win32.ActiveCfg = Debug|Any CPU
+		{3C37A408-3A01-4568-99D1-ADFEDDFFF2BC}.Oracle|.NET.ActiveCfg = Release|Any CPU
+		{3C37A408-3A01-4568-99D1-ADFEDDFFF2BC}.Oracle|Any CPU.ActiveCfg = Release|Any CPU
+		{3C37A408-3A01-4568-99D1-ADFEDDFFF2BC}.Oracle|Any CPU.Build.0 = Release|Any CPU
+		{3C37A408-3A01-4568-99D1-ADFEDDFFF2BC}.Oracle|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{3C37A408-3A01-4568-99D1-ADFEDDFFF2BC}.Oracle|Mixed Platforms.Build.0 = Release|Any CPU
+		{3C37A408-3A01-4568-99D1-ADFEDDFFF2BC}.Oracle|Win32.ActiveCfg = Release|Any CPU
+		{3C37A408-3A01-4568-99D1-ADFEDDFFF2BC}.Release|.NET.ActiveCfg = Release|Any CPU
+		{3C37A408-3A01-4568-99D1-ADFEDDFFF2BC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3C37A408-3A01-4568-99D1-ADFEDDFFF2BC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3C37A408-3A01-4568-99D1-ADFEDDFFF2BC}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{3C37A408-3A01-4568-99D1-ADFEDDFFF2BC}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{3C37A408-3A01-4568-99D1-ADFEDDFFF2BC}.Release|Win32.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

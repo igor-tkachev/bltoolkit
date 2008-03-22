@@ -2,7 +2,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>8.0.50727</ProductVersion>
+    <ProductVersion>9.0.21022</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{3C37A408-3A01-4568-99D1-ADFEDDFFF2BC}</ProjectGuid>
     <OutputType>Library</OutputType>
@@ -369,10 +369,12 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Mapping\Mapping.xsd">
-      <SubType>Designer</SubType>
+      <SubType>
+      </SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="DataAccess\DataAccess.xsd">
-      <SubType>Designer</SubType>
+      <SubType>
+      </SubType>
     </EmbeddedResource>
     <None Include="DataAccess\DataAccess.xsx">
       <DependentUpon>DataAccess.xsd</DependentUpon>
@@ -382,7 +384,8 @@
       <DependentUpon>Mapping.xsd</DependentUpon>
     </None>
     <EmbeddedResource Include="Reflection\Extension\TypeExtension.xsd">
-      <SubType>Designer</SubType>
+      <SubType>
+      </SubType>
     </EmbeddedResource>
     <None Include="Reflection\Extension\TypeExtension.xsx">
       <DependentUpon>TypeExtension.xsd</DependentUpon>

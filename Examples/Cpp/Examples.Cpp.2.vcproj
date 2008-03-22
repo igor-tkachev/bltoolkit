@@ -177,8 +177,8 @@
 			AssemblyName="System.Xml, Version=2.0.0.0, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL"
 		/>
 		<ProjectReference
-			ReferencedProjectIdentifier="{0C325F5D-E50E-4340-8724-D29896CCC583}"
-			RelativePathToProject=".\Source\BLToolkit.2005.csproj"
+			ReferencedProjectIdentifier="{3C37A408-3A01-4568-99D1-ADFEDDFFF2BC}"
+			RelativePathToProject=".\Source\BLToolkit.2.csproj"
 		/>
 		<AssemblyReference
 			RelativePath="c:\Program Files\NUnit 2.4.6\bin\nunit.framework.dll"
