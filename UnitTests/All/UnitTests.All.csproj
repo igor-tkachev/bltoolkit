@@ -114,6 +114,7 @@
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>copy "$(ProjectDir)App.config" "$(ProjectDir)$(OutDir)"
-copy "$(ProjectDir)App.config" "$(ProjectDir)$(OutDir)\UnitTests.CS.dll.config"</PostBuildEvent>
+copy "$(ProjectDir)App.config" "$(ProjectDir)$(OutDir)UnitTests.CS.dll.config"
+copy "$(ProjectDir)App.config" "$(ProjectDir)$(OutDir)HowTo.dll.config"</PostBuildEvent>
   </PropertyGroup>
 </Project>
