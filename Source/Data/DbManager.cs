@@ -3532,22 +3532,9 @@ namespace BLToolkit.Data
 		/// Executes a SQL statement and maps resultset to an object.
 		/// </summary>
 		/// <param name="entity">An object to populate.</param>
-		/// <returns>A business object.</returns>
-		public object ExecuteObject(object entity)
-		{
-			if (null == entity)
-				throw new ArgumentNullException("entity");
-
-			return ExecuteObjectInternal(entity, entity.GetType());
-		}
-
-		/// <summary>
-		/// Executes a SQL statement and maps resultset to an object.
-		/// </summary>
-		/// <param name="entity">An object to populate.</param>
 		/// <param name="type">The System.Type of the object.</param>
 		/// <returns>A business object.</returns>
-		private object ExecuteObjectInternal(object entity, Type type)
+		private object ExecuteObjectInternal(object entity, Type type, object[] parameters)
 		{
 			if (_prepared)
 				InitParameters(CommandAction.Select);
@@ -3557,8 +3544,8 @@ namespace BLToolkit.Data
 				if (dr.Read()) 
 				{
 					return entity == null?
-						_mappingSchema.MapDataReaderToObject(dr, type,   null):
-						_mappingSchema.MapDataReaderToObject(dr, entity, null);
+						_mappingSchema.MapDataReaderToObject(dr, type,   parameters):
+						_mappingSchema.MapDataReaderToObject(dr, entity, parameters);
 				}
 
 				return null;
@@ -3568,11 +3555,47 @@ namespace BLToolkit.Data
 		/// <summary>
 		/// Executes a SQL statement and maps resultset to an object.
 		/// </summary>
+		/// <param name="entity">An object to populate.</param>
+		/// <returns>A business object.</returns>
+		public object ExecuteObject(object entity)
+		{
+			if (null == entity)
+				throw new ArgumentNullException("entity");
+
+			return ExecuteObjectInternal(entity, entity.GetType(), null);
+		}
+
+		/// <summary>
+		/// Executes a SQL statement and maps resultset to an object.
+		/// </summary>
+		/// <param name="entity">An object to populate.</param>
+		/// <returns>A business object.</returns>
+		public object ExecuteObject(object entity, params object[] parameters)
+		{
+			if (null == entity)
+				throw new ArgumentNullException("entity");
+
+			return ExecuteObjectInternal(entity, entity.GetType(), parameters);
+		}
+
+		/// <summary>
+		/// Executes a SQL statement and maps resultset to an object.
+		/// </summary>
 		/// <param name="type">Type of an object.</param>
 		/// <returns>A business object.</returns>
 		public object ExecuteObject(Type type)
 		{
-			return ExecuteObjectInternal(null, type);
+			return ExecuteObjectInternal(null, type, null);
+		}
+
+		/// <summary>
+		/// Executes a SQL statement and maps resultset to an object.
+		/// </summary>
+		/// <param name="type">Type of an object.</param>
+		/// <returns>A business object.</returns>
+		public object ExecuteObject(Type type, params object[] parameters)
+		{
+			return ExecuteObjectInternal(null, type, parameters);
 		}
 
 		/// <summary>
@@ -3582,7 +3605,17 @@ namespace BLToolkit.Data
 		/// <returns>A business object.</returns>
 		public T ExecuteObject<T>()
 		{
-			return (T)ExecuteObjectInternal(null, typeof(T));
+			return (T)ExecuteObjectInternal(null, typeof(T), null);
+		}
+
+		/// <summary>
+		/// Executes a SQL statement and maps resultset to an object.
+		/// </summary>
+		/// <typeparam name="T">Type of an object.</typeparam>
+		/// <returns>A business object.</returns>
+		public T ExecuteObject<T>(params object[] parameters)
+		{
+			return (T)ExecuteObjectInternal(null, typeof(T), parameters);
 		}
 
 		#endregion
