@@ -10,7 +10,7 @@ using System.Diagnostics;
 namespace BLToolkit.Data
 {
 	using Common;
-	using Data.DataProvider;
+	using DataProvider;
 	using Mapping;
 	using Properties;
 	using Reflection;
@@ -25,7 +25,7 @@ namespace BLToolkit.Data
 	/// <see cref="Dispose(bool)"/>. Also, you can use the C# <b>using</b> statement.
 	/// </remarks>
 	/// <include file="Examples.xml" path='examples/db[@name="DbManager"]/*' />
-	[System.ComponentModel.DesignerCategory("Code")]
+	[DesignerCategory("Code")]
 	public partial class DbManager : Component
 	{
 		#region Constructors
