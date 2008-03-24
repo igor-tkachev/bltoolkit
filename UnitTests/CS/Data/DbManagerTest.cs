@@ -250,6 +250,8 @@ namespace Data
 
 				Assert.IsTrue(e.ID > 0);
 
+				// Cleanup.
+				//
 				db
 					.SetSpCommand("Person_Delete", db.CreateParameters(e))
 					.ExecuteNonQuery();
@@ -320,9 +322,17 @@ namespace Data
 
 				IDbDataParameter[] parameters = db.CreateParameters(dt);
 
-				foreach (IDbDataParameter parameter in parameters)
+				Assert.IsNotNull(parameters);
+				Assert.AreEqual(ObjectMapper<DataTypeTest>.Instance.Count, parameters.Length);
+
+				foreach (MemberMapper mm in ObjectMapper<DataTypeTest>.Instance)
 				{
-					Console.WriteLine("{0}: '{1}'", parameter.ParameterName, parameter.Value);
+					string paramName = (string)db.DataProvider.Convert(mm.Name, ConvertType.NameToParameter);
+					IDbDataParameter p = Array.Find(parameters,
+						delegate(IDbDataParameter obj) { return obj.ParameterName == paramName; });
+
+					Assert.IsNotNull(p);
+					Assert.AreEqual(mm.GetValue(dt), p.Value);
 				}
 			}
 		}
@@ -357,9 +367,17 @@ namespace Data
 
 				IDbDataParameter[] parameters = db.CreateParameters(dt);
 
-				foreach (IDbDataParameter parameter in parameters)
+				Assert.IsNotNull(parameters);
+				Assert.AreEqual(ObjectMapper<DataTypeSqlTest>.Instance.Count, parameters.Length);
+
+				foreach (MemberMapper mm in ObjectMapper<DataTypeSqlTest>.Instance)
 				{
-					Console.WriteLine("{0}: '{1}'", parameter.ParameterName, parameter.Value);
+					string paramName = (string)db.DataProvider.Convert(mm.Name, ConvertType.NameToParameter);
+					IDbDataParameter p = Array.Find(parameters,
+						delegate(IDbDataParameter obj) { return obj.ParameterName == paramName; });
+
+					Assert.IsNotNull(p);
+					Assert.AreEqual(mm.GetValue(dt), p.Value);
 				}
 			}
 		}
@@ -412,6 +430,8 @@ namespace Data
 					.ExecuteObject(typeof(Person));
 				
 				Assert.IsNotNull(p);
+				Assert.AreEqual(f.FirstName, p.FirstName);
+				Assert.AreEqual(s.LastName,  p.LastName);
 			}
 		}
 	}
