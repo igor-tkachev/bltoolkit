@@ -21,11 +21,6 @@ namespace BLToolkit.Data.DataProvider
 	/// <seealso cref="DbManager.AddDataProvider(DataProviderBase)">AddDataManager Method</seealso>
 	public sealed class SQLiteDataProvider: DataProviderBase
 	{
-		public SQLiteDataProvider()
-		{
-			MappingSchema = new SQLiteMappingSchema();
-		}
-
 		/// <summary>
 		/// Creates the database connection object.
 		/// </summary>

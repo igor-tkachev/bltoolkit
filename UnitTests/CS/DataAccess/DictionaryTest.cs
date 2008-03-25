@@ -189,17 +189,33 @@ namespace DataAccess
 			[ObjectType(typeof(Person))]
 			public abstract Dictionary<int, object>           GenericsScalarDictionaryByPKWithObjectType();
 
+#if SQLITE
+			[SqlQuery("SELECT * FROM Person")]
+#else
 			[ActionName("SelectAll")]
+#endif
 			[Index("ID")]
 			public abstract Dictionary<uint, Person> SelectAllT7();
 
+#if SQLITE
+			[SqlQuery("SELECT * FROM Person")]
+#else
 			[ActionName("SelectAll")]
+#endif
 			public abstract Dictionary<long, Person> SelectAllT8();
 
+#if SQLITE
+			[SqlQuery("SELECT * FROM Person")]
+#else
 			[SprocName("Person_SelectAll")]
+#endif
 			public abstract Dictionary<long, Derived> SelectAllDerived();
 
+#if SQLITE
+			[SqlQuery("SELECT * FROM Person")]
+#else
 			[SprocName("Person_SelectAll")]
+#endif
 			public abstract Dictionary<CompoundValue, PersonMultiPK> SelectAllT9();
 		}
 
@@ -207,6 +223,8 @@ namespace DataAccess
 
 #if ORACLE
 		private const decimal _id = 1m;
+#elif SQLITE
+		private const long    _id = 1;
 #else
 		private const int     _id = 1;
 #endif

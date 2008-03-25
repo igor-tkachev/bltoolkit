@@ -16,6 +16,8 @@ namespace Data
 
 #if ORACLE
 		private const decimal _id = 1m;
+#elif SQLITE
+		private const long    _id = 1;
 #else
 		private const int     _id = 1;
 #endif
@@ -48,7 +50,11 @@ namespace Data
 			using (DbManager db = new DbManager())
 			{
 				Hashtable table = db
+#if SQLITE
+					.SetCommand("SELECT * FROM Person")
+#else
 					.SetSpCommand("Person_SelectAll")
+#endif
 					.ExecuteDictionary("ID", typeof(Person));
 
 				Assert.IsNotNull(table);
@@ -67,7 +73,7 @@ namespace Data
 			{
 				Hashtable table = new Hashtable();
 					db
-					.SetSpCommand("Person_SelectAll")
+					.SetCommand("SELECT * FROM Person")
 					.ExecuteDictionary(table, "@PersonID", typeof(Person));
 
 				Assert.IsNotNull(table);
@@ -85,7 +91,7 @@ namespace Data
 			using (DbManager db = new DbManager())
 			{
 				Hashtable table = db
-					.SetSpCommand("Person_SelectAll")
+					.SetCommand("SELECT * FROM Person")
 					.ExecuteDictionary(0, typeof(Person));
 
 				Assert.IsNotNull(table);
@@ -104,7 +110,7 @@ namespace Data
 			{
 				Hashtable table = new Hashtable();
 					db
-					.SetSpCommand("Person_SelectAll")
+					.SetCommand("SELECT * FROM Person")
 					.ExecuteDictionary(table, new MapIndex("ID"), typeof(Person));
 
 				Assert.IsNotNull(table);
@@ -122,7 +128,7 @@ namespace Data
 			using (DbManager db = new DbManager())
 			{
 				Hashtable table = db
-					.SetSpCommand("Person_SelectAll")
+					.SetCommand("SELECT * FROM Person")
 					.ExecuteDictionary(new MapIndex(0), typeof(Person));
 
 				Assert.IsNotNull(table);
@@ -142,8 +148,8 @@ namespace Data
 			{
 				Hashtable table = new Hashtable();
 				db
-				.SetSpCommand("Person_SelectAll")
-				.ExecuteDictionary(table,
+					.SetCommand("SELECT * FROM Person")
+					.ExecuteDictionary(table,
 					new MapIndex("@PersonID", 2, 3), typeof(Person));
 
 				Assert.IsNotNull(table);
@@ -161,7 +167,7 @@ namespace Data
 			using (DbManager db = new DbManager())
 			{
 				Dictionary<int, Person> dic = db
-					.SetSpCommand("Person_SelectAll")
+					.SetCommand("SELECT * FROM Person")
 					.ExecuteDictionary<int, Person>("ID");
 
 				Assert.IsNotNull(dic);
@@ -180,11 +186,13 @@ namespace Data
 			{
 #if ORACLE
 				Dictionary<decimal, Person> dic = new Dictionary<decimal, Person>();
+#elif SQLITE
+				Dictionary<long, Person> dic = new Dictionary<long, Person>();
 #else
 				Dictionary<int, Person> dic = new Dictionary<int, Person>();
 #endif
 					db
-					.SetSpCommand("Person_SelectAll")
+					.SetCommand("SELECT * FROM Person")
 					.ExecuteDictionary(dic, "@PersonID");
 
 				Assert.IsNotNull(dic);
@@ -202,7 +210,7 @@ namespace Data
 			using (DbManager db = new DbManager())
 			{
 				Dictionary<int, Person> dic = db
-					.SetSpCommand("Person_SelectAll")
+					.SetCommand("SELECT * FROM Person")
 					.ExecuteDictionary<int, Person>(0);
 
 				Assert.IsNotNull(dic);
@@ -239,7 +247,7 @@ namespace Data
 			{
 				Dictionary<CompoundValue, Person> dic = new Dictionary<CompoundValue, Person>();
 					db
-					.SetSpCommand("Person_SelectAll")
+					.SetCommand("SELECT * FROM Person")
 					.ExecuteDictionary(dic, new MapIndex(0));
 
 				Assert.IsNotNull(dic);
@@ -258,7 +266,7 @@ namespace Data
 			{
 				Dictionary<CompoundValue, Person> dic = new Dictionary<CompoundValue, Person>();
 					db
-					.SetSpCommand("Person_SelectAll")
+					.SetCommand("SELECT * FROM Person")
 					.ExecuteDictionary(dic, new MapIndex("@PersonID", 2, 3));
 
 				Assert.IsNotNull(dic);

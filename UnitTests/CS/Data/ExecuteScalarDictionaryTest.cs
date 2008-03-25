@@ -38,7 +38,11 @@ namespace Data
 			using (DbManager db = new DbManager())
 			{
 				Hashtable table = db
+#if SQLITE
+					.SetCommand("SELECT * FROM Person")
+#else
 					.SetSpCommand("Person_SelectAll")
+#endif
 					.ExecuteScalarDictionary("PersonID", typeof(int),
 						"FirstName", typeof(string));
 
@@ -54,7 +58,7 @@ namespace Data
 			{
 				Hashtable table = new Hashtable();
 					db
-					.SetSpCommand("Person_SelectAll")
+					.SetCommand("SELECT * FROM Person")
 					.ExecuteScalarDictionary(table,
 						"PersonID", typeof(int), "FirstName", typeof(string));
 
@@ -69,7 +73,7 @@ namespace Data
 			using (DbManager db = new DbManager())
 			{
 				Hashtable table = db
-					.SetSpCommand("Person_SelectAll")
+					.SetCommand("SELECT * FROM Person")
 					.ExecuteScalarDictionary(0, typeof(int), 1, typeof(string));
 
 				Assert.IsNotNull(table);
@@ -84,7 +88,7 @@ namespace Data
 			{
 				Hashtable table = new Hashtable();
 					db
-					.SetSpCommand("Person_SelectAll")
+					.SetCommand("SELECT * FROM Person")
 					.ExecuteScalarDictionary(table,0, typeof(int), 1, typeof(string));
 
 				Assert.IsNotNull(table);
@@ -98,7 +102,7 @@ namespace Data
 			using (DbManager db = new DbManager())
 			{
 				Hashtable table = db
-					.SetSpCommand("Person_SelectAll")
+					.SetCommand("SELECT * FROM Person")
 					.ExecuteScalarDictionary(new MapIndex("PersonID"),
 						"FirstName", typeof(string));
 
@@ -114,7 +118,7 @@ namespace Data
 			{
 				Hashtable table = new Hashtable();
 				db
-				.SetSpCommand("Person_SelectAll")
+					.SetCommand("SELECT * FROM Person")
 				.ExecuteScalarDictionary(table,
 					new MapIndex("PersonID"), 1, typeof(string));
 
@@ -129,7 +133,7 @@ namespace Data
 			using (DbManager db = new DbManager())
 			{
 				Hashtable table = db
-					.SetSpCommand("Person_SelectAll")
+					.SetCommand("SELECT * FROM Person")
 					.ExecuteScalarDictionary(new MapIndex(0),
 						"FirstName", typeof(string));
 
@@ -145,7 +149,7 @@ namespace Data
 			{
 				Hashtable table = new Hashtable();
 				db
-				.SetSpCommand("Person_SelectAll")
+					.SetCommand("SELECT * FROM Person")
 				.ExecuteScalarDictionary(table,
 					new MapIndex("PersonID"), 1, typeof(string));
 
@@ -161,7 +165,7 @@ namespace Data
 			{
 				Hashtable table = new Hashtable();
 				db
-				.SetSpCommand("Person_SelectAll")
+					.SetCommand("SELECT * FROM Person")
 				.ExecuteScalarDictionary(table,
 					new MapIndex(0, 1, 2), 1, typeof(string));
 
@@ -177,7 +181,7 @@ namespace Data
 			{
 				Hashtable table = new Hashtable();
 				db
-				.SetSpCommand("Person_SelectAll")
+					.SetCommand("SELECT * FROM Person")
 				.ExecuteScalarDictionary(table,
 					new MapIndex("PersonID", "FirstName", "LastName"), 1, typeof(string));
 
@@ -193,7 +197,7 @@ namespace Data
 			{
 				Hashtable table = new Hashtable();
 				db
-				.SetSpCommand("Person_SelectAll")
+					.SetCommand("SELECT * FROM Person")
 				.ExecuteScalarDictionary(table,
 					new MapIndex("PersonID", 2, 3), 1, typeof(string));
 
@@ -208,7 +212,7 @@ namespace Data
 			using (DbManager db = new DbManager())
 			{
 				Dictionary<int, string> dic = db
-					.SetSpCommand("Person_SelectAll")
+					.SetCommand("SELECT * FROM Person")
 					.ExecuteScalarDictionary<int, string>("PersonID", "FirstName");
 
 				Assert.IsNotNull(dic);
@@ -223,7 +227,7 @@ namespace Data
 			{
 				Dictionary<int, string> dic = new Dictionary<int, string>();
 				db
-					.SetSpCommand("Person_SelectAll")
+					.SetCommand("SELECT * FROM Person")
 					.ExecuteScalarDictionary(dic, "PersonID", "FirstName");
 
 				Assert.IsNotNull(dic);
@@ -237,7 +241,7 @@ namespace Data
 			using (DbManager db = new DbManager())
 			{
 				Dictionary<int, string> dic = db
-					.SetSpCommand("Person_SelectAll")
+					.SetCommand("SELECT * FROM Person")
 					.ExecuteScalarDictionary<int, string>(0, 1);
 
 				Assert.IsNotNull(dic);
@@ -252,7 +256,7 @@ namespace Data
 			{
 				Dictionary<int, string> dic = new Dictionary<int, string>();
 					db
-					.SetSpCommand("Person_SelectAll")
+					.SetCommand("SELECT * FROM Person")
 					.ExecuteScalarDictionary(dic, 0, 1);
 
 				Assert.IsNotNull(dic);
@@ -266,7 +270,7 @@ namespace Data
 			using (DbManager db = new DbManager())
 			{
 				Dictionary<CompoundValue, string> dic = db
-					.SetSpCommand("Person_SelectAll")
+					.SetCommand("SELECT * FROM Person")
 					.ExecuteScalarDictionary<string>(new MapIndex("LastName"), "FirstName");
 
 				Assert.IsNotNull(dic);
@@ -281,7 +285,7 @@ namespace Data
 			{
 				Dictionary<CompoundValue, string> dic = new Dictionary<CompoundValue, string>();
 					db
-					.SetSpCommand("Person_SelectAll")
+					.SetCommand("SELECT * FROM Person")
 					.ExecuteScalarDictionary(dic, new MapIndex("LastName"), 1);
 
 				Assert.IsNotNull(dic);
@@ -295,7 +299,7 @@ namespace Data
 			using (DbManager db = new DbManager())
 			{
 				Dictionary<CompoundValue, string> dic = db
-					.SetSpCommand("Person_SelectAll")
+					.SetCommand("SELECT * FROM Person")
 					.ExecuteScalarDictionary<string>(new MapIndex(2), "FirstName");
 
 				Assert.IsNotNull(dic);
@@ -310,8 +314,8 @@ namespace Data
 			{
 				Dictionary<CompoundValue, string> dic = new Dictionary<CompoundValue, string>();
 				db
-				.SetSpCommand("Person_SelectAll")
-				.ExecuteScalarDictionary(dic, new MapIndex(0), 2);
+					.SetCommand("SELECT * FROM Person")
+					.ExecuteScalarDictionary(dic, new MapIndex(0), 2);
 
 				Assert.IsNotNull(dic);
 				Assert.IsTrue(dic.Count > 0);
@@ -325,8 +329,8 @@ namespace Data
 			{
 				Dictionary<CompoundValue, string> dic = new Dictionary<CompoundValue, string>();
 				db
-				.SetSpCommand("Person_SelectAll")
-				.ExecuteScalarDictionary(dic, new MapIndex(0, 1, 2), 2);
+					.SetCommand("SELECT * FROM Person")
+					.ExecuteScalarDictionary(dic, new MapIndex(0, 1, 2), 2);
 
 				Assert.IsNotNull(dic);
 				Assert.IsTrue(dic.Count > 0);
@@ -340,8 +344,8 @@ namespace Data
 			{
 				Dictionary<CompoundValue, string> dic = new Dictionary<CompoundValue, string>();
 				db
-				.SetSpCommand("Person_SelectAll")
-				.ExecuteScalarDictionary(dic, new MapIndex("PersonID", "FirstName", "LastName"), 2);
+					.SetCommand("SELECT * FROM Person")
+					.ExecuteScalarDictionary(dic, new MapIndex("PersonID", "FirstName", "LastName"), 2);
 
 				Assert.IsNotNull(dic);
 				Assert.IsTrue(dic.Count > 0);
@@ -355,8 +359,8 @@ namespace Data
 			{
 				Dictionary<CompoundValue, string> dic = new Dictionary<CompoundValue, string>();
 				db
-				.SetSpCommand("Person_SelectAll")
-				.ExecuteScalarDictionary(dic, new MapIndex("PersonID", 2, 3), "LastName");
+					.SetCommand("SELECT * FROM Person")
+					.ExecuteScalarDictionary(dic, new MapIndex("PersonID", 2, 3), "LastName");
 
 				Assert.IsNotNull(dic);
 				Assert.IsTrue(dic.Count > 0);

@@ -190,7 +190,6 @@
     <Compile Include="Data\DataProvider\OleDbDataProvider.cs" />
     <Compile Include="Data\DataProvider\SqlDataProvider.cs" />
     <Compile Include="Data\DbManager.cs">
-      <SubType>Component</SubType>
     </Compile>
     <Compile Include="Data\DbManager.Config.cs">
       <DependentUpon>DbManager.cs</DependentUpon>

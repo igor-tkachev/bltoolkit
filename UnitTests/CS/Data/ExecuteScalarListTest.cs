@@ -56,7 +56,11 @@ namespace Data
 			using (DbManager db = new DbManager())
 			{
 				ArrayList array = db
+#if SQLITE
+					.SetCommand("SELECT * FROM Person")
+#else
 					.SetSpCommand("Person_SelectAll")
+#endif
 					.ExecuteScalarList(typeof(int));
 
 				Assert.IsNotNull(array);
@@ -71,7 +75,7 @@ namespace Data
 			{
 				ArrayList array = new ArrayList();
 					db
-					.SetSpCommand("Person_SelectAll")
+					.SetCommand("SELECT * FROM Person")
 					.ExecuteScalarList(array, typeof(int));
 
 				Assert.IsNotNull(array);
@@ -85,7 +89,7 @@ namespace Data
 			using (DbManager db = new DbManager())
 			{
 				ArrayList array = db
-					.SetSpCommand("Person_SelectAll")
+					.SetCommand("SELECT * FROM Person")
 					.ExecuteScalarList(typeof(string),1);
 
 				Assert.IsNotNull(array);
@@ -100,8 +104,8 @@ namespace Data
 			{
 				ArrayList array = new ArrayList();
 				db
-				.SetSpCommand("Person_SelectAll")
-				.ExecuteScalarList(array, typeof(string), "LastName");
+					.SetCommand("SELECT * FROM Person")
+					.ExecuteScalarList(array, typeof(string), "LastName");
 
 				Assert.IsNotNull(array);
 				Assert.IsTrue(array.Count > 0);
@@ -154,7 +158,7 @@ namespace Data
 			using (DbManager db = new DbManager())
 			{
 				List<string> array = db
-					.SetSpCommand("Person_SelectAll")
+					.SetCommand("SELECT * FROM Person")
 					.ExecuteScalarList<string>(1);
 
 				Assert.IsNotNull(array);
@@ -169,7 +173,7 @@ namespace Data
 			{
 				List<string> array = new List<string>();
 				db
-					.SetSpCommand("Person_SelectAll")
+					.SetCommand("SELECT * FROM Person")
 					.ExecuteScalarList(array, "LastName");
 
 				Assert.IsNotNull(array);
@@ -203,7 +207,7 @@ namespace Data
 			{
 				List<uint> array = new List<uint>();
 				db
-					.SetSpCommand("Person_SelectAll")
+					.SetCommand("SELECT * FROM Person")
 					.ExecuteScalarList(array);
 
 				Assert.IsNotNull(array);

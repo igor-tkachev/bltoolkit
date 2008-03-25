@@ -29,11 +29,6 @@ namespace BLToolkit.Data.DataProvider
 	/// <seealso cref="DbManager.AddDataProvider(DataProviderBase)">AddDataManager Method</seealso>
 	public class OdpDataProvider : DataProviderBase
 	{
-		public OdpDataProvider()
-		{
-			MappingSchema = new OdpMappingSchema();
-		}
-
 		static OdpDataProvider()
 		{
 			// Fix Oracle.Net bug #1: Array types are not handled.

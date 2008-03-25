@@ -1,21 +1,41 @@
-﻿<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+﻿<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="3.5">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>8.0.50727</ProductVersion>
+    <ProductVersion>9.0.21022</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{2BB4AD77-190F-4D7E-A83E-7B254A0A1FCA}</ProjectGuid>
+    <ProjectGuid>{3293F570-DDFC-4449-9442-BAC6DDFE8184}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>UnitTests.CS</RootNamespace>
-    <AssemblyName>UnitTests.CS.2.Odp</AssemblyName>
+    <AssemblyName>UnitTests.SQLite</AssemblyName>
+    <FileUpgradeFlags>
+    </FileUpgradeFlags>
+    <OldToolsVersion>2.0</OldToolsVersion>
+    <UpgradeBackupLocation>
+    </UpgradeBackupLocation>
+    <Install>true</Install>
+    <InstallFrom>Web</InstallFrom>
+    <UpdateEnabled>true</UpdateEnabled>
+    <UpdateMode>Foreground</UpdateMode>
+    <UpdateInterval>7</UpdateInterval>
+    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
+    <UpdatePeriodically>false</UpdatePeriodically>
+    <UpdateRequired>false</UpdateRequired>
+    <MapFileExtensions>true</MapFileExtensions>
+    <ApplicationRevision>0</ApplicationRevision>
+    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
+    <IsWebBootstrapper>true</IsWebBootstrapper>
+    <UseApplicationTrust>false</UseApplicationTrust>
+    <BootstrapperEnabled>true</BootstrapperEnabled>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>TRACE;DEBUG;ORACLE</DefineConstants>
+    <OutputPath>..\bin\Debug\</OutputPath>
+    <DefineConstants>TRACE;DEBUG;SQLITE;FW3</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <NoWarn>3021</NoWarn>
@@ -23,8 +43,8 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE;ORACLE</DefineConstants>
+    <OutputPath>..\bin\Release\</OutputPath>
+    <DefineConstants>TRACE;SQLITE;FW3</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <NoWarn>3021</NoWarn>
@@ -34,12 +54,18 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>%ProgramFiles%\NUnit-Net-2.0 2.2.8\bin\nunit.framework.dll</HintPath>
     </Reference>
-    <Reference Include="Oracle.DataAccess, Version=2.102.2.20, Culture=neutral, PublicKeyToken=89b483f429c47342, processorArchitecture=x86" />
     <Reference Include="System" />
+    <Reference Include="System.Core">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
     <Reference Include="System.Data" />
+    <Reference Include="System.Data.SQLite, Version=1.0.48.0, Culture=neutral, PublicKeyToken=db937bc2d44ff139, processorArchitecture=x86" />
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\..\..\Source\Data\DataProvider\SQLiteDataProvider.cs">
+      <Link>SQLiteDataProvider.cs</Link>
+    </Compile>
     <Compile Include="..\..\CS\Aspects\CacheAspectTest.cs">
       <Link>Aspects\CacheAspectTest.cs</Link>
     </Compile>
@@ -61,14 +87,14 @@
     <Compile Include="..\..\CS\Common\ConvertTest.cs">
       <Link>Common\ConvertTest.cs</Link>
     </Compile>
-    <Compile Include="..\..\CS\Common\OperatorTest.cs">
-      <Link>Common\OperatorTest.cs</Link>
-    </Compile>
     <Compile Include="..\..\CS\Common\NameOrIndexParameterTest.cs">
       <Link>Common\NameOrIndexParameterTest.cs</Link>
     </Compile>
-    <Compile Include="..\..\CS\DataAccess\ArrayTest.cs">
-      <Link>DataAccess\ArrayTest.cs</Link>
+    <Compile Include="..\..\CS\DataAccess\PersonDataSet2.Designer.cs">
+      <Link>Mapping\PersonDataSet2.Designer.cs</Link>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>PersonDataSet2.xsd</DependentUpon>
     </Compile>
     <Compile Include="..\..\CS\DataAccess\XmlTypeTest.cs">
       <Link>DataAccess\XmlTypeTest.cs</Link>
@@ -79,14 +105,8 @@
     <Compile Include="..\..\CS\DataAccess\PrimaryKeyAttributeTest.cs">
       <Link>DataAccess\PrimaryKeyAttributeTest.cs</Link>
     </Compile>
-    <Compile Include="..\..\CS\DataAccess\ScalarListTest.cs">
-      <Link>DataAccess\ScalarListTest.cs</Link>
-    </Compile>
     <Compile Include="..\..\CS\DataAccess\CreateEntityTest.cs">
       <Link>DataAccess\CreateEntityTest.cs</Link>
-    </Compile>
-    <Compile Include="..\..\CS\DataAccess\DataAccessorTest.cs">
-      <Link>DataAccess\DataAccessorTest.cs</Link>
     </Compile>
     <Compile Include="..\..\CS\DataAccess\DictionaryTest.cs">
       <Link>DataAccess\DictionaryTest.cs</Link>
@@ -94,22 +114,10 @@
     <Compile Include="..\..\CS\DataAccess\EnumTest.cs">
       <Link>DataAccess\EnumTest.cs</Link>
     </Compile>
-    <Compile Include="..\..\CS\DataAccess\ScalarTest.cs">
-      <Link>DataAccess\ScalarTest.cs</Link>
-    </Compile>
-    <Compile Include="..\..\CS\DataAccess\OutRefTest.cs">
-      <Link>DataAccess\OutRefTest.cs</Link>
-    </Compile>
     <Compile Include="..\..\CS\DataAccess\PersonDataSet2.cs">
       <DependentUpon>PersonDataSet2.xsd</DependentUpon>
       <SubType>Component</SubType>
       <Link>Mapping\PersonDataSet2.cs</Link>
-    </Compile>
-    <Compile Include="..\..\CS\DataAccess\PersonDataSet2.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>PersonDataSet2.xsd</DependentUpon>
-      <Link>Mapping\PersonDataSet2.Designer.cs</Link>
     </Compile>
     <Compile Include="..\..\CS\DataAccess\SqlQueryTest.cs">
       <Link>DataAccess\SqlQueryTest.cs</Link>
@@ -201,9 +209,6 @@
     <Compile Include="..\..\CS\Mapping\ObjectMapperAttributeTest.cs">
       <Link>Mapping\ObjectMapperAttributeTest.cs</Link>
     </Compile>
-    <Compile Include="..\..\CS\Mapping\ResultSetTest.cs">
-      <Link>Mapping\ResultSetTest.cs</Link>
-    </Compile>
     <Compile Include="..\..\CS\Mapping\TrimmableAttributeTest.cs">
       <Link>Mapping\TrimmableAttributeTest.cs</Link>
     </Compile>
@@ -220,10 +225,10 @@
       <Link>Properties\AssemblyInfo.cs</Link>
     </Compile>
     <Compile Include="..\..\CS\Properties\Settings.Designer.cs">
+      <Link>Properties\Settings.Designer.cs</Link>
       <AutoGen>True</AutoGen>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <DependentUpon>Settings.settings</DependentUpon>
-      <Link>Properties\Settings.Designer.cs</Link>
     </Compile>
     <Compile Include="..\..\CS\Reflection\Emit\MethodBuilderHelperTest.cs">
       <Link>Reflection\MethodBuilderHelperTest.cs</Link>
@@ -286,7 +291,7 @@
       <Link>TypeBuilder\PropertyChangeBuilderTest.cs</Link>
     </Compile>
     <Compile Include="..\..\CS\TypeBuilder\TypeFactoryTest.cs">
-      <Link>Reflection\TypeFactoryTest.cs</Link>
+      <Link>TypeBuilder\TypeFactoryTest.cs</Link>
     </Compile>
     <Compile Include="..\..\CS\Reflection\Extension\ExtensionTest.cs">
       <Link>Reflection\ExtensionTest.cs</Link>
@@ -296,7 +301,6 @@
     </Compile>
     <Compile Include="..\..\CS\TestFixtureBase.cs" />
     <Compile Include="..\..\CS\TestObject.cs" />
-    <Compile Include="..\..\..\Source\Data\DataProvider\OdpDataProvider.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
@@ -346,10 +350,27 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\Source\BLToolkit.2.csproj">
+    <ProjectReference Include="..\..\..\Source\BLToolkit.3.csproj">
       <Project>{0C325F5D-E50E-4340-8724-D29896CCC583}</Project>
-      <Name>BLToolkit.2</Name>
+      <Name>BLToolkit.3</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.2.0">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 2.0 %28x86%29</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.0">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.0 %28x86%29</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>

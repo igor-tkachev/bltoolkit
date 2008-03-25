@@ -38,6 +38,8 @@ namespace DataAccess
 			[SqlQuery("SELECT * FROM Person WHERE LastName = :lastName AND rownum <= {0}")]
 #elif FIREBIRD
 			[SqlQuery("SELECT FIRST {0} * FROM Person WHERE LastName = @lastName")]
+#elif SQLITE
+			[SqlQuery("SELECT * FROM Person WHERE LastName = @lastName LIMIT {0}")]
 #else
 			[SqlQuery("SELECT TOP {0} * FROM Person WHERE LastName = @lastName")]
 #endif

@@ -52,6 +52,15 @@ namespace Data
 				id = db
 					.SetCommand("SELECT @@IDENTITY")
 					.ExecuteScalar();
+#elif SQLITE
+				db
+					.SetCommand("INSERT INTO BinaryData (Stamp, Data) VALUES (datetime('now'), @Data)",
+						db.Parameter("@Data", new byte[] { 1, 2, 3, 4, 5}))
+					.ExecuteNonQuery();
+
+				id = db
+					.SetCommand("SELECT last_insert_rowid()")
+					.ExecuteScalar();
 #else
 				Assert.Fail("Unknown DB type.");
 #endif
@@ -77,7 +86,7 @@ namespace Data
 #endif
 
 				db
-#if FIREBIRD || ACCESS
+#if FIREBIRD || ACCESS || SQLITE
 					.SetCommand("DELETE FROM BinaryData")
 #else
 					.SetCommand("TRUNCATE TABLE BinaryData")

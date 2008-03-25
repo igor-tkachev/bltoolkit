@@ -154,7 +154,7 @@ namespace DataAccess
 			}
 		}
 
-#if !ACCESS
+#if !ACCESS && !SQLITE
 		[Test]
 		public void OutputParameterRegressionTest()
 		{
@@ -312,7 +312,7 @@ namespace DataAccess
 				XmlReader xml = ta.GetXml(db, 2);
 				xml.MoveToContent();
 				Assert.IsTrue(xml.ReadToDescendant("element"));
-				Console.WriteLine("{0}", xml.GetAttribute("strattr"));
+				Assert.AreEqual("strvalue", xml.GetAttribute("strattr"));
 			}
 		}
 
@@ -325,7 +325,7 @@ namespace DataAccess
 				XmlDocument xmlDocument= ta.GetXmlDoc(db, 2);
 				Assert.IsNotNull(xmlDocument);
 				Assert.IsNotNull(xmlDocument.DocumentElement);
-				Console.WriteLine("{0}", xmlDocument.DocumentElement.GetAttribute("strattr"));
+				Assert.AreEqual("strvalue", xmlDocument.DocumentElement.GetAttribute("strattr"));
 			}
 		}
 

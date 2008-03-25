@@ -22,7 +22,11 @@ namespace DataAccess
 
 		public abstract class EntityAccessor : DataAccessor<Entity>
 		{
+#if SQLITE
+			[SqlQuery("SELECT * FROM Person")]
+#else
 			[SprocName("Person_SelectAll")]
+#endif
 			public abstract int Insert(Entity entity);
 
 			public static EntityAccessor CreateInstance(DbManager dbManager)

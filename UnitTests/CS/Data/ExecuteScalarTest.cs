@@ -15,8 +15,14 @@ namespace Data
 			using (DbManager db = new DbManager())
 			{
 				int expectedValue = 12345;
-				int actualValue = db.MappingSchema.ConvertToInt32(db
-					.SetSpCommand("Scalar_DataReader").ExecuteScalar());
+				int actualValue = db.MappingSchema.ConvertToInt32(
+					db
+#if SQLITE
+						.SetCommand("SELECT 12345 FROM Dual")
+#else
+						.SetSpCommand("Scalar_DataReader")
+#endif
+						.ExecuteScalar());
 
 				Assert.AreEqual(expectedValue, actualValue);
 			}
@@ -28,9 +34,14 @@ namespace Data
 			using (DbManager db = new DbManager())
 			{
 				int expectedValue = 12345;
-				int actualValue = db.MappingSchema.ConvertToInt32(db
-					.SetSpCommand("Scalar_DataReader")
-					.ExecuteScalar(ScalarSourceType.DataReader));
+				int actualValue = db.MappingSchema.ConvertToInt32(
+					db
+#if SQLITE
+						.SetCommand("SELECT 12345 FROM Dual")
+#else
+						.SetSpCommand("Scalar_DataReader")
+#endif
+						.ExecuteScalar(ScalarSourceType.DataReader));
 				
 				Assert.AreEqual(expectedValue, actualValue);
 			}
@@ -42,9 +53,14 @@ namespace Data
 			using (DbManager db = new DbManager())
 			{
 				string expectedValue = "54321";
-				string actualValue = db.MappingSchema.ConvertToString(db
-					.SetSpCommand("Scalar_DataReader")
-					.ExecuteScalar(ScalarSourceType.DataReader, 1));
+				string actualValue = db.MappingSchema.ConvertToString(
+					db
+#if SQLITE
+						.SetCommand("SELECT 12345, '54321' FROM Dual")
+#else
+						.SetSpCommand("Scalar_DataReader")
+#endif
+						.ExecuteScalar(ScalarSourceType.DataReader, 1));
 
 				Assert.AreEqual(expectedValue, actualValue);
 			}
@@ -56,15 +72,20 @@ namespace Data
 			using (DbManager db = new DbManager())
 			{
 				string expectedValue = "54321";
-				string actualValue = db.MappingSchema.ConvertToString(db
-					.SetSpCommand("Scalar_DataReader")
-					.ExecuteScalar(ScalarSourceType.DataReader, "stringField"));
+				string actualValue = db.MappingSchema.ConvertToString(
+					db
+#if SQLITE
+						.SetCommand("SELECT 12345 intField, '54321' stringField FROM Dual")
+#else
+						.SetSpCommand("Scalar_DataReader")
+#endif
+						.ExecuteScalar(ScalarSourceType.DataReader, "stringField"));
 
 				Assert.AreEqual(expectedValue, actualValue);
 			}
 		}
 		
-#if !ACCESS
+#if !ACCESS && !SQLITE
 		[Test]
 		public void OutputParameterTest()
 		{
@@ -127,14 +148,19 @@ namespace Data
 		{
 			using (DbManager db = new DbManager())
 			{
-#if ACCESS
+#if ACCESS || SQLITE
 				int expectedValue = 0;
 #else
  				int expectedValue = -1;
 #endif
-				int actualValue = db.MappingSchema.ConvertToInt32(db
-					.SetSpCommand("Scalar_DataReader")
-					.ExecuteScalar(ScalarSourceType.AffectedRows));
+				int actualValue = db.MappingSchema.ConvertToInt32(
+					db
+#if SQLITE
+						.SetCommand("SELECT 12345 FROM Dual")
+#else
+						.SetSpCommand("Scalar_DataReader")
+#endif
+						.ExecuteScalar(ScalarSourceType.AffectedRows));
 
 				Assert.AreEqual(expectedValue, actualValue);
 			}
@@ -147,7 +173,12 @@ namespace Data
 			{
 				int expectedValue = 12345;
 				int actualValue = db
-					.SetSpCommand("Scalar_DataReader").ExecuteScalar<int>();
+#if SQLITE
+					.SetCommand("SELECT 12345 FROM Dual")
+#else
+					.SetSpCommand("Scalar_DataReader")
+#endif
+					.ExecuteScalar<int>();
 
 				Assert.AreEqual(expectedValue, actualValue);
 			}
@@ -160,7 +191,11 @@ namespace Data
 			{
 				int expectedValue = 12345;
 				int actualValue = db
+#if SQLITE
+					.SetCommand("SELECT 12345 FROM Dual")
+#else
 					.SetSpCommand("Scalar_DataReader")
+#endif
 					.ExecuteScalar<int>(ScalarSourceType.DataReader);
 
 				Assert.AreEqual(expectedValue, actualValue);
@@ -174,7 +209,11 @@ namespace Data
 			{
 				string expectedValue = "54321";
 				string actualValue = db
+#if SQLITE
+					.SetCommand("SELECT 12345, '54321' FROM Dual")
+#else
 					.SetSpCommand("Scalar_DataReader")
+#endif
 					.ExecuteScalar<string>(ScalarSourceType.DataReader, 1);
 
 				Assert.AreEqual(expectedValue, actualValue);

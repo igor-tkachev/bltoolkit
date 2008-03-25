@@ -192,7 +192,7 @@ namespace Data
 			public string inputOutputStr = "10";
 		}
 
-#if !ACCESS
+#if !ACCESS && !SQLITE
 		[Test]
 		public void MapOutput()
 		{
@@ -414,7 +414,9 @@ namespace Data
 			public string LastName;
 		}
 
+#if !SQLITE
 		[Test]
+#endif
 		public void CreateManyParametersTest()
 		{
 			FirstPart  f = new FirstPart();

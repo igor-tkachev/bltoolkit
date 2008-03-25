@@ -51,10 +51,6 @@ namespace BLToolkit.Data.DataProvider
 
 		#region overloads
 
-		public FdpDataProvider()
-		{
-			MappingSchema = new FbMappingSchema();
-		}
 		public override IDbConnection CreateConnectionObject()
 		{
 			return new FbConnection();

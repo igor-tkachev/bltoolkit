@@ -1,21 +1,42 @@
-﻿<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+﻿<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="3.5">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>8.0.50727</ProductVersion>
+    <ProductVersion>9.0.21022</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{2BB4AD77-190F-4D7E-A83E-7B254A0A1FCA}</ProjectGuid>
+    <ProjectGuid>{ACD42369-6C01-44FA-B53C-685E6A01894E}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>UnitTests.CS</RootNamespace>
-    <AssemblyName>UnitTests.CS.2.Access</AssemblyName>
+    <AssemblyName>UnitTests.Firebird</AssemblyName>
+    <FileUpgradeFlags>
+    </FileUpgradeFlags>
+    <OldToolsVersion>2.0</OldToolsVersion>
+    <UpgradeBackupLocation>
+    </UpgradeBackupLocation>
+    <PublishUrl>http://localhost/UnitTests.CS.2.Fdp/</PublishUrl>
+    <Install>true</Install>
+    <InstallFrom>Web</InstallFrom>
+    <UpdateEnabled>true</UpdateEnabled>
+    <UpdateMode>Foreground</UpdateMode>
+    <UpdateInterval>7</UpdateInterval>
+    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
+    <UpdatePeriodically>false</UpdatePeriodically>
+    <UpdateRequired>false</UpdateRequired>
+    <MapFileExtensions>true</MapFileExtensions>
+    <ApplicationRevision>0</ApplicationRevision>
+    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
+    <IsWebBootstrapper>true</IsWebBootstrapper>
+    <UseApplicationTrust>false</UseApplicationTrust>
+    <BootstrapperEnabled>true</BootstrapperEnabled>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>TRACE;DEBUG;ACCESS;OLEDB</DefineConstants>
+    <OutputPath>..\bin\Debug\</OutputPath>
+    <DefineConstants>TRACE;DEBUG;FIREBIRD;FW3</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <NoWarn>3021</NoWarn>
@@ -23,18 +44,22 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE;ACCESS;OLEDB</DefineConstants>
+    <OutputPath>..\bin\Release\</OutputPath>
+    <DefineConstants>TRACE;FIREBIRD;FW3</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <NoWarn>3021</NoWarn>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="FirebirdSql.Data.FirebirdClient, Version=2.1.0.0, Culture=neutral, PublicKeyToken=3750abcc3150b00c, processorArchitecture=MSIL" />
     <Reference Include="nunit.framework, Version=2.2.8.0, Culture=neutral, PublicKeyToken=96d09a1eb7f44a77, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>%ProgramFiles%\NUnit-Net-2.0 2.2.8\bin\nunit.framework.dll</HintPath>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.Core">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
   </ItemGroup>
@@ -63,12 +88,6 @@
     <Compile Include="..\..\CS\Common\NameOrIndexParameterTest.cs">
       <Link>Common\NameOrIndexParameterTest.cs</Link>
     </Compile>
-    <Compile Include="..\..\CS\DataAccess\PersonDataSet2.Designer.cs">
-      <Link>Mapping\PersonDataSet2.Designer.cs</Link>
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>PersonDataSet2.xsd</DependentUpon>
-    </Compile>
     <Compile Include="..\..\CS\DataAccess\XmlTypeTest.cs">
       <Link>DataAccess\XmlTypeTest.cs</Link>
     </Compile>
@@ -96,10 +115,19 @@
     <Compile Include="..\..\CS\DataAccess\ScalarTest.cs">
       <Link>DataAccess\ScalarTest.cs</Link>
     </Compile>
+    <Compile Include="..\..\CS\DataAccess\OutRefTest.cs">
+      <Link>DataAccess\OutRefTest.cs</Link>
+    </Compile>
     <Compile Include="..\..\CS\DataAccess\PersonDataSet2.cs">
       <DependentUpon>PersonDataSet2.xsd</DependentUpon>
       <SubType>Component</SubType>
       <Link>Mapping\PersonDataSet2.cs</Link>
+    </Compile>
+    <Compile Include="..\..\CS\DataAccess\PersonDataSet2.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>PersonDataSet2.xsd</DependentUpon>
+      <Link>Mapping\PersonDataSet2.Designer.cs</Link>
     </Compile>
     <Compile Include="..\..\CS\DataAccess\SqlQueryTest.cs">
       <Link>DataAccess\SqlQueryTest.cs</Link>
@@ -117,7 +145,7 @@
       <Link>Data\BinaryTest.cs</Link>
     </Compile>
     <Compile Include="..\..\CS\Data\CompositeKeyTest.cs">
-      <Link>Data\CompositeKeyTest.cs</Link>
+      <Link>Common\CompositeKeyTest.cs</Link>
     </Compile>
     <Compile Include="..\..\CS\Data\InnerTypesTest.cs">
       <Link>Data\InnerTypesTest.cs</Link>
@@ -207,10 +235,10 @@
       <Link>Properties\AssemblyInfo.cs</Link>
     </Compile>
     <Compile Include="..\..\CS\Properties\Settings.Designer.cs">
-      <Link>Properties\Settings.Designer.cs</Link>
       <AutoGen>True</AutoGen>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <DependentUpon>Settings.settings</DependentUpon>
+      <Link>Properties\Settings.Designer.cs</Link>
     </Compile>
     <Compile Include="..\..\CS\Reflection\Emit\MethodBuilderHelperTest.cs">
       <Link>Reflection\MethodBuilderHelperTest.cs</Link>
@@ -283,6 +311,7 @@
     </Compile>
     <Compile Include="..\..\CS\TestFixtureBase.cs" />
     <Compile Include="..\..\CS\TestObject.cs" />
+    <Compile Include="..\..\..\Source\Data\DataProvider\FdpDataProvider.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
@@ -332,10 +361,27 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\Source\BLToolkit.2.csproj">
+    <ProjectReference Include="..\..\..\Source\BLToolkit.3.csproj">
       <Project>{0C325F5D-E50E-4340-8724-D29896CCC583}</Project>
-      <Name>BLToolkit.2</Name>
+      <Name>BLToolkit.3</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.2.0">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 2.0 %28x86%29</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.0">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.0 %28x86%29</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>
