@@ -55,7 +55,9 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>%ProgramFiles%\NUnit-Net-2.0 2.2.8\bin\nunit.framework.dll</HintPath>
     </Reference>
-    <Reference Include="Oracle.DataAccess, Version=2.102.2.20, Culture=neutral, PublicKeyToken=89b483f429c47342, processorArchitecture=x86" />
+    <Reference Include="Oracle.DataAccess, Version=2.102.2.20, Culture=neutral, PublicKeyToken=89b483f429c47342, processorArchitecture=x86">
+      <SpecificVersion>False</SpecificVersion>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
     <Reference Include="System.Core">
