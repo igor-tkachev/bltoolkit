@@ -35,6 +35,9 @@ namespace DataAccess
 				string @FirstName, string @MiddleName, string @LastName, Gender @Gender);
 
 #if ACCESS || SQLITE
+#if SQLITE
+			[SqlQuery(@"SELECT * FROM Person WHERE FirstName = @FirstName AND LastName = @LastName")]
+#endif
 			public abstract int Person_SelectByName(
 				string @FirstName, string @LastName	);
 #endif
