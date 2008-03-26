@@ -1172,7 +1172,7 @@ namespace BLToolkit.DataAccess
 
 				if (_sqlQueryAttribute.IsDynamic)
 				{
-					Type         attrType = _sqlQueryAttribute.GetType();
+					Type         attrType = typeof(SqlQueryAttribute);
 					FieldBuilder field    = Context.CreatePrivateStaticField(attrType + "$" + ++_nameCounter, attrType);
 					Label        isNull   = emit.DefineLabel();
 
@@ -1180,8 +1180,11 @@ namespace BLToolkit.DataAccess
 						.ldsfld    (field)
 						.brtrue_s  (isNull)
 
-						.newobj    (TypeHelper.GetDefaultConstructor(_sqlQueryAttribute.GetType()))
-						//.castclass (attrType)
+						.ldarg_0
+						.call      (typeof(MethodBase), "GetCurrentMethod")
+						.castclass (typeof(MethodInfo))
+						.callvirt  (_baseType, "GetSqlQueryAttribute", _bindingFlags, typeof(MethodInfo))
+
 						.stsfld    (field)
 						.MarkLabel (isNull)
 

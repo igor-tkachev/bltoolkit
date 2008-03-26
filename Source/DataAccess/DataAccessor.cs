@@ -5,6 +5,7 @@ using System.Data;
 using System.Data.SqlTypes;
 using System.Diagnostics;
 using System.IO;
+using System.Reflection;
 using System.Xml;
 
 using BLToolkit.Aspects;
@@ -684,6 +685,12 @@ namespace BLToolkit.DataAccess
 		}
 
 		#endregion
+
+		protected SqlQueryAttribute GetSqlQueryAttribute(MethodInfo methodInfo)
+		{
+			object[] attrs = methodInfo.GetCustomAttributes(typeof(SqlQueryAttribute), true);
+			return (SqlQueryAttribute)attrs[0];
+		}
 
 		#endregion
 	}

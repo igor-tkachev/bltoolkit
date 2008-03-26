@@ -14,20 +14,15 @@ namespace DataAccess
 	{
 		public abstract class DynamicSqlQueryAccessor : DataAccessor
 		{
-			public class DynamicSqlQueryAttribute : SqlQueryAttribute
+			class DynamicSqlQueryAttribute : SqlQueryAttribute
 			{
-				public DynamicSqlQueryAttribute()
-				{
-					IsDynamic = true;
-				}
-
 				public override string GetSqlText(DataAccessor accessor, DbManager dbManager)
 				{
-					return "SELECT 1";
+					return SqlText + 1;
 				}
 			}
 
-			[DynamicSqlQuery]
+			[DynamicSqlQuery(SqlText="SELECT ", IsDynamic=true)]
 			public abstract int GetID1();
 
 			[SqlQuery("SELECT ", ID = 2)]
