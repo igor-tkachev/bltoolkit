@@ -180,7 +180,7 @@
 		/>
 		<ProjectReference
 			ReferencedProjectIdentifier="{0C325F5D-E50E-4340-8724-D29896CCC583}"
-			RelativePathToProject=".\Source\BLToolkit.2008.csproj"
+			RelativePathToProject=".\Source\BLToolkit.3.csproj"
 		/>
 		<AssemblyReference
 			RelativePath="c:\Program Files\NUnit 2.4.6\bin\nunit.framework.dll"

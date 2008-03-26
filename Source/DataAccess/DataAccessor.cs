@@ -160,6 +160,12 @@ namespace BLToolkit.DataAccess
 				inputOutputParameters, ignoreParameters, commandParameters);
 		}
 
+		[NoInterception]
+		protected virtual string PrepareSqlQuery(DbManager db, int queryID, int uniqueID, string sqlQuery)
+		{
+			return sqlQuery;
+		}
+
 		#endregion
 
 		#region ExecuteDictionary

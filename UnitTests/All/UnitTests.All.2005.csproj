@@ -8,7 +8,7 @@
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>UnitTests.All._2</RootNamespace>
-    <AssemblyName>UnitTests.All</AssemblyName>
+    <AssemblyName>UnitTests.All.2005</AssemblyName>
     <RunPostBuildEvent>OnOutputUpdated</RunPostBuildEvent>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -42,7 +42,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Examples\Cpp\Examples.Cpp.2.vcproj">
+    <ProjectReference Include="..\..\Examples\Cpp\Examples.Cpp.2005.vcproj">
       <Project>{1710C5C2-0416-4981-81FC-BBBDFDA0B24D}</Project>
       <Name>Examples.Cpp.2005</Name>
     </ProjectReference>

@@ -78,6 +78,7 @@
     <Compile Include="Common\OperatorTest.cs" />
     <Compile Include="Common\NameOrIndexParameterTest.cs" />
     <Compile Include="DataAccess\ArrayTest.cs" />
+    <Compile Include="DataAccess\DynamicSqlQueryTest.cs" />
     <Compile Include="DataAccess\XmlTypeTest.cs" />
     <Compile Include="DataAccess\DataAccessorBuilderTest.cs" />
     <Compile Include="DataAccess\PrimaryKeyAttributeTest.cs" />

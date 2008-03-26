@@ -8,7 +8,7 @@
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>UnitTests.CS</RootNamespace>
-    <AssemblyName>UnitTests.CS</AssemblyName>
+    <AssemblyName>UnitTests.CS.2005</AssemblyName>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -57,6 +57,7 @@
     <Compile Include="Common\OperatorTest.cs" />
     <Compile Include="Common\NameOrIndexParameterTest.cs" />
     <Compile Include="DataAccess\ArrayTest.cs" />
+    <Compile Include="DataAccess\DynamicSqlQueryTest.cs" />
     <Compile Include="DataAccess\XmlTypeTest.cs" />
     <Compile Include="DataAccess\DataAccessorBuilderTest.cs" />
     <Compile Include="DataAccess\PrimaryKeyAttributeTest.cs" />

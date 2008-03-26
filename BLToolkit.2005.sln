@@ -37,7 +37,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnitTests.All.2005", "UnitT
 		Release.AspNetCompiler.Debug = "False"
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Examples.Cpp.2005", "Examples\Cpp\Examples.Cpp.2.vcproj", "{1710C5C2-0416-4981-81FC-BBBDFDA0B24D}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Examples.Cpp.2005", "Examples\Cpp\Examples.Cpp.2005.vcproj", "{1710C5C2-0416-4981-81FC-BBBDFDA0B24D}"
 	ProjectSection(WebsiteProperties) = preProject
 		Debug.AspNetCompiler.Debug = "True"
 		Release.AspNetCompiler.Debug = "False"
@@ -109,7 +109,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "UnitTests", "UnitTests", "{
 		Release.AspNetCompiler.Debug = "False"
 	EndProjectSection
 	ProjectSection(SolutionItems) = preProject
-		UnitTests\BLToolkit.nunit = UnitTests\BLToolkit.nunit
+		UnitTests\BLToolkit.2005.nunit = UnitTests\BLToolkit.2005.nunit
 	EndProjectSection
 	ProjectSection(FolderStartupServices) = postProject
 		{B4F97281-0DBD-4835-9ED8-7DFB966E87FF} = {B4F97281-0DBD-4835-9ED8-7DFB966E87FF}

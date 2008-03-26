@@ -63,7 +63,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Examples\Cpp\Examples.Cpp.2008.vcproj">
+    <ProjectReference Include="..\..\Examples\Cpp\Examples.Cpp.vcproj">
       <Project>{1710C5C2-0416-4981-81FC-BBBDFDA0B24D}</Project>
       <Name>Examples.Cpp</Name>
     </ProjectReference>

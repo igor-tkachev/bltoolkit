@@ -20,6 +20,7 @@ Enhancement
 - LinqMetadataProvider to support Linq To SQL attributes.
 - Relocated MetadataProvider's to BLToolkit.Reflection namespace.
 - New DbManager ctors to support manual/custom configuration.
+- Ability to configure SqlQueryAttribute dynamically.
 
 v 2.0.7
 

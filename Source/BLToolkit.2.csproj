@@ -2,7 +2,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>9.0.21022</ProductVersion>
+    <ProductVersion>8.0.50727</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{3C37A408-3A01-4568-99D1-ADFEDDFFF2BC}</ProjectGuid>
     <OutputType>Library</OutputType>
@@ -158,9 +158,12 @@
     <Compile Include="Data\DataProvider\OdbcDataProvider.cs" />
     <Compile Include="Data\DataProvider\OleDbDataProvider.cs" />
     <Compile Include="Data\DataProvider\SqlDataProvider.cs" />
-    <Compile Include="Data\DbManager.cs" />
+    <Compile Include="Data\DbManager.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="Data\DbManager.Config.cs">
       <DependentUpon>DbManager.cs</DependentUpon>
+      <SubType>Component</SubType>
     </Compile>
     <Compile Include="Data\OperationType.cs" />
     <Compile Include="EditableObjects\EditableXmlDocument.cs" />
@@ -369,12 +372,10 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Mapping\Mapping.xsd">
-      <SubType>
-      </SubType>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="DataAccess\DataAccess.xsd">
-      <SubType>
-      </SubType>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
     <None Include="DataAccess\DataAccess.xsx">
       <DependentUpon>DataAccess.xsd</DependentUpon>
@@ -384,8 +385,7 @@
       <DependentUpon>Mapping.xsd</DependentUpon>
     </None>
     <EmbeddedResource Include="Reflection\Extension\TypeExtension.xsd">
-      <SubType>
-      </SubType>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
     <None Include="Reflection\Extension\TypeExtension.xsx">
       <DependentUpon>TypeExtension.xsd</DependentUpon>

@@ -41,7 +41,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnitTests.CS", "UnitTests\C
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnitTests.All", "UnitTests\All\UnitTests.All.csproj", "{6AE74A35-B337-4B17-8092-E1B98DEF06AF}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Examples.Cpp", "Examples\Cpp\Examples.Cpp.2008.vcproj", "{1710C5C2-0416-4981-81FC-BBBDFDA0B24D}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Examples.Cpp", "Examples\Cpp\Examples.Cpp.vcproj", "{1710C5C2-0416-4981-81FC-BBBDFDA0B24D}"
 EndProject
 Project("{4F174C21-8C12-11D0-8340-0000F80270F8}") = "Data", "Data\Data.dbp", "{EC231D13-4BA9-4646-BADA-3A33B4BA6264}"
 EndProject
