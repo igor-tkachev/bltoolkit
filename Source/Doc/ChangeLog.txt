@@ -8,6 +8,7 @@ Bug fixes
 - Some opcodes were not implemented.
 - MappingSchema.MapResultSets fails with NullReferenceException when no data returned.
 - Nullable enums were not handled properly.
+- BindingList.GetItemSortedPosition() returns wrong index for an item at end of the list.
 
 Enhancement
 - DateTimeOffset type support.

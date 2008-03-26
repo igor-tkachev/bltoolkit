@@ -2,7 +2,7 @@ using System;
 using System.ComponentModel;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
-
+using System.Windows.Forms;
 using NUnit.Framework;
 
 using BLToolkit.TypeBuilder;
@@ -307,7 +307,7 @@ namespace EditableObjects
 			public abstract int    ID   { get; set; }
 			public abstract Guid   UUID { get; set; }
 			public abstract string Name { get; set; }
-		    
+
 			public abstract EditableList<string> Array { get; set; }
 		}
 
@@ -377,5 +377,39 @@ namespace EditableObjects
 			_notificationCount++;
 		}
 
+		[Test]
+		public void SortTest()
+		{
+			EditableList<EditableTestObject> dataList = new EditableList<EditableTestObject>();
+
+			dataList.Add(EditableTestObject.CreateInstance(1, "John", 60));
+			dataList.Add(EditableTestObject.CreateInstance(1, "John", 60));
+			dataList.Add(EditableTestObject.CreateInstance(1, "John", 60));
+			dataList.Add(EditableTestObject.CreateInstance(2, "Tester", 70));
+			dataList.Add(EditableTestObject.CreateInstance(2, "Tester", 70));
+			dataList.Add(EditableTestObject.CreateInstance(2, "Tester", 70));
+			dataList.Add(EditableTestObject.CreateInstance(3, "Tester", 70));
+			dataList.Add(EditableTestObject.CreateInstance(3, "Tester", 70));
+			dataList.Add(EditableTestObject.CreateInstance(3, "Tester", 70));
+
+			BindingSource bindingSource = new BindingSource(dataList, null);
+			bindingSource.Sort = "ID";
+
+			int prev = 0;
+			foreach (EditableTestObject o in dataList)
+			{
+				Assert.IsTrue(o.ID >= prev);
+				prev = o.ID;
+			}
+
+			bindingSource[0] = EditableTestObject.CreateInstance(2, "John", 60);
+
+			prev = 0;
+			foreach (EditableTestObject o in dataList)
+			{
+				Assert.IsTrue(o.ID >= prev);
+				prev = o.ID;
+			}
+		}
 	}
 }
