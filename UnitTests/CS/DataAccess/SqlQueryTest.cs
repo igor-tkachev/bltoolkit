@@ -21,29 +21,21 @@ namespace DataAccess
 		[ObjectType(typeof(Person))]
 		public abstract class PersonAccessor : DataAccessor
 		{
-#if ORACLE
-			[SqlQuery("SELECT * FROM Person WHERE LastName = :lastName")]
-#else
-			[SqlQuery("SELECT * FROM Person WHERE LastName = @lastName")]
-#endif
+			[TestQuery(
+				SqlText    = "SELECT * FROM Person WHERE LastName = @lastName",
+				OracleText = "SELECT * FROM Person WHERE LastName = :lastName")]
 			public abstract ArrayList SelectByLastName(string lastName);
 
-#if ORACLE
-			[SqlQuery("SELECT * FROM Person WHERE {0} = :value")]
-#else
-			[SqlQuery("SELECT * FROM Person WHERE {0} = @value")]
-#endif
+			[TestQuery(
+				SqlText    = "SELECT * FROM Person WHERE {0} = @value",
+				OracleText = "SELECT * FROM Person WHERE {0} = :value")]
 			public abstract ArrayList SelectBy([Format] string fieldName, string value);
 
-#if ORACLE
-			[SqlQuery("SELECT * FROM Person WHERE LastName = :lastName AND rownum <= {0}")]
-#elif FIREBIRD
-			[SqlQuery("SELECT FIRST {0} * FROM Person WHERE LastName = @lastName")]
-#elif SQLITE
-			[SqlQuery("SELECT * FROM Person WHERE LastName = @lastName LIMIT {0}")]
-#else
-			[SqlQuery("SELECT TOP {0} * FROM Person WHERE LastName = @lastName")]
-#endif
+			[TestQuery(
+				SqlText    = "SELECT TOP {0} * FROM Person WHERE LastName = @lastName",
+				OracleText = "SELECT * FROM Person WHERE LastName = :lastName AND rownum <= {0}",
+				FbText     = "SELECT FIRST {0} * FROM Person WHERE LastName = @lastName",
+				SQLiteText = "SELECT * FROM Person WHERE LastName = @lastName LIMIT {0}")]
 			public abstract ArrayList SelectByLastName(string lastName, [Format(0)] int top);
 		}
 

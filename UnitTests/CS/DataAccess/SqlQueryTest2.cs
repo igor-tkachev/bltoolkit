@@ -20,38 +20,27 @@ namespace DataAccess
 
 		public abstract class PersonAccessor : DataAccessor<Person>
 		{
-#if ORACLE
-			[SqlQuery("SELECT * FROM Person WHERE LastName = :lastName")]
-#else
-			[SqlQuery("SELECT * FROM Person WHERE LastName = @lastName")]
-#endif
+			[TestQuery(
+				SqlText    = "SELECT * FROM Person WHERE LastName = @lastName",
+				OracleText = "SELECT * FROM Person WHERE LastName = :lastName")]
 			public abstract List<Person> SelectByLastName(string lastName);
 
-#if ORACLE
-			[SqlQuery("SELECT * FROM Person WHERE {0} = :value")]
-#else
-			[SqlQuery("SELECT * FROM Person WHERE {0} = @value")]
-#endif
+			[TestQuery(
+				SqlText    = "SELECT * FROM Person WHERE {0} = @value",
+				OracleText = "SELECT * FROM Person WHERE {0} = :value")]
 			public abstract List<Person> SelectBy([Format] string fieldName, string value);
 
-#if ORACLE
-			[SqlQuery("SELECT * FROM Person WHERE LastName = :lastName AND rownum <= {0}")]
-#elif FIREBIRD
-			[SqlQuery("SELECT FIRST {0} * FROM Person WHERE LastName = @lastName")]
-#elif SQLITE
-			[SqlQuery("SELECT * FROM Person WHERE LastName = @lastName LIMIT {0}")]
-#else
-			[SqlQuery("SELECT TOP {0} * FROM Person WHERE LastName = @lastName")]
-#endif
+			[TestQuery(
+				SqlText    = "SELECT TOP {0} * FROM Person WHERE LastName = @lastName",
+				OracleText = "SELECT * FROM Person WHERE LastName = :lastName AND rownum <= {0}",
+				FbText     = "SELECT FIRST {0} * FROM Person WHERE LastName = @lastName",
+				SQLiteText = "SELECT * FROM Person WHERE LastName = @lastName LIMIT {0}")]
 			public abstract List<Person> SelectByLastName(string lastName, [Format(0)] int top);
 
-#if ORACLE
-			[SqlQuery("SELECT :id ID FROM Dual")]
-#elif FIREBIRD
-			[SqlQuery("SELECT CAST(@id AS INTEGER) ID FROM Dual")]
-#else
-			[SqlQuery("SELECT @id as ID")]
-#endif
+			[TestQuery(
+				SqlText    = "SELECT @id as ID",
+				OracleText = "SELECT :id ID FROM Dual",
+				FbText     = "SELECT CAST(@id AS INTEGER) ID FROM Dual")]
 			public abstract List<Person> SelectID(int @id);
 		}
 

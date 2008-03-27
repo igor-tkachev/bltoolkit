@@ -24,11 +24,9 @@ namespace DataAccess
 			[SqlQuery("Select * FROM DataTypeTest")]
 			public abstract List<TestObject> LoadAll();
 
-#if ORACLE
-			[SqlQuery("SELECT * FROM DataTypeTest WHERE DataTypeID=:ID")]
-#else
-			[SqlQuery("SELECT * FROM DataTypeTest WHERE DataTypeID=@ID")]
-#endif
+			[TestQuery(
+				SqlText    = "SELECT * FROM DataTypeTest WHERE DataTypeID=@ID",
+				OracleText = "SELECT * FROM DataTypeTest WHERE DataTypeID=:ID")]
 			public abstract TestObject       LoadById(int ID); 
 
 		}

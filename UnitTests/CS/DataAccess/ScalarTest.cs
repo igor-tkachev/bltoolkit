@@ -50,25 +50,19 @@ namespace DataAccess
 			[ScalarSource(ScalarSourceType.AffectedRows)]
 			public abstract int Scalar_AffectedRows(DbManager db);
 
-#if ORACLE
-			[SqlQuery("SELECT Stream_ FROM DataTypeTest WHERE DataTypeID = :id")]
-#else
-			[SqlQuery("SELECT Stream_ FROM DataTypeTest WHERE DataTypeID = @id")]
-#endif
+			[TestQuery(
+				SqlText    = "SELECT Stream_ FROM DataTypeTest WHERE DataTypeID = @id",
+				OracleText = "SELECT Stream_ FROM DataTypeTest WHERE DataTypeID = :id")]
 			public abstract Stream GetStream(DbManager db, int id);
 
-#if ORACLE
-			[SqlQuery("SELECT Xml_ FROM DataTypeTest WHERE DataTypeID = :id")]
-#else
-			[SqlQuery("SELECT Xml_ FROM DataTypeTest WHERE DataTypeID = @id")]
-#endif
+			[TestQuery(
+				SqlText    = "SELECT Xml_ FROM DataTypeTest WHERE DataTypeID = @id",
+				OracleText = "SELECT Xml_ FROM DataTypeTest WHERE DataTypeID = :id")]
 			public abstract XmlReader GetXml(DbManager db, int id);
 
-#if ORACLE
-			[SqlQuery("SELECT Xml_ FROM DataTypeTest WHERE DataTypeID = :id")]
-#else
-			[SqlQuery("SELECT Xml_ FROM DataTypeTest WHERE DataTypeID = @id")]
-#endif
+			[TestQuery(
+				SqlText    = "SELECT Xml_ FROM DataTypeTest WHERE DataTypeID = @id",
+				OracleText = "SELECT Xml_ FROM DataTypeTest WHERE DataTypeID = :id")]
 			public abstract XmlDocument GetXmlDoc(DbManager db, int id);
 
 			[SprocName("Scalar_DataReader")]
