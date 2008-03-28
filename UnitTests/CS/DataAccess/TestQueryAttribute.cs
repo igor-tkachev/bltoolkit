@@ -36,7 +36,8 @@ namespace DataAccess
 		{
 			switch (dbManager.DataProvider.Name)
 			{
-				case "Sql"   : return SqlText;
+				case "Sql"   :
+				case "Access": return SqlText;
 				case "Oracle": return OracleText ?? SqlText;
 				case "Fdp"   : return FbText     ?? SqlText;
 				case "SQLite": return SQLiteText ?? SqlText;
