@@ -571,22 +571,29 @@ namespace BLToolkit.ComponentModel
 
 		public int GetItemSortedPosition(int index, object sender)
 		{
-			IComparer comparer = GetSortComparer();
+			IComparer comparer = Comparer.Default;
+
 			if (comparer == null)
 				return index;
-			if (_list.Count > 1)
+
+			if ((index > 0 && comparer.Compare(_list[index - 1], sender) > 0) ||
+				(index < _list.Count - 1 && comparer.Compare(_list[index + 1], sender) < 0))
 			{
-				if (index < _list.Count - 1 && comparer.Compare(_list[index + 1], sender) == 0)
-					return index;
 				for (int i = 0; i < _list.Count; i++)
+				{
 					if (i != index && comparer.Compare(_list[i], sender) > 0)
 					{
 						if (i > index)
 							return i - 1;
+
 						return i;
 					}
+				}
+
+				return _list.Count - 1;
 			}
-			return _list.Count - 1;
+
+			return index;
 		}
 
 		public int GetSortedInsertIndex(object value)
