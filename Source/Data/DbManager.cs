@@ -40,7 +40,7 @@ namespace BLToolkit.Data
 
 			_connection.ConnectionString = connectionString;
 
-			//_dataProvider.InitDbManager(this);
+			_dataProvider.InitDbManager(this);
 		}
 
 		public DbManager(DataProviderBase dataProvider, IDbConnection connection)
@@ -51,7 +51,7 @@ namespace BLToolkit.Data
 			_dataProvider = dataProvider;
 			_connection   = connection;
 
-			//_dataProvider.InitDbManager(this);
+			_dataProvider.InitDbManager(this);
 		}
 
 		public DbManager(DataProviderBase dataProvider, IDbTransaction transaction)
@@ -64,7 +64,7 @@ namespace BLToolkit.Data
 			_transaction      = transaction;
 			_closeTransaction = false;
 
-			//_dataProvider.InitDbManager(this);
+			_dataProvider.InitDbManager(this);
 		}
 
 		#endregion

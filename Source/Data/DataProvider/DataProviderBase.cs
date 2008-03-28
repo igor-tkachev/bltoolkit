@@ -153,8 +153,6 @@ namespace BLToolkit.Data.DataProvider
 			return value;
 		}
 
-		/*
-		[Obsolete]
 		public virtual void InitDbManager(DbManager dbManager)
 		{
 			MappingSchema schema = MappingSchema;
@@ -164,13 +162,11 @@ namespace BLToolkit.Data.DataProvider
 		}
 
 		private        MappingSchema _mappingSchema;
-		[Obsolete]
 		public virtual MappingSchema  MappingSchema
 		{
 			get { return _mappingSchema;  }
 			set { _mappingSchema = value; }
 		}
-		*/
 
 		public virtual void PrepareCommand(ref CommandType commandType, ref string commandText, ref IDbDataParameter[] commandParameters)
 		{
