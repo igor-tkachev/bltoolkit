@@ -571,7 +571,7 @@ namespace BLToolkit.ComponentModel
 
 		public int GetItemSortedPosition(int index, object sender)
 		{
-			IComparer comparer = Comparer.Default;
+			IComparer comparer = GetSortComparer();
 
 			if (comparer == null)
 				return index;
