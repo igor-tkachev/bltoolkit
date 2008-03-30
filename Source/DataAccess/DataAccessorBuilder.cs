@@ -55,6 +55,26 @@ namespace BLToolkit.DataAccess
 			return false;
 		}
 
+		private Dictionary<Type, Type> _actualTypes;
+		private Dictionary<Type, Type>  ActualTypes
+		{
+			get
+			{
+				if (_actualTypes == null)
+				{
+					_actualTypes = new Dictionary<Type,Type>();
+
+					object[] attrs = Context.Type.GetAttributes(typeof(ActualTypeAttribute));
+
+					foreach (ActualTypeAttribute attr in attrs)
+						if (!_actualTypes.ContainsKey(attr.BaseType))
+							_actualTypes.Add(attr.BaseType, attr.ActualType);
+				}
+
+				return _actualTypes;
+			}
+		}
+
 		const BindingFlags _bindingFlags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
 
 		readonly Type     _baseType = typeof(DataAccessor);
@@ -124,6 +144,9 @@ namespace BLToolkit.DataAccess
 
 					if (elementType != typeof(object))
 						_objectType = elementType;
+
+					if (ActualTypes.ContainsKey(_objectType))
+						_objectType = ActualTypes[_objectType];
 				}
 
 				if (_objectType == null || _objectType == typeof(object))
@@ -205,6 +228,9 @@ namespace BLToolkit.DataAccess
 				}
 				else
 				{
+					if (!_explicitObjectType && ActualTypes.ContainsKey(elementType))
+						elementType = ActualTypes[elementType];
+
 					if (fields.Length == 0)
 						ExecuteDictionaryWithPK(keyType, elementType);
 					else if (isIndex || fields.Length > 1)
@@ -225,6 +251,9 @@ namespace BLToolkit.DataAccess
 			{
 				if (_objectType == null)
 					_objectType = returnType;
+
+				if (!_explicitObjectType && ActualTypes.ContainsKey(_objectType))
+					_objectType = ActualTypes[_objectType];
 
 				ExecuteObject();
 			}
@@ -1737,8 +1766,8 @@ namespace BLToolkit.DataAccess
 			LocalBuilder locParams = emit.DeclareLocal(typeof(object[]));
 
 			emit
-				.ldc_i4_           (_paramList.Count)
-				.newarr            (typeof(object))
+				.ldc_i4_     (_paramList.Count)
+				.newarr      (typeof(object))
 				;
 
 			for (int i = 0; i < _paramList.Count; i++)
@@ -1747,7 +1776,7 @@ namespace BLToolkit.DataAccess
 
 				emit
 					.dup
-					.ldc_i4_       (i)
+					.ldc_i4_ (i)
 					;
 
 				LoadParameterOrNull(pi, pi.ParameterType);
@@ -1903,10 +1932,10 @@ namespace BLToolkit.DataAccess
 			foreach (MapOutputParametersValue v in _mapOutputParameters)
 			{
 				emit
-					.ldloc     (_locManager)
-					.ldstrEx   (v.ReturnValueMember)
-					.ldarg     (v.ParameterInfo)
-					.callvirt  (typeof(DbManager), "MapOutputParameters", typeof(string), typeof(object));
+					.ldloc    (_locManager)
+					.ldstrEx  (v.ReturnValueMember)
+					.ldarg    (v.ParameterInfo)
+					.callvirt (typeof(DbManager), "MapOutputParameters", typeof(string), typeof(object));
 			}
 		}
 

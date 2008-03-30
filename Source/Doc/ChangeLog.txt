@@ -23,6 +23,7 @@ Enhancement
 - New DbManager ctors to support manual/custom configuration.
 - Ability to configure SqlQueryAttribute dynamically.
 - Assembly is signed.
+- New ActualTypeAttribute to associate DataAccessor's object type and its implementation.
 
 v 2.0.7
 
