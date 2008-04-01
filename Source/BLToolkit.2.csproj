@@ -224,8 +224,8 @@
     <Compile Include="Mapping\NullDateTimeAttribute.cs" />
     <Compile Include="Mapping\NullDecimalAttribute.cs" />
     <Compile Include="Mapping\NullGuidAttribute.cs" />
+    <Compile Include="Patterns\DuckType.cs" />
     <Compile Include="Patterns\DuckTyping.cs" />
-    <Compile Include="Patterns\DuckTypeBase.cs" />
     <Compile Include="Patterns\MustImplementAttribute.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>

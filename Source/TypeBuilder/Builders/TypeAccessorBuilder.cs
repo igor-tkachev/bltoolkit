@@ -33,7 +33,7 @@ namespace BLToolkit.TypeBuilder.Builders
 
 		public static string GetTypeAccessorClassName(Type originalType)
 		{
- 			// It's bad idea to use '.TypeAccessor' here since we got
+ 			// It's a bad idea to use '.TypeAccessor' here since we got
  			// a class and a namespace with the same full name.
  			// The sgen utility fill fail in such case.
  			//

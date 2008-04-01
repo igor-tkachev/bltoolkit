@@ -349,6 +349,14 @@ namespace BLToolkit.Reflection
 		}
 
 		/// <summary>
+		/// Gets a value indicating whether the System.Type is an interface; that is, not a class or a value type.
+		/// </summary>
+		public bool IsInterface
+		{
+			get { return _type.IsInterface; }
+		}
+
+		/// <summary>
 		/// Indicates whether the Type is serializable.
 		/// </summary>
 		public bool IsSerializable

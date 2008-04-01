@@ -91,11 +91,7 @@ namespace BLToolkit.Patterns
 			{
 				// Switch to underlying object when a duck object was passed.
 				//
-				obj     = ((DuckType)obj).Object;
-				objType = obj.GetType();
-
-				if (TypeHelper.IsSameOrParent(interfaceType, objType))
-					return obj;
+				return Implement(interfaceType, baseObjectType, ((DuckType)obj).Object);
 			}
 
 			if (baseObjectType == null)
@@ -104,12 +100,12 @@ namespace BLToolkit.Patterns
 				throw new ArgumentException(
 					string.Format("'{0}' is not a subtype of '{1}'.", objType.FullName, baseObjectType.FullName), "obj");
 
-			Type   duckType = GetDuckType(interfaceType, baseObjectType);
+			Type duckType = GetDuckType(interfaceType, baseObjectType);
 
 			if (duckType == null)
 				return null;
 
-			object duck     = TypeAccessor.CreateInstanceEx(duckType);
+			object duck = TypeAccessor.CreateInstanceEx(duckType);
 
 			((DuckType)duck).SetObject(obj);
 

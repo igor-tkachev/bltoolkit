@@ -254,7 +254,7 @@
     <Compile Include="Mapping\NullDecimalAttribute.cs" />
     <Compile Include="Mapping\NullGuidAttribute.cs" />
     <Compile Include="Patterns\DuckTyping.cs" />
-    <Compile Include="Patterns\DuckTypeBase.cs" />
+    <Compile Include="Patterns\DuckType.cs" />
     <Compile Include="Patterns\MustImplementAttribute.cs" />
     <Compile Include="Reflection\GenericBinder.cs" />
     <Compile Include="Reflection\MetadataProvider\AttributeMetadataProvider.cs" />
@@ -263,6 +263,8 @@
     <Compile Include="Reflection\MetadataProvider\MetadataProviderBase.cs" />
     <Compile Include="Reflection\MetadataProvider\MetadataProviderList.cs" />
     <Compile Include="Reflection\XmlIncludeAbstractAttribute.cs" />
+    <Compile Include="TypeBuilder\AutoImplementInterfaceAttribute.cs" />
+    <Compile Include="TypeBuilder\Builders\AutoImplementInterfaceBuilder.cs" />
     <Compile Include="TypeBuilder\Builders\GeneratedAttributeBuilder.cs" />
     <Compile Include="TypeBuilder\Builders\DuckTypeBuilder.cs" />
     <Compile Include="TypeBuilder\GenerateAttributeAttribute.cs" />

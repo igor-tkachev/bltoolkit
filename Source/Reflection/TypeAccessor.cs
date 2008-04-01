@@ -27,14 +27,18 @@ namespace BLToolkit.Reflection
 
 		protected MemberInfo GetMember(int memberType, string memberName)
 		{
-			const BindingFlags allInstaceMembers = BindingFlags.Instance |
-				BindingFlags.Public | BindingFlags.NonPublic;
+			const BindingFlags allInstaceMembers =
+				BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
 			MemberInfo mi;
 
 			switch (memberType)
 			{
 				case 1: mi = Type.GetField   (memberName, allInstaceMembers); break;
-				case 2: mi = Type.GetProperty(memberName, allInstaceMembers); break;
+				case 2:
+					mi =
+						Type.        GetProperty(memberName, allInstaceMembers) ??
+						OriginalType.GetProperty(memberName, allInstaceMembers);
+					break;
 				default:
 					throw new InvalidOperationException();
 			}
@@ -306,6 +310,14 @@ namespace BLToolkit.Reflection
 
 				if (TypeHelper.GetConstructor(type, typeof(InitContext)) != null)
 					return true;
+
+				if (type.IsInterface)
+				{
+					object[] attrs = TypeHelper.GetAttributes(type, typeof(AutoImplementInterfaceAttribute));
+
+					if (attrs != null && attrs.Length > 0)
+						return true;
+				}
 			}
 
 			return false;

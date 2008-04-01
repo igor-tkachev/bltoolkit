@@ -24,6 +24,7 @@ Enhancement
 - Ability to configure SqlQueryAttribute dynamically.
 - Assembly is signed.
 - New ActualTypeAttribute to associate DataAccessor's object type and its implementation.
+- New AutoImplementInterfaceAttribute to automatically generate interface implementation.
 
 v 2.0.7
 

@@ -38,7 +38,7 @@ namespace BLToolkit.TypeBuilder.Builders
 			get { return _typeBuilder;  }
 			set { _typeBuilder = value; }
 		}
-
+			
 		private readonly Hashtable  _items = new Hashtable(100);
 		public           IDictionary Items
 		{
@@ -202,20 +202,13 @@ namespace BLToolkit.TypeBuilder.Builders
 			set { _step = value; }
 		}
 
-		public bool IsBeforeStep
-		{
-			get { return Step == BuildStep.Before; }
-		}
-
-		public bool IsBuildStep
-		{
-			get { return Step == BuildStep.Build; }
-		}
-
-		public bool IsAfterStep
-		{
-			get { return Step == BuildStep.After; }
-		}
+		public bool IsBeginStep   { get { return Step == BuildStep.Begin;   } }
+		public bool IsBeforeStep  { get { return Step == BuildStep.Before;  } }
+		public bool IsBuildStep   { get { return Step == BuildStep.Build;   } }
+		public bool IsAfterStep   { get { return Step == BuildStep.After;   } }
+		public bool IsCatchStep   { get { return Step == BuildStep.Catch;   } }
+		public bool IsFinallyStep { get { return Step == BuildStep.Finally; } }
+		public bool IsEndStep     { get { return Step == BuildStep.End;     } }
 
 		public bool IsBeforeOrBuildStep
 		{

@@ -149,6 +149,7 @@
     <Compile Include="Reflection\Emit\MethodBuilderHelperTest.cs" />
     <Compile Include="Reflection\Extension\DefaultValueTest.cs" />
     <Compile Include="Mapping\Person.mapping.cs" />
+    <Compile Include="TypeBuilder\Builders\AutoImplementInterfaceTest.cs" />
     <Compile Include="Reflection\ObjectFactoryAttributeTest.cs" />
     <Compile Include="Reflection\ExtendedPropertyDescriptorTest.cs" />
     <Compile Include="Reflection\TypeAccessorTest.cs" />

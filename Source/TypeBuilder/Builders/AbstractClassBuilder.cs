@@ -103,9 +103,8 @@ namespace BLToolkit.TypeBuilder.Builders
 
 		private static readonly DefaultTypeBuilder _defaultTypeBuilder = new DefaultTypeBuilder();
 
-		private readonly AbstractTypeBuilderList _usedBuilders = new AbstractTypeBuilderList();
-		private          BuildContext            _context;
-		private          AbstractTypeBuilderList _builders;
+		private BuildContext            _context;
+		private AbstractTypeBuilderList _builders;
 
 		private Type Build()
 		{
@@ -208,7 +207,7 @@ namespace BLToolkit.TypeBuilder.Builders
 
 		private void DefineNonAbstractType()
 		{
-			ArrayList interfaces = new ArrayList();
+			List<Type> interfaces = new List<Type>();
 
 			foreach (IAbstractTypeBuilder tb in _builders)
 			{
@@ -242,8 +241,8 @@ namespace BLToolkit.TypeBuilder.Builders
 				TypeAttributes.Public
 				| TypeAttributes.BeforeFieldInit
 				| (TypeFactory.SealTypes? TypeAttributes.Sealed: 0),
-				_context.Type,
-				(Type[])interfaces.ToArray(typeof(Type)));
+				_context.Type.IsInterface? typeof(object): (Type)_context.Type,
+				interfaces.ToArray());
 
 			if (_context.Type.IsSerializable)
 				_context.TypeBuilder.SetCustomAttribute(typeof(SerializableAttribute));
@@ -286,9 +285,6 @@ namespace BLToolkit.TypeBuilder.Builders
 				IAbstractTypeBuilder builder = _context.TypeBuilders[i];
 
 				builder.Build(_context);
-
-				if (!_usedBuilders.Contains(builder))
-					_usedBuilders.Add(builder);
 			}
 		}
 
@@ -317,8 +313,6 @@ namespace BLToolkit.TypeBuilder.Builders
 
 			if (parameters != null)
 				emit.InitOutParameters(parameters);
-
-			_usedBuilders.Clear();
 		}
 
 		private void EmitMethod(
@@ -401,15 +395,13 @@ namespace BLToolkit.TypeBuilder.Builders
 			if (isCatchBlockRequired || isFinallyBlockRequired)
 				emit.EndExceptionBlock();
 
-			Build(BuildStep.End, _usedBuilders);
+			Build(BuildStep.End, builders);
 
 			EndEmitMethod();
 		}
 
 		private void EndEmitMethod()
 		{
-			_usedBuilders.Clear();
-
 			EmitHelper emit = _context.MethodBuilder.Emitter;
 
 			// Prepare return.
@@ -676,10 +668,13 @@ namespace BLToolkit.TypeBuilder.Builders
 			{
 				_context.CurrentInterface = (Type)de.Key;
 
-				MethodInfo[] methods = _context.CurrentInterface.GetMethods();
+				MethodInfo[] interfaceMethods = _context.CurrentInterface.GetMethods();
 
-				foreach (MethodInfo m in methods)
+				foreach (MethodInfo m in interfaceMethods)
 				{
+					if (_context.TypeBuilder.OverridenMethods.ContainsKey(m))
+						continue;
+
 					BeginEmitMethod(m);
 
 					// Call builder to build the method.

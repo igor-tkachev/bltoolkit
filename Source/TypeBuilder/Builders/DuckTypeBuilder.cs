@@ -96,7 +96,7 @@ namespace BLToolkit.TypeBuilder.Builders
 					{
 						emit
 							.ldarg_0
-							.ldfld          (objectField)
+							.ldfld         (objectField)
 							;
 
 						if (_objectType.IsValueType)
@@ -106,14 +106,14 @@ namespace BLToolkit.TypeBuilder.Builders
 							LocalBuilder obj = emit.DeclareLocal(_objectType);
 
 							emit
-								.unbox_any  (_objectType)
-								.stloc      (obj)
-								.ldloca     (obj)
+								.unbox_any (_objectType)
+								.stloc     (obj)
+								.ldloca    (obj)
 								;
 						}
 						else
 							emit
-								.castclass(_objectType)
+								.castclass (_objectType)
 								;
 					}
 
@@ -166,13 +166,14 @@ namespace BLToolkit.TypeBuilder.Builders
 					if (attr.ThrowException)
 					{
 						string message = attr.ExceptionMessage;
+
 						if (message == null)
 							message = string.Format(Resources.TypeBuilder_PublicMethodNotImplemented,
 								_objectType.FullName, interfaceMethod);
 
 						emit
-							.ldstr     (message)
-							.newobj    (typeof(NotImplementedException), typeof(string))
+							.ldstr  (message)
+							.newobj (typeof(NotImplementedException), typeof(string))
 							.@throw
 							.end();
 					}

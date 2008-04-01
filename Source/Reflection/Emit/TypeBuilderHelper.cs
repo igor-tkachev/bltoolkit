@@ -1,9 +1,12 @@
 using System;
+using System.Collections.Generic;
 using System.Reflection;
 using System.Reflection.Emit;
 
 namespace BLToolkit.Reflection.Emit
 {
+	using TypeBuilder.Builders;
+
 	/// <summary>
 	/// A wrapper around the <see cref="TypeBuilder"/> class.
 	/// </summary>
@@ -124,6 +127,12 @@ namespace BLToolkit.Reflection.Emit
 			return new MethodBuilderHelper(this, _typeBuilder.DefineMethod(name, attributes, callingConvention));
 		}
 
+		private Dictionary<MethodInfo, MethodBuilder> _overridenMethods;
+		public  Dictionary<MethodInfo, MethodBuilder>  OverridenMethods
+		{
+			get { return _overridenMethods ?? (_overridenMethods = new Dictionary<MethodInfo,MethodBuilder>()); }
+		}
+
 		/// <summary>
 		/// Adds a new method to the class, with the given name and method signature.
 		/// </summary>
@@ -209,8 +218,11 @@ namespace BLToolkit.Reflection.Emit
 			// and the following condition should've been used below:
 			// if ((methodInfoDeclaration is FakeMethodInfo) == false)
 			//
-			if (methodInfoDeclaration.DeclaringType.IsInterface)
+			if (methodInfoDeclaration.DeclaringType.IsInterface && !(methodInfoDeclaration is FakeMethodInfo))
+			{
+				OverridenMethods.Add(methodInfoDeclaration, method.MethodBuilder);
 				_typeBuilder.DefineMethodOverride(method.MethodBuilder, methodInfoDeclaration);
+			}
 
 			method.OverriddenMethod = methodInfoDeclaration;
 
@@ -241,8 +253,9 @@ namespace BLToolkit.Reflection.Emit
 			if (methodInfoDeclaration == null) throw new ArgumentNullException("methodInfoDeclaration");
 
 			bool isInterface = methodInfoDeclaration.DeclaringType.IsInterface;
+			bool isFake      = methodInfoDeclaration is FakeMethodInfo;
 
-			string name = isInterface?
+			string name = isInterface && !isFake?
 				methodInfoDeclaration.DeclaringType.FullName + "." + methodInfoDeclaration.Name:
 				methodInfoDeclaration.Name;
 
@@ -252,7 +265,7 @@ namespace BLToolkit.Reflection.Emit
 				MethodAttributes.PrivateScope |
 				methodInfoDeclaration.Attributes & MethodAttributes.SpecialName;
 
-			if (isInterface)
+			if (isInterface && !isFake)
 				attrs |= MethodAttributes.Private;
 			else if ((attrs & MethodAttributes.SpecialName) != 0)
 				attrs |= MethodAttributes.Public;
