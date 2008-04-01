@@ -176,10 +176,20 @@ namespace BLToolkit.TypeBuilder.Builders
 
 			if (field == null)
 			{
+				bool buildInstance = !fieldType.IsInterface;
+
+				if (!buildInstance)
+				{
+					object[] attrs = TypeHelper.GetAttributes(fieldType, typeof(AutoImplementInterfaceAttribute));
+
+					if (attrs != null && attrs.Length > 0)
+						buildInstance = true;
+				}
+
 				field = Context.CreatePrivateField(propertyInfo, fieldName, fieldType);
 
-				//if (fieldType.IsInterface == false)
-				//{
+				if (buildInstance)
+				{
 					bool noInstance = propertyInfo.GetCustomAttributes(typeof(NoInstanceAttribute), true).Length > 0;
 
 					if (IsObjectHolder && noInstance)
@@ -199,7 +209,7 @@ namespace BLToolkit.TypeBuilder.Builders
 							BuildInitContextInstance();
 						}
 					}
-				//}
+				}
 			}
 
 			return field;
