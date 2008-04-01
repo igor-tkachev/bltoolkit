@@ -238,6 +238,8 @@
     <Compile Include="Reflection\MetadataProvider\MetadataProviderBase.cs" />
     <Compile Include="Reflection\MetadataProvider\MetadataProviderList.cs" />
     <Compile Include="Reflection\XmlIncludeAbstractAttribute.cs" />
+    <Compile Include="TypeBuilder\AutoImplementInterfaceAttribute.cs" />
+    <Compile Include="TypeBuilder\Builders\AutoImplementInterfaceBuilder.cs" />
     <Compile Include="TypeBuilder\Builders\GeneratedAttributeBuilder.cs" />
     <Compile Include="TypeBuilder\Builders\DuckTypeBuilder.cs" />
     <Compile Include="TypeBuilder\GenerateAttributeAttribute.cs" />
