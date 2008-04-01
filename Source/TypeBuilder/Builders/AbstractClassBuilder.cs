@@ -209,6 +209,12 @@ namespace BLToolkit.TypeBuilder.Builders
 		{
 			List<Type> interfaces = new List<Type>();
 
+			if (_context.Type.IsInterface)
+			{
+				interfaces.Add(_context.Type);
+				_context.InterfaceMap.Add(_context.Type, null);
+			}
+
 			foreach (IAbstractTypeBuilder tb in _builders)
 			{
 				Type[] types = tb.GetInterfaces();
@@ -664,9 +670,9 @@ namespace BLToolkit.TypeBuilder.Builders
 
 		private void DefineInterfaces()
 		{
-			foreach (DictionaryEntry de in _context.InterfaceMap)
+			foreach (KeyValuePair<TypeHelper, IAbstractTypeBuilder> de in _context.InterfaceMap)
 			{
-				_context.CurrentInterface = (Type)de.Key;
+				_context.CurrentInterface = de.Key;
 
 				MethodInfo[] interfaceMethods = _context.CurrentInterface.GetMethods();
 
@@ -679,13 +685,16 @@ namespace BLToolkit.TypeBuilder.Builders
 
 					// Call builder to build the method.
 					//
-					IAbstractTypeBuilder builder = (IAbstractTypeBuilder)de.Value;
+					IAbstractTypeBuilder builder = de.Value;
 
-					builder.ID = ++_idCounter;
+					if (builder != null)
+					{
+						builder.ID = ++_idCounter;
 
-					_context.BuildElement = BuildElement.InterfaceMethod;
-					_context.Step         = BuildStep.Build;
-					builder.Build(_context);
+						_context.BuildElement = BuildElement.InterfaceMethod;
+						_context.Step         = BuildStep.Build;
+						builder.Build(_context);
+					}
 
 					EndEmitMethod();
 				}

@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Reflection;
 using System.Reflection.Emit;
 using System.Diagnostics.CodeAnalysis;
@@ -70,13 +71,13 @@ namespace BLToolkit.TypeBuilder.Builders
 			}
 		}
 
-		private Hashtable _interfaceMap;
-		public  Hashtable  InterfaceMap
+		private IDictionary<TypeHelper, IAbstractTypeBuilder> _interfaceMap;
+		public  IDictionary<TypeHelper, IAbstractTypeBuilder>  InterfaceMap
 		{
 			get 
 			{
 				if (_interfaceMap == null)
-					_interfaceMap = new Hashtable();
+					_interfaceMap = new Dictionary<TypeHelper, IAbstractTypeBuilder>();
 
 				return _interfaceMap;
 			}

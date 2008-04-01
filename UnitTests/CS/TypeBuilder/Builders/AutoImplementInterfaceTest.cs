@@ -60,7 +60,7 @@ namespace TypeBuilder.Builders
 		}
 
 		[Test]
-		public void TestMemberImp()
+		public void TestMemberImpl()
 		{
 			TypeFactory.SaveTypes = true;
 
