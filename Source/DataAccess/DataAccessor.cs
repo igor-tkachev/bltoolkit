@@ -46,14 +46,40 @@ namespace BLToolkit.DataAccess
 			return (DataAccessor)TypeAccessor.CreateInstance(type);
 		}
 
+		public static DataAccessor CreateInstance(Type type, InitContext context)
+		{
+			return (DataAccessor)TypeAccessor.CreateInstance(type, context);
+		}
+
 		public static DataAccessor CreateInstance(Type type, DbManager dbManager)
 		{
 			return CreateInstance(type, dbManager, false);
 		}
 
+		public static DataAccessor CreateInstance(
+			Type type,
+			InitContext context,
+			DbManager dbManager)
+		{
+			return CreateInstance(type, context, dbManager, false);
+		}
+
 		public static DataAccessor CreateInstance(Type type, DbManager dbManager, bool dispose)
 		{
 			DataAccessor da = CreateInstance(type);
+
+			da.SetDbManager(dbManager, dispose);
+
+			return da;
+		}
+
+		public static DataAccessor CreateInstance(
+			Type type,
+			InitContext context,
+			DbManager dbManager,
+			bool dispose)
+		{
+			DataAccessor da = CreateInstance(type, context);
 
 			da.SetDbManager(dbManager, dispose);
 
