@@ -2567,6 +2567,7 @@ namespace BLToolkit.Common
 		#endregion
 
 		#if FW3
+
 		#region DateTimeOffset
 
 		// Scalar Types.
@@ -2645,6 +2646,7 @@ namespace BLToolkit.Common
 		#endregion
 
 		#endif
+
 		#region TimeSpan
 
 		// Scalar Types.

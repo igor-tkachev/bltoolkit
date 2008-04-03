@@ -43,8 +43,7 @@ namespace BLToolkit.DataAccess
 			}
 			finally
 			{
-				if (DisposeDbManager)
-					db.Dispose();
+				Dispose(db);
 			}
 		}
 
@@ -83,8 +82,7 @@ namespace BLToolkit.DataAccess
 			}
 			finally
 			{
-				if (DisposeDbManager)
-					db.Dispose();
+				Dispose(db);
 			}
 		}
 
@@ -99,8 +97,7 @@ namespace BLToolkit.DataAccess
 			}
 			finally
 			{
-				if (DisposeDbManager)
-					db.Dispose();
+				Dispose(db);
 			}
 		}
 
@@ -133,8 +130,7 @@ namespace BLToolkit.DataAccess
 			}
 			finally
 			{
-				if (DisposeDbManager)
-					db.Dispose();
+				Dispose(db);
 			}
 		}
 
@@ -161,8 +157,7 @@ namespace BLToolkit.DataAccess
 			}
 			finally
 			{
-				if (DisposeDbManager)
-					db.Dispose();
+				Dispose(db);
 			}
 		}
 
@@ -187,8 +182,7 @@ namespace BLToolkit.DataAccess
 			}
 			finally
 			{
-				if (DisposeDbManager)
-					db.Dispose();
+				Dispose(db);
 			}
 		}
 
@@ -215,8 +209,7 @@ namespace BLToolkit.DataAccess
 			}
 			finally
 			{
-				if (DisposeDbManager)
-					db.Dispose();
+				Dispose(db);
 			}
 		}
 

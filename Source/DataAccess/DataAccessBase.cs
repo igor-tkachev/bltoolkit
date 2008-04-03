@@ -168,6 +168,13 @@ namespace BLToolkit.DataAccess
 			return MappingSchema.MetadataProvider.GetTableName(type, Extensions, out isSet);
 		}
 
+		[NoInterception]
+		protected virtual void Dispose(DbManager dbManager)
+		{
+			if (dbManager != null && DisposeDbManager)
+				dbManager.Dispose();
+		}
+
 		#endregion
 	}
 }

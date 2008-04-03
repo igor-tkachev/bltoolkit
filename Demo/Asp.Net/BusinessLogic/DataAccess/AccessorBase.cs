@@ -97,8 +97,7 @@ namespace PetShop.BusinessLogic.DataAccess
 				}
 				finally
 				{
-					if (DisposeDbManager)
-						db.Dispose();
+					Dispose(db);
 				}
 			}
 

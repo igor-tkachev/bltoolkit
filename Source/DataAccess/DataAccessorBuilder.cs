@@ -1082,20 +1082,11 @@ namespace BLToolkit.DataAccess
 		{
 			if (_createManager)
 			{
-				Label        fin = Context.MethodBuilder.Emitter.DefineLabel();
-				PropertyInfo pi  = _baseType.GetProperty("DisposeDbManager",
-					BindingFlags.Public | BindingFlags.Instance);
-
 				Context.MethodBuilder.Emitter
 					.BeginFinallyBlock()
-					.ldloc     (_locManager)
-					.brfalse_s (fin)
 					.ldarg_0
-					.callvirt  (pi.GetGetMethod(true))
-					.brfalse_s (fin)
-					.ldloc     (_locManager)
-					.callvirt  (typeof(IDisposable), "Dispose")
-					.MarkLabel (fin)
+					.ldloc    (_locManager)
+					.callvirt (_baseType, "Dispose", _bindingFlags, typeof(DbManager))
 					.EndExceptionBlock()
 					;
 			}
