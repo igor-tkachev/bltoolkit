@@ -155,6 +155,8 @@ namespace BLToolkit.ComponentModel
 
 					if (ma != null)
 						OnListChanged(new EditableListChangedEventArgs(indexOfSender, ma.PropertyDescriptor));
+					else
+						OnListChanged(new EditableListChangedEventArgs(ListChangedType.ItemChanged, indexOfSender));
 
 					if (_isSorted && _list.Count > 1)
 					{
@@ -209,7 +211,7 @@ namespace BLToolkit.ComponentModel
 			_sortDirection = direction;
 			_sortDescriptions = null;
 
-			ApplySort(new SortPropertyComparer(property, direction));
+			ApplySort(GetSortComparer(_sortProperty, _sortDirection));
 			
 			if (_list.Count > 0)
 				OnListChanged(new EditableListChangedEventArgs(ListChangedType.Reset));
@@ -480,12 +482,52 @@ namespace BLToolkit.ComponentModel
 			if (_isSorted)
 			{
 				if (_sortDescriptions != null)
-					return new SortListPropertyComparer(_sortDescriptions);
+					return GetSortComparer(_sortDescriptions);
 
-				return new SortPropertyComparer(_sortProperty, _sortDirection);
+				return GetSortComparer(_sortProperty, _sortDirection);
 			}
 
 			return null;
+		}
+		
+		private IComparer GetSortComparer(PropertyDescriptor sortProperty, ListSortDirection sortDirection)
+		{
+			if (_sortSubstitutions.ContainsKey(sortProperty.Name))
+				sortProperty = ((SortSubstitutionPair)_sortSubstitutions[sortProperty.Name]).Substitute;
+
+			return new SortPropertyComparer(sortProperty, sortDirection);
+		}
+
+		private IComparer GetSortComparer(ListSortDescriptionCollection sortDescriptions)
+		{
+			bool needSubstitution = false;
+
+			if (_sortSubstitutions.Count > 0)
+			{
+				foreach (ListSortDescription sortDescription in sortDescriptions)
+				{
+					if (_sortSubstitutions.ContainsKey(sortDescription.PropertyDescriptor.Name))
+					{
+						needSubstitution = true;
+						break;
+					}
+				}
+
+				if (needSubstitution)
+				{
+					ListSortDescription[] sorts = new ListSortDescription[sortDescriptions.Count];
+					sortDescriptions.CopyTo(sorts, 0);
+
+					for (int i = 0; i < sorts.Length; i++)
+						if (_sortSubstitutions.ContainsKey(sorts[i].PropertyDescriptor.Name))
+							sorts[i] = new ListSortDescription(((SortSubstitutionPair)_sortSubstitutions[sorts[i].PropertyDescriptor.Name]).Substitute, 
+								                               sorts[i].SortDirection);
+
+					sortDescriptions = new ListSortDescriptionCollection(sorts);
+				}
+			}
+
+			return new SortListPropertyComparer(sortDescriptions);
 		}
 		
 		#endregion
@@ -504,7 +546,7 @@ namespace BLToolkit.ComponentModel
 			_isSorted = true;
 			_sortProperty = null;
 			
-			ApplySort(new SortListPropertyComparer(sorts));
+			ApplySort(GetSortComparer(sorts));
 			
 			if (_list.Count > 0)
 				OnListChanged(new EditableListChangedEventArgs(ListChangedType.Reset));
@@ -563,6 +605,42 @@ namespace BLToolkit.ComponentModel
 
 				return 0;
 			}
+		}
+
+		#endregion
+
+		#region Sorting enhancement
+
+		private Hashtable _sortSubstitutions = new Hashtable();
+
+		private class SortSubstitutionPair
+		{
+			public SortSubstitutionPair(PropertyDescriptor original, PropertyDescriptor substitute)
+			{
+				Original = original;
+				Substitute = substitute;
+			}
+
+			public PropertyDescriptor Original;
+			public PropertyDescriptor Substitute;
+		}
+
+		public void CreateSortSubstitution(string originalProperty, string substituteProperty)
+		{
+			TypeAccessor typeAccessor = TypeAccessor.GetAccessor(_itemType);
+
+			PropertyDescriptor originalDescriptor = typeAccessor.PropertyDescriptors[originalProperty];
+			PropertyDescriptor substituteDescriptor = typeAccessor.PropertyDescriptors[substituteProperty];
+
+			if (originalDescriptor == null)   throw new InvalidOperationException("Can not retrieve PropertyDescriptor for original property: " + originalProperty);
+			if (substituteDescriptor == null) throw new InvalidOperationException("Can not retrieve PropertyDescriptor for substitute property: " + substituteProperty);
+
+			_sortSubstitutions[originalProperty] = new SortSubstitutionPair(originalDescriptor, substituteDescriptor);
+		}
+
+		public void RemoveSortSubstitution(string originalProperty)
+		{
+			_sortSubstitutions.Remove(originalProperty);
 		}
 
 		#endregion

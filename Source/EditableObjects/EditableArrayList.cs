@@ -269,7 +269,7 @@ namespace BLToolkit.EditableObjects
 				if (_noTrackingChangesCount < _minTrackingChangesCount)
 				{
 					_noTrackingChangesCount = _minTrackingChangesCount;
-					throw new InvalidOperationException("Tracking Changes Counter con not be negative.");
+					throw new InvalidOperationException("Tracking Changes Counter can not be negative.");
 				}
 			}
 			else
@@ -487,6 +487,9 @@ namespace BLToolkit.EditableObjects
 
 		public override void AddRange(ICollection c)
 		{
+			if (c.Count == 0)
+				return;
+
 			BindingListImpl.AddRange(c);
 			
 			AddInternal(c);
@@ -494,6 +497,9 @@ namespace BLToolkit.EditableObjects
 
 		public void AddRange(ICollection c, bool trackChanges)
 		{
+			if (c.Count == 0)
+				return;
+
 			if (!trackChanges) _noTrackingChangesCount++;
 			AddRange(c);
 			if (!trackChanges) _noTrackingChangesCount--;
@@ -671,6 +677,9 @@ namespace BLToolkit.EditableObjects
 
 		public override void SetRange(int index, ICollection c)
 		{
+			if (c.Count == 0)
+				return;
+
 			BindingListImpl.SetRange(index, c);
 
 			AddInternal(c);
@@ -888,7 +897,11 @@ namespace BLToolkit.EditableObjects
 
 		public object AddNew()
 		{
-			return BindingListImpl.AddNew();
+			object newObject = BindingListImpl.AddNew();
+
+			AddInternal(newObject);
+
+			return newObject;
 		}
 
 		public bool AllowEdit
@@ -960,6 +973,20 @@ namespace BLToolkit.EditableObjects
 		public bool SupportsSorting
 		{
 			get { return BindingListImpl.SupportsSorting; }
+		}
+
+		#endregion
+
+		#region Sorting Enhancement
+
+		public void CreateSortSubstitution(string originalProperty, string substituteProperty)
+		{
+			BindingListImpl.CreateSortSubstitution(originalProperty, substituteProperty);
+		}
+
+		public void RemoveSortSubstitution(string originalProperty)
+		{
+			BindingListImpl.RemoveSortSubstitution(originalProperty);
 		}
 
 		#endregion
