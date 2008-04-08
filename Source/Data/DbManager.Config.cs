@@ -289,7 +289,7 @@ namespace BLToolkit.Data
 			{
 				ConnectionStringSettings css = ConfigurationManager.ConnectionStrings[configurationString];
 
-				if (css != null)
+				if (css != null && !string.IsNullOrEmpty(css.ProviderName))
 					return _dataProviderNameList[css.ProviderName];
 
 				// configurationString can be:
