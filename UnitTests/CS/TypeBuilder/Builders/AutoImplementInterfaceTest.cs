@@ -12,6 +12,8 @@ namespace TypeBuilder.Builders
 	[TestFixture]
 	public class AutoImplementInterfaceTest
 	{
+		#region Test
+
 		[AutoImplementInterface]
 		public interface Test1
 		{
@@ -35,6 +37,10 @@ namespace TypeBuilder.Builders
 			Assert.AreEqual("John", t.Name);
 		}
 
+		#endregion
+
+		#region TestException
+
 		public interface Test2
 		{
 			string Name { get; }
@@ -46,6 +52,10 @@ namespace TypeBuilder.Builders
 			TypeAccessor ta = TypeAccessor.GetAccessor(typeof(Test2));
 			Test2 t = (Test2)ta.CreateInstance();
 		}
+
+		#endregion
+
+		#region TestMemberImpl
 
 		[AutoImplementInterface]
 		public interface Test3
@@ -62,13 +72,47 @@ namespace TypeBuilder.Builders
 		[Test]
 		public void TestMemberImpl()
 		{
-			TypeFactory.SaveTypes = true;
-
 			Test4 t = TypeAccessor<Test4>.CreateInstance();
 
 			t.Test.Name = "John";
 
 			Assert.AreEqual("John", t.Test.Name);
 		}
+
+		#endregion
+
+		#region Inheritance
+
+		public interface Interface1
+		{
+			void Foo();
+			string Name { get; set; }
+		}
+
+		[AutoImplementInterface]
+		public interface Interface2 : Interface1
+		{
+			void Bar();
+		}
+
+		[Test]
+		public void TestInheritance()
+		{
+			TypeFactory.SaveTypes = true;
+
+			Interface2 i2 = TypeAccessor<Interface2>.CreateInstance();
+			Interface1 i1 = i2;
+
+			i1.Foo();
+			i2.Foo();
+			i2.Bar();
+
+			i1.Name = "John";
+
+			Assert.AreEqual("John", i1.Name);
+			Assert.AreEqual("John", i2.Name);
+		}
+
+		#endregion
 	}
 }

@@ -676,9 +676,10 @@ namespace BLToolkit.Data
 				dbParameters = true;
 			}
 
-			if (commandParameters == null)
+			if (commandParameters == null/* || commandParameters.Length == 0*/)
 			{
 				commandParameters = new IDbDataParameter[parameterValues.Length];
+
 				if (dbParameters)
 				{
 					parameterValues.CopyTo(commandParameters, 0);
