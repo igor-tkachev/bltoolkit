@@ -507,12 +507,15 @@ namespace BLToolkit.TypeBuilder.Builders
 
 		void GetAbstractProperties(Type type, List<PropertyInfo> props)
 		{
-			props.AddRange(
-				type.GetProperties(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance));
+			if (props.Find(delegate(PropertyInfo mi) { return mi.DeclaringType == type; }) == null)
+			{
+				props.AddRange(
+					type.GetProperties(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance));
 
-			if (type.IsInterface)
-				foreach (Type t in type.GetInterfaces())
-					GetAbstractProperties(t, props);
+				if (type.IsInterface)
+					foreach (Type t in type.GetInterfaces())
+						GetAbstractProperties(t, props);
+			}
 		}
 
 		private void DefineAbstractProperties()
@@ -585,12 +588,15 @@ namespace BLToolkit.TypeBuilder.Builders
 
 		void GetAbstractMethods(Type type, List<MethodInfo> methods)
 		{
-			methods.AddRange(
-				type.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance));
+			if (methods.Find(delegate(MethodInfo mi) { return mi.DeclaringType == type; }) == null)
+			{
+				methods.AddRange(
+					type.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance));
 
-			if (type.IsInterface)
-				foreach (Type t in type.GetInterfaces())
-					GetAbstractMethods(t, methods);
+				if (type.IsInterface)
+					foreach (Type t in type.GetInterfaces())
+						GetAbstractMethods(t, methods);
+			}
 		}
 
 		private void DefineAbstractMethods()

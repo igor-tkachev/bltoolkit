@@ -83,14 +83,18 @@ namespace TypeBuilder.Builders
 
 		#region Inheritance
 
-		public interface Interface1
+		public interface InterfaceBase
 		{
-			void Foo();
 			string Name { get; set; }
 		}
 
+		public interface Interface1 : InterfaceBase
+		{
+			void Foo();
+		}
+
 		[AutoImplementInterface]
-		public interface Interface2 : Interface1
+		public interface Interface2 : Interface1, InterfaceBase
 		{
 			void Bar();
 		}
@@ -98,7 +102,7 @@ namespace TypeBuilder.Builders
 		[Test]
 		public void TestInheritance()
 		{
-			TypeFactory.SaveTypes = true;
+			//TypeFactory.SaveTypes = true;
 
 			Interface2 i2 = TypeAccessor<Interface2>.CreateInstance();
 			Interface1 i1 = i2;
