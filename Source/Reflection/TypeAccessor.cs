@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Data.SqlTypes;
@@ -252,6 +253,9 @@ namespace BLToolkit.Reflection
 
 					if (accessor == null)
 					{
+						if (IsAssociatedType(originalType))
+							return (TypeAccessor)_accessors[originalType];
+
 						Type instanceType = IsClassBulderNeeded(originalType)? null: originalType;
 						Type accessorType = null;
 
@@ -305,18 +309,58 @@ namespace BLToolkit.Reflection
 		{
 			if (type.IsAbstract && !type.IsSealed)
 			{
-				if (TypeHelper.GetDefaultConstructor(type) != null)
-					return true;
+				if (!type.IsInterface)
+				{
+					if (TypeHelper.GetDefaultConstructor(type) != null)
+						return true;
 
-				if (TypeHelper.GetConstructor(type, typeof(InitContext)) != null)
-					return true;
-
-				if (type.IsInterface)
+					if (TypeHelper.GetConstructor(type, typeof(InitContext)) != null)
+						return true;
+				}
+				else
 				{
 					object[] attrs = TypeHelper.GetAttributes(type, typeof(AutoImplementInterfaceAttribute));
 
 					if (attrs != null && attrs.Length > 0)
 						return true;
+				}
+			}
+
+			return false;
+		}
+
+		internal static bool IsInstanceBuildable(Type type)
+		{
+			if (!type.IsInterface)
+				return true;
+
+			lock (_accessors.SyncRoot)
+			{
+				if (_accessors[type] != null)
+					return true;
+
+				if (IsAssociatedType(type))
+					return true;
+			}
+
+			object[] attrs = TypeHelper.GetAttributes(type, typeof(AutoImplementInterfaceAttribute));
+
+			if (attrs != null && attrs.Length > 0)
+				return true;
+
+			return false;
+		}
+
+		private static bool IsAssociatedType(Type type)
+		{
+			if (AssociatedTypeHandler != null)
+			{
+				Type child = AssociatedTypeHandler(type);
+
+				if (child != null)
+				{
+					AssociateType(type, child);
+					return true;
 				}
 			}
 
@@ -408,6 +452,26 @@ namespace BLToolkit.Reflection
 		{
 			return TypeAccessor<T>.CreateInstance(context);
 		}
+
+		public static TypeAccessor AssociateType(Type parent, Type child)
+		{
+			if (!TypeHelper.IsSameOrParent(parent, child))
+				throw new ArgumentException(
+					string.Format("'{0}' must be a base type of '{1}'", parent, child),
+					"inheritedType");
+
+			TypeAccessor accessor = GetAccessor(child);
+
+			accessor = (TypeAccessor)Activator.CreateInstance(accessor.GetType());
+
+			lock (_accessors.SyncRoot)
+				_accessors[parent] = accessor;
+
+			return accessor;
+		}
+
+		public delegate Type GetAssociatedType(Type parent);
+		public static event GetAssociatedType AssociatedTypeHandler;
 
 		#endregion
 

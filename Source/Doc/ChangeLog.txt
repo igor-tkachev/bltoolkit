@@ -25,6 +25,8 @@ Enhancement
 - Assembly is signed.
 - New ActualTypeAttribute to associate DataAccessor's object type and its implementation.
 - New AutoImplementInterfaceAttribute to automatically generate interface implementation.
+- New TypeAccessor.AssociateType method and TypeAccessor.AssociatedTypeHandler event
+  to control interface/type implementation.
 
 v 2.0.7
 

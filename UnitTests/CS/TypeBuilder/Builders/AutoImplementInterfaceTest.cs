@@ -118,5 +118,73 @@ namespace TypeBuilder.Builders
 		}
 
 		#endregion
+
+		#region AssociateTypeTest
+
+		public class MyClass : Interface1
+		{
+			public void Foo() {}
+
+			private string _name;
+			public  string  Name
+			{
+				get { return _name;  }
+				set { _name = value; }
+			}
+
+			public string Address;
+		}
+
+		[Test]
+		public void AssociateTypeTest()
+		{
+			TypeAccessor.AssociateType(typeof(Interface1), typeof(MyClass));
+
+			Interface1 i1 = TypeAccessor<Interface1>.CreateInstance();
+
+			i1.Name = "John";
+
+			Assert.AreEqual("John", i1.Name);
+			Assert.AreEqual("John", TypeAccessor<Interface1>.Instance["Name"].GetValue(i1).ToString());
+		}
+
+		#endregion
+		
+		#region AssociateTypeHandlerTest
+
+		public interface IMy
+		{
+			string Name { get; set; }
+		}
+
+		public class MyImpl : IMy
+		{
+			private string _name;
+			public  string  Name
+			{
+				get { return _name;  }
+				set { _name = value; }
+			}
+		}
+
+
+		[Test]
+		public void AssociateTypeHandlerTest()
+		{
+			TypeAccessor.AssociatedTypeHandler += delegate(Type parent)
+			{
+				if (parent == typeof(IMy)) return typeof(MyImpl);
+				return null;
+			};
+
+			IMy i = TypeAccessor<IMy>.CreateInstance();
+
+			i.Name = "John";
+
+			Assert.AreEqual("John", i.Name);
+			Assert.AreEqual("John", TypeAccessor<IMy>.Instance["Name"].GetValue(i).ToString());
+		}
+
+		#endregion
 	}
 }
