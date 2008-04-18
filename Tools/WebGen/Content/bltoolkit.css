@@ -2,6 +2,7 @@ body
 {
 	background  : White;
 	font-family : Verdana;
+	font-size   : small;
 }
 
 a:link    { text-decoration: none;      color : #338899; }
@@ -87,8 +88,9 @@ td.pj
 
 .a
 {
-	color       : DarkRed;
-	font-weight : bold;
+	color           : DarkRed;
+	font-weight     : bold;
+	text-decoration : underline;
 }
 
 table.code

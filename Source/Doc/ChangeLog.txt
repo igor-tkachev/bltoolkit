@@ -51,7 +51,7 @@ Enhancement
 - GenerateAtribute attribute to specify any custom attribute for a generated type or member.
 - SQLite data provider.
 - DeriveParameters implemented for MsAccess data provider.
-- XmlIncludeAbstractAttribute.to simplify the xml serialization of a BLToolkit generated type.
+- XmlIncludeAbstractAttribute to simplify the xml serialization of a BLToolkit generated type.
 - Better support for internal types/members.
   The behavior is configurable via Configuration.EditableObjectUsesMemberwiseEquals property.
 - VS 2008 support.

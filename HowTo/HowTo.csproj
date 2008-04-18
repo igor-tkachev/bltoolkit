@@ -58,6 +58,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Aspects\CacheAspect.cs" />
+    <Compile Include="Aspects\CustomCacheAspect.cs" />
     <Compile Include="DataAccess\AbstractAccessor.cs" />
     <Compile Include="DataAccess\ExecuteScalar.cs" />
     <Compile Include="DataAccess\ExecuteObject.cs" />
