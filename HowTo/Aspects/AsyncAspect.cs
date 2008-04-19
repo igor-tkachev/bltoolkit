@@ -10,17 +10,30 @@ namespace HowTo.Aspects
 {
 	public /*[a]*/abstract/*[/a]*/ class AsyncTestObject
 	{
+		// This is the member we will call asynchronously.
+		//
 		public /*[a]*/int/*[/a]*/ /*[a]*/Test/*[/a]*/(/*[a]*/int intVal/*[/a]*/, /*[a]*/string strVal/*[/a]*/)
 		{
 			Thread.Sleep(200);
 			return intVal;
 		}
 
+		// Begin async methods should take the same parameter list as the Test method and return IAsyncResult.
+		// Two additional parameters can be provided: AsyncCallback and state object.
+		// 'Begin' prefix is a part of the default naming convention.
+		//
 		[/*[a]*/Async/*[/a]*/] public abstract /*[a]*/IAsyncResult/*[/a]*/ /*[a]*/BeginTest/*[/a]*/(/*[a]*/int intVal/*[/a]*/, /*[a]*/string strVal/*[/a]*/);
 		[/*[a]*/Async/*[/a]*/] public abstract /*[a]*/IAsyncResult/*[/a]*/ /*[a]*/BeginTest/*[/a]*/(/*[a]*/int intVal/*[/a]*/, /*[a]*/string strVal/*[/a]*/, /*[a]*/AsyncCallback/*[/a]*/ callback);
 		[/*[a]*/Async/*[/a]*/] public abstract /*[a]*/IAsyncResult/*[/a]*/ /*[a]*/BeginTest/*[/a]*/(/*[a]*/int intVal/*[/a]*/, /*[a]*/string strVal/*[/a]*/, /*[a]*/AsyncCallback/*[/a]*/ callback, /*[a]*/object/*[/a]*/ state);
+
+		// End async methods should take IAsyncResult and return the same type as the Test method.
+		// 'End' prefix is a part of the default naming convention.
+		//
 		[/*[a]*/Async/*[/a]*/] public abstract /*[a]*/int/*[/a]*/          /*[a]*/EndTest/*[/a]*/  (/*[a]*/IAsyncResult/*[/a]*/ asyncResult);
 
+		// Begin/End naming convention is not required. You can use any name 
+		// if you provide the target method name as a parameter of the Async attribute.
+		//
 		[/*[a]*/Async/*[/a]*/("Test")]
 		public abstract /*[a]*/IAsyncResult/*[/a]*/ AnyName(/*[a]*/int intVal/*[/a]*/, /*[a]*/string strVal/*[/a]*/, /*[a]*/AsyncCallback/*[/a]*/ callback, /*[a]*/object/*[/a]*/ state);
 

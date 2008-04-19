@@ -40,6 +40,7 @@
   <ItemGroup>
     <Content Include="Content\Doc\DataAccess\ExecuteDictionary.htm" />
     <Content Include="Content\Doc\Aspects\AsyncAspect.htm" />
+    <Content Include="Content\Doc\Aspects\AsyncAspect.cs" />
     <Compile Include="FileAction.cs" />
     <Compile Include="Generator.cs" />
     <Compile Include="Program.cs" />

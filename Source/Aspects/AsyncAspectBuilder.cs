@@ -236,10 +236,10 @@ namespace BLToolkit.Aspects
 					AsyncCallback(this);
 			}
 
-			public bool         IsCompleted            { get { return InnerResult.IsCompleted; } }
-			public WaitHandle   AsyncWaitHandle        { get { return InnerResult.AsyncWaitHandle; } }
-			public object       AsyncState             { get { return InnerResult.AsyncState; } }
-			public bool         CompletedSynchronously { get { return InnerResult.CompletedSynchronously; } }
+			public bool       IsCompleted            { get { return InnerResult.IsCompleted; } }
+			public WaitHandle AsyncWaitHandle        { get { return InnerResult.AsyncWaitHandle; } }
+			public object     AsyncState             { get { return InnerResult.AsyncState; } }
+			public bool       CompletedSynchronously { get { return InnerResult.CompletedSynchronously; } }
 		}
 
 		#endregion

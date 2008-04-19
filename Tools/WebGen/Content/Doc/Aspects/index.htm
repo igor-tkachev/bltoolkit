@@ -1,3 +1,10 @@
+<p class="j">All BLToolkit aspects are implemented as attributes and have to be applied to 
+abstract or virtual members of an abstract class. 
+You need to use <i>TypeAccessor&lt;T&gt;.CreateInstance()</i> method to create an instance of the class. 
+BLToolkit type builder creates an actual class and applies aspects to abstract and virtual members 
+by overriding the members and emitting (see <i>System.Reflection.Emit</i> namespace) 
+additional code around them.
+</p>
 <table border="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="3" class="hr"><img width="1" height="1" alt=""/></td></tr>
 

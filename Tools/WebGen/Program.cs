@@ -31,6 +31,7 @@ namespace WebGen
 
 					switch (ext)
 					{
+						case ".cs":
 						case ".config":
 						case ".xml":
 						case ".sql": return FileAction.Skip;
