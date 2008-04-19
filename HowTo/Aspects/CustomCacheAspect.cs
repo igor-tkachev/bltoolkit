@@ -42,7 +42,7 @@ namespace HowTo.Aspects
 			CustomTestClass t = TypeAccessor<CustomTestClass>.CreateInstance();
 
 			CustomTestClass.Value = 1; Assert.AreEqual(1, t.CachedMethod(1, 1));
-			CustomTestClass.Value = 2; Assert.AreEqual(1, t.CachedMethod(1, 1));
+			CustomTestClass.Value = 2; Assert.AreEqual(1, t.CachedMethod(1, 1)); // no change
 			CustomTestClass.Value = 3; Assert.AreEqual(3, t.CachedMethod(2, 1));
 
 			CustomCacheAspect.Cache.Clear();

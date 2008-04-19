@@ -34,10 +34,7 @@ namespace WebGen
 
 			CreateDestFolder();
 
-			string template;
-
-			using (StreamReader sr = File.OpenText(templateFileName))
-				template = sr.ReadToEnd();
+			string template = File.ReadAllText(templateFileName);
 
 			GenerateContent(createdFiles, template, path, createIndex);
 		}

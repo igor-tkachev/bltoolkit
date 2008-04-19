@@ -39,6 +39,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Content\Doc\DataAccess\ExecuteDictionary.htm" />
+    <Content Include="Content\Doc\Aspects\AsyncAspect.htm" />
     <Compile Include="FileAction.cs" />
     <Compile Include="Generator.cs" />
     <Compile Include="Program.cs" />
@@ -47,6 +48,7 @@
   <ItemGroup>
     <Content Include="Content\bltoolkit.css" />
     <Content Include="Content\Doc\Aspects\CacheAspect.htm" />
+    <Content Include="Content\Doc\Aspects\NoCacheAttribute.htm" />
     <Content Include="Content\Doc\Aspects\CustomCacheAspect.htm" />
     <Content Include="Content\Doc\Aspects\index.htm" />
     <Content Include="Content\Doc\ComponentModel\index.htm" />
