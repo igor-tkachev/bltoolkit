@@ -12,7 +12,7 @@ namespace HowTo.Aspects
 	{
 		// This is the member we will call asynchronously.
 		//
-		public /*[a]*/int/*[/a]*/ /*[a]*/Test/*[/a]*/(/*[a]*/int intVal/*[/a]*/, /*[a]*/string strVal/*[/a]*/)
+		public /*[a]*/int/*[/a]*/ /*[a]*/Test/*[/a]*/(/*[a]*/int intVal, string strVal/*[/a]*/)
 		{
 			Thread.Sleep(200);
 			return intVal;
@@ -22,9 +22,9 @@ namespace HowTo.Aspects
 		// Two additional parameters can be provided: AsyncCallback and state object.
 		// 'Begin' prefix is a part of the default naming convention.
 		//
-		[/*[a]*/Async/*[/a]*/] public abstract /*[a]*/IAsyncResult/*[/a]*/ /*[a]*/BeginTest/*[/a]*/(/*[a]*/int intVal/*[/a]*/, /*[a]*/string strVal/*[/a]*/);
-		[/*[a]*/Async/*[/a]*/] public abstract /*[a]*/IAsyncResult/*[/a]*/ /*[a]*/BeginTest/*[/a]*/(/*[a]*/int intVal/*[/a]*/, /*[a]*/string strVal/*[/a]*/, /*[a]*/AsyncCallback/*[/a]*/ callback);
-		[/*[a]*/Async/*[/a]*/] public abstract /*[a]*/IAsyncResult/*[/a]*/ /*[a]*/BeginTest/*[/a]*/(/*[a]*/int intVal/*[/a]*/, /*[a]*/string strVal/*[/a]*/, /*[a]*/AsyncCallback/*[/a]*/ callback, /*[a]*/object/*[/a]*/ state);
+		[/*[a]*/Async/*[/a]*/] public abstract /*[a]*/IAsyncResult/*[/a]*/ /*[a]*/BeginTest/*[/a]*/(/*[a]*/int intVal, string strVal/*[/a]*/);
+		[/*[a]*/Async/*[/a]*/] public abstract /*[a]*/IAsyncResult/*[/a]*/ /*[a]*/BeginTest/*[/a]*/(/*[a]*/int intVal, string strVal/*[/a]*/, /*[a]*/AsyncCallback/*[/a]*/ callback);
+		[/*[a]*/Async/*[/a]*/] public abstract /*[a]*/IAsyncResult/*[/a]*/ /*[a]*/BeginTest/*[/a]*/(/*[a]*/int intVal, string strVal/*[/a]*/, /*[a]*/AsyncCallback/*[/a]*/ callback, /*[a]*/object/*[/a]*/ state);
 
 		// End async methods should take IAsyncResult and return the same type as the Test method.
 		// 'End' prefix is a part of the default naming convention.
@@ -47,13 +47,13 @@ namespace HowTo.Aspects
 		[Test]
 		public void AsyncTest()
 		{
-			AsyncTestObject o = TypeAccessor<AsyncTestObject>.CreateInstance();
+			AsyncTestObject o = /*[a]*/TypeAccessor/*[/a]*/<AsyncTestObject>.CreateInstance();
 
-			IAsyncResult ar = o.BeginTest(1, "10");
-			Assert.AreEqual(1, o.EndTest(ar));
+			IAsyncResult ar = o./*[a]*/BeginTest/*[/a]*/(1, "10");
+			Assert.AreEqual(1, o./*[a]*/EndTest/*[/a]*/(ar));
 		}
 
-		private static void CallBack(IAsyncResult ar)
+		private static void /*[a]*/CallBack/*[/a]*/(IAsyncResult ar)
 		{
 			Console.WriteLine("Callback");
 
@@ -66,7 +66,7 @@ namespace HowTo.Aspects
 		{
 			AsyncTestObject o = TypeAccessor<AsyncTestObject>.CreateInstance();
 
-			o.BeginTest(2, null, new AsyncCallback(CallBack), o);
+			o.BeginTest(2, null, /*[a]*/CallBack/*[/a]*/, /*[a]*/o/*[/a]*/);
 		}
 
 		[Test]
@@ -74,8 +74,8 @@ namespace HowTo.Aspects
 		{
 			AsyncTestObject o = TypeAccessor<AsyncTestObject>.CreateInstance();
 
-			IAsyncResult ar = o.AnyName(2, null, null, null);
-			Assert.AreEqual(2, o.AnyName(ar));
+			IAsyncResult ar = o./*[a]*/AnyName/*[/a]*/(2, null, null, null);
+			Assert.AreEqual(2, o./*[a]*/AnyName/*[/a]*/(ar));
 		}
 	}
 }

@@ -2,7 +2,7 @@
 internal delegate int TestObject$Test$Delegate(int, string);
 
 [BLToolkitGenerated]
-public sealed class AsyncTestObject : AsyncAspectTest.AsyncTestObject
+public sealed class AsyncTestObject : HowTo.Aspects.AsyncAspectTest.AsyncTestObject
 {
 	[BLToolkitGenerated]
 	public override IAsyncResult BeginTest(int intVal, string strVal)
