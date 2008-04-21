@@ -4,7 +4,13 @@
 		<title>Business Logic Toolkit for .NET</title>
 		<link>http://www.bltoolkit.net</link>
 		<description />
-		<lastBuildDate>2008-02-12</lastBuildDate>
+		<lastBuildDate>2008-04-21</lastBuildDate>
+		<item>
+			<title>New HowTos</title>
+			<link>http://www.bltoolkit.net/Doc/Aspects/</link>
+			<description>See the following &lt;a href="http://www.bltoolkit.net/Doc/Aspects/"&gt;link&lt;/a&gt;</description>
+			<pubDate>2008-04-21</pubDate>
+		</item>
 		<item>
 			<title>Version 2.0.7 released</title>
 			<link>http://www.bltoolkit.net/Download.htm</link>

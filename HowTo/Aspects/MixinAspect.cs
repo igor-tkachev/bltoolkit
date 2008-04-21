@@ -41,7 +41,7 @@ namespace HowTo.Aspects
 				/*[a]*/_testInterface1/*[/a]*/ = new /*[a]*/TestInterface1Impl/*[/a]*/();
 			}
 
-			protected /*[a]*/object/*[/a]*/          /*[a]*/_testInterface1/*[/a]*/;
+			/*[a]*/protected/*[/a]*/ /*[a]*/object/*[/a]*/          /*[a]*/_testInterface1/*[/a]*/;
 
 			private   ITestInterface2 _testInterface2;
 			public    /*[a]*/ITestInterface2/*[/a]*/  /*[a]*/TestInterface2/*[/a]*/
@@ -56,7 +56,7 @@ namespace HowTo.Aspects
 		[Test]
 		public void Test()
 		{
-			TestClass       tc = TypeAccessor<TestClass>.CreateInstance();
+			TestClass       tc = /*[a]*/TypeAccessor/*[/a]*/<TestClass>.CreateInstance();
 			ITestInterface1 i1 = (ITestInterface1)tc;
 			ITestInterface2 i2 = (ITestInterface2)tc;
 

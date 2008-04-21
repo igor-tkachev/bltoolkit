@@ -25,18 +25,18 @@ namespace Examples.Reflection.Emit
 				.DefineMethod(typeof(IHello).GetMethod("SayHello"))
 				.Emitter;
 
-			/*[a]*/emit
+			/*[a]*/emit/*[/a]*/
 				// string.Format("Hello, {0}!", toWhom)
 				//
-				.ldstr   ("Hello, {0}!")
-				.ldarg_1
-				.call    (typeof(string), "Format", typeof(string), typeof(object))
+				./*[a]*/ldstr/*[/a]*/   ("Hello, {0}!")
+				./*[a]*/ldarg_1/*[/a]*/
+				./*[a]*/call/*[/a]*/    (typeof(string), "Format", typeof(string), typeof(object))
 
 				// Console.WriteLine("Hello, World!");
 				//
-				.call    (typeof(Console), "WriteLine", typeof(string))
-				.ret()
-				;/*[/a]*/
+				./*[a]*/call/*[/a]*/    (typeof(Console), "WriteLine", typeof(string))
+				./*[a]*/ret/*[/a]*/()
+				;
 
 			Type type = emit.Method.Type.Create();
 
