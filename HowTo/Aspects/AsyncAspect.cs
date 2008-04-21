@@ -18,7 +18,7 @@ namespace HowTo.Aspects
 			return intVal;
 		}
 
-		// Begin async methods should take the same parameter list as the Test method and return IAsyncResult.
+		// Begin async method should take the same parameter list as the Test method and return IAsyncResult.
 		// Two additional parameters can be provided: AsyncCallback and state object.
 		// 'Begin' prefix is a part of the default naming convention.
 		//
@@ -26,7 +26,7 @@ namespace HowTo.Aspects
 		[/*[a]*/Async/*[/a]*/] public abstract /*[a]*/IAsyncResult/*[/a]*/ /*[a]*/BeginTest/*[/a]*/(/*[a]*/int intVal, string strVal/*[/a]*/, /*[a]*/AsyncCallback/*[/a]*/ callback);
 		[/*[a]*/Async/*[/a]*/] public abstract /*[a]*/IAsyncResult/*[/a]*/ /*[a]*/BeginTest/*[/a]*/(/*[a]*/int intVal, string strVal/*[/a]*/, /*[a]*/AsyncCallback/*[/a]*/ callback, /*[a]*/object/*[/a]*/ state);
 
-		// End async methods should take IAsyncResult and return the same type as the Test method.
+		// End async method should take IAsyncResult and return the same type as the Test method.
 		// 'End' prefix is a part of the default naming convention.
 		//
 		[/*[a]*/Async/*[/a]*/] public abstract /*[a]*/int/*[/a]*/          /*[a]*/EndTest/*[/a]*/  (/*[a]*/IAsyncResult/*[/a]*/ asyncResult);
@@ -37,6 +37,8 @@ namespace HowTo.Aspects
 		[/*[a]*/Async/*[/a]*/("Test")]
 		public abstract /*[a]*/IAsyncResult/*[/a]*/ AnyName(/*[a]*/int intVal/*[/a]*/, /*[a]*/string strVal/*[/a]*/, /*[a]*/AsyncCallback/*[/a]*/ callback, /*[a]*/object/*[/a]*/ state);
 
+		// Here we provide the parameter list along with the method name.
+		//
 		[/*[a]*/Async/*[/a]*/("Test", typeof(int), typeof(string))]
 		public abstract /*[a]*/int/*[/a]*/          AnyName(/*[a]*/IAsyncResult/*[/a]*/ asyncResult);
 	}

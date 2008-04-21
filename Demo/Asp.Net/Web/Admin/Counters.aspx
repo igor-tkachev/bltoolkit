@@ -22,10 +22,10 @@
 <HeaderTemplate>
 <table class="grid" cellspacing="0" cellpadding="0"  rules="all" border="1" style="width:100%;border-collapse:collapse">
 <tr class="grid-header">
-<th rowspan="2">Type</th><th rowspan="2">Method</th><th colspan="2">Calls</th><th colspan="2">Cache</th><th colspan="3">Call Time</th>
+<th rowspan="2">Type</th><th rowspan="2">Method</th><th colspan="2">Calls</th><th colspan="2">Cache</th><th colspan="4">Call Time</th>
 </tr>
 <tr class="grid-header">
-<th>Count</th><th>Ex</th><th>In</th><th>From</th><th>Min</th><th>Average</th><th>Max</th>
+<th>Count</th><th>Ex</th><th>In</th><th>From</th><th>Min</th><th>Average</th><th>Max</th><th>Total</th>
 </tr>
 </HeaderTemplate>
 <ItemTemplate><tr>
@@ -38,6 +38,7 @@
 <td><%# GetTime(((MethodCallCounter)Container.DataItem).MinTime)              %></td>
 <td><%# GetTime(((MethodCallCounter)Container.DataItem).AverageTime)          %></td>
 <td><%# GetTime(((MethodCallCounter)Container.DataItem).MaxTime)              %></td>
+<td><%# GetTime(((MethodCallCounter)Container.DataItem).TotalTime)            %></td>
 </tr><%# GetCurrent((MethodCallCounter)Container.DataItem) %></ItemTemplate>
 <SeparatorTemplate>
 </SeparatorTemplate>

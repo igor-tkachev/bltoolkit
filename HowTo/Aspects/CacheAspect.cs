@@ -12,6 +12,9 @@ namespace HowTo.Aspects
 	{
 		public static int Value;
 
+		// This is a method we will cache. Cached return value depends on input parameters.
+		// We will change the 'Value' field outside of the class and see how it affects the result.
+		//
 		[/*[a]*/Cache/*[/a]*/(MaxCacheTime=500, IsWeak=false)]
 		public /*[a]*/virtual/*[/a]*/ int CachedMethod(int p1, int p2)
 		{
@@ -57,26 +60,26 @@ namespace HowTo.Aspects
 
 			// Return value depends on parameter values.
 			//
-			TestClass.Value = 1; Assert.AreEqual(1, tc.CachedMethod(1, 1));
-			TestClass.Value = 2; Assert.AreEqual(1, tc.CachedMethod(1, 1)); // no change
-			TestClass.Value = 3; Assert.AreEqual(3, tc.CachedMethod(2, 1));
+			TestClass.Value = /*[a]*/1/*[/a]*/; Assert.AreEqual(/*[a]*/1/*[/a]*/, tc.CachedMethod(1, 1));
+			TestClass.Value = /*[a]*/2/*[/a]*/; Assert.AreEqual(/*[a]*/1/*[/a]*/, tc.CachedMethod(1, 1)); // no change
+			TestClass.Value = /*[a]*/3/*[/a]*/; Assert.AreEqual(/*[a]*/3/*[/a]*/, tc.CachedMethod(2, 1));
 
 			// However we can clear cache manually.
 			// For particular method:
 			//
 			CacheAspect.ClearCache(typeof(TestClass), "CachedMethod", typeof(int), typeof(int));
-			TestClass.Value = 4; Assert.AreEqual(4, tc.CachedMethod(2, 1));
+			TestClass.Value = /*[a]*/4/*[/a]*/; Assert.AreEqual(/*[a]*/4/*[/a]*/, tc.CachedMethod(2, 1));
 
 			// By MethodInfo:
 			//
 			MethodInfo methodInfo = tc.GetType().GetMethod("CachedMethod", new Type[] { typeof(int), typeof(int) });
 			CacheAspect.ClearCache(methodInfo);
-			TestClass.Value = 5; Assert.AreEqual(5, tc.CachedMethod(2, 1));
+			TestClass.Value = /*[a]*/5/*[/a]*/; Assert.AreEqual(/*[a]*/5/*[/a]*/, tc.CachedMethod(2, 1));
 
 			// For the all cached methods.
 			//
 			CacheAspect.ClearCache();
-			TestClass.Value = 6; Assert.AreEqual(6, tc.CachedMethod(2, 1));
+			TestClass.Value = /*[a]*/6/*[/a]*/; Assert.AreEqual(/*[a]*/6/*[/a]*/, tc.CachedMethod(2, 1));
 		}
 	}
 }

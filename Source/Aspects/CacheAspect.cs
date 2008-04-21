@@ -174,11 +174,7 @@ namespace BLToolkit.Aspects
 		public  static IsCacheableParameterType  IsCacheableParameterType
 		{
 			get { return _isCacheableParameterType; }
-			set
-			{
-				_isCacheableParameterType = value ??
-					new IsCacheableParameterType(IsCacheableParameterTypeInternal);
-			}
+			set { _isCacheableParameterType = value ?? IsCacheableParameterTypeInternal; }
 		}
 
 		private static bool IsCacheableParameterTypeInternal(Type parameterType)

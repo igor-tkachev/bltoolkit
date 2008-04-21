@@ -101,8 +101,8 @@ namespace BLToolkit.Aspects
 		private static LogOperation _logOperation = LogOperationInternal;
 		public  static LogOperation  LogOperation
 		{
-			get { return _logOperation ?? (_logOperation = LogOperationInternal); }
-			set { _logOperation = value; }
+			get { return _logOperation; }
+			set { _logOperation = value ?? LogOperationInternal; }
 		}
 
 		private static void LogOperationInternal(InterceptCallInfo info)
@@ -122,33 +122,33 @@ namespace BLToolkit.Aspects
 				if (cp.LogParameters != null) logParameters = (bool)cp.LogParameters;
 			}
 
-			string parameters = null;
-			int    plen       = info.ParameterValues.Length;
-
-			if (logParameters && plen > 0)
-			{
-				string[] pvs    = new string[plen];
-				object[] values = info.ParameterValues;
-
-				for (int i = 0; i < plen; i++)
-				{
-					object o = values[i];
-					pvs[i] =
-						o == null?   "<null>":
-						o is string? "\"" + o + "\"":
-						o is char?   "'"  + o + "'":
-						o.ToString();
-				}
-
-				parameters = string.Join(", ", pvs);
-			}
-
 			DateTime end  = DateTime.Now;
 			int      time = (int)((end - info.BeginCallTime).TotalMilliseconds);
 
 			if (info.Exception != null && logExceptions ||
 				info.Exception == null && time >= minCallTime)
 			{
+				string parameters = null;
+				int    plen       = info.ParameterValues.Length;
+
+				if (logParameters && plen > 0)
+				{
+					string[] pvs    = new string[plen];
+					object[] values = info.ParameterValues;
+
+					for (int i = 0; i < plen; i++)
+					{
+						object o = values[i];
+						pvs[i] =
+							o == null?   "<null>":
+							o is string? "\"" + o + "\"":
+							o is char?   "'"  + o + "'":
+							o.ToString();
+					}
+
+					parameters = string.Join(", ", pvs);
+				}
+
 				string exText = null;
 
 				if (info.Exception != null)
@@ -176,8 +176,8 @@ namespace BLToolkit.Aspects
 		private static LogOutput _logOutput = LogOutputInternal;
 		public  static LogOutput  LogOutput
 		{
-			get { return _logOutput ?? (_logOutput = LogOutputInternal); }
-			set { _logOutput = value; }
+			get { return _logOutput; }
+			set { _logOutput = value ?? LogOutputInternal; }
 		}
 
 		private static void LogOutputInternal(string logText, string fileName)

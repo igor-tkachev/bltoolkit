@@ -60,7 +60,10 @@
   <ItemGroup>
     <Compile Include="Aspects\AsyncAspect.cs" />
     <Compile Include="Aspects\CacheAspect.cs" />
+    <Compile Include="Aspects\CounterAspect.cs" />
     <Compile Include="Aspects\CustomCacheAspect.cs" />
+    <Compile Include="Aspects\LoggingAspect.cs" />
+    <Compile Include="Aspects\MixinAspect.cs" />
     <Compile Include="Aspects\NoCache.cs" />
     <Compile Include="DataAccess\AbstractAccessor.cs" />
     <Compile Include="DataAccess\ExecuteScalar.cs" />
