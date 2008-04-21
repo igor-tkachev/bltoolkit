@@ -44,7 +44,7 @@ namespace HowTo.Aspects
 	}
 
 	[TestFixture]
-	public class AsyncAspect
+	public class AsyncAspectTest
 	{
 		[Test]
 		public void AsyncTest()

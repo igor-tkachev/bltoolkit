@@ -274,6 +274,7 @@ namespace WebGen
 
 			string html   = "<table border='0' cellpadding='0' cellspacing='0'>";
 			string @class = "";
+			int    i      = 0;
 
 			foreach (XmlNode item in doc.SelectNodes("rss/channel/item"))
 			{
@@ -288,6 +289,9 @@ namespace WebGen
 					item.SelectSingleNode("description").InnerText);
 
 				@class = " class='p'";
+
+				if (++i == 10)
+					break;
 			}
 
 			html += "</table>";

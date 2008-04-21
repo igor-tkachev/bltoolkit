@@ -22,7 +22,7 @@ namespace Aspects
 		{
 			public int Test(int intVal, string strVal)
 			{
-				System.Threading.Thread.Sleep(ExecutionTime + 1);
+				System.Threading.Thread.Sleep(ExecutionTime + 10);
 				return intVal;
 			}
 
