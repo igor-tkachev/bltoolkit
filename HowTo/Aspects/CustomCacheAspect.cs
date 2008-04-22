@@ -29,7 +29,7 @@ namespace HowTo.Aspects
 		{
 			public static int Value;
 
-			[Cache(/*[a]*/typeof(CustomCacheAspect)/*[/a]*/, MaxSeconds = 1)]
+			[/*[a]*/Cache/*[/a]*/(/*[a]*/typeof(CustomCacheAspect)/*[/a]*/, MaxSeconds = 1)]
 			public /*[a]*/virtual/*[/a]*/ int CachedMethod(int i1, int i2)
 			{
 				return Value;

@@ -1,10 +1,10 @@
 ﻿using System;
+using System.Reflection;
 
 using NUnit.Framework;
 
 using BLToolkit.Aspects;
 using BLToolkit.Reflection;
-using System.Reflection;
 
 namespace HowTo.Aspects
 {
@@ -14,6 +14,8 @@ namespace HowTo.Aspects
 		public /*[a]*/abstract/*[/a]*/ class TestClass
 		{
 			// This is a method we will collect statistic for.
+			// Actually the entire class can be decorated with 
+			// the attribute or even a base class.
 			//
 			[/*[a]*/Counter/*[/a]*/]
 			public /*[a]*/virtual/*[/a]*/ void TestMethod()

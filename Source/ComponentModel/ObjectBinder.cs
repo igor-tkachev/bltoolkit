@@ -3,12 +3,15 @@ using System.Collections;
 using System.ComponentModel;
 using System.Drawing.Design;
 using System.Drawing;
+using System.Windows.Forms;
 
 using BLToolkit.EditableObjects;
 using BLToolkit.Reflection;
 
 namespace BLToolkit.ComponentModel
 {
+	//[ComplexBindingProperties("DataSource", "DataMember")]
+	[ComplexBindingProperties("DataSource")]
 	[DefaultProperty("ItemType")]
 	[ToolboxItem(true)]
 	[ToolboxBitmap(typeof(ObjectBinder))]
@@ -33,6 +36,27 @@ namespace BLToolkit.ComponentModel
 
 		#region Public members
 
+		private object _dataSource;
+
+		[AttributeProvider(typeof(IListSource))]
+		[RefreshProperties(RefreshProperties.Repaint)]
+		[DefaultValue(null)]
+		[Category("Data")]
+		public  object  DataSource
+		{
+			get { return _dataSource; }
+			set
+			{
+				_dataSource = value;
+
+				if      (value is Type)          ItemType   = (Type)value;
+				else if (value is BindingSource) DataSource = ((BindingSource)value).DataSource;
+				else if (value is IList)         List       = (IList)value;
+				else if (value is IListSource)   List       = ((IListSource)value).GetList();
+				else                             Object     = value;
+			}
+		}
+
 		private Type _itemType;
 		[RefreshProperties(RefreshProperties.Repaint)]
 		[DefaultValue(null)]
@@ -48,7 +72,7 @@ namespace BLToolkit.ComponentModel
 
 				OnListChanged(ListChangedType.PropertyDescriptorChanged, -1);
 
-				List  = null;
+				List = null;
 			}
 		}
 

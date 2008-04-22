@@ -13,8 +13,7 @@
 	<asp:BoundField DataField="ID"         HeaderText="Order ID"   SortExpression="ID"         ItemStyle-HorizontalAlign="Right" />
 	<asp:BoundField DataField="UserID"     HeaderText="User ID"    SortExpression="UserID" />
 	<asp:TemplateField HeaderText="Ship To">
-		<ItemTemplate><%# FormatAddress(((Order)Container.DataItem).ShippingAddress) %>
-		</ItemTemplate>
+		<ItemTemplate><%# FormatAddress(((Order)Container.DataItem).ShippingAddress) %></ItemTemplate>
 	</asp:TemplateField>
 	<asp:BoundField DataField="OrderDate"  HeaderText="Date"       SortExpression="OrderDate" DataFormatString="{0:MM/dd/yy hh:mm tt}" HtmlEncode="false" />
 	<asp:BoundField DataField="Courier"    HeaderText="Courier"    SortExpression="Courier" />

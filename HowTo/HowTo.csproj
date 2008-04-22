@@ -65,6 +65,7 @@
     <Compile Include="Aspects\LoggingAspect.cs" />
     <Compile Include="Aspects\MixinAspect.cs" />
     <Compile Include="Aspects\NoCache.cs" />
+    <Compile Include="Aspects\NotNull.cs" />
     <Compile Include="DataAccess\AbstractAccessor.cs" />
     <Compile Include="DataAccess\ExecuteScalar.cs" />
     <Compile Include="DataAccess\ExecuteObject.cs" />

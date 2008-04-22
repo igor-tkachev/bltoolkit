@@ -1,10 +1,10 @@
 using System;
 using System.Collections;
 using System.ComponentModel;
+using System.Diagnostics;
 
 using BLToolkit.Reflection;
 using BLToolkit.EditableObjects;
-using System.Diagnostics;
 
 namespace BLToolkit.ComponentModel
 {

@@ -44,6 +44,7 @@
     <Content Include="Content\Doc\Aspects\CacheAspect.cs" />
     <Content Include="Content\Doc\Aspects\CounterAspect.cs" />
     <Content Include="Content\Doc\Aspects\MixinAspect.cs" />
+    <Content Include="Content\Doc\Aspects\NotNull.cs" />
     <Compile Include="FileAction.cs" />
     <Compile Include="Generator.cs" />
     <Compile Include="Program.cs" />
@@ -52,6 +53,7 @@
   <ItemGroup>
     <Content Include="Content\bltoolkit.css" />
     <Content Include="Content\Doc\Aspects\CacheAspect.htm" />
+    <Content Include="Content\Doc\Aspects\NotNullAttribute.htm" />
     <Content Include="Content\Doc\Aspects\CounterAspect.htm" />
     <Content Include="Content\Doc\Aspects\Counters.png" />
     <Content Include="Content\Doc\Aspects\LoggingAspect.htm" />
@@ -61,6 +63,7 @@
     <Content Include="Content\Doc\Aspects\index.htm" />
     <Content Include="Content\Doc\ComponentModel\index.htm" />
     <None Include="Content\Doc\DataAccess\SQL\SelectByKeySql.sql" />
+    <Content Include="Content\Doc\ComponentModel\ObjectBinder.htm" />
     <Content Include="Content\Doc\DataAccess\AbstractAccessor.htm" />
     <Content Include="Content\Doc\DataAccess\ExecuteScalar.htm" />
     <Content Include="Content\Doc\DataAccess\ExecuteObject.htm" />

@@ -445,6 +445,7 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="ComponentModel\ObjectBinder.bmp" />
     <Content Include="Doc\ChangeLog.txt" />
     <Content Include="Doc\License.txt" />
     <Content Include="Doc\OnlineDoc.txt" />
