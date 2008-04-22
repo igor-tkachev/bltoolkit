@@ -56,7 +56,7 @@ namespace BLToolkit.Aspects
 				else
 				{
 					emit
-						.ldstr  (pi.Name)
+						.ldnull
 						.ldstr  (message)
 						.newobj (typeof(ArgumentNullException), typeof(string), typeof(string))
 						;

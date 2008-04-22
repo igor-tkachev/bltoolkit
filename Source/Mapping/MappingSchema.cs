@@ -412,6 +412,7 @@ namespace BLToolkit.Mapping
 					Convert.ToDateTimeOffset(value);
 		}
 #endif
+
 		private decimal _defaultDecimalNullValue;
 		public  decimal  DefaultDecimalNullValue
 		{
