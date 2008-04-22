@@ -4,6 +4,9 @@ using BLToolkit.TypeBuilder.Builders;
 
 namespace BLToolkit.Aspects
 {
+	/// <summary>
+	/// http://www.bltoolkit.net/Doc/Aspects/index.htm
+	/// </summary>
 	[AttributeUsage(AttributeTargets.Parameter)]
 	public sealed class NotNullAttribute : AbstractTypeBuilderAttribute
 	{

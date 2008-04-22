@@ -13,9 +13,9 @@ namespace HowTo.Aspects
 	{
 		public /*[a]*/abstract/*[/a]*/ class TestClass
 		{
-			// This is a method we will collect statistic for.
-			// Actually the entire class can be decorated with 
-			// the attribute or even a base class.
+			// This is a method we collect statistic for.
+			// Actually the entire class or even a base class 
+			// can be decorated with the attribute.
 			//
 			[/*[a]*/Counter/*[/a]*/]
 			public /*[a]*/virtual/*[/a]*/ void TestMethod()

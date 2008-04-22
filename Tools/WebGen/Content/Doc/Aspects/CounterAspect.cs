@@ -27,6 +27,7 @@ public sealed class TestClass : CounterAspectTest.TestClass
 
 			// 'BeforeCall' creates or gets a counter for the method and 
 			// registers the current call.
+			// See the [link][file]Aspects/CounterAspect.cs[/file]CounterAspect.BeforeCall[/link] method for details.
 			//
 			_interceptor$_BLToolkit.Aspects.CounterAspect.Intercept(info);
 
@@ -60,6 +61,7 @@ public sealed class TestClass : CounterAspectTest.TestClass
 			info.InterceptType   = InterceptType.OnFinally;
 
 			// 'OnFinally' step adds statistic to the method counter.
+			// See the [link][file]Aspects/CounterAspect.cs[/file]CounterAspect.OnFinally[/link] method for details.
 			//
 			_interceptor$_BLToolkit.Aspects.CounterAspect.Intercept(info);
 		}

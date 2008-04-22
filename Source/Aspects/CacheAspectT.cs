@@ -4,6 +4,9 @@ using BLToolkit.Common;
 
 namespace BLToolkit.Aspects
 {
+	/// <summary>
+	/// http://www.bltoolkit.net/Doc/Aspects/index.htm
+	/// </summary>
 	public class CacheAspect<T> : CacheAspect
 	{
 		private static readonly IDictionary _cache = new Dictionary<CompoundValue, object>();

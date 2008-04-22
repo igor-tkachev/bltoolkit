@@ -9,6 +9,9 @@ namespace BLToolkit.Aspects
 {
 	public delegate bool IsCacheableParameterType(Type parameterType);
 
+	/// <summary>
+	/// http://www.bltoolkit.net/Doc/Aspects/index.htm
+	/// </summary>
 	[System.Diagnostics.DebuggerStepThrough]
 	public class CacheAspect : Interceptor
 	{

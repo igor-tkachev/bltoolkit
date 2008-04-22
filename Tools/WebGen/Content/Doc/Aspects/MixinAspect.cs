@@ -13,7 +13,7 @@ public sealed class TestClass : MixinAspectTest.TestClass, MixinAspectTest.ITest
 	[BLToolkitGenerated]
 	int MixinAspectTest.ITestInterface2.TestMethod1(int value)
 	{
-		// The MixinOverride attribute enforces direct method call.
+		// The [link][file]Aspects/MixinOverrideAttribute.cs[/file]MixinOverride[/link] attribute enforces direct method call.
 		//
 		return base.TestMethod1(value);
 	}

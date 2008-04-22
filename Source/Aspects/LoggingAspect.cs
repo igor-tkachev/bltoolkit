@@ -7,6 +7,9 @@ namespace BLToolkit.Aspects
 	public delegate void LogOperation(InterceptCallInfo interceptCallInfo);
 	public delegate void LogOutput   (string logText, string fileName);
 
+	/// <summary>
+	/// http://www.bltoolkit.net/Doc/Aspects/index.htm
+	/// </summary>
 	public class LoggingAspect : Interceptor
 	{
 		protected override void OnFinally(InterceptCallInfo info)

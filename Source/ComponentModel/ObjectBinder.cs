@@ -10,6 +10,9 @@ using BLToolkit.Reflection;
 
 namespace BLToolkit.ComponentModel
 {
+	/// <summary>
+	/// http://www.bltoolkit.net/Doc/ComponentModel/ObjectBinder.htm
+	/// </summary>
 	//[ComplexBindingProperties("DataSource", "DataMember")]
 	[ComplexBindingProperties("DataSource")]
 	[DefaultProperty("ItemType")]

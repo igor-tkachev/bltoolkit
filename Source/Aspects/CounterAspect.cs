@@ -7,6 +7,9 @@ namespace BLToolkit.Aspects
 {
 	public delegate MethodCallCounter CreateCounter(CallMethodInfo methodInfo);
 
+	/// <summary>
+	/// http://www.bltoolkit.net/Doc/Aspects/index.htm
+	/// </summary>
 	[System.Diagnostics.DebuggerStepThrough]
 	public class CounterAspect : Interceptor
 	{

@@ -2,6 +2,9 @@ using System;
 
 namespace BLToolkit.Aspects
 {
+	/// <summary>
+	/// http://www.bltoolkit.net/Doc/Aspects/index.htm
+	/// </summary>
 	[AttributeUsage(AttributeTargets.Method, AllowMultiple=true)]
 	public class MixinOverrideAttribute : Attribute
 	{

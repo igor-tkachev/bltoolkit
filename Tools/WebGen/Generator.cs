@@ -3,6 +3,7 @@ using System.IO;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Xml;
+
 using Rsdn.Framework.Formatting;
 
 namespace WebGen
@@ -335,12 +336,16 @@ namespace WebGen
 					;
 
 			return code
-				.Replace("\n",     "\r\n")
-				.Replace("\r\r\n", "\r\n")
+				.Replace("\n",      "\r\n")
+				.Replace("\r\r\n",  "\r\n")
 				.Replace("<table width='96%'>", "<table width='100%' class='code'>")
-				.Replace("<pre>",  "<pre class='code'>")
-				.Replace("[a]",    "<span class='a'>")
-				.Replace("[/a]",   "</span>")
+				.Replace("<pre>",   "<pre class='code'>")
+				.Replace("[a]",     "<span class='a'>")
+				.Replace("[/a]",    "</span>")
+				.Replace("[link]",  "<a ")
+				.Replace("[/link]", "</a>")
+				.Replace("[file]",  "href='/Source/")
+				.Replace("[/file]", ".htm'>")
 				;
 		}
 
@@ -355,7 +360,7 @@ namespace WebGen
 			{
 				case "Doc":
 					backLinks += string.Format(
-						"<br><nobr>&nbsp;&nbsp;<small><a class='m' href='{0}index.htm'>BLToolkit</a>",
+						"<br><nobr>&nbsp;&nbsp;<small><a class='m' href='{0}Doc/index.htm'>Doc</a>",
 						backPath);
 
 					for (int i = 1; i < path.Length; i++)
@@ -374,7 +379,7 @@ namespace WebGen
 
 				case "Source":
 					backLinks += string.Format(
-						"<br><nobr>&nbsp;&nbsp;<small><a class='m' href='{0}Source/index.htm'>BLToolkit</a>",
+						"<br><nobr>&nbsp;&nbsp;<small><a class='m' href='{0}Source/index.htm'>Source</a>",
 						backPath);
 
 					for (int i = 1; i < path.Length; i++)
