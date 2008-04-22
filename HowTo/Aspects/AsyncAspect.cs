@@ -10,7 +10,7 @@ namespace HowTo.Aspects
 {
 	public /*[a]*/abstract/*[/a]*/ class AsyncTestObject
 	{
-		// This is the member we will call asynchronously.
+		// This is a member we will call asynchronously.
 		//
 		public /*[a]*/int/*[/a]*/ /*[a]*/Test/*[/a]*/(/*[a]*/int intVal, string strVal/*[/a]*/)
 		{

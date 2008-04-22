@@ -29,7 +29,7 @@ public sealed class TestClass : HowTo.Aspects.TestClass
 		info.InterceptResult    = InterceptResult.Continue;
 		info.InterceptType      = InterceptType.BeforeCall;
 
-		// 'BeforeCall' call checks if the method is cached.
+		// 'BeforeCall' step checks if the method is cached.
 		// If it is and the cache is not expired, the intercept method populates 
 		// return value and output parameters with the cached values and 
 		// sets info.InterceptResult to InterceptResult.Return.
@@ -50,7 +50,7 @@ public sealed class TestClass : HowTo.Aspects.TestClass
 			info.InterceptResult = InterceptResult.Continue;
 			info.InterceptType   = InterceptType.AfterCall;
 
-			// 'AfterCall' call stores parameters and return values in the cache
+			// 'AfterCall' step stores parameters and return values in the cache
 			// for the feature use.
 			//
 			_interceptor$_BLToolkit.Aspects.CacheAspect.Intercept(info);
