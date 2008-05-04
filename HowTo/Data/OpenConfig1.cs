@@ -11,11 +11,22 @@ namespace HowTo.Data
 	public class OpenConfig1
 	{
 		[Test]
+		public void FW2Configuration()
+		{
+			// <connectionString> section configuration supported in FW 2.0+.
+			//
+			using (DbManager db = new DbManager(/*[a]*/"DemoConnection"/*[/a]*/))
+			{
+				Assert.AreEqual(ConnectionState.Open, db.Connection.State);
+			}
+		}
+
+		[Test]
 		public void DefaultConfiguration()
 		{
 			// Default configuration and default data provider.
 			//
-			using (DbManager db = /*[a]*/new DbManager()/*[/a]*/)
+			using (DbManager db = new DbManager/*[a]*/()/*[/a]*/)
 			{
 				Assert.AreEqual(ConnectionState.Open, db.Connection.State);
 			}
@@ -26,7 +37,7 @@ namespace HowTo.Data
 		{
 			// Development configuration and default data provider.
 			//
-			using (DbManager db = /*[a]*/new DbManager("Development")/*[/a]*/)
+			using (DbManager db = new DbManager(/*[a]*/"Development"/*[/a]*/))
 			{
 				Assert.AreEqual(ConnectionState.Open, db.Connection.State);
 			}
@@ -37,7 +48,7 @@ namespace HowTo.Data
 		{
 			// Production configuration and default data provider.
 			//
-			using (DbManager db = /*[a]*/new DbManager("Production")/*[/a]*/)
+			using (DbManager db = new DbManager(/*[a]*/"Production"/*[/a]*/))
 			{
 				Assert.AreEqual(ConnectionState.Open, db.Connection.State);
 			}
@@ -48,7 +59,7 @@ namespace HowTo.Data
 		{
 			// Default configuration and OleDb data provider.
 			//
-			using (DbManager db = /*[a]*/new DbManager("OleDb")/*[/a]*/)
+			using (DbManager db = new DbManager(/*[a]*/"OleDb"/*[/a]*/))
 			{
 				Assert.AreEqual(ConnectionState.Open, db.Connection.State);
 			}
@@ -59,7 +70,7 @@ namespace HowTo.Data
 		{
 			// Development configuration and OleDb data provider.
 			//
-			using (DbManager db = /*[a]*/new DbManager("OleDb", "Development")/*[/a]*/)
+			using (DbManager db = new DbManager(/*[a]*/"OleDb"/*[/a]*/, /*[a]*/"Development"/*[/a]*/))
 			{
 				Assert.AreEqual(ConnectionState.Open, db.Connection.State);
 			}
@@ -70,7 +81,7 @@ namespace HowTo.Data
 		{
 			// Production configuration and OleDb data provider.
 			//
-			using (DbManager db = /*[a]*/new DbManager("OleDb", "Production")/*[/a]*/)
+			using (DbManager db = new DbManager(/*[a]*/"OleDb"/*[/a]*/, /*[a]*/"Production"/*[/a]*/))
 			{
 				Assert.AreEqual(ConnectionState.Open, db.Connection.State);
 			}

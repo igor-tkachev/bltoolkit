@@ -397,10 +397,12 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Mapping\Mapping.xsd">
-      <SubType>Designer</SubType>
+      <SubType>
+      </SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="DataAccess\DataAccess.xsd">
-      <SubType>Designer</SubType>
+      <SubType>
+      </SubType>
     </EmbeddedResource>
     <None Include="BLToolkit.snk" />
     <None Include="DataAccess\DataAccess.xsx">
@@ -411,7 +413,8 @@
       <DependentUpon>Mapping.xsd</DependentUpon>
     </None>
     <EmbeddedResource Include="Reflection\Extension\TypeExtension.xsd">
-      <SubType>Designer</SubType>
+      <SubType>
+      </SubType>
     </EmbeddedResource>
     <None Include="Reflection\Extension\TypeExtension.xsx">
       <DependentUpon>TypeExtension.xsd</DependentUpon>

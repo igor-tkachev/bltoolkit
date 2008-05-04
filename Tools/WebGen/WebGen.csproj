@@ -85,6 +85,7 @@
     <Content Include="Content\Doc\DataAccess\SelectByKeySql.htm" />
     <Content Include="Content\Doc\DataAccess\index.htm" />
     <Content Include="Content\Doc\Data\Close.htm" />
+    <Content Include="Content\Doc\Data\DbManagerVsAdo.htm" />
     <Content Include="Content\Doc\Data\ExecuteList.htm" />
     <Content Include="Content\Doc\Data\ExecuteObject.htm" />
     <Content Include="Content\Doc\Data\OpenConfig3.htm" />
@@ -93,7 +94,6 @@
     <Content Include="Content\Doc\Data\OpenConfig1.htm" />
     <Content Include="Content\Doc\Data\CreateSql.htm" />
     <Content Include="Content\Doc\Data\index.htm" />
-    <Content Include="Content\Doc\Data\Intro.htm" />
     <Content Include="Content\Doc\EditableObjects\index.htm" />
     <Content Include="Content\Doc\index.htm" />
     <Content Include="Content\Doc\Mapping\MapFieldAttribute.htm" />
@@ -129,6 +129,7 @@
     <None Include="Content\Doc\DataAccess\SQL\DeleteSql.sql" />
     <None Include="Content\Doc\DataAccess\SQL\SelectAllSql.sql" />
     <None Include="Content\Doc\Data\App.config" />
+    <None Include="Content\Doc\Data\App1.config" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\..\..\Rsdn\trunk\source\Framework\Format\Rsdn.Framework.Formatting.csproj">

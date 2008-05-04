@@ -13,6 +13,9 @@ namespace HowTo.Data
 	[TestFixture]
 	public class CompareDbManagerWithAdo
 	{
+		// This is a typified definition of the Gender database field.
+		// The MapValue attribute is used by BLToolkit.
+		//
 		public enum Gender
 		{
 			[MapValue("F")] Female,
@@ -21,40 +24,56 @@ namespace HowTo.Data
 			[MapValue("O")] Other
 		}
 
+		// This is our business object. Here we use C# 3.0 automatic properties,
+		// however it can be public fields, regular or abstract properties.
+		// The MapField attribute is used by BLToolkit to associate a database field
+		// with a business object property if they have different names.
+		//
 		public class Person
 		{
 			[MapField("PersonID")]
-			public int    ID;
-			public string FirstName;
-			public string MiddleName;
-			public string LastName;
-			public Gender Gender;
+			public int    ID         { get; set; }
+			public string FirstName  { get; set; }
+			public string MiddleName { get; set; }
+			public string LastName   { get; set; }
+			public /*[a]*/Gender/*[/a]*/ Gender     { get; set; }
 		}
 
-		public List<Person> AdoDemo(Gender gender)
+		// ADO.NET data access method.
+		//
+		public List<Person> /*[a]*/AdoDemo/*[/a]*/(Gender gender)
 		{
-			string cs = ConfigurationManager.ConnectionStrings["Demo"].ConnectionString;
+			// Map the typified parameter value to its database representation.
+			//
+			string paramValue = "";
 
+			switch (gender)
+			{
+				case Gender.Female:  paramValue = "F"; break;
+				case Gender.Male:    paramValue = "M"; break;
+				case Gender.Unknown: paramValue = "U"; break;
+				case Gender.Other:   paramValue = "O"; break;
+			}
+
+			// Read a database configuration string.
+			//
+			string cs = ConfigurationManager.ConnectionStrings["DemoConnection"].ConnectionString;
+
+			// Create and open a database connection.
+			//
 			using (SqlConnection con = new SqlConnection(cs))
 			{
 				con.Open();
 
+				// Create and initialize a Command object.
+				//
 				using (SqlCommand cmd = con.CreateCommand())
 				{
 					cmd.CommandText = "SELECT * FROM Person WHERE Gender = @gender";
+					cmd.Parameters.AddWithValue("@gender", paramValue);
 
-					string p = "";
-
-					switch (gender)
-					{
-						case Gender.Female:  p = "F"; break;
-						case Gender.Male:    p = "M"; break;
-						case Gender.Unknown: p = "U"; break;
-						case Gender.Other:   p = "O"; break;
-					}
-
-					cmd.Parameters.AddWithValue("@gender", p);
-
+					// Execute query.
+					//
 					using (SqlDataReader rd = cmd.ExecuteReader())
 					{
 						List<Person> list = new List<Person>();
@@ -63,6 +82,8 @@ namespace HowTo.Data
 						{
 							Person person = new Person();
 
+							// Map a data reader row to a business object.
+							//
 							person.ID         = Convert.ToInt32 (rd["PersonID"]);
 							person.FirstName  = Convert.ToString(rd["FirstName"]);
 							person.MiddleName = Convert.ToString(rd["MiddleName"]);
@@ -89,18 +110,20 @@ namespace HowTo.Data
 		public void AdoDemo()
 		{
 			List<Person> list = AdoDemo(Gender.Male);
-
 			Assert.Greater(list.Count, 0);
 		}
 
-		public List<Person> BLToolkitDemo(Gender gender)
+		// BLToolkit data access method.
+		//
+		public List<Person> /*[a]*/BLToolkitDemo/*[/a]*/(Gender gender)
 		{
-			using (DbManager db = new DbManager())
+			/*[a]*/using/*[/a]*/ (/*[a]*/DbManager/*[/a]*/ db = new DbManager(/*[a]*/"DemoConnection"/*[/a]*/))
 			{
 				return db
-					.SetCommand(@"SELECT * FROM Person WHERE Gender = @gender",
-						db.Parameter("@gender", Map.EnumToValue(gender)))
-					.ExecuteList<Person>();
+					./*[a]*/SetCommand/*[/a]*/(
+						"SELECT * FROM Person WHERE Gender = @gender",
+						db./*[a]*/Parameter/*[/a]*/("@gender", /*[a]*/Map.EnumToValue/*[/a]*/(gender)))
+					./*[a]*/ExecuteList/*[/a]*/<Person>();
 			}
 		}
 
@@ -108,7 +131,6 @@ namespace HowTo.Data
 		public void BLToolkitDemo()
 		{
 			List<Person> list = BLToolkitDemo(Gender.Male);
-
 			Assert.Greater(list.Count, 0);
 		}
 	}
