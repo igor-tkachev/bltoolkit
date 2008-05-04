@@ -106,7 +106,6 @@ namespace Patterns
 			{
 				return value + 5;
 			}
-			
 		}
 
 		public class Child2 : TestClass
@@ -115,7 +114,6 @@ namespace Patterns
 			{
 				return value + 10;
 			}
-			
 		}
 
 		[Test]

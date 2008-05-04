@@ -1,3 +1,5 @@
+using System;
+
 namespace BLToolkit.Common
 {
 	public interface IOperable<T>
@@ -23,3 +25,4 @@ namespace BLToolkit.Common
 		bool LessThanOrEqual   (T op1, T op2);
 	}
 }
+

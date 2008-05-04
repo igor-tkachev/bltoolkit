@@ -14,7 +14,7 @@ This interface includes only one property - <i>object <b>Object</b> { get; set; 
 An object view can implement additional properties based on the assosiated object.
 The <b>ObjectBinder</b> will combine all of these properties with main object properties and create a single <b>PropertyDescriptor</b> collection.
 This feature can be used to separate UI presentation logic from business model objects and to keep them clean.
-ObjectView should be a stateless, lightweight object as its instance can be assosiated with different objects.</p></li>
+ObjectView should be a stateless, lightweight object as its single instance can be assigned to many assosiated objects.</p></li>
 <li><p class="j">The <b>ObjectBinder</b> is optimized for high performance applications such real-time multithreaded message processing and
 distribution banking systems. So it does not use reflection to access objects.
 The standard way (which is used by the <b>BindingSource</b>) is to call the <b>TypeDescriptor.GetProperties</b> method
@@ -22,4 +22,4 @@ to get a <b>PropertyDescriptor</b> collection. This method creates property desc
 The <b>ObjectBinder</b> has its own mechanism to avoid unnessasy reflection and boxing/unboxing operations.</p></li>
 </ul>
 
-<p class="j">The dev version of BLToolkit contains a demo project (Demo\WinForms) showing use of the <b>ObjectBinder</b>.</p>
+<p class="j">The dev version of BLToolkit contains a demo project (Demo\WinForms) showing the use of the <b>ObjectBinder</b>.</p>

@@ -40,7 +40,7 @@ namespace WebGen
 					}
 				});
 
-//return;
+return;
 			new Generator().Generate(
 				files,
 				template, new string[] { "Source" }, destPath, @"..\..\..\..\", false, true,

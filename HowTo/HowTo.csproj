@@ -54,6 +54,7 @@
       <HintPath>..\Tools\NUnit\nunit.framework.dll</HintPath>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.configuration" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
   </ItemGroup>
@@ -91,6 +92,7 @@
     <Compile Include="DataAccess\SelectByKeySql.cs" />
     <Compile Include="DataAccess\PersonAccessor.cs" />
     <Compile Include="Data\Close.cs" />
+    <Compile Include="Data\CompareDbManagerWithAdo.cs" />
     <Compile Include="Data\ComplexMapping.cs" />
     <Compile Include="Data\OpenConfig1.cs" />
     <Compile Include="Data\OpenConfig2.cs" />
