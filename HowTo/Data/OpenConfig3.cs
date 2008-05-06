@@ -5,18 +5,19 @@ using System.Data.SqlClient;
 using NUnit.Framework;
 
 using BLToolkit.Data;
+using BLToolkit.Data.DataProvider;
 
 namespace HowTo.Data
 {
 	[TestFixture]
 	public class OpenConfig3
 	{
+		const string connectionString =
+			"Server=.;Database=BLToolkitData;Integrated Security=SSPI";
+
 		[Test]
 		public void DbConnectionConfiguration()
 		{
-			string connectionString =
-				"Server=.;Database=BLToolkitData;Integrated Security=SSPI";
-
 			using (SqlConnection con = new SqlConnection(connectionString))
 			{
 				con.Open();
@@ -31,9 +32,6 @@ namespace HowTo.Data
 		[Test]
 		public void DbTransactionConfiguration()
 		{
-			string connectionString =
-				"Server=.;Database=BLToolkitData;Integrated Security=SSPI";
-
 			using (SqlConnection con = new SqlConnection(connectionString))
 			{
 				con.Open();
@@ -46,6 +44,17 @@ namespace HowTo.Data
 				}
 
 				tran.Commit();
+			}
+		}
+
+		[Test]
+		public void DataProviderConfiguration()
+		{
+			SqlDataProvider dp = new SqlDataProvider();
+
+			using (DbManager db = /*[a]*/new DbManager(dp, connectionString)/*[/a]*/)
+			{
+				Assert.AreEqual(ConnectionState.Open, db.Connection.State);
 			}
 		}
 	}

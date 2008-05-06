@@ -72,6 +72,7 @@
     <Compile Include="Data\Close.cs" />
     <Compile Include="Data\ComplexMapping.cs" />
     <Compile Include="Data\OpenConfig1.cs" />
+    <Compile Include="Data\OpenConfig1FW2.cs" />
     <Compile Include="Data\OpenConfig2.cs" />
     <Compile Include="Data\ExecuteObject.cs" />
     <Compile Include="Data\ExecuteList.cs" />

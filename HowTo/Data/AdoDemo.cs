@@ -5,33 +5,25 @@ using System.Data.SqlClient;
 
 using NUnit.Framework;
 
-using BLToolkit.Data;
-using BLToolkit.Mapping;
-
 namespace HowTo.Data
 {
 	[TestFixture]
-	public class CompareDbManagerWithAdo
+	public class AdoDemo
 	{
-		// This is a typified definition of the Gender database field.
-		// The MapValue attribute is used by BLToolkit.
+		// Typified definition of the Gender database field.
 		//
 		public enum Gender
 		{
-			[MapValue("F")] Female,
-			[MapValue("M")] Male,
-			[MapValue("U")] Unknown,
-			[MapValue("O")] Other
+			Female,
+			Male,
+			Unknown,
+			Other
 		}
 
-		// This is our business object. Here we use C# 3.0 automatic properties,
-		// however it can be public fields, regular or abstract properties.
-		// The MapField attribute is used by BLToolkit to associate a database field
-		// with a business object property if they have different names.
+		// Business object.
 		//
 		public class Person
 		{
-			[MapField("PersonID")]
 			public int    ID         { get; set; }
 			public string FirstName  { get; set; }
 			public string MiddleName { get; set; }
@@ -41,7 +33,7 @@ namespace HowTo.Data
 
 		// ADO.NET data access method.
 		//
-		public List<Person> /*[a]*/AdoDemo/*[/a]*/(Gender gender)
+		public List<Person> /*[a]*/GetList/*[/a]*/(Gender gender)
 		{
 			// Map the typified parameter value to its database representation.
 			//
@@ -107,30 +99,9 @@ namespace HowTo.Data
 		}
 
 		[Test]
-		public void AdoDemo()
+		public void Test()
 		{
-			List<Person> list = AdoDemo(Gender.Male);
-			Assert.Greater(list.Count, 0);
-		}
-
-		// BLToolkit data access method.
-		//
-		public List<Person> /*[a]*/BLToolkitDemo/*[/a]*/(Gender gender)
-		{
-			/*[a]*/using/*[/a]*/ (/*[a]*/DbManager/*[/a]*/ db = new DbManager(/*[a]*/"DemoConnection"/*[/a]*/))
-			{
-				return db
-					./*[a]*/SetCommand/*[/a]*/(
-						"SELECT * FROM Person WHERE Gender = @gender",
-						db./*[a]*/Parameter/*[/a]*/("@gender", /*[a]*/Map.EnumToValue/*[/a]*/(gender)))
-					./*[a]*/ExecuteList/*[/a]*/<Person>();
-			}
-		}
-
-		[Test]
-		public void BLToolkitDemo()
-		{
-			List<Person> list = BLToolkitDemo(Gender.Male);
+			List<Person> list = GetList(Gender.Male);
 			Assert.Greater(list.Count, 0);
 		}
 	}

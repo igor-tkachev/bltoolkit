@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Text.RegularExpressions;
 using System.Xml;
 
 using Rsdn.Framework.Formatting;
@@ -67,6 +68,10 @@ namespace WebGen
 			clean(_destFolder);
 		}
 
+		static readonly Regex ct_item1 = new Regex(@"<ct_item\s*link\=(?<link>.*?)\s*label=['""](?<label>.*?)['""]\s*/>");
+		static readonly Regex ct_item2 = new Regex(@"<ct_item\s*link\=(?<link>.*?)\s*label=['""](?<label>.*?)['""]\s*>(?<text>.*?)</ct_item>");
+		static readonly Regex ct_item3 = new Regex(@"<mt_item\s*link\=(?<link>.*?)\s*label=['""](?<label>.*?)['""]\s*>(?<text>.*?)</mt_item>");
+
 		private bool GenerateContent(
 			List<string> createdFiles, string template, string[] path, bool createIndex)
 		{
@@ -114,7 +119,23 @@ namespace WebGen
 								{
 									createdFiles.Add(destName);
 
-									string source = GenerateSource(sr.ReadToEnd());
+									string source = sr.ReadToEnd();
+
+									source = source
+										.Replace("<ct_table>",  "<table border='0' cellpadding='0' cellspacing='0'>")
+										.Replace("<ct_hr>",     "<ct_mg><tr><td colspan='3' class='hr'><img width='1' height='1' alt=''/></td></tr><ct_mg>")
+										.Replace("<ct_text>",   "<tr><td colspan='3'>")
+										.Replace("</ct_text>",  "</td></tr><ct_mg>")
+										.Replace("<ct_mg>",     "<tr><td colspan='3' class='sp'><img width='1' height='1' alt=''/></td></tr>")
+										.Replace("</ct_table>", "</table>")
+										;
+
+									source = ct_item1.Replace(source, @"<tr><td nowrap colspan='3'>&#8226; <a href=${link}>${label}</a></td></tr>");
+									source = ct_item2.Replace(source, @"<tr><td nowrap>&#8226; <a href=${link}>${label}</a></td><td>&nbsp;&nbsp;&nbsp;</td><td class='j'>${text}</td></tr>");
+									source = ct_item3.Replace(source, @"<tr><td nowrap class='p'>&#8226; <a href=${link}><b>${label}</b></a></td><td></td><td class='pj'>${text}</td></tr>");
+
+									source = GenerateSource(source);
+
 									string title  = Path.GetFileNameWithoutExtension(fileName);
 
 									if (title == "index")
@@ -143,6 +164,7 @@ namespace WebGen
 									createdFiles.Add(destName + ".htm");
 
 									string source = GenerateSource("<% " + fileName + " %>");
+
 									sw.WriteLine(string.Format(
 										template,
 										source,
@@ -346,6 +368,8 @@ namespace WebGen
 				.Replace("[/link]", "</a>")
 				.Replace("[file]",  "href='/Source/")
 				.Replace("[/file]", ".htm'>")
+				.Replace("&lt;!--", "<span class='com'>&lt;!--")
+				.Replace("--&gt;",  "--&gt;</span>")
 				;
 		}
 

@@ -85,6 +85,7 @@
     <Content Include="Content\Doc\DataAccess\SelectByKeySql.htm" />
     <Content Include="Content\Doc\DataAccess\index.htm" />
     <Content Include="Content\Doc\Data\Close.htm" />
+    <Content Include="Content\Doc\Data\DataProvider\index.htm" />
     <Content Include="Content\Doc\Data\DbManagerVsAdo.htm" />
     <Content Include="Content\Doc\Data\ExecuteList.htm" />
     <Content Include="Content\Doc\Data\ExecuteObject.htm" />
@@ -97,6 +98,7 @@
     <Content Include="Content\Doc\EditableObjects\index.htm" />
     <Content Include="Content\Doc\index.htm" />
     <Content Include="Content\Doc\Mapping\MapFieldAttribute.htm" />
+    <Content Include="Content\Doc\Mapping\MapToJson.htm" />
     <Content Include="Content\Doc\Mapping\ObjectToObject.htm" />
     <Content Include="Content\Doc\Mapping\MapValueAttribute.htm" />
     <Content Include="Content\Doc\Mapping\ValueToEnum.htm" />
@@ -107,6 +109,7 @@
     <Content Include="Content\Doc\Reflection\index.htm" />
     <Content Include="Content\Doc\Reflection\ObjectFactory.htm" />
     <Content Include="Content\Doc\TypeBuilder\index.htm" />
+    <Content Include="Content\Doc\TypeBuilder\InternalTypes.htm" />
     <Content Include="Content\Doc\Validation\index.htm" />
     <Content Include="Content\Download.htm" />
     <Content Include="Content\index.htm" />

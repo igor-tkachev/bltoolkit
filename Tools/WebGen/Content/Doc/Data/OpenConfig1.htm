@@ -1,5 +1,36 @@
+<p class='j'>
+Since Microsoft has released FW 2.0 and the <b>&lt;connectionStrings&gt;</b> section of
+configuration file is available, it should be used. This configuration method is preferable.
+The following method demonstrates this ability.
+</p>
+OpenConfig1FW2.cs
+<% ..\..\..\HowTo\Data\OpenConfig1FW2.cs %>
+
+<p class='j'>
+In addition <b>BLToolkit</b> supports an alternative way which uses the <b>&lt;appSettings&gt;</b> section.
+At the bottom of this page you can find a demo <a href='#cfg'>App.config</a> file with a few examples.
+</p>
+<p class='j'>
+<b>BLToolkit</b> recognizes configuration strings in the <b>&lt;appSettings&gt;</b> section 
+by looking for a <b>ConnectionString</b> key prefix. Actual key value can be the following:
+
+<table class='data'>
+<tr><th>key value</th><th>Provider</th><th>Configuration</th></tr>
+<tr><td><span class='kw'>key</span>=<span class='str'>"ConnectionString"</span></td><td align='right'>default provider</td><td align='right'>default configuration</td></tr>
+<tr><td><span class='kw'>key</span>=<span class='str'>"ConnectionString.Foo.Bar"</span></td><td align='right'>'Foo' provider</td><td align='right'>'Bar' configuration</td></tr>
+<tr><td><span class='kw'>key</span>=<span class='str'>"ConnectionString.Foo."</span></td><td align='right'>'Foo' provider</td><td align='right'>default configuration</td></tr>
+<tr><td><span class='kw'>key</span>=<span class='str'>"ConnectionString.Foo"</span></td><td align='right'>default provider</td><td align='right'>'Foo' configuration</td></tr>
+<tr><td align='right'>or</td><td align='right'>'Foo' provider</td><td align='right'>default configuration</td></tr>
+<tr><td><span class='kw'>key</span>=<span class='str'>"ConnectionString..Foo"</span></td><td align='right'>default provider</td><td align='right'>'Foo' configuration</td></tr>
+<tr><td><span class='kw'>key</span>=<span class='str'>"ConnectionString..Foo.Bar"</span></td><td align='right'>default provider</td><td align='right'>'Foo.Bar' configuration</td></tr>
+</table>
+
+Default provider is <b>SqlDataProvider</b>.
+See also <a href='DataProvider/index.htm'>Data Providers</a>.
+</p>
+
 OpenConfig1.cs
 <% ..\..\..\HowTo\Data\OpenConfig1.cs %>
-App.config
+<a name='cfg'/>App.config
 <% ..\..\..\UnitTests\All\App.config %>
 <a href="CreateSql.htm">Create.sql script</a>

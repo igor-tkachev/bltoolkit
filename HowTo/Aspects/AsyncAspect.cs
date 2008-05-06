@@ -40,7 +40,7 @@ namespace HowTo.Aspects
 		// Here we provide the parameter list along with the method name.
 		//
 		[/*[a]*/Async/*[/a]*/("Test", typeof(int), typeof(string))]
-		public abstract /*[a]*/int/*[/a]*/          AnyName(/*[a]*/IAsyncResult/*[/a]*/ asyncResult);
+		public abstract /*[a]*/int/*[/a]*/         AnyName(/*[a]*/IAsyncResult/*[/a]*/ asyncResult);
 	}
 
 	[TestFixture]

@@ -11,17 +11,6 @@ namespace HowTo.Data
 	public class OpenConfig1
 	{
 		[Test]
-		public void FW2Configuration()
-		{
-			// <connectionString> section configuration supported in FW 2.0+.
-			//
-			using (DbManager db = new DbManager(/*[a]*/"DemoConnection"/*[/a]*/))
-			{
-				Assert.AreEqual(ConnectionState.Open, db.Connection.State);
-			}
-		}
-
-		[Test]
 		public void DefaultConfiguration()
 		{
 			// Default configuration and default data provider.

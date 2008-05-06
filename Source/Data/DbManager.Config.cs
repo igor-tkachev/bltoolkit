@@ -290,37 +290,42 @@ namespace BLToolkit.Data
 				ConnectionStringSettings css = ConfigurationManager.ConnectionStrings[configurationString];
 
 				if (css != null && !string.IsNullOrEmpty(css.ProviderName))
-					return _dataProviderNameList[css.ProviderName];
-
-				// configurationString can be:
-				// ''        : default provider,   default configuration;
-				// '.'       : default provider,   default configuration;
-				// 'foo.bar' :   'foo' provider,     'bar' configuration;
-				// 'foo.'    :   'foo' provider,   default configuration;
-				// 'foo'     : default provider,     'foo' configuration;
-				// '.foo'    : default provider,     'foo' configuration;
-				// '.foo.bar': default provider, 'foo.bar' configuration;
-				//
-				// Default provider is SqlDataProvider
-				//
-				string cs  = configurationString.ToUpper();
-				string key = "SQL";
-
-				if (cs.Length > 0)
 				{
-					cs += ProviderNameDivider;
+					dp = _dataProviderNameList[css.ProviderName];
+				}
+				else
+				{
+					// configurationString can be:
+					// ''        : default provider,   default configuration;
+					// '.'       : default provider,   default configuration;
+					// 'foo.bar' :   'foo' provider,     'bar' configuration;
+					// 'foo.'    :   'foo' provider,   default configuration;
+					// 'foo'     : default provider,     'foo' configuration or
+					//             foo     provider,   default configuration;
+					// '.foo'    : default provider,     'foo' configuration;
+					// '.foo.bar': default provider, 'foo.bar' configuration;
+					//
+					// Default provider is SqlDataProvider
+					//
+					string cs  = configurationString.ToUpper();
+					string key = "SQL";
 
-					foreach (string k in _dataProviderNameList.Keys)
+					if (cs.Length > 0)
 					{
-						if (cs.StartsWith(k + ProviderNameDivider))
+						cs += ProviderNameDivider;
+
+						foreach (string k in _dataProviderNameList.Keys)
 						{
-							key = k;
-							break;
+							if (cs.StartsWith(k + ProviderNameDivider))
+							{
+								key = k;
+								break;
+							}
 						}
 					}
-				}
 
-				dp = _dataProviderNameList[key];
+					dp = _dataProviderNameList[key];
+				}
 
 				if (dp == null)
 					throw new DataException(string.Format(

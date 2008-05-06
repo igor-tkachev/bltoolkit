@@ -2,7 +2,7 @@ body
 {
 	background  : White;
 	font-family : Verdana;
-	font-size   : small;
+	font-size   : .80em;
 }
 
 a:link    { text-decoration: none;      color : #338899; }
@@ -15,14 +15,13 @@ a.m:hover   { text-decoration: underline; color : Black; }
 
 .title
 {
-	font-size   : x-large;
+	font-size   : 1.75em;
 	color       : #116677;
 	font-family : Arial;
 }
 
 .homeurl
 {
-	font-size : small;
 	color     : #338899;
 }
 
@@ -39,7 +38,7 @@ a.m:hover   { text-decoration: underline; color : Black; }
 
 th
 {
-	font-size        : small;
+	font-size        : .80em;
 	vertical-align   : top;
 	background-color : #EEEEEE;
 	text-align       : center;
@@ -47,20 +46,20 @@ th
 
 td
 {
-	font-size      : small;
+	font-size      : .80em;
 	vertical-align : top;
 }
 
 td.p
 {
-	font-size      : small;
+	font-size      : .80em;
 	vertical-align : top;
 	padding-top    : 7px;
 }
 
 td.pj
 {
-	font-size      : small;
+	font-size      : .80em;
 	vertical-align : top;
 	padding-top    : 7px;
 	text-align     : justify;
@@ -104,9 +103,9 @@ table.code
 
 pre.code
 {
-	font    : 100% Monospace, Courier New, Courier;
-	margin  : 0;
-	padding : 5px;
+	font      : 120% Consolas, Monospace, Courier New, Courier;
+	margin    : 0;
+	padding   : 5px;
 }
 
 a.rss
@@ -114,8 +113,18 @@ a.rss
 	color            : White;
 	background-color : DarkOrange;
 	font-weight      : bold;
-	font-size        : 85%;
+	font-size        : .80em;
 	font-family      : Arial;
+}
+
+table.data
+{
+	margin: 10px 7px 10px 7px;
+}
+
+.data td, .data th
+{
+	padding: 2px 5px 2px 5px;
 }
 
 a.rss:link    { text-decoration: none; color : White; }

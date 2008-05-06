@@ -10,11 +10,16 @@ namespace HowTo.Data
 	[TestFixture]
 	public class OpenConfig2
 	{
+		const string sqlConnectionString =
+			"Server=.;Database=BLToolkitData;Integrated Security=SSPI";
+		const string oleDbConnectionString =
+			"Provider=SQLNCLI.1;Data Source=.;Integrated Security=SSPI;Initial Catalog=BLToolkitData";
+
 		[Test]
-		public void NoConfigConfiguration1()
+		public void Test1()
 		{
-			/*[a]*/DbManager.AddConnectionString(
-				"Server=.;Database=BLToolkitData;Integrated Security=SSPI")/*[/a]*/;
+			/*[a]*/DbManager.AddConnectionString/*[/a]*/(
+				sqlConnectionString);   // connection string
 
 			using (DbManager db = /*[a]*/new DbManager()/*[/a]*/)
 			{
@@ -23,13 +28,27 @@ namespace HowTo.Data
 		}
 
 		[Test]
-		public void NoConfigConfiguration2()
+		public void Test2()
 		{
-			/*[a]*/DbManager.AddConnectionString(
-				"NewConfig",
-				"Server=.;Database=BLToolkitData;Integrated Security=SSPI")/*[/a]*/;
+			/*[a]*/DbManager.AddConnectionString/*[/a]*/(
+				"NewConfig",            // configuration string
+				sqlConnectionString);   // connection string
 
 			using (DbManager db = /*[a]*/new DbManager("NewConfig")/*[/a]*/)
+			{
+				Assert.AreEqual(ConnectionState.Open, db.Connection.State);
+			}
+		}
+
+		[Test]
+		public void Test3()
+		{
+			/*[a]*/DbManager.AddConnectionString/*[/a]*/(
+				"OleDb",                // provider name
+				"NewConfig",            // configuration string
+				oleDbConnectionString); // connection string
+
+			using (DbManager db = /*[a]*/new DbManager("OleDb", "NewConfig")/*[/a]*/)
 			{
 				Assert.AreEqual(ConnectionState.Open, db.Connection.State);
 			}
