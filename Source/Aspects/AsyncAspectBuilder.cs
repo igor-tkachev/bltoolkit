@@ -24,36 +24,41 @@ namespace BLToolkit.Aspects
 			return TypeBuilderConsts.Priority.AsyncAspect;
 		}
 
+		public override bool IsCompatible(BuildContext context, IAbstractTypeBuilder typeBuilder)
+		{
+			return false;
+		}
+
 		public override bool IsApplied(BuildContext context, AbstractTypeBuilderList builders)
 		{
 			if (context == null) throw new ArgumentNullException("context");
 
-			return context.IsBeforeStep && context.BuildElement == BuildElement.AbstractMethod;
+			return context.BuildElement == BuildElement.AbstractMethod;
 		}
 
-		public override void Build(BuildContext context)
+		protected override void BuildAbstractMethod()
 		{
-			if (context == null) throw new ArgumentNullException("context");
+			MethodInfo mi = Context.CurrentMethod;
 
-			MethodInfo mi = context.CurrentMethod;
 			if (mi.ReturnType == typeof(IAsyncResult))
-				BuildBeginMethod(context);
+				BuildBeginMethod();
 			else
 			{
 				ParameterInfo[] parameters = mi.GetParameters();
+
 				if (parameters.Length == 1 && parameters[0].ParameterType == typeof(IAsyncResult))
-					BuildEndMethod(context);
+					BuildEndMethod();
 				else
 					throw new TypeBuilderException(string.Format("Method '{0}.{1}' is not a 'Begin' nor an 'End' method.", mi.DeclaringType.FullName, mi.Name));
 			}
 		}
 
-		private void BuildBeginMethod(BuildContext context)
+		private void BuildBeginMethod()
 		{
-			MethodInfo   mi           = context.CurrentMethod;
-			MethodInfo   method       = GetTargetMethod(context, "Begin");
-			Type         delegateType = EnsureDelegateType(context, method);
-			EmitHelper   emit         = context.MethodBuilder.Emitter;
+			MethodInfo   mi           = Context.CurrentMethod;
+			MethodInfo   method       = GetTargetMethod(Context, "Begin");
+			Type         delegateType = EnsureDelegateType(Context, method);
+			EmitHelper   emit         = Context.MethodBuilder.Emitter;
 			Type         type         = typeof(InternalAsyncResult);
 			LocalBuilder arLocal      = emit.DeclareLocal(type);
 			LocalBuilder dLocal       = emit.DeclareLocal(delegateType);
@@ -110,15 +115,15 @@ namespace BLToolkit.Aspects
 			emit
 				.callvirt (delegateType.GetMethod("BeginInvoke"))
 				.stfld    (type.GetField("InnerResult"))
-				.stloc    (context.ReturnValue)
+				.stloc    (Context.ReturnValue)
 				;
 		}
 
-		private void BuildEndMethod(BuildContext context)
+		private void BuildEndMethod()
 		{
-			MethodInfo   method       = GetTargetMethod(context, "End");
-			Type         delegateType = EnsureDelegateType(context, method);
-			EmitHelper   emit         = context.MethodBuilder.Emitter;
+			MethodInfo   method       = GetTargetMethod(Context, "End");
+			Type         delegateType = EnsureDelegateType(Context, method);
+			EmitHelper   emit         = Context.MethodBuilder.Emitter;
 			Type         type         = typeof(InternalAsyncResult);
 			LocalBuilder arLocal      = emit.DeclareLocal(type);
 
@@ -133,8 +138,8 @@ namespace BLToolkit.Aspects
 				.ldfld     (type.GetField("InnerResult"))
 				.callvirt  (delegateType, "EndInvoke", typeof(IAsyncResult));
 
-			if (context.ReturnValue != null)
-				emit.stloc(context.ReturnValue);
+			if (Context.ReturnValue != null)
+				emit.stloc(Context.ReturnValue);
 		}
 
 		private MethodInfo GetTargetMethod(BuildContext context, string prefix)

@@ -68,6 +68,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Aspects\AsyncAndDataAccessorTest.cs" />
     <Compile Include="Aspects\CacheAspectTest.cs" />
     <Compile Include="Aspects\AsyncAspectTest.cs" />
     <Compile Include="Aspects\CounterAspectTest.cs" />

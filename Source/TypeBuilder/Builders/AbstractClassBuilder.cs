@@ -282,6 +282,9 @@ namespace BLToolkit.TypeBuilder.Builders
 			if (_context.IsVirtualMethod || _context.IsVirtualProperty)
 				_context.TypeBuilders.Add(_defaultTypeBuilder);
 
+			if (_context.TypeBuilders.Count == 0)
+				return;
+
 			CheckCompatibility(_context, _context.TypeBuilders);
 
 			_context.TypeBuilders.Sort(new BuilderComparer(_context));

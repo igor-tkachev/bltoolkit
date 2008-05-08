@@ -5,18 +5,12 @@ using NUnit.Framework;
 
 using BLToolkit.Aspects;
 using BLToolkit.Reflection;
-using BLToolkit.TypeBuilder;
 
 namespace Aspects
 {
 	[TestFixture]
 	public class AsyncAspectTest
 	{
-		public AsyncAspectTest()
-		{
-			TypeFactory.SaveTypes = true;
-		}
-
 		private const int ExecutionTime = 200;
 
 		public abstract class TestObject
