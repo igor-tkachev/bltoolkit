@@ -809,7 +809,7 @@ namespace BLToolkit.Reflection
 			}
 		}
 
-		public  PropertyDescriptorCollection  CreatePropertyDescriptors()
+		public PropertyDescriptorCollection CreatePropertyDescriptors()
 		{
 			Debug.WriteLineIf(BLToolkit.Data.DbManager.TS.TraceInfo,
 				OriginalType.FullName, "CreatePropertyDescriptors");

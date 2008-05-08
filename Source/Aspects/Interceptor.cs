@@ -1,3 +1,5 @@
+using System;
+
 namespace BLToolkit.Aspects
 {
 	[System.Diagnostics.DebuggerStepThrough]

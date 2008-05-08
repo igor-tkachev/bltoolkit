@@ -26,7 +26,7 @@ namespace BLToolkit.Aspects
 
 		public override bool IsCompatible(BuildContext context, IAbstractTypeBuilder typeBuilder)
 		{
-			return false;
+			return !context.IsBuildStep;
 		}
 
 		public override bool IsApplied(BuildContext context, AbstractTypeBuilderList builders)
