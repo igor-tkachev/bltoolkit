@@ -1,2 +1,46 @@
 <p class="j">
+The <b>BLToolkit.DbManager</b> component is a data provider independent wrapper for ADO.NET.
+It means that the <b>DbManager</b> does not use any specific data source classes such as <b>SqlConnection</b>,
+<b>SqlCommand</b>, etc. It uses common classes and interfaces instead.
+All data source specific logic is encapsulated in special classes called <b>DataProviders</b>.
 </p>
+<p class="j">
+The following table lists providers available with <b>BLToolkit</b>:
+</p>
+
+<table class='data'>
+<tr><th>Class</th>                                                                                         <th>Provider Name</th><th>Namespace</th>                      <th>Vendor</th></tr>
+<tr><td><a href='..\..\..\Source\Data\DataProvider\AccessDataProvider.cs.htm'   >AccessDataProvider</a></td>   <td>Access</td>   <td>System.Data.OleDb</td>              <td>Microsoft</td></tr>
+<tr><td><a href='..\..\..\Source\Data\DataProvider\OdbcDataProvider.cs.htm'     >OdbcDataProvider</a></td>     <td>Odbc</td>     <td>System.Data.Odbc</td>               <td>Microsoft</td></tr>
+<tr><td><a href='..\..\..\Source\Data\DataProvider\OleDbDataProvider.cs.htm'    >OleDbDataProvider</a></td>    <td>OleDb</td>    <td>System.Data.OleDb</td>              <td>Microsoft</td></tr>
+<tr><td><a href='..\..\..\Source\Data\DataProvider\OracleDataProvider.cs.htm'   >OracleDataProvider</a></td>   <td>Oracle</td>   <td>System.Data.OracleClient</td>       <td>Microsoft</td></tr>
+<tr><td><a href='..\..\..\Source\Data\DataProvider\SqlDataProvider.cs.htm'      >SqlDataProvider</a></td>      <td>Sql</td>      <td>System.Data.SqlClient</td>          <td>Microsoft</td></tr>
+<tr><td colspan='4' class='hr' style='padding:0'><img width='1' height='1' alt=''/></td></tr>
+<tr><td><a href='..\..\..\Source\Data\DataProvider\FdpDataProvider.cs.htm'      >FdpDataProvider</a></td>      <td>Fdp</td>      <td>FirebirdSql.Data.FirebirdClient</td><td><a href='http://www.firebirdsql.org/'>Firebird</a></td></tr>
+<tr><td><a href='..\..\..\Source\Data\DataProvider\MySqlDataProvider.cs.htm'    >MySqlDataProvider</a></td>    <td>MySql</td>    <td>MySql.Data.MySqlClient</td>         <td><a href='http://www.mysql.com/'>Sun Microsystems</a></td></tr><tr><td><a href='..\..\..\Source\Data\DataProvider\OdpDataProvider.cs.htm'      >OdpDataProvider</a></td>      <td>ODP</td>      <td>Oracle.DataAccess.Client</td>       <td><a href='http://www.oracle.com/technology/tech/windows/odpnet/index.html'>Oracle</a></td></tr>
+<tr><td><a href='..\..\..\Source\Data\DataProvider\SqlCeDataProvider.cs.htm'    >SqlCeDataProvider</a></td>    <td>SqlCe</td>    <td>System.Data.SqlServerCe</td>        <td><a href='http://www.microsoft.com/sql/editions/compact/default.mspx'>Microsoft</a></td></tr>
+<tr><td><a href='..\..\..\Source\Data\DataProvider\SQLiteDataProvider.cs.htm'   >SQLiteDataProvider</a></td>   <td>SQLite</td>   <td>System.Data.SQLite</td>             <td><a href='http://sqlite.phxsoftware.com/'>SQLite.org</a></td></tr>
+<tr><td><a href='..\..\..\Source\Data\DataProvider\SybaseAdoDataProvider.cs.htm'>SybaseAdoDataProvider</a></td><td>SybaseAdo</td><td>System.Data.OleDb</td>              <td>Support for <a href='http://www.datadirect.com/products/ado/index.ssp'>DataDirect Sybase ADO Provider</a></td></tr>
+<tr><td><a href='..\..\..\Source\Data\DataProvider\SybaseDataProvider.cs.htm'   >SybaseDataProvider</a></td>   <td>Sybase</td>   <td>Sybase.Data.AseClient</td>          <td><a href='http://www.sybase.com/products/allproductsa-z/softwaredeveloperkit'>Sybase</a></td></tr>
+<tr><td colspan='4' class='hr' style='padding:0'><img width='1' height='1' alt=''/></td></tr>
+</table>
+
+<p class="j">
+The first five providers are preregistered in the library and are ready to use. 
+The remaining providers need additional configuration as they require references to 3rd party components.
+</p>
+
+<p class="j">
+You can add a listed above or your own data provider into your project and register it as shown below:
+</p>
+
+AddDataProvider.cs
+<% ..\..\..\HowTo\Data\DataProvider\AddDataProvider.cs %>
+
+<p class="j">
+Also a data provider can be registered by configuration file:
+</p>
+
+App.config
+<% Doc\Data\DataProvider\App.config %>
+

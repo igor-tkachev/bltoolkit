@@ -94,11 +94,12 @@ td.pj
 
 table.code
 {
-	border-color  : #116677;
-	border-style  : solid;
-	border-width  : 1px;
-	margin-top    : .6em;
-	margin-bottom : .6em;
+	border-color     : #116677;
+	border-style     : solid;
+	border-width     : 1px;
+	margin-top       : .6em;
+	margin-bottom    : .6em;
+	background-color : #FAFAFA;
 }
 
 pre.code

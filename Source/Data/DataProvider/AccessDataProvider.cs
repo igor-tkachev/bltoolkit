@@ -15,10 +15,12 @@ namespace BLToolkit.Data.DataProvider
 		{
 			if (command == null)
 				throw new ArgumentNullException("command");
+
 			if (command.CommandType != CommandType.StoredProcedure)
 				throw new InvalidOperationException("command.CommandType must be CommandType.StoredProcedure");
 
 			OleDbConnection conn = command.Connection as OleDbConnection;
+
 			if (conn == null || conn.State != ConnectionState.Open)
 				throw new InvalidOperationException("Invalid connection state.");
 
@@ -51,7 +53,7 @@ namespace BLToolkit.Data.DataProvider
 				if (_paramsExp == null)
 					_paramsExp = new Regex(@"PARAMETERS ((\[(?<name>[^\]]+)\]|(?<name>[^\s]+))\s(?<type>[^,;\s]+(\s\([^\)]+\))?)[,;]\s)*", RegexOptions.Compiled | RegexOptions.ExplicitCapture);
 
-				Match match = _paramsExp.Match((string)dt.Rows[0][col.Ordinal]);
+				Match             match = _paramsExp.Match((string)dt.Rows[0][col.Ordinal]);
 				CaptureCollection names = match.Groups["name"].Captures;
 				CaptureCollection types = match.Groups["type"].Captures;
 

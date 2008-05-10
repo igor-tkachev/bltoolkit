@@ -59,6 +59,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\Source\Data\DataProvider\SybaseAdoDataProvider.cs">
+      <Link>Data\DataProvider\SybaseAdoDataProvider.cs</Link>
+    </Compile>
     <Compile Include="Aspects\AsyncAspect.cs" />
     <Compile Include="Aspects\CacheAspect.cs" />
     <Compile Include="Aspects\CounterAspect.cs" />
@@ -94,6 +97,8 @@
     <Compile Include="Data\Close.cs" />
     <Compile Include="Data\AdoDemo.cs" />
     <Compile Include="Data\ComplexMapping.cs" />
+    <Compile Include="Data\PrepareDemo.cs" />
+    <Compile Include="Data\DataProvider\AddDataProvider.cs" />
     <Compile Include="Data\OpenConfig1.cs" />
     <Compile Include="Data\DbManagerDemo.cs" />
     <Compile Include="Data\OpenConfig1FW2.cs" />
@@ -101,6 +106,9 @@
     <Compile Include="Data\ExecuteObject.cs" />
     <Compile Include="Data\ExecuteList.cs" />
     <Compile Include="Data\OpenConfig3.cs" />
+    <Compile Include="Data\ParameterDemo.cs" />
+    <Compile Include="Data\SetCommandDemo.cs" />
+    <Compile Include="Data\SetSpCommandDemo.cs" />
     <Compile Include="Data\Transaction.cs" />
     <Compile Include="Data\UpdateObject.cs" />
     <Compile Include="Mapping\MapToJson.cs" />

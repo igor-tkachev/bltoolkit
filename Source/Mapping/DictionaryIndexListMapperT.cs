@@ -17,7 +17,7 @@ namespace BLToolkit.Mapping
 			_mapper = objectMapper;
 
 			_fields = new NameOrIndexParameter[index.Fields.Length];
-			_fromSource = new bool  [index.Fields.Length];
+			_fromSource = new bool[index.Fields.Length];
 
 			for (int i = 0; i < _fields.Length; i++)
 			{

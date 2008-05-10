@@ -43,7 +43,16 @@ namespace BLToolkit.DataAccess
 			if (context.IsBuildStep)
 			{
 				if (context.IsAbstractMethod)
+				{
+					// Give up if there is any builder that builds the method body.
+					//
+					if (builders.Count > 1)
+						foreach (IAbstractTypeBuilder builder in builders)
+							if (builder != this && builder.IsApplied(context, builders))
+								return false;
+
 					return true;
+				}
 
 				// Treat an abstract getter/setter as a regular method
 				// when the property has [NoInstance] attribute 

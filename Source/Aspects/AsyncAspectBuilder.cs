@@ -26,7 +26,26 @@ namespace BLToolkit.Aspects
 
 		public override bool IsCompatible(BuildContext context, IAbstractTypeBuilder typeBuilder)
 		{
-			return !context.IsBuildStep;
+			if (context.IsBuildStep)
+				return false;
+
+			AbstractTypeBuilderList list = new AbstractTypeBuilderList(2);
+
+			list.Add(this);
+			list.Add(typeBuilder);
+
+			BuildStep step = context.Step;
+
+			try
+			{
+				context.Step = BuildStep.Build;
+
+				return typeBuilder.IsApplied(context, list);
+			}
+			finally
+			{
+				context.Step = step;
+			}
 		}
 
 		public override bool IsApplied(BuildContext context, AbstractTypeBuilderList builders)

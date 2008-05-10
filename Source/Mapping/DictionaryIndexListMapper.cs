@@ -17,13 +17,13 @@ namespace BLToolkit.Mapping
 			_mapper = objectMapper;
 
 			_fields = new NameOrIndexParameter[index.Fields.Length];
-			_fromSource = new bool  [index.Fields.Length];
+			_fromSource = new bool[index.Fields.Length];
 
 			for (int i = 0; i < _fields.Length; i++)
 			{
 				bool fromSource = index.Fields[i].ByName && index.Fields[i].Name[0] == '@';
 
-				_fields    [i] = fromSource? index.Fields[i].Name.Substring(1): index.Fields[i];
+				_fields[i]     = fromSource? index.Fields[i].Name.Substring(1): index.Fields[i];
 				_fromSource[i] = fromSource;
 				_isFromSource  = _isFromSource ||  fromSource;
 				_isFromDest    = _isFromDest   || !fromSource;

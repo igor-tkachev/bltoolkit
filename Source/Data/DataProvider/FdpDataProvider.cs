@@ -24,7 +24,6 @@ Known troubles:
 	FdpDataProvider.ReturnParameterName = "RETURN_VALUE";
 	FdpDataProvider.IsReturnValueEmulation = true;
 
-
  */
 
 using System;
@@ -32,6 +31,7 @@ using System.Data;
 using System.Data.Common;
 
 using FirebirdSql.Data.FirebirdClient;
+
 using BLToolkit.Mapping;
 
 namespace BLToolkit.Data.DataProvider

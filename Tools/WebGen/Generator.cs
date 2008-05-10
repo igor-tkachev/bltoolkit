@@ -379,6 +379,8 @@ namespace WebGen
 				return "";
 
 			string backLinks = "";
+			string parent    = "";
+			string name      = Path.GetFileNameWithoutExtension(fileName);
 
 			switch (path[0])
 			{
@@ -389,12 +391,18 @@ namespace WebGen
 
 					for (int i = 1; i < path.Length; i++)
 					{
-						string parent = "";
+						parent = "";
 
 						for (int j = i + 1; j < path.Length; j++)
 							parent += "../";
 
 						backLinks += string.Format(".<a class='m' href='{0}index.htm'>{1}</a>", parent, path[i]);
+					}
+
+					if (name.ToLower() != "index")
+					{
+						backLinks += string.Format(".<a class='m' href='{0}{1}'>{2}</a>",
+							parent, Path.GetFileName(fileName), name);
 					}
 
 					backLinks += "<small></nobr></br>";
@@ -408,7 +416,7 @@ namespace WebGen
 
 					for (int i = 1; i < path.Length; i++)
 					{
-						string parent = "";
+						parent = "";
 
 						for (int j = i + 1; j < path.Length; j++)
 							parent += "../";
@@ -416,7 +424,12 @@ namespace WebGen
 						backLinks += string.Format(".<a class='m' href='{0}index.htm'>{1}</a>", parent, path[i]);
 					}
 
-					backLinks += "." + Path.GetFileNameWithoutExtension(fileName);
+					if (name.ToLower() != "@@@")
+					{
+						backLinks += string.Format(".<a class='m' href='{0}{1}.htm'>{1}</a>",
+							parent, Path.GetFileName(fileName));
+					}
+
 					backLinks += "<small></nobr></br>";
 
 					break;
