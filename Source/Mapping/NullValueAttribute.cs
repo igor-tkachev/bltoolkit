@@ -26,14 +26,14 @@ namespace BLToolkit.Mapping
 			_value = value;
 		}
 
-		private object _value;
-		public  object  Value
+		private readonly object _value;
+		public           object  Value
 		{
 			get { return _value; }
 		}
 
-		private Type _type;
-		public  Type  Type
+		private readonly Type _type;
+		public           Type  Type
 		{
 			get { return _type; }
 		}

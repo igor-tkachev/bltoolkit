@@ -10,12 +10,8 @@ using BLToolkit.TypeBuilder.Builders;
 
 namespace BLToolkit.TypeBuilder
 {
-	public sealed class TypeFactory
+	public static class TypeFactory
 	{
-		private TypeFactory()
-		{
-		}
-
 		static TypeFactory()
 		{
 			AppDomain.CurrentDomain.AssemblyResolve += CurrentDomain_AssemblyResolve;
@@ -65,7 +61,7 @@ namespace BLToolkit.TypeBuilder
 			if (_globalAssembly != null)
 				SaveGlobalAssembly();
 
-			if (path != null && path.Length > 0)
+			if (!string.IsNullOrEmpty(path))
 				_globalAssemblyPath = path;
 
 			_globalAssemblyVersion = version;

@@ -68,7 +68,7 @@ namespace BLToolkit.Aspects
 				int  maxCacheTime = MaxCacheTime;
 				bool isWeak       = IsWeak;
 
-				if (info.ConfigString != null && info.ConfigString.Length > 0)
+				if (!string.IsNullOrEmpty(info.ConfigString))
 				{
 					ConfigParameters cp = GetConfigParameters(info);
 

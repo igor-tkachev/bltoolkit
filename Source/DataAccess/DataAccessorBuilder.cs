@@ -1152,10 +1152,9 @@ namespace BLToolkit.DataAccess
 
 		private bool IsGenericDestinationOrReturnValue()
 		{
-			if (_destination != null)
-				return _destination.ParameterType.IsGenericType;
-			else
-				return Context.ReturnValue.LocalType.IsGenericType;
+			return _destination == null?
+				Context.ReturnValue.LocalType.IsGenericType:
+				_destination.ParameterType.IsGenericType;
 		}
 
 		private void InitObjectType()
@@ -1871,7 +1870,7 @@ namespace BLToolkit.DataAccess
 				}
 
 				emit
-					.MarkLabel          (labelEndIf);
+					.MarkLabel          (labelEndIf)
 					;
 			}
 

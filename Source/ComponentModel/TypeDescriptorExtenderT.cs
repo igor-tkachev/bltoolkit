@@ -1,15 +1,13 @@
-using System;
-
 namespace BLToolkit.ComponentModel
 {
 	public abstract class TypeDescriptorExtender<T> : TypeDescriptorExtender
 	{
-		public TypeDescriptorExtender()
+		protected TypeDescriptorExtender()
 			: base(typeof(T))
 		{
 		}
 
-		public TypeDescriptorExtender(T t)
+		protected TypeDescriptorExtender(T t)
 			: base(t)
 		{
 		}

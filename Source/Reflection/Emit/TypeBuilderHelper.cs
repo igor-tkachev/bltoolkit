@@ -164,7 +164,7 @@ namespace BLToolkit.Reflection.Emit
 
 				// Copy parameter constraints.
 				//
-				System.Collections.Generic.List<Type> interfaceConstraints = null;
+				List<Type> interfaceConstraints = null;
 				for (int i = 0; i < genParams.Length; i++)
 				{
 					genParams[i].SetGenericParameterAttributes(genArgs[i].GenericParameterAttributes);
@@ -176,7 +176,7 @@ namespace BLToolkit.Reflection.Emit
 						else
 						{
 							if (interfaceConstraints == null)
-								interfaceConstraints = new System.Collections.Generic.List<Type>();
+								interfaceConstraints = new List<Type>();
 							interfaceConstraints.Add(constraint);
 						}
 					}

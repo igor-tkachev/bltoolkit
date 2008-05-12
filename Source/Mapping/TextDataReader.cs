@@ -52,7 +52,7 @@ namespace BLToolkit.Mapping
 				_line = _reader.ReadLine();
 				_lineNumber++;
 
-				if (_line != null && _line.Length > 0 && _line[0] == '*')
+				if (!string.IsNullOrEmpty(_line) && _line[0] == '*')
 					return true;
 			}
 

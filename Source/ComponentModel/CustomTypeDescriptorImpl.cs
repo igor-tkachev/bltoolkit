@@ -64,7 +64,7 @@ namespace BLToolkit.ComponentModel
 				TypeConverterAttribute attr =
 					_td.GetAttributes()[typeof(TypeConverterAttribute)] as TypeConverterAttribute;
 
-				if (attr != null && attr.ConverterTypeName != null && attr.ConverterTypeName.Length > 0)
+				if (attr != null && !string.IsNullOrEmpty(attr.ConverterTypeName))
 				{
 					Type type = GetTypeByName(attr.ConverterTypeName);
 
@@ -90,7 +90,7 @@ namespace BLToolkit.ComponentModel
 				DefaultEventAttribute attr =
 					_td.GetAttributes()[typeof(DefaultEventAttribute)] as DefaultEventAttribute;
 
-				if (attr != null && attr.Name != null && attr.Name.Length > 0)
+				if (attr != null && !string.IsNullOrEmpty(attr.Name))
 					_defaultEvent = _typeDescriptionProvider.GetEvent(attr.Name);
 			}
 
@@ -108,7 +108,7 @@ namespace BLToolkit.ComponentModel
 				DefaultPropertyAttribute attr =
 					_td.GetAttributes()[typeof(DefaultPropertyAttribute)] as DefaultPropertyAttribute;
 
-				if (attr != null && attr.Name != null && attr.Name.Length > 0)
+				if (attr != null && !string.IsNullOrEmpty(attr.Name))
 					_defaultProperty = _typeDescriptionProvider.GetProperty(attr.Name);
 			}
 

@@ -78,7 +78,7 @@ namespace BLToolkit.EditableObjects
 	{
 		#region Constructor
 
-		public EditableObject()
+		protected EditableObject()
 		{
 			ISetParent setParent = this as ISetParent;
 

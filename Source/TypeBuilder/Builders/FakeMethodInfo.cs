@@ -6,7 +6,7 @@ namespace BLToolkit.TypeBuilder.Builders
 {
 	abstract class FakeMethodInfo : MethodInfo
 	{
-		public FakeMethodInfo(PropertyInfo propertyInfo, MethodInfo pair)
+		protected FakeMethodInfo(PropertyInfo propertyInfo, MethodInfo pair)
 		{
 			_property = propertyInfo;
 			_pair     = pair;

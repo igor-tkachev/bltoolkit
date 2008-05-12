@@ -611,7 +611,7 @@ namespace BLToolkit.ComponentModel
 
 		#region Sorting enhancement
 
-		private Hashtable _sortSubstitutions = new Hashtable();
+		private readonly Hashtable _sortSubstitutions = new Hashtable();
 
 		private class SortSubstitutionPair
 		{
@@ -621,8 +621,8 @@ namespace BLToolkit.ComponentModel
 				Substitute = substitute;
 			}
 
-			public PropertyDescriptor Original;
-			public PropertyDescriptor Substitute;
+			public readonly PropertyDescriptor Original;
+			public readonly PropertyDescriptor Substitute;
 		}
 
 		public void CreateSortSubstitution(string originalProperty, string substituteProperty)

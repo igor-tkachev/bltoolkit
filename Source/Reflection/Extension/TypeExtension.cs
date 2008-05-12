@@ -9,25 +9,19 @@ namespace BLToolkit.Reflection.Extension
 	{
 		#region Consts
 
-		public sealed class NodeName
+		public static class NodeName
 		{
-			private NodeName() {}
-
 			public const string Type   = "Type";
 			public const string Member = "Member";
 		}
 
-		public sealed class AttrName
+		public static class AttrName
 		{
-			private AttrName() {}
-
 			public const string Name        = "Name";
 		}
 
-		public sealed class ValueName
+		public static class ValueName
 		{
-			private ValueName() {}
-
 			public const char   Delimiter   = '-';
 			public const string Value       = "Value";
 			public const string Type        = "Type";
@@ -223,10 +217,10 @@ namespace BLToolkit.Reflection.Extension
 			{
 				TypeExtensionAttribute attr = (TypeExtensionAttribute)attrs[0];
 
-				if (attr.FileName != null && attr.FileName.Length > 0)
+				if (!string.IsNullOrEmpty(attr.FileName))
 					typeExtensions = GetExtenstions(attr.FileName, type.Assembly);
 
-				if (typeExtensions != null && attr.TypeName != null && attr.TypeName.Length > 0)
+				if (typeExtensions != null && !string.IsNullOrEmpty(attr.TypeName))
 					return typeExtensions[attr.TypeName];
 			}
 

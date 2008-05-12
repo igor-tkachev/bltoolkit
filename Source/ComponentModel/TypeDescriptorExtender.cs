@@ -11,7 +11,7 @@ namespace BLToolkit.ComponentModel
 	{
 		#region Constructors
 
-		public TypeDescriptorExtender(Type baseType)
+		protected TypeDescriptorExtender(Type baseType)
 		{
 			if (baseType == null)
 				throw new ArgumentNullException("baseType");
@@ -19,7 +19,7 @@ namespace BLToolkit.ComponentModel
 			_baseObject = TypeAccessor.CreateInstanceEx(baseType);
 		}
 
-		public TypeDescriptorExtender(object baseObject)
+		protected TypeDescriptorExtender(object baseObject)
 		{
 			if (baseObject == null)
 				throw new ArgumentNullException("baseObject");
@@ -150,10 +150,8 @@ namespace BLToolkit.ComponentModel
 			{
 				if (_baseTypeDescriptor == null)
 				{
-					_baseTypeDescriptor = _baseObject as ICustomTypeDescriptor;
-
-					if (_baseTypeDescriptor == null)
-						_baseTypeDescriptor = new CustomTypeDescriptorImpl(_baseObject.GetType());
+					_baseTypeDescriptor = _baseObject as ICustomTypeDescriptor ??
+						new CustomTypeDescriptorImpl(_baseObject.GetType());
 				}
 
 				return _baseTypeDescriptor;
@@ -188,7 +186,7 @@ namespace BLToolkit.ComponentModel
 		{
 			PropertyDescriptor pd = Provider.GetProperty(name);
 
-			return pd != null ? pd : BaseTypeDescriptor.GetProperties()[name];
+			return pd ?? BaseTypeDescriptor.GetProperties()[name];
 		}
 
 		AttributeCollection ITypeDescriptionProvider.GetAttributes()

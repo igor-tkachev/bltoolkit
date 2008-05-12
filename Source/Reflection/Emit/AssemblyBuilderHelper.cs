@@ -82,7 +82,7 @@ namespace BLToolkit.Reflection.Emit
 			if (version != null)
 				_assemblyName.Version = version;
 
-			if (keyFile != null && keyFile.Length > 0)
+			if (!string.IsNullOrEmpty(keyFile))
 			{
 				_assemblyName.Flags        |= AssemblyNameFlags.PublicKey;
 				_assemblyName.KeyPair       = new StrongNameKeyPair(System.IO.File.OpenRead(keyFile));

@@ -115,7 +115,7 @@ namespace BLToolkit.Aspects
 			bool     logExceptions = LogExceptions;
 			bool     logParameters = LogParameters;
 
-			if (info.ConfigString != null && info.ConfigString.Length > 0)
+			if (!string.IsNullOrEmpty(info.ConfigString))
 			{
 				ConfigParameters cp = GetConfigParameters(info);
 

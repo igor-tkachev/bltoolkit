@@ -6,11 +6,11 @@ namespace BLToolkit.Validation
 {
 	public abstract class ValidatorBaseAttribute : Attribute
 	{
-		public ValidatorBaseAttribute()
+		protected ValidatorBaseAttribute()
 		{
 		}
 
-		public ValidatorBaseAttribute(string errorMessage)
+		protected ValidatorBaseAttribute(string errorMessage)
 		{
 			_errorMessage = errorMessage;
 		}

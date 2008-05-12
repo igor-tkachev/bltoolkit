@@ -6,7 +6,7 @@ namespace BLToolkit.ComponentModel
 	[System.Diagnostics.DebuggerStepThrough]
 	public abstract class PropertyDescriptorWrapper : PropertyDescriptor
 	{
-		public PropertyDescriptorWrapper(PropertyDescriptor propertyDescriptor)
+		protected PropertyDescriptorWrapper(PropertyDescriptor propertyDescriptor)
 			: base(propertyDescriptor)
 		{
 			if (propertyDescriptor == null) throw new ArgumentNullException("propertyDescriptor");
