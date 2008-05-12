@@ -10,7 +10,7 @@ namespace HowTo.Data
 	using DataAccess;
 
 	[TestFixture]
-	public class PrepareDemo
+	public class ExecuteForEachDemo
 	{
 		[Test]
 		public void Test()
@@ -29,7 +29,7 @@ namespace HowTo.Data
 				//
 				db
 					.SetSpCommand("Person_Insert")
-					./*[a]*/ExecuteForEach/*[/a]*/(list);
+					./*[a]*/ExecuteForEach/*[/a]*/<Person>(list);
 
 				// Check the result.
 				//
