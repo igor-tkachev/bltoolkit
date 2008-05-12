@@ -359,11 +359,13 @@ BEGIN DROP Procedure Scalar_OutputParameter END
 GO
 
 CREATE Procedure Scalar_OutputParameter
-	@outputInt      int = 0 output,
-	@outputString   varchar(50) = '' output
+	@outputInt    int = 0 output,
+	@outputString varchar(50) = '' output
 AS
-SET @outputInt = 12345
-SET @outputString = '54321'
+BEGIN
+	SET @outputInt    = 12345
+	SET @outputString = '54321'
+END
 
 GO
 

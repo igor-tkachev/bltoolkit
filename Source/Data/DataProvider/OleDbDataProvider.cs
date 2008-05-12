@@ -48,7 +48,9 @@ namespace BLToolkit.Data.DataProvider
 		/// See the <see cref="DbManager.AddDataProvider(DataProviderBase)"/> method to find an example.
 		/// </remarks>
 		/// <seealso cref="DbManager.AddDataProvider(DataProviderBase)">AddDataManager Method</seealso>
-		/// <param name="command">The IDbCommand referencing the stored procedure for which the parameter information is to be derived. The derived parameters will be populated into the Parameters of this command.</param>
+		/// <param name="command">The IDbCommand referencing the stored procedure for which 
+		/// the parameter information is to be derived. The derived parameters will be 
+		/// populated into the Parameters of this command.</param>
 		public override bool DeriveParameters(IDbCommand command)
 		{
 			OleDbCommandBuilder.DeriveParameters((OleDbCommand)command);
@@ -102,6 +104,7 @@ namespace BLToolkit.Data.DataProvider
 						if (ex.Errors.Count > 0)
 							return ex.Errors[0].NativeError;
 					}
+
 					break;
 			}
 

@@ -85,6 +85,7 @@
     <Content Include="Content\Doc\DataAccess\SelectByKeySql.htm" />
     <Content Include="Content\Doc\DataAccess\index.htm" />
     <Content Include="Content\Doc\Data\Close.htm" />
+    <Content Include="Content\Doc\Data\ExecuteForEach.htm" />
     <Content Include="Content\Doc\Data\Prepare.htm" />
     <Content Include="Content\Doc\Data\DataProvider\index.htm" />
     <Content Include="Content\Doc\Data\DbManagerVsAdo.htm" />

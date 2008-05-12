@@ -110,7 +110,9 @@ namespace Data
 		private static void RunTest<T>(T[] args)
 		{
 			List<TypeWrapper<T>> col = new List<TypeWrapper<T>>();
+
 			col.AddRange(Array.ConvertAll<T, TypeWrapper<T>>(args, delegate(T val) { return new TypeWrapper<T>(val); }));
+
 			using (DbManager db = new DbManager())
 			{
 				db

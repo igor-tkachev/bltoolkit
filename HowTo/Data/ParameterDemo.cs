@@ -7,6 +7,8 @@ using BLToolkit.Data;
 
 namespace HowTo.Data
 {
+	using DataAccess;
+
 	[TestFixture]
 	public class ParameterDemo
 	{
@@ -33,7 +35,7 @@ namespace HowTo.Data
 				db.SetCommand("SELECT @par * 2",
 					db./*[a]*/Parameter/*[/a]*/("@par", DbType.Int32));
 
-				db.Parameter("@par").Value = 2;
+				db./*[a]*/Parameter("@par").Value/*[/a]*/ = 2;
 
 				Assert.AreEqual(4, db.ExecuteScalar<int>());
 			}
@@ -54,11 +56,106 @@ namespace HowTo.Data
 				 */
 				db
 					.SetSpCommand("Scalar_ReturnParameter")
-					.ExecuteScalar<int>();
+					.ExecuteNonQuery();
 
-				int n = (int)db.Parameter("@RETURN_VALUE").Value;
+				int n = (int)db./*[a]*/Parameter("@RETURN_VALUE").Value/*[/a]*/;
 
 				Assert.AreEqual(12345, n);
+			}
+		}
+
+		[Test]
+		public void ReturnValueTest2()
+		{
+			using (DbManager db = new DbManager())
+			{
+				int n = db
+					.SetSpCommand("Scalar_ReturnParameter")
+					.ExecuteScalar<int>(ScalarSourceType.ReturnValue);
+
+				Assert.AreEqual(12345, n);
+			}
+		}
+
+		[Test]
+		public void OutputParameterTest()
+		{
+			using (DbManager db = new DbManager())
+			{
+				/*
+				 * CREATE Procedure Scalar_OutputParameter
+				 *     @outputInt    int         = 0  output,
+				 *     @outputString varchar(50) = '' output
+				 * AS
+				 * BEGIN
+				 *     SET @outputInt = 12345
+				 *     SET @outputString = '54321'
+				 * END
+				 */
+
+				db
+					.SetSpCommand("Scalar_OutputParameter",
+						db./*[a]*/OutputParameter/*[/a]*/("@outputInt",    1),
+						db./*[a]*/OutputParameter/*[/a]*/("@outputString", "1"))
+					.ExecuteNonQuery();
+
+				Assert.AreEqual(12345,   (int)   db./*[a]*/Parameter("@outputInt").   Value/*[/a]*/);
+				Assert.AreEqual("54321", (string)db./*[a]*/Parameter("@outputString").Value/*[/a]*/);
+			}
+		}
+
+		[Test]
+		public void OutputParameterAsReturnValueTest()
+		{
+			using (DbManager db = new DbManager())
+			{
+				string returnValue = db
+					.SetSpCommand("Scalar_OutputParameter")
+					.ExecuteScalar<string>(/*[a]*/ScalarSourceType.OutputParameter/*[/a]*/, /*[a]*/"outputString"/*[/a]*/);
+
+				Assert.AreEqual("54321", returnValue);
+			}
+		}
+
+		[Test]
+		public void CreateParametersTest()
+		{
+			Person person = new Person();
+
+			person.FirstName = "John";
+			person.LastName  = "Smith";
+			person.Gender    = Gender.Male;
+
+			using (DbManager db = new DbManager())
+			{
+				db.BeginTransaction();
+
+				// Prepare command.
+				//
+				int id = db
+					.SetSpCommand("Person_Insert",
+						db./*[a]*/CreateParameters/*[/a]*/(person))
+					.ExecuteScalar<int>();
+
+				// Check the result.
+				//
+				person = db
+					.SetCommand(
+						"SELECT * FROM Person WHERE PersonID = @id",
+						db.Parameter("@id", id))
+					.ExecuteObject<Person>();
+
+				Assert.IsNotNull(person);
+
+				// Cleanup.
+				//
+				db
+					.SetCommand(
+						"DELETE FROM Person WHERE PersonID = @id",
+						db.Parameter("@id", id))
+					.ExecuteNonQuery();
+
+				db.CommitTransaction();
 			}
 		}
 	}

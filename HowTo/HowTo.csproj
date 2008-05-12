@@ -97,6 +97,7 @@
     <Compile Include="Data\Close.cs" />
     <Compile Include="Data\AdoDemo.cs" />
     <Compile Include="Data\ComplexMapping.cs" />
+    <Compile Include="Data\ExecuteForEachDemo.cs" />
     <Compile Include="Data\PrepareDemo.cs" />
     <Compile Include="Data\DataProvider\AddDataProvider.cs" />
     <Compile Include="Data\OpenConfig1.cs" />

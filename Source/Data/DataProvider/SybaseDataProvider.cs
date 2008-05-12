@@ -64,6 +64,17 @@ namespace BLToolkit.Data.DataProvider
 					}
 
 					break;
+
+				case ConvertType.ExceptionToErrorNumber:
+					if (value is AseException)
+					{
+						AseException ex = (AseException)value;
+
+						if (ex.Errors.Count > 0)
+							return ex.Errors[0].MessageNumber;
+					}
+
+					break;
 			}
 
 			return value;
