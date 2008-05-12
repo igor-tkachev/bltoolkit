@@ -769,7 +769,7 @@ namespace BLToolkit.Data
 					cmd.CommandType = CommandType.StoredProcedure;
 					cmd.CommandText = spName;
 
-					bool res = ExecuteOperation(OperationType.DeriveParameters, delegate { return _dataProvider.DeriveParameters(cmd); });
+					bool res = ExecuteOperation<bool>(OperationType.DeriveParameters, delegate { return _dataProvider.DeriveParameters(cmd); });
 					ExecuteOperation(OperationType.CloseConnection, con.Close);
 
 					if (res == false)
