@@ -94,6 +94,15 @@ namespace BLToolkit.Data.DataProvider
 					}
 
 					break;
+
+				case ConvertType.ExceptionToErrorNumber:
+					if (value is OleDbException)
+					{
+						OleDbException ex = (OleDbException)value;
+						if (ex.Errors.Count > 0)
+							return ex.Errors[0].NativeError;
+					}
+					break;
 			}
 
 			return value;

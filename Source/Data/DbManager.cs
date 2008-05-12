@@ -104,59 +104,6 @@ namespace BLToolkit.Data
 
 		#endregion
 
-		#region Public Methods
-
-		/// <summary>
-		/// Closes the connection to the database.
-		/// </summary>
-		/// <remarks>
-		/// The <b>Close</b> method rolls back any pending transactions
-		/// and then closes the connection.
-		/// </remarks>
-		/// <include file="Examples.xml" path='examples/db[@name="Close()"]/*' />
-		/// <seealso cref="Dispose(bool)"/>
-		public void Close()
-		{
-			if (_selectCommand != null) { _selectCommand.Dispose(); _selectCommand = null; }
-			if (_insertCommand != null) { _insertCommand.Dispose(); _insertCommand = null; }
-			if (_updateCommand != null) { _updateCommand.Dispose(); _updateCommand = null; }
-			if (_deleteCommand != null) { _deleteCommand.Dispose(); _deleteCommand = null; }
-
-			if (_transaction != null && _closeTransaction)
-			{
-				try
-				{
-					OnBeforeOperation(OperationType.DisposeTransaction);
-					_transaction.Dispose();
-					OnAfterOperation (OperationType.DisposeTransaction);
-					_transaction = null;
-				}
-				catch (Exception ex)
-				{
-					OnOperationException(OperationType.DisposeTransaction, ex);
-					throw;
-				}
-			}
-
-			if (_connection != null && _closeConnection)
-			{
-				try
-				{
-					OnBeforeOperation(OperationType.CloseConnection);
-					_connection.Dispose();
-					OnAfterOperation (OperationType.CloseConnection);
-					_connection = null;
-				}
-				catch (Exception ex)
-				{
-					OnOperationException(OperationType.CloseConnection, ex);
-					throw;
-				}
-			}
-		}
-
-		#endregion
-
 		#region Connection
 
 		private bool          _closeConnection;
@@ -187,7 +134,7 @@ namespace BLToolkit.Data
 			set
 			{
 				if (value == null)
-					throw new ArgumentNullException("Connection");
+					throw new ArgumentNullException("value");
 
 				if (value.GetType() != _dataProvider.ConnectionType)
 					InitDataProvider(value);
@@ -205,19 +152,37 @@ namespace BLToolkit.Data
 
 		private void OpenConnection()
 		{
-			try
+			ExecuteOperation(OperationType.OpenConnection, _connection.Open);
+			_closeConnection = true;
+		}
+
+		/// <summary>
+		/// Closes the connection to the database.
+		/// </summary>
+		/// <remarks>
+		/// The <b>Close</b> method rolls back any pending transactions
+		/// and then closes the connection.
+		/// </remarks>
+		/// <include file="Examples.xml" path='examples/db[@name="Close()"]/*' />
+		/// <seealso cref="Dispose(bool)"/>
+		public void Close()
+		{
+			if (_selectCommand != null) { _selectCommand.Dispose(); _selectCommand = null; }
+			if (_insertCommand != null) { _insertCommand.Dispose(); _insertCommand = null; }
+			if (_updateCommand != null) { _updateCommand.Dispose(); _updateCommand = null; }
+			if (_deleteCommand != null) { _deleteCommand.Dispose(); _deleteCommand = null; }
+
+			if (_transaction != null && _closeTransaction)
 			{
-				OnBeforeOperation(OperationType.OpenConnection);
-				_connection.Open();
-				OnAfterOperation (OperationType.OpenConnection);
-			}
-			catch (Exception ex)
-			{
-				OnOperationException(OperationType.OpenConnection, ex);
-				throw;
+				ExecuteOperation(OperationType.DisposeTransaction, _transaction.Dispose);
+				_transaction = null;
 			}
 
-			_closeConnection = true;
+			if (_connection != null && _closeConnection)
+			{
+				ExecuteOperation(OperationType.CloseConnection, _connection.Dispose);
+				_connection = null;
+			}
 		}
 
 		#endregion
@@ -276,33 +241,15 @@ namespace BLToolkit.Data
 			//
 			if (_transaction != null)
 			{
-				try
-				{
-					OnBeforeOperation(OperationType.DisposeTransaction);
-					_transaction.Dispose();
-					OnAfterOperation (OperationType.DisposeTransaction);
-				}
-				catch (Exception ex)
-				{
-					OnOperationException(OperationType.DisposeTransaction, ex);
-					throw;
-				}
+				ExecuteOperation(OperationType.DisposeTransaction, _transaction.Dispose);
 			}
 
 			// Create new transaction object.
 			//
-			try
-			{
-				OnBeforeOperation(OperationType.BeginTransaction);
-				_transaction      = Connection.BeginTransaction(il);
-				OnAfterOperation (OperationType.BeginTransaction);
-				_closeTransaction = true;
-			}
-			catch (Exception ex)
-			{
-				OnOperationException(OperationType.BeginTransaction, ex);
-				throw;
-			}
+			_transaction = ExecuteOperation<IDbTransaction>(OperationType.BeginTransaction,
+				delegate { return Connection.BeginTransaction(il); });
+
+			_closeTransaction = true;
 
 			// If the active command exists.
 			//
@@ -322,17 +269,7 @@ namespace BLToolkit.Data
 		{
 			if (_transaction != null)
 			{
-				try
-				{
-					OnBeforeOperation(OperationType.CommitTransaction);
-					_transaction.Commit();
-					OnAfterOperation (OperationType.CommitTransaction);
-				}
-				catch (Exception ex)
-				{
-					OnOperationException(OperationType.CommitTransaction, ex);
-					throw;
-				}
+				ExecuteOperation(OperationType.CommitTransaction, _transaction.Commit);
 
 				if (_closeTransaction)
 					_transaction = null;
@@ -349,17 +286,7 @@ namespace BLToolkit.Data
 		{
 			if (_transaction != null)
 			{
-				try
-				{
-					OnBeforeOperation(OperationType.RollbackTransaction);
-					_transaction.Rollback();
-					OnAfterOperation (OperationType.RollbackTransaction);
-				}
-				catch (Exception ex)
-				{
-					OnOperationException(OperationType.RollbackTransaction, ex);
-					throw;
-				}
+				ExecuteOperation(OperationType.RollbackTransaction, _transaction.Rollback);
 
 				if (_closeTransaction)
 					_transaction = null;
@@ -582,7 +509,7 @@ namespace BLToolkit.Data
 		/// </summary>
 		/// <param name="op">The <see cref="OperationType"/>.</param>
 		/// <param name="ex">The <see cref="Exception"/> occurred.</param>
-		protected virtual void OnOperationException(OperationType op, Exception ex)
+		protected virtual void OnOperationException(OperationType op, DataException ex)
 		{
 			if (CanRaiseEvents)
 			{
@@ -591,7 +518,7 @@ namespace BLToolkit.Data
 					handler(this, new OperationExceptionEventArgs(op, ex));
 			}
 
-			throw new DataException(ex);
+			throw ex;
 		}
 
 		#endregion
@@ -611,41 +538,12 @@ namespace BLToolkit.Data
 
 		private IDataReader ExecuteReaderInternal(CommandBehavior commandBehavior)
 		{
-			IDataReader dr = null;
-
-			try
-			{
-				OnBeforeOperation(OperationType.ExecuteReader);
-				dr = SelectCommand.ExecuteReader(commandBehavior);
-				OnAfterOperation (OperationType.ExecuteReader);
-			}
-			catch (Exception ex)
-			{
-				if (dr != null)
-					dr.Dispose();
-
-				OnOperationException(OperationType.ExecuteReader, ex);
-				throw;
-			}
-
-			return dr;
+			return ExecuteOperation<IDataReader>(OperationType.ExecuteReader, delegate { return SelectCommand.ExecuteReader(commandBehavior); });
 		}
 
 		private int ExecuteNonQueryInternal()
 		{
-			try
-			{
-				OnBeforeOperation(OperationType.ExecuteNonQuery);
-				int result = SelectCommand.ExecuteNonQuery();
-				OnAfterOperation (OperationType.ExecuteNonQuery);
-
-				return result;
-			}
-			catch (Exception ex)
-			{
-				OnOperationException(OperationType.ExecuteNonQuery, ex);
-				throw;
-			}
+			return ExecuteOperation<int>(OperationType.ExecuteNonQuery, SelectCommand.ExecuteNonQuery);
 		}
 
 		#endregion
@@ -791,7 +689,8 @@ namespace BLToolkit.Data
 			{
 				return (IDbDataParameter[])refParam;
 			}
-			else if (refParam is IDbDataParameter)
+
+			if (refParam is IDbDataParameter)
 			{
 				IDbDataParameter[] oneParameterArray = new IDbDataParameter[1];
 				oneParameterArray[0] = (IDbDataParameter)refParam;
@@ -863,42 +762,24 @@ namespace BLToolkit.Data
 		{
 			using (IDbConnection con = CloneConnection())
 			{
-				try
-				{
-					OnBeforeOperation(OperationType.OpenConnection);
-					con.Open();
-					OnAfterOperation (OperationType.OpenConnection);
-				}
-				catch (Exception ex)
-				{
-					OnOperationException(OperationType.OpenConnection, ex);
-					throw;
-				}
+				ExecuteOperation(OperationType.OpenConnection, con.Open);
 
 				using (IDbCommand cmd = con.CreateCommand())
 				{
 					cmd.CommandType = CommandType.StoredProcedure;
 					cmd.CommandText = spName;
 
-					bool res;
-
-					try
-					{
-						OnBeforeOperation(OperationType.DeriveParameters);
-						res = _dataProvider.DeriveParameters(cmd);
-						OnAfterOperation (OperationType.DeriveParameters);
-					}
-					catch (Exception ex)
-					{
-						OnOperationException(OperationType.DeriveParameters, ex);
-						throw;
-					}
+					bool res = ExecuteOperation(OperationType.DeriveParameters, delegate { return _dataProvider.DeriveParameters(cmd); });
+					ExecuteOperation(OperationType.CloseConnection, con.Close);
 
 					if (res == false)
 						return null;
 
 					if (includeReturnValueParameter == false)
 					{
+						// All known data providers always treat
+						// the return value as first parameter.
+						//
 						cmd.Parameters.RemoveAt(0);
 					}
 
@@ -2198,17 +2079,7 @@ namespace BLToolkit.Data
 
 			if (InitParameters(CommandAction.Select) == false)
 			{
-				try
-				{
-					OnBeforeOperation(OperationType.PrepareCommand);
-					command.Prepare();
-					OnAfterOperation (OperationType.PrepareCommand);
-				}
-				catch (Exception ex)
-				{
-					OnOperationException(OperationType.PrepareCommand, ex);
-					throw;
-				}
+				ExecuteOperation(OperationType.PrepareCommand, command.Prepare);
 			}
 
 			_prepared = true;
@@ -2593,19 +2464,7 @@ namespace BLToolkit.Data
 			if (_prepared)
 				InitParameters(CommandAction.Select);
 
-			try
-			{
-				OnBeforeOperation(OperationType.ExecuteScalar);
-				object result = SelectCommand.ExecuteScalar();
-				OnAfterOperation (OperationType.ExecuteScalar);
-
-				return result;
-			}
-			catch (Exception ex)
-			{
-				OnOperationException(OperationType.ExecuteScalar, ex);
-				throw;
-			}
+			return ExecuteOperation<object>(OperationType.ExecuteScalar, SelectCommand.ExecuteScalar);
 		}
 
 		/// <summary>
@@ -2703,21 +2562,19 @@ namespace BLToolkit.Data
 						
 						return Parameter(name).Value;
 					}
-					else
+
+					int index = nameOrIndex.Index;
+					foreach (IDataParameter p in SelectCommand.Parameters)
 					{
-						int index = nameOrIndex.Index;
-						foreach (IDataParameter p in SelectCommand.Parameters)
-						{
-							// Skip the return value parameter.
-							//
-							if (p.Direction == ParameterDirection.ReturnValue)
-								continue;
+						// Skip the return value parameter.
+						//
+						if (p.Direction == ParameterDirection.ReturnValue)
+							continue;
 
-							if (0 == index)
-								return p.Value;
+						if (0 == index)
+							return p.Value;
 
-							--index;
-						}
+						--index;
 					}
 					break;
 
@@ -3417,22 +3274,15 @@ namespace BLToolkit.Data
 
 			((IDbDataAdapter)da).SelectCommand = SelectCommand;
 
-			try
+			ExecuteOperation(OperationType.Fill, delegate
 			{
-				OnBeforeOperation(OperationType.Fill);
 				if (table.ByName)
 					da.Fill(dataSet, startRecord, maxRecords, table.Name);
 				else
 					da.Fill(startRecord, maxRecords, dataSet.Tables[table.Index]);
-				OnAfterOperation(OperationType.Fill);
+			});
 
-				return dataSet;
-			}
-			catch (Exception ex)
-			{
-				OnOperationException(OperationType.Fill, ex);
-				throw;
-			}
+			return dataSet;
 		}
 
 		#endregion
@@ -3464,19 +3314,8 @@ namespace BLToolkit.Data
 			DbDataAdapter da = _dataProvider.CreateDataAdapterObject();
 			((IDbDataAdapter)da).SelectCommand = SelectCommand;
 
-			try
-			{
-				OnBeforeOperation(OperationType.Fill);
-				da.Fill(dataTable);
-				OnAfterOperation (OperationType.Fill);
-
-				return dataTable;
-			}
-			catch (Exception ex)
-			{
-				OnOperationException(OperationType.Fill, ex);
-				throw;
-			}
+			ExecuteOperation(OperationType.Fill, delegate { da.Fill(dataTable); });
+			return dataTable;
 		}
 
 		/// <summary>Adds or refreshes rows in a <see cref="System.Data.DataTable"/>
@@ -3501,17 +3340,7 @@ namespace BLToolkit.Data
 			DbDataAdapter da = _dataProvider.CreateDataAdapterObject();
 			((IDbDataAdapter)da).SelectCommand = SelectCommand;
 
-			try
-			{
-				OnBeforeOperation(OperationType.Fill);
-				da.Fill(startRecord, maxRecords, tableList);
-				OnAfterOperation (OperationType.Fill);
-			}
-			catch (Exception ex)
-			{
-				OnOperationException(OperationType.Fill, ex);
-				throw;
-			}
+			ExecuteOperation(OperationType.Fill, delegate { da.Fill(startRecord, maxRecords, tableList); });
 		}
 
 		/// <summary>Adds or refreshes rows in a <see cref="System.Data.DataTable"/>
@@ -3534,6 +3363,7 @@ namespace BLToolkit.Data
 		/// </summary>
 		/// <param name="entity">An object to populate.</param>
 		/// <param name="type">The System.Type of the object.</param>
+		/// <param name="parameters">Additional parameters passed to object constructor through <see cref="InitContext"/>.</param>
 		/// <returns>A business object.</returns>
 		private object ExecuteObjectInternal(object entity, Type type, object[] parameters)
 		{
@@ -3542,7 +3372,7 @@ namespace BLToolkit.Data
 
 			using (IDataReader dr = ExecuteReaderInternal(CommandBehavior.SingleRow))
 			{
-				if (dr.Read()) 
+				if (dr.Read())
 				{
 					return entity == null?
 						_mappingSchema.MapDataReaderToObject(dr, type,   parameters):
@@ -3570,6 +3400,7 @@ namespace BLToolkit.Data
 		/// Executes a SQL statement and maps resultset to an object.
 		/// </summary>
 		/// <param name="entity">An object to populate.</param>
+		/// <param name="parameters">Additional parameters passed to object constructor through <see cref="InitContext"/>.</param>
 		/// <returns>A business object.</returns>
 		public object ExecuteObject(object entity, params object[] parameters)
 		{
@@ -3593,6 +3424,7 @@ namespace BLToolkit.Data
 		/// Executes a SQL statement and maps resultset to an object.
 		/// </summary>
 		/// <param name="type">Type of an object.</param>
+		/// <param name="parameters">Additional parameters passed to object constructor through <see cref="InitContext"/>.</param>
 		/// <returns>A business object.</returns>
 		public object ExecuteObject(Type type, params object[] parameters)
 		{
@@ -3613,6 +3445,7 @@ namespace BLToolkit.Data
 		/// Executes a SQL statement and maps resultset to an object.
 		/// </summary>
 		/// <typeparam name="T">Type of an object.</typeparam>
+		/// <param name="parameters">Additional parameters passed to object constructor through <see cref="InitContext"/>.</param>
 		/// <returns>A business object.</returns>
 		public T ExecuteObject<T>(params object[] parameters)
 		{
@@ -4107,21 +3940,12 @@ namespace BLToolkit.Data
 
 			DbDataAdapter da = CreateDataAdapter();
 
-			try
+			return ExecuteOperation<int>(OperationType.Update, delegate
 			{
-				OnBeforeOperation(OperationType.Update);
-				int result = (table.ByName) ?
+				return (table.ByName) ?
 					da.Update(dataSet, table.Name) :
 					da.Update(dataSet.Tables[table.Index]);
-				OnAfterOperation(OperationType.Update);
-
-				return result;
-			}
-			catch (Exception ex)
-			{
-				OnOperationException(OperationType.Update, ex);
-				throw;
-			}
+			});
 		}
 
 		/// <summary>
@@ -4139,19 +3963,70 @@ namespace BLToolkit.Data
 				throw new ArgumentNullException(
 					"dataTable", Resources.DbManager_CannotUpdateNullDataTable);
 
+			return ExecuteOperation<int>(OperationType.Update, delegate
+			{
+				return CreateDataAdapter().Update(dataTable);
+			});
+		}
+
+		#endregion
+
+		#region ExecuteOperation
+
+#if !FW3
+		/// <summary>Encapsulates a method that takes no parameters and does not return a value.</summary>
+		private delegate void Action();
+#endif
+
+		private void ExecuteOperation(OperationType operationType, Action operation)
+		{
 			try
 			{
-				OnBeforeOperation(OperationType.Update);
-				int result = CreateDataAdapter().Update(dataTable);
-				OnAfterOperation(OperationType.Update);
-
-				return result;
+				OnBeforeOperation(operationType);
+				operation();
+				OnAfterOperation (operationType);
 			}
 			catch (Exception ex)
 			{
-				OnOperationException(OperationType.Update, ex);
+				HandleOperationException(operationType, ex);
 				throw;
 			}
+		}
+
+#if !FW3
+		/// <summary>Encapsulates a method that has no parameters and returns a value of the type specified by the <paramref name="TResult" /> parameter.</summary>
+		/// <returns>The return value of the method that this delegate encapsulates.</returns>
+		private delegate TResult Func<TResult>();
+#endif
+
+		private T ExecuteOperation<T>(OperationType operationType, Func<T> operation)
+		{
+			T res = default(T);
+
+			try
+			{
+				OnBeforeOperation(operationType);
+				res = operation();
+				OnAfterOperation (operationType);
+			}
+			catch (Exception ex)
+			{
+				if (res is IDisposable)
+					((IDisposable)res).Dispose();
+
+				HandleOperationException(operationType, ex);
+				throw;
+			}
+
+			return res;
+		}
+
+		private void HandleOperationException(OperationType op, Exception ex)
+		{
+			Debug.WriteLineIf(TS.TraceError, string.Format(
+				"Operation '{0}' throws exception '{1}'", op, ex), TS.DisplayName);
+
+			OnOperationException(op, new DataException(this, ex));
 		}
 
 		#endregion

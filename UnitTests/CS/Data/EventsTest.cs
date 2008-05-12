@@ -1,6 +1,7 @@
 ﻿using System;
 using BLToolkit.Data;
 using NUnit.Framework;
+using NUnit.Framework.SyntaxHelpers;
 
 namespace Data
 {
@@ -52,8 +53,13 @@ namespace Data
 
 		private static void HandleOperationException(object sender, OperationExceptionEventArgs ea)
 		{
-			Console.WriteLine("Operation:  " + ea.Operation);
-			Console.WriteLine("Exception:  " + ea.Exception.GetBaseException().Message);
+			Assert.That(ea, Is.Not.Null);
+			Assert.That(ea.Exception, Is.Not.Null);
+			Assert.That(ea.Exception.Number, Is.Not.Null);
+
+			Console.WriteLine("Operation:    " + ea.Operation);
+			Console.WriteLine("Error number: " + ea.Exception.Number);
+			Console.WriteLine("Exception:    " + ea.Exception.GetBaseException().Message);
 		}
 	}
 }

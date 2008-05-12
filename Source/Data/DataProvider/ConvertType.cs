@@ -51,5 +51,13 @@ namespace BLToolkit.Data.DataProvider
 		///                   ^ at has to be removed
 		/// </summary>
 		ParameterToName,
+
+		/// <summary>
+		/// Gets error number from a native exception.
+		/// For example:
+		///     SqlException -> SqlException.Number,
+		///   OleDbException -> OleDbException.Errors[0].NativeError
+		/// </summary>
+		ExceptionToErrorNumber,
 	}
 }

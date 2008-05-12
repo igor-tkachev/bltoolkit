@@ -1,18 +1,16 @@
-﻿using System;
-
-namespace BLToolkit.Data
+﻿namespace BLToolkit.Data
 {
 	public delegate void OperationExceptionEventHandler(object sender, OperationExceptionEventArgs ea);
 
 	public class OperationExceptionEventArgs : OperationTypeEventArgs
 	{
-		private readonly Exception _exception;
-		public           Exception  Exception
+		private readonly DataException _exception;
+		public           DataException  Exception
 		{
 			get { return _exception; }
 		}
 
-		public OperationExceptionEventArgs(OperationType operation, Exception exception)
+		public OperationExceptionEventArgs(OperationType operation, DataException exception)
 			: base (operation)
 		{
 			_exception = exception;

@@ -49,7 +49,7 @@ namespace BLToolkit.Data.DataProvider
 
 		#endregion
 
-		#region overloads
+		#region Overloads
 
 		public override IDbConnection CreateConnectionObject()
 		{
@@ -105,10 +105,20 @@ namespace BLToolkit.Data.DataProvider
 						return str.Length > 0 && str[0] == '@' ? str.Substring(1) : str;
 					}
 					break;
+
+				case ConvertType.ExceptionToErrorNumber:
+					if (value is FbException)
+					{
+						FbException ex = (FbException)value;
+						if (ex.Errors.Count > 0)
+							return ex.Errors[0].Number;
+					}
+					break;
 			}
 
 			return value;
 		}
+
 		public override Type ConnectionType
 		{
 			get

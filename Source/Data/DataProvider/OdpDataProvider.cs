@@ -231,7 +231,11 @@ namespace BLToolkit.Data.DataProvider
 							return name.Substring(ParameterPrefix.Length);
 						}
 					}
+					break;
 
+				case ConvertType.ExceptionToErrorNumber:
+					if (value is OracleException)
+						return ((OracleException)value).Number;
 					break;
 			}
 

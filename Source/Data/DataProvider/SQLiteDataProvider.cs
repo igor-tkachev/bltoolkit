@@ -87,6 +87,11 @@ namespace BLToolkit.Data.DataProvider
 
 				case ConvertType.ParameterToName:
 					return name.Length > 0 && name[0] == '@'? name.Substring(1): name;
+
+				case ConvertType.ExceptionToErrorNumber:
+					if (value is SQLiteException)
+						return ((SQLiteException)value).ErrorCode;
+					break;
 			}
 
 			return value;

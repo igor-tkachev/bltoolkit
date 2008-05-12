@@ -1,5 +1,6 @@
 using System;
 using System.Runtime.Serialization;
+using BLToolkit.Data.DataProvider;
 
 namespace BLToolkit.Data
 {
@@ -11,7 +12,7 @@ namespace BLToolkit.Data
 	/// execution of the namespace members.
 	/// </remarks>
 	[Serializable] 
-	public class DataException : Exception
+	public class DataException : System.Data.DataException
 	{
 		/// <summary>
 		/// Initializes a new instance of the <see cref="DataException"/> class.
@@ -22,25 +23,25 @@ namespace BLToolkit.Data
 		/// to a system-supplied message that describes the error,
 		/// such as "BLToolkit Data error has occurred."
 		/// </remarks>
-		public DataException() 
+		public DataException()
 			: base("An BLToolkit Data error has occurred.")
 		{
 		}
 
 		/// <summary>
-		/// Initializes a new instance of the <see cref="DataException"/> class 
+		/// Initializes a new instance of the <see cref="DataException"/> class
 		/// with the specified error message.
 		/// </summary>
 		/// <param name="message">The message to display to the client when the
 		/// exception is thrown.</param>
 		/// <seealso cref="Exception.Message"/>
-		public DataException(string message) 
+		public DataException(string message)
 			: base(message) 
 		{
 		}
 
 		/// <summary>
-		/// Initializes a new instance of the <see cref="DataException"/> class 
+		/// Initializes a new instance of the <see cref="DataException"/> class
 		/// with the specified error message and InnerException property.
 		/// </summary>
 		/// <param name="message">The message to display to the client when the
@@ -49,20 +50,20 @@ namespace BLToolkit.Data
 		/// the current exception.</param>
 		/// <seealso cref="Exception.Message"/>
 		/// <seealso cref="Exception.InnerException"/>
-		public DataException(string message, Exception innerException) 
-			: base(message, innerException) 
+		public DataException(string message, Exception innerException)
+			: base(message, innerException)
 		{
 		}
 
 		/// <summary>
-		/// Initializes a new instance of the <see cref="DataException"/> class 
+		/// Initializes a new instance of the <see cref="DataException"/> class
 		/// with the InnerException property.
 		/// </summary>
 		/// <param name="innerException">The InnerException, if any, that threw
 		/// the current exception.</param>
 		/// <seealso cref="Exception.InnerException"/>
-		public DataException(Exception innerException) 
-			: base(innerException.Message, innerException) 
+		public DataException(Exception innerException)
+			: base(innerException.Message, innerException)
 		{
 		}
 
@@ -75,10 +76,39 @@ namespace BLToolkit.Data
 		/// destination.</param>
 		/// <remarks>This constructor is called during deserialization to
 		/// reconstitute the exception object transmitted over a stream.</remarks>
-		protected DataException(SerializationInfo info, StreamingContext context) 
-			: base(info, context) 
+		protected DataException(SerializationInfo info, StreamingContext context)
+			: base(info, context)
 		{
 		}
+
+		#region Internal
+
+		private readonly DbManager _dbManager;
+
+		internal DataException(DbManager dbManager, Exception innerException)
+			: this(innerException)
+		{
+			_dbManager = dbManager;
+		}
+
+		#endregion
+
+		#region Public Properties
+
+		/// <summary>
+		/// Gets a number that identifies the type of error.
+		/// </summary>
+		public int? Number
+		{
+			get
+			{
+				return (int?)(_dbManager == null? null:
+					_dbManager.DataProvider.Convert(InnerException,
+						ConvertType.ExceptionToErrorNumber));
+			}
+		}
+
+		#endregion
 	}
 }
 

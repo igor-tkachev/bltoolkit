@@ -90,11 +90,15 @@ namespace BLToolkit.Data.DataProvider
 							return name.Substring(ParameterPrefix.Length);
 						}
 					}
+					break;
 
+					case ConvertType.ExceptionToErrorNumber:
+						if (value is OracleException)
+							return ((OracleException)value).Code;
 					break;
 			}
 
-			return value;
+			return base.Convert(value, convertType);
 		}
 
 		/// <summary>

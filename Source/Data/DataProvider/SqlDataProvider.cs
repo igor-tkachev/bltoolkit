@@ -92,7 +92,11 @@ namespace BLToolkit.Data.DataProvider
 						string str = value.ToString();
 						return str.Length > 0 && str[0] == '@'? str.Substring(1): str;
 					}
+					break;
 
+				case ConvertType.ExceptionToErrorNumber:
+					if (value is SqlException)
+						return ((SqlException)value).Number;
 					break;
 			}
 

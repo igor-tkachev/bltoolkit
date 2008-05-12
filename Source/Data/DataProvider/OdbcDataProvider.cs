@@ -55,6 +55,23 @@ namespace BLToolkit.Data.DataProvider
 			return true;
 		}
 
+		public override object Convert(object value, ConvertType convertType)
+		{
+			switch (convertType)
+			{
+				case ConvertType.ExceptionToErrorNumber:
+					if (value is OdbcException)
+					{
+						OdbcException ex = (OdbcException)value;
+						if (ex.Errors.Count > 0)
+							return ex.Errors[0].NativeError;
+					}
+					break;
+			}
+
+			return base.Convert(value, convertType);
+		}
+
 		/// <summary>
 		/// Returns connection type.
 		/// </summary>
