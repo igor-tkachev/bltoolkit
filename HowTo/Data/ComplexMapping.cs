@@ -65,7 +65,7 @@ namespace HowTo.Data
 		public void Test()
 		{
 			List<Parent>   parents = new List<Parent>();
-			MapResultSet[] sets    = new MapResultSet[3];
+			/*[/a]*/MapResultSet/*[/a]*/[] sets    = new MapResultSet[3];
 
 			sets[0] = new MapResultSet(typeof(Parent), parents);
 			sets[1] = new MapResultSet(typeof(Child));
@@ -81,10 +81,11 @@ namespace HowTo.Data
 			{
 				db
 					.SetCommand      (TestQuery)
-					.ExecuteResultSet(sets);
+					./*[a]*/ExecuteResultSet/*[/a]*/(sets);
 			}
 
 			Assert.IsNotEmpty(parents);
+
 			foreach (Parent parent in parents)
 			{
 				Assert.IsNotNull(parent);

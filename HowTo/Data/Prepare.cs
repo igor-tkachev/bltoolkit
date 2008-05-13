@@ -10,7 +10,7 @@ namespace HowTo.Data
 	using DataAccess;
 
 	[TestFixture]
-	public class PrepareDemo
+	public class Prepare
 	{
 		[Test]
 		public void Test()

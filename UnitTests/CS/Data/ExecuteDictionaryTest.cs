@@ -24,20 +24,16 @@ namespace Data
 
 		public enum Gender
 		{
-			[MapValue("F")]
-			Female,
-			[MapValue("M")]
-			Male,
-			[MapValue("U")]
-			Unknown,
-			[MapValue("O")]
-			Other
+			[MapValue("F")] Female,
+			[MapValue("M")] Male,
+			[MapValue("U")] Unknown,
+			[MapValue("O")] Other
 		}
 
 		public class Person
 		{
 			[MapField("PersonID")]
-			public int ID;
+			public int    ID;
 			public string FirstName;
 			public string MiddleName;
 			public string LastName;
@@ -72,7 +68,7 @@ namespace Data
 			using (DbManager db = new DbManager())
 			{
 				Hashtable table = new Hashtable();
-					db
+				db
 					.SetCommand("SELECT * FROM Person")
 					.ExecuteDictionary(table, "@PersonID", typeof(Person));
 

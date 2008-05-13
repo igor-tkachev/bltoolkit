@@ -1803,7 +1803,7 @@ namespace BLToolkit.Data
 		#region Select
 
 		/// <summary>
-		/// Creates a SQL statement.
+		/// Creates an SQL statement.
 		/// </summary>
 		/// <param name="commandText">The command text to execute.</param>
 		/// <returns>Current instance.</returns>
@@ -1815,7 +1815,7 @@ namespace BLToolkit.Data
 		}
 
 		/// <summary>
-		/// Creates a SQL statement.
+		/// Creates an SQL statement.
 		/// </summary>
 		/// <param name="commandType">The <see cref="System.Data.CommandType"/> (stored procedure, text, etc.)</param>
 		/// <param name="commandText">The command text to execute.</param>
@@ -1829,7 +1829,7 @@ namespace BLToolkit.Data
 		}
 
 		/// <summary>
-		/// Creates a SQL statement.
+		/// Creates an SQL statement.
 		/// </summary>
 		/// <remarks>
 		/// The method can be used to create the <i>INSERT</i>, <i>UPDATE</i>, and <i>DELETE</i> SQL statements.
@@ -1846,7 +1846,7 @@ namespace BLToolkit.Data
 		}
 
 		/// <summary>
-		/// Creates a SQL statement.
+		/// Creates an SQL statement.
 		/// </summary>
 		/// <param name="commandType">The <see cref="System.Data.CommandType"/> (stored procedure, text, etc.)</param>
 		/// <param name="commandText">The command text to execute.</param>
@@ -2183,7 +2183,7 @@ namespace BLToolkit.Data
 		#region ExecuteForEach
 
 		/// <summary>
-		/// Executes a SQL statement for a given collection of objects and 
+		/// Executes an SQL statement for a given collection of objects and 
 		/// returns the number of rows affected.
 		/// </summary>
 		/// <remarks>
@@ -2230,7 +2230,7 @@ namespace BLToolkit.Data
 		}
 
 		/// <summary>
-		/// Executes a SQL statement for a given collection of objects and 
+		/// Executes an SQL statement for a given collection of objects and 
 		/// returns the number of rows affected.
 		/// </summary>
 		/// <remarks>
@@ -2277,7 +2277,7 @@ namespace BLToolkit.Data
 		}
 
 		/// <summary>
-		/// Executes a SQL statement for the <see cref="DataTable"/> and 
+		/// Executes an SQL statement for the <see cref="DataTable"/> and 
 		/// returns the number of rows affected.
 		/// </summary>
 		/// <remarks>
@@ -2318,7 +2318,7 @@ namespace BLToolkit.Data
 		}
 
 		/// <summary>
-		/// Executes a SQL statement for the first table of the <see cref="DataSet"/> 
+		/// Executes an SQL statement for the first table of the <see cref="DataSet"/> 
 		/// and returns the number of rows affected.
 		/// </summary>
 		/// <remarks>
@@ -2334,7 +2334,7 @@ namespace BLToolkit.Data
 		}
 
 		/// <summary>
-		/// Executes a SQL statement for the specified table of the <see cref="DataSet"/> 
+		/// Executes an SQL statement for the specified table of the <see cref="DataSet"/> 
 		/// and returns the number of rows affected.
 		/// </summary>
 		/// <remarks>
@@ -2357,7 +2357,7 @@ namespace BLToolkit.Data
 		#region ExecuteNonQuery
 
 		/// <summary>
-		/// Executes a SQL statement and returns the number of rows affected.
+		/// Executes an SQL statement and returns the number of rows affected.
 		/// </summary>
 		/// <remarks>
 		/// The method can be used to execute the <i>INSERT</i>, <i>UPDATE</i>, and <i>DELETE</i> SQL statements.
@@ -2373,7 +2373,7 @@ namespace BLToolkit.Data
 		}
 
 		/// <summary>
-		/// Executes a SQL statement and returns the number of rows affected.
+		/// Executes an SQL statement and returns the number of rows affected.
 		/// </summary>
 		/// <remarks>
 		/// The method can be used to execute the <i>INSERT</i>, <i>UPDATE</i>, and <i>DELETE</i> SQL statements.
@@ -2393,7 +2393,7 @@ namespace BLToolkit.Data
 		}
 
 		/// <summary>
-		/// Executes a SQL statement and returns the number of rows affected.
+		/// Executes an SQL statement and returns the number of rows affected.
 		/// </summary>
 		/// <remarks>
 		/// The method can be used to execute the <i>INSERT</i>, <i>UPDATE</i>, and <i>DELETE</i> SQL statements.
@@ -2410,7 +2410,7 @@ namespace BLToolkit.Data
 		}
 
 		/// <summary>
-		/// Executes a SQL statement and returns the number of rows affected.
+		/// Executes an SQL statement and returns the number of rows affected.
 		/// </summary>
 		/// <remarks>
 		/// The method can be used to execute the <i>INSERT</i>, <i>UPDATE</i>, and <i>DELETE</i> SQL statements.
@@ -2431,7 +2431,7 @@ namespace BLToolkit.Data
 		}
 
 		/// <summary>
-		/// Executes a SQL statement and returns the number of rows affected.
+		/// Executes an SQL statement and returns the number of rows affected.
 		/// </summary>
 		/// <remarks>
 		/// The method can be used to execute the <i>INSERT</i>, <i>UPDATE</i>, and <i>DELETE</i> SQL statements.
@@ -2812,7 +2812,7 @@ namespace BLToolkit.Data
 		}
 
 		/// <summary>
-		/// Executes the query, and returns the array list of values of the
+		/// Executes the query, and returns a list of values of the
 		/// specified column of the every row in the resultset returned by the
 		/// query. Other columns are ignored.
 		/// </summary>
@@ -3195,7 +3195,7 @@ namespace BLToolkit.Data
 		#region ExecuteDataSet
 
 		/// <summary>
-		/// Executes a SQL statement using the provided parameters.
+		/// Executes an SQL statement using the provided parameters.
 		/// </summary>
 		/// <remarks>
 		/// See the <see cref="ExecuteDataSet(NameOrIndexParameter)"/> method
@@ -3208,7 +3208,7 @@ namespace BLToolkit.Data
 		}
 
 		/// <summary>
-		/// Executes a SQL statement using the provided parameters.
+		/// Executes an SQL statement using the provided parameters.
 		/// </summary>
 		/// <remarks>
 		/// See the <see cref="ExecuteDataSet(NameOrIndexParameter)"/> method
@@ -3223,7 +3223,7 @@ namespace BLToolkit.Data
 		}
 
 		/// <summary>
-		/// Executes a SQL statement using the provided parameters.
+		/// Executes an SQL statement using the provided parameters.
 		/// </summary>
 		/// <remarks>
 		/// See the <see cref="ExecuteDataSet(NameOrIndexParameter)"/> method
@@ -3238,7 +3238,7 @@ namespace BLToolkit.Data
 		}
 
 		/// <summary>
-		/// Executes a SQL statement using the provided parameters.
+		/// Executes an SQL statement using the provided parameters.
 		/// </summary>
 		/// <param name="dataSet">The <see cref="DataSet"/> object to populate.</param>
 		/// <param name="table">The name or index of the populating table.</param>
@@ -3251,7 +3251,7 @@ namespace BLToolkit.Data
 		}
 
 		/// <summary>
-		/// Executes a SQL statement using the provided parameters.
+		/// Executes an SQL statement using the provided parameters.
 		/// </summary>
 		/// <param name="dataSet">The <see cref="DataSet"/> object to populate.</param>
 		/// <param name="table">The name or index of the populating table.</param>
@@ -3290,7 +3290,7 @@ namespace BLToolkit.Data
 		#region ExecuteDataTable
 
 		/// <summary>
-		/// Executes a SQL statement using the provided parameters.
+		/// Executes an SQL statement using the provided parameters.
 		/// </summary>
 		/// <returns>The <see cref="DataTable"/>.</returns>
 		public DataTable ExecuteDataTable()
@@ -3299,7 +3299,7 @@ namespace BLToolkit.Data
 		}
 
 		/// <summary>
-		/// Executes a SQL statement using the provided parameters.
+		/// Executes an SQL statement using the provided parameters.
 		/// </summary>
 		/// <param name="dataTable">The <see cref="DataTable"/> object to populate.</param>
 		/// <returns>The <see cref="DataTable"/>.</returns>
@@ -3359,7 +3359,7 @@ namespace BLToolkit.Data
 		#region ExecuteObject
 
 		/// <summary>
-		/// Executes a SQL statement and maps resultset to an object.
+		/// Executes an SQL statement and maps resultset to an object.
 		/// </summary>
 		/// <param name="entity">An object to populate.</param>
 		/// <param name="type">The System.Type of the object.</param>
@@ -3384,7 +3384,7 @@ namespace BLToolkit.Data
 		}
 
 		/// <summary>
-		/// Executes a SQL statement and maps resultset to an object.
+		/// Executes an SQL statement and maps resultset to an object.
 		/// </summary>
 		/// <param name="entity">An object to populate.</param>
 		/// <returns>A business object.</returns>
@@ -3397,7 +3397,7 @@ namespace BLToolkit.Data
 		}
 
 		/// <summary>
-		/// Executes a SQL statement and maps resultset to an object.
+		/// Executes an SQL statement and maps resultset to an object.
 		/// </summary>
 		/// <param name="entity">An object to populate.</param>
 		/// <param name="parameters">Additional parameters passed to object constructor through <see cref="InitContext"/>.</param>
@@ -3411,7 +3411,7 @@ namespace BLToolkit.Data
 		}
 
 		/// <summary>
-		/// Executes a SQL statement and maps resultset to an object.
+		/// Executes an SQL statement and maps resultset to an object.
 		/// </summary>
 		/// <param name="type">Type of an object.</param>
 		/// <returns>A business object.</returns>
@@ -3421,7 +3421,7 @@ namespace BLToolkit.Data
 		}
 
 		/// <summary>
-		/// Executes a SQL statement and maps resultset to an object.
+		/// Executes an SQL statement and maps resultset to an object.
 		/// </summary>
 		/// <param name="type">Type of an object.</param>
 		/// <param name="parameters">Additional parameters passed to object constructor through <see cref="InitContext"/>.</param>
@@ -3432,7 +3432,7 @@ namespace BLToolkit.Data
 		}
 
 		/// <summary>
-		/// Executes a SQL statement and maps resultset to an object.
+		/// Executes an SQL statement and maps resultset to an object.
 		/// </summary>
 		/// <typeparam name="T">Type of an object.</typeparam>
 		/// <returns>A business object.</returns>
@@ -3442,7 +3442,7 @@ namespace BLToolkit.Data
 		}
 
 		/// <summary>
-		/// Executes a SQL statement and maps resultset to an object.
+		/// Executes an SQL statement and maps resultset to an object.
 		/// </summary>
 		/// <typeparam name="T">Type of an object.</typeparam>
 		/// <param name="parameters">Additional parameters passed to object constructor through <see cref="InitContext"/>.</param>

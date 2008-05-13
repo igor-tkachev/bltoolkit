@@ -1,4 +1,5 @@
 using System;
+
 using BLToolkit.Common;
 
 namespace BLToolkit.DataAccess
@@ -26,6 +27,5 @@ namespace BLToolkit.DataAccess
 			get { return _nameOrIndex; }
 			set { _nameOrIndex = value; }
 		}
-
 	}
 }

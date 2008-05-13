@@ -131,3 +131,9 @@ table.data
 a.rss:link    { text-decoration: none; color : White; }
 a.rss:visited { text-decoration: none; color : White; }
 a.rss:hover   { text-decoration: nonr; color : White; }
+
+h4, h5
+{
+	font-family : Verdana;
+	color       : #338899;
+}

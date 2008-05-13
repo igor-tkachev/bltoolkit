@@ -1,7 +1,9 @@
 ﻿using System;
-using BLToolkit.Data;
+
 using NUnit.Framework;
 using NUnit.Framework.SyntaxHelpers;
+
+using BLToolkit.Data;
 
 namespace Data
 {

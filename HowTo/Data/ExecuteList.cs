@@ -46,6 +46,15 @@ namespace HowTo.Data
 			}
 		}
 
+		[Test]
+		public void SqlText()
+		{
+			IList<Person> list = GetPersonListSqlText();
+
+			foreach (Person p in list)
+				TypeAccessor.WriteDebug(p);
+		}
+
 		IList<Person> GetPersonListSproc()
 		{
 			using (DbManager db = new DbManager())
@@ -56,6 +65,15 @@ namespace HowTo.Data
 			}
 		}
 
+		[Test]
+		public void Sproc()
+		{
+			IList<Person> list = GetPersonListSproc();
+
+			foreach (Person p in list)
+				TypeAccessor.WriteDebug(p);
+		}
+
 		void GetCustomPersonList(IList list)
 		{
 			using (DbManager db = new DbManager())
@@ -64,24 +82,6 @@ namespace HowTo.Data
 					.SetSpCommand("Person_SelectAll")
 					./*[a]*/ExecuteList(list, typeof(Person))/*[/a]*/;
 			}
-		}
-
-		[Test]
-		public void SqlText()
-		{
-			IList<Person> list = GetPersonListSqlText();
-
-			foreach (Person p in list)
-				TypeAccessor.WriteDebug(p);
-		}
-
-		[Test]
-		public void Sproc()
-		{
-			IList<Person> list = GetPersonListSproc();
-
-			foreach (Person p in list)
-				TypeAccessor.WriteDebug(p);
 		}
 
 		[Test]
@@ -96,4 +96,3 @@ namespace HowTo.Data
 		}
 	}
 }
-

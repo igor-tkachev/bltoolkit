@@ -10,7 +10,7 @@ namespace HowTo.Data
 	using DataAccess;
 
 	[TestFixture]
-	public class ExecuteForEachDemo
+	public class ExecuteForEach
 	{
 		[Test]
 		public void Test()

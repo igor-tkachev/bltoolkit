@@ -261,29 +261,28 @@ namespace WebGen
 				 end = text.IndexOf("%>", idx + 2))
 			{
 				string startSource = text.Substring(0, idx);
-				string fileName    = text.Substring(idx + 2, end - idx - 2).Trim();
+				string source      = text.Substring(idx + 2, end - idx - 2).Trim();
 				string command     = "source";
 
-				string[] cmds = fileName.Split('#');
+				int cmdIdx = source.IndexOf('#');
 
-				if (cmds.Length > 1)
+				if (cmdIdx >= 0)
 				{
-					command  = cmds[0].Trim().ToLower();
-					fileName = cmds[1].Trim();
+					command = source.Substring(0, cmdIdx).Trim().ToLower();
+					source  = source.Substring(cmdIdx+1).Trim();
 				}
-
-				string endSource   = text.Substring(end + 2);
-				string sourcePath  = Path.Combine(_sourcePath, fileName);
-				string source;
 
 				switch (command)
 				{
-					case "source": source = GetSourceCode(sourcePath, text); break;
-					case "rss"   : source = GetNews      (sourcePath);       break;
+					case "source": source = GetSourceCodeFromPath(Path.Combine(_sourcePath, source), text); break;
+					case "rss"   : source = GetNews              (Path.Combine(_sourcePath, source));       break;
+					case "txt"   :
+					case "cs"    :
+					case "sql"   : source = GetSourceCode(source, "." + command, text);                     break;
 					default      : throw new InvalidOperationException();
 				}
 
-				text = startSource + source + endSource;
+				text = startSource + source + text.Substring(end + 2);
 			}
 
 			return text;
@@ -322,16 +321,9 @@ namespace WebGen
 			return html;
 		}
 
-		private static string GetSourceCode(string sourcePath, string source)
+		private static string GetSourceCode(string code, string ext, string source)
 		{
-			string code = "";
-
-			using (StreamReader sr = File.OpenText(sourcePath))
-				for (string s = sr.ReadLine(); s != null; s = sr.ReadLine())
-					if (!s.StartsWith("//@") && !s.StartsWith("''@"))
-						code += s + "\n";
-
-			switch (Path.GetExtension(sourcePath).ToLower())
+			switch (ext)
 			{
 				case ".cpp":    code = "[c]"    + code + "[/c]";    break;
 				case ".cs":     code = "[c#]"   + code + "[/c#]";   break;
@@ -352,6 +344,7 @@ namespace WebGen
 			if (source.IndexOf("<a name='Person'></a>") >= 0)
 				code = code
 					.Replace("&lt;Person&gt;", "&lt;<a class=m href=#Person>Person</a>&gt;")
+					.Replace(", Person&gt;",   ", <a class=m href=#Person>Person</a>&gt;")
 					.Replace("    Person ",    "    <a class='m' href=#Person>Person</a> ")
 					.Replace(" Person()",      " <a class='m' href=#Person>Person</a>()")
 					.Replace("(Person ",       "(<a class='m' href=#Person>Person</a> ")
@@ -371,6 +364,18 @@ namespace WebGen
 				.Replace("&lt;!--", "<span class='com'>&lt;!--")
 				.Replace("--&gt;",  "--&gt;</span>")
 				;
+		}
+
+		private static string GetSourceCodeFromPath(string sourcePath, string source)
+		{
+			string code = "";
+
+			using (StreamReader sr = File.OpenText(sourcePath))
+				for (string s = sr.ReadLine(); s != null; s = sr.ReadLine())
+					if (!s.StartsWith("//@") && !s.StartsWith("''@"))
+						code += s + "\n";
+
+			return GetSourceCode(code, Path.GetExtension(sourcePath).ToLower(), source);
 		}
 
 		private string GeneratePath(string[] path, string backPath, string fileName)

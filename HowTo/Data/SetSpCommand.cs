@@ -11,7 +11,7 @@ namespace HowTo.Data
 	using DataAccess;
 
 	[TestFixture]
-	public class SetCommandDemo
+	public class SetSpCommand
 	{
 		// Select a person list.
 		//
@@ -20,7 +20,7 @@ namespace HowTo.Data
 			using (DbManager db = new DbManager())
 			{
 				return db
-					./*[a]*/SetCommand/*[/a]*/("SELECT * FROM Person")
+					./*[a]*/SetSpCommand/*[/a]*/("Person_SelectAll")
 					.ExecuteList<Person>();
 			}
 		}
@@ -35,13 +35,27 @@ namespace HowTo.Data
 
 		// Select a person.
 		//
-		public Person GetPersonByID(int id)
+		public Person GetPersonByID1(int id)
 		{
 			using (DbManager db = new DbManager())
 			{
+				// Pass a parameter using the [b]Parameter[/b] method.
+				//
 				return db
-					./*[a]*/SetCommand/*[/a]*/("SELECT * FROM Person WHERE PersonID = @id",
+					./*[a]*/SetSpCommand/*[/a]*/("Person_SelectByKey",
 						db./*[a]*/Parameter/*[/a]*/("@id", id))
+					.ExecuteObject<Person>();
+			}
+		}
+
+		public Person GetPersonByID2(int id)
+		{
+			using (DbManager db = new DbManager())
+			{
+				// Pass a parameter using the [b]params[/b] parameter of the SetSpCommand method.
+				//
+				return db
+					./*[a]*/SetSpCommand/*[/a]*/("Person_SelectByKey", /*[a]*/id/*[/a]*/)
 					.ExecuteObject<Person>();
 			}
 		}
@@ -49,8 +63,10 @@ namespace HowTo.Data
 		[Test]
 		public void Test2()
 		{
-			Person person = GetPersonByID(1);
+			Person person = GetPersonByID1(1);
+			Assert.IsNotNull(person);
 
+			person = GetPersonByID2(1);
 			Assert.IsNotNull(person);
 		}
 
@@ -59,22 +75,18 @@ namespace HowTo.Data
 		public Person GetPersonByID(DbManager db, int id)
 		{
 			return db
-				./*[a]*/SetCommand/*[/a]*/("SELECT * FROM Person WHERE PersonID = @id",
-					db./*[a]*/Parameter/*[/a]*/("@id", id))
+				./*[a]*/SetSpCommand/*[/a]*/("Person_SelectByKey", /*[a]*/id/*[/a]*/)
 				.ExecuteObject<Person>();
 		}
 
 		public Person CreatePerson(DbManager db)
 		{
 			int id = db
-				./*[a]*/SetCommand/*[/a]*/(@"
-					INSERT INTO Person ( LastName,  FirstName,  Gender)
-					VALUES             (@LastName, @FirstName, @Gender)
-
-					SELECT Cast(SCOPE_IDENTITY() as int) PersonID",
-					db./*[a]*/Parameter/*[/a]*/("@LastName",  "Frog"),
-					db./*[a]*/Parameter/*[/a]*/("@FirstName", "Crazy"),
-					db./*[a]*/Parameter/*[/a]*/("@Gender",    Map.EnumToValue(Gender.Male)))
+				./*[a]*/SetSpCommand/*[/a]*/("Person_Insert",
+					db./*[a]*/Parameter/*[/a]*/("@LastName",   "Frog"),
+					db./*[a]*/Parameter/*[/a]*/("@MiddleName", null),
+					db./*[a]*/Parameter/*[/a]*/("@FirstName",  "Crazy"),
+					db./*[a]*/Parameter/*[/a]*/("@Gender",     Map.EnumToValue(Gender.Male)))
 				.ExecuteScalar<int>();
 
 			return GetPersonByID(db, id);
@@ -83,16 +95,7 @@ namespace HowTo.Data
 		public Person UpdatePerson(DbManager db, Person person)
 		{
 			db
-				./*[a]*/SetCommand/*[/a]*/(@"
-					UPDATE
-						Person
-					SET
-						LastName   = @LastName,
-						FirstName  = @FirstName,
-						Gender     = @Gender
-					WHERE
-						PersonID = @PersonID",
-					db./*[a]*/CreateParameters/*[/a]*/(person))
+				./*[a]*/SetSpCommand/*[/a]*/("Person_Update", db./*[a]*/CreateParameters/*[/a]*/(person))
 				.ExecuteNonQuery();
 
 			return GetPersonByID(db, person.ID);
@@ -101,8 +104,7 @@ namespace HowTo.Data
 		public Person DeletePerson(DbManager db, Person person)
 		{
 			db
-				./*[a]*/SetCommand/*[/a]*/("DELETE FROM Person WHERE PersonID = @id",
-					db./*[a]*/Parameter/*[/a]*/("@id", person.ID))
+				./*[a]*/SetSpCommand/*[/a]*/("Person_Delete", /*[a]*/person.ID/*[/a]*/)
 				.ExecuteNonQuery();
 
 			return GetPersonByID(db, person.ID);

@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 
 using NUnit.Framework;
 
@@ -42,6 +41,14 @@ namespace HowTo.Data
 			}
 		}
 
+		[Test]
+		public void SqlText()
+		{
+			Person person = GetPersonSqlText(1);
+
+			TypeAccessor.WriteConsole(person);
+		}
+
 		Person GetPersonSproc1(int id)
 		{
 			using (DbManager db = new DbManager())
@@ -51,6 +58,14 @@ namespace HowTo.Data
 						db.Parameter("@id", id))
 					./*[a]*/ExecuteObject<Person>()/*[/a]*/;
 			}
+		}
+
+		[Test]
+		public void Sproc1()
+		{
+			Person person = GetPersonSproc1(1);
+
+			TypeAccessor.WriteConsole(person);
 		}
 
 		Person GetPersonSproc2(int id)
@@ -64,22 +79,6 @@ namespace HowTo.Data
 		}
 
 		[Test]
-		public void SqlText()
-		{
-			Person person = GetPersonSqlText(1);
-
-			TypeAccessor.WriteConsole(person);
-		}
-
-		[Test]
-		public void Sproc1()
-		{
-			Person person = GetPersonSproc1(1);
-
-			TypeAccessor.WriteConsole(person);
-		}
-
-		[Test]
 		public void Sproc2()
 		{
 			Person person = GetPersonSproc2(1);
@@ -88,4 +87,3 @@ namespace HowTo.Data
 		}
 	}
 }
-

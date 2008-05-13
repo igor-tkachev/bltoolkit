@@ -1,0 +1,628 @@
+<h4>Introduction</h4>
+
+<p class='j'>
+Before we start talking about the data accessors, let us create a few examples of 
+typical data accessor methods.
+</p>
+<p class='j'>
+The following table contains three stored procedures and 
+three data access methods implementing the stored procedure calls.
+</p>
+
+<table width='100%'>
+<tr><th>Stored procedure</th><th>Data access method</th></tr>
+<tr><td colspan=2 style='padding-top:7px'>
+The first stored procedure takes filter and page parameters and returns recordset from the Person table.
+</td></tr>
+<tr>
+<td width=50% height=100%><% sql #
+CREATE Procedure GetPersonListByName(
+	@firstName  varchar(50),
+	@lastName   varchar(50),
+	@pageNumber int,
+	@pageSize   int)
+AS
+	-- stored procedure implementation
+	--
+%></td>
+<td width=50%><% cs #
+public List<Person> GetPersonListByName(
+	string firstName,
+	string lastName,
+	int    pageNumber,
+	int    pageSize)
+{
+	// method implementation.
+}
+%></td>
+</tr>
+<tr><td colspan=2>
+Second example will return single <b>Person</b> record by <b>id</b>.
+</td></tr>
+<tr>
+<td width=50% height=100%><% sql #
+CREATE Procedure GetPersonByID(@id int)
+AS
+	-- stored procedure implementation
+	--
+%>
+</td>
+<td width=50%><% cs #
+public Person GetPersonByID(int id)
+{
+    // method implementation.
+}
+%></td>
+</tr>
+<tr><td colspan=2>
+The last example will delete a record from the database by <b>id</b>.
+</td></tr>
+<tr>
+<td width=50% height=100%><% sql #
+CREATE Procedure DeletePersonByID(@id int)
+AS
+	-- stored procedure implementation
+	--
+%></td>
+<td width=50%><% cs #
+public void DeletePersonByID(int id)
+{
+    // method implementation.
+}
+%></td>
+</tr>
+</table>
+
+<p class='j'>Now lets see what we can say if we compare the stored procedure and C# method signatures. 
+<ol>
+<li>Stored procedure and method names match up.</li>
+<li>Sequential order, method parameter types and names correspond to stored procedure parameters.</li>
+<li>Methods' return values can give us an idea what <b>Execute</b> method we 
+should utilize and what object type has to be used to map data from recordset if needed.</li>
+</ol>
+</p>
+
+<p class='j'>
+As demonstrated above method definition contains all the information we need 
+to implement the method body. Actually, by defining the method signatures, we 
+completed the most intelligent part of data accessor development. The rest of 
+work is definitely a monkey's job. Honestly, I got bored of being just a coding 
+machine writing the same data access code over and over again, especially 
+understanding that this process can be automated.
+</p>
+<p class='j'>
+This introduction shows how to avoid the implementation step of data access 
+development and how to reduce this routine process to the method declaration.
+</p>
+
+<h4>Abstract classes</h4>
+
+<p class='j'>
+Unfortunately, mainstream .NET languages still do not have a compile-time 
+transformation system like some functional or <a href="http://nemerle.org/Macros">hybrid</a> languages do.
+All we have today is pre-compile- and run-time code generation.
+</p>
+<p class='j'>
+This introduction concentrates on run-time code generation and its support by
+<a href="http://www.bltoolkit.net/">Business Logic Toolkit for .NET</a>.
+</p>
+<p class='j'>
+Let us step back and bring the methods from the previous examples together in one class.
+Ideally, this data accessor class could look like the following:
+</p>
+<% cs #
+using System;
+using System.Collections.Generic;
+
+public class PersonAccessor
+{
+	public List<Person> GetPersonListByName(
+		string firstName, string lastName, int pageNumber, int pageSize);
+
+	public Person GetPersonByID   (int id);
+	public void   DeletePersonByID(int id);
+}
+%>
+
+<p class='j'>
+The bad news about this sample is that we cannot use such syntax as the 
+compiler expects the method's body implementation.
+</p>
+<p class='j'>
+The good news is we can use abstract classes and methods that give us quite 
+similar, compilable source code.
+</p>
+<% cs #
+using System;
+using System.Collections.Generic;
+
+public /*[a]*/abstract/*[/a]*/ class PersonAccessor
+{
+	public /*[a]*/abstract/*[/a]*/ List<Person> GetPersonListByName(
+		string firstName, string lastName, int pageNumber, int pageSize);
+
+	public /*[a]*/abstract/*[/a]*/ Person GetPersonByID   (int id);
+	public /*[a]*/abstract/*[/a]*/ void   DeletePersonByID(int id);
+}
+%>
+
+<p class='j'>This code is 100% valid and our next step is to make it workable.</p>
+
+<H4>Abstract DataAccessor</H4>
+
+<p class='j'>
+Business Logic Toolkit provides the <b>DataAccessor</b> class, which is 
+used as a base class to develop data accessor classes. If we add 
+<b>DataAccessor</b> to our previous example, it will look like the following:
+</p>
+<% cs #
+using System;
+using System.Collections.Generic;
+
+public abstract class PersonAccessor : /*[a]*/DataAccessor/*[/a]*/
+{
+	public abstract List<Person> GetPersonListByName(
+		string firstName, string lastName, int pageNumber, int pageSize);
+
+	public abstract Person GetPersonByID   (int id);
+	public abstract void   DeletePersonByID(int id);
+}
+%>
+
+<p class='j'>That's it! Now this class is complete and fully functional. The code below shows how to use it:</p>
+
+<% cs #
+using System;
+using System.Collections.Generic;
+
+using BLToolkit.Reflection;
+
+namespace DataAccess
+{
+	class Program
+	{
+		static void Main(string[] args)
+		{
+			PersonAccessor pa = /*[a]*/TypeAccessor/*[/a]*/<PersonAccessor>./*[a]*/CreateInstance/*[/a]*/();
+
+			List<Person> list = pa.GetPersonListByName("Crazy", "Frog", 0, 20);
+
+			foreach (Person p in list)
+				Console.Write("{0} {1}", p.FirstName, p.LastName);
+		}
+	}
+}
+%>
+
+<p class='j'>
+The only magic here is the <b>TypeAccessor.CreateInstance</b> method. First of all this 
+method creates a new class inherited from the <b>PersonAccessor</b> class and 
+then generates abstract method bodies depending on each method declaration.
+If we wrote those methods manually, we could get something like the following:
+</p>
+<% cs #
+using System;
+using System.Collections.Generic;
+
+using BLToolkit.Data;
+
+namespace Example.BLToolkitExtension
+{
+	public sealed class PersonAccessor : Example.PersonAccessor
+	{
+		public override List<Person> GetPersonListByName(
+			string firstName,
+			string lastName,
+			int    pageNumber,
+			int    pageSize)
+		{
+			using (DbManager db = GetDbManager())
+			{
+				return db
+					.SetSpCommand("GetPersonListByName",
+						db.Parameter("@firstName",  firstName),
+						db.Parameter("@lastName",   lastName),
+						db.Parameter("@pageNumber", pageNumber),
+						db.Parameter("@pageSize",   pageSize))
+					.ExecuteList<Person>();
+			}
+		}
+
+		public override Person GetPersonByID(int id)
+		{
+			using (DbManager db = GetDbManager())
+			{
+				return db
+					.SetSpCommand("GetPersonByID", db.Parameter("@id", id))
+					.ExecuteObject<Person>();
+			}
+		}
+
+		public override void DeletePersonByID(int id)
+		{
+			using (DbManager db = GetDbManager())
+			{
+				db
+					.SetSpCommand("DeletePersonByID", db.Parameter("@id", id))
+					.ExecuteNonQuery();
+			}
+		}
+	}
+}
+%>
+
+<p class='j'>
+(The <a href='..\Data\index.htm'>DbManager</a> class is another BLToolkit class used for 'low-level' database access).
+</p>
+
+<p class="j">
+Every part of the method declaration is important.
+Method's return value specifies one of the Execute methods in the following way:
+<table class='data'>
+<tr><th>Return Type</th><th>Execute Method</th></tr>
+<tr><td><i>IDataReader</i> interface</td><td>ExecuteReader</td></tr>
+<tr><td>Subclass of <i>DataSet</i></td><td>ExecuteDataSet</td></tr>
+<tr><td>Subclass of <i>DataTable</i></td><td>ExecuteDataTable</td></tr>
+<tr><td>Class implementing the <i>IList</i> interface</td><td><a href="ExecuteList.htm">ExecuteList</a> or <a href="ExecuteList.htm">ExecuteScalarList</a></td></tr>
+<tr><td>Class implementing the <i>IDictionary</i> interface</td><td><a href="ExecuteDictionary.htm">ExecuteDictionary</a> or <a href="ExecuteDictionary.htm">ExecuteScalarDictionary</a></td></tr>
+<tr><td><i>void</i></td><td>ExecuteNonQuery</td></tr>
+<tr><td><i>string</i>, <i>byte[]</i> or value type</td><td><a href="ExecuteScalar.htm">ExecuteScalar</a></td></tr>
+<tr><td>In any other case</td><td><a href="ExecuteObject.htm">ExecuteObject</a></td></tr>
+</table>
+The method name explicitly defines the action name, which is converted to the stored procedure name.
+Type, sequential order, and name of the method parameters are mapped to the command parameters.
+Exceptions from this rule are:
+<br>
+<div style='margin:-10px 0px -0px -10px'><ul compact="compact">
+<li>a parameter of <a href="../Data/index.htm"><i>DbManager</i></a> type. In this case generator uses provided <a href="../Data/index.htm"><i>DbManager</i></a> to call the command.</li>
+<li>parameters decorated with attribute <a href='#FormatAttribute'>FormatAttribute</a>, <a href='#DestinationAttribute'>DestinationAttribute</a>.</li>
+</ul></div>
+</p>
+
+<h4>Generating process control</h4>
+
+<p class='j'>
+The <b>PersonAccessor</b> class above is a very simple example and, of 
+course, it seems too ideal to be real. In real life, we need more flexibility 
+and more control over the generated code. BLToolkit contains a bunch of 
+attributes to control DataAccessor generation in addition to <b>DataAccessor</b> virtual members.
+</p>
+
+<h5>Method CreateDbManager</h5>
+
+<% cs #
+protected virtual DbManager CreateDbManager()
+{
+    return new DbManager();
+}
+%>
+
+<p class='j'>
+By default, this method creates a new instance of <b>DbManager</b> that uses default database configuration.
+You can change this behavior by overriding this method. For example:
+</p>
+<% cs #
+public abstract class OracleDataAccessor : DataAccessor
+{
+	protected override DbManager CreateDbManager()
+	{
+		return new DbManager("Oracle", "Production");
+	}
+}
+%>
+
+<p class='j'>
+This code will use the <i>Oracle</i> data provider and <i>Production</i> configuration.
+</p>
+
+<a name='GetDefaultSpName'></a><h5>Method GetDefaultSpName</h5>
+
+<% cs #
+protected virtual string GetDefaultSpName(string typeName, string actionName)
+{
+	return typeName == null?
+		actionName:
+		string.Format("{0}_{1}", typeName, actionName);
+}
+%>
+
+<p class='j'>
+As I mentioned, the method name explicitly defines the so-called action name.
+The final stored procedure name is created by the <b>GetDefaultSpName</b>
+method. The default implementation uses the following naming convention:
+</p>
+
+<ul>
+<li>
+If type name is provided, the method constructs the stored proc name by 
+concatenating the type and action names. Thus, if the type name is "Person" and 
+the action name is "GetAll", the resulting sproc name will be "Person_GetAll".
+</li>
+<li>
+If the type name is NOT provided, the stored procedure name will equal the 
+action name.</li>
+</ul>
+
+<p class='j'>
+You can easily change this behavior. For example, for the naming convention "p_Person_GetAll",
+the method implementation can be the following:
+</p>
+<% cs #
+public abstract class MyBaseDataAccessor<T,A> : DataAccessor<T,A>
+    where A : DataAccessor<T,A>
+{
+    protected override string GetDefaultSpName(string typeName, string actionName)
+    {
+        return string.Format("p_{0}_{1}", typeName, actionName);
+    }
+}
+%>
+
+<h5>Method GetTableName</h5>
+
+<% cs #
+protected virtual string GetTableName(Type type)
+{
+    // ...
+    return type.Name;
+}
+%>
+
+<p class='j'>
+By default, the table name is the associated object type name (<i>Person</i> in our examples).
+There are two ways to associate an object type with an accessor. By providing generic parameter:
+</p>
+ <% cs #
+public abstract class PersonAccessor : DataAccessor<Person>
+{
+}
+%>
+
+<p class='j'>
+And by the <b>ObjectType</b> attribute:
+</p>
+<% cs #
+[ObjectType(typeof(Person))]
+public abstract class PersonAccessor : DataAccessor
+{
+}
+%>
+
+<p class='j'>
+If you want to have different table and type names in your application, you may override the <b>GetTableName</b> method:
+</p>
+<% cs #
+public abstract class OracleDataAccessor<T,A> : DataAccessor<T,A>
+	where A : DataAccessor<T,A>
+{
+	protected override string GetTableName(Type type)
+	{
+		return base.GetTableName(type).ToUpper();
+	}
+}
+%>
+
+<h5>TableNameAttribute</h5>
+
+<p class='j'>
+Also, you can change the table name for a particular object type by decorating this object
+with the <b>TableNameAttribute</b> attribute:
+</p>
+<% cs #
+[TableName("PERSON")]
+public class Person
+{
+	public int    ID;
+	public string FirstName;
+	public string LastName;
+}
+%>
+
+<h5>ActionNameAttribute</h5>
+
+<p class='j'>
+This attribute allows changing the action name.
+</p>
+<% cs #
+public abstract class PersonAccessor : DataAccessor<Person, PersonAccessor>
+{
+	[ActionName("GetByID")]
+	protected abstract IDataReader GetByIDInternal(DbManager db, int id);
+
+	public Person GetByID(int id)
+	{
+		using (DbManager   db = GetDbManager())
+		using (IDataReader rd = GetByIDInternal(db, id))
+		{
+			Person p = new Person();
+
+			// do something complicated.
+
+			return p;
+		}
+	}
+}
+%>
+
+<h5>ActionSprocNameAttribute</h5>
+
+<p class='j'>
+This attribute associates the action name with a stored procedure name:
+</p>
+<% cs#
+[ActionSprocName("Insert", Ýsp_Person_Insert")]
+public abstract class PersonAccessor : DataAccessor<Person, PersonAccessor>
+{
+	public abstract void Insert(Person p);
+}
+%>
+
+<p class='j'>
+This attribute can be useful when you need to reassign a stored procedure name for a method defined in your base class.
+</p>
+
+<h5>SprocNameAttribute</h5>
+
+<p class='j'>
+The regular way to assign deferent from default sproc name for a method is the <b>SprocName</b> attribute.
+</p>
+<% cs #
+public abstract class PersonAccessor : DataAccessor<Person, PersonAccessor>
+{
+	[SprocName("sp_Person_Insert")]
+	public abstract void Insert(Person p);
+}
+%>
+
+<a name='DestinationAttribute'></a><h5>DestinationAttribute</h5>
+
+<p class='j'>
+By default, the DataAccessor generator uses method's return value to determine which <i>Execute</i> method
+should be used to perform the current operation.
+The <b>DestinationAttribute</b> indicates that target object is a parameter decorated with this attribute:
+</p>
+<% cs #
+public abstract class PersonAccessor : DataAccessor<Person, PersonAccessor>
+{
+	public abstract void GetAll([Destination] List<Person> list);
+}
+%>
+
+<h5>DirectionAttributes</h5>
+
+<p class='j'>
+<i>DataAccessor</i> generator can map provided business object to stored 
+procedure parameters. <b>Direction</b> attributes allow controlling this process more precisely.
+</p>
+<% cs #
+public abstract class PersonAccessor : DataAccessor<Person, PersonAccessor>
+{
+	public abstract void Insert(
+		[Direction.Output("ID"), Direction.Ignore("LastName")] Person person);
+}
+%>
+
+<p class='j'>
+In addition, BLToolkit provides two more direction attributes: 
+<b>Direction.InputOutputAttribute</b> and <b>Direction.ReturnValueAttribute</b>.
+</p>
+
+<h5>DiscoverParametersAttribute</h5>
+<p class='j'>
+Usually, BLToolkit expects method parameter names to match stored procedure 
+parameter names. The sequential order of parameters is not important in this 
+case. This attribute enforces BLToolkit to retrieve parameter information from 
+the sproc and to assign method parameters in the order they go. Parameter names 
+are ignored.
+</p>
+
+<a name='FormatAttribute'></a><h5>FormatAttribute</h5>
+
+<p class='j'>
+This attribute indicates that specified parameter should be used to construct the stored procedure name or SQL statement:
+</p>
+<% cs #
+public abstract class PersonAccessor : DataAccessor<Person, PersonAccessor>
+{
+	[SqlQuery("SELECT {0} FROM {1} WHERE {2}")]
+	public abstract List<string> GetStrings(
+		[Format(0)] string fieldName,
+		[Format(1)] string tableName,
+		[Format(2)] string whereClause);
+}
+%>
+
+<h5>IndexAttribute</h5>
+
+<p class='j'>
+If you want your method to return a dictionary, you will have to specify fields to build the dictionary key.
+The Index attribute allows you to do that:
+</p>
+<% cs #
+public abstract class PersonAccessor : DataAccessor<Person, PersonAccessor>
+{
+	[SqlQuery("SELECT * FROM Person")]
+	[Index("ID")]
+	public abstract Dictionary<int, Person>           SelectAll1();
+
+	[SqlQuery("SELECT * FROM Person")]
+	[Index("@PersonID", "LastName")]
+	public abstract Dictionary<CompoundValue, Person> SelectAll2();
+}
+%>
+<p class='j'>Note: if your key has more than one field, the type of this key should be <b>CompoundValue</b>.</p>
+<p class='j'>If the field name starts from '@' symbol, BLToolkit reads the field value from data source, 
+otherwise from an object property/field.</p>
+
+<h5>ParamNameAttribute</h5>
+
+<p class='j'>
+By default, the method parameter name should match the stored procedure parameter name.
+This attribute specifies the sproc parameter name explicitly.
+</p>
+<% cs #
+public abstract class PersonAccessor : DataAccessor<Person, PersonAccessor>
+{
+	[ActionName("SelectByName")]
+	public abstract Person AnyParamName(
+		[ParamName("FirstName")] string name1,
+		[ParamName("@LastName")] string name2);
+}
+%>
+
+<h5>ScalarFieldNameAttribute</h5>
+
+<p class='j'>
+If your method returns a dictionary of scalar values, you will have to specify the name or index of the field
+used to populate the scalar list. The <b>Index</b> attribute allows you to do that:
+</p>
+<% cs #
+public abstract class PersonAccessor : DataAccessor<Person, PersonAccessor>
+{
+	[SqlQuery("SELECT * FROM Person")]
+	[Index("@PersonID")]
+	[ScalarFieldName("FirstName")]
+	public abstract Dictionary<int, string>           SelectAll1();
+
+	[SqlQuery("SELECT * FROM Person")]
+	[Index("PersonID", "LastName")]
+	[ScalarFieldName("FirstName")]
+	public abstract Dictionary<CompoundValue, string> SelectAll2();
+}
+%>
+
+<h5>ScalarSourceAttribute</h5>
+
+<p class='j'>
+If a method returns a scalar value, this attribute can be used to specify how database returns this value.
+The <b>ScalarSource</b> attribute take a parameter of the <b>ScalarSourceType</b> type:
+</p>
+
+<table class='data'>
+<tr><th>ScalarSourceType</th><th>Description</th></tr>
+<tr><td>DataReader</td><td>Calls the <b>DbManager.ExecuteReader</b> method, and then calls <b>IDataReader.GetValue</b> method to read the value.</td></tr>
+<tr><td>OutputParameter</td><td>Calls the <b>DbManager.ExecuteNonQuery</b> method, and then reads value from the <b>IDbDataParameter.Value</b> property.</td></tr>
+<tr><td>ReturnValue</td><td>Calls the <b>DbManager.ExecuteNonQuery</b> method, and then reads return value from command parameter collection.</td></tr>
+<tr><td>AffectedRows</td><td>Calls the <b>DbManager.ExecuteNonQuery</b> method, and then returns its return value.</td></tr>
+</table>
+
+<h5>SqlQueryAttribute</h5>
+
+<p class='j'>
+This attribute allows specifying SQL statement.
+</p>
+<% cs # public abstract class PersonAccessor : DataAccessor<Person, PersonAccessor>
+{
+    [SqlQuery("SELECT * FROM Person WHERE PersonID = @id")]
+    public abstract Person GetByID(int @id);
+}
+%>
+
+<h4>Conclusion</h4>
+
+<p class='j'>
+I hope this brief tutorial demonstrates one of the simplest, quickest and 
+most low-maintenance ways to develop your data access layer. In addition, you 
+will get one more benefit, which is incredible object mapping performance. But 
+that is a topic we will discuss later. 
+</p>

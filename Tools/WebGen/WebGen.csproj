@@ -65,6 +65,11 @@
     <None Include="Content\Doc\DataAccess\SQL\SelectByKeySql.sql" />
     <Content Include="Content\Doc\ComponentModel\ObjectBinder.htm" />
     <Content Include="Content\Doc\DataAccess\AbstractAccessor.htm" />
+    <Content Include="Content\Doc\DataAccess\ActionName.htm" />
+    <Content Include="Content\Doc\DataAccess\ActionSprocName.htm" />
+    <Content Include="Content\Doc\DataAccess\ActualType.htm" />
+    <Content Include="Content\Doc\DataAccess\CommandBehavior.htm" />
+    <Content Include="Content\Doc\DataAccess\Introduction.htm" />
     <Content Include="Content\Doc\DataAccess\ExecuteScalar.htm" />
     <Content Include="Content\Doc\DataAccess\ExecuteObject.htm" />
     <Content Include="Content\Doc\DataAccess\ExecuteList.htm" />
@@ -85,6 +90,15 @@
     <Content Include="Content\Doc\DataAccess\SelectByKeySql.htm" />
     <Content Include="Content\Doc\DataAccess\index.htm" />
     <Content Include="Content\Doc\Data\Close.htm" />
+    <Content Include="Content\Doc\Data\ExecuteScalarList.htm" />
+    <Content Include="Content\Doc\Data\ExecuteScalarDictionary.htm" />
+    <Content Include="Content\Doc\Data\ExecuteScalar.htm" />
+    <Content Include="Content\Doc\Data\ExecuteResultSet.htm" />
+    <Content Include="Content\Doc\Data\ExecuteReader.htm" />
+    <Content Include="Content\Doc\Data\ExecuteDictionary.htm" />
+    <Content Include="Content\Doc\Data\ExecuteDataTable.htm" />
+    <Content Include="Content\Doc\Data\ExecuteDataSet.htm" />
+    <Content Include="Content\Doc\Data\ExecuteNonQuery.htm" />
     <Content Include="Content\Doc\Data\ExecuteForEach.htm" />
     <Content Include="Content\Doc\Data\Prepare.htm" />
     <Content Include="Content\Doc\Data\DataProvider\index.htm" />

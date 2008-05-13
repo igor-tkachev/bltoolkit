@@ -10,7 +10,7 @@ namespace HowTo.Data
 	using DataAccess;
 
 	[TestFixture]
-	public class ParameterDemo
+	public class Parameter
 	{
 		[Test]
 		public void AssignParameterTest()
