@@ -1,1 +1,0 @@
-exec Person_Delete @PersonID=2

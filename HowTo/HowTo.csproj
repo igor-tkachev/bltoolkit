@@ -75,6 +75,8 @@
     <Compile Include="DataAccess\ActionSprocName.cs" />
     <Compile Include="DataAccess\ActualType.cs" />
     <Compile Include="DataAccess\CommandBehavior.cs" />
+    <Compile Include="DataAccess\Destination.cs" />
+    <Compile Include="DataAccess\DataSetTable.cs" />
     <Compile Include="DataAccess\ExecuteScalar.cs" />
     <Compile Include="DataAccess\ExecuteObject.cs" />
     <Compile Include="DataAccess\ExecuteList.cs" />

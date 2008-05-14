@@ -1,7 +1,15 @@
 SelectAllSql.cs
 <% ..\..\..\HowTo\DataAccess\SelectAllSql.cs %>
 <i>DataAccessor.SelectAllSql</i> method generates and executes the following SQL statement:
-<% Doc\DataAccess\SQL\SelectAllSql.sql %>
+<% sql #
+SELECT
+	[MiddleName],
+	[PersonID],
+	[LastName],
+	[FirstName]
+FROM
+	[Person]
+%>
 <a name='Person'></a>
 Person.cs
 <% ..\..\..\HowTo\DataAccess\Person.cs %>

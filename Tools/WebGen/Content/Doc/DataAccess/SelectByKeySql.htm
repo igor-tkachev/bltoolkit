@@ -1,7 +1,17 @@
 SelectByKeySql.cs
 <% ..\..\..\HowTo\DataAccess\SelectByKeySql.cs %>
 <i>DataAccessor.SelectByKetSql</i> method generates and executes the following SQL statement:
-<% Doc\DataAccess\SQL\SelectByKeySql.sql %>
+<% sql #
+SELECT
+	[MiddleName],
+	[PersonID],
+	[LastName],
+	[FirstName]
+FROM
+	[Person]
+WHERE
+	[PersonID] = @PersonID
+%>
 <a name='Person'></a>
 Person.cs
 <% ..\..\..\HowTo\DataAccess\Person.cs %>

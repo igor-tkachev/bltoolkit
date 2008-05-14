@@ -1,7 +1,17 @@
 UpdateSql.cs
 <% ..\..\..\HowTo\DataAccess\UpdateSql.cs %>
 <i>DataAccessor.UpdateSql</i> method generates and executes the following SQL statement:
-<% Doc\DataAccess\SQL\UpdateSql.sql %>
+<% sql #
+UPDATE
+	[Person]
+SET
+	[MiddleName] = @MiddleName,
+	[Gender]     = @Gender,
+	[LastName]   = @LastName,
+	[FirstName]  = @FirstName
+WHERE
+	[PersonID]   = @PersonID
+%>
 <a name='Person'></a>
 Person.cs
 <% ..\..\..\HowTo\DataAccess\Person.cs %>

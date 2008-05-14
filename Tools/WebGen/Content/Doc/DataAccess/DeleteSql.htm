@@ -1,7 +1,12 @@
 DeleteSql.cs
 <% ..\..\..\HowTo\DataAccess\DeleteSql.cs %>
 Both <i>DataAccessor.DeleteByKeySql</i> and <i>DataAccessor.DeleteSql</i> methods generate and execute the following SQL statement:
-<% Doc\DataAccess\SQL\DeleteSql.sql %>
+<% sql #
+DELETE FROM
+	[Person]
+WHERE
+	[PersonID] = @PersonID
+%>
 <a name='Person'></a>
 Person.cs
 <% ..\..\..\HowTo\DataAccess\Person.cs %>

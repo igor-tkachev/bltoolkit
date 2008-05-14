@@ -62,13 +62,14 @@
     <Content Include="Content\Doc\Aspects\CustomCacheAspect.htm" />
     <Content Include="Content\Doc\Aspects\index.htm" />
     <Content Include="Content\Doc\ComponentModel\index.htm" />
-    <None Include="Content\Doc\DataAccess\SQL\SelectByKeySql.sql" />
     <Content Include="Content\Doc\ComponentModel\ObjectBinder.htm" />
     <Content Include="Content\Doc\DataAccess\AbstractAccessor.htm" />
     <Content Include="Content\Doc\DataAccess\ActionName.htm" />
     <Content Include="Content\Doc\DataAccess\ActionSprocName.htm" />
     <Content Include="Content\Doc\DataAccess\ActualType.htm" />
     <Content Include="Content\Doc\DataAccess\CommandBehavior.htm" />
+    <Content Include="Content\Doc\DataAccess\Destination.htm" />
+    <Content Include="Content\Doc\DataAccess\DataSetTable.htm" />
     <Content Include="Content\Doc\DataAccess\Introduction.htm" />
     <Content Include="Content\Doc\DataAccess\ExecuteScalar.htm" />
     <Content Include="Content\Doc\DataAccess\ExecuteObject.htm" />
@@ -138,18 +139,6 @@
     <Content Include="Content\template.html" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Content\Doc\DataAccess\SQL\NonUpdatableAttribute.sql" />
-    <None Include="Content\Doc\DataAccess\SQL\MultipleSelectByKeySql.sql" />
-    <None Include="Content\Doc\DataAccess\SQL\SelectByKey2.sql" />
-    <None Include="Content\Doc\DataAccess\SQL\Delete.sql" />
-    <None Include="Content\Doc\DataAccess\SQL\Update.sql" />
-    <None Include="Content\Doc\DataAccess\SQL\Insert.sql" />
-    <None Include="Content\Doc\DataAccess\SQL\SelectAll.sql" />
-    <None Include="Content\Doc\DataAccess\SQL\SelectByKey.sql" />
-    <None Include="Content\Doc\DataAccess\SQL\UpdateSql.sql" />
-    <None Include="Content\Doc\DataAccess\SQL\InsertSql.sql" />
-    <None Include="Content\Doc\DataAccess\SQL\DeleteSql.sql" />
-    <None Include="Content\Doc\DataAccess\SQL\SelectAllSql.sql" />
     <None Include="Content\Doc\Data\App.config" />
     <None Include="Content\Doc\Data\App1.config" />
     <None Include="Content\Doc\Data\App2.config" />

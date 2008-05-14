@@ -1,7 +1,19 @@
 NonUpdatableAttribute.cs
 <% ..\..\..\HowTo\DataAccess\NonUpdatableAttribute.cs %>
 <i>DataAccessor.Insert</i> method generates and executes the following SQL statement:
-<% Doc\DataAccess\SQL\NonUpdatableAttribute.sql %>
+<% sql #
+INSERT INTO [Person] (
+	[MiddleName],
+	[Gender],
+	[LastName],
+	[FirstName]
+) VALUES (
+	@MiddleName,
+	@Gender,
+	@LastName,
+	@FirstName
+)
+%>
 App.config
 <% Doc\Data\App.config %>
 <a href="../Data/CreateSql.htm">Create.sql script</a>
