@@ -379,7 +379,7 @@ namespace BLToolkit.Reflection
 
 			try
 			{
-				string  originalAssemblyLocation = originalAssembly.Location;
+				string  originalAssemblyLocation = new Uri(originalAssembly.EscapedCodeBase).AbsolutePath;
 				string extensionAssemblyLocation = Path.ChangeExtension(
 					originalAssemblyLocation, "BLToolkitExtension.dll");
 

@@ -75,7 +75,7 @@ namespace BLToolkit.Reflection
 
 		#region Public Methods
 
-		[Obsolete]
+		[Obsolete("Use generic version instead")]
 		public Attribute GetAttribute(Type attributeType)
 		{
 			object[] attrs = _memberInfo.GetCustomAttributes(attributeType, true);
@@ -83,18 +83,26 @@ namespace BLToolkit.Reflection
 			return attrs.Length > 0? (Attribute)attrs[0]: null;
 		}
 
-		public T GetAttribute<T>()
+		public T GetAttribute<T>() where T : Attribute
 		{
 			object[] attrs = _memberInfo.GetCustomAttributes(typeof(T), true);
 
 			return (T)(attrs.Length > 0? attrs[0]: null);
 		}
 
+		[Obsolete("Use generic version instead")]
 		public object[] GetAttributes(Type attributeType)
 		{
 			object[] attrs = _memberInfo.GetCustomAttributes(attributeType, true);
 
 			return attrs.Length > 0? attrs: null;
+		}
+
+		public T[] GetAttributes<T>() where T : Attribute
+		{
+			Array attrs = _memberInfo.GetCustomAttributes(typeof(T), true);
+
+			return attrs.Length > 0? (T[])attrs: null;
 		}
 
 		public object[] GetAttributes()
