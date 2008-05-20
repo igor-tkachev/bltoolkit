@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Data.SqlTypes;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
@@ -12,13 +13,13 @@ using BLToolkit.Reflection.MetadataProvider;
 namespace BLToolkit.Mapping
 {
 	[DebuggerDisplay("Type = {TypeAccessor.Type}, OriginalType = {TypeAccessor.OriginalType}")]
-	public class ObjectMapper : MapDataSourceDestinationBase, IEnumerable
+	public class ObjectMapper : MapDataSourceDestinationBase, IEnumerable<MemberMapper>
 	{
 		#region Constructor
 
 		public ObjectMapper()
 		{
-			_members      = new ArrayList();
+			_members      = new List<MemberMapper>();
 			_nameToMember = new Hashtable();
 		}
 
@@ -93,7 +94,7 @@ namespace BLToolkit.Mapping
 
 		#region Public Members
 
-		private readonly ArrayList _members;
+		private readonly List<MemberMapper> _members;
 		public  MemberMapper this[int index]
 		{
 			get { return (MemberMapper)_members[index]; }
@@ -129,7 +130,7 @@ namespace BLToolkit.Mapping
 
 					for (int i = 0; i < _fieldNames.Length; i++)
 					{
-						_fieldNames[i] = ((MemberMapper)_members[i]).Name;
+						_fieldNames[i] = _members[i].Name;
 					}
 				}
 
@@ -202,7 +203,7 @@ namespace BLToolkit.Mapping
 			if (byPropertyName)
 			{
 				for (int i = 0; i < _members.Count; ++i)
-					if (((MemberMapper)_members[i]).MemberName == name)
+					if (_members[i].MemberName == name)
 						return i;
 
 				return -1;
@@ -469,17 +470,17 @@ namespace BLToolkit.Mapping
 
 		public override Type GetFieldType(int index)
 		{
-			return ((MemberMapper)_members[index]).Type;
+			return _members[index].Type;
 		}
 
 		public override string GetName(int index)
 		{
-			return ((MemberMapper)_members[index]).Name;
+			return _members[index].Name;
 		}
 
 		public override object GetValue(object o, int index)
 		{
-			return ((MemberMapper)_members[index]).GetValue(o);
+			return _members[index].GetValue(o);
 		}
 
 		public override object GetValue(object o, string name)
@@ -579,7 +580,7 @@ namespace BLToolkit.Mapping
 
 		public override void SetValue(object o, int index, object value)
 		{
-			((MemberMapper)_members[index]).SetValue(o, value);
+			_members[index].SetValue(o, value);
 		}
 
 		public override void SetValue(object o, string name, object value)
@@ -663,6 +664,11 @@ namespace BLToolkit.Mapping
 		#region IEnumerable Members
 
 		public IEnumerator GetEnumerator()
+		{
+			return _members.GetEnumerator();
+		}
+
+		IEnumerator<MemberMapper> IEnumerable<MemberMapper>.GetEnumerator()
 		{
 			return _members.GetEnumerator();
 		}

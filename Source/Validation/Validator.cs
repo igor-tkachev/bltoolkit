@@ -1,5 +1,5 @@
 using System;
-using System.Collections;
+using System.Collections.Generic;
 using System.ComponentModel;
 
 using BLToolkit.Reflection;
@@ -14,7 +14,7 @@ namespace BLToolkit.Validation
 		{
 			foreach (MemberAccessor ma in context.TypeAccessor)
 			{
-				object[] attrs = ma.GetAttributes(typeof(ValidatorBaseAttribute));
+				ValidatorBaseAttribute[] attrs = ma.GetAttributes<ValidatorBaseAttribute>();
 
 				if (attrs == null)
 					continue;
@@ -22,11 +22,11 @@ namespace BLToolkit.Validation
 				context.MemberAccessor = ma;
 				context.Value          = ma.GetValue(context.Object);
 
-				foreach (ValidatorBaseAttribute attr in attrs)
+				for (int i = 0; i < attrs.Length; i++)
 				{
+					ValidatorBaseAttribute attr = attrs[i];
 					if (attr.IsValid(context) == false)
-						throw new ValidationException(
-							attr.GetErrorMessage(context));
+						throw new ValidationException(attr.GetErrorMessage(context));
 				}
 			}
 		}
@@ -78,31 +78,28 @@ namespace BLToolkit.Validation
 
 		public static bool IsValid(ValidationContext context, string fieldName)
 		{
-			object[] attrs = null;
-			object   value = null;
+			ValidatorBaseAttribute[] attrs = null;
+			object                   value = null;
 
 			if (context.PropertyDescriptor != null)
 			{
 				value = context.PropertyDescriptor.GetValue(context.Object);
 
-				ArrayList list = null;
+				List<ValidatorBaseAttribute> list = null;
 
 				foreach (object o in context.PropertyDescriptor.Attributes)
 				{
 					if (o is ValidatorBaseAttribute)
 					{
 						if (list == null)
-							list = new ArrayList();
+							list = new List<ValidatorBaseAttribute>();
 
-						list.Add(o);
+						list.Add((ValidatorBaseAttribute)o);
 					}
 				}
 
 				if (list != null)
-				{
-					attrs = new object[list.Count];
-					list.CopyTo(attrs);
-				}
+					attrs = list.ToArray();
 			}
 			else
 			{
@@ -111,7 +108,7 @@ namespace BLToolkit.Validation
 				if (context.MemberAccessor != null)
 				{
 					value = context.MemberAccessor.GetValue(context.Object);
-					attrs = context.MemberAccessor.GetAttributes(typeof(ValidatorBaseAttribute));
+					attrs = context.MemberAccessor.GetAttributes<ValidatorBaseAttribute>();
 				}
 			}
 
@@ -119,9 +116,11 @@ namespace BLToolkit.Validation
 			{
 				context.Value = value;
 
-				foreach (ValidatorBaseAttribute attr in attrs)
-					if (attr.IsValid(context) == false)
+				for (int i = 0; i < attrs.Length; i++)
+				{
+					if (!attrs[i].IsValid(context))
 						return false;
+				}
 			}
 
 			return true;
@@ -157,17 +156,17 @@ namespace BLToolkit.Validation
 
 			if (context.MemberAccessor != null)
 			{
-				ArrayList messages = new ArrayList();
-				object[]  attrs    = context.MemberAccessor.GetAttributes(typeof(ValidatorBaseAttribute));
+				List<string>          messages = new List<string>();
+				ValidatorBaseAttribute[] attrs = context.MemberAccessor.GetAttributes<ValidatorBaseAttribute>();
 
 				if (attrs != null)
 				{
 					context.Value = context.MemberAccessor.GetValue(context.Object);
 
-					foreach (ValidatorBaseAttribute attr in attrs)
-						messages.Add(attr.GetErrorMessage(context));
+					for (int i = 0; i < attrs.Length; i++)
+						messages.Add(attrs[i].GetErrorMessage(context));
 
-					return (string[])messages.ToArray(typeof(string));
+					return messages.ToArray();
 				}
 			}
 

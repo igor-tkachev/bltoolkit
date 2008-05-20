@@ -838,9 +838,9 @@ namespace BLToolkit.Reflection
 
 			if (objectViewType != null)
 			{
-				TypeAccessor viewAccessor = GetAccessor(objectViewType);
-				IObjectView  objectView   = (IObjectView)viewAccessor.CreateInstanceEx();
-				ArrayList    list         = new ArrayList();
+				TypeAccessor             viewAccessor = GetAccessor(objectViewType);
+				IObjectView              objectView   = (IObjectView)viewAccessor.CreateInstanceEx();
+				List<PropertyDescriptor> list         = new List<PropertyDescriptor>();
 
 				PropertyDescriptorCollection viewpdc = viewAccessor.PropertyDescriptors;
 
@@ -851,13 +851,12 @@ namespace BLToolkit.Reflection
 					if (viewpdc.Find(pd.Name, false) == null)
 						list.Add(pd);
 
-				pdc = new PropertyDescriptorCollection(
-					(PropertyDescriptor[])list.ToArray(typeof(PropertyDescriptor)));
+				pdc = new PropertyDescriptorCollection(list.ToArray());
 			}
 
 			pdc = pdc.Sort(new PropertyDescriptorComparer());
 
-			pdc = GetExtendedProperties(pdc, OriginalType, "", new Type[0], new PropertyDescriptor[0], isNull);
+			pdc = GetExtendedProperties(pdc, OriginalType, String.Empty, Type.EmptyTypes, new PropertyDescriptor[0], isNull);
 
 			return pdc;
 		}

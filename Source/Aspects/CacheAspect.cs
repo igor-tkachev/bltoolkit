@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Reflection;
 using System.Threading;
 
@@ -365,7 +366,7 @@ namespace BLToolkit.Aspects
 				{
 					_workTimes++;
 
-					ArrayList list = new ArrayList();
+					List<DictionaryEntry> list = new List<DictionaryEntry>();
 
 					foreach (IDictionary cache in _caches)
 					{

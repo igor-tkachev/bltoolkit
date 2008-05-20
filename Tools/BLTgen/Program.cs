@@ -1,5 +1,4 @@
 using System;
-using System.Collections;
 using System.ComponentModel;
 using System.IO;
 using System.Reflection;
@@ -125,47 +124,38 @@ namespace BLTgen
 
 		private static Type[] FilterBaseTypes(Type[] types, string pattern)
 		{
-			if (null == pattern || 0 == pattern.Length)
+			if (string.IsNullOrEmpty(pattern))
 				return types;
 
-			Regex     re            = new Regex("^" + Regex.Escape(pattern).Replace("\\*", ".*").Replace(";", "$|") + "$");
-			ArrayList filteredTypes = new ArrayList(types.Length);
+			Regex re = new Regex("^" + Regex.Escape(pattern).Replace("\\*", ".*").Replace(";", "$|") + "$");
 
-			foreach (Type t in types)
+			return Array.FindAll(types, delegate(Type t)
 			{
 				for (Type bt = t.BaseType; bt != null; bt = bt.BaseType)
 				{
 					if (re.Match(bt.FullName).Success)
-					{
-						filteredTypes.Add(t);
-						break;
-					}
+						return true;
 				}
-			}
-
-			return (Type[])filteredTypes.ToArray(typeof(Type));
+				return false;
+			});
 		}
 
 		private static Type[] FilterTypes(Type[] types, string pattern, bool include)
 		{
-			if (null == pattern || 0 == pattern.Length)
+			if (string.IsNullOrEmpty(pattern))
 				return types;
 
-			Regex     re            = new Regex("^" + Regex.Escape(pattern).Replace("\\*", ".*").Replace(";", "$|") + "$");
-			ArrayList filteredTypes = new ArrayList(types.Length);
+			Regex re = new Regex("^" + Regex.Escape(pattern).Replace("\\*", ".*").Replace(";", "$|") + "$");
 
-			foreach (Type t in types)
+			return Array.FindAll(types, delegate(Type t)
 			{
-				if (re.Match(t.FullName).Success == include)
-					filteredTypes.Add(t);
-			}
-
-			return (Type[])filteredTypes.ToArray(typeof(Type));
+				return re.Match(t.FullName).Success == include;
+			});
 		}
 
 		private static string GetOutputAssemblyLocation(string sourceAssembly, string outputDirectory)
 		{
-			if (null == outputDirectory || 0 == outputDirectory.Length)
+			if (string.IsNullOrEmpty(outputDirectory))
 				outputDirectory = Path.GetDirectoryName(sourceAssembly);
 
 			string fileName = Path.ChangeExtension(Path.GetFileName(sourceAssembly), "BLToolkitExtension.dll");
@@ -189,7 +179,7 @@ namespace BLTgen
 
 		private static string ExecutableName
 		{
-			get { return Path.GetFileName(Assembly.GetEntryAssembly().Location); }
+			get { return Path.GetFileName(new Uri(Assembly.GetEntryAssembly().EscapedCodeBase).AbsolutePath); }
 		}
 
 		private static string GetDescription(MemberMapper mm)

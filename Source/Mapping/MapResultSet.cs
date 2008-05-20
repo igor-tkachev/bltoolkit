@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 
 namespace BLToolkit.Mapping
 {
@@ -39,7 +40,7 @@ namespace BLToolkit.Mapping
 
 			if (resultSet._relationList != null)
 			{
-				_relationList = new ArrayList(resultSet._relationList.Count);
+				_relationList = new List<MapRelation>(resultSet._relationList.Count);
 				_relationList.AddRange(resultSet._relationList);
 			}
 		}
@@ -97,7 +98,7 @@ namespace BLToolkit.Mapping
 			get 
 			{
 				if (_relationList != null && (_relations == null || _relations.Length != _relationList.Count))
-					_relations = (MapRelation[])_relationList.ToArray(typeof(MapRelation));
+					_relations = _relationList.ToArray();
 
 				return _relations;
 			}
@@ -105,7 +106,7 @@ namespace BLToolkit.Mapping
 			set { _relations = value; }
 		}
 
-		private ArrayList _relationList;
+		private List<MapRelation> _relationList;
 
 		public void AddRelation(
 			MapResultSet slaveResultSet,
@@ -114,7 +115,7 @@ namespace BLToolkit.Mapping
 			string       containerName)
 		{
 			if (_relationList == null)
-				_relationList = new ArrayList();
+				_relationList = new List<MapRelation>();
 
 			_relationList.Add(new MapRelation(slaveResultSet, slaveIndex, masterIndex, containerName));
 		}

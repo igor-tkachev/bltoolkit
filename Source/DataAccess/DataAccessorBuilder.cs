@@ -1395,7 +1395,7 @@ namespace BLToolkit.DataAccess
 			if (attrs.Length == 0)
 				return null;
 
-			ArrayList list = new ArrayList();
+			List<string> list = new List<string>();
 
 			foreach (Direction attr in attrs)
 				if (attr.Members != null)
@@ -1404,9 +1404,9 @@ namespace BLToolkit.DataAccess
 			if (list.Count == 0)
 				return null;
 
-			list.Sort(CaseInsensitiveComparer.Default);
+			list.Sort(string.CompareOrdinal);
 
-			string[] strings = (string[]) list.ToArray(typeof(string));
+			string[] strings = list.ToArray();
 
 			// There a no limit for a field name length, but Visual Studio Debugger
 			// may crash on fields with name longer then 256 symbols.

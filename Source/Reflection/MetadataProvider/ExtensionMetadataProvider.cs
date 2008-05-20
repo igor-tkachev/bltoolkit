@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Reflection;
 
 using BLToolkit.Mapping;
@@ -77,7 +78,7 @@ namespace BLToolkit.Reflection.MetadataProvider
 			if (extList == AttributeExtensionCollection.Null)
 				return GetMapValues(mapper.Extension, member.Type, out isSet);
 
-			ArrayList list = new ArrayList(extList.Count);
+			List<MapValue> list = new List<MapValue>(extList.Count);
 
 			foreach (AttributeExtension ext in extList)
 			{
@@ -92,15 +93,15 @@ namespace BLToolkit.Reflection.MetadataProvider
 
 			isSet = true;
 
-			return (MapValue[])list.ToArray(typeof(MapValue));
+			return list.ToArray();
 		}
 
 		const FieldAttributes EnumField = FieldAttributes.Public | FieldAttributes.Static | FieldAttributes.Literal;
 
-		static ArrayList GetEnumMapValues(TypeExtension typeExt, Type type)
+		static List<MapValue> GetEnumMapValues(TypeExtension typeExt, Type type)
 		{
-			ArrayList   mapValues = null;
-			FieldInfo[] fields    = type.GetFields();
+			List<MapValue> mapValues = null;
+			FieldInfo[]    fields    = type.GetFields();
 
 			foreach (FieldInfo fi in fields)
 			{
@@ -121,7 +122,7 @@ namespace BLToolkit.Reflection.MetadataProvider
 					if (list.Count > 0)
 					{
 						if (mapValues == null)
-							mapValues = new ArrayList(fields.Length);
+							mapValues = new List<MapValue>(fields.Length);
 
 						mapValues.Add(new MapValue(origValue, list.ToArray()));
 					}
@@ -131,14 +132,14 @@ namespace BLToolkit.Reflection.MetadataProvider
 			return mapValues;
 		}
 
-		static ArrayList GetTypeMapValues(TypeExtension typeExt, Type type)
+		static List<MapValue> GetTypeMapValues(TypeExtension typeExt, Type type)
 		{
 			AttributeExtensionCollection extList = typeExt.Attributes["MapValue"];
 
 			if (extList == AttributeExtensionCollection.Null)
 				return null;
 
-			ArrayList attrs = new ArrayList(extList.Count);
+			List<MapValue> attrs = new List<MapValue>(extList.Count);
 
 			foreach (AttributeExtension ext in extList)
 			{
@@ -156,7 +157,7 @@ namespace BLToolkit.Reflection.MetadataProvider
 
 		public override MapValue[] GetMapValues(TypeExtension typeExt, Type type, out bool isSet)
 		{
-			ArrayList list = null;
+			List<MapValue> list = null;
 
 			if (type.IsEnum)
 				list = GetEnumMapValues(typeExt, type);
@@ -166,7 +167,7 @@ namespace BLToolkit.Reflection.MetadataProvider
 
 			isSet = list != null;
 
-			return isSet? (MapValue[])list.ToArray(typeof(MapValue)): null;
+			return isSet? list.ToArray(): null;
 		}
 
 		#endregion

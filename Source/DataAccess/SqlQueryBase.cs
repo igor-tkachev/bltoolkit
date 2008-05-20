@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Text;
 
 using BLToolkit.Aspects;
@@ -36,18 +37,18 @@ namespace BLToolkit.DataAccess
 
 		protected static MemberMapper[] GetFieldList(ObjectMapper om)
 		{
-			ArrayList list = new ArrayList();
+			List<MemberMapper> list = new List<MemberMapper>();
 
 			foreach (MemberMapper mm in om)
 				list.Add(mm);
 
-			return (MemberMapper[])list.ToArray(typeof(MemberMapper));
+			return list.ToArray();
 		}
 
 		protected MemberMapper[] GetNonKeyFieldList(ObjectMapper om)
 		{
-			TypeExtension typeExt = TypeExtension.GetTypeExtension(om.TypeAccessor.OriginalType, Extensions);
-			ArrayList     list    = new ArrayList();
+			TypeExtension      typeExt = TypeExtension.GetTypeExtension(om.TypeAccessor.OriginalType, Extensions);
+			List<MemberMapper> list    = new List<MemberMapper>();
 
 			foreach (MemberMapper mm in om)
 			{
@@ -60,7 +61,7 @@ namespace BLToolkit.DataAccess
 					list.Add(mm);
 			}
 
-			return (MemberMapper[])list.ToArray(typeof(MemberMapper));
+			return list.ToArray();
 		}
 
 		class MemberOrder
@@ -75,16 +76,7 @@ namespace BLToolkit.DataAccess
 			public readonly int          Order;
 		}
 
-		class PrimaryKeyComparer : IComparer
-		{
-			public int Compare(object x, object y)
-			{
-				return ((MemberOrder)x).Order - ((MemberOrder)y).Order;
-			}
-		}
-
-		private static readonly PrimaryKeyComparer _primaryKeyComparer = new PrimaryKeyComparer();
-		private static readonly Hashtable          _keyList            = new Hashtable();
+		private static readonly Hashtable _keyList = new Hashtable();
 
 		protected internal MemberMapper[] GetKeyFieldList(DbManager db, Type type)
 		{
@@ -93,8 +85,8 @@ namespace BLToolkit.DataAccess
 
 			if (mmList == null)
 			{
-				TypeExtension typeExt = TypeExtension.GetTypeExtension(type, Extensions);
-				ArrayList     list    = new ArrayList();
+				TypeExtension     typeExt = TypeExtension.GetTypeExtension(type, Extensions);
+				List<MemberOrder> list    = new List<MemberOrder>();
 
 				foreach (MemberMapper mm in db.MappingSchema.GetObjectMapper(type))
 				{
@@ -110,12 +102,12 @@ namespace BLToolkit.DataAccess
 					}
 				}
 
-				list.Sort(_primaryKeyComparer);
+				list.Sort(delegate(MemberOrder x, MemberOrder y) { return x.Order - y.Order; });
 
 				_keyList[key] = mmList = new MemberMapper[list.Count];
 
 				for (int i = 0; i < list.Count; i++)
-					mmList[i] = ((MemberOrder)list[i]).MemberMapper;
+					mmList[i] = list[i].MemberMapper;
 			}
 
 			return mmList;
@@ -193,12 +185,12 @@ namespace BLToolkit.DataAccess
 
 		protected SqlQueryInfo CreateInsertSqlText(DbManager db, Type type)
 		{
-			TypeExtension   typeExt = TypeExtension.GetTypeExtension(type, Extensions);
-			ObjectMapper    om      = db.MappingSchema.GetObjectMapper(type);
-			ArrayList       list    = new ArrayList();
-			StringBuilder   sb      = new StringBuilder();
-			SqlQueryInfo    query   = new SqlQueryInfo(om);
-			MetadataProviderBase mp = MappingSchema.MetadataProvider;
+			TypeExtension        typeExt = TypeExtension.GetTypeExtension(type, Extensions);
+			ObjectMapper         om      = db.MappingSchema.GetObjectMapper(type);
+			List<MemberMapper>   list    = new List<MemberMapper>();
+			StringBuilder        sb      = new StringBuilder();
+			SqlQueryInfo         query   = new SqlQueryInfo(om);
+			MetadataProviderBase mp      = MappingSchema.MetadataProvider;
 
 			sb.AppendFormat("INSERT INTO {0} (\n",
 				db.DataProvider.Convert(GetTableName(type), ConvertType.NameToQueryTable));

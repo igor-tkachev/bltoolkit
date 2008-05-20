@@ -1014,8 +1014,8 @@ namespace BLToolkit.Data
 			if (dataRow == null)
 				throw new ArgumentNullException("dataRow");
 
-			ArrayList paramList = new ArrayList();
-			IComparer comparer  = CaseInsensitiveComparer.Default;
+			List<IDbDataParameter> paramList = new List<IDbDataParameter>();
+			IComparer              comparer  = CaseInsensitiveComparer.Default;
 
 			outputParameters      = (string[])SortArray(outputParameters,      comparer);
 			inputOutputParameters = (string[])SortArray(inputOutputParameters, comparer);
@@ -1045,7 +1045,7 @@ namespace BLToolkit.Data
 			if (commandParameters != null)
 				paramList.AddRange(commandParameters);
 
-			return (IDbDataParameter[])paramList.ToArray(typeof(IDbDataParameter));
+			return paramList.ToArray();
 		}
 
 		/// <summary>
@@ -1090,11 +1090,11 @@ namespace BLToolkit.Data
 			if (obj == null)
 				throw new ArgumentNullException("obj");
 
-			bool         isType    = obj is Type;
-			Type         type      = isType? (Type)obj: obj.GetType();
-			ObjectMapper om        = _mappingSchema.GetObjectMapper(type);
-			ArrayList    paramList = new ArrayList();
-			IComparer    comparer  = CaseInsensitiveComparer.Default;
+			bool                   isType    = obj is Type;
+			Type                   type      = isType? (Type)obj: obj.GetType();
+			ObjectMapper           om        = _mappingSchema.GetObjectMapper(type);
+			List<IDbDataParameter> paramList = new List<IDbDataParameter>();
+			IComparer              comparer  = CaseInsensitiveComparer.Default;
 
 			outputParameters       = (string[])SortArray(outputParameters,      comparer);
 			inputOutputParameters  = (string[])SortArray(inputOutputParameters, comparer);
@@ -1124,7 +1124,7 @@ namespace BLToolkit.Data
 			if (commandParameters != null)
 				paramList.AddRange(commandParameters);
 
-			return (IDbDataParameter[])paramList.ToArray(typeof(IDbDataParameter));
+			return paramList.ToArray();
 		}
 
 		/// <summary>

@@ -1,5 +1,5 @@
 using System;
-using System.Collections;
+using System.Collections.Generic;
 using System.Reflection;
 
 namespace BLToolkit.Reflection.MetadataProvider
@@ -134,13 +134,13 @@ namespace BLToolkit.Reflection.MetadataProvider
 
 		public override MapValue[] GetMapValues(ObjectMapper mapper, MemberAccessor member, out bool isSet)
 		{
-			ArrayList list = null;
+			List<MapValue> list = null;
 
-			object[] attrs = member.GetAttributes(typeof(MapValueAttribute));
+			object[] attrs = member.GetAttributes<MapValueAttribute>();
 
 			if (attrs != null)
 			{
-				list = new ArrayList(attrs.Length);
+				list = new List<MapValue>(attrs.Length);
 
 				foreach (MapValueAttribute a in attrs)
 					list.Add(new MapValue(a.OrigValue, a.Values));
@@ -151,7 +151,7 @@ namespace BLToolkit.Reflection.MetadataProvider
 			if (attrs != null && attrs.Length > 0)
 			{
 				if (list == null)
-					list = new ArrayList(attrs.Length);
+					list = new List<MapValue>(attrs.Length);
 
 				foreach (MapValueAttribute a in attrs)
 					if (a.Type == null && a.OrigValue != null && a.OrigValue.GetType() == member.Type ||
@@ -169,15 +169,15 @@ namespace BLToolkit.Reflection.MetadataProvider
 
 			isSet = true;
 
-			return (MapValue[])list.ToArray(typeof(MapValue));
+			return list.ToArray();
 		}
 
 		const FieldAttributes EnumField = FieldAttributes.Public | FieldAttributes.Static | FieldAttributes.Literal;
 
-		static ArrayList GetEnumMapValues(Type type)
+		static List<MapValue> GetEnumMapValues(Type type)
 		{
-			ArrayList   list   = null;
-			FieldInfo[] fields = type.GetFields();
+			List<MapValue> list   = null;
+			FieldInfo[]    fields = type.GetFields();
 
 			foreach (FieldInfo fi in fields)
 			{
@@ -188,7 +188,7 @@ namespace BLToolkit.Reflection.MetadataProvider
 					foreach (MapValueAttribute attr in enumAttributes)
 					{
 						if (list == null)
-							list = new ArrayList(fields.Length);
+							list = new List<MapValue>(fields.Length);
 
 						object origValue = Enum.Parse(type, fi.Name);
 
@@ -202,7 +202,7 @@ namespace BLToolkit.Reflection.MetadataProvider
 
 		public override MapValue[] GetMapValues(TypeExtension typeExt, Type type, out bool isSet)
 		{
-			ArrayList list = null;
+			List<MapValue> list = null;
 
 			if (type.IsEnum)
 				list = GetEnumMapValues(type);
@@ -212,7 +212,7 @@ namespace BLToolkit.Reflection.MetadataProvider
 			if (attrs != null && attrs.Length != 0)
 			{
 				if (list == null)
-					list = new ArrayList(attrs.Length);
+					list = new List<MapValue>(attrs.Length);
 
 				for (int i = 0; i < attrs.Length; i++)
 				{
@@ -223,7 +223,7 @@ namespace BLToolkit.Reflection.MetadataProvider
 
 			isSet = list != null;
 
-			return isSet? (MapValue[])list.ToArray(typeof(MapValue)): null;
+			return isSet? list.ToArray(): null;
 		}
 
 		#endregion
@@ -425,12 +425,12 @@ namespace BLToolkit.Reflection.MetadataProvider
 
 		public override int GetPrimaryKeyOrder(Type type, TypeExtension typeExt, MemberAccessor member, out bool isSet)
 		{
-			object[] attrs = member.GetAttributes(typeof(PrimaryKeyAttribute));
+			PrimaryKeyAttribute attr = member.GetAttribute<PrimaryKeyAttribute>();
 
-			if (attrs != null)
+			if (attr != null)
 			{
 				isSet = true;
-				return ((PrimaryKeyAttribute)attrs[0]).Order;
+				return attr.Order;
 			}
 
 			return base.GetPrimaryKeyOrder(type, typeExt, member, out isSet);
@@ -442,7 +442,7 @@ namespace BLToolkit.Reflection.MetadataProvider
 
 		public override bool GetNonUpdatableFlag(Type type, TypeExtension typeExt, MemberAccessor member, out bool isSet)
 		{
-			if (member.GetAttributes(typeof(NonUpdatableAttribute)) != null)
+			if (member.IsDefined<NonUpdatableAttribute>())
 			{
 				isSet = true;
 				return true;

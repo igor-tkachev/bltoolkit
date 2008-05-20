@@ -75,6 +75,11 @@ namespace BLToolkit.Reflection
 
 		#region Public Methods
 
+		public bool IsDefined<T>() where T : Attribute
+		{
+			return _memberInfo.IsDefined(typeof(T), true);
+		}
+
 		[Obsolete("Use generic version instead")]
 		public Attribute GetAttribute(Type attributeType)
 		{
@@ -87,7 +92,7 @@ namespace BLToolkit.Reflection
 		{
 			object[] attrs = _memberInfo.GetCustomAttributes(typeof(T), true);
 
-			return (T)(attrs.Length > 0? attrs[0]: null);
+			return attrs.Length > 0? (T)attrs[0]: null;
 		}
 
 		[Obsolete("Use generic version instead")]
