@@ -38,6 +38,11 @@ namespace BLToolkit.Data.DataProvider
 {
 	public class FdpDataProvider : DataProviderBase
 	{
+		public FdpDataProvider()
+		{
+			MappingSchema = new FbMappingSchema();
+		}
+
 		#region InOut & ReturnValue emulation
 
 		public static string InOutInputParameterPrefix = "in_";

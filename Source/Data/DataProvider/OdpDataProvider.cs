@@ -29,6 +29,11 @@ namespace BLToolkit.Data.DataProvider
 	/// <seealso cref="DbManager.AddDataProvider(DataProviderBase)">AddDataManager Method</seealso>
 	public class OdpDataProvider : DataProviderBase
 	{
+		public OdpDataProvider()
+		{
+			MappingSchema = new OdpMappingSchema();
+		}
+
 		static OdpDataProvider()
 		{
 			// Fix Oracle.Net bug #1: Array types are not handled.
@@ -397,6 +402,15 @@ namespace BLToolkit.Data.DataProvider
 						oraParameter.Value = CopyStream(stream, (OracleCommand)command);
 					}
 				}
+				else if (oraParameter.Value is Byte[])
+				{
+					Byte[] bytes = (Byte[]) oraParameter.Value;
+
+					if (bytes.Length > 32000)
+					{
+						oraParameter.Value = CopyStream(bytes, (OracleCommand)command);
+					}
+				}
 				else if (oraParameter.Value is XmlDocument)
 				{
 					XmlDocument xmlDocument = (XmlDocument)oraParameter.Value;
@@ -452,8 +466,12 @@ namespace BLToolkit.Data.DataProvider
 
 		private static Stream CopyStream(Stream stream, OracleCommand cmd)
 		{
+			return CopyStream(BLToolkit.Common.Convert.ToByteArray(stream), cmd);
+		}
+
+		private static Stream CopyStream(Byte[] bytes, OracleCommand cmd)
+		{
 			OracleBlob ret = new OracleBlob(cmd.Connection);
-			Byte[] bytes = BLToolkit.Common.Convert.ToByteArray(stream);
 			ret.Write(bytes, 0, bytes.Length);
 			return ret;
 		}
@@ -1003,7 +1021,8 @@ namespace BLToolkit.Data.DataProvider
 				}
 
 				return base.MapValueToEnum(value, type);
-			}		}
+			}
+		}
 
 		public class OracleDataReaderMapper : DataReaderMapper
 		{
