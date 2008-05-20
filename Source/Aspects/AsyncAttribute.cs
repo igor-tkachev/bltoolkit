@@ -30,7 +30,7 @@ namespace BLToolkit.Aspects
 
 		public override IAbstractTypeBuilder TypeBuilder
 		{
-			get { return new AsyncAspectBuilder(_targetMethodName, _parameterTypes); }
+			get { return new Builders.AsyncAspectBuilder(_targetMethodName, _parameterTypes); }
 		}
 	}
 }

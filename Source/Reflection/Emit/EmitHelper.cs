@@ -3469,7 +3469,9 @@ namespace BLToolkit.Reflection.Emit
 		/// <param name="type">A type</param>
 		public EmitHelper LoadType(Type type)
 		{
-			return ldtoken(type).call(typeof(Type), "GetTypeFromHandle", typeof(RuntimeTypeHandle));
+			return type == null?
+				ldnull:
+				ldtoken(type).call(typeof(Type), "GetTypeFromHandle", typeof(RuntimeTypeHandle));
 		}
 
 		/// <summary>

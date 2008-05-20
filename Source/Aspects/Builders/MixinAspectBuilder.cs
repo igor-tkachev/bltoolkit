@@ -6,7 +6,7 @@ using BLToolkit.TypeBuilder.Builders;
 using BLToolkit.Reflection.Emit;
 using BLToolkit.TypeBuilder;
 
-namespace BLToolkit.Aspects
+namespace BLToolkit.Aspects.Builders
 {
 	public class MixinAspectBuilder : AbstractTypeBuilderBase
 	{

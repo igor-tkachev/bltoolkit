@@ -67,7 +67,7 @@ namespace BLToolkit.Aspects
 		{
 			get
 			{
-				 return new InterceptorAspectBuilder(
+				 return new Builders.InterceptorAspectBuilder(
 					 InterceptorType, InterceptType, ConfigString, Priority);
 			}
 		}

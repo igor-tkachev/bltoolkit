@@ -5,7 +5,7 @@ using System.Reflection.Emit;
 using BLToolkit.Reflection.Emit;
 using BLToolkit.TypeBuilder.Builders;
 
-namespace BLToolkit.Aspects
+namespace BLToolkit.Aspects.Builders
 {
 	public class NotNullAspectBuilder : AbstractTypeBuilderBase
 	{

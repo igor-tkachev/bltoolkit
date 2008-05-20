@@ -259,8 +259,9 @@ namespace BLToolkit.Aspects
 				if (fieldInfo.FieldType != typeof(CallMethodInfo))
 					continue;
 
-				CallMethodInfo cmi = (CallMethodInfo) fieldInfo.GetValue(null);
-				if (cmi.MethodInfo == methodInfo)
+				CallMethodInfo cmi = (CallMethodInfo)fieldInfo.GetValue(null);
+
+				if (cmi != null && cmi.MethodInfo == methodInfo)
 				{
 					CleanupThread.ClearCache(cmi.MethodCallCache);
 					break;

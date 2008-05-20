@@ -64,6 +64,7 @@
     </Compile>
     <Compile Include="Aspects\AsyncAspect.cs" />
     <Compile Include="Aspects\CacheAspect.cs" />
+    <Compile Include="Aspects\ClearCacheAspect.cs" />
     <Compile Include="Aspects\CounterAspect.cs" />
     <Compile Include="Aspects\CustomCacheAspect.cs" />
     <Compile Include="Aspects\LoggingAspect.cs" />

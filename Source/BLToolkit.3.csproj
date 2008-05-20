@@ -93,6 +93,13 @@
     <None Include="Data\DataProvider\SybaseAdoDataProvider.cs">
       <DependentUpon>DataProviderBase.cs</DependentUpon>
     </None>
+    <Compile Include="Aspects\Builders\AsyncAspectBuilder.cs" />
+    <Compile Include="Aspects\Builders\InterceptorAspectBuilder.cs" />
+    <Compile Include="Aspects\Builders\MixinAspectBuilder.cs" />
+    <Compile Include="Aspects\Builders\NotNullAspectBuilder.cs" />
+    <Compile Include="Aspects\ClearCacheAspect.cs" />
+    <Compile Include="Aspects\Builders\ClearCacheAspectBuilder.cs" />
+    <Compile Include="Aspects\ClearCacheAttribute.cs" />
     <Compile Include="DataAccess\ActualTypeAttribute.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
@@ -104,7 +111,6 @@
     <Compile Include="Aspects\CacheAspectT.cs" />
     <Compile Include="Aspects\CacheAttribute.cs" />
     <Compile Include="Aspects\CallMethodInfo.cs" />
-    <Compile Include="Aspects\AsyncAspectBuilder.cs" />
     <Compile Include="Aspects\AsyncAttribute.cs" />
     <Compile Include="Aspects\MethodCallCounter.cs" />
     <Compile Include="Aspects\CounterAspect.cs" />
@@ -112,14 +118,12 @@
     <Compile Include="Aspects\NoCacheAttribute.cs" />
     <Compile Include="Aspects\IInterceptor.cs" />
     <Compile Include="Aspects\Interceptor.cs" />
-    <Compile Include="Aspects\InterceptorAspectBuilder.cs" />
     <Compile Include="Aspects\InterceptCallInfo.cs" />
     <Compile Include="Aspects\InterceptorAttribute.cs" />
     <Compile Include="Aspects\InterceptResult.cs" />
     <Compile Include="Aspects\InterceptType.cs" />
     <Compile Include="Aspects\LogAttribute.cs" />
     <Compile Include="Aspects\LoggingAspect.cs" />
-    <Compile Include="Aspects\MixinAspectBuilder.cs" />
     <Compile Include="Aspects\MixinAttribute.cs" />
     <Compile Include="Aspects\MixinOverrideAttribute.cs" />
     <Compile Include="Aspects\NoCounterAttribute.cs" />
@@ -348,7 +352,6 @@
     <Compile Include="TypeBuilder\Builders\IAbstractTypeBuilder.cs" />
     <Compile Include="Reflection\InitContext.cs" />
     <Compile Include="TypeBuilder\Builders\InstanceTypeBuilder.cs" />
-    <Compile Include="Aspects\NotNullAspectBuilder.cs" />
     <Compile Include="TypeBuilder\Builders\TypeBuilderConsts.cs" />
     <Compile Include="TypeBuilder\DefaultInstanceTypeAttribute.cs" />
     <Compile Include="TypeBuilder\GetValueAttribute.cs" />

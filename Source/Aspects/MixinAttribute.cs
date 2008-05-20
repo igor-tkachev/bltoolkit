@@ -64,7 +64,7 @@ namespace BLToolkit.Aspects
 		{
 			get
 			{
-				return new MixinAspectBuilder(
+				return new Builders.MixinAspectBuilder(
 					_targetInterface, _memberName, _throwExceptionIfNull, _exceptionMessage);
 			}
 		}

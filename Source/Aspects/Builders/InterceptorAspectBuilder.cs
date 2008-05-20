@@ -6,7 +6,7 @@ using BLToolkit.Reflection;
 using BLToolkit.Reflection.Emit;
 using BLToolkit.TypeBuilder.Builders;
 
-namespace BLToolkit.Aspects
+namespace BLToolkit.Aspects.Builders
 {
 	public class InterceptorAspectBuilder : AbstractTypeBuilderBase
 	{
@@ -235,20 +235,6 @@ namespace BLToolkit.Aspects
 				EmitHelper emit = Context.MethodBuilder.Emitter;
 
 				Label checkMethodInfo = emit.DefineLabel();
-
-//				emit
-//					.ldsfld    (methodInfo)
-//					.brtrue_s  (checkMethodInfo)
-//					.ldc_i4_0
-//					.newobj    (TypeHelper.GetConstructor(typeof(StackTrace), typeof(int)))
-//					.ldc_i4_0
-//					.callvirt  (typeof(StackTrace), "GetFrame", typeof(int))
-//					.callvirt  (typeof(StackFrame), "GetMethod")
-//					.castclass (typeof(MethodInfo))
-//					.newobj    (TypeHelper.GetConstructor(typeof(CallMethodInfo), typeof(MethodInfo)))
-//					.stsfld    (methodInfo)
-//					.MarkLabel (checkMethodInfo)
-//					;
 
 				emit
 					.ldsfld    (methodInfo)

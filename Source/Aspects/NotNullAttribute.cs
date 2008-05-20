@@ -28,7 +28,7 @@ namespace BLToolkit.Aspects
 
 		public override IAbstractTypeBuilder TypeBuilder
 		{
-			get { return new NotNullAspectBuilder(_message); }
+			get { return new Builders.NotNullAspectBuilder(_message); }
 		}
 	}
 }

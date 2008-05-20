@@ -2,11 +2,12 @@ using System;
 using System.Reflection;
 using System.Reflection.Emit;
 using System.Threading;
+
 using BLToolkit.Reflection.Emit;
 using BLToolkit.TypeBuilder;
 using BLToolkit.TypeBuilder.Builders;
 
-namespace BLToolkit.Aspects
+namespace BLToolkit.Aspects.Builders
 {
 	public class AsyncAspectBuilder : AbstractTypeBuilderBase
 	{

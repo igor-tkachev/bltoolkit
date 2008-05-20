@@ -30,6 +30,7 @@ Enhancement
 - New TypeAccessor.AssociateType method and TypeAccessor.AssociatedTypeHandler event
   to control interface/type implementation.
 - DataException now has the 'Number' property.
+- New ClearCache aspect.
 
 v 2.0.7
 

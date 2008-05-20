@@ -2,7 +2,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>8.0.50727</ProductVersion>
+    <ProductVersion>9.0.21022</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{3C37A408-3A01-4568-99D1-ADFEDDFFF2BC}</ProjectGuid>
     <OutputType>Library</OutputType>
@@ -48,27 +48,31 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Aspects\Builders\AsyncAspectBuilder.cs" />
+    <Compile Include="Aspects\Builders\ClearCacheAspectBuilder.cs" />
+    <Compile Include="Aspects\Builders\InterceptorAspectBuilder.cs" />
+    <Compile Include="Aspects\Builders\MixinAspectBuilder.cs" />
+    <Compile Include="Aspects\Builders\NotNullAspectBuilder.cs" />
     <Compile Include="Aspects\CacheAspect.cs" />
     <Compile Include="Aspects\CacheAspectItem.cs" />
     <Compile Include="Aspects\CacheAspectT.cs" />
     <Compile Include="Aspects\CacheAttribute.cs" />
     <Compile Include="Aspects\CallMethodInfo.cs" />
-    <Compile Include="Aspects\AsyncAspectBuilder.cs" />
     <Compile Include="Aspects\AsyncAttribute.cs" />
+    <Compile Include="Aspects\ClearCacheAspect.cs" />
+    <Compile Include="Aspects\ClearCacheAttribute.cs" />
     <Compile Include="Aspects\MethodCallCounter.cs" />
     <Compile Include="Aspects\CounterAspect.cs" />
     <Compile Include="Aspects\CounterAttribute.cs" />
     <Compile Include="Aspects\NoCacheAttribute.cs" />
     <Compile Include="Aspects\IInterceptor.cs" />
     <Compile Include="Aspects\Interceptor.cs" />
-    <Compile Include="Aspects\InterceptorAspectBuilder.cs" />
     <Compile Include="Aspects\InterceptCallInfo.cs" />
     <Compile Include="Aspects\InterceptorAttribute.cs" />
     <Compile Include="Aspects\InterceptResult.cs" />
     <Compile Include="Aspects\InterceptType.cs" />
     <Compile Include="Aspects\LogAttribute.cs" />
     <Compile Include="Aspects\LoggingAspect.cs" />
-    <Compile Include="Aspects\MixinAspectBuilder.cs" />
     <Compile Include="Aspects\MixinAttribute.cs" />
     <Compile Include="Aspects\MixinOverrideAttribute.cs" />
     <Compile Include="Aspects\NoCounterAttribute.cs" />
@@ -323,7 +327,6 @@
     <Compile Include="TypeBuilder\Builders\IAbstractTypeBuilder.cs" />
     <Compile Include="Reflection\InitContext.cs" />
     <Compile Include="TypeBuilder\Builders\InstanceTypeBuilder.cs" />
-    <Compile Include="Aspects\NotNullAspectBuilder.cs" />
     <Compile Include="TypeBuilder\Builders\TypeBuilderConsts.cs" />
     <Compile Include="TypeBuilder\DefaultInstanceTypeAttribute.cs" />
     <Compile Include="TypeBuilder\GetValueAttribute.cs" />
