@@ -16,6 +16,9 @@ namespace BLTgen
 		[MapField(""), Description("source assembly location")]
 		public string SourceAssembly;
 
+		[MapField("B"), Description("Base type names to include (default: none). Example: /B:*EntityBase;SomeNamespace.*Base")]
+		public string BaseTypes;
+
 		[MapField("O"), Description("Output directory name (default: target assembly location). Example: /O:C:\\Temp")]
 		public string OutputDirectory;
 
@@ -68,6 +71,7 @@ namespace BLTgen
 			TypeFactory.SetGlobalAssembly(extensionAssemblyPath, extensionAssemblyVersion, parsedArgs.KeyPairFile);
 
 			Type[] typesToProcess = sourceAsm.GetExportedTypes();
+			typesToProcess = FilterBaseTypes(typesToProcess, parsedArgs.BaseTypes);
 			typesToProcess = FilterTypes(typesToProcess, parsedArgs.Include, true);
 			typesToProcess = FilterTypes(typesToProcess, parsedArgs.Exclude, false);
 
@@ -117,6 +121,29 @@ namespace BLTgen
 			}
 
 			return null;
+		}
+
+		private static Type[] FilterBaseTypes(Type[] types, string pattern)
+		{
+			if (null == pattern || 0 == pattern.Length)
+				return types;
+
+			Regex     re            = new Regex("^" + Regex.Escape(pattern).Replace("\\*", ".*").Replace(";", "$|") + "$");
+			ArrayList filteredTypes = new ArrayList(types.Length);
+
+			foreach (Type t in types)
+			{
+				for (Type bt = t.BaseType; bt != null; bt = bt.BaseType)
+				{
+					if (re.Match(bt.FullName).Success)
+					{
+						filteredTypes.Add(t);
+						break;
+					}
+				}
+			}
+
+			return (Type[])filteredTypes.ToArray(typeof(Type));
 		}
 
 		private static Type[] FilterTypes(Type[] types, string pattern, bool include)
