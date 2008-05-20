@@ -1,9 +1,6 @@
 using System;
-
 using NUnit.Framework;
-
 using BLToolkit.DataAccess;
-using BLToolkit.Reflection;
 
 namespace HowTo.DataAccess
 {
@@ -36,7 +33,7 @@ namespace HowTo.DataAccess
 		[Test]
 		public void Test()
 		{
-			PersonAccessor pa = /*[a]*/TypeAccessor/*[/a]*/<PersonAccessor>./*[a]*/CreateInstance/*[/a]*/();
+			PersonAccessor pa = /*[a]*/DataAccessor/*[/a]*/./*[a]*/CreateInstance/*[/a]*/<PersonAccessor>();
 
 			Person person1 = pa.SelectByKey(1);
 

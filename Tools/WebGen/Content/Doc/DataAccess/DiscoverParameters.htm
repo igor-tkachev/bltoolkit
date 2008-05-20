@@ -1,0 +1,18 @@
+<p class='j'>
+By default, BLToolkit expects method parameter names to match stored procedure 
+parameter names. The sequential order of parameters is not important in this 
+case. The <b>DiscoverParameters</b> attribute enforces BLToolkit to retrieve parameter
+information from the sproc and to assign method parameters in the order they go.
+Parameter names are ignored.
+</p>
+
+DiscoverParameters.cs
+<% ..\..\..\HowTo\DataAccess\DiscoverParameters.cs %>
+<a name='Person'></a>
+Person.cs
+<% ..\..\..\HowTo\DataAccess\Person.cs %>
+Gender.cs
+<% ..\..\..\HowTo\DataAccess\Gender.cs %>
+App.config
+<% Doc\Data\App.config %>
+<a href="../Data/CreateSql.htm">Create.sql script</a>

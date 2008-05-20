@@ -4,7 +4,6 @@ using System.Data;
 using NUnit.Framework;
 
 using BLToolkit.DataAccess;
-using BLToolkit.Reflection;
 
 namespace HowTo.DataAccess
 {
@@ -29,7 +28,7 @@ namespace HowTo.DataAccess
 		[Test]
 		public void Test()
 		{
-			TestAcessor ta = TypeAccessor<TestAcessor>.CreateInstance();
+			TestAcessor ta = DataAccessor.CreateInstance<TestAcessor>();
 
 			DataSet ds = new DataSet();
 

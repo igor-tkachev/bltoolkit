@@ -71,6 +71,8 @@ namespace WebGen
 		static readonly Regex ct_item1 = new Regex(@"<ct_item\s*link\=(?<link>.*?)\s*label=['""](?<label>.*?)['""]\s*/>");
 		static readonly Regex ct_item2 = new Regex(@"<ct_item\s*link\=(?<link>.*?)\s*label=['""](?<label>.*?)['""]\s*>(?<text>.*?)</ct_item>");
 		static readonly Regex ct_item3 = new Regex(@"<mt_item\s*link\=(?<link>.*?)\s*label=['""](?<label>.*?)['""]\s*>(?<text>.*?)</mt_item>");
+		static readonly Regex ct_item4 = new Regex(@"<ct_item2\s*link1\=(?<link1>.*?)\s*label1=['""](?<label1>.*?)['""]\s*link2\=(?<link2>.*?)\s*label2=['""](?<label2>.*?)['""]\s*/>");
+		static readonly Regex ct_item5 = new Regex(@"<ct_item3\s*link1\=(?<link1>.*?)\s*label1=['""](?<label1>.*?)['""]\s*link2\=(?<link2>.*?)\s*label2=['""](?<label2>.*?)['""]\s*link3\=(?<link3>.*?)\s*label3=['""](?<label3>.*?)['""]\s*/>");
 
 		private bool GenerateContent(
 			List<string> createdFiles, string template, string[] path, bool createIndex)
@@ -123,16 +125,18 @@ namespace WebGen
 
 									source = source
 										.Replace("<ct_table>",  "<table border='0' cellpadding='0' cellspacing='0'>")
-										.Replace("<ct_hr>",     "<ct_mg><tr><td colspan='3' class='hr'><img width='1' height='1' alt=''/></td></tr><ct_mg>")
-										.Replace("<ct_text>",   "<tr><td colspan='3'>")
+										.Replace("<ct_hr>",     "<ct_mg><tr><td colspan='5' class='hr'><img width='1' height='1' alt=''/></td></tr><ct_mg>")
+										.Replace("<ct_text>",   "<tr><td colspan='5'>")
 										.Replace("</ct_text>",  "</td></tr><ct_mg>")
-										.Replace("<ct_mg>",     "<tr><td colspan='3' class='sp'><img width='1' height='1' alt=''/></td></tr>")
+										.Replace("<ct_mg>",     "<tr><td colspan='5' class='sp'><img width='1' height='1' alt=''/></td></tr>")
 										.Replace("</ct_table>", "</table>")
 										;
 
-									source = ct_item1.Replace(source, @"<tr><td nowrap colspan='3'>&#8226; <a href=${link}>${label}</a></td></tr>");
-									source = ct_item2.Replace(source, @"<tr><td nowrap>&#8226; <a href=${link}>${label}</a></td><td>&nbsp;&nbsp;&nbsp;</td><td class='j'>${text}</td></tr>");
-									source = ct_item3.Replace(source, @"<tr><td nowrap class='p'>&#8226; <a href=${link}><b>${label}</b></a></td><td></td><td class='pj'>${text}</td></tr>");
+									source = ct_item1.Replace(source, @"<tr><td nowrap colspan='5'>&#8226; <a href=${link}>${label}</a></td></tr>");
+									source = ct_item2.Replace(source, @"<tr><td nowrap>&#8226; <a href=${link}>${label}</a></td><td>&nbsp;&nbsp;&nbsp;</td><td class='j' colspan='3'>${text}</td></tr>");
+									source = ct_item3.Replace(source, @"<tr><td nowrap class='p'>&#8226; <a href=${link}>${label}</a></td><td></td><td class='pj' colspan='3'>${text}</td></tr>");
+									source = ct_item4.Replace(source, @"<tr><td nowrap>&#8226; <a href=${link1}>${label1}</a></td><td>&nbsp;&nbsp;&nbsp;</td><td nowrap colspan='3'>&#8226; <a href=${link2}>${label2}</a></td></tr>");
+									source = ct_item5.Replace(source, @"<tr><td nowrap>&#8226; <a href=${link1}>${label1}</a></td><td>&nbsp;&nbsp;&nbsp;</td><td nowrap>&#8226; <a href=${link2}>${label2}</a></td><td>&nbsp;&nbsp;&nbsp;</td><td nowrap>&#8226; <a href=${link3}>${label3}</a></td></tr>");
 
 									source = GenerateSource(source);
 
@@ -301,7 +305,7 @@ namespace WebGen
 			foreach (XmlNode item in doc.SelectNodes("rss/channel/item"))
 			{
 				html += string.Format(@"
-<tr><td{0} colspan='2'><nobr><b>{1:MM/dd/yy}</nobr> <a href='{2}'>{3}</a></b></td></tr>
+<tr><td{0} colspan='2'><nobr><b>{1:MM/dd/yy}</nobr></b> <a href='{2}'>{3}</a></td></tr>
 <tr><td>&nbsp;&nbsp;</td><td class='j'>{4}</td></tr>
 ",
 					@class,
@@ -345,7 +349,7 @@ namespace WebGen
 				code = code
 					.Replace("&lt;Person&gt;", "&lt;<a class=m href=#Person>Person</a>&gt;")
 					.Replace(", Person&gt;",   ", <a class=m href=#Person>Person</a>&gt;")
-					.Replace("    Person ",    "    <a class='m' href=#Person>Person</a> ")
+					.Replace(" Person ",       " <a class='m' href=#Person>Person</a> ")
 					.Replace(" Person()",      " <a class='m' href=#Person>Person</a>()")
 					.Replace("(Person ",       "(<a class='m' href=#Person>Person</a> ")
 					;

@@ -9,63 +9,60 @@ using BLToolkit.Mapping;
 namespace HowTo.DataAccess
 {
 	[TestFixture]
-	public class OpenConfig
+	public class Transaction
 	{
-		public class Person
+		public abstract class TestAccessor : DataAccessor<Person>
 		{
-			[MapField("PersonID"), PrimaryKey, NonUpdatable]
-			public int    ID;
+			public abstract int  Insert(Person person);
+			public abstract void Delete(int @PersonID);
 
-			public string LastName;
-			public string FirstName;
-			public string MiddleName;
-		}
-
-		public abstract class TestAccessor : DataAccessor
-		{
 			public abstract Person SelectByKey(int id);
 			public abstract Person SelectByKey(/*[a]*/DbManager/*[/a]*/ db, int id);
-		}
-
-		// /*[i]*/DbManager/*[/i]*/ is created by /*[i]*/DataAccessor/*[/i]*/.
-		//
-		[Test]
-		public void Test1()
-		{
-			TestAccessor ta = DataAccessor.CreateInstance<TestAccessor>/*[a]*/()/*[/a]*/;
-
-			Person person = ta.SelectByKey(1);
-
-			Assert.IsNotNull(person);
 		}
 
 		// /*[i]*/DataAccessor/*[/i]*/ takes /*[i]*/DbManager/*[/i]*/ as a parameter.
 		//
 		[Test]
-		public void Test2()
+		public void Test1()
 		{
 			using (DbManager db = new DbManager())
 			{
 				TestAccessor ta = DataAccessor.CreateInstance<TestAccessor>/*[a]*/(db)/*[/a]*/;
 
-				Person person = ta.SelectByKey(1);
+				ta./*[a]*/BeginTransaction/*[/a]*/();
 
+				int id = ta.Insert(new Person { FirstName = "John", LastName = "Smith" });
+				Assert.AreNotEqual(0, id);
+
+				Person person = ta.SelectByKey(id);
 				Assert.IsNotNull(person);
+
+				ta.Delete(id);
+
+				ta./*[a]*/CommitTransaction/*[/a]*/();
 			}
 		}
 
 		// /*[i]*/DataAccessor/*[/i]*/ method takes /*[i]*/DbManager/*[/i]*/ as a parameter.
 		//
 		[Test]
-		public void Test3()
+		public void Test2()
 		{
 			using (DbManager db = new DbManager())
 			{
+				db.BeginTransaction();
+
 				TestAccessor ta = DataAccessor.CreateInstance<TestAccessor>/*[a]*/()/*[/a]*/;
 
-				Person person = ta.SelectByKey(/*[a]*/db/*[/a]*/, 1);
+				int id = ta.Insert(new Person { FirstName = "John", LastName = "Smith" });
+				Assert.AreNotEqual(0, id);
 
+				Person person = ta.SelectByKey(/*[a]*/db/*[/a]*/, id);
 				Assert.IsNotNull(person);
+
+				ta.Delete(id);
+
+				db.CommitTransaction();
 			}
 		}
 	}

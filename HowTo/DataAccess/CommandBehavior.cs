@@ -5,7 +5,6 @@ using NUnit.Framework;
 
 using BLToolkit.Data;
 using BLToolkit.DataAccess;
-using BLToolkit.Reflection;
 
 namespace HowTo.DataAccess
 {
@@ -21,7 +20,7 @@ namespace HowTo.DataAccess
 		[Test]
 		public void Test()
 		{
-			TestAcessor ta = TypeAccessor<TestAcessor>.CreateInstance();
+			TestAcessor ta = DataAccessor.CreateInstance<TestAcessor>();
 
 			using (DbManager   db = ta.GetDbManager())
 			using (IDataReader dr = ta.SelectAllIDataReaderSchemaOnly(db))

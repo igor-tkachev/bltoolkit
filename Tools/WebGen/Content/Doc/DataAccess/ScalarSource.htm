@@ -1,0 +1,18 @@
+<p class='j'>
+If a method returns a scalar value, this attribute can be used to specify how database returns this value.
+The <b>ScalarSource</b> attribute take a parameter of the <b>ScalarSourceType</b> type:
+
+<table class='data'>
+<tr><th>ScalarSourceType</th><th>Description</th></tr>
+<tr><td>DataReader</td><td>Calls the <b>DbManager.ExecuteReader</b> method, and then calls <b>IDataReader.GetValue</b> method to read the value.</td></tr>
+<tr><td>OutputParameter</td><td>Calls the <b>DbManager.ExecuteNonQuery</b> method, and then reads value from the <b>IDbDataParameter.Value</b> property.</td></tr>
+<tr><td>ReturnValue</td><td>Calls the <b>DbManager.ExecuteNonQuery</b> method, and then reads return value from command parameter collection.</td></tr>
+<tr><td>AffectedRows</td><td>Calls the <b>DbManager.ExecuteNonQuery</b> method, and then returns its return value.</td></tr>
+</table>
+</p>
+
+ScalarSource.cs
+<% ..\..\..\HowTo\DataAccess\ScalarSource.cs %>
+App.config
+<% Doc\Data\App.config %>
+<a href="../Data/CreateSql.htm">Create.sql script</a>

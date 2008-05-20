@@ -1,30 +1,25 @@
 using System;
-using System.Collections.Generic;
-
 using NUnit.Framework;
-
 using BLToolkit.DataAccess;
 
 namespace HowTo.DataAccess
 {
 	[TestFixture]
-	public class Destination
+	public class DiscoverParameters
 	{
 		public abstract class PersonAcessor : DataAccessor
 		{
-			public abstract void SelectAll([/*[a]*/Destination/*[/a]*/] IList<Person> list);
+			[/*[a]*/DiscoverParameters/*[/a]*/]
+			public abstract Person SelectByName(string anyParameterName, string otherParameterName);
 		}
 
 		[Test]
 		public void Test()
 		{
 			PersonAcessor pa = DataAccessor.CreateInstance<PersonAcessor>();
+			Person        p  = pa.SelectByName("John", "Pupkin");
 
-			List<Person> list = new List<Person>();
-
-			pa.SelectAll(list);
-
-			Assert.AreNotEqual(0, list.Count);
+			Assert.AreEqual(1, p.ID);
 		}
 	}
 }

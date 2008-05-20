@@ -509,7 +509,7 @@ In addition, BLToolkit provides two more direction attributes:
 
 <h5>DiscoverParametersAttribute</h5>
 <p class='j'>
-Usually, BLToolkit expects method parameter names to match stored procedure 
+By default, BLToolkit expects method parameter names to match stored procedure 
 parameter names. The sequential order of parameters is not important in this 
 case. This attribute enforces BLToolkit to retrieve parameter information from 
 the sproc and to assign method parameters in the order they go. Parameter names 
@@ -519,7 +519,7 @@ are ignored.
 <a name='FormatAttribute'></a><h5>FormatAttribute</h5>
 
 <p class='j'>
-This attribute indicates that specified parameter should be used to construct the stored procedure name or SQL statement:
+This attribute indicates that the specified parameter is used to construct the stored procedure name or SQL statement:
 </p>
 <% cs #
 public abstract class PersonAccessor : DataAccessor<Person, PersonAccessor>
@@ -563,8 +563,7 @@ This attribute specifies the sproc parameter name explicitly.
 <% cs #
 public abstract class PersonAccessor : DataAccessor<Person, PersonAccessor>
 {
-	[ActionName("SelectByName")]
-	public abstract Person AnyParamName(
+	public abstract Person SelectByName(
 		[ParamName("FirstName")] string name1,
 		[ParamName("@LastName")] string name2);
 }
@@ -574,7 +573,7 @@ public abstract class PersonAccessor : DataAccessor<Person, PersonAccessor>
 
 <p class='j'>
 If your method returns a dictionary of scalar values, you will have to specify the name or index of the field
-used to populate the scalar list. The <b>Index</b> attribute allows you to do that:
+used to populate the scalar list. The <b>ScalarFieldName</b> attribute allows you to do that:
 </p>
 <% cs #
 public abstract class PersonAccessor : DataAccessor<Person, PersonAccessor>

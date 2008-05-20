@@ -988,9 +988,9 @@ namespace BLToolkit.DataAccess
 				ScalarSourceAttribute attr = (ScalarSourceAttribute)attrs[0];
 
 				emit
-					.ldc_i4_              ((int)attr.ScalarType)
-					.ldNameOrIndex        (attr.NameOrIndex)
-					.callvirtNoGenerics   (typeof(DbManager), "ExecuteScalar", typeof(ScalarSourceType), typeof(NameOrIndexParameter));
+					.ldc_i4_            ((int)attr.ScalarType)
+					.ldNameOrIndex      (attr.NameOrIndex)
+					.callvirtNoGenerics (typeof(DbManager), "ExecuteScalar", typeof(ScalarSourceType), typeof(NameOrIndexParameter));
 			}
 
 			string converterName = GetConverterMethodName(scalarType);
@@ -998,9 +998,9 @@ namespace BLToolkit.DataAccess
 			if (converterName == null)
 			{
 				emit
-					.LoadType             (scalarType)
+					.LoadType           (scalarType)
 					.ldnull
-					.callvirt             (_baseType, "ConvertChangeType", _bindingFlags, typeof (DbManager), typeof (object), typeof (Type), typeof (object))
+					.callvirt           (_baseType, "ConvertChangeType", _bindingFlags, typeof (DbManager), typeof (object), typeof (Type), typeof (object))
 					;
 				
 			}
@@ -1008,14 +1008,14 @@ namespace BLToolkit.DataAccess
 			{
 				emit
 					.ldnull
-					.callvirt             (_baseType, converterName, _bindingFlags, typeof(DbManager), typeof(object), typeof(object))
+					.callvirt           (_baseType, converterName, _bindingFlags, typeof(DbManager), typeof(object), typeof(object))
 					;
 			}
 
 			if (_destination != null)
 			{
 				emit
-					.stind                (scalarType)
+					.stind              (scalarType)
 					;
 
 				// The return value and a destination both are present
@@ -1023,7 +1023,7 @@ namespace BLToolkit.DataAccess
 				if (Context.ReturnValue != null)
 				{
 					emit
-						.ldargEx          (_destination, false)
+						.ldargEx        (_destination, false)
 						;
 
 					if (scalarType != returnType)
@@ -1032,13 +1032,13 @@ namespace BLToolkit.DataAccess
 							.CastFromObject (returnType)
 							;
 
-					emit.stloc            (Context.ReturnValue)
+					emit.stloc          (Context.ReturnValue)
 					;
 				}
 			}
 			else
 				emit
-					.stloc                (Context.ReturnValue)
+					.stloc              (Context.ReturnValue)
 					;
 		}
 
@@ -1509,7 +1509,8 @@ namespace BLToolkit.DataAccess
 						.ldarg   (pi)
 						;
 
-					fieldBuilder = CreateStringArrayField(pi.GetCustomAttributes(typeof(Direction.OutputAttribute),      true));
+					fieldBuilder = CreateStringArrayField(pi.GetCustomAttributes(typeof(Direction.OutputAttribute), true));
+
 					if (fieldBuilder != null)
 					{
 						emit.ldsfld (fieldBuilder);
@@ -1519,6 +1520,7 @@ namespace BLToolkit.DataAccess
 						emit.ldnull.end();
 
 					fieldBuilder = CreateStringArrayField(pi.GetCustomAttributes(typeof(Direction.InputOutputAttribute), true));
+
 					if (fieldBuilder != null)
 					{
 						emit.ldsfld (fieldBuilder);
@@ -1528,6 +1530,7 @@ namespace BLToolkit.DataAccess
 						emit.ldnull.end();
 
 					fieldBuilder = CreateStringArrayField(pi.GetCustomAttributes(typeof(Direction.IgnoreAttribute), true));
+
 					if (fieldBuilder != null)
 						emit.ldsfld (fieldBuilder);
 					else

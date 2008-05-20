@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using NUnit.Framework;
 
 using BLToolkit.DataAccess;
-using BLToolkit.Reflection;
 
 namespace HowTo.DataAccess
 {
@@ -50,7 +49,7 @@ namespace HowTo.DataAccess
 		[Test]
 		public void Test()
 		{
-			TestAcessor ta = TypeAccessor<TestAcessor>.CreateInstance();
+			TestAcessor ta = DataAccessor.CreateInstance<TestAcessor>();
 
 			Assert.IsTrue(ta.GetName1()              is Name1);
 			Assert.IsTrue(ta.GetName2()              is Name2);
