@@ -45,6 +45,7 @@
     <Content Include="Content\Doc\Aspects\CounterAspect.cs" />
     <Content Include="Content\Doc\Aspects\MixinAspect.cs" />
     <Content Include="Content\Doc\Aspects\NotNull.cs" />
+    <Content Include="Content\Doc\Aspects\ClearCacheAspect.cs" />
     <Compile Include="FileAction.cs" />
     <Compile Include="Generator.cs" />
     <Compile Include="Program.cs" />
@@ -52,7 +53,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Content\bltoolkit.css" />
-    <Content Include="Content\Doc\Aspects\CacheAspect.htm" />
+    <Content Include="Content\Doc\Aspects\ClearCacheAspect.htm" />
     <Content Include="Content\Doc\Aspects\NotNullAttribute.htm" />
     <Content Include="Content\Doc\Aspects\CounterAspect.htm" />
     <Content Include="Content\Doc\Aspects\Counters.png" />

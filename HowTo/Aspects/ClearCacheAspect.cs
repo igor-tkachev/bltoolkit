@@ -10,141 +10,66 @@ namespace HowTo.Aspects
 	[TestFixture]
 	public class ClearCacheAspect
 	{
-		public abstract class TestClass
+		public /*[a]*/abstract/*[/a]*/ class TestClass
 		{
-			int _value;
+			public static int Value;
 
-			[Cache]
-			public virtual int Test1()
+			// This is a method we will cache. Cached return value depends on input parameters.
+			// We will change the 'Value' field outside of the class and see how it affects the result.
+			//
+			[/*[a]*/Cache/*[/a]*/(MaxCacheTime=500, IsWeak=false)]
+			public /*[a]*/virtual/*[/a]*/ int CachedMethod(int p1, int p2)
 			{
-				return _value++;
+				return Value;
 			}
 
-			[ClearCache("Test1")]
-			public abstract void ClearTest1();
+			// This method clears the CachedMethod cache.
+			//
+			[/*[a]*/ClearCache/*[/a]*/(/*[a]*/"CachedMethod"/*[/a]*/)]
+			public abstract void ClearCache();
 
-			[Cache]
-			public virtual int Test2()
+			// The CachedMethod is specified by name and parameters.
+			// Also you can use declaring method type.
+			//
+			[/*[a]*/ClearCache/*[/a]*/(/*[a]*/"CachedMethod"/*[/a]*/, /*[a]*/typeof(int), typeof(int)/*[/a]*/)]
+			public abstract void ClearCache2();
+
+			public static TestClass CreateInstance()
 			{
-				return _value++;
+				// Use TypeAccessor to create an instance of an abstract class.
+				//
+				return /*[a]*/TypeAccessor/*[/a]*/<TestClass>.CreateInstance();
 			}
-
-			[Cache]
-			public virtual int Test2(int i)
-			{
-				return _value++;
-			}
-
-			[ClearCache("Test2")]
-			public abstract void ClearTest2();
-
-			[ClearCache("Test2", typeof(int))]
-			public abstract void ClearTest2a();
-
-			[ClearCache("Test2"), ClearCache("Test2", typeof(int))]
-			public abstract void ClearTest2b();
-		}
-
-		public abstract class TestClass1
-		{
-			[ClearCache(typeof(TestClass), "Test2")]
-			public abstract void ClearTest();
-
-			[ClearCache(typeof(TestClass), "Test2", typeof(int))]
-			public abstract void ClearTest1();
 		}
 
 		[Test]
-		public void Test1()
+		public void Test()
 		{
+			BLToolkit.TypeBuilder.TypeFactory.SaveTypes = true;
+
 			TestClass tc = TypeAccessor<TestClass>.CreateInstance();
 
-			int value1 = tc.Test1();
-			int value2 = tc.Test1();
+			TestClass.Value = 1;
 
+			int value1 = tc.CachedMethod(1, 2);
+
+			TestClass.Value = 2;
+
+			int value2 = tc.CachedMethod(1, 2);
+
+			// The cached values are equal.
+			//
 			Assert.AreEqual(value1, value2);
 
-			tc.ClearTest1();
+			tc.ClearCache();
 
-			Assert.AreNotEqual(value1, tc.Test1());
-		}
+			TestClass.Value = 3;
 
-		[Test]
-		public void Test2()
-		{
-			TestClass tc = TypeAccessor<TestClass>.CreateInstance();
+			// Previous and returned values are not equal.
+			//
+			Assert.AreNotEqual(value1, tc.CachedMethod(1, 2));
 
-			tc.ClearTest2();
-
-			int value1 = tc.Test2();
-			int value2 = tc.Test2();
-
-			Assert.AreEqual(value1, value2);
-
-			tc.ClearTest2();
-
-			Assert.AreNotEqual(value1, tc.Test2());
-		}
-
-		[Test]
-		public void Test2a()
-		{
-			TestClass tc = TypeAccessor<TestClass>.CreateInstance();
-
-			tc.ClearTest2a();
-
-			int value1 = tc.Test2(1);
-			int value2 = tc.Test2(1);
-
-			Assert.AreEqual(value1, value2);
-
-			tc.ClearTest2a();
-
-			Assert.AreNotEqual(value1, tc.Test2(1));
-		}
-
-		[Test]
-		public void Test2b()
-		{
-			TestClass tc = TypeAccessor<TestClass>.CreateInstance();
-
-			tc.ClearTest2b();
-
-			int value1 = tc.Test2();
-			int value2 = tc.Test2();
-			int value3 = tc.Test2(1);
-			int value4 = tc.Test2(1);
-
-			Assert.AreEqual(value1, value2);
-			Assert.AreEqual(value3, value4);
-
-			tc.ClearTest2b();
-
-			Assert.AreNotEqual(value1, tc.Test2());
-			Assert.AreNotEqual(value3, tc.Test2(1));
-		}
-
-		[Test]
-		public void Test3()
-		{
-			TestClass  tc1 = TypeAccessor<TestClass>. CreateInstance();
-			TestClass1 tc2 = TypeAccessor<TestClass1>.CreateInstance();
-
-			tc1.ClearTest2b();
-
-			int value1 = tc1.Test2();
-			int value2 = tc1.Test2();
-			int value3 = tc1.Test2(1);
-			int value4 = tc1.Test2(1);
-
-			Assert.AreEqual(value1, value2);
-			Assert.AreEqual(value3, value4);
-
-			tc2.ClearTest();
-			tc2.ClearTest1();
-
-			Assert.AreNotEqual(value1, tc1.Test2());
-			Assert.AreNotEqual(value3, tc1.Test2(1));
+			tc.ClearCache2();
 		}
 	}
 }

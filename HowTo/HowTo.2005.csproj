@@ -37,8 +37,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\Source\Data\DataProvider\SybaseAdoDataProvider.cs">
+      <Link>Data\DataProvider\SybaseAdoDataProvider.cs</Link>
+    </Compile>
     <Compile Include="Aspects\AsyncAspect.cs" />
     <Compile Include="Aspects\CacheAspect.cs" />
+    <Compile Include="Aspects\ClearCacheAspect.cs" />
     <Compile Include="Aspects\CounterAspect.cs" />
     <Compile Include="Aspects\CustomCacheAspect.cs" />
     <Compile Include="Aspects\LoggingAspect.cs" />
@@ -46,16 +50,32 @@
     <Compile Include="Aspects\NoCache.cs" />
     <Compile Include="Aspects\NotNull.cs" />
     <Compile Include="DataAccess\AbstractAccessor.cs" />
+    <Compile Include="DataAccess\ActionName.cs" />
+    <Compile Include="DataAccess\ActionSprocName.cs" />
+    <Compile Include="DataAccess\ActualType.cs" />
+    <Compile Include="DataAccess\CommandBehavior.cs" />
+    <Compile Include="DataAccess\DataSetTable.cs" />
+    <Compile Include="DataAccess\Destination.cs" />
+    <Compile Include="DataAccess\DiscoverParameters.cs" />
     <Compile Include="DataAccess\ExecuteScalar.cs" />
     <Compile Include="DataAccess\ExecuteObject.cs" />
     <Compile Include="DataAccess\ExecuteList.cs" />
     <Compile Include="DataAccess\ExecuteDictionary.cs" />
-    <Compile Include="DataAccess\TableNameAttribute.cs" />
-    <Compile Include="DataAccess\NonUpdatableAttribute.cs" />
-    <Compile Include="DataAccess\MultiplePrimaryKeyAttribute.cs" />
-    <Compile Include="DataAccess\PrimaryKeyAttribute.cs" />
+    <Compile Include="DataAccess\Format.cs" />
     <Compile Include="DataAccess\Gender.cs" />
+    <Compile Include="DataAccess\MultiplePrimaryKey.cs" />
+    <Compile Include="DataAccess\NonUpdatable.cs" />
+    <Compile Include="DataAccess\OpenConfigQuery.cs" />
+    <Compile Include="DataAccess\Param.cs" />
+    <Compile Include="DataAccess\ParamName.cs" />
+    <Compile Include="DataAccess\ParamNullValue.cs" />
     <Compile Include="DataAccess\Person.cs" />
+    <Compile Include="DataAccess\PrimaryKey.cs" />
+    <Compile Include="DataAccess\ScalarFieldName.cs" />
+    <Compile Include="DataAccess\ScalarSource.cs" />
+    <Compile Include="DataAccess\SprocName.cs" />
+    <Compile Include="DataAccess\SqlQuery.cs" />
+    <Compile Include="DataAccess\TableName.cs" />
     <Compile Include="DataAccess\XmlExtension.cs" />
     <Compile Include="DataAccess\Delete.cs" />
     <Compile Include="DataAccess\Update.cs" />
@@ -71,12 +91,26 @@
     <Compile Include="DataAccess\PersonAccessor.cs" />
     <Compile Include="Data\Close.cs" />
     <Compile Include="Data\ComplexMapping.cs" />
+    <Compile Include="Data\DataProvider\AddDataProvider.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Data\ExecuteDataSet.cs" />
+    <Compile Include="Data\ExecuteDataTable.cs" />
+    <Compile Include="Data\ExecuteDictionary.cs" />
+    <Compile Include="Data\ExecuteNonQuery.cs" />
+    <Compile Include="Data\ExecuteReader.cs" />
+    <Compile Include="Data\ExecuteScalar.cs" />
+    <Compile Include="Data\ExecuteScalarDictionary.cs" />
+    <Compile Include="Data\ExecuteScalarList.cs" />
     <Compile Include="Data\OpenConfig1.cs" />
     <Compile Include="Data\OpenConfig1FW2.cs" />
     <Compile Include="Data\OpenConfig2.cs" />
     <Compile Include="Data\ExecuteObject.cs" />
     <Compile Include="Data\ExecuteList.cs" />
     <Compile Include="Data\OpenConfig3.cs" />
+    <Compile Include="Data\Parameter.cs" />
+    <Compile Include="Data\SetCommand.cs" />
+    <Compile Include="Data\SetSpCommand.cs" />
     <Compile Include="Data\Transaction.cs" />
     <Compile Include="Data\UpdateObject.cs" />
     <Compile Include="Mapping\MapToJson.cs" />

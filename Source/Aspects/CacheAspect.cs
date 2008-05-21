@@ -280,6 +280,11 @@ namespace BLToolkit.Aspects
 		/// to get a method that takes no parameters.</param>
 		public static void ClearCache(Type declaringType, string methodName, params Type[] types)
 		{
+			ClearCache(GetMethodInfo(declaringType, methodName, types));
+		}
+
+		public static MethodInfo GetMethodInfo(Type declaringType, string methodName, params Type[] types)
+		{
 			if (declaringType == null)
 				throw new ArgumentNullException("declaringType");
 
@@ -290,13 +295,23 @@ namespace BLToolkit.Aspects
 				types = Type.EmptyTypes;
 
 			MethodInfo methodInfo = declaringType.GetMethod(
-				methodName, BindingFlags.Instance | BindingFlags.Public, null, types, null);
+				methodName,
+				BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic,
+				null,
+				types,
+				null);
 
 			if (methodInfo == null)
-				throw new ArgumentException(string.Format("Method '{0}.{1}' not found.",
-					declaringType.FullName, methodName));
+			{
+				methodInfo = declaringType.GetMethod(
+					methodName, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
 
-			ClearCache(methodInfo);
+				if (methodInfo == null)
+					throw new ArgumentException(string.Format("Method '{0}.{1}' not found.",
+						declaringType.FullName, methodName));
+			}
+
+			return methodInfo;
 		}
 
 		/// <summary>
