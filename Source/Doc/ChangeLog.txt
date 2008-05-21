@@ -1,7 +1,7 @@
-v 3.0.0
+v 3.0
 
 Breaking changes
-- No more support for .Net 1.1 Frramework.
+- No more support for .Net 1.1 Framework.
 
 Bug fixes
 - EmitHelper.ldc_i4_ emits wrong opcode for numbers from 128 till 255 (bug in msdn)
@@ -27,7 +27,7 @@ Enhancement
 - Assembly is signed.
 - New ActualTypeAttribute to associate DataAccessor's object type and its implementation.
 - New AutoImplementInterfaceAttribute to automatically generate interface implementation.
-- New TypeAccessor.AssociateType method and TypeAccessor.AssociatedTypeHandler event
+- New TypeAccessor.AssociateType method and TypeAccessor.AssociatedTypeHandler event.
   to control interface/type implementation.
 - DataException now has the 'Number' property.
 - New ClearCache aspect.
