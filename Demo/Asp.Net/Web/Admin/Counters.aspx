@@ -47,7 +47,7 @@
 
 <br/>
 <font size="1">
-<a href="Counter.aspx?cleanup=1">cache cleanup</a>
+<a href="Counters.aspx?cleanup=1">cache cleanup</a>
 </font>
 
 </asp:Content>

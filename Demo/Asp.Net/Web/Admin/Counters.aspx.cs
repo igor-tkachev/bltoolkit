@@ -13,7 +13,7 @@ public partial class Admin_Counters : Page
 		if (Request["cleanup"] == "1")
 		{
 			CacheAspect.ClearCache();
-			Response.Redirect("Counter.aspx");
+			Response.Redirect("Counters.aspx");
 		}
 
 		List<MethodCallCounter> counters = new List<MethodCallCounter>();

@@ -3,16 +3,17 @@ using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
-using BLToolkit.Data.DataProvider;
+
 using NUnit.Framework;
 
-using BLToolkit.EditableObjects;
 using BLToolkit.Data;
+using BLToolkit.Data.DataProvider;
 using BLToolkit.DataAccess;
+using BLToolkit.EditableObjects;
 using BLToolkit.Mapping;
-using BLToolkit.Validation;
 using BLToolkit.Reflection;
 using BLToolkit.TypeBuilder;
+using BLToolkit.Validation;
 
 using PersonDataSet = DataAccessTest.PersonDataSet2;
 
@@ -30,7 +31,6 @@ namespace DataAccess
 	[TestFixture]
 	public class DataAccessorTest
 	{
-
 		public enum Gender
 		{
 			[MapValue("F")] Female,

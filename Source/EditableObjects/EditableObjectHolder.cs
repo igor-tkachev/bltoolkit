@@ -12,8 +12,8 @@ namespace BLToolkit.EditableObjects
 	{
 		public EditableObjectHolder(EditableObject obj)
 		{
-			_original     = obj;
-			_current      = obj;
+			_original = obj;
+			_current  = obj;
 
 			if (_current != null)
 				_current.PropertyChanged += _current_PropertyChanged;
@@ -35,7 +35,7 @@ namespace BLToolkit.EditableObjects
 		[GetValue, SetValue]
 		public EditableObject Value
 		{
-			get { return _current;  }
+			get { return _current; }
 			set
 			{
 				if (_current != null)

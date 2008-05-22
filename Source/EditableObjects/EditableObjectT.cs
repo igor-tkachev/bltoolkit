@@ -34,6 +34,5 @@ namespace BLToolkit.EditableObjects
 		}
 
 		#endregion
-
 	}
 }

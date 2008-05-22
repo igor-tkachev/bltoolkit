@@ -215,8 +215,6 @@ namespace BLToolkit.Aspects.Builders
 					typeof(object), typeof(IntPtr));
 				ctorBuilder.ConstructorBuilder.SetImplementationFlags(mia);
 
-				MethodBuilderHelper methodBuilder;
-
 				// Define the BeginInvoke method for the delegate
 				//
 				Type[] beginParameters = new Type[parameters.Length + 2];
@@ -225,7 +223,9 @@ namespace BLToolkit.Aspects.Builders
 				beginParameters[parameters.Length]   = typeof(AsyncCallback);
 				beginParameters[parameters.Length+1] = typeof(object);
 
-				methodBuilder = delegateBuilder.DefineMethod("BeginInvoke", ma, typeof(IAsyncResult), beginParameters);
+				MethodBuilderHelper methodBuilder =
+					delegateBuilder.DefineMethod("BeginInvoke", ma, typeof(IAsyncResult), beginParameters);
+
 				methodBuilder.MethodBuilder.SetImplementationFlags(mia);
 
 				// Define the EndInvoke method for the delegate
