@@ -656,7 +656,7 @@ namespace BLToolkit.EditableObjects
 			if (!BindingListImpl.IsSorted)
 				_list.Reverse();
 			else
-				throw new InvalidOperationException("Reverse is not supported for already sorted arrays. Invoke IBindingList.RemoveSort() first or provide revese sort direction.");
+				throw new InvalidOperationException("Reverse is not supported for already sorted arrays. Invoke IBindingList.RemoveSort() first or provide reverse sort direction.");
 
 			if (_list.Count > 1)
 				OnListChanged(ListChangedType.Reset, -1);
@@ -703,7 +703,7 @@ namespace BLToolkit.EditableObjects
 				else if (BindingListImpl.SortDescriptions != null)
 					BindingListImpl.ApplySort(BindingListImpl.SortDescriptions);
 				else
-					throw new InvalidOperationException("Currntly applied sort method is not recognised/supported by EditableArrayList.");
+					throw new InvalidOperationException("Currently applied sort method is not recognized/supported by EditableArrayList.");
 			}
 		}
 

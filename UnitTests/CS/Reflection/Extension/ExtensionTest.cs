@@ -1,4 +1,3 @@
-using System;
 using System.IO;
 
 using NUnit.Framework;
@@ -73,7 +72,7 @@ namespace Reflection.Extension
 		[Test]
 		public void Test()
 		{
-			Map.Extensions = TypeExtension.GetExtenstions("Mapping.xml");
+			Map.Extensions = TypeExtension.GetExtensions("Mapping.xml");
 
 			object o = Map.Extensions["TriState"]["Yes"]["MapValue"].Value;
 

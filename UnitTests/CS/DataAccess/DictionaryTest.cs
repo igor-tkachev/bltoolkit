@@ -342,7 +342,7 @@ namespace DataAccess
 		}
 
 		[Test]
-		public void DictionaryByMapIndexTestWithDestionation()
+		public void DictionaryByMapIndexTestWithDestination()
 		{
 			TestAccessor da = (TestAccessor)DataAccessor.CreateInstance(typeof(TestAccessor));
 

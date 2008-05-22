@@ -101,7 +101,7 @@ namespace Mapping
 		}
 
 		[Test, ExpectedException(typeof(InvalidCastException))]
-		public void ToEnumwWithIncompatibleValue()
+		public void ToEnumWithIncompatibleValue()
 		{
 			// An object can't be converted to Enum3.
 			// Expected result is an exception, since Enum3 does not have
@@ -111,7 +111,7 @@ namespace Mapping
 		}
 
 		[Test]
-		public void ToEnumwWithCompatibleValue()
+		public void ToEnumWithCompatibleValue()
 		{
 			// 123 is not defined for this enum, but can be converted to.
 			// Enum3 does not have a default value defined, so just cast 123 to Enum3

@@ -214,7 +214,7 @@ namespace Data
 			Assert.AreEqual("510", o.inputOutputStr);
 		}
 
-		public class PeturnParameter
+		public class ReturnParameter
 		{
 			public int Value;
 		}
@@ -222,7 +222,7 @@ namespace Data
 		[Test]
 		public void MapReturnValue()
 		{
-			PeturnParameter e = new PeturnParameter();
+			ReturnParameter e = new ReturnParameter();
 
 			using (DbManager db = new DbManager())
 			{

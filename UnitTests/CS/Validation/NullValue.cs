@@ -49,7 +49,7 @@ namespace Validation
 		{
 			PersonDoc doc = TypeAccessor<PersonDoc>.CreateInstance();
 
-			doc.Series_PersonDoc = "aaa";
+			doc.Series_PersonDoc = "PersonDoc";
 			doc.Validate();
 		}
 	}

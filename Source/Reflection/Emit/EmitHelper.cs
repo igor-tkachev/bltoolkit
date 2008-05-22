@@ -2450,7 +2450,7 @@ namespace BLToolkit.Reflection.Emit
 
 		/// <summary>
 		/// Calls ILGenerator.Emit(<see cref="OpCodes.Leave_S"/>, label) that
-		/// exits a protected region of code, unconditionally tranferring control to a target instruction (short form).
+		/// exits a protected region of code, unconditionally transferring control to a target instruction (short form).
 		/// </summary>
 		/// <param name="label">The label.</param>
 		/// <seealso cref="OpCodes.Leave_S">OpCodes.Leave_S</seealso>

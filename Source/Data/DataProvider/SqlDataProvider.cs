@@ -41,14 +41,14 @@ namespace BLToolkit.Data.DataProvider
 		}
 
 		/// <summary>
-		/// Populates the specified IDbCommand object's Parameters collection with 
-		/// parameter information for the stored procedure specified in the IDbCommand.
+		/// Populates the specified <see cref="IDbCommand"/> object's Parameters collection with 
+		/// parameter information for the stored procedure specified in the <see cref="IDbCommand"/>.
 		/// </summary>
 		/// <remarks>
 		/// See the <see cref="DbManager.AddDataProvider(DataProviderBase)"/> method to find an example.
 		/// </remarks>
 		/// <seealso cref="DbManager.AddDataProvider(DataProviderBase)">AddDataManager Method</seealso>
-		/// <param name="command">The IDbCommand referencing the stored procedure for which the parameter
+		/// <param name="command">The <see cref="IDbCommand"/> referencing the stored procedure for which the parameter
 		/// information is to be derived. The derived parameters will be populated into the 
 		/// Parameters of this command.</param>
 		public override bool DeriveParameters(IDbCommand command)

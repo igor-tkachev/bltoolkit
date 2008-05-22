@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 
 using NUnit.Framework;
@@ -25,7 +24,7 @@ namespace HowTo.DataAccess
 		public class Name2 : NameBase {}
 
 		[/*[a]*/ActualType/*[/a]*/(typeof(IName), typeof(/*[a]*/Name1/*[/a]*/))]
-		public abstract class TestAcessor : DataAccessor
+		public abstract class TestAccessor : DataAccessor
 		{
 			[SqlQuery("SELECT 'John' as Name")]
 			public abstract IName GetName1();
@@ -49,7 +48,7 @@ namespace HowTo.DataAccess
 		[Test]
 		public void Test()
 		{
-			TestAcessor ta = DataAccessor.CreateInstance<TestAcessor>();
+			TestAccessor ta = DataAccessor.CreateInstance<TestAccessor>();
 
 			Assert.IsTrue(ta.GetName1()              is Name1);
 			Assert.IsTrue(ta.GetName2()              is Name2);

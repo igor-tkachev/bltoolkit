@@ -54,7 +54,7 @@ namespace BLToolkit.TypeBuilder
 		/// <summary>
 		/// Controls whether OnPropertyChanged notifications are sent when current value is same as new one.
 		/// 
-		/// Default value controled via <see cref="Configuration.NotifyOnEqualSet"/> and by default is set to false
+		/// Default value controlled via <see cref="Configuration.NotifyOnEqualSet"/> and by default is set to false
 		/// </summary>
 		public  bool  NotifyOnEqualSet
 		{

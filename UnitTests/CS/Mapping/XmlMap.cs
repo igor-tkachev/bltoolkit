@@ -31,7 +31,7 @@ namespace Mapping
 
 			MappingSchema map = new MappingSchema();
 
-			map.Extensions = TypeExtension.GetExtenstions("XmlMap.xml");
+			map.Extensions = TypeExtension.GetExtensions("XmlMap.xml");
 
 			DataRow dr = map.MapObjectToDataRow(p, new DataTable());
 

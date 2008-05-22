@@ -1,4 +1,3 @@
-using System;
 using System.Data;
 
 using NUnit.Framework;
@@ -11,7 +10,7 @@ namespace HowTo.DataAccess
 	[TestFixture]
 	public class CommandBehaviorDemo
 	{
-		public abstract class TestAcessor : DataAccessor
+		public abstract class TestAccessor : DataAccessor
 		{
 			[SprocName("Person_SelectAll"), /*[a]*/CommandBehavior/*[/a]*/(CommandBehavior.SchemaOnly)]
 			public abstract IDataReader SelectAllIDataReaderSchemaOnly(DbManager db);
@@ -20,7 +19,7 @@ namespace HowTo.DataAccess
 		[Test]
 		public void Test()
 		{
-			TestAcessor ta = DataAccessor.CreateInstance<TestAcessor>();
+			TestAccessor ta = DataAccessor.CreateInstance<TestAccessor>();
 
 			using (DbManager   db = ta.GetDbManager())
 			using (IDataReader dr = ta.SelectAllIDataReaderSchemaOnly(db))

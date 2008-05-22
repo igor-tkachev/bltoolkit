@@ -25,7 +25,7 @@ namespace TypeBuilder.Builders
 	}
 
 	[TestFixture]
-	public class ImplemetInterfaceBuilderTest
+	public class ImplementInterfaceBuilderTest
 	{
 
 		public interface IInterface2

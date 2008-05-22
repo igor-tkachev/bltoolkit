@@ -34,7 +34,7 @@ namespace BLToolkit.Reflection.Emit
 		/// </summary>
 		/// <param name="typeBuilder">Associated <see cref="TypeBuilderHelper"/>.</param>
 		/// <param name="methodBuilder">A <see cref="MethodBuilder"/></param>
-		/// <param name="dummy">A dummpy parameter to alter the signature</param>
+		/// <param name="dummy">A dummy parameter to alter the signature</param>
 		internal MethodBuilderHelper(TypeBuilderHelper typeBuilder, MethodBuilder methodBuilder, bool dummy)
 			: base(typeBuilder)
 		{

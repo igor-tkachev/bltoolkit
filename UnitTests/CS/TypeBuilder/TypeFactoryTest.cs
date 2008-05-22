@@ -26,7 +26,7 @@ namespace TypeBuilder
 			public abstract int Number { get; set; }
 		}
 
-		public int GetNumnber(TestObject o)
+		public int GetNumber(TestObject o)
 		{
 			return o.Number;
 		}
@@ -53,7 +53,7 @@ namespace TypeBuilder
 
 			o.Number = 23;
 
-			int n = test.GetNumnber(o);
+			int n = test.GetNumber(o);
 
 			AppDomain.Unload(appDomain);
 

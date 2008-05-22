@@ -15,7 +15,7 @@ namespace BLToolkit.Reflection
 
 			if (_objectFactory == null)
 				throw new ArgumentException(
-					string.Format("Type '{0}' does not implement IObjectFactroty interface.", type));
+					string.Format("Type '{0}' does not implement IObjectFactory interface.", type));
 		}
 
 		private readonly IObjectFactory _objectFactory;

@@ -24,7 +24,7 @@ namespace DataAccess
 			using (DbManager db = new DbManager())
 			{
 				SqlQuery          sq = new SqlQuery(db);
-				sq.Extensions = TypeExtension.GetExtenstions(@"XmlExtension.xml");
+				sq.Extensions = TypeExtension.GetExtensions(@"XmlExtension.xml");
 				Assert.IsNotNull(sq.Extensions["Person1"]);
 
 				Person1           ps = (Person1)sq.SelectByKey(typeof(Person1), 1);
@@ -38,7 +38,7 @@ namespace DataAccess
 			using (DbManager db = new DbManager())
 			{
 				SqlQuery<Person1> sq = new SqlQuery<Person1>(db);
-				sq.Extensions = TypeExtension.GetExtenstions(@"XmlExtension.xml");
+				sq.Extensions = TypeExtension.GetExtensions(@"XmlExtension.xml");
 				Assert.IsNotNull(sq.Extensions["Person1"]);
 
 				Person1           ps = sq.SelectByKey(1);

@@ -7,7 +7,7 @@ namespace HowTo.DataAccess
 	[TestFixture]
 	public class DirectionTest
 	{
-		public abstract class PersonAcessor : DataAccessor
+		public abstract class PersonAccessor : DataAccessor
 		{
 			[SprocName("Person_Insert_OutputParameter")]
 			public abstract void Insert_OutputParameter([/*[a]*/Direction.Output/*[/a]*/("PERSONID")] Person p);
@@ -23,9 +23,9 @@ namespace HowTo.DataAccess
 				 /*[a]*/Direction.Ignore/*[/a]*/("PersonID", "FirstName", "LastName", "MiddleName", "Gender")] Person p);
 		}
 
-		PersonAcessor Accessor
+		PersonAccessor Accessor
 		{
-			get { return DataAccessor.CreateInstance<PersonAcessor>(); }
+			get { return DataAccessor.CreateInstance<PersonAccessor>(); }
 		}
 
 		[Test]

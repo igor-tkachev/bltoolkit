@@ -23,7 +23,7 @@ namespace BLToolkit.Mapping
 				throw new ArgumentNullException("indices");
 
 			if (indices.Length == 0)
-				throw new ArgumentException("At least one field ndex must be specified", "indices");
+				throw new ArgumentException("At least one field index must be specified", "indices");
 
 			_fields = NameOrIndexParameter.FromIndexArray(indices);
 		}

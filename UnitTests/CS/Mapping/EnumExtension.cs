@@ -28,7 +28,7 @@ namespace Mapping
 		[Test]
 		public void Test()
 		{
-			Map.Extensions = TypeExtension.GetExtenstions("Map.xml");
+			Map.Extensions = TypeExtension.GetExtensions("Map.xml");
 
 			Assert.AreEqual("AL", Map.EnumToValue(CountryCodeEnum.AL));
 			Assert.AreEqual(101,  Map.EnumToValue(OtherEnum.EnumValue2));

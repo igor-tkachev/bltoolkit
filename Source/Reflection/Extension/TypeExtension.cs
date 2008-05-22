@@ -139,12 +139,12 @@ namespace BLToolkit.Reflection.Extension
 
 		#region Public Static Members
 		
-		public static ExtensionList GetExtenstions(string xmlFile)
+		public static ExtensionList GetExtensions(string xmlFile)
 		{
-			return GetExtenstions(xmlFile, Assembly.GetCallingAssembly());
+			return GetExtensions(xmlFile, Assembly.GetCallingAssembly());
 		}
 
-		public static ExtensionList GetExtenstions(string xmlFile, Assembly assembly)
+		public static ExtensionList GetExtensions(string xmlFile, Assembly assembly)
 		{
 			StreamReader streamReader = null;
 
@@ -191,7 +191,7 @@ namespace BLToolkit.Reflection.Extension
 						string.Format("Could not find file '{0}'.", xmlFile));
 
 				using (stream)
-					return GetExtenstions(stream);
+					return GetExtensions(stream);
 			} 
 			finally
 			{
@@ -200,7 +200,7 @@ namespace BLToolkit.Reflection.Extension
 			}
 		}
 
-		public static ExtensionList GetExtenstions(Stream xmlDocStream)
+		public static ExtensionList GetExtensions(Stream xmlDocStream)
 		{
 			XmlDocument doc = new XmlDocument();
 
@@ -218,7 +218,7 @@ namespace BLToolkit.Reflection.Extension
 				TypeExtensionAttribute attr = (TypeExtensionAttribute)attrs[0];
 
 				if (!string.IsNullOrEmpty(attr.FileName))
-					typeExtensions = GetExtenstions(attr.FileName, type.Assembly);
+					typeExtensions = GetExtensions(attr.FileName, type.Assembly);
 
 				if (typeExtensions != null && !string.IsNullOrEmpty(attr.TypeName))
 					return typeExtensions[attr.TypeName];

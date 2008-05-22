@@ -11,7 +11,7 @@ using BLToolkit.EditableObjects;
 namespace Reflection
 {
 	[TestFixture]
-	public class TypeHellperTest
+	public class TypeHelperTest
 	{
 		public class Attribute1 : Attribute {}
 		public class Attribute2 : Attribute {}
@@ -212,7 +212,7 @@ namespace Reflection
 		}
 
 		[Test, ExpectedException(typeof(AmbiguousMatchException))]
-		public void GenericsAmbigousMatchTest()
+		public void GenericsAmbiguousMatchTest()
 		{
 			// There are more then one Method2 in the TestObject<T> class
 			new TypeHelper(typeof (TestObject<int>)).GetMethod("Method2");

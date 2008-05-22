@@ -10,7 +10,7 @@ namespace HowTo.DataAccess
 	[TestFixture]
 	public class Destination
 	{
-		public abstract class PersonAcessor : DataAccessor
+		public abstract class PersonAccessor : DataAccessor
 		{
 			public abstract void SelectAll([/*[a]*/Destination/*[/a]*/] IList<Person> list);
 		}
@@ -18,7 +18,7 @@ namespace HowTo.DataAccess
 		[Test]
 		public void Test()
 		{
-			PersonAcessor pa = DataAccessor.CreateInstance<PersonAcessor>();
+			PersonAccessor pa = DataAccessor.CreateInstance<PersonAccessor>();
 
 			List<Person> list = new List<Person>();
 

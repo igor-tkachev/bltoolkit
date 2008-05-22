@@ -1,5 +1,3 @@
-using System;
-
 using NUnit.Framework;
 
 using BLToolkit.DataAccess;
@@ -26,7 +24,7 @@ namespace HowTo.DataAccess
 		{
 			SqlQuery<MyPersonObject> query = new SqlQuery<MyPersonObject>();
 
-			/*[a]*/query.Extensions = TypeExtension.GetExtenstions("XmlExtension.xml")/*[/a]*/;
+			/*[a]*/query.Extensions = TypeExtension.GetExtensions("XmlExtension.xml")/*[/a]*/;
 
 			MyPersonObject person = query.SelectByKey(1);
 

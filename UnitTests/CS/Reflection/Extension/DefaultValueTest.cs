@@ -93,7 +93,7 @@ namespace Reflection.Extension
 		[Test]
 		public void Test1()
 		{
-			Map.Extensions = TypeExtension.GetExtenstions("Mapping.xml");
+			Map.Extensions = TypeExtension.GetExtensions("Mapping.xml");
 
 			Enum1 e1 = (Enum1)Map.ValueToEnum("3", typeof(Enum1));
 			Assert.AreEqual(Enum1.Value2, e1);

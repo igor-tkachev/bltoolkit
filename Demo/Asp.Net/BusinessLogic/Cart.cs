@@ -89,7 +89,7 @@ namespace PetShop.BusinessLogic
 		}
 
 		/// <summary>
-		/// Remove item from the cart based on itemId
+		/// Remove item from the cart based on <paramref name="itemId"/>
 		/// </summary>
 		/// <param name="itemId">ItemId of item to remove</param>
 		public void Remove(string itemId)

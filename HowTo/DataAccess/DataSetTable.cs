@@ -10,7 +10,7 @@ namespace HowTo.DataAccess
 	[TestFixture]
 	public class DataSetTable
 	{
-		public abstract class TestAcessor : DataAccessor
+		public abstract class TestAccessor : DataAccessor
 		{
 			[SprocName("Person_SelectAll"), /*[a]*/DataSetTable/*[/a]*/("First")]
 			public abstract void SelectFirstTable  ([Destination] DataSet ds);
@@ -28,7 +28,7 @@ namespace HowTo.DataAccess
 		[Test]
 		public void Test()
 		{
-			TestAcessor ta = DataAccessor.CreateInstance<TestAcessor>();
+			TestAccessor ta = DataAccessor.CreateInstance<TestAccessor>();
 
 			DataSet ds = new DataSet();
 

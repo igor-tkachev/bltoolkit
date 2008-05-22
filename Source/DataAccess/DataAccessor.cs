@@ -268,7 +268,7 @@ namespace BLToolkit.DataAccess
 
 			if (mms.Length != 1)
 				throw new DataAccessException(string.Format(
-					"Index hax more then one field for the method '{0}.{1}'. Use CompoundValue as the Key type",
+					"Index has more then one field for the method '{0}.{1}'. Use CompoundValue as the Key type",
 					GetType().Name, methodName));
 
 			db.ExecuteDictionary<TKey, TValue>(dictionary, mms[0].MemberName, objectType, null);

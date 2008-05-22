@@ -38,7 +38,7 @@ namespace DataAccess
 
 		[ActualType(typeof(IName),  typeof(Name1))]
 		[ActualType(typeof(IValue), typeof(MyValue))]
-		public abstract class TestAcessor : DataAccessor
+		public abstract class TestAccessor : DataAccessor
 		{
 			[SqlQuery("SELECT 'John' as Name")]
 			public abstract IName GetName();
@@ -62,9 +62,9 @@ namespace DataAccess
 			public abstract IValue GetValue();
 		}
 
-		TestAcessor Accessor
+		TestAccessor Accessor
 		{
-			get { return TypeAccessor.CreateInstance<TestAcessor>(); }
+			get { return TypeAccessor.CreateInstance<TestAccessor>(); }
 		}
 
 		[Test]
