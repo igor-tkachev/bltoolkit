@@ -79,7 +79,7 @@ namespace BLTgen
 				foreach (Type t in typesToProcess)
 				{
 					if (verbose)
-						Console.Write(t.FullName);
+						Console.Write(GetFullTypeName(t));
 
 					// We cannot create accessors for generic definitions
 					//
@@ -133,7 +133,7 @@ namespace BLTgen
 			{
 				for (Type bt = t.BaseType; bt != null; bt = bt.BaseType)
 				{
-					if (re.Match(bt.FullName).Success)
+					if (re.Match(GetFullTypeName(bt)).Success)
 						return true;
 				}
 				return false;
@@ -149,8 +149,30 @@ namespace BLTgen
 
 			return Array.FindAll(types, delegate(Type t)
 			{
-				return re.Match(t.FullName).Success == include;
+				return re.Match(GetFullTypeName(t)).Success == include;
 			});
+		}
+
+		// System.Type.FullName may be null under some conditions. See
+		// http://blogs.msdn.com/haibo_luo/archive/2006/02/17/534480.aspx
+		//
+		private static string GetFullTypeName(Type t)
+		{
+			string fullName = t.FullName;
+
+			if (fullName != null)
+				return fullName;
+
+			if (t.DeclaringType != null)
+				return GetFullTypeName(t.DeclaringType) + "+" + t.Name;
+
+			fullName = t.Namespace;
+			if (fullName != null)
+				fullName += ".";
+
+			fullName += t.Name;
+
+			return fullName;
 		}
 
 		private static string GetOutputAssemblyLocation(string sourceAssembly, string outputDirectory)
