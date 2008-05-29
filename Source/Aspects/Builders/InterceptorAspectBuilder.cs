@@ -24,6 +24,8 @@ namespace BLToolkit.Aspects.Builders
 		private readonly string        _configString;
 		private readonly int           _priority;
 
+		private          FieldBuilder  _interceptorField;
+
 		public override int GetPriority(BuildContext context)
 		{
 			return _priority;
@@ -79,7 +81,7 @@ namespace BLToolkit.Aspects.Builders
 			Context = context;
 
 			LocalBuilder info        = GetInfoField();
-			FieldBuilder interceptor = GetInterceptorField();
+			FieldBuilder interceptor = _interceptorField;
 			EmitHelper   emit        = Context.MethodBuilder.Emitter;
 
 			// Push ref & out parameters.
@@ -329,10 +331,12 @@ namespace BLToolkit.Aspects.Builders
 		protected override void BeginMethodBuild()
 		{
 			GetInfoField();
+			_interceptorField = GetInterceptorField();
 		}
 
 		protected override void EndMethodBuild()
 		{
+			Context.Items.Remove("$BLToolkit.MethodInfo");
 			Context.Items.Remove("$BLToolkit.InfoField");
 		}
 	}
