@@ -1,0 +1,7 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<sql>
+	<query id="1">SELECT * FROM Person WHERE LastName = @lastName</query>
+	<query id="2">SELECT * FROM Person WHERE {0} = @value</query>
+	<query id="3">SELECT TOP {0} * FROM Person WHERE LastName = @lastName</query>
+	<query id="4">SELECT @id as PersonID</query>
+</sql>

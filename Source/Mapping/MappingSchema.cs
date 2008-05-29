@@ -1549,6 +1549,7 @@ namespace BLToolkit.Mapping
 			while (dataSourceList.SetNextDataSource(ctx))
 			{
 				ctx.ObjectMapper = om;
+				ctx.StopMapping  = false;
 
 				object destObject = dataDestinationList.GetNextObject(ctx);
 

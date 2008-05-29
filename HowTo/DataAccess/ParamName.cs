@@ -18,9 +18,9 @@ namespace HowTo.DataAccess
 		public void Test()
 		{
 			TestAccessor ta = DataAccessor.CreateInstance<TestAccessor>();
-			Person       p  = ta.SelectByName("John", "Pupkin");
+			Person       p  = ta.SelectByName("Tester", "Testerson");
 
-			Assert.AreEqual(1, p.ID);
+			Assert.AreEqual(2, p.ID);
 		}
 	}
 }

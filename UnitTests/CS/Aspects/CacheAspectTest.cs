@@ -50,15 +50,15 @@ namespace Aspects
 
 		public class CustomCacheAspect : CacheAspect
 		{
-			private static IDictionary _cache = new Hashtable();
-			public  static IDictionary  Cache
+			private static IDictionary _methodcache = new Hashtable();
+			public  static IDictionary  MethodCache
 			{
-				get { return _cache; }
+				get { return _methodcache; }
 			}
 
-			protected override IDictionary GetCache(InterceptCallInfo info)
+			protected override IDictionary GetCache()
 			{
-				return Cache;
+				return MethodCache;
 			}
 		}
 
@@ -83,39 +83,8 @@ namespace Aspects
 			CustomTestClass.Value = 2; Assert.AreEqual(1, t.Test(1, 1));
 			CustomTestClass.Value = 3; Assert.AreEqual(3, t.Test(2, 1));
 
-			CustomCacheAspect.Cache.Clear();
+			CustomCacheAspect.MethodCache.Clear();
 			CustomTestClass.Value = 4; Assert.AreEqual(4, t.Test(2, 1));
-		}
-
-		public abstract class GenericTestClass
-		{
-			public static int Value;
-
-			[Cache(typeof(CacheAspect<GenericTestClass>), MaxSeconds = 1, IsWeak = false)]
-			public virtual int Test(int i1, int i2)
-			{
-				return Value;
-			}
-		}
-
-		[Test]
-		public void GenericCacheAspectTest()
-		{
-			GenericTestClass t = TypeAccessor<GenericTestClass>.CreateInstance();
-
-			DateTime begin = DateTime.Now;
-
-			for (GenericTestClass.Value = 777; t.Test(2, 2) == 777; GenericTestClass.Value++)
-				continue;
-
-			Assert.IsTrue((DateTime.Now - begin).TotalMilliseconds >= 1000);
-
-			GenericTestClass.Value = 1; Assert.AreEqual(1, t.Test(1, 1));
-			GenericTestClass.Value = 2; Assert.AreEqual(1, t.Test(1, 1));
-			GenericTestClass.Value = 3; Assert.AreEqual(3, t.Test(2, 1));
-
-			CacheAspect<GenericTestClass>.Cache.Clear();
-			GenericTestClass.Value = 4; Assert.AreEqual(4, t.Test(2, 1));
 		}
 	}
 }

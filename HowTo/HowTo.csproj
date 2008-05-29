@@ -66,7 +66,6 @@
     <Compile Include="Aspects\CacheAspect.cs" />
     <Compile Include="Aspects\ClearCacheAspect.cs" />
     <Compile Include="Aspects\CounterAspect.cs" />
-    <Compile Include="Aspects\CustomCacheAspect.cs" />
     <Compile Include="Aspects\LoggingAspect.cs" />
     <Compile Include="Aspects\MixinAspect.cs" />
     <Compile Include="Aspects\NoCache.cs" />
@@ -76,6 +75,8 @@
     <Compile Include="DataAccess\ActionSprocName.cs" />
     <Compile Include="DataAccess\ActualType.cs" />
     <Compile Include="DataAccess\CommandBehavior.cs" />
+    <Compile Include="DataAccess\CustomSqlQuery2.cs" />
+    <Compile Include="DataAccess\CustomSqlQuery1.cs" />
     <Compile Include="DataAccess\Transaction.cs" />
     <Compile Include="DataAccess\OpenConfigQuery.cs" />
     <Compile Include="DataAccess\SqlQuery.cs" />
@@ -183,6 +184,21 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="DataAccess\Sql\Sql.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="DataAccess\Sql\Access.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="DataAccess\Sql\Oracle.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="DataAccess\Sql\Fdp.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="DataAccess\Sql\SQLite.xml" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

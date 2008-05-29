@@ -78,8 +78,8 @@ namespace BLToolkit.Aspects.Builders
 
 			Context = context;
 
-			FieldBuilder interceptor = GetInterceptorField();
 			LocalBuilder info        = GetInfoField();
+			FieldBuilder interceptor = GetInterceptorField();
 			EmitHelper   emit        = Context.MethodBuilder.Emitter;
 
 			// Push ref & out parameters.
@@ -227,10 +227,12 @@ namespace BLToolkit.Aspects.Builders
 
 			if (field == null)
 			{
+				_methodCounter++;
+
 				// Create MethodInfo field.
 				//
 				FieldBuilder methodInfo = Context.CreatePrivateStaticField(
-					"_methodInfo$" + Context.CurrentMethod.Name + ++_methodCounter, typeof(CallMethodInfo));
+					"_methodInfo$" + Context.CurrentMethod.Name + _methodCounter, typeof(CallMethodInfo));
 
 				EmitHelper emit = Context.MethodBuilder.Emitter;
 
@@ -281,7 +283,9 @@ namespace BLToolkit.Aspects.Builders
 				}
 
 				emit.stloc(field);
-				Context.Items.Add("$BLToolkit.InfoField", field);
+
+				Context.Items.Add("$BLToolkit.MethodInfo", methodInfo);
+				Context.Items.Add("$BLToolkit.InfoField",  field);
 			}
 
 			return field;
@@ -289,17 +293,33 @@ namespace BLToolkit.Aspects.Builders
 
 		private FieldBuilder GetInterceptorField()
 		{
-			string       fieldName = "_interceptor$_" + _interceptorType.FullName;
-			FieldBuilder field     = Context.GetField(fieldName);
+			string fieldName = "_interceptor$" + _interceptorType.FullName + "$_" + Context.CurrentMethod.Name + _methodCounter;
+
+			FieldBuilder field = Context.GetField(fieldName);
 
 			if (field == null)
 			{
+				// Create MethodInfo field.
+				//
 				field = Context.CreatePrivateStaticField(fieldName, typeof(IInterceptor));
 
-				Context.TypeBuilder.TypeInitializer.Emitter
+				EmitHelper emit = Context.MethodBuilder.Emitter;
+
+				Label        checkInterceptor = emit.DefineLabel();
+				FieldBuilder methodInfo       = (FieldBuilder)Context.Items["$BLToolkit.MethodInfo"];
+
+				emit
+					.ldsfld    (field)
+					.brtrue_s  (checkInterceptor)
 					.newobj    (TypeHelper.GetDefaultConstructor(_interceptorType))
 					.castclass (typeof(IInterceptor))
 					.stsfld    (field)
+
+					.ldsfld    (field)
+					.ldsfld    (methodInfo)
+					.callvirt  (typeof(IInterceptor), "Init", typeof(CallMethodInfo))
+
+					.MarkLabel (checkInterceptor)
 					;
 			}
 

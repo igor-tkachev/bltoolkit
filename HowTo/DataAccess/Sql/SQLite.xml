@@ -1,0 +1,4 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<sql>
+	<query id="3">SELECT * FROM Person WHERE LastName = @lastName LIMIT {0}</query>
+</sql>

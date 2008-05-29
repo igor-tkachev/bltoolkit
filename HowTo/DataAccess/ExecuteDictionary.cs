@@ -125,9 +125,9 @@ namespace HowTo.DataAccess
 			//
 			Dictionary<CompoundValue,string> sdic = pa.GetPersonNameDictionary();
 
-			string firstName = sdic[new CompoundValue(1, "Pupkin")];
+			string firstName = sdic[new CompoundValue(2, "Testerson")];
 
-			Assert.AreEqual("John", firstName);
+			Assert.AreEqual("Tester", firstName);
 		}
 	}
 }

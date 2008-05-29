@@ -1,11 +1,16 @@
 using System;
+using System.Reflection;
 
 namespace BLToolkit.Aspects
 {
 	[System.Diagnostics.DebuggerStepThrough]
 	public abstract class Interceptor : IInterceptor
 	{
-		public void Intercept(InterceptCallInfo info)
+		public virtual void Init(CallMethodInfo info)
+		{
+		}
+
+		public virtual void Intercept(InterceptCallInfo info)
 		{
 			switch (info.InterceptType)
 			{

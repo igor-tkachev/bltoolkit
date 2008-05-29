@@ -30,7 +30,7 @@ namespace HowTo.DataAccess
 		{
 			SqlQuery<Person> query = new SqlQuery<Person>();
 
-			Person person = query./*[a]*/SelectByKey("John", "Pupkin")/*[/a]*/;
+			Person person = query./*[a]*/SelectByKey("Tester", "Testerson")/*[/a]*/;
 
 			Assert.IsNotNull(person);
 		}

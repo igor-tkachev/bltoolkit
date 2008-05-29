@@ -1,4 +1,5 @@
 using System;
+using System.Reflection;
 
 using BLToolkit.Aspects;
 using BLToolkit.Reflection;
@@ -19,6 +20,10 @@ namespace Aspects
 
 		public class TestInterceptor : IInterceptor
 		{
+			public void Init(CallMethodInfo info)
+			{
+			}
+
 			public void Intercept(InterceptCallInfo info)
 			{
 				if (info.CallMethodInfo.MethodInfo.ReturnType == typeof(int))

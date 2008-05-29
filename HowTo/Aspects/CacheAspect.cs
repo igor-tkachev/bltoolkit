@@ -50,7 +50,9 @@ namespace HowTo.Aspects
 				TestClass.Value++;
 			}
 
-			Assert.IsTrue((DateTime.Now - begin).TotalMilliseconds >= 500);
+			double totalMilliseconds = (DateTime.Now - begin).TotalMilliseconds;
+
+			Assert.GreaterOrEqual(totalMilliseconds, 500);
 		}
 
 		[Test]

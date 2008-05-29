@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Reflection;
 
@@ -38,6 +39,19 @@ namespace BLToolkit.Aspects
 			}
 		}
 
+		private CacheAspect _cacheAspect;
+		public  CacheAspect  CacheAspect
+		{
+			         get { return _cacheAspect;  }
+			internal set { _cacheAspect = value; }
+		}
+
+		[Obsolete]
+		public  IDictionary  MethodCallCache
+		{
+			get { return _cacheAspect != null? _cacheAspect.Cache: new Hashtable(); }
+		}
+
 		#endregion
 
 		#region Proptected Members
@@ -45,19 +59,6 @@ namespace BLToolkit.Aspects
 		internal CacheAspect.  ConfigParameters CacheParameters;
 		internal LoggingAspect.ConfigParameters LogParameters;
 		internal MethodCallCounter              Counter;
-
-		private IDictionary _methodCallCache;
-		public  IDictionary  MethodCallCache
-		{
-			get
-			{
-				if (_methodCallCache == null) lock (this) if (_methodCallCache == null)
-					CacheAspect.CleanupThread.RegisterCache(_methodCallCache = new Hashtable());
-
-				return _methodCallCache;
-			}
-			set { _methodCallCache = value; }
-		}
 
 		private  bool[] _cacheableParameters;
 		internal bool[]  CacheableParameters

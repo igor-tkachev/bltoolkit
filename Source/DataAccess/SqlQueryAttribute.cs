@@ -34,7 +34,7 @@ namespace BLToolkit.DataAccess
 		public  int  ID
 		{
 			get { return _id;  }
-			set { _id = value; }
+			set { _id = value; _isDynamic = value != int.MinValue; }
 		}
 
 		public virtual string GetSqlText(DataAccessor accessor, DbManager dbManager)

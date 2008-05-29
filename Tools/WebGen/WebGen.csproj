@@ -69,6 +69,7 @@
     <Content Include="Content\Doc\DataAccess\ActionSprocName.htm" />
     <Content Include="Content\Doc\DataAccess\ActualType.htm" />
     <Content Include="Content\Doc\DataAccess\CommandBehavior.htm" />
+    <Content Include="Content\Doc\DataAccess\CustomSqlQuery.htm" />
     <Content Include="Content\Doc\DataAccess\Transaction.htm" />
     <Content Include="Content\Doc\DataAccess\OpenConfigQuery.htm" />
     <Content Include="Content\Doc\DataAccess\SqlQuery.htm" />
