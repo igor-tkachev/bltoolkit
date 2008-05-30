@@ -46,7 +46,7 @@ namespace BLToolkit.Aspects
 			internal set { _cacheAspect = value; }
 		}
 
-		[Obsolete]
+		[Obsolete("Use CacheAspect.Cache instead")]
 		public  IDictionary  MethodCallCache
 		{
 			get { return _cacheAspect != null? _cacheAspect.Cache: new Hashtable(); }
@@ -55,10 +55,6 @@ namespace BLToolkit.Aspects
 		#endregion
 
 		#region Proptected Members
-
-		internal CacheAspect.  ConfigParameters CacheParameters;
-		internal LoggingAspect.ConfigParameters LogParameters;
-		internal MethodCallCounter              Counter;
 
 		private  bool[] _cacheableParameters;
 		internal bool[]  CacheableParameters

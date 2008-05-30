@@ -1,18 +1,15 @@
 ﻿[BLToolkitGenerated]
 public sealed class TestClass : CounterAspectTest.TestClass
 {
-	[BLToolkitGenerated]
-	private static IInterceptor _interceptor$_BLToolkit.Aspects.CounterAspect = new CounterAspect();
-
-	[BLToolkitGenerated]
-	private static CallMethodInfo _methodInfo$TestMethod1;
+	[BLToolkitGenerated] private static CallMethodInfo _methodInfo;
+	[BLToolkitGenerated] private static IInterceptor   _interceptor;
 
 	[BLToolkitGenerated]
 	public override void TestMethod()
 	{
-		if (_methodInfo$TestMethod1 == null)
+		if (_methodInfo == null)
 		{
-			_methodInfo$TestMethod1 = new CallMethodInfo((MethodInfo)MethodBase.GetCurrentMethod());
+			_methodInfo = new CallMethodInfo((MethodInfo)MethodBase.GetCurrentMethod());
 		}
 
 		InterceptCallInfo info = new InterceptCallInfo();
@@ -20,16 +17,21 @@ public sealed class TestClass : CounterAspectTest.TestClass
 		try
 		{
 			info.Object          = this;
-			info.CallMethodInfo  = _methodInfo$TestMethod1;
-			info.InterceptorID   = 2;
+			info.CallMethodInfo  = _methodInfo;
 			info.InterceptResult = InterceptResult.Continue;
 			info.InterceptType   = InterceptType.BeforeCall;
+
+			if (_interceptor == null)
+			{
+				_interceptor = new CounterAspect();
+				_interceptor.Init(_methodInfo, null);
+			}
 
 			// 'BeforeCall' creates or gets a counter for the method and 
 			// registers the current call.
 			// See the [link][file]Aspects/CounterAspect.cs[/file]CounterAspect.BeforeCall[/link] method for details.
 			//
-			_interceptor$_BLToolkit.Aspects.CounterAspect.Intercept(info);
+			_interceptor.Intercept(info);
 
 			if (info.InterceptResult != InterceptResult.Return)
 			{
@@ -41,13 +43,12 @@ public sealed class TestClass : CounterAspectTest.TestClass
 		catch (Exception exception)
 		{
 			info.Exception       = exception;
-			info.InterceptorID   = 2;
 			info.InterceptResult = InterceptResult.Continue;
 			info.InterceptType   = InterceptType.OnCatch;
 
 			// 'OnCatch' is required to count calls with exceptions.
 			//
-			_interceptor$_BLToolkit.Aspects.CounterAspect.Intercept(info);
+			_interceptor.Intercept(info);
 
 			if (info.InterceptResult != InterceptResult.Return)
 			{
@@ -56,14 +57,13 @@ public sealed class TestClass : CounterAspectTest.TestClass
 		}
 		finally
 		{
-			info.InterceptorID   = 2;
 			info.InterceptResult = InterceptResult.Continue;
 			info.InterceptType   = InterceptType.OnFinally;
 
 			// 'OnFinally' step adds statistic to the method counter.
 			// See the [link][file]Aspects/CounterAspect.cs[/file]CounterAspect.OnFinally[/link] method for details.
 			//
-			_interceptor$_BLToolkit.Aspects.CounterAspect.Intercept(info);
+			_interceptor.Intercept(info);
 		}
 	}
 }

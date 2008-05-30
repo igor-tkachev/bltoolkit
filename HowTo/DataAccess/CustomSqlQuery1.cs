@@ -18,9 +18,9 @@ namespace HowTo.DataAccess
 				/*[a]*/IsDynamic = true/*[/a]*/;
 			}
 
-			public  string  OracleText { get; set; }
-			public  string  FbText     { get; set; }
-			public  string  SQLiteText { get; set; }
+			public string OracleText { get; set; }
+			public string FbText     { get; set; }
+			public string SQLiteText { get; set; }
 
 			public /*[a]*/override/*[/a]*/ string /*[a]*/GetSqlText/*[/a]*/(DataAccessor accessor, DbManager dbManager)
 			{

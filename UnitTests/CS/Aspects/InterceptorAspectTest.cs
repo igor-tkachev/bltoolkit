@@ -20,7 +20,7 @@ namespace Aspects
 
 		public class TestInterceptor : IInterceptor
 		{
-			public void Init(CallMethodInfo info)
+			public void Init(CallMethodInfo info, string configString)
 			{
 			}
 

@@ -69,20 +69,6 @@ namespace BLToolkit.Aspects
 			set { _exception = value; }
 		}
 
-		private string _configString;
-		public  string  ConfigString
-		{
-			get { return _configString;  }
-			set { _configString = value; }
-		}
-
-		private int _interceptorID;
-		public  int  InterceptorID
-		{
-			get { return _interceptorID;  }
-			set { _interceptorID = value; }
-		}
-
 		private Hashtable  _items;
 		public  IDictionary Items
 		{

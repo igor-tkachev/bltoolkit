@@ -92,13 +92,6 @@ namespace BLToolkit.Aspects
 
 		#region Protected Members
 
-		private  int _interceptorID;
-		internal int  InterceptorID
-		{
-			get { return _interceptorID;  }
-			set { _interceptorID = value; }
-		}
-
 		protected internal virtual void AddCall(TimeSpan time, bool withException, bool cached)
 		{
 			if (cached)

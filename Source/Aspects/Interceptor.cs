@@ -6,7 +6,7 @@ namespace BLToolkit.Aspects
 	[System.Diagnostics.DebuggerStepThrough]
 	public abstract class Interceptor : IInterceptor
 	{
-		public virtual void Init(CallMethodInfo info)
+		public virtual void Init(CallMethodInfo info, string configString)
 		{
 		}
 

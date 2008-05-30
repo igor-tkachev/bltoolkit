@@ -13,6 +13,15 @@ namespace BLToolkit.Aspects
 	[System.Diagnostics.DebuggerStepThrough]
 	public class CounterAspect : Interceptor
 	{
+		public override void Init(CallMethodInfo info, string configString)
+		{
+			base.Init(info, configString);
+
+			_counters.Add(_counter = CreateCounter(info));
+		}
+
+		private MethodCallCounter _counter;
+
 		static readonly LocalDataStoreSlot counterSlot = Thread.AllocateDataSlot();
 
 		protected override void BeforeCall(InterceptCallInfo info)
@@ -20,12 +29,10 @@ namespace BLToolkit.Aspects
 			if (!IsEnabled || Thread.GetData(counterSlot) != null)
 				return;
 
-			MethodCallCounter counter = GetCounter(info);
+			lock (_counter.CurrentCalls.SyncRoot)
+				_counter.CurrentCalls.Add(info);
 
-			lock (counter.CurrentCalls.SyncRoot)
-				counter.CurrentCalls.Add(info);
-
-			Thread.SetData(counterSlot, counter);
+			Thread.SetData(counterSlot, _counter);
 		}
 
 		protected override void OnFinally(InterceptCallInfo info)
@@ -33,15 +40,14 @@ namespace BLToolkit.Aspects
 			if (!IsEnabled)
 				return;
 
-			MethodCallCounter counter = GetCounter(info);
-			MethodCallCounter prev    = (MethodCallCounter)Thread.GetData(counterSlot);
+			MethodCallCounter prev = (MethodCallCounter)Thread.GetData(counterSlot);
 
-			if (counter == prev)
+			if (_counter == prev)
 			{
-				counter.AddCall(DateTime.Now - info.BeginCallTime, info.Exception != null, info.Cached);
+				_counter.AddCall(DateTime.Now - info.BeginCallTime, info.Exception != null, info.Cached);
 
-				lock (counter.CurrentCalls.SyncRoot)
-					counter.CurrentCalls.Remove(info);
+				lock (_counter.CurrentCalls.SyncRoot)
+					_counter.CurrentCalls.Remove(info);
 
 				Thread.SetData(counterSlot, null);
 			}
@@ -109,24 +115,6 @@ namespace BLToolkit.Aspects
 		}
 
 		#endregion
-
-		private static MethodCallCounter GetCounter(InterceptCallInfo info)
-		{
-			if (info.CallMethodInfo.Counter == null)
-				lock (_counters.SyncRoot)
-					if (info.CallMethodInfo.Counter == null)
-					{
-						foreach (MethodCallCounter c in _counters)
-							if (c.InterceptorID == info.InterceptorID)
-								return info.CallMethodInfo.Counter = c;
-
-						_counters.Add(info.CallMethodInfo.Counter = CreateCounter(info.CallMethodInfo));
-
-						info.CallMethodInfo.Counter.InterceptorID = info.InterceptorID;
-					}
-
-			return info.CallMethodInfo.Counter;
-		}
 
 		#endregion
 	}

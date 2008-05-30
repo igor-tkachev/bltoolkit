@@ -1,33 +1,34 @@
 ﻿[BLToolkitGenerated]
 public sealed class TestClass : HowTo.Aspects.TestClass
 {
-	[BLToolkitGenerated]
-	private static IInterceptor _interceptor$_BLToolkit.Aspects.CacheAspect = new CacheAspect();
-
-	[BLToolkitGenerated]
-	private static CallMethodInfo _methodInfo$CachedMethod1;
+	[BLToolkitGenerated] private static CallMethodInfo _methodInfo;
+	[BLToolkitGenerated] private static IInterceptor   _interceptor;
 
 	[BLToolkitGenerated]
 	public override int CachedMethod(int p1, int p2)
 	{
 		int returnValue = 0;
 
-		if (_methodInfo$CachedMethod1 == null)
+		if (_methodInfo == null)
 		{
-			_methodInfo$CachedMethod1 = new CallMethodInfo((MethodInfo)MethodBase.GetCurrentMethod());
+			_methodInfo = new CallMethodInfo((MethodInfo)MethodBase.GetCurrentMethod());
 		}
 
 		InterceptCallInfo info = new InterceptCallInfo();
 
 		info.Object             = this;
-		info.CallMethodInfo     = _methodInfo$CachedMethod1;
+		info.CallMethodInfo     = _methodInfo;
 		info.ParameterValues[0] = p1;
 		info.ParameterValues[1] = p2;
 		info.ReturnValue        = returnValue;
-		info.ConfigString       = "MaxCacheTime=500;IsWeak=False";
-		info.InterceptorID      = 2; // Unique interceptor ID
 		info.InterceptResult    = InterceptResult.Continue;
 		info.InterceptType      = InterceptType.BeforeCall;
+
+		if (_interceptor == null)
+		{
+			_interceptor = new CacheAspect();
+			_interceptor.Init(_methodInfo, "MaxCacheTime=500;IsWeak=False");
+		}
 
 		// 'BeforeCall' step checks if the method is cached.
 		// If it is and the cache is not expired, the Intercept method populates 
@@ -35,7 +36,7 @@ public sealed class TestClass : HowTo.Aspects.TestClass
 		// sets info.InterceptResult to InterceptResult.Return.
 		// See the [link][file]Aspects/CacheAspect.cs[/file]CacheAspect.BeforeCall[/link] method for details.
 		//
-		_interceptor$_BLToolkit.Aspects.CacheAspect.Intercept(info);
+		_interceptor.Intercept(info);
 
 		returnValue = (int)info.ReturnValue;
 
@@ -46,15 +47,13 @@ public sealed class TestClass : HowTo.Aspects.TestClass
 			returnValue = base.CachedMethod(p1, p2);
 
 			info.ReturnValue     = returnValue;
-			info.ConfigString    = "MaxCacheTime=500;IsWeak=False";
-			info.InterceptorID   = 2;
 			info.InterceptResult = InterceptResult.Continue;
 			info.InterceptType   = InterceptType.AfterCall;
 
 			// 'AfterCall' step stores parameters and return values in the cache.
 			// See the [link][file]Aspects/CacheAspect.cs[/file]CacheAspect.AfterCall[/link] method for details.
 			//
-			_interceptor$_BLToolkit.Aspects.CacheAspect.Intercept(info);
+			_interceptor.Intercept(info);
 
 			returnValue = (int)info.ReturnValue;
 		}

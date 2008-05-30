@@ -25,6 +25,7 @@ namespace BLToolkit.Aspects.Builders
 		private readonly int           _priority;
 
 		private          FieldBuilder  _interceptorField;
+		private          LocalBuilder  _infoField;
 
 		public override int GetPriority(BuildContext context)
 		{
@@ -80,9 +81,7 @@ namespace BLToolkit.Aspects.Builders
 
 			Context = context;
 
-			LocalBuilder info        = GetInfoField();
-			FieldBuilder interceptor = _interceptorField;
-			EmitHelper   emit        = Context.MethodBuilder.Emitter;
+			EmitHelper emit = Context.MethodBuilder.Emitter;
 
 			// Push ref & out parameters.
 			//
@@ -96,7 +95,7 @@ namespace BLToolkit.Aspects.Builders
 					continue;
 
 				emit
-					.ldloc      (info)
+					.ldloc      (_infoField)
 					.callvirt   (typeof(InterceptCallInfo).GetProperty("ParameterValues").GetGetMethod())
 					.ldc_i4     (i)
 					.ldargEx    (p, true)
@@ -110,7 +109,7 @@ namespace BLToolkit.Aspects.Builders
 			if (Context.ReturnValue != null)
 			{
 				emit
-					.ldloc          (info)
+					.ldloc          (_infoField)
 					.ldloc          (Context.ReturnValue)
 					.boxIfValueType (Context.CurrentMethod.ReturnType)
 					.callvirt       (typeof(InterceptCallInfo).GetProperty("ReturnValue").GetSetMethod())
@@ -122,32 +121,16 @@ namespace BLToolkit.Aspects.Builders
 			if (Context.Step == BuildStep.Catch)
 			{
 				emit
-					.ldloc(info)
+					.ldloc(_infoField)
 					.ldloc(Context.Exception)
 					.callvirt(typeof(InterceptCallInfo).GetProperty("Exception").GetSetMethod())
 					;
 			}
 
-			// Set config string.
-			//
-			emit
-				.ldloc    (info)
-				.ldstrEx  (_configString)
-				.callvirt (typeof(InterceptCallInfo).GetProperty("ConfigString").GetSetMethod())
-				;
-
-			// Set interceptor ID.
-			//
-			emit
-				.ldloc    (info)
-				.ldc_i4   (ID)
-				.callvirt (typeof(InterceptCallInfo).GetProperty("InterceptorID").GetSetMethod())
-				;
-
 			// Set intercept result.
 			//
 			emit
-				.ldloc    (info)
+				.ldloc    (_infoField)
 				.ldc_i4   ((int)InterceptResult.Continue)
 				.callvirt (typeof(InterceptCallInfo).GetProperty("InterceptResult").GetSetMethod())
 				;
@@ -167,14 +150,14 @@ namespace BLToolkit.Aspects.Builders
 			}
 
 			emit
-				.ldloc    (info)
+				.ldloc    (_infoField)
 				.ldc_i4   ((int)interceptType)
 				.callvirt (typeof(InterceptCallInfo).GetProperty("InterceptType").GetSetMethod())
 
-				// Call interceptor.
-				//
-				.ldsfld   (interceptor)
-				.ldloc    (info)
+			// Call interceptor.
+			//
+				.ldsfld   (_interceptorField)
+				.ldloc    (_infoField)
 				.callvirt (typeof(IInterceptor), "Intercept", typeof(InterceptCallInfo))
 				;
 
@@ -183,7 +166,7 @@ namespace BLToolkit.Aspects.Builders
 			if (Context.ReturnValue != null)
 			{
 				emit
-					.ldloc          (info)
+					.ldloc          (_infoField)
 					.callvirt       (typeof(InterceptCallInfo).GetProperty("ReturnValue").GetGetMethod())
 					.CastFromObject (Context.CurrentMethod.ReturnType)
 					.stloc          (Context.ReturnValue)
@@ -203,7 +186,7 @@ namespace BLToolkit.Aspects.Builders
 
 				emit
 					.ldarg          (p)
-					.ldloc          (info)
+					.ldloc          (_infoField)
 					.callvirt       (typeof(InterceptCallInfo).GetProperty("ParameterValues").GetGetMethod())
 					.ldc_i4         (i)
 					.ldelem_ref
@@ -214,7 +197,7 @@ namespace BLToolkit.Aspects.Builders
 
 			// Check InterceptResult
 			emit
-				.ldloc    (info)
+				.ldloc    (_infoField)
 				.callvirt (typeof(InterceptCallInfo).GetProperty("InterceptResult").GetGetMethod())
 				.ldc_i4   ((int)InterceptResult.Return)
 				.beq      (Context.ReturnLabel)
@@ -319,7 +302,8 @@ namespace BLToolkit.Aspects.Builders
 
 					.ldsfld    (field)
 					.ldsfld    (methodInfo)
-					.callvirt  (typeof(IInterceptor), "Init", typeof(CallMethodInfo))
+					.ldstrEx   (_configString ?? "")
+					.callvirt  (typeof(IInterceptor), "Init", typeof(CallMethodInfo), typeof(string))
 
 					.MarkLabel (checkInterceptor)
 					;
@@ -330,7 +314,7 @@ namespace BLToolkit.Aspects.Builders
 
 		protected override void BeginMethodBuild()
 		{
-			GetInfoField();
+			_infoField        = GetInfoField();
 			_interceptorField = GetInterceptorField();
 		}
 

@@ -14,7 +14,7 @@ namespace HowTo.DataAccess
 	[TestFixture]
 	public class CustomSqlQuery2
 	{
-		public abstract class TestAccessorBase<T> : DataAccessor
+		public abstract class TestAccessorBase<T> : /*[a]*/DataAccessor/*[/a]*/
 			where T : TestAccessorBase<T>
 		{
 			const int Sql    = 0;
@@ -40,7 +40,7 @@ namespace HowTo.DataAccess
 
 			}
 
-			protected override string PrepareSqlQuery(DbManager db, int queryID, int uniqueID, string sqlQuery)
+			protected /*[a]*/override/*[/a]*/ string /*[a]*/PrepareSqlQuery/*[/a]*/(DbManager db, int queryID, int uniqueID, string sqlQuery)
 			{
 				int    provider     = Sql;
 				string providerName = db.DataProvider.Name;

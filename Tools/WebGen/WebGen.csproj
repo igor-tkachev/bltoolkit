@@ -60,7 +60,6 @@
     <Content Include="Content\Doc\Aspects\LoggingAspect.htm" />
     <Content Include="Content\Doc\Aspects\MixinAspect.htm" />
     <Content Include="Content\Doc\Aspects\NoCacheAttribute.htm" />
-    <Content Include="Content\Doc\Aspects\CustomCacheAspect.htm" />
     <Content Include="Content\Doc\Aspects\index.htm" />
     <Content Include="Content\Doc\ComponentModel\index.htm" />
     <Content Include="Content\Doc\ComponentModel\ObjectBinder.htm" />
@@ -69,7 +68,8 @@
     <Content Include="Content\Doc\DataAccess\ActionSprocName.htm" />
     <Content Include="Content\Doc\DataAccess\ActualType.htm" />
     <Content Include="Content\Doc\DataAccess\CommandBehavior.htm" />
-    <Content Include="Content\Doc\DataAccess\CustomSqlQuery.htm" />
+    <Content Include="Content\Doc\DataAccess\CustomSqlQuery2.htm" />
+    <Content Include="Content\Doc\DataAccess\CustomSqlQuery1.htm" />
     <Content Include="Content\Doc\DataAccess\Transaction.htm" />
     <Content Include="Content\Doc\DataAccess\OpenConfigQuery.htm" />
     <Content Include="Content\Doc\DataAccess\SqlQuery.htm" />

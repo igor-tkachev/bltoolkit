@@ -349,7 +349,7 @@ namespace WebGen
 				code = code
 					.Replace("&lt;Person&gt;", "&lt;<a class=m href=#Person>Person</a>&gt;")
 					.Replace(", Person&gt;",   ", <a class=m href=#Person>Person</a>&gt;")
-					.Replace(" Person ",       " <a class='m' href=#Person>Person</a> ")
+					.Replace("  Person ",      "  <a class='m' href=#Person>Person</a> ")
 					.Replace(" Person()",      " <a class='m' href=#Person>Person</a>()")
 					.Replace("(Person ",       "(<a class='m' href=#Person>Person</a> ")
 					;

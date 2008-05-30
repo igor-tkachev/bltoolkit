@@ -56,7 +56,7 @@ namespace Aspects
 				get { return _methodcache; }
 			}
 
-			protected override IDictionary GetCache()
+			protected override IDictionary CreateCache()
 			{
 				return MethodCache;
 			}

@@ -23,14 +23,34 @@ namespace BLToolkit.Aspects
 			_registeredAspects.Add(this);
 		}
 
-		public override void Init(CallMethodInfo info)
+		private MethodInfo _methodInfo;
+		private int?       _instanceMaxCacheTime;
+		private bool?      _instanceIsWeak;
+
+		public override void Init(CallMethodInfo info, string configString)
 		{
+ 			base.Init(info, configString);
+
 			info.CacheAspect = this;
 
 			_methodInfo = info.MethodInfo;
-		}
 
-		private MethodInfo _methodInfo;
+			string[] ps = configString.Split(';');
+
+			foreach (string p in ps)
+			{
+				string[] vs = p.Split('=');
+
+				if (vs.Length == 2)
+				{
+					switch (vs[0].ToLower().Trim())
+					{
+						case "maxcachetime": _instanceMaxCacheTime = int. Parse(vs[1].Trim()); break;
+						case "isweak":       _instanceIsWeak       = bool.Parse(vs[1].Trim()); break;
+					}
+				}
+			}
+		}
 
 		private static IList _registeredAspects = ArrayList.Synchronized(new ArrayList());
 		private static IList  RegisteredAspects
@@ -102,16 +122,8 @@ namespace BLToolkit.Aspects
 				if (key == null)
 					return;
 
-				int  maxCacheTime = MaxCacheTime;
-				bool isWeak       = IsWeak;
-
-				if (!string.IsNullOrEmpty(info.ConfigString))
-				{
-					ConfigParameters cp = GetConfigParameters(info);
-
-					if (cp.MaxCacheTime != null) maxCacheTime = (int) cp.MaxCacheTime;
-					if (cp.IsWeak       != null) isWeak       = (bool)cp.IsWeak;
-				}
+				int  maxCacheTime = _instanceMaxCacheTime ?? MaxCacheTime;
+				bool isWeak       = _instanceIsWeak       ?? IsWeak;
 
 				CacheAspectItem item = new CacheAspectItem();
 
@@ -145,45 +157,7 @@ namespace BLToolkit.Aspects
 
 		#endregion
 
-		#region Config Support
-
-		internal class ConfigParameters
-		{
-			public object MaxCacheTime;
-			public object IsWeak;
-		}
-
-		private static ConfigParameters GetConfigParameters(InterceptCallInfo info)
-		{
-			ConfigParameters cp = info.CallMethodInfo.CacheParameters;
-
-			if (cp == null)
-			{
-				info.CallMethodInfo.CacheParameters = cp = new ConfigParameters();
-
-				string[] ps = info.ConfigString.Split(';');
-
-				foreach (string p in ps)
-				{
-					string[] vs = p.Split('=');
-
-					if (vs.Length == 2)
-					{
-						switch (vs[0].ToLower().Trim())
-						{
-							case "maxcachetime": cp.MaxCacheTime = int. Parse(vs[1].Trim()); break;
-							case "isweak":       cp.IsWeak       = bool.Parse(vs[1].Trim()); break;
-						}
-					}
-				}
-			}
-
-			return cp;
-		}
-
-		#endregion
-
-		#region Parameters
+		#region Global Parameters
 
 		private bool _isEnabled = true;
 		public  bool  IsEnabled
@@ -231,7 +205,7 @@ namespace BLToolkit.Aspects
 		private IDictionary _cache;
 		public  IDictionary  Cache
 		{
-			get { return _cache ?? (_cache = GetCache()); }
+			get { return _cache ?? (_cache = CreateCache()); }
 		}
 
 		protected virtual CacheAspectItem CreateCacheItem(InterceptCallInfo info)
@@ -239,7 +213,7 @@ namespace BLToolkit.Aspects
 			return new CacheAspectItem();
 		}
 
-		protected virtual IDictionary GetCache()
+		protected virtual IDictionary CreateCache()
 		{
 			return Hashtable.Synchronized(new Hashtable());
 		}
@@ -316,7 +290,7 @@ namespace BLToolkit.Aspects
 			ClearCache(GetMethodInfo(declaringType, methodName, types));
 		}
 
-		public static MethodInfo GetMethodInfo(Type declaringType, string methodName, params Type[] types)
+		public static void ClearCache(Type declaringType)
 		{
 			if (declaringType == null)
 				throw new ArgumentNullException("declaringType");
@@ -324,14 +298,28 @@ namespace BLToolkit.Aspects
 			if (declaringType.IsAbstract)
 				declaringType = BLToolkit.Reflection.TypeAccessor.GetAccessor(declaringType).Type;
 
-			if (types == null)
-				types = Type.EmptyTypes;
+			lock (RegisteredAspects.SyncRoot)
+				foreach (CacheAspect aspect in RegisteredAspects)
+					if (aspect._methodInfo.DeclaringType == declaringType)
+						CleanupThread.ClearCache(aspect.Cache);
+		}
+
+		public static MethodInfo GetMethodInfo(Type declaringType, string methodName, params Type[] parameterTypes)
+		{
+			if (declaringType == null)
+				throw new ArgumentNullException("declaringType");
+
+			if (declaringType.IsAbstract)
+				declaringType = BLToolkit.Reflection.TypeAccessor.GetAccessor(declaringType).Type;
+
+			if (parameterTypes == null)
+				parameterTypes = Type.EmptyTypes;
 
 			MethodInfo methodInfo = declaringType.GetMethod(
 				methodName,
 				BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic,
 				null,
-				types,
+				parameterTypes,
 				null);
 
 			if (methodInfo == null)
@@ -408,8 +396,8 @@ namespace BLToolkit.Aspects
 					return;
 				}
 
-				DateTime start = DateTime.Now;
-				int objectsInCache = 0;
+				DateTime start          = DateTime.Now;
+				int      objectsInCache = 0;
 
 				try
 				{
@@ -419,7 +407,7 @@ namespace BLToolkit.Aspects
 
 					foreach (CacheAspect aspect in CacheAspect.RegisteredAspects)
 					{
-						IDictionary cache = aspect.GetCache();
+						IDictionary cache = aspect.Cache;
 
 						lock (cache.SyncRoot)
 						{

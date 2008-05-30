@@ -34,6 +34,16 @@ namespace HowTo.Aspects
 			[/*[a]*/ClearCache/*[/a]*/(/*[a]*/"CachedMethod"/*[/a]*/, /*[a]*/typeof(int), typeof(int)/*[/a]*/)]
 			public abstract void ClearCache2();
 
+			// This method clears all caches for provided type.
+			//
+			[/*[a]*/ClearCache/*[/a]*/(/*[a]*/typeof(TestClass)/*[/a]*/)]
+			public abstract void ClearAll();
+
+			// This method clears all caches for current type.
+			//
+			[/*[a]*/ClearCache/*[/a]*/]
+			public abstract void ClearAll2();
+
 			public static TestClass CreateInstance()
 			{
 				// Use TypeAccessor to create an instance of an abstract class.

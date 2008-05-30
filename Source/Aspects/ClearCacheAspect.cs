@@ -13,5 +13,16 @@ namespace BLToolkit.Aspects
 
 			return CacheAspect.GetMethodInfo(declaringType, methodName, parameterTypes);
 		}
+
+		public static Type GetType(object caller, Type declaringType)
+		{
+			if (declaringType == null)
+				declaringType = caller.GetType();
+
+			if (declaringType.IsAbstract)
+				declaringType = BLToolkit.Reflection.TypeAccessor.GetAccessor(declaringType).Type;
+
+			return declaringType;
+		}
 	}
 }

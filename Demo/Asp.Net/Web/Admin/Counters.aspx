@@ -33,7 +33,7 @@
 <td><%# ((MethodCallCounter)Container.DataItem).MethodInfo.Name               %></td>
 <td align="right"><%# ((MethodCallCounter)Container.DataItem).TotalCount      %></td>
 <td><%# ((MethodCallCounter)Container.DataItem).ExceptionCount == 0? "": ((MethodCallCounter)Container.DataItem).ExceptionCount.ToString() %></td>
-<td align="right"><%# ((MethodCallCounter)Container.DataItem).CallMethodInfo.MethodCallCache.Count %></td>
+<td align="right"><%# ((MethodCallCounter)Container.DataItem).CallMethodInfo.CacheAspect != null? ((MethodCallCounter)Container.DataItem).CallMethodInfo.CacheAspect.Cache.Count: 0 %></td>
 <td align="right"><%# ((MethodCallCounter)Container.DataItem).CachedCount     %></td>
 <td><%# GetTime(((MethodCallCounter)Container.DataItem).MinTime)              %></td>
 <td><%# GetTime(((MethodCallCounter)Container.DataItem).AverageTime)          %></td>

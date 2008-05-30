@@ -57,6 +57,12 @@ namespace Aspects
 
 			[ClearCache("Test")]
 			public abstract void ClearTest3();
+
+			[ClearCache(typeof(TestClass))]
+			public abstract void ClearTest4();
+
+			[ClearCache]
+			public abstract void ClearTest5();
 		}
 
 		[Test]
@@ -158,6 +164,37 @@ namespace Aspects
 			TestClass1 tc = TypeAccessor<TestClass1>.CreateInstance();
 
 			tc.ClearTest3();
+		}
+
+		[Test]
+		public void Test5()
+		{
+			TestClass  tc1 = TypeAccessor<TestClass>. CreateInstance();
+			TestClass1 tc2 = TypeAccessor<TestClass1>.CreateInstance();
+
+			tc1.ClearTest2b();
+
+			int value1 = tc1.Test2();
+			int value2 = tc1.Test2();
+			int value3 = tc1.Test2(1);
+			int value4 = tc1.Test2(1);
+
+			Assert.AreEqual(value1, value2);
+			Assert.AreEqual(value3, value4);
+
+			tc2.ClearTest();
+			tc2.ClearTest4();
+
+			Assert.AreNotEqual(value1, tc1.Test2());
+			Assert.AreNotEqual(value3, tc1.Test2(1));
+		}
+
+		[Test]
+		public void Test6()
+		{
+			TestClass1 tc = TypeAccessor<TestClass1>.CreateInstance();
+
+			tc.ClearTest5();
 		}
 	}
 }

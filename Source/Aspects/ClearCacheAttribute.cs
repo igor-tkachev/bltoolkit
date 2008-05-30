@@ -13,6 +13,10 @@ namespace BLToolkit.Aspects
 	{
 		#region Constructors
 
+		public ClearCacheAttribute()
+		{
+		}
+
 		public ClearCacheAttribute(string methodName)
 		{
 			_methodName = methodName;
@@ -29,6 +33,11 @@ namespace BLToolkit.Aspects
 			_declaringType  = declaringType;
 			_methodName     = methodName;
 			_parameterTypes = parameterTypes;
+		}
+
+		public ClearCacheAttribute(Type declaringType)
+		{
+			_declaringType = declaringType;
 		}
 
 		Type   _declaringType;
