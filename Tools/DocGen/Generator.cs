@@ -161,10 +161,11 @@ namespace DocGen
 											item.Title = title;
 									}
 
+									source = GenerateSource(source, item);
+									title  = item.Title;
+
 									if (title.Length > 0 && _addDashToTitle)
 										title += " - ";
-
-									source = GenerateSource(source, item);
 
 									sw.WriteLine(string.Format(
 										template,
@@ -178,11 +179,18 @@ namespace DocGen
 										source = source
 											.Replace("<span class='a'>", "")
 											.Replace("</span>", "")
+											.Replace("&lt;", "<")
+											.Replace("&gt;", ">")
 											;
 
 										foreach (var index in IndexItem.Index)
-											if (!item.NoIndexes.Contains(index.Name) && source.IndexOf(index.Text) >= 0)
-												index.Files.Add(item);
+											if (!item.NoIndexes.Contains(index.Name))
+												foreach (string s in index.Text)
+													if (source.IndexOf(s) >= 0)
+													{
+														index.Files.Add(item);
+														break;
+													}
 
 										foreach (var s in item.Indexes)
 										{

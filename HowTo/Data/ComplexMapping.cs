@@ -98,7 +98,7 @@ namespace HowTo.Data
 
 					foreach (Grandchild grandchild in child.Grandchildren)
 					{
-						Assert.AreEqual(child, grandchild.Child);
+						Assert.AreEqual(child,  grandchild.Child);
 						Assert.AreEqual(parent, grandchild.Child.Parent);
 					}
 				}
