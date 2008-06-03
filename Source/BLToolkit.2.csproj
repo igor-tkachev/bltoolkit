@@ -411,6 +411,7 @@
     <None Include="DataAccess\DataAccess.xsx">
       <DependentUpon>DataAccess.xsd</DependentUpon>
     </None>
+    <None Include="Doc\BLToolkit.chm" />
     <None Include="Doc\Development rules and regulations.doc" />
     <None Include="Mapping\Mapping.xsx">
       <DependentUpon>Mapping.xsd</DependentUpon>

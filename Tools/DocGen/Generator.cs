@@ -1,24 +1,24 @@
 using System;
-using System.IO;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 using System.Text.RegularExpressions;
 using System.Xml;
 
 using Rsdn.Framework.Formatting;
 
-namespace WebGen
+namespace DocGen
 {
 	delegate FileAction FileActionHandler(string ext);
 
-	class Generator
+	partial class Generator
 	{
 		string            _sourcePath;
 		string            _destFolder;
 		FileActionHandler _fileAction;
 
 		public void Generate(
-			List<string>      createdFiles,
+			FileItem          createdFiles,
 			string            templateFileName,
 			string[]          path,
 			string            destFolder,
@@ -75,7 +75,7 @@ namespace WebGen
 		static readonly Regex ct_item5 = new Regex(@"<ct_item3\s*link1\=(?<link1>.*?)\s*label1=['""](?<label1>.*?)['""]\s*link2\=(?<link2>.*?)\s*label2=['""](?<label2>.*?)['""]\s*link3\=(?<link3>.*?)\s*label3=['""](?<label3>.*?)['""]\s*/>");
 
 		private bool GenerateContent(
-			List<string> createdFiles, string template, string[] path, bool createIndex)
+			FileItem createdFiles, string template, string[] path, bool createIndex)
 		{
 			string folder     = string.Join("/", path);
 			string destFolder = Path.Combine(_destFolder, folder);
@@ -87,8 +87,8 @@ namespace WebGen
 			string   sourcePath  = Path.Combine(_sourcePath, folder);
 			string[] sourceFiles = Directory.GetFiles(sourcePath);
 
-			List<string> files   = new List<string>();
-			List<string> folders = new List<string>();
+			var files   = new List<string>();
+			var folders = new List<string>();
 
 			foreach (string fileName in sourceFiles)
 			{
@@ -119,7 +119,8 @@ namespace WebGen
 								using (StreamWriter sw = File.CreateText(destName))
 								using (StreamReader sr = File.OpenText(fileName))
 								{
-									createdFiles.Add(destName);
+									FileItem item = new FileItem { IsFile = true, Name = destName };
+									createdFiles.Add(item);
 
 									string source = sr.ReadToEnd();
 
@@ -138,9 +139,17 @@ namespace WebGen
 									source = ct_item4.Replace(source, @"<tr><td nowrap>&#8226; <a href=${link1}>${label1}</a></td><td>&nbsp;&nbsp;&nbsp;</td><td nowrap colspan='3'>&#8226; <a href=${link2}>${label2}</a></td></tr>");
 									source = ct_item5.Replace(source, @"<tr><td nowrap>&#8226; <a href=${link1}>${label1}</a></td><td>&nbsp;&nbsp;&nbsp;</td><td nowrap>&#8226; <a href=${link2}>${label2}</a></td><td>&nbsp;&nbsp;&nbsp;</td><td nowrap>&#8226; <a href=${link3}>${label3}</a></td></tr>");
 
-									source = GenerateSource(source);
+									if (_modifySourceLinks)
+									{
+										source = source
+											.Replace("href=\"..\\..\\..\\Source\\", "target=_blank href=\"http://www.bltoolkit.net/Source/")
+											.Replace("href='..\\..\\..\\Source\\",  "target=_blank href='http://www.bltoolkit.net/Source/")
+											.Replace("<a href=\"http://", "<a target=_blank href=\"http://")
+											.Replace("<a href='http://",  "<a target=_blank href='http://")
+											;
+									}
 
-									string title  = Path.GetFileNameWithoutExtension(fileName);
+									string title  = item.Title;
 
 									if (title == "index")
 									{
@@ -148,10 +157,14 @@ namespace WebGen
 
 										if (title == "content")
 											title = "";
+										else
+											item.Title = title;
 									}
 
-									if (title.Length > 0)
+									if (title.Length > 0 && _addDashToTitle)
 										title += " - ";
+
+									source = GenerateSource(source, item);
 
 									sw.WriteLine(string.Format(
 										template,
@@ -159,15 +172,39 @@ namespace WebGen
 										backPath,
 										backLinks,
 										title));
+
+									if (item.NoIndex == false)
+									{
+										source = source
+											.Replace("<span class='a'>", "")
+											.Replace("</span>", "")
+											;
+
+										foreach (var index in IndexItem.Index)
+											if (!item.NoIndexes.Contains(index.Name) && source.IndexOf(index.Text) >= 0)
+												index.Files.Add(item);
+
+										foreach (var s in item.Indexes)
+										{
+											IndexItem index = IndexItem.Index.Find(i => i.Name == s);
+
+											if (index == null)
+												IndexItem.Index.Add(new IndexItem(s));
+
+											if (index.Files.Contains(item) == false)
+												index.Files.Add(item);
+										}
+									}
 								}
+
 								break;
 
 							case ".cs":
 								using (StreamWriter sw = File.CreateText(destName + ".htm"))
 								{
-									createdFiles.Add(destName + ".htm");
+									createdFiles.Add(new FileItem { IsFile = true, Name = destName + ".htm" });
 
-									string source = GenerateSource("<% " + fileName + " %>");
+									string source = GenerateSource("<% " + fileName + " %>", null);
 
 									sw.WriteLine(string.Format(
 										template,
@@ -202,7 +239,11 @@ namespace WebGen
 
 				newPath[path.Length] = dirName;
 
-				if (GenerateContent(createdFiles, template, newPath, createIndex))
+				FileItem item = new FileItem { IsFile = false, Name = dirName};
+
+				createdFiles.Add(item);
+
+				if (GenerateContent(item, template, newPath, createIndex))
 					folders.Add(dir);
 			}
 
@@ -237,7 +278,7 @@ namespace WebGen
 
 					using (StreamWriter sw = File.CreateText(indexName))
 					{
-						createdFiles.Add(indexName);
+						createdFiles.Add(new FileItem { IsFile = true, Name = indexName });
 
 						sw.WriteLine(string.Format(
 							template,
@@ -254,14 +295,14 @@ namespace WebGen
 			return false;
 		}
 
-		private string GenerateSource(string text)
+		private string GenerateSource(string text, FileItem item)
 		{
 			for (int
 				 idx = text.IndexOf("<%"),
 				 end = text.IndexOf("%>", idx + 2);
 				 idx >= 0 &&
 				 end >= 0;
-				 idx = text.IndexOf("<%", end + 2),
+				 idx = text.IndexOf("<%", idx + 2),
 				 end = text.IndexOf("%>", idx + 2))
 			{
 				string startSource = text.Substring(0, idx);
@@ -278,12 +319,25 @@ namespace WebGen
 
 				switch (command)
 				{
-					case "source": source = GetSourceCodeFromPath(Path.Combine(_sourcePath, source), text); break;
-					case "rss"   : source = GetNews              (Path.Combine(_sourcePath, source));       break;
-					case "txt"   :
-					case "cs"    :
-					case "sql"   : source = GetSourceCode(source, "." + command, text);                     break;
-					default      : throw new InvalidOperationException();
+					case "source"  : source = GetSourceCodeFromPath(Path.Combine(_sourcePath, source), text); break;
+					case "rss"     : source = GetNews              (Path.Combine(_sourcePath, source));       break;
+					case "txt"     :
+					case "cs"      :
+					case "sql"     : source = GetSourceCode(source, "." + command, text);                     break;
+					case "title"   : item.Title     = source;            source = "";                         break;
+					case "order"   : item.SortOrder = int.Parse(source); source = "";                         break;
+					case "group"   : item.Group     = source;            source = "";                         break;
+					case "index"   : item.Indexes.Add(source);           source = "";                         break;
+					case "noindex" :
+						if (source.Length == 0)
+							item.NoIndex = true;
+						else
+							item.NoIndexes.Add(source);
+							
+						source = "";
+						break;
+
+					default        : throw new InvalidOperationException();
 				}
 
 				text = startSource + source + text.Substring(end + 2);
@@ -292,7 +346,7 @@ namespace WebGen
 			return text;
 		}
 
-		private string GetNews(string sourcePath)
+		private static string GetNews(string sourcePath)
 		{
 			XmlDocument doc = new XmlDocument();
 

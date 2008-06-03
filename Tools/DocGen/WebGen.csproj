@@ -7,20 +7,21 @@
     <ProjectGuid>{06353283-C802-4706-BB18-5BBC49B03D59}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>WebGen</RootNamespace>
+    <RootNamespace>DocGen</RootNamespace>
     <AssemblyName>WebGen</AssemblyName>
     <FileUpgradeFlags>
     </FileUpgradeFlags>
     <OldToolsVersion>2.0</OldToolsVersion>
     <UpgradeBackupLocation>
     </UpgradeBackupLocation>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;WEB</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
@@ -28,144 +29,35 @@
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
+    <DefineConstants>TRACE;WEB</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Rsdn.Framework.Common, Version=1.0.3006.25300, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\Rsdn\Rsdn.Framework.Common.dll</HintPath>
+    </Reference>
+    <Reference Include="Rsdn.Framework.Formatting, Version=1.0.3072.30252, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\Rsdn\Rsdn.Framework.Formatting.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
+    <Reference Include="System.Core">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Content\Doc\DataAccess\ExecuteDictionary.htm" />
-    <Content Include="Content\Doc\Aspects\AsyncAspect.htm" />
-    <Content Include="Content\Doc\Aspects\AsyncAspect.cs" />
-    <Content Include="Content\Doc\Aspects\CacheAspect.cs" />
-    <Content Include="Content\Doc\Aspects\CounterAspect.cs" />
-    <Content Include="Content\Doc\Aspects\MixinAspect.cs" />
-    <Content Include="Content\Doc\Aspects\NotNull.cs" />
-    <Content Include="Content\Doc\Aspects\ClearCacheAspect.cs" />
     <Compile Include="FileAction.cs" />
+    <Compile Include="FileItem.cs" />
     <Compile Include="Generator.cs" />
+    <Compile Include="Generator.Web.cs" />
+    <Compile Include="IndexItem.cs" />
+    <Compile Include="Program.Web.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="Content\bltoolkit.css" />
-    <Content Include="Content\Doc\Aspects\ClearCacheAspect.htm" />
-    <Content Include="Content\Doc\Aspects\NotNullAttribute.htm" />
-    <Content Include="Content\Doc\Aspects\CounterAspect.htm" />
-    <Content Include="Content\Doc\Aspects\Counters.png" />
-    <Content Include="Content\Doc\Aspects\LoggingAspect.htm" />
-    <Content Include="Content\Doc\Aspects\MixinAspect.htm" />
-    <Content Include="Content\Doc\Aspects\NoCacheAttribute.htm" />
-    <Content Include="Content\Doc\Aspects\index.htm" />
-    <Content Include="Content\Doc\ComponentModel\index.htm" />
-    <Content Include="Content\Doc\ComponentModel\ObjectBinder.htm" />
-    <Content Include="Content\Doc\DataAccess\AbstractAccessor.htm" />
-    <Content Include="Content\Doc\DataAccess\ActionName.htm" />
-    <Content Include="Content\Doc\DataAccess\ActionSprocName.htm" />
-    <Content Include="Content\Doc\DataAccess\ActualType.htm" />
-    <Content Include="Content\Doc\DataAccess\CommandBehavior.htm" />
-    <Content Include="Content\Doc\DataAccess\CustomSqlQuery2.htm" />
-    <Content Include="Content\Doc\DataAccess\CustomSqlQuery1.htm" />
-    <Content Include="Content\Doc\DataAccess\Transaction.htm" />
-    <Content Include="Content\Doc\DataAccess\OpenConfigQuery.htm" />
-    <Content Include="Content\Doc\DataAccess\SqlQuery.htm" />
-    <Content Include="Content\Doc\DataAccess\SprocName.htm" />
-    <Content Include="Content\Doc\DataAccess\ScalarSource.htm" />
-    <Content Include="Content\Doc\DataAccess\ScalarFieldName.htm" />
-    <Content Include="Content\Doc\DataAccess\ParamNullValue.htm" />
-    <Content Include="Content\Doc\DataAccess\ParamName.htm" />
-    <Content Include="Content\Doc\DataAccess\ParamSize.htm" />
-    <Content Include="Content\Doc\DataAccess\ParamDbType.htm" />
-    <Content Include="Content\Doc\DataAccess\ObjectType.htm" />
-    <Content Include="Content\Doc\DataAccess\IndexAttribute.htm" />
-    <Content Include="Content\Doc\DataAccess\Format.htm" />
-    <Content Include="Content\Doc\DataAccess\DiscoverParameters.htm" />
-    <Content Include="Content\Doc\DataAccess\Direction.htm" />
-    <Content Include="Content\Doc\DataAccess\Destination.htm" />
-    <Content Include="Content\Doc\DataAccess\DataSetTable.htm" />
-    <Content Include="Content\Doc\DataAccess\Introduction.htm" />
-    <Content Include="Content\Doc\DataAccess\ExecuteScalar.htm" />
-    <Content Include="Content\Doc\DataAccess\ExecuteObject.htm" />
-    <Content Include="Content\Doc\DataAccess\ExecuteList.htm" />
-    <Content Include="Content\Doc\DataAccess\XmlExtension.htm" />
-    <Content Include="Content\Doc\DataAccess\NonUpdatable.htm" />
-    <Content Include="Content\Doc\DataAccess\PrimaryKey.htm" />
-    <Content Include="Content\Doc\DataAccess\TableName.htm" />
-    <Content Include="Content\Doc\DataAccess\Delete.htm" />
-    <Content Include="Content\Doc\DataAccess\Update.htm" />
-    <Content Include="Content\Doc\DataAccess\Insert.htm" />
-    <Content Include="Content\Doc\DataAccess\SelectAll.htm" />
-    <Content Include="Content\Doc\DataAccess\SelectByKey.htm" />
-    <Content Include="Content\Doc\DataAccess\DeleteSql.htm" />
-    <Content Include="Content\Doc\DataAccess\UpdateSql.htm" />
-    <Content Include="Content\Doc\DataAccess\InsertSql.htm" />
-    <Content Include="Content\Doc\DataAccess\SelectAllSql.htm" />
-    <Content Include="Content\Doc\DataAccess\OpenConfig.htm" />
-    <Content Include="Content\Doc\DataAccess\SelectByKeySql.htm" />
-    <Content Include="Content\Doc\DataAccess\index.htm" />
-    <Content Include="Content\Doc\Data\Close.htm" />
-    <Content Include="Content\Doc\Data\ExecuteScalarList.htm" />
-    <Content Include="Content\Doc\Data\ExecuteScalarDictionary.htm" />
-    <Content Include="Content\Doc\Data\ExecuteScalar.htm" />
-    <Content Include="Content\Doc\Data\ExecuteResultSet.htm" />
-    <Content Include="Content\Doc\Data\ExecuteReader.htm" />
-    <Content Include="Content\Doc\Data\ExecuteDictionary.htm" />
-    <Content Include="Content\Doc\Data\ExecuteDataTable.htm" />
-    <Content Include="Content\Doc\Data\ExecuteDataSet.htm" />
-    <Content Include="Content\Doc\Data\ExecuteNonQuery.htm" />
-    <Content Include="Content\Doc\Data\ExecuteForEach.htm" />
-    <Content Include="Content\Doc\Data\Prepare.htm" />
-    <Content Include="Content\Doc\Data\DataProvider\index.htm" />
-    <Content Include="Content\Doc\Data\DbManagerVsAdo.htm" />
-    <Content Include="Content\Doc\Data\ExecuteList.htm" />
-    <Content Include="Content\Doc\Data\ExecuteObject.htm" />
-    <Content Include="Content\Doc\Data\OpenConfig3.htm" />
-    <Content Include="Content\Doc\Data\OpenConfig2.htm" />
-    <Content Include="Content\Doc\Data\Parameter.htm" />
-    <Content Include="Content\Doc\Data\SetCommand.htm" />
-    <Content Include="Content\Doc\Data\SetSpCommand.htm" />
-    <Content Include="Content\Doc\Data\Transaction.htm" />
-    <Content Include="Content\Doc\Data\OpenConfig1.htm" />
-    <Content Include="Content\Doc\Data\CreateSql.htm" />
-    <Content Include="Content\Doc\Data\index.htm" />
-    <Content Include="Content\Doc\EditableObjects\index.htm" />
-    <Content Include="Content\Doc\index.htm" />
-    <Content Include="Content\Doc\Mapping\MapFieldAttribute.htm" />
-    <Content Include="Content\Doc\Mapping\MapToJson.htm" />
-    <Content Include="Content\Doc\Mapping\ObjectToObject.htm" />
-    <Content Include="Content\Doc\Mapping\MapValueAttribute.htm" />
-    <Content Include="Content\Doc\Mapping\ValueToEnum.htm" />
-    <Content Include="Content\Doc\Mapping\index.htm" />
-    <Content Include="Content\Doc\Mapping\EnumToValue.htm" />
-    <Content Include="Content\Doc\Reflection\Emit\HelloWorld.htm" />
-    <Content Include="Content\Doc\Reflection\Emit\index.htm" />
-    <Content Include="Content\Doc\Reflection\index.htm" />
-    <Content Include="Content\Doc\Reflection\ObjectFactory.htm" />
-    <Content Include="Content\Doc\TypeBuilder\index.htm" />
-    <Content Include="Content\Doc\TypeBuilder\InternalTypes.htm" />
-    <Content Include="Content\Doc\Validation\index.htm" />
-    <Content Include="Content\Download.htm" />
-    <Content Include="Content\index.htm" />
-    <Content Include="Content\License.htm" />
-    <Content Include="Content\robots.txt" />
-    <Content Include="Content\rss.xml" />
-    <Content Include="Content\template.html" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Content\Doc\Data\App.config" />
-    <None Include="Content\Doc\Data\App1.config" />
-    <None Include="Content\Doc\Data\App2.config" />
-    <None Include="Content\Doc\Data\DataProvider\App.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\..\..\..\Rsdn\trunk\source\Framework\Format\Rsdn.Framework.Formatting.csproj">
-      <Project>{5D93361E-3F17-4553-91F0-B6C24DEBB4CC}</Project>
-      <Name>Rsdn.Framework.Formatting</Name>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <Service Include="{B4F97281-0DBD-4835-9ED8-7DFB966E87FF}" />

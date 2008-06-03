@@ -119,18 +119,22 @@ namespace BLToolkit.Aspects.Builders
 			}
 
 			if (callbackIndex < 0)
+			{
 				// Callback omitted
 				//
 				emit
 					.ldnull
 					.ldnull
 					.end();
+			}
 			else if (callbackIndex == parameters.Length - 1)
+			{
 				// State omitted
 				//
 				emit
 					.ldnull
 					.end();
+			}
 
 			emit
 				.callvirt (delegateType.GetMethod("BeginInvoke"))

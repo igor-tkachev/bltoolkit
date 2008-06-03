@@ -1,0 +1,183 @@
+﻿<Project ToolsVersion="3.5" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>9.0.21022</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{DE11BCB2-94A1-4691-9192-5FC8E0323E2E}</ProjectGuid>
+    <ProjectTypeGuids>{349c5851-65df-11da-9384-00065b846f21};{fae04ec0-301f-11d3-bf4b-00c04f79efbc}</ProjectTypeGuids>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Content</RootNamespace>
+    <AssemblyName>Content</AssemblyName>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Content Include="Content\bltoolkit.css" />
+    <Content Include="Content\Doc\Aspects\AsyncAspect.htm" />
+    <Content Include="Content\Doc\Aspects\CacheAspect.htm" />
+    <Content Include="Content\Doc\Aspects\ClearCacheAspect.htm" />
+    <Content Include="Content\Doc\Aspects\CounterAspect.htm" />
+    <Content Include="Content\Doc\Aspects\Counters.png" />
+    <Content Include="Content\Doc\Aspects\index.htm" />
+    <Content Include="Content\Doc\Aspects\LoggingAspect.htm" />
+    <Content Include="Content\Doc\Aspects\MixinAspect.htm" />
+    <Content Include="Content\Doc\Aspects\NoCacheAttribute.htm" />
+    <Content Include="Content\Doc\Aspects\NotNullAttribute.htm" />
+    <Content Include="Content\Doc\ComponentModel\index.htm" />
+    <Content Include="Content\Doc\ComponentModel\ObjectBinder.htm" />
+    <Content Include="Content\Doc\DataAccess\AbstractAccessor.htm" />
+    <Content Include="Content\Doc\DataAccess\ActionName.htm" />
+    <Content Include="Content\Doc\DataAccess\ActionSprocName.htm" />
+    <Content Include="Content\Doc\DataAccess\ActualType.htm" />
+    <Content Include="Content\Doc\DataAccess\CommandBehavior.htm" />
+    <Content Include="Content\Doc\DataAccess\CustomSqlQuery1.htm" />
+    <Content Include="Content\Doc\DataAccess\CustomSqlQuery2.htm" />
+    <Content Include="Content\Doc\DataAccess\DataSetTable.htm" />
+    <Content Include="Content\Doc\DataAccess\Delete.htm" />
+    <Content Include="Content\Doc\DataAccess\DeleteSql.htm" />
+    <Content Include="Content\Doc\DataAccess\Destination.htm" />
+    <Content Include="Content\Doc\DataAccess\Direction.htm" />
+    <Content Include="Content\Doc\DataAccess\DiscoverParameters.htm" />
+    <Content Include="Content\Doc\DataAccess\ExecuteDictionary.htm" />
+    <Content Include="Content\Doc\DataAccess\ExecuteList.htm" />
+    <Content Include="Content\Doc\DataAccess\ExecuteObject.htm" />
+    <Content Include="Content\Doc\DataAccess\ExecuteScalar.htm" />
+    <Content Include="Content\Doc\DataAccess\Format.htm" />
+    <Content Include="Content\Doc\DataAccess\index.htm" />
+    <Content Include="Content\Doc\DataAccess\IndexAttribute.htm" />
+    <Content Include="Content\Doc\DataAccess\Insert.htm" />
+    <Content Include="Content\Doc\DataAccess\InsertSql.htm" />
+    <Content Include="Content\Doc\DataAccess\Introduction.htm" />
+    <Content Include="Content\Doc\DataAccess\NonUpdatable.htm" />
+    <Content Include="Content\Doc\DataAccess\ObjectType.htm" />
+    <Content Include="Content\Doc\DataAccess\OpenConfig.htm" />
+    <Content Include="Content\Doc\DataAccess\OpenConfigQuery.htm" />
+    <Content Include="Content\Doc\DataAccess\ParamDbType.htm" />
+    <Content Include="Content\Doc\DataAccess\ParamName.htm" />
+    <Content Include="Content\Doc\DataAccess\ParamNullValue.htm" />
+    <Content Include="Content\Doc\DataAccess\ParamSize.htm" />
+    <Content Include="Content\Doc\DataAccess\PrimaryKey.htm" />
+    <Content Include="Content\Doc\DataAccess\ScalarFieldName.htm" />
+    <Content Include="Content\Doc\DataAccess\ScalarSource.htm" />
+    <Content Include="Content\Doc\DataAccess\SelectAll.htm" />
+    <Content Include="Content\Doc\DataAccess\SelectAllSql.htm" />
+    <Content Include="Content\Doc\DataAccess\SelectByKey.htm" />
+    <Content Include="Content\Doc\DataAccess\SelectByKeySql.htm" />
+    <Content Include="Content\Doc\DataAccess\SprocName.htm" />
+    <Content Include="Content\Doc\DataAccess\SqlQuery.htm" />
+    <Content Include="Content\Doc\DataAccess\TableName.htm" />
+    <Content Include="Content\Doc\DataAccess\Transaction.htm" />
+    <Content Include="Content\Doc\DataAccess\Update.htm" />
+    <Content Include="Content\Doc\DataAccess\UpdateSql.htm" />
+    <Content Include="Content\Doc\DataAccess\XmlExtension.htm" />
+    <Content Include="Content\Doc\Data\Close.htm" />
+    <Content Include="Content\Doc\Data\CreateSql.htm" />
+    <Content Include="Content\Doc\Data\DataProvider\index.htm" />
+    <Content Include="Content\Doc\Data\DbManagerVsAdo.htm" />
+    <Content Include="Content\Doc\Data\ExecuteDataSet.htm" />
+    <Content Include="Content\Doc\Data\ExecuteDataTable.htm" />
+    <Content Include="Content\Doc\Data\ExecuteDictionary.htm" />
+    <Content Include="Content\Doc\Data\ExecuteForEach.htm" />
+    <Content Include="Content\Doc\Data\ExecuteList.htm" />
+    <Content Include="Content\Doc\Data\ExecuteNonQuery.htm" />
+    <Content Include="Content\Doc\Data\ExecuteObject.htm" />
+    <Content Include="Content\Doc\Data\ExecuteReader.htm" />
+    <Content Include="Content\Doc\Data\ExecuteResultSet.htm" />
+    <Content Include="Content\Doc\Data\ExecuteScalar.htm" />
+    <Content Include="Content\Doc\Data\ExecuteScalarDictionary.htm" />
+    <Content Include="Content\Doc\Data\ExecuteScalarList.htm" />
+    <Content Include="Content\Doc\Data\index.htm" />
+    <Content Include="Content\Doc\Data\OpenConfig1.htm" />
+    <Content Include="Content\Doc\Data\OpenConfig2.htm" />
+    <Content Include="Content\Doc\Data\OpenConfig3.htm" />
+    <Content Include="Content\Doc\Data\Parameter.htm" />
+    <Content Include="Content\Doc\Data\Prepare.htm" />
+    <Content Include="Content\Doc\Data\SetCommand.htm" />
+    <Content Include="Content\Doc\Data\SetSpCommand.htm" />
+    <Content Include="Content\Doc\Data\Transaction.htm" />
+    <Content Include="Content\Doc\EditableObjects\index.htm" />
+    <Content Include="Content\Doc\index.htm" />
+    <Content Include="Content\Doc\Mapping\EnumToValue.htm" />
+    <Content Include="Content\Doc\Mapping\index.htm" />
+    <Content Include="Content\Doc\Mapping\MapFieldAttribute.htm" />
+    <Content Include="Content\Doc\Mapping\MapToJson.htm" />
+    <Content Include="Content\Doc\Mapping\MapValueAttribute.htm" />
+    <Content Include="Content\Doc\Mapping\ObjectToObject.htm" />
+    <Content Include="Content\Doc\Mapping\ValueToEnum.htm" />
+    <Content Include="Content\Doc\Reflection\Emit\HelloWorld.htm" />
+    <Content Include="Content\Doc\Reflection\Emit\index.htm" />
+    <Content Include="Content\Doc\Reflection\index.htm" />
+    <Content Include="Content\Doc\Reflection\ObjectFactory.htm" />
+    <Content Include="Content\Doc\TypeBuilder\index.htm" />
+    <Content Include="Content\Doc\TypeBuilder\InternalTypes.htm" />
+    <Content Include="Content\Doc\Validation\index.htm" />
+    <Content Include="Content\Download.htm" />
+    <Content Include="Content\index.htm" />
+    <Content Include="Content\License.htm" />
+    <Content Include="Content\robots.txt" />
+    <Content Include="Content\rss.xml" />
+    <Content Include="Content\WebTemplate.html" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Content\Doc\Aspects\AsyncAspect.cs" />
+    <Content Include="Content\Doc\Aspects\CacheAspect.cs" />
+    <Content Include="Content\Doc\Aspects\ClearCacheAspect.cs" />
+    <Content Include="Content\Doc\Aspects\CounterAspect.cs" />
+    <Content Include="Content\Doc\Aspects\MixinAspect.cs" />
+    <Content Include="Content\Doc\Aspects\NotNull.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Content\ChmTemplate.html" />
+    <Content Include="Content\Home.htm" />
+    <Content Include="Content\Doc\Data\App.config" />
+    <Content Include="Content\Doc\Data\App1.config" />
+    <Content Include="Content\Doc\Data\App2.config" />
+    <Content Include="Content\Doc\Data\DataProvider\App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Properties\" />
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <Import Project="$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v9.0\WebApplications\Microsoft.WebApplication.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+  <ProjectExtensions>
+    <VisualStudio>
+      <FlavorProperties GUID="{349c5851-65df-11da-9384-00065b846f21}">
+        <WebProjectProperties>
+          <UseIIS>False</UseIIS>
+          <AutoAssignPort>True</AutoAssignPort>
+          <DevelopmentServerPort>20832</DevelopmentServerPort>
+          <DevelopmentServerVPath>/</DevelopmentServerVPath>
+          <IISUrl>
+          </IISUrl>
+          <NTLMAuthentication>False</NTLMAuthentication>
+          <SaveServerSettingsInUserFile>False</SaveServerSettingsInUserFile>
+        </WebProjectProperties>
+      </FlavorProperties>
+    </VisualStudio>
+  </ProjectExtensions>
+</Project>

@@ -1,6 +1,6 @@
 using System;
 
-namespace WebGen
+namespace DocGen
 {
 	enum FileAction
 	{

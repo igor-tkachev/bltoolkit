@@ -4,7 +4,7 @@ Bug fixes
 - 
 
 Enhancement
-- 
+- CHM help file provided. See the Doc folder.
 
 
 v 3.0
@@ -36,38 +36,46 @@ Enhancement
 - Assembly is signed.
 - New ActualTypeAttribute to associate DataAccessor's object type and its implementation.
 - New AutoImplementInterfaceAttribute to automatically generate interface implementation.
-- New TypeAccessor.AssociateType method and TypeAccessor.AssociatedTypeHandler event.
+- New TypeAccessor.AssociateType method and TypeAccessor.AssociatedTypeHandler event
   to control interface/type implementation.
 - DataException now has the 'Number' property.
 - New ClearCache aspect.
+
 
 v 2.0.7
 
 Bug fixes
 
 - Oracle/Odp does not handle colon (':') in ConvertType.ParameterToName.
-- Property change builder will use op_Inequality operation if it is available to compare property values.
+- Property change builder will use op_Inequality operation if it is available to compare
+  property values.
 - DbManager.ExecuteList<T>(params object[]) add an extra typeof(T)
 - EditableObject.Clone does reference cloning of its inner objects.
 - EditableObject.Clone does not track dirty state of its members.
 - Generated assembly name ends with '.dll'.
-  As result, System.Reflection.Assembly.Load() tries to load 'SomeAssembly.dll.DLL' and fails.
+  As a result, System.Reflection.Assembly.Load() tries to load 'SomeAssembly.dll.DLL'
+  and fails.
 - Oracle treat '\r' as an invalid character.
-- DataAccessorBuilder calls DbProvider.Convert(NameToParameter) for text query parameters.
+- DataAccessorBuilder calls DbProvider.Convert(NameToParameter) for text query
+  parameters.
 - SqlQueryBase.GetKeyFieldList was incorrectly marked as public.
 - TypeAccessorBuilder fails to build a getter/setter if base method is protected.
-- EditableXmlDocument fails to reject changes if there was an attribute insertion or deletion.
+- EditableXmlDocument fails to reject changes if there was an attribute insertion or
+  deletion.
 
 Enhancement
 
 - FdpDataProvider.QuoteIdentifiers option for FB data provier.
-- GenerateAtribute attribute to specify any custom attribute for a generated type or member.
+- GenerateAtribute attribute to specify any custom attribute for a generated type or
+  member.
 - SQLite data provider.
 - DeriveParameters implemented for MsAccess data provider.
-- XmlIncludeAbstractAttribute to simplify the xml serialization of a BLToolkit generated type.
-- Better support for internal types/members.
-  The behavior is configurable via Configuration.EditableObjectUsesMemberwiseEquals property.
+- XmlIncludeAbstractAttribute to simplify the xml serialization of a BLToolkit generated
+  type.
+- Better support for internal types/members. The behavior is configurable via
+  Configuration.EditableObjectUsesMemberwiseEquals property.
 - VS 2008 support.
+
 
 v 2.0.6
 
@@ -84,18 +92,23 @@ Bug fixes
 
 Enhancement
 
-- ParamSize & ParamDbType attributes to tweak DataAccessor parameters. Especially output ones.
-- All 'emit.stloc' immediately followed by 'emit.ldloc' were replaced with simple 'emit.dup' command.
+- ParamSize & ParamDbType attributes to tweak DataAccessor parameters. Especially output
+  ones.
+- All 'emit.stloc' immediately followed by 'emit.ldloc' were replaced with simple
+  'emit.dup' command.
   Lots of redundant local variables were removed.
 - UnitTests for Oracle, Firebird & Access (Jet)
-- DataSetTableAttribute is handled by all DataSet/DataTable related methods of DataAccessBuilder.
+- DataSetTableAttribute is handled by all DataSet/DataTable related methods of
+  DataAccessBuilder.
 - ClearCache method for CacheAspect.
 - Metadata provider for mapping.
 - Ability to specify global assembly version & strong name key pair.
 - AsyncAspect to execute any method asynchronously.
 - Added support for ConnectionStrings config settings.
 - Editable XmlDocuments.
-- Added support for IDictionary, IDictionary<,>, IList, and IList<> abstract data accessor return types.
+- Added support for IDictionary, IDictionary<,>, IList, and IList<> abstract data
+  accessor return types.
+
 
 v 2.0.5
 
@@ -106,10 +119,11 @@ Breaking changes
 Bug fixes
 
 - System.Reflection.Emit.AssemblyBuilder assemblies are processed properly.
-- RegExAttribute - now properly returns valid==true only when whole value is equal to match
+- RegExAttribute - now properly returns valid==true only when whole value is equal to
+  match.
 - EditableObject serialization issue
-- StandardPropertyDescriptor.CheckNull was always returning DBNull.Value if _isNull handler
-  was returning null. Now configurable via Configuration.CheckNullReturnIfNull.
+- StandardPropertyDescriptor.CheckNull was always returning DBNull.Value if _isNull
+  handler was returning null. Now configurable via Configuration.CheckNullReturnIfNull.
 - PropertyChangedBuilder was crashing when property was not public
 - ObjectBinder.IsNull was serialized to resources
 - Oracle provider now handles arrays of nullable types correctly.
@@ -122,19 +136,22 @@ Bug fixes
 
 Enhancement
 
-- Ability to specify RegexOptions for RegExAttribute. Regex not being created on every call to IsValid
+- Ability to specify RegexOptions for RegExAttribute. Regex not being created on every
+  call to IsValid
 - Destination attribute works with scalar types.
 - DataAccessorBuilder generates getters/setters for abstract properties & indexers.
 - Ability to specify globaly whether strings should be trimed when mapping
-- Ability to specify whether PropertyChange notification should only be fired when underlying value is changed
-  and not when setter is called
+- Ability to specify whether PropertyChange notification should only be fired when
+  underlying value is changed and not when setter is called
 - XmlDocument type support.
 - DbManager.SetParameters() accepts arrays of IDbDataParameter.
 - DataSetTableAttribute for DataAccessorBuilder to explicitly specify DataSet table name.
 - Default CacheAspect.IsWeak value changed to false.
 - Cleanup thread for CacheAspect.
 - MemberMapper type can be specified directly in the target type declaration.
-- Events for DbManager.OnBeforeOperation, OnAfterOperation, OnOperationException & OnInitCommand.
+- Events for DbManager.OnBeforeOperation, OnAfterOperation, OnOperationException &
+  OnInitCommand.
+
 
 v 2.0.4
 
@@ -149,17 +166,20 @@ Bug fixes
   with 3rd+ level nested properties.
 - Object holder ignored NoInstanceAttribute.
 - ValidatorContext caches NullValue.
-- EditableObject.RejectChanges/RejectMemberChanges were not firing PropertyChanged event for reverted fields.
+- EditableObject.RejectChanges/RejectMemberChanges were not firing PropertyChanged event
+  for reverted fields.
 - Fixed the generating IsValueType && !IsPrimitive ref/out parameters.
 
 Enhancement
 
 - Operator<T> is extensible now.
 - ObjectBinder can now control lifetime (Disposal) of underlying collection.
-- DuckTyping (the idea was shamelessly stolen from http://www.codeproject.com/cs/library/nduck.asp)
+- DuckTyping.
 - ParamNullValue attribute.
-- Virtual method DataProviderBase.PrepareCommand to let a data provider modify SQL statement befory query.
+- Virtual method DataProviderBase.PrepareCommand to let a data provider modify SQL
+  statement befory query.
 - Virtual method CacheAspect.GetCache. Can be used to provide a custom hashtable.
+
 
 v 2.0.3
 
@@ -167,19 +187,23 @@ Bug fixes
 
 - Race condition in MappingSchema.GetObjectMapper.
 - DbManager will not try to close the connection in the finalizer anymore.
-- MinValue/MaxValue attributes now determine value type by object property/field instead of test value.
-- Fixed obscure case when object is removed from EditableArrayList/BindingListImpl while ItemPropertyChanged 
-  delegate is in process of being executed and collection handler was not yet invoked.
+- MinValue/MaxValue attributes now determine value type by object property/field instead
+  of test value.
+- Fixed obscure case when object is removed from EditableArrayList/BindingListImpl while
+  ItemPropertyChanged delegate is in process of being executed and collection handler was
+  not yet invoked.
 
 Enhancement
 
 - HttpReader SOAP support.
 - Convert<T,P> uses type cast operators when available.
 - Third party DataProvider registration via appsettings.
-- More specification adherent sorting behavior implementation of IBindingList/IBindingListView in BindingListImpl. 
-- EditableArrayList (potentially breaking changes) heavily relies on BindingListImpl for IBindingList/IBindingListView 
-  and their base interfaces implementation. 
-- BindingListImpl is changed to be fully specification adherent binding wrapper for other object lists/collection types.
+- More specification adherent sorting behavior implementation of 
+  IBindingList/IBindingListView in BindingListImpl. 
+- EditableArrayList (potentially breaking changes) heavily relies on BindingListImpl for
+  IBindingList/IBindingListView and their base interfaces implementation. 
+- BindingListImpl is changed to be fully specification adherent binding wrapper for other
+  object lists/collection types.
 - 2.0.1 version obsolete methods have been removed.
 
 
@@ -195,5 +219,6 @@ Enhancement
 
 - New DataAccessor<T,A> class.
 - Direction.ReturnValueAttribute takes the Member parameter in '@fieldName' format.
-- New property Object of the InterceptCallInfo class, which is an intercepted object reference.
+- New property Object of the InterceptCallInfo class, which is an intercepted object
+  reference.
 

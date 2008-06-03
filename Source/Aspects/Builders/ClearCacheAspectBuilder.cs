@@ -18,9 +18,9 @@ namespace BLToolkit.Aspects.Builders
 			_parameterTypes = parameterTypes;
 		}
 
-		Type   _declaringType;
-		string _methodName;
-		Type[] _parameterTypes;
+		private Type   _declaringType;
+		private string _methodName;
+		private Type[] _parameterTypes;
 
 		#endregion
 
