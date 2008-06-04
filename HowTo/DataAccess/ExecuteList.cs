@@ -13,7 +13,7 @@ namespace HowTo.DataAccess
 	{
 		public abstract class /*[a]*/PersonAccessor/*[/a]*/ : /*[a]*/DataAccessor/*[/a]*/
 		{
-			// This method uses Person class primary key information.
+			// This method reads a list of Person objects.
 			//
 			[ActionName("SelectAll")]
 			public abstract /*[a]*/List<Person>/*[/a]*/ GetPersonList1();
