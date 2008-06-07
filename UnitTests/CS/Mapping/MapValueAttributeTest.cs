@@ -158,12 +158,35 @@ namespace Mapping
 		}
 
 		[Test]
-		public void TestEnum()
+		public void EnumTest()
 		{
 			SourceObject so = new SourceObject();
 			DestObject o = (DestObject)Map.ObjectToObject(so, typeof(DestObject));
 
 			Assert.AreEqual(StringAlignment.Near, o.test);
 		}
+
+		#region Nullable Enum
+
+		public enum Enum2
+		{
+			[MapValue("Near")] Value1,
+		}
+
+		public class Object5
+		{
+			public Enum2? test;
+		}
+
+		[Test]
+		public void NullableEnumTest()
+		{
+			SourceObject so = new SourceObject();
+
+			Object5 b = Map.ObjectToObject<Object5>(so);
+			Assert.AreEqual(Enum2.Value1, b.test);
+		}
+
+		#endregion
 	}
 }

@@ -159,6 +159,9 @@ namespace BLToolkit.Reflection.MetadataProvider
 		{
 			List<MapValue> list = null;
 
+			if (TypeHelper.IsNullable(type))
+				type = type.GetGenericArguments()[0];
+
 			if (type.IsEnum)
 				list = GetEnumMapValues(typeExt, type);
 
