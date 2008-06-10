@@ -3,8 +3,8 @@ using System.Collections;
 using System.ComponentModel;
 using System.Diagnostics;
 
-using BLToolkit.Reflection;
 using BLToolkit.EditableObjects;
+using BLToolkit.Reflection;
 
 namespace BLToolkit.ComponentModel
 {

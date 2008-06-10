@@ -1,13 +1,13 @@
 using System;
 using System.Reflection;
 using System.Xml;
-using BLToolkit.Common;
+
 using NUnit.Framework;
 
 using BLToolkit.EditableObjects;
 using BLToolkit.Mapping;
-using BLToolkit.TypeBuilder;
 using BLToolkit.Reflection;
+using BLToolkit.TypeBuilder;
 
 namespace EditableObjects
 {

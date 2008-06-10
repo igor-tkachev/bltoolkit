@@ -4,7 +4,6 @@ internal delegate int TestObject$Test$Delegate(int, string);
 [BLToolkitGenerated]
 public sealed class AsyncTestObject : HowTo.Aspects.AsyncAspectTest.AsyncTestObject
 {
-	[BLToolkitGenerated]
 	public override IAsyncResult BeginTest(int intVal, string strVal)
 	{
 		AsyncAspectBuilder.InternalAsyncResult r = new AsyncAspectBuilder.InternalAsyncResult();
@@ -15,7 +14,6 @@ public sealed class AsyncTestObject : HowTo.Aspects.AsyncAspectTest.AsyncTestObj
 		return r;
 	}
 
-	[BLToolkitGenerated]
 	public override IAsyncResult BeginTest(int intVal, string strVal, AsyncCallback callback)
 	{
 		AsyncAspectBuilder.InternalAsyncResult r = new AsyncAspectBuilder.InternalAsyncResult();
@@ -27,7 +25,6 @@ public sealed class AsyncTestObject : HowTo.Aspects.AsyncAspectTest.AsyncTestObj
 		return r;
 	}
 
-	[BLToolkitGenerated]
 	public override IAsyncResult BeginTest(int intVal, string strVal, AsyncCallback callback, object state)
 	{
 		AsyncAspectBuilder.InternalAsyncResult r = new AsyncAspectBuilder.InternalAsyncResult();
@@ -39,7 +36,6 @@ public sealed class AsyncTestObject : HowTo.Aspects.AsyncAspectTest.AsyncTestObj
 		return r;
 	}
 
-	[BLToolkitGenerated]
 	public override int EndTest(IAsyncResult asyncResult)
 	{
 		AsyncAspectBuilder.InternalAsyncResult r = (AsyncAspectBuilder.InternalAsyncResult)asyncResult;

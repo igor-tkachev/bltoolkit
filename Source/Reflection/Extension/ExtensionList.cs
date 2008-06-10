@@ -26,6 +26,9 @@ namespace BLToolkit.Reflection.Extension
 					if (ext.Name == type.Name || ext.Name == type.FullName)
 						return ext;
 
+				if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>))
+					return this[Nullable.GetUnderlyingType(type)];
+
 				return TypeExtension.Null;
 			}
 		}

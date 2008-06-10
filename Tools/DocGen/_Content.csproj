@@ -146,11 +146,15 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Content\ChmTemplate.html" />
+    <Content Include="Content\Doc\EditableObjects\EditableObject.htm" />
     <Content Include="Content\Home.htm" />
     <Content Include="Content\Doc\Data\App.config" />
     <Content Include="Content\Doc\Data\App1.config" />
     <Content Include="Content\Doc\Data\App2.config" />
     <Content Include="Content\Doc\Data\DataProvider\App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Content\Doc\EditableObjects\EditableObject.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties\" />

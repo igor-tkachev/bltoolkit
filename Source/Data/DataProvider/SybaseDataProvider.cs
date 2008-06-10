@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Data;
 using System.Data.Common;
+using System.Text;
 
 using Sybase.Data.AseClient;
 
@@ -70,8 +71,36 @@ namespace BLToolkit.Data.DataProvider
 					{
 						AseException ex = (AseException)value;
 
-						if (ex.Errors.Count > 0)
-							return ex.Errors[0].MessageNumber;
+						foreach (AseError error in ex.Errors)
+							if (error.IsError)
+								return error.MessageNumber;
+
+						foreach (AseError error in ex.Errors)
+							if (error.MessageNumber != 0)
+								return error.MessageNumber;
+
+						return 0;
+					}
+
+					break;
+
+				case ConvertType.ExceptionToErrorMessage:
+					if (value is AseException)
+					{
+						AseException ex = (AseException)value;
+
+						StringBuilder sb = new StringBuilder();
+
+						foreach (AseError error in ex.Errors)
+							if (error.IsError)
+								sb.AppendFormat("{0} Ln: {1}{2}", 
+									error.Message.TrimEnd('\n', '\r'), error.LineNum, Environment.NewLine);
+
+						foreach (AseError error in ex.Errors)
+							if (!error.IsError)
+								sb.AppendFormat("* {0}{1}", error.Message, Environment.NewLine);
+
+						return sb.Length == 0 ? ex.Message : sb.ToString();
 					}
 
 					break;

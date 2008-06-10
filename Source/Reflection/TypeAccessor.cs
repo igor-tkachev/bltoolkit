@@ -660,7 +660,7 @@ namespace BLToolkit.Reflection
 			if (type.IsGenericType)
 			{
 				if (type.GetGenericTypeDefinition() == typeof(Nullable<>))
-					return string.Format("{0}?", MapTypeName(type.GetGenericArguments()[0]));
+					return string.Format("{0}?", MapTypeName(Nullable.GetUnderlyingType(type)));
 
 				string name = type.Name;
 

@@ -24,7 +24,7 @@ namespace BLToolkit.Data
 		/// such as "BLToolkit Data error has occurred."
 		/// </remarks>
 		public DataException()
-			: base("An BLToolkit Data error has occurred.")
+			: base("A BLToolkit Data error has occurred.")
 		{
 		}
 
@@ -85,8 +85,16 @@ namespace BLToolkit.Data
 
 		private readonly DbManager _dbManager;
 
+		static string GetMessage(DbManager dbManager, Exception innerException)
+		{
+			object obj = dbManager.DataProvider.Convert(
+				innerException, ConvertType.ExceptionToErrorMessage);
+
+			return obj is Exception ? ((Exception)obj).Message : obj.ToString();
+		}
+
 		internal DataException(DbManager dbManager, Exception innerException)
-			: this(innerException)
+			: this(GetMessage(dbManager, innerException), innerException)
 		{
 			_dbManager = dbManager;
 		}
@@ -103,8 +111,8 @@ namespace BLToolkit.Data
 			get
 			{
 				return (int?)(_dbManager == null? null:
-					_dbManager.DataProvider.Convert(InnerException,
-						ConvertType.ExceptionToErrorNumber));
+					_dbManager.DataProvider.Convert(
+						InnerException, ConvertType.ExceptionToErrorNumber));
 			}
 		}
 

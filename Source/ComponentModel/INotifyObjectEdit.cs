@@ -1,3 +1,5 @@
+using System;
+
 namespace BLToolkit.ComponentModel
 {
 	public delegate void ObjectEditEventHandler(object sender, ObjectEditEventArgs args);

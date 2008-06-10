@@ -1,18 +1,16 @@
 ﻿[BLToolkitGenerated]
 public sealed class TestClass : ClearCacheAspect.TestClass
 {
-	[BLToolkitGenerated] private static MethodInfo _methodInfo1;
-	[BLToolkitGenerated] private static MethodInfo _methodInfo2;
-	[BLToolkitGenerated] private static Type       _type3;
-	[BLToolkitGenerated] private static Type       _type4;
+	private static MethodInfo _methodInfo1;
+	private static MethodInfo _methodInfo2;
+	private static Type       _type3;
+	private static Type       _type4;
 
-	[BLToolkitGenerated]
 	public override int CachedMethod(int p1, int p2)
 	{
 		// Method implementation.
 	}
 
-	[BLToolkitGenerated]
 	public override void ClearCache()
 	{
 		try
@@ -32,7 +30,6 @@ public sealed class TestClass : ClearCacheAspect.TestClass
 		}
 	}
 
-	[BLToolkitGenerated]
 	public override void ClearCache2()
 	{
 		try
@@ -53,7 +50,6 @@ public sealed class TestClass : ClearCacheAspect.TestClass
 		}
 	}
 
-	[BLToolkitGenerated]
 	public override void ClearAll()
 	{
 		try
@@ -70,7 +66,6 @@ public sealed class TestClass : ClearCacheAspect.TestClass
 		}
 	}
 
-	[BLToolkitGenerated]
 	public override void ClearAll2()
 	{
 		try

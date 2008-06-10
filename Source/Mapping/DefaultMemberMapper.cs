@@ -1,3 +1,5 @@
+using System;
+
 namespace BLToolkit.Mapping
 {
 	class DefaultMemberMapper : MemberMapper

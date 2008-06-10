@@ -133,6 +133,8 @@ namespace DocGen
 				new IndexItem("SprocName attribute"),
 				new IndexItem("TableName attribute"),
 
+				new IndexItem("EditableObject class"),
+
 				new IndexItem("IsDynamic property"),
 				new IndexItem("Extensions property"),
 

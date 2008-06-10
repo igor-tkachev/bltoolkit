@@ -1,7 +1,6 @@
 ﻿[BLToolkitGenerated]
 public sealed class TestClass : MixinAspectTest.TestClass, MixinAspectTest.ITestInterface1, MixinAspectTest.ITestInterface2
 {
-	[BLToolkitGenerated]
 	int MixinAspectTest.ITestInterface1.TestMethod(int value)
 	{
 		if (base._testInterface1 == null)
@@ -10,7 +9,6 @@ public sealed class TestClass : MixinAspectTest.TestClass, MixinAspectTest.ITest
 		return base._testInterface1.TestMethod(value);
 	}
 
-	[BLToolkitGenerated]
 	int MixinAspectTest.ITestInterface2.TestMethod1(int value)
 	{
 		// The [link][file]Aspects/MixinOverrideAttribute.cs[/file]MixinOverride[/link] attribute enforces direct method call.
@@ -18,7 +16,6 @@ public sealed class TestClass : MixinAspectTest.TestClass, MixinAspectTest.ITest
 		return base.TestMethod1(value);
 	}
 
-	[BLToolkitGenerated]
 	int MixinAspectTest.ITestInterface2.TestMethod2(int value)
 	{
 		if (base.TestInterface2 == null)

@@ -1,7 +1,6 @@
 ﻿[BLToolkitGenerated]
 public sealed class TestObject : NotNullTest.TestObject
 {
-	[BLToolkitGenerated]
 	public override void Foo1(string str1, string str2, string str3)
 	{
 		if (str2 == null) throw new ArgumentNullException("str2");
@@ -9,7 +8,6 @@ public sealed class TestObject : NotNullTest.TestObject
 		base.Foo1(str1, str2, str3);
 	}
 
-	[BLToolkitGenerated]
 	public override void Foo2(string str1, string str2, string str3)
 	{
 		if (str2 == null) throw new ArgumentNullException("str2", "Null");
@@ -17,7 +15,6 @@ public sealed class TestObject : NotNullTest.TestObject
 		base.Foo2(str1, str2, str3);
 	}
 
-	[BLToolkitGenerated]
 	public override void Foo3(string str1, string str2, string str3)
 	{
 		if (str2 == null) throw new ArgumentNullException("str2", "Null: str2");

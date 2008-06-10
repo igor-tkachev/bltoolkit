@@ -1,10 +1,9 @@
 ﻿[BLToolkitGenerated]
 public sealed class TestClass : HowTo.Aspects.TestClass
 {
-	[BLToolkitGenerated] private static CallMethodInfo _methodInfo;
-	[BLToolkitGenerated] private static IInterceptor   _interceptor;
+	private static CallMethodInfo _methodInfo;
+	private static IInterceptor   _interceptor;
 
-	[BLToolkitGenerated]
 	public override int CachedMethod(int p1, int p2)
 	{
 		int returnValue = 0;

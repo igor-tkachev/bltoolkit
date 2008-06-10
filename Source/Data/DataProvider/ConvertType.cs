@@ -59,5 +59,13 @@ namespace BLToolkit.Data.DataProvider
 		///   OleDbException -> OleDbException.Errors[0].NativeError
 		/// </summary>
 		ExceptionToErrorNumber,
+
+		/// <summary>
+		/// Gets error message from a native exception.
+		/// For example:
+		///     SqlException -> SqlException.Message,
+		///   OleDbException -> OleDbException.Errors[0].Message
+		/// </summary>
+		ExceptionToErrorMessage,
 	}
 }

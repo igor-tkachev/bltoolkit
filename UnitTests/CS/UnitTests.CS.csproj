@@ -126,6 +126,7 @@
     <Compile Include="EditableObjects\EditableObjectTest.cs" />
     <Compile Include="EditableObjects\InnerObjectTest.cs" />
     <Compile Include="EditableObjects\NestedObjectTest.cs" />
+    <Compile Include="Mapping\NullableEnum.cs" />
     <Compile Include="Mapping\DefaultValueAttributeTest.cs" />
     <Compile Include="Mapping\EnumExtension.cs" />
     <Compile Include="Mapping\ISupportMappingTest.cs" />

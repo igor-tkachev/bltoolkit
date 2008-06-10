@@ -1,10 +1,9 @@
 ﻿[BLToolkitGenerated]
 public sealed class TestClass : CounterAspectTest.TestClass
 {
-	[BLToolkitGenerated] private static CallMethodInfo _methodInfo;
-	[BLToolkitGenerated] private static IInterceptor   _interceptor;
+	private static CallMethodInfo _methodInfo;
+	private static IInterceptor   _interceptor;
 
-	[BLToolkitGenerated]
 	public override void TestMethod()
 	{
 		if (_methodInfo == null)
