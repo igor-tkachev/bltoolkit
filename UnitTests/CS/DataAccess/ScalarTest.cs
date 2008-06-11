@@ -6,12 +6,19 @@ using NUnit.Framework;
 using BLToolkit.Data;
 using BLToolkit.DataAccess;
 using BLToolkit.Reflection;
+using NUnit.Framework.SyntaxHelpers;
 
 namespace DataAccess
 {
 	[TestFixture]
 	public class ScalarTest
 	{
+		public enum TestEnum
+		{
+			Null  = 0,
+			Value = 12345,
+		}
+
 		public abstract class TestAccessor : DataAccessor
 		{
 			[ActionName("Scalar_DataReader")]
@@ -85,6 +92,12 @@ namespace DataAccess
 
 			[SprocName("Scalar_DataReader")]
 			public abstract int? ScalarNullableDestination([Destination] ref int? id);
+
+			[SprocName("Scalar_DataReader")]
+			public abstract TestEnum ScalarEnumDestination([Destination] ref TestEnum value);
+
+			[SprocName("Scalar_DataReader")]
+			public abstract TestEnum? ScalarNullableEnumDestination([Destination] ref TestEnum? value);
 
 			public static TestAccessor CreateInstance()
 			{
@@ -332,6 +345,28 @@ namespace DataAccess
 			int? id2 = -1;
 			id1 = ta.ScalarNullableDestination(ref id2);
 			Assert.AreEqual(id1, id2);
+		}
+
+		[Test]
+		public void ScalarEnumDestinationTest()
+		{
+			TestAccessor ta = TestAccessor.CreateInstance();
+
+			TestEnum refVal = TestEnum.Null;
+			TestEnum outVal = ta.ScalarEnumDestination(ref refVal);
+			Assert.That(outVal, Is.EqualTo(TestEnum.Value));
+			Assert.That(refVal, Is.EqualTo(TestEnum.Value));
+		}
+
+		[Test]
+		public void ScalarNullableEnumDestinationTest()
+		{
+			TestAccessor ta = TestAccessor.CreateInstance();
+
+			TestEnum? refVal = null;
+			TestEnum? outVal = ta.ScalarNullableEnumDestination(ref refVal);
+			Assert.That(outVal, Is.EqualTo(TestEnum.Value));
+			Assert.That(refVal, Is.EqualTo(TestEnum.Value));
 		}
 	}
 }

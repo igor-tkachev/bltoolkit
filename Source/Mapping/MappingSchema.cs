@@ -904,7 +904,17 @@ namespace BLToolkit.Mapping
 
 			if (isNullable)
 			{
-				switch (Type.GetTypeCode(TypeHelper.GetUnderlyingType(conversionType)))
+				if (TypeHelper.IsNullable(conversionType))
+				{
+					// Return a null reference or boxed not null value.
+					//
+					return value == null || value is DBNull? null:
+						ConvertChangeType(value, conversionType.GetGenericArguments()[0]);
+				}
+
+				Type type = conversionType.IsEnum? Enum.GetUnderlyingType(conversionType): conversionType;
+
+				switch (Type.GetTypeCode(type))
 				{
 					case TypeCode.Boolean:  return ConvertToNullableBoolean (value);
 					case TypeCode.Byte:     return ConvertToNullableByte    (value);

@@ -3285,7 +3285,7 @@ namespace BLToolkit.Reflection.Emit
 		{
 			if (type == null) throw new ArgumentNullException("type");
 
-			return type.IsValueType? unbox(type): this;
+			return type.IsValueType? TypeHelper.IsNullable(type)? unbox_any(type): unbox(type): this;
 		}
 
 		/// <summary>
