@@ -140,6 +140,8 @@
     <Compile Include="Data\SetSpCommand.cs" />
     <Compile Include="Data\Transaction.cs" />
     <Compile Include="Data\UpdateObject.cs" />
+    <Compile Include="EditableObjects\AcceptRejectChanges.cs" />
+    <Compile Include="EditableObjects\IsDirty.cs" />
     <Compile Include="EditableObjects\EditableObjectTest.cs" />
     <Compile Include="Mapping\MapToJson.cs" />
     <Compile Include="Mapping\MapFieldAttribute.cs" />

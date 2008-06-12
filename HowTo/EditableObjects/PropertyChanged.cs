@@ -5,21 +5,12 @@ using BLToolkit.EditableObjects;
 namespace HowTo.EditableObjects
 {
 	[TestFixture]
-	public class EditableObjectTest
+	public class PropertyChanged
 	{
 		public /*[a]*/abstract/*[/a]*/ class TestObject : /*[a]*/EditableObject/*[/a]*/<TestObject>
 		{
-			// Any abstract property becomes editable.
-			//
 			public /*[a]*/abstract/*[/a]*/ string FirstName { get; set; }
 			public /*[a]*/abstract/*[/a]*/ string LastName  { get; set; }
-
-			// This field is not editable.
-			//
-			public string FullName
-			{
-				get { return string.Format("{0} {1}", FirstName, LastName); }
-			}
 		}
 
 		[Test]
@@ -27,14 +18,19 @@ namespace HowTo.EditableObjects
 		{
 			TestObject obj = TestObject./*[a]*/CreateInstance/*[/a]*/();
 
-			obj.FirstName = "Tester";
-			obj.LastName  = "Testerson";
+			bool proprtyName = null;
 
-			Assert.IsTrue(obj.IsDirty);
+			obj./*[a]*/PropertyChanged/*[/a]*/ += (s, e) => proprtyName = e.PropertyName;
+
+			Assert.IsNull(propertyName);
+
+			obj.FirstName = "Tester";
+
+			Assert.AreEqual(proprtyName, "FirstName");
+
+			bool proprtyName = null;
 
 			obj.AcceptChanges();
-
-			Assert.IsFalse(obj.IsDirty);
 		}
 	}
 }

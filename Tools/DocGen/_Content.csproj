@@ -157,6 +157,11 @@
     <Content Include="Content\Doc\EditableObjects\EditableObject.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Content\Doc\EditableObjects\AcceptRejectChanges.htm" />
+    <Content Include="Content\Doc\EditableObjects\IsDirty.htm" />
+    <Content Include="Content\Doc\EditableObjects\ManualEditableObject.cs" />
+  </ItemGroup>
+  <ItemGroup>
     <Folder Include="Properties\" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />

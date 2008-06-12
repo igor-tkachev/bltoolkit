@@ -115,6 +115,7 @@
     <Compile Include="Mapping\MemberMapperTest.cs" />
     <Compile Include="Mapping\MetadataProvider\MetadataProviderTest.cs" />
     <Compile Include="Mapping\NullableAttributeTest.cs" />
+    <Compile Include="Mapping\NullableEnum.cs" />
     <Compile Include="Mapping\ObjectMapperAttributeTest.cs" />
     <Compile Include="Mapping\ResultSetTest.cs" />
     <Compile Include="Mapping\TrimmableAttributeTest.cs" />

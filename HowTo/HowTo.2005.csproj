@@ -44,7 +44,6 @@
     <Compile Include="Aspects\CacheAspect.cs" />
     <Compile Include="Aspects\ClearCacheAspect.cs" />
     <Compile Include="Aspects\CounterAspect.cs" />
-    <Compile Include="Aspects\CustomCacheAspect.cs" />
     <Compile Include="Aspects\LoggingAspect.cs" />
     <Compile Include="Aspects\MixinAspect.cs" />
     <Compile Include="Aspects\NoCache.cs" />
@@ -113,6 +112,7 @@
     <Compile Include="Data\SetSpCommand.cs" />
     <Compile Include="Data\Transaction.cs" />
     <Compile Include="Data\UpdateObject.cs" />
+    <Compile Include="EditableObjects\EditableObjectTest.cs" />
     <Compile Include="Mapping\MapToJson.cs" />
     <Compile Include="Mapping\MapFieldAttribute.cs" />
     <Compile Include="Mapping\ObjectToObject.cs" />

@@ -2,7 +2,7 @@
 public sealed class TestObject : EditableObjectTest.TestObject, IEditable, IMemberwiseEditable, IPrintDebugState
 {
 	// Note that the internal representation of the properties is EditableValue<string>.
-	// The EditableValue class provides a mechanism to keep and to control the field value state.
+	// The EditableValue class provides a mechanism to keep and control the field value state.
 	//
 	private /*[a]*/EditableValue<string>/*[/a]*/ _firstName;
 	private /*[a]*/EditableValue<string>/*[/a]*/ _lastName;
