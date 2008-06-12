@@ -1617,7 +1617,7 @@ namespace BLToolkit.DataAccess
 					nullValueType = type.GetGenericArguments()[0];
 
 					emit
-						.ldargEx  (pi, false)
+						.ldarga   (pi)
 						.call     (type, "get_HasValue")
 						.brfalse  (labelNull)
 						;
@@ -1633,7 +1633,7 @@ namespace BLToolkit.DataAccess
 							;
 					else if (isNullable)
 						emit
-							.ldargEx (pi, false)
+							.ldarga  (pi)
 							.call    (type, "get_Value")
 							.beq     (labelNull)
 							;
