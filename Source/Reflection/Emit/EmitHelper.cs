@@ -3488,6 +3488,16 @@ namespace BLToolkit.Reflection.Emit
 			return type.IsValueType? unbox_any(type): castclass(type);
 		}
 
+		public EmitHelper CastIfNecessary(Type expectedType, Type actualType)
+		{
+			if (expectedType == null) throw new ArgumentNullException("expectedType");
+			if (actualType   == null) throw new ArgumentNullException("actualType");
+
+			if (TypeHelper.IsSameOrParent(expectedType, actualType)) return this;
+
+			return actualType.IsValueType? unbox_any(expectedType): castclass(expectedType);
+		}
+
 		/// <summary>
 		/// Increase max stack size by specified delta.
 		/// </summary>

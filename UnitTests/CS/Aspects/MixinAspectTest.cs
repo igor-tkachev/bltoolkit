@@ -1,11 +1,12 @@
 using System;
 using System.ComponentModel;
-
+using System.Data.SqlTypes;
 using NUnit.Framework;
 
 using BLToolkit.Aspects;
 using BLToolkit.ComponentModel;
 using BLToolkit.Reflection;
+using NUnit.Framework.SyntaxHelpers;
 
 namespace Aspects
 {
@@ -23,7 +24,7 @@ namespace Aspects
 			int    Test6 { get; }
 		}
 
-		public class TestInterfaceImpl : ITestInterface
+		public class TestInterfaceImpl : ITestInterface, INullable
 		{
 			int    ITestInterface.Test1(ref int    value) { return value; }
 			object ITestInterface.Test2(ref object value) { return value; }
@@ -33,10 +34,13 @@ namespace Aspects
 
 			int    ITestInterface.Test5 { get { return 30; } }
 			int    ITestInterface.Test6 { get { return 40; } }
+
+			bool   INullable.IsNull     { get { return true; } }
 		}
 
 		[Mixin(typeof(ICustomTypeDescriptor), "_typeDescriptor")]
 		[Mixin(typeof(ITestInterface),        "TestInterface", "'{0}.{1}' is null.")]
+		[Mixin(typeof(INullable),             "TestInterface", "'{0}.{1}' is null.")]
 		public abstract class TestClass
 		{
 			public TestClass()
@@ -83,6 +87,7 @@ namespace Aspects
 		{
 			TestClass      tc = (TestClass)TypeAccessor.CreateInstance(typeof(TestClass));
 			ITestInterface ti = (ITestInterface)tc;
+			INullable      tn = (INullable)tc;
 
 			int    n = 10;
 			object o = new object();
@@ -93,6 +98,7 @@ namespace Aspects
 			Assert.AreEqual(20, ti.Test4(0));
 			Assert.AreEqual(35, ti.Test5);
 			Assert.AreEqual(40, ti.Test6);
+			Assert.That(tn.IsNull, Is.True);
 		}
 	}
 }

@@ -44,6 +44,7 @@ namespace BLToolkit.Aspects.Builders
 			EmitHelper      emit   = Context.MethodBuilder.Emitter;
 			MethodInfo      method = Context.MethodBuilder.OverriddenMethod;
 			ParameterInfo[] ps     = method.GetParameters();
+			Type            memberType;
 
 			FieldInfo field = Context.Type.GetField(_memberName);
 
@@ -53,6 +54,8 @@ namespace BLToolkit.Aspects.Builders
 					throw new TypeBuilderException(string.Format(
 						"Field '{0}.{1}' must be protected or public.",
 						Context.Type.Name, _memberName));
+
+				memberType = field.FieldType;
 
 				emit
 					.ldarg_0
@@ -79,6 +82,8 @@ namespace BLToolkit.Aspects.Builders
 							"Property '{0}.{1}' getter not found.",
 							Context.Type.Name, _memberName));
 
+					memberType = prop.PropertyType;
+
 					if (mi.IsPrivate)
 						throw new TypeBuilderException(string.Format(
 							"Property '{0}.{1}' getter must be protected or public.",
@@ -103,6 +108,8 @@ namespace BLToolkit.Aspects.Builders
 						Context.Type.Name, _memberName));
 				}
 			}
+
+			emit.CastIfNecessary(_targetInterface, memberType);
 
 			for (int i = 0; i < ps.Length; i++)
 				emit.ldarg(i + 1);

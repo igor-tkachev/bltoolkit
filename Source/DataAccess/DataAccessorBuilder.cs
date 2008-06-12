@@ -127,7 +127,7 @@ namespace BLToolkit.DataAccess
 
 			// Define execute method type.
 			//
-			Type returnType = _destination != null? _destination.ParameterType: Context.CurrentMethod.ReturnType;
+			Type returnType = ReturnType;
 
 			if (returnType == typeof(IDataReader))
 			{
@@ -607,8 +607,9 @@ namespace BLToolkit.DataAccess
 			LoadDestinationOrReturnValue();
 
 			Context.MethodBuilder.Emitter
-				.ldloc    (_locObjType)
-				.callvirt (typeof(DbManager), "ExecuteList", typeof(IList), typeof(Type))
+				.CastIfNecessary (typeof(IList), ReturnType)
+				.ldloc           (_locObjType)
+				.callvirt        (typeof(DbManager), "ExecuteList", typeof(IList), typeof(Type))
 				.pop
 				.end()
 				;
@@ -1110,8 +1111,9 @@ namespace BLToolkit.DataAccess
 			if (null != _destination)
 			{
 				Context.MethodBuilder.Emitter
-					.ldarg    (_destination)
-					.stloc    (Context.ReturnValue)
+					.ldarg           (_destination)
+					.CastIfNecessary (Context.ReturnValue.LocalType, _destination.ParameterType)
+					.stloc           (Context.ReturnValue)
 					;
 			}
 			else
@@ -1140,6 +1142,16 @@ namespace BLToolkit.DataAccess
 					.newobj   (ci)
 					.stloc    (Context.ReturnValue)
 					;
+			}
+		}
+
+		private Type ReturnType
+		{
+			get
+			{
+				return _destination != null?
+					_destination.ParameterType:
+					Context.CurrentMethod.ReturnType;
 			}
 		}
 
@@ -1605,9 +1617,9 @@ namespace BLToolkit.DataAccess
 					nullValueType = type.GetGenericArguments()[0];
 
 					emit
-						.ldarga  (pi)
-						.call    (type, "get_HasValue")
-						.brfalse (labelNull)
+						.ldargEx  (pi, false)
+						.call     (type, "get_HasValue")
+						.brfalse  (labelNull)
 						;
 				}
 
@@ -1615,20 +1627,20 @@ namespace BLToolkit.DataAccess
 				{
 					if (nullValueType == typeof(string))
 						emit
-							.ldarg  (pi)
-							.call   (nullValueType, "Equals", nullValueType)
-							.brtrue (labelNull)
+							.ldargEx (pi, false)
+							.call    (nullValueType, "Equals", nullValueType)
+							.brtrue  (labelNull)
 							;
 					else if (isNullable)
 						emit
-							.ldarga (pi)
-							.call   (type, "get_Value")
-							.beq    (labelNull)
+							.ldargEx (pi, false)
+							.call    (type, "get_Value")
+							.beq     (labelNull)
 							;
 					else
 						emit
-							.ldarg  (pi)
-							.beq    (labelNull)
+							.ldargEx (pi, false)
+							.beq     (labelNull)
 						;
 				}
 				else
