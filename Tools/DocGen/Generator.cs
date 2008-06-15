@@ -69,10 +69,10 @@ namespace DocGen
 		}
 
 		static readonly Regex ct_item1 = new Regex(@"<ct_item\s*link\=(?<link>.*?)\s*label=['""](?<label>.*?)['""]\s*/>");
-		static readonly Regex ct_item2 = new Regex(@"<ct_item\s*link\=(?<link>.*?)\s*label=['""](?<label>.*?)['""]\s*>(?<text>.*?)</ct_item>");
-		static readonly Regex ct_item3 = new Regex(@"<mt_item\s*link\=(?<link>.*?)\s*label=['""](?<label>.*?)['""]\s*>(?<text>.*?)</mt_item>");
-		static readonly Regex ct_item4 = new Regex(@"<ct_item2\s*link1\=(?<link1>.*?)\s*label1=['""](?<label1>.*?)['""]\s*link2\=(?<link2>.*?)\s*label2=['""](?<label2>.*?)['""]\s*/>");
-		static readonly Regex ct_item5 = new Regex(@"<ct_item3\s*link1\=(?<link1>.*?)\s*label1=['""](?<label1>.*?)['""]\s*link2\=(?<link2>.*?)\s*label2=['""](?<label2>.*?)['""]\s*link3\=(?<link3>.*?)\s*label3=['""](?<label3>.*?)['""]\s*/>");
+		static readonly Regex ct_item2 = new Regex(@"<ct_item\s*link\=(?<link>.*?)\s*label=['""](?<label>.*?)['""]\s*>(?<text>.*?)</ct_item>", RegexOptions.Singleline);
+		static readonly Regex ct_item3 = new Regex(@"<mt_item\s*link\=(?<link>.*?)\s*label=['""](?<label>.*?)['""]\s*>(?<text>.*?)</mt_item>", RegexOptions.Singleline);
+		static readonly Regex ct_item4 = new Regex(@"<ct_item2\s*link1\=(?<link1>.*?)\s*label1=['""](?<label1>.*?)['""]\s*link2\=(?<link2>.*?)\s*label2=['""](?<label2>.*?)['""]\s*/>", RegexOptions.Singleline);
+		static readonly Regex ct_item5 = new Regex(@"<ct_item3\s*link1\=(?<link1>.*?)\s*label1=['""](?<label1>.*?)['""]\s*link2\=(?<link2>.*?)\s*label2=['""](?<label2>.*?)['""]\s*link3\=(?<link3>.*?)\s*label3=['""](?<label3>.*?)['""]\s*/>", RegexOptions.Singleline);
 
 		private bool GenerateContent(
 			FileItem createdFiles, string template, string[] path, bool createIndex)
@@ -378,7 +378,7 @@ namespace DocGen
 
 				@class = " class='p'";
 
-				if (++i == 10)
+				if (++i == 20)
 					break;
 			}
 

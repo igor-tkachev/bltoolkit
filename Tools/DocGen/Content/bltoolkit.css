@@ -109,6 +109,19 @@ pre.code
 	padding   : 5px;
 }
 
+.j pre.code, .pj pre.code
+{
+	font      : 80% Consolas, Monospace, Courier New, Courier;
+	margin    : 0;
+	padding   : 3px;
+}
+
+.j table.code, .pj table.code
+{
+	margin-top       : .4em;
+	margin-bottom    : .0em;
+}
+
 a.rss
 {
 	color            : White;

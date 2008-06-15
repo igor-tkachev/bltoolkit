@@ -13,14 +13,75 @@ It is written in C# and compatible with .NET Framework 2.0, 3.0, and 3.5.<br/><b
 <td nowrap>&nbsp;&nbsp;&nbsp;&nbsp;</td>
 <td>
 <ct_table>
-<ct_item link="Doc/Aspects/index.htm"         label="Aspects"        >CacheAspect, CounterAspect, LoggingAspect, MixinAttribute. All of these are available now in C# (well, with one little limitation).</ct_item>
+<ct_item link="Doc/Aspects/index.htm"         label="Aspects"        >
+CacheAspect, CounterAspect, LoggingAspect, MixinAttribute. All of these are available now in C# (well, with one little limitation).
+<% cs #
+[/*[a]*/Counter/*[/a]*/, /*[a]*/Log/*[/a]*/]
+public /*[a]*/abstract/*[/a]*/ class MyClass
+{
+	[/*[a]*/Cache/*[/a]*/]
+	public /*[a]*/virtual/*[/a]*/ int MyMethod(int p1, int p2)
+	{
+%>
+</ct_item>
 <mt_item link="Doc/ComponentModel/index.htm"  label="ComponentModel" >Object Binder. Add Business Objects' native purity and flexibility to your ASP.NET and WinForms applications.</mt_item>
-<mt_item link="Doc/Data/index.htm"            label="Data"           >High-level, data provider independent wrapper for ADO.NET.</mt_item>
-<mt_item link="Doc/DataAccess/index.htm"      label="DataAccess"     >Data Access Layer. Got bored of writing the same data access code over and over again? Now you are saved from being just a coding machine!</mt_item>
-<mt_item link="Doc/EditableObjects/index.htm" label="EditableObjects">Set of base classes to build custom object hierarchies. The <i>EditableObject</i> and <i>EditableList</i> classes support such methods as <i>AcceptChanges</i>, <i>RejectChanges</i>, flag <i>IsDirty</i>, and event <i>PropertyChanged</i>.</mt_item>
+<mt_item link="Doc/Data/index.htm"            label="Data"           >
+High-level, data provider independent wrapper for ADO.NET.
+<% cs #
+using (DbManager db = new DbManager())
+{
+	return db
+		.SetCommand("SELECT * FROM Person")
+		.ExecuteList<Person>();
+%>
+</mt_item>
+<mt_item link="Doc/DataAccess/index.htm"      label="DataAccess"     >
+Data Access Layer. Got bored of writing the same data access code over and over again? Now you are saved from being just a coding machine!
+<% cs #
+public /*[a]*/abstract/*[/a]*/ class PersonAccessor : /*[a]*/DataAccessor/*[/a]*/
+{
+	[/*[a]*/SqlText/*[/a]*/(@"SELECT * FROM Person WHERE FirstName = @firstName")]
+	public /*[a]*/abstract/*[/a]*/ List<Person> GetPersonListByFirstName(string @firstName);
+
+	[/*[a]*/SprocName/*[/a]*/("sp_GetPersonListByLastName")]
+	public /*[a]*/abstract/*[/a]*/ List<Person> GetPersonListByLastName(string @lastName);
+%>
+</mt_item>
+<mt_item link="Doc/EditableObjects/index.htm" label="EditableObjects">
+Set of base classes to build custom object hierarchies. The <i>EditableObject</i> and <i>EditableList</i> classes support such methods as <i>AcceptChanges</i>, <i>RejectChanges</i>, flag <i>IsDirty</i>, and event <i>PropertyChanged</i>.
+<% cs #
+public /*[a]*/abstract/*[/a]*/ class TestObject : /*[a]*/EditableObject/*[/a]*/<TestObject>
+{
+	public /*[a]*/abstract/*[/a]*/ string FirstName { get; set; }
+	public /*[a]*/abstract/*[/a]*/ string LastName  { get; set; }
+}
+
+...
+
+TestObject obj = TestObject./*[a]*/CreateInstance/*[/a]*/();
+obj.FirstName = "Tester";
+obj.AcceptChanges();
+%>
+</mt_item>
 <mt_item link="Doc/Mapping/index.htm"         label="Mapping"        >High performance object mapper will help you build your own ORM.</mt_item>
 <mt_item link="Doc/Reflection/index.htm"      label="Reflection"     >The <i>TypeAccessor</i> class allows to avoid slowness of Reflection and gain incredible performance of applications working with types dynamically.</mt_item>
-<mt_item link="Doc/Reflection/Emit/index.htm" label="Reflection.Emit">The <i>EmitHelper</i> class - emit with a human face.</mt_item>
+<mt_item link="Doc/Reflection/Emit/index.htm" label="Reflection.Emit">
+The <i>EmitHelper</i> class - emit with a human face.
+<% cs #
+emit
+	// string.Format("Hello, {0}!", toWhom)
+	//
+	./*[a]*/ldstr/*[/a]*/   ("Hello, {0}!")
+	./*[a]*/ldarg_1/*[/a]*/
+	./*[a]*/call/*[/a]*/    (typeof(string), "Format", typeof(string), typeof(object))
+
+	// Console.WriteLine("Hello, World!");
+	//
+	./*[a]*/call/*[/a]*/    (typeof(Console), "WriteLine", typeof(string))
+	./*[a]*/ret/*[/a]*/()
+	;
+%>
+</mt_item>
 <mt_item link="Doc/TypeBuilder/index.htm"     label="TypeBuilder"    >Extensible run-time class generator.</mt_item>
 <mt_item link="Doc/Validation/index.htm"      label="Validation"     >Simple way to do a complex thing.</mt_item>
 

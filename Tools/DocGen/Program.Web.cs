@@ -50,8 +50,8 @@ namespace DocGen
 			{
 				string s = file.Name.Replace(destPath, "http://www.bltoolkit.net/").Replace("\\", "/");
 
-				if (s == "http://www.bltoolkit.net/" + "index.htm")
-					return;
+				if (s == "http://www.bltoolkit.net/index.htm")
+					continue;
 
 				sm += string.Format(@"
 	<url>
