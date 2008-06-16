@@ -249,13 +249,15 @@ namespace BLToolkit.TypeBuilder.Builders
 
 		private void BuildMember(MemberInfo mi)
 		{
-			TypeBuilderHelper nestedType = _typeBuilder.DefineNestedType(
+			bool              isValueType = _originalType.IsValueType;
+			TypeBuilderHelper nestedType  = _typeBuilder.DefineNestedType(
 				"Accessor$" + mi.Name, TypeAttributes.NestedPrivate, typeof(MemberAccessor));
 
 			ConstructorBuilderHelper ctorBuilder = BuildNestedTypeConstructor(nestedType);
 
 			BuildGetter    (mi, nestedType);
-			BuildSetter    (mi, nestedType);
+			if (!isValueType)
+				BuildSetter(mi, nestedType);
 			BuildInitMember(mi, ctorBuilder);
 
 			Type type = mi is FieldInfo ? ((FieldInfo)mi).FieldType : ((PropertyInfo)mi).PropertyType;
@@ -273,11 +275,15 @@ namespace BLToolkit.TypeBuilder.Builders
 
 				if (underlyingType != null)
 				{
-					BuildTypedGetterForNullable(mi, nestedType, underlyingType);
-					BuildTypedSetterForNullable(mi, nestedType, underlyingType);
+					BuildTypedGetterForNullable    (mi, nestedType, underlyingType);
+					if (!isValueType)
+						BuildTypedSetterForNullable(mi, nestedType, underlyingType);
 
 					if (underlyingType.IsEnum)
 					{
+						// Note that PEVerify will complain on using Nullable<SomeEnum> as Nullable<Int32>.
+						// It works in the current CLR implementation, bu may not work in future releases.
+						//
 						underlyingType = Enum.GetUnderlyingType(underlyingType);
 						type = typeof(Nullable<>).MakeGenericType(underlyingType);
 					}
@@ -291,11 +297,13 @@ namespace BLToolkit.TypeBuilder.Builders
 
 			if (typedPropertyName != null)
 			{
-				BuildTypedGetter(mi, nestedType, typedPropertyName);
-				BuildTypedSetter(mi, nestedType, type, typedPropertyName);
+				BuildTypedGetter    (mi, nestedType, typedPropertyName);
+				if (!isValueType)
+					BuildTypedSetter(mi, nestedType, type, typedPropertyName);
 			}
 
-			BuildCloneValueMethod(mi, nestedType, type);
+			if (!isValueType)
+				BuildCloneValueMethod(mi, nestedType, type);
 
 			// FW 1.1 wants nested types to be created before parent.
 			//
@@ -753,8 +761,7 @@ namespace BLToolkit.TypeBuilder.Builders
 				return;
 
 			MethodBuilderHelper method = nestedType.DefineMethod(methodInfo);
-			Type nullableType = typeof(Nullable<>).MakeGenericType(memberType);
-			LocalBuilder locObj = method.Emitter.DeclareLocal(nullableType);
+			Type          nullableType = typeof(Nullable<>).MakeGenericType(memberType);
 			
 			EmitHelper emit = method.Emitter;
 
@@ -763,12 +770,22 @@ namespace BLToolkit.TypeBuilder.Builders
 				.castType (methodType)
 				.end();
 
-			if (mi is FieldInfo) emit.ldfld   ((FieldInfo)mi);
-			else                 emit.callvirt(getMethod);
+			if (mi is FieldInfo)
+			{
+				emit.ldflda  ((FieldInfo)mi);
+			}
+			else
+			{
+				LocalBuilder locNullable = emit.DeclareLocal(nullableType);
+
+				emit
+					.callvirt (getMethod)
+					.stloc    (locNullable)
+					.ldloca   (locNullable)
+					;
+			}
 
 			emit
-				.stloc(locObj)
-				.ldloca(locObj)
 				.call(nullableType, "get_Value")
 				.ret()
 				;

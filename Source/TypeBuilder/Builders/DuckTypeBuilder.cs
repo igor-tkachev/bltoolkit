@@ -120,7 +120,7 @@ namespace BLToolkit.TypeBuilder.Builders
 					foreach (ParameterInfo p in interfaceMethod.GetParameters())
 						emit.ldarg(p);
 
-					if (targetMethod.IsStatic)
+					if (targetMethod.IsStatic || targetMethod.IsFinal || targetMethod.DeclaringType.IsSealed)
 						emit
 							.call     (targetMethod)
 							.ret();

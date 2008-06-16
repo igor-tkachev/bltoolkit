@@ -822,7 +822,7 @@ namespace BLToolkit.Reflection.Emit
 		{
 			if (type == null) throw new ArgumentNullException("type");
 
-			return type.IsValueType? unbox(type): castclass(type);
+			return type.IsValueType? unbox_any(type): castclass(type);
 		}
 
 		/// <summary>
@@ -3276,7 +3276,7 @@ namespace BLToolkit.Reflection.Emit
 		}
 
 		/// <summary>
-		/// Calls <see cref="unbox(Type)"/> if given type is a value type.
+		/// Calls <see cref="unbox_any(Type)"/> if given type is a value type.
 		/// </summary>
 		/// <param name="type">A Type</param>
 		/// <seealso cref="OpCodes.Unbox_Any">OpCodes.Unbox</seealso>
@@ -3285,7 +3285,7 @@ namespace BLToolkit.Reflection.Emit
 		{
 			if (type == null) throw new ArgumentNullException("type");
 
-			return type.IsValueType? TypeHelper.IsNullable(type)? unbox_any(type): unbox(type): this;
+			return type.IsValueType? unbox_any(type): this;
 		}
 
 		/// <summary>

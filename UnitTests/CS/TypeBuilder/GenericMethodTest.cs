@@ -39,6 +39,8 @@ namespace TypeBuilder
 			Assert.AreEqual(0, t.Abstract2(123));
 			Assert.AreEqual(0, t.Abstract3(123));
 
+			// Throws ArgumentNullException
+			//
 			t.GetValue<string>(null);
 		}
 	}
