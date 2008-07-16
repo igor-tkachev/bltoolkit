@@ -3474,6 +3474,11 @@ namespace BLToolkit.Reflection.Emit
 				ldtoken(type).call(typeof(Type), "GetTypeFromHandle", typeof(RuntimeTypeHandle));
 		}
 
+		public EmitHelper LoadField(FieldInfo fieldInfo)
+		{
+			return fieldInfo.IsStatic ? ldsfld(fieldInfo) : ldarg_0.ldfld(fieldInfo);
+		}
+
 		/// <summary>
 		/// Cast an object passed by reference to the specified type
 		/// or unbox a boxed value type.

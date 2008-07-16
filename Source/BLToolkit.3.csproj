@@ -100,6 +100,7 @@
     <Compile Include="Aspects\ClearCacheAspect.cs" />
     <Compile Include="Aspects\Builders\ClearCacheAspectBuilder.cs" />
     <Compile Include="Aspects\ClearCacheAttribute.cs" />
+    <Compile Include="Aspects\InstanceCacheAttribute.cs" />
     <Compile Include="DataAccess\ActualTypeAttribute.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>

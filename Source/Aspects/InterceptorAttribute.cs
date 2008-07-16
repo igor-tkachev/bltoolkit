@@ -29,14 +29,21 @@ namespace BLToolkit.Aspects
 
 		public InterceptorAttribute(
 			Type interceptorType, InterceptType interceptType, string configString, int priority)
+			: this(interceptorType, interceptType, configString, priority, false)
+		{
+		}
+
+		public InterceptorAttribute(
+			Type interceptorType, InterceptType interceptType, string configString, int priority, bool localInterceptor)
 		{
 			if (interceptorType == null && interceptType != 0)
 				throw new ArgumentNullException("interceptorType");
 
-			_interceptorType = interceptorType;
-			_interceptType   = interceptType;
-			_configString    = configString;
-			_priority        = priority;
+			_interceptorType  = interceptorType;
+			_interceptType    = interceptType;
+			_configString     = configString;
+			_priority         = priority;
+			_localInterceptor = localInterceptor;
 		}
 
 		private readonly Type _interceptorType;
@@ -63,12 +70,18 @@ namespace BLToolkit.Aspects
 			get { return _configString; }
 		}
 
+		private readonly bool _localInterceptor;
+		public  virtual  bool  LocalInterceptor
+		{
+			get { return _localInterceptor; }
+		}
+
 		public override IAbstractTypeBuilder TypeBuilder
 		{
 			get
 			{
 				 return new Builders.InterceptorAspectBuilder(
-					 InterceptorType, InterceptType, ConfigString, Priority);
+					 InterceptorType, InterceptType, ConfigString, Priority, LocalInterceptor);
 			}
 		}
 	}

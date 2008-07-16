@@ -20,12 +20,18 @@ namespace Aspects
 			{
 				return Value;
 			}
+
+			[InstanceCache]
+			public virtual int InstanceTest(int i1, int i2)
+			{
+				return Value;
+			}
 		}
 
 		[Test]
 		public void Test()
 		{
-			TestClass t = (TestClass)TypeAccessor.CreateInstance(typeof(TestClass));
+			TestClass t = TypeAccessor.CreateInstance<TestClass>();
 
 			DateTime begin = DateTime.Now;
 
@@ -46,6 +52,24 @@ namespace Aspects
 
 			CacheAspect.ClearCache();
 			TestClass.Value = 6; Assert.AreEqual(6, t.Test(2, 1));
+		}
+
+		[Test]
+		public void InstanceTest()
+		{
+			BLToolkit.TypeBuilder.TypeFactory.SaveTypes = true;
+
+			TestClass t = TypeAccessor.CreateInstance<TestClass>();
+
+			TestClass.Value = 1; Assert.AreEqual(1, t.InstanceTest(1, 1));
+			TestClass.Value = 2; Assert.AreEqual(1, t.InstanceTest(1, 1));
+			TestClass.Value = 3; Assert.AreEqual(3, t.InstanceTest(2, 1));
+			TestClass.Value = 4;
+
+			t = TypeAccessor.CreateInstance<TestClass>();
+
+			Assert.AreNotEqual(1, t.InstanceTest(1, 1));
+			Assert.AreNotEqual(3, t.InstanceTest(2, 1));
 		}
 
 		public class CustomCacheAspect : CacheAspect

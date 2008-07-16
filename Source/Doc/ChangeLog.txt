@@ -6,6 +6,7 @@ Bug fixes
 
 Enhancement
 - CHM help file provided. See the Doc folder.
+- New InstanceCache attribute.
 
 
 v 3.0

@@ -258,6 +258,11 @@ namespace BLToolkit.TypeBuilder.Builders
 			return field;
 		}
 
+		public FieldBuilder CreatePrivateField(string fieldName, Type type)
+		{
+			return CreateField(fieldName, type, FieldAttributes.Private);
+		}
+
 		public FieldBuilder CreatePrivateField(PropertyInfo propertyInfo, string fieldName, Type type)
 		{
 			FieldBuilder field = CreateField(fieldName, type, FieldAttributes.Private);

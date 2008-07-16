@@ -30,7 +30,7 @@ namespace BLToolkit.Aspects
 		private class NoInterceptionAspectBuilder : Builders.InterceptorAspectBuilder
 		{
 			public NoInterceptionAspectBuilder(Type interceptorType, InterceptType interceptType)
-				: base(interceptorType, interceptType, null, TypeBuilderConsts.Priority.Normal)
+				: base(interceptorType, interceptType, null, TypeBuilderConsts.Priority.Normal, false)
 			{
 			}
 

@@ -11,18 +11,20 @@ namespace BLToolkit.Aspects.Builders
 	public class InterceptorAspectBuilder : AbstractTypeBuilderBase
 	{
 		public InterceptorAspectBuilder(
-			Type interceptorType, InterceptType interceptType, string configString, int priority)
+			Type interceptorType, InterceptType interceptType, string configString, int priority, bool localInterceptor)
 		{
-			_interceptorType = interceptorType;
-			_interceptType   = interceptType;
-			_configString    = configString;
-			_priority        = priority;
+			_interceptorType  = interceptorType;
+			_interceptType    = interceptType;
+			_configString     = configString;
+			_priority         = priority;
+			_localInterceptor = localInterceptor;
 		}
 
 		private readonly Type          _interceptorType;
 		private readonly InterceptType _interceptType;
 		private readonly string        _configString;
 		private readonly int           _priority;
+		private readonly bool          _localInterceptor;
 
 		private          FieldBuilder  _interceptorField;
 		private          LocalBuilder  _infoField;
@@ -156,7 +158,7 @@ namespace BLToolkit.Aspects.Builders
 
 			// Call interceptor.
 			//
-				.ldsfld   (_interceptorField)
+				.LoadField(_interceptorField)
 				.ldloc    (_infoField)
 				.callvirt (typeof(IInterceptor), "Intercept", typeof(InterceptCallInfo))
 				;
@@ -224,7 +226,7 @@ namespace BLToolkit.Aspects.Builders
 				Label checkMethodInfo = emit.DefineLabel();
 
 				emit
-					.ldsfld    (methodInfo)
+					.LoadField (methodInfo)
 					.brtrue_s  (checkMethodInfo)
 					.call      (typeof(MethodBase), "GetCurrentMethod")
 					.castclass (typeof(MethodInfo))
@@ -244,7 +246,7 @@ namespace BLToolkit.Aspects.Builders
 					.callvirt (typeof(InterceptCallInfo).GetProperty("Object").GetSetMethod())
 
 					.dup
-					.ldsfld   (methodInfo)
+					.LoadField(methodInfo)
 					.callvirt (typeof(InterceptCallInfo).GetProperty("CallMethodInfo").GetSetMethod())
 					;
 
@@ -286,7 +288,9 @@ namespace BLToolkit.Aspects.Builders
 			{
 				// Create MethodInfo field.
 				//
-				field = Context.CreatePrivateStaticField(fieldName, typeof(IInterceptor));
+				field = _localInterceptor? 
+					Context.CreatePrivateField      (fieldName, typeof(IInterceptor)):
+					Context.CreatePrivateStaticField(fieldName, typeof(IInterceptor));
 
 				EmitHelper emit = Context.MethodBuilder.Emitter;
 
@@ -294,14 +298,26 @@ namespace BLToolkit.Aspects.Builders
 				FieldBuilder methodInfo       = (FieldBuilder)Context.Items["$BLToolkit.MethodInfo"];
 
 				emit
-					.ldsfld    (field)
+					.LoadField (field)
 					.brtrue_s  (checkInterceptor)
+					;
+
+					if (!field.IsStatic)
+						emit.ldarg_0.end();
+
+				emit
 					.newobj    (TypeHelper.GetDefaultConstructor(_interceptorType))
 					.castclass (typeof(IInterceptor))
-					.stsfld    (field)
+					;
 
-					.ldsfld    (field)
-					.ldsfld    (methodInfo)
+				if (field.IsStatic)
+					emit.stsfld(field);
+				else
+					emit.stfld(field);
+
+				emit
+					.LoadField (field)
+					.LoadField (methodInfo)
 					.ldstrEx   (_configString ?? "")
 					.callvirt  (typeof(IInterceptor), "Init", typeof(CallMethodInfo), typeof(string))
 
