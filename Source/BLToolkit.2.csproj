@@ -66,6 +66,7 @@
     <Compile Include="Aspects\CounterAttribute.cs" />
     <Compile Include="Aspects\NoCacheAttribute.cs" />
     <Compile Include="Aspects\IInterceptor.cs" />
+    <Compile Include="Aspects\InstanceCacheAttribute.cs" />
     <Compile Include="Aspects\Interceptor.cs" />
     <Compile Include="Aspects\InterceptCallInfo.cs" />
     <Compile Include="Aspects\InterceptorAttribute.cs" />
