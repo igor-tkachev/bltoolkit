@@ -386,7 +386,7 @@ namespace BLToolkit.EditableObjects
 				if (o != value)
 				{
 					RemoveInternal(o);
-					AddInternal(o);
+					AddInternal(value);
 				}
 			}
 		} 

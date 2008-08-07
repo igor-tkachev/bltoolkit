@@ -394,7 +394,7 @@ namespace BLToolkit.ComponentModel
 					
 					_list[index] = value;
 
-					AddInternal(o);
+					AddInternal(value);
 
 					OnListChanged(new EditableListChangedEventArgs(ListChangedType.ItemChanged, index));
 					
@@ -787,6 +787,7 @@ namespace BLToolkit.ComponentModel
 		#endregion
 
 		#region Add/Remove Internal
+
 		private void AddInternal(object value)
 		{
 			EndNew();
@@ -816,6 +817,7 @@ namespace BLToolkit.ComponentModel
 			foreach (object o in e)
 				RemoveInternal(o);
 		}
+
 		#endregion
 	}
 }
