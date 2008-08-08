@@ -5,6 +5,7 @@ using BLToolkit.Reflection;
 using BLToolkit.TypeBuilder;
 
 using NUnit.Framework;
+using NUnit.Framework.SyntaxHelpers;
 
 namespace TypeBuilder
 {
@@ -70,6 +71,14 @@ namespace TypeBuilder
 			}
 		}
 
+		[AttributeUsage(AttributeTargets.Property)]
+		public class NewGuidParameterAttribute : ParameterAttribute
+		{
+			public NewGuidParameterAttribute() : base(Guid.NewGuid().ToByteArray())
+			{
+			}
+		}
+
 		public abstract class TestObject1
 		{
 			[Parameter(10)]     public abstract ArrayList   List        { get; set; }
@@ -80,6 +89,13 @@ namespace TypeBuilder
 			[Parameter(55)]     public abstract InnerObject InnerObject { get; set; }
 			[Parameter(54)]     public abstract int         Int1        { get; set; }
 			[Parameter(2,2,2)]  public abstract DateTime    Date        { get; set; }
+			[Parameter(222L)]   public abstract Decimal     Decimal1    { get; set; }
+			[Parameter(1, 0, 0, true, (byte)2)]
+			                    public abstract Decimal     Decimal2    { get; set; }
+			[Parameter(new int[]{2, 0, 0, 0})]
+			                    public abstract Decimal     Decimal3    { get; set; }
+			[Parameter(22.05)]  public abstract Decimal     Decimal4    { get; set; }
+			[NewGuidParameter]  public abstract Guid        Guid        { get; set; }
 		}
 
 		[Test]
@@ -87,14 +103,19 @@ namespace TypeBuilder
 		{
 			TestObject1 o = (TestObject1)TypeAccessor.CreateInstance(typeof(TestObject1));
 
-			Assert.AreEqual(10,  o.List.Capacity);
-			Assert.AreEqual("t", o.Str);
-			Assert.AreEqual(50,  o.Field1.Value);
-			Assert.AreEqual(77,  o.Field2.Value);
-			Assert.AreEqual(55,  o.InnerObject.Field);
-			Assert.AreEqual(54,  o.Int1);
+			Assert.That(o.List.Capacity,     Is.EqualTo(10));
+			Assert.That(o.Str,               Is.EqualTo("t"));
+			Assert.That(o.Field1.Value,      Is.EqualTo(50));
+			Assert.That(o.Field2.Value,      Is.EqualTo(77));
+			Assert.That(o.InnerObject.Field, Is.EqualTo(55));
+			Assert.That(o.Int1,              Is.EqualTo(54));
 
-			Assert.AreEqual(new DateTime(2,2,2), o.Date);
+			Assert.That(o.Date,     Is.EqualTo(new DateTime(2,2,2)));
+			Assert.That(o.Decimal1, Is.EqualTo(222m));
+			Assert.That(o.Decimal2, Is.EqualTo(-0.01m));
+			Assert.That(o.Decimal3, Is.EqualTo(2m));
+			Assert.That(o.Decimal4, Is.EqualTo(22.05m));
+			Assert.That(o.Guid,     Is.Not.EqualTo(Guid.Empty));
 		}
 	}
 }

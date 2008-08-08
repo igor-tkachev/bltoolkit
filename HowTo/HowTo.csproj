@@ -153,6 +153,7 @@
     <Compile Include="Patterns\DuckTyping.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Reflection\ObjectFactory.cs" />
+    <Compile Include="TypeBuilder\InitialValues.cs" />
     <Compile Include="TypeBuilder\XmlSerialization.cs" />
     <Compile Include="TypeBuilder\InternalTypes.cs" />
   </ItemGroup>
