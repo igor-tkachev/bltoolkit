@@ -47,16 +47,16 @@ namespace Mapping
 		public class AnsiStringObject
 		{
 			[MemberMapper(typeof(AnsiStringNumberMapper))]
-			public string       ansi;
-			public string       unicode;
+			public string ansi;
+			public string unicode;
 		}
 
 		internal class AnsiStringNumberMapper : MemberMapper
 		{
-			public override void Init( MapMemberInfo mapMemberInfo )
+			public override void Init(MapMemberInfo mapMemberInfo)
 			{
 				mapMemberInfo.DbType = DbType.AnsiString;
-				base.Init( mapMemberInfo );
+				base.Init(mapMemberInfo);
 			}
 		}
 
@@ -64,14 +64,19 @@ namespace Mapping
 		public void ProvideCustomDBTypeTest()
 		{
 			AnsiStringObject obj = new AnsiStringObject();
-			obj.ansi = "aaa";
-			obj.unicode = "bbb";
+			obj.ansi    = "ansi";
+			obj.unicode = "unicode";
 
 			IDbDataParameter[] parametrs = new DbManager().CreateParameters( obj );
 
-			Assert.AreEqual(2, parametrs.Length );
-			Assert.AreEqual(DbType.AnsiString, parametrs[0].DbType );
-			Assert.AreEqual(DbType.String, parametrs[1].DbType );
+			Assert.AreEqual(2, parametrs.Length);
+			Assert.AreEqual(DbType.String,     parametrs[1].DbType);
+
+#if !FIREBIRD
+			// AnsiString is not supported by FB.
+			//
+			Assert.AreEqual(DbType.AnsiString, parametrs[0].DbType);
+#endif
 		}
 
 		public class Object2

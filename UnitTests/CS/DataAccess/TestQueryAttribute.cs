@@ -38,7 +38,8 @@ namespace DataAccess
 			{
 				case "Sql"   :
 				case "Access": return SqlText;
-				case "Oracle": return OracleText ?? SqlText;
+				case "Oracle":
+				case "ODP"   : return OracleText ?? SqlText;
 				case "Fdp"   : return FbText     ?? SqlText;
 				case "SQLite": return SQLiteText ?? SqlText;
 			}

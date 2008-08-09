@@ -42,14 +42,18 @@ namespace Data
 			public int       ID;
 			[MapIgnore(false)]
 			public Byte[]    Binary_;
+#if !ORACLE
+			// Oracle does not know boolean nor guid.
+			//
 			public Boolean   Boolean_;
+			public Guid      Guid_;
+#endif
 			public Byte      Byte_;
 			[MapIgnore(false)]
 			public Byte[]    Bytes_;
 			public DateTime  DateTime_;
 			public Decimal   Decimal_;
 			public Double    Double_;
-			public Guid      Guid_;
 			public Int16     Int16_;
 			public Int32     Int32_;
 			public Int64     Int64_;
@@ -297,13 +301,15 @@ namespace Data
 				
 				dt.ID        = 12345;
 				dt.Binary_   = new byte[2] {1, 2};
+#if !ORACLE
 				dt.Boolean_  = true;
+				dt.Guid_     = Guid.Empty;
+#endif
 				dt.Byte_     = 250;
 				dt.Bytes_    = new byte[2] {2, 1};
 				dt.DateTime_ = DateTime.Now;
 				dt.Decimal_  = 9876543210.0m;
 				dt.Double_   = 12345.67890;
-				dt.Guid_     = Guid.Empty;
 				dt.Int16_    = 12345;
 				dt.Int32_    = 1234567890;
 				dt.Int64_    = 1234567890123456789;

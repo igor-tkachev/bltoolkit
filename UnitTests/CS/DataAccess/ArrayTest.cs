@@ -85,8 +85,8 @@ END;"
 				new int?[]    {1,null,3,4,5},        out @outputIntArray, ref @inputOutputIntArray,
 				new string[] {"5","4","3","2","1"},  out @outputStrArray, ref @inputOutputStrArray);
 
-			Assert.AreEqual(new int?[] {1,null,3,4,5},                @outputIntArray);
-			Assert.AreEqual(new int?[] {2,null,6,8,10},               @inputOutputIntArray);
+			Assert.AreEqual(new int?[] {1,0,3,4,5},                   @outputIntArray);
+			Assert.AreEqual(new int?[] {2,0,6,8,10},                  @inputOutputIntArray);
 			Assert.AreEqual(new string[] { "5","4","3","2","1"},      @outputStrArray);
 			Assert.AreEqual(new string[] { "95","84","73","62","51"}, @inputOutputStrArray);
 		}

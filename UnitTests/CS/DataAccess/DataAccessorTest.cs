@@ -481,7 +481,11 @@ namespace DataAccess
 		}
 #endif
 
+#if !FIREBIRD
+		// Firebird is incomatible with DiscoverParameters due to In/Out parameters emulation.
+		//
 		[Test]
+#endif
 		public void Gen_SprocName()
 		{
 			Person e = _da.AnySprocName("John", "Pupkin");

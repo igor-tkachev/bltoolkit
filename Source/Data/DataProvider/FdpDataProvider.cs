@@ -174,29 +174,19 @@ namespace BLToolkit.Data.DataProvider
 			{
 				foreach (IDbDataParameter par in commandParameters)
 				{
-					if (par.Direction == ParameterDirection.InputOutput
-						|| par.Direction == ParameterDirection.Output)
-					{
-						string           iParameterName  = GetInputParameterName(par.ParameterName);
-						IDbDataParameter fakeIOParameter = GetParameter(iParameterName, commandParameters);
+					string           iParameterName  = GetInputParameterName(par.ParameterName);
+					IDbDataParameter fakeIOParameter = GetParameter(iParameterName, commandParameters);
 
-						if (fakeIOParameter == null)
-							if (par.Direction == ParameterDirection.InputOutput)
-								throw new DataException(string.Format(
-										"Input parameter {0} for input-output parameter {1} is not found",
-										iParameterName, par.ParameterName));
-							else
-								continue;
+					if (fakeIOParameter == null)
+						continue;
 
-						fakeIOParameter.Value = par.Value;
+					fakeIOParameter.Value = par.Value;
 
-						// direction should be output, or parameter mistmath for procedure exception
-						// would be thrown
-						par.Direction = ParameterDirection.Output;
-						// direction should be Input
-						fakeIOParameter.Direction = ParameterDirection.Input;
-					}
-
+					// direction should be output, or parameter mistmath for procedure exception
+					// would be thrown
+					par.Direction = ParameterDirection.Output;
+					// direction should be Input
+					fakeIOParameter.Direction = ParameterDirection.Input;
 				}
 			}
 			#endregion

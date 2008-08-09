@@ -174,7 +174,7 @@ FUNCTION Person_Insert
 	)
 RETURN SYS_REFCURSOR IS
 	retCursor SYS_REFCURSOR;
-	lPersonID NUMBER
+	lPersonID NUMBER;
 BEGIN
 INSERT INTO Person
 	( LastName,  FirstName,  MiddleName,  Gender)
@@ -454,9 +454,11 @@ FOR i IN 1..5 LOOP
 	pOutputIntArray(i) := i;
 END LOOP;
 END;
+/
 
 -- ResultSetTest
 
+CREATE OR REPLACE 
 PROCEDURE RESULTSETTEST
 	( mr OUT SYS_REFCURSOR
 	, sr OUT SYS_REFCURSOR
@@ -471,6 +473,8 @@ OPEN sr FOR
 	UNION SELECT 6 SlaveID, 2 as MasterID FROM dual
 	UNION SELECT 7 SlaveID, 1 as MasterID FROM dual;
 END;
+/
+
 -- ExecuteScalarTest
 
 CREATE OR REPLACE 

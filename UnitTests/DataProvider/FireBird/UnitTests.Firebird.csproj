@@ -59,6 +59,7 @@
       <HintPath>..\..\..\Tools\NUnit\nunit.framework.dll</HintPath>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.configuration" />
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
@@ -318,6 +319,7 @@
     <Compile Include="..\..\CS\TestFixtureBase.cs" />
     <Compile Include="..\..\CS\TestObject.cs" />
     <Compile Include="..\..\..\Source\Data\DataProvider\FdpDataProvider.cs" />
+    <Compile Include="CreateDatabase.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

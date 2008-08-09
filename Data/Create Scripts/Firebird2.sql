@@ -1,8 +1,4 @@
 /*
-set sql dialect 3;
-*/
-
-/*
 Dual table FOR supporting queryies LIKE:
 SELECT 1 AS id => SELECT 1 AS "id" *FROM Dual*
 */
@@ -117,35 +113,9 @@ END!!
 
 -- Person_SelectByName
 
-CREATE PROCEDURE Person_SelectByName(
-	FirstName VARCHAR(50),
-	LastName  VARCHAR(50)
-	)
-RETURNS (
-	PersonID   INTEGER,
-	MiddleName VARCHAR(50),
-	Gender     CHAR(1)
-	)
-AS
-BEGIN
-	SELECT PersonID, MiddleName, Gender FROM Person 
-	WHERE FirstName = :FirstName and LastName = :LastName
-	INTO
-		:PersonID,   
-		:MiddleName, 
-		:Gender ;
-	SUSPEND;
-END!!
-
-
--- Person_SelectListByName
-
-/*
-Cursor couldn't de returned, so input and output parameters names should differ.
-*/
-CREATE PROCEDURE Person_SelectListByName (
-	pFirstName VARCHAR(50),
-	pLastName  VARCHAR(50)
+CREATE PROCEDURE Person_SelectByName (
+	in_FirstName VARCHAR(50),
+	in_LastName  VARCHAR(50)
 	)
 RETURNS (
 	PersonID   int,
@@ -158,7 +128,7 @@ AS
 BEGIN
 
 	FOR SELECT PersonID, FirstName, LastName, MiddleName, Gender FROM Person 
-		WHERE FirstName LIKE :pFirstName and LastName LIKE :pLastName
+		WHERE FirstName LIKE :in_FirstName and LastName LIKE :in_LastName
 	INTO
 		:PersonID,   
 		:FirstName,  
