@@ -5,6 +5,7 @@ using System.Reflection.Emit;
 using BLToolkit.Properties;
 using BLToolkit.Reflection;
 using BLToolkit.Reflection.Emit;
+using System.Collections.Generic;
 
 namespace BLToolkit.TypeBuilder.Builders
 {
@@ -390,9 +391,38 @@ namespace BLToolkit.TypeBuilder.Builders
 					types[i] = typeof(object);
 			}
 
-			ConstructorInfo ci = objectType.GetPublicConstructor(types);
+			ConstructorInfo objectCtor  = objectType.GetPublicConstructor(types);
 
-			if (ci == null)
+			Stack<ConstructorInfo> intermediateConstructors = null;
+
+			// Do some heuristics for Nullable<DateTime> and EditableValue<Decimal>
+			//
+			if (objectCtor == null)
+			{
+				TypeHelper nestedType = objectType;
+
+				while (nestedType.Type.IsGenericType && objectCtor == null)
+				{
+					Type[] typeArgs = nestedType.Type.GetGenericArguments();
+
+					if (typeArgs.Length == 1)
+					{
+						ConstructorInfo genericCtor = nestedType.GetPublicConstructor(typeArgs[0]);
+
+						if (genericCtor != null)
+						{
+							if (intermediateConstructors == null)
+								intermediateConstructors = new Stack<ConstructorInfo>();
+
+							intermediateConstructors.Push(genericCtor);
+							nestedType = typeArgs[0];
+							objectCtor = nestedType.GetPublicConstructor(types);
+						}
+					}
+				}
+			}
+
+			if (objectCtor == null)
 			{
 				if (objectType.IsValueType)
 					return;
@@ -406,7 +436,7 @@ namespace BLToolkit.TypeBuilder.Builders
 						objectType.FullName));
 			}
 
-			ParameterInfo[] pi = ci.GetParameters();
+			ParameterInfo[] pi = objectCtor.GetParameters();
 
 			emit.ldarg_0.end();
 
@@ -440,8 +470,18 @@ namespace BLToolkit.TypeBuilder.Builders
 			}
 
 			emit
-				.newobj (ci)
+				.newobj (objectCtor)
 				;
+
+			if (intermediateConstructors != null)
+			{
+				while (intermediateConstructors.Count != 0)
+				{
+					emit
+						.newobj(intermediateConstructors.Pop())
+						;
+				}
+			}
 
 			if (IsObjectHolder)
 			{

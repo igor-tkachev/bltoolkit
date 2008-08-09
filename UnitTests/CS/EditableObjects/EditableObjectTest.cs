@@ -8,6 +8,7 @@ using BLToolkit.EditableObjects;
 using BLToolkit.Mapping;
 using BLToolkit.Reflection;
 using BLToolkit.TypeBuilder;
+using NUnit.Framework.SyntaxHelpers;
 
 namespace EditableObjects
 {
@@ -49,7 +50,7 @@ namespace EditableObjects
 		[Test]
 		public void Notification()
 		{
-			Dest o = (Dest)Map.ObjectToObject(new Source(), typeof(Dest));
+			Dest o = Map.ObjectToObject<Dest>(new Source());
 
 			Assert.AreEqual("", o.ChangedPropertyName);
 
@@ -60,37 +61,34 @@ namespace EditableObjects
 			Assert.AreEqual("Xml", o.ChangedPropertyName);
 		}
 
-		public abstract class Object1 : EditableObject
+		public abstract class Object1: EditableObject<Object1>
 		{
 			[MapField("ObjectId")]
-			public abstract int         ID      { get;  }
-			public abstract short       Field1  { get; set; }
+			public abstract int         ID       { get; }
+			public abstract short       Field1   { get; set; }
 
 			[MapValue(true,  "Y")]
 			[MapValue(false, "N")]
-			public abstract bool        Field2  { get; set; }
-
-			public abstract DateTime    Field3  { get; set; }
-			public abstract long        Field4  { get; set; }
-			public abstract byte        Field5  { get; set; }
-			public abstract char        Field6  { get; set; }
-			public abstract ushort      Field7  { get; set; }
-			public abstract uint        Field8  { get; set; }
-			public abstract ulong       Field9  { get; set; }
-			public abstract sbyte       Field10 { get; set; }
-			public abstract float       Field11 { get; set; }
-			public abstract double      Field12 { get; set; }
-			public abstract decimal     Field13 { get; set; }
-			public abstract string      Field14 { get; set; }
-			public abstract Guid        Field15 { get; set; }
-			public abstract DayOfWeek   Field16 { get; set; }
-			public abstract ulong?      Field17 { get; set; }
+			public abstract bool        Field2   { get; set; }
+			[Parameter(2, 2, 2)]
+			public abstract DateTime?   Field3   { get; set; }
+			[Parameter(2L)]
+			public abstract long        Field4   { get; set; }
+			public abstract byte        Field5   { get; set; }
+			public abstract char        Field6   { get; set; }
+			public abstract ushort      Field7   { get; set; }
+			public abstract uint        Field8   { get; set; }
+			public abstract ulong       Field9   { get; set; }
+			public abstract sbyte       Field10  { get; set; }
+			public abstract float       Field11  { get; set; }
+			public abstract double      Field12  { get; set; }
+			[Parameter(3.08)]
+			public abstract decimal?    Field13  { get; set; }
+			public abstract string      Field14  { get; set; }
+			public abstract Guid        Field15  { get; set; }
+			public abstract DayOfWeek   Field16  { get; set; }
+			public abstract ulong?      Field17  { get; set; }
 			public abstract XmlDocument XmlField { get; set; }
-
-			public static Object1 CreateInstance()
-			{
-				return (Object1)Map.CreateInstance(typeof(Object1));
-			}
 		}
 
 		[Test]
@@ -98,9 +96,13 @@ namespace EditableObjects
 		{
 			Object1 o = Object1.CreateInstance();
 
+			Assert.That(o.Field4,  Is.EqualTo(2L));
+			Assert.That(o.Field3,  Is.EqualTo(new DateTime(2,2,2)));
+			Assert.That(o.Field13, Is.EqualTo(3.08m));
+
 			Assert.IsFalse(o.IsDirty);
 
-			TypeAccessor.GetAccessor(typeof(Object1))["ID"].SetValue(o, 1);
+			TypeAccessor<Object1>.Instance["ID"].SetValue(o, 1);
 
 			Assert.AreEqual(1, o.ID);
 			Assert.IsTrue  (o.IsDirty);

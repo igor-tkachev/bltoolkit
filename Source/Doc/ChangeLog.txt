@@ -4,6 +4,8 @@ Bug fixes
 - MapValueAttribute ignored for nullable enums.
 - MappingSchema.ConvertChangeType does not handle nullable enums properly.
 - EditableArrayList indexer add/remove bug.
+- ParameterAttribute doesn't work with Nullabe<T> and EditableValue<T>
+  when `T' constructor is not trivial.
 
 Enhancement
 - CHM help file provided. See the Doc folder.
