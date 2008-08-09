@@ -22,10 +22,11 @@ namespace DataAccess
 		[TestFixtureSetUp]
 		public void SetUp()
 		{
+			string path = new Uri(Assembly.GetExecutingAssembly().EscapedCodeBase).LocalPath;
+
 			_localDomain = AppDomain.CreateDomain("NewDomain");
 			_localDomain.Load(typeof(DataAccessor).Assembly.GetName());
-			_localTest = (DataAccessorBuilderTest)_localDomain
-			                                      	.CreateInstanceFromAndUnwrap(Assembly.GetExecutingAssembly().Location, GetType().FullName);
+			_localTest = (DataAccessorBuilderTest)_localDomain.CreateInstanceFromAndUnwrap(path, GetType().FullName);
 		}
 
 		[TestFixtureTearDown]
@@ -50,7 +51,7 @@ namespace DataAccess
 		[Test, ExpectedException(typeof(TypeBuilderException))]
 		public void TypelessTest()
 		{
-			AppDomain.CurrentDomain.DoCallBack(new CrossAppDomainDelegate(_localTest.Typeless));
+			AppDomain.CurrentDomain.DoCallBack(_localTest.Typeless);
 		}
 
 		public abstract class TypelessAccessor2 : DataAccessor
@@ -69,7 +70,7 @@ namespace DataAccess
 		[Test, ExpectedException(typeof(TypeBuilderException))]
 		public void Gen_SelectAllListException()
 		{
-			AppDomain.CurrentDomain.DoCallBack(new CrossAppDomainDelegate(_localTest.Typeless2));
+			AppDomain.CurrentDomain.DoCallBack(_localTest.Typeless2);
 		}
 
 		public abstract class MultiDestinationAccessor : DataAccessor
@@ -88,7 +89,7 @@ namespace DataAccess
 		[Test, ExpectedException(typeof(TypeBuilderException))]
 		public void MultiDestinationExceptionTest()
 		{
-			AppDomain.CurrentDomain.DoCallBack(new CrossAppDomainDelegate(_localTest.MultiDestinationException));
+			AppDomain.CurrentDomain.DoCallBack(_localTest.MultiDestinationException);
 		}
 
 		public abstract class ScalarDestinationAccessor : DataAccessor
@@ -107,7 +108,7 @@ namespace DataAccess
 		[Test, ExpectedException(typeof(TypeBuilderException))]
 		public void ScalarDestinationExceptionTest()
 		{
-			AppDomain.CurrentDomain.DoCallBack(new CrossAppDomainDelegate(_localTest.ScalarDestinationException));
+			AppDomain.CurrentDomain.DoCallBack(_localTest.ScalarDestinationException);
 		}
 
 		public abstract class IncompatibleScalarDestinationAccessor : DataAccessor
@@ -127,7 +128,7 @@ namespace DataAccess
 		[Test, ExpectedException(typeof(TypeBuilderException))]
 		public void IncompatibleScalarDestinationExceptionTest()
 		{
-			AppDomain.CurrentDomain.DoCallBack(new CrossAppDomainDelegate(_localTest.IncompatibleScalarDestinationException));
+			AppDomain.CurrentDomain.DoCallBack(_localTest.IncompatibleScalarDestinationException);
 		}
 
 		public abstract class VoidDestinationAccessor : DataAccessor
@@ -146,7 +147,7 @@ namespace DataAccess
 		[Test, ExpectedException(typeof(TypeBuilderException))]
 		public void VoidDestinationExceptionTest()
 		{
-			AppDomain.CurrentDomain.DoCallBack(new CrossAppDomainDelegate(_localTest.VoidDestinationException));
+			AppDomain.CurrentDomain.DoCallBack(_localTest.VoidDestinationException);
 		}
 
 		public abstract class IllegalDataSetTableAccessor : DataAccessor
@@ -165,7 +166,7 @@ namespace DataAccess
 		[Test, ExpectedException(typeof(TypeBuilderException))]
 		public void IllegalDataSetTableTest()
 		{
-			AppDomain.CurrentDomain.DoCallBack(new CrossAppDomainDelegate(_localTest.IllegalDataSetTable));
+			AppDomain.CurrentDomain.DoCallBack(_localTest.IllegalDataSetTable);
 		}
 	}
 }
