@@ -71,14 +71,6 @@ namespace TypeBuilder
 			}
 		}
 
-		[AttributeUsage(AttributeTargets.Property)]
-		public class NewGuidParameterAttribute : ParameterAttribute
-		{
-			public NewGuidParameterAttribute() : base(Guid.NewGuid().ToByteArray())
-			{
-			}
-		}
-
 		public abstract class TestObject1
 		{
 			[Parameter(10)]     public abstract ArrayList   List        { get; set; }
@@ -95,7 +87,6 @@ namespace TypeBuilder
 			[Parameter(new int[]{2, 0, 0, 0})]
 			                    public abstract Decimal     Decimal3    { get; set; }
 			[Parameter(22.05)]  public abstract Decimal     Decimal4    { get; set; }
-			[NewGuidParameter]  public abstract Guid?       Guid        { get; set; }
 		}
 
 		[Test]
@@ -115,8 +106,6 @@ namespace TypeBuilder
 			Assert.That(o.Decimal2,          Is.EqualTo(-0.01m));
 			Assert.That(o.Decimal3,          Is.EqualTo(2m));
 			Assert.That(o.Decimal4,          Is.EqualTo(22.05m));
-			Assert.That(o.Guid.HasValue,     Is.True);
-			Assert.That(o.Guid.Value,        Is.Not.EqualTo(Guid.Empty));
 		}
 	}
 }
