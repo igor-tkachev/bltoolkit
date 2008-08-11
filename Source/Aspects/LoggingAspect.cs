@@ -1,6 +1,9 @@
 using System;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
+using System.Collections;
+using System.Text;
 
 namespace BLToolkit.Aspects
 {
@@ -123,20 +126,16 @@ namespace BLToolkit.Aspects
 
 				if (parameters.LogParameters && plen > 0)
 				{
-					string[] pvs    = new string[plen];
+					StringBuilder sb = new StringBuilder();
 					object[] values = info.ParameterValues;
 
-					for (int i = 0; i < plen; i++)
+					FormatParameter(values[0], sb);
+					for (int i = 1; i < plen; i++)
 					{
-						object o = values[i];
-						pvs[i] =
-							o == null?   "<null>":
-							o is string? "\"" + o + "\"":
-							o is char?   "'"  + o + "'":
-							o.ToString();
+						FormatParameter(values[i], sb.Append(", "));
 					}
 
-					callParameters = string.Join(", ", pvs);
+					callParameters = sb.ToString();
 				}
 
 				string exText = null;
@@ -148,15 +147,44 @@ namespace BLToolkit.Aspects
 						info.Exception.Message);
 
 				LogOutput(
-					string.Format("{0}: {1}.{2}({3}) - {4} ms{5}.",
+					string.Format("{0}: {1}.{2}({3}) - {4} ms{5}{6}.",
 						end,
 						info.CallMethodInfo.MethodInfo.DeclaringType.FullName,
 						info.CallMethodInfo.MethodInfo.Name,
 						callParameters,
 						time,
+						info.Cached? " from cache": null,
 						exText),
 					parameters.FileName);
 			}
+		}
+
+		private static void FormatParameter(object parameter, StringBuilder sb)
+		{
+			if (parameter == null)
+				sb.Append("<null>");
+			else if (parameter is string)
+				sb.Append('"').Append((string)parameter).Append('"');
+			else if (parameter is char)
+				sb.Append('\'').Append((char)parameter).Append('\'');
+			else if (parameter is IEnumerable)
+			{
+				sb.Append('[');
+				bool first = true;
+				foreach (object item in (IEnumerable)parameter)
+				{
+					FormatParameter(item, first? sb: sb.Append(','));
+					first = false;
+				}
+				sb.Append(']');
+			}
+			else if (parameter is IFormattable)
+			{
+				IFormattable formattable = (IFormattable)parameter;
+				sb.Append(formattable.ToString(null, CultureInfo.InvariantCulture));
+			}
+			else
+				sb.Append(parameter.ToString());
 		}
 
 		#endregion
