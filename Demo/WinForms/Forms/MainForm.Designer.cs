@@ -174,7 +174,7 @@ namespace BLToolkit.Demo.Forms
 			// 
 			this.aboutToolStripMenuItem.Name = "aboutToolStripMenuItem";
 			this.aboutToolStripMenuItem.Size = new System.Drawing.Size(134, 22);
-			this.aboutToolStripMenuItem.Text = "&About...";
+			this.aboutToolStripMenuItem.Text = "&About…";
 			// 
 			// tool
 			// 

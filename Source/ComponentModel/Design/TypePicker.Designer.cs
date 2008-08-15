@@ -29,12 +29,13 @@ namespace BLToolkit.ComponentModel.Design
 		private void InitializeComponent()
 		{
 			this.components = new System.ComponentModel.Container();
+			System.Windows.Forms.ImageList imageList;
 			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(TypePicker));
 			this.treeView = new System.Windows.Forms.TreeView();
-			this.imageList = new System.Windows.Forms.ImageList(this.components);
-			this.addNewLinkLabel = new NewLink();
+			this.addNewLinkLabel = new BLToolkit.ComponentModel.Design.TypePicker.NewLink();
 			this.addNewPanel = new System.Windows.Forms.Panel();
 			this.addNewSplitPanel = new System.Windows.Forms.Panel();
+			imageList = new System.Windows.Forms.ImageList(this.components);
 			this.addNewPanel.SuspendLayout();
 			this.SuspendLayout();
 			// 
@@ -44,7 +45,7 @@ namespace BLToolkit.ComponentModel.Design
 			this.treeView.Dock = System.Windows.Forms.DockStyle.Fill;
 			this.treeView.HotTracking = true;
 			this.treeView.ImageIndex = 0;
-			this.treeView.ImageList = this.imageList;
+			this.treeView.ImageList = imageList;
 			this.treeView.Location = new System.Drawing.Point(0, 0);
 			this.treeView.Name = "treeView";
 			this.treeView.SelectedImageIndex = 0;
@@ -54,26 +55,26 @@ namespace BLToolkit.ComponentModel.Design
 			// 
 			// imageList
 			// 
-			this.imageList.ImageStream = ((System.Windows.Forms.ImageListStreamer)(resources.GetObject("imageList.ImageStream")));
-			this.imageList.TransparentColor = System.Drawing.Color.Magenta;
-			this.imageList.Images.SetKeyName(0, "None.bmp");
-			this.imageList.Images.SetKeyName(1, "Assembly.bmp");
-			this.imageList.Images.SetKeyName(2, "Namespace.bmp");
-			this.imageList.Images.SetKeyName(3, "Object.bmp");
+			imageList.ImageStream = ((System.Windows.Forms.ImageListStreamer)(resources.GetObject("imageList.ImageStream")));
+			imageList.TransparentColor = System.Drawing.Color.Magenta;
+			imageList.Images.SetKeyName(0, "None.bmp");
+			imageList.Images.SetKeyName(1, "Assembly.bmp");
+			imageList.Images.SetKeyName(2, "Namespace.bmp");
+			imageList.Images.SetKeyName(3, "Object.bmp");
 			// 
 			// addNewLinkLabel
 			// 
 			this.addNewLinkLabel.AutoSize = true;
 			this.addNewLinkLabel.ForeColor = System.Drawing.SystemColors.WindowText;
-			this.addNewLinkLabel.ImageList = this.imageList;
+			this.addNewLinkLabel.ImageList = imageList;
 			this.addNewLinkLabel.LinkBehavior = System.Windows.Forms.LinkBehavior.HoverUnderline;
 			this.addNewLinkLabel.Location = new System.Drawing.Point(0, 3);
 			this.addNewLinkLabel.Name = "addNewLinkLabel";
 			this.addNewLinkLabel.Padding = new System.Windows.Forms.Padding(5, 0, 0, 0);
-			this.addNewLinkLabel.Size = new System.Drawing.Size(103, 13);
+			this.addNewLinkLabel.Size = new System.Drawing.Size(100, 13);
 			this.addNewLinkLabel.TabIndex = 1;
 			this.addNewLinkLabel.TabStop = true;
-			this.addNewLinkLabel.Text = "Add Project Type...";
+			this.addNewLinkLabel.Text = "Add Project Type…";
 			this.addNewLinkLabel.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
 			this.addNewLinkLabel.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.addNewLinkLabel_LinkClicked);
 			// 
@@ -117,6 +118,5 @@ namespace BLToolkit.ComponentModel.Design
 		private NewLink addNewLinkLabel;
 		private System.Windows.Forms.Panel addNewPanel;
 		private System.Windows.Forms.Panel addNewSplitPanel;
-		private System.Windows.Forms.ImageList imageList;
 	}
 }

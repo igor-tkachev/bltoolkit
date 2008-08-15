@@ -156,7 +156,7 @@ namespace BLToolkit.ComponentModel.Design
 				if (ui != null)
 					ui.ShowError(ex, message);
 				else
-					MessageBox.Show(message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+					MessageBox.Show(this, message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
 			}
 
 			if (dataSources == null)
@@ -178,17 +178,20 @@ namespace BLToolkit.ComponentModel.Design
 
 		private void addNewLinkLabel_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
 		{
-			GetTypeDialog dlg = new GetTypeDialog(_serviceProvider, typeof(object), _filter);
-
-			DialogResult result = dlg.ShowDialog();
-
-			if (result == DialogResult.OK && dlg.ResultType != null)
+			using (GetTypeDialog dlg = new GetTypeDialog(_serviceProvider, typeof (object), _filter))
 			{
-				_resultType = dlg.ResultType;
+				IUIService   uiService = GetService<IUIService>();
+				IWin32Window owner     = uiService == null? null: uiService.GetDialogOwnerWindow();
+				DialogResult result    = dlg.ShowDialog(owner);
 
-				SaveType(_resultType);
+				if (result == DialogResult.OK && dlg.ResultType != null)
+				{
+					_resultType = dlg.ResultType;
 
-				_windowsFormsEditorService.CloseDropDown();
+					SaveType(_resultType);
+
+					_windowsFormsEditorService.CloseDropDown();
+				}
 			}
 		}
 
@@ -206,8 +209,10 @@ namespace BLToolkit.ComponentModel.Design
 
 			try
 			{
-				string typeName    = "Microsoft.VSDesigner.VSDesignerPackage.IGenericObjectDataSourcesService, Microsoft.VSDesigner, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a";
-				Type   serviceType = Type.GetType(typeName);
+				const string vs9TypeName = "Microsoft.VSDesigner.VSDesignerPackage.IGenericObjectDataSourcesService, Microsoft.VSDesigner, Version=9.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a";
+				const string vs8TypeName = "Microsoft.VSDesigner.VSDesignerPackage.IGenericObjectDataSourcesService, Microsoft.VSDesigner, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a";
+
+				Type   serviceType = Type.GetType(vs9TypeName) ?? Type.GetType(vs8TypeName);
 
 				if (serviceType == null)
 					return;
@@ -228,7 +233,7 @@ namespace BLToolkit.ComponentModel.Design
 				if (ui != null)
 					ui.ShowError(ex);
 				else
-					MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+					MessageBox.Show(this, ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
 			}
 		}
 

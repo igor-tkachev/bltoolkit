@@ -5,6 +5,7 @@ using System.ComponentModel.Design.Data;
 using System.Data;
 using System.Collections;
 using System.Windows.Forms;
+using System.Windows.Forms.Design;
 
 namespace BLToolkit.ComponentModel.Design
 {
@@ -18,12 +19,18 @@ namespace BLToolkit.ComponentModel.Design
 
 			if (dspService == null || !dspService.SupportsAddNewDataSource)
 			{
-				GetTypeDialog dlg = new GetTypeDialog(provider, typeof(object), FilterTypeList);
+				using (GetTypeDialog dlg = new GetTypeDialog(provider, typeof (object), FilterTypeList))
+				{
+					IWin32Window dialogOwnerWindow = null;
+					IUIService   uiService         = (IUIService)provider.GetService(typeof(IUIService));
 
-				DialogResult result = dlg.ShowDialog();
+					if (uiService != null)
+						dialogOwnerWindow = uiService.GetDialogOwnerWindow();
 
-				return result == DialogResult.OK && dlg.ResultType != null?
-					dlg.ResultType: value;
+					DialogResult result = dlg.ShowDialog(dialogOwnerWindow);
+
+					return result == DialogResult.OK && dlg.ResultType != null? dlg.ResultType: value;
+				}
 			}
 
 			return new TypePicker().PickType(provider, value as Type, FilterTypeList);

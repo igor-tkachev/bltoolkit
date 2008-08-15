@@ -39,16 +39,16 @@ namespace BLToolkit.ComponentModel.Design
 
 			try
 			{
-				treeView.Nodes.Clear();
+				_treeView.Nodes.Clear();
 
-				Hashtable assemblyNodes  = new Hashtable();
-				Hashtable namespaceNodes = new Hashtable();
-				Hashtable typeNodes      = new Hashtable();
+				Dictionary<Assembly, TreeNode>   assemblyNodes  = new Dictionary<Assembly, TreeNode>();
+				Dictionary<string, TreeNode>     namespaceNodes = new Dictionary<string, TreeNode>();
+				Dictionary<Type, TypePicker.TypeNode> typeNodes = new Dictionary<Type, TypePicker.TypeNode>();
 
 				ITypeDiscoveryService service = 
 					(ITypeDiscoveryService)_serviceProvider.GetService(typeof(ITypeDiscoveryService));
 
-				ICollection cTypes = service.GetTypes(_baseType, systemCheckBox.Checked);
+				ICollection cTypes = service.GetTypes(_baseType, _systemCheckBox.Checked);
 				List<Type>  types  = new List<Type>(cTypes.Count);
 
 				foreach (Type type in cTypes)
@@ -57,8 +57,8 @@ namespace BLToolkit.ComponentModel.Design
 				types.Sort(delegate(Type a, Type b)
 				{
 					return a.Assembly == b.Assembly?
-						a.FullName.CompareTo(b.FullName):
-						a.Assembly.FullName.CompareTo(b.Assembly.FullName);
+						string.Compare(a.FullName, b.FullName):
+						string.Compare(a.Assembly.FullName, b.Assembly.FullName);
 				});
 
 				foreach (Type type in types)
@@ -66,20 +66,20 @@ namespace BLToolkit.ComponentModel.Design
 					if (_filter != null && _filter(type) == false)
 						continue;
 
-					Assembly assembly     = type.Assembly;
-					TreeNode assemblyNode = (TreeNode)assemblyNodes[assembly];
+					Assembly assembly = type.Assembly;
+					TreeNode assemblyNode;
 
-					if (assemblyNode == null)
+					if (!assemblyNodes.TryGetValue(assembly, out assemblyNode))
 					{
 						assemblyNodes[assembly] = assemblyNode =
-							treeView.Nodes.Add(assembly.FullName, assembly.GetName().Name, 1, 1);
+							_treeView.Nodes.Add(assembly.FullName, assembly.GetName().Name, 1, 1);
 					}
 
-					string  @namespace     = type.Namespace ?? string.Empty;
-					string   namespaceKey  = assembly.FullName + ", " + @namespace;
-					TreeNode namespaceNode = (TreeNode)namespaceNodes[namespaceKey];
+					string  @namespace    = type.Namespace ?? string.Empty;
+					string   namespaceKey = assembly.FullName + ", " + @namespace;
+					TreeNode namespaceNode;
 
-					if (namespaceNode == null)
+					if (!namespaceNodes.TryGetValue(namespaceKey, out namespaceNode))
 					{
 						namespaceNodes[namespaceKey] = namespaceNode =
 							assemblyNode.Nodes.Add(namespaceKey, @namespace, 2, 2);
@@ -87,9 +87,9 @@ namespace BLToolkit.ComponentModel.Design
 
 					GetTypeNode getTypeNode = null; getTypeNode = delegate(Type t)
 					{
-						TypePicker.TypeNode node = (TypePicker.TypeNode)typeNodes[t];
-
-						if (node != null)
+						TypePicker.TypeNode node;
+						
+						if (typeNodes.TryGetValue(t, out node))
 							return node;
 
 						if (t.DeclaringType == null)
@@ -103,7 +103,7 @@ namespace BLToolkit.ComponentModel.Design
 							parent.Nodes.Add(node = new TypePicker.TypeNode(t.Name, t, false));
 						}
 
-						typeNodes[t] = node;
+						typeNodes.Add(t, node);
 
 						return node;
 					};
@@ -132,16 +132,13 @@ namespace BLToolkit.ComponentModel.Design
 
 			_resultType = node != null && node.IsSelectable? node.Type: null;
 
-			okButton.Enabled = _resultType != null;
+			_okButton.Enabled = _resultType != null;
 		}
 
 		private void treeView_DoubleClick(object sender, EventArgs e)
 		{
-			if (okButton.Enabled)
-			{
-				DialogResult = DialogResult.OK;
-				Close();
-			}
+			_okButton.PerformClick();
 		}
+
 	}
 }
