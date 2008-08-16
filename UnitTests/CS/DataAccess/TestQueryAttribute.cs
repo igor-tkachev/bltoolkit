@@ -11,6 +11,13 @@ namespace DataAccess
 			IsDynamic = true;
 		}
 
+		private string _accessText;
+		public  string  AccessText
+		{
+			get { return _accessText;  }
+			set { _accessText = value; }
+		}
+
 		private string _oracleText;
 		public  string  OracleText
 		{
@@ -37,8 +44,9 @@ namespace DataAccess
 			switch (dbManager.DataProvider.Name)
 			{
 				case "Sql"   :
-				case "SqlCe" :
-				case "Access": return SqlText;
+				case "SqlCe" : return SqlText;
+
+				case "Access": return AccessText ?? SqlText;
 	
 				case "Oracle":
 				case "ODP"   : return OracleText ?? SqlText;
