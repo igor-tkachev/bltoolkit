@@ -63,15 +63,17 @@ namespace Data
 
 			public Char      Char_;
 			public SByte     SByte_;
-			[MapIgnore(false)]
-			public Stream    Stream_;
 			public UInt16    UInt16_;
 			public UInt32    UInt32_;
 			public UInt64    UInt64_;
+#if !SQLCE
+			[MapIgnore(false)]
+			public Stream    Stream_;
 			[MapIgnore]
 			public XmlReader Xml_;
 			[MapField("Xml_")]
 			public XmlDocument XmlDoc_;
+#endif
 		}
 
 		public class DataTypeSqlTest
@@ -91,12 +93,14 @@ namespace Data
 			public SqlMoney    Money_;
 			public SqlSingle   Single_;
 			public SqlString   String_;
+#if !SQLCE
 			[MapIgnore(false)]
 			public SqlBytes    Bytes_;
 			[MapIgnore(false)]
 			public SqlChars    Chars_;
 			[MapIgnore(false)]
 			public SqlXml      Xml_;
+#endif
 		}
 
 		[Test]
@@ -196,7 +200,7 @@ namespace Data
 			public string inputOutputStr = "10";
 		}
 
-#if !ACCESS && !SQLITE
+#if !ACCESS && !SQLCE && !SQLITE
 		[Test]
 		public void MapOutput()
 		{
@@ -319,12 +323,14 @@ namespace Data
 
 				dt.Char_     = 'F';
 				dt.SByte_    = 123;
-				dt.Stream_   = new MemoryStream(5);
 				dt.UInt16_   = 65432;
 				dt.UInt32_   = 4000000000;
 				dt.UInt64_   = 12345678901234567890;
+#if !SQLCE
+				dt.Stream_   = new MemoryStream(5);
 				dt.Xml_      = new XmlTextReader(new StringReader("<xml/>"));
 				dt.XmlDoc_   = new XmlDocument(); dt.XmlDoc_.LoadXml("<xmldoc/>");
+#endif
 
 				IDbDataParameter[] parameters = db.CreateParameters(dt);
 
@@ -367,9 +373,11 @@ namespace Data
 				dt.Single_   = new SqlSingle(1234.0f);
 				dt.String_   = new SqlString("Crazy Frog");
 
+#if !SQLCE
 				dt.Bytes_    = new SqlBytes(new byte[2] {2, 1});
 				dt.Chars_    = new SqlChars(new char[2] {'B', 'L'});
 				dt.Xml_      = new SqlXml(new XmlTextReader(new StringReader("<xml/>")));
+#endif
 
 				IDbDataParameter[] parameters = db.CreateParameters(dt);
 
@@ -420,7 +428,7 @@ namespace Data
 			public string LastName;
 		}
 
-#if !SQLITE
+#if !SQLITE && !SQLCE
 		[Test]
 #endif
 		public void CreateManyParametersTest()

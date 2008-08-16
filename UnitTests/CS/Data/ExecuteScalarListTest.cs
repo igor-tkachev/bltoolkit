@@ -56,7 +56,7 @@ namespace Data
 			using (DbManager db = new DbManager())
 			{
 				ArrayList array = db
-#if SQLITE
+#if SQLITE || SQLCE || SQLCE
 					.SetCommand("SELECT * FROM Person")
 #else
 					.SetSpCommand("Person_SelectAll")
@@ -116,7 +116,7 @@ namespace Data
 		public void GenericsScalarListTest()
 		{
 			string cmd = "SELECT PersonID FROM Person UNION ALL SELECT NULL";
-#if !MSSQL
+#if !MSSQL && !SQLCE
 			cmd += " FROM dual";
 #endif
 
@@ -136,7 +136,7 @@ namespace Data
 		public void GenericsScalarListTest2()
 		{
 			string cmd = "SELECT PersonID FROM Person UNION ALL SELECT NULL";
-#if !MSSQL
+#if !MSSQL && !SQLCE
 			cmd += " FROM dual";
 #endif
 			using (DbManager db = new DbManager())
@@ -187,7 +187,7 @@ namespace Data
 			using (DbManager db = new DbManager())
 			{
 				string cmd = "SELECT PersonID FROM Person UNION ALL SELECT NULL";
-#if !MSSQL
+#if !MSSQL && !SQLCE
 				cmd += " FROM dual";
 #endif
 				List<uint?> array = db

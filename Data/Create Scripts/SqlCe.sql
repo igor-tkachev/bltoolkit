@@ -104,3 +104,4 @@ VALUES
 	1234.567,  NewID(),   32767,   32768, 1000000,   12.3456,      127,
 	1234.123,  NewID(), 'string',  32767,   32768, 200000000,
 	'<root><element strattr="strvalue" intattr="12345"/></root>')
+GO

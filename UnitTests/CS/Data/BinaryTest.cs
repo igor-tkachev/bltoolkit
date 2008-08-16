@@ -43,7 +43,7 @@ namespace Data
 				id = db
 					.SetCommand("SELECT GEN_ID(PersonID, 0) FROM dual")
 					.ExecuteScalar();
-#elif ACCESS
+#elif ACCESS || SQLCE
 				db
 					.SetCommand("INSERT INTO BinaryData (Data) VALUES (@Data)",
 						db.Parameter("@Data", new byte[] { 1, 2, 3, 4, 5}))
@@ -77,7 +77,7 @@ namespace Data
 				// Stamps are integers in Firebird.
 				//
 				Assert.AreEqual(4, bd.Stamp.Length);
-#elif ACCESS
+#elif ACCESS || SQLCE
 				// Not supported in MS Access
 				//
 				Assert.IsNull(bd.Stamp);
@@ -86,7 +86,7 @@ namespace Data
 #endif
 
 				db
-#if FIREBIRD || ACCESS || SQLITE
+#if FIREBIRD || ACCESS || SQLCE || SQLITE
 					.SetCommand("DELETE FROM BinaryData")
 #else
 					.SetCommand("TRUNCATE TABLE BinaryData")

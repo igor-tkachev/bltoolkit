@@ -32,10 +32,10 @@ namespace DataAccess
 			public abstract ArrayList SelectBy([Format] string fieldName, string value);
 
 			[TestQuery(
-				SqlText    = "SELECT TOP {0} * FROM Person WHERE LastName = @lastName",
-				OracleText = "SELECT * FROM Person WHERE LastName = :lastName AND rownum <= {0}",
-				FbText     = "SELECT FIRST {0} * FROM Person WHERE LastName = @lastName",
-				SQLiteText = "SELECT * FROM Person WHERE LastName = @lastName LIMIT {0}")]
+				SqlText    = "SELECT TOP ({0}) * FROM Person WHERE LastName = @lastName",
+				OracleText = "SELECT * FROM Person WHERE LastName = :lastName AND rownum <= ({0})",
+				FbText     = "SELECT FIRST ({0}) * FROM Person WHERE LastName = @lastName",
+				SQLiteText = "SELECT * FROM Person WHERE LastName = @lastName LIMIT ({0})")]
 			public abstract ArrayList SelectByLastName(string lastName, [Format(0)] int top);
 		}
 

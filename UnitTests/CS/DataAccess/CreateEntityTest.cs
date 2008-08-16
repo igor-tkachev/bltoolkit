@@ -22,7 +22,7 @@ namespace DataAccess
 
 		public abstract class EntityAccessor : DataAccessor<Entity>
 		{
-#if SQLITE
+#if SQLITE || SQLCE
 			[SqlQuery("SELECT * FROM Person")]
 #else
 			[SprocName("Person_SelectAll")]

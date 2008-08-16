@@ -27,22 +27,22 @@ namespace DataAccess
 
 		public abstract class TestAccessor : DataAccessor
 		{
-#if SQLITE
+#if SQLITE || SQLCE
 			[SqlQuery(@"INSERT INTO Person(FirstName, MiddleName, LastName, Gender)
 						VALUES(@FirstName, @MiddleName, @LastName, @Gender)")]
 #endif
 			public abstract int Person_Insert(
 				string @FirstName, string @MiddleName, string @LastName, Gender @Gender);
 
-#if ACCESS || SQLITE
-#if SQLITE
+#if ACCESS || SQLITE || SQLCE
+#if SQLITE || SQLCE
 			[SqlQuery(@"SELECT * FROM Person WHERE FirstName = @FirstName AND LastName = @LastName")]
 #endif
 			public abstract int Person_SelectByName(
 				string @FirstName, string @LastName	);
 #endif
 
-#if SQLITE
+#if SQLITE || SQLCE
 			[SqlQuery(@"DELETE FROM Person WHERE PersonID = @PersonID")]
 #endif
 			public abstract void Person_Delete(int @personID);
@@ -59,7 +59,7 @@ namespace DataAccess
 
 			int id = ta.Person_Insert("Crazy", null, "Frog", Gender.E_Unknown);
 
-#if ACCESS || SQLITE
+#if ACCESS || SQLITE || SQLCE
 			Assert.AreEqual(0, id);
 			id = ta.Person_SelectByName("Crazy", "Frog");
 #endif
@@ -68,7 +68,7 @@ namespace DataAccess
 			ta.Person_Delete(id);
 		}
 
-#if !ACCESS && !SQLITE
+#if !ACCESS && !SQLITE && !SQLCE
 		[Test]
 		public void RefTest()
 		{

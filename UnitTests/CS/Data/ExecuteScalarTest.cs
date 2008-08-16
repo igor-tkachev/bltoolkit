@@ -17,8 +17,8 @@ namespace Data
 				int expectedValue = 12345;
 				int actualValue = db.MappingSchema.ConvertToInt32(
 					db
-#if SQLITE
-						.SetCommand("SELECT 12345 FROM Dual")
+#if SQLITE || SQLCE
+						.SetCommand("SELECT 12345")
 #else
 						.SetSpCommand("Scalar_DataReader")
 #endif
@@ -36,8 +36,8 @@ namespace Data
 				int expectedValue = 12345;
 				int actualValue = db.MappingSchema.ConvertToInt32(
 					db
-#if SQLITE
-						.SetCommand("SELECT 12345 FROM Dual")
+#if SQLITE || SQLCE
+						.SetCommand("SELECT 12345")
 #else
 						.SetSpCommand("Scalar_DataReader")
 #endif
@@ -55,8 +55,8 @@ namespace Data
 				string expectedValue = "54321";
 				string actualValue = db.MappingSchema.ConvertToString(
 					db
-#if SQLITE
-						.SetCommand("SELECT 12345, '54321' FROM Dual")
+#if SQLITE || SQLCE
+						.SetCommand("SELECT 12345, '54321'")
 #else
 						.SetSpCommand("Scalar_DataReader")
 #endif
@@ -74,8 +74,8 @@ namespace Data
 				string expectedValue = "54321";
 				string actualValue = db.MappingSchema.ConvertToString(
 					db
-#if SQLITE
-						.SetCommand("SELECT 12345 intField, '54321' stringField FROM Dual")
+#if SQLITE || SQLCE
+						.SetCommand("SELECT 12345 intField, '54321' stringField")
 #else
 						.SetSpCommand("Scalar_DataReader")
 #endif
@@ -85,7 +85,7 @@ namespace Data
 			}
 		}
 		
-#if !ACCESS && !SQLITE
+#if !ACCESS && !SQLITE && !SQLCE
 		[Test]
 		public void OutputParameterTest()
 		{
@@ -155,8 +155,8 @@ namespace Data
 #endif
 				int actualValue = db.MappingSchema.ConvertToInt32(
 					db
-#if SQLITE
-						.SetCommand("SELECT 12345 FROM Dual")
+#if SQLITE || SQLCE
+						.SetCommand("SELECT 12345")
 #else
 						.SetSpCommand("Scalar_DataReader")
 #endif
@@ -173,8 +173,8 @@ namespace Data
 			{
 				int expectedValue = 12345;
 				int actualValue = db
-#if SQLITE
-					.SetCommand("SELECT 12345 FROM Dual")
+#if SQLITE || SQLCE
+					.SetCommand("SELECT 12345")
 #else
 					.SetSpCommand("Scalar_DataReader")
 #endif
@@ -191,8 +191,8 @@ namespace Data
 			{
 				int expectedValue = 12345;
 				int actualValue = db
-#if SQLITE
-					.SetCommand("SELECT 12345 FROM Dual")
+#if SQLITE || SQLCE
+					.SetCommand("SELECT 12345")
 #else
 					.SetSpCommand("Scalar_DataReader")
 #endif
@@ -209,8 +209,8 @@ namespace Data
 			{
 				string expectedValue = "54321";
 				string actualValue = db
-#if SQLITE
-					.SetCommand("SELECT 12345, '54321' FROM Dual")
+#if SQLITE || SQLCE
+					.SetCommand("SELECT 12345, '54321'")
 #else
 					.SetSpCommand("Scalar_DataReader")
 #endif

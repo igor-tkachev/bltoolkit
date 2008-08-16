@@ -60,7 +60,9 @@ namespace Mapping
 			}
 		}
 
+#if !SQLCE
 		[Test]
+#endif
 		public void ProvideCustomDBTypeTest()
 		{
 			AnsiStringObject obj = new AnsiStringObject();

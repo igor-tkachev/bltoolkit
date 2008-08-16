@@ -38,7 +38,7 @@ namespace Data
 			using (DbManager db = new DbManager())
 			{
 				Hashtable table = db
-#if SQLITE
+#if SQLITE || SQLCE
 					.SetCommand("SELECT * FROM Person")
 #else
 					.SetSpCommand("Person_SelectAll")

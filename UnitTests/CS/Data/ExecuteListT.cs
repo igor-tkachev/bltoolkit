@@ -48,7 +48,7 @@ namespace Data
 				List<SimpleObject> list = new List<SimpleObject>();
 
 				db
-#if MSSQL
+#if MSSQL || SQLCE
 					.SetCommand(@"
 						SELECT 0 as [Key], 'value0' as Value UNION
 						SELECT 1 as [Key], 'value1' as Value UNION
@@ -73,7 +73,7 @@ namespace Data
 			using (DbManager db = new DbManager())
 			{
 				List<SimpleObject> list = db
-#if MSSQL
+#if MSSQL || SQLCE
 					.SetCommand(@"
 						SELECT 0 as [Key], 'value0' as Value UNION
 						SELECT 1 as [Key], 'value1' as Value UNION

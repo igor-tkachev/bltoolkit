@@ -181,7 +181,7 @@ namespace BLTgen
 				outputDirectory = Path.GetDirectoryName(sourceAssembly);
 
 			string fileName = Path.ChangeExtension(Path.GetFileName(sourceAssembly), "BLToolkitExtension.dll");
-			return Path.Combine(outputDirectory, fileName);
+			return Path.Combine(Path.GetFullPath(outputDirectory), fileName);
 		}
 
 		#region Usage

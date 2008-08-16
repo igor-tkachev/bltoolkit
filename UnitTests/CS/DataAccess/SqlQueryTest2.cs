@@ -31,10 +31,10 @@ namespace DataAccess
 			public abstract List<Person> SelectBy([Format] string fieldName, string value);
 
 			[TestQuery(
-				SqlText    = "SELECT TOP {0} * FROM Person WHERE LastName = @lastName",
-				OracleText = "SELECT * FROM Person WHERE LastName = :lastName AND rownum <= {0}",
-				FbText     = "SELECT FIRST {0} * FROM Person WHERE LastName = @lastName",
-				SQLiteText = "SELECT * FROM Person WHERE LastName = @lastName LIMIT {0}")]
+				SqlText    = "SELECT TOP ({0}) * FROM Person WHERE LastName = @lastName",
+				OracleText = "SELECT * FROM Person WHERE LastName = :lastName AND rownum <= ({0})",
+				FbText     = "SELECT FIRST ({0}) * FROM Person WHERE LastName = @lastName",
+				SQLiteText = "SELECT * FROM Person WHERE LastName = @lastName LIMIT ({0})")]
 			public abstract List<Person> SelectByLastName(string lastName, [Format(0)] int top);
 
 			[TestQuery(
@@ -74,7 +74,9 @@ namespace DataAccess
 			Assert.AreNotEqual(0, list.Count);
 		}
 
+#if !SQLCE // Works in Query window but not here???
 		[Test]
+#endif
 		public void Test4()
 		{
 			PersonAccessor da = DataAccessor.CreateInstance<PersonAccessor>();

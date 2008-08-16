@@ -189,7 +189,7 @@ namespace DataAccess
 			[ObjectType(typeof(Person))]
 			public abstract Dictionary<int, object>           GenericsScalarDictionaryByPKWithObjectType();
 
-#if SQLITE
+#if SQLITE || SQLCE
 			[SqlQuery("SELECT * FROM Person")]
 #else
 			[ActionName("SelectAll")]
@@ -197,21 +197,21 @@ namespace DataAccess
 			[Index("ID")]
 			public abstract Dictionary<uint, Person> SelectAllT7();
 
-#if SQLITE
+#if SQLITE || SQLCE
 			[SqlQuery("SELECT * FROM Person")]
 #else
 			[ActionName("SelectAll")]
 #endif
 			public abstract Dictionary<long, Person> SelectAllT8();
 
-#if SQLITE
+#if SQLITE || SQLCE
 			[SqlQuery("SELECT * FROM Person")]
 #else
 			[SprocName("Person_SelectAll")]
 #endif
 			public abstract Dictionary<long, Derived> SelectAllDerived();
 
-#if SQLITE
+#if SQLITE || SQLCE
 			[SqlQuery("SELECT * FROM Person")]
 #else
 			[SprocName("Person_SelectAll")]
