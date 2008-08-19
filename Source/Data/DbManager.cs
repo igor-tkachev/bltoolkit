@@ -219,7 +219,7 @@ namespace BLToolkit.Data
 		/// <include file="Examples.xml" path='examples/db[@name="BeginTransaction()"]/*' />
 		/// <returns>This instance of the <see cref="DbManager"/>.</returns>
 		/// <seealso cref="Transaction"/>
-		public DbManager BeginTransaction()
+		public virtual DbManager BeginTransaction()
 		{
 			return BeginTransaction(IsolationLevel.ReadCommitted);
 		}
@@ -265,7 +265,7 @@ namespace BLToolkit.Data
 		/// Commits the database transaction.
 		/// </summary>
 		/// <returns>This instance of the <see cref="DbManager"/>.</returns>
-		public DbManager CommitTransaction()
+		public virtual DbManager CommitTransaction()
 		{
 			if (_transaction != null)
 			{
@@ -282,7 +282,7 @@ namespace BLToolkit.Data
 		/// Rolls back a transaction from a pending state.
 		/// </summary>
 		/// <returns>This instance of the <see cref="DbManager"/>.</returns>
-		public DbManager RollbackTransaction()
+		public virtual DbManager RollbackTransaction()
 		{
 			if (_transaction != null)
 			{
