@@ -216,6 +216,7 @@ namespace BLToolkit.TypeBuilder
 				string.Format("Could not build the '{0}' type: " + format, parameters));
 		}
 
+		[System.Diagnostics.Conditional("DEBUG")]
 		private static void WriteDebug(string format, params object[] parameters)
 		{
 			System.Diagnostics.Debug.WriteLine(string.Format(format, parameters));
@@ -225,10 +226,14 @@ namespace BLToolkit.TypeBuilder
 
 		#region Resolve Types
 
-		[Obsolete("Do not call this method directly.")]
+		/// <summary>
+		/// Initializes AssemblyResolve hooks for the current <see cref="AppDomain"/>.
+		/// </summary>
 		public static void Init()
 		{
-			// The code has been moved to the type constructor.
+			//
+			// The code actually does nothing except an implicit call to the type constructor.
+			//
 		}
 
 		private static Assembly CurrentDomain_AssemblyResolve(object sender, ResolveEventArgs args)
