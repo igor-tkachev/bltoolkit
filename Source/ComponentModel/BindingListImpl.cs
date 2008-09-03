@@ -68,13 +68,14 @@ namespace BLToolkit.ComponentModel
 
 			EndNew();
 
-			object o = TypeAccessor.CreateInstanceEx(_itemType);
-
-			_newItemIndex = _list.Add(o);
-			_newObject    = o as INotifyObjectEdit;
+			object   o = TypeAccessor.CreateInstanceEx(_itemType);
+			_newObject = o as INotifyObjectEdit;
 
 			if (_newObject != null)
 				_newObject.ObjectEdit += NewObject_ObjectEdit;
+
+			_newItemIndex = _list.Add(o);
+			OnListChanged(new EditableListChangedEventArgs(ListChangedType.ItemAdded, _newItemIndex));
 
 			Debug.WriteLine(string.Format("AddNew - ({0})", o.GetType().Name));
 
@@ -272,6 +273,7 @@ namespace BLToolkit.ComponentModel
 			if (itemIndex >= 0 && itemIndex == _newItemIndex)
 			{
 				_list.RemoveAt(itemIndex);
+				OnListChanged(new EditableListChangedEventArgs(ListChangedType.ItemDeleted, itemIndex));
 				EndNew();
 			}
 		}

@@ -6,6 +6,7 @@ Bug fixes
 - EditableArrayList indexer add/remove bug.
 - ParameterAttribute doesn't work with Nullabe<T> and EditableValue<T>
   when `T' constructor is not trivial.
+- BindingListImpl.AddNew does not fire ListChanged event.
 
 Enhancement
 - CHM help file provided. See the Doc folder.

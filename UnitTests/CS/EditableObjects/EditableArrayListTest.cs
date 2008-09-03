@@ -103,6 +103,23 @@ namespace EditableObjects
 		}
 
 		[Test]
+		public void TestAddNew()
+		{
+			EditableList<EditableTestObject> list = new EditableList<EditableTestObject>();
+			bool listChangedFired = false;
+			list.ListChanged += delegate { listChangedFired = true; };
+
+			list.AddNew();
+			Assert.That(listChangedFired);
+			Assert.AreEqual(1, list.Count);
+
+			listChangedFired = false;
+			list.CancelNew(0);
+			Assert.That(listChangedFired);
+			Assert.IsEmpty(list);
+		}
+
+		[Test]
 		public void TestInsert()
 		{
 			Console.WriteLine("--- TestInsert ---");
