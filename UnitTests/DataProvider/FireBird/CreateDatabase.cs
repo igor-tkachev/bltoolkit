@@ -7,7 +7,7 @@ using NUnit.Framework;
 
 namespace UnitTests.CS
 {
-	[TestFixture(Description = "DB setup"), Explicit]
+	[TestFixture, Explicit, Category("DB setup")]
 	public class CreateDatabase
 	{
 		[Test]

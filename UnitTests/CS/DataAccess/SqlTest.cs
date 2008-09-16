@@ -1,5 +1,3 @@
-using System;
-
 using NUnit.Framework;
 
 using BLToolkit.Mapping;
@@ -17,14 +15,12 @@ namespace DataAccess
 			public string MiddleName;
 		}
 
-		[MapField("LastName",   "Name.LastName")]
-		[MapField("FirstName",  "Name.FirstName")]
-		[MapField("MiddleName", "Name.MiddleName")]
 		public class Person
 		{
 			[MapField("PersonID"), PrimaryKey]
-			public int    ID;
-			public Name   Name = new Name();
+			public int  ID;
+			[MapField(Format="{0}")]
+			public Name Name = new Name();
 		}
 
 		[Test]
@@ -36,5 +32,6 @@ namespace DataAccess
 
 			Assert.AreEqual("Pupkin", p.Name.LastName);
 		}
+
 	}
 }

@@ -1,7 +1,7 @@
 @if "%DevEnvDir%"=="" goto error_no_DevEnvDir
 
-copy TransformCodeGenerator.dll %DevEnvDir%\PrivateAssemblies\ 
-regasm %DevEnvDir%\PrivateAssemblies\TransformCodeGenerator.dll
+copy TransformCodeGenerator.dll "%DevEnvDir%\PrivateAssemblies\"
+regasm "%DevEnvDir%\PrivateAssemblies\TransformCodeGenerator.dll"
 
 @goto end
 

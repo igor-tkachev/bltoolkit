@@ -35,12 +35,18 @@ namespace BLToolkit.DataAccess
 
 		#region Protected Members
 
-		protected static MemberMapper[] GetFieldList(ObjectMapper om)
+		protected MemberMapper[] GetFieldList(ObjectMapper om)
 		{
-			List<MemberMapper> list = new List<MemberMapper>();
+			List<MemberMapper> list = new List<MemberMapper>(om.Count);
 
 			foreach (MemberMapper mm in om)
-				list.Add(mm);
+			{
+				MemberAccessor ma = mm.MemberAccessor;
+
+				bool isSet;
+				if (!MappingSchema.MetadataProvider.GetIgnore(om, ma, out isSet))
+					list.Add(mm);
+			}
 
 			return list.ToArray();
 		}
