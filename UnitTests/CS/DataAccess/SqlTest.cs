@@ -1,5 +1,6 @@
 using System;
 using BLToolkit.Data;
+using BLToolkit.Data.DataProvider;
 using NUnit.Framework;
 
 using BLToolkit.Mapping;
@@ -45,12 +46,30 @@ namespace DataAccess
 			using (DbManager db = new DbManager())
 			{
 				info = da.GetSqlQueryInfo(db, typeof (Person),        "SelectAll");
+
+				Console.WriteLine(info.QueryText);
+				Assert.That(info.QueryText.Contains("\t" + db.DataProvider.Convert("PersonID", ConvertType.NameToQueryField)));
+				Assert.That(info.QueryText.Contains("\t" + db.DataProvider.Convert("LastName", ConvertType.NameToQueryField)));
+				Assert.That(info.QueryText, Is.Not.Contains("\t" + db.DataProvider.Convert("Name", ConvertType.NameToQueryField)));
 			}
+		}
+
+		[MapField("InnerId", "InnerObject.Id")]
+		public class TestObject
+		{
+			public int        Id;
+			public TestObject InnerObject;
+		}
+
+		[Test]
+		public void RecursiveTest()
+		{
+			SqlQuery<TestObject> query = new SqlQuery<TestObject>();
+			SqlQueryInfo         info  = query.GetSqlQueryInfo(new DbManager(), "SelectAll");
 
 			Console.WriteLine(info.QueryText);
-			Assert.That(info.QueryText.Contains("[PersonID]"));
-			Assert.That(info.QueryText.Contains("[LastName]"));
-			Assert.That(info.QueryText, Is.Not.Contains("[Name]"));
+			Assert.That(info.QueryText.Contains("InnerId"));
+			Assert.That(info.QueryText, Is.Not.Contains("InnerObject"));
 		}
 	}
 }
