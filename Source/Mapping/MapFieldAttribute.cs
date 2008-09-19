@@ -7,7 +7,7 @@ namespace BLToolkit.Mapping
 		AttributeTargets.Field | AttributeTargets.Property |
 		AttributeTargets.Class | AttributeTargets.Interface,
 		AllowMultiple=true)]
-	public sealed class MapFieldAttribute : MapImplicitAttribute
+	public sealed class MapFieldAttribute : Attribute
 	{
 		public MapFieldAttribute()
 		{

@@ -7,6 +7,7 @@ Bug fixes
 - ParameterAttribute doesn't work with Nullabe<T> and EditableValue<T>
   when `T' constructor is not trivial.
 - BindingListImpl.AddNew does not fire ListChanged event.
+- Some inner types are missing in ObjectMappes, some included w/o reason.
 
 Enhancement
 - CHM help file provided. See the Doc folder.

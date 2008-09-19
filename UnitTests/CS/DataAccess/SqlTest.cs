@@ -1,7 +1,10 @@
+using System;
+using BLToolkit.Data;
 using NUnit.Framework;
 
 using BLToolkit.Mapping;
 using BLToolkit.DataAccess;
+using NUnit.Framework.SyntaxHelpers;
 
 namespace DataAccess
 {
@@ -33,5 +36,21 @@ namespace DataAccess
 			Assert.AreEqual("Pupkin", p.Name.LastName);
 		}
 
+		[Test]
+		public void GetFieldListTest()
+		{
+			SqlQuery     da = new SqlQuery();
+			SqlQueryInfo info;
+
+			using (DbManager db = new DbManager())
+			{
+				info = da.GetSqlQueryInfo(db, typeof (Person),        "SelectAll");
+			}
+
+			Console.WriteLine(info.QueryText);
+			Assert.That(info.QueryText.Contains("[PersonID]"));
+			Assert.That(info.QueryText.Contains("[LastName]"));
+			Assert.That(info.QueryText, Is.Not.Contains("[Name]"));
+		}
 	}
 }

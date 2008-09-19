@@ -1,7 +1,10 @@
 using System;
+using System.Collections.Generic;
 
 using NUnit.Framework;
+using NUnit.Framework.SyntaxHelpers;
 
+using BLToolkit.DataAccess;
 using BLToolkit.Mapping;
 using BLToolkit.Reflection.Extension;
 
@@ -100,6 +103,95 @@ namespace Mapping
 
 			Assert.IsNotNull(mm1);
 			Assert.IsNotNull(mm2);
+		}
+
+		public class Entity
+		{
+			[PrimaryKey]
+			public int Id;
+		}
+
+		public class Name
+		{
+			public string LastName;
+			public string FirstName;
+			public string MiddleName;
+		}
+
+		[MapField("PhoneId", "Id")]
+		public class PhoneEntity : Entity
+		{
+			public string Phone;
+		}
+
+		[MapField("PhoneId",    "Phone.Id")]
+		[MapField("LastName",   "Name.LastName")]
+		[MapField("FirstName",  "Name.FirstName")]
+		[MapField("MiddleName", "Name.MiddleName")]
+		public class PersonEntity : Entity
+		{
+			public PhoneEntity Phone;
+			public Name        Name   = new Name();
+		}
+
+		[Test]
+		public void InnerTest1()
+		{
+			ObjectMapper om = ObjectMapper<PersonEntity>.Instance;
+			List<string> list = new List<MemberMapper>(om)
+				.ConvertAll<string>(delegate(MemberMapper mm) { return mm.Name; });
+
+			Assert.That(list.Count == 5);
+			Assert.That(list.Contains("PhoneId"));
+			Assert.That(list.Contains("Phone"), Is.False);
+			Assert.That(list.Contains("LastName"));
+			Assert.That(list.Contains("Name"), Is.False);
+		}
+
+		[MapField("PhoneId", "Phone.Id")]
+		public class PersonEntity2 : Entity
+		{
+			[MapIgnore]
+			public PhoneEntity Phone = new PhoneEntity();
+			[MapField(Format="{0}")]
+			public Name        Name  = new Name();
+		}
+
+		[Test]
+		public void InnerTest2()
+		{
+			ObjectMapper om = ObjectMapper<PersonEntity2>.Instance;
+			List<string> list = new List<MemberMapper>(om)
+				.ConvertAll<string>(delegate(MemberMapper mm) { return mm.Name; });
+
+			Assert.That(list.Count == 5);
+			Assert.That(list.Contains("PhoneId"));
+			Assert.That(list.Contains("Phone"), Is.False);
+			Assert.That(list.Contains("LastName"));
+			Assert.That(list.Contains("Name"), Is.False);
+		}
+
+		[MapField("PhoneId", "Phone.Id")]
+		[MapField("Name", Format="{0}")]
+		public class PersonEntity3 : Entity
+		{
+			[MapIgnore]
+			public PhoneEntity Phone = new PhoneEntity();
+			public Name        Name  = new Name();
+		}
+
+		[Test]
+		public void InnerTest3()
+		{
+			ObjectMapper om = ObjectMapper<PersonEntity3>.Instance;
+			List<string> list = new List<MemberMapper>(om)
+				.ConvertAll<string>(delegate(MemberMapper mm) { return mm.Name; });
+
+			Assert.That(list.Count == 5);
+			Assert.That(list.Contains("PhoneId"));
+			Assert.That(list.Contains("Phone"), Is.False);
+			Assert.That(list.Contains("LastName"));
+			Assert.That(list.Contains("Name"), Is.False);
 		}
 	}
 }

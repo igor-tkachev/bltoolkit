@@ -48,11 +48,9 @@ namespace BLToolkit.Reflection.MetadataProvider
 				return a.MapName;
 			}
 
-			string name = member.Name.ToLower();
-
 			foreach (MapFieldAttribute attr in GetMapFieldAttributes(mapper))
 			{
-				if (attr.OrigName.ToLower() == name)
+				if (string.Equals(attr.OrigName, member.Name, StringComparison.InvariantCultureIgnoreCase))
 				{
 					isSet = true;
 					return attr.MapName;
@@ -69,7 +67,17 @@ namespace BLToolkit.Reflection.MetadataProvider
 		public override void EnsureMapper(ObjectMapper mapper, EnsureMapperHandler handler)
 		{
 			foreach (MapFieldAttribute attr in GetMapFieldAttributes(mapper))
-				handler(attr.MapName, attr.OrigName);
+			{
+				if (attr.OrigName != null)
+					handler(attr.MapName, attr.OrigName);
+				else
+				{
+					MemberAccessor ma = mapper.TypeAccessor[attr.MapName];
+
+					foreach (MemberMapper inner in mapper.MappingSchema.GetObjectMapper(ma.Type))
+						handler(string.Format(attr.Format, inner.Name), ma.Name + "." + inner.MemberName);
+				}
+			}
 		}
 
 		#endregion
@@ -89,7 +97,8 @@ namespace BLToolkit.Reflection.MetadataProvider
 				return attr.Ignore;
 			}
 
-			if (member.GetAttribute<MapImplicitAttribute>() != null ||
+			if (member.GetAttribute<MapFieldAttribute>() != null ||
+				member.GetAttribute<MapImplicitAttribute>() != null ||
 				TypeHelper.GetFirstAttribute(member.Type, typeof(MapImplicitAttribute)) != null)
 			{
 				isSet = true;

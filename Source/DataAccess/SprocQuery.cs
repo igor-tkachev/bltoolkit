@@ -178,10 +178,10 @@ namespace BLToolkit.DataAccess
 		public virtual void Insert(DbManager db, object obj)
 		{
 			db
-			  .SetSpCommand(
+				.SetSpCommand(
 					GetSpName(obj.GetType(), "Insert"),
 					db.CreateParameters(obj))
-			  .ExecuteNonQuery();
+				.ExecuteNonQuery();
 		}
 
 		public virtual void Insert(object obj)

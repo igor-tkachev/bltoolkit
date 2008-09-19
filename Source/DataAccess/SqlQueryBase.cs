@@ -35,23 +35,14 @@ namespace BLToolkit.DataAccess
 
 		#region Protected Members
 
-		protected MemberMapper[] GetFieldList(ObjectMapper om)
+		[NoInterception]
+		protected virtual MemberMapper[] GetFieldList(ObjectMapper om)
 		{
-			List<MemberMapper> list = new List<MemberMapper>(om.Count);
-
-			foreach (MemberMapper mm in om)
-			{
-				MemberAccessor ma = mm.MemberAccessor;
-
-				bool isSet;
-				if (!MappingSchema.MetadataProvider.GetIgnore(om, ma, out isSet))
-					list.Add(mm);
-			}
-
-			return list.ToArray();
+			return new List<MemberMapper>(om).ToArray();
 		}
 
-		protected MemberMapper[] GetNonKeyFieldList(ObjectMapper om)
+		[NoInterception]
+		protected virtual MemberMapper[] GetNonKeyFieldList(ObjectMapper om)
 		{
 			TypeExtension      typeExt = TypeExtension.GetTypeExtension(om.TypeAccessor.OriginalType, Extensions);
 			List<MemberMapper> list    = new List<MemberMapper>();
@@ -70,7 +61,7 @@ namespace BLToolkit.DataAccess
 			return list.ToArray();
 		}
 
-		class MemberOrder
+		struct MemberOrder
 		{
 			public MemberOrder(MemberMapper memberMapper, int order)
 			{
@@ -84,7 +75,8 @@ namespace BLToolkit.DataAccess
 
 		private static readonly Hashtable _keyList = new Hashtable();
 
-		protected internal MemberMapper[] GetKeyFieldList(DbManager db, Type type)
+		[NoInterception]
+		protected internal virtual MemberMapper[] GetKeyFieldList(DbManager db, Type type)
 		{
 			string         key    = type.FullName + "$" + db.DataProvider.Name;
 			MemberMapper[] mmList = (MemberMapper[])_keyList[key];
@@ -119,7 +111,8 @@ namespace BLToolkit.DataAccess
 			return mmList;
 		}
 
-		protected void AddWherePK(DbManager db, SqlQueryInfo query, StringBuilder sb)
+		[NoInterception]
+		protected virtual void AddWherePK(DbManager db, SqlQueryInfo query, StringBuilder sb)
 		{
 			sb.Append("WHERE\n");
 
