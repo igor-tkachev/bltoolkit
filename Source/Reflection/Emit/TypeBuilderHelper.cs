@@ -154,51 +154,8 @@ namespace BLToolkit.Reflection.Emit
 			Type               returnType,
 			Type[]             parameterTypes)
 		{
-			string[] genParamNames = Array.ConvertAll<Type, string>(genericArguments, delegate (Type t)
-			{
-				return t.Name;
-			});
-
-			GenericTypeParameterBuilder[] genParams;
-			MethodBuilderHelper           method = new MethodBuilderHelper(this,
-				_typeBuilder.DefineMethod(name, attributes, callingConvention), genParamNames, out genParams);
-
-			// Copy parameter constraints.
-			//
-			List<Type> interfaceConstraints = null;
-			for (int i = 0; i < genParams.Length; i++)
-			{
-				genParams[i].SetGenericParameterAttributes(genericArguments[i].GenericParameterAttributes);
-
-				foreach (Type constraint in genericArguments[i].GetGenericParameterConstraints())
-				{
-					if (constraint.IsClass)
-						genParams[i].SetBaseTypeConstraint(constraint);
-					else
-					{
-						if (interfaceConstraints == null)
-							interfaceConstraints = new List<Type>();
-						interfaceConstraints.Add(constraint);
-					}
-				}
-
-				if (interfaceConstraints != null && interfaceConstraints.Count != 0)
-				{
-					genParams[i].SetInterfaceConstraints(interfaceConstraints.ToArray());
-					interfaceConstraints.Clear();
-				}
-			}
-
-			// When a method contains a generic parameter we need to replace all
-			// generic types from methodInfoDeclaration with local ones.
-			//
-			for (int i = 0; i < parameterTypes.Length; i++)
-				parameterTypes[i] = TypeHelper.TranslateGenericParameters(parameterTypes[i], genParams);
-
-			method.MethodBuilder.SetParameters(parameterTypes);
-			method.MethodBuilder.SetReturnType(TypeHelper.TranslateGenericParameters(returnType, genParams));
-
-			return method;
+			return new MethodBuilderHelper(this,
+				_typeBuilder.DefineMethod(name, attributes, callingConvention), genericArguments, returnType, parameterTypes);
 		}
 
 
