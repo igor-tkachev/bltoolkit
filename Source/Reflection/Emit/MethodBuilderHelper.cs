@@ -25,7 +25,7 @@ namespace BLToolkit.Reflection.Emit
 
 			_methodBuilder = methodBuilder;
 
-			_methodBuilder.SetCustomAttribute(Type.Assembly.BLToolkitAttribute);
+			methodBuilder.SetCustomAttribute(Type.Assembly.BLToolkitAttribute);
 		}
 
 		/// <summary>
@@ -34,17 +34,23 @@ namespace BLToolkit.Reflection.Emit
 		/// </summary>
 		/// <param name="typeBuilder">Associated <see cref="TypeBuilderHelper"/>.</param>
 		/// <param name="methodBuilder">A <see cref="MethodBuilder"/></param>
-		/// <param name="dummy">A dummy parameter to alter the signature</param>
-		internal MethodBuilderHelper(TypeBuilderHelper typeBuilder, MethodBuilder methodBuilder, bool dummy)
+		/// <param name="genArgNames">Names of generic arguments.</param>
+		/// <param name="genArgs">Builders of generic arguments on method return.</param>
+		internal MethodBuilderHelper(
+			TypeBuilderHelper                 typeBuilder,
+			MethodBuilder                     methodBuilder,
+			string[]                          genArgNames,
+			out GenericTypeParameterBuilder[] genArgs)
 			: base(typeBuilder)
 		{
 			if (methodBuilder == null) throw new ArgumentNullException("methodBuilder");
+			if (genArgNames == null)   throw new ArgumentNullException("genArgNames");
 
 			_methodBuilder = methodBuilder;
 
-			// There is a bug related to generic parameters, so we add this attribute later.
-			//
-			// _methodBuilder.SetCustomAttribute(Type.Assembly.BLToolkitAttribute);
+			genArgs = methodBuilder.DefineGenericParameters(genArgNames);
+
+			methodBuilder.SetCustomAttribute(Type.Assembly.BLToolkitAttribute);
 		}
 
 		private readonly MethodBuilder _methodBuilder;
