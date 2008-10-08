@@ -84,6 +84,58 @@ namespace BLToolkit.DataAccess
 			}
 		}
 
+		enum ReturnType
+		{
+			DataReader,
+			DataSet,
+			DataTable,
+			List,
+			Dictionary,
+			Enumerable,
+			Void,
+			Scalar,
+			Object
+		}
+
+		ReturnType GetReturnType(Type returnType)
+		{
+			if (returnType == typeof(IDataReader))
+				return ReturnType.DataReader;
+
+			if (returnType == typeof(DataSet) || returnType.IsSubclassOf(typeof(DataSet)))
+				return ReturnType.DataSet;
+
+			if (returnType == typeof(DataTable) || returnType.IsSubclassOf(typeof(DataTable)))
+				return ReturnType.DataTable;
+
+			if (!returnType.IsArray &&
+				(IsInterfaceOf(returnType, typeof(IList)) ||
+					returnType.IsGenericType && returnType.GetGenericTypeDefinition() == typeof(IList<>)))
+				return ReturnType.List;
+
+			if (IsInterfaceOf(returnType, typeof(IDictionary)) ||
+				returnType.IsGenericType && returnType.GetGenericTypeDefinition() == typeof(IDictionary<,>))
+				return ReturnType.Dictionary;
+
+			if (returnType == typeof(IEnumerable) ||
+				returnType.IsGenericType && returnType.GetGenericTypeDefinition() == typeof(IEnumerable<>))
+				return ReturnType.Enumerable;
+
+			if (returnType == typeof(void))
+				return ReturnType.Void;
+
+			if (TypeHelper.IsScalar(returnType.IsByRef? returnType.GetElementType(): returnType))
+				return ReturnType.Scalar;
+
+			return ReturnType.Object;
+		}
+
+		void ThrowTypeBuilderException(string message)
+		{
+			throw new TypeBuilderException(
+				string.Format(message, Context.CurrentMethod.DeclaringType.Name, Context.CurrentMethod.Name));
+		}
+
 		const BindingFlags _bindingFlags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
 
 		readonly Type     _baseType = typeof(DataAccessor);
@@ -122,153 +174,138 @@ namespace BLToolkit.DataAccess
 
 			GetSqlQueryAttribute();
 			ProcessParameters();
-			CreateDbManager();
+
+			Type returnType = MethodReturnType;
+			ReturnType rt   = GetReturnType(returnType);
+
+			CreateDbManager(rt != ReturnType.Enumerable);
 			SetObjectType();
 
-			// Define execute method type.
+			// Define execution method type.
 			//
-			Type returnType = ReturnType;
-
-			if (returnType == typeof(IDataReader))
+			switch (rt)
 			{
-				ExecuteReader();
-			}
-			else if (returnType == typeof(DataSet) || returnType.IsSubclassOf(typeof(DataSet)))
-			{
-				ExecuteDataSet(returnType);
-			}
-			else if (returnType == typeof(DataTable) || returnType.IsSubclassOf(typeof(DataTable)))
-			{
-				ExecuteDataTable();
-			}
-			else if (!returnType.IsArray && (IsInterfaceOf(returnType, typeof(IList))
-				|| returnType.IsGenericType && returnType.GetGenericTypeDefinition() == typeof(IList<>)))
-			{
-				if (!_explicitObjectType)
-				{
-					Type elementType = TypeHelper.GetListItemType(returnType);
+				case ReturnType.DataReader : ExecuteReader();            break;
+				case ReturnType.DataSet    : ExecuteDataSet(returnType); break;
+				case ReturnType.DataTable  : ExecuteDataTable();         break;
+				case ReturnType.Void       : ExecuteNonQuery();          break;
+				case ReturnType.Scalar     : ExecuteScalar();            break;
+				case ReturnType.Enumerable : ExecuteEnumerable();        break;
 
-					if (elementType == typeof(object) && _destination != null)
-						elementType = TypeHelper.GetListItemType(Context.CurrentMethod.ReturnType);
+				case ReturnType.List       :
 
-					if (elementType != typeof(object))
-						_objectType = elementType;
+					if (!_explicitObjectType)
+					{
+						Type elementType = TypeHelper.GetListItemType(returnType);
 
-					if (ActualTypes.ContainsKey(_objectType))
+						if (elementType == typeof(object) && _destination != null)
+							elementType = TypeHelper.GetListItemType(Context.CurrentMethod.ReturnType);
+
+						if (elementType != typeof(object))
+							_objectType = elementType;
+
+						if (ActualTypes.ContainsKey(_objectType))
+							_objectType = ActualTypes[_objectType];
+					}
+
+					if (_objectType == null || _objectType == typeof(object))
+						ThrowTypeBuilderException("Can not determine object type for method '{0}.{1}'");
+
+					if (TypeHelper.IsScalar(_objectType))
+						ExecuteScalarList();
+					else
+						ExecuteList();
+
+					break;
+
+				case ReturnType.Dictionary:
+					{
+						Type   elementType = null;
+						Type   keyType     = typeof(object);
+						Type[] gTypes      = TypeHelper.GetGenericArguments(returnType, typeof(IDictionary));
+
+						if ((gTypes == null || gTypes.Length != 2) && _destination != null)
+							gTypes = TypeHelper.GetGenericArguments(_destination.ParameterType, typeof(IDictionary));
+
+						if (gTypes != null && gTypes.Length == 2)
+						{
+							keyType     = gTypes[0];
+							elementType = gTypes[1];
+						}
+
+						if (elementType == null || _explicitObjectType)
+							elementType = _objectType;
+
+						if (elementType == null || elementType == typeof(object))
+							ThrowTypeBuilderException("Can not determine object type for the method '{0}.{1}'");
+
+						bool isIndex = TypeHelper.IsSameOrParent(typeof(CompoundValue), keyType);
+
+						if (keyType != typeof(object) && !isIndex && !TypeHelper.IsScalar(keyType))
+							ThrowTypeBuilderException(
+								"Key type for the method '{0}.{1}' can be of type object, CompoundValue, or a scalar type.");
+
+						MethodInfo mi = Context.CurrentMethod;
+
+						object[]               attrs  = mi.GetCustomAttributes(typeof(IndexAttribute), true);
+						NameOrIndexParameter[] fields = new NameOrIndexParameter[0];
+
+						if (attrs.Length != 0)
+							fields = ((IndexAttribute)attrs[0]).Fields;
+
+						if (fields.Length > 1 && keyType != typeof(object) && !isIndex)
+							ThrowTypeBuilderException(
+								"Key type for the method '{0}.{1}' can be of type object or CompoundValue.");
+
+						if (TypeHelper.IsScalar(elementType))
+						{
+							attrs = mi.GetCustomAttributes(typeof(ScalarFieldNameAttribute), true);
+
+							if (attrs.Length == 0)
+								ThrowTypeBuilderException("Scalar field name is not defined for the method '{0}.{1}'.");
+
+							NameOrIndexParameter scalarField = ((ScalarFieldNameAttribute)attrs[0]).NameOrIndex;
+
+							if (fields.Length == 0)
+								ExecuteScalarDictionaryWithPK(keyType, scalarField, elementType);
+							else if (isIndex || fields.Length > 1)
+								ExecuteScalarDictionaryWithMapIndex(fields, scalarField, elementType);
+							else
+								ExecuteScalarDictionaryWithScalarKey(fields[0], keyType, scalarField, elementType);
+						}
+						else
+						{
+							if (!_explicitObjectType && ActualTypes.ContainsKey(elementType))
+								elementType = ActualTypes[elementType];
+
+							if (fields.Length == 0)
+								ExecuteDictionaryWithPK(keyType, elementType);
+							else if (isIndex || fields.Length > 1)
+								ExecuteDictionaryWithMapIndex(fields, elementType);
+							else
+								ExecuteDictionaryWithScalarKey(fields[0], elementType);
+						}
+					}
+
+					break;
+
+				default:
+
+					if (_objectType == null)
+						_objectType = returnType;
+
+					if (!_explicitObjectType && ActualTypes.ContainsKey(_objectType))
 						_objectType = ActualTypes[_objectType];
-				}
 
-				if (_objectType == null || _objectType == typeof(object))
-					throw new TypeBuilderException(string.Format(
-						"Can not determine object type for method '{0}.{1}'",
-						Context.CurrentMethod.DeclaringType.Name,
-						Context.CurrentMethod.Name));
+					ExecuteObject();
 
-				if (TypeHelper.IsScalar(_objectType))
-					ExecuteScalarList();
-				else
-					ExecuteList();
-			}
-			else if (IsInterfaceOf(returnType, typeof(IDictionary))
-				|| returnType.IsGenericType && returnType.GetGenericTypeDefinition() == typeof(IDictionary<,>))
-			{
-				Type   elementType = null;
-				Type   keyType     = typeof(object);
-				Type[] gTypes      = TypeHelper.GetGenericArguments(returnType, typeof(IDictionary));
-
-				if ((gTypes == null || gTypes.Length != 2) && _destination != null)
-					gTypes = TypeHelper.GetGenericArguments(_destination.ParameterType, typeof(IDictionary));
-
-				if (gTypes != null && gTypes.Length == 2)
-				{
-					keyType     = gTypes[0];
-					elementType = gTypes[1];
-				}
-
-				if (elementType == null || _explicitObjectType)
-					elementType = _objectType;
-
-				if (elementType == null || elementType == typeof(object))
-					throw new TypeBuilderException(string.Format(
-						"Can not determine object type for the method '{0}.{1}'",
-						Context.CurrentMethod.DeclaringType.Name,
-						Context.CurrentMethod.Name));
-
-				bool isIndex = TypeHelper.IsSameOrParent(typeof(CompoundValue), keyType);
-
-				if (keyType != typeof(object) && !isIndex && !TypeHelper.IsScalar(keyType))
-					throw new TypeBuilderException(string.Format(
-						"Key type for the method '{0}.{1}' can be of type object, CompoundValue, or a scalar type.",
-						Context.CurrentMethod.DeclaringType.Name,
-						Context.CurrentMethod.Name));
-
-				MethodInfo mi = Context.CurrentMethod;
-
-				object[] attrs = mi.GetCustomAttributes(typeof(IndexAttribute), true);
-				NameOrIndexParameter[] fields = new NameOrIndexParameter[0];
-
-				if (attrs.Length != 0)
-					fields = ((IndexAttribute)attrs[0]).Fields;
-
-				if (fields.Length > 1 && keyType != typeof(object) && !isIndex)
-					throw new TypeBuilderException(string.Format(
-						"Key type for the method '{0}.{1}' can be of type object or CompoundValue.",
-						Context.CurrentMethod.DeclaringType.Name,
-						Context.CurrentMethod.Name));
-
-				if (TypeHelper.IsScalar(elementType))
-				{
-					attrs = mi.GetCustomAttributes(typeof(ScalarFieldNameAttribute), true);
-
-					if (attrs.Length == 0)
-						throw new TypeBuilderException(string.Format(
-							"Scalar field name is not defined for the method '{0}.{1}'.",
-							Context.CurrentMethod.DeclaringType.Name,
-							Context.CurrentMethod.Name));
-
-					NameOrIndexParameter scalarField = ((ScalarFieldNameAttribute)attrs[0]).NameOrIndex;
-
-					if (fields.Length == 0)
-						ExecuteScalarDictionaryWithPK(keyType, scalarField, elementType);
-					else if (isIndex || fields.Length > 1)
-						ExecuteScalarDictionaryWithMapIndex(fields, scalarField, elementType);
-					else
-						ExecuteScalarDictionaryWithScalarKey(fields[0], keyType, scalarField, elementType);
-				}
-				else
-				{
-					if (!_explicitObjectType && ActualTypes.ContainsKey(elementType))
-						elementType = ActualTypes[elementType];
-
-					if (fields.Length == 0)
-						ExecuteDictionaryWithPK(keyType, elementType);
-					else if (isIndex || fields.Length > 1)
-						ExecuteDictionaryWithMapIndex(fields, elementType);
-					else
-						ExecuteDictionaryWithScalarKey(fields[0], elementType);
-				}
-			}
-			else if (returnType == typeof(void))
-			{
-				ExecuteNonQuery();
-			}
-			else if (TypeHelper.IsScalar(returnType.IsByRef? returnType.GetElementType(): returnType))
-			{
-				ExecuteScalar();
-			}
-			else
-			{
-				if (_objectType == null)
-					_objectType = returnType;
-
-				if (!_explicitObjectType && ActualTypes.ContainsKey(_objectType))
-					_objectType = ActualTypes[_objectType];
-
-				ExecuteObject();
+					break;
 			}
 
 			GetOutRefParameters();
-			Finally();
+
+			if (rt != ReturnType.Enumerable)
+				Finally();
 		}
 
 		protected override void BuildAbstractGetter()
@@ -343,7 +380,7 @@ namespace BLToolkit.DataAccess
 			}
 		}
 
-		private void CreateDbManager()
+		private void CreateDbManager(bool beginException)
 		{
 			EmitHelper emit = Context.MethodBuilder.Emitter;
 
@@ -351,10 +388,11 @@ namespace BLToolkit.DataAccess
 			{
 				emit
 					.ldarg_0
-					.callvirt              (_baseType, "GetDbManager")
-					.stloc                 (_locManager)
-					.BeginExceptionBlock()
-					;
+					.callvirt (_baseType, "GetDbManager")
+					.stloc    (_locManager);
+
+				if (beginException)
+					emit.BeginExceptionBlock();
 			}
 			else
 			{
@@ -607,7 +645,7 @@ namespace BLToolkit.DataAccess
 			LoadDestinationOrReturnValue();
 
 			Context.MethodBuilder.Emitter
-				.CastIfNecessary (typeof(IList), ReturnType)
+				.CastIfNecessary (typeof(IList), MethodReturnType)
 				.ldloc           (_locObjType)
 				.callvirt        (typeof(DbManager), "ExecuteList", typeof(IList), typeof(Type))
 				.pop
@@ -903,6 +941,47 @@ namespace BLToolkit.DataAccess
 
 		#endregion
 
+		#region ExecuteEnumerable
+
+		public void ExecuteEnumerable()
+		{
+			EmitHelper emit         = Context.MethodBuilder.Emitter;
+			Type       returnType   = Context.CurrentMethod.ReturnType;
+
+			if (_objectType == null && returnType.IsGenericType)
+				_objectType = returnType.GetGenericArguments()[0];
+
+			if (_objectType == null || _objectType == typeof(object))
+				ThrowTypeBuilderException("Can not determine object type for method '{0}.{1}'");
+
+			Type returnObjectType = returnType.IsGenericType ? returnType.GetGenericArguments()[0] : _objectType;
+
+			InitObjectType();
+
+			Context.MethodBuilder.Emitter
+				.ldarg_0
+				.end()
+				;
+
+			GetSprocNameOrSqlQueryTest();
+			CallSetCommand();
+
+			Type[]     genericArgs = new Type[] { returnObjectType };
+			Type[]     types       = new Type[] { typeof(DbManager), typeof(Type), typeof(bool), };
+			MethodInfo method      = _baseType
+				.GetMethod("ExecuteEnumerable", _bindingFlags, GenericBinder.Generic, types, null)
+				.MakeGenericMethod(genericArgs);
+
+			emit
+				.LoadType (_objectType)
+				.ldc_i4_1
+				.callvirt (method)
+				.stloc    (Context.ReturnValue)
+				;
+		}
+
+		#endregion
+
 		#region ExecuteNonQuery
 
 		public void ExecuteNonQuery()
@@ -1145,7 +1224,7 @@ namespace BLToolkit.DataAccess
 			}
 		}
 
-		private Type ReturnType
+		private Type MethodReturnType
 		{
 			get
 			{
@@ -1172,20 +1251,10 @@ namespace BLToolkit.DataAccess
 
 		private void InitObjectType()
 		{
-			if (_objectType == null)
-			{
-				Context.MethodBuilder.Emitter
-					.ldnull
-					.stloc    (_locObjType)
-					;
-			}
-			else
-			{
-				Context.MethodBuilder.Emitter
-					.LoadType (_objectType)
-					.stloc    (_locObjType)
-					;
-			}
+			Context.MethodBuilder.Emitter
+				.LoadType (_objectType)
+				.stloc    (_locObjType)
+				;
 		}
 
 		static int _nameCounter;

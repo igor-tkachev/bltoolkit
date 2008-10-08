@@ -13,7 +13,7 @@ using BLToolkit.Reflection.MetadataProvider;
 
 namespace BLToolkit.DataAccess
 {
-	public abstract class SqlQueryBase : DataAccessBase
+	public abstract class SqlQueryBase : DataAccessorBase
 	{
 		#region Constructors
 

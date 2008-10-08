@@ -19,7 +19,7 @@ using BLToolkit.Reflection;
 namespace BLToolkit.DataAccess
 {
 	[DataAccessor, DebuggerStepThrough]
-	public abstract class DataAccessor : DataAccessBase
+	public abstract class DataAccessor : DataAccessorBase
 	{
 		#region Constructors
 
@@ -313,6 +313,44 @@ namespace BLToolkit.DataAccess
 					keyType,
 					scalarField,
 					elementType);
+			}
+		}
+
+		#endregion
+
+		#region ExecuteEnumerable
+
+		protected IEnumerable<T> ExecuteEnumerable<T>(DbManager db, Type objectType, bool disposeDbManager)
+		{
+			if (disposeDbManager)
+			{
+				using (db)
+				using (IDataReader rd = db.ExecuteReader())
+					while (rd.Read())
+						yield return (T)Map.DataReaderToObject(rd, objectType);
+			}
+			else
+			{
+				using (IDataReader rd = db.ExecuteReader())
+					while (rd.Read())
+						yield return (T)Map.DataReaderToObject(rd, objectType);
+			}
+		}
+
+		protected IEnumerable ExecuteEnumerable(DbManager db, Type objectType, bool disposeDbManager)
+		{
+			if (disposeDbManager)
+			{
+				using (db)
+				using (IDataReader rd = db.ExecuteReader())
+					while (rd.Read())
+						yield return Map.DataReaderToObject(rd, objectType);
+			}
+			else
+			{
+				using (IDataReader rd = db.ExecuteReader())
+					while (rd.Read())
+						yield return Map.DataReaderToObject(rd, objectType);
 			}
 		}
 

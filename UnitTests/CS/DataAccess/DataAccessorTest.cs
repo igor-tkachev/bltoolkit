@@ -234,6 +234,19 @@ namespace DataAccess
 			public abstract void SelectAllListTReturnVoid              ([Destination] IList<Person> list);
 
 			#endregion
+
+			#region IEnumerable
+
+			[ActionName("SelectAll"), ObjectType(typeof(Person))]
+			public abstract IEnumerable SelectAllEnumerable();
+
+			[ActionName("SelectAll")]
+			public abstract IEnumerable<Person> SelectAllEnumerableT();
+
+			[ActionName("SelectAll"), ObjectType(typeof(Person))]
+			public abstract IEnumerable<IPerson> SelectAllEnumerableTWithObjectType();
+
+			#endregion
 		}
 
 		public abstract class PersonDataAccessor1 : PersonAccessor
@@ -883,6 +896,43 @@ namespace DataAccess
 			Assert.AreEqual("John", i.FirstName);
 			Assert.AreEqual("Pupkin", i.LastName);
 		}
+		#endregion
+
+		#region IEnumerable
+
+		[Test]
+		public void Gen_SelectAllEnumerable()
+		{
+			List<Person> list = new List<Person>();
+
+			foreach (Person p in _da.SelectAllEnumerable())
+				list.Add(p);
+
+			Assert.AreNotEqual(0, list.Count);
+		}
+
+		[Test]
+		public void Gen_SelectAllEnumerableT()
+		{
+			List<Person> list = new List<Person>();
+
+			foreach (Person p in _da.SelectAllEnumerableT())
+				list.Add(p);
+
+			Assert.AreNotEqual(0, list.Count);
+		}
+
+		[Test]
+		public void Gen_SelectAllEnumerableTWithObjectType()
+		{
+			List<Person> list = new List<Person>();
+
+			foreach (Person p in _da.SelectAllEnumerableTWithObjectType())
+				list.Add(p);
+
+			Assert.AreNotEqual(0, list.Count);
+		}
+
 		#endregion
 	}
 }

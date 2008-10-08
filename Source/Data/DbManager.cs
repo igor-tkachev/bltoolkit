@@ -2882,13 +2882,13 @@ namespace BLToolkit.Data
 			{
 				if (dr.Read())
 				{
-					int keyIndex = keyField.ByName ? dr.GetOrdinal(keyField.Name) : keyField.Index;
+					int keyIndex   = keyField.ByName   ? dr.GetOrdinal(keyField.Name)   : keyField.Index;
 					int valueIndex = valueField.ByName ? dr.GetOrdinal(valueField.Name) : valueField.Index;
 
 					do
 					{
 						object value = dr[valueIndex];
-						object key = dr[keyIndex];
+						object key   = dr[keyIndex];
 
 						if (key == null || key.GetType() != keyFieldType)
 							key = key is DBNull ? null : _mappingSchema.ConvertChangeType(key, keyFieldType);

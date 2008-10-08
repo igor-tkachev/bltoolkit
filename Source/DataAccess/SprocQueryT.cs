@@ -4,7 +4,7 @@ using BLToolkit.Data;
 
 namespace BLToolkit.DataAccess
 {
-	public class SprocQuery<T> : DataAccessBase
+	public class SprocQuery<T> : DataAccessorBase
 	{
 		#region Constructors
 

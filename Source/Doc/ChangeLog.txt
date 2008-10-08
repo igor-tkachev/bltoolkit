@@ -12,6 +12,7 @@ Bug fixes
 Enhancement
 - CHM help file provided. See the Doc folder.
 - New InstanceCache attribute.
+- DataAccessor support for IEnumerable<T>.
 
 
 v 3.0

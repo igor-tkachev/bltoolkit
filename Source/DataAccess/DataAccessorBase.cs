@@ -9,23 +9,23 @@ using BLToolkit.Reflection.Extension;
 
 namespace BLToolkit.DataAccess
 {
-	public abstract class DataAccessBase
+	public abstract class DataAccessorBase
 	{
 		#region Constructors
 
 		[System.Diagnostics.DebuggerStepThrough]
-		protected DataAccessBase()
+		protected DataAccessorBase()
 		{
 		}
 
 		[System.Diagnostics.DebuggerStepThrough]
-		protected DataAccessBase(DbManager dbManager)
+		protected DataAccessorBase(DbManager dbManager)
 		{
 			SetDbManager(dbManager, false);
 		}
 
 		[System.Diagnostics.DebuggerStepThrough]
-		protected DataAccessBase(DbManager dbManager, bool dispose)
+		protected DataAccessorBase(DbManager dbManager, bool dispose)
 		{
 			SetDbManager(dbManager, dispose);
 		}
