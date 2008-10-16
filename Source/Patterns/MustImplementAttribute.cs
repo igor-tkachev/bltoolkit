@@ -54,6 +54,7 @@ namespace BLToolkit.Patterns
 
 		// Default is optional method which throws NotImplementedException at run tune.
 		//
-		public static readonly MustImplementAttribute Default = new MustImplementAttribute(false, true, null);
+		public static readonly MustImplementAttribute Default   = new MustImplementAttribute(false, true, null);
+		public static readonly MustImplementAttribute Aggregate = new MustImplementAttribute(true, false, null);
 	}
 }

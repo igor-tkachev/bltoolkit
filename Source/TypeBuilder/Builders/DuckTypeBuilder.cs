@@ -9,15 +9,17 @@ namespace BLToolkit.TypeBuilder.Builders
 {
 	class DuckTypeBuilder : ITypeBuilder
 	{
-		public DuckTypeBuilder(Type interfaceType, Type[] objectTypes)
+		public DuckTypeBuilder(MustImplementAttribute defaultAttribute, Type interfaceType, Type[] objectTypes)
 		{
-			_interfaceType = interfaceType;
-			_objectTypes   = objectTypes;
+			_interfaceType    = interfaceType;
+			_objectTypes      = objectTypes;
+			_defaultAttribute = defaultAttribute;
 		}
 
-		private readonly Type              _interfaceType;
-		private readonly Type[]            _objectTypes;
-		private          TypeBuilderHelper _typeBuilder;
+		private readonly Type                   _interfaceType;
+		private readonly Type[]                 _objectTypes;
+		private          TypeBuilderHelper      _typeBuilder;
+		private readonly MustImplementAttribute _defaultAttribute;
 
 		#region ITypeBuilder Members
 
@@ -163,7 +165,7 @@ namespace BLToolkit.TypeBuilder.Builders
 						attr = (MustImplementAttribute)Attribute.GetCustomAttribute(
 							interfaceMethod.DeclaringType, typeof (MustImplementAttribute));
 						if (attr == null)
-							attr = MustImplementAttribute.Default;
+							attr = _defaultAttribute;
 					}
 
 					// When the member is marked as 'Required' throw a build-time exception.

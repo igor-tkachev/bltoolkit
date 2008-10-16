@@ -280,7 +280,6 @@ namespace Patterns
 		public void AggregateTest()
 		{
 			IAggregatable duck  = DuckTyping.Aggregate<IAggregatable>(new AggregateClass1(), new AggregateClass2());
-			duck  = DuckTyping.Aggregate<IAggregatable>(new AggregateClass1(), new AggregateClass2());
 
 			Assert.AreEqual(1, duck.Method1());
 			Assert.AreEqual(2, duck.Method2());

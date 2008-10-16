@@ -61,7 +61,7 @@ namespace BLToolkit.Patterns
 					type = TypeFactory.GetType(
 						new CompoundValue(interfaceType, objectType),
 						objectType,
-						new DuckTypeBuilder(interfaceType, new Type[] { objectType }));
+						new DuckTypeBuilder(MustImplementAttribute.Default, interfaceType, new Type[] { objectType }));
 
 					types.Add(objectType, type);
 				}
@@ -290,7 +290,7 @@ namespace BLToolkit.Patterns
 					type = TypeFactory.GetType(
 						new CompoundValue(interfaceType, key),
 						interfaceType,
-						new DuckTypeBuilder(interfaceType, objectTypes));
+						new DuckTypeBuilder(MustImplementAttribute.Aggregate, interfaceType, objectTypes));
 
 					types.Add(key, type);
 				}
