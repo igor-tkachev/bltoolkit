@@ -151,6 +151,17 @@ namespace Common
 			//
 			Assert.AreEqual((CallingConventions?)CallingConventions.VarArgs,
 				ConvertTo<CallingConventions?>.From((BindingFlags?)BindingFlags.DeclaredOnly));
+
+			// Integer-to-enum.
+			//
+			Assert.AreEqual(BindingFlags.DeclaredOnly,
+				ConvertTo<BindingFlags>.From((int)BindingFlags.DeclaredOnly));
+
+			// Integer-to-nullable enum.
+			//
+			Assert.AreEqual(BindingFlags.DeclaredOnly,
+				ConvertTo<BindingFlags?>.From((int)BindingFlags.DeclaredOnly));
+
 		}
 
 		[Test]

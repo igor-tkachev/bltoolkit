@@ -9,6 +9,7 @@ Bug fixes
 - BindingListImpl.AddNew does not fire ListChanged event.
 - Some inner types are missing in ObjectMappes, some included w/o reason.
 - Setter for ObjectBinder.ItemType fires OnListChanged event before the list changes.
+- Convert<T,F> does not handle `Nullable<T>' from scalar `F' case.
 
 Enhancement
 - CHM help file provided. See the Doc folder.

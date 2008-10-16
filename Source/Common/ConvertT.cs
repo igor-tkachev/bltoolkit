@@ -71,14 +71,18 @@ namespace BLToolkit.Common
 				BindingFlags.Public | BindingFlags.Static | BindingFlags.ExactBinding,
 				null, new Type[] {from}, null) ?? FindTypeCastOperator(to) ?? FindTypeCastOperator(from);
 
-			if (mi == null && TypeHelper.IsNullable(to) && TypeHelper.IsNullable(from))
+			if (mi == null && TypeHelper.IsNullable(to))
 			{
-				// Nullable-to-nullable conversion.
+				// To-nullable conversion.
 				// We have to use reflection to enforce some constraints.
 				//
+				Type toType   = to.GetGenericArguments()[0];
+				Type fromType = TypeHelper.IsNullable(from)? from.GetGenericArguments()[0]: from;
+				methodName = TypeHelper.IsNullable(from) ? "FromNullable" : "From";
+
 				mi = typeof(NullableConvert<,>)
-					.MakeGenericType(to.GetGenericArguments()[0], from.GetGenericArguments()[0])
-					.GetMethod("From", BindingFlags.Public | BindingFlags.Static);
+					.MakeGenericType(toType, fromType)
+					.GetMethod(methodName, BindingFlags.Public | BindingFlags.Static);
 			}
 
 			if (mi != null)
@@ -127,9 +131,14 @@ namespace BLToolkit.Common
 		where T: struct
 		where P: struct
 	{
-		public static T? From(P? p)
+		public static T? FromNullable(P? p)
 		{
-			return p.HasValue? Convert<T,P>.From(p.Value): (T?)null;
+			return p.HasValue? From(p.Value): null;
+		}
+
+		public static T? From(P p)
+		{
+			return Convert<T,P>.From(p);
 		}
 	}
 }
