@@ -15,6 +15,7 @@ Enhancement
 - CHM help file provided. See the Doc folder.
 - New InstanceCache attribute.
 - DataAccessor support for IEnumerable<T>.
+- Multiple duck. See DuckTyping.Aggregate methods.
 
 
 v 3.0

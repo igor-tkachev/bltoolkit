@@ -17,6 +17,8 @@ namespace BLToolkit.Patterns
 	/// </summary>
 	public static class DuckTyping
 	{
+		#region Single Duck
+
 		private static readonly Hashtable _duckTypes = new Hashtable();
 
 		/// <summary>
@@ -59,7 +61,7 @@ namespace BLToolkit.Patterns
 					type = TypeFactory.GetType(
 						new CompoundValue(interfaceType, objectType),
 						objectType,
-						new DuckTypeBuilder(interfaceType, objectType));
+						new DuckTypeBuilder(interfaceType, new Type[] { objectType }));
 
 					types.Add(objectType, type);
 				}
@@ -89,9 +91,9 @@ namespace BLToolkit.Patterns
 
 			if (obj is DuckType)
 			{
-				// Switch to underlying object when a duck object was passed.
+				// Switch to underlying objects when a duck object was passed.
 				//
-				return Implement(interfaceType, baseObjectType, ((DuckType)obj).Object);
+				return Implement(interfaceType, baseObjectType, ((DuckType)obj).Objects[0]);
 			}
 
 			if (baseObjectType == null)
@@ -107,7 +109,7 @@ namespace BLToolkit.Patterns
 
 			object duck = TypeAccessor.CreateInstanceEx(duckType);
 
-			((DuckType)duck).SetObject(obj);
+			((DuckType)duck).SetObjects(obj);
 
 			return duck;
 		}
@@ -159,7 +161,7 @@ namespace BLToolkit.Patterns
 		/// <returns>An array of object which implements the interface.</returns>
 		public static object[] Implement(Type interfaceType, params object[] objects)
 		{
-			return Implement(interfaceType, null, objects);
+			return Implement(interfaceType, (Type)null, objects);
 		}
 
 		/// <summary>
@@ -242,5 +244,137 @@ namespace BLToolkit.Patterns
 			get { return _allowStaticMembers;  }
 			set { _allowStaticMembers = value; }
 		}
+
+		#endregion
+
+		#region Multiple Duck
+
+		/// <summary>
+		/// Build a proxy type which implements the requested interface by redirecting all calls to the supplied object type.
+		/// </summary>
+		/// <param name="interfaceType">An interface type to implement.</param>
+		/// <param name="objectTypes">Array of types which have all members of the given interface.</param>
+		/// <returns>The duck object type.</returns>
+		public static Type GetDuckType(Type interfaceType, Type[] objectTypes)
+		{
+			if (interfaceType == null)      throw new ArgumentNullException("interfaceType");
+			if (!interfaceType.IsInterface) throw new ArgumentException("'interfaceType' must be an interface.", "interfaceType");
+			if (!interfaceType.IsPublic && !interfaceType.IsNestedPublic)
+				throw new ArgumentException("The interface must be public.", "interfaceType");
+
+			Hashtable types = (Hashtable)_duckTypes[interfaceType];
+
+			if (types == null)
+			{
+				lock (_duckTypes.SyncRoot)
+				{
+					types = (Hashtable)_duckTypes[interfaceType];
+
+					if (types == null)
+						_duckTypes.Add(interfaceType, types = new Hashtable());
+				}
+			}
+
+			object key  = new CompoundValue(objectTypes);
+			Type   type = (Type)types[key];
+
+			if (type == null)
+			{
+				lock (types.SyncRoot)
+				{
+					type = (Type)types[key];
+
+					if (type != null || types.ContainsKey(key))
+						return type;
+
+					type = TypeFactory.GetType(
+						new CompoundValue(interfaceType, key),
+						interfaceType,
+						new DuckTypeBuilder(interfaceType, objectTypes));
+
+					types.Add(key, type);
+				}
+			}
+
+			return type;
+		}
+
+		/// <summary>
+		/// Implements the requested interface for supplied object.
+		/// If the supplied object implements the interface, the object itself will be returned.
+		/// Otherwise a convenient duck object will be created.
+		/// </summary>
+		/// <param name="interfaceType">An interface type to implement.</param>
+		/// <param name="baseObjectTypes">Array of types which have all members of the given interface.
+		/// When this parameter is set to null, the object type will be used.</param>
+		/// <param name="objs">Array of objects which types have all members of the given interface.</param>
+		/// <returns>An object which implements the interface.</returns>
+		public static object Aggregate(Type interfaceType, Type[] baseObjectTypes,params object[] objs)
+		{
+			if (objs == null) throw new ArgumentNullException("objs");
+
+			if (baseObjectTypes == null)
+			{
+				baseObjectTypes = new Type[objs.Length];
+
+				for (int i = 0; i < objs.Length; i++)
+					if (objs[i] != null)
+						baseObjectTypes[i] = objs[i].GetType();
+			}
+			else
+			{
+				if (baseObjectTypes.Length != objs.Length)
+					throw new ArgumentException("Invalid number of 'baseObjectTypes' or 'objs'.", "baseObjectTypes");
+
+				for (int i = 0; i < objs.Length; i++)
+				{
+					Type objType = objs[i].GetType();
+
+					if (!TypeHelper.IsSameOrParent(baseObjectTypes[i], objType))
+						throw new ArgumentException(
+							string.Format("'{0}' is not a subtype of '{1}'.", objType.FullName, baseObjectTypes[i].FullName), "obj");
+				}
+			}
+
+			Type duckType = GetDuckType(interfaceType, baseObjectTypes);
+
+			if (duckType == null)
+				return null;
+
+			object duck = TypeAccessor.CreateInstanceEx(duckType);
+
+			((DuckType)duck).SetObjects(objs);
+
+			return duck;
+		}
+
+		/// <summary>
+		/// Implements the requested interface.
+		/// If the supplied object implements the interface, the object itself will be returned.
+		/// Otherwise a convenient duck object will be created.
+		/// </summary>
+		/// <param name="interfaceType">An interface type to implement.</param>
+		/// <param name="objs">Array of object which types have all members of the given interface.</param>
+		/// <returns>An object which implements the interface.</returns>
+		public static object Aggregate(Type interfaceType,params object[] objs)
+		{
+			return Aggregate(interfaceType, (Type[])null, objs);
+		}
+
+		/// <summary>
+		/// Implements the requested interface for supplied object.
+		/// If the supplied object implements the interface, the object itself will be returned.
+		/// Otherwise a convenient duck object will be created.
+		/// </summary>
+		/// <typeparam name="I">An interface type to implement.</typeparam>
+		/// <param name="obj">An object which type has all members of the given interface.</param>
+		/// <returns>An object which implements the interface.</returns>
+		public static I Aggregate<I>(params object[] obj)
+			where I : class
+		{
+			return (I)Aggregate(typeof(I), null, obj);
+		}
+
+		#endregion
 	}
 }

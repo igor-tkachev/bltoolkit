@@ -9,14 +9,14 @@ namespace BLToolkit.TypeBuilder.Builders
 {
 	class DuckTypeBuilder : ITypeBuilder
 	{
-		public DuckTypeBuilder(Type interfaceType, Type objectType)
+		public DuckTypeBuilder(Type interfaceType, Type[] objectTypes)
 		{
 			_interfaceType = interfaceType;
-			_objectType    = objectType;
+			_objectTypes   = objectTypes;
 		}
 
 		private readonly Type              _interfaceType;
-		private readonly Type              _objectType;
+		private readonly Type[]            _objectTypes;
 		private          TypeBuilderHelper _typeBuilder;
 
 		#region ITypeBuilder Members
@@ -44,47 +44,65 @@ namespace BLToolkit.TypeBuilder.Builders
 
 		private string GetClassName()
 		{
-			return AbstractClassBuilder.GetTypeFullName(_objectType)
-				.Replace('+', '.') + "$" + AssemblyNameSuffix;
+			string name = "";
+
+			foreach (Type t in _objectTypes)
+			{
+				if (t != null)
+					name += AbstractClassBuilder.GetTypeFullName(t).Replace('+', '.');
+				name += "$";
+			}
+
+			return name + AssemblyNameSuffix;
 		}
 
 		private bool BuildMembers(Type interfaceType)
 		{
-			FieldInfo    objectField = typeof(DuckType).GetField("_object", BindingFlags.NonPublic | BindingFlags.Instance);
-			BindingFlags flags       = BindingFlags.Public | BindingFlags.Instance
+			FieldInfo    objectsField = typeof(DuckType).GetField("_objects", BindingFlags.NonPublic | BindingFlags.Instance);
+			BindingFlags flags        = BindingFlags.Public | BindingFlags.Instance
 				| (DuckTyping.AllowStaticMembers? BindingFlags.Static | BindingFlags.FlattenHierarchy: 0);
 
 			foreach (MethodInfo interfaceMethod in interfaceType.GetMethods(BindingFlags.Public | BindingFlags.Instance))
 			{
 				ParameterInfo[] ips = interfaceMethod.GetParameters();
 				MethodInfo      targetMethod = null;
+				int             typeIndex    = 0;
 
-				foreach (MethodInfo mi in _objectType.GetMethods(flags))
+				for (; typeIndex < _objectTypes.Length; typeIndex++)
 				{
-					ParameterInfo[] ops = mi.GetParameters();
+					if (_objectTypes[typeIndex] == null)
+						continue;
 
-					if (mi.Name       == interfaceMethod.Name       &&
-						mi.ReturnType == interfaceMethod.ReturnType &&
-						ops.Length    == ips.Length)
+					foreach (MethodInfo mi in _objectTypes[typeIndex].GetMethods(flags))
 					{
-						targetMethod = mi;
+						ParameterInfo[] ops = mi.GetParameters();
 
-						for (int i = 0; i < ips.Length && targetMethod != null; i++)
+						if (mi.Name       == interfaceMethod.Name       &&
+							mi.ReturnType == interfaceMethod.ReturnType &&
+							ops.Length    == ips.Length)
 						{
-							ParameterInfo ip = ips[i];
-							ParameterInfo op = ops[i];
+							targetMethod = mi;
 
-							if (ip.ParameterType != op.ParameterType ||
-								ip.IsIn          != op.IsIn          ||
-								ip.IsOut         != op.IsOut)
+							for (int i = 0; i < ips.Length && targetMethod != null; i++)
 							{
-								targetMethod = null;
-							}
-						}
+								ParameterInfo ip = ips[i];
+								ParameterInfo op = ops[i];
 
-						if (targetMethod != null)
-							break;
+								if (ip.ParameterType != op.ParameterType ||
+									ip.IsIn          != op.IsIn          ||
+									ip.IsOut         != op.IsOut)
+								{
+									targetMethod = null;
+								}
+							}
+
+							if (targetMethod != null)
+								break;
+						}
 					}
+
+					if (targetMethod != null)
+						break;
 				}
 
 				MethodBuilderHelper builder = _typeBuilder.DefineMethod(interfaceMethod);
@@ -96,24 +114,27 @@ namespace BLToolkit.TypeBuilder.Builders
 					{
 						emit
 							.ldarg_0
-							.ldfld         (objectField)
+							.ldfld         (objectsField)
+							.ldc_i4        (typeIndex)
+							.ldelem_ref
+							.end()
 							;
 
-						if (_objectType.IsValueType)
+						if (_objectTypes[typeIndex].IsValueType)
 						{
 							// For value types we have to use stack.
 							//
-							LocalBuilder obj = emit.DeclareLocal(_objectType);
+							LocalBuilder obj = emit.DeclareLocal(_objectTypes[typeIndex]);
 
 							emit
-								.unbox_any (_objectType)
+								.unbox_any (_objectTypes[typeIndex])
 								.stloc     (obj)
 								.ldloca    (obj)
 								;
 						}
 						else
 							emit
-								.castclass (_objectType)
+								.castclass (_objectTypes[typeIndex])
 								;
 					}
 
@@ -152,7 +173,8 @@ namespace BLToolkit.TypeBuilder.Builders
 						if (attr.ThrowException)
 							throw new TypeBuilderException(string.Format(
 								Resources.TypeBuilder_PublicMethodMustBeImplemented,
-								_objectType.FullName, interfaceMethod));
+								_objectTypes.Length > 0 && _objectTypes[0] != null ? _objectTypes[0].FullName: "???",
+								interfaceMethod));
 						else
 						{
 							// Implement == true, but ThrowException == false.
@@ -169,7 +191,8 @@ namespace BLToolkit.TypeBuilder.Builders
 
 						if (message == null)
 							message = string.Format(Resources.TypeBuilder_PublicMethodNotImplemented,
-								_objectType.FullName, interfaceMethod);
+								_objectTypes.Length > 0 && _objectTypes[0] != null ? _objectTypes[0].FullName: "???",
+								interfaceMethod);
 
 						emit
 							.ldstr  (message)

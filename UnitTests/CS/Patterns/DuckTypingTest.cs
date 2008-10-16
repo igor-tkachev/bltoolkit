@@ -249,7 +249,7 @@ namespace Patterns
 		[Test, ExpectedException(typeof(ArgumentException))]
 		public void InvalidArgTest3()
 		{
-			Child1 duck  = (Child1) DuckTyping.Implement(typeof(Child1), new Child2());
+			Child1 duck  = (Child1)DuckTyping.Implement(typeof(Child1), new Child2());
 		}
 
 		[Test, ExpectedException(typeof(ArgumentException))]
@@ -258,5 +258,34 @@ namespace Patterns
 			TestInterface duck  = (TestInterface)DuckTyping.Implement(typeof(TestInterface), typeof(TestInterface), new TestClass());
 		}
 
+		#region Aggregate
+
+		public interface IAggregatable
+		{
+			int Method1();
+			int Method2();
+		}
+
+		public class AggregateClass1
+		{
+			public int Method1() { return 1; }
+		}
+
+		public class AggregateClass2
+		{
+			public int Method2() { return 2; }
+		}
+
+		[Test]
+		public void AggregateTest()
+		{
+			IAggregatable duck  = DuckTyping.Aggregate<IAggregatable>(new AggregateClass1(), new AggregateClass2());
+			duck  = DuckTyping.Aggregate<IAggregatable>(new AggregateClass1(), new AggregateClass2());
+
+			Assert.AreEqual(1, duck.Method1());
+			Assert.AreEqual(2, duck.Method2());
+		}
+
+		#endregion
 	}
 }

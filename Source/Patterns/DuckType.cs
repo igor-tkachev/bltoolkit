@@ -5,15 +5,15 @@ namespace BLToolkit.Patterns
 	public abstract class DuckType
 	{
 		[CLSCompliant(false)]
-		protected object _object;
-		public    object  Object
+		protected object[] _objects;
+		public    object[]  Objects
 		{
-			get { return _object; }
+			get { return _objects; }
 		}
 
-		internal void SetObject(object obj)
+		internal void SetObjects(params object[] objs)
 		{
-			_object = obj;
+			_objects = objs;
 		}
 	}
 }
