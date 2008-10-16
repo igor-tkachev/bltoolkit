@@ -64,6 +64,9 @@ namespace BLTgen
 			if (verbose)
 				Console.WriteLine("{0} =>{1}{2}", sourceAsm.Location, Environment.NewLine, extensionAssemblyPath);
 
+			if (!Directory.Exists(parsedArgs.OutputDirectory))
+				Directory.CreateDirectory(parsedArgs.OutputDirectory);
+
 			AppDomain.CurrentDomain.AssemblyResolve += CurrentDomain_AssemblyResolve;
 
 			TypeFactory.SaveTypes = true;

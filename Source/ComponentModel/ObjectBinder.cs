@@ -73,9 +73,9 @@ namespace BLToolkit.ComponentModel
 			{
 				_itemType = value;
 
-				OnListChanged(ListChangedType.PropertyDescriptorChanged, -1);
-
 				List = null;
+
+				OnListChanged(ListChangedType.PropertyDescriptorChanged, -1);
 			}
 		}
 
@@ -185,6 +185,7 @@ namespace BLToolkit.ComponentModel
 
 				if (_list != _empty)
 					_list.ListChanged += ListChangedHandler;
+
 				OnListChanged(ListChangedType.Reset, -1);
 			}
 		}
@@ -258,8 +259,9 @@ namespace BLToolkit.ComponentModel
 
 		protected virtual void OnListChanged(ListChangedEventArgs e)
 		{
-			if (ListChanged != null)
-				ListChanged(this, e);
+			ListChangedEventHandler handler = (ListChangedEventHandler)base.Events[ListChangedEvent];
+			if (handler != null)
+				handler(this, e);
 		}
 
 		protected void OnListChanged(ListChangedType listChangedType, int newIndex)
@@ -403,7 +405,13 @@ namespace BLToolkit.ComponentModel
 			get { return _list.IsSorted; }
 		}
 
-		public event ListChangedEventHandler ListChanged;
+		private static readonly object ListChangedEvent = new object();
+
+		public event ListChangedEventHandler ListChanged
+		{
+			add    { Events.AddHandler   (ListChangedEvent, value); }
+			remove { Events.RemoveHandler(ListChangedEvent, value); }
+		}
 
 		void IBindingList.RemoveIndex(PropertyDescriptor property)
 		{

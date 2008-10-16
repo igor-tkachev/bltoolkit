@@ -8,6 +8,7 @@ Bug fixes
   when `T' constructor is not trivial.
 - BindingListImpl.AddNew does not fire ListChanged event.
 - Some inner types are missing in ObjectMappes, some included w/o reason.
+- Setter for ObjectBinder.ItemType fires OnListChanged event before the list changes.
 
 Enhancement
 - CHM help file provided. See the Doc folder.

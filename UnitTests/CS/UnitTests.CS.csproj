@@ -2,7 +2,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>9.0.21022</ProductVersion>
+    <ProductVersion>9.0.30729</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{2BB4AD77-190F-4D7E-A83E-7B254A0A1FCA}</ProjectGuid>
     <OutputType>Library</OutputType>
@@ -72,6 +72,7 @@
     <Compile Include="Common\ConvertTest.cs" />
     <Compile Include="Common\OperatorTest.cs" />
     <Compile Include="Common\NameOrIndexParameterTest.cs" />
+    <Compile Include="ComponenetModel\ObjectBinderTest.cs" />
     <Compile Include="DataAccess\ActualTypeAttributeTest.cs" />
     <Compile Include="DataAccess\ArrayTest.cs" />
     <Compile Include="DataAccess\DynamicSqlQueryTest.cs" />

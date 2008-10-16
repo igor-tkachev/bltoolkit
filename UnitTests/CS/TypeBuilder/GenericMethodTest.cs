@@ -1,9 +1,11 @@
 using System;
+using System.Collections.Generic;
 using BLToolkit.Aspects;
 using NUnit.Framework;
 
 using BLToolkit.Reflection;
 using BLToolkit.TypeBuilder;
+using NUnit.Framework.SyntaxHelpers;
 
 namespace TypeBuilder
 {
@@ -42,6 +44,21 @@ namespace TypeBuilder
 			// Throws ArgumentNullException
 			//
 			t.GetValue<string>(null);
+		}
+
+		public abstract class TestClass<T>
+		{
+			public abstract L SelectAll<L>() where L : IList<T>, new();
+		}
+
+		// Works only with Mono.
+		// See https://connect.microsoft.com/VisualStudio/feedback/ViewFeedback.aspx?FeedbackID=282829
+		//
+		//[Test]
+		public void GenericMixTest()
+		{
+			TestClass<int> t = TypeAccessor.CreateInstance<TestClass<int>>();
+			Assert.That(t, Is.Not.Null);
 		}
 	}
 }
