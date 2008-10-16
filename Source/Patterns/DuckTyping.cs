@@ -292,6 +292,19 @@ namespace BLToolkit.Patterns
 						interfaceType,
 						new DuckTypeBuilder(MustImplementAttribute.Aggregate, interfaceType, objectTypes));
 
+					if (type == null)
+					{
+						Type[] newTypes = new Type[objectTypes.Length + 1];
+
+						objectTypes.CopyTo(newTypes, 0);
+						newTypes[objectTypes.Length] = TypeFactory.GetType(interfaceType, new AbstractClassBuilder());
+
+						type = TypeFactory.GetType(
+							new CompoundValue(interfaceType, key),
+							interfaceType,
+							new DuckTypeBuilder(MustImplementAttribute.Aggregate, interfaceType, newTypes));
+					}
+
 					types.Add(key, type);
 				}
 			}

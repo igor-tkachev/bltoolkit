@@ -58,6 +58,35 @@ namespace BLToolkit.TypeBuilder.Builders
 			return name + AssemblyNameSuffix;
 		}
 
+		private bool CompareMethodSignature(MethodInfo m1, MethodInfo m2)
+		{
+			if (m1 == m2)
+				return true;
+
+			if (m1.Name != m2.Name)
+				return false;
+
+			if (m1.ReturnType != m2.ReturnType)
+				return false;
+
+			ParameterInfo[] ps1 = m1.GetParameters();
+			ParameterInfo[] ps2 = m2.GetParameters();
+
+			if (ps1.Length != ps2.Length)
+				return false;
+
+			for (int i = 0; i < ps1.Length; i++)
+			{
+				ParameterInfo p1 = ps1[i];
+				ParameterInfo p2 = ps2[i];
+
+				if (p1.ParameterType != p2.ParameterType || p1.IsIn != p2.IsIn || p1.IsOut != p2.IsOut)
+					return false;
+			}
+
+			return true;
+		}
+
 		private bool BuildMembers(Type interfaceType)
 		{
 			FieldInfo    objectsField = typeof(DuckType).GetField("_objects", BindingFlags.NonPublic | BindingFlags.Instance);
@@ -77,29 +106,31 @@ namespace BLToolkit.TypeBuilder.Builders
 
 					foreach (MethodInfo mi in _objectTypes[typeIndex].GetMethods(flags))
 					{
-						ParameterInfo[] ops = mi.GetParameters();
-
-						if (mi.Name       == interfaceMethod.Name       &&
-							mi.ReturnType == interfaceMethod.ReturnType &&
-							ops.Length    == ips.Length)
+						if (CompareMethodSignature(interfaceMethod, mi))
 						{
 							targetMethod = mi;
+							break;
+						}
+					}
 
-							for (int i = 0; i < ips.Length && targetMethod != null; i++)
+					if (targetMethod == null)
+					{
+						foreach (Type intf in _objectTypes[typeIndex].GetInterfaces())
+						{
+							if (intf.IsPublic)
 							{
-								ParameterInfo ip = ips[i];
-								ParameterInfo op = ops[i];
-
-								if (ip.ParameterType != op.ParameterType ||
-									ip.IsIn          != op.IsIn          ||
-									ip.IsOut         != op.IsOut)
+								foreach (MethodInfo mi in intf.GetMethods(flags))
 								{
-									targetMethod = null;
+									if (CompareMethodSignature(interfaceMethod, mi))
+									{
+										targetMethod = mi;
+										break;
+									}
 								}
-							}
 
-							if (targetMethod != null)
-								break;
+								if (targetMethod != null)
+									break;
+							}
 						}
 					}
 
@@ -112,6 +143,8 @@ namespace BLToolkit.TypeBuilder.Builders
 
 				if (targetMethod != null)
 				{
+					Type targetType = targetMethod.DeclaringType;
+
 					if (!targetMethod.IsStatic)
 					{
 						emit
@@ -122,21 +155,21 @@ namespace BLToolkit.TypeBuilder.Builders
 							.end()
 							;
 
-						if (_objectTypes[typeIndex].IsValueType)
+						if (targetType.IsValueType)
 						{
 							// For value types we have to use stack.
 							//
-							LocalBuilder obj = emit.DeclareLocal(_objectTypes[typeIndex]);
+							LocalBuilder obj = emit.DeclareLocal(targetType);
 
 							emit
-								.unbox_any (_objectTypes[typeIndex])
+								.unbox_any (targetType)
 								.stloc     (obj)
 								.ldloca    (obj)
 								;
 						}
 						else
 							emit
-								.castclass (_objectTypes[typeIndex])
+								.castclass (targetType)
 								;
 					}
 
