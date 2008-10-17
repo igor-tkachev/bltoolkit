@@ -15,7 +15,7 @@ namespace Patterns
 		}
 
 		[MustImplement]
-		public interface RequiredInterface
+		public interface IRequiredInterface
 		{
 			int RequiredMethod();
 			[MustImplement(false)]
@@ -24,23 +24,24 @@ namespace Patterns
 			int OptionalMethod();
 		}
 
-		public interface SameMethodNameInterface
+		public interface ISameMethodNameInterface
 		{
 			[MustImplement]
 			int SameMethodName();
 		}
 
-		public interface IntermediateInterface : RequiredInterface, SameMethodNameInterface
+		public interface IIntermediateInterface : IRequiredInterface, ISameMethodNameInterface
 		{
+			[MustImplement(false, ThrowException = true)]
 			new int OptionalMethod();
 		}
 
-		public interface OptionalInterface : IntermediateInterface, SameMethodNameInterface
+		public interface IOptionalInterface : IIntermediateInterface
 		{
 		}
 
 		[MustImplement(false, ThrowException = false)]
-		public interface OptionalInterfaceNoException : RequiredInterface
+		public interface IOptionalInterfaceNoException : IRequiredInterface
 		{
 			int OtherOptionalMethod();
 		}
@@ -71,7 +72,13 @@ namespace Patterns
 		[Test]
 		public void Test()
 		{
-			OptionalInterfaceNoException duck = DuckTyping.Implement<OptionalInterfaceNoException> (new TestClass());
+			IOptionalInterfaceNoException duck = DuckTyping.Implement<IOptionalInterfaceNoException> (new TestClass());
+
+			Assert.AreEqual(1, duck.RequiredMethod());
+			Assert.AreEqual(0, duck.OtherOptionalMethod());
+			Assert.AreEqual(2, duck.SameMethodName());
+
+			duck = DuckTyping.Aggregate<IOptionalInterfaceNoException>(new TestClass(), string.Empty, Guid.Empty);
 
 			Assert.AreEqual(1, duck.RequiredMethod());
 			Assert.AreEqual(0, duck.OtherOptionalMethod());
@@ -79,9 +86,21 @@ namespace Patterns
 		}
 
 		[Test, ExpectedException(typeof(NotImplementedException))]
-		public void RuntimeExceptionTes()
+		public void RuntimeExceptionTest()
 		{
-			OptionalInterface duck = DuckTyping.Implement<OptionalInterface>(new TestClass());
+			IOptionalInterface duck = DuckTyping.Implement<IOptionalInterface>(new TestClass());
+
+			Assert.AreEqual(1, duck.RequiredMethod());
+
+			// Exception here.
+			//
+			duck.OptionalMethod();
+		}
+
+		[Test, ExpectedException(typeof(NotImplementedException))]
+		public void RuntimeAggregateExceptionTest()
+		{
+			IOptionalInterface duck = DuckTyping.Aggregate<IOptionalInterface>(new TestClass(), new EmptyClass());
 
 			Assert.AreEqual(1, duck.RequiredMethod());
 
@@ -95,20 +114,32 @@ namespace Patterns
 		{
 			// Exception here.
 			//
-			OptionalInterface duck1 = DuckTyping.Implement<OptionalInterface> (string.Empty);
-			OptionalInterface duck2 = (OptionalInterface)DuckTyping.Implement(typeof(OptionalInterface), string.Empty);
+			IOptionalInterface duck1 = DuckTyping.Implement<IOptionalInterface> (string.Empty);
+		}
+
+		[Test, ExpectedException(typeof(TypeBuilderException))]
+		public void BuildtimeAggregateExceptionTest()
+		{
+			// Exception here.
+			//
+			IOptionalInterface duck1 = DuckTyping.Aggregate<IOptionalInterface>(string.Empty, Guid.Empty);
 		}
 
 		[Test]
 		public void AsLikeBehaviourTest()
 		{
-			IOtherOptionalInterface duck1 = DuckTyping.Implement<IOtherOptionalInterface>(new TestClass());
-			IOtherOptionalInterface duck2 = DuckTyping.Implement<IOtherOptionalInterface>(new EmptyClass());
-			IOtherOptionalInterface duck3 = DuckTyping.Implement<IOtherOptionalInterface>(new EmptyClass());
+			IOtherOptionalInterface duck = DuckTyping.Implement<IOtherOptionalInterface>(new TestClass());
+			Assert.IsNotNull(duck);
 
-			Assert.IsNotNull(duck1);
-			Assert.IsNull   (duck2);
-			Assert.IsNull   (duck3);
+			duck = DuckTyping.Implement<IOtherOptionalInterface>(new EmptyClass());
+			Assert.IsNull(duck);
+
+			duck = DuckTyping.Implement<IOtherOptionalInterface>(new EmptyClass());
+			Assert.IsNull   (duck);
+
+			duck = DuckTyping.Aggregate<IOtherOptionalInterface>(new EmptyClass(), string.Empty);
+			Assert.IsNull   (duck);
 		}
+
 	}
 }

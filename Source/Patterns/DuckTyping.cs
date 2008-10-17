@@ -1,7 +1,7 @@
 using System;
 using System.Collections;
-
 using BLToolkit.Common;
+using BLToolkit.Properties;
 using BLToolkit.Reflection;
 using BLToolkit.TypeBuilder;
 using BLToolkit.TypeBuilder.Builders;
@@ -10,10 +10,13 @@ namespace BLToolkit.Patterns
 {
 	/// <summary>
 	/// Duck typing implementation.
-	/// In computer science, duck typing is a term for dynamic typing typical of some programming languages,
-	/// such as Smalltalk, Python or ColdFusion, where a variable's value itself determines what the variable can do.
-	/// Thus an object having all the methods described in an interface can be made to implement that interface
-	/// dynamically at runtime, even if the object’s class does not include the interface in its implements clause.
+	/// In computer science, duck typing is a term for dynamic typing typical
+	/// of some programming languages, such as Smalltalk, Python or ColdFusion,
+	/// where a variable's value itself determines what the variable can do.
+	/// Thus an object or set of objects having all the methods described in
+	/// an interface can be made to implement that interface dynamically
+	/// at runtime, even if the object’s class does not include the interface
+	/// in its implements clause.
 	/// </summary>
 	public static class DuckTyping
 	{
@@ -25,14 +28,14 @@ namespace BLToolkit.Patterns
 		/// Build a proxy type which implements the requested interface by redirecting all calls to the supplied object type.
 		/// </summary>
 		/// <param name="interfaceType">An interface type to implement.</param>
-		/// <param name="objectType">Any type which has all members of the given interface.</param>
+		/// <param name="objectType">Any type which expected to have all members of the given interface.</param>
 		/// <returns>The duck object type.</returns>
 		public static Type GetDuckType(Type interfaceType, Type objectType)
 		{
 			if (interfaceType == null)      throw new ArgumentNullException("interfaceType");
-			if (!interfaceType.IsInterface) throw new ArgumentException("'interfaceType' must be an interface.", "interfaceType");
+			if (!interfaceType.IsInterface) throw new ArgumentException(Resources.DuckTyping_InterfaceTypeMustBeAnInterface, "interfaceType");
 			if (!interfaceType.IsPublic && !interfaceType.IsNestedPublic)
-				throw new ArgumentException("The interface must be public.", "interfaceType");
+				throw new ArgumentException(Resources.DuckTyping_InterfaceMustBePublic, "interfaceType");
 
 			Hashtable types = (Hashtable)_duckTypes[interfaceType];
 
@@ -78,7 +81,7 @@ namespace BLToolkit.Patterns
 		/// <param name="interfaceType">An interface type to implement.</param>
 		/// <param name="baseObjectType">Any type which has all members of the given interface.
 		/// When this parameter is set to null, the object type will be used.</param>
-		/// <param name="obj">An object which type has all members of the given interface.</param>
+		/// <param name="obj">An object which type expected to have all members of the given interface.</param>
 		/// <returns>An object which implements the interface.</returns>
 		public static object Implement(Type interfaceType, Type baseObjectType, object obj)
 		{
@@ -91,16 +94,24 @@ namespace BLToolkit.Patterns
 
 			if (obj is DuckType)
 			{
-				// Switch to underlying objects when a duck object was passed.
+				DuckType duckObject = (DuckType)obj;
+				if (duckObject.Objects.Length == 1)
+				{
+					// Switch to underlying objects when a duck object was passed.
+					//
+					return Implement(interfaceType, baseObjectType, duckObject.Objects[0]);
+				}
+
+				// Re-aggregate underlying objects to expose new interface.
 				//
-				return Implement(interfaceType, baseObjectType, ((DuckType)obj).Objects[0]);
+				return Aggregate(interfaceType, duckObject.Objects);
 			}
 
 			if (baseObjectType == null)
 				baseObjectType = objType;
 			else if (!TypeHelper.IsSameOrParent(baseObjectType, objType))
 				throw new ArgumentException(
-					string.Format("'{0}' is not a subtype of '{1}'.", objType.FullName, baseObjectType.FullName), "obj");
+					string.Format(Resources.DuckTyping_NotASubtypeOf, objType.FullName, baseObjectType.FullName), "obj");
 
 			Type duckType = GetDuckType(interfaceType, baseObjectType);
 
@@ -120,7 +131,7 @@ namespace BLToolkit.Patterns
 		/// Otherwise a convenient duck object will be created.
 		/// </summary>
 		/// <param name="interfaceType">An interface type to implement.</param>
-		/// <param name="obj">An object which type has all members of the given interface.</param>
+		/// <param name="obj">An object which type expected to have all members of the given interface.</param>
 		/// <returns>An object which implements the interface.</returns>
 		public static object Implement(Type interfaceType, object obj)
 		{
@@ -135,7 +146,7 @@ namespace BLToolkit.Patterns
 		/// <param name="interfaceType">An interface type to implement.</param>
 		/// <param name="baseObjectType">Any type which has all members of the given interface.
 		/// When this parameter is set to null, the object type will be used.</param>
-		/// <param name="objects">An object array which types has all members of the given interface.
+		/// <param name="objects">An object array which types expected to have all members of the given interface.
 		/// All objects may have different types.</param>
 		/// <returns>An array of object which implements the interface.</returns>
 		public static object[] Implement(Type interfaceType, Type baseObjectType, params object[] objects)
@@ -156,7 +167,7 @@ namespace BLToolkit.Patterns
 		/// Otherwise a convenient duck object will be created.
 		/// </summary>
 		/// <param name="interfaceType">An interface type to implement.</param>
-		/// <param name="objects">An object array which types has all members of the given interface.
+		/// <param name="objects">An object array which types expected to have all members of the given interface.
 		/// All objects may have different types.</param>
 		/// <returns>An array of object which implements the interface.</returns>
 		public static object[] Implement(Type interfaceType, params object[] objects)
@@ -170,7 +181,7 @@ namespace BLToolkit.Patterns
 		/// Otherwise a convenient duck object will be created.
 		/// </summary>
 		/// <typeparam name="I">An interface type to implement.</typeparam>
-		/// <param name="obj">An object which type has all members of the given interface.</param>
+		/// <param name="obj">An object which type expected to have all members of the given interface.</param>
 		/// <returns>An object which implements the interface.</returns>
 		public static I Implement<I>(object obj)
 			where I : class
@@ -185,7 +196,7 @@ namespace BLToolkit.Patterns
 		/// </summary>
 		/// <typeparam name="I">An interface type to implement.</typeparam>
 		/// <typeparam name="T">Any type which has all members of the given interface.</typeparam>
-		/// <param name="obj">An object which type has all members of the given interface.</param>
+		/// <param name="obj">An object which type expected to have all members of the given interface.</param>
 		/// <returns>An object which implements the interface.</returns>
 		public static I Implement<I,T>(T obj)
 			where I : class
@@ -199,7 +210,7 @@ namespace BLToolkit.Patterns
 		/// Otherwise a convenient duck object will be created.
 		/// </summary>
 		/// <typeparam name="I">An interface type to implement.</typeparam>
-		/// <param name="objects">An object array which types has all members of the given interface.
+		/// <param name="objects">An object array which types expected to have all members of the given interface.
 		/// All objects may have different types.</param>
 		/// <returns>An array of object which implements the interface.</returns>
 		public static I[] Implement<I>(params object[] objects)
@@ -222,7 +233,7 @@ namespace BLToolkit.Patterns
 		/// </summary>
 		/// <typeparam name="I">An interface type to implement.</typeparam>
 		/// <typeparam name="T">Any type which has all members of the given interface.</typeparam>
-		/// <param name="objects">An object array which types has all members of the given interface.
+		/// <param name="objects">An object array which types expected to have all members of the given interface.
 		/// All objects may have different types.</param>
 		/// <returns>An array of object which implements the interface.</returns>
 		public static I[] Implement<I,T>(params T[] objects)
@@ -253,14 +264,14 @@ namespace BLToolkit.Patterns
 		/// Build a proxy type which implements the requested interface by redirecting all calls to the supplied object type.
 		/// </summary>
 		/// <param name="interfaceType">An interface type to implement.</param>
-		/// <param name="objectTypes">Array of types which have all members of the given interface.</param>
+		/// <param name="objectTypes">Array of types which expected to have all members of the given interface.</param>
 		/// <returns>The duck object type.</returns>
 		public static Type GetDuckType(Type interfaceType, Type[] objectTypes)
 		{
 			if (interfaceType == null)      throw new ArgumentNullException("interfaceType");
-			if (!interfaceType.IsInterface) throw new ArgumentException("'interfaceType' must be an interface.", "interfaceType");
+			if (!interfaceType.IsInterface) throw new ArgumentException(Resources.DuckTyping_InterfaceTypeMustBeAnInterface, "interfaceType");
 			if (!interfaceType.IsPublic && !interfaceType.IsNestedPublic)
-				throw new ArgumentException("The interface must be public.", "interfaceType");
+				throw new ArgumentException(Resources.DuckTyping_InterfaceMustBePublic, "interfaceType");
 
 			Hashtable types = (Hashtable)_duckTypes[interfaceType];
 
@@ -292,19 +303,6 @@ namespace BLToolkit.Patterns
 						interfaceType,
 						new DuckTypeBuilder(MustImplementAttribute.Aggregate, interfaceType, objectTypes));
 
-					if (type == null)
-					{
-						Type[] newTypes = new Type[objectTypes.Length + 1];
-
-						objectTypes.CopyTo(newTypes, 0);
-						newTypes[objectTypes.Length] = TypeFactory.GetType(interfaceType, new AbstractClassBuilder());
-
-						type = TypeFactory.GetType(
-							new CompoundValue(interfaceType, key),
-							interfaceType,
-							new DuckTypeBuilder(MustImplementAttribute.Aggregate, interfaceType, newTypes));
-					}
-
 					types.Add(key, type);
 				}
 			}
@@ -313,14 +311,12 @@ namespace BLToolkit.Patterns
 		}
 
 		/// <summary>
-		/// Implements the requested interface for supplied object.
-		/// If the supplied object implements the interface, the object itself will be returned.
-		/// Otherwise a convenient duck object will be created.
+		/// Implements the requested interface from supplied set of objects.
 		/// </summary>
 		/// <param name="interfaceType">An interface type to implement.</param>
 		/// <param name="baseObjectTypes">Array of types which have all members of the given interface.
 		/// When this parameter is set to null, the object type will be used.</param>
-		/// <param name="objs">Array of objects which types have all members of the given interface.</param>
+		/// <param name="objs">Array of objects which types expected to have all members of the given interface.</param>
 		/// <returns>An object which implements the interface.</returns>
 		public static object Aggregate(Type interfaceType, Type[] baseObjectTypes,params object[] objs)
 		{
@@ -337,7 +333,7 @@ namespace BLToolkit.Patterns
 			else
 			{
 				if (baseObjectTypes.Length != objs.Length)
-					throw new ArgumentException("Invalid number of 'baseObjectTypes' or 'objs'.", "baseObjectTypes");
+					throw new ArgumentException(Resources.DuckTyping_InvalidNumberOfObjs, "baseObjectTypes");
 
 				for (int i = 0; i < objs.Length; i++)
 				{
@@ -345,7 +341,7 @@ namespace BLToolkit.Patterns
 
 					if (!TypeHelper.IsSameOrParent(baseObjectTypes[i], objType))
 						throw new ArgumentException(
-							string.Format("'{0}' is not a subtype of '{1}'.", objType.FullName, baseObjectTypes[i].FullName), "obj");
+							string.Format(Resources.DuckTyping_NotASubtypeOf, objType.FullName, baseObjectTypes[i].FullName), "objs");
 				}
 			}
 
@@ -362,12 +358,10 @@ namespace BLToolkit.Patterns
 		}
 
 		/// <summary>
-		/// Implements the requested interface.
-		/// If the supplied object implements the interface, the object itself will be returned.
-		/// Otherwise a convenient duck object will be created.
+		/// Implements the requested interface from supplied set of objects.
 		/// </summary>
 		/// <param name="interfaceType">An interface type to implement.</param>
-		/// <param name="objs">Array of object which types have all members of the given interface.</param>
+		/// <param name="objs">Array of object which types expected to have of the given interface.</param>
 		/// <returns>An object which implements the interface.</returns>
 		public static object Aggregate(Type interfaceType,params object[] objs)
 		{
@@ -375,17 +369,15 @@ namespace BLToolkit.Patterns
 		}
 
 		/// <summary>
-		/// Implements the requested interface for supplied object.
-		/// If the supplied object implements the interface, the object itself will be returned.
-		/// Otherwise a convenient duck object will be created.
+		/// Implements the requested interface from supplied set of objects.
 		/// </summary>
 		/// <typeparam name="I">An interface type to implement.</typeparam>
-		/// <param name="obj">An object which type has all members of the given interface.</param>
+		/// <param name="objs">Array of object which type expected to have all members of the given interface.</param>
 		/// <returns>An object which implements the interface.</returns>
-		public static I Aggregate<I>(params object[] obj)
+		public static I Aggregate<I>(params object[] objs)
 			where I : class
 		{
-			return (I)Aggregate(typeof(I), null, obj);
+			return (I)Aggregate(typeof(I), null, objs);
 		}
 
 		#endregion

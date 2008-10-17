@@ -95,7 +95,6 @@ namespace BLToolkit.TypeBuilder.Builders
 
 			foreach (MethodInfo interfaceMethod in interfaceType.GetMethods(BindingFlags.Public | BindingFlags.Instance))
 			{
-				ParameterInfo[] ips = interfaceMethod.GetParameters();
 				MethodInfo      targetMethod = null;
 				int             typeIndex    = 0;
 
@@ -117,7 +116,7 @@ namespace BLToolkit.TypeBuilder.Builders
 					{
 						foreach (Type intf in _objectTypes[typeIndex].GetInterfaces())
 						{
-							if (intf.IsPublic)
+							if (intf.IsPublic || intf.IsNestedPublic)
 							{
 								foreach (MethodInfo mi in intf.GetMethods(flags))
 								{
@@ -138,6 +137,7 @@ namespace BLToolkit.TypeBuilder.Builders
 						break;
 				}
 
+				ParameterInfo[]     ips     = interfaceMethod.GetParameters();
 				MethodBuilderHelper builder = _typeBuilder.DefineMethod(interfaceMethod);
 				EmitHelper          emit    = builder.Emitter;
 
@@ -173,7 +173,7 @@ namespace BLToolkit.TypeBuilder.Builders
 								;
 					}
 
-					foreach (ParameterInfo p in interfaceMethod.GetParameters())
+					foreach (ParameterInfo p in ips)
 						emit.ldarg(p);
 
 					if (targetMethod.IsStatic || targetMethod.IsFinal || targetMethod.DeclaringType.IsSealed)
@@ -249,7 +249,7 @@ namespace BLToolkit.TypeBuilder.Builders
 
 						// Initialize out parameters.
 						//
-						ParameterInfo[] parameters = interfaceMethod.GetParameters();
+						ParameterInfo[] parameters = ips;
 
 						if (parameters != null)
 							emit.InitOutParameters(parameters);

@@ -52,9 +52,15 @@ namespace BLToolkit.Patterns
 			set { _exceptionMessage = value; }
 		}
 
-		// Default is optional method which throws NotImplementedException at run tune.
-		//
+		/// <summary>
+		/// All methods are optional and throws <see cref="NotImplementedException"/> at run tune.
+		/// </summary>
 		public static readonly MustImplementAttribute Default   = new MustImplementAttribute(false, true, null);
-		public static readonly MustImplementAttribute Aggregate = new MustImplementAttribute(true, false, null);
+
+		/// <summary>
+		/// All methods are optional and does nothing at run tune.
+		/// Return value and all output parameters will be set to appropriate default values.
+		/// </summary>
+		public static readonly MustImplementAttribute Aggregate = new MustImplementAttribute(false, false, null);
 	}
 }

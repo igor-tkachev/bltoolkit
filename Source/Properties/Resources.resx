@@ -189,4 +189,16 @@
   <data name="TypeBuilder_PublicMethodNotImplemented" xml:space="preserve">
   <value>Type '{0}' does not implement public method '{1}'</value>
 </data>
+  <data name="DuckTyping_InterfaceMustBePublic" xml:space="preserve">
+    <value>The interface must be public.</value>
+  </data>
+  <data name="DuckTyping_InterfaceTypeMustBeAnInterface" xml:space="preserve">
+    <value>'interfaceType' must be an interface.</value>
+  </data>
+  <data name="DuckTyping_NotASubtypeOf" xml:space="preserve">
+    <value>'{0}' is not a subtype of '{1}'.</value>
+  </data>
+  <data name="DuckTyping_InvalidNumberOfObjs" xml:space="preserve">
+    <value>Invalid number of 'baseObjectTypes' or 'objs'.</value>
+  </data>
 </root>

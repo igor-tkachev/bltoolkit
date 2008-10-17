@@ -4,6 +4,7 @@ using NUnit.Framework;
 
 using BLToolkit.TypeBuilder;
 using BLToolkit.Patterns;
+using NUnit.Framework.SyntaxHelpers;
 
 namespace Patterns
 {
@@ -266,12 +267,24 @@ namespace Patterns
 			int Method2();
 		}
 
-		public class AggregateClass1
+		public interface IClass1
 		{
-			public int Method1() { return 1; }
+			int Method1();
+			int Method3();
 		}
 
-		public class AggregateClass2
+		public interface IClass2
+		{
+			int Method2();
+		}
+
+		public class AggregateClass1: IClass1
+		{
+			public int Method1() { return 1; }
+			public int Method3() { return 3; }
+		}
+
+		public class AggregateClass2: IClass2
 		{
 			public int Method2() { return 2; }
 		}
@@ -280,9 +293,36 @@ namespace Patterns
 		public void AggregateTest()
 		{
 			IAggregatable duck  = DuckTyping.Aggregate<IAggregatable>(new AggregateClass1(), new AggregateClass2());
+			Assert.IsNotNull(duck);
 
 			Assert.AreEqual(1, duck.Method1());
 			Assert.AreEqual(2, duck.Method2());
+
+			// It is still possible to get access
+			// to an interface of an underlying object.
+			//
+			IClass2 cls2 = DuckTyping.Implement<IClass2>(duck);
+			Assert.IsNotNull(cls2);
+			Assert.AreEqual(2, cls2.Method2());
+
+			// Even to switch from one aggregated object to another
+			//
+			IClass1 cls1 = DuckTyping.Implement<IClass1>(cls2);
+			Assert.IsNotNull(cls1);
+			Assert.AreEqual(1, cls1.Method1());
+			Assert.AreEqual(3, cls1.Method3());
+		}
+
+		[Test]
+		public void MissedMethodsAggregateTest()
+		{
+			IClass1 duck = DuckTyping.Aggregate<IClass1>(new Version(1,0), Guid.NewGuid());
+
+			Assert.That(duck, Is.Not.Null);
+
+			// Neither System.Guid nor System.Version will ever have Method1.
+			//
+			Assert.That(duck.Method1(), Is.EqualTo(0));
 		}
 
 		#endregion

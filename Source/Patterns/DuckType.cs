@@ -2,6 +2,9 @@ using System;
 
 namespace BLToolkit.Patterns
 {
+	/// <summary>
+	/// Reserved to internal BLToolkit use.
+	/// </summary>
 	public abstract class DuckType
 	{
 		[CLSCompliant(false)]
