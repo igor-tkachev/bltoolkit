@@ -12,7 +12,7 @@ namespace BLToolkit.ComponentModel
 	{
 		// Human readable text for 'nothing selected'.
 		//
-		private string NoType = "(none)";
+		private const string NoType = "(none)";
 
 		/// <summary>
 		/// Returns whether this converter can convert an object of the given type to
@@ -26,9 +26,12 @@ namespace BLToolkit.ComponentModel
 		/// <see langword="true"/> if this converter can perform the conversion;
 		/// otherwise, <see langword="false"/>.
 		/// </returns>
-		public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType)
+		public override bool CanConvertFrom(
+			ITypeDescriptorContext context,
+			Type                   sourceType)
 		{
-			return sourceType == typeof(string) || base.CanConvertFrom(context, sourceType);
+			return sourceType == typeof(string) ||
+				base.CanConvertFrom(context, sourceType);
 		}
 
 		/// <summary>
@@ -47,7 +50,9 @@ namespace BLToolkit.ComponentModel
 		/// <exception cref="System.NotSupportedException">The conversion cannot be
 		/// performed. </exception>
 		public override object ConvertFrom(
-			ITypeDescriptorContext context, CultureInfo culture, object value)
+			ITypeDescriptorContext context,
+			CultureInfo            culture,
+			object                 value)
 		{
 			if (value == null)
 				return null;
@@ -86,11 +91,15 @@ namespace BLToolkit.ComponentModel
 		/// <param name="destinationType">A <see cref="System.Type"/> that represents
 		/// the type you want to convert to. </param>
 		/// <returns>
-		/// <see langword="true"/> if this converter can perform the conversion; otherwise, <see langword="false"/>.
+		/// <see langword="true"/> if this converter can perform the conversion;
+		/// otherwise, <see langword="false"/>.
 		/// </returns>
-		public override bool CanConvertTo(ITypeDescriptorContext context, Type destinationType)
+		public override bool CanConvertTo(
+			ITypeDescriptorContext context,
+			Type                   destinationType)
 		{
-			return destinationType == typeof(string) || base.CanConvertTo(context, destinationType);
+			return destinationType == typeof(string) ||
+				base.CanConvertTo(context, destinationType);
 		}
 
 		/// <summary>
@@ -114,9 +123,9 @@ namespace BLToolkit.ComponentModel
 		/// The <paramref name="destinationType"/> parameter is null. </exception>
 		public override object ConvertTo(
 			ITypeDescriptorContext context,
-			CultureInfo culture,
-			object value,
-			Type destinationType)
+			CultureInfo            culture,
+			object                 value,
+			Type                   destinationType)
 		{
 			if (destinationType != typeof(string))
 				return base.ConvertTo(context, culture, value, destinationType);
