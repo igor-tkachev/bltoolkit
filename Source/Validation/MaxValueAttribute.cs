@@ -125,7 +125,7 @@ namespace BLToolkit.Validation
 
 		public override string ErrorMessage
 		{
-			get { return base.ErrorMessage != null? base.ErrorMessage: "Maximum value for '{0}' is {1}{2}."; }
+			get { return base.ErrorMessage ?? "Maximum value for '{0}' is {1}{2}."; }
 			set { base.ErrorMessage = value; }
 		}
 

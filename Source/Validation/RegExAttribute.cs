@@ -63,7 +63,7 @@ namespace BLToolkit.Validation
 
 		public override string ErrorMessage
 		{
-			get { return base.ErrorMessage != null? base.ErrorMessage: "'{0}' format is not valid."; }
+			get { return base.ErrorMessage ?? "'{0}' format is not valid."; }
 			set { base.ErrorMessage = value; }
 		}
 	}

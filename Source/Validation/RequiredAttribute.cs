@@ -21,7 +21,7 @@ namespace BLToolkit.Validation
 
 		public override string ErrorMessage
 		{
-			get { return base.ErrorMessage != null? base.ErrorMessage: "'{0}' is required."; }
+			get { return base.ErrorMessage ?? "'{0}' is required."; }
 			set { base.ErrorMessage = value; }
 		}
 	}

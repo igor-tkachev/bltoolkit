@@ -125,7 +125,7 @@ namespace BLToolkit.Validation
 
 		public override string ErrorMessage
 		{
-			get { return base.ErrorMessage != null? base.ErrorMessage: "Minimum value for '{0}' is {1}{2}."; }
+			get { return base.ErrorMessage ?? "Minimum value for '{0}' is {1}{2}."; }
 			set { base.ErrorMessage = value; }
 		}
 
@@ -133,7 +133,7 @@ namespace BLToolkit.Validation
 		{
 			return string.Format(ErrorMessage,
 				GetPropertyFriendlyName(context),
-			    GetValue(context),
+				GetValue(context),
 				IsExclusive? " exclusive": string.Empty);
 		}
 	}

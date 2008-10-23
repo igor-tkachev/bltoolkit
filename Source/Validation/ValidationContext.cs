@@ -107,13 +107,10 @@ namespace BLToolkit.Validation
 		{
 			get
 			{
-				if (_memberInfo != null)
-					return _memberInfo.Name;
-
-				if (_propertyDescriptor != null)
-					return _propertyDescriptor.Name;
-
-				return null;
+				return
+					_memberInfo         != null? _memberInfo.Name:
+					_propertyDescriptor != null? _propertyDescriptor.Name:
+						null;
 			}
 		}
 	}

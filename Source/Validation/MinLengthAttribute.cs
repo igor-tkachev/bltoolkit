@@ -29,7 +29,7 @@ namespace BLToolkit.Validation
 
 		public override string ErrorMessage
 		{
-			get { return base.ErrorMessage != null? base.ErrorMessage: "'{0}' minimum length is {1}."; }
+			get { return base.ErrorMessage ?? "'{0}' minimum length is {1}."; }
 			set { base.ErrorMessage = value; }
 		}
 
