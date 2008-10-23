@@ -59,7 +59,7 @@ namespace PetShop.Web
 		}
 
 		/// <summary>
-		/// Overriden method to control how the page is rendered
+		/// Overridden method to control how the page is rendered
 		/// </summary>
 		/// <param name="writer"></param>
 		protected override void Render(HtmlTextWriter writer)
