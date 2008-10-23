@@ -30,6 +30,59 @@ namespace BLToolkit.Reflection.Emit
 		}
 
 		/// <summary>
+		/// Sets a custom attribute using a custom attribute type.
+		/// </summary>
+		/// <param name="attributeType">Attribute type.</param>
+		public void SetCustomAttribute(Type attributeType)
+		{
+			if (attributeType == null) throw new ArgumentNullException("attributeType");
+
+			ConstructorInfo ci = attributeType.GetConstructor(System.Type.EmptyTypes);
+			CustomAttributeBuilder caBuilder = new CustomAttributeBuilder(ci, new object[0]);
+
+			_methodBuilder.SetCustomAttribute(caBuilder);
+		}
+
+		/// <summary>
+		/// Sets a custom attribute using a custom attribute type
+		/// and named properties.
+		/// </summary>
+		/// <param name="attributeType">Attribute type.</param>
+		/// <param name="properties">Named properties of the custom attribute.</param>
+		/// <param name="propertyValues">Values for the named properties of the custom attribute.</param>
+		public void SetCustomAttribute(
+			Type           attributeType,
+			PropertyInfo[] properties,
+			object[]       propertyValues)
+		{
+			if (attributeType == null) throw new ArgumentNullException("attributeType");
+
+			ConstructorInfo ci = attributeType.GetConstructor(System.Type.EmptyTypes);
+			CustomAttributeBuilder caBuilder = new CustomAttributeBuilder(
+				ci, new object[0], properties, propertyValues);
+
+			_methodBuilder.SetCustomAttribute(caBuilder);
+		}
+
+		/// <summary>
+		/// Sets a custom attribute using a custom attribute type
+		/// and named property.
+		/// </summary>
+		/// <param name="attributeType">Attribute type.</param>
+		/// <param name="propertyName">A named property of the custom attribute.</param>
+		/// <param name="propertyValue">Value for the named property of the custom attribute.</param>
+		public void SetCustomAttribute(
+			Type   attributeType,
+			string propertyName,
+			object propertyValue)
+		{
+			SetCustomAttribute(
+				attributeType,
+				new PropertyInfo[] { attributeType.GetProperty(propertyName) },
+				new object[] { propertyValue });
+		}
+
+		/// <summary>
 		/// Initializes a new instance of the <see cref="MethodBuilderHelper"/> class
 		/// with the specified parameters.
 		/// </summary>
@@ -103,7 +156,7 @@ namespace BLToolkit.Reflection.Emit
 		/// <summary>
 		/// Gets MethodBuilder.
 		/// </summary>
-		public  MethodBuilder  MethodBuilder
+		public MethodBuilder MethodBuilder
 		{
 			get { return _methodBuilder; }
 		}
@@ -111,8 +164,8 @@ namespace BLToolkit.Reflection.Emit
 		/// <summary>
 		/// Converts the supplied <see cref="MethodBuilderHelper"/> to a <see cref="MethodBuilder"/>.
 		/// </summary>
-		/// <param name="methodBuilder">The MethodBuilderHelper.</param>
-		/// <returns>A MethodBuilder.</returns>
+		/// <param name="methodBuilder">The <see cref="MethodBuilderHelper"/>.</param>
+		/// <returns>A <see cref="MethodBuilder"/>.</returns>
 		public static implicit operator MethodBuilder(MethodBuilderHelper methodBuilder)
 		{
 			if (methodBuilder == null) throw new ArgumentNullException("methodBuilder");
@@ -122,7 +175,7 @@ namespace BLToolkit.Reflection.Emit
 
 		private EmitHelper _emitter;
 		/// <summary>
-		/// Gets EmitHelper.
+		/// Gets <see cref="EmitHelper"/>.
 		/// </summary>
 		public override EmitHelper Emitter
 		{
@@ -136,6 +189,9 @@ namespace BLToolkit.Reflection.Emit
 		}
 
 		private MethodInfo _overriddenMethod;
+		/// <summary>
+		/// Gets or sets the base type method overridden by this method, if any.
+		/// </summary>
 		public  MethodInfo  OverriddenMethod
 		{
 			get { return _overriddenMethod;  }

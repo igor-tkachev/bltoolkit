@@ -112,26 +112,22 @@ namespace BLToolkit.TypeBuilder
 		[SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
 		private static void SaveAssembly(AssemblyBuilderHelper assemblyBuilder, Type type)
 		{
-			if (_globalAssembly != null)
+			if (!_saveTypes || _globalAssembly != null)
 				return;
-
-			if (_saveTypes)
+			try
 			{
-				try
-				{
-					assemblyBuilder.Save();
+				assemblyBuilder.Save();
 
-					WriteDebug("The '{0}' type saved in '{1}'.",
-						type.FullName,
-						assemblyBuilder.Path);
-				}
-				catch (Exception ex)
-				{
-					WriteDebug("Can't save the '{0}' assembly for the '{1}' type: {2}.", 
-						assemblyBuilder.Path,
-						type.FullName,
-						ex.Message);
-				}
+				WriteDebug("The '{0}' type saved in '{1}'.",
+							type.FullName,
+							assemblyBuilder.Path);
+			}
+			catch (Exception ex)
+			{
+				WriteDebug("Can't save the '{0}' assembly for the '{1}' type: {2}.",
+							assemblyBuilder.Path,
+							type.FullName,
+							ex.Message);
 			}
 		}
 
@@ -261,9 +257,8 @@ namespace BLToolkit.TypeBuilder
 					{
 						Assembly a = ass[i];
 
-						if (!(a is _AssemblyBuilder))
-							if (a.CodeBase.IndexOf("Microsoft.NET/Framework") > 0 || a.FullName.StartsWith("System."))
-								continue;
+						if (!(a is _AssemblyBuilder) &&
+							(a.CodeBase.IndexOf("Microsoft.NET/Framework") > 0 || a.FullName.StartsWith("System."))) continue;
 
 						type = a.GetType(typeName);
 

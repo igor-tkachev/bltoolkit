@@ -35,8 +35,8 @@ namespace BLToolkit.Reflection.Emit
 		/// <summary>
 		/// Converts the supplied <see cref="ConstructorBuilderHelper"/> to a <see cref="MethodBuilder"/>.
 		/// </summary>
-		/// <param name="constructorBuilder">The ConstructorBuilder.</param>
-		/// <returns>A ConstructorBuilder.</returns>
+		/// <param name="constructorBuilder">The <see cref="ConstructorBuilder"/>.</param>
+		/// <returns>A <see cref="ConstructorBuilder"/>.</returns>
 		public static implicit operator ConstructorBuilder(ConstructorBuilderHelper constructorBuilder)
 		{
 			if (constructorBuilder == null) throw new ArgumentNullException("constructorBuilder");
@@ -46,7 +46,7 @@ namespace BLToolkit.Reflection.Emit
 
 		private EmitHelper _emitter;
 		/// <summary>
-		/// Gets EmitHelper.
+		/// Gets <see cref="EmitHelper"/>.
 		/// </summary>
 		public override EmitHelper Emitter
 		{

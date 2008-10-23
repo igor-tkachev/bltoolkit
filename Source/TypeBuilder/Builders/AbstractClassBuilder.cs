@@ -508,7 +508,7 @@ namespace BLToolkit.TypeBuilder.Builders
 			return false;
 		}
 
-		void GetAbstractProperties(Type type, List<PropertyInfo> props)
+		private static void GetAbstractProperties(Type type, List<PropertyInfo> props)
 		{
 			if (props.Find(delegate(PropertyInfo mi) { return mi.DeclaringType == type; }) == null)
 			{
@@ -589,7 +589,7 @@ namespace BLToolkit.TypeBuilder.Builders
 			EmitMethod(builders, setter, BuildElement.AbstractSetter);
 		}
 
-		void GetAbstractMethods(Type type, List<MethodInfo> methods)
+		private static void GetAbstractMethods(Type type, List<MethodInfo> methods)
 		{
 			if (methods.Find(delegate(MethodInfo mi) { return mi.DeclaringType == type; }) == null)
 			{
@@ -709,7 +709,7 @@ namespace BLToolkit.TypeBuilder.Builders
 
 				foreach (MethodInfo m in interfaceMethods)
 				{
-					if (_context.TypeBuilder.OverridenMethods.ContainsKey(m))
+					if (_context.TypeBuilder.OverriddenMethods.ContainsKey(m))
 						continue;
 
 					BeginEmitMethod(m);

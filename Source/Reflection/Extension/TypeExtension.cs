@@ -83,10 +83,7 @@ namespace BLToolkit.Reflection.Extension
 
 		public static bool ToBoolean(object value,  bool defaultValue)
 		{
-			if (value == null)
-				return defaultValue;
-
-			return ToBoolean(value);
+			return value == null? defaultValue: ToBoolean(value);
 		}
 
 		public static bool ToBoolean(object value)

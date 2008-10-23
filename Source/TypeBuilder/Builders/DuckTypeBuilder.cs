@@ -58,7 +58,7 @@ namespace BLToolkit.TypeBuilder.Builders
 			return name + AssemblyNameSuffix;
 		}
 
-		private bool CompareMethodSignature(MethodInfo m1, MethodInfo m2)
+		private static bool CompareMethodSignature(MethodInfo m1, MethodInfo m2)
 		{
 			if (m1 == m2)
 				return true;

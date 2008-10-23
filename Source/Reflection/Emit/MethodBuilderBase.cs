@@ -21,7 +21,7 @@ namespace BLToolkit.Reflection.Emit
 
 		private readonly TypeBuilderHelper _type;
 		/// <summary>
-		/// Gets associated TypeBuilderHelper.
+		/// Gets associated <see cref="TypeBuilderHelper"/>.
 		/// </summary>
 		public           TypeBuilderHelper  Type
 		{
@@ -29,7 +29,7 @@ namespace BLToolkit.Reflection.Emit
 		}
 
 		/// <summary>
-		/// Gets EmitHelper.
+		/// Gets <see cref="EmitHelper"/>.
 		/// </summary>
 		public abstract EmitHelper Emitter { get; }
 	}

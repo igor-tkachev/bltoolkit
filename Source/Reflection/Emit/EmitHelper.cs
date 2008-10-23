@@ -46,7 +46,7 @@ namespace BLToolkit.Reflection.Emit
 
 		private readonly MethodBuilderBase _method;
 		/// <summary>
-		/// Gets MethodBuilderHelper.
+		/// Gets <see cref="MethodBuilderHelper"/>.
 		/// </summary>
 		public           MethodBuilderBase  Method
 		{
@@ -65,7 +65,7 @@ namespace BLToolkit.Reflection.Emit
 		/// <summary>
 		/// Converts the supplied <see cref="EmitHelper"/> to a <see cref="ILGenerator"/>.
 		/// </summary>
-		/// <param name="emitHelper">The EmitHelper.</param>
+		/// <param name="emitHelper">The <see cref="EmitHelper"/>.</param>
 		/// <returns>An ILGenerator.</returns>
 		public static implicit operator ILGenerator(EmitHelper emitHelper)
 		{
@@ -107,7 +107,7 @@ namespace BLToolkit.Reflection.Emit
 		/// <summary>
 		/// Begins an exception fault block in the Microsoft intermediate language (MSIL) stream.
 		/// </summary>
-		/// <returns>Current instance of the EmitHelper.</returns>
+		/// <returns>Current instance of the <see cref="EmitHelper"/>.</returns>
 		public EmitHelper BeginFaultBlock()
 		{
 			_ilGenerator.BeginFaultBlock(); return this;
@@ -116,7 +116,7 @@ namespace BLToolkit.Reflection.Emit
 		/// <summary>
 		/// Begins a finally block in the Microsoft intermediate language (MSIL) instruction stream.
 		/// </summary>
-		/// <returns>Current instance of the EmitHelper.</returns>
+		/// <returns>Current instance of the <see cref="EmitHelper"/>.</returns>
 		public EmitHelper BeginFinallyBlock()
 		{
 			_ilGenerator.BeginFinallyBlock(); return this;
@@ -125,7 +125,7 @@ namespace BLToolkit.Reflection.Emit
 		/// <summary>
 		/// Begins a lexical scope.
 		/// </summary>
-		/// <returns>Current instance of the EmitHelper.</returns>
+		/// <returns>Current instance of the <see cref="EmitHelper"/>.</returns>
 		public EmitHelper BeginScope()
 		{
 			_ilGenerator.BeginScope(); return this;
@@ -153,7 +153,7 @@ namespace BLToolkit.Reflection.Emit
 		/// <summary>
 		/// Ends an exception block.
 		/// </summary>
-		/// <returns>Current instance of the EmitHelper.</returns>
+		/// <returns>Current instance of the <see cref="EmitHelper"/>.</returns>
 		public EmitHelper EndExceptionBlock()
 		{
 			_ilGenerator.EndExceptionBlock(); return this;
@@ -162,7 +162,7 @@ namespace BLToolkit.Reflection.Emit
 		/// <summary>
 		/// Ends a lexical scope.
 		/// </summary>
-		/// <returns>Current instance of the EmitHelper.</returns>
+		/// <returns>Current instance of the <see cref="EmitHelper"/>.</returns>
 		public EmitHelper EndScope()
 		{
 			_ilGenerator.EndScope(); return this;
@@ -173,7 +173,7 @@ namespace BLToolkit.Reflection.Emit
 		/// with the given label.
 		/// </summary>
 		/// <param name="loc">The label for which to set an index.</param>
-		/// <returns>Current instance of the EmitHelper.</returns>
+		/// <returns>Current instance of the <see cref="EmitHelper"/>.</returns>
 		public EmitHelper MarkLabel(Label loc)
 		{
 			_ilGenerator.MarkLabel(loc); return this;
@@ -187,7 +187,7 @@ namespace BLToolkit.Reflection.Emit
 		/// <param name="startColumn">The column in the line where the sequence point begins.</param>
 		/// <param name="endLine">The line where the sequence point ends.</param>
 		/// <param name="endColumn">The column in the line where the sequence point ends.</param>
-		/// <returns>Current instance of the EmitHelper.</returns>
+		/// <returns>Current instance of the <see cref="EmitHelper"/>.</returns>
 		public EmitHelper MarkSequencePoint(
 			ISymbolDocumentWriter document,
 			int startLine,
@@ -203,7 +203,7 @@ namespace BLToolkit.Reflection.Emit
 		/// Emits an instruction to throw an exception.
 		/// </summary>
 		/// <param name="exceptionType">The class of the type of exception to throw.</param>
-		/// <returns>Current instance of the EmitHelper.</returns>
+		/// <returns>Current instance of the <see cref="EmitHelper"/>.</returns>
 		public EmitHelper ThrowException(Type exceptionType)
 		{
 			_ilGenerator.ThrowException(exceptionType); return this;
@@ -214,7 +214,7 @@ namespace BLToolkit.Reflection.Emit
 		/// the current active lexical scope.
 		/// </summary>
 		/// <param name="namespaceName">The namespace to be used in evaluating locals and watches for the current active lexical scope.</param>
-		/// <returns>Current instance of the EmitHelper.</returns>
+		/// <returns>Current instance of the <see cref="EmitHelper"/>.</returns>
 		public EmitHelper UsingNamespace(string namespaceName)
 		{
 			_ilGenerator.UsingNamespace(namespaceName); return this;
@@ -649,6 +649,13 @@ namespace BLToolkit.Reflection.Emit
 			_ilGenerator.Emit(OpCodes.Call, methodInfo); return this;
 		}
 
+		/// <summary>
+		/// Calls ILGenerator.Emit(<see cref="OpCodes.Call"/>, constructorInfo) that
+		/// calls the method indicated by the passed method descriptor.
+		/// </summary>
+		/// <param name="constructorInfo">The constructor to be called.</param>
+		/// <seealso cref="OpCodes.Call">OpCodes.Call</seealso>
+		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode,MethodInfo)">ILGenerator.Emit</seealso>
 		public EmitHelper call(ConstructorInfo constructorInfo)
 		{
 			_ilGenerator.Emit(OpCodes.Call, constructorInfo); return this;
@@ -667,23 +674,20 @@ namespace BLToolkit.Reflection.Emit
 			_ilGenerator.EmitCall(OpCodes.Call, methodInfo, optionalParameterTypes); return this;
 		}
 
-		public EmitHelper call(Type type, string methodName, params Type[] parameterTypes)
+		/// <summary>
+		/// Calls ILGenerator.EmitCall(<see cref="OpCodes.Call"/>, methodInfo, optionalParameterTypes) that
+		/// calls the method indicated by the passed method descriptor.
+		/// </summary>
+		/// <param name="type">A Type</param>
+		/// <param name="methodName">The name of the method to be called.</param>
+		/// <param name="optionalParameterTypes">The types of the optional arguments if the method is a varargs method.</param>
+		/// <seealso cref="OpCodes.Call">OpCodes.Call</seealso>
+		/// <seealso cref="System.Reflection.Emit.ILGenerator.EmitCall(OpCode,MethodInfo,Type[])">ILGenerator.EmitCall</seealso>
+		public EmitHelper call(Type type, string methodName, params Type[] optionalParameterTypes)
 		{
 			if (type == null) throw new ArgumentNullException("type");
 
-			MethodInfo methodInfo = type.GetMethod(methodName, parameterTypes);
-
-			if (methodInfo == null)
-				throw CreateNoSuchMethodException(type, methodName);
-
-			return call(methodInfo);
-		}
-
-		public EmitHelper call(Type type, string methodName, BindingFlags flags, params Type[] parameterTypes)
-		{
-			if (type == null) throw new ArgumentNullException("type");
-
-			MethodInfo methodInfo = type.GetMethod(methodName, flags, null, parameterTypes, null);
+			MethodInfo methodInfo = type.GetMethod(methodName, optionalParameterTypes);
 
 			if (methodInfo == null)
 				throw CreateNoSuchMethodException(type, methodName);
@@ -692,7 +696,30 @@ namespace BLToolkit.Reflection.Emit
 		}
 
 		/// <summary>
-		/// Calls ILGenerator.EmitCalli(<see cref="OpCodes.Calli"/>, CallingConvention, Type, Type[]) that
+		/// Calls ILGenerator.EmitCall(<see cref="OpCodes.Call"/>, methodInfo, optionalParameterTypes) that
+		/// calls the method indicated by the passed method descriptor.
+		/// </summary>
+		/// <param name="type">A Type</param>
+		/// <param name="methodName">The name of the method to be called.</param>
+		/// <param name="flags">A bitmask comprised of one or more <see cref="BindingFlags"/> 
+		/// that specify how the search is conducted.</param>
+		/// <param name="optionalParameterTypes">The types of the optional arguments if the method is a varargs method.</param>
+		/// <seealso cref="OpCodes.Call">OpCodes.Call</seealso>
+		/// <seealso cref="System.Reflection.Emit.ILGenerator.EmitCall(OpCode,MethodInfo,Type[])">ILGenerator.EmitCall</seealso>
+		public EmitHelper call(Type type, string methodName, BindingFlags flags, params Type[] optionalParameterTypes)
+		{
+			if (type == null) throw new ArgumentNullException("type");
+
+			MethodInfo methodInfo = type.GetMethod(methodName, flags, null, optionalParameterTypes, null);
+
+			if (methodInfo == null)
+				throw CreateNoSuchMethodException(type, methodName);
+
+			return call(methodInfo);
+		}
+
+		/// <summary>
+		/// Calls ILGenerator.EmitCalli(<see cref="OpCodes.Calli"/>, <see cref="CallingConvention"/>, Type, Type[]) that
 		/// calls the method indicated on the evaluation stack (as a pointer to an entry point) 
 		/// with arguments described by a calling convention using an unmanaged calling convention.
 		/// </summary>
@@ -707,7 +734,7 @@ namespace BLToolkit.Reflection.Emit
 		}
 
 		/// <summary>
-		/// Calls ILGenerator.EmitCalli(<see cref="OpCodes.Calli"/>, CallingConventions, Type, Type[], Type[]) that
+		/// Calls ILGenerator.EmitCalli(<see cref="OpCodes.Calli"/>, <see cref="CallingConvention"/>, Type, Type[], Type[]) that
 		/// calls the method indicated on the evaluation stack (as a pointer to an entry point)
 		/// with arguments described by a calling convention using a managed calling convention.
 		/// </summary>
@@ -754,14 +781,14 @@ namespace BLToolkit.Reflection.Emit
 		/// </summary>
 		/// <param name="methodName">The method to be called.</param>
 		/// <param name="type">The declaring type of the method.</param>
-		/// <param name="parameterTypes">The types of the optional arguments if the method is a varargs method.</param>
+		/// <param name="optionalParameterTypes">The types of the optional arguments if the method is a varargs method.</param>
 		/// <seealso cref="OpCodes.Callvirt">OpCodes.Callvirt</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.EmitCall(OpCode,MethodInfo,Type[])">ILGenerator.EmitCall</seealso>
-		public EmitHelper callvirt(Type type, string methodName, params Type[] parameterTypes)
+		public EmitHelper callvirt(Type type, string methodName, params Type[] optionalParameterTypes)
 		{
 			if (type == null) throw new ArgumentNullException("type");
 
-			MethodInfo methodInfo = type.GetMethod(methodName, parameterTypes);
+			MethodInfo methodInfo = type.GetMethod(methodName, optionalParameterTypes);
 
 			if (methodInfo == null)
 				throw CreateNoSuchMethodException(type, methodName);
@@ -769,12 +796,23 @@ namespace BLToolkit.Reflection.Emit
 			return callvirt(methodInfo);
 		}
 
-		public EmitHelper callvirt(Type type, string methodName, BindingFlags bindingAttr, params Type[] optionalParameterTypes)
+		/// <summary>
+		/// Calls ILGenerator.EmitCall(<see cref="OpCodes.Callvirt"/>, methodInfo, optionalParameterTypes) that
+		/// calls a late-bound method on an object, pushing the return value onto the evaluation stack.
+		/// </summary>
+		/// <param name="methodName">The method to be called.</param>
+		/// <param name="type">The declaring type of the method.</param>
+		/// <param name="flags">A bitmask comprised of one or more <see cref="BindingFlags"/> 
+		/// that specify how the search is conducted.</param>
+		/// <param name="optionalParameterTypes">The types of the optional arguments if the method is a varargs method.</param>
+		/// <seealso cref="OpCodes.Callvirt">OpCodes.Callvirt</seealso>
+		/// <seealso cref="System.Reflection.Emit.ILGenerator.EmitCall(OpCode,MethodInfo,Type[])">ILGenerator.EmitCall</seealso>
+		public EmitHelper callvirt(Type type, string methodName, BindingFlags flags, params Type[] optionalParameterTypes)
 		{
 			MethodInfo methodInfo = 
 				optionalParameterTypes == null?
-					type.GetMethod(methodName, bindingAttr):
-					type.GetMethod(methodName, bindingAttr, null, optionalParameterTypes, null);
+					type.GetMethod(methodName, flags):
+					type.GetMethod(methodName, flags, null, optionalParameterTypes, null);
 
 			if (methodInfo == null)
 				throw CreateNoSuchMethodException(type, methodName);
@@ -782,23 +820,42 @@ namespace BLToolkit.Reflection.Emit
 			return callvirt(methodInfo, null);
 		}
 
-		public EmitHelper callvirt(Type type, string methodName, BindingFlags bindingAttr)
+		/// <summary>
+		/// Calls ILGenerator.EmitCall(<see cref="OpCodes.Callvirt"/>, methodInfo, optionalParameterTypes) that
+		/// calls a late-bound method on an object, pushing the return value onto the evaluation stack.
+		/// </summary>
+		/// <param name="methodName">The method to be called.</param>
+		/// <param name="type">The declaring type of the method.</param>
+		/// <param name="flags">A bitmask comprised of one or more <see cref="BindingFlags"/> 
+		/// that specify how the search is conducted.</param>
+		/// <seealso cref="OpCodes.Callvirt">OpCodes.Callvirt</seealso>
+		/// <seealso cref="System.Reflection.Emit.ILGenerator.EmitCall(OpCode,MethodInfo,Type[])">ILGenerator.EmitCall</seealso>
+		public EmitHelper callvirt(Type type, string methodName, BindingFlags flags)
 		{
-			return callvirt(type, methodName, bindingAttr, null);
+			return callvirt(type, methodName, flags, null);
 		}
 
-		public EmitHelper callvirtNoGenerics(Type type, string methodName, params Type[] parameterTypes)
+		/// <summary>
+		/// Calls ILGenerator.EmitCall(<see cref="OpCodes.Callvirt"/>, methodInfo, optionalParameterTypes) that
+		/// calls a late-bound method on an object, pushing the return value onto the evaluation stack.
+		/// </summary>
+		/// <param name="methodName">The non-generic method to be called.</param>
+		/// <param name="type">The declaring type of the method.</param>
+		/// <param name="optionalParameterTypes">The types of the optional arguments if the method is a varargs method.</param>
+		/// <seealso cref="OpCodes.Callvirt">OpCodes.Callvirt</seealso>
+		/// <seealso cref="System.Reflection.Emit.ILGenerator.EmitCall(OpCode,MethodInfo,Type[])">ILGenerator.EmitCall</seealso>
+		public EmitHelper callvirtNoGenerics(Type type, string methodName, params Type[] optionalParameterTypes)
 		{
 			MethodInfo methodInfo = type.GetMethod(
 				methodName,
 				BindingFlags.Instance | BindingFlags.Public,
 				GenericBinder.NonGeneric,
-				parameterTypes, null);
+				optionalParameterTypes, null);
 
 			if (methodInfo == null)
 				throw CreateNoSuchMethodException(type, methodName);
 
-			return callvirt(methodInfo, parameterTypes.Length == 0? null: parameterTypes);
+			return callvirt(methodInfo, optionalParameterTypes.Length == 0? null: optionalParameterTypes);
 		}
 
 		/// <summary>
@@ -877,7 +934,7 @@ namespace BLToolkit.Reflection.Emit
 
 		/// <summary>
 		/// Calls ILGenerator.Emit(<see cref="OpCodes.Ckfinite"/>) that
-		/// throws ArithmeticException if value is not a finite number.
+		/// throws <see cref="ArithmeticException"/> if value is not a finite number.
 		/// </summary>
 		/// <seealso cref="OpCodes.Ckfinite">OpCodes.Ckfinite</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode)">ILGenerator.Emit</seealso>
@@ -1003,7 +1060,7 @@ namespace BLToolkit.Reflection.Emit
 		/// <summary>
 		/// Calls ILGenerator.Emit(<see cref="OpCodes.Conv_Ovf_I"/>) that
 		/// converts the signed value on top of the evaluation stack to signed natural int,
-		/// throwing OverflowException on overflow.
+		/// throwing <see cref="OverflowException"/> on overflow.
 		/// </summary>
 		/// <seealso cref="OpCodes.Conv_Ovf_I">OpCodes.Conv_Ovf_I</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode)">ILGenerator.Emit</seealso>
@@ -1015,7 +1072,7 @@ namespace BLToolkit.Reflection.Emit
 		/// <summary>
 		/// Calls ILGenerator.Emit(<see cref="OpCodes.Conv_Ovf_I1"/>) that
 		/// converts the signed value on top of the evaluation stack to signed int8 and extends it to int32,
-		/// throwing OverflowException on overflow.
+		/// throwing <see cref="OverflowException"/> on overflow.
 		/// </summary>
 		/// <seealso cref="OpCodes.Conv_Ovf_I1">OpCodes.Conv_Ovf_I1</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode)">ILGenerator.Emit</seealso>
@@ -1027,7 +1084,7 @@ namespace BLToolkit.Reflection.Emit
 		/// <summary>
 		/// Calls ILGenerator.Emit(<see cref="OpCodes.Conv_Ovf_I1_Un"/>) that
 		/// converts the unsigned value on top of the evaluation stack to signed int8 and extends it to int32,
-		/// throwing OverflowException on overflow.
+		/// throwing <see cref="OverflowException"/> on overflow.
 		/// </summary>
 		/// <seealso cref="OpCodes.Conv_Ovf_I1_Un">OpCodes.Conv_Ovf_I1_Un</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode)">ILGenerator.Emit</seealso>
@@ -1039,7 +1096,7 @@ namespace BLToolkit.Reflection.Emit
 		/// <summary>
 		/// Calls ILGenerator.Emit(<see cref="OpCodes.Conv_Ovf_I2"/>) that
 		/// converts the signed value on top of the evaluation stack to signed int16 and extending it to int32,
-		/// throwing OverflowException on overflow.
+		/// throwing <see cref="OverflowException"/> on overflow.
 		/// </summary>
 		/// <seealso cref="OpCodes.Conv_Ovf_I2">OpCodes.Conv_Ovf_I2</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode)">ILGenerator.Emit</seealso>
@@ -1051,7 +1108,7 @@ namespace BLToolkit.Reflection.Emit
 		/// <summary>
 		/// Calls ILGenerator.Emit(<see cref="OpCodes.Conv_Ovf_I2_Un"/>) that
 		/// converts the unsigned value on top of the evaluation stack to signed int16 and extends it to int32,
-		/// throwing OverflowException on overflow.
+		/// throwing <see cref="OverflowException"/> on overflow.
 		/// </summary>
 		/// <seealso cref="OpCodes.Conv_Ovf_I2_Un">OpCodes.Conv_Ovf_I2_Un</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode)">ILGenerator.Emit</seealso>
@@ -1062,7 +1119,7 @@ namespace BLToolkit.Reflection.Emit
 
 		/// <summary>
 		/// Calls ILGenerator.Emit(<see cref="OpCodes.Conv_Ovf_I4"/>) that
-		/// converts the signed value on top of the evaluation tack to signed int32, throwing OverflowException on overflow.
+		/// converts the signed value on top of the evaluation tack to signed int32, throwing <see cref="OverflowException"/> on overflow.
 		/// </summary>
 		/// <seealso cref="OpCodes.Conv_Ovf_I4">OpCodes.Conv_Ovf_I4</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode)">ILGenerator.Emit</seealso>
@@ -1073,7 +1130,7 @@ namespace BLToolkit.Reflection.Emit
 
 		/// <summary>
 		/// Calls ILGenerator.Emit(<see cref="OpCodes.Conv_Ovf_I4_Un"/>) that
-		/// converts the unsigned value on top of the evaluation stack to signed int32, throwing OverflowException on overflow.
+		/// converts the unsigned value on top of the evaluation stack to signed int32, throwing <see cref="OverflowException"/> on overflow.
 		/// </summary>
 		/// <seealso cref="OpCodes.Conv_Ovf_I4_Un">OpCodes.Conv_Ovf_I4_Un</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode)">ILGenerator.Emit</seealso>
@@ -1084,7 +1141,8 @@ namespace BLToolkit.Reflection.Emit
 
 		/// <summary>
 		/// Calls ILGenerator.Emit(<see cref="OpCodes.Conv_Ovf_I8"/>) that
-		/// converts the signed value on top of the evaluation stack to signed int64, throwing OverflowException on overflow.
+		/// converts the signed value on top of the evaluation stack to signed int64,
+		/// throwing <see cref="OverflowException"/> on overflow.
 		/// </summary>
 		/// <seealso cref="OpCodes.Conv_Ovf_I8">OpCodes.Conv_Ovf_I8</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode)">ILGenerator.Emit</seealso>
@@ -1095,7 +1153,7 @@ namespace BLToolkit.Reflection.Emit
 
 		/// <summary>
 		/// Calls ILGenerator.Emit(<see cref="OpCodes.Conv_Ovf_I8_Un"/>) that
-		/// converts the unsigned value on top of the evaluation stack to signed int64, throwing OverflowException on overflow.
+		/// converts the unsigned value on top of the evaluation stack to signed int64, throwing <see cref="OverflowException"/> on overflow.
 		/// </summary>
 		/// <seealso cref="OpCodes.Conv_Ovf_I8_Un">OpCodes.Conv_Ovf_I8_Un</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode)">ILGenerator.Emit</seealso>
@@ -1107,7 +1165,7 @@ namespace BLToolkit.Reflection.Emit
 		/// <summary>
 		/// Calls ILGenerator.Emit(<see cref="OpCodes.Conv_Ovf_I_Un"/>) that
 		/// converts the unsigned value on top of the evaluation stack to signed natural int,
-		/// throwing OverflowException on overflow.
+		/// throwing <see cref="OverflowException"/> on overflow.
 		/// </summary>
 		/// <seealso cref="OpCodes.Conv_Ovf_I_Un">OpCodes.Conv_Ovf_I_Un</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode)">ILGenerator.Emit</seealso>
@@ -1119,7 +1177,7 @@ namespace BLToolkit.Reflection.Emit
 		/// <summary>
 		/// Calls ILGenerator.Emit(<see cref="OpCodes.Conv_Ovf_U"/>) that
 		/// converts the signed value on top of the evaluation stack to unsigned natural int,
-		/// throwing OverflowException on overflow.
+		/// throwing <see cref="OverflowException"/> on overflow.
 		/// </summary>
 		/// <seealso cref="OpCodes.Conv_Ovf_U">OpCodes.Conv_Ovf_U</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode)">ILGenerator.Emit</seealso>
@@ -1131,7 +1189,7 @@ namespace BLToolkit.Reflection.Emit
 		/// <summary>
 		/// Calls ILGenerator.Emit(<see cref="OpCodes.Conv_Ovf_U1"/>) that
 		/// converts the signed value on top of the evaluation stack to unsigned int8 and extends it to int32,
-		/// throwing OverflowException on overflow.
+		/// throwing <see cref="OverflowException"/> on overflow.
 		/// </summary>
 		/// <seealso cref="OpCodes.Conv_Ovf_U1">OpCodes.Conv_Ovf_U1</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode)">ILGenerator.Emit</seealso>
@@ -1143,7 +1201,7 @@ namespace BLToolkit.Reflection.Emit
 		/// <summary>
 		/// Calls ILGenerator.Emit(<see cref="OpCodes.Conv_Ovf_U1_Un"/>) that
 		/// converts the unsigned value on top of the evaluation stack to unsigned int8 and extends it to int32,
-		/// throwing OverflowException on overflow.
+		/// throwing <see cref="OverflowException"/> on overflow.
 		/// </summary>
 		/// <seealso cref="OpCodes.Conv_Ovf_U1_Un">OpCodes.Conv_Ovf_U1_Un</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode)">ILGenerator.Emit</seealso>
@@ -1155,7 +1213,7 @@ namespace BLToolkit.Reflection.Emit
 		/// <summary>
 		/// Calls ILGenerator.Emit(<see cref="OpCodes.Conv_Ovf_U2"/>) that
 		/// converts the signed value on top of the evaluation stack to unsigned int16 and extends it to int32,
-		/// throwing OverflowException on overflow.
+		/// throwing <see cref="OverflowException"/> on overflow.
 		/// </summary>
 		/// <seealso cref="OpCodes.Conv_Ovf_U2">OpCodes.Conv_Ovf_U2</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode)">ILGenerator.Emit</seealso>
@@ -1167,7 +1225,7 @@ namespace BLToolkit.Reflection.Emit
 		/// <summary>
 		/// Calls ILGenerator.Emit(<see cref="OpCodes.Conv_Ovf_U2_Un"/>) that
 		/// converts the unsigned value on top of the evaluation stack to unsigned int16 and extends it to int32,
-		/// throwing OverflowException on overflow.
+		/// throwing <see cref="OverflowException"/> on overflow.
 		/// </summary>
 		/// <seealso cref="OpCodes.Conv_Ovf_U2_Un">OpCodes.Conv_Ovf_U2_Un</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode)">ILGenerator.Emit</seealso>
@@ -1178,7 +1236,7 @@ namespace BLToolkit.Reflection.Emit
 
 		/// <summary>
 		/// Calls ILGenerator.Emit(<see cref="OpCodes.Conv_Ovf_U4"/>) that
-		/// Converts the signed value on top of the evaluation stack to unsigned int32, throwing OverflowException on overflow.
+		/// Converts the signed value on top of the evaluation stack to unsigned int32, throwing <see cref="OverflowException"/> on overflow.
 		/// </summary>
 		/// <seealso cref="OpCodes.Conv_Ovf_U4">OpCodes.Conv_Ovf_U4</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode)">ILGenerator.Emit</seealso>
@@ -1189,7 +1247,7 @@ namespace BLToolkit.Reflection.Emit
 
 		/// <summary>
 		/// Calls ILGenerator.Emit(<see cref="OpCodes.Conv_Ovf_U4_Un"/>) that
-		/// converts the unsigned value on top of the evaluation stack to unsigned int32, throwing OverflowException on overflow.
+		/// converts the unsigned value on top of the evaluation stack to unsigned int32, throwing <see cref="OverflowException"/> on overflow.
 		/// </summary>
 		/// <seealso cref="OpCodes.Conv_Ovf_U4_Un">OpCodes.Conv_Ovf_U4_Un</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode)">ILGenerator.Emit</seealso>
@@ -1200,7 +1258,7 @@ namespace BLToolkit.Reflection.Emit
 
 		/// <summary>
 		/// Calls ILGenerator.Emit(<see cref="OpCodes.Conv_Ovf_U8"/>) that
-		/// converts the signed value on top of the evaluation stack to unsigned int64, throwing OverflowException on overflow.
+		/// converts the signed value on top of the evaluation stack to unsigned int64, throwing <see cref="OverflowException"/> on overflow.
 		/// </summary>
 		/// <seealso cref="OpCodes.Conv_Ovf_U8">OpCodes.Conv_Ovf_U8</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode)">ILGenerator.Emit</seealso>
@@ -1211,7 +1269,7 @@ namespace BLToolkit.Reflection.Emit
 
 		/// <summary>
 		/// Calls ILGenerator.Emit(<see cref="OpCodes.Conv_Ovf_U8_Un"/>) that
-		/// converts the unsigned value on top of the evaluation stack to unsigned int64, throwing OverflowException on overflow.
+		/// converts the unsigned value on top of the evaluation stack to unsigned int64, throwing <see cref="OverflowException"/> on overflow.
 		/// </summary>
 		/// <seealso cref="OpCodes.Conv_Ovf_U8_Un">OpCodes.Conv_Ovf_U8_Un</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode)">ILGenerator.Emit</seealso>
@@ -1223,7 +1281,7 @@ namespace BLToolkit.Reflection.Emit
 		/// <summary>
 		/// Calls ILGenerator.Emit(<see cref="OpCodes.Conv_Ovf_U_Un"/>) that
 		/// converts the unsigned value on top of the evaluation stack to unsigned natural int,
-		/// throwing OverflowException on overflow.
+		/// throwing <see cref="OverflowException"/> on overflow.
 		/// </summary>
 		/// <seealso cref="OpCodes.Conv_Ovf_U_Un">OpCodes.Conv_Ovf_U_Un</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode)">ILGenerator.Emit</seealso>
@@ -1462,6 +1520,12 @@ namespace BLToolkit.Reflection.Emit
 			_ilGenerator.Emit(OpCodes.Ldarg, index); return this;
 		}
 
+		/// <summary>
+		/// Loads an argument onto the stack.
+		/// </summary>
+		/// <param name="parameterInfo">A <see cref="ParameterInfo"/> representing a parameter.</param>
+		/// <param name="box">True, if parameter must be converted to a reference.</param>
+		/// <seealso cref="ldarg(ParameterInfo)"/>
 		public EmitHelper ldargEx(ParameterInfo parameterInfo, bool box)
 		{
 			ldarg(parameterInfo);
@@ -1516,7 +1580,7 @@ namespace BLToolkit.Reflection.Emit
 		/// <summary>
 		/// Loads an argument onto the stack.
 		/// </summary>
-		/// <param name="parameterInfo">A ParameterInfo representing a parameter.</param>
+		/// <param name="parameterInfo">A <see cref="ParameterInfo"/> representing a parameter.</param>
 		public EmitHelper ldarg(ParameterInfo parameterInfo)
 		{
 			if (parameterInfo == null) throw new ArgumentNullException("parameterInfo");
@@ -1568,7 +1632,7 @@ namespace BLToolkit.Reflection.Emit
 		/// <summary>
 		/// Loads an argument address onto the stack.
 		/// </summary>
-		/// <param name="parameterInfo">A ParameterInfo representing a parameter.</param>
+		/// <param name="parameterInfo">A <see cref="ParameterInfo"/> representing a parameter.</param>
 		public EmitHelper ldarga(ParameterInfo parameterInfo)
 		{
 			if (parameterInfo == null) throw new ArgumentNullException("parameterInfo");
@@ -1771,6 +1835,11 @@ namespace BLToolkit.Reflection.Emit
 			get { _ilGenerator.Emit(OpCodes.Ldc_I4_M1); return this; }
 		}
 
+		/// <summary>
+		/// Calls the best form of ILGenerator.Emit(Ldc_I4_X) that
+		/// pushes the integer value of -1 onto the evaluation stack as an int32.
+		/// </summary>
+		/// <seealso cref="ldc_i4"/>
 		public EmitHelper ldc_i4_(int num)
 		{
 			switch (num)
@@ -1988,7 +2057,7 @@ namespace BLToolkit.Reflection.Emit
 		/// Calls ILGenerator.Emit(<see cref="OpCodes.Ldfld"/>, fieldInfo) that
 		/// finds the value of a field in the object whose reference is currently on the evaluation stack.
 		/// </summary>
-		/// <param name="fieldInfo">A FieldInfo representing a field.</param>
+		/// <param name="fieldInfo">A <see cref="FieldInfo"/> representing a field.</param>
 		/// <seealso cref="OpCodes.Ldfld">OpCodes.Ldfld</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode,FieldInfo)">ILGenerator.Emit</seealso>
 		public EmitHelper ldfld(FieldInfo fieldInfo)
@@ -2000,7 +2069,7 @@ namespace BLToolkit.Reflection.Emit
 		/// Calls ILGenerator.Emit(<see cref="OpCodes.Ldflda"/>, fieldInfo) that
 		/// finds the address of a field in the object whose reference is currently on the evaluation stack.
 		/// </summary>
-		/// <param name="fieldInfo">A FieldInfo representing a field.</param>
+		/// <param name="fieldInfo">A <see cref="FieldInfo"/> representing a field.</param>
 		/// <seealso cref="OpCodes.Ldflda">OpCodes.Ldflda</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode,FieldInfo)">ILGenerator.Emit</seealso>
 		public EmitHelper ldflda(FieldInfo fieldInfo)
@@ -2206,7 +2275,7 @@ namespace BLToolkit.Reflection.Emit
 		}
 
 		/// <summary>
-		/// Calls ILGenerator.Emit(<see cref="OpCodes.Ldloc"/>, LocalBuilder) that
+		/// Calls ILGenerator.Emit(<see cref="OpCodes.Ldloc"/>, <see cref="LocalBuilder"/>) that
 		/// load an argument address onto the evaluation stack.
 		/// </summary>
 		/// <param name="localBuilder">Local variable builder.</param>
@@ -2242,7 +2311,7 @@ namespace BLToolkit.Reflection.Emit
 		}
 
 		/// <summary>
-		/// Calls ILGenerator.Emit(<see cref="OpCodes.Ldloca"/>, LocalBuilder) that
+		/// Calls ILGenerator.Emit(<see cref="OpCodes.Ldloca"/>, <see cref="LocalBuilder"/>) that
 		/// loads the address of the local variable at a specific index onto the evaluation stack.
 		/// </summary>
 		/// <param name="local">A <see cref="LocalBuilder"/> representing the local variable.</param>
@@ -2336,7 +2405,7 @@ namespace BLToolkit.Reflection.Emit
 		/// Calls ILGenerator.Emit(<see cref="OpCodes.Ldsfld"/>, fieldInfo) that
 		/// pushes the value of a static field onto the evaluation stack.
 		/// </summary>
-		/// <param name="fieldInfo">A FieldInfo representing a field.</param>
+		/// <param name="fieldInfo">A <see cref="FieldInfo"/> representing a field.</param>
 		/// <seealso cref="OpCodes.Ldsfld">OpCodes.Ldsfld</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode,FieldInfo)">ILGenerator.Emit</seealso>
 		public EmitHelper ldsfld(FieldInfo fieldInfo)
@@ -2348,7 +2417,7 @@ namespace BLToolkit.Reflection.Emit
 		/// Calls ILGenerator.Emit(<see cref="OpCodes.Ldsflda"/>, fieldInfo) that
 		/// pushes the address of a static field onto the evaluation stack.
 		/// </summary>
-		/// <param name="fieldInfo">A FieldInfo representing a field.</param>
+		/// <param name="fieldInfo">A <see cref="FieldInfo"/> representing a field.</param>
 		/// <seealso cref="OpCodes.Ldsflda">OpCodes.Ldsflda</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode,FieldInfo)">ILGenerator.Emit</seealso>
 		public EmitHelper ldsflda(FieldInfo fieldInfo)
@@ -2356,6 +2425,13 @@ namespace BLToolkit.Reflection.Emit
 			_ilGenerator.Emit(OpCodes.Ldsflda, fieldInfo); return this;
 		}
 
+		/// <summary>
+		/// Calls <see cref="ldstr"/> -or- <see cref="ldnull"/>,
+		/// if given string is a null reference.
+		/// </summary>
+		/// <param name="str">The String to be emitted.</param>
+		/// <seealso cref="ldstr"/>
+		/// <seealso cref="ldnull"/>
 		public EmitHelper ldstrEx(string str)
 		{
 			return str == null ? ldnull : ldstr(str);
@@ -2377,7 +2453,7 @@ namespace BLToolkit.Reflection.Emit
 		/// Calls ILGenerator.Emit(<see cref="OpCodes.Ldstr"/>, string) that
 		/// pushes a new object reference to a string literal stored in the metadata.
 		/// </summary>
-		/// <param name="nameOrIndex">The NameOrIndexParameter to be emitted.</param>
+		/// <param name="nameOrIndex">The <see cref="NameOrIndexParameter"/> to be emitted.</param>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode,FieldInfo)">ILGenerator.Emit</seealso>
 		public EmitHelper ldNameOrIndex(NameOrIndexParameter nameOrIndex)
 		{
@@ -2403,7 +2479,7 @@ namespace BLToolkit.Reflection.Emit
 		/// converts a metadata token to its runtime representation, 
 		/// pushing it onto the evaluation stack.
 		/// </summary>
-		/// <param name="fieldInfo">A FieldInfo representing a field.</param>
+		/// <param name="fieldInfo">A <see cref="FieldInfo"/> representing a field.</param>
 		/// <seealso cref="OpCodes.Ldtoken">OpCodes.Ldtoken</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode,FieldInfo)">ILGenerator.Emit</seealso>
 		public EmitHelper ldtoken(FieldInfo fieldInfo)
@@ -2545,11 +2621,11 @@ namespace BLToolkit.Reflection.Emit
 		}
 
 		/// <summary>
-		/// Calls ILGenerator.Emit(<see cref="OpCodes.Newobj"/>, ConstructorInfo) that
+		/// Calls ILGenerator.Emit(<see cref="OpCodes.Newobj"/>, <see cref="ConstructorInfo"/>) that
 		/// creates a new object or a new instance of a value type,
 		/// pushing an object reference (type O) onto the evaluation stack.
 		/// </summary>
-		/// <param name="constructorInfo">A ConstructorInfo representing a constructor.</param>
+		/// <param name="constructorInfo">A <see cref="ConstructorInfo"/> representing a constructor.</param>
 		/// <seealso cref="OpCodes.Newobj">OpCodes.Newobj</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode,ConstructorInfo)">ILGenerator.Emit</seealso>
 		public EmitHelper newobj(ConstructorInfo constructorInfo)
@@ -2557,6 +2633,16 @@ namespace BLToolkit.Reflection.Emit
 			_ilGenerator.Emit(OpCodes.Newobj, constructorInfo); return this;
 		}
 
+		/// <summary>
+		/// Calls ILGenerator.Emit(<see cref="OpCodes.Newobj"/>, ConstructorInfo) that
+		/// creates a new object or a new instance of a value type,
+		/// pushing an object reference (type O) onto the evaluation stack.
+		/// </summary>
+		/// <param name="type">A type.</param>
+		/// <param name="parameters">An array of System.Type objects representing
+		/// the number, order, and type of the parameters for the desired constructor.
+		/// -or- An empty array of System.Type objects, to get a constructor that takes
+		/// no parameters. Such an empty array is provided by the static field System.Type.EmptyTypes.</param>
 		public EmitHelper newobj(Type type, params Type[] parameters)
 		{
 			if (type == null) throw new ArgumentNullException("type");
@@ -2874,10 +2960,10 @@ namespace BLToolkit.Reflection.Emit
 		}
 
 		/// <summary>
-		/// Calls ILGenerator.Emit(<see cref="OpCodes.Stfld"/>, FieldInfo) that
+		/// Calls ILGenerator.Emit(<see cref="OpCodes.Stfld"/>, <see cref="FieldInfo"/>) that
 		/// replaces the value stored in the field of an object reference or pointer with a new value.
 		/// </summary>
-		/// <param name="fieldInfo">A FieldInfo representing a field.</param>
+		/// <param name="fieldInfo">A <see cref="FieldInfo"/> representing a field.</param>
 		/// <seealso cref="OpCodes.Stfld">OpCodes.Stfld</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode,FieldInfo)">ILGenerator.Emit</seealso>
 		public EmitHelper stfld(FieldInfo fieldInfo)
@@ -3014,7 +3100,7 @@ namespace BLToolkit.Reflection.Emit
 		}
 
 		/// <summary>
-		/// Calls ILGenerator.Emit(<see cref="OpCodes.Stloc"/>, LocalBuilder) that
+		/// Calls ILGenerator.Emit(<see cref="OpCodes.Stloc"/>, <see cref="LocalBuilder"/>) that
 		/// pops the current value from the top of the evaluation stack and stores it 
 		/// in the local variable list at a specified index.
 		/// </summary>
@@ -3092,7 +3178,7 @@ namespace BLToolkit.Reflection.Emit
 		}
 
 		/// <summary>
-		/// Calls ILGenerator.Emit(<see cref="OpCodes.Stloc_S"/>, LocalBuilder) that
+		/// Calls ILGenerator.Emit(<see cref="OpCodes.Stloc_S"/>, <see cref="LocalBuilder"/>) that
 		/// pops the current value from the top of the evaluation stack and stores it 
 		/// in the local variable list at index (short form).
 		/// </summary>
@@ -3144,7 +3230,7 @@ namespace BLToolkit.Reflection.Emit
 		/// Calls ILGenerator.Emit(<see cref="OpCodes.Stsfld"/>, fieldInfo) that
 		/// replaces the value of a static field with a value from the evaluation stack.
 		/// </summary>
-		/// <param name="fieldInfo">A FieldInfo representing a field.</param>
+		/// <param name="fieldInfo">A <see cref="FieldInfo"/> representing a field.</param>
 		/// <seealso cref="OpCodes.Stsfld">OpCodes.Stsfld</seealso>
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.Emit(OpCode,FieldInfo)">ILGenerator.Emit</seealso>
 		public EmitHelper stsfld(FieldInfo fieldInfo)
@@ -3474,6 +3560,10 @@ namespace BLToolkit.Reflection.Emit
 				ldtoken(type).call(typeof(Type), "GetTypeFromHandle", typeof(RuntimeTypeHandle));
 		}
 
+		/// <summary>
+		/// Loads a field instance at runtime.
+		/// </summary>
+		/// <param name="fieldInfo">A <see cref="FieldInfo"/> representing a field.</param>
 		public EmitHelper LoadField(FieldInfo fieldInfo)
 		{
 			return fieldInfo.IsStatic ? ldsfld(fieldInfo) : ldarg_0.ldfld(fieldInfo);
@@ -3488,19 +3578,28 @@ namespace BLToolkit.Reflection.Emit
 		{
 			if (type == null) throw new ArgumentNullException("type");
 
-			if (type == typeof(object)) return this;
-
-			return type.IsValueType? unbox_any(type): castclass(type);
+			return
+				type == typeof(object)? this:
+				(type.IsValueType?      unbox_any(type):
+					castclass(type));
 		}
 
+		/// <summary>
+		/// Cast an object passed by reference to the specified type
+		/// or unbox a boxed value type unless <paramref name="expectedType"/>
+		/// is a parent of <paramref name="actualType"/>.
+		/// </summary>
+		/// <param name="expectedType">A type required.</param>
+		/// <param name="actualType">A type available.</param>
 		public EmitHelper CastIfNecessary(Type expectedType, Type actualType)
 		{
 			if (expectedType == null) throw new ArgumentNullException("expectedType");
 			if (actualType   == null) throw new ArgumentNullException("actualType");
 
-			if (TypeHelper.IsSameOrParent(expectedType, actualType)) return this;
-
-			return actualType.IsValueType? unbox_any(expectedType): castclass(expectedType);
+			return
+				TypeHelper.IsSameOrParent(expectedType, actualType)? this:
+				actualType.IsValueType?                              unbox_any(expectedType):
+					castclass(expectedType);
 		}
 
 		/// <summary>

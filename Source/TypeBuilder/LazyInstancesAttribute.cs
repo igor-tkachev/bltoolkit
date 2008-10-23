@@ -38,7 +38,7 @@ namespace BLToolkit.TypeBuilder
 		public  Type  Type
 		{
 			get { return _type; }
-			set { _type = value == null? typeof(object): value; }
+			set { _type = value ?? typeof(object); }
 		}
 	}
 }

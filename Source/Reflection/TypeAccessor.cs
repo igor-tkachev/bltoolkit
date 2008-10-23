@@ -345,10 +345,7 @@ namespace BLToolkit.Reflection
 
 			object[] attrs = TypeHelper.GetAttributes(type, typeof(AutoImplementInterfaceAttribute));
 
-			if (attrs != null && attrs.Length > 0)
-				return true;
-
-			return false;
+			return attrs != null && attrs.Length > 0;
 		}
 
 		private static bool IsAssociatedType(Type type)
@@ -458,7 +455,7 @@ namespace BLToolkit.Reflection
 			if (!TypeHelper.IsSameOrParent(parent, child))
 				throw new ArgumentException(
 					string.Format("'{0}' must be a base type of '{1}'", parent, child),
-					"inheritedType");
+					"child");
 
 			TypeAccessor accessor = GetAccessor(child);
 
@@ -589,10 +586,7 @@ namespace BLToolkit.Reflection
 
 			object nullValue = GetNullValue(value.GetType());
 
-			if (nullValue == null)
-				return false;
-
-			return value.Equals(nullValue);
+			return nullValue != null && value.Equals(nullValue);
 		}
 
 		#endregion

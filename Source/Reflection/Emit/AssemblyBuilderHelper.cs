@@ -157,6 +157,9 @@ namespace BLToolkit.Reflection.Emit
 		}
 
 		private CustomAttributeBuilder _blToolkitAttribute;
+		/// <summary>
+		/// Retrieves a cached instance of <see cref="BLToolkit.TypeBuilder.BLToolkitGeneratedAttribute"/> builder.
+		/// </summary>
 		public  CustomAttributeBuilder  BLToolkitAttribute
 		{
 			get 
@@ -176,8 +179,8 @@ namespace BLToolkit.Reflection.Emit
 		/// <summary>
 		/// Converts the supplied <see cref="AssemblyBuilderHelper"/> to a <see cref="AssemblyBuilder"/>.
 		/// </summary>
-		/// <param name="assemblyBuilder">The AssemblyBuilderHelper.</param>
-		/// <returns>An AssemblyBuilder.</returns>
+		/// <param name="assemblyBuilder">The <see cref="AssemblyBuilderHelper"/>.</param>
+		/// <returns>An <see cref="AssemblyBuilder"/>.</returns>
 		public static implicit operator AssemblyBuilder(AssemblyBuilderHelper assemblyBuilder)
 		{
 			if (assemblyBuilder == null) throw new ArgumentNullException("assemblyBuilder");
@@ -188,8 +191,8 @@ namespace BLToolkit.Reflection.Emit
 		/// <summary>
 		/// Converts the supplied <see cref="AssemblyBuilderHelper"/> to a <see cref="ModuleBuilder"/>.
 		/// </summary>
-		/// <param name="assemblyBuilder">The AssemblyBuilderHelper.</param>
-		/// <returns>A ModuleBuilder.</returns>
+		/// <param name="assemblyBuilder">The <see cref="AssemblyBuilderHelper"/>.</param>
+		/// <returns>A <see cref="ModuleBuilder"/>.</returns>
 		public static implicit operator ModuleBuilder(AssemblyBuilderHelper assemblyBuilder)
 		{
 			if (assemblyBuilder == null) throw new ArgumentNullException("assemblyBuilder");
@@ -211,7 +214,7 @@ namespace BLToolkit.Reflection.Emit
 		/// Constructs a <see cref="TypeBuilderHelper"/> for a type with the specified name.
 		/// </summary>
 		/// <param name="name">The full path of the type.</param>
-		/// <returns>Returns the created <b>TypeBuilderHelper</b>.</returns>
+		/// <returns>Returns the created <see cref="TypeBuilderHelper"/>.</returns>
 		/// <seealso cref="System.Reflection.Emit.ModuleBuilder.DefineType(string)">ModuleBuilder.DefineType Method</seealso>
 		public TypeBuilderHelper DefineType(string name)
 		{
@@ -223,7 +226,7 @@ namespace BLToolkit.Reflection.Emit
 		/// </summary>
 		/// <param name="name">The full path of the type.</param>
 		/// <param name="parent">The Type that the defined type extends.</param>
-		/// <returns>Returns the created <b>TypeBuilderHelper</b>.</returns>
+		/// <returns>Returns the created <see cref="TypeBuilderHelper"/>.</returns>
 		/// <seealso cref="System.Reflection.Emit.ModuleBuilder.DefineType(string,TypeAttributes,Type)">ModuleBuilder.DefineType Method</seealso>
 		public TypeBuilderHelper DefineType(string name, Type parent)
 		{
@@ -236,7 +239,7 @@ namespace BLToolkit.Reflection.Emit
 		/// <param name="name">The full path of the type.</param>
 		/// <param name="attrs">The attribute to be associated with the type.</param>
 		/// <param name="parent">The Type that the defined type extends.</param>
-		/// <returns>Returns the created <b>TypeBuilderHelper</b>.</returns>
+		/// <returns>Returns the created <see cref="TypeBuilderHelper"/>.</returns>
 		/// <seealso cref="System.Reflection.Emit.ModuleBuilder.DefineType(string,TypeAttributes,Type)">ModuleBuilder.DefineType Method</seealso>
 		public TypeBuilderHelper DefineType(string name, TypeAttributes attrs, Type parent)
 		{
@@ -250,7 +253,7 @@ namespace BLToolkit.Reflection.Emit
 		/// <param name="name">The full path of the type.</param>
 		/// <param name="parent">The Type that the defined type extends.</param>
 		/// <param name="interfaces">The list of interfaces that the type implements.</param>
-		/// <returns>Returns the created <b>TypeBuilderHelper</b>.</returns>
+		/// <returns>Returns the created <see cref="TypeBuilderHelper"/>.</returns>
 		/// <seealso cref="System.Reflection.Emit.ModuleBuilder.DefineType(string,TypeAttributes,Type,Type[])">ModuleBuilder.DefineType Method</seealso>
 		public TypeBuilderHelper DefineType(string name, Type parent, params Type[] interfaces)
 		{
@@ -267,7 +270,7 @@ namespace BLToolkit.Reflection.Emit
 		/// <param name="attrs">The attribute to be associated with the type.</param>
 		/// <param name="parent">The Type that the defined type extends.</param>
 		/// <param name="interfaces">The list of interfaces that the type implements.</param>
-		/// <returns>Returns the created <b>TypeBuilderHelper</b>.</returns>
+		/// <returns>Returns the created <see cref="TypeBuilderHelper"/>.</returns>
 		/// <seealso cref="System.Reflection.Emit.ModuleBuilder.DefineType(string,TypeAttributes,Type,Type[])">ModuleBuilder.DefineType Method</seealso>
 		public TypeBuilderHelper DefineType(string name, TypeAttributes attrs, Type parent, params Type[] interfaces)
 		{

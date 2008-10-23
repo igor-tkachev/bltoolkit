@@ -190,43 +190,43 @@ namespace BLToolkit.Reflection
 			else
 				list.AddRange(attrs);
 
-			if (type.IsInterface == false)
+			if (type.IsInterface)
+				return;
+
+			// Reflection returns interfaces for the whole inheritance chain.
+			// So, we are going to get some hemorrhoid here to restore the inheritance sequence.
+			//
+			Type[] interfaces      = type.GetInterfaces();
+			int    nBaseInterfaces = type.BaseType != null? type.BaseType.GetInterfaces().Length: 0;
+
+			for (int i = 0; i < interfaces.Length; i++)
 			{
-				// Reflection returns interfaces for the whole inheritance chain.
-				// So, we are going to get some hemorrhoid here to restore the inheritance sequence.
-				//
-				Type[] interfaces      = type.GetInterfaces();
-				int    nBaseInterfaces = type.BaseType != null? type.BaseType.GetInterfaces().Length: 0;
+				Type intf = interfaces[i];
 
-				for (int i = 0; i < interfaces.Length; i++)
+				if (i < nBaseInterfaces)
 				{
-					Type intf = interfaces[i];
+					bool getAttr = false;
 
-					if (i < nBaseInterfaces)
+					foreach (MethodInfo mi in type.GetInterfaceMap(intf).TargetMethods)
 					{
-						bool getAttr = false;
-
-						foreach (MethodInfo mi in type.GetInterfaceMap(intf).TargetMethods)
+						// Check if the interface is reimplemented.
+						//
+						if (mi.DeclaringType == type)
 						{
-							// Check if the interface is reimplemented.
-							//
-							if (mi.DeclaringType == type)
-							{
-								getAttr = true;
-								break;
-							}
+							getAttr = true;
+							break;
 						}
-
-						if (getAttr == false)
-							continue;
 					}
 
-					GetAttributesTreeInternal(list, intf);
+					if (getAttr == false)
+						continue;
 				}
 
-				if (type.BaseType != null && type.BaseType != typeof(object))
-					GetAttributesTreeInternal(list, type.BaseType);
+				GetAttributesTreeInternal(list, intf);
 			}
+
+			if (type.BaseType != null && type.BaseType != typeof(object))
+				GetAttributesTreeInternal(list, type.BaseType);
 		}
 
 		private static readonly Hashtable _typeAttributes = new Hashtable(10);
