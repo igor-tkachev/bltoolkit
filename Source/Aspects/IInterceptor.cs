@@ -1,6 +1,3 @@
-using System;
-using System.Reflection;
-
 namespace BLToolkit.Aspects
 {
 	public interface IInterceptor

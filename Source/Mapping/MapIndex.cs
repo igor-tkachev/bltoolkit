@@ -1,6 +1,6 @@
 using System;
-
 using BLToolkit.Common;
+using BLToolkit.Properties;
 
 namespace BLToolkit.Mapping
 {
@@ -12,7 +12,7 @@ namespace BLToolkit.Mapping
 				throw new ArgumentNullException("names");
 
 			if (names.Length == 0)
-				throw new ArgumentException("At least one field name must be specified", "names");
+				throw new ArgumentException(Resources.MapIndex_EmptyNames, "names");
 
 			_fields = NameOrIndexParameter.FromStringArray(names);
 		}
@@ -23,7 +23,7 @@ namespace BLToolkit.Mapping
 				throw new ArgumentNullException("indices");
 
 			if (indices.Length == 0)
-				throw new ArgumentException("At least one field index must be specified", "indices");
+				throw new ArgumentException(Resources.MapIndex_EmptyIndices, "indices");
 
 			_fields = NameOrIndexParameter.FromIndexArray(indices);
 		}
@@ -34,7 +34,7 @@ namespace BLToolkit.Mapping
 				throw new ArgumentNullException("fields");
 
 			if (fields.Length == 0)
-				throw new ArgumentException("At least one field name or index must be specified", "fields");
+				throw new ArgumentException(Resources.MapIndex_EmptyFields, "fields");
 			
 			_fields = fields;
 		}
@@ -48,7 +48,7 @@ namespace BLToolkit.Mapping
 		private string _id;
 		public  string  ID
 		{
-			get 
+			get
 			{
 				if (_id == null)
 				{
@@ -66,8 +66,12 @@ namespace BLToolkit.Mapping
 		[CLSCompliant(false)]
 		public object GetValue(IMapDataSource source, object obj, int index)
 		{
-			object value = _fields[index].ByName ?
-				source.GetValue(obj, _fields[index].Name) : source.GetValue(obj, _fields[index].Index);
+			if (source == null)
+				throw new ArgumentNullException("source");
+
+			object value = _fields[index].ByName?
+				source.GetValue(obj, _fields[index].Name):
+				source.GetValue(obj, _fields[index].Index);
 
 			if (value == null)
 			{
@@ -75,11 +79,11 @@ namespace BLToolkit.Mapping
 
 				if (objectMapper != null)
 				{
-					MemberMapper mm = _fields[index].ByName ?
-						objectMapper[_fields[index].Name] : objectMapper[_fields[index].Index];
+					MemberMapper mm = _fields[index].ByName?
+						objectMapper[_fields[index].Name]: objectMapper[_fields[index].Index];
 
 					if (mm == null)
-						throw new MappingException(string.Format("Type '{0}' does not contain field '{1}'.",
+						throw new MappingException(string.Format(Resources.MapIndex_BadField,
 							objectMapper.TypeAccessor.OriginalType.Name, Fields[index]));
 				}
 			}
@@ -90,10 +94,9 @@ namespace BLToolkit.Mapping
 		[CLSCompliant(false)]
 		public object GetValueOrIndex(IMapDataSource source, object obj)
 		{
-			if (Fields.Length == 1)
-				return GetValue(source, obj, 0);
-
-			return GetIndexValue(source, obj);
+			return Fields.Length == 1?
+				GetValue(source, obj, 0):
+				GetIndexValue(source, obj);
 		}
 
 		[CLSCompliant(false)]

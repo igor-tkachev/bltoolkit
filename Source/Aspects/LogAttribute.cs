@@ -77,7 +77,7 @@ namespace BLToolkit.Aspects
 				if (_hasLogExceptions) s += ";LogExceptions=" + LogExceptions;
 				if (_hasLogParameters) s += ";LogParameters=" + LogParameters;
 
-				if (s != null && s.Length > 0 && s[0] == ';')
+				if (!string.IsNullOrEmpty(s) && s[0] == ';')
 					s = s.Substring(1);
 
 				return s;

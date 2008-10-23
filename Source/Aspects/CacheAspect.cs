@@ -52,8 +52,8 @@ namespace BLToolkit.Aspects
 			}
 		}
 
-		private static IList _registeredAspects = ArrayList.Synchronized(new ArrayList());
-		private static IList  RegisteredAspects
+		private static readonly IList _registeredAspects = ArrayList.Synchronized(new ArrayList());
+		private static          IList  RegisteredAspects
 		{
 			get { return _registeredAspects; }
 		}

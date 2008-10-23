@@ -1,6 +1,3 @@
-using System;
-using System.Reflection;
-
 namespace BLToolkit.Aspects
 {
 	[System.Diagnostics.DebuggerStepThrough]

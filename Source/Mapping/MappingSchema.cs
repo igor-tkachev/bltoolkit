@@ -11,6 +11,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Xml;
 
 using BLToolkit.Common;
+using BLToolkit.Properties;
 using BLToolkit.Reflection;
 using BLToolkit.Reflection.Extension;
 using BLToolkit.Reflection.MetadataProvider;
@@ -511,135 +512,135 @@ namespace BLToolkit.Mapping
 		[CLSCompliant(false)]
 		public virtual SByte? ConvertToNullableSByte(object value)
 		{
-			if (value is SByte) return (SByte?)value;
-			if (value == null)  return null;
-
-			return Convert.ToNullableSByte(value);
+			return
+				value is SByte? (SByte?)value:
+				value == null?  null:
+					Convert.ToNullableSByte(value);
 		}
 
 		public virtual Int16? ConvertToNullableInt16(object value)
 		{
-			if (value is Int16) return (Int16?)value;
-			if (value == null)  return null;
-
-			return Convert.ToNullableInt16(value);
+			return
+				value is Int16? (Int16?)value:
+				value == null?  null:
+					Convert.ToNullableInt16(value);
 		}
 
 		public virtual Int32? ConvertToNullableInt32(object value)
 		{
-			if (value is Int32) return (Int32?)value;
-			if (value == null)  return null;
-
-			return Convert.ToNullableInt32(value);
+			return
+				value is Int32? (Int32?)value:
+				value == null?  null:
+					Convert.ToNullableInt32(value);
 		}
 
 		public virtual Int64? ConvertToNullableInt64(object value)
 		{
-			if (value is Int64) return (Int64?)value;
-			if (value == null)  return null;
-
-			return Convert.ToNullableInt64(value);
+			return
+				value is Int64? (Int64?)value:
+				value == null?  null:
+					Convert.ToNullableInt64(value);
 		}
 
 		public virtual Byte? ConvertToNullableByte(object value)
 		{
-			if (value is Byte) return (Byte?)value;
-			if (value == null) return null;
-
-			return Convert.ToNullableByte(value);
+			return
+				value is Byte? (Byte?)value:
+				value == null? null:
+					Convert.ToNullableByte(value);
 		}
 
 		[CLSCompliant(false)]
 		public virtual UInt16? ConvertToNullableUInt16(object value)
 		{
-			if (value is UInt16) return (UInt16?)value;
-			if (value == null)   return null;
-
-			return Convert.ToNullableUInt16(value);
+			return
+				value is UInt16? (UInt16?)value:
+				value == null?   null:
+					Convert.ToNullableUInt16(value);
 		}
 
 		[CLSCompliant(false)]
 		public virtual UInt32? ConvertToNullableUInt32(object value)
 		{
-			if (value is UInt32) return (UInt32?)value;
-			if (value == null)   return null;
-
-			return Convert.ToNullableUInt32(value);
+			return
+				value is UInt32? (UInt32?)value:
+				value == null?   null:
+					Convert.ToNullableUInt32(value);
 		}
 
 		[CLSCompliant(false)]
 		public virtual UInt64? ConvertToNullableUInt64(object value)
 		{
-			if (value is UInt64) return (UInt64?)value;
-			if (value == null)   return null;
-
-			return Convert.ToNullableUInt64(value);
+			return
+				value is UInt64? (UInt64?)value:
+				value == null?   null:
+					Convert.ToNullableUInt64(value);
 		}
 
 		public virtual Char? ConvertToNullableChar(object value)
 		{
-			if (value is Char) return (Char?)value;
-			if (value == null) return null;
-
-			return Convert.ToNullableChar(value);
+			return
+				value is Char? (Char?)value:
+				value == null? null:
+					Convert.ToNullableChar(value);
 		}
 
 		public virtual Double? ConvertToNullableDouble(object value)
 		{
-			if (value is Double) return (Double?)value;
-			if (value == null)   return null;
-
-			return Convert.ToNullableDouble(value);
+			return
+				value is Double? (Double?)value:
+				value == null?   null:
+					Convert.ToNullableDouble(value);
 		}
 
 		public virtual Single? ConvertToNullableSingle(object value)
 		{
-			if (value is Single) return (Single?)value;
-			if (value == null)   return null;
-
-			return Convert.ToNullableSingle(value);
+			return
+				value is Single? (Single?)value:
+				value == null? null:
+					Convert.ToNullableSingle(value);
 		}
 
 		public virtual Boolean? ConvertToNullableBoolean(object value)
 		{
-			if (value is Boolean) return (Boolean?)value;
-			if (value == null)    return null;
-
-			return Convert.ToNullableBoolean(value);
+			return
+				value is Boolean? (Boolean?)value:
+				value == null?    null:
+					Convert.ToNullableBoolean(value);
 		}
 
 		public virtual DateTime? ConvertToNullableDateTime(object value)
 		{
-			if (value is DateTime) return (DateTime?)value;
-			if (value == null)     return null;
-
-			return Convert.ToNullableDateTime(value);
+			return
+				value is DateTime? (DateTime?)value:
+				value == null?     null:
+					Convert.ToNullableDateTime(value);
 		}
 
 #if FW3
 		public virtual DateTimeOffset? ConvertToNullableDateTimeOffset(object value)
 		{
-			if (value is DateTimeOffset) return (DateTimeOffset?)value;
-			if (value == null)           return null;
-
-			return Convert.ToNullableDateTimeOffset(value);
+			return
+				value is DateTimeOffset? (DateTimeOffset?)value:
+				value == null?           null:
+					Convert.ToNullableDateTimeOffset(value);
 		}
 #endif
 
 		public virtual Decimal? ConvertToNullableDecimal(object value)
 		{
-			if (value is Decimal) return (Decimal?)value;
-			if (value == null)    return null;
-
-			return Convert.ToNullableDecimal(value);
+			return
+				value is Decimal? (Decimal?)value:
+				value == null?    null:
+					Convert.ToNullableDecimal(value);
 		}
 
 		public virtual Guid? ConvertToNullableGuid(object value)
 		{
-			if (value is Guid) return (Guid?)value;
-			if (value == null) return null;
-
-			return Convert.ToNullableGuid(value);
+			return
+				value is Guid? (Guid?)value:
+				value == null? null:
+					Convert.ToNullableGuid(value);
 		}
 
 		#endregion
@@ -814,9 +815,9 @@ namespace BLToolkit.Mapping
 
 		public virtual T ConvertTo<T, P>(P value)
 		{
-			if (Equals(value, default(P))) return GetDefaultNullValue<T>();
-
-			return Convert<T, P>.From(value);
+			return Equals(value, default(P))?
+				GetDefaultNullValue<T>():
+				Convert<T, P>.From(value);
 		}
 
 		public virtual object ConvertChangeType(object value, Type conversionType)
@@ -846,7 +847,7 @@ namespace BLToolkit.Mapping
 							srcElementType.GetArrayRank() != dstElementType.GetArrayRank()))
 					{
 						throw new InvalidCastException(string.Format(
-							"Can not convert array of type '{0}' to array of '{1}'.",
+							Resources.MappingSchema_IncompatibleArrayTypes,
 							srcType.FullName, conversionType.FullName));
 					}
 
@@ -3421,7 +3422,7 @@ namespace BLToolkit.Mapping
 						MemberAccessor ma = masterMapper.TypeAccessor[r.ContainerName];
 
 						if (ma == null)
-							throw new MappingException(string.Format("Type '{0}' does not contain field '{1}'.",
+							throw new MappingException(string.Format(Resources.MapIndex_BadField,
 								masterMapper.TypeAccessor.OriginalType.Name, r.ContainerName));
 
 						// Create hash.

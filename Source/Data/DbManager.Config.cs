@@ -158,7 +158,7 @@ namespace BLToolkit.Data
 
 		#region Public Properties
 
-		private string _configurationString;
+		private readonly string _configurationString;
 		/// <summary>
 		/// Gets the string used to open a database.
 		/// </summary>
@@ -349,8 +349,8 @@ namespace BLToolkit.Data
 			return dp;
 		}
 
-		private static Dictionary<string, string> _connectionStringList =
-			new Dictionary<string, string>(4);
+		private static readonly Dictionary<string, string>
+			_connectionStringList = new Dictionary<string, string>(4);
 
 		private static string GetConnectionString(string configurationString)
 		{

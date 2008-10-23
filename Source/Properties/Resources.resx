@@ -201,4 +201,19 @@
   <data name="DuckTyping_InvalidNumberOfObjs" xml:space="preserve">
     <value>Invalid number of 'baseObjectTypes' or 'objs'.</value>
   </data>
+  <data name="MapIndex_EmptyNames" xml:space="preserve">
+    <value>At least one field name must be specified</value>
+  </data>
+  <data name="MapIndex_EmptyIndices" xml:space="preserve">
+    <value>At least one field index must be specified</value>
+  </data>
+  <data name="MapIndex_EmptyFields" xml:space="preserve">
+    <value>At least one field name or index must be specified</value>
+  </data>
+  <data name="MapIndex_BadField" xml:space="preserve">
+    <value>Type '{0}' does not contain field '{1}'.</value>
+  </data>
+  <data name="MappingSchema_IncompatibleArrayTypes" xml:space="preserve">
+    <value>Can not convert array of type '{0}' to array of '{1}'.</value>
+  </data>
 </root>

@@ -119,7 +119,7 @@ namespace BLToolkit.Aspects
 				if (_hasMaxCacheTime) s += ";MaxCacheTime=" + MaxCacheTime;
 				if (_hasIsWeak)       s += ";IsWeak="       + IsWeak;
 
-				if (s != null && s.Length > 0 && s[0] == ';')
+				if (!string.IsNullOrEmpty(s) && s[0] == ';')
 					s = s.Substring(1);
 
 				return s;

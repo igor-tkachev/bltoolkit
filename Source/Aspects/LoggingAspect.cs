@@ -23,11 +23,11 @@ namespace BLToolkit.Aspects
 			public bool   LogParameters;
 		}
 
-		private string     _instanceFileName;
-		private int?       _instanceMinCallTime;
-		private bool?      _instanceLogExceptions;
-		private bool?      _instanceLogParameters;
-		private Parameters _parameters = new Parameters();
+		private string              _instanceFileName;
+		private int?                _instanceMinCallTime;
+		private bool?               _instanceLogExceptions;
+		private bool?               _instanceLogParameters;
+		private readonly Parameters _parameters = new Parameters();
 
 		public override void Init(CallMethodInfo info, string configString)
 		{

@@ -3,11 +3,8 @@ using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
-using System.Data.SqlTypes;
-using System.IO;
 using System.Reflection;
 using System.Reflection.Emit;
-using System.Xml;
 
 using BLToolkit.Common;
 using BLToolkit.Data;
@@ -97,7 +94,7 @@ namespace BLToolkit.DataAccess
 			Object
 		}
 
-		ReturnType GetReturnType(Type returnType)
+		private static ReturnType GetReturnType(Type returnType)
 		{
 			if (returnType == typeof(IDataReader))
 				return ReturnType.DataReader;

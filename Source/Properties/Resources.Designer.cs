@@ -232,6 +232,51 @@ namespace BLToolkit.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Type &apos;{0}&apos; does not contain field &apos;{1}&apos;..
+        /// </summary>
+        internal static string MapIndex_BadField {
+            get {
+                return ResourceManager.GetString("MapIndex_BadField", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to At least one field name or index must be specified.
+        /// </summary>
+        internal static string MapIndex_EmptyFields {
+            get {
+                return ResourceManager.GetString("MapIndex_EmptyFields", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to At least one field index must be specified.
+        /// </summary>
+        internal static string MapIndex_EmptyIndices {
+            get {
+                return ResourceManager.GetString("MapIndex_EmptyIndices", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to At least one field name must be specified.
+        /// </summary>
+        internal static string MapIndex_EmptyNames {
+            get {
+                return ResourceManager.GetString("MapIndex_EmptyNames", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Can not convert array of type &apos;{0}&apos; to array of &apos;{1}&apos;..
+        /// </summary>
+        internal static string MappingSchema_IncompatibleArrayTypes {
+            get {
+                return ResourceManager.GetString("MappingSchema_IncompatibleArrayTypes", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The &apos;{0}&apos; type does not have appropriate getter. See &apos;{1}&apos; member &apos;{2}&apos; of &apos;{3}&apos; type..
         /// </summary>
         internal static string TypeBuilder_CannotGetGetter {

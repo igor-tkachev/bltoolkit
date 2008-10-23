@@ -73,10 +73,7 @@ namespace BLToolkit.EditableObjects
 				if (_current == null)
 					return _original != null;
 
-				if (_current != _original)
-					return true;
-
-				return _current.IsDirty;
+				return _current != _original || _current.IsDirty;
 			}
 		}
 

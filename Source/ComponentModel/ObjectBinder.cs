@@ -259,7 +259,7 @@ namespace BLToolkit.ComponentModel
 
 		protected virtual void OnListChanged(ListChangedEventArgs e)
 		{
-			ListChangedEventHandler handler = (ListChangedEventHandler)base.Events[ListChangedEvent];
+			ListChangedEventHandler handler = (ListChangedEventHandler)Events[ListChangedEvent];
 			if (handler != null)
 				handler(this, e);
 		}

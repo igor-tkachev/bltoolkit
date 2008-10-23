@@ -1,6 +1,6 @@
 using System;
-
 using BLToolkit.Common;
+using BLToolkit.Properties;
 
 namespace BLToolkit.DataAccess
 {
@@ -13,7 +13,7 @@ namespace BLToolkit.DataAccess
 				throw new ArgumentNullException("names");
 
 			if (names.Length == 0)
-				throw new ArgumentException("At least one field name must be specified", "names");
+				throw new ArgumentException(Resources.MapIndex_EmptyNames, "names");
 
 			_fields = NameOrIndexParameter.FromStringArray(names);
 		}
@@ -24,7 +24,7 @@ namespace BLToolkit.DataAccess
 				throw new ArgumentNullException("indices");
 
 			if (indices.Length == 0)
-				throw new ArgumentException("At least one field index must be specified", "indices");
+				throw new ArgumentException(Resources.MapIndex_EmptyIndices, "indices");
 
 			_fields = NameOrIndexParameter.FromIndexArray(indices);
 		}
@@ -35,7 +35,7 @@ namespace BLToolkit.DataAccess
 				throw new ArgumentNullException("fields");
 
 			if (fields.Length == 0)
-				throw new ArgumentException("At least one field name or index must be specified", "fields");
+				throw new ArgumentException(Resources.MapIndex_EmptyFields, "fields");
 			
 			_fields = fields;
 		}

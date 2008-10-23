@@ -1,6 +1,5 @@
 using System;
 
-using BLToolkit.Reflection;
 using BLToolkit.TypeBuilder.Builders;
 
 namespace BLToolkit.Aspects
@@ -40,9 +39,9 @@ namespace BLToolkit.Aspects
 			_declaringType = declaringType;
 		}
 
-		Type   _declaringType;
-		string _methodName;
-		Type[] _parameterTypes;
+		readonly Type   _declaringType;
+		readonly string _methodName;
+		readonly Type[] _parameterTypes;
 
 		#endregion
 

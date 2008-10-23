@@ -37,21 +37,21 @@ namespace BLToolkit.EditableObjects
 			get { return _current;  }
 			set
 			{
-				if (_current != value)
-				{
-					if (_current == _original)
-						StopXmlDocTracking();
+				if (_current == value)
+					return;
 
-					// Drop changes, if any.
-					//
-					if (_changedNodes != null)
-						_changedNodes.Clear();
+				if (_current == _original)
+					StopXmlDocTracking();
 
-					_current = value;
+				// Drop changes, if any.
+				//
+				if (_changedNodes != null)
+					_changedNodes.Clear();
 
-					if (_current == _original)
-						StartXmlDocTracking();
-				}
+				_current = value;
+
+				if (_current == _original)
+					StartXmlDocTracking();
 			}
 		}
 

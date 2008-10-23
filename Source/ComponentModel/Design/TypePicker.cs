@@ -264,8 +264,8 @@ namespace BLToolkit.ComponentModel.Design
 				set { _isSelectable = value; }
 			}
 
-			private Type _type;
-			public  Type  Type
+			private readonly Type _type;
+			public           Type  Type
 			{
 				get { return _type; }
 			}
