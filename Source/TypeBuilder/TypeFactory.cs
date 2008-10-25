@@ -253,6 +253,14 @@ namespace BLToolkit.TypeBuilder
 				{
 					Assembly[] ass = ((AppDomain)sender).GetAssemblies();
 
+					// CLR can't find an assembly built on previous AssemblyResolve event.
+					//
+					for (int i = ass.Length - 1; i >= 0; i--)
+					{
+						if (string.Compare(ass[i].FullName, args.Name) == 0)
+							return ass[i];
+					}
+
 					for (int i = ass.Length - 1; i >= 0; i--)
 					{
 						Assembly a = ass[i];

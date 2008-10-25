@@ -67,8 +67,6 @@ namespace BLTgen
 			if (!Directory.Exists(parsedArgs.OutputDirectory))
 				Directory.CreateDirectory(parsedArgs.OutputDirectory);
 
-			AppDomain.CurrentDomain.AssemblyResolve += CurrentDomain_AssemblyResolve;
-
 			TypeFactory.SaveTypes = true;
 			TypeFactory.SetGlobalAssembly(extensionAssemblyPath, extensionAssemblyVersion, parsedArgs.KeyPairFile);
 
@@ -112,17 +110,6 @@ namespace BLTgen
 			}
 			else if (verbose)
 				Console.WriteLine("No types to process.");
-		}
-
-		static Assembly CurrentDomain_AssemblyResolve(object sender, ResolveEventArgs args)
-		{
-			foreach (Assembly assembly in AppDomain.CurrentDomain.GetAssemblies())
-			{
-				if (assembly.GetName(false).FullName == args.Name)
-					return assembly;
-			}
-
-			return null;
 		}
 
 		private static Type[] FilterBaseTypes(Type[] types, string pattern)
