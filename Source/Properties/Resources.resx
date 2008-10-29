@@ -216,4 +216,10 @@
   <data name="MappingSchema_IncompatibleArrayTypes" xml:space="preserve">
     <value>Can not convert array of type '{0}' to array of '{1}'.</value>
   </data>
+  <data name="AsyncAspectBuilder_NoTargetMethod" xml:space="preserve">
+    <value>Can not figure out the target method for the method '{0}.{1}'.</value>
+  </data>
+  <data name="OverloadAspectBuilder_NoOverloadedMethod" xml:space="preserve">
+    <value>Can not figure out the overloaded method for the method '{0}.{1}'.</value>
+  </data>
 </root>

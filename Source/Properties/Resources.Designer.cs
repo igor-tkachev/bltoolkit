@@ -61,6 +61,15 @@ namespace BLToolkit.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Can not figure out the target method for the method &apos;{0}.{1}&apos;..
+        /// </summary>
+        internal static string AsyncAspectBuilder_NoTargetMethod {
+            get {
+                return ResourceManager.GetString("AsyncAspectBuilder_NoTargetMethod", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Invalid cast from {0} to {1}.
         /// </summary>
         internal static string Convert_InvalidCast {
@@ -273,6 +282,15 @@ namespace BLToolkit.Properties {
         internal static string MappingSchema_IncompatibleArrayTypes {
             get {
                 return ResourceManager.GetString("MappingSchema_IncompatibleArrayTypes", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Can not figure out the overloaded method for the method &apos;{0}.{1}&apos;..
+        /// </summary>
+        internal static string OverloadAspectBuilder_NoOverloadedMethod {
+            get {
+                return ResourceManager.GetString("OverloadAspectBuilder_NoOverloadedMethod", resourceCulture);
             }
         }
         

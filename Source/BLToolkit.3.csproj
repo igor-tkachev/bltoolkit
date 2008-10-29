@@ -97,10 +97,12 @@
     <Compile Include="Aspects\Builders\InterceptorAspectBuilder.cs" />
     <Compile Include="Aspects\Builders\MixinAspectBuilder.cs" />
     <Compile Include="Aspects\Builders\NotNullAspectBuilder.cs" />
+    <Compile Include="Aspects\Builders\OverloadAspectBuilder.cs" />
     <Compile Include="Aspects\ClearCacheAspect.cs" />
     <Compile Include="Aspects\Builders\ClearCacheAspectBuilder.cs" />
     <Compile Include="Aspects\ClearCacheAttribute.cs" />
     <Compile Include="Aspects\InstanceCacheAttribute.cs" />
+    <Compile Include="Aspects\OverloadAttribute.cs" />
     <Compile Include="DataAccess\ActualTypeAttribute.cs" />
     <Compile Include="DataAccess\DataAccessorBase.cs" />
     <Compile Include="Properties\Resources.Designer.cs">

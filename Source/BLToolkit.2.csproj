@@ -53,6 +53,7 @@
     <Compile Include="Aspects\Builders\InterceptorAspectBuilder.cs" />
     <Compile Include="Aspects\Builders\MixinAspectBuilder.cs" />
     <Compile Include="Aspects\Builders\NotNullAspectBuilder.cs" />
+    <Compile Include="Aspects\Builders\OverloadAspectBuilder.cs" />
     <Compile Include="Aspects\CacheAspect.cs" />
     <Compile Include="Aspects\CacheAspectItem.cs" />
     <Compile Include="Aspects\CacheAspectT.cs" />
@@ -80,6 +81,7 @@
     <Compile Include="Aspects\NoInterceptionAttribute.cs" />
     <Compile Include="Aspects\NoLogAttribute.cs" />
     <Compile Include="Aspects\NotNullAttribute.cs" />
+    <Compile Include="Aspects\OverloadAttribute.cs" />
     <Compile Include="Common\CompoundValue.cs" />
     <Compile Include="Common\Configuration.cs" />
     <Compile Include="Common\Convert.cs" />

@@ -66,16 +66,16 @@ namespace BLToolkit.Data.DataProvider
 
 		public override object Convert(object value, ConvertType convertType)
 		{
-			string name = (string)value;
-
 			switch (convertType)
 			{
 				case ConvertType.NameToQueryParameter:
 				case ConvertType.NameToParameter:
-					return "@" + name;
+					return "@" + value;
 
 				case ConvertType.NameToQueryField:
 				case ConvertType.NameToQueryTable:
+				{
+					string name = (string)value;
 
 					if (name.Length > 0 && name[0] == '[')
 						return value;
@@ -84,14 +84,20 @@ namespace BLToolkit.Data.DataProvider
 						value = string.Join("].[", name.Split('.'));
 
 					return "[" + value + "]";
+				}
 
 				case ConvertType.ParameterToName:
+				{
+					string name = (string)value;
 					return name.Length > 0 && name[0] == '@'? name.Substring(1): name;
+				}
 
 				case ConvertType.ExceptionToErrorNumber:
+				{
 					if (value is SQLiteException)
 						return ((SQLiteException)value).ErrorCode;
 					break;
+				}
 			}
 
 			return value;

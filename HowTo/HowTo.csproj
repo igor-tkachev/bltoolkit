@@ -2,7 +2,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>9.0.21022</ProductVersion>
+    <ProductVersion>9.0.30729</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{8DA66999-005A-49AB-86A9-2C1F62905B50}</ProjectGuid>
     <OutputType>Library</OutputType>
@@ -70,6 +70,7 @@
     <Compile Include="Aspects\MixinAspect.cs" />
     <Compile Include="Aspects\NoCache.cs" />
     <Compile Include="Aspects\NotNull.cs" />
+    <Compile Include="Aspects\OverloadAspect.cs" />
     <Compile Include="DataAccess\AbstractAccessor.cs" />
     <Compile Include="DataAccess\ActionName.cs" />
     <Compile Include="DataAccess\ActionSprocName.cs" />

@@ -16,6 +16,7 @@ Enhancement
 - New InstanceCache attribute.
 - DataAccessor support for IEnumerable<T>.
 - Multiple duck. See DuckTyping.Aggregate methods.
+- New Overload aspect.
 
 
 v 3.0

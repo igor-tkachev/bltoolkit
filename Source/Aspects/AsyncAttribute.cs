@@ -17,15 +17,18 @@ namespace BLToolkit.Aspects
 		{
 		}
 
-		public AsyncAttribute(string targetMethodName)
+		public AsyncAttribute(string targetMethodName): this(targetMethodName, null)
 		{
-			_targetMethodName = targetMethodName;
+		}
+
+		public AsyncAttribute(params Type[] parameterTypes): this(null, parameterTypes)
+		{
 		}
 
 		public AsyncAttribute(string targetMethodName, params Type[] parameterTypes)
 		{
 			_targetMethodName = targetMethodName;
-			_parameterTypes = parameterTypes;
+			_parameterTypes   = parameterTypes;
 		}
 
 		public override IAbstractTypeBuilder TypeBuilder

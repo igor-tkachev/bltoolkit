@@ -3,12 +3,16 @@ using System.Reflection;
 using System.Reflection.Emit;
 using System.Threading;
 
+using BLToolkit.Properties;
 using BLToolkit.Reflection.Emit;
 using BLToolkit.TypeBuilder;
 using BLToolkit.TypeBuilder.Builders;
 
 namespace BLToolkit.Aspects.Builders
 {
+	/// <summary>
+	/// This aspect simplifies asynchronous operations.
+	/// </summary>
 	public class AsyncAspectBuilder : AbstractTypeBuilderBase
 	{
 		private readonly string _targetMethodName;
@@ -53,7 +57,7 @@ namespace BLToolkit.Aspects.Builders
 		{
 			if (context == null) throw new ArgumentNullException("context");
 
-			return context.BuildElement == BuildElement.AbstractMethod;
+			return context.IsBuildStep && context.BuildElement == BuildElement.AbstractMethod;
 		}
 
 		protected override void BuildAbstractMethod()
@@ -179,7 +183,7 @@ namespace BLToolkit.Aspects.Builders
 					targetMethodName = name.Substring(prefix.Length);
 				else
 					throw new TypeBuilderException(string.Format(
-						"Can not figure out the target method for the method '{0}.{1}'.",
+						Resources.AsyncAspectBuilder_NoTargetMethod,
 							mi.DeclaringType.FullName, mi.Name));
 			}
 

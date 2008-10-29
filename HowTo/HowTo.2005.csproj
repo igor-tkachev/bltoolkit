@@ -48,6 +48,7 @@
     <Compile Include="Aspects\MixinAspect.cs" />
     <Compile Include="Aspects\NoCache.cs" />
     <Compile Include="Aspects\NotNull.cs" />
+    <Compile Include="Aspects\OverloadAspect.cs" />
     <Compile Include="DataAccess\AbstractAccessor.cs" />
     <Compile Include="DataAccess\ActionName.cs" />
     <Compile Include="DataAccess\ActionSprocName.cs" />
