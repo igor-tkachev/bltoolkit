@@ -2,7 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Reflection.Emit;
+
 using BLToolkit.Properties;
+using BLToolkit.Reflection;
 using BLToolkit.Reflection.Emit;
 using BLToolkit.TypeBuilder;
 using BLToolkit.TypeBuilder.Builders;
@@ -163,10 +165,10 @@ namespace BLToolkit.Aspects.Builders
 
 			foreach (MethodInfo m in Context.Type.GetMethods(bindingFlags))
 			{
-				if (m.IsPrivate || m.Name != methodName || m == currentMethod)
+				if (m.IsPrivate || m.Name != methodName || m.IsGenericMethod != currentMethod.IsGenericMethod)
 					continue;
 
-				if (m.ReturnType != currentMethod.ReturnType)
+				if (!TypeHelper.CompareParameterTypes(m.ReturnType, currentMethod.ReturnType))
 					continue;
 
 				if (m.IsDefined(typeof(OverloadAttribute), true))
@@ -176,7 +178,7 @@ namespace BLToolkit.Aspects.Builders
 				if (overloadedMethodParameters.Length <= bestMatchParametersCount)
 					continue;
 
-				int matchedParameters = MatchParameters(currentMethodParameters, overloadedMethodParameters);
+				int matchedParameters = MatchParameters(overloadedMethodParameters, currentMethodParameters);
 				if (matchedParameters <= bestMatchParametersCount)
 					continue;
 
@@ -198,7 +200,7 @@ namespace BLToolkit.Aspects.Builders
 					if (existing.Name != param.Name)
 						continue;
 
-					if (param.ParameterType != existing.ParameterType)
+					if (!TypeHelper.CompareParameterTypes(param.ParameterType, existing.ParameterType))
 						return -1;
 
 					++matchedParameters;

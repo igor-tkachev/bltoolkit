@@ -32,10 +32,22 @@ namespace Aspects
 			public abstract int AnyName(IAsyncResult asyncResult);
 		}
 
+		public abstract class TestObject<T>
+		{
+			public T Test(T intVal)
+			{
+				System.Threading.Thread.Sleep(ExecutionTime + 10);
+				return intVal;
+			}
+
+			[Async] public abstract IAsyncResult BeginTest(T intVal);
+			[Async] public abstract T EndTest(IAsyncResult asyncResult);
+		}
+
 		[Test]
 		public void AsyncTest()
 		{
-			TestObject o = (TestObject)TypeAccessor.CreateInstance(typeof(TestObject));
+			TestObject o = TypeAccessor<TestObject>.CreateInstanceEx();
 			Stopwatch sw = Stopwatch.StartNew();
 
 			Assert.AreEqual(1, o.Test(1, null));
@@ -54,6 +66,16 @@ namespace Aspects
 			Assert.IsTrue(mss >= ExecutionTime);
 		}
 
+		[Test]
+		public void GenericTest()
+		{
+			TestObject<DateTime> o = TypeAccessor<TestObject<DateTime>>.CreateInstanceEx();
+			DateTime           now = DateTime.Now;
+			IAsyncResult        ar = o.BeginTest(now);
+
+			Assert.AreEqual(now, o.EndTest(ar));
+		}
+
 		private static void CallBack(IAsyncResult ar)
 		{
 			TestObject o = (TestObject) ar.AsyncState;
@@ -64,7 +86,7 @@ namespace Aspects
 		[Test]
 		public void CallbackTest()
 		{
-			TestObject o = (TestObject)TypeAccessor.CreateInstance(typeof(TestObject));
+			TestObject o = TypeAccessor<TestObject>.CreateInstanceEx();
 
 			o.BeginTest(2, null, new AsyncCallback(CallBack), o);
 		}
@@ -72,7 +94,7 @@ namespace Aspects
 		[Test]
 		public void NoStateTest()
 		{
-			TestObject o = (TestObject)TypeAccessor.CreateInstance(typeof(TestObject));
+			TestObject o = TypeAccessor<TestObject>.CreateInstanceEx();
 
 			Assert.AreEqual(1, o.Test(1, null));
 
@@ -83,7 +105,7 @@ namespace Aspects
 		[Test]
 		public void NoCallbackTest()
 		{
-			TestObject o = (TestObject)TypeAccessor.CreateInstance(typeof(TestObject));
+			TestObject o = TypeAccessor<TestObject>.CreateInstanceEx();
 
 			Assert.AreEqual(1, o.Test(1, null));
 
@@ -94,7 +116,7 @@ namespace Aspects
 		[Test]
 		public void AnyNameTest()
 		{
-			TestObject o = (TestObject)TypeAccessor.CreateInstance(typeof(TestObject));
+			TestObject o = TypeAccessor<TestObject>.CreateInstanceEx();
 
 			IAsyncResult ar = o.AnyName(2, null, null, null);
 			Assert.AreEqual(2, o.AnyName(ar));

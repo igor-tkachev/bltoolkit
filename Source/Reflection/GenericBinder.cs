@@ -38,28 +38,19 @@ namespace BLToolkit.Reflection
 		{
 			for (int i = 0; i < matchMethods.Length; ++i)
 			{
-				if (matchMethods[i].IsGenericMethodDefinition == _genericMethodDefinition)
+				if (matchMethods[i].IsGenericMethodDefinition != _genericMethodDefinition)
+					continue;
+
+				ParameterInfo[] pis = matchMethods[i].GetParameters();
+				bool          match = (pis.Length == parameterTypes.Length);
+
+				for (int j = 0; match && j < pis.Length; ++j)
 				{
-					ParameterInfo[] pis = matchMethods[i].GetParameters();
-
-					bool match = (pis.Length == parameterTypes.Length);
-
-					for (int j = 0; match && j < pis.Length; ++j)
-					{
-						if (pis[j].ParameterType == parameterTypes[j])
-							continue;
-
-						if (pis[j].ParameterType.IsGenericParameter)
-							match = CheckGenericTypeConstraints(pis[j].ParameterType, parameterTypes[j]);
-						else if (pis[j].ParameterType.IsGenericType && parameterTypes[j].IsGenericType)
-							match = CompareGenericTypesRecursive(pis[j].ParameterType, parameterTypes[j]);
-						else
-							match = false;
-					}
-
-					if (match)
-						return matchMethods[i];
+					match = TypeHelper.CompareParameterTypes(pis[j].ParameterType, parameterTypes[j]);
 				}
+
+				if (match)
+					return matchMethods[i];
 			}
 
 			return null;
@@ -82,40 +73,6 @@ namespace BLToolkit.Reflection
 		}
 
 		#endregion
-
-		private static bool CheckGenericTypeConstraints(Type genType, Type parameterType)
-		{
-			Type[] constraints = genType.GetGenericParameterConstraints();
-
-			for (int i = 0; i < constraints.Length; i++)
-				if (!constraints[i].IsAssignableFrom(parameterType))
-					return false;
-
-			return true;
-		}
-
-		private static bool CompareGenericTypesRecursive(Type genType, Type specType)
-		{
-			Type[]  genArgs =  genType.GetGenericArguments();
-			Type[] specArgs = specType.GetGenericArguments();
-
-			bool match = (genArgs.Length == specArgs.Length);
-
-			for (int i = 0; match && i < genArgs.Length; i++)
-			{
-				if (genArgs[i] == specArgs[i])
-					continue;
-
-				if (genArgs[i].IsGenericParameter)
-					match = CheckGenericTypeConstraints(genArgs[i], specArgs[i]);
-				else if (genArgs[i].IsGenericType && specArgs[i].IsGenericType)
-					match = CompareGenericTypesRecursive(genArgs[i], specArgs[i]);
-				else
-					match = false;
-			}
-
-			return match;
-		}
 
 		private static GenericBinder _generic;
 		public  static GenericBinder  Generic

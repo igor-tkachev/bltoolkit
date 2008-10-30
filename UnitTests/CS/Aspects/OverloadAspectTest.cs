@@ -11,6 +11,24 @@ namespace Aspects
 	[TestFixture]
 	public class OverloadAspectTest
 	{
+		public abstract class TestObject<T>
+		{
+			public T Test(T inVal, out T outVal)
+			{
+				outVal = inVal;
+				return inVal;
+			}
+
+			public string Test(DateTime dateVal, string inVal)
+			{
+				return inVal.ToUpper();
+			}
+
+			[Overload] abstract public T Test(T inVal);
+			[Overload] abstract public T Test(T inVal, out T outVal, ref T refVal);
+			[Overload] abstract public T Test(T inVal, DateTime dateVal);
+		}
+
 		public abstract class TestObject
 		{
 			public int    IntValue;
@@ -46,6 +64,12 @@ namespace Aspects
 			protected static int StaticMethod(int intVal, ref Guid guidVal)
 			{
 				return intVal;
+			}
+
+			public T Generic<T>(T inVal, out T outVal)
+			{
+				outVal = inVal;
+				return inVal;
 			}
 
 			// Becomes
@@ -90,8 +114,7 @@ namespace Aspects
 
 			// Value types and ref value types also works.
 			//
-			[Overload]
-			public abstract void OutRefStructTest(int? inVal, out int? outVal, ref int? refVal, out Guid guidVal);
+			[Overload] public abstract void OutRefStructTest(int? inVal, out int? outVal, ref int? refVal, out Guid guidVal);
 			[Overload] public abstract void OutRefStructTest(int? inVal);
 
 			// We can overload static methods.
@@ -100,13 +123,18 @@ namespace Aspects
 
 			// We can overload methods declared in a base type.
 			//
-			[Overload]
-			public abstract string ToString(int intVal);
+			[Overload] public abstract string ToString(int intVal);
+
+			// A generic method can be overloaded by an other generic method.
+			//
+			[Overload] public abstract T Generic<T>(T inVal);
 		}
 
 		[Test]
 		public void OverloadTest()
 		{
+			TypeFactory.SaveTypes = true;
+
 			TestObject o = TypeAccessor<TestObject>.CreateInstance();
 
 			o.Test(12345, "str");
@@ -132,6 +160,8 @@ namespace Aspects
 			Assert.AreEqual(0, o.IntValue);
 			Assert.AreEqual("(default)", o.StrValue);
 			Assert.AreNotEqual(Guid.Empty, o.GuidValue);
+
+			Assert.AreEqual(1, o.Generic(1));
 		}
 
 		[Test]
@@ -211,5 +241,29 @@ namespace Aspects
 
 			o.OutRefStructTest(inVal);
 		}
+
+		[Test]
+		public void GenericTypeTest()
+		{
+			TestObject<int?> o = TypeAccessor<TestObject<int?>>.CreateInstance();
+
+			int? inVal = 123;
+			int? refVal = 99;
+			int? outVal;
+			o.Test(inVal, out outVal, ref refVal);
+
+			Assert.AreEqual(inVal, outVal);
+			Assert.AreEqual(refVal, 99);
+
+			Assert.AreEqual(inVal, o.Test(inVal));
+			Assert.AreEqual(12, o.Test(12, DateTime.Now));
+
+			TestObject<string> o2 = TypeAccessor<TestObject<string>>.CreateInstance();
+
+			// When T is a string, method Test(DateTime, string) becomes the best match.
+			//
+			Assert.AreEqual("STR", o2.Test("str", DateTime.Now));
+		}
+
 	}
 }

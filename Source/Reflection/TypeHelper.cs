@@ -1288,6 +1288,53 @@ namespace BLToolkit.Reflection
 			return type;
 		}
 
+		public static bool CompareParameterTypes(Type goal, Type probe)
+		{
+			if (goal == probe)
+				return true;
+
+			if (goal.IsGenericParameter)
+				return CheckConstraints(goal, probe);
+			if (goal.IsGenericType && probe.IsGenericType)
+				return CompareGenericTypes(goal, probe);
+
+			return false;
+		}
+
+		public static bool CheckConstraints(Type goal, Type probe)
+		{
+			Type[] constraints = goal.GetGenericParameterConstraints();
+
+			for (int i = 0; i < constraints.Length; i++)
+				if (!constraints[i].IsAssignableFrom(probe))
+					return false;
+
+			return true;
+		}
+
+		public static bool CompareGenericTypes(Type goal, Type probe)
+		{
+			Type[]  genArgs =  goal.GetGenericArguments();
+			Type[] specArgs = probe.GetGenericArguments();
+
+			bool match = (genArgs.Length == specArgs.Length);
+
+			for (int i = 0; match && i < genArgs.Length; i++)
+			{
+				if (genArgs[i] == specArgs[i])
+					continue;
+
+				if (genArgs[i].IsGenericParameter)
+					match = CheckConstraints(genArgs[i], specArgs[i]);
+				else if (genArgs[i].IsGenericType && specArgs[i].IsGenericType)
+					match = CompareGenericTypes(genArgs[i], specArgs[i]);
+				else
+					match = false;
+			}
+
+			return match;
+		}
+
 		#endregion
 	}
 }
