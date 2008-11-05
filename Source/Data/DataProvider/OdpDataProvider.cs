@@ -296,7 +296,8 @@ namespace BLToolkit.Data.DataProvider
 							//
 							return;
 						}
-						else if (oraParameter.Value is Stream[])
+
+						if (oraParameter.Value is Stream[])
 						{
 							Stream[]     streams = (Stream[]) oraParameter.Value;
 
@@ -1022,6 +1023,14 @@ namespace BLToolkit.Data.DataProvider
 
 				return base.MapValueToEnum(value, type);
 			}
+
+			public override object ConvertChangeType(object value, Type conversionType)
+			{
+				// Handle OracleDecimal with IsNull == true case
+				//
+				return base.ConvertChangeType(value is INullable &&
+					((INullable)value).IsNull? null: value, conversionType);
+			}
 		}
 
 		public class OracleDataReaderMapper : DataReaderMapper
@@ -1053,16 +1062,15 @@ namespace BLToolkit.Data.DataProvider
 					OracleXmlType xml = _dataReader.GetOracleXmlType(index);
 					return MappingSchema.ConvertToXmlDocument(xml);
 				}
-				else if (fieldType == typeof(OracleBlob))
+
+				if (fieldType == typeof(OracleBlob))
 				{
 					OracleBlob blob = _dataReader.GetOracleBlob(index);
 					return MappingSchema.ConvertToStream(blob);
 				}
-				else
-				{
-					object value = _dataReader.GetValue(index);
-					return value is DBNull? null: value;
-				}
+
+				return _dataReader.IsDBNull(index)? null:
+					_dataReader.GetValue(index);
 			}
 
 			public override Boolean  GetBoolean(object o, int index) { return MappingSchema.ConvertToBoolean(GetValue(o, index)); }
@@ -1127,16 +1135,15 @@ namespace BLToolkit.Data.DataProvider
 					OracleXmlType xml = _dataReader.GetOracleXmlType(Index);
 					return MappingSchema.ConvertToXmlDocument(xml);
 				}
-				else if (_fieldType == typeof(OracleBlob))
+
+				if (_fieldType == typeof(OracleBlob))
 				{
 					OracleBlob blob = _dataReader.GetOracleBlob(Index);
 					return MappingSchema.ConvertToStream(blob);
 				}
-				else
-				{
-					object value = _dataReader.GetValue(Index);
-					return value is DBNull? null: value;
-				}
+
+				return _dataReader.IsDBNull(index)? null:
+					_dataReader.GetValue(Index);
 			}
 
 			public override Boolean  GetBoolean(object o, int index) { return MappingSchema.ConvertToBoolean(GetValue(o, Index)); }
@@ -1185,12 +1192,16 @@ namespace BLToolkit.Data.DataProvider
 
 			public static IDbDataParameter CreateInstance(OracleParameter oraParameter)
 			{
-				OracleParameterWrap wrap = (OracleParameterWrap)TypeAccessor
-					.CreateInstance(typeof (OracleParameterWrap));
+				OracleParameterWrap wrap = TypeAccessor<OracleParameterWrap>.CreateInstanceEx();
 
 				wrap._oracleParameter = oraParameter;
 
 				return (IDbDataParameter)wrap;
+			}
+
+			public override string ToString()
+			{
+				return _oracleParameter.ToString();
 			}
 
 			///<summary>
