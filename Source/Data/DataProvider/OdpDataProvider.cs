@@ -1028,8 +1028,30 @@ namespace BLToolkit.Data.DataProvider
 			{
 				// Handle OracleDecimal with IsNull == true case
 				//
-				return base.ConvertChangeType(value is INullable &&
-					((INullable)value).IsNull? null: value, conversionType);
+				return base.ConvertChangeType(IsNull(value)? null: value, conversionType);
+			}
+
+			private static bool IsNull(object value)
+			{
+				// ODP 10 does not expose this interface to public.
+				//
+				// return value is INullable && ((INullable)value).IsNull;
+
+				return
+					value is OracleDecimal?      ((OracleDecimal)     value).IsNull:
+					value is OracleString?       ((OracleString)      value).IsNull:
+					value is OracleDate?         ((OracleDate)        value).IsNull:
+					value is OracleTimeStamp?    ((OracleTimeStamp)   value).IsNull:
+					value is OracleTimeStampTZ?  ((OracleTimeStampTZ) value).IsNull:
+					value is OracleTimeStampLTZ? ((OracleTimeStampLTZ)value).IsNull:
+					value is OracleXmlType?      ((OracleXmlType)     value).IsNull:
+					value is OracleBlob?         ((OracleBlob)        value).IsNull:
+					value is OracleClob?         ((OracleClob)        value).IsNull:
+					value is OracleBFile?        ((OracleBFile)       value).IsNull:
+					value is OracleBinary?       ((OracleBinary)      value).IsNull:
+					value is OracleIntervalDS?   ((OracleIntervalDS)  value).IsNull:
+					value is OracleIntervalYM?   ((OracleIntervalYM)  value).IsNull:
+						false;
 			}
 		}
 
