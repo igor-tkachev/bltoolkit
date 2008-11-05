@@ -44,6 +44,11 @@ namespace EditableObjects
 			protected override void OnPropertyChanged(string propertyName)
 			{
 				ChangedPropertyName = propertyName;
+				if (propertyName == "ID")
+					Assert.That(ID, Is.Not.EqualTo(0));
+				else if (propertyName == "Xml")
+					Assert.That(Xml.InnerXml, Is.Not.EqualTo("<test />"));
+
 			}
 		}
 

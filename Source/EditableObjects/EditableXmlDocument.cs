@@ -2,14 +2,14 @@ using System;
 using System.Collections;
 using System.Reflection;
 using System.Xml;
+
 using BLToolkit.TypeBuilder;
 
 namespace BLToolkit.EditableObjects
 {
 	[Serializable]
-	public class EditableXmlDocument : IEditable, ISetParent, IMemberwiseEditable, IPrintDebugState
+	public class EditableXmlDocument: IEditable, ISetParent, IMemberwiseEditable, IPrintDebugState
 	{
-		private readonly XmlNodeChangedEventHandler _handler;
 		private          Stack                      _changedNodes;
 		private          XmlDocument                _original;
 		private          XmlDocument                _current;
@@ -24,7 +24,6 @@ namespace BLToolkit.EditableObjects
 		public EditableXmlDocument(XmlDocument value)
 		{
 			_changedNodes = null;
-			_handler      = HandleNodeChanged;
 			_current      = value;
 			_original     = value;
 
@@ -34,7 +33,7 @@ namespace BLToolkit.EditableObjects
 		[GetValue, SetValue]
 		public XmlDocument Value
 		{
-			get { return _current;  }
+			get { return _current; }
 			set
 			{
 				if (_current == value)
@@ -57,22 +56,22 @@ namespace BLToolkit.EditableObjects
 
 		private void StartXmlDocTracking()
 		{
-			if (_current != null)
-			{
-				_current.NodeInserting += _handler;
-				_current.NodeRemoving  += _handler;
-				_current.NodeChanging  += _handler;
-			}
+			if (_current == null)
+				return;
+
+			_current.NodeInserted += HandleNodeChanged;
+			_current.NodeRemoved  += HandleNodeChanged;
+			_current.NodeChanged  += HandleNodeChanged;
 		}
 
 		private void StopXmlDocTracking()
 		{
-			if (_current != null)
-			{
-				_current.NodeInserting -= _handler;
-				_current.NodeRemoving  -= _handler;
-				_current.NodeChanging  -= _handler;
-			}
+			if (_current == null)
+				return;
+
+			_current.NodeInserted -= HandleNodeChanged;
+			_current.NodeRemoved  -= HandleNodeChanged;
+			_current.NodeChanged  -= HandleNodeChanged;
 		}
 
 		private void HandleNodeChanged(object sender, XmlNodeChangedEventArgs ea)
@@ -235,7 +234,7 @@ namespace BLToolkit.EditableObjects
 
 		#region Inner types
 
-		private class XmlNodeTrackBack
+		private struct XmlNodeTrackBack
 		{
 			public readonly XmlNode              Node;
 			public readonly XmlNodeChangedAction Action;
