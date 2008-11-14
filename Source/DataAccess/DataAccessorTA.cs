@@ -1,5 +1,5 @@
 using BLToolkit.Data;
-using BLToolkit.Reflection;
+using BLToolkit.TypeBuilder;
 
 namespace BLToolkit.DataAccess
 {
@@ -25,7 +25,7 @@ namespace BLToolkit.DataAccess
 
 		public static A CreateInstance()
 		{
-			return TypeAccessor<A>.CreateInstanceEx();
+			return TypeFactory.CreateInstance<A>();
 		}
 
 		public static A CreateInstance(DbManager dbManager)
@@ -35,7 +35,7 @@ namespace BLToolkit.DataAccess
 
 		public static A CreateInstance(DbManager dbManager, bool dispose)
 		{
-			A da = TypeAccessor<A>.CreateInstanceEx();
+			A da = TypeFactory.CreateInstance<A>();
 
 			da.SetDbManager(dbManager, dispose);
 

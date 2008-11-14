@@ -547,9 +547,22 @@ namespace BLToolkit.Data.DataProvider
 			get { return _parameterPrefix;  }
 			set
 			{
-				_parameterPrefix = (value == null || value.Length == 0)? null:
+				_parameterPrefix = string.IsNullOrEmpty(value)? null:
 					value.ToUpper(CultureInfo.InvariantCulture);
 			}
+		}
+
+		/// <summary>
+		/// One time initialization from a configuration file.
+		/// </summary>
+		/// <param name="attributes">Provider specific attributes.</param>
+		public override void Configure(System.Collections.Specialized.NameValueCollection attributes)
+		{
+			string val = attributes["ParameterPrefix"];
+			if (val != null)
+				ParameterPrefix = val;
+
+			base.Configure(attributes);
 		}
 
 		#region Inner types

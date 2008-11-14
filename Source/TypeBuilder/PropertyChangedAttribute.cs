@@ -14,7 +14,7 @@ namespace BLToolkit.TypeBuilder
 		/// Specifies default generation options should be used for PropertyChanged notification
 		/// </summary>
 		public PropertyChangedAttribute()
-			:this(Configuration.NotifyOnEqualSet)
+			:this(Common.Configuration.NotifyOnEqualSet)
 		{
 		}
 

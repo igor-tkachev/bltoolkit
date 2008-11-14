@@ -103,6 +103,11 @@
     <Compile Include="Aspects\ClearCacheAttribute.cs" />
     <Compile Include="Aspects\InstanceCacheAttribute.cs" />
     <Compile Include="Aspects\OverloadAttribute.cs" />
+    <Compile Include="Configuration\ElementBase.cs" />
+    <Compile Include="Configuration\ElementCollectionBase.cs" />
+    <Compile Include="Configuration\DataProviderElement.cs" />
+    <Compile Include="Configuration\DataProviderElementCollection.cs" />
+    <Compile Include="Configuration\BLToolkitSection.cs" />
     <Compile Include="DataAccess\ActualTypeAttribute.cs" />
     <Compile Include="DataAccess\DataAccessorBase.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
@@ -219,11 +224,9 @@
     <Compile Include="Data\DataProvider\OleDbDataProvider.cs" />
     <Compile Include="Data\DataProvider\SqlDataProvider.cs" />
     <Compile Include="Data\DbManager.cs">
-      <SubType>Component</SubType>
     </Compile>
     <Compile Include="Data\DbManager.Config.cs">
       <DependentUpon>DbManager.cs</DependentUpon>
-      <SubType>Component</SubType>
     </Compile>
     <Compile Include="Data\OperationType.cs" />
     <Compile Include="EditableObjects\EditableXmlDocument.cs" />

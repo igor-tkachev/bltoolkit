@@ -287,9 +287,9 @@ namespace BLToolkit.Reflection
 						if (accessorType == null)
 						{
 							if (instanceType == null)
-								instanceType = TypeFactory.GetType(originalType, new AbstractClassBuilder());
+								instanceType = TypeFactory.GetType(originalType);
 
-							accessorType = TypeFactory.GetType(originalType, new TypeAccessorBuilder(instanceType, originalType));
+							accessorType = TypeFactory.GetType(originalType, originalType, new TypeAccessorBuilder(instanceType, originalType));
 						}
 
 						accessor = (TypeAccessor)Activator.CreateInstance(accessorType);
@@ -1034,13 +1034,13 @@ namespace BLToolkit.Reflection
 			{
 				if (_isNull != null && _isNull(value))
 				{
-					switch (Configuration.CheckNullReturnIfNull)
+					switch (Common.Configuration.CheckNullReturnIfNull)
 					{
-						case Configuration.NullEquivalent.DBNull:
+						case Common.Configuration.NullEquivalent.DBNull:
 							return DBNull.Value;
-						case Configuration.NullEquivalent.Null:
+						case Common.Configuration.NullEquivalent.Null:
 							return null;
-						case Configuration.NullEquivalent.Value:
+						case Common.Configuration.NullEquivalent.Value:
 							return value;
 					}
 

@@ -1,5 +1,5 @@
 using System;
-
+using BLToolkit.Properties;
 using BLToolkit.Reflection;
 using BLToolkit.TypeBuilder.Builders;
 
@@ -31,7 +31,7 @@ namespace BLToolkit.Aspects
 				TypeBuilderConsts.Priority.CacheAspect)
 		{
 			if (!TypeHelper.IsSameOrParent(typeof(CacheAspect), cacheAspectType))
-				throw new ArgumentException("Parameter 'cacheAspectType' must be of CacheAspect type");
+				throw new ArgumentException(Resources.CacheAttribute_ParentTypeConstraintViolated);
 		}
 
 		public CacheAttribute(Type interceptorType)

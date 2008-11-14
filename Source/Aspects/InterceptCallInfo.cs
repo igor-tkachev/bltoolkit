@@ -3,6 +3,7 @@ using System.Collections;
 using System.Diagnostics;
 using System.Security.Principal;
 using System.Threading;
+using BLToolkit.Properties;
 
 namespace BLToolkit.Aspects
 {
@@ -21,8 +22,15 @@ namespace BLToolkit.Aspects
 			get { return _callMethodInfo;  }
 			set
 			{
+				if (_callMethodInfo == value)
+				{
+					// A race condition.
+					//
+					return;
+				}
+
 				if (_callMethodInfo != null)
-					throw new InvalidOperationException("MethodInfo can not be changed.");
+					throw new InvalidOperationException(Resources.InterceptCallInfo_CallMethodInfoIsNotMutable);
 
 				_callMethodInfo = value;
 

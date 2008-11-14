@@ -15,7 +15,7 @@ namespace BLToolkit.Reflection
 		/// <param name="type">The <see cref="Type"/> of an abstract class to
 		/// include its BLToolkit extensions.</param>
 		public XmlIncludeAbstractAttribute(Type type)
-			: base(TypeAccessor.GetAccessor(type).Type)
+			: base(TypeBuilder.TypeFactory.GetType(type))
 		{
 		}
 	}

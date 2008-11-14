@@ -27,7 +27,7 @@ namespace BLToolkit.Mapping
 
 		private static TrimmableAttribute GetDefaultTrimmableAttribute()
 		{
-			return Configuration.TrimOnMapping ? Yes : No;
+			return Common.Configuration.TrimOnMapping ? Yes : No;
 		}
 
 		[SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes")]

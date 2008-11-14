@@ -7,6 +7,7 @@ using System.Runtime.InteropServices;
 
 using BLToolkit.Reflection.Emit;
 using BLToolkit.TypeBuilder.Builders;
+using BLToolkit.Properties;
 
 namespace BLToolkit.TypeBuilder
 {
@@ -192,25 +193,28 @@ namespace BLToolkit.TypeBuilder
 			}
 			catch (Exception ex)
 			{
-				throw new TypeBuilderException(string.Format(
-					"Could not build the '{0}' type: {1}", sourceType.FullName, ex.Message), ex);
+				// Convert an Exception to TypeBuilderException.
+				//
+				throw new TypeBuilderException(
+					string.Format(Resources.TypeFactory_BuildFailed, sourceType.FullName), ex);
 			}
 		}
 
-		public static Type GetType(Type sourceType, ITypeBuilder typeBuilder)
+		public static Type GetType(Type sourceType)
 		{
-			return GetType(sourceType, sourceType, typeBuilder);
+			return
+				sourceType.IsSealed || sourceType.IsDefined(typeof(BLToolkitGeneratedAttribute), true)? sourceType
+				: GetType(sourceType, sourceType, new AbstractClassBuilder());
+		}
+
+		public static T CreateInstance<T>() where T: class
+		{
+			return (T)Activator.CreateInstance(GetType(typeof(T)));
 		}
 
 		#endregion
 
 		#region Private Helpers
-
-		internal static void Error(string format, params object[] parameters)
-		{
-			throw new TypeBuilderException(
-				string.Format("Could not build the '{0}' type: " + format, parameters));
-		}
 
 		[System.Diagnostics.Conditional("DEBUG")]
 		private static void WriteDebug(string format, params object[] parameters)
@@ -306,7 +310,7 @@ namespace BLToolkit.TypeBuilder
 
 				if (type != null)
 				{
-					Type newType = GetType(type, new AbstractClassBuilder());
+					Type newType = GetType(type);
 
 					if (newType.Assembly.FullName == args.Name)
 						return newType.Assembly;

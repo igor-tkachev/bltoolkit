@@ -296,7 +296,7 @@ namespace BLToolkit.Aspects
 				throw new ArgumentNullException("declaringType");
 
 			if (declaringType.IsAbstract)
-				declaringType = BLToolkit.Reflection.TypeAccessor.GetAccessor(declaringType).Type;
+				declaringType = TypeBuilder.TypeFactory.GetType(declaringType);
 
 			lock (RegisteredAspects.SyncRoot)
 				foreach (CacheAspect aspect in RegisteredAspects)
@@ -310,7 +310,7 @@ namespace BLToolkit.Aspects
 				throw new ArgumentNullException("declaringType");
 
 			if (declaringType.IsAbstract)
-				declaringType = BLToolkit.Reflection.TypeAccessor.GetAccessor(declaringType).Type;
+				declaringType = TypeBuilder.TypeFactory.GetType(declaringType);
 
 			if (parameterTypes == null)
 				parameterTypes = Type.EmptyTypes;

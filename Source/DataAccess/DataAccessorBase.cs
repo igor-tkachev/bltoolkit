@@ -5,6 +5,7 @@ using System.Data;
 using BLToolkit.Aspects;
 using BLToolkit.Data;
 using BLToolkit.Mapping;
+using BLToolkit.Properties;
 using BLToolkit.Reflection.Extension;
 
 namespace BLToolkit.DataAccess
@@ -50,7 +51,7 @@ namespace BLToolkit.DataAccess
 		public virtual void BeginTransaction()
 		{
 			if (_dbManager == null)
-				throw new InvalidOperationException("DbManager object is not provided.");
+				throw new InvalidOperationException(Resources.DataAccessorBase_NoDbManager);
 
 			_dbManager.BeginTransaction();
 		}
@@ -59,7 +60,7 @@ namespace BLToolkit.DataAccess
 		public virtual void BeginTransaction(IsolationLevel il)
 		{
 			if (_dbManager == null)
-				throw new InvalidOperationException("DbManager object is not provided.");
+				throw new InvalidOperationException(Resources.DataAccessorBase_NoDbManager);
 
 			_dbManager.BeginTransaction(il);
 		}
@@ -68,7 +69,7 @@ namespace BLToolkit.DataAccess
 		public virtual void CommitTransaction()
 		{
 			if (_dbManager == null)
-				throw new InvalidOperationException("DbManager object is not provided.");
+				throw new InvalidOperationException(Resources.DataAccessorBase_NoDbManager);
 
 			_dbManager.CommitTransaction();
 		}
@@ -77,7 +78,7 @@ namespace BLToolkit.DataAccess
 		public virtual void RollbackTransaction()
 		{
 			if (_dbManager == null)
-				throw new InvalidOperationException("DbManager object is not provided.");
+				throw new InvalidOperationException(Resources.DataAccessorBase_NoDbManager);
 
 			_dbManager.RollbackTransaction();
 		}

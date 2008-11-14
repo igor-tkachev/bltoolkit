@@ -181,7 +181,7 @@ namespace BLToolkit.Reflection
 			if (attrs == null)
 				_typeAttributesInternal[type] = attrs = type.GetCustomAttributes(false);
 
-			if (Configuration.FilterOutBaseEqualAttributes)
+			if (Common.Configuration.FilterOutBaseEqualAttributes)
 			{
 				for (int i = 0; i < attrs.Length; i++)
 					if (!list.Contains(attrs[i]))

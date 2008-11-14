@@ -25,8 +25,8 @@ namespace BLToolkit.Data
 	/// <see cref="Dispose(bool)"/>. Also, you can use the C# <b>using</b> statement.
 	/// </remarks>
 	/// <include file="Examples.xml" path='examples/db[@name="DbManager"]/*' />
-	[DesignerCategory("Code")]
-	public partial class DbManager : Component
+	[System.ComponentModel.DesignerCategory("Code")]
+	public partial class DbManager: Component
 	{
 		#region Constructors
 
@@ -528,7 +528,7 @@ namespace BLToolkit.Data
 		private  static TraceSwitch _ts;
 		internal static TraceSwitch  TS
 		{
-			get { return _ts ?? (_ts = new TraceSwitch("DbManager", "DbManager trace switch")); }
+			get { return _ts ?? (_ts = new TraceSwitch("DbManager", "DbManager trace switch", "Warning")); }
 		}
 
 		private IDataReader ExecuteReaderInternal()

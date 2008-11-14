@@ -20,7 +20,7 @@ namespace BLToolkit.Aspects
 				declaringType = caller.GetType();
 
 			if (declaringType.IsAbstract)
-				declaringType = BLToolkit.Reflection.TypeAccessor.GetAccessor(declaringType).Type;
+				declaringType = TypeBuilder.TypeFactory.GetType(declaringType);
 
 			return declaringType;
 		}

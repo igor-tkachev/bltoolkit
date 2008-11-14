@@ -1,7 +1,6 @@
 using System;
 using System.Reflection;
 using System.Reflection.Emit;
-using BLToolkit.Common;
 using BLToolkit.Reflection.Emit;
 
 namespace BLToolkit.TypeBuilder.Builders
@@ -9,7 +8,7 @@ namespace BLToolkit.TypeBuilder.Builders
 	public class PropertyChangedBuilder : AbstractTypeBuilderBase
 	{
 		public PropertyChangedBuilder()
-			: this(Configuration.NotifyOnEqualSet, true, true)
+			: this(Common.Configuration.NotifyOnEqualSet, true, true)
 		{
 		}
 

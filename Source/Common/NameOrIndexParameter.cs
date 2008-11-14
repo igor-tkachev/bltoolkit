@@ -1,4 +1,5 @@
 using System;
+using BLToolkit.Properties;
 
 namespace BLToolkit.Common
 {
@@ -15,7 +16,7 @@ namespace BLToolkit.Common
 				throw new ArgumentNullException("name");
 
 			if (name.Length == 0)
-				throw new ArgumentException("Name must be a valid string.", "name");
+				throw new ArgumentException(Resources.NameOrIndexParameter_BadName, "name");
 
 			_name  = name;
 			_index = 0;
@@ -24,8 +25,7 @@ namespace BLToolkit.Common
 		public NameOrIndexParameter(int index)
 		{
 			if (index < 0)
-				throw new ArgumentException(
-					"The index parameter must be greater or equal to zero.", "index");
+				throw new ArgumentException(Resources.NameOrIndexParameter_BadIndex, "index");
 
 			_name  = null;
 			_index = index;

@@ -18,6 +18,8 @@ Enhancement
 - DataAccessor support for IEnumerable<T>.
 - Multiple duck. See DuckTyping.Aggregate methods.
 - New Overload aspect.
+- Own configuration section.
+- TypeFactory.GetType() is public now.
 
 
 v 3.0

@@ -14,7 +14,9 @@ using BLToolkit.Data;
 using BLToolkit.Data.DataProvider;
 using BLToolkit.Mapping;
 using BLToolkit.Patterns;
+using BLToolkit.Properties;
 using BLToolkit.Reflection;
+using BLToolkit.TypeBuilder;
 
 namespace BLToolkit.DataAccess
 {
@@ -43,12 +45,12 @@ namespace BLToolkit.DataAccess
 
 		public static DataAccessor CreateInstance(Type type)
 		{
-			return (DataAccessor)TypeAccessor.CreateInstance(type);
+			return (DataAccessor)Activator.CreateInstance(TypeFactory.GetType(type));
 		}
 
 		public static DataAccessor CreateInstance(Type type, InitContext context)
 		{
-			return (DataAccessor)TypeAccessor.CreateInstance(type, context);
+			return (DataAccessor)Activator.CreateInstance(TypeFactory.GetType(type), context);
 		}
 
 		public static DataAccessor CreateInstance(Type type, DbManager dbManager)
@@ -88,7 +90,7 @@ namespace BLToolkit.DataAccess
 
 		public static T CreateInstance<T>() where T : DataAccessor
 		{
-			return TypeAccessor<T>.CreateInstanceEx();
+			return TypeFactory.CreateInstance<T>();
 		}
 
 		public static T CreateInstance<T>(DbManager dbManager)
@@ -100,7 +102,7 @@ namespace BLToolkit.DataAccess
 		public static T CreateInstance<T>(DbManager dbManager, bool dispose)
 			where T : DataAccessor
 		{
-			T da = TypeAccessor<T>.CreateInstanceEx();
+			T da = TypeFactory.CreateInstance<T>();
 
 			da.SetDbManager(dbManager, dispose);
 
@@ -149,7 +151,7 @@ namespace BLToolkit.DataAccess
 				// This usually means that the parameter name is incorrect.
 				//
 				throw new DataAccessException(string.Format(
-					"No such parameter: '{0}'", paramName));
+					Resources.DataAccessot_ParameterNotFound, paramName));
 			}
 
 			// Input parameter mapping make no sence.
@@ -209,12 +211,12 @@ namespace BLToolkit.DataAccess
 
 			if (mms.Length == 0)
 				throw new DataAccessException(string.Format(
-					"Index is not defined for the method '{0}.{1}'.",
+					Resources.DataAccessor_UnknownIndex,
 					GetType().Name, methodName));
 
 			if (mms.Length > 1 && keyType != typeof(object) && !isIndex)
 				throw new DataAccessException(string.Format(
-					"Key type for the method '{0}.{1}' can be of type object or CompoundValue.",
+					Resources.DataAccessor_InvalidKeyType,
 					GetType().Name, methodName));
 
 			if (isIndex || mms.Length > 1)
@@ -242,7 +244,7 @@ namespace BLToolkit.DataAccess
 
 			if (mms.Length == 0)
 				throw new DataAccessException(string.Format(
-					"Index is not defined for the method '{0}.{1}'.",
+					Resources.DataAccessor_UnknownIndex,
 					GetType().Name, methodName));
 
 			string[] fields = new string[mms.Length];
@@ -263,12 +265,12 @@ namespace BLToolkit.DataAccess
 
 			if (mms.Length == 0)
 				throw new DataAccessException(string.Format(
-					"Index is not defined for the method '{0}.{1}'.",
+					Resources.DataAccessor_UnknownIndex,
 					GetType().Name, methodName));
 
 			if (mms.Length != 1)
 				throw new DataAccessException(string.Format(
-					"Index has more then one field for the method '{0}.{1}'. Use CompoundValue as the Key type",
+					Resources.DataAccessor_IndexIsComplex,
 					GetType().Name, methodName));
 
 			db.ExecuteDictionary<TKey, TValue>(dictionary, mms[0].MemberName, objectType, null);
@@ -288,12 +290,12 @@ namespace BLToolkit.DataAccess
 
 			if (mms.Length == 0)
 				throw new DataAccessException(string.Format(
-					"Index is not defined for the method '{0}.{1}'.",
+					Resources.DataAccessor_UnknownIndex,
 					GetType().Name, methodName));
 
 			if (mms.Length > 1 && keyType != typeof(object) && !isIndex)
 				throw new DataAccessException(string.Format(
-					"Key type for the method '{0}.{1}' can be of type object or CompoundValue.",
+					Resources.DataAccessor_InvalidKeyType,
 					GetType().Name, methodName));
 
 			if (isIndex || mms.Length > 1)
@@ -644,7 +646,7 @@ namespace BLToolkit.DataAccess
 			// For types without 'IsNull' property the return value is always false.
 			//
 			INullableInternal nullableInternal = 
-				(INullableInternal)DuckTyping.Implement(typeof (INullableInternal), value);
+				(INullableInternal)DuckTyping.Implement(typeof(INullableInternal), value);
 
 			return nullableInternal.IsNull;
 		}

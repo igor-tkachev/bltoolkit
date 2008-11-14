@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using System.Reflection.Emit;
 using System.Diagnostics.CodeAnalysis;
-
+using BLToolkit.Properties;
 using BLToolkit.Reflection;
 using BLToolkit.Reflection.Emit;
 
@@ -226,12 +226,13 @@ namespace BLToolkit.TypeBuilder.Builders
 						if (t == null)
 							continue;
 
-						if (t.IsInterface == false)
+						if (!t.IsInterface)
 						{
-							TypeFactory.Error("The '{1}' must be an interface.",
-								_context.Type.FullName, t.FullName);
+							throw new InvalidOperationException(
+								string.Format(Resources.AbstractClassBuilder_TypeIsNotAnInterface, t.FullName));
 						}
-						else if (interfaces.Contains(t) == false)
+
+						if (interfaces.Contains(t) == false)
 						{
 							interfaces.Add(t);
 							_context.InterfaceMap.Add(t, tb);

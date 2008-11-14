@@ -9,6 +9,7 @@ using System.Reflection.Emit;
 using BLToolkit.Common;
 using BLToolkit.Data;
 using BLToolkit.Mapping;
+using BLToolkit.Properties;
 using BLToolkit.Reflection;
 using BLToolkit.Reflection.Emit;
 using BLToolkit.TypeBuilder;
@@ -206,7 +207,7 @@ namespace BLToolkit.DataAccess
 					}
 
 					if (_objectType == null || _objectType == typeof(object))
-						ThrowTypeBuilderException("Can not determine object type for method '{0}.{1}'");
+						ThrowTypeBuilderException(Resources.DataAccessorBuilder_BadListItemType);
 
 					if (TypeHelper.IsScalar(_objectType))
 						ExecuteScalarList();
@@ -234,13 +235,13 @@ namespace BLToolkit.DataAccess
 							elementType = _objectType;
 
 						if (elementType == null || elementType == typeof(object))
-							ThrowTypeBuilderException("Can not determine object type for the method '{0}.{1}'");
+							ThrowTypeBuilderException(Resources.DataAccessorBuilder_BadListItemType);
 
 						bool isIndex = TypeHelper.IsSameOrParent(typeof(CompoundValue), keyType);
 
 						if (keyType != typeof(object) && !isIndex && !TypeHelper.IsScalar(keyType))
 							ThrowTypeBuilderException(
-								"Key type for the method '{0}.{1}' can be of type object, CompoundValue, or a scalar type.");
+								Resources.DataAccessorBuilder_BadKeyType);
 
 						MethodInfo mi = Context.CurrentMethod;
 
@@ -252,14 +253,14 @@ namespace BLToolkit.DataAccess
 
 						if (fields.Length > 1 && keyType != typeof(object) && !isIndex)
 							ThrowTypeBuilderException(
-								"Key type for the method '{0}.{1}' can be of type object or CompoundValue.");
+								Resources.DataAccessor_InvalidKeyType);
 
 						if (TypeHelper.IsScalar(elementType))
 						{
 							attrs = mi.GetCustomAttributes(typeof(ScalarFieldNameAttribute), true);
 
 							if (attrs.Length == 0)
-								ThrowTypeBuilderException("Scalar field name is not defined for the method '{0}.{1}'.");
+								ThrowTypeBuilderException(Resources.DataAccessorBuilder_ScalarFieldNameMissing);
 
 							NameOrIndexParameter scalarField = ((ScalarFieldNameAttribute)attrs[0]).NameOrIndex;
 
@@ -349,7 +350,7 @@ namespace BLToolkit.DataAccess
 					AddParameter(pi);
 				else
 				{
-					for(int j = 0; j < attrs.Length; ++j)
+					for (int j = 0; j < attrs.Length; ++j)
 					{
 						if (!attrs[j].NoMap)
 							AddParameter(pi);
@@ -368,7 +369,7 @@ namespace BLToolkit.DataAccess
 						else if (attrs[j] is DestinationAttribute)
 						{
 							if (_destination != null)
-								throw new TypeBuilderException("More then one parameter is marked as destination");
+								throw new TypeBuilderException(Resources.DataAccessorBuilderTooManyDestinations);
 
 							_destination = pi;
 						}
@@ -586,7 +587,7 @@ namespace BLToolkit.DataAccess
 
 				if (!attr.NameOrIndex.ByName)
 					throw new TypeBuilderException(string.Format(
-						"DataSetTable attribute for method '{0}.{1}' may not be an index",
+						Resources.DataAccessorBuilder_DataSetTableMustBeByName,
 						Context.CurrentMethod.DeclaringType.Name, Context.CurrentMethod.Name));
 
 				LoadDestinationOrReturnValue();
@@ -949,7 +950,7 @@ namespace BLToolkit.DataAccess
 				_objectType = returnType.GetGenericArguments()[0];
 
 			if (_objectType == null || _objectType == typeof(object))
-				ThrowTypeBuilderException("Can not determine object type for method '{0}.{1}'");
+				ThrowTypeBuilderException(Resources.DataAccessorBuilder_BadListItemType);
 
 			Type returnObjectType = returnType.IsGenericType ? returnType.GetGenericArguments()[0] : _objectType;
 
@@ -984,7 +985,7 @@ namespace BLToolkit.DataAccess
 		public void ExecuteNonQuery()
 		{
 			if (_destination != null)
-				throw new TypeBuilderException("ExecuteNonQuery does not support the Destination attribute");
+				throw new TypeBuilderException(Resources.DataAccessorBuilder_CantExecuteNonQueryToDestination);
 
 			InitObjectType();
 			GetSprocNameOrSqlQueryTest();
@@ -1022,7 +1023,7 @@ namespace BLToolkit.DataAccess
 				if (_destination.ParameterType.IsByRef)
 					scalarType = _destination.ParameterType.GetElementType();
 				else
-					throw new TypeBuilderException("ExecuteScalar destination must be an out or a ref parameter.");
+					throw new TypeBuilderException(Resources.DataAccessorBuilder_ScalarDestinationIsNotByRef);
 
 				if (returnType != typeof(void) && !TypeHelper.IsSameOrParent(returnType, scalarType))
 				{
@@ -1031,7 +1032,7 @@ namespace BLToolkit.DataAccess
 					// but string Bar(out DateTime dt) is not
 					//
 					throw new TypeBuilderException(string.Format(
-						"The return type '{0}' of the method '{1}' is incompatible with the destination parameter type '{2}'.",
+						Resources.DataAccessorBuilder_IncompatibleDestinationType,
 						returnType.FullName, Context.CurrentMethod.Name, scalarType.FullName));
 				}
 			}
@@ -1211,7 +1212,7 @@ namespace BLToolkit.DataAccess
 				ConstructorInfo ci = TypeHelper.GetDefaultConstructor(returnType);
 
 				if (ci == null)
-					throw new TypeBuilderException(string.Format("Cannot create an instance of the type '{0}'",
+					throw new TypeBuilderException(string.Format(Resources.DataAccessorBuilder_CantCreateTypeInstance,
 						Context.CurrentMethod.ReturnType.FullName));
 
 				Context.MethodBuilder.Emitter
@@ -1720,7 +1721,7 @@ namespace BLToolkit.DataAccess
 						// Is it possible?
 						//
 						throw new TypeBuilderException(string.Format(
-							"The type '{0}' does not have 'Equals' method", type.FullName));
+							Resources.DataAccessorBuilder_EqualsMethodIsNotPublic, type.FullName));
 					}
 
 					if (isNullable)

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
 using System.Diagnostics;
+using BLToolkit.Configuration;
 
 namespace BLToolkit.Data
 {
@@ -248,20 +249,59 @@ namespace BLToolkit.Data
 			AddDataProvider(new OleDbDataProvider());
 			AddDataProvider(new OdbcDataProvider());
 
+			BLToolkitSection section = BLToolkitSection.Instance;
+
+			if (section != null)
+			{
+				_defaultConfiguration = section.DefaultConfiguration;
+
+				foreach (DataProviderElement provider in section.DataProviders)
+				{
+					Type             dataProviderType = Type.GetType(provider.TypeName, true);
+					DataProviderBase providerInstance = (DataProviderBase)Activator.CreateInstance(dataProviderType);
+
+					string providerName = provider.Name;
+					if (string.IsNullOrEmpty(providerName))
+						providerName = providerInstance.Name;
+
+					providerInstance.Configure(provider.Attributes);
+
+					AddDataProvider(providerName, providerInstance);
+
+					if (!provider.Default)
+						continue;
+
+					if (_defaultDataProviderName != null)
+					{
+						throw new ConfigurationErrorsException(string.Format(
+							Resources.DbManager_MoreThenOneDefaultProvider, _defaultDataProviderName, providerName),
+							provider.ElementInformation.Source, provider.ElementInformation.LineNumber);
+					}
+
+					_defaultDataProviderName = providerName;
+				}
+			}
+
 			string dataProviders = ConfigurationManager.AppSettings.Get("BLToolkit.DataProviders");
 
 			if (dataProviders != null)
 			{
+				Debug.WriteLineIf(TS.TraceWarning, "Using appSEttings\\BLToolkit.DataProviders is obsolete. Consider using bltoolkit configuration section instead.", TS.DisplayName);
 				foreach (string dataProviderTypeName in dataProviders.Split(';'))
 					AddDataProvider(Type.GetType(dataProviderTypeName, true));
 			}
 
-			_defaultConfiguration = ConfigurationManager.AppSettings.Get("BLToolkit.DefaultConfiguration");
+			if (string.IsNullOrEmpty(_defaultConfiguration))
+				_defaultConfiguration = ConfigurationManager.AppSettings.Get("BLToolkit.DefaultConfiguration");
+
+			if (string.IsNullOrEmpty(_defaultDataProviderName))
+				_defaultDataProviderName = SqlDataProvider.NameString;
 		}
 
 		private static string             _firstConfiguration;
 		private static DataProviderBase   _firstProvider;
 		private static readonly Hashtable _configurationList = Hashtable.Synchronized(new Hashtable());
+		private static readonly Hashtable _anyProviderConfigurationList = Hashtable.Synchronized(new Hashtable());
 
 		private static DataProviderBase GetDataProvider(IDbConnection connection)
 		{
@@ -278,10 +318,13 @@ namespace BLToolkit.Data
 
 		private static DataProviderBase GetDataProvider(string configurationString)
 		{
+			if (configurationString == null) throw new ArgumentNullException("configurationString");
+
+			if (configurationString.StartsWith(AnyProvider))
+				return FindFirstSuitableProvider(configurationString);
+
 			if (configurationString == _firstConfiguration)
 				return _firstProvider;
-
-			if (configurationString == null) throw new ArgumentNullException("configurationString");
 
 			DataProviderBase dp = (DataProviderBase)_configurationList[configurationString];
 
@@ -308,7 +351,7 @@ namespace BLToolkit.Data
 					// Default provider is SqlDataProvider
 					//
 					string cs  = configurationString.ToUpper();
-					string key = "SQL";
+					string key = _defaultDataProviderName;
 
 					if (cs.Length > 0)
 					{
@@ -349,6 +392,77 @@ namespace BLToolkit.Data
 			return dp;
 		}
 
+		private static bool IsMatchedConfigurationString(string configurationString, string csWithoutProvider)
+		{
+			int dividerPos;
+
+			return
+				!configurationString.StartsWith(AnyProvider) &&
+				(dividerPos = configurationString.IndexOf(ProviderNameDivider)) >= 0 &&
+				0 == StringComparer.OrdinalIgnoreCase.Compare
+					(configurationString.Substring(dividerPos + ProviderNameDivider.Length), csWithoutProvider);
+		}
+
+		private static DataProviderBase FindFirstSuitableProvider(string configurationString)
+		{
+			string cs = (string)_anyProviderConfigurationList[configurationString];
+			bool searchRequired = (cs == null);
+
+			if (searchRequired)
+			{
+				string csWithoutProvider = configurationString.Substring(AnyProvider.Length);
+
+				if (configurationString.Length == 0) throw new ArgumentNullException("configurationString");
+
+				foreach (string str in _connectionStringList.Keys)
+				{
+					if (IsMatchedConfigurationString(str, csWithoutProvider))
+					{
+						cs = str;
+						break;
+					}
+				}
+
+				if (cs == null)
+				{
+					foreach (ConnectionStringSettings css in ConfigurationManager.ConnectionStrings)
+					{
+						if (IsMatchedConfigurationString(css.Name, csWithoutProvider))
+						{
+							cs = css.Name;
+							break;
+						}
+					}
+				}
+
+				if (cs == null)
+				{
+					foreach (string name in ConfigurationManager.AppSettings.AllKeys)
+					{
+						if (name.StartsWith("ConnectionString" + ProviderNameDivider))
+						{
+							string str = name.Substring(name.IndexOf(ProviderNameDivider) + ProviderNameDivider.Length);
+
+							if (IsMatchedConfigurationString(str, csWithoutProvider))
+							{
+								cs = str;
+								break;
+							}
+						}
+					}
+				}
+
+				if (cs == null)
+					cs = csWithoutProvider;
+			}
+
+			DataProviderBase dp = GetDataProvider(cs);
+
+			if (searchRequired)
+				_anyProviderConfigurationList[configurationString] = cs;
+			return dp;
+		}
+
 		private static readonly Dictionary<string, string>
 			_connectionStringList = new Dictionary<string, string>(4);
 
@@ -359,6 +473,8 @@ namespace BLToolkit.Data
 			if (configurationString == null) 
 				configurationString = DefaultConfiguration;
 
+			if (_anyProviderConfigurationList.Contains(configurationString))
+				configurationString = (string)_anyProviderConfigurationList[configurationString];
 			string str;
 
 			// Check cached strings first.
@@ -370,7 +486,7 @@ namespace BLToolkit.Data
 					// Connection string is not in the cache.
 					//
 					string key = string.Format("ConnectionString{0}{1}",
-						configurationString.Length == 0? String.Empty: ".", configurationString);
+						configurationString.Length == 0? String.Empty: ProviderNameDivider, configurationString);
 
 					ConnectionStringSettings css = ConfigurationManager.ConnectionStrings[configurationString];
 
@@ -420,10 +536,10 @@ namespace BLToolkit.Data
 		#region AddDataProvider
 
 		private static readonly Dictionary<string, DataProviderBase> _dataProviderNameList =
-			new Dictionary<string, DataProviderBase>(8);
+			new Dictionary<string, DataProviderBase>(8, StringComparer.OrdinalIgnoreCase);
 		private static readonly Dictionary<Type,   DataProviderBase> _dataProviderTypeList =
 			new Dictionary<Type,   DataProviderBase>(4);
-		private static readonly object    _dataProviderListLock = new object();
+		private static readonly object                               _dataProviderListLock = new object();
 
 		/// <summary>
 		/// Adds a new data provider.
@@ -570,8 +686,10 @@ namespace BLToolkit.Data
 		#region Public Static Properties
 
 		public const string ProviderNameDivider = ".";
+		public const string AnyProvider = "*" + ProviderNameDivider;
 
-		private static string _defaultConfiguration;
+		private static readonly string _defaultDataProviderName;
+		private static          string _defaultConfiguration;
 
 		/// <summary>
 		/// Gets and sets the default configuration string.

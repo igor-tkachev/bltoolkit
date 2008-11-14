@@ -61,6 +61,15 @@ namespace BLToolkit.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The &apos;{0}&apos; must be an interface..
+        /// </summary>
+        internal static string AbstractClassBuilder_TypeIsNotAnInterface {
+            get {
+                return ResourceManager.GetString("AbstractClassBuilder_TypeIsNotAnInterface", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Can not figure out the target method for the method &apos;{0}.{1}&apos;..
         /// </summary>
         internal static string AsyncAspectBuilder_NoTargetMethod {
@@ -70,11 +79,155 @@ namespace BLToolkit.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Parameter &apos;cacheAspectType&apos; must be of CacheAspect type.
+        /// </summary>
+        internal static string CacheAttribute_ParentTypeConstraintViolated {
+            get {
+                return ResourceManager.GetString("CacheAttribute_ParentTypeConstraintViolated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Invalid cast from {0} to {1}.
         /// </summary>
         internal static string Convert_InvalidCast {
             get {
                 return ResourceManager.GetString("Convert_InvalidCast", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Index has more then one field for the method &apos;{0}.{1}&apos;. Use CompoundValue as the Key type.
+        /// </summary>
+        internal static string DataAccessor_IndexIsComplex {
+            get {
+                return ResourceManager.GetString("DataAccessor_IndexIsComplex", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Key type for the method &apos;{0}.{1}&apos; can be of type object or CompoundValue..
+        /// </summary>
+        internal static string DataAccessor_InvalidKeyType {
+            get {
+                return ResourceManager.GetString("DataAccessor_InvalidKeyType", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Index is not defined for the method &apos;{0}.{1}&apos;..
+        /// </summary>
+        internal static string DataAccessor_UnknownIndex {
+            get {
+                return ResourceManager.GetString("DataAccessor_UnknownIndex", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to DbManager object is not provided..
+        /// </summary>
+        internal static string DataAccessorBase_NoDbManager {
+            get {
+                return ResourceManager.GetString("DataAccessorBase_NoDbManager", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Key type for the method &apos;{0}.{1}&apos; can be of type object, CompoundValue, or a scalar type..
+        /// </summary>
+        internal static string DataAccessorBuilder_BadKeyType {
+            get {
+                return ResourceManager.GetString("DataAccessorBuilder_BadKeyType", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Can not determine object type for the method &apos;{0}.{1}&apos;.
+        /// </summary>
+        internal static string DataAccessorBuilder_BadListItemType {
+            get {
+                return ResourceManager.GetString("DataAccessorBuilder_BadListItemType", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Cannot create an instance of the type &apos;{0}&apos;.
+        /// </summary>
+        internal static string DataAccessorBuilder_CantCreateTypeInstance {
+            get {
+                return ResourceManager.GetString("DataAccessorBuilder_CantCreateTypeInstance", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to ExecuteNonQuery does not support the Destination attribute.
+        /// </summary>
+        internal static string DataAccessorBuilder_CantExecuteNonQueryToDestination {
+            get {
+                return ResourceManager.GetString("DataAccessorBuilder_CantExecuteNonQueryToDestination", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to DataSetTable attribute for method &apos;{0}.{1}&apos; may not be an index.
+        /// </summary>
+        internal static string DataAccessorBuilder_DataSetTableMustBeByName {
+            get {
+                return ResourceManager.GetString("DataAccessorBuilder_DataSetTableMustBeByName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The type &apos;{0}&apos; does not have &apos;Equals&apos; method.
+        /// </summary>
+        internal static string DataAccessorBuilder_EqualsMethodIsNotPublic {
+            get {
+                return ResourceManager.GetString("DataAccessorBuilder_EqualsMethodIsNotPublic", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The return type &apos;{0}&apos; of the method &apos;{1}&apos; is incompatible with the destination parameter type &apos;{2}&apos;..
+        /// </summary>
+        internal static string DataAccessorBuilder_IncompatibleDestinationType {
+            get {
+                return ResourceManager.GetString("DataAccessorBuilder_IncompatibleDestinationType", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to ExecuteScalar destination must be an out or a ref parameter..
+        /// </summary>
+        internal static string DataAccessorBuilder_ScalarDestinationIsNotByRef {
+            get {
+                return ResourceManager.GetString("DataAccessorBuilder_ScalarDestinationIsNotByRef", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Scalar field name is not defined for the method &apos;{0}.{1}&apos;..
+        /// </summary>
+        internal static string DataAccessorBuilder_ScalarFieldNameMissing {
+            get {
+                return ResourceManager.GetString("DataAccessorBuilder_ScalarFieldNameMissing", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to More then one parameter is marked as destination.
+        /// </summary>
+        internal static string DataAccessorBuilderTooManyDestinations {
+            get {
+                return ResourceManager.GetString("DataAccessorBuilderTooManyDestinations", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to No such parameter: &apos;{0}&apos;.
+        /// </summary>
+        internal static string DataAccessot_ParameterNotFound {
+            get {
+                return ResourceManager.GetString("DataAccessot_ParameterNotFound", resourceCulture);
             }
         }
         
@@ -147,6 +300,15 @@ namespace BLToolkit.Properties {
         internal static string DbManager_MismatchParameterCount {
             get {
                 return ResourceManager.GetString("DbManager_MismatchParameterCount", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Both `{0}&apos; and `{1}&apos; data providers are default.
+        /// </summary>
+        internal static string DbManager_MoreThenOneDefaultProvider {
+            get {
+                return ResourceManager.GetString("DbManager_MoreThenOneDefaultProvider", resourceCulture);
             }
         }
         
@@ -241,6 +403,15 @@ namespace BLToolkit.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to MethodInfo can not be changed..
+        /// </summary>
+        internal static string InterceptCallInfo_CallMethodInfoIsNotMutable {
+            get {
+                return ResourceManager.GetString("InterceptCallInfo_CallMethodInfoIsNotMutable", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Type &apos;{0}&apos; does not contain field &apos;{1}&apos;..
         /// </summary>
         internal static string MapIndex_BadField {
@@ -282,6 +453,24 @@ namespace BLToolkit.Properties {
         internal static string MappingSchema_IncompatibleArrayTypes {
             get {
                 return ResourceManager.GetString("MappingSchema_IncompatibleArrayTypes", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The index parameter must be greater or equal to zero..
+        /// </summary>
+        internal static string NameOrIndexParameter_BadIndex {
+            get {
+                return ResourceManager.GetString("NameOrIndexParameter_BadIndex", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Name must be a valid string..
+        /// </summary>
+        internal static string NameOrIndexParameter_BadName {
+            get {
+                return ResourceManager.GetString("NameOrIndexParameter_BadName", resourceCulture);
             }
         }
         
@@ -372,6 +561,15 @@ namespace BLToolkit.Properties {
         internal static string TypeBuilder_UnknownParameterType {
             get {
                 return ResourceManager.GetString("TypeBuilder_UnknownParameterType", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Could not build the &apos;{0}&apos; type..
+        /// </summary>
+        internal static string TypeFactory_BuildFailed {
+            get {
+                return ResourceManager.GetString("TypeFactory_BuildFailed", resourceCulture);
             }
         }
     }

@@ -161,6 +161,14 @@ namespace BLToolkit.Data.DataProvider
 				dbManager.MappingSchema = schema;
 		}
 
+		/// <summary>
+		/// One time initialization from a configuration file.
+		/// </summary>
+		/// <param name="attributes">Provider specific attributes.</param>
+		public virtual void Configure(System.Collections.Specialized.NameValueCollection attributes)
+		{
+		}
+
 		private        MappingSchema _mappingSchema;
 		public virtual MappingSchema  MappingSchema
 		{

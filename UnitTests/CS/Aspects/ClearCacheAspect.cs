@@ -1,9 +1,8 @@
-﻿using System;
-
-using NUnit.Framework;
+﻿using NUnit.Framework;
 
 using BLToolkit.Aspects;
 using BLToolkit.Reflection;
+using BLToolkit.TypeBuilder;
 
 namespace Aspects
 {
@@ -68,7 +67,7 @@ namespace Aspects
 		[Test]
 		public void Test1()
 		{
-			TestClass tc = TypeAccessor<TestClass>.CreateInstance();
+			TestClass tc = TypeFactory.CreateInstance<TestClass>();
 
 			int value1 = tc.Test1();
 			int value2 = tc.Test1();
@@ -83,7 +82,7 @@ namespace Aspects
 		[Test]
 		public void Test2()
 		{
-			TestClass tc = TypeAccessor<TestClass>.CreateInstance();
+			TestClass tc = TypeFactory.CreateInstance<TestClass>();
 
 			tc.ClearTest2();
 
@@ -100,7 +99,7 @@ namespace Aspects
 		[Test]
 		public void Test2a()
 		{
-			TestClass tc = TypeAccessor<TestClass>.CreateInstance();
+			TestClass tc = TypeFactory.CreateInstance<TestClass>();
 
 			tc.ClearTest2a();
 
@@ -117,7 +116,7 @@ namespace Aspects
 		[Test]
 		public void Test2b()
 		{
-			TestClass tc = TypeAccessor<TestClass>.CreateInstance();
+			TestClass tc = TypeFactory.CreateInstance<TestClass>();
 
 			tc.ClearTest2b();
 
