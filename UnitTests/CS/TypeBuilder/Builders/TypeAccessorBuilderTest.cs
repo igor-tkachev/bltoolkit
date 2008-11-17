@@ -10,11 +10,6 @@ namespace TypeBuilder.Builders
 	[TestFixture]
 	public class TypeAccessorBuilderTest
 	{
-		public TypeAccessorBuilderTest()
-		{
-			TypeFactory.SaveTypes = true;
-		}
-
 		public class TestObject1
 		{
 			public TestObject1()

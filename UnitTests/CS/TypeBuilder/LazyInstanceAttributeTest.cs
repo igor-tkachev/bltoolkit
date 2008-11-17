@@ -11,11 +11,6 @@ namespace TypeBuilder
 	[TestFixture]
 	public class LazyInstanceAttributeTest
 	{
-		public LazyInstanceAttributeTest()
-		{
-			TypeFactory.SaveTypes = true;
-		}
-
 		public abstract class AbstractObject
 		{
 			public AbstractObject(InitContext init)

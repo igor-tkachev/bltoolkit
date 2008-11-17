@@ -108,6 +108,7 @@
     <Compile Include="Configuration\DataProviderElement.cs" />
     <Compile Include="Configuration\DataProviderElementCollection.cs" />
     <Compile Include="Configuration\BLToolkitSection.cs" />
+    <Compile Include="Configuration\TypeFactoryElement.cs" />
     <Compile Include="DataAccess\ActualTypeAttribute.cs" />
     <Compile Include="DataAccess\DataAccessorBase.cs" />
     <Compile Include="Properties\Resources.Designer.cs">

@@ -1,11 +1,9 @@
-using System;
 using System.Collections.Generic;
 
 using NUnit.Framework;
 
 using BLToolkit.Reflection;
 using BLToolkit.EditableObjects;
-using BLToolkit.TypeBuilder;
 
 namespace Reflection
 {
@@ -42,7 +40,6 @@ namespace Reflection
 		[Test]
 		public void TestLongName()
 		{
-			TypeFactory.SaveTypes = true;
 			EditableList<TestObject> o = TypeAccessor<EditableList<TestObject>>.CreateInstance();
 		}
 	}

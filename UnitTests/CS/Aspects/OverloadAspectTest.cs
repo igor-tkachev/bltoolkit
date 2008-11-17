@@ -133,8 +133,6 @@ namespace Aspects
 		[Test]
 		public void OverloadTest()
 		{
-			TypeFactory.SaveTypes = true;
-
 			TestObject o = TypeAccessor<TestObject>.CreateInstance();
 
 			o.Test(12345, "str");

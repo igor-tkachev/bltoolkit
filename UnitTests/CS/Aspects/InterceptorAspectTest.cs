@@ -13,11 +13,6 @@ namespace Aspects
 	[TestFixture]
 	public class InterceptorAspectTest
 	{
-		public InterceptorAspectTest()
-		{
-			TypeFactory.SaveTypes = true;
-		}
-
 		public class TestInterceptor : IInterceptor
 		{
 			public void Init(CallMethodInfo info, string configString)

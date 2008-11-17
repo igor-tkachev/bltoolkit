@@ -38,7 +38,6 @@ namespace DataAccess
 		[Test]
 		public void Test()
 		{
-			TypeFactory.SaveTypes = true;
 			TypeFactory.SetGlobalAssembly("CreateEntityTest.dll");
 
 			DbManager db = new DbManager();

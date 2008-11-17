@@ -55,8 +55,6 @@ namespace EditableObjects
 		
 		public EditableArrayListTest()
 		{
-			TypeFactory.SaveTypes = true;
-
 			_testList = new EditableArrayList(typeof(EditableTestObject));
 			_testList.ListChanged += TestList_ListChanged;
 		}

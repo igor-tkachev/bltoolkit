@@ -1,21 +1,14 @@
-using System;
 using System.Collections;
 
 using NUnit.Framework;
 
 using BLToolkit.Reflection;
-using BLToolkit.TypeBuilder;
 
 namespace Reflection
 {
 	[TestFixture]
 	public class TypeAccessorTest
 	{
-		public TypeAccessorTest()
-		{
-			TypeFactory.SaveTypes = true;
-		}
-
 		public class TestObject1
 		{
 			public int    IntField = 10;

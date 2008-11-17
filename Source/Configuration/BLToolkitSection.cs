@@ -12,16 +12,24 @@ namespace BLToolkit.Configuration
 			new ConfigurationPropertyCollection();
 
 		private static readonly ConfigurationProperty           _propDataProviders =
-			new ConfigurationProperty("dataProviders",        typeof(DataProviderElementCollection),
-			new DataProviderElementCollection(),              ConfigurationPropertyOptions.None);
+			new ConfigurationProperty("dataProviders",           typeof(DataProviderElementCollection),
+			new DataProviderElementCollection(),                 ConfigurationPropertyOptions.None);
 		private static readonly ConfigurationProperty           _propDefaultConfiguration =
-			new ConfigurationProperty("defaultConfiguration", typeof(string),
-			null,                                             ConfigurationPropertyOptions.None);
+			new ConfigurationProperty("defaultConfiguration",    typeof(string),
+			null,                                                ConfigurationPropertyOptions.None);
+		private static readonly ConfigurationProperty           _propLoadExtensionAssemblies =
+			new ConfigurationProperty("loadExtensionAssemblies", typeof(bool),
+			null,                                                ConfigurationPropertyOptions.None);
+		private static readonly ConfigurationProperty           _propTypeFactory =
+			new ConfigurationProperty("typeFactory",             typeof(TypeFactoryElement),
+			null,                                                ConfigurationPropertyOptions.None);
 
 		static BLToolkitSection()
 		{
-			_properties.Add(_propDefaultConfiguration);
 			_properties.Add(_propDataProviders);
+			_properties.Add(_propDefaultConfiguration);
+			_properties.Add(_propLoadExtensionAssemblies);
+			_properties.Add(_propTypeFactory);
 		}
 
 		public static BLToolkitSection Instance
@@ -34,14 +42,24 @@ namespace BLToolkit.Configuration
 			get { return _properties; }
 		}
 
+		public DataProviderElementCollection DataProviders
+		{
+			get { return (DataProviderElementCollection) base[_propDataProviders]; }
+		}
+
 		public string DefaultConfiguration
 		{
 			get { return (string)base[_propDefaultConfiguration]; }
 		}
 
-		public DataProviderElementCollection DataProviders
+		public bool LoadExtensionAssemblies
 		{
-			get { return (DataProviderElementCollection) base[_propDataProviders]; }
+			get { return (bool)base[_propLoadExtensionAssemblies]; }
+		}
+
+		public TypeFactoryElement TypeFactory
+		{
+			get { return (TypeFactoryElement)base[_propTypeFactory]; }
 		}
 	}
 }

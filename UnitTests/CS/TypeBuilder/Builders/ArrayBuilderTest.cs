@@ -1,5 +1,3 @@
-using System;
-
 using NUnit.Framework;
 
 using BLToolkit.TypeBuilder;
@@ -10,11 +8,6 @@ namespace TypeBuilder.Builders
 	[TestFixture]
 	public class ArrayBuilderTest
 	{
-		public ArrayBuilderTest()
-		{
-			TypeFactory.SaveTypes = true;
-		}
-
 		public abstract class TestObject
 		{
 			public abstract int[]    IntArray1 { get; set; }

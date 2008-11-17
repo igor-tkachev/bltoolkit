@@ -1,4 +1,4 @@
-﻿namespace BLToolkit.Data
+namespace BLToolkit.Data
 {
 	public delegate void OperationExceptionEventHandler(object sender, OperationExceptionEventArgs ea);
 

@@ -1,6 +1,4 @@
-using System;
 using System.Reflection;
-using BLToolkit.Common;
 using NUnit.Framework;
 
 using BLToolkit.TypeBuilder;
@@ -11,11 +9,6 @@ namespace TypeBuilder.Builders
 	[TestFixture]
 	public class PropertyChangeBuilderTest
 	{
-		public PropertyChangeBuilderTest()
-		{
-			TypeFactory.SaveTypes = true;
-		}
-
 		public abstract class TestObject1 : IPropertyChanged
 		{
 			public string NotifiedName;

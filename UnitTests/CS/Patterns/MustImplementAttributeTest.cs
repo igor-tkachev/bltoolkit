@@ -9,11 +9,6 @@ namespace Patterns
 	[TestFixture]
 	public class MustImplementAttributeTest
 	{
-		public MustImplementAttributeTest()
-		{
-			TypeFactory.SaveTypes = true;
-		}
-
 		[MustImplement]
 		public interface IRequiredInterface
 		{

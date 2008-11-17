@@ -260,13 +260,12 @@ namespace BLToolkit.Data
 					Type             dataProviderType = Type.GetType(provider.TypeName, true);
 					DataProviderBase providerInstance = (DataProviderBase)Activator.CreateInstance(dataProviderType);
 
-					string providerName = provider.Name;
-					if (string.IsNullOrEmpty(providerName))
-						providerName = providerInstance.Name;
+					if (!string.IsNullOrEmpty(provider.Name))
+						providerInstance.UniqueName = provider.Name;
 
 					providerInstance.Configure(provider.Attributes);
 
-					AddDataProvider(providerName, providerInstance);
+					AddDataProvider(providerInstance);
 
 					if (!provider.Default)
 						continue;
@@ -274,11 +273,11 @@ namespace BLToolkit.Data
 					if (_defaultDataProviderName != null)
 					{
 						throw new ConfigurationErrorsException(string.Format(
-							Resources.DbManager_MoreThenOneDefaultProvider, _defaultDataProviderName, providerName),
+							Resources.DbManager_MoreThenOneDefaultProvider, _defaultDataProviderName, providerInstance.UniqueName),
 							provider.ElementInformation.Source, provider.ElementInformation.LineNumber);
 					}
 
-					_defaultDataProviderName = providerName;
+					_defaultDataProviderName = providerInstance.UniqueName;
 				}
 			}
 
@@ -286,7 +285,7 @@ namespace BLToolkit.Data
 
 			if (dataProviders != null)
 			{
-				Debug.WriteLineIf(TS.TraceWarning, "Using appSEttings\\BLToolkit.DataProviders is obsolete. Consider using bltoolkit configuration section instead.", TS.DisplayName);
+				Debug.WriteLineIf(TS.TraceWarning, "Using appSettings\\BLToolkit.DataProviders is obsolete. Consider using bltoolkit configuration section instead.", TS.DisplayName);
 				foreach (string dataProviderTypeName in dataProviders.Split(';'))
 					AddDataProvider(Type.GetType(dataProviderTypeName, true));
 			}
@@ -556,7 +555,7 @@ namespace BLToolkit.Data
 			if (null == dataProvider)
 				throw new ArgumentNullException("dataProvider");
 
-			if (string.IsNullOrEmpty(dataProvider.Name))
+			if (string.IsNullOrEmpty(dataProvider.UniqueName))
 				throw new ArgumentException(Resources.DbManager_InvalidDataProviderName, "dataProvider");
 
 			if (string.IsNullOrEmpty(dataProvider.ProviderName))
@@ -567,7 +566,7 @@ namespace BLToolkit.Data
 
 			lock (_dataProviderListLock)
 			{
-				_dataProviderNameList[dataProvider.Name.ToUpper()] = dataProvider;
+				_dataProviderNameList[dataProvider.UniqueName.ToUpper()] = dataProvider;
 				_dataProviderNameList[dataProvider.ProviderName]   = dataProvider;
 				_dataProviderTypeList[dataProvider.ConnectionType] = dataProvider;
 			}
@@ -590,16 +589,10 @@ namespace BLToolkit.Data
 				throw new ArgumentNullException("dataProvider");
 
 			if (string.IsNullOrEmpty(providerName))
-				throw new ArgumentException(Resources.DbManager_InvalidProviderName, "providerName");
+				throw new ArgumentException(Resources.DbManager_InvalidDataProviderName, "providerName");
 
-			if (dataProvider.ConnectionType == null || !typeof(IDbConnection).IsAssignableFrom(dataProvider.ConnectionType))
-				throw new ArgumentException(Resources.DbManager_InvalidDataProviderConnectionType, "dataProvider");
-
-			lock (_dataProviderListLock)
-			{
-				_dataProviderNameList[providerName.ToUpper()]      = dataProvider;
-				_dataProviderTypeList[dataProvider.ConnectionType] = dataProvider;
-			}
+			dataProvider.UniqueName = providerName;
+			AddDataProvider(dataProvider);
 		}
 
 		/// <summary>

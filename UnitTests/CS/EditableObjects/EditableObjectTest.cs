@@ -15,11 +15,6 @@ namespace EditableObjects
 	[TestFixture]
 	public class EditableObjectTest
 	{
-		public EditableObjectTest()
-		{
-			TypeFactory.SaveTypes = true;
-		}
-
 		public class Source
 		{
 			public int         ID   = 10;

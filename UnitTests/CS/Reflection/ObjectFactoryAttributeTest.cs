@@ -3,18 +3,12 @@ using System;
 using NUnit.Framework;
 
 using BLToolkit.Reflection;
-using BLToolkit.TypeBuilder;
 
 namespace Reflection
 {
 	[TestFixture]
 	public class ObjectFactoryAttributeTest
 	{
-		public ObjectFactoryAttributeTest()
-		{
-			TypeFactory.SaveTypes = true;
-		}
-
 		[ObjectFactory(typeof(TestObject.Factory))]
 		public class TestObject
 		{

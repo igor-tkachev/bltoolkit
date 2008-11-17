@@ -10,11 +10,6 @@ namespace DataAccess
 	[TestFixture]
 	public class OutRefTest
 	{
-		public OutRefTest()
-		{
-			TypeFactory.SaveTypes = true;
-		}
-
 		public class Entity
 		{
 			public int    ID             = 5;

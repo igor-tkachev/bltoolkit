@@ -8,6 +8,7 @@ using System.Runtime.InteropServices;
 using BLToolkit.Reflection.Emit;
 using BLToolkit.TypeBuilder.Builders;
 using BLToolkit.Properties;
+using BLToolkit.Configuration;
 
 namespace BLToolkit.TypeBuilder
 {
@@ -16,6 +17,19 @@ namespace BLToolkit.TypeBuilder
 		static TypeFactory()
 		{
 			AppDomain.CurrentDomain.AssemblyResolve += CurrentDomain_AssemblyResolve;
+
+			BLToolkitSection section = BLToolkitSection.Instance;
+			if (section == null)
+				return;
+
+			TypeFactoryElement elm = section.TypeFactory;
+			if (elm == null)
+				return;
+
+			SaveTypes = elm.SaveTypes;
+			SealTypes = elm.SealTypes;
+
+			SetGlobalAssembly(elm.AssemblyPath, elm.Version, elm.KeyFile);
 		}
 
 		#region Create Assembly

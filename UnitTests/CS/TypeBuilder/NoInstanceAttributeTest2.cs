@@ -1,5 +1,3 @@
-using System;
-
 using NUnit.Framework;
 
 using BLToolkit.EditableObjects;
@@ -11,11 +9,6 @@ namespace TypeBuilder
 	[TestFixture]
 	public class NoInstanceAttributeTest2
 	{
-		public NoInstanceAttributeTest2()
-		{
-			TypeFactory.SaveTypes = true;
-		}
-
 		public abstract class PersonCitizenship : EditableObject
 		{
 		}

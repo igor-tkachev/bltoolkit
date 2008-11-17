@@ -11,11 +11,6 @@ namespace Patterns
 	[TestFixture]
 	public class DuckTypingTest
 	{
-		public DuckTypingTest()
-		{
-			TypeFactory.SaveTypes = true;
-		}
-
 		public interface TestInterface
 		{
 			int  Method(int value);

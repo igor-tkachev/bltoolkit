@@ -33,7 +33,6 @@ namespace TypeBuilder
 		[Test]
 		public void Test()
 		{
-			TypeFactory.SaveTypes = true;
 			TypeFactory.SetGlobalAssembly("InternalTypesTest.dll", new Version(1,2,3,4), "TypeBuilder/InternalTypesTest.snk");
 
 			InternalObject o = TypeAccessor.CreateInstance<InternalObject>();
@@ -43,7 +42,6 @@ namespace TypeBuilder
 			Assert.IsNotNull(o2);
 
 			TypeFactory.SaveGlobalAssembly();
-			TypeFactory.SaveTypes = false;
 
 			TypeAccessor ta = TypeAccessor<PublicObject>.Instance;
 			Assert.IsNotNull(ta["InternalField"]);

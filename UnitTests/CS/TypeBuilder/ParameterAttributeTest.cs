@@ -12,11 +12,6 @@ namespace TypeBuilder
 	[TestFixture]
 	public class ParameterAttributeTest
 	{
-		public ParameterAttributeTest()
-		{
-			TypeFactory.SaveTypes = true;
-		}
-
 		public abstract class AbstractObject
 		{
 			public AbstractObject(InitContext init)

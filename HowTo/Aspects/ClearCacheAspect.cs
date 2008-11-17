@@ -55,8 +55,6 @@ namespace HowTo.Aspects
 		[Test]
 		public void Test()
 		{
-			BLToolkit.TypeBuilder.TypeFactory.SaveTypes = true;
-
 			TestClass tc = TypeAccessor<TestClass>.CreateInstance();
 
 			TestClass.Value = 1;

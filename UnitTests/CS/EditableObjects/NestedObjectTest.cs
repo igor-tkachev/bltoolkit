@@ -60,8 +60,6 @@ namespace EditableObjects
 		[Test]
 		public void Test()
 		{
-			TypeFactory.SaveTypes = true;
-
 			MasterObject obj = (MasterObject)TypeAccessor.CreateInstance(typeof(MasterObject));
 
 			Assert.IsNotNull(obj.Object1);

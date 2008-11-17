@@ -61,8 +61,6 @@ namespace HowTo.DataAccess
 		[Test]
 		public void Test()
 		{
-			BLToolkit.TypeBuilder.TypeFactory.SaveTypes = true;
-
 			PersonAccessor pa = DataAccessor.CreateInstance<PersonAccessor>();
 
 			// Insert and get id.

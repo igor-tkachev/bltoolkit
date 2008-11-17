@@ -7,7 +7,10 @@ namespace BLToolkit.Configuration
 	{
 		protected override object GetElementKey(DataProviderElement element)
 		{
-			return element.Name;
+			// element.Name is optional and may be omitted.
+			// element.TypeName is required, but is not unique.
+			//
+			return string.Concat(element.Name, "/", element.TypeName);
 		}
 	}
 }

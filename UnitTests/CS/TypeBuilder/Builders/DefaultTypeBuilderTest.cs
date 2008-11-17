@@ -13,11 +13,6 @@ namespace TypeBuilder.Builders
 	[TestFixture]
 	public class DefaultTypeBuilderTest
 	{
-		public DefaultTypeBuilderTest()
-		{
-			TypeFactory.SaveTypes = true;
-		}
-
 		public abstract class TestObject
 		{
 			public    abstract int       Int       { get; set; }

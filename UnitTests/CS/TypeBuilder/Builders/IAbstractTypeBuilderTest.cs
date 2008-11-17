@@ -75,8 +75,6 @@ namespace TypeBuilder.Builders
 		[Test]
 		public void Test()
 		{
-			TypeFactory.SaveTypes = true;
-
 			ITest test = (ITest)TypeAccessor.CreateInstance(typeof(TestObject));
 
 			bool      pbool;

@@ -295,8 +295,6 @@ namespace DataAccess
 
 		public DataAccessorTest()
 		{
-			TypeFactory.SaveTypes = true;
-
 			object o = TypeAccessor.CreateInstance(typeof(Person));
 			Assert.IsInstanceOfType(typeof(Person), o);
 

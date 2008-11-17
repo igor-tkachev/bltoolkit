@@ -78,7 +78,7 @@ namespace BLToolkit.DataAccess
 		[NoInterception]
 		protected internal virtual MemberMapper[] GetKeyFieldList(DbManager db, Type type)
 		{
-			string         key    = type.FullName + "$" + db.DataProvider.Name;
+			string         key    = type.FullName + "$" + db.DataProvider.UniqueName;
 			MemberMapper[] mmList = (MemberMapper[])_keyList[key];
 
 			if (mmList == null)
@@ -303,7 +303,7 @@ namespace BLToolkit.DataAccess
 		[NoInterception]
 		public virtual SqlQueryInfo GetSqlQueryInfo(DbManager db, Type type, string actionName)
 		{
-			string       key   = type.FullName + "$" + actionName + "$" + db.DataProvider.Name + "$" + GetTableName(type);
+			string       key   = type.FullName + "$" + actionName + "$" + db.DataProvider.UniqueName + "$" + GetTableName(type);
 			SqlQueryInfo query = (SqlQueryInfo)_actionSqlQueryInfo[key];
 
 			if (query == null)

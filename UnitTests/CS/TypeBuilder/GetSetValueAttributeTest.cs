@@ -11,11 +11,6 @@ namespace TypeBuilder
 	[TestFixture]
 	public class GetSetValueAttributeTest
 	{
-		public GetSetValueAttributeTest()
-		{
-			TypeFactory.SaveTypes = true;
-		}
-
 		public class Value
 		{
 			public Value(int value)

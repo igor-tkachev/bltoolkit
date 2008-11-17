@@ -231,8 +231,6 @@ namespace DataAccess
 
 		public DictionaryTest()
 		{
-			TypeFactory.SaveTypes = true;
-
 			_da = (TestAccessor)DataAccessor.CreateInstance(typeof(TestAccessor));
 		}
 

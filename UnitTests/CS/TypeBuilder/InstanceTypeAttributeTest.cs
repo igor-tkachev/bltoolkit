@@ -11,11 +11,6 @@ namespace TypeBuilder
 	[TestFixture]
 	public class InstanceTypeAttributeTest
 	{
-		public InstanceTypeAttributeTest()
-		{
-			TypeFactory.SaveTypes = true;
-		}
-
 		public class TestClass
 		{
 			public class IntFieldInstance

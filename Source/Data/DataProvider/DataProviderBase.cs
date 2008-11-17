@@ -39,6 +39,16 @@ namespace BLToolkit.Data.DataProvider
 		/// <value>The data manager name.</value>
 		public abstract string Name { get; }
 
+		private  string _uniqueName;
+		/// <summary>
+		/// Same as <see cref="Name"/>, but may be overridden to add two or more providers of same type.
+		/// </summary>
+		public string  UniqueName
+		{
+			get { return _uniqueName ?? Name; }
+			internal set { _uniqueName = value; }
+		}
+
 		#endregion
 
 		#region Abstract Methods

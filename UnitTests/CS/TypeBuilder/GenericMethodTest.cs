@@ -4,7 +4,6 @@ using BLToolkit.Aspects;
 using NUnit.Framework;
 
 using BLToolkit.Reflection;
-using BLToolkit.TypeBuilder;
 using NUnit.Framework.SyntaxHelpers;
 
 namespace TypeBuilder
@@ -12,11 +11,6 @@ namespace TypeBuilder
 	[TestFixture]
 	public class GenericMethodTest
 	{
-		public GenericMethodTest()
-		{
-			TypeFactory.SaveTypes = true;
-		}
-
 		public abstract class TestObject
 		{
 			public virtual T GetValue<T>([NotNull] T value) where T : class, ICloneable

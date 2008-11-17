@@ -57,8 +57,6 @@ namespace Aspects
 		[Test]
 		public void InstanceTest()
 		{
-			BLToolkit.TypeBuilder.TypeFactory.SaveTypes = true;
-
 			TestClass t = TypeAccessor.CreateInstance<TestClass>();
 
 			TestClass.Value = 1; Assert.AreEqual(1, t.InstanceTest(1, 1));

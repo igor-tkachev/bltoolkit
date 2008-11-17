@@ -11,11 +11,6 @@ namespace Aspects
 	[TestFixture]
 	public class NotNullAspectTest
 	{
-		public NotNullAspectTest()
-		{
-			TypeFactory.SaveTypes = true;
-		}
-
 		public abstract class TestObject1
 		{
 			public virtual void Foo1(string str1, [NotNull] string str2, string str3) {}

@@ -10,11 +10,6 @@ namespace EditableObjects
 	[TestFixture]
 	public class EditableObjectT
 	{
-		public EditableObjectT()
-		{
-			TypeFactory.SaveTypes = true;
-		}
-
 		public abstract class TestObject: EditableObject<TestObject>
 		{
 			public abstract int         ID    { get; set; }
