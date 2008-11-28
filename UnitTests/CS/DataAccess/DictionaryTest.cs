@@ -54,6 +54,8 @@ namespace DataAccess
 		[ObjectType(typeof(Person))]
 		public abstract class TestAccessor : DataAccessor
 		{
+			private const string TEST_QUERY = "SELECT * FROM Person WHERE PersonID < 3";
+
 			[SqlQuery("SELECT * FROM Person")]
 			[Index("ID")]
 			public abstract Hashtable   SelectAll1();
@@ -66,29 +68,29 @@ namespace DataAccess
 				get;
 			}
 
-			[SqlQuery("SELECT * FROM Person WHERE PersonID < 3")]
+			[SqlQuery(TEST_QUERY)]
 			[Index("@PersonID", "LastName")]
 			public abstract Hashtable   SelectAll2();
 
-			[SqlQuery("SELECT * FROM Person WHERE PersonID < 3")]
+			[SqlQuery(TEST_QUERY)]
 			[Index("@PersonID")]
 			[ScalarFieldName("FirstName")]
 			[ObjectType(typeof(string))]
 			public abstract Hashtable   SelectAll3();
 
-			[SqlQuery("SELECT * FROM Person WHERE PersonID < 3")]
+			[SqlQuery(TEST_QUERY)]
 			[Index("PersonID", "LastName")]
 			[ScalarFieldName("FirstName")]
 			[ObjectType(typeof(string))]
 			public abstract Hashtable   SelectAll4();
 
-			[SqlQuery("SELECT * FROM Person WHERE PersonID < 3")]
+			[SqlQuery(TEST_QUERY)]
 			[Index("PersonID", "LastName")]
 			[ScalarFieldName(1)]
 			[ObjectType(typeof(string))]
 			public abstract Hashtable   SelectAll5();
 
-			[SqlQuery("SELECT * FROM Person WHERE PersonID < 3")]
+			[SqlQuery(TEST_QUERY)]
 			[Index("PersonID", "LastName")]
 			[ScalarFieldName(1)]
 			[ObjectType(typeof(string))]
@@ -98,38 +100,38 @@ namespace DataAccess
 			// we can not figure out both key type and scalar object type.
 			// Note that version with generics works just fine.
 			//
-			[SqlQuery("SELECT * FROM Person WHERE PersonID < 3")]
+			[SqlQuery(TEST_QUERY)]
 			[ScalarFieldName("FirstName"), ObjectType(typeof(string))]
 			public abstract Hashtable   ScalarDictionaryByPK();
 
-			[SqlQuery("SELECT * FROM Person WHERE PersonID < 3")]
+			[SqlQuery(TEST_QUERY)]
 			[ObjectType(typeof(PersonNoPK))]
 			public abstract Hashtable   Keyless();
 
-			[SqlQuery("SELECT * FROM Person WHERE PersonID < 3")]
+			[SqlQuery(TEST_QUERY)]
 			[ObjectType(typeof(PersonMultiPK))]
 			public abstract Hashtable   MultiPK();
 
-			[SqlQuery("SELECT * FROM Person WHERE PersonID < 3")]
+			[SqlQuery(TEST_QUERY)]
 			[ObjectType(typeof(PersonMultiPK))]
 			public abstract void        MultiPKReturnVoid([Destination] Hashtable dictionary);
 
-			[SqlQuery("SELECT * FROM Person WHERE PersonID < 3")]
+			[SqlQuery(TEST_QUERY)]
 			public abstract Hashtable   DictionaryByPK();
 
-			[SqlQuery("SELECT * FROM Person WHERE PersonID < 3")]
+			[SqlQuery(TEST_QUERY)]
 			[Index("@PersonID")]
 			public abstract Hashtable   DictionaryByIndex();
 
-			[SqlQuery("SELECT * FROM Person WHERE PersonID < 3")]
+			[SqlQuery(TEST_QUERY)]
 			[Index(0, 1)]
 			public abstract Hashtable   DictionaryByMapIndex();
 
-			[SqlQuery("SELECT * FROM Person WHERE PersonID < 3")]
+			[SqlQuery(TEST_QUERY)]
 			[Index(0, 1)]
 			public abstract IDictionary DictionaryByMapIndexWithDestination([Destination] Hashtable dictionary);
 
-			[SqlQuery("SELECT * FROM Person WHERE PersonID < 3")]
+			[SqlQuery(TEST_QUERY)]
 			[Index(0), ScalarFieldName(1)]
 			public abstract void                              GenericsScalarDictionaryByIndexReturnVoid1([Destination] IDictionary<int, string> dictionary);
 
@@ -161,31 +163,31 @@ namespace DataAccess
 			[ScalarFieldName(1)]
 			public abstract IDictionary<CompoundValue, string> SelectAllAsIDictionaryT();
 
-			[SqlQuery("SELECT * FROM Person WHERE PersonID < 3")]
+			[SqlQuery(TEST_QUERY)]
 			[ScalarFieldName("FirstName")]
 			public abstract Dictionary<object, string>        GenericsScalarDictionaryByPK();
 
-			[SqlQuery("SELECT * FROM Person WHERE PersonID < 3")]
+			[SqlQuery(TEST_QUERY)]
 			[ScalarFieldName(1)] // Index from Db table Person, not type Person!
 			public abstract Dictionary<int, string>           GenericsScalarDictionaryByPK2();
 
-			[SqlQuery("SELECT * FROM Person WHERE PersonID < 3")]
+			[SqlQuery(TEST_QUERY)]
 			[Index(0), ScalarFieldName(1)]
 			public abstract Dictionary<int, string>           GenericsScalarDictionaryByIndex();
 
-			[SqlQuery("SELECT * FROM Person WHERE PersonID < 3")]
+			[SqlQuery(TEST_QUERY)]
 			[Index(0), ScalarFieldName(1)]
 			public abstract void                              GenericsScalarDictionaryByIndexReturnVoid([Destination] IDictionary<int, string> dictionary);
 
-			[SqlQuery("SELECT * FROM Person WHERE PersonID < 3")]
+			[SqlQuery(TEST_QUERY)]
 			[Index(0, 1), ScalarFieldName(1)]
 			public abstract Dictionary<CompoundValue, string> GenericsScalarDictionaryByMapIndex();
 
-			[SqlQuery("SELECT * FROM Person WHERE PersonID < 3")]
+			[SqlQuery(TEST_QUERY)]
 			[Index(0)]
 			public abstract Dictionary<int, PersonNoPK>       GenericsScalarDictionaryByPKWithCustomType();
 
-			[SqlQuery("SELECT * FROM Person WHERE PersonID < 3")]
+			[SqlQuery(TEST_QUERY)]
 			[ObjectType(typeof(Person))]
 			public abstract Dictionary<int, object>           GenericsScalarDictionaryByPKWithObjectType();
 

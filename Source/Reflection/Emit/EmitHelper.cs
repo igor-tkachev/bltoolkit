@@ -855,7 +855,7 @@ namespace BLToolkit.Reflection.Emit
 			if (methodInfo == null)
 				throw CreateNoSuchMethodException(type, methodName);
 
-			return callvirt(methodInfo, optionalParameterTypes.Length == 0? null: optionalParameterTypes);
+			return callvirt(methodInfo);
 		}
 
 		/// <summary>

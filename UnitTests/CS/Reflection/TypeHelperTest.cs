@@ -205,9 +205,9 @@ namespace Reflection
 			Assert.IsNull   (helper.GetMethod(true,  "Method3", typeof(TestStruct<Nullable<int>, object>)));
 			Assert.IsNull   (helper.GetMethod(true,  "Method3", typeof(TestStruct<int, int>)));
 
-			Assert.AreEqual (helper.GetMethods().Length,     15);  // 15 total
-			Assert.AreEqual (helper.GetMethods(true).Length,  5);  //  5 generic
-			Assert.AreEqual (helper.GetMethods(false).Length, 10); // 10 non-generics
+			Assert.AreEqual (15, helper.GetMethods(     ).Length);  // 15 total
+			Assert.AreEqual (5,  helper.GetMethods(true ).Length);  //  5 generic
+			Assert.AreEqual (10, helper.GetMethods(false).Length); // 10 non-generics
 
 		}
 
