@@ -20,7 +20,7 @@ Enhancement
 - New Overload aspect.
 - Own configuration section.
 - TypeFactory.GetType() is public now.
-
+- Simplified GenerateAttributeAttribute usage.
 
 v 3.0
 
