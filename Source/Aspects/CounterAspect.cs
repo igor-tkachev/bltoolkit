@@ -55,8 +55,8 @@ namespace BLToolkit.Aspects
 
 		#region Parameters
 
-		private bool _isEnabled = true;
-		public  bool  IsEnabled
+		private static bool _isEnabled = true;
+		public  static bool  IsEnabled
 		{
 			get { return _isEnabled;  }
 			set { _isEnabled = value; }

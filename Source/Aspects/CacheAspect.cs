@@ -159,22 +159,22 @@ namespace BLToolkit.Aspects
 
 		#region Global Parameters
 
-		private bool _isEnabled = true;
-		public  bool  IsEnabled
+		private static bool _isEnabled = true;
+		public  static bool  IsEnabled
 		{
 			get { return _isEnabled;  }
 			set { _isEnabled = value; }
 		}
 
-		private int _maxCacheTime = int.MaxValue;
-		public  int  MaxCacheTime
+		private static int _maxCacheTime = int.MaxValue;
+		public  static int  MaxCacheTime
 		{
 			get { return _maxCacheTime;  }
 			set { _maxCacheTime = value; }
 		}
 
-		private bool _isWeak;
-		public  bool  IsWeak
+		private static bool _isWeak;
+		public  static bool  IsWeak
 		{
 			get { return _isWeak;  }
 			set { _isWeak = value; }

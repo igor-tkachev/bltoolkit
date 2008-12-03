@@ -95,8 +95,8 @@ namespace BLToolkit.Aspects
 			set { _fileName = value; }
 		}
 
-		private bool _isEnabled = true;
-		public  bool  IsEnabled
+		private static bool _isEnabled = true;
+		public  static bool  IsEnabled
 		{
 			get { return _isEnabled;  }
 			set { _isEnabled = value; }
@@ -104,7 +104,7 @@ namespace BLToolkit.Aspects
 
 		#endregion
 
-		#region LogOparation
+		#region LogOperation
 
 		private static LogOperation _logOperation = LogOperationInternal;
 		public  static LogOperation  LogOperation
