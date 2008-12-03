@@ -528,6 +528,8 @@ namespace BLToolkit.Data.DataProvider
 			get { return typeof(OracleConnection); }
 		}
 
+		public const string NameString = "Odp";
+
 		/// <summary>
 		/// Returns the data provider name.
 		/// </summary>
@@ -538,7 +540,7 @@ namespace BLToolkit.Data.DataProvider
 		/// <value>Data provider name.</value>
 		public override string Name
 		{
-			get { return "ODP"; }
+			get { return NameString; }
 		}
 
 		private string _parameterPrefix = "P";
@@ -1044,7 +1046,7 @@ namespace BLToolkit.Data.DataProvider
 				return base.ConvertChangeType(IsNull(value)? null: value, conversionType);
 			}
 
-			private static bool IsNull(object value)
+			public override bool IsNull(object value)
 			{
 				// ODP 10 does not expose this interface to public.
 				//
@@ -1064,7 +1066,7 @@ namespace BLToolkit.Data.DataProvider
 					value is OracleBinary?       ((OracleBinary)      value).IsNull:
 					value is OracleIntervalDS?   ((OracleIntervalDS)  value).IsNull:
 					value is OracleIntervalYM?   ((OracleIntervalYM)  value).IsNull:
-						false;
+						base.IsNull(value);
 			}
 		}
 
