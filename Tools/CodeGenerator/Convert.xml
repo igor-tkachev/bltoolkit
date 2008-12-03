@@ -76,8 +76,8 @@
 			<group name="SqlTypes">
 				<include template ="SqlTypes"/>
 				<from type="SqlGuid"/>
-				<from type="SqlChars" >return p.IsNull?  null : p.ToSqlString().Value;</from>
-				<from type="SqlXml"   >return p.IsNull?  null : p.Value;</from>
+				<from type="SqlChars" >return p.IsNull?  null: p.ToSqlString().Value;</from>
+				<from type="SqlXml"   >return p.IsNull?  null: p.Value;</from>
 				<default              >return p.ToString();</default>
 			</group>
 			<group name="Other Types">
@@ -591,7 +591,7 @@
 				<from type="String"   >return p == null? Guid.Empty: new Guid(p);</from>
 			</group>
 			<group name="Nullable Types." nullable="true">
-				<from type="Guid"    >return p.HasValue? p.Value : Guid.Empty;</from>
+				<from type="Guid"    >return p.HasValue? p.Value: Guid.Empty;</from>
 			</group>
 			<group name="SqlTypes">
 				<from type="SqlGuid"  >return p.IsNull? Guid.Empty: p.Value;            </from>
@@ -846,8 +846,8 @@
 			</group>
 			<group name="Nullable Types." nullable="true">
 				<include template ="Numeric Types"/>
-				<from type="Boolean"  >return p.HasValue? (Char?)(p.Value? 1: 0)  : null;</from>
-				<default              >return p.HasValue? checked((Char?)p.Value) : null;</default>
+				<from type="Boolean"  >return p.HasValue?  (Char?)(p.Value? 1: 0): null;</from>
+				<default              >return p.HasValue? checked((Char?)p.Value): null;</default>
 			</group>
 			<group name="SqlTypes">
 				<include template ="SqlTypes"/>
@@ -1428,7 +1428,7 @@
 				<from type="String"   >return p == null? SqlGuid.Null: SqlGuid.Parse(p);</from>
 			</group>
 			<group name="Nullable Types." nullable="true">
-				<from type="Guid"    >return p.HasValue? p.Value : SqlGuid.Null;</from>
+				<from type="Guid"    >return p.HasValue? p.Value: SqlGuid.Null;</from>
 			</group>
 			<group name="SqlTypes">
 				<from type="SqlBinary"/>

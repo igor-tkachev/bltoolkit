@@ -60,15 +60,13 @@ namespace BLTgen
 			Assembly sourceAsm                = Assembly.LoadFrom(parsedArgs.SourceAssembly);
 			string   extensionAssemblyPath    = GetOutputAssemblyLocation(sourceAsm.Location, parsedArgs.OutputDirectory);
 			Version  extensionAssemblyVersion = parsedArgs.Version != null? new Version(parsedArgs.Version): sourceAsm.GetName().Version;
+			string   extensionAssemblyFolder  = Path.GetDirectoryName(extensionAssemblyPath);
 
 			if (verbose)
 				Console.WriteLine("{0} =>{1}{2}", sourceAsm.Location, Environment.NewLine, extensionAssemblyPath);
 
-			if (!Directory.Exists(parsedArgs.OutputDirectory))
-				Directory.CreateDirectory(parsedArgs.OutputDirectory);
-
-			TypeFactory.SaveTypes = true;
-			TypeFactory.SetGlobalAssembly(extensionAssemblyPath, extensionAssemblyVersion, parsedArgs.KeyPairFile);
+			if (!string.IsNullOrEmpty(extensionAssemblyFolder) && !Directory.Exists(extensionAssemblyFolder))
+				Directory.CreateDirectory(extensionAssemblyFolder);
 
 			Type[] typesToProcess = sourceAsm.GetExportedTypes();
 			typesToProcess = FilterBaseTypes(typesToProcess, parsedArgs.BaseTypes);
@@ -77,6 +75,9 @@ namespace BLTgen
 
 			if (typesToProcess.Length > 0)
 			{
+				TypeFactory.SaveTypes = true;
+				TypeFactory.SetGlobalAssembly(extensionAssemblyPath, extensionAssemblyVersion, parsedArgs.KeyPairFile);
+
 				foreach (Type t in typesToProcess)
 				{
 					if (verbose)
