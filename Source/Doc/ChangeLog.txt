@@ -21,6 +21,8 @@ Enhancement
 - Own configuration section.
 - TypeFactory.GetType() is public now.
 - Simplified GenerateAttributeAttribute usage.
+- New SqlBuilder class.
+
 
 v 3.0
 

@@ -114,6 +114,7 @@
     <Compile Include="Data\ExecuteScalarTest.cs" />
     <Compile Include="Data\NullableParameter.cs" />
     <Compile Include="Data\OutputParameter.cs" />
+    <Compile Include="Data\Sql\SqlBuilderTest.cs" />
     <Compile Include="EditableObjects\EditableObjectT.cs" />
     <Compile Include="EditableObjects\EditableArrayListTest.cs" />
     <Compile Include="EditableObjects\EditableList_AcceptChanges.cs" />

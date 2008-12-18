@@ -2,7 +2,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>9.0.30729</ProductVersion>
+    <ProductVersion>8.0.50727</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{3C37A408-3A01-4568-99D1-ADFEDDFFF2BC}</ProjectGuid>
     <OutputType>Library</OutputType>
@@ -201,6 +201,12 @@
       <DependentUpon>DbManager.cs</DependentUpon>
     </Compile>
     <Compile Include="Data\OperationType.cs" />
+    <Compile Include="Data\Sql\ChildContainer.cs" />
+    <Compile Include="Data\Sql\Field.cs" />
+    <Compile Include="Data\Sql\IChild.cs" />
+    <Compile Include="Data\Sql\Parameter.cs" />
+    <Compile Include="Data\Sql\Table.cs" />
+    <Compile Include="Data\Sql\TableT.cs" />
     <Compile Include="EditableObjects\EditableXmlDocument.cs" />
     <Compile Include="EditableObjects\EditableList.cs" />
     <Compile Include="EditableObjects\EditableListChangedEventArgs.cs" />

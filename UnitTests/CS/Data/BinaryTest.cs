@@ -1,8 +1,9 @@
 using System;
-using BLToolkit.Data.DataProvider;
+
 using NUnit.Framework;
 
 using BLToolkit.Data;
+using BLToolkit.Data.DataProvider;
 
 namespace Data
 {

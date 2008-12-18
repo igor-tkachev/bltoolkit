@@ -111,6 +111,12 @@
     <Compile Include="Configuration\TypeFactoryElement.cs" />
     <Compile Include="DataAccess\ActualTypeAttribute.cs" />
     <Compile Include="DataAccess\DataAccessorBase.cs" />
+    <Compile Include="Data\Sql\ChildContainer.cs" />
+    <Compile Include="Data\Sql\Field.cs" />
+    <Compile Include="Data\Sql\IChild.cs" />
+    <Compile Include="Data\Sql\Parameter.cs" />
+    <Compile Include="Data\Sql\Table.cs" />
+    <Compile Include="Data\Sql\TableT.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>

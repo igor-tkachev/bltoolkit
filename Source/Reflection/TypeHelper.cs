@@ -1,13 +1,14 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Reflection;
-using System.ComponentModel;
 using System.Xml;
-using BLToolkit.Common;
-using BLToolkit.TypeBuilder;
+
 using BLToolkit.EditableObjects;
+using BLToolkit.TypeBuilder;
 
 namespace BLToolkit.Reflection
 {
@@ -1207,6 +1208,38 @@ namespace BLToolkit.Reflection
 			}
 
 			return typeof(object);
+		}
+
+		public static Type GetElementType(Type type)
+		{
+			if (type == null)
+				return null;
+
+			if (type == typeof(object))
+				return type.HasElementType ? type.GetElementType(): null;
+
+			if (type.IsArray)
+				type.GetElementType();
+
+			if (type.IsGenericType)
+				foreach (Type aType in type.GetGenericArguments())
+					if (typeof(IEnumerable<>).MakeGenericType(new Type[] { aType }).IsAssignableFrom(type))
+						return aType;
+
+			Type[] interfaces = type.GetInterfaces();
+
+			if (interfaces != null && interfaces.Length > 0)
+			{
+				foreach (Type iType in interfaces)
+				{
+					Type eType = GetElementType(iType);
+
+					if (eType != null)
+						return eType;
+				}
+			}
+
+			return GetElementType(type.BaseType);
 		}
 
 		/// <summary>
