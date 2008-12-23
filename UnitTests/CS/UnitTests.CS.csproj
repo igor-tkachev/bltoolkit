@@ -114,7 +114,7 @@
     <Compile Include="Data\ExecuteScalarTest.cs" />
     <Compile Include="Data\NullableParameter.cs" />
     <Compile Include="Data\OutputParameter.cs" />
-    <Compile Include="Data\Sql\SqlBuilderTest.cs" />
+    <Compile Include="Data\Sql\DefinitionTest.cs" />
     <Compile Include="EditableObjects\EditableObjectT.cs" />
     <Compile Include="EditableObjects\EditableArrayListTest.cs" />
     <Compile Include="EditableObjects\EditableList_AcceptChanges.cs" />
@@ -237,6 +237,9 @@
       <ProductName>.NET Framework 3.5</ProductName>
       <Install>false</Install>
     </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Data\Sql\DefinitionData.xml" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>

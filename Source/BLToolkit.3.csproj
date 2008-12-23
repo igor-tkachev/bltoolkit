@@ -114,6 +114,8 @@
     <Compile Include="Data\Sql\ChildContainer.cs" />
     <Compile Include="Data\Sql\Field.cs" />
     <Compile Include="Data\Sql\IChild.cs" />
+    <Compile Include="Data\Sql\Join.cs" />
+    <Compile Include="Data\Sql\JoinOn.cs" />
     <Compile Include="Data\Sql\Parameter.cs" />
     <Compile Include="Data\Sql\Table.cs" />
     <Compile Include="Data\Sql\TableT.cs" />
