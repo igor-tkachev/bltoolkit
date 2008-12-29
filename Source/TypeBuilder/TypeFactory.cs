@@ -217,8 +217,8 @@ namespace BLToolkit.TypeBuilder
 		public static Type GetType(Type sourceType)
 		{
 			return
-				sourceType.IsSealed || sourceType.IsDefined(typeof(BLToolkitGeneratedAttribute), true)? sourceType
-				: GetType(sourceType, sourceType, new AbstractClassBuilder());
+				!sourceType.IsAbstract && sourceType.IsDefined(typeof(BLToolkitGeneratedAttribute), true)? sourceType:
+					GetType(sourceType, sourceType, new AbstractClassBuilder());
 		}
 
 		public static T CreateInstance<T>() where T: class
