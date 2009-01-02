@@ -465,7 +465,7 @@ namespace BLToolkit.Data
 		private static readonly Dictionary<string, string>
 			_connectionStringList = new Dictionary<string, string>(4);
 
-		private static string GetConnectionString(string configurationString)
+		public static string GetConnectionString(string configurationString)
 		{
 			// Use default configuration.
 			//
