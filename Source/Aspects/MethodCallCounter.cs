@@ -92,7 +92,21 @@ namespace BLToolkit.Aspects
 
 		#region Protected Members
 
-		protected internal virtual void AddCall(TimeSpan time, bool withException, bool cached)
+		public virtual void RegisterCall(InterceptCallInfo info)
+		{
+			lock (_currentCalls.SyncRoot)
+				_currentCalls.Add(info);
+		}
+
+		public virtual void UnregisterCall(InterceptCallInfo info)
+		{
+			AddCall(DateTime.Now - info.BeginCallTime, info.Exception != null, info.Cached);
+
+			lock (_currentCalls.SyncRoot)
+				_currentCalls.Remove(info);
+		}
+
+		protected void AddCall(TimeSpan time, bool withException, bool cached)
 		{
 			if (cached)
 			{

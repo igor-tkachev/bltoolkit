@@ -3,7 +3,7 @@ using System.Collections;
 
 namespace BLToolkit.Common
 {
-	public class CompoundValue : IComparable
+	public class CompoundValue : IComparable, IEquatable<CompoundValue>
 	{
 		public CompoundValue(params object[] values)
 		{
@@ -79,10 +79,22 @@ namespace BLToolkit.Common
 
 		public override bool Equals(object obj)
 		{
-			if (!(obj is CompoundValue) || _hash != ((CompoundValue)obj)._hash)
+			if (!(obj is CompoundValue))
 				return false;
 
-			object[] values = ((CompoundValue)obj)._values;
+			return Equals((CompoundValue)obj);
+		}
+
+		#endregion
+
+		#region IEquatable<CompoundValue> Members
+
+		public bool Equals(CompoundValue other)
+		{
+			if (_hash != other._hash)
+				return false;
+
+			object[] values = other._values;
 
 			if (_values.Length != values.Length)
 				return false;

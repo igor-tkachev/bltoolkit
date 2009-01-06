@@ -22,17 +22,16 @@ namespace BLToolkit.Aspects
 
 		private MethodCallCounter _counter;
 
-		static readonly LocalDataStoreSlot counterSlot = Thread.AllocateDataSlot();
+		static readonly LocalDataStoreSlot _counterSlot = Thread.AllocateDataSlot();
 
 		protected override void BeforeCall(InterceptCallInfo info)
 		{
-			if (!IsEnabled || Thread.GetData(counterSlot) != null)
+			if (!IsEnabled || Thread.GetData(_counterSlot) != null)
 				return;
 
-			lock (_counter.CurrentCalls.SyncRoot)
-				_counter.CurrentCalls.Add(info);
+			_counter.RegisterCall(info);
 
-			Thread.SetData(counterSlot, _counter);
+			Thread.SetData(_counterSlot, _counter);
 		}
 
 		protected override void OnFinally(InterceptCallInfo info)
@@ -40,16 +39,13 @@ namespace BLToolkit.Aspects
 			if (!IsEnabled)
 				return;
 
-			MethodCallCounter prev = (MethodCallCounter)Thread.GetData(counterSlot);
+			MethodCallCounter prev = (MethodCallCounter)Thread.GetData(_counterSlot);
 
 			if (_counter == prev)
 			{
-				_counter.AddCall(DateTime.Now - info.BeginCallTime, info.Exception != null, info.Cached);
+				_counter.UnregisterCall(info);
 
-				lock (_counter.CurrentCalls.SyncRoot)
-					_counter.CurrentCalls.Remove(info);
-
-				Thread.SetData(counterSlot, null);
+				Thread.SetData(_counterSlot, null);
 			}
 		}
 

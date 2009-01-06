@@ -5,7 +5,7 @@ using BLToolkit.Reflection.Extension;
 
 namespace BLToolkit.Data.Sql
 {
-	public class Field : IChild<Table>
+	public class Field : IChild<Table>, ISqlExpression
 	{
 		public Field()
 		{
@@ -26,5 +26,10 @@ namespace BLToolkit.Data.Sql
 		private Table      _parent;
 		Table IChild<Table>.Parent { get { return _parent; } set { _parent = value; } }
 		public       Table  Table  { get { return _parent; } }
+
+		bool IEquatable<ISqlExpression>.Equals(ISqlExpression other)
+		{
+			return (object)this == other;
+		}
 	}
 }

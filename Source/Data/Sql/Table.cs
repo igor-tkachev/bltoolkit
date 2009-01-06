@@ -6,7 +6,7 @@ using BLToolkit.Reflection.Extension;
 
 namespace BLToolkit.Data.Sql
 {
-	public class Table
+	public class Table : ITableSource
 	{
 		#region Init
 
