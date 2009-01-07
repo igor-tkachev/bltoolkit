@@ -5,14 +5,31 @@ namespace BLToolkit.Data.Sql
 {
 	public class SqlBuilder : ISqlExpression, ITableSource
 	{
+		#region Init
+
+		public SqlBuilder()
+		{
+			_select = new SelectClause(this);
+			_from   = new FromClause(this);
+		}
+
+		#endregion
+
 		#region Column
 
 		public class Column : IEquatable<Column>
 		{
 			public Column(ISqlExpression expression, string alias)
 			{
+				if (expression == null) throw new ArgumentNullException("expression");
+
 				_expression  = expression;
 				_alias       = alias;
+			}
+
+			public Column(ISqlExpression expression)
+				: this(expression, null)
+			{
 			}
 
 			private ISqlExpression _expression;
@@ -35,16 +52,101 @@ namespace BLToolkit.Data.Sql
 			}
 		}
 
-		public static Column CreateColumn(ISqlExpression expression)
+		#endregion
+
+		#region Select Clause
+
+		public class SelectClause
 		{
-			return CreateColumn(expression, null);
+			readonly SqlBuilder _builder;
+
+			internal SelectClause(SqlBuilder builder)
+			{
+				_builder = builder;
+			}
+
+			public SelectClause Field(Field field)
+			{
+				AddOrGetColumn(new Column(field));
+				return this;
+			}
+
+			public SelectClause Field(Field field, string alias)
+			{
+				AddOrGetColumn(new Column(field, alias));
+				return this;
+			}
+
+			public SelectClause Sql(SqlBuilder sql)
+			{
+				AddOrGetColumn(new Column(sql));
+				return this;
+			}
+
+			public SelectClause Sql(SqlBuilder sql, string alias)
+			{
+				AddOrGetColumn(new Column(sql, alias));
+				return this;
+			}
+
+			public SelectClause Expr(ISqlExpression expr)
+			{
+				AddOrGetColumn(new Column(expr));
+				return this;
+			}
+
+			public SelectClause Expr(ISqlExpression expr, string alias)
+			{
+				AddOrGetColumn(new Column(expr, alias));
+				return this;
+			}
+
+			public SelectClause Expr(string expr, params ISqlExpression[] values)
+			{
+				AddOrGetColumn(new Column(new SqlExpression(expr, values)));
+				return this;
+			}
+
+			public SelectClause Expr(string alias, string expr, params ISqlExpression[] values)
+			{
+				AddOrGetColumn(new Column(new SqlExpression(expr, values)));
+				return this;
+			}
+
+			public FromClause From
+			{
+				get { return _builder.From; }
+			}
+
+			public SqlBuilder End()
+			{
+				return _builder;
+			}
+
+			Column AddOrGetColumn(Column col)
+			{
+				foreach (Column c in Columns)
+					if (c.Equals(col))
+						return col;
+
+				//col.Index = SelectList.Count;
+
+				Columns.Add(col);
+
+				return col;
+			}
+
+			readonly List<Column> _columns = new List<Column>();
+			public   List<Column>  Columns
+			{
+				get { return _columns; }
+			}
 		}
 
-		public static Column CreateColumn(ISqlExpression expression, string alias)
+		readonly SelectClause _select;
+		public   SelectClause  Select
 		{
-			if (expression == null) throw new ArgumentNullException("expression");
-
-			return new Column(expression, alias);
+			get { return _select; }
 		}
 
 		#endregion
@@ -76,102 +178,6 @@ namespace BLToolkit.Data.Sql
 
 		#endregion
 
-		#region Select Clause
-
-		public class SelectClause
-		{
-			readonly SqlBuilder _builder;
-
-			internal SelectClause(SqlBuilder builder)
-			{
-				_builder = builder;
-			}
-
-			public SelectClause Field(Field field)
-			{
-				_builder.AddColumn(CreateColumn(field));
-				return this;
-			}
-
-			public SelectClause Field(Field field, string alias)
-			{
-				_builder.AddColumn(CreateColumn(field, alias));
-				return this;
-			}
-
-			public SelectClause Sql(SqlBuilder sql)
-			{
-				_builder.AddColumn(CreateColumn(sql));
-				return this;
-			}
-
-			public SelectClause Sql(SqlBuilder sql, string alias)
-			{
-				_builder.AddColumn(CreateColumn(sql, alias));
-				return this;
-			}
-
-			public SelectClause Expr(ISqlExpression expr)
-			{
-				_builder.AddColumn(CreateColumn(expr));
-				return this;
-			}
-
-			public SelectClause Expr(ISqlExpression expr, string alias)
-			{
-				_builder.AddColumn(CreateColumn(expr, alias));
-				return this;
-			}
-
-			public SelectClause Expr(string expr, params ISqlExpression[] values)
-			{
-				_builder.AddColumn(CreateColumn(new SqlExpression(expr, values)));
-				return this;
-			}
-
-			public SelectClause Expr(string alias, string expr, params ISqlExpression[] values)
-			{
-				_builder.AddColumn(CreateColumn(new SqlExpression(expr, values)));
-				return this;
-			}
-
-			public FromClause From
-			{
-				get { return _builder.From; }
-			}
-
-			public SqlBuilder End()
-			{
-				return _builder;
-			}
-		}
-
-		Column AddColumn(Column col)
-		{
-			foreach (Column c in SelectList)
-				if (c.Equals(col))
-					return col;
-
-			//col.Index = SelectList.Count;
-
-			SelectList.Add(col);
-
-			return col;
-		}
-
-		public SelectClause Select
-		{
-			get { return new SelectClause(this); }
-		}
-
-		readonly List<Column> _selectList = new List<Column>();
-		public   List<Column>  SelectList
-		{
-			get { return _selectList; }
-		}
-
-		#endregion
-
 		#region From
 
 		public class FromClause
@@ -190,23 +196,31 @@ namespace BLToolkit.Data.Sql
 
 			public TableSource Table(ITableSource table, string alias)
 			{
+				foreach (TableSource ts in Tables)
+					if (ts.Source == table)
+						if (alias == null || ts.Alias == alias)
+							return ts;
+						else
+							throw new ArithmeticException("alias");
+
 				TableSource t = new TableSource(table, alias);
 
-				_builder._fromTable = t;
+				Tables.Add(t);
 
 				return t;
 			}
+
+			private List<TableSource> _tables = new List<TableSource>();
+			public  List<TableSource>  Tables
+			{
+				get { return _tables; }
+			}
 		}
 
-		private TableSource _fromTable;
-		public  TableSource  FromTable
+		readonly FromClause _from;
+		public   FromClause  From
 		{
-			get { return _fromTable; }
-		}
-
-		public FromClause From
-		{
-			get { return new FromClause(this); }
+			get { return _from; }
 		}
 
 		#endregion

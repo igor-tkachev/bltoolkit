@@ -29,7 +29,7 @@ namespace Data.Sql
 					.Table(Tables.Order)
 				;
 
-			Assert.AreEqual(2, sb.SelectList.Count);
+			Assert.AreEqual(2, sb.Select.Columns.Count);
 		}
 
 		[Test]
@@ -44,7 +44,7 @@ namespace Data.Sql
 					.Field(Tables.Order["ID"])
 				;
 
-			Assert.AreEqual(2, sb.SelectList.Count);
+			Assert.AreEqual(2, sb.Select.Columns.Count);
 		}
 
 		[Test]
@@ -60,7 +60,7 @@ namespace Data.Sql
 					.Expr(new SqlExpression("{0} + {1}", Tables.Order["Number"], Tables.Order["Number"]))
 				;
 
-			Assert.AreEqual(3, sb.SelectList.Count);
+			Assert.AreEqual(3, sb.Select.Columns.Count);
 		}
 	}
 }
