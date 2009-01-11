@@ -1,3 +1,12 @@
+v 3.2 (working)
+
+Bug fixes
+- 
+
+Enhancement
+- New SqlBuilder class.
+
+
 v 3.1
 
 Bug fixes

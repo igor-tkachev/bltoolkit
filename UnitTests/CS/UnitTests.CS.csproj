@@ -114,6 +114,12 @@
     <Compile Include="Data\ExecuteScalarTest.cs" />
     <Compile Include="Data\NullableParameter.cs" />
     <Compile Include="Data\OutputParameter.cs" />
+    <Compile Include="Data\Sql\DefinitionTest.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Data\Sql\SelectTest.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="EditableObjects\EditableObjectT.cs" />
     <Compile Include="EditableObjects\EditableArrayListTest.cs" />
     <Compile Include="EditableObjects\EditableList_AcceptChanges.cs" />
@@ -215,6 +221,7 @@
     <EmbeddedResource Include="Mapping\Person.mapping.xml" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="Data\Sql\DefinitionData.xml" />
     <EmbeddedResource Include="Mapping\XmlMap.xml" />
   </ItemGroup>
   <ItemGroup>
