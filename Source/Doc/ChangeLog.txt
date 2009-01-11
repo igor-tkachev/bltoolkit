@@ -1,4 +1,4 @@
-v 3.1 (working)
+v 3.1
 
 Bug fixes
 - MapValueAttribute ignored for nullable enums.
@@ -21,7 +21,6 @@ Enhancement
 - Own configuration section.
 - TypeFactory.GetType() is public now.
 - Simplified GenerateAttributeAttribute usage.
-- New SqlBuilder class.
 
 
 v 3.0

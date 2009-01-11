@@ -7,7 +7,7 @@ using System.Runtime.InteropServices;
 // associated with an assembly.
 [assembly: AssemblyTitle("PetShop.ObjectModel")]
 [assembly: AssemblyProduct("PetShop.ObjectModel")]
-[assembly: AssemblyCopyright("\xA9 2002-2008 www.bltoolkit.net")]
+[assembly: AssemblyCopyright("\xA9 2002-2009 www.bltoolkit.net")]
 [assembly: AssemblyCulture("")]
 
 // Setting ComVisible to false makes the types in this assembly not visible 

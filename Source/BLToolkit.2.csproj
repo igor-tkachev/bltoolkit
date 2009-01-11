@@ -201,18 +201,6 @@
       <DependentUpon>DbManager.cs</DependentUpon>
     </Compile>
     <Compile Include="Data\OperationType.cs" />
-    <Compile Include="Data\Sql\ChildContainer.cs" />
-    <Compile Include="Data\Sql\Field.cs" />
-    <Compile Include="Data\Sql\IChild.cs" />
-    <Compile Include="Data\Sql\ISqlExpression.cs" />
-    <Compile Include="Data\Sql\ITableSource.cs" />
-    <Compile Include="Data\Sql\Join.cs" />
-    <Compile Include="Data\Sql\JoinOn.cs" />
-    <Compile Include="Data\Sql\Parameter.cs" />
-    <Compile Include="Data\Sql\SqlBuilder.cs" />
-    <Compile Include="Data\Sql\SqlExpression.cs" />
-    <Compile Include="Data\Sql\Table.cs" />
-    <Compile Include="Data\Sql\TableT.cs" />
     <Compile Include="EditableObjects\EditableXmlDocument.cs" />
     <Compile Include="EditableObjects\EditableList.cs" />
     <Compile Include="EditableObjects\EditableListChangedEventArgs.cs" />

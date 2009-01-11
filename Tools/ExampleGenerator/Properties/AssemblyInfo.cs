@@ -9,8 +9,8 @@ using System.Runtime.CompilerServices;
 [assembly: AssemblyTitle("ExampleGenerator")]
 [assembly: AssemblyDescription("Business Logic Toolkit Example Generator")]
 [assembly: AssemblyProduct("Business Logic Toolkit")]
-[assembly: AssemblyCopyright("\xA9 2002-2008 www.bltoolkit.net")]
-[assembly: AssemblyCulture("")]		
+[assembly: AssemblyCopyright("\xA9 2002-2009 www.bltoolkit.net")]
+[assembly: AssemblyCulture("")]
 
 //
 // Version information for an assembly consists of the following four values:
