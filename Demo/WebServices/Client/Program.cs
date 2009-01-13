@@ -49,6 +49,8 @@ namespace Demo.WebServices.Client
 				Application.DoEvents();
 				Thread.Sleep(200);
 			}
+
+			Console.ReadKey(true);
 		}
 
 		private static void PrintPerson(Person p)
