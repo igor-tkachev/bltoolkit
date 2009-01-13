@@ -1,5 +1,9 @@
 v 3.2 (working)
 
+Demo
+
+- WebServices powered by BLToolkit (see the dev version of the project).
+
 Bug fixes
 - 
 

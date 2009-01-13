@@ -75,6 +75,17 @@ namespace BLTgen
 
 			if (typesToProcess.Length > 0)
 			{
+				AppDomain.CurrentDomain.AssemblyResolve += delegate(object sender, ResolveEventArgs args)
+				{
+					foreach (Assembly asm in ((AppDomain)sender).GetAssemblies())
+					{
+						if (string.Compare(asm.FullName, args.Name) == 0)
+							return asm;
+					}
+
+					return null;
+				};
+
 				TypeFactory.SaveTypes = true;
 				TypeFactory.SetGlobalAssembly(extensionAssemblyPath, extensionAssemblyVersion, parsedArgs.KeyPairFile);
 

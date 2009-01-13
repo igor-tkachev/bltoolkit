@@ -4,7 +4,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Reflection;
 using System.Runtime.InteropServices;
-
+using BLToolkit.Reflection;
 using BLToolkit.Reflection.Emit;
 using BLToolkit.TypeBuilder.Builders;
 using BLToolkit.Properties;
@@ -217,7 +217,8 @@ namespace BLToolkit.TypeBuilder
 		public static Type GetType(Type sourceType)
 		{
 			return
-				!sourceType.IsAbstract && sourceType.IsDefined(typeof(BLToolkitGeneratedAttribute), true)? sourceType:
+				TypeHelper.IsScalar(sourceType) || sourceType.IsSealed ||
+						(!sourceType.IsAbstract && sourceType.IsDefined(typeof(BLToolkitGeneratedAttribute), true))? sourceType:
 					GetType(sourceType, sourceType, new AbstractClassBuilder());
 		}
 
