@@ -9,8 +9,12 @@ namespace BLToolkit.Data.Sql
 
 		public SqlBuilder()
 		{
-			_select = new SelectClause(this);
-			_from   = new FromClause(this);
+			_select  = new SelectClause (this);
+			_from    = new FromClause   (this);
+			_where   = new WhereClause  (this);
+			_groupBy = new GroupByClause(this);
+			_having  = new HavingClause (this);
+			_orderBy = new OrderByClause(this);
 		}
 
 		#endregion
@@ -54,15 +58,85 @@ namespace BLToolkit.Data.Sql
 
 		#endregion
 
-		#region Select Clause
+		#region TableSource
 
-		public class SelectClause
+		public class TableSource : ITableSource
 		{
-			readonly SqlBuilder _builder;
+			public TableSource(ITableSource source, string alias)
+			{
+				_source = source;
+				_alias  = alias;
+			}
 
-			internal SelectClause(SqlBuilder builder)
+			private ITableSource _source;
+			public  ITableSource  Source
+			{
+				get { return _source;  }
+				set { _source = value; }
+			}
+
+			private string _alias;
+			public  string  Alias
+			{
+				get { return _alias;  }
+				set { _alias = value; }
+			}
+		}
+
+		#endregion
+
+		#region Predicate
+
+		public class Predicate
+		{
+		}
+
+		#endregion
+
+		#region SearchCondition
+
+		public class SearchCondition
+		{
+			private bool      _begGroup;  public bool       BegGroup  { get { return _begGroup;  } set { _begGroup  = value; } }
+			private bool      _isNot;     public bool       IsNot     { get { return _isNot;     } set { _isNot     = value; } }
+			private Predicate _predicate; public Predicate  Predicate { get { return _predicate; } set { _predicate = value; } }
+			private bool      _endGroup;  public bool       EndGroup  { get { return _endGroup;  } set { _endGroup  = value; } }
+			private bool      _isOr;      public bool       IsOr      { get { return _isOr;      } set { _isOr      = value; } }
+		}
+
+		#endregion
+
+		#region ClauseBase
+
+		public abstract class ClauseBase
+		{
+			protected ClauseBase(SqlBuilder builder)
 			{
 				_builder = builder;
+			}
+
+			public SelectClause  Select  { get { return Builder.Select;  } }
+			public FromClause    From    { get { return Builder.From;    } }
+			public GroupByClause GroupBy { get { return Builder.GroupBy; } }
+			public HavingClause  Having  { get { return Builder.Having;  } }
+			public OrderByClause OrderBy { get { return Builder.OrderBy; } }
+			public SqlBuilder    End()   { return Builder; }
+
+			readonly SqlBuilder _builder;
+			public   SqlBuilder  Builder
+			{
+				get { return _builder; }
+			}
+		}
+
+		#endregion
+
+		#region SelectClause
+
+		public class SelectClause : ClauseBase
+		{
+			internal SelectClause(SqlBuilder builder) : base(builder)
+			{
 			}
 
 			public SelectClause Field(Field field)
@@ -113,16 +187,6 @@ namespace BLToolkit.Data.Sql
 				return this;
 			}
 
-			public FromClause From
-			{
-				get { return _builder.From; }
-			}
-
-			public SqlBuilder End()
-			{
-				return _builder;
-			}
-
 			Column AddOrGetColumn(Column col)
 			{
 				foreach (Column c in Columns)
@@ -151,50 +215,67 @@ namespace BLToolkit.Data.Sql
 
 		#endregion
 
-		#region TableSource
+		#region FromClause
 
-		public class TableSource : ITableSource
+		public class FromClause : ClauseBase
 		{
-			public TableSource(ITableSource source, string alias)
+			#region Table
+
+			#region Join
+
+			public class Join : FromTable
 			{
-				_source = source;
-				_alias  = alias;
+				internal Join(SqlBuilder builder, TableSource table)
+					: base(builder, table)
+				{
+				}
+
+
 			}
 
-			private ITableSource _source;
-			public  ITableSource  Source
+			#endregion
+
+			public class FromTable : ClauseBase
 			{
-				get { return _source;  }
-				set { _source = value; }
+				internal FromTable(SqlBuilder builder, TableSource table)
+					: base(builder)
+				{
+					_table = table;
+				}
+
+				private TableSource _table;
+
+				public FromTable Table(ITableSource table)               { return Builder.From.Table(table); }
+				public FromTable Table(ITableSource table, string alias) { return Builder.From.Table(table, alias); }
+
+				public Join Join(ITableSource table)
+				{
+					return Join(table, null);
+				}
+
+				public Join Join(ITableSource table, string alias)
+				{
+					return new Join(Builder, _table);
+				}
 			}
 
-			private string _alias;
-			public  string  Alias
+			#endregion
+
+			internal FromClause(SqlBuilder builder) : base(builder)
 			{
-				get { return _alias;  }
-				set { _alias = value; }
-			}
-		}
-
-		#endregion
-
-		#region From
-
-		public class FromClause
-		{
-			internal FromClause(SqlBuilder builder)
-			{
-				_builder = builder;
 			}
 
-			internal SqlBuilder _builder;
-
-			public TableSource Table(ITableSource table)
+			public FromTable Table(ITableSource table)
 			{
 				return Table(table, null);
 			}
 
-			public TableSource Table(ITableSource table, string alias)
+			public FromTable Table(ITableSource table, string alias)
+			{
+				return new FromTable(Builder, AddOrGetTable(table, alias));
+			}
+
+			TableSource AddOrGetTable(ITableSource table, string alias)
 			{
 				foreach (TableSource ts in Tables)
 					if (ts.Source == table)
@@ -221,6 +302,98 @@ namespace BLToolkit.Data.Sql
 		public   FromClause  From
 		{
 			get { return _from; }
+		}
+
+		#endregion
+
+		#region WhereClause
+
+		public class WhereClause : ClauseBase
+		{
+			internal WhereClause(SqlBuilder builder) : base(builder)
+			{
+			}
+
+			private List<SearchCondition> _conditions = new List<SearchCondition>();
+			public  List<SearchCondition>  Conditions
+			{
+				get { return _conditions; }
+			}
+		}
+
+		readonly WhereClause _where;
+		public   WhereClause  Where
+		{
+			get { return _where; }
+		}
+
+		#endregion
+
+		#region GroupByClause
+
+		public class GroupByClause : ClauseBase
+		{
+			internal GroupByClause(SqlBuilder builder) : base(builder)
+			{
+			}
+
+			//private List<SearchCondition> _conditions = new List<SearchCondition>();
+			//public  List<SearchCondition>  Conditions
+			//{
+			//	get { return _conditions; }
+			//}
+		}
+
+		readonly GroupByClause _groupBy;
+		public   GroupByClause  GroupBy
+		{
+			get { return _groupBy; }
+		}
+
+		#endregion
+
+		#region HavingClause
+
+		public class HavingClause : ClauseBase
+		{
+			internal HavingClause(SqlBuilder builder) : base(builder)
+			{
+			}
+
+			//private List<SearchCondition> _conditions = new List<SearchCondition>();
+			//public  List<SearchCondition>  Conditions
+			//{
+			//	get { return _conditions; }
+			//}
+		}
+
+		readonly HavingClause _having;
+		public   HavingClause  Having
+		{
+			get { return _having; }
+		}
+
+		#endregion
+
+		#region OrderByClause
+
+		public class OrderByClause : ClauseBase
+		{
+			internal OrderByClause(SqlBuilder builder) : base(builder)
+			{
+			}
+
+			//private List<SearchCondition> _conditions = new List<SearchCondition>();
+			//public  List<SearchCondition>  Conditions
+			//{
+			//	get { return _conditions; }
+			//}
+		}
+
+		readonly OrderByClause _orderBy;
+		public   OrderByClause  OrderBy
+		{
+			get { return _orderBy; }
 		}
 
 		#endregion
