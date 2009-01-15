@@ -5,7 +5,7 @@ Demo
 - WebServices powered by BLToolkit (see the dev version of the project).
 
 Bug fixes
-- 
+- Extension assemblies are ignored in TypeFactory.GetType(type).
 
 Enhancement
 - New SqlBuilder class.

@@ -229,15 +229,14 @@ namespace BLToolkit.Reflection
 
 		#region Static Members
 
-		private static bool _loadTypes;
-		public  static bool  LoadTypes
+		[Obsolete("Use TypeFactory.LoadTypes instead")]
+		public static bool LoadTypes
 		{
-			get { return _loadTypes;  }
-			set { _loadTypes = value; }
+			get { return TypeFactory.LoadTypes;  }
+			set { TypeFactory.LoadTypes = value; }
 		}
 
 		private static readonly Hashtable _accessors  = new Hashtable(10);
-		private static readonly Hashtable _assemblies = new Hashtable(10);
 
 		public static TypeAccessor GetAccessor(Type originalType)
 		{
@@ -257,40 +256,12 @@ namespace BLToolkit.Reflection
 							return (TypeAccessor)_accessors[originalType];
 
 						Type instanceType = IsClassBulderNeeded(originalType)? null: originalType;
-						Type accessorType = null;
 
-						if (_loadTypes)
-						{
-							Assembly originalAssembly = originalType.Assembly;
-							Assembly extensionAssembly;
+						if (instanceType == null)
+							instanceType = TypeFactory.GetType(originalType);
 
-							if (_assemblies.Contains(originalAssembly))
-								extensionAssembly = (Assembly)_assemblies[originalAssembly];
-							else
-							{
-								extensionAssembly = LoadExtensionAssembly(originalAssembly);
-								_assemblies.Add(originalAssembly, extensionAssembly);
-							}
-
-							if (extensionAssembly != null)
-							{
-								if (instanceType == null)
-									instanceType = extensionAssembly.GetType(
-										AbstractClassBuilder.GetTypeName(originalType));
-
-								if (instanceType != null)
-									accessorType = extensionAssembly.GetType(
-										TypeAccessorBuilder.GetTypeAccessorClassName(instanceType));
-							}
-						}
-
-						if (accessorType == null)
-						{
-							if (instanceType == null)
-								instanceType = TypeFactory.GetType(originalType);
-
-							accessorType = TypeFactory.GetType(originalType, originalType, new TypeAccessorBuilder(instanceType, originalType));
-						}
+						Type accessorType = TypeFactory.GetType(originalType,
+							originalType, new TypeAccessorBuilder(instanceType, originalType));
 
 						accessor = (TypeAccessor)Activator.CreateInstance(accessorType);
 
@@ -362,52 +333,6 @@ namespace BLToolkit.Reflection
 			}
 
 			return false;
-		}
-
-		private static Assembly LoadExtensionAssembly(Assembly originalAssembly)
-		{
-			if (originalAssembly is System.Runtime.InteropServices._AssemblyBuilder)
-			{
-				// This is a generated assembly. Even if it has a valid Location,
-				// there is definitelly no extension assembly at this path.
-				//
-				return null;
-			}
-
-			try
-			{
-				string  originalAssemblyLocation = new Uri(originalAssembly.EscapedCodeBase).AbsolutePath;
-				string extensionAssemblyLocation = Path.ChangeExtension(
-					originalAssemblyLocation, "BLToolkitExtension.dll");
-
-				if (File.GetLastWriteTime(originalAssemblyLocation) <= File.GetLastWriteTime(extensionAssemblyLocation))
-					return Assembly.LoadFrom(extensionAssemblyLocation);
-
-				Debug.WriteLineIf(File.Exists(extensionAssemblyLocation),
-					string.Format("Extension assembly '{0}' is out of date. Please rebuild.",
-						extensionAssemblyLocation), typeof(TypeAccessor).FullName);
-
-				// Some good man may load this assembly already. Like IIS does it.
-				//
-				AssemblyName extensionAssemblyName = originalAssembly.GetName(true);
-				extensionAssemblyName.Name += ".BLToolkitExtension";
-				foreach (Assembly assembly in AppDomain.CurrentDomain.GetAssemblies())
-				{
-					// Note that assembly version and strong name are compared too.
-					//
-					if (AssemblyName.ReferenceMatchesDefinition(assembly.GetName(false), extensionAssemblyName))
-						return assembly;
-				}
-			}
-			catch (Exception ex)
-			{
-				// Extension exist, but can't be loaded for some reason.
-				// Switch back to code generation
-				//
-				Debug.WriteLine(ex, typeof(TypeAccessor).FullName);
-			}
-
-			return null;
 		}
 
 		public static object CreateInstance(Type type)

@@ -10,7 +10,7 @@ using BLToolkit.Reflection.Emit;
 
 namespace BLToolkit.TypeBuilder.Builders
 {
-	class TypeAccessorBuilder : ITypeBuilder
+	internal class TypeAccessorBuilder : ITypeBuilder
 	{
 		public TypeAccessorBuilder(Type type, Type originalType)
 		{
@@ -31,13 +31,13 @@ namespace BLToolkit.TypeBuilder.Builders
 			get { return "TypeAccessor"; }
 		}
 
-		public static string GetTypeAccessorClassName(Type originalType)
+		public string GetTypeName(Type sourceType)
 		{
  			// It's a bad idea to use '.TypeAccessor' here since we got
  			// a class and a namespace with the same full name.
  			// The sgen utility fill fail in such case.
  			//
- 			return originalType.FullName.Replace('+', '.')	+ "$TypeAccessor";
+ 			return sourceType.FullName.Replace('+', '.')	+ "$TypeAccessor";
 		}
 
 		public Type Build(Type sourceType, AssemblyBuilderHelper assemblyBuilder)
@@ -69,7 +69,7 @@ namespace BLToolkit.TypeBuilder.Builders
 			if (!sourceType.IsVisible && !_friendlyAssembly)
 				throw new TypeBuilderException(string.Format("Can not build type accessor for non-public type '{0}'.", sourceType.FullName));
 
-			string typeName = GetTypeAccessorClassName(_type);
+			string typeName = GetTypeName(_type);
 
 			_typeBuilder = assemblyBuilder.DefineType(typeName, _accessorType);
 

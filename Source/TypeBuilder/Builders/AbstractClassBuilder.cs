@@ -10,7 +10,7 @@ using BLToolkit.Reflection.Emit;
 
 namespace BLToolkit.TypeBuilder.Builders
 {
-	class AbstractClassBuilder : ITypeBuilder
+	internal class AbstractClassBuilder : ITypeBuilder
 	{
 		public string AssemblyNameSuffix
 		{
@@ -61,15 +61,15 @@ namespace BLToolkit.TypeBuilder.Builders
 			return name;
 		}
 
-		public static string GetTypeName(Type type)
+		public string GetTypeName(Type sourceType)
 		{
-			string typeFullName  = type.FullName;
-			string typeShortName = type.Name;
+			string typeFullName  = sourceType.FullName;
+			string typeShortName = sourceType.Name;
 
-			if (type.IsGenericType)
+			if (sourceType.IsGenericType)
 			{
-				typeFullName  = GetTypeFullName (type);
-				typeShortName = GetTypeShortName(type);
+				typeFullName  = GetTypeFullName (sourceType);
+				typeShortName = GetTypeShortName(sourceType);
 			}
 
 			typeFullName  = typeFullName. Replace('+', '.');

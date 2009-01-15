@@ -30,7 +30,7 @@ namespace BLToolkit.TypeBuilder.Builders
 
 		public Type Build(Type sourceType, AssemblyBuilderHelper assemblyBuilder)
 		{
-			_typeBuilder = assemblyBuilder.DefineType(GetClassName(), typeof(DuckType), _interfaceType);
+			_typeBuilder = assemblyBuilder.DefineType(GetTypeName(sourceType), typeof(DuckType), _interfaceType);
 
 			if (!BuildMembers(_interfaceType))
 				return null;
@@ -42,11 +42,9 @@ namespace BLToolkit.TypeBuilder.Builders
 			return _typeBuilder.Create();
 		}
 
-		#endregion
-
-		private string GetClassName()
+		public string GetTypeName(Type sourceType)
 		{
-			string name = "";
+			string name = String.Empty;
 
 			foreach (Type t in _objectTypes)
 			{
@@ -57,6 +55,8 @@ namespace BLToolkit.TypeBuilder.Builders
 
 			return name + AssemblyNameSuffix;
 		}
+
+		#endregion
 
 		private static bool CompareMethodSignature(MethodInfo m1, MethodInfo m2)
 		{
@@ -206,10 +206,12 @@ namespace BLToolkit.TypeBuilder.Builders
 					if (attr.Implement)
 					{
 						if (attr.ThrowException)
+						{
 							throw new TypeBuilderException(string.Format(
 								Resources.TypeBuilder_PublicMethodMustBeImplemented,
-								_objectTypes.Length > 0 && _objectTypes[0] != null ? _objectTypes[0].FullName: "???",
+								_objectTypes.Length > 0 && _objectTypes[0] != null ? _objectTypes[0].FullName : "???",
 								interfaceMethod));
+						}
 						else
 						{
 							// Implement == true, but ThrowException == false.
@@ -225,9 +227,11 @@ namespace BLToolkit.TypeBuilder.Builders
 						string message = attr.ExceptionMessage;
 
 						if (message == null)
+						{
 							message = string.Format(Resources.TypeBuilder_PublicMethodNotImplemented,
-								_objectTypes.Length > 0 && _objectTypes[0] != null ? _objectTypes[0].FullName: "???",
+								_objectTypes.Length > 0 && _objectTypes[0] != null ? _objectTypes[0].FullName : "???",
 								interfaceMethod);
+						}
 
 						emit
 							.ldstr  (message)

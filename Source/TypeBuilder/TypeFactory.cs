@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Reflection;
@@ -28,6 +29,7 @@ namespace BLToolkit.TypeBuilder
 
 			SaveTypes = elm.SaveTypes;
 			SealTypes = elm.SealTypes;
+			LoadTypes = elm.LoadTypes;
 
 			SetGlobalAssembly(elm.AssemblyPath, elm.Version, elm.KeyFile);
 		}
@@ -151,6 +153,14 @@ namespace BLToolkit.TypeBuilder
 		#region GetType
 
 		private static readonly Hashtable _builtTypes = new Hashtable(10);
+		private static readonly Hashtable _assemblies = new Hashtable(10);
+
+		private static bool _loadTypes;
+		public  static bool  LoadTypes
+		{
+			get { return _loadTypes;  }
+			set { _loadTypes = value; }
+		}
 
 		public static Type GetType(object hashKey, Type sourceType, ITypeBuilder typeBuilder)
 		{
@@ -185,6 +195,32 @@ namespace BLToolkit.TypeBuilder
 					else
 					{
 						_builtTypes.Add(typeBuilder.GetType(), builderTable = new Hashtable());
+					}
+
+					if (_loadTypes)
+					{
+						Assembly originalAssembly = sourceType.Assembly;
+						Assembly extensionAssembly;
+
+						if (_assemblies.Contains(originalAssembly))
+							extensionAssembly = (Assembly)_assemblies[originalAssembly];
+						else
+						{
+							extensionAssembly = LoadExtensionAssembly(originalAssembly);
+							_assemblies.Add(originalAssembly, extensionAssembly);
+						}
+
+						if (extensionAssembly != null)
+						{
+							type = extensionAssembly.GetType(
+								typeBuilder.GetTypeName(sourceType));
+
+							if (type != null)
+							{
+								builderTable.Add(hashKey, type);
+								return type;
+							}
+						}
 					}
 
 					AssemblyBuilderHelper assemblyBuilder =
@@ -230,6 +266,52 @@ namespace BLToolkit.TypeBuilder
 		#endregion
 
 		#region Private Helpers
+
+		private static Assembly LoadExtensionAssembly(Assembly originalAssembly)
+		{
+			if (originalAssembly is _AssemblyBuilder)
+			{
+				// This is a generated assembly. Even if it has a valid Location,
+				// there is definitelly no extension assembly at this path.
+				//
+				return null;
+			}
+
+			try
+			{
+				string  originalAssemblyLocation = new Uri(originalAssembly.EscapedCodeBase).AbsolutePath;
+				string extensionAssemblyLocation = Path.ChangeExtension(
+					originalAssemblyLocation, "BLToolkitExtension.dll");
+
+				if (File.GetLastWriteTime(originalAssemblyLocation) <= File.GetLastWriteTime(extensionAssemblyLocation))
+					return Assembly.LoadFrom(extensionAssemblyLocation);
+
+				Debug.WriteLineIf(File.Exists(extensionAssemblyLocation),
+					string.Format("Extension assembly '{0}' is out of date. Please rebuild.",
+						extensionAssemblyLocation), typeof(TypeAccessor).FullName);
+
+				// Some good man may load this assembly already. Like IIS does it.
+				//
+				AssemblyName extensionAssemblyName = originalAssembly.GetName(true);
+				extensionAssemblyName.Name += ".BLToolkitExtension";
+				foreach (Assembly assembly in AppDomain.CurrentDomain.GetAssemblies())
+				{
+					// Note that assembly version and strong name are compared too.
+					//
+					if (AssemblyName.ReferenceMatchesDefinition(assembly.GetName(false), extensionAssemblyName))
+						return assembly;
+				}
+			}
+			catch (Exception ex)
+			{
+				// Extension exist, but can't be loaded for some reason.
+				// Switch back to code generation
+				//
+				Debug.WriteLine(ex, typeof(TypeAccessor).FullName);
+			}
+
+			return null;
+		}
 
 		[System.Diagnostics.Conditional("DEBUG")]
 		private static void WriteDebug(string format, params object[] parameters)

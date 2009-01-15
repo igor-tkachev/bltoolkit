@@ -7,6 +7,7 @@ namespace BLToolkit.TypeBuilder.Builders
 	public interface ITypeBuilder
 	{
 		string AssemblyNameSuffix { get; }
-		Type   Build (Type sourceType, AssemblyBuilderHelper assemblyBuilder);
+		Type   Build       (Type sourceType, AssemblyBuilderHelper assemblyBuilder);
+		string GetTypeName (Type sourceType);
 	}
 }
