@@ -122,7 +122,11 @@ namespace BLToolkit.Aspects.Builders
 					}
 					else
 					{
-						emit.LoadInitValue(type);
+						if ((param.Attributes & ParameterAttributes.HasDefault) == 0 ||
+							!emit.LoadWellKnownValue(param.DefaultValue))
+						{
+							emit.LoadInitValue(type);
+						}
 
 						if (isRef)
 						{

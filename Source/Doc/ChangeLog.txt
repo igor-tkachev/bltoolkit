@@ -6,6 +6,7 @@ Demo
 
 Bug fixes
 - Extension assemblies are ignored in TypeFactory.GetType(type).
+- Default parameter values were ignored by OverloadAspectBuilder.
 
 Enhancement
 - New SqlBuilder class.
