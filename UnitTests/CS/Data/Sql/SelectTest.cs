@@ -7,14 +7,11 @@ namespace Data.Sql
 	[TestFixture]
 	public class SelectTest
 	{
-		static class Tables
+		public static Table Order = new Table
 		{
-			public static Table Order = new Table
-			{
-				Name   = "Order",
-				Fields = { new Field { Name = "ID" }, new Field { Name = "Number" } }
-			};
-		}
+			Name   = "Order",
+			Fields = { new Field { Name = "ID" }, new Field { Name = "Number" } }
+		};
 
 		[Test]
 		public void Test1()
@@ -23,10 +20,8 @@ namespace Data.Sql
 
 			sb
 				.Select
-					.Field(Tables.Order["ID"])
-					.Field(Tables.Order["Number"])
-				.From
-					.Table(Tables.Order)
+					.Field(Order["ID"])
+					.Field(Order["Number"])
 				;
 
 			Assert.AreEqual(2, sb.Select.Columns.Count);
@@ -39,9 +34,9 @@ namespace Data.Sql
 
 			sb
 				.Select
-					.Field(Tables.Order["ID"])
-					.Field(Tables.Order["Number"])
-					.Field(Tables.Order["ID"])
+					.Field(Order["ID"])
+					.Field(Order["Number"])
+					.Field(Order["ID"])
 				;
 
 			Assert.AreEqual(2, sb.Select.Columns.Count);
@@ -54,10 +49,10 @@ namespace Data.Sql
 
 			sb
 				.Select
-					.Field(Tables.Order["ID"], "id1")
-					.Field(Tables.Order["ID"])
-					.Expr("{0} + {1}", Tables.Order["Number"], Tables.Order["Number"])
-					.Expr(new SqlExpression("{0} + {1}", Tables.Order["Number"], Tables.Order["Number"]))
+					.Field(Order["ID"], "id1")
+					.Field(Order["ID"])
+					.Expr("{0} + {1}", Order["Number"], Order["Number"])
+					.Expr(new SqlExpression("{0} + {1}", Order["Number"], Order["Number"]))
 				;
 
 			Assert.AreEqual(3, sb.Select.Columns.Count);

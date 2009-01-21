@@ -27,8 +27,8 @@ namespace BLToolkit.Data.Sql
 			{
 				if (expression == null) throw new ArgumentNullException("expression");
 
-				_expression  = expression;
-				_alias       = alias;
+				_expression = expression;
+				_alias      = alias;
 			}
 
 			public Column(ISqlExpression expression)
@@ -64,6 +64,8 @@ namespace BLToolkit.Data.Sql
 		{
 			public TableSource(ITableSource source, string alias)
 			{
+				if (source == null) throw new ArgumentNullException("source");
+
 				_source = source;
 				_alias  = alias;
 			}
@@ -81,6 +83,66 @@ namespace BLToolkit.Data.Sql
 				get { return _alias;  }
 				set { _alias = value; }
 			}
+
+			private List<TableJoin> _joins = new List<TableJoin>();
+			public  List<TableJoin>  Joins
+			{
+				get { return _joins;  }
+			}
+		}
+
+		#endregion
+
+		#region TableJoin
+
+		public enum JoinType
+		{
+			Delayed,
+			InnerJoin,
+			LeftJoin
+		}
+
+		public class TableJoin
+		{
+			public TableJoin(JoinType joinType, TableSource table, bool isWeak)
+			{
+				_joinType = joinType;
+				_table    = table;
+				_isWeak   = isWeak;
+			}
+
+			public TableJoin(JoinType joinType, ITableSource table, string alias, bool isWeak)
+				: this(joinType, new TableSource(table, alias), isWeak)
+			{
+			}
+
+			private JoinType _joinType;
+			private JoinType  JoinType
+			{
+				get { return _joinType;  }
+				set { _joinType = value; }
+			}
+
+			private TableSource _table;
+			private TableSource  Table
+			{
+				get { return _table;  }
+				set { _table = value; }
+			}
+
+			private ISqlExpression _joinExpression;
+			private ISqlExpression  JoinExpression
+			{
+				get { return _joinExpression;  }
+				set { _joinExpression = value; }
+			}
+
+			private bool _isWeak;
+			private bool  IsWeak
+			{
+				get { return _isWeak;  }
+				set { _isWeak = value; }
+			}
 		}
 
 		#endregion
@@ -97,11 +159,11 @@ namespace BLToolkit.Data.Sql
 
 		public class SearchCondition
 		{
-			private bool      _begGroup;  public bool       BegGroup  { get { return _begGroup;  } set { _begGroup  = value; } }
-			private bool      _isNot;     public bool       IsNot     { get { return _isNot;     } set { _isNot     = value; } }
-			private Predicate _predicate; public Predicate  Predicate { get { return _predicate; } set { _predicate = value; } }
-			private bool      _endGroup;  public bool       EndGroup  { get { return _endGroup;  } set { _endGroup  = value; } }
-			private bool      _isOr;      public bool       IsOr      { get { return _isOr;      } set { _isOr      = value; } }
+			private bool      _begGroup;  public bool      BegGroup  { get { return _begGroup;  } set { _begGroup  = value; } }
+			private bool      _isNot;     public bool      IsNot     { get { return _isNot;     } set { _isNot     = value; } }
+			private Predicate _predicate; public Predicate Predicate { get { return _predicate; } set { _predicate = value; } }
+			private bool      _endGroup;  public bool      EndGroup  { get { return _endGroup;  } set { _endGroup  = value; } }
+			private bool      _isOr;      public bool      IsOr      { get { return _isOr;      } set { _isOr      = value; } }
 		}
 
 		#endregion
@@ -151,13 +213,13 @@ namespace BLToolkit.Data.Sql
 				return this;
 			}
 
-			public SelectClause Sql(SqlBuilder sql)
+			public SelectClause SubQuery(SqlBuilder sql)
 			{
 				AddOrGetColumn(new Column(sql));
 				return this;
 			}
 
-			public SelectClause Sql(SqlBuilder sql, string alias)
+			public SelectClause SubQuery(SqlBuilder sql, string alias)
 			{
 				AddOrGetColumn(new Column(sql, alias));
 				return this;
@@ -229,8 +291,6 @@ namespace BLToolkit.Data.Sql
 					: base(builder, table)
 				{
 				}
-
-
 			}
 
 			#endregion
@@ -257,6 +317,38 @@ namespace BLToolkit.Data.Sql
 				{
 					return new Join(Builder, _table);
 				}
+
+				/*
+				public static TableJoin InnerJoin(ITableSource table, string alias, ISqlExpression joinExpression, params TableJoin[] joins)
+				{
+					return new TableJoin(JoinType.InnerJoin, table, alias, joinExpression, false, joins);
+				}
+
+				public static TableJoin InnerJoin(ITableSource table, ISqlExpression joinExpression, params TableJoin[] joins)
+				{
+					return InnerJoin(table, null, joinExpression, joins);
+				}
+
+				public static TableJoin LeftJoin(ITableSource table, string alias, ISqlExpression joinExpression, params TableJoin[] joins)
+				{
+					return new TableJoin(JoinType.LeftJoin, table, alias, joinExpression, false, joins);
+				}
+
+				public static TableJoin LeftJoin(ITableSource table, ISqlExpression joinExpression, params TableJoin[] joins)
+				{
+					return LeftJoin(table, null, joinExpression, joins);
+				}
+
+				public static TableJoin DelayedJoin(ITableSource table, string alias, ISqlExpression joinExpression, params TableJoin[] joins)
+				{
+					return new TableJoin(JoinType.Delayed, table, alias, joinExpression, false, joins);
+				}
+
+				public static TableJoin DelayedJoin(ITableSource table, ISqlExpression joinExpression, params TableJoin[] joins)
+				{
+					return DelayedJoin(table, null, joinExpression, joins);
+				}
+				*/
 			}
 
 			#endregion
@@ -282,7 +374,7 @@ namespace BLToolkit.Data.Sql
 						if (alias == null || ts.Alias == alias)
 							return ts;
 						else
-							throw new ArithmeticException("alias");
+							throw new ArgumentException("alias");
 
 				TableSource t = new TableSource(table, alias);
 
