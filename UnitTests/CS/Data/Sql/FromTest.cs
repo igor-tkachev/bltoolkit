@@ -46,7 +46,8 @@ namespace Data.Sql
 					.Field(Order["ID"])
 					.Field(OrderItem["ID"])
 				.From
-					.Table(Order)//						SqlBuilder.InnerJoin(OrderItem, new SqlExpression("{0} = {1}", Order["ID"], OrderItem["OrderID"])))
+					.Table(Order)
+						.InnerJoin(OrderItem) //, new SqlExpression("{0} = {1}", Order["ID"], OrderItem["OrderID"])))
 				;
 
 			Assert.AreEqual(1, sb.From.Tables.Count);

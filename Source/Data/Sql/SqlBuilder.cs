@@ -84,6 +84,27 @@ namespace BLToolkit.Data.Sql
 				set { _alias = value; }
 			}
 
+			public TableSource this[ITableSource table]
+			{
+				get { return this[table, null]; }
+			}
+
+			public TableSource this[ITableSource table, string alias]
+			{
+				get
+				{
+					foreach (TableJoin tj in Joins)
+					{
+						TableSource ts = tj.Table;
+
+						if (ts.Source == table && (alias == null || ts.Alias == alias))
+							return ts;
+					}
+
+					return null;
+				}
+			}
+
 			private List<TableJoin> _joins = new List<TableJoin>();
 			public  List<TableJoin>  Joins
 			{
@@ -117,28 +138,28 @@ namespace BLToolkit.Data.Sql
 			}
 
 			private JoinType _joinType;
-			private JoinType  JoinType
+			public  JoinType  JoinType
 			{
 				get { return _joinType;  }
 				set { _joinType = value; }
 			}
 
 			private TableSource _table;
-			private TableSource  Table
+			public  TableSource  Table
 			{
 				get { return _table;  }
 				set { _table = value; }
 			}
 
 			private ISqlExpression _joinExpression;
-			private ISqlExpression  JoinExpression
+			public  ISqlExpression  JoinExpression
 			{
 				get { return _joinExpression;  }
 				set { _joinExpression = value; }
 			}
 
 			private bool _isWeak;
-			private bool  IsWeak
+			public  bool  IsWeak
 			{
 				get { return _isWeak;  }
 				set { _isWeak = value; }
@@ -281,16 +302,19 @@ namespace BLToolkit.Data.Sql
 
 		public class FromClause : ClauseBase
 		{
-			#region Table
+			#region FromTable
 
 			#region Join
 
 			public class Join : FromTable
 			{
-				internal Join(SqlBuilder builder, TableSource table)
+				internal Join(SqlBuilder builder, TableSource parent, TableSource table)
 					: base(builder, table)
 				{
+					_parent = parent;
 				}
+
+				private TableSource _parent;
 			}
 
 			#endregion
@@ -308,47 +332,24 @@ namespace BLToolkit.Data.Sql
 				public FromTable Table(ITableSource table)               { return Builder.From.Table(table); }
 				public FromTable Table(ITableSource table, string alias) { return Builder.From.Table(table, alias); }
 
-				public Join Join(ITableSource table)
-				{
-					return Join(table, null);
-				}
+				public Join InnerJoin  (ITableSource table)               { return AddTableJoin(JoinType.InnerJoin, table, null,  false); }
+				public Join InnerJoin  (ITableSource table, string alias) { return AddTableJoin(JoinType.InnerJoin, table, alias, false); }
+				public Join LeftJoin   (ITableSource table)               { return AddTableJoin(JoinType.LeftJoin,  table, null,  false); }
+				public Join LeftJoin   (ITableSource table, string alias) { return AddTableJoin(JoinType.LeftJoin,  table, alias, false); }
+				public Join DelayedJoin(ITableSource table)               { return AddTableJoin(JoinType.Delayed,   table, null,  false); }
+				public Join DelayedJoin(ITableSource table, string alias) { return AddTableJoin(JoinType.Delayed,   table, alias, false); }
 
-				public Join Join(ITableSource table, string alias)
+				Join AddTableJoin(JoinType type, ITableSource table, string alias, bool isWeak)
 				{
-					return new Join(Builder, _table);
-				}
+					if (Builder.From[table, alias] != null)
+						throw new ArgumentException("alias");
 
-				/*
-				public static TableJoin InnerJoin(ITableSource table, string alias, ISqlExpression joinExpression, params TableJoin[] joins)
-				{
-					return new TableJoin(JoinType.InnerJoin, table, alias, joinExpression, false, joins);
-				}
+					TableJoin join = new TableJoin(type, table, alias, isWeak);
 
-				public static TableJoin InnerJoin(ITableSource table, ISqlExpression joinExpression, params TableJoin[] joins)
-				{
-					return InnerJoin(table, null, joinExpression, joins);
-				}
+					_table.Joins.Add(join);
 
-				public static TableJoin LeftJoin(ITableSource table, string alias, ISqlExpression joinExpression, params TableJoin[] joins)
-				{
-					return new TableJoin(JoinType.LeftJoin, table, alias, joinExpression, false, joins);
+					return new Join(Builder, _table, join.Table);
 				}
-
-				public static TableJoin LeftJoin(ITableSource table, ISqlExpression joinExpression, params TableJoin[] joins)
-				{
-					return LeftJoin(table, null, joinExpression, joins);
-				}
-
-				public static TableJoin DelayedJoin(ITableSource table, string alias, ISqlExpression joinExpression, params TableJoin[] joins)
-				{
-					return new TableJoin(JoinType.Delayed, table, alias, joinExpression, false, joins);
-				}
-
-				public static TableJoin DelayedJoin(ITableSource table, ISqlExpression joinExpression, params TableJoin[] joins)
-				{
-					return DelayedJoin(table, null, joinExpression, joins);
-				}
-				*/
 			}
 
 			#endregion
@@ -381,6 +382,30 @@ namespace BLToolkit.Data.Sql
 				Tables.Add(t);
 
 				return t;
+			}
+
+			public TableSource this[ITableSource table]
+			{
+				get { return this[table, null]; }
+			}
+
+			public TableSource this[ITableSource table, string alias]
+			{
+				get
+				{
+					foreach (TableSource ts in Tables)
+					{
+						if (ts.Source == table && (alias == null || ts.Alias == alias))
+							return ts;
+
+						TableSource join = ts[table, alias];
+
+						if (join != null)
+							return join;
+					}
+
+					return null;
+				}
 			}
 
 			private List<TableSource> _tables = new List<TableSource>();
