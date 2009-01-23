@@ -10,8 +10,7 @@ namespace BLToolkit.Data.Sql
 	{
 		#region Init
 
-		public Table()
-			: this(Map.DefaultSchema)
+		public Table() : this(Map.DefaultSchema)
 		{
 		}
 
@@ -22,6 +21,9 @@ namespace BLToolkit.Data.Sql
 			_mappingSchema = mappingSchema;
 
 			_fields = new ChildContainer<Table,Field>(this);
+			_all    = new Field("*", "*");
+
+			((IChild<Table>)_all).Parent = this;
 		}
 
 		#endregion
@@ -156,6 +158,9 @@ namespace BLToolkit.Data.Sql
 
 		private List<Join> _joins = new List<Join>();
 		public  List<Join>  Joins { get { return _joins; } }
+
+		private Field _all;
+		public  Field  All { get { return _all; } }
 
 		#endregion
 

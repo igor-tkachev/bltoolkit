@@ -44,10 +44,13 @@ namespace Data.Sql
 			sb
 				.Select
 					.Field(Order["ID"])
-					.Field(OrderItem["ID"])
+					.Field(OrderItem.All)
 				.From
 					.Table(Order)
-						.InnerJoin(OrderItem) //, new SqlExpression("{0} = {1}", Order["ID"], OrderItem["OrderID"])))
+						.Join(OrderItem)//.On.Field(Order["ID"]).Equal.Field(OrderItem["OrderID"])
+				.Where
+					.Not.Field(Order["ID"]).Like("1234").Or
+					.Field(Order["ID"]).Equal.Value("!%")
 				;
 
 			Assert.AreEqual(1, sb.From.Tables.Count);

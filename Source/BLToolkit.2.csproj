@@ -231,6 +231,8 @@
     <Compile Include="Data\Sql\SqlExpression.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Data\Sql\SqlFunction.cs" />
+    <Compile Include="Data\Sql\SqlValue.cs" />
     <Compile Include="Data\Sql\Table.cs">
       <SubType>Code</SubType>
     </Compile>

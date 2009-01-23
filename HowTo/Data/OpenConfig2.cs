@@ -13,7 +13,7 @@ namespace HowTo.Data
 		const string sqlConnectionString =
 			"Server=.;Database=BLToolkitData;Integrated Security=SSPI";
 		const string oleDbConnectionString =
-			"Provider=SQLNCLI.1;Data Source=.;Integrated Security=SSPI;Initial Catalog=BLToolkitData";
+			"Provider=SQLOLEDB;Data Source=.;Integrated Security=SSPI;Initial Catalog=BLToolkitData";
 
 		[Test]
 		public void Test1()
