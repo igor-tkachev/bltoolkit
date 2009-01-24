@@ -201,44 +201,23 @@
       <DependentUpon>DbManager.cs</DependentUpon>
     </Compile>
     <Compile Include="Data\OperationType.cs" />
-    <Compile Include="Data\Sql\ChildContainer.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Data\Sql\Field.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Data\Sql\IChild.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Data\Sql\ISqlExpression.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Data\Sql\ITableSource.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Data\Sql\Join.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Data\Sql\JoinOn.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Data\Sql\Parameter.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Data\Sql\SqlBuilder.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Data\Sql\SqlExpression.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Data\Sql\SqlFunction.cs" />
-    <Compile Include="Data\Sql\SqlValue.cs" />
-    <Compile Include="Data\Sql\Table.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Data\Sql\TableT.cs">
-      <SubType>Code</SubType>
-    </Compile>
+    <Compile Include="Data\SqlBuilder\ChildContainer.cs" />
+    <Compile Include="Data\SqlBuilder\Field.cs" />
+    <Compile Include="Data\SqlBuilder\IChild.cs" />
+    <Compile Include="Data\SqlBuilder\IExpressionScannable.cs" />
+    <Compile Include="Data\SqlBuilder\ISqlExpression.cs" />
+    <Compile Include="Data\SqlBuilder\ITableSource.cs" />
+    <Compile Include="Data\SqlBuilder\Join.cs" />
+    <Compile Include="Data\SqlBuilder\JoinOn.cs" />
+    <Compile Include="Data\SqlBuilder\Sql.cs" />
+    <Compile Include="Data\SqlBuilder\SqlExpression.cs" />
+    <Compile Include="Data\SqlBuilder\SqlFunction.cs" />
+    <Compile Include="Data\SqlBuilder\SqlParameter.cs" />
+    <Compile Include="Data\SqlBuilder\SqlProvider\BasicSqlProvider.cs" />
+    <Compile Include="Data\SqlBuilder\SqlProvider\ISqlProvider.cs" />
+    <Compile Include="Data\SqlBuilder\SqlValue.cs" />
+    <Compile Include="Data\SqlBuilder\Table.cs" />
+    <Compile Include="Data\SqlBuilder\TableT.cs" />
     <Compile Include="EditableObjects\EditableXmlDocument.cs" />
     <Compile Include="EditableObjects\EditableList.cs" />
     <Compile Include="EditableObjects\EditableListChangedEventArgs.cs" />

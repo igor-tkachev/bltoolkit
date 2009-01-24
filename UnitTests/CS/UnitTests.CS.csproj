@@ -114,11 +114,11 @@
     <Compile Include="Data\ExecuteScalarTest.cs" />
     <Compile Include="Data\NullableParameter.cs" />
     <Compile Include="Data\OutputParameter.cs" />
-    <Compile Include="Data\Sql\FromTest.cs" />
-    <Compile Include="Data\Sql\DefinitionTest.cs">
+    <Compile Include="Data\SqlBuilder\FromTest.cs" />
+    <Compile Include="Data\SqlBuilder\DefinitionTest.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Data\Sql\SelectTest.cs">
+    <Compile Include="Data\SqlBuilder\SelectTest.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="EditableObjects\EditableObjectT.cs" />
@@ -222,7 +222,7 @@
     <EmbeddedResource Include="Mapping\Person.mapping.xml" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Data\Sql\DefinitionData.xml" />
+    <EmbeddedResource Include="Data\SqlBuilder\DefinitionData.xml" />
     <EmbeddedResource Include="Mapping\XmlMap.xml" />
   </ItemGroup>
   <ItemGroup>

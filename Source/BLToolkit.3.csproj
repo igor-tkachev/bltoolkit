@@ -111,42 +111,45 @@
     <Compile Include="Configuration\TypeFactoryElement.cs" />
     <Compile Include="DataAccess\ActualTypeAttribute.cs" />
     <Compile Include="DataAccess\DataAccessorBase.cs" />
-    <Compile Include="Data\Sql\ChildContainer.cs">
+    <Compile Include="Data\SqlBuilder\ChildContainer.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Data\Sql\Field.cs">
+    <Compile Include="Data\SqlBuilder\Field.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Data\Sql\SqlFunction.cs" />
-    <Compile Include="Data\Sql\IChild.cs">
+    <Compile Include="Data\SqlBuilder\IExpressionScannable.cs" />
+    <Compile Include="Data\SqlBuilder\SqlFunction.cs" />
+    <Compile Include="Data\SqlBuilder\IChild.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Data\Sql\ISqlExpression.cs">
+    <Compile Include="Data\SqlBuilder\ISqlExpression.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Data\Sql\ITableSource.cs">
+    <Compile Include="Data\SqlBuilder\ITableSource.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Data\Sql\Join.cs">
+    <Compile Include="Data\SqlBuilder\Join.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Data\Sql\JoinOn.cs">
+    <Compile Include="Data\SqlBuilder\JoinOn.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Data\Sql\Parameter.cs">
+    <Compile Include="Data\SqlBuilder\SqlParameter.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Data\Sql\SqlBuilder.cs">
+    <Compile Include="Data\SqlBuilder\Sql.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Data\Sql\SqlExpression.cs">
+    <Compile Include="Data\SqlBuilder\SqlExpression.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Data\Sql\SqlValue.cs" />
-    <Compile Include="Data\Sql\Table.cs">
+    <Compile Include="Data\SqlBuilder\SqlProvider\BasicSqlProvider.cs" />
+    <Compile Include="Data\SqlBuilder\SqlProvider\ISqlProvider.cs" />
+    <Compile Include="Data\SqlBuilder\SqlValue.cs" />
+    <Compile Include="Data\SqlBuilder\Table.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Data\Sql\TableT.cs">
+    <Compile Include="Data\SqlBuilder\TableT.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Properties\Resources.Designer.cs">
