@@ -1,9 +1,11 @@
+using System;
+
 using NUnit.Framework;
 
-using BLToolkit.Mapping;
-using BLToolkit.Reflection;
-using BLToolkit.Reflection.MetadataProvider;
 using BLToolkit.Data;
+using BLToolkit.Reflection;
+using BLToolkit.Reflection.Extension;
+using BLToolkit.Reflection.MetadataProvider;
 
 namespace Mapping.MetadataProvider
 {
@@ -12,7 +14,7 @@ namespace Mapping.MetadataProvider
 	{
 		class CustomMetadataProvider : MetadataProviderBase
 		{
-			public override string GetFieldName(ObjectMapper mapper, MemberAccessor member, out bool isSet)
+			public override string GetFieldName(TypeExtension typeExtension, MemberAccessor member, out bool isSet)
 			{
 				string name = string.Empty;
 

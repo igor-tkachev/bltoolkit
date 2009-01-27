@@ -4,6 +4,7 @@ using NUnit.Framework;
 
 using BLToolkit.Mapping;
 using BLToolkit.Reflection;
+using BLToolkit.Reflection.Extension;
 using BLToolkit.Reflection.MetadataProvider;
 
 namespace Mapping
@@ -165,7 +166,7 @@ namespace Mapping
 		{
 			private class TestMapMetadataProvider : MetadataProviderBase
 			{
-				public override bool GetIgnore(ObjectMapper mapper, MemberAccessor member, out bool isSet)
+				public override bool GetMapIgnore(TypeExtension typeExtension, MemberAccessor member, out bool isSet)
 				{
 					if (member.Type == typeof(CustomString))
 					{
@@ -173,7 +174,7 @@ namespace Mapping
 						return false;
 					}
 
-					return base.GetIgnore(mapper, member, out isSet);
+					return base.GetMapIgnore(typeExtension, member, out isSet);
 				}
 			}
 

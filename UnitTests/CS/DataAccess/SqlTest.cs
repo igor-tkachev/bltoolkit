@@ -25,6 +25,9 @@ namespace DataAccess
 			public int  ID;
 			[MapField(Format="{0}")]
 			public Name Name = new Name();
+
+			[SqlIgnore]
+			public string Gender;
 		}
 
 		[Test]
@@ -70,6 +73,16 @@ namespace DataAccess
 			Console.WriteLine(info.QueryText);
 			Assert.That(info.QueryText.Contains("InnerId"));
 			Assert.That(info.QueryText, Is.Not.Contains("InnerObject"));
+		}
+
+		[Test]
+		public void SqlIgnoreAttributeTest()
+		{
+			SqlQuery da = new SqlQuery();
+
+			Person p = (Person)da.SelectByKey(typeof(Person), 1);
+
+			Assert.IsNull(p.Gender);
 		}
 	}
 }
