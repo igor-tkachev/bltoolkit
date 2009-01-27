@@ -1,13 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace BLToolkit.Data.SqlBuilder
+namespace BLToolkit.Data.Sql
 {
-	public class Sql : ISqlExpression, ITableSource
+	using FJoin = SqlBuilder.FromClause.Join;
+
+	public class SqlBuilder : ISqlExpression, ITableSource
 	{
 		#region Init
 
-		public Sql()
+		public SqlBuilder()
 		{
 			_select  = new SelectClause (this);
 			_from    = new FromClause   (this);
@@ -311,18 +313,18 @@ namespace BLToolkit.Data.SqlBuilder
 			//
 			public class InSubquery : NotExprBase
 			{
-				public InSubquery(ISqlExpression exp1, bool isNot, Sql subquery)
+				public InSubquery(ISqlExpression exp1, bool isNot, SqlBuilder subQuery)
 					: base(exp1, isNot)
 				{
-					_subquery = subquery;
+					_subQuery = subQuery;
 				}
 
-				readonly Sql _subquery; public Sql Subquery { get { return _subquery; } }
+				readonly SqlBuilder _subQuery; public SqlBuilder SubQuery { get { return _subQuery; } }
 
 				protected override void ForEach(Action<ISqlExpression> action)
 				{
 					base.ForEach(action);
-					((ISqlExpression)_subquery).ForEach(action);
+					((ISqlExpression)_subQuery).ForEach(action);
 				}
 			}
 
@@ -426,7 +428,7 @@ namespace BLToolkit.Data.SqlBuilder
 		{
 			T Expr    (ISqlExpression expr);
 			T Field   (Field          field);
-			T SubQuery(Sql     sql);
+			T SubQuery(SqlBuilder     sqlBuilder);
 			T Value   (object         value);
 		}
 
@@ -465,14 +467,14 @@ namespace BLToolkit.Data.SqlBuilder
 					Expr_              _expr;
 					Predicate.Operator _op;
 
-					public T2 Expr    (ISqlExpression expr)  { return _expr.Add(new Predicate.ExprExpr(_expr._expr, _op, expr)); }
-					public T2 Field   (Field          field) { return Expr(field);                    }
-					public T2 SubQuery(Sql     sql)   { return Expr(sql);                      }
-					public T2 Value   (object         value) { return Expr(new SqlValue(value));      }
+					public T2 Expr    (ISqlExpression expr)     { return _expr.Add(new Predicate.ExprExpr(_expr._expr, _op, expr)); }
+					public T2 Field   (Field          field)    { return Expr(field);               }
+					public T2 SubQuery(SqlBuilder     subQuery) { return Expr(subQuery);            }
+					public T2 Value   (object         value)    { return Expr(new SqlValue(value)); }
 
-					public T2 All     (Sql     sql)   { return Expr(new SqlFunction.All (sql)); }
-					public T2 Some    (Sql     sql)   { return Expr(new SqlFunction.Some(sql)); }
-					public T2 Any     (Sql     sql)   { return Expr(new SqlFunction.Any (sql)); }
+					public T2 All     (SqlBuilder     subQuery) { return Expr(new SqlFunction.All (subQuery)); }
+					public T2 Some    (SqlBuilder     subQuery) { return Expr(new SqlFunction.Some(subQuery)); }
+					public T2 Any     (SqlBuilder     subQuery) { return Expr(new SqlFunction.Any (subQuery)); }
 				}
 
 				public Op_ Equal          { get { return new Op_(this, Predicate.Operator.Equal);          } }
@@ -511,8 +513,8 @@ namespace BLToolkit.Data.SqlBuilder
 
 				#region Predicate.In
 
-				public T2 In   (Sql sql) { return Add(new Predicate.InSubquery(_expr, false, sql)); }
-				public T2 NotIn(Sql sql) { return Add(new Predicate.InSubquery(_expr, true,  sql)); }
+				public T2 In   (SqlBuilder subQuery) { return Add(new Predicate.InSubquery(_expr, false, subQuery)); }
+				public T2 NotIn(SqlBuilder subQuery) { return Add(new Predicate.InSubquery(_expr, true,  subQuery)); }
 
 				Predicate.InList CreateInList(bool isNot, object[] exprs)
 				{
@@ -550,12 +552,12 @@ namespace BLToolkit.Data.SqlBuilder
 
 				ConditionBase<T1,T2> _condition;
 
-				public Expr_ Expr    (ISqlExpression expr)  { return new Expr_(_condition, true, expr);  }
-				public Expr_ Field   (Field          field) { return Expr(field);               }
-				public Expr_ SubQuery(Sql     sql)   { return Expr(sql);                 }
-				public Expr_ Value   (object         value) { return Expr(new SqlValue(value)); }
+				public Expr_ Expr    (ISqlExpression expr)     { return new Expr_(_condition, true, expr);  }
+				public Expr_ Field   (Field          field)    { return Expr(field);               }
+				public Expr_ SubQuery(SqlBuilder     subQuery) { return Expr(subQuery);            }
+				public Expr_ Value   (object         value)    { return Expr(new SqlValue(value)); }
 
-				public T2 Exists(Sql subQuery)
+				public T2 Exists(SqlBuilder subQuery)
 				{
 					_condition.Conditions.Conditions.Add(new Condition(true, new Predicate.FuncLike(new SqlFunction.Exists(subQuery))));
 					return _condition.GetNext();
@@ -573,12 +575,12 @@ namespace BLToolkit.Data.SqlBuilder
 
 			public Not_  Not { get { return new Not_(this); } }
 
-			public Expr_ Expr    (ISqlExpression expr)  { return new Expr_(this, false, expr);  }
-			public Expr_ Field   (Field          field) { return Expr(field);               }
-			public Expr_ SubQuery(Sql     sql)   { return Expr(sql);                 }
-			public Expr_ Value   (object         value) { return Expr(new SqlValue(value)); }
+			public Expr_ Expr    (ISqlExpression expr)     { return new Expr_(this, false, expr); }
+			public Expr_ Field   (Field          field)    { return Expr(field);                  }
+			public Expr_ SubQuery(SqlBuilder     subQuery) { return Expr(subQuery);               }
+			public Expr_ Value   (object         value)    { return Expr(new SqlValue(value));    }
 
-			public T2 Exists(Sql subQuery)
+			public T2 Exists(SqlBuilder subQuery)
 			{
 				Conditions.Conditions.Add(new Condition(false, new Predicate.FuncLike(new SqlFunction.Exists(subQuery))));
 				return this.GetNext();
@@ -607,45 +609,45 @@ namespace BLToolkit.Data.SqlBuilder
 
 		public abstract class ClauseBase
 		{
-			protected ClauseBase(Sql sql)
+			protected ClauseBase(SqlBuilder sqlBuilder)
 			{
-				_sql = sql;
+				_sqlBuilder = sqlBuilder;
 			}
 
-			public SelectClause  Select  { get { return Sql.Select;  } }
-			public FromClause    From    { get { return Sql.From;    } }
-			public WhereClause   Where   { get { return Sql.Where;   } }
-			public GroupByClause GroupBy { get { return Sql.GroupBy; } }
-			public WhereClause   Having  { get { return Sql.Having;  } }
-			public OrderByClause OrderBy { get { return Sql.OrderBy; } }
-			public Sql           End()   { return Sql; }
+			public SelectClause  Select  { get { return SqlBuilder.Select;  } }
+			public FromClause    From    { get { return SqlBuilder.From;    } }
+			public WhereClause   Where   { get { return SqlBuilder.Where;   } }
+			public GroupByClause GroupBy { get { return SqlBuilder.GroupBy; } }
+			public WhereClause   Having  { get { return SqlBuilder.Having;  } }
+			public OrderByClause OrderBy { get { return SqlBuilder.OrderBy; } }
+			public SqlBuilder    End()   { return SqlBuilder; }
 
-			readonly  Sql _sql;
-			protected Sql  Sql
+			readonly  SqlBuilder _sqlBuilder;
+			protected SqlBuilder  SqlBuilder
 			{
-				get { return _sql; }
+				get { return _sqlBuilder; }
 			}
 		}
 
 		public abstract class ClauseBase<T1, T2> : ConditionBase<T1, T2>
 			where T1 : ClauseBase<T1, T2>
 		{
-			protected ClauseBase(Sql sql)
+			protected ClauseBase(SqlBuilder sqlBuilder)
 			{
-				_sql = sql;
+				_sqlBuilder = sqlBuilder;
 			}
 
-			public SelectClause  Select  { get { return Sql.Select;  } }
-			public FromClause    From    { get { return Sql.From;    } }
-			public GroupByClause GroupBy { get { return Sql.GroupBy; } }
-			public WhereClause   Having  { get { return Sql.Having;  } }
-			public OrderByClause OrderBy { get { return Sql.OrderBy; } }
-			public Sql           End()   { return Sql; }
+			public SelectClause  Select  { get { return SqlBuilder.Select;  } }
+			public FromClause    From    { get { return SqlBuilder.From;    } }
+			public GroupByClause GroupBy { get { return SqlBuilder.GroupBy; } }
+			public WhereClause   Having  { get { return SqlBuilder.Having;  } }
+			public OrderByClause OrderBy { get { return SqlBuilder.OrderBy; } }
+			public SqlBuilder    End()   { return SqlBuilder; }
 
-			readonly  Sql _sql;
-			protected Sql  Sql
+			readonly  SqlBuilder _sqlBuilder;
+			protected SqlBuilder  SqlBuilder
 			{
-				get { return _sql; }
+				get { return _sqlBuilder; }
 			}
 		}
 
@@ -657,7 +659,7 @@ namespace BLToolkit.Data.SqlBuilder
 		{
 			#region Init
 
-			internal SelectClause(Sql sql) : base(sql)
+			internal SelectClause(SqlBuilder sqlBuilder) : base(sqlBuilder)
 			{
 			}
 
@@ -677,15 +679,15 @@ namespace BLToolkit.Data.SqlBuilder
 				return this;
 			}
 
-			public SelectClause SubQuery(Sql sql)
+			public SelectClause SubQuery(SqlBuilder subQuery)
 			{
-				AddOrGetColumn(new Column(sql));
+				AddOrGetColumn(new Column(subQuery));
 				return this;
 			}
 
-			public SelectClause SubQuery(Sql sql, string alias)
+			public SelectClause SubQuery(SqlBuilder sqlQuery, string alias)
 			{
-				AddOrGetColumn(new Column(sql, alias));
+				AddOrGetColumn(new Column(sqlQuery, alias));
 				return this;
 			}
 
@@ -795,177 +797,77 @@ namespace BLToolkit.Data.SqlBuilder
 
 		public class FromClause : ClauseBase, IExpressionScannable
 		{
-			#region FromTable
+			#region Join
 
-			interface INextJoin
+			public class Join : ConditionBase<Join, Join.Next>
 			{
-				Table_       Table        (ITableSource table);
-				Table_       Table        (ITableSource table, string alias);
-
-				Table_.Join_ InnerJoin    (ITableSource table);
-				Table_.Join_ InnerJoin    (ITableSource table, string alias);
-				Table_.Join_ LeftJoin     (ITableSource table);
-				Table_.Join_ LeftJoin     (ITableSource table, string alias);
-				Table_.Join_ Join         (ITableSource table);
-				Table_.Join_ Join         (ITableSource table, string alias);
-
-				Table_.Join_ WeakInnerJoin(ITableSource table);
-				Table_.Join_ WeakInnerJoin(ITableSource table, string alias);
-				Table_.Join_ WeakLeftJoin (ITableSource table);
-				Table_.Join_ WeakLeftJoin (ITableSource table, string alias);
-				Table_.Join_ WeakJoin     (ITableSource table);
-				Table_.Join_ WeakJoin     (ITableSource table, string alias);
-			}
-
-			public class Table_ : ClauseBase, INextJoin
-			{
-				#region Join
-
-				public class Join_ : Table_
+				public class Next
 				{
-					#region On
-
-					public class On_ : ConditionBase<On_, On_.Next>
-					{
-						public class Next : ClauseBase, INextJoin
-						{
-							internal Next(On_ parent) : base(parent._parent.Sql)
-							{
-								_parent = parent;
-							}
-
-							On_ _parent;
-
-							public On_ Or  { get { return _parent.SetOr(true);  } }
-							public On_ And { get { return _parent.SetOr(false); } }
-
-							public Table_ Table        (ITableSource table)               { return Sql.From.Table(table);        }
-							public Table_ Table        (ITableSource table, string alias) { return Sql.From.Table(table, alias); }
-
-							public Join_  InnerJoin    (ITableSource table)               { return _parent._parent._parent.InnerJoin    (table);        }
-							public Join_  InnerJoin    (ITableSource table, string alias) { return _parent._parent._parent.InnerJoin    (table, alias); }
-							public Join_  LeftJoin     (ITableSource table)               { return _parent._parent._parent.LeftJoin     (table);        }
-							public Join_  LeftJoin     (ITableSource table, string alias) { return _parent._parent._parent.LeftJoin     (table, alias); }
-							public Join_  Join         (ITableSource table)               { return _parent._parent._parent.Join         (table);        }
-							public Join_  Join         (ITableSource table, string alias) { return _parent._parent._parent.InnerJoin    (table, alias); }
-
-							public Join_  WeakInnerJoin(ITableSource table)               { return _parent._parent._parent.WeakInnerJoin(table);        }
-							public Join_  WeakInnerJoin(ITableSource table, string alias) { return _parent._parent._parent.WeakInnerJoin(table, alias); }
-							public Join_  WeakLeftJoin (ITableSource table)               { return _parent._parent._parent.WeakLeftJoin (table);        }
-							public Join_  WeakLeftJoin (ITableSource table, string alias) { return _parent._parent._parent.WeakLeftJoin (table, alias); }
-							public Join_  WeakJoin     (ITableSource table)               { return _parent._parent._parent.WeakJoin     (table);        }
-							public Join_  WeakJoin     (ITableSource table, string alias) { return _parent._parent._parent.WeakInnerJoin(table, alias); }
-						}
-
-						internal On_(Join_ parent)
-						{
-							_parent = parent;
-						}
-
-						Join_ _parent;
-
-						protected override SearchCondition Conditions
-						{
-							get { return _parent._join.Condition; }
-						}
-
-						protected override On_.Next GetNext()
-						{
-							return new Next(this);
-						}
-
-						public Table_ Default { get { return _parent._parent; } }
-					}
-
-					#endregion
-
-					internal Join_(Table_ parent, JoinedTable join)
-						: base(parent.Sql, join.Table)
+					internal Next(Join parent)
 					{
 						_parent = parent;
-						_join   = join;
 					}
 
-					Table_      _parent;
-					JoinedTable _join;
+					Join _parent;
 
-					public On_ On
+					public Join Or  { get { return _parent.SetOr(true);  } }
+					public Join And { get { return _parent.SetOr(false); } }
+
+					public static implicit operator Join(Next next)
 					{
-						get { return new On_(this); }
+						return next._parent;
 					}
 				}
 
-				#endregion
-
-				internal Table_(Sql sql, TableSource table)
-					: base(sql)
+				protected override SearchCondition Conditions
 				{
-					_table = table;
+					get { return _joinedTable.Condition; }
 				}
 
-				private TableSource _table;
-
-				public Table_ Table        (ITableSource table)               { return Sql.From.Table(table);        }
-				public Table_ Table        (ITableSource table, string alias) { return Sql.From.Table(table, alias); }
-
-				public Join_  InnerJoin    (ITableSource table)               { return AddJoin(JoinType.Inner, table, null,  false); }
-				public Join_  InnerJoin    (ITableSource table, string alias) { return AddJoin(JoinType.Inner, table, alias, false); }
-				public Join_  LeftJoin     (ITableSource table)               { return AddJoin(JoinType.Left,  table, null,  false); }
-				public Join_  LeftJoin     (ITableSource table, string alias) { return AddJoin(JoinType.Left,  table, alias, false); }
-				public Join_  Join         (ITableSource table)               { return AddJoin(JoinType.Auto,  table, null,  false); }
-				public Join_  Join         (ITableSource table, string alias) { return AddJoin(JoinType.Auto,  table, alias, false); }
-
-				public Join_  WeakInnerJoin(ITableSource table)               { return AddJoin(JoinType.Inner, table, null,  true); }
-				public Join_  WeakInnerJoin(ITableSource table, string alias) { return AddJoin(JoinType.Inner, table, alias, true); }
-				public Join_  WeakLeftJoin (ITableSource table)               { return AddJoin(JoinType.Left,  table, null,  true); }
-				public Join_  WeakLeftJoin (ITableSource table, string alias) { return AddJoin(JoinType.Left,  table, alias, true); }
-				public Join_  WeakJoin     (ITableSource table)               { return AddJoin(JoinType.Auto,  table, null,  true); }
-				public Join_  WeakJoin     (ITableSource table, string alias) { return AddJoin(JoinType.Auto,  table, alias, true); }
-
-				Join_ AddJoin(JoinType joinType, ITableSource table, string alias, bool isWeak)
+				protected override Join.Next GetNext()
 				{
-					foreach (JoinedTable tj in _table.Joins)
-					{
-						TableSource ts = tj.Table;
+					return new Next(this);
+				}
 
-						if (ts.Source == table)
-						{
-							if (alias != null && ts.Alias != alias) throw new ArgumentException("alias");
-							if (tj.JoinType != joinType)            throw new ArgumentException("joinType");
-							if (tj.IsWeak != isWeak)                throw new ArgumentException("isWeak");
+				internal Join(JoinType joinType, ITableSource table, string alias, bool isWeak, Join[] joins)
+				{
+					_joinedTable = new JoinedTable(joinType, table, alias, isWeak);
 
-							return new Join_(this, tj);
-						}
-					}
+					if (joins != null && joins.Length > 0)
+						foreach (Join join in joins)
+							_joinedTable.Table.Joins.Add(join._joinedTable);
+				}
 
-					if (Sql.From[table, alias] != null)
-						throw new ArgumentException("alias");
-
-					JoinedTable join = new JoinedTable(joinType, table, alias, isWeak);
-
-					_table.Joins.Add(join);
-
-					return new Join_(this, join);
+				private  JoinedTable _joinedTable;
+				internal JoinedTable  JoinedTable
+				{
+					get { return _joinedTable; }
 				}
 			}
 
 			#endregion
 
-			internal FromClause(Sql sql) : base(sql)
+			internal FromClause(SqlBuilder sqlBuilder) : base(sqlBuilder)
 			{
 			}
 
-			public Table_ Table(ITableSource table)
+			public FromClause Table(ITableSource table, params FJoin[] joins)
 			{
-				return Table(table, null);
+				return Table(table, null, joins);
 			}
 
-			public Table_ Table(ITableSource table, string alias)
+			public FromClause Table(ITableSource table, string alias, params FJoin[] joins)
 			{
-				return new Table_(Sql, AddOrGetTable(table, alias));
+				TableSource ts = AddOrGetTable(table, alias);
+
+				if (joins != null && joins.Length > 0)
+					foreach (Join join in joins)
+						ts.Joins.Add(join.JoinedTable);
+
+				return this;
 			}
 
-			TableSource AddOrGetTable(ITableSource table, string alias)
+			TableSource GetTable(ITableSource table, string alias)
 			{
 				foreach (TableSource ts in Tables)
 					if (ts.Source == table)
@@ -973,6 +875,16 @@ namespace BLToolkit.Data.SqlBuilder
 							return ts;
 						else
 							throw new ArgumentException("alias");
+
+				return null;
+			}
+
+			TableSource AddOrGetTable(ITableSource table, string alias)
+			{
+				TableSource ts = GetTable(table, alias);
+
+				if (ts != null)
+					return ts;
 
 				TableSource t = new TableSource(table, alias);
 
@@ -1022,6 +934,20 @@ namespace BLToolkit.Data.SqlBuilder
 			#endregion
 		}
 
+		public static FJoin InnerJoin    (ITableSource table,               params FJoin[] joins) { return new FJoin(JoinType.Inner, table, null,  false, joins); }
+		public static FJoin InnerJoin    (ITableSource table, string alias, params FJoin[] joins) { return new FJoin(JoinType.Inner, table, alias, false, joins); }
+		public static FJoin LeftJoin     (ITableSource table,               params FJoin[] joins) { return new FJoin(JoinType.Left,  table, null,  false, joins); }
+		public static FJoin LeftJoin     (ITableSource table, string alias, params FJoin[] joins) { return new FJoin(JoinType.Left,  table, alias, false, joins); }
+		public static FJoin Join         (ITableSource table,               params FJoin[] joins) { return new FJoin(JoinType.Auto,  table, null,  false, joins); }
+		public static FJoin Join         (ITableSource table, string alias, params FJoin[] joins) { return new FJoin(JoinType.Auto,  table, alias, false, joins); }
+
+		public static FJoin WeakInnerJoin(ITableSource table,               params FJoin[] joins) { return new FJoin(JoinType.Inner, table, null,  true,  joins); }
+		public static FJoin WeakInnerJoin(ITableSource table, string alias, params FJoin[] joins) { return new FJoin(JoinType.Inner, table, alias, true,  joins); }
+		public static FJoin WeakLeftJoin (ITableSource table,               params FJoin[] joins) { return new FJoin(JoinType.Left,  table, null,  true,  joins); }
+		public static FJoin WeakLeftJoin (ITableSource table, string alias, params FJoin[] joins) { return new FJoin(JoinType.Left,  table, alias, true,  joins); }
+		public static FJoin WeakJoin     (ITableSource table,               params FJoin[] joins) { return new FJoin(JoinType.Auto,  table, null,  true,  joins); }
+		public static FJoin WeakJoin     (ITableSource table, string alias, params FJoin[] joins) { return new FJoin(JoinType.Auto,  table, alias, true,  joins); }
+
 		readonly FromClause _from;
 		public   FromClause  From
 		{
@@ -1036,7 +962,7 @@ namespace BLToolkit.Data.SqlBuilder
 		{
 			public class Next : ClauseBase
 			{
-				internal Next(WhereClause parent) : base(parent.Sql)
+				internal Next(WhereClause parent) : base(parent.SqlBuilder)
 				{
 					_parent = parent;
 				}
@@ -1047,7 +973,7 @@ namespace BLToolkit.Data.SqlBuilder
 				public WhereClause And { get { return _parent.SetOr(false); } }
 			}
 
-			internal WhereClause(Sql sql) : base(sql)
+			internal WhereClause(SqlBuilder sqlBuilder) : base(sqlBuilder)
 			{
 			}
 
@@ -1089,7 +1015,7 @@ namespace BLToolkit.Data.SqlBuilder
 
 		public class GroupByClause : ClauseBase, IExpressionScannable
 		{
-			internal GroupByClause(Sql sql) : base(sql)
+			internal GroupByClause(SqlBuilder sqlBuilder) : base(sqlBuilder)
 			{
 			}
 
@@ -1152,7 +1078,7 @@ namespace BLToolkit.Data.SqlBuilder
 
 		public class OrderByClause : ClauseBase, IExpressionScannable
 		{
-			internal OrderByClause(Sql sql) : base(sql)
+			internal OrderByClause(SqlBuilder sqlBuilder) : base(sqlBuilder)
 			{
 			}
 

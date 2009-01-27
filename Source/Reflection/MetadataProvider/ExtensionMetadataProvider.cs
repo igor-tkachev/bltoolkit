@@ -13,9 +13,9 @@ namespace BLToolkit.Reflection.MetadataProvider
 	{
 		#region Helpers
 
-		private static object GetValue(ObjectMapper mapper, MemberAccessor member, string elemName, out bool isSet)
+		private static object GetValue(TypeExtension typeExtension, MemberAccessor member, string elemName, out bool isSet)
 		{
-			object value = mapper.Extension[member.Name][elemName].Value;
+			object value = typeExtension[member.Name][elemName].Value;
 
 			isSet = value != null;
 
@@ -26,57 +26,57 @@ namespace BLToolkit.Reflection.MetadataProvider
 
 		#region GetFieldName
 
-		public override string GetFieldName(ObjectMapper mapper, MemberAccessor member, out bool isSet)
+		public override string GetFieldName(TypeExtension typeExtension, MemberAccessor member, out bool isSet)
 		{
-			object value = GetValue(mapper, member, "MapField", out isSet);
+			object value = GetValue(typeExtension, member, "MapField", out isSet);
 
 			if (value != null)
 				return value.ToString();
 
-			return base.GetFieldName(mapper, member, out isSet);
+			return base.GetFieldName(typeExtension, member, out isSet);
 		}
 
 		#endregion
 
-		#region GetIgnore
+		#region GetMapIgnore
 
-		public override bool GetIgnore(ObjectMapper mapper, MemberAccessor member, out bool isSet)
+		public override bool GetMapIgnore(TypeExtension typeExtension, MemberAccessor member, out bool isSet)
 		{
-			object value = GetValue(mapper, member, "MapIgnore", out isSet);
+			object value = GetValue(typeExtension, member, "MapIgnore", out isSet);
 
 			if (value != null)
 				return TypeExtension.ToBoolean(value);
 
-			return base.GetIgnore(mapper, member, out isSet);
+			return base.GetMapIgnore(typeExtension, member, out isSet);
 		}
 
 		#endregion
 
 		#region GetTrimmable
 
-		public override bool GetTrimmable(ObjectMapper mapper, MemberAccessor member, out bool isSet)
+		public override bool GetTrimmable(TypeExtension typeExtension, MemberAccessor member, out bool isSet)
 		{
 			if (member.Type == typeof(string))
 			{
-				object value = GetValue(mapper, member, "Trimmable", out isSet);
+				object value = GetValue(typeExtension, member, "Trimmable", out isSet);
 
 				if (value != null)
 					return TypeExtension.ToBoolean(value);
 			}
 
-			return base.GetTrimmable(mapper, member, out isSet);
+			return base.GetTrimmable(typeExtension, member, out isSet);
 		}
 
 		#endregion
 
 		#region GetMapValues
 
-		public override MapValue[] GetMapValues(ObjectMapper mapper, MemberAccessor member, out bool isSet)
+		public override MapValue[] GetMapValues(TypeExtension typeExtension, MemberAccessor member, out bool isSet)
 		{
-			AttributeExtensionCollection extList = mapper.Extension[member.Name]["MapValue"];
+			AttributeExtensionCollection extList = typeExtension[member.Name]["MapValue"];
 
 			if (extList == AttributeExtensionCollection.Null)
-				return GetMapValues(mapper.Extension, member.Type, out isSet);
+				return GetMapValues(typeExtension, member.Type, out isSet);
 
 			List<MapValue> list = new List<MapValue>(extList.Count);
 
@@ -177,9 +177,9 @@ namespace BLToolkit.Reflection.MetadataProvider
 
 		#region GetDefaultValue
 
-		public override object GetDefaultValue(ObjectMapper mapper, MemberAccessor member, out bool isSet)
+		public override object GetDefaultValue(MappingSchema mappingSchema, TypeExtension typeExtension, MemberAccessor member, out bool isSet)
 		{
-			object value = mapper.Extension[member.Name]["DefaultValue"].Value;
+			object value = typeExtension[member.Name]["DefaultValue"].Value;
 
 			if (value != null)
 			{
@@ -187,10 +187,10 @@ namespace BLToolkit.Reflection.MetadataProvider
 				return TypeExtension.ChangeType(value, member.Type);
 			}
 
-			return GetDefaultValue(mapper.Extension, member.Type, out isSet);
+			return GetDefaultValue(mappingSchema, typeExtension, member.Type, out isSet);
 		}
 
-		public override object GetDefaultValue(TypeExtension typeExt, Type type, out bool isSet)
+		public override object GetDefaultValue(MappingSchema mappingSchema, TypeExtension typeExt, Type type, out bool isSet)
 		{
 			object value = null;
 
@@ -221,32 +221,32 @@ namespace BLToolkit.Reflection.MetadataProvider
 
 		#region GetNullable
 
-		public override bool GetNullable(ObjectMapper mapper, MemberAccessor member, out bool isSet)
+		public override bool GetNullable(MappingSchema mappingSchema, TypeExtension typeExtension, MemberAccessor member, out bool isSet)
 		{
 			// Check extension <Member1 Nullable='true' />
 			//
-			object value = GetValue(mapper, member, "Nullable", out isSet);
+			object value = GetValue(typeExtension, member, "Nullable", out isSet);
 
 			if (isSet)
 				return TypeExtension.ToBoolean(value);
 
 			// Check extension <Member1 NullValue='-1' />
 			//
-			if (GetValue(mapper, member, "NullValue", out isSet) != null)
+			if (GetValue(typeExtension, member, "NullValue", out isSet) != null)
 				return true;
 
-			return base.GetNullable(mapper, member, out isSet);
+			return base.GetNullable(mappingSchema, typeExtension, member, out isSet);
 		}
 
 		#endregion
 
 		#region GetNullable
 
-		public override object GetNullValue(ObjectMapper mapper, MemberAccessor member, out bool isSet)
+		public override object GetNullValue(MappingSchema mappingSchema, TypeExtension typeExtension, MemberAccessor member, out bool isSet)
 		{
 			// Check extension <Member1 NullValue='-1' />
 			//
-			object value = GetValue(mapper, member, "NullValue", out isSet);
+			object value = GetValue(typeExtension, member, "NullValue", out isSet);
 
 			return isSet? TypeExtension.ChangeType(value, member.Type): null;
 		}
@@ -302,6 +302,20 @@ namespace BLToolkit.Reflection.MetadataProvider
 			}
 
 			return base.GetNonUpdatableFlag(type, typeExt, member, out isSet);
+		}
+
+		#endregion
+
+		#region GetSqlIgnore
+
+		public override bool GetSqlIgnore(TypeExtension typeExtension, MemberAccessor member, out bool isSet)
+		{
+			object value = GetValue(typeExtension, member, "SqlIgnore", out isSet);
+
+			if (value != null)
+				return TypeExtension.ToBoolean(value);
+
+			return base.GetSqlIgnore(typeExtension, member, out isSet);
 		}
 
 		#endregion

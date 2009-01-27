@@ -3,7 +3,7 @@
 using BLToolkit.Mapping;
 using BLToolkit.Reflection.Extension;
 
-namespace BLToolkit.Data.SqlBuilder
+namespace BLToolkit.Data.Sql
 {
 	public class Field : IChild<ITableSource>, ISqlExpression
 	{

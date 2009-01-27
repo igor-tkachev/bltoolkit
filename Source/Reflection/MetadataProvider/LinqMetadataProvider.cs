@@ -39,9 +39,9 @@ namespace BLToolkit.Reflection.MetadataProvider
 
 		#region GetFieldName
 
-		public override string GetFieldName(ObjectMapper mapper, MemberAccessor member, out bool isSet)
+		public override string GetFieldName(TypeExtension typeExtension, MemberAccessor member, out bool isSet)
 		{
-			if (IsLinqObject(mapper.TypeAccessor.Type))
+			if (IsLinqObject(member.TypeAccessor.Type))
 			{
 				ColumnAttribute a = member.GetAttribute<ColumnAttribute>();
 
@@ -52,31 +52,31 @@ namespace BLToolkit.Reflection.MetadataProvider
 				}
 			}
 
-			return base.GetFieldName(mapper, member, out isSet);
+			return base.GetFieldName(typeExtension, member, out isSet);
 		}
 
 		#endregion
 
-		#region GetIgnore
+		#region GetMapIgnore
 
-		public override bool GetIgnore(ObjectMapper mapper, MemberAccessor member, out bool isSet)
+		public override bool GetMapIgnore(TypeExtension typeExtension, MemberAccessor member, out bool isSet)
 		{
-			if (IsLinqObject(mapper.TypeAccessor.Type))
+			if (IsLinqObject(member.TypeAccessor.Type))
 			{
 				isSet = true;
 				return member.GetAttribute<ColumnAttribute>() == null;
 			}
 
-			return base.GetIgnore(mapper, member, out isSet);
+			return base.GetMapIgnore(typeExtension, member, out isSet);
 		}
 
 		#endregion
 
 		#region GetNullable
 
-		public override bool GetNullable(ObjectMapper mapper, MemberAccessor member, out bool isSet)
+		public override bool GetNullable(MappingSchema mappingSchema, TypeExtension typeExtension, MemberAccessor member, out bool isSet)
 		{
-			if (IsLinqObject(mapper.TypeAccessor.Type))
+			if (IsLinqObject(member.TypeAccessor.Type))
 			{
 				var attr = member.GetAttribute<ColumnAttribute>();
 
@@ -87,7 +87,7 @@ namespace BLToolkit.Reflection.MetadataProvider
 				}
 			}
 
-			return base.GetNullable(mapper, member, out isSet);
+			return base.GetNullable(mappingSchema, typeExtension, member, out isSet);
 		}
 
 		#endregion

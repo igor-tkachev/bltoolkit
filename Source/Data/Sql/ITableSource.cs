@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace BLToolkit.Data.SqlBuilder
+namespace BLToolkit.Data.Sql
 {
 	public interface ITableSource
 	{

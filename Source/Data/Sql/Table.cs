@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using BLToolkit.Mapping;
 using BLToolkit.Reflection.Extension;
 
-namespace BLToolkit.Data.SqlBuilder
+namespace BLToolkit.Data.Sql
 {
 	public class Table : ITableSource
 	{

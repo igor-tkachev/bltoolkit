@@ -1155,7 +1155,7 @@ namespace BLToolkit.Mapping
 			TypeExtension typeExt = TypeExtension.GetTypeExtension(type, Extensions);
 			bool          isSet;
 
-			defaultValue = MetadataProvider.GetDefaultValue(typeExt, type, out isSet);
+			defaultValue = MetadataProvider.GetDefaultValue(this, typeExt, type, out isSet);
 
 			_defaultValues[type] = defaultValue = TypeExtension.ChangeType(defaultValue, type);
 

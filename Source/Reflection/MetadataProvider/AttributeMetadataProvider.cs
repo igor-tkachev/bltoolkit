@@ -12,24 +12,24 @@ namespace BLToolkit.Reflection.MetadataProvider
 	{
 		#region Helpers
 
-		private ObjectMapper _mapper;
+		private TypeAccessor _typeAccessor;
 		private object[]     _mapFieldAttributes;
 
-		private void EnsureMapper(ObjectMapper mapper)
+		private void EnsureMapper(TypeAccessor typeAccessor)
 		{
-			if (_mapper != mapper)
+			if (_typeAccessor != typeAccessor)
 			{
-				_mapper             = mapper;
+				_typeAccessor       = typeAccessor;
 				_mapFieldAttributes = null;
 			}
 		}
 
-		private object[] GetMapFieldAttributes(ObjectMapper mapper)
+		private object[] GetMapFieldAttributes(TypeAccessor typeAccessor)
 		{
-			EnsureMapper(mapper);
+			EnsureMapper(typeAccessor);
 
 			if (_mapFieldAttributes == null)
-				_mapFieldAttributes = TypeHelper.GetAttributes(mapper.TypeAccessor.Type, typeof(MapFieldAttribute));
+				_mapFieldAttributes = TypeHelper.GetAttributes(typeAccessor.Type, typeof(MapFieldAttribute));
 
 			return _mapFieldAttributes;
 		}
@@ -38,7 +38,7 @@ namespace BLToolkit.Reflection.MetadataProvider
 
 		#region GetFieldName
 
-		public override string GetFieldName(ObjectMapper mapper, MemberAccessor member, out bool isSet)
+		public override string GetFieldName(TypeExtension typeExtension, MemberAccessor member, out bool isSet)
 		{
 			MapFieldAttribute a = member.GetAttribute<MapFieldAttribute>();
 
@@ -48,7 +48,7 @@ namespace BLToolkit.Reflection.MetadataProvider
 				return a.MapName;
 			}
 
-			foreach (MapFieldAttribute attr in GetMapFieldAttributes(mapper))
+			foreach (MapFieldAttribute attr in GetMapFieldAttributes(member.TypeAccessor))
 			{
 				if (string.Equals(attr.OrigName, member.Name, StringComparison.InvariantCultureIgnoreCase))
 				{
@@ -57,24 +57,24 @@ namespace BLToolkit.Reflection.MetadataProvider
 				}
 			}
 
-			return base.GetFieldName(mapper, member, out isSet);
+			return base.GetFieldName(typeExtension, member, out isSet);
 		}
 
 		#endregion
 
 		#region EnsureMapper
 
-		public override void EnsureMapper(ObjectMapper mapper, EnsureMapperHandler handler)
+		public override void EnsureMapper(TypeAccessor typeAccessor, MappingSchema mappingSchema, EnsureMapperHandler handler)
 		{
-			foreach (MapFieldAttribute attr in GetMapFieldAttributes(mapper))
+			foreach (MapFieldAttribute attr in GetMapFieldAttributes(typeAccessor))
 			{
 				if (attr.OrigName != null)
 					handler(attr.MapName, attr.OrigName);
 				else
 				{
-					MemberAccessor ma = mapper.TypeAccessor[attr.MapName];
+					MemberAccessor ma = typeAccessor[attr.MapName];
 
-					foreach (MemberMapper inner in mapper.MappingSchema.GetObjectMapper(ma.Type))
+					foreach (MemberMapper inner in mappingSchema.GetObjectMapper(ma.Type))
 						handler(string.Format(attr.Format, inner.Name), ma.Name + "." + inner.MemberName);
 				}
 			}
@@ -82,9 +82,9 @@ namespace BLToolkit.Reflection.MetadataProvider
 
 		#endregion
 
-		#region GetIgnore
+		#region GetMapIgnore
 
-		public override bool GetIgnore(ObjectMapper mapper, MemberAccessor member, out bool isSet)
+		public override bool GetMapIgnore(TypeExtension typeExtension, MemberAccessor member, out bool isSet)
 		{
 			MapIgnoreAttribute attr = member.GetAttribute<MapIgnoreAttribute>();
 
@@ -105,14 +105,14 @@ namespace BLToolkit.Reflection.MetadataProvider
 				return false;
 			}
 
-			return base.GetIgnore(mapper, member, out isSet);
+			return base.GetMapIgnore(typeExtension, member, out isSet);
 		}
 
 		#endregion
 
 		#region GetTrimmable
 
-		public override bool GetTrimmable(ObjectMapper mapper, MemberAccessor member, out bool isSet)
+		public override bool GetTrimmable(TypeExtension typeExtension, MemberAccessor member, out bool isSet)
 		{
 			if (member.Type == typeof(string))
 			{
@@ -134,14 +134,14 @@ namespace BLToolkit.Reflection.MetadataProvider
 				}
 			}
 
-			return base.GetTrimmable(mapper, member, out isSet);
+			return base.GetTrimmable(typeExtension, member, out isSet);
 		}
 
 		#endregion
 
 		#region GetMapValues
 
-		public override MapValue[] GetMapValues(ObjectMapper mapper, MemberAccessor member, out bool isSet)
+		public override MapValue[] GetMapValues(TypeExtension typeExtension, MemberAccessor member, out bool isSet)
 		{
 			List<MapValue> list = null;
 
@@ -168,7 +168,7 @@ namespace BLToolkit.Reflection.MetadataProvider
 						list.Add(new MapValue(a.OrigValue, a.Values));
 			}
 
-			MapValue[] typeMapValues = GetMapValues(mapper.Extension, member.Type, out isSet);
+			MapValue[] typeMapValues = GetMapValues(typeExtension, member.Type, out isSet);
 
 			if (list == null)
 				return typeMapValues;
@@ -209,7 +209,7 @@ namespace BLToolkit.Reflection.MetadataProvider
 			return list;
 		}
 
-		public override MapValue[] GetMapValues(TypeExtension typeExt, Type type, out bool isSet)
+		public override MapValue[] GetMapValues(TypeExtension typeExtension, Type type, out bool isSet)
 		{
 			List<MapValue> list = null;
 
@@ -242,7 +242,7 @@ namespace BLToolkit.Reflection.MetadataProvider
 
 		#region GetDefaultValue
 
-		public override object GetDefaultValue(ObjectMapper mapper, MemberAccessor member, out bool isSet)
+		public override object GetDefaultValue(MappingSchema mappingSchema, TypeExtension typeExtension, MemberAccessor member, out bool isSet)
 		{
 			// Check member [DefaultValue(0)]
 			//
@@ -266,10 +266,10 @@ namespace BLToolkit.Reflection.MetadataProvider
 					return a.Value;
 				}
 
-			return GetDefaultValue(mapper.Extension, member.Type, out isSet);
+			return GetDefaultValue(mappingSchema, typeExtension, member.Type, out isSet);
 		}
 
-		public override object GetDefaultValue(TypeExtension typeExt, Type type, out bool isSet)
+		public override object GetDefaultValue(MappingSchema mappingSchema, TypeExtension typeExtension, Type type, out bool isSet)
 		{
 			object value = null;
 
@@ -311,7 +311,7 @@ namespace BLToolkit.Reflection.MetadataProvider
 
 		#region GetNullable
 
-		public override bool GetNullable(ObjectMapper mapper, MemberAccessor member, out bool isSet)
+		public override bool GetNullable(MappingSchema mappingSchema, TypeExtension typeExtension, MemberAccessor member, out bool isSet)
 		{
 			// Check member [Nullable(true | false)]
 			//
@@ -351,9 +351,9 @@ namespace BLToolkit.Reflection.MetadataProvider
 					return isSet = true;
 
 			if (member.Type.IsEnum)
-				return isSet = mapper.MappingSchema.GetNullValue(member.Type) != null;
+				return isSet = mappingSchema.GetNullValue(member.Type) != null;
 
-			return base.GetNullable(mapper, member, out isSet);
+			return base.GetNullable(mappingSchema, typeExtension, member, out isSet);
 		}
 
 		#endregion
@@ -373,7 +373,7 @@ namespace BLToolkit.Reflection.MetadataProvider
 			return value;
 		}
 
-		public override object GetNullValue(ObjectMapper mapper, MemberAccessor member, out bool isSet)
+		public override object GetNullValue(MappingSchema mappingSchema, TypeExtension typeExtension, MemberAccessor member, out bool isSet)
 		{
 			// Check member [NullValue(0)]
 			//
@@ -401,7 +401,7 @@ namespace BLToolkit.Reflection.MetadataProvider
 
 			if (member.Type.IsEnum)
 			{
-				object value = CheckNullValue(mapper.MappingSchema.GetNullValue(member.Type), member);
+				object value = CheckNullValue(mappingSchema.GetNullValue(member.Type), member);
 
 				if (value != null)
 				{
@@ -461,6 +461,26 @@ namespace BLToolkit.Reflection.MetadataProvider
 			}
 
 			return base.GetNonUpdatableFlag(type, typeExt, member, out isSet);
+		}
+
+		#endregion
+
+		#region GetSqlIgnore
+
+		public override bool GetSqlIgnore(TypeExtension typeExtension, MemberAccessor member, out bool isSet)
+		{
+			SqlIgnoreAttribute attr = member.GetAttribute<SqlIgnoreAttribute>();
+
+			if (attr == null)
+				attr = (SqlIgnoreAttribute)TypeHelper.GetFirstAttribute(member.Type, typeof(SqlIgnoreAttribute));
+
+			if (attr != null)
+			{
+				isSet = true;
+				return attr.Ignore;
+			}
+
+			return base.GetSqlIgnore(typeExtension, member, out isSet);
 		}
 
 		#endregion

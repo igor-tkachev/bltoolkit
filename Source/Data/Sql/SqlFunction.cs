@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace BLToolkit.Data.SqlBuilder
+namespace BLToolkit.Data.Sql
 {
 	public class SqlFunction : ISqlExpression, ITableSource
 	{
@@ -46,9 +46,9 @@ namespace BLToolkit.Data.SqlBuilder
 
 		#endregion
 
-		public class All    : SqlFunction { public All   (Sql sql) : base("ALL",    sql) {} }
-		public class Some   : SqlFunction { public Some  (Sql sql) : base("SOME",   sql) {} }
-		public class Any    : SqlFunction { public Any   (Sql sql) : base("ANY",    sql) {} }
-		public class Exists : SqlFunction { public Exists(Sql sql) : base("EXISTS", sql) {} }
+		public class All    : SqlFunction { public All   (SqlBuilder subQuery) : base("ALL",    subQuery) {} }
+		public class Some   : SqlFunction { public Some  (SqlBuilder subQuery) : base("SOME",   subQuery) {} }
+		public class Any    : SqlFunction { public Any   (SqlBuilder subQuery) : base("ANY",    subQuery) {} }
+		public class Exists : SqlFunction { public Exists(SqlBuilder subQuery) : base("EXISTS", subQuery) {} }
 	}
 }

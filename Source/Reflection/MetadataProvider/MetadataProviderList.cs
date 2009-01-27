@@ -45,81 +45,81 @@ namespace BLToolkit.Reflection.MetadataProvider
 
 		#region GetFieldName
 
-		public override string GetFieldName(ObjectMapper mapper, MemberAccessor member, out bool isSet)
+		public override string GetFieldName(TypeExtension typeExtension, MemberAccessor member, out bool isSet)
 		{
 			foreach (MetadataProviderBase p in _list)
 			{
-				string name = p.GetFieldName(mapper, member, out isSet);
+				string name = p.GetFieldName(typeExtension, member, out isSet);
 
 				if (isSet)
 					return name;
 			}
 
-			return base.GetFieldName(mapper, member, out isSet);
+			return base.GetFieldName(typeExtension, member, out isSet);
 		}
 
 		#endregion
 
 		#region EnsureMapper
 
-		public override void EnsureMapper(ObjectMapper mapper, EnsureMapperHandler handler)
+		public override void EnsureMapper(TypeAccessor typeAccessor, MappingSchema mappingSchema, EnsureMapperHandler handler)
 		{
 			foreach (MetadataProviderBase p in _list)
-				p.EnsureMapper(mapper, handler);
+				p.EnsureMapper(typeAccessor, mappingSchema, handler);
 		}
 
 		#endregion
 
-		#region GetIgnore
+		#region GetMapIgnore
 
-		public override bool GetIgnore(ObjectMapper mapper, MemberAccessor member, out bool isSet)
+		public override bool GetMapIgnore(TypeExtension typeExtension, MemberAccessor member, out bool isSet)
 		{
 			foreach (MetadataProviderBase p in _list)
 			{
-				bool ignore = p.GetIgnore(mapper, member, out isSet);
+				bool ignore = p.GetMapIgnore(typeExtension, member, out isSet);
 
 				if (isSet)
 					return ignore;
 			}
 
-			return base.GetIgnore(mapper, member, out isSet);
+			return base.GetMapIgnore(typeExtension, member, out isSet);
 		}
 
 		#endregion
 
 		#region GetTrimmable
 
-		public override bool GetTrimmable(ObjectMapper mapper, MemberAccessor member, out bool isSet)
+		public override bool GetTrimmable(TypeExtension typeExtension, MemberAccessor member, out bool isSet)
 		{
 			if (member.Type == typeof(string))
 			{
 				foreach (MetadataProviderBase p in _list)
 				{
-					bool trimmable = p.GetTrimmable(mapper, member, out isSet);
+					bool trimmable = p.GetTrimmable(typeExtension, member, out isSet);
 
 					if (isSet)
 						return trimmable;
 				}
 			}
 
-			return base.GetTrimmable(mapper, member, out isSet);
+			return base.GetTrimmable(typeExtension, member, out isSet);
 		}
 
 		#endregion
 
 		#region GetMapValues
 
-		public override MapValue[] GetMapValues(ObjectMapper mapper, MemberAccessor member, out bool isSet)
+		public override MapValue[] GetMapValues(TypeExtension typeExtension, MemberAccessor member, out bool isSet)
 		{
 			foreach (MetadataProviderBase p in _list)
 			{
-				MapValue[] value = p.GetMapValues(mapper, member, out isSet);
+				MapValue[] value = p.GetMapValues(typeExtension, member, out isSet);
 
 				if (isSet)
 					return value;
 			}
 
-			return base.GetMapValues(mapper, member, out isSet);
+			return base.GetMapValues(typeExtension, member, out isSet);
 		}
 
 		public override MapValue[] GetMapValues(TypeExtension typeExt, Type type, out bool isSet)
@@ -139,64 +139,64 @@ namespace BLToolkit.Reflection.MetadataProvider
 
 		#region GetDefaultValue
 
-		public override object GetDefaultValue(ObjectMapper mapper, MemberAccessor member, out bool isSet)
+		public override object GetDefaultValue(MappingSchema mappingSchema, TypeExtension typeExtension, MemberAccessor member, out bool isSet)
 		{
 			foreach (MetadataProviderBase p in _list)
 			{
-				object value = p.GetDefaultValue(mapper, member, out isSet);
+				object value = p.GetDefaultValue(mappingSchema, typeExtension, member, out isSet);
 
 				if (isSet)
 					return value;
 			}
 
-			return base.GetDefaultValue(mapper, member, out isSet);
+			return base.GetDefaultValue(mappingSchema, typeExtension, member, out isSet);
 		}
 
-		public override object GetDefaultValue(TypeExtension typeExt, Type type, out bool isSet)
+		public override object GetDefaultValue(MappingSchema mappingSchema, TypeExtension typeExtension, Type type, out bool isSet)
 		{
 			foreach (MetadataProviderBase p in _list)
 			{
-				object value = p.GetDefaultValue(typeExt, type, out isSet);
+				object value = p.GetDefaultValue(mappingSchema, typeExtension, type, out isSet);
 
 				if (isSet)
 					return value;
 			}
 
-			return base.GetDefaultValue(typeExt, type, out isSet);
+			return base.GetDefaultValue(mappingSchema, typeExtension, type, out isSet);
 		}
 
 		#endregion
 
 		#region GetNullable
 
-		public override bool GetNullable(ObjectMapper mapper, MemberAccessor member, out bool isSet)
+		public override bool GetNullable(MappingSchema mappingSchema, TypeExtension typeExtension, MemberAccessor member, out bool isSet)
 		{
 			foreach (MetadataProviderBase p in _list)
 			{
-				bool value = p.GetNullable(mapper, member, out isSet);
+				bool value = p.GetNullable(mappingSchema, typeExtension, member, out isSet);
 
 				if (isSet)
 					return value;
 			}
 
-			return base.GetNullable(mapper, member, out isSet);
+			return base.GetNullable(mappingSchema, typeExtension, member, out isSet);
 		}
 
 		#endregion
 
 		#region GetNullValue
 
-		public override object GetNullValue(ObjectMapper mapper, MemberAccessor member, out bool isSet)
+		public override object GetNullValue(MappingSchema mappingSchema, TypeExtension typeExtension, MemberAccessor member, out bool isSet)
 		{
 			foreach (MetadataProviderBase p in _list)
 			{
-				object value = p.GetNullValue(mapper, member, out isSet);
+				object value = p.GetNullValue(mappingSchema, typeExtension, member, out isSet);
 
 				if (isSet)
 					return value;
 			}
 
-			return base.GetNullValue(mapper, member, out isSet);
+			return base.GetNullValue(mappingSchema, typeExtension, member, out isSet);
 		}
 
 		#endregion
@@ -248,6 +248,23 @@ namespace BLToolkit.Reflection.MetadataProvider
 			}
 
 			return base.GetNonUpdatableFlag(type, typeExt, member, out isSet);
+		}
+
+		#endregion
+
+		#region GetSqlIgnore
+
+		public override bool GetSqlIgnore(TypeExtension typeExtension, MemberAccessor member, out bool isSet)
+		{
+			foreach (MetadataProviderBase p in _list)
+			{
+				bool ignore = p.GetSqlIgnore(typeExtension, member, out isSet);
+
+				if (isSet)
+					return ignore;
+			}
+
+			return base.GetSqlIgnore(typeExtension, member, out isSet);
 		}
 
 		#endregion

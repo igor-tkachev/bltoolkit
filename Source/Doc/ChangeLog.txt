@@ -5,16 +5,20 @@ Demo
 - WebServices powered by BLToolkit (see the dev version of the project).
 
 Bug fixes
+
 - Extension assemblies are ignored in TypeFactory.GetType(type).
 - Default parameter values were ignored by OverloadAspectBuilder.
 
 Enhancement
+
+- New SqlIgnore attribute.
 - New SqlBuilder class.
 
 
 v 3.1
 
 Bug fixes
+
 - MapValueAttribute ignored for nullable enums.
 - MappingSchema.ConvertChangeType does not handle nullable enums properly.
 - EditableArrayList indexer add/remove bug.
@@ -27,6 +31,7 @@ Bug fixes
 - EditableXmlDocument fires PropertyChanged event before an xml node changes.
 
 Enhancement
+
 - CHM help file provided. See the Doc folder.
 - New InstanceCache attribute.
 - DataAccessor support for IEnumerable<T>.
@@ -40,9 +45,11 @@ Enhancement
 v 3.0
 
 Breaking changes
+
 - No more support for .Net 1.1 Framework.
 
 Bug fixes
+
 - EmitHelper.ldc_i4_ emits wrong opcode for numbers from 128 till 255 (bug in msdn)
 - Some opcodes were not implemented.
 - MappingSchema.MapResultSets fails with NullReferenceException when no data returned.
@@ -52,6 +59,7 @@ Bug fixes
 - DbMananger.DiscoverSpParameters fires both OpenConnection and CloseConnection events.
 
 Enhancement
+
 - DateTimeOffset type support.
 - MemberAccessor.CloneValue to avoid boxing.
 - Named arguments support for GenerateAttributeTypeBuilder.

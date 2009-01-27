@@ -38,7 +38,13 @@ namespace BLToolkit.DataAccess
 		[NoInterception]
 		protected virtual MemberMapper[] GetFieldList(ObjectMapper om)
 		{
-			return new List<MemberMapper>(om).ToArray();
+			List<MemberMapper> list = new List<MemberMapper>(om.Count);
+
+			foreach (MemberMapper mm in om)
+				if (mm.MapMemberInfo.SqlIgnore == false)
+					list.Add(mm);
+
+			return list.ToArray();
 		}
 
 		[NoInterception]
@@ -49,6 +55,9 @@ namespace BLToolkit.DataAccess
 
 			foreach (MemberMapper mm in om)
 			{
+				if (mm.MapMemberInfo.SqlIgnore)
+					continue;
+
 				MemberAccessor ma = mm.MemberAccessor;
 
 				bool isSet;
@@ -88,6 +97,9 @@ namespace BLToolkit.DataAccess
 
 				foreach (MemberMapper mm in db.MappingSchema.GetObjectMapper(type))
 				{
+					if (mm.MapMemberInfo.SqlIgnore)
+						continue;
+
 					MemberAccessor ma = mm.MemberAccessor;
 
 					if (TypeHelper.IsScalar(ma.Type))

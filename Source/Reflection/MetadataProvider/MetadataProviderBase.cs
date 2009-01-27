@@ -6,9 +6,9 @@ namespace BLToolkit.Reflection.MetadataProvider
 {
 	using Extension;
 
-	public delegate void                OnCreateProvider(MetadataProviderBase parentProvider);
+	public delegate void                 OnCreateProvider(MetadataProviderBase parentProvider);
 	public delegate MetadataProviderBase CreateProvider();
-	public delegate MemberMapper        EnsureMapperHandler(string mapName, string origName);
+	public delegate MemberMapper         EnsureMapperHandler(string mapName, string origName);
 
 	public abstract class MetadataProviderBase
 	{
@@ -31,7 +31,7 @@ namespace BLToolkit.Reflection.MetadataProvider
 
 		#region GetFieldName
 
-		public virtual string GetFieldName(ObjectMapper mapper, MemberAccessor member, out bool isSet)
+		public virtual string GetFieldName(TypeExtension typeExtension, MemberAccessor member, out bool isSet)
 		{
 			isSet = false;
 			return member.Name;
@@ -41,15 +41,15 @@ namespace BLToolkit.Reflection.MetadataProvider
 
 		#region EnsureMapper
 
-		public virtual void EnsureMapper(ObjectMapper mapper, EnsureMapperHandler handler)
+		public virtual void EnsureMapper(TypeAccessor typeAccessor, MappingSchema mappingSchema, EnsureMapperHandler handler)
 		{
 		}
 
 		#endregion
 
-		#region GetIgnore
+		#region GetMapIgnore
 
-		public virtual bool GetIgnore(ObjectMapper mapper, MemberAccessor member, out bool isSet)
+		public virtual bool GetMapIgnore(TypeExtension typeExtension, MemberAccessor member, out bool isSet)
 		{
 			isSet = false;
 
@@ -62,7 +62,7 @@ namespace BLToolkit.Reflection.MetadataProvider
 
 		#region GetTrimmable
 
-		public virtual bool GetTrimmable(ObjectMapper mapper, MemberAccessor member, out bool isSet)
+		public virtual bool GetTrimmable(TypeExtension typeExtension, MemberAccessor member, out bool isSet)
 		{
 			isSet = member.Type != typeof(string);
 			return isSet? false: TrimmableAttribute.Default.IsTrimmable;
@@ -72,13 +72,13 @@ namespace BLToolkit.Reflection.MetadataProvider
 
 		#region GetMapValues
 
-		public virtual MapValue[] GetMapValues(ObjectMapper mapper, MemberAccessor member, out bool isSet)
+		public virtual MapValue[] GetMapValues(TypeExtension typeExtension, MemberAccessor member, out bool isSet)
 		{
 			isSet = false;
 			return null;
 		}
 
-		public virtual MapValue[] GetMapValues(TypeExtension typeExt, Type type, out bool isSet)
+		public virtual MapValue[] GetMapValues(TypeExtension typeExtension, Type type, out bool isSet)
 		{
 			isSet = false;
 			return null;
@@ -88,13 +88,13 @@ namespace BLToolkit.Reflection.MetadataProvider
 
 		#region GetDefaultValue
 
-		public virtual object GetDefaultValue(ObjectMapper mapper, MemberAccessor member, out bool isSet)
+		public virtual object GetDefaultValue(MappingSchema mappingSchema, TypeExtension typeExtension, MemberAccessor member, out bool isSet)
 		{
 			isSet = false;
 			return null;
 		}
 
-		public virtual object GetDefaultValue(TypeExtension typeExt, Type type, out bool isSet)
+		public virtual object GetDefaultValue(MappingSchema mappingSchema, TypeExtension typeExtension, Type type, out bool isSet)
 		{
 			isSet = false;
 			return null;
@@ -104,7 +104,7 @@ namespace BLToolkit.Reflection.MetadataProvider
 
 		#region GetNullable
 
-		public virtual bool GetNullable(ObjectMapper mapper, MemberAccessor member, out bool isSet)
+		public virtual bool GetNullable(MappingSchema mappingSchema, TypeExtension typeExtension, MemberAccessor member, out bool isSet)
 		{
 			isSet = false;
 			return false;
@@ -114,14 +114,14 @@ namespace BLToolkit.Reflection.MetadataProvider
 
 		#region GetNullValue
 
-		public virtual object GetNullValue(ObjectMapper mapper, MemberAccessor member, out bool isSet)
+		public virtual object GetNullValue(MappingSchema mappingSchema, TypeExtension typeExtension, MemberAccessor member, out bool isSet)
 		{
 			isSet = false;
 
 			if (member.Type.IsEnum)
 				return null;
 
-			object value = mapper.MappingSchema.GetNullValue(member.Type);
+			object value = mappingSchema.GetNullValue(member.Type);
 
 			if (value is Type && value == typeof(DBNull))
 			{
@@ -159,6 +159,16 @@ namespace BLToolkit.Reflection.MetadataProvider
 		#region GetNonUpdatableFlag
 
 		public virtual bool GetNonUpdatableFlag(Type type, TypeExtension typeExt, MemberAccessor member, out bool isSet)
+		{
+			isSet = false;
+			return false;
+		}
+
+		#endregion
+
+		#region GetSqlIgnore
+
+		public virtual bool GetSqlIgnore(TypeExtension typeExtension, MemberAccessor member, out bool isSet)
 		{
 			isSet = false;
 			return false;

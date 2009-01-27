@@ -82,6 +82,7 @@
     <Compile Include="Aspects\NoLogAttribute.cs" />
     <Compile Include="Aspects\NotNullAttribute.cs" />
     <Compile Include="Aspects\OverloadAttribute.cs" />
+    <Compile Include="Common\ArrayT.cs" />
     <Compile Include="Common\CompoundValue.cs" />
     <Compile Include="Common\Configuration.cs" />
     <Compile Include="Common\Convert.cs" />
@@ -154,6 +155,7 @@
     <Compile Include="DataAccess\SprocNameAttribute.cs" />
     <Compile Include="DataAccess\SprocQuery.cs" />
     <Compile Include="DataAccess\SprocQueryT.cs" />
+    <Compile Include="DataAccess\SqlIgnoreAttribute.cs" />
     <Compile Include="DataAccess\SqlQuery.cs" />
     <Compile Include="DataAccess\SqlQueryAttribute.cs" />
     <Compile Include="DataAccess\SqlQueryBase.cs" />
@@ -201,23 +203,23 @@
       <DependentUpon>DbManager.cs</DependentUpon>
     </Compile>
     <Compile Include="Data\OperationType.cs" />
-    <Compile Include="Data\SqlBuilder\ChildContainer.cs" />
-    <Compile Include="Data\SqlBuilder\Field.cs" />
-    <Compile Include="Data\SqlBuilder\IChild.cs" />
-    <Compile Include="Data\SqlBuilder\IExpressionScannable.cs" />
-    <Compile Include="Data\SqlBuilder\ISqlExpression.cs" />
-    <Compile Include="Data\SqlBuilder\ITableSource.cs" />
-    <Compile Include="Data\SqlBuilder\Join.cs" />
-    <Compile Include="Data\SqlBuilder\JoinOn.cs" />
-    <Compile Include="Data\SqlBuilder\Sql.cs" />
-    <Compile Include="Data\SqlBuilder\SqlExpression.cs" />
-    <Compile Include="Data\SqlBuilder\SqlFunction.cs" />
-    <Compile Include="Data\SqlBuilder\SqlParameter.cs" />
-    <Compile Include="Data\SqlBuilder\SqlProvider\BasicSqlProvider.cs" />
-    <Compile Include="Data\SqlBuilder\SqlProvider\ISqlProvider.cs" />
-    <Compile Include="Data\SqlBuilder\SqlValue.cs" />
-    <Compile Include="Data\SqlBuilder\Table.cs" />
-    <Compile Include="Data\SqlBuilder\TableT.cs" />
+    <Compile Include="Data\Sql\ChildContainer.cs" />
+    <Compile Include="Data\Sql\Field.cs" />
+    <Compile Include="Data\Sql\IChild.cs" />
+    <Compile Include="Data\Sql\IExpressionScannable.cs" />
+    <Compile Include="Data\Sql\ISqlExpression.cs" />
+    <Compile Include="Data\Sql\ITableSource.cs" />
+    <Compile Include="Data\Sql\Join.cs" />
+    <Compile Include="Data\Sql\JoinOn.cs" />
+    <Compile Include="Data\Sql\SqlBuilder.cs" />
+    <Compile Include="Data\Sql\SqlExpression.cs" />
+    <Compile Include="Data\Sql\SqlFunction.cs" />
+    <Compile Include="Data\Sql\SqlParameter.cs" />
+    <Compile Include="Data\Sql\SqlProvider\BasicSqlProvider.cs" />
+    <Compile Include="Data\Sql\SqlProvider\ISqlProvider.cs" />
+    <Compile Include="Data\Sql\SqlValue.cs" />
+    <Compile Include="Data\Sql\Table.cs" />
+    <Compile Include="Data\Sql\TableT.cs" />
     <Compile Include="EditableObjects\EditableXmlDocument.cs" />
     <Compile Include="EditableObjects\EditableList.cs" />
     <Compile Include="EditableObjects\EditableListChangedEventArgs.cs" />

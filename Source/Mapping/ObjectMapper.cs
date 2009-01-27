@@ -239,7 +239,7 @@ namespace BLToolkit.Mapping
 
 			foreach (MemberAccessor ma in _typeAccessor)
 			{
-				if (GetIgnore(ma))
+				if (GetMapIgnore(ma))
 					continue;
 
 				MapFieldAttribute mapFieldAttr = ma.GetAttribute<MapFieldAttribute>();
@@ -255,6 +255,7 @@ namespace BLToolkit.Mapping
 					mi.Name            = GetFieldName   (ma);
 					mi.MemberName      = ma.Name;
 					mi.Trimmable       = GetTrimmable   (ma);
+					mi.SqlIgnore       = GetSqlIgnore   (ma);
 					mi.MapValues       = GetMapValues   (ma);
 					mi.DefaultValue    = GetDefaultValue(ma);
 					mi.Nullable        = GetNullable    (ma);
@@ -286,7 +287,7 @@ namespace BLToolkit.Mapping
 				EnsureMapper(mapName, origName);
 			}
 
-			MetadataProvider.EnsureMapper(this, EnsureMapper);
+			MetadataProvider.EnsureMapper(TypeAccessor, MappingSchema, EnsureMapper);
 		}
 
 		private MemberMapper EnsureMapper(string mapName, string origName)
@@ -396,7 +397,7 @@ namespace BLToolkit.Mapping
 		{
 			bool isSet;
 
-			MapValue[] values = MetadataProvider.GetMapValues(this, member, out isSet);
+			MapValue[] values = MetadataProvider.GetMapValues(Extension, member, out isSet);
 
 			return isSet? values: _mappingSchema.GetMapValues(member.Type);
 		}
@@ -405,7 +406,7 @@ namespace BLToolkit.Mapping
 		{
 			bool isSet;
 
-			object value = MetadataProvider.GetDefaultValue(this, memberAccessor, out isSet);
+			object value = MetadataProvider.GetDefaultValue(MappingSchema, Extension, memberAccessor, out isSet);
 
 			return isSet? value: _mappingSchema.GetDefaultValue(memberAccessor.Type);
 		}
@@ -413,25 +414,31 @@ namespace BLToolkit.Mapping
 		protected virtual bool GetNullable(MemberAccessor memberAccessor)
 		{
 			bool isSet;
-			return MetadataProvider.GetNullable(this, memberAccessor, out isSet);
+			return MetadataProvider.GetNullable(MappingSchema, Extension, memberAccessor, out isSet);
 		}
 
-		protected virtual bool GetIgnore(MemberAccessor memberAccessor)
+		protected virtual bool GetMapIgnore(MemberAccessor memberAccessor)
 		{
 			bool isSet;
-			return MetadataProvider.GetIgnore(this, memberAccessor, out isSet);
+			return MetadataProvider.GetMapIgnore(Extension, memberAccessor, out isSet);
+		}
+
+		protected virtual bool GetSqlIgnore(MemberAccessor memberAccessor)
+		{
+			bool isSet;
+			return MetadataProvider.GetSqlIgnore(Extension, memberAccessor, out isSet);
 		}
 
 		protected virtual string GetFieldName(MemberAccessor memberAccessor)
 		{
 			bool isSet;
-			return MetadataProvider.GetFieldName(this, memberAccessor, out isSet);
+			return MetadataProvider.GetFieldName(Extension, memberAccessor, out isSet);
 		}
 
 		protected virtual bool GetTrimmable(MemberAccessor memberAccessor)
 		{
 			bool isSet;
-			return MetadataProvider.GetTrimmable(this, memberAccessor, out isSet);
+			return MetadataProvider.GetTrimmable(Extension, memberAccessor, out isSet);
 		}
 
 		protected virtual object GetNullValue(MemberAccessor memberAccessor, bool isNullable)
@@ -439,7 +446,7 @@ namespace BLToolkit.Mapping
 			if (isNullable)
 			{
 				bool isSet;
-				return MetadataProvider.GetNullValue(this, memberAccessor, out isSet);
+				return MetadataProvider.GetNullValue(MappingSchema, Extension, memberAccessor, out isSet);
 			}
 
 			return MappingSchema.GetNullValue(memberAccessor.Type);

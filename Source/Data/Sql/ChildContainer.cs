@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Collections;
 
-namespace BLToolkit.Data.SqlBuilder
+namespace BLToolkit.Data.Sql
 {
 	public class ChildContainer<P,C> : Dictionary<string,C>, IDictionary<string,C>
 		where C : IChild<P>

@@ -2,7 +2,7 @@
 
 using BLToolkit.Mapping;
 
-namespace BLToolkit.Data.SqlBuilder
+namespace BLToolkit.Data.Sql
 {
 	public class Table<T> : Table
 	{

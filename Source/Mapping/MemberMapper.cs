@@ -4,9 +4,11 @@ using System.Data.SqlTypes;
 using System.Diagnostics;
 using System.IO;
 using System.Xml;
+
 using BLToolkit.Reflection;
 using BLToolkit.TypeBuilder;
-using Convert=BLToolkit.Common.Convert;
+
+using Convert = BLToolkit.Common.Convert;
 
 namespace BLToolkit.Mapping
 {
@@ -108,12 +110,12 @@ namespace BLToolkit.Mapping
 			get { return _memberName; }
 		}
 
-	    private DbType _dbType;
-	    public  DbType DbType
-        {
-            [DebuggerStepThrough]
-            get { return _dbType; }
-        }
+		private DbType _dbType;
+		public  DbType  DbType
+		{
+			[DebuggerStepThrough]
+			get { return _dbType; }
+		}
 
 		private         Type  _type;
 		public  virtual Type   Type

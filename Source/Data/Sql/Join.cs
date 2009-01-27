@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 using BLToolkit.Reflection.Extension;
 
-namespace BLToolkit.Data.SqlBuilder
+namespace BLToolkit.Data.Sql
 {
 	public class Join
 	{

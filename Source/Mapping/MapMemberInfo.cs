@@ -45,6 +45,13 @@ namespace BLToolkit.Mapping
 			set { _trimmable = value; }
 		}
 
+		private bool _sqlIgnore;
+		public  bool  SqlIgnore
+		{
+			get { return _sqlIgnore;  }
+			set { _sqlIgnore = value; }
+		}
+
 		private bool _nullable;
 		public  bool  Nullable
 		{
