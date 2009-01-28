@@ -7,10 +7,10 @@ namespace Data.Sql
 	[TestFixture]
 	public class SelectTest
 	{
-		public static Table Order = new Table
+		public static SqlTable Order = new SqlTable
 		{
 			Name   = "Order",
-			Fields = { new Field { Name = "ID" }, new Field { Name = "Number" } }
+			Fields = { new SqlField { Name = "ID" }, new SqlField { Name = "Number" } }
 		};
 
 		[Test]

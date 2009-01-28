@@ -2,7 +2,7 @@
 
 namespace BLToolkit.Data.Sql
 {
-	public interface ISqlExpression : IEquatable<ISqlExpression>, IExpressionScannable
+	public interface ISqlExpression : IEquatable<ISqlExpression>, ISqlExpressionScannable
 	{
 	}
 }

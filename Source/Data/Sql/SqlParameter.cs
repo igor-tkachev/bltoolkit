@@ -15,9 +15,9 @@ namespace BLToolkit.Data.Sql
 		private string _value;
 		public  string  Value { get { return _value; } set { _value = value; } }
 
-		#region IExpressionScannable Members
+		#region ISqlExpressionScannable Members
 
-		void IExpressionScannable.ForEach(Action<ISqlExpression> action)
+		void ISqlExpressionScannable.ForEach(Action<ISqlExpression> action)
 		{
 			action(this);
 		}

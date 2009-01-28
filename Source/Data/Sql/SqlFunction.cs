@@ -2,7 +2,7 @@
 
 namespace BLToolkit.Data.Sql
 {
-	public class SqlFunction : ISqlExpression, ITableSource
+	public class SqlFunction : ISqlExpression, ISqlTableSource
 	{
 		public SqlFunction(string name, params ISqlExpression[] parameters)
 		{
@@ -18,9 +18,9 @@ namespace BLToolkit.Data.Sql
 		readonly string           _name;       public string           Name       { get { return _name;       } }
 		readonly ISqlExpression[] _parameters; public ISqlExpression[] Parameters { get { return _parameters; } }
 
-		#region IExpressionScannable Members
+		#region ISqlExpressionScannable Members
 
-		void IExpressionScannable.ForEach(Action<ISqlExpression> action)
+		void ISqlExpressionScannable.ForEach(Action<ISqlExpression> action)
 		{
 			action(this);
 			Array.ForEach(_parameters, action);

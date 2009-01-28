@@ -40,8 +40,8 @@ namespace BLToolkit.Data.Sql
 		private string _alias;
 		public  string  Alias { get { return _alias; } set { _alias = value; } }
 
-		private List<JoinOn> _joinOns = new List<JoinOn>();
-		public  List<JoinOn>  JoinOns
+		private  List<JoinOn> _joinOns = new List<JoinOn>();
+		public  IList<JoinOn>  JoinOns
 		{
 			get { return _joinOns; }
 		}

@@ -5,7 +5,7 @@ namespace BLToolkit.Data.Sql
 {
 	using FJoin = SqlBuilder.FromClause.Join;
 
-	public class SqlBuilder : ISqlExpression, ITableSource
+	public class SqlBuilder : ISqlExpression, ISqlTableSource
 	{
 		#region Init
 
@@ -62,9 +62,9 @@ namespace BLToolkit.Data.Sql
 
 		#region TableSource
 
-		public class TableSource : ITableSource, IExpressionScannable
+		public class TableSource : ISqlTableSource, ISqlExpressionScannable
 		{
-			public TableSource(ITableSource source, string alias)
+			public TableSource(ISqlTableSource source, string alias)
 			{
 				if (source == null) throw new ArgumentNullException("source");
 
@@ -72,8 +72,8 @@ namespace BLToolkit.Data.Sql
 				_alias  = alias;
 			}
 
-			private ITableSource _source;
-			public  ITableSource  Source
+			private ISqlTableSource _source;
+			public  ISqlTableSource  Source
 			{
 				get { return _source;  }
 				set { _source = value; }
@@ -86,12 +86,12 @@ namespace BLToolkit.Data.Sql
 				set { _alias = value; }
 			}
 
-			public TableSource this[ITableSource table]
+			public TableSource this[ISqlTableSource table]
 			{
 				get { return this[table, null]; }
 			}
 
-			public TableSource this[ITableSource table, string alias]
+			public TableSource this[ISqlTableSource table, string alias]
 			{
 				get
 				{
@@ -113,12 +113,12 @@ namespace BLToolkit.Data.Sql
 				get { return _joins;  }
 			}
 
-			#region IExpressionScannable Members
+			#region ISqlExpressionScannable Members
 
 			public void ForEach(Action<ISqlExpression> action)
 			{
 				foreach (JoinedTable join in Joins)
-					((IExpressionScannable)join).ForEach(action);
+					((ISqlExpressionScannable)join).ForEach(action);
 			}
 
 			#endregion
@@ -135,7 +135,7 @@ namespace BLToolkit.Data.Sql
 			Left
 		}
 
-		public class JoinedTable : IExpressionScannable
+		public class JoinedTable : ISqlExpressionScannable
 		{
 			public JoinedTable(JoinType joinType, TableSource table, bool isWeak)
 			{
@@ -144,7 +144,7 @@ namespace BLToolkit.Data.Sql
 				_isWeak   = isWeak;
 			}
 
-			public JoinedTable(JoinType joinType, ITableSource table, string alias, bool isWeak)
+			public JoinedTable(JoinType joinType, ISqlTableSource table, string alias, bool isWeak)
 				: this(joinType, new TableSource(table, alias), isWeak)
 			{
 			}
@@ -176,12 +176,12 @@ namespace BLToolkit.Data.Sql
 				set { _isWeak = value; }
 			}
 
-			#region IExpressionScannable Members
+			#region ISqlExpressionScannable Members
 
 			public void ForEach(Action<ISqlExpression> action)
 			{
-				((IExpressionScannable)Condition).ForEach(action);
-				((IExpressionScannable)Table).    ForEach(action);
+				((ISqlExpressionScannable)Condition).ForEach(action);
+				((ISqlExpressionScannable)Table).    ForEach(action);
 			}
 
 			#endregion
@@ -191,7 +191,7 @@ namespace BLToolkit.Data.Sql
 
 		#region Predicate
 
-		public interface IPredicate : IExpressionScannable
+		public interface IPredicate : ISqlExpressionScannable
 		{
 		}
 
@@ -372,7 +372,7 @@ namespace BLToolkit.Data.Sql
 
 			protected abstract void ForEach(Action<ISqlExpression> action);
 
-			void IExpressionScannable.ForEach(Action<ISqlExpression> action)
+			void ISqlExpressionScannable.ForEach(Action<ISqlExpression> action)
 			{
 				ForEach(action);
 			}
@@ -411,7 +411,7 @@ namespace BLToolkit.Data.Sql
 
 			#region IPredicate Members
 
-			void IExpressionScannable.ForEach(Action<ISqlExpression> action)
+			void ISqlExpressionScannable.ForEach(Action<ISqlExpression> action)
 			{
 				foreach (Condition condition in Conditions)
 					condition.Predicate.ForEach(action);
@@ -427,7 +427,7 @@ namespace BLToolkit.Data.Sql
 		interface IConditionExpr<T>
 		{
 			T Expr    (ISqlExpression expr);
-			T Field   (Field          field);
+			T Field   (SqlField          field);
 			T SubQuery(SqlBuilder     sqlBuilder);
 			T Value   (object         value);
 		}
@@ -468,7 +468,7 @@ namespace BLToolkit.Data.Sql
 					Predicate.Operator _op;
 
 					public T2 Expr    (ISqlExpression expr)     { return _expr.Add(new Predicate.ExprExpr(_expr._expr, _op, expr)); }
-					public T2 Field   (Field          field)    { return Expr(field);               }
+					public T2 Field   (SqlField          field)    { return Expr(field);               }
 					public T2 SubQuery(SqlBuilder     subQuery) { return Expr(subQuery);            }
 					public T2 Value   (object         value)    { return Expr(new SqlValue(value)); }
 
@@ -553,7 +553,7 @@ namespace BLToolkit.Data.Sql
 				ConditionBase<T1,T2> _condition;
 
 				public Expr_ Expr    (ISqlExpression expr)     { return new Expr_(_condition, true, expr);  }
-				public Expr_ Field   (Field          field)    { return Expr(field);               }
+				public Expr_ Field   (SqlField          field)    { return Expr(field);               }
 				public Expr_ SubQuery(SqlBuilder     subQuery) { return Expr(subQuery);            }
 				public Expr_ Value   (object         value)    { return Expr(new SqlValue(value)); }
 
@@ -576,7 +576,7 @@ namespace BLToolkit.Data.Sql
 			public Not_  Not { get { return new Not_(this); } }
 
 			public Expr_ Expr    (ISqlExpression expr)     { return new Expr_(this, false, expr); }
-			public Expr_ Field   (Field          field)    { return Expr(field);                  }
+			public Expr_ Field   (SqlField          field)    { return Expr(field);                  }
 			public Expr_ SubQuery(SqlBuilder     subQuery) { return Expr(subQuery);               }
 			public Expr_ Value   (object         value)    { return Expr(new SqlValue(value));    }
 
@@ -655,7 +655,7 @@ namespace BLToolkit.Data.Sql
 
 		#region SelectClause
 
-		public class SelectClause : ClauseBase, IExpressionScannable
+		public class SelectClause : ClauseBase, ISqlExpressionScannable
 		{
 			#region Init
 
@@ -667,13 +667,13 @@ namespace BLToolkit.Data.Sql
 
 			#region Columns
 
-			public SelectClause Field(Field field)
+			public SelectClause Field(SqlField field)
 			{
 				AddOrGetColumn(new Column(field));
 				return this;
 			}
 
-			public SelectClause Field(Field field, string alias)
+			public SelectClause Field(SqlField field, string alias)
 			{
 				AddOrGetColumn(new Column(field, alias));
 				return this;
@@ -774,9 +774,9 @@ namespace BLToolkit.Data.Sql
 
 			#endregion
 
-			#region IExpressionScannable Members
+			#region ISqlExpressionScannable Members
 
-			void IExpressionScannable.ForEach(Action<ISqlExpression> action)
+			void ISqlExpressionScannable.ForEach(Action<ISqlExpression> action)
 			{
 				foreach (Column column in Columns)
 					column.Expression.ForEach(action);
@@ -795,7 +795,7 @@ namespace BLToolkit.Data.Sql
 
 		#region FromClause
 
-		public class FromClause : ClauseBase, IExpressionScannable
+		public class FromClause : ClauseBase, ISqlExpressionScannable
 		{
 			#region Join
 
@@ -829,7 +829,7 @@ namespace BLToolkit.Data.Sql
 					return new Next(this);
 				}
 
-				internal Join(JoinType joinType, ITableSource table, string alias, bool isWeak, Join[] joins)
+				internal Join(JoinType joinType, ISqlTableSource table, string alias, bool isWeak, Join[] joins)
 				{
 					_joinedTable = new JoinedTable(joinType, table, alias, isWeak);
 
@@ -851,12 +851,12 @@ namespace BLToolkit.Data.Sql
 			{
 			}
 
-			public FromClause Table(ITableSource table, params FJoin[] joins)
+			public FromClause Table(ISqlTableSource table, params FJoin[] joins)
 			{
 				return Table(table, null, joins);
 			}
 
-			public FromClause Table(ITableSource table, string alias, params FJoin[] joins)
+			public FromClause Table(ISqlTableSource table, string alias, params FJoin[] joins)
 			{
 				TableSource ts = AddOrGetTable(table, alias);
 
@@ -867,7 +867,7 @@ namespace BLToolkit.Data.Sql
 				return this;
 			}
 
-			TableSource GetTable(ITableSource table, string alias)
+			TableSource GetTable(ISqlTableSource table, string alias)
 			{
 				foreach (TableSource ts in Tables)
 					if (ts.Source == table)
@@ -879,7 +879,7 @@ namespace BLToolkit.Data.Sql
 				return null;
 			}
 
-			TableSource AddOrGetTable(ITableSource table, string alias)
+			TableSource AddOrGetTable(ISqlTableSource table, string alias)
 			{
 				TableSource ts = GetTable(table, alias);
 
@@ -893,12 +893,12 @@ namespace BLToolkit.Data.Sql
 				return t;
 			}
 
-			public TableSource this[ITableSource table]
+			public TableSource this[ISqlTableSource table]
 			{
 				get { return this[table, null]; }
 			}
 
-			public TableSource this[ITableSource table, string alias]
+			public TableSource this[ISqlTableSource table, string alias]
 			{
 				get
 				{
@@ -923,30 +923,30 @@ namespace BLToolkit.Data.Sql
 				get { return _tables; }
 			}
 
-			#region IExpressionScannable Members
+			#region ISqlExpressionScannable Members
 
-			void IExpressionScannable.ForEach(Action<ISqlExpression> action)
+			void ISqlExpressionScannable.ForEach(Action<ISqlExpression> action)
 			{
 				foreach (TableSource table in Tables)
-					((IExpressionScannable)table).ForEach(action);
+					((ISqlExpressionScannable)table).ForEach(action);
 			}
 
 			#endregion
 		}
 
-		public static FJoin InnerJoin    (ITableSource table,               params FJoin[] joins) { return new FJoin(JoinType.Inner, table, null,  false, joins); }
-		public static FJoin InnerJoin    (ITableSource table, string alias, params FJoin[] joins) { return new FJoin(JoinType.Inner, table, alias, false, joins); }
-		public static FJoin LeftJoin     (ITableSource table,               params FJoin[] joins) { return new FJoin(JoinType.Left,  table, null,  false, joins); }
-		public static FJoin LeftJoin     (ITableSource table, string alias, params FJoin[] joins) { return new FJoin(JoinType.Left,  table, alias, false, joins); }
-		public static FJoin Join         (ITableSource table,               params FJoin[] joins) { return new FJoin(JoinType.Auto,  table, null,  false, joins); }
-		public static FJoin Join         (ITableSource table, string alias, params FJoin[] joins) { return new FJoin(JoinType.Auto,  table, alias, false, joins); }
+		public static FJoin InnerJoin    (ISqlTableSource table,               params FJoin[] joins) { return new FJoin(JoinType.Inner, table, null,  false, joins); }
+		public static FJoin InnerJoin    (ISqlTableSource table, string alias, params FJoin[] joins) { return new FJoin(JoinType.Inner, table, alias, false, joins); }
+		public static FJoin LeftJoin     (ISqlTableSource table,               params FJoin[] joins) { return new FJoin(JoinType.Left,  table, null,  false, joins); }
+		public static FJoin LeftJoin     (ISqlTableSource table, string alias, params FJoin[] joins) { return new FJoin(JoinType.Left,  table, alias, false, joins); }
+		public static FJoin Join         (ISqlTableSource table,               params FJoin[] joins) { return new FJoin(JoinType.Auto,  table, null,  false, joins); }
+		public static FJoin Join         (ISqlTableSource table, string alias, params FJoin[] joins) { return new FJoin(JoinType.Auto,  table, alias, false, joins); }
 
-		public static FJoin WeakInnerJoin(ITableSource table,               params FJoin[] joins) { return new FJoin(JoinType.Inner, table, null,  true,  joins); }
-		public static FJoin WeakInnerJoin(ITableSource table, string alias, params FJoin[] joins) { return new FJoin(JoinType.Inner, table, alias, true,  joins); }
-		public static FJoin WeakLeftJoin (ITableSource table,               params FJoin[] joins) { return new FJoin(JoinType.Left,  table, null,  true,  joins); }
-		public static FJoin WeakLeftJoin (ITableSource table, string alias, params FJoin[] joins) { return new FJoin(JoinType.Left,  table, alias, true,  joins); }
-		public static FJoin WeakJoin     (ITableSource table,               params FJoin[] joins) { return new FJoin(JoinType.Auto,  table, null,  true,  joins); }
-		public static FJoin WeakJoin     (ITableSource table, string alias, params FJoin[] joins) { return new FJoin(JoinType.Auto,  table, alias, true,  joins); }
+		public static FJoin WeakInnerJoin(ISqlTableSource table,               params FJoin[] joins) { return new FJoin(JoinType.Inner, table, null,  true,  joins); }
+		public static FJoin WeakInnerJoin(ISqlTableSource table, string alias, params FJoin[] joins) { return new FJoin(JoinType.Inner, table, alias, true,  joins); }
+		public static FJoin WeakLeftJoin (ISqlTableSource table,               params FJoin[] joins) { return new FJoin(JoinType.Left,  table, null,  true,  joins); }
+		public static FJoin WeakLeftJoin (ISqlTableSource table, string alias, params FJoin[] joins) { return new FJoin(JoinType.Left,  table, alias, true,  joins); }
+		public static FJoin WeakJoin     (ISqlTableSource table,               params FJoin[] joins) { return new FJoin(JoinType.Auto,  table, null,  true,  joins); }
+		public static FJoin WeakJoin     (ISqlTableSource table, string alias, params FJoin[] joins) { return new FJoin(JoinType.Auto,  table, alias, true,  joins); }
 
 		readonly FromClause _from;
 		public   FromClause  From
@@ -958,7 +958,7 @@ namespace BLToolkit.Data.Sql
 
 		#region WhereClause
 
-		public class WhereClause : ClauseBase<WhereClause, WhereClause.Next>, IExpressionScannable
+		public class WhereClause : ClauseBase<WhereClause, WhereClause.Next>, ISqlExpressionScannable
 		{
 			public class Next : ClauseBase
 			{
@@ -993,11 +993,11 @@ namespace BLToolkit.Data.Sql
 				return new Next(this);
 			}
 
-			#region IExpressionScannable Members
+			#region ISqlExpressionScannable Members
 
-			void IExpressionScannable.ForEach(Action<ISqlExpression> action)
+			void ISqlExpressionScannable.ForEach(Action<ISqlExpression> action)
 			{
-				((IExpressionScannable)SearchCondition).ForEach(action);
+				((ISqlExpressionScannable)SearchCondition).ForEach(action);
 			}
 
 			#endregion
@@ -1013,7 +1013,7 @@ namespace BLToolkit.Data.Sql
 
 		#region GroupByClause
 
-		public class GroupByClause : ClauseBase, IExpressionScannable
+		public class GroupByClause : ClauseBase, ISqlExpressionScannable
 		{
 			internal GroupByClause(SqlBuilder sqlBuilder) : base(sqlBuilder)
 			{
@@ -1025,7 +1025,7 @@ namespace BLToolkit.Data.Sql
 				return this;
 			}
 
-			public GroupByClause Field(Field field)
+			public GroupByClause Field(SqlField field)
 			{
 				return Expr(field);
 			}
@@ -1045,9 +1045,9 @@ namespace BLToolkit.Data.Sql
 				get { return _items; }
 			}
 
-			#region IExpressionScannable Members
+			#region ISqlExpressionScannable Members
 
-			void IExpressionScannable.ForEach(Action<ISqlExpression> action)
+			void ISqlExpressionScannable.ForEach(Action<ISqlExpression> action)
 			{
 				foreach (ISqlExpression item in Items)
 					item.ForEach(action);
@@ -1076,7 +1076,7 @@ namespace BLToolkit.Data.Sql
 
 		#region OrderByClause
 
-		public class OrderByClause : ClauseBase, IExpressionScannable
+		public class OrderByClause : ClauseBase, ISqlExpressionScannable
 		{
 			internal OrderByClause(SqlBuilder sqlBuilder) : base(sqlBuilder)
 			{
@@ -1091,10 +1091,10 @@ namespace BLToolkit.Data.Sql
 			public OrderByClause Expr     (ISqlExpression expr)            { return Expr(expr,  false);        }
 			public OrderByClause ExprAsc  (ISqlExpression expr)            { return Expr(expr,  false);        }
 			public OrderByClause ExprDesc (ISqlExpression expr)            { return Expr(expr,  true);         }
-			public OrderByClause Field    (Field field, bool isDescending) { return Expr(field, isDescending); }
-			public OrderByClause Field    (Field field)                    { return Expr(field, false);        }
-			public OrderByClause FieldAsc (Field field)                    { return Expr(field, false);        }
-			public OrderByClause FieldDesc(Field field)                    { return Expr(field, true);         }
+			public OrderByClause Field    (SqlField field, bool isDescending) { return Expr(field, isDescending); }
+			public OrderByClause Field    (SqlField field)                    { return Expr(field, false);        }
+			public OrderByClause FieldAsc (SqlField field)                    { return Expr(field, false);        }
+			public OrderByClause FieldDesc(SqlField field)                    { return Expr(field, true);         }
 
 			void Add(ISqlExpression expr, bool isDescending)
 			{
@@ -1111,9 +1111,9 @@ namespace BLToolkit.Data.Sql
 				get { return _items; }
 			}
 
-			#region IExpressionScannable Members
+			#region ISqlExpressionScannable Members
 
-			void IExpressionScannable.ForEach(Action<ISqlExpression> action)
+			void ISqlExpressionScannable.ForEach(Action<ISqlExpression> action)
 			{
 				foreach (OrderByItem item in Items)
 					item.Expression.ForEach(action);
@@ -1141,7 +1141,7 @@ namespace BLToolkit.Data.Sql
 
 		void ResolveWeakJoins()
 		{
-			List<ITableSource> tables = null;
+			List<ISqlTableSource> tables = null;
 
 			FindTableSource findTable = null; findTable = delegate(TableSource table)
 			{
@@ -1168,21 +1168,21 @@ namespace BLToolkit.Data.Sql
 					{
 						if (tables == null)
 						{
-							tables = new List<ITableSource>();
+							tables = new List<ISqlTableSource>();
 
 							Action<ISqlExpression> tableCollector = delegate(ISqlExpression expr)
 							{
-								Field field = expr as Field;
+								SqlField field = expr as SqlField;
 
 								if (field != null && !tables.Contains(field.Table))
 									tables.Add(field.Table);
 							};
 
-							((IExpressionScannable)Select) .ForEach(tableCollector);
-							((IExpressionScannable)Where)  .ForEach(tableCollector);
-							((IExpressionScannable)GroupBy).ForEach(tableCollector);
-							((IExpressionScannable)Having) .ForEach(tableCollector);
-							((IExpressionScannable)OrderBy).ForEach(tableCollector);
+							((ISqlExpressionScannable)Select) .ForEach(tableCollector);
+							((ISqlExpressionScannable)Where)  .ForEach(tableCollector);
+							((ISqlExpressionScannable)GroupBy).ForEach(tableCollector);
+							((ISqlExpressionScannable)Having) .ForEach(tableCollector);
+							((ISqlExpressionScannable)OrderBy).ForEach(tableCollector);
 						}
 
 						if (findTable(join.Table))
@@ -1207,17 +1207,17 @@ namespace BLToolkit.Data.Sql
 
 		#endregion
 
-		#region IExpressionScannable Members
+		#region ISqlExpressionScannable Members
 
-		void IExpressionScannable.ForEach(Action<ISqlExpression> action)
+		void ISqlExpressionScannable.ForEach(Action<ISqlExpression> action)
 		{
 			action(this);
-			((IExpressionScannable)Select) .ForEach(action);
-			((IExpressionScannable)From)   .ForEach(action);
-			((IExpressionScannable)Where)  .ForEach(action);
-			((IExpressionScannable)GroupBy).ForEach(action);
-			((IExpressionScannable)Having) .ForEach(action);
-			((IExpressionScannable)OrderBy).ForEach(action);
+			((ISqlExpressionScannable)Select) .ForEach(action);
+			((ISqlExpressionScannable)From)   .ForEach(action);
+			((ISqlExpressionScannable)Where)  .ForEach(action);
+			((ISqlExpressionScannable)GroupBy).ForEach(action);
+			((ISqlExpressionScannable)Having) .ForEach(action);
+			((ISqlExpressionScannable)OrderBy).ForEach(action);
 		}
 
 		#endregion

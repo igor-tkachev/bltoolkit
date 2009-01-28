@@ -12,9 +12,9 @@ namespace BLToolkit.Data.Sql
 		readonly object _value;
 		public   object  Value { get { return _value; } }
 
-		#region IExpressionScannable Members
+		#region ISqlExpressionScannable Members
 
-		void IExpressionScannable.ForEach(Action<ISqlExpression> action)
+		void ISqlExpressionScannable.ForEach(Action<ISqlExpression> action)
 		{
 			action(this);
 		}

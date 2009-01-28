@@ -2,7 +2,7 @@
 
 namespace BLToolkit.Data.Sql
 {
-	public interface ITableSource
+	public interface ISqlTableSource
 	{
 	}
 }

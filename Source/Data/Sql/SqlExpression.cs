@@ -18,9 +18,9 @@ namespace BLToolkit.Data.Sql
 		readonly string           _expr;
 		readonly ISqlExpression[] _values;
 
-		#region IExpressionScannable Members
+		#region ISqlExpressionScannable Members
 
-		void IExpressionScannable.ForEach(Action<ISqlExpression> action)
+		void ISqlExpressionScannable.ForEach(Action<ISqlExpression> action)
 		{
 			action(this);
 			Array.ForEach(_values, action);

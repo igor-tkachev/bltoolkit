@@ -6,41 +6,41 @@ using BLToolkit.Reflection.Extension;
 
 namespace BLToolkit.Data.Sql
 {
-	public class Table : ITableSource
+	public class SqlTable : ISqlTableSource
 	{
 		#region Init
 
-		public Table() : this(Map.DefaultSchema)
+		public SqlTable() : this(Map.DefaultSchema)
 		{
 		}
 
-		public Table(MappingSchema mappingSchema)
+		public SqlTable(MappingSchema mappingSchema)
 		{
 			if (mappingSchema == null) throw new ArgumentNullException("mappingSchema");
 
 			_mappingSchema = mappingSchema;
 
-			_fields = new ChildContainer<ITableSource,Field>(this);
-			_all    = new Field("*", "*");
+			_fields = new ChildContainer<ISqlTableSource,SqlField>(this);
+			_all    = new SqlField("*", "*");
 
-			((IChild<ITableSource>)_all).Parent = this;
+			((IChild<ISqlTableSource>)_all).Parent = this;
 		}
 
 		#endregion
 
 		#region Init from type
 
-		public Table(MappingSchema mappingSchema, Type objectType)
+		public SqlTable(MappingSchema mappingSchema, Type objectType)
 			: this(mappingSchema)
 		{
 			bool isSet;
 			Name = _mappingSchema.MetadataProvider.GetTableName(objectType, _mappingSchema.Extensions, out isSet);
 
 			foreach (MemberMapper mm in MappingSchema.GetObjectMapper(objectType))
-				Fields.Add(new Field(mm.MemberName, mm.Name));
+				Fields.Add(new SqlField(mm.MemberName, mm.Name));
 		}
 
-		public Table(Type objectType)
+		public SqlTable(Type objectType)
 			: this(Map.DefaultSchema, objectType)
 		{
 		}
@@ -49,7 +49,7 @@ namespace BLToolkit.Data.Sql
 
 		#region Init from Table
 
-		public Table(MappingSchema mappingSchema, Table table)
+		public SqlTable(MappingSchema mappingSchema, SqlTable table)
 			: this(mappingSchema)
 		{
 			_alias        = table._alias;
@@ -58,14 +58,14 @@ namespace BLToolkit.Data.Sql
 			_name         = table._name;
 			_physicalName = table._physicalName;
 
-			foreach (Field field in table.Fields.Values)
-				Fields.Add(new Field(field.Name, field.PhysicalName));
+			foreach (SqlField field in table.Fields.Values)
+				Fields.Add(new SqlField(field.Name, field.PhysicalName));
 
 			foreach (Join join in table.Joins)
 				Joins.Add(join.Clone());
 		}
 
-		public Table(Table table)
+		public SqlTable(SqlTable table)
 			: this(table.MappingSchema, table)
 		{
 		}
@@ -74,12 +74,12 @@ namespace BLToolkit.Data.Sql
 
 		#region Init from XML
 
-		public Table(ExtensionList extensions, string name)
+		public SqlTable(ExtensionList extensions, string name)
 			: this(Map.DefaultSchema, extensions, name)
 		{
 		}
 
-		public Table(MappingSchema mappingSchema, ExtensionList extensions, string name)
+		public SqlTable(MappingSchema mappingSchema, ExtensionList extensions, string name)
 			: this(mappingSchema)
 		{
 			if (extensions == null) throw new ArgumentNullException("extensions");
@@ -97,7 +97,7 @@ namespace BLToolkit.Data.Sql
 			_physicalName = (string)te.Attributes["PhysicalName"].Value;
 
 			foreach (MemberExtension me in te.Members)
-				Fields.Add(new Field(me.Name, (string)me["MapField"].Value ?? (string)me["PhysicalName"].Value));
+				Fields.Add(new SqlField(me.Name, (string)me["MapField"].Value ?? (string)me["PhysicalName"].Value));
 
 			foreach (AttributeExtension ae in te.Attributes["Join"])
 				Joins.Add(new Join(ae));
@@ -105,24 +105,24 @@ namespace BLToolkit.Data.Sql
 			string baseExtension = (string)te.Attributes["BaseExtension"].Value;
 
 			if (!string.IsNullOrEmpty(baseExtension))
-				InitFromBase(new Table(mappingSchema, extensions, baseExtension));
+				InitFromBase(new SqlTable(mappingSchema, extensions, baseExtension));
 
 			string baseTypeName = (string)te.Attributes["BaseType"].Value;
 
 			if (!string.IsNullOrEmpty(baseTypeName))
-				InitFromBase(new Table(mappingSchema, Type.GetType(baseTypeName, true, true)));
+				InitFromBase(new SqlTable(mappingSchema, Type.GetType(baseTypeName, true, true)));
 		}
 
-		void InitFromBase(Table baseTable)
+		void InitFromBase(SqlTable baseTable)
 		{
 			if (_alias        == null) _alias        = baseTable._alias;
 			if (_database     == null) _database     = baseTable._database;
 			if (_owner        == null) _owner        = baseTable._owner;
 			if (_physicalName == null) _physicalName = baseTable._physicalName;
 
-			foreach (Field field in baseTable.Fields.Values)
+			foreach (SqlField field in baseTable.Fields.Values)
 				if (!Fields.ContainsKey(field.Name))
-					Fields.Add(new Field(field.Name, field.PhysicalName));
+					Fields.Add(new SqlField(field.Name, field.PhysicalName));
 
 			foreach (Join join in baseTable.Joins)
 				if (Joins.Find(delegate(Join j) { return j.TableName == join.TableName; }) == null)
@@ -133,7 +133,7 @@ namespace BLToolkit.Data.Sql
 
 		#region Public Members
 
-		public Field this[string fieldName]
+		public SqlField this[string fieldName]
 		{
 			get { return Fields[fieldName]; }
 		}
@@ -153,14 +153,14 @@ namespace BLToolkit.Data.Sql
 		private string _physicalName;
 		public  string  PhysicalName { get { return _physicalName ?? _name; } set { _physicalName = value; } }
 
-		private ChildContainer<ITableSource,Field> _fields;
-		public  ChildContainer<ITableSource,Field>  Fields { get { return _fields; } }
+		private ChildContainer<ISqlTableSource,SqlField> _fields;
+		public  ChildContainer<ISqlTableSource,SqlField>  Fields { get { return _fields; } }
 
 		private List<Join> _joins = new List<Join>();
 		public  List<Join>  Joins { get { return _joins; } }
 
-		private Field _all;
-		public  Field  All { get { return _all; } }
+		private SqlField _all;
+		public  SqlField  All { get { return _all; } }
 
 		#endregion
 

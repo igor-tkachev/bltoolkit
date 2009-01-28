@@ -4,14 +4,14 @@ using BLToolkit.Mapping;
 
 namespace BLToolkit.Data.Sql
 {
-	public class Table<T> : Table
+	public class SqlTable<T> : SqlTable
 	{
-		public Table()
+		public SqlTable()
 			: base(typeof(T))
 		{
 		}
 
-		public Table(MappingSchema mappingSchema)
+		public SqlTable(MappingSchema mappingSchema)
 			: base(mappingSchema, typeof(T))
 		{
 		}

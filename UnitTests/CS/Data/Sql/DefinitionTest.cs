@@ -15,12 +15,12 @@ namespace Data.Sql
 
 		static class Tables
 		{
-			public static Table Order = new Table
+			public static SqlTable Order = new SqlTable
 			{
 				Name   = "Order",
 				Fields =
 				{
-					new Field { Name = "ID", PhysicalName = "OrderID" }
+					new SqlField { Name = "ID", PhysicalName = "OrderID" }
 				},
 				Joins  =
 				{
@@ -32,14 +32,14 @@ namespace Data.Sql
 				}
 			};
 
-			public static Table OrderItem = new Table
+			public static SqlTable OrderItem = new SqlTable
 			{
 				Name   = "OrderItem",
 				Alias  = "oi",
 				Fields =
 				{
-					new Field { Name = "OrderID" },
-					new Field { Name = "ID", PhysicalName = "OrderItemID" }
+					new SqlField { Name = "OrderID" },
+					new SqlField { Name = "ID", PhysicalName = "OrderItemID" }
 				}
 			};
 		}
@@ -48,10 +48,10 @@ namespace Data.Sql
 		{
 			static readonly ExtensionList _ext = TypeExtension.GetExtensions("DefinitionData.xml");
 
-			public static Table Order     = new Table(_ext, "Order");
-			public static Table Order2    = new Table(_ext, "Order2") { Name = "Order" };
-			public static Table Order3    = new Table(_ext, "Order3") { Name = "Order" };
-			public static Table OrderItem = new Table(_ext, "OrderItem");
+			public static SqlTable Order     = new SqlTable(_ext, "Order");
+			public static SqlTable Order2    = new SqlTable(_ext, "Order2") { Name = "Order" };
+			public static SqlTable Order3    = new SqlTable(_ext, "Order3") { Name = "Order" };
+			public static SqlTable OrderItem = new SqlTable(_ext, "OrderItem");
 		}
 
 		public class Types
@@ -67,7 +67,7 @@ namespace Data.Sql
 				[MapField("OrderItemID")] public int ID;
 			}
 
-			public static Table OrderTable = new Table<Order>()
+			public static SqlTable OrderTable = new SqlTable<Order>()
 			{
 				Joins =
 				{
@@ -78,12 +78,12 @@ namespace Data.Sql
 					}
 				}
 			};
-			public static Table OrderItemTable = new Table<OrderItem>() { Alias = "oi"};
+			public static SqlTable OrderItemTable = new SqlTable<OrderItem>() { Alias = "oi"};
 		}
 
 		#endregion
 
-		static void CompareTables(Table t1, Table t2)
+		static void CompareTables(SqlTable t1, SqlTable t2)
 		{
 			Assert.AreEqual(t1.Name,         t2.Name);
 			Assert.AreEqual(t1.PhysicalName, t2.PhysicalName);

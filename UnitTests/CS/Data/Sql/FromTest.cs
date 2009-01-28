@@ -7,22 +7,22 @@ namespace Data.Sql
 	[TestFixture]
 	public class FromTest
 	{
-		public static Table Order = new Table
+		public static SqlTable Order = new SqlTable
 		{
 			Name   = "Order",
-			Fields = { new Field { Name = "ID" }, new Field { Name = "Number" } }
+			Fields = { new SqlField { Name = "ID" }, new SqlField { Name = "Number" } }
 		};
 
-		public static Table OrderItem = new Table
+		public static SqlTable OrderItem = new SqlTable
 		{
 			Name   = "OrderItem",
-			Fields = { new Field { Name = "ID" }, new Field { Name = "OrderID" } }
+			Fields = { new SqlField { Name = "ID" }, new SqlField { Name = "OrderID" } }
 		};
 
-		public static Table OrderItem2 = new Table(OrderItem);
-		public static Table OrderItem3 = new Table(OrderItem);
-		public static Table OrderItem4 = new Table(OrderItem);
-		public static Table OrderItem5 = new Table(OrderItem);
+		public static SqlTable OrderItem2 = new SqlTable(OrderItem);
+		public static SqlTable OrderItem3 = new SqlTable(OrderItem);
+		public static SqlTable OrderItem4 = new SqlTable(OrderItem);
+		public static SqlTable OrderItem5 = new SqlTable(OrderItem);
 
 		[Test]
 		public void Test1()
@@ -64,6 +64,10 @@ namespace Data.Sql
 				.Where
 					.Not.Field(Order["ID"]).Like("1234").Or
 					.Field(Order["ID"]).Equal.Value("!%")
+				.GroupBy
+					.Field(Order["ID"])
+				.OrderBy
+					.Field(Order["ID"])
 				;
 
 			Assert.AreEqual(1, sb.From.Tables.Count);

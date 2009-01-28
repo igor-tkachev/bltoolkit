@@ -2,7 +2,7 @@
 
 namespace BLToolkit.Data.Sql
 {
-	public interface IExpressionScannable
+	public interface ISqlExpressionScannable
 	{
 		void ForEach(Action<ISqlExpression> action);
 	}

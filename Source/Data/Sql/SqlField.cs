@@ -5,13 +5,13 @@ using BLToolkit.Reflection.Extension;
 
 namespace BLToolkit.Data.Sql
 {
-	public class Field : IChild<ITableSource>, ISqlExpression
+	public class SqlField : IChild<ISqlTableSource>, ISqlExpression
 	{
-		public Field()
+		public SqlField()
 		{
 		}
 
-		public Field(string name, string physicalName)
+		public SqlField(string name, string physicalName)
 		{
 			_name         = name;
 			_physicalName = physicalName;
@@ -23,13 +23,13 @@ namespace BLToolkit.Data.Sql
 		private string _physicalName;
 		public  string  PhysicalName { get { return _physicalName ?? _name; } set { _physicalName = value; } }
 
-		private      ITableSource        _parent;
-		ITableSource IChild<ITableSource>.Parent { get { return _parent; } set { _parent = value; } }
-		public       ITableSource         Table  { get { return _parent; } }
+		private         ISqlTableSource        _parent;
+		ISqlTableSource IChild<ISqlTableSource>.Parent { get { return _parent; } set { _parent = value; } }
+		public          ISqlTableSource         Table  { get { return _parent; } }
 
-		#region IExpressionScannable Members
+		#region ISqlExpressionScannable Members
 
-		void IExpressionScannable.ForEach(Action<ISqlExpression> action)
+		void ISqlExpressionScannable.ForEach(Action<ISqlExpression> action)
 		{
 			action(this);
 		}

@@ -29,7 +29,7 @@
     <IsWebBootstrapper>false</IsWebBootstrapper>
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>
-    <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -54,10 +54,19 @@
       <HintPath>..\..\Tools\NUnit\nunit.framework.dll</HintPath>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.Core">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
     <Reference Include="System.Data" />
+    <Reference Include="System.Data.Linq">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
     <Reference Include="System.Data.OracleClient" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
+    <Reference Include="System.Xml.Linq">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Aspects\AsyncAndDataAccessorTest.cs" />
@@ -112,6 +121,12 @@
     <Compile Include="Data\DbManagerTest.cs" />
     <Compile Include="Data\ExecuteListT.cs" />
     <Compile Include="Data\ExecuteScalarTest.cs" />
+    <Compile Include="Data\Linq\LinqTest.cs" />
+    <Compile Include="Data\Model\BinaryData.cs" />
+    <Compile Include="Data\Model\DataTypeTest.cs" />
+    <Compile Include="Data\Model\Doctor.cs" />
+    <Compile Include="Data\Model\Patient.cs" />
+    <Compile Include="Data\Model\Person.cs" />
     <Compile Include="Data\NullableParameter.cs" />
     <Compile Include="Data\OutputParameter.cs" />
     <Compile Include="Data\Sql\DefinitionTest.cs" />
