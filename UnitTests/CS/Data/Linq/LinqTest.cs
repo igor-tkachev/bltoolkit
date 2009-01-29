@@ -31,5 +31,29 @@ namespace Data.Linq
 				var list = query.ToList();
 			}
 		}
+
+		Func<int, int> f;
+
+		void Func(System.Linq.Expressions.Expression<Func<int, int>> func, int n)
+		{
+			if (f == null)
+				f = func.Compile();
+
+			n = f(n);
+
+			Console.WriteLine(n);
+		}
+
+		void Foo(int i)
+		{
+			Func((n) => n + 2, i);
+		}
+
+		[Test]
+		public void Test2()
+		{
+			Foo(0);
+			Foo(1);
+		}
 	}
 }

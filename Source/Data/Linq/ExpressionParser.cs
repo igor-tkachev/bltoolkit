@@ -79,59 +79,226 @@ namespace BLToolkit.Data.Linq
 			}
 		}
 
-		public void ParseMethod1(MethodCallExpression expression)
+		static bool Compare(Expression expr1, Expression expr2)
 		{
-			switch (expression.NodeType)
+			if (expr1 == expr2)
+				return true;
+
+			if (expr1 == null || expr2 == null || expr1.NodeType != expr2.NodeType || expr1.Type != expr2.Type)
+				return false;
+
+			switch (expr1.NodeType)
 			{
-				case ExpressionType.Call:               break;
-				case ExpressionType.Add:                break;
-				case ExpressionType.AddChecked:         break;
-				case ExpressionType.And:                break;
-				case ExpressionType.AndAlso:            break;
-				case ExpressionType.ArrayIndex:         break;
-				case ExpressionType.ArrayLength:        break;
-				case ExpressionType.Coalesce:           break;
-				case ExpressionType.Conditional:        break;
-				case ExpressionType.Constant:           break;
-				case ExpressionType.Convert:            break;
-				case ExpressionType.ConvertChecked:     break;
-				case ExpressionType.Divide:             break;
-				case ExpressionType.Equal:              break;
-				case ExpressionType.ExclusiveOr:        break;
-				case ExpressionType.GreaterThan:        break;
-				case ExpressionType.GreaterThanOrEqual: break;
-				case ExpressionType.Invoke:             break;
-				case ExpressionType.Lambda:             break;
-				case ExpressionType.LeftShift:          break;
-				case ExpressionType.LessThan:           break;
-				case ExpressionType.LessThanOrEqual:    break;
-				case ExpressionType.ListInit:           break;
-				case ExpressionType.MemberAccess:       break;
-				case ExpressionType.MemberInit:         break;
-				case ExpressionType.Modulo:             break;
-				case ExpressionType.Multiply:           break;
-				case ExpressionType.MultiplyChecked:    break;
-				case ExpressionType.Negate:             break;
-				case ExpressionType.NegateChecked:      break;
-				case ExpressionType.New:                break;
-				case ExpressionType.NewArrayBounds:     break;
-				case ExpressionType.NewArrayInit:       break;
-				case ExpressionType.Not:                break;
-				case ExpressionType.NotEqual:           break;
-				case ExpressionType.Or:                 break;
-				case ExpressionType.OrElse:             break;
-				case ExpressionType.Parameter:          break;
-				case ExpressionType.Power:              break;
-				case ExpressionType.Quote:              break;
-				case ExpressionType.RightShift:         break;
-				case ExpressionType.Subtract:           break;
-				case ExpressionType.SubtractChecked:    break;
-				case ExpressionType.TypeAs:             break;
-				case ExpressionType.TypeIs:             break;
-				case ExpressionType.UnaryPlus:          break;
-				default:
-					break;
+				case ExpressionType.Add:
+				case ExpressionType.AddChecked:
+				case ExpressionType.And:
+				case ExpressionType.AndAlso:
+				case ExpressionType.ArrayIndex:
+				case ExpressionType.Coalesce:
+				case ExpressionType.Divide:
+				case ExpressionType.Equal:
+				case ExpressionType.ExclusiveOr:
+				case ExpressionType.GreaterThan:
+				case ExpressionType.GreaterThanOrEqual:
+				case ExpressionType.LeftShift:
+				case ExpressionType.LessThan:
+				case ExpressionType.LessThanOrEqual:
+				case ExpressionType.Modulo:
+				case ExpressionType.Multiply:
+				case ExpressionType.MultiplyChecked:
+				case ExpressionType.NotEqual:
+				case ExpressionType.Or:
+				case ExpressionType.OrElse:
+				case ExpressionType.Power:
+				case ExpressionType.RightShift:
+				case ExpressionType.Subtract:
+				case ExpressionType.SubtractChecked:
+					{
+						var e1 = (BinaryExpression)expr1;
+						var e2 = (BinaryExpression)expr2;
+						return e1.Method == e2.Method && Compare(e1.Left, e2.Left) && Compare(e1.Right, e2.Right);
+					}
+
+				case ExpressionType.ArrayLength:
+				case ExpressionType.Convert:
+				case ExpressionType.ConvertChecked:
+				case ExpressionType.Negate:
+				case ExpressionType.NegateChecked:
+				case ExpressionType.Not:
+				case ExpressionType.Quote:
+				case ExpressionType.TypeAs:
+				case ExpressionType.UnaryPlus:
+					{
+						var e1 = (UnaryExpression)expr1;
+						var e2 = (UnaryExpression)expr2;
+						return e1.Method == e2.Method && Compare(e1.Operand, e2.Operand);
+					}
+
+				case ExpressionType.Call:
+					{
+						var e1 = (MethodCallExpression)expr1;
+						var e2 = (MethodCallExpression)expr2;
+
+						if (e1.Arguments.Count != e2.Arguments.Count || e1.Method != e2.Method || !Compare(e1.Object, e2.Object))
+							return false;
+
+						for (var i = 0; i < e1.Arguments.Count; i++)
+							if (!Compare(e1.Arguments[i], e2.Arguments[i]))
+								return false;
+
+						return true;
+					}
+
+				case ExpressionType.Conditional:
+					{
+						var e1 = (ConditionalExpression)expr1;
+						var e2 = (ConditionalExpression)expr2;
+						return Compare(e1.Test, e2.Test) && Compare(e1.IfTrue, e2.IfTrue) && Compare(e1.IfFalse, e2.IfFalse);
+					}
+
+				case ExpressionType.Constant:
+					{
+						var e1 = (ConstantExpression)expr1;
+						var e2 = (ConstantExpression)expr2;
+						// TODO: Evaluate parameters.
+						return e1.Value == e2.Value;
+					}
+
+				case ExpressionType.Invoke:
+					{
+						var e1 = (InvocationExpression)expr1;
+						var e2 = (InvocationExpression)expr2;
+
+						if (e1.Arguments.Count != e2.Arguments.Count || !Compare(e1.Expression, e2.Expression))
+							return false;
+
+						for (var i = 0; i < e1.Arguments.Count; i++)
+							if (!Compare(e1.Arguments[i], e2.Arguments[i]))
+								return false;
+
+						return true;
+					}
+
+				case ExpressionType.Lambda:
+					{
+						var e1 = (LambdaExpression)expr1;
+						var e2 = (LambdaExpression)expr2;
+
+						if (e1.Parameters.Count != e2.Parameters.Count || !Compare(e1.Body, e2.Body))
+							return false;
+
+						for (var i = 0; i < e1.Parameters.Count; i++)
+							if (!Compare(e1.Parameters[i], e2.Parameters[i]))
+								return false;
+
+						return true;
+					}
+
+				case ExpressionType.ListInit:
+					{
+						var e1 = (ListInitExpression)expr1;
+						var e2 = (ListInitExpression)expr2;
+
+						if (e1.Initializers.Count != e2.Initializers.Count || !Compare(e1.NewExpression, e2.NewExpression))
+							return false;
+
+						for (var i = 0; i < e1.Initializers.Count; i++)
+						{
+							var i1 = e1.Initializers[i];
+							var i2 = e2.Initializers[i];
+
+							if (i1.Arguments.Count != i2.Arguments.Count || i1.AddMethod != i2.AddMethod)
+								return false;
+
+							for (var j = 0; j < i1.Arguments.Count; j++)
+								if (!Compare(i1.Arguments[j], i2.Arguments[j]))
+									return false;
+						}
+
+						return true;
+					}
+
+				case ExpressionType.MemberAccess:
+					{
+						var e1 = (MemberExpression)expr1;
+						var e2 = (MemberExpression)expr2;
+						return e1.Member == e2.Member && Compare(e1.Expression, e2.Expression);
+					}
+
+				case ExpressionType.MemberInit:
+					{
+						var e1 = (MemberInitExpression)expr1;
+						var e2 = (MemberInitExpression)expr2;
+
+						if (e1.Bindings.Count != e2.Bindings.Count || !Compare(e1.NewExpression, e2.NewExpression))
+							return false;
+
+						for (var i = 0; i < e1.Bindings.Count; i++)
+						{
+							var b1 = e1.Bindings[i];
+							var b2 = e2.Bindings[i];
+
+							if (b1 == b2)
+								continue;
+
+							if (b1 == null || b2 == null || b1.BindingType != b2.BindingType || b1.Member != b2.Member)
+								return false;
+						}
+
+						return true;
+					}
+
+				case ExpressionType.New:
+					{
+						var e1 = (NewExpression)expr1;
+						var e2 = (NewExpression)expr2;
+
+						if (e1.Arguments.Count != e2.Arguments.Count || e1.Members.  Count != e2.Members.  Count || e1.Constructor != e2.Constructor)
+							return false;
+
+						for (var i = 0; i < e1.Members.Count; i++)
+							if (e1.Members[i] != e2.Members[i])
+								return false;
+
+						for (var i = 0; i < e1.Arguments.Count; i++)
+							if (!Compare(e1.Arguments[i], e2.Arguments[i]))
+								return false;
+
+						return true;
+					}
+
+				case ExpressionType.NewArrayBounds:
+				case ExpressionType.NewArrayInit:
+					{
+						var e1 = (NewArrayExpression)expr1;
+						var e2 = (NewArrayExpression)expr2;
+
+						if (e1.Expressions.Count != e2.Expressions.Count)
+							return false;
+
+						for (var i = 0; i < e1.Expressions.Count; i++)
+							if (!Compare(e1.Expressions[i], e2.Expressions[i]))
+								return false;
+
+						return true;
+					}
+
+				case ExpressionType.Parameter:
+					{
+						var e1 = (ParameterExpression)expr1;
+						var e2 = (ParameterExpression)expr2;
+						return e1.Name == e2.Name;
+					}
+
+				case ExpressionType.TypeIs:
+					{
+						var e1 = (TypeBinaryExpression)expr1;
+						var e2 = (TypeBinaryExpression)expr2;
+						return e1.TypeOperand == e2.TypeOperand && Compare(e1.Expression, e2.Expression);
+					}
 			}
+
+			throw new InvalidOperationException();
 		}
 	}
 }
