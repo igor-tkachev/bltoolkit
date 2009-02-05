@@ -51,9 +51,9 @@ namespace BLToolkit.Data.Linq
 
 		IEnumerable<T> Execute(Expression expression)
 		{
-			var sql = new ExpressionParser(_dbManager != null? _dbManager.MappingSchema: Map.DefaultSchema).Parse(expression);
+			var info = ExpressionInfo<T>.GetExpressionInfo(_dbManager != null? _dbManager.MappingSchema: Map.DefaultSchema, expression);
 
-			return new List<T>();
+			return info.GetIEnumerable(_dbManager);
 		}
 
 		#endregion

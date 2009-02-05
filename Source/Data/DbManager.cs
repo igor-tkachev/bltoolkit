@@ -14,6 +14,7 @@ namespace BLToolkit.Data
 	using Mapping;
 	using Properties;
 	using Reflection;
+	using Sql;
 
 	/// <summary>
 	/// The <b>DbManager</b> is a primary class of the <see cref="BLToolkit.Data"/> namespace
@@ -1877,6 +1878,13 @@ namespace BLToolkit.Data
 			params object[] parameterValues)
 		{
 			return SetSpCommand(CommandAction.Select, spName, parameterValues);
+		}
+
+		public DbManager SetCommand(SqlBuilder sql)
+		{
+			string command = DataProvider.SqlProvider.BuildSql(sql);
+
+			return SetCommand(command, null);
 		}
 
 		#endregion

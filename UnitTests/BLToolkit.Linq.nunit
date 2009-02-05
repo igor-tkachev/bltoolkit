@@ -1,0 +1,9 @@
+﻿<NUnitProject>
+	<Settings activeconfig="Release" />
+	<Config name="Debug" configfile="Linq\App.config" binpathtype="Auto">
+		<assembly path="Linq\bin\Debug\UnitTests.Linq.dll" />
+	</Config>
+	<Config name="Release" configfile="Linq\App.config" binpathtype="Auto">
+		<assembly path="Linq\bin\Release\UnitTests.Linq.dll" />
+	</Config>
+</NUnitProject>

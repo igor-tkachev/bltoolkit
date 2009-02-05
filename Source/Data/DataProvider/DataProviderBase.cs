@@ -7,6 +7,8 @@ using BLToolkit.Mapping;
 
 namespace BLToolkit.Data.DataProvider
 {
+	using Sql.SqlProvider;
+
 	/// <summary>
 	/// The <b>DataProviderBase</b> is a class that provides specific data provider information
 	/// for the <see cref="DbManager"/> class. 
@@ -193,6 +195,12 @@ namespace BLToolkit.Data.DataProvider
 		public virtual string ProviderName
 		{
 			get { return ConnectionType.Namespace; }
+		}
+
+		private        ISqlProvider _sqlProvider;
+		public virtual ISqlProvider  SqlProvider
+		{
+			get { return _sqlProvider ?? (_sqlProvider = new BasicSqlProvider()); }
 		}
 
 		#endregion

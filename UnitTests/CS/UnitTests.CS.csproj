@@ -121,12 +121,6 @@
     <Compile Include="Data\DbManagerTest.cs" />
     <Compile Include="Data\ExecuteListT.cs" />
     <Compile Include="Data\ExecuteScalarTest.cs" />
-    <Compile Include="Data\Linq\LinqTest.cs" />
-    <Compile Include="Data\Model\BinaryData.cs" />
-    <Compile Include="Data\Model\DataTypeTest.cs" />
-    <Compile Include="Data\Model\Doctor.cs" />
-    <Compile Include="Data\Model\Patient.cs" />
-    <Compile Include="Data\Model\Person.cs" />
     <Compile Include="Data\NullableParameter.cs" />
     <Compile Include="Data\OutputParameter.cs" />
     <Compile Include="Data\Sql\DefinitionTest.cs" />
