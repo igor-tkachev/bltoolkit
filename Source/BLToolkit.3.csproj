@@ -117,6 +117,7 @@
     <Compile Include="Data\Linq\ExpressionParser.cs" />
     <Compile Include="Data\Linq\TableT.cs" />
     <Compile Include="Data\Sql\ChildContainer.cs" />
+    <Compile Include="Data\Sql\SqlException.cs" />
     <Compile Include="Data\Sql\Extensions.cs" />
     <Compile Include="Data\Sql\IChild.cs" />
     <Compile Include="Data\Sql\ISqlExpressionScannable.cs" />

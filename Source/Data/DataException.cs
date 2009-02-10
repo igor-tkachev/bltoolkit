@@ -1,5 +1,6 @@
 using System;
 using System.Runtime.Serialization;
+
 using BLToolkit.Data.DataProvider;
 
 namespace BLToolkit.Data

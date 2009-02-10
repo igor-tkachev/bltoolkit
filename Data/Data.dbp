@@ -10,6 +10,7 @@ Begin DataProject = "Data"
       Script = "MsSql.sql"
       Script = "Oracle.sql"
       Script = "SqlCe.sql"
+      Script = "Sybase.sql"
    End
    Begin DBRefFolder = "Database References"
       Begin DBRefNode = "BLToolkitData.dbo"

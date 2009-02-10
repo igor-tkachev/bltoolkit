@@ -69,7 +69,7 @@
     <Compile Include="..\..\Source\Data\DataProvider\SybaseDataProvider.cs">
       <Link>Providers\SybaseDataProvider.cs</Link>
     </Compile>
-    <Compile Include="LinqTest.cs" />
+    <Compile Include="SelectTest.cs" />
     <Compile Include="Model\BinaryData.cs" />
     <Compile Include="Model\DataTypeTest.cs" />
     <Compile Include="Model\Doctor.cs" />

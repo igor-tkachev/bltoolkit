@@ -26,7 +26,7 @@ namespace Data.Linq
 		{
 			"Sql2008",
 			"Sql2005",
-			"Odp",
+			"Oracle",
 			"Sybase"
 		};
 

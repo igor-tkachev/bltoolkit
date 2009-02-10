@@ -89,13 +89,13 @@ namespace BLToolkit.Data.Linq
 			{
 				using (db = new DbManager())
 					using (IDataReader dr = db.SetCommand(sql).ExecuteReader())
-						if (dr.Read())
+						while (dr.Read())
 							yield return MappingSchema.MapDataReaderToObject<T>(dr, null);
 			}
 			else
 			{
 				using (IDataReader dr = db.SetCommand(sql).ExecuteReader())
-					if (dr.Read())
+					while (dr.Read())
 						yield return MappingSchema.MapDataReaderToObject<T>(dr, null);
 			}
 		}

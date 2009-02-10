@@ -217,6 +217,7 @@
     <Compile Include="Data\Sql\SqlBuilder.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Data\Sql\SqlException.cs" />
     <Compile Include="Data\Sql\SqlExpression.cs">
       <SubType>Code</SubType>
     </Compile>

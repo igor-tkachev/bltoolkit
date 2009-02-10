@@ -200,7 +200,7 @@ namespace BLToolkit.Data.DataProvider
 		private        ISqlProvider _sqlProvider;
 		public virtual ISqlProvider  SqlProvider
 		{
-			get { return _sqlProvider ?? (_sqlProvider = new BasicSqlProvider()); }
+			get { return _sqlProvider ?? (_sqlProvider = new BasicSqlProvider(this)); }
 		}
 
 		#endregion
