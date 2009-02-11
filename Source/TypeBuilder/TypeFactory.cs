@@ -335,18 +335,27 @@ namespace BLToolkit.TypeBuilder
 
 		private static Assembly CurrentDomain_AssemblyResolve(object sender, ResolveEventArgs args)
 		{
+			string   name      = args.Name;
+			string[] nameParts = name.Split(',');
+
+			if (nameParts.Length > 0 && nameParts[0].ToLower().EndsWith(".dll"))
+			{
+				nameParts[0] = nameParts[0].Substring(0, nameParts[0].Length - 4);
+				name         = string.Join(",", nameParts);
+			}
+
 			lock (_builtTypes.SyncRoot)
 			{
 				foreach (Type type in _builtTypes.Keys)
-					if (type.FullName == args.Name)
+					if (type.FullName == name)
 						return type.Assembly;
 			}
 
-			int idx = args.Name.IndexOf("." + TypeBuilderConsts.AssemblyNameSuffix);
+			int idx = name.IndexOf("." + TypeBuilderConsts.AssemblyNameSuffix);
 
 			if (idx > 0)
 			{
-				string typeName = args.Name.Substring(0, idx);
+				string typeName = name.Substring(0, idx);
 
 				Type type = Type.GetType(typeName);
 
@@ -358,7 +367,7 @@ namespace BLToolkit.TypeBuilder
 					//
 					for (int i = ass.Length - 1; i >= 0; i--)
 					{
-						if (string.Compare(ass[i].FullName, args.Name) == 0)
+						if (string.Compare(ass[i].FullName, name) == 0)
 							return ass[i];
 					}
 
@@ -409,7 +418,7 @@ namespace BLToolkit.TypeBuilder
 				{
 					Type newType = GetType(type);
 
-					if (newType.Assembly.FullName == args.Name)
+					if (newType.Assembly.FullName == name)
 						return newType.Assembly;
 				}
 			}
