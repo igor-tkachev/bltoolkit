@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Linq.Expressions;
 
 using NUnit.Framework;
 
@@ -28,21 +29,35 @@ namespace Data.Linq
 			});
 		}
 
-		Func<int, int> f;
-
-		void Func(System.Linq.Expressions.Expression<Func<int, int>> func, int n)
+		void Func(Expression<Func<Expression, int>> func)
 		{
-			if (f == null)
-				f = func.Compile();
+			var exp = Expression.Parameter(typeof(Expression), "exp");
 
-			n = f(n);
-
-			Console.WriteLine(n);
+			/*
+			this.Func(
+				Expression.Lambda<Func<Expression, int>>(
+					Expression.Property(
+						Expression.Property(
+							Expression.Convert(
+								Expression.Call(
+									Expression.Property(
+										Expression.Convert(exp, typeof(MethodCallExpression)),
+										"Arguments"),
+									(System.Reflection.MethodInfo)null, //"Item",
+									new Expression[] { Expression.Constant(0, typeof(int)) }), typeof(MethodCallExpression)),
+								(MethodInfo) methodof(MethodCallExpression.get_Arguments)),
+								(MethodInfo) methodof(ReadOnlyCollection<Expression>.get_Count,
+								ReadOnlyCollection<Expression>)
+					),
+					new ParameterExpression[] { CS$0$0000 }
+				)
+			);
+			*/
 		}
 
 		void Foo(int i)
 		{
-			Func((n) => n + 2, i);
+			Func((exp) => ((MethodCallExpression)((MethodCallExpression)exp).Arguments[0]).Arguments.Count);
 		}
 
 		[Test]
