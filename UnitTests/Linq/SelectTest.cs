@@ -3,6 +3,7 @@ using System.Linq;
 using System.Linq.Expressions;
 
 using NUnit.Framework;
+using System.Reflection;
 
 namespace Data.Linq
 {
@@ -29,35 +30,30 @@ namespace Data.Linq
 			});
 		}
 
-		void Func(Expression<Func<Expression, int>> func)
+		void Func(Expression<Func<LambdaExpression, string>> func)
 		{
 			var exp = Expression.Parameter(typeof(Expression), "exp");
 
 			/*
-			this.Func(
-				Expression.Lambda<Func<Expression, int>>(
-					Expression.Property(
+			this.Func(Expression.Lambda<Func<LambdaExpression, string>>(
+				Expression.Property(
+					Expression.Call(
 						Expression.Property(
-							Expression.Convert(
-								Expression.Call(
-									Expression.Property(
-										Expression.Convert(exp, typeof(MethodCallExpression)),
-										"Arguments"),
-									(System.Reflection.MethodInfo)null, //"Item",
-									new Expression[] { Expression.Constant(0, typeof(int)) }), typeof(MethodCallExpression)),
-								(MethodInfo) methodof(MethodCallExpression.get_Arguments)),
-								(MethodInfo) methodof(ReadOnlyCollection<Expression>.get_Count,
-								ReadOnlyCollection<Expression>)
-					),
-					new ParameterExpression[] { CS$0$0000 }
-				)
-			);
+							exp,
+							(MethodInfo) null//methodof(LambdaExpression.get_Parameters)
+						),
+						(MethodInfo) null// methodof(ReadOnlyCollection<ParameterExpression>.get_Item, ReadOnlyCollection<ParameterExpression>)
+						,
+						new Expression[] { Expression.Constant(0, typeof(int)) }),
+					(MethodInfo) methodof(ParameterExpression.get_Name))
+					,
+					new ParameterExpression[] { exp }));
 			*/
 		}
 
 		void Foo(int i)
 		{
-			Func((exp) => ((MethodCallExpression)((MethodCallExpression)exp).Arguments[0]).Arguments.Count);
+			Func(exp => exp.Parameters[0].Name);
 		}
 
 		[Test]

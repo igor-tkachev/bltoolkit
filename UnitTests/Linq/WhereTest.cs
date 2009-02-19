@@ -13,10 +13,11 @@ namespace Data.Linq
 		{
 			ForEachProvider(db =>
 			{
-				var list = (from p in db.Person where p.PersonID == 1 select p).ToList();
+				var id = 1;
+
+				var list = (from p in db.Person where p.PersonID == id select p).ToList();
 				Assert.AreNotEqual(0, list.Count);
 			});
 		}
-
 	}
 }

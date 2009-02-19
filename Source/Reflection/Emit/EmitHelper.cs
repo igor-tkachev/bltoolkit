@@ -142,6 +142,17 @@ namespace BLToolkit.Reflection.Emit
 		}
 
 		/// <summary>
+		/// Declares a local variable, optionally pinning the object referred to by the variable.
+		/// </summary>
+		/// <param name="localType">The Type of the local variable.</param>
+		/// <param name="pinned"><b>true</b> to pin the object in memory; otherwise, <b>false</b>.</param>
+		/// <returns>The declared local variable.</returns>
+		public LocalBuilder DeclareLocal(Type localType, bool pinned)
+		{
+			return _ilGenerator.DeclareLocal(localType, pinned);
+		}
+
+		/// <summary>
 		/// Declares a new label.
 		/// </summary>
 		/// <returns>Returns a new label that can be used as a token for branching.</returns>
