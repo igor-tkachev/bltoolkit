@@ -24,11 +24,11 @@ namespace Data.Linq
 
 		static List<string> _configurations = new List<string>
 		{
-			"MySql",
+			//"MySql",
 			"Sql2008",
-			"Sql2005",
-			"Oracle",
-			"Sybase",
+			//"Sql2005",
+			//"Oracle",
+			//"Sybase",
 		};
 
 		protected void ForEachProvider(Action<TestDbManager> func)

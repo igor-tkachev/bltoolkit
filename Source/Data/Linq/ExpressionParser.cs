@@ -43,6 +43,10 @@ namespace BLToolkit.Data.Linq
 				pi =>
 				{
 					var select = ParseSequence(pi);
+					select.BuildSelect(_info.SqlBuilder);
+
+					BuildQuery(select);
+
 					return true;
 				}
 			);
@@ -50,15 +54,28 @@ namespace BLToolkit.Data.Linq
 			return _info;
 		}
 
+		void BuildQuery(SelectInfo select)
+		{
+			select.ParseInfo.Match(
+				p => p.IsConstant<IQueryable>((_,__) =>
+				{
+					_info.GetIEnumerable = db => _info.Query(db, _info.SqlBuilder);
+					return true;
+				}),
+
+				p => { throw new NotImplementedException(); }
+			);
+		}
+
 		SelectInfo ParseSequence(ParseInfo<Expression> info)
 		{
 			SelectInfo select = null;
 
-			if (info.IsConstant<IQueryable>((value, pi) =>
+			if (info.IsConstant<IQueryable>((value, _) =>
 				{
 					var table = new SqlTable(_info.MappingSchema, value.ElementType);
-					select = new SelectInfo(value.ElementType, table);
 					_info.SqlBuilder.From.Table(table);
+					select = new SelectInfo(info, table);
 					return true;
 				}))
 				return select;
@@ -67,15 +84,8 @@ namespace BLToolkit.Data.Linq
 				throw new ArgumentException(string.Format("Queryable method call expected. Got '{0}'", info.Expr), "expression");
 
 			ParseInfo.Create((MethodCallExpression)info.Expr, () => info.ConvertTo<MethodCallExpression>()).Match(
-				pi => pi.IsQueryableMethod("Select",
-					seq => { select = ParseSequence(seq); },
-					arg => arg.IsLambda<T>(
-						body => body.IsParameter(),
-						l    => SimpleQuery(typeof(T), l.Expr.Parameters[0].Name))),
-
-				pi => pi.IsQueryableMethod("Where",
-					seq => { select = ParseSequence(seq); },
-					arg => arg.IsLambda(1, l => { ParseWhere(l); return true; })),
+				pi => pi.IsQueryableMethod("Select", seq => select = ParseSequence(seq), (p,b) => select = ParseSelect(select, p, b)),
+				pi => pi.IsQueryableMethod("Where",  seq => select = ParseSequence(seq), (p,b) =>          ParseWhere (select, p, b)),
 
 				pi => { throw new ArgumentException(string.Format("Queryable method call expected. Got '{0}'", pi.Expr), "expression"); }
 			);
@@ -83,7 +93,21 @@ namespace BLToolkit.Data.Linq
 			return select;
 		}
 
-		void ParseWhere(ParseInfo<LambdaExpression> lambda)
+		SelectInfo ParseSelect(SelectInfo select, ParseInfo<ParameterExpression> parm, ParseInfo<Expression> body)
+		{
+			select.SetAlias(parm.Expr.Name, _info.SqlBuilder);
+
+			if (body.IsParameter())
+				return select;
+			else
+			{
+				throw new NotImplementedException();
+			}
+
+			return select;
+		}
+
+		void ParseWhere(SelectInfo select, ParseInfo<ParameterExpression> parm, ParseInfo<Expression> body)
 		{
 		}
 

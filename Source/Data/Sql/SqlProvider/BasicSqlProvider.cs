@@ -56,15 +56,21 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 			foreach (SqlBuilder.Column col in _sqlBuilder.Select.Columns)
 			{
+				AppendIndent();
 				BuildColumn(col);
 
 				if (!string.IsNullOrEmpty(col.Alias))
 					_sb.Append(" ").Append(col.Alias);
+
+				_sb.Append(',');
+				_sb.Append(Environment.NewLine);
 			}
 
 			_indent--;
 
-			_sb.AppendLine();
+			_sb
+				.Remove(_sb.Length - Environment.NewLine.Length - 1, Environment.NewLine.Length + 1)
+				.AppendLine();
 		}
 
 		void BuildColumn(SqlBuilder.Column col)
@@ -73,12 +79,12 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			{
 				SqlField field = (SqlField)col.Expression;
 
-				string table = GetTableAlias(field.Table) ?? GetTablePhysicalName(field.Table);
+				string table = GetTableAlias(_sqlBuilder.From[field.Table]) ?? GetTablePhysicalName(field.Table);
 
 				if (string.IsNullOrEmpty(table))
 					throw new SqlException(string.Format("Table {0} should have alias.", field.Table));
 
-				AppendIndent().Append(table).Append('.');
+				_sb.Append(table).Append('.');
 
 				if   (field.Name == "*") _sb.Append(field.PhysicalName);
 				else _sb.Append(_dataProvider.Convert(field.PhysicalName, ConvertType.NameToQueryField));

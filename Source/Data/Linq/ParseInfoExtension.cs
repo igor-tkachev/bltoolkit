@@ -40,6 +40,7 @@ namespace BLToolkit.Data.Linq
 			return IsMethod(pi, declaringType, methodName, args, p => true);
 		}
 
+		[Obsolete]
 		public static bool IsQueryableMethod(this ParseInfo<MethodCallExpression> pi, string methodName, params FTest[] args)
 		{
 			return IsMethod(pi, typeof(Queryable), methodName, args, p => true);
@@ -49,9 +50,9 @@ namespace BLToolkit.Data.Linq
 			this ParseInfo<MethodCallExpression> pi,
 			string methodName,
 			Action<ParseInfo<Expression>>        seq,
-			Func<ParseInfo<Expression>, bool>    lambda)
+			Action<ParseInfo<ParameterExpression>,ParseInfo<Expression>> lambda)
 		{
-			return IsQueryableMethod(pi, methodName, p => { seq(p); return true; }, lambda);
+			return IsMethod(pi, typeof(Queryable), methodName, new FTest[] { p => { seq(p); return true; }, l => l.IsLambda(lambda) }, p => true);
 		}
 	}
 }

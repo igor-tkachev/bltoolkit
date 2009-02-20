@@ -63,6 +63,7 @@ namespace BLToolkit.Data.Linq
 
 		static FParm[] _singleParam = new FParm[] { p => true };
 
+		[Obsolete]
 		public bool IsLambda(int parameters, Func<ParseInfo<LambdaExpression>,bool> func)
 		{
 			var parms = parameters != 1? new FParm[parameters]: _singleParam;
@@ -72,6 +73,16 @@ namespace BLToolkit.Data.Linq
 					parms[i] = _singleParam[0];
 
 			return IsLambda(parms, p => true, func);
+		}
+
+		public bool IsLambda(Action<ParseInfo<ParameterExpression>,ParseInfo<Expression>> lambda)
+		{
+			ParseInfo<ParameterExpression> parameter = null;
+
+			return IsLambda(
+				new FParm[] { p => { parameter = p; return true; } },
+				body => { lambda(parameter, body); return true; },
+				p => true);
 		}
 
 			#endregion

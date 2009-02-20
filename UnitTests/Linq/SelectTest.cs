@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Reflection;
 
 using NUnit.Framework;
-using System.Reflection;
 
 namespace Data.Linq
 {
@@ -16,7 +16,7 @@ namespace Data.Linq
 			ForEachProvider(db =>
 			{
 				var list = db.Person.ToList();
-				Assert.AreNotEqual(0, list.Count);
+				Assert.Less(0, list.Count);
 			});
 		}
 
@@ -26,7 +26,17 @@ namespace Data.Linq
 			ForEachProvider(db =>
 			{
 				var list = (from p in db.Person select p).ToList();
-				Assert.AreNotEqual(0, list.Count);
+				Assert.Less(0, list.Count);
+			});
+		}
+
+		[Test]
+		public void Test3()
+		{
+			ForEachProvider(db =>
+			{
+				var list = db.Person.Select(p => p).Select(p => p).ToList();
+				Assert.Less(0, list.Count);
 			});
 		}
 
