@@ -118,7 +118,7 @@
     <Compile Include="Data\Linq\ParseInfoExtension.cs" />
     <Compile Include="Data\Linq\ParseInfoT.cs" />
     <Compile Include="Data\Linq\ParseInfo.cs" />
-    <Compile Include="Data\Linq\SelectInfo.cs" />
+    <Compile Include="Data\Linq\QueryInfo.cs" />
     <Compile Include="Data\Linq\TableT.cs" />
     <Compile Include="Data\Sql\ChildContainer.cs" />
     <Compile Include="Data\Sql\SqlException.cs" />

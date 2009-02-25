@@ -40,6 +40,16 @@ namespace Data.Linq
 			});
 		}
 
+		[Test]
+		public void Test4()
+		{
+			ForEachProvider(db =>
+			{
+				var list = (from p in db.Person select new { p.PersonID, p.FirstName }).ToList();
+				Assert.Less(0, list.Count);
+			});
+		}
+
 		void Func(Expression<Func<LambdaExpression, string>> func)
 		{
 			var exp = Expression.Parameter(typeof(Expression), "exp");

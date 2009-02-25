@@ -20,7 +20,7 @@ namespace BLToolkit.Data.Linq
 
 		public ExpressionInfo<T> Parse(MappingSchema mappingSchema, Expression expression)
 		{
-			var op = ParseInfo._miOperand;
+			var op = ParseInfo.Unary.Operand;
 
 			_info.MappingSchema = mappingSchema;
 			_info.Expression    = expression;
@@ -29,7 +29,7 @@ namespace BLToolkit.Data.Linq
 				//
 				// db.Table.ToList()
 				//
-				pi => pi.IsConstant<IQueryable>((value, pa) => SimpleQuery(value.ElementType, null)),
+				pi => pi.IsConstant<IQueryable>((value, _) => SimpleQuery(value.ElementType, null)),
 				//
 				// from p in db.Table select p
 				// db.Table.Select(p => p)
@@ -39,14 +39,14 @@ namespace BLToolkit.Data.Linq
 					arg => arg.IsLambda<T>(
 						body => body.IsParameter(),
 						l    => SimpleQuery(typeof(T), l.Expr.Parameters[0].Name))),
-
+				//
+				// everything else
+				//
 				pi =>
 				{
-					var select = ParseSequence(pi);
+					var select = ParseSequence(pi, true);
 					select.BuildSelect(_info.SqlBuilder);
-
 					BuildQuery(select);
-
 					return true;
 				}
 			);
@@ -54,7 +54,7 @@ namespace BLToolkit.Data.Linq
 			return _info;
 		}
 
-		void BuildQuery(SelectInfo select)
+		void BuildQuery(QueryInfo select)
 		{
 			select.ParseInfo.Match(
 				p => p.IsConstant<IQueryable>((_,__) =>
@@ -67,38 +67,45 @@ namespace BLToolkit.Data.Linq
 			);
 		}
 
-		SelectInfo ParseSequence(ParseInfo<Expression> info)
+		QueryInfo ParseSequence(ParseInfo<Expression> info, bool top)
 		{
-			SelectInfo select = null;
+			QueryInfo select = null;
 
 			if (info.IsConstant<IQueryable>((value, _) =>
 				{
 					var table = new SqlTable(_info.MappingSchema, value.ElementType);
 					_info.SqlBuilder.From.Table(table);
-					select = new SelectInfo(info, table);
+					select = new QueryInfo(info, table);
 					return true;
 				}))
 				return select;
 
 			if (info.NodeType != ExpressionType.Call)
-				throw new ArgumentException(string.Format("Queryable method call expected. Got '{0}'", info.Expr), "expression");
+				throw new ArgumentException(string.Format("Queryable method call expected. Got '{0}'.", info.Expr), "expression");
 
-			ParseInfo.Create((MethodCallExpression)info.Expr, () => info.ConvertTo<MethodCallExpression>()).Match(
-				pi => pi.IsQueryableMethod("Select", seq => select = ParseSequence(seq), (p,b) => select = ParseSelect(select, p, b)),
-				pi => pi.IsQueryableMethod("Where",  seq => select = ParseSequence(seq), (p,b) =>          ParseWhere (select, p, b)),
+			ParseInfo.Create((MethodCallExpression)info.Expr, () => info.ConvertTo<MethodCallExpression>()).Match
+			(
+				pi => pi.IsQueryableMethod("Select", seq => select = ParseSequence(seq, false), (p,b) => select = ParseSelect(select, p, b, top)),
+				pi => pi.IsQueryableMethod("Where",  seq => select = ParseSequence(seq, false), (p,b) =>          ParseWhere (select, p, b)),
 
-				pi => { throw new ArgumentException(string.Format("Queryable method call expected. Got '{0}'", pi.Expr), "expression"); }
+				pi => { throw new ArgumentException(string.Format("Queryable method call expected. Got '{0}'.", pi.Expr), "expression"); }
 			);
 
 			return select;
 		}
 
-		SelectInfo ParseSelect(SelectInfo select, ParseInfo<ParameterExpression> parm, ParseInfo<Expression> body)
+		QueryInfo ParseSelect(QueryInfo select, ParseInfo<ParameterExpression> parm, ParseInfo<Expression> body, bool top)
 		{
+			select.ParseInfo = body;
 			select.SetAlias(parm.Expr.Name, _info.SqlBuilder);
 
 			if (body.IsParameter())
+			{
 				return select;
+			}
+			else if (body.IsNew())
+			{
+			}
 			else
 			{
 				throw new NotImplementedException();
@@ -107,7 +114,7 @@ namespace BLToolkit.Data.Linq
 			return select;
 		}
 
-		void ParseWhere(SelectInfo select, ParseInfo<ParameterExpression> parm, ParseInfo<Expression> body)
+		void ParseWhere(QueryInfo select, ParseInfo<ParameterExpression> parm, ParseInfo<Expression> body)
 		{
 		}
 

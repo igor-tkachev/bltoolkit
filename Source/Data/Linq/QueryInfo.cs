@@ -6,9 +6,9 @@ using BLToolkit.Data.Sql;
 
 namespace BLToolkit.Data.Linq
 {
-	class SelectInfo
+	class QueryInfo
 	{
-		public SelectInfo(ParseInfo<Expression> parseInfo, SqlTable table)
+		public QueryInfo(ParseInfo<Expression> parseInfo, SqlTable table)
 		{
 			ParseInfo = parseInfo;
 

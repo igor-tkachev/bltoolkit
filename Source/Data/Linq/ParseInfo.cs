@@ -9,7 +9,7 @@ namespace BLToolkit.Data.Linq
 {
 	class ParseInfo
 	{
-		public Func<Expression> ParamAccessor;
+		public FExpr ParamAccessor;
 
 		public static ParseInfo<T> Create<T>(T expr, FExpr func)
 			where T : Expression
@@ -43,29 +43,110 @@ namespace BLToolkit.Data.Linq
 
 		#region Reflection Helpers
 
-		public static Expression Expressor<P>(Expression<Func<P,object>> func)
+		public class Expressor<T>
 		{
-			return func.Body;
+			/*
+			public static Expression Expressor(Expression<Func<T,object>> func)
+			{
+				return func.Body;
+			}
+			*/
+
+			public static MethodInfo PropertyExpressor(Expression<Func<T, object>> func)
+			{
+				return ((PropertyInfo)((MemberExpression)func.Body).Member).GetGetMethod();
+			}
 		}
 
-		public static MethodInfo PropertyExpressor<P>(Expression<Func<P, object>> func)
+		public class Binary : Expressor<BinaryExpression>
 		{
-			return ((PropertyInfo)((MemberExpression)func.Body).Member).GetGetMethod();
+			public static MethodInfo Left  = PropertyExpressor(e => e.Left);
+			public static MethodInfo Right = PropertyExpressor(e => e.Right);
 		}
 
-		public static MethodInfo IndexerExpressor<P>(Expression<Func<ReadOnlyCollection<P>, object>> func)
+		public class Unary : Expressor<UnaryExpression>
 		{
-			return ((MethodCallExpression)func.Body).Method;
+			public static MethodInfo Operand = PropertyExpressor(e => e.Operand);
 		}
 
-		public static MethodInfo _miOperand    = PropertyExpressor<UnaryExpression>     (e => e.Operand);
-		public static MethodInfo _miBody       = PropertyExpressor<LambdaExpression>    (e => e.Body);
-		public static MethodInfo _miValue      = PropertyExpressor<ConstantExpression>  (e => e.Value);
-		public static MethodInfo _miParameters = PropertyExpressor<MethodCallExpression>(e => e.Arguments);
-		public static MethodInfo _miArguments  = PropertyExpressor<LambdaExpression>    (e => e.Parameters);
+		public class Lambda : Expressor<LambdaExpression>
+		{
+			public static MethodInfo Body       = PropertyExpressor(e => e.Body);
+			public static MethodInfo Parameters = PropertyExpressor(e => e.Parameters);
+		}
 
-		public static MethodInfo _miParamItem  = IndexerExpressor<ParameterExpression>  (c  => c[0]);
-		public static MethodInfo _miExprItem   = IndexerExpressor<Expression>           (c  => c[0]);
+		public class Constant : Expressor<ConstantExpression>
+		{
+			public static MethodInfo Value = PropertyExpressor(e => e.Value);
+		}
+
+		public class MethodCall : Expressor<MethodCallExpression>
+		{
+			public static MethodInfo Arguments = PropertyExpressor(e => e.Arguments);
+		}
+
+		public class Conditional : Expressor<ConditionalExpression>
+		{
+			public static MethodInfo Test    = PropertyExpressor(e => e.Test);
+			public static MethodInfo IfTrue  = PropertyExpressor(e => e.IfTrue);
+			public static MethodInfo IfFalse = PropertyExpressor(e => e.IfFalse);
+		}
+
+		public class Invocation : Expressor<InvocationExpression>
+		{
+			public static MethodInfo Expression = PropertyExpressor(e => e.Expression);
+			public static MethodInfo Arguments  = PropertyExpressor(e => e.Arguments);
+		}
+
+		public class ListInit : Expressor<ListInitExpression>
+		{
+			public static MethodInfo NewExpression = PropertyExpressor(e => e.NewExpression);
+			public static MethodInfo Initializers  = PropertyExpressor(e => e.Initializers);
+		}
+
+		public class ElementInit : Expressor<System.Linq.Expressions.ElementInit>
+		{
+			public static MethodInfo Arguments = PropertyExpressor(e => e.Arguments);
+		}
+
+		public class Member : Expressor<MemberExpression>
+		{
+			public static MethodInfo Expression = PropertyExpressor(e => e.Expression);
+		}
+
+		public class MemberInit : Expressor<MemberInitExpression>
+		{
+			public static MethodInfo NewExpression = PropertyExpressor(e => e.NewExpression);
+		}
+
+		public class New : Expressor<NewExpression>
+		{
+			public static MethodInfo Arguments = PropertyExpressor(e => e.Arguments);
+		}
+
+		public class NewArray : Expressor<NewArrayExpression>
+		{
+			public static MethodInfo Expressions = PropertyExpressor(e => e.Expressions);
+		}
+
+		public class TypeBinary : Expressor<TypeBinaryExpression>
+		{
+			public static MethodInfo Expression = PropertyExpressor(e => e.Expression);
+		}
+
+		public class IndexExpressor<T>
+		{
+			public static MethodInfo IndexerExpressor(Expression<Func<ReadOnlyCollection<T>, object>> func)
+			{
+				return ((MethodCallExpression)((UnaryExpression)func.Body).Operand).Method;
+			}
+
+			public static MethodInfo Item = IndexerExpressor(c => c[0]);
+		}
+
+		public static MethodInfo ExprItem  = IndexExpressor<Expression>         .Item;
+		public static MethodInfo ParamItem = IndexExpressor<ParameterExpression>.Item;
+		public static MethodInfo ElemItem  = IndexExpressor<ElementInit>        .Item;
 
 		#endregion
 	}
