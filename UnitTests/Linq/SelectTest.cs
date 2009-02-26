@@ -7,6 +7,8 @@ using NUnit.Framework;
 
 namespace Data.Linq
 {
+	using Model;
+
 	[TestFixture]
 	public class SelectTest : TestBase
 	{

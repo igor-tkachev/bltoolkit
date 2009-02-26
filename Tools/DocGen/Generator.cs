@@ -142,8 +142,8 @@ namespace DocGen
 									if (_modifySourceLinks)
 									{
 										source = source
-											.Replace("href=\"..\\..\\..\\Source\\", "target=_blank href=\"http://www.bltoolkit.net/Source/")
-											.Replace("href='..\\..\\..\\Source\\",  "target=_blank href='http://www.bltoolkit.net/Source/")
+											.Replace("href=\"..\\..\\..\\Source\\", "target=_blank href=\"/Source/")
+											.Replace("href='..\\..\\..\\Source\\",  "target=_blank href='/Source/")
 											.Replace("<a href=\"http://", "<a target=_blank href=\"http://")
 											.Replace("<a href='http://",  "<a target=_blank href='http://")
 											;

@@ -96,7 +96,7 @@ namespace BLToolkit.Data.Linq
 
 		QueryInfo ParseSelect(QueryInfo select, ParseInfo<ParameterExpression> parm, ParseInfo<Expression> body, bool top)
 		{
-			select.ParseInfo = body;
+			//select.ParseInfo = body;
 			select.SetAlias(parm.Expr.Name, _info.SqlBuilder);
 
 			if (body.IsParameter())
@@ -105,6 +105,10 @@ namespace BLToolkit.Data.Linq
 			}
 			else if (body.IsNew())
 			{
+				body.Walk(pi =>
+				{
+					return true;
+				});
 			}
 			else
 			{
