@@ -102,7 +102,7 @@ namespace BLToolkit.Mapping
 		[CLSCompliant(false)]
 		public CompoundValue GetIndexValue(IMapDataSource source, object obj)
 		{
-			object[] values = new string[Fields.Length];
+			object[] values = new object[Fields.Length];
 
 			for (int i = 0; i < values.Length; i++)
 				values[i] = GetValue(source, obj, i);
