@@ -13,76 +13,45 @@ namespace Data.Linq
 	public class SelectTest : TestBase
 	{
 		[Test]
-		public void Test1()
+		public void PersonToList()
 		{
-			ForEachProvider(db =>
-			{
-				var list = db.Person.ToList();
-				Assert.Less(0, list.Count);
-			});
+			Less0ForEachProvider(db => db.Person.ToList().Count);
 		}
 
 		[Test]
-		public void Test2()
+		public void PersonSelect()
 		{
-			ForEachProvider(db =>
-			{
-				var list = (from p in db.Person select p).ToList();
-				Assert.Less(0, list.Count);
-			});
+			Less0ForEachProvider(db => (from p in db.Person select p).ToList().Count);
 		}
 
 		[Test]
-		public void Test3()
+		public void PersonDoubleSelect()
 		{
-			ForEachProvider(db =>
-			{
-				var list = db.Person.Select(p => p).Select(p => p).ToList();
-				Assert.Less(0, list.Count);
-			});
+			Less0ForEachProvider(db => db.Person.Select(p => p).Select(p => p).ToList().Count);
 		}
 
 		[Test]
-		public void Test4()
+		public void New()
 		{
-			ForEachProvider(db =>
-			{
-				var list = (from p in db.Person select new { p.PersonID, p.FirstName }).ToList();
-				Assert.Less(0, list.Count);
-			});
-		}
-
-		void Func(Expression<Func<LambdaExpression, string>> func)
-		{
-			var exp = Expression.Parameter(typeof(Expression), "exp");
-
-			/*
-			this.Func(Expression.Lambda<Func<LambdaExpression, string>>(
-				Expression.Property(
-					Expression.Call(
-						Expression.Property(
-							exp,
-							(MethodInfo) null//methodof(LambdaExpression.get_Parameters)
-						),
-						(MethodInfo) null// methodof(ReadOnlyCollection<ParameterExpression>.get_Item, ReadOnlyCollection<ParameterExpression>)
-						,
-						new Expression[] { Expression.Constant(0, typeof(int)) }),
-					(MethodInfo) methodof(ParameterExpression.get_Name))
-					,
-					new ParameterExpression[] { exp }));
-			*/
-		}
-
-		void Foo(int i)
-		{
-			Func(exp => exp.Parameters[0].Name);
+			Less0ForEachProvider(db => (from p in db.Person select new { p.PersonID, p.FirstName }).ToList().Count);
 		}
 
 		[Test]
-		public void Test___()
+		public void NewPerson1()
 		{
-			Foo(0);
-			Foo(1);
+			Less0ForEachProvider(db => (from p in db.Person select new Person { PersonID = p.PersonID }).ToList().Count);
+		}
+
+		[Test]
+		public void NewPerson2()
+		{
+			Less0ForEachProvider(db => (from p in db.Person select new Person(p.PersonID)).ToList().Count);
+		}
+
+		[Test]
+		public void NewPerson3()
+		{
+			Less0ForEachProvider(db => (from p in db.Person select new Person(p.PersonID) { FirstName = p.FirstName }).ToList().Count);
 		}
 	}
 }

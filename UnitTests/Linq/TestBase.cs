@@ -4,6 +4,7 @@ using System.Reflection;
 
 using BLToolkit.Data;
 using BLToolkit.Data.DataProvider;
+using NUnit.Framework;
 
 namespace Data.Linq
 {
@@ -24,11 +25,11 @@ namespace Data.Linq
 
 		static List<string> _configurations = new List<string>
 		{
-			//"MySql",
+			"MySql",
 			"Sql2008",
-			//"Sql2005",
-			//"Oracle",
-			//"Sybase",
+			"Sql2005",
+			"Oracle",
+			"Sybase",
 		};
 
 		protected void ForEachProvider(Action<TestDbManager> func)
@@ -55,6 +56,11 @@ namespace Data.Linq
 					i--;
 				}
 			}
+		}
+
+		protected void Less0ForEachProvider(Func<TestDbManager, int> func)
+		{
+			ForEachProvider(db => Assert.Less(0, func(db)));
 		}
 	}
 }

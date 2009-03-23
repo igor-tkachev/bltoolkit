@@ -8,8 +8,9 @@ namespace Data.Linq.Model
 		{
 		}
 
-		public Person(char gender)
+		public Person(int id)
 		{
+			PersonID = id;
 		}
 
 		public int    PersonID;

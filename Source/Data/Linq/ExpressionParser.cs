@@ -37,7 +37,7 @@ namespace BLToolkit.Data.Linq
 				pi => pi.IsMethod(typeof(Queryable), "Select",
 					obj => obj.IsConstant<IQueryable>(),
 					arg => arg.IsLambda<T>(
-						body => body.IsParameter(),
+						body => body.NodeType == ExpressionType.Parameter,
 						l    => SimpleQuery(typeof(T), l.Expr.Parameters[0].Name))),
 				//
 				// everything else
@@ -45,26 +45,12 @@ namespace BLToolkit.Data.Linq
 				pi =>
 				{
 					var select = ParseSequence(pi, true);
-					select.BuildSelect(_info.SqlBuilder);
-					BuildQuery(select);
+					select.BuildSelect(_info);
 					return true;
 				}
 			);
 
 			return _info;
-		}
-
-		void BuildQuery(QueryInfo select)
-		{
-			select.ParseInfo.Match(
-				p => p.IsConstant<IQueryable>((_,__) =>
-				{
-					_info.GetIEnumerable = db => _info.Query(db, _info.SqlBuilder);
-					return true;
-				}),
-
-				p => { throw new NotImplementedException(); }
-			);
 		}
 
 		QueryInfo ParseSequence(ParseInfo<Expression> info, bool top)
@@ -75,7 +61,7 @@ namespace BLToolkit.Data.Linq
 				{
 					var table = new SqlTable(_info.MappingSchema, value.ElementType);
 					_info.SqlBuilder.From.Table(table);
-					select = new QueryInfo(info, table);
+					select = new QueryInfo.Constant(table);
 					return true;
 				}))
 				return select;
@@ -83,7 +69,7 @@ namespace BLToolkit.Data.Linq
 			if (info.NodeType != ExpressionType.Call)
 				throw new ArgumentException(string.Format("Queryable method call expected. Got '{0}'.", info.Expr), "expression");
 
-			ParseInfo.Create((MethodCallExpression)info.Expr, () => info.ConvertTo<MethodCallExpression>()).Match
+			info.ConvertTo<MethodCallExpression>().Match
 			(
 				pi => pi.IsQueryableMethod("Select", seq => select = ParseSequence(seq, false), (p,b) => select = ParseSelect(select, p, b, top)),
 				pi => pi.IsQueryableMethod("Where",  seq => select = ParseSequence(seq, false), (p,b) =>          ParseWhere (select, p, b)),
@@ -96,30 +82,20 @@ namespace BLToolkit.Data.Linq
 
 		QueryInfo ParseSelect(QueryInfo select, ParseInfo<ParameterExpression> parm, ParseInfo<Expression> body, bool top)
 		{
-			//select.ParseInfo = body;
 			select.SetAlias(parm.Expr.Name, _info.SqlBuilder);
 
-			if (body.IsParameter())
+			switch (body.NodeType)
 			{
-				return select;
+				case ExpressionType.Parameter : return select;
+				case ExpressionType.New       : return new QueryInfo.New       (select, parm, body.ConvertTo<NewExpression>());
+				case ExpressionType.MemberInit: return new QueryInfo.MemberInit(select, parm, body.ConvertTo<MemberInitExpression>());
+				default                       : throw  new NotImplementedException();
 			}
-			else if (body.IsNew())
-			{
-				body.Walk(pi =>
-				{
-					return true;
-				});
-			}
-			else
-			{
-				throw new NotImplementedException();
-			}
-
-			return select;
 		}
 
 		void ParseWhere(QueryInfo select, ParseInfo<ParameterExpression> parm, ParseInfo<Expression> body)
 		{
+			throw  new NotImplementedException();
 		}
 
 		bool SimpleQuery(Type type, string alias)

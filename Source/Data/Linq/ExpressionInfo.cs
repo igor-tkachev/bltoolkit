@@ -263,15 +263,64 @@ namespace BLToolkit.Data.Linq
 						if (e1.Bindings.Count != e2.Bindings.Count || !Compare(e1.NewExpression, e2.NewExpression))
 							return false;
 
+						Func<MemberBinding,MemberBinding,bool> compareBindings = null; compareBindings = (b1,b2) =>
+						{
+							if (b1 == b2)
+								return true;
+
+							if (b1 == null || b2 == null || b1.BindingType != b2.BindingType || b1.Member != b2.Member)
+								return false;
+
+							switch (b1.BindingType)
+							{
+								case MemberBindingType.Assignment:
+									return Compare(((MemberAssignment)b1).Expression, ((MemberAssignment)b2).Expression);
+
+								case MemberBindingType.ListBinding:
+									var ml1 = (MemberListBinding)b1;
+									var ml2 = (MemberListBinding)b2;
+
+									if (ml1.Initializers.Count != ml2.Initializers.Count)
+										return false;
+
+									for (int i = 0; i < ml1.Initializers.Count; i++)
+									{
+										var ei1 = ml1.Initializers[i];
+										var ei2 = ml2.Initializers[i];
+
+										if (ei1.AddMethod != ei2.AddMethod || ei1.Arguments.Count != ei2.Arguments.Count)
+											return false;
+
+										for (int j = 0; j < ei1.Arguments.Count; j++)
+											if (!Compare(ei1.Arguments[j], ei2.Arguments[j]))
+												return false;
+									}
+
+									break;
+
+								case MemberBindingType.MemberBinding:
+									var mm1 = (MemberMemberBinding)b1;
+									var mm2 = (MemberMemberBinding)b2;
+
+									if (mm1.Bindings.Count != mm2.Bindings.Count)
+										return false;
+
+									for (int i = 0; i < mm1.Bindings.Count; i++)
+										if (!compareBindings(mm1.Bindings[i], mm2.Bindings[i]))
+											return false;
+
+									break;
+							}
+
+							return true;
+						};
+
 						for (var i = 0; i < e1.Bindings.Count; i++)
 						{
 							var b1 = e1.Bindings[i];
 							var b2 = e2.Bindings[i];
 
-							if (b1 == b2)
-								continue;
-
-							if (b1 == null || b2 == null || b1.BindingType != b2.BindingType || b1.Member != b2.Member)
+							if (!compareBindings(b1, b2))
 								return false;
 						}
 

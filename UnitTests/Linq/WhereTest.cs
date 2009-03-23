@@ -16,7 +16,7 @@ namespace Data.Linq
 				var id = 1;
 
 				var list = (from p in db.Person where p.PersonID == id select p).ToList();
-				Assert.AreNotEqual(0, list.Count);
+				Assert.AreEqual(1, list.Count);
 			});
 		}
 	}

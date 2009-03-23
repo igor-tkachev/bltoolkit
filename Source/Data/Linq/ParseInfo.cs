@@ -19,9 +19,9 @@ namespace BLToolkit.Data.Linq
 
 		#region Parameter accessor helpers
 
-		public UnaryExpression ConvertTo<P>()
+		public UnaryExpression ConvertExpressionTo<T>()
 		{
-			return Expression.Convert(ParamAccessor(), typeof(P));
+			return Expression.Convert(ParamAccessor(), typeof(T));
 		}
 
 		public MemberExpression Property(MethodInfo mi)
@@ -29,9 +29,9 @@ namespace BLToolkit.Data.Linq
 			return Expression.Property(ParamAccessor(), mi);
 		}
 
-		public MemberExpression Property<P>(MethodInfo mi)
+		public MemberExpression Property<T>(MethodInfo mi)
 		{
-			return Expression.Property(ConvertTo<P>(), mi);
+			return Expression.Property(ConvertExpressionTo<T>(), mi);
 		}
 
 		public MethodCallExpression Indexer(MethodInfo pmi, MethodInfo mi, int idx)
@@ -45,13 +45,6 @@ namespace BLToolkit.Data.Linq
 
 		public class Expressor<T>
 		{
-			/*
-			public static Expression Expressor(Expression<Func<T,object>> func)
-			{
-				return func.Body;
-			}
-			*/
-
 			public static MethodInfo PropertyExpressor(Expression<Func<T, object>> func)
 			{
 				return ((PropertyInfo)((MemberExpression)func.Body).Member).GetGetMethod();
