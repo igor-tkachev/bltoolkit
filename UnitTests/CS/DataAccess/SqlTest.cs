@@ -84,5 +84,52 @@ namespace DataAccess
 
 			Assert.IsNull(p.Gender);
 		}
+
+		public class TestCategory
+		{
+			[PrimaryKey, NonUpdatable]
+			public int    Id;
+			public string Name;
+		}
+
+		[MapField("CategoryId", "Category.Id")]
+		public class TestObject2
+		{
+			[PrimaryKey, NonUpdatable]
+			public int          Id;
+			public TestCategory Category;
+		}
+
+		[Test]
+		public void NonUpdatableTest()
+		{
+			SqlQuery da = new SqlQuery();
+
+			using (DbManager db = new DbManager())
+			{
+				SqlQueryInfo update = da.GetSqlQueryInfo<TestCategory>(db, "Update");
+				SqlQueryInfo insert = da.GetSqlQueryInfo<TestCategory>(db, "Insert");
+
+				Assert.That(update.QueryText, Is.Not.Contains(
+					"\t" + db.DataProvider.Convert("Id", ConvertType.NameToQueryField) + " = " + db.DataProvider.Convert("Id", ConvertType.NameToParameter) + "\n"),
+					"Update");
+				Assert.That(insert.QueryText, Is.Not.Contains("Id"), "Insert");
+			}
+		}
+
+		[Test]
+		public void ComplexMapperNonUpdatableTest()
+		{
+			SqlQuery da = new SqlQuery();
+
+			using (DbManager db = new DbManager())
+			{
+				SqlQueryInfo update = da.GetSqlQueryInfo<TestObject2>(db, "Update");
+				SqlQueryInfo insert = da.GetSqlQueryInfo<TestObject2>(db, "Insert");
+
+				Assert.That(update.QueryText.Contains("CategoryId"), "Update");
+				Assert.That(insert.QueryText.Contains("CategoryId"), "Insert");
+			}
+		}
 	}
 }

@@ -18,13 +18,24 @@ namespace HowTo.Data
 		[Test]
 		public void Test1()
 		{
-			/*[a]*/DbManager.AddConnectionString/*[/a]*/(
-				sqlConnectionString);   // connection string
+			string defaultConfiguration = DbManager.DefaultConfiguration;
+			DbManager.DefaultConfiguration = ""; //to reset possible previous changes
 
-			using (DbManager db = /*[a]*/new DbManager()/*[/a]*/)
+			try
 			{
-				Assert.AreEqual(ConnectionState.Open, db.Connection.State);
+				/*[a]*/DbManager.AddConnectionString/*[/a]*/(
+					sqlConnectionString);   // connection string
+
+				using (DbManager db = /*[a]*/new DbManager()/*[/a]*/)
+				{
+					Assert.AreEqual(ConnectionState.Open, db.Connection.State);
+				}
 			}
+			finally
+			{
+				DbManager.DefaultConfiguration = defaultConfiguration; // to restore previous settings
+			}
+
 		}
 
 		[Test]

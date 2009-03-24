@@ -210,9 +210,13 @@ namespace BLToolkit.DataAccess
 			{
 				// IT: This works incorrectly for complex mappers.
 				//
+				// [2009-03-24] ili: use mm.MemberAccessor instead of mm.ComplexMemberAccessor
+				// as in CreateUpdateSqlText
+				//
+
 				bool isSet;
 
-				if (!mp.GetNonUpdatableFlag(type, typeExt, mm.ComplexMemberAccessor, out isSet) || !isSet)
+				if (!mp.GetNonUpdatableFlag(type, typeExt, mm.MemberAccessor, out isSet) || !isSet)
 				{
 					sb.AppendFormat("\t{0},\n",
 						db.DataProvider.Convert(mm.Name, ConvertType.NameToQueryField));
