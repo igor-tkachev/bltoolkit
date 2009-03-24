@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Linq;
 using System.Linq.Expressions;
 
 using BLToolkit.Mapping;
@@ -146,7 +147,11 @@ namespace BLToolkit.Data.Linq
 					{
 						var e1 = (BinaryExpression)expr1;
 						var e2 = (BinaryExpression)expr2;
-						return e1.Method == e2.Method && Compare(e1.Left, e2.Left) && Compare(e1.Right, e2.Right);
+						return
+							e1.Method == e2.Method &&
+							Compare(e1.Conversion, e2.Conversion) &&
+							Compare(e1.Left,       e2.Left) &&
+							Compare(e1.Right,      e2.Right);
 					}
 
 				case ExpressionType.ArrayLength:

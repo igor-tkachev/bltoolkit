@@ -44,8 +44,7 @@ namespace BLToolkit.Data.Linq
 				//
 				pi =>
 				{
-					var select = ParseSequence(pi, true);
-					select.BuildSelect(_info);
+					BuildSelect(ParseSequence(pi));
 					return true;
 				}
 			);
@@ -53,7 +52,7 @@ namespace BLToolkit.Data.Linq
 			return _info;
 		}
 
-		QueryInfo ParseSequence(ParseInfo<Expression> info, bool top)
+		QueryInfo ParseSequence(ParseInfo<Expression> info)
 		{
 			QueryInfo select = null;
 
@@ -71,8 +70,8 @@ namespace BLToolkit.Data.Linq
 
 			info.ConvertTo<MethodCallExpression>().Match
 			(
-				pi => pi.IsQueryableMethod("Select", seq => select = ParseSequence(seq, false), (p,b) => select = ParseSelect(select, p, b, top)),
-				pi => pi.IsQueryableMethod("Where",  seq => select = ParseSequence(seq, false), (p,b) =>          ParseWhere (select, p, b)),
+				pi => pi.IsQueryableMethod("Select", seq => select = ParseSequence(seq), (p, b) => select = ParseSelect(select, p, b)),
+				pi => pi.IsQueryableMethod("Where",  seq => select = ParseSequence(seq), (p, b) => ParseWhere(select, p, b)),
 
 				pi => { throw new ArgumentException(string.Format("Queryable method call expected. Got '{0}'.", pi.Expr), "expression"); }
 			);
@@ -80,9 +79,9 @@ namespace BLToolkit.Data.Linq
 			return select;
 		}
 
-		QueryInfo ParseSelect(QueryInfo select, ParseInfo<ParameterExpression> parm, ParseInfo<Expression> body, bool top)
+		QueryInfo ParseSelect(QueryInfo select, ParseInfo<ParameterExpression> parm, ParseInfo<Expression> body)
 		{
-			select.SetAlias(parm.Expr.Name, _info.SqlBuilder);
+			SetAlias(select, parm.Expr.Name);
 
 			switch (body.NodeType)
 			{
@@ -96,6 +95,59 @@ namespace BLToolkit.Data.Linq
 		void ParseWhere(QueryInfo select, ParseInfo<ParameterExpression> parm, ParseInfo<Expression> body)
 		{
 			throw  new NotImplementedException();
+		}
+
+		void BuildSelect(QueryInfo query)
+		{
+			query.Match(
+				constantExpr =>
+				{
+					_info.SqlBuilder.Select.Columns.Clear();
+
+					foreach (var c in constantExpr.Columns)
+						_info.SqlBuilder.Select.Expr(c.Value);
+
+					_info.GetIEnumerable = db => _info.Query(db, _info.SqlBuilder);
+				},
+				newExpr =>
+				{
+					var info = newExpr.Body.Walk(pi =>
+					{
+						return pi;
+					});
+
+					throw new NotImplementedException();
+				},
+				memberInit =>
+				{
+					throw new NotImplementedException();
+				}
+			);
+		}
+
+		void SetAlias(QueryInfo query, string alias)
+		{
+			query.Match(
+				constant =>
+				{
+					foreach (var item in constant.Columns.Values)
+					{
+						var field = item as SqlField;
+
+						if (field != null)
+						{
+							var table = _info.SqlBuilder.From[field.Table];
+
+							if (table.Alias == null)
+								table.Alias = alias;
+						}
+
+						break;
+					}
+				},
+				@new       => {},
+				memberInit => {}
+			);
 		}
 
 		bool SimpleQuery(Type type, string alias)

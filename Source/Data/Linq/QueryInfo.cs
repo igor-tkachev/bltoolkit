@@ -47,59 +47,11 @@ namespace BLToolkit.Data.Linq
 			public ParseInfo<MemberInitExpression> Body;
 		}
 
-		void Match(Action<Constant> sourceAction, Action<New> newAction, Action<MemberInit> memberInitAction)
+		public void Match(Action<Constant> sourceAction, Action<New> newAction, Action<MemberInit> memberInitAction)
 		{
 			if      (this is Constant)   sourceAction    (this as Constant);
 			else if (this is New)        newAction       (this as New);
 			else if (this is MemberInit) memberInitAction(this as MemberInit);
-		}
-
-		public void SetAlias(string alias, SqlBuilder sql)
-		{
-			Match(
-				constant =>
-				{
-					foreach (var item in constant.Columns.Values)
-					{
-						var field = item as SqlField;
-
-						if (field != null)
-						{
-							var table = sql.From[field.Table];
-
-							if (table.Alias == null)
-								table.Alias = alias;
-						}
-
-						break;
-					}
-				},
-				@new       => {},
-				memberInit => {}
-			);
-		}
-
-		public void BuildSelect<T>(ExpressionInfo<T> info)
-		{
-			Match(
-				constant =>
-				{
-					info.SqlBuilder.Select.Columns.Clear();
-
-					foreach (var c in constant.Columns)
-						info.SqlBuilder.Select.Expr(c.Value);
-
-					info.GetIEnumerable = db => info.Query(db, info.SqlBuilder);
-				},
-				@new =>
-				{
-					throw new NotImplementedException();
-				},
-				memberInit =>
-				{
-					throw new NotImplementedException();
-				}
-			);
 		}
 	}
 }
