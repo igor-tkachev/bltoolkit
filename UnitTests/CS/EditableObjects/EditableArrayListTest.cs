@@ -167,6 +167,53 @@ namespace EditableObjects
 		}
 
 		[Test]
+		public void TestRemoveRange()
+		{
+			Console.WriteLine("--- TestRemoveRange ---");
+
+			_testList.Clear();
+			_testList.RemoveSort();
+			_testList.AcceptChanges();
+			_testList.AddRange(_testObjects);
+
+			Assert.AreEqual(6, _testList.Count);
+			Assert.AreEqual(6, _testList.NewItems.Count);
+			Assert.AreEqual(0, _testList.DelItems.Count);
+
+			_testList.RemoveRange(1, 3);
+
+			Assert.AreEqual(3, _testList.Count);
+			Assert.AreEqual(3, _testList.NewItems.Count);
+			Assert.AreEqual(0, _testList.DelItems.Count);
+			Assert.AreEqual(0, ((EditableTestObject)_testList[0]).ID);
+			Assert.AreEqual(4, ((EditableTestObject)_testList[1]).ID);
+
+			_testList.AcceptChanges();
+
+			Assert.AreEqual(3, _testList.Count);
+			Assert.AreEqual(0, _testList.NewItems.Count);
+			Assert.AreEqual(0, _testList.DelItems.Count);
+
+			_testList.RemoveRange(0, 1);
+
+			Assert.AreEqual(2, _testList.Count);
+			Assert.AreEqual(0, _testList.NewItems.Count);
+			Assert.AreEqual(1, _testList.DelItems.Count);
+			
+			_testList.Clear();
+
+			Assert.AreEqual(0, _testList.Count);
+			Assert.AreEqual(0, _testList.NewItems.Count);
+			Assert.AreEqual(3, _testList.DelItems.Count);
+			
+			_testList.AcceptChanges();
+
+			Assert.AreEqual(0, _testList.Count);
+			Assert.AreEqual(0, _testList.NewItems.Count);
+			Assert.AreEqual(0, _testList.DelItems.Count);
+		}
+
+		[Test]
 		public void TestSortedAdd()
 		{
 			Console.WriteLine("--- TestSortedAdd ---");

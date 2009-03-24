@@ -639,6 +639,8 @@ namespace BLToolkit.EditableObjects
 
 		public override void RemoveRange(int index, int count)
 		{
+			RemoveInternal(GetRange(index, count));
+
 			BindingListImpl.RemoveRange(index, count);
 		}
 
