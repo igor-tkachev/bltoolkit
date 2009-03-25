@@ -715,6 +715,11 @@ namespace BLToolkit.Data.Sql
 				return this;
 			}
 
+			public int Add(ISqlExpression expr)
+			{
+				return Columns.IndexOf(AddOrGetColumn(new Column(expr)));
+			}
+
 			Column AddOrGetColumn(Column col)
 			{
 				foreach (Column c in Columns)

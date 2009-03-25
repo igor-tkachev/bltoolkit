@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Data;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Reflection;
 
 using BLToolkit.Mapping;
 
@@ -15,8 +17,10 @@ namespace BLToolkit.Data.Linq
 			_info.SqlBuilder = new SqlBuilder();
 		}
 
-		ExpressionInfo<T>   _info        = new ExpressionInfo<T>();
-		ParameterExpression _lambdaParam = Expression.Parameter(typeof(Expression), "exp");
+		ExpressionInfo<T>   _info            = new ExpressionInfo<T>();
+		ParameterExpression _expressionParam = Expression.Parameter(typeof(Expression),    "expr");
+		ParameterExpression _dataReaderParam = Expression.Parameter(typeof(IDataReader),   "rd");
+		ParameterExpression _mapSchemaParam  = Expression.Parameter(typeof(MappingSchema), "ms");
 
 		public ExpressionInfo<T> Parse(MappingSchema mappingSchema, Expression expression)
 		{
@@ -25,7 +29,7 @@ namespace BLToolkit.Data.Linq
 			_info.MappingSchema = mappingSchema;
 			_info.Expression    = expression;
 
-			ParseInfo.Create(expression, () => _lambdaParam).Match(
+			ParseInfo.Create(expression, () => _expressionParam).Match(
 				//
 				// db.Table.ToList()
 				//
@@ -60,7 +64,7 @@ namespace BLToolkit.Data.Linq
 				{
 					var table = new SqlTable(_info.MappingSchema, value.ElementType);
 					_info.SqlBuilder.From.Table(table);
-					select = new QueryInfo.Constant(table);
+					select = new QueryInfo.Constant(value.ElementType, table);
 					return true;
 				}))
 				return select;
@@ -100,53 +104,88 @@ namespace BLToolkit.Data.Linq
 		void BuildSelect(QueryInfo query)
 		{
 			query.Match(
-				constantExpr =>
+				constantExpr => // QueryInfo.Constant
 				{
-					_info.SqlBuilder.Select.Columns.Clear();
+					foreach (var field in constantExpr.Table.Fields.Values)
+						_info.SqlBuilder.Select.Expr(field);
 
-					foreach (var c in constantExpr.Columns)
-						_info.SqlBuilder.Select.Expr(c.Value);
-
-					_info.GetIEnumerable = db => _info.Query(db, _info.SqlBuilder);
+					_info.SetQuery();
 				},
-				newExpr =>
-				{
-					var info = newExpr.Body.Walk(pi =>
-					{
-						return pi;
-					});
-
-					throw new NotImplementedException();
-				},
-				memberInit =>
-				{
-					throw new NotImplementedException();
-				}
+				newExpr    => BuildNew(query, newExpr.   Body, newExpr.   Parameter), // QueryInfo.New
+				memberInit => BuildNew(query, memberInit.Body, memberInit.Parameter)  // QueryInfo.MemberInit
 			);
+		}
+
+		void BuildNew(QueryInfo query, ParseInfo expr, ParseInfo<ParameterExpression> parm)
+		{
+			var info = expr.Walk(pi =>
+			{
+				pi.IsMemberAccess((ma,ex) =>
+				{
+					if (ex.Expr == parm.Expr)
+					{
+						var member = ma.Expr.Member;
+
+						if (member.MemberType == MemberTypes.Field || member.MemberType == MemberTypes.Property)
+						{
+							var field = query.GetField(ma);
+
+							if (field != null)
+							{
+								var idx = _info.SqlBuilder.Select.Add(field);
+
+								var memberType = member.MemberType == MemberTypes.Field ?
+									((FieldInfo)member).FieldType :
+									((PropertyInfo)member).PropertyType;
+
+								MethodInfo mi;
+
+								if (!ParseInfo.MappingSchema.Converters.TryGetValue(memberType, out mi))
+									throw new LinqException("Cannot find converter for the '{0}' type.", memberType.FullName);
+
+								pi = ParseInfo.Create(
+									Expression.Call(_mapSchemaParam, mi,
+										Expression.Call(_dataReaderParam, ParseInfo.DataReader.GetValue,
+											Expression.Constant(idx, typeof(int)))),
+									pi.ParamAccessor);
+
+								return true;
+							}
+						}
+					}
+					else if (ex.IsConstant(c =>
+					{
+						var e = Expression.MakeMemberAccess(Expression.Convert(c.ParamAccessor(), ex.Expr.Type), ma.Expr.Member);
+						//var e = Expression.Convert(c.ParamAccessor(), pi.Expr.Type);
+						//var e = Expression.Call(_mapSchemaParam, ParseInfo.MappingSchema.Converters[typeof(int)], c.ParamAccessor());
+						pi = ParseInfo.Create(e, c.ParamAccessor); return true;
+					}))
+					{
+						return true;
+					}
+
+					return false;
+				});
+
+				return pi;
+			});
+
+			var mapper = Expression.Lambda<Func<IDataReader,MappingSchema,Expression,T>>(
+				info, new ParameterExpression[] { _dataReaderParam, _mapSchemaParam, _expressionParam });
+
+			_info.SetQuery(mapper.Compile());
 		}
 
 		void SetAlias(QueryInfo query, string alias)
 		{
 			query.Match(
-				constant =>
+				constantExpr =>
 				{
-					foreach (var item in constant.Columns.Values)
-					{
-						var field = item as SqlField;
-
-						if (field != null)
-						{
-							var table = _info.SqlBuilder.From[field.Table];
-
-							if (table.Alias == null)
-								table.Alias = alias;
-						}
-
-						break;
-					}
+					if (constantExpr.Table.Alias == null)
+						constantExpr.Table.Alias = alias;
 				},
-				@new       => {},
-				memberInit => {}
+				_ => {},
+				__ => {}
 			);
 		}
 
@@ -160,7 +199,7 @@ namespace BLToolkit.Data.Linq
 				.From
 					.Table(table);
 
-			_info.GetIEnumerable = db => _info.Query(db, _info.SqlBuilder);
+			_info.SetQuery();
 
 			return true;
 		}

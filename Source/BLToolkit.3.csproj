@@ -113,6 +113,7 @@
     <Compile Include="DataAccess\ActualTypeAttribute.cs" />
     <Compile Include="DataAccess\DataAccessorBase.cs" />
     <Compile Include="DataAccess\SqlIgnoreAttribute.cs" />
+    <Compile Include="Data\Linq\LinqException.cs" />
     <Compile Include="Data\Linq\ExpressionInfo.cs" />
     <Compile Include="Data\Linq\ExpressionParser.cs" />
     <Compile Include="Data\Linq\ParseInfoExtension.cs" />

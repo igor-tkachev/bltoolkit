@@ -662,7 +662,7 @@ namespace BLToolkit.Common
 		public static Int32 ToInt32(Byte[] p)          { return p == null || p.Length == 0? 0: BitConverter.ToInt32(p, 0); }
 
 		/// <summary>Converts the value of a specified object to an equivalent <c>Int32</c> value.</summary>
-		public static Int32 ToInt32(object p)         
+		public static Int32 ToInt32(object p)
 		{
 			if (p == null || p is DBNull) return 0;
 
@@ -707,7 +707,7 @@ namespace BLToolkit.Common
 			//
 			if (p is Byte[])          return ToInt32((Byte[])p);
 
-			if (p is IConvertible) return ((IConvertible)p).ToInt32(null);
+			if (p is IConvertible)    return ((IConvertible)p).ToInt32(null);
 			
 			throw CreateInvalidCastException(p.GetType(), typeof(Int32));
 		}
@@ -5122,6 +5122,7 @@ namespace BLToolkit.Common
 		#endregion
 
 		#if FW3
+
 		#region DateTimeOffset?
 
 		// Scalar Types.
@@ -5203,6 +5204,7 @@ namespace BLToolkit.Common
 		#endregion
 
 		#endif
+
 		#region TimeSpan?
 
 		// Scalar Types.
@@ -7805,7 +7807,7 @@ namespace BLToolkit.Common
 			
 		}
 		/// <summary>Converts the value of a specified object to an equivalent <c>Char[]</c> value.</summary>
-		public static Char[] ToCharArray(object p)         
+		public static Char[] ToCharArray(object p)
 		{
 			if (p == null || p is DBNull) return null;
 

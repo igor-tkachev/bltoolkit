@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq.Expressions;
 
 using BLToolkit.Data.Sql;
+using BLToolkit.Reflection;
 
 namespace BLToolkit.Data.Linq
 {
@@ -10,13 +11,14 @@ namespace BLToolkit.Data.Linq
 	{
 		public class Constant : QueryInfo
 		{
-			public Constant(SqlTable table)
+			public Constant(Type objectType, SqlTable table)
 			{
-				foreach (var field in table.Fields.Values)
-					Columns.Add(field.Name, field);
+				ObjectType = objectType;
+				Table      = table;
 			}
 
-			public Dictionary<string,ISqlExpression> Columns = new Dictionary<string,ISqlExpression>();
+			public Type     ObjectType;
+			public SqlTable Table;
 		}
 
 		public class New : QueryInfo
@@ -52,6 +54,25 @@ namespace BLToolkit.Data.Linq
 			if      (this is Constant)   sourceAction    (this as Constant);
 			else if (this is New)        newAction       (this as New);
 			else if (this is MemberInit) memberInitAction(this as MemberInit);
+		}
+
+		public ISqlExpression GetField(ParseInfo<MemberExpression> memberExpr)
+		{
+			ISqlExpression expr = null;
+
+			Match(
+				constantExpr =>
+				{
+					expr = constantExpr.Table[memberExpr.Expr.Member.Name];
+
+					if (expr == null)
+						throw new LinqException("Member '{0}.{1}' is not an SQL column.", constantExpr.ObjectType, memberExpr.Expr.Member.Name);
+				},
+				newExpr    => expr = newExpr.   SourceInfo.GetField(memberExpr),
+				memberInit => expr = memberInit.SourceInfo.GetField(memberExpr)
+			);
+
+			return expr;
 		}
 	}
 }

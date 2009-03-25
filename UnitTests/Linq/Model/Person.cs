@@ -13,6 +13,12 @@ namespace Data.Linq.Model
 			PersonID = id;
 		}
 
+		public Person(int id, string firstName)
+		{
+			PersonID  = id;
+			FirstName = firstName;
+		}
+
 		public int    PersonID;
 		public string FirstName;
 		public string LastName;

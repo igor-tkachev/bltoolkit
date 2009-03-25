@@ -12,11 +12,12 @@ namespace BLToolkit.Data.Linq
 
 	class ExpressionInfo<T>
 	{
-		public Expression                     Expression;
-		public MappingSchema                  MappingSchema;
-		public SqlBuilder                     SqlBuilder;
-		public Func<DbManager,IEnumerable<T>> GetIEnumerable;
-		public ExpressionInfo<T>              Next;
+		public Expression        Expression;
+		public MappingSchema     MappingSchema;
+		public SqlBuilder        SqlBuilder;
+		public ExpressionInfo<T> Next;
+
+		public Func<DbManager,Expression,IEnumerable<T>> GetIEnumerable;
 
 		#region GetInfo
 
@@ -84,20 +85,47 @@ namespace BLToolkit.Data.Linq
 
 		#region Query
 
-		internal IEnumerable<T> Query(DbManager db, SqlBuilder sql)
+		internal void SetQuery()
+		{
+			GetIEnumerable = Query;
+		}
+
+		IEnumerable<T> Query(DbManager db, Expression expr)
 		{
 			if (db == null)
 			{
 				using (db = new DbManager())
-					using (IDataReader dr = db.SetCommand(sql).ExecuteReader())
+					using (IDataReader dr = db.SetCommand(SqlBuilder).ExecuteReader())
 						while (dr.Read())
 							yield return MappingSchema.MapDataReaderToObject<T>(dr, null);
 			}
 			else
 			{
-				using (IDataReader dr = db.SetCommand(sql).ExecuteReader())
+				using (IDataReader dr = db.SetCommand(SqlBuilder).ExecuteReader())
 					while (dr.Read())
 						yield return MappingSchema.MapDataReaderToObject<T>(dr, null);
+			}
+		}
+
+		internal void SetQuery(Func<IDataReader,MappingSchema,Expression,T> mapper)
+		{
+			GetIEnumerable = (db, expr) => Query(db, expr, mapper);
+		}
+
+		IEnumerable<T> Query(DbManager db, Expression expr, Func<IDataReader,MappingSchema,Expression,T> mapper)
+		{
+			if (db == null)
+			{
+				using (db = new DbManager())
+					using (IDataReader dr = db.SetCommand(SqlBuilder).ExecuteReader())
+						while (dr.Read())
+							yield return mapper(dr, MappingSchema, expr);
+			}
+			else
+			{
+				using (IDataReader dr = db.SetCommand(SqlBuilder).ExecuteReader())
+					while (dr.Read())
+						yield return mapper(dr, MappingSchema, expr);
 			}
 		}
 
@@ -337,7 +365,11 @@ namespace BLToolkit.Data.Linq
 						var e1 = (NewExpression)expr1;
 						var e2 = (NewExpression)expr2;
 
-						if (e1.Arguments.Count != e2.Arguments.Count || e1.Members.  Count != e2.Members.  Count || e1.Constructor != e2.Constructor)
+						if (e1.Arguments.Count != e2.Arguments.Count ||
+							(e1.Members == null && e2.Members == null ||
+							 e1.Members != null && e2.Members != null &&
+							 e1.Members.Count != e2.Members.Count) ||
+							e1.Constructor     != e2.Constructor)
 							return false;
 
 						for (var i = 0; i < e1.Members.Count; i++)

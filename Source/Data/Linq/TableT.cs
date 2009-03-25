@@ -53,7 +53,7 @@ namespace BLToolkit.Data.Linq
 		{
 			var info = ExpressionInfo<T>.GetExpressionInfo(_dbManager != null? _dbManager.MappingSchema: Map.DefaultSchema, expression);
 
-			return info.GetIEnumerable(_dbManager);
+			return info.GetIEnumerable(_dbManager, expression);
 		}
 
 		#endregion

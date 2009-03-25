@@ -1,9 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Data;
+using System.Data.SqlTypes;
+using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using System.Xml;
 
 using FExpr = System.Func<System.Linq.Expressions.Expression>;
 using FParm = System.Func<BLToolkit.Data.Linq.ParseInfo<System.Linq.Expressions.ParameterExpression>, bool>;
@@ -45,7 +49,7 @@ namespace BLToolkit.Data.Linq
 
 			if (pi.NodeType == ExpressionType.Quote)
 			{
-				pi = Create((pi.Expr as UnaryExpression).Operand as T, () => pi.Property<UnaryExpression>(Unary.Operand));
+				pi = Create((Expr as UnaryExpression).Operand as T, () => Property<UnaryExpression>(Unary.Operand));
 			}
 
 			if (pi.NodeType == ExpressionType.Lambda)
@@ -109,13 +113,15 @@ namespace BLToolkit.Data.Linq
 
 		#region IsConstant
 
-		[Obsolete]
 		public bool IsConstant(Func<ParseInfo<ConstantExpression>,bool> func)
 		{
-			return
-				NodeType == ExpressionType.Constant?
-					func(Create(Expr as ConstantExpression, () => ConvertExpressionTo<ConstantExpression>())):
-					false;
+			if (NodeType == ExpressionType.Constant)
+			{
+				var c = Expr as ConstantExpression;
+				return func(Create(c, () => Property<ConstantExpression>(Constant.Value)));
+			}
+
+			return false;
 		}
 
 		public bool IsConstant<T>(Func<T,FExpr,bool> func)
@@ -132,6 +138,45 @@ namespace BLToolkit.Data.Linq
 		public bool IsConstant<T>()
 		{
 			return IsConstant<T>((p1, p2) => true);
+		}
+
+		#endregion
+
+		#region IsMemberAccess
+
+		public bool IsMemberAccess(FTest test, Func<ParseInfo<MemberExpression>,bool> func)
+		{
+			if (NodeType == ExpressionType.MemberAccess)
+			{
+				var ex = Expr as MemberExpression;
+				return
+					test(Create(ex.Expression, () => Property(Member.Expression))) &&
+					func(ConvertTo<MemberExpression>());
+			}
+
+			return false;
+		}
+
+		public bool IsMemberAccess(Func<ParseInfo<MemberExpression>,ParseInfo<Expression>,bool> func)
+		{
+			if (NodeType == ExpressionType.MemberAccess)
+			{
+				var ex = Expr as MemberExpression;
+				return func(
+					ConvertTo<MemberExpression>(),
+					Create(ex.Expression, () => Property(Member.Expression)));
+			}
+
+			return false;
+		}
+
+		#endregion
+
+		#region IsParameter
+
+		public bool IsParameter()
+		{
+			return NodeType == ExpressionType.Parameter;
 		}
 
 		#endregion
@@ -158,7 +203,7 @@ namespace BLToolkit.Data.Linq
 		public ParseInfo<P> ConvertTo<P>()
 			where P : Expression
 		{
-			return Create(Expr as P, () => Expression.Convert(ParamAccessor(), typeof(P)));
+			return Create(Expr as P, () => ConvertExpressionTo<P>());
 		}
 
 		#endregion
@@ -268,9 +313,9 @@ namespace BLToolkit.Data.Linq
 						var r  = pi.Walk(e.Right,      Binary.Right,      func);
 
 						if (c != e.Conversion || l != e.Left || r != e.Right)
-							Expr = Expression.MakeBinary(Expr.NodeType, l, r, e.IsLiftedToNull, e.Method, (LambdaExpression)c);
+							pi.Expr = Expression.MakeBinary(Expr.NodeType, l, r, e.IsLiftedToNull, e.Method, (LambdaExpression)c);
 
-						return func(this);
+						return func(pi);
 					}
 
 				case ExpressionType.ArrayLength:
@@ -288,9 +333,9 @@ namespace BLToolkit.Data.Linq
 						var o  = pi.Walk(e.Operand, Unary.Operand, func);
 
 						if (o != e.Operand)
-							Expr = Expression.MakeUnary(Expr.NodeType, o.Expr, e.Type, e.Method);
+							pi.Expr = Expression.MakeUnary(Expr.NodeType, o.Expr, e.Type, e.Method);
 
-						return func(this);
+						return func(pi);
 					}
 
 				case ExpressionType.Call:
@@ -301,9 +346,9 @@ namespace BLToolkit.Data.Linq
 						var a  = pi.Walk(e.Arguments, MethodCall.Arguments, func);
 
 						if (o != e.Object || a != e.Arguments)
-							Expr = Expression.Call(o.Expr, e.Method, a);
+							pi.Expr = Expression.Call(o.Expr, e.Method, a);
 
-						return func(this);
+						return func(pi);
 					}
 
 				case ExpressionType.Conditional:
@@ -315,9 +360,9 @@ namespace BLToolkit.Data.Linq
 						var f  = pi.Walk(e.IfFalse, Conditional.IfFalse, func);
 
 						if (s != e.Test || t != e.IfTrue || f != e.IfFalse)
-							Expr = Expression.Condition(s.Expr, t.Expr, f.Expr);
+							pi.Expr = Expression.Condition(s.Expr, t.Expr, f.Expr);
 
-						return func(this);
+						return func(pi);
 					}
 
 				case ExpressionType.Invoke:
@@ -328,9 +373,9 @@ namespace BLToolkit.Data.Linq
 						var a  = pi.Walk(e.Arguments,  Invocation.Arguments,  func);
 
 						if (ex != e.Expression || a != e.Arguments)
-							Expr = Expression.Invoke(ex, a);
+							pi.Expr = Expression.Invoke(ex, a);
 
-						return func(this);
+						return func(pi);
 					}
 
 				case ExpressionType.Lambda:
@@ -341,9 +386,9 @@ namespace BLToolkit.Data.Linq
 						var p  = pi.Walk(e.Parameters, Lambda.Parameters, func);
 
 						if (b != e.Body || p != e.Parameters)
-							Expr = Expression.Lambda(b, p.ToArray());
+							pi.Expr = Expression.Lambda(b, p.ToArray());
 
-						return func(this);
+						return func(pi);
 					}
 
 				case ExpressionType.ListInit:
@@ -358,9 +403,9 @@ namespace BLToolkit.Data.Linq
 						});
 
 						if (n != e.NewExpression || i != e.Initializers)
-							Expr = Expression.ListInit((NewExpression)n, i);
+							pi.Expr = Expression.ListInit((NewExpression)n, i);
 
-						return func(this);
+						return func(pi);
 					}
 
 				case ExpressionType.MemberAccess:
@@ -370,9 +415,9 @@ namespace BLToolkit.Data.Linq
 						var ex = pi.Walk(e.Expression, Member.Expression, func);
 
 						if (ex != e.Expression)
-							Expr = Expression.MakeMemberAccess(ex, e.Member);
+							pi.Expr = Expression.MakeMemberAccess(ex, e.Member);
 
-						return func(this);
+						return func(pi);
 					}
 
 				case ExpressionType.MemberInit:
@@ -428,9 +473,9 @@ namespace BLToolkit.Data.Linq
 						var bb = pi.Walk(e.Bindings,      MemberInit.Bindings,      modify);
 
 						if (ne != e.NewExpression || bb != e.Bindings)
-							Expr = Expression.MemberInit((NewExpression)ne, bb);
+							pi.Expr = Expression.MemberInit((NewExpression)ne, bb);
 
-						return func(this);
+						return func(pi);
 					}
 
 				case ExpressionType.New:
@@ -440,9 +485,11 @@ namespace BLToolkit.Data.Linq
 						var a  = Walk(e.Arguments, New.Arguments, func);
 
 						if (a != e.Arguments)
-							Expr = Expression.New(e.Constructor, a, e.Members);
+							pi.Expr = e.Members == null?
+								Expression.New(e.Constructor, a):
+								Expression.New(e.Constructor, a, e.Members);
 
-						return func(this);
+						return func(pi);
 					}
 
 				case ExpressionType.NewArrayBounds:
@@ -452,9 +499,9 @@ namespace BLToolkit.Data.Linq
 						var ex = Walk(e.Expressions, NewArray.Expressions, func);
 
 						if (ex != e.Expressions)
-							Expr = Expression.NewArrayBounds(e.Type, ex);
+							pi.Expr = Expression.NewArrayBounds(e.Type, ex);
 
-						return func(this);
+						return func(pi);
 					}
 
 				case ExpressionType.NewArrayInit:
@@ -464,9 +511,9 @@ namespace BLToolkit.Data.Linq
 						var ex = Walk(e.Expressions, NewArray.Expressions, func);
 
 						if (ex != e.Expressions)
-							Expr = Expression.NewArrayInit(e.Type, ex);
+							pi.Expr = Expression.NewArrayInit(e.Type, ex);
 
-						return func(this);
+						return func(pi);
 					}
 
 				case ExpressionType.TypeIs:
@@ -476,14 +523,13 @@ namespace BLToolkit.Data.Linq
 						var ex = Walk(e.Expression, TypeBinary.Expression, func);
 
 						if (ex != e.Expression)
-							Expr = Expression.TypeIs(ex, e.Type);
+							pi.Expr = Expression.TypeIs(ex, e.Type);
 
-						return func(this);
+						return func(pi);
 					}
 
-				case ExpressionType.Constant:
-				case ExpressionType.Parameter:
-					return func(this);
+				case ExpressionType.Constant : return func(Convert<ConstantExpression> ());
+				case ExpressionType.Parameter: return func(Convert<ParameterExpression>());
 			}
 
 			throw new InvalidOperationException();
@@ -519,9 +565,19 @@ namespace BLToolkit.Data.Linq
 
 		public class Expressor<T>
 		{
-			public static MethodInfo PropertyExpressor(Expression<Func<T, object>> func)
+			public static MethodInfo PropertyExpressor(Expression<Func<T,object>> func)
 			{
 				return ((PropertyInfo)((MemberExpression)func.Body).Member).GetGetMethod();
+			}
+
+			public static MethodInfo MethodExpressor(Expression<Func<T,object>> func)
+			{
+				var ex = func.Body;
+
+				if (ex is UnaryExpression)
+					ex = ((UnaryExpression)func.Body).Operand;
+
+				return ((MethodCallExpression)ex).Method;
 			}
 		}
 
@@ -632,6 +688,83 @@ namespace BLToolkit.Data.Linq
 		public static MethodInfo ExprItem  = IndexExpressor<Expression>         .Item;
 		public static MethodInfo ParamItem = IndexExpressor<ParameterExpression>.Item;
 		public static MethodInfo ElemItem  = IndexExpressor<ElementInit>        .Item;
+
+		public class DataReader : Expressor<IDataReader>
+		{
+			public static MethodInfo GetValue = MethodExpressor(rd => rd.GetValue(0));
+		}
+
+		public class MappingSchema : Expressor<BLToolkit.Mapping.MappingSchema>
+		{
+			public static Dictionary<Type,MethodInfo> Converters = new Dictionary<Type,MethodInfo>
+			{
+				// Primitive Types
+				//
+				{ typeof(SByte),           MethodExpressor(m => m.ConvertToSByte                 (null)) },
+				{ typeof(Int16),           MethodExpressor(m => m.ConvertToInt16                 (null)) },
+				{ typeof(Int32),           MethodExpressor(m => m.ConvertToInt32                 (null)) },
+				{ typeof(Int64),           MethodExpressor(m => m.ConvertToInt64                 (null)) },
+				{ typeof(Byte),            MethodExpressor(m => m.ConvertToByte                  (null)) },
+				{ typeof(UInt16),          MethodExpressor(m => m.ConvertToUInt16                (null)) },
+				{ typeof(UInt32),          MethodExpressor(m => m.ConvertToUInt32                (null)) },
+				{ typeof(UInt64),          MethodExpressor(m => m.ConvertToUInt64                (null)) },
+				{ typeof(Char),            MethodExpressor(m => m.ConvertToChar                  (null)) },
+				{ typeof(Single),          MethodExpressor(m => m.ConvertToSingle                (null)) },
+				{ typeof(Double),          MethodExpressor(m => m.ConvertToDouble                (null)) },
+				{ typeof(Boolean),         MethodExpressor(m => m.ConvertToBoolean               (null)) },
+
+				// Simple Types
+				//
+				{ typeof(String),          MethodExpressor(m => m.ConvertToString                (null)) },
+				{ typeof(DateTime),        MethodExpressor(m => m.ConvertToDateTime              (null)) },
+				{ typeof(DateTimeOffset),  MethodExpressor(m => m.ConvertToDateTimeOffset        (null)) },
+				{ typeof(Decimal),         MethodExpressor(m => m.ConvertToDecimal               (null)) },
+				{ typeof(Guid),            MethodExpressor(m => m.ConvertToGuid                  (null)) },
+				{ typeof(Stream),          MethodExpressor(m => m.ConvertToStream                (null)) },
+				{ typeof(XmlReader),       MethodExpressor(m => m.ConvertToXmlReader             (null)) },
+				{ typeof(XmlDocument),     MethodExpressor(m => m.ConvertToXmlDocument           (null)) },
+				{ typeof(Byte[]),          MethodExpressor(m => m.ConvertToByteArray             (null)) },
+				{ typeof(Char[]),          MethodExpressor(m => m.ConvertToCharArray             (null)) },
+
+				// Nullable Types
+				//
+				{ typeof(SByte?),          MethodExpressor(m => m.ConvertToNullableSByte         (null)) },
+				{ typeof(Int16?),          MethodExpressor(m => m.ConvertToNullableInt16         (null)) },
+				{ typeof(Int32?),          MethodExpressor(m => m.ConvertToNullableInt32         (null)) },
+				{ typeof(Int64?),          MethodExpressor(m => m.ConvertToNullableInt64         (null)) },
+				{ typeof(Byte?),           MethodExpressor(m => m.ConvertToNullableByte          (null)) },
+				{ typeof(UInt16?),         MethodExpressor(m => m.ConvertToNullableUInt16        (null)) },
+				{ typeof(UInt32?),         MethodExpressor(m => m.ConvertToNullableUInt32        (null)) },
+				{ typeof(UInt64?),         MethodExpressor(m => m.ConvertToNullableUInt64        (null)) },
+				{ typeof(Char?),           MethodExpressor(m => m.ConvertToNullableChar          (null)) },
+				{ typeof(Double?),         MethodExpressor(m => m.ConvertToNullableDouble        (null)) },
+				{ typeof(Single?),         MethodExpressor(m => m.ConvertToNullableSingle        (null)) },
+				{ typeof(Boolean?),        MethodExpressor(m => m.ConvertToNullableBoolean       (null)) },
+				{ typeof(DateTime?),       MethodExpressor(m => m.ConvertToNullableDateTime      (null)) },
+				{ typeof(DateTimeOffset?), MethodExpressor(m => m.ConvertToNullableDateTimeOffset(null)) },
+				{ typeof(Decimal?),        MethodExpressor(m => m.ConvertToNullableDecimal       (null)) },
+				{ typeof(Guid?),           MethodExpressor(m => m.ConvertToNullableGuid          (null)) },
+
+				// SqlTypes
+				//
+				{ typeof(SqlByte),         MethodExpressor(m => m.ConvertToSqlByte               (null)) },
+				{ typeof(SqlInt16),        MethodExpressor(m => m.ConvertToSqlInt16              (null)) },
+				{ typeof(SqlInt32),        MethodExpressor(m => m.ConvertToSqlInt32              (null)) },
+				{ typeof(SqlInt64),        MethodExpressor(m => m.ConvertToSqlInt64              (null)) },
+				{ typeof(SqlSingle),       MethodExpressor(m => m.ConvertToSqlSingle             (null)) },
+				{ typeof(SqlBoolean),      MethodExpressor(m => m.ConvertToSqlBoolean            (null)) },
+				{ typeof(SqlDouble),       MethodExpressor(m => m.ConvertToSqlDouble             (null)) },
+				{ typeof(SqlDateTime),     MethodExpressor(m => m.ConvertToSqlDateTime           (null)) },
+				{ typeof(SqlDecimal),      MethodExpressor(m => m.ConvertToSqlDecimal            (null)) },
+				{ typeof(SqlMoney),        MethodExpressor(m => m.ConvertToSqlMoney              (null)) },
+				{ typeof(SqlString),       MethodExpressor(m => m.ConvertToSqlString             (null)) },
+				{ typeof(SqlBinary),       MethodExpressor(m => m.ConvertToSqlBinary             (null)) },
+				{ typeof(SqlGuid),         MethodExpressor(m => m.ConvertToSqlGuid               (null)) },
+				{ typeof(SqlBytes),        MethodExpressor(m => m.ConvertToSqlBytes              (null)) },
+				{ typeof(SqlChars),        MethodExpressor(m => m.ConvertToSqlChars              (null)) },
+				{ typeof(SqlXml),          MethodExpressor(m => m.ConvertToSqlXml                (null)) },
+			};
+		}
 
 		#endregion
 	}
