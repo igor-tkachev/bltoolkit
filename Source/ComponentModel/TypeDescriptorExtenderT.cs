@@ -1,3 +1,5 @@
+using System;
+
 namespace BLToolkit.ComponentModel
 {
 	public abstract class TypeDescriptorExtender<T> : TypeDescriptorExtender

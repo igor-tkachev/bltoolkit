@@ -13,11 +13,6 @@ namespace BLToolkit.Data.Linq
 			return Expression.Convert(expr, typeof(T));
 		}
 
-		static Func<Expression> GetArgument(ParseInfo<MethodCallExpression> pi, int i)
-		{
-			return () => pi.Indexer(ParseInfo.MethodCall.Arguments, ParseInfo.ExprItem, i);
-		}
-
 		public static bool IsMethod(
 			this ParseInfo<MethodCallExpression>  pi,
 			Type                                  declaringType,
@@ -30,7 +25,7 @@ namespace BLToolkit.Data.Linq
 			if (declaringType == method.Method.DeclaringType && method.Method.Name == methodName && method.Arguments.Count == args.Length)
 			{
 				for (int i = 0; i < args.Length; i++)
-					if (!args[i](ParseInfo.Create(method.Arguments[i], GetArgument(pi, i))))
+					if (!args[i](pi.Create(method.Arguments[i], pi.Indexer(ParseInfo.MethodCall.Arguments, ParseInfo.ExprItem, i))))
 						return false;
 
 				return func(pi);

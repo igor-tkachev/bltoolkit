@@ -26,7 +26,7 @@ namespace BLToolkit.Data
 	/// <see cref="Dispose(bool)"/>. Also, you can use the C# <b>using</b> statement.
 	/// </remarks>
 	/// <include file="Examples.xml" path='examples/db[@name="DbManager"]/*' />
-	[System.ComponentModel.DesignerCategory("Code")]
+	[DesignerCategory("Code")]
 	public partial class DbManager: Component
 	{
 		#region Constructors

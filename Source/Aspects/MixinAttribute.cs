@@ -46,7 +46,7 @@ namespace BLToolkit.Aspects
 			get { return _memberName;  }
 		}
 
-		private bool _throwExceptionIfNull = false;
+		private bool _throwExceptionIfNull;
 		public  bool  ThrowExceptionIfNull
 		{
 			get { return _throwExceptionIfNull;  }

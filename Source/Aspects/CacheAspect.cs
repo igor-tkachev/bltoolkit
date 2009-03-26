@@ -270,7 +270,7 @@ namespace BLToolkit.Aspects
 			if (methodInfo == null)
 				throw new ArgumentNullException("methodInfo");
 
-			CacheAspect aspect = CacheAspect.GetAspect(methodInfo);
+			CacheAspect aspect = GetAspect(methodInfo);
 
 			if (aspect != null)
 				CleanupThread.ClearCache(aspect.Cache);
@@ -389,7 +389,7 @@ namespace BLToolkit.Aspects
 
 			private static void Cleanup(object state)
 			{
-				if (!Monitor.TryEnter(CacheAspect.RegisteredAspects.SyncRoot, 10))
+				if (!Monitor.TryEnter(RegisteredAspects.SyncRoot, 10))
 				{
 					// The Cache is busy, skip this turn.
 					//
@@ -405,7 +405,7 @@ namespace BLToolkit.Aspects
 
 					List<DictionaryEntry> list = new List<DictionaryEntry>();
 
-					foreach (CacheAspect aspect in CacheAspect.RegisteredAspects)
+					foreach (CacheAspect aspect in RegisteredAspects)
 					{
 						IDictionary cache = aspect.Cache;
 
@@ -450,7 +450,7 @@ namespace BLToolkit.Aspects
 				{
 					_workTime += DateTime.Now - start;
 
-					Monitor.Exit(CacheAspect.RegisteredAspects.SyncRoot);
+					Monitor.Exit(RegisteredAspects.SyncRoot);
 				}
 			}
 
@@ -480,13 +480,13 @@ namespace BLToolkit.Aspects
 
 			public static void UnregisterCache(IDictionary cache)
 			{
-				lock (CacheAspect.RegisteredAspects.SyncRoot)
-					CacheAspect.RegisteredAspects.Remove(cache);
+				lock (RegisteredAspects.SyncRoot)
+					RegisteredAspects.Remove(cache);
 			}
 
 			public static void ClearCache(IDictionary cache)
 			{
-				lock (CacheAspect.RegisteredAspects.SyncRoot) lock (cache.SyncRoot)
+				lock (RegisteredAspects.SyncRoot) lock (cache.SyncRoot)
 				{
 					_objectsExpired += cache.Count;
 					cache.Clear();
@@ -495,9 +495,9 @@ namespace BLToolkit.Aspects
 
 			public static void ClearCache()
 			{
-				lock (CacheAspect.RegisteredAspects.SyncRoot)
+				lock (RegisteredAspects.SyncRoot)
 				{
-					foreach (CacheAspect aspect in CacheAspect.RegisteredAspects)
+					foreach (CacheAspect aspect in RegisteredAspects)
 					{
 						_objectsExpired += aspect.Cache.Count;
 						aspect.Cache.Clear();

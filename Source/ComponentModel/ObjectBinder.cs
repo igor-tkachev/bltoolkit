@@ -121,7 +121,7 @@ namespace BLToolkit.ComponentModel
 			}
 		}
 
-		private bool              _isListCreatedInternally = false;
+		private bool              _isListCreatedInternally;
 		private EditableArrayList _list = _empty;
 		[Browsable(false)]
 		[RefreshProperties(RefreshProperties.Repaint)]
@@ -190,7 +190,7 @@ namespace BLToolkit.ComponentModel
 			}
 		}
 
-		private bool _disposeList = false;
+		private bool _disposeList;
 		[DefaultValue(false)]
 		[Category("Behavior")]
 		[Description("Determines whether ObjectBinder will invoke underlying List's dispose when being itself disposed.")]

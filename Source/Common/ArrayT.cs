@@ -4,6 +4,6 @@ namespace BLToolkit.Common
 {
 	public static class Array<T>
 	{
-		static readonly T[] Empty = new T[0];
+		public static readonly T[] Empty = new T[0];
 	}
 }

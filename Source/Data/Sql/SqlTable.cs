@@ -135,7 +135,12 @@ namespace BLToolkit.Data.Sql
 
 		public SqlField this[string fieldName]
 		{
-			get { return Fields[fieldName]; }
+			get
+			{
+				SqlField field;
+				Fields.TryGetValue(fieldName, out field);
+				return field;
+			}
 		}
 
 		private string _name;

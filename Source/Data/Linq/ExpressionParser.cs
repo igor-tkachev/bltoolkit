@@ -17,19 +17,17 @@ namespace BLToolkit.Data.Linq
 			_info.SqlBuilder = new SqlBuilder();
 		}
 
-		ExpressionInfo<T>   _info            = new ExpressionInfo<T>();
-		ParameterExpression _expressionParam = Expression.Parameter(typeof(Expression),    "expr");
-		ParameterExpression _dataReaderParam = Expression.Parameter(typeof(IDataReader),   "rd");
-		ParameterExpression _mapSchemaParam  = Expression.Parameter(typeof(MappingSchema), "ms");
+		readonly ExpressionInfo<T>   _info            = new ExpressionInfo<T>();
+		readonly ParameterExpression _expressionParam = Expression.Parameter(typeof(Expression),    "expr");
+		readonly ParameterExpression _dataReaderParam = Expression.Parameter(typeof(IDataReader),   "rd");
+		readonly ParameterExpression _mapSchemaParam  = Expression.Parameter(typeof(MappingSchema), "ms");
 
 		public ExpressionInfo<T> Parse(MappingSchema mappingSchema, Expression expression)
 		{
-			var op = ParseInfo.Unary.Operand;
-
 			_info.MappingSchema = mappingSchema;
 			_info.Expression    = expression;
 
-			ParseInfo.Create(expression, () => _expressionParam).Match(
+			ParseInfo.CreateRoot(expression, _expressionParam).Match(
 				//
 				// db.Table.ToList()
 				//
@@ -70,20 +68,20 @@ namespace BLToolkit.Data.Linq
 				return select;
 
 			if (info.NodeType != ExpressionType.Call)
-				throw new ArgumentException(string.Format("Queryable method call expected. Got '{0}'.", info.Expr), "expression");
+				throw new ArgumentException(string.Format("Queryable method call expected. Got '{0}'.", info.Expr), "info");
 
 			info.ConvertTo<MethodCallExpression>().Match
 			(
 				pi => pi.IsQueryableMethod("Select", seq => select = ParseSequence(seq), (p, b) => select = ParseSelect(select, p, b)),
 				pi => pi.IsQueryableMethod("Where",  seq => select = ParseSequence(seq), (p, b) => ParseWhere(select, p, b)),
 
-				pi => { throw new ArgumentException(string.Format("Queryable method call expected. Got '{0}'.", pi.Expr), "expression"); }
+				pi => { throw new ArgumentException(string.Format("Queryable method call expected. Got '{0}'.", pi.Expr), "info"); }
 			);
 
 			return select;
 		}
 
-		QueryInfo ParseSelect(QueryInfo select, ParseInfo<ParameterExpression> parm, ParseInfo<Expression> body)
+		QueryInfo ParseSelect(QueryInfo select, ParseInfo<ParameterExpression> parm, ParseInfo body)
 		{
 			SetAlias(select, parm.Expr.Name);
 
@@ -92,7 +90,7 @@ namespace BLToolkit.Data.Linq
 				case ExpressionType.Parameter : return select;
 				case ExpressionType.New       : return new QueryInfo.New       (select, parm, body.ConvertTo<NewExpression>());
 				case ExpressionType.MemberInit: return new QueryInfo.MemberInit(select, parm, body.ConvertTo<MemberInitExpression>());
-				default                       : throw  new NotImplementedException();
+				default                       : throw  new InvalidOperationException();
 			}
 		}
 
@@ -122,13 +120,18 @@ namespace BLToolkit.Data.Linq
 			{
 				pi.IsMemberAccess((ma,ex) =>
 				{
+					if (ma.Parent.IsMemberAccess((_,pex) => pex.Expr == pi.Expr))
+						return false;
+
 					if (ex.Expr == parm.Expr)
 					{
+						// field = p.FieldName
+						//
 						var member = ma.Expr.Member;
 
 						if (member.MemberType == MemberTypes.Field || member.MemberType == MemberTypes.Property)
 						{
-							var field = query.GetField(ma);
+							var field = GetField(query, ma);
 
 							if (field != null)
 							{
@@ -143,7 +146,7 @@ namespace BLToolkit.Data.Linq
 								if (!ParseInfo.MappingSchema.Converters.TryGetValue(memberType, out mi))
 									throw new LinqException("Cannot find converter for the '{0}' type.", memberType.FullName);
 
-								pi = ParseInfo.Create(
+								pi = pi.Parent.Create(
 									Expression.Call(_mapSchemaParam, mi,
 										Expression.Call(_dataReaderParam, ParseInfo.DataReader.GetValue,
 											Expression.Constant(idx, typeof(int)))),
@@ -155,10 +158,11 @@ namespace BLToolkit.Data.Linq
 					}
 					else if (ex.IsConstant(c =>
 					{
-						var e = Expression.MakeMemberAccess(Expression.Convert(c.ParamAccessor(), ex.Expr.Type), ma.Expr.Member);
-						//var e = Expression.Convert(c.ParamAccessor(), pi.Expr.Type);
-						//var e = Expression.Call(_mapSchemaParam, ParseInfo.MappingSchema.Converters[typeof(int)], c.ParamAccessor());
-						pi = ParseInfo.Create(e, c.ParamAccessor); return true;
+						// field = localVariable
+						//
+						var e = Expression.MakeMemberAccess(Expression.Convert(c.ParamAccessor, ex.Expr.Type), ma.Expr.Member);
+						pi = pi.Parent.Create(e, c.ParamAccessor);
+						return true;
 					}))
 					{
 						return true;
@@ -171,9 +175,107 @@ namespace BLToolkit.Data.Linq
 			});
 
 			var mapper = Expression.Lambda<Func<IDataReader,MappingSchema,Expression,T>>(
-				info, new ParameterExpression[] { _dataReaderParam, _mapSchemaParam, _expressionParam });
+				info, new [] { _dataReaderParam, _mapSchemaParam, _expressionParam });
 
 			_info.SetQuery(mapper.Compile());
+		}
+
+		public ISqlExpression GetField(QueryInfo query, ParseInfo<MemberExpression> memberExpr)
+		{
+			ISqlExpression expr = null;
+
+			var member = memberExpr.Expr.Member;
+
+			query.Match(
+				constantExpr =>
+				{
+					expr = constantExpr.Table[member.Name];
+				},
+				newExpr =>
+				{
+					if (newExpr.Parameter.Expr == memberExpr.Expr.Expression)
+					{
+						expr = GetField(newExpr.SourceInfo, memberExpr);
+					}
+					else
+					{
+						var body = newExpr.Body.Expr;
+						var mem  = member;
+
+						if (mem is PropertyInfo)
+							mem = ((PropertyInfo)member).GetGetMethod();
+
+						if (body.Members != null)
+						{
+							for (int i = 0; i < body.Members.Count; i++)
+							{
+								if (mem == body.Members[i])
+								{
+									var arg = body.Arguments[i];
+
+									if (arg is MemberExpression)
+									{
+										expr = GetField(
+											newExpr.SourceInfo,
+											newExpr.Body.Create((MemberExpression)arg, newExpr.Body.Index(body.Arguments, ParseInfo.New.Arguments, i)));
+										return;
+									}
+
+									if (arg is ParameterExpression)
+									{
+									}
+
+									throw new InvalidOperationException();
+								}
+							}
+						}
+					}
+				},
+				memberInit =>
+				{
+					if (memberInit.Parameter.Expr == memberExpr.Expr.Expression)
+					{
+						expr = GetField(memberInit.SourceInfo, memberExpr);
+					}
+					else
+					{
+						var body = memberInit.Body.Expr;
+
+						for (int i = 0; i < body.Bindings.Count; i++)
+						{
+							var binding = body.Bindings[i];
+
+							if (member == binding.Member)
+							{
+								if (binding is MemberAssignment)
+								{
+									var ma = binding as MemberAssignment;
+
+									if (ma.Expression is MemberExpression)
+									{
+										var piBinding    = memberInit.Body.Create(ma.Expression, memberInit.Body.Index(body.Bindings, ParseInfo.MemberInit.Bindings, i));
+										var piAssign     = piBinding.      Create(ma.Expression, piBinding.ConvertExpressionTo<MemberAssignment>());
+										var piExpression = piAssign.       Create(ma.Expression, piAssign.Property(ParseInfo.MemberAssignmentBind.Expression));
+
+										expr = GetField(
+											memberInit.SourceInfo,
+											piExpression.Create(ma.Expression as MemberExpression, piExpression.Convert<MemberExpression>()));
+										return;
+									}
+
+									throw new InvalidOperationException();
+								}
+							}
+						}
+
+					}
+				}
+			);
+
+			if (expr == null)
+				throw new LinqException("Member '{0}.{1}' is not an SQL column.", member.ReflectedType, member.Name);
+
+			return expr;
 		}
 
 		void SetAlias(QueryInfo query, string alias)

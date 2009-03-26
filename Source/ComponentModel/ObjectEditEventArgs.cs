@@ -1,3 +1,5 @@
+using System;
+
 namespace BLToolkit.ComponentModel
 {
 	public class ObjectEditEventArgs

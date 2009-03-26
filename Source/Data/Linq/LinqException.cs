@@ -1,8 +1,6 @@
 using System;
 using System.Runtime.Serialization;
 
-using BLToolkit.Data.DataProvider;
-
 namespace BLToolkit.Data.Linq
 {
 	/// <summary>
@@ -13,7 +11,7 @@ namespace BLToolkit.Data.Linq
 	/// execution of the namespace members.
 	/// </remarks>
 	[Serializable] 
-	public class LinqException : System.Exception
+	public class LinqException : Exception
 	{
 		/// <summary>
 		/// Initializes a new instance of the <see cref="LinqException"/> class.
@@ -34,6 +32,7 @@ namespace BLToolkit.Data.Linq
 		/// with the specified error message.
 		/// </summary>
 		/// <param name="message">The message to display to the client when the exception is thrown.</param>
+		/// <param name="args">An System.Object array containing zero or more objects to format.</param>
 		/// <seealso cref="Exception.Message"/>
 		public LinqException(string message, params object[] args)
 			: base(string.Format(message, args))

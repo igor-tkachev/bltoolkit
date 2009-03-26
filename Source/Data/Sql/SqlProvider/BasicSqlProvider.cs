@@ -14,10 +14,11 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			_dataProvider = dataProvider;
 		}
 
-		DataProviderBase _dataProvider;
-		SqlBuilder       _sqlBuilder;
-		StringBuilder    _sb;
-		int              _indent;
+		readonly DataProviderBase _dataProvider;
+
+		SqlBuilder    _sqlBuilder;
+		StringBuilder _sb;
+		int           _indent;
 
 		#endregion
 

@@ -36,7 +36,7 @@ namespace BLToolkit.Data.Linq
 			_expression = expression;
 		}
 
-		Expression _expression;
+		readonly Expression _expression;
 
 		private DbManager _dbManager;
 		public  DbManager  DbManager
@@ -104,7 +104,7 @@ namespace BLToolkit.Data.Linq
 				throw new ArgumentNullException("expression");
 
 			var elementType   = TypeHelper.GetElementType(expression.Type) ?? expression.Type;
-			var queryableType = typeof(IQueryable<>).MakeGenericType(new [] { elementType });
+			//var queryableType = typeof(IQueryable<>).MakeGenericType(new [] { elementType });
 
 			try
 			{

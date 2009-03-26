@@ -1,4 +1,5 @@
 using System;
+
 using BLToolkit.Properties;
 
 namespace BLToolkit.Common

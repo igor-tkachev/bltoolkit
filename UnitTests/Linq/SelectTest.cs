@@ -2,7 +2,6 @@
 using System.Data;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Reflection;
 
 using NUnit.Framework;
 
@@ -11,7 +10,6 @@ using BLToolkit.Mapping;
 namespace Data.Linq
 {
 	using Model;
-using BLToolkit.Data.Linq;
 
 	[TestFixture]
 	public class SelectTest : TestBase
@@ -49,7 +47,7 @@ using BLToolkit.Data.Linq;
 			});
 		}
 
-		void NewParam(Table<Person> table, int i)
+		static void NewParam(IQueryable<Person> table, int i)
 		{
 			var person = (
 
@@ -90,6 +88,30 @@ using BLToolkit.Data.Linq;
 		public void NewPerson4()
 		{
 			TestJohn(db => from p in db.Person select new Person(p.PersonID) { FirstName = (p.FirstName + "\r\r\r").TrimEnd('\r') });
+		}
+
+		[Test]
+		public void MultipleSelect1()
+		{
+			TestJohn(db => db.Person.Select(p => new { ID = p.PersonID, Name = p.FirstName }).Select(p => new Person(p.ID) { FirstName = p.Name }));
+		}
+
+		[Test]
+		public void MultipleSelect2()
+		{
+			TestJohn(db => db.Person
+				.Select(p => new        { ID       = p.PersonID, Name      = p.FirstName })
+				.Select(p => new Person { PersonID = p.ID,       FirstName = p.Name      })
+				.Select(p => new        { ID       = p.PersonID, Name      = p.FirstName })
+				.Select(p => new Person { PersonID = p.ID,       FirstName = p.Name      }));
+		}
+
+		[Test]
+		public void MultipleSelect3()
+		{
+			TestJohn(db => db.Person
+				.Select(p => new        { p })
+				.Select(p => new Person { PersonID = p.p.PersonID, FirstName = p.p.FirstName }));
 		}
 
 		void Foo(Expression<Func<IDataReader,MappingSchema,int>> func)

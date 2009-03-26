@@ -128,7 +128,7 @@ namespace BLToolkit.ComponentModel
 
 		public event ListChangedEventHandler ListChanged;
 
-		private void FireListChangedEvent(object sender, EditableListChangedEventArgs e)
+		private void FireListChangedEvent(object sender, ListChangedEventArgs e)
 		{
 			if (_notifyChanges && ListChanged != null)
 				ListChanged(sender, e);
@@ -619,7 +619,7 @@ namespace BLToolkit.ComponentModel
 		{
 			public SortSubstitutionPair(PropertyDescriptor original, PropertyDescriptor substitute)
 			{
-				Original = original;
+				Original   = original;
 				Substitute = substitute;
 			}
 

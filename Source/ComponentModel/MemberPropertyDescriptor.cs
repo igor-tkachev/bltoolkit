@@ -35,8 +35,7 @@ namespace BLToolkit.ComponentModel
 		{
 			if (PropertyType.IsValueType)
 				return TypeAccessor.GetNullValue(PropertyType) != null;
-			else
-				return PropertyType == typeof(string);
+			return PropertyType == typeof(string);
 		}
 
 		public override void ResetValue(object component)

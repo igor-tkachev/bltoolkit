@@ -17,15 +17,21 @@ namespace BLToolkit.Data.Linq
 {
 	abstract class ParseInfo
 	{
-		public Expression Expr;
-		public FExpr      ParamAccessor;
-
+		public Expression     Expr;
+		public ParseInfo      Parent;
+		public Expression     ParamAccessor;
 		public ExpressionType NodeType { get { return Expr.NodeType; } }
 
-		public static ParseInfo<T> Create<T>(T expr, FExpr func)
+		public static ParseInfo<T> CreateRoot<T>(T expr, Expression paramAccesor)
 			where T : Expression
 		{
-			return new ParseInfo<T> { Expr = expr, ParamAccessor = func };
+			return new ParseInfo<T> { Expr = expr, Parent = null, ParamAccessor = paramAccesor };
+		}
+
+		public ParseInfo<T> Create<T>(T expr, Expression paramAccesor)
+			where T : Expression
+		{
+			return new ParseInfo<T> { Expr = expr, Parent = this, ParamAccessor = paramAccesor };
 		}
 
 		#region Match
@@ -49,7 +55,7 @@ namespace BLToolkit.Data.Linq
 
 			if (pi.NodeType == ExpressionType.Quote)
 			{
-				pi = Create((Expr as UnaryExpression).Operand as T, () => Property<UnaryExpression>(Unary.Operand));
+				pi = Create(((UnaryExpression)Expr).Operand as T, Property<UnaryExpression>(Unary.Operand));
 			}
 
 			if (pi.NodeType == ExpressionType.Lambda)
@@ -58,10 +64,10 @@ namespace BLToolkit.Data.Linq
 
 				if (lambda.Expr.Parameters.Count == parameters.Length)
 					for (int i = 0; i < parameters.Length; i++)
-						if (!parameters[i](Create(lambda.Expr.Parameters[i], () => lambda.Indexer(Lambda.Parameters, ParamItem, i))))
+						if (!parameters[i](lambda.Create(lambda.Expr.Parameters[i], lambda.Indexer(Lambda.Parameters, ParamItem, i))))
 							return false;
 
-				return body(Create(lambda.Expr.Body, () => lambda.Property(Lambda.Body))) && func(lambda);
+				return body(lambda.Create(lambda.Expr.Body, lambda.Property(Lambda.Body))) && func(lambda);
 			}
 			
 			return false;
@@ -72,7 +78,7 @@ namespace BLToolkit.Data.Linq
 			return IsLambda<Expression>(new FParm[] { e => e.Expr.Type == typeof(T) }, body, func);
 		}
 
-		static FParm[] _singleParam = new FParm[] { p => true };
+		static readonly FParm[] _singleParam = new FParm[] { p => true };
 
 		[Obsolete]
 		public bool IsLambda(int parameters, Func<ParseInfo<LambdaExpression>,bool> func)
@@ -105,7 +111,7 @@ namespace BLToolkit.Data.Linq
 		{
 			return
 				pi.NodeType == nodeType?
-					func(Create(((UnaryExpression)pi.Expr).Operand, () => pi.Property<UnaryExpression>(Unary.Operand))):
+					func(pi.Create(((UnaryExpression)pi.Expr).Operand, pi.Property<UnaryExpression>(Unary.Operand))):
 					false;
 		}
 
@@ -118,7 +124,7 @@ namespace BLToolkit.Data.Linq
 			if (NodeType == ExpressionType.Constant)
 			{
 				var c = Expr as ConstantExpression;
-				return func(Create(c, () => Property<ConstantExpression>(Constant.Value)));
+				return func(Parent.Create(c, Property<ConstantExpression>(Constant.Value)));
 			}
 
 			return false;
@@ -150,7 +156,7 @@ namespace BLToolkit.Data.Linq
 			{
 				var ex = Expr as MemberExpression;
 				return
-					test(Create(ex.Expression, () => Property(Member.Expression))) &&
+					test(Create(ex.Expression, Property(Member.Expression))) &&
 					func(ConvertTo<MemberExpression>());
 			}
 
@@ -164,7 +170,7 @@ namespace BLToolkit.Data.Linq
 				var ex = Expr as MemberExpression;
 				return func(
 					ConvertTo<MemberExpression>(),
-					Create(ex.Expression, () => Property(Member.Expression)));
+					Create(ex.Expression, Property(Member.Expression)));
 			}
 
 			return false;
@@ -200,10 +206,12 @@ namespace BLToolkit.Data.Linq
 
 		#region Helpers
 
-		public ParseInfo<P> ConvertTo<P>()
-			where P : Expression
+		public ParseInfo<T> ConvertTo<T>()
+			where T : Expression
 		{
-			return Create(Expr as P, () => ConvertExpressionTo<P>());
+			return Parent == null?
+				CreateRoot   (Expr as T, ConvertExpressionTo<T>()):
+				Parent.Create(Expr as T, ConvertExpressionTo<T>());
 		}
 
 		#endregion
@@ -222,7 +230,7 @@ namespace BLToolkit.Data.Linq
 
 		public static bool operator == (ParseInfo pi, Expression expr)
 		{
-			return pi.Expr == expr;
+			return (object)pi == null && expr == null || pi.Expr == expr;
 		}
 
 		public static bool operator != (ParseInfo pi, Expression expr)
@@ -235,21 +243,21 @@ namespace BLToolkit.Data.Linq
 			return pi.Expr;
 		}
 
-		ParseInfo<Expression> Convert<P>()
+		public ParseInfo<Expression> Convert<T>()
 		{
-			return Create(Expr as Expression, () => ConvertExpressionTo<P>());
+			return Parent.Create(Expr, ConvertExpressionTo<T>());
 		}
 
 		ParseInfo Walk(Expression e, MethodInfo property, Func<ParseInfo,ParseInfo> func)
 		{
-			return Create(e, () => Property(property)).Walk(func);
+			return Create(e, Property(property)).Walk(func);
 		}
 
-		IEnumerable<E> Walk<E>(IEnumerable<E> source, Func<E,int,E> func)
-			where E : class
+		IEnumerable<T> Walk<T>(IEnumerable<T> source, Func<T,int,T> func)
+			where T : class
 		{
 			var modified = false;
-			var list     = new List<E>();
+			var list     = new List<T>();
 			var i        = 0;
 
 			foreach (var item in source)
@@ -262,16 +270,16 @@ namespace BLToolkit.Data.Linq
 			return modified? list: source;
 		}
 
-		IEnumerable<E> Walk<E>(IEnumerable<E> source, MethodInfo property, Func<E,ParseInfo,E> func)
-			where E : class
+		IEnumerable<T> Walk<T>(IEnumerable<T> source, MethodInfo property, Func<T,ParseInfo,T> func)
+			where T : class
 		{
-			return Walk(source, (e,i) => func(e, Create(Expr, () => Indexer(property, IndexExpressor<E>.Item, i))));
+			return Walk(source, (e,i) => func(e, Create(Expr, Indexer(property, IndexExpressor<T>.Item, i))));
 		}
 
-		IEnumerable<E> Walk<E>(IEnumerable<E> source, MethodInfo property, Func<ParseInfo,ParseInfo> func)
-			where E : Expression
+		IEnumerable<T> Walk<T>(IEnumerable<T> source, MethodInfo property, Func<ParseInfo,ParseInfo> func)
+			where T : Expression
 		{
-			return Walk(source, (e,i) => Create((Expression)e, () => Indexer(property, IndexExpressor<E>.Item, i)).Walk(func).Expr as E);
+			return Walk(source, (e,i) => Create((Expression)e, Indexer(property, IndexExpressor<T>.Item, i)).Walk(func).Expr as T);
 		}
 
 		public ParseInfo Walk(Func<ParseInfo,ParseInfo> func)
@@ -464,7 +472,7 @@ namespace BLToolkit.Data.Linq
 									}
 							}
 
-							return (MemberBinding)b;
+							return b;
 						};
 
 						var pi = Convert<MemberInitExpression>();
@@ -482,7 +490,7 @@ namespace BLToolkit.Data.Linq
 					{
 						var pi = Convert<NewExpression>();
 						var e  = Expr as NewExpression;
-						var a  = Walk(e.Arguments, New.Arguments, func);
+						var a  = pi.Walk(e.Arguments, New.Arguments, func);
 
 						if (a != e.Arguments)
 							pi.Expr = e.Members == null?
@@ -496,7 +504,7 @@ namespace BLToolkit.Data.Linq
 					{
 						var pi = Convert<NewArrayExpression>();
 						var e  = Expr as NewArrayExpression;
-						var ex = Walk(e.Expressions, NewArray.Expressions, func);
+						var ex = pi.Walk(e.Expressions, NewArray.Expressions, func);
 
 						if (ex != e.Expressions)
 							pi.Expr = Expression.NewArrayBounds(e.Type, ex);
@@ -508,7 +516,7 @@ namespace BLToolkit.Data.Linq
 					{
 						var pi = Convert<NewArrayExpression>();
 						var e  = Expr as NewArrayExpression;
-						var ex = Walk(e.Expressions, NewArray.Expressions, func);
+						var ex = pi.Walk(e.Expressions, NewArray.Expressions, func);
 
 						if (ex != e.Expressions)
 							pi.Expr = Expression.NewArrayInit(e.Type, ex);
@@ -520,7 +528,7 @@ namespace BLToolkit.Data.Linq
 					{
 						var pi = Convert<TypeBinaryExpression>();
 						var e  = Expr as TypeBinaryExpression;
-						var ex = Walk(e.Expression, TypeBinary.Expression, func);
+						var ex = pi.Walk(e.Expression, TypeBinary.Expression, func);
 
 						if (ex != e.Expression)
 							pi.Expr = Expression.TypeIs(ex, e.Type);
@@ -541,12 +549,12 @@ namespace BLToolkit.Data.Linq
 
 		public UnaryExpression ConvertExpressionTo<T>()
 		{
-			return Expression.Convert(ParamAccessor(), typeof(T));
+			return Expression.Convert(ParamAccessor, typeof(T));
 		}
 
 		public MemberExpression Property(MethodInfo mi)
 		{
-			return Expression.Property(ParamAccessor(), mi);
+			return Expression.Property(ParamAccessor, mi);
 		}
 
 		public MemberExpression Property<T>(MethodInfo mi)
@@ -557,6 +565,11 @@ namespace BLToolkit.Data.Linq
 		public MethodCallExpression Indexer(MethodInfo pmi, MethodInfo mi, int idx)
 		{
 			return Expression.Call(Property(pmi), mi, new Expression[] { Expression.Constant(idx, typeof(int)) });
+		}
+
+		public MethodCallExpression Index<T>(IEnumerable<T> source, MethodInfo property, int idx)
+		{
+			return Indexer(property, IndexExpressor<T>.Item, idx);
 		}
 
 		#endregion
@@ -694,7 +707,7 @@ namespace BLToolkit.Data.Linq
 			public static MethodInfo GetValue = MethodExpressor(rd => rd.GetValue(0));
 		}
 
-		public class MappingSchema : Expressor<BLToolkit.Mapping.MappingSchema>
+		public class MappingSchema : Expressor<Mapping.MappingSchema>
 		{
 			public static Dictionary<Type,MethodInfo> Converters = new Dictionary<Type,MethodInfo>
 			{

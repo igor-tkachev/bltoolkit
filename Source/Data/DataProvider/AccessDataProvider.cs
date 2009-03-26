@@ -74,12 +74,12 @@ namespace BLToolkit.Data.DataProvider
 
 					if (rawType.Length > 2)
 					{
-						p.Precision = BLToolkit.Common.Convert.ToByte(rawType[1]);
-						p.Scale     = BLToolkit.Common.Convert.ToByte(rawType[2]);
+						p.Precision = Common.Convert.ToByte(rawType[1]);
+						p.Scale     = Common.Convert.ToByte(rawType[2]);
 					}
 					else if (rawType.Length > 1)
 					{
-						p.Size      = BLToolkit.Common.Convert.ToInt32(rawType[1]);
+						p.Size      = Common.Convert.ToInt32(rawType[1]);
 					}
 
 					command.Parameters.Add(p);

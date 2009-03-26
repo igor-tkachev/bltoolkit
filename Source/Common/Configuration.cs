@@ -22,7 +22,7 @@ namespace BLToolkit.Common
 			set { _checkNullReturnIfNull = value; }
 		}
 
-		private static bool _trimOnMapping = false;
+		private static bool _trimOnMapping;
 		/// <summary>
 		/// Controls global trimming behaviour of mapper. Specifies whether trailing spaces
 		/// should be trimmed when mapping from one entity to another. Default is: false. 

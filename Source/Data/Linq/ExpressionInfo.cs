@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Linq;
 using System.Linq.Expressions;
 
 using BLToolkit.Mapping;
@@ -21,9 +20,9 @@ namespace BLToolkit.Data.Linq
 
 		#region GetInfo
 
-		static ExpressionInfo<T> _first;
-		static object            _sync      = new object();
-		const  int               _cacheSize = 100;
+		static          ExpressionInfo<T> _first;
+		static readonly object            _sync      = new object();
+		const           int               _cacheSize = 100;
 
 		public static ExpressionInfo<T> GetExpressionInfo(MappingSchema mappingSchema, Expression expr)
 		{
@@ -224,7 +223,7 @@ namespace BLToolkit.Data.Linq
 						var e1 = (ConstantExpression)expr1;
 						var e2 = (ConstantExpression)expr2;
 
-						return IsConstant(e1.Type)? object.Equals(e1.Value, e2.Value): true;
+						return IsConstant(e1.Type)? Equals(e1.Value, e2.Value): true;
 					}
 
 				case ExpressionType.Invoke:
