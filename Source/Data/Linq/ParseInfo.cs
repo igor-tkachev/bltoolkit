@@ -20,6 +20,8 @@ namespace BLToolkit.Data.Linq
 		public Expression     Expr;
 		public ParseInfo      Parent;
 		public Expression     ParamAccessor;
+		public bool           IsReplaced;
+
 		public ExpressionType NodeType { get { return Expr.NodeType; } }
 
 		public static ParseInfo<T> CreateRoot<T>(T expr, Expression paramAccesor)
@@ -32,6 +34,12 @@ namespace BLToolkit.Data.Linq
 			where T : Expression
 		{
 			return new ParseInfo<T> { Expr = expr, Parent = this, ParamAccessor = paramAccesor };
+		}
+
+		public ParseInfo<T> Replace<T>(T expr, Expression paramAccesor)
+			where T : Expression
+		{
+			return new ParseInfo<T> { Expr = expr, Parent = this, ParamAccessor = paramAccesor, IsReplaced = true };
 		}
 
 		#region Match
@@ -253,7 +261,7 @@ namespace BLToolkit.Data.Linq
 			return Create(e, Property(property)).Walk(func);
 		}
 
-		IEnumerable<T> Walk<T>(IEnumerable<T> source, Func<T,int,T> func)
+		static IEnumerable<T> Walk<T>(IEnumerable<T> source, Func<T,int,T> func)
 			where T : class
 		{
 			var modified = false;
@@ -314,16 +322,19 @@ namespace BLToolkit.Data.Linq
 				case ExpressionType.Subtract:
 				case ExpressionType.SubtractChecked:
 					{
-						var pi = Convert<BinaryExpression>();
-						var e  = Expr as BinaryExpression;
-						var c  = pi.Walk(e.Conversion, Binary.Conversion, func);
-						var l  = pi.Walk(e.Left,       Binary.Left,       func);
-						var r  = pi.Walk(e.Right,      Binary.Right,      func);
+						var pi = func(Convert<BinaryExpression>());
+						if (pi.IsReplaced)
+							return pi;
 
-						if (c != e.Conversion || l != e.Left || r != e.Right)
-							pi.Expr = Expression.MakeBinary(Expr.NodeType, l, r, e.IsLiftedToNull, e.Method, (LambdaExpression)c);
+						var e = Expr as BinaryExpression;
+						var c = pi.Walk(e.Conversion, Binary.Conversion, func);
+						var l = pi.Walk(e.Left,       Binary.Left, func);
+						var r = pi.Walk(e.Right,      Binary.Right, func);
 
-						return func(pi);
+							if (c != e.Conversion || l != e.Left || r != e.Right)
+								pi.Expr = Expression.MakeBinary(Expr.NodeType, l, r, e.IsLiftedToNull, e.Method, (LambdaExpression) c);
+
+						return pi;
 					}
 
 				case ExpressionType.ArrayLength:
@@ -336,19 +347,25 @@ namespace BLToolkit.Data.Linq
 				case ExpressionType.TypeAs:
 				case ExpressionType.UnaryPlus:
 					{
-						var pi = Convert<UnaryExpression>();
+						var pi = func(Convert<UnaryExpression>());
+						if (pi.IsReplaced)
+							return pi;
+
 						var e  = Expr as UnaryExpression;
 						var o  = pi.Walk(e.Operand, Unary.Operand, func);
 
 						if (o != e.Operand)
 							pi.Expr = Expression.MakeUnary(Expr.NodeType, o.Expr, e.Type, e.Method);
 
-						return func(pi);
+						return pi;
 					}
 
 				case ExpressionType.Call:
 					{
-						var pi = Convert<MethodCallExpression>();
+						var pi = func(Convert<MethodCallExpression>());
+						if (pi.IsReplaced)
+							return pi;
+
 						var e  = Expr as MethodCallExpression;
 						var o  = pi.Walk(e.Object,    MethodCall.Object,    func);
 						var a  = pi.Walk(e.Arguments, MethodCall.Arguments, func);
@@ -356,12 +373,15 @@ namespace BLToolkit.Data.Linq
 						if (o != e.Object || a != e.Arguments)
 							pi.Expr = Expression.Call(o.Expr, e.Method, a);
 
-						return func(pi);
+						return pi;
 					}
 
 				case ExpressionType.Conditional:
 					{
-						var pi = Convert<ConditionalExpression>();
+						var pi = func(Convert<ConditionalExpression>());
+						if (pi.IsReplaced)
+							return pi;
+
 						var e  = Expr as ConditionalExpression;
 						var s  = pi.Walk(e.Test,    Conditional.Test,    func);
 						var t  = pi.Walk(e.IfTrue,  Conditional.IfTrue,  func);
@@ -370,12 +390,15 @@ namespace BLToolkit.Data.Linq
 						if (s != e.Test || t != e.IfTrue || f != e.IfFalse)
 							pi.Expr = Expression.Condition(s.Expr, t.Expr, f.Expr);
 
-						return func(pi);
+						return pi;
 					}
 
 				case ExpressionType.Invoke:
 					{
-						var pi = Convert<InvocationExpression>();
+						var pi = func(Convert<InvocationExpression>());
+						if (pi.IsReplaced)
+							return pi;
+
 						var e  = Expr as InvocationExpression;
 						var ex = pi.Walk(e.Expression, Invocation.Expression, func);
 						var a  = pi.Walk(e.Arguments,  Invocation.Arguments,  func);
@@ -383,12 +406,15 @@ namespace BLToolkit.Data.Linq
 						if (ex != e.Expression || a != e.Arguments)
 							pi.Expr = Expression.Invoke(ex, a);
 
-						return func(pi);
+						return pi;
 					}
 
 				case ExpressionType.Lambda:
 					{
-						var pi = Convert<LambdaExpression>();
+						var pi = func(Convert<LambdaExpression>());
+						if (pi.IsReplaced)
+							return pi;
+
 						var e  = Expr as LambdaExpression;
 						var b  = pi.Walk(e.Body,       Lambda.Body,       func);
 						var p  = pi.Walk(e.Parameters, Lambda.Parameters, func);
@@ -396,12 +422,15 @@ namespace BLToolkit.Data.Linq
 						if (b != e.Body || p != e.Parameters)
 							pi.Expr = Expression.Lambda(b, p.ToArray());
 
-						return func(pi);
+						return pi;
 					}
 
 				case ExpressionType.ListInit:
 					{
-						var pi = Convert<ListInitExpression>();
+						var pi = func(Convert<ListInitExpression>());
+						if (pi.IsReplaced)
+							return pi;
+
 						var e  = Expr as ListInitExpression;
 						var n  = pi.Walk(e.NewExpression, ListInit.NewExpression, func);
 						var i  = pi.Walk(e.Initializers,  ListInit.Initializers, (p,pinf) =>
@@ -413,19 +442,22 @@ namespace BLToolkit.Data.Linq
 						if (n != e.NewExpression || i != e.Initializers)
 							pi.Expr = Expression.ListInit((NewExpression)n, i);
 
-						return func(pi);
+						return pi;
 					}
 
 				case ExpressionType.MemberAccess:
 					{
-						var pi = Convert<MemberExpression>();
+						var pi = func(Convert<MemberExpression>());
+						if (pi.IsReplaced)
+							return pi;
+
 						var e  = Expr as MemberExpression;
 						var ex = pi.Walk(e.Expression, Member.Expression, func);
 
 						if (ex != e.Expression)
 							pi.Expr = Expression.MakeMemberAccess(ex, e.Member);
 
-						return func(pi);
+						return pi;
 					}
 
 				case ExpressionType.MemberInit:
@@ -475,7 +507,10 @@ namespace BLToolkit.Data.Linq
 							return b;
 						};
 
-						var pi = Convert<MemberInitExpression>();
+						var pi = func(Convert<MemberInitExpression>());
+						if (pi.IsReplaced)
+							return pi;
+
 						var e  = Expr as MemberInitExpression;
 						var ne = pi.Walk(e.NewExpression, MemberInit.NewExpression, func);
 						var bb = pi.Walk(e.Bindings,      MemberInit.Bindings,      modify);
@@ -483,12 +518,15 @@ namespace BLToolkit.Data.Linq
 						if (ne != e.NewExpression || bb != e.Bindings)
 							pi.Expr = Expression.MemberInit((NewExpression)ne, bb);
 
-						return func(pi);
+						return pi;
 					}
 
 				case ExpressionType.New:
 					{
-						var pi = Convert<NewExpression>();
+						var pi = func(Convert<NewExpression>());
+						if (pi.IsReplaced)
+							return pi;
+
 						var e  = Expr as NewExpression;
 						var a  = pi.Walk(e.Arguments, New.Arguments, func);
 
@@ -497,43 +535,52 @@ namespace BLToolkit.Data.Linq
 								Expression.New(e.Constructor, a):
 								Expression.New(e.Constructor, a, e.Members);
 
-						return func(pi);
+						return pi;
 					}
 
 				case ExpressionType.NewArrayBounds:
 					{
-						var pi = Convert<NewArrayExpression>();
+						var pi = func(Convert<NewArrayExpression>());
+						if (pi.IsReplaced)
+							return pi;
+
 						var e  = Expr as NewArrayExpression;
 						var ex = pi.Walk(e.Expressions, NewArray.Expressions, func);
 
 						if (ex != e.Expressions)
 							pi.Expr = Expression.NewArrayBounds(e.Type, ex);
 
-						return func(pi);
+						return pi;
 					}
 
 				case ExpressionType.NewArrayInit:
 					{
-						var pi = Convert<NewArrayExpression>();
+						var pi = func(Convert<NewArrayExpression>());
+						if (pi.IsReplaced)
+							return pi;
+
 						var e  = Expr as NewArrayExpression;
 						var ex = pi.Walk(e.Expressions, NewArray.Expressions, func);
 
 						if (ex != e.Expressions)
 							pi.Expr = Expression.NewArrayInit(e.Type, ex);
 
-						return func(pi);
+						return pi;
 					}
 
 				case ExpressionType.TypeIs:
 					{
-						var pi = Convert<TypeBinaryExpression>();
+						var pi = func(Convert<TypeBinaryExpression>());
+						if (pi.IsReplaced)
+							return pi;
+
 						var e  = Expr as TypeBinaryExpression;
 						var ex = pi.Walk(e.Expression, TypeBinary.Expression, func);
 
 						if (ex != e.Expression)
 							pi.Expr = Expression.TypeIs(ex, e.Type);
 
-						return func(pi);
+						return pi;
 					}
 
 				case ExpressionType.Constant : return func(Convert<ConstantExpression> ());

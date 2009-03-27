@@ -20,7 +20,7 @@ namespace Data.Linq.Model
 		}
 
 		public int    PersonID;
-		public string FirstName;
+		public string FirstName { get; set; }
 		public string LastName;
 		public string MiddleName;
 		public char   Gender;

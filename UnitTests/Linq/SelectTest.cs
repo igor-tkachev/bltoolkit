@@ -110,8 +110,29 @@ namespace Data.Linq
 		public void MultipleSelect3()
 		{
 			TestJohn(db => db.Person
-				.Select(p => new        { p })
-				.Select(p => new Person { PersonID = p.p.PersonID, FirstName = p.p.FirstName }));
+				.Select(p1 => new        { p1 })
+				.Select(p2 => new        { p2 })
+				.Select(p3 => new Person { PersonID = p3.p2.p1.PersonID, FirstName = p3.p2.p1.FirstName }));
+		}
+
+		[Test]
+		public void MultipleSelect4()
+		{
+			TestJohn(db => db.Person
+				.Select(p1 => new        { p1 })
+				.Select(p2 => new Person { PersonID = p2.p1.PersonID, FirstName = p2.p1.FirstName })
+				.Select(p3 => new        { p3 })
+				.Select(p4 => new Person { PersonID = p4.p3.PersonID, FirstName = p4.p3.FirstName }));
+		}
+
+		[Test]
+		public void MultipleSelect5()
+		{
+			TestJohn(db => db.Person
+				.Select(p1 => new        { p1 })
+				.Select(p2 => new Person { PersonID = p2.p1.PersonID, FirstName = p2.p1.FirstName })
+				.Select(p3 => p3)
+				.Select(p4 => new Person { PersonID = p4.PersonID,    FirstName = p4.FirstName }));
 		}
 
 		void Foo(Expression<Func<IDataReader,MappingSchema,int>> func)

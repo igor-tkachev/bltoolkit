@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Linq.Expressions;
@@ -114,16 +115,23 @@ namespace BLToolkit.Data.Linq
 			);
 		}
 
+		static bool IsParameter(MemberExpression ex, ParameterExpression parm)
+		{
+			if (ex.Expression == parm) return true;
+
+			if (ex.Expression is MemberExpression)
+				return IsParameter(ex.Expression as MemberExpression, parm);
+
+			return false;
+		}
+
 		void BuildNew(QueryInfo query, ParseInfo expr, ParseInfo<ParameterExpression> parm)
 		{
 			var info = expr.Walk(pi =>
 			{
 				pi.IsMemberAccess((ma,ex) =>
 				{
-					if (ma.Parent.IsMemberAccess((_,pex) => pex.Expr == pi.Expr))
-						return false;
-
-					if (ex.Expr == parm.Expr)
+					if (IsParameter(ma.Expr, parm.Expr))
 					{
 						// field = p.FieldName
 						//
@@ -146,7 +154,7 @@ namespace BLToolkit.Data.Linq
 								if (!ParseInfo.MappingSchema.Converters.TryGetValue(memberType, out mi))
 									throw new LinqException("Cannot find converter for the '{0}' type.", memberType.FullName);
 
-								pi = pi.Parent.Create(
+								pi = pi.Parent.Replace(
 									Expression.Call(_mapSchemaParam, mi,
 										Expression.Call(_dataReaderParam, ParseInfo.DataReader.GetValue,
 											Expression.Constant(idx, typeof(int)))),
@@ -161,7 +169,7 @@ namespace BLToolkit.Data.Linq
 						// field = localVariable
 						//
 						var e = Expression.MakeMemberAccess(Expression.Convert(c.ParamAccessor, ex.Expr.Type), ma.Expr.Member);
-						pi = pi.Parent.Create(e, c.ParamAccessor);
+						pi = pi.Parent.Replace(e, c.ParamAccessor);
 						return true;
 					}))
 					{
@@ -180,6 +188,26 @@ namespace BLToolkit.Data.Linq
 			_info.SetQuery(mapper.Compile());
 		}
 
+		static bool IsMember(Expression ex, IEnumerable<MemberInfo> members)
+		{
+			var me = ex as MemberExpression;
+
+			if (me != null)
+			{
+				var member = me.Member;
+				if (member is PropertyInfo)
+					member = ((PropertyInfo)member).GetGetMethod();
+
+				foreach (var m in members)
+					if (m == member)
+						return true;
+
+				return IsMember(me.Expression, members);
+			}
+
+			return false;
+		}
+
 		public ISqlExpression GetField(QueryInfo query, ParseInfo<MemberExpression> memberExpr)
 		{
 			ISqlExpression expr = null;
@@ -193,7 +221,11 @@ namespace BLToolkit.Data.Linq
 				},
 				newExpr =>
 				{
-					if (newExpr.Parameter.Expr == memberExpr.Expr.Expression)
+					if (IsParameter(memberExpr.Expr, newExpr.Parameter.Expr))
+					{
+						expr = GetField(newExpr.SourceInfo, memberExpr);
+					}
+					else if (IsMember(memberExpr.Expr.Expression, newExpr.Body.Expr.Members))
 					{
 						expr = GetField(newExpr.SourceInfo, memberExpr);
 					}
@@ -221,10 +253,6 @@ namespace BLToolkit.Data.Linq
 										return;
 									}
 
-									if (arg is ParameterExpression)
-									{
-									}
-
 									throw new InvalidOperationException();
 								}
 							}
@@ -233,7 +261,11 @@ namespace BLToolkit.Data.Linq
 				},
 				memberInit =>
 				{
-					if (memberInit.Parameter.Expr == memberExpr.Expr.Expression)
+					if (IsParameter(memberExpr.Expr, memberInit.Parameter.Expr))
+					{
+						expr = GetField(memberInit.SourceInfo, memberExpr);
+					}
+					else if (IsMember(memberExpr.Expr.Expression, memberInit.Members))
 					{
 						expr = GetField(memberInit.SourceInfo, memberExpr);
 					}

@@ -1,5 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Linq.Expressions;
+using System.Reflection;
 
 using BLToolkit.Data.Sql;
 
@@ -40,11 +43,13 @@ namespace BLToolkit.Data.Linq
 				SourceInfo = sourceInfo;
 				Parameter  = parameter;
 				Body       = body;
+				Members    = (from b in body.Expr.Bindings select b.Member).ToList();
 			}
 
 			public QueryInfo                       SourceInfo;
 			public ParseInfo<ParameterExpression>  Parameter;
 			public ParseInfo<MemberInitExpression> Body;
+			public List<MemberInfo>                Members;
 		}
 
 		public void Match(Action<Constant> sourceAction, Action<New> newAction, Action<MemberInit> memberInitAction)

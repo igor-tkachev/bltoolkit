@@ -24,7 +24,7 @@ namespace Data.Linq
 			};
 		}
 
-		static List<string> _configurations = new List<string>
+		static readonly List<string> _configurations = new List<string>
 		{
 			"MySql",
 			"Sql2008",
@@ -43,7 +43,7 @@ namespace Data.Linq
 				{
 					using (var db = new TestDbManager(_configurations[i]))
 					{
-						var conn = db.Connection;
+						//var conn = db.Connection;
 
 						reThrow = true;
 						func(db);

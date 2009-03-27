@@ -198,9 +198,11 @@
       <DependentUpon>DataProviderBase.cs</DependentUpon>
     </None>
     <Compile Include="Data\DbManager.cs">
+      <SubType>Component</SubType>
     </Compile>
     <Compile Include="Data\DbManager.Config.cs">
       <DependentUpon>DbManager.cs</DependentUpon>
+      <SubType>Component</SubType>
     </Compile>
     <Compile Include="Data\OperationType.cs" />
     <Compile Include="Data\Sql\ChildContainer.cs">

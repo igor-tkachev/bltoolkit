@@ -26,7 +26,7 @@ namespace BLToolkit.Data.Sql
 		bool IEquatable<ISqlExpression>.Equals(ISqlExpression other)
 		{
 			SqlValue value = other as SqlValue;
-			return _value == null && value._value == null || _value.Equals(value._value);
+			return _value == null && value._value == null || _value != null && _value.Equals(value._value);
 		}
 
 		#endregion
