@@ -128,6 +128,11 @@ namespace BLToolkit.Mapping
 		{
 			AddRelation( slaveResultSet, new MapIndex(slaveIndex), new MapIndex(masterIndex),containerName);
 		}
+
+		public void AddRelation(MapResultSet slaveResultSet, MapRelationBase relation)
+		{
+			AddRelation(slaveResultSet, relation.SlaveIndex, relation.MasterIndex, relation.ContainerName);
+		}
 	}
 }
 

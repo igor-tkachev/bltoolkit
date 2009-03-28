@@ -5,6 +5,7 @@ using BLToolkit.Mapping;
 namespace BLToolkit.Reflection.MetadataProvider
 {
 	using Extension;
+	using System.Collections.Generic;
 
 	public delegate void                 OnCreateProvider(MetadataProviderBase parentProvider);
 	public delegate MetadataProviderBase CreateProvider();
@@ -172,6 +173,16 @@ namespace BLToolkit.Reflection.MetadataProvider
 		{
 			isSet = false;
 			return false;
+		}
+
+		#endregion
+
+		#region GetRelations
+
+		public virtual List<MapRelationBase> GetRelations(MappingSchema schema, ExtensionList typeExt, Type master, Type slave, out bool isSet)
+		{
+			isSet = false;
+			return new List<MapRelationBase>();
 		}
 
 		#endregion

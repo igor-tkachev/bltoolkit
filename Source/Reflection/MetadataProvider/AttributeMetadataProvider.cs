@@ -7,6 +7,7 @@ namespace BLToolkit.Reflection.MetadataProvider
 	using DataAccess;
 	using Extension;
 	using Mapping;
+	using System.Collections;
 
 	public class AttributeMetadataProvider : MetadataProviderBase
 	{
@@ -483,6 +484,75 @@ namespace BLToolkit.Reflection.MetadataProvider
 			return base.GetSqlIgnore(typeExtension, member, out isSet);
 		}
 
+		#endregion
+
+		#region GetRelations
+
+		public override List<MapRelationBase> GetRelations(MappingSchema schema, ExtensionList typeExt, Type master, Type slave, out bool isSet)
+		{
+			TypeAccessor masterAccessor = TypeAccessor.GetAccessor(master);
+			TypeAccessor slaveAccessor  = slave != null ? TypeAccessor.GetAccessor(slave) : null;
+
+			List<MapRelationBase> relations = new List<MapRelationBase>();
+
+			foreach (MemberAccessor ma in masterAccessor)
+			{
+				RelationAttribute attr = ma.GetAttribute<RelationAttribute>();
+
+				if (attr == null || (slave != null && attr.Destination != slave && ma.Type != slave))
+					continue;
+
+				if (slave == null)
+					slaveAccessor = TypeAccessor.GetAccessor(attr.Destination != null ? attr.Destination : ma.Type);
+
+
+				bool toMany = TypeHelper.IsSameOrParent(typeof(IEnumerable), ma.Type);
+				if (toMany && attr.Destination == null)
+					throw new InvalidOperationException("Destination type should be set for enumerable relations: " + ma.Type.FullName + "." + ma.Name);
+
+
+				MapIndex masterIndex = attr.MasterIndex;
+				MapIndex slaveIndex  = attr.SlaveIndex;
+
+				if (slaveIndex == null)
+				{
+					MetadataProviderBase mdp = schema.MetadataProvider;
+					List<string> keys = new List<string>();
+
+					TypeAccessor accessor = toMany ? masterAccessor : slaveAccessor;
+					TypeExtension tex = TypeExtension.GetTypeExtension(accessor.Type, typeExt);
+					foreach (MemberAccessor sma in accessor)
+					{
+						bool isSetFlag;
+
+						mdp.GetPrimaryKeyOrder(accessor.Type, tex, sma, out isSetFlag);
+
+						if (isSetFlag)
+						{
+							string name = mdp.GetFieldName(tex, sma, out isSetFlag);
+							keys.Add(name);
+						}
+					}
+
+					if (keys.Count > 0)
+						slaveIndex = new MapIndex(keys.ToArray());
+				}
+
+				if (slaveIndex == null)
+					throw new InvalidOperationException("Slave index is not set for relation: " + ma.Type.FullName + "." + ma.Name);
+
+				if (masterIndex == null)
+					masterIndex = slaveIndex;
+
+				MapRelationBase relation = new MapRelationBase(attr.Destination != null ? attr.Destination : ma.Type, slaveIndex, masterIndex, ma.Name);
+
+				relations.Add(relation);
+			}
+
+			isSet = true;
+			return relations;
+		}
+		
 		#endregion
 	}
 }

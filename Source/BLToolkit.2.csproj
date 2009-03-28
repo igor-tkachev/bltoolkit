@@ -254,6 +254,8 @@
     <Compile Include="EditableObjects\EditableObjectT.cs" />
     <Compile Include="EditableObjects\EditableValue.cs" />
     <Compile Include="EditableObjects\IEditable.cs" />
+    <Compile Include="Mapping\MapRelationBase.cs" />
+    <Compile Include="Mapping\RelationAttribute.cs" />
     <Compile Include="Mapping\SimpleSourceListMapper.cs" />
     <Compile Include="Mapping\MapImplicitAttribute.cs" />
     <Compile Include="Mapping\MapSetDataT.cs" />

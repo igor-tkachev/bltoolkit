@@ -3408,6 +3408,8 @@ namespace BLToolkit.Mapping
 
 			try
 			{
+				PrepareRelarions(resultSets);
+
 				// Map relations.
 				//
 				foreach (MapResultSet rs in resultSets)
@@ -3587,6 +3589,29 @@ namespace BLToolkit.Mapping
 			GetResultSets(1, output, output[0], nextResults);
 
 			return output;
+		}
+
+		private void PrepareRelarions(params MapResultSet[] sets)
+		{
+			foreach (MapResultSet masterSet in sets)
+			{
+				if (masterSet.Relations != null)
+					continue;
+
+				foreach (MapResultSet slaveSet in sets)
+				{
+					bool isSet;
+
+					List<MapRelationBase> relations
+						= MetadataProvider.GetRelations(this, Extensions, masterSet.ObjectType, slaveSet.ObjectType, out isSet);
+
+					if (!isSet)
+						continue;
+
+					foreach (MapRelationBase relation in relations)
+						masterSet.AddRelation(slaveSet, relation);
+				}
+			}
 		}
 
 		#endregion

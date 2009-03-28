@@ -5,6 +5,7 @@ using NUnit.Framework;
 
 using BLToolkit.Mapping;
 using BLToolkit.Data;
+using BLToolkit.DataAccess;
 
 namespace HowTo.Data
 {
@@ -35,29 +36,33 @@ namespace HowTo.Data
 
 		public class Parent
 		{
-			[MapField("ParentID")]
+			[MapField("ParentID"), /*[a]*/PrimaryKey/*[/a]*/]
 			public int ID;
 
+			/*[a]*/[Relation(typeof(Child))]/*[/a]*/
 			public List<Child> Children = new List<Child>();
 		}
 
 		[MapField("ParentID", "Parent.ID")]
 		public class Child
 		{
-			[MapField("ChildID")]
+			[MapField("ChildID"), /*[a]*/PrimaryKey/*[/a]*/]
 			public int ID;
 
+			/*[a]*/[Relation]/*[/a]*/
 			public Parent Parent = new Parent();
 
+			/*[a]*/[Relation(typeof(Grandchild))]/*[/a]*/
 			public List<Grandchild> Grandchildren = new List<Grandchild>();
 		}
 
 		[MapField("ChildID", "Child.ID")]
 		public class Grandchild
 		{
-			[MapField("GrandchildID")]
+			[MapField("GrandchildID"), /*[a]*/PrimaryKey/*[/a]*/]
 			public int ID;
 
+			/*[a]*/[Relation]/*[/a]*/
 			public Child Child = new Child();
 		}
 
@@ -65,7 +70,7 @@ namespace HowTo.Data
 		public void Test()
 		{
 			List<Parent>   parents = new List<Parent>();
-			/*[/a]*/MapResultSet/*[/a]*/[] sets    = new MapResultSet[3];
+			/*[a]*/MapResultSet/*[/a]*/[] sets    = new MapResultSet[3];
 
 			sets[0] = new MapResultSet(typeof(Parent), parents);
 			sets[1] = new MapResultSet(typeof(Child));
@@ -99,6 +104,44 @@ namespace HowTo.Data
 					foreach (Grandchild grandchild in child.Grandchildren)
 					{
 						Assert.AreEqual(child,  grandchild.Child);
+						Assert.AreEqual(parent, grandchild.Child.Parent);
+					}
+				}
+			}
+		}
+		
+		[Test]
+		public void Test2()
+		{
+			List<Parent> parents = new List<Parent>();
+			/*[a]*/MapResultSet/*[/a]*/[] sets = new MapResultSet[3];
+
+			sets[0] = new MapResultSet(typeof(Parent), parents);
+			sets[1] = new MapResultSet(typeof(Child));
+			sets[2] = new MapResultSet(typeof(Grandchild));
+
+			using (DbManager db = new DbManager())
+			{
+				db
+					.SetCommand(TestQuery)
+					./*[a]*/ExecuteResultSet/*[/a]*/(sets);
+			}
+
+			Assert.IsNotEmpty(parents);
+
+			foreach (Parent parent in parents)
+			{
+				Assert.IsNotNull(parent);
+				Assert.IsNotEmpty(parent.Children);
+
+				foreach (Child child in parent.Children)
+				{
+					Assert.AreEqual(parent, child.Parent);
+					Assert.IsNotEmpty(child.Grandchildren);
+
+					foreach (Grandchild grandchild in child.Grandchildren)
+					{
+						Assert.AreEqual(child, grandchild.Child);
 						Assert.AreEqual(parent, grandchild.Child.Parent);
 					}
 				}

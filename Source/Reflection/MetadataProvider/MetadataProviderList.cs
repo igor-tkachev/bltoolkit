@@ -6,6 +6,7 @@ using BLToolkit.Mapping;
 namespace BLToolkit.Reflection.MetadataProvider
 {
 	using Extension;
+	using System.Collections.Generic;
 
 	public class MetadataProviderList : MetadataProviderBase, ICollection
 	{
@@ -265,6 +266,23 @@ namespace BLToolkit.Reflection.MetadataProvider
 			}
 
 			return base.GetSqlIgnore(typeExtension, member, out isSet);
+		}
+
+		#endregion
+
+		#region GetRelations
+
+		public override List<MapRelationBase> GetRelations(MappingSchema schema, ExtensionList typeExt, Type master, Type slave, out bool isSet)
+		{
+			foreach (MetadataProviderBase p in _list)
+			{
+				List<MapRelationBase> relations = p.GetRelations(schema, typeExt, master, slave, out isSet);
+
+				if (isSet)
+					return relations;
+			}
+
+			return base.GetRelations(schema, typeExt, master, slave, out isSet);
 		}
 
 		#endregion

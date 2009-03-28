@@ -140,6 +140,8 @@
     <Compile Include="Data\Sql\SqlTable.cs" />
     <Compile Include="Data\Sql\SqlTableT.cs" />
     <Compile Include="Data\Sql\SqlValue.cs" />
+    <Compile Include="Mapping\MapRelationBase.cs" />
+    <Compile Include="Mapping\RelationAttribute.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
