@@ -188,9 +188,10 @@ namespace BLToolkit.EditableObjects
 			set { BindingListImpl.NotifyChanges = value; }
 		}
 
-		protected virtual void OnListChanged(EditableListChangedEventArgs e)
+		protected virtual void OnListChanged(ListChangedEventArgs e)
 		{
-			BindingListImpl.OnListChanged(e);
+			if (NotifyChanges && _listChanged != null)
+				_listChanged(this, e);
 		}
 
 		protected void OnListChanged(ListChangedType listChangedType, int index)
@@ -380,24 +381,22 @@ namespace BLToolkit.EditableObjects
 			set
 			{
 				object o = BindingListImpl[index];
-				
-				BindingListImpl[index] = value;
 
 				if (o != value)
 				{
 					RemoveInternal(o);
 					AddInternal(value);
 				}
+				
+				BindingListImpl[index] = value;
 			}
 		} 
 
 		public override int Add(object value)
 		{
-			int index = BindingListImpl.Add(value);
-
 			AddInternal(value);
 
-			return index;
+			return BindingListImpl.Add(value);
 		}
 
 		public override void Clear()
@@ -420,9 +419,9 @@ namespace BLToolkit.EditableObjects
 
 		public override void Insert(int index, object value)
 		{
-			BindingListImpl.Insert(index, value);
-
 			AddInternal(value);
+
+			BindingListImpl.Insert(index, value);
 		}
 
 		public override void Remove(object value)
@@ -489,10 +488,10 @@ namespace BLToolkit.EditableObjects
 		{
 			if (c.Count == 0)
 				return;
-
-			BindingListImpl.AddRange(c);
 			
 			AddInternal(c);
+
+			BindingListImpl.AddRange(c);
 		}
 
 		public void AddRange(ICollection c, bool trackChanges)
@@ -682,9 +681,9 @@ namespace BLToolkit.EditableObjects
 			if (c.Count == 0)
 				return;
 
-			BindingListImpl.SetRange(index, c);
-
 			AddInternal(c);
+
+			BindingListImpl.SetRange(index, c);
 		}
 
 		public override void Sort()
@@ -899,11 +898,22 @@ namespace BLToolkit.EditableObjects
 
 		public object AddNew()
 		{
-			object newObject = BindingListImpl.AddNew();
+			try
+			{
+				BeginSuppressEvent();
 
-			AddInternal(newObject);
+				object newObject = BindingListImpl.AddNew();
 
-			return newObject;
+				AddInternal(newObject);
+
+				OnListChanged(ListChangedType.ItemAdded, IndexOf(newObject));
+
+				return newObject;
+			}
+			finally
+			{
+				EndSuppressEvent();
+			}
 		}
 
 		public bool AllowEdit
@@ -961,10 +971,40 @@ namespace BLToolkit.EditableObjects
 			get { return BindingListImpl.SupportsChangeNotification; }
 		}
 
+		private event ListChangedEventHandler _listChanged;
 		public event ListChangedEventHandler ListChanged
 		{
-			add    { BindingListImpl.ListChanged += value; }
-			remove { BindingListImpl.ListChanged -= value; }
+			add    
+			{
+				if (_listChanged == null)
+					BindingListImpl.ListChanged += BindingListImpl_ListChanged;
+
+				_listChanged += value; 
+			}
+			remove 
+			{ 
+				_listChanged -= value; 
+
+				if (_listChanged == null)
+					BindingListImpl.ListChanged -= BindingListImpl_ListChanged;
+			}
+		}
+
+		private void BindingListImpl_ListChanged(object sender, ListChangedEventArgs e)
+		{
+			OnListChanged(e);
+		}
+
+		private void BeginSuppressEvent()
+		{
+			if (_listChanged != null)
+				BindingListImpl.ListChanged -= BindingListImpl_ListChanged;
+		}
+
+		private void EndSuppressEvent()
+		{
+			if (_listChanged != null)
+				BindingListImpl.ListChanged += BindingListImpl_ListChanged;
 		}
 
 		public bool SupportsSearching

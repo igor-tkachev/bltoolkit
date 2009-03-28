@@ -111,6 +111,7 @@
     <Compile Include="DataAccess\SqlTest.cs" />
     <Compile Include="DataAccess\XmlExtension.cs" />
     <Compile Include="Data\BinaryTest.cs" />
+    <Compile Include="Data\ComplexMappingTest.cs" />
     <Compile Include="Data\CompositeKeyTest.cs" />
     <Compile Include="Data\EventsTest.cs" />
     <Compile Include="Data\ExecuteForEach.cs" />

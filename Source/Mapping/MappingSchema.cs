@@ -3400,7 +3400,7 @@ namespace BLToolkit.Mapping
 
 		public void MapResultSets(MapResultSet[] resultSets)
 		{
-			Hashtable   initTable     = null;
+			Hashtable   initTable     = new Hashtable();
 			object      lastContainer = null;
 			InitContext context       = new InitContext();
 
@@ -3458,6 +3458,17 @@ namespace BLToolkit.Mapping
 
 							foreach (object master in masterList)
 							{
+								ISupportMapping msm = master as ISupportMapping;
+
+								if (msm != null)
+								{
+									if (initTable.ContainsValue(master) == false)
+									{
+										msm.BeginMapping(context);
+										initTable.Add(master, msm);
+									}
+								}
+
 								object container = ma.GetValue(master);
 
 								if (container is IList)
@@ -3470,9 +3481,6 @@ namespace BLToolkit.Mapping
 
 										if (sm != null)
 										{
-											if (initTable == null)
-												initTable = new Hashtable();
-
 											if (initTable.ContainsKey(container) == false)
 											{
 												sm.BeginMapping(context);
@@ -3494,9 +3502,8 @@ namespace BLToolkit.Mapping
 			}
 			finally
 			{
-				if (initTable != null)
-					foreach (ISupportMapping si in initTable.Values)
-						si.EndMapping(context);
+				foreach (ISupportMapping si in initTable.Values)
+					si.EndMapping(context);
 			}
 		}
 

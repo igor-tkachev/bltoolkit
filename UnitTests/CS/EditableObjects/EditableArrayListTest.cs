@@ -63,6 +63,12 @@ namespace EditableObjects
 		
 		private void TestList_ListChanged(object sender, ListChangedEventArgs e)
 		{
+			EditableArrayList array = sender as EditableArrayList;
+			
+			Assert.IsNotNull(array);
+			if (e.ListChangedType != ListChangedType.Reset)
+				Assert.That(array.IsDirty);
+
 			if (e.ListChangedType != ListChangedType.ItemDeleted && e.ListChangedType != ListChangedType.Reset)
 				Console.WriteLine("ListChanged (ID:{3}). Type: {0}, OldIndex: {1}, NewIndex: {2}", e.ListChangedType, e.OldIndex, e.NewIndex, (e.NewIndex >= 0 && e.NewIndex < _testList.Count) ? ((EditableTestObject)_testList[e.NewIndex]).ID : -1);
 			else
