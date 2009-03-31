@@ -1,5 +1,6 @@
 using System;
 using System.Runtime.CompilerServices;
+
 using NUnit.Framework;
 
 using BLToolkit.Reflection;
@@ -9,7 +10,7 @@ using BLToolkit.Reflection;
 /*[a]*/[assembly: InternalsVisibleTo("TypeBuilder.InternalTypesTest.TestObject.TypeBuilder")]/*[/a]*/
 /*[a]*/[assembly: InternalsVisibleTo("TypeBuilder.InternalTypesTest.TestObject.TypeAccessor")]/*[/a]*/
 
-namespace TypeBuilder
+namespace HowTo.TypeBuilder
 {
 	[TestFixture]
 	public class InternalTypesTest

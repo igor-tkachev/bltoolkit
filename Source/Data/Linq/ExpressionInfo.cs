@@ -94,13 +94,13 @@ namespace BLToolkit.Data.Linq
 			if (db == null)
 			{
 				using (db = new DbManager())
-					using (IDataReader dr = db.SetCommand(SqlBuilder).ExecuteReader())
+					using (var dr = db.SetCommand(SqlBuilder).ExecuteReader())
 						while (dr.Read())
 							yield return MappingSchema.MapDataReaderToObject<T>(dr, null);
 			}
 			else
 			{
-				using (IDataReader dr = db.SetCommand(SqlBuilder).ExecuteReader())
+				using (var dr = db.SetCommand(SqlBuilder).ExecuteReader())
 					while (dr.Read())
 						yield return MappingSchema.MapDataReaderToObject<T>(dr, null);
 			}
@@ -116,13 +116,13 @@ namespace BLToolkit.Data.Linq
 			if (db == null)
 			{
 				using (db = new DbManager())
-					using (IDataReader dr = db.SetCommand(SqlBuilder).ExecuteReader())
+					using (var dr = db.SetCommand(SqlBuilder).ExecuteReader())
 						while (dr.Read())
 							yield return mapper(dr, MappingSchema, expr);
 			}
 			else
 			{
-				using (IDataReader dr = db.SetCommand(SqlBuilder).ExecuteReader())
+				using (var dr = db.SetCommand(SqlBuilder).ExecuteReader())
 					while (dr.Read())
 						yield return mapper(dr, MappingSchema, expr);
 			}
@@ -315,7 +315,7 @@ namespace BLToolkit.Data.Linq
 									if (ml1.Initializers.Count != ml2.Initializers.Count)
 										return false;
 
-									for (int i = 0; i < ml1.Initializers.Count; i++)
+									for (var i = 0; i < ml1.Initializers.Count; i++)
 									{
 										var ei1 = ml1.Initializers[i];
 										var ei2 = ml2.Initializers[i];
@@ -323,7 +323,7 @@ namespace BLToolkit.Data.Linq
 										if (ei1.AddMethod != ei2.AddMethod || ei1.Arguments.Count != ei2.Arguments.Count)
 											return false;
 
-										for (int j = 0; j < ei1.Arguments.Count; j++)
+										for (var j = 0; j < ei1.Arguments.Count; j++)
 											if (!Compare(ei1.Arguments[j], ei2.Arguments[j]))
 												return false;
 									}
@@ -337,7 +337,7 @@ namespace BLToolkit.Data.Linq
 									if (mm1.Bindings.Count != mm2.Bindings.Count)
 										return false;
 
-									for (int i = 0; i < mm1.Bindings.Count; i++)
+									for (var i = 0; i < mm1.Bindings.Count; i++)
 										if (!compareBindings(mm1.Bindings[i], mm2.Bindings[i]))
 											return false;
 

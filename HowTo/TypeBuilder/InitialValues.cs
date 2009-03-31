@@ -1,11 +1,12 @@
 using System;
+
 using NUnit.Framework;
+using NUnit.Framework.SyntaxHelpers;
 
 using BLToolkit.Reflection;
 using BLToolkit.TypeBuilder;
-using NUnit.Framework.SyntaxHelpers;
 
-namespace TypeBuilder
+namespace HowTo.TypeBuilder
 {
 	[TestFixture]
 	public class InitialValueTest

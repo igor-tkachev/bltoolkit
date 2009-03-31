@@ -82,7 +82,7 @@ namespace BLToolkit.Data.Linq
 			return select;
 		}
 
-		QueryInfo ParseSelect(QueryInfo select, ParseInfo<ParameterExpression> parm, ParseInfo body)
+		static QueryInfo ParseSelect(QueryInfo select, ParseInfo<ParameterExpression> parm, ParseInfo body)
 		{
 			SetAlias(select, parm.Expr.Name);
 
@@ -102,7 +102,8 @@ namespace BLToolkit.Data.Linq
 
 		void BuildSelect(QueryInfo query)
 		{
-			query.Match(
+			query.Match
+			(
 				constantExpr => // QueryInfo.Constant
 				{
 					foreach (var field in constantExpr.Table.Fields.Values)
@@ -143,23 +144,7 @@ namespace BLToolkit.Data.Linq
 
 							if (field != null)
 							{
-								var idx = _info.SqlBuilder.Select.Add(field);
-
-								var memberType = member.MemberType == MemberTypes.Field ?
-									((FieldInfo)member).FieldType :
-									((PropertyInfo)member).PropertyType;
-
-								MethodInfo mi;
-
-								if (!ParseInfo.MappingSchema.Converters.TryGetValue(memberType, out mi))
-									throw new LinqException("Cannot find converter for the '{0}' type.", memberType.FullName);
-
-								pi = pi.Parent.Replace(
-									Expression.Call(_mapSchemaParam, mi,
-										Expression.Call(_dataReaderParam, ParseInfo.DataReader.GetValue,
-											Expression.Constant(idx, typeof(int)))),
-									pi.ParamAccessor);
-
+								pi = field;
 								return true;
 							}
 						}
@@ -208,26 +193,47 @@ namespace BLToolkit.Data.Linq
 			return false;
 		}
 
-		public ISqlExpression GetField(QueryInfo query, ParseInfo<MemberExpression> memberExpr)
+		public ParseInfo GetField(QueryInfo query, ParseInfo<MemberExpression> memberExpr)
 		{
-			ISqlExpression expr = null;
+			ParseInfo pi = null;
 
 			var member = memberExpr.Expr.Member;
 
-			query.Match(
+			query.Match
+			(
 				constantExpr =>
 				{
-					expr = constantExpr.Table[member.Name];
+					var field = constantExpr.Table[member.Name];
+
+					if (field != null)
+					{
+						var idx = _info.SqlBuilder.Select.Add(field);
+
+						var memberType = member.MemberType == MemberTypes.Field ?
+							((FieldInfo)   member).FieldType :
+							((PropertyInfo)member).PropertyType;
+
+						MethodInfo mi;
+
+						if (!ParseInfo.MappingSchema.Converters.TryGetValue(memberType, out mi))
+							throw new LinqException("Cannot find converter for the '{0}' type.", memberType.FullName);
+
+						pi = memberExpr.Parent.Replace(
+							Expression.Call(_mapSchemaParam, mi,
+								Expression.Call(_dataReaderParam, ParseInfo.DataReader.GetValue,
+									Expression.Constant(idx, typeof(int)))),
+							memberExpr.ParamAccessor);
+					}
 				},
 				newExpr =>
 				{
 					if (IsParameter(memberExpr.Expr, newExpr.Parameter.Expr))
 					{
-						expr = GetField(newExpr.SourceInfo, memberExpr);
+						pi = GetField(newExpr.SourceInfo, memberExpr);
 					}
 					else if (IsMember(memberExpr.Expr.Expression, newExpr.Body.Expr.Members))
 					{
-						expr = GetField(newExpr.SourceInfo, memberExpr);
+						pi = GetField(newExpr.SourceInfo, memberExpr);
 					}
 					else
 					{
@@ -239,7 +245,7 @@ namespace BLToolkit.Data.Linq
 
 						if (body.Members != null)
 						{
-							for (int i = 0; i < body.Members.Count; i++)
+							for (var i = 0; i < body.Members.Count; i++)
 							{
 								if (mem == body.Members[i])
 								{
@@ -247,7 +253,7 @@ namespace BLToolkit.Data.Linq
 
 									if (arg is MemberExpression)
 									{
-										expr = GetField(
+										pi = GetField(
 											newExpr.SourceInfo,
 											newExpr.Body.Create((MemberExpression)arg, newExpr.Body.Index(body.Arguments, ParseInfo.New.Arguments, i)));
 										return;
@@ -263,17 +269,17 @@ namespace BLToolkit.Data.Linq
 				{
 					if (IsParameter(memberExpr.Expr, memberInit.Parameter.Expr))
 					{
-						expr = GetField(memberInit.SourceInfo, memberExpr);
+						pi = GetField(memberInit.SourceInfo, memberExpr);
 					}
 					else if (IsMember(memberExpr.Expr.Expression, memberInit.Members))
 					{
-						expr = GetField(memberInit.SourceInfo, memberExpr);
+						pi = GetField(memberInit.SourceInfo, memberExpr);
 					}
 					else
 					{
 						var body = memberInit.Body.Expr;
 
-						for (int i = 0; i < body.Bindings.Count; i++)
+						for (var i = 0; i < body.Bindings.Count; i++)
 						{
 							var binding = body.Bindings[i];
 
@@ -289,7 +295,7 @@ namespace BLToolkit.Data.Linq
 										var piAssign     = piBinding.      Create(ma.Expression, piBinding.ConvertExpressionTo<MemberAssignment>());
 										var piExpression = piAssign.       Create(ma.Expression, piAssign.Property(ParseInfo.MemberAssignmentBind.Expression));
 
-										expr = GetField(
+										pi = GetField(
 											memberInit.SourceInfo,
 											piExpression.Create(ma.Expression as MemberExpression, piExpression.Convert<MemberExpression>()));
 										return;
@@ -304,15 +310,16 @@ namespace BLToolkit.Data.Linq
 				}
 			);
 
-			if (expr == null)
+			if (pi == null)
 				throw new LinqException("Member '{0}.{1}' is not an SQL column.", member.ReflectedType, member.Name);
 
-			return expr;
+			return pi;
 		}
 
-		void SetAlias(QueryInfo query, string alias)
+		static void SetAlias(QueryInfo query, string alias)
 		{
-			query.Match(
+			query.Match
+			(
 				constantExpr =>
 				{
 					if (constantExpr.Table.Alias == null)

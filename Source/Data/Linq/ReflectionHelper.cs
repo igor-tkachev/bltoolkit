@@ -1,0 +1,218 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Data;
+using System.Data.SqlTypes;
+using System.IO;
+using System.Linq.Expressions;
+using System.Reflection;
+using System.Xml;
+
+namespace BLToolkit.Data.Linq
+{
+	class ReflectionHelper
+	{
+		public class Expressor<T>
+		{
+			public static MethodInfo PropertyExpressor(Expression<Func<T,object>> func)
+			{
+				return ((PropertyInfo)((MemberExpression)func.Body).Member).GetGetMethod();
+			}
+
+			public static MethodInfo MethodExpressor(Expression<Func<T,object>> func)
+			{
+				var ex = func.Body;
+
+				if (ex is UnaryExpression)
+					ex = ((UnaryExpression)func.Body).Operand;
+
+				return ((MethodCallExpression)ex).Method;
+			}
+		}
+
+		public class Binary : Expressor<BinaryExpression>
+		{
+			public static MethodInfo Conversion = PropertyExpressor(e => e.Conversion);
+			public static MethodInfo Left       = PropertyExpressor(e => e.Left);
+			public static MethodInfo Right      = PropertyExpressor(e => e.Right);
+		}
+
+		public class Unary : Expressor<UnaryExpression>
+		{
+			public static MethodInfo Operand = PropertyExpressor(e => e.Operand);
+		}
+
+		public class Lambda : Expressor<LambdaExpression>
+		{
+			public static MethodInfo Body       = PropertyExpressor(e => e.Body);
+			public static MethodInfo Parameters = PropertyExpressor(e => e.Parameters);
+		}
+
+		public class Constant : Expressor<ConstantExpression>
+		{
+			public static MethodInfo Value = PropertyExpressor(e => e.Value);
+		}
+
+		public class MethodCall : Expressor<MethodCallExpression>
+		{
+			public static MethodInfo Object    = PropertyExpressor(e => e.Object);
+			public static MethodInfo Arguments = PropertyExpressor(e => e.Arguments);
+		}
+
+		public class Conditional : Expressor<ConditionalExpression>
+		{
+			public static MethodInfo Test    = PropertyExpressor(e => e.Test);
+			public static MethodInfo IfTrue  = PropertyExpressor(e => e.IfTrue);
+			public static MethodInfo IfFalse = PropertyExpressor(e => e.IfFalse);
+		}
+
+		public class Invocation : Expressor<InvocationExpression>
+		{
+			public static MethodInfo Expression = PropertyExpressor(e => e.Expression);
+			public static MethodInfo Arguments  = PropertyExpressor(e => e.Arguments);
+		}
+
+		public class ListInit : Expressor<ListInitExpression>
+		{
+			public static MethodInfo NewExpression = PropertyExpressor(e => e.NewExpression);
+			public static MethodInfo Initializers  = PropertyExpressor(e => e.Initializers);
+		}
+
+		public class ElementInit : Expressor<System.Linq.Expressions.ElementInit>
+		{
+			public static MethodInfo Arguments = PropertyExpressor(e => e.Arguments);
+		}
+
+		public class Member : Expressor<MemberExpression>
+		{
+			public static MethodInfo Expression = PropertyExpressor(e => e.Expression);
+		}
+
+		public class MemberInit : Expressor<MemberInitExpression>
+		{
+			public static MethodInfo NewExpression = PropertyExpressor(e => e.NewExpression);
+			public static MethodInfo Bindings      = PropertyExpressor(e => e.Bindings);
+		}
+
+		public class New : Expressor<NewExpression>
+		{
+			public static MethodInfo Arguments = PropertyExpressor(e => e.Arguments);
+		}
+
+		public class NewArray : Expressor<NewArrayExpression>
+		{
+			public static MethodInfo Expressions = PropertyExpressor(e => e.Expressions);
+		}
+
+		public class TypeBinary : Expressor<TypeBinaryExpression>
+		{
+			public static MethodInfo Expression = PropertyExpressor(e => e.Expression);
+		}
+
+		public class IndexExpressor<T>
+		{
+			public static MethodInfo IndexerExpressor(Expression<Func<ReadOnlyCollection<T>, object>> func)
+			{
+				return ((MethodCallExpression)((UnaryExpression)func.Body).Operand).Method;
+			}
+
+			public static MethodInfo Item = IndexerExpressor(c => c[0]);
+		}
+
+		public class MemberAssignmentBind : Expressor<MemberAssignment>
+		{
+			public static MethodInfo Expression = PropertyExpressor(e => e.Expression);
+		}
+
+		public class MemberListBind : Expressor<MemberListBinding>
+		{
+			public static MethodInfo Initializers = PropertyExpressor(e => e.Initializers);
+		}
+
+		public class MemberMemberBind : Expressor<MemberMemberBinding>
+		{
+			public static MethodInfo Bindings = PropertyExpressor(e => e.Bindings);
+		}
+
+		public static MethodInfo ExprItem  = IndexExpressor<Expression>         .Item;
+		public static MethodInfo ParamItem = IndexExpressor<ParameterExpression>.Item;
+		public static MethodInfo ElemItem  = IndexExpressor<ElementInit>        .Item;
+
+		public class DataReader : Expressor<IDataReader>
+		{
+			public static MethodInfo GetValue = MethodExpressor(rd => rd.GetValue(0));
+		}
+
+		public class MappingSchema : Expressor<Mapping.MappingSchema>
+		{
+			public static Dictionary<Type,MethodInfo> Converters = new Dictionary<Type,MethodInfo>
+			{
+				// Primitive Types
+				//
+				{ typeof(SByte),           MethodExpressor(m => m.ConvertToSByte                 (null)) },
+				{ typeof(Int16),           MethodExpressor(m => m.ConvertToInt16                 (null)) },
+				{ typeof(Int32),           MethodExpressor(m => m.ConvertToInt32                 (null)) },
+				{ typeof(Int64),           MethodExpressor(m => m.ConvertToInt64                 (null)) },
+				{ typeof(Byte),            MethodExpressor(m => m.ConvertToByte                  (null)) },
+				{ typeof(UInt16),          MethodExpressor(m => m.ConvertToUInt16                (null)) },
+				{ typeof(UInt32),          MethodExpressor(m => m.ConvertToUInt32                (null)) },
+				{ typeof(UInt64),          MethodExpressor(m => m.ConvertToUInt64                (null)) },
+				{ typeof(Char),            MethodExpressor(m => m.ConvertToChar                  (null)) },
+				{ typeof(Single),          MethodExpressor(m => m.ConvertToSingle                (null)) },
+				{ typeof(Double),          MethodExpressor(m => m.ConvertToDouble                (null)) },
+				{ typeof(Boolean),         MethodExpressor(m => m.ConvertToBoolean               (null)) },
+
+				// Simple Types
+				//
+				{ typeof(String),          MethodExpressor(m => m.ConvertToString                (null)) },
+				{ typeof(DateTime),        MethodExpressor(m => m.ConvertToDateTime              (null)) },
+				{ typeof(DateTimeOffset),  MethodExpressor(m => m.ConvertToDateTimeOffset        (null)) },
+				{ typeof(Decimal),         MethodExpressor(m => m.ConvertToDecimal               (null)) },
+				{ typeof(Guid),            MethodExpressor(m => m.ConvertToGuid                  (null)) },
+				{ typeof(Stream),          MethodExpressor(m => m.ConvertToStream                (null)) },
+				{ typeof(XmlReader),       MethodExpressor(m => m.ConvertToXmlReader             (null)) },
+				{ typeof(XmlDocument),     MethodExpressor(m => m.ConvertToXmlDocument           (null)) },
+				{ typeof(Byte[]),          MethodExpressor(m => m.ConvertToByteArray             (null)) },
+				{ typeof(Char[]),          MethodExpressor(m => m.ConvertToCharArray             (null)) },
+
+				// Nullable Types
+				//
+				{ typeof(SByte?),          MethodExpressor(m => m.ConvertToNullableSByte         (null)) },
+				{ typeof(Int16?),          MethodExpressor(m => m.ConvertToNullableInt16         (null)) },
+				{ typeof(Int32?),          MethodExpressor(m => m.ConvertToNullableInt32         (null)) },
+				{ typeof(Int64?),          MethodExpressor(m => m.ConvertToNullableInt64         (null)) },
+				{ typeof(Byte?),           MethodExpressor(m => m.ConvertToNullableByte          (null)) },
+				{ typeof(UInt16?),         MethodExpressor(m => m.ConvertToNullableUInt16        (null)) },
+				{ typeof(UInt32?),         MethodExpressor(m => m.ConvertToNullableUInt32        (null)) },
+				{ typeof(UInt64?),         MethodExpressor(m => m.ConvertToNullableUInt64        (null)) },
+				{ typeof(Char?),           MethodExpressor(m => m.ConvertToNullableChar          (null)) },
+				{ typeof(Double?),         MethodExpressor(m => m.ConvertToNullableDouble        (null)) },
+				{ typeof(Single?),         MethodExpressor(m => m.ConvertToNullableSingle        (null)) },
+				{ typeof(Boolean?),        MethodExpressor(m => m.ConvertToNullableBoolean       (null)) },
+				{ typeof(DateTime?),       MethodExpressor(m => m.ConvertToNullableDateTime      (null)) },
+				{ typeof(DateTimeOffset?), MethodExpressor(m => m.ConvertToNullableDateTimeOffset(null)) },
+				{ typeof(Decimal?),        MethodExpressor(m => m.ConvertToNullableDecimal       (null)) },
+				{ typeof(Guid?),           MethodExpressor(m => m.ConvertToNullableGuid          (null)) },
+
+				// SqlTypes
+				//
+				{ typeof(SqlByte),         MethodExpressor(m => m.ConvertToSqlByte               (null)) },
+				{ typeof(SqlInt16),        MethodExpressor(m => m.ConvertToSqlInt16              (null)) },
+				{ typeof(SqlInt32),        MethodExpressor(m => m.ConvertToSqlInt32              (null)) },
+				{ typeof(SqlInt64),        MethodExpressor(m => m.ConvertToSqlInt64              (null)) },
+				{ typeof(SqlSingle),       MethodExpressor(m => m.ConvertToSqlSingle             (null)) },
+				{ typeof(SqlBoolean),      MethodExpressor(m => m.ConvertToSqlBoolean            (null)) },
+				{ typeof(SqlDouble),       MethodExpressor(m => m.ConvertToSqlDouble             (null)) },
+				{ typeof(SqlDateTime),     MethodExpressor(m => m.ConvertToSqlDateTime           (null)) },
+				{ typeof(SqlDecimal),      MethodExpressor(m => m.ConvertToSqlDecimal            (null)) },
+				{ typeof(SqlMoney),        MethodExpressor(m => m.ConvertToSqlMoney              (null)) },
+				{ typeof(SqlString),       MethodExpressor(m => m.ConvertToSqlString             (null)) },
+				{ typeof(SqlBinary),       MethodExpressor(m => m.ConvertToSqlBinary             (null)) },
+				{ typeof(SqlGuid),         MethodExpressor(m => m.ConvertToSqlGuid               (null)) },
+				{ typeof(SqlBytes),        MethodExpressor(m => m.ConvertToSqlBytes              (null)) },
+				{ typeof(SqlChars),        MethodExpressor(m => m.ConvertToSqlChars              (null)) },
+				{ typeof(SqlXml),          MethodExpressor(m => m.ConvertToSqlXml                (null)) },
+			};
+		}
+	}
+}

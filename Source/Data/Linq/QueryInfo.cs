@@ -4,10 +4,10 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 
-using BLToolkit.Data.Sql;
-
 namespace BLToolkit.Data.Linq
 {
+	using Sql;
+
 	abstract class QueryInfo
 	{
 		public class Constant : QueryInfo

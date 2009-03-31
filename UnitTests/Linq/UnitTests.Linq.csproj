@@ -85,7 +85,9 @@
     <Compile Include="Model\Person.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TestBase.cs" />
-    <Compile Include="TestDbManager.cs" />
+    <Compile Include="TestDbManager.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="WhereTest.cs" />
   </ItemGroup>
   <ItemGroup>

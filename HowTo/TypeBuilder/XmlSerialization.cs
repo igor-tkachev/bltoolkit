@@ -7,7 +7,7 @@ using NUnit.Framework.SyntaxHelpers;
 using BLToolkit.Reflection;
 using BLToolkit.EditableObjects;
 
-namespace TypeBuilder
+namespace HowTo.TypeBuilder
 {
 	[TestFixture]
 	public class XmlSerializationTest
@@ -22,7 +22,7 @@ namespace TypeBuilder
 		/*[a]*/[XmlIncludeAbstract(typeof(MyClassA))]/*[/a]*/
 		public abstract class MyClassB
 		{
-			public abstract string ValueB { get; set; }
+			public abstract string   ValueB        { get; set; }
 			public abstract MyClassA ValueMyClassA { get; set; }
 	
 			public abstract EditableList<MyClassA> MyList { get; set; }
@@ -31,11 +31,11 @@ namespace TypeBuilder
 		[Test]
 		public void Test()
 		{
-			MyClassB original = TypeAccessor<MyClassB>.CreateInstance();
-			MyClassB serialized;
-			XmlSerializer sr = new XmlSerializer(/*[a]*/TypeAccessor<MyClassB>.Type/*[/a]*/);
+			MyClassB      original = TypeAccessor<MyClassB>.CreateInstance();
+			MyClassB      serialized;
+			XmlSerializer sr      = new XmlSerializer(/*[a]*/TypeAccessor<MyClassB>.Type/*[/a]*/);
 
-			original.ValueB = "string value B";
+			original.ValueB               = "string value B";
 			original.ValueMyClassA.ValueA = "string value A";
 
 			using (MemoryStream stm = new MemoryStream())
