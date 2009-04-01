@@ -64,15 +64,40 @@ namespace Data.Linq
 			ForEachProvider(db => Assert.Less(0, func(db)));
 		}
 
-		protected void TestJohn(Func<TestDbManager,IQueryable<Person>> func)
+		protected void TestPerson(int id, string firstName, Func<TestDbManager,IQueryable<Person>> func)
 		{
 			ForEachProvider(db =>
 			{
-				var person = func(db).ToList().Where(p => p.PersonID == 1).First();
+				var person = func(db).ToList().Where(p => p.PersonID == id).First();
 
-				Assert.AreEqual(1,      person.PersonID);
-				Assert.AreEqual("John", person.FirstName);
+				Assert.AreEqual(id,        person.PersonID);
+				Assert.AreEqual(firstName, person.FirstName);
 			});
+		}
+
+		protected void TestJohn(Func<TestDbManager,IQueryable<Person>> func)
+		{
+			TestPerson(1, "John", func);
+		}
+
+		protected void TestOnePerson(int id, string firstName, Func<TestDbManager,IQueryable<Person>> func)
+		{
+			ForEachProvider(db =>
+			{
+				var list = func(db).ToList();
+
+				Assert.AreEqual(1, list.Count);
+
+				var person = list[0];
+
+				Assert.AreEqual(id,        person.PersonID);
+				Assert.AreEqual(firstName, person.FirstName);
+			});
+		}
+
+		protected void TestOneJohn(Func<TestDbManager,IQueryable<Person>> func)
+		{
+			TestOnePerson(1, "John", func);
 		}
 	}
 }

@@ -15,19 +15,19 @@ namespace Data.Linq
 	public class SelectTest : TestBase
 	{
 		[Test]
-		public void PersonToList()
+		public void SimpleDirect()
 		{
 			TestJohn(db => db.Person);
 		}
 
 		[Test]
-		public void PersonSelect()
+		public void Simple()
 		{
 			TestJohn(db => from p in db.Person select p);
 		}
 
 		[Test]
-		public void PersonDoubleSelect()
+		public void SimpleDouble()
 		{
 			TestJohn(db => db.Person.Select(p => p).Select(p => p));
 		}
@@ -67,37 +67,48 @@ namespace Data.Linq
 		}
 
 		[Test]
-		public void NewPerson1()
+		public void InitObject()
 		{
 			TestJohn(db => from p in db.Person select new Person { PersonID = p.PersonID, FirstName = p.FirstName });
 		}
 
 		[Test]
-		public void NewPerson2()
+		public void NewObject()
 		{
 			TestJohn(db => from p in db.Person select new Person(p.PersonID, p.FirstName));
 		}
 
 		[Test]
-		public void NewPerson3()
+		public void NewInitObject()
 		{
 			TestJohn(db => from p in db.Person select new Person(p.PersonID) { FirstName = p.FirstName });
 		}
 
 		[Test]
-		public void NewPerson4()
+		public void NewWithExpr()
 		{
-			TestJohn(db => from p in db.Person select new Person(p.PersonID) { FirstName = (p.FirstName + "\r\r\r").TrimEnd('\r') });
+			TestPerson(1, "John1", db => from p in db.Person select new Person(p.PersonID) { FirstName = (p.FirstName + "1\r\r\r").TrimEnd('\r') });
 		}
 
 		[Test]
 		public void MultipleSelect1()
 		{
-			TestJohn(db => db.Person.Select(p => new { ID = p.PersonID, Name = p.FirstName }).Select(p => new Person(p.ID) { FirstName = p.Name }));
+			TestJohn(db => db.Person
+				.Select(p => new { ID = p.PersonID, Name = p.FirstName })
+				.Select(p => new Person(p.ID) { FirstName = p.Name }));
 		}
 
 		[Test]
 		public void MultipleSelect2()
+		{
+			TestJohn(db => 
+				from p in db.Person
+				select new { ID = p.PersonID, Name = p.FirstName } into pp
+				select new Person(pp.ID) { FirstName = pp.Name });
+		}
+
+		[Test]
+		public void MultipleSelect3()
 		{
 			TestJohn(db => db.Person
 				.Select(p => new        { ID       = p.PersonID, Name      = p.FirstName })
@@ -107,7 +118,7 @@ namespace Data.Linq
 		}
 
 		[Test]
-		public void MultipleSelect3()
+		public void MultipleSelect4()
 		{
 			TestJohn(db => db.Person
 				.Select(p1 => new        { p1 })
@@ -116,7 +127,7 @@ namespace Data.Linq
 		}
 
 		[Test]
-		public void MultipleSelect4()
+		public void MultipleSelect5()
 		{
 			TestJohn(db => db.Person
 				.Select(p1 => new        { p1 })
@@ -126,13 +137,49 @@ namespace Data.Linq
 		}
 
 		[Test]
-		public void MultipleSelect5()
+		public void MultipleSelect6()
 		{
 			TestJohn(db => db.Person
 				.Select(p1 => new        { p1 })
 				.Select(p2 => new Person { PersonID = p2.p1.PersonID, FirstName = p2.p1.FirstName })
 				.Select(p3 => p3)
 				.Select(p4 => new Person { PersonID = p4.PersonID,    FirstName = p4.FirstName }));
+		}
+
+		[Test]
+		public void MultipleSelect7()
+		{
+			TestJohn(db => db.Person
+				.Select(p1 => new        { PersonID = p1.PersonID + 1, p1.FirstName })
+				.Select(p2 => new Person { PersonID = p2.PersonID - 1, FirstName = p2.FirstName }));
+		}
+
+		[Test]
+		public void MultipleSelect8()
+		{
+			ForEachProvider(db =>
+			{
+				var person = (
+
+					db.Person
+						.Select(p1 => new Person { PersonID = p1.PersonID * 2,           FirstName = p1.FirstName })
+						.Select(p2 => new        { PersonID = p2.PersonID / "22".Length, p2.FirstName })
+
+				).ToList().Where(p => p.PersonID == 1).First();
+				Assert.AreEqual(1,      person.PersonID);
+				Assert.AreEqual("John", person.FirstName);
+			});
+		}
+
+		[Test]
+		public void MultipleSelect9()
+		{
+			TestJohn(db => db.Person
+				.Select(p1 => new        { PersonID = p1.PersonID - 1, p1.FirstName })
+				.Select(p2 => new Person { PersonID = p2.PersonID + 1, FirstName = p2.FirstName })
+				.Select(p3 => p3)
+				.Select(p4 => new        { PersonID = p4.PersonID * "22".Length, p4.FirstName })
+				.Select(p5 => new Person { PersonID = p5.PersonID / 2, FirstName = p5.FirstName }));
 		}
 
 		void Foo(Expression<Func<IDataReader,MappingSchema,int>> func)
@@ -186,10 +233,10 @@ namespace Data.Linq
 
 		void Bar()
 		{
-			//Foo((e) => Expression;
+			//Foo(e => e);
 		}
 
-		[Test]
+		//[Test]
 		public void Test___()
 		{
 			Bar();

@@ -1,17 +1,17 @@
 using System;
 using System.Runtime.CompilerServices;
-
 using NUnit.Framework;
 
 using BLToolkit.Reflection;
 
 // typeof(TargetType).FullName + "." + TypeBuilderConsts.AssemblyNameSuffix
 //
-/*[a]*/[assembly: InternalsVisibleTo("TypeBuilder.InternalTypesTest.TestObject.TypeBuilder")]/*[/a]*/
-/*[a]*/[assembly: InternalsVisibleTo("TypeBuilder.InternalTypesTest.TestObject.TypeAccessor")]/*[/a]*/
+/*[a]*/[assembly: InternalsVisibleTo("HowTo.TypeBuilder.InternalTypesTest.TestObject.TypeBuilder")]/*[/a]*/
+/*[a]*/[assembly: InternalsVisibleTo("HowTo.TypeBuilder.InternalTypesTest.TestObject.TypeAccessor")]/*[/a]*/
 
 namespace HowTo.TypeBuilder
 {
+
 	[TestFixture]
 	public class InternalTypesTest
 	{

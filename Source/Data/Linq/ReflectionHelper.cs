@@ -143,7 +143,7 @@ namespace BLToolkit.Data.Linq
 			public static MethodInfo GetValue = MethodExpressor(rd => rd.GetValue(0));
 		}
 
-		public class MappingSchema : Expressor<Mapping.MappingSchema>
+		public class MapSchema : Expressor<Mapping.MappingSchema>
 		{
 			public static Dictionary<Type,MethodInfo> Converters = new Dictionary<Type,MethodInfo>
 			{

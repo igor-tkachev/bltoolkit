@@ -25,7 +25,7 @@ namespace BLToolkit.Data.Linq
 			if (declaringType == method.Method.DeclaringType && method.Method.Name == methodName && method.Arguments.Count == args.Length)
 			{
 				for (int i = 0; i < args.Length; i++)
-					if (!args[i](pi.Create(method.Arguments[i], pi.Indexer(ParseInfo.MethodCall.Arguments, ParseInfo.ExprItem, i))))
+					if (!args[i](pi.Create(method.Arguments[i], pi.Indexer(ReflectionHelper.MethodCall.Arguments, ReflectionHelper.ExprItem, i))))
 						return false;
 
 				return func(pi);

@@ -19,6 +19,8 @@ namespace BLToolkit.Data.Linq
 
 		public ExpressionType NodeType { get { return Expr.NodeType; } }
 
+		#region Create
+
 		public static ParseInfo<T> CreateRoot<T>(T expr, Expression paramAccesor)
 			where T : Expression
 		{
@@ -36,6 +38,8 @@ namespace BLToolkit.Data.Linq
 		{
 			return new ParseInfo<T> { Expr = expr, Parent = this, ParamAccessor = paramAccesor, IsReplaced = true };
 		}
+
+		#endregion
 
 		#region Match
 
@@ -248,7 +252,8 @@ namespace BLToolkit.Data.Linq
 
 		public ParseInfo<Expression> Convert<T>()
 		{
-			return Parent.Create(Expr, ConvertExpressionTo<T>());
+			var pi = Parent.Create(Expr, ConvertExpressionTo<T>());
+			return pi;
 		}
 
 		ParseInfo Walk(Expression e, MethodInfo property, Func<ParseInfo,ParseInfo> func)
