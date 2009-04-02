@@ -1,8 +1,5 @@
 ﻿using System;
 
-using BLToolkit.Mapping;
-using BLToolkit.Reflection.Extension;
-
 namespace BLToolkit.Data.Sql
 {
 	public class SqlField : IChild<ISqlTableSource>, ISqlExpression

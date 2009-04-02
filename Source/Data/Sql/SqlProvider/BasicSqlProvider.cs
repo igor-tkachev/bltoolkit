@@ -45,6 +45,15 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		#endregion
 
+		#region Overrides
+
+		protected virtual void BuildSqlBuilder(SqlBuilder sqlBuilder, StringBuilder sb, int indent)
+		{
+			new BasicSqlProvider(_dataProvider).BuildSql(sqlBuilder, sb, indent);
+		}
+
+		#endregion
+
 		#region Build Select
 
 		void BuildSelectClause()
@@ -63,8 +72,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 				if (!string.IsNullOrEmpty(col.Alias))
 					_sb.Append(" ").Append(col.Alias);
 
-				_sb.Append(',');
-				_sb.Append(Environment.NewLine);
+				_sb.Append(',').AppendLine();
 			}
 
 			_indent--;
@@ -89,6 +97,20 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 				if   (field.Name == "*") _sb.Append(field.PhysicalName);
 				else _sb.Append(_dataProvider.Convert(field.PhysicalName, ConvertType.NameToQueryField));
+			}
+			else if (col.Expression is SqlBuilder.Column)
+			{
+				SqlBuilder.Column column = (SqlBuilder.Column)col.Expression;
+
+				string table = GetTableAlias(_sqlBuilder.From[column.Parent]) ?? GetTablePhysicalName(column.Parent);
+
+				if (string.IsNullOrEmpty(table))
+					throw new SqlException(string.Format("Table {0} should have alias.", column.Parent));
+
+				_sb
+					.Append(table)
+					.Append('.')
+					.Append(_dataProvider.Convert(column.Alias, ConvertType.NameToQueryField));
 			}
 			else
 				throw new InvalidOperationException();
@@ -126,7 +148,15 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		void BuildPhysicalTable(ISqlTableSource table)
 		{
 			if (table is SqlTable || table is SqlBuilder.TableSource)
+			{
 				_sb.Append(GetTablePhysicalName(table));
+			}
+			else if (table is SqlBuilder)
+			{
+				_sb.Append("(").AppendLine();
+				BuildSqlBuilder((SqlBuilder)table, _sb, _indent + 1);
+				AppendIndent().Append(")");
+			}
 			else
 				throw new InvalidOperationException();
 		}
@@ -135,29 +165,29 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		#region Helpers
 
-		string GetTableAlias(ISqlTableSource table)
+		static string GetTableAlias(ISqlTableSource table)
 		{
 			if (table is SqlBuilder.TableSource)
 			{
 				SqlBuilder.TableSource ts = (SqlBuilder.TableSource)table;
 				return string.IsNullOrEmpty(ts.Alias) ? GetTableAlias(ts.Source) : ts.Alias;
 			}
-			else if (table is SqlTable)
-			{
+
+			if (table is SqlTable)
 				return ((SqlTable)table).Alias;
-			}
-			else
-				throw new InvalidOperationException();
+
+			throw new InvalidOperationException();
 		}
 
 		string GetTablePhysicalName(ISqlTableSource table)
 		{
 			if (table is SqlTable)
 				return _dataProvider.Convert(((SqlTable)table).PhysicalName, ConvertType.NameToQueryTable).ToString();
-			else if (table is SqlBuilder.TableSource)
-				return GetTablePhysicalName((SqlBuilder.TableSource)table);
-			else
-				throw new InvalidOperationException();
+
+			if (table is SqlBuilder.TableSource)
+				return GetTablePhysicalName(table);
+
+			throw new InvalidOperationException();
 		}
 
 		StringBuilder AppendIndent()

@@ -5,7 +5,6 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 
-
 namespace BLToolkit.Data.Linq
 {
 	using Mapping;
@@ -105,14 +104,13 @@ namespace BLToolkit.Data.Linq
 		{
 			if (CheckForSubQuery(select, parm, body))
 			{
-				select = MakeSubQuery(select, parm, body);
+				var subQuery = new QueryInfo.SubQuery(select, _info.SqlBuilder);
+
+				_info.SqlBuilder = subQuery.SqlBuilder;
+
+				select = subQuery;
 			}
 
-			return select;
-		}
-
-		private QueryInfo MakeSubQuery(QueryInfo select, ParseInfo<ParameterExpression> parm, ParseInfo info)
-		{
 			return select;
 		}
 
@@ -151,10 +149,7 @@ namespace BLToolkit.Data.Linq
 			bool? makeQuery = null;
 			var   member    = memberExpr.Expr.Member;
 
-			FieldWalker(queryInfo, memberExpr,
-				field              => makeQuery = false,
-				(query,memExpr)    => makeQuery = CheckFieldForSubQuery(query, memExpr),
-				(query,expr,parms) => makeQuery = true);
+			FieldWalker(queryInfo, memberExpr, _ => makeQuery = false, (_,__,___) => makeQuery = true);
 
 			if (makeQuery == null)
 				throw new LinqException("Member '{0}.{1}' is not an SQL column.", member.ReflectedType, member.Name);
@@ -178,7 +173,8 @@ namespace BLToolkit.Data.Linq
 					_info.SetQuery();
 				},
 				newExpr    => BuildNew(query, newExpr.   Body, newExpr.   Parameter), // QueryInfo.New
-				memberInit => BuildNew(query, memberInit.Body, memberInit.Parameter)  // QueryInfo.MemberInit
+				memberInit => BuildNew(query, memberInit.Body, memberInit.Parameter), // QueryInfo.MemberInit
+				subQuery   => _info.SetQuery()                                        // QueryInfo.SubQuery
 			);
 		}
 
@@ -241,9 +237,9 @@ namespace BLToolkit.Data.Linq
 			var member = memberExpr.Expr.Member;
 
 			FieldWalker(queryInfo, memberExpr,
-				field =>
+				column =>
 				{
-					var idx = _info.SqlBuilder.Select.Add(field);
+					var idx = _info.SqlBuilder.Select.Add(column);
 
 					var memberType = member.MemberType == MemberTypes.Field ?
 						((FieldInfo)   member).FieldType :
@@ -260,7 +256,6 @@ namespace BLToolkit.Data.Linq
 								Expression.Constant(idx, typeof(int)))),
 						memberExpr.ParamAccessor);
 				},
-				(query,memExpr)    => pi = GetField(query, memExpr),
 				(query,expr,parms) =>
 				{
 					pi = BuildNewExpression(query,expr,parms);
@@ -284,7 +279,13 @@ namespace BLToolkit.Data.Linq
 						constantExpr.Table.Alias = alias;
 				},
 				_ => {},
-				__ => {}
+				_ => {},
+				subQuery =>
+				{
+					var table = subQuery.SqlBuilder.From.Tables[0];
+					if (table.Alias == null)
+						table.Alias = alias;
+				}
 			);
 		}
 
@@ -310,29 +311,35 @@ namespace BLToolkit.Data.Linq
 		public void FieldWalker(
 			QueryInfo                   query,
 			ParseInfo<MemberExpression> memberExpr,
-			Action<SqlField>            processConst,
-			Action<QueryInfo,ParseInfo<MemberExpression>> processNextSource,
+			Action<ISqlExpression>      processColumn,
 			Action<QueryInfo,ParseInfo,ParseInfo<ParameterExpression>> processExpression)
 		{
 			var member = memberExpr.Expr.Member;
 
 			query.Match
 			(
+				#region QueryInfo.Constant
+
 				constantExpr =>
 				{
 					var field = constantExpr.Table[member.Name];
 					if (field != null)
-						processConst(field);
+						processColumn(field);
 				},
+
+				#endregion
+
+				#region QueryInfo.New
+
 				newExpr =>
 				{
 					if (IsParameter(memberExpr.Expr, newExpr.Parameter.Expr))
 					{
-						processNextSource(newExpr.SourceInfo, memberExpr);
+						FieldWalker(newExpr.SourceInfo, memberExpr, processColumn, processExpression);
 					}
 					else if (IsMember(memberExpr.Expr.Expression, newExpr.Body.Expr.Members))
 					{
-						processNextSource(newExpr.SourceInfo, memberExpr);
+						FieldWalker(newExpr.SourceInfo, memberExpr, processColumn, processExpression);
 					}
 					else
 					{
@@ -352,9 +359,11 @@ namespace BLToolkit.Data.Linq
 
 									if (arg is MemberExpression)
 									{
-										processNextSource(
+										FieldWalker(
 											newExpr.SourceInfo,
-											newExpr.Body.Create((MemberExpression)arg, newExpr.Body.Index(body.Arguments, New.Arguments, i)));
+											newExpr.Body.Create((MemberExpression)arg, newExpr.Body.Index(body.Arguments, New.Arguments, i)),
+											processColumn,
+											processExpression);
 									}
 									else
 									{
@@ -370,15 +379,20 @@ namespace BLToolkit.Data.Linq
 						}
 					}
 				},
+
+				#endregion
+
+				#region QueryInfo.MemberInit
+
 				memberInit =>
 				{
 					if (IsParameter(memberExpr.Expr, memberInit.Parameter.Expr))
 					{
-						processNextSource(memberInit.SourceInfo, memberExpr);
+						FieldWalker(memberInit.SourceInfo, memberExpr, processColumn, processExpression);
 					}
 					else if (IsMember(memberExpr.Expr.Expression, memberInit.Members))
 					{
-						processNextSource(memberInit.SourceInfo, memberExpr);
+						FieldWalker(memberInit.SourceInfo, memberExpr, processColumn, processExpression);
 					}
 					else
 					{
@@ -400,9 +414,11 @@ namespace BLToolkit.Data.Linq
 
 									if (ma.Expression is MemberExpression)
 									{
-										processNextSource(
+										FieldWalker(
 											memberInit.SourceInfo,
-											piExpression.Create(ma.Expression as MemberExpression, piExpression.Convert<MemberExpression>()));
+											piExpression.Create(ma.Expression as MemberExpression, piExpression.Convert<MemberExpression>()),
+											processColumn,
+											processExpression);
 									}
 									else
 									{
@@ -415,7 +431,38 @@ namespace BLToolkit.Data.Linq
 						}
 
 					}
+				},
+
+				#endregion
+
+				#region QueryInfo.SubQuery
+
+				subQuery =>
+				{
+					FieldWalker(subQuery.SourceInfo, memberExpr,
+						column =>
+						{
+							ISqlExpression col;
+
+							if (!subQuery.Columns.TryGetValue(column, out col))
+							{
+								var idx       = subQuery.SubSql.Select.Add(column);
+								var newColumn = subQuery.SubSql.Select.Columns[idx];
+
+								((IChild<ISqlTableSource>)newColumn).Parent = subQuery.SubSql;
+
+								subQuery.Columns.Add(column, col = newColumn);
+							}
+
+							processColumn(col);
+						},
+						(q,pi,ps) =>
+						{
+							
+						});
 				}
+
+				#endregion
 			);
 		}
 

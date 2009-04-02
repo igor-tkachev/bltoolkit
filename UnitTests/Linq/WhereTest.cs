@@ -22,10 +22,10 @@ namespace Data.Linq
 		public void DoNotMakeSubQuery()
 		{
 			TestOneJohn(db => 
-				from p in db.Person
-				select new { p.PersonID, Name = p.FirstName + "\r\r\r" } into p
-				where p.PersonID == 1
-				select new Person(p.PersonID) { FirstName = p.Name.TrimEnd('\r') });
+				from p1 in db.Person
+				select new { p1.PersonID, Name = p1.FirstName /*+ "\r\r\r"*/ } into p2
+				where p2.PersonID == 1
+				select new Person(p2.PersonID) { FirstName = p2.Name.TrimEnd('\r') });
 		}
 
 		[Test]

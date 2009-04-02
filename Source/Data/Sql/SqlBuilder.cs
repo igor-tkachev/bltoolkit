@@ -23,18 +23,19 @@ namespace BLToolkit.Data.Sql
 
 		#region Column
 
-		public class Column : IEquatable<Column>
+		public class Column : IEquatable<Column>, ISqlExpression, IChild<ISqlTableSource>
 		{
-			public Column(ISqlExpression expression, string alias)
+			public Column(SqlBuilder builder, ISqlExpression expression, string alias)
 			{
 				if (expression == null) throw new ArgumentNullException("expression");
 
+				_parent     = builder;
 				_expression = expression;
 				_alias      = alias;
 			}
 
-			public Column(ISqlExpression expression)
-				: this(expression, null)
+			public Column(SqlBuilder builder, ISqlExpression expression)
+				: this(builder, expression, null)
 			{
 			}
 
@@ -48,14 +49,61 @@ namespace BLToolkit.Data.Sql
 			private string _alias;
 			public  string  Alias
 			{
-				get { return _alias;  }
+				get
+				{
+					if (_alias == null)
+					{
+						if (_expression is SqlField)
+						{
+							SqlField field = (SqlField)_expression;
+							return field.Name ?? field.PhysicalName;
+						}
+					}
+
+					return _alias;
+				}
 				set { _alias = value; }
 			}
 
 			public bool Equals(Column other)
 			{
-				return _alias == other.Alias && _expression.Equals(other._expression);
+				return _alias == other._alias && _expression.Equals(other._expression);
 			}
+
+			#region IEquatable<ISqlExpression> Members
+
+			bool IEquatable<ISqlExpression>.Equals(ISqlExpression other)
+			{
+				return Equals((Column)other);
+			}
+
+			#endregion
+
+			#region ISqlExpressionScannable Members
+
+			public void ForEach(Action<ISqlExpression> action)
+			{
+				action(this);
+				_expression.ForEach(action);
+			}
+
+			#endregion
+
+			#region IChild<ISqlTableSource> Members
+
+			string IChild<ISqlTableSource>.Name
+			{
+				get { return Alias; }
+			}
+
+			private ISqlTableSource _parent;
+			public  ISqlTableSource  Parent
+			{
+				get { return _parent;  }
+				set { _parent = value; }
+			}
+
+			#endregion
 		}
 
 		#endregion
@@ -82,7 +130,19 @@ namespace BLToolkit.Data.Sql
 			private string _alias;
 			public  string  Alias
 			{
-				get { return _alias;  }
+				get
+				{
+					if (string.IsNullOrEmpty(_alias))
+					{
+						if (_source is TableSource)
+							return (_source as TableSource).Alias;
+
+						if (_source is SqlTable)
+							return ((SqlTable)_source).Alias;
+					}
+
+					return _alias;
+				}
 				set { _alias = value; }
 			}
 
@@ -107,16 +167,26 @@ namespace BLToolkit.Data.Sql
 				}
 			}
 
-			private List<JoinedTable> _joins = new List<JoinedTable>();
-			public  List<JoinedTable>  Joins
+			readonly List<JoinedTable> _joins = new List<JoinedTable>();
+			public   List<JoinedTable>  Joins
 			{
 				get { return _joins;  }
+			}
+
+			public void ForEach(Action<TableSource> action)
+			{
+				action(this);
+				foreach (JoinedTable join in Joins)
+					join.ForEach(action);
 			}
 
 			#region ISqlExpressionScannable Members
 
 			public void ForEach(Action<ISqlExpression> action)
 			{
+				if (Source is ISqlExpression)
+					((ISqlExpression)Source).ForEach(action);
+
 				foreach (JoinedTable join in Joins)
 					((ISqlExpressionScannable)join).ForEach(action);
 			}
@@ -163,8 +233,8 @@ namespace BLToolkit.Data.Sql
 				set { _table = value; }
 			}
 
-			private SearchCondition _condition = new SearchCondition();
-			public  SearchCondition  Condition
+			readonly SearchCondition _condition = new SearchCondition();
+			public   SearchCondition  Condition
 			{
 				get { return _condition;  }
 			}
@@ -174,6 +244,11 @@ namespace BLToolkit.Data.Sql
 			{
 				get { return _isWeak;  }
 				set { _isWeak = value; }
+			}
+
+			public void ForEach(Action<TableSource> action)
+			{
+				Table.ForEach(action);
 			}
 
 			#region ISqlExpressionScannable Members
@@ -211,7 +286,7 @@ namespace BLToolkit.Data.Sql
 
 			public abstract class ExprBase : Predicate
 			{
-				public ExprBase(ISqlExpression exp1)
+				protected ExprBase(ISqlExpression exp1)
 				{
 					_expr1 = exp1;
 				}
@@ -226,7 +301,7 @@ namespace BLToolkit.Data.Sql
 
 			public abstract class NotExprBase : ExprBase
 			{
-				public NotExprBase(ISqlExpression exp1, bool isNot)
+				protected NotExprBase(ISqlExpression exp1, bool isNot)
 					: base(exp1)
 				{
 					_isNot = isNot;
@@ -403,8 +478,8 @@ namespace BLToolkit.Data.Sql
 
 		public class SearchCondition : IPredicate
 		{
-			private List<Condition> _conditions = new List<Condition>();
-			public  List<Condition>  Conditions
+			readonly List<Condition> _conditions = new List<Condition>();
+			public   List<Condition>  Conditions
 			{
 				get { return _conditions; }
 			}
@@ -444,9 +519,9 @@ namespace BLToolkit.Data.Sql
 					_expr      = expr;
 				}
 
-				ConditionBase<T1,T2> _condition;
-				bool                 _isNot;
-				ISqlExpression       _expr;
+				readonly ConditionBase<T1,T2> _condition;
+				readonly bool                 _isNot;
+				readonly ISqlExpression       _expr;
 
 				T2 Add(IPredicate predicate)
 				{
@@ -464,8 +539,8 @@ namespace BLToolkit.Data.Sql
 						_op   = op;
 					}
 
-					Expr_              _expr;
-					Predicate.Operator _op;
+					readonly Expr_              _expr;
+					readonly Predicate.Operator _op;
 
 					public T2 Expr    (ISqlExpression expr)     { return _expr.Add(new Predicate.ExprExpr(_expr._expr, _op, expr)); }
 					public T2 Field   (SqlField          field)    { return Expr(field);               }
@@ -550,7 +625,7 @@ namespace BLToolkit.Data.Sql
 					_condition = condition;
 				}
 
-				ConditionBase<T1,T2> _condition;
+				readonly ConditionBase<T1,T2> _condition;
 
 				public Expr_ Expr    (ISqlExpression expr)     { return new Expr_(_condition, true, expr);  }
 				public Expr_ Field   (SqlField          field)    { return Expr(field);               }
@@ -583,7 +658,7 @@ namespace BLToolkit.Data.Sql
 			public T2 Exists(SqlBuilder subQuery)
 			{
 				Conditions.Conditions.Add(new Condition(false, new Predicate.FuncLike(new SqlFunction.Exists(subQuery))));
-				return this.GetNext();
+				return GetNext();
 			}
 		}
 
@@ -599,8 +674,8 @@ namespace BLToolkit.Data.Sql
 				_isDescending = isDescending;
 			}
 
-			private ISqlExpression _expression;   public ISqlExpression Expression   { get { return _expression;   } }
-			private bool           _isDescending; public bool           IsDescending { get { return _isDescending; } }
+			readonly ISqlExpression _expression;   public ISqlExpression Expression   { get { return _expression;   } }
+			readonly bool           _isDescending; public bool           IsDescending { get { return _isDescending; } }
 		}
 
 		#endregion
@@ -669,55 +744,55 @@ namespace BLToolkit.Data.Sql
 
 			public SelectClause Field(SqlField field)
 			{
-				AddOrGetColumn(new Column(field));
+				AddOrGetColumn(new Column(SqlBuilder, field));
 				return this;
 			}
 
 			public SelectClause Field(SqlField field, string alias)
 			{
-				AddOrGetColumn(new Column(field, alias));
+				AddOrGetColumn(new Column(SqlBuilder, field, alias));
 				return this;
 			}
 
 			public SelectClause SubQuery(SqlBuilder subQuery)
 			{
-				AddOrGetColumn(new Column(subQuery));
+				AddOrGetColumn(new Column(SqlBuilder, subQuery));
 				return this;
 			}
 
 			public SelectClause SubQuery(SqlBuilder sqlQuery, string alias)
 			{
-				AddOrGetColumn(new Column(sqlQuery, alias));
+				AddOrGetColumn(new Column(SqlBuilder, sqlQuery, alias));
 				return this;
 			}
 
 			public SelectClause Expr(ISqlExpression expr)
 			{
-				AddOrGetColumn(new Column(expr));
+				AddOrGetColumn(new Column(SqlBuilder, expr));
 				return this;
 			}
 
 			public SelectClause Expr(ISqlExpression expr, string alias)
 			{
-				AddOrGetColumn(new Column(expr, alias));
+				AddOrGetColumn(new Column(SqlBuilder, expr, alias));
 				return this;
 			}
 
 			public SelectClause Expr(string expr, params ISqlExpression[] values)
 			{
-				AddOrGetColumn(new Column(new SqlExpression(expr, values)));
+				AddOrGetColumn(new Column(SqlBuilder, new SqlExpression(expr, values)));
 				return this;
 			}
 
 			public SelectClause Expr(string alias, string expr, params ISqlExpression[] values)
 			{
-				AddOrGetColumn(new Column(new SqlExpression(expr, values)));
+				AddOrGetColumn(new Column(SqlBuilder, new SqlExpression(expr, values)));
 				return this;
 			}
 
 			public int Add(ISqlExpression expr)
 			{
-				return Columns.IndexOf(AddOrGetColumn(new Column(expr)));
+				return Columns.IndexOf(AddOrGetColumn(new Column(SqlBuilder, expr)));
 			}
 
 			Column AddOrGetColumn(Column col)
@@ -784,7 +859,7 @@ namespace BLToolkit.Data.Sql
 			void ISqlExpressionScannable.ForEach(Action<ISqlExpression> action)
 			{
 				foreach (Column column in Columns)
-					column.Expression.ForEach(action);
+					column.ForEach(action);
 			}
 
 			#endregion
@@ -804,7 +879,7 @@ namespace BLToolkit.Data.Sql
 		{
 			#region Join
 
-			public class Join : ConditionBase<Join, Join.Next>
+			public class Join : ConditionBase<Join,Join.Next>
 			{
 				public class Next
 				{
@@ -813,7 +888,7 @@ namespace BLToolkit.Data.Sql
 						_parent = parent;
 					}
 
-					Join _parent;
+					readonly Join _parent;
 
 					public Join Or  { get { return _parent.SetOr(true);  } }
 					public Join And { get { return _parent.SetOr(false); } }
@@ -829,7 +904,7 @@ namespace BLToolkit.Data.Sql
 					get { return _joinedTable.Condition; }
 				}
 
-				protected override Join.Next GetNext()
+				protected override Next GetNext()
 				{
 					return new Next(this);
 				}
@@ -843,7 +918,7 @@ namespace BLToolkit.Data.Sql
 							_joinedTable.Table.Joins.Add(join._joinedTable);
 				}
 
-				private  JoinedTable _joinedTable;
+				readonly JoinedTable _joinedTable;
 				internal JoinedTable  JoinedTable
 				{
 					get { return _joinedTable; }
@@ -922,8 +997,8 @@ namespace BLToolkit.Data.Sql
 				}
 			}
 
-			private List<TableSource> _tables = new List<TableSource>();
-			public  List<TableSource>  Tables
+			readonly List<TableSource> _tables = new List<TableSource>();
+			public   List<TableSource>  Tables
 			{
 				get { return _tables; }
 			}
@@ -972,7 +1047,7 @@ namespace BLToolkit.Data.Sql
 					_parent = parent;
 				}
 
-				WhereClause _parent;
+				readonly WhereClause _parent;
 
 				public WhereClause Or  { get { return _parent.SetOr(true);  } }
 				public WhereClause And { get { return _parent.SetOr(false); } }
@@ -982,8 +1057,8 @@ namespace BLToolkit.Data.Sql
 			{
 			}
 
-			private SearchCondition _searchCondition = new SearchCondition();
-			public  SearchCondition  SearchCondition
+			readonly SearchCondition _searchCondition = new SearchCondition();
+			public   SearchCondition  SearchCondition
 			{
 				get { return _searchCondition; }
 			}
@@ -993,7 +1068,7 @@ namespace BLToolkit.Data.Sql
 				get { return _searchCondition; }
 			}
 
-			protected override WhereClause.Next GetNext()
+			protected override Next GetNext()
 			{
 				return new Next(this);
 			}
@@ -1044,8 +1119,8 @@ namespace BLToolkit.Data.Sql
 				Items.Add(expr);
 			}
 
-			private List<ISqlExpression> _items = new List<ISqlExpression>();
-			public  List<ISqlExpression>  Items
+			readonly List<ISqlExpression> _items = new List<ISqlExpression>();
+			public   List<ISqlExpression>  Items
 			{
 				get { return _items; }
 			}
@@ -1110,8 +1185,8 @@ namespace BLToolkit.Data.Sql
 				Items.Add(new OrderByItem(expr, isDescending));
 			}
 
-			private List<OrderByItem> _items = new List<OrderByItem>();
-			public  List<OrderByItem>  Items
+			readonly List<OrderByItem> _items = new List<OrderByItem>();
+			public   List<OrderByItem>  Items
 			{
 				get { return _items; }
 			}
@@ -1139,7 +1214,21 @@ namespace BLToolkit.Data.Sql
 
 		public void FinalizeAndValidate()
 		{
+			((ISqlExpressionScannable)this).ForEach(delegate(ISqlExpression expr)
+			{
+				SqlBuilder sb = expr as SqlBuilder;
+
+				if (sb != null && sb != this)
+					sb.FinalizeAndValidate();
+			});
+
 			ResolveWeakJoins();
+			SetAliases();
+		}
+
+		void ForEachTable(Action<TableSource> action)
+		{
+			From.Tables.ForEach(delegate(TableSource tbl) { tbl.ForEach(action); });
 		}
 
 		delegate bool FindTableSource(TableSource table);
@@ -1163,7 +1252,7 @@ namespace BLToolkit.Data.Sql
 				return false;
 			};
 
-			Action<TableSource> doTable = null; doTable = delegate(TableSource table)
+			ForEachTable(delegate(TableSource table)
 			{
 				for (int i = 0; i < table.Joins.Count; i++)
 				{
@@ -1201,13 +1290,29 @@ namespace BLToolkit.Data.Sql
 							continue;
 						}
 					}
-
-					doTable(join.Table);
 				}
-			};
+			});
+		}
 
-			foreach (TableSource table in From.Tables)
-				doTable(table);
+		void SetAliases()
+		{
+			var aliases = new Dictionary<string,ISqlTableSource>();
+
+			ForEachTable(delegate(TableSource table)
+			{
+				string alias = table.Alias;
+
+				if (string.IsNullOrEmpty(alias))
+				{
+					table.Alias = "t";
+					alias       = "t1";
+				}
+
+				for (int i = 1; aliases.ContainsKey(alias); i++)
+					alias = table.Alias + i;
+
+				aliases.Add(table.Alias = alias, table);
+			});
 		}
 
 		#endregion

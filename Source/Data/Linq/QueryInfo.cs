@@ -52,11 +52,34 @@ namespace BLToolkit.Data.Linq
 			public List<MemberInfo>                Members;
 		}
 
-		public void Match(Action<Constant> sourceAction, Action<New> newAction, Action<MemberInit> memberInitAction)
+		public class SubQuery : QueryInfo
+		{
+			public SubQuery(QueryInfo sourceInfo, SqlBuilder subSql)
+			{
+				SourceInfo = sourceInfo;
+				SubSql     = subSql;
+
+				SqlBuilder = new SqlBuilder();
+				SqlBuilder.From.Table(subSql);
+			}
+
+			public QueryInfo  SourceInfo;
+			public SqlBuilder SubSql;
+			public SqlBuilder SqlBuilder;
+
+			public Dictionary<object,ISqlExpression> Columns = new Dictionary<object,ISqlExpression>();
+		}
+
+		public void Match(
+			Action<Constant>   sourceAction,
+			Action<New>        newAction,
+			Action<MemberInit> memberInitAction,
+			Action<SubQuery>   subQueryAction)
 		{
 			if      (this is Constant)   sourceAction    (this as Constant);
 			else if (this is New)        newAction       (this as New);
 			else if (this is MemberInit) memberInitAction(this as MemberInit);
+			else if (this is SubQuery)   subQueryAction  (this as SubQuery);
 		}
 	}
 }

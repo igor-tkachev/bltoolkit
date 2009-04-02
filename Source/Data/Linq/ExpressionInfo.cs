@@ -86,6 +86,7 @@ namespace BLToolkit.Data.Linq
 
 		internal void SetQuery()
 		{
+			SqlBuilder.FinalizeAndValidate();
 			GetIEnumerable = Query;
 		}
 
@@ -108,6 +109,7 @@ namespace BLToolkit.Data.Linq
 
 		internal void SetQuery(Func<IDataReader,MappingSchema,Expression,T> mapper)
 		{
+			SqlBuilder.FinalizeAndValidate();
 			GetIEnumerable = (db, expr) => Query(db, expr, mapper);
 		}
 
