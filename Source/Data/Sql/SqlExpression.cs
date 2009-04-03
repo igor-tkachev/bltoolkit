@@ -15,8 +15,17 @@ namespace BLToolkit.Data.Sql
 			_values = values;
 		}
 
-		readonly string           _expr;
+		readonly string _expr;
+		public   string  Expr
+		{
+			get { return _expr; }
+		}
+
 		readonly ISqlExpression[] _values;
+		public   ISqlExpression[]  Values
+		{
+			get { return _values; }
+		}
 
 		#region ISqlExpressionScannable Members
 

@@ -225,7 +225,7 @@ namespace BLToolkit.Data.Linq
 						var e1 = (ConstantExpression)expr1;
 						var e2 = (ConstantExpression)expr2;
 
-						return IsConstant(e1.Type)? Equals(e1.Value, e2.Value): true;
+						return ExpressionParser<T>.IsConstant(e1.Type)? Equals(e1.Value, e2.Value): true;
 					}
 
 				case ExpressionType.Invoke:
@@ -416,11 +416,6 @@ namespace BLToolkit.Data.Linq
 			}
 
 			throw new InvalidOperationException();
-		}
-
-		static bool IsConstant(Type type)
-		{
-			return type == typeof(int) || type == typeof(string);
 		}
 
 		#endregion

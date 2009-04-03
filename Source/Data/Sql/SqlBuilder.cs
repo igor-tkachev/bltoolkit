@@ -795,6 +795,11 @@ namespace BLToolkit.Data.Sql
 				return Columns.IndexOf(AddOrGetColumn(new Column(SqlBuilder, expr)));
 			}
 
+			public int Add(ISqlExpression expr, string alias)
+			{
+				return Columns.IndexOf(AddOrGetColumn(new Column(SqlBuilder, expr, alias)));
+			}
+
 			Column AddOrGetColumn(Column col)
 			{
 				foreach (Column c in Columns)
@@ -1296,23 +1301,41 @@ namespace BLToolkit.Data.Sql
 
 		void SetAliases()
 		{
-			var aliases = new Dictionary<string,ISqlTableSource>();
-
-			ForEachTable(delegate(TableSource table)
 			{
-				string alias = table.Alias;
+				Dictionary<string,ISqlTableSource> aliases = new Dictionary<string,ISqlTableSource>();
 
-				if (string.IsNullOrEmpty(alias))
+				ForEachTable(delegate(TableSource table)
 				{
-					table.Alias = "t";
-					alias       = "t1";
+					string alias = table.Alias;
+
+					if (string.IsNullOrEmpty(alias))
+					{
+						table.Alias = "t";
+						alias = "t1";
+					}
+
+					for (int i = 2; aliases.ContainsKey(alias); i++)
+						alias = table.Alias + i;
+
+					aliases.Add(table.Alias = alias, table);
+				});
+			}
+			{
+				Dictionary<string, Column> aliases = new Dictionary<string,Column>();
+
+				foreach (Column c in Select.Columns)
+				{
+					string alias = c.Alias;
+
+					if (string.IsNullOrEmpty(alias))
+						alias = "column1";
+
+					for (int i = 2; aliases.ContainsKey(alias); i++)
+						alias = "column" + i;
+
+					aliases.Add(c.Alias = alias, c);
 				}
-
-				for (int i = 1; aliases.ContainsKey(alias); i++)
-					alias = table.Alias + i;
-
-				aliases.Add(table.Alias = alias, table);
-			});
+			}
 		}
 
 		#endregion

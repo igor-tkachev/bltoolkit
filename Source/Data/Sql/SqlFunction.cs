@@ -6,10 +6,10 @@ namespace BLToolkit.Data.Sql
 	{
 		public SqlFunction(string name, params ISqlExpression[] parameters)
 		{
-			if (parameters == null) throw new ArgumentNullException("values");
+			if (parameters == null) throw new ArgumentNullException("parameters");
 
 			foreach (ISqlExpression p in parameters)
-				if (p == null) throw new ArgumentNullException("values");
+				if (p == null) throw new ArgumentNullException("parameters");
 
 			_name       = name;
 			_parameters = parameters;

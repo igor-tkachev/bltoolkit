@@ -306,9 +306,9 @@ namespace BLToolkit.Data.Linq
 
 		#endregion
 
-		#region Helpers
+		#region Field Walker
 
-		public void FieldWalker(
+		static void FieldWalker(
 			QueryInfo                   query,
 			ParseInfo<MemberExpression> memberExpr,
 			Action<ISqlExpression>      processColumn,
@@ -439,27 +439,34 @@ namespace BLToolkit.Data.Linq
 
 				subQuery =>
 				{
+					ISqlExpression col = null;
+					object         key = null;
+
 					FieldWalker(subQuery.SourceInfo, memberExpr,
 						column =>
 						{
-							ISqlExpression col;
-
 							if (!subQuery.Columns.TryGetValue(column, out col))
 							{
-								var idx       = subQuery.SubSql.Select.Add(column);
-								var newColumn = subQuery.SubSql.Select.Columns[idx];
+								string alias = null;
 
-								((IChild<ISqlTableSource>)newColumn).Parent = subQuery.SubSql;
 
-								subQuery.Columns.Add(column, col = newColumn);
+								key = column;
+								col = subQuery.SubSql.Select.Columns[subQuery.SubSql.Select.Add(column, alias)];
 							}
-
-							processColumn(col);
 						},
-						(q,pi,ps) =>
+						(q,pi,_) =>
 						{
-							
+							if (!subQuery.Columns.TryGetValue(pi, out col))
+							{
+								key = pi;
+								col = subQuery.SubSql.Select.Columns[subQuery.SubSql.Select.Add(ParseExpression(q, pi))];
+							}
 						});
+
+					if (key != null)
+						subQuery.Columns.Add(key, col);
+
+					processColumn(col);
 				}
 
 				#endregion
@@ -494,6 +501,378 @@ namespace BLToolkit.Data.Linq
 			}
 
 			return false;
+		}
+
+		#endregion
+
+		#region Expression Parser
+
+		static ISqlExpression ParseExpression(QueryInfo query, ParseInfo parseInfo)
+		{
+			switch (parseInfo.NodeType)
+			{
+				case ExpressionType.Add:
+				case ExpressionType.AddChecked:
+				case ExpressionType.And:
+				case ExpressionType.AndAlso:
+				case ExpressionType.ArrayIndex:
+				case ExpressionType.Coalesce:
+				case ExpressionType.Divide:
+				case ExpressionType.Equal:
+				case ExpressionType.ExclusiveOr:
+				case ExpressionType.GreaterThan:
+				case ExpressionType.GreaterThanOrEqual:
+				case ExpressionType.LeftShift:
+				case ExpressionType.LessThan:
+				case ExpressionType.LessThanOrEqual:
+				case ExpressionType.Modulo:
+				case ExpressionType.Multiply:
+				case ExpressionType.MultiplyChecked:
+				case ExpressionType.NotEqual:
+				case ExpressionType.Or:
+				case ExpressionType.OrElse:
+				case ExpressionType.Power:
+				case ExpressionType.RightShift:
+				case ExpressionType.Subtract:
+				case ExpressionType.SubtractChecked:
+					{
+						var pi = parseInfo.Convert<BinaryExpression>();
+						var e  = parseInfo.Expr as BinaryExpression;
+						var l  = ParseExpression(query, pi.Create(e.Left,  pi.Property(Binary.Left)));
+						var r  = ParseExpression(query, pi.Create(e.Right, pi.Property(Binary.Right)));
+
+						switch (parseInfo.NodeType)
+						{
+							case ExpressionType.Add:
+							case ExpressionType.AddChecked:
+								return new SqlExpression("({0} + {1})", l, r);
+
+							case ExpressionType.And:
+							case ExpressionType.AndAlso:
+							case ExpressionType.ArrayIndex:
+							case ExpressionType.Coalesce:
+								var c = ParseExpression(query, pi.Create(e.Conversion, pi.Property(Binary.Conversion)));
+								break;
+
+							case ExpressionType.Divide:
+							case ExpressionType.Equal:
+							case ExpressionType.ExclusiveOr:
+							case ExpressionType.GreaterThan:
+							case ExpressionType.GreaterThanOrEqual:
+							case ExpressionType.LeftShift:
+							case ExpressionType.LessThan:
+							case ExpressionType.LessThanOrEqual:
+							case ExpressionType.Modulo:
+							case ExpressionType.Multiply:
+							case ExpressionType.MultiplyChecked:
+							case ExpressionType.NotEqual:
+							case ExpressionType.Or:
+							case ExpressionType.OrElse:
+							case ExpressionType.Power:
+							case ExpressionType.RightShift:
+							case ExpressionType.Subtract:
+							case ExpressionType.SubtractChecked:
+								break;
+						}
+
+						throw new NotImplementedException();
+					}
+
+				case ExpressionType.ArrayLength:
+				case ExpressionType.Convert:
+				case ExpressionType.ConvertChecked:
+				case ExpressionType.Negate:
+				case ExpressionType.NegateChecked:
+				case ExpressionType.Not:
+				case ExpressionType.Quote:
+				case ExpressionType.TypeAs:
+				case ExpressionType.UnaryPlus:
+					{
+						throw new NotImplementedException();
+
+						/*
+						var pi = parseInfo.Convert<UnaryExpression>();
+						var e  = parseInfo.Expr as UnaryExpression;
+						var o  = pi.Walk(e.Operand, Unary.Operand, func);
+
+						if (o != e.Operand)
+							pi.Expr = Expression.MakeUnary(Expr.NodeType, o.Expr, e.Type, e.Method);
+
+						return pi;
+						*/
+					}
+
+				case ExpressionType.Call:
+					{
+						throw new NotImplementedException();
+
+						/*
+						var pi = parseInfo.Convert<MethodCallExpression>();
+						var e  = parseInfo.Expr as MethodCallExpression;
+						var o  = pi.Walk(e.Object,    MethodCall.Object,    func);
+						var a  = pi.Walk(e.Arguments, MethodCall.Arguments, func);
+
+						if (o != e.Object || a != e.Arguments)
+							pi.Expr = Expression.Call(o.Expr, e.Method, a);
+
+						return pi;
+						*/
+					}
+
+				case ExpressionType.Conditional:
+					{
+						throw new NotImplementedException();
+
+						/*
+						var pi = parseInfo.Convert<ConditionalExpression>();
+						var e  = parseInfo.Expr as ConditionalExpression;
+						var s  = pi.Walk(e.Test,    Conditional.Test,    func);
+						var t  = pi.Walk(e.IfTrue,  Conditional.IfTrue,  func);
+						var f  = pi.Walk(e.IfFalse, Conditional.IfFalse, func);
+
+						if (s != e.Test || t != e.IfTrue || f != e.IfFalse)
+							pi.Expr = Expression.Condition(s.Expr, t.Expr, f.Expr);
+
+						return pi;
+						*/
+					}
+
+				case ExpressionType.Constant:
+					{
+						var pi = parseInfo.Convert<ConstantExpression>();
+						var e  = parseInfo.Expr as ConstantExpression;
+
+						if (IsConstant(e.Type))
+							return new SqlValue(e.Value);
+
+						throw new NotImplementedException();
+					}
+
+				case ExpressionType.Invoke:
+					{
+						throw new NotImplementedException();
+
+						/*
+						var pi = parseInfo.Convert<InvocationExpression>();
+						var e  = parseInfo.Expr as InvocationExpression;
+						var ex = pi.Walk(e.Expression, Invocation.Expression, func);
+						var a  = pi.Walk(e.Arguments,  Invocation.Arguments,  func);
+
+						if (ex != e.Expression || a != e.Arguments)
+							pi.Expr = Expression.Invoke(ex, a);
+
+						return pi;
+						*/
+					}
+
+				case ExpressionType.Lambda:
+					{
+						throw new NotImplementedException();
+
+						/*
+						var pi = parseInfo.Convert<LambdaExpression>();
+						var e  = parseInfo.Expr as LambdaExpression;
+						var b  = pi.Walk(e.Body,       Lambda.Body,       func);
+						var p  = pi.Walk(e.Parameters, Lambda.Parameters, func);
+
+						if (b != e.Body || p != e.Parameters)
+							pi.Expr = Expression.Lambda(b, p.ToArray());
+
+						return pi;
+						*/
+					}
+
+				case ExpressionType.ListInit:
+					{
+						throw new NotImplementedException();
+
+						/*
+						var pi = parseInfo.Convert<ListInitExpression>();
+						var e  = parseInfo.Expr as ListInitExpression;
+						var n  = pi.Walk(e.NewExpression, ListInit.NewExpression, func);
+						var i  = pi.Walk(e.Initializers,  ListInit.Initializers, (p,pinf) =>
+						{
+							var args = pinf.Walk(p.Arguments, ElementInit.Arguments, func);
+							return args != p.Arguments? Expression.ElementInit(p.AddMethod, args): p;
+						});
+
+						if (n != e.NewExpression || i != e.Initializers)
+							pi.Expr = Expression.ListInit((NewExpression)n, i);
+
+						return pi;
+						*/
+					}
+
+				case ExpressionType.MemberAccess:
+					{
+						var pi = parseInfo.ConvertTo<MemberExpression>();
+						var e  = parseInfo.Expr as MemberExpression;
+
+						if (e.Expression.NodeType == ExpressionType.Parameter)
+						{
+							ISqlExpression sql = null;
+
+							FieldWalker(query, pi,
+								column   => sql = column,
+								(q,p,ps) => sql = ParseExpression(q, p));
+
+							return sql;
+						}
+
+						throw new NotImplementedException();
+
+						/*
+						var ex = pi.Walk(e.Expression, Member.Expression, func);
+
+						return pi;
+						*/
+					}
+
+				case ExpressionType.MemberInit:
+					{
+						throw new NotImplementedException();
+
+						/*
+						Func<MemberBinding,ParseInfo,MemberBinding> modify = null; modify = (b,pinf) =>
+						{
+							switch (b.BindingType)
+							{
+								case MemberBindingType.Assignment:
+									{
+										var ma = (MemberAssignment)b;
+										var ex = pinf.Convert<MemberAssignment>().Walk(ma.Expression, MemberAssignmentBind.Expression, func);
+
+										if (ex != ma.Expression)
+											ma = Expression.Bind(ma.Member, ex);
+
+										return ma;
+									}
+
+								case MemberBindingType.ListBinding:
+									{
+										var ml = (MemberListBinding)b;
+										var i  = pinf.Convert<MemberListBinding>().Walk(ml.Initializers, MemberListBind.Initializers, (p,psi) =>
+										{
+											var args = psi.Walk(p.Arguments, ElementInit.Arguments, func);
+											return args != p.Arguments? Expression.ElementInit(p.AddMethod, args): p;
+										});
+
+										if (i != ml.Initializers)
+											ml = Expression.ListBind(ml.Member, i);
+
+										return ml;
+									}
+
+								case MemberBindingType.MemberBinding:
+									{
+										var mm = (MemberMemberBinding)b;
+										var bs = pinf.Convert<MemberMemberBinding>().Walk(mm.Bindings, MemberMemberBind.Bindings, modify);
+
+										if (bs != mm.Bindings)
+											mm = Expression.MemberBind(mm.Member);
+
+										return mm;
+									}
+							}
+
+							return b;
+						};
+
+						var pi = parseInfo.Convert<MemberInitExpression>();
+						var e  = parseInfo.Expr as MemberInitExpression;
+						var ne = pi.Walk(e.NewExpression, MemberInit.NewExpression, func);
+						var bb = pi.Walk(e.Bindings,      MemberInit.Bindings,      modify);
+
+						if (ne != e.NewExpression || bb != e.Bindings)
+							pi.Expr = Expression.MemberInit((NewExpression)ne, bb);
+
+						return pi;
+						*/
+					}
+
+				case ExpressionType.New:
+					{
+						throw new NotImplementedException();
+
+						/*
+						var pi = parseInfo.Convert<NewExpression>();
+						var e  = parseInfo.Expr as NewExpression;
+						var a  = pi.Walk(e.Arguments, New.Arguments, func);
+
+						if (a != e.Arguments)
+							pi.Expr = e.Members == null?
+								Expression.New(e.Constructor, a):
+								Expression.New(e.Constructor, a, e.Members);
+
+						return pi;
+						*/
+					}
+
+				case ExpressionType.NewArrayBounds:
+					{
+						throw new NotImplementedException();
+
+						/*
+						var pi = parseInfo.Convert<NewArrayExpression>();
+						var e  = parseInfo.Expr as NewArrayExpression;
+						var ex = pi.Walk(e.Expressions, NewArray.Expressions, func);
+
+						if (ex != e.Expressions)
+							pi.Expr = Expression.NewArrayBounds(e.Type, ex);
+
+						return pi;
+						*/
+					}
+
+				case ExpressionType.NewArrayInit:
+					{
+						throw new NotImplementedException();
+
+						/*
+						var pi = parseInfo.Convert<NewArrayExpression>();
+						var e  = parseInfo.Expr as NewArrayExpression;
+						var ex = pi.Walk(e.Expressions, NewArray.Expressions, func);
+
+						if (ex != e.Expressions)
+							pi.Expr = Expression.NewArrayInit(e.Type, ex);
+
+						return pi;
+						*/
+					}
+
+				case ExpressionType.TypeIs:
+					{
+						throw new NotImplementedException();
+
+						/*
+						var pi = parseInfo.Convert<TypeBinaryExpression>();
+						var e  = parseInfo.Expr as TypeBinaryExpression;
+						var ex = pi.Walk(e.Expression, TypeBinary.Expression, func);
+
+						if (ex != e.Expression)
+							pi.Expr = Expression.TypeIs(ex, e.Type);
+
+						return pi;
+						*/
+					}
+
+				case ExpressionType.Parameter:
+					{
+						throw new NotImplementedException();
+
+						/*
+						var pi = parseInfo.Convert<ParameterExpression>();
+						return pi;
+						*/
+					}
+			}
+
+			throw new InvalidOperationException();
+		}
+
+		public static bool IsConstant(Type type)
+		{
+			return type == typeof(int) || type == typeof(string);
 		}
 
 		#endregion

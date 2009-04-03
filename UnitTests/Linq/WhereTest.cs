@@ -23,7 +23,7 @@ namespace Data.Linq
 		{
 			TestOneJohn(db => 
 				from p1 in db.Person
-				select new { p1.PersonID, Name = p1.FirstName /*+ "\r\r\r"*/ } into p2
+				select new { p1.PersonID, Name = p1.FirstName + "\r\r\r" } into p2
 				where p2.PersonID == 1
 				select new Person(p2.PersonID) { FirstName = p2.Name.TrimEnd('\r') });
 		}

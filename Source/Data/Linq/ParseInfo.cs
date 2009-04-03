@@ -331,8 +331,8 @@ namespace BLToolkit.Data.Linq
 						var l = pi.Walk(e.Left,       Binary.Left, func);
 						var r = pi.Walk(e.Right,      Binary.Right, func);
 
-							if (c != e.Conversion || l != e.Left || r != e.Right)
-								pi.Expr = Expression.MakeBinary(Expr.NodeType, l, r, e.IsLiftedToNull, e.Method, (LambdaExpression) c);
+						if (c != e.Conversion || l != e.Left || r != e.Right)
+							pi.Expr = Expression.MakeBinary(Expr.NodeType, l, r, e.IsLiftedToNull, e.Method, (LambdaExpression) c);
 
 						return pi;
 					}
