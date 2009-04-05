@@ -79,6 +79,7 @@ namespace BLToolkit.Data.DataProvider
 
 				case ConvertType.ParameterToName:
 					string name = (string)value;
+
 					if (name.Length > 0)
 					{
 						if (name[0] == ':')
@@ -90,11 +91,12 @@ namespace BLToolkit.Data.DataProvider
 							return name.Substring(ParameterPrefix.Length);
 						}
 					}
+
 					break;
 
-					case ConvertType.ExceptionToErrorNumber:
-						if (value is OracleException)
-							return ((OracleException)value).Code;
+				case ConvertType.ExceptionToErrorNumber:
+					if (value is OracleException)
+						return ((OracleException)value).Code;
 					break;
 			}
 

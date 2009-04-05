@@ -19,7 +19,7 @@ CREATE TABLE Person
 	LastName   nvarchar(50) NOT NULL,
 	MiddleName nvarchar(50)     NULL,
 	Gender     char(1)      NOT NULL,
-    CONSTRAINT PK_Person PRIMARY KEY CLUSTERED (PersonID)
+	CONSTRAINT PK_Person PRIMARY KEY CLUSTERED (PersonID)
 )
 GO
 

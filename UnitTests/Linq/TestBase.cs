@@ -17,8 +17,10 @@ namespace Data.Linq
 			{
 				if (args.Name.IndexOf("Sybase.AdoNet2.AseClient") >= 0)
 					return Assembly.LoadFrom(@"..\..\..\..\Redist\Sybase\Sybase.AdoNet2.AseClient.dll");
-				if (args.Name.IndexOf("Oracle.DataAccess.dll") >= 0)
+				if (args.Name.IndexOf("Oracle.DataAccess") >= 0)
 					return Assembly.LoadFrom(@"..\..\..\..\Redist\Oracle\Oracle.DataAccess.dll");
+				if (args.Name.IndexOf("IBM.Data.DB2") >= 0)
+					return Assembly.LoadFrom(@"..\..\..\..\Redist\DB2\IBM.Data.DB2.dll");
 
 				return null;
 			};
@@ -26,6 +28,7 @@ namespace Data.Linq
 
 		static readonly List<string> _configurations = new List<string>
 		{
+			"DB2",
 			"MySql",
 			"Sql2008",
 			"Sql2005",

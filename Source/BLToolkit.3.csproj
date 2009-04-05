@@ -93,6 +93,9 @@
     <None Include="Data\DataProvider\SybaseAdoDataProvider.cs">
       <DependentUpon>DataProviderBase.cs</DependentUpon>
     </None>
+    <None Include="Data\DataProvider\DB2DataProvider.cs">
+      <DependentUpon>DataProviderBase.cs</DependentUpon>
+    </None>
     <Compile Include="Aspects\Builders\AsyncAspectBuilder.cs" />
     <Compile Include="Aspects\Builders\InterceptorAspectBuilder.cs" />
     <Compile Include="Aspects\Builders\MixinAspectBuilder.cs" />

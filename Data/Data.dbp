@@ -6,6 +6,7 @@ Begin DataProject = "Data"
    End
    Begin Folder = "Create Scripts"
       Script = "Access.sql"
+      Script = "DB2.sql"
       Script = "Firebird2.sql"
       Script = "MsSql.sql"
       Script = "MySql.sql"

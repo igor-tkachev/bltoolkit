@@ -197,6 +197,9 @@
     <None Include="Data\DataProvider\SybaseAdoDataProvider.cs">
       <DependentUpon>DataProviderBase.cs</DependentUpon>
     </None>
+    <None Include="Data\DataProvider\DB2DataProvider.cs">
+      <DependentUpon>DataProviderBase.cs</DependentUpon>
+    </None>
     <Compile Include="Data\DbManager.cs">
       <SubType>Component</SubType>
     </Compile>

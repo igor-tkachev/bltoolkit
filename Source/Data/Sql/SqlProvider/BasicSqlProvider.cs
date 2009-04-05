@@ -68,7 +68,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			{
 				AppendIndent().Append(BuildExpression(col.Expression));
 
-				if (!string.IsNullOrEmpty(col.Alias))
+				if (!string.IsNullOrEmpty(col.Alias) && col.Alias != "*")
 					_sb.Append(" ").Append(col.Alias);
 
 				_sb.Append(',').AppendLine();

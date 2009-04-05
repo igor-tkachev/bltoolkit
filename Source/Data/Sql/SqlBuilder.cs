@@ -1327,6 +1327,9 @@ namespace BLToolkit.Data.Sql
 				{
 					string alias = c.Alias;
 
+					if (alias == "*")
+						continue;
+
 					if (string.IsNullOrEmpty(alias))
 						alias = "column1";
 

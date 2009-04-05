@@ -27,7 +27,7 @@ namespace BLToolkit.Data.DataProvider
 		/// <summary>
 		/// Provided name should be converted to query field name.
 		/// For example:
-		///     firstName -> @firstName
+		///     FirstName -> [FirstName]
 		/// for the following query:
 		///     SELECT [FirstName] FROM Person WHERE ID = 1
 		///            ^   and   ^
@@ -37,7 +37,7 @@ namespace BLToolkit.Data.DataProvider
 		/// <summary>
 		/// Provided name should be converted to query table name.
 		/// For example:
-		///     firstName -> @firstName
+		///     Person -> [Person]
 		/// for the following query:
 		///     SELECT * FROM [Person]
 		///                   ^ and  ^

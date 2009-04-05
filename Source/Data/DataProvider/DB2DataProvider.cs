@@ -1,32 +1,28 @@
-// MySql Connector/Net
-// http://dev.mysql.com/downloads/connector/net/
-//
-using System;
+﻿using System;
 using System.Data;
 using System.Data.Common;
-using System.Text;
 
-using MySql.Data.MySqlClient;
+using IBM.Data.DB2;
 
 namespace BLToolkit.Data.DataProvider
 {
-	public class MySqlDataProvider :  DataProviderBase
+	class DB2DataProvider :  DataProviderBase
 	{
 		public override IDbConnection CreateConnectionObject()
 		{
-			return new MySqlConnection();
+			return new DB2Connection();
 		}
 
 		public override DbDataAdapter CreateDataAdapterObject()
 		{
-			return new MySqlDataAdapter();
+			return new DB2DataAdapter();
 		}
 
 		public override bool DeriveParameters(IDbCommand command)
 		{
-			if (command is MySqlCommand)
+			if (command is DB2Command)
 			{
-				MySqlCommandBuilder.DeriveParameters((MySqlCommand)command);
+				DB2CommandBuilder.DeriveParameters((DB2Command)command);
 				return true;
 			}
 
@@ -39,19 +35,32 @@ namespace BLToolkit.Data.DataProvider
 			{
 				case ConvertType.NameToQueryParameter:
 				case ConvertType.NameToParameter:
-					return "?" + value;
+					return ":" + value;
 
 				case ConvertType.ParameterToName:
 					if (value != null)
 					{
 						string str = value.ToString();
-						return (str.Length > 0 && str[0] == '?')? str.Substring(1): str;
+						return (str.Length > 0 && str[0] == ':')? str.Substring(1): str;
 					}
+
 					break;
 
+				case ConvertType.NameToQueryField:
+				case ConvertType.NameToQueryTable:
+					return "\"" + value + "\"";
+
 				case ConvertType.ExceptionToErrorNumber:
-					if (value is MySqlException)
-						return ((MySqlException)value).Number;
+					if (value is DB2Exception)
+					{
+						DB2Exception ex = (DB2Exception)value;
+
+						foreach (DB2Error error in ex.Errors)
+							return error.RowNumber;
+
+						return 0;
+					}
+
 					break;
 				 
 			}
@@ -61,12 +70,12 @@ namespace BLToolkit.Data.DataProvider
 
 		public override Type ConnectionType
 		{
-			get { return typeof(MySqlConnection); }
+			get { return typeof(DB2Connection); }
 		}
 
 		public override string Name
 		{
-			get { return "MySql"; }
+			get { return "DB2"; }
 		}
 	}
 }
