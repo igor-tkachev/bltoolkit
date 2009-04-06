@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
 using System.Diagnostics;
+
 using BLToolkit.Configuration;
 
 namespace BLToolkit.Data
@@ -285,7 +286,7 @@ namespace BLToolkit.Data
 
 			if (dataProviders != null)
 			{
-				Debug.WriteLineIf(TS.TraceWarning, "Using appSettings\\BLToolkit.DataProviders is obsolete. Consider using bltoolkit configuration section instead.", TS.DisplayName);
+				Debug.WriteLineIf(TraceSwitch.TraceWarning, "Using appSettings\\BLToolkit.DataProviders is obsolete. Consider using bltoolkit configuration section instead.", TraceSwitch.DisplayName);
 				foreach (string dataProviderTypeName in dataProviders.Split(';'))
 					AddDataProvider(Type.GetType(dataProviderTypeName, true));
 			}

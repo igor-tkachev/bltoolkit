@@ -2,7 +2,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>9.0.21022</ProductVersion>
+    <ProductVersion>9.0.30729</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{DE11BCB2-94A1-4691-9192-5FC8E0323E2E}</ProjectGuid>
     <ProjectTypeGuids>{349c5851-65df-11da-9384-00065b846f21};{fae04ec0-301f-11d3-bf4b-00c04f79efbc}</ProjectTypeGuids>
@@ -157,6 +157,7 @@
     <Content Include="Content\Doc\EditableObjects\EditableObject.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Content\Doc\Data\Linq.htm" />
     <Content Include="Content\Doc\EditableObjects\AcceptRejectChanges.htm" />
     <Content Include="Content\Doc\EditableObjects\IsDirty.htm" />
     <Content Include="Content\Doc\EditableObjects\ManualEditableObject.cs" />
@@ -184,6 +185,9 @@
           <IISUrl>
           </IISUrl>
           <NTLMAuthentication>False</NTLMAuthentication>
+          <UseCustomServer>False</UseCustomServer>
+          <CustomServerUrl>
+          </CustomServerUrl>
           <SaveServerSettingsInUserFile>False</SaveServerSettingsInUserFile>
         </WebProjectProperties>
       </FlavorProperties>

@@ -37,6 +37,10 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\Redist\IBM\IBM.Data.DB2.dll</HintPath>
     </Reference>
+    <Reference Include="IBM.Data.Informix, Version=3.0.0.2, Culture=neutral, PublicKeyToken=7c307b91aa13d208, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\Redist\IBM\IBM.Data.Informix.dll</HintPath>
+    </Reference>
     <Reference Include="MySql.Data, Version=5.2.5.0, Culture=neutral, PublicKeyToken=c5687fc88969c44d, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\Redist\MySql\MySql.Data.dll</HintPath>
@@ -75,6 +79,9 @@
   <ItemGroup>
     <Compile Include="..\..\Source\Data\DataProvider\DB2DataProvider.cs">
       <Link>Providers\DB2DataProvider.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Source\Data\DataProvider\InformixDataProvider.cs">
+      <Link>Providers\InformixDataProvider.cs</Link>
     </Compile>
     <Compile Include="..\..\Source\Data\DataProvider\MySqlDataProvider.cs">
       <Link>Providers\MySqlDataProvider.cs</Link>

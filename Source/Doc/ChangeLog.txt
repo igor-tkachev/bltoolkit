@@ -11,6 +11,8 @@ Bug fixes
 
 Enhancement
 
+- Informix Data Provider added.
+- DB2 Data Provider added.
 - New SqlIgnore attribute.
 - New SqlBuilder class.
 

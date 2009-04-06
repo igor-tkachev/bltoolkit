@@ -103,6 +103,13 @@ namespace BLToolkit.Data
 			protected set { _dataProvider = value; }
 		}
 
+		private static TraceSwitch _traceSwitch;
+		public  static TraceSwitch  TraceSwitch
+		{
+			get { return _traceSwitch ?? (_traceSwitch = new TraceSwitch("DbManager", "DbManager trace switch", "Warning")); }
+			set { _traceSwitch = value; }
+		}
+
 		#endregion
 
 		#region Connection
@@ -526,12 +533,6 @@ namespace BLToolkit.Data
 
 		#region Protected Methods
 
-		private  static TraceSwitch _ts;
-		internal static TraceSwitch  TS
-		{
-			get { return _ts ?? (_ts = new TraceSwitch("DbManager", "DbManager trace switch", "Warning")); }
-		}
-
 		private IDataReader ExecuteReaderInternal()
 		{
 			return ExecuteReader(CommandBehavior.Default);
@@ -609,10 +610,10 @@ namespace BLToolkit.Data
 						{
 							if (param.Direction != p.Direction)
 							{
-								Debug.WriteLineIf(TS.TraceWarning, string.Format(
+								Debug.WriteLineIf(TraceSwitch.TraceWarning, string.Format(
 									"Stored Procedure '{0}'. Parameter '{1}' has different direction '{2}'. Should be '{3}'.",
 										spName, name, param.Direction, p.Direction),
-									TS.DisplayName);
+									TraceSwitch.DisplayName);
 
 								param.Direction = p.Direction;
 							}
@@ -632,9 +633,9 @@ namespace BLToolkit.Data
 						param.Direction == ParameterDirection.Input || 
 						param.Direction == ParameterDirection.InputOutput))
 					{
-						Debug.WriteLineIf(TS.TraceWarning, string.Format(
+						Debug.WriteLineIf(TraceSwitch.TraceWarning, string.Format(
 							"Stored Procedure '{0}'. Parameter '{1}' not assigned.", spName, name),
-							TS.DisplayName);
+							TraceSwitch.DisplayName);
 
 						param.SourceColumn = _dataProvider.Convert(name, ConvertType.ParameterToName).ToString();
 					}
@@ -1797,8 +1798,8 @@ namespace BLToolkit.Data
 			string          spName,
 			params object[] parameterValues)
 		{
-			return SetCommand(commandAction, CommandType.StoredProcedure,
-					spName, CreateSpParameters(spName, parameterValues));
+			return SetCommand(
+				commandAction, CommandType.StoredProcedure, spName, CreateSpParameters(spName, parameterValues));
 		}
 
 		#region Select
@@ -1811,8 +1812,7 @@ namespace BLToolkit.Data
 		public DbManager SetCommand(
 			string commandText)
 		{
-			return SetCommand(
-				CommandAction.Select, CommandType.Text, commandText, null);
+			return SetCommand(CommandAction.Select, CommandType.Text, commandText, null);
 		}
 
 		/// <summary>
@@ -1825,8 +1825,7 @@ namespace BLToolkit.Data
 			CommandType commandType,
 			string      commandText)
 		{
-			return SetCommand(
-				CommandAction.Select, commandType, commandText, null);
+			return SetCommand(CommandAction.Select, commandType, commandText, null);
 		}
 
 		/// <summary>
@@ -1842,8 +1841,7 @@ namespace BLToolkit.Data
 			string commandText,
 			params IDbDataParameter[] commandParameters)
 		{
-			return SetCommand(
-				CommandAction.Select, CommandType.Text, commandText, commandParameters);
+			return SetCommand(CommandAction.Select, CommandType.Text, commandText, commandParameters);
 		}
 
 		/// <summary>
@@ -1858,8 +1856,7 @@ namespace BLToolkit.Data
 			string      commandText,
 			params      IDbDataParameter[] commandParameters)
 		{
-			return SetCommand(
-				CommandAction.Select, commandType, commandText, commandParameters);
+			return SetCommand(CommandAction.Select, commandType, commandText, commandParameters);
 		}
 
 		/// <summary>
@@ -1883,6 +1880,11 @@ namespace BLToolkit.Data
 		public DbManager SetCommand(SqlBuilder sql)
 		{
 			string command = DataProvider.SqlProvider.BuildSql(sql);
+
+			Debug.WriteLineIf(
+				TraceSwitch.TraceInfo,
+				string.Format("{0} {1}\n{2}", DataProvider.Name, ConfigurationString, command),
+				TraceSwitch.DisplayName);
 
 			return SetCommand(command, null);
 		}
@@ -4033,8 +4035,8 @@ namespace BLToolkit.Data
 		{
 			DataException dex = new DataException(this, ex);
 
-			Debug.WriteLineIf(TS.TraceError, string.Format(
-				"Operation '{0}' throws exception '{1}'", op, dex), TS.DisplayName);
+			Debug.WriteLineIf(TraceSwitch.TraceError, string.Format(
+				"Operation '{0}' throws exception '{1}'", op, dex), TraceSwitch.DisplayName);
 
 			OnOperationException(op, dex);
 		}

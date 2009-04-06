@@ -23,6 +23,8 @@ The following table lists providers available with <b>BLToolkit</b>:
 <tr><td><a href='..\..\..\Source\Data\DataProvider\SQLiteDataProvider.cs.htm'   >SQLiteDataProvider</a></td>   <td>SQLite</td>   <td>System.Data.SQLite</td>             <td><a href='http://sqlite.phxsoftware.com/'>SQLite.org</a></td></tr>
 <tr><td><a href='..\..\..\Source\Data\DataProvider\SybaseAdoDataProvider.cs.htm'>SybaseAdoDataProvider</a></td><td>SybaseAdo</td><td>System.Data.OleDb</td>              <td>Support for <a href='http://www.datadirect.com/products/ado/index.ssp'>DataDirect Sybase ADO Provider</a></td></tr>
 <tr><td><a href='..\..\..\Source\Data\DataProvider\SybaseDataProvider.cs.htm'   >SybaseDataProvider</a></td>   <td>Sybase</td>   <td>Sybase.Data.AseClient</td>          <td><a href='http://www.sybase.com/products/allproductsa-z/softwaredeveloperkit'>Sybase</a></td></tr>
+<tr><td><a href='..\..\..\Source\Data\DataProvider\DB2DataProvider.cs.htm'      >DB2DataProvider</a></td>      <td>DB2</td>      <td>IBM.Data.DB2</td>                   <td><a href='http://www.ibm.com/software/data/db2/ad/dotnet.html'>IBM</a></td></tr>
+<tr><td><a href='..\..\..\Source\Data\DataProvider\InformixDataProvider.cs.htm' >InformixDataProvider</a></td> <td>Informix</td> <td>IBM.Data.Informix</td>              <td><a href='http://www.informix.com'>IBM</a></td></tr>
 <tr><td colspan='4' class='hr' style='padding:0'><img width='1' height='1' alt=''/></td></tr>
 </table>
 
@@ -45,3 +47,8 @@ Also a data provider can be registered by configuration file:
 App.config
 <% Doc\Data\DataProvider\App.config %>
 
+Also you can use BLToolkit config section.
+
+<% ..\..\..\UnitTests\Linq\App.config %>
+
+Here <i>UnitTests.Linq</i> assembly name should be replaces by your own.

@@ -58,7 +58,7 @@ namespace BLToolkit.Common
 			set { _notifyOnEqualSet = value; }
 		}
 
-		private static bool _filterOutBaseEqualAttributes = false;
+		private static bool _filterOutBaseEqualAttributes;
 		/// <summary>
 		/// Controls whether attributes specified on base types should be always added to list of attributes
 		/// when scanning hierarchy tree or they should be compared to attributes found on derived classes

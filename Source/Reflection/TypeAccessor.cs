@@ -730,7 +730,7 @@ namespace BLToolkit.Reflection
 
 		public PropertyDescriptorCollection CreatePropertyDescriptors()
 		{
-			Debug.WriteLineIf(BLToolkit.Data.DbManager.TS.TraceInfo,
+			Debug.WriteLineIf(BLToolkit.Data.DbManager.TraceSwitch.TraceInfo,
 				OriginalType.FullName, "CreatePropertyDescriptors");
 
 			PropertyDescriptor[] pd = new PropertyDescriptor[Count];

@@ -6,11 +6,11 @@ namespace DocGen
 {
 	partial class Program
 	{
-		static string template = Path.GetFullPath(@"..\..\content\ChmTemplate.html");
+		static readonly string _template = Path.GetFullPath(@"..\..\content\ChmTemplate.html");
 
 		static FileAction FilterFile(string fileName)
 		{
-			string name = Path.GetFileName(fileName).ToLower();
+			var name = Path.GetFileName(fileName).ToLower();
 
 			switch (name)
 			{
@@ -30,25 +30,33 @@ namespace DocGen
 			CreateIndexFile  ();
 			CreateContentFile(root);
 
-			Process.Start(
-				Environment.GetEnvironmentVariable("ProgramFiles") + @"\HTML Help Workshop\hhc.exe",
-				destPath + "BLToolkit.hhp").WaitForExit();
+			var hcc = ProgramFilesx86() + @"\HTML Help Workshop\hhc.exe";
+
+			Process.Start(hcc, destPath + "BLToolkit.hhp").WaitForExit();
 			Process.Start(Path.GetFullPath(@"..\..\..\..\Source\Doc\") + "BLToolkit.chm");
+		}
+
+		static string ProgramFilesx86()
+		{
+			if (IntPtr.Size == 8 || !String.IsNullOrEmpty(Environment.GetEnvironmentVariable("PROCESSOR_ARCHITEW6432")))
+				return Environment.GetEnvironmentVariable("ProgramFiles(x86)");
+
+			return Environment.GetEnvironmentVariable("ProgramFiles");
 		}
 
 		static void CreateProjectFile(FileItem root)
 		{
-			using (StreamWriter sw = File.CreateText(destPath + "BLToolkit.hhp"))
+			using (var sw = File.CreateText(destPath + "BLToolkit.hhp"))
 			{
 				sw.WriteLine("[FILES]");
 
 				foreach (var file in root.GetFiles())
 				{
-					string s = file.Path;
+					var s = file.Path;
 					sw.WriteLine(s);
 				}
 
-				string path = Path.GetFullPath(@"..\..\..\..\Source\Doc\");
+				var path = Path.GetFullPath(@"..\..\..\..\Source\Doc\");
 
 				sw.WriteLine(@"
 [OPTIONS]
@@ -76,7 +84,7 @@ MsdnHelp=""Business Logic Toolkit for .NET Help"",""BLToolkit.hhc"",""BLToolkit.
 
 		private static void CreateIndexFile()
 		{
-			using (StreamWriter sw = File.CreateText(destPath + "BLToolkit.hhk"))
+			using (var sw = File.CreateText(destPath + "BLToolkit.hhk"))
 			{
 				sw.WriteLine("<HTML><HEAD></HEAD><BODY><UL>");
 
@@ -107,12 +115,12 @@ MsdnHelp=""Business Logic Toolkit for .NET Help"",""BLToolkit.hhc"",""BLToolkit.
 			}
 		}
 
-		private static void CreateContent(FileItem dir, StreamWriter sw)
+		private static void CreateContent(FileItem dir, TextWriter sw)
 		{
 			if (dir.Items == null)
 				return;
 
-			FileItem index = dir.Items.Find(i => i.Name.ToLower().EndsWith("index.htm"));
+			var index = dir.Items.Find(i => i.Name.ToLower().EndsWith("index.htm"));
 
 			if (index == null)
 			{
@@ -139,17 +147,16 @@ MsdnHelp=""Business Logic Toolkit for .NET Help"",""BLToolkit.hhc"",""BLToolkit.
 			foreach (var file in dir.Items)
 			{
 				if (file.Name.ToLower().EndsWith("index.htm"))
-				{
 					continue;
-				}
-				else if (file.IsFile)
+
+				if (file.IsFile)
 				{
 					sw.WriteLine(@"
 <LI><OBJECT type=""text/sitemap"">
 	<param name=""Name"" value=""{0}"">
 	<param name=""Local"" value=""{1}"">
 	</OBJECT>",
-						file.Title, file.Name);
+					             file.Title, file.Name);
 
 				}
 				else
@@ -161,7 +168,7 @@ MsdnHelp=""Business Logic Toolkit for .NET Help"",""BLToolkit.hhc"",""BLToolkit.
 
 		private static void CreateContentFile(FileItem root)
 		{
-			using (StreamWriter sw = File.CreateText(destPath + "BLToolkit.hhc"))
+			using (var sw = File.CreateText(destPath + "BLToolkit.hhc"))
 			{
 				sw.WriteLine(@"
 <HTML>

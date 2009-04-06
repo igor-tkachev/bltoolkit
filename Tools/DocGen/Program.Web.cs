@@ -5,11 +5,11 @@ namespace DocGen
 {
 	partial class Program
 	{
-		static string template = Path.GetFullPath(@"..\..\content\WebTemplate.html");
+		static readonly string _template = Path.GetFullPath(@"..\..\content\WebTemplate.html");
 
 		static FileAction FilterFile(string fileName)
 		{
-			string name = Path.GetFileName(fileName).ToLower();
+			var name = Path.GetFileName(fileName).ToLower();
 
 			switch (name)
 			{
@@ -22,20 +22,20 @@ namespace DocGen
 		{
 			new Generator().Generate(
 				new FileItem(),
-				template, new string[] { "Source" }, destPath, @"..\..\..\..\", false, true,
+				_template, new string[] { "Source" }, destPath, @"..\..\..\..\", false, true,
 				fileName =>
 				{
-					string name = Path.GetFileName(fileName).ToLower();
+					var name = Path.GetFileName(fileName).ToLower();
 
 					if (name == "assemblyinfo.cs")
 						return FileAction.Skip;
 
-					string ext = Path.GetExtension(fileName).ToLower();
+					var ext = Path.GetExtension(fileName).ToLower();
 
 					switch (ext)
 					{
 						case ".cs": return FileAction.Process;
-						default: return FileAction.Skip;
+						default   : return FileAction.Skip;
 					}
 				});
 
@@ -44,11 +44,11 @@ namespace DocGen
 
 		static void CreateSitemap(FileItem files)
 		{
-			string sm = "";
+			var sm = "";
 
 			foreach (var file in files.GetFiles())
 			{
-				string s = file.Name.Replace(destPath, "http://www.bltoolkit.net/").Replace("\\", "/");
+				var s = file.Name.Replace(destPath, "http://www.bltoolkit.net/").Replace("\\", "/");
 
 				if (s == "http://www.bltoolkit.net/index.htm")
 					continue;
@@ -62,7 +62,7 @@ namespace DocGen
 					s, DateTime.Now);
 			}
 
-			using (StreamWriter sw = File.CreateText(destPath + "sitemap.xml"))
+			using (var sw = File.CreateText(destPath + "sitemap.xml"))
 			{
 				sw.WriteLine(string.Format(@"<?xml version=""1.0"" encoding=""UTF-8""?>
 <urlset xmlns=""http://www.google.com/schemas/sitemap/0.84"">

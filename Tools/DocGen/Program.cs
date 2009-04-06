@@ -8,16 +8,16 @@ namespace DocGen
 		public static string rss      = Path.GetFullPath(@"..\..\content\rss.xml");
 		public static string destPath = @"c:\temp\bltoolkit\";
 
-		static void Main(string[] args)
+		static void Main()
 		{
-			FileItem root = new FileItem();
+			var root = new FileItem();
 
 			new Generator().Generate(
 				root,
-				template, new string[] {}, destPath, @"..\..\content", true, false,
+				_template, new string[] {}, destPath, @"..\..\content", true, false,
 				fileName =>
 				{
-					string name = Path.GetFileName(fileName).ToLower();
+					var name = Path.GetFileName(fileName).ToLower();
 
 					switch (name)
 					{
@@ -26,12 +26,12 @@ namespace DocGen
 						case "webtemplate.html": return FileAction.Skip;
 					}
 
-					FileAction fileAction = FilterFile(fileName);
+					var fileAction = FilterFile(fileName);
 
 					if (fileAction != FileAction.Process)
 						return fileAction;
 
-					string ext = Path.GetExtension(fileName).ToLower();
+					var ext = Path.GetExtension(fileName).ToLower();
 
 					switch (ext)
 					{

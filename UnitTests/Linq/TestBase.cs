@@ -1,9 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 
 using NUnit.Framework;
+
+using BLToolkit.Data;
 
 namespace Data.Linq
 {
@@ -20,14 +23,17 @@ namespace Data.Linq
 				if (args.Name.IndexOf("Oracle.DataAccess") >= 0)
 					return Assembly.LoadFrom(@"..\..\..\..\Redist\Oracle\Oracle.DataAccess.dll");
 				if (args.Name.IndexOf("IBM.Data.DB2") >= 0)
-					return Assembly.LoadFrom(@"..\..\..\..\Redist\DB2\IBM.Data.DB2.dll");
+					return Assembly.LoadFrom(@"..\..\..\..\Redist\IBM\IBM.Data.DB2.dll");
 
 				return null;
 			};
+
+			DbManager.TraceSwitch = new TraceSwitch("DbManager", "DbManager trace switch", "Info");
 		}
 
 		static readonly List<string> _configurations = new List<string>
 		{
+			"Informix",
 			"DB2",
 			"MySql",
 			"Sql2008",
@@ -38,7 +44,7 @@ namespace Data.Linq
 
 		protected void ForEachProvider(Action<TestDbManager> func)
 		{
-			for (int i = 0; i < _configurations.Count; i++)
+			for (var i = 0; i < _configurations.Count; i++)
 			{
 				var reThrow = false;
 

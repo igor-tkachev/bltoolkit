@@ -36,7 +36,7 @@ namespace DocGen
 
 			CreateDestFolder();
 
-			string template = File.ReadAllText(templateFileName);
+			var template = File.ReadAllText(templateFileName);
 
 			GenerateContent(createdFiles, template, path, createIndex);
 		}
@@ -54,11 +54,11 @@ namespace DocGen
 
 			Action<string> clean = null; clean = delegate(string path)
 			{
-				foreach (string file in Directory.GetFiles(path))
+				foreach (var file in Directory.GetFiles(path))
 					if (Path.GetExtension(file).ToLower() != ".zip")
 						try { File.Delete(file); } catch {}
 
-				foreach (string dir in Directory.GetDirectories(path))
+				foreach (var dir in Directory.GetDirectories(path))
 				{
 					clean(dir);
 					try { Directory.Delete(dir); } catch {}
@@ -77,25 +77,25 @@ namespace DocGen
 		private bool GenerateContent(
 			FileItem createdFiles, string template, string[] path, bool createIndex)
 		{
-			string folder     = string.Join("/", path);
-			string destFolder = Path.Combine(_destFolder, folder);
-			string backPath   = "";
+			var folder     = string.Join("/", path);
+			var destFolder = Path.Combine(_destFolder, folder);
+			var backPath   = "";
 
-			for (int i = 0; i < path.Length; i++)
+			for (var i = 0; i < path.Length; i++)
 				backPath += "../";
 
-			string   sourcePath  = Path.Combine(_sourcePath, folder);
-			string[] sourceFiles = Directory.GetFiles(sourcePath);
+			var sourcePath  = Path.Combine(_sourcePath, folder);
+			var sourceFiles = Directory.GetFiles(sourcePath);
 
 			var files   = new List<string>();
 			var folders = new List<string>();
 
-			foreach (string fileName in sourceFiles)
+			foreach (var fileName in sourceFiles)
 			{
-				string backLinks = GeneratePath(path, backPath, fileName);
+				var backLinks = GeneratePath(path, backPath, fileName);
 
-				string destName = Path.Combine(destFolder, Path.GetFileName(fileName));
-				string ext      = Path.GetExtension(destName).ToLower();
+				var destName  = Path.Combine(destFolder, Path.GetFileName(fileName));
+				var ext       = Path.GetExtension(destName).ToLower();
 
 				Console.WriteLine(destName);
 
@@ -116,13 +116,13 @@ namespace DocGen
 						{
 							case ".htm":
 							case ".html":
-								using (StreamWriter sw = File.CreateText(destName))
-								using (StreamReader sr = File.OpenText(fileName))
+								using (var sw = File.CreateText(destName))
+								using (var sr = File.OpenText(fileName))
 								{
-									FileItem item = new FileItem { IsFile = true, Name = destName };
+									var item = new FileItem { IsFile = true, Name = destName };
 									createdFiles.Add(item);
 
-									string source = sr.ReadToEnd();
+									var source = sr.ReadToEnd();
 
 									source = source
 										.Replace("<ct_table>",  "<table border='0' cellpadding='0' cellspacing='0'>")
@@ -149,15 +149,13 @@ namespace DocGen
 											;
 									}
 
-									string title  = item.Title;
+									var title  = item.Title;
 
 									if (title == "index")
 									{
 										title = Path.GetFileName(Path.GetDirectoryName(fileName));
 
-										if (title == "content")
-											title = "";
-										else
+										if (title != "content")
 											item.Title = title;
 									}
 
@@ -185,7 +183,7 @@ namespace DocGen
 
 										foreach (var index in IndexItem.Index)
 											if (!item.NoIndexes.Contains(index.Name))
-												foreach (string s in index.Text)
+												foreach (var s in index.Text)
 													if (source.IndexOf(s) >= 0)
 													{
 														index.Files.Add(item);
@@ -194,7 +192,7 @@ namespace DocGen
 
 										foreach (var s in item.Indexes)
 										{
-											IndexItem index = IndexItem.Index.Find(i => i.Name == s);
+											var index = IndexItem.Index.Find(i => i.Name == s);
 
 											if (index == null)
 												IndexItem.Index.Add(new IndexItem(s));
@@ -208,11 +206,11 @@ namespace DocGen
 								break;
 
 							case ".cs":
-								using (StreamWriter sw = File.CreateText(destName + ".htm"))
+								using (var sw = File.CreateText(destName + ".htm"))
 								{
 									createdFiles.Add(new FileItem { IsFile = true, Name = destName + ".htm" });
 
-									string source = GenerateSource("<% " + fileName + " %>", null);
+									var source = GenerateSource("<% " + fileName + " %>", null);
 
 									sw.WriteLine(string.Format(
 										template,
@@ -230,15 +228,15 @@ namespace DocGen
 				}
 			}
 
-			string[] dirs    = Directory.GetDirectories(sourcePath);
-			string[] newPath = new string[path.Length + 1];
+			var dirs    = Directory.GetDirectories(sourcePath);
+			var newPath = new string[path.Length + 1];
 
 			path.CopyTo(newPath, 0);
 
-			foreach (string dir in dirs)
+			foreach (var dir in dirs)
 			{
-				string[] dirList = dir.Split('/', '\\');
-				string   dirName = dirList[dirList.Length - 1];
+				var dirList = dir.Split('/', '\\');
+				var dirName = dirList[dirList.Length - 1];
 
 				// Skip Subversion folders.
 				//
@@ -247,7 +245,7 @@ namespace DocGen
 
 				newPath[path.Length] = dirName;
 
-				FileItem item = new FileItem { IsFile = false, Name = dirName};
+				var item = new FileItem { IsFile = false, Name = dirName};
 
 				createdFiles.Add(item);
 
@@ -257,15 +255,15 @@ namespace DocGen
 
 			if (files.Count > 0 || folders.Count > 0)
 			{
-				string indexName = destFolder + "/index.htm";
+				var indexName = destFolder + "/index.htm";
 
 				if (createIndex && File.Exists(indexName) == false)
 				{
-					string str = "";
+					var str = "";
 
 					folders.Sort();
 
-					foreach (string s in folders)
+					foreach (var s in folders)
 						str += string.Format("&#8226; <a href='{0}/index.htm'>{0}</a><br>\n",
 							Path.GetFileName(s));
 
@@ -274,7 +272,7 @@ namespace DocGen
 
 					files.Sort();
 
-					foreach (string s in files)
+					foreach (var s in files)
 						str += string.Format(
 							s.EndsWith(".htm",  true, CultureInfo.CurrentCulture) ||
 							s.EndsWith(".html", true, CultureInfo.CurrentCulture)?
@@ -284,7 +282,7 @@ namespace DocGen
 
 					_fileAction(indexName);
 
-					using (StreamWriter sw = File.CreateText(indexName))
+					using (var sw = File.CreateText(indexName))
 					{
 						createdFiles.Add(new FileItem { IsFile = true, Name = indexName });
 
@@ -313,11 +311,11 @@ namespace DocGen
 				 idx = text.IndexOf("<%", idx + 2),
 				 end = text.IndexOf("%>", idx + 2))
 			{
-				string startSource = text.Substring(0, idx);
-				string source      = text.Substring(idx + 2, end - idx - 2).Trim();
-				string command     = "source";
+				var startSource = text.Substring(0, idx);
+				var source      = text.Substring(idx + 2, end - idx - 2).Trim();
+				var command     = "source";
 
-				int cmdIdx = source.IndexOf('#');
+				var cmdIdx = source.IndexOf('#');
 
 				if (cmdIdx >= 0)
 				{
@@ -351,18 +349,19 @@ namespace DocGen
 				text = startSource + source + text.Substring(end + 2);
 			}
 
-			return text;
+			return text
+				.Replace(@"Data Source=(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST=DBHost)(PORT=1521))(CONNECT_DATA=(SERVICE_NAME=XE)));User Id=TestUser;Password=TestPassword;", "...");
 		}
 
 		private static string GetNews(string sourcePath)
 		{
-			XmlDocument doc = new XmlDocument();
+			var doc = new XmlDocument();
 
 			doc.Load(sourcePath);
 
-			string html   = "<table border='0' cellpadding='0' cellspacing='0'>";
-			string @class = "";
-			int    i      = 0;
+			var html   = "<table border='0' cellpadding='0' cellspacing='0'>";
+			var @class = "";
+			var i      = 0;
 
 			foreach (XmlNode item in doc.SelectNodes("rss/channel/item"))
 			{
@@ -434,24 +433,24 @@ namespace DocGen
 
 		private static string GetSourceCodeFromPath(string sourcePath, string source)
 		{
-			string code = "";
+			var code = "";
 
-			using (StreamReader sr = File.OpenText(sourcePath))
-				for (string s = sr.ReadLine(); s != null; s = sr.ReadLine())
+			using (var sr = File.OpenText(sourcePath))
+				for (var s = sr.ReadLine(); s != null; s = sr.ReadLine())
 					if (!s.StartsWith("//@") && !s.StartsWith("''@"))
 						code += s + "\n";
 
 			return GetSourceCode(code, Path.GetExtension(sourcePath).ToLower(), source);
 		}
 
-		private string GeneratePath(string[] path, string backPath, string fileName)
+		private static string GeneratePath(string[] path, string backPath, string fileName)
 		{
 			if (path.Length == 0)
 				return "";
 
-			string backLinks = "";
-			string parent    = "";
-			string name      = Path.GetFileNameWithoutExtension(fileName);
+			var backLinks = "";
+			var parent    = "";
+			var name      = Path.GetFileNameWithoutExtension(fileName);
 
 			switch (path[0])
 			{
@@ -460,11 +459,11 @@ namespace DocGen
 						"<br><nobr>&nbsp;&nbsp;<small><a class='m' href='{0}Doc/index.htm'>Doc</a>",
 						backPath);
 
-					for (int i = 1; i < path.Length; i++)
+					for (var i = 1; i < path.Length; i++)
 					{
 						parent = "";
 
-						for (int j = i + 1; j < path.Length; j++)
+						for (var j = i + 1; j < path.Length; j++)
 							parent += "../";
 
 						backLinks += string.Format(".<a class='m' href='{0}index.htm'>{1}</a>", parent, path[i]);
@@ -485,11 +484,11 @@ namespace DocGen
 						"<br><nobr>&nbsp;&nbsp;<small><a class='m' href='{0}Source/index.htm'>Source</a>",
 						backPath);
 
-					for (int i = 1; i < path.Length; i++)
+					for (var i = 1; i < path.Length; i++)
 					{
 						parent = "";
 
-						for (int j = i + 1; j < path.Length; j++)
+						for (var j = i + 1; j < path.Length; j++)
 							parent += "../";
 
 						backLinks += string.Format(".<a class='m' href='{0}index.htm'>{1}</a>", parent, path[i]);

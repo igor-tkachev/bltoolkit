@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 
 namespace DocGen
 {
@@ -74,15 +73,15 @@ namespace DocGen
 		{
 			if (Items != null)
 			{
-				List<FileItem> groups = new List<FileItem>();
+				var groups = new List<FileItem>();
 
-				for (int i = 0; i < Items.Count; i++)
+				for (var i = 0; i < Items.Count; i++)
 				{
-					FileItem item = Items[i];
+					var item = Items[i];
 
 					if (item.Group != null && item.Group != Name)
 					{
-						FileItem group = groups.Find(file => file.Name == item.Group);
+						var group = groups.Find(file => file.Name == item.Group);
 
 						if (group == null)
 							groups.Add(group = new FileItem { Name = item.Group, SortOrder = item.SortOrder });
@@ -101,8 +100,8 @@ namespace DocGen
 
 				Items.Sort((x, y) =>
 				{
-					string xname = x.Title.ToLower();
-					string yname = y.Title.ToLower();
+					var xname = x.Title.ToLower();
+					var yname = y.Title.ToLower();
 
 					if (xname == yname)                         return  0;
 					if (x.Name.ToLower().EndsWith("index.htm")) return -1;

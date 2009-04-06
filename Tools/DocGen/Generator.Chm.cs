@@ -4,7 +4,7 @@ namespace DocGen
 {
 	partial class Generator
 	{
-		static bool _addDashToTitle    = false;
-		static bool _modifySourceLinks = true;
+		const bool _addDashToTitle    = false;
+		const bool _modifySourceLinks = true;
 	}
 }

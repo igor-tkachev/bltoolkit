@@ -1,9 +1,9 @@
-DROP TABLE "dbo"."Person"
+DROP TABLE "Person"
 GO
 
-CREATE TABLE "dbo"."Person"
+CREATE TABLE "Person"
 ( 
-	"PersonID"   INTEGER PRIMARY KEY NOT NULL,
+	"PersonID"   INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY NOT NULL,
 	"FirstName"  VARCHAR(50) NOT NULL,
 	"LastName"   VARCHAR(50) NOT NULL,
 	"MiddleName" VARCHAR(50),
@@ -11,7 +11,7 @@ CREATE TABLE "dbo"."Person"
 )
 GO
 
-INSERT INTO "dbo"."Person" ("FirstName", "LastName", "Gender") VALUES ('John',   'Pupkin',    'M')
+INSERT INTO "Person" ("FirstName", "LastName", "Gender") VALUES ('John',   'Pupkin',    'M')
 GO
-INSERT INTO "dbo"."Person" ("FirstName", "LastName", "Gender") VALUES ('Tester', 'Testerson', 'M')
+INSERT INTO "Person" ("FirstName", "LastName", "Gender") VALUES ('Tester', 'Testerson', 'M')
 GO

@@ -9,7 +9,7 @@ namespace DocGen
 		{
 			Name = name;
 
-			string[] ss = name.Split(' ');
+			var ss = name.Split(' ');
 
 			if (ss.Length > 1)
 			{
