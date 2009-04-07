@@ -12,6 +12,7 @@ Begin DataProject = "Data"
       Script = "MsSql.sql"
       Script = "MySql.sql"
       Script = "Oracle.sql"
+      Script = "PostgreSQL.sql"
       Script = "SqlCe.sql"
       Script = "Sybase.sql"
    End

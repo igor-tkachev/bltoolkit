@@ -1,35 +1,27 @@
-// MySql Connector/Net
-// http://dev.mysql.com/downloads/connector/net/
-//
 using System;
 using System.Data;
 using System.Data.Common;
 
-using MySql.Data.MySqlClient;
+using Npgsql;
 
 namespace BLToolkit.Data.DataProvider
 {
-	public class MySqlDataProvider :  DataProviderBase
+	public class PostgreSQLDataProvider : DataProviderBase
 	{
 		public override IDbConnection CreateConnectionObject()
 		{
-			return new MySqlConnection();
+			return new NpgsqlConnection();
 		}
 
 		public override DbDataAdapter CreateDataAdapterObject()
 		{
-			return new MySqlDataAdapter();
+			return new NpgsqlDataAdapter();
 		}
 
 		public override bool DeriveParameters(IDbCommand command)
 		{
-			if (command is MySqlCommand)
-			{
-				MySqlCommandBuilder.DeriveParameters((MySqlCommand)command);
-				return true;
-			}
-
-			return false;
+			NpgsqlCommandBuilder.DeriveParameters((NpgsqlCommand)command);
+			return true;
 		}
 
 		public override object Convert(object value, ConvertType convertType)
@@ -38,21 +30,29 @@ namespace BLToolkit.Data.DataProvider
 			{
 				case ConvertType.NameToQueryParameter:
 				case ConvertType.NameToParameter:
-					return "?" + value;
+					return ":" + value;
 
 				case ConvertType.ParameterToName:
 					if (value != null)
 					{
 						string str = value.ToString();
-						return (str.Length > 0 && str[0] == '?')? str.Substring(1): str;
+						return (str.Length > 0 && str[0] == ':')? str.Substring(1): str;
 					}
+
 					break;
 
 				case ConvertType.ExceptionToErrorNumber:
-					if (value is MySqlException)
-						return ((MySqlException)value).Number;
+					if (value is NpgsqlException)
+					{
+						NpgsqlException ex = (NpgsqlException)value;
+
+						foreach (NpgsqlError error in ex.Errors)
+							return error.Code;
+
+						return 0;
+					}
+
 					break;
-				 
 			}
 
 			return value;
@@ -60,12 +60,12 @@ namespace BLToolkit.Data.DataProvider
 
 		public override Type ConnectionType
 		{
-			get { return typeof(MySqlConnection); }
+			get { return typeof(NpgsqlConnection); }
 		}
 
 		public override string Name
 		{
-			get { return "MySql"; }
+			get { return "PostgreSQL"; }
 		}
 	}
 }

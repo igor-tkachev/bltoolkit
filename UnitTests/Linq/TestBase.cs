@@ -24,6 +24,8 @@ namespace Data.Linq
 					return Assembly.LoadFrom(@"..\..\..\..\Redist\Oracle\Oracle.DataAccess.dll");
 				if (args.Name.IndexOf("IBM.Data.DB2") >= 0)
 					return Assembly.LoadFrom(@"..\..\..\..\Redist\IBM\IBM.Data.DB2.dll");
+				if (args.Name.IndexOf("Mono.Security") >= 0)
+					return Assembly.LoadFrom(@"..\..\..\..\Redist\PostgreSql\Mono.Security.dll");
 
 				return null;
 			};
@@ -33,6 +35,7 @@ namespace Data.Linq
 
 		static readonly List<string> _configurations = new List<string>
 		{
+			"PostgreSQL",
 			"Informix",
 			"DB2",
 			"MySql",

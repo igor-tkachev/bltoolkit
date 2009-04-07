@@ -66,10 +66,12 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 			foreach (SqlBuilder.Column col in _sqlBuilder.Select.Columns)
 			{
-				AppendIndent().Append(BuildExpression(col.Expression));
+				bool addAlias = true;
 
-				if (!string.IsNullOrEmpty(col.Alias) && col.Alias != "*")
-					_sb.Append(" ").Append(col.Alias);
+				AppendIndent().Append(BuildExpression(col.Expression, col.Alias, ref addAlias));
+
+				if (addAlias)
+					_sb.Append(" as ").Append(col.Alias);
 
 				_sb.Append(',').AppendLine();
 			}
@@ -130,7 +132,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		#region Helpers
 
-		string BuildExpression(ISqlExpression expr)
+		string BuildExpression(ISqlExpression expr, string alias, ref bool addAlias)
 		{
 			if (expr is SqlField)
 			{
@@ -140,6 +142,8 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 				if (string.IsNullOrEmpty(table))
 					throw new SqlException(string.Format("Table {0} should have alias.", field.Table));
+
+				addAlias = alias != field.PhysicalName;
 
 				return string.Format("{0}.{1}",
 					table,
@@ -154,6 +158,8 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 				if (string.IsNullOrEmpty(table))
 					throw new SqlException(string.Format("Table {0} should have alias.", column.Parent));
+
+				addAlias = alias != column.Alias;
 
 				return string.Format("{0}.{1}",
 					table,
@@ -179,9 +185,10 @@ namespace BLToolkit.Data.Sql.SqlProvider
 				SqlExpression e = (SqlExpression)expr;
 
 				object[] values = new object[e.Values.Length];
+				bool     dummy  = false;
 
 				for (int i = 0; i < values.Length; i++)
-					values[i] = BuildExpression(e.Values[i]);
+					values[i] = BuildExpression(e.Values[i], "", ref dummy);
 
 				return string.Format(e.Expr, values);
 			}

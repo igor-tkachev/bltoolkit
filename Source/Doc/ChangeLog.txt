@@ -11,6 +11,7 @@ Bug fixes
 
 Enhancement
 
+- PostgreSQL Data Provider added.
 - Informix Data Provider added.
 - DB2 Data Provider added.
 - New SqlIgnore attribute.
