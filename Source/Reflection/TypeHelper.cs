@@ -1368,6 +1368,26 @@ namespace BLToolkit.Reflection
 			return match;
 		}
 
+		public static PropertyInfo GetPropertyByMethod(MethodInfo method)
+		{
+			if (method != null)
+			{
+				Type         type = method.DeclaringType;
+				BindingFlags attr = BindingFlags.NonPublic | BindingFlags.Public | (method.IsStatic ? BindingFlags.Static : BindingFlags.Instance);
+
+				foreach (PropertyInfo info in type.GetProperties(attr))
+				{
+					if (info.CanRead && method == info.GetGetMethod(true))
+						return info;
+
+					if (info.CanWrite && method == info.GetSetMethod(true))
+						return info;
+				}
+			}
+
+			return null;
+		}
+
 		#endregion
 	}
 }

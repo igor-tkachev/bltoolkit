@@ -41,6 +41,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 			BuildSelectClause();
 			BuildFromClause  ();
+			BuildWhereClause();
 		}
 
 		#endregion
@@ -56,7 +57,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		#region Build Select
 
-		void BuildSelectClause()
+		protected virtual void BuildSelectClause()
 		{
 			AppendIndent();
 
@@ -87,7 +88,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		#region Build From
 
-		void BuildFromClause()
+		protected virtual void BuildFromClause()
 		{
 			AppendIndent();
 
@@ -130,9 +131,95 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		#endregion
 
+		#region Where Clause
+
+		protected virtual void BuildWhereClause()
+		{
+			if (_sqlBuilder.Where.SearchCondition.Conditions.Count == 0)
+				return;
+
+			AppendIndent();
+
+			_sb.Append("WHERE").AppendLine();
+
+			_indent++;
+
+			bool? isOr = null;
+
+			foreach (SqlBuilder.Condition col in _sqlBuilder.Where.SearchCondition.Conditions)
+			{
+				if (isOr != null)
+					_sb.Append(isOr.Value ? " OR" : " AND");
+
+				AppendIndent();
+				BuildPredicate(col.Predicate);
+				isOr = col.IsOr;
+			}
+
+			_indent--;
+
+			_sb.AppendLine();
+		}
+
+		#endregion
+
 		#region Helpers
 
-		string BuildExpression(ISqlExpression expr, string alias, ref bool addAlias)
+		protected virtual void BuildPredicate(SqlBuilder.IPredicate predicate)
+		{
+			bool dummy = false;
+
+			if (predicate is SqlBuilder.Predicate.ExprExpr)
+			{
+				var expr = (SqlBuilder.Predicate.ExprExpr)predicate;
+
+				_sb.Append(BuildExpression(expr.Expr1, null, ref dummy));
+
+				switch (expr.Operator)
+				{
+					case SqlBuilder.Predicate.Operator.Equal         : _sb.Append(" = ");  break;
+					case SqlBuilder.Predicate.Operator.NotEqual      : _sb.Append(" <> "); break;
+					case SqlBuilder.Predicate.Operator.Greater       : _sb.Append(" > ");  break;
+					case SqlBuilder.Predicate.Operator.GreaterOrEqual: _sb.Append(" >= "); break;
+					case SqlBuilder.Predicate.Operator.NotGreater    : _sb.Append(" !> "); break;
+					case SqlBuilder.Predicate.Operator.Less          : _sb.Append(" <  "); break;
+					case SqlBuilder.Predicate.Operator.LessOrEqual   : _sb.Append(" <= "); break;
+					case SqlBuilder.Predicate.Operator.NotLess       : _sb.Append(" !< "); break;
+				}
+
+				_sb.Append(BuildExpression(expr.Expr2, null, ref dummy));
+			}
+			else if (predicate is SqlBuilder.Predicate.Like)
+			{
+				throw new NotImplementedException();
+			}
+			else if (predicate is SqlBuilder.Predicate.Between)
+			{
+				throw new NotImplementedException();
+			}
+			else if (predicate is SqlBuilder.Predicate.IsNull)
+			{
+				throw new NotImplementedException();
+			}
+			else if (predicate is SqlBuilder.Predicate.InSubquery)
+			{
+				throw new NotImplementedException();
+			}
+			else if (predicate is SqlBuilder.Predicate.InList)
+			{
+				throw new NotImplementedException();
+			}
+			else if (predicate is SqlBuilder.Predicate.FuncLike)
+			{
+				throw new NotImplementedException();
+			}
+			else
+			{
+				throw new InvalidOperationException();
+			}
+		}
+
+		protected virtual string BuildExpression(ISqlExpression expr, string alias, ref bool addAlias)
 		{
 			if (expr is SqlField)
 			{

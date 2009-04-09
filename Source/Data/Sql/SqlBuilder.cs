@@ -58,6 +58,12 @@ namespace BLToolkit.Data.Sql
 							SqlField field = (SqlField)_expression;
 							return field.Name ?? field.PhysicalName;
 						}
+
+						if (_expression is Column)
+						{
+							Column col = (Column)_expression;
+							return col.Alias;
+						}
 					}
 
 					return _alias;
@@ -178,6 +184,9 @@ namespace BLToolkit.Data.Sql
 				action(this);
 				foreach (JoinedTable join in Joins)
 					join.ForEach(action);
+
+				if (Source is SqlBuilder)
+					((SqlBuilder)Source).ForEachTable(action);
 			}
 
 			#region ISqlExpressionScannable Members
@@ -543,7 +552,7 @@ namespace BLToolkit.Data.Sql
 					readonly Predicate.Operator _op;
 
 					public T2 Expr    (ISqlExpression expr)     { return _expr.Add(new Predicate.ExprExpr(_expr._expr, _op, expr)); }
-					public T2 Field   (SqlField          field)    { return Expr(field);               }
+					public T2 Field   (SqlField       field)    { return Expr(field);               }
 					public T2 SubQuery(SqlBuilder     subQuery) { return Expr(subQuery);            }
 					public T2 Value   (object         value)    { return Expr(new SqlValue(value)); }
 
@@ -628,7 +637,7 @@ namespace BLToolkit.Data.Sql
 				readonly ConditionBase<T1,T2> _condition;
 
 				public Expr_ Expr    (ISqlExpression expr)     { return new Expr_(_condition, true, expr);  }
-				public Expr_ Field   (SqlField          field)    { return Expr(field);               }
+				public Expr_ Field   (SqlField       field)    { return Expr(field);               }
 				public Expr_ SubQuery(SqlBuilder     subQuery) { return Expr(subQuery);            }
 				public Expr_ Value   (object         value)    { return Expr(new SqlValue(value)); }
 
@@ -651,7 +660,7 @@ namespace BLToolkit.Data.Sql
 			public Not_  Not { get { return new Not_(this); } }
 
 			public Expr_ Expr    (ISqlExpression expr)     { return new Expr_(this, false, expr); }
-			public Expr_ Field   (SqlField          field)    { return Expr(field);                  }
+			public Expr_ Field   (SqlField       field)    { return Expr(field);                  }
 			public Expr_ SubQuery(SqlBuilder     subQuery) { return Expr(subQuery);               }
 			public Expr_ Value   (object         value)    { return Expr(new SqlValue(value));    }
 
@@ -829,7 +838,7 @@ namespace BLToolkit.Data.Sql
 			}
 
 			private bool _isDistinct;
-			private bool  IsDistinct { get { return _isDistinct; } set { _isDistinct = value; } }
+			public  bool  IsDistinct { get { return _isDistinct; } set { _isDistinct = value; } }
 
 			#endregion
 
@@ -842,7 +851,7 @@ namespace BLToolkit.Data.Sql
 			}
 
 			private int _takeValue;
-			private int  TakeValue { get { return _takeValue; } set { _takeValue = value; } }
+			public  int  TakeValue { get { return _takeValue; } set { _takeValue = value; } }
 
 			#endregion
 
@@ -855,7 +864,7 @@ namespace BLToolkit.Data.Sql
 			}
 
 			private int _skipValue;
-			private int  SkipeValue { get { return _skipValue; } set { _skipValue = value; } }
+			public  int  SkipValue { get { return _skipValue; } set { _skipValue = value; } }
 
 			#endregion
 
@@ -1314,7 +1323,7 @@ namespace BLToolkit.Data.Sql
 						alias = "t1";
 					}
 
-					for (int i = 2; aliases.ContainsKey(alias); i++)
+					for (int i = 1; aliases.ContainsKey(alias); i++)
 						alias = table.Alias + i;
 
 					aliases.Add(table.Alias = alias, table);
@@ -1331,10 +1340,10 @@ namespace BLToolkit.Data.Sql
 						continue;
 
 					if (string.IsNullOrEmpty(alias))
-						alias = "column1";
+						alias = "c1";
 
-					for (int i = 2; aliases.ContainsKey(alias); i++)
-						alias = "column" + i;
+					for (int i = 1; aliases.ContainsKey(alias); i++)
+						alias = "c" + i;
 
 					aliases.Add(c.Alias = alias, c);
 				}

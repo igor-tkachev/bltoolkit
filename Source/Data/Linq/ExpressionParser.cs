@@ -9,6 +9,7 @@ namespace BLToolkit.Data.Linq
 {
 	using Mapping;
 	using Sql;
+	using Reflection;
 
 	class ExpressionParser<T> : ReflectionHelper
 	{
@@ -102,6 +103,8 @@ namespace BLToolkit.Data.Linq
 
 		QueryInfo ParseWhere(QueryInfo select, ParseInfo<ParameterExpression> parm, ParseInfo body)
 		{
+			SetAlias(select, parm.Expr.Name);
+
 			if (CheckForSubQuery(select, parm, body))
 			{
 				var subQuery = new QueryInfo.SubQuery(select, _info.SqlBuilder);
@@ -110,6 +113,8 @@ namespace BLToolkit.Data.Linq
 
 				select = subQuery;
 			}
+
+			_info.SqlBuilder.Where.SearchCondition.Conditions.Add(ParseSearchCondition(select, body));
 
 			return select;
 		}
@@ -149,7 +154,7 @@ namespace BLToolkit.Data.Linq
 			bool? makeQuery = null;
 			var   member    = memberExpr.Expr.Member;
 
-			FieldWalker(queryInfo, memberExpr, _ => makeQuery = false, (_,__,___) => makeQuery = true);
+			FieldWalker(queryInfo, memberExpr, _ => makeQuery = false, (_,__,___,____) => makeQuery = true);
 
 			if (makeQuery == null)
 				throw new LinqException("Member '{0}.{1}' is not an SQL column.", member.ReflectedType, member.Name);
@@ -256,7 +261,7 @@ namespace BLToolkit.Data.Linq
 								Expression.Constant(idx, typeof(int)))),
 						memberExpr.ParamAccessor);
 				},
-				(query,expr,parms) =>
+				(query,expr,parms,_) =>
 				{
 					pi = BuildNewExpression(query,expr,parms);
 					pi.IsReplaced = true;
@@ -312,7 +317,7 @@ namespace BLToolkit.Data.Linq
 			QueryInfo                   query,
 			ParseInfo<MemberExpression> memberExpr,
 			Action<ISqlExpression>      processColumn,
-			Action<QueryInfo,ParseInfo,ParseInfo<ParameterExpression>> processExpression)
+			Action<QueryInfo,ParseInfo,ParseInfo<ParameterExpression>,string> processExpression)
 		{
 			var member = memberExpr.Expr.Member;
 
@@ -367,10 +372,22 @@ namespace BLToolkit.Data.Linq
 									}
 									else
 									{
+										string memberName = null;
+
+										if (mem is MethodInfo)
+										{
+											var pi = TypeHelper.GetPropertyByMethod((MethodInfo) mem);
+											if (pi != null)
+												memberName = pi.Name;
+										}
+										else if (mem is PropertyInfo || mem is FieldInfo)
+											memberName = mem.Name;
+
 										processExpression(
 											query,
 											newExpr.Body.Create(arg, newExpr.Body.Index(body.Arguments, New.Arguments, i)),
-											newExpr.Parameter);
+											newExpr.Parameter,
+											memberName);
 									}
 
 									return;
@@ -422,7 +439,7 @@ namespace BLToolkit.Data.Linq
 									}
 									else
 									{
-										processExpression(query, piExpression, memberInit.Parameter);
+										processExpression(query, piExpression, memberInit.Parameter, null);
 									}
 
 									return;
@@ -447,19 +464,16 @@ namespace BLToolkit.Data.Linq
 						{
 							if (!subQuery.Columns.TryGetValue(column, out col))
 							{
-								string alias = null;
-
-
 								key = column;
-								col = subQuery.SubSql.Select.Columns[subQuery.SubSql.Select.Add(column, alias)];
+								col = subQuery.SubSql.Select.Columns[subQuery.SubSql.Select.Add(column)];
 							}
 						},
-						(q,pi,_) =>
+						(q,pi,_,memberName) =>
 						{
 							if (!subQuery.Columns.TryGetValue(pi, out col))
 							{
 								key = pi;
-								col = subQuery.SubSql.Select.Columns[subQuery.SubSql.Select.Add(ParseExpression(q, pi))];
+								col = subQuery.SubSql.Select.Columns[subQuery.SubSql.Select.Add(ParseExpression(q, pi), memberName)];
 							}
 						});
 
@@ -518,7 +532,6 @@ namespace BLToolkit.Data.Linq
 				case ExpressionType.ArrayIndex:
 				case ExpressionType.Coalesce:
 				case ExpressionType.Divide:
-				case ExpressionType.Equal:
 				case ExpressionType.ExclusiveOr:
 				case ExpressionType.GreaterThan:
 				case ExpressionType.GreaterThanOrEqual:
@@ -555,7 +568,6 @@ namespace BLToolkit.Data.Linq
 								break;
 
 							case ExpressionType.Divide:
-							case ExpressionType.Equal:
 							case ExpressionType.ExclusiveOr:
 							case ExpressionType.GreaterThan:
 							case ExpressionType.GreaterThanOrEqual:
@@ -588,18 +600,25 @@ namespace BLToolkit.Data.Linq
 				case ExpressionType.TypeAs:
 				case ExpressionType.UnaryPlus:
 					{
-						throw new NotImplementedException();
-
-						/*
 						var pi = parseInfo.Convert<UnaryExpression>();
 						var e  = parseInfo.Expr as UnaryExpression;
-						var o  = pi.Walk(e.Operand, Unary.Operand, func);
+						var o  = ParseExpression(query, pi.Create(e.Operand, pi.Property(Unary.Operand)));
 
-						if (o != e.Operand)
-							pi.Expr = Expression.MakeUnary(Expr.NodeType, o.Expr, e.Type, e.Method);
+						switch (parseInfo.NodeType)
+						{
+							case ExpressionType.ArrayLength:
+							case ExpressionType.Convert:
+							case ExpressionType.ConvertChecked:
+							case ExpressionType.Negate:
+							case ExpressionType.NegateChecked:
+							case ExpressionType.Not:
+							case ExpressionType.Quote:
+							case ExpressionType.TypeAs:
+							case ExpressionType.UnaryPlus:
+								break;
+						}
 
-						return pi;
-						*/
+						throw new NotImplementedException();
 					}
 
 				case ExpressionType.Call:
@@ -713,8 +732,8 @@ namespace BLToolkit.Data.Linq
 							ISqlExpression sql = null;
 
 							FieldWalker(query, pi,
-								column   => sql = column,
-								(q,p,ps) => sql = ParseExpression(q, p));
+								column     => sql = column,
+								(q,p,_,__) => sql = ParseExpression(q, p));
 
 							return sql;
 						}
@@ -873,6 +892,38 @@ namespace BLToolkit.Data.Linq
 		public static bool IsConstant(Type type)
 		{
 			return type == typeof(int) || type == typeof(string);
+		}
+
+		#endregion
+
+		#region Predicate Parser
+
+		static SqlBuilder.IPredicate ParsePredicate(QueryInfo query, ParseInfo parseInfo)
+		{
+			switch (parseInfo.NodeType)
+			{
+				case ExpressionType.Equal:
+					{
+						var pi = parseInfo.Convert<BinaryExpression>();
+						var e  = parseInfo.Expr as BinaryExpression;
+						var l  = ParseExpression(query, pi.Create(e.Left,  pi.Property(Binary.Left)));
+						var r  = ParseExpression(query, pi.Create(e.Right, pi.Property(Binary.Right)));
+
+						return new SqlBuilder.Predicate.ExprExpr(l, SqlBuilder.Predicate.Operator.Equal, r);
+					}
+			}
+
+			throw new InvalidOperationException();
+		}
+
+		#endregion
+
+		#region Search Condition Parser
+
+		static SqlBuilder.Condition ParseSearchCondition(QueryInfo query, ParseInfo parseInfo)
+		{
+			var predicate = ParsePredicate(query, parseInfo);
+			return new SqlBuilder.Condition(false, predicate);
 		}
 
 		#endregion
