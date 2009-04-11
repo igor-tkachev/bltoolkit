@@ -1343,6 +1343,7 @@ namespace BLToolkit.Mapping
 				if (sourceType == destType)
 				{
 					IValueMapper t = (IValueMapper)_sameTypeMappers[sourceType];
+
 					if (t == null)
 					{
 						lock (_sameTypeMappers.SyncRoot)

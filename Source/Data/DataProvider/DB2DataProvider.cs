@@ -34,6 +34,8 @@ namespace BLToolkit.Data.DataProvider
 			switch (convertType)
 			{
 				case ConvertType.NameToQueryParameter:
+					return "?";
+
 				case ConvertType.NameToParameter:
 					return ":" + value;
 

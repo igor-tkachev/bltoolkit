@@ -209,6 +209,11 @@ namespace BLToolkit.Data.Linq
 			return IsMethod(declaringType, methodName, args, p => true);
 		}
 
+		public bool IsMethod(Func<ParseInfo<MethodCallExpression>,bool> func)
+		{
+			return NodeType == ExpressionType.Call? func(ConvertTo<MethodCallExpression>()): false;
+		}
+
 		#endregion
 
 		#region Helpers
@@ -328,8 +333,8 @@ namespace BLToolkit.Data.Linq
 
 						var e = Expr as BinaryExpression;
 						var c = pi.Walk(e.Conversion, Binary.Conversion, func);
-						var l = pi.Walk(e.Left,       Binary.Left, func);
-						var r = pi.Walk(e.Right,      Binary.Right, func);
+						var l = pi.Walk(e.Left,       Binary.Left,       func);
+						var r = pi.Walk(e.Right,      Binary.Right,      func);
 
 						if (c != e.Conversion || l != e.Left || r != e.Right)
 							pi.Expr = Expression.MakeBinary(Expr.NodeType, l, r, e.IsLiftedToNull, e.Method, (LambdaExpression) c);

@@ -24,9 +24,14 @@ namespace BLToolkit.Data.Sql
 		ISqlTableSource IChild<ISqlTableSource>.Parent { get { return _parent; } set { _parent = value; } }
 		public          ISqlTableSource         Table  { get { return _parent; } }
 
+		public override string ToString()
+		{
+			return SqlBuilder.LeaveAlias(Table) + "." + Name;
+		}
+
 		#region ISqlExpressionScannable Members
 
-		void ISqlExpressionScannable.ForEach(Action<ISqlExpression> action)
+		void ISqlExpressionScannable.ForEach(bool skipColumns, Action<ISqlExpression> action)
 		{
 			action(this);
 		}

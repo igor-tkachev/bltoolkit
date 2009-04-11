@@ -1877,16 +1877,23 @@ namespace BLToolkit.Data
 			return SetSpCommand(CommandAction.Select, spName, parameterValues);
 		}
 
-		public DbManager SetCommand(SqlBuilder sql)
+		public DbManager SetCommand(SqlBuilder sql, params IDbDataParameter[] commandParameters)
 		{
+			string s = sql.ToString();
+
 			string command = DataProvider.SqlProvider.BuildSql(sql);
 
-			Debug.WriteLineIf(
-				TraceSwitch.TraceInfo,
-				string.Format("{0} {1}\n{2}", DataProvider.Name, ConfigurationString, command),
-				TraceSwitch.DisplayName);
+#if DEBUG
+			string info = string.Format("{0} {1}\n{2}", DataProvider.Name, ConfigurationString, command);
 
-			return SetCommand(command, null);
+			if (commandParameters != null && commandParameters.Length > 0)
+				foreach (IDbDataParameter p in commandParameters)
+					info += string.Format("\n{0}\t{1}", p.ParameterName, p.Value);
+
+			Debug.WriteLineIf(TraceSwitch.TraceInfo, info, TraceSwitch.DisplayName);
+#endif
+
+			return SetCommand(command, commandParameters);
 		}
 
 		#endregion

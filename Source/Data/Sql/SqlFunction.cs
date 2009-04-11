@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text;
 
 namespace BLToolkit.Data.Sql
 {
@@ -18,9 +19,23 @@ namespace BLToolkit.Data.Sql
 		readonly string           _name;       public string           Name       { get { return _name;       } }
 		readonly ISqlExpression[] _parameters; public ISqlExpression[] Parameters { get { return _parameters; } }
 
+		public override string ToString()
+		{
+			StringBuilder sb = new StringBuilder(Name);
+
+			sb.Append("(");
+
+			foreach (ISqlExpression p in Parameters)
+				sb.Append(p.ToString());
+
+			sb.Append("(");
+
+			return sb.ToString();
+		}
+
 		#region ISqlExpressionScannable Members
 
-		void ISqlExpressionScannable.ForEach(Action<ISqlExpression> action)
+		void ISqlExpressionScannable.ForEach(bool skipColumns, Action<ISqlExpression> action)
 		{
 			action(this);
 			Array.ForEach(_parameters, action);
@@ -32,6 +47,9 @@ namespace BLToolkit.Data.Sql
 
 		bool IEquatable<ISqlExpression>.Equals(ISqlExpression other)
 		{
+			if ((object)this == other)
+				return true;
+
 			SqlFunction func = other as SqlFunction;
 
 			if (func == null || _name != func._name || _parameters.Length != func._parameters.Length)

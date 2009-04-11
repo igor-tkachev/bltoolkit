@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Linq;
 using System.Linq.Expressions;
-
-using BLToolkit.Mapping;
 
 namespace BLToolkit.Data.Linq
 {
+	using DataProvider;
+	using Mapping;
 	using Sql;
 
 	class ExpressionInfo<T>
@@ -15,6 +16,7 @@ namespace BLToolkit.Data.Linq
 		public MappingSchema     MappingSchema;
 		public SqlBuilder        SqlBuilder;
 		public ExpressionInfo<T> Next;
+		public List<Parameter>   Parameters = new List<Parameter>();
 
 		public Func<DbManager,Expression,IEnumerable<T>> GetIEnumerable;
 
@@ -92,18 +94,20 @@ namespace BLToolkit.Data.Linq
 
 		IEnumerable<T> Query(DbManager db, Expression expr)
 		{
+			var dispose = db == null;
 			if (db == null)
+				db = new DbManager();
+
+			try
 			{
-				using (db = new DbManager())
-					using (var dr = db.SetCommand(SqlBuilder).ExecuteReader())
-						while (dr.Read())
-							yield return MappingSchema.MapDataReaderToObject<T>(dr, null);
-			}
-			else
-			{
-				using (var dr = db.SetCommand(SqlBuilder).ExecuteReader())
+				using (var dr = db.SetCommand(SqlBuilder, GetParameters(db, expr)).ExecuteReader())
 					while (dr.Read())
 						yield return MappingSchema.MapDataReaderToObject<T>(dr, null);
+			}
+			finally
+			{
+				if (dispose)
+					db.Dispose();
 			}
 		}
 
@@ -115,19 +119,40 @@ namespace BLToolkit.Data.Linq
 
 		IEnumerable<T> Query(DbManager db, Expression expr, Func<IDataReader,MappingSchema,Expression,T> mapper)
 		{
+			var dispose = db == null;
 			if (db == null)
+				db = new DbManager();
+
+			try
 			{
-				using (db = new DbManager())
-					using (var dr = db.SetCommand(SqlBuilder).ExecuteReader())
-						while (dr.Read())
-							yield return mapper(dr, MappingSchema, expr);
-			}
-			else
-			{
-				using (var dr = db.SetCommand(SqlBuilder).ExecuteReader())
+				using (var dr = db.SetCommand(SqlBuilder, GetParameters(db, expr)).ExecuteReader())
 					while (dr.Read())
 						yield return mapper(dr, MappingSchema, expr);
 			}
+			finally
+			{
+				if (dispose)
+					db.Dispose();
+			}
+		}
+
+		private IDbDataParameter[] GetParameters(DbManager db, Expression expr)
+		{
+			if (SqlBuilder.Parameters.Count == 0)
+				return null;
+
+			var parms = new IDbDataParameter[Parameters.Count];
+
+			for (var i = 0; i < parms.Length; i++)
+			{
+				var sqlp = SqlBuilder.Parameters[i];
+				var parm = Parameters.Count > i && Parameters[i].SqlParameter == sqlp? Parameters[i]: Parameters.First(p => p.SqlParameter == sqlp);
+				var name = db.DataProvider.Convert(parm.SqlParameter.Name, ConvertType.NameToQueryParameter);
+
+				parms[i] = db.Parameter(name.ToString(), parm.SqlParameter.Value = parm.Accessor(expr));
+			}
+
+			return parms;
 		}
 
 		#endregion
@@ -419,5 +444,12 @@ namespace BLToolkit.Data.Linq
 		}
 
 		#endregion
+
+		public class Parameter
+		{
+			public Expression              Expression;
+			public Func<Expression,object> Accessor;
+			public SqlParameter            SqlParameter;
+		}
 	}
 }

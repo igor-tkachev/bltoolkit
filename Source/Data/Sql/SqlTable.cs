@@ -131,6 +131,11 @@ namespace BLToolkit.Data.Sql
 
 		#endregion
 
+		public override string ToString()
+		{
+			return string.IsNullOrEmpty(Alias) ? Name : Name + " as " + Alias;
+		}
+
 		#region Public Members
 
 		public SqlField this[string fieldName]

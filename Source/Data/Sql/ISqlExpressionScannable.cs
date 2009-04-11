@@ -4,6 +4,6 @@ namespace BLToolkit.Data.Sql
 {
 	public interface ISqlExpressionScannable
 	{
-		void ForEach(Action<ISqlExpression> action);
+		void ForEach(bool skipColumns, Action<ISqlExpression> action);
 	}
 }

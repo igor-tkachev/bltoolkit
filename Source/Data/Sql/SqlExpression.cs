@@ -27,9 +27,14 @@ namespace BLToolkit.Data.Sql
 			get { return _values; }
 		}
 
+		public override string ToString()
+		{
+			return string.Format(Expr, Values);
+		}
+
 		#region ISqlExpressionScannable Members
 
-		void ISqlExpressionScannable.ForEach(Action<ISqlExpression> action)
+		void ISqlExpressionScannable.ForEach(bool skipColumns, Action<ISqlExpression> action)
 		{
 			action(this);
 			Array.ForEach(_values, action);
@@ -41,6 +46,9 @@ namespace BLToolkit.Data.Sql
 
 		bool IEquatable<ISqlExpression>.Equals(ISqlExpression other)
 		{
+			if ((object)this == other)
+				return true;
+
 			SqlExpression expr = other as SqlExpression;
 
 			if (expr == null || _expr != expr._expr || _values.Length != expr._values.Length)

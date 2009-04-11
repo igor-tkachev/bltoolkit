@@ -289,7 +289,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			if (expr is SqlParameter)
 			{
 				SqlParameter parm = (SqlParameter)expr;
-				throw new NotImplementedException();
+				return _dataProvider.Convert(parm.Name, ConvertType.NameToQueryParameter).ToString();
 			}
 
 			throw new InvalidOperationException();

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Reflection;
 
 using FTest = System.Func<BLToolkit.Data.Linq.ParseInfo<System.Linq.Expressions.Expression>, bool>;
 
@@ -14,10 +15,10 @@ namespace BLToolkit.Data.Linq
 		}
 
 		public static bool IsMethod(
-			this ParseInfo<MethodCallExpression>  pi,
-			Type                                  declaringType,
-			string                                methodName,
-			FTest[]                               args,
+			this ParseInfo<MethodCallExpression> pi,
+			Type                                 declaringType,
+			string                               methodName,
+			FTest[]                              args,
 			Func<ParseInfo<MethodCallExpression>,bool> func)
 		{
 			var method = pi.Expr;
@@ -25,7 +26,7 @@ namespace BLToolkit.Data.Linq
 			if (declaringType == method.Method.DeclaringType && method.Method.Name == methodName && method.Arguments.Count == args.Length)
 			{
 				for (int i = 0; i < args.Length; i++)
-					if (!args[i](pi.Create(method.Arguments[i], pi.Indexer(ReflectionHelper.MethodCall.Arguments, ReflectionHelper.ExprItem, i))))
+					if (!args[i](pi.CreateArgument(i)))
 						return false;
 
 				return func(pi);
@@ -53,6 +54,29 @@ namespace BLToolkit.Data.Linq
 			Action<ParseInfo<ParameterExpression>,ParseInfo<Expression>> lambda)
 		{
 			return IsMethod(pi, typeof(Queryable), methodName, new FTest[] { p => { seq(p); return true; }, l => l.IsLambda(lambda) }, p => true);
+		}
+
+		public static ParseInfo<Expression> CreateArgument(this ParseInfo<MethodCallExpression> pi, int idx)
+		{
+			return pi.Create(pi.Expr.Arguments[idx], pi.Indexer(ReflectionHelper.MethodCall.Arguments, ReflectionHelper.ExprItem, idx));
+		}
+
+		[Obsolete]
+		public static bool IsMethod(
+			this ParseInfo<MethodCallExpression> pi,
+			MethodInfo method,
+			Action<ParseInfo<Expression>>        seq,
+			Action<ParseInfo<ParameterExpression>,ParseInfo<Expression>> lambda)
+		{
+			if (pi.Expr.Method == method)
+			{
+				seq(pi.CreateArgument(0));
+				pi.CreateArgument(1).IsLambda(lambda);
+
+				return true;
+			}
+
+			return false;
 		}
 	}
 }
