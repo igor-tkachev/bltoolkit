@@ -197,10 +197,9 @@ namespace BLToolkit.Data.DataProvider
 			get { return ConnectionType.Namespace; }
 		}
 
-		private        ISqlProvider _sqlProvider;
-		public virtual ISqlProvider  SqlProvider
+		public virtual ISqlProvider CreateSqlProvider()
 		{
-			get { return _sqlProvider ?? (_sqlProvider = new BasicSqlProvider(this)); }
+			return new BasicSqlProvider(this);
 		}
 
 		#endregion

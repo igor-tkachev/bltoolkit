@@ -15,33 +15,28 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		}
 
 		readonly DataProviderBase _dataProvider;
+		public   DataProviderBase  DataProvider
+		{
+			get { return _dataProvider; }
+		}
 
-		SqlBuilder    _sqlBuilder;
-		StringBuilder _sb;
-		int           _indent;
+		SqlBuilder _sqlBuilder;
+		int        _indent;
 
 		#endregion
 
 		#region BuildSQL
 
-		public string BuildSql(SqlBuilder sqlBuilder)
-		{
-			StringBuilder sb = new StringBuilder();
-
-			BuildSql(sqlBuilder, sb, 0);
-
-			return sb.ToString();
-		}
-
-		void BuildSql(SqlBuilder sqlBuilder, StringBuilder sb, int indent)
+		public StringBuilder BuildSql(SqlBuilder sqlBuilder, StringBuilder sb, int indent)
 		{
 			_sqlBuilder = sqlBuilder;
-			_sb         = sb;
 			_indent     = indent;
 
-			BuildSelectClause();
-			BuildFromClause  ();
-			BuildWhereClause();
+			BuildSelectClause(sb);
+			BuildFromClause  (sb);
+			BuildWhereClause (sb);
+
+			return sb;
 		}
 
 		#endregion
@@ -50,18 +45,18 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		protected virtual void BuildSqlBuilder(SqlBuilder sqlBuilder, StringBuilder sb, int indent)
 		{
-			new BasicSqlProvider(_dataProvider).BuildSql(sqlBuilder, sb, indent);
+			DataProvider.CreateSqlProvider().BuildSql(sqlBuilder, sb, indent);
 		}
 
 		#endregion
 
 		#region Build Select
 
-		protected virtual void BuildSelectClause()
+		protected virtual void BuildSelectClause(StringBuilder sb)
 		{
-			AppendIndent();
+			AppendIndent(sb);
 
-			_sb.Append("SELECT").AppendLine();
+			sb.Append("SELECT").AppendLine();
 
 			_indent++;
 
@@ -69,18 +64,19 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			{
 				bool addAlias = true;
 
-				AppendIndent().Append(BuildExpression(col.Expression, col.Alias, ref addAlias));
+				AppendIndent(sb);
+				BuildExpression(sb, col.Expression, col.Alias, ref addAlias);
 
 				if (addAlias)
-					_sb.Append(" as ").Append(col.Alias);
+					sb.Append(" as ").Append(col.Alias);
 
-				_sb.Append(',').AppendLine();
+				sb.Append(',').AppendLine();
 			}
 
 			_indent--;
 
-			_sb
-				.Remove(_sb.Length - Environment.NewLine.Length - 1, Environment.NewLine.Length + 1)
+			sb
+				.Remove(sb.Length - Environment.NewLine.Length - 1, Environment.NewLine.Length + 1)
 				.AppendLine();
 		}
 
@@ -88,42 +84,42 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		#region Build From
 
-		protected virtual void BuildFromClause()
+		protected virtual void BuildFromClause(StringBuilder sb)
 		{
-			AppendIndent();
+			AppendIndent(sb);
 
-			_sb.Append("FROM").AppendLine();
+			sb.Append("FROM").AppendLine();
 
 			_indent++;
 
 			foreach (SqlBuilder.TableSource ts in _sqlBuilder.From.Tables)
 			{
-				AppendIndent();
+				AppendIndent(sb);
 
-				BuildPhysicalTable(ts.Source);
+				BuildPhysicalTable(sb, ts.Source);
 
 				string alias = GetTableAlias(ts);
 
 				if (!string.IsNullOrEmpty(alias))
-					_sb.Append(" ").Append(alias);
+					sb.Append(" ").Append(alias);
 			}
 
 			_indent--;
 
-			_sb.AppendLine();
+			sb.AppendLine();
 		}
 
-		void BuildPhysicalTable(ISqlTableSource table)
+		void BuildPhysicalTable(StringBuilder sb, ISqlTableSource table)
 		{
 			if (table is SqlTable || table is SqlBuilder.TableSource)
 			{
-				_sb.Append(GetTablePhysicalName(table));
+				sb.Append(GetTablePhysicalName(table));
 			}
 			else if (table is SqlBuilder)
 			{
-				_sb.Append("(").AppendLine();
-				BuildSqlBuilder((SqlBuilder)table, _sb, _indent + 1);
-				AppendIndent().Append(")");
+				sb.Append("(").AppendLine();
+				BuildSqlBuilder((SqlBuilder)table, sb, _indent + 1);
+				AppendIndent(sb).Append(")");
 			}
 			else
 				throw new InvalidOperationException();
@@ -133,61 +129,131 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		#region Where Clause
 
-		protected virtual void BuildWhereClause()
+		protected virtual void BuildWhereClause(StringBuilder sb)
 		{
 			if (_sqlBuilder.Where.SearchCondition.Conditions.Count == 0)
 				return;
 
-			AppendIndent();
+			AppendIndent(sb);
 
-			_sb.Append("WHERE").AppendLine();
+			sb.Append("WHERE").AppendLine();
 
 			_indent++;
-
-			bool? isOr = null;
-
-			foreach (SqlBuilder.Condition col in _sqlBuilder.Where.SearchCondition.Conditions)
-			{
-				if (isOr != null)
-					_sb.Append(isOr.Value ? " OR" : " AND");
-
-				AppendIndent();
-				BuildPredicate(col.Predicate);
-				isOr = col.IsOr;
-			}
-
+			AppendIndent(sb);
+			BuildSearchCondition(sb, _sqlBuilder.Where.SearchCondition);
 			_indent--;
 
-			_sb.AppendLine();
+			sb.AppendLine();
 		}
 
 		#endregion
 
-		#region Helpers
+		#region Builders
 
-		protected virtual void BuildPredicate(SqlBuilder.IPredicate predicate)
+		#region BuildSearchCondition
+
+		protected virtual void BuildSearchCondition(StringBuilder sb, SqlBuilder.SearchCondition condition)
 		{
-			bool dummy = false;
+			bool? isOr = null;
+			int   len  = sb.Length;
 
+			foreach (SqlBuilder.Condition cond in condition.Conditions)
+			{
+				if (isOr != null)
+				{
+					sb.Append(isOr.Value ? " OR" : " AND");
+
+					if (condition.Conditions.Count < 4 && sb.Length - len < 50)
+					{
+						sb.Append(' ');
+					}
+					else
+					{
+						sb.AppendLine();
+						AppendIndent(sb);
+						len = sb.Length;
+					}
+				}
+
+				int precedence;
+
+				if (cond.IsNot)
+				{
+					sb.Append("NOT ");
+					precedence = Precedence.LogicalNegation;
+				}
+				else
+				{
+					precedence = GetPrecedence(condition);
+				}
+
+				BuildPredicate(sb, precedence, cond.Predicate);
+
+				isOr = cond.IsOr;
+			}
+		}
+
+		protected virtual void BuildSearchCondition(StringBuilder sb, int parentPrecedence, SqlBuilder.SearchCondition condition)
+		{
+			int precedence = GetPrecedence(condition);
+
+			if (precedence == 0 || precedence < parentPrecedence)
+				sb.Append('(');
+
+			BuildSearchCondition(sb, condition);
+
+			if (precedence == 0 || precedence < parentPrecedence)
+				sb.Append(')');
+		}
+
+		#endregion
+
+		#region BuildPredicate
+
+		protected virtual void BuildPredicate(StringBuilder sb, SqlBuilder.IPredicate predicate)
+		{
 			if (predicate is SqlBuilder.Predicate.ExprExpr)
 			{
 				var expr = (SqlBuilder.Predicate.ExprExpr)predicate;
 
-				_sb.Append(BuildExpression(expr.Expr1, null, ref dummy));
+				switch (expr.Operator)
+				{
+					case SqlBuilder.Predicate.Operator.Equal:
+					case SqlBuilder.Predicate.Operator.NotEqual:
+						{
+							ISqlExpression e = null;
+
+							if (expr.Expr1 is SqlValue && ((SqlValue) expr.Expr1).Value == null)
+								e = expr.Expr2;
+							else if (expr.Expr2 is SqlValue && ((SqlValue) expr.Expr2).Value == null)
+								e = expr.Expr1;
+
+							if (e != null)
+							{
+								BuildExpression(sb, GetPrecedence(expr), e);
+								sb.Append(expr.Operator == SqlBuilder.Predicate.Operator.Equal? " IS NULL": " IS NOT NULL");
+								return;
+							}
+
+							break;
+						}
+				}
+
+				BuildExpression(sb, GetPrecedence(expr), expr.Expr1);
 
 				switch (expr.Operator)
 				{
-					case SqlBuilder.Predicate.Operator.Equal         : _sb.Append(" = ");  break;
-					case SqlBuilder.Predicate.Operator.NotEqual      : _sb.Append(" <> "); break;
-					case SqlBuilder.Predicate.Operator.Greater       : _sb.Append(" > ");  break;
-					case SqlBuilder.Predicate.Operator.GreaterOrEqual: _sb.Append(" >= "); break;
-					case SqlBuilder.Predicate.Operator.NotGreater    : _sb.Append(" !> "); break;
-					case SqlBuilder.Predicate.Operator.Less          : _sb.Append(" <  "); break;
-					case SqlBuilder.Predicate.Operator.LessOrEqual   : _sb.Append(" <= "); break;
-					case SqlBuilder.Predicate.Operator.NotLess       : _sb.Append(" !< "); break;
+					case SqlBuilder.Predicate.Operator.Equal         : sb.Append(" = ");  break;
+					case SqlBuilder.Predicate.Operator.NotEqual      : sb.Append(" <> "); break;
+					case SqlBuilder.Predicate.Operator.Greater       : sb.Append(" > ");  break;
+					case SqlBuilder.Predicate.Operator.GreaterOrEqual: sb.Append(" >= "); break;
+					case SqlBuilder.Predicate.Operator.NotGreater    : sb.Append(" !> "); break;
+					case SqlBuilder.Predicate.Operator.Less          : sb.Append(" < ");  break;
+					case SqlBuilder.Predicate.Operator.LessOrEqual   : sb.Append(" <= "); break;
+					case SqlBuilder.Predicate.Operator.NotLess       : sb.Append(" !< "); break;
 				}
 
-				_sb.Append(BuildExpression(expr.Expr2, null, ref dummy));
+				BuildExpression(sb, GetPrecedence(expr), expr.Expr2);
 			}
 			else if (predicate is SqlBuilder.Predicate.Like)
 			{
@@ -213,13 +279,34 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			{
 				throw new NotImplementedException();
 			}
+			else if (predicate is SqlBuilder.SearchCondition)
+			{
+				BuildSearchCondition(sb, predicate.Precedence, (SqlBuilder.SearchCondition)predicate);
+			}
 			else
 			{
 				throw new InvalidOperationException();
 			}
 		}
 
-		protected virtual string BuildExpression(ISqlExpression expr, string alias, ref bool addAlias)
+		protected void BuildPredicate(StringBuilder sb, int parentPrecedence, SqlBuilder.IPredicate predicate)
+		{
+			int precedence = GetPrecedence(predicate);
+
+			if (precedence == 0 || precedence < parentPrecedence)
+				sb.Append('(');
+
+			BuildPredicate(sb, predicate);
+
+			if (precedence == 0 || precedence < parentPrecedence)
+				sb.Append(')');
+		}
+
+		#endregion
+
+		#region BuildExpression
+
+		protected virtual void BuildExpression(StringBuilder sb, ISqlExpression expr, string alias, ref bool addAlias)
 		{
 			if (expr is SqlField)
 			{
@@ -228,72 +315,169 @@ namespace BLToolkit.Data.Sql.SqlProvider
 				string table = GetTableAlias(_sqlBuilder.From[field.Table]) ?? GetTablePhysicalName(field.Table);
 
 				if (string.IsNullOrEmpty(table))
-					throw new SqlException(string.Format("Table {0} should have alias.", field.Table));
+					throw new SqlException(string.Format("Table {0} should have an alias.", field.Table));
 
 				addAlias = alias != field.PhysicalName;
 
-				return string.Format("{0}.{1}",
-					table,
-					field.Name == "*"? field.PhysicalName: _dataProvider.Convert(field.PhysicalName, ConvertType.NameToQueryField));
+				sb
+					.Append(table)
+					.Append('.')
+					.Append(field.Name == "*"? field.PhysicalName: _dataProvider.Convert(field.PhysicalName, ConvertType.NameToQueryField));
 			}
-
-			if (expr is SqlBuilder.Column)
+			else if (expr is SqlBuilder.Column)
 			{
 				SqlBuilder.Column column = (SqlBuilder.Column)expr;
 
 				string table = GetTableAlias(_sqlBuilder.From[column.Parent]) ?? GetTablePhysicalName(column.Parent);
 
 				if (string.IsNullOrEmpty(table))
-					throw new SqlException(string.Format("Table {0} should have alias.", column.Parent));
+					throw new SqlException(string.Format("Table {0} should have an alias.", column.Parent));
 
 				addAlias = alias != column.Alias;
 
-				return string.Format("{0}.{1}",
-					table,
-					_dataProvider.Convert(column.Alias, ConvertType.NameToQueryField));
+				sb
+					.Append(table)
+					.Append('.')
+					.Append(_dataProvider.Convert(column.Alias, ConvertType.NameToQueryField));
 			}
-
-			if (expr is SqlBuilder)
+			else if (expr is SqlBuilder)
 			{
 				SqlBuilder builder = (SqlBuilder)expr;
 				throw new NotImplementedException();
 			}
-
-			if (expr is SqlValue)
+			else if (expr is SqlValue)
 			{
-				SqlValue value = (SqlValue)expr;
-				return
-					value.Value == null?
-					"NULL" : value.Value.ToString();
+				object value = ((SqlValue)expr).Value;
+
+				if      (value == null)   sb.Append("NULL");
+				else if (value is string) sb.Append('\'').Append(value.ToString().Replace("'", "''")).Append('\'');
+				else    sb.Append(value);
 			}
-
-			if (expr is SqlExpression)
+			else if (expr is SqlExpression)
 			{
-				SqlExpression e = (SqlExpression)expr;
-
-				object[] values = new object[e.Values.Length];
-				bool     dummy  = false;
+				SqlExpression e      = (SqlExpression)expr;
+				StringBuilder s      = new StringBuilder();
+				object[]      values = new object[e.Values.Length];
 
 				for (int i = 0; i < values.Length; i++)
-					values[i] = BuildExpression(e.Values[i], "", ref dummy);
+				{
+					ISqlExpression value = e.Values[i];
 
-				return string.Format(e.Expr, values);
+					s.Length = 0;
+					BuildExpression(s, GetPrecedence(e), value);
+					values[i] = s.ToString();
+				}
+
+				sb.AppendFormat(e.Expr, values);
 			}
-
-			if (expr is SqlFunction)
+			else if (expr is SqlBinaryExpression)
 			{
-				SqlFunction func = (SqlFunction)expr;
-				throw new NotImplementedException();
+				BuildBinaryExpression(sb, (SqlBinaryExpression)expr);
 			}
-
-			if (expr is SqlParameter)
+			else if (expr is SqlFunction)
+			{
+				BuildFunction(sb, (SqlFunction)expr);
+			}
+			else if (expr is SqlParameter)
 			{
 				SqlParameter parm = (SqlParameter)expr;
-				return _dataProvider.Convert(parm.Name, ConvertType.NameToQueryParameter).ToString();
+				sb.Append(_dataProvider.Convert(parm.Name, ConvertType.NameToQueryParameter));
 			}
-
-			throw new InvalidOperationException();
+			else
+			{
+				throw new InvalidOperationException();
+			}
 		}
+
+		protected void BuildExpression(StringBuilder sb, int parentPrecedence, ISqlExpression expr, string alias, ref bool addAlias)
+		{
+			int precedence = GetPrecedence(expr);
+
+			if (precedence == 0 || precedence < parentPrecedence)
+				sb.Append('(');
+
+			BuildExpression(sb, expr, alias, ref addAlias);
+
+			if (precedence == 0 || precedence < parentPrecedence)
+				sb.Append(')');
+		}
+
+		protected virtual void BuildExpression(StringBuilder sb, ISqlExpression expr)
+		{
+			bool dummy = false;
+			BuildExpression(sb, expr, null, ref dummy);
+		}
+
+		protected void BuildExpression(StringBuilder sb, int precedence, ISqlExpression expr)
+		{
+			bool dummy = false;
+			BuildExpression(sb, precedence, expr, null, ref dummy);
+		}
+
+		#endregion
+
+		#region BuildBinaryExpression
+
+		protected virtual void BuildBinaryExpression(StringBuilder sb, SqlBinaryExpression expr)
+		{
+			BuildBinaryExpression(sb, expr.Operation, expr);
+		}
+
+		protected void BuildFunction(StringBuilder sb, string name, SqlBinaryExpression expr)
+		{
+			sb.Append(name);
+			sb.Append("(");
+			BuildExpression(sb, expr.Expr1);
+			sb.Append(", ");
+			BuildExpression(sb, expr.Expr2);
+			sb.Append(')');
+		}
+
+		protected void BuildBinaryExpression(StringBuilder sb, string op, SqlBinaryExpression expr)
+		{
+			BuildExpression(sb, GetPrecedence(expr), expr.Expr1);
+			sb.Append(' ').Append(op).Append(' ');
+			BuildExpression(sb, GetPrecedence(expr), expr.Expr2);
+		}
+
+		#endregion
+
+		#region BuildFunction
+
+		protected virtual void BuildFunction(StringBuilder sb, SqlFunction func)
+		{
+			BuildFunction(sb, func.Name, func);
+		}
+
+		protected void BuildFunction(StringBuilder sb, string name, SqlFunction expr)
+		{
+			sb.Append(name).Append('(');
+
+			foreach (ISqlExpression parameter in expr.Parameters)
+				BuildExpression(sb, parameter);
+
+			sb.Append(')');
+		}
+
+		#endregion
+
+		#region GetPrecedence
+
+		protected virtual int GetPrecedence(ISqlExpression expr)
+		{
+			return expr.Precedence;
+		}
+
+		protected virtual int GetPrecedence(SqlBuilder.IPredicate predicate)
+		{
+			return predicate.Precedence;
+		}
+
+		#endregion
+
+		#endregion
+
+		#region Helpers
 
 		static string GetTableAlias(ISqlTableSource table)
 		{
@@ -320,12 +504,12 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			throw new InvalidOperationException();
 		}
 
-		StringBuilder AppendIndent()
+		StringBuilder AppendIndent(StringBuilder sb)
 		{
 			if (_indent > 0)
-				_sb.Append('\t', _indent);
+				sb.Append('\t', _indent);
 
-			return _sb;
+			return sb;
 		}
 
 		#endregion

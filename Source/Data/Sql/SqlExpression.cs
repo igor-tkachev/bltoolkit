@@ -4,40 +4,42 @@ namespace BLToolkit.Data.Sql
 {
 	public class SqlExpression : ISqlExpression
 	{
-		public SqlExpression(string expr, params ISqlExpression[] values)
+		public SqlExpression(string expr, int precedence, params ISqlExpression[] values)
 		{
 			if (values == null) throw new ArgumentNullException("values");
 
 			foreach (ISqlExpression value in values)
 				if (value == null) throw new ArgumentNullException("values");
 
-			_expr   = expr;
-			_values = values;
+			_expr       = expr;
+			_precedence = precedence;
+			_values     = values;
 		}
 
-		readonly string _expr;
-		public   string  Expr
+		public SqlExpression(string expr, params ISqlExpression[] values)
+			: this(expr, Sql.Precedence.Unknown, values)
 		{
-			get { return _expr; }
 		}
 
-		readonly ISqlExpression[] _values;
-		public   ISqlExpression[]  Values
-		{
-			get { return _values; }
-		}
+		readonly string           _expr;       public string           Expr       { get { return _expr;       } }
+		readonly int              _precedence; public int              Precedence { get { return _precedence; } }
+		readonly ISqlExpression[] _values;     public ISqlExpression[] Values     { get { return _values;     } }
+
+		#region Overrides
 
 		public override string ToString()
 		{
 			return string.Format(Expr, Values);
 		}
 
+		#endregion
+
 		#region ISqlExpressionScannable Members
 
 		void ISqlExpressionScannable.ForEach(bool skipColumns, Action<ISqlExpression> action)
 		{
 			action(this);
-			Array.ForEach(_values, action);
+			Array.ForEach(_values, e => e.ForEach(skipColumns, action));
 		}
 
 		#endregion

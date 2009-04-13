@@ -250,7 +250,7 @@ namespace BLToolkit.Data.Linq
 						var e1 = (ConstantExpression)expr1;
 						var e2 = (ConstantExpression)expr2;
 
-						return ExpressionParser<T>.IsConstant(e1.Type)? Equals(e1.Value, e2.Value): true;
+						return e1.Value == null && e2.Value == null || ExpressionParser<T>.IsConstant(e1.Type)? Equals(e1.Value, e2.Value): true;
 					}
 
 				case ExpressionType.Invoke:

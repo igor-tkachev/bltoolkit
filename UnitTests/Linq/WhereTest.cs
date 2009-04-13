@@ -49,10 +49,33 @@ namespace Data.Linq
 		}
 
 		[Test]
+		public void EqualsConsts()
+		{
+			TestOneJohn(db => from p in db.Person where p.PersonID == 1 && p.FirstName == "John" select p);
+		}
+
+		[Test]
+		public void EqualsConsts2()
+		{
+			TestOneJohn(db =>
+				from p in db.Person
+				where (p.FirstName == "John" || p.FirstName == "John's") && p.PersonID > 0 && p.PersonID < 2 && p.LastName != "123"
+				select p);
+		}
+
+		[Test]
 		public void EqualsParam()
 		{
 			var id = 1;
 			TestOneJohn(db => from p in db.Person where p.PersonID == id select p);
+		}
+
+		[Test]
+		public void EqualsParams()
+		{
+			var id   = 1;
+			var name = "John";
+			TestOneJohn(db => from p in db.Person where p.PersonID == id && p.FirstName == name select p);
 		}
 
 		int TestMethod()
@@ -108,6 +131,103 @@ namespace Data.Linq
 		{
 			MethodParam(1);
 			MethodParam(2);
+		}
+
+		static IQueryable<Person> TestDirectParam(TestDbManager db, int id)
+		{
+			var name = "John";
+			return from p in db.Person where p.PersonID == id && p.FirstName == name select p;
+		}
+
+		[Test]
+		public void DirectParams()
+		{
+			TestOneJohn(db => TestDirectParam(db, 1));
+		}
+
+		[Test]
+		public void BinaryAdd()
+		{
+			TestOneJohn(db => from p in db.Person where p.PersonID + 1 == 2 select p);
+		}
+
+		[Test]
+		public void BinaryDivide()
+		{
+			TestOneJohn(db => from p in db.Person where (p.PersonID + 9) / 10 == 1 && p.PersonID == 1 select p);
+		}
+
+		[Test]
+		public void BinaryModulo()
+		{
+			TestOneJohn(db => from p in db.Person where p.PersonID % 2 == 1 && p.PersonID == 1 select p);
+		}
+
+		[Test]
+		public void BinaryMultiply()
+		{
+			TestOneJohn(db => from p in db.Person where p.PersonID * 10 - 9 == 1 select p);
+		}
+
+		[Test]
+		public void BinaryXor()
+		{
+			TestOneJohn(db => from p in db.Person where (p.PersonID ^ 2) == 3 select p);
+		}
+
+		[Test]
+		public void BinaryAnd()
+		{
+			TestOneJohn(db => from p in db.Person where (p.PersonID & 3) == 1 select p);
+		}
+
+		[Test]
+		public void BinaryOr()
+		{
+			TestOneJohn(db => from p in db.Person where (p.PersonID | 2) == 3 select p);
+		}
+
+		[Test]
+		public void BinarySubtract()
+		{
+			TestOneJohn(db => from p in db.Person where p.PersonID - 1 == 0 select p);
+		}
+
+		[Test]
+		public void EqualsNull()
+		{
+			TestOneJohn(db => from p in db.Person where p.PersonID == 1 && p.MiddleName == null select p);
+		}
+
+		[Test]
+		public void EqualsNull2()
+		{
+			TestOneJohn(db => from p in db.Person where p.PersonID == 1 && null == p.MiddleName select p);
+		}
+
+		[Test]
+		public void NotEqualNull()
+		{
+			TestOneJohn(db => from p in db.Person where p.PersonID == 1 && p.FirstName != null select p);
+		}
+
+		[Test]
+		public void NotEqualNull2()
+		{
+			TestOneJohn(db => from p in db.Person where p.PersonID == 1 && null != p.FirstName select p);
+		}
+
+		[Test]
+		public void NotTest()
+		{
+			TestOneJohn(db => from p in db.Person where p.PersonID == 1 && !(p.MiddleName != null) select p);
+		}
+
+		[Test]
+		public void NotTest2()
+		{
+			int n = 2;
+			TestOneJohn(db => from p in db.Person where p.PersonID == 1 && !(p.MiddleName != null && p.PersonID == n) select p);
 		}
 	}
 }

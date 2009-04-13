@@ -1,9 +1,10 @@
 ﻿using System;
+using System.Text;
 
 namespace BLToolkit.Data.Sql.SqlProvider
 {
 	public interface ISqlProvider
 	{
-		string BuildSql(SqlBuilder sqlBuilder);
+		StringBuilder BuildSql(SqlBuilder sqlBuilder, StringBuilder sb, int indent);
 	}
 }

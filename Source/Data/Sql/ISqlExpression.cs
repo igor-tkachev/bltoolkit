@@ -4,5 +4,6 @@ namespace BLToolkit.Data.Sql
 {
 	public interface ISqlExpression : IEquatable<ISqlExpression>, ISqlExpressionScannable
 	{
+		int Precedence { get; }
 	}
 }

@@ -141,6 +141,16 @@ table.data
 	padding: 2px 5px 2px 5px;
 }
 
+.bordered td, .bordered th
+{
+	border: solid 1 #AAAAAA;
+}
+
+.nowrappable td
+{
+	white-space: nowrap;
+}
+
 a.rss:link    { text-decoration: none; color : White; }
 a.rss:visited { text-decoration: none; color : White; }
 a.rss:hover   { text-decoration: nonr; color : White; }

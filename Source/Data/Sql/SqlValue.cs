@@ -12,6 +12,8 @@ namespace BLToolkit.Data.Sql
 		readonly object _value;
 		public   object  Value { get { return _value; } }
 
+		#region Overrides
+
 		public override string ToString()
 		{
 			if (_value == null)
@@ -22,6 +24,17 @@ namespace BLToolkit.Data.Sql
 
 			return _value.ToString();
 		}
+
+		#endregion
+
+		#region ISqlExpression Members
+
+		public int Precedence
+		{
+			get { return Sql.Precedence.Primary; }
+		}
+
+		#endregion
 
 		#region ISqlExpressionScannable Members
 

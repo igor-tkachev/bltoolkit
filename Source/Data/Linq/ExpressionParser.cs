@@ -122,7 +122,7 @@ namespace BLToolkit.Data.Linq
 				select = subQuery;
 			}
 
-			_info.SqlBuilder.Where.SearchCondition.Conditions.Add(ParseSearchCondition(select, body));
+			ParseSearchCondition(_info.SqlBuilder.Where.SearchCondition.Conditions, select, body);
 
 			return select;
 		}
@@ -330,6 +330,8 @@ namespace BLToolkit.Data.Linq
 			if (_parameters.TryGetValue(expr.Expr, out p))
 				return p;
 
+			string name = null;
+
 			var newExpr = expr.Walk(pi =>
 			{
 				pi.IsConstant(c =>
@@ -338,6 +340,12 @@ namespace BLToolkit.Data.Linq
 					{
 						var e = Expression.Convert(c.ParamAccessor, pi.Expr.Type);
 						pi = pi.Parent.Replace(e, c.ParamAccessor);
+
+						if (pi.Parent.NodeType == ExpressionType.MemberAccess)
+						{
+							var ma = (MemberExpression)pi.Parent.Expr;
+							name = ma.Member.Name;
+						}
 					}
 
 					return true;
@@ -352,7 +360,7 @@ namespace BLToolkit.Data.Linq
 			{
 				Expression   = expr.Expr,
 				Accessor     = mapper.Compile(),
-				SqlParameter = new SqlParameter(null, null)
+				SqlParameter = new SqlParameter(name, null)
 			};
 
 			_parameters.Add(expr.Expr, p);
@@ -361,7 +369,7 @@ namespace BLToolkit.Data.Linq
 			return p;
 		}
 
-		static bool CanBeParameterized(ParseInfo expr)
+		static bool CanBeCompiled(ParseInfo expr)
 		{
 			bool canbe = true;
 
@@ -591,16 +599,30 @@ namespace BLToolkit.Data.Linq
 
 		ISqlExpression ParseExpression(QueryInfo query, ParseInfo parseInfo)
 		{
-			if (parseInfo.NodeType == ExpressionType.Constant && IsConstant(parseInfo.Expr.Type))
-				return new SqlValue(((ConstantExpression)parseInfo.Expr).Value);
+			if (parseInfo.NodeType == ExpressionType.Constant)
+			{
+				var c = (ConstantExpression)parseInfo.Expr;
 
-			if (CanBeParameterized(parseInfo))
+				if (c.Value == null || IsConstant(parseInfo.Expr.Type))
+					return new SqlValue(((ConstantExpression) parseInfo.Expr).Value);
+			}
+
+			if (CanBeCompiled(parseInfo))
 				return BuildParameter(parseInfo).SqlParameter;
 
 			switch (parseInfo.NodeType)
 			{
 				case ExpressionType.Add:
 				case ExpressionType.AddChecked:
+				case ExpressionType.And:
+				case ExpressionType.Divide:
+				case ExpressionType.ExclusiveOr:
+				case ExpressionType.Modulo:
+				case ExpressionType.Multiply:
+				case ExpressionType.Or:
+				//case ExpressionType.Power:
+				case ExpressionType.Subtract:
+				case ExpressionType.SubtractChecked:
 					{
 						var pi = parseInfo.Convert<BinaryExpression>();
 						var e  = parseInfo.Expr as BinaryExpression;
@@ -609,9 +631,17 @@ namespace BLToolkit.Data.Linq
 
 						switch (parseInfo.NodeType)
 						{
-							case ExpressionType.Add:
-							case ExpressionType.AddChecked:
-								return new SqlExpression("({0} + {1})", l, r);
+							case ExpressionType.Add            :
+							case ExpressionType.AddChecked     : return new SqlBinaryExpression(l, "+", r, Precedence.Additive);
+							case ExpressionType.And            : return new SqlBinaryExpression(l, "&", r, Precedence.Bitwise);
+							case ExpressionType.Divide         : return new SqlBinaryExpression(l, "/", r, Precedence.Multiplicative);
+							case ExpressionType.ExclusiveOr    : return new SqlBinaryExpression(l, "^", r, Precedence.Bitwise);
+							case ExpressionType.Modulo         : return new SqlBinaryExpression(l, "%", r, Precedence.Multiplicative);
+							case ExpressionType.Multiply       : return new SqlBinaryExpression(l, "*", r, Precedence.Multiplicative);
+							case ExpressionType.Or             : return new SqlBinaryExpression(l, "|", r, Precedence.Bitwise);
+							//case ExpressionType.Power:
+							case ExpressionType.Subtract       :
+							case ExpressionType.SubtractChecked: return new SqlBinaryExpression(l, "-", r, Precedence.Additive);
 						}
 
 						break;
@@ -657,13 +687,31 @@ namespace BLToolkit.Data.Linq
 			switch (parseInfo.NodeType)
 			{
 				case ExpressionType.Equal:
+				case ExpressionType.NotEqual:
+				case ExpressionType.GreaterThan:
+				case ExpressionType.GreaterThanOrEqual:
+				case ExpressionType.LessThan:
+				case ExpressionType.LessThanOrEqual:
 					{
 						var pi = parseInfo.Convert<BinaryExpression>();
 						var e  = parseInfo.Expr as BinaryExpression;
 						var l  = ParseExpression(query, pi.Create(e.Left,  pi.Property(Binary.Left)));
 						var r  = ParseExpression(query, pi.Create(e.Right, pi.Property(Binary.Right)));
 
-						return new SqlBuilder.Predicate.ExprExpr(l, SqlBuilder.Predicate.Operator.Equal, r);
+						SqlBuilder.Predicate.Operator op;
+
+						switch (parseInfo.NodeType)
+						{
+							case ExpressionType.Equal             : op = SqlBuilder.Predicate.Operator.Equal;          break;
+							case ExpressionType.NotEqual          : op = SqlBuilder.Predicate.Operator.NotEqual;       break;
+							case ExpressionType.GreaterThan       : op = SqlBuilder.Predicate.Operator.Greater;        break;
+							case ExpressionType.GreaterThanOrEqual: op = SqlBuilder.Predicate.Operator.GreaterOrEqual; break;
+							case ExpressionType.LessThan          : op = SqlBuilder.Predicate.Operator.Less;           break;
+							case ExpressionType.LessThanOrEqual   : op = SqlBuilder.Predicate.Operator.LessOrEqual;    break;
+							default: throw new InvalidOperationException();
+						}
+
+						return new SqlBuilder.Predicate.ExprExpr(l, op, r);
 					}
 			}
 
@@ -674,10 +722,55 @@ namespace BLToolkit.Data.Linq
 
 		#region Search Condition Parser
 
-		SqlBuilder.Condition ParseSearchCondition(QueryInfo query, ParseInfo parseInfo)
+		void ParseSearchCondition(ICollection<SqlBuilder.Condition> conditions, QueryInfo query, ParseInfo parseInfo)
 		{
+			switch (parseInfo.NodeType)
+			{
+				case ExpressionType.AndAlso:
+					{
+						var pi = parseInfo.Convert<BinaryExpression>();
+						var e  = parseInfo.Expr as BinaryExpression;
+
+						ParseSearchCondition(conditions, query, pi.Create(e.Left,  pi.Property(Binary.Left)));
+						ParseSearchCondition(conditions, query, pi.Create(e.Right, pi.Property(Binary.Right)));
+
+						return;
+					}
+
+				case ExpressionType.OrElse:
+					{
+						var pi = parseInfo.Convert<BinaryExpression>();
+						var e  = parseInfo.Expr as BinaryExpression;
+
+						var orCondition = new SqlBuilder.SearchCondition();
+
+						ParseSearchCondition(orCondition.Conditions, query, pi.Create(e.Left,  pi.Property(Binary.Left)));
+						ParseSearchCondition(orCondition.Conditions, query, pi.Create(e.Right, pi.Property(Binary.Right)));
+
+						orCondition.Conditions[0].IsOr = true;
+
+						conditions.Add(new SqlBuilder.Condition(false, orCondition));
+
+						return;
+					}
+
+				case ExpressionType.Not:
+					{
+						var pi = parseInfo.Convert<UnaryExpression>();
+						var e  = parseInfo.Expr as UnaryExpression;
+
+						var notCondition = new SqlBuilder.SearchCondition();
+
+						ParseSearchCondition(notCondition.Conditions, query, pi.Create(e.Operand, pi.Property(Unary.Operand)));
+
+						conditions.Add(new SqlBuilder.Condition(true, notCondition));
+
+						return;
+					}
+			}
+
 			var predicate = ParsePredicate(query, parseInfo);
-			return new SqlBuilder.Condition(false, predicate);
+			conditions.Add(new SqlBuilder.Condition(false, predicate));
 		}
 
 		#endregion

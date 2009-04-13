@@ -6,6 +6,8 @@ using IBM.Data.Informix;
 
 namespace BLToolkit.Data.DataProvider
 {
+	using Sql.SqlProvider;
+
 	class InformixDataProvider :  DataProviderBase
 	{
 		public override IDbConnection CreateConnectionObject()
@@ -48,10 +50,6 @@ namespace BLToolkit.Data.DataProvider
 
 					break;
 
-				//case ConvertType.NameToQueryField:
-				//case ConvertType.NameToQueryTable:
-				//	return "\"" + value + "\"";
-
 				case ConvertType.ExceptionToErrorNumber:
 					if (value is IfxException)
 					{
@@ -78,6 +76,11 @@ namespace BLToolkit.Data.DataProvider
 		public override string Name
 		{
 			get { return "Informix"; }
+		}
+
+		public override ISqlProvider CreateSqlProvider()
+		{
+			return new InformixSqlProvider(this);
 		}
 	}
 }

@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 
-using BLToolkit.Mapping;
-using BLToolkit.Reflection.Extension;
-
 namespace BLToolkit.Data.Sql
 {
+	using Mapping;
+	using Reflection.Extension;
+
 	public class SqlTable : ISqlTableSource
 	{
 		#region Init
@@ -131,10 +131,14 @@ namespace BLToolkit.Data.Sql
 
 		#endregion
 
+		#region Overrides
+
 		public override string ToString()
 		{
 			return string.IsNullOrEmpty(Alias) ? Name : Name + " as " + Alias;
 		}
+
+		#endregion
 
 		#region Public Members
 
@@ -163,21 +167,21 @@ namespace BLToolkit.Data.Sql
 		private string _physicalName;
 		public  string  PhysicalName { get { return _physicalName ?? _name; } set { _physicalName = value; } }
 
-		private ChildContainer<ISqlTableSource,SqlField> _fields;
-		public  ChildContainer<ISqlTableSource,SqlField>  Fields { get { return _fields; } }
+		readonly ChildContainer<ISqlTableSource,SqlField> _fields;
+		public   ChildContainer<ISqlTableSource,SqlField>  Fields { get { return _fields; } }
 
-		private List<Join> _joins = new List<Join>();
-		public  List<Join>  Joins { get { return _joins; } }
+		readonly List<Join> _joins = new List<Join>();
+		public   List<Join>  Joins { get { return _joins; } }
 
-		private SqlField _all;
-		public  SqlField  All { get { return _all; } }
+		readonly SqlField _all;
+		public   SqlField  All { get { return _all; } }
 
 		#endregion
 
 		#region Protected Members
 
-		private MappingSchema _mappingSchema;
-		public  MappingSchema  MappingSchema
+		readonly MappingSchema _mappingSchema;
+		public   MappingSchema  MappingSchema
 		{
 			get { return _mappingSchema; }
 		}

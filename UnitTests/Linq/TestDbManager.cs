@@ -12,7 +12,6 @@ namespace Data.Linq
 		public TestDbManager(string configString)
 			: base(configString)
 		{
-
 		}
 
 		public Table<Person> Person

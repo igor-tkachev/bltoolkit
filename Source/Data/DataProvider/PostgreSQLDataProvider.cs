@@ -6,6 +6,8 @@ using Npgsql;
 
 namespace BLToolkit.Data.DataProvider
 {
+	using Sql.SqlProvider;
+
 	public class PostgreSQLDataProvider : DataProviderBase
 	{
 		public override IDbConnection CreateConnectionObject()
@@ -66,6 +68,11 @@ namespace BLToolkit.Data.DataProvider
 		public override string Name
 		{
 			get { return "PostgreSQL"; }
+		}
+
+		public override ISqlProvider CreateSqlProvider()
+		{
+			return new PostgreSQLSqlProvider(this);
 		}
 	}
 }

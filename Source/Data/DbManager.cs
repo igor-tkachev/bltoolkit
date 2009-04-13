@@ -6,6 +6,7 @@ using System.Data;
 using System.Data.Common;
 using System.Data.SqlTypes;
 using System.Diagnostics;
+using System.Text;
 
 namespace BLToolkit.Data
 {
@@ -1879,9 +1880,9 @@ namespace BLToolkit.Data
 
 		public DbManager SetCommand(SqlBuilder sql, params IDbDataParameter[] commandParameters)
 		{
-			string s = sql.ToString();
+			//string s = sql.ToString();
 
-			string command = DataProvider.SqlProvider.BuildSql(sql);
+			string command = DataProvider.CreateSqlProvider().BuildSql(sql, new StringBuilder(), 0).ToString();
 
 #if DEBUG
 			string info = string.Format("{0} {1}\n{2}", DataProvider.Name, ConfigurationString, command);

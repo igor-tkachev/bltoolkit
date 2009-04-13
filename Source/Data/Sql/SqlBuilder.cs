@@ -88,6 +88,15 @@ namespace BLToolkit.Data.Sql
 				return RemoveAlias(Expression) + " as " + (Alias ?? "[field]");
 			}
 
+			#region ISqlExpression Members
+
+			public int Precedence
+			{
+				get { return _expression.Precedence; }
+			}
+
+			#endregion
+
 			#region IEquatable<ISqlExpression> Members
 
 			bool IEquatable<ISqlExpression>.Equals(ISqlExpression other)
@@ -303,6 +312,7 @@ namespace BLToolkit.Data.Sql
 
 		public interface IPredicate : ISqlExpressionScannable
 		{
+			int Precedence { get; }
 		}
 
 		public abstract class Predicate : IPredicate
@@ -321,7 +331,8 @@ namespace BLToolkit.Data.Sql
 
 			public abstract class ExprBase : Predicate
 			{
-				protected ExprBase(ISqlExpression exp1)
+				protected ExprBase(ISqlExpression exp1, int precedence)
+					: base(precedence)
 				{
 					_expr1 = exp1;
 				}
@@ -336,8 +347,8 @@ namespace BLToolkit.Data.Sql
 
 			public abstract class NotExprBase : ExprBase
 			{
-				protected NotExprBase(ISqlExpression exp1, bool isNot)
-					: base(exp1)
+				protected NotExprBase(ISqlExpression exp1, bool isNot, int precedence)
+					: base(exp1, precedence)
 				{
 					_isNot = isNot;
 				}
@@ -350,7 +361,7 @@ namespace BLToolkit.Data.Sql
 			public class ExprExpr : ExprBase
 			{
 				public ExprExpr(ISqlExpression exp1, Operator op, ISqlExpression exp2)
-					: base(exp1)
+					: base(exp1, Sql.Precedence.Comparison)
 				{
 					_op    = op;
 					_expr2 = exp2;
@@ -395,7 +406,7 @@ namespace BLToolkit.Data.Sql
 			public class Like : NotExprBase
 			{
 				public Like(ISqlExpression exp1, bool isNot, ISqlExpression exp2, char escape)
-					: base(exp1, isNot)
+					: base(exp1, isNot, Sql.Precedence.Comparison)
 				{
 					_expr2  = exp2;
 					_escape = escape;
@@ -416,7 +427,7 @@ namespace BLToolkit.Data.Sql
 			public class Between : NotExprBase
 			{
 				public Between(ISqlExpression exp1, bool isNot, ISqlExpression exp2, ISqlExpression exp3)
-					: base(exp1, isNot)
+					: base(exp1, isNot, Sql.Precedence.Comparison)
 				{
 					_expr2 = exp2;
 					_expr3 = exp3;
@@ -438,7 +449,7 @@ namespace BLToolkit.Data.Sql
 			public class IsNull : NotExprBase
 			{
 				public IsNull(ISqlExpression exp1, bool isNot)
-					: base(exp1, isNot)
+					: base(exp1, isNot, Sql.Precedence.Comparison)
 				{
 				}
 			}
@@ -448,7 +459,7 @@ namespace BLToolkit.Data.Sql
 			public class InSubquery : NotExprBase
 			{
 				public InSubquery(ISqlExpression exp1, bool isNot, SqlBuilder subQuery)
-					: base(exp1, isNot)
+					: base(exp1, isNot, Sql.Precedence.Comparison)
 				{
 					_subQuery = subQuery;
 				}
@@ -465,7 +476,7 @@ namespace BLToolkit.Data.Sql
 			public class InList : NotExprBase
 			{
 				public InList(ISqlExpression exp1, bool isNot, params ISqlExpression[] values)
-					: base(exp1, isNot)
+					: base(exp1, isNot, Sql.Precedence.Comparison)
 				{
 					if (values != null && values.Length > 0)
 						_values.AddRange(values);
@@ -490,6 +501,7 @@ namespace BLToolkit.Data.Sql
 			public class FuncLike : Predicate
 			{
 				public FuncLike(SqlFunction func)
+					: base(func.Precedence)
 				{
 					_func = func;
 				}
@@ -502,7 +514,18 @@ namespace BLToolkit.Data.Sql
 				}
 			}
 
+			protected Predicate(int precedence)
+			{
+				_precedence = precedence;
+			}
+
 			#region IPredicate Members
+
+			readonly int _precedence;
+			public   int  Precedence
+			{
+				get { return _precedence;  }
+			}
 
 			protected abstract void ForEach(bool skipColumns, Action<ISqlExpression> action);
 
@@ -529,6 +552,17 @@ namespace BLToolkit.Data.Sql
 			private bool       _isNot;     public bool       IsNot     { get { return _isNot;     } set { _isNot     = value; } }
 			private IPredicate _predicate; public IPredicate Predicate { get { return _predicate; } set { _predicate = value; } }
 			private bool       _isOr;      public bool       IsOr      { get { return _isOr;      } set { _isOr      = value; } }
+
+			public int Precedence
+			{
+				get
+				{
+					return
+						_isNot ? Sql.Precedence.LogicalNegation :
+						_isOr  ? Sql.Precedence.LogicalDisjunction :
+						         Sql.Precedence.LogicalConjunction;
+				}
+			}
 
 			public override string ToString()
 			{
@@ -563,6 +597,16 @@ namespace BLToolkit.Data.Sql
 			#endregion
 
 			#region IPredicate Members
+
+			public int Precedence
+			{
+				get
+				{
+					if (_conditions.Count == 0) return Sql.Precedence.Unknown;
+					if (_conditions.Count == 1) return _conditions[0].Precedence;
+					return Math.Min(_conditions[0].Precedence, _conditions[_conditions.Count-1].Precedence);
+				}
+			}
 
 			void ISqlExpressionScannable.ForEach(bool skipColumns, Action<ISqlExpression> action)
 			{
@@ -862,9 +906,33 @@ namespace BLToolkit.Data.Sql
 				return this;
 			}
 
-			public SelectClause Expr(string alias, string expr, params ISqlExpression[] values)
+			public SelectClause Expr(string expr, int priority, params ISqlExpression[] values)
 			{
-				AddOrGetColumn(new Column(SqlBuilder, new SqlExpression(expr, values)));
+				AddOrGetColumn(new Column(SqlBuilder, new SqlExpression(expr, priority, values)));
+				return this;
+			}
+
+			public SelectClause Expr(string alias, string expr, int priority, params ISqlExpression[] values)
+			{
+				AddOrGetColumn(new Column(SqlBuilder, new SqlExpression(expr, priority, values)));
+				return this;
+			}
+
+			public SelectClause Expr(ISqlExpression expr1, string operation, ISqlExpression expr2)
+			{
+				AddOrGetColumn(new Column(SqlBuilder, new SqlBinaryExpression(expr1, operation, expr2)));
+				return this;
+			}
+
+			public SelectClause Expr(ISqlExpression expr1, string operation, ISqlExpression expr2, int priority)
+			{
+				AddOrGetColumn(new Column(SqlBuilder, new SqlBinaryExpression(expr1, operation, expr2, priority)));
+				return this;
+			}
+
+			public SelectClause Expr(string alias, ISqlExpression expr1, string operation, ISqlExpression expr2, int priority)
+			{
+				AddOrGetColumn(new Column(SqlBuilder, new SqlBinaryExpression(expr1, operation, expr2, priority), alias));
 				return this;
 			}
 
@@ -1518,6 +1586,15 @@ namespace BLToolkit.Data.Sql
 			int    idx2 = str.LastIndexOf(" as ");
 
 			return idx2 < 0 || idx2 < idx1? str : str.Substring(idx2 + 4);
+		}
+
+		#endregion
+
+		#region ISqlExpression Members
+
+		public int Precedence
+		{
+			get { return Sql.Precedence.Unknown; }
 		}
 
 		#endregion

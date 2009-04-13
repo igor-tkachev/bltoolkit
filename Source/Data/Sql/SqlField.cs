@@ -14,20 +14,30 @@ namespace BLToolkit.Data.Sql
 			_physicalName = physicalName;
 		}
 
-		private string _name;
-		public  string  Name { get { return _name; } set { _name = value; } }
-
-		private string _physicalName;
-		public  string  PhysicalName { get { return _physicalName ?? _name; } set { _physicalName = value; } }
+		private string _name;         public string Name         { get { return _name;                  } set { _name         = value; } }
+		private string _physicalName; public string PhysicalName { get { return _physicalName ?? _name; } set { _physicalName = value; } }
 
 		private         ISqlTableSource        _parent;
 		ISqlTableSource IChild<ISqlTableSource>.Parent { get { return _parent; } set { _parent = value; } }
 		public          ISqlTableSource         Table  { get { return _parent; } }
 
+		#region Overrides
+
 		public override string ToString()
 		{
 			return SqlBuilder.LeaveAlias(Table) + "." + Name;
 		}
+
+		#endregion
+
+		#region ISqlExpression Members
+
+		public int Precedence
+		{
+			get { return Sql.Precedence.Primary; }
+		}
+
+		#endregion
 
 		#region ISqlExpressionScannable Members
 

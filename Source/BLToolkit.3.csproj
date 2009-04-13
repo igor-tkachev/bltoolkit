@@ -132,6 +132,8 @@
     <Compile Include="Data\Linq\ReflectionHelper.cs" />
     <Compile Include="Data\Linq\TableT.cs" />
     <Compile Include="Data\Sql\ChildContainer.cs" />
+    <Compile Include="Data\Sql\Precedence.cs" />
+    <Compile Include="Data\Sql\SqlBinaryExpression.cs" />
     <Compile Include="Data\Sql\SqlException.cs" />
     <Compile Include="Data\Sql\Extensions.cs" />
     <Compile Include="Data\Sql\IChild.cs" />
@@ -146,6 +148,10 @@
     <Compile Include="Data\Sql\SqlJoinOn.cs" />
     <Compile Include="Data\Sql\SqlParameter.cs" />
     <Compile Include="Data\Sql\SqlProvider\BasicSqlProvider.cs" />
+    <Compile Include="Data\Sql\SqlProvider\PostgreSQLSqlProvider.cs" />
+    <Compile Include="Data\Sql\SqlProvider\OracleSqlProvider.cs" />
+    <Compile Include="Data\Sql\SqlProvider\DB2SqlProvider.cs" />
+    <Compile Include="Data\Sql\SqlProvider\InformixSqlProvider.cs" />
     <Compile Include="Data\Sql\SqlProvider\ISqlProvider.cs" />
     <Compile Include="Data\Sql\SqlTable.cs" />
     <Compile Include="Data\Sql\SqlTableT.cs" />

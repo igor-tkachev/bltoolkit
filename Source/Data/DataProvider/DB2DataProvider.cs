@@ -6,6 +6,8 @@ using IBM.Data.DB2;
 
 namespace BLToolkit.Data.DataProvider
 {
+	using Sql.SqlProvider;
+
 	class DB2DataProvider :  DataProviderBase
 	{
 		public override IDbConnection CreateConnectionObject()
@@ -34,7 +36,7 @@ namespace BLToolkit.Data.DataProvider
 			switch (convertType)
 			{
 				case ConvertType.NameToQueryParameter:
-					return "?";
+					return "@" + value;
 
 				case ConvertType.NameToParameter:
 					return ":" + value;
@@ -78,6 +80,11 @@ namespace BLToolkit.Data.DataProvider
 		public override string Name
 		{
 			get { return "DB2"; }
+		}
+
+		public override ISqlProvider CreateSqlProvider()
+		{
+			return new DB2SqlProvider(this);
 		}
 	}
 }

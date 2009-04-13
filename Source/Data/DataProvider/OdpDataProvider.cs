@@ -20,6 +20,8 @@ using Oracle.DataAccess.Types;
 
 namespace BLToolkit.Data.DataProvider
 {
+	using Sql.SqlProvider;
+
 	/// <summary>
 	/// Implements access to the Data Provider for Oracle.
 	/// </summary>
@@ -541,6 +543,11 @@ namespace BLToolkit.Data.DataProvider
 		public override string Name
 		{
 			get { return NameString; }
+		}
+
+		public override ISqlProvider CreateSqlProvider()
+		{
+			return new OracleSqlProvider(this);
 		}
 
 		private string _parameterPrefix = "P";

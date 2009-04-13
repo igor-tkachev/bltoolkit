@@ -10,16 +10,26 @@ namespace BLToolkit.Data.Sql
 			_value = value;
 		}
 
-		private string _name;
-		public  string  Name  { get { return _name;  } set { _name = value;  } }
+		private string _name;  public  string  Name  { get { return _name;  } set { _name = value;  } }
+		private object _value; public  object  Value { get { return _value; } set { _value = value; } }
 
-		private object _value;
-		public  object  Value { get { return _value; } set { _value = value; } }
+		#region Overrides
 
 		public override string ToString()
 		{
 			return "@" + (Name ?? "parameter") + "[" + (Value ?? "NULL") + "]";
 		}
+
+		#endregion
+
+		#region ISqlExpression Members
+
+		public int Precedence
+		{
+			get { return Sql.Precedence.Primary; }
+		}
+
+		#endregion
 
 		#region ISqlExpressionScannable Members
 
