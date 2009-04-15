@@ -44,7 +44,7 @@ namespace BLToolkit.Data.Sql
 
 		bool IEquatable<ISqlExpression>.Equals(ISqlExpression other)
 		{
-			if ((object)this == other)
+			if (this == other)
 				return true;
 
 			SqlParameter p = other as SqlParameter;

@@ -1314,7 +1314,7 @@ namespace BLToolkit.Mapping
 		}
 
 		[CLSCompliant(false)]
-		protected IValueMapper[] GetValueMappers(
+		internal protected IValueMapper[] GetValueMappers(
 			IMapDataSource      source,
 			IMapDataDestination dest,
 			int[]               index)
@@ -1412,7 +1412,7 @@ namespace BLToolkit.Mapping
 		}
 
 		[CLSCompliant(false)]
-		protected static void MapInternal(
+		internal protected static void MapInternal(
 			IMapDataSource      source, object sourceObject,
 			IMapDataDestination dest,   object destObject,
 			int[]               index,
@@ -1479,8 +1479,6 @@ namespace BLToolkit.Mapping
 				if (dest != initContext.ObjectMapper && initContext.ObjectMapper != null)
 					dest = initContext.ObjectMapper;
 			}
-
-			//MapInternal(source, sourceObject, dest, destObject, GetIndex(source, dest));
 
 			int[]          index   = GetIndex       (source, dest);
 			IValueMapper[] mappers = GetValueMappers(source, dest, index);

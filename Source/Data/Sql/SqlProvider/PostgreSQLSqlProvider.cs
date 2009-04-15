@@ -16,7 +16,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			switch (expr.Operation[0])
 			{
 				case '^': BuildBinaryExpression(sb, "#", expr); break;
-				default : base.BuildBinaryExpression(sb, expr); break;;
+				default : base.BuildBinaryExpression(sb, expr); break;
 			}
 		}
 	}

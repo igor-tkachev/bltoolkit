@@ -16,6 +16,7 @@ namespace BLToolkit.Data.Linq
 		public ParseInfo      Parent;
 		public Expression     ParamAccessor;
 		public bool           IsReplaced;
+		public bool           StopWalking;
 
 		public ExpressionType NodeType { get { return Expr.NodeType; } }
 
@@ -36,7 +37,7 @@ namespace BLToolkit.Data.Linq
 		public ParseInfo<T> Replace<T>(T expr, Expression paramAccesor)
 			where T : Expression
 		{
-			return new ParseInfo<T> { Expr = expr, Parent = this, ParamAccessor = paramAccesor, IsReplaced = true };
+			return new ParseInfo<T> { Expr = expr, Parent = this, ParamAccessor = paramAccesor, IsReplaced = true, StopWalking = true };
 		}
 
 		#endregion
@@ -230,6 +231,12 @@ namespace BLToolkit.Data.Linq
 
 		#region Walk
 
+		public ParseInfo ClearStopWalkingFlag()
+		{
+			StopWalking = false;
+			return this;
+		}
+
 		public override bool Equals(object obj)
 		{
 			return base.Equals(obj);
@@ -328,8 +335,8 @@ namespace BLToolkit.Data.Linq
 				case ExpressionType.SubtractChecked:
 					{
 						var pi = func(Convert<BinaryExpression>());
-						if (pi.IsReplaced)
-							return pi;
+						if (pi.StopWalking)
+							return pi.ClearStopWalkingFlag();
 
 						var e = Expr as BinaryExpression;
 						var c = pi.Walk(e.Conversion, Binary.Conversion, func);
@@ -353,8 +360,8 @@ namespace BLToolkit.Data.Linq
 				case ExpressionType.UnaryPlus:
 					{
 						var pi = func(Convert<UnaryExpression>());
-						if (pi.IsReplaced)
-							return pi;
+						if (pi.StopWalking)
+							return pi.ClearStopWalkingFlag();
 
 						var e  = Expr as UnaryExpression;
 						var o  = pi.Walk(e.Operand, Unary.Operand, func);
@@ -368,8 +375,8 @@ namespace BLToolkit.Data.Linq
 				case ExpressionType.Call:
 					{
 						var pi = func(Convert<MethodCallExpression>());
-						if (pi.IsReplaced)
-							return pi;
+						if (pi.StopWalking)
+							return pi.ClearStopWalkingFlag();
 
 						var e  = Expr as MethodCallExpression;
 						var o  = pi.Walk(e.Object,    MethodCall.Object,    func);
@@ -384,8 +391,8 @@ namespace BLToolkit.Data.Linq
 				case ExpressionType.Conditional:
 					{
 						var pi = func(Convert<ConditionalExpression>());
-						if (pi.IsReplaced)
-							return pi;
+						if (pi.StopWalking)
+							return pi.ClearStopWalkingFlag();
 
 						var e  = Expr as ConditionalExpression;
 						var s  = pi.Walk(e.Test,    Conditional.Test,    func);
@@ -401,8 +408,8 @@ namespace BLToolkit.Data.Linq
 				case ExpressionType.Invoke:
 					{
 						var pi = func(Convert<InvocationExpression>());
-						if (pi.IsReplaced)
-							return pi;
+						if (pi.StopWalking)
+							return pi.ClearStopWalkingFlag();
 
 						var e  = Expr as InvocationExpression;
 						var ex = pi.Walk(e.Expression, Invocation.Expression, func);
@@ -417,8 +424,8 @@ namespace BLToolkit.Data.Linq
 				case ExpressionType.Lambda:
 					{
 						var pi = func(Convert<LambdaExpression>());
-						if (pi.IsReplaced)
-							return pi;
+						if (pi.StopWalking)
+							return pi.ClearStopWalkingFlag();
 
 						var e  = Expr as LambdaExpression;
 						var b  = pi.Walk(e.Body,       Lambda.Body,       func);
@@ -433,8 +440,8 @@ namespace BLToolkit.Data.Linq
 				case ExpressionType.ListInit:
 					{
 						var pi = func(Convert<ListInitExpression>());
-						if (pi.IsReplaced)
-							return pi;
+						if (pi.StopWalking)
+							return pi.ClearStopWalkingFlag();
 
 						var e  = Expr as ListInitExpression;
 						var n  = pi.Walk(e.NewExpression, ListInit.NewExpression, func);
@@ -453,8 +460,8 @@ namespace BLToolkit.Data.Linq
 				case ExpressionType.MemberAccess:
 					{
 						var pi = func(Convert<MemberExpression>());
-						if (pi.IsReplaced)
-							return pi;
+						if (pi.StopWalking)
+							return pi.ClearStopWalkingFlag();
 
 						var e  = Expr as MemberExpression;
 						var ex = pi.Walk(e.Expression, Member.Expression, func);
@@ -513,8 +520,8 @@ namespace BLToolkit.Data.Linq
 						};
 
 						var pi = func(Convert<MemberInitExpression>());
-						if (pi.IsReplaced)
-							return pi;
+						if (pi.StopWalking)
+							return pi.ClearStopWalkingFlag();
 
 						var e  = Expr as MemberInitExpression;
 						var ne = pi.Walk(e.NewExpression, MemberInit.NewExpression, func);
@@ -529,8 +536,8 @@ namespace BLToolkit.Data.Linq
 				case ExpressionType.New:
 					{
 						var pi = func(Convert<NewExpression>());
-						if (pi.IsReplaced)
-							return pi;
+						if (pi.StopWalking)
+							return pi.ClearStopWalkingFlag();
 
 						var e  = Expr as NewExpression;
 						var a  = pi.Walk(e.Arguments, New.Arguments, func);
@@ -546,8 +553,8 @@ namespace BLToolkit.Data.Linq
 				case ExpressionType.NewArrayBounds:
 					{
 						var pi = func(Convert<NewArrayExpression>());
-						if (pi.IsReplaced)
-							return pi;
+						if (pi.StopWalking)
+							return pi.ClearStopWalkingFlag();
 
 						var e  = Expr as NewArrayExpression;
 						var ex = pi.Walk(e.Expressions, NewArray.Expressions, func);
@@ -561,8 +568,8 @@ namespace BLToolkit.Data.Linq
 				case ExpressionType.NewArrayInit:
 					{
 						var pi = func(Convert<NewArrayExpression>());
-						if (pi.IsReplaced)
-							return pi;
+						if (pi.StopWalking)
+							return pi.ClearStopWalkingFlag();
 
 						var e  = Expr as NewArrayExpression;
 						var ex = pi.Walk(e.Expressions, NewArray.Expressions, func);
@@ -576,8 +583,8 @@ namespace BLToolkit.Data.Linq
 				case ExpressionType.TypeIs:
 					{
 						var pi = func(Convert<TypeBinaryExpression>());
-						if (pi.IsReplaced)
-							return pi;
+						if (pi.StopWalking)
+							return pi.ClearStopWalkingFlag();
 
 						var e  = Expr as TypeBinaryExpression;
 						var ex = pi.Walk(e.Expression, TypeBinary.Expression, func);

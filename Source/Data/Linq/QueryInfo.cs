@@ -70,16 +70,34 @@ namespace BLToolkit.Data.Linq
 			public Dictionary<object,ISqlExpression> Columns = new Dictionary<object,ISqlExpression>();
 		}
 
-		public void Match(
-			Action<Constant>   sourceAction,
-			Action<New>        newAction,
-			Action<MemberInit> memberInitAction,
-			Action<SubQuery>   subQueryAction)
+		public class MemberAccess : QueryInfo
 		{
-			if      (this is Constant)   sourceAction    (this as Constant);
-			else if (this is New)        newAction       (this as New);
-			else if (this is MemberInit) memberInitAction(this as MemberInit);
-			else if (this is SubQuery)   subQueryAction  (this as SubQuery);
+			public MemberAccess(QueryInfo sourceInfo, ParseInfo<ParameterExpression> parameter, ParseInfo<MemberExpression> body)
+			{
+				SourceInfo = sourceInfo;
+				Parameter  = parameter;
+				Body       = body;
+				//Members    = (from b in body.Expr.Bindings select b.Member).ToList();
+			}
+
+			public QueryInfo                      SourceInfo;
+			public ParseInfo<ParameterExpression> Parameter;
+			public ParseInfo<MemberExpression>    Body;
+			//public List<MemberInfo>               Members;
+		}
+
+		public void Match(
+			Action<Constant>     sourceAction,
+			Action<New>          newAction,
+			Action<MemberInit>   memberInitAction,
+			Action<SubQuery>     subQueryAction,
+			Action<MemberAccess> memberAccessAction)
+		{
+			if      (this is Constant)     sourceAction      (this as Constant);
+			else if (this is New)          newAction         (this as New);
+			else if (this is MemberInit)   memberInitAction  (this as MemberInit);
+			else if (this is SubQuery)     subQueryAction    (this as SubQuery);
+			else if (this is MemberAccess) memberAccessAction(this as MemberAccess);
 		}
 	}
 }

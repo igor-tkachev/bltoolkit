@@ -4,6 +4,7 @@ using System.Data;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using BLToolkit.Data.DataProvider;
 
 namespace BLToolkit.Data.Linq
 {
@@ -29,8 +30,9 @@ namespace BLToolkit.Data.Linq
 
 		#region Parse
 
-		public ExpressionInfo<T> Parse(MappingSchema mappingSchema, Expression expression)
+		public ExpressionInfo<T> Parse(DataProviderBase dataProvider, MappingSchema mappingSchema, Expression expression)
 		{
+			_info.DataProvider  = dataProvider;
 			_info.MappingSchema = mappingSchema;
 			_info.Expression    = expression;
 
@@ -92,18 +94,59 @@ namespace BLToolkit.Data.Linq
 
 		#region Parse Select
 
-		static QueryInfo ParseSelect(QueryInfo select, ParseInfo<ParameterExpression> parm, ParseInfo body)
+		QueryInfo ParseSelect(QueryInfo select, ParseInfo<ParameterExpression> parm, ParseInfo body)
 		{
 			SetAlias(select, parm.Expr.Name);
 
 			switch (body.NodeType)
 			{
-				case ExpressionType.Parameter : return select;
-				case ExpressionType.New       : return new QueryInfo.New       (select, parm, body.ConvertTo<NewExpression>());
-				case ExpressionType.MemberInit: return new QueryInfo.MemberInit(select, parm, body.ConvertTo<MemberInitExpression>());
-				default                       : throw  new InvalidOperationException();
+				case ExpressionType.Parameter   : return select;
+				case ExpressionType.New         : return new QueryInfo.New       (select, parm, body.ConvertTo<NewExpression>());
+				case ExpressionType.MemberInit  : return new QueryInfo.MemberInit(select, parm, body.ConvertTo<MemberInitExpression>());
+				case ExpressionType.MemberAccess: return ParseMemberAccess       (select, parm, body.ConvertTo<MemberExpression>());
+				default                         : throw  new InvalidOperationException();
 			}
 		}
+
+		QueryInfo ParseMemberAccess(QueryInfo select, ParseInfo<ParameterExpression> parm, ParseInfo<MemberExpression> body)
+		{
+			QueryInfo qi = FindSource(select, parm, body);
+
+			return qi;
+		}
+
+		QueryInfo FindSource(QueryInfo select, ParseInfo<ParameterExpression> parm, ParseInfo<MemberExpression> body)
+		{
+			QueryInfo qi = null;
+
+			select.Match
+			(
+				constantExpr =>
+				{
+					if (constantExpr.ObjectType == body.Expr.Type)
+						qi = constantExpr;
+				},
+				newExpr      =>
+				{
+					qi = FindSource(newExpr.SourceInfo, parm, body);
+				},
+				memberInit   =>
+				{
+					qi = FindSource(memberInit.SourceInfo, parm, body);
+				},
+				subQuery     =>
+				{
+					qi = FindSource(subQuery.SourceInfo, parm, body);
+				},
+				memberAccess =>
+				{
+					
+				}
+			);
+
+			return qi;
+		}
+
 
 		#endregion
 
@@ -145,6 +188,8 @@ namespace BLToolkit.Data.Linq
 							if (member.MemberType == MemberTypes.Field || member.MemberType == MemberTypes.Property)
 								makeSubquery = CheckFieldForSubQuery(query, ma);
 
+							pi.StopWalking = true;
+
 							return true;
 						}
 
@@ -185,9 +230,10 @@ namespace BLToolkit.Data.Linq
 
 					_info.SetQuery();
 				},
-				newExpr    => BuildNew(query, newExpr.   Body, newExpr.   Parameter), // QueryInfo.New
-				memberInit => BuildNew(query, memberInit.Body, memberInit.Parameter), // QueryInfo.MemberInit
-				subQuery   => _info.SetQuery()                                        // QueryInfo.SubQuery
+				newExpr      => BuildNew(query, newExpr.     Body, newExpr.     Parameter), // QueryInfo.New
+				memberInit   => BuildNew(query, memberInit.  Body, memberInit.  Parameter), // QueryInfo.MemberInit
+				subQuery     => _info.SetQuery(),                                           // QueryInfo.SubQuery
+				memberAccess => BuildNew(query, memberAccess.Body, memberAccess.Parameter)  // QueryInfo.MemberAccess
 			);
 		}
 
@@ -205,7 +251,7 @@ namespace BLToolkit.Data.Linq
 		{
 			return expr.Walk(pi =>
 			{
-				pi.IsMemberAccess((ma,ex) =>
+				if (pi.IsMemberAccess((ma,ex) =>
 				{
 					if (IsParameter(ma.Expr, parm.Expr))
 					{
@@ -237,7 +283,15 @@ namespace BLToolkit.Data.Linq
 					}
 
 					return false;
-				});
+				}))
+				{
+				}
+				else if (pi.IsParameter())
+				{
+					// p => new { p }
+					//
+					//FindSource()
+				}
 
 				return pi;
 			});
@@ -271,8 +325,8 @@ namespace BLToolkit.Data.Linq
 				},
 				(query,expr,parms,_) =>
 				{
-					pi = BuildNewExpression(query,expr,parms);
-					pi.IsReplaced = true;
+					pi = BuildNewExpression(query, expr, parms);
+					pi.IsReplaced = pi.StopWalking = true;
 				}
 			);
 
@@ -298,7 +352,8 @@ namespace BLToolkit.Data.Linq
 					var table = subQuery.SqlBuilder.From.Tables[0];
 					if (table.Alias == null)
 						table.Alias = alias;
-				}
+				},
+				_ => {}
 			);
 		}
 
@@ -306,12 +361,10 @@ namespace BLToolkit.Data.Linq
 		{
 			var table = new SqlTable(_info.MappingSchema, type) { Alias = alias };
 
-			_info.SqlBuilder
-				.Select
-					.Field(table.All)
-				.From
-					.Table(table);
+			foreach (var field in table.Fields.Values)
+				_info.SqlBuilder.Select.Expr(field);
 
+			_info.SqlBuilder.From.Table(table);
 			_info.SetQuery();
 
 			return true;
@@ -557,6 +610,15 @@ namespace BLToolkit.Data.Linq
 						subQuery.Columns.Add(key, col);
 
 					processColumn(col);
+				},
+
+				#endregion
+
+				#region QueryInfo.MemberAccess
+
+				memberAccess =>
+				{
+					
 				}
 
 				#endregion
@@ -654,6 +716,7 @@ namespace BLToolkit.Data.Linq
 
 						switch (e.Expression.NodeType)
 						{
+							case ExpressionType.MemberAccess:
 							case ExpressionType.Parameter:
 								{
 									ISqlExpression sql = null;

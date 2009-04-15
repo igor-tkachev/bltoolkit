@@ -1,8 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Diagnostics;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Text;
+using BLToolkit.Reflection;
 
 namespace BLToolkit.Data.Linq
 {
@@ -13,6 +16,7 @@ namespace BLToolkit.Data.Linq
 	class ExpressionInfo<T>
 	{
 		public Expression        Expression;
+		public DataProviderBase  DataProvider;
 		public MappingSchema     MappingSchema;
 		public SqlBuilder        SqlBuilder;
 		public ExpressionInfo<T> Next;
@@ -26,19 +30,19 @@ namespace BLToolkit.Data.Linq
 		static readonly object            _sync      = new object();
 		const           int               _cacheSize = 100;
 
-		public static ExpressionInfo<T> GetExpressionInfo(MappingSchema mappingSchema, Expression expr)
+		public static ExpressionInfo<T> GetExpressionInfo(DataProviderBase dataProvider, MappingSchema mappingSchema, Expression expr)
 		{
-			var info = FindInfo(mappingSchema, expr);
+			var info = FindInfo(dataProvider, mappingSchema, expr);
 
 			if (info == null)
 			{
 				lock (_sync)
 				{
-					info = FindInfo(mappingSchema, expr);
+					info = FindInfo(dataProvider, mappingSchema, expr);
 
 					if (info == null)
 					{
-						info = new ExpressionParser<T>().Parse(mappingSchema, expr);
+						info = new ExpressionParser<T>().Parse(dataProvider, mappingSchema, expr);
 						info.Next = _first;
 						_first = info;
 					}
@@ -48,14 +52,14 @@ namespace BLToolkit.Data.Linq
 			return info;
 		}
 
-		static ExpressionInfo<T> FindInfo( MappingSchema mappingSchema, Expression expr)
+		static ExpressionInfo<T> FindInfo(DataProviderBase dataProvider, MappingSchema mappingSchema, Expression expr)
 		{
 			ExpressionInfo<T> prev = null;
 			var n = 0;
 
 			for (var info = _first; info != null; info = info.Next)
 			{
-				if (info.Compare(mappingSchema, expr))
+				if (info.Compare(dataProvider, mappingSchema, expr))
 				{
 					if (prev != null)
 					{
@@ -89,10 +93,16 @@ namespace BLToolkit.Data.Linq
 		internal void SetQuery()
 		{
 			SqlBuilder.FinalizeAndValidate();
-			GetIEnumerable = Query;
+
+			var index = new int[SqlBuilder.Select.Columns.Count];
+
+			for (var i = 0; i < index.Length; i++)
+				index[i] = i;
+
+			GetIEnumerable = (db, expr) => Query(db, expr, GetMapperSlot(), index);
 		}
 
-		IEnumerable<T> Query(DbManager db, Expression expr)
+		IEnumerable<T> Query(DbManager db, Expression expr, int slot, int[] index)
 		{
 			var dispose = db == null;
 			if (db == null)
@@ -100,9 +110,9 @@ namespace BLToolkit.Data.Linq
 
 			try
 			{
-				using (var dr = db.SetCommand(SqlBuilder, GetParameters(db, expr)).ExecuteReader())
+				using (var dr = GetReader(db, expr))
 					while (dr.Read())
-						yield return MappingSchema.MapDataReaderToObject<T>(dr, null);
+						yield return (T)MapDataReaderToObject(typeof(T), dr, slot, index);
 			}
 			finally
 			{
@@ -125,7 +135,7 @@ namespace BLToolkit.Data.Linq
 
 			try
 			{
-				using (var dr = db.SetCommand(SqlBuilder, GetParameters(db, expr)).ExecuteReader())
+				using (var dr = GetReader(db, expr))
 					while (dr.Read())
 						yield return mapper(dr, MappingSchema, expr);
 			}
@@ -134,6 +144,41 @@ namespace BLToolkit.Data.Linq
 				if (dispose)
 					db.Dispose();
 			}
+		}
+
+		string _command;
+
+		string GetCommand()
+		{
+			if (_command != null)
+				return _command;
+
+			var command = DataProvider.CreateSqlProvider().BuildSql(SqlBuilder, new StringBuilder(), 0).ToString();
+
+			if (!SqlBuilder.ParameterDependent)
+				_command = command;
+
+			return command;
+		}
+
+		IDataReader GetReader(DbManager db, Expression expr)
+		{
+			var parms   = GetParameters(db, expr);
+			var command = GetCommand();
+
+			//string s = sql.ToString();
+
+#if DEBUG
+			var info = string.Format("{0} {1}\n{2}", DataProvider.Name, db.ConfigurationString, command);
+
+			if (parms != null && parms.Length > 0)
+				foreach (var p in parms)
+					info += string.Format("\n{0}\t{1}", p.ParameterName, p.Value);
+
+			Debug.WriteLineIf(DbManager.TraceSwitch.TraceInfo, info, DbManager.TraceSwitch.DisplayName);
+#endif
+
+			return db.SetCommand(command, parms).ExecuteReader();
 		}
 
 		private IDbDataParameter[] GetParameters(DbManager db, Expression expr)
@@ -157,11 +202,81 @@ namespace BLToolkit.Data.Linq
 
 		#endregion
 
+		#region Mapping
+
+		class MapperSlot
+		{
+			public ObjectMapper   ObjectMapper;
+			public IValueMapper[] ValueMappers;
+		}
+
+		MapperSlot[] _mapperSlots;
+
+		internal int GetMapperSlot()
+		{
+			if (_mapperSlots == null)
+			{
+				_mapperSlots = new [] { new MapperSlot() };
+			}
+			else
+			{
+				var slots = new MapperSlot[_mapperSlots.Length + 1];
+
+				slots[_mapperSlots.Length] = new MapperSlot();
+
+				_mapperSlots.CopyTo(slots, 0);
+				_mapperSlots = slots;
+			}
+
+			return _mapperSlots.Length - 1;
+		}
+
+		protected object MapDataReaderToObject(Type destObjectType, IDataReader dataReader, int slotNumber, int[] index)
+		{
+			var slot   = _mapperSlots[slotNumber];
+			var source = MappingSchema.CreateDataReaderMapper(dataReader);
+			var dest   = slot.ObjectMapper ?? (slot.ObjectMapper = MappingSchema.GetObjectMapper(destObjectType));
+
+			var initContext = new InitContext
+			{
+				MappingSchema = MappingSchema,
+				DataSource    = source,
+				SourceObject  = dataReader,
+				ObjectMapper  = dest
+			};
+
+			var destObject = dest.CreateInstance(initContext);
+
+			if (initContext.StopMapping)
+				return destObject;
+
+			var smDest = destObject as ISupportMapping;
+
+			if (smDest != null)
+			{
+				smDest.BeginMapping(initContext);
+
+				if (initContext.StopMapping)
+					return destObject;
+			}
+
+			var mappers = slot.ValueMappers ?? (slot.ValueMappers = initContext.MappingSchema.GetValueMappers(source, dest, index));
+
+			MappingSchema.MapInternal(source, dataReader, dest, destObject, index, mappers);
+
+			if (smDest != null)
+				smDest.EndMapping(initContext);
+
+			return destObject;
+		}
+
+		#endregion
+
 		#region Compare
 
-		public bool Compare( MappingSchema mappingSchema, Expression expr)
+		public bool Compare(DataProviderBase dataProvider, MappingSchema mappingSchema, Expression expr)
 		{
-			return MappingSchema == mappingSchema && Compare(expr, Expression);
+			return DataProvider == dataProvider && MappingSchema == mappingSchema && Compare(expr, Expression);
 		}
 
 		static bool Compare(Expression expr1, Expression expr2)

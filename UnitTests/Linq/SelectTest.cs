@@ -182,6 +182,57 @@ namespace Data.Linq
 				.Select(p5 => new Person { PersonID = p5.PersonID / 2, FirstName = p5.FirstName }));
 		}
 
+		[Test]
+		public void SelectScalar()
+		{
+			ForEachProvider(db =>
+			{
+				var q = (
+
+					from p in db.Person select new { p } into p1 select p1.p
+					
+				).ToList().Where(p => p.PersonID == 1).First();
+
+				Assert.AreEqual(1, q.PersonID);
+			});
+		}
+
+		[Test]
+		public void SelectScalar2()
+		{
+			ForEachProvider(db =>
+			{
+				var q = (
+
+					from p in db.Person select new { p1 = p, p2 = p } into p1 where p1.p1.PersonID == 1 && p1.p2.PersonID == 1 select p1
+					
+				).ToList().Where(p => p.p1.PersonID == 1).First();
+
+				Assert.AreEqual(1, q.p1.PersonID);
+				Assert.AreEqual(1, q.p2.PersonID);
+			});
+		}
+
+		[Test]
+		public void SelectScalar11()
+		{
+			ForEachProvider(db =>
+			{
+				var n = (from p in db.Person select p.PersonID).ToList().Where(id => id == 1).First();
+				Assert.AreEqual(1, n);
+			});
+		}
+
+		[Test]
+		public void SelectScalar21()
+		{
+			ForEachProvider(db =>
+			{
+				var n = (from p in db.Person select p.FirstName.Length).ToList().Where(len => len == 4).First();
+				Assert.AreEqual(4, n);
+			});
+		}
+
 		void Foo(Expression<Func<IDataReader,MappingSchema,int>> func)
 		{
 			/*

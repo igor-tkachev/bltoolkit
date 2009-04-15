@@ -26,6 +26,13 @@ namespace BLToolkit.Data.Sql
 			get { return _parameters; }
 		}
 
+		private bool _parameterDependent;
+		public  bool  ParameterDependent
+		{
+			get { return _parameterDependent;  }
+			set { _parameterDependent = value; }
+		}
+
 		#endregion
 
 		#region Column
@@ -101,7 +108,7 @@ namespace BLToolkit.Data.Sql
 
 			bool IEquatable<ISqlExpression>.Equals(ISqlExpression other)
 			{
-				if ((object)this == other)
+				if (this == other)
 					return true;
 
 				return Equals((Column)other);
@@ -1072,11 +1079,11 @@ namespace BLToolkit.Data.Sql
 					return new Next(this);
 				}
 
-				internal Join(JoinType joinType, ISqlTableSource table, string alias, bool isWeak, Join[] joins)
+				internal Join(JoinType joinType, ISqlTableSource table, string alias, bool isWeak, ICollection<Join> joins)
 				{
 					_joinedTable = new JoinedTable(joinType, table, alias, isWeak);
 
-					if (joins != null && joins.Length > 0)
+					if (joins != null && joins.Count > 0)
 						foreach (Join join in joins)
 							_joinedTable.Table.Joins.Add(join._joinedTable);
 				}
@@ -1618,7 +1625,7 @@ namespace BLToolkit.Data.Sql
 
 		bool IEquatable<ISqlExpression>.Equals(ISqlExpression other)
 		{
-			return (object)this == other;
+			return this == other;
 		}
 
 		#endregion

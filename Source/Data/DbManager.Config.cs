@@ -316,7 +316,7 @@ namespace BLToolkit.Data
 			return dp;
 		}
 
-		private static DataProviderBase GetDataProvider(string configurationString)
+		public static DataProviderBase GetDataProvider(string configurationString)
 		{
 			if (configurationString == null) throw new ArgumentNullException("configurationString");
 

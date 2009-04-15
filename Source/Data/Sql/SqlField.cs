@@ -52,7 +52,7 @@ namespace BLToolkit.Data.Sql
 
 		bool IEquatable<ISqlExpression>.Equals(ISqlExpression other)
 		{
-			return (object)this == other;
+			return this == other;
 		}
 
 		#endregion

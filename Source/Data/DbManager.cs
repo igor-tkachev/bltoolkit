@@ -1880,8 +1880,6 @@ namespace BLToolkit.Data
 
 		public DbManager SetCommand(SqlBuilder sql, params IDbDataParameter[] commandParameters)
 		{
-			//string s = sql.ToString();
-
 			string command = DataProvider.CreateSqlProvider().BuildSql(sql, new StringBuilder(), 0).ToString();
 
 #if DEBUG

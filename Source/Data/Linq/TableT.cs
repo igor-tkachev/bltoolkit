@@ -51,7 +51,10 @@ namespace BLToolkit.Data.Linq
 
 		IEnumerable<T> Execute(Expression expression)
 		{
-			var info = ExpressionInfo<T>.GetExpressionInfo(_dbManager != null? _dbManager.MappingSchema: Map.DefaultSchema, expression);
+			var info = ExpressionInfo<T>.GetExpressionInfo(
+				_dbManager != null? _dbManager.DataProvider:  DbManager.GetDataProvider(DbManager.DefaultConfiguration),
+				_dbManager != null? _dbManager.MappingSchema: Map.DefaultSchema,
+				expression);
 
 			return info.GetIEnumerable(_dbManager, expression);
 		}

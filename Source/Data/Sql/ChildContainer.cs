@@ -5,6 +5,7 @@ namespace BLToolkit.Data.Sql
 {
 	public class ChildContainer<P,C> : Dictionary<string,C>, IDictionary<string,C>
 		where C : IChild<P>
+		where P : class
 	{
 		internal ChildContainer(P parent)
 		{
