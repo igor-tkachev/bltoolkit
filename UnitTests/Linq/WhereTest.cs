@@ -15,9 +15,9 @@ namespace Data.Linq
 		{
 			TestOneJohn(db => 
 				from p in db.Person
-				select new { ID = p.PersonID + 1, p.FirstName } into p
-				where p.ID == 2
-				select new Person(p.ID - 1) { FirstName = p.FirstName });
+				select new { PersonID = p.ID + 1, p.FirstName } into p
+				where p.PersonID == 2
+				select new Person(p.PersonID - 1) { FirstName = p.FirstName });
 		}
 
 		[Test]
@@ -27,9 +27,9 @@ namespace Data.Linq
 
 			TestOneJohn(db => 
 				from p in db.Person
-				select new { ID = p.PersonID + n, p.FirstName } into p
-				where p.ID == 2
-				select new Person(p.ID - 1) { FirstName = p.FirstName });
+				select new { PersonID = p.ID + n, p.FirstName } into p
+				where p.PersonID == 2
+				select new Person(p.PersonID - 1) { FirstName = p.FirstName });
 		}
 
 		[Test]
@@ -37,21 +37,21 @@ namespace Data.Linq
 		{
 			TestOneJohn(db => 
 				from p1 in db.Person
-				select new { p1.PersonID, Name = p1.FirstName + "\r\r\r" } into p2
-				where p2.PersonID == 1
-				select new Person(p2.PersonID) { FirstName = p2.Name.TrimEnd('\r') });
+				select new { p1.ID, Name = p1.FirstName + "\r\r\r" } into p2
+				where p2.ID == 1
+				select new Person(p2.ID) { FirstName = p2.Name.TrimEnd('\r') });
 		}
 
 		[Test]
 		public void EqualsConst()
 		{
-			TestOneJohn(db => from p in db.Person where p.PersonID == 1 select p);
+			TestOneJohn(db => from p in db.Person where p.ID == 1 select p);
 		}
 
 		[Test]
 		public void EqualsConsts()
 		{
-			TestOneJohn(db => from p in db.Person where p.PersonID == 1 && p.FirstName == "John" select p);
+			TestOneJohn(db => from p in db.Person where p.ID == 1 && p.FirstName == "John" select p);
 		}
 
 		[Test]
@@ -59,7 +59,7 @@ namespace Data.Linq
 		{
 			TestOneJohn(db =>
 				from p in db.Person
-				where (p.FirstName == "John" || p.FirstName == "John's") && p.PersonID > 0 && p.PersonID < 2 && p.LastName != "123"
+				where (p.FirstName == "John" || p.FirstName == "John's") && p.ID > 0 && p.ID < 2 && p.LastName != "123"
 				select p);
 		}
 
@@ -67,7 +67,7 @@ namespace Data.Linq
 		public void EqualsParam()
 		{
 			var id = 1;
-			TestOneJohn(db => from p in db.Person where p.PersonID == id select p);
+			TestOneJohn(db => from p in db.Person where p.ID == id select p);
 		}
 
 		[Test]
@@ -75,7 +75,7 @@ namespace Data.Linq
 		{
 			var id   = 1;
 			var name = "John";
-			TestOneJohn(db => from p in db.Person where p.PersonID == id && p.FirstName == name select p);
+			TestOneJohn(db => from p in db.Person where p.ID == id && p.FirstName == name select p);
 		}
 
 		int TestMethod()
@@ -86,7 +86,7 @@ namespace Data.Linq
 		[Test]
 		public void MethodParam()
 		{
-			TestOneJohn(db => from p in db.Person where p.PersonID == TestMethod() select p);
+			TestOneJohn(db => from p in db.Person where p.ID == TestMethod() select p);
 		}
 
 		static int StaticTestMethod()
@@ -97,7 +97,7 @@ namespace Data.Linq
 		[Test]
 		public void StaticMethodParam()
 		{
-			TestOneJohn(db => from p in db.Person where p.PersonID == StaticTestMethod() select p);
+			TestOneJohn(db => from p in db.Person where p.ID == StaticTestMethod() select p);
 		}
 
 		class TestMethodClas
@@ -121,8 +121,8 @@ namespace Data.Linq
 
 			ForEachProvider(db =>
 			{
-				var id = (from p in db.Person where p.PersonID == t.TestMethod() select new { p.PersonID }).ToList().First();
-				Assert.AreEqual(n, id.PersonID);
+				var id = (from p in db.Person where p.ID == t.TestMethod() select new { p.ID }).ToList().First();
+				Assert.AreEqual(n, id.ID);
 			});
 		}
 
@@ -136,7 +136,7 @@ namespace Data.Linq
 		static IQueryable<Person> TestDirectParam(TestDbManager db, int id)
 		{
 			var name = "John";
-			return from p in db.Person where p.PersonID == id && p.FirstName == name select p;
+			return from p in db.Person where p.ID == id && p.FirstName == name select p;
 		}
 
 		[Test]
@@ -148,86 +148,86 @@ namespace Data.Linq
 		[Test]
 		public void BinaryAdd()
 		{
-			TestOneJohn(db => from p in db.Person where p.PersonID + 1 == 2 select p);
+			TestOneJohn(db => from p in db.Person where p.ID + 1 == 2 select p);
 		}
 
 		[Test]
 		public void BinaryDivide()
 		{
-			TestOneJohn(db => from p in db.Person where (p.PersonID + 9) / 10 == 1 && p.PersonID == 1 select p);
+			TestOneJohn(db => from p in db.Person where (p.ID + 9) / 10 == 1 && p.ID == 1 select p);
 		}
 
 		[Test]
 		public void BinaryModulo()
 		{
-			TestOneJohn(db => from p in db.Person where p.PersonID % 2 == 1 && p.PersonID == 1 select p);
+			TestOneJohn(db => from p in db.Person where p.ID % 2 == 1 && p.ID == 1 select p);
 		}
 
 		[Test]
 		public void BinaryMultiply()
 		{
-			TestOneJohn(db => from p in db.Person where p.PersonID * 10 - 9 == 1 select p);
+			TestOneJohn(db => from p in db.Person where p.ID * 10 - 9 == 1 select p);
 		}
 
 		[Test]
 		public void BinaryXor()
 		{
-			TestOneJohn(db => from p in db.Person where (p.PersonID ^ 2) == 3 select p);
+			TestOneJohn(db => from p in db.Person where (p.ID ^ 2) == 3 select p);
 		}
 
 		[Test]
 		public void BinaryAnd()
 		{
-			TestOneJohn(db => from p in db.Person where (p.PersonID & 3) == 1 select p);
+			TestOneJohn(db => from p in db.Person where (p.ID & 3) == 1 select p);
 		}
 
 		[Test]
 		public void BinaryOr()
 		{
-			TestOneJohn(db => from p in db.Person where (p.PersonID | 2) == 3 select p);
+			TestOneJohn(db => from p in db.Person where (p.ID | 2) == 3 select p);
 		}
 
 		[Test]
 		public void BinarySubtract()
 		{
-			TestOneJohn(db => from p in db.Person where p.PersonID - 1 == 0 select p);
+			TestOneJohn(db => from p in db.Person where p.ID - 1 == 0 select p);
 		}
 
 		[Test]
 		public void EqualsNull()
 		{
-			TestOneJohn(db => from p in db.Person where p.PersonID == 1 && p.MiddleName == null select p);
+			TestOneJohn(db => from p in db.Person where p.ID == 1 && p.MiddleName == null select p);
 		}
 
 		[Test]
 		public void EqualsNull2()
 		{
-			TestOneJohn(db => from p in db.Person where p.PersonID == 1 && null == p.MiddleName select p);
+			TestOneJohn(db => from p in db.Person where p.ID == 1 && null == p.MiddleName select p);
 		}
 
 		[Test]
 		public void NotEqualNull()
 		{
-			TestOneJohn(db => from p in db.Person where p.PersonID == 1 && p.FirstName != null select p);
+			TestOneJohn(db => from p in db.Person where p.ID == 1 && p.FirstName != null select p);
 		}
 
 		[Test]
 		public void NotEqualNull2()
 		{
-			TestOneJohn(db => from p in db.Person where p.PersonID == 1 && null != p.FirstName select p);
+			TestOneJohn(db => from p in db.Person where p.ID == 1 && null != p.FirstName select p);
 		}
 
 		[Test]
 		public void NotTest()
 		{
-			TestOneJohn(db => from p in db.Person where p.PersonID == 1 && !(p.MiddleName != null) select p);
+			TestOneJohn(db => from p in db.Person where p.ID == 1 && !(p.MiddleName != null) select p);
 		}
 
 		[Test]
 		public void NotTest2()
 		{
 			int n = 2;
-			TestOneJohn(db => from p in db.Person where p.PersonID == 1 && !(p.MiddleName != null && p.PersonID == n) select p);
+			TestOneJohn(db => from p in db.Person where p.ID == 1 && !(p.MiddleName != null && p.ID == n) select p);
 		}
 	}
 }

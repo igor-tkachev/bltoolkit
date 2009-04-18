@@ -2,6 +2,8 @@
 
 namespace Data.Linq.Model
 {
+	using BLToolkit.Mapping;
+
 	public class Person
 	{
 		public Person()
@@ -10,16 +12,17 @@ namespace Data.Linq.Model
 
 		public Person(int id)
 		{
-			PersonID = id;
+			ID = id;
 		}
 
 		public Person(int id, string firstName)
 		{
-			PersonID  = id;
+			ID        = id;
 			FirstName = firstName;
 		}
 
-		public int    PersonID;
+		[MapField("PersonID")] 
+		public int    ID;
 		public string FirstName { get; set; }
 		public string LastName;
 		public string MiddleName;

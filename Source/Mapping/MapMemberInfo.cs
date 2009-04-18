@@ -94,12 +94,12 @@ namespace BLToolkit.Mapping
 			set { _memberExtension = value; }
 		}
 
-	    private DbType _dbType = DbType.Object;
-	    public DbType DbType
-        {
-            get { return _dbType; }
-            set { _dbType = value; }
-        }
+		private DbType _dbType = DbType.Object;
+		public  DbType  DbType
+		{
+			get { return _dbType; }
+			set { _dbType = value; }
+		}
 
 		private Type _type;
 		public  Type  Type

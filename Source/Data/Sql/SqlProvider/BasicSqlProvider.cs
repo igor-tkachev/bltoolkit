@@ -68,7 +68,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 				BuildExpression(sb, col.Expression, col.Alias, ref addAlias);
 
 				if (addAlias)
-					sb.Append(" as ").Append(col.Alias);
+					sb.Append(" as ").Append(DataProvider.Convert(col.Alias, ConvertType.NameToQueryFieldAlias));
 
 				sb.Append(',').AppendLine();
 			}

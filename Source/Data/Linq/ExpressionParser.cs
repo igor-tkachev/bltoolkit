@@ -63,15 +63,13 @@ namespace BLToolkit.Data.Linq
 			return _info;
 		}
 
-		QueryInfo ParseSequence(ParseInfo<Expression> info)
+		QuerySource ParseSequence(ParseInfo<Expression> info)
 		{
-			QueryInfo select = null;
+			QuerySource select = null;
 
-			if (info.IsConstant<IQueryable>((value,_) =>
+			if (info.IsConstant<IQueryable>((value,expr) =>
 				{
-					var table = new SqlTable(_info.MappingSchema, value.ElementType);
-					_info.SqlBuilder.From.Table(table);
-					select = new QueryInfo.Constant(value.ElementType, table);
+					select = new QuerySource.Table(_info.MappingSchema, _info.SqlBuilder, expr);
 					return true;
 				}))
 				return select;
@@ -94,49 +92,55 @@ namespace BLToolkit.Data.Linq
 
 		#region Parse Select
 
-		QueryInfo ParseSelect(QueryInfo select, ParseInfo<ParameterExpression> parm, ParseInfo body)
+		QuerySource ParseSelect(QuerySource select, ParseInfo<ParameterExpression> parm, ParseInfo body)
 		{
 			SetAlias(select, parm.Expr.Name);
 
 			switch (body.NodeType)
 			{
 				case ExpressionType.Parameter   : return select;
-				case ExpressionType.New         : return new QueryInfo.New       (select, parm, body.ConvertTo<NewExpression>());
-				case ExpressionType.MemberInit  : return new QueryInfo.MemberInit(select, parm, body.ConvertTo<MemberInitExpression>());
-				case ExpressionType.MemberAccess: return ParseMemberAccess       (select, parm, body.ConvertTo<MemberExpression>());
+				case ExpressionType.New         : return new QuerySource.Expr(_info.SqlBuilder, select, body.ConvertTo<NewExpression>());
+													//return new QuerySource.New       (select, parm, body.ConvertTo<NewExpression>());
+				case ExpressionType.MemberInit  : return new QuerySource.Expr(_info.SqlBuilder, select, body.ConvertTo<MemberInitExpression>());
+													//return new QuerySource.MemberInit(select, parm, body.ConvertTo<MemberInitExpression>());
+				case ExpressionType.MemberAccess: return ParseMemberAccess         (select, parm, body.ConvertTo<MemberExpression>());
 				default                         : throw  new InvalidOperationException();
 			}
 		}
 
-		QueryInfo ParseMemberAccess(QueryInfo select, ParseInfo<ParameterExpression> parm, ParseInfo<MemberExpression> body)
+		QuerySource ParseMemberAccess(QuerySource select, ParseInfo<ParameterExpression> parm, ParseInfo<MemberExpression> body)
 		{
-			QueryInfo qi = FindSource(select, parm, body);
+			QuerySource qs = FindSource(select, parm, body);
 
-			return qi;
+			return qs;
 		}
 
-		QueryInfo FindSource(QueryInfo select, ParseInfo<ParameterExpression> parm, ParseInfo<MemberExpression> body)
+		QuerySource FindSource(QuerySource select, ParseInfo<ParameterExpression> parm, ParseInfo<MemberExpression> body)
 		{
-			QueryInfo qi = null;
+			QuerySource qi = null;
 
 			select.Match
 			(
-				constantExpr =>
+				table =>
 				{
-					if (constantExpr.ObjectType == body.Expr.Type)
-						qi = constantExpr;
+					if (table.ObjectType == body.Expr.Type)
+						qi = table;
+				},
+				expr =>
+				{
+					qi = FindSource(expr.ParentQuery, parm, body);
 				},
 				newExpr      =>
 				{
-					qi = FindSource(newExpr.SourceInfo, parm, body);
+					qi = FindSource(newExpr.ParentQuery, parm, body);
 				},
 				memberInit   =>
 				{
-					qi = FindSource(memberInit.SourceInfo, parm, body);
+					qi = FindSource(memberInit.ParentQuery, parm, body);
 				},
 				subQuery     =>
 				{
-					qi = FindSource(subQuery.SourceInfo, parm, body);
+					qi = FindSource(subQuery.ParentQuery, parm, body);
 				},
 				memberAccess =>
 				{
@@ -152,13 +156,13 @@ namespace BLToolkit.Data.Linq
 
 		#region Parse Where
 
-		QueryInfo ParseWhere(QueryInfo select, ParseInfo<ParameterExpression> parm, ParseInfo body)
+		QuerySource ParseWhere(QuerySource select, ParseInfo<ParameterExpression> parm, ParseInfo body)
 		{
 			SetAlias(select, parm.Expr.Name);
 
 			if (CheckForSubQuery(select, parm, body))
 			{
-				var subQuery = new QueryInfo.SubQuery(select, _info.SqlBuilder);
+				var subQuery = new QuerySource.SubQuery(_info.SqlBuilder, select);
 
 				_info.SqlBuilder = subQuery.SqlBuilder;
 
@@ -170,7 +174,7 @@ namespace BLToolkit.Data.Linq
 			return select;
 		}
 
-		bool CheckForSubQuery(QueryInfo query, ParseInfo<ParameterExpression> parm, ParseInfo expr)
+		bool CheckForSubQuery(QuerySource query, ParseInfo<ParameterExpression> parm, ParseInfo expr)
 		{
 			var makeSubquery = false;
 
@@ -202,7 +206,7 @@ namespace BLToolkit.Data.Linq
 			return makeSubquery;
 		}
 
-		public bool CheckFieldForSubQuery(QueryInfo queryInfo, ParseInfo<MemberExpression> memberExpr)
+		public bool CheckFieldForSubQuery(QuerySource queryInfo, ParseInfo<MemberExpression> memberExpr)
 		{
 			bool? makeQuery = null;
 			var   member    = memberExpr.Expr.Member;
@@ -219,17 +223,16 @@ namespace BLToolkit.Data.Linq
 
 		#region Build Select
 
-		void BuildSelect(QueryInfo query)
+		void BuildSelect(QuerySource query)
 		{
 			query.Match
 			(
-				constantExpr => // QueryInfo.Constant
+				table => // QueryInfo.Table
 				{
-					foreach (var field in constantExpr.Table.Fields.Values)
-						_info.SqlBuilder.Select.Expr(field);
-
+					table.SetSelect();
 					_info.SetQuery();
 				},
+				expr         => BuildNew(query, expr.Expression, null), // QueryInfo.Expr
 				newExpr      => BuildNew(query, newExpr.     Body, newExpr.     Parameter), // QueryInfo.New
 				memberInit   => BuildNew(query, memberInit.  Body, memberInit.  Parameter), // QueryInfo.MemberInit
 				subQuery     => _info.SetQuery(),                                           // QueryInfo.SubQuery
@@ -237,7 +240,7 @@ namespace BLToolkit.Data.Linq
 			);
 		}
 
-		void BuildNew(QueryInfo query, ParseInfo expr, ParseInfo<ParameterExpression> parm)
+		void BuildNew(QuerySource query, ParseInfo expr, ParseInfo<ParameterExpression> parm)
 		{
 			var info = BuildNewExpression(query, expr, parm);
 
@@ -247,13 +250,50 @@ namespace BLToolkit.Data.Linq
 			_info.SetQuery(mapper.Compile());
 		}
 
-		ParseInfo BuildNewExpression(QueryInfo query, ParseInfo expr, ParseInfo<ParameterExpression> parm)
+		ParseInfo BuildNewExpression(QuerySource query, ParseInfo expr, ParseInfo<ParameterExpression> parm)
 		{
 			return expr.Walk(pi =>
 			{
 				if (pi.IsMemberAccess((ma,ex) =>
 				{
-					if (IsParameter(ma.Expr, parm.Expr))
+					var fld = query.GetField(ma);
+
+					if (fld != null)
+					{
+						if (fld is QueryField.Column)
+						{
+							var col = (QueryField.Column)fld;
+							var idx = col.Select();
+
+							var memberType = ma.Expr.Member.MemberType == MemberTypes.Field ?
+								((FieldInfo)   ma.Expr.Member).FieldType :
+								((PropertyInfo)ma.Expr.Member).PropertyType;
+
+							MethodInfo mi;
+
+							if (!MapSchema.Converters.TryGetValue(memberType, out mi))
+								throw new LinqException("Cannot find converter for the '{0}' type.", memberType.FullName);
+
+							pi = ma.Parent.Replace(
+								Expression.Call(_mapSchemaParam, mi,
+									Expression.Call(_dataReaderParam, DataReader.GetValue,
+										Expression.Constant(idx, typeof(int)))),
+								ma.ParamAccessor);
+
+							return true;
+						}
+
+						if (fld is QueryField.ColumnExpr)
+						{
+							var col = (QueryField.ColumnExpr)fld;
+
+							pi = BuildNewExpression(col.QuerySource, col.Expr, null);
+							pi.IsReplaced = pi.StopWalking = true;
+
+							return true;
+						}
+					}
+					else if (IsParameter(ma.Expr, parm == null? null: parm.Expr))
 					{
 						// field = p.FieldName
 						//
@@ -297,7 +337,7 @@ namespace BLToolkit.Data.Linq
 			});
 		}
 
-		public ParseInfo GetField(QueryInfo queryInfo, ParseInfo<MemberExpression> memberExpr)
+		public ParseInfo GetField(QuerySource queryInfo, ParseInfo<MemberExpression> memberExpr)
 		{
 			ParseInfo pi = null;
 
@@ -336,15 +376,16 @@ namespace BLToolkit.Data.Linq
 			return pi;
 		}
 
-		static void SetAlias(QueryInfo query, string alias)
+		static void SetAlias(QuerySource query, string alias)
 		{
 			query.Match
 			(
-				constantExpr =>
+				table  =>
 				{
-					if (constantExpr.Table.Alias == null)
-						constantExpr.Table.Alias = alias;
+					if (table.SqlTable.Alias == null)
+						table.SqlTable.Alias = alias;
 				},
+				_ => {},
 				_ => {},
 				_ => {},
 				subQuery =>
@@ -424,7 +465,7 @@ namespace BLToolkit.Data.Linq
 
 		static bool CanBeCompiled(ParseInfo expr)
 		{
-			bool canbe = true;
+			var canbe = true;
 
 			expr.Walk(pi =>
 			{
@@ -442,22 +483,43 @@ namespace BLToolkit.Data.Linq
 		#region Field Walker
 
 		void FieldWalker(
-			QueryInfo                   query,
+			QuerySource                 query,
 			ParseInfo<MemberExpression> memberExpr,
 			Action<ISqlExpression>      processColumn,
-			Action<QueryInfo,ParseInfo,ParseInfo<ParameterExpression>,string> processExpression)
+			Action<QuerySource,ParseInfo,ParseInfo<ParameterExpression>,string> processExpression)
 		{
 			var member = memberExpr.Expr.Member;
 
 			query.Match
 			(
-				#region QueryInfo.Constant
+				#region QueryInfo.Table
 
-				constantExpr =>
+				table =>
 				{
-					var field = constantExpr.Table[member.Name];
-					if (field != null)
-						processColumn(field);
+					QueryField field;
+
+					if (table.Fields.TryGetValue(member, out field))
+						processColumn(((QueryField.Column)field).Field);
+				},
+
+				#endregion
+
+				#region QueryInfo.Expr
+
+				expr =>
+				{
+					QueryField field;
+
+					if (expr.Fields.TryGetValue(member, out field))
+					{
+						if (field is QueryField.Column)
+							processColumn(((QueryField.Column)field).Field);
+						else if (field is QueryField.ColumnExpr)
+						{
+							var ex = (QueryField.ColumnExpr)field;
+							processExpression(expr, ex.Expr, null, member.Name);
+						}
+					}
 				},
 
 				#endregion
@@ -468,11 +530,11 @@ namespace BLToolkit.Data.Linq
 				{
 					if (IsParameter(memberExpr.Expr, newExpr.Parameter.Expr))
 					{
-						FieldWalker(newExpr.SourceInfo, memberExpr, processColumn, processExpression);
+						FieldWalker(newExpr.ParentQuery, memberExpr, processColumn, processExpression);
 					}
 					else if (IsMember(memberExpr.Expr.Expression, newExpr.Body.Expr.Members))
 					{
-						FieldWalker(newExpr.SourceInfo, memberExpr, processColumn, processExpression);
+						FieldWalker(newExpr.ParentQuery, memberExpr, processColumn, processExpression);
 					}
 					else
 					{
@@ -493,7 +555,7 @@ namespace BLToolkit.Data.Linq
 									if (arg is MemberExpression)
 									{
 										FieldWalker(
-											newExpr.SourceInfo,
+											newExpr.ParentQuery,
 											newExpr.Body.Create((MemberExpression)arg, newExpr.Body.Index(body.Arguments, New.Arguments, i)),
 											processColumn,
 											processExpression);
@@ -533,11 +595,11 @@ namespace BLToolkit.Data.Linq
 				{
 					if (IsParameter(memberExpr.Expr, memberInit.Parameter.Expr))
 					{
-						FieldWalker(memberInit.SourceInfo, memberExpr, processColumn, processExpression);
+						FieldWalker(memberInit.ParentQuery, memberExpr, processColumn, processExpression);
 					}
 					else if (IsMember(memberExpr.Expr.Expression, memberInit.Members))
 					{
-						FieldWalker(memberInit.SourceInfo, memberExpr, processColumn, processExpression);
+						FieldWalker(memberInit.ParentQuery, memberExpr, processColumn, processExpression);
 					}
 					else
 					{
@@ -560,7 +622,7 @@ namespace BLToolkit.Data.Linq
 									if (ma.Expression is MemberExpression)
 									{
 										FieldWalker(
-											memberInit.SourceInfo,
+											memberInit.ParentQuery,
 											piExpression.Create(ma.Expression as MemberExpression, piExpression.Convert<MemberExpression>()),
 											processColumn,
 											processExpression);
@@ -587,7 +649,7 @@ namespace BLToolkit.Data.Linq
 					ISqlExpression col = null;
 					object         key = null;
 
-					FieldWalker(subQuery.SourceInfo, memberExpr,
+					FieldWalker(subQuery.ParentQuery, memberExpr,
 						column =>
 						{
 							if (!subQuery.Columns.TryGetValue(column, out col))
@@ -659,14 +721,14 @@ namespace BLToolkit.Data.Linq
 
 		#region Expression Parser
 
-		ISqlExpression ParseExpression(QueryInfo query, ParseInfo parseInfo)
+		ISqlExpression ParseExpression(QuerySource query, ParseInfo parseInfo)
 		{
 			if (parseInfo.NodeType == ExpressionType.Constant)
 			{
 				var c = (ConstantExpression)parseInfo.Expr;
 
 				if (c.Value == null || IsConstant(parseInfo.Expr.Type))
-					return new SqlValue(((ConstantExpression) parseInfo.Expr).Value);
+					return new SqlValue(((ConstantExpression)parseInfo.Expr).Value);
 			}
 
 			if (CanBeCompiled(parseInfo))
@@ -745,7 +807,7 @@ namespace BLToolkit.Data.Linq
 
 		#region Predicate Parser
 
-		SqlBuilder.IPredicate ParsePredicate(QueryInfo query, ParseInfo parseInfo)
+		SqlBuilder.IPredicate ParsePredicate(QuerySource query, ParseInfo parseInfo)
 		{
 			switch (parseInfo.NodeType)
 			{
@@ -785,7 +847,7 @@ namespace BLToolkit.Data.Linq
 
 		#region Search Condition Parser
 
-		void ParseSearchCondition(ICollection<SqlBuilder.Condition> conditions, QueryInfo query, ParseInfo parseInfo)
+		void ParseSearchCondition(ICollection<SqlBuilder.Condition> conditions, QuerySource query, ParseInfo parseInfo)
 		{
 			switch (parseInfo.NodeType)
 			{

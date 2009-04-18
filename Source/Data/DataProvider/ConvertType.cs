@@ -35,6 +35,16 @@ namespace BLToolkit.Data.DataProvider
 		NameToQueryField,
 
 		/// <summary>
+		/// Provided name should be converted to query field alias.
+		/// For example:
+		///     ID -> "ID"
+		/// for the following query:
+		///     SELECT "ID" as "ID" FROM Person WHERE "ID" = 1
+		///                    ^  ^ here
+		/// </summary>
+		NameToQueryFieldAlias,
+
+		/// <summary>
 		/// Provided name should be converted to query table name.
 		/// For example:
 		///     Person -> [Person]

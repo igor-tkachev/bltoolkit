@@ -51,6 +51,7 @@ namespace BLToolkit.Data.DataProvider
 					break;
 
 				case ConvertType.NameToQueryField:
+				case ConvertType.NameToQueryFieldAlias:
 				case ConvertType.NameToQueryTable:
 					return "\"" + value + "\"";
 

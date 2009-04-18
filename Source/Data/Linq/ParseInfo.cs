@@ -138,12 +138,12 @@ namespace BLToolkit.Data.Linq
 			return false;
 		}
 
-		public bool IsConstant<T>(Func<T,FExpr,bool> func)
+		public bool IsConstant<T>(Func<T,ParseInfo<ConstantExpression>,bool> func)
 		{
 			if (NodeType == ExpressionType.Constant)
 			{
 				var c = Expr as ConstantExpression;
-				return c.Value is T? func((T)c.Value, () => Property<ConstantExpression>(Constant.Value).ConvertTo<T>()): false;
+				return c.Value is T? func((T)c.Value, ConvertTo<ConstantExpression>()): false;
 			}
 
 			return false;
@@ -151,7 +151,7 @@ namespace BLToolkit.Data.Linq
 
 		public bool IsConstant<T>()
 		{
-			return IsConstant<T>((p1, p2) => true);
+			return IsConstant<T>((_,__) => true);
 		}
 
 		#endregion

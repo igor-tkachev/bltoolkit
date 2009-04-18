@@ -92,7 +92,7 @@ namespace BLToolkit.Data.Sql
 
 			public override string ToString()
 			{
-				return RemoveAlias(Expression) + " as " + (Alias ?? "[field]");
+				return RemoveAlias(Expression) + " as " + (Alias ?? "field");
 			}
 
 			#region ISqlExpression Members

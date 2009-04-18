@@ -97,7 +97,7 @@ namespace BLToolkit.Mapping
 		private readonly List<MemberMapper> _members;
 		public  MemberMapper this[int index]
 		{
-			get { return (MemberMapper)_members[index]; }
+			get { return _members[index]; }
 		}
 
 		private TypeExtension _extension;

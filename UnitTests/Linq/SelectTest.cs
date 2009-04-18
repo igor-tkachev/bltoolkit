@@ -39,10 +39,10 @@ namespace Data.Linq
 			{
 				var person = (
 
-					from p in db.Person select new { p.PersonID, p.FirstName }
+					from p in db.Person select new { p.ID, p.FirstName }
 
-				).ToList().Where(p => p.PersonID == 1).First();
-				Assert.AreEqual(1,      person.PersonID);
+				).ToList().Where(p => p.ID == 1).First();
+				Assert.AreEqual(1,      person.ID);
 				Assert.AreEqual("John", person.FirstName);
 			});
 		}
@@ -51,12 +51,12 @@ namespace Data.Linq
 		{
 			var person = (
 
-				from p in table select new { i, p.PersonID, p.FirstName }
+				from p in table select new { i, p.ID, p.FirstName }
 
-			).ToList().Where(p => p.PersonID == 1).First();
+			).ToList().Where(p => p.ID == 1).First();
 
 			Assert.AreEqual(i,      person.i);
-			Assert.AreEqual(1,      person.PersonID);
+			Assert.AreEqual(1,      person.ID);
 			Assert.AreEqual("John", person.FirstName);
 		}
 
@@ -69,33 +69,33 @@ namespace Data.Linq
 		[Test]
 		public void InitObject()
 		{
-			TestJohn(db => from p in db.Person select new Person { PersonID = p.PersonID, FirstName = p.FirstName });
+			TestJohn(db => from p in db.Person select new Person { ID = p.ID, FirstName = p.FirstName });
 		}
 
 		[Test]
 		public void NewObject()
 		{
-			TestJohn(db => from p in db.Person select new Person(p.PersonID, p.FirstName));
+			TestJohn(db => from p in db.Person select new Person(p.ID, p.FirstName));
 		}
 
 		[Test]
 		public void NewInitObject()
 		{
-			TestJohn(db => from p in db.Person select new Person(p.PersonID) { FirstName = p.FirstName });
+			TestJohn(db => from p in db.Person select new Person(p.ID) { FirstName = p.FirstName });
 		}
 
 		[Test]
 		public void NewWithExpr()
 		{
-			TestPerson(1, "John1", db => from p in db.Person select new Person(p.PersonID) { FirstName = (p.FirstName + "1\r\r\r").TrimEnd('\r') });
+			TestPerson(1, "John1", db => from p in db.Person select new Person(p.ID) { FirstName = (p.FirstName + "1\r\r\r").TrimEnd('\r') });
 		}
 
 		[Test]
 		public void MultipleSelect1()
 		{
 			TestJohn(db => db.Person
-				.Select(p => new { ID = p.PersonID, Name = p.FirstName })
-				.Select(p => new Person(p.ID) { FirstName = p.Name }));
+				.Select(p => new { PersonID = p.ID, Name = p.FirstName })
+				.Select(p => new Person(p.PersonID) { FirstName = p.Name }));
 		}
 
 		[Test]
@@ -103,18 +103,18 @@ namespace Data.Linq
 		{
 			TestJohn(db => 
 				from p in db.Person
-				select new { ID = p.PersonID, Name = p.FirstName } into pp
-				select new Person(pp.ID) { FirstName = pp.Name });
+				select new { PersonID = p.ID, Name = p.FirstName } into pp
+				select new Person(pp.PersonID) { FirstName = pp.Name });
 		}
 
 		[Test]
 		public void MultipleSelect3()
 		{
 			TestJohn(db => db.Person
-				.Select(p => new        { ID       = p.PersonID, Name      = p.FirstName })
-				.Select(p => new Person { PersonID = p.ID,       FirstName = p.Name      })
-				.Select(p => new        { ID       = p.PersonID, Name      = p.FirstName })
-				.Select(p => new Person { PersonID = p.ID,       FirstName = p.Name      }));
+				.Select(p => new        { PersonID = p.ID,       Name      = p.FirstName })
+				.Select(p => new Person { ID       = p.PersonID, FirstName = p.Name      })
+				.Select(p => new        { PersonID = p.ID,       Name      = p.FirstName })
+				.Select(p => new Person { ID       = p.PersonID, FirstName = p.Name      }));
 		}
 
 		[Test]
@@ -123,7 +123,7 @@ namespace Data.Linq
 			TestJohn(db => db.Person
 				.Select(p1 => new        { p1 })
 				.Select(p2 => new        { p2 })
-				.Select(p3 => new Person { PersonID = p3.p2.p1.PersonID, FirstName = p3.p2.p1.FirstName }));
+				.Select(p3 => new Person { ID = p3.p2.p1.ID, FirstName = p3.p2.p1.FirstName }));
 		}
 
 		[Test]
@@ -131,9 +131,9 @@ namespace Data.Linq
 		{
 			TestJohn(db => db.Person
 				.Select(p1 => new        { p1 })
-				.Select(p2 => new Person { PersonID = p2.p1.PersonID, FirstName = p2.p1.FirstName })
+				.Select(p2 => new Person { ID = p2.p1.ID, FirstName = p2.p1.FirstName })
 				.Select(p3 => new        { p3 })
-				.Select(p4 => new Person { PersonID = p4.p3.PersonID, FirstName = p4.p3.FirstName }));
+				.Select(p4 => new Person { ID = p4.p3.ID, FirstName = p4.p3.FirstName }));
 		}
 
 		[Test]
@@ -141,17 +141,17 @@ namespace Data.Linq
 		{
 			TestJohn(db => db.Person
 				.Select(p1 => new        { p1 })
-				.Select(p2 => new Person { PersonID = p2.p1.PersonID, FirstName = p2.p1.FirstName })
+				.Select(p2 => new Person { ID = p2.p1.ID, FirstName = p2.p1.FirstName })
 				.Select(p3 => p3)
-				.Select(p4 => new Person { PersonID = p4.PersonID,    FirstName = p4.FirstName }));
+				.Select(p4 => new Person { ID = p4.ID,    FirstName = p4.FirstName }));
 		}
 
 		[Test]
 		public void MultipleSelect7()
 		{
 			TestJohn(db => db.Person
-				.Select(p1 => new        { PersonID = p1.PersonID + 1, p1.FirstName })
-				.Select(p2 => new Person { PersonID = p2.PersonID - 1, FirstName = p2.FirstName }));
+				.Select(p1 => new        { ID = p1.ID + 1, p1.FirstName })
+				.Select(p2 => new Person { ID = p2.ID - 1, FirstName = p2.FirstName }));
 		}
 
 		[Test]
@@ -162,11 +162,11 @@ namespace Data.Linq
 				var person = (
 
 					db.Person
-						.Select(p1 => new Person { PersonID = p1.PersonID * 2,           FirstName = p1.FirstName })
-						.Select(p2 => new        { PersonID = p2.PersonID / "22".Length, p2.FirstName })
+						.Select(p1 => new Person { ID = p1.ID * 2,           FirstName = p1.FirstName })
+						.Select(p2 => new        { ID = p2.ID / "22".Length, p2.FirstName })
 
-				).ToList().Where(p => p.PersonID == 1).First();
-				Assert.AreEqual(1,      person.PersonID);
+				).ToList().Where(p => p.ID == 1).First();
+				Assert.AreEqual(1,      person.ID);
 				Assert.AreEqual("John", person.FirstName);
 			});
 		}
@@ -175,11 +175,21 @@ namespace Data.Linq
 		public void MultipleSelect9()
 		{
 			TestJohn(db => db.Person
-				.Select(p1 => new        { PersonID = p1.PersonID - 1, p1.FirstName })
-				.Select(p2 => new Person { PersonID = p2.PersonID + 1, FirstName = p2.FirstName })
+				.Select(p1 => new        { ID = p1.ID - 1, p1.FirstName })
+				.Select(p2 => new Person { ID = p2.ID + 1, FirstName = p2.FirstName })
 				.Select(p3 => p3)
-				.Select(p4 => new        { PersonID = p4.PersonID * "22".Length, p4.FirstName })
-				.Select(p5 => new Person { PersonID = p5.PersonID / 2, FirstName = p5.FirstName }));
+				.Select(p4 => new        { ID = p4.ID * "22".Length, p4.FirstName })
+				.Select(p5 => new Person { ID = p5.ID / 2, FirstName = p5.FirstName }));
+		}
+
+		[Test]
+		public void MultipleSelect10()
+		{
+			TestJohn(db => db.Person
+				.Select(p1 => new        { p1.ID, p1 })
+				.Select(p2 => new        { p2.ID, p2.p1, p2 })
+				.Select(p3 => new        { p3.ID, p3.p1.FirstName, p11 = p3.p2.p1, p3 })
+				.Select(p4 => new Person { ID = p4.p11.ID, FirstName = p4.p3.p1.FirstName }));
 		}
 
 		[Test]
@@ -191,9 +201,9 @@ namespace Data.Linq
 
 					from p in db.Person select new { p } into p1 select p1.p
 					
-				).ToList().Where(p => p.PersonID == 1).First();
+				).ToList().Where(p => p.ID == 1).First();
 
-				Assert.AreEqual(1, q.PersonID);
+				Assert.AreEqual(1, q.ID);
 			});
 		}
 
@@ -204,12 +214,12 @@ namespace Data.Linq
 			{
 				var q = (
 
-					from p in db.Person select new { p1 = p, p2 = p } into p1 where p1.p1.PersonID == 1 && p1.p2.PersonID == 1 select p1
+					from p in db.Person select new { p1 = p, p2 = p } into p1 where p1.p1.ID == 1 && p1.p2.ID == 1 select p1
 					
-				).ToList().Where(p => p.p1.PersonID == 1).First();
+				).ToList().Where(p => p.p1.ID == 1).First();
 
-				Assert.AreEqual(1, q.p1.PersonID);
-				Assert.AreEqual(1, q.p2.PersonID);
+				Assert.AreEqual(1, q.p1.ID);
+				Assert.AreEqual(1, q.p2.ID);
 			});
 		}
 
@@ -218,7 +228,7 @@ namespace Data.Linq
 		{
 			ForEachProvider(db =>
 			{
-				var n = (from p in db.Person select p.PersonID).ToList().Where(id => id == 1).First();
+				var n = (from p in db.Person select p.ID).ToList().Where(id => id == 1).First();
 				Assert.AreEqual(1, n);
 			});
 		}

@@ -80,9 +80,9 @@ namespace Data.Linq
 		{
 			ForEachProvider(db =>
 			{
-				var person = func(db).ToList().Where(p => p.PersonID == id).First();
+				var person = func(db).ToList().Where(p => p.ID == id).First();
 
-				Assert.AreEqual(id,        person.PersonID);
+				Assert.AreEqual(id,        person.ID);
 				Assert.AreEqual(firstName, person.FirstName);
 			});
 		}
@@ -102,7 +102,7 @@ namespace Data.Linq
 
 				var person = list[0];
 
-				Assert.AreEqual(id,        person.PersonID);
+				Assert.AreEqual(id,        person.ID);
 				Assert.AreEqual(firstName, person.FirstName);
 			});
 		}
