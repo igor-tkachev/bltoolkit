@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using System.Windows.Forms;
 
 namespace BLToolkit.Data.Linq
 {
@@ -33,12 +32,6 @@ namespace BLToolkit.Data.Linq
 				}
 			}
 
-			public void SetSelect()
-			{
-				foreach (Column field in Fields.Values)
-					field.Select();
-			}
-
 			public Type     ObjectType;
 			public SqlTable SqlTable;
 		}
@@ -60,7 +53,7 @@ namespace BLToolkit.Data.Linq
 					if (member is MethodInfo)
 						member = TypeHelper.GetPropertyByMethod((MethodInfo)member);
 
-					var field = GetField(ex.Arguments[i]);
+					var field = parentQuery.GetField(ex.Arguments[i]);
 
 					if (field != null)
 					{
@@ -68,7 +61,7 @@ namespace BLToolkit.Data.Linq
 					}
 					else
 					{
-						var e = new ColumnExpr(this, expr.Create(ex.Arguments[i], expr.Index(ex.Arguments, ReflectionHelper.New.Arguments, i)));
+						var e = new ExprColumn(this, expr.Create(ex.Arguments[i], expr.Index(ex.Arguments, New.Arguments, i)), member.Name);
 						Fields.Add(member, e);
 					}
 				}
@@ -91,21 +84,13 @@ namespace BLToolkit.Data.Linq
 					{
 						var ma = binding as MemberAssignment;
 
-						var piBinding    = expr.Create(ma.Expression, expr.Index(ex.Bindings, ReflectionHelper.MemberInit.Bindings, i));
-						var piAssign     = piBinding.      Create(ma.Expression, piBinding.ConvertExpressionTo<MemberAssignment>());
-						var piExpression = piAssign.       Create(ma.Expression, piAssign.Property(ReflectionHelper.MemberAssignmentBind.Expression));
+						var piBinding    = expr.     Create(ma.Expression, expr.Index(ex.Bindings, MemberInit.Bindings, i));
+						var piAssign     = piBinding.Create(ma.Expression, piBinding.ConvertExpressionTo<MemberAssignment>());
+						var piExpression = piAssign. Create(ma.Expression, piAssign.Property(MemberAssignmentBind.Expression));
 
-						var field = GetField(piExpression);
+						var field = parentQuery.GetField(piExpression);
 
-						if (field != null)
-						{
-							Fields.Add(member, field);
-						}
-						else
-						{
-							var e = new ColumnExpr(this, piExpression);
-							Fields.Add(member, e);
-						}
+						Fields.Add(member, field ?? new ExprColumn(this, piExpression, member.Name));
 					}
 					else
 						throw new InvalidOperationException();
@@ -113,46 +98,18 @@ namespace BLToolkit.Data.Linq
 			}
 		}
 
-
-		public class New : QuerySource
-		{
-			public New(QuerySource parentQuery, ParseInfo<ParameterExpression> parameter, ParseInfo<NewExpression> body)
-				: base(parentQuery.SqlBuilder, parentQuery, body)
-			{
-				Parameter = parameter;
-				Body      = body;
-			}
-
-			public ParseInfo<ParameterExpression> Parameter;
-			public ParseInfo<NewExpression>       Body;
-		}
-
-		public class MemberInit : QuerySource
-		{
-			public MemberInit(QuerySource parentQuery, ParseInfo<ParameterExpression> parameter, ParseInfo<MemberInitExpression> body)
-				: base(parentQuery.SqlBuilder, parentQuery, body)
-			{
-				Parameter = parameter;
-				Body      = body;
-				Members   = (from b in body.Expr.Bindings select b.Member).ToList();
-			}
-
-			public ParseInfo<ParameterExpression>  Parameter;
-			public ParseInfo<MemberInitExpression> Body;
-			public List<MemberInfo>                Members;
-		}
-
 		public class SubQuery : QuerySource
 		{
 			public SubQuery(SqlBuilder subSql, QuerySource parentQuery)
 				: base(new SqlBuilder(), parentQuery, null)
 			{
-				SubSql = subSql;
+				SqlBuilder.From.Table(SubSql = subSql);
 
-				SqlBuilder.From.Table(subSql);
+				foreach (var field in parentQuery.Fields)
+					Fields.Add(field.Key, new SubQueryColumn(this, field.Value));
 			}
 
-			public SqlBuilder  SubSql;
+			public SqlBuilder SubSql;
 
 			public Dictionary<object,ISqlExpression> Columns = new Dictionary<object,ISqlExpression>();
 		}
@@ -173,7 +130,6 @@ namespace BLToolkit.Data.Linq
 		}
 
 		protected QuerySource(SqlBuilder sqlBilder, QuerySource parentQuery, ParseInfo expr)
-			: base(null)
 		{
 			SqlBuilder  = sqlBilder;
 			ParentQuery = parentQuery;
@@ -191,7 +147,7 @@ namespace BLToolkit.Data.Linq
 			switch (expr.NodeType)
 			{
 				case ExpressionType.Parameter:
-					return ParentQuery;
+					return this;
 
 				case ExpressionType.MemberAccess:
 					{
@@ -200,7 +156,7 @@ namespace BLToolkit.Data.Linq
 						if (ma.Expression.NodeType == ExpressionType.Parameter)
 						{
 							QueryField fld;
-							ParentQuery.Fields.TryGetValue(ma.Member, out fld);
+							Fields.TryGetValue(ma.Member, out fld);
 							return fld;
 						}
 
@@ -227,7 +183,7 @@ namespace BLToolkit.Data.Linq
 							}
 						}
 
-						var        source = ParentQuery;
+						var        source = this;
 						QueryField field  = null;
 
 						for (var i = 0; i < list.Count; i++)
@@ -253,18 +209,37 @@ namespace BLToolkit.Data.Linq
 			}
 		}
 
+		int[] _indexes;
+
+		public override int[] Select<T>(ExpressionParser<T> parser)
+		{
+			if (_indexes == null)
+			{
+				_indexes = new int[Fields.Count];
+
+				var i = 0;
+
+				foreach (var field in Fields.Values)
+					_indexes[i++] = field.Select(parser)[0];
+			}
+
+			return _indexes;
+		}
+
+		public override ISqlExpression GetExpression<T>(ExpressionParser<T> parser)
+		{
+			throw new InvalidOperationException();
+			//throw new LinqException("Cannot convert '{0}' to SQL.", Field.GetExpression(parser));
+		}
+
 		public void Match(
 			Action<Table>        tableAction,
 			Action<Expr>         exprAction,
-			Action<New>          newAction,
-			Action<MemberInit>   memberInitAction,
 			Action<SubQuery>     subQueryAction,
 			Action<MemberAccess> memberAccessAction)
 		{
 			if      (this is Table)        tableAction       (this as Table);
 			else if (this is Expr)         exprAction        (this as Expr);
-			else if (this is New)          newAction         (this as New);
-			else if (this is MemberInit)   memberInitAction  (this as MemberInit);
 			else if (this is SubQuery)     subQueryAction    (this as SubQuery);
 			else if (this is MemberAccess) memberAccessAction(this as MemberAccess);
 		}

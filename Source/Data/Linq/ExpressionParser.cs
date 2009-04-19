@@ -100,10 +100,8 @@ namespace BLToolkit.Data.Linq
 			{
 				case ExpressionType.Parameter   : return select;
 				case ExpressionType.New         : return new QuerySource.Expr(_info.SqlBuilder, select, body.ConvertTo<NewExpression>());
-													//return new QuerySource.New       (select, parm, body.ConvertTo<NewExpression>());
 				case ExpressionType.MemberInit  : return new QuerySource.Expr(_info.SqlBuilder, select, body.ConvertTo<MemberInitExpression>());
-													//return new QuerySource.MemberInit(select, parm, body.ConvertTo<MemberInitExpression>());
-				case ExpressionType.MemberAccess: return ParseMemberAccess         (select, parm, body.ConvertTo<MemberExpression>());
+				case ExpressionType.MemberAccess: return ParseMemberAccess   (select, parm, body.ConvertTo<MemberExpression>());
 				default                         : throw  new InvalidOperationException();
 			}
 		}
@@ -130,14 +128,6 @@ namespace BLToolkit.Data.Linq
 				{
 					qi = FindSource(expr.ParentQuery, parm, body);
 				},
-				newExpr      =>
-				{
-					qi = FindSource(newExpr.ParentQuery, parm, body);
-				},
-				memberInit   =>
-				{
-					qi = FindSource(memberInit.ParentQuery, parm, body);
-				},
 				subQuery     =>
 				{
 					qi = FindSource(subQuery.ParentQuery, parm, body);
@@ -160,7 +150,7 @@ namespace BLToolkit.Data.Linq
 		{
 			SetAlias(select, parm.Expr.Name);
 
-			if (CheckForSubQuery(select, parm, body))
+			if (CheckForSubQuery(select, body))
 			{
 				var subQuery = new QuerySource.SubQuery(_info.SqlBuilder, select);
 
@@ -174,7 +164,7 @@ namespace BLToolkit.Data.Linq
 			return select;
 		}
 
-		bool CheckForSubQuery(QuerySource query, ParseInfo<ParameterExpression> parm, ParseInfo expr)
+		static bool CheckForSubQuery(QuerySource query, ParseInfo expr)
 		{
 			var makeSubquery = false;
 
@@ -183,19 +173,10 @@ namespace BLToolkit.Data.Linq
 				if (!makeSubquery)
 					pi.IsMemberAccess((ma,ex) =>
 					{
-						if (IsParameter(ma.Expr, parm.Expr))
-						{
-							// field = p.FieldName
-							//
-							var member = ma.Expr.Member;
+						var field = query.GetField(ma);
 
-							if (member.MemberType == MemberTypes.Field || member.MemberType == MemberTypes.Property)
-								makeSubquery = CheckFieldForSubQuery(query, ma);
-
-							pi.StopWalking = true;
-
-							return true;
-						}
+						if (field is QueryField.ExprColumn)
+							return makeSubquery = pi.StopWalking = true;
 
 						return false;
 					});
@@ -206,19 +187,6 @@ namespace BLToolkit.Data.Linq
 			return makeSubquery;
 		}
 
-		public bool CheckFieldForSubQuery(QuerySource queryInfo, ParseInfo<MemberExpression> memberExpr)
-		{
-			bool? makeQuery = null;
-			var   member    = memberExpr.Expr.Member;
-
-			FieldWalker(queryInfo, memberExpr, _ => makeQuery = false, (_,__,___,____) => makeQuery = true);
-
-			if (makeQuery == null)
-				throw new LinqException("Member '{0}.{1}' is not an SQL column.", member.ReflectedType, member.Name);
-
-			return makeQuery.Value;
-		}
-
 		#endregion
 
 		#region Build Select
@@ -227,22 +195,16 @@ namespace BLToolkit.Data.Linq
 		{
 			query.Match
 			(
-				table => // QueryInfo.Table
-				{
-					table.SetSelect();
-					_info.SetQuery();
-				},
-				expr         => BuildNew(query, expr.Expression, null), // QueryInfo.Expr
-				newExpr      => BuildNew(query, newExpr.     Body, newExpr.     Parameter), // QueryInfo.New
-				memberInit   => BuildNew(query, memberInit.  Body, memberInit.  Parameter), // QueryInfo.MemberInit
-				subQuery     => _info.SetQuery(),                                           // QueryInfo.SubQuery
-				memberAccess => BuildNew(query, memberAccess.Body, memberAccess.Parameter)  // QueryInfo.MemberAccess
+				table        => { table.Select(this); _info.SetQuery(); }, // QueryInfo.Table
+				expr         => BuildNew(query, expr.Expression),          // QueryInfo.Expr
+				subQuery     => _info.SetQuery(),                          // QueryInfo.SubQuery
+				memberAccess => BuildNew(query, memberAccess.Body)         // QueryInfo.MemberAccess
 			);
 		}
 
-		void BuildNew(QuerySource query, ParseInfo expr, ParseInfo<ParameterExpression> parm)
+		void BuildNew(QuerySource query, ParseInfo expr)
 		{
-			var info = BuildNewExpression(query, expr, parm);
+			var info = BuildNewExpression(query, expr);
 
 			var mapper = Expression.Lambda<Func<IDataReader,MappingSchema,Expression,T>>(
 				info, new [] { _dataReaderParam, _mapSchemaParam, _expressionParam });
@@ -250,20 +212,19 @@ namespace BLToolkit.Data.Linq
 			_info.SetQuery(mapper.Compile());
 		}
 
-		ParseInfo BuildNewExpression(QuerySource query, ParseInfo expr, ParseInfo<ParameterExpression> parm)
+		ParseInfo BuildNewExpression(QuerySource query, ParseInfo expr)
 		{
 			return expr.Walk(pi =>
 			{
 				if (pi.IsMemberAccess((ma,ex) =>
 				{
-					var fld = query.GetField(ma);
+					var fld = query.ParentQuery.GetField(ma);
 
 					if (fld != null)
 					{
-						if (fld is QueryField.Column)
+						if (fld is QueryField.Column || fld is QueryField.SubQueryColumn)
 						{
-							var col = (QueryField.Column)fld;
-							var idx = col.Select();
+							var idx = fld.Select(this);
 
 							var memberType = ma.Expr.Member.MemberType == MemberTypes.Field ?
 								((FieldInfo)   ma.Expr.Member).FieldType :
@@ -277,40 +238,26 @@ namespace BLToolkit.Data.Linq
 							pi = ma.Parent.Replace(
 								Expression.Call(_mapSchemaParam, mi,
 									Expression.Call(_dataReaderParam, DataReader.GetValue,
-										Expression.Constant(idx, typeof(int)))),
+										Expression.Constant(idx[0], typeof(int)))),
 								ma.ParamAccessor);
 
 							return true;
 						}
 
-						if (fld is QueryField.ColumnExpr)
+						if (fld is QueryField.ExprColumn)
 						{
-							var col = (QueryField.ColumnExpr)fld;
+							var col = (QueryField.ExprColumn)fld;
 
-							pi = BuildNewExpression(col.QuerySource, col.Expr, null);
+							pi = BuildNewExpression(col.QuerySource, col.Expr);
 							pi.IsReplaced = pi.StopWalking = true;
 
 							return true;
 						}
-					}
-					else if (IsParameter(ma.Expr, parm == null? null: parm.Expr))
-					{
-						// field = p.FieldName
-						//
-						var member = ma.Expr.Member;
 
-						if (member.MemberType == MemberTypes.Field || member.MemberType == MemberTypes.Property)
-						{
-							var field = GetField(query, ma);
-
-							if (field != null)
-							{
-								pi = field;
-								return true;
-							}
-						}
+						throw new InvalidOperationException();
 					}
-					else if (ex.IsConstant(c =>
+
+					if (ex.IsConstant(c =>
 					{
 						// field = localVariable
 						//
@@ -363,9 +310,9 @@ namespace BLToolkit.Data.Linq
 								Expression.Constant(idx, typeof(int)))),
 						memberExpr.ParamAccessor);
 				},
-				(query,expr,parms,_) =>
+				(query,expr,_) =>
 				{
-					pi = BuildNewExpression(query, expr, parms);
+					pi = BuildNewExpression(query, expr);
 					pi.IsReplaced = pi.StopWalking = true;
 				}
 			);
@@ -385,8 +332,6 @@ namespace BLToolkit.Data.Linq
 					if (table.SqlTable.Alias == null)
 						table.SqlTable.Alias = alias;
 				},
-				_ => {},
-				_ => {},
 				_ => {},
 				subQuery =>
 				{
@@ -486,13 +431,13 @@ namespace BLToolkit.Data.Linq
 			QuerySource                 query,
 			ParseInfo<MemberExpression> memberExpr,
 			Action<ISqlExpression>      processColumn,
-			Action<QuerySource,ParseInfo,ParseInfo<ParameterExpression>,string> processExpression)
+			Action<QuerySource,ParseInfo,string> processExpression)
 		{
 			var member = memberExpr.Expr.Member;
 
 			query.Match
 			(
-				#region QueryInfo.Table
+				#region QuerySource.Table
 
 				table =>
 				{
@@ -504,7 +449,7 @@ namespace BLToolkit.Data.Linq
 
 				#endregion
 
-				#region QueryInfo.Expr
+				#region QuerySource.Expr
 
 				expr =>
 				{
@@ -512,131 +457,13 @@ namespace BLToolkit.Data.Linq
 
 					if (expr.Fields.TryGetValue(member, out field))
 					{
-						if (field is QueryField.Column)
-							processColumn(((QueryField.Column)field).Field);
-						else if (field is QueryField.ColumnExpr)
+						if (field is QueryField.Column || field is QueryField.SubQueryColumn)
+							processColumn(field.GetExpression(this));
+						else if (field is QueryField.ExprColumn)
 						{
-							var ex = (QueryField.ColumnExpr)field;
-							processExpression(expr, ex.Expr, null, member.Name);
+							var ex = (QueryField.ExprColumn)field;
+							processExpression(expr, ex.Expr, member.Name);
 						}
-					}
-				},
-
-				#endregion
-
-				#region QueryInfo.New
-
-				newExpr =>
-				{
-					if (IsParameter(memberExpr.Expr, newExpr.Parameter.Expr))
-					{
-						FieldWalker(newExpr.ParentQuery, memberExpr, processColumn, processExpression);
-					}
-					else if (IsMember(memberExpr.Expr.Expression, newExpr.Body.Expr.Members))
-					{
-						FieldWalker(newExpr.ParentQuery, memberExpr, processColumn, processExpression);
-					}
-					else
-					{
-						var body = newExpr.Body.Expr;
-						var mem  = member;
-
-						if (mem is PropertyInfo)
-							mem = ((PropertyInfo)member).GetGetMethod();
-
-						if (body.Members != null)
-						{
-							for (var i = 0; i < body.Members.Count; i++)
-							{
-								if (mem == body.Members[i])
-								{
-									var arg = body.Arguments[i];
-
-									if (arg is MemberExpression)
-									{
-										FieldWalker(
-											newExpr.ParentQuery,
-											newExpr.Body.Create((MemberExpression)arg, newExpr.Body.Index(body.Arguments, New.Arguments, i)),
-											processColumn,
-											processExpression);
-									}
-									else
-									{
-										string memberName = null;
-
-										if (mem is MethodInfo)
-										{
-											var pi = TypeHelper.GetPropertyByMethod((MethodInfo) mem);
-											if (pi != null)
-												memberName = pi.Name;
-										}
-										else if (mem is PropertyInfo || mem is FieldInfo)
-											memberName = mem.Name;
-
-										processExpression(
-											query,
-											newExpr.Body.Create(arg, newExpr.Body.Index(body.Arguments, New.Arguments, i)),
-											newExpr.Parameter,
-											memberName);
-									}
-
-									return;
-								}
-							}
-						}
-					}
-				},
-
-				#endregion
-
-				#region QueryInfo.MemberInit
-
-				memberInit =>
-				{
-					if (IsParameter(memberExpr.Expr, memberInit.Parameter.Expr))
-					{
-						FieldWalker(memberInit.ParentQuery, memberExpr, processColumn, processExpression);
-					}
-					else if (IsMember(memberExpr.Expr.Expression, memberInit.Members))
-					{
-						FieldWalker(memberInit.ParentQuery, memberExpr, processColumn, processExpression);
-					}
-					else
-					{
-						var body = memberInit.Body.Expr;
-
-						for (var i = 0; i < body.Bindings.Count; i++)
-						{
-							var binding = body.Bindings[i];
-
-							if (member == binding.Member)
-							{
-								if (binding is MemberAssignment)
-								{
-									var ma = binding as MemberAssignment;
-
-									var piBinding    = memberInit.Body.Create(ma.Expression, memberInit.Body.Index(body.Bindings, MemberInit.Bindings, i));
-									var piAssign     = piBinding.      Create(ma.Expression, piBinding.ConvertExpressionTo<MemberAssignment>());
-									var piExpression = piAssign.       Create(ma.Expression, piAssign.Property(MemberAssignmentBind.Expression));
-
-									if (ma.Expression is MemberExpression)
-									{
-										FieldWalker(
-											memberInit.ParentQuery,
-											piExpression.Create(ma.Expression as MemberExpression, piExpression.Convert<MemberExpression>()),
-											processColumn,
-											processExpression);
-									}
-									else
-									{
-										processExpression(query, piExpression, memberInit.Parameter, null);
-									}
-
-									return;
-								}
-							}
-						}
-
 					}
 				},
 
@@ -658,7 +485,7 @@ namespace BLToolkit.Data.Linq
 								col = subQuery.SubSql.Select.Columns[subQuery.SubSql.Select.Add(column)];
 							}
 						},
-						(q,pi,_,memberName) =>
+						(q,pi,memberName) =>
 						{
 							if (!subQuery.Columns.TryGetValue(pi, out col))
 							{
@@ -721,7 +548,7 @@ namespace BLToolkit.Data.Linq
 
 		#region Expression Parser
 
-		ISqlExpression ParseExpression(QuerySource query, ParseInfo parseInfo)
+		public ISqlExpression ParseExpression(QuerySource query, ParseInfo parseInfo)
 		{
 			if (parseInfo.NodeType == ExpressionType.Constant)
 			{
@@ -776,6 +603,13 @@ namespace BLToolkit.Data.Linq
 						var pi = parseInfo.ConvertTo<MemberExpression>();
 						var e  = parseInfo.Expr as MemberExpression;
 
+						var field = query.GetField(e);
+
+						if (field != null)
+							return field.GetExpression(this);
+
+						break;
+
 						switch (e.Expression.NodeType)
 						{
 							case ExpressionType.MemberAccess:
@@ -784,8 +618,8 @@ namespace BLToolkit.Data.Linq
 									ISqlExpression sql = null;
 
 									FieldWalker(query, pi,
-										column     => sql = column,
-										(q,p,_,__) => sql = ParseExpression(q, p));
+										column  => sql = column,
+										(q,p,_) => sql = ParseExpression(q, p));
 
 									return sql;
 								}
