@@ -10,6 +10,8 @@ using FTest = System.Func<BLToolkit.Data.Linq.ParseInfo<System.Linq.Expressions.
 
 namespace BLToolkit.Data.Linq
 {
+	using Common;
+
 	abstract class ParseInfo : ReflectionHelper
 	{
 		public Expression     Expr;
@@ -71,7 +73,7 @@ namespace BLToolkit.Data.Linq
 				var lambda = pi.ConvertTo<LambdaExpression>();
 
 				if (lambda.Expr.Parameters.Count == parameters.Length)
-					for (int i = 0; i < parameters.Length; i++)
+					for (var i = 0; i < parameters.Length; i++)
 						if (!parameters[i](lambda.Create(lambda.Expr.Parameters[i], lambda.Indexer(Lambda.Parameters, ParamItem, i))))
 							return false;
 
@@ -89,15 +91,26 @@ namespace BLToolkit.Data.Linq
 		static readonly FParm[] _singleParam = new FParm[] { p => true };
 
 		[Obsolete]
-		public bool IsLambda(int parameters, Func<ParseInfo<LambdaExpression>,bool> func)
+		public bool IsLambda1(int parameters, Func<ParseInfo<LambdaExpression>,bool> func)
 		{
-			var parms = parameters != 1? new FParm[parameters]: _singleParam;
+			var parms = parameters == 0? Array<FParm>.Empty : parameters == 1? _singleParam : new FParm[parameters];
 
-			if (parameters != 1)
-				for (int i = 0; i < parms.Length; i++)
+			if (parameters > 1)
+				for (var i = 0; i < parms.Length; i++)
 					parms[i] = _singleParam[0];
 
 			return IsLambda<Expression>(parms, p => true, func);
+		}
+
+		public bool IsLambda(int parameters, Func<ParseInfo<Expression>,bool> func)
+		{
+			var parms = parameters == 0? Array<FParm>.Empty : parameters == 1? _singleParam : new FParm[parameters];
+
+			if (parameters > 1)
+				for (var i = 0; i < parms.Length; i++)
+					parms[i] = _singleParam[0];
+
+			return IsLambda<Expression>(parms, func, p => true);
 		}
 
 		public bool IsLambda(Action<ParseInfo<ParameterExpression>,ParseInfo<Expression>> lambda)
@@ -158,6 +171,7 @@ namespace BLToolkit.Data.Linq
 
 		#region IsMemberAccess
 
+		[Obsolete]
 		public bool IsMemberAccess(FTest test, Func<ParseInfo<MemberExpression>,bool> func)
 		{
 			if (NodeType == ExpressionType.MemberAccess)
@@ -175,10 +189,10 @@ namespace BLToolkit.Data.Linq
 		{
 			if (NodeType == ExpressionType.MemberAccess)
 			{
+				var pi = ConvertTo<MemberExpression>();
 				var ex = Expr as MemberExpression;
-				return func(
-					ConvertTo<MemberExpression>(),
-					Create(ex.Expression, Property(Member.Expression)));
+
+				return func(pi, pi.Create(ex.Expression, pi.Property(Member.Expression)));
 			}
 
 			return false;

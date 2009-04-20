@@ -6,6 +6,7 @@ using System.Reflection;
 
 using NUnit.Framework;
 
+using BLToolkit.Common;
 using BLToolkit.Data;
 
 namespace Data.Linq
@@ -47,8 +48,16 @@ namespace Data.Linq
 
 		protected void ForEachProvider(Action<TestDbManager> func)
 		{
+			ForEachProvider(Array<string>.Empty, func);
+		}
+
+		protected void ForEachProvider(string[] exceptList, Action<TestDbManager> func)
+		{
 			for (var i = 0; i < _configurations.Count; i++)
 			{
+				if (exceptList.Contains(_configurations[i]))
+					continue;
+
 				var reThrow = false;
 
 				try

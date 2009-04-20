@@ -20,8 +20,18 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			get { return _dataProvider; }
 		}
 
-		SqlBuilder _sqlBuilder;
-		int        _indent;
+		private SqlBuilder _sqlBuilder;
+		public  SqlBuilder  SqlBuilder
+		{
+			get { return _sqlBuilder; }
+		}
+
+		private int _indent;
+		public  int  Indent
+		{
+			get { return _indent;  }
+			set { _indent = value; }
+		}
 
 		#endregion
 
@@ -55,9 +65,12 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		protected virtual void BuildSelectClause(StringBuilder sb)
 		{
 			AppendIndent(sb);
-
 			sb.Append("SELECT").AppendLine();
+			BuildColumns(sb);
+		}
 
+		protected virtual void BuildColumns(StringBuilder sb)
+		{
 			_indent++;
 
 			foreach (SqlBuilder.Column col in _sqlBuilder.Select.Columns)
@@ -86,6 +99,9 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		protected virtual void BuildFromClause(StringBuilder sb)
 		{
+			if (_sqlBuilder.From.Tables.Count == 0)
+				return;
+
 			AppendIndent(sb);
 
 			sb.Append("FROM").AppendLine();
@@ -504,7 +520,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			throw new InvalidOperationException();
 		}
 
-		StringBuilder AppendIndent(StringBuilder sb)
+		protected StringBuilder AppendIndent(StringBuilder sb)
 		{
 			if (_indent > 0)
 				sb.Append('\t', _indent);

@@ -28,7 +28,7 @@ namespace BLToolkit.Data.Linq
 				{
 					var mapper = objectMapper[field.Value.PhysicalName];
 
-					Fields.Add(mapper.MemberAccessor.MemberInfo, new Column(this, field.Value, mapper));
+					_fields.Add(mapper.MemberAccessor.MemberInfo, new Column(this, field.Value, mapper));
 				}
 			}
 
@@ -53,16 +53,16 @@ namespace BLToolkit.Data.Linq
 					if (member is MethodInfo)
 						member = TypeHelper.GetPropertyByMethod((MethodInfo)member);
 
-					var field = parentQuery.GetField(ex.Arguments[i]);
+					var field = parentQuery != null? parentQuery.GetField(ex.Arguments[i]): null;
 
 					if (field != null)
 					{
-						Fields.Add(member, field);
+						_fields.Add(member, field);
 					}
 					else
 					{
 						var e = new ExprColumn(this, expr.Create(ex.Arguments[i], expr.Index(ex.Arguments, New.Arguments, i)), member.Name);
-						Fields.Add(member, e);
+						_fields.Add(member, e);
 					}
 				}
 			}
@@ -90,7 +90,7 @@ namespace BLToolkit.Data.Linq
 
 						var field = parentQuery.GetField(piExpression);
 
-						Fields.Add(member, field ?? new ExprColumn(this, piExpression, member.Name));
+						_fields.Add(member, field ?? new ExprColumn(this, piExpression, member.Name));
 					}
 					else
 						throw new InvalidOperationException();
@@ -105,28 +105,21 @@ namespace BLToolkit.Data.Linq
 			{
 				SqlBuilder.From.Table(SubSql = subSql);
 
-				foreach (var field in parentQuery.Fields)
-					Fields.Add(field.Key, new SubQueryColumn(this, field.Value));
+				foreach (var field in parentQuery._fields)
+					_fields.Add(field.Key, new SubQueryColumn(this, field.Value));
 			}
 
 			public SqlBuilder SubSql;
 
-			public Dictionary<object,ISqlExpression> Columns = new Dictionary<object,ISqlExpression>();
+			public Dictionary<object,ISqlExpression> Columns1 = new Dictionary<object,ISqlExpression>();
 		}
 
 		public class MemberAccess : QuerySource
 		{
-			public MemberAccess(QuerySource parentQuery, ParseInfo<ParameterExpression> parameter, ParseInfo<MemberExpression> body)
-				: base(parentQuery.SqlBuilder, parentQuery, body)
+			public MemberAccess(SqlBuilder sqlBilder, QuerySource parentQuery, ParseInfo<MemberExpression> expr)
+				: base(sqlBilder, parentQuery, expr)
 			{
-				Parameter  = parameter;
-				Body       = body;
-				//Members    = (from b in body.Expr.Bindings select b.Member).ToList();
 			}
-
-			public ParseInfo<ParameterExpression> Parameter;
-			public ParseInfo<MemberExpression>    Body;
-			//public List<MemberInfo>               Members;
 		}
 
 		protected QuerySource(SqlBuilder sqlBilder, QuerySource parentQuery, ParseInfo expr)
@@ -140,7 +133,7 @@ namespace BLToolkit.Data.Linq
 		public QuerySource  ParentQuery;
 		public ParseInfo    Expression;
 
-		public readonly Dictionary<MemberInfo,QueryField> Fields = new Dictionary<MemberInfo, QueryField>();
+		readonly Dictionary<MemberInfo,QueryField> _fields = new Dictionary<MemberInfo, QueryField>();
 
 		public QueryField GetField(Expression expr)
 		{
@@ -156,9 +149,12 @@ namespace BLToolkit.Data.Linq
 						if (ma.Expression.NodeType == ExpressionType.Parameter)
 						{
 							QueryField fld;
-							Fields.TryGetValue(ma.Member, out fld);
+							_fields.TryGetValue(ma.Member, out fld);
 							return fld;
 						}
+
+						if (ma.Expression.NodeType == ExpressionType.Constant)
+							break;
 
 						var list = new List<MemberInfo>();
 
@@ -190,7 +186,7 @@ namespace BLToolkit.Data.Linq
 						{
 							var mi = list[i];
 
-							source.Fields.TryGetValue(mi, out field);
+							source._fields.TryGetValue(mi, out field);
 
 							if (field == null || i + 1 == list.Count)
 								 break;
@@ -203,10 +199,13 @@ namespace BLToolkit.Data.Linq
 
 						return field;
 					}
-
-				default:
-					return null;
 			}
+
+			foreach (var item in _fields)
+				if (item.Value is ExprColumn && ((ExprColumn)item.Value).Expr == expr)
+					return item.Value;
+
+			return null;
 		}
 
 		int[] _indexes;
@@ -215,11 +214,11 @@ namespace BLToolkit.Data.Linq
 		{
 			if (_indexes == null)
 			{
-				_indexes = new int[Fields.Count];
+				_indexes = new int[_fields.Count];
 
 				var i = 0;
 
-				foreach (var field in Fields.Values)
+				foreach (var field in _fields.Values)
 					_indexes[i++] = field.Select(parser)[0];
 			}
 
@@ -236,12 +235,12 @@ namespace BLToolkit.Data.Linq
 			Action<Table>        tableAction,
 			Action<Expr>         exprAction,
 			Action<SubQuery>     subQueryAction,
-			Action<MemberAccess> memberAccessAction)
+			Action<MemberAccess> memberAction)
 		{
-			if      (this is Table)        tableAction       (this as Table);
-			else if (this is Expr)         exprAction        (this as Expr);
-			else if (this is SubQuery)     subQueryAction    (this as SubQuery);
-			else if (this is MemberAccess) memberAccessAction(this as MemberAccess);
+			if      (this is Table)        tableAction   (this as Table);
+			else if (this is Expr)         exprAction    (this as Expr);
+			else if (this is SubQuery)     subQueryAction(this as SubQuery);
+			else if (this is MemberAccess) memberAction  (this as MemberAccess);
 		}
 	}
 }

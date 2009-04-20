@@ -46,7 +46,7 @@ namespace BLToolkit.Data.Linq
 
 			readonly string _alias;
 			int[]           _index;
-			ISqlExpression _sqlExpression;
+			ISqlExpression  _sqlExpression;
 
 			public override int[] Select<T>(ExpressionParser<T> parser)
 			{

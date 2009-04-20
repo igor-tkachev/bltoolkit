@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Linq;
+using System.Linq.Expressions;
 
 namespace BLToolkit.Data
 {
@@ -6,10 +8,22 @@ namespace BLToolkit.Data
 
 	public partial class DbManager
 	{
-		public Table<TEntity> GetTable<TEntity>()
-			where TEntity : class
+		public Table<T> GetTable<T>()
+			where T : class
 		{
-			return new Table<TEntity>(this);
+			return new Table<T>(this);
+		}
+
+		public T Select<T>(Expression<Func<T>> selector)
+		{
+			if (selector == null) throw new ArgumentNullException("selector");
+
+			var q = new Table<T>(this, selector);
+
+			foreach (var item in q)
+				return item;
+
+			throw new InvalidOperationException();
 		}
 	}
 }

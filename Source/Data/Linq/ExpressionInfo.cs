@@ -4,6 +4,7 @@ using System.Data;
 using System.Diagnostics;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Reflection;
 using System.Text;
 using BLToolkit.Reflection;
 
@@ -13,7 +14,7 @@ namespace BLToolkit.Data.Linq
 	using Mapping;
 	using Sql;
 
-	class ExpressionInfo<T>
+	class ExpressionInfo<T> : ReflectionHelper
 	{
 		public Expression        Expression;
 		public DataProviderBase  DataProvider;
@@ -121,13 +122,13 @@ namespace BLToolkit.Data.Linq
 			}
 		}
 
-		internal void SetQuery(Func<IDataReader,MappingSchema,Expression,T> mapper)
+		internal void SetQuery(Func<ExpressionInfo<T>,IDataReader,MappingSchema,Expression,T> mapper)
 		{
 			SqlBuilder.FinalizeAndValidate();
 			GetIEnumerable = (db, expr) => Query(db, expr, mapper);
 		}
 
-		IEnumerable<T> Query(DbManager db, Expression expr, Func<IDataReader,MappingSchema,Expression,T> mapper)
+		IEnumerable<T> Query(DbManager db, Expression expr, Func<ExpressionInfo<T>,IDataReader,MappingSchema,Expression,T> mapper)
 		{
 			var dispose = db == null;
 			if (db == null)
@@ -137,7 +138,7 @@ namespace BLToolkit.Data.Linq
 			{
 				using (var dr = GetReader(db, expr))
 					while (dr.Read())
-						yield return mapper(dr, MappingSchema, expr);
+						yield return mapper(this, dr, MappingSchema, expr);
 			}
 			finally
 			{
@@ -172,8 +173,11 @@ namespace BLToolkit.Data.Linq
 			var info = string.Format("{0} {1}\n{2}", DataProvider.Name, db.ConfigurationString, command);
 
 			if (parms != null && parms.Length > 0)
+			{
+				info += "---\n";
 				foreach (var p in parms)
-					info += string.Format("\n{0}\t{1}", p.ParameterName, p.Value);
+					info += string.Format("{0}\t{1}\n", p.ParameterName, p.Value);
+			}
 
 			Debug.WriteLineIf(DbManager.TraceSwitch.TraceInfo, info, DbManager.TraceSwitch.DisplayName);
 #endif
@@ -268,6 +272,11 @@ namespace BLToolkit.Data.Linq
 				smDest.EndMapping(initContext);
 
 			return destObject;
+		}
+
+		public MethodInfo GetMapperMethodInfo()
+		{
+			return Expressor<ExpressionInfo<T>>.MethodExpressor(e => e.MapDataReaderToObject(null, null, 0, null));
 		}
 
 		#endregion

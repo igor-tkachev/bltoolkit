@@ -10,9 +10,18 @@
 </table>
 
 <table class='data bordered nowrappable'>
-<tr><th>&nbsp;</th>        <th>Linq</th> <th>DB2</th><th>Informix</th>  <th>Oracle</th>                     <th>PostgreSQL</th><th>MySql</th><th>MS SQL</th><th>Sybase</th></tr>
-<tr><td>Modulo</td>        <td>a % b</td><td colspan=3>MOD(a, b)</td>                                       <td colspan=4>a % b</td></tr>
-<tr><td>Bitwise AND</td>   <td>a & b</td><td colspan=3>BITAND(a, b)</td>                                    <td colspan=4>a & b</td></tr>
-<tr><td>Bitwise OR</td>    <td>a | b</td><td colspan=2>BITXOR(a, b)</td><td >(a + b) - BITAND(a, b)</td>    <td colspan=4>a | b</td></tr>
-<tr><td>Bitwise XOR</td>   <td>a ^ b</td><td colspan=2>BITXOR(a, b)</td><td >(a + b) - BITAND(a, b) * 2</td><td>a # b</td>     <td colspan=3>a % b</td></tr>
+<tr><th>&nbsp;</th>      <th>Linq</th>               <th>DB2</th>                    <th>Informix</th>       <th>Oracle</th>                           <th>PostgreSQL</th>      <th>MySql</th><th>MS SQL</th><th>Sybase</th></tr>
+<tr><td>Modulo</td>      <td>a % b</td>              <td colspan=3>MOD(a, b)</td>                                                                      <td colspan=4>a % b</td>                                             </tr>
+<tr><td>Bitwise AND</td> <td>a & b</td>              <td colspan=3>BITAND(a, b)</td>                                                                   <td colspan=4>a & b</td>                                             </tr>
+<tr><td>Bitwise OR</td>  <td>a | b</td>              <td colspan=2>BITXOR(a, b)</td>                         <td>(a + b) - BITAND(a, b)</td>           <td colspan=4>a | b</td>                                             </tr>
+<tr><td>Bitwise XOR</td> <td>a ^ b</td>              <td colspan=2>BITXOR(a, b)</td>                         <td>(a + b) - BITAND(a, b) * 2</td>       <td>a # b</td>           <td colspan=3>a % b</td>                    </tr>
+
+<tr><td>SELECT x</td>    <td>db.Select(() => x)</td> <td><% sql #
+SELECT x
+FROM SYSIBM.SYSDUMMY1
+FETCH FIRST 1 ROW ONLY
+%></td>                                                                              <td><% sql #
+SELECT FIRST 1 x
+FROM SYSTABLES%></td>                                                                                        <td><% sql #SELECT x FROM SYS.DUAL%></td> <td colspan=4><% sql #SELECT x%></td>                                </tr>
+
 </table>

@@ -104,9 +104,9 @@ table.code
 
 pre.code
 {
-	font      : 120% Consolas, Monospace, Courier New, Courier;
-	margin    : 0;
-	padding   : 5px;
+	font    : 120% Consolas, Monospace, Courier New, Courier;
+	margin  : 0;
+	padding : 5px;
 }
 
 .j pre.code, .pj pre.code
@@ -143,10 +143,12 @@ table.data
 
 .bordered td, .bordered th
 {
-	border: solid 1 #AAAAAA;
+	border-color: #AAAAAA;
+	border-style: solid;
+	border-width: 1px;
 }
 
-.nowrappable td
+.nowrappable td, .nowrappable th
 {
 	white-space: nowrap;
 }
@@ -159,4 +161,23 @@ h4, h5
 {
 	font-family : Verdana;
 	color       : #338899;
+}
+
+.data table.code
+{
+	border-style : none;
+	margin       : 0;
+	padding      : 0;
+	background   : #FFFFFF;
+}
+
+.data pre.code
+{
+	padding : 0;
+	padding : 0;
+}
+
+.code td, .code th
+{
+	border-style: none;
 }

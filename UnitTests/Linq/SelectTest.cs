@@ -5,8 +5,6 @@ using System.Linq.Expressions;
 
 using NUnit.Framework;
 
-using BLToolkit.Mapping;
-
 namespace Data.Linq
 {
 	using Model;
@@ -200,26 +198,10 @@ namespace Data.Linq
 				var q = (
 
 					from p in db.Person select new { p } into p1 select p1.p
-					
+
 				).ToList().Where(p => p.ID == 1).First();
 
 				Assert.AreEqual(1, q.ID);
-			});
-		}
-
-		[Test]
-		public void SelectScalar2()
-		{
-			ForEachProvider(db =>
-			{
-				var q = (
-
-					from p in db.Person select new { p1 = p, p2 = p } into p1 where p1.p1.ID == 1 && p1.p2.ID == 1 select p1
-					
-				).ToList().Where(p => p.p1.ID == 1).First();
-
-				Assert.AreEqual(1, q.p1.ID);
-				Assert.AreEqual(1, q.p2.ID);
 			});
 		}
 
@@ -234,6 +216,16 @@ namespace Data.Linq
 		}
 
 		[Test]
+		public void SelectScalar2()
+		{
+			ForEachProvider(db =>
+			{
+				var q = (from p in db.Person select new { p }).ToList().Where(p => p.p.ID == 1).First();
+				Assert.AreEqual(1, q.p.ID);
+			});
+		}
+
+		[Test]
 		public void SelectScalar21()
 		{
 			ForEachProvider(db =>
@@ -243,7 +235,33 @@ namespace Data.Linq
 			});
 		}
 
-		void Foo(Expression<Func<IDataReader,MappingSchema,int>> func)
+		[Test]
+		public void SelectScalar22()
+		{
+			ForEachProvider(db =>
+			{
+				var q = (
+
+					from p in db.Person select new { p1 = p, p2 = p } into p1 where p1.p1.ID == 1 && p1.p2.ID == 1 select p1
+
+				).ToList().First();
+
+				Assert.AreEqual(1, q.p1.ID);
+				Assert.AreEqual(1, q.p2.ID);
+			});
+		}
+
+		[Test]
+		public void SelectScalar23()
+		{
+			ForEachProvider(db =>
+			{
+				var q = (from p in db.Person select p.ID into p1 where p1 == 1 select new { p1 }).ToList().First();
+				Assert.AreEqual(1, q.p1);
+			});
+		}
+
+		void Foo(Expression<Func<IDataReader,object>> func)
 		{
 			/*
 			ParameterExpression p0;
@@ -292,9 +310,14 @@ namespace Data.Linq
 			*/
 		}
 
+		protected object MapDataReaderToObject(Type destObjectType, IDataReader dataReader, int slotNumber, int[] index)
+		{
+			return null;
+		}
+
 		void Bar()
 		{
-			//Foo(e => e);
+			Foo(rd => MapDataReaderToObject(typeof(string), rd, 10, new[] { 0, 2, 3, 4, 5 }));
 		}
 
 		//[Test]
