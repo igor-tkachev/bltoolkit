@@ -88,7 +88,7 @@ namespace BLToolkit.Data.Linq
 						var piAssign     = piBinding.Create(ma.Expression, piBinding.ConvertExpressionTo<MemberAssignment>());
 						var piExpression = piAssign. Create(ma.Expression, piAssign.Property(MemberAssignmentBind.Expression));
 
-						var field = parentQuery.GetField(piExpression);
+						var field = parentQuery != null? parentQuery.GetField(piExpression): null;
 
 						_fields.Add(member, field ?? new ExprColumn(this, piExpression, member.Name));
 					}
@@ -110,15 +110,14 @@ namespace BLToolkit.Data.Linq
 			}
 
 			public SqlBuilder SubSql;
-
-			public Dictionary<object,ISqlExpression> Columns1 = new Dictionary<object,ISqlExpression>();
 		}
 
-		public class MemberAccess : QuerySource
+		public class Scalar : QuerySource
 		{
-			public MemberAccess(SqlBuilder sqlBilder, QuerySource parentQuery, ParseInfo<MemberExpression> expr)
+			public Scalar(SqlBuilder sqlBilder, QuerySource parentQuery, ParseInfo expr)
 				: base(sqlBilder, parentQuery, expr)
 			{
+				
 			}
 		}
 
@@ -135,7 +134,7 @@ namespace BLToolkit.Data.Linq
 
 		readonly Dictionary<MemberInfo,QueryField> _fields = new Dictionary<MemberInfo, QueryField>();
 
-		public QueryField GetField(Expression expr)
+		public virtual QueryField GetField(Expression expr)
 		{
 			switch (expr.NodeType)
 			{
@@ -232,15 +231,15 @@ namespace BLToolkit.Data.Linq
 		}
 
 		public void Match(
-			Action<Table>        tableAction,
-			Action<Expr>         exprAction,
-			Action<SubQuery>     subQueryAction,
-			Action<MemberAccess> memberAction)
+			Action<Table>    tableAction,
+			Action<Expr>     exprAction,
+			Action<SubQuery> subQueryAction,
+			Action<Scalar>   scalarAction)
 		{
-			if      (this is Table)        tableAction   (this as Table);
-			else if (this is Expr)         exprAction    (this as Expr);
-			else if (this is SubQuery)     subQueryAction(this as SubQuery);
-			else if (this is MemberAccess) memberAction  (this as MemberAccess);
+			if      (this is Table)    tableAction   (this as Table);
+			else if (this is Expr)     exprAction    (this as Expr);
+			else if (this is SubQuery) subQueryAction(this as SubQuery);
+			else if (this is Scalar)   scalarAction  (this as Scalar);
 		}
 	}
 }

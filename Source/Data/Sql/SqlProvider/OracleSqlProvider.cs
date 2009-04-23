@@ -25,50 +25,57 @@ namespace BLToolkit.Data.Sql.SqlProvider
 				base.BuildSelectClause(sb);
 		}
 
-		protected override void BuildBinaryExpression(StringBuilder sb, SqlBinaryExpression expr)
-		{
-			switch (expr.Operation[0])
-			{
-				case '%': BuildFunction(sb, "MOD",    expr);    break;
-				case '&': BuildFunction(sb, "BITAND", expr);    break;
-				case '|':
-					sb.Append('(');
-					BuildExpression(sb, expr.Expr1);
-					sb.Append(" + ");
-					BuildExpression(sb, expr.Expr2);
-					sb.Append(") - ");
-					BuildFunction(sb, "BITAND", expr);
-					break;
-
-				case '^':
-					sb.Append('(');
-					BuildExpression(sb, expr.Expr1);
-					sb.Append(" + ");
-					BuildExpression(sb, expr.Expr2);
-					sb.Append(") - ");
-					BuildFunction(sb, "BITAND", expr);
-					sb.Append(" * 2");
-					break;
-
-				default : base.BuildBinaryExpression(sb, expr); break;
-			}
-		}
-
-
-		protected override int GetPrecedence(ISqlExpression expr)
+		public override ISqlExpression ConvertExpression(ISqlExpression expr)
 		{
 			if (expr is SqlBinaryExpression)
 			{
-				switch (((SqlBinaryExpression)expr).Operation[0])
+				SqlBinaryExpression be = (SqlBinaryExpression)expr;
+
+				switch (be.Operation[0])
 				{
-					case '%':
-					case '&': return Precedence.Primary;
-					case '|':
-					case '^': return Precedence.Additive - 1;
+					case '%': return new SqlFunction("MOD",    be.Expr1, be.Expr2);
+					case '&': return new SqlFunction("BITAND", be.Expr1, be.Expr2);
+					case '|': // (a + b) - BITAND(a, b)
+						return new SqlBinaryExpression(
+							new SqlBinaryExpression(be.Expr1, "+", be.Expr2),
+							"-",
+							new SqlFunction("BITAND", be.Expr1, be.Expr2),
+							Precedence.Subtraction);
+
+					case '^': // (a + b) - BITAND(a, b) * 2
+						return new SqlBinaryExpression(
+							new SqlBinaryExpression(be.Expr1, "+", be.Expr2),
+							"-",
+							new SqlBinaryExpression(
+								new SqlFunction("BITAND", be.Expr1, be.Expr2),
+								"*",
+								new SqlValue(2)),
+							Precedence.Subtraction);
+				}
+			}
+			else if (expr is SqlFunction)
+			{
+				SqlFunction func = (SqlFunction) expr;
+
+				switch (func.Name)
+				{
+					case "COALESCE"        : return new SqlFunction("NVL",    func.Parameters);
+					case "CHARACTER_LENGTH": return new SqlFunction("LENGTH", func.Parameters);
+					case "IndexOf":
+						return new SqlBinaryExpression(
+							func.Parameters.Length == 2?
+								new SqlFunction("INSTR", func.Parameters[0], func.Parameters[1]):
+								new SqlFunction("INSTR",
+									func.Parameters[0],
+									func.Parameters[1],
+									new SqlBinaryExpression(func.Parameters[2], "+", new SqlValue(1), Precedence.Additive)),
+							"-",
+							new SqlValue(1),
+							Precedence.Subtraction);
 				}
 			}
 
-			return base.GetPrecedence(expr);
+			return base.ConvertExpression(expr);
 		}
 	}
 }

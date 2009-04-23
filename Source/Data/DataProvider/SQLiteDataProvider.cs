@@ -12,6 +12,8 @@ using System.Data.SQLite;
 
 namespace BLToolkit.Data.DataProvider
 {
+	using Sql.SqlProvider;
+
 	/// <summary>
 	/// Implements access to the Data Provider for SQLite.
 	/// </summary>
@@ -140,7 +142,12 @@ namespace BLToolkit.Data.DataProvider
 		/// <value>Data provider name.</value>
 		public override string Name
 		{
-			get { return "SQLite"; }
+			get { return DataProvider.ProviderName.SQLite; }
+		}
+
+		public override ISqlProvider CreateSqlProvider()
+		{
+			return new SQLiteSqlProvider(this);
 		}
 
 		public class SQLiteMappingSchema : Mapping.MappingSchema

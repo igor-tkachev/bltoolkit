@@ -1,5 +1,6 @@
 ﻿using System;
 
+using BLToolkit.Data.DataProvider;
 using BLToolkit.DataAccess;
 
 namespace DataAccess
@@ -43,17 +44,17 @@ namespace DataAccess
 		{
 			switch (dbManager.DataProvider.Name)
 			{
-				case "Sql"   :
-				case "SqlCe" : return SqlText;
+				case ProviderName.MsSql   :
+				case ProviderName.SqlCe   : return SqlText;
 
-				case "Access": return AccessText ?? SqlText;
+				case ProviderName.Access  : return AccessText ?? SqlText;
 	
 				case "Oracle":
-				case "ODP"   : return OracleText ?? SqlText;
+				case ProviderName.Oracle  : return OracleText ?? SqlText;
 
-				case "Fdp"   : return FbText     ?? SqlText;
+				case ProviderName.Firebird: return FbText     ?? SqlText;
 
-				case "SQLite": return SQLiteText ?? SqlText;
+				case ProviderName.SQLite  : return SQLiteText ?? SqlText;
 			}
 
 			throw new ApplicationException(string.Format("Unknown data provider '{0}'", dbManager.DataProvider.Name));

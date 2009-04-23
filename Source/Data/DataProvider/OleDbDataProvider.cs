@@ -124,7 +124,7 @@ namespace BLToolkit.Data.DataProvider
 			get { return typeof(OleDbConnection); }
 		}
 
-		public const string NameString = "OleDb";
+		public const string NameString = DataProvider.ProviderName.OleDb;
 
 		/// <summary>
 		/// Returns the data provider name.

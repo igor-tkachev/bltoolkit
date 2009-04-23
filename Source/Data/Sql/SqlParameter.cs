@@ -10,8 +10,37 @@ namespace BLToolkit.Data.Sql
 			_value = value;
 		}
 
-		private string _name;  public  string  Name  { get { return _name;  } set { _name = value;  } }
-		private object _value; public  object  Value { get { return _value; } set { _value = value; } }
+		public SqlParameter(string name, object value, Converter<object,object> valueConverter)
+			: this(name, value)
+		{
+			_valueConverter = valueConverter;
+		}
+
+		private string _name;
+		public  string  Name
+		{
+			get { return _name;  }
+			set { _name = value; }
+		}
+
+		private object _value;
+		public  object  Value
+		{
+			get { return _valueConverter == null? _value: _valueConverter(_value); }
+			set { _value = value; }
+		}
+
+		//public object RawValue
+		//{
+		//	get { return _value; }
+		//}
+
+		private Converter<object, object> _valueConverter;
+		public  Converter<object, object>  ValueConverter
+		{
+			get { return _valueConverter;  }
+			set { _valueConverter = value; }
+		}
 
 		#region Overrides
 

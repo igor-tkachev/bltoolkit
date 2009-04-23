@@ -4,10 +4,11 @@ using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 
-using NUnit.Framework;
-
+using BLToolkit.Data.DataProvider;
 using BLToolkit.Common;
 using BLToolkit.Data;
+
+using NUnit.Framework;
 
 namespace Data.Linq
 {
@@ -36,14 +37,18 @@ namespace Data.Linq
 
 		static readonly List<string> _configurations = new List<string>
 		{
-			"PostgreSQL",
-			"Informix",
-			"DB2",
-			"MySql",
 			"Sql2008",
 			"Sql2005",
+			ProviderName.SqlCe,
+			ProviderName.Firebird,
+			ProviderName.SQLite,
+			ProviderName.Access,
+			ProviderName.PostgreSQL,
+			ProviderName.Informix,
+			ProviderName.DB2,
+			ProviderName.MySql,
 			"Oracle",
-			"Sybase",
+			ProviderName.Sybase,
 		};
 
 		protected void ForEachProvider(Action<TestDbManager> func)
@@ -101,9 +106,9 @@ namespace Data.Linq
 			TestPerson(1, "John", func);
 		}
 
-		protected void TestOnePerson(int id, string firstName, Func<TestDbManager,IQueryable<Person>> func)
+		protected void TestOnePerson(string[] exceptList, int id, string firstName, Func<TestDbManager,IQueryable<Person>> func)
 		{
-			ForEachProvider(db =>
+			ForEachProvider(exceptList, db =>
 			{
 				var list = func(db).ToList();
 
@@ -116,9 +121,19 @@ namespace Data.Linq
 			});
 		}
 
+		protected void TestOnePerson(int id, string firstName, Func<TestDbManager,IQueryable<Person>> func)
+		{
+			TestOnePerson(Array<string>.Empty, id, firstName, func);
+		}
+
+		protected void TestOneJohn(string[] exceptList, Func<TestDbManager,IQueryable<Person>> func)
+		{
+			TestOnePerson(exceptList, 1, "John", func);
+		}
+
 		protected void TestOneJohn(Func<TestDbManager,IQueryable<Person>> func)
 		{
-			TestOnePerson(1, "John", func);
+			TestOnePerson(Array<string>.Empty, 1, "John", func);
 		}
 	}
 }

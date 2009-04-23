@@ -241,6 +241,31 @@ namespace BLToolkit.Data.Linq
 				Parent.Create(Expr as T, ConvertExpressionTo<T>());
 		}
 
+		public UnaryExpression ConvertExpressionTo<T>()
+		{
+			return Expression.Convert(ParamAccessor, typeof(T));
+		}
+
+		public MemberExpression Property(MethodInfo mi)
+		{
+			return Expression.Property(ParamAccessor, mi);
+		}
+
+		public MemberExpression Property<T>(MethodInfo mi)
+		{
+			return Expression.Property(ConvertExpressionTo<T>(), mi);
+		}
+
+		public MethodCallExpression Indexer(MethodInfo pmi, MethodInfo mi, int idx)
+		{
+			return Expression.Call(Property(pmi), mi, new Expression[] { Expression.Constant(idx, typeof(int)) });
+		}
+
+		public MethodCallExpression Index<T>(IEnumerable<T> source, MethodInfo property, int idx)
+		{
+			return Indexer(property, IndexExpressor<T>.Item, idx);
+		}
+
 		#endregion
 
 		#region Walk
@@ -614,35 +639,6 @@ namespace BLToolkit.Data.Linq
 			}
 
 			throw new InvalidOperationException();
-		}
-
-		#endregion
-
-		#region Parameter accessor helpers
-
-		public UnaryExpression ConvertExpressionTo<T>()
-		{
-			return Expression.Convert(ParamAccessor, typeof(T));
-		}
-
-		public MemberExpression Property(MethodInfo mi)
-		{
-			return Expression.Property(ParamAccessor, mi);
-		}
-
-		public MemberExpression Property<T>(MethodInfo mi)
-		{
-			return Expression.Property(ConvertExpressionTo<T>(), mi);
-		}
-
-		public MethodCallExpression Indexer(MethodInfo pmi, MethodInfo mi, int idx)
-		{
-			return Expression.Call(Property(pmi), mi, new Expression[] { Expression.Constant(idx, typeof(int)) });
-		}
-
-		public MethodCallExpression Index<T>(IEnumerable<T> source, MethodInfo property, int idx)
-		{
-			return Indexer(property, IndexExpressor<T>.Item, idx);
 		}
 
 		#endregion

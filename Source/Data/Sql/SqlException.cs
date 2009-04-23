@@ -16,6 +16,11 @@ namespace BLToolkit.Data.Sql
 		{
 		}
 
+		public SqlException(string message, params object[] args)
+			: base(string.Format(message, args))
+		{
+		}
+
 		public SqlException(string message, Exception innerException)
 			: base(message, innerException)
 		{

@@ -8,6 +8,8 @@ using Sybase.Data.AseClient;
 
 namespace BLToolkit.Data.DataProvider
 {
+	using Sql.SqlProvider;
+
 	public class SybaseDataProvider : DataProviderBase
 	{
 		public override IDbConnection CreateConnectionObject()
@@ -129,7 +131,12 @@ namespace BLToolkit.Data.DataProvider
 
 		public override string Name
 		{
-			get { return "Sybase"; }
+			get { return DataProvider.ProviderName.Sybase; }
+		}
+
+		public override ISqlProvider CreateSqlProvider()
+		{
+			return new SybaseSqlProvider(this);
 		}
 
 		public override void PrepareCommand(ref CommandType commandType, ref string commandText, ref IDbDataParameter[] commandParameters)

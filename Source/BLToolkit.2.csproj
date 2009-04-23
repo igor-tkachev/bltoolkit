@@ -164,6 +164,7 @@
     <Compile Include="DataAccess\SqlQueryT.cs" />
     <Compile Include="DataAccess\TableNameAttribute.cs" />
     <Compile Include="Common\NameOrIndexParameter.cs" />
+    <Compile Include="Data\DataProvider\ProviderName.cs" />
     <Compile Include="Data\InitCommandEventArgs.cs" />
     <Compile Include="Data\OperationExceptionEventArgs.cs" />
     <Compile Include="Data\DataProvider\OracleDataProvider.cs" />
@@ -224,6 +225,7 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Data\Sql\ISqlExpressionScannable.cs" />
+    <Compile Include="Data\Sql\ISqlPredicate.cs" />
     <Compile Include="Data\Sql\ISqlTableSource.cs" />
     <Compile Include="Data\Sql\Precedence.cs" />
     <Compile Include="Data\Sql\SqlBinaryExpression.cs" />
@@ -243,16 +245,23 @@
     <Compile Include="Data\Sql\SqlParameter.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Data\Sql\SqlProvider\AccessSqlProvider.cs" />
     <Compile Include="Data\Sql\SqlProvider\BasicSqlProvider.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Data\Sql\SqlProvider\DB2SqlProvider.cs" />
+    <Compile Include="Data\Sql\SqlProvider\FirebirdSqlProvider.cs" />
     <Compile Include="Data\Sql\SqlProvider\InformixSqlProvider.cs" />
     <Compile Include="Data\Sql\SqlProvider\ISqlProvider.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Data\Sql\SqlProvider\MSSqlSqlProvider.cs" />
+    <Compile Include="Data\Sql\SqlProvider\MySqlSqlProvider.cs" />
     <Compile Include="Data\Sql\SqlProvider\OracleSqlProvider.cs" />
     <Compile Include="Data\Sql\SqlProvider\PostgreSQLSqlProvider.cs" />
+    <Compile Include="Data\Sql\SqlProvider\SqlCeSqlProvider.cs" />
+    <Compile Include="Data\Sql\SqlProvider\SQLiteSqlProvider.cs" />
+    <Compile Include="Data\Sql\SqlProvider\SybaseSqlProvider.cs" />
     <Compile Include="Data\Sql\SqlTable.cs" />
     <Compile Include="Data\Sql\SqlTableT.cs" />
     <Compile Include="Data\Sql\SqlValue.cs">

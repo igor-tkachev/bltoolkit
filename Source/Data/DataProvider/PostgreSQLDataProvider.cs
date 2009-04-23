@@ -67,7 +67,7 @@ namespace BLToolkit.Data.DataProvider
 
 		public override string Name
 		{
-			get { return "PostgreSQL"; }
+			get { return DataProvider.ProviderName.PostgreSQL; }
 		}
 
 		public override ISqlProvider CreateSqlProvider()

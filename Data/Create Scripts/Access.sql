@@ -8,14 +8,14 @@ CREATE TABLE Person (
     LastName                Text(50) WITH COMP NOT NULL,
     MiddleName              Text(50) WITH COMP,
     Gender                  Text(1) NOT NULL,
-    
+
     CONSTRAINT PrimaryKey PRIMARY KEY (PersonID)
 );
 
 CREATE TABLE Doctor (
     PersonID                Long NOT NULL DEFAULT 0,
     Taxonomy                Text(50) WITH COMP NOT NULL,
-    
+
     CONSTRAINT PrimaryKey PRIMARY KEY (PersonID)
 );
 

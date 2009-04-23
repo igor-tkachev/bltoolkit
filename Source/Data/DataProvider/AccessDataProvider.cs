@@ -5,6 +5,8 @@ using System.Text.RegularExpressions;
 
 namespace BLToolkit.Data.DataProvider
 {
+	using Sql.SqlProvider;
+
 	public sealed class AccessDataProvider : OleDbDataProvider
 	{
 		private static Regex _paramsExp;
@@ -200,11 +202,16 @@ namespace BLToolkit.Data.DataProvider
 			base.AttachParameter(command, parameter);
 		}
 
-		public new const string NameString = "Access";
+		public new const string NameString = DataProvider.ProviderName.Access;
 
 		public override string Name
 		{
 			get { return NameString; }
+		}
+
+		public override ISqlProvider CreateSqlProvider()
+		{
+			return new AccessSqlProvider(this);
 		}
 	}
 }

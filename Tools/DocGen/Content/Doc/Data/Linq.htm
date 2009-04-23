@@ -1,27 +1,83 @@
-﻿<table class='data'>
-<tr><th>Data Provider</th>  <th>Provider Name</th>  <th>Namespace</th>               <th>Vendor</th></tr>
-<tr><td>DB2DataProvider</td>     <td>DB2</td>       <td>IBM.Data.DB2</td>            <td><a href='http://www.ibm.com/software/data/db2/ad/dotnet.html'>IBM</a></td></tr>
-<tr><td>InformixDataProvider</td><td>Informix</td>  <td>IBM.Data.Informix</td>       <td><a href='http://www.informix.com'>IBM</a></td></tr>
-<tr><td>MySqlDataProvider</td>   <td>MySql</td>     <td>MySql.Data.MySqlClient</td>  <td><a href='http://www.mysql.com/'>Sun Microsystems</a></td></tr><tr><td>OdpDataProvider</td>     <td>ODP</td>       <td>Oracle.DataAccess.Client</td><td><a href='http://www.oracle.com/technology/tech/windows/odpnet/index.html'>Oracle</a></td></tr>
-<tr><td>PostgreSQLProvider</td>  <td>PostgreSQL</td><td>Npgsql</td>                  <td><a href='http://npgsql.projects.postgresql.org/'>PostgreSQL.org</a></td></tr>
-<tr><td>SqlDataProvider</td>     <td>Sql</td>       <td>System.Data.SqlClient</td>   <td>Microsoft</td></tr>
-<tr><td>SybaseDataProvider</td>  <td>Sybase</td>    <td>Sybase.Data.AseClient</td>   <td><a href='http://www.sybase.com/products/allproductsa-z/softwaredeveloperkit'>Sybase</a></td></tr>
+﻿<p class='j'>Data providers supported.</p>
+
+<table class='data'>
+<tr><th>Data Provider</th>    <th>Provider Name</th>  <th>Namespace</th>                       <th>Vendor</th></tr>
+<tr><td>AccessDataProvider</td>   <td>Access</td>     <td>System.Data.OleDb</td>               <td>Microsoft</td></tr>
+<tr><td>DB2DataProvider</td>      <td>DB2</td>        <td>IBM.Data.DB2</td>                    <td><a href='http://www.ibm.com/software/data/db2/ad/dotnet.html'>IBM</a></td></tr>
+<tr><td>InformixDataProvider</td> <td>Informix</td>   <td>IBM.Data.Informix</td>               <td><a href='http://www.informix.com'>IBM</a></td></tr>
+<tr><td>FdpDataProvider</td>      <td>Fdp</td>        <td>FirebirdSql.Data.FirebirdClient</td> <td><a href='http://www.firebirdsql.org/'>Firebird</a></td></tr>
+<tr><td>MySqlDataProvider</td>    <td>MySql</td>      <td>MySql.Data.MySqlClient</td>          <td><a href='http://www.mysql.com/'>Sun Microsystems</a></td></tr><tr><td>OdpDataProvider</td>      <td>ODP</td>        <td>Oracle.DataAccess.Client</td>        <td><a href='http://www.oracle.com/technology/tech/windows/odpnet/index.html'>Oracle</a></td></tr>
+<tr><td>PostgreSQLProvider</td>   <td>PostgreSQL</td> <td>Npgsql</td>                          <td><a href='http://npgsql.projects.postgresql.org/'>PostgreSQL.org</a></td></tr>
+<tr><td>SqlCeDataProvider</td>    <td>SqlCe</td>      <td>System.Data.SqlServerCe</td>         <td><a href='http://www.microsoft.com/sql/editions/compact/default.mspx'>Microsoft</a></td></tr>
+<tr><td>SQLiteDataProvider</td>   <td>SQLite</td>     <td>System.Data.SQLite</td>              <td><a href='http://sqlite.phxsoftware.com/'>SQLite.org</a></td></tr>
+<tr><td>SqlDataProvider</td>      <td>Sql</td>        <td>System.Data.SqlClient</td>           <td>Microsoft</td></tr>
+<tr><td>SybaseDataProvider</td>   <td>Sybase</td>     <td>Sybase.Data.AseClient</td>           <td><a href='http://www.sybase.com/products/allproductsa-z/softwaredeveloperkit'>Sybase</a></td></tr>
 <tr><td colspan='4' class='hr' style='padding:0'><img width='1' height='1' alt=''/></td></tr>
 </table>
 
-<table class='data bordered nowrappable'>
-<tr><th>&nbsp;</th>      <th>Linq</th>               <th>DB2</th>                    <th>Informix</th>       <th>Oracle</th>                           <th>PostgreSQL</th>      <th>MySql</th><th>MS SQL</th><th>Sybase</th></tr>
-<tr><td>Modulo</td>      <td>a % b</td>              <td colspan=3>MOD(a, b)</td>                                                                      <td colspan=4>a % b</td>                                             </tr>
-<tr><td>Bitwise AND</td> <td>a & b</td>              <td colspan=3>BITAND(a, b)</td>                                                                   <td colspan=4>a & b</td>                                             </tr>
-<tr><td>Bitwise OR</td>  <td>a | b</td>              <td colspan=2>BITXOR(a, b)</td>                         <td>(a + b) - BITAND(a, b)</td>           <td colspan=4>a | b</td>                                             </tr>
-<tr><td>Bitwise XOR</td> <td>a ^ b</td>              <td colspan=2>BITXOR(a, b)</td>                         <td>(a + b) - BITAND(a, b) * 2</td>       <td>a # b</td>           <td colspan=3>a % b</td>                    </tr>
+<p class='j'>Operators.</p>
 
-<tr><td>SELECT x</td>    <td>db.Select(() => x)</td> <td><% sql #
+<table class='data bordered nowrappable'>
+<tr><th>&nbsp;</th>                <th>Linq</th>              <th>DB2</th>                    <th>Informix</th>  <th>Oracle</th>                     <th>Firebird</th>      <th>PostgreSQL</th> <th>MySql</th> <th>MS SQL</th> <th>SqlCe</th> <th>Sybase</th> <th>SQLite</th>                <th>Access</th>                                  </tr>
+
+<tr><td>Modulo</td>                <td>a % b</td>             <td colspan=3>MOD(a, b)</td>                                                           <td>MOD(a, b)   </td>  <td colspan=6>a % b</td>                                                                                         <td>a MOD b</td>                                 </tr>
+<tr><td>Bitwise AND</td>           <td>a & b</td>             <td colspan=3>BITAND(a, b)</td>                                                        <td>BIN_AND(a, b)</td> <td colspan=6>a & b</td>                                                                                         <td class=nosup>X</td>                           </tr>
+<tr><td>Bitwise OR</td>            <td>a | b</td>             <td colspan=2>BITOR(a, b)</td>                     <td>(a + b) - BITAND(a, b)</td>     <td>BIN_OR(a, b)</td>  <td colspan=6>a | b</td>                                                                                         <td class=nosup>X</td>                           </tr>
+<tr><td>Bitwise XOR</td>           <td>a ^ b</td>             <td colspan=2>BITXOR(a, b)</td>                    <td>(a + b) - BITAND(a, b) * 2</td> <td>BIN_XOR(a, b)</td> <td>a # b</td>      <td colspan=4>a ^ b</td>                                      <td>(a + b) - (a & b) * 2</td> <td class=nosup>X</td>                           </tr>
+<tr><td rowspan=2>COALESCE</td>    <td>a ?? b</td>            <td>COALESCE(a, b)</td>         <td colspan=2>NVL(a, b)</td>                           <td colspan=7>COALESCE(a, b)</td>                                                                                                       <td>IIF(a IS NULL, b, a)</td>                    </tr>
+<tr>                               <td>a ?? b ?? c</td>       <td>COALESCE(a, b, c)</td>      <td colspan=2>NVL(a, b, c)</td>                        <td colspan=7>COALESCE(a, b, c)</td>                                                                                                    <td>IIF(a IS NULL, IIF(b IS NULL, c, b), a)</td> </tr>
+<tr><td rowspan=2>CONDITIONAL</td> <td>a ? b : c</td>         <td colspan=10>CASE WHEN a THEN b ELSE c END</td>                                                                                                                                                                              <td>IIF(a, b, c)</td>                            </tr>
+<tr>                               <td>a ? b : c ? d : e</td> <td colspan=10>CASE WHEN a THEN b WHEN c THEN d ELSE e END</td>                                                                                                                                                                <td>IIF(a, b, IIF(c, d, e))</td>                 </tr>
+</table>
+
+<p class='j'>String functions.</p>
+
+<table class='data bordered nowrappable'>
+<tr><th>&nbsp;</th>           <th>Linq</th>                            <th>DB2</th>          <th>Informix</th>     <th>Oracle</th> <th>Firebird</th> <th>PostgreSQL</th> <th>MySql</th> <th>MS SQL</th> <th>SqlCe</th> <th>Sybase</th> <th>SQLite</th>    <th>Access</th>           </tr>
+
+<tr><td>Character length</td> <td>s.Length</td>                        <td colspan=3>LENGTH(s)</td>                                <td colspan=3>CHARACTER_LENGTH(s)</td>               <td colspan=3>LEN(s)</td>                      <td>LENGTH(s)</td> <td>LEN(s)</td>           </tr>
+<tr><td rowspan=10>LIKE</td>  <td>s.Contains("abc")</td>               <td colspan=11>s LIKE '%abc%'</td>                                                                                                                                                                           </tr>
+<tr>                          <td>s.Contains("a%b")</td>               <td colspan=10>s LIKE '%a~%b%' ESCAPE '~'</td>                                                                                                                                     <td>s LIKE "%a[%]b%"</td> </tr>
+<tr>                          <td>s.Contains(str)</td>                 <td colspan=10>s LIKE @str ESCAPE '~'</td>                                                                                                                                         <td>s LIKE @str</td>      </tr>
+<tr>                          <td>!s.Contains(a)</td>                  <td>s NOT LIKE a</td> <td>NOT s LIKE a</td> <td colspan=9>s NOT LIKE a</td>                                                                                                                                  </tr>
+<tr>                          <td>s.StartsWith("abc")</td>             <td colspan=11>s LIKE 'abc%'</td>                                                                                                                                                                            </tr>
+<tr>                          <td>s.EndsWith("abc")</td>               <td colspan=11>s LIKE '%abc'</td>                                                                                                                                                                            </tr>
+<tr>                          <td>SqlMethods.Like(s, "%abc%")</td>     <td colspan=11>s LIKE '%abc%'</td>                                                                                                                                                                           </tr>
+<tr>                          <td>SqlMethods.Like(s, "a~%b", '~')</td> <td colspan=10>s LIKE "a~%b" ESCAPE '~'</td>                                                                                                                                       <td>s LIKE "a[%]b"</td>   </tr>
+<tr>                          <td>s.Like("%abc%")</td>                 <td colspan=11>s LIKE '%abc%'</td>                                                                                                                                                                           </tr>
+<tr>                          <td>s.Like("a~%b", '~')</td>             <td colspan=10>s LIKE "a~%b" ESCAPE '~'</td>                                                                                                                                       <td>s LIKE "a[%]b"</td>   </tr>
+</table>
+
+<p class='j'>SQL transformations.</p>
+
+<table class='data bordered nowrappable'>
+<tr><th>&nbsp;</th><th>Linq</th><th>DB2</th><th>Informix</th><th>Oracle</th><th>Firebird</th><th>PostgreSQL</th><th>MySql</th><th>MS SQL</th><th>SqlCe</th><th>Sybase</th><th>SQLite</th><th>Access</th></tr>
+
+<tr><td>SELECT x</td> <td>db.Select(() => x)</td>
+
+<td><% sql #
 SELECT x
 FROM SYSIBM.SYSDUMMY1
 FETCH FIRST 1 ROW ONLY
-%></td>                                                                              <td><% sql #
+%></td>
+
+<td><% sql #
 SELECT FIRST 1 x
-FROM SYSTABLES%></td>                                                                                        <td><% sql #SELECT x FROM SYS.DUAL%></td> <td colspan=4><% sql #SELECT x%></td>                                </tr>
+FROM SYSTABLES
+%></td>
+
+<td><% sql #
+SELECT x
+FROM SYS.DUAL
+%></td>
+
+<td><% sql #
+SELECT x
+FROM rdb$database
+%></td>
+
+<td colspan=7><% sql #SELECT x%></td>
+
+</tr>
 
 </table>

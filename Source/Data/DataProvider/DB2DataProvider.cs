@@ -80,7 +80,7 @@ namespace BLToolkit.Data.DataProvider
 
 		public override string Name
 		{
-			get { return "DB2"; }
+			get { return DataProvider.ProviderName.DB2; }
 		}
 
 		public override ISqlProvider CreateSqlProvider()

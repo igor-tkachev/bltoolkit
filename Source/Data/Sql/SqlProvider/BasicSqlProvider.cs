@@ -73,24 +73,34 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		{
 			_indent++;
 
+			bool first = true;
+
 			foreach (SqlBuilder.Column col in _sqlBuilder.Select.Columns)
 			{
+				if (!first)
+					sb.Append(',').AppendLine();
+				first = false;
+
 				bool addAlias = true;
 
 				AppendIndent(sb);
-				BuildExpression(sb, col.Expression, col.Alias, ref addAlias);
+				BuildColumn(sb, col, ref addAlias);
 
 				if (addAlias)
 					sb.Append(" as ").Append(DataProvider.Convert(col.Alias, ConvertType.NameToQueryFieldAlias));
-
-				sb.Append(',').AppendLine();
 			}
+
+			if (first)
+				sb.Append("NULL");
 
 			_indent--;
 
-			sb
-				.Remove(sb.Length - Environment.NewLine.Length - 1, Environment.NewLine.Length + 1)
-				.AppendLine();
+			sb.AppendLine();
+		}
+
+		protected virtual void BuildColumn(StringBuilder sb, SqlBuilder.Column col, ref bool addAlias)
+		{
+			BuildExpression(sb, col.Expression, col.Alias, ref addAlias);
 		}
 
 		#endregion
@@ -179,7 +189,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 				{
 					sb.Append(isOr.Value ? " OR" : " AND");
 
-					if (condition.Conditions.Count < 4 && sb.Length - len < 50)
+					if (condition.Conditions.Count < 4 && sb.Length - len < 50 || condition != _sqlBuilder.Where.SearchCondition)
 					{
 						sb.Append(' ');
 					}
@@ -200,7 +210,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 				}
 				else
 				{
-					precedence = GetPrecedence(condition);
+					precedence = GetPrecedence(condition as ISqlExpression);
 				}
 
 				BuildPredicate(sb, precedence, cond.Predicate);
@@ -211,7 +221,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		protected virtual void BuildSearchCondition(StringBuilder sb, int parentPrecedence, SqlBuilder.SearchCondition condition)
 		{
-			int precedence = GetPrecedence(condition);
+			int precedence = GetPrecedence(condition as ISqlExpression);
 
 			if (precedence == 0 || precedence < parentPrecedence)
 				sb.Append('(');
@@ -226,7 +236,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		#region BuildPredicate
 
-		protected virtual void BuildPredicate(StringBuilder sb, SqlBuilder.IPredicate predicate)
+		protected virtual void BuildPredicate(StringBuilder sb, ISqlPredicate predicate)
 		{
 			if (predicate is SqlBuilder.Predicate.ExprExpr)
 			{
@@ -273,7 +283,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			}
 			else if (predicate is SqlBuilder.Predicate.Like)
 			{
-				throw new NotImplementedException();
+				BuildLikePredicate(sb, (SqlBuilder.Predicate.Like)predicate);
 			}
 			else if (predicate is SqlBuilder.Predicate.Between)
 			{
@@ -281,7 +291,9 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			}
 			else if (predicate is SqlBuilder.Predicate.IsNull)
 			{
-				throw new NotImplementedException();
+				var p = (SqlBuilder.Predicate.IsNull)predicate;
+				BuildExpression(sb, GetPrecedence(p), p.Expr1);
+				sb.Append(p.IsNot? " IS NOT NULL": " IS NULL");
 			}
 			else if (predicate is SqlBuilder.Predicate.InSubquery)
 			{
@@ -305,7 +317,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			}
 		}
 
-		protected void BuildPredicate(StringBuilder sb, int parentPrecedence, SqlBuilder.IPredicate predicate)
+		protected void BuildPredicate(StringBuilder sb, int parentPrecedence, ISqlPredicate predicate)
 		{
 			int precedence = GetPrecedence(predicate);
 
@@ -318,12 +330,30 @@ namespace BLToolkit.Data.Sql.SqlProvider
 				sb.Append(')');
 		}
 
+		protected virtual void BuildLikePredicate(StringBuilder sb, SqlBuilder.Predicate.Like predicate)
+		{
+			int precedence = GetPrecedence(predicate);
+
+			BuildExpression(sb, precedence, predicate.Expr1);
+			sb.Append(predicate.IsNot? " NOT LIKE ": " LIKE ");
+			BuildExpression(sb, precedence, predicate.Expr2);
+
+			if (predicate.Escape != null)
+			{
+				sb.Append(" ESCAPE '");
+				sb.Append(predicate.Escape);
+				sb.Append("'");
+			}
+		}
+
 		#endregion
 
 		#region BuildExpression
 
 		protected virtual void BuildExpression(StringBuilder sb, ISqlExpression expr, string alias, ref bool addAlias)
 		{
+			expr = ConvertExpression(expr);
+
 			if (expr is SqlField)
 			{
 				SqlField field = (SqlField)expr;
@@ -371,9 +401,9 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			}
 			else if (expr is SqlExpression)
 			{
-				SqlExpression e      = (SqlExpression)expr;
-				StringBuilder s      = new StringBuilder();
-				object[]      values = new object[e.Values.Length];
+				SqlExpression e = (SqlExpression)expr;
+				StringBuilder s = new StringBuilder();
+				object[] values = new object[e.Values.Length];
 
 				for (int i = 0; i < values.Length; i++)
 				{
@@ -398,6 +428,10 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			{
 				SqlParameter parm = (SqlParameter)expr;
 				sb.Append(_dataProvider.Convert(parm.Name, ConvertType.NameToQueryParameter));
+			}
+			else if (expr is SqlBuilder.SearchCondition)
+			{
+				BuildSearchCondition(sb, expr.Precedence, (SqlBuilder.SearchCondition)expr);
 			}
 			else
 			{
@@ -462,15 +496,46 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		protected virtual void BuildFunction(StringBuilder sb, SqlFunction func)
 		{
-			BuildFunction(sb, func.Name, func);
+			if (func.Name == "CASE")
+			{
+				sb.Append("CASE");
+
+				int i = 0;
+
+				for (; i < func.Parameters.Length - 1; i += 2)
+				{
+					sb.Append(" WHEN ");
+					BuildExpression(sb, func.Parameters[i]);
+					sb.Append(" THEN ");
+					BuildExpression(sb, func.Parameters[i+1]);
+				}
+
+				if (i < func.Parameters.Length)
+				{
+					sb.Append(" ELSE ");
+					BuildExpression(sb, func.Parameters[i]);
+				}
+
+				sb.Append(" END");
+			}
+			else
+				BuildFunction(sb, func.Name, func.Parameters);
 		}
 
-		protected void BuildFunction(StringBuilder sb, string name, SqlFunction expr)
+		protected void BuildFunction(StringBuilder sb, string name, ISqlExpression[] exprs)
 		{
 			sb.Append(name).Append('(');
 
-			foreach (ISqlExpression parameter in expr.Parameters)
+			bool first = true;
+
+			foreach (ISqlExpression parameter in exprs)
+			{
+				if (!first)
+					sb.Append(", ");
+				first = false;
+
 				BuildExpression(sb, parameter);
+			}
 
 			sb.Append(')');
 		}
@@ -484,7 +549,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			return expr.Precedence;
 		}
 
-		protected virtual int GetPrecedence(SqlBuilder.IPredicate predicate)
+		protected virtual int GetPrecedence(ISqlPredicate predicate)
 		{
 			return predicate.Precedence;
 		}
@@ -526,6 +591,20 @@ namespace BLToolkit.Data.Sql.SqlProvider
 				sb.Append('\t', _indent);
 
 			return sb;
+		}
+
+		#endregion
+
+		#region ISqlProvider Members
+
+		public virtual ISqlExpression ConvertExpression(ISqlExpression expression)
+		{
+			return expression;
+		}
+
+		public virtual ISqlPredicate ConvertPredicate(ISqlPredicate predicate)
+		{
+			return predicate;
 		}
 
 		#endregion

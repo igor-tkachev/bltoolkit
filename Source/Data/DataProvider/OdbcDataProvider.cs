@@ -87,7 +87,7 @@ namespace BLToolkit.Data.DataProvider
 			get { return typeof(OdbcConnection); }
 		}
 
-		public const string NameString = "Odbc";
+		public const string NameString = DataProvider.ProviderName.Odbc;
 
 		/// <summary>
 		/// Returns the data provider name.

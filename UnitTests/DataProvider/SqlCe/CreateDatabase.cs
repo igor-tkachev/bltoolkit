@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using BLToolkit.Data;
+
 using NUnit.Framework;
 
 namespace UnitTests.CS
@@ -15,12 +16,13 @@ namespace UnitTests.CS
 
 			using (DbManager db = new DbManager())
 			{
-				string cmd = string.Empty;
+				string cmd  = string.Empty;
 				string term = "GO";
 
 				foreach (string s in File.ReadAllLines(path))
 				{
 					string line = s.TrimEnd();
+
 					if (!line.EndsWith(term))
 					{
 						cmd += line + Environment.NewLine;
@@ -41,7 +43,6 @@ namespace UnitTests.CS
 
 					cmd = string.Empty;
 				}
-	
 			}
 		}
 	}

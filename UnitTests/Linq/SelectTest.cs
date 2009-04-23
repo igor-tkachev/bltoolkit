@@ -191,122 +191,58 @@ namespace Data.Linq
 		}
 
 		[Test]
-		public void SelectScalar()
+		public void Coalesce()
 		{
 			ForEachProvider(db =>
 			{
 				var q = (
 
-					from p in db.Person select new { p } into p1 select p1.p
-
-				).ToList().Where(p => p.ID == 1).First();
-
-				Assert.AreEqual(1, q.ID);
-			});
-		}
-
-		[Test]
-		public void SelectScalar11()
-		{
-			ForEachProvider(db =>
-			{
-				var n = (from p in db.Person select p.ID).ToList().Where(id => id == 1).First();
-				Assert.AreEqual(1, n);
-			});
-		}
-
-		[Test]
-		public void SelectScalar2()
-		{
-			ForEachProvider(db =>
-			{
-				var q = (from p in db.Person select new { p }).ToList().Where(p => p.p.ID == 1).First();
-				Assert.AreEqual(1, q.p.ID);
-			});
-		}
-
-		[Test]
-		public void SelectScalar21()
-		{
-			ForEachProvider(db =>
-			{
-				var n = (from p in db.Person select p.FirstName.Length).ToList().Where(len => len == 4).First();
-				Assert.AreEqual(4, n);
-			});
-		}
-
-		[Test]
-		public void SelectScalar22()
-		{
-			ForEachProvider(db =>
-			{
-				var q = (
-
-					from p in db.Person select new { p1 = p, p2 = p } into p1 where p1.p1.ID == 1 && p1.p2.ID == 1 select p1
+					from p in db.Person
+					where p.ID == 1
+					select new
+					{
+						p.ID,
+						FirstName  = p.FirstName  ?? "None",
+						MiddleName = p.MiddleName ?? "None"
+					}
 
 				).ToList().First();
 
-				Assert.AreEqual(1, q.p1.ID);
-				Assert.AreEqual(1, q.p2.ID);
+				Assert.AreEqual(1,      q.ID);
+				Assert.AreEqual("John", q.FirstName);
+				Assert.AreEqual("None", q.MiddleName);
 			});
 		}
 
 		[Test]
-		public void SelectScalar23()
+		public void Coalesce2()
 		{
 			ForEachProvider(db =>
 			{
-				var q = (from p in db.Person select p.ID into p1 where p1 == 1 select new { p1 }).ToList().First();
-				Assert.AreEqual(1, q.p1);
+				var q = (
+
+					from p in db.Person
+					where p.ID == 1
+					select new
+					{
+						p.ID,
+						FirstName  = p.MiddleName ?? p.FirstName  ?? "None",
+						LastName   = p.LastName   ?? p.FirstName  ?? "None",
+						MiddleName = p.MiddleName ?? p.MiddleName ?? "None"
+					}
+
+				).ToList().First();
+
+				Assert.AreEqual(1,        q.ID);
+				Assert.AreEqual("John",   q.FirstName);
+				Assert.AreEqual("Pupkin", q.LastName);
+				Assert.AreEqual("None",   q.MiddleName);
 			});
 		}
 
 		void Foo(Expression<Func<IDataReader,object>> func)
 		{
 			/*
-			ParameterExpression p0;
-			Expression.Lambda
-			(
-				Expression.New(
-					(ConstructorInfo) methodof(
-						<>f__AnonymousType1<int, int, string>..ctor,
-						<>f__AnonymousType1<int, int, string>),
-						new Expression[]
-						{
-							Expression.Constant(i),
-							Expression.Field
-							(
-								p0 = Expression.Parameter(typeof(Person), "p"),
-								fieldof(Person.PersonID)
-							),
-							Expression.Field
-							(
-								p0,
-								fieldof(Person.FirstName)
-							)
-						},
-						new MethodInfo[]
-						{
-							(MethodInfo) methodof
-							(
-								<>f__AnonymousType1<int, int, string>.get_i,
-								<>f__AnonymousType1<int, int, string>
-							),
-							(MethodInfo) methodof
-							(
-								<>f__AnonymousType1<int, int, string>.get_PersonID,
-								<>f__AnonymousType1<int, int, string>
-							),
-							(MethodInfo) methodof
-							(
-								<>f__AnonymousType1<int, int, string>.get_FirstName,
-								<>f__AnonymousType1<int, int, string>
-							)
-						}
-					),
-					new ParameterExpression[] { p0 }
-				)
-			)
 			*/
 		}
 

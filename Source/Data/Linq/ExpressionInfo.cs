@@ -147,23 +147,10 @@ namespace BLToolkit.Data.Linq
 			}
 		}
 
-		string _command;
-
-		string GetCommand()
-		{
-			if (_command != null)
-				return _command;
-
-			var command = DataProvider.CreateSqlProvider().BuildSql(SqlBuilder, new StringBuilder(), 0).ToString();
-
-			if (!SqlBuilder.ParameterDependent)
-				_command = command;
-
-			return command;
-		}
-
 		IDataReader GetReader(DbManager db, Expression expr)
 		{
+			SetParameters(expr);
+
 			var parms   = GetParameters(db, expr);
 			var command = GetCommand();
 
@@ -185,23 +172,71 @@ namespace BLToolkit.Data.Linq
 			return db.SetCommand(command, parms).ExecuteReader();
 		}
 
+		private void SetParameters(Expression expr)
+		{
+			foreach (var p in Parameters)
+				p.SqlParameter.Value = p.Accessor(expr);
+		}
+
 		private IDbDataParameter[] GetParameters(DbManager db, Expression expr)
 		{
-			if (SqlBuilder.Parameters.Count == 0)
+			if (Parameters.Count == 0)
 				return null;
 
-			var parms = new IDbDataParameter[Parameters.Count];
+			var x = db.DataProvider.Convert("x", ConvertType.NameToQueryParameter).ToString();
+			var y = db.DataProvider.Convert("y", ConvertType.NameToQueryParameter).ToString();
 
-			for (var i = 0; i < parms.Length; i++)
+			var parms = new IDbDataParameter[x == y? SqlBuilder.Parameters.Count: Parameters.Count];
+
+			if (x == y)
 			{
-				var sqlp = SqlBuilder.Parameters[i];
-				var parm = Parameters.Count > i && Parameters[i].SqlParameter == sqlp? Parameters[i]: Parameters.First(p => p.SqlParameter == sqlp);
-				var name = db.DataProvider.Convert(parm.SqlParameter.Name, ConvertType.NameToQueryParameter);
+				for (var i = 0; i < parms.Length; i++)
+				{
+					var sqlp = SqlBuilder.Parameters[i];
+					var parm = Parameters.Count > i && Parameters[i].SqlParameter == sqlp ? Parameters[i] : Parameters.First(p => p.SqlParameter == sqlp);
 
-				parms[i] = db.Parameter(name.ToString(), parm.SqlParameter.Value = parm.Accessor(expr));
+					parms[i] = db.Parameter(x, parm.SqlParameter.Value);
+				}
+			}
+			else
+			{
+				int i = 0, j = 0;
+
+				for (; i < parms.Length; i++)
+				{
+					var parm = Parameters[i];
+
+					if (SqlBuilder.Parameters.Contains(parm.SqlParameter))
+					{
+						var name = db.DataProvider.Convert(parm.SqlParameter.Name, ConvertType.NameToQueryParameter).ToString();
+						parms[j++] = db.Parameter(name, parm.SqlParameter.Value);
+					}
+				}
+
+				if (i > j)
+				{
+					var parms1 = new IDbDataParameter[j];
+					Array.Copy(parms, parms1, j);
+					parms = parms1;
+				}
 			}
 
 			return parms;
+		}
+
+		string _command;
+
+		string GetCommand()
+		{
+			if (_command != null)
+				return _command;
+
+			var command = DataProvider.CreateSqlProvider().BuildSql(SqlBuilder, new StringBuilder(), 0).ToString();
+
+			if (!SqlBuilder.ParameterDependent)
+				_command = command;
+
+			return command;
 		}
 
 		#endregion

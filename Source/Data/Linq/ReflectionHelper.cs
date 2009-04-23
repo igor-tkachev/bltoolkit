@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Data;
+using System.Data.Linq.SqlClient;
 using System.Data.SqlTypes;
 using System.IO;
 using System.Linq.Expressions;
@@ -10,6 +11,8 @@ using System.Xml;
 
 namespace BLToolkit.Data.Linq
 {
+	using Sql;
+
 	class ReflectionHelper
 	{
 		public class Expressor<T>
@@ -212,6 +215,41 @@ namespace BLToolkit.Data.Linq
 				{ typeof(SqlBytes),        MethodExpressor(m => m.ConvertToSqlBytes              (null)) },
 				{ typeof(SqlChars),        MethodExpressor(m => m.ConvertToSqlChars              (null)) },
 				{ typeof(SqlXml),          MethodExpressor(m => m.ConvertToSqlXml                (null)) },
+			};
+		}
+
+		public class Functions
+		{
+			public static MemberInfo Function<T>(Expression<Func<T,object>> func)
+			{
+				var ex = func.Body;
+
+				if (ex is UnaryExpression)
+					ex = ((UnaryExpression)func.Body).Operand;
+
+				return ex is MemberExpression?
+					((MemberExpression)    ex).Member:
+					((MethodCallExpression)ex).Method;
+			}
+
+			public class String : Expressor<string>
+			{
+				public static MethodInfo Contains   = MethodExpressor(s => s.Contains(""));
+				public static MethodInfo StartsWith = MethodExpressor(s => s.StartsWith(""));
+				public static MethodInfo EndsWith   = MethodExpressor(s => s.EndsWith(""));
+				public static MethodInfo Like11     = MethodExpressor(s => SqlMethods.Like("", ""));
+				public static MethodInfo Like12     = MethodExpressor(s => SqlMethods.Like("", "", ' '));
+				public static MethodInfo Like21     = MethodExpressor(s => s.Like(""));
+				public static MethodInfo Like22     = MethodExpressor(s => s.Like("", ' '));
+			}
+
+			public static Dictionary<MemberInfo,string> Member = new Dictionary<MemberInfo,string>
+			{
+				{ Function<string>(s => s.Length),          "CHARACTER_LENGTH" },
+				{ Function<string>(s => s.IndexOf("")),     "IndexOf" },
+				{ Function<string>(s => s.IndexOf("", 0)),  "IndexOf" },
+				{ Function<string>(s => s.IndexOf(' ')),    "IndexOf" },
+				{ Function<string>(s => s.IndexOf(' ', 0)), "IndexOf" },
 			};
 		}
 	}

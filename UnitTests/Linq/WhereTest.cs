@@ -25,7 +25,7 @@ namespace Data.Linq
 		{
 			var n = 1;
 
-			TestOneJohn(db => 
+			TestOneJohn(new[] { "Fdp" }, db => 
 				from p in db.Person
 				select new { PersonID = p.ID + n, p.FirstName } into p
 				where p.PersonID == 2
@@ -172,19 +172,19 @@ namespace Data.Linq
 		[Test]
 		public void BinaryXor()
 		{
-			TestOneJohn(db => from p in db.Person where (p.ID ^ 2) == 3 select p);
+			TestOneJohn(new[] { "Access" }, db => from p in db.Person where (p.ID ^ 2) == 3 select p);
 		}
 
 		[Test]
 		public void BinaryAnd()
 		{
-			TestOneJohn(db => from p in db.Person where (p.ID & 3) == 1 select p);
+			TestOneJohn(new[] { "Access" }, db => from p in db.Person where (p.ID & 3) == 1 select p);
 		}
 
 		[Test]
 		public void BinaryOr()
 		{
-			TestOneJohn(db => from p in db.Person where (p.ID | 2) == 3 select p);
+			TestOneJohn(new[] { "Access" }, db => from p in db.Person where (p.ID | 2) == 3 select p);
 		}
 
 		[Test]
@@ -228,6 +228,66 @@ namespace Data.Linq
 		{
 			int n = 2;
 			TestOneJohn(db => from p in db.Person where p.ID == 1 && !(p.MiddleName != null && p.ID == n) select p);
+		}
+
+		[Test]
+		public void Coalesce()
+		{
+			TestOneJohn(db =>
+
+				from p in db.Person
+				where
+					p.ID == 1 &&
+					(p.MiddleName ?? "None") == "None" &&
+					(p.FirstName  ?? "None") == "John"
+				select p
+
+			);
+		}
+
+		[Test]
+		public void Conditional()
+		{
+			TestOneJohn(db =>
+
+				from p in db.Person
+				where
+					p.ID == 1 &&
+					(p.MiddleName == null ? 1 : 2) == 1 &&
+					(p.FirstName  != null ? 1 : 2) == 1
+				select p
+
+			);
+		}
+
+		[Test]
+		public void Conditional2()
+		{
+			TestOneJohn(db =>
+
+				from p in db.Person
+				where
+					p.ID == 1 &&
+					(p.MiddleName != null ? 3 : p.MiddleName == null? 1 : 2) == 1 &&
+					(p.FirstName  == null ? 3 : p.FirstName  != null? 1 : 2) == 1
+				select p
+
+			);
+		}
+
+		[Test]
+		public void Conditional3()
+		{
+			TestOneJohn(db =>
+
+				from p in db.Person
+				where
+					p.ID == 1 &&
+					(p.MiddleName != null ? 3 : p.ID == 2 ? 2 : p.MiddleName != null ? 0 : 1) == 1 &&
+					(p.FirstName  == null ? 3 : p.ID == 2 ? 2 : p.FirstName  == null ? 0 : 1) == 1
+				select p
+
+			);
 		}
 	}
 }

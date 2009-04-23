@@ -75,7 +75,7 @@ namespace BLToolkit.Data.DataProvider
 
 		public override string Name
 		{
-			get { return "Informix"; }
+			get { return DataProvider.ProviderName.Informix; }
 		}
 
 		public override ISqlProvider CreateSqlProvider()

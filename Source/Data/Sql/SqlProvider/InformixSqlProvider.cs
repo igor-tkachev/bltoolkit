@@ -25,32 +25,51 @@ namespace BLToolkit.Data.Sql.SqlProvider
 				base.BuildSelectClause(sb);
 		}
 
-		protected override void BuildBinaryExpression(StringBuilder sb, SqlBinaryExpression expr)
-		{
-			switch (expr.Operation[0])
-			{
-				case '%': BuildFunction(sb, "MOD",    expr);    break;
-				case '&': BuildFunction(sb, "BITAND", expr);    break;
-				case '|': BuildFunction(sb, "BITOR",  expr);    break;
-				case '^': BuildFunction(sb, "BITXOR", expr);    break;
-				default : base.BuildBinaryExpression(sb, expr); break;
-			}
-		}
-
-		protected override int GetPrecedence(ISqlExpression expr)
+		public override ISqlExpression ConvertExpression(ISqlExpression expr)
 		{
 			if (expr is SqlBinaryExpression)
 			{
-				switch (((SqlBinaryExpression)expr).Operation[0])
+				SqlBinaryExpression be = (SqlBinaryExpression)expr;
+
+				switch (be.Operation[0])
 				{
-					case '%':
-					case '&':
-					case '|':
-					case '^': return Precedence.Primary;
+					case '%': return new SqlFunction("MOD",    be.Expr1, be.Expr2);
+					case '&': return new SqlFunction("BITAND", be.Expr1, be.Expr2);
+					case '|': return new SqlFunction("BITOR",  be.Expr1, be.Expr2);
+					case '^': return new SqlFunction("BITXOR", be.Expr1, be.Expr2);
+				}
+			}
+			else if (expr is SqlFunction)
+			{
+				SqlFunction func = (SqlFunction) expr;
+
+				switch (func.Name)
+				{
+					case "COALESCE":         return new SqlFunction("NVL",    func.Parameters);
+					case "CHARACTER_LENGTH": return new SqlFunction("LENGTH", func.Parameters);
 				}
 			}
 
-			return base.GetPrecedence(expr);
+			return base.ConvertExpression(expr);
+		}
+
+		protected override void BuildLikePredicate(StringBuilder sb, SqlBuilder.Predicate.Like predicate)
+		{
+			if (predicate.IsNot)
+				sb.Append("NOT ");
+
+			int precedence = GetPrecedence(predicate);
+
+			BuildExpression(sb, precedence, predicate.Expr1);
+			sb.Append(" LIKE ");
+			BuildExpression(sb, precedence, predicate.Expr2);
+
+			if (predicate.Escape != null)
+			{
+				sb.Append(" ESCAPE '");
+				BuildExpression(sb, precedence, predicate.Escape);
+				sb.Append("'");
+			}
 		}
 	}
 }

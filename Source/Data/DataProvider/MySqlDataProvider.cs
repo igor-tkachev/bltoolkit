@@ -9,6 +9,8 @@ using MySql.Data.MySqlClient;
 
 namespace BLToolkit.Data.DataProvider
 {
+	using Sql.SqlProvider;
+
 	public class MySqlDataProvider :  DataProviderBase
 	{
 		public override IDbConnection CreateConnectionObject()
@@ -65,7 +67,12 @@ namespace BLToolkit.Data.DataProvider
 
 		public override string Name
 		{
-			get { return "MySql"; }
+			get { return DataProvider.ProviderName.MySql; }
+		}
+
+		public override ISqlProvider CreateSqlProvider()
+		{
+			return new MySqlSqlProvider(this);
 		}
 	}
 }

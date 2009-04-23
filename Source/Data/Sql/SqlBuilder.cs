@@ -317,12 +317,7 @@ namespace BLToolkit.Data.Sql
 
 		#region Predicate
 
-		public interface IPredicate : ISqlExpressionScannable
-		{
-			int Precedence { get; }
-		}
-
-		public abstract class Predicate : IPredicate
+		public abstract class Predicate : ISqlPredicate
 		{
 			public enum Operator
 			{
@@ -360,7 +355,7 @@ namespace BLToolkit.Data.Sql
 					_isNot = isNot;
 				}
 
-				readonly bool _isNot; public bool IsNot { get { return _isNot; } }
+				bool _isNot; public bool IsNot { get { return _isNot; } set { _isNot = value; } }
 			}
 
 			// { expression { = | <> | != | > | >= | ! > | < | <= | !< } expression
@@ -412,7 +407,7 @@ namespace BLToolkit.Data.Sql
 			//
 			public class Like : NotExprBase
 			{
-				public Like(ISqlExpression exp1, bool isNot, ISqlExpression exp2, char escape)
+				public Like(ISqlExpression exp1, bool isNot, ISqlExpression exp2, ISqlExpression escape)
 					: base(exp1, isNot, Sql.Precedence.Comparison)
 				{
 					_expr2  = exp2;
@@ -420,12 +415,15 @@ namespace BLToolkit.Data.Sql
 				}
 
 				readonly ISqlExpression _expr2;  public ISqlExpression Expr2  { get { return _expr2;  } }
-				readonly char           _escape; public char           Escape { get { return _escape; } }
+				readonly ISqlExpression _escape; public ISqlExpression Escape { get { return _escape; } }
 
 				protected override void ForEach(bool skipColumns, Action<ISqlExpression> action)
 				{
 					base.ForEach(skipColumns, action);
-					_expr2.ForEach(skipColumns, action);
+					_expr2 .ForEach(skipColumns, action);
+
+					if (_escape != null)
+						_escape.ForEach(skipColumns, action);
 				}
 			}
 
@@ -550,15 +548,15 @@ namespace BLToolkit.Data.Sql
 
 		public class Condition
 		{
-			public Condition(bool isNot, IPredicate predicate)
+			public Condition(bool isNot, ISqlPredicate predicate)
 			{
 				_isNot     = isNot;
 				_predicate = predicate;
 			}
 
-			private bool       _isNot;     public bool       IsNot     { get { return _isNot;     } set { _isNot     = value; } }
-			private IPredicate _predicate; public IPredicate Predicate { get { return _predicate; } set { _predicate = value; } }
-			private bool       _isOr;      public bool       IsOr      { get { return _isOr;      } set { _isOr      = value; } }
+			private bool          _isNot;     public bool          IsNot     { get { return _isNot;     } set { _isNot     = value; } }
+			private ISqlPredicate _predicate; public ISqlPredicate Predicate { get { return _predicate; } set { _predicate = value; } }
+			private bool          _isOr;      public bool          IsOr      { get { return _isOr;      } set { _isOr      = value; } }
 
 			public int Precedence
 			{
@@ -581,7 +579,7 @@ namespace BLToolkit.Data.Sql
 
 		#region SearchCondition
 
-		public class SearchCondition : IPredicate
+		public class SearchCondition : ISqlPredicate, ISqlExpression
 		{
 			readonly List<Condition> _conditions = new List<Condition>();
 			public   List<Condition>  Conditions
@@ -622,6 +620,15 @@ namespace BLToolkit.Data.Sql
 			}
 
 			#endregion
+
+			#region IEquatable<ISqlExpression> Members
+
+			bool IEquatable<ISqlExpression>.Equals(ISqlExpression other)
+			{
+				return this == other;
+			}
+
+			#endregion
 		}
 
 		#endregion
@@ -652,7 +659,7 @@ namespace BLToolkit.Data.Sql
 				readonly bool                 _isNot;
 				readonly ISqlExpression       _expr;
 
-				T2 Add(IPredicate predicate)
+				T2 Add(ISqlPredicate predicate)
 				{
 					_condition.Conditions.Conditions.Add(new Condition(_isNot, predicate));
 					return _condition.GetNext();
@@ -694,10 +701,10 @@ namespace BLToolkit.Data.Sql
 
 				#region Predicate.Like
 
-				public T2 Like(ISqlExpression expression, char escape) { return Add(new Predicate.Like(_expr, false, expression, escape)); }
-				public T2 Like(ISqlExpression expression)              { return Like(expression, '\x0'); }
-				public T2 Like(string expression,         char escape) { return Like(new SqlValue(expression), escape); }
-				public T2 Like(string expression)                      { return Like(new SqlValue(expression), '\x0'); }
+				public T2 Like(ISqlExpression expression, SqlValue escape) { return Add(new Predicate.Like(_expr, false, expression, escape)); }
+				public T2 Like(ISqlExpression expression)                  { return Like(expression, null); }
+				public T2 Like(string expression,         SqlValue escape) { return Like(new SqlValue(expression), escape); }
+				public T2 Like(string expression)                          { return Like(new SqlValue(expression), null);   }
 
 				#endregion
 
@@ -1515,7 +1522,7 @@ namespace BLToolkit.Data.Sql
 				if (string.IsNullOrEmpty(alias))
 				{
 					table.Alias = "t";
-					alias = "t1";
+					alias       = "t1";
 				}
 
 				for (int i = 1; names.ContainsKey(alias); i++)
@@ -1534,7 +1541,7 @@ namespace BLToolkit.Data.Sql
 				if (string.IsNullOrEmpty(alias))
 				{
 					c.Alias = "c";
-					alias = "c1";
+					alias   = "c1";
 				}
 
 				for (int i = 1; names.ContainsKey(alias); i++)
@@ -1556,7 +1563,7 @@ namespace BLToolkit.Data.Sql
 					if (string.IsNullOrEmpty(alias))
 					{
 						p.Name = "p";
-						alias = "p1";
+						alias  = "p1";
 					}
 
 					for (int i = 1; names.ContainsKey(alias); i++)

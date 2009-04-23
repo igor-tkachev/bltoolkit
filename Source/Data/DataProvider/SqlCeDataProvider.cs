@@ -9,6 +9,8 @@ using System.Data.SqlServerCe;
 
 namespace BLToolkit.Data.DataProvider
 {
+	using Sql.SqlProvider;
+
 	/// <summary>
 	/// Implements access to the Data Provider for Microsoft SQL Server 2005 Everywhere Edition
 	/// </summary>
@@ -132,7 +134,12 @@ namespace BLToolkit.Data.DataProvider
 		/// <value>Data provider name.</value>
 		public override string Name
 		{
-			get { return "SqlCe"; }
+			get { return DataProvider.ProviderName.SqlCe; }
+		}
+
+		public override ISqlProvider CreateSqlProvider()
+		{
+			return new SqlCeSqlProvider(this);
 		}
 	}
 }

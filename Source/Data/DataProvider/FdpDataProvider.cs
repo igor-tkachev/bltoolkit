@@ -32,10 +32,11 @@ using System.Data.Common;
 
 using FirebirdSql.Data.FirebirdClient;
 
-using BLToolkit.Mapping;
-
 namespace BLToolkit.Data.DataProvider
 {
+	using Sql.SqlProvider;
+	using Mapping;
+
 	public class FdpDataProvider : DataProviderBase
 	{
 		public FdpDataProvider()
@@ -134,7 +135,12 @@ namespace BLToolkit.Data.DataProvider
 
 		public override string Name
 		{
-			get { return "Fdp"; }
+			get { return DataProvider.ProviderName.Firebird; }
+		}
+
+		public override ISqlProvider CreateSqlProvider()
+		{
+			return new FirebirdSqlProvider(this);
 		}
 
 		public override bool IsValueParameter(IDbDataParameter parameter)
@@ -149,6 +155,7 @@ namespace BLToolkit.Data.DataProvider
 				InOutInputParameterPrefix + (string)Convert(ioParameterName, ConvertType.ParameterToName),
 				ConvertType.NameToParameter);
 		}
+
 		private static IDbDataParameter GetParameter(string parameterName, IDbDataParameter[] commandParameters)
 		{
 			foreach (IDbDataParameter par in commandParameters)
@@ -229,7 +236,6 @@ namespace BLToolkit.Data.DataProvider
 
 				return base.ConvertToBoolean(value);
 			}
-
 
 			public System.IO.Stream ConvertToStream(string value)
 			{

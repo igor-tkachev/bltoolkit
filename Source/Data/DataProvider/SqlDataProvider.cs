@@ -5,6 +5,8 @@ using System.Data.SqlClient;
 
 namespace BLToolkit.Data.DataProvider
 {
+	using Sql.SqlProvider;
+
 	/// <summary>
 	/// Implements access to the Data Provider for SQL Server.
 	/// </summary>
@@ -118,7 +120,7 @@ namespace BLToolkit.Data.DataProvider
 			get { return typeof(SqlConnection); }
 		}
 
-		public const string NameString = "Sql";
+		public const string NameString = DataProvider.ProviderName.MsSql;
 
 		/// <summary>
 		/// Returns the data provider name.
@@ -131,6 +133,11 @@ namespace BLToolkit.Data.DataProvider
 		public override string Name
 		{
 			get { return NameString; }
+		}
+
+		public override ISqlProvider CreateSqlProvider()
+		{
+			return new MSSqlSqlProvider(this);
 		}
 	}
 }
