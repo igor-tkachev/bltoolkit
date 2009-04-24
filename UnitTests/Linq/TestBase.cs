@@ -37,18 +37,18 @@ namespace Data.Linq
 
 		static readonly List<string> _configurations = new List<string>
 		{
+			ProviderName.DB2,
+			ProviderName.Informix,
+			"Oracle",
+			ProviderName.Firebird,
+			ProviderName.PostgreSQL,
+			ProviderName.MySql,
 			"Sql2008",
 			"Sql2005",
 			ProviderName.SqlCe,
-			ProviderName.Firebird,
+			ProviderName.Sybase,
 			ProviderName.SQLite,
 			ProviderName.Access,
-			ProviderName.PostgreSQL,
-			ProviderName.Informix,
-			ProviderName.DB2,
-			ProviderName.MySql,
-			"Oracle",
-			ProviderName.Sybase,
 		};
 
 		protected void ForEachProvider(Action<TestDbManager> func)

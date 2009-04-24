@@ -20,3 +20,19 @@ INSERT INTO Person (FirstName, LastName, Gender) VALUES ('John',   'Pupkin',    
 GO
 INSERT INTO Person (FirstName, LastName, Gender) VALUES ('Tester', 'Testerson', 'M')
 GO
+
+CREATE FUNCTION reverse(text) RETURNS text
+	AS $_$
+DECLARE
+original alias for $1;
+	reverse_str text;
+	i int4;
+BEGIN
+	reverse_str := '';
+	FOR i IN REVERSE LENGTH(original)..1 LOOP
+		reverse_str := reverse_str || substr(original,i,1);
+	END LOOP;
+RETURN reverse_str;
+END;$_$
+	LANGUAGE plpgsql IMMUTABLE;
+GO

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Text.RegularExpressions;
 using System.Xml;
 
@@ -334,6 +335,7 @@ namespace DocGen
 					case "order"   : item.SortOrder = int.Parse(source); source = "";                         break;
 					case "group"   : item.Group     = source;            source = "";                         break;
 					case "index"   : item.Indexes.Add(source);           source = "";                         break;
+					case "table"   : source = GetTable(Path.Combine(_sourcePath, source));                    break;
 					case "noindex" :
 						if (source.Length == 0)
 							item.NoIndex = true;
@@ -506,6 +508,148 @@ namespace DocGen
 			}
 
 			return backLinks;
+		}
+
+		class TableItem
+		{
+			public string Provider;
+			public string Feature;
+			public string Linq;
+			public string Implementation;
+		}
+
+		static TableItem GetTableItem(string line)
+		{
+			var ss = line.Replace("||", "$$$$$").Split('|');
+
+			if (ss.Length != 5)
+				throw new InvalidOperationException(line);
+
+			var impl = ss[4].Trim().Replace("$$$$$", "|");
+
+			if (impl.StartsWith("#sql"))
+			{
+				impl = impl.Substring(4).Replace("\\n", "\n").Trim();
+				impl = GetSourceCode(impl, ".sql", "");
+			}
+
+			return new TableItem
+			{
+				Provider       = ss[1].Trim().Replace("$$$$$", "|"),
+				Feature        = ss[2].Trim().Replace("$$$$$", "|"),
+				Linq           = ss[3].Trim().Replace("$$$$$", "|"),
+				Implementation = impl
+			};
+		}
+
+		static string GetTable(string sourcePath)
+		{
+			Console.WriteLine("table {0}", sourcePath);
+
+			var lines     = File.ReadAllLines(sourcePath);
+			var items     = (from l in lines where l.Trim().Length > 0 select GetTableItem(l)).ToList();
+			var providers = (from i in items where i.Provider.Length > 0 group i by i.Provider into g select g.Key).ToList();
+			var forall    = (from i in items where i.Provider.Length == 0 select i).ToList();
+
+			foreach (var p in providers)
+			{
+				items.AddRange(from a in forall select new TableItem
+				{
+					Provider       = p,
+					Feature        = a.Feature,
+					Linq           = a.Linq,
+					Implementation = a.Implementation
+				});
+			}
+
+			foreach (var i in forall)
+				items.Remove(i);
+
+			var features  = (
+				from i in items
+				group i by new { i.Feature, i.Linq } into g
+				orderby g.Key.Feature
+				select new
+				{
+					g.Key.Feature,
+					g.Key.Linq,
+					Providers = new string[providers.Count()]
+				}
+			).ToList();
+
+			foreach (var f in features)
+			{
+				for (var i = 0; i < providers.Count; i++)
+				{
+					f.Providers[i] = (
+						from it in items
+						where it.Provider == providers[i] && it.Feature == f.Feature && it.Linq == f.Linq
+						select it.Implementation
+					).FirstOrDefault();
+				}
+			}
+
+			var s = "<table class='data bordered nowrappable'>\n<tr><th>&nbsp;</th><th>Linq</th>";
+
+			foreach (var p in providers)
+				s += "<th>" + p + "</th>";
+
+			s += "</tr>";
+
+			var byFeature = from f in features group f by f.Feature;
+
+			foreach (var f in byFeature)
+			{
+				bool first = true;
+
+				foreach (var l in f)
+				{
+					s += "<tr>";
+
+					if (first)
+					{
+						s += f.Count() == 1? "<td>": "<td rowspan=" + f.Count() + ">";
+						s += f.Key + "</td>";
+						first = false;
+					}
+
+					s += "<td>" + l.Linq + "</td>";
+
+					var    n = 0;
+					string p = null;
+
+					for (var i = 0; i < l.Providers.Count(); i++)
+					{
+						if (l.Providers[i] == p)
+							n++;
+						else
+						{
+							if (n > 0)
+							{
+								s += n == 1? "<td": "<td colspan=" + n;
+								s += p == null ? " class=nosup>" : ">";
+								s += p ?? "X";
+								s += "</td>";
+							}
+
+							p = l.Providers[i];
+							n = 1;
+						}
+					}
+
+					if (n > 0)
+					{
+						s += n == 1? "<td": "<td colspan=" + n;
+						s += p == null ? " class=nosup>" : ">";
+						s += p ?? "X";
+						s += "</td>";
+					}
+
+					s += "</tr>\n";
+				}
+			}
+
+			return s + "</table>";
 		}
 	}
 }

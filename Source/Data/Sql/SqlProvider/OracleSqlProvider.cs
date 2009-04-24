@@ -36,21 +36,10 @@ namespace BLToolkit.Data.Sql.SqlProvider
 					case '%': return new SqlFunction("MOD",    be.Expr1, be.Expr2);
 					case '&': return new SqlFunction("BITAND", be.Expr1, be.Expr2);
 					case '|': // (a + b) - BITAND(a, b)
-						return new SqlBinaryExpression(
-							new SqlBinaryExpression(be.Expr1, "+", be.Expr2),
-							"-",
-							new SqlFunction("BITAND", be.Expr1, be.Expr2),
-							Precedence.Subtraction);
+						return Sub(Add(be.Expr1, be.Expr2), new SqlFunction("BITAND", be.Expr1, be.Expr2));
 
 					case '^': // (a + b) - BITAND(a, b) * 2
-						return new SqlBinaryExpression(
-							new SqlBinaryExpression(be.Expr1, "+", be.Expr2),
-							"-",
-							new SqlBinaryExpression(
-								new SqlFunction("BITAND", be.Expr1, be.Expr2),
-								"*",
-								new SqlValue(2)),
-							Precedence.Subtraction);
+						return Sub(Add(be.Expr1, be.Expr2), Mul(new SqlFunction("BITAND", be.Expr1, be.Expr2), 2));
 				}
 			}
 			else if (expr is SqlFunction)
@@ -59,19 +48,12 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 				switch (func.Name)
 				{
-					case "COALESCE"        : return new SqlFunction("NVL",    func.Parameters);
-					case "CHARACTER_LENGTH": return new SqlFunction("LENGTH", func.Parameters);
-					case "IndexOf":
-						return new SqlBinaryExpression(
-							func.Parameters.Length == 2?
-								new SqlFunction("INSTR", func.Parameters[0], func.Parameters[1]):
-								new SqlFunction("INSTR",
-									func.Parameters[0],
-									func.Parameters[1],
-									new SqlBinaryExpression(func.Parameters[2], "+", new SqlValue(1), Precedence.Additive)),
-							"-",
-							new SqlValue(1),
-							Precedence.Subtraction);
+					case "Coalesce"  : return new SqlFunction("Nvl",    func.Parameters);
+					case "Substring" : return new SqlFunction("Substr", func.Parameters);
+					case "CharIndex" :
+						return func.Parameters.Length == 2?
+							new SqlFunction("InStr", func.Parameters[1], func.Parameters[0]):
+							new SqlFunction("InStr", func.Parameters[1], func.Parameters[0], func.Parameters[2]);
 				}
 			}
 

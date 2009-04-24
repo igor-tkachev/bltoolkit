@@ -49,7 +49,8 @@ namespace BLToolkit.Data.Sql
 		void ISqlExpressionScannable.ForEach(bool skipColumns, Action<ISqlExpression> action)
 		{
 			action(this);
-			Array.ForEach(_parameters, action);
+			foreach (ISqlExpression parameter in _parameters)
+				parameter.ForEach(skipColumns, action);
 		}
 
 		#endregion

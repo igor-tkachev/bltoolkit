@@ -221,15 +221,11 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		protected virtual void BuildSearchCondition(StringBuilder sb, int parentPrecedence, SqlBuilder.SearchCondition condition)
 		{
-			int precedence = GetPrecedence(condition as ISqlExpression);
+			bool wrap = Wrap(GetPrecedence(condition as ISqlExpression), parentPrecedence);
 
-			if (precedence == 0 || precedence < parentPrecedence)
-				sb.Append('(');
-
+			if (wrap) sb.Append('(');
 			BuildSearchCondition(sb, condition);
-
-			if (precedence == 0 || precedence < parentPrecedence)
-				sb.Append(')');
+			if (wrap) sb.Append(')');
 		}
 
 		#endregion
@@ -319,15 +315,11 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		protected void BuildPredicate(StringBuilder sb, int parentPrecedence, ISqlPredicate predicate)
 		{
-			int precedence = GetPrecedence(predicate);
+			bool wrap = Wrap(GetPrecedence(predicate), parentPrecedence);
 
-			if (precedence == 0 || precedence < parentPrecedence)
-				sb.Append('(');
-
+			if (wrap) sb.Append('(');
 			BuildPredicate(sb, predicate);
-
-			if (precedence == 0 || precedence < parentPrecedence)
-				sb.Append(')');
+			if (wrap) sb.Append(')');
 		}
 
 		protected virtual void BuildLikePredicate(StringBuilder sb, SqlBuilder.Predicate.Like predicate)
@@ -441,15 +433,11 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		protected void BuildExpression(StringBuilder sb, int parentPrecedence, ISqlExpression expr, string alias, ref bool addAlias)
 		{
-			int precedence = GetPrecedence(expr);
+			bool wrap = Wrap(GetPrecedence(expr), parentPrecedence);
 
-			if (precedence == 0 || precedence < parentPrecedence)
-				sb.Append('(');
-
+			if (wrap) sb.Append('(');
 			BuildExpression(sb, expr, alias, ref addAlias);
-
-			if (precedence == 0 || precedence < parentPrecedence)
-				sb.Append(')');
+			if (wrap) sb.Append(')');
 		}
 
 		protected virtual void BuildExpression(StringBuilder sb, ISqlExpression expr)
@@ -560,6 +548,14 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		#region Helpers
 
+		static bool Wrap(int precedence, int parentPrecedence)
+		{
+			return
+				precedence == 0 ||
+				precedence < parentPrecedence ||
+				(precedence == parentPrecedence && precedence == Precedence.Subtraction); 
+		}
+
 		static string GetTableAlias(ISqlTableSource table)
 		{
 			if (table is SqlBuilder.TableSource)
@@ -591,6 +587,89 @@ namespace BLToolkit.Data.Sql.SqlProvider
 				sb.Append('\t', _indent);
 
 			return sb;
+		}
+
+		public static ISqlExpression Add(ISqlExpression expr1, ISqlExpression expr2)
+		{
+			if (expr1 is SqlValue)
+			{
+				SqlValue v1 = (SqlValue)expr1;
+				if (v1.Value is int && (int)v1.Value == 0) return expr2;
+			}
+
+			if (expr2 is SqlValue)
+			{
+				SqlValue v2 = (SqlValue)expr2;
+				if (v2.Value is int && (int)v2.Value == 0) return expr1;
+			}
+
+			if (expr1 is SqlValue && expr2 is SqlValue)
+			{
+				SqlValue v1 = (SqlValue)expr1;
+				SqlValue v2 = (SqlValue)expr2;
+				if (v1.Value is int && v2.Value is int)    return new SqlValue((int)v1.Value + (int)v2.Value);
+			}
+
+			return new SqlBinaryExpression(expr1, "+", expr2, Precedence.Additive);
+		}
+
+		public static ISqlExpression Add(ISqlExpression expr1, int value)
+		{
+			return Add(expr1, new SqlValue(value));
+		}
+
+		public static ISqlExpression Sub(ISqlExpression expr1, ISqlExpression expr2)
+		{
+			if (expr2 is SqlValue)
+			{
+				SqlValue v2 = (SqlValue)expr2;
+				if (v2.Value is int && (int)v2.Value == 0) return expr1;
+			}
+
+			if (expr1 is SqlValue && expr2 is SqlValue)
+			{
+				SqlValue v1 = (SqlValue)expr1;
+				SqlValue v2 = (SqlValue)expr2;
+				if (v1.Value is int && v2.Value is int) return new SqlValue((int)v1.Value - (int)v2.Value);
+			}
+
+			return new SqlBinaryExpression(expr1, "-", expr2, Precedence.Subtraction);
+		}
+
+		public static ISqlExpression Sub(ISqlExpression expr1, int value)
+		{
+			return Sub(expr1, new SqlValue(value));
+		}
+
+		public static ISqlExpression Mul(ISqlExpression expr1, ISqlExpression expr2)
+		{
+			if (expr1 is SqlValue)
+			{
+				SqlValue v1 = (SqlValue)expr1;
+				if (v1.Value is int && (int)v1.Value == 1) return expr2;
+				if (v1.Value is int && (int)v1.Value == 0) return new SqlValue(0);
+			}
+
+			if (expr2 is SqlValue)
+			{
+				SqlValue v2 = (SqlValue)expr2;
+				if (v2.Value is int && (int)v2.Value == 1) return expr1;
+				if (v2.Value is int && (int)v2.Value == 0) return new SqlValue(0);
+			}
+
+			if (expr1 is SqlValue && expr2 is SqlValue)
+			{
+				SqlValue v1 = (SqlValue)expr1;
+				SqlValue v2 = (SqlValue)expr2;
+				if (v1.Value is int && v2.Value is int) return new SqlValue((int)v1.Value * (int)v2.Value);
+			}
+
+			return new SqlBinaryExpression(expr1, "*", expr2, Precedence.Subtraction);
+		}
+
+		public static ISqlExpression Mul(ISqlExpression expr1, int value)
+		{
+			return Mul(expr1, new SqlValue(value));
 		}
 
 		#endregion

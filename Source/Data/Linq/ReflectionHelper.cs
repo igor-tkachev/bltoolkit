@@ -12,6 +12,7 @@ using System.Xml;
 namespace BLToolkit.Data.Linq
 {
 	using Sql;
+	using Sql.SqlProvider;
 
 	class ReflectionHelper
 	{
@@ -220,18 +221,6 @@ namespace BLToolkit.Data.Linq
 
 		public class Functions
 		{
-			public static MemberInfo Function<T>(Expression<Func<T,object>> func)
-			{
-				var ex = func.Body;
-
-				if (ex is UnaryExpression)
-					ex = ((UnaryExpression)func.Body).Operand;
-
-				return ex is MemberExpression?
-					((MemberExpression)    ex).Member:
-					((MethodCallExpression)ex).Method;
-			}
-
 			public class String : Expressor<string>
 			{
 				public static MethodInfo Contains   = MethodExpressor(s => s.Contains(""));
@@ -242,15 +231,6 @@ namespace BLToolkit.Data.Linq
 				public static MethodInfo Like21     = MethodExpressor(s => s.Like(""));
 				public static MethodInfo Like22     = MethodExpressor(s => s.Like("", ' '));
 			}
-
-			public static Dictionary<MemberInfo,string> Member = new Dictionary<MemberInfo,string>
-			{
-				{ Function<string>(s => s.Length),          "CHARACTER_LENGTH" },
-				{ Function<string>(s => s.IndexOf("")),     "IndexOf" },
-				{ Function<string>(s => s.IndexOf("", 0)),  "IndexOf" },
-				{ Function<string>(s => s.IndexOf(' ')),    "IndexOf" },
-				{ Function<string>(s => s.IndexOf(' ', 0)), "IndexOf" },
-			};
 		}
 	}
 }

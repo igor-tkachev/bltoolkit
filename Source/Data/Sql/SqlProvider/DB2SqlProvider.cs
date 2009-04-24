@@ -33,10 +33,10 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 				switch (be.Operation[0])
 				{
-					case '%': return new SqlFunction("MOD",    be.Expr1, be.Expr2);
-					case '&': return new SqlFunction("BITAND", be.Expr1, be.Expr2);
-					case '|': return new SqlFunction("BITOR",  be.Expr1, be.Expr2);
-					case '^': return new SqlFunction("BITXOR", be.Expr1, be.Expr2);
+					case '%': return new SqlFunction("Mod",    be.Expr1, be.Expr2);
+					case '&': return new SqlFunction("BitAnd", be.Expr1, be.Expr2);
+					case '|': return new SqlFunction("BitOr",  be.Expr1, be.Expr2);
+					case '^': return new SqlFunction("BitXor", be.Expr1, be.Expr2);
 				}
 			}
 			else if (expr is SqlFunction)
@@ -45,18 +45,8 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 				switch (func.Name)
 				{
-					case "CHARACTER_LENGTH": return new SqlFunction("LENGTH", func.Parameters);
-					case "IndexOf":
-						return new SqlBinaryExpression(
-							func.Parameters.Length == 2?
-								new SqlFunction("LOCATE", func.Parameters[1], func.Parameters[0]):
-								new SqlFunction("LOCATE",
-									func.Parameters[1],
-									func.Parameters[0],
-									new SqlBinaryExpression(func.Parameters[2], "+", new SqlValue(1), Precedence.Additive)),
-							"-",
-							new SqlValue(1),
-							Precedence.Subtraction);
+					case "CharIndex" : return new SqlFunction("Locate", func.Parameters);
+					case "Substring" : return new SqlFunction("Substr", func.Parameters);
 		}
 			}
 

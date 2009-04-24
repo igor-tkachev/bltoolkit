@@ -33,10 +33,10 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 				switch (be.Operation[0])
 				{
-					case '%': return new SqlFunction("MOD",     be.Expr1, be.Expr2);
-					case '&': return new SqlFunction("BIN_AND", be.Expr1, be.Expr2);
-					case '|': return new SqlFunction("BIN_OR",  be.Expr1, be.Expr2);
-					case '^': return new SqlFunction("BIN_XOR", be.Expr1, be.Expr2);
+					case '%': return new SqlFunction("Mod",     be.Expr1, be.Expr2);
+					case '&': return new SqlFunction("Bin_And", be.Expr1, be.Expr2);
+					case '|': return new SqlFunction("Bin_Or",  be.Expr1, be.Expr2);
+					case '^': return new SqlFunction("Bin_Xor", be.Expr1, be.Expr2);
 				}
 			}
 			else if (expr is SqlFunction)
@@ -45,7 +45,8 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 				switch (func.Name)
 				{
-					case "CHARACTER_LENGTH": return new SqlFunction("CHAR_LENGTH", func.Parameters);
+					case "Length":    return new SqlFunction  ("Char_Length", func.Parameters);
+					case "Substring": return new SqlExpression("Substring({0} from {1} for {2})", Precedence.Primary, func.Parameters);
 				}
 			}
 

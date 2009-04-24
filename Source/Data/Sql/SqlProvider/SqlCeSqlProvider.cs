@@ -18,18 +18,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 				switch (func.Name)
 				{
-					case "CHARACTER_LENGTH": return new SqlFunction("LEN", func.Parameters);
-					case "IndexOf":
-						return new SqlBinaryExpression(
-							func.Parameters.Length == 2?
-								new SqlFunction("CHARINDEX", func.Parameters[1], func.Parameters[0]):
-								new SqlFunction("CHARINDEX",
-									func.Parameters[1],
-									func.Parameters[0],
-									new SqlBinaryExpression(func.Parameters[2], "+", new SqlValue(1), Precedence.Additive)),
-							"-",
-							new SqlValue(1),
-							Precedence.Subtraction);
+					case "Length": return new SqlFunction("Len", func.Parameters);
 				}
 			}
 

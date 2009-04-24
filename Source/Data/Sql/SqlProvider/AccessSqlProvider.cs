@@ -31,7 +31,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 				switch (func.Name)
 				{
-					case "COALESCE":
+					case "Coalesce":
 
 						if (func.Parameters.Length > 2)
 						{
@@ -45,28 +45,21 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 						sc.Conditions.Add(new SqlBuilder.Condition(false, new SqlBuilder.Predicate.IsNull(func.Parameters[0], false)));
 
-						return new SqlFunction("IIF", sc, func.Parameters[1], func.Parameters[0]);
+						return new SqlFunction("Iif", sc, func.Parameters[1], func.Parameters[0]);
 
 					case "CASE":
 
 						if (func.Parameters.Length == 3)
-							return new SqlFunction("IIF", func.Parameters[0], func.Parameters[1], func.Parameters[2]);
+							return new SqlFunction("Iif", func.Parameters[0], func.Parameters[1], func.Parameters[2]);
 
 						throw new SqlException("CASE statement is not supported by the {0}.", GetType().Name);
 
-					case "CHARACTER_LENGTH": return new SqlFunction("LEN", func.Parameters);
-					case "IndexOf":
-						return new SqlBinaryExpression(
-							func.Parameters.Length == 2?
-								new SqlFunction("INSTR", new SqlValue(1),    func.Parameters[0], func.Parameters[1], new SqlValue(1)):
-								new SqlFunction("INSTR",
-									new SqlBinaryExpression(func.Parameters[2], "+", new SqlValue(1), Precedence.Additive),
-									func.Parameters[0],
-									func.Parameters[1],
-									new SqlValue(1)),
-							"-",
-							new SqlValue(1),
-							Precedence.Subtraction);
+					case "Length"   : return new SqlFunction("Len",        func.Parameters);
+					case "Substring": return new SqlFunction("Mid",        func.Parameters);
+					case "CharIndex":
+						return func.Parameters.Length == 2?
+							new SqlFunction("InStr", new SqlValue(1),    func.Parameters[1], func.Parameters[0], new SqlValue(1)):
+							new SqlFunction("InStr", func.Parameters[2], func.Parameters[1], func.Parameters[0], new SqlValue(1));
 				}
 			}
 

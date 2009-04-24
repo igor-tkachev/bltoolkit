@@ -151,8 +151,8 @@ namespace BLToolkit.Data.Linq
 		{
 			SetParameters(expr);
 
-			var parms   = GetParameters(db, expr);
 			var command = GetCommand();
+			var parms   = GetParameters(db, expr);
 
 			//string s = sql.ToString();
 
@@ -180,7 +180,7 @@ namespace BLToolkit.Data.Linq
 
 		private IDbDataParameter[] GetParameters(DbManager db, Expression expr)
 		{
-			if (Parameters.Count == 0)
+			if (Parameters.Count == 0 && SqlBuilder.Parameters.Count == 0)
 				return null;
 
 			var x = db.DataProvider.Convert("x", ConvertType.NameToQueryParameter).ToString();

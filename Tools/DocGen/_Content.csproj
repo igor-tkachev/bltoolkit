@@ -158,6 +158,9 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Content\Doc\Data\Linq.htm" />
+    <Content Include="Content\Doc\Data\LinqOperators.txt" />
+    <Content Include="Content\Doc\Data\LinqSqlTransformations.txt" />
+    <Content Include="Content\Doc\Data\LinqStringFunctions.txt" />
     <Content Include="Content\Doc\EditableObjects\AcceptRejectChanges.htm" />
     <Content Include="Content\Doc\EditableObjects\IsDirty.htm" />
     <Content Include="Content\Doc\EditableObjects\ManualEditableObject.cs" />

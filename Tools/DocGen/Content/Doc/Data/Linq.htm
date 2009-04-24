@@ -16,68 +16,10 @@
 </table>
 
 <p class='j'>Operators.</p>
-
-<table class='data bordered nowrappable'>
-<tr><th>&nbsp;</th>                <th>Linq</th>              <th>DB2</th>                    <th>Informix</th>  <th>Oracle</th>                     <th>Firebird</th>      <th>PostgreSQL</th> <th>MySql</th> <th>MS SQL</th> <th>SqlCe</th> <th>Sybase</th> <th>SQLite</th>                <th>Access</th>                                  </tr>
-
-<tr><td>Modulo</td>                <td>a % b</td>             <td colspan=3>MOD(a, b)</td>                                                           <td>MOD(a, b)   </td>  <td colspan=6>a % b</td>                                                                                         <td>a MOD b</td>                                 </tr>
-<tr><td>Bitwise AND</td>           <td>a & b</td>             <td colspan=3>BITAND(a, b)</td>                                                        <td>BIN_AND(a, b)</td> <td colspan=6>a & b</td>                                                                                         <td class=nosup>X</td>                           </tr>
-<tr><td>Bitwise OR</td>            <td>a | b</td>             <td colspan=2>BITOR(a, b)</td>                     <td>(a + b) - BITAND(a, b)</td>     <td>BIN_OR(a, b)</td>  <td colspan=6>a | b</td>                                                                                         <td class=nosup>X</td>                           </tr>
-<tr><td>Bitwise XOR</td>           <td>a ^ b</td>             <td colspan=2>BITXOR(a, b)</td>                    <td>(a + b) - BITAND(a, b) * 2</td> <td>BIN_XOR(a, b)</td> <td>a # b</td>      <td colspan=4>a ^ b</td>                                      <td>(a + b) - (a & b) * 2</td> <td class=nosup>X</td>                           </tr>
-<tr><td rowspan=2>COALESCE</td>    <td>a ?? b</td>            <td>COALESCE(a, b)</td>         <td colspan=2>NVL(a, b)</td>                           <td colspan=7>COALESCE(a, b)</td>                                                                                                       <td>IIF(a IS NULL, b, a)</td>                    </tr>
-<tr>                               <td>a ?? b ?? c</td>       <td>COALESCE(a, b, c)</td>      <td colspan=2>NVL(a, b, c)</td>                        <td colspan=7>COALESCE(a, b, c)</td>                                                                                                    <td>IIF(a IS NULL, IIF(b IS NULL, c, b), a)</td> </tr>
-<tr><td rowspan=2>CONDITIONAL</td> <td>a ? b : c</td>         <td colspan=10>CASE WHEN a THEN b ELSE c END</td>                                                                                                                                                                              <td>IIF(a, b, c)</td>                            </tr>
-<tr>                               <td>a ? b : c ? d : e</td> <td colspan=10>CASE WHEN a THEN b WHEN c THEN d ELSE e END</td>                                                                                                                                                                <td>IIF(a, b, IIF(c, d, e))</td>                 </tr>
-</table>
+<% table # Doc\Data\LinqOperators.txt %>
 
 <p class='j'>String functions.</p>
-
-<table class='data bordered nowrappable'>
-<tr><th>&nbsp;</th>           <th>Linq</th>                            <th>DB2</th>          <th>Informix</th>     <th>Oracle</th> <th>Firebird</th> <th>PostgreSQL</th> <th>MySql</th> <th>MS SQL</th> <th>SqlCe</th> <th>Sybase</th> <th>SQLite</th>    <th>Access</th>           </tr>
-
-<tr><td>Character length</td> <td>s.Length</td>                        <td colspan=3>LENGTH(s)</td>                                <td colspan=3>CHARACTER_LENGTH(s)</td>               <td colspan=3>LEN(s)</td>                      <td>LENGTH(s)</td> <td>LEN(s)</td>           </tr>
-<tr><td rowspan=10>LIKE</td>  <td>s.Contains("abc")</td>               <td colspan=11>s LIKE '%abc%'</td>                                                                                                                                                                           </tr>
-<tr>                          <td>s.Contains("a%b")</td>               <td colspan=10>s LIKE '%a~%b%' ESCAPE '~'</td>                                                                                                                                     <td>s LIKE "%a[%]b%"</td> </tr>
-<tr>                          <td>s.Contains(str)</td>                 <td colspan=10>s LIKE @str ESCAPE '~'</td>                                                                                                                                         <td>s LIKE @str</td>      </tr>
-<tr>                          <td>!s.Contains(a)</td>                  <td>s NOT LIKE a</td> <td>NOT s LIKE a</td> <td colspan=9>s NOT LIKE a</td>                                                                                                                                  </tr>
-<tr>                          <td>s.StartsWith("abc")</td>             <td colspan=11>s LIKE 'abc%'</td>                                                                                                                                                                            </tr>
-<tr>                          <td>s.EndsWith("abc")</td>               <td colspan=11>s LIKE '%abc'</td>                                                                                                                                                                            </tr>
-<tr>                          <td>SqlMethods.Like(s, "%abc%")</td>     <td colspan=11>s LIKE '%abc%'</td>                                                                                                                                                                           </tr>
-<tr>                          <td>SqlMethods.Like(s, "a~%b", '~')</td> <td colspan=10>s LIKE "a~%b" ESCAPE '~'</td>                                                                                                                                       <td>s LIKE "a[%]b"</td>   </tr>
-<tr>                          <td>s.Like("%abc%")</td>                 <td colspan=11>s LIKE '%abc%'</td>                                                                                                                                                                           </tr>
-<tr>                          <td>s.Like("a~%b", '~')</td>             <td colspan=10>s LIKE "a~%b" ESCAPE '~'</td>                                                                                                                                       <td>s LIKE "a[%]b"</td>   </tr>
-</table>
+<% table # Doc\Data\LinqStringFunctions.txt %>
 
 <p class='j'>SQL transformations.</p>
-
-<table class='data bordered nowrappable'>
-<tr><th>&nbsp;</th><th>Linq</th><th>DB2</th><th>Informix</th><th>Oracle</th><th>Firebird</th><th>PostgreSQL</th><th>MySql</th><th>MS SQL</th><th>SqlCe</th><th>Sybase</th><th>SQLite</th><th>Access</th></tr>
-
-<tr><td>SELECT x</td> <td>db.Select(() => x)</td>
-
-<td><% sql #
-SELECT x
-FROM SYSIBM.SYSDUMMY1
-FETCH FIRST 1 ROW ONLY
-%></td>
-
-<td><% sql #
-SELECT FIRST 1 x
-FROM SYSTABLES
-%></td>
-
-<td><% sql #
-SELECT x
-FROM SYS.DUAL
-%></td>
-
-<td><% sql #
-SELECT x
-FROM rdb$database
-%></td>
-
-<td colspan=7><% sql #SELECT x%></td>
-
-</tr>
-
-</table>
+<% table # Doc\Data\LinqSqlTransformations.txt %>

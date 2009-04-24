@@ -152,6 +152,82 @@ namespace Data.Linq
 		}
 
 		[Test]
+		public void IndexOf3()
+		{
+			var n = 3;
+			ForEachProvider(new[] { ProviderName.Firebird, ProviderName.Informix, ProviderName.SqlCe }, db => 
+			{
+				var q = from p in db.Person where p.LastName.IndexOf("p", 1, n) == 2 && p.ID == 1 select p;
+				Assert.AreEqual(1, q.ToList().First().ID);
+			});
+		}
+
+		static readonly string[] _lastIndexExcludeList = new[]
+		{
+			ProviderName.DB2, ProviderName.Firebird, ProviderName.Informix, ProviderName.SqlCe, ProviderName.Access
+		};
+
+		[Test]
+		public void LastIndexOf1()
+		{
+			ForEachProvider(_lastIndexExcludeList, db => 
+			{
+				var q = from p in db.Person where p.LastName.LastIndexOf("p") == 2 && p.ID == 1 select p;
+				Assert.AreEqual(1, q.ToList().First().ID);
+			});
+		}
+
+		[Test]
+		public void CharIndex1()
+		{
+			ForEachProvider(new[] { ProviderName.Firebird, ProviderName.Informix }, db => 
+			{
+				var q = from p in db.Person where p.FirstName.CharIndex("oh") == 2 && p.ID == 1 select p;
+				Assert.AreEqual(1, q.ToList().First().ID);
+			});
+		}
+
+		[Test]
+		public void CharIndex2()
+		{
+			ForEachProvider(new[] { ProviderName.Firebird, ProviderName.Informix }, db => 
+			{
+				var q = from p in db.Person where p.LastName.CharIndex("p", 2) == 3 && p.ID == 1 select p;
+				Assert.AreEqual(1, q.ToList().First().ID);
+			});
+		}
+
+		[Test]
+		public void Substring1()
+		{
+			ForEachProvider(db => 
+			{
+				var q = from p in db.Person where p.FirstName.Substring(1) == "ohn" && p.ID == 1 select p;
+				Assert.AreEqual(1, q.ToList().First().ID);
+			});
+		}
+
+		[Test]
+		public void Substring2()
+		{
+			ForEachProvider(db => 
+			{
+				var q = from p in db.Person where p.FirstName.Substring(1, 2) == "oh" && p.ID == 1 select p;
+				Assert.AreEqual(1, q.ToList().First().ID);
+			});
+		}
+
+		[Test]
+		public void Reverse()
+		{
+			ForEachProvider(new[] { ProviderName.DB2, ProviderName.Informix, ProviderName.SqlCe, ProviderName.Access }, db => 
+			{
+				var q = from p in db.Person where p.FirstName.Reverse() == "nhoJ" && p.ID == 1 select p;
+				Assert.AreEqual(1, q.ToList().First().ID);
+			});
+		}
+
+		[Test]
 		public void Test()
 		{
 			using (var db = new TestDbManager(ProviderName.Informix))

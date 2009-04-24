@@ -579,12 +579,37 @@ namespace BLToolkit.Data.Sql
 
 		#region SearchCondition
 
-		public class SearchCondition : ISqlPredicate, ISqlExpression
+		public class SearchCondition : ConditionBase<SearchCondition, SearchCondition.Next>, ISqlPredicate, ISqlExpression
 		{
+			public class Next
+			{
+				internal Next(SearchCondition parent)
+				{
+					_parent = parent;
+				}
+
+				readonly SearchCondition _parent;
+
+				public SearchCondition Or  { get { return _parent.SetOr(true);  } }
+				public SearchCondition And { get { return _parent.SetOr(false); } }
+
+				public ISqlExpression  ToExpr() { return _parent; }
+			}
+
 			readonly List<Condition> _conditions = new List<Condition>();
 			public   List<Condition>  Conditions
 			{
 				get { return _conditions; }
+			}
+
+			protected override SearchCondition Search
+			{
+				get { return this; }
+			}
+
+			protected override Next GetNext()
+			{
+				return new Next(this);
 			}
 
 			#region Overrides
@@ -661,7 +686,7 @@ namespace BLToolkit.Data.Sql
 
 				T2 Add(ISqlPredicate predicate)
 				{
-					_condition.Conditions.Conditions.Add(new Condition(_isNot, predicate));
+					_condition.Search.Conditions.Add(new Condition(_isNot, predicate));
 					return _condition.GetNext();
 				}
 
@@ -770,17 +795,17 @@ namespace BLToolkit.Data.Sql
 
 				public T2 Exists(SqlBuilder subQuery)
 				{
-					_condition.Conditions.Conditions.Add(new Condition(true, new Predicate.FuncLike(new SqlFunction.Exists(subQuery))));
+					_condition.Search.Conditions.Add(new Condition(true, new Predicate.FuncLike(new SqlFunction.Exists(subQuery))));
 					return _condition.GetNext();
 				}
 			}
 
-			protected abstract SearchCondition Conditions { get; }
+			protected abstract SearchCondition Search { get; }
 			protected abstract T2              GetNext();
 
 			protected T1 SetOr(bool value)
 			{
-				Conditions.Conditions[Conditions.Conditions.Count - 1].IsOr = value;
+				Search.Conditions[Search.Conditions.Count - 1].IsOr = value;
 				return (T1)this;
 			}
 
@@ -793,7 +818,7 @@ namespace BLToolkit.Data.Sql
 
 			public T2 Exists(SqlBuilder subQuery)
 			{
-				Conditions.Conditions.Add(new Condition(false, new Predicate.FuncLike(new SqlFunction.Exists(subQuery))));
+				Search.Conditions.Add(new Condition(false, new Predicate.FuncLike(new SqlFunction.Exists(subQuery))));
 				return GetNext();
 			}
 		}
@@ -1076,7 +1101,7 @@ namespace BLToolkit.Data.Sql
 					}
 				}
 
-				protected override SearchCondition Conditions
+				protected override SearchCondition Search
 				{
 					get { return _joinedTable.Condition; }
 				}
@@ -1254,7 +1279,7 @@ namespace BLToolkit.Data.Sql
 				get { return _searchCondition; }
 			}
 
-			protected override SearchCondition Conditions
+			protected override SearchCondition Search
 			{
 				get { return _searchCondition; }
 			}
@@ -1266,7 +1291,7 @@ namespace BLToolkit.Data.Sql
 
 			public override string ToString()
 			{
-				return Conditions.Conditions.Count == 0 ? "" : "\nWHERE\n\t" + Conditions;
+				return Search.Conditions.Count == 0 ? "" : "\nWHERE\n\t" + Search;
 			}
 
 			#region ISqlExpressionScannable Members

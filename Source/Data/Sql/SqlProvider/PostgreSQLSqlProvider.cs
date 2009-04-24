@@ -27,22 +27,16 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 				switch (func.Name)
 				{
-					case "IndexOf":
-						if (func.Parameters.Length == 2)
-							return new SqlBinaryExpression(
-								new SqlExpression("POSITION({0} in {1})", Precedence.Primary, func.Parameters[1], func.Parameters[0]),
-								"-",
-								new SqlValue(1),
-								Precedence.Subtraction);
-
-						var n = new SqlBinaryExpression(func.Parameters[2], "+", new SqlValue(1), Precedence.Additive);
-
-						return new SqlExpression("POSITION({0} in {1})", Precedence.Primary,
-							func.Parameters[1],
-							new SqlFunction("SUBSTRING",
-								func.Parameters[0],
-								n,
-								new SqlBinaryExpression(new SqlFunction("CHARACTER_LENGTH", func.Parameters[0]), "-", n, Precedence.Subtraction)));
+					case "CharIndex":
+						return func.Parameters.Length == 2?
+							new SqlExpression("Position({0} in {1})", Precedence.Primary, func.Parameters[0], func.Parameters[1]):
+							Add(
+								new SqlExpression("Position({0} in {1})", Precedence.Primary, func.Parameters[0],
+									new SqlFunction("Substring",
+										func.Parameters[1],
+										func.Parameters[2],
+										Sub(new SqlFunction("Length", func.Parameters[1]), func.Parameters[2]))),
+								Sub(func.Parameters[2], 1));
 				}
 			}
 
