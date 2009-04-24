@@ -697,8 +697,8 @@ namespace BLToolkit.Data.Linq
 
 			static readonly MemberMaker1 _length       = (p,s)     => MakeFunc(p, "Length",    s);
 			static readonly MemberMaker2 _charIndex1   = (p,s,a)   => MakeFunc(p, "CharIndex", a, s);
-			static readonly MemberMaker3 _charIndex2   = (p,s,a,b) => MakeFunc(p, "CharIndex", a, s,      b);
-			static readonly MemberMaker3 _substring    = (p,s,a,b) => MakeFunc(p, "Substring", s, Inc(a), b);
+			static readonly MemberMaker3 _charIndex2   = (p,s,a,b) => MakeFunc(p, "CharIndex", a, s, b);
+			static readonly MemberMaker3 _substring    = (p,s,a,b) => MakeFunc(p, "Substring", s, a, b);
 			static readonly MemberMaker1 _reverse      = (p,s)     => MakeFunc(p, "Reverse",   s);
 
 			static readonly MemberMaker2 _indexOf1     = (p,s,a) =>
@@ -723,7 +723,7 @@ namespace BLToolkit.Data.Linq
 						.Expr(_length(p, a)).Equal.Value(0)
 						.And
 						.Expr(_length(p, s)).GreaterOrEqual.Expr(Inc(b)).ToExpr(), b,
-					Dec(_charIndex2(p, _substring(p, s, Value(0), Add(b, c)), a, Inc(b)))
+					Dec(_charIndex2(p, _substring(p, s, Value(1), Add(b, c)), a, Inc(b)))
 				);
 
 			static readonly MemberMaker  _lastIndexOf1 = (s,p) =>
@@ -737,20 +737,20 @@ namespace BLToolkit.Data.Linq
 
 			static readonly Dictionary<MemberInfo,MemberMaker> _members = new Dictionary<MemberInfo,MemberMaker>
 			{
-				{ Function<string>(s => s.Length                ), (s,p) => _length    (s, p[0])                   },
-				{ Function<string>(s => s.CharIndex  (""       )), (s,p) => _charIndex1(s, p[0], p[1])             },
-				{ Function<string>(s => s.CharIndex  ("",  0   )), (s,p) => _charIndex2(s, p[0], p[1], p[2])       },
-				{ Function<string>(s => s.IndexOf    (""       )), (s,p) => _indexOf1  (s, p[0], p[1])             },
-				{ Function<string>(s => s.IndexOf    ("",  0   )), (s,p) => _indexOf2  (s, p[0], p[1], p[2])       },
-				{ Function<string>(s => s.IndexOf    ("",  0, 0)), (s,p) => _indexOf3  (s, p[0], p[1], p[2], p[3]) },
-				{ Function<string>(s => s.IndexOf    (' '      )), (s,p) => _indexOf1  (s, p[0], p[1])             },
-				{ Function<string>(s => s.IndexOf    (' ', 0   )), (s,p) => _indexOf2  (s, p[0], p[1], p[2])       },
-				{ Function<string>(s => s.IndexOf    (' ', 0, 0)), (s,p) => _indexOf3  (s, p[0], p[1], p[2], p[3]) },
+				{ Function<string>(s => s.Length                ), (s,p) => _length    (s, p[0])                       },
+				{ Function<string>(s => s.CharIndex  (""       )), (s,p) => _charIndex1(s, p[0], p[1])                 },
+				{ Function<string>(s => s.CharIndex  ("",  0   )), (s,p) => _charIndex2(s, p[0], p[1],     p[2])       },
+				{ Function<string>(s => s.IndexOf    (""       )), (s,p) => _indexOf1  (s, p[0], p[1])                 },
+				{ Function<string>(s => s.IndexOf    ("",  0   )), (s,p) => _indexOf2  (s, p[0], p[1],     p[2])       },
+				{ Function<string>(s => s.IndexOf    ("",  0, 0)), (s,p) => _indexOf3  (s, p[0], p[1],     p[2], p[3]) },
+				{ Function<string>(s => s.IndexOf    (' '      )), (s,p) => _indexOf1  (s, p[0], p[1])                 },
+				{ Function<string>(s => s.IndexOf    (' ', 0   )), (s,p) => _indexOf2  (s, p[0], p[1],     p[2])       },
+				{ Function<string>(s => s.IndexOf    (' ', 0, 0)), (s,p) => _indexOf3  (s, p[0], p[1],     p[2], p[3]) },
 				{ Function<string>(s => s.LastIndexOf(""       )), _lastIndexOf1 },
 				{ Function<string>(s => s.LastIndexOf(' '      )), _lastIndexOf1 },
-				{ Function<string>(s => s.Substring  (0,   0   )), (s,p) => _substring(s, p[0], p[1], p[2])  },
-				{ Function<string>(s => s.Substring  (0        )), (s,p) => _substring(s, p[0], p[1], Sub(_length(s, p[0]), p[1])) },
-				{ Function<string>(s => s.Reverse    (         )), (s,p) => _reverse  (s, p[0])      },
+				{ Function<string>(s => s.Substring  (0,   0   )), (s,p) => _substring(s, p[0], Inc(p[1]), p[2])  },
+				{ Function<string>(s => s.Substring  (0        )), (s,p) => _substring(s, p[0], Inc(p[1]), Sub(_length(s, p[0]), p[1])) },
+				{ Function<string>(s => s.Reverse    (         )), (s,p) => _reverse  (s, p[0])                        },
 			};
 
 			static SqlBuilder.SearchCondition Condition { get { return new SqlBuilder.SearchCondition(); } }

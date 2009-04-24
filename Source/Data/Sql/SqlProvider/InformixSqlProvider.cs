@@ -34,7 +34,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 				switch (be.Operation[0])
 				{
 					case '%': return new SqlFunction("Mod",    be.Expr1, be.Expr2);
-					case '&': return new SqlFunction("BitAna", be.Expr1, be.Expr2);
+					case '&': return new SqlFunction("BitAnd", be.Expr1, be.Expr2);
 					case '|': return new SqlFunction("BitOr",  be.Expr1, be.Expr2);
 					case '^': return new SqlFunction("BitXor", be.Expr1, be.Expr2);
 				}
