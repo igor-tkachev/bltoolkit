@@ -240,6 +240,17 @@ namespace Data.Linq
 			});
 		}
 
+		[Test]
+		public void Concatenation()
+		{
+			ForEachProvider(db =>
+			{
+				var q = from p in db.Person where p.ID == 1 select new { p.ID, FirstName  = "123" + p.FirstName + "456" };
+				var f = q.Where(p => p.FirstName == "123John456").ToList().First();
+				Assert.AreEqual(1, f.ID);
+			});
+		}
+
 		void Foo(Expression<Func<IDataReader,object>> func)
 		{
 			/*

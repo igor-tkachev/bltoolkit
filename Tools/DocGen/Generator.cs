@@ -529,7 +529,7 @@ namespace DocGen
 
 			if (impl.StartsWith("#sql"))
 			{
-				impl = impl.Substring(4).Replace("\\n", "\n").Trim();
+				impl = impl.Substring(4).Replace("\\n", "\n").Replace("\\t", "\t").Trim();
 				impl = GetSourceCode(impl, ".sql", "");
 			}
 

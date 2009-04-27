@@ -31,12 +31,13 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			{
 				SqlBinaryExpression be = (SqlBinaryExpression)expr;
 
-				switch (be.Operation[0])
+				switch (be.Operation)
 				{
-					case '%': return new SqlFunction("Mod",     be.Expr1, be.Expr2);
-					case '&': return new SqlFunction("Bin_And", be.Expr1, be.Expr2);
-					case '|': return new SqlFunction("Bin_Or",  be.Expr1, be.Expr2);
-					case '^': return new SqlFunction("Bin_Xor", be.Expr1, be.Expr2);
+					case "%": return new SqlFunction("Mod",     be.Expr1, be.Expr2);
+					case "&": return new SqlFunction("Bin_And", be.Expr1, be.Expr2);
+					case "|": return new SqlFunction("Bin_Or",  be.Expr1, be.Expr2);
+					case "^": return new SqlFunction("Bin_Xor", be.Expr1, be.Expr2);
+					case "+": return be.Type == typeof(string)? new SqlBinaryExpression(be.Expr1, "||", be.Expr2, be.Type, be.Precedence): expr;
 				}
 			}
 			else if (expr is SqlFunction)

@@ -4,7 +4,7 @@ namespace BLToolkit.Data.Sql
 {
 	public class SqlBinaryExpression : ISqlExpression
 	{
-		public SqlBinaryExpression(ISqlExpression expr1, string operation, ISqlExpression expr2, int precedence)
+		public SqlBinaryExpression(ISqlExpression expr1, string operation, ISqlExpression expr2, Type type, int precedence)
 		{
 			if (expr1     == null) throw new ArgumentNullException("expr1");
 			if (operation == null) throw new ArgumentNullException("operation");
@@ -13,17 +13,19 @@ namespace BLToolkit.Data.Sql
 			_expr1      = expr1;
 			_operation  = operation;
 			_expr2      = expr2;
+			_type       = type;
 			_precedence = precedence;
 		}
 
-		public SqlBinaryExpression(ISqlExpression expr1, string operation, ISqlExpression expr2)
-			: this(expr1, operation, expr2, Sql.Precedence.Unknown)
+		public SqlBinaryExpression(ISqlExpression expr1, string operation, ISqlExpression expr2, Type type)
+			: this(expr1, operation, expr2, type, Sql.Precedence.Unknown)
 		{
 		}
 
 		readonly ISqlExpression _expr1;      public ISqlExpression Expr1      { get { return _expr1;      } }
 		readonly string         _operation;  public string         Operation  { get { return _operation;  } }
 		readonly ISqlExpression _expr2;      public ISqlExpression Expr2      { get { return _expr2;      } }
+		readonly Type           _type;       public Type           Type       { get { return _type;       } }
 		readonly int            _precedence; public int            Precedence { get { return _precedence; } }
 
 		#region Overrides

@@ -91,7 +91,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			}
 
 			if (first)
-				sb.Append("NULL");
+				AppendIndent(sb).Append("NULL");
 
 			_indent--;
 
@@ -486,25 +486,31 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		{
 			if (func.Name == "CASE")
 			{
-				sb.Append("CASE");
+				sb.Append("CASE").AppendLine();
+
+				_indent++;
 
 				int i = 0;
 
 				for (; i < func.Parameters.Length - 1; i += 2)
 				{
-					sb.Append(" WHEN ");
+					AppendIndent(sb).Append("WHEN ");
 					BuildExpression(sb, func.Parameters[i]);
 					sb.Append(" THEN ");
 					BuildExpression(sb, func.Parameters[i+1]);
+					sb.AppendLine();
 				}
 
 				if (i < func.Parameters.Length)
 				{
-					sb.Append(" ELSE ");
+					AppendIndent(sb).Append("ELSE ");
 					BuildExpression(sb, func.Parameters[i]);
+					sb.AppendLine();
 				}
 
-				sb.Append(" END");
+				_indent--;
+
+				AppendIndent(sb).Append("END");
 			}
 			else
 				BuildFunction(sb, func.Name, func.Parameters);
@@ -589,7 +595,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			return sb;
 		}
 
-		public static ISqlExpression Add(ISqlExpression expr1, ISqlExpression expr2)
+		public static ISqlExpression Add(ISqlExpression expr1, ISqlExpression expr2, Type type)
 		{
 			if (expr1 is SqlValue)
 			{
@@ -610,15 +616,20 @@ namespace BLToolkit.Data.Sql.SqlProvider
 				if (v1.Value is int && v2.Value is int)    return new SqlValue((int)v1.Value + (int)v2.Value);
 			}
 
-			return new SqlBinaryExpression(expr1, "+", expr2, Precedence.Additive);
+			return new SqlBinaryExpression(expr1, "+", expr2, type, Precedence.Additive);
+		}
+
+		public static ISqlExpression Add<T>(ISqlExpression expr1, ISqlExpression expr2)
+		{
+			return Add(expr1, expr2, typeof(T));
 		}
 
 		public static ISqlExpression Add(ISqlExpression expr1, int value)
 		{
-			return Add(expr1, new SqlValue(value));
+			return Add<int>(expr1, new SqlValue(value));
 		}
 
-		public static ISqlExpression Sub(ISqlExpression expr1, ISqlExpression expr2)
+		public static ISqlExpression Sub(ISqlExpression expr1, ISqlExpression expr2, Type type)
 		{
 			if (expr2 is SqlValue)
 			{
@@ -633,15 +644,20 @@ namespace BLToolkit.Data.Sql.SqlProvider
 				if (v1.Value is int && v2.Value is int) return new SqlValue((int)v1.Value - (int)v2.Value);
 			}
 
-			return new SqlBinaryExpression(expr1, "-", expr2, Precedence.Subtraction);
+			return new SqlBinaryExpression(expr1, "-", expr2, type, Precedence.Subtraction);
+		}
+
+		public static ISqlExpression Sub<T>(ISqlExpression expr1, ISqlExpression expr2)
+		{
+			return Sub(expr1, expr2, typeof(T));
 		}
 
 		public static ISqlExpression Sub(ISqlExpression expr1, int value)
 		{
-			return Sub(expr1, new SqlValue(value));
+			return Sub<int>(expr1, new SqlValue(value));
 		}
 
-		public static ISqlExpression Mul(ISqlExpression expr1, ISqlExpression expr2)
+		public static ISqlExpression Mul(ISqlExpression expr1, ISqlExpression expr2, Type type)
 		{
 			if (expr1 is SqlValue)
 			{
@@ -664,12 +680,17 @@ namespace BLToolkit.Data.Sql.SqlProvider
 				if (v1.Value is int && v2.Value is int) return new SqlValue((int)v1.Value * (int)v2.Value);
 			}
 
-			return new SqlBinaryExpression(expr1, "*", expr2, Precedence.Subtraction);
+			return new SqlBinaryExpression(expr1, "*", expr2, type, Precedence.Subtraction);
+		}
+
+		public static ISqlExpression Mul<T>(ISqlExpression expr1, ISqlExpression expr2)
+		{
+			return Mul(expr1, expr2, typeof(T));
 		}
 
 		public static ISqlExpression Mul(ISqlExpression expr1, int value)
 		{
-			return Mul(expr1, new SqlValue(value));
+			return Mul<int>(expr1, new SqlValue(value));
 		}
 
 		#endregion

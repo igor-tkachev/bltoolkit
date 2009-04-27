@@ -19,7 +19,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 				switch (be.Operation[0])
 				{
-					case '%': return new SqlBinaryExpression(be.Expr1, "MOD", be.Expr2, Precedence.Additive - 1);
+					case '%': return new SqlBinaryExpression(be.Expr1, "MOD", be.Expr2, be.Type, Precedence.Additive - 1);
 					case '&':
 					case '|':
 					case '^': throw new SqlException("Operator '{0}' is not supported by the {1}.", be.Operation, GetType().Name);

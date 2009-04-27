@@ -21,7 +21,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 					case "Length"   : return new SqlFunction("Len", func.Parameters);
 					case "CharIndex":
 						if (func.Parameters.Length == 3)
-							return Add(
+							return Add<int>(
 								new SqlFunction("CharIndex",
 									func.Parameters[0],
 									new SqlFunction("Substring",

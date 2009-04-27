@@ -1,6 +1,9 @@
-﻿|            | CharIndex   | s.IndexOf(a)                    | CASE WHEN <b>Length</b>(a) = 0 THEN 0 ELSE <b>CharIndex</b>(a, s) - 1 END
-|            | CharIndex   | s.IndexOf(a, b)                 | CASE WHEN <b>Length</b>(a) = 0 AND <b>Length</b>(s) > b + 1 THEN b ELSE <b>CharIndex</b>(a, s, b + 1) - 1 END
-|            | LastIndexOf | s.LastIndexOf(a)                | Length(s) - (Length(a) + CharIndex(Reverse(a), Reverse(s)) + 1 -- <i>all used functions must be implemented by provider</i>
+﻿|            | CharIndex   |                                 | #sql -- [i]to support methods listed below provider must implement highlighted functions[/i]
+|            | CharIndex   | s.IndexOf(a)                    | #sql CASE WHEN [b]Length[/b](a) = 0 THEN 0 ELSE [b]CharIndex[/b](a, s) - 1 END
+|            | CharIndex   | s.IndexOf(a, b)                 | #sql CASE WHEN [b]Length[/b](a) = 0 AND [b]Length[/b](s) >= b + 1 THEN b ELSE [b]CharIndex[/b](a, s, b + 1) - 1 END
+|            | CharIndex   | s.IndexOf(a, b, c)              | #sql CASE WHEN [b]Length[/b](a) = 0 AND [b]Length[/b](s) >= b + 1 THEN b ELSE [b]CharIndex[/b](a, [b]Left[/b](s, b + c), b + 1) - 1 END
+|            | LastIndexOf | s.LastIndexOf(a)                | #sql CASE\n\tWHEN [b]Length[/b](a)       = 0 THEN [b]Length[/b](s) - 1\n\tWHEN [b]CharIndex[/b](a, s) = 0 THEN -1\n\tELSE [b]Length[/b](s) - ([b]Length[/b](a) + [b]CharIndex[/b]([b]Reverse[/b](a), [b]Reverse[/b](s)) + 1\nEND
+|            | LastIndexOf | s.LastIndexOf(a, b)             | #sql CASE\n\tWHEN [b]Length[/b](a) = 0 THEN [b]Length[/b](s) - 1\n\tWHEN [b]CharIndex[/b](a, s) = 0 THEN -1\n\tELSE [b]Length[/b](s) - ([b]Length[/b](a) + [b]CharIndex[/b]([b]Reverse[/b](a), [b]Reverse[/b](s)) + 1\nEND
 
 | DB2        | Length      | s.Length                        | Length(s)
 | DB2        | LIKE        | s.Contains("abc")               | s LIKE '%abc%'
@@ -13,11 +16,11 @@
 | DB2        | LIKE        | SqlMethods.Like(s, "a~%b", '~') | s LIKE "a~%b" ESCAPE '~' s LIKE "a[%]b" 
 | DB2        | LIKE        | s.Like("%abc%")                 | s LIKE '%abc%' 
 | DB2        | LIKE        | s.Like("a~%b", '~')             | s LIKE "a~%b" ESCAPE '~'
-| DB2        | CharIndex   | s.IndexOf(a, b, c)              | Locate(<br>&nbsp;a,<br>&nbsp;Substr(s, 1, b+c),<br>&nbsp;b+1) - 1
 | DB2        | CharIndex   | s.CharIndex(a)                  | Locate(a, s)
 | DB2        | CharIndex   | s.CharIndex(a, b)               | Locate(a, s, b)
 | DB2        | Substring   | s.Substring(a)                  | Substr(s, a+1, Length(s)-a)
 | DB2        | Substring   | s.Substring(a, b)               | Substr(s, a+1, b)
+| DB2        | Substring   | s.Left(a)                       | Left(s, a)
 
 | Informix   | Length      | s.Length                        | Length(s)
 | Informix   | LIKE        | s.Contains("abc")               | s LIKE '%abc%'
@@ -32,6 +35,7 @@
 | Informix   | LIKE        | s.Like("a~%b", '~')             | s LIKE "a~%b" ESCAPE '~' 
 | Informix   | Substring   | s.Substring(a)                  | Substr(s, a+1, Length(s)-a)
 | Informix   | Substring   | s.Substring(a, b)               | Substr(s, a+1, b)
+| Informix   | Substring   | s.Left(a)                       | Substr(s, 1, a)
 
 | Oracle     | Length      | s.Length                        | Length(s)
 | Oracle     | LIKE        | s.Contains("abc")               | s LIKE '%abc%'
@@ -44,11 +48,11 @@
 | Oracle     | LIKE        | SqlMethods.Like(s, "a~%b", '~') | s LIKE "a~%b" ESCAPE '~' s LIKE "a[%]b" 
 | Oracle     | LIKE        | s.Like("%abc%")                 | s LIKE '%abc%' 
 | Oracle     | LIKE        | s.Like("a~%b", '~')             | s LIKE "a~%b" ESCAPE '~' 
-| Oracle     | CharIndex   | s.IndexOf(a, b, c)              | InStr(<br>&nbsp;Substr(s, 1, b+c), <br>&nbsp;a, <br>&nbsp;b+1) - 1
 | Oracle     | CharIndex   | s.CharIndex(a)                  | InStr(s, a)
 | Oracle     | CharIndex   | s.CharIndex(a, b)               | InStr(s, a, b)
 | Oracle     | Substring   | s.Substring(a)                  | Substr(s, a+1, Length(s)-a)
 | Oracle     | Substring   | s.Substring(a, b)               | Substr(s, a+1, b)
+| Oracle     | Substring   | s.Left(a)                       | Substr(s, 1, a)
 | Oracle     | Reverse     | s.Reverse(a)                    | Reverse(s)
 
 | Firebird   | Length      | s.Length                        | Char_Length(s)
@@ -62,8 +66,9 @@
 | Firebird   | LIKE        | SqlMethods.Like(s, "a~%b", '~') | s LIKE "a~%b" ESCAPE '~' s LIKE "a[%]b" 
 | Firebird   | LIKE        | s.Like("%abc%")                 | s LIKE '%abc%' 
 | Firebird   | LIKE        | s.Like("a~%b", '~')             | s LIKE "a~%b" ESCAPE '~' 
-| Firebird   | Substring   | s.Substring(a)                  | Substring(s from  a+1<br>&nbsp;&nbsp;for CHAR_Length(s)-a)
+| Firebird   | Substring   | s.Substring(a)                  | Substring(s from  a+1<br>&nbsp;&nbsp;for Char_Length(s)-a)
 | Firebird   | Substring   | s.Substring(a, b)               | Substring(s from  a+1<br>&nbsp;&nbsp;for b)
+| Firebird   | Substring   | s.Left(a)                       | Left(s, a)
 | Firebird   | Reverse     | s.Reverse(a)                    | Reverse(s)
 
 | PostgreSQL | Length      | s.Length                        | Length(s)
@@ -77,11 +82,11 @@
 | PostgreSQL | LIKE        | SqlMethods.Like(s, "a~%b", '~') | s LIKE "a~%b" ESCAPE '~' s LIKE "a[%]b" 
 | PostgreSQL | LIKE        | s.Like("%abc%")                 | s LIKE '%abc%' 
 | PostgreSQL | LIKE        | s.Like("a~%b", '~')             | s LIKE "a~%b" ESCAPE '~' 
-| PostgreSQL | CharIndex   | s.IndexOf(a, b, c)              | Position(a in Substring(<br>&nbsp;Substring(s, 1, b+c), b+1,<br>&nbsp;&nbsp;Length(Substring(s, 1, b+c))<br>&nbsp;- (b+1)))
 | PostgreSQL | CharIndex   | s.CharIndex(a)                  | Position(a in s)
 | PostgreSQL | CharIndex   | s.CharIndex(a, b)               | Position(a in Substring(s, b, <br>&nbsp;&nbsp;Length(s)-b)) + b-1
 | PostgreSQL | Substring   | s.Substring(a)                  | Substring(s, a+1, Length(s)-a)
 | PostgreSQL | Substring   | s.Substring(a, b)               | Substring(s, a+1, b)
+| PostgreSQL | Substring   | s.Left(a)                       | Substring(s, 1, a)
 | PostgreSQL | Reverse     | s.Reverse(a)                    | Reverse(s) -- <i>implemented as UDF<i>
 
 | MySql      | Length      | s.Length                        | Length(s)
@@ -95,11 +100,11 @@
 | MySql      | LIKE        | SqlMethods.Like(s, "a~%b", '~') | s LIKE "a~%b" ESCAPE '~' s LIKE "a[%]b" 
 | MySql      | LIKE        | s.Like("%abc%")                 | s LIKE '%abc%' 
 | MySql      | LIKE        | s.Like("a~%b", '~')             | s LIKE "a~%b" ESCAPE '~' 
-| MySql      | CharIndex   | s.IndexOf(a, b, c)              | Locate(a,<br>&nbsp;Substring(s, 1, b+c),<br>&nbsp;b+1) - 1
 | MySql      | CharIndex   | s.CharIndex(a)                  | Locate(a, s)
 | MySql      | CharIndex   | s.CharIndex(a, b)               | Locate(a, s, b)
 | MySql      | Substring   | s.Substring(a)                  | Substring(s, a+1, Length(s)-a)
 | MySql      | Substring   | s.Substring(a, b)               | Substring(s, a+1, b)
+| MySql      | Substring   | s.Left(a)                       | Left(s, a)
 | MySql      | Reverse     | s.Reverse(a)                    | Reverse(s)
 
 | MS SQL     | Length      | s.Length                        | Len(s)
@@ -113,11 +118,11 @@
 | MS SQL     | LIKE        | SqlMethods.Like(s, "a~%b", '~') | s LIKE "a~%b" ESCAPE '~' s LIKE "a[%]b" 
 | MS SQL     | LIKE        | s.Like("%abc%")                 | s LIKE '%abc%' 
 | MS SQL     | LIKE        | s.Like("a~%b", '~')             | s LIKE "a~%b" ESCAPE '~' 
-| MS SQL     | CharIndex   | s.IndexOf(a, b, c)              | CharIndex(a,<br>&nbsp;Substring(s, 1, b+c),<br>&nbsp;b+1) - 1
 | MS SQL     | CharIndex   | s.CharIndex(a)                  | CharIndex(a, s)
 | MS SQL     | CharIndex   | s.CharIndex(a, b)               | CharIndex(a, s, b)
 | MS SQL     | Substring   | s.Substring(a)                  | Substring(s, a+1, Len(s)-a)
 | MS SQL     | Substring   | s.Substring(a, b)               | Substring(s, a+1, b)
+| MS SQL     | Substring   | s.Left(a)                       | Left(s, a)
 | MS SQL     | Reverse     | s.Reverse(a)                    | Reverse(s)
 
 | SqlCe      | Length      | s.Length                        | Len(s)
@@ -131,11 +136,11 @@
 | SqlCe      | LIKE        | SqlMethods.Like(s, "a~%b", '~') | s LIKE "a~%b" ESCAPE '~' s LIKE "a[%]b" 
 | SqlCe      | LIKE        | s.Like("%abc%")                 | s LIKE '%abc%' 
 | SqlCe      | LIKE        | s.Like("a~%b", '~')             | s LIKE "a~%b" ESCAPE '~' 
-| SqlCe      | CharIndex   | s.IndexOf(a, b, c)              | CharIndex(a,<br>&nbsp;Substring(s, 1, b+c),<br>&nbsp;b+1) - 1
 | SqlCe      | CharIndex   | s.CharIndex(a)                  | CharIndex(a, s)
 | SqlCe      | CharIndex   | s.CharIndex(a, b)               | CharIndex(a, s, b)
 | SqlCe      | Substring   | s.Substring(a)                  | Substring(s, a+1, Len(s)-a)
 | SqlCe      | Substring   | s.Substring(a, b)               | Substring(s, a+1, b)
+| SqlCe      | Substring   | s.Left(a)                       | Substring(s, 1, a)
 
 | Sybase     | Length      | s.Length                        | Len(s)
 | Sybase     | LIKE        | s.Contains("abc")               | s LIKE '%abc%'
@@ -148,11 +153,11 @@
 | Sybase     | LIKE        | SqlMethods.Like(s, "a~%b", '~') | s LIKE "a~%b" ESCAPE '~' s LIKE "a[%]b" 
 | Sybase     | LIKE        | s.Like("%abc%")                 | s LIKE '%abc%' 
 | Sybase     | LIKE        | s.Like("a~%b", '~')             | s LIKE "a~%b" ESCAPE '~' 
-| Sybase     | CharIndex   | s.IndexOf(a, b, c)              | CharIndex(a, Substring(<br>&nbsp;Substring(s, 1, b+c),<br>&nbsp;b + 1,<br>&nbsp;Len(Substring(s, 1, b+c)) - (b+1)))
 | Sybase     | CharIndex   | s.CharIndex(a)                  | CharIndex(a, s)
 | Sybase     | CharIndex   | s.CharIndex(a, b)               | CharIndex(a,Substring(<br>&nbsp;&nbsp;s, b, Len(s)-b)) + b - 1
 | Sybase     | Substring   | s.Substring(a)                  | Substring(s, a+1, Len(s)-a)
 | Sybase     | Substring   | s.Substring(a, b)               | Substring(s, a+1, b)
+| Sybase     | Substring   | s.Left(a)                       | Left(s, a)
 | Sybase     | Reverse     | s.Reverse(a)                    | Reverse(s)
 
 | SQLite     | Length      | s.Length                        | Length(s)
@@ -166,11 +171,11 @@
 | SQLite     | LIKE        | SqlMethods.Like(s, "a~%b", '~') | s LIKE "a~%b" ESCAPE '~' s LIKE "a[%]b"
 | SQLite     | LIKE        | s.Like("%abc%")                 | s LIKE '%abc%' 
 | SQLite     | LIKE        | s.Like("a~%b", '~')             | s LIKE "a~%b" ESCAPE '~'
-| SQLite     | CharIndex   | s.IndexOf(a, b, c)              | CharIndex(a,<br>&nbsp;Substr(s, 1, b+c),<br>&nbsp;b + 1) - 1
 | SQLite     | CharIndex   | s.CharIndex(a)                  | CharIndex(a, s)
 | SQLite     | CharIndex   | s.CharIndex(a, b)               | CharIndex(a, s, b)
 | SQLite     | Substring   | s.Substring(a)                  | Substr(s, a+1,<br>&nbsp;&nbsp;Length(s) - a)
 | SQLite     | Substring   | s.Substring(a, b)               | Substr(s, a+1, b)
+| SQLite     | Substring   | s.Left(a)                       | Substr(s, 1, a)
 | SQLite     | Reverse     | s.Reverse(a)                    | Reverse(s)
 
 | Access     | Length      | s.Length                        | Len(s)
@@ -184,9 +189,9 @@
 | Access     | LIKE        | SqlMethods.Like(s, "a~%b", '~') | s LIKE "a[%]b"
 | Access     | LIKE        | s.Like("%abc%")                 | s LIKE '%abc%'
 | Access     | LIKE        | s.Like("a~%b", '~')             | s LIKE "a[%]b"
-| Access     | CharIndex   | s.IndexOf(a, b, c)              | InStr(b+1,<br>&nbsp;Mid(s, 1, b+c),<br>&nbsp;a, 1) - 1
 | Access     | CharIndex   | s.CharIndex(a)                  | InStr(1, s, a, 1)
 | Access     | CharIndex   | s.CharIndex(a, b)               | InStr(b, s, a, 1)
 | Access     | Substring   | s.Substring(a)                  | Mid(s, a+1, Len(s)-a)
 | Access     | Substring   | s.Substring(a, b)               | Mid(s, a+1, b)
+| Access     | Substring   | s.Left(a)                       | Left(s, a)
 

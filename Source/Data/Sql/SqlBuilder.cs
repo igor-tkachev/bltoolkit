@@ -957,21 +957,21 @@ namespace BLToolkit.Data.Sql
 				return this;
 			}
 
-			public SelectClause Expr(ISqlExpression expr1, string operation, ISqlExpression expr2)
+			public SelectClause Expr<T>(ISqlExpression expr1, string operation, ISqlExpression expr2)
 			{
-				AddOrGetColumn(new Column(SqlBuilder, new SqlBinaryExpression(expr1, operation, expr2)));
+				AddOrGetColumn(new Column(SqlBuilder, new SqlBinaryExpression(expr1, operation, expr2, typeof(T))));
 				return this;
 			}
 
-			public SelectClause Expr(ISqlExpression expr1, string operation, ISqlExpression expr2, int priority)
+			public SelectClause Expr<T>(ISqlExpression expr1, string operation, ISqlExpression expr2, int priority)
 			{
-				AddOrGetColumn(new Column(SqlBuilder, new SqlBinaryExpression(expr1, operation, expr2, priority)));
+				AddOrGetColumn(new Column(SqlBuilder, new SqlBinaryExpression(expr1, operation, expr2, typeof(T), priority)));
 				return this;
 			}
 
-			public SelectClause Expr(string alias, ISqlExpression expr1, string operation, ISqlExpression expr2, int priority)
+			public SelectClause Expr<T>(string alias, ISqlExpression expr1, string operation, ISqlExpression expr2, int priority)
 			{
-				AddOrGetColumn(new Column(SqlBuilder, new SqlBinaryExpression(expr1, operation, expr2, priority), alias));
+				AddOrGetColumn(new Column(SqlBuilder, new SqlBinaryExpression(expr1, operation, expr2, typeof(T), priority), alias));
 				return this;
 			}
 

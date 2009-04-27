@@ -31,13 +31,14 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			{
 				SqlBinaryExpression be = (SqlBinaryExpression)expr;
 
-				switch (be.Operation[0])
+				switch (be.Operation)
 				{
-					case '%': return new SqlFunction("Mod",    be.Expr1, be.Expr2);
-					case '&': return new SqlFunction("BitAnd", be.Expr1, be.Expr2);
-					case '|': return new SqlFunction("BitOr",  be.Expr1, be.Expr2);
-					case '^': return new SqlFunction("BitXor", be.Expr1, be.Expr2);
-				}
+					case "%": return new SqlFunction("Mod",    be.Expr1, be.Expr2);
+					case "&": return new SqlFunction("BitAnd", be.Expr1, be.Expr2);
+					case "|": return new SqlFunction("BitOr",  be.Expr1, be.Expr2);
+					case "^": return new SqlFunction("BitXor", be.Expr1, be.Expr2);
+					case "+": return be.Type == typeof(string)? new SqlBinaryExpression(be.Expr1, "||", be.Expr2, be.Type, be.Precedence): expr;
+			}
 			}
 			else if (expr is SqlFunction)
 			{
@@ -47,6 +48,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 				{
 					case "Coalesce"  : return new SqlFunction("Nvl",    func.Parameters);
 					case "Substring" : return new SqlFunction("Substr", func.Parameters);
+					case "Left"      : return new SqlFunction("Substr", func.Parameters[0], new SqlValue(1), func.Parameters[1]);
 				}
 			}
 

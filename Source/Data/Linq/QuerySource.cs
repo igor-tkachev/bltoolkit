@@ -117,7 +117,6 @@ namespace BLToolkit.Data.Linq
 			public Scalar(SqlBuilder sqlBilder, QuerySource parentQuery, ParseInfo expr)
 				: base(sqlBilder, parentQuery, expr)
 			{
-				
 			}
 		}
 
@@ -133,6 +132,7 @@ namespace BLToolkit.Data.Linq
 		public ParseInfo    Expression;
 
 		readonly Dictionary<MemberInfo,QueryField> _fields = new Dictionary<MemberInfo, QueryField>();
+		public   Dictionary<MemberInfo,QueryField>  Fields { get { return _fields; } }
 
 		public virtual QueryField GetField(Expression expr)
 		{

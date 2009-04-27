@@ -31,15 +31,22 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			{
 				SqlBinaryExpression be = (SqlBinaryExpression)expr;
 
-				switch (be.Operation[0])
+				switch (be.Operation)
 				{
-					case '%': return new SqlFunction("MOD",    be.Expr1, be.Expr2);
-					case '&': return new SqlFunction("BITAND", be.Expr1, be.Expr2);
-					case '|': // (a + b) - BITAND(a, b)
-						return Sub(Add(be.Expr1, be.Expr2), new SqlFunction("BITAND", be.Expr1, be.Expr2));
+					case "%": return new SqlFunction("MOD",    be.Expr1, be.Expr2);
+					case "&": return new SqlFunction("BITAND", be.Expr1, be.Expr2);
+					case "|": // (a + b) - BITAND(a, b)
+						return Sub(
+							Add(be.Expr1, be.Expr2, be.Type),
+							new SqlFunction("BITAND", be.Expr1, be.Expr2),
+							be.Type);
 
-					case '^': // (a + b) - BITAND(a, b) * 2
-						return Sub(Add(be.Expr1, be.Expr2), Mul(new SqlFunction("BITAND", be.Expr1, be.Expr2), 2));
+					case "^": // (a + b) - BITAND(a, b) * 2
+						return Sub(
+							Add(be.Expr1, be.Expr2, be.Type),
+							Mul(new SqlFunction("BITAND", be.Expr1, be.Expr2), 2),
+							be.Type);
+					case "+": return be.Type == typeof(string)? new SqlBinaryExpression(be.Expr1, "||", be.Expr2, be.Type, be.Precedence): expr;
 				}
 			}
 			else if (expr is SqlFunction)
@@ -50,6 +57,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 				{
 					case "Coalesce"  : return new SqlFunction("Nvl",    func.Parameters);
 					case "Substring" : return new SqlFunction("Substr", func.Parameters);
+					case "Left"      : return new SqlFunction("Substr", func.Parameters[0], new SqlValue(1), func.Parameters[1]);
 					case "CharIndex" :
 						return func.Parameters.Length == 2?
 							new SqlFunction("InStr", func.Parameters[1], func.Parameters[0]):

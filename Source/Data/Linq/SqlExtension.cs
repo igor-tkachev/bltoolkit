@@ -40,5 +40,10 @@ namespace BLToolkit.Data.Linq
 			Array.Reverse(chars);
 			return new string(chars);
 		}
+
+		public static string Left(this string str, int length)
+		{
+			return str.Substring(1, length);
+		}
 	}
 }

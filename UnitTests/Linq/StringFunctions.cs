@@ -178,6 +178,17 @@ namespace Data.Linq
 		}
 
 		[Test]
+		public void LastIndexOf2()
+		{
+			ForEachProvider(_lastIndexExcludeList, db => 
+			{
+				var q = from p in db.Person where p.ID == 1 select new { p.ID, FirstName = "123" + p.FirstName + "012345" };
+				q = q.Where(p => p.FirstName.LastIndexOf("123", 5) == 7);
+				Assert.AreEqual(1, q.ToList().First().ID);
+			});
+		}
+
+		[Test]
 		public void CharIndex1()
 		{
 			ForEachProvider(new[] { ProviderName.Firebird, ProviderName.Informix }, db => 
@@ -193,6 +204,16 @@ namespace Data.Linq
 			ForEachProvider(new[] { ProviderName.Firebird, ProviderName.Informix }, db => 
 			{
 				var q = from p in db.Person where p.LastName.CharIndex("p", 2) == 3 && p.ID == 1 select p;
+				Assert.AreEqual(1, q.ToList().First().ID);
+			});
+		}
+
+		[Test]
+		public void Left()
+		{
+			ForEachProvider(db => 
+			{
+				var q = from p in db.Person where p.FirstName.Left(2) == "Jo" && p.ID == 1 select p;
 				Assert.AreEqual(1, q.ToList().First().ID);
 			});
 		}

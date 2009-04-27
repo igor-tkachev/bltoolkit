@@ -5,14 +5,16 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
-using BLToolkit.Data.DataProvider;
-using BLToolkit.Data.Sql.SqlProvider;
 
 namespace BLToolkit.Data.Linq
 {
+	using DataProvider;
 	using Mapping;
 	using Reflection;
 	using Sql;
+	using Sql.SqlProvider;
+
+	using IExpr = Sql.ISqlExpression;
 
 	class ExpressionParser<T> : ReflectionHelper
 	{
@@ -163,10 +165,10 @@ namespace BLToolkit.Data.Linq
 		{
 			query.Match
 			(
-				table    => { table.Select(this); _info.SetQuery(); }, // QueryInfo.Table
-				expr     => BuildNew(query, expr.Expression),          // QueryInfo.Expr
-				subQuery => _info.SetQuery(),                          // QueryInfo.SubQuery
-				scalar   => BuildNew(query, scalar.Expression)         // QueryInfo.Scalar
+				table    => { table.Select(this);   _info.SetQuery();  }, // QueryInfo.Table
+				expr     => BuildNew(query, expr.Expression),             // QueryInfo.Expr
+				BuildSubQuery,                                            // QueryInfo.SubQuery
+				scalar   => BuildNew(query, scalar.Expression)            // QueryInfo.Scalar
 			);
 		}
 
@@ -178,6 +180,53 @@ namespace BLToolkit.Data.Linq
 				info, new [] { _infoParam, _dataReaderParam, _mapSchemaParam, _expressionParam });
 
 			_info.SetQuery(mapper.Compile());
+		}
+
+		void BuildSubQuery(QuerySource.SubQuery subQuery)
+		{
+			subQuery.ParentQuery.Match
+			(
+				table  => _info.SetQuery(), // QueryInfo.Table
+				expr   => // QueryInfo.Expr
+				{
+					if (expr.Expression.Expr is NewExpression)
+					{
+						ParseInfo newExpr = null;
+						var member = 0;
+
+						var info = expr.Expression.Walk(pi =>
+						{
+							if (newExpr == null && pi.NodeType == ExpressionType.New)
+							{
+								newExpr = pi;
+							}
+							else if (newExpr != null)
+							{
+								var mi = ((NewExpression)newExpr.Expr).Members[member++];
+
+								if (mi is MethodInfo)
+									mi = TypeHelper.GetPropertyByMethod((MethodInfo)mi);
+
+								var field = subQuery.Fields[mi];
+
+								var idx = field.Select(this);
+								return BuildField(pi, idx, pi.Expr.Type);
+							}
+
+							return pi;
+						});
+
+						var mapper = Expression.Lambda<Func<ExpressionInfo<T>,IDataReader,MappingSchema,Expression,T>>(
+							info, new [] { _infoParam, _dataReaderParam, _mapSchemaParam, _expressionParam });
+
+						_info.SetQuery(mapper.Compile());
+					}
+					else
+						throw new NotImplementedException();
+				}, 
+				sub    => { throw new NotImplementedException(); }, // QueryInfo.SubQuery
+				scalar => { throw new NotImplementedException(); }  // QueryInfo.Scalar
+			);
 		}
 
 		ParseInfo BuildNewExpression(QuerySource query, ParseInfo expr)
@@ -552,20 +601,21 @@ namespace BLToolkit.Data.Linq
 						var e  = parseInfo.Expr as BinaryExpression;
 						var l  = ParseExpression(query, pi.Create(e.Left,  pi.Property(Binary.Left)));
 						var r  = ParseExpression(query, pi.Create(e.Right, pi.Property(Binary.Right)));
+						var t  = e.Left.Type ?? e.Right.Type;
 
 						switch (parseInfo.NodeType)
 						{
 							case ExpressionType.Add            :
-							case ExpressionType.AddChecked     : return Convert(BasicSqlProvider.Add(l, r));
-							case ExpressionType.And            : return Convert(new SqlBinaryExpression(l, "&", r, Precedence.Bitwise));
-							case ExpressionType.Divide         : return Convert(new SqlBinaryExpression(l, "/", r, Precedence.Multiplicative));
-							case ExpressionType.ExclusiveOr    : return Convert(new SqlBinaryExpression(l, "^", r, Precedence.Bitwise));
-							case ExpressionType.Modulo         : return Convert(new SqlBinaryExpression(l, "%", r, Precedence.Multiplicative));
-							case ExpressionType.Multiply       : return Convert(BasicSqlProvider.Mul(l, r));
-							case ExpressionType.Or             : return Convert(new SqlBinaryExpression(l, "|", r, Precedence.Bitwise));
+							case ExpressionType.AddChecked     : return Convert(BasicSqlProvider.Add(l, r, t));
+							case ExpressionType.And            : return Convert(new SqlBinaryExpression(l, "&", r, t, Precedence.Bitwise));
+							case ExpressionType.Divide         : return Convert(new SqlBinaryExpression(l, "/", r, t, Precedence.Multiplicative));
+							case ExpressionType.ExclusiveOr    : return Convert(new SqlBinaryExpression(l, "^", r, t, Precedence.Bitwise));
+							case ExpressionType.Modulo         : return Convert(new SqlBinaryExpression(l, "%", r, t, Precedence.Multiplicative));
+							case ExpressionType.Multiply       : return Convert(BasicSqlProvider.Mul(l, r, t));
+							case ExpressionType.Or             : return Convert(new SqlBinaryExpression(l, "|", r, t, Precedence.Bitwise));
 							case ExpressionType.Power          : return Convert(new SqlFunction("Power", l, r));
 							case ExpressionType.Subtract       :
-							case ExpressionType.SubtractChecked: return Convert(BasicSqlProvider.Sub(l, r));
+							case ExpressionType.SubtractChecked: return Convert(BasicSqlProvider.Sub(l, r, t));
 							case ExpressionType.Coalesce       :
 								{
 									if (r is SqlFunction)
@@ -662,108 +712,6 @@ namespace BLToolkit.Data.Linq
 			}
 
 			throw new LinqException("'{0}' cannot be converted to SQL.", parseInfo.Expr);
-		}
-
-		static class Members
-		{
-			public static MemberMaker GetMember(MemberInfo mi)
-			{
-				MemberMaker maker;
-				return _members.TryGetValue(mi, out maker) ? maker : null;
-			}
-
-			static MemberInfo Function<T1>(Expression<Func<T1,object>> func)
-			{
-				var ex = func.Body;
-
-				if (ex is UnaryExpression)
-					ex = ((UnaryExpression)func.Body).Operand;
-
-				return ex is MemberExpression?
-					((MemberExpression)    ex).Member:
-					((MethodCallExpression)ex).Method;
-			}
-
-			static ISqlExpression MakeFunc(ISqlProvider sqlProvider, string name, params ISqlExpression[] parameters)
-			{
-				return sqlProvider.ConvertExpression(new SqlFunction(name, parameters));
-			}
-
-			public  delegate ISqlExpression MemberMaker (ISqlProvider sqlProvider, params ISqlExpression[] exprs);
-			private delegate ISqlExpression MemberMaker1(ISqlProvider sqlProvider, ISqlExpression o);
-			private delegate ISqlExpression MemberMaker2(ISqlProvider sqlProvider, ISqlExpression o, ISqlExpression a);
-			private delegate ISqlExpression MemberMaker3(ISqlProvider sqlProvider, ISqlExpression o, ISqlExpression a, ISqlExpression b);
-			private delegate ISqlExpression MemberMaker4(ISqlProvider sqlProvider, ISqlExpression o, ISqlExpression a, ISqlExpression b, ISqlExpression c);
-
-			static readonly MemberMaker1 _length       = (p,s)     => MakeFunc(p, "Length",    s);
-			static readonly MemberMaker2 _charIndex1   = (p,s,a)   => MakeFunc(p, "CharIndex", a, s);
-			static readonly MemberMaker3 _charIndex2   = (p,s,a,b) => MakeFunc(p, "CharIndex", a, s, b);
-			static readonly MemberMaker3 _substring    = (p,s,a,b) => MakeFunc(p, "Substring", s, a, b);
-			static readonly MemberMaker1 _reverse      = (p,s)     => MakeFunc(p, "Reverse",   s);
-
-			static readonly MemberMaker2 _indexOf1     = (p,s,a) =>
-				MakeFunc(p, "CASE",
-					Condition
-						.Expr(_length(p, a)).Equal.Value(0).ToExpr(), Value(0),
-					Dec(_charIndex1(p, s, a))
-				);
-
-			static readonly MemberMaker3 _indexOf2     = (p,s,a,b) =>
-				MakeFunc(p, "CASE",
-					Condition
-						.Expr(_length(p, a)).Equal.Value(0)
-						.And
-						.Expr(_length(p, s)).GreaterOrEqual.Expr(Inc(b)).ToExpr(), b,
-					Dec(_charIndex2(p, s, a, Inc(b)))
-				);
-
-			static readonly MemberMaker4 _indexOf3     = (p,s,a,b,c) =>
-				MakeFunc(p, "CASE",
-					Condition
-						.Expr(_length(p, a)).Equal.Value(0)
-						.And
-						.Expr(_length(p, s)).GreaterOrEqual.Expr(Inc(b)).ToExpr(), b,
-					Dec(_charIndex2(p, _substring(p, s, Value(1), Add(b, c)), a, Inc(b)))
-				);
-
-			static readonly MemberMaker  _lastIndexOf1 = (s,p) =>
-				MakeFunc(s, "CASE",
-					Condition.Expr(_length(s, p[1])).Equal.Value(0).ToExpr(),
-						Dec(_length(s, p[0])),
-					Condition.Expr(_charIndex1(s, p[1], p[0])).Equal.Value(0).ToExpr(),
-						Value(-1),
-					Inc(Sub(_length(s, p[0]), Add(_charIndex1(s, _reverse(s, p[0]), _reverse(s, p[1])), _length(s, p[1]))))
-				);
-
-			static readonly Dictionary<MemberInfo,MemberMaker> _members = new Dictionary<MemberInfo,MemberMaker>
-			{
-				{ Function<string>(s => s.Length                ), (s,p) => _length    (s, p[0])                       },
-				{ Function<string>(s => s.CharIndex  (""       )), (s,p) => _charIndex1(s, p[0], p[1])                 },
-				{ Function<string>(s => s.CharIndex  ("",  0   )), (s,p) => _charIndex2(s, p[0], p[1],     p[2])       },
-				{ Function<string>(s => s.IndexOf    (""       )), (s,p) => _indexOf1  (s, p[0], p[1])                 },
-				{ Function<string>(s => s.IndexOf    ("",  0   )), (s,p) => _indexOf2  (s, p[0], p[1],     p[2])       },
-				{ Function<string>(s => s.IndexOf    ("",  0, 0)), (s,p) => _indexOf3  (s, p[0], p[1],     p[2], p[3]) },
-				{ Function<string>(s => s.IndexOf    (' '      )), (s,p) => _indexOf1  (s, p[0], p[1])                 },
-				{ Function<string>(s => s.IndexOf    (' ', 0   )), (s,p) => _indexOf2  (s, p[0], p[1],     p[2])       },
-				{ Function<string>(s => s.IndexOf    (' ', 0, 0)), (s,p) => _indexOf3  (s, p[0], p[1],     p[2], p[3]) },
-				{ Function<string>(s => s.LastIndexOf(""       )), _lastIndexOf1 },
-				{ Function<string>(s => s.LastIndexOf(' '      )), _lastIndexOf1 },
-				{ Function<string>(s => s.Substring  (0,   0   )), (s,p) => _substring(s, p[0], Inc(p[1]), p[2])  },
-				{ Function<string>(s => s.Substring  (0        )), (s,p) => _substring(s, p[0], Inc(p[1]), Sub(_length(s, p[0]), p[1])) },
-				{ Function<string>(s => s.Reverse    (         )), (s,p) => _reverse  (s, p[0])                        },
-			};
-
-			static SqlBuilder.SearchCondition Condition { get { return new SqlBuilder.SearchCondition(); } }
-			static ISqlExpression Value(object o) { return new SqlValue(o); }
-
-			static ISqlExpression Inc(ISqlExpression expr)                        { return BasicSqlProvider.Add(expr,  1);     }
-			static ISqlExpression Dec(ISqlExpression expr)                        { return BasicSqlProvider.Sub(expr,  1);     }
-			static ISqlExpression Add(ISqlExpression expr1, ISqlExpression expr2) { return BasicSqlProvider.Add(expr1, expr2); }
-			//static ISqlExpression Add(ISqlExpression expr1, int value)            { return BasicSqlProvider.Add(expr1, value); }
-			static ISqlExpression Sub(ISqlExpression expr1, ISqlExpression expr2) { return BasicSqlProvider.Sub(expr1, expr2); }
-			//static ISqlExpression Sub(ISqlExpression expr1, int value)            { return BasicSqlProvider.Sub(expr1, value); }
-			//static ISqlExpression Mul(ISqlExpression expr1, ISqlExpression expr2) { return BasicSqlProvider.Mul(expr1, expr2); }
-			//static ISqlExpression Mul(ISqlExpression expr1, int value)            { return BasicSqlProvider.Mul(expr1, value); }
 		}
 
 		static bool CanBeConstant(ParseInfo expr)
