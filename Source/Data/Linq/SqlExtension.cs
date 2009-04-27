@@ -43,7 +43,12 @@ namespace BLToolkit.Data.Linq
 
 		public static string Left(this string str, int length)
 		{
-			return str.Substring(1, length);
+			return str == null || str.Length < length? null: str.Substring(1, length);
+		}
+
+		public static string Right(this string str, int length)
+		{
+			return str == null || str.Length < length? null: str.Substring(str.Length - length);
 		}
 	}
 }

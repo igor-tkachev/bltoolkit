@@ -27,6 +27,8 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		public override ISqlExpression ConvertExpression(ISqlExpression expr)
 		{
+			expr = base.ConvertExpression(expr);
+
 			if (expr is SqlBinaryExpression)
 			{
 				SqlBinaryExpression be = (SqlBinaryExpression)expr;
@@ -57,7 +59,8 @@ namespace BLToolkit.Data.Sql.SqlProvider
 				{
 					case "Coalesce"  : return new SqlFunction("Nvl",    func.Parameters);
 					case "Substring" : return new SqlFunction("Substr", func.Parameters);
-					case "Left"      : return new SqlFunction("Substr", func.Parameters[0], new SqlValue(1), func.Parameters[1]);
+					case "Left"      : return BuildComplexLeft (func);
+					case "Right"     : return BuildComplexRight(func);
 					case "CharIndex" :
 						return func.Parameters.Length == 2?
 							new SqlFunction("InStr", func.Parameters[1], func.Parameters[0]):
@@ -65,7 +68,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 				}
 			}
 
-			return base.ConvertExpression(expr);
+			return expr;
 		}
 	}
 }

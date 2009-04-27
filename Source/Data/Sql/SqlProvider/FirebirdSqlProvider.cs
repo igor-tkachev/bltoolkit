@@ -27,6 +27,8 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		public override ISqlExpression ConvertExpression(ISqlExpression expr)
 		{
+			expr = base.ConvertExpression(expr);
+
 			if (expr is SqlBinaryExpression)
 			{
 				SqlBinaryExpression be = (SqlBinaryExpression)expr;
@@ -51,7 +53,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 				}
 			}
 
-			return base.ConvertExpression(expr);
+			return expr;
 		}
 	}
 }

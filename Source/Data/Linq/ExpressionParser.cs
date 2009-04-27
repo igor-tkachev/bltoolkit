@@ -606,16 +606,16 @@ namespace BLToolkit.Data.Linq
 						switch (parseInfo.NodeType)
 						{
 							case ExpressionType.Add            :
-							case ExpressionType.AddChecked     : return Convert(BasicSqlProvider.Add(l, r, t));
+							case ExpressionType.AddChecked     : return Convert(new SqlBinaryExpression(l, "+", r, t, Precedence.Additive));
 							case ExpressionType.And            : return Convert(new SqlBinaryExpression(l, "&", r, t, Precedence.Bitwise));
 							case ExpressionType.Divide         : return Convert(new SqlBinaryExpression(l, "/", r, t, Precedence.Multiplicative));
 							case ExpressionType.ExclusiveOr    : return Convert(new SqlBinaryExpression(l, "^", r, t, Precedence.Bitwise));
 							case ExpressionType.Modulo         : return Convert(new SqlBinaryExpression(l, "%", r, t, Precedence.Multiplicative));
-							case ExpressionType.Multiply       : return Convert(BasicSqlProvider.Mul(l, r, t));
+							case ExpressionType.Multiply       : return Convert(new SqlBinaryExpression(l, "*", r, t, Precedence.Multiplicative));
 							case ExpressionType.Or             : return Convert(new SqlBinaryExpression(l, "|", r, t, Precedence.Bitwise));
 							case ExpressionType.Power          : return Convert(new SqlFunction("Power", l, r));
 							case ExpressionType.Subtract       :
-							case ExpressionType.SubtractChecked: return Convert(BasicSqlProvider.Sub(l, r, t));
+							case ExpressionType.SubtractChecked: return Convert(new SqlBinaryExpression(l, "-", r, t, Precedence.Subtraction));
 							case ExpressionType.Coalesce       :
 								{
 									if (r is SqlFunction)

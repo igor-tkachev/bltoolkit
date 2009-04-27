@@ -13,6 +13,8 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		public override ISqlExpression ConvertExpression(ISqlExpression expr)
 		{
+			expr = base.ConvertExpression(expr);
+
 			if (expr is SqlBinaryExpression)
 			{
 				SqlBinaryExpression be = (SqlBinaryExpression)expr;
@@ -54,8 +56,8 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 						throw new SqlException("CASE statement is not supported by the {0}.", GetType().Name);
 
-					case "Length"   : return new SqlFunction("Len",        func.Parameters);
-					case "Substring": return new SqlFunction("Mid",        func.Parameters);
+					case "Length"   : return new SqlFunction("Len", func.Parameters);
+					case "Substring": return new SqlFunction("Mid", func.Parameters);
 					case "CharIndex":
 						return func.Parameters.Length == 2?
 							new SqlFunction("InStr", new SqlValue(1),    func.Parameters[1], func.Parameters[0], new SqlValue(1)):
@@ -63,7 +65,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 				}
 			}
 
-			return base.ConvertExpression(expr);
+			return expr;
 		}
 
 		public override ISqlPredicate ConvertPredicate(ISqlPredicate predicate)

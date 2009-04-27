@@ -12,6 +12,8 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		public override ISqlExpression ConvertExpression(ISqlExpression expr)
 		{
+			expr = base.ConvertExpression(expr);
+
 			if (expr is SqlFunction)
 			{
 				SqlFunction func = (SqlFunction) expr;
@@ -22,18 +24,18 @@ namespace BLToolkit.Data.Sql.SqlProvider
 					case "CharIndex":
 						if (func.Parameters.Length == 3)
 							return Add<int>(
-								new SqlFunction("CharIndex",
+								ConvertExpression(new SqlFunction("CharIndex",
 									func.Parameters[0],
-									new SqlFunction("Substring",
+									ConvertExpression(new SqlFunction("Substring",
 										func.Parameters[1],
-										func.Parameters[2], new SqlFunction("Len", func.Parameters[1]))),
+										func.Parameters[2], new SqlFunction("Len", func.Parameters[1]))))),
 								Sub(func.Parameters[2], 1));
 
 						break;
 				}
 			}
 
-			return base.ConvertExpression(expr);
+			return expr;
 		}
 	}
 }

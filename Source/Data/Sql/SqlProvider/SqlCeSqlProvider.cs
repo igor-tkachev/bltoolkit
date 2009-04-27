@@ -12,18 +12,21 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		public override ISqlExpression ConvertExpression(ISqlExpression expr)
 		{
+			expr = base.ConvertExpression(expr);
+
 			if (expr is SqlFunction)
 			{
 				SqlFunction func = (SqlFunction) expr;
 
 				switch (func.Name)
 				{
-					case "Length": return new SqlFunction("Len",       func.Parameters);
-					case "Left"  : return new SqlFunction("Substring", func.Parameters[0], new SqlValue(1), func.Parameters[1]);
+					case "Length": return new SqlFunction("Len", func.Parameters);
+					case "Left"  : return BuildComplexLeft (func);
+					case "Right" : return BuildComplexRight(func);
 				}
 			}
 
-			return base.ConvertExpression(expr);
+			return expr;
 		}
 	}
 }

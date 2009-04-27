@@ -552,6 +552,23 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		#endregion
 
+		#region Alternatives
+
+		protected ISqlExpression BuildComplexLeft(SqlFunction func)
+		{
+			return ConvertExpression(new SqlFunction("Substring", func.Parameters[0], new SqlValue(1), func.Parameters[1]));
+		}
+
+		protected ISqlExpression BuildComplexRight(SqlFunction func)
+		{
+			return ConvertExpression(new SqlFunction("Substring",
+				func.Parameters[0],
+				Add(Sub<int>(ConvertExpression(new SqlFunction("Length", func.Parameters[0])), func.Parameters[1]), 1),
+				func.Parameters[1]));
+		}
+
+		#endregion
+
 		#region Helpers
 
 		static bool Wrap(int precedence, int parentPrecedence)
@@ -559,7 +576,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			return
 				precedence == 0 ||
 				precedence < parentPrecedence ||
-				(precedence == parentPrecedence && precedence == Precedence.Subtraction); 
+				(precedence == parentPrecedence && parentPrecedence == Precedence.Subtraction); 
 		}
 
 		static string GetTableAlias(ISqlTableSource table)
@@ -595,100 +612,47 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			return sb;
 		}
 
-		public static ISqlExpression Add(ISqlExpression expr1, ISqlExpression expr2, Type type)
+		public ISqlExpression Add(ISqlExpression expr1, ISqlExpression expr2, Type type)
 		{
-			if (expr1 is SqlValue)
-			{
-				SqlValue v1 = (SqlValue)expr1;
-				if (v1.Value is int && (int)v1.Value == 0) return expr2;
-			}
-
-			if (expr2 is SqlValue)
-			{
-				SqlValue v2 = (SqlValue)expr2;
-				if (v2.Value is int && (int)v2.Value == 0) return expr1;
-			}
-
-			if (expr1 is SqlValue && expr2 is SqlValue)
-			{
-				SqlValue v1 = (SqlValue)expr1;
-				SqlValue v2 = (SqlValue)expr2;
-				if (v1.Value is int && v2.Value is int)    return new SqlValue((int)v1.Value + (int)v2.Value);
-			}
-
-			return new SqlBinaryExpression(expr1, "+", expr2, type, Precedence.Additive);
+			return ConvertExpression(new SqlBinaryExpression(expr1, "+", expr2, type, Precedence.Additive));
 		}
 
-		public static ISqlExpression Add<T>(ISqlExpression expr1, ISqlExpression expr2)
+		public ISqlExpression Add<T>(ISqlExpression expr1, ISqlExpression expr2)
 		{
 			return Add(expr1, expr2, typeof(T));
 		}
 
-		public static ISqlExpression Add(ISqlExpression expr1, int value)
+		public ISqlExpression Add(ISqlExpression expr1, int value)
 		{
 			return Add<int>(expr1, new SqlValue(value));
 		}
 
-		public static ISqlExpression Sub(ISqlExpression expr1, ISqlExpression expr2, Type type)
+		public ISqlExpression Sub(ISqlExpression expr1, ISqlExpression expr2, Type type)
 		{
-			if (expr2 is SqlValue)
-			{
-				SqlValue v2 = (SqlValue)expr2;
-				if (v2.Value is int && (int)v2.Value == 0) return expr1;
-			}
-
-			if (expr1 is SqlValue && expr2 is SqlValue)
-			{
-				SqlValue v1 = (SqlValue)expr1;
-				SqlValue v2 = (SqlValue)expr2;
-				if (v1.Value is int && v2.Value is int) return new SqlValue((int)v1.Value - (int)v2.Value);
-			}
-
-			return new SqlBinaryExpression(expr1, "-", expr2, type, Precedence.Subtraction);
+			return ConvertExpression(new SqlBinaryExpression(expr1, "-", expr2, type, Precedence.Subtraction));
 		}
 
-		public static ISqlExpression Sub<T>(ISqlExpression expr1, ISqlExpression expr2)
+		public ISqlExpression Sub<T>(ISqlExpression expr1, ISqlExpression expr2)
 		{
 			return Sub(expr1, expr2, typeof(T));
 		}
 
-		public static ISqlExpression Sub(ISqlExpression expr1, int value)
+		public ISqlExpression Sub(ISqlExpression expr1, int value)
 		{
 			return Sub<int>(expr1, new SqlValue(value));
 		}
 
-		public static ISqlExpression Mul(ISqlExpression expr1, ISqlExpression expr2, Type type)
+		public ISqlExpression Mul(ISqlExpression expr1, ISqlExpression expr2, Type type)
 		{
-			if (expr1 is SqlValue)
-			{
-				SqlValue v1 = (SqlValue)expr1;
-				if (v1.Value is int && (int)v1.Value == 1) return expr2;
-				if (v1.Value is int && (int)v1.Value == 0) return new SqlValue(0);
-			}
-
-			if (expr2 is SqlValue)
-			{
-				SqlValue v2 = (SqlValue)expr2;
-				if (v2.Value is int && (int)v2.Value == 1) return expr1;
-				if (v2.Value is int && (int)v2.Value == 0) return new SqlValue(0);
-			}
-
-			if (expr1 is SqlValue && expr2 is SqlValue)
-			{
-				SqlValue v1 = (SqlValue)expr1;
-				SqlValue v2 = (SqlValue)expr2;
-				if (v1.Value is int && v2.Value is int) return new SqlValue((int)v1.Value * (int)v2.Value);
-			}
-
-			return new SqlBinaryExpression(expr1, "*", expr2, type, Precedence.Subtraction);
+			return ConvertExpression(new SqlBinaryExpression(expr1, "*", expr2, type, Precedence.Subtraction));
 		}
 
-		public static ISqlExpression Mul<T>(ISqlExpression expr1, ISqlExpression expr2)
+		public ISqlExpression Mul<T>(ISqlExpression expr1, ISqlExpression expr2)
 		{
 			return Mul(expr1, expr2, typeof(T));
 		}
 
-		public static ISqlExpression Mul(ISqlExpression expr1, int value)
+		public ISqlExpression Mul(ISqlExpression expr1, int value)
 		{
 			return Mul<int>(expr1, new SqlValue(value));
 		}
@@ -699,6 +663,111 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		public virtual ISqlExpression ConvertExpression(ISqlExpression expression)
 		{
+			if (expression is SqlBinaryExpression)
+			{
+				SqlBinaryExpression be = (SqlBinaryExpression)expression;
+
+				switch (be.Operation)
+				{
+					case "+":
+						if (be.Expr1 is SqlValue)
+						{
+							SqlValue v1 = (SqlValue) be.Expr1;
+							if (v1.Value is int && (int)v1.Value == 0) return be.Expr2;
+						}
+
+						if (be.Expr2 is SqlValue)
+						{
+							SqlValue v2 = (SqlValue) be.Expr2;
+							if (v2.Value is int && (int) v2.Value == 0) return be.Expr1;
+						}
+
+						if (be.Expr1 is SqlValue && be.Expr2 is SqlValue)
+						{
+							SqlValue v1 = (SqlValue)be.Expr1;
+							SqlValue v2 = (SqlValue)be.Expr2;
+							if (v1.Value is int && v2.Value is int) return new SqlValue((int)v1.Value + (int)v2.Value);
+						}
+
+						break;
+
+					case "-":
+						if (be.Expr2 is SqlValue)
+						{
+							SqlValue v2 = (SqlValue) be.Expr2;
+							if (v2.Value is int && (int) v2.Value == 0) return be.Expr1;
+						}
+
+						if (be.Expr1 is SqlValue && be.Expr2 is SqlValue)
+						{
+							SqlValue v1 = (SqlValue)be.Expr1;
+							SqlValue v2 = (SqlValue)be.Expr2;
+							if (v1.Value is int && v2.Value is int) return new SqlValue((int)v1.Value - (int)v2.Value);
+						}
+
+						break;
+
+					case "*":
+						if (be.Expr1 is SqlValue)
+						{
+							SqlValue v1 = (SqlValue)be.Expr1;
+							if (v1.Value is int && (int)v1.Value == 1) return be.Expr2;
+							if (v1.Value is int && (int)v1.Value == 0) return new SqlValue(0);
+						}
+
+						if (be.Expr2 is SqlValue)
+						{
+							SqlValue v2 = (SqlValue)be.Expr2;
+							if (v2.Value is int && (int)v2.Value == 1) return be.Expr1;
+							if (v2.Value is int && (int)v2.Value == 0) return new SqlValue(0);
+						}
+
+						if (be.Expr1 is SqlValue && be.Expr2 is SqlValue)
+						{
+							SqlValue v1 = (SqlValue)be.Expr1;
+							SqlValue v2 = (SqlValue)be.Expr2;
+							if (v1.Value is int && v2.Value is int) return new SqlValue((int)v1.Value * (int)v2.Value);
+						}
+
+						break;
+				}
+			}
+			else if (expression is SqlFunction)
+			{
+				SqlFunction func = (SqlFunction)expression;
+
+				switch (func.Name)
+				{
+					case "Length":
+						if (func.Parameters[0] is SqlValue)
+						{
+							SqlValue v = (SqlValue)func.Parameters[0];
+
+							if (v.Value is string)
+								return new SqlValue(v.Value.ToString().Length);
+						}
+
+						break;
+
+					case "Reverse":
+						if (func.Parameters[0] is SqlValue)
+						{
+							SqlValue v = (SqlValue)func.Parameters[0];
+
+							if (v.Value is string)
+							{
+								string str   = v.Value.ToString();
+								char[] chars = str.ToCharArray();
+
+								Array.Reverse(chars);
+								return new SqlValue(new string(chars));
+							}
+						}
+
+						break;
+				}
+			}
+
 			return expression;
 		}
 

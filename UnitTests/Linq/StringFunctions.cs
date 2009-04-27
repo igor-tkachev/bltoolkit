@@ -183,7 +183,18 @@ namespace Data.Linq
 			ForEachProvider(_lastIndexExcludeList, db => 
 			{
 				var q = from p in db.Person where p.ID == 1 select new { p.ID, FirstName = "123" + p.FirstName + "012345" };
-				q = q.Where(p => p.FirstName.LastIndexOf("123", 5) == 7);
+				q = q.Where(p => p.FirstName.LastIndexOf("123", 5) == 8);
+				Assert.AreEqual(1, q.ToList().First().ID);
+			});
+		}
+
+		[Test]
+		public void LastIndexOf3()
+		{
+			ForEachProvider(_lastIndexExcludeList, db => 
+			{
+				var q = from p in db.Person where p.ID == 1 select new { p.ID, FirstName = p.FirstName + "012345" };
+				q = q.Where(p => p.FirstName.LastIndexOf("123", 3, 10) == 5);
 				Assert.AreEqual(1, q.ToList().First().ID);
 			});
 		}
@@ -214,6 +225,16 @@ namespace Data.Linq
 			ForEachProvider(db => 
 			{
 				var q = from p in db.Person where p.FirstName.Left(2) == "Jo" && p.ID == 1 select p;
+				Assert.AreEqual(1, q.ToList().First().ID);
+			});
+		}
+
+		[Test]
+		public void Right()
+		{
+			ForEachProvider(db => 
+			{
+				var q = from p in db.Person where p.FirstName.Right(3) == "ohn" && p.ID == 1 select p;
 				Assert.AreEqual(1, q.ToList().First().ID);
 			});
 		}
