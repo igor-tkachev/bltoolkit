@@ -3416,7 +3416,7 @@ namespace BLToolkit.Mapping
 					if (rs.Relations == null)
 						continue;
 
-					ObjectMapper masterMapper = rs.ObjectMapper;
+					ObjectMapper masterMapper = GetObjectMapper(rs.ObjectType);
 
 					foreach (MapRelation r in rs.Relations)
 					{
@@ -3447,11 +3447,12 @@ namespace BLToolkit.Mapping
 
 						// Map.
 						//
-						MapResultSet slave = r.SlaveResultSet;
+						MapResultSet slave       = r.SlaveResultSet;
+						ObjectMapper slaveMapper = GetObjectMapper(r.SlaveResultSet.ObjectType);
 
 						foreach (object o in slave.List)
 						{
-							object key = r.SlaveIndex.GetValueOrIndex(slave.ObjectMapper, o);
+							object key = r.SlaveIndex.GetValueOrIndex(slaveMapper, o);
 
 							ArrayList masterList = (ArrayList)rs.Hashtable[key];
 							if (masterList == null)

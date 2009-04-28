@@ -1,0 +1,39 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Types
+	xmlns   = "urn:schemas-bltoolkit-net:typeext"
+	xmlns:m = "urn:schemas-bltoolkit-net:mapping">
+
+	<Type Name="HowTo.Data.ComplexMapping+ParentEx">
+		<Member Name="ID" MapField="ParentID" PrimaryKey="1"/>
+		<Member Name="Children">
+			<Relation DestinationType = "HowTo.Data.ComplexMapping+ChildEx, HowTo">
+			</Relation>
+		</Member>
+	</Type>
+
+	<Type Name="HowTo.Data.ComplexMapping+ChildEx">
+		<Member Name ="ID" MapField="ChildID"/>
+		<Member Name ="Parent">
+			<Relation></Relation>
+		</Member>
+		<m:MapField OrigName="Parent.ID" MapName="ParentID"/>
+		<Member Name ="Grandchildren">
+			<Relation DestinationType="HowTo.Data.ComplexMapping+GrandchildEx">
+				<SlaveIndex Name="ChildID"/>
+				<MasterIndex Name="ChildID"/>
+			</Relation>
+		</Member>
+	</Type>
+
+	<Type Name="HowTo.Data.ComplexMapping+GrandchildEx">
+		<Member Name="ID" MapField="GrandchildId" PrimaryKey="1"/>
+		<m:MapField OrigName="Child.ID" MapName="ChildID"/>
+		<Member Name="Child">
+			<Relation>
+				<SlaveIndex  Name="ChildID"/>
+				<MasterIndex Name="ChildID"/>
+			</Relation>
+		</Member>
+	</Type>
+
+</Types>

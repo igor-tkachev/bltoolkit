@@ -4,6 +4,8 @@ using NUnit.Framework;
 
 using BLToolkit.Mapping;
 using BLToolkit.Reflection.Extension;
+using System.Collections.Generic;
+using System.Xml;
 
 namespace Reflection.Extension
 {
@@ -38,6 +40,16 @@ namespace Reflection.Extension
         <MapValue OrigValue='1' OrigValue-Type='System.Double' Value='One' Type='System.String' />
         <MapValue OrigValue='2' Value='Two' Type='System.String' />
         <DefaultValue Value='54' />
+    </Type>
+    <Type Name='TestType'>
+        <Member Name='SomeRelation'>
+            <Relation>
+                <MasterIndex Name='MasterIndex1'/>
+                <MasterIndex Name='MasterIndex2'/>
+                <SlaveIndex  Name='SlaveIndex1'/>
+                <SlaveIndex  Name='SlaveIndex2'/>
+           </Relation>
+        </Member>
     </Type>
 </Types>");
 			}
@@ -86,6 +98,27 @@ namespace Reflection.Extension
 			Assert.AreEqual( 2,                     d.Field3);
 			Assert.AreEqual(54,                     d.Field4);
 			Assert.AreEqual(TriState.NotApplicable, Map.ValueToEnum("1234", typeof(TriState)));
+		}
+
+		public class TestType
+		{
+			public object SomeRelation;
+		}
+
+		[Test]
+		public void MultiKeyRelationTest()
+		{
+			MappingSchema ms = new MappingSchema();
+			ms.Extensions = TypeExtension.GetExtensions("Mapping.xml");
+
+			bool isSet = false;
+
+			List<MapRelationBase> relations = ms.MetadataProvider.GetRelations(ms, ms.Extensions, typeof(TestType), null, out isSet);
+
+			Assert.IsTrue(isSet);
+			Assert.AreEqual(1, relations.Count);
+			Assert.AreEqual(2, relations[0].MasterIndex.Fields.Length);
+			Assert.AreEqual(2, relations[0].SlaveIndex .Fields.Length);
 		}
 
 		[TearDown]

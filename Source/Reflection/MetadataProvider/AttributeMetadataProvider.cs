@@ -516,23 +516,10 @@ namespace BLToolkit.Reflection.MetadataProvider
 
 				if (slaveIndex == null)
 				{
-					MetadataProviderBase mdp = schema.MetadataProvider;
-					List<string> keys = new List<string>();
+					TypeAccessor  accessor = toMany ? masterAccessor : slaveAccessor;
+					TypeExtension tex      = TypeExtension.GetTypeExtension(accessor.Type, typeExt);
 
-					TypeAccessor accessor = toMany ? masterAccessor : slaveAccessor;
-					TypeExtension tex = TypeExtension.GetTypeExtension(accessor.Type, typeExt);
-					foreach (MemberAccessor sma in accessor)
-					{
-						bool isSetFlag;
-
-						mdp.GetPrimaryKeyOrder(accessor.Type, tex, sma, out isSetFlag);
-
-						if (isSetFlag)
-						{
-							string name = mdp.GetFieldName(tex, sma, out isSetFlag);
-							keys.Add(name);
-						}
-					}
+					List<string> keys = GetPrimaryKeyFields(schema, accessor, tex);
 
 					if (keys.Count > 0)
 						slaveIndex = new MapIndex(keys.ToArray());

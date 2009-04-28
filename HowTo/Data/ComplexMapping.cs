@@ -6,6 +6,7 @@ using NUnit.Framework;
 using BLToolkit.Mapping;
 using BLToolkit.Data;
 using BLToolkit.DataAccess;
+using BLToolkit.Reflection.Extension;
 
 namespace HowTo.Data
 {
@@ -140,6 +141,68 @@ namespace HowTo.Data
 					Assert.IsNotEmpty(child.Grandchildren);
 
 					foreach (Grandchild grandchild in child.Grandchildren)
+					{
+						Assert.AreEqual(child, grandchild.Child);
+						Assert.AreEqual(parent, grandchild.Child.Parent);
+					}
+				}
+			}
+		}
+
+		public class ParentEx
+		{
+			public int           ID;
+			public List<ChildEx> Children = new List<ChildEx>();
+		}
+
+		public class ChildEx
+		{
+			public int                ID;
+			public ParentEx           Parent        = new ParentEx();
+			public List<GrandchildEx> Grandchildren = new List<GrandchildEx>();
+		}
+
+		public class GrandchildEx
+		{
+			public int     ID;
+			public ChildEx Child = new ChildEx();
+		}
+		
+		[Test]
+		public void Test3()
+		{
+			List<ParentEx> parents = new List<ParentEx>();
+			/*[a]*/MapResultSet/*[/a]*/[] sets = new MapResultSet[3];
+
+			sets[0] = new MapResultSet(typeof(ParentEx), parents);
+			sets[1] = new MapResultSet(typeof(ChildEx));
+			sets[2] = new MapResultSet(typeof(GrandchildEx));
+
+			MappingSchema ms = new MappingSchema();
+			ms.Extensions = TypeExtension.GetExtensions("RelationExtension.xml");
+
+			using (DbManager db = new DbManager())
+			{
+				db.MappingSchema = ms;
+
+				db
+					.SetCommand(TestQuery)
+					./*[a]*/ExecuteResultSet/*[/a]*/(sets);
+			}
+
+			Assert.IsNotEmpty(parents);
+
+			foreach (ParentEx parent in parents)
+			{
+				Assert.IsNotNull(parent);
+				Assert.IsNotEmpty(parent.Children);
+
+				foreach (ChildEx child in parent.Children)
+				{
+					Assert.AreEqual(parent, child.Parent);
+					Assert.IsNotEmpty(child.Grandchildren);
+
+					foreach (GrandchildEx grandchild in child.Grandchildren)
 					{
 						Assert.AreEqual(child, grandchild.Child);
 						Assert.AreEqual(parent, grandchild.Child.Parent);

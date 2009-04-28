@@ -26,7 +26,7 @@ namespace BLToolkit.Mapping
 		}
 
 		public TextDataWriter(Stream stream, MappingSchema mappingSchema, Type type)
-			: this(stream, mappingSchema, Map.GetObjectMapper(type).FieldNames)
+			: this(stream, mappingSchema, mappingSchema.GetObjectMapper(type).FieldNames)
 		{
 		}
 
@@ -55,7 +55,7 @@ namespace BLToolkit.Mapping
 		}
 
 		public TextDataWriter(TextWriter writer, MappingSchema mappingSchema, Type type)
-			: this(writer, mappingSchema, Map.GetObjectMapper(type).FieldNames)
+			: this(writer, mappingSchema, mappingSchema.GetObjectMapper(type).FieldNames)
 		{
 		}
 

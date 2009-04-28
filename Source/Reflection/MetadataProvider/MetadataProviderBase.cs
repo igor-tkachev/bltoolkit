@@ -185,6 +185,27 @@ namespace BLToolkit.Reflection.MetadataProvider
 			return new List<MapRelationBase>();
 		}
 
+		protected static List<string> GetPrimaryKeyFields(MappingSchema schema, TypeAccessor ta, TypeExtension tex)
+		{
+			MetadataProviderBase mdp = schema.MetadataProvider;
+			List<string> keys = new List<string>();
+
+			foreach (MemberAccessor sma in ta)
+			{
+				bool isSetFlag;
+
+				mdp.GetPrimaryKeyOrder(ta.Type, tex, sma, out isSetFlag);
+
+				if (isSetFlag)
+				{
+					string name = mdp.GetFieldName(tex, sma, out isSetFlag);
+					keys.Add(name);
+				}
+			}
+
+			return keys;
+		}
+
 		#endregion
 
 		#region Static Members

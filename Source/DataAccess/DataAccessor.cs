@@ -324,35 +324,39 @@ namespace BLToolkit.DataAccess
 
 		protected IEnumerable<T> ExecuteEnumerable<T>(DbManager db, Type objectType, bool disposeDbManager)
 		{
+			MappingSchema ms = db.MappingSchema;
+
 			if (disposeDbManager)
 			{
 				using (db)
 				using (IDataReader rd = db.ExecuteReader())
 					while (rd.Read())
-						yield return (T)Map.DataReaderToObject(rd, objectType);
+						yield return (T)ms.MapDataReaderToObject(rd, objectType);
 			}
 			else
 			{
 				using (IDataReader rd = db.ExecuteReader())
 					while (rd.Read())
-						yield return (T)Map.DataReaderToObject(rd, objectType);
+						yield return (T)ms.MapDataReaderToObject(rd, objectType);
 			}
 		}
 
 		protected IEnumerable ExecuteEnumerable(DbManager db, Type objectType, bool disposeDbManager)
 		{
+			MappingSchema ms = db.MappingSchema;
+
 			if (disposeDbManager)
 			{
 				using (db)
 				using (IDataReader rd = db.ExecuteReader())
 					while (rd.Read())
-						yield return Map.DataReaderToObject(rd, objectType);
+						yield return ms.MapDataReaderToObject(rd, objectType);
 			}
 			else
 			{
 				using (IDataReader rd = db.ExecuteReader())
 					while (rd.Read())
-						yield return Map.DataReaderToObject(rd, objectType);
+						yield return ms.MapDataReaderToObject(rd, objectType);
 			}
 		}
 

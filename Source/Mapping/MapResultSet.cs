@@ -8,15 +8,13 @@ namespace BLToolkit.Mapping
 	{
 		public MapResultSet(Type objectType)
 		{
-			_objectType   = objectType;
-			_objectMapper = Map.GetObjectMapper(objectType);
+			_objectType = objectType;
 		}
 
 		public MapResultSet(Type objectType, IList list)
 		{
-			_objectType   = objectType;
-			_objectMapper = Map.GetObjectMapper(objectType);
-			_list         = list;
+			_objectType = objectType;
+			_list       = list;
 		}
 
 		public MapResultSet(Type objectType, object[] parameters)
@@ -29,14 +27,13 @@ namespace BLToolkit.Mapping
 		{
 			_objectType = objectType;
 			_parameters = parameters;
-			_list         = list;
+			_list       = list;
 		}
 
 		internal MapResultSet(MapResultSet resultSet)
 		{
-			_objectType   = resultSet._objectType;
-			_parameters   = resultSet._parameters;
-			_objectMapper = resultSet._objectMapper;
+			_objectType = resultSet._objectType;
+			_parameters = resultSet._parameters;
 
 			if (resultSet._relationList != null)
 			{
@@ -49,12 +46,6 @@ namespace BLToolkit.Mapping
 		internal         Type  ObjectType
 		{
 			get { return _objectType; }
-		}
-
-		private readonly ObjectMapper _objectMapper;
-		internal         ObjectMapper  ObjectMapper
-		{
-			get { return _objectMapper;  }
 		}
 
 		private object[] _parameters;

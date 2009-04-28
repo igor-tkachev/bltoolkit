@@ -11,13 +11,17 @@ namespace BLToolkit.Reflection.Extension
 
 		public static class NodeName
 		{
-			public const string Type   = "Type";
-			public const string Member = "Member";
+			public const string Type        = "Type";
+			public const string Member      = "Member";
+			public const string Relation    = "Relation";
+			public const string MasterIndex = "MasterIndex";
+			public const string SlaveIndex  = "SlaveIndex";
 		}
 
 		public static class AttrName
 		{
-			public const string Name        = "Name";
+			public const string Name            = "Name";
+			public const string DestinationType = "DestinationType";
 		}
 
 		public static class ValueName

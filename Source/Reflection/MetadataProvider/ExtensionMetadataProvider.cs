@@ -319,5 +319,95 @@ namespace BLToolkit.Reflection.MetadataProvider
 		}
 
 		#endregion
+
+		#region GetRelations
+
+		public override List<MapRelationBase> GetRelations(MappingSchema schema, ExtensionList typeExt, Type master, Type slave, out bool isSet)
+		{
+			List<MapRelationBase> relations = new List<MapRelationBase>();
+			TypeExtension         ext       = typeExt != null ? typeExt[master] : TypeExtension.Null;
+
+			isSet = ext != TypeExtension.Null;
+
+			if (!isSet)
+				return relations;
+
+			TypeAccessor ta = TypeAccessor.GetAccessor(master);
+
+			foreach (MemberExtension mex in ext.Members)
+			{
+				AttributeExtensionCollection relationInfos = mex.Attributes[TypeExtension.NodeName.Relation];
+
+				if (relationInfos == AttributeExtensionCollection.Null)
+					continue;
+
+				string         destinationTypeName = relationInfos[0][TypeExtension.AttrName.DestinationType, string.Empty].ToString();
+				Type           destinationType     = slave;
+				MemberAccessor ma                  = ta[mex.Name];
+				bool           toMany              = TypeHelper.IsSameOrParent(typeof(IEnumerable), ma.Type);
+
+				if (destinationTypeName == string.Empty)
+				{
+					if (toMany)
+						throw new InvalidOperationException("Destination type should be set for enumerable relations: " + ma.Type.FullName + "." + ma.Name);
+
+					destinationType = ma.Type;
+				}
+				else
+				{
+					if (!destinationTypeName.Contains(","))
+						destinationTypeName += ", " + ta.OriginalType.Assembly.FullName;
+					
+					try
+					{
+						destinationType = Type.GetType(destinationTypeName, true);
+					}
+					catch (TypeLoadException ex)
+					{
+						throw new InvalidOperationException(
+							"Unable to load type by name: " + destinationTypeName
+							+ "\n may be assembly is not specefied, please see Type.GetType(string typeName) documentation",
+							ex);
+					}
+				}
+
+				if (slave != null && !TypeHelper.IsSameOrParent(slave, destinationType))
+					continue;
+
+				List<string> masterIndexFields = new List<string>();
+				List<string> slaveIndexFields  = new List<string>();
+
+				foreach (AttributeExtension ae in relationInfos[0].Attributes[TypeExtension.NodeName.MasterIndex])
+					masterIndexFields.Add(ae[TypeExtension.AttrName.Name].ToString());
+
+				foreach (AttributeExtension ae in relationInfos[0].Attributes[TypeExtension.NodeName.SlaveIndex])
+					slaveIndexFields.Add(ae[TypeExtension.AttrName.Name].ToString());
+
+
+				if (slaveIndexFields.Count == 0)
+				{
+					TypeAccessor  accessor = toMany ? ta : TypeAccessor.GetAccessor(destinationType);
+					TypeExtension tex      = TypeExtension.GetTypeExtension(accessor.Type, typeExt);
+
+					slaveIndexFields = GetPrimaryKeyFields(schema, accessor, tex);
+				}
+
+				if (slaveIndexFields.Count == 0)
+					throw new InvalidOperationException("Slave index is not set for relation: " + ma.Type.FullName + "." + ma.Name);
+
+				MapIndex slaveIndex  = new MapIndex(slaveIndexFields.ToArray());
+				MapIndex masterIndex = masterIndexFields.Count > 0 ? new MapIndex(masterIndexFields.ToArray()) : slaveIndex;
+
+				MapRelationBase mapRelation = new MapRelationBase(destinationType, slaveIndex, masterIndex, mex.Name);
+
+				relations.Add(mapRelation);
+
+			}
+
+			isSet = relations.Count > 0;
+			return relations;
+		}
+
+		#endregion
 	}
 }
