@@ -765,6 +765,51 @@ namespace BLToolkit.Data.Sql.SqlProvider
 						}
 
 						break;
+
+					case "CASE":
+						{
+							ISqlExpression[] parms = func.Parameters;
+
+							for (int i = 0; i < parms.Length; i += 2)
+							{
+								SqlValue value = parms[i] as SqlValue;
+
+								if (value != null)
+								{
+									if ((bool)value.Value == false)
+									{
+										ISqlExpression[] newParms = new ISqlExpression[parms.Length - 2];
+
+										if (i != 0)
+											Array.Copy(parms, 0, newParms, 0, i);
+
+										Array.Copy(parms, i + 2, newParms, i, parms.Length - i - 2);
+
+										parms = newParms;
+										i -= 2;
+									}
+									else
+									{
+										ISqlExpression[] newParms = new ISqlExpression[i + 1];
+
+										if (i != 0)
+											Array.Copy(parms, 0, newParms, 0, i);
+
+										newParms[i] = parms[i + 1];
+
+										parms = newParms;
+										break;
+									}
+								}
+							}
+
+							if (parms.Length == 1)
+								return parms[0];
+
+							return new SqlFunction(func.Name, func.Precedence, parms);
+						}
+
+						break;
 				}
 			}
 

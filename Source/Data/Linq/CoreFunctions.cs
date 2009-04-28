@@ -3,14 +3,14 @@ using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Reflection;
 
-using BLToolkit.Data.Sql;
-using BLToolkit.Data.Sql.SqlProvider;
-
 namespace BLToolkit.Data.Linq
 {
-	using IExpr = ISqlExpression;
+	using Sql;
+	using Sql.SqlProvider;
 
-	class Members : ReflectionHelper
+	using IExpr = Sql.ISqlExpression;
+
+	class CoreFunctions : ReflectionHelper
 	{
 		public static MemberMaker GetMember(MemberInfo mi)
 		{
@@ -18,7 +18,7 @@ namespace BLToolkit.Data.Linq
 			return _members.TryGetValue(mi, out maker) ? maker : null;
 		}
 
-		static MemberInfo Function<T1>(Expression<Func<T1,object>> func)
+		static MemberInfo Function<T>(Expression<Func<T,object>> func)
 		{
 			var ex = func.Body;
 
@@ -97,21 +97,23 @@ namespace BLToolkit.Data.Linq
 			{ Function<string>(s => s.Length                ), (s,p) => Length     (s, p[0])                        },
 			{ Function<string>(s => s.CharIndex  (""       )), (s,p) => CharIndex  (s, p[0], p[1])                  },
 			{ Function<string>(s => s.CharIndex  ("",  0   )), (s,p) => CharIndex  (s, p[0], p[1],      p[2])       },
-			{ Function<string>(s => s.IndexOf    (""       )), (s,p) => IndexOf    (s, p[0], p[1])                  },
-			{ Function<string>(s => s.IndexOf    ("",  0   )), (s,p) => IndexOf    (s, p[0], p[1],      p[2])       },
-			{ Function<string>(s => s.IndexOf    ("",  0, 0)), (s,p) => IndexOf    (s, p[0], p[1],      p[2], p[3]) },
-			{ Function<string>(s => s.IndexOf    (' '      )), (s,p) => IndexOf    (s, p[0], p[1])                  },
-			{ Function<string>(s => s.IndexOf    (' ', 0   )), (s,p) => IndexOf    (s, p[0], p[1],      p[2])       },
-			{ Function<string>(s => s.IndexOf    (' ', 0, 0)), (s,p) => IndexOf    (s, p[0], p[1],      p[2], p[3]) },
-			{ Function<string>(s => s.LastIndexOf(""       )), (s,p) => LastIndexOf(s, p[0], p[1])                  },
-			{ Function<string>(s => s.LastIndexOf(' '      )), (s,p) => LastIndexOf(s, p[0], p[1])                  },
-			{ Function<string>(s => s.LastIndexOf("",  0   )), (s,p) => LastIndexOf(s, p[0], p[1],      p[2])       },
-			{ Function<string>(s => s.LastIndexOf("",  0, 0)), (s,p) => LastIndexOf(s, p[0], p[1],      p[2], p[3]) },
+			{ Function<string>(s => s.CharIndex  (' '      )), (s,p) => CharIndex  (s, p[0], p[1])                  },
+			{ Function<string>(s => s.CharIndex  (' ', 0   )), (s,p) => CharIndex  (s, p[0], p[1],      p[2])       },
 			{ Function<string>(s => s.Left       (0        )), (s,p) => Left       (s, p[0], p[1])                  },
 			{ Function<string>(s => s.Right      (0        )), (s,p) => Right      (s, p[0], p[1])                  },
 			{ Function<string>(s => s.Substring  (0        )), (s,p) => Substring  (s, p[0], Inc(s, p[1]), Sub(s, Length(s, p[0]), p[1])) },
 			{ Function<string>(s => s.Substring  (0,   0   )), (s,p) => Substring  (s, p[0], Inc(s, p[1]), p[2])       },
 			{ Function<string>(s => s.Reverse    (         )), (s,p) => Reverse    (s, p[0])                        },
+//			{ Function<string>(s => s.IndexOf    (""       )), (s,p) => IndexOf    (s, p[0], p[1])                  },
+//			{ Function<string>(s => s.IndexOf    ("",  0   )), (s,p) => IndexOf    (s, p[0], p[1],      p[2])       },
+//			{ Function<string>(s => s.IndexOf    ("",  0, 0)), (s,p) => IndexOf    (s, p[0], p[1],      p[2], p[3]) },
+//			{ Function<string>(s => s.IndexOf    (' '      )), (s,p) => IndexOf    (s, p[0], p[1])                  },
+//			{ Function<string>(s => s.IndexOf    (' ', 0   )), (s,p) => IndexOf    (s, p[0], p[1],      p[2])       },
+//			{ Function<string>(s => s.IndexOf    (' ', 0, 0)), (s,p) => IndexOf    (s, p[0], p[1],      p[2], p[3]) },
+//			{ Function<string>(s => s.LastIndexOf(""       )), (s,p) => LastIndexOf(s, p[0], p[1])                  },
+//			{ Function<string>(s => s.LastIndexOf(' '      )), (s,p) => LastIndexOf(s, p[0], p[1])                  },
+//			{ Function<string>(s => s.LastIndexOf("",  0   )), (s,p) => LastIndexOf(s, p[0], p[1],      p[2])       },
+//			{ Function<string>(s => s.LastIndexOf("",  0, 0)), (s,p) => LastIndexOf(s, p[0], p[1],      p[2], p[3]) },
 		};
 
 		static SqlBuilder.SearchCondition Condition { get { return new SqlBuilder.SearchCondition(); } }

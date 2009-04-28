@@ -670,7 +670,7 @@ namespace BLToolkit.Data.Linq
 				case ExpressionType.MemberAccess:
 					{
 						var ma = (MemberExpression)parseInfo.Expr;
-						var mm = Members.GetMember(ma.Member);
+						var mm = CoreFunctions.GetMember(ma.Member);
 
 						if (mm != null)
 						{
@@ -690,7 +690,7 @@ namespace BLToolkit.Data.Linq
 				case ExpressionType.Call:
 					{
 						var e  = parseInfo.Expr as MethodCallExpression;
-						var mm = Members.GetMember(e.Method);
+						var mm = CoreFunctions.GetMember(e.Method);
 
 						if (mm != null)
 						{
@@ -705,6 +705,29 @@ namespace BLToolkit.Data.Linq
 								parms.Add(ParseExpression(query, pi.Create(e.Arguments[i], pi.Index(e.Arguments, MethodCall.Arguments, i))));
 
 							return Convert(mm(SqlProvider, parms.ToArray()));
+						}
+
+						var ex = ExtendedFunctions.GetExpr(e.Method);
+
+						if (ex != null)
+						{
+							var pie = parseInfo.Parent.Replace(ex, parseInfo.ParamAccessor).Walk(pi =>
+							{
+								if (pi.NodeType == ExpressionType.Parameter)
+								{
+									var pe = (ParameterExpression)pi.Expr;
+
+									if (pe.Name == "obj")
+										return pi.Parent.Replace(e.Object, pi.Parent.ParamAccessor);
+
+									var i = int.Parse(pe.Name.Substring(1));
+									return pi.Parent.Replace(e.Arguments[i], pi.Parent.ParamAccessor);
+								}
+
+								return pi;
+							});
+
+							return ParseExpression(query, pie);
 						}
 
 						break;

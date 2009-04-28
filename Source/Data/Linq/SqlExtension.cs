@@ -31,6 +31,22 @@ namespace BLToolkit.Data.Linq
 			return str.IndexOf(value, startLocation - 1) + 1;
 		}
 
+		public static int? CharIndex(this string str, char value)
+		{
+			if (str == null)
+				return null;
+
+			return str.IndexOf(value) + 1;
+		}
+
+		public static int? CharIndex(this string str, char value, int startLocation)
+		{
+			if (str == null)
+				return null;
+
+			return str.IndexOf(value, startLocation - 1) + 1;
+		}
+
 		public static string Reverse(this string str)
 		{
 			if (string.IsNullOrEmpty(str))

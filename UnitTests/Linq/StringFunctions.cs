@@ -132,11 +132,21 @@ namespace Data.Linq
 		}
 
 		[Test]
-		public void IndexOf1()
+		public void IndexOf11()
 		{
 			ForEachProvider(new[] { ProviderName.Firebird, ProviderName.Informix }, db => 
 			{
 				var q = from p in db.Person where p.FirstName.IndexOf("oh") == 1 && p.ID == 1 select p;
+				Assert.AreEqual(1, q.ToList().First().ID);
+			});
+		}
+
+		[Test]
+		public void IndexOf12()
+		{
+			ForEachProvider(new[] { ProviderName.Firebird, ProviderName.Informix }, db => 
+			{
+				var q = from p in db.Person where p.FirstName.IndexOf("") == 0 && p.ID == 1 select p;
 				Assert.AreEqual(1, q.ToList().First().ID);
 			});
 		}

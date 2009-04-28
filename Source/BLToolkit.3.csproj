@@ -123,10 +123,11 @@
     <Compile Include="DataAccess\DataAccessorBase.cs" />
     <Compile Include="DataAccess\SqlIgnoreAttribute.cs" />
     <Compile Include="Data\DataProvider\ProviderName.cs" />
+    <Compile Include="Data\Linq\ExtendedFunctions.cs" />
     <Compile Include="Data\Linq\LinqException.cs" />
     <Compile Include="Data\Linq\ExpressionInfo.cs" />
     <Compile Include="Data\Linq\ExpressionParser.cs" />
-    <Compile Include="Data\Linq\Members.cs" />
+    <Compile Include="Data\Linq\CoreFunctions.cs" />
     <Compile Include="Data\Linq\ParseInfoExtension.cs" />
     <Compile Include="Data\Linq\ParseInfoT.cs" />
     <Compile Include="Data\Linq\ParseInfo.cs" />
