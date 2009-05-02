@@ -50,16 +50,16 @@ namespace BLToolkit.Data.Linq
 
 		static readonly Dictionary<MemberInfo,FBase> _members = new Dictionary<MemberInfo,FBase>
 		{
-			{ MI<S>(s => s.IndexOf    (""       )), new F<S,S,I>    ((obj,p0)       => p0.Length == 0                    ? 0  : (obj.CharIndex(p0)     ?? 0) - 1) },
-			{ MI<S>(s => s.IndexOf    ("",  0   )), new F<S,S,I,I>  ((obj,p0,p1)    => p0.Length == 0 && obj.Length > p1 ? p1 : (obj.CharIndex(p0, p1) ?? 0) - 1) },
+			{ MI<S>(s => s.IndexOf    (""       )), new F<S,S,I>    ((obj,p0)       => p0.Length == 0                    ? 0  : (obj.CharIndex(p0)         ?? 0) - 1) },
+			{ MI<S>(s => s.IndexOf    ("",  0   )), new F<S,S,I,I>  ((obj,p0,p1)    => p0.Length == 0 && obj.Length > p1 ? p1 : (obj.CharIndex(p0, p1 + 1) ?? 0) - 1) },
 			{ MI<S>(s => s.IndexOf    ("",  0, 0)), new F<S,S,I,I,I>((obj,p0,p1,p2) => p0.Length == 0 && obj.Length > p1 ? p1 : (obj.Left(p2).CharIndex(p0, p1) ?? 0) - 1) },
-			{ MI<S>(s => s.IndexOf    (' '      )), new F<S,C,I>    ((obj,p0)       => (obj.CharIndex(p0)     ?? 0) - 1) },
-			{ MI<S>(s => s.IndexOf    (' ', 0   )), new F<S,C,I,I>  ((obj,p0,p1)    => (obj.CharIndex(p0, p1) ?? 0) - 1) },
+			{ MI<S>(s => s.IndexOf    (' '      )), new F<S,C,I>    ((obj,p0)       => (obj.CharIndex(p0)         ?? 0) - 1) },
+			{ MI<S>(s => s.IndexOf    (' ', 0   )), new F<S,C,I,I>  ((obj,p0,p1)    => (obj.CharIndex(p0, p1 + 1) ?? 0) - 1) },
 			{ MI<S>(s => s.IndexOf    (' ', 0, 0)), new F<S,C,I,I,I>((obj,p0,p1,p2) => (obj.Left(p2).CharIndex(p0, p1) ?? 0) - 1) },
-			{ MI<S>(s => s.LastIndexOf(""       )), new F<S,S,I>    ((obj,p0)       => obj.LastIndexOf(p0))       },
-			{ MI<S>(s => s.LastIndexOf("",  0   )), new F<S,S,I,I>  ((obj,p0,p1)    => obj.LastIndexOf(p0,p1))    },
+			{ MI<S>(s => s.LastIndexOf(""       )), new F<S,S,I>    ((obj,p0)       => p0.Length == 0 ? obj.Length - 1 : (obj.CharIndex(p0) ?? 0) == 0 ? -1 : obj.Length - (obj.Reverse().CharIndex(p0.Reverse()) ?? 0) - p0.Length + 1) },
+			{ MI<S>(s => s.LastIndexOf("",  0   )), new F<S,S,I,I>  ((obj,p0,p1)    => p0.Length == 0 ? obj.Length - 1 : (obj.CharIndex(p0, p1 + 1) ?? 0) == 0 ? -1 : obj.Length - (obj.Left(p1).Reverse().CharIndex(p0.Reverse()) ?? 0) - p0.Length + 1) },
 			{ MI<S>(s => s.LastIndexOf("",  0, 0)), new F<S,S,I,I,I>((obj,p0,p1,p2) => obj.LastIndexOf(p0,p1,p2)) },
-			{ MI<S>(s => s.LastIndexOf(' '      )), new F<S,C,I>    ((obj,p0)       => obj.LastIndexOf(p0))       },
+			{ MI<S>(s => s.LastIndexOf(' '      )), new F<S,C,I>    ((obj,p0)       => (obj.CharIndex(p0) ?? 0) == 0 ? -1 : obj.Length - (obj.Reverse().CharIndex(p0) ?? 0)) },
 			{ MI<S>(s => s.LastIndexOf(' ', 0   )), new F<S,C,I,I>  ((obj,p0,p1)    => obj.LastIndexOf(p0,p1))    },
 			{ MI<S>(s => s.LastIndexOf(' ', 0, 0)), new F<S,C,I,I,I>((obj,p0,p1,p2) => obj.LastIndexOf(p0,p1,p2)) },
 		};

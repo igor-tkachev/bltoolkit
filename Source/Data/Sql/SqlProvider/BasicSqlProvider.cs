@@ -672,14 +672,39 @@ namespace BLToolkit.Data.Sql.SqlProvider
 					case "+":
 						if (be.Expr1 is SqlValue)
 						{
-							SqlValue v1 = (SqlValue) be.Expr1;
+							SqlValue v1 = (SqlValue)be.Expr1;
 							if (v1.Value is int && (int)v1.Value == 0) return be.Expr2;
 						}
 
 						if (be.Expr2 is SqlValue)
 						{
 							SqlValue v2 = (SqlValue) be.Expr2;
-							if (v2.Value is int && (int) v2.Value == 0) return be.Expr1;
+
+							if (v2.Value is int)
+							{
+								if ((int)v2.Value == 0) return be.Expr1;
+
+								/*
+								if (be.Expr1 is SqlBinaryExpression)
+								{
+									SqlBinaryExpression be1 = (SqlBinaryExpression) be.Expr1;
+
+									if (be1.Expr2 is SqlValue)
+									{
+										SqlValue be1v2 = (SqlValue)be1.Expr2;
+
+										if (be1v2.Value is int)
+										{
+											switch (be1.Operation)
+											{
+												case "+": return new SqlBinaryExpression(be1.Expr1, be1.Operation, new SqlValue((int)be1v2.Value + (int)v2.Value), be.Type, be.Precedence);
+												case "-": return new SqlBinaryExpression(be1.Expr1, be1.Operation, new SqlValue((int)be1v2.Value - (int)v2.Value), be.Type, be.Precedence);
+											}
+										}
+									}
+								}
+								*/
+							}
 						}
 
 						if (be.Expr1 is SqlValue && be.Expr2 is SqlValue)
@@ -769,8 +794,9 @@ namespace BLToolkit.Data.Sql.SqlProvider
 					case "CASE":
 						{
 							ISqlExpression[] parms = func.Parameters;
+							int              len   = parms.Length;
 
-							for (int i = 0; i < parms.Length; i += 2)
+							for (int i = 0; i < parms.Length - 1; i += 2)
 							{
 								SqlValue value = parms[i] as SqlValue;
 
@@ -806,7 +832,8 @@ namespace BLToolkit.Data.Sql.SqlProvider
 							if (parms.Length == 1)
 								return parms[0];
 
-							return new SqlFunction(func.Name, func.Precedence, parms);
+							if (parms.Length != len)
+								return new SqlFunction(func.Name, func.Precedence, parms);
 						}
 
 						break;

@@ -774,7 +774,7 @@ namespace BLToolkit.Data.Linq
 						{
 							var mc = (MethodCallExpression)ex;
 
-							if (IsConstant(mc.Method.DeclaringType))
+							if (IsConstant(mc.Method.DeclaringType) )// || mc.Method.DeclaringType == typeof(SqlExtension))
 								return pi;
 
 							break;
