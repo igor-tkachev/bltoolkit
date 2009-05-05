@@ -486,6 +486,7 @@ namespace BLToolkit.Data.Linq
 		#region Build Parameter
 
 		readonly Dictionary<Expression,ExpressionInfo<T>.Parameter> _parameters = new Dictionary<Expression, ExpressionInfo<T>.Parameter>();
+		readonly Dictionary<Expression,Expression>                  _accessors  = new Dictionary<Expression, Expression>();
 
 		ExpressionInfo<T>.Parameter BuildParameter(ParseInfo expr)
 		{
@@ -498,6 +499,19 @@ namespace BLToolkit.Data.Linq
 
 			var newExpr = expr.Walk(pi =>
 			{
+				if (pi.NodeType == ExpressionType.MemberAccess)
+				{
+					Expression accessor;
+
+					if (_accessors.TryGetValue(pi.Expr, out accessor))
+					{
+						var ma = (MemberExpression)pi.Expr;
+						name = ma.Member.Name;
+
+						return pi.Parent.Replace(pi.Expr, accessor);
+					}
+				}
+
 				pi.IsConstant(c =>
 				{
 					if (!TypeHelper.IsScalar(pi.Expr.Type))
@@ -689,13 +703,12 @@ namespace BLToolkit.Data.Linq
 
 				case ExpressionType.Call:
 					{
+						var pi = parseInfo.Convert<MethodCallExpression>();
 						var e  = parseInfo.Expr as MethodCallExpression;
 						var mm = CoreFunctions.GetMember(e.Method);
 
 						if (mm != null)
 						{
-							var pi = parseInfo.Convert<MethodCallExpression>();
-
 							var parms = new List<ISqlExpression>();
 
 							if (e.Object != null)
@@ -711,20 +724,37 @@ namespace BLToolkit.Data.Linq
 
 						if (ex != null)
 						{
-							var pie = parseInfo.Parent.Replace(ex, parseInfo.ParamAccessor).Walk(pi =>
+							var pie = parseInfo.Parent.Replace(ex, parseInfo.ParamAccessor).Walk(wpi =>
 							{
-								if (pi.NodeType == ExpressionType.Parameter)
+								if (wpi.NodeType == ExpressionType.Parameter)
 								{
-									var pe = (ParameterExpression)pi.Expr;
+									Expression expr;
+									Expression param;
+
+									var pe = (ParameterExpression)wpi.Expr;
 
 									if (pe.Name == "obj")
-										return pi.Parent.Replace(e.Object, pi.Parent.ParamAccessor);
+									{
+										expr  = e.Object;
+										param = pi.Property(MethodCall.Object);
+									}
+									else
+									{
+										var i = int.Parse(pe.Name.Substring(1));
+										expr  = e.Arguments[i];
+										param = pi.Index(e.Arguments, MethodCall.Arguments, i);
+									}
 
-									var i = int.Parse(pe.Name.Substring(1));
-									return pi.Parent.Replace(e.Arguments[i], pi.Parent.ParamAccessor);
+									if (expr.NodeType == ExpressionType.MemberAccess)
+									{
+										if (!_accessors.ContainsKey(expr))
+											_accessors.Add(expr, param);
+									}
+
+									return pi.Create(expr, param);
 								}
 
-								return pi;
+								return wpi;
 							});
 
 							return ParseExpression(query, pie);
@@ -774,7 +804,7 @@ namespace BLToolkit.Data.Linq
 						{
 							var mc = (MethodCallExpression)ex;
 
-							if (IsConstant(mc.Method.DeclaringType) )// || mc.Method.DeclaringType == typeof(SqlExtension))
+							if (IsConstant(mc.Method.DeclaringType) || mc.Method.DeclaringType == typeof(SqlExtension))
 								return pi;
 
 							break;
@@ -1008,9 +1038,9 @@ namespace BLToolkit.Data.Linq
 
 						ParseSearchCondition(notCondition.Conditions, query, pi.Create(e.Operand, pi.Property(Unary.Operand)));
 
-						if (notCondition.Conditions.Count == 1 && notCondition.Conditions[0].Predicate is SqlBuilder.Predicate.NotExprBase)
+						if (notCondition.Conditions.Count == 1 && notCondition.Conditions[0].Predicate is SqlBuilder.Predicate.NotExpr)
 						{
-							var p = notCondition.Conditions[0].Predicate as SqlBuilder.Predicate.NotExprBase;
+							var p = notCondition.Conditions[0].Predicate as SqlBuilder.Predicate.NotExpr;
 							p.IsNot = !p.IsNot;
 							conditions.Add(notCondition.Conditions[0]);
 						}

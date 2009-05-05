@@ -331,9 +331,9 @@ namespace BLToolkit.Data.Sql
 				NotLess         // !<    Is the operator used to test the condition of one expression not being less than the other expression.
 			}
 
-			public abstract class ExprBase : Predicate
+			public class Expr : Predicate
 			{
-				protected ExprBase(ISqlExpression exp1, int precedence)
+				public Expr(ISqlExpression exp1, int precedence)
 					: base(precedence)
 				{
 					_expr1 = exp1;
@@ -347,9 +347,9 @@ namespace BLToolkit.Data.Sql
 				}
 			}
 
-			public abstract class NotExprBase : ExprBase
+			public class NotExpr : Expr
 			{
-				protected NotExprBase(ISqlExpression exp1, bool isNot, int precedence)
+				public NotExpr(ISqlExpression exp1, bool isNot, int precedence)
 					: base(exp1, precedence)
 				{
 					_isNot = isNot;
@@ -360,7 +360,7 @@ namespace BLToolkit.Data.Sql
 
 			// { expression { = | <> | != | > | >= | ! > | < | <= | !< } expression
 			//
-			public class ExprExpr : ExprBase
+			public class ExprExpr : Expr
 			{
 				public ExprExpr(ISqlExpression exp1, Operator op, ISqlExpression exp2)
 					: base(exp1, Sql.Precedence.Comparison)
@@ -405,7 +405,7 @@ namespace BLToolkit.Data.Sql
 
 			// string_expression [ NOT ] LIKE string_expression [ ESCAPE 'escape_character' ]
 			//
-			public class Like : NotExprBase
+			public class Like : NotExpr
 			{
 				public Like(ISqlExpression exp1, bool isNot, ISqlExpression exp2, ISqlExpression escape)
 					: base(exp1, isNot, Sql.Precedence.Comparison)
@@ -429,7 +429,7 @@ namespace BLToolkit.Data.Sql
 
 			// expression [ NOT ] BETWEEN expression AND expression
 			//
-			public class Between : NotExprBase
+			public class Between : NotExpr
 			{
 				public Between(ISqlExpression exp1, bool isNot, ISqlExpression exp2, ISqlExpression exp3)
 					: base(exp1, isNot, Sql.Precedence.Comparison)
@@ -451,7 +451,7 @@ namespace BLToolkit.Data.Sql
 
 			// expression IS [ NOT ] NULL
 			//
-			public class IsNull : NotExprBase
+			public class IsNull : NotExpr
 			{
 				public IsNull(ISqlExpression exp1, bool isNot)
 					: base(exp1, isNot, Sql.Precedence.Comparison)
@@ -461,7 +461,7 @@ namespace BLToolkit.Data.Sql
 
 			// expression [ NOT ] IN ( subquery | expression [ ,...n ] )
 			//
-			public class InSubquery : NotExprBase
+			public class InSubquery : NotExpr
 			{
 				public InSubquery(ISqlExpression exp1, bool isNot, SqlBuilder subQuery)
 					: base(exp1, isNot, Sql.Precedence.Comparison)
@@ -478,7 +478,7 @@ namespace BLToolkit.Data.Sql
 				}
 			}
 
-			public class InList : NotExprBase
+			public class InList : NotExpr
 			{
 				public InList(ISqlExpression exp1, bool isNot, params ISqlExpression[] values)
 					: base(exp1, isNot, Sql.Precedence.Comparison)

@@ -165,10 +165,10 @@ namespace Data.Linq
 		public void IndexOf3()
 		{
 			var n = 5;
-			ForEachProvider(new[] { ProviderName.Firebird, ProviderName.Informix, ProviderName.SqlCe }, db => 
+			ForEachProvider(new[] { ProviderName.DB2, ProviderName.Firebird, ProviderName.Informix }, db => 
 			{
-				var q = from p in db.Person where p.LastName.IndexOf("e", 2, n) == 4 && p.ID == 1 select p;
-				Assert.AreEqual(1, q.ToList().First().ID);
+				var q = from p in db.Person where p.LastName.IndexOf("e", 2, n) == 1 && p.ID == 2 select p;
+				Assert.AreEqual(2, q.ToList().First().ID);
 			});
 		}
 
@@ -198,13 +198,13 @@ namespace Data.Linq
 			});
 		}
 
-		//[Test]
+		[Test]
 		public void LastIndexOf3()
 		{
 			ForEachProvider(_lastIndexExcludeList, db => 
 			{
-				var q = from p in db.Person where p.ID == 1 select new { p.ID, FirstName = p.FirstName + "012345" };
-				q = q.Where(p => p.FirstName.LastIndexOf("123", 3, 10) == 5);
+				var q = from p in db.Person where p.ID == 1 select new { p.ID, FirstName = "123" + p.FirstName + "0123451234" };
+				q = q.Where(p => p.FirstName.LastIndexOf("123", 5, 6) == 8);
 				Assert.AreEqual(1, q.ToList().First().ID);
 			});
 		}

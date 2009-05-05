@@ -307,6 +307,15 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			{
 				BuildSearchCondition(sb, predicate.Precedence, (SqlBuilder.SearchCondition)predicate);
 			}
+			else if (predicate is SqlBuilder.Predicate.Expr)
+			{
+				var p = (SqlBuilder.Predicate.Expr)predicate;
+				BuildExpression(sb, GetPrecedence(p), p.Expr1);
+			}
+			else if (predicate is SqlBuilder.Predicate.NotExpr)
+			{
+				throw new NotImplementedException();
+			}
 			else
 			{
 				throw new InvalidOperationException();
@@ -389,6 +398,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 				if      (value == null)   sb.Append("NULL");
 				else if (value is string) sb.Append('\'').Append(value.ToString().Replace("'", "''")).Append('\'');
+				else if (value is bool)   sb.Append((bool)value? "1 = 1": "1 = 0");
 				else    sb.Append(value);
 			}
 			else if (expr is SqlExpression)
@@ -684,7 +694,6 @@ namespace BLToolkit.Data.Sql.SqlProvider
 							{
 								if ((int)v2.Value == 0) return be.Expr1;
 
-								/*
 								if (be.Expr1 is SqlBinaryExpression)
 								{
 									SqlBinaryExpression be1 = (SqlBinaryExpression) be.Expr1;
@@ -703,7 +712,6 @@ namespace BLToolkit.Data.Sql.SqlProvider
 										}
 									}
 								}
-								*/
 							}
 						}
 
@@ -845,6 +853,17 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		public virtual ISqlPredicate ConvertPredicate(ISqlPredicate predicate)
 		{
+			if (predicate is SqlBuilder.Predicate.ExprExpr)
+			{
+				var expr = (SqlBuilder.Predicate.ExprExpr) predicate;
+
+				if (expr.Operator == SqlBuilder.Predicate.Operator.Equal && expr.Expr1 is SqlValue && expr.Expr2 is SqlValue)
+				{
+					var value = object.Equals(((SqlValue)expr.Expr1).Value, ((SqlValue)expr.Expr2).Value);
+					return new SqlBuilder.Predicate.Expr(new SqlValue(value), Precedence.Comparison);
+				}
+			}
+
 			return predicate;
 		}
 
