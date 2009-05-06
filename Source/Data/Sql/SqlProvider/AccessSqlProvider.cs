@@ -56,9 +56,10 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 						throw new SqlException("CASE statement is not supported by the {0}.", GetType().Name);
 
-					case "Length"   : return new SqlFunction("Len", func.Parameters);
-					case "Substring": return new SqlFunction("Mid", func.Parameters);
-					case "CharIndex":
+					case "Length"    : return new SqlFunction("Len", func.Parameters);
+					case "Substring" : return new SqlFunction("Mid", func.Parameters);
+					case "Stuff"     : return BuildAlternativeStuff(func);
+					case "CharIndex" :
 						return func.Parameters.Length == 2?
 							new SqlFunction("InStr", new SqlValue(1),    func.Parameters[1], func.Parameters[0], new SqlValue(1)):
 							new SqlFunction("InStr", func.Parameters[2], func.Parameters[1], func.Parameters[0], new SqlValue(1));

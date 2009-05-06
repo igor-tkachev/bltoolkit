@@ -66,5 +66,10 @@ namespace BLToolkit.Data.Linq
 		{
 			return str == null || str.Length < length? null: str.Substring(str.Length - length);
 		}
+
+		public static string Stuff(this string str, int startLocation, int length, string value)
+		{
+			return str.Remove(startLocation - 1).Insert(startLocation - 1, value);
+		}
 	}
 }

@@ -48,7 +48,8 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 				switch (func.Name)
 				{
-					case "CharIndex": return new SqlFunction("Locate", func.Parameters);
+					case "CharIndex" : return new SqlFunction("Locate", func.Parameters);
+					case "Stuff"     : return BuildAlternativeStuff(func);
 				}
 			}
 

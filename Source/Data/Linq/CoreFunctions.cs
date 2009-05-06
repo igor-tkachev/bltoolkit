@@ -37,26 +37,28 @@ namespace BLToolkit.Data.Linq
 
 		public delegate ISqlExpression MemberMaker (ISqlProvider sqlProvider, params ISqlExpression[] exprs);
 
-		static IExpr Length   (ISqlProvider p, IExpr s)                   { return MakeFunc(p, "Length",    s      ); }
-		static IExpr CharIndex(ISqlProvider p, IExpr s, IExpr a)          { return MakeFunc(p, "CharIndex", a, s   ); }
-		static IExpr CharIndex(ISqlProvider p, IExpr s, IExpr a, IExpr b) { return MakeFunc(p, "CharIndex", a, s, b); }
-		static IExpr Substring(ISqlProvider p, IExpr s, IExpr a, IExpr b) { return MakeFunc(p, "Substring", s, a, b); }
-		static IExpr Left     (ISqlProvider p, IExpr s, IExpr a)          { return MakeFunc(p, "Left",      s, a   ); }
-		static IExpr Right    (ISqlProvider p, IExpr s, IExpr a)          { return MakeFunc(p, "Right",     s, a   ); }
-		static IExpr Reverse  (ISqlProvider p, IExpr s)                   { return MakeFunc(p, "Reverse",   s      ); }
+		static IExpr Length   (ISqlProvider p, IExpr s)                            { return MakeFunc(p, "Length",    s         ); }
+		static IExpr CharIndex(ISqlProvider p, IExpr s, IExpr a)                   { return MakeFunc(p, "CharIndex", a, s      ); }
+		static IExpr CharIndex(ISqlProvider p, IExpr s, IExpr a, IExpr b)          { return MakeFunc(p, "CharIndex", a, s, b   ); }
+		static IExpr Substring(ISqlProvider p, IExpr s, IExpr a, IExpr b)          { return MakeFunc(p, "Substring", s, a, b   ); }
+		static IExpr Left     (ISqlProvider p, IExpr s, IExpr a)                   { return MakeFunc(p, "Left",      s, a      ); }
+		static IExpr Right    (ISqlProvider p, IExpr s, IExpr a)                   { return MakeFunc(p, "Right",     s, a      ); }
+		static IExpr Reverse  (ISqlProvider p, IExpr s)                            { return MakeFunc(p, "Reverse",   s         ); }
+		static IExpr Stuff    (ISqlProvider p, IExpr s, IExpr a, IExpr b, IExpr c) { return MakeFunc(p, "Stuff",     s, a, b, c); }
 
 		static readonly Dictionary<MemberInfo,MemberMaker> _members = new Dictionary<MemberInfo,MemberMaker>
 		{
-			{ Function<string>(s => s.Length                ), (s,p) => Length     (s, p[0])                        },
-			{ Function<string>(s => s.CharIndex  (""       )), (s,p) => CharIndex  (s, p[0], p[1])                  },
-			{ Function<string>(s => s.CharIndex  ("",  0   )), (s,p) => CharIndex  (s, p[0], p[1],      p[2])       },
-			{ Function<string>(s => s.CharIndex  (' '      )), (s,p) => CharIndex  (s, p[0], p[1])                  },
-			{ Function<string>(s => s.CharIndex  (' ', 0   )), (s,p) => CharIndex  (s, p[0], p[1],      p[2])       },
-			{ Function<string>(s => s.Left       (0        )), (s,p) => Left       (s, p[0], p[1])                  },
-			{ Function<string>(s => s.Right      (0        )), (s,p) => Right      (s, p[0], p[1])                  },
-			//{ Function<string>(s => s.Substring  (0        )), (s,p) => Substring  (s, p[0], Inc(s, p[1]), Sub(s, Length(s, p[0]), p[1])) },
-			{ Function<string>(s => s.Substring  (0,   0   )), (s,p) => Substring  (s, p[0], Inc(s, p[1]), p[2])    },
-			{ Function<string>(s => s.Reverse    (         )), (s,p) => Reverse    (s, p[0])                        },
+			{ Function<string>(s => s.Length                 ), (s,p) => Length     (s, p[0])                     },
+			{ Function<string>(s => s.CharIndex  (""        )), (s,p) => CharIndex  (s, p[0], p[1])               },
+			{ Function<string>(s => s.CharIndex  ("",  0    )), (s,p) => CharIndex  (s, p[0], p[1], p[2])         },
+			{ Function<string>(s => s.CharIndex  (' '       )), (s,p) => CharIndex  (s, p[0], p[1])               },
+			{ Function<string>(s => s.CharIndex  (' ', 0    )), (s,p) => CharIndex  (s, p[0], p[1], p[2])         },
+			{ Function<string>(s => s.Left       (0         )), (s,p) => Left       (s, p[0], p[1])               },
+			{ Function<string>(s => s.Right      (0         )), (s,p) => Right      (s, p[0], p[1])               },
+			//{ Function<string>(s => s.Substring  (0         )), (s,p) => Substring  (s, p[0], Inc(s, p[1]), Sub(s, Length(s, p[0]), p[1])) },
+			{ Function<string>(s => s.Substring  (0,   0    )), (s,p) => Substring  (s, p[0], Inc(s, p[1]), p[2]) },
+			{ Function<string>(s => s.Reverse    (          )), (s,p) => Reverse    (s, p[0])                     },
+			{ Function<string>(s => s.Stuff      (0,   0, "")), (s,p) => Stuff      (s, p[0], p[1], p[2], p[3])   },
 		};
 
 		static ISqlExpression Add(ISqlProvider p, ISqlExpression expr1, ISqlExpression expr2) { return p.ConvertExpression(new SqlBinaryExpression(expr1, "+", expr2, typeof (int), Precedence.Additive)); }

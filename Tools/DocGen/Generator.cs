@@ -518,26 +518,34 @@ namespace DocGen
 			public string Implementation;
 		}
 
+		static string _providerName;
+
 		static TableItem GetTableItem(string line)
 		{
+			if (line.StartsWith("*"))
+			{
+				_providerName = line.Substring(1).Trim();
+				return null;
+			}
+
 			var ss = line.Replace("||", "$$$$$").Split('|');
 
-			if (ss.Length != 5)
+			if (ss.Length != 4)
 				throw new InvalidOperationException(line);
 
-			var impl = ss[4].Trim().Replace("$$$$$", "|");
+			var impl = ss[3].Trim().Replace("$$$$$", "|");
 
-			if (impl.StartsWith("#sql"))
+			if (impl.StartsWith("#"))
 			{
-				impl = impl.Substring(4).Replace("\\n", "\n").Replace("\\t", "\t").Trim();
+				impl = impl.Substring(impl.IndexOf(' ')).Replace("\\n", "\n").Replace("\\t", "\t").Trim();
 				impl = GetSourceCode(impl, ".sql", "");
 			}
 
 			return new TableItem
 			{
-				Provider       = ss[1].Trim().Replace("$$$$$", "|"),
-				Feature        = ss[2].Trim().Replace("$$$$$", "|"),
-				Linq           = ss[3].Trim().Replace("$$$$$", "|"),
+				Provider       = _providerName,
+				Feature        = ss[1].Trim().Replace("$$$$$", "|"),
+				Linq           = ss[2].Trim().Replace("$$$$$", "|"),
 				Implementation = impl
 			};
 		}
@@ -547,7 +555,7 @@ namespace DocGen
 			Console.WriteLine("table {0}", sourcePath);
 
 			var lines     = File.ReadAllLines(sourcePath);
-			var items     = (from l in lines where l.Trim().Length > 0 select GetTableItem(l)).ToList();
+			var items     = (from l in lines where l.Trim().Length > 0 select GetTableItem(l)).Where(i => i != null).ToList();
 			var providers = (from i in items where i.Provider.Length > 0 group i by i.Provider into g select g.Key).ToList();
 			var forall    = (from i in items where i.Provider.Length == 0 select i).ToList();
 

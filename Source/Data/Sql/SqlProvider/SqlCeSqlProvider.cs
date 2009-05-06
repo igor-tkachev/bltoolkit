@@ -21,8 +21,8 @@ namespace BLToolkit.Data.Sql.SqlProvider
 				switch (func.Name)
 				{
 					case "Length": return new SqlFunction("Len", func.Parameters);
-					case "Left"  : return BuildComplexLeft (func);
-					case "Right" : return BuildComplexRight(func);
+					case "Left"  : return BuildAlternativeLeft (func);
+					case "Right" : return BuildAlternativeRight(func);
 				}
 			}
 

@@ -1,21 +1,32 @@
-﻿| DB2        | SELECT x | db.Select(() => x) | #sql SELECT x \nFROM SYSIBM.SYSDUMMY1 \nFETCH FIRST 1 ROW ONLY
+﻿* DB2
+| SELECT x | db.Select(() => x) | #sql SELECT x \nFROM SYSIBM.SYSDUMMY1 \nFETCH FIRST 1 ROW ONLY
 
-| Informix   | SELECT x | db.Select(() => x) | #sql SELECT FIRST 1 x\nFROM SYSTABLES
+* Informix
+| SELECT x | db.Select(() => x) | #sql SELECT FIRST 1 x\nFROM SYSTABLES
 
-| Oracle     | SELECT x | db.Select(() => x) | #sql SELECT x \nFROM SYS.DUAL
+* Oracle
+| SELECT x | db.Select(() => x) | #sql SELECT x \nFROM SYS.DUAL
 
-| Firebird   | SELECT x | db.Select(() => x) | #sql SELECT x \nFROM rdb$database
+* Firebird
+| SELECT x | db.Select(() => x) | #sql SELECT x \nFROM rdb$database
 
-| PostgreSQL | SELECT x | db.Select(() => x) | #sql SELECT x
+* PostgreSQL
+| SELECT x | db.Select(() => x) | #sql SELECT x
 
-| MySql      | SELECT x | db.Select(() => x) | #sql SELECT x
+* MySql
+| SELECT x | db.Select(() => x) | #sql SELECT x
 
-| MS SQL     | SELECT x | db.Select(() => x) | #sql SELECT x
+* MS SQL
+| SELECT x | db.Select(() => x) | #sql SELECT x
 
-| SqlCe      | SELECT x | db.Select(() => x) | #sql SELECT x
+* SqlCe
+| SELECT x | db.Select(() => x) | #sql SELECT x
 
-| Sybase     | SELECT x | db.Select(() => x) | #sql SELECT x
+* Sybase
+| SELECT x | db.Select(() => x) | #sql SELECT x
 
-| SQLite     | SELECT x | db.Select(() => x) | #sql SELECT x
+* SQLite
+| SELECT x | db.Select(() => x) | #sql SELECT x
 
-| Access     | SELECT x | db.Select(() => x) | #sql SELECT x
+* Access
+| SELECT x | db.Select(() => x) | #sql SELECT x

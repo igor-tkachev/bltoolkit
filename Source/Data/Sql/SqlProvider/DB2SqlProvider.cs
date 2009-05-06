@@ -50,6 +50,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 				{
 					case "CharIndex" : return new SqlFunction("Locate", func.Parameters);
 					case "Substring" : return new SqlFunction("Substr", func.Parameters);
+					case "Stuff"     : return BuildAlternativeStuff(func);
 				}
 			}
 

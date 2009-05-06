@@ -1,190 +1,222 @@
-﻿| DB2        | Length      | s.Length                        | Length(s)
-| DB2        | LIKE        | s.Contains("abc")               | s LIKE '%abc%'
-| DB2        | LIKE        | s.Contains("a%b")               | s LIKE '%a~%b%' ESCAPE '~' s LIKE "%a[%]b%" 
-| DB2        | LIKE        | s.Contains(str)                 | s LIKE @str ESCAPE '~' s LIKE @str 
-| DB2        | LIKE        | !s.Contains(a)                  | s NOT LIKE a
-| DB2        | LIKE        | s.StartsWith("abc")             | s LIKE 'abc%' 
-| DB2        | LIKE        | s.EndsWith("abc")               | s LIKE '%abc' 
-| DB2        | LIKE        | SqlMethods.Like(s, "%abc%")     | s LIKE '%abc%' 
-| DB2        | LIKE        | SqlMethods.Like(s, "a~%b", '~') | s LIKE "a~%b" ESCAPE '~' s LIKE "a[%]b" 
-| DB2        | LIKE        | s.Like("%abc%")                 | s LIKE '%abc%' 
-| DB2        | LIKE        | s.Like("a~%b", '~')             | s LIKE "a~%b" ESCAPE '~'
-| DB2        | CharIndex   | s.CharIndex(a)                  | Locate(a, s)
-| DB2        | CharIndex   | s.CharIndex(a, b)               | Locate(a, s, b)
-| DB2        | Substring   | s.Substring(a)                  | Substr(s, a+1, Length(s)-a)
-| DB2        | Substring   | s.Substring(a, b)               | Substr(s, a+1, b)
-| DB2        | Substring   | s.Left(a)                       | Left(s, a)
+﻿* DB2
+| Length      | s.Length                        | Length(s)
+| LIKE        | s.Contains("abc")               | s LIKE '%abc%'
+| LIKE        | s.Contains("a%b")               | s LIKE '%a~%b%' ESCAPE '~' s LIKE "%a[%]b%" 
+| LIKE        | s.Contains(str)                 | s LIKE @str ESCAPE '~' s LIKE @str 
+| LIKE        | !s.Contains(a)                  | s NOT LIKE a
+| LIKE        | s.StartsWith("abc")             | s LIKE 'abc%' 
+| LIKE        | s.EndsWith("abc")               | s LIKE '%abc' 
+| LIKE        | SqlMethods.Like(s, "%abc%")     | s LIKE '%abc%' 
+| LIKE        | SqlMethods.Like(s, "a~%b", '~') | s LIKE "a~%b" ESCAPE '~' s LIKE "a[%]b" 
+| LIKE        | s.Like("%abc%")                 | s LIKE '%abc%' 
+| LIKE        | s.Like("a~%b", '~')             | s LIKE "a~%b" ESCAPE '~'
+| CharIndex   | s.CharIndex(a)                  | Locate(a, s)
+| CharIndex   | s.CharIndex(a, b)               | Locate(a, s, b)
+| Substring   | s.Substring(a)                  | Substr(s, a+1, Length(s)-a)
+| Substring   | s.Substring(a, b)               | Substr(s, a+1, b)
+| Substring   | s.Left(a)                       | Left(s, a)
+| Substring   | s.Right(a)                      | Right(s, a)
+| Stuff       | s.Stuff(a, b, c)                | Substring(s, 1, a-1) + c + Substring(s, a+b, Length(s)-a-b+1))
 
-| Informix   | Length      | s.Length                        | Length(s)
-| Informix   | LIKE        | s.Contains("abc")               | s LIKE '%abc%'
-| Informix   | LIKE        | s.Contains("a%b")               | s LIKE '%a~%b%' ESCAPE '~' s LIKE "%a[%]b%"
-| Informix   | LIKE        | s.Contains(str)                 | s LIKE @str ESCAPE '~' s LIKE @str
-| Informix   | LIKE        | !s.Contains(a)                  | NOT s LIKE a
-| Informix   | LIKE        | s.StartsWith("abc")             | s LIKE 'abc%' 
-| Informix   | LIKE        | s.EndsWith("abc")               | s LIKE '%abc' 
-| Informix   | LIKE        | SqlMethods.Like(s, "%abc%")     | s LIKE '%abc%' 
-| Informix   | LIKE        | SqlMethods.Like(s, "a~%b", '~') | s LIKE "a~%b" ESCAPE '~' s LIKE "a[%]b" 
-| Informix   | LIKE        | s.Like("%abc%")                 | s LIKE '%abc%' 
-| Informix   | LIKE        | s.Like("a~%b", '~')             | s LIKE "a~%b" ESCAPE '~' 
-| Informix   | Substring   | s.Substring(a)                  | Substr(s, a+1, Length(s)-a)
-| Informix   | Substring   | s.Substring(a, b)               | Substr(s, a+1, b)
-| Informix   | Substring   | s.Left(a)                       | Substr(s, 1, a)
+* Informix
+| Length      | s.Length                        | Length(s)
+| LIKE        | s.Contains("abc")               | s LIKE '%abc%'
+| LIKE        | s.Contains("a%b")               | s LIKE '%a~%b%' ESCAPE '~' s LIKE "%a[%]b%"
+| LIKE        | s.Contains(str)                 | s LIKE @str ESCAPE '~' s LIKE @str
+| LIKE        | !s.Contains(a)                  | NOT s LIKE a
+| LIKE        | s.StartsWith("abc")             | s LIKE 'abc%' 
+| LIKE        | s.EndsWith("abc")               | s LIKE '%abc' 
+| LIKE        | SqlMethods.Like(s, "%abc%")     | s LIKE '%abc%' 
+| LIKE        | SqlMethods.Like(s, "a~%b", '~') | s LIKE "a~%b" ESCAPE '~' s LIKE "a[%]b" 
+| LIKE        | s.Like("%abc%")                 | s LIKE '%abc%' 
+| LIKE        | s.Like("a~%b", '~')             | s LIKE "a~%b" ESCAPE '~' 
+| Substring   | s.Substring(a)                  | Substr(s, a+1, Length(s)-a)
+| Substring   | s.Substring(a, b)               | Substr(s, a+1, b)
+| Substring   | s.Left(a)                       | Substr(s, 1, a)
+| Substring   | s.Right(a)                      | Substr(s,<br>&nbsp;&nbsp;Length(s)-a+1, a)
+| Stuff       | s.Stuff(a, b, c)                | Substring(s, 1, a-1) + c + Substring(s, a+b, Length(s)-a-b+1))
 
-| Oracle     | Length      | s.Length                        | Length(s)
-| Oracle     | LIKE        | s.Contains("abc")               | s LIKE '%abc%'
-| Oracle     | LIKE        | s.Contains("a%b")               | s LIKE '%a~%b%' ESCAPE '~' s LIKE "%a[%]b%" 
-| Oracle     | LIKE        | s.Contains(str)                 | s LIKE @str ESCAPE '~' s LIKE @str 
-| Oracle     | LIKE        | !s.Contains(a)                  | s NOT LIKE a
-| Oracle     | LIKE        | s.StartsWith("abc")             | s LIKE 'abc%' 
-| Oracle     | LIKE        | s.EndsWith("abc")               | s LIKE '%abc' 
-| Oracle     | LIKE        | SqlMethods.Like(s, "%abc%")     | s LIKE '%abc%' 
-| Oracle     | LIKE        | SqlMethods.Like(s, "a~%b", '~') | s LIKE "a~%b" ESCAPE '~' s LIKE "a[%]b" 
-| Oracle     | LIKE        | s.Like("%abc%")                 | s LIKE '%abc%' 
-| Oracle     | LIKE        | s.Like("a~%b", '~')             | s LIKE "a~%b" ESCAPE '~' 
-| Oracle     | CharIndex   | s.CharIndex(a)                  | InStr(s, a)
-| Oracle     | CharIndex   | s.CharIndex(a, b)               | InStr(s, a, b)
-| Oracle     | Substring   | s.Substring(a)                  | Substr(s, a+1, Length(s)-a)
-| Oracle     | Substring   | s.Substring(a, b)               | Substr(s, a+1, b)
-| Oracle     | Substring   | s.Left(a)                       | Substr(s, 1, a)
-| Oracle     | Reverse     | s.Reverse(a)                    | Reverse(s)
+* Oracle
+| Length      | s.Length                        | Length(s)
+| LIKE        | s.Contains("abc")               | s LIKE '%abc%'
+| LIKE        | s.Contains("a%b")               | s LIKE '%a~%b%' ESCAPE '~' s LIKE "%a[%]b%" 
+| LIKE        | s.Contains(str)                 | s LIKE @str ESCAPE '~' s LIKE @str 
+| LIKE        | !s.Contains(a)                  | s NOT LIKE a
+| LIKE        | s.StartsWith("abc")             | s LIKE 'abc%' 
+| LIKE        | s.EndsWith("abc")               | s LIKE '%abc' 
+| LIKE        | SqlMethods.Like(s, "%abc%")     | s LIKE '%abc%' 
+| LIKE        | SqlMethods.Like(s, "a~%b", '~') | s LIKE "a~%b" ESCAPE '~' s LIKE "a[%]b" 
+| LIKE        | s.Like("%abc%")                 | s LIKE '%abc%' 
+| LIKE        | s.Like("a~%b", '~')             | s LIKE "a~%b" ESCAPE '~' 
+| CharIndex   | s.CharIndex(a)                  | InStr(s, a)
+| CharIndex   | s.CharIndex(a, b)               | InStr(s, a, b)
+| Substring   | s.Substring(a)                  | Substr(s, a+1, Length(s)-a)
+| Substring   | s.Substring(a, b)               | Substr(s, a+1, b)
+| Substring   | s.Left(a)                       | Substr(s, 1, a)
+| Substring   | s.Right(a)                      | Substr(s,<br>&nbsp;&nbsp;Length(s)-a+1, a)
+| Reverse     | s.Reverse(a)                    | Reverse(s)
+| Stuff       | s.Stuff(a, b, c)                | Substring(s, 1, a-1) + c + Substring(s, a+b, Length(s)-a-b+1))
 
-| Firebird   | Length      | s.Length                        | Char_Length(s)
-| Firebird   | LIKE        | s.Contains("abc")               | s LIKE '%abc%'
-| Firebird   | LIKE        | s.Contains("a%b")               | s LIKE '%a~%b%' ESCAPE '~' s LIKE "%a[%]b%" 
-| Firebird   | LIKE        | s.Contains(str)                 | s LIKE @str ESCAPE '~' s LIKE @str 
-| Firebird   | LIKE        | !s.Contains(a)                  | s NOT LIKE a
-| Firebird   | LIKE        | s.StartsWith("abc")             | s LIKE 'abc%' 
-| Firebird   | LIKE        | s.EndsWith("abc")               | s LIKE '%abc' 
-| Firebird   | LIKE        | SqlMethods.Like(s, "%abc%")     | s LIKE '%abc%' 
-| Firebird   | LIKE        | SqlMethods.Like(s, "a~%b", '~') | s LIKE "a~%b" ESCAPE '~' s LIKE "a[%]b" 
-| Firebird   | LIKE        | s.Like("%abc%")                 | s LIKE '%abc%' 
-| Firebird   | LIKE        | s.Like("a~%b", '~')             | s LIKE "a~%b" ESCAPE '~' 
-| Firebird   | Substring   | s.Substring(a)                  | Substring(s from  a+1<br>&nbsp;&nbsp;for Char_Length(s)-a)
-| Firebird   | Substring   | s.Substring(a, b)               | Substring(s from  a+1<br>&nbsp;&nbsp;for b)
-| Firebird   | Substring   | s.Left(a)                       | Left(s, a)
-| Firebird   | Reverse     | s.Reverse(a)                    | Reverse(s)
+* Firebird
+| Length      | s.Length                        | Char_Length(s)
+| LIKE        | s.Contains("abc")               | s LIKE '%abc%'
+| LIKE        | s.Contains("a%b")               | s LIKE '%a~%b%' ESCAPE '~' s LIKE "%a[%]b%" 
+| LIKE        | s.Contains(str)                 | s LIKE @str ESCAPE '~' s LIKE @str 
+| LIKE        | !s.Contains(a)                  | s NOT LIKE a
+| LIKE        | s.StartsWith("abc")             | s LIKE 'abc%' 
+| LIKE        | s.EndsWith("abc")               | s LIKE '%abc' 
+| LIKE        | SqlMethods.Like(s, "%abc%")     | s LIKE '%abc%' 
+| LIKE        | SqlMethods.Like(s, "a~%b", '~') | s LIKE "a~%b" ESCAPE '~' s LIKE "a[%]b" 
+| LIKE        | s.Like("%abc%")                 | s LIKE '%abc%' 
+| LIKE        | s.Like("a~%b", '~')             | s LIKE "a~%b" ESCAPE '~' 
+| Substring   | s.Substring(a)                  | Substring(s from  a+1<br>&nbsp;&nbsp;for Char_Length(s)-a)
+| Substring   | s.Substring(a, b)               | Substring(s from  a+1<br>&nbsp;&nbsp;for b)
+| Substring   | s.Left(a)                       | Left(s, a)
+| Substring   | s.Right(a)                      | Right(s, a)
+| Reverse     | s.Reverse(a)                    | Reverse(s)
+| Stuff       | s.Stuff(a, b, c)                | Substring(s, 1, a-1) + c + Substring(s, a+b, Length(s)-a-b+1))
 
-| PostgreSQL | Length      | s.Length                        | Length(s)
-| PostgreSQL | LIKE        | s.Contains("abc")               | s LIKE '%abc%'
-| PostgreSQL | LIKE        | s.Contains("a%b")               | s LIKE '%a~%b%' ESCAPE '~' s LIKE "%a[%]b%" 
-| PostgreSQL | LIKE        | s.Contains(str)                 | s LIKE @str ESCAPE '~' s LIKE @str 
-| PostgreSQL | LIKE        | !s.Contains(a)                  | s NOT LIKE a
-| PostgreSQL | LIKE        | s.StartsWith("abc")             | s LIKE 'abc%' 
-| PostgreSQL | LIKE        | s.EndsWith("abc")               | s LIKE '%abc' 
-| PostgreSQL | LIKE        | SqlMethods.Like(s, "%abc%")     | s LIKE '%abc%' 
-| PostgreSQL | LIKE        | SqlMethods.Like(s, "a~%b", '~') | s LIKE "a~%b" ESCAPE '~' s LIKE "a[%]b" 
-| PostgreSQL | LIKE        | s.Like("%abc%")                 | s LIKE '%abc%' 
-| PostgreSQL | LIKE        | s.Like("a~%b", '~')             | s LIKE "a~%b" ESCAPE '~' 
-| PostgreSQL | CharIndex   | s.CharIndex(a)                  | Position(a in s)
-| PostgreSQL | CharIndex   | s.CharIndex(a, b)               | Position(a in Substring(s, b, <br>&nbsp;&nbsp;Length(s)-b)) + b-1
-| PostgreSQL | Substring   | s.Substring(a)                  | Substring(s, a+1, Length(s)-a)
-| PostgreSQL | Substring   | s.Substring(a, b)               | Substring(s, a+1, b)
-| PostgreSQL | Substring   | s.Left(a)                       | Substring(s, 1, a)
-| PostgreSQL | Reverse     | s.Reverse(a)                    | Reverse(s) -- <i>implemented as UDF<i>
+* PostgreSQL
+| Length      | s.Length                        | Length(s)
+| LIKE        | s.Contains("abc")               | s LIKE '%abc%'
+| LIKE        | s.Contains("a%b")               | s LIKE '%a~%b%' ESCAPE '~' s LIKE "%a[%]b%" 
+| LIKE        | s.Contains(str)                 | s LIKE @str ESCAPE '~' s LIKE @str 
+| LIKE        | !s.Contains(a)                  | s NOT LIKE a
+| LIKE        | s.StartsWith("abc")             | s LIKE 'abc%' 
+| LIKE        | s.EndsWith("abc")               | s LIKE '%abc' 
+| LIKE        | SqlMethods.Like(s, "%abc%")     | s LIKE '%abc%' 
+| LIKE        | SqlMethods.Like(s, "a~%b", '~') | s LIKE "a~%b" ESCAPE '~' s LIKE "a[%]b" 
+| LIKE        | s.Like("%abc%")                 | s LIKE '%abc%' 
+| LIKE        | s.Like("a~%b", '~')             | s LIKE "a~%b" ESCAPE '~' 
+| CharIndex   | s.CharIndex(a)                  | Position(a in s)
+| CharIndex   | s.CharIndex(a, b)               | Position(a in Substring(s, b, <br>&nbsp;&nbsp;Length(s)-b)) + b-1
+| Substring   | s.Substring(a)                  | Substring(s, a+1, Length(s)-a)
+| Substring   | s.Substring(a, b)               | Substring(s, a+1, b)
+| Substring   | s.Left(a)                       | Substring(s, 1, a)
+| Substring   | s.Right(a)                      | Substring(s, Length(s)-a+1, a)
+| Reverse     | s.Reverse(a)                    | Reverse(s) -- <i>implemented as UDF<i>
+| Stuff       | s.Stuff(a, b, c)                | Substring(s, 1, a-1) + c + Substring(s, a+b, Length(s)-a-b+1))
 
-| MySql      | Length      | s.Length                        | Length(s)
-| MySql      | LIKE        | s.Contains("abc")               | s LIKE '%abc%'
-| MySql      | LIKE        | s.Contains("a%b")               | s LIKE '%a~%b%' ESCAPE '~' s LIKE "%a[%]b%" 
-| MySql      | LIKE        | s.Contains(str)                 | s LIKE @str ESCAPE '~' s LIKE @str 
-| MySql      | LIKE        | !s.Contains(a)                  | s NOT LIKE a
-| MySql      | LIKE        | s.StartsWith("abc")             | s LIKE 'abc%' 
-| MySql      | LIKE        | s.EndsWith("abc")               | s LIKE '%abc' 
-| MySql      | LIKE        | SqlMethods.Like(s, "%abc%")     | s LIKE '%abc%' 
-| MySql      | LIKE        | SqlMethods.Like(s, "a~%b", '~') | s LIKE "a~%b" ESCAPE '~' s LIKE "a[%]b" 
-| MySql      | LIKE        | s.Like("%abc%")                 | s LIKE '%abc%' 
-| MySql      | LIKE        | s.Like("a~%b", '~')             | s LIKE "a~%b" ESCAPE '~' 
-| MySql      | CharIndex   | s.CharIndex(a)                  | Locate(a, s)
-| MySql      | CharIndex   | s.CharIndex(a, b)               | Locate(a, s, b)
-| MySql      | Substring   | s.Substring(a)                  | Substring(s, a+1, Length(s)-a)
-| MySql      | Substring   | s.Substring(a, b)               | Substring(s, a+1, b)
-| MySql      | Substring   | s.Left(a)                       | Left(s, a)
-| MySql      | Reverse     | s.Reverse(a)                    | Reverse(s)
+* MySql
+| Length      | s.Length                        | Length(s)
+| LIKE        | s.Contains("abc")               | s LIKE '%abc%'
+| LIKE        | s.Contains("a%b")               | s LIKE '%a~%b%' ESCAPE '~' s LIKE "%a[%]b%" 
+| LIKE        | s.Contains(str)                 | s LIKE @str ESCAPE '~' s LIKE @str 
+| LIKE        | !s.Contains(a)                  | s NOT LIKE a
+| LIKE        | s.StartsWith("abc")             | s LIKE 'abc%' 
+| LIKE        | s.EndsWith("abc")               | s LIKE '%abc' 
+| LIKE        | SqlMethods.Like(s, "%abc%")     | s LIKE '%abc%' 
+| LIKE        | SqlMethods.Like(s, "a~%b", '~') | s LIKE "a~%b" ESCAPE '~' s LIKE "a[%]b" 
+| LIKE        | s.Like("%abc%")                 | s LIKE '%abc%' 
+| LIKE        | s.Like("a~%b", '~')             | s LIKE "a~%b" ESCAPE '~' 
+| CharIndex   | s.CharIndex(a)                  | Locate(a, s)
+| CharIndex   | s.CharIndex(a, b)               | Locate(a, s, b)
+| Substring   | s.Substring(a)                  | Substring(s, a+1, Length(s)-a)
+| Substring   | s.Substring(a, b)               | Substring(s, a+1, b)
+| Substring   | s.Left(a)                       | Left(s, a)
+| Substring   | s.Right(a)                      | Right(s, a)
+| Reverse     | s.Reverse(a)                    | Reverse(s)
+| Stuff       | s.Stuff(a, b, c)                | Substring(s, 1, a-1) + c + Substring(s, a+b, Length(s)-a-b+1))
 
-| MS SQL     | Length      | s.Length                        | Len(s)
-| MS SQL     | LIKE        | s.Contains("abc")               | s LIKE '%abc%'
-| MS SQL     | LIKE        | s.Contains("a%b")               | s LIKE '%a~%b%' ESCAPE '~' s LIKE "%a[%]b%" 
-| MS SQL     | LIKE        | s.Contains(str)                 | s LIKE @str ESCAPE '~' s LIKE @str 
-| MS SQL     | LIKE        | !s.Contains(a)                  | s NOT LIKE a
-| MS SQL     | LIKE        | s.StartsWith("abc")             | s LIKE 'abc%' 
-| MS SQL     | LIKE        | s.EndsWith("abc")               | s LIKE '%abc' 
-| MS SQL     | LIKE        | SqlMethods.Like(s, "%abc%")     | s LIKE '%abc%' 
-| MS SQL     | LIKE        | SqlMethods.Like(s, "a~%b", '~') | s LIKE "a~%b" ESCAPE '~' s LIKE "a[%]b" 
-| MS SQL     | LIKE        | s.Like("%abc%")                 | s LIKE '%abc%' 
-| MS SQL     | LIKE        | s.Like("a~%b", '~')             | s LIKE "a~%b" ESCAPE '~' 
-| MS SQL     | CharIndex   | s.CharIndex(a)                  | CharIndex(a, s)
-| MS SQL     | CharIndex   | s.CharIndex(a, b)               | CharIndex(a, s, b)
-| MS SQL     | Substring   | s.Substring(a)                  | Substring(s, a+1, Len(s)-a)
-| MS SQL     | Substring   | s.Substring(a, b)               | Substring(s, a+1, b)
-| MS SQL     | Substring   | s.Left(a)                       | Left(s, a)
-| MS SQL     | Reverse     | s.Reverse(a)                    | Reverse(s)
+* MS SQL
+| Length      | s.Length                        | Len(s)
+| LIKE        | s.Contains("abc")               | s LIKE '%abc%'
+| LIKE        | s.Contains("a%b")               | s LIKE '%a~%b%' ESCAPE '~' s LIKE "%a[%]b%" 
+| LIKE        | s.Contains(str)                 | s LIKE @str ESCAPE '~' s LIKE @str 
+| LIKE        | !s.Contains(a)                  | s NOT LIKE a
+| LIKE        | s.StartsWith("abc")             | s LIKE 'abc%' 
+| LIKE        | s.EndsWith("abc")               | s LIKE '%abc' 
+| LIKE        | SqlMethods.Like(s, "%abc%")     | s LIKE '%abc%' 
+| LIKE        | SqlMethods.Like(s, "a~%b", '~') | s LIKE "a~%b" ESCAPE '~' s LIKE "a[%]b" 
+| LIKE        | s.Like("%abc%")                 | s LIKE '%abc%' 
+| LIKE        | s.Like("a~%b", '~')             | s LIKE "a~%b" ESCAPE '~' 
+| CharIndex   | s.CharIndex(a)                  | CharIndex(a, s)
+| CharIndex   | s.CharIndex(a, b)               | CharIndex(a, s, b)
+| Substring   | s.Substring(a)                  | Substring(s, a+1, Len(s)-a)
+| Substring   | s.Substring(a, b)               | Substring(s, a+1, b)
+| Substring   | s.Left(a)                       | Left(s, a)
+| Substring   | s.Right(a)                      | Right(s, a)
+| Reverse     | s.Reverse(a)                    | Reverse(s)
+| Stuff       | s.Stuff(a, b, c)                | Stuff(s, a, b, c)
 
-| SqlCe      | Length      | s.Length                        | Len(s)
-| SqlCe      | LIKE        | s.Contains("abc")               | s LIKE '%abc%'
-| SqlCe      | LIKE        | s.Contains("a%b")               | s LIKE '%a~%b%' ESCAPE '~' s LIKE "%a[%]b%" 
-| SqlCe      | LIKE        | s.Contains(str)                 | s LIKE @str ESCAPE '~' s LIKE @str 
-| SqlCe      | LIKE        | !s.Contains(a)                  | s NOT LIKE a
-| SqlCe      | LIKE        | s.StartsWith("abc")             | s LIKE 'abc%' 
-| SqlCe      | LIKE        | s.EndsWith("abc")               | s LIKE '%abc' 
-| SqlCe      | LIKE        | SqlMethods.Like(s, "%abc%")     | s LIKE '%abc%' 
-| SqlCe      | LIKE        | SqlMethods.Like(s, "a~%b", '~') | s LIKE "a~%b" ESCAPE '~' s LIKE "a[%]b" 
-| SqlCe      | LIKE        | s.Like("%abc%")                 | s LIKE '%abc%' 
-| SqlCe      | LIKE        | s.Like("a~%b", '~')             | s LIKE "a~%b" ESCAPE '~' 
-| SqlCe      | CharIndex   | s.CharIndex(a)                  | CharIndex(a, s)
-| SqlCe      | CharIndex   | s.CharIndex(a, b)               | CharIndex(a, s, b)
-| SqlCe      | Substring   | s.Substring(a)                  | Substring(s, a+1, Len(s)-a)
-| SqlCe      | Substring   | s.Substring(a, b)               | Substring(s, a+1, b)
-| SqlCe      | Substring   | s.Left(a)                       | Substring(s, 1, a)
+* SqlCe
+| Length      | s.Length                        | Len(s)
+| LIKE        | s.Contains("abc")               | s LIKE '%abc%'
+| LIKE        | s.Contains("a%b")               | s LIKE '%a~%b%' ESCAPE '~' s LIKE "%a[%]b%" 
+| LIKE        | s.Contains(str)                 | s LIKE @str ESCAPE '~' s LIKE @str 
+| LIKE        | !s.Contains(a)                  | s NOT LIKE a
+| LIKE        | s.StartsWith("abc")             | s LIKE 'abc%' 
+| LIKE        | s.EndsWith("abc")               | s LIKE '%abc' 
+| LIKE        | SqlMethods.Like(s, "%abc%")     | s LIKE '%abc%' 
+| LIKE        | SqlMethods.Like(s, "a~%b", '~') | s LIKE "a~%b" ESCAPE '~' s LIKE "a[%]b" 
+| LIKE        | s.Like("%abc%")                 | s LIKE '%abc%' 
+| LIKE        | s.Like("a~%b", '~')             | s LIKE "a~%b" ESCAPE '~' 
+| CharIndex   | s.CharIndex(a)                  | CharIndex(a, s)
+| CharIndex   | s.CharIndex(a, b)               | CharIndex(a, s, b)
+| Substring   | s.Substring(a)                  | Substring(s, a+1, Len(s)-a)
+| Substring   | s.Substring(a, b)               | Substring(s, a+1, b)
+| Substring   | s.Left(a)                       | Substring(s, 1, a)
+| Substring   | s.Right(a)                      | Substring(s,<br>&nbsp;&nbsp;Len(s)-a+1, a)
+| Stuff       | s.Stuff(a, b, c)                | Stuff(s, a, b, c)
 
-| Sybase     | Length      | s.Length                        | Len(s)
-| Sybase     | LIKE        | s.Contains("abc")               | s LIKE '%abc%'
-| Sybase     | LIKE        | s.Contains("a%b")               | s LIKE '%a~%b%' ESCAPE '~' s LIKE "%a[%]b%" 
-| Sybase     | LIKE        | s.Contains(str)                 | s LIKE @str ESCAPE '~' s LIKE @str 
-| Sybase     | LIKE        | !s.Contains(a)                  | s NOT LIKE a
-| Sybase     | LIKE        | s.StartsWith("abc")             | s LIKE 'abc%' 
-| Sybase     | LIKE        | s.EndsWith("abc")               | s LIKE '%abc' 
-| Sybase     | LIKE        | SqlMethods.Like(s, "%abc%")     | s LIKE '%abc%' 
-| Sybase     | LIKE        | SqlMethods.Like(s, "a~%b", '~') | s LIKE "a~%b" ESCAPE '~' s LIKE "a[%]b" 
-| Sybase     | LIKE        | s.Like("%abc%")                 | s LIKE '%abc%' 
-| Sybase     | LIKE        | s.Like("a~%b", '~')             | s LIKE "a~%b" ESCAPE '~' 
-| Sybase     | CharIndex   | s.CharIndex(a)                  | CharIndex(a, s)
-| Sybase     | CharIndex   | s.CharIndex(a, b)               | CharIndex(a,Substring(<br>&nbsp;&nbsp;s, b, Len(s)-b)) + b - 1
-| Sybase     | Substring   | s.Substring(a)                  | Substring(s, a+1, Len(s)-a)
-| Sybase     | Substring   | s.Substring(a, b)               | Substring(s, a+1, b)
-| Sybase     | Substring   | s.Left(a)                       | Left(s, a)
-| Sybase     | Reverse     | s.Reverse(a)                    | Reverse(s)
+* Sybase
+| Length      | s.Length                        | Len(s)
+| LIKE        | s.Contains("abc")               | s LIKE '%abc%'
+| LIKE        | s.Contains("a%b")               | s LIKE '%a~%b%' ESCAPE '~' s LIKE "%a[%]b%" 
+| LIKE        | s.Contains(str)                 | s LIKE @str ESCAPE '~' s LIKE @str 
+| LIKE        | !s.Contains(a)                  | s NOT LIKE a
+| LIKE        | s.StartsWith("abc")             | s LIKE 'abc%' 
+| LIKE        | s.EndsWith("abc")               | s LIKE '%abc' 
+| LIKE        | SqlMethods.Like(s, "%abc%")     | s LIKE '%abc%' 
+| LIKE        | SqlMethods.Like(s, "a~%b", '~') | s LIKE "a~%b" ESCAPE '~' s LIKE "a[%]b" 
+| LIKE        | s.Like("%abc%")                 | s LIKE '%abc%' 
+| LIKE        | s.Like("a~%b", '~')             | s LIKE "a~%b" ESCAPE '~' 
+| CharIndex   | s.CharIndex(a)                  | CharIndex(a, s)
+| CharIndex   | s.CharIndex(a, b)               | CharIndex(a,Substring(<br>&nbsp;&nbsp;s, b, Len(s)-b)) + b - 1
+| Substring   | s.Substring(a)                  | Substring(s, a+1, Len(s)-a)
+| Substring   | s.Substring(a, b)               | Substring(s, a+1, b)
+| Substring   | s.Left(a)                       | Left(s, a)
+| Substring   | s.Right(a)                      | Right(s, a)
+| Reverse     | s.Reverse(a)                    | Reverse(s)
+| Stuff       | s.Stuff(a, b, c)                | Stuff(s, a, b, c)
 
-| SQLite     | Length      | s.Length                        | Length(s)
-| SQLite     | LIKE        | s.Contains("abc")               | s LIKE '%abc%'
-| SQLite     | LIKE        | s.Contains("a%b")               | s LIKE '%a~%b%' ESCAPE '~' s LIKE "%a[%]b%" 
-| SQLite     | LIKE        | s.Contains(str)                 | s LIKE @str ESCAPE '~' s LIKE @str 
-| SQLite     | LIKE        | !s.Contains(a)                  | s NOT LIKE a
-| SQLite     | LIKE        | s.StartsWith("abc")             | s LIKE 'abc%' 
-| SQLite     | LIKE        | s.EndsWith("abc")               | s LIKE '%abc' 
-| SQLite     | LIKE        | SqlMethods.Like(s, "%abc%")     | s LIKE '%abc%' 
-| SQLite     | LIKE        | SqlMethods.Like(s, "a~%b", '~') | s LIKE "a~%b" ESCAPE '~' s LIKE "a[%]b"
-| SQLite     | LIKE        | s.Like("%abc%")                 | s LIKE '%abc%' 
-| SQLite     | LIKE        | s.Like("a~%b", '~')             | s LIKE "a~%b" ESCAPE '~'
-| SQLite     | CharIndex   | s.CharIndex(a)                  | CharIndex(a, s)
-| SQLite     | CharIndex   | s.CharIndex(a, b)               | CharIndex(a, s, b)
-| SQLite     | Substring   | s.Substring(a)                  | Substr(s, a+1,<br>&nbsp;&nbsp;Length(s) - a)
-| SQLite     | Substring   | s.Substring(a, b)               | Substr(s, a+1, b)
-| SQLite     | Substring   | s.Left(a)                       | Substr(s, 1, a)
-| SQLite     | Reverse     | s.Reverse(a)                    | Reverse(s)
+* SQLite
+| Length      | s.Length                        | Length(s)
+| LIKE        | s.Contains("abc")               | s LIKE '%abc%'
+| LIKE        | s.Contains("a%b")               | s LIKE '%a~%b%' ESCAPE '~' s LIKE "%a[%]b%" 
+| LIKE        | s.Contains(str)                 | s LIKE @str ESCAPE '~' s LIKE @str 
+| LIKE        | !s.Contains(a)                  | s NOT LIKE a
+| LIKE        | s.StartsWith("abc")             | s LIKE 'abc%' 
+| LIKE        | s.EndsWith("abc")               | s LIKE '%abc' 
+| LIKE        | SqlMethods.Like(s, "%abc%")     | s LIKE '%abc%' 
+| LIKE        | SqlMethods.Like(s, "a~%b", '~') | s LIKE "a~%b" ESCAPE '~' s LIKE "a[%]b"
+| LIKE        | s.Like("%abc%")                 | s LIKE '%abc%' 
+| LIKE        | s.Like("a~%b", '~')             | s LIKE "a~%b" ESCAPE '~'
+| CharIndex   | s.CharIndex(a)                  | CharIndex(a, s)
+| CharIndex   | s.CharIndex(a, b)               | CharIndex(a, s, b)
+| Substring   | s.Substring(a)                  | Substr(s, a+1,<br>&nbsp;&nbsp;Length(s) - a)
+| Substring   | s.Substring(a, b)               | Substr(s, a+1, b)
+| Substring   | s.Left(a)                       | Substr(s, 1, a)
+| Substring   | s.Right(a)                      | Substr(s,<br>&nbsp;&nbsp;Length(s)-a+1, a)
+| Reverse     | s.Reverse(a)                    | Reverse(s)
+| Stuff       | s.Stuff(a, b, c)                | Substring(s, 1, a-1) + c +<br>Substring(s, a+b, Length(s)-a-b+1))
 
-| Access     | Length      | s.Length                        | Len(s)
-| Access     | LIKE        | s.Contains("abc")               | s LIKE '%abc%'
-| Access     | LIKE        | s.Contains("a%b")               | s LIKE "%a[%]b%"
-| Access     | LIKE        | s.Contains(str)                 | s LIKE @str ESCAPE '~' s LIKE @str
-| Access     | LIKE        | !s.Contains(a)                  | s NOT LIKE a
-| Access     | LIKE        | s.StartsWith("abc")             | s LIKE 'abc%'
-| Access     | LIKE        | s.EndsWith("abc")               | s LIKE '%abc'
-| Access     | LIKE        | SqlMethods.Like(s, "%abc%")     | s LIKE '%abc%'
-| Access     | LIKE        | SqlMethods.Like(s, "a~%b", '~') | s LIKE "a[%]b"
-| Access     | LIKE        | s.Like("%abc%")                 | s LIKE '%abc%'
-| Access     | LIKE        | s.Like("a~%b", '~')             | s LIKE "a[%]b"
-| Access     | CharIndex   | s.CharIndex(a)                  | InStr(1, s, a, 1)
-| Access     | CharIndex   | s.CharIndex(a, b)               | InStr(b, s, a, 1)
-| Access     | Substring   | s.Substring(a)                  | Mid(s, a+1, Len(s)-a)
-| Access     | Substring   | s.Substring(a, b)               | Mid(s, a+1, b)
-| Access     | Substring   | s.Left(a)                       | Left(s, a)
-
+* Access
+| Length      | s.Length                        | Len(s)
+| LIKE        | s.Contains("abc")               | s LIKE '%abc%'
+| LIKE        | s.Contains("a%b")               | s LIKE "%a[%]b%"
+| LIKE        | s.Contains(str)                 | s LIKE @str ESCAPE '~' s LIKE @str
+| LIKE        | !s.Contains(a)                  | s NOT LIKE a
+| LIKE        | s.StartsWith("abc")             | s LIKE 'abc%'
+| LIKE        | s.EndsWith("abc")               | s LIKE '%abc'
+| LIKE        | SqlMethods.Like(s, "%abc%")     | s LIKE '%abc%'
+| LIKE        | SqlMethods.Like(s, "a~%b", '~') | s LIKE "a[%]b"
+| LIKE        | s.Like("%abc%")                 | s LIKE '%abc%'
+| LIKE        | s.Like("a~%b", '~')             | s LIKE "a[%]b"
+| CharIndex   | s.CharIndex(a)                  | InStr(1, s, a, 1)
+| CharIndex   | s.CharIndex(a, b)               | InStr(b, s, a, 1)
+| Substring   | s.Substring(a)                  | Mid(s, a+1, Len(s)-a)
+| Substring   | s.Substring(a, b)               | Mid(s, a+1, b)
+| Substring   | s.Left(a)                       | Left(s, a)
+| Substring   | s.Right(a)                      | Right(s, a)
+| Stuff       | s.Stuff(a, b, c)                | Substring(s, 1, a-1) + c +<br>Substring(s, a+b, Length(s)-a-b+1))

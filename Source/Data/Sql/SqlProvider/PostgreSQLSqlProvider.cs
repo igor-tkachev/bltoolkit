@@ -30,8 +30,9 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 				switch (func.Name)
 				{
-					case "Left"     : return BuildComplexLeft (func);
-					case "Right"    : return BuildComplexRight(func);
+					case "Left"     : return BuildAlternativeLeft (func);
+					case "Right"    : return BuildAlternativeRight(func);
+					case "Stuff"    : return BuildAlternativeStuff(func);
 					case "CharIndex":
 						return func.Parameters.Length == 2?
 							new SqlExpression("Position({0} in {1})", Precedence.Primary, func.Parameters[0], func.Parameters[1]):

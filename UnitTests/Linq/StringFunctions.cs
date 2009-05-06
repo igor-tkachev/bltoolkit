@@ -280,6 +280,46 @@ namespace Data.Linq
 		}
 
 		[Test]
+		public void Stuff()
+		{
+			ForEachProvider(db => 
+			{
+				var q = from p in db.Person where p.FirstName.Stuff(3, 1, "123") == "Jo123n" && p.ID == 1 select p;
+				Assert.AreEqual(1, q.ToList().First().ID);
+			});
+		}
+
+		[Test]
+		public void Insert()
+		{
+			ForEachProvider(db => 
+			{
+				var q = from p in db.Person where p.FirstName.Insert(2, "123") == "Jo123hn" && p.ID == 1 select p;
+				Assert.AreEqual(1, q.ToList().First().ID);
+			});
+		}
+
+		[Test]
+		public void Remove1()
+		{
+			ForEachProvider(db => 
+			{
+				var q = from p in db.Person where p.FirstName.Remove(2) == "Jo" && p.ID == 1 select p;
+				Assert.AreEqual(1, q.ToList().First().ID);
+			});
+		}
+
+		[Test]
+		public void Remove2()
+		{
+			ForEachProvider(db => 
+			{
+				var q = from p in db.Person where p.FirstName.Remove(1, 2) == "Jn" && p.ID == 1 select p;
+				Assert.AreEqual(1, q.ToList().First().ID);
+			});
+		}
+
+		//[Test]
 		public void Test()
 		{
 			using (var db = new TestDbManager(ProviderName.Informix))

@@ -34,8 +34,9 @@ namespace BLToolkit.Data.Sql.SqlProvider
 				switch (func.Name)
 				{
 					case "Substring" : return new SqlFunction("Substr", func.Parameters);
-					case "Left"      : return BuildComplexLeft (func);
-					case "Right"     : return BuildComplexRight(func);
+					case "Left"      : return BuildAlternativeLeft (func);
+					case "Right"     : return BuildAlternativeRight(func);
+					case "Stuff"     : return BuildAlternativeStuff(func);
 				}
 			}
 

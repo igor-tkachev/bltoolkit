@@ -1,7 +1,12 @@
-﻿| All data providers | IndexOf     | s.IndexOf(a)           | #sql CASE\n\tWHEN [b]Length[/b](a) = 0 THEN 0\n\tELSE [b]CharIndex[/b](a, s) - 1\nEND
-| All data providers | IndexOf     | s.IndexOf(a, b)        | #sql CASE\n\tWHEN [b]Length[/b](a) = 0 AND [b]Length[/b](s) >= b + 1 THEN b\n\tELSE [b]CharIndex[/b](a, s, b + 1) - 1\nEND
-| All data providers | IndexOf     | s.IndexOf(a, b, c)     | #sql CASE\n\tWHEN [b]Length[/b](a) = 0 AND [b]Length[/b](s) >= b + 1 THEN b\n\tELSE [b]CharIndex[/b](a, [b]Left[/b](s, b + c), b + 1) - 1\nEND
-| All data providers | LastIndexOf | s.LastIndexOf(a)       | #sql CASE\n\tWHEN [b]Length[/b](a)       = 0 THEN [b]Length[/b](s) - 1\n\tWHEN [b]CharIndex[/b](a, s) = 0 THEN -1\n\tELSE [b]Length[/b](s) - ([b]CharIndex[/b]([b]Reverse[/b](a), [b]Reverse[/b](s)) + [b]Length[/b](a)) + 1\nEND
-| All data providers | LastIndexOf | s.LastIndexOf(a, b)    | #sql CASE\n\tWHEN [b]Length[/b](a) = 0 THEN [b]Length[/b](s) - 1\n\tWHEN [b]CharIndex[/b](a, s) = 0 THEN -1\n\tELSE [b]Length[/b](s) - ([b]CharIndex[/b]([b]Reverse[/b](a), [b]Reverse[/b]([b]Left[/b](s, b + 1))) + [b]Length[/b](a)) + 1\nEND
-| All data providers | LastIndexOf | s.LastIndexOf(a, b, c) | #sql CASE\n\tWHEN [b]Length[/b](a) = 0 AND [b]Length[/b](s) >= b + 1 THEN b\n\tWHEN [b]CharIndex[/b](a, s) = 0 OR [b]Length[/b](s) - ([b]CharIndex[/b]([b]Reverse[/b](a), [b]Reverse[/b]([b]Left[/b](s, b + 1))) + [b]Length[/b](a)) + 1 <= b - c THEN -1\n\tELSE [b]Length[/b](s) - ([b]CharIndex[/b]([b]Reverse[/b](a), [b]Reverse[/b]([b]Left[/b](s, b + 1))) + [b]Length[/b](a)) + 1\nEND
+﻿* All data providers
+| Substring   | s.Substring(a)         | s.Substring(a, s.Length - a)
+| IndexOf     | s.IndexOf(a)           | a.Length == 0 ? 0  : (s.CharIndex(a) ?? 0) - 1
+| IndexOf     | s.IndexOf(a, b)        | a.Length == 0 && s.Length > b ? b : (s.CharIndex(a, b + 1) ?? 0) - 1
+| IndexOf     | s.IndexOf(a, b, c)     | a.Length == 0 && s.Length > b ? b : (s.Left(c).CharIndex(a, b) ?? 0) - 1
+| LastIndexOf | s.LastIndexOf(a)       | a.Length == 0 ? s.Length - 1 : (s.CharIndex(a) ?? 0) == 0 ? -1 : s.Length - (s.Reverse().CharIndex(a.Reverse()) ?? 0) - a.Length + 1
+| LastIndexOf | s.LastIndexOf(a, b)    | a.Length == 0 ? b : (s.CharIndex(a, b + 1) ?? 0) == 0 ? -1 : s.Length - (s.Substring(b, s.Length - b).Reverse().CharIndex(a.Reverse()) ?? 0) - a.Length + 1
+| LastIndexOf | s.LastIndexOf(a, b, c) | a.Length == 0 ? b : (s.Left(b + c).CharIndex(a, b + 1) ?? 0) == 0 ? -1 : b + c - (s.Substring(b, c).Reverse().CharIndex(a.Reverse()) ?? 0) - a.Length + 1
+| Insert      | s.Insert(a, b)         | s.Length == a ? s + b : s.Stuff(a + 1, 0, b)
+| Remove      | s.Remove(a)            | s.Left(a)
+| Remove      | s.Remove(a, b)         | s.Stuff(a + 1, b, "")
 
