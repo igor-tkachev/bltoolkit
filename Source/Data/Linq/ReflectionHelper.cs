@@ -11,9 +11,6 @@ using System.Xml;
 
 namespace BLToolkit.Data.Linq
 {
-	using Sql;
-	using Sql.SqlProvider;
-
 	class ReflectionHelper
 	{
 		public class Expressor<T>
@@ -228,8 +225,8 @@ namespace BLToolkit.Data.Linq
 				public static MethodInfo EndsWith   = MethodExpressor(s => s.EndsWith(""));
 				public static MethodInfo Like11     = MethodExpressor(s => SqlMethods.Like("", ""));
 				public static MethodInfo Like12     = MethodExpressor(s => SqlMethods.Like("", "", ' '));
-				public static MethodInfo Like21     = MethodExpressor(s => s.Like(""));
-				public static MethodInfo Like22     = MethodExpressor(s => s.Like("", ' '));
+				public static MethodInfo Like21     = MethodExpressor(s => Sql.Like(s, ""));
+				public static MethodInfo Like22     = MethodExpressor(s => Sql.Like(s, "", ' '));
 			}
 		}
 	}

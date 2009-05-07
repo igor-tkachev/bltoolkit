@@ -576,7 +576,7 @@ namespace DocGen
 			var features  = (
 				from i in items
 				group i by new { i.Feature, i.Linq } into g
-				orderby g.Key.Feature
+				orderby g.Key.Feature, g.Key.Linq
 				select new
 				{
 					g.Key.Feature,

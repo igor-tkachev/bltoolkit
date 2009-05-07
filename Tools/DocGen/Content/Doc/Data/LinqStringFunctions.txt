@@ -1,12 +1,15 @@
 ﻿* All data providers
-| Substring   | s.Substring(a)         | s.Substring(a, s.Length - a)
-| IndexOf     | s.IndexOf(a)           | a.Length == 0 ? 0  : (s.CharIndex(a) ?? 0) - 1
-| IndexOf     | s.IndexOf(a, b)        | a.Length == 0 && s.Length > b ? b : (s.CharIndex(a, b + 1) ?? 0) - 1
-| IndexOf     | s.IndexOf(a, b, c)     | a.Length == 0 && s.Length > b ? b : (s.Left(c).CharIndex(a, b) ?? 0) - 1
-| LastIndexOf | s.LastIndexOf(a)       | a.Length == 0 ? s.Length - 1 : (s.CharIndex(a) ?? 0) == 0 ? -1 : s.Length - (s.Reverse().CharIndex(a.Reverse()) ?? 0) - a.Length + 1
-| LastIndexOf | s.LastIndexOf(a, b)    | a.Length == 0 ? b : (s.CharIndex(a, b + 1) ?? 0) == 0 ? -1 : s.Length - (s.Substring(b, s.Length - b).Reverse().CharIndex(a.Reverse()) ?? 0) - a.Length + 1
-| LastIndexOf | s.LastIndexOf(a, b, c) | a.Length == 0 ? b : (s.Left(b + c).CharIndex(a, b + 1) ?? 0) == 0 ? -1 : b + c - (s.Substring(b, c).Reverse().CharIndex(a.Reverse()) ?? 0) - a.Length + 1
-| Insert      | s.Insert(a, b)         | s.Length == a ? s + b : s.Stuff(a + 1, 0, b)
-| Remove      | s.Remove(a)            | s.Left(a)
-| Remove      | s.Remove(a, b)         | s.Stuff(a + 1, b, "")
+| Length      | s.Length               | Sql.Length(s)
+| Substring   | s.Substring  (a)       | Sql.Substring(s, a + 1, Sql.Length(s) - a)
+| Substring   | s.Substring  (a, b)    | Sql.Substring(s, a + 1, b)
+| IndexOf     | s.IndexOf    (a)       | Sql.Length(a) == 0 ? 0  : (Sql.CharIndex(a, s) ?? 0) - 1
+| IndexOf     | s.IndexOf    (a, b)    | Sql.Length(a) == 0 && Sql.Length(s) > b ? b : (Sql.CharIndex(a, s, b + 1) ?? 0) - 1
+| IndexOf     | s.IndexOf    (a, b, c) | Sql.Length(a) == 0 && Sql.Length(s) > b ? b : (Sql.CharIndex(a, Sql.Left(s, c), b) ?? 0) - 1
+| LastIndexOf | s.LastIndexOf(a)       | Sql.Length(a) == 0 ? Sql.Length(s) - 1 : (Sql.CharIndex(a, s) ?? 0) == 0 ? -1 : Sql.Length(s) - (Sql.CharIndex(Sql.Reverse(a), Sql.Reverse(s)) ?? 0) - Sql.Length(a) + 1
+| LastIndexOf | s.LastIndexOf(a, b)    | Sql.Length(a) == 0 ? b : (Sql.CharIndex(a, s, b + 1) ?? 0) == 0 ? -1 : Sql.Length(s) - (Sql.CharIndex(Sql.Reverse(a), Sql.Reverse(Sql.Substring(s, b + 1, Sql.Length(s) - b))) ?? 0) - Sql.Length(a) + 1
+| LastIndexOf | s.LastIndexOf(a, b, c) | Sql.Length(a) == 0 ? b : (Sql.CharIndex(a, Sql.Left(s, b + c), b + 1) ?? 0) == 0 ? -1 : b + c - (Sql.CharIndex(Sql.Reverse(a), Sql.Reverse(Sql.Substring(s, b + 1, c))) ?? 0) - Sql.Length(a) + 1
+| Insert      | s.Insert     (a, b)    | Sql.Length(s) == a ? s + b : Sql.Stuff(s, a + 1, 0, b)
+| Remove      | s.Remove     (a)       | Sql.Left(s, a)
+| Remove      | s.Remove     (a, b)    | Sql.Stuff(s, a + 1, b, "")
+
 

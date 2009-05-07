@@ -1,8 +1,18 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Reflection;
 
 namespace BLToolkit.Data.Sql.SqlProvider
 {
 	using DataProvider;
+
+#if FW3
+	using Linq;
+
+	using C = Char;
+	using S = String;
+	using I = Int32;
+#endif
 
 	public class SQLiteSqlProvider : BasicSqlProvider
 	{
@@ -33,14 +43,22 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 				switch (func.Name)
 				{
-					case "Substring" : return new SqlFunction("Substr", func.Parameters);
-					case "Left"      : return BuildAlternativeLeft (func);
-					case "Right"     : return BuildAlternativeRight(func);
-					case "Stuff"     : return BuildAlternativeStuff(func);
+					case "Substring" : return new SqlFunction("Substr",   func.Parameters);
+					case "Space"     : return new SqlFunction("PadR",     new SqlValue(" "), func.Parameters[0]);
+					case "Left"      : return new SqlFunction("LeftStr",  func.Parameters);
+					case "Right"     : return new SqlFunction("RightStr", func.Parameters);
 				}
 			}
 
 			return expr;
 		}
+
+#if FW3
+		protected override Dictionary<MemberInfo,BaseExpressor> GetExpressors() { return _members; }
+		static    readonly Dictionary<MemberInfo,BaseExpressor> _members = new Dictionary<MemberInfo,BaseExpressor>
+		{
+			{ MI(() => Sql.Stuff("",0,0,"")), new F<S,I,I,S,S>((p0,p1,p2,p3) => AltStuff(p0, p1, p2, p3)) },
+		};
+#endif
 	}
 }

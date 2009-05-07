@@ -1,9 +1,19 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Reflection;
 using System.Text;
 
 namespace BLToolkit.Data.Sql.SqlProvider
 {
 	using DataProvider;
+
+#if FW3
+	using Linq;
+
+	using C = Char;
+	using S = String;
+	using I = Int32;
+#endif
 
 	public class InformixSqlProvider : BasicSqlProvider
 	{
@@ -50,9 +60,6 @@ namespace BLToolkit.Data.Sql.SqlProvider
 				{
 					case "Coalesce"  : return new SqlFunction("Nvl",    func.Parameters);
 					case "Substring" : return new SqlFunction("Substr", func.Parameters);
-					case "Left"      : return BuildAlternativeLeft (func);
-					case "Right"     : return BuildAlternativeRight(func);
-					case "Stuff"     : return BuildAlternativeStuff(func);
 				}
 			}
 
@@ -72,10 +79,19 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 			if (predicate.Escape != null)
 			{
-				sb.Append(" ESCAPE '");
+				sb.Append(" ESCAPE ");
 				BuildExpression(sb, precedence, predicate.Escape);
-				sb.Append("'");
 			}
 		}
+
+#if FW3
+		protected override Dictionary<MemberInfo,BaseExpressor> GetExpressors() { return _members; }
+		static    readonly Dictionary<MemberInfo,BaseExpressor> _members = new Dictionary<MemberInfo,BaseExpressor>
+		{
+			{ MI<S>(s => Sql.Left (s, 0      )), new F<S,I,S>    ((p0,p1)       => Sql.Substring(p0, 1, p1)) },
+			{ MI<S>(s => Sql.Right(s, 0      )), new F<S,I,S>    ((p0,p1)       => Sql.Substring(p0, p0.Length - p1 + 1, p1)) },
+			{ MI<S>(s => Sql.Stuff(s, 0, 0, s)), new F<S,I,I,S,S>((p0,p1,p2,p3) => AltStuff(p0, p1, p2, p3)) },
+		};
+#endif
 	}
 }

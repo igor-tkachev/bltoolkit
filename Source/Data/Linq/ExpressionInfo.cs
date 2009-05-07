@@ -12,7 +12,7 @@ namespace BLToolkit.Data.Linq
 {
 	using DataProvider;
 	using Mapping;
-	using Sql;
+	using Data.Sql;
 
 	class ExpressionInfo<T> : ReflectionHelper
 	{

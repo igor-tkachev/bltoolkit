@@ -116,7 +116,7 @@ namespace Data.Linq
 		{
 			ForEachProvider(db => 
 			{
-				var q = from p in db.Person where p.FirstName.Like("%hn%") && p.ID == 1 select p;
+				var q = from p in db.Person where Sql.Like(p.FirstName, "%hn%") && p.ID == 1 select p;
 				Assert.AreEqual(1, q.ToList().First().ID);
 			});
 		}
@@ -126,7 +126,7 @@ namespace Data.Linq
 		{
 			ForEachProvider(db => 
 			{
-				var q = from p in db.Person where !p.FirstName.Like(@"%h~%n%", '~') && p.ID == 1 select p;
+				var q = from p in db.Person where !Sql.Like(p.FirstName, @"%h~%n%", '~') && p.ID == 1 select p;
 				Assert.AreEqual(1, q.ToList().First().ID);
 			});
 		}
@@ -164,10 +164,12 @@ namespace Data.Linq
 		[Test]
 		public void IndexOf3()
 		{
-			var n = 5;
-			ForEachProvider(new[] { ProviderName.DB2, ProviderName.Firebird, ProviderName.Informix }, db => 
+			var s = "e";
+			var n1 = 2;
+			var n2 = 5;
+			ForEachProvider(new[] { ProviderName.DB2, ProviderName.Firebird, ProviderName.Informix, ProviderName.SqlCe, ProviderName.Sybase, ProviderName.Access }, db => 
 			{
-				var q = from p in db.Person where p.LastName.IndexOf("e", 2, n) == 1 && p.ID == 2 select p;
+				var q = from p in db.Person where p.LastName.IndexOf(s, n1, n2) == 1 && p.ID == 2 select p;
 				Assert.AreEqual(2, q.ToList().First().ID);
 			});
 		}
@@ -214,7 +216,7 @@ namespace Data.Linq
 		{
 			ForEachProvider(new[] { ProviderName.Firebird, ProviderName.Informix }, db => 
 			{
-				var q = from p in db.Person where p.FirstName.CharIndex("oh") == 2 && p.ID == 1 select p;
+				var q = from p in db.Person where Sql.CharIndex("oh", p.FirstName) == 2 && p.ID == 1 select p;
 				Assert.AreEqual(1, q.ToList().First().ID);
 			});
 		}
@@ -224,7 +226,7 @@ namespace Data.Linq
 		{
 			ForEachProvider(new[] { ProviderName.Firebird, ProviderName.Informix }, db => 
 			{
-				var q = from p in db.Person where p.LastName.CharIndex("p", 2) == 3 && p.ID == 1 select p;
+				var q = from p in db.Person where Sql.CharIndex("p", p.LastName, 2) == 3 && p.ID == 1 select p;
 				Assert.AreEqual(1, q.ToList().First().ID);
 			});
 		}
@@ -234,7 +236,7 @@ namespace Data.Linq
 		{
 			ForEachProvider(db => 
 			{
-				var q = from p in db.Person where p.FirstName.Left(2) == "Jo" && p.ID == 1 select p;
+				var q = from p in db.Person where Sql.Left(p.FirstName, 2) == "Jo" && p.ID == 1 select p;
 				Assert.AreEqual(1, q.ToList().First().ID);
 			});
 		}
@@ -244,7 +246,7 @@ namespace Data.Linq
 		{
 			ForEachProvider(db => 
 			{
-				var q = from p in db.Person where p.FirstName.Right(3) == "ohn" && p.ID == 1 select p;
+				var q = from p in db.Person where Sql.Right(p.FirstName, 3) == "ohn" && p.ID == 1 select p;
 				Assert.AreEqual(1, q.ToList().First().ID);
 			});
 		}
@@ -272,9 +274,9 @@ namespace Data.Linq
 		[Test]
 		public void Reverse()
 		{
-			ForEachProvider(new[] { ProviderName.DB2, ProviderName.Informix, ProviderName.SqlCe, ProviderName.Access }, db => 
+			ForEachProvider(new[] { ProviderName.DB2, ProviderName.Informix, ProviderName.SqlCe, ProviderName.Access }, db =>
 			{
-				var q = from p in db.Person where p.FirstName.Reverse() == "nhoJ" && p.ID == 1 select p;
+				var q = from p in db.Person where Sql.Reverse(p.FirstName) == "nhoJ" && p.ID == 1 select p;
 				Assert.AreEqual(1, q.ToList().First().ID);
 			});
 		}
@@ -284,7 +286,7 @@ namespace Data.Linq
 		{
 			ForEachProvider(db => 
 			{
-				var q = from p in db.Person where p.FirstName.Stuff(3, 1, "123") == "Jo123n" && p.ID == 1 select p;
+				var q = from p in db.Person where Sql.Stuff(p.FirstName, 3, 1, "123") == "Jo123n" && p.ID == 1 select p;
 				Assert.AreEqual(1, q.ToList().First().ID);
 			});
 		}
@@ -315,6 +317,36 @@ namespace Data.Linq
 			ForEachProvider(db => 
 			{
 				var q = from p in db.Person where p.FirstName.Remove(1, 2) == "Jn" && p.ID == 1 select p;
+				Assert.AreEqual(1, q.ToList().First().ID);
+			});
+		}
+
+		[Test]
+		public void Space()
+		{
+			ForEachProvider(new[] { ProviderName.Informix }, db =>
+			{
+				var q = from p in db.Person where p.FirstName + Sql.Space(p.ID + 1) + "123" == "John  123" && p.ID == 1 select p;
+				Assert.AreEqual(1, q.ToList().First().ID);
+			});
+		}
+
+		[Test]
+		public void PadRight()
+		{
+			ForEachProvider(new[] { ProviderName.Informix }, db =>
+			{
+				var q = from p in db.Person where Sql.PadRight(p.FirstName, 6, ' ') + "123" == "John  123" && p.ID == 1 select p;
+				Assert.AreEqual(1, q.ToList().First().ID);
+			});
+		}
+
+		[Test]
+		public void PadLeft()
+		{
+			ForEachProvider(new[] { ProviderName.Informix }, db =>
+			{
+				var q = from p in db.Person where "123" + Sql.PadLeft(p.FirstName, 6, ' ') == "123  John" && p.ID == 1 select p;
 				Assert.AreEqual(1, q.ToList().First().ID);
 			});
 		}

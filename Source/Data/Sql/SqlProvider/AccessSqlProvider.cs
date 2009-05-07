@@ -1,72 +1,24 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Reflection;
 using System.Text;
 
 namespace BLToolkit.Data.Sql.SqlProvider
 {
 	using DataProvider;
 
+#if FW3
+	using Linq;
+
+	using C = Char;
+	using S = String;
+	using I = Int32;
+#endif
+
 	public class AccessSqlProvider : BasicSqlProvider
 	{
 		public AccessSqlProvider(DataProviderBase dataProvider) : base(dataProvider)
 		{
-		}
-
-		public override ISqlExpression ConvertExpression(ISqlExpression expr)
-		{
-			expr = base.ConvertExpression(expr);
-
-			if (expr is SqlBinaryExpression)
-			{
-				SqlBinaryExpression be = (SqlBinaryExpression)expr;
-
-				switch (be.Operation[0])
-				{
-					case '%': return new SqlBinaryExpression(be.Expr1, "MOD", be.Expr2, be.Type, Precedence.Additive - 1);
-					case '&':
-					case '|':
-					case '^': throw new SqlException("Operator '{0}' is not supported by the {1}.", be.Operation, GetType().Name);
-				}
-			}
-			else if (expr is SqlFunction)
-			{
-				SqlFunction func = (SqlFunction) expr;
-
-				switch (func.Name)
-				{
-					case "Coalesce":
-
-						if (func.Parameters.Length > 2)
-						{
-							ISqlExpression[] parms = new ISqlExpression[func.Parameters.Length - 1];
-
-							Array.Copy(func.Parameters, 1, parms, 0, parms.Length);
-							return new SqlFunction(func.Name, func.Parameters[0], new SqlFunction(func.Name, parms));
-						}
-
-						SqlBuilder.SearchCondition sc = new SqlBuilder.SearchCondition();
-
-						sc.Conditions.Add(new SqlBuilder.Condition(false, new SqlBuilder.Predicate.IsNull(func.Parameters[0], false)));
-
-						return new SqlFunction("Iif", sc, func.Parameters[1], func.Parameters[0]);
-
-					case "CASE":
-
-						if (func.Parameters.Length == 3)
-							return new SqlFunction("Iif", func.Parameters[0], func.Parameters[1], func.Parameters[2]);
-
-						throw new SqlException("CASE statement is not supported by the {0}.", GetType().Name);
-
-					case "Length"    : return new SqlFunction("Len", func.Parameters);
-					case "Substring" : return new SqlFunction("Mid", func.Parameters);
-					case "Stuff"     : return BuildAlternativeStuff(func);
-					case "CharIndex" :
-						return func.Parameters.Length == 2?
-							new SqlFunction("InStr", new SqlValue(1),    func.Parameters[1], func.Parameters[0], new SqlValue(1)):
-							new SqlFunction("InStr", func.Parameters[2], func.Parameters[1], func.Parameters[0], new SqlValue(1));
-				}
-			}
-
-			return expr;
 		}
 
 		public override ISqlPredicate ConvertPredicate(ISqlPredicate predicate)
@@ -157,5 +109,70 @@ namespace BLToolkit.Data.Sql.SqlProvider
 				return sb.ToString();
 			};
 		}
+		public override ISqlExpression ConvertExpression(ISqlExpression expr)
+		{
+			expr = base.ConvertExpression(expr);
+
+			if (expr is SqlBinaryExpression)
+			{
+				SqlBinaryExpression be = (SqlBinaryExpression)expr;
+
+				switch (be.Operation[0])
+				{
+					case '%': return new SqlBinaryExpression(be.Expr1, "MOD", be.Expr2, be.Type, Precedence.Additive - 1);
+					case '&':
+					case '|':
+					case '^': throw new SqlException("Operator '{0}' is not supported by the {1}.", be.Operation, GetType().Name);
+				}
+			}
+			else if (expr is SqlFunction)
+			{
+				SqlFunction func = (SqlFunction) expr;
+
+				switch (func.Name)
+				{
+					case "Coalesce":
+
+						if (func.Parameters.Length > 2)
+						{
+							ISqlExpression[] parms = new ISqlExpression[func.Parameters.Length - 1];
+
+							Array.Copy(func.Parameters, 1, parms, 0, parms.Length);
+							return new SqlFunction(func.Name, func.Parameters[0], new SqlFunction(func.Name, parms));
+						}
+
+						SqlBuilder.SearchCondition sc = new SqlBuilder.SearchCondition();
+
+						sc.Conditions.Add(new SqlBuilder.Condition(false, new SqlBuilder.Predicate.IsNull(func.Parameters[0], false)));
+
+						return new SqlFunction("Iif", sc, func.Parameters[1], func.Parameters[0]);
+
+					case "CASE":
+
+						if (func.Parameters.Length == 3)
+							return new SqlFunction("Iif", func.Parameters[0], func.Parameters[1], func.Parameters[2]);
+
+						throw new SqlException("CASE statement is not supported by the {0}.", GetType().Name);
+
+					case "Length"    : return new SqlFunction("Len", func.Parameters);
+					case "Substring" : return new SqlFunction("Mid", func.Parameters);
+					case "CharIndex" :
+						return func.Parameters.Length == 2?
+							new SqlFunction("InStr", new SqlValue(1),    func.Parameters[1], func.Parameters[0], new SqlValue(1)):
+							new SqlFunction("InStr", func.Parameters[2], func.Parameters[1], func.Parameters[0], new SqlValue(1));
+				}
+			}
+
+			return expr;
+		}
+
+
+#if FW3
+		protected override Dictionary<MemberInfo,BaseExpressor> GetExpressors() { return _members; }
+		static    readonly Dictionary<MemberInfo,BaseExpressor> _members = new Dictionary<MemberInfo,BaseExpressor>
+		{
+			{ MI(() => Sql.Stuff("", 0, 0, "")), new F<S,I,I,S,S>((p0,p1,p2,p3) => AltStuff(p0, p1, p2, p3)) },
+		};
+#endif
 	}
 }

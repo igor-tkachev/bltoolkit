@@ -7,7 +7,7 @@ using System.Reflection;
 namespace BLToolkit.Data.Linq
 {
 	using Mapping;
-	using Sql;
+	using Data.Sql;
 	using Reflection;
 
 	abstract class QuerySource : QueryField

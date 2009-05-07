@@ -5,7 +5,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 {
 	using DataProvider;
 
-	public class BasicSqlProvider : ISqlProvider
+	public partial class BasicSqlProvider : ISqlProvider
 	{
 		#region Init
 
@@ -398,6 +398,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 				if      (value == null)   sb.Append("NULL");
 				else if (value is string) sb.Append('\'').Append(value.ToString().Replace("'", "''")).Append('\'');
+				else if (value is char)   sb.Append('\'').Append(value.ToString().Replace("'", "''")).Append('\'');
 				else if (value is bool)   sb.Append((bool)value? "1 = 1": "1 = 0");
 				else    sb.Append(value);
 			}
@@ -559,70 +560,6 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		}
 
 		#endregion
-
-		#endregion
-
-		#region Alternatives
-
-		protected ISqlExpression BuildAlternativeLeft(SqlFunction func)
-		{
-			return ConvertExpression(new SqlFunction("Substring", func.Parameters[0], new SqlValue(1), func.Parameters[1]));
-		}
-
-		protected ISqlExpression BuildAlternativeRight(SqlFunction func)
-		{
-			return ConvertExpression(new SqlFunction("Substring",
-				func.Parameters[0],
-				Add(Sub<int>(ConvertExpression(new SqlFunction("Length", func.Parameters[0])), func.Parameters[1]), 1),
-				func.Parameters[1]));
-		}
-
-		protected ISqlExpression BuildAlternativeStuff(SqlFunction func)
-		{
-			// STUFF (str, start, length, value)
-			// Implement as Substring(str, 1, start - 1) + value + Substring(str, start + length, Length(str) - (start + length - 1))
-			//
-
-			// value1 = 1
-			//
-			ISqlExpression value1 = ConvertExpression(new SqlValue(1));
-
-			// start1 = start - value1
-			//
-			ISqlExpression start1 = ConvertExpression(new SqlBinaryExpression(func.Parameters[1], "-", value1, typeof(int), Precedence.Subtraction));
-
-			// substr1 = Substring(str, 1, start1)
-			//
-			ISqlExpression substr1 = ConvertExpression(new SqlFunction("Substring", func.Parameters[0], value1, start1));
-
-			// sum = start + length
-			//
-			ISqlExpression sum = ConvertExpression(new SqlBinaryExpression(func.Parameters[1], "+", func.Parameters[2], typeof(int), Precedence.Additive));
-
-			// sum1 = sum - 1
-			//
-			ISqlExpression sum1 = ConvertExpression(new SqlBinaryExpression(sum, "-", value1, typeof(int), Precedence.Subtraction));
-
-			// len = Length(str)
-			//
-			ISqlExpression len = ConvertExpression(new SqlFunction("Length", func.Parameters[0]));
-
-			// lensum1 = len - sum1
-			//
-			ISqlExpression lensum1 = ConvertExpression(new SqlBinaryExpression(len, "-", sum1, typeof(int), Precedence.Subtraction));
-
-			// substr2 = Substring(str, sum, lensum1)
-			//
-			ISqlExpression substr2 = ConvertExpression(new SqlFunction("Substring", func.Parameters[0], sum, lensum1));
-
-			// cancat = substr1 + value
-			//
-			ISqlExpression concat = ConvertExpression(new SqlBinaryExpression(substr1, "+", func.Parameters[3], typeof(string), Precedence.Additive));
-
-			// cancat + substr2
-			//
-			return ConvertExpression(new SqlBinaryExpression(concat, "+", substr2, typeof(string), Precedence.Additive));
-		}
 
 		#endregion
 
@@ -821,6 +758,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 				switch (func.Name)
 				{
+					/*
 					case "Length":
 						if (func.Parameters[0] is SqlValue)
 						{
@@ -848,6 +786,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 						}
 
 						break;
+					*/
 
 					case "CASE":
 						{

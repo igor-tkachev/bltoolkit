@@ -11,10 +11,10 @@ namespace BLToolkit.Data.Linq
 	using DataProvider;
 	using Mapping;
 	using Reflection;
-	using Sql;
-	using Sql.SqlProvider;
+	using Data.Sql;
+	using Data.Sql.SqlProvider;
 
-	using IExpr = Sql.ISqlExpression;
+	using IExpr = Data.Sql.ISqlExpression;
 
 	class ExpressionParser<T> : ReflectionHelper
 	{
@@ -684,13 +684,29 @@ namespace BLToolkit.Data.Linq
 				case ExpressionType.MemberAccess:
 					{
 						var ma = (MemberExpression)parseInfo.Expr;
-						var mm = CoreFunctions.GetMember(ma.Member);
+						var ef = SqlProvider.ConvertMember(ma.Member);
 
-						if (mm != null)
+						if (ef != null)
 						{
 							var pi = parseInfo.ConvertTo<MemberExpression>();
-							var ex = pi.Create(pi.Expr.Expression, pi.Property(Member.Expression));
-							return mm(SqlProvider, ParseExpression(query, ex));
+
+							var pie = parseInfo.Parent.Replace(ef, null).Walk(wpi =>
+							{
+								if (wpi.NodeType == ExpressionType.Parameter)
+								{
+									var expr = ma.Expression;
+
+									if (expr.NodeType == ExpressionType.MemberAccess)
+										if (!_accessors.ContainsKey(expr))
+											_accessors.Add(expr, pi.Property(Member.Expression));
+
+									return pi.Create(expr, null);
+								}
+
+								return wpi;
+							});
+
+							return ParseExpression(query, pie);
 						}
 
 						var field = query.GetField(parseInfo.Expr);
@@ -705,9 +721,48 @@ namespace BLToolkit.Data.Linq
 					{
 						var pi = parseInfo.Convert<MethodCallExpression>();
 						var e  = parseInfo.Expr as MethodCallExpression;
-						var mm = CoreFunctions.GetMember(e.Method);
 
-						if (mm != null)
+						var ef = SqlProvider.ConvertMember(e.Method);
+
+						if (ef != null)
+						{
+							var pie = parseInfo.Parent.Replace(ef, null).Walk(wpi =>
+							{
+								if (wpi.NodeType == ExpressionType.Parameter)
+								{
+									Expression       expr;
+									Func<Expression> fparam;
+
+									var pe = (ParameterExpression)wpi.Expr;
+
+									if (pe.Name == "obj")
+									{
+										expr   = e.Object;
+										fparam = () => pi.Property(MethodCall.Object);
+									}
+									else
+									{
+										var i  = int.Parse(pe.Name.Substring(1));
+										expr   = e.Arguments[i];
+										fparam = () => pi.Index(e.Arguments, MethodCall.Arguments, i);
+									}
+
+									if (expr.NodeType == ExpressionType.MemberAccess)
+										if (!_accessors.ContainsKey(expr))
+											_accessors.Add(expr, fparam());
+
+									return pi.Create(expr, null);
+								}
+
+								return wpi;
+							});
+
+							return ParseExpression(query, pie);
+						}
+
+						var attrs = e.Method.GetCustomAttributes(typeof(SqlFunctionAttribute), true);
+
+						if (attrs.Length > 0)
 						{
 							var parms = new List<ISqlExpression>();
 
@@ -717,47 +772,7 @@ namespace BLToolkit.Data.Linq
 							for (var i = 0; i < e.Arguments.Count; i++)
 								parms.Add(ParseExpression(query, pi.Create(e.Arguments[i], pi.Index(e.Arguments, MethodCall.Arguments, i))));
 
-							return Convert(mm(SqlProvider, parms.ToArray()));
-						}
-
-						var ex = ExtendedFunctions.GetExpr(e.Method);
-
-						if (ex != null)
-						{
-							var pie = parseInfo.Parent.Replace(ex, parseInfo.ParamAccessor).Walk(wpi =>
-							{
-								if (wpi.NodeType == ExpressionType.Parameter)
-								{
-									Expression expr;
-									Expression param;
-
-									var pe = (ParameterExpression)wpi.Expr;
-
-									if (pe.Name == "obj")
-									{
-										expr  = e.Object;
-										param = pi.Property(MethodCall.Object);
-									}
-									else
-									{
-										var i = int.Parse(pe.Name.Substring(1));
-										expr  = e.Arguments[i];
-										param = pi.Index(e.Arguments, MethodCall.Arguments, i);
-									}
-
-									if (expr.NodeType == ExpressionType.MemberAccess)
-									{
-										if (!_accessors.ContainsKey(expr))
-											_accessors.Add(expr, param);
-									}
-
-									return pi.Create(expr, param);
-								}
-
-								return wpi;
-							});
-
-							return ParseExpression(query, pie);
+							return Convert(new SqlFunction(e.Method.Name, parms.ToArray()));
 						}
 
 						break;
@@ -804,7 +819,7 @@ namespace BLToolkit.Data.Linq
 						{
 							var mc = (MethodCallExpression)ex;
 
-							if (IsConstant(mc.Method.DeclaringType) || mc.Method.DeclaringType == typeof(SqlExtension))
+							if (IsConstant(mc.Method.DeclaringType) || mc.Method.DeclaringType == typeof(Sql))
 								return pi;
 
 							break;

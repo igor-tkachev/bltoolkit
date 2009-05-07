@@ -3,7 +3,7 @@
 namespace BLToolkit.Data.Linq
 {
 	using Mapping;
-	using Sql;
+	using Data.Sql;
 
 	abstract class QueryField : ReflectionHelper
 	{

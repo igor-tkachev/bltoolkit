@@ -243,12 +243,12 @@ namespace BLToolkit.Data.Linq
 
 		public UnaryExpression ConvertExpressionTo<T>()
 		{
-			return Expression.Convert(ParamAccessor, typeof(T));
+			return ParamAccessor != null ? Expression.Convert(ParamAccessor, typeof(T)) : null;
 		}
 
 		public MemberExpression Property(MethodInfo mi)
 		{
-			return Expression.Property(ParamAccessor, mi);
+			return ParamAccessor != null ? Expression.Property(ParamAccessor, mi) : null;
 		}
 
 		public MemberExpression Property<T>(MethodInfo mi)
@@ -258,7 +258,8 @@ namespace BLToolkit.Data.Linq
 
 		public MethodCallExpression Indexer(MethodInfo pmi, MethodInfo mi, int idx)
 		{
-			return Expression.Call(Property(pmi), mi, new Expression[] { Expression.Constant(idx, typeof(int)) });
+			var prop = Property(pmi);
+			return prop != null ? Expression.Call(prop, mi, new Expression[] { Expression.Constant(idx, typeof(int)) }) : null;
 		}
 
 		public MethodCallExpression Index<T>(IEnumerable<T> source, MethodInfo property, int idx)
