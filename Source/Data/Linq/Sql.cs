@@ -100,16 +100,58 @@ namespace BLToolkit.Data.Linq
 			return "".PadRight(length);
 		}
 
-		[SqlFunction]
+		[SqlFunction(Name = "LPad")]
 		public static string PadLeft(string str, int totalWidth, char paddingChar)
 		{
 			return str.PadLeft(totalWidth, paddingChar);
 		}
 
-		[SqlFunction]
+		[SqlFunction(Name = "RPad")]
 		public static string PadRight(string str, int totalWidth, char paddingChar)
 		{
 			return str.PadRight(totalWidth, paddingChar);
+		}
+
+		[SqlFunction]
+		public static string Replace(string str, string oldValue, string newValue)
+		{
+			return str.Replace(oldValue, newValue);
+		}
+
+		[SqlFunction]
+		public static string Replace(string str, char oldValue, char newValue)
+		{
+			return str.Replace(oldValue, newValue);
+		}
+
+		[SqlFunction]
+		public static string Trim(string str)
+		{
+			return str.Trim();
+		}
+
+		[SqlFunction(Name = "LTrim")]
+		public static string TrimLeft(string str)
+		{
+			return str.TrimStart();
+		}
+
+		[SqlFunction(Name = "RTrim")]
+		public static string TrimRight(string str)
+		{
+			return str.TrimEnd();
+		}
+
+		[SqlFunction]
+		public static string Lower(string str)
+		{
+			return str.ToLower();
+		}
+
+		[SqlFunction]
+		public static string Upper(string str)
+		{
+			return str.ToUpper();
 		}
 	}
 }

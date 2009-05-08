@@ -147,15 +147,12 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 						return new SqlFunction("Iif", sc, func.Parameters[1], func.Parameters[0]);
 
-					case "CASE":
-
-						if (func.Parameters.Length == 3)
-							return new SqlFunction("Iif", func.Parameters[0], func.Parameters[1], func.Parameters[2]);
-
-						throw new SqlException("CASE statement is not supported by the {0}.", GetType().Name);
-
-					case "Length"    : return new SqlFunction("Len", func.Parameters);
-					case "Substring" : return new SqlFunction("Mid", func.Parameters);
+					case "CASE"      : return ConvertCase(func.Parameters, 0);
+					case "Length"    : return new SqlFunction("Len",    func.Parameters);
+					case "Substring" : return new SqlFunction("Mid",    func.Parameters);
+					case "Lower"     : return new SqlFunction("LCase",  func.Parameters);
+					case "Upper"     : return new SqlFunction("UCase",  func.Parameters);
+					case "Replicate" : return new SqlFunction("String", func.Parameters[1], func.Parameters[0]);
 					case "CharIndex" :
 						return func.Parameters.Length == 2?
 							new SqlFunction("InStr", new SqlValue(1),    func.Parameters[1], func.Parameters[0], new SqlValue(1)):
@@ -166,12 +163,26 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			return expr;
 		}
 
+		SqlFunction ConvertCase(ISqlExpression[] parameters, int start)
+		{
+			int len = parameters.Length - start;
+
+			if (len < 3)
+				throw new SqlException("CASE statement is not supported by the {0}.", GetType().Name);
+
+			if (len == 3)
+				return new SqlFunction("Iif", parameters[start], parameters[start + 1], parameters[start + 2]);
+
+			return new SqlFunction("Iif", parameters[start], parameters[start + 1], ConvertCase(parameters, start + 2));
+		}
 
 #if FW3
 		protected override Dictionary<MemberInfo,BaseExpressor> GetExpressors() { return _members; }
 		static    readonly Dictionary<MemberInfo,BaseExpressor> _members = new Dictionary<MemberInfo,BaseExpressor>
 		{
-			{ MI(() => Sql.Stuff("", 0, 0, "")), new F<S,I,I,S,S>((p0,p1,p2,p3) => AltStuff(p0, p1, p2, p3)) },
+			{ MI(() => Sql.Stuff   ("",0,0,"")), new F<S,I,I,S,S>((p0,p1,p2,p3) => AltStuff(p0, p1, p2, p3)) },
+			{ MI(() => Sql.PadRight("",0,' ') ), new F<S,I,C,S>  ((p0,p1,p2)    => p0.Length > p1 ? p0 : p0 + Replicate(p2, p1 - p0.Length)) },
+			{ MI(() => Sql.PadLeft ("",0,' ') ), new F<S,I,C,S>  ((p0,p1,p2)    => p0.Length > p1 ? p0 : Replicate(p2, p1 - p0.Length) + p0) },
 		};
 #endif
 	}

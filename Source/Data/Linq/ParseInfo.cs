@@ -253,7 +253,8 @@ namespace BLToolkit.Data.Linq
 
 		public MemberExpression Property<T>(MethodInfo mi)
 		{
-			return Expression.Property(ConvertExpressionTo<T>(), mi);
+			var expr = ConvertExpressionTo<T>();
+			return expr != null ? Expression.Property(expr, mi) : null;
 		}
 
 		public MethodCallExpression Indexer(MethodInfo pmi, MethodInfo mi, int idx)

@@ -324,7 +324,7 @@ namespace Data.Linq
 		[Test]
 		public void Space()
 		{
-			ForEachProvider(new[] { ProviderName.Informix }, db =>
+			ForEachProvider(db =>
 			{
 				var q = from p in db.Person where p.FirstName + Sql.Space(p.ID + 1) + "123" == "John  123" && p.ID == 1 select p;
 				Assert.AreEqual(1, q.ToList().First().ID);
@@ -334,7 +334,7 @@ namespace Data.Linq
 		[Test]
 		public void PadRight()
 		{
-			ForEachProvider(new[] { ProviderName.Informix }, db =>
+			ForEachProvider(db =>
 			{
 				var q = from p in db.Person where Sql.PadRight(p.FirstName, 6, ' ') + "123" == "John  123" && p.ID == 1 select p;
 				Assert.AreEqual(1, q.ToList().First().ID);
@@ -342,11 +342,157 @@ namespace Data.Linq
 		}
 
 		[Test]
+		public void PadRight1()
+		{
+			ForEachProvider(db =>
+			{
+				var q = from p in db.Person where p.FirstName.PadRight(6) + "123" == "John  123" && p.ID == 1 select p;
+				Assert.AreEqual(1, q.ToList().First().ID);
+			});
+		}
+
+		[Test]
+		public void PadRight2()
+		{
+			ForEachProvider(db =>
+			{
+				var q = from p in db.Person where p.FirstName.PadRight(6, '*') + "123" == "John**123" && p.ID == 1 select p;
+				Assert.AreEqual(1, q.ToList().First().ID);
+			});
+		}
+
+		[Test]
 		public void PadLeft()
 		{
-			ForEachProvider(new[] { ProviderName.Informix }, db =>
+			ForEachProvider(db =>
 			{
 				var q = from p in db.Person where "123" + Sql.PadLeft(p.FirstName, 6, ' ') == "123  John" && p.ID == 1 select p;
+				Assert.AreEqual(1, q.ToList().First().ID);
+			});
+		}
+
+		[Test]
+		public void PadLeft1()
+		{
+			ForEachProvider(db =>
+			{
+				var q = from p in db.Person where "123" + p.FirstName.PadLeft(6) == "123  John" && p.ID == 1 select p;
+				Assert.AreEqual(1, q.ToList().First().ID);
+			});
+		}
+
+		[Test]
+		public void PadLeft2()
+		{
+			ForEachProvider(db =>
+			{
+				var q = from p in db.Person where "123" + p.FirstName.PadLeft(6, '*') == "123**John" && p.ID == 1 select p;
+				Assert.AreEqual(1, q.ToList().First().ID);
+			});
+		}
+
+		[Test]
+		public void Replace()
+		{
+			ForEachProvider(new[] { ProviderName.Access }, db =>
+			{
+				var q = from p in db.Person where p.FirstName.Replace("hn", "lie") == "Jolie" && p.ID == 1 select p;
+				Assert.AreEqual(1, q.ToList().First().ID);
+			});
+		}
+
+		[Test]
+		public void Trim()
+		{
+			ForEachProvider(db =>
+			{
+				var q = 
+					from p in db.Person where p.ID == 1 select new { p.ID, Name = "  " + p.FirstName + " " } into pp
+					where pp.Name.Trim() == "John" select pp;
+				Assert.AreEqual(1, q.ToList().First().ID);
+			});
+		}
+
+		[Test]
+		public void TrimLeft()
+		{
+			ForEachProvider(db =>
+			{
+				var q = 
+					from p in db.Person where p.ID == 1 select new { p.ID, Name = "  " + p.FirstName + " " } into pp
+					where pp.Name.TrimStart() == "John " select pp;
+				Assert.AreEqual(1, q.ToList().First().ID);
+			});
+		}
+
+		[Test]
+		public void TrimRight()
+		{
+			ForEachProvider(db =>
+			{
+				var q = 
+					from p in db.Person where p.ID == 1 select new { p.ID, Name = "  " + p.FirstName + " " } into pp
+					where pp.Name.TrimEnd() == "  John" select pp;
+				Assert.AreEqual(1, q.ToList().First().ID);
+			});
+		}
+
+		[Test]
+		public void ToLower()
+		{
+			ForEachProvider(db =>
+			{
+				var q = from p in db.Person where p.FirstName.ToLower() == "john" && p.ID == 1 select p;
+				Assert.AreEqual(1, q.ToList().First().ID);
+			});
+		}
+
+		[Test]
+		public void ToUpper()
+		{
+			ForEachProvider(db =>
+			{
+				var q = from p in db.Person where p.FirstName.ToUpper() == "JOHN" && p.ID == 1 select p;
+				Assert.AreEqual(1, q.ToList().First().ID);
+			});
+		}
+
+		[Test]
+		public void CompareTo()
+		{
+			ForEachProvider(db =>
+			{
+				var q = from p in db.Person where p.FirstName.CompareTo("John") == 0 && p.ID == 1 select p;
+				Assert.AreEqual(1, q.ToList().First().ID);
+			});
+		}
+
+		[Test]
+		public void CompareTo1()
+		{
+			ForEachProvider(db =>
+			{
+				var q = from p in db.Person where p.FirstName.CompareTo("Joh") > 0 && p.ID == 1 select p;
+				Assert.AreEqual(1, q.ToList().First().ID);
+			});
+		}
+
+		[Test]
+		public void CompareTo2()
+		{
+			ForEachProvider(db =>
+			{
+				var q = from p in db.Person where p.FirstName.CompareTo("Johnn") < 0 && p.ID == 1 select p;
+				Assert.AreEqual(1, q.ToList().First().ID);
+			});
+		}
+
+		[Test]
+		public void CompareTo3()
+		{
+			ForEachProvider(db =>
+			{
+				var q = from p in db.Person where p.FirstName.CompareTo(55) > 0 && p.ID == 1 select p;
 				Assert.AreEqual(1, q.ToList().First().ID);
 			});
 		}
@@ -354,7 +500,7 @@ namespace Data.Linq
 		//[Test]
 		public void Test()
 		{
-			using (var db = new TestDbManager(ProviderName.Informix))
+			using (var db = new TestDbManager(ProviderName.Firebird))
 			{
 				var p = db
 					.SetCommand(@"

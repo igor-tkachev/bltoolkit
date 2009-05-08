@@ -758,35 +758,11 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 				switch (func.Name)
 				{
-					/*
-					case "Length":
-						if (func.Parameters[0] is SqlValue)
-						{
-							SqlValue v = (SqlValue)func.Parameters[0];
-
-							if (v.Value is string)
-								return new SqlValue(v.Value.ToString().Length);
-						}
-
-						break;
-
-					case "Reverse":
-						if (func.Parameters[0] is SqlValue)
-						{
-							SqlValue v = (SqlValue)func.Parameters[0];
-
-							if (v.Value is string)
-							{
-								string str   = v.Value.ToString();
-								char[] chars = str.ToCharArray();
-
-								Array.Reverse(chars);
-								return new SqlValue(new string(chars));
-							}
-						}
-
-						break;
-					*/
+					case "ConvertToCaseCompareTo":
+						return ConvertExpression(new SqlFunction("CASE",
+							new SqlBuilder.SearchCondition().Expr(func.Parameters[0]). Greater .Expr(func.Parameters[1]).ToExpr(),   new SqlValue(1),
+							new SqlBuilder.SearchCondition().Expr(func.Parameters[0]). Equal   .Expr(func.Parameters[1]).ToExpr(),   new SqlValue(0),
+							new SqlValue(-1)));
 
 					case "CASE":
 						{
@@ -834,6 +810,36 @@ namespace BLToolkit.Data.Sql.SqlProvider
 						}
 
 						break;
+
+					/*
+					case "Length":
+						if (func.Parameters[0] is SqlValue)
+						{
+							SqlValue v = (SqlValue)func.Parameters[0];
+
+							if (v.Value is string)
+								return new SqlValue(v.Value.ToString().Length);
+						}
+
+						break;
+
+					case "Reverse":
+						if (func.Parameters[0] is SqlValue)
+						{
+							SqlValue v = (SqlValue)func.Parameters[0];
+
+							if (v.Value is string)
+							{
+								string str   = v.Value.ToString();
+								char[] chars = str.ToCharArray();
+
+								Array.Reverse(chars);
+								return new SqlValue(new string(chars));
+							}
+						}
+
+						break;
+					*/
 				}
 			}
 
@@ -844,16 +850,110 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		{
 			if (predicate is SqlBuilder.Predicate.ExprExpr)
 			{
-				var expr = (SqlBuilder.Predicate.ExprExpr) predicate;
+				var expr = (SqlBuilder.Predicate.ExprExpr)predicate;
 
 				if (expr.Operator == SqlBuilder.Predicate.Operator.Equal && expr.Expr1 is SqlValue && expr.Expr2 is SqlValue)
 				{
 					var value = object.Equals(((SqlValue)expr.Expr1).Value, ((SqlValue)expr.Expr2).Value);
 					return new SqlBuilder.Predicate.Expr(new SqlValue(value), Precedence.Comparison);
 				}
+
+				switch (expr.Operator)
+				{
+					case SqlBuilder.Predicate.Operator.Equal:
+					case SqlBuilder.Predicate.Operator.Greater:
+					case SqlBuilder.Predicate.Operator.Less : return OptimizeCase(expr);
+				}
 			}
 
 			return predicate;
+		}
+
+		ISqlPredicate OptimizeCase(SqlBuilder.Predicate.ExprExpr expr)
+		{
+			SqlValue    value = expr.Expr1 as SqlValue;
+			SqlFunction func  = expr.Expr2 as SqlFunction;
+			bool        valueFirst = false;
+
+			if (value != null && func != null)
+			{
+				valueFirst = true;
+			}
+			else
+			{
+				value = expr.Expr2 as SqlValue;
+				func  = expr.Expr1 as SqlFunction;
+			}
+
+			if (value != null && func != null && value.Value is int && func.Name == "CASE" && func.Parameters.Length == 5)
+			{
+				SqlBuilder.SearchCondition c1 = func.Parameters[0] as SqlBuilder.SearchCondition;
+				SqlValue                   v1 = func.Parameters[1] as SqlValue;
+				SqlBuilder.SearchCondition c2 = func.Parameters[2] as SqlBuilder.SearchCondition;
+				SqlValue                   v2 = func.Parameters[3] as SqlValue;
+				SqlValue                   v3 = func.Parameters[4] as SqlValue;
+
+				if (c1 != null && c1.Conditions.Count == 1 && v1 != null && v1.Value is int &&
+				    c2 != null && c2.Conditions.Count == 1 && v2 != null && v2.Value is int && v3 != null && v3.Value is int)
+				{
+					SqlBuilder.Predicate.ExprExpr ee1 = c1.Conditions[0].Predicate as SqlBuilder.Predicate.ExprExpr;
+					SqlBuilder.Predicate.ExprExpr ee2 = c2.Conditions[0].Predicate as SqlBuilder.Predicate.ExprExpr;
+
+					if (ee1 != null && ee2 != null && ee1.Expr1.Equals(ee2.Expr1) && ee1.Expr2.Equals(ee2.Expr2))
+					{
+						int e = 0, g = 0, l = 0;
+
+						if (ee1.Operator == SqlBuilder.Predicate.Operator.Equal   || ee2.Operator == SqlBuilder.Predicate.Operator.Equal)   e = 1;
+						if (ee1.Operator == SqlBuilder.Predicate.Operator.Greater || ee2.Operator == SqlBuilder.Predicate.Operator.Greater) g = 1;
+						if (ee1.Operator == SqlBuilder.Predicate.Operator.Less    || ee2.Operator == SqlBuilder.Predicate.Operator.Less)    l = 1;
+
+						if (e + g + l == 2)
+						{
+							int n  = (int)value.Value;
+							int i1 = (int)v1.Value;
+							int i2 = (int)v2.Value;
+							int i3 = (int)v3.Value;
+
+							int n1 = Compare(valueFirst ? n : i1, valueFirst ? i1 : n, expr.Operator) ? 1 : 0;
+							int n2 = Compare(valueFirst ? n : i2, valueFirst ? i2 : n, expr.Operator) ? 1 : 0;
+							int n3 = Compare(valueFirst ? n : i3, valueFirst ? i3 : n, expr.Operator) ? 1 : 0;
+
+							if (n1 + n2 + n3 == 1)
+							{
+								if (n1 == 1) return ee1;
+								if (n2 == 1) return ee2;
+
+								return new SqlBuilder.Predicate.ExprExpr(
+									ee1.Expr1,
+									e == 0 ? SqlBuilder.Predicate.Operator.Equal :
+									g == 0 ? SqlBuilder.Predicate.Operator.Greater :
+									         SqlBuilder.Predicate.Operator.Less,
+									ee1.Expr2);
+							}
+						}
+
+					}
+				}
+			}
+
+			return expr;
+		}
+
+		bool Compare(int v1, int v2, SqlBuilder.Predicate.Operator op)
+		{
+			switch (op)
+			{
+				case SqlBuilder.Predicate.Operator.Equal:           return v1 == v2;
+				case SqlBuilder.Predicate.Operator.NotEqual:        return v1 != v2;
+				case SqlBuilder.Predicate.Operator.Greater:         return v1 >  v2;
+				case SqlBuilder.Predicate.Operator.NotLess:
+				case SqlBuilder.Predicate.Operator.GreaterOrEqual:  return v1 >= v2;
+				case SqlBuilder.Predicate.Operator.Less:            return v1 <  v2;
+				case SqlBuilder.Predicate.Operator.NotGreater:
+				case SqlBuilder.Predicate.Operator.LessOrEqual:     return v1 <= v2;
+			}
+
+			throw new InvalidOperationException();
 		}
 
 		#endregion

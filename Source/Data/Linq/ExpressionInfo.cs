@@ -157,14 +157,29 @@ namespace BLToolkit.Data.Linq
 			//string s = sql.ToString();
 
 #if DEBUG
-			var info = string.Format("{0} {1}\n{2}", DataProvider.Name, db.ConfigurationString, command);
+			var info = string.Format("{0} {1}\n", DataProvider.Name, db.ConfigurationString);
 
 			if (parms != null && parms.Length > 0)
 			{
-				info += "---\n";
 				foreach (var p in parms)
-					info += string.Format("{0}\t{1}\n", p.ParameterName, p.Value);
+					info += string.Format("DECLARE {0} {1}\n", p.ParameterName, p.DbType);
+
+				info += "\n";
+
+				foreach (var p in parms)
+				{
+					var value = p.Value;
+
+					if (value is string || value is char)
+						value = "'" + value.ToString().Replace("'", "''") + "'";
+
+					info += string.Format("SET {0} = {1}\n", p.ParameterName, value);
+				}
+
+				info += "\n";
 			}
+
+			info += command;
 
 			Debug.WriteLineIf(DbManager.TraceSwitch.TraceInfo, info, DbManager.TraceSwitch.DisplayName);
 #endif

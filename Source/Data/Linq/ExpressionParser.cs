@@ -764,6 +764,7 @@ namespace BLToolkit.Data.Linq
 
 						if (attrs.Length > 0)
 						{
+							var attr  = (SqlFunctionAttribute)attrs[0];
 							var parms = new List<ISqlExpression>();
 
 							if (e.Object != null)
@@ -772,7 +773,7 @@ namespace BLToolkit.Data.Linq
 							for (var i = 0; i < e.Arguments.Count; i++)
 								parms.Add(ParseExpression(query, pi.Create(e.Arguments[i], pi.Index(e.Arguments, MethodCall.Arguments, i))));
 
-							return Convert(new SqlFunction(e.Method.Name, parms.ToArray()));
+							return Convert(new SqlFunction(attr.Name ?? e.Method.Name, parms.ToArray()));
 						}
 
 						break;
@@ -790,7 +791,7 @@ namespace BLToolkit.Data.Linq
 			{
 				var ex = pi.Expr;
 
-				if (ex is BinaryExpression || ex is UnaryExpression)
+				if (ex is BinaryExpression || ex is UnaryExpression || ex.NodeType == ExpressionType.Convert)
 					return pi;
 
 				switch (ex.NodeType)
@@ -819,7 +820,12 @@ namespace BLToolkit.Data.Linq
 						{
 							var mc = (MethodCallExpression)ex;
 
-							if (IsConstant(mc.Method.DeclaringType) || mc.Method.DeclaringType == typeof(Sql))
+							if (IsConstant(mc.Method.DeclaringType) || mc.Method.DeclaringType == typeof(object))
+								return pi;
+
+							// TODO: Fix this sham.
+							//
+							if (mc.Method.DeclaringType == typeof(Sql))
 								return pi;
 
 							break;

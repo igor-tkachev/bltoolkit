@@ -10,6 +10,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 	using C = Char;
 	using S = String;
 	using I = Int32;
+	using O = Object;
 
 	partial class BasicSqlProvider
 	{
@@ -94,9 +95,28 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			{ MI(() => "".Insert     (0,"")   ), new F<S,I,S,S>  ((obj,p0,p1)    => obj.Length == p0 ? obj + p1 : Linq.Sql.Stuff(obj, p0 + 1, 0, p1)) },
 			{ MI(() => "".Remove     (0)      ), new F<S,I,S>    ((obj,p0)       => Linq.Sql.Left(obj, p0)) },
 			{ MI(() => "".Remove     (0,0)    ), new F<S,I,I,S>  ((obj,p0,p1)    => Linq.Sql.Stuff(obj, p0 + 1, p1, "")) },
+			{ MI(() => "".PadLeft    (0)      ), new F<S,I,S>    ((obj,p0)       => Linq.Sql.PadLeft(obj, p0, ' ')) },
+			{ MI(() => "".PadLeft    (0,' ')  ), new F<S,I,C,S>  ((obj,p0,p1)    => Linq.Sql.PadLeft(obj, p0, p1)) },
+			{ MI(() => "".PadRight   (0)      ), new F<S,I,S>    ((obj,p0)       => Linq.Sql.PadRight(obj, p0, ' ')) },
+			{ MI(() => "".PadRight   (0,' ')  ), new F<S,I,C,S>  ((obj,p0,p1)    => Linq.Sql.PadRight(obj, p0, p1)) },
+			{ MI(() => "".Replace    ("","")  ), new F<S,S,S,S>  ((obj,p0,p1)    => Linq.Sql.Replace(obj, p0, p1)) },
+			{ MI(() => "".Replace    (' ',' ')), new F<S,C,C,S>  ((obj,p0,p1)    => Linq.Sql.Replace(obj, p0, p1)) },
+			{ MI(() => "".Trim       ()       ), new F<S,S>      ( obj           => Linq.Sql.Trim(obj)) },
+			{ MI(() => "".TrimEnd    ()       ), new F<S,S>      ( obj           => Linq.Sql.TrimRight(obj)) },
+			{ MI(() => "".TrimStart  ()       ), new F<S,S>      ( obj           => Linq.Sql.TrimLeft(obj)) },
+			{ MI(() => "".ToLower    ()       ), new F<S,S>      ( obj           => Linq.Sql.Lower(obj)) },
+			{ MI(() => "".ToUpper    ()       ), new F<S,S>      ( obj           => Linq.Sql.Upper(obj)) },
+			{ MI(() => "".CompareTo  ("")     ), new F<S,S,I>    ((obj,p0)       => ConvertToCaseCompareTo(obj, p0) ) },
+			{ MI(() => "".CompareTo  (1)      ), new F<S,O,I>    ((obj,p0)       => ConvertToCaseCompareTo(obj, p0.ToString()) ) },
 
 			{ MI(() => AltStuff    ("",0,0,"")), new F<S,I,I,S,S>((p0, p1,p2,p3) => Linq.Sql.Left(p0, p1 - 1) + p3 + Linq.Sql.Right(p0, p0.Length - (p1 + p2 - 1))) },
 		};
+
+		[SqlFunction]
+		static int ConvertToCaseCompareTo(string str, string value)
+		{
+			return str.CompareTo(value);
+		}
 
 		// Access, DB2, Firebird, Informix, MySql, Oracle, PostgreSQL, SQLite
 		//
@@ -114,11 +134,14 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			return obj.ToString();
 		}
 
-		// DB2, PostgreSQL
+		// DB2, PostgreSQL, MS SQL, SqlCe
 		//
 		[SqlFunction]
-		protected static string Repeat(string str, int count)
+		protected static string Replicate(string str, int count)
 		{
+			if (str == null)
+				return null;
+
 			var sb = new StringBuilder(str.Length * count);
 
 			for (var i = 0; i < count; i++)
@@ -128,7 +151,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		}
 
 		[SqlFunction]
-		protected static string Repeat(char ch, int count)
+		protected static string Replicate(char ch, int count)
 		{
 			var sb = new StringBuilder(count);
 

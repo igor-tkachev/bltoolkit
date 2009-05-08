@@ -58,8 +58,6 @@ namespace BLToolkit.Data.Sql.SqlProvider
 				switch (func.Name)
 				{
 					case "CharIndex" : return new SqlFunction("Locate", func.Parameters);
-					case "PadRight"  : return new SqlFunction("RPad",   func.Parameters);
-					case "PadLeft"   : return new SqlFunction("LPad",   func.Parameters);
 				}
 			}
 

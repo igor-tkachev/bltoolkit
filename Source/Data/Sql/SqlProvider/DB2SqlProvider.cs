@@ -60,6 +60,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 				{
 					case "CharIndex" : return new SqlFunction("Locate", func.Parameters);
 					case "Substring" : return new SqlFunction("Substr", func.Parameters);
+					case "Replicate" : return new SqlFunction("Repeat", func.Parameters);
 				}
 			}
 
@@ -70,10 +71,10 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		protected override Dictionary<MemberInfo,BaseExpressor> GetExpressors() { return _members; }
 		static    readonly Dictionary<MemberInfo,BaseExpressor> _members = new Dictionary<MemberInfo,BaseExpressor>
 		{
-			{ MI(() => Sql.Space   (0)        ), new F<I,S>      ( p0           => VarChar(Repeat(" ", p0), 1000)) },
+			{ MI(() => Sql.Space   (0)        ), new F<I,S>      ( p0           => VarChar(Replicate(" ", p0), 1000)) },
 			{ MI(() => Sql.Stuff   ("",0,0,"")), new F<S,I,I,S,S>((p0,p1,p2,p3) => AltStuff(p0, p1, p2, p3)) },
-			{ MI(() => Sql.PadRight("",0,' ') ), new F<S,I,C,S>  ((p0,p1,p2)    => p0.Length > p1 ? p0 : p0 + VarChar(Repeat(p2, p1 - p0.Length), 1000)) },
-			{ MI(() => Sql.PadLeft ("",0,' ') ), new F<S,I,C,S>  ((p0,p1,p2)    => p0.Length > p1 ? p0 : VarChar(Repeat(p2, p1 - p0.Length), 1000) + p0) },
+			{ MI(() => Sql.PadRight("",0,' ') ), new F<S,I,C,S>  ((p0,p1,p2)    => p0.Length > p1 ? p0 : p0 + VarChar(Replicate(p2, p1 - p0.Length), 1000)) },
+			{ MI(() => Sql.PadLeft ("",0,' ') ), new F<S,I,C,S>  ((p0,p1,p2)    => p0.Length > p1 ? p0 : VarChar(Replicate(p2, p1 - p0.Length), 1000) + p0) },
 		};
 #endif
 	}

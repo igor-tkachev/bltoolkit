@@ -5,11 +5,20 @@
 | IndexOf     | s.IndexOf    (a)       | Sql.Length(a) == 0 ? 0  : (Sql.CharIndex(a, s) ?? 0) - 1
 | IndexOf     | s.IndexOf    (a, b)    | Sql.Length(a) == 0 && Sql.Length(s) > b ? b : (Sql.CharIndex(a, s, b + 1) ?? 0) - 1
 | IndexOf     | s.IndexOf    (a, b, c) | Sql.Length(a) == 0 && Sql.Length(s) > b ? b : (Sql.CharIndex(a, Sql.Left(s, c), b) ?? 0) - 1
-| LastIndexOf | s.LastIndexOf(a)       | Sql.Length(a) == 0 ? Sql.Length(s) - 1 : (Sql.CharIndex(a, s) ?? 0) == 0 ? -1 : Sql.Length(s) - (Sql.CharIndex(Sql.Reverse(a), Sql.Reverse(s)) ?? 0) - Sql.Length(a) + 1
-| LastIndexOf | s.LastIndexOf(a, b)    | Sql.Length(a) == 0 ? b : (Sql.CharIndex(a, s, b + 1) ?? 0) == 0 ? -1 : Sql.Length(s) - (Sql.CharIndex(Sql.Reverse(a), Sql.Reverse(Sql.Substring(s, b + 1, Sql.Length(s) - b))) ?? 0) - Sql.Length(a) + 1
-| LastIndexOf | s.LastIndexOf(a, b, c) | Sql.Length(a) == 0 ? b : (Sql.CharIndex(a, Sql.Left(s, b + c), b + 1) ?? 0) == 0 ? -1 : b + c - (Sql.CharIndex(Sql.Reverse(a), Sql.Reverse(Sql.Substring(s, b + 1, c))) ?? 0) - Sql.Length(a) + 1
+| LastIndexOf | s.LastIndexOf(a)       | Sql.Length(a) == 0 ? Sql.Length(s) - 1 :<br>(Sql.CharIndex(a, s) ?? 0) == 0 ? -1 :<br>Sql.Length(s) - (Sql.CharIndex(Sql.Reverse(a), Sql.Reverse(s)) ?? 0) - Sql.Length(a) + 1
+| LastIndexOf | s.LastIndexOf(a, b)    | Sql.Length(a) == 0 ? b :<br>(Sql.CharIndex(a, s, b + 1) ?? 0) == 0 ? -1 :<br>&nbsp;&nbsp;Sql.Length(s) - (Sql.CharIndex(Sql.Reverse(a), Sql.Reverse(Sql.Substring(s, b + 1, Sql.Length(s) - b))) ?? 0) - Sql.Length(a) + 1
+| LastIndexOf | s.LastIndexOf(a, b, c) | Sql.Length(a) == 0 ? b :<br>(Sql.CharIndex(a, Sql.Left(s, b + c), b + 1) ?? 0) == 0 ? -1 :<br>&nbsp;&nbsp;b + c - (Sql.CharIndex(Sql.Reverse(a), Sql.Reverse(Sql.Substring(s, b + 1, c))) ?? 0) - Sql.Length(a) + 1
 | Insert      | s.Insert     (a, b)    | Sql.Length(s) == a ? s + b : Sql.Stuff(s, a + 1, 0, b)
 | Remove      | s.Remove     (a)       | Sql.Left(s, a)
 | Remove      | s.Remove     (a, b)    | Sql.Stuff(s, a + 1, b, "")
-
-
+| Pad         | s.PadLeft    (a)       | Sql.PadLeft(s, a, ' ')
+| Pad         | s.PadLeft    (a, b)    | Sql.PadLeft(s, a, b)
+| Pad         | s.PadRight   (a)       | Sql.PadRight(s, a, ' ')
+| Pad         | s.PadRight   (a, b)    | Sql.PadRight(s, a, b)
+| Replace     | s.Replace    (a, b)    | Sql.Replace(s, a, b)
+| Trim        | s.Trim       ()        | Sql.Trim(s)
+| Trim        | s.TrimEnd    ()        | Sql.TrimRight(s)
+| Trim        | s.TrimStart  ()        | Sql.TrimLeft(s)
+| Case        | s.ToLower    ()        | Sql.Lower(s)
+| Case        | s.ToUpper    ()        | Sql.Upper(s)
+| Compare     | s.CompareTo  (a)       | s > a ? 1 : s == 0 ? 0 : -1

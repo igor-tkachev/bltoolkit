@@ -533,7 +533,7 @@ namespace DocGen
 			if (ss.Length != 4)
 				throw new InvalidOperationException(line);
 
-			var impl = ss[3].Trim().Replace("$$$$$", "|");
+			var impl = ss[3].Trim().Replace("$$$$$", "||");
 
 			if (impl.StartsWith("#"))
 			{
@@ -544,8 +544,8 @@ namespace DocGen
 			return new TableItem
 			{
 				Provider       = _providerName,
-				Feature        = ss[1].Trim().Replace("$$$$$", "|"),
-				Linq           = ss[2].Trim().Replace("$$$$$", "|"),
+				Feature        = ss[1].Trim().Replace("$$$$$", "||"),
+				Linq           = ss[2].Trim().Replace("$$$$$", "||"),
 				Implementation = impl
 			};
 		}

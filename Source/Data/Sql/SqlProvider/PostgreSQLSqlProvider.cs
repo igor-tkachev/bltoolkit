@@ -40,8 +40,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 				switch (func.Name)
 				{
-					case "PadRight"  : return new SqlFunction("RPad", func.Parameters);
-					case "PadLeft"   : return new SqlFunction("LPad", func.Parameters);
+					case "Replicate" : return new SqlFunction("Repeat", func.Parameters);
 					case "CharIndex" :
 						return func.Parameters.Length == 2?
 							new SqlExpression("Position({0} in {1})", Precedence.Primary, func.Parameters[0], func.Parameters[1]):
@@ -65,7 +64,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			{ MI(() => Sql.Left ("",0)     ), new F<S,I,S>    ((p0,p1)       => Sql.Substring(p0, 1, p1)) },
 			{ MI(() => Sql.Right("",0)     ), new F<S,I,S>    ((p0,p1)       => Sql.Substring(p0, p0.Length - p1 + 1, p1)) },
 			{ MI(() => Sql.Stuff("",0,0,"")), new F<S,I,I,S,S>((p0,p1,p2,p3) => AltStuff(p0, p1, p2, p3)) },
-			{ MI(() => Sql.Space(0)        ), new F<I,S>      ( p0           => Repeat(" ", p0)) },
+			{ MI(() => Sql.Space(0)        ), new F<I,S>      ( p0           => Replicate(" ", p0)) },
 		};
 #endif
 	}

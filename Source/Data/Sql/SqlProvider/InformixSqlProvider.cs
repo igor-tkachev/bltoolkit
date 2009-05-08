@@ -35,6 +35,24 @@ namespace BLToolkit.Data.Sql.SqlProvider
 				base.BuildSelectClause(sb);
 		}
 
+		protected override void BuildLikePredicate(StringBuilder sb, SqlBuilder.Predicate.Like predicate)
+		{
+			if (predicate.IsNot)
+				sb.Append("NOT ");
+
+			int precedence = GetPrecedence(predicate);
+
+			BuildExpression(sb, precedence, predicate.Expr1);
+			sb.Append(" LIKE ");
+			BuildExpression(sb, precedence, predicate.Expr2);
+
+			if (predicate.Escape != null)
+			{
+				sb.Append(" ESCAPE ");
+				BuildExpression(sb, precedence, predicate.Escape);
+			}
+		}
+
 		public override ISqlExpression ConvertExpression(ISqlExpression expr)
 		{
 			expr = base.ConvertExpression(expr);
@@ -66,31 +84,14 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			return expr;
 		}
 
-		protected override void BuildLikePredicate(StringBuilder sb, SqlBuilder.Predicate.Like predicate)
-		{
-			if (predicate.IsNot)
-				sb.Append("NOT ");
-
-			int precedence = GetPrecedence(predicate);
-
-			BuildExpression(sb, precedence, predicate.Expr1);
-			sb.Append(" LIKE ");
-			BuildExpression(sb, precedence, predicate.Expr2);
-
-			if (predicate.Escape != null)
-			{
-				sb.Append(" ESCAPE ");
-				BuildExpression(sb, precedence, predicate.Escape);
-			}
-		}
-
 #if FW3
 		protected override Dictionary<MemberInfo,BaseExpressor> GetExpressors() { return _members; }
 		static    readonly Dictionary<MemberInfo,BaseExpressor> _members = new Dictionary<MemberInfo,BaseExpressor>
 		{
-			{ MI<S>(s => Sql.Left (s, 0      )), new F<S,I,S>    ((p0,p1)       => Sql.Substring(p0, 1, p1)) },
-			{ MI<S>(s => Sql.Right(s, 0      )), new F<S,I,S>    ((p0,p1)       => Sql.Substring(p0, p0.Length - p1 + 1, p1)) },
-			{ MI<S>(s => Sql.Stuff(s, 0, 0, s)), new F<S,I,I,S,S>((p0,p1,p2,p3) => AltStuff(p0, p1, p2, p3)) },
+			{ MI(() => Sql.Left ("",0)     ), new F<S,I,S>    ((p0,p1)       => Sql.Substring(p0, 1, p1)) },
+			{ MI(() => Sql.Right("",0)     ), new F<S,I,S>    ((p0,p1)       => Sql.Substring(p0, p0.Length - p1 + 1, p1)) },
+			{ MI(() => Sql.Stuff("",0,0,"")), new F<S,I,I,S,S>((p0,p1,p2,p3) => AltStuff(p0, p1, p2, p3)) },
+			{ MI(() => Sql.Space(0)        ), new F<I,S>      ( p0           => Sql.PadRight(" ", p0, ' ')) },
 		};
 #endif
 	}

@@ -69,8 +69,6 @@ namespace BLToolkit.Data.Sql.SqlProvider
 				{
 					case "Coalesce"  : return new SqlFunction("Nvl",    func.Parameters);
 					case "Substring" : return new SqlFunction("Substr", func.Parameters);
-					case "PadRight"  : return new SqlFunction("RPad",   func.Parameters);
-					case "PadLeft"   : return new SqlFunction("LPad",   func.Parameters);
 					case "CharIndex" :
 						return func.Parameters.Length == 2?
 							new SqlFunction("InStr", func.Parameters[1], func.Parameters[0]):

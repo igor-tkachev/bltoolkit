@@ -30,7 +30,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 				switch (func.Name)
 				{
-					case "Length": return new SqlFunction("Len", func.Parameters);
+					case "Length" : return new SqlFunction("Len", func.Parameters);
 				}
 			}
 
@@ -41,8 +41,11 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		protected override Dictionary<MemberInfo,BaseExpressor> GetExpressors() { return _members; }
 		static    readonly Dictionary<MemberInfo,BaseExpressor> _members = new Dictionary<MemberInfo,BaseExpressor>
 		{
-			{ MI(() => Sql.Left ("",0)), new F<S,I,S>((p0,p1) => Sql.Substring(p0, 1, p1)) },
-			{ MI(() => Sql.Right("",0)), new F<S,I,S>((p0,p1) => Sql.Substring(p0, p0.Length - p1 + 1, p1)) },
+			{ MI(() => Sql.Left    ("",0)    ), new F<S,I,S>  ((p0,p1)    => Sql.Substring(p0, 1, p1)) },
+			{ MI(() => Sql.Right   ("",0)    ), new F<S,I,S>  ((p0,p1)    => Sql.Substring(p0, p0.Length - p1 + 1, p1)) },
+			{ MI(() => Sql.PadRight("",0,' ')), new F<S,I,C,S>((p0,p1,p2) => p0.Length > p1 ? p0 : p0 + Replicate(p2, p1 - p0.Length)) },
+			{ MI(() => Sql.PadLeft ("",0,' ')), new F<S,I,C,S>((p0,p1,p2) => p0.Length > p1 ? p0 : Replicate(p2, p1 - p0.Length) + p0) },
+			{ MI(() => Sql.Trim    ("")      ), new F<S,S>    ( p0        => Sql.TrimLeft(Sql.TrimRight(p0))) },
 		};
 #endif
 	}

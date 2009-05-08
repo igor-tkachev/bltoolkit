@@ -10,6 +10,11 @@
 | LIKE      | Sql.Like(s, "%abc%")            | s LIKE '%abc%'
 | LIKE      | Sql.Like(s, "a~%b", '~')        | s LIKE "a~%b" ESCAPE '~'
 | Length    | Sql.Length(s)                   | Length(s)
+| Trim      | Sql.Trim(s)                     | Trim(s)
+| Trim      | Sql.TrimLeft(s)                 | LTrim(s)
+| Trim      | Sql.TrimRight(s)                | RTrim(s)
+| Case      | Sql.Lower(s)                    | Lower(s)
+| Case      | Sql.Upper(s)                    | Upper(s)
 
 * DB2
 | CharIndex | Sql.CharIndex(a, s)             | Locate(a, s)
@@ -19,6 +24,9 @@
 | Substring | Sql.Right(s, a)                 | Right(s, a)
 | Stuff     | Sql.Stuff(s, a, b, c)           | Substring(s, 1, a-1) + c + Substring(s, a+b, Length(s)-a-b+1))
 | Space     | Sql.Space(a)                    | VarChar(<br>&nbsp;Repeat(' ', a), 1000)
+| Pad       | Sql.PadRight(s, a, b)           | s || VarChar(Repeat(<br>&nbsp;b, a-Length(s)), 1000)
+| Pad       | Sql.PadLeft(s, a, b)            | VarChar(Repeat(b,<br>&nbsp;a-Length(s)), 1000) || s
+| Replace   | Sql.Replace(s, a, b)            | Replace(s, a, b)
 
 * Informix
 | LIKE      | !s.Contains(a)                  | NOT s LIKE a
@@ -26,6 +34,10 @@
 | Substring | Sql.Left(s, a)                  | Substr(s, 1, a)
 | Substring | Sql.Right(s, a)                 | Substr(s,<br>&nbsp;&nbsp;Length(s)-a+1, a)
 | Stuff     | Sql.Stuff(s, a, b, c)           | Substring(s, 1, a-1) + c + Substring(s, a+b, Length(s)-a-b+1))
+| Space     | Sql.Space(a)                    | RPad(' ', a, ' ')
+| Pad       | Sql.PadRight(s, a, b)           | RPad(s, a, b)
+| Pad       | Sql.PadLeft(s, a, b)            | LPad(s, a, b)
+| Replace   | Sql.Replace(s, a, b)            | Replace(s, a, b)
 
 * Oracle
 | CharIndex | Sql.CharIndex(a, s)             | InStr(s, a)
@@ -36,6 +48,9 @@
 | Reverse   | Sql.Reverse(s)                  | Reverse(s)
 | Stuff     | Sql.Stuff(s, a, b, c)           | Substring(s, 1, a-1) + c + Substring(s, a+b, Length(s)-a-b+1))
 | Space     | Sql.Space(a)                    | RPad(' ', a, ' ')
+| Pad       | Sql.PadRight(s, a, b)           | RPad(s, a, b)
+| Pad       | Sql.PadLeft(s, a, b)            | LPad(s, a, b)
+| Replace   | Sql.Replace(s, a, b)            | Replace(s, a, b)
 
 * Firebird
 | Length    | Sql.Length(s)                   | Char_Length(s)
@@ -45,6 +60,9 @@
 | Reverse   | Sql.Reverse(s)                  | Reverse(s)
 | Stuff     | Sql.Stuff(s, a, b, c)           | Substring(s, 1, a-1) + c + Substring(s, a+b, Length(s)-a-b+1))
 | Space     | Sql.Space(a)                    | RPad(' ', a, ' ')
+| Pad       | Sql.PadRight(s, a, b)           | RPad(s, a, b)
+| Pad       | Sql.PadLeft(s, a, b)            | LPad(s, a, b)
+| Replace   | Sql.Replace(s, a, b)            | Replace(s, a, b)
 
 * PostgreSQL
 | CharIndex | Sql.CharIndex(a, s)             | Position(a in s)
@@ -55,6 +73,9 @@
 | Reverse   | Sql.Reverse(s)                  | Reverse(s) -- <i>implemented as UDF<i>
 | Stuff     | Sql.Stuff(s, a, b, c)           | Substring(s, 1, a-1) + c + Substring(s, a+b, Length(s)-a-b+1))
 | Space     | Sql.Space(a)                    | Repeat(' ', a)
+| Pad       | Sql.PadRight(s, a, b)           | RPad(s, a, b)
+| Pad       | Sql.PadLeft(s, a, b)            | LPad(s, a, b)
+| Replace   | Sql.Replace(s, a, b)            | Replace(s, a, b)
 
 * MySql
 | CharIndex | Sql.CharIndex(a, s)             | Locate(a, s)
@@ -65,6 +86,9 @@
 | Reverse   | Sql.Reverse(s)                  | Reverse(s)
 | Stuff     | Sql.Stuff(s, a, b, c)           | Substring(s, 1, a-1) + c + Substring(s, a+b, Length(s)-a-b+1))
 | Space     | Sql.Space(a)                    | Space(a)
+| Pad       | Sql.PadRight(s, a, b)           | RPad(s, a, b)
+| Pad       | Sql.PadLeft(s, a, b)            | LPad(s, a, b)
+| Replace   | Sql.Replace(s, a, b)            | Replace(s, a, b)
 
 * MS SQL
 | Length    | Sql.Length(s)                   | Len(s)
@@ -76,6 +100,10 @@
 | Reverse   | Sql.Reverse(s)                  | Reverse(s)
 | Stuff     | Sql.Stuff(s, a, b, c)           | Stuff(s, a, b, c)
 | Space     | Sql.Space(a)                    | Space(a)
+| Pad       | Sql.PadRight(s, a, b)           | s + Replicate(b, a - Len(s))
+| Pad       | Sql.PadLeft(s, a, b)            | Replicate(b, a - Len(s)) + s
+| Replace   | Sql.Replace(s, a, b)            | Replace(s, a, b)
+| Trim      | Sql.Trim(s)                     | LTrim(RTrim(s))
 
 * SqlCe
 | Length    | Sql.Length(s)                   | Len(s)
@@ -86,6 +114,10 @@
 | Substring | Sql.Right(s, a)                 | Substring(s,<br>&nbsp;&nbsp;Len(s)-a+1, a)
 | Stuff     | Sql.Stuff(s, a, b, c)           | Stuff(s, a, b, c)
 | Space     | Sql.Space(a)                    | Space(a)
+| Pad       | Sql.PadRight(s, a, b)           | s + Replicate(b, a - Len(s))
+| Pad       | Sql.PadLeft(s, a, b)            | Replicate(b, a - Len(s)) + s
+| Replace   | Sql.Replace(s, a, b)            | Replace(s, a, b)
+| Trim      | Sql.Trim(s)                     | LTrim(RTrim(s))
 
 * Sybase
 | Length    | Sql.Length(s)                   | Len(s)
@@ -97,6 +129,10 @@
 | Reverse   | Sql.Reverse(s)                  | Reverse(s)
 | Stuff     | Sql.Stuff(s, a, b, c)           | Stuff(s, a, b, c)
 | Space     | Sql.Space(a)                    | Space(a)
+| Pad       | Sql.PadRight(s, a, b)           | s + Replicate(b, a - Len(s))
+| Pad       | Sql.PadLeft(s, a, b)            | Replicate(b, a - Len(s)) + s
+| Replace   | Sql.Replace(s, a, b)            | Str_Replace(s, a, b)
+| Trim      | Sql.Trim(s)                     | LTrim(RTrim(s))
 
 * SQLite
 | CharIndex | Sql.CharIndex(a, s)             | CharIndex(a, s)
@@ -107,6 +143,9 @@
 | Reverse   | Sql.Reverse(s)                  | Reverse(s)
 | Stuff     | Sql.Stuff(s, a, b, c)           | Substring(s, 1, a-1) + c +<br>Substring(s, a+b, Length(s)-a-b+1))
 | Space     | Sql.Space(a)                    | PadR(' ', a)
+| Pad       | Sql.PadRight(s, a, b)           | s + Replicate(b, a - Len(s))
+| Pad       | Sql.PadLeft(s, a, b)            | Replicate(b, a - Len(s)) + s
+| Replace   | Sql.Replace(s, a, b)            | Replace(s, a, b)
 
 * Access
 | LIKE      | s.Contains("a%b")               | s LIKE "%a[%]b%"
@@ -121,3 +160,7 @@
 | Substring | Sql.Right(s, a)                 | Right(s, a)
 | Stuff     | Sql.Stuff(s, a, b, c)           | Substring(s, 1, a-1) + c +<br>Substring(s, a+b, Length(s)-a-b+1))
 | Space     | Sql.Space(a)                    | Space(a)
+| Pad       | Sql.PadRight(s, a, b)           | s + String(a-Len(s), b))
+| Pad       | Sql.PadLeft(s, a, b)            | String(a-Len(s), b)) + s
+| Case      | Sql.Lower(s)                    | LCase(s)
+| Case      | Sql.Upper(s)                    | UCase(s)
