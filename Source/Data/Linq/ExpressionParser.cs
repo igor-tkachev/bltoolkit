@@ -90,6 +90,7 @@ namespace BLToolkit.Data.Linq
 			(
 				pi => pi.IsQueryableMethod("Select", seq => select = ParseSequence(seq), (p, b) => select = ParseSelect(select, p, b)),
 				pi => pi.IsQueryableMethod("Where",  seq => select = ParseSequence(seq), (p, b) => select = ParseWhere (select, p, b)),
+				pi => pi.IsQueryableMethod("SelectMany", seq => select = ParseSequence(seq), (p, b) => select = ParseSelect(select, p, b)),
 
 				pi => { throw new ArgumentException(string.Format("Queryable method call expected. Got '{0}'.", pi.Expr), "info"); }
 			);
@@ -238,7 +239,11 @@ namespace BLToolkit.Data.Linq
 					case ExpressionType.MemberAccess:
 						{
 							var ma = pi.ConvertTo<MemberExpression>();
-							var ex = pi.Create(((MemberExpression)pi.Expr).Expression, pi.Property(Member.Expression));
+
+							if (IsServerSideOnly(pi))
+								return BuildField(query, ma);
+
+							var ex = pi.Create(ma.Expr.Expression, pi.Property(Member.Expression));
 
 							if (query.ParentQuery != null)
 							{
@@ -361,6 +366,15 @@ namespace BLToolkit.Data.Linq
 					case ExpressionType.Coalesce:
 					//case ExpressionType.Conditional:
 						return BuildField(query.ParentQuery, pi);
+
+					case ExpressionType.Call:
+						{
+							if (IsServerSideOnly(pi))
+								return BuildField(query, pi);
+						}
+
+						break;
+
 				}
 
 				return pi;
@@ -709,6 +723,14 @@ namespace BLToolkit.Data.Linq
 							return ParseExpression(query, pie);
 						}
 
+						var attrs = ma.Member.GetCustomAttributes(typeof(SqlPropertyAttribute), true);
+
+						if (attrs.Length > 0)
+						{
+							var attr = (SqlPropertyAttribute)attrs[0];
+							return Convert(new SqlExpression(attr.Name ?? ma.Member.Name));
+						}
+
 						var field = query.GetField(parseInfo.Expr);
 
 						if (field != null)
@@ -764,7 +786,11 @@ namespace BLToolkit.Data.Linq
 
 						if (attrs.Length > 0)
 						{
-							var attr  = (SqlFunctionAttribute)attrs[0];
+							var attr = (SqlFunctionAttribute)attrs[0];
+
+							if (attr is SqlPropertyAttribute)
+								return Convert(new SqlExpression(attr.Name ?? e.Method.Name));
+
 							var parms = new List<ISqlExpression>();
 
 							if (e.Object != null)
@@ -781,6 +807,60 @@ namespace BLToolkit.Data.Linq
 			}
 
 			throw new LinqException("'{0}' cannot be converted to SQL.", parseInfo.Expr);
+		}
+
+		bool IsServerSideOnly(ParseInfo parseInfo)
+		{
+			bool isServerSideOnly = false;
+
+			parseInfo.Walk(pi =>
+			{
+				if (isServerSideOnly)
+					return pi;
+
+				switch (pi.NodeType)
+				{
+					case ExpressionType.MemberAccess:
+						{
+							var ma = (MemberExpression)pi.Expr;
+							var ef = SqlProvider.ConvertMember(ma.Member);
+
+							if (ef != null)
+							{
+								isServerSideOnly = IsServerSideOnly(pi.Parent.Replace(ef, null));
+								break;
+							}
+
+							var attrs = ma.Member.GetCustomAttributes(typeof(SqlFunctionAttribute), true);
+
+							isServerSideOnly = attrs.Length > 0 && ((SqlFunctionAttribute)attrs[0]).ServerSideOnly;
+						}
+
+						break;
+
+					case ExpressionType.Call:
+						{
+							var e  = pi.Expr as MethodCallExpression;
+							var ef = SqlProvider.ConvertMember(e.Method);
+
+							if (ef != null)
+							{
+								isServerSideOnly = IsServerSideOnly(pi.Parent.Replace(ef, null));
+								break;
+							}
+
+							var attrs = e.Method.GetCustomAttributes(typeof(SqlFunctionAttribute), true);
+
+							isServerSideOnly = attrs.Length > 0 && ((SqlFunctionAttribute)attrs[0]).ServerSideOnly;
+						}
+
+						break;
+				}
+
+				return pi;
+			});
+
+			return isServerSideOnly;
 		}
 
 		static bool CanBeConstant(ParseInfo expr)
@@ -823,9 +903,9 @@ namespace BLToolkit.Data.Linq
 							if (IsConstant(mc.Method.DeclaringType) || mc.Method.DeclaringType == typeof(object))
 								return pi;
 
-							// TODO: Fix this sham.
-							//
-							if (mc.Method.DeclaringType == typeof(Sql))
+							var attrs = mc.Method.GetCustomAttributes(typeof(SqlFunctionAttribute), true);
+
+							if (attrs.Length > 0 && !((SqlFunctionAttribute)attrs[0]).ServerSideOnly)
 								return pi;
 
 							break;
@@ -841,19 +921,43 @@ namespace BLToolkit.Data.Linq
 			return canbe;
 		}
 
-		static bool CanBeCompiled(ParseInfo expr)
+		bool CanBeCompiled(ParseInfo expr)
 		{
 			var canbe = true;
 
 			expr.Walk(pi =>
 			{
-				switch (pi.NodeType)
+				if (canbe)
 				{
-					case ExpressionType.Parameter:
-						canbe = false;
-						pi.StopWalking = true;
-						break;
+					canbe = !IsServerSideOnly(pi);
+
+					if (canbe) switch (pi.NodeType)
+					{
+						case ExpressionType.Parameter:
+							canbe = false;
+							break;
+
+						case ExpressionType.MemberAccess:
+							{
+								var ma    = (MemberExpression)pi.Expr;
+								var attrs = ma.Member.GetCustomAttributes(typeof(SqlFunctionAttribute), true);
+
+								canbe = attrs.Length == 0  || !((SqlFunctionAttribute)attrs[0]).ServerSideOnly;
+								break;
+							}
+
+						case ExpressionType.Call:
+							{
+								var mc    = (MethodCallExpression)pi.Expr;
+								var attrs = mc.Method.GetCustomAttributes(typeof(SqlFunctionAttribute), true);
+
+								canbe = attrs.Length == 0  || !((SqlFunctionAttribute)attrs[0]).ServerSideOnly;
+								break;
+							}
+					}
 				}
+
+				pi.StopWalking = !canbe;
 
 				return pi;
 			});

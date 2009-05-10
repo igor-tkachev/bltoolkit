@@ -33,6 +33,15 @@ namespace BLToolkit.Data.Sql.SqlProvider
 					case "Length" : return new SqlFunction("Len", func.Parameters);
 				}
 			}
+			else if (expr is SqlExpression)
+			{
+				SqlExpression ex = (SqlExpression)expr;
+
+				switch (ex.Expr)
+				{
+					case "CURRENT_TIMESTAMP" : return new SqlFunction("GetDate");
+				}
+			}
 
 			return expr;
 		}

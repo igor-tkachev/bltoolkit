@@ -15,6 +15,7 @@ namespace BLToolkit.Data.Linq
 			Name = name;
 		}
 
-		public string Name { get; set; }
+		public string Name           { get; set; }
+		public bool   ServerSideOnly { get; set; }
 	}
 }

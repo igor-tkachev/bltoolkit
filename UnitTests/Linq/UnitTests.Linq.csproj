@@ -117,6 +117,8 @@
     <Compile Include="..\..\Source\Data\DataProvider\SybaseDataProvider.cs">
       <Link>Providers\SybaseDataProvider.cs</Link>
     </Compile>
+    <Compile Include="DateTimeFunctions.cs" />
+    <Compile Include="SelectManyTest.cs" />
     <Compile Include="StringFunctions.cs" />
     <Compile Include="SelectTest.cs" />
     <Compile Include="Model\BinaryData.cs" />

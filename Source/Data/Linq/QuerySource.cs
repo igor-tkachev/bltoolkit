@@ -145,15 +145,18 @@ namespace BLToolkit.Data.Linq
 					{
 						var ma = (MemberExpression)expr;
 
-						if (ma.Expression.NodeType == ExpressionType.Parameter)
+						if (ma.Expression != null)
 						{
-							QueryField fld;
-							_fields.TryGetValue(ma.Member, out fld);
-							return fld;
-						}
+							if (ma.Expression.NodeType == ExpressionType.Parameter)
+							{
+								QueryField fld;
+								_fields.TryGetValue(ma.Member, out fld);
+								return fld;
+							}
 
-						if (ma.Expression.NodeType == ExpressionType.Constant)
-							break;
+							if (ma.Expression.NodeType == ExpressionType.Constant)
+								break;
+						}
 
 						var list = new List<MemberInfo>();
 

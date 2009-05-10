@@ -11,6 +11,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 	using S = String;
 	using I = Int32;
 	using O = Object;
+	using D = DateTime;
 
 	partial class BasicSqlProvider
 	{
@@ -110,6 +111,9 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			{ MI(() => "".CompareTo  (1)      ), new F<S,O,I>    ((obj,p0)       => ConvertToCaseCompareTo(obj, p0.ToString()) ) },
 
 			{ MI(() => AltStuff    ("",0,0,"")), new F<S,I,I,S,S>((p0, p1,p2,p3) => Linq.Sql.Left(p0, p1 - 1) + p3 + Linq.Sql.Right(p0, p0.Length - (p1 + p2 - 1))) },
+
+			{ MI(() => Linq.Sql.GetDate()     ), new F<D>        (()             => Linq.Sql.CurrentTimestamp ) },
+			{ MI(() => DateTime.Now           ), new F<D>        (()             => Linq.Sql.CurrentTimestamp ) },
 		};
 
 		[SqlFunction]

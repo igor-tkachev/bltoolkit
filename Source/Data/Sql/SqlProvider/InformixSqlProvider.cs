@@ -68,16 +68,25 @@ namespace BLToolkit.Data.Sql.SqlProvider
 					case "|": return new SqlFunction("BitOr",  be.Expr1, be.Expr2);
 					case "^": return new SqlFunction("BitXor", be.Expr1, be.Expr2);
 					case "+": return be.Type == typeof(string)? new SqlBinaryExpression(be.Expr1, "||", be.Expr2, be.Type, be.Precedence): expr;
-			}
+				}
 			}
 			else if (expr is SqlFunction)
 			{
-				SqlFunction func = (SqlFunction) expr;
+				SqlFunction func = (SqlFunction)expr;
 
 				switch (func.Name)
 				{
 					case "Coalesce"  : return new SqlFunction("Nvl",    func.Parameters);
 					case "Substring" : return new SqlFunction("Substr", func.Parameters);
+				}
+			}
+			else if (expr is SqlExpression)
+			{
+				SqlExpression ex = (SqlExpression)expr;
+
+				switch (ex.Expr)
+				{
+					case "CURRENT_TIMESTAMP" : return new SqlExpression("CURRENT");
 				}
 			}
 

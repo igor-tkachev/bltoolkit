@@ -1,0 +1,47 @@
+﻿*
+| Current Timestamp | Sql.CurrentTimestamp | CURRENT_TIMESTAMP
+| Current Timestamp | Sql.GetDate()        | CURRENT_TIMESTAMP
+
+* DB2
+| Current Timestamp | Sql.CurrentTimestamp | CURRENT_TIMESTAMP
+| Current Timestamp | Sql.GetDate()        | CURRENT_TIMESTAMP
+
+* Informix
+| Current Timestamp | Sql.CurrentTimestamp | CURRENT
+| Current Timestamp | Sql.GetDate()        | CURRENT
+
+* Oracle
+| Current Timestamp | Sql.CurrentTimestamp | CURRENT_TIMESTAMP
+| Current Timestamp | Sql.GetDate()        | CURRENT_TIMESTAMP
+
+* Firebird
+| Current Timestamp | Sql.CurrentTimestamp | CURRENT_TIMESTAMP
+| Current Timestamp | Sql.GetDate()        | CURRENT_TIMESTAMP
+
+* PostgreSQL
+| Current Timestamp | Sql.CurrentTimestamp | CURRENT_TIMESTAMP
+| Current Timestamp | Sql.GetDate()        | CURRENT_TIMESTAMP
+
+* MySql
+| Current Timestamp | Sql.CurrentTimestamp | CURRENT_TIMESTAMP
+| Current Timestamp | Sql.GetDate()        | CURRENT_TIMESTAMP
+
+* MS SQL
+| Current Timestamp | Sql.CurrentTimestamp | CURRENT_TIMESTAMP
+| Current Timestamp | Sql.GetDate()        | CURRENT_TIMESTAMP
+
+* SqlCe
+| Current Timestamp | Sql.CurrentTimestamp | GetDate()
+| Current Timestamp | Sql.GetDate()        | GetDate()
+
+* Sybase
+| Current Timestamp | Sql.CurrentTimestamp | GetDate()
+| Current Timestamp | Sql.GetDate()        | GetDate()
+
+* SQLite
+| Current Timestamp | Sql.CurrentTimestamp | CURRENT_TIMESTAMP
+| Current Timestamp | Sql.GetDate()        | CURRENT_TIMESTAMP
+
+* Access
+| Current Timestamp | Sql.CurrentTimestamp | Now
+| Current Timestamp | Sql.GetDate()        | Now

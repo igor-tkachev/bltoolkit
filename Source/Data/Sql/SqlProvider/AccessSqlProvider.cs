@@ -159,6 +159,15 @@ namespace BLToolkit.Data.Sql.SqlProvider
 							new SqlFunction("InStr", func.Parameters[2], func.Parameters[1], func.Parameters[0], new SqlValue(1));
 				}
 			}
+			else if (expr is SqlExpression)
+			{
+				SqlExpression ex = (SqlExpression)expr;
+
+				switch (ex.Expr)
+				{
+					case "CURRENT_TIMESTAMP" : return new SqlExpression("Now");
+				}
+			}
 
 			return expr;
 		}

@@ -5,6 +5,8 @@ namespace BLToolkit.Data.Linq
 {
 	public static class Sql
 	{
+		#region String Finctions
+
 		[SqlFunction]
 		public static int Length(string str)
 		{
@@ -153,5 +155,23 @@ namespace BLToolkit.Data.Linq
 		{
 			return str.ToUpper();
 		}
+
+		#endregion
+
+		#region DateTime Functions
+
+		[SqlFunction(ServerSideOnly = true)]
+		public static DateTime GetDate()
+		{
+			throw new LinqException("The 'GetDate' method is server side only method.");
+		}
+
+		[SqlProperty(Name = "CURRENT_TIMESTAMP", ServerSideOnly = true)]
+		public static DateTime CurrentTimestamp
+		{
+			get { throw new LinqException("The 'CurrentTimestamp' property is server side only property."); }
+		}
+
+		#endregion
 	}
 }

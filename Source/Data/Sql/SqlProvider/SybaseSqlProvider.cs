@@ -61,6 +61,15 @@ namespace BLToolkit.Data.Sql.SqlProvider
 						break;
 				}
 			}
+			else if (expr is SqlExpression)
+			{
+				SqlExpression ex = (SqlExpression)expr;
+
+				switch (ex.Expr)
+				{
+					case "CURRENT_TIMESTAMP" : return new SqlFunction("GetDate");
+				}
+			}
 
 			return expr;
 		}

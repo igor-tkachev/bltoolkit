@@ -157,6 +157,8 @@
     <Content Include="Content\Doc\EditableObjects\EditableObject.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Content\Doc\Data\LinqDateTimeFunctions.txt" />
+    <Content Include="Content\Doc\Data\LinqDateTimeCoreFunctions.txt" />
     <Content Include="Content\Doc\Data\LinqStringCoreFunctions.txt" />
     <Content Include="Content\Doc\Data\Linq.htm" />
     <Content Include="Content\Doc\Data\LinqOperators.txt" />

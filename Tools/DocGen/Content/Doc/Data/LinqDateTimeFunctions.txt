@@ -1,0 +1,2 @@
+﻿* All data providers
+| Current Timestamp | DateTime.Now | Sql.CurrentTimestamp
