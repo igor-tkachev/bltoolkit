@@ -72,9 +72,16 @@ namespace BLToolkit.Data.Linq
 			return _info;
 		}
 
-		QuerySource ParseSequence(ParseInfo<Expression> info)
+		QuerySource ParseSequence(ParseInfo info)
 		{
 			QuerySource select = null;
+
+			if (info.NodeType == ExpressionType.MemberAccess)
+			{
+				var pi = info.ConvertTo<MemberExpression>();
+				if (TypeHelper.IsSameOrParent(typeof(IQueryable), pi.Expr.Type))
+					info = pi;
+			}
 
 			if (info.IsConstant<IQueryable>((value,expr) =>
 				{
@@ -88,10 +95,9 @@ namespace BLToolkit.Data.Linq
 
 			info.ConvertTo<MethodCallExpression>().Match
 			(
-				pi => pi.IsQueryableMethod("Select", seq => select = ParseSequence(seq), (p, b) => select = ParseSelect(select, p, b)),
-				pi => pi.IsQueryableMethod("Where",  seq => select = ParseSequence(seq), (p, b) => select = ParseWhere (select, p, b)),
-				pi => pi.IsQueryableMethod("SelectMany", seq => select = ParseSequence(seq), (p, b) => select = ParseSelect(select, p, b)),
-
+				pi => pi.IsQueryableMethod("Select",     seq => select = ParseSequence(seq),  l      => select = ParseSelect    (select, l)),
+				pi => pi.IsQueryableMethod("Where",      seq => select = ParseSequence(seq),  l      => select = ParseWhere     (select, l)),
+				pi => pi.IsQueryableMethod("SelectMany", seq => select = ParseSequence(seq), (l1,l2) => select = ParseSelectMany(select, l1, l2)),
 				pi => { throw new ArgumentException(string.Format("Queryable method call expected. Got '{0}'.", pi.Expr), "info"); }
 			);
 
@@ -102,29 +108,50 @@ namespace BLToolkit.Data.Linq
 
 		#region Parse Select
 
-		QuerySource ParseSelect(QuerySource select, ParseInfo<ParameterExpression> parm, ParseInfo body)
+		QuerySource ParseSelect(QuerySource select, LambdaInfo1 l)
 		{
 			if (select != null)
-				SetAlias(select, parm.Expr.Name);
+				SetAlias(select, l.Parameter.Expr.Name);
 
-			switch (body.NodeType)
+			switch (l.Body.NodeType)
 			{
 				case ExpressionType.Parameter   : return select;
-				case ExpressionType.New         : return new QuerySource.Expr  (_info.SqlBuilder, select, body.ConvertTo<NewExpression>());
-				case ExpressionType.MemberInit  : return new QuerySource.Expr  (_info.SqlBuilder, select, body.ConvertTo<MemberInitExpression>());
-				default                         : return new QuerySource.Scalar(_info.SqlBuilder, select, body);
+				case ExpressionType.New         : return new QuerySource.Expr  (_info.SqlBuilder, select, l.Body.ConvertTo<NewExpression>());
+				case ExpressionType.MemberInit  : return new QuerySource.Expr  (_info.SqlBuilder, select, l.Body.ConvertTo<MemberInitExpression>());
+				default                         : return new QuerySource.Scalar(_info.SqlBuilder, select, l.Body);
 			}
+		}
+
+		#endregion
+
+		#region Parse SelectMany
+
+		QuerySource ParseSelectMany(QuerySource select, LambdaInfo1 lambda1, LambdaInfo2 lambda2)
+		{
+			var sqlBuilder        = new SqlBuilder();
+			var currentSqlBuilder = _info.SqlBuilder;
+
+			_info.SqlBuilder = sqlBuilder;
+
+			var source = ParseSequence(lambda1.Body);
+
+			_info.SqlBuilder = currentSqlBuilder;
+			_info.SqlBuilder.From.Table(sqlBuilder);
+
+			return ParseSelect(
+				new QuerySource.Many(_info.SqlBuilder, sqlBuilder, select, lambda2),
+				new LambdaInfo1(lambda2.Parameter2, lambda2.Body));
 		}
 
 		#endregion
 
 		#region Parse Where
 
-		QuerySource ParseWhere(QuerySource select, ParseInfo<ParameterExpression> parm, ParseInfo body)
+		QuerySource ParseWhere(QuerySource select, LambdaInfo1 l)
 		{
-			SetAlias(select, parm.Expr.Name);
+			SetAlias(select, l.Parameter.Expr.Name);
 
-			if (CheckForSubQuery(select, body))
+			if (CheckForSubQuery(select, l.Body))
 			{
 				var subQuery = new QuerySource.SubQuery(_info.SqlBuilder, select);
 
@@ -133,7 +160,7 @@ namespace BLToolkit.Data.Linq
 				select = subQuery;
 			}
 
-			ParseSearchCondition(_info.SqlBuilder.Where.SearchCondition.Conditions, select, body);
+			ParseSearchCondition(_info.SqlBuilder.Where.SearchCondition.Conditions, select, l.Body);
 
 			return select;
 		}
@@ -457,7 +484,7 @@ namespace BLToolkit.Data.Linq
 			{
 				case ExpressionType.New:
 				case ExpressionType.MemberInit:
-					BuildNew(ParseSelect(query, null, parseInfo), parseInfo);
+					BuildNew(ParseSelect(query, new LambdaInfo1(null, parseInfo)), parseInfo);
 					return;
 			}
 

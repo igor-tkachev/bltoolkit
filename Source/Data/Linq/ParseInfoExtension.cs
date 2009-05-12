@@ -51,9 +51,32 @@ namespace BLToolkit.Data.Linq
 			this ParseInfo<MethodCallExpression> pi,
 			string methodName,
 			Action<ParseInfo<Expression>>        seq,
-			Action<ParseInfo<ParameterExpression>,ParseInfo<Expression>> lambda)
+			Action<LambdaInfo1>                  lambda)
 		{
-			return IsMethod(pi, typeof(Queryable), methodName, new FTest[] { p => { seq(p); return true; }, l => l.IsLambda(lambda) }, p => true);
+			return IsMethod(pi, typeof(Queryable), methodName, new FTest[] { p => { seq(p); return true; }, l => l.IsLambda1(lambda) }, p => true);
+		}
+
+		public static bool IsQueryableMethod(
+			this ParseInfo<MethodCallExpression> pi,
+			string methodName,
+			Action<ParseInfo<Expression>>        seq,
+			Action<LambdaInfo1,LambdaInfo2>      parms)
+		{
+			LambdaInfo1 lambda1 = null;
+			LambdaInfo2 lambda2 = null;
+
+			if (IsMethod(pi, typeof(Queryable), methodName, new FTest[]
+				{
+					p => { seq(p); return true; },
+					l => l.IsLambda1(l1 => lambda1 = l1),
+					l => l.IsLambda2(l2 => lambda2 = l2),
+				}, p => true))
+			{
+				parms(lambda1, lambda2);
+				return true;
+			}
+
+			return false;
 		}
 
 		public static ParseInfo<Expression> CreateArgument(this ParseInfo<MethodCallExpression> pi, int idx)
@@ -62,7 +85,7 @@ namespace BLToolkit.Data.Linq
 		}
 
 		[Obsolete]
-		public static bool IsMethod(
+		static bool IsMethod(
 			this ParseInfo<MethodCallExpression> pi,
 			MethodInfo method,
 			Action<ParseInfo<Expression>>        seq,

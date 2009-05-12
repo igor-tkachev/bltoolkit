@@ -120,6 +120,17 @@ namespace BLToolkit.Data.Linq
 			}
 		}
 
+		public class Many : QuerySource
+		{
+			public Many(SqlBuilder sqlBilder, SqlBuilder subSql, QuerySource parentQuery, LambdaInfo2 lambda2)
+				: base(sqlBilder, parentQuery, lambda2.Body)
+			{
+				SubSql = subSql;
+			}
+
+			public SqlBuilder SubSql;
+		}
+
 		protected QuerySource(SqlBuilder sqlBilder, QuerySource parentQuery, ParseInfo expr)
 		{
 			SqlBuilder  = sqlBilder;

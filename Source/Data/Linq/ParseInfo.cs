@@ -72,10 +72,12 @@ namespace BLToolkit.Data.Linq
 			{
 				var lambda = pi.ConvertTo<LambdaExpression>();
 
-				if (lambda.Expr.Parameters.Count == parameters.Length)
-					for (var i = 0; i < parameters.Length; i++)
-						if (!parameters[i](lambda.Create(lambda.Expr.Parameters[i], lambda.Indexer(Lambda.Parameters, ParamItem, i))))
-							return false;
+				if (lambda.Expr.Parameters.Count != parameters.Length)
+					return false;
+
+				for (var i = 0; i < parameters.Length; i++)
+					if (!parameters[i](lambda.Create(lambda.Expr.Parameters[i], lambda.Indexer(Lambda.Parameters, ParamItem, i))))
+						return false;
 
 				return body(lambda.Create(lambda.Expr.Body, lambda.Property(Lambda.Body))) && func(lambda);
 			}
@@ -113,6 +115,7 @@ namespace BLToolkit.Data.Linq
 			return IsLambda<Expression>(parms, func, p => true);
 		}
 
+		[Obsolete]
 		public bool IsLambda(Action<ParseInfo<ParameterExpression>,ParseInfo<Expression>> lambda)
 		{
 			ParseInfo<ParameterExpression> parameter = null;
@@ -120,6 +123,31 @@ namespace BLToolkit.Data.Linq
 			return IsLambda<Expression>(
 				new FParm[] { p => { parameter = p; return true; } },
 				body => { lambda(parameter, body); return true; },
+				p => true);
+		}
+
+		public bool IsLambda1(Action<LambdaInfo1> lambda)
+		{
+			ParseInfo<ParameterExpression> parameter = null;
+
+			return IsLambda<Expression>(
+				new FParm[] { p => { parameter = p; return true; } },
+				body => { lambda(new LambdaInfo1(parameter, body)); return true; },
+				p => true);
+		}
+
+		public bool IsLambda2(Action<LambdaInfo2> lambda)
+		{
+			ParseInfo<ParameterExpression> parameter1 = null;
+			ParseInfo<ParameterExpression> parameter2 = null;
+
+			return IsLambda<Expression>(
+				new FParm[]
+				{
+					p => { parameter1 = p; return true; },
+					p => { parameter2 = p; return true; }
+				},
+				body => { lambda(new LambdaInfo2(parameter1, parameter2, body)); return true; },
 				p => true);
 		}
 
@@ -644,5 +672,31 @@ namespace BLToolkit.Data.Linq
 		}
 
 		#endregion
+	}
+
+	class LambdaInfo1
+	{
+		public LambdaInfo1(ParseInfo<ParameterExpression> p, ParseInfo b)
+		{
+			Parameter = p;
+			Body      = b;
+		}
+
+		public ParseInfo<ParameterExpression> Parameter;
+		public ParseInfo                      Body;
+	}
+
+	class LambdaInfo2
+	{
+		public LambdaInfo2(ParseInfo<ParameterExpression> p1, ParseInfo<ParameterExpression> p2, ParseInfo b)
+		{
+			Parameter1 = p1;
+			Parameter2 = p2;
+			Body       = b;
+		}
+
+		public ParseInfo<ParameterExpression> Parameter1;
+		public ParseInfo<ParameterExpression> Parameter2;
+		public ParseInfo                      Body;
 	}
 }

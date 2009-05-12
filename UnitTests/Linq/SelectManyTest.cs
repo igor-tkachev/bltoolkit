@@ -7,17 +7,21 @@ namespace Data.Linq
 {
 	using Model;
 
-	//[TestFixture]
+	[TestFixture]
 	public class SelectManyTest : TestBase
 	{
 		[Test]
 		public void Test1()
 		{
 			TestJohn(db =>
-				db.Person
-					.SelectMany(p1 => db.Person, (p1, p2) => new {p1, p2})
-					.Where(@t => @t.p1.ID == @t.p2.ID && @t.p1.ID == 1)
-					.Select(@t => new Person {ID = @t.p1.ID, FirstName = @t.p2.FirstName}));
+			{
+				var q = db.Person.Select(p => p);
+
+				return db.Person
+					.SelectMany(p1 => q/*db.Person.Select(p => p)*/, (p1, p2) => new {p1, p2})
+					.Where(t => t.p1.ID == t.p2.ID && t.p1.ID == 1)
+					.Select(t => new Person {ID = t.p1.ID, FirstName = t.p2.FirstName});
+			});
 		}
 
 		[Test]
