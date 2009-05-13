@@ -6,6 +6,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
+
 using BLToolkit.Reflection;
 
 namespace BLToolkit.Data.Linq
@@ -335,10 +336,12 @@ namespace BLToolkit.Data.Linq
 
 		public bool Compare(DataProviderBase dataProvider, MappingSchema mappingSchema, Expression expr)
 		{
-			return DataProvider == dataProvider && MappingSchema == mappingSchema && Compare(expr, Expression);
+			return DataProvider == dataProvider && MappingSchema == mappingSchema && Compare(Expression, expr);
 		}
 
-		static bool Compare(Expression expr1, Expression expr2)
+		public Dictionary<Expression,Func<Expression,IQueryable>> QueryableAccessors = new Dictionary<Expression,Func<Expression,IQueryable>>();
+
+		bool Compare(Expression expr1, Expression expr2)
 		{
 			if (expr1 == expr2)
 				return true;
@@ -485,7 +488,21 @@ namespace BLToolkit.Data.Linq
 					{
 						var e1 = (MemberExpression)expr1;
 						var e2 = (MemberExpression)expr2;
-						return e1.Member == e2.Member && Compare(e1.Expression, e2.Expression);
+
+						if (e1.Member == e2.Member)
+						{
+							if (QueryableAccessors.Count > 0)
+							{
+								Func<Expression,IQueryable> func = null;
+
+								if (QueryableAccessors.TryGetValue(expr1, out func))
+									return Compare(func(expr1).Expression, func(expr2).Expression);
+							}
+
+							return Compare(e1.Expression, e2.Expression);
+						}
+
+						return false;
 					}
 
 				case ExpressionType.MemberInit:

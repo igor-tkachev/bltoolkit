@@ -76,11 +76,12 @@ namespace BLToolkit.Data.Linq
 		{
 			QuerySource select = null;
 
-			if (info.NodeType == ExpressionType.MemberAccess)
+			if (TypeHelper.IsSameOrParent(typeof(IQueryable), info.Expr.Type))
 			{
-				var pi = info.ConvertTo<MemberExpression>();
-				if (TypeHelper.IsSameOrParent(typeof(IQueryable), pi.Expr.Type))
-					info = pi;
+				if (info.NodeType == ExpressionType.MemberAccess)
+				{
+					info = GetIQueriable(info);
+				}
 			}
 
 			if (info.IsConstant<IQueryable>((value,expr) =>
@@ -102,6 +103,47 @@ namespace BLToolkit.Data.Linq
 			);
 
 			return select;
+		}
+
+		ParseInfo GetIQueriable(ParseInfo info)
+		{
+			ParameterExpression expressionParam = Expression.Parameter(typeof(Expression), "expr");
+
+			if (info.NodeType == ExpressionType.MemberAccess)
+			{
+				var expr = ParseInfo.CreateRoot(info.Expr, _expressionParam).ConvertTo<MemberExpression>().Walk(pi =>
+				{
+					if (pi.NodeType == ExpressionType.MemberAccess)
+					{
+						Expression accessor;
+
+						if (_accessors.TryGetValue(pi.Expr, out accessor))
+							return pi.Parent.Replace(pi.Expr, accessor);
+					}
+
+					pi.IsConstant(c =>
+					{
+						if (!TypeHelper.IsScalar(pi.Expr.Type))
+						{
+							var e = Expression.Convert(c.ParamAccessor, pi.Expr.Type);
+							pi = pi.Parent.Replace(e, c.ParamAccessor);
+						}
+
+						return true;
+					});
+
+					return pi;
+				});
+
+				var l  = Expression.Lambda<Func<Expression,IQueryable>>(Expression.Convert(expr, typeof(IQueryable)), new [] { _expressionParam });
+				var qe = l.Compile();
+
+				_info.QueryableAccessors.Add(info.Expr, qe);
+
+				return info;
+			}
+
+			throw new InvalidOperationException();
 		}
 
 		#endregion
