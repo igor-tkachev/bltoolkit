@@ -122,10 +122,13 @@ namespace BLToolkit.Data.Linq
 
 		public class Many : QuerySource
 		{
-			public Many(SqlBuilder sqlBilder, SqlBuilder subSql, QuerySource parentQuery, LambdaInfo2 lambda2)
-				: base(sqlBilder, parentQuery, lambda2.Body)
+			public Many(SqlBuilder sqlBilder, SqlBuilder subSql, QuerySource source1, QuerySource source2, LambdaInfo2 lambda2)
+				: base(sqlBilder, source1, lambda2.Body)
 			{
 				SubSql = subSql;
+
+				foreach (var field in source1._fields) _fields.Add(field.Key, field.Value);
+				//foreach (var field in source2._fields) _fields.Add(field.Key, field.Value);
 			}
 
 			public SqlBuilder SubSql;
@@ -248,12 +251,14 @@ namespace BLToolkit.Data.Linq
 			Action<Table>    tableAction,
 			Action<Expr>     exprAction,
 			Action<SubQuery> subQueryAction,
-			Action<Scalar>   scalarAction)
+			Action<Scalar>   scalarAction,
+			Action<Many>     manyAction)
 		{
 			if      (this is Table)    tableAction   (this as Table);
 			else if (this is Expr)     exprAction    (this as Expr);
 			else if (this is SubQuery) subQueryAction(this as SubQuery);
 			else if (this is Scalar)   scalarAction  (this as Scalar);
+			else if (this is Many)     manyAction    (this as Many);
 		}
 	}
 }

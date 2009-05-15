@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Data;
 using System.Linq;
-using System.Linq.Expressions;
 
 using NUnit.Framework;
 
@@ -249,28 +247,6 @@ namespace Data.Linq
 				var f = q.Where(p => p.FirstName == "123John456").ToList().First();
 				Assert.AreEqual(1, f.ID);
 			});
-		}
-
-		void Foo(Expression<Func<IDataReader,object>> func)
-		{
-			/*
-			*/
-		}
-
-		protected object MapDataReaderToObject(Type destObjectType, IDataReader dataReader, int slotNumber, int[] index)
-		{
-			return null;
-		}
-
-		void Bar()
-		{
-			Foo(rd => MapDataReaderToObject(typeof(string), rd, 10, new[] { 0, 2, 3, 4, 5 }));
-		}
-
-		//[Test]
-		public void Test___()
-		{
-			Bar();
 		}
 	}
 }

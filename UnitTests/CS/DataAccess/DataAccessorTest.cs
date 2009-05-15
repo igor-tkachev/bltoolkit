@@ -296,10 +296,10 @@ namespace DataAccess
 		public DataAccessorTest()
 		{
 			object o = TypeAccessor.CreateInstance(typeof(Person));
-			Assert.IsInstanceOfType(typeof(Person), o);
+			Assert.IsInstanceOf(typeof(Person), o);
 
 			_da = (PersonAccessor)DataAccessor.CreateInstance(typeof(PersonAccessor));
-			Assert.IsInstanceOfType(typeof(PersonAccessor), _da);
+			Assert.IsInstanceOf(typeof(PersonAccessor), _da);
 		}
 
 		[Test]
@@ -521,22 +521,22 @@ namespace DataAccess
 		public void Gen_SameTypeName()
 		{
 			Person e = _da.SameTypeName("Tester", "Testerson");
-			Assert.IsInstanceOfType(typeof(Person), e);
+			Assert.IsInstanceOf(typeof(Person), e);
 			Assert.AreEqual(2, e.ID);
 
 			ArrayList list = _da.SameTypeName();
 			Assert.AreNotEqual(0, list.Count);
-			Assert.IsInstanceOfType(typeof(Person), list[0]);
+			Assert.IsInstanceOf(typeof(Person), list[0]);
 
 			PersonDataAccessor1 da1 = (PersonDataAccessor1)DataAccessor.CreateInstance(typeof(PersonDataAccessor1));
 			Other.Person         e1 = da1.SameTypeName1("Tester", "Testerson");
 
-			Assert.IsInstanceOfType(typeof(Other.Person), e1);
+			Assert.IsInstanceOf(typeof(Other.Person), e1);
 			Assert.IsNotEmpty(e1.Diagnosis);
 
 			list = da1.SameTypeName1();
 			Assert.AreNotEqual(0, list.Count);
-			Assert.IsInstanceOfType(typeof(Other.Person), list[0]);
+			Assert.IsInstanceOf(typeof(Other.Person), list[0]);
 		}
 
 		[Test]
@@ -679,7 +679,7 @@ namespace DataAccess
 		public void Gen_SelectAllTypedDataSetWithObjectType()
 		{
 			object o = _da.SelectAllTypedDataSetWithDestination(new PersonDataSet());
-			Assert.IsInstanceOfType(typeof(PersonDataSet), o);
+			Assert.IsInstanceOf(typeof(PersonDataSet), o);
 
 			PersonDataSet ds = (PersonDataSet)o;
 			Assert.AreNotEqual(0, ds.Person.Rows.Count);

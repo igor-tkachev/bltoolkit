@@ -1,12 +1,12 @@
 using System;
 using System.ComponentModel;
 using System.Data.SqlTypes;
+
 using NUnit.Framework;
 
 using BLToolkit.Aspects;
 using BLToolkit.ComponentModel;
 using BLToolkit.Reflection;
-using NUnit.Framework.SyntaxHelpers;
 
 namespace Aspects
 {

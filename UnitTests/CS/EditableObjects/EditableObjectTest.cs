@@ -8,7 +8,6 @@ using BLToolkit.EditableObjects;
 using BLToolkit.Mapping;
 using BLToolkit.Reflection;
 using BLToolkit.TypeBuilder;
-using NUnit.Framework.SyntaxHelpers;
 
 namespace EditableObjects
 {

@@ -1,9 +1,9 @@
+using System;
 using System.Collections.Generic;
 
 using NUnit.Framework;
 
 using BLToolkit.DataAccess;
-using NUnit.Framework.SyntaxHelpers;
 
 namespace HowTo.DataAccess
 {

@@ -1,10 +1,10 @@
 using System;
 using System.Reflection;
+
 using NUnit.Framework;
 
 using BLToolkit.Reflection;
 using BLToolkit.TypeBuilder;
-using NUnit.Framework.SyntaxHelpers;
 
 namespace TypeBuilder
 {

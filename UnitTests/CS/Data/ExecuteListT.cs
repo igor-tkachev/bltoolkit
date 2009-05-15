@@ -25,19 +25,8 @@ namespace Data
 				}
 			}
 
-			private int _key;
-			public  int  Key
-			{
-				get { return _key;  }
-				set { _key = value; }
-			}
-
-			private string _value;
-			public  string  Value
-			{
-				get { return _value; }
-				set { _value = value; }
-			}
+			private int    _key;   public int    Key   { get { return _key;   } set { _key   = value; } }
+			private string _value; public string Value { get { return _value; } set { _value = value; } }
 		}
 
 		[Test]
@@ -89,7 +78,7 @@ namespace Data
 					.ExecuteList<SimpleObject>("123", "456");
 
 				Assert.IsNotEmpty(list);
-				Assert.IsInstanceOfType(typeof(SimpleObject), list[0]);
+				Assert.IsInstanceOf(typeof(SimpleObject), list[0]);
 			}
 		}
 	}

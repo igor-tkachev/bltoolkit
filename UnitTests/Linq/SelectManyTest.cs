@@ -1,5 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Data;
 using System.Linq;
+using System.Linq.Expressions;
 
 using NUnit.Framework;
 
@@ -33,6 +36,50 @@ namespace Data.Linq
 				from p3 in db.Person
 				where p1.ID == p2.ID && p1.ID == p3.ID && p1.ID == 1
 				select new Person { ID = p1.ID, FirstName = p2.FirstName, LastName = p3.LastName } );
+		}
+
+
+
+		
+		void Foo(Expression<Func<IDataReader,object>> func)
+		{
+			/*
+			ParameterExpression CS$0$0000;
+			this.Foo
+			(
+				Expression.Lambda<Func<IDataReader, object>>
+				(
+					Expression.Call
+					(
+						Expression.Field
+						(
+							Expression.Constant(this, typeof(SelectManyTest)),
+							fieldof(SelectManyTest._dic)
+						),
+						(MethodInfo) methodof
+						(
+							Dictionary<string, string>.get_Item,
+							Dictionary<string, string>
+						),
+						new Expression[] { Expression.Constant("123", typeof(string)) }
+					),
+					new ParameterExpression[] { CS$0$0000 = Expression.Parameter(typeof(IDataReader), "rd") }
+				)
+			);
+			*/
+		}
+
+		Dictionary<string,string> _dic = new Dictionary<string,string>();
+
+		void Bar()
+		{
+			Foo(rd => _dic["123"]);
+		}
+
+		//[Test]
+		public void Test___()
+		{
+			Bar();
 		}
 	}
 }

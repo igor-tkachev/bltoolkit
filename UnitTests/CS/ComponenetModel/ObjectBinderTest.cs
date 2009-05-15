@@ -1,7 +1,9 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.ComponentModel;
+
 using BLToolkit.ComponentModel;
+
 using NUnit.Framework;
-using NUnit.Framework.SyntaxHelpers;
 
 namespace UnitTests.CS.ComponenetModel
 {

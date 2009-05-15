@@ -2,7 +2,6 @@ using System.IO;
 using System.Xml.Serialization;
 
 using NUnit.Framework;
-using NUnit.Framework.SyntaxHelpers;
 
 using BLToolkit.Reflection;
 using BLToolkit.EditableObjects;

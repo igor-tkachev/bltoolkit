@@ -1,11 +1,11 @@
 using System;
-using BLToolkit.Data;
-using BLToolkit.Data.DataProvider;
+
 using NUnit.Framework;
 
-using BLToolkit.Mapping;
+using BLToolkit.Data;
+using BLToolkit.Data.DataProvider;
 using BLToolkit.DataAccess;
-using NUnit.Framework.SyntaxHelpers;
+using BLToolkit.Mapping;
 
 namespace DataAccess
 {

@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 
 using NUnit.Framework;
-using NUnit.Framework.SyntaxHelpers;
 
 using BLToolkit.DataAccess;
 using BLToolkit.Mapping;

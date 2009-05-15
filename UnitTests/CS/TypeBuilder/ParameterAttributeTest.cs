@@ -5,7 +5,6 @@ using BLToolkit.Reflection;
 using BLToolkit.TypeBuilder;
 
 using NUnit.Framework;
-using NUnit.Framework.SyntaxHelpers;
 
 namespace TypeBuilder
 {

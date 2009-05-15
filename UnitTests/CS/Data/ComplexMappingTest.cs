@@ -1,14 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+
 using NUnit.Framework;
+
+using BLToolkit.Data;
+using BLToolkit.DataAccess;
 using BLToolkit.EditableObjects;
 using BLToolkit.Mapping;
-using BLToolkit.Data;
-using NUnit.Framework.SyntaxHelpers;
-using BLToolkit.DataAccess;
-using BLToolkit.Reflection.Extension;
 using BLToolkit.Reflection.MetadataProvider;
 
 namespace Data

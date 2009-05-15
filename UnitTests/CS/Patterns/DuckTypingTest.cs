@@ -4,7 +4,6 @@ using NUnit.Framework;
 
 using BLToolkit.TypeBuilder;
 using BLToolkit.Patterns;
-using NUnit.Framework.SyntaxHelpers;
 
 namespace Patterns
 {

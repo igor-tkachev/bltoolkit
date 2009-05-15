@@ -15,6 +15,11 @@ namespace BLToolkit.Data.Linq
 	{
 		public class Expressor<T>
 		{
+			public static FieldInfo FieldExpressor(Expression<Func<T,object>> func)
+			{
+				return (FieldInfo)((MemberExpression)func.Body).Member;
+			}
+
 			public static MethodInfo PropertyExpressor(Expression<Func<T,object>> func)
 			{
 				return ((PropertyInfo)((MemberExpression)func.Body).Member).GetGetMethod();

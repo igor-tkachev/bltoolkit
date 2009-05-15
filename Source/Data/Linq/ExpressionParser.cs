@@ -77,12 +77,8 @@ namespace BLToolkit.Data.Linq
 			QuerySource select = null;
 
 			if (TypeHelper.IsSameOrParent(typeof(IQueryable), info.Expr.Type))
-			{
 				if (info.NodeType == ExpressionType.MemberAccess)
-				{
 					info = GetIQueriable(info);
-				}
-			}
 
 			if (info.IsConstant<IQueryable>((value,expr) =>
 				{
@@ -107,40 +103,21 @@ namespace BLToolkit.Data.Linq
 
 		ParseInfo GetIQueriable(ParseInfo info)
 		{
-			ParameterExpression expressionParam = Expression.Parameter(typeof(Expression), "expr");
-
 			if (info.NodeType == ExpressionType.MemberAccess)
 			{
-				var expr = ParseInfo.CreateRoot(info.Expr, _expressionParam).ConvertTo<MemberExpression>().Walk(pi =>
-				{
-					if (pi.NodeType == ExpressionType.MemberAccess)
-					{
-						Expression accessor;
-
-						if (_accessors.TryGetValue(pi.Expr, out accessor))
-							return pi.Parent.Replace(pi.Expr, accessor);
-					}
-
-					pi.IsConstant(c =>
-					{
-						if (!TypeHelper.IsScalar(pi.Expr.Type))
-						{
-							var e = Expression.Convert(c.ParamAccessor, pi.Expr.Type);
-							pi = pi.Parent.Replace(e, c.ParamAccessor);
-						}
-
-						return true;
-					});
-
-					return pi;
-				});
-
-				var l  = Expression.Lambda<Func<Expression,IQueryable>>(Expression.Convert(expr, typeof(IQueryable)), new [] { _expressionParam });
-				var qe = l.Compile();
+				var p    = Expression.Parameter(typeof(Expression), "expr");
+				var expr = ReplaceParameter(ParseInfo.CreateRoot(info.Expr, p), _ => {});
+				var l    = Expression.Lambda<Func<Expression,IQueryable>>(Expression.Convert(expr, typeof(IQueryable)), new [] { p });
+				var qe   = l.Compile();
 
 				_info.QueryableAccessors.Add(info.Expr, qe);
 
-				return info;
+				return info.Create(
+					qe(info).Expression,
+					Expression.Call(
+						_infoParam,
+						Expressor<ExpressionInfo<T>>.MethodExpressor(a => a.GetIQueryable(null, null)),
+						new Expression[] { info.ParamAccessor, _expressionParam }));
 			}
 
 			throw new InvalidOperationException();
@@ -181,7 +158,7 @@ namespace BLToolkit.Data.Linq
 			_info.SqlBuilder.From.Table(sqlBuilder);
 
 			return ParseSelect(
-				new QuerySource.Many(_info.SqlBuilder, sqlBuilder, select, lambda2),
+				new QuerySource.Many(_info.SqlBuilder, sqlBuilder, select, source, lambda2),
 				new LambdaInfo1(lambda2.Parameter2, lambda2.Body));
 		}
 
@@ -238,7 +215,8 @@ namespace BLToolkit.Data.Linq
 				table    => { table.Select(this);   _info.SetQuery();  }, // QueryInfo.Table
 				expr     => BuildNew(query, expr.Expression),             // QueryInfo.Expr
 				BuildSubQuery,                                            // QueryInfo.SubQuery
-				scalar   => BuildNew(query, scalar.Expression)            // QueryInfo.Scalar
+				scalar   => BuildNew(query, scalar.Expression),           // QueryInfo.Scalar
+				many     => { throw new InvalidOperationException(); }    // QueryInfo.Scalar
 			);
 		}
 
@@ -295,7 +273,8 @@ namespace BLToolkit.Data.Linq
 						throw new NotImplementedException();
 				}, 
 				sub    => { throw new NotImplementedException(); }, // QueryInfo.SubQuery
-				scalar => { throw new NotImplementedException(); }  // QueryInfo.Scalar
+				scalar => { throw new NotImplementedException(); }, // QueryInfo.Scalar
+				many   => { throw new NotImplementedException(); }  // QueryInfo.Many
 			);
 		}
 
@@ -499,6 +478,7 @@ namespace BLToolkit.Data.Linq
 					if (table.Alias == null)
 						table.Alias = alias;
 				},
+				_ => {},
 				_ => {}
 			);
 		}
@@ -580,7 +560,25 @@ namespace BLToolkit.Data.Linq
 
 			string name = null;
 
-			var newExpr = expr.Walk(pi =>
+			var newExpr = ReplaceParameter(expr, nm => name = nm);
+			var mapper  = Expression.Lambda<Func<Expression,object>>(Expression.Convert(newExpr, typeof(object)), new [] { _expressionParam });
+
+			p = new ExpressionInfo<T>.Parameter
+			{
+				Expression   = expr.Expr,
+				Accessor     = mapper.Compile(),
+				SqlParameter = new SqlParameter(name, null)
+			};
+
+			_parameters.Add(expr.Expr, p);
+			_info.Parameters.Add(p);
+
+			return p;
+		}
+
+		ParseInfo ReplaceParameter(ParseInfo expr, Action<string> setName)
+		{
+			return expr.Walk(pi =>
 			{
 				if (pi.NodeType == ExpressionType.MemberAccess)
 				{
@@ -589,7 +587,7 @@ namespace BLToolkit.Data.Linq
 					if (_accessors.TryGetValue(pi.Expr, out accessor))
 					{
 						var ma = (MemberExpression)pi.Expr;
-						name = ma.Member.Name;
+						setName(ma.Member.Name);
 
 						return pi.Parent.Replace(pi.Expr, accessor);
 					}
@@ -605,7 +603,7 @@ namespace BLToolkit.Data.Linq
 						if (pi.Parent.NodeType == ExpressionType.MemberAccess)
 						{
 							var ma = (MemberExpression)pi.Parent.Expr;
-							name = ma.Member.Name;
+							setName(ma.Member.Name);
 						}
 					}
 
@@ -614,20 +612,6 @@ namespace BLToolkit.Data.Linq
 
 				return pi;
 			});
-
-			var mapper = Expression.Lambda<Func<Expression,object>>(Expression.Convert(newExpr, typeof(object)), new [] { _expressionParam });
-
-			p = new ExpressionInfo<T>.Parameter
-			{
-				Expression   = expr.Expr,
-				Accessor     = mapper.Compile(),
-				SqlParameter = new SqlParameter(name, null)
-			};
-
-			_parameters.Add(expr.Expr, p);
-			_info.Parameters.Add(p);
-
-			return p;
 		}
 
 		#endregion

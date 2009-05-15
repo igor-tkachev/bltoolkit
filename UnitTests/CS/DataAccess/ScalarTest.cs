@@ -1,12 +1,12 @@
 using System;
 using System.IO;
 using System.Xml;
+
 using NUnit.Framework;
 
 using BLToolkit.Data;
 using BLToolkit.DataAccess;
 using BLToolkit.Reflection;
-using NUnit.Framework.SyntaxHelpers;
 
 namespace DataAccess
 {

@@ -528,7 +528,7 @@ namespace BLToolkit.Data.Linq
 
 				case ExpressionType.MemberAccess:
 					{
-						var pi = func(Convert<MemberExpression>());
+						var pi = func(ConvertTo<MemberExpression>());
 						if (pi.StopWalking)
 							return pi.ClearStopWalkingFlag();
 

@@ -341,6 +341,11 @@ namespace BLToolkit.Data.Linq
 
 		public Dictionary<Expression,Func<Expression,IQueryable>> QueryableAccessors = new Dictionary<Expression,Func<Expression,IQueryable>>();
 
+		public Expression GetIQueryable(Expression expr1, Expression expr2)
+		{
+			return QueryableAccessors[expr1](expr2).Expression;
+		}
+
 		bool Compare(Expression expr1, Expression expr2)
 		{
 			if (expr1 == expr2)
