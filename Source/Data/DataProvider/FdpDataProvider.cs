@@ -201,6 +201,31 @@ namespace BLToolkit.Data.DataProvider
 			base.PrepareCommand(ref commandType, ref commandText, ref commandParameters);
 		}
 
+		public override void Configure(System.Collections.Specialized.NameValueCollection attributes)
+		{
+			string inOutInputParameterPrefix = attributes["InOutInputParameterPrefix"];
+			if (inOutInputParameterPrefix != null)
+				InOutInputParameterPrefix = inOutInputParameterPrefix;
+
+			string returnParameterName = attributes["ReturnParameterName"];
+			if (returnParameterName != null)
+				ReturnParameterName = returnParameterName;
+
+			string isReturnValueEmulation = attributes["IsReturnValueEmulation"];
+			if (isReturnValueEmulation != null)
+				IsReturnValueEmulation = BLToolkit.Common.Convert.ToBoolean(isReturnValueEmulation);
+
+			string isInOutParameterEmulation = attributes["IsInOutParameterEmulation"];
+			if (isInOutParameterEmulation != null)
+				IsInOutParameterEmulation = BLToolkit.Common.Convert.ToBoolean(isInOutParameterEmulation);
+
+			string quoteIdentifiers = attributes["QuoteIdentifiers"];
+			if (quoteIdentifiers != null)
+				QuoteIdentifiers = BLToolkit.Common.Convert.ToBoolean(quoteIdentifiers);
+
+			base.Configure(attributes);
+		}
+
 		#endregion
 
 		#region FbMappingSchema
