@@ -11,34 +11,42 @@ namespace BLToolkit.Data.DataProvider
 {
 	using Sql.SqlProvider;
 using System.Collections.Generic;
+	using BLToolkit.Common;
 
 	public class MySqlDataProvider :  DataProviderBase
 	{
 		#region Static configuration
 
 
-		public static char ParameterPrefix         { get; set; }
-		public static bool TryConvertParameterName { get; set; }
+		public static char ParameterSymbol           { get; set; }
+		public static bool TryConvertParameterSymbol { get; set; }
 
-		private static List<char> _convertParameterPrefixies;
-		public  static List<char>  ConvertParameterPrefixies
+		private static List<char> _convertParameterSymbols;
+		public  static List<char>  ConvertParameterSymbols
 		{
-			get { return _convertParameterPrefixies; }
-			set { _convertParameterPrefixies = value ?? new List<char>(); }
+			get { return _convertParameterSymbols; }
+			set { _convertParameterSymbols = value ?? new List<char>(); }
+		}
+
+		private static string _parameterPrefix = "";
+		public  static string  ParameterPrefix
+		{
+			get { return _parameterPrefix; }
+			set { _parameterPrefix = String.IsNullOrEmpty(value) ? string.Empty : value; }
 		}
 
 		public static void ConfigureOldStyle()
 		{
-			ParameterPrefix           = '?';
-			ConvertParameterPrefixies = new List<char>(new char[] { '@' });
-			TryConvertParameterName   = true;
+			ParameterSymbol           = '?';
+			ConvertParameterSymbols   = new List<char>(new char[] { '@' });
+			TryConvertParameterSymbol = true;
 		}
 
 		public static void ConfigureNewStyle()
 		{
-			ParameterPrefix           = '@';
-			ConvertParameterPrefixies = null;
-			TryConvertParameterName   = false;
+			ParameterSymbol           = '@';
+			ConvertParameterSymbols   = null;
+			TryConvertParameterSymbol = false;
 		}
 
 		static MySqlDataProvider()
@@ -62,7 +70,7 @@ using System.Collections.Generic;
 		{
 			foreach (IDataParameter p in command.Parameters)
 			{
-				if (p.ParameterName[0] != ParameterPrefix)
+				if (p.ParameterName[0] != ParameterSymbol)
 					p.ParameterName =
 						Convert(
 							Convert(p.ParameterName, ConvertType.ParameterToName),
@@ -75,7 +83,7 @@ using System.Collections.Generic;
 			if (command is MySqlCommand)
 			{
 				MySqlCommandBuilder.DeriveParameters((MySqlCommand)command);
-				if (TryConvertParameterName && ConvertParameterPrefixies.Count > 0)
+				if (TryConvertParameterSymbol && ConvertParameterSymbols.Count > 0)
 					ConvertParameterNames(command);
 				return true;
 			}
@@ -88,20 +96,31 @@ using System.Collections.Generic;
 			switch (convertType)
 			{
 				case ConvertType.NameToQueryParameter:
+					return ParameterSymbol + value.ToString();
 				case ConvertType.NameToParameter:
-					return ParameterPrefix + value.ToString();
+					return ParameterSymbol + ParameterPrefix + value.ToString();
 
 				case ConvertType.ParameterToName:
 					if (value != null)
 					{
 						string str = value.ToString();
-						return (str.Length > 0 && (str[0] == ParameterPrefix || (TryConvertParameterName && ConvertParameterPrefixies.Contains(str[0])))) ? str.Substring(1) : str;
+						str = (str.Length > 0 && (str[0] == ParameterSymbol || (TryConvertParameterSymbol && ConvertParameterSymbols.Contains(str[0])))) ? str.Substring(1) : str;
+
+						if ((!string.IsNullOrEmpty(ParameterPrefix))
+							&& str.StartsWith(ParameterPrefix))
+							str = str.Substring(ParameterPrefix.Length);
+
+						return str;
 					}
 					break;
 
 				case ConvertType.ExceptionToErrorNumber:
 					if (value is MySqlException)
 						return ((MySqlException)value).Number;
+					break;
+				case ConvertType.ExceptionToErrorMessage:
+					if (value is MySqlException)
+						return ((MySqlException)value).Message;
 					break;
 				 
 			}
@@ -122,6 +141,41 @@ using System.Collections.Generic;
 		public override ISqlProvider CreateSqlProvider()
 		{
 			return new MySqlSqlProvider(this);
+		}
+
+		public override void Configure(System.Collections.Specialized.NameValueCollection attributes)
+		{
+			string paremeterPrefix = attributes["ParameterPrefix"];
+			if (paremeterPrefix != null)
+				ParameterPrefix = paremeterPrefix;
+
+			string configName = attributes["ParameterSymbolConfig"];
+			if (configName != null)
+			{
+				switch (configName)
+				{
+					case "OldStyle":
+						ConfigureOldStyle();
+						break;
+					case "NewStyle":
+						ConfigureNewStyle();
+						break;
+				}
+			}
+
+			string parameterSymbol = attributes["ParameterSymbol"];
+			if (parameterSymbol != null && parameterSymbol.Length == 1)
+				ParameterSymbol = parameterSymbol[0];
+
+			string convertParameterSymbols = attributes["ConvertParameterSymbols"];
+			if (convertParameterSymbols != null)
+				ConvertParameterSymbols = new List<char>(convertParameterSymbols.ToCharArray());
+
+			string tryConvertParameterSymbol = attributes["TryConvertParameterSymbol"];
+			if (tryConvertParameterSymbol != null)
+				TryConvertParameterSymbol = BLToolkit.Common.Convert.ToBoolean(tryConvertParameterSymbol);
+
+			base.Configure(attributes);
 		}
 	}
 }
