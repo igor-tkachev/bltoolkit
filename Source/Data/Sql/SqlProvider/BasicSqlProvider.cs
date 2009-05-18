@@ -236,7 +236,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		{
 			if (predicate is SqlBuilder.Predicate.ExprExpr)
 			{
-				var expr = (SqlBuilder.Predicate.ExprExpr)predicate;
+				SqlBuilder.Predicate.ExprExpr expr = (SqlBuilder.Predicate.ExprExpr)predicate;
 
 				switch (expr.Operator)
 				{
@@ -287,7 +287,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			}
 			else if (predicate is SqlBuilder.Predicate.IsNull)
 			{
-				var p = (SqlBuilder.Predicate.IsNull)predicate;
+				SqlBuilder.Predicate.IsNull p = (SqlBuilder.Predicate.IsNull)predicate;
 				BuildExpression(sb, GetPrecedence(p), p.Expr1);
 				sb.Append(p.IsNot? " IS NOT NULL": " IS NULL");
 			}
@@ -309,7 +309,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			}
 			else if (predicate is SqlBuilder.Predicate.Expr)
 			{
-				var p = (SqlBuilder.Predicate.Expr)predicate;
+				SqlBuilder.Predicate.Expr p = (SqlBuilder.Predicate.Expr)predicate;
 				BuildExpression(sb, GetPrecedence(p), p.Expr1);
 			}
 			else if (predicate is SqlBuilder.Predicate.NotExpr)
@@ -850,11 +850,11 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		{
 			if (predicate is SqlBuilder.Predicate.ExprExpr)
 			{
-				var expr = (SqlBuilder.Predicate.ExprExpr)predicate;
+				SqlBuilder.Predicate.ExprExpr expr = (SqlBuilder.Predicate.ExprExpr)predicate;
 
 				if (expr.Operator == SqlBuilder.Predicate.Operator.Equal && expr.Expr1 is SqlValue && expr.Expr2 is SqlValue)
 				{
-					var value = object.Equals(((SqlValue)expr.Expr1).Value, ((SqlValue)expr.Expr2).Value);
+					bool value = object.Equals(((SqlValue)expr.Expr1).Value, ((SqlValue)expr.Expr2).Value);
 					return new SqlBuilder.Predicate.Expr(new SqlValue(value), Precedence.Comparison);
 				}
 

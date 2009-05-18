@@ -25,7 +25,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		{
 			if (predicate is SqlBuilder.Predicate.Like)
 			{
-				var l = (SqlBuilder.Predicate.Like)predicate;
+				SqlBuilder.Predicate.Like l = (SqlBuilder.Predicate.Like)predicate;
 
 				if (l.Escape != null)
 				{
@@ -57,11 +57,11 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		static string ReescapeLikeText(string text, char esc)
 		{
-			var sb = new StringBuilder(text.Length);
+			StringBuilder sb = new StringBuilder(text.Length);
 
-			for (var i = 0; i < text.Length; i++)
+			for (int i = 0; i < text.Length; i++)
 			{
-				var c = text[i];
+				char c = text[i];
 
 				if (c == esc)
 				{
@@ -80,7 +80,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		static Converter<object,object> GetLikeEscaper(string start, string end)
 		{
-			return value =>
+			return delegate(object value)
 			{
 				if (value == null)
 					throw new SqlException("NULL cannot be used as a LIKE predicate parameter.");
@@ -92,9 +92,9 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 				StringBuilder sb = new StringBuilder(start, text.Length + start.Length + end.Length);
 
-				for (var i = 0; i < text.Length; i++)
+				for (int i = 0; i < text.Length; i++)
 				{
-					var c = text[i];
+					char c = text[i];
 
 					if (c == '%' || c == '_' || c == '[')
 					{
@@ -109,6 +109,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 				return sb.ToString();
 			};
 		}
+
 		public override ISqlExpression ConvertExpression(ISqlExpression expr)
 		{
 			expr = base.ConvertExpression(expr);
