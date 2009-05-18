@@ -87,7 +87,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 				string text = value.ToString();
 
-				if (text.IndexOfAny(new[] { '%', '_', '[' }) < 0)
+				if (text.IndexOfAny(new char[] { '%', '_', '[' }) < 0)
 					return start + text + end;
 
 				StringBuilder sb = new StringBuilder(start, text.Length + start.Length + end.Length);
