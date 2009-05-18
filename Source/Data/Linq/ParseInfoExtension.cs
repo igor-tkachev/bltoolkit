@@ -51,25 +51,25 @@ namespace BLToolkit.Data.Linq
 			this ParseInfo<MethodCallExpression> pi,
 			string methodName,
 			Action<ParseInfo<Expression>>        seq,
-			Action<LambdaInfo1>                  lambda)
+			Action<LambdaInfo>                   lambda)
 		{
-			return IsMethod(pi, typeof(Queryable), methodName, new FTest[] { p => { seq(p); return true; }, l => l.IsLambda1(lambda) }, p => true);
+			return IsMethod(pi, typeof(Queryable), methodName, new FTest[] { p => { seq(p); return true; }, l => l.IsLambda(1, lambda) }, p => true);
 		}
 
 		public static bool IsQueryableMethod(
 			this ParseInfo<MethodCallExpression> pi,
 			string methodName,
 			Action<ParseInfo<Expression>>        seq,
-			Action<LambdaInfo1,LambdaInfo2>      parms)
+			Action<LambdaInfo,LambdaInfo>        parms)
 		{
-			LambdaInfo1 lambda1 = null;
-			LambdaInfo2 lambda2 = null;
+			LambdaInfo lambda1 = null;
+			LambdaInfo lambda2 = null;
 
 			if (IsMethod(pi, typeof(Queryable), methodName, new FTest[]
 				{
 					p => { seq(p); return true; },
-					l => l.IsLambda1(l1 => lambda1 = l1),
-					l => l.IsLambda2(l2 => lambda2 = l2),
+					l => l.IsLambda(1, l1 => lambda1 = l1),
+					l => l.IsLambda(2, l2 => lambda2 = l2),
 				}, p => true))
 			{
 				parms(lambda1, lambda2);

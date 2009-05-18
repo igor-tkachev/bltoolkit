@@ -48,7 +48,7 @@ namespace BLToolkit.Data.Linq
 			public static MethodInfo Operand = PropertyExpressor(e => e.Operand);
 		}
 
-		public class Lambda : Expressor<LambdaExpression>
+		public class LambdaExpr : Expressor<LambdaExpression>
 		{
 			public static MethodInfo Body       = PropertyExpressor(e => e.Body);
 			public static MethodInfo Parameters = PropertyExpressor(e => e.Parameters);

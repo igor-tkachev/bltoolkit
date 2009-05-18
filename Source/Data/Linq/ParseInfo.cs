@@ -76,10 +76,10 @@ namespace BLToolkit.Data.Linq
 					return false;
 
 				for (var i = 0; i < parameters.Length; i++)
-					if (!parameters[i](lambda.Create(lambda.Expr.Parameters[i], lambda.Indexer(Lambda.Parameters, ParamItem, i))))
+					if (!parameters[i](lambda.Create(lambda.Expr.Parameters[i], lambda.Indexer(LambdaExpr.Parameters, ParamItem, i))))
 						return false;
 
-				return body(lambda.Create(lambda.Expr.Body, lambda.Property(Lambda.Body))) && func(lambda);
+				return body(lambda.Create(lambda.Expr.Body, lambda.Property(LambdaExpr.Body))) && func(lambda);
 			}
 			
 			return false;
@@ -126,28 +126,18 @@ namespace BLToolkit.Data.Linq
 				p => true);
 		}
 
-		public bool IsLambda1(Action<LambdaInfo1> lambda)
+		FParm GetFParm(ParseInfo<ParameterExpression>[] parms, int n)
 		{
-			ParseInfo<ParameterExpression> parameter = null;
-
-			return IsLambda<Expression>(
-				new FParm[] { p => { parameter = p; return true; } },
-				body => { lambda(new LambdaInfo1(parameter, body)); return true; },
-				p => true);
+			return p => { parms[n] = p; return true; };
 		}
 
-		public bool IsLambda2(Action<LambdaInfo2> lambda)
+		public bool IsLambda(int nparms, Action<LambdaInfo> lambda)
 		{
-			ParseInfo<ParameterExpression> parameter1 = null;
-			ParseInfo<ParameterExpression> parameter2 = null;
+			var parameters = new ParseInfo<ParameterExpression>[nparms];
 
 			return IsLambda<Expression>(
-				new FParm[]
-				{
-					p => { parameter1 = p; return true; },
-					p => { parameter2 = p; return true; }
-				},
-				body => { lambda(new LambdaInfo2(parameter1, parameter2, body)); return true; },
+				parameters.Select((_,i) => GetFParm(parameters, i)).ToArray(),
+				body => { lambda(new LambdaInfo(body, parameters)); return true; },
 				p => true);
 		}
 
@@ -497,8 +487,8 @@ namespace BLToolkit.Data.Linq
 							return pi.ClearStopWalkingFlag();
 
 						var e  = Expr as LambdaExpression;
-						var b  = pi.Walk(e.Body,       Lambda.Body,       func);
-						var p  = pi.Walk(e.Parameters, Lambda.Parameters, func);
+						var b  = pi.Walk(e.Body,       LambdaExpr.Body,       func);
+						var p  = pi.Walk(e.Parameters, LambdaExpr.Parameters, func);
 
 						if (b != e.Body || p != e.Parameters)
 							pi.Expr = Expression.Lambda(b, p.ToArray());
@@ -672,31 +662,5 @@ namespace BLToolkit.Data.Linq
 		}
 
 		#endregion
-	}
-
-	class LambdaInfo1
-	{
-		public LambdaInfo1(ParseInfo<ParameterExpression> p, ParseInfo b)
-		{
-			Parameter = p;
-			Body      = b;
-		}
-
-		public ParseInfo<ParameterExpression> Parameter;
-		public ParseInfo                      Body;
-	}
-
-	class LambdaInfo2
-	{
-		public LambdaInfo2(ParseInfo<ParameterExpression> p1, ParseInfo<ParameterExpression> p2, ParseInfo b)
-		{
-			Parameter1 = p1;
-			Parameter2 = p2;
-			Body       = b;
-		}
-
-		public ParseInfo<ParameterExpression> Parameter1;
-		public ParseInfo<ParameterExpression> Parameter2;
-		public ParseInfo                      Body;
 	}
 }

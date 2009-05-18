@@ -14,10 +14,10 @@ namespace BLToolkit.Data.Linq
 	{
 		public class Table : QuerySource
 		{
-			public Table(MappingSchema mappingSchema, SqlBuilder sqlBuilder, ParseInfo<ConstantExpression> expr)
-				: base(sqlBuilder, null, expr)
+			public Table(MappingSchema mappingSchema, SqlBuilder sqlBuilder, LambdaInfo lambda)
+				: base(sqlBuilder, lambda, null)
 			{
-				ObjectType = ((IQueryable)expr.Expr.Value).ElementType;
+				ObjectType = ((IQueryable)((ConstantExpression)lambda.Body.Expr).Value).ElementType;
 				SqlTable   = new SqlTable(mappingSchema, ObjectType);
 
 				sqlBuilder.From.Table(SqlTable);
@@ -38,62 +38,77 @@ namespace BLToolkit.Data.Linq
 
 		public class Expr : QuerySource
 		{
-			public Expr(SqlBuilder sqlBilder, QuerySource parentQuery, ParseInfo<NewExpression> expr)
-				: base(sqlBilder, parentQuery, expr)
+			public Expr(SqlBuilder sqlBilder, LambdaInfo lambda, params QuerySource[] parentQueries)
+				: base(sqlBilder, lambda, parentQueries)
 			{
-				var ex = expr.Expr;
-
-				if (ex.Members == null)
-					return;
-
-				for (var i = 0; i < ex.Members.Count; i++)
+				if (lambda.Body.Expr is NewExpression)
 				{
-					var member = ex.Members[i];
+					var ex = (NewExpression)lambda.Body.Expr;
 
-					if (member is MethodInfo)
-						member = TypeHelper.GetPropertyByMethod((MethodInfo)member);
+					if (ex.Members == null)
+						return;
 
-					var field = parentQuery != null? parentQuery.GetField(ex.Arguments[i]): null;
-
-					if (field != null)
+					for (var i = 0; i < ex.Members.Count; i++)
 					{
-						_fields.Add(member, field);
-					}
-					else
-					{
-						var e = new ExprColumn(this, expr.Create(ex.Arguments[i], expr.Index(ex.Arguments, New.Arguments, i)), member.Name);
-						_fields.Add(member, e);
+						var member = ex.Members[i];
+
+						if (member is MethodInfo)
+							member = TypeHelper.GetPropertyByMethod((MethodInfo)member);
+
+						QueryField field = null;
+
+						foreach (var parentQuery in parentQueries)
+						{
+							field = parentQuery.GetField(ex.Arguments[i]);
+							if (field != null)
+								break;
+						}
+
+						if (field != null)
+						{
+							_fields.Add(member, field);
+						}
+						else
+						{
+							var e = new ExprColumn(this, lambda.Body.Create(ex.Arguments[i], lambda.Body.Index(ex.Arguments, New.Arguments, i)), member.Name);
+							_fields.Add(member, e);
+						}
 					}
 				}
-			}
-
-			public Expr(SqlBuilder sqlBilder, QuerySource parentQuery, ParseInfo<MemberInitExpression> expr)
-				: base(sqlBilder, parentQuery, expr)
-			{
-				var ex = expr.Expr;
-
-				for (var i = 0; i < ex.Bindings.Count; i++)
+				else
 				{
-					var binding = ex.Bindings[i];
-					var member  = binding.Member;
+					var ex = (MemberInitExpression)lambda.Body.Expr;
 
-					if (member is MethodInfo)
-						member = TypeHelper.GetPropertyByMethod((MethodInfo)member);
-
-					if (binding is MemberAssignment)
+					for (var i = 0; i < ex.Bindings.Count; i++)
 					{
-						var ma = binding as MemberAssignment;
+						var binding = ex.Bindings[i];
+						var member  = binding.Member;
 
-						var piBinding    = expr.     Create(ma.Expression, expr.Index(ex.Bindings, MemberInit.Bindings, i));
-						var piAssign     = piBinding.Create(ma.Expression, piBinding.ConvertExpressionTo<MemberAssignment>());
-						var piExpression = piAssign. Create(ma.Expression, piAssign.Property(MemberAssignmentBind.Expression));
+						if (member is MethodInfo)
+							member = TypeHelper.GetPropertyByMethod((MethodInfo)member);
 
-						var field = parentQuery != null? parentQuery.GetField(piExpression): null;
+						if (binding is MemberAssignment)
+						{
+							var ma = binding as MemberAssignment;
 
-						_fields.Add(member, field ?? new ExprColumn(this, piExpression, member.Name));
+							var piBinding    = lambda.Body.Create(ma.Expression, lambda.Body.Index(ex.Bindings, MemberInit.Bindings, i));
+							var piAssign     = piBinding.  Create(ma.Expression, piBinding.ConvertExpressionTo<MemberAssignment>());
+							var piExpression = piAssign.   Create(ma.Expression, piAssign.Property(MemberAssignmentBind.Expression));
+
+							QueryField field = null;
+
+							foreach (var parentQuery in parentQueries)
+							{
+								field = parentQuery.GetField(piExpression);
+								if (field != null)
+									break;
+							}
+
+							_fields.Add(member, field ?? new ExprColumn(this, piExpression, member.Name));
+						}
+						else
+							throw new InvalidOperationException();
 					}
-					else
-						throw new InvalidOperationException();
 				}
 			}
 		}
@@ -101,7 +116,7 @@ namespace BLToolkit.Data.Linq
 		public class SubQuery : QuerySource
 		{
 			public SubQuery(SqlBuilder subSql, QuerySource parentQuery)
-				: base(new SqlBuilder(), parentQuery, null)
+				: base(new SqlBuilder(), null, parentQuery)
 			{
 				SqlBuilder.From.Table(SubSql = subSql);
 
@@ -114,36 +129,22 @@ namespace BLToolkit.Data.Linq
 
 		public class Scalar : QuerySource
 		{
-			public Scalar(SqlBuilder sqlBilder, QuerySource parentQuery, ParseInfo expr)
-				: base(sqlBilder, parentQuery, expr)
+			public Scalar(SqlBuilder sqlBilder, LambdaInfo lambda, params QuerySource[] parentQueries)
+				: base(sqlBilder, lambda, parentQueries)
 			{
 			}
 		}
 
-		public class Many : QuerySource
+		protected QuerySource(SqlBuilder sqlBilder, LambdaInfo lambda, params QuerySource[] parentQueries)
 		{
-			public Many(SqlBuilder sqlBilder, SqlBuilder subSql, QuerySource source1, QuerySource source2, LambdaInfo2 lambda2)
-				: base(sqlBilder, source1, lambda2.Body)
-			{
-				SubSql = subSql;
-
-				foreach (var field in source1._fields) _fields.Add(field.Key, field.Value);
-				//foreach (var field in source2._fields) _fields.Add(field.Key, field.Value);
-			}
-
-			public SqlBuilder SubSql;
+			SqlBuilder    = sqlBilder;
+			Lambda        = lambda;
+			ParentQueries = parentQueries;
 		}
 
-		protected QuerySource(SqlBuilder sqlBilder, QuerySource parentQuery, ParseInfo expr)
-		{
-			SqlBuilder  = sqlBilder;
-			ParentQuery = parentQuery;
-			Expression  = expr;
-		}
-
-		public SqlBuilder   SqlBuilder;
-		public QuerySource  ParentQuery;
-		public ParseInfo    Expression;
+		public SqlBuilder    SqlBuilder;
+		public QuerySource[] ParentQueries;
+		public LambdaInfo    Lambda;
 
 		readonly Dictionary<MemberInfo,QueryField> _fields = new Dictionary<MemberInfo, QueryField>();
 		public   Dictionary<MemberInfo,QueryField>  Fields { get { return _fields; } }
@@ -251,14 +252,12 @@ namespace BLToolkit.Data.Linq
 			Action<Table>    tableAction,
 			Action<Expr>     exprAction,
 			Action<SubQuery> subQueryAction,
-			Action<Scalar>   scalarAction,
-			Action<Many>     manyAction)
+			Action<Scalar>   scalarAction)
 		{
 			if      (this is Table)    tableAction   (this as Table);
 			else if (this is Expr)     exprAction    (this as Expr);
 			else if (this is SubQuery) subQueryAction(this as SubQuery);
 			else if (this is Scalar)   scalarAction  (this as Scalar);
-			else if (this is Many)     manyAction    (this as Many);
 		}
 	}
 }

@@ -18,7 +18,8 @@ namespace BLToolkit.Data.Linq
 
 			public  readonly QuerySource.Table Table;
 			public  readonly SqlField          Field;
-			private readonly MemberMapper      _mapper;
+
+			private readonly MemberMapper _mapper;
 
 			public override int[] Select<T>(ExpressionParser<T> parser)
 			{
@@ -53,7 +54,7 @@ namespace BLToolkit.Data.Linq
 				if (_index == null)
 				{
 					if (_sqlExpression == null)
-						_sqlExpression = parser.ParseExpression(QuerySource.ParentQuery, Expr);
+						_sqlExpression = parser.ParseExpression(QuerySource.ParentQueries[0], Expr);
 
 					_index = new[] { QuerySource.SqlBuilder.Select.Add(_sqlExpression, _alias) };
 				}
