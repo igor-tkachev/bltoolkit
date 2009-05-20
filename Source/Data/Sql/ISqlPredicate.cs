@@ -2,7 +2,7 @@
 
 namespace BLToolkit.Data.Sql
 {
-	public interface ISqlPredicate : ISqlExpressionScannable
+	public interface ISqlPredicate : ISqlExpressionWalkable
 	{
 		int Precedence { get; }
 	}

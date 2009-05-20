@@ -39,11 +39,11 @@ namespace BLToolkit.Data.Sql
 
 		#endregion
 
-		#region ISqlExpressionScannable Members
+		#region ISqlExpressionWalkable Members
 
-		void ISqlExpressionScannable.ForEach(bool skipColumns, Action<ISqlExpression> action)
+		ISqlExpression ISqlExpressionWalkable.Walk(bool skipColumns, WalkingFunc func)
 		{
-			action(this);
+			return func(this);
 		}
 
 		#endregion

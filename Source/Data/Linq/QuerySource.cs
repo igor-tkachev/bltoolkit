@@ -27,7 +27,6 @@ namespace BLToolkit.Data.Linq
 				foreach (var field in SqlTable.Fields)
 				{
 					var mapper = objectMapper[field.Value.PhysicalName];
-
 					_fields.Add(mapper.MemberAccessor.MemberInfo, new Column(this, field.Value, mapper));
 				}
 			}
@@ -55,14 +54,7 @@ namespace BLToolkit.Data.Linq
 						if (member is MethodInfo)
 							member = TypeHelper.GetPropertyByMethod((MethodInfo)member);
 
-						QueryField field = null;
-
-						foreach (var parentQuery in parentQueries)
-						{
-							field = parentQuery.GetField(ex.Arguments[i]);
-							if (field != null)
-								break;
-						}
+						QueryField field = GetParentField(ex.Arguments[i]);
 
 						if (field != null)
 						{
@@ -95,14 +87,7 @@ namespace BLToolkit.Data.Linq
 							var piAssign     = piBinding.  Create(ma.Expression, piBinding.ConvertExpressionTo<MemberAssignment>());
 							var piExpression = piAssign.   Create(ma.Expression, piAssign.Property(MemberAssignmentBind.Expression));
 
-							QueryField field = null;
-
-							foreach (var parentQuery in parentQueries)
-							{
-								field = parentQuery.GetField(piExpression);
-								if (field != null)
-									break;
-							}
+							QueryField field = GetParentField(piExpression);
 
 							_fields.Add(member, field ?? new ExprColumn(this, piExpression, member.Name));
 						}
@@ -115,8 +100,8 @@ namespace BLToolkit.Data.Linq
 
 		public class SubQuery : QuerySource
 		{
-			public SubQuery(SqlBuilder subSql, QuerySource parentQuery)
-				: base(new SqlBuilder(), null, parentQuery)
+			public SubQuery(SqlBuilder currentSql, SqlBuilder subSql, QuerySource parentQuery)
+				: base(currentSql, null, parentQuery)
 			{
 				SqlBuilder.From.Table(SubSql = subSql);
 
@@ -142,8 +127,10 @@ namespace BLToolkit.Data.Linq
 			ParentQueries = parentQueries;
 		}
 
-		public SqlBuilder    SqlBuilder;
+		public override QuerySource[] Sources { get { return ParentQueries; } }
+
 		public QuerySource[] ParentQueries;
+		public SqlBuilder    SqlBuilder;
 		public LambdaInfo    Lambda;
 
 		readonly Dictionary<MemberInfo,QueryField> _fields = new Dictionary<MemberInfo, QueryField>();
@@ -154,7 +141,8 @@ namespace BLToolkit.Data.Linq
 			switch (expr.NodeType)
 			{
 				case ExpressionType.Parameter:
-					return this;
+					throw new InvalidOperationException();
+					//return this;
 
 				case ExpressionType.MemberAccess:
 					{
@@ -221,6 +209,34 @@ namespace BLToolkit.Data.Linq
 			foreach (var item in _fields)
 				if (item.Value is ExprColumn && ((ExprColumn)item.Value).Expr == expr)
 					return item.Value;
+
+			return null;
+		}
+
+		public QueryField GetParentField(Expression expr)
+		{
+			if (ParentQueries.Length > 0)
+			{
+				if (expr.NodeType == ExpressionType.Parameter)
+				{
+					if (ParentQueries.Length == 1)
+						return ParentQueries[0];
+
+					if (ParentQueries.Length != Lambda.Parameters.Length)
+						throw new InvalidOperationException();
+
+					for (int i = 0; i < ParentQueries.Length; i++)
+						if (Lambda.Parameters[i].Expr == expr)
+							return ParentQueries[i];
+				}
+
+				foreach (var pq in ParentQueries)
+				{
+					var field = pq.GetField(expr);
+					if (field != null)
+						return field;
+				}
+			}
 
 			return null;
 		}

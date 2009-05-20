@@ -44,13 +44,14 @@ namespace BLToolkit.Data.Sql
 
 		#endregion
 
-		#region ISqlExpressionScannable Members
+		#region ISqlExpressionWalkable Members
 
-		void ISqlExpressionScannable.ForEach(bool skipColumns, Action<ISqlExpression> action)
+		ISqlExpression ISqlExpressionWalkable.Walk(bool skipColumns, WalkingFunc action)
 		{
-			action(this);
-			foreach (ISqlExpression parameter in _parameters)
-				parameter.ForEach(skipColumns, action);
+			for (int i = 0; i < _parameters.Length; i++)
+				_parameters[i] = _parameters[i].Walk(skipColumns, action);
+
+			return action(this);
 		}
 
 		#endregion

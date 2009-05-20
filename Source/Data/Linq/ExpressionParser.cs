@@ -152,7 +152,7 @@ namespace BLToolkit.Data.Linq
 
 			_info.SqlBuilder = sqlBuilder;
 
-			var source = ParseSequence(lambda1.Body);
+			var source = new QuerySource.SubQuery(currentSqlBuilder, sqlBuilder, ParseSequence(lambda1.Body));
 
 			_info.SqlBuilder = currentSqlBuilder;
 			_info.SqlBuilder.From.Table(sqlBuilder);
@@ -170,7 +170,7 @@ namespace BLToolkit.Data.Linq
 
 			if (CheckForSubQuery(select, l.Body))
 			{
-				var subQuery = new QuerySource.SubQuery(_info.SqlBuilder, select);
+				var subQuery = new QuerySource.SubQuery(new SqlBuilder(), _info.SqlBuilder, select);
 
 				_info.SqlBuilder = subQuery.SqlBuilder;
 
@@ -291,14 +291,7 @@ namespace BLToolkit.Data.Linq
 
 							if (query.ParentQueries.Length > 0)
 							{
-								QueryField field = null;
-
-								foreach (var pq in query.ParentQueries)
-								{
-									field = pq.GetField(ma);
-									if (field != null)
-										break;
-								}
+								var field = query.GetParentField(ma);
 
 								if (field != null)
 								{
@@ -363,14 +356,7 @@ namespace BLToolkit.Data.Linq
 
 					case ExpressionType.Parameter:
 						{
-							QueryField field = null;
-
-							foreach (var pq in query.ParentQueries)
-							{
-								field = pq.GetField(pi.Expr);
-								if (field != null)
-									break;
-							}
+							var field = query.GetParentField(pi.Expr);
 
 							if (field != null)
 							{
@@ -404,16 +390,9 @@ namespace BLToolkit.Data.Linq
 
 					case ExpressionType.Constant:
 						{
-							if (query.ParentQueries.Length > 0)
+							if (query.ParentQueries.Length == 0)
 							{
-								QueryField field = null;
-
-								foreach (var pq in query.ParentQueries)
-								{
-									field = pq.GetField(pi);
-									if (field != null)
-										break;
-								}
+								var field = query.GetField(pi);
 
 								if (field != null)
 								{

@@ -144,7 +144,7 @@
     <Compile Include="Data\Sql\SqlException.cs" />
     <Compile Include="Data\Sql\Extensions.cs" />
     <Compile Include="Data\Sql\IChild.cs" />
-    <Compile Include="Data\Sql\ISqlExpressionScannable.cs" />
+    <Compile Include="Data\Sql\ISqlExpressionWalkable.cs" />
     <Compile Include="Data\Sql\ISqlExpression.cs" />
     <Compile Include="Data\Sql\ISqlTableSource.cs" />
     <Compile Include="Data\Sql\SqlBuilder.cs" />

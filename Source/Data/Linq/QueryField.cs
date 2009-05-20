@@ -16,10 +16,12 @@ namespace BLToolkit.Data.Linq
 				_mapper = mapper;
 			}
 
-			public  readonly QuerySource.Table Table;
-			public  readonly SqlField          Field;
+			public readonly QuerySource.Table Table;
+			public readonly SqlField          Field;
 
 			private readonly MemberMapper _mapper;
+
+			public override QuerySource[] Sources { get { return new[] { Table }; } }
 
 			public override int[] Select<T>(ExpressionParser<T> parser)
 			{
@@ -49,12 +51,14 @@ namespace BLToolkit.Data.Linq
 			int[]           _index;
 			ISqlExpression  _sqlExpression;
 
+			public override QuerySource[] Sources { get { return new[] { QuerySource }; } }
+
 			public override int[] Select<T>(ExpressionParser<T> parser)
 			{
 				if (_index == null)
 				{
 					if (_sqlExpression == null)
-						_sqlExpression = parser.ParseExpression(QuerySource.ParentQueries[0], Expr);
+						_sqlExpression = parser.ParseExpression(QuerySource.ParentQueries.Length == 0 ? null: QuerySource.ParentQueries[0], Expr);
 
 					_index = new[] { QuerySource.SqlBuilder.Select.Add(_sqlExpression, _alias) };
 				}
@@ -84,6 +88,8 @@ namespace BLToolkit.Data.Linq
 
 			int[] _index;
 			int[] _subIndex;
+
+			public override QuerySource[] Sources { get { return new[] { QuerySource }; } }
 
 			public override int[] Select<T>(ExpressionParser<T> parser)
 			{
@@ -115,6 +121,8 @@ namespace BLToolkit.Data.Linq
 				return QuerySource.SubSql.Select.Columns[_subIndex[0]];
 			}
 		}
+
+		public abstract QuerySource[] Sources { get; }
 
 		public abstract int[]          Select       <T>(ExpressionParser<T> parser);
 		public abstract ISqlExpression GetExpression<T>(ExpressionParser<T> parser);

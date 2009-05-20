@@ -22,9 +22,9 @@ namespace BLToolkit.Data.Sql
 		{
 		}
 
-		readonly ISqlExpression _expr1;      public ISqlExpression Expr1      { get { return _expr1;      } }
+		private  ISqlExpression _expr1;      public ISqlExpression Expr1      { get { return _expr1;      } }
 		readonly string         _operation;  public string         Operation  { get { return _operation;  } }
-		readonly ISqlExpression _expr2;      public ISqlExpression Expr2      { get { return _expr2;      } }
+		private  ISqlExpression _expr2;      public ISqlExpression Expr2      { get { return _expr2;      } }
 		readonly Type           _type;       public Type           Type       { get { return _type;       } }
 		readonly int            _precedence; public int            Precedence { get { return _precedence; } }
 
@@ -37,13 +37,14 @@ namespace BLToolkit.Data.Sql
 
 		#endregion
 
-		#region ISqlExpressionScannable Members
+		#region ISqlExpressionWalkable Members
 
-		void ISqlExpressionScannable.ForEach(bool skipColumns, Action<ISqlExpression> action)
+		ISqlExpression ISqlExpressionWalkable.Walk(bool skipColumns, WalkingFunc func)
 		{
-			action(this);
-			_expr1.ForEach(skipColumns, action);
-			_expr2.ForEach(skipColumns, action);
+			_expr1 = _expr1.Walk(skipColumns, func);
+			_expr2 = _expr2.Walk(skipColumns, func);
+
+			return func(this);
 		}
 
 		#endregion

@@ -117,10 +117,15 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			sb.Append("FROM").AppendLine();
 
 			_indent++;
+			AppendIndent(sb);
+
+			bool first = true;
 
 			foreach (SqlBuilder.TableSource ts in _sqlBuilder.From.Tables)
 			{
-				AppendIndent(sb);
+				if (!first)
+					sb.Append(", ");
+				first = false;
 
 				BuildPhysicalTable(sb, ts.Source);
 

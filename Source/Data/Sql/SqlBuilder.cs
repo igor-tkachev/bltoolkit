@@ -116,14 +116,14 @@ namespace BLToolkit.Data.Sql
 
 			#endregion
 
-			#region ISqlExpressionScannable Members
+			#region ISqlExpressionWalkable Members
 
-			public void ForEach(bool skipColumns, Action<ISqlExpression> action)
+			public ISqlExpression Walk(bool skipColumns, WalkingFunc func)
 			{
-				action(this);
-
 				if (!(skipColumns && _expression is Column))
-					_expression.ForEach(skipColumns, action);
+					_expression = _expression.Walk(skipColumns, func);
+
+				return func(this);
 			}
 
 			#endregion
@@ -149,7 +149,7 @@ namespace BLToolkit.Data.Sql
 
 		#region TableSource
 
-		public class TableSource : ISqlTableSource, ISqlExpressionScannable
+		public class TableSource : ISqlTableSource, ISqlExpressionWalkable
 		{
 			public TableSource(ISqlTableSource source, string alias)
 			{
@@ -231,15 +231,17 @@ namespace BLToolkit.Data.Sql
 				return s + " as " + (Alias ?? "[table]");
 			}
 
-			#region ISqlExpressionScannable Members
+			#region ISqlExpressionWalkable Members
 
-			public void ForEach(bool skipColumns, Action<ISqlExpression> action)
+			public ISqlExpression Walk(bool skipColumns, WalkingFunc func)
 			{
-				if (Source is ISqlExpression)
-					((ISqlExpression)Source).ForEach(skipColumns, action);
+				if (_source is ISqlExpression)
+					_source = (ISqlTableSource)((ISqlExpression)_source).Walk(skipColumns, func);
 
-				foreach (JoinedTable join in Joins)
-					((ISqlExpressionScannable)join).ForEach(skipColumns, action);
+				for (int i = 0; i < Joins.Count; i++)
+					((ISqlExpressionWalkable)Joins[i]).Walk(skipColumns, func);
+
+				return null;
 			}
 
 			#endregion
@@ -256,7 +258,7 @@ namespace BLToolkit.Data.Sql
 			Left
 		}
 
-		public class JoinedTable : ISqlExpressionScannable
+		public class JoinedTable : ISqlExpressionWalkable
 		{
 			public JoinedTable(JoinType joinType, TableSource table, bool isWeak)
 			{
@@ -284,8 +286,8 @@ namespace BLToolkit.Data.Sql
 				set { _table = value; }
 			}
 
-			readonly SearchCondition _condition = new SearchCondition();
-			public   SearchCondition  Condition
+			private SearchCondition _condition = new SearchCondition();
+			public  SearchCondition  Condition
 			{
 				get { return _condition;  }
 			}
@@ -302,12 +304,14 @@ namespace BLToolkit.Data.Sql
 				Table.ForEach(action);
 			}
 
-			#region ISqlExpressionScannable Members
+			#region ISqlExpressionWalkable Members
 
-			public void ForEach(bool skipColumns, Action<ISqlExpression> action)
+			public ISqlExpression Walk(bool skipColumns, WalkingFunc action)
 			{
-				((ISqlExpressionScannable)Condition).ForEach(skipColumns, action);
-				((ISqlExpressionScannable)Table).    ForEach(skipColumns, action);
+				_condition = (SearchCondition)((ISqlExpressionWalkable)_condition).Walk(skipColumns, action);
+				_table     = (TableSource)    ((ISqlExpressionWalkable)_table).    Walk(skipColumns, action);
+
+				return null;
 			}
 
 			#endregion
@@ -339,11 +343,11 @@ namespace BLToolkit.Data.Sql
 					_expr1 = exp1;
 				}
 
-				readonly ISqlExpression _expr1; public ISqlExpression Expr1 { get { return _expr1; } }
+				ISqlExpression _expr1; public ISqlExpression Expr1 { get { return _expr1; } }
 
-				protected override void ForEach(bool skipColumns, Action<ISqlExpression> action)
+				protected override void Walk(bool skipColumns, WalkingFunc func)
 				{
-					_expr1.ForEach(skipColumns, action);
+					_expr1 = _expr1.Walk(skipColumns, func);
 				}
 			}
 
@@ -370,12 +374,12 @@ namespace BLToolkit.Data.Sql
 				}
 
 				readonly Operator       _op;    public new Operator   Operator { get { return _op;    } }
-				readonly ISqlExpression _expr2; public ISqlExpression Expr2    { get { return _expr2; } }
+				private  ISqlExpression _expr2; public ISqlExpression Expr2    { get { return _expr2; } }
 
-				protected override void ForEach(bool skipColumns, Action<ISqlExpression> action)
+				protected override void Walk(bool skipColumns, WalkingFunc func)
 				{
-					base.ForEach(skipColumns, action);
-					_expr2.ForEach(skipColumns, action);
+					base.Walk(skipColumns, func);
+					_expr2 = _expr2.Walk(skipColumns, func);
 				}
 
 				#region Overrides
@@ -414,16 +418,16 @@ namespace BLToolkit.Data.Sql
 					_escape = escape;
 				}
 
-				readonly ISqlExpression _expr2;  public ISqlExpression Expr2  { get { return _expr2;  } }
-				readonly ISqlExpression _escape; public ISqlExpression Escape { get { return _escape; } }
+				ISqlExpression _expr2;  public ISqlExpression Expr2  { get { return _expr2;  } }
+				ISqlExpression _escape; public ISqlExpression Escape { get { return _escape; } }
 
-				protected override void ForEach(bool skipColumns, Action<ISqlExpression> action)
+				protected override void Walk(bool skipColumns, WalkingFunc func)
 				{
-					base.ForEach(skipColumns, action);
-					_expr2 .ForEach(skipColumns, action);
+					base.Walk(skipColumns, func);
+					_expr2 = _expr2.Walk(skipColumns, func);
 
 					if (_escape != null)
-						_escape.ForEach(skipColumns, action);
+						_escape = _escape.Walk(skipColumns, func);
 				}
 			}
 
@@ -438,14 +442,14 @@ namespace BLToolkit.Data.Sql
 					_expr3 = exp3;
 				}
 
-				readonly ISqlExpression _expr2; public ISqlExpression Expr2 { get { return _expr2; } }
-				readonly ISqlExpression _expr3; public ISqlExpression Expr3 { get { return _expr3; } }
+				ISqlExpression _expr2; public ISqlExpression Expr2 { get { return _expr2; } }
+				ISqlExpression _expr3; public ISqlExpression Expr3 { get { return _expr3; } }
 
-				protected override void ForEach(bool skipColumns, Action<ISqlExpression> action)
+				protected override void Walk(bool skipColumns, WalkingFunc func)
 				{
-					base.ForEach(skipColumns, action);
-					_expr2.ForEach(skipColumns, action);
-					_expr3.ForEach(skipColumns, action);
+					base.Walk(skipColumns, func);
+					_expr2 = _expr2.Walk(skipColumns, func);
+					_expr3 = _expr3.Walk(skipColumns, func);
 				}
 			}
 
@@ -469,12 +473,12 @@ namespace BLToolkit.Data.Sql
 					_subQuery = subQuery;
 				}
 
-				readonly SqlBuilder _subQuery; public SqlBuilder SubQuery { get { return _subQuery; } }
+				SqlBuilder _subQuery; public SqlBuilder SubQuery { get { return _subQuery; } }
 
-				protected override void ForEach(bool skipColumns, Action<ISqlExpression> action)
+				protected override void Walk(bool skipColumns, WalkingFunc func)
 				{
-					base.ForEach(skipColumns, action);
-					((ISqlExpression)_subQuery).ForEach(skipColumns, action);
+					base.Walk(skipColumns, func);
+					_subQuery = (SqlBuilder)((ISqlExpression)_subQuery).Walk(skipColumns, func);
 				}
 			}
 
@@ -490,11 +494,11 @@ namespace BLToolkit.Data.Sql
 				readonly List<ISqlExpression> _values = new List<ISqlExpression>();
 				public   List<ISqlExpression>  Values { get { return _values; } }
 
-				protected override void ForEach(bool skipColumns, Action<ISqlExpression> action)
+				protected override void Walk(bool skipColumns, WalkingFunc action)
 				{
-					base.ForEach(skipColumns, action);
-					foreach (ISqlExpression expr in _values)
-						expr.ForEach(skipColumns, action);
+					base.Walk(skipColumns, action);
+					for (int i = 0; i < _values.Count; i++)
+						_values[i] = _values[i].Walk(skipColumns, action);
 				}
 			}
 
@@ -511,11 +515,11 @@ namespace BLToolkit.Data.Sql
 					_func = func;
 				}
 
-				readonly SqlFunction _func; public SqlFunction Function { get { return _func; } }
+				SqlFunction _func; public SqlFunction Function { get { return _func; } }
 		
-				protected override void ForEach(bool skipColumns, Action<ISqlExpression> action)
+				protected override void Walk(bool skipColumns, WalkingFunc func)
 				{
-					((ISqlExpression)_func).ForEach(skipColumns, action);
+					_func = (SqlFunction)((ISqlExpression)_func).Walk(skipColumns, func);
 				}
 			}
 
@@ -532,11 +536,12 @@ namespace BLToolkit.Data.Sql
 				get { return _precedence;  }
 			}
 
-			protected abstract void ForEach(bool skipColumns, Action<ISqlExpression> action);
+			protected abstract void Walk(bool skipColumns, WalkingFunc action);
 
-			void ISqlExpressionScannable.ForEach(bool skipColumns, Action<ISqlExpression> action)
+			ISqlExpression ISqlExpressionWalkable.Walk(bool skipColumns, WalkingFunc func)
 			{
-				ForEach(skipColumns, action);
+				Walk(skipColumns, func);
+				return null;
 			}
 
 			#endregion
@@ -638,10 +643,12 @@ namespace BLToolkit.Data.Sql
 				}
 			}
 
-			void ISqlExpressionScannable.ForEach(bool skipColumns, Action<ISqlExpression> action)
+			ISqlExpression ISqlExpressionWalkable.Walk(bool skipColumns, WalkingFunc func)
 			{
 				foreach (Condition condition in Conditions)
-					condition.Predicate.ForEach(skipColumns, action);
+					condition.Predicate.Walk(skipColumns, func);
+
+				return func(this);
 			}
 
 			#endregion
@@ -835,8 +842,13 @@ namespace BLToolkit.Data.Sql
 				_isDescending = isDescending;
 			}
 
-			readonly ISqlExpression _expression;   public ISqlExpression Expression   { get { return _expression;   } }
+			private  ISqlExpression _expression;   public ISqlExpression Expression   { get { return _expression;   } }
 			readonly bool           _isDescending; public bool           IsDescending { get { return _isDescending; } }
+
+			internal void Walk(bool skipColumns, WalkingFunc func)
+			{
+				_expression = _expression.Walk(skipColumns, func);
+			}
 		}
 
 		#endregion
@@ -891,7 +903,7 @@ namespace BLToolkit.Data.Sql
 
 		#region SelectClause
 
-		public class SelectClause : ClauseBase, ISqlExpressionScannable
+		public class SelectClause : ClauseBase, ISqlExpressionWalkable
 		{
 			#region Init
 
@@ -1046,22 +1058,32 @@ namespace BLToolkit.Data.Sql
 
 			public override string ToString()
 			{
-				StringBuilder sb = new StringBuilder("SELECT\n");
+				StringBuilder sb = new StringBuilder("SELECT \n");
 
 				foreach (Column c in Columns)
-					sb.Append("\t").Append(c.ToString()).Append(",\n");
+					sb.Append("\t").Append(c.ToString()).Append(", \n");
 
-				return sb.Remove(sb.Length - 2, 2).ToString();
+				return sb.Remove(sb.Length - 3, 3).ToString();
 			}
 
 			#endregion
 
-			#region ISqlExpressionScannable Members
+			#region ISqlExpressionWalkable Members
 
-			void ISqlExpressionScannable.ForEach(bool skipColumns, Action<ISqlExpression> action)
+			ISqlExpression ISqlExpressionWalkable.Walk(bool skipColumns, WalkingFunc func)
 			{
-				foreach (Column column in Columns)
-					column.ForEach(skipColumns, action);
+				for (int i = 0; i < Columns.Count; i++)
+				{
+					Column         col  = Columns[i];
+					ISqlExpression expr = col.Walk(skipColumns, func);
+
+					if (expr is Column)
+						Columns[i] = (Column)expr;
+					else
+						Columns[i] = new Column(col.Parent, expr, col.Alias);
+				}
+
+				return null;
 			}
 
 			#endregion
@@ -1077,7 +1099,7 @@ namespace BLToolkit.Data.Sql
 
 		#region FromClause
 
-		public class FromClause : ClauseBase, ISqlExpressionScannable
+		public class FromClause : ClauseBase, ISqlExpressionWalkable
 		{
 			#region Join
 
@@ -1193,6 +1215,14 @@ namespace BLToolkit.Data.Sql
 
 						if (join != null)
 							return join;
+
+						if (ts.Source is SqlBuilder)
+						{
+							TableSource s = ((SqlBuilder)ts.Source).From[table, alias];
+
+							if (s != null)
+								return s;
+						}
 					}
 
 					return null;
@@ -1209,7 +1239,7 @@ namespace BLToolkit.Data.Sql
 
 			public override string ToString()
 			{
-				StringBuilder sb = new StringBuilder("\nFROM\n");
+				StringBuilder sb = new StringBuilder(" \nFROM \n");
 
 				foreach (TableSource ts in Tables)
 					sb.Append("\t").Append(ts.ToString());
@@ -1219,12 +1249,14 @@ namespace BLToolkit.Data.Sql
 
 			#endregion
 
-			#region ISqlExpressionScannable Members
+			#region ISqlExpressionWalkable Members
 
-			void ISqlExpressionScannable.ForEach(bool skipColumns, Action<ISqlExpression> action)
+			ISqlExpression ISqlExpressionWalkable.Walk(bool skipColumns, WalkingFunc func)
 			{
-				foreach (TableSource table in Tables)
-					((ISqlExpressionScannable)table).ForEach(skipColumns, action);
+				for (int i = 0; i <	Tables.Count; i++)
+					((ISqlExpressionWalkable)Tables[i]).Walk(skipColumns, func);
+
+				return null;
 			}
 
 			#endregion
@@ -1254,7 +1286,7 @@ namespace BLToolkit.Data.Sql
 
 		#region WhereClause
 
-		public class WhereClause : ClauseBase<WhereClause, WhereClause.Next>, ISqlExpressionScannable
+		public class WhereClause : ClauseBase<WhereClause, WhereClause.Next>, ISqlExpressionWalkable
 		{
 			public class Next : ClauseBase
 			{
@@ -1273,10 +1305,15 @@ namespace BLToolkit.Data.Sql
 			{
 			}
 
-			readonly SearchCondition _searchCondition = new SearchCondition();
-			public   SearchCondition  SearchCondition
+			private SearchCondition _searchCondition = new SearchCondition();
+			public  SearchCondition  SearchCondition
 			{
 				get { return _searchCondition; }
+			}
+
+			public bool IsEmpty
+			{
+				get { return SearchCondition.Conditions.Count == 0; }
 			}
 
 			protected override SearchCondition Search
@@ -1294,11 +1331,12 @@ namespace BLToolkit.Data.Sql
 				return Search.Conditions.Count == 0 ? "" : "\nWHERE\n\t" + Search;
 			}
 
-			#region ISqlExpressionScannable Members
+			#region ISqlExpressionWalkable Members
 
-			void ISqlExpressionScannable.ForEach(bool skipColumns, Action<ISqlExpression> action)
+			ISqlExpression ISqlExpressionWalkable.Walk(bool skipColumns, WalkingFunc action)
 			{
-				((ISqlExpressionScannable)SearchCondition).ForEach(skipColumns, action);
+				_searchCondition = (SearchCondition)((ISqlExpressionWalkable)_searchCondition).Walk(skipColumns, action);
+				return null;
 			}
 
 			#endregion
@@ -1314,7 +1352,7 @@ namespace BLToolkit.Data.Sql
 
 		#region GroupByClause
 
-		public class GroupByClause : ClauseBase, ISqlExpressionScannable
+		public class GroupByClause : ClauseBase, ISqlExpressionWalkable
 		{
 			internal GroupByClause(SqlBuilder sqlBuilder) : base(sqlBuilder)
 			{
@@ -1346,12 +1384,17 @@ namespace BLToolkit.Data.Sql
 				get { return _items; }
 			}
 
+			public bool IsEmpty
+			{
+				get { return Items.Count == 0; }
+			}
+
 			public override string ToString()
 			{
 				if (Items.Count == 0)
 					return "";
 
-				StringBuilder sb = new StringBuilder("\nGROUP BY\n");
+				StringBuilder sb = new StringBuilder(" \nGROUP BY \n");
 
 				foreach (ISqlExpression item in Items)
 					sb.Append(item.ToString()).Append(",");
@@ -1359,12 +1402,14 @@ namespace BLToolkit.Data.Sql
 				return sb.Remove(sb.Length - 1, 1).ToString();
 			}
 
-			#region ISqlExpressionScannable Members
+			#region ISqlExpressionWalkable Members
 
-			void ISqlExpressionScannable.ForEach(bool skipColumns, Action<ISqlExpression> action)
+			ISqlExpression ISqlExpressionWalkable.Walk(bool skipColumns, WalkingFunc func)
 			{
-				foreach (ISqlExpression item in Items)
-					item.ForEach(skipColumns, action);
+				for (int i = 0; i < Items.Count; i++)
+					Items[i] = Items[i].Walk(skipColumns, func);
+
+				return null;
 			}
 
 			#endregion
@@ -1390,7 +1435,7 @@ namespace BLToolkit.Data.Sql
 
 		#region OrderByClause
 
-		public class OrderByClause : ClauseBase, ISqlExpressionScannable
+		public class OrderByClause : ClauseBase, ISqlExpressionWalkable
 		{
 			internal OrderByClause(SqlBuilder sqlBuilder) : base(sqlBuilder)
 			{
@@ -1425,6 +1470,11 @@ namespace BLToolkit.Data.Sql
 				get { return _items; }
 			}
 
+			public bool IsEmpty
+			{
+				get { return Items.Count == 0; }
+			}
+
 			public override string ToString()
 			{
 				if (Items.Count == 0)
@@ -1433,12 +1483,14 @@ namespace BLToolkit.Data.Sql
 				return base.ToString();
 			}
 
-			#region ISqlExpressionScannable Members
+			#region ISqlExpressionWalkable Members
 
-			void ISqlExpressionScannable.ForEach(bool skipColumns, Action<ISqlExpression> action)
+			ISqlExpression ISqlExpressionWalkable.Walk(bool skipColumns, WalkingFunc func)
 			{
-				foreach (OrderByItem item in Items)
-					item.Expression.ForEach(skipColumns, action);
+				for (int i = 0; i < Items.Count; i++)
+					Items[i].Walk(skipColumns, func);
+
+				return null;
 			}
 
 			#endregion
@@ -1456,15 +1508,18 @@ namespace BLToolkit.Data.Sql
 
 		public void FinalizeAndValidate()
 		{
-			((ISqlExpressionScannable)this).ForEach(false, delegate(ISqlExpression expr)
+			((ISqlExpressionWalkable)this).Walk(false, delegate(ISqlExpression expr)
 			{
 				SqlBuilder sb = expr as SqlBuilder;
 
 				if (sb != null && sb != this)
 					sb.FinalizeAndValidate();
+
+				return expr;
 			});
 
 			ResolveWeakJoins();
+			OptimizeSubQueries();
 			SetAliases();
 		}
 
@@ -1506,19 +1561,21 @@ namespace BLToolkit.Data.Sql
 						{
 							tables = new List<ISqlTableSource>();
 
-							Action<ISqlExpression> tableCollector = delegate(ISqlExpression expr)
+							WalkingFunc tableCollector = delegate(ISqlExpression expr)
 							{
 								SqlField field = expr as SqlField;
 
 								if (field != null && !tables.Contains(field.Table))
 									tables.Add(field.Table);
+
+								return expr;
 							};
 
-							((ISqlExpressionScannable)Select) .ForEach(false, tableCollector);
-							((ISqlExpressionScannable)Where)  .ForEach(false, tableCollector);
-							((ISqlExpressionScannable)GroupBy).ForEach(false, tableCollector);
-							((ISqlExpressionScannable)Having) .ForEach(false, tableCollector);
-							((ISqlExpressionScannable)OrderBy).ForEach(false, tableCollector);
+							((ISqlExpressionWalkable)Select) .Walk(false, tableCollector);
+							((ISqlExpressionWalkable)Where)  .Walk(false, tableCollector);
+							((ISqlExpressionWalkable)GroupBy).Walk(false, tableCollector);
+							((ISqlExpressionWalkable)Having) .Walk(false, tableCollector);
+							((ISqlExpressionWalkable)OrderBy).Walk(false, tableCollector);
 						}
 
 						if (findTable(join.Table))
@@ -1534,6 +1591,47 @@ namespace BLToolkit.Data.Sql
 					}
 				}
 			});
+		}
+
+		TableSource OptimizeSubQuery(TableSource source)
+		{
+			foreach (JoinedTable jt in source.Joins)
+				OptimizeSubQuery(jt.Table);
+
+			if (source.Source is SqlBuilder)
+			{
+				SqlBuilder builder = (SqlBuilder)source.Source;
+
+				if (builder.From.Tables.Count == 1 &&
+				    builder.From.Tables[0].Joins.Count == 0 &&
+				    builder.Where.  IsEmpty &&
+				    builder.GroupBy.IsEmpty &&
+				    builder.Having. IsEmpty &&
+				    builder.OrderBy.IsEmpty &&
+				   !builder.Select.Columns.Exists(delegate(Column c) { return !(c.Expression is SqlField); }))
+				{
+					Dictionary<ISqlExpression,SqlField> map = new Dictionary<ISqlExpression,SqlField>(builder.Select.Columns.Count);
+
+					foreach (Column c in builder.Select.Columns)
+						map.Add(c, (SqlField)c.Expression);
+
+					((ISqlExpressionWalkable)this).Walk(false, delegate(ISqlExpression expr)
+					{
+						SqlField fld;
+						return map.TryGetValue(expr, out fld)? fld: expr;
+					});
+
+					return builder.From.Tables[0];
+				}
+			}
+
+			return source;
+		}
+
+		void OptimizeSubQueries()
+		{
+			for (int i = 0; i < From.Tables.Count; i++)
+				From.Tables[i] = OptimizeSubQuery(From.Tables[i]);
 		}
 
 		void SetAliases()
@@ -1577,7 +1675,7 @@ namespace BLToolkit.Data.Sql
 
 			Parameters.Clear();
 
-			((ISqlExpressionScannable)this).ForEach(true, delegate(ISqlExpression expr)
+			((ISqlExpressionWalkable)this).Walk(true, delegate(ISqlExpression expr)
 			{
 				if (expr is SqlParameter)
 				{
@@ -1597,6 +1695,8 @@ namespace BLToolkit.Data.Sql
 					names.Add(p.Name = alias, p);
 					Parameters.Add(p);
 				}
+
+				return expr;
 			});
 		}
 
@@ -1638,17 +1738,18 @@ namespace BLToolkit.Data.Sql
 
 		#endregion
 
-		#region ISqlExpressionScannable Members
+		#region ISqlExpressionWalkable Members
 
-		void ISqlExpressionScannable.ForEach(bool skipColumns, Action<ISqlExpression> action)
+		ISqlExpression ISqlExpressionWalkable.Walk(bool skipColumns, WalkingFunc func)
 		{
-			action(this);
-			((ISqlExpressionScannable)Select) .ForEach(skipColumns, action);
-			((ISqlExpressionScannable)From)   .ForEach(skipColumns, action);
-			((ISqlExpressionScannable)Where)  .ForEach(skipColumns, action);
-			((ISqlExpressionScannable)GroupBy).ForEach(skipColumns, action);
-			((ISqlExpressionScannable)Having) .ForEach(skipColumns, action);
-			((ISqlExpressionScannable)OrderBy).ForEach(skipColumns, action);
+			((ISqlExpressionWalkable)Select) .Walk(skipColumns, func);
+			((ISqlExpressionWalkable)From)   .Walk(skipColumns, func);
+			((ISqlExpressionWalkable)Where)  .Walk(skipColumns, func);
+			((ISqlExpressionWalkable)GroupBy).Walk(skipColumns, func);
+			((ISqlExpressionWalkable)Having) .Walk(skipColumns, func);
+			((ISqlExpressionWalkable)OrderBy).Walk(skipColumns, func);
+
+			return func(this);
 		}
 
 		#endregion
