@@ -9,6 +9,7 @@ using NUnit.Framework;
 namespace Data.Linq
 {
 	using Model;
+using BLToolkit.Data.Linq;
 
 	[TestFixture]
 	public class SelectManyTest : TestBase
@@ -21,9 +22,9 @@ namespace Data.Linq
 				var q = db.Person.Select(p => p);
 
 				return db.Person
-					.SelectMany(p1 => q/*db.Person.Select(p => p)*/, (p1, p2) => new {p1, p2})
+					.SelectMany(p1 => q/*db.Person.Select(p => p)*/, (p1, p2) => new { p1, p2 })
 					.Where(t => t.p1.ID == t.p2.ID && t.p1.ID == 1)
-					.Select(t => new Person {ID = t.p1.ID, FirstName = t.p2.FirstName});
+					.Select(t => new Person { ID = t.p1.ID, FirstName = t.p2.FirstName });
 			});
 		}
 
@@ -38,9 +39,70 @@ namespace Data.Linq
 				select new Person { ID = p1.ID, FirstName = p2.FirstName, LastName = p3.LastName } );
 		}
 
+		[Test]
+		public void SubQuery1()
+		{
+			TestJohn(db =>
+			{
+				var id = 1;
+				var q  = from p in db.Person where p.ID == id select p;
 
+				return 
+					from p1 in db.Person
+					from p2 in q
+					where p1.ID == p2.ID
+					select new Person { ID = p1.ID, FirstName = p2.FirstName };
+			});
+		}
 
-		
+		public void SubQuery2(TestDbManager db)
+		{
+			var q1 = from p in db.Person where p.ID == 1 || p.ID == 2 select p;
+			var q2 = from p in db.Person where !(p.ID == 2) select p;
+
+			var q = 
+				from p1 in q1
+				from p2 in q2
+				where p1.ID == p2.ID
+				select new Person { ID = p1.ID, FirstName = p2.FirstName };
+
+			foreach (var person in q)
+			{
+				Assert.AreEqual(1,      person.ID);
+				Assert.AreEqual("John", person.FirstName);
+			}
+		}
+
+		[Test]
+		public void SubQuery2()
+		{
+			ForEachProvider(db =>
+			{
+				SubQuery2(db);
+				SubQuery2(db);
+			});
+		}
+
+		IQueryable<Person> GetPersonQuery(TestDbManager db, int id)
+		{
+			return from p in db.Person where p.ID == id select new Person { ID = p.ID + 1, FirstName = p.FirstName };
+		}
+
+		[Test]
+		public void SubQuery3()
+		{
+			TestJohn(db =>
+			{
+				var q = GetPersonQuery(db, 1);
+
+				return
+					from p1 in db.Person
+					from p2 in q
+					where p1.ID == p2.ID - 1
+					select new Person { ID = p1.ID, FirstName = p2.FirstName };
+			});
+		}
+
 		void Foo(Expression<Func<IDataReader,object>> func)
 		{
 			/*

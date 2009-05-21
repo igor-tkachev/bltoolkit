@@ -433,7 +433,7 @@ namespace BLToolkit.Data.Linq
 
 				case ExpressionType.Call:
 					{
-						var pi = func(Convert<MethodCallExpression>());
+						var pi = func(ConvertTo<MethodCallExpression>());
 						if (pi.StopWalking)
 							return pi.ClearStopWalkingFlag();
 

@@ -92,9 +92,16 @@ namespace BLToolkit.Data.Linq
 
 			info.ConvertTo<MethodCallExpression>().Match
 			(
-				pi => pi.IsQueryableMethod("Select", seq => select = ParseSequence(seq), l => select = ParseSelect(l, select)),
-				pi => pi.IsQueryableMethod("Where",      seq => select = ParseSequence(seq),  l      => select = ParseWhere     (select, l)),
-				pi => pi.IsQueryableMethod("SelectMany", seq => select = ParseSequence(seq), (l1,l2) => select = ParseSelectMany(select, l1, l2)),
+				pi => pi.IsQueryableMethod("Select",     seq => select = ParseSequence(seq),  l      => select = ParseSelect    (l,      select)),
+				pi => pi.IsQueryableMethod("Where",      seq => select = ParseSequence(seq),  l      => select = ParseWhere     (l,      select)),
+				pi => pi.IsQueryableMethod("SelectMany", seq => select = ParseSequence(seq), (l1,l2) => select = ParseSelectMany(l1, l2, select)),
+				pi => pi.IsMethod(m =>
+				{
+					if (m.Expr.Method.DeclaringType == typeof(Queryable) || !TypeHelper.IsSameOrParent(typeof(IQueryable), pi.Expr.Type))
+						return false;
+					select = ParseSequence(GetIQueriable(info));
+					return true;
+				}),
 				pi => { throw new ArgumentException(string.Format("Queryable method call expected. Got '{0}'.", pi.Expr), "info"); }
 			);
 
@@ -103,21 +110,20 @@ namespace BLToolkit.Data.Linq
 
 		ParseInfo GetIQueriable(ParseInfo info)
 		{
-			if (info.NodeType == ExpressionType.MemberAccess)
+			if (info.NodeType == ExpressionType.MemberAccess || info.NodeType == ExpressionType.Call)
 			{
-				var p    = Expression.Parameter(typeof(Expression), "expr");
+				var p    = Expression.Parameter(typeof(Expression), "exp");
 				var expr = ReplaceParameter(ParseInfo.CreateRoot(info.Expr, p), _ => {});
 				var l    = Expression.Lambda<Func<Expression,IQueryable>>(Expression.Convert(expr, typeof(IQueryable)), new [] { p });
 				var qe   = l.Compile();
-
-				_info.QueryableAccessors.Add(info.Expr, qe);
+				var n    = _info.AddQueryableAccessors(info.Expr, qe);
 
 				return info.Create(
 					qe(info).Expression,
 					Expression.Call(
 						_infoParam,
-						Expressor<ExpressionInfo<T>>.MethodExpressor(a => a.GetIQueryable(null, null)),
-						new Expression[] { info.ParamAccessor, _expressionParam }));
+						Expressor<ExpressionInfo<T>>.MethodExpressor(a => a.GetIQueryable(0, null)),
+						new Expression[] { Expression.Constant(n), info.ParamAccessor }));
 			}
 
 			throw new InvalidOperationException();
@@ -145,7 +151,7 @@ namespace BLToolkit.Data.Linq
 
 		#region Parse SelectMany
 
-		QuerySource ParseSelectMany(QuerySource select, LambdaInfo lambda1, LambdaInfo lambda2)
+		QuerySource ParseSelectMany(LambdaInfo lambda1, LambdaInfo lambda2, QuerySource select)
 		{
 			var sqlBuilder        = new SqlBuilder();
 			var currentSqlBuilder = _info.SqlBuilder;
@@ -164,7 +170,7 @@ namespace BLToolkit.Data.Linq
 
 		#region Parse Where
 
-		QuerySource ParseWhere(QuerySource select, LambdaInfo l)
+		QuerySource ParseWhere(LambdaInfo l, QuerySource select)
 		{
 			SetAlias(select, l.Parameters[0].Expr.Name);
 
@@ -556,7 +562,9 @@ namespace BLToolkit.Data.Linq
 			string name = null;
 
 			var newExpr = ReplaceParameter(expr, nm => name = nm);
-			var mapper  = Expression.Lambda<Func<Expression,object>>(Expression.Convert(newExpr, typeof(object)), new [] { _expressionParam });
+			var mapper  = Expression.Lambda<Func<ExpressionInfo<T>,Expression,object>>(
+				Expression.Convert(newExpr, typeof(object)),
+				new [] { _infoParam, _expressionParam });
 
 			p = new ExpressionInfo<T>.Parameter
 			{

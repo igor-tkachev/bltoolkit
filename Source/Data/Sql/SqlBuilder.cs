@@ -99,7 +99,7 @@ namespace BLToolkit.Data.Sql
 
 			public int Precedence
 			{
-				get { return _expression.Precedence; }
+				get { return Sql.Precedence.Primary; } // _expression.Precedence; }
 			}
 
 			#endregion
@@ -1604,9 +1604,7 @@ namespace BLToolkit.Data.Sql
 
 				if (builder.From.Tables.Count == 1 &&
 				    builder.From.Tables[0].Joins.Count == 0 &&
-				    builder.Where.  IsEmpty &&
 				    builder.GroupBy.IsEmpty &&
-				    builder.Having. IsEmpty &&
 				    builder.OrderBy.IsEmpty &&
 				   !builder.Select.Columns.Exists(delegate(Column c) { return !(c.Expression is SqlField); }))
 				{
@@ -1621,11 +1619,34 @@ namespace BLToolkit.Data.Sql
 						return map.TryGetValue(expr, out fld)? fld: expr;
 					});
 
+					if (!builder.Where. IsEmpty) ConcatSearchCondition(Where,  builder.Where);
+					if (!builder.Having.IsEmpty) ConcatSearchCondition(Having, builder.Having);
+
 					return builder.From.Tables[0];
 				}
 			}
 
 			return source;
+		}
+
+		void ConcatSearchCondition(WhereClause where1, WhereClause where2)
+		{
+			if (where1.IsEmpty)
+			{
+				where1.SearchCondition.Conditions.AddRange(where2.SearchCondition.Conditions);
+			}
+			else
+			{
+				SearchCondition sc1 = new SearchCondition();
+				SearchCondition sc2 = new SearchCondition();
+
+				sc1.Conditions.AddRange(where1.SearchCondition.Conditions);
+				sc2.Conditions.AddRange(where2.SearchCondition.Conditions);
+
+				where1.SearchCondition.Conditions.Clear();
+				where1.SearchCondition.Conditions.Add(new Condition(false, sc1));
+				where1.SearchCondition.Conditions.Add(new Condition(false, sc2));
+			}
 		}
 
 		void OptimizeSubQueries()

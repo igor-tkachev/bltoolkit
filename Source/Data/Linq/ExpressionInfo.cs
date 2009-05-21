@@ -191,7 +191,7 @@ namespace BLToolkit.Data.Linq
 		private void SetParameters(Expression expr)
 		{
 			foreach (var p in Parameters)
-				p.SqlParameter.Value = p.Accessor(expr);
+				p.SqlParameter.Value = p.Accessor(this, expr);
 		}
 
 		private IDbDataParameter[] GetParameters(DbManager db, Expression expr)
@@ -339,11 +339,20 @@ namespace BLToolkit.Data.Linq
 			return DataProvider == dataProvider && MappingSchema == mappingSchema && Compare(Expression, expr);
 		}
 
-		public Dictionary<Expression,Func<Expression,IQueryable>> QueryableAccessors = new Dictionary<Expression,Func<Expression,IQueryable>>();
+		Dictionary<Expression,Func<Expression,IQueryable>> QueryableAccessorDic  = new Dictionary<Expression,Func<Expression,IQueryable>>();
+		List<Func<Expression,IQueryable>>                  QueryableAccessorList = new List<Func<Expression,IQueryable>>();
 
-		public Expression GetIQueryable(Expression expr1, Expression expr2)
+		public int AddQueryableAccessors(Expression expr, Func<Expression,IQueryable> qe)
 		{
-			return QueryableAccessors[expr1](expr2).Expression;
+			QueryableAccessorDic. Add(expr, qe);
+			QueryableAccessorList.Add(qe);
+
+			return QueryableAccessorList.Count - 1;
+		}
+
+		public Expression GetIQueryable(int n, Expression expr)
+		{
+			return QueryableAccessorList[n](expr).Expression;
 		}
 
 		bool Compare(Expression expr1, Expression expr2)
@@ -410,7 +419,18 @@ namespace BLToolkit.Data.Linq
 						var e1 = (MethodCallExpression)expr1;
 						var e2 = (MethodCallExpression)expr2;
 
-						if (e1.Arguments.Count != e2.Arguments.Count || e1.Method != e2.Method || !Compare(e1.Object, e2.Object))
+						if (e1.Arguments.Count != e2.Arguments.Count || e1.Method != e2.Method)
+							return false;
+
+						if (QueryableAccessorDic.Count > 0)
+						{
+							Func<Expression,IQueryable> func = null;
+
+							if (QueryableAccessorDic.TryGetValue(expr1, out func))
+								return Compare(func(expr1).Expression, func(expr2).Expression);
+						}
+
+						if (!Compare(e1.Object, e2.Object))
 							return false;
 
 						for (var i = 0; i < e1.Arguments.Count; i++)
@@ -496,11 +516,11 @@ namespace BLToolkit.Data.Linq
 
 						if (e1.Member == e2.Member)
 						{
-							if (QueryableAccessors.Count > 0)
+							if (QueryableAccessorDic.Count > 0)
 							{
 								Func<Expression,IQueryable> func = null;
 
-								if (QueryableAccessors.TryGetValue(expr1, out func))
+								if (QueryableAccessorDic.TryGetValue(expr1, out func))
 									return Compare(func(expr1).Expression, func(expr2).Expression);
 							}
 
@@ -643,9 +663,9 @@ namespace BLToolkit.Data.Linq
 
 		public class Parameter
 		{
-			public Expression              Expression;
-			public Func<Expression,object> Accessor;
-			public SqlParameter            SqlParameter;
+			public Expression                                Expression;
+			public Func<ExpressionInfo<T>,Expression,object> Accessor;
+			public SqlParameter                              SqlParameter;
 		}
 	}
 }
