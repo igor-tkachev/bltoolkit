@@ -92,9 +92,11 @@ namespace BLToolkit.Data.Linq
 
 			info.ConvertTo<MethodCallExpression>().Match
 			(
-				pi => pi.IsQueryableMethod("Select",     seq => select = ParseSequence(seq),  l      => select = ParseSelect    (l,      select)),
-				pi => pi.IsQueryableMethod("Where",      seq => select = ParseSequence(seq),  l      => select = ParseWhere     (l,      select)),
-				pi => pi.IsQueryableMethod("SelectMany", seq => select = ParseSequence(seq), (l1,l2) => select = ParseSelectMany(l1, l2, select)),
+				pi => pi.IsQueryableMethod("Select",     seq => select = ParseSequence(seq),  l      => select = ParseSelect    (l,        select)),
+				pi => pi.IsQueryableMethod("Where",      seq => select = ParseSequence(seq),  l      => select = ParseWhere     (l,        select)),
+				pi => pi.IsQueryableMethod("SelectMany", seq => select = ParseSequence(seq),  l      => select = ParseSelectMany(l,  null, select)),
+				pi => pi.IsQueryableMethod("SelectMany", seq => select = ParseSequence(seq), (l1,l2) => select = ParseSelectMany(l1, l2,   select)),
+				pi => pi.IsQueryableMethod("Join",       seq => select = ParseSequence(seq), (i,l2,l3,l4) => select = ParseJoin(i, l2, l3, l4, select)),
 				pi => pi.IsMethod(m =>
 				{
 					if (m.Expr.Method.DeclaringType == typeof(Queryable) || !TypeHelper.IsSameOrParent(typeof(IQueryable), pi.Expr.Type))
@@ -140,7 +142,11 @@ namespace BLToolkit.Data.Linq
 
 			switch (l.Body.NodeType)
 			{
-				case ExpressionType.Parameter   : return sources[0];
+				case ExpressionType.Parameter   :
+					for (int i = 0; i < sources.Length; i++)
+						if (l.Body == l.Parameters[i].Expr)
+							return sources[i];
+					throw new InvalidOperationException();
 				case ExpressionType.New         : return new QuerySource.Expr  (_info.SqlBuilder, l.ConvertTo<NewExpression>(),        sources);
 				case ExpressionType.MemberInit  : return new QuerySource.Expr  (_info.SqlBuilder, l.ConvertTo<MemberInitExpression>(), sources);
 				default                         : return new QuerySource.Scalar(_info.SqlBuilder, l,                                   sources);
@@ -151,19 +157,73 @@ namespace BLToolkit.Data.Linq
 
 		#region Parse SelectMany
 
-		QuerySource ParseSelectMany(LambdaInfo lambda1, LambdaInfo lambda2, QuerySource select)
+		QuerySource ParseSelectMany(LambdaInfo collectionSelector, LambdaInfo resultSelector, QuerySource source)
 		{
+			/*
 			var sqlBuilder        = new SqlBuilder();
 			var currentSqlBuilder = _info.SqlBuilder;
 
 			_info.SqlBuilder = sqlBuilder;
 
-			var source = new QuerySource.SubQuery(currentSqlBuilder, sqlBuilder, ParseSequence(lambda1.Body));
+			var source2 = new QuerySource.SubQuery(currentSqlBuilder, sqlBuilder, ParseSequence(collectionSelector.Body));
 
 			_info.SqlBuilder = currentSqlBuilder;
 			_info.SqlBuilder.From.Table(sqlBuilder);
 
-			return ParseSelect(lambda2, select, source);
+			return resultSelector == null ? source2 : ParseSelect(resultSelector, source, source2);
+			 */
+
+			var current = new SqlBuilder();
+			var source1 = new QuerySource.SubQuery(current, _info.SqlBuilder, source);
+
+			current.From.Table(source1.SubSql);
+
+			_info.SqlBuilder = new SqlBuilder();
+
+			var source2 = new QuerySource.SubQuery(current, _info.SqlBuilder, ParseSequence(collectionSelector.Body));
+
+			current.From.Table(source2.SubSql);
+
+			_info.SqlBuilder = current;
+
+			return resultSelector == null ? source2 : ParseSelect(resultSelector, source1, source2);
+		}
+
+		#endregion
+
+		#region Parse Join
+
+		QuerySource ParseJoin(
+			ParseInfo<Expression> inner,
+			LambdaInfo            outerKeySelector,
+			LambdaInfo            innerKeySelector,
+			LambdaInfo            resultSelector,
+			QuerySource           outerSource)
+		{
+			if (outerKeySelector.Body.NodeType == ExpressionType.MemberInit)
+				throw new NotSupportedException(
+					string.Format("Explicit construction of entity type '{0}' in query is not allowed.",
+					outerKeySelector.Body.Expr.Type));
+
+			var sqlBuilder        = new SqlBuilder();
+			var currentSqlBuilder = _info.SqlBuilder;
+
+			_info.SqlBuilder = sqlBuilder;
+
+			var innerSource = ParseSequence(inner);
+
+			_info.SqlBuilder = currentSqlBuilder;
+
+			_info.SqlBuilder.From.Table(sqlBuilder);
+
+			if (outerKeySelector.Body.NodeType == ExpressionType.New)
+			{
+			}
+			else
+			{
+			}
+
+			return ParseSelect(resultSelector, outerSource, innerSource);
 		}
 
 		#endregion
@@ -198,6 +258,9 @@ namespace BLToolkit.Data.Linq
 				{
 					var field = query.GetField(pi.Expr);
 
+					//while (field is QueryField.SubQueryColumn)
+					//	field = ((QueryField.SubQueryColumn)field).Field;
+
 					if (field is QueryField.ExprColumn)
 						makeSubquery = pi.StopWalking = true;
 				}
@@ -216,10 +279,10 @@ namespace BLToolkit.Data.Linq
 		{
 			query.Match
 			(
-				table    => { table.Select(this);   _info.SetQuery();  }, // QueryInfo.Table
-				expr     => BuildNew(query, expr.Lambda.Body),            // QueryInfo.Expr
-				BuildSubQuery,                                            // QueryInfo.SubQuery
-				scalar   => BuildNew(query, scalar.Lambda.Body)           // QueryInfo.Scalar
+				table    => { table.Select(this); _info.SetQuery(); }, // QueryInfo.Table
+				expr     => BuildNew(query, expr.Lambda.Body),         // QueryInfo.Expr
+				BuildSubQuery,                                         // QueryInfo.SubQuery
+				scalar   => BuildNew(query, scalar.Lambda.Body)        // QueryInfo.Scalar
 			);
 		}
 
@@ -237,7 +300,7 @@ namespace BLToolkit.Data.Linq
 		{
 			subQuery.ParentQueries[0].Match
 			(
-				table  => _info.SetQuery(), // QueryInfo.Table
+				table  => { subQuery.Select(this); _info.SetQuery(); }, // QueryInfo.Table
 				expr   => // QueryInfo.Expr
 				{
 					if (expr.Lambda.Body.Expr is NewExpression)
@@ -301,8 +364,13 @@ namespace BLToolkit.Data.Linq
 
 								if (field != null)
 								{
-									if (field is QueryField.Column || field is QueryField.SubQueryColumn)
+									if (field is QueryField.Column)
 										return BuildField(ma, field);
+
+									if (field is QueryField.SubQueryColumn)
+									{
+										return BuildField(ma, field);
+									}
 
 									if (field is QueryField.ExprColumn)
 									{
@@ -316,7 +384,7 @@ namespace BLToolkit.Data.Linq
 
 									if (field is QuerySource.Table)
 									{
-										var table = (QuerySource.Table) field;
+										var table = (QuerySource.Table)field;
 										var index = table.Select(this).Select(i => Expression.Constant(i, typeof(int)) as Expression);
 
 										return ma.Parent.Replace(
@@ -466,6 +534,9 @@ namespace BLToolkit.Data.Linq
 
 		static void SetAlias(QuerySource query, string alias)
 		{
+			if (alias.Contains('<'))
+				return;
+
 			query.Match
 			(
 				table  =>

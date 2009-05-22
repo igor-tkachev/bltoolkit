@@ -9,7 +9,6 @@ using NUnit.Framework;
 namespace Data.Linq
 {
 	using Model;
-using BLToolkit.Data.Linq;
 
 	[TestFixture]
 	public class SelectManyTest : TestBase
@@ -32,11 +31,26 @@ using BLToolkit.Data.Linq;
 		public void Test2()
 		{
 			TestJohn(db =>
-				from p1 in db.Person
-				from p2 in db.Person
-				from p3 in db.Person
-				where p1.ID == p2.ID && p1.ID == p3.ID && p1.ID == 1
-				select new Person { ID = p1.ID, FirstName = p2.FirstName, LastName = p3.LastName } );
+				from p1 in from p in db.Person select new { ID1 = p.ID, p.LastName }
+				from p2 in from p in db.Person select new { ID2 = p.ID, p.FirstName }
+				from p3 in from p in db.Person select new { ID3 = p.ID, p.LastName }
+				where p1.ID1 == p2.ID2 && p1.LastName == p3.LastName && p1.ID1 == 1
+				select new Person { ID = p1.ID1, FirstName = p2.FirstName, LastName = p3.LastName } );
+		}
+
+		[Test]
+		public void Test3()
+		{
+			TestJohn(db =>
+				from p in
+					from p in
+						from p in db.Person
+						where p.ID == 1
+						select new { p, ID = p.ID + 1 }
+					where p.ID == 2
+					select new { p, ID = p.ID + 1 }
+				where p.p.ID == 3
+				select p.p.p);
 		}
 
 		[Test]
@@ -101,6 +115,12 @@ using BLToolkit.Data.Linq;
 					where p1.ID == p2.ID - 1
 					select new Person { ID = p1.ID, FirstName = p2.FirstName };
 			});
+		}
+
+		[Test]
+		public void OneParam()
+		{
+			TestJohn(db => db.Person.SelectMany(p => db.Person).Where(t => t.ID == 1).Select(t => t));
 		}
 
 		void Foo(Expression<Func<IDataReader,object>> func)

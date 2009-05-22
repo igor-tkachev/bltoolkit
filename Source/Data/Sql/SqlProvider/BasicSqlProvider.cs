@@ -379,16 +379,20 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			else if (expr is SqlBuilder.Column)
 			{
 				SqlBuilder.Column column = (SqlBuilder.Column)expr;
+				ISqlTableSource   table  = _sqlBuilder.From[column.Parent];
 
-				string table = GetTableAlias(_sqlBuilder.From[column.Parent]) ?? GetTablePhysicalName(column.Parent);
+				if (table == null)
+					throw new SqlException(string.Format("Table not found for '{0}'.", column));
 
-				if (string.IsNullOrEmpty(table))
+				string tableAlias = GetTableAlias(table) ?? GetTablePhysicalName(column.Parent);
+
+				if (string.IsNullOrEmpty(tableAlias))
 					throw new SqlException(string.Format("Table {0} should have an alias.", column.Parent));
 
 				addAlias = alias != column.Alias;
 
 				sb
-					.Append(table)
+					.Append(tableAlias)
 					.Append('.')
 					.Append(_dataProvider.Convert(column.Alias, ConvertType.NameToQueryField));
 			}

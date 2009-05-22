@@ -197,7 +197,13 @@ namespace BLToolkit.Data.Linq
 								 break;
 
 							if (!(field is QuerySource))
-								return null;
+							{
+								//while (field is SubQueryColumn)
+								//	field = ((SubQueryColumn)field).Field;
+
+								if (!(field is QuerySource))
+									return null;
+							}
 
 							source = (QuerySource)field;
 						}

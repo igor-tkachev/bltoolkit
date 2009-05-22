@@ -1651,8 +1651,8 @@ namespace BLToolkit.Data.Sql
 
 		void OptimizeSubQueries()
 		{
-			for (int i = 0; i < From.Tables.Count; i++)
-				From.Tables[i] = OptimizeSubQuery(From.Tables[i]);
+			//for (int i = 0; i < From.Tables.Count; i++)
+			//	From.Tables[i] = OptimizeSubQuery(From.Tables[i]);
 		}
 
 		void SetAliases()

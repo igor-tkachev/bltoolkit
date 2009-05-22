@@ -79,6 +79,33 @@ namespace BLToolkit.Data.Linq
 			return false;
 		}
 
+		public static bool IsQueryableMethod(
+			this ParseInfo<MethodCallExpression> pi,
+			string methodName,
+			Action<ParseInfo<Expression>>        seq,
+			Action<ParseInfo<Expression>,LambdaInfo,LambdaInfo,LambdaInfo> parms)
+		{
+			ParseInfo<Expression> inner   = null;
+			LambdaInfo            lambda1 = null;
+			LambdaInfo            lambda2 = null;
+			LambdaInfo            lambda3 = null;
+
+			if (IsMethod(pi, typeof(Queryable), methodName, new FTest[]
+				{
+					p => { seq(p);    return true; },
+					p => { inner = p; return true; },
+					l => l.IsLambda(1, l1 => lambda1 = l1),
+					l => l.IsLambda(1, l2 => lambda2 = l2),
+					l => l.IsLambda(2, l3 => lambda3 = l3),
+				}, p => true))
+			{
+				parms(inner, lambda1, lambda2, lambda3);
+				return true;
+			}
+
+			return false;
+		}
+
 		public static ParseInfo<Expression> CreateArgument(this ParseInfo<MethodCallExpression> pi, int idx)
 		{
 			return pi.Create(pi.Expr.Arguments[idx], pi.Indexer(ReflectionHelper.MethodCall.Arguments, ReflectionHelper.ExprItem, idx));
