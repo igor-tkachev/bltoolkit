@@ -3436,6 +3436,10 @@ namespace BLToolkit.Mapping
 							foreach (object o in rs.List)
 							{
 								object key = r.MasterIndex.GetValueOrIndex(masterMapper, o);
+
+								if (IsNull(key))
+									continue;
+
 								ArrayList matches = (ArrayList) rs.Hashtable[key];
 
 								if (matches == null)
@@ -3453,6 +3457,9 @@ namespace BLToolkit.Mapping
 						foreach (object o in slave.List)
 						{
 							object key = r.SlaveIndex.GetValueOrIndex(slaveMapper, o);
+
+							if (IsNull(key))
+								continue;
 
 							ArrayList masterList = (ArrayList)rs.Hashtable[key];
 							if (masterList == null)

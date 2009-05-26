@@ -8,6 +8,7 @@ using BLToolkit.DataAccess;
 using BLToolkit.EditableObjects;
 using BLToolkit.Mapping;
 using BLToolkit.Reflection.MetadataProvider;
+using BLToolkit.Reflection;
 
 namespace Data
 {
@@ -95,7 +96,7 @@ namespace Data
 	
 		public abstract class Master
 		{
-			[PrimaryKey]
+			[PrimaryKey, Nullable]
 			public abstract int          MasterId {get; set;}
 			[Relation(typeof(Detail))]
 			public abstract List<Detail> Details  {get; set;}
@@ -105,7 +106,7 @@ namespace Data
 		[MapField("MasterId", "Master.MasterId")]
 		public abstract class Detail
 		{
-			[PrimaryKey, MapField("Id")]
+			[PrimaryKey, MapField("Id"), Nullable]
 			public abstract int             DetailId   {get; set;}
 
 			[Relation]
@@ -121,7 +122,7 @@ namespace Data
 			[PrimaryKey]
 			public abstract int             SubDetailId {get; set;}
 
-			[Relation("Id", "DetailId")]
+			[Relation("Id", "DetailId"), Nullable]
 			public abstract Detail          Master      {get; set;}
 		}
 
@@ -186,6 +187,36 @@ namespace Data
 
 			Assert.That(relations.Count == 2);
 
+		}
+
+		[Test]
+		public void NullKeyTest()
+		{
+			Master m = TypeAccessor.CreateInstance<Master>();
+			Detail d = TypeAccessor.CreateInstance<Detail>();
+			
+			List<Master> masters = new List<Master>();
+			List<Detail> details = new List<Detail>();
+
+			masters.Add(m);
+			details.Add(d);
+
+			Map.ResultSets(new MapResultSet[] { new MapResultSet(typeof(Master), masters), 
+												new MapResultSet(typeof(Detail), details) });
+
+			Assert.IsFalse (object.ReferenceEquals(d.Master, m));
+			Assert.AreEqual(0, m.Details.Count);
+
+			m.MasterId = 1;
+			d.DetailId = 1;
+			d.Master.MasterId = 1;
+
+			Map.ResultSets(new MapResultSet[] { new MapResultSet(typeof(Master), masters), 
+												new MapResultSet(typeof(Detail), details) });
+
+			
+			Assert.IsTrue  (object.ReferenceEquals(d.Master, m));
+			Assert.AreEqual(1, m.Details.Count);
 		}
 	}
 }
