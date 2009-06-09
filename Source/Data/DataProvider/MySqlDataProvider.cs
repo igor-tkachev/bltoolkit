@@ -2,6 +2,7 @@
 // http://dev.mysql.com/downloads/connector/net/
 //
 using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
 
@@ -10,13 +11,11 @@ using MySql.Data.MySqlClient;
 namespace BLToolkit.Data.DataProvider
 {
 	using Sql.SqlProvider;
-using System.Collections.Generic;
-	using BLToolkit.Common;
+	using Common;
 
 	public class MySqlDataProvider :  DataProviderBase
 	{
 		#region Static configuration
-
 
 		public static char ParameterSymbol           { get; set; }
 		public static bool TryConvertParameterSymbol { get; set; }
@@ -97,6 +96,7 @@ using System.Collections.Generic;
 			{
 				case ConvertType.NameToQueryParameter:
 					return ParameterSymbol + value.ToString();
+
 				case ConvertType.NameToParameter:
 					return ParameterSymbol + ParameterPrefix + value.ToString();
 
@@ -118,11 +118,11 @@ using System.Collections.Generic;
 					if (value is MySqlException)
 						return ((MySqlException)value).Number;
 					break;
+
 				case ConvertType.ExceptionToErrorMessage:
 					if (value is MySqlException)
 						return ((MySqlException)value).Message;
 					break;
-				 
 			}
 
 			return value;

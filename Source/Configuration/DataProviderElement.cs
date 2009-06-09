@@ -1,4 +1,6 @@
+using System;
 using System.Configuration;
+
 using BLToolkit.Data.DataProvider;
 
 namespace BLToolkit.Configuration

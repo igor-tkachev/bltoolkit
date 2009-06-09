@@ -1,5 +1,6 @@
 using System;
 using System.Configuration;
+
 using BLToolkit.TypeBuilder;
 
 namespace BLToolkit.Configuration
@@ -7,17 +8,17 @@ namespace BLToolkit.Configuration
 	internal class TypeFactoryElement : ElementBase
 	{
 		protected static readonly ConfigurationProperty _propSaveTypes =
-			new ConfigurationProperty("saveTypes",    typeof(bool),    false,        ConfigurationPropertyOptions.None);
+			new ConfigurationProperty("saveTypes",    typeof(bool),    false, ConfigurationPropertyOptions.None);
 		protected static readonly ConfigurationProperty _propSealTypes =
-			new ConfigurationProperty("sealTypes",    typeof(bool),    true,         ConfigurationPropertyOptions.None);
+			new ConfigurationProperty("sealTypes",    typeof(bool),    true,  ConfigurationPropertyOptions.None);
 		protected static readonly ConfigurationProperty _propLoadTypes =
-			new ConfigurationProperty("loadTypes",    typeof(bool),    false,        ConfigurationPropertyOptions.None);
+			new ConfigurationProperty("loadTypes",    typeof(bool),    false, ConfigurationPropertyOptions.None);
 		protected static readonly ConfigurationProperty _propAssemblyPath =
-			new ConfigurationProperty("assemblyPath", typeof(string),  null,         ConfigurationPropertyOptions.None);
+			new ConfigurationProperty("assemblyPath", typeof(string),  null,  ConfigurationPropertyOptions.None);
 		protected static readonly ConfigurationProperty _propVersion =
-			new ConfigurationProperty("version",      typeof(string),  null,         ConfigurationPropertyOptions.None);
+			new ConfigurationProperty("version",      typeof(string),  null,  ConfigurationPropertyOptions.None);
 		protected static readonly ConfigurationProperty _propKeyFile =
-			new ConfigurationProperty("keyFile",      typeof(string),  null,         ConfigurationPropertyOptions.None);
+			new ConfigurationProperty("keyFile",      typeof(string),  null,  ConfigurationPropertyOptions.None);
 
 		public TypeFactoryElement()
 		{

@@ -309,7 +309,8 @@ namespace BLToolkit.Data.Sql
 			public ISqlExpression Walk(bool skipColumns, WalkingFunc action)
 			{
 				_condition = (SearchCondition)((ISqlExpressionWalkable)_condition).Walk(skipColumns, action);
-				_table     = (TableSource)    ((ISqlExpressionWalkable)_table).    Walk(skipColumns, action);
+
+				_table.Walk(skipColumns, action);
 
 				return null;
 			}

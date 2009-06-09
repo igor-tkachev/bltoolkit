@@ -40,7 +40,7 @@ namespace A.EditableObjects
 			public abstract EditableList<_PersonPhone> Phones { get; set; }
 		}
 
-		[Test]
+		//[Test]
 		public void Test_EditableList_AcceptChanges()
 		{
 			_Person person = TypeAccessor<_Person>.CreateInstance();

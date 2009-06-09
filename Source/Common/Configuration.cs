@@ -72,5 +72,20 @@ namespace BLToolkit.Common
 			get { return _filterOutBaseEqualAttributes; }
 			set { _filterOutBaseEqualAttributes = value; }
 		}
+
+		private static bool _openNewConnectionToDiscoverParameters = true;
+		/// <summary>
+		/// Controls whether attributes specified on base types should be always added to list of attributes
+		/// when scanning hierarchy tree or they should be compared to attributes found on derived classes
+		/// and added only when not present already. Default value: false;
+		/// WARNING: setting this flag to "true" can significantly affect initial object generation/access performance
+		/// use only when side effects are noticed with attribute being present on derived and base classes. 
+		/// For builder attributes use provided attribute compatibility mechanism.
+		/// </summary>
+		public  static bool OpenNewConnectionToDiscoverParameters
+		{
+			get { return _openNewConnectionToDiscoverParameters; }
+			set { _openNewConnectionToDiscoverParameters = value; }
+		}
 	}
 }

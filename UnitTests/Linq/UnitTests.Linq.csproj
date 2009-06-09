@@ -83,6 +83,7 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\Redist\SqlCe\System.Data.SqlServerCe.dll</HintPath>
     </Reference>
+    <Reference Include="System.Transactions" />
     <Reference Include="System.Xml.Linq">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
@@ -123,6 +124,7 @@
     <Compile Include="Exceptions\JoinTest.cs" />
     <Compile Include="JoinTest.cs" />
     <Compile Include="DateTimeFunctions.cs" />
+    <Compile Include="Providers\MySqlTest.cs" />
     <Compile Include="SelectManyTest.cs" />
     <Compile Include="StringFunctions.cs" />
     <Compile Include="SelectTest.cs" />

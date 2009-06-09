@@ -553,12 +553,12 @@ namespace BLToolkit.Data
 
 		#region Parameters
 
-		private IDbDataParameter[] CreateSpParameters(string spName, object[] parameterValues)
+		private IDbDataParameter[] CreateSpParameters(string spName, object[] parameterValues, bool openNewConnectionToDiscoverParameters)
 		{
 			// Pull the parameters for this stored procedure from 
 			// the parameter cache (or discover them & populate the cache)
 			//
-			IDbDataParameter[] commandParameters = GetSpParameters(spName, true);
+			IDbDataParameter[] commandParameters = GetSpParameters(spName, true, openNewConnectionToDiscoverParameters);
 
 			// DbParameters are bound by name, plain parameters by order
 			//
@@ -761,11 +761,18 @@ namespace BLToolkit.Data
 		/// <param name="spName">The name of the stored procedure.</param>
 		/// <param name="includeReturnValueParameter">Whether or not to include their return value parameter.</param>
 		/// <returns></returns>
-		protected virtual IDbDataParameter[] DiscoverSpParameters(string spName, bool includeReturnValueParameter)
+		protected virtual IDbDataParameter[] DiscoverSpParameters(string spName, bool includeReturnValueParameter, bool openNewConnection)
 		{
-			using (IDbConnection con = CloneConnection())
+			IDbConnection con = openNewConnection ? CloneConnection() : _connection;
+
+			try
 			{
-				ExecuteOperation(OperationType.OpenConnection, con.Open);
+				if (con.State == ConnectionState.Closed)
+				{
+					ExecuteOperation(OperationType.OpenConnection, con.Open);
+					if (!openNewConnection)
+						_closeConnection = true;
+				}
 
 				using (IDbCommand cmd = con.CreateCommand())
 				{
@@ -786,13 +793,18 @@ namespace BLToolkit.Data
 						cmd.Parameters.RemoveAt(0);
 					}
 
-					IDbDataParameter[] discoveredParameters = 
+					IDbDataParameter[] discoveredParameters =
 						new IDbDataParameter[cmd.Parameters.Count];
 
 					cmd.Parameters.CopyTo(discoveredParameters, 0);
 
 					return discoveredParameters;
 				}
+			}
+			finally
+			{
+				if (con != null && openNewConnection)
+					con.Dispose();
 			}
 		}
 
@@ -827,7 +839,7 @@ namespace BLToolkit.Data
 		/// <param name="includeReturnValueParameter">A boolean value indicating
 		/// whether the return value parameter should be included in the results.</param>
 		/// <returns>An array of the <see cref="IDbDataParameter"/>.</returns>
-		public IDbDataParameter[] GetSpParameters(string spName, bool includeReturnValueParameter)
+		public IDbDataParameter[] GetSpParameters(string spName, bool includeReturnValueParameter, bool openNewConnectionToDiscoverParameters)
 		{
 			string key = string.Format("{0}:{1}:{2}", GetConnectionHash(), spName, includeReturnValueParameter);
 
@@ -843,7 +855,7 @@ namespace BLToolkit.Data
 					//
 					if (!_paramCache.TryGetValue(key, out cachedParameters))
 					{
-						cachedParameters = DiscoverSpParameters(spName, includeReturnValueParameter);
+						cachedParameters = DiscoverSpParameters(spName, includeReturnValueParameter, openNewConnectionToDiscoverParameters);
 						_paramCache.Add(key, cachedParameters);
 					}
 				}
@@ -1797,10 +1809,26 @@ namespace BLToolkit.Data
 		private DbManager SetSpCommand(
 			CommandAction   commandAction,
 			string          spName,
+			bool            openNewConnectionToDiscoverParameters,
 			params object[] parameterValues)
 		{
 			return SetCommand(
-				commandAction, CommandType.StoredProcedure, spName, CreateSpParameters(spName, parameterValues));
+				commandAction,
+				CommandType.StoredProcedure,
+				spName,
+				CreateSpParameters(spName, parameterValues, openNewConnectionToDiscoverParameters));
+		}
+
+		private DbManager SetSpCommand(
+			CommandAction   commandAction,
+			string          spName,
+			params object[] parameterValues)
+		{
+			return SetCommand(
+				commandAction,
+				CommandType.StoredProcedure,
+				spName,
+				CreateSpParameters(spName, parameterValues, Configuration.OpenNewConnectionToDiscoverParameters));
 		}
 
 		#region Select
@@ -1876,6 +1904,14 @@ namespace BLToolkit.Data
 			params object[] parameterValues)
 		{
 			return SetSpCommand(CommandAction.Select, spName, parameterValues);
+		}
+
+		public DbManager SetSpCommand(
+			string spName,
+			bool   openNewConnectionToDiscoverParameters,
+			params object[] parameterValues)
+		{
+			return SetSpCommand(CommandAction.Select, spName, openNewConnectionToDiscoverParameters, parameterValues);
 		}
 
 		public DbManager SetCommand(SqlBuilder sql, params IDbDataParameter[] commandParameters)

@@ -1,3 +1,4 @@
+using System;
 using System.Configuration;
 
 namespace BLToolkit.Configuration

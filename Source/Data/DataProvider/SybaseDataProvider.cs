@@ -89,20 +89,25 @@ namespace BLToolkit.Data.DataProvider
 				case ConvertType.ExceptionToErrorMessage:
 					if (value is AseException)
 					{
-						AseException ex = (AseException)value;
+						try
+						{
+							AseException  ex = (AseException)value;
+							StringBuilder sb = new StringBuilder();
 
-						StringBuilder sb = new StringBuilder();
+							foreach (AseError error in ex.Errors)
+								if (error.IsError)
+									sb.AppendFormat("{0} Ln: {1}{2}",
+										error.Message.TrimEnd('\n', '\r'), error.LineNum, Environment.NewLine);
 
-						foreach (AseError error in ex.Errors)
-							if (error.IsError)
-								sb.AppendFormat("{0} Ln: {1}{2}", 
-									error.Message.TrimEnd('\n', '\r'), error.LineNum, Environment.NewLine);
+							foreach (AseError error in ex.Errors)
+								if (!error.IsError)
+									sb.AppendFormat("* {0}{1}", error.Message, Environment.NewLine);
 
-						foreach (AseError error in ex.Errors)
-							if (!error.IsError)
-								sb.AppendFormat("* {0}{1}", error.Message, Environment.NewLine);
-
-						return sb.Length == 0 ? ex.Message : sb.ToString();
+							return sb.Length == 0 ? ex.Message : sb.ToString();
+						}
+						catch
+						{
+						}
 					}
 
 					break;

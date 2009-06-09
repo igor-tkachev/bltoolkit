@@ -1,4 +1,5 @@
-﻿using System.Configuration;
+﻿using System;
+using System.Configuration;
 
 namespace BLToolkit.Configuration
 {
@@ -11,7 +12,7 @@ namespace BLToolkit.Configuration
 		private static readonly ConfigurationPropertyCollection _properties =
 			new ConfigurationPropertyCollection();
 
-		private static readonly ConfigurationProperty           _propDataProviders =
+		private static readonly ConfigurationProperty           _propDataProviders = 
 			new ConfigurationProperty("dataProviders",           typeof(DataProviderElementCollection),
 			new DataProviderElementCollection(),                 ConfigurationPropertyOptions.None);
 		private static readonly ConfigurationProperty           _propDefaultConfiguration =

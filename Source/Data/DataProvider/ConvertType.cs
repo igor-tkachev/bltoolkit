@@ -60,7 +60,7 @@ namespace BLToolkit.Data.DataProvider
 		///     @firstName -> firstName
 		/// for the following query:
 		///     db.Parameter("@firstName") = "John";
-		///                   ^ at has to be removed
+		///                   ^ '@' has to be removed
 		/// </summary>
 		ParameterToName,
 
