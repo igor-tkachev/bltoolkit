@@ -47,14 +47,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		protected static MemberInfo MI(Expression<Func<object>> func)
 		{
-			var ex = func.Body;
-
-			if (ex is UnaryExpression)
-				ex = ((UnaryExpression)func.Body).Operand;
-
-			return ex is MemberExpression?
-				((MemberExpression)    ex).Member:
-				((MethodCallExpression)ex).Method;
+			return ReflectionHelper.MemeberInfo(func);
 		}
 
 		protected abstract class BaseExpressor

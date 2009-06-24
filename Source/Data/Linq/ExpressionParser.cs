@@ -321,10 +321,10 @@ namespace BLToolkit.Data.Linq
 								if (mi is MethodInfo)
 									mi = TypeHelper.GetPropertyByMethod((MethodInfo)mi);
 
-								var field = subQuery.Fields[mi];
+								var field = subQuery.GetField(mi);
 								var idx   = field.Select(this);
 
-								return BuildField(pi, idx, pi.Expr.Type);
+								return BuildField(pi, idx.Select(i => i.Index).ToArray(), pi.Expr.Type);
 							}
 
 							return pi;
@@ -364,13 +364,8 @@ namespace BLToolkit.Data.Linq
 
 								if (field != null)
 								{
-									if (field is QueryField.Column)
+									if (field is QueryField.Column || field is QuerySource.SubQuery)
 										return BuildField(ma, field);
-
-									if (field is QueryField.SubQueryColumn)
-									{
-										return BuildField(ma, field);
-									}
 
 									if (field is QueryField.ExprColumn)
 									{
@@ -383,19 +378,18 @@ namespace BLToolkit.Data.Linq
 									}
 
 									if (field is QuerySource.Table)
-									{
-										var table = (QuerySource.Table)field;
-										var index = table.Select(this).Select(i => Expression.Constant(i, typeof(int)) as Expression);
+										return BuildTable(ma, field);
 
-										return ma.Parent.Replace(
-											Expression.Convert(
-												Expression.Call(_infoParam, _info.GetMapperMethodInfo(),
-													Expression.Constant(table.ObjectType, typeof(Type)),
-													_dataReaderParam,
-													Expression.Constant(_info.GetMapperSlot(), typeof(int)),
-													Expression.NewArrayInit(typeof(int), index)),
-												table.ObjectType),
-											ma.ParamAccessor);
+									if (field is QueryField.SubQueryColumn)
+									{
+										var sq = (QueryField.SubQueryColumn)field;
+
+										if (sq.Field is QuerySource)
+										{
+											throw new InvalidOperationException();
+										}
+
+										return BuildField(ma, field);
 									}
 
 									throw new InvalidOperationException();
@@ -435,20 +429,7 @@ namespace BLToolkit.Data.Linq
 							if (field != null)
 							{
 								if (field is QuerySource.Table)
-								{
-									var table = (QuerySource.Table)field;
-									var index = table.Select(this).Select(i => Expression.Constant(i, typeof(int)) as Expression);
-
-									return pi.Parent.Replace(
-										Expression.Convert(
-											Expression.Call(_infoParam, _info.GetMapperMethodInfo(),
-												Expression.Constant(table.ObjectType, typeof(Type)),
-												_dataReaderParam,
-												Expression.Constant(_info.GetMapperSlot(), typeof(int)),
-												Expression.NewArrayInit(typeof(int), index)),
-											table.ObjectType),
-										pi.ParamAccessor);
-								}
+									return BuildTable(pi, field);
 
 								if (field is QuerySource.Scalar)
 								{
@@ -471,7 +452,7 @@ namespace BLToolkit.Data.Linq
 								if (field != null)
 								{
 									var idx = field.Select(this);
-									return BuildField(pi, idx, pi.Expr.Type);
+									return BuildField(pi, idx.Select(i => i.Index).ToArray(), pi.Expr.Type);
 								}
 							}
 
@@ -499,6 +480,22 @@ namespace BLToolkit.Data.Linq
 			});
 		}
 
+		private ParseInfo BuildTable(ParseInfo pi, QueryField field)
+		{
+			var table = (QuerySource.Table)field;
+			var index = table.Select(this).Select(i => Expression.Constant(i.Index, typeof(int)) as Expression);
+
+			return pi.Parent.Replace(
+				Expression.Convert(
+					Expression.Call(_infoParam, _info.GetMapperMethodInfo(),
+						Expression.Constant(table.ObjectType, typeof(Type)),
+						_dataReaderParam,
+						Expression.Constant(_info.GetMapperSlot(), typeof(int)),
+						Expression.NewArrayInit(typeof(int), index)),
+					table.ObjectType),
+				pi.ParamAccessor);
+		}
+
 		ParseInfo BuildField(QuerySource query, ParseInfo pi)
 		{
 			var sqlex = ParseExpression(query, pi);
@@ -515,10 +512,10 @@ namespace BLToolkit.Data.Linq
 
 			var idx = field.Select(this);
 
-			return BuildField(ma, idx, memberType);
+			return BuildField(ma, idx.Select(i => i.Index).ToArray(), memberType);
 		}
 
-		private ParseInfo BuildField(ParseInfo ma, int[] idx, Type memberType)
+		ParseInfo BuildField(ParseInfo ma, int[] idx, Type memberType)
 		{
 			MethodInfo mi;
 

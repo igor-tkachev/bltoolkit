@@ -36,6 +36,18 @@ namespace BLToolkit.Data.Linq
 			}
 		}
 
+		public static MemberInfo MemeberInfo(Expression<Func<object>> func)
+		{
+			var ex = func.Body;
+
+			if (ex is UnaryExpression)
+				ex = ((UnaryExpression)func.Body).Operand;
+
+			return ex is MemberExpression?
+				((MemberExpression)    ex).Member:
+				((MethodCallExpression)ex).Method;
+		}
+
 		public class Binary : Expressor<BinaryExpression>
 		{
 			public static MethodInfo Conversion = PropertyExpressor(e => e.Conversion);

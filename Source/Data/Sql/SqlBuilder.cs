@@ -1240,10 +1240,15 @@ namespace BLToolkit.Data.Sql
 
 			public override string ToString()
 			{
-				StringBuilder sb = new StringBuilder(" \nFROM \n");
+				StringBuilder sb = new StringBuilder(" \nFROM \n\t");
 
-				foreach (TableSource ts in Tables)
-					sb.Append("\t").Append(ts.ToString());
+				if (Tables.Count > 0)
+				{
+					foreach (TableSource ts in Tables)
+						sb.Append(ts.ToString()).Append(", ");
+
+					sb.Remove(sb.Length - 2, 2);
+				}
 
 				return sb.ToString();
 			}
@@ -1652,8 +1657,8 @@ namespace BLToolkit.Data.Sql
 
 		void OptimizeSubQueries()
 		{
-			//for (int i = 0; i < From.Tables.Count; i++)
-			//	From.Tables[i] = OptimizeSubQuery(From.Tables[i]);
+			for (int i = 0; i < From.Tables.Count; i++)
+				From.Tables[i] = OptimizeSubQuery(From.Tables[i]);
 		}
 
 		void SetAliases()

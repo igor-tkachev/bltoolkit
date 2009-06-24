@@ -113,6 +113,7 @@
     <Compile Include="Aspects\InstanceCacheAttribute.cs" />
     <Compile Include="Aspects\OverloadAttribute.cs" />
     <Compile Include="Common\ArrayT.cs" />
+    <Compile Include="Common\Tuple.cs" />
     <Compile Include="Configuration\ElementBase.cs" />
     <Compile Include="Configuration\ElementCollectionBase.cs" />
     <Compile Include="Configuration\DataProviderElement.cs" />
@@ -123,6 +124,7 @@
     <Compile Include="DataAccess\DataAccessorBase.cs" />
     <Compile Include="DataAccess\SqlIgnoreAttribute.cs" />
     <Compile Include="Data\DataProvider\ProviderName.cs" />
+    <Compile Include="Data\Linq\FieldIndex.cs" />
     <Compile Include="Data\Linq\LambdaInfo.cs" />
     <Compile Include="Data\Linq\SqlPropertyAttribute.cs" />
     <Compile Include="Data\Linq\LinqException.cs" />

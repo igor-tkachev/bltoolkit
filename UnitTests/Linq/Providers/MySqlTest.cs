@@ -10,10 +10,10 @@ namespace Data.Providers
 {
 	using Linq;
 
-	[TestFixture]
+	//[TestFixture]
 	public class MySqlTest : TestBase
 	{
-		[Test]
+		//[Test]
 		public void TranScopeSproc()
 		{
 			using (new TransactionScope())

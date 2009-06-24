@@ -28,18 +28,29 @@ namespace Data.Linq
 		}
 
 		[Test]
-		public void Test2()
+		public void Test21()
 		{
 			TestJohn(db =>
-				from p1 in from p in db.Person select new { ID1 = p.ID, p.LastName }
+				from p1 in from p in db.Person select new { ID1 = p.ID, p.LastName  }
 				from p2 in from p in db.Person select new { ID2 = p.ID, p.FirstName }
-				from p3 in from p in db.Person select new { ID3 = p.ID, p.LastName }
+				from p3 in from p in db.Person select new { ID3 = p.ID, p.LastName  }
 				where p1.ID1 == p2.ID2 && p1.LastName == p3.LastName && p1.ID1 == 1
 				select new Person { ID = p1.ID1, FirstName = p2.FirstName, LastName = p3.LastName } );
 		}
 
 		[Test]
-		public void Test3()
+		public void Test22()
+		{
+			TestJohn(db =>
+				from p1 in from p in db.Person select p
+				from p2 in from p in db.Person select p
+				from p3 in from p in db.Person select p
+				where p1.ID == p2.ID && p1.LastName == p3.LastName && p1.ID == 1
+				select new Person { ID = p1.ID, FirstName = p2.FirstName, LastName = p3.LastName } );
+		}
+
+		[Test]
+		public void Test31()
 		{
 			TestJohn(db =>
 				from p in
@@ -51,6 +62,33 @@ namespace Data.Linq
 					select new { p, ID = p.ID + 1 }
 				where p.p.ID == 3
 				select p.p.p);
+		}
+
+		[Test]
+		public void Test32()
+		{
+			ForEachProvider(db =>
+			{
+				var q =
+					from p in
+						from p in
+							from p in db.Person
+							where p.ID == 1
+							select new { p, ID = p.ID + 1 }
+						where p.ID == 2
+						select new { p, ID = p.ID + 1 }
+					where p.p.ID == 3
+					select new { p.p.p };
+
+				var list = q.ToList();
+
+				Assert.AreEqual(1, list.Count);
+
+				var person = list[0].p;
+
+				Assert.AreEqual(1,      person.ID);
+				Assert.AreEqual("John", person.FirstName);
+			});
 		}
 
 		[Test]
@@ -121,6 +159,19 @@ namespace Data.Linq
 		public void OneParam()
 		{
 			TestJohn(db => db.Person.SelectMany(p => db.Person).Where(t => t.ID == 1).Select(t => t));
+		}
+
+		[Test]
+		public void ScalarQuery()
+		{
+			TestJohn(db =>
+			{
+				return 
+					from p1 in db.Person
+					from p2 in (from p in db.Person select p.ID)
+					where p1.ID == p2
+					select new Person { ID = p2, FirstName = p1.FirstName };
+			});
 		}
 
 		void Foo(Expression<Func<IDataReader,object>> func)

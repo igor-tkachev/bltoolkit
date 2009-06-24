@@ -15,7 +15,7 @@ namespace BLToolkit.Data.Linq
 		public class Table : QuerySource
 		{
 			public Table(MappingSchema mappingSchema, SqlBuilder sqlBuilder, LambdaInfo lambda)
-				: base(sqlBuilder, lambda, null)
+				: base(sqlBuilder, lambda)
 			{
 				ObjectType = ((IQueryable)((ConstantExpression)lambda.Body.Expr).Value).ElementType;
 				SqlTable   = new SqlTable(mappingSchema, ObjectType);
@@ -27,12 +27,40 @@ namespace BLToolkit.Data.Linq
 				foreach (var field in SqlTable.Fields)
 				{
 					var mapper = objectMapper[field.Value.PhysicalName];
-					_fields.Add(mapper.MemberAccessor.MemberInfo, new Column(this, field.Value, mapper));
+					_columns.Add(mapper.MemberAccessor.MemberInfo, new Column(this, field.Value, mapper));
 				}
 			}
 
 			public Type     ObjectType;
 			public SqlTable SqlTable;
+
+			Dictionary<MemberInfo,Column> _columns = new Dictionary<MemberInfo,Column>();
+
+			public override QueryField GetField(MemberInfo mi)
+			{
+				Column col;
+				_columns.TryGetValue(mi, out col);
+				return col;
+			}
+
+			public override QueryField GetField(Expression expr)
+			{
+				if (expr.NodeType == ExpressionType.MemberAccess)
+				{
+					var ma = (MemberExpression)expr;
+
+					if (ma.Expression != null && ma.Expression.Type == ObjectType)
+						return GetField(ma.Member);
+				}
+
+				return null;
+			}
+
+			protected override IEnumerable<QueryField> GetFields()
+			{
+				foreach (var col in _columns.Values)
+					yield return col;
+			}
 		}
 
 		public class Expr : QuerySource
@@ -54,17 +82,11 @@ namespace BLToolkit.Data.Linq
 						if (member is MethodInfo)
 							member = TypeHelper.GetPropertyByMethod((MethodInfo)member);
 
-						QueryField field = GetParentField(ex.Arguments[i]);
+						var field = 
+							GetParentField(ex.Arguments[i]) ??
+							new ExprColumn(this, lambda.Body.Create(ex.Arguments[i], lambda.Body.Index(ex.Arguments, New.Arguments, i)), member.Name);
 
-						if (field != null)
-						{
-							_fields.Add(member, field);
-						}
-						else
-						{
-							var e = new ExprColumn(this, lambda.Body.Create(ex.Arguments[i], lambda.Body.Index(ex.Arguments, New.Arguments, i)), member.Name);
-							_fields.Add(member, e);
-						}
+						_fields.Add(member, field);
 					}
 				}
 				else
@@ -87,14 +109,88 @@ namespace BLToolkit.Data.Linq
 							var piAssign     = piBinding.  Create(ma.Expression, piBinding.ConvertExpressionTo<MemberAssignment>());
 							var piExpression = piAssign.   Create(ma.Expression, piAssign.Property(MemberAssignmentBind.Expression));
 
-							QueryField field = GetParentField(piExpression);
+							var field = GetParentField(piExpression) ?? new ExprColumn(this, piExpression, member.Name);
 
-							_fields.Add(member, field ?? new ExprColumn(this, piExpression, member.Name));
+							_fields.Add(member, field);
 						}
 						else
 							throw new InvalidOperationException();
 					}
 				}
+			}
+
+			Dictionary<MemberInfo,QueryField> _fields = new Dictionary<MemberInfo,QueryField>();
+
+			public override QueryField GetField(MemberInfo mi)
+			{
+				QueryField fld;
+				_fields.TryGetValue(mi, out fld);
+				return fld;
+			}
+
+			public override QueryField GetField(Expression expr)
+			{
+				switch (expr.NodeType)
+				{
+					case ExpressionType.Parameter:
+						throw new InvalidOperationException();
+						//return this;
+
+					case ExpressionType.MemberAccess:
+						{
+							var ma = (MemberExpression)expr;
+
+							if (ma.Expression != null)
+							{
+								if (ma.Expression.NodeType == ExpressionType.Parameter)
+									return GetField(ma.Member);
+
+								if (ma.Expression.NodeType == ExpressionType.Constant)
+									break;
+							}
+
+							var list = new List<MemberInfo>();
+
+							while (expr != null)
+							{
+								switch (expr.NodeType)
+								{
+									case ExpressionType.MemberAccess:
+										ma = (MemberExpression)expr;
+
+										list.Insert(0, ma.Member);
+
+										expr = ma.Expression;
+										break;
+
+									case ExpressionType.Parameter:
+										expr = null;
+										break;
+
+									default:
+										return null;
+								}
+							}
+
+							var field = GetField(list, 0);
+
+							if (field != null)
+								return field;
+
+							break;
+						}
+				}
+
+				foreach (var item in _fields)
+					if (item.Value is ExprColumn && ((ExprColumn)item.Value).Expr == expr)
+						return item.Value;
+
+				return null;
+			}
+
+			protected override IEnumerable<QueryField> GetFields()
+			{
+				return _fields.Values;
 			}
 		}
 
@@ -105,11 +201,71 @@ namespace BLToolkit.Data.Linq
 			{
 				SqlBuilder.From.Table(SubSql = subSql);
 
-				foreach (var field in parentQuery._fields)
-					_fields.Add(field.Key, new SubQueryColumn(this, field.Value));
+				foreach (var field in parentQuery.GetFields())
+					GetColumn(field);
 			}
 
 			public SqlBuilder SubSql;
+
+			Dictionary<QueryField,SubQueryColumn> _columns = new Dictionary<QueryField,SubQueryColumn>();
+
+			public SubQueryColumn GetColumn(QueryField field)
+			{
+				if (field == null)
+					return null;
+
+				SubQueryColumn col;
+
+				if (!_columns.TryGetValue(field, out col))
+					_columns.Add(field, col = new SubQueryColumn(this, field));
+
+				return col;
+			}
+
+			public override QueryField GetField(MemberInfo mi)
+			{
+				return GetColumn(ParentQueries[0].GetField(mi));
+			}
+
+			public override QueryField GetField(Expression expr)
+			{
+				return GetColumn(ParentQueries[0].GetField(expr));
+			}
+
+			protected override IEnumerable<QueryField> GetFields()
+			{
+				foreach (var col in _columns.Values)
+					yield return col;
+			}
+
+			public override ISqlExpression GetExpression<T>(ExpressionParser<T> parser)
+			{
+				if (_columns.Count == 1 && ParentQueries[0] is Scalar)
+					return _columns.Values.First().GetExpression(parser);
+
+				throw new InvalidOperationException();
+			}
+
+			protected override QueryField GetField(List<MemberInfo> members, int currentMember)
+			{
+				var field = GetField(members[currentMember]);
+
+				if (field == null || currentMember + 1 == members.Count)
+					 return field;
+
+				if (!(field is SubQueryColumn))
+					return ((QuerySource)field).GetField(members, currentMember + 1);
+
+				field = ((SubQueryColumn)field).Field;
+
+				//if (field.Sources.Length != 1)
+				//	throw new InvalidOperationException();
+
+				field = ParentQueries[0].GetField(members, currentMember);
+				//field = field.Sources[0].GetField(members, currentMember);
+
+				return field != null ? GetColumn(field) : null;
+			}
 		}
 
 		public class Scalar : QuerySource
@@ -117,6 +273,24 @@ namespace BLToolkit.Data.Linq
 			public Scalar(SqlBuilder sqlBilder, LambdaInfo lambda, params QuerySource[] parentQueries)
 				: base(sqlBilder, lambda, parentQueries)
 			{
+				_field = GetParentField(lambda.Body) ?? new ExprColumn(this, lambda.Body, null);
+			}
+
+			QueryField _field;
+
+			public override QueryField GetField(MemberInfo mi)
+			{
+				throw new NotImplementedException();
+			}
+
+			public override QueryField GetField(Expression expr)
+			{
+				throw new NotImplementedException();
+			}
+
+			protected override IEnumerable<QueryField> GetFields()
+			{
+				yield return _field;
 			}
 		}
 
@@ -133,90 +307,21 @@ namespace BLToolkit.Data.Linq
 		public SqlBuilder    SqlBuilder;
 		public LambdaInfo    Lambda;
 
-		readonly Dictionary<MemberInfo,QueryField> _fields = new Dictionary<MemberInfo, QueryField>();
-		public   Dictionary<MemberInfo,QueryField>  Fields { get { return _fields; } }
+		//readonly List<QueryField> _fields = new List<QueryField>();
+		//public   List<QueryField>  Fields { get { return _fields; } }
 
-		public virtual QueryField GetField(Expression expr)
+		public    abstract QueryField              GetField(Expression expr);
+		public    abstract QueryField              GetField(MemberInfo mi);
+		protected abstract IEnumerable<QueryField> GetFields();
+
+		protected virtual QueryField GetField(List<MemberInfo> members, int currentMember)
 		{
-			switch (expr.NodeType)
-			{
-				case ExpressionType.Parameter:
-					throw new InvalidOperationException();
-					//return this;
+			var field = GetField(members[currentMember]);
 
-				case ExpressionType.MemberAccess:
-					{
-						var ma = (MemberExpression)expr;
+			if (field == null || currentMember + 1 == members.Count)
+				 return field;
 
-						if (ma.Expression != null)
-						{
-							if (ma.Expression.NodeType == ExpressionType.Parameter)
-							{
-								QueryField fld;
-								_fields.TryGetValue(ma.Member, out fld);
-								return fld;
-							}
-
-							if (ma.Expression.NodeType == ExpressionType.Constant)
-								break;
-						}
-
-						var list = new List<MemberInfo>();
-
-						while (expr != null)
-						{
-							switch (expr.NodeType)
-							{
-								case ExpressionType.MemberAccess:
-									ma = (MemberExpression)expr;
-
-									list.Insert(0, ma.Member);
-
-									expr = ma.Expression;
-									break;
-
-								case ExpressionType.Parameter:
-									expr = null;
-									break;
-
-								default:
-									return null;
-							}
-						}
-
-						var        source = this;
-						QueryField field  = null;
-
-						for (var i = 0; i < list.Count; i++)
-						{
-							var mi = list[i];
-
-							source._fields.TryGetValue(mi, out field);
-
-							if (field == null || i + 1 == list.Count)
-								 break;
-
-							if (!(field is QuerySource))
-							{
-								//while (field is SubQueryColumn)
-								//	field = ((SubQueryColumn)field).Field;
-
-								if (!(field is QuerySource))
-									return null;
-							}
-
-							source = (QuerySource)field;
-						}
-
-						return field;
-					}
-			}
-
-			foreach (var item in _fields)
-				if (item.Value is ExprColumn && ((ExprColumn)item.Value).Expr == expr)
-					return item.Value;
-
-			return null;
+			return ((QuerySource)field).GetField(members, currentMember + 1);
 		}
 
 		public QueryField GetParentField(Expression expr)
@@ -247,18 +352,27 @@ namespace BLToolkit.Data.Linq
 			return null;
 		}
 
-		int[] _indexes;
+		FieldIndex[] _indexes;
 
-		public override int[] Select<T>(ExpressionParser<T> parser)
+		public override FieldIndex[] Select<T>(ExpressionParser<T> parser)
 		{
 			if (_indexes == null)
 			{
-				_indexes = new int[_fields.Count];
+				var fields = GetFields().ToList();
+
+				_indexes = new FieldIndex[fields.Count];
 
 				var i = 0;
 
-				foreach (var field in _fields.Values)
-					_indexes[i++] = field.Select(parser)[0];
+				foreach (var field in fields)
+				{
+					var idx = field.Select(parser);
+
+					if (idx.Length != 1)
+						throw new InvalidOperationException();
+
+					_indexes[i++] = new FieldIndex { Index = idx[0].Index, Field = field };
+				}
 			}
 
 			return _indexes;
@@ -267,7 +381,6 @@ namespace BLToolkit.Data.Linq
 		public override ISqlExpression GetExpression<T>(ExpressionParser<T> parser)
 		{
 			throw new InvalidOperationException();
-			//throw new LinqException("Cannot convert '{0}' to SQL.", Field.GetExpression(parser));
 		}
 
 		public void Match(
