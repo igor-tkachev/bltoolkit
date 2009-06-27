@@ -159,20 +159,6 @@ namespace BLToolkit.Data.Linq
 
 		QuerySource ParseSelectMany(LambdaInfo collectionSelector, LambdaInfo resultSelector, QuerySource source)
 		{
-			/*
-			var sqlBuilder        = new SqlBuilder();
-			var currentSqlBuilder = _info.SqlBuilder;
-
-			_info.SqlBuilder = sqlBuilder;
-
-			var source2 = new QuerySource.SubQuery(currentSqlBuilder, sqlBuilder, ParseSequence(collectionSelector.Body));
-
-			_info.SqlBuilder = currentSqlBuilder;
-			_info.SqlBuilder.From.Table(sqlBuilder);
-
-			return resultSelector == null ? source2 : ParseSelect(resultSelector, source, source2);
-			 */
-
 			var current = new SqlBuilder();
 			var source1 = new QuerySource.SubQuery(current, _info.SqlBuilder, source);
 
@@ -180,7 +166,8 @@ namespace BLToolkit.Data.Linq
 
 			_info.SqlBuilder = new SqlBuilder();
 
-			var source2 = new QuerySource.SubQuery(current, _info.SqlBuilder, ParseSequence(collectionSelector.Body));
+			var seq     = ParseSequence(collectionSelector.Body);
+			var source2 = new QuerySource.SubQuery(current, _info.SqlBuilder, seq);
 
 			current.From.Table(source2.SubSql);
 
@@ -205,25 +192,37 @@ namespace BLToolkit.Data.Linq
 					string.Format("Explicit construction of entity type '{0}' in query is not allowed.",
 					outerKeySelector.Body.Expr.Type));
 
-			var sqlBuilder        = new SqlBuilder();
-			var currentSqlBuilder = _info.SqlBuilder;
+			var current = new SqlBuilder();
+			var source1 = new QuerySource.SubQuery(current, _info.SqlBuilder, outerSource);
 
-			_info.SqlBuilder = sqlBuilder;
+			_info.SqlBuilder = new SqlBuilder();
 
-			var innerSource = ParseSequence(inner);
+			var seq     = ParseSequence(inner);
+			var source2 = new QuerySource.SubQuery(current, _info.SqlBuilder, seq, false);
+			_info.SqlBuilder = current;
 
-			_info.SqlBuilder = currentSqlBuilder;
+			var join = source2.SubSql.Join();
 
-			_info.SqlBuilder.From.Table(sqlBuilder);
+			current.From.Table(source1.SubSql, join);
 
 			if (outerKeySelector.Body.NodeType == ExpressionType.New)
 			{
+				var new1 = outerKeySelector.Body.ConvertTo<NewExpression>();
+				var new2 = innerKeySelector.Body.ConvertTo<NewExpression>();
+
+				for (var i = 0; i < new1.Expr.Arguments.Count; i++)
+					join
+						.Expr(ParseExpression(source1, new1.Create(new1.Expr.Arguments[i], new1.Index(new1.Expr.Arguments, New.Arguments, i)))).Equal
+						.Expr(ParseExpression(source2, new2.Create(new2.Expr.Arguments[i], new2.Index(new2.Expr.Arguments, New.Arguments, i))));
 			}
 			else
 			{
+				join
+					.Expr(ParseExpression(source1, outerKeySelector.Body)).Equal
+					.Expr(ParseExpression(source2, innerKeySelector.Body));
 			}
 
-			return ParseSelect(resultSelector, outerSource, innerSource);
+			return resultSelector == null ? source2 : ParseSelect(resultSelector, source1, source2);
 		}
 
 		#endregion
@@ -365,7 +364,7 @@ namespace BLToolkit.Data.Linq
 								if (field != null)
 								{
 									if (field is QueryField.Column || field is QuerySource.SubQuery)
-										return BuildField(ma, field);
+										return BuildField(ma, field, i => i);
 
 									if (field is QueryField.ExprColumn)
 									{
@@ -378,19 +377,10 @@ namespace BLToolkit.Data.Linq
 									}
 
 									if (field is QuerySource.Table)
-										return BuildTable(ma, field);
+										return BuildTable(ma, field, i => i);
 
 									if (field is QueryField.SubQueryColumn)
-									{
-										var sq = (QueryField.SubQueryColumn)field;
-
-										if (sq.Field is QuerySource)
-										{
-											throw new InvalidOperationException();
-										}
-
-										return BuildField(ma, field);
-									}
+										return BuildSubQuery(ma, field, i => i);
 
 									throw new InvalidOperationException();
 								}
@@ -403,7 +393,7 @@ namespace BLToolkit.Data.Linq
 								var field = query.GetField(ma);
 
 								if (field != null)
-									return BuildField(ma, field);
+									return BuildField(ma, field, i => i);
 							}
 
 							if (ex.NodeType == ExpressionType.Constant)
@@ -429,7 +419,7 @@ namespace BLToolkit.Data.Linq
 							if (field != null)
 							{
 								if (field is QuerySource.Table)
-									return BuildTable(pi, field);
+									return BuildTable(pi, field, i => i);
 
 								if (field is QuerySource.Scalar)
 								{
@@ -480,10 +470,26 @@ namespace BLToolkit.Data.Linq
 			});
 		}
 
-		private ParseInfo BuildTable(ParseInfo pi, QueryField field)
+		private ParseInfo BuildSubQuery(ParseInfo<MemberExpression> ma, QueryField field, Func<FieldIndex,FieldIndex> converter)
+		{
+			var sq = (QueryField.SubQueryColumn)field;
+
+			if (sq.Field is QuerySource.Table)
+				return BuildTable(ma, sq.Field, i => converter(sq.QuerySource.GetColumn(i.Field).Select(this)[0]));
+
+			if (sq.Field is QuerySource)
+				throw new InvalidOperationException();
+
+			if (sq.Field is QueryField.SubQueryColumn)
+				return BuildSubQuery(ma, sq.Field, i => converter(sq.QuerySource.GetColumn(i.Field).Select(this)[0]));
+
+			return BuildField(ma, field, i => converter(i));
+		}
+
+		ParseInfo BuildTable(ParseInfo pi, QueryField field, Func<FieldIndex,FieldIndex> converter)
 		{
 			var table = (QuerySource.Table)field;
-			var index = table.Select(this).Select(i => Expression.Constant(i.Index, typeof(int)) as Expression);
+			var index = table.Select(this).Select(i => Expression.Constant(converter(i).Index, typeof(int)) as Expression);
 
 			return pi.Parent.Replace(
 				Expression.Convert(
@@ -504,7 +510,7 @@ namespace BLToolkit.Data.Linq
 			return BuildField(pi, new[] { idx }, pi.Expr.Type);
 		}
 
-		ParseInfo BuildField(ParseInfo<MemberExpression> ma, QueryField field)
+		ParseInfo BuildField(ParseInfo<MemberExpression> ma, QueryField field, Func<FieldIndex,FieldIndex> converter)
 		{
 			var memberType = ma.Expr.Member.MemberType == MemberTypes.Field ?
 				((FieldInfo)   ma.Expr.Member).FieldType :
@@ -512,7 +518,7 @@ namespace BLToolkit.Data.Linq
 
 			var idx = field.Select(this);
 
-			return BuildField(ma, idx.Select(i => i.Index).ToArray(), memberType);
+			return BuildField(ma, idx.Select(i => converter(i).Index).ToArray(), memberType);
 		}
 
 		ParseInfo BuildField(ParseInfo ma, int[] idx, Type memberType)

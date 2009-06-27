@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Diagnostics;
 
 namespace BLToolkit.Data.Sql
 {
+	[DebuggerDisplay("SQL = {SqlText}")]
 	public class SqlBinaryExpression : ISqlExpression
 	{
 		public SqlBinaryExpression(ISqlExpression expr1, string operation, ISqlExpression expr2, Type type, int precedence)
@@ -29,6 +31,8 @@ namespace BLToolkit.Data.Sql
 		readonly int            _precedence; public int            Precedence { get { return _precedence; } }
 
 		#region Overrides
+
+		public string SqlText { get { return ToString(); } }
 
 		public override string ToString()
 		{

@@ -91,7 +91,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			}
 
 			if (first)
-				AppendIndent(sb).Append("NULL");
+				AppendIndent(sb).Append("*");
 
 			_indent--;
 
@@ -133,6 +133,9 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 				if (!string.IsNullOrEmpty(alias))
 					sb.Append(" ").Append(alias);
+
+				foreach (SqlBuilder.JoinedTable jt in ts.Joins)
+					BuildJoinTable(sb, jt);
 			}
 
 			_indent--;
@@ -154,6 +157,31 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			}
 			else
 				throw new InvalidOperationException();
+		}
+
+		void BuildJoinTable(StringBuilder sb, SqlBuilder.JoinedTable join)
+		{
+			sb.AppendLine();
+			_indent++;
+			AppendIndent(sb);
+
+			sb.Append("INNER JOIN ");
+
+			BuildPhysicalTable(sb, join.Table.Source);
+
+			string alias = GetTableAlias(join.Table);
+
+			if (!string.IsNullOrEmpty(alias))
+				sb.Append(" ").Append(alias);
+
+			sb.Append(" ON ");
+
+			BuildSearchCondition(sb, join.Condition);
+
+			foreach (SqlBuilder.JoinedTable jt in join.Table.Joins)
+				BuildJoinTable(sb, jt);
+
+			_indent--;
 		}
 
 		#endregion

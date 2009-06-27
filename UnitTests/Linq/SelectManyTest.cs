@@ -60,7 +60,7 @@ namespace Data.Linq
 						select new { p, ID = p.ID + 1 }
 					where p.ID == 2
 					select new { p, ID = p.ID + 1 }
-				where p.p.ID == 3
+				where p.ID == 3
 				select p.p.p);
 		}
 
@@ -77,7 +77,7 @@ namespace Data.Linq
 							select new { p, ID = p.ID + 1 }
 						where p.ID == 2
 						select new { p, ID = p.ID + 1 }
-					where p.p.ID == 3
+					where p.ID == 3
 					select new { p.p.p };
 
 				var list = q.ToList();

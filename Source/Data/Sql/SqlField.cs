@@ -25,7 +25,7 @@ namespace BLToolkit.Data.Sql
 
 		public override string ToString()
 		{
-			return SqlBuilder.LeaveAlias(Table) + "." + Name;
+			return "t" + Table.SourceID + "." + Name;
 		}
 
 		#endregion

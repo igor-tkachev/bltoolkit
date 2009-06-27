@@ -12,6 +12,8 @@ namespace BLToolkit.Data.Sql
 
 		public SqlFunction(string name, int precedence, params ISqlExpression[] parameters)
 		{
+			_sourceID = ++SqlBuilder.SourceIDCounter;
+
 			if (parameters == null) throw new ArgumentNullException("parameters");
 
 			foreach (ISqlExpression p in parameters)
@@ -74,6 +76,13 @@ namespace BLToolkit.Data.Sql
 
 			return true;
 		}
+
+		#endregion
+
+		#region ISqlTableSource Members
+
+		private int _sourceID;
+		public  int  SourceID { get { return _sourceID; } }
 
 		#endregion
 

@@ -1,17 +1,21 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Text;
 
 namespace BLToolkit.Data.Sql
 {
 	using FJoin = SqlBuilder.FromClause.Join;
 
+	[DebuggerDisplay("SQL = {SqlText}")]
 	public class SqlBuilder : ISqlExpression, ISqlTableSource
 	{
 		#region Init
 
 		public SqlBuilder()
 		{
+			_sourceID = ++SourceIDCounter;
+
 			_select  = new SelectClause (this);
 			_from    = new FromClause   (this);
 			_where   = new WhereClause  (this);
@@ -92,7 +96,7 @@ namespace BLToolkit.Data.Sql
 
 			public override string ToString()
 			{
-				return RemoveAlias(Expression) + " as " + (Alias ?? "field");
+				return Expression.ToString();
 			}
 
 			#region ISqlExpression Members
@@ -200,6 +204,11 @@ namespace BLToolkit.Data.Sql
 
 						if (ts.Source == table && (alias == null || ts.Alias == alias))
 							return ts;
+
+						TableSource jt = ts[table, alias];
+
+						if (jt != null)
+							return jt;
 					}
 
 					return null;
@@ -224,11 +233,16 @@ namespace BLToolkit.Data.Sql
 
 			public override string ToString()
 			{
-				string s = Source is SqlBuilder ?
+				StringBuilder sb = new StringBuilder(Source is SqlBuilder ?
 					"(\n\t\t" + Source.ToString().Replace("\n", "\n\t\t") + "\n\t)" :
-					RemoveAlias(Source);
+					Source.ToString());
 
-				return s + " as " + (Alias ?? "[table]");
+				sb.Append(" as t").Append(SourceID);
+
+				foreach (JoinedTable join in Joins)
+					sb.Append(join.ToString());
+
+				return sb.ToString();
 			}
 
 			#region ISqlExpressionWalkable Members
@@ -243,6 +257,12 @@ namespace BLToolkit.Data.Sql
 
 				return null;
 			}
+
+			#endregion
+
+			#region ISqlTableSource Members
+
+			public  int  SourceID { get { return Source.SourceID; } }
 
 			#endregion
 		}
@@ -302,6 +322,11 @@ namespace BLToolkit.Data.Sql
 			public void ForEach(Action<TableSource> action)
 			{
 				Table.ForEach(action);
+			}
+
+			public override string ToString()
+			{
+				return "\n\t\tINNER JOIN " + Table.ToString() + " ON " + Condition.ToString();
 			}
 
 			#region ISqlExpressionWalkable Members
@@ -1601,15 +1626,18 @@ namespace BLToolkit.Data.Sql
 
 		TableSource OptimizeSubQuery(TableSource source)
 		{
-			foreach (JoinedTable jt in source.Joins)
-				OptimizeSubQuery(jt.Table);
+			for (int i = 0; i < source.Joins.Count; i++)
+			{
+				JoinedTable jt = source.Joins[i];
+				jt.Table = OptimizeSubQuery(jt.Table);
+			}
 
 			if (source.Source is SqlBuilder)
 			{
 				SqlBuilder builder = (SqlBuilder)source.Source;
 
 				if (builder.From.Tables.Count == 1 &&
-				    builder.From.Tables[0].Joins.Count == 0 &&
+				    //builder.From.Tables[0].Joins.Count == 0 &&
 				    builder.GroupBy.IsEmpty &&
 				    builder.OrderBy.IsEmpty &&
 				   !builder.Select.Columns.Exists(delegate(Column c) { return !(c.Expression is SqlField); }))
@@ -1624,6 +1652,8 @@ namespace BLToolkit.Data.Sql
 						SqlField fld;
 						return map.TryGetValue(expr, out fld)? fld: expr;
 					});
+
+					builder.From.Tables[0].Joins.AddRange(source.Joins);
 
 					if (!builder.Where. IsEmpty) ConcatSearchCondition(Where,  builder.Where);
 					if (!builder.Having.IsEmpty) ConcatSearchCondition(Having, builder.Having);
@@ -1731,27 +1761,11 @@ namespace BLToolkit.Data.Sql
 
 		#region Overrides
 
+		public string SqlText { get { return ToString(); } }
+
 		public override string ToString()
 		{
 			return Select.ToString() + From + Where + GroupBy + Having + OrderBy;
-		}
-
-		internal static string RemoveAlias(object obj)
-		{
-			string str  = obj.ToString();
-			int    idx1 = str.LastIndexOf(')');
-			int    idx2 = str.LastIndexOf(" as ");
-
-			return idx2 < 0 || idx2 < idx1? str : str.Substring(0, idx2);
-		}
-
-		internal static string LeaveAlias(object obj)
-		{
-			string str  = obj.ToString();
-			int    idx1 = str.LastIndexOf(')');
-			int    idx2 = str.LastIndexOf(" as ");
-
-			return idx2 < 0 || idx2 < idx1? str : str.Substring(idx2 + 4);
 		}
 
 		#endregion
@@ -1787,6 +1801,15 @@ namespace BLToolkit.Data.Sql
 		{
 			return this == other;
 		}
+
+		#endregion
+
+		#region ISqlTableSource Members
+
+		public static int SourceIDCounter;
+
+		private int _sourceID;
+		public  int  SourceID { get { return _sourceID; } }
 
 		#endregion
 	}

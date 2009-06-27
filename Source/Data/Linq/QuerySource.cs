@@ -196,13 +196,21 @@ namespace BLToolkit.Data.Linq
 
 		public class SubQuery : QuerySource
 		{
-			public SubQuery(SqlBuilder currentSql, SqlBuilder subSql, QuerySource parentQuery)
+			public SubQuery(SqlBuilder currentSql, SqlBuilder subSql, QuerySource parentQuery, bool addToSource)
 				: base(currentSql, null, parentQuery)
 			{
-				SqlBuilder.From.Table(SubSql = subSql);
+				SubSql = subSql;
+
+				if (addToSource)
+					SqlBuilder.From.Table(subSql);
 
 				foreach (var field in parentQuery.GetFields())
 					GetColumn(field);
+			}
+
+			public SubQuery(SqlBuilder currentSql, SqlBuilder subSql, QuerySource parentQuery)
+				: this(currentSql, subSql, parentQuery, true)
+			{
 			}
 
 			public SqlBuilder SubSql;
@@ -264,7 +272,7 @@ namespace BLToolkit.Data.Linq
 				field = ParentQueries[0].GetField(members, currentMember);
 				//field = field.Sources[0].GetField(members, currentMember);
 
-				return field != null ? GetColumn(field) : null;
+				return GetColumn(field);
 			}
 		}
 
@@ -306,9 +314,6 @@ namespace BLToolkit.Data.Linq
 		public QuerySource[] ParentQueries;
 		public SqlBuilder    SqlBuilder;
 		public LambdaInfo    Lambda;
-
-		//readonly List<QueryField> _fields = new List<QueryField>();
-		//public   List<QueryField>  Fields { get { return _fields; } }
 
 		public    abstract QueryField              GetField(Expression expr);
 		public    abstract QueryField              GetField(MemberInfo mi);

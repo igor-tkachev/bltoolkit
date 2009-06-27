@@ -16,6 +16,8 @@ namespace BLToolkit.Data.Sql
 
 		public SqlTable(MappingSchema mappingSchema)
 		{
+			_sourceID = ++SqlBuilder.SourceIDCounter;
+
 			if (mappingSchema == null) throw new ArgumentNullException("mappingSchema");
 
 			_mappingSchema = mappingSchema;
@@ -185,6 +187,13 @@ namespace BLToolkit.Data.Sql
 		{
 			get { return _mappingSchema; }
 		}
+
+		#endregion
+
+		#region ISqlTableSource Members
+
+		private int _sourceID;
+		public  int  SourceID { get { return _sourceID; } }
 
 		#endregion
 	}
