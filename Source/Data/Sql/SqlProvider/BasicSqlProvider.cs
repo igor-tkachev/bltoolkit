@@ -58,6 +58,11 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			DataProvider.CreateSqlProvider().BuildSql(sqlBuilder, sb, indent);
 		}
 
+		protected virtual bool ParenthesizeJoin()
+		{
+			return false;
+		}
+
 		#endregion
 
 		#region Build Select
@@ -127,6 +132,15 @@ namespace BLToolkit.Data.Sql.SqlProvider
 					sb.Append(", ");
 				first = false;
 
+				int jn = ParenthesizeJoin() ? ts.GetJoinNumber() : 0;
+
+				if (jn > 0)
+				{
+					jn--;
+					for (int i = 0; i < jn; i++)
+						sb.Append("(");
+				}
+
 				BuildPhysicalTable(sb, ts.Source);
 
 				string alias = GetTableAlias(ts);
@@ -135,7 +149,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 					sb.Append(" ").Append(alias);
 
 				foreach (SqlBuilder.JoinedTable jt in ts.Joins)
-					BuildJoinTable(sb, jt);
+					BuildJoinTable(sb, jt, ref jn);
 			}
 
 			_indent--;
@@ -159,7 +173,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 				throw new InvalidOperationException();
 		}
 
-		void BuildJoinTable(StringBuilder sb, SqlBuilder.JoinedTable join)
+		void BuildJoinTable(StringBuilder sb, SqlBuilder.JoinedTable join, ref int joinCounter)
 		{
 			sb.AppendLine();
 			_indent++;
@@ -178,8 +192,14 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 			BuildSearchCondition(sb, join.Condition);
 
+			if (joinCounter > 0)
+			{
+				joinCounter--;
+				sb.Append(")");
+			}
+
 			foreach (SqlBuilder.JoinedTable jt in join.Table.Joins)
-				BuildJoinTable(sb, jt);
+				BuildJoinTable(sb, jt, ref joinCounter);
 
 			_indent--;
 		}

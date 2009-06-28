@@ -21,6 +21,11 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		{
 		}
 
+		protected override bool ParenthesizeJoin()
+		{
+			return true;
+		}
+
 		public override ISqlPredicate ConvertPredicate(ISqlPredicate predicate)
 		{
 			if (predicate is SqlBuilder.Predicate.Like)

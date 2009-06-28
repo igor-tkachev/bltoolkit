@@ -231,6 +231,16 @@ namespace BLToolkit.Data.Sql
 					((SqlBuilder)Source).ForEachTable(action);
 			}
 
+			public int GetJoinNumber()
+			{
+				int n = Joins.Count;
+
+				foreach (JoinedTable join in Joins)
+					n += join.Table.GetJoinNumber();
+
+				return n;
+			}
+
 			public override string ToString()
 			{
 				StringBuilder sb = new StringBuilder(Source is SqlBuilder ?
