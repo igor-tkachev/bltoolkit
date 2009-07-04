@@ -1,85 +1,118 @@
--- SQL script generated using BatchAccess utility
-
--- Tables
+DROP Procedure Person_SelectByKey
+GO
+DROP Procedure Person_SelectAll
+GO
+DROP Procedure Person_SelectByName
+GO
+DROP Procedure Person_SelectListByName
+GO
+DROP Procedure Person_Insert
+GO
+DROP Procedure Person_Update
+GO
+DROP Procedure Person_Delete
+GO
+DROP Procedure Patient_SelectAll
+GO
+DROP Procedure Patient_SelectByName
+GO
+DROP Procedure Scalar_DataReader
+GO
+DROP TABLE Dual
+GO
+DROP TABLE BinaryData
+GO
+DROP TABLE DataTypeTest
+GO
+DROP TABLE Doctor
+GO
+DROP TABLE Patient
+GO
+DROP TABLE Person
+GO
 
 CREATE TABLE Person (
-    PersonID                AutoIncrement,
-    FirstName               Text(50) WITH COMP NOT NULL,
-    LastName                Text(50) WITH COMP NOT NULL,
-    MiddleName              Text(50) WITH COMP,
-    Gender                  Text(1) NOT NULL,
+	PersonID                Int IDENTITY,
+	FirstName               Text(50) NOT NULL,
+	LastName                Text(50) NOT NULL,
+	MiddleName              Text(50),
+	Gender                  Text(1) NOT NULL,
 
-    CONSTRAINT PrimaryKey PRIMARY KEY (PersonID)
-);
+	CONSTRAINT PK_Peson PRIMARY KEY (PersonID)
+)
+GO
 
 CREATE TABLE Doctor (
-    PersonID                Long NOT NULL DEFAULT 0,
-    Taxonomy                Text(50) WITH COMP NOT NULL,
+	PersonID                Int NOT NULL,
+	Taxonomy                Text(50) NOT NULL,
 
-    CONSTRAINT PrimaryKey PRIMARY KEY (PersonID)
-);
+	CONSTRAINT OK_Doctor PRIMARY KEY (PersonID)
+)
+GO
 
 CREATE TABLE Patient (
-    PersonID                Long DEFAULT 0,
-    Diagnosis               Text(255) WITH COMP,
-    
-    CONSTRAINT PrimaryKey PRIMARY KEY (PersonID)
-);
+	PersonID                Int NOT NULL,
+	Diagnosis               Text(255) NOT NULL,
+
+	CONSTRAINT PK_Patient PRIMARY KEY (PersonID)
+)
+GO
 
 ALTER TABLE Doctor
-    ADD CONSTRAINT PersonDoctor FOREIGN KEY (PersonID) REFERENCES Person ON UPDATE CASCADE ON DELETE CASCADE;
+	ADD CONSTRAINT PersonDoctor FOREIGN KEY (PersonID) REFERENCES Person ON UPDATE CASCADE ON DELETE CASCADE;
+GO
 
 ALTER TABLE Patient
-    ADD CONSTRAINT PersonPatient FOREIGN KEY (PersonID) REFERENCES Person ON UPDATE CASCADE ON DELETE CASCADE;
-
+	ADD CONSTRAINT PersonPatient FOREIGN KEY (PersonID) REFERENCES Person ON UPDATE CASCADE ON DELETE CASCADE;
+GO
 
 CREATE TABLE BinaryData (
-    BinaryDataID            AutoIncrement,
-    Data                    Image NOT NULL,
-    
-    CONSTRAINT PrimaryKey PRIMARY KEY (BinaryDataID)
+	BinaryDataID            AutoIncrement,
+	Data                    Image NOT NULL,
+
+	CONSTRAINT PrimaryKey PRIMARY KEY (BinaryDataID)
 );
+GO
 
 CREATE TABLE DataTypeTest (
-    DataTypeID              AutoIncrement,
-    Binary_                 Image,
-    Boolean_                Long,
-    Byte_                   Byte DEFAULT 0,
-    Bytes_                  Image,
-    Char_                   Text(1),
-    DateTime_               DateTime,
-    Decimal_                Currency DEFAULT 0,
-    Double_                 Double DEFAULT 0,
-    Guid_                   Uniqueidentifier,
-    Int16_                  SmallInt DEFAULT 0,
-    Int32_                  Long DEFAULT 0,
-    Int64_                  Long DEFAULT 0,
-    Money_                  Currency DEFAULT 0,
-    SByte_                  Byte DEFAULT 0,
-    Single_                 Single DEFAULT 0,
-    Stream_                 Image,
-    String_                 Text(50) WITH COMP,
-    UInt16_                 SmallInt DEFAULT 0,
-    UInt32_                 Long DEFAULT 0,
-    UInt64_                 Long DEFAULT 0,    
-    Xml_                    Text WITH COMP,
-    
-    CONSTRAINT PrimaryKey PRIMARY KEY (DataTypeID)
+	DataTypeID              AutoIncrement,
+	Binary_                 Image,
+	Boolean_                Long,
+	Byte_                   Byte DEFAULT 0,
+	Bytes_                  Image,
+	Char_                   Text(1),
+	DateTime_               DateTime,
+	Decimal_                Currency DEFAULT 0,
+	Double_                 Double DEFAULT 0,
+	Guid_                   Uniqueidentifier,
+	Int16_                  SmallInt DEFAULT 0,
+	Int32_                  Long DEFAULT 0,
+	Int64_                  Long DEFAULT 0,
+	Money_                  Currency DEFAULT 0,
+	SByte_                  Byte DEFAULT 0,
+	Single_                 Single DEFAULT 0,
+	Stream_                 Image,
+	String_                 Text(50) WITH COMP,
+	UInt16_                 SmallInt DEFAULT 0,
+	UInt32_                 Long DEFAULT 0,
+	UInt64_                 Long DEFAULT 0,    
+	Xml_                    Text WITH COMP,
+
+	CONSTRAINT PrimaryKey PRIMARY KEY (DataTypeID)
 );
+GO
 
+CREATE TABLE Dual (Dummy Text(10));
+GO
 
--- Dual table FOR supporting queryies LIKE:
--- SELECT 1 AS id => SELECT 1 AS "id" *FROM Dual*
-CREATE TABLE Dual (
-    Dummy                   Text(10) WITH COMP);
-
--- Data
-
-INSERT INTO Person (FirstName, LastName, Gender) VALUES ("John",   "Pupkin",    "M");
-INSERT INTO Person (FirstName, LastName, Gender) VALUES ("Tester", "Testerson", "M");
-
-INSERT INTO Doctor (PersonID, Taxonomy)   VALUES (1, "Psychiatry");
-INSERT INTO Patient (PersonID, Diagnosis) VALUES (2, "Hallucination with Paranoid Bugs' Delirium of Persecution");
+INSERT INTO Person (FirstName, LastName, Gender) VALUES ("John",   "Pupkin",    "M")
+GO
+INSERT INTO Person (FirstName, LastName, Gender) VALUES ("Tester", "Testerson", "M")
+GO
+INSERT INTO Doctor (PersonID, Taxonomy)   VALUES (1, "Psychiatry")
+GO
+INSERT INTO Patient (PersonID, Diagnosis) VALUES (2, "Hallucination with Paranoid Bugs' Delirium of Persecution")
+GO
 
 INSERT INTO DataTypeTest
 	(Binary_, Boolean_,   Byte_,  Bytes_,  Char_,  DateTime_, Decimal_,
@@ -88,7 +121,8 @@ INSERT INTO DataTypeTest
 VALUES
 	(   NULL,     NULL,    NULL,    NULL,    NULL,      NULL,     NULL,
 	    NULL,     NULL,    NULL,    NULL,    NULL,      NULL,     NULL,
-	    NULL,     NULL,    NULL,    NULL,    NULL,      NULL,     NULL);
+	    NULL,     NULL,    NULL,    NULL,    NULL,      NULL,     NULL)
+GO
 
 INSERT INTO DataTypeTest
 	(Binary_, Boolean_,   Byte_,  Bytes_,  Char_,  DateTime_, Decimal_,
@@ -99,26 +133,22 @@ VALUES
 	(1,        True,      255,  1,         "B",     Now(), 12345.67,
 	1234.567,     1,    32767,  32768, 1000000,   12.3456,      127,
 	1234.123,     "12345678", "string",  32767,   32768, 2000000000,
-	"<root><element strattr='strvalue' intattr='12345'/></root>");
+	"<root><element strattr='strvalue' intattr='12345'/></root>")
+GO
 
--- Constrains
-
-INSERT INTO  Dual (Dummy) VALUES ('X');
-
--- Procedures
+INSERT INTO  Dual (Dummy) VALUES ('X')
+GO
 
 CREATE Procedure Person_SelectByKey(
 	[@id] Long)
 AS
 SELECT * FROM Person WHERE PersonID = [@id];
-
--- GO
+GO
 
 CREATE Procedure Person_SelectAll
 AS
 SELECT * FROM Person;
-
--- GO
+GO
 
 CREATE Procedure Person_SelectByName(
 	[@firstName] Text(50),
@@ -130,8 +160,7 @@ FROM
 	Person
 WHERE
 	FirstName = [@firstName] AND LastName = [@lastName];
-
--- GO
+GO
 
 CREATE Procedure Person_SelectListByName(
 	[@firstName] Text(50),
@@ -143,22 +172,19 @@ FROM
 	Person
 WHERE
 	FirstName like [@firstName] AND LastName like [@lastName];
-
-
--- GO
+GO
 
 CREATE Procedure Person_Insert(
-    [@FirstName]  Text(50),
-    [@MiddleName] Text(50),
-    [@LastName]   Text(50),
-    [@Gender]     Text(1))
+	[@FirstName]  Text(50),
+	[@MiddleName] Text(50),
+	[@LastName]   Text(50),
+	[@Gender]     Text(1))
 AS
 INSERT INTO Person
-    (FirstName, MiddleName, LastName, Gender)
+	(FirstName, MiddleName, LastName, Gender)
 VALUES
-    ([@FirstName], [@MiddleName], [@LastName], [@Gender]);
-	
--- GO
+	([@FirstName], [@MiddleName], [@LastName], [@Gender]);
+GO
 
 CREATE Procedure Person_Update(
 	[@id]         Long,
@@ -177,15 +203,13 @@ SET
 	Gender     = [@Gender]
 WHERE
 	PersonID = [@id];
-	
--- GO
+GO
 
 CREATE Procedure Person_Delete(
 	[@PersonID] Long)
 AS
 DELETE FROM Person WHERE PersonID = [@PersonID];
-
--- GO
+GO
 
 CREATE Procedure Patient_SelectAll
 AS
@@ -195,8 +219,7 @@ FROM
 	Patient, Person
 WHERE
 	Patient.PersonID = Person.PersonID;
-	
--- GO
+GO
 
 CREATE Procedure Patient_SelectByName(
 	[@firstName] Text(50),
@@ -209,11 +232,103 @@ FROM
 WHERE
 	Patient.PersonID = Person.PersonID
 	AND FirstName = [@firstName] AND LastName = [@lastName];
-	
--- GO
+GO
 
 CREATE Procedure Scalar_DataReader
 AS
 SELECT 12345 AS intField, "54321" AS stringField;
+GO
 
--- End
+
+DROP TABLE Parent
+GO
+DROP TABLE Child
+GO
+DROP TABLE GrandChild
+GO
+
+CREATE TABLE Parent     (ParentID int)
+GO
+CREATE TABLE Child      (ParentID int, ChildID int)
+GO
+CREATE TABLE GrandChild (ParentID int, ChildID int, GrandChildID int)
+GO
+
+INSERT INTO Parent     VALUES (1)
+GO
+INSERT INTO Child      VALUES (1,11)
+GO
+INSERT INTO GrandChild VALUES (1,11,111)
+GO
+
+INSERT INTO Parent     VALUES (2)
+GO
+INSERT INTO Child      VALUES (2,21)
+GO
+INSERT INTO GrandChild VALUES (2,21,211)
+GO
+INSERT INTO GrandChild VALUES (2,21,212)
+GO
+INSERT INTO Child      VALUES (2,22)
+GO
+INSERT INTO GrandChild VALUES (2,22,221)
+GO
+INSERT INTO GrandChild VALUES (2,22,222)
+GO
+
+INSERT INTO Parent     VALUES (3)
+GO
+INSERT INTO Child      VALUES (3,31)
+GO
+INSERT INTO GrandChild VALUES (3,31,311)
+GO
+INSERT INTO GrandChild VALUES (3,31,312)
+GO
+INSERT INTO GrandChild VALUES (3,31,313)
+GO
+INSERT INTO Child      VALUES (3,32)
+GO
+INSERT INTO GrandChild VALUES (3,32,321)
+GO
+INSERT INTO GrandChild VALUES (3,32,322)
+GO
+INSERT INTO GrandChild VALUES (3,32,323)
+GO
+INSERT INTO Child      VALUES (3,33)
+GO
+INSERT INTO GrandChild VALUES (3,33,331)
+GO
+INSERT INTO GrandChild VALUES (3,33,332)
+GO
+INSERT INTO GrandChild VALUES (3,33,333)
+GO
+
+INSERT INTO Parent     VALUES (4)
+GO
+INSERT INTO Child      VALUES (4,41)
+GO
+INSERT INTO GrandChild VALUES (4,41,411)
+GO
+INSERT INTO GrandChild VALUES (4,41,412)
+GO
+INSERT INTO GrandChild VALUES (4,41,413)
+GO
+INSERT INTO GrandChild VALUES (4,41,414)
+GO
+INSERT INTO Child      VALUES (4,42)
+GO
+INSERT INTO GrandChild VALUES (4,42,421)
+GO
+INSERT INTO GrandChild VALUES (4,42,422)
+GO
+INSERT INTO GrandChild VALUES (4,42,423)
+GO
+INSERT INTO GrandChild VALUES (4,42,424)
+GO
+INSERT INTO Child      VALUES (4,43)
+GO
+INSERT INTO Child      VALUES (4,44)
+GO
+
+INSERT INTO Parent     VALUES (5)
+GO

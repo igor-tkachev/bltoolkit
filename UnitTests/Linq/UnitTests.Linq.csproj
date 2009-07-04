@@ -121,6 +121,7 @@
     <Compile Include="..\..\Source\Data\DataProvider\SybaseDataProvider.cs">
       <Link>Providers\SybaseDataProvider.cs</Link>
     </Compile>
+    <Compile Include="CreateData.cs" />
     <Compile Include="GroupByTest.cs" />
     <Compile Include="Exceptions\JoinTest.cs" />
     <Compile Include="JoinTest.cs" />
@@ -150,6 +151,16 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <COMReference Include="ADOX">
+      <Guid>{00000600-0000-0010-8000-00AA006D2EA4}</Guid>
+      <VersionMajor>6</VersionMajor>
+      <VersionMinor>0</VersionMinor>
+      <Lcid>0</Lcid>
+      <WrapperTool>tlbimp</WrapperTool>
+      <Isolated>False</Isolated>
+    </COMReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

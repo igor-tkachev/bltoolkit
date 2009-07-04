@@ -66,5 +66,16 @@ namespace Data.Linq
 				where p1.ID == 1
 				select new Person { ID = p1.ID, FirstName = p2.FirstName, LastName = p3.LastName });
 		}
+
+		[Test]
+		public void LeftJoin1()
+		{
+			TestJohn(db =>
+				from p1 in db.Person
+					join p2 in db.Person on p1.ID equals p2.ID into lj1
+					from p in lj1.DefaultIfEmpty()
+				where p.ID == 1
+				select p);
+		}
 	}
 }

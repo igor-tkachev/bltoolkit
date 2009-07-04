@@ -65,9 +65,9 @@ CREATE SEQUENCE PersonSeq
 
 CREATE TABLE Person
 	( PersonID                     NUMBER NOT NULL PRIMARY KEY
-	, Firstname                    NVARCHAR2(50) NOT NULL
-	, Lastname                     NVARCHAR2(50) NOT NULL
-	, Middlename                   NVARCHAR2(50)
+	, Firstname                    VARCHAR2(50) NOT NULL
+	, Lastname                     VARCHAR2(50) NOT NULL
+	, Middlename                   VARCHAR2(50)
 	, Gender                       CHAR(1) NOT NULL
 	
 	, CONSTRAINT Ck_Person_Gender  CHECK (Gender IN ('M', 'F', 'U', 'O'))
@@ -114,22 +114,14 @@ CREATE TABLE Patient
 
 -- Sample data for Person/Doctor/Patient
 
-INSERT INTO
-	Person	(FirstName, LastName, Gender)
-VALUES
-			(   'John', 'Pupkin',    'M');
-INSERT INTO
-	Doctor	(         PersonID,     Taxonomy)
-VALUES 
-			(PersonSeq.CURRVAL, 'Psychiatry');
-INSERT INTO
-	Person	(FirstName,    LastName, Gender)
-VALUES
-			( 'Tester', 'Testerson',    'M');
-INSERT INTO
-	Patient	(         PersonID,                                                    Diagnosis)
-VALUES
-			(PersonSeq.CURRVAL, 'Hallucination with Paranoid Bugs'' Delirium of Persecution');
+INSERT INTO Person  (FirstName, LastName, Gender) VALUES ('John',   'Pupkin',    'M')
+/
+INSERT INTO Person  (FirstName, LastName, Gender) VALUES ('Tester', 'Testerson', 'M')
+/
+INSERT INTO Doctor  (PersonID,  Taxonomy)  VALUES (PersonSeq.CURRVAL, 'Psychiatry')
+/
+INSERT INTO Patient (PersonID,  Diagnosis) VALUES (PersonSeq.CURRVAL, 'Hallucination with Paranoid Bugs'' Delirium of Persecution')
+/
 
 -- Person_Delete
 
@@ -581,4 +573,92 @@ VALUES
 	   1234.567, SYS_GUID(),    32767,      32768, 1000000,   12.3456,      127,
 	   1234.123, SYS_GUID(), 'string',      32767,   32768, 200000000,
 	XMLTYPE('<root><element strattr="strvalue" intattr="12345"/></root>'))
+/
+
+
+
+CREATE TABLE Parent      (ParentID int)
+/
+CREATE TABLE Child       (ParentID int, ChildID int)
+/
+CREATE TABLE GrandChild  (ParentID int, ChildID int, GrandChildID int)
+/
+
+INSERT INTO Parent     VALUES (1)
+/
+INSERT INTO Child      VALUES (1,11)
+/
+INSERT INTO GrandChild VALUES (1,11,111)
+/
+
+INSERT INTO Parent     VALUES (2)
+/
+INSERT INTO Child      VALUES (2,21)
+/
+INSERT INTO GrandChild VALUES (2,21,211)
+/
+INSERT INTO GrandChild VALUES (2,21,212)
+/
+INSERT INTO Child      VALUES (2,22)
+/
+INSERT INTO GrandChild VALUES (2,22,221)
+/
+INSERT INTO GrandChild VALUES (2,22,222)
+/
+
+INSERT INTO Parent     VALUES (3)
+/
+INSERT INTO Child      VALUES (3,31)
+/
+INSERT INTO GrandChild VALUES (3,31,311)
+/
+INSERT INTO GrandChild VALUES (3,31,312)
+/
+INSERT INTO GrandChild VALUES (3,31,313)
+/
+INSERT INTO Child      VALUES (3,32)
+/
+INSERT INTO GrandChild VALUES (3,32,321)
+/
+INSERT INTO GrandChild VALUES (3,32,322)
+/
+INSERT INTO GrandChild VALUES (3,32,323)
+/
+INSERT INTO Child      VALUES (3,33)
+/
+INSERT INTO GrandChild VALUES (3,33,331)
+/
+INSERT INTO GrandChild VALUES (3,33,332)
+/
+INSERT INTO GrandChild VALUES (3,33,333)
+/
+
+INSERT INTO Parent     VALUES (4)
+/
+INSERT INTO Child      VALUES (4,41)
+/
+INSERT INTO GrandChild VALUES (4,41,411)
+/
+INSERT INTO GrandChild VALUES (4,41,412)
+/
+INSERT INTO GrandChild VALUES (4,41,413)
+/
+INSERT INTO GrandChild VALUES (4,41,414)
+/
+INSERT INTO Child      VALUES (4,42)
+/
+INSERT INTO GrandChild VALUES (4,42,421)
+/
+INSERT INTO GrandChild VALUES (4,42,422)
+/
+INSERT INTO GrandChild VALUES (4,42,423)
+/
+INSERT INTO GrandChild VALUES (4,42,424)
+/
+INSERT INTO Child      VALUES (4,43)
+/
+INSERT INTO Child      VALUES (4,44)
+/
+
+INSERT INTO Parent     VALUES (5)
 /

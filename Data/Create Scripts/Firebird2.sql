@@ -1,8 +1,41 @@
+DROP PROCEDURE Person_SelectByKey;            COMMIT;
+DROP PROCEDURE Person_SelectAll;              COMMIT;
+DROP PROCEDURE Person_SelectByName;           COMMIT;
+DROP PROCEDURE Person_Insert;                 COMMIT;
+DROP PROCEDURE Person_Insert_OutputParameter; COMMIT;
+DROP PROCEDURE Person_Update;                 COMMIT;
+DROP PROCEDURE Person_Delete;                 COMMIT;
+DROP PROCEDURE Patient_SelectAll;             COMMIT;
+DROP PROCEDURE Patient_SelectByName;          COMMIT;
+DROP PROCEDURE OutRefTest;                    COMMIT;
+DROP PROCEDURE OutRefEnumTest;                COMMIT;
+DROP PROCEDURE Scalar_DataReader;             COMMIT;
+DROP PROCEDURE Scalar_OutputParameter;        COMMIT;
+DROP PROCEDURE Scalar_ReturnParameter;        COMMIT;
+
+DROP TRIGGER CREATE_BinaryDataID;             COMMIT;
+DROP TRIGGER CHANGE_BinaryData;               COMMIT;
+DROP TRIGGER CREATE_PersonID;                 COMMIT;
+DROP TRIGGER CREATE_DataTypeTest;             COMMIT;
+
+DROP GENERATOR DataTypeID;                    COMMIT;
+DROP GENERATOR PersonID;                      COMMIT;
+DROP GENERATOR TimestampGen;                  COMMIT;
+
+DROP TABLE Dual;                              COMMIT;
+DROP TABLE DataTypeTest;                      COMMIT;
+DROP TABLE BinaryData;                        COMMIT;
+DROP TABLE Doctor;                            COMMIT;
+DROP TABLE Patient;                           COMMIT;
+DROP TABLE Person;                            COMMIT;
+
+
 /*
 Dual table FOR supporting queryies LIKE:
 SELECT 1 AS id => SELECT 1 AS "id" *FROM Dual*
 */
 CREATE TABLE Dual (Dummy  VARCHAR(10));
+COMMIT;
 INSERT INTO  Dual (Dummy) VALUES ('X');
 COMMIT;
 
@@ -16,22 +49,23 @@ CREATE TABLE Person
 	MiddleName VARCHAR(50),
 	Gender     CHAR(1)     NOT NULL CHECK (Gender in ('M', 'F', 'U', 'O'))
 ); 
+COMMIT;
 
 CREATE GENERATOR PersonID;
+COMMIT;
 
 CREATE GENERATOR TimestampGen;
-
-SET TERM !!;
+COMMIT;
 
 CREATE TRIGGER CREATE_PersonID FOR Person
 BEFORE INSERT POSITION 0
 AS BEGIN
 	NEW.PersonID = GEN_ID(PersonID, 1); 
-END!!
-
-SET TERM ; !!
+END
+COMMIT;
 
 INSERT INTO Person (FirstName, LastName, Gender) VALUES ('John',   'Pupkin',    'M');
+COMMIT;
 INSERT INTO Person (FirstName, LastName, Gender) VALUES ('Tester', 'Testerson', 'M');
 COMMIT;
 
@@ -43,8 +77,8 @@ CREATE TABLE Doctor
 	Taxonomy VARCHAR(50) NOT NULL,
 		FOREIGN KEY (PersonID) REFERENCES Person (PersonID)
 			ON DELETE CASCADE
-
-);
+)
+COMMIT;
 
 INSERT INTO Doctor (PersonID, Taxonomy) VALUES (1, 'Psychiatry');
 COMMIT;
@@ -58,12 +92,10 @@ CREATE TABLE Patient
 	FOREIGN KEY (PersonID) REFERENCES Person (PersonID)
 			ON DELETE CASCADE
 );
+COMMIT;
 
 INSERT INTO Patient (PersonID, Diagnosis) VALUES (2, 'Hallucination with Paranoid Bugs'' Delirium of Persecution');
 COMMIT;
-
-
-SET TERM !!;
 
 -- Person_SelectByKey
 
@@ -86,7 +118,8 @@ BEGIN
 		:MiddleName, 
 		:Gender ;     
 	SUSPEND;
-END!!
+END
+COMMIT;
 
 -- Person_SelectAll
 
@@ -109,7 +142,8 @@ BEGIN
 			:MiddleName, 
 			:Gender     
 	DO SUSPEND;
-END!!
+END
+COMMIT;
 
 -- Person_SelectByName
 
@@ -136,7 +170,8 @@ BEGIN
 		:MiddleName, 
 		:Gender 
 	DO SUSPEND;
-END!!
+END
+COMMIT;
 
 -- Person_Insert
 
@@ -157,7 +192,8 @@ BEGIN
 	SELECT MAX(PersonID) FROM person
 		INTO :PersonID;
 	SUSPEND;
-END!! 
+END
+COMMIT;
 
 -- Person_Insert_OutputParameter
 
@@ -178,7 +214,8 @@ BEGIN
 	SELECT max(PersonID) FROM person
 	INTO :PersonID;
 	SUSPEND;
-END!! 
+END
+COMMIT;
 
 -- Person_Update
 
@@ -200,7 +237,8 @@ BEGIN
 		Gender     = :Gender
 	WHERE
 		PersonID = :PersonID;
-END !!
+END
+COMMIT;
 
 -- Person_Delete
 
@@ -210,7 +248,8 @@ CREATE PROCEDURE Person_Delete(
 AS
 BEGIN
 	DELETE FROM Person WHERE PersonID = :PersonID;
-END !!
+END
+COMMIT;
 
 -- Patient_SelectAll
 
@@ -245,7 +284,8 @@ BEGIN
 			:Gender,
 			:Diagnosis
 	DO SUSPEND;
-END !!
+END
+COMMIT;
 
 -- Patient_SelectByName
 
@@ -278,9 +318,8 @@ BEGIN
 			:Gender,
 			:Diagnosis
 	DO SUSPEND;
-END !!
-
-SET TERM ; !!
+END
+COMMIT;
 
 -- BinaryData Table
 
@@ -290,23 +329,22 @@ CREATE TABLE BinaryData
 	Stamp        INTEGER       NOT NULL,
 	Data         BLOB          NOT NULL
 );
-
-
-SET TERM !!;
-
+COMMIT;
 
 CREATE TRIGGER CREATE_BinaryDataID FOR BinaryData
 BEFORE INSERT POSITION 0
 AS BEGIN
 	NEW.BinaryDataID = GEN_ID(PersonID, 1); 
 	NEW.Stamp = GEN_ID(TimestampGen, 1);
-END!!
+END
+COMMIT;
 
 CREATE TRIGGER CHANGE_BinaryData FOR BinaryData
 beFORe update 
 AS BEGIN
 	NEW.Stamp = GEN_ID(TimestampGen, 1);
-END!! 
+END
+COMMIT;
 
 -- OutRefTest
 
@@ -337,7 +375,8 @@ BEGIN
 	outputStr      = str;
 	inputOutputStr = str || in_inputOutputStr;
 	SUSPEND;
-END !!
+END
+COMMIT;
 
 -- OutRefEnumTest
 
@@ -354,7 +393,8 @@ BEGIN
 	outputStr      = str;
 	inputOutputStr = str || in_inputOutputStr;
 	SUSPEND;
-END !!
+END
+COMMIT;
 
 -- ExecuteScalarTest
 
@@ -368,7 +408,8 @@ BEGIN
 	intField = 12345;
 	stringField = '54321';
 	SUSPEND;
-END!!
+END
+COMMIT;
 
 CREATE PROCEDURE Scalar_OutputParameter
 RETURNS (
@@ -380,7 +421,8 @@ BEGIN
 	outputInt = 12345;
 	outputString = '54321';
 	SUSPEND;
-END!!
+END
+COMMIT;
 
 /*
 "Return_Value" is the name for ReturnValue "emulating"
@@ -392,9 +434,8 @@ AS
 BEGIN
 	Return_Value = 12345;
 	SUSPEND;
-END!!
-
-SET TERM ; !!
+END
+COMMIT;
 
 -- Data Types test
 
@@ -408,42 +449,39 @@ BUT! BLOB is ised for BINARY data! not CHAR
 CREATE TABLE DataTypeTest
 (
 	DataTypeID      INTEGER NOT NULL PRIMARY KEY,
-	Binary_         BLOB						,
-	Boolean_        CHAR(1)						,
-	Byte_           SMALLINT					,
-	Bytes_          BLOB						,
-	CHAR_           CHAR(1)						,
-	DateTime_       TIMESTAMP					,
-	Decimal_        DECIMAL(10, 2)				,
-	Double_         DOUBLE	PRECISION			,
-	Guid_           CHAR(38)					,
-	Int16_          SMALLINT					,
-	Int32_          INTEGER						,
-	Int64_          NUMERIC(11)					,
-	Money_          DECIMAL(18, 4)				,
-	SByte_          SMALLINT					,
-	Single_         FLOAT						,
-	Stream_         BLOB						,
-	String_         VARCHAR(50) 
-			CHARACTER SET UNICODE_FSS			,
-	UInt16_         SMALLINT					,
-	UInt32_         INTEGER						,
-	UInt64_         NUMERIC(11)					,
-	Xml_            CHAR(1000)     
-) ;
-
+	Binary_         BLOB,
+	Boolean_        CHAR(1),
+	Byte_           SMALLINT,
+	Bytes_          BLOB,
+	CHAR_           CHAR(1),
+	DateTime_       TIMESTAMP,
+	Decimal_        DECIMAL(10, 2),
+	Double_         DOUBLE	PRECISION,
+	Guid_           CHAR(38),
+	Int16_          SMALLINT,
+	Int32_          INTEGER,
+	Int64_          NUMERIC(11),
+	Money_          DECIMAL(18, 4),
+	SByte_          SMALLINT,
+	Single_         FLOAT,
+	Stream_         BLOB,
+	String_         VARCHAR(50) CHARACTER SET UNICODE_FSS,
+	UInt16_         SMALLINT,
+	UInt32_         INTEGER,
+	UInt64_         NUMERIC(11),
+	Xml_            CHAR(1000)
+)
+COMMIT;
 
 CREATE GENERATOR DataTypeID;
-
-SET TERM !!;
+COMMIT;
 
 CREATE TRIGGER CREATE_DataTypeTest FOR DataTypeTest
 BEFORE INSERT POSITION 0
 AS BEGIN
 	NEW.DataTypeID = GEN_ID(DataTypeID, 1); 
-END!!
-
-SET TERM ; !!
+END
+COMMIT;
 
 INSERT INTO DataTypeTest
 	(Binary_, Boolean_,   Byte_,  Bytes_,  CHAR_,  DateTime_, Decimal_,
@@ -453,7 +491,6 @@ VALUES
 	(   NULL,     NULL,    NULL,    NULL,    NULL,      NULL,     NULL,
 	    NULL,     NULL,    NULL,    NULL,    NULL,      NULL,     NULL,
 	    NULL,     NULL,    NULL,    NULL,    NULL,      NULL,     NULL);
-
 COMMIT;
 
 INSERT INTO DataTypeTest
@@ -466,5 +503,57 @@ VALUES
 	1234.567, 'dddddddddddddddddddddddddddddddd', 32767, 32768, 1000000, 12.3456, 127,
 	1234.123, 'dddddddddddddddd', 'string', 32767, 32768, 200000000,
 	'<root><element strattr="strvalue" intattr="12345"/></root>');
+COMMIT;
 
+
+
+DROP TABLE Parent     COMMIT;
+DROP TABLE Child      COMMIT;
+DROP TABLE GrandChild COMMIT;
+
+CREATE TABLE Parent      (ParentID int)                                COMMIT;
+CREATE TABLE Child       (ParentID int, ChildID int)                   COMMIT;
+CREATE TABLE GrandChild  (ParentID int, ChildID int, GrandChildID int) COMMIT;
+
+INSERT INTO Parent     VALUES (1)        COMMIT;
+INSERT INTO Child      VALUES (1,11)     COMMIT;
+INSERT INTO GrandChild VALUES (1,11,111) COMMIT;
+
+INSERT INTO Parent     VALUES (2)        COMMIT;
+INSERT INTO Child      VALUES (2,21)     COMMIT;
+INSERT INTO GrandChild VALUES (2,21,211) COMMIT;
+INSERT INTO GrandChild VALUES (2,21,212) COMMIT;
+INSERT INTO Child      VALUES (2,22)     COMMIT;
+INSERT INTO GrandChild VALUES (2,22,221) COMMIT;
+INSERT INTO GrandChild VALUES (2,22,222) COMMIT;
+
+INSERT INTO Parent     VALUES (3)        COMMIT;
+INSERT INTO Child      VALUES (3,31)     COMMIT;
+INSERT INTO GrandChild VALUES (3,31,311) COMMIT;
+INSERT INTO GrandChild VALUES (3,31,312) COMMIT;
+INSERT INTO GrandChild VALUES (3,31,313) COMMIT;
+INSERT INTO Child      VALUES (3,32)     COMMIT;
+INSERT INTO GrandChild VALUES (3,32,321) COMMIT;
+INSERT INTO GrandChild VALUES (3,32,322) COMMIT;
+INSERT INTO GrandChild VALUES (3,32,323) COMMIT;
+INSERT INTO Child      VALUES (3,33)     COMMIT;
+INSERT INTO GrandChild VALUES (3,33,331) COMMIT;
+INSERT INTO GrandChild VALUES (3,33,332) COMMIT;
+INSERT INTO GrandChild VALUES (3,33,333) COMMIT;
+
+INSERT INTO Parent     VALUES (4)        COMMIT;
+INSERT INTO Child      VALUES (4,41)     COMMIT;
+INSERT INTO GrandChild VALUES (4,41,411) COMMIT;
+INSERT INTO GrandChild VALUES (4,41,412) COMMIT;
+INSERT INTO GrandChild VALUES (4,41,413) COMMIT;
+INSERT INTO GrandChild VALUES (4,41,414) COMMIT;
+INSERT INTO Child      VALUES (4,42)     COMMIT;
+INSERT INTO GrandChild VALUES (4,42,421) COMMIT;
+INSERT INTO GrandChild VALUES (4,42,422) COMMIT;
+INSERT INTO GrandChild VALUES (4,42,423) COMMIT;
+INSERT INTO GrandChild VALUES (4,42,424) COMMIT;
+INSERT INTO Child      VALUES (4,43)     COMMIT;
+INSERT INTO Child      VALUES (4,44)     COMMIT;
+
+INSERT INTO Parent     VALUES (5)        COMMIT;
 COMMIT;
