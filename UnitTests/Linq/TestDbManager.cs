@@ -14,9 +14,9 @@ namespace Data.Linq
 		{
 		}
 
-		public Table<Person> Person
-		{
-			get { return GetTable<Person>(); }
-		}
+		public Table<Person>     Person     { get { return GetTable<Person>();     } }
+		public Table<Parent>     Parent     { get { return GetTable<Parent>();     } }
+		public Table<Child>      Child      { get { return GetTable<Child>();      } }
+		public Table<GrandChild> GrandChild { get { return GetTable<GrandChild>(); } }
 	}
 }

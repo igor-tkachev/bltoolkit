@@ -147,6 +147,20 @@ namespace BLToolkit.Data.Sql
 			}
 
 			#endregion
+
+			#region ISqlExpression Members
+
+			public object Clone(Dictionary<object,object> objectTree)
+			{
+				object clone;
+
+				if (!objectTree.TryGetValue(this, out clone))
+					objectTree.Add(this, clone = new Column((ISqlTableSource)_parent.Clone(objectTree), (ISqlExpression)_expression.Clone(objectTree), _alias));
+
+				return clone;
+			}
+
+			#endregion
 		}
 
 		#endregion
@@ -272,7 +286,23 @@ namespace BLToolkit.Data.Sql
 
 			#region ISqlTableSource Members
 
-			public  int  SourceID { get { return Source.SourceID; } }
+			public int SourceID { get { return Source.SourceID; } }
+
+			public object Clone(Dictionary<object,object> objectTree)
+			{
+				object clone;
+
+				if (!objectTree.TryGetValue(this, out clone))
+				{
+					TableSource ts = new TableSource((ISqlTableSource)_source.Clone(objectTree), _alias);
+
+					ts._joins.AddRange(_joins.ConvertAll<JoinedTable>(delegate(JoinedTable jt) { return (JoinedTable)jt.Clone(objectTree); }));
+
+					objectTree.Add(this, clone = ts);
+				}
+
+				return clone;
+			}
 
 			#endregion
 		}
@@ -327,6 +357,11 @@ namespace BLToolkit.Data.Sql
 			{
 				get { return _isWeak;  }
 				set { _isWeak = value; }
+			}
+
+			internal JoinedTable Clone(Dictionary<object, object> objectTree)
+			{
+				throw new NotImplementedException();
 			}
 
 			public void ForEach(Action<TableSource> action)
@@ -610,6 +645,11 @@ namespace BLToolkit.Data.Sql
 				}
 			}
 
+			internal Condition Clone(Dictionary<object, object> objectTree)
+			{
+				throw new NotImplementedException();
+			}
+
 			public override string ToString()
 			{
 				return "(" + (IsNot ? "NOT " : "") + Predicate + ")" + (IsOr ? " OR " : " AND ");
@@ -694,6 +734,26 @@ namespace BLToolkit.Data.Sql
 			bool IEquatable<ISqlExpression>.Equals(ISqlExpression other)
 			{
 				return this == other;
+			}
+
+			#endregion
+
+			#region ISqlExpression Members
+
+			public object Clone(Dictionary<object,object> objectTree)
+			{
+				object clone;
+
+				if (!objectTree.TryGetValue(this, out clone))
+				{
+					SearchCondition sc = new SearchCondition();
+
+					sc._conditions.AddRange(_conditions.ConvertAll<Condition>(delegate(Condition c) { return (Condition)c.Clone(objectTree); }));
+
+					objectTree.Add(this, clone = sc);
+				}
+
+				return clone;
 			}
 
 			#endregion
@@ -947,6 +1007,14 @@ namespace BLToolkit.Data.Sql
 			{
 			}
 
+			internal SelectClause(SqlBuilder sqlBuilder, SelectClause clone) : base(sqlBuilder)
+			{
+				_columns.AddRange(clone._columns);
+				_isDistinct = clone._isDistinct;
+				_takeValue  = clone._takeValue;
+				_skipValue  = clone._skipValue;
+			}
+
 			#endregion
 
 			#region Columns
@@ -1188,6 +1256,10 @@ namespace BLToolkit.Data.Sql
 			#endregion
 
 			internal FromClause(SqlBuilder sqlBuilder) : base(sqlBuilder)
+			{
+			}
+
+			internal FromClause(SqlBuilder sqlBuilder, FromClause clone) : base(sqlBuilder)
 			{
 			}
 
@@ -1769,6 +1841,32 @@ namespace BLToolkit.Data.Sql
 
 		#endregion
 
+		#region Clone
+
+		SqlBuilder(SqlBuilder clone, Dictionary<object,object> objectTree)
+		{
+			_sourceID = ++SourceIDCounter;
+
+			/*
+			_select  = new SelectClause (this, clone._select);
+			_from    = new FromClause   (this, clone._from);
+			_where   = new WhereClause  (this, clone._where);
+			_groupBy = new GroupByClause(this, clone._groupBy);
+			_having  = new WhereClause  (this, clone._having);
+			_orderBy = new OrderByClause(this, clone._orderBy);
+
+			_parameters.AddRange(clone._parameters.ConvertAll(delegate(SqlParameter p) { return p.Clone(); }));
+			_parameterDependent = clone.ParameterDependent;
+			*/
+		}
+
+		public SqlBuilder Clone()
+		{
+			return (SqlBuilder)Clone(new Dictionary<object,object>());
+		}
+
+		#endregion
+
 		#region Overrides
 
 		public string SqlText { get { return ToString(); } }
@@ -1785,6 +1883,16 @@ namespace BLToolkit.Data.Sql
 		public int Precedence
 		{
 			get { return Sql.Precedence.Unknown; }
+		}
+
+		public object Clone(Dictionary<object,object> objectTree)
+		{
+			object clone;
+
+			if (!objectTree.TryGetValue(this, out clone))
+				objectTree.Add(this, clone = new SqlBuilder(this, objectTree));
+
+			return clone;
 		}
 
 		#endregion

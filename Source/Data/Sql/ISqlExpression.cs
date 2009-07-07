@@ -1,9 +1,11 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace BLToolkit.Data.Sql
 {
 	public interface ISqlExpression : IEquatable<ISqlExpression>, ISqlExpressionWalkable
 	{
-		int Precedence { get; }
+		object Clone(Dictionary<object,object> objectTree);
+		int    Precedence { get; }
 	}
 }

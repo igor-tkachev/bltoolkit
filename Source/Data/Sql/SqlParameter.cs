@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace BLToolkit.Data.Sql
 {
@@ -78,6 +79,20 @@ namespace BLToolkit.Data.Sql
 
 			SqlParameter p = other as SqlParameter;
 			return _name != null && p._name != null && _name == p._name;
+		}
+
+		#endregion
+
+		#region ISqlExpression Members
+
+		public object Clone(Dictionary<object,object> objectTree)
+		{
+			object clone;
+
+			if (!objectTree.TryGetValue(this, out clone))
+				objectTree.Add(this, clone = new SqlParameter(_name, _value, _valueConverter));
+
+			return clone;
 		}
 
 		#endregion

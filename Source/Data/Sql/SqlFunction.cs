@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Text;
+using System.Collections.Generic;
 
 namespace BLToolkit.Data.Sql
 {
@@ -83,6 +84,23 @@ namespace BLToolkit.Data.Sql
 
 		private int _sourceID;
 		public  int  SourceID { get { return _sourceID; } }
+
+		#endregion
+
+		#region ISqlExpression Members
+
+		public object Clone(Dictionary<object,object> objectTree)
+		{
+			object clone;
+
+			if (!objectTree.TryGetValue(this, out clone))
+				objectTree.Add(this, clone = new SqlFunction(
+					_name,
+					_precedence,
+					Array.ConvertAll<ISqlExpression,ISqlExpression>(_parameters, delegate(ISqlExpression e) { return (ISqlExpression)e.Clone(objectTree); })));
+
+			return clone;
+		}
 
 		#endregion
 

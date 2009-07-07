@@ -196,5 +196,14 @@ namespace BLToolkit.Data.Sql
 		public  int  SourceID { get { return _sourceID; } }
 
 		#endregion
+
+		#region ISqlTableSource Members
+
+		public object Clone(Dictionary<object,object> objectTree)
+		{
+			return this;
+		}
+
+		#endregion
 	}
 }

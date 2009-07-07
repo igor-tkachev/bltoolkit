@@ -96,7 +96,8 @@ namespace BLToolkit.Data.Linq
 				pi => pi.IsQueryableMethod("Where",      seq => select = ParseSequence(seq),  l      => select = ParseWhere     (l,        select)),
 				pi => pi.IsQueryableMethod("SelectMany", seq => select = ParseSequence(seq),  l      => select = ParseSelectMany(l,  null, select)),
 				pi => pi.IsQueryableMethod("SelectMany", seq => select = ParseSequence(seq), (l1,l2) => select = ParseSelectMany(l1, l2,   select)),
-				pi => pi.IsQueryableMethod("Join",       seq => select = ParseSequence(seq), (i,l2,l3,l4) => select = ParseJoin(i, l2, l3, l4, select)),
+				pi => pi.IsQueryableMethod("Join",       seq => select = ParseSequence(seq), (i,l2,l3,l4) => select = ParseJoin     (i, l2, l3, l4, select)),
+				pi => pi.IsQueryableMethod("GroupJoin",  seq => select = ParseSequence(seq), (i,l2,l3,l4) => select = ParseGroupJoin(i, l2, l3, l4, select)),
 				pi => pi.IsMethod(m =>
 				{
 					if (m.Expr.Method.DeclaringType == typeof(Queryable) || !TypeHelper.IsSameOrParent(typeof(IQueryable), pi.Expr.Type))
@@ -199,9 +200,60 @@ namespace BLToolkit.Data.Linq
 
 			var seq     = ParseSequence(inner);
 			var source2 = new QuerySource.SubQuery(current, _info.SqlBuilder, seq, false);
+
 			_info.SqlBuilder = current;
 
 			var join = source2.SubSql.Join();
+
+			current.From.Table(source1.SubSql, join);
+
+			if (outerKeySelector.Body.NodeType == ExpressionType.New)
+			{
+				var new1 = outerKeySelector.Body.ConvertTo<NewExpression>();
+				var new2 = innerKeySelector.Body.ConvertTo<NewExpression>();
+
+				for (var i = 0; i < new1.Expr.Arguments.Count; i++)
+					join
+						.Expr(ParseExpression(source1, new1.Create(new1.Expr.Arguments[i], new1.Index(new1.Expr.Arguments, New.Arguments, i)))).Equal
+						.Expr(ParseExpression(source2, new2.Create(new2.Expr.Arguments[i], new2.Index(new2.Expr.Arguments, New.Arguments, i))));
+			}
+			else
+			{
+				join
+					.Expr(ParseExpression(source1, outerKeySelector.Body)).Equal
+					.Expr(ParseExpression(source2, innerKeySelector.Body));
+			}
+
+			return resultSelector == null ? source2 : ParseSelect(resultSelector, source1, source2);
+		}
+
+		#endregion
+
+		#region Parse GroupJoin
+
+		QuerySource ParseGroupJoin(
+			ParseInfo<Expression> inner,
+			LambdaInfo            outerKeySelector,
+			LambdaInfo            innerKeySelector,
+			LambdaInfo            resultSelector,
+			QuerySource           outerSource)
+		{
+			if (outerKeySelector.Body.NodeType == ExpressionType.MemberInit)
+				throw new NotSupportedException(
+					string.Format("Explicit construction of entity type '{0}' in query is not allowed.",
+					outerKeySelector.Body.Expr.Type));
+
+			var current = new SqlBuilder();
+			var source1 = new QuerySource.SubQuery(current, _info.SqlBuilder, outerSource);
+
+			_info.SqlBuilder = new SqlBuilder();
+
+			var seq     = ParseSequence(inner);
+			var source2 = new QuerySource.SubQuery(current, _info.SqlBuilder, seq, false);
+
+			_info.SqlBuilder = current;
+
+			var join = source2.SubSql.WeakLeftJoin();
 
 			current.From.Table(source1.SubSql, join);
 
@@ -350,7 +402,7 @@ namespace BLToolkit.Data.Linq
 				{
 					case ExpressionType.MemberAccess:
 						{
-							var ma = pi.ConvertTo<MemberExpression>();
+							var ma = (ParseInfo<MemberExpression>)pi;//.ConvertTo<MemberExpression>();
 
 							if (IsServerSideOnly(pi))
 								return BuildField(query, ma);
@@ -363,8 +415,11 @@ namespace BLToolkit.Data.Linq
 
 								if (field != null)
 								{
-									if (field is QueryField.Column || field is QuerySource.SubQuery)
+									if (field is QueryField.Column)
 										return BuildField(ma, field, i => i);
+
+									if (field is QuerySource.SubQuery)
+										return BuildSubQuery(ma, (QuerySource.SubQuery)field, i => i);
 
 									if (field is QueryField.ExprColumn)
 									{
@@ -377,10 +432,10 @@ namespace BLToolkit.Data.Linq
 									}
 
 									if (field is QuerySource.Table)
-										return BuildTable(ma, field, i => i);
+										return BuildTable(ma, (QuerySource.Table)field, i => i);
 
 									if (field is QueryField.SubQueryColumn)
-										return BuildSubQuery(ma, field, i => i);
+										return BuildSubQuery(ma, (QueryField.SubQueryColumn)field, i => i);
 
 									throw new InvalidOperationException();
 								}
@@ -419,7 +474,7 @@ namespace BLToolkit.Data.Linq
 							if (field != null)
 							{
 								if (field is QuerySource.Table)
-									return BuildTable(pi, field, i => i);
+									return BuildTable(pi, (QuerySource.Table)field, i => i);
 
 								if (field is QuerySource.Scalar)
 								{
@@ -470,25 +525,22 @@ namespace BLToolkit.Data.Linq
 			});
 		}
 
-		private ParseInfo BuildSubQuery(ParseInfo<MemberExpression> ma, QueryField field, Func<FieldIndex,FieldIndex> converter)
+		ParseInfo BuildSubQuery(ParseInfo<MemberExpression> ma, QueryField.SubQueryColumn query, Func<FieldIndex,FieldIndex> converter)
 		{
-			var sq = (QueryField.SubQueryColumn)field;
+			if (query.Field is QuerySource.Table)
+				return BuildTable(ma, (QuerySource.Table)query.Field, i => converter(query.QuerySource.GetColumn(i.Field).Select(this)[0]));
 
-			if (sq.Field is QuerySource.Table)
-				return BuildTable(ma, sq.Field, i => converter(sq.QuerySource.GetColumn(i.Field).Select(this)[0]));
-
-			if (sq.Field is QuerySource)
+			if (query.Field is QuerySource)
 				throw new InvalidOperationException();
 
-			if (sq.Field is QueryField.SubQueryColumn)
-				return BuildSubQuery(ma, sq.Field, i => converter(sq.QuerySource.GetColumn(i.Field).Select(this)[0]));
+			if (query.Field is QueryField.SubQueryColumn)
+				return BuildSubQuery(ma, (QueryField.SubQueryColumn)query.Field, i => converter(query.QuerySource.GetColumn(i.Field).Select(this)[0]));
 
-			return BuildField(ma, field, i => converter(i));
+			return BuildField(ma, query, converter);
 		}
 
-		ParseInfo BuildTable(ParseInfo pi, QueryField field, Func<FieldIndex,FieldIndex> converter)
+		ParseInfo BuildTable(ParseInfo pi, QuerySource.Table table, Func<FieldIndex,FieldIndex> converter)
 		{
-			var table = (QuerySource.Table)field;
 			var index = table.Select(this).Select(i => Expression.Constant(converter(i).Index, typeof(int)) as Expression);
 
 			return pi.Parent.Replace(
@@ -510,8 +562,36 @@ namespace BLToolkit.Data.Linq
 			return BuildField(pi, new[] { idx }, pi.Expr.Type);
 		}
 
+		ParseInfo BuildSubQuery(ParseInfo<MemberExpression> ma, QuerySource.SubQuery query, Func<FieldIndex,FieldIndex> converter)
+		{
+			var table = (QuerySource.Table)query.Sources[0];
+
+			if (ma.Expr.Type == table.ObjectType)
+				return BuildTable(ma, table, i => converter(query.GetColumn(i.Field).Select(this)[0]));
+
+			if (ma.Expr.Type.IsGenericType && ma.Expr.Type.GetGenericTypeDefinition() == typeof(IEnumerable<>))
+			{
+				var args = ma.Expr.Type.GetGenericArguments();
+
+				if (args.Length == 1 && args[0] == table.ObjectType)
+				{
+					
+				}
+			}
+
+			throw new InvalidOperationException();
+		}
+
 		ParseInfo BuildField(ParseInfo<MemberExpression> ma, QueryField field, Func<FieldIndex,FieldIndex> converter)
 		{
+			if (field is QuerySource.SubQuery)
+			{
+				var query = (QuerySource.SubQuery)field;
+
+				if (query.Sources[0] is QuerySource.Table)
+					return BuildSubQuery(ma, query, converter);
+			}
+
 			var memberType = ma.Expr.Member.MemberType == MemberTypes.Field ?
 				((FieldInfo)   ma.Expr.Member).FieldType :
 				((PropertyInfo)ma.Expr.Member).PropertyType;
@@ -523,6 +603,9 @@ namespace BLToolkit.Data.Linq
 
 		ParseInfo BuildField(ParseInfo ma, int[] idx, Type memberType)
 		{
+			if (idx.Length != 1)
+				throw new InvalidOperationException();
+
 			MethodInfo mi;
 
 			if (!MapSchema.Converters.TryGetValue(memberType, out mi))

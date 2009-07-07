@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace BLToolkit.Data.Sql
 {
@@ -54,6 +55,20 @@ namespace BLToolkit.Data.Sql
 
 			SqlValue value = other as SqlValue;
 			return _value == null && value._value == null || _value != null && _value.Equals(value._value);
+		}
+
+		#endregion
+
+		#region ISqlExpression Members
+
+		public object Clone(Dictionary<object,object> objectTree)
+		{
+			object clone;
+
+			if (!objectTree.TryGetValue(this, out clone))
+				objectTree.Add(this, clone = new SqlValue(_value));
+
+			return clone;
 		}
 
 		#endregion

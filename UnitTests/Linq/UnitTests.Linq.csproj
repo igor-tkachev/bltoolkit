@@ -126,6 +126,9 @@
     <Compile Include="Exceptions\JoinTest.cs" />
     <Compile Include="JoinTest.cs" />
     <Compile Include="DateTimeFunctions.cs" />
+    <Compile Include="Model\Child.cs" />
+    <Compile Include="Model\GrandChild.cs" />
+    <Compile Include="Model\Parent.cs" />
     <Compile Include="Providers\MySqlTest.cs" />
     <Compile Include="SelectManyTest.cs" />
     <Compile Include="StringFunctions.cs" />

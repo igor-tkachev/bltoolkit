@@ -70,12 +70,56 @@ namespace Data.Linq
 		[Test]
 		public void LeftJoin1()
 		{
-			TestJohn(db =>
-				from p1 in db.Person
-					join p2 in db.Person on p1.ID equals p2.ID into lj1
-					from p in lj1.DefaultIfEmpty()
-				where p.ID == 1
-				select p);
+			ForEachProvider(db =>
+			{
+				var q = 
+					from p in db.Parent
+						join ch in db.Child on p.ParentID equals ch.ParentID into lj1
+					where p.ParentID == 1
+					select p;
+
+				var list = q.ToList();
+
+				Assert.AreEqual(1, list.Count);
+				Assert.AreEqual(1, list[0].ParentID);
+			});
+		}
+
+		[Test]
+		public void LeftJoin2()
+		{
+			ForEachProvider(db =>
+			{
+				var q = 
+					from p in db.Parent
+						join ch in db.Child on p.ParentID equals ch.ParentID into lj1
+					where p.ParentID == 1
+					select new { p, lj1 };
+
+				var list = q.ToList();
+
+				Assert.AreEqual(1, list.Count);
+				Assert.AreEqual(1, list[0].p.ParentID);
+			});
+		}
+
+		[Test]
+		public void LeftJoin3()
+		{
+			ForEachProvider(db =>
+			{
+				var q = 
+					from p in db.Parent
+						join ch in db.Child on p.ParentID equals ch.ParentID into lj1
+						from ch in lj1.DefaultIfEmpty()
+					where p.ParentID == 1
+					select new { p, ch };
+
+				var list = q.ToList();
+
+				Assert.AreEqual(1, list.Count);
+				Assert.AreEqual(1, list[0].p.ParentID);
+			});
 		}
 	}
 }

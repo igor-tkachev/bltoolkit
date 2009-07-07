@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace BLToolkit.Data.Sql
 {
@@ -53,6 +54,15 @@ namespace BLToolkit.Data.Sql
 		bool IEquatable<ISqlExpression>.Equals(ISqlExpression other)
 		{
 			return this == other;
+		}
+
+		#endregion
+
+		#region ISqlExpression Members
+
+		public object Clone(Dictionary<object,object> objectTree)
+		{
+			return this;
 		}
 
 		#endregion

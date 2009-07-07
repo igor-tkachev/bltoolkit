@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Collections.Generic;
 
 namespace BLToolkit.Data.Sql
 {
@@ -63,6 +64,25 @@ namespace BLToolkit.Data.Sql
 			SqlBinaryExpression expr = other as SqlBinaryExpression;
 
 			return expr != null && _operation == expr._operation && _expr1.Equals(expr._expr1) && _expr2.Equals(expr._expr2);
+		}
+
+		#endregion
+
+		#region ISqlExpression Members
+
+		public object Clone(Dictionary<object,object> objectTree)
+		{
+			object clone;
+
+			if (!objectTree.TryGetValue(this, out clone))
+				objectTree.Add(this, clone = new SqlBinaryExpression(
+					(ISqlExpression)_expr1.Clone(objectTree),
+					_operation,
+					(ISqlExpression)_expr2.Clone(objectTree),
+					_type,
+					_precedence));
+
+			return clone;
 		}
 
 		#endregion

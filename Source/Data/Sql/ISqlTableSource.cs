@@ -1,9 +1,11 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace BLToolkit.Data.Sql
 {
 	public interface ISqlTableSource
 	{
-		int SourceID { get; }
+		object Clone(Dictionary<object,object> objectTree);
+		int    SourceID { get; }
 	}
 }
