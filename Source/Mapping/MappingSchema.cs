@@ -1533,6 +1533,12 @@ namespace BLToolkit.Mapping
 
 		private static readonly ObjectMapper _nullMapper = new ObjectMapper();
 
+		private class MapInfo
+		{
+			public int[]          Index;
+			public IValueMapper[] Mappers;
+		}
+
 		[CLSCompliant(false)]
 		public virtual void MapSourceListToDestinationList(
 			IMapDataSourceList      dataSourceList,
@@ -1541,6 +1547,8 @@ namespace BLToolkit.Mapping
 		{
 			if (dataSourceList      == null) throw new ArgumentNullException("dataSourceList");
 			if (dataDestinationList == null) throw new ArgumentNullException("dataDestinationList");
+
+			Dictionary<ObjectMapper, MapInfo> infos = new Dictionary<ObjectMapper, MapInfo>();
 
 			InitContext ctx = new InitContext();
 
@@ -1592,8 +1600,28 @@ namespace BLToolkit.Mapping
 				{
 					current     = ctx.ObjectMapper;
 					currentDest = current ?? dest;
-					index       = GetIndex(ctx.DataSource, currentDest);
-					mappers     = GetValueMappers(ctx.DataSource, currentDest, index);
+
+					if (current != null)
+					{
+						MapInfo info;
+						if (!infos.TryGetValue(current, out info))
+						{
+							info = new MapInfo();
+
+							info.Index   = GetIndex(ctx.DataSource, currentDest);
+							info.Mappers = GetValueMappers(ctx.DataSource, currentDest, info.Index);
+
+							infos.Add(current, info);
+						}
+
+						index   = info.Index;
+						mappers = info.Mappers;
+					}
+					else
+					{
+						index   = GetIndex(ctx.DataSource, currentDest);
+						mappers = GetValueMappers(ctx.DataSource, currentDest, index);
+					}
 				}
 
 				MapInternal(
@@ -3426,33 +3454,11 @@ namespace BLToolkit.Mapping
 							throw new MappingException(string.Format(Resources.MapIndex_BadField,
 								masterMapper.TypeAccessor.OriginalType.Name, r.ContainerName));
 
-						// Create hash.
-						//
-						if (rs.IndexID != r.MasterIndex.ID)
-						{
-							rs.Hashtable = new Hashtable();
-							rs.IndexID   = r.MasterIndex.ID;
-
-							foreach (object o in rs.List)
-							{
-								object key = r.MasterIndex.GetValueOrIndex(masterMapper, o);
-
-								if (IsNull(key))
-									continue;
-
-								ArrayList matches = (ArrayList) rs.Hashtable[key];
-
-								if (matches == null)
-									rs.Hashtable[key] = matches = new ArrayList();
-
-								matches.Add(o);
-							}
-						}
-
 						// Map.
 						//
-						MapResultSet slave       = r.SlaveResultSet;
-						ObjectMapper slaveMapper = GetObjectMapper(r.SlaveResultSet.ObjectType);
+						MapResultSet slave        = r.SlaveResultSet;
+						ObjectMapper slaveMapper  = GetObjectMapper(r.SlaveResultSet.ObjectType);
+						Hashtable    indexedLists = rs.GetIndex(this, r.MasterIndex);
 
 						foreach (object o in slave.List)
 						{
@@ -3461,7 +3467,7 @@ namespace BLToolkit.Mapping
 							if (IsNull(key))
 								continue;
 
-							ArrayList masterList = (ArrayList)rs.Hashtable[key];
+							ArrayList masterList = (ArrayList)indexedLists[key];
 							if (masterList == null)
 								continue;
 

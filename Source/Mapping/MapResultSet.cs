@@ -69,20 +69,6 @@ namespace BLToolkit.Mapping
 			set { _list = value; }
 		}
 
-		private  string _indexID;
-		internal string  IndexID
-		{
-			get { return _indexID;  }
-			set { _indexID = value; }
-		}
-
-		private  Hashtable _hashtable;
-		internal Hashtable  Hashtable
-		{
-			get { return _hashtable;  }
-			set { _hashtable = value; }
-		}
-
 		private  MapRelation[] _relations;
 		internal MapRelation[]  Relations
 		{
@@ -124,6 +110,44 @@ namespace BLToolkit.Mapping
 		{
 			AddRelation(slaveResultSet, relation.SlaveIndex, relation.MasterIndex, relation.ContainerName);
 		}
+
+		private Dictionary<string, Hashtable> _indexies = new Dictionary<string, Hashtable>();
+		public  Hashtable GetIndex(MappingSchema ms, MapIndex masterIndex)
+		{
+			string     indexId  = masterIndex.ID;
+			Hashtable indexHash = null;
+
+			if (_indexies.TryGetValue(indexId, out indexHash))
+				return indexHash;
+
+			ObjectMapper   masterMapper = ms.GetObjectMapper(ObjectType);
+			List<MapIndex> createIndex  = new List<MapIndex>();
+
+			indexHash = new Hashtable();
+
+			foreach (object o in List)
+			{
+				object key = masterIndex.GetValueOrIndex(masterMapper, o);
+
+				if (ms.IsNull(key))
+					continue;
+
+				ArrayList matches = (ArrayList)indexHash[key];
+
+				if (matches == null)
+					indexHash[key] = matches = new ArrayList();
+
+				matches.Add(o);
+			}
+
+			return indexHash;
+		}
+
+		public Hashtable GetIndex(MappingSchema ms, MapRelation relation)
+		{
+			return GetIndex(ms, relation.MasterIndex);
+		}
+
 	}
 }
 

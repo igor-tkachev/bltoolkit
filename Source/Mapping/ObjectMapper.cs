@@ -19,8 +19,9 @@ namespace BLToolkit.Mapping
 
 		public ObjectMapper()
 		{
-			_members      = new List<MemberMapper>();
-			_nameToMember = new Hashtable();
+			_members            = new List<MemberMapper>();
+			_nameToMember       = new Hashtable();
+			_memberNameToMember = new Hashtable();
 		}
 
 		#endregion
@@ -81,8 +82,9 @@ namespace BLToolkit.Mapping
 
 			memberMapper.SetOrdinal(_members.Count);
 
-			_members.     Add(memberMapper);
-			_nameToMember.Add(memberMapper.Name.ToLower(), memberMapper);
+			_members           .Add(memberMapper);
+			_nameToMember      .Add(memberMapper.Name.ToLower(), memberMapper);
+			_memberNameToMember.Add(memberMapper.MemberName,     memberMapper);
 		}
 
 		protected virtual MetadataProviderBase CreateMetadataProvider()
@@ -139,6 +141,7 @@ namespace BLToolkit.Mapping
 		}
 
 		private readonly Hashtable _nameToMember;
+		private readonly Hashtable _memberNameToMember;
 		public  MemberMapper this[string name]
 		{
 			get
@@ -159,14 +162,21 @@ namespace BLToolkit.Mapping
 
 							if (mm == null)
 							{
+								if (_memberNameToMember.ContainsKey(name)
+									|| _memberNameToMember.ContainsKey(name.ToLower(CultureInfo.CurrentCulture)))
+									return null;
+
 								mm = GetComplexMapper(name, name);
 
 								if (mm != null)
 								{
 									if (_members.Contains(mm))
-										throw new MappingException(string.Format(
-											"Wrong mapping field name: '{0}', type: '{1}'. Use field name '{2}' instead.",
-											name, _typeAccessor.OriginalType.Name, mm.Name));
+									{
+										//throw new MappingException(string.Format(
+										//    "Wrong mapping field name: '{0}', type: '{1}'. Use field name '{2}' instead.",
+										//    name, _typeAccessor.OriginalType.Name, mm.Name));
+										return null;
+									}
 
 									Add(mm);
 								}
@@ -186,13 +196,7 @@ namespace BLToolkit.Mapping
 			get
 			{
 				if (byPropertyName)
-				{
-					foreach (MemberMapper ma in _members)
-						if (ma.MemberName == name)
-							return ma;
-
-					return null;
-				}
+					return (MemberMapper)_memberNameToMember[name];
 
 				return this[name];
 			}
@@ -325,8 +329,17 @@ namespace BLToolkit.Mapping
 		{
 			if (origName == null) throw new ArgumentNullException("origName");
 
-			string name = origName.ToLower();
-			int    idx  = origName.IndexOf('.');
+			string       name = origName.ToLower();
+			int          idx  = origName.IndexOf('.');
+			MemberMapper mm;
+
+			mm = (MemberMapper)_nameToComplexMapper[name];
+			
+			if (mm != null)
+				return mm;
+
+			if (_nameToNotFoundComplexMappers.ContainsKey(name))
+				return null;
 
 			if (idx > 0)
 			{
@@ -340,7 +353,7 @@ namespace BLToolkit.Mapping
 
 						if (om != null)
 						{
-							MemberMapper mm = om.GetComplexMapper(mapName, origName.Substring(idx + 1));
+							mm = om.GetComplexMapper(mapName, origName.Substring(idx + 1));
 
 							if (mm != null)
 							{
@@ -357,6 +370,8 @@ namespace BLToolkit.Mapping
 
 								mapper.Init(mi);
 
+								_nameToComplexMapper[origName.ToLower()] = mapper;
+
 								return mapper;
 							}
 						}
@@ -367,29 +382,20 @@ namespace BLToolkit.Mapping
 			}
 			else
 			{
-				MemberMapper mm = (MemberMapper)_nameToComplexMapper[name];
-
-				if (mm != null)
-					return mm;
-
-				if (_nameToNotFoundComplexMappers.ContainsKey(name))
-					return null;
-
 				foreach (MemberMapper m in _members)
 					if (m.MemberAccessor.Name.Length == name.Length && m.MemberAccessor.Name.ToLower() == name)
 					{
 						_nameToComplexMapper[name] = m;
 						return m;
 					}
-
-				// Under some conditions, this way lead to memory leaks.
-				// In other hand, shaking mappers up every time lead to performance loss.
-				// So we cache failed requests.
-				// If this optimization is a memory leak for you, just comment out next line.
-				//
-				_nameToNotFoundComplexMappers.Add(name, null);
 			}
 
+			// Under some conditions, this way lead to memory leaks.
+			// In other hand, shaking mappers up every time lead to performance loss.
+			// So we cache failed requests.
+			// If this optimization is a memory leak for you, just comment out next line.
+			//
+			_nameToNotFoundComplexMappers[name] = null;
 			return null;
 		}
 

@@ -118,6 +118,7 @@
     <Compile Include="Data\CompositeKeyTest.cs" />
     <Compile Include="Data\EventsTest.cs" />
     <Compile Include="Data\ExecuteForEach.cs" />
+    <Compile Include="Data\ExecuteObjectTest.cs" />
     <Compile Include="Data\InnerTypesTest.cs" />
     <Compile Include="Data\ExecuteDictionaryTest.cs" />
     <Compile Include="Data\ExecuteScalarDictionaryTest.cs" />
@@ -148,6 +149,7 @@
     <Compile Include="Mapping\MetadataProvider\MetadataProviderTest.cs" />
     <Compile Include="Mapping\NullableAttributeTest.cs" />
     <Compile Include="Mapping\ObjectMapperAttributeTest.cs" />
+    <Compile Include="Mapping\ObjectMapperTest.cs" />
     <Compile Include="Mapping\ResultSetTest.cs" />
     <Compile Include="Mapping\TrimmableAttributeTest.cs" />
     <Compile Include="Mapping\XmlMap.cs" />
