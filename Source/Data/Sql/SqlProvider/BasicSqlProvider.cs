@@ -179,7 +179,12 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			_indent++;
 			AppendIndent(sb);
 
-			sb.Append("INNER JOIN ");
+			switch (join.JoinType)
+			{
+				case SqlBuilder.JoinType.Inner : sb.Append("INNER JOIN "); break;
+				case SqlBuilder.JoinType.Left  : sb.Append("LEFT JOIN ");  break;
+				default: throw new InvalidOperationException();
+			}
 
 			BuildPhysicalTable(sb, join.Table.Source);
 
@@ -412,7 +417,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			{
 				SqlField field = (SqlField)expr;
 
-				string table = GetTableAlias(_sqlBuilder.From[field.Table]) ?? GetTablePhysicalName(field.Table);
+				string table = GetTableAlias(_sqlBuilder.GetTableSource(field.Table)) ?? GetTablePhysicalName(field.Table);
 
 				if (string.IsNullOrEmpty(table))
 					throw new SqlException(string.Format("Table {0} should have an alias.", field.Table));
@@ -427,7 +432,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			else if (expr is SqlBuilder.Column)
 			{
 				SqlBuilder.Column column = (SqlBuilder.Column)expr;
-				ISqlTableSource   table  = _sqlBuilder.From[column.Parent];
+				ISqlTableSource   table  = _sqlBuilder.GetTableSource(column.Parent);
 
 				if (table == null)
 					throw new SqlException(string.Format("Table not found for '{0}'.", column));
@@ -446,8 +451,9 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			}
 			else if (expr is SqlBuilder)
 			{
-				SqlBuilder builder = (SqlBuilder)expr;
-				throw new NotImplementedException();
+				sb.Append("(").AppendLine();
+				BuildSqlBuilder((SqlBuilder)expr, sb, _indent + 1);
+				AppendIndent(sb).Append(")");
 			}
 			else if (expr is SqlValue)
 			{

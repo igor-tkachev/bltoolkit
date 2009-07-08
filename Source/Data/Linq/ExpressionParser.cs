@@ -257,24 +257,49 @@ namespace BLToolkit.Data.Linq
 
 			current.From.Table(source1.SubSql, join);
 
+			var counter = (QuerySource.SubQuery)source2.Clone();
+
+			counter.SqlBuilder.Select.Columns.Clear();
+			counter.SqlBuilder.Select.Expr("COUNT(*)");
+			counter.SqlBuilder.ParentSql = current;
+
+			//current.Select.SubQuery(counter.SqlBuilder);
+
 			if (outerKeySelector.Body.NodeType == ExpressionType.New)
 			{
 				var new1 = outerKeySelector.Body.ConvertTo<NewExpression>();
 				var new2 = innerKeySelector.Body.ConvertTo<NewExpression>();
 
 				for (var i = 0; i < new1.Expr.Arguments.Count; i++)
+				{
 					join
 						.Expr(ParseExpression(source1, new1.Create(new1.Expr.Arguments[i], new1.Index(new1.Expr.Arguments, New.Arguments, i)))).Equal
 						.Expr(ParseExpression(source2, new2.Create(new2.Expr.Arguments[i], new2.Index(new2.Expr.Arguments, New.Arguments, i))));
+
+					counter.SqlBuilder.Where
+						.Expr(ParseExpression(source1, new1.Create(new1.Expr.Arguments[i], new1.Index(new1.Expr.Arguments, New.Arguments, i)))).Equal
+						.Expr(ParseExpression(counter, new2.Create(new2.Expr.Arguments[i], new2.Index(new2.Expr.Arguments, New.Arguments, i))));
+				}
 			}
 			else
 			{
 				join
 					.Expr(ParseExpression(source1, outerKeySelector.Body)).Equal
 					.Expr(ParseExpression(source2, innerKeySelector.Body));
+
+				counter.SqlBuilder.Where
+					.Expr(ParseExpression(source1, outerKeySelector.Body)).Equal
+					.Expr(ParseExpression(counter, innerKeySelector.Body));
 			}
 
-			return resultSelector == null ? source2 : ParseSelect(resultSelector, source1, source2);
+			if (resultSelector == null)
+				return source2;
+			
+			var select = ParseSelect(resultSelector, source1, source2);
+
+			source2.LeftJoinCounter = new QueryField.ExprColumn(select, counter.SqlBuilder, null);
+
+			return select;
 		}
 
 		#endregion
@@ -569,13 +594,17 @@ namespace BLToolkit.Data.Linq
 			if (ma.Expr.Type == table.ObjectType)
 				return BuildTable(ma, table, i => converter(query.GetColumn(i.Field).Select(this)[0]));
 
-			if (ma.Expr.Type.IsGenericType && ma.Expr.Type.GetGenericTypeDefinition() == typeof(IEnumerable<>))
+			if (ma.Expr.Type.IsGenericType && ma.Expr.Type.GetGenericTypeDefinition() == typeof(IEnumerable<>) && query.LeftJoinCounter != null)
 			{
 				var args = ma.Expr.Type.GetGenericArguments();
 
 				if (args.Length == 1 && args[0] == table.ObjectType)
 				{
-					
+					var counterIndex = converter(query.LeftJoinCounter.Select(this)[0]);
+
+					return ma.Parent.Replace(
+						Expression.Call(_infoParam, _info.GetEnumeratorMethodInfo(args[0])),
+						ma.ParamAccessor);
 				}
 			}
 

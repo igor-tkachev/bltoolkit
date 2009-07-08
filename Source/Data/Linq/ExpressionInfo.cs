@@ -330,6 +330,17 @@ namespace BLToolkit.Data.Linq
 			return Expressor<ExpressionInfo<T>>.MethodExpressor(e => e.MapDataReaderToObject(null, null, 0, null));
 		}
 
+		public IEnumerable<TE> GetEnumerator<TE>()
+		{
+			return null;
+		}
+
+		public MethodInfo GetEnumeratorMethodInfo(Type elementType)
+		{
+			var method = GetType().GetMethod("GetEnumerator");
+			return method.MakeGenericMethod(elementType);
+		}
+
 		#endregion
 
 		#region Compare

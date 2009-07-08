@@ -1,6 +1,6 @@
 ﻿using System;
-using System.Text;
 using System.Collections.Generic;
+using System.Text;
 
 namespace BLToolkit.Data.Sql
 {
@@ -94,10 +94,12 @@ namespace BLToolkit.Data.Sql
 			object clone;
 
 			if (!objectTree.TryGetValue(this, out clone))
+			{
 				objectTree.Add(this, clone = new SqlFunction(
 					_name,
 					_precedence,
 					Array.ConvertAll<ISqlExpression,ISqlExpression>(_parameters, delegate(ISqlExpression e) { return (ISqlExpression)e.Clone(objectTree); })));
+			}
 
 			return clone;
 		}

@@ -62,7 +62,8 @@ namespace BLToolkit.Data.Sql
 
 		public object Clone(Dictionary<object,object> objectTree)
 		{
-			return this;
+			_parent.Clone(objectTree);
+			return objectTree[this];
 		}
 
 		#endregion

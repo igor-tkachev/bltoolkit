@@ -61,6 +61,28 @@ namespace BLToolkit.Data.Linq
 				foreach (var col in _columns.Values)
 					yield return col;
 			}
+
+			Table() {}
+
+			public override object Clone(Dictionary<object,object> objectTree)
+			{
+				object clone;
+
+				if (!objectTree.TryGetValue(this, out clone))
+				{
+					var table = Clone(new Table(), objectTree);
+
+					table.ObjectType = ObjectType;
+					table.SqlTable   = (SqlTable)SqlTable.Clone(objectTree);
+
+					foreach (var c in _columns)
+						table._columns.Add(c.Key, (Column)c.Value.Clone(objectTree));
+
+					clone = table;
+				}
+
+				return clone;
+			}
 		}
 
 		public class Expr : QuerySource
@@ -192,6 +214,25 @@ namespace BLToolkit.Data.Linq
 			{
 				return _fields.Values;
 			}
+
+			Expr() {}
+
+			public override object Clone(Dictionary<object, object> objectTree)
+			{
+				object clone;
+
+				if (!objectTree.TryGetValue(this, out clone))
+				{
+					var expr = Clone(new Expr(), objectTree);
+
+					foreach (var c in _fields)
+						expr._fields.Add(c.Key, (QueryField)c.Value.Clone(objectTree));
+
+					clone = expr;
+				}
+
+				return clone;
+			}
 		}
 
 		public class SubQuery : QuerySource
@@ -214,6 +255,7 @@ namespace BLToolkit.Data.Linq
 			}
 
 			public SqlBuilder SubSql;
+			public ExprColumn LeftJoinCounter;
 
 			Dictionary<QueryField,SubQueryColumn> _columns = new Dictionary<QueryField,SubQueryColumn>();
 
@@ -274,6 +316,30 @@ namespace BLToolkit.Data.Linq
 
 				return GetColumn(field);
 			}
+
+			SubQuery() {}
+
+			public override object Clone(Dictionary<object, object> objectTree)
+			{
+				object clone;
+
+				if (!objectTree.TryGetValue(this, out clone))
+				{
+					var sub = Clone(new SubQuery(), objectTree);
+
+					sub.SubSql = (SqlBuilder)SubSql.Clone(objectTree);
+
+					if (LeftJoinCounter != null)
+						sub.LeftJoinCounter = (ExprColumn)LeftJoinCounter.Clone(objectTree);
+
+					foreach (var c in _columns)
+						sub._columns.Add(c.Key, (SubQueryColumn)c.Value.Clone(objectTree));
+
+					clone = sub;
+				}
+
+				return clone;
+			}
 		}
 
 		public class Scalar : QuerySource
@@ -300,6 +366,22 @@ namespace BLToolkit.Data.Linq
 			{
 				yield return _field;
 			}
+
+			Scalar() {}
+
+			public override object Clone(Dictionary<object, object> objectTree)
+			{
+				object clone;
+
+				if (!objectTree.TryGetValue(this, out clone))
+				{
+					var scalar = Clone(new Scalar(), objectTree);
+					scalar._field = (QueryField)_field.Clone(objectTree);
+					clone = scalar;
+				}
+
+				return clone;
+			}
 		}
 
 		protected QuerySource(SqlBuilder sqlBilder, LambdaInfo lambda, params QuerySource[] parentQueries)
@@ -307,6 +389,22 @@ namespace BLToolkit.Data.Linq
 			SqlBuilder    = sqlBilder;
 			Lambda        = lambda;
 			ParentQueries = parentQueries;
+		}
+
+		protected QuerySource()
+		{
+		}
+
+		protected T Clone<T>(T clone, Dictionary<object,object> objectTree)
+			where T : QuerySource
+		{
+			objectTree.Add(this, clone);
+
+			clone.SqlBuilder    = (SqlBuilder)SqlBuilder.Clone(objectTree);
+			clone.Lambda        = Lambda;
+			clone.ParentQueries = Array.ConvertAll(ParentQueries, q => (QuerySource)q.Clone(objectTree));
+
+			return clone;
 		}
 
 		public override QuerySource[] Sources { get { return ParentQueries; } }

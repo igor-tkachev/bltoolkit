@@ -37,6 +37,13 @@ namespace BLToolkit.Data.Sql
 			set { _parameterDependent = value; }
 		}
 
+		private SqlBuilder _parentSql;
+		public  SqlBuilder  ParentSql
+		{
+			get { return _parentSql;  }
+			set { _parentSql = value; }
+		}
+
 		#endregion
 
 		#region Column
@@ -115,7 +122,7 @@ namespace BLToolkit.Data.Sql
 				if (this == other)
 					return true;
 
-				return Equals((Column)other);
+				return other is Column && Equals((Column)other);
 			}
 
 			#endregion
@@ -296,9 +303,9 @@ namespace BLToolkit.Data.Sql
 				{
 					TableSource ts = new TableSource((ISqlTableSource)_source.Clone(objectTree), _alias);
 
-					ts._joins.AddRange(_joins.ConvertAll<JoinedTable>(delegate(JoinedTable jt) { return (JoinedTable)jt.Clone(objectTree); }));
-
 					objectTree.Add(this, clone = ts);
+
+					ts._joins.AddRange(_joins.ConvertAll<JoinedTable>(delegate(JoinedTable jt) { return (JoinedTable)jt.Clone(objectTree); }));
 				}
 
 				return clone;
@@ -359,9 +366,14 @@ namespace BLToolkit.Data.Sql
 				set { _isWeak = value; }
 			}
 
-			internal JoinedTable Clone(Dictionary<object, object> objectTree)
+			internal object Clone(Dictionary<object, object> objectTree)
 			{
-				throw new NotImplementedException();
+				object clone;
+
+				if (!objectTree.TryGetValue(this, out clone))
+					objectTree.Add(this, clone = new JoinedTable(JoinType, (TableSource)_table.Clone(objectTree), _isWeak));
+
+				return clone;
 			}
 
 			public void ForEach(Action<TableSource> action)
@@ -420,6 +432,16 @@ namespace BLToolkit.Data.Sql
 				{
 					_expr1 = _expr1.Walk(skipColumns, func);
 				}
+
+				protected override object Clone(Dictionary<object, object> objectTree)
+				{
+					object clone;
+
+					if (!objectTree.TryGetValue(this, out clone))
+						objectTree.Add(this, clone = new Expr((ISqlExpression)_expr1.Clone(objectTree), _precedence));
+
+					return clone;
+				}
 			}
 
 			public class NotExpr : Expr
@@ -431,6 +453,16 @@ namespace BLToolkit.Data.Sql
 				}
 
 				bool _isNot; public bool IsNot { get { return _isNot; } set { _isNot = value; } }
+
+				protected override object Clone(Dictionary<object, object> objectTree)
+				{
+					object clone;
+
+					if (!objectTree.TryGetValue(this, out clone))
+						objectTree.Add(this, clone = new NotExpr((ISqlExpression)Expr1.Clone(objectTree), _isNot, _precedence));
+
+					return clone;
+				}
 			}
 
 			// { expression { = | <> | != | > | >= | ! > | < | <= | !< } expression
@@ -451,6 +483,17 @@ namespace BLToolkit.Data.Sql
 				{
 					base.Walk(skipColumns, func);
 					_expr2 = _expr2.Walk(skipColumns, func);
+				}
+
+				protected override object Clone(Dictionary<object, object> objectTree)
+				{
+					object clone;
+
+					if (!objectTree.TryGetValue(this, out clone))
+						objectTree.Add(this, clone = new ExprExpr(
+							(ISqlExpression)Expr1.Clone(objectTree), _op, (ISqlExpression)_expr2.Clone(objectTree)));
+
+					return clone;
 				}
 
 				#region Overrides
@@ -500,6 +543,17 @@ namespace BLToolkit.Data.Sql
 					if (_escape != null)
 						_escape = _escape.Walk(skipColumns, func);
 				}
+
+				protected override object Clone(Dictionary<object, object> objectTree)
+				{
+					object clone;
+
+					if (!objectTree.TryGetValue(this, out clone))
+						objectTree.Add(this, clone = new Like(
+							(ISqlExpression)Expr1.Clone(objectTree), IsNot, (ISqlExpression)_expr2.Clone(objectTree), _escape));
+
+					return clone;
+				}
 			}
 
 			// expression [ NOT ] BETWEEN expression AND expression
@@ -522,6 +576,20 @@ namespace BLToolkit.Data.Sql
 					_expr2 = _expr2.Walk(skipColumns, func);
 					_expr3 = _expr3.Walk(skipColumns, func);
 				}
+
+				protected override object Clone(Dictionary<object, object> objectTree)
+				{
+					object clone;
+
+					if (!objectTree.TryGetValue(this, out clone))
+						objectTree.Add(this, clone = new Between(
+							(ISqlExpression)Expr1.Clone(objectTree),
+							IsNot,
+							(ISqlExpression)_expr2.Clone(objectTree),
+							(ISqlExpression)_expr3.Clone(objectTree)));
+
+					return clone;
+				}
 			}
 
 			// expression IS [ NOT ] NULL
@@ -531,6 +599,16 @@ namespace BLToolkit.Data.Sql
 				public IsNull(ISqlExpression exp1, bool isNot)
 					: base(exp1, isNot, Sql.Precedence.Comparison)
 				{
+				}
+
+				protected override object Clone(Dictionary<object, object> objectTree)
+				{
+					object clone;
+
+					if (!objectTree.TryGetValue(this, out clone))
+						objectTree.Add(this, clone = new IsNull((ISqlExpression)Expr1.Clone(objectTree), IsNot));
+
+					return clone;
 				}
 			}
 
@@ -551,6 +629,16 @@ namespace BLToolkit.Data.Sql
 					base.Walk(skipColumns, func);
 					_subQuery = (SqlBuilder)((ISqlExpression)_subQuery).Walk(skipColumns, func);
 				}
+
+				protected override object Clone(Dictionary<object, object> objectTree)
+				{
+					object clone;
+
+					if (!objectTree.TryGetValue(this, out clone))
+						objectTree.Add(this, clone = new InSubquery((ISqlExpression)Expr1.Clone(objectTree), IsNot, (SqlBuilder)_subQuery.Clone(objectTree)));
+
+					return clone;
+				}
 			}
 
 			public class InList : NotExpr
@@ -570,6 +658,21 @@ namespace BLToolkit.Data.Sql
 					base.Walk(skipColumns, action);
 					for (int i = 0; i < _values.Count; i++)
 						_values[i] = _values[i].Walk(skipColumns, action);
+				}
+
+				protected override object Clone(Dictionary<object, object> objectTree)
+				{
+					object clone;
+
+					if (!objectTree.TryGetValue(this, out clone))
+					{
+						objectTree.Add(this, clone = new InList(
+							(ISqlExpression)Expr1.Clone(objectTree),
+							IsNot,
+							_values.ConvertAll<ISqlExpression>(delegate(ISqlExpression e) { return (ISqlExpression)e.Clone(objectTree); }).ToArray()));
+					}
+
+					return clone;
 				}
 			}
 
@@ -592,6 +695,16 @@ namespace BLToolkit.Data.Sql
 				{
 					_func = (SqlFunction)((ISqlExpression)_func).Walk(skipColumns, func);
 				}
+
+				protected override object Clone(Dictionary<object, object> objectTree)
+				{
+					object clone;
+
+					if (!objectTree.TryGetValue(this, out clone))
+						objectTree.Add(this, clone = new FuncLike((SqlFunction)_func.Clone(objectTree)));
+
+					return clone;
+				}
 			}
 
 			protected Predicate(int precedence)
@@ -607,12 +720,18 @@ namespace BLToolkit.Data.Sql
 				get { return _precedence;  }
 			}
 
-			protected abstract void Walk(bool skipColumns, WalkingFunc action);
+			protected abstract void   Walk (bool skipColumns, WalkingFunc action);
+			protected abstract object Clone(Dictionary<object,object> objectTree);
 
 			ISqlExpression ISqlExpressionWalkable.Walk(bool skipColumns, WalkingFunc func)
 			{
 				Walk(skipColumns, func);
 				return null;
+			}
+
+			object ISqlPredicate.Clone(Dictionary<object, object> objectTree)
+			{
+				return Clone(objectTree);
 			}
 
 			#endregion
@@ -645,9 +764,20 @@ namespace BLToolkit.Data.Sql
 				}
 			}
 
-			internal Condition Clone(Dictionary<object, object> objectTree)
+			internal object Clone(Dictionary<object,object> objectTree)
 			{
-				throw new NotImplementedException();
+				object clone;
+
+				if (!objectTree.TryGetValue(this, out clone))
+				{
+					Condition sc = new Condition(_isNot, (ISqlPredicate)_predicate.Clone(objectTree));
+
+					sc._isOr = _isOr;
+
+					objectTree.Add(this, clone = sc);
+				}
+
+				return clone;
 			}
 
 			public override string ToString()
@@ -702,7 +832,10 @@ namespace BLToolkit.Data.Sql
 				foreach (Condition c in Conditions)
 					sb.Append(c);
 
-				return sb.Remove(sb.Length - 4, 4).ToString();
+				if (Conditions.Count > 0)
+					sb.Remove(sb.Length - 4, 4);
+
+				return sb.ToString();
 			}
 
 			#endregion
@@ -748,9 +881,9 @@ namespace BLToolkit.Data.Sql
 				{
 					SearchCondition sc = new SearchCondition();
 
-					sc._conditions.AddRange(_conditions.ConvertAll<Condition>(delegate(Condition c) { return (Condition)c.Clone(objectTree); }));
-
 					objectTree.Add(this, clone = sc);
+
+					sc._conditions.AddRange(_conditions.ConvertAll<Condition>(delegate(Condition c) { return (Condition)c.Clone(objectTree); }));
 				}
 
 				return clone;
@@ -945,6 +1078,16 @@ namespace BLToolkit.Data.Sql
 			{
 				_expression = _expression.Walk(skipColumns, func);
 			}
+
+			internal object Clone(Dictionary<object, object> objectTree)
+			{
+				object clone;
+
+				if (!objectTree.TryGetValue(this, out clone))
+					objectTree.Add(this, clone = new OrderByItem((ISqlExpression)_expression.Clone(objectTree), _isDescending));
+
+				return clone;
+			}
 		}
 
 		#endregion
@@ -1007,9 +1150,9 @@ namespace BLToolkit.Data.Sql
 			{
 			}
 
-			internal SelectClause(SqlBuilder sqlBuilder, SelectClause clone) : base(sqlBuilder)
+			internal SelectClause(SqlBuilder sqlBuilder, SelectClause clone, Dictionary<object,object> objectTree) : base(sqlBuilder)
 			{
-				_columns.AddRange(clone._columns);
+				_columns.AddRange(clone._columns.ConvertAll<Column>(delegate(Column c) { return (Column)c.Clone(objectTree); }));
 				_isDistinct = clone._isDistinct;
 				_takeValue  = clone._takeValue;
 				_skipValue  = clone._skipValue;
@@ -1033,12 +1176,22 @@ namespace BLToolkit.Data.Sql
 
 			public SelectClause SubQuery(SqlBuilder subQuery)
 			{
+				if (subQuery.ParentSql != null && subQuery.ParentSql != SqlBuilder)
+					throw new ArgumentException("SqlBuilder already used as subquery");
+
+				subQuery.ParentSql = SqlBuilder;
+
 				AddOrGetColumn(new Column(SqlBuilder, subQuery));
 				return this;
 			}
 
 			public SelectClause SubQuery(SqlBuilder sqlQuery, string alias)
 			{
+				if (sqlQuery.ParentSql != null && sqlQuery.ParentSql != SqlBuilder)
+					throw new ArgumentException("SqlBuilder already used as subquery");
+
+				sqlQuery.ParentSql = SqlBuilder;
+
 				AddOrGetColumn(new Column(SqlBuilder, sqlQuery, alias));
 				return this;
 			}
@@ -1259,8 +1412,10 @@ namespace BLToolkit.Data.Sql
 			{
 			}
 
-			internal FromClause(SqlBuilder sqlBuilder, FromClause clone) : base(sqlBuilder)
+			internal FromClause(SqlBuilder sqlBuilder, FromClause clone, Dictionary<object,object> objectTree)
+				: base(sqlBuilder)
 			{
+				_tables.AddRange(clone._tables.ConvertAll<TableSource>(delegate(TableSource ts) { return (TableSource)ts.Clone(objectTree); }));
 			}
 
 			public FromClause Table(ISqlTableSource table, params FJoin[] joins)
@@ -1416,9 +1571,16 @@ namespace BLToolkit.Data.Sql
 
 			internal WhereClause(SqlBuilder sqlBuilder) : base(sqlBuilder)
 			{
+				_searchCondition = new SearchCondition();
 			}
 
-			private SearchCondition _searchCondition = new SearchCondition();
+			internal WhereClause(SqlBuilder sqlBuilder, WhereClause clone, Dictionary<object,object> objectTree)
+				: base(sqlBuilder)
+			{
+				_searchCondition = (SearchCondition)clone._searchCondition.Clone(objectTree);
+			}
+
+			private SearchCondition _searchCondition;
 			public  SearchCondition  SearchCondition
 			{
 				get { return _searchCondition; }
@@ -1469,6 +1631,12 @@ namespace BLToolkit.Data.Sql
 		{
 			internal GroupByClause(SqlBuilder sqlBuilder) : base(sqlBuilder)
 			{
+			}
+
+			internal GroupByClause(SqlBuilder sqlBuilder, GroupByClause clone, Dictionary<object,object> objectTree)
+				: base(sqlBuilder)
+			{
+				_items.AddRange(clone._items.ConvertAll<ISqlExpression>(delegate(ISqlExpression e) { return (ISqlExpression)e.Clone(objectTree); }));
 			}
 
 			public GroupByClause Expr(ISqlExpression expr)
@@ -1554,15 +1722,21 @@ namespace BLToolkit.Data.Sql
 			{
 			}
 
+			internal OrderByClause(SqlBuilder sqlBuilder, OrderByClause clone, Dictionary<object,object> objectTree)
+				: base(sqlBuilder)
+			{
+				_items.AddRange(clone._items.ConvertAll<OrderByItem>(delegate(OrderByItem item) { return (OrderByItem)item.Clone(objectTree); }));
+			}
+
 			public OrderByClause Expr(ISqlExpression expr, bool isDescending)
 			{
 				Add(expr, isDescending);
 				return this;
 			}
 
-			public OrderByClause Expr     (ISqlExpression expr)            { return Expr(expr,  false);        }
-			public OrderByClause ExprAsc  (ISqlExpression expr)            { return Expr(expr,  false);        }
-			public OrderByClause ExprDesc (ISqlExpression expr)            { return Expr(expr,  true);         }
+			public OrderByClause Expr     (ISqlExpression expr)               { return Expr(expr,  false);        }
+			public OrderByClause ExprAsc  (ISqlExpression expr)               { return Expr(expr,  false);        }
+			public OrderByClause ExprDesc (ISqlExpression expr)               { return Expr(expr,  true);         }
 			public OrderByClause Field    (SqlField field, bool isDescending) { return Expr(field, isDescending); }
 			public OrderByClause Field    (SqlField field)                    { return Expr(field, false);        }
 			public OrderByClause FieldAsc (SqlField field)                    { return Expr(field, false);        }
@@ -1845,24 +2019,44 @@ namespace BLToolkit.Data.Sql
 
 		SqlBuilder(SqlBuilder clone, Dictionary<object,object> objectTree)
 		{
+			objectTree.Add(clone, this);
+
 			_sourceID = ++SourceIDCounter;
 
-			/*
-			_select  = new SelectClause (this, clone._select);
-			_from    = new FromClause   (this, clone._from);
-			_where   = new WhereClause  (this, clone._where);
-			_groupBy = new GroupByClause(this, clone._groupBy);
-			_having  = new WhereClause  (this, clone._having);
-			_orderBy = new OrderByClause(this, clone._orderBy);
+			_select  = new SelectClause (this, clone._select,  objectTree);
+			_from    = new FromClause   (this, clone._from,    objectTree);
+			_where   = new WhereClause  (this, clone._where,   objectTree);
+			_groupBy = new GroupByClause(this, clone._groupBy, objectTree);
+			_having  = new WhereClause  (this, clone._having,  objectTree);
+			_orderBy = new OrderByClause(this, clone._orderBy, objectTree);
 
-			_parameters.AddRange(clone._parameters.ConvertAll(delegate(SqlParameter p) { return p.Clone(); }));
+			_parameters.AddRange(clone._parameters.ConvertAll<SqlParameter>(delegate(SqlParameter p) { return (SqlParameter)p.Clone(objectTree); }));
 			_parameterDependent = clone.ParameterDependent;
-			*/
+
+			((ISqlExpressionWalkable)this).Walk(false, delegate(ISqlExpression expr)
+			{
+				SqlBuilder sb = expr as SqlBuilder;
+
+				if (sb != null && sb.ParentSql == clone)
+					sb.ParentSql = this;
+
+				return expr;
+			});
 		}
 
 		public SqlBuilder Clone()
 		{
 			return (SqlBuilder)Clone(new Dictionary<object,object>());
+		}
+
+		#endregion
+
+		#region Helpers
+
+		public TableSource GetTableSource(ISqlTableSource table)
+		{
+			TableSource ts = From[table];
+			return ts == null && ParentSql != null? ParentSql.GetTableSource(table) : ts;
 		}
 
 		#endregion
@@ -1890,7 +2084,7 @@ namespace BLToolkit.Data.Sql
 			object clone;
 
 			if (!objectTree.TryGetValue(this, out clone))
-				objectTree.Add(this, clone = new SqlBuilder(this, objectTree));
+				clone = new SqlBuilder(this, objectTree);
 
 			return clone;
 		}

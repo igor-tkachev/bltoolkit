@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace BLToolkit.Data.Linq
 {
@@ -31,6 +32,16 @@ namespace BLToolkit.Data.Linq
 			{
 				return _field;
 			}
+
+			public override object Clone(Dictionary<object, object> objectTree)
+			{
+				object clone;
+
+				if (!objectTree.TryGetValue(this, out clone))
+					objectTree.Add(this, clone = new Column((QuerySource.Table)_table.Clone(objectTree), (SqlField)_field.Clone(objectTree), _mapper));
+
+				return clone;
+			}
 		}
 
 		public class ExprColumn : QueryField
@@ -41,6 +52,14 @@ namespace BLToolkit.Data.Linq
 				Expr        = expr;
 
 				_alias      = alias;
+			}
+
+			public ExprColumn(QuerySource source, ISqlExpression expr, string alias)
+			{
+				QuerySource    = source;
+
+				_sqlExpression = expr;
+				_alias         = alias;
 			}
 
 			public readonly QuerySource QuerySource;
@@ -71,6 +90,23 @@ namespace BLToolkit.Data.Linq
 					_sqlExpression = parser.ParseExpression(QuerySource, Expr);
 
 				return _sqlExpression;
+			}
+
+			public override object Clone(Dictionary<object, object> objectTree)
+			{
+				object clone;
+
+				if (!objectTree.TryGetValue(this, out clone))
+				{
+					var col = new ExprColumn((QuerySource)QuerySource.Clone(objectTree), Expr, _alias);
+
+					if (_sqlExpression != null)
+						col._sqlExpression = (ISqlExpression)_sqlExpression.Clone(objectTree);
+
+					objectTree.Add(this, clone = col);
+				}
+
+				return clone;
 			}
 		}
 
@@ -119,10 +155,27 @@ namespace BLToolkit.Data.Linq
 
 				return QuerySource.SubSql.Select.Columns[_subIndex[0].Index];
 			}
+
+
+			public override object Clone(Dictionary<object, object> objectTree)
+			{
+				object clone;
+
+				if (!objectTree.TryGetValue(this, out clone))
+					objectTree.Add(this, clone = new SubQueryColumn((QuerySource.SubQuery)QuerySource.Clone(objectTree), (QueryField)Field.Clone(objectTree)));
+
+				return clone;
+			}
+		}
+
+		public object Clone()
+		{
+			return Clone(new Dictionary<object,object>());
 		}
 
 		public abstract QuerySource[] Sources { get; }
 
+		public abstract object         Clone           (Dictionary<object,object> objectTree);
 		public abstract FieldIndex[]   Select       <T>(ExpressionParser<T> parser);
 		public abstract ISqlExpression GetExpression<T>(ExpressionParser<T> parser);
 	}

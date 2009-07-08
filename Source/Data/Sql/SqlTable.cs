@@ -201,7 +201,34 @@ namespace BLToolkit.Data.Sql
 
 		public object Clone(Dictionary<object,object> objectTree)
 		{
-			return this;
+			object clone;
+
+			if (!objectTree.TryGetValue(this, out clone))
+			{
+				SqlTable table = new SqlTable(_mappingSchema);
+
+				table._name         = _name;
+				table._alias        = _alias;
+				table._database     = _database;
+				table._owner        = _owner;
+				table._physicalName = _physicalName;
+
+				table._fields.Clear();
+
+				foreach (KeyValuePair<string,SqlField> field in _fields)
+				{
+					SqlField fc = new SqlField(field.Value.Name, field.Value.PhysicalName);
+
+					objectTree.Add(field.Value, fc);
+					table._fields.Add(field.Key, fc);
+				}
+
+				table._joins.AddRange(_joins.ConvertAll<Join>(delegate(Join j) { return j.Clone(); }));
+
+				objectTree.Add(this, clone = table);
+			}
+
+			return clone;
 		}
 
 		#endregion

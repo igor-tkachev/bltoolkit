@@ -75,10 +75,12 @@ namespace BLToolkit.Data.Sql
 			object clone;
 
 			if (!objectTree.TryGetValue(this, out clone))
+			{
 				objectTree.Add(this, clone = new SqlExpression(
 					_expr,
 					_precedence,
 					Array.ConvertAll<ISqlExpression,ISqlExpression>(_values, delegate(ISqlExpression e) { return (ISqlExpression)e.Clone(objectTree); })));
+			}
 
 			return clone;
 		}

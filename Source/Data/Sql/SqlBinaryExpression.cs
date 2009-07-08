@@ -1,6 +1,6 @@
 ﻿using System;
-using System.Diagnostics;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace BLToolkit.Data.Sql
 {
@@ -75,12 +75,14 @@ namespace BLToolkit.Data.Sql
 			object clone;
 
 			if (!objectTree.TryGetValue(this, out clone))
+			{
 				objectTree.Add(this, clone = new SqlBinaryExpression(
 					(ISqlExpression)_expr1.Clone(objectTree),
 					_operation,
 					(ISqlExpression)_expr2.Clone(objectTree),
 					_type,
 					_precedence));
+			}
 
 			return clone;
 		}
