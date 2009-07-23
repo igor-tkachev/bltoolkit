@@ -1269,8 +1269,8 @@ namespace BLToolkit.Mapping
 			get { return ValueMapping.DefaultMapper; }
 		}
 
-		private readonly Hashtable _sameTypeMappers      = new Hashtable();
-		private readonly Hashtable _differentTypeMappers = new Hashtable();
+		internal readonly Hashtable SameTypeMappers      = new Hashtable();
+		internal readonly Hashtable DifferentTypeMappers = new Hashtable();
 
 		[CLSCompliant(false)]
 		public void SetValueMapper(
@@ -1283,30 +1283,30 @@ namespace BLToolkit.Mapping
 
 			if (sourceType == destType)
 			{
-				lock (_sameTypeMappers.SyncRoot)
+				lock (SameTypeMappers.SyncRoot)
 				{
 					if (mapper == null)
-						_sameTypeMappers.Remove(sourceType);
+						SameTypeMappers.Remove(sourceType);
 					else
-						_sameTypeMappers[sourceType] = mapper;
+						SameTypeMappers[sourceType] = mapper;
 				}
 			}
 			else
 			{
 				KeyValue key = new KeyValue(sourceType, destType);
 
-				lock (_differentTypeMappers.SyncRoot)
+				lock (DifferentTypeMappers.SyncRoot)
 				{
 					if (mapper == null)
-						_differentTypeMappers.Remove(key);
+						DifferentTypeMappers.Remove(key);
 					else
-						_differentTypeMappers[key] = mapper;
+						DifferentTypeMappers[key] = mapper;
 				}
 			}
 		}
 
 		[CLSCompliant(false)]
-		protected virtual IValueMapper GetValueMapper(
+		protected internal virtual IValueMapper GetValueMapper(
 			Type sourceType,
 			Type destType)
 		{
@@ -1342,15 +1342,15 @@ namespace BLToolkit.Mapping
 
 				if (sourceType == destType)
 				{
-					IValueMapper t = (IValueMapper)_sameTypeMappers[sourceType];
+					IValueMapper t = (IValueMapper)SameTypeMappers[sourceType];
 
 					if (t == null)
 					{
-						lock (_sameTypeMappers.SyncRoot)
+						lock (SameTypeMappers.SyncRoot)
 						{
-							t = (IValueMapper)_sameTypeMappers[sourceType];
+							t = (IValueMapper)SameTypeMappers[sourceType];
 							if (t == null)
-								_sameTypeMappers[sourceType] = t = GetValueMapper(sourceType, destType);
+								SameTypeMappers[sourceType] = t = GetValueMapper(sourceType, destType);
 						}
 					}
 
@@ -1359,15 +1359,15 @@ namespace BLToolkit.Mapping
 				else
 				{
 					KeyValue     key = new KeyValue(sourceType, destType);
-					IValueMapper t   = (IValueMapper)_differentTypeMappers[key];
+					IValueMapper t   = (IValueMapper)DifferentTypeMappers[key];
 
 					if (t == null)
 					{
-						lock (_differentTypeMappers.SyncRoot)
+						lock (DifferentTypeMappers.SyncRoot)
 						{
-							t = (IValueMapper)_differentTypeMappers[key];
+							t = (IValueMapper)DifferentTypeMappers[key];
 							if (t == null)
-								_differentTypeMappers[key] = t = GetValueMapper(sourceType, destType);
+								DifferentTypeMappers[key] = t = GetValueMapper(sourceType, destType);
 						}
 					}
 
@@ -1548,7 +1548,7 @@ namespace BLToolkit.Mapping
 			if (dataSourceList      == null) throw new ArgumentNullException("dataSourceList");
 			if (dataDestinationList == null) throw new ArgumentNullException("dataDestinationList");
 
-			Dictionary<ObjectMapper, MapInfo> infos = new Dictionary<ObjectMapper, MapInfo>();
+			Dictionary<ObjectMapper,MapInfo> infos = new Dictionary<ObjectMapper,MapInfo>();
 
 			InitContext ctx = new InitContext();
 

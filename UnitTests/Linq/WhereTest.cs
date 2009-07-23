@@ -3,6 +3,8 @@ using System.Linq;
 
 using NUnit.Framework;
 
+using BLToolkit.Data.DataProvider;
+
 namespace Data.Linq
 {
 	using Model;
@@ -172,19 +174,19 @@ namespace Data.Linq
 		[Test]
 		public void BinaryXor()
 		{
-			TestOneJohn(new[] { "Access" }, db => from p in db.Person where (p.ID ^ 2) == 3 select p);
+			TestOneJohn(new[] { ProviderName.Access }, db => from p in db.Person where (p.ID ^ 2) == 3 select p);
 		}
 
 		[Test]
 		public void BinaryAnd()
 		{
-			TestOneJohn(new[] { "Access" }, db => from p in db.Person where (p.ID & 3) == 1 select p);
+			TestOneJohn(new[] { ProviderName.Access }, db => from p in db.Person where (p.ID & 3) == 1 select p);
 		}
 
 		[Test]
 		public void BinaryOr()
 		{
-			TestOneJohn(new[] { "Access" }, db => from p in db.Person where (p.ID | 2) == 3 select p);
+			TestOneJohn(new[] { ProviderName.Access }, db => from p in db.Person where (p.ID | 2) == 3 select p);
 		}
 
 		[Test]

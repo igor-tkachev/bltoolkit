@@ -103,6 +103,9 @@ namespace BLToolkit.Data.Sql
 
 			public override string ToString()
 			{
+				if (Expression is SqlBuilder)
+					return "(\n\t\t" + Expression.ToString().Replace("\n", "\n\t\t") + "\n\t)";
+
 				return Expression.ToString();
 			}
 
@@ -265,13 +268,13 @@ namespace BLToolkit.Data.Sql
 			public override string ToString()
 			{
 				StringBuilder sb = new StringBuilder(Source is SqlBuilder ?
-					"(\n\t\t" + Source.ToString().Replace("\n", "\n\t\t") + "\n\t)" :
+					"(\n\t" + Source.ToString().Replace("\n", "\n\t") + "\n)" :
 					Source.ToString());
 
 				sb.Append(" as t").Append(SourceID);
 
 				foreach (JoinedTable join in Joins)
-					sb.Append(join.ToString());
+					sb.AppendLine().Append('\t').Append(join.ToString().Replace("\n", "\n\t"));
 
 				return sb.ToString();
 			}
@@ -383,7 +386,7 @@ namespace BLToolkit.Data.Sql
 
 			public override string ToString()
 			{
-				return "\n\t\tINNER JOIN " + Table.ToString() + " ON " + Condition.ToString();
+				return (JoinType == JoinType.Inner? "INNER" : "LEFT") + " JOIN " + Table.ToString() + " ON " + Condition.ToString();
 			}
 
 			#region ISqlExpressionWalkable Members
@@ -1317,8 +1320,11 @@ namespace BLToolkit.Data.Sql
 			{
 				StringBuilder sb = new StringBuilder("SELECT \n");
 
-				foreach (Column c in Columns)
-					sb.Append("\t").Append(c.ToString()).Append(", \n");
+				if (Columns.Count == 0)
+					sb.Append("\t*, \n");
+				else
+					foreach (Column c in Columns)
+						sb.Append("\t").Append(c.ToString()).Append(", \n");
 
 				return sb.Remove(sb.Length - 3, 3).ToString();
 			}
@@ -1502,12 +1508,12 @@ namespace BLToolkit.Data.Sql
 
 			public override string ToString()
 			{
-				StringBuilder sb = new StringBuilder(" \nFROM \n\t");
+				StringBuilder sb = new StringBuilder(" \nFROM \n");
 
 				if (Tables.Count > 0)
 				{
 					foreach (TableSource ts in Tables)
-						sb.Append(ts.ToString()).Append(", ");
+						sb.Append('\t').Append(ts.ToString().Replace("\n", "\n\t")).Append(", ");
 
 					sb.Remove(sb.Length - 2, 2);
 				}
@@ -1813,6 +1819,13 @@ namespace BLToolkit.Data.Sql
 		void ForEachTable(Action<TableSource> action)
 		{
 			From.Tables.ForEach(delegate(TableSource tbl) { tbl.ForEach(action); });
+
+			((ISqlExpressionWalkable)this).Walk(false, delegate(ISqlExpression expr)
+			{
+				if (expr is SqlBuilder && expr != this)
+					((SqlBuilder)expr).ForEachTable(action);
+				return expr;
+			});
 		}
 
 		delegate bool FindTableSource(TableSource table);
@@ -1827,11 +1840,18 @@ namespace BLToolkit.Data.Sql
 					return true;
 
 				foreach (JoinedTable join in table.Joins)
+				{
 					if (findTable(join.Table))
 					{
 						join.IsWeak = false;
 						return true;
 					}
+				}
+
+				if (table.Source is SqlBuilder)
+					foreach (TableSource t in ((SqlBuilder)table.Source).From.Tables)
+						if (findTable(t))
+							return true;
 
 				return false;
 			};
@@ -1949,22 +1969,28 @@ namespace BLToolkit.Data.Sql
 
 		void SetAliases()
 		{
-			Dictionary<string,object> names = new Dictionary<string,object>();
+			Dictionary<string,object>      names   = new Dictionary<string,object>();
+			Dictionary<TableSource,object> sources = new Dictionary<TableSource,object>();
 
 			ForEachTable(delegate(TableSource table)
 			{
-				string alias = table.Alias;
-
-				if (string.IsNullOrEmpty(alias))
+				if (!sources.ContainsKey(table))
 				{
-					table.Alias = "t";
-					alias       = "t1";
+					sources.Add(table, table);
+
+					string alias = table.Alias;
+
+					if (string.IsNullOrEmpty(alias))
+					{
+						table.Alias = "t";
+						alias       = "t1";
+					}
+
+					for (int i = 1; names.ContainsKey(alias); i++)
+						alias = table.Alias + i;
+
+					names.Add(table.Alias = alias, table);
 				}
-
-				for (int i = 1; names.ContainsKey(alias); i++)
-					alias = table.Alias + i;
-
-				names.Add(table.Alias = alias, table);
 			});
 
 			foreach (Column c in Select.Columns)

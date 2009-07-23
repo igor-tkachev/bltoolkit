@@ -972,7 +972,7 @@ namespace BLToolkit.EditableObjects
 		}
 
 		private event ListChangedEventHandler _listChanged;
-		public event ListChangedEventHandler ListChanged
+		public  event ListChangedEventHandler  ListChanged
 		{
 			add    
 			{

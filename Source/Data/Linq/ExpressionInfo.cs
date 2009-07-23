@@ -101,10 +101,10 @@ namespace BLToolkit.Data.Linq
 			for (var i = 0; i < index.Length; i++)
 				index[i] = i;
 
-			GetIEnumerable = (db, expr) => Query(db, expr, GetMapperSlot(), index);
+			GetIEnumerable = (db, expr) => Query(db, expr, GetMapperSlot(index));
 		}
 
-		IEnumerable<T> Query(DbManager db, Expression expr, int slot, int[] index)
+		IEnumerable<T> Query(DbManager db, Expression expr, int slot)
 		{
 			var dispose = db == null;
 			if (db == null)
@@ -114,7 +114,7 @@ namespace BLToolkit.Data.Linq
 			{
 				using (var dr = GetReader(db, expr))
 					while (dr.Read())
-						yield return (T)MapDataReaderToObject(typeof(T), dr, slot, index);
+						yield return (T)MapDataReaderToObject(typeof(T), dr, slot);
 			}
 			finally
 			{
@@ -263,21 +263,22 @@ namespace BLToolkit.Data.Linq
 		{
 			public ObjectMapper   ObjectMapper;
 			public IValueMapper[] ValueMappers;
+			public int[]          Index;
 		}
 
 		MapperSlot[] _mapperSlots;
 
-		internal int GetMapperSlot()
+		internal int GetMapperSlot(int[] index)
 		{
 			if (_mapperSlots == null)
 			{
-				_mapperSlots = new [] { new MapperSlot() };
+				_mapperSlots = new [] { new MapperSlot { Index = index } };
 			}
 			else
 			{
 				var slots = new MapperSlot[_mapperSlots.Length + 1];
 
-				slots[_mapperSlots.Length] = new MapperSlot();
+				slots[_mapperSlots.Length] = new MapperSlot { Index = index };
 
 				_mapperSlots.CopyTo(slots, 0);
 				_mapperSlots = slots;
@@ -286,7 +287,7 @@ namespace BLToolkit.Data.Linq
 			return _mapperSlots.Length - 1;
 		}
 
-		protected object MapDataReaderToObject(Type destObjectType, IDataReader dataReader, int slotNumber, int[] index)
+		protected object MapDataReaderToObject(Type destObjectType, IDataReader dataReader, int slotNumber)
 		{
 			var slot   = _mapperSlots[slotNumber];
 			var source = MappingSchema.CreateDataReaderMapper(dataReader);
@@ -315,9 +316,73 @@ namespace BLToolkit.Data.Linq
 					return destObject;
 			}
 
-			var mappers = slot.ValueMappers ?? (slot.ValueMappers = initContext.MappingSchema.GetValueMappers(source, dest, index));
+			var index = slot.Index;
 
-			MappingSchema.MapInternal(source, dataReader, dest, destObject, index, mappers);
+			if (slot.ValueMappers == null)
+			{
+				IValueMapper[] mappers = new IValueMapper[index.Length];
+
+				for (int i = 0; i < index.Length; i++)
+				{
+					int n = index[i];
+
+					if (!dest.SupportsTypedValues(i))
+					{
+						mappers[i] = MappingSchema.DefaultValueMapper;
+						continue;
+					}
+
+					Type sourceType = source.GetFieldType(n);
+					Type destType   = dest.  GetFieldType(i);
+
+					if (sourceType == null) sourceType = typeof(object);
+					if (destType   == null) destType   = typeof(object);
+
+					if (sourceType == destType)
+					{
+						IValueMapper t = (IValueMapper)MappingSchema.SameTypeMappers[sourceType];
+
+						if (t == null)
+						{
+							lock (MappingSchema.SameTypeMappers.SyncRoot)
+							{
+								t = (IValueMapper)MappingSchema.SameTypeMappers[sourceType];
+								if (t == null)
+									MappingSchema.SameTypeMappers[sourceType] = t = MappingSchema.GetValueMapper(sourceType, destType);
+							}
+						}
+
+						mappers[i] = t;
+					}
+					else
+					{
+						var key = new KeyValuePair<Type,Type>(sourceType, destType);
+						var t   = (IValueMapper)MappingSchema.DifferentTypeMappers[key];
+
+						if (t == null)
+						{
+							lock (MappingSchema.DifferentTypeMappers.SyncRoot)
+							{
+								t = (IValueMapper)MappingSchema.DifferentTypeMappers[key];
+								if (t == null)
+									MappingSchema.DifferentTypeMappers[key] = t = MappingSchema.GetValueMapper(sourceType, destType);
+							}
+						}
+
+						mappers[i] = t;
+					}
+				}
+
+				slot.ValueMappers = mappers;
+			}
+
+			//var mappers = slot.ValueMappers ?? (slot.ValueMappers = initContext.MappingSchema.GetValueMappers(source, dest, slot.Index));
+			//MappingSchema.MapInternal(source, dataReader, dest, destObject, slot.Index, slot.ValueMappers);
+
+			var ms = slot.ValueMappers;
+
+			for (int i = 0; i < index.Length; i++)
+				ms[i].Map(source, dataReader, index[i], dest, destObject, i);
 
 			if (smDest != null)
 				smDest.EndMapping(initContext);
@@ -327,18 +392,28 @@ namespace BLToolkit.Data.Linq
 
 		public MethodInfo GetMapperMethodInfo()
 		{
-			return Expressor<ExpressionInfo<T>>.MethodExpressor(e => e.MapDataReaderToObject(null, null, 0, null));
+			return Expressor<ExpressionInfo<T>>.MethodExpressor(e => e.MapDataReaderToObject(null, null, 0));
 		}
 
-		public IEnumerable<TE> GetEnumerator<TE>()
+		IEnumerable<TE> GetGroupJoinEnumerator<TE>(int count, TE item)
 		{
-			return null;
+			for (int i = 0; i < count; i++)
+				yield return item;
 		}
 
-		public MethodInfo GetEnumeratorMethodInfo(Type elementType)
+		public IEnumerable<TE> GetGroupJoinEnumerator<TE>(
+			IDataReader dataReader,
+			Expression  expr,
+			int         counterIndex,
+			Func<ExpressionInfo<T>,IDataReader,MappingSchema,Expression,TE> itemReader)
 		{
-			var method = GetType().GetMethod("GetEnumerator");
-			return method.MakeGenericMethod(elementType);
+			var count = MappingSchema.ConvertToInt32(dataReader[counterIndex]);
+			return GetGroupJoinEnumerator(count, count == 0? default(TE): itemReader(this, dataReader, MappingSchema, expr));
+		}
+
+		public MethodInfo GetGroupJoinEnumeratorMethodInfo<TE>()
+		{
+			return Expressor<ExpressionInfo<T>>.MethodExpressor(e => e.GetGroupJoinEnumerator<TE>(null, null, 0, null));
 		}
 
 		#endregion

@@ -246,7 +246,7 @@ namespace BLToolkit.Data.Linq
 					SqlBuilder.From.Table(subSql);
 
 				foreach (var field in parentQuery.GetFields())
-					GetColumn(field);
+					EnsureField(field);
 			}
 
 			public SubQuery(SqlBuilder currentSql, SqlBuilder subSql, QuerySource parentQuery)
@@ -255,11 +255,10 @@ namespace BLToolkit.Data.Linq
 			}
 
 			public SqlBuilder SubSql;
-			public ExprColumn LeftJoinCounter;
 
 			Dictionary<QueryField,SubQueryColumn> _columns = new Dictionary<QueryField,SubQueryColumn>();
 
-			public SubQueryColumn GetColumn(QueryField field)
+			public override QueryField EnsureField(QueryField field)
 			{
 				if (field == null)
 					return null;
@@ -274,12 +273,12 @@ namespace BLToolkit.Data.Linq
 
 			public override QueryField GetField(MemberInfo mi)
 			{
-				return GetColumn(ParentQueries[0].GetField(mi));
+				return EnsureField(ParentQueries[0].GetField(mi));
 			}
 
 			public override QueryField GetField(Expression expr)
 			{
-				return GetColumn(ParentQueries[0].GetField(expr));
+				return EnsureField(ParentQueries[0].GetField(expr));
 			}
 
 			protected override IEnumerable<QueryField> GetFields()
@@ -314,23 +313,25 @@ namespace BLToolkit.Data.Linq
 				field = ParentQueries[0].GetField(members, currentMember);
 				//field = field.Sources[0].GetField(members, currentMember);
 
-				return GetColumn(field);
+				return EnsureField(field);
 			}
 
-			SubQuery() {}
+			protected SubQuery() {}
 
-			public override object Clone(Dictionary<object, object> objectTree)
+			protected virtual SubQuery CreateSubQuery(Dictionary<object,object> objectTree)
+			{
+				return new SubQuery();
+			}
+
+			public override object Clone(Dictionary<object,object> objectTree)
 			{
 				object clone;
 
 				if (!objectTree.TryGetValue(this, out clone))
 				{
-					var sub = Clone(new SubQuery(), objectTree);
+					var sub = Clone(CreateSubQuery(objectTree), objectTree);
 
 					sub.SubSql = (SqlBuilder)SubSql.Clone(objectTree);
-
-					if (LeftJoinCounter != null)
-						sub.LeftJoinCounter = (ExprColumn)LeftJoinCounter.Clone(objectTree);
 
 					foreach (var c in _columns)
 						sub._columns.Add(c.Key, (SubQueryColumn)c.Value.Clone(objectTree));
@@ -339,6 +340,54 @@ namespace BLToolkit.Data.Linq
 				}
 
 				return clone;
+			}
+		}
+
+		public class GroupJoinQuery : SubQuery
+		{
+			public GroupJoinQuery(SqlBuilder currentSql, SqlBuilder subSql, QuerySource parentQuery)
+				: base(currentSql, subSql, parentQuery, false)
+			{
+			}
+
+			public ExprColumn Counter;
+			public ParseInfo  SourceInfo;
+
+			GroupJoinQuery() {}
+
+			protected override SubQuery CreateSubQuery(Dictionary<object,object> objectTree)
+			{
+				return new GroupJoinQuery { Counter = (ExprColumn)Counter.Clone(objectTree) };
+			}
+
+			public override ISqlExpression GetExpression<T>(ExpressionParser<T> parser)
+			{
+				return base.GetExpression<T>(parser);
+			}
+
+			public override QueryField GetField(Expression expr)
+			{
+				return base.GetField(expr);
+			}
+
+			protected override QueryField GetField(List<MemberInfo> members, int currentMember)
+			{
+				return base.GetField(members, currentMember);
+			}
+
+			public override QueryField GetField(MemberInfo mi)
+			{
+				return base.GetField(mi);
+			}
+
+			protected override IEnumerable<QueryField> GetFields()
+			{
+				return base.GetFields();
+			}
+
+			public override FieldIndex[] Select<T>(ExpressionParser<T> parser)
+			{
+				return base.Select<T>(parser);
 			}
 		}
 
@@ -425,6 +474,15 @@ namespace BLToolkit.Data.Linq
 				 return field;
 
 			return ((QuerySource)field).GetField(members, currentMember + 1);
+		}
+
+		public virtual QueryField EnsureField(QueryField field)
+		{
+			foreach (var f in GetFields())
+				if (f == field)
+					return field;
+
+			throw new InvalidOperationException();
 		}
 
 		public QueryField GetParentField(Expression expr)

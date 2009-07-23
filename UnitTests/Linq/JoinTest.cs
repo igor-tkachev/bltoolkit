@@ -6,6 +6,8 @@ using System.Linq.Expressions;
 
 using NUnit.Framework;
 
+using BLToolkit.Data.DataProvider;
+
 namespace Data.Linq
 {
 	using Model;
@@ -88,7 +90,7 @@ namespace Data.Linq
 		[Test]
 		public void LeftJoin2()
 		{
-			ForEachProvider(db =>
+			ForEachProvider(new[] { ProviderName.SqlCe }, db =>
 			{
 				var q = 
 					from p in db.Parent
@@ -105,6 +107,48 @@ namespace Data.Linq
 
 		[Test]
 		public void LeftJoin3()
+		{
+			ForEachProvider(db =>
+			{
+				var q = db.Parent
+					.GroupJoin(
+						db.Child,
+						p => p.ParentID,
+						ch => ch.ParentID,
+						(p, lj1) => new { p = p, lj1 = new { lj1 } }
+					)
+					.Where (t => t.p.ParentID == 1)
+					.Select(t => new { p = t.p, lj1 = t.lj1 });
+
+				var list = q.ToList();
+
+				Assert.AreEqual(1, list.Count);
+				Assert.AreEqual(1, list[0].p.ParentID);
+			});
+		}
+
+		[Test]
+		public void LeftJoin4()
+		{
+			ForEachProvider(db =>
+			{
+				var q = 
+					from p in db.Parent
+						join ch in
+							from c in db.Child select new { c.ParentID, c.ChildID }
+						on p.ParentID equals ch.ParentID into lj1
+					where p.ParentID == 1
+					select new { p, lj1 };
+
+				var list = q.ToList();
+
+				Assert.AreEqual(1, list.Count);
+				Assert.AreEqual(1, list[0].p.ParentID);
+			});
+		}
+
+		[Test]
+		public void LeftJoin5()
 		{
 			ForEachProvider(db =>
 			{

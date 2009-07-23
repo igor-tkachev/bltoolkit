@@ -278,7 +278,7 @@ namespace BLToolkit.Data.Linq
 		public MethodCallExpression Indexer(MethodInfo pmi, MethodInfo mi, int idx)
 		{
 			var prop = Property(pmi);
-			return prop != null ? Expression.Call(prop, mi, new Expression[] { Expression.Constant(idx, typeof(int)) }) : null;
+			return prop != null ? Expression.Call(prop, mi, new Expression[] { Expression.Constant(idx) }) : null;
 		}
 
 		public MethodCallExpression Index<T>(IEnumerable<T> source, MethodInfo property, int idx)
