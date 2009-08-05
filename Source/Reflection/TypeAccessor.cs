@@ -684,8 +684,19 @@ namespace BLToolkit.Reflection
 			ICustomTypeDescriptor descriptor = (ICustomTypeDescriptor)_descriptors[type];
 
 			if (descriptor == null)
-				descriptor = new CustomTypeDescriptorImpl(type);
-
+			{
+				lock (_descriptors.SyncRoot)
+				{
+					descriptor = (ICustomTypeDescriptor)_descriptors[type];
+					
+					if (descriptor == null)
+					{
+						descriptor = new CustomTypeDescriptorImpl(type);
+						
+						_descriptors.Add(type, descriptor);
+					}
+				}
+			}
 			return descriptor;
 		}
 
