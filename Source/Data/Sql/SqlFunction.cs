@@ -40,7 +40,7 @@ namespace BLToolkit.Data.Sql
 			foreach (ISqlExpression p in Parameters)
 				sb.Append(p.ToString());
 
-			sb.Append("(");
+			sb.Append(")");
 
 			return sb.ToString();
 		}
@@ -85,6 +85,21 @@ namespace BLToolkit.Data.Sql
 		private int _sourceID;
 		public  int  SourceID { get { return _sourceID; } }
 
+		SqlField _all;
+		SqlField  ISqlTableSource.All
+		{
+			get
+			{
+				if (_all == null)
+				{
+					_all = new SqlField("*", "*");
+					((IChild<ISqlTableSource>)_all).Parent = this;
+				}
+
+				return _all;
+			}
+		}
+
 		#endregion
 
 		#region ISqlExpression Members
@@ -105,6 +120,8 @@ namespace BLToolkit.Data.Sql
 		}
 
 		#endregion
+
+		public class Count  : SqlFunction { public Count (ISqlTableSource table) : base("Count", table.All) {} }
 
 		public class All    : SqlFunction { public All   (SqlBuilder subQuery) : base("ALL",    Sql.Precedence.Comparison, subQuery) {} }
 		public class Some   : SqlFunction { public Some  (SqlBuilder subQuery) : base("SOME",   Sql.Precedence.Comparison, subQuery) {} }

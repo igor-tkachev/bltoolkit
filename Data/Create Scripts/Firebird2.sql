@@ -29,6 +29,22 @@ DROP TABLE Doctor;                            COMMIT;
 DROP TABLE Patient;                           COMMIT;
 DROP TABLE Person;                            COMMIT;
 
+DROP EXTERNAL FUNCTION rtrim;                 COMMIT;
+DROP EXTERNAL FUNCTION ltrim;                 COMMIT;
+
+
+DECLARE EXTERNAL FUNCTION ltrim 
+	CSTRING(255) NULL
+	RETURNS CSTRING(255) FREE_IT
+	ENTRY_POINT 'IB_UDF_ltrim' MODULE_NAME 'ib_udf';
+COMMIT;
+
+DECLARE EXTERNAL FUNCTION rtrim 
+	CSTRING(255) NULL
+	RETURNS CSTRING(255) FREE_IT
+	ENTRY_POINT 'IB_UDF_rtrim' MODULE_NAME 'ib_udf';
+COMMIT;
+
 
 /*
 Dual table FOR supporting queryies LIKE:

@@ -224,15 +224,10 @@ namespace BLToolkit.Data.Sql
 				{
 					foreach (JoinedTable tj in Joins)
 					{
-						TableSource ts = tj.Table;
+						TableSource t = CheckTableSource(tj.Table, table, alias);
 
-						if (ts.Source == table && (alias == null || ts.Alias == alias))
-							return ts;
-
-						TableSource jt = ts[table, alias];
-
-						if (jt != null)
-							return jt;
+						if (t != null)
+							return t;
 					}
 
 					return null;
@@ -296,7 +291,8 @@ namespace BLToolkit.Data.Sql
 
 			#region ISqlTableSource Members
 
-			public int SourceID { get { return Source.SourceID; } }
+			public int       SourceID { get { return Source.SourceID; } }
+			public SqlField  All      { get { return Source.All;      } }
 
 			public object Clone(Dictionary<object,object> objectTree)
 			{
@@ -1477,21 +1473,10 @@ namespace BLToolkit.Data.Sql
 				{
 					foreach (TableSource ts in Tables)
 					{
-						if (ts.Source == table && (alias == null || ts.Alias == alias))
-							return ts;
+						TableSource t = CheckTableSource(ts, table, alias);
 
-						TableSource join = ts[table, alias];
-
-						if (join != null)
-							return join;
-
-						if (ts.Source is SqlBuilder)
-						{
-							TableSource s = ((SqlBuilder)ts.Source).From[table, alias];
-
-							if (s != null)
-								return s;
-						}
+						if (t != null)
+							return t;
 					}
 
 					return null;
@@ -1684,7 +1669,7 @@ namespace BLToolkit.Data.Sql
 				StringBuilder sb = new StringBuilder(" \nGROUP BY \n");
 
 				foreach (ISqlExpression item in Items)
-					sb.Append(item.ToString()).Append(",");
+					sb.Append('\t').Append(item.ToString()).Append(",");
 
 				return sb.Remove(sb.Length - 1, 1).ToString();
 			}
@@ -1923,7 +1908,12 @@ namespace BLToolkit.Data.Sql
 					foreach (Column c in builder.Select.Columns)
 						map.Add(c, (SqlField)c.Expression);
 
-					((ISqlExpressionWalkable)this).Walk(false, delegate(ISqlExpression expr)
+					SqlBuilder top = this;
+
+					while (top.ParentSql != null)
+						top = top.ParentSql;
+
+					((ISqlExpressionWalkable)top).Walk(false, delegate(ISqlExpression expr)
 					{
 						SqlField fld;
 						return map.TryGetValue(expr, out fld)? fld: expr;
@@ -2085,6 +2075,27 @@ namespace BLToolkit.Data.Sql
 			return ts == null && ParentSql != null? ParentSql.GetTableSource(table) : ts;
 		}
 
+		static TableSource CheckTableSource(TableSource ts, ISqlTableSource table, string alias)
+		{
+			if (ts.Source == table && (alias == null || ts.Alias == alias))
+				return ts;
+
+			TableSource jt = ts[table, alias];
+
+			if (jt != null)
+				return jt;
+
+			if (ts.Source is SqlBuilder)
+			{
+				TableSource s = ((SqlBuilder)ts.Source).From[table, alias];
+
+				if (s != null)
+					return s;
+			}
+
+			return null;
+		}
+
 		#endregion
 
 		#region Overrides
@@ -2148,6 +2159,21 @@ namespace BLToolkit.Data.Sql
 
 		private int _sourceID;
 		public  int  SourceID { get { return _sourceID; } }
+
+		private SqlField _all;
+		public  SqlField  All
+		{
+			get
+			{
+				if (_all == null)
+				{
+					_all = new SqlField("*", "*");
+					((IChild<ISqlTableSource>)_all).Parent = this;
+				}
+
+				return _all;
+			}
+		}
 
 		#endregion
 	}

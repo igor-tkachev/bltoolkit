@@ -42,9 +42,10 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			_sqlBuilder = sqlBuilder;
 			_indent     = indent;
 
-			BuildSelectClause(sb);
-			BuildFromClause  (sb);
-			BuildWhereClause (sb);
+			BuildSelectClause (sb);
+			BuildFromClause   (sb);
+			BuildWhereClause  (sb);
+			BuildGroupByClause(sb);
 
 			return sb;
 		}
@@ -228,6 +229,36 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			_indent--;
 
 			sb.AppendLine();
+		}
+
+		#endregion
+
+		#region GroupBy Clause
+
+		protected virtual void BuildGroupByClause(StringBuilder sb)
+		{
+			if (_sqlBuilder.GroupBy.Items.Count == 0)
+				return;
+
+			AppendIndent(sb);
+
+			sb.Append("GROUP BY").AppendLine();
+
+			_indent++;
+
+			for (int i = 0; i < _sqlBuilder.GroupBy.Items.Count; i++)
+			{
+				AppendIndent(sb);
+
+				BuildExpression(sb, _sqlBuilder.GroupBy.Items[i]);
+
+				if (i + 1 < _sqlBuilder.GroupBy.Items.Count)
+					sb.Append(',');
+
+				sb.AppendLine();
+			}
+
+			_indent--;
 		}
 
 		#endregion
@@ -417,17 +448,22 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			{
 				SqlField field = (SqlField)expr;
 
-				string table = GetTableAlias(_sqlBuilder.GetTableSource(field.Table)) ?? GetTablePhysicalName(field.Table);
+				if (field == field.Table.All)
+					sb.Append("*");
+				else
+				{
+					string table = GetTableAlias(_sqlBuilder.GetTableSource(field.Table)) ?? GetTablePhysicalName(field.Table);
 
-				if (string.IsNullOrEmpty(table))
-					throw new SqlException(string.Format("Table {0} should have an alias.", field.Table));
+					if (string.IsNullOrEmpty(table))
+						throw new SqlException(string.Format("Table {0} should have an alias.", field.Table));
 
-				addAlias = alias != field.PhysicalName;
+					addAlias = alias != field.PhysicalName;
 
-				sb
-					.Append(table)
-					.Append('.')
-					.Append(field.Name == "*"? field.PhysicalName: _dataProvider.Convert(field.PhysicalName, ConvertType.NameToQueryField));
+					sb
+						.Append(table)
+						.Append('.')
+						.Append(_dataProvider.Convert(field.PhysicalName, ConvertType.NameToQueryField));
+				}
 			}
 			else if (expr is SqlBuilder.Column)
 			{
@@ -560,7 +596,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		{
 			if (func.Name == "CASE")
 			{
-				sb.Append("CASE").AppendLine();
+				sb.Append(func.Name).AppendLine();
 
 				_indent++;
 

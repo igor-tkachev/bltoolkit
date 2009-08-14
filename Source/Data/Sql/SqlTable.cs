@@ -23,9 +23,6 @@ namespace BLToolkit.Data.Sql
 			_mappingSchema = mappingSchema;
 
 			_fields = new ChildContainer<ISqlTableSource,SqlField>(this);
-			_all    = new SqlField("*", "*");
-
-			((IChild<ISqlTableSource>)_all).Parent = this;
 		}
 
 		#endregion
@@ -175,8 +172,20 @@ namespace BLToolkit.Data.Sql
 		readonly List<Join> _joins = new List<Join>();
 		public   List<Join>  Joins { get { return _joins; } }
 
-		readonly SqlField _all;
-		public   SqlField  All { get { return _all; } }
+		private  SqlField _all;
+		public   SqlField  All
+		{
+			get
+			{
+				if (_all == null)
+				{
+					_all = new SqlField("*", "*");
+					((IChild<ISqlTableSource>)_all).Parent = this;
+				}
+
+				return _all;
+			}
+		}
 
 		#endregion
 

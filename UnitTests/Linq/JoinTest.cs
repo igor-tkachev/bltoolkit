@@ -70,6 +70,16 @@ namespace Data.Linq
 		}
 
 		[Test]
+		public void InnerJoin6()
+		{
+			TestJohn(db =>
+				from p1 in db.Person
+					join p2 in from p3 in db.Person select new { ID = p3.ID + 1, p3.FirstName } on p1.ID equals p2.ID - 1
+				where p1.ID == 1
+				select new Person { ID = p1.ID, FirstName = p2.FirstName });
+		}
+
+		[Test]
 		public void LeftJoin1()
 		{
 			ForEachProvider(db =>
@@ -94,14 +104,20 @@ namespace Data.Linq
 			{
 				var q = 
 					from p in db.Parent
-						join ch in db.Child on p.ParentID equals ch.ParentID into lj1
+						join c in db.Child on p.ParentID equals c.ParentID into lj
 					where p.ParentID == 1
-					select new { p, lj1 };
+					select new { p, lj };
 
 				var list = q.ToList();
 
 				Assert.AreEqual(1, list.Count);
 				Assert.AreEqual(1, list[0].p.ParentID);
+				Assert.AreEqual(1, list[0].lj.Count());
+
+				var ch = list[0].lj.ToList();
+
+				Assert.AreEqual( 1, ch[0].ParentID);
+				Assert.AreEqual(11, ch[0].ChildID);
 			});
 		}
 

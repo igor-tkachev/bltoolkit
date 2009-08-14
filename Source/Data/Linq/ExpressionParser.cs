@@ -202,10 +202,9 @@ namespace BLToolkit.Data.Linq
 
 			var seq     = ParseSequence(inner);
 			var source2 = new QuerySource.SubQuery(current, _info.SqlBuilder, seq, false);
+			var join    = source2.SubSql.InnerJoin();
 
 			_info.SqlBuilder = current;
-
-			var join = source2.SubSql.InnerJoin();
 
 			current.From.Table(source1.SubSql, join);
 
@@ -256,20 +255,24 @@ namespace BLToolkit.Data.Linq
 
 			var seq     = ParseSequence(inner);
 			var source2 = new QuerySource.GroupJoinQuery(current, _info.SqlBuilder, seq);
+			var join    = source2.SubSql.WeakLeftJoin();
 
 			_info.SqlBuilder = current;
-
-			var join = source2.SubSql.WeakLeftJoin();
 
 			current.From.Table(source1.SubSql, join);
 
 			// Process counter.
 			//
-			var sclone  = (QuerySource)seq.Clone();
-			var counter = new QuerySource.SubQuery(new SqlBuilder(), sclone.SqlBuilder, sclone);
+			_info.SqlBuilder = new SqlBuilder();
 
-			counter.SqlBuilder.Select.Expr("COUNT(*)");
-			counter.SqlBuilder.ParentSql = current;
+			var cntseq   = ParseSequence(inner);
+			var counter  = new QuerySource.SubQuery(current, _info.SqlBuilder, cntseq, false);
+			var cntjoin  = counter.SubSql.WeakLeftJoin();
+ 
+			_info.SqlBuilder = current;
+
+			counter.SubSql.Select.Expr(new SqlFunction.Count(counter.SubSql.From.Tables[0]), "cnt");
+			current.From.Table(source1.SubSql, cntjoin);
 
 			// Make join and where for the counter.
 			//
@@ -284,9 +287,13 @@ namespace BLToolkit.Data.Linq
 						.Expr(ParseExpression(source1, new1.Create(new1.Expr.Arguments[i], new1.Index(new1.Expr.Arguments, New.Arguments, i)))).Equal
 						.Expr(ParseExpression(source2, new2.Create(new2.Expr.Arguments[i], new2.Index(new2.Expr.Arguments, New.Arguments, i))));
 
-					counter.SqlBuilder.Where
+					//counter.SqlBuilder.Where
+					cntjoin
 						.Expr(ParseExpression(source1, new1.Create(new1.Expr.Arguments[i], new1.Index(new1.Expr.Arguments, New.Arguments, i)))).Equal
 						.Expr(ParseExpression(counter, new2.Create(new2.Expr.Arguments[i], new2.Index(new2.Expr.Arguments, New.Arguments, i))));
+
+					counter.SubSql.GroupBy
+						.Expr(ParseExpression(cntseq, new2.Create(new2.Expr.Arguments[i], new2.Index(new2.Expr.Arguments, New.Arguments, i))));
 				}
 			}
 			else
@@ -295,17 +302,20 @@ namespace BLToolkit.Data.Linq
 					.Expr(ParseExpression(source1, outerKeySelector.Body)).Equal
 					.Expr(ParseExpression(source2, innerKeySelector.Body));
 
-				counter.SqlBuilder.Where
+				cntjoin
 					.Expr(ParseExpression(source1, outerKeySelector.Body)).Equal
 					.Expr(ParseExpression(counter, innerKeySelector.Body));
+
+				counter.SubSql.GroupBy
+					.Expr(ParseExpression(cntseq, innerKeySelector.Body));
 			}
 
 			if (resultSelector == null)
 				return source2;
 			
-			var select = ParseSelect(resultSelector, source1, source2);
+			var select = ParseSelect(resultSelector, source1, source2, counter);
 
-			source2.Counter    = new QueryField.ExprColumn(select, counter.SqlBuilder, null);
+			source2.Counter    = new QueryField.ExprColumn(select, counter.SubSql.Select.Columns[0], null);
 			source2.SourceInfo = inner;
 
 			return select;

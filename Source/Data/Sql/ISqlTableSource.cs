@@ -5,7 +5,9 @@ namespace BLToolkit.Data.Sql
 {
 	public interface ISqlTableSource
 	{
-		object Clone(Dictionary<object,object> objectTree);
-		int    SourceID { get; }
+		object   Clone(Dictionary<object,object> objectTree);
+
+		SqlField All      { get; }
+		int      SourceID { get; }
 	}
 }

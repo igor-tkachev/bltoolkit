@@ -254,9 +254,8 @@ namespace BLToolkit.Data.Linq
 			{
 			}
 
-			public SqlBuilder SubSql;
-
-			Dictionary<QueryField,SubQueryColumn> _columns = new Dictionary<QueryField,SubQueryColumn>();
+			public SqlBuilder                            SubSql;
+			public Dictionary<QueryField,SubQueryColumn> Columns = new Dictionary<QueryField,SubQueryColumn>();
 
 			public override QueryField EnsureField(QueryField field)
 			{
@@ -265,8 +264,8 @@ namespace BLToolkit.Data.Linq
 
 				SubQueryColumn col;
 
-				if (!_columns.TryGetValue(field, out col))
-					_columns.Add(field, col = new SubQueryColumn(this, field));
+				if (!Columns.TryGetValue(field, out col))
+					Columns.Add(field, col = new SubQueryColumn(this, field));
 
 				return col;
 			}
@@ -283,14 +282,14 @@ namespace BLToolkit.Data.Linq
 
 			protected override IEnumerable<QueryField> GetFields()
 			{
-				foreach (var col in _columns.Values)
+				foreach (var col in Columns.Values)
 					yield return col;
 			}
 
 			public override ISqlExpression GetExpression<T>(ExpressionParser<T> parser)
 			{
-				if (_columns.Count == 1 && ParentQueries[0] is Scalar)
-					return _columns.Values.First().GetExpression(parser);
+				if (Columns.Count == 1 && ParentQueries[0] is Scalar)
+					return Columns.Values.First().GetExpression(parser);
 
 				throw new InvalidOperationException();
 			}
@@ -333,8 +332,8 @@ namespace BLToolkit.Data.Linq
 
 					sub.SubSql = (SqlBuilder)SubSql.Clone(objectTree);
 
-					foreach (var c in _columns)
-						sub._columns.Add(c.Key, (SubQueryColumn)c.Value.Clone(objectTree));
+					foreach (var c in Columns)
+						sub.Columns.Add(c.Key, (SubQueryColumn)c.Value.Clone(objectTree));
 
 					clone = sub;
 				}
@@ -494,7 +493,7 @@ namespace BLToolkit.Data.Linq
 					if (ParentQueries.Length == 1)
 						return ParentQueries[0];
 
-					if (ParentQueries.Length != Lambda.Parameters.Length)
+					if (ParentQueries.Length < Lambda.Parameters.Length)
 						throw new InvalidOperationException();
 
 					for (int i = 0; i < ParentQueries.Length; i++)
