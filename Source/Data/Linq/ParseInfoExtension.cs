@@ -49,7 +49,7 @@ namespace BLToolkit.Data.Linq
 
 		public static bool IsQueryableMethod(
 			this ParseInfo<MethodCallExpression> pi,
-			string methodName,
+			string                               methodName,
 			Action<ParseInfo<Expression>>        seq,
 			Action<LambdaInfo>                   lambda)
 		{
@@ -58,7 +58,7 @@ namespace BLToolkit.Data.Linq
 
 		public static bool IsQueryableMethod(
 			this ParseInfo<MethodCallExpression> pi,
-			string methodName,
+			string                               methodName,
 			Action<ParseInfo<Expression>>        seq,
 			Action<LambdaInfo,LambdaInfo>        parms)
 		{
@@ -81,7 +81,7 @@ namespace BLToolkit.Data.Linq
 
 		public static bool IsQueryableMethod(
 			this ParseInfo<MethodCallExpression> pi,
-			string methodName,
+			string                               methodName,
 			Action<ParseInfo<Expression>>        seq,
 			Action<ParseInfo<Expression>,LambdaInfo,LambdaInfo,LambdaInfo> parms)
 		{
@@ -106,6 +106,14 @@ namespace BLToolkit.Data.Linq
 			return false;
 		}
 
+		public static bool IsEnumerableMethod(
+			this ParseInfo<MethodCallExpression> pi,
+			string                               methodName,
+			Func<ParseInfo<Expression>,bool>     action)
+		{
+			return IsMethod(pi, typeof(Enumerable), methodName, new FTest[] { p => action(p) }, p => true);
+		}
+
 		public static ParseInfo<Expression> CreateArgument(this ParseInfo<MethodCallExpression> pi, int idx)
 		{
 			return pi.Create(pi.Expr.Arguments[idx], pi.Indexer(ReflectionHelper.MethodCall.Arguments, ReflectionHelper.ExprItem, idx));
@@ -114,7 +122,7 @@ namespace BLToolkit.Data.Linq
 		[Obsolete]
 		static bool IsMethod(
 			this ParseInfo<MethodCallExpression> pi,
-			MethodInfo method,
+			MethodInfo                           method,
 			Action<ParseInfo<Expression>>        seq,
 			Action<ParseInfo<ParameterExpression>,ParseInfo<Expression>> lambda)
 		{

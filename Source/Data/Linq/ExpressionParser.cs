@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
@@ -66,7 +67,7 @@ namespace BLToolkit.Data.Linq
 				//
 				pi =>
 				{
-					BuildSelect(ParseSequence(pi), SetQuery, SetQuery, i => i);
+					BuildSelect(ParseSequence(pi, null), SetQuery, SetQuery, i => i);
 					return true;
 				}
 			);
@@ -74,7 +75,7 @@ namespace BLToolkit.Data.Linq
 			return _info;
 		}
 
-		QuerySource ParseSequence(ParseInfo info)
+		QuerySource ParseSequence(ParseInfo info, QuerySource parent)
 		{
 			QuerySource select = null;
 
@@ -94,17 +95,19 @@ namespace BLToolkit.Data.Linq
 
 			info.ConvertTo<MethodCallExpression>().Match
 			(
-				pi => pi.IsQueryableMethod("Select",     seq => select = ParseSequence(seq),  l      => select = ParseSelect    (l,        select)),
-				pi => pi.IsQueryableMethod("Where",      seq => select = ParseSequence(seq),  l      => select = ParseWhere     (l,        select)),
-				pi => pi.IsQueryableMethod("SelectMany", seq => select = ParseSequence(seq),  l      => select = ParseSelectMany(l,  null, select)),
-				pi => pi.IsQueryableMethod("SelectMany", seq => select = ParseSequence(seq), (l1,l2) => select = ParseSelectMany(l1, l2,   select)),
-				pi => pi.IsQueryableMethod("Join",       seq => select = ParseSequence(seq), (i,l2,l3,l4) => select = ParseJoin     (i, l2, l3, l4, select)),
-				pi => pi.IsQueryableMethod("GroupJoin",  seq => select = ParseSequence(seq), (i,l2,l3,l4) => select = ParseGroupJoin(i, l2, l3, l4, select)),
+				pi => pi.IsQueryableMethod ("Select",         seq => select = ParseSequence(seq, null),  l      => select = ParseSelect    (l,        select)),
+				pi => pi.IsQueryableMethod ("Where",          seq => select = ParseSequence(seq, null),  l      => select = ParseWhere     (l,        select)),
+				pi => pi.IsQueryableMethod ("SelectMany",     seq => select = ParseSequence(seq, null),  l      => select = ParseSelectMany(l,  null, select)),
+				pi => pi.IsQueryableMethod ("SelectMany",     seq => select = ParseSequence(seq, null), (l1,l2) => select = ParseSelectMany(l1, l2,   select)),
+				pi => pi.IsQueryableMethod ("Join",           seq => select = ParseSequence(seq, null), (i,l2,l3,l4) => select = ParseJoin     (i, l2, l3, l4, select)),
+				pi => pi.IsQueryableMethod ("GroupJoin",      seq => select = ParseSequence(seq, null), (i,l2,l3,l4) => select = ParseGroupJoin(i, l2, l3, l4, select)),
+				pi => pi.IsEnumerableMethod("DefaultIfEmpty", seq => { select = ParseDefaultIfEmpty(parent, seq); return select != null; }),
 				pi => pi.IsMethod(m =>
 				{
 					if (m.Expr.Method.DeclaringType == typeof(Queryable) || !TypeHelper.IsSameOrParent(typeof(IQueryable), pi.Expr.Type))
 						return false;
-					select = ParseSequence(GetIQueriable(info));
+
+					select = ParseSequence(GetIQueriable(info), null);
 					return true;
 				}),
 				pi => { throw new ArgumentException(string.Format("Queryable method call expected. Got '{0}'.", pi.Expr), "info"); }
@@ -162,21 +165,31 @@ namespace BLToolkit.Data.Linq
 
 		QuerySource ParseSelectMany(LambdaInfo collectionSelector, LambdaInfo resultSelector, QuerySource source)
 		{
-			var current = new SqlBuilder();
-			var source1 = new QuerySource.SubQuery(current, _info.SqlBuilder, source);
-
-			current.From.Table(source1.SubSql);
+			var sql = _info.SqlBuilder;
 
 			_info.SqlBuilder = new SqlBuilder();
 
-			var seq     = ParseSequence(collectionSelector.Body);
-			var source2 = new QuerySource.SubQuery(current, _info.SqlBuilder, seq);
+			var seq2 = ParseSequence(collectionSelector.Body, source);
 
-			current.From.Table(source2.SubSql);
+			if (source.ParentQueries.Contains(seq2))
+			{
+				_info.SqlBuilder = sql;
 
-			_info.SqlBuilder = current;
+				return resultSelector == null ? seq2 : ParseSelect(resultSelector, source, seq2);
+			}
+			else
+			{
+				var current = new SqlBuilder();
+				var source1 = new QuerySource.SubQuery(current, sql,              source);
+				var source2 = new QuerySource.SubQuery(current, _info.SqlBuilder, seq2);
 
-			return resultSelector == null ? source2 : ParseSelect(resultSelector, source1, source2);
+				current.From.Table(source1.SubSql);
+				current.From.Table(source2.SubSql);
+
+				_info.SqlBuilder = current;
+
+				return resultSelector == null ? source2 : ParseSelect(resultSelector, source1, source2);
+			}
 		}
 
 		#endregion
@@ -200,7 +213,7 @@ namespace BLToolkit.Data.Linq
 
 			_info.SqlBuilder = new SqlBuilder();
 
-			var seq     = ParseSequence(inner);
+			var seq     = ParseSequence(inner, null);
 			var source2 = new QuerySource.SubQuery(current, _info.SqlBuilder, seq, false);
 			var join    = source2.SubSql.InnerJoin();
 
@@ -253,9 +266,9 @@ namespace BLToolkit.Data.Linq
 			//
 			_info.SqlBuilder = new SqlBuilder();
 
-			var seq     = ParseSequence(inner);
+			var seq     = ParseSequence(inner, null);
 			var source2 = new QuerySource.GroupJoinQuery(current, _info.SqlBuilder, seq);
-			var join    = source2.SubSql.WeakLeftJoin();
+			var join    = source2.SubSql.LeftJoin();
 
 			_info.SqlBuilder = current;
 
@@ -265,7 +278,7 @@ namespace BLToolkit.Data.Linq
 			//
 			_info.SqlBuilder = new SqlBuilder();
 
-			var cntseq   = ParseSequence(inner);
+			var cntseq   = ParseSequence(inner, null);
 			var counter  = new QuerySource.SubQuery(current, _info.SqlBuilder, cntseq, false);
 			var cntjoin  = counter.SubSql.WeakLeftJoin();
  
@@ -315,10 +328,19 @@ namespace BLToolkit.Data.Linq
 			
 			var select = ParseSelect(resultSelector, source1, source2, counter);
 
-			source2.Counter    = new QueryField.ExprColumn(select, counter.SubSql.Select.Columns[0], null);
-			source2.SourceInfo = inner;
+			source2.Counter = new QueryField.ExprColumn(select, counter.SubSql.Select.Columns[0], null);
+			//source2.SourceInfo = inner;
 
 			return select;
+		}
+
+		#endregion
+
+		#region Parse DefaultIfEmpty
+
+		QuerySource ParseDefaultIfEmpty(QuerySource parent, ParseInfo<Expression> seq)
+		{
+			return parent.GetField(seq) as QuerySource;
 		}
 
 		#endregion
@@ -453,7 +475,7 @@ namespace BLToolkit.Data.Linq
 				{
 					case ExpressionType.MemberAccess:
 						{
-							var ma = (ParseInfo<MemberExpression>)pi;//.ConvertTo<MemberExpression>();
+							var ma = (ParseInfo<MemberExpression>)pi;
 
 							if (IsServerSideOnly(pi))
 								return BuildField(query, ma);
@@ -672,7 +694,7 @@ namespace BLToolkit.Data.Linq
 			{
 				var query = (QuerySource.SubQuery)field;
 
-				if (query is QuerySource.GroupJoinQuery)
+				if (query is QuerySource.GroupJoinQuery && TypeHelper.IsSameOrParent(typeof(IEnumerable), ma.Expr.Type))
 					return BuildGroupJoin(ma, (QuerySource.GroupJoinQuery)query, converter);
 
 				if (query.Sources[0] is QuerySource.Table)

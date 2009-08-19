@@ -350,43 +350,13 @@ namespace BLToolkit.Data.Linq
 			}
 
 			public ExprColumn Counter;
-			public ParseInfo  SourceInfo;
+			//public ParseInfo  SourceInfo;
 
 			GroupJoinQuery() {}
 
 			protected override SubQuery CreateSubQuery(Dictionary<object,object> objectTree)
 			{
 				return new GroupJoinQuery { Counter = (ExprColumn)Counter.Clone(objectTree) };
-			}
-
-			public override ISqlExpression GetExpression<T>(ExpressionParser<T> parser)
-			{
-				return base.GetExpression<T>(parser);
-			}
-
-			public override QueryField GetField(Expression expr)
-			{
-				return base.GetField(expr);
-			}
-
-			protected override QueryField GetField(List<MemberInfo> members, int currentMember)
-			{
-				return base.GetField(members, currentMember);
-			}
-
-			public override QueryField GetField(MemberInfo mi)
-			{
-				return base.GetField(mi);
-			}
-
-			protected override IEnumerable<QueryField> GetFields()
-			{
-				return base.GetFields();
-			}
-
-			public override FieldIndex[] Select<T>(ExpressionParser<T> parser)
-			{
-				return base.Select<T>(parser);
 			}
 		}
 

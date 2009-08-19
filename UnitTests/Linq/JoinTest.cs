@@ -133,13 +133,13 @@ namespace Data.Linq
 						ch => ch.ParentID,
 						(p, lj1) => new { p = p, lj1 = new { lj1 } }
 					)
-					.Where (t => t.p.ParentID == 1)
+					.Where (t => t.p.ParentID == 2)
 					.Select(t => new { p = t.p, lj1 = t.lj1 });
 
 				var list = q.ToList();
 
-				Assert.AreEqual(1, list.Count);
-				Assert.AreEqual(1, list[0].p.ParentID);
+				Assert.AreEqual(2, list.Count);
+				Assert.AreEqual(2, list[0].p.ParentID);
 			});
 		}
 
@@ -153,13 +153,13 @@ namespace Data.Linq
 						join ch in
 							from c in db.Child select new { c.ParentID, c.ChildID }
 						on p.ParentID equals ch.ParentID into lj1
-					where p.ParentID == 1
+					where p.ParentID == 3
 					select new { p, lj1 };
 
 				var list = q.ToList();
 
-				Assert.AreEqual(1, list.Count);
-				Assert.AreEqual(1, list[0].p.ParentID);
+				Assert.AreEqual(3, list.Count);
+				Assert.AreEqual(3, list[0].p.ParentID);
 			});
 		}
 
@@ -172,13 +172,13 @@ namespace Data.Linq
 					from p in db.Parent
 						join ch in db.Child on p.ParentID equals ch.ParentID into lj1
 						from ch in lj1.DefaultIfEmpty()
-					where p.ParentID == 1
+					where p.ParentID == 4
 					select new { p, ch };
 
 				var list = q.ToList();
 
-				Assert.AreEqual(1, list.Count);
-				Assert.AreEqual(1, list[0].p.ParentID);
+				Assert.AreEqual(4, list.Count);
+				Assert.AreEqual(4, list[0].p.ParentID);
 			});
 		}
 	}
