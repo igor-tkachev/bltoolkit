@@ -4,6 +4,7 @@ using BLToolkit.Data;
 
 namespace BLToolkit.DataAccess
 {
+	[JetBrains.Annotations.BaseTypeRequired(typeof(DataAccessor))]
 	[AttributeUsage(AttributeTargets.Method)]
 	public class SqlQueryAttribute : Attribute
 	{

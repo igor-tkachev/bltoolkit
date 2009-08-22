@@ -1,26 +1,62 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Data;
 using System.Linq;
-using System.Linq.Expressions;
 
 using NUnit.Framework;
 
 namespace Data.Linq
 {
-	using Model;
-
 	[TestFixture]
 	public class GroupByTest : TestBase
 	{
 		[Test]
 		public void GroupBy1()
 		{
-			TestJohn(db =>
-				from p in db.Person
-				where p.ID == 1
-				group p by p.FirstName into g
-				select new Person { ID = g.Min(p => p.ID), FirstName = g.Key });
+			ForEachProvider(db =>
+			{
+				var q =
+					from ch in db.Child
+					group ch by ch.ParentID;
+
+				var list = q.ToList().OrderBy(n => n).ToList();
+
+				Assert.AreEqual(4, list.Count);
+				for (var i = 0; i < list.Count; i++) Assert.AreEqual(i + 1, list[i]);
+			});
+		}
+
+		[Test]
+		public void GroupBy2()
+		{
+			ForEachProvider(db =>
+			{
+				var q =
+					from ch in db.Child
+					group ch by ch.ParentID into g
+					select g.Key;
+
+				var list = q.ToList().OrderBy(n => n).ToList();
+
+				Assert.AreEqual(4, list.Count);
+				for (var i = 0; i < list.Count; i++) Assert.AreEqual(i + 1, list[i]);
+			});
+		}
+
+		[Test]
+		public void GroupBy3()
+		{
+			ForEachProvider(db =>
+			{
+				var q =
+					from ch in db.Child
+					group ch by ch.ParentID into g
+					orderby g.Key
+					select g.Key;
+
+				var list = q.ToList();
+
+				Assert.AreEqual(4, list.Count);
+				for (var i = 0; i < list.Count; i++) Assert.AreEqual(i + 1, list[i]);
+			});
 		}
 	}
 }

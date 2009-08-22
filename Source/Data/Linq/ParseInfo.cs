@@ -126,7 +126,7 @@ namespace BLToolkit.Data.Linq
 				p => true);
 		}
 
-		FParm GetFParm(ParseInfo<ParameterExpression>[] parms, int n)
+		static FParm GetFParm(ParseInfo<ParameterExpression>[] parms, int n)
 		{
 			return p => { parms[n] = p; return true; };
 		}

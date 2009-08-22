@@ -9,7 +9,7 @@ using BLToolkit.Validation;
 
 namespace BLToolkit.Common
 {
-	[Serializable, Trimmable, ComVisible(true)]
+	[Serializable, Trimmable, ComVisible(true), JetBrains.Annotations.UsedImplicitly]
 	public abstract class EntityBase : ICustomTypeDescriptor
 	{
 		#region Protected members

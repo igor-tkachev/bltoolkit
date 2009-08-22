@@ -156,13 +156,49 @@ namespace BLToolkit.Data.Linq
 				return QuerySource.SubSql.Select.Columns[_subIndex[0].Index];
 			}
 
-
 			public override object Clone(Dictionary<object, object> objectTree)
 			{
 				object clone;
 
 				if (!objectTree.TryGetValue(this, out clone))
 					objectTree.Add(this, clone = new SubQueryColumn((QuerySource.SubQuery)QuerySource.Clone(objectTree), (QueryField)Field.Clone(objectTree)));
+
+				return clone;
+			}
+		}
+
+		public class GroupByColumn : QueryField
+		{
+			public GroupByColumn(QuerySource.GroupBy groupBySource)
+			{
+				GroupBySource = groupBySource;
+			}
+
+			public readonly QuerySource.GroupBy GroupBySource;
+
+			FieldIndex[] _index;
+
+			public override QuerySource[] Sources { get { return new[] { GroupBySource }; } }
+
+			public override FieldIndex[] Select<T>(ExpressionParser<T> parser)
+			{
+				if (_index == null)
+					_index = GroupBySource.ParentQueries[0].Select(parser);
+
+				return _index;
+			}
+
+			public override ISqlExpression GetExpression<T>(ExpressionParser<T> parser)
+			{
+				throw new NotImplementedException();
+			}
+
+			public override object Clone(Dictionary<object, object> objectTree)
+			{
+				object clone;
+
+				if (!objectTree.TryGetValue(this, out clone))
+					objectTree.Add(this, clone = new GroupByColumn((QuerySource.GroupBy)GroupBySource.Clone(objectTree)));
 
 				return clone;
 			}

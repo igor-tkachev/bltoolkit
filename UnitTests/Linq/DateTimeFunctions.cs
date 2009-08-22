@@ -7,8 +7,6 @@ using BLToolkit.Data.Linq;
 
 namespace Data.Linq
 {
-	using Model;
-
 	[TestFixture]
 	public class DateTimeFunctions : TestBase
 	{

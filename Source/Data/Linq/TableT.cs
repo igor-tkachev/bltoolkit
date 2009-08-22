@@ -10,7 +10,7 @@ using BLToolkit.Reflection;
 
 namespace BLToolkit.Data.Linq
 {
-	public class Table<T> : IQueryable<T>, IQueryProvider
+	public class Table<T> : IOrderedQueryable<T>, IQueryProvider
 	{
 		#region Init
 

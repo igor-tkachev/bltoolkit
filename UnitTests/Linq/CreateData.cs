@@ -1,21 +1,17 @@
 ﻿using System;
 using System.IO;
-
-using ADOX;
-
 using NUnit.Framework;
 
 using BLToolkit.Data.DataProvider;
 
 using Data.Linq;
-using BLToolkit.Data;
 
 namespace Create
 {
 	[TestFixture]
 	public class CreateData : TestBase
 	{
-		void RunScript(Action<string> execute, string divider, string name)
+		static void RunScript(Action<string> execute, string divider, string name)
 		{
 			Console.WriteLine("=== " + name + " === \n");
 
@@ -51,7 +47,7 @@ namespace Create
 				throw exception;
 		}
 
-		void RunScript(TestDbManager db, string divider, string name)
+		static void RunScript(TestDbManager db, string divider, string name)
 		{
 			RunScript(cmd => db.SetCommand(cmd).ExecuteNonQuery(), divider, name);
 		}

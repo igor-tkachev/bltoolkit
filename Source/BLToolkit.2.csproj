@@ -306,6 +306,7 @@
     <Compile Include="Patterns\DuckType.cs" />
     <Compile Include="Patterns\DuckTyping.cs" />
     <Compile Include="Patterns\MustImplementAttribute.cs" />
+    <Compile Include="Properties\JetBrains.Annotations.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>

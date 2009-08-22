@@ -2,6 +2,7 @@
 
 namespace BLToolkit.DataAccess
 {
+	[JetBrains.Annotations.BaseTypeRequired(typeof(DataAccessor))]
 	[AttributeUsage(AttributeTargets.Class | AttributeTargets.Interface, AllowMultiple = true)]
 	public class ActualTypeAttribute : Attribute
 	{

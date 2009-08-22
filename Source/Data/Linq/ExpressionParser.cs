@@ -95,13 +95,16 @@ namespace BLToolkit.Data.Linq
 
 			info.ConvertTo<MethodCallExpression>().Match
 			(
-				pi => pi.IsQueryableMethod ("Select",         seq => select = ParseSequence(seq, null),  l      => select = ParseSelect    (l,        select)),
-				pi => pi.IsQueryableMethod ("Where",          seq => select = ParseSequence(seq, null),  l      => select = ParseWhere     (l,        select)),
-				pi => pi.IsQueryableMethod ("SelectMany",     seq => select = ParseSequence(seq, null),  l      => select = ParseSelectMany(l,  null, select)),
-				pi => pi.IsQueryableMethod ("SelectMany",     seq => select = ParseSequence(seq, null), (l1,l2) => select = ParseSelectMany(l1, l2,   select)),
-				pi => pi.IsQueryableMethod ("Join",           seq => select = ParseSequence(seq, null), (i,l2,l3,l4) => select = ParseJoin     (i, l2, l3, l4, select)),
-				pi => pi.IsQueryableMethod ("GroupJoin",      seq => select = ParseSequence(seq, null), (i,l2,l3,l4) => select = ParseGroupJoin(i, l2, l3, l4, select)),
-				pi => pi.IsEnumerableMethod("DefaultIfEmpty", seq => { select = ParseDefaultIfEmpty(parent, seq); return select != null; }),
+				pi => pi.IsQueryableMethod ("Select",            seq => select = ParseSequence(seq, null),  l      => select = ParseSelect    (l,        select)),
+				pi => pi.IsQueryableMethod ("Where",             seq => select = ParseSequence(seq, null),  l      => select = ParseWhere     (l,        select)),
+				pi => pi.IsQueryableMethod ("SelectMany",        seq => select = ParseSequence(seq, null),  l      => select = ParseSelectMany(l,  null, select)),
+				pi => pi.IsQueryableMethod ("SelectMany",        seq => select = ParseSequence(seq, null), (l1,l2) => select = ParseSelectMany(l1, l2,   select)),
+				pi => pi.IsQueryableMethod ("Join",              seq => select = ParseSequence(seq, null), (i,l2,l3,l4) => select = ParseJoin     (i, l2, l3, l4, select)),
+				pi => pi.IsQueryableMethod ("GroupJoin",         seq => select = ParseSequence(seq, null), (i,l2,l3,l4) => select = ParseGroupJoin(i, l2, l3, l4, select)),
+				pi => pi.IsEnumerableMethod("DefaultIfEmpty",    seq => { select = ParseDefaultIfEmpty(parent, seq); return select != null; }),
+				pi => pi.IsQueryableMethod ("GroupBy",           seq => select = ParseSequence(seq, null),  l      => select = ParseGroupBy   (l,        select)),
+				pi => pi.IsQueryableMethod ("OrderBy",           seq => select = ParseSequence(seq, null),  l      => select = ParseOrderBy   (l,        select, true)),
+				pi => pi.IsQueryableMethod ("OrderByDescending", seq => select = ParseSequence(seq, null),  l      => select = ParseOrderBy   (l,        select, false)),
 				pi => pi.IsMethod(m =>
 				{
 					if (m.Expr.Method.DeclaringType == typeof(Queryable) || !TypeHelper.IsSameOrParent(typeof(IQueryable), pi.Expr.Type))
@@ -131,7 +134,7 @@ namespace BLToolkit.Data.Linq
 					Expression.Call(
 						_infoParam,
 						Expressor<ExpressionInfo<T>>.MethodExpressor(a => a.GetIQueryable(0, null)),
-						new Expression[] { Expression.Constant(n), info.ParamAccessor }));
+						new [] { Expression.Constant(n), info.ParamAccessor }));
 			}
 
 			throw new InvalidOperationException();
@@ -143,13 +146,13 @@ namespace BLToolkit.Data.Linq
 
 		QuerySource ParseSelect(LambdaInfo l, params QuerySource[] sources)
 		{
-			for (int i = 0; i < sources.Length && i < l.Parameters.Length; i++)
+			for (var i = 0; i < sources.Length && i < l.Parameters.Length; i++)
 				SetAlias(sources[i], l.Parameters[i].Expr.Name);
 
 			switch (l.Body.NodeType)
 			{
 				case ExpressionType.Parameter   :
-					for (int i = 0; i < sources.Length; i++)
+					for (var i = 0; i < sources.Length; i++)
 						if (l.Body == l.Parameters[i].Expr)
 							return sources[i];
 					throw new InvalidOperationException();
@@ -174,22 +177,19 @@ namespace BLToolkit.Data.Linq
 			if (source.ParentQueries.Contains(seq2))
 			{
 				_info.SqlBuilder = sql;
-
 				return resultSelector == null ? seq2 : ParseSelect(resultSelector, source, seq2);
 			}
-			else
-			{
-				var current = new SqlBuilder();
-				var source1 = new QuerySource.SubQuery(current, sql,              source);
-				var source2 = new QuerySource.SubQuery(current, _info.SqlBuilder, seq2);
 
-				current.From.Table(source1.SubSql);
-				current.From.Table(source2.SubSql);
+			var current = new SqlBuilder();
+			var source1 = new QuerySource.SubQuery(current, sql,              source);
+			var source2 = new QuerySource.SubQuery(current, _info.SqlBuilder, seq2);
 
-				_info.SqlBuilder = current;
+			current.From.Table(source1.SubSql);
+			current.From.Table(source2.SubSql);
 
-				return resultSelector == null ? source2 : ParseSelect(resultSelector, source1, source2);
-			}
+			_info.SqlBuilder = current;
+
+			return resultSelector == null ? source2 : ParseSelect(resultSelector, source1, source2);
 		}
 
 		#endregion
@@ -197,16 +197,13 @@ namespace BLToolkit.Data.Linq
 		#region Parse Join
 
 		QuerySource ParseJoin(
-			ParseInfo<Expression> inner,
-			LambdaInfo            outerKeySelector,
-			LambdaInfo            innerKeySelector,
-			LambdaInfo            resultSelector,
-			QuerySource           outerSource)
+			ParseInfo   inner,
+			LambdaInfo  outerKeySelector,
+			LambdaInfo  innerKeySelector,
+			LambdaInfo  resultSelector,
+			QuerySource outerSource)
 		{
-			if (outerKeySelector.Body.NodeType == ExpressionType.MemberInit)
-				throw new NotSupportedException(
-					string.Format("Explicit construction of entity type '{0}' in query is not allowed.",
-					outerKeySelector.Body.Expr.Type));
+			CheckExplicitCtor(outerKeySelector.Body);
 
 			var current = new SqlBuilder();
 			var source1 = new QuerySource.SubQuery(current, _info.SqlBuilder, outerSource);
@@ -239,6 +236,14 @@ namespace BLToolkit.Data.Linq
 			}
 
 			return resultSelector == null ? source2 : ParseSelect(resultSelector, source1, source2);
+		}
+
+		static void CheckExplicitCtor(Expression expr)
+		{
+			if (expr.NodeType == ExpressionType.MemberInit)
+				throw new NotSupportedException(
+					string.Format("Explicit construction of entity type '{0}' in query is not allowed.",
+					              expr.Type));
 		}
 
 		#endregion
@@ -390,6 +395,38 @@ namespace BLToolkit.Data.Linq
 
 		#endregion
 
+		#region Parse GroupBy
+
+		QuerySource ParseGroupBy(LambdaInfo lambda, QuerySource source)
+		{
+			CheckExplicitCtor(lambda.Body);
+
+			var group = ParseSelect(lambda, source);
+
+			foreach (var field in group.GetFields())
+				_info.SqlBuilder.GroupBy.Expr(field.GetExpression(this));
+
+			return new QuerySource.GroupBy(_info.SqlBuilder, group.Lambda, group);
+		}
+
+		#endregion
+
+		#region Parse OrderBy
+
+		QuerySource ParseOrderBy(LambdaInfo lambda, QuerySource source, bool ascending)
+		{
+			CheckExplicitCtor(lambda.Body);
+
+			var order = ParseSelect(lambda, source);
+
+			foreach (var field in order.GetFields())
+				_info.SqlBuilder.OrderBy.Expr(field.GetExpression(this), !ascending);
+
+			return source;
+		}
+
+		#endregion
+
 		#region Build Select
 
 		void SetQuery(QuerySource query, IndexConverter converter)
@@ -413,7 +450,8 @@ namespace BLToolkit.Data.Linq
 				table  => queryAction(table, converter),                                  // QueryInfo.Table
 				expr   => BuildNew     (query, expr.Lambda.Body,   newAction),            // QueryInfo.Expr
 				sub    => BuildSubQuery(sub,   queryAction,        newAction, converter), // QueryInfo.SubQuery
-				scalar => BuildNew     (query, scalar.Lambda.Body, newAction)             // QueryInfo.Scalar
+				scalar => BuildNew     (query, scalar.Lambda.Body, newAction),            // QueryInfo.Scalar
+				group  => BuildGroupBy (query, group.Lambda.Body,  newAction)             // QueryInfo.GroupBy
 			);
 		}
 
@@ -463,8 +501,15 @@ namespace BLToolkit.Data.Linq
 						throw new NotImplementedException();
 				}, 
 				_ => { throw new NotImplementedException(); }, // QueryInfo.SubQuery
-				_ => { throw new NotImplementedException(); }  // QueryInfo.Scalar
+				_ => { throw new NotImplementedException(); }, // QueryInfo.Scalar
+				_ => { throw new NotImplementedException(); }  // QueryInfo.GroupBy
 			);
+		}
+
+		void BuildGroupBy(QuerySource query, ParseInfo expr, Action<ParseInfo> newAction)
+		{
+			var info = BuildNewExpression(query, expr);
+			newAction(info);
 		}
 
 		ParseInfo BuildNewExpression(QuerySource query, ParseInfo expr)
@@ -506,6 +551,9 @@ namespace BLToolkit.Data.Linq
 
 									if (field is QueryField.SubQueryColumn)
 										return BuildSubQuery(ma, (QueryField.SubQueryColumn)field, i => i);
+
+									if (field is QueryField.GroupByColumn)
+										return BuildGroupBy(ma, (QueryField.GroupByColumn)field, i => i);
 
 									throw new InvalidOperationException();
 								}
@@ -680,6 +728,11 @@ namespace BLToolkit.Data.Linq
 
 		#endregion
 
+		ParseInfo BuildGroupBy(ParseInfo<MemberExpression> ma, QueryField.GroupByColumn field, IndexConverter converter)
+		{
+			return BuildField(ma, field, converter);
+		}
+
 		ParseInfo BuildField(QuerySource query, ParseInfo pi)
 		{
 			var sqlex = ParseExpression(query, pi);
@@ -751,6 +804,7 @@ namespace BLToolkit.Data.Linq
 					if (table.Alias == null)
 						table.Alias = alias;
 				},
+				_ => {},
 				_ => {}
 			);
 		}
@@ -1138,7 +1192,7 @@ namespace BLToolkit.Data.Linq
 
 		bool IsServerSideOnly(ParseInfo parseInfo)
 		{
-			bool isServerSideOnly = false;
+			var isServerSideOnly = false;
 
 			parseInfo.Walk(pi =>
 			{

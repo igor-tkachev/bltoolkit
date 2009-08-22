@@ -46,6 +46,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			BuildFromClause   (sb);
 			BuildWhereClause  (sb);
 			BuildGroupByClause(sb);
+			BuildOrderByClause(sb);
 
 			return sb;
 		}
@@ -253,6 +254,41 @@ namespace BLToolkit.Data.Sql.SqlProvider
 				BuildExpression(sb, _sqlBuilder.GroupBy.Items[i]);
 
 				if (i + 1 < _sqlBuilder.GroupBy.Items.Count)
+					sb.Append(',');
+
+				sb.AppendLine();
+			}
+
+			_indent--;
+		}
+
+		#endregion
+
+		#region OrderBy Clause
+
+		protected virtual void BuildOrderByClause(StringBuilder sb)
+		{
+			if (_sqlBuilder.OrderBy.Items.Count == 0)
+				return;
+
+			AppendIndent(sb);
+
+			sb.Append("ORDER BY").AppendLine();
+
+			_indent++;
+
+			for (int i = 0; i < _sqlBuilder.OrderBy.Items.Count; i++)
+			{
+				AppendIndent(sb);
+
+				SqlBuilder.OrderByItem item = _sqlBuilder.OrderBy.Items[i];
+
+				BuildExpression(sb, item.Expression);
+
+				if (item.IsDescending)
+					sb.Append(" DESC");
+
+				if (i + 1 < _sqlBuilder.OrderBy.Items.Count)
 					sb.Append(',');
 
 				sb.AppendLine();

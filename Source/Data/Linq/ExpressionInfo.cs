@@ -153,7 +153,7 @@ namespace BLToolkit.Data.Linq
 			SetParameters(expr);
 
 			var command = GetCommand();
-			var parms   = GetParameters(db, expr);
+			var parms   = GetParameters(db);
 
 			//string s = sql.ToString();
 
@@ -194,7 +194,7 @@ namespace BLToolkit.Data.Linq
 				p.SqlParameter.Value = p.Accessor(this, expr);
 		}
 
-		private IDbDataParameter[] GetParameters(DbManager db, Expression expr)
+		private IDbDataParameter[] GetParameters(DbManager db)
 		{
 			if (Parameters.Count == 0 && SqlBuilder.Parameters.Count == 0)
 				return null;
@@ -320,11 +320,11 @@ namespace BLToolkit.Data.Linq
 
 			if (slot.ValueMappers == null)
 			{
-				IValueMapper[] mappers = new IValueMapper[index.Length];
+				var mappers = new IValueMapper[index.Length];
 
-				for (int i = 0; i < index.Length; i++)
+				for (var i = 0; i < index.Length; i++)
 				{
-					int n = index[i];
+					var n = index[i];
 
 					if (!dest.SupportsTypedValues(i))
 					{
@@ -332,15 +332,15 @@ namespace BLToolkit.Data.Linq
 						continue;
 					}
 
-					Type sourceType = source.GetFieldType(n);
-					Type destType   = dest.  GetFieldType(i);
+					var sourceType = source.GetFieldType(n);
+					var destType   = dest.  GetFieldType(i);
 
 					if (sourceType == null) sourceType = typeof(object);
 					if (destType   == null) destType   = typeof(object);
 
 					if (sourceType == destType)
 					{
-						IValueMapper t = (IValueMapper)MappingSchema.SameTypeMappers[sourceType];
+						var t = (IValueMapper)MappingSchema.SameTypeMappers[sourceType];
 
 						if (t == null)
 						{
@@ -376,12 +376,9 @@ namespace BLToolkit.Data.Linq
 				slot.ValueMappers = mappers;
 			}
 
-			//var mappers = slot.ValueMappers ?? (slot.ValueMappers = initContext.MappingSchema.GetValueMappers(source, dest, slot.Index));
-			//MappingSchema.MapInternal(source, dataReader, dest, destObject, slot.Index, slot.ValueMappers);
-
 			var ms = slot.ValueMappers;
 
-			for (int i = 0; i < index.Length; i++)
+			for (var i = 0; i < index.Length; i++)
 				ms[i].Map(source, dataReader, index[i], dest, destObject, i);
 
 			if (smDest != null)
@@ -395,9 +392,9 @@ namespace BLToolkit.Data.Linq
 			return Expressor<ExpressionInfo<T>>.MethodExpressor(e => e.MapDataReaderToObject(null, null, 0));
 		}
 
-		IEnumerable<TE> GetGroupJoinEnumerator<TE>(int count, TE item)
+		static IEnumerable<TE> GetGroupJoinEnumerator<TE>(int count, TE item)
 		{
-			for (int i = 0; i < count; i++)
+			for (var i = 0; i < count; i++)
 				yield return item;
 		}
 
@@ -425,20 +422,20 @@ namespace BLToolkit.Data.Linq
 			return DataProvider == dataProvider && MappingSchema == mappingSchema && Compare(Expression, expr);
 		}
 
-		Dictionary<Expression,Func<Expression,IQueryable>> QueryableAccessorDic  = new Dictionary<Expression,Func<Expression,IQueryable>>();
-		List<Func<Expression,IQueryable>>                  QueryableAccessorList = new List<Func<Expression,IQueryable>>();
+		readonly Dictionary<Expression,Func<Expression,IQueryable>> _queryableAccessorDic  = new Dictionary<Expression,Func<Expression,IQueryable>>();
+		readonly List<Func<Expression,IQueryable>>                  _queryableAccessorList = new List<Func<Expression,IQueryable>>();
 
 		public int AddQueryableAccessors(Expression expr, Func<Expression,IQueryable> qe)
 		{
-			QueryableAccessorDic. Add(expr, qe);
-			QueryableAccessorList.Add(qe);
+			_queryableAccessorDic. Add(expr, qe);
+			_queryableAccessorList.Add(qe);
 
-			return QueryableAccessorList.Count - 1;
+			return _queryableAccessorList.Count - 1;
 		}
 
 		public Expression GetIQueryable(int n, Expression expr)
 		{
-			return QueryableAccessorList[n](expr).Expression;
+			return _queryableAccessorList[n](expr).Expression;
 		}
 
 		bool Compare(Expression expr1, Expression expr2)
@@ -508,11 +505,11 @@ namespace BLToolkit.Data.Linq
 						if (e1.Arguments.Count != e2.Arguments.Count || e1.Method != e2.Method)
 							return false;
 
-						if (QueryableAccessorDic.Count > 0)
+						if (_queryableAccessorDic.Count > 0)
 						{
-							Func<Expression,IQueryable> func = null;
+							Func<Expression,IQueryable> func;
 
-							if (QueryableAccessorDic.TryGetValue(expr1, out func))
+							if (_queryableAccessorDic.TryGetValue(expr1, out func))
 								return Compare(func(expr1).Expression, func(expr2).Expression);
 						}
 
@@ -602,11 +599,11 @@ namespace BLToolkit.Data.Linq
 
 						if (e1.Member == e2.Member)
 						{
-							if (QueryableAccessorDic.Count > 0)
+							if (_queryableAccessorDic.Count > 0)
 							{
-								Func<Expression,IQueryable> func = null;
+								Func<Expression,IQueryable> func;
 
-								if (QueryableAccessorDic.TryGetValue(expr1, out func))
+								if (_queryableAccessorDic.TryGetValue(expr1, out func))
 									return Compare(func(expr1).Expression, func(expr2).Expression);
 							}
 

@@ -34,7 +34,7 @@ namespace BLToolkit.Data.Linq
 			public Type     ObjectType;
 			public SqlTable SqlTable;
 
-			Dictionary<MemberInfo,Column> _columns = new Dictionary<MemberInfo,Column>();
+			readonly Dictionary<MemberInfo,Column> _columns = new Dictionary<MemberInfo,Column>();
 
 			public override QueryField GetField(MemberInfo mi)
 			{
@@ -56,7 +56,7 @@ namespace BLToolkit.Data.Linq
 				return null;
 			}
 
-			protected override IEnumerable<QueryField> GetFields()
+			public override IEnumerable<QueryField> GetFields()
 			{
 				foreach (var col in _columns.Values)
 					yield return col;
@@ -141,7 +141,7 @@ namespace BLToolkit.Data.Linq
 				}
 			}
 
-			Dictionary<MemberInfo,QueryField> _fields = new Dictionary<MemberInfo,QueryField>();
+			readonly Dictionary<MemberInfo,QueryField> _fields = new Dictionary<MemberInfo,QueryField>();
 
 			public override QueryField GetField(MemberInfo mi)
 			{
@@ -210,7 +210,7 @@ namespace BLToolkit.Data.Linq
 				return null;
 			}
 
-			protected override IEnumerable<QueryField> GetFields()
+			public override IEnumerable<QueryField> GetFields()
 			{
 				return _fields.Values;
 			}
@@ -280,7 +280,7 @@ namespace BLToolkit.Data.Linq
 				return EnsureField(ParentQueries[0].GetField(expr));
 			}
 
-			protected override IEnumerable<QueryField> GetFields()
+			public override IEnumerable<QueryField> GetFields()
 			{
 				foreach (var col in Columns.Values)
 					yield return col;
@@ -304,13 +304,7 @@ namespace BLToolkit.Data.Linq
 				if (!(field is SubQueryColumn))
 					return ((QuerySource)field).GetField(members, currentMember + 1);
 
-				field = ((SubQueryColumn)field).Field;
-
-				//if (field.Sources.Length != 1)
-				//	throw new InvalidOperationException();
-
 				field = ParentQueries[0].GetField(members, currentMember);
-				//field = field.Sources[0].GetField(members, currentMember);
 
 				return EnsureField(field);
 			}
@@ -350,7 +344,6 @@ namespace BLToolkit.Data.Linq
 			}
 
 			public ExprColumn Counter;
-			//public ParseInfo  SourceInfo;
 
 			GroupJoinQuery() {}
 
@@ -377,17 +370,20 @@ namespace BLToolkit.Data.Linq
 
 			public override QueryField GetField(Expression expr)
 			{
-				throw new NotImplementedException();
+				if (((MemberExpression)expr).Member == ((MemberExpression)Lambda.Body).Member)
+					return _field;
+
+				return null;
 			}
 
-			protected override IEnumerable<QueryField> GetFields()
+			public override IEnumerable<QueryField> GetFields()
 			{
 				yield return _field;
 			}
 
 			Scalar() {}
 
-			public override object Clone(Dictionary<object, object> objectTree)
+			public override object Clone(Dictionary<object,object> objectTree)
 			{
 				object clone;
 
@@ -396,6 +392,54 @@ namespace BLToolkit.Data.Linq
 					var scalar = Clone(new Scalar(), objectTree);
 					scalar._field = (QueryField)_field.Clone(objectTree);
 					clone = scalar;
+				}
+
+				return clone;
+			}
+		}
+
+		public class GroupBy : QuerySource
+		{
+			public GroupBy(SqlBuilder sqlBilder, LambdaInfo lambda, params QuerySource[] parentQueries)
+				: base(sqlBilder, lambda, parentQueries)
+			{
+				_field = new GroupByColumn(this);
+			}
+
+			GroupByColumn _field;
+
+			public override QueryField GetField(Expression expr)
+			{
+				var me = expr as MemberExpression;
+
+				if (me != null)
+					if (me.Member.Name == "Key" && me.Member.DeclaringType.GetGenericTypeDefinition() == typeof(IGrouping<,>))
+						return _field;
+
+				return null;
+			}
+
+			public override QueryField GetField(MemberInfo mi)
+			{
+				throw new NotImplementedException();
+			}
+
+			public override IEnumerable<QueryField> GetFields()
+			{
+				yield return _field;
+			}
+
+			GroupBy() {}
+
+			public override object Clone(Dictionary<object,object> objectTree)
+			{
+				object clone;
+
+				if (!objectTree.TryGetValue(this, out clone))
+				{
+					var groupBy = Clone(new GroupBy(), objectTree);
+					groupBy._field = (GroupByColumn)_field.Clone(objectTree);
+					clone = groupBy;
 				}
 
 				return clone;
@@ -431,9 +475,9 @@ namespace BLToolkit.Data.Linq
 		public SqlBuilder    SqlBuilder;
 		public LambdaInfo    Lambda;
 
-		public    abstract QueryField              GetField(Expression expr);
-		public    abstract QueryField              GetField(MemberInfo mi);
-		protected abstract IEnumerable<QueryField> GetFields();
+		public abstract QueryField              GetField(Expression expr);
+		public abstract QueryField              GetField(MemberInfo mi);
+		public abstract IEnumerable<QueryField> GetFields();
 
 		protected virtual QueryField GetField(List<MemberInfo> members, int currentMember)
 		{
@@ -466,7 +510,7 @@ namespace BLToolkit.Data.Linq
 					if (ParentQueries.Length < Lambda.Parameters.Length)
 						throw new InvalidOperationException();
 
-					for (int i = 0; i < ParentQueries.Length; i++)
+					for (var i = 0; i < ParentQueries.Length; i++)
 						if (Lambda.Parameters[i].Expr == expr)
 							return ParentQueries[i];
 				}
@@ -517,12 +561,16 @@ namespace BLToolkit.Data.Linq
 			Action<Table>    tableAction,
 			Action<Expr>     exprAction,
 			Action<SubQuery> subQueryAction,
-			Action<Scalar>   scalarAction)
+			Action<Scalar>   scalarAction,
+			Action<GroupBy>  groupByAction)
 		{
 			if      (this is Table)    tableAction   (this as Table);
 			else if (this is Expr)     exprAction    (this as Expr);
 			else if (this is SubQuery) subQueryAction(this as SubQuery);
 			else if (this is Scalar)   scalarAction  (this as Scalar);
+			else if (this is GroupBy)  groupByAction (this as GroupBy);
+			else
+				throw new InvalidOperationException();
 		}
 	}
 }

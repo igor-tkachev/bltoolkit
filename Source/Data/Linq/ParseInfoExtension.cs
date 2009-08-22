@@ -25,7 +25,7 @@ namespace BLToolkit.Data.Linq
 
 			if (declaringType == method.Method.DeclaringType && method.Method.Name == methodName && method.Arguments.Count == args.Length)
 			{
-				for (int i = 0; i < args.Length; i++)
+				for (var i = 0; i < args.Length; i++)
 					if (!args[i](pi.CreateArgument(i)))
 						return false;
 
@@ -111,7 +111,7 @@ namespace BLToolkit.Data.Linq
 			string                               methodName,
 			Func<ParseInfo<Expression>,bool>     action)
 		{
-			return IsMethod(pi, typeof(Enumerable), methodName, new FTest[] { p => action(p) }, p => true);
+			return IsMethod(pi, typeof(Enumerable), methodName, new [] { action }, p => true);
 		}
 
 		public static ParseInfo<Expression> CreateArgument(this ParseInfo<MethodCallExpression> pi, int idx)
