@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics;
@@ -17,12 +18,12 @@ namespace BLToolkit.Data.Linq
 
 	class ExpressionInfo<T> : ReflectionHelper
 	{
+		public ExpressionInfo<T> Next;
 		public Expression        Expression;
 		public DataProviderBase  DataProvider;
 		public MappingSchema     MappingSchema;
-		public SqlBuilder        SqlBuilder;
-		public ExpressionInfo<T> Next;
-		public List<Parameter>   Parameters = new List<Parameter>();
+		public List<QueryInfo>   Queries = new List<QueryInfo>(1);
+		public bool              PreloadData;
 
 		public Func<DbManager,Expression,IEnumerable<T>> GetIEnumerable;
 
@@ -94,9 +95,9 @@ namespace BLToolkit.Data.Linq
 
 		internal void SetQuery()
 		{
-			SqlBuilder.FinalizeAndValidate();
+			Queries[0].SqlBuilder.FinalizeAndValidate();
 
-			var index = new int[SqlBuilder.Select.Columns.Count];
+			var index = new int[Queries[0].SqlBuilder.Select.Columns.Count];
 
 			for (var i = 0; i < index.Length; i++)
 				index[i] = i;
@@ -112,7 +113,7 @@ namespace BLToolkit.Data.Linq
 
 			try
 			{
-				using (var dr = GetReader(db, expr))
+				using (var dr = GetReader(db, expr, 0))
 					while (dr.Read())
 						yield return (T)MapDataReaderToObject(typeof(T), dr, slot);
 			}
@@ -123,13 +124,20 @@ namespace BLToolkit.Data.Linq
 			}
 		}
 
-		internal void SetQuery(Func<ExpressionInfo<T>,IDataReader,MappingSchema,Expression,T> mapper)
+		internal void SetQuery(Mapper<T> mapper)
 		{
-			SqlBuilder.FinalizeAndValidate();
-			GetIEnumerable = (db, expr) => Query(db, expr, mapper);
+			Queries[0].Mapper = mapper;
+
+			foreach (var sql in Queries)
+				sql.SqlBuilder.FinalizeAndValidate();
+
+			if (PreloadData || Queries.Count != 1)
+				GetIEnumerable = (db, expr) => Query(db, expr);
+			else
+				GetIEnumerable = (db, expr) => Query(db, expr, mapper);
 		}
 
-		IEnumerable<T> Query(DbManager db, Expression expr, Func<ExpressionInfo<T>,IDataReader,MappingSchema,Expression,T> mapper)
+		IEnumerable<T> Query(DbManager db, Expression expr, Mapper<T> mapper)
 		{
 			var dispose = db == null;
 			if (db == null)
@@ -137,9 +145,9 @@ namespace BLToolkit.Data.Linq
 
 			try
 			{
-				using (var dr = GetReader(db, expr))
+				using (var dr = GetReader(db, expr, 0))
 					while (dr.Read())
-						yield return mapper(this, dr, MappingSchema, expr);
+						yield return mapper(this, db, dr, MappingSchema, expr);
 			}
 			finally
 			{
@@ -148,12 +156,37 @@ namespace BLToolkit.Data.Linq
 			}
 		}
 
-		IDataReader GetReader(DbManager db, Expression expr)
+		IEnumerable<T> Query(DbManager db, Expression expr)
 		{
-			SetParameters(expr);
+			var dispose = db == null;
+			if (db == null)
+				db = new DbManager();
 
-			var command = GetCommand();
-			var parms   = GetParameters(db);
+			var list = new List<T>();
+
+			try
+			{
+				var mapper = Queries[0].Mapper;
+
+				using (var dr = GetReader(db, expr, 0))
+					while (dr.Read())
+						list.Add(mapper(this, db, dr, MappingSchema, expr));
+			}
+			finally
+			{
+				if (dispose)
+					db.Dispose();
+			}
+
+			return list;
+		}
+
+		IDataReader GetReader(DbManager db, Expression expr, int idx)
+		{
+			SetParameters(expr, idx);
+
+			var command = GetCommand(idx);
+			var parms   = GetParameters(db, idx);
 
 			//string s = sql.ToString();
 
@@ -188,28 +221,31 @@ namespace BLToolkit.Data.Linq
 			return db.SetCommand(command, parms).ExecuteReader();
 		}
 
-		private void SetParameters(Expression expr)
+		private void SetParameters(Expression expr, int idx)
 		{
-			foreach (var p in Parameters)
+			foreach (var p in Queries[idx].Parameters)
 				p.SqlParameter.Value = p.Accessor(this, expr);
 		}
 
-		private IDbDataParameter[] GetParameters(DbManager db)
+		private IDbDataParameter[] GetParameters(DbManager db, int idx)
 		{
-			if (Parameters.Count == 0 && SqlBuilder.Parameters.Count == 0)
+			var sql        = Queries[idx].SqlBuilder;
+			var parameters = Queries[idx].Parameters;
+
+			if (parameters.Count == 0 && sql.Parameters.Count == 0)
 				return null;
 
 			var x = db.DataProvider.Convert("x", ConvertType.NameToQueryParameter).ToString();
 			var y = db.DataProvider.Convert("y", ConvertType.NameToQueryParameter).ToString();
 
-			var parms = new IDbDataParameter[x == y? SqlBuilder.Parameters.Count: Parameters.Count];
+			var parms = new IDbDataParameter[x == y? sql.Parameters.Count: parameters.Count];
 
 			if (x == y)
 			{
 				for (var i = 0; i < parms.Length; i++)
 				{
-					var sqlp = SqlBuilder.Parameters[i];
-					var parm = Parameters.Count > i && Parameters[i].SqlParameter == sqlp ? Parameters[i] : Parameters.First(p => p.SqlParameter == sqlp);
+					var sqlp = sql.Parameters[i];
+					var parm = parameters.Count > i && parameters[i].SqlParameter == sqlp ? parameters[i] : parameters.First(p => p.SqlParameter == sqlp);
 
 					parms[i] = db.Parameter(x, parm.SqlParameter.Value);
 				}
@@ -220,9 +256,9 @@ namespace BLToolkit.Data.Linq
 
 				for (; i < parms.Length; i++)
 				{
-					var parm = Parameters[i];
+					var parm = parameters[i];
 
-					if (SqlBuilder.Parameters.Contains(parm.SqlParameter))
+					if (sql.Parameters.Contains(parm.SqlParameter))
 					{
 						var name = db.DataProvider.Convert(parm.SqlParameter.Name, ConvertType.NameToQueryParameter).ToString();
 						parms[j++] = db.Parameter(name, parm.SqlParameter.Value);
@@ -242,14 +278,16 @@ namespace BLToolkit.Data.Linq
 
 		string _command;
 
-		string GetCommand()
+		string GetCommand(int idx)
 		{
 			if (_command != null)
 				return _command;
 
-			var command = DataProvider.CreateSqlProvider().BuildSql(SqlBuilder, new StringBuilder(), 0).ToString();
+			var sql = Queries[idx].SqlBuilder;
 
-			if (!SqlBuilder.ParameterDependent)
+			var command = DataProvider.CreateSqlProvider().BuildSql(sql, new StringBuilder(), 0).ToString();
+
+			if (!sql.ParameterDependent)
 				_command = command;
 
 			return command;
@@ -392,25 +430,69 @@ namespace BLToolkit.Data.Linq
 			return Expressor<ExpressionInfo<T>>.MethodExpressor(e => e.MapDataReaderToObject(null, null, 0));
 		}
 
-		static IEnumerable<TE> GetGroupJoinEnumerator<TE>(int count, TE item)
+		#endregion
+
+		#region GroupJoinEnumerator
+
+		static IEnumerable<TElement> GetGroupJoinEnumerator<TElement>(int count, TElement item)
 		{
 			for (var i = 0; i < count; i++)
 				yield return item;
 		}
 
-		public IEnumerable<TE> GetGroupJoinEnumerator<TE>(
-			IDataReader dataReader,
-			Expression  expr,
-			int         counterIndex,
-			Func<ExpressionInfo<T>,IDataReader,MappingSchema,Expression,TE> itemReader)
+		public IEnumerable<TElement> GetGroupJoinEnumerator<TElement>(
+			DbManager        dbManager,
+			IDataReader      dataReader,
+			Expression       expr,
+			int              counterIndex,
+			Mapper<TElement> itemReader)
 		{
 			var count = MappingSchema.ConvertToInt32(dataReader[counterIndex]);
-			return GetGroupJoinEnumerator(count, count == 0? default(TE): itemReader(this, dataReader, MappingSchema, expr));
+			return GetGroupJoinEnumerator(count, count == 0? default(TElement): itemReader(this, dbManager, dataReader, MappingSchema, expr));
 		}
 
-		public MethodInfo GetGroupJoinEnumeratorMethodInfo<TE>()
+		public MethodInfo GetGroupJoinEnumeratorMethodInfo<TElement>()
 		{
-			return Expressor<ExpressionInfo<T>>.MethodExpressor(e => e.GetGroupJoinEnumerator<TE>(null, null, 0, null));
+			return Expressor<ExpressionInfo<T>>.MethodExpressor(e => e.GetGroupJoinEnumerator<TElement>(null, null, null, 0, null));
+		}
+
+		#endregion
+
+		#region Grouping
+
+		class Grouping<TKey,TElement> : IGrouping<TKey,TElement>
+		{
+			public Grouping(TKey key)
+			{
+				Key = key;
+			}
+
+			public TKey Key { get; set; }
+
+			public IEnumerator<TElement> GetEnumerator()
+			{
+				if ("" == 1.ToString())
+					yield return default(TElement);
+			}
+
+			IEnumerator IEnumerable.GetEnumerator()
+			{
+				return GetEnumerator();
+			}
+		}
+
+		public IGrouping<TKey,TElement> GetGrouping<TKey,TElement>(
+			DbManager    dbManager,
+			IDataReader  dataReader,
+			Expression   expr,
+			Mapper<TKey> keyReader)
+		{
+			return new Grouping<TKey,TElement>(keyReader(this, dbManager, dataReader, MappingSchema, expr));
+		}
+
+		public MethodInfo GetGroupingMethodInfo<TKey,TElement>()
+		{
+			return Expressor<ExpressionInfo<T>>.MethodExpressor(e => e.GetGrouping<TKey,TElement>(null, null, null, null));
 		}
 
 		#endregion
@@ -744,11 +826,24 @@ namespace BLToolkit.Data.Linq
 
 		#endregion
 
+		#region Inner Types
+
+		public delegate TE Mapper<TE>(ExpressionInfo<T> info,DbManager db,IDataReader rd,MappingSchema ms,Expression expr);
+
 		public class Parameter
 		{
 			public Expression                                Expression;
 			public Func<ExpressionInfo<T>,Expression,object> Accessor;
 			public SqlParameter                              SqlParameter;
 		}
+
+		public class QueryInfo
+		{
+			public SqlBuilder      SqlBuilder = new SqlBuilder();
+			public List<Parameter> Parameters = new List<Parameter>();
+			public Mapper<T>       Mapper;
+		}
+
+		#endregion
 	}
 }

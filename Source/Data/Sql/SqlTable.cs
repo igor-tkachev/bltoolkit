@@ -201,8 +201,8 @@ namespace BLToolkit.Data.Sql
 
 		#region ISqlTableSource Members
 
-		private int _sourceID;
-		public  int  SourceID { get { return _sourceID; } }
+		readonly int _sourceID;
+		public   int  SourceID { get { return _sourceID; } }
 
 		#endregion
 

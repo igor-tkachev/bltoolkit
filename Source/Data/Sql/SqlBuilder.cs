@@ -1791,7 +1791,10 @@ namespace BLToolkit.Data.Sql
 				SqlBuilder sb = expr as SqlBuilder;
 
 				if (sb != null && sb != this)
+				{
 					sb.FinalizeAndValidate();
+					sb.RemoveOrderBy();
+				}
 
 				return expr;
 			});
@@ -1814,6 +1817,12 @@ namespace BLToolkit.Data.Sql
 		}
 
 		delegate bool FindTableSource(TableSource table);
+
+		void RemoveOrderBy()
+		{
+			if (OrderBy.Items.Count > 0 && Select.SkipValue == 0 && Select.TakeValue == 0)
+				OrderBy.Items.Clear();
+		}
 
 		void ResolveWeakJoins()
 		{
@@ -1900,7 +1909,8 @@ namespace BLToolkit.Data.Sql
 				if (builder.From.Tables.Count == 1 &&
 				    //builder.From.Tables[0].Joins.Count == 0 &&
 				    builder.GroupBy.IsEmpty &&
-				    builder.OrderBy.IsEmpty &&
+				    builder.Select.SkipValue == 0 &&
+					builder.Select.TakeValue == 0 &&
 				   !builder.Select.Columns.Exists(delegate(Column c) { return !(c.Expression is SqlField); }))
 				{
 					Dictionary<ISqlExpression,SqlField> map = new Dictionary<ISqlExpression,SqlField>(builder.Select.Columns.Count);

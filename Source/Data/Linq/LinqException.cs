@@ -34,6 +34,7 @@ namespace BLToolkit.Data.Linq
 		/// <param name="message">The message to display to the client when the exception is thrown.</param>
 		/// <param name="args">An System.Object array containing zero or more objects to format.</param>
 		/// <seealso cref="Exception.Message"/>
+		[JetBrains.Annotations.StringFormatMethod("args")]
 		public LinqException(string message, params object[] args)
 			: base(string.Format(message, args))
 		{

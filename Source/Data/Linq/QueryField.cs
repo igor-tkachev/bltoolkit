@@ -28,9 +28,9 @@ namespace BLToolkit.Data.Linq
 				return new[] { new FieldIndex { Index = _table.SqlBuilder.Select.Add(_field, _field.Name), Field = this } };
 			}
 
-			public override ISqlExpression GetExpression<T>(ExpressionParser<T> parser)
+			public override ISqlExpression[] GetExpressions<T>(ExpressionParser<T> parser)
 			{
-				return _field;
+				return new [] { _field };
 			}
 
 			public override object Clone(Dictionary<object, object> objectTree)
@@ -84,15 +84,15 @@ namespace BLToolkit.Data.Linq
 				return _index;
 			}
 
-			public override ISqlExpression GetExpression<T>(ExpressionParser<T> parser)
+			public override ISqlExpression[] GetExpressions<T>(ExpressionParser<T> parser)
 			{
 				if (_sqlExpression == null)
 					_sqlExpression = parser.ParseExpression(QuerySource, Expr);
 
-				return _sqlExpression;
+				return new []  { _sqlExpression };
 			}
 
-			public override object Clone(Dictionary<object, object> objectTree)
+			public override object Clone(Dictionary<object,object> objectTree)
 			{
 				object clone;
 
@@ -145,15 +145,15 @@ namespace BLToolkit.Data.Linq
 				return _index;
 			}
 
-			public override ISqlExpression GetExpression<T>(ExpressionParser<T> parser)
+			public override ISqlExpression[] GetExpressions<T>(ExpressionParser<T> parser)
 			{
 				if (_subIndex == null)
 					_subIndex = Field.Select(parser);
 
 				if (_subIndex.Length != 1)
-					throw new LinqException("Cannot convert '{0}' to SQL.", Field.GetExpression(parser));
+					throw new LinqException("Cannot convert '{0}' to SQL.", Field.GetExpressions(parser)[0]);
 
-				return QuerySource.SubSql.Select.Columns[_subIndex[0].Index];
+				return new [] { QuerySource.SubSql.Select.Columns[_subIndex[0].Index] };
 			}
 
 			public override object Clone(Dictionary<object, object> objectTree)
@@ -188,9 +188,9 @@ namespace BLToolkit.Data.Linq
 				return _index;
 			}
 
-			public override ISqlExpression GetExpression<T>(ExpressionParser<T> parser)
+			public override ISqlExpression[] GetExpressions<T>(ExpressionParser<T> parser)
 			{
-				throw new NotImplementedException();
+				return GroupBySource.GetExpressions(parser);
 			}
 
 			public override object Clone(Dictionary<object, object> objectTree)
@@ -211,8 +211,8 @@ namespace BLToolkit.Data.Linq
 
 		public abstract QuerySource[] Sources { get; }
 
-		public abstract object         Clone           (Dictionary<object,object> objectTree);
-		public abstract FieldIndex[]   Select       <T>(ExpressionParser<T> parser);
-		public abstract ISqlExpression GetExpression<T>(ExpressionParser<T> parser);
+		public abstract object           Clone           (Dictionary<object,object> objectTree);
+		public abstract FieldIndex[]     Select       <T>(ExpressionParser<T> parser);
+		public abstract ISqlExpression[] GetExpressions<T>(ExpressionParser<T> parser);
 	}
 }

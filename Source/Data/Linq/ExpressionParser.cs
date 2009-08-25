@@ -25,14 +25,28 @@ namespace BLToolkit.Data.Linq
 
 		public ExpressionParser()
 		{
-			_info.SqlBuilder = new SqlBuilder();
+			_info.Queries.Add(new ExpressionInfo<T>.QueryInfo());
 		}
 
 		readonly ExpressionInfo<T>   _info            = new ExpressionInfo<T>();
 		readonly ParameterExpression _expressionParam = Expression.Parameter(typeof(Expression),        "expr");
+		readonly ParameterExpression _dbManagerParam  = Expression.Parameter(typeof(DbManager),         "db");
 		readonly ParameterExpression _dataReaderParam = Expression.Parameter(typeof(IDataReader),       "rd");
 		readonly ParameterExpression _mapSchemaParam  = Expression.Parameter(typeof(MappingSchema),     "ms");
 		readonly ParameterExpression _infoParam       = Expression.Parameter(typeof(ExpressionInfo<T>), "info");
+
+		int _currentSql = 0;
+
+		SqlBuilder CurrentSql
+		{
+			get { return _info.Queries[_currentSql].SqlBuilder;  }
+			set { _info.Queries[_currentSql].SqlBuilder = value; }
+		}
+
+		List<ExpressionInfo<T>.Parameter> CurrentSqlParameters
+		{
+			get { return _info.Queries[_currentSql].Parameters; }
+		}
 
 		#endregion
 
@@ -85,7 +99,7 @@ namespace BLToolkit.Data.Linq
 
 			if (info.IsConstant<IQueryable>((value,expr) =>
 				{
-					select = new QuerySource.Table(_info.MappingSchema, _info.SqlBuilder, new LambdaInfo(expr));
+					select = new QuerySource.Table(_info.MappingSchema, CurrentSql, new LambdaInfo(expr));
 					return true;
 				}))
 				return select;
@@ -156,9 +170,9 @@ namespace BLToolkit.Data.Linq
 						if (l.Body == l.Parameters[i].Expr)
 							return sources[i];
 					throw new InvalidOperationException();
-				case ExpressionType.New         : return new QuerySource.Expr  (_info.SqlBuilder, l.ConvertTo<NewExpression>(),        sources);
-				case ExpressionType.MemberInit  : return new QuerySource.Expr  (_info.SqlBuilder, l.ConvertTo<MemberInitExpression>(), sources);
-				default                         : return new QuerySource.Scalar(_info.SqlBuilder, l,                                   sources);
+				case ExpressionType.New         : return new QuerySource.Expr  (CurrentSql, l.ConvertTo<NewExpression>(),        sources);
+				case ExpressionType.MemberInit  : return new QuerySource.Expr  (CurrentSql, l.ConvertTo<MemberInitExpression>(), sources);
+				default                         : return new QuerySource.Scalar(CurrentSql, l,                                   sources);
 			}
 		}
 
@@ -168,26 +182,26 @@ namespace BLToolkit.Data.Linq
 
 		QuerySource ParseSelectMany(LambdaInfo collectionSelector, LambdaInfo resultSelector, QuerySource source)
 		{
-			var sql = _info.SqlBuilder;
+			var sql = CurrentSql;
 
-			_info.SqlBuilder = new SqlBuilder();
+			CurrentSql = new SqlBuilder();
 
 			var seq2 = ParseSequence(collectionSelector.Body, source);
 
 			if (source.ParentQueries.Contains(seq2))
 			{
-				_info.SqlBuilder = sql;
+				CurrentSql = sql;
 				return resultSelector == null ? seq2 : ParseSelect(resultSelector, source, seq2);
 			}
 
 			var current = new SqlBuilder();
-			var source1 = new QuerySource.SubQuery(current, sql,              source);
-			var source2 = new QuerySource.SubQuery(current, _info.SqlBuilder, seq2);
+			var source1 = new QuerySource.SubQuery(current, sql,        source);
+			var source2 = new QuerySource.SubQuery(current, CurrentSql, seq2);
 
 			current.From.Table(source1.SubSql);
 			current.From.Table(source2.SubSql);
 
-			_info.SqlBuilder = current;
+			CurrentSql = current;
 
 			return resultSelector == null ? source2 : ParseSelect(resultSelector, source1, source2);
 		}
@@ -206,15 +220,15 @@ namespace BLToolkit.Data.Linq
 			CheckExplicitCtor(outerKeySelector.Body);
 
 			var current = new SqlBuilder();
-			var source1 = new QuerySource.SubQuery(current, _info.SqlBuilder, outerSource);
+			var source1 = new QuerySource.SubQuery(current, CurrentSql, outerSource);
 
-			_info.SqlBuilder = new SqlBuilder();
+			CurrentSql = new SqlBuilder();
 
 			var seq     = ParseSequence(inner, null);
-			var source2 = new QuerySource.SubQuery(current, _info.SqlBuilder, seq, false);
+			var source2 = new QuerySource.SubQuery(current, CurrentSql, seq, false);
 			var join    = source2.SubSql.InnerJoin();
 
-			_info.SqlBuilder = current;
+			CurrentSql = current;
 
 			current.From.Table(source1.SubSql, join);
 
@@ -265,29 +279,29 @@ namespace BLToolkit.Data.Linq
 			// Process outer source.
 			//
 			var current = new SqlBuilder();
-			var source1 = new QuerySource.SubQuery(current, _info.SqlBuilder, outerSource);
+			var source1 = new QuerySource.SubQuery(current, CurrentSql, outerSource);
 
 			// Process inner source.
 			//
-			_info.SqlBuilder = new SqlBuilder();
+			CurrentSql = new SqlBuilder();
 
 			var seq     = ParseSequence(inner, null);
-			var source2 = new QuerySource.GroupJoinQuery(current, _info.SqlBuilder, seq);
+			var source2 = new QuerySource.GroupJoinQuery(current, CurrentSql, seq);
 			var join    = source2.SubSql.LeftJoin();
 
-			_info.SqlBuilder = current;
+			CurrentSql = current;
 
 			current.From.Table(source1.SubSql, join);
 
 			// Process counter.
 			//
-			_info.SqlBuilder = new SqlBuilder();
+			CurrentSql = new SqlBuilder();
 
 			var cntseq   = ParseSequence(inner, null);
-			var counter  = new QuerySource.SubQuery(current, _info.SqlBuilder, cntseq, false);
+			var counter  = new QuerySource.SubQuery(current, CurrentSql, cntseq, false);
 			var cntjoin  = counter.SubSql.WeakLeftJoin();
  
-			_info.SqlBuilder = current;
+			CurrentSql = current;
 
 			counter.SubSql.Select.Expr(new SqlFunction.Count(counter.SubSql.From.Tables[0]), "cnt");
 			current.From.Table(source1.SubSql, cntjoin);
@@ -358,14 +372,14 @@ namespace BLToolkit.Data.Linq
 
 			if (CheckForSubQuery(select, l.Body))
 			{
-				var subQuery = new QuerySource.SubQuery(new SqlBuilder(), _info.SqlBuilder, select);
+				var subQuery = new QuerySource.SubQuery(new SqlBuilder(), CurrentSql, select);
 
-				_info.SqlBuilder = subQuery.SqlBuilder;
+				CurrentSql = subQuery.SqlBuilder;
 
 				select = subQuery;
 			}
 
-			ParseSearchCondition(_info.SqlBuilder.Where.SearchCondition.Conditions, select, l.Body);
+			ParseSearchCondition(CurrentSql.Where.SearchCondition.Conditions, select, l.Body);
 
 			return select;
 		}
@@ -403,10 +417,17 @@ namespace BLToolkit.Data.Linq
 
 			var group = ParseSelect(lambda, source);
 
-			foreach (var field in group.GetFields())
-				_info.SqlBuilder.GroupBy.Expr(field.GetExpression(this));
+			foreach (var field in group.Fields)
+			{
+				var exprs = field.GetExpressions(this);
 
-			return new QuerySource.GroupBy(_info.SqlBuilder, group.Lambda, group);
+				if (exprs.Length != 1)
+					throw new LinqException("Cannot group by type '{0}'", lambda.Body.Expr.Type);
+
+				CurrentSql.GroupBy.Expr(exprs[0]);
+			}
+
+			return new QuerySource.GroupBy(CurrentSql, group.Lambda, group);
 		}
 
 		#endregion
@@ -419,8 +440,9 @@ namespace BLToolkit.Data.Linq
 
 			var order = ParseSelect(lambda, source);
 
-			foreach (var field in order.GetFields())
-				_info.SqlBuilder.OrderBy.Expr(field.GetExpression(this), !ascending);
+			foreach (var field in order.Fields)
+				foreach (var expr in field.GetExpressions(this))
+					CurrentSql.OrderBy.Expr(expr, !ascending);
 
 			return source;
 		}
@@ -437,8 +459,8 @@ namespace BLToolkit.Data.Linq
 
 		void SetQuery(ParseInfo info)
 		{
-			var mapper = Expression.Lambda<Func<ExpressionInfo<T>, IDataReader, MappingSchema, Expression, T>>(
-				info, new[] { _infoParam, _dataReaderParam, _mapSchemaParam, _expressionParam });
+			var mapper = Expression.Lambda<ExpressionInfo<T>.Mapper<T>>(
+				info, new[] { _infoParam, _dbManagerParam, _dataReaderParam, _mapSchemaParam, _expressionParam });
 
 			_info.SetQuery(mapper.Compile());
 		}
@@ -451,7 +473,7 @@ namespace BLToolkit.Data.Linq
 				expr   => BuildNew     (query, expr.Lambda.Body,   newAction),            // QueryInfo.Expr
 				sub    => BuildSubQuery(sub,   queryAction,        newAction, converter), // QueryInfo.SubQuery
 				scalar => BuildNew     (query, scalar.Lambda.Body, newAction),            // QueryInfo.Scalar
-				group  => BuildGroupBy (query, group.Lambda.Body,  newAction)             // QueryInfo.GroupBy
+				group  => BuildGroupBy (group, group.Lambda.Body,  newAction)             // QueryInfo.GroupBy
 			);
 		}
 
@@ -506,11 +528,42 @@ namespace BLToolkit.Data.Linq
 			);
 		}
 
-		void BuildGroupBy(QuerySource query, ParseInfo expr, Action<ParseInfo> newAction)
+		#region BuildGroupBy
+
+		interface IGroupByHelper
 		{
-			var info = BuildNewExpression(query, expr);
+			ParseInfo GetParseInfo(ExpressionParser<T> parser, ParseInfo expr, Expression info);
+		}
+
+		class GroupByHelper<TKey,TElement> : IGroupByHelper
+		{
+			public ParseInfo GetParseInfo(ExpressionParser<T> parser, ParseInfo expr, Expression info)
+			{
+				var keyReader = Expression.Lambda<ExpressionInfo<T>.Mapper<TKey>>(
+					info, new[] { parser._infoParam, parser._dbManagerParam, parser._dataReaderParam, parser._mapSchemaParam, parser._expressionParam });
+
+				return expr.Parent.Replace(
+					Expression.Call(parser._infoParam, parser._info.GetGroupingMethodInfo<TKey,TElement>(),
+						parser._dbManagerParam,
+						parser._dataReaderParam,
+						parser._expressionParam,
+						Expression.Constant(keyReader.Compile())),
+					expr.ParamAccessor);
+			}
+		}
+
+		void BuildGroupBy(QuerySource.GroupBy query, ParseInfo expr, Action<ParseInfo> newAction)
+		{
+			_info.PreloadData = true;
+
+			var helper = (IGroupByHelper)Activator.CreateInstance(typeof(GroupByHelper<,>).MakeGenericType(
+				typeof(T), query.Lambda.Body.Expr.Type, query.Lambda.Parameters[0].Expr.Type));
+
+			var info   = helper.GetParseInfo(this, expr, BuildNewExpression(query, expr));
 			newAction(info);
 		}
+
+		#endregion
 
 		ParseInfo BuildNewExpression(QuerySource query, ParseInfo expr)
 		{
@@ -685,11 +738,12 @@ namespace BLToolkit.Data.Linq
 		{
 			public ParseInfo GetParseInfo(ExpressionParser<T> parser, ParseInfo ma, FieldIndex counterIndex, Expression info)
 			{
-				var itemReader = Expression.Lambda<Func<ExpressionInfo<T>, IDataReader, MappingSchema, Expression, TE>>(
-					info, new[] { parser._infoParam, parser._dataReaderParam, parser._mapSchemaParam, parser._expressionParam });
+				var itemReader = Expression.Lambda<ExpressionInfo<T>.Mapper<TE>>(
+					info, new[] { parser._infoParam, parser._dbManagerParam, parser._dataReaderParam, parser._mapSchemaParam, parser._expressionParam });
 
 				return ma.Parent.Replace(
 					Expression.Call(parser._infoParam, parser._info.GetGroupJoinEnumeratorMethodInfo<TE>(),
+						parser._dbManagerParam,
 						parser._dataReaderParam,
 						parser._expressionParam,
 						Expression.Constant(counterIndex.Index),
@@ -736,7 +790,7 @@ namespace BLToolkit.Data.Linq
 		ParseInfo BuildField(QuerySource query, ParseInfo pi)
 		{
 			var sqlex = ParseExpression(query, pi);
-			var idx   = _info.SqlBuilder.Select.Add(sqlex);
+			var idx   = CurrentSql.Select.Add(sqlex);
 
 			return BuildField(pi, new[] { idx }, pi.Expr.Type);
 		}
@@ -814,9 +868,9 @@ namespace BLToolkit.Data.Linq
 			var table = new SqlTable(_info.MappingSchema, type) { Alias = alias };
 
 			foreach (var field in table.Fields.Values)
-				_info.SqlBuilder.Select.Expr(field);
+				CurrentSql.Select.Expr(field);
 
-			_info.SqlBuilder.From.Table(table);
+			CurrentSql.From.Table(table);
 			_info.SetQuery();
 
 			return true;
@@ -838,12 +892,12 @@ namespace BLToolkit.Data.Linq
 
 			var expr = ParseExpression(null, parseInfo);
 
-			_info.SqlBuilder.Select.Expr(expr);
+			CurrentSql.Select.Expr(expr);
 
 			var pi = BuildField(parseInfo, new[] { 0 }, parseInfo.Expr.Type);
 
-			var mapper = Expression.Lambda<Func<ExpressionInfo<T>,IDataReader,MappingSchema,Expression,T>>(
-				pi, new [] { _infoParam, _dataReaderParam, _mapSchemaParam, _expressionParam });
+			var mapper = Expression.Lambda<ExpressionInfo<T>.Mapper<T>>(
+				pi, new [] { _infoParam, _dbManagerParam, _dataReaderParam, _mapSchemaParam, _expressionParam });
 
 			_info.SetQuery(mapper.Compile());
 		}
@@ -899,7 +953,7 @@ namespace BLToolkit.Data.Linq
 			};
 
 			_parameters.Add(expr.Expr, p);
-			_info.Parameters.Add(p);
+			CurrentSqlParameters.Add(p);
 
 			return p;
 		}
@@ -1115,7 +1169,14 @@ namespace BLToolkit.Data.Linq
 						var field = query.GetField(parseInfo.Expr);
 
 						if (field != null)
-							return field.GetExpression(this);
+						{
+							var exprs = field.GetExpressions(this);
+
+							if (exprs.Length == 1)
+								return exprs[0];
+
+							throw new InvalidOperationException();
+						}
 
 						break;
 					}
@@ -1436,7 +1497,7 @@ namespace BLToolkit.Data.Linq
 			if (a is SqlParameter)
 			{
 				var p  = (SqlParameter)a;
-				var ep = (from pm in _info.Parameters where pm.SqlParameter == p select pm).First();
+				var ep = (from pm in CurrentSqlParameters where pm.SqlParameter == p select pm).First();
 
 				ep = new ExpressionInfo<T>.Parameter
 				{
@@ -1446,7 +1507,7 @@ namespace BLToolkit.Data.Linq
 				};
 
 				_parameters.Add(e, ep);
-				_info.Parameters.Add(ep);
+				CurrentSqlParameters.Add(ep);
 
 				return new SqlBuilder.Predicate.Like(o, false, ep.SqlParameter, new SqlValue('~'));
 			}

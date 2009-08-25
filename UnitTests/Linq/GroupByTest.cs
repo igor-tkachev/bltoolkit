@@ -20,7 +20,7 @@ namespace Data.Linq
 				var list = q.ToList().OrderBy(n => n).ToList();
 
 				Assert.AreEqual(4, list.Count);
-				for (var i = 0; i < list.Count; i++) Assert.AreEqual(i + 1, list[i]);
+				for (var i = 0; i < list.Count; i++) Assert.AreEqual(i + 1, list[i].Key);
 			});
 		}
 

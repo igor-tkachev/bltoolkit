@@ -27,7 +27,10 @@ namespace BLToolkit.Data.Linq
 				foreach (var field in SqlTable.Fields)
 				{
 					var mapper = objectMapper[field.Value.PhysicalName];
-					_columns.Add(mapper.MemberAccessor.MemberInfo, new Column(this, field.Value, mapper));
+					var column = new Column(this, field.Value, mapper);
+
+					Fields.Add(column);
+					_columns.Add(mapper.MemberAccessor.MemberInfo, column);
 				}
 			}
 
@@ -54,12 +57,6 @@ namespace BLToolkit.Data.Linq
 				}
 
 				return null;
-			}
-
-			public override IEnumerable<QueryField> GetFields()
-			{
-				foreach (var col in _columns.Values)
-					yield return col;
 			}
 
 			Table() {}
@@ -108,6 +105,7 @@ namespace BLToolkit.Data.Linq
 							GetParentField(ex.Arguments[i]) ??
 							new ExprColumn(this, lambda.Body.Create(ex.Arguments[i], lambda.Body.Index(ex.Arguments, New.Arguments, i)), member.Name);
 
+						base.Fields.Add(field);
 						_fields.Add(member, field);
 					}
 				}
@@ -133,6 +131,7 @@ namespace BLToolkit.Data.Linq
 
 							var field = GetParentField(piExpression) ?? new ExprColumn(this, piExpression, member.Name);
 
+							base.Fields.Add(field);
 							_fields.Add(member, field);
 						}
 						else
@@ -203,16 +202,11 @@ namespace BLToolkit.Data.Linq
 						}
 				}
 
-				foreach (var item in _fields)
-					if (item.Value is ExprColumn && ((ExprColumn)item.Value).Expr == expr)
-						return item.Value;
+				foreach (var field in Fields)
+					if (field is ExprColumn && ((ExprColumn)field).Expr == expr)
+						return field;
 
 				return null;
-			}
-
-			public override IEnumerable<QueryField> GetFields()
-			{
-				return _fields.Values;
 			}
 
 			Expr() {}
@@ -245,7 +239,7 @@ namespace BLToolkit.Data.Linq
 				if (addToSource)
 					SqlBuilder.From.Table(subSql);
 
-				foreach (var field in parentQuery.GetFields())
+				foreach (var field in parentQuery.Fields)
 					EnsureField(field);
 			}
 
@@ -254,8 +248,8 @@ namespace BLToolkit.Data.Linq
 			{
 			}
 
-			public SqlBuilder                            SubSql;
-			public Dictionary<QueryField,SubQueryColumn> Columns = new Dictionary<QueryField,SubQueryColumn>();
+			public   SqlBuilder                            SubSql;
+			readonly Dictionary<QueryField,SubQueryColumn> _columns = new Dictionary<QueryField,SubQueryColumn>();
 
 			public override QueryField EnsureField(QueryField field)
 			{
@@ -264,8 +258,13 @@ namespace BLToolkit.Data.Linq
 
 				SubQueryColumn col;
 
-				if (!Columns.TryGetValue(field, out col))
-					Columns.Add(field, col = new SubQueryColumn(this, field));
+				if (!_columns.TryGetValue(field, out col))
+				{
+					col = new SubQueryColumn(this, field);
+
+					Fields.Add(col);
+					_columns.Add(field, col);
+				}
 
 				return col;
 			}
@@ -278,20 +277,6 @@ namespace BLToolkit.Data.Linq
 			public override QueryField GetField(Expression expr)
 			{
 				return EnsureField(ParentQueries[0].GetField(expr));
-			}
-
-			public override IEnumerable<QueryField> GetFields()
-			{
-				foreach (var col in Columns.Values)
-					yield return col;
-			}
-
-			public override ISqlExpression GetExpression<T>(ExpressionParser<T> parser)
-			{
-				if (Columns.Count == 1 && ParentQueries[0] is Scalar)
-					return Columns.Values.First().GetExpression(parser);
-
-				throw new InvalidOperationException();
 			}
 
 			protected override QueryField GetField(List<MemberInfo> members, int currentMember)
@@ -326,8 +311,8 @@ namespace BLToolkit.Data.Linq
 
 					sub.SubSql = (SqlBuilder)SubSql.Clone(objectTree);
 
-					foreach (var c in Columns)
-						sub.Columns.Add(c.Key, (SubQueryColumn)c.Value.Clone(objectTree));
+					foreach (var c in _columns)
+						sub._columns.Add(c.Key, (SubQueryColumn)c.Value.Clone(objectTree));
 
 					clone = sub;
 				}
@@ -359,6 +344,8 @@ namespace BLToolkit.Data.Linq
 				: base(sqlBilder, lambda, parentQueries)
 			{
 				_field = GetParentField(lambda.Body) ?? new ExprColumn(this, lambda.Body, null);
+
+				Fields.Add(_field);
 			}
 
 			QueryField _field;
@@ -374,11 +361,6 @@ namespace BLToolkit.Data.Linq
 					return _field;
 
 				return null;
-			}
-
-			public override IEnumerable<QueryField> GetFields()
-			{
-				yield return _field;
 			}
 
 			Scalar() {}
@@ -400,13 +382,15 @@ namespace BLToolkit.Data.Linq
 
 		public class GroupBy : QuerySource
 		{
-			public GroupBy(SqlBuilder sqlBilder, LambdaInfo lambda, params QuerySource[] parentQueries)
-				: base(sqlBilder, lambda, parentQueries)
+			public GroupBy(SqlBuilder sqlBilder, LambdaInfo lambda, QuerySource groupQuery)
+				: base(sqlBilder, lambda, groupQuery)
 			{
-				_field = new GroupByColumn(this);
+				_groupField = new GroupByColumn(this);
+
+				Fields.AddRange(groupQuery.Fields);
 			}
 
-			GroupByColumn _field;
+			GroupByColumn _groupField;
 
 			public override QueryField GetField(Expression expr)
 			{
@@ -414,7 +398,7 @@ namespace BLToolkit.Data.Linq
 
 				if (me != null)
 					if (me.Member.Name == "Key" && me.Member.DeclaringType.GetGenericTypeDefinition() == typeof(IGrouping<,>))
-						return _field;
+						return _groupField;
 
 				return null;
 			}
@@ -422,11 +406,6 @@ namespace BLToolkit.Data.Linq
 			public override QueryField GetField(MemberInfo mi)
 			{
 				throw new NotImplementedException();
-			}
-
-			public override IEnumerable<QueryField> GetFields()
-			{
-				yield return _field;
 			}
 
 			GroupBy() {}
@@ -438,7 +417,7 @@ namespace BLToolkit.Data.Linq
 				if (!objectTree.TryGetValue(this, out clone))
 				{
 					var groupBy = Clone(new GroupBy(), objectTree);
-					groupBy._field = (GroupByColumn)_field.Clone(objectTree);
+					groupBy._groupField = (GroupByColumn)_groupField.Clone(objectTree);
 					clone = groupBy;
 				}
 
@@ -464,22 +443,23 @@ namespace BLToolkit.Data.Linq
 
 			clone.SqlBuilder    = (SqlBuilder)SqlBuilder.Clone(objectTree);
 			clone.Lambda        = Lambda;
-			clone.ParentQueries = Array.ConvertAll(ParentQueries, q => (QuerySource)q.Clone(objectTree));
+			clone.ParentQueries = Array. ConvertAll(ParentQueries, q => (QuerySource)q.Clone(objectTree));
+			clone.Fields        = Fields.ConvertAll(f => (QueryField)f.Clone(objectTree));
 
 			return clone;
 		}
 
 		public override QuerySource[] Sources { get { return ParentQueries; } }
 
-		public QuerySource[] ParentQueries;
-		public SqlBuilder    SqlBuilder;
-		public LambdaInfo    Lambda;
+		public QuerySource[]    ParentQueries;
+		public SqlBuilder       SqlBuilder;
+		public LambdaInfo       Lambda;
+		public List<QueryField> Fields = new List<QueryField>();
 
-		public abstract QueryField              GetField(Expression expr);
-		public abstract QueryField              GetField(MemberInfo mi);
-		public abstract IEnumerable<QueryField> GetFields();
+		public    abstract QueryField GetField(Expression expr);
+		public    abstract QueryField GetField(MemberInfo mi);
 
-		protected virtual QueryField GetField(List<MemberInfo> members, int currentMember)
+		protected virtual  QueryField GetField(List<MemberInfo> members, int currentMember)
 		{
 			var field = GetField(members[currentMember]);
 
@@ -491,7 +471,7 @@ namespace BLToolkit.Data.Linq
 
 		public virtual QueryField EnsureField(QueryField field)
 		{
-			foreach (var f in GetFields())
+			foreach (var f in Fields)
 				if (f == field)
 					return field;
 
@@ -532,13 +512,11 @@ namespace BLToolkit.Data.Linq
 		{
 			if (_indexes == null)
 			{
-				var fields = GetFields().ToList();
-
-				_indexes = new FieldIndex[fields.Count];
+				_indexes = new FieldIndex[Fields.Count];
 
 				var i = 0;
 
-				foreach (var field in fields)
+				foreach (var field in Fields)
 				{
 					var idx = field.Select(parser);
 
@@ -552,9 +530,17 @@ namespace BLToolkit.Data.Linq
 			return _indexes;
 		}
 
-		public override ISqlExpression GetExpression<T>(ExpressionParser<T> parser)
+		public override ISqlExpression[] GetExpressions<T>(ExpressionParser<T> parser)
 		{
-			throw new InvalidOperationException();
+			if (Fields.Count == 1)
+				return Fields[0].GetExpressions(parser);
+
+			var exprs = new List<ISqlExpression>();
+
+			foreach (var field in Fields)
+				exprs.AddRange(field.GetExpressions(parser));
+
+			return exprs.ToArray();
 		}
 
 		public void Match(
