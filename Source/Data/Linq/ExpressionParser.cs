@@ -30,7 +30,7 @@ namespace BLToolkit.Data.Linq
 
 		readonly ExpressionInfo<T>   _info            = new ExpressionInfo<T>();
 		readonly ParameterExpression _expressionParam = Expression.Parameter(typeof(Expression),        "expr");
-		readonly ParameterExpression _dbManagerParam  = Expression.Parameter(typeof(DbManager),         "db");
+		readonly ParameterExpression _contextParam    = Expression.Parameter(typeof(QueryContext),      "context");
 		readonly ParameterExpression _dataReaderParam = Expression.Parameter(typeof(IDataReader),       "rd");
 		readonly ParameterExpression _mapSchemaParam  = Expression.Parameter(typeof(MappingSchema),     "ms");
 		readonly ParameterExpression _infoParam       = Expression.Parameter(typeof(ExpressionInfo<T>), "info");
@@ -427,7 +427,7 @@ namespace BLToolkit.Data.Linq
 				CurrentSql.GroupBy.Expr(exprs[0]);
 			}
 
-			return new QuerySource.GroupBy(CurrentSql, group.Lambda, group);
+			return new QuerySource.GroupBy(CurrentSql, group, source.Lambda);
 		}
 
 		#endregion
@@ -460,7 +460,7 @@ namespace BLToolkit.Data.Linq
 		void SetQuery(ParseInfo info)
 		{
 			var mapper = Expression.Lambda<ExpressionInfo<T>.Mapper<T>>(
-				info, new[] { _infoParam, _dbManagerParam, _dataReaderParam, _mapSchemaParam, _expressionParam });
+				info, new[] { _infoParam, _contextParam, _dataReaderParam, _mapSchemaParam, _expressionParam });
 
 			_info.SetQuery(mapper.Compile());
 		}
@@ -532,34 +532,70 @@ namespace BLToolkit.Data.Linq
 
 		interface IGroupByHelper
 		{
-			ParseInfo GetParseInfo(ExpressionParser<T> parser, ParseInfo expr, Expression info);
+			ParseInfo GetParseInfo(ExpressionParser<T> parser, QuerySource.GroupBy query, ParseInfo expr, Expression info);
 		}
 
 		class GroupByHelper<TKey,TElement> : IGroupByHelper
 		{
-			public ParseInfo GetParseInfo(ExpressionParser<T> parser, ParseInfo expr, Expression info)
+			public ParseInfo GetParseInfo(ExpressionParser<T> parser, QuerySource.GroupBy query, ParseInfo expr, Expression info)
 			{
+				var valueParser = new ExpressionParser<TElement>();
+				var keyConst    = Expression.Constant(new ExpressionInfo<TKey>.KeyValueHolder());
+
+				Expression valueExpr = null;
+
+				if (expr.NodeType == ExpressionType.New)
+				{
+					var ne  = (NewExpression)expr.Expr;
+					var key = Expression.MakeMemberAccess(keyConst, ExpressionInfo<TKey>.KeyValueHolderField);
+
+					for (var i = 0; i < ne.Arguments.Count; i++)
+					{
+						var member = TypeHelper.GetPropertyByMethod((MethodInfo)ne.Members[i]);
+						var equal  = Expression.Equal(ne.Arguments[i], Expression.MakeMemberAccess(key, member));
+
+						valueExpr = valueExpr == null ? equal : Expression.AndAlso(valueExpr, equal);
+					}
+				}
+				else
+				{
+					valueExpr = Expression.Equal(
+						query.Lambda.Body,
+						Expression.MakeMemberAccess(keyConst, ExpressionInfo<TKey>.KeyValueHolderField));
+				}
+
+				valueExpr = Expression.Call(
+					null,
+					Expressor<object>.MethodExpressor(_ => Queryable.Where(null, (Expression<Func<TElement,bool>>)null)),
+					new[]
+					{
+						query.SourceLambda.Body.Expr,
+						Expression.Lambda<Func<TElement,bool>>(valueExpr, new[] { query.Lambda.Parameters[0].Expr })
+					});
+
 				var keyReader = Expression.Lambda<ExpressionInfo<T>.Mapper<TKey>>(
-					info, new[] { parser._infoParam, parser._dbManagerParam, parser._dataReaderParam, parser._mapSchemaParam, parser._expressionParam });
+					info, new[] { parser._infoParam, parser._contextParam, parser._dataReaderParam, parser._mapSchemaParam, parser._expressionParam });
 
 				return expr.Parent.Replace(
 					Expression.Call(parser._infoParam, parser._info.GetGroupingMethodInfo<TKey,TElement>(),
-						parser._dbManagerParam,
+						parser._contextParam,
 						parser._dataReaderParam,
 						parser._expressionParam,
-						Expression.Constant(keyReader.Compile())),
+						Expression.Constant(keyReader.Compile()),
+						keyConst,
+						Expression.Constant(valueParser.Parse(parser._info.DataProvider, parser._info.MappingSchema, valueExpr))),
 					expr.ParamAccessor);
 			}
 		}
 
 		void BuildGroupBy(QuerySource.GroupBy query, ParseInfo expr, Action<ParseInfo> newAction)
 		{
-			_info.PreloadData = true;
+			//_info.PreloadData = true;
 
 			var helper = (IGroupByHelper)Activator.CreateInstance(typeof(GroupByHelper<,>).MakeGenericType(
 				typeof(T), query.Lambda.Body.Expr.Type, query.Lambda.Parameters[0].Expr.Type));
 
-			var info   = helper.GetParseInfo(this, expr, BuildNewExpression(query, expr));
+			var info   = helper.GetParseInfo(this, query, expr, BuildNewExpression(query, expr));
 			newAction(info);
 		}
 
@@ -649,8 +685,8 @@ namespace BLToolkit.Data.Linq
 
 								if (field is QuerySource.Scalar)
 								{
-									var ma = (QuerySource.Scalar)field;
-									return BuildNewExpression(ma, ma.Lambda.Body);
+									var source = (QuerySource)field;
+									return BuildNewExpression(source, source.Lambda.Body);
 								}
 
 								if (field is QuerySource.GroupJoinQuery)
@@ -739,11 +775,11 @@ namespace BLToolkit.Data.Linq
 			public ParseInfo GetParseInfo(ExpressionParser<T> parser, ParseInfo ma, FieldIndex counterIndex, Expression info)
 			{
 				var itemReader = Expression.Lambda<ExpressionInfo<T>.Mapper<TE>>(
-					info, new[] { parser._infoParam, parser._dbManagerParam, parser._dataReaderParam, parser._mapSchemaParam, parser._expressionParam });
+					info, new[] { parser._infoParam, parser._contextParam, parser._dataReaderParam, parser._mapSchemaParam, parser._expressionParam });
 
 				return ma.Parent.Replace(
 					Expression.Call(parser._infoParam, parser._info.GetGroupJoinEnumeratorMethodInfo<TE>(),
-						parser._dbManagerParam,
+						parser._contextParam,
 						parser._dataReaderParam,
 						parser._expressionParam,
 						Expression.Constant(counterIndex.Index),
@@ -897,7 +933,7 @@ namespace BLToolkit.Data.Linq
 			var pi = BuildField(parseInfo, new[] { 0 }, parseInfo.Expr.Type);
 
 			var mapper = Expression.Lambda<ExpressionInfo<T>.Mapper<T>>(
-				pi, new [] { _infoParam, _dbManagerParam, _dataReaderParam, _mapSchemaParam, _expressionParam });
+				pi, new [] { _infoParam, _contextParam, _dataReaderParam, _mapSchemaParam, _expressionParam });
 
 			_info.SetQuery(mapper.Compile());
 		}

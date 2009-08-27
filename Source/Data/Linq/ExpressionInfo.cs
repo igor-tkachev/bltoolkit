@@ -25,7 +25,7 @@ namespace BLToolkit.Data.Linq
 		public List<QueryInfo>   Queries = new List<QueryInfo>(1);
 		public bool              PreloadData;
 
-		public Func<DbManager,Expression,IEnumerable<T>> GetIEnumerable;
+		public Func<QueryContext,DbManager,Expression,IEnumerable<T>> GetIEnumerable;
 
 		#region GetInfo
 
@@ -102,12 +102,13 @@ namespace BLToolkit.Data.Linq
 			for (var i = 0; i < index.Length; i++)
 				index[i] = i;
 
-			GetIEnumerable = (db, expr) => Query(db, expr, GetMapperSlot(index));
+			GetIEnumerable = (_, db, expr) => Query(db, expr, GetMapperSlot(index));
 		}
 
 		IEnumerable<T> Query(DbManager db, Expression expr, int slot)
 		{
 			var dispose = db == null;
+
 			if (db == null)
 				db = new DbManager();
 
@@ -132,22 +133,26 @@ namespace BLToolkit.Data.Linq
 				sql.SqlBuilder.FinalizeAndValidate();
 
 			if (PreloadData || Queries.Count != 1)
-				GetIEnumerable = (db, expr) => Query(db, expr);
+				GetIEnumerable = (ctx, db, expr) => Query(ctx, db, expr);
 			else
-				GetIEnumerable = (db, expr) => Query(db, expr, mapper);
+				GetIEnumerable = (ctx, db, expr) => Query(ctx, db, expr, mapper);
 		}
 
-		IEnumerable<T> Query(DbManager db, Expression expr, Mapper<T> mapper)
+		IEnumerable<T> Query(QueryContext context, DbManager db, Expression expr, Mapper<T> mapper)
 		{
-			var dispose = db == null;
+			var dispose = db == null && context == null;
+
 			if (db == null)
 				db = new DbManager();
+
+			if (context == null)
+				context = new QueryContext { RootDbManager = db };
 
 			try
 			{
 				using (var dr = GetReader(db, expr, 0))
 					while (dr.Read())
-						yield return mapper(this, db, dr, MappingSchema, expr);
+						yield return mapper(this, context, dr, MappingSchema, expr);
 			}
 			finally
 			{
@@ -156,11 +161,15 @@ namespace BLToolkit.Data.Linq
 			}
 		}
 
-		IEnumerable<T> Query(DbManager db, Expression expr)
+		IEnumerable<T> Query(QueryContext context, DbManager db, Expression expr)
 		{
-			var dispose = db == null;
+			var dispose = db == null && context == null;
+
 			if (db == null)
 				db = new DbManager();
+
+			if (context == null)
+				context = new QueryContext { RootDbManager = db };
 
 			var list = new List<T>();
 
@@ -170,7 +179,7 @@ namespace BLToolkit.Data.Linq
 
 				using (var dr = GetReader(db, expr, 0))
 					while (dr.Read())
-						list.Add(mapper(this, db, dr, MappingSchema, expr));
+						list.Add(mapper(this, context, dr, MappingSchema, expr));
 			}
 			finally
 			{
@@ -178,7 +187,8 @@ namespace BLToolkit.Data.Linq
 					db.Dispose();
 			}
 
-			return list;
+			foreach (var item in list)
+				yield return item;
 		}
 
 		IDataReader GetReader(DbManager db, Expression expr, int idx)
@@ -441,14 +451,14 @@ namespace BLToolkit.Data.Linq
 		}
 
 		public IEnumerable<TElement> GetGroupJoinEnumerator<TElement>(
-			DbManager        dbManager,
+			QueryContext     qc,
 			IDataReader      dataReader,
 			Expression       expr,
 			int              counterIndex,
 			Mapper<TElement> itemReader)
 		{
 			var count = MappingSchema.ConvertToInt32(dataReader[counterIndex]);
-			return GetGroupJoinEnumerator(count, count == 0? default(TElement): itemReader(this, dbManager, dataReader, MappingSchema, expr));
+			return GetGroupJoinEnumerator(count, count == 0? default(TElement): itemReader(this, qc, dataReader, MappingSchema, expr));
 		}
 
 		public MethodInfo GetGroupJoinEnumeratorMethodInfo<TElement>()
@@ -462,17 +472,19 @@ namespace BLToolkit.Data.Linq
 
 		class Grouping<TKey,TElement> : IGrouping<TKey,TElement>
 		{
-			public Grouping(TKey key)
+			public Grouping(TKey key, IEnumerable<TElement> items)
 			{
-				Key = key;
+				Key    = key;
+				_items = items;
 			}
+
+			readonly IEnumerable<TElement> _items;
 
 			public TKey Key { get; set; }
 
 			public IEnumerator<TElement> GetEnumerator()
 			{
-				if ("" == 1.ToString())
-					yield return default(TElement);
+				return _items.GetEnumerator();
 			}
 
 			IEnumerator IEnumerable.GetEnumerator()
@@ -482,17 +494,32 @@ namespace BLToolkit.Data.Linq
 		}
 
 		public IGrouping<TKey,TElement> GetGrouping<TKey,TElement>(
-			DbManager    dbManager,
-			IDataReader  dataReader,
-			Expression   expr,
-			Mapper<TKey> keyReader)
+			QueryContext                        context,
+			IDataReader                         dataReader,
+			Expression                          expr,
+			Mapper<TKey>                        keyReader,
+			ExpressionInfo<TKey>.KeyValueHolder keyHolder,
+			ExpressionInfo<TElement>            valueReader)
 		{
-			return new Grouping<TKey,TElement>(keyReader(this, dbManager, dataReader, MappingSchema, expr));
+			var db = context.GetDbManager();
+
+			try
+			{
+				keyHolder.Key = keyReader(this, context, dataReader, MappingSchema, expr);
+
+				var values = valueReader.GetIEnumerable(context, db.DbManager, valueReader.Expression);
+
+				return new Grouping<TKey, TElement>(keyHolder.Key, Common.Configuration.Linq.PreloadGroups ? values.ToList() : values);
+			}
+			finally
+			{
+				context.ReleaseDbManager(db);
+			}
 		}
 
 		public MethodInfo GetGroupingMethodInfo<TKey,TElement>()
 		{
-			return Expressor<ExpressionInfo<T>>.MethodExpressor(e => e.GetGrouping<TKey,TElement>(null, null, null, null));
+			return Expressor<ExpressionInfo<T>>.MethodExpressor(e => e.GetGrouping<TKey,TElement>(null, null, null, null, null, null));
 		}
 
 		#endregion
@@ -828,7 +855,7 @@ namespace BLToolkit.Data.Linq
 
 		#region Inner Types
 
-		public delegate TE Mapper<TE>(ExpressionInfo<T> info,DbManager db,IDataReader rd,MappingSchema ms,Expression expr);
+		public delegate TE Mapper<TE>(ExpressionInfo<T> info,QueryContext qc,IDataReader rd,MappingSchema ms,Expression expr);
 
 		public class Parameter
 		{
@@ -843,6 +870,13 @@ namespace BLToolkit.Data.Linq
 			public List<Parameter> Parameters = new List<Parameter>();
 			public Mapper<T>       Mapper;
 		}
+
+		public class KeyValueHolder
+		{
+			public T Key;
+		}
+
+		public static FieldInfo KeyValueHolderField = Expressor<KeyValueHolder>.FieldExpressor(e => e.Key);
 
 		#endregion
 	}

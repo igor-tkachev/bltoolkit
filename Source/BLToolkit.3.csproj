@@ -126,6 +126,7 @@
     <Compile Include="Data\DataProvider\ProviderName.cs" />
     <Compile Include="Data\Linq\FieldIndex.cs" />
     <Compile Include="Data\Linq\LambdaInfo.cs" />
+    <Compile Include="Data\Linq\QueryContext.cs" />
     <Compile Include="Data\Linq\SqlPropertyAttribute.cs" />
     <Compile Include="Data\Linq\LinqException.cs" />
     <Compile Include="Data\Linq\ExpressionInfo.cs" />

@@ -17,7 +17,7 @@ namespace BLToolkit.Data.Linq
 		{
 			public static FieldInfo FieldExpressor(Expression<Func<T,object>> func)
 			{
-				return (FieldInfo)((MemberExpression)func.Body).Member;
+				return (FieldInfo)((MemberExpression)((UnaryExpression)func.Body).Operand).Member;
 			}
 
 			public static MethodInfo PropertyExpressor(Expression<Func<T,object>> func)
@@ -28,6 +28,9 @@ namespace BLToolkit.Data.Linq
 			public static MethodInfo MethodExpressor(Expression<Func<T,object>> func)
 			{
 				var ex = func.Body;
+
+				//if (ex is MemberExpression)
+				//	return ((PropertyInfo)((MemberExpression)ex).Member).GetGetMethod();
 
 				if (ex is UnaryExpression)
 					ex = ((UnaryExpression)func.Body).Operand;

@@ -160,7 +160,7 @@ namespace BLToolkit.Data
 
 		#region Public Properties
 
-		private readonly string _configurationString;
+		private string _configurationString;
 		/// <summary>
 		/// Gets the string used to open a database.
 		/// </summary>

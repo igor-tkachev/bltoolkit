@@ -56,7 +56,7 @@ namespace BLToolkit.Data.Linq
 				_dbManager != null? _dbManager.MappingSchema: Map.DefaultSchema,
 				expression);
 
-			return info.GetIEnumerable(_dbManager, expression);
+			return info.GetIEnumerable(null, _dbManager, expression);
 		}
 
 		#endregion

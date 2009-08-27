@@ -382,15 +382,19 @@ namespace BLToolkit.Data.Linq
 
 		public class GroupBy : QuerySource
 		{
-			public GroupBy(SqlBuilder sqlBilder, LambdaInfo lambda, QuerySource groupQuery)
-				: base(sqlBilder, lambda, groupQuery)
+
+			public GroupBy(SqlBuilder sqlBilder, QuerySource groupQuery, LambdaInfo sourceLambda)
+				: base(sqlBilder, groupQuery.Lambda, groupQuery)
 			{
-				_groupField = new GroupByColumn(this);
+				_groupField  = new GroupByColumn(this);
+				SourceLambda = sourceLambda;
 
 				Fields.AddRange(groupQuery.Fields);
 			}
 
 			GroupByColumn _groupField;
+
+			public LambdaInfo SourceLambda;
 
 			public override QueryField GetField(Expression expr)
 			{
@@ -400,12 +404,17 @@ namespace BLToolkit.Data.Linq
 					if (me.Member.Name == "Key" && me.Member.DeclaringType.GetGenericTypeDefinition() == typeof(IGrouping<,>))
 						return _groupField;
 
-				return null;
+				return ParentQueries[0].GetField(expr);
 			}
 
 			public override QueryField GetField(MemberInfo mi)
 			{
-				throw new NotImplementedException();
+				return ParentQueries[0].GetField(mi);
+			}
+
+			public override QueryField GetParentField(Expression expr)
+			{
+				return ParentQueries[0].GetParentField(expr);
 			}
 
 			GroupBy() {}
@@ -417,7 +426,10 @@ namespace BLToolkit.Data.Linq
 				if (!objectTree.TryGetValue(this, out clone))
 				{
 					var groupBy = Clone(new GroupBy(), objectTree);
-					groupBy._groupField = (GroupByColumn)_groupField.Clone(objectTree);
+
+					groupBy._groupField   = (GroupByColumn)_groupField. Clone(objectTree);
+					groupBy.SourceLambda = SourceLambda;
+
 					clone = groupBy;
 				}
 
@@ -478,7 +490,7 @@ namespace BLToolkit.Data.Linq
 			throw new InvalidOperationException();
 		}
 
-		public QueryField GetParentField(Expression expr)
+		public virtual QueryField GetParentField(Expression expr)
 		{
 			if (ParentQueries.Length > 0)
 			{

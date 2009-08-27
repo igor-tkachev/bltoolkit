@@ -69,6 +69,24 @@ namespace BLToolkit.Data
 			_dataProvider.InitDbManager(this);
 		}
 
+		DbManager(int n)
+		{
+		}
+
+		public DbManager Clone()
+		{
+			DbManager clone = new DbManager(0);
+
+			clone._configurationString = _configurationString;
+			clone._dataProvider        = _dataProvider;
+			clone._mappingSchema       = _mappingSchema;
+
+			if (_connection != null)
+				clone._connection = CloneConnection();
+
+			return clone;
+		}
+
 		#endregion
 
 		#region Public Properties
@@ -176,6 +194,9 @@ namespace BLToolkit.Data
 		/// <seealso cref="Dispose(bool)"/>
 		public void Close()
 		{
+			if (OnClosing != null)
+				OnClosing(this, EventArgs.Empty);
+
 			if (_selectCommand != null) { _selectCommand.Dispose(); _selectCommand = null; }
 			if (_insertCommand != null) { _insertCommand.Dispose(); _insertCommand = null; }
 			if (_updateCommand != null) { _updateCommand.Dispose(); _updateCommand = null; }
@@ -192,6 +213,9 @@ namespace BLToolkit.Data
 				ExecuteOperation(OperationType.CloseConnection, _connection.Dispose);
 				_connection = null;
 			}
+
+			if (OnClosed != null)
+				OnClosed(this, EventArgs.Empty);
 		}
 
 		#endregion
@@ -444,6 +468,9 @@ namespace BLToolkit.Data
 		#endregion
 
 		#region Events
+
+		public event EventHandler OnClosing;
+		public event EventHandler OnClosed;
 
 		private static readonly object EventBeforeOperation = new object();
 		/// <summary>

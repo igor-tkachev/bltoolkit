@@ -87,5 +87,12 @@ namespace BLToolkit.Common
 			get { return _openNewConnectionToDiscoverParameters; }
 			set { _openNewConnectionToDiscoverParameters = value; }
 		}
+
+#if FW3
+		public static class Linq
+		{
+			public static bool PreloadGroups { get; set; }
+		}
+#endif
 	}
 }
