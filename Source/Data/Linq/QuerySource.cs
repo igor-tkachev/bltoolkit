@@ -12,6 +12,8 @@ namespace BLToolkit.Data.Linq
 
 	abstract class QuerySource : QueryField
 	{
+		#region Table
+
 		public class Table : QuerySource
 		{
 			public Table(MappingSchema mappingSchema, SqlBuilder sqlBuilder, LambdaInfo lambda)
@@ -61,26 +63,24 @@ namespace BLToolkit.Data.Linq
 
 			Table() {}
 
-			public override object Clone(Dictionary<object,object> objectTree)
+			protected override QuerySource CloneInstance(Dictionary<object, object> objectTree)
 			{
-				object clone;
-
-				if (!objectTree.TryGetValue(this, out clone))
+				var table = new Table
 				{
-					var table = Clone(new Table(), objectTree);
+					ObjectType = ObjectType,
+					SqlTable   = (SqlTable)SqlTable.Clone(objectTree)
+				};
 
-					table.ObjectType = ObjectType;
-					table.SqlTable   = (SqlTable)SqlTable.Clone(objectTree);
+				foreach (var c in _columns)
+					table._columns.Add(c.Key, (Column)c.Value.Clone(objectTree));
 
-					foreach (var c in _columns)
-						table._columns.Add(c.Key, (Column)c.Value.Clone(objectTree));
-
-					clone = table;
-				}
-
-				return clone;
+				return table;
 			}
 		}
+
+		#endregion
+
+		#region Expr
 
 		public class Expr : QuerySource
 		{
@@ -105,11 +105,11 @@ namespace BLToolkit.Data.Linq
 							GetParentField(ex.Arguments[i]) ??
 							new ExprColumn(this, lambda.Body.Create(ex.Arguments[i], lambda.Body.Index(ex.Arguments, New.Arguments, i)), member.Name);
 
-						base.Fields.Add(field);
-						_fields.Add(member, field);
+						Fields.Add(field);
+						Members.Add(member, field);
 					}
 				}
-				else
+				else if (lambda.Body.Expr is MemberInitExpression)
 				{
 					var ex = (MemberInitExpression)lambda.Body.Expr;
 
@@ -131,8 +131,8 @@ namespace BLToolkit.Data.Linq
 
 							var field = GetParentField(piExpression) ?? new ExprColumn(this, piExpression, member.Name);
 
-							base.Fields.Add(field);
-							_fields.Add(member, field);
+							Fields.Add(field);
+							Members.Add(member, field);
 						}
 						else
 							throw new InvalidOperationException();
@@ -140,12 +140,12 @@ namespace BLToolkit.Data.Linq
 				}
 			}
 
-			readonly Dictionary<MemberInfo,QueryField> _fields = new Dictionary<MemberInfo,QueryField>();
+			protected readonly Dictionary<MemberInfo,QueryField> Members = new Dictionary<MemberInfo,QueryField>();
 
 			public override QueryField GetField(MemberInfo mi)
 			{
 				QueryField fld;
-				_fields.TryGetValue(mi, out fld);
+				Members.TryGetValue(mi, out fld);
 				return fld;
 			}
 
@@ -209,25 +209,27 @@ namespace BLToolkit.Data.Linq
 				return null;
 			}
 
-			Expr() {}
+			protected Expr() {}
 
-			public override object Clone(Dictionary<object, object> objectTree)
+			protected virtual Expr CreateExpr(Dictionary<object,object> objectTree)
 			{
-				object clone;
+				return new Expr();
+			}
 
-				if (!objectTree.TryGetValue(this, out clone))
-				{
-					var expr = Clone(new Expr(), objectTree);
+			protected override QuerySource CloneInstance(Dictionary<object, object> objectTree)
+			{
+				var expr = CreateExpr(objectTree);
 
-					foreach (var c in _fields)
-						expr._fields.Add(c.Key, (QueryField)c.Value.Clone(objectTree));
+				foreach (var c in Members)
+					expr.Members.Add(c.Key, (QueryField)c.Value.Clone(objectTree));
 
-					clone = expr;
-				}
-
-				return clone;
+				return expr;
 			}
 		}
+
+		#endregion
+
+		#region SubQuery
 
 		public class SubQuery : QuerySource
 		{
@@ -301,25 +303,22 @@ namespace BLToolkit.Data.Linq
 				return new SubQuery();
 			}
 
-			public override object Clone(Dictionary<object,object> objectTree)
+			protected override QuerySource CloneInstance(Dictionary<object, object> objectTree)
 			{
-				object clone;
+				var sub = CreateSubQuery(objectTree);
 
-				if (!objectTree.TryGetValue(this, out clone))
-				{
-					var sub = Clone(CreateSubQuery(objectTree), objectTree);
+				sub.SubSql = (SqlBuilder)SubSql.Clone(objectTree);
 
-					sub.SubSql = (SqlBuilder)SubSql.Clone(objectTree);
+				foreach (var c in _columns)
+					sub._columns.Add(c.Key, (SubQueryColumn)c.Value.Clone(objectTree));
 
-					foreach (var c in _columns)
-						sub._columns.Add(c.Key, (SubQueryColumn)c.Value.Clone(objectTree));
-
-					clone = sub;
-				}
-
-				return clone;
+				return sub;
 			}
 		}
+
+		#endregion
+
+		#region GroupJoinQuery
 
 		public class GroupJoinQuery : SubQuery
 		{
@@ -337,6 +336,10 @@ namespace BLToolkit.Data.Linq
 				return new GroupJoinQuery { Counter = (ExprColumn)Counter.Clone(objectTree) };
 			}
 		}
+
+		#endregion
+
+		#region Scalar
 
 		public class Scalar : QuerySource
 		{
@@ -357,85 +360,58 @@ namespace BLToolkit.Data.Linq
 
 			public override QueryField GetField(Expression expr)
 			{
-				if (((MemberExpression)expr).Member == ((MemberExpression)Lambda.Body).Member)
-					return _field;
+				if (Lambda.Body.Expr is MemberExpression && expr is MemberExpression)
+					if (((MemberExpression)expr).Member == ((MemberExpression)Lambda.Body.Expr).Member)
+						return _field;
 
-				return null;
+				return GetParentField(expr);
 			}
 
 			Scalar() {}
 
-			public override object Clone(Dictionary<object,object> objectTree)
+			protected override QuerySource CloneInstance(Dictionary<object, object> objectTree)
 			{
-				object clone;
-
-				if (!objectTree.TryGetValue(this, out clone))
-				{
-					var scalar = Clone(new Scalar(), objectTree);
-					scalar._field = (QueryField)_field.Clone(objectTree);
-					clone = scalar;
-				}
-
-				return clone;
+				return new Scalar { _field = (QueryField)_field.Clone(objectTree) };
 			}
 		}
 
-		public class GroupBy : QuerySource
-		{
+		#endregion
 
-			public GroupBy(SqlBuilder sqlBilder, QuerySource groupQuery, LambdaInfo sourceLambda)
+		#region GroupBy
+
+		public class GroupBy : Expr
+		{
+			public GroupBy(SqlBuilder sqlBilder, QuerySource groupQuery, QuerySource elementSource, Type groupingType)
 				: base(sqlBilder, groupQuery.Lambda, groupQuery)
 			{
-				_groupField  = new GroupByColumn(this);
-				SourceLambda = sourceLambda;
+				ElementSource = elementSource;
+				GroupingType  = groupingType;
 
-				Fields.AddRange(groupQuery.Fields);
+				var field = new GroupByColumn(this);
+
+				Fields.Add(field);
+				Members.Add(groupingType.GetProperty("Key"), field);
 			}
 
-			GroupByColumn _groupField;
-
-			public LambdaInfo SourceLambda;
-
-			public override QueryField GetField(Expression expr)
-			{
-				var me = expr as MemberExpression;
-
-				if (me != null)
-					if (me.Member.Name == "Key" && me.Member.DeclaringType.GetGenericTypeDefinition() == typeof(IGrouping<,>))
-						return _groupField;
-
-				return ParentQueries[0].GetField(expr);
-			}
-
-			public override QueryField GetField(MemberInfo mi)
-			{
-				return ParentQueries[0].GetField(mi);
-			}
+			public QuerySource ElementSource;
+			public Type        GroupingType;
 
 			public override QueryField GetParentField(Expression expr)
 			{
-				return ParentQueries[0].GetParentField(expr);
+			    return ParentQueries[0].GetParentField(expr);
 			}
 
 			GroupBy() {}
 
-			public override object Clone(Dictionary<object,object> objectTree)
+			protected override Expr CreateExpr(Dictionary<object,object> objectTree)
 			{
-				object clone;
-
-				if (!objectTree.TryGetValue(this, out clone))
-				{
-					var groupBy = Clone(new GroupBy(), objectTree);
-
-					groupBy._groupField   = (GroupByColumn)_groupField. Clone(objectTree);
-					groupBy.SourceLambda = SourceLambda;
-
-					clone = groupBy;
-				}
-
-				return clone;
+				return new GroupBy { ElementSource = ElementSource };
 			}
 		}
+
+		#endregion
+
+		#region base
 
 		protected QuerySource(SqlBuilder sqlBilder, LambdaInfo lambda, params QuerySource[] parentQueries)
 		{
@@ -448,15 +424,25 @@ namespace BLToolkit.Data.Linq
 		{
 		}
 
-		protected T Clone<T>(T clone, Dictionary<object,object> objectTree)
-			where T : QuerySource
-		{
-			objectTree.Add(this, clone);
+		protected abstract QuerySource CloneInstance(Dictionary<object,object> objectTree);
 
-			clone.SqlBuilder    = (SqlBuilder)SqlBuilder.Clone(objectTree);
-			clone.Lambda        = Lambda;
-			clone.ParentQueries = Array. ConvertAll(ParentQueries, q => (QuerySource)q.Clone(objectTree));
-			clone.Fields        = Fields.ConvertAll(f => (QueryField)f.Clone(objectTree));
+		public override object Clone(Dictionary<object,object> objectTree)
+		{
+			object clone;
+
+			if (!objectTree.TryGetValue(this, out clone))
+			{
+				var qs = CloneInstance(objectTree);
+
+				objectTree.Add(this, qs);
+
+				qs.SqlBuilder    = (SqlBuilder)SqlBuilder.Clone(objectTree);
+				qs.Lambda        = Lambda;
+				qs.ParentQueries = Array. ConvertAll(ParentQueries, q => (QuerySource)q.Clone(objectTree));
+				qs.Fields        = Fields.ConvertAll(f => (QueryField)f.Clone(objectTree));
+
+				clone = qs;
+			}
 
 			return clone;
 		}
@@ -468,8 +454,8 @@ namespace BLToolkit.Data.Linq
 		public LambdaInfo       Lambda;
 		public List<QueryField> Fields = new List<QueryField>();
 
-		public    abstract QueryField GetField(Expression expr);
-		public    abstract QueryField GetField(MemberInfo mi);
+		public abstract QueryField GetField(Expression expr);
+		public abstract QueryField GetField(MemberInfo mi);
 
 		protected virtual  QueryField GetField(List<MemberInfo> members, int currentMember)
 		{
@@ -477,6 +463,9 @@ namespace BLToolkit.Data.Linq
 
 			if (field == null || currentMember + 1 == members.Count)
 				 return field;
+
+			if (field is GroupByColumn)
+				return ((GroupByColumn)field).GroupBySource.ParentQueries[0].GetField(members, currentMember + 1);
 
 			return ((QuerySource)field).GetField(members, currentMember + 1);
 		}
@@ -563,12 +552,14 @@ namespace BLToolkit.Data.Linq
 			Action<GroupBy>  groupByAction)
 		{
 			if      (this is Table)    tableAction   (this as Table);
+			else if (this is GroupBy)  groupByAction (this as GroupBy);
 			else if (this is Expr)     exprAction    (this as Expr);
 			else if (this is SubQuery) subQueryAction(this as SubQuery);
 			else if (this is Scalar)   scalarAction  (this as Scalar);
-			else if (this is GroupBy)  groupByAction (this as GroupBy);
 			else
 				throw new InvalidOperationException();
 		}
+
+		#endregion
 	}
 }

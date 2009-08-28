@@ -8,6 +8,8 @@ namespace BLToolkit.Data.Linq
 
 	abstract class QueryField : ReflectionHelper
 	{
+		#region Column
+
 		public class Column : QueryField
 		{
 			public Column(QuerySource.Table table, SqlField field, MemberMapper mapper)
@@ -43,6 +45,10 @@ namespace BLToolkit.Data.Linq
 				return clone;
 			}
 		}
+
+		#endregion
+
+		#region ExprColumn
 
 		public class ExprColumn : QueryField
 		{
@@ -89,7 +95,7 @@ namespace BLToolkit.Data.Linq
 				if (_sqlExpression == null)
 					_sqlExpression = parser.ParseExpression(QuerySource, Expr);
 
-				return new []  { _sqlExpression };
+				return new [] { _sqlExpression };
 			}
 
 			public override object Clone(Dictionary<object,object> objectTree)
@@ -109,6 +115,10 @@ namespace BLToolkit.Data.Linq
 				return clone;
 			}
 		}
+
+		#endregion
+
+		#region SubQueryColumn
 
 		public class SubQueryColumn : QueryField
 		{
@@ -167,6 +177,10 @@ namespace BLToolkit.Data.Linq
 			}
 		}
 
+		#endregion
+
+		#region GroupByColumn
+
 		public class GroupByColumn : QueryField
 		{
 			public GroupByColumn(QuerySource.GroupBy groupBySource)
@@ -190,7 +204,7 @@ namespace BLToolkit.Data.Linq
 
 			public override ISqlExpression[] GetExpressions<T>(ExpressionParser<T> parser)
 			{
-				return GroupBySource.GetExpressions(parser);
+				return GroupBySource.ParentQueries[0].GetExpressions(parser);
 			}
 
 			public override object Clone(Dictionary<object, object> objectTree)
@@ -204,15 +218,21 @@ namespace BLToolkit.Data.Linq
 			}
 		}
 
+		#endregion
+
+		#region base
+
 		public object Clone()
 		{
 			return Clone(new Dictionary<object,object>());
 		}
 
-		public abstract QuerySource[] Sources { get; }
+		public abstract QuerySource[]    Sources { get; }
 
-		public abstract object           Clone           (Dictionary<object,object> objectTree);
-		public abstract FieldIndex[]     Select       <T>(ExpressionParser<T> parser);
+		public abstract object           Clone            (Dictionary<object,object> objectTree);
+		public abstract FieldIndex[]     Select        <T>(ExpressionParser<T> parser);
 		public abstract ISqlExpression[] GetExpressions<T>(ExpressionParser<T> parser);
+
+		#endregion
 	}
 }

@@ -109,16 +109,21 @@ namespace BLToolkit.Data.Linq
 
 			info.ConvertTo<MethodCallExpression>().Match
 			(
-				pi => pi.IsQueryableMethod ("Select",            seq => select = ParseSequence(seq, null),  l      => select = ParseSelect    (l,        select)),
-				pi => pi.IsQueryableMethod ("Where",             seq => select = ParseSequence(seq, null),  l      => select = ParseWhere     (l,        select)),
-				pi => pi.IsQueryableMethod ("SelectMany",        seq => select = ParseSequence(seq, null),  l      => select = ParseSelectMany(l,  null, select)),
-				pi => pi.IsQueryableMethod ("SelectMany",        seq => select = ParseSequence(seq, null), (l1,l2) => select = ParseSelectMany(l1, l2,   select)),
+				pi => pi.IsQueryableMethod ("Select",            seq => select = ParseSequence(seq, null),  l         => select = ParseSelect    (l,        select)),
+				pi => pi.IsQueryableMethod ("Where",             seq => select = ParseSequence(seq, null),  l         => select = ParseWhere     (l,        select)),
+				pi => pi.IsQueryableMethod ("SelectMany",        seq => select = ParseSequence(seq, null),  l         => select = ParseSelectMany(l,  null, select)),
+				pi => pi.IsQueryableMethod ("SelectMany", 1, 2,  seq => select = ParseSequence(seq, null), (l1,l2)    => select = ParseSelectMany(l1, l2,   select)),
 				pi => pi.IsQueryableMethod ("Join",              seq => select = ParseSequence(seq, null), (i,l2,l3,l4) => select = ParseJoin     (i, l2, l3, l4, select)),
 				pi => pi.IsQueryableMethod ("GroupJoin",         seq => select = ParseSequence(seq, null), (i,l2,l3,l4) => select = ParseGroupJoin(i, l2, l3, l4, select)),
 				pi => pi.IsEnumerableMethod("DefaultIfEmpty",    seq => { select = ParseDefaultIfEmpty(parent, seq); return select != null; }),
-				pi => pi.IsQueryableMethod ("GroupBy",           seq => select = ParseSequence(seq, null),  l      => select = ParseGroupBy   (l,        select)),
+				pi => pi.IsQueryableMethod ("GroupBy",           seq => select = ParseSequence(seq, null),  l         => select = ParseGroupBy   (l,  null, null, select, pi.Expr.Type.GetGenericArguments()[0])),
+				pi => pi.IsQueryableMethod ("GroupBy",    1, 1,  seq => select = ParseSequence(seq, null), (l1,l2)    => select = ParseGroupBy   (l1, l2,   null, select, pi.Expr.Type.GetGenericArguments()[0])),
+				pi => pi.IsQueryableMethod ("GroupBy",    1, 2,  seq => select = ParseSequence(seq, null), (l1,l2)    => select = ParseGroupBy   (l1, null, l2,   select, null)),
+				pi => pi.IsQueryableMethod ("GroupBy", 1, 1, 2,  seq => select = ParseSequence(seq, null), (l1,l2,l3) => select = ParseGroupBy   (l1, l2,   l3,   select, null)),
 				pi => pi.IsQueryableMethod ("OrderBy",           seq => select = ParseSequence(seq, null),  l      => select = ParseOrderBy   (l,        select, true)),
 				pi => pi.IsQueryableMethod ("OrderByDescending", seq => select = ParseSequence(seq, null),  l      => select = ParseOrderBy   (l,        select, false)),
+				pi => pi.IsQueryableMethod ("ThenBy",            seq => select = ParseSequence(seq, null),  l      => select = ParseOrderBy   (l,        select, true)),
+				pi => pi.IsQueryableMethod ("ThenByDescending",  seq => select = ParseSequence(seq, null),  l      => select = ParseOrderBy   (l,        select, false)),
 				pi => pi.IsMethod(m =>
 				{
 					if (m.Expr.Method.DeclaringType == typeof(Queryable) || !TypeHelper.IsSameOrParent(typeof(IQueryable), pi.Expr.Type))
@@ -411,23 +416,27 @@ namespace BLToolkit.Data.Linq
 
 		#region Parse GroupBy
 
-		QuerySource ParseGroupBy(LambdaInfo lambda, QuerySource source)
+		QuerySource ParseGroupBy(LambdaInfo keySelector, LambdaInfo elementSelector, LambdaInfo resultSelector, QuerySource source, Type groupingType)
 		{
-			CheckExplicitCtor(lambda.Body);
+			CheckExplicitCtor(keySelector.Body);
 
-			var group = ParseSelect(lambda, source);
+			var group   = ParseSelect(keySelector, source);
+			var element = elementSelector != null? ParseSelect(elementSelector, source) : null;
 
 			foreach (var field in group.Fields)
 			{
 				var exprs = field.GetExpressions(this);
 
 				if (exprs.Length != 1)
-					throw new LinqException("Cannot group by type '{0}'", lambda.Body.Expr.Type);
+					throw new LinqException("Cannot group by type '{0}'", keySelector.Body.Expr.Type);
 
 				CurrentSql.GroupBy.Expr(exprs[0]);
 			}
 
-			return new QuerySource.GroupBy(CurrentSql, group, source.Lambda);
+			if (resultSelector == null)
+				return new QuerySource.GroupBy(CurrentSql, group, element, groupingType);
+
+			return ParseSelect(resultSelector, group, source);
 		}
 
 		#endregion
@@ -479,7 +488,7 @@ namespace BLToolkit.Data.Linq
 
 		void BuildNew(QuerySource query, ParseInfo expr, Action<ParseInfo> newAction)
 		{
-			var info = BuildNewExpression(query, expr);
+			var info = BuildNewExpression(query, expr, i => i);
 			newAction(info);
 		}
 
@@ -535,7 +544,7 @@ namespace BLToolkit.Data.Linq
 			ParseInfo GetParseInfo(ExpressionParser<T> parser, QuerySource.GroupBy query, ParseInfo expr, Expression info);
 		}
 
-		class GroupByHelper<TKey,TElement> : IGroupByHelper
+		class GroupByHelper<TKey,TElement,TSource> : IGroupByHelper
 		{
 			public ParseInfo GetParseInfo(ExpressionParser<T> parser, QuerySource.GroupBy query, ParseInfo expr, Expression info)
 			{
@@ -566,12 +575,24 @@ namespace BLToolkit.Data.Linq
 
 				valueExpr = Expression.Call(
 					null,
-					Expressor<object>.MethodExpressor(_ => Queryable.Where(null, (Expression<Func<TElement,bool>>)null)),
+					Expressor<object>.MethodExpressor(_ => Queryable.Where(null, (Expression<Func<TSource,bool>>)null)),
 					new[]
 					{
-						query.SourceLambda.Body.Expr,
-						Expression.Lambda<Func<TElement,bool>>(valueExpr, new[] { query.Lambda.Parameters[0].Expr })
+						query.ParentQueries[0].ParentQueries[0].Lambda.Body.Expr,
+						Expression.Lambda<Func<TSource,bool>>(valueExpr, new[] { query.Lambda.Parameters[0].Expr })
 					});
+
+				if (query.ElementSource != null)
+				{
+					valueExpr = Expression.Call(
+						null,
+						Expressor<object>.MethodExpressor(_ => Queryable.Select(null, (Expression<Func<TSource,TElement>>)null)),
+						new[]
+						{
+							valueExpr,
+							Expression.Lambda<Func<TSource,TElement>>(query.ElementSource.Lambda.Body, new[] { query.ElementSource.Lambda.Parameters[0].Expr })
+						});
+				}
 
 				var keyReader = Expression.Lambda<ExpressionInfo<T>.Mapper<TKey>>(
 					info, new[] { parser._infoParam, parser._contextParam, parser._dataReaderParam, parser._mapSchemaParam, parser._expressionParam });
@@ -590,18 +611,20 @@ namespace BLToolkit.Data.Linq
 
 		void BuildGroupBy(QuerySource.GroupBy query, ParseInfo expr, Action<ParseInfo> newAction)
 		{
-			//_info.PreloadData = true;
+			_info.PreloadData = false;
 
-			var helper = (IGroupByHelper)Activator.CreateInstance(typeof(GroupByHelper<,>).MakeGenericType(
-				typeof(T), query.Lambda.Body.Expr.Type, query.Lambda.Parameters[0].Expr.Type));
+			var args   = query.GroupingType.GetGenericArguments();
+			var helper = (IGroupByHelper)Activator.CreateInstance(typeof(GroupByHelper<,,>).
+				MakeGenericType(typeof(T), args[0], args[1], query.Lambda.Parameters[0].Expr.Type));
 
-			var info   = helper.GetParseInfo(this, query, expr, BuildNewExpression(query, expr));
+			var info   = helper.GetParseInfo(this, query, expr, BuildNewExpression(query, expr, i => i));
+
 			newAction(info);
 		}
 
 		#endregion
 
-		ParseInfo BuildNewExpression(QuerySource query, ParseInfo expr)
+		ParseInfo BuildNewExpression(QuerySource query, ParseInfo expr, IndexConverter converter)
 		{
 			return expr.Walk(pi =>
 			{
@@ -629,20 +652,26 @@ namespace BLToolkit.Data.Linq
 									{
 										var col = (QueryField.ExprColumn)field;
 
-										pi = BuildNewExpression(col.QuerySource, col.Expr);
+										pi = BuildNewExpression(col.QuerySource, col.Expr, converter);
 										pi.IsReplaced = pi.StopWalking = true;
 
 										return pi;
 									}
 
 									if (field is QuerySource.Table)
-										return BuildQueryField(ma, (QuerySource.Table)field, i => i);
+										return BuildQueryField(ma, (QuerySource.Table)field, converter);
 
 									if (field is QueryField.SubQueryColumn)
-										return BuildSubQuery(ma, (QueryField.SubQueryColumn)field, i => i);
+										return BuildSubQuery(ma, (QueryField.SubQueryColumn)field, converter);
 
 									if (field is QueryField.GroupByColumn)
-										return BuildGroupBy(ma, (QueryField.GroupByColumn)field, i => i);
+									{
+										var ret = BuildGroupBy(ma, (QueryField.GroupByColumn)field, converter);
+
+										ret.StopWalking = true;
+
+										return ret;
+									}
 
 									throw new InvalidOperationException();
 								}
@@ -681,16 +710,16 @@ namespace BLToolkit.Data.Linq
 							if (field != null)
 							{
 								if (field is QuerySource.Table)
-									return BuildQueryField(pi, (QuerySource.Table)field, i => i);
+									return BuildQueryField(pi, (QuerySource.Table)field, converter);
 
 								if (field is QuerySource.Scalar)
 								{
 									var source = (QuerySource)field;
-									return BuildNewExpression(source, source.Lambda.Body);
+									return BuildNewExpression(source, source.Lambda.Body, converter);
 								}
 
 								if (field is QuerySource.GroupJoinQuery)
-									return BuildGroupJoin(pi, (QuerySource.GroupJoinQuery)field, i => i);
+									return BuildGroupJoin(pi, (QuerySource.GroupJoinQuery)field, converter);
 
 								throw new InvalidOperationException();
 							}
@@ -707,7 +736,7 @@ namespace BLToolkit.Data.Linq
 								if (field != null)
 								{
 									var idx = field.Select(this);
-									return BuildField(pi, idx.Select(i => i.Index).ToArray(), pi.Expr.Type);
+									return BuildField(pi, idx.Select(i => converter(i).Index).ToArray(), pi.Expr.Type);
 								}
 							}
 
@@ -820,7 +849,12 @@ namespace BLToolkit.Data.Linq
 
 		ParseInfo BuildGroupBy(ParseInfo<MemberExpression> ma, QueryField.GroupByColumn field, IndexConverter converter)
 		{
-			return BuildField(ma, field, converter);
+			var source = field.GroupBySource.ParentQueries[0];
+
+			if (source is QuerySource.Scalar)
+				return BuildField(ma, field.GroupBySource, converter);
+
+			return BuildNewExpression(field.GroupBySource.ParentQueries[0], field.GroupBySource.Lambda.Body, converter);
 		}
 
 		ParseInfo BuildField(QuerySource query, ParseInfo pi)

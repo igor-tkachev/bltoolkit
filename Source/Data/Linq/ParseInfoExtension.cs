@@ -59,6 +59,8 @@ namespace BLToolkit.Data.Linq
 		public static bool IsQueryableMethod(
 			this ParseInfo<MethodCallExpression> pi,
 			string                               methodName,
+			int                                  nparams1,
+			int                                  nparams2,
 			Action<ParseInfo<Expression>>        seq,
 			Action<LambdaInfo,LambdaInfo>        parms)
 		{
@@ -68,11 +70,39 @@ namespace BLToolkit.Data.Linq
 			if (IsMethod(pi, typeof(Queryable), methodName, new FTest[]
 				{
 					p => { seq(p); return true; },
-					l => l.IsLambda(1, l1 => lambda1 = l1),
-					l => l.IsLambda(2, l2 => lambda2 = l2),
+					l => l.IsLambda(nparams1, l1 => lambda1 = l1),
+					l => l.IsLambda(nparams2, l2 => lambda2 = l2),
 				}, p => true))
 			{
 				parms(lambda1, lambda2);
+				return true;
+			}
+
+			return false;
+		}
+
+		public static bool IsQueryableMethod(
+			this ParseInfo<MethodCallExpression>     pi,
+			string                                   methodName,
+			int                                      nparams1,
+			int                                      nparams2,
+			int                                      nparams3,
+			Action<ParseInfo<Expression>>            seq,
+			Action<LambdaInfo,LambdaInfo,LambdaInfo> parms)
+		{
+			LambdaInfo lambda1 = null;
+			LambdaInfo lambda2 = null;
+			LambdaInfo lambda3 = null;
+
+			if (IsMethod(pi, typeof(Queryable), methodName, new FTest[]
+				{
+					p => { seq(p); return true; },
+					l => l.IsLambda(nparams1, l1 => lambda1 = l1),
+					l => l.IsLambda(nparams2, l2 => lambda2 = l2),
+					l => l.IsLambda(nparams3, l3 => lambda3 = l3),
+				}, p => true))
+			{
+				parms(lambda1, lambda2, lambda3);
 				return true;
 			}
 
