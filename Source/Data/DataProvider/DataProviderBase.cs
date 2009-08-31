@@ -202,6 +202,16 @@ namespace BLToolkit.Data.DataProvider
 			return new BasicSqlProvider(this);
 		}
 
+		public virtual int MaxParameters
+		{
+			get { return 100; }
+		}
+
+		public virtual int MaxBatchSize
+		{
+			get { return 65536; }
+		}
+
 		#endregion
 	}
 }

@@ -129,6 +129,13 @@ namespace BLToolkit.Data
 			set { _traceSwitch = value; }
 		}
 
+		private    bool _canRaiseEvents = true;
+		public new bool  CanRaiseEvents
+		{
+			get { return _canRaiseEvents && base.CanRaiseEvents; }
+			set { _canRaiseEvents = value; }
+		}
+
 		#endregion
 
 		#region Connection
@@ -1754,7 +1761,7 @@ namespace BLToolkit.Data
 		/// It is used in Execute methods of the <see cref="DbManager"/> class to identify command instance 
 		/// to be used.
 		/// </summary>
-		private enum CommandAction
+		enum CommandAction
 		{
 			Select,
 			Insert,
@@ -2166,7 +2173,7 @@ namespace BLToolkit.Data
 			return this;
 		}
 
-		private bool InitParameters(CommandAction commandAction)
+		bool InitParameters(CommandAction commandAction)
 		{
 			bool prepare = false;
 
@@ -2351,6 +2358,147 @@ namespace BLToolkit.Data
 						rowsTotal += rows;
 				}
 			}
+
+			return rowsTotal;
+		}
+
+		public int ExecuteForEach<T>(int maxBatchSize, IEnumerable<T> collection)
+		{
+			ObjectMapper       om  = _mappingSchema.GetObjectMapper(typeof(T));
+			List<MemberMapper> mms = new List<MemberMapper>();
+
+			foreach (MemberMapper mm in om)
+			{
+				string name = _dataProvider.Convert(mm.Name, ConvertType.NameToParameter).ToString();
+
+				if (Command.Parameters.Contains(name))
+					mms.Add(mm);
+			}
+
+			return ExecuteForEach<T>(collection, mms.ToArray(), maxBatchSize, delegate(T obj) { return CreateParameters(obj); });
+		}
+
+		public delegate IDbDataParameter[] ParameterProvider<T>(T obj);
+
+		internal int ExecuteForEach<T>(IEnumerable<T> collection, MemberMapper[] members, int maxBatchSize, ParameterProvider<T> getParameters)
+		{
+			if (collection == null)
+				return 0;
+
+			int maxRows =
+				Math.Max(
+					Math.Min(
+						Math.Max(
+							members.Length == 0? 1000 : _dataProvider.MaxParameters / members.Length,
+							members.Length),
+						maxBatchSize),
+					1);
+			string baseSql          = SelectCommand.CommandText;
+			int    rowsTotal        = 0;
+			int    nRows            = 0;
+			bool   initParameters   = true;
+			bool   saveCanRaseEvent = _canRaiseEvents;
+
+			_canRaiseEvents = false;
+
+			StringBuilder          sb             = new StringBuilder();
+			List<int>              rowSql         = new List<int>(maxRows);
+			IDbDataParameter[]     baseParameters = null;
+			List<IDbDataParameter> parameters     = new List<IDbDataParameter>();
+
+			foreach (T obj in collection)
+			{
+				if (initParameters)
+				{
+					initParameters = false;
+					baseParameters = getParameters(obj);
+
+					int n = 0;
+
+					foreach (IDbDataParameter p in baseParameters)
+						n += p.ParameterName.Length + 3 - "{0}".Length;
+
+					maxRows = Math.Min(maxRows, _dataProvider.MaxBatchSize / (baseSql.Length + n));
+				}
+
+				bool isSet;
+
+				if (rowSql.Count < maxRows)
+				{
+					isSet = false;
+
+					sb
+						.Append("\n")
+						.AppendFormat(
+							baseSql,
+							Array.ConvertAll<IDbDataParameter,string>(
+								baseParameters, delegate(IDbDataParameter p) { return p.ParameterName + nRows; }));
+
+					rowSql.Add(sb.Length);
+
+					for (int i = 0; i < members.Length; i++)
+					{
+						object value = members[i].GetValue(obj);
+
+						parameters.Add(Parameter(baseParameters[i].ParameterName + nRows, value ?? DBNull.Value));
+					}
+
+				}
+				else
+				{
+					isSet = true;
+
+					for (int i = 0, n = nRows * members.Length; i < members.Length; i++)
+					{
+						object value = members[i].GetValue(obj);
+
+						parameters[n + i].Value =
+							value == null || members[i].MapMemberInfo.Nullable && _mappingSchema.IsNull(value)?
+								DBNull.Value: value;
+					}
+				}
+
+				nRows++;
+
+				if (nRows >= maxRows)
+				{
+					if (isSet == false)
+					{
+						SetCommand(sb.ToString(), parameters.ToArray());
+						Prepare();
+					}
+					else
+					{
+						InitParameters(CommandAction.Select);
+					}
+
+					int n = ExecuteNonQueryInternal();
+					if (n > 0)
+						rowsTotal += n;
+
+					nRows = 0;
+				}
+			}
+
+			if (nRows > 0)
+			{
+				if (rowSql.Count >= maxRows)
+				{
+					int nps = nRows * members.Length;
+					parameters.RemoveRange(nps, parameters.Count - nps);
+
+					sb.Length = rowSql[nRows - 1];
+				}
+
+				SetCommand(sb.ToString(), parameters.ToArray());
+				Prepare();
+
+				int n = ExecuteNonQueryInternal();
+				if (n > 0)
+					rowsTotal += n;
+			}
+
+			_canRaiseEvents = saveCanRaseEvent;
 
 			return rowsTotal;
 		}

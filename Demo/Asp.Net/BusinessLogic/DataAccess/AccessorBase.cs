@@ -107,7 +107,7 @@ namespace PetShop.BusinessLogic.DataAccess
 				switch (actionName)
 				{
 					case "InsertAndGetIdentity":
-						SqlQueryInfo qi = CreateInsertSqlText(db, type);
+						SqlQueryInfo qi = CreateInsertSqlText(db, type, -1);
 
 						qi.QueryText += "\nSELECT Cast(SCOPE_IDENTITY() as int)";
 

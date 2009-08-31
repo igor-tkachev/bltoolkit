@@ -139,5 +139,15 @@ namespace BLToolkit.Data.DataProvider
 		{
 			return new MSSqlSqlProvider(this);
 		}
+
+		public override int MaxParameters
+		{
+			get { return 2100 - 20; }
+		}
+
+		public override int MaxBatchSize
+		{
+			get { return 65536; }
+		}
 	}
 }

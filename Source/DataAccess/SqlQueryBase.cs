@@ -124,7 +124,7 @@ namespace BLToolkit.DataAccess
 		}
 
 		[NoInterception]
-		protected virtual void AddWherePK(DbManager db, SqlQueryInfo query, StringBuilder sb)
+		protected virtual void AddWherePK(DbManager db, SqlQueryInfo query, StringBuilder sb, int nParameter)
 		{
 			sb.Append("WHERE\n");
 
@@ -140,9 +140,12 @@ namespace BLToolkit.DataAccess
 					db.DataProvider.Convert(mm.Name + "_W", ConvertType.NameToQueryParameter).ToString(),
 					mm.Name);
 
-				sb.AppendFormat("\t{0} = {1} AND\n",
-					db.DataProvider.Convert(p.FieldName, ConvertType.NameToQueryField),
-					p.ParameterName);
+				sb.AppendFormat("\t{0} = ", db.DataProvider.Convert(p.FieldName, ConvertType.NameToQueryField));
+
+				if (nParameter < 0)
+					sb.AppendFormat("{0} AND\n", p.ParameterName);
+				else
+					sb.AppendFormat("{{{0}}} AND\n", nParameter);
 			}
 
 			sb.Remove(sb.Length - 5, 5);
@@ -165,7 +168,7 @@ namespace BLToolkit.DataAccess
 			sb.AppendFormat("FROM\n\t{0}\n",
 				db.DataProvider.Convert(GetTableName(type), ConvertType.NameToQueryTable));
 
-			AddWherePK(db, query, sb);
+			AddWherePK(db, query, sb, -1);
 
 			query.QueryText = sb.ToString();
 
@@ -194,7 +197,7 @@ namespace BLToolkit.DataAccess
 			return query;
 		}
 
-		protected SqlQueryInfo CreateInsertSqlText(DbManager db, Type type)
+		protected SqlQueryInfo CreateInsertSqlText(DbManager db, Type type, int nParameter)
 		{
 			TypeExtension        typeExt = TypeExtension.GetTypeExtension(type, Extensions);
 			ObjectMapper         om      = db.MappingSchema.GetObjectMapper(type);
@@ -234,7 +237,10 @@ namespace BLToolkit.DataAccess
 					db.DataProvider.Convert(mm.Name, ConvertType.NameToQueryParameter).ToString(),
 					mm.Name);
 
-				sb.AppendFormat("\t{0},\n", p.ParameterName);
+				if (nParameter < 0)
+					sb.AppendFormat("\t{0},\n", p.ParameterName);
+				else
+					sb.AppendFormat("\t{{{0}}},\n", nParameter++);
 			}
 
 			sb.Remove(sb.Length - 2, 1);
@@ -246,7 +252,7 @@ namespace BLToolkit.DataAccess
 			return query;
 		}
 
-		protected SqlQueryInfo CreateUpdateSqlText(DbManager db, Type type)
+		protected SqlQueryInfo CreateUpdateSqlText(DbManager db, Type type, int nParameter)
 		{
 			TypeExtension   typeExt = TypeExtension.GetTypeExtension(type, Extensions);
 			ObjectMapper    om      = db.MappingSchema.GetObjectMapper(type);
@@ -263,26 +269,34 @@ namespace BLToolkit.DataAccess
 
 				if (!mp.GetNonUpdatableFlag(type, typeExt, mm.MemberAccessor, out isSet) || !isSet)
 				{
+					mp.GetPrimaryKeyOrder(type, typeExt, mm.MemberAccessor, out isSet);
+
+					if (isSet)
+						continue;
+
 					SqlQueryParameterInfo p = query.AddParameter(
 						db.DataProvider.Convert(mm.Name, ConvertType.NameToQueryParameter).ToString(),
 						mm.Name);
 
-					sb.AppendFormat("\t{0} = {1},\n",
-						db.DataProvider.Convert(p.FieldName, ConvertType.NameToQueryField),
-						p.ParameterName);
+					sb.AppendFormat("\t{0} = ", db.DataProvider.Convert(p.FieldName, ConvertType.NameToQueryField));
+
+					if (nParameter < 0)
+						sb.AppendFormat("{0},\n", p.ParameterName);
+					else
+						sb.AppendFormat("\t{{{0}}},\n", nParameter++);
 				}
 			}
 
 			sb.Remove(sb.Length - 2, 1);
 
-			AddWherePK(db, query, sb);
+			AddWherePK(db, query, sb, nParameter);
 
 			query.QueryText = sb.ToString();
 
 			return query;
 		}
 
-		protected SqlQueryInfo CreateDeleteSqlText(DbManager db, Type type)
+		protected SqlQueryInfo CreateDeleteSqlText(DbManager db, Type type, int nParameter)
 		{
 			ObjectMapper  om    = db.MappingSchema.GetObjectMapper(type);
 			StringBuilder sb    = new StringBuilder();
@@ -291,7 +305,7 @@ namespace BLToolkit.DataAccess
 			sb.AppendFormat("DELETE FROM\n\t{0}\n",
 				db.DataProvider.Convert(GetTableName(type), ConvertType.NameToQueryTable));
 
-			AddWherePK(db, query, sb);
+			AddWherePK(db, query, sb, nParameter);
 
 			query.QueryText = sb.ToString();
 
@@ -305,9 +319,12 @@ namespace BLToolkit.DataAccess
 			{
 				case "SelectByKey": return CreateSelectByKeySqlText(db, type);
 				case "SelectAll":   return CreateSelectAllSqlText  (db, type);
-				case "Insert":      return CreateInsertSqlText     (db, type);
-				case "Update":      return CreateUpdateSqlText     (db, type);
-				case "Delete":      return CreateDeleteSqlText     (db, type);
+				case "Insert":      return CreateInsertSqlText     (db, type, -1);
+				case "InsertBatch": return CreateInsertSqlText     (db, type,  0);
+				case "Update":      return CreateUpdateSqlText     (db, type, -1);
+				case "UpdateBatch": return CreateUpdateSqlText     (db, type,  0);
+				case "Delete":      return CreateDeleteSqlText     (db, type, -1);
+				case "DeleteBatch": return CreateDeleteSqlText     (db, type,  0);
 				default:
 					throw new DataAccessException(
 						string.Format("Unknown action '{0}'.", actionName));

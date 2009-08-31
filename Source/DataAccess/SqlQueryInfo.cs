@@ -1,5 +1,5 @@
 using System;
-using System.Collections;
+using System.Collections.Generic;
 using System.Data;
 
 using BLToolkit.Data;
@@ -32,7 +32,7 @@ namespace BLToolkit.DataAccess
 			get { return _objectMapper.TypeAccessor.OriginalType; }
 		}
 
-		private readonly ArrayList _parameters = new ArrayList();
+		private readonly List<SqlQueryParameterInfo> _parameters = new List<SqlQueryParameterInfo>();
 
 		public SqlQueryParameterInfo AddParameter(string parameterName, string fieldName)
 		{
@@ -57,7 +57,7 @@ namespace BLToolkit.DataAccess
 
 			for (int i = 0; i < _parameters.Count; i++)
 			{
-				SqlQueryParameterInfo info = (SqlQueryParameterInfo)_parameters[i];
+				SqlQueryParameterInfo info = _parameters[i];
 
 				parameters[i] = db.Parameter(info.ParameterName, key[i]);
 			}
@@ -71,12 +71,22 @@ namespace BLToolkit.DataAccess
 
 			for (int i = 0; i < _parameters.Count; i++)
 			{
-				SqlQueryParameterInfo info = (SqlQueryParameterInfo)_parameters[i];
+				SqlQueryParameterInfo info = _parameters[i];
 
 				parameters[i] = db.Parameter(info.ParameterName, info.MemberMapper.GetValue(obj));
 			}
 
 			return parameters;
+		}
+
+		public MemberMapper[] GetMemberMappers()
+		{
+			MemberMapper[] memberss = new MemberMapper[_parameters.Count];
+
+			for (int i = 0; i < _parameters.Count; i++)
+				memberss[i] = _parameters[i].MemberMapper;
+
+			return memberss;
 		}
 	}
 }
