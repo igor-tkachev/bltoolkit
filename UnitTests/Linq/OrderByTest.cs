@@ -34,8 +34,7 @@ namespace Data.Linq
 			ForEachProvider(db =>
 				ValidateResult(
 					from ch in db.Child
-					orderby ch.ParentID descending
-					orderby ch.ChildID  ascending
+					orderby ch.ParentID descending, ch.ChildID  ascending
 					select ch));
 		}
 
@@ -58,7 +57,7 @@ namespace Data.Linq
 						from ch in db.Child
 						orderby ch.ParentID descending
 						select ch
-					orderby ch.ChildID
+					orderby ch.ParentID descending, ch.ChildID
 					select ch)
 			);
 		}
@@ -72,7 +71,7 @@ namespace Data.Linq
 						from ch in db.Child
 						orderby ch.ParentID descending
 						select ch
-					orderby ch.ChildID, ch.ParentID + 1 descending
+					orderby ch.ParentID descending, ch.ChildID, ch.ParentID + 1 descending
 					select ch)
 			);
 		}

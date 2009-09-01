@@ -109,21 +109,22 @@ namespace BLToolkit.Data.Linq
 
 			info.ConvertTo<MethodCallExpression>().Match
 			(
-				pi => pi.IsQueryableMethod ("Select",            seq => select = ParseSequence(seq, null),  l         => select = ParseSelect    (l,        select)),
-				pi => pi.IsQueryableMethod ("Where",             seq => select = ParseSequence(seq, null),  l         => select = ParseWhere     (l,        select)),
-				pi => pi.IsQueryableMethod ("SelectMany",        seq => select = ParseSequence(seq, null),  l         => select = ParseSelectMany(l,  null, select)),
-				pi => pi.IsQueryableMethod ("SelectMany", 1, 2,  seq => select = ParseSequence(seq, null), (l1,l2)    => select = ParseSelectMany(l1, l2,   select)),
-				pi => pi.IsQueryableMethod ("Join",              seq => select = ParseSequence(seq, null), (i,l2,l3,l4) => select = ParseJoin     (i, l2, l3, l4, select)),
-				pi => pi.IsQueryableMethod ("GroupJoin",         seq => select = ParseSequence(seq, null), (i,l2,l3,l4) => select = ParseGroupJoin(i, l2, l3, l4, select)),
+				pi => pi.IsQueryableMethod ("Select",            seq => select = ParseSequence(seq, null),  l         => select = ParseSelect     (l,        select)),
+				pi => pi.IsQueryableMethod ("Where",             seq => select = ParseSequence(seq, null),  l         => select = ParseWhere      (l,        select)),
+				pi => pi.IsQueryableMethod ("SelectMany",        seq => select = ParseSequence(seq, null),  l         => select = ParseSelectMany (l,  null, select)),
+				pi => pi.IsQueryableMethod ("SelectMany", 1, 2,  seq => select = ParseSequence(seq, null), (l1,l2)    => select = ParseSelectMany (l1, l2,   select)),
+				pi => pi.IsQueryableMethod ("Join",              seq => select = ParseSequence(seq, null), (i,l2,l3,l4) => select = ParseJoin     (i,  l2, l3, l4, select)),
+				pi => pi.IsQueryableMethod ("GroupJoin",         seq => select = ParseSequence(seq, null), (i,l2,l3,l4) => select = ParseGroupJoin(i,  l2, l3, l4, select)),
 				pi => pi.IsEnumerableMethod("DefaultIfEmpty",    seq => { select = ParseDefaultIfEmpty(parent, seq); return select != null; }),
-				pi => pi.IsQueryableMethod ("GroupBy",           seq => select = ParseSequence(seq, null),  l         => select = ParseGroupBy   (l,  null, null, select, pi.Expr.Type.GetGenericArguments()[0])),
-				pi => pi.IsQueryableMethod ("GroupBy",    1, 1,  seq => select = ParseSequence(seq, null), (l1,l2)    => select = ParseGroupBy   (l1, l2,   null, select, pi.Expr.Type.GetGenericArguments()[0])),
-				pi => pi.IsQueryableMethod ("GroupBy",    1, 2,  seq => select = ParseSequence(seq, null), (l1,l2)    => select = ParseGroupBy   (l1, null, l2,   select, null)),
-				pi => pi.IsQueryableMethod ("GroupBy", 1, 1, 2,  seq => select = ParseSequence(seq, null), (l1,l2,l3) => select = ParseGroupBy   (l1, l2,   l3,   select, null)),
-				pi => pi.IsQueryableMethod ("OrderBy",           seq => select = ParseSequence(seq, null),  l      => select = ParseOrderBy   (l,        select, true)),
-				pi => pi.IsQueryableMethod ("OrderByDescending", seq => select = ParseSequence(seq, null),  l      => select = ParseOrderBy   (l,        select, false)),
-				pi => pi.IsQueryableMethod ("ThenBy",            seq => select = ParseSequence(seq, null),  l      => select = ParseOrderBy   (l,        select, true)),
-				pi => pi.IsQueryableMethod ("ThenByDescending",  seq => select = ParseSequence(seq, null),  l      => select = ParseOrderBy   (l,        select, false)),
+				pi => pi.IsQueryableMethod ("GroupBy",           seq => select = ParseSequence(seq, null),  l         => select = ParseGroupBy    (l,  null, null, select, pi.Expr.Type.GetGenericArguments()[0])),
+				pi => pi.IsQueryableMethod ("GroupBy",    1, 1,  seq => select = ParseSequence(seq, null), (l1,l2)    => select = ParseGroupBy    (l1, l2,   null, select, pi.Expr.Type.GetGenericArguments()[0])),
+				pi => pi.IsQueryableMethod ("GroupBy",    1, 2,  seq => select = ParseSequence(seq, null), (l1,l2)    => select = ParseGroupBy    (l1, null, l2,   select, null)),
+				pi => pi.IsQueryableMethod ("GroupBy", 1, 1, 2,  seq => select = ParseSequence(seq, null), (l1,l2,l3) => select = ParseGroupBy    (l1, l2,   l3,   select, null)),
+				pi => pi.IsQueryableMethod ("OrderBy",           seq => select = ParseSequence(seq, null),  l         => select = ParseOrderBy    (l, select, false, true)),
+				pi => pi.IsQueryableMethod ("OrderByDescending", seq => select = ParseSequence(seq, null),  l         => select = ParseOrderBy    (l, select, false, false)),
+				pi => pi.IsQueryableMethod ("ThenBy",            seq => select = ParseSequence(seq, null),  l         => select = ParseOrderBy    (l, select, true,  true)),
+				pi => pi.IsQueryableMethod ("ThenByDescending",  seq => select = ParseSequence(seq, null),  l         => select = ParseOrderBy    (l, select, true,  false)),
+				pi => pi.IsQueryableMethod ("Take",              seq => select = ParseSequence(seq, null),  ex        => ParseTake(select, ex)),
 				pi => pi.IsMethod(m =>
 				{
 					if (m.Expr.Method.DeclaringType == typeof(Queryable) || !TypeHelper.IsSameOrParent(typeof(IQueryable), pi.Expr.Type))
@@ -443,17 +444,34 @@ namespace BLToolkit.Data.Linq
 
 		#region Parse OrderBy
 
-		QuerySource ParseOrderBy(LambdaInfo lambda, QuerySource source, bool ascending)
+		QuerySource ParseOrderBy(LambdaInfo lambda, QuerySource source, bool isThen, bool ascending)
 		{
 			CheckExplicitCtor(lambda.Body);
 
 			var order = ParseSelect(lambda, source);
+
+			if (!isThen)
+				CurrentSql.OrderBy.Items.Clear();
 
 			foreach (var field in order.Fields)
 				foreach (var expr in field.GetExpressions(this))
 					CurrentSql.OrderBy.Expr(expr, !ascending);
 
 			return source;
+		}
+
+		#endregion
+
+		#region Parse Take
+
+		bool ParseTake(QuerySource select, ParseInfo<Expression> value)
+		{
+			if (value.Expr.Type != typeof(int))
+				return false;
+
+			CurrentSql.Select.Take(ParseExpression(select, value));
+
+			return true;
 		}
 
 		#endregion

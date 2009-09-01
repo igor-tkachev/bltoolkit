@@ -121,6 +121,7 @@
     <Compile Include="..\..\Source\Data\DataProvider\SybaseDataProvider.cs">
       <Link>Providers\SybaseDataProvider.cs</Link>
     </Compile>
+    <Compile Include="TakeSkipTest.cs" />
     <Compile Include="OrderByTest.cs" />
     <Compile Include="CreateData.cs" />
     <Compile Include="GroupByTest.cs" />

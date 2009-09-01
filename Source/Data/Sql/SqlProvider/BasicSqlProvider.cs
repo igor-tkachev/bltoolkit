@@ -48,6 +48,9 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			BuildGroupByClause(sb);
 			BuildOrderByClause(sb);
 
+			if (SqlBuilder.Select.TakeValue != null)
+				BuildFetch(sb);
+
 			return sb;
 		}
 
@@ -72,8 +75,17 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		protected virtual void BuildSelectClause(StringBuilder sb)
 		{
 			AppendIndent(sb);
-			sb.Append("SELECT").AppendLine();
+			sb.Append("SELECT");
+
+			if (SqlBuilder.Select.TakeValue != null)
+				BuildTop(sb);
+
+			sb.AppendLine();
 			BuildColumns(sb);
+		}
+
+		protected virtual void BuildTop(StringBuilder sb)
+		{
 		}
 
 		protected virtual void BuildColumns(StringBuilder sb)
@@ -215,9 +227,14 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		#region Where Clause
 
+		protected virtual bool BuildWhere()
+		{
+			return _sqlBuilder.Where.SearchCondition.Conditions.Count != 0;
+		}
+
 		protected virtual void BuildWhereClause(StringBuilder sb)
 		{
-			if (_sqlBuilder.Where.SearchCondition.Conditions.Count == 0)
+			if (!BuildWhere())
 				return;
 
 			AppendIndent(sb);
@@ -226,7 +243,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 			_indent++;
 			AppendIndent(sb);
-			BuildSearchCondition(sb, _sqlBuilder.Where.SearchCondition);
+			BuildWhereSearchCondition(sb, _sqlBuilder.Where.SearchCondition);
 			_indent--;
 
 			sb.AppendLine();
@@ -299,9 +316,22 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		#endregion
 
+		#region Fetch
+
+		protected virtual void BuildFetch(StringBuilder sb)
+		{
+		}
+
+		#endregion
+
 		#region Builders
 
 		#region BuildSearchCondition
+
+		protected virtual void BuildWhereSearchCondition(StringBuilder sb, SqlBuilder.SearchCondition condition)
+		{
+			BuildSearchCondition(sb, condition);
+		}
 
 		protected virtual void BuildSearchCondition(StringBuilder sb, SqlBuilder.SearchCondition condition)
 		{

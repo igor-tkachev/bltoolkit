@@ -149,6 +149,15 @@ namespace BLToolkit.Data.Linq
 			return pi.Create(pi.Expr.Arguments[idx], pi.Indexer(ReflectionHelper.MethodCall.Arguments, ReflectionHelper.ExprItem, idx));
 		}
 
+		public static bool IsQueryableMethod(
+			this ParseInfo<MethodCallExpression> pi,
+			string                               methodName,
+			Action<ParseInfo<Expression>>        seq,
+			Func<ParseInfo<Expression>,bool>     action)
+		{
+			return IsMethod(pi, typeof(Queryable), methodName, new FTest[] { p => { seq(p); return true; }, action }, p => true);
+		}
+
 		[Obsolete]
 		static bool IsMethod(
 			this ParseInfo<MethodCallExpression> pi,

@@ -1153,8 +1153,8 @@ namespace BLToolkit.Data.Sql
 			{
 				_columns.AddRange(clone._columns.ConvertAll<Column>(delegate(Column c) { return (Column)c.Clone(objectTree); }));
 				_isDistinct = clone._isDistinct;
-				_takeValue  = clone._takeValue;
-				_skipValue  = clone._skipValue;
+				_takeValue  = clone._takeValue == null ? null : (ISqlExpression)clone._takeValue.Clone(objectTree);
+				_skipValue  = clone._skipValue == null ? null : (ISqlExpression)clone._skipValue.Clone(objectTree);
 			}
 
 			#endregion
@@ -1288,12 +1288,18 @@ namespace BLToolkit.Data.Sql
 
 			public SelectClause Take(int value)
 			{
+				_takeValue = new SqlValue(value);
+				return this;
+			}
+
+			public SelectClause Take(ISqlExpression value)
+			{
 				_takeValue = value;
 				return this;
 			}
 
-			private int _takeValue;
-			public  int  TakeValue { get { return _takeValue; } set { _takeValue = value; } }
+			private ISqlExpression _takeValue;
+			public  ISqlExpression  TakeValue { get { return _takeValue; } set { _takeValue = value; } }
 
 			#endregion
 
@@ -1301,12 +1307,18 @@ namespace BLToolkit.Data.Sql
 
 			public SelectClause Skip(int value)
 			{
+				_skipValue = new SqlValue(value);
+				return this;
+			}
+
+			public SelectClause Skip(ISqlExpression value)
+			{
 				_skipValue = value;
 				return this;
 			}
 
-			private int _skipValue;
-			public  int  SkipValue { get { return _skipValue; } set { _skipValue = value; } }
+			private ISqlExpression _skipValue;
+			public  ISqlExpression  SkipValue { get { return _skipValue; } set { _skipValue = value; } }
 
 			#endregion
 
@@ -1820,7 +1832,7 @@ namespace BLToolkit.Data.Sql
 
 		void RemoveOrderBy()
 		{
-			if (OrderBy.Items.Count > 0 && Select.SkipValue == 0 && Select.TakeValue == 0)
+			if (OrderBy.Items.Count > 0 && Select.SkipValue == null && Select.TakeValue == null)
 				OrderBy.Items.Clear();
 		}
 
@@ -1909,8 +1921,8 @@ namespace BLToolkit.Data.Sql
 				if (builder.From.Tables.Count == 1 &&
 				    //builder.From.Tables[0].Joins.Count == 0 &&
 				    builder.GroupBy.IsEmpty &&
-				    builder.Select.SkipValue == 0 &&
-					builder.Select.TakeValue == 0 &&
+				    builder.Select.SkipValue == null &&
+					builder.Select.TakeValue == null &&
 				   !builder.Select.Columns.Exists(delegate(Column c) { return !(c.Expression is SqlField); }))
 				{
 					Dictionary<ISqlExpression,SqlField> map = new Dictionary<ISqlExpression,SqlField>(builder.Select.Columns.Count);

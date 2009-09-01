@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Reflection;
+using System.Text;
 
 namespace BLToolkit.Data.Sql.SqlProvider
 {
@@ -18,6 +19,13 @@ namespace BLToolkit.Data.Sql.SqlProvider
 	{
 		public SQLiteSqlProvider(DataProviderBase dataProvider) : base(dataProvider)
 		{
+		}
+
+		protected override void BuildFetch(StringBuilder sb)
+		{
+			sb.Append("LIMIT ");
+			BuildExpression(sb, SqlBuilder.Select.TakeValue);
+			sb.AppendLine();
 		}
 
 		public override ISqlExpression ConvertExpression(ISqlExpression expr)

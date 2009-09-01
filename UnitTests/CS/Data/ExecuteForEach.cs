@@ -1,8 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
-using BLToolkit.Data;
+
 using NUnit.Framework;
+
+using BLToolkit.Data;
 
 namespace Data
 {
@@ -13,14 +15,14 @@ namespace Data
 		{
 			public TypeWrapper(T value)
 			{
-				value_ = value;
+				_value = value;
 			}
 
-			private T value_;
-			public T Value
+			private T _value;
+			public  T  Value
 			{
-				get { return value_; }
-				set { value_ = value; }
+				get { return _value;  }
+				set { _value = value; }
 			}
 		}
 

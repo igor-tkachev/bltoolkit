@@ -35,6 +35,14 @@ namespace BLToolkit.Data.Sql.SqlProvider
 				base.BuildSelectClause(sb);
 		}
 
+		protected override void BuildFetch(StringBuilder sb)
+		{
+			sb.Append("FETCH FIRST ");
+			BuildExpression(sb, SqlBuilder.Select.TakeValue);
+			sb.Append(" ROWS ONLY");
+			sb.AppendLine();
+		}
+
 		public override ISqlExpression ConvertExpression(ISqlExpression expr)
 		{
 			expr = base.ConvertExpression(expr);

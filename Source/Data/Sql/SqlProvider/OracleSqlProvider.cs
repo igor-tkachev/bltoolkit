@@ -35,6 +35,33 @@ namespace BLToolkit.Data.Sql.SqlProvider
 				base.BuildSelectClause(sb);
 		}
 
+		protected override bool BuildWhere()
+		{
+			return base.BuildWhere() || SqlBuilder.Select.TakeValue != null;
+		}
+
+		protected override void BuildWhereSearchCondition(StringBuilder sb, SqlBuilder.SearchCondition condition)
+		{
+			if (SqlBuilder.Select.TakeValue != null)
+			{
+				BuildPredicate(
+					sb,
+					Precedence.LogicalConjunction,
+					new SqlBuilder.Predicate.ExprExpr(
+						new SqlExpression("rownum", Precedence.Primary),
+						SqlBuilder.Predicate.Operator.LessOrEqual,
+						SqlBuilder.Select.TakeValue));
+
+				if (base.BuildWhere())
+				{
+					sb.Append(" AND ");
+					BuildSearchCondition(sb, Precedence.LogicalConjunction, condition);
+				}
+			}
+			else
+				BuildSearchCondition(sb, condition);
+		}
+
 		public override ISqlExpression ConvertExpression(ISqlExpression expr)
 		{
 			expr = base.ConvertExpression(expr);

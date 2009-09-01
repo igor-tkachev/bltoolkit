@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Reflection;
+using System.Text;
 
 namespace BLToolkit.Data.Sql.SqlProvider
 {
@@ -18,6 +19,12 @@ namespace BLToolkit.Data.Sql.SqlProvider
 	{
 		public SybaseSqlProvider(DataProviderBase dataProvider) : base(dataProvider)
 		{
+		}
+
+		protected override void BuildTop(StringBuilder sb)
+		{
+			sb.Append(" TOP ");
+			BuildExpression(sb, SqlBuilder.Select.TakeValue);
 		}
 
 		public override ISqlExpression ConvertExpression(ISqlExpression expr)
