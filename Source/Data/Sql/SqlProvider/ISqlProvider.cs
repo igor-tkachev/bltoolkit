@@ -14,6 +14,8 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		ISqlExpression ConvertExpression(ISqlExpression expression);
 		ISqlPredicate  ConvertPredicate (ISqlPredicate  predicate);
 
+		bool           IsTakeSupported { get; }
+
 #if FW3
 		Expression     ConvertMember    (MemberInfo mi);
 #endif

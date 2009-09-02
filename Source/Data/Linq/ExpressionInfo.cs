@@ -8,6 +8,7 @@ using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
 
+using BLToolkit.Data.Sql.SqlProvider;
 using BLToolkit.Reflection;
 
 namespace BLToolkit.Data.Linq
@@ -26,6 +27,12 @@ namespace BLToolkit.Data.Linq
 		public bool              PreloadData;
 
 		public Func<QueryContext,DbManager,Expression,IEnumerable<T>> GetIEnumerable;
+
+		private ISqlProvider _sqlProvider; 
+		public  ISqlProvider  SqlProvider
+		{
+			get { return _sqlProvider ?? (_sqlProvider = DataProvider.CreateSqlProvider()); }
+		}
 
 		#region GetInfo
 
@@ -95,34 +102,7 @@ namespace BLToolkit.Data.Linq
 
 		internal void SetQuery()
 		{
-			Queries[0].SqlBuilder.FinalizeAndValidate();
-
-			var index = new int[Queries[0].SqlBuilder.Select.Columns.Count];
-
-			for (var i = 0; i < index.Length; i++)
-				index[i] = i;
-
-			GetIEnumerable = (_, db, expr) => Query(db, expr, GetMapperSlot(index));
-		}
-
-		IEnumerable<T> Query(DbManager db, Expression expr, int slot)
-		{
-			var dispose = db == null;
-
-			if (db == null)
-				db = new DbManager();
-
-			try
-			{
-				using (var dr = GetReader(db, expr, 0))
-					while (dr.Read())
-						yield return (T)MapDataReaderToObject(typeof(T), dr, slot);
-			}
-			finally
-			{
-				if (dispose)
-					db.Dispose();
-			}
+			SetQuery(null);
 		}
 
 		internal void SetQuery(Mapper<T> mapper)
@@ -133,26 +113,48 @@ namespace BLToolkit.Data.Linq
 				sql.SqlBuilder.FinalizeAndValidate();
 
 			if (PreloadData || Queries.Count != 1)
-				GetIEnumerable = (ctx, db, expr) => Query(ctx, db, expr);
+				throw new InvalidOperationException();
+
+			Func<DbManager,Expression,int,IEnumerable<IDataReader>> query = Query;
+
+			var select = Queries[0].SqlBuilder.Select;
+
+			if (select.TakeValue != null && !SqlProvider.IsTakeSupported)
+			{
+				var q = query;
+				var n = (int)((SqlValue)select.TakeValue).Value;
+
+				if (n > 0)
+					query = (db, expr, qn) => q(db, expr, qn).Take(n);
+			}
+
+			if (mapper != null)
+			{
+				GetIEnumerable = (ctx, db, expr) => Map(query(db, expr, 0), ctx, db, expr, mapper);
+			}
 			else
-				GetIEnumerable = (ctx, db, expr) => Query(ctx, db, expr, mapper);
+			{
+				var index = new int[select.Columns.Count];
+
+				for (var i = 0; i < index.Length; i++)
+					index[i] = i;
+
+				GetIEnumerable = (_, db, expr) => Map(query(db, expr, 0), GetMapperSlot(index));
+			}
 		}
 
-		IEnumerable<T> Query(QueryContext context, DbManager db, Expression expr, Mapper<T> mapper)
+		IEnumerable<IDataReader> Query(DbManager db, Expression expr, int queryNumber)
 		{
-			var dispose = db == null && context == null;
+			var dispose = db == null;
 
 			if (db == null)
 				db = new DbManager();
 
-			if (context == null)
-				context = new QueryContext { RootDbManager = db };
-
 			try
 			{
-				using (var dr = GetReader(db, expr, 0))
+				using (var dr = GetReader(db, expr, queryNumber))
 					while (dr.Read())
-						yield return mapper(this, context, dr, MappingSchema, expr);
+						yield return dr;
 			}
 			finally
 			{
@@ -161,34 +163,19 @@ namespace BLToolkit.Data.Linq
 			}
 		}
 
-		IEnumerable<T> Query(QueryContext context, DbManager db, Expression expr)
+		IEnumerable<T> Map(IEnumerable<IDataReader> data, int slot)
 		{
-			var dispose = db == null && context == null;
+			foreach (var dr in data)
+				yield return (T)MapDataReaderToObject(typeof(T), dr, slot);
+		}
 
-			if (db == null)
-				db = new DbManager();
-
+		IEnumerable<T> Map(IEnumerable<IDataReader> data, QueryContext context, DbManager db, Expression expr, Mapper<T> mapper)
+		{
 			if (context == null)
 				context = new QueryContext { RootDbManager = db };
 
-			var list = new List<T>();
-
-			try
-			{
-				var mapper = Queries[0].Mapper;
-
-				using (var dr = GetReader(db, expr, 0))
-					while (dr.Read())
-						list.Add(mapper(this, context, dr, MappingSchema, expr));
-			}
-			finally
-			{
-				if (dispose)
-					db.Dispose();
-			}
-
-			foreach (var item in list)
-				yield return item;
+			foreach (var dr in data)
+				yield return mapper(this, context, dr, MappingSchema, expr);
 		}
 
 		IDataReader GetReader(DbManager db, Expression expr, int idx)
@@ -295,7 +282,7 @@ namespace BLToolkit.Data.Linq
 
 			var sql = Queries[idx].SqlBuilder;
 
-			var command = DataProvider.CreateSqlProvider().BuildSql(sql, new StringBuilder(), 0).ToString();
+			var command = SqlProvider.BuildSql(sql, new StringBuilder(), 0).ToString();
 
 			if (!sql.ParameterDependent)
 				_command = command;

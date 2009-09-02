@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Reflection;
-using System.Text;
 
 namespace BLToolkit.Data.Sql.SqlProvider
 {
@@ -21,11 +20,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		{
 		}
 
-		protected override void BuildTop(StringBuilder sb)
-		{
-			sb.Append(" TOP ");
-			BuildExpression(sb, SqlBuilder.Select.TakeValue);
-		}
+		protected override string TopFormat { get { return " TOP {0} "; } }
 
 		public override ISqlExpression ConvertExpression(ISqlExpression expr)
 		{

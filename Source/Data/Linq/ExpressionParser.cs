@@ -15,9 +15,6 @@ namespace BLToolkit.Data.Linq
 	using Mapping;
 	using Reflection;
 	using Data.Sql;
-	using Data.Sql.SqlProvider;
-
-	using IExpr = Data.Sql.ISqlExpression;
 
 	class ExpressionParser<T> : ReflectionHelper
 	{
@@ -124,6 +121,7 @@ namespace BLToolkit.Data.Linq
 				pi => pi.IsQueryableMethod ("OrderByDescending", seq => select = ParseSequence(seq, null),  l         => select = ParseOrderBy    (l, select, false, false)),
 				pi => pi.IsQueryableMethod ("ThenBy",            seq => select = ParseSequence(seq, null),  l         => select = ParseOrderBy    (l, select, true,  true)),
 				pi => pi.IsQueryableMethod ("ThenByDescending",  seq => select = ParseSequence(seq, null),  l         => select = ParseOrderBy    (l, select, true,  false)),
+				pi => pi.IsQueryableMethod ("Distinct",          seq => { select = ParseSequence(seq, null); CurrentSql.Select.IsDistinct = true; }),
 				pi => pi.IsQueryableMethod ("Take",              seq => select = ParseSequence(seq, null),  ex        => ParseTake(select, ex)),
 				pi => pi.IsMethod(m =>
 				{
@@ -428,7 +426,7 @@ namespace BLToolkit.Data.Linq
 			{
 				var exprs = field.GetExpressions(this);
 
-				if (exprs.Length != 1)
+				if (exprs == null || exprs.Length != 1)
 					throw new LinqException("Cannot group by type '{0}'", keySelector.Body.Expr.Type);
 
 				CurrentSql.GroupBy.Expr(exprs[0]);
@@ -454,8 +452,15 @@ namespace BLToolkit.Data.Linq
 				CurrentSql.OrderBy.Items.Clear();
 
 			foreach (var field in order.Fields)
-				foreach (var expr in field.GetExpressions(this))
+			{
+				var exprs = field.GetExpressions(this);
+
+				if (exprs == null)
+					throw new LinqException("Cannot order by type '{0}'", lambda.Body.Expr.Type);
+
+				foreach (var expr in exprs)
 					CurrentSql.OrderBy.Expr(expr, !ascending);
+			}
 
 			return source;
 		}
@@ -1088,20 +1093,14 @@ namespace BLToolkit.Data.Linq
 
 		#region Expression Parser
 
-		ISqlProvider _sqlProvider; 
-		ISqlProvider  SqlProvider
-		{
-			get { return _sqlProvider ?? (_sqlProvider = _info.DataProvider.CreateSqlProvider()); }
-		}
-
 		ISqlExpression Convert(ISqlExpression expr)
 		{
-			return SqlProvider.ConvertExpression(expr);
+			return _info.SqlProvider.ConvertExpression(expr);
 		}
 
 		ISqlPredicate Convert(ISqlPredicate predicate)
 		{
-			return SqlProvider.ConvertPredicate(predicate);
+			return _info.SqlProvider.ConvertPredicate(predicate);
 		}
 
 		public ISqlExpression ParseExpression(QuerySource query, ParseInfo parseInfo)
@@ -1221,7 +1220,7 @@ namespace BLToolkit.Data.Linq
 				case ExpressionType.MemberAccess:
 					{
 						var ma = (MemberExpression)parseInfo.Expr;
-						var ef = SqlProvider.ConvertMember(ma.Member);
+						var ef = _info.SqlProvider.ConvertMember(ma.Member);
 
 						if (ef != null)
 						{
@@ -1260,6 +1259,9 @@ namespace BLToolkit.Data.Linq
 						{
 							var exprs = field.GetExpressions(this);
 
+							if (exprs == null)
+								break;
+
 							if (exprs.Length == 1)
 								return exprs[0];
 
@@ -1274,7 +1276,7 @@ namespace BLToolkit.Data.Linq
 						var pi = parseInfo.Convert<MethodCallExpression>();
 						var e  = parseInfo.Expr as MethodCallExpression;
 
-						var ef = SqlProvider.ConvertMember(e.Method);
+						var ef = _info.SqlProvider.ConvertMember(e.Method);
 
 						if (ef != null)
 						{
@@ -1353,7 +1355,7 @@ namespace BLToolkit.Data.Linq
 					case ExpressionType.MemberAccess:
 						{
 							var ma = (MemberExpression)pi.Expr;
-							var ef = SqlProvider.ConvertMember(ma.Member);
+							var ef = _info.SqlProvider.ConvertMember(ma.Member);
 
 							if (ef != null)
 							{
@@ -1371,7 +1373,7 @@ namespace BLToolkit.Data.Linq
 					case ExpressionType.Call:
 						{
 							var e  = pi.Expr as MethodCallExpression;
-							var ef = SqlProvider.ConvertMember(e.Method);
+							var ef = _info.SqlProvider.ConvertMember(e.Method);
 
 							if (ef != null)
 							{

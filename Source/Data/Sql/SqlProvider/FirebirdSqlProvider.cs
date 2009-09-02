@@ -35,11 +35,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 				base.BuildSelectClause(sb);
 		}
 
-		protected override void BuildTop(StringBuilder sb)
-		{
-			sb.Append(" FIRST ");
-			BuildExpression(sb, SqlBuilder.Select.TakeValue);
-		}
+		protected override string TopFormat { get { return " FIRST {0} "; } }
 
 		public override ISqlExpression ConvertExpression(ISqlExpression expr)
 		{

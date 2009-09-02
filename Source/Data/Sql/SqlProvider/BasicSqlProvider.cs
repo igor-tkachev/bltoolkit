@@ -60,6 +60,9 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		protected virtual void BuildSqlBuilder(SqlBuilder sqlBuilder, StringBuilder sb, int indent)
 		{
+			if (!IsTakeSupported && sqlBuilder.Select.TakeValue != null)
+				throw new SqlException("Take for subqueries is not supported by the '{0}' provider.", _dataProvider.Name);
+
 			DataProvider.CreateSqlProvider().BuildSql(sqlBuilder, sb, indent);
 		}
 
@@ -77,15 +80,14 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			AppendIndent(sb);
 			sb.Append("SELECT");
 
+			if (SqlBuilder.Select.IsDistinct)
+				sb.Append(" DISTINCT");
+
 			if (SqlBuilder.Select.TakeValue != null)
 				BuildTop(sb);
 
 			sb.AppendLine();
 			BuildColumns(sb);
-		}
-
-		protected virtual void BuildTop(StringBuilder sb)
-		{
 		}
 
 		protected virtual void BuildColumns(StringBuilder sb)
@@ -316,10 +318,36 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		#endregion
 
-		#region Fetch
+		#region Top/Fetch
+
+		public virtual bool IsTakeSupported { get { return true; } }
+
+		protected virtual string TopFormat   { get { return null; } }
+		protected virtual string FetchFormat { get { return null; } }
+
+		protected virtual void BuildTop(StringBuilder sb)
+		{
+			string top = TopFormat;
+
+			if (top != null)
+			{
+				StringBuilder topsb = new StringBuilder();
+				BuildExpression(topsb, SqlBuilder.Select.TakeValue);
+				sb.AppendFormat(top, topsb);
+			}
+		}
 
 		protected virtual void BuildFetch(StringBuilder sb)
 		{
+			string fetch = FetchFormat;
+
+			if (fetch != null)
+			{
+				StringBuilder fetchsb = new StringBuilder();
+				BuildExpression(fetchsb, SqlBuilder.Select.TakeValue);
+				sb.AppendFormat(fetch, fetchsb);
+				sb.AppendLine();
+			}
 		}
 
 		#endregion

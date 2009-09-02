@@ -90,10 +90,19 @@ namespace BLToolkit.Data.Linq
 				return _index;
 			}
 
+			bool _inParsing;
+
 			public override ISqlExpression[] GetExpressions<T>(ExpressionParser<T> parser)
 			{
 				if (_sqlExpression == null)
+				{
+					if (_inParsing)
+						return null;
+
+					_inParsing = true;
 					_sqlExpression = parser.ParseExpression(QuerySource, Expr);
+					_inParsing = false;
+				}
 
 				return new [] { _sqlExpression };
 			}

@@ -61,6 +61,12 @@ namespace BLToolkit.Reflection.MetadataProvider
 
 		public override bool GetMapIgnore(TypeExtension typeExtension, MemberAccessor member, out bool isSet)
 		{
+			if (member.GetAttribute<AssociationAttribute>() != null)
+			{
+				isSet = true;
+				return true;
+			}
+
 			if (IsLinqObject(member.TypeAccessor.Type))
 			{
 				isSet = true;

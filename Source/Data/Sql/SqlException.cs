@@ -16,6 +16,7 @@ namespace BLToolkit.Data.Sql
 		{
 		}
 
+		[JetBrains.Annotations.StringFormatMethod("message")]
 		public SqlException(string message, params object[] args)
 			: base(string.Format(message, args))
 		{

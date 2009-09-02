@@ -21,12 +21,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		{
 		}
 
-		protected override void BuildFetch(StringBuilder sb)
-		{
-			sb.Append("LIMIT ");
-			BuildExpression(sb, SqlBuilder.Select.TakeValue);
-			sb.AppendLine();
-		}
+		protected override string FetchFormat { get { return "LIMIT {0}"; } }
 
 		public override ISqlExpression ConvertExpression(ISqlExpression expr)
 		{

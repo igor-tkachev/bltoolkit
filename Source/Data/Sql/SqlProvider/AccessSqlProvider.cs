@@ -21,11 +21,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		{
 		}
 
-		protected override void BuildTop(StringBuilder sb)
-		{
-			sb.Append(" TOP ");
-			BuildExpression(sb, SqlBuilder.Select.TakeValue);
-		}
+		protected override string TopFormat { get { return " TOP {0} "; } }
 
 		protected override bool ParenthesizeJoin()
 		{

@@ -1918,11 +1918,12 @@ namespace BLToolkit.Data.Sql
 			{
 				SqlBuilder builder = (SqlBuilder)source.Source;
 
-				if (builder.From.Tables.Count == 1 &&
+				if (builder.From.Tables.Count == 1     &&
 				    //builder.From.Tables[0].Joins.Count == 0 &&
-				    builder.GroupBy.IsEmpty &&
-				    builder.Select.SkipValue == null &&
-					builder.Select.TakeValue == null &&
+				    builder.GroupBy.IsEmpty            &&
+				    builder.Select.IsDistinct == false &&
+				    builder.Select.SkipValue  == null  &&
+					builder.Select.TakeValue  == null  &&
 				   !builder.Select.Columns.Exists(delegate(Column c) { return !(c.Expression is SqlField); }))
 				{
 					Dictionary<ISqlExpression,SqlField> map = new Dictionary<ISqlExpression,SqlField>(builder.Select.Columns.Count);
