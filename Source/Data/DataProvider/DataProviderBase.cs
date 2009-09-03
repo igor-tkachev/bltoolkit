@@ -212,6 +212,11 @@ namespace BLToolkit.Data.DataProvider
 			get { return 65536; }
 		}
 
+		public virtual string EndOfSql
+		{
+			get { return ";"; }
+		}
+
 		#endregion
 	}
 }

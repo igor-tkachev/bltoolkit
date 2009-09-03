@@ -42,15 +42,12 @@ namespace BLToolkit.DataAccess
 
 		#region SelectByKey
 
-		static SqlQueryInfo _selectByKeyQuery;
-
 		public virtual T SelectByKey(DbManager db, params object[] keys)
 		{
-			if (_selectByKeyQuery == null)
-				_selectByKeyQuery = GetSqlQueryInfo(db, typeof(T), "SelectByKey");
+			SqlQueryInfo query = GetSqlQueryInfo(db, typeof(T), "SelectByKey");
 
 			return db
-				.SetCommand(_selectByKeyQuery.QueryText, _selectByKeyQuery.GetParameters(db, keys))
+				.SetCommand(query.QueryText, query.GetParameters(db, keys))
 				.ExecuteObject<T>();
 		}
 
@@ -142,15 +139,12 @@ namespace BLToolkit.DataAccess
 
 		#region Insert
 
-		static SqlQueryInfo _insertQuery;
-
 		public virtual int Insert(DbManager db, T obj)
 		{
-			if (_insertQuery == null)
-				_insertQuery = GetSqlQueryInfo(db, obj.GetType(), "Insert");
+			SqlQueryInfo query = GetSqlQueryInfo(db, obj.GetType(), "Insert");
 
 			return db
-				.SetCommand(_insertQuery.QueryText, _insertQuery.GetParameters(db, obj))
+				.SetCommand(query.QueryText, query.GetParameters(db, obj))
 				.ExecuteNonQuery();
 		}
 
@@ -169,20 +163,17 @@ namespace BLToolkit.DataAccess
 			}
 		}
 
-		static SqlQueryInfo _insertBatchQuery;
-
 		public virtual int Insert(DbManager db, int maxBatchSize, IEnumerable<T> list)
 		{
-			if (_insertBatchQuery == null)
-				_insertBatchQuery = GetSqlQueryInfo(db, typeof(T), "InsertBatch");
+			SqlQueryInfo query = GetSqlQueryInfo(db, typeof(T), "InsertBatch");
 
 			return db
-				.SetCommand(_insertBatchQuery.QueryText)
+				.SetCommand(query.QueryText)
 				.ExecuteForEach(
 					list,
-					_insertBatchQuery.GetMemberMappers(),
+					query.GetMemberMappers(),
 					maxBatchSize,
-					delegate(T obj) { return _insertBatchQuery.GetParameters(db, obj); });
+					delegate(T obj) { return query.GetParameters(db, obj); });
 		}
 
 		public virtual int Insert(int maxBatchSize, IEnumerable<T> list)
@@ -214,15 +205,12 @@ namespace BLToolkit.DataAccess
 
 		#region Update
 
-		static SqlQueryInfo _updateQuery;
-
 		public virtual int Update(DbManager db, T obj)
 		{
-			if (_updateQuery == null)
-				_updateQuery = GetSqlQueryInfo(db, obj.GetType(), "Update");
+			SqlQueryInfo query = GetSqlQueryInfo(db, obj.GetType(), "Update");
 
 			return db
-				.SetCommand(_updateQuery.QueryText, _updateQuery.GetParameters(db, obj))
+				.SetCommand(query.QueryText, query.GetParameters(db, obj))
 				.ExecuteNonQuery();
 		}
 
@@ -241,20 +229,17 @@ namespace BLToolkit.DataAccess
 			}
 		}
 
-		static SqlQueryInfo _updateBatchQuery;
-
 		public virtual int Update(DbManager db, int maxBatchSize, IEnumerable<T> list)
 		{
-			if (_updateBatchQuery == null)
-				_updateBatchQuery = GetSqlQueryInfo(db, typeof(T), "UpdateBatch");
+			SqlQueryInfo query = GetSqlQueryInfo(db, typeof(T), "UpdateBatch");
 
 			return db
-				.SetCommand(_updateBatchQuery.QueryText)
+				.SetCommand(query.QueryText)
 				.ExecuteForEach(
 					list,
-					_updateBatchQuery.GetMemberMappers(),
+					query.GetMemberMappers(),
 					maxBatchSize,
-					delegate(T obj) { return _updateBatchQuery.GetParameters(db, obj); });
+					delegate(T obj) { return query.GetParameters(db, obj); });
 		}
 
 		public virtual int Update(int maxBatchSize, IEnumerable<T> list)
@@ -314,15 +299,12 @@ namespace BLToolkit.DataAccess
 
 		#region Delete
 
-		static SqlQueryInfo _deleteQuery;
-
 		public virtual int Delete(DbManager db, T obj)
 		{
-			if (_deleteQuery == null)
-				_deleteQuery = GetSqlQueryInfo(db, obj.GetType(), "Delete");
+			SqlQueryInfo query = GetSqlQueryInfo(db, obj.GetType(), "Delete");
 
 			return db
-				.SetCommand(_deleteQuery.QueryText, _deleteQuery.GetParameters(db, obj))
+				.SetCommand(query.QueryText, query.GetParameters(db, obj))
 				.ExecuteNonQuery();
 		}
 
@@ -341,20 +323,17 @@ namespace BLToolkit.DataAccess
 			}
 		}
 
-		static SqlQueryInfo _deleteBatchQuery;
-
 		public virtual int Delete(DbManager db, int maxBatchSize, IEnumerable<T> list)
 		{
-			if (_deleteBatchQuery == null)
-				_deleteBatchQuery = GetSqlQueryInfo(db, typeof(T), "DeleteBatch");
+			SqlQueryInfo query = GetSqlQueryInfo(db, typeof(T), "DeleteBatch");
 
 			return db
-				.SetCommand(_deleteBatchQuery.QueryText)
+				.SetCommand(query.QueryText)
 				.ExecuteForEach(
 					list,
-					_deleteBatchQuery.GetMemberMappers(),
+					query.GetMemberMappers(),
 					maxBatchSize,
-					delegate(T obj) { return _deleteBatchQuery.GetParameters(db, obj); });
+					delegate(T obj) { return query.GetParameters(db, obj); });
 		}
 
 		public virtual int Delete(int maxBatchSize, IEnumerable<T> list)
@@ -381,7 +360,6 @@ namespace BLToolkit.DataAccess
 		{
 			return Delete(int.MaxValue, list);
 		}
-
 
 		#endregion
 	}

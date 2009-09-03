@@ -182,8 +182,14 @@ namespace BLToolkit.Data.Linq
 		{
 			SetParameters(expr, idx);
 
-			var command = GetCommand(idx);
-			var parms   = GetParameters(db, idx);
+			string             command;
+			IDbDataParameter[] parms;
+
+			lock (this)
+			{
+				command = GetCommand(idx);
+				parms   = GetParameters(db, idx);
+			}
 
 			//string s = sql.ToString();
 
@@ -221,7 +227,12 @@ namespace BLToolkit.Data.Linq
 		private void SetParameters(Expression expr, int idx)
 		{
 			foreach (var p in Queries[idx].Parameters)
-				p.SqlParameter.Value = p.Accessor(this, expr);
+			{
+				if (p.OriginalSqlParameter == null)
+					p.OriginalSqlParameter = p.SqlParameter;
+
+				p.OriginalSqlParameter.Value = p.Accessor(this, expr);
+			}
 		}
 
 		private IDbDataParameter[] GetParameters(DbManager db, int idx)
@@ -273,19 +284,38 @@ namespace BLToolkit.Data.Linq
 			return parms;
 		}
 
-		string _command;
-
 		string GetCommand(int idx)
 		{
-			if (_command != null)
-				return _command;
+			var query = Queries[idx];
 
-			var sql = Queries[idx].SqlBuilder;
+			if (query.CommandText != null)
+				return query.CommandText;
+
+			if (query.OriginalSql == null)
+				query.OriginalSql = query.SqlBuilder;
+
+			var sql = query.SqlBuilder;
+
+			if (query.OriginalSql.ParameterDependent)
+			{
+				var dic = new Dictionary<object,object>();
+
+				query.SqlBuilder = sql = (SqlBuilder)query.OriginalSql.Clone(dic);
+
+				foreach (var p in query.Parameters)
+				{
+					object sp;
+					if (dic.TryGetValue(p.OriginalSqlParameter, out sp))
+						p.SqlParameter = (SqlParameter)sp;
+				}
+
+				SqlProvider.UpdateParameters(sql);
+			}
 
 			var command = SqlProvider.BuildSql(sql, new StringBuilder(), 0).ToString();
 
-			if (!sql.ParameterDependent)
-				_command = command;
+			if (!query.OriginalSql.ParameterDependent)
+				query.CommandText = command;
 
 			return command;
 		}
@@ -849,6 +879,7 @@ namespace BLToolkit.Data.Linq
 			public Expression                                Expression;
 			public Func<ExpressionInfo<T>,Expression,object> Accessor;
 			public SqlParameter                              SqlParameter;
+			public SqlParameter                              OriginalSqlParameter;
 		}
 
 		public class QueryInfo
@@ -856,6 +887,8 @@ namespace BLToolkit.Data.Linq
 			public SqlBuilder      SqlBuilder = new SqlBuilder();
 			public List<Parameter> Parameters = new List<Parameter>();
 			public Mapper<T>       Mapper;
+			public SqlBuilder      OriginalSql;
+			public string          CommandText;
 		}
 
 		public class KeyValueHolder

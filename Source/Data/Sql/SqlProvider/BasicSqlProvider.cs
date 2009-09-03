@@ -35,6 +35,33 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		#endregion
 
+		#region UpdateParameters
+
+		public void UpdateParameters(SqlBuilder sqlBuilder)
+		{
+			_sqlBuilder = sqlBuilder;
+
+			sqlBuilder.Parameters.Clear();
+
+
+			((ISqlExpressionWalkable)sqlBuilder).Walk(true, delegate(ISqlExpression expr)
+			{
+				if (expr is SqlParameter)
+				{
+					SqlParameter p = (SqlParameter)expr;
+
+					if (p.Value == null)
+						return new SqlValue(null);
+
+					sqlBuilder.Parameters.Add(p);
+				}
+
+				return expr;
+			});
+		}
+
+		#endregion
+
 		#region BuildSQL
 
 		public StringBuilder BuildSql(SqlBuilder sqlBuilder, StringBuilder sb, int indent)
@@ -493,6 +520,18 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			else if (predicate is SqlBuilder.Predicate.Expr)
 			{
 				SqlBuilder.Predicate.Expr p = (SqlBuilder.Predicate.Expr)predicate;
+
+				if (p.Expr1 is SqlValue)
+				{
+					object value = ((SqlValue)p.Expr1).Value;
+
+					if (value is bool)
+					{
+						sb.Append((bool)value ? "1 = 1" : "1 = 0");
+						return;
+					}
+				}
+
 				BuildExpression(sb, GetPrecedence(p), p.Expr1);
 			}
 			else if (predicate is SqlBuilder.Predicate.NotExpr)
@@ -592,7 +631,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 				if      (value == null)   sb.Append("NULL");
 				else if (value is string) sb.Append('\'').Append(value.ToString().Replace("'", "''")).Append('\'');
 				else if (value is char)   sb.Append('\'').Append(value.ToString().Replace("'", "''")).Append('\'');
-				else if (value is bool)   sb.Append((bool)value? "1 = 1": "1 = 0");
+				else if (value is bool)   sb.Append((bool)value? "1": "0");
 				else    sb.Append(value);
 			}
 			else if (expr is SqlExpression)
@@ -1003,36 +1042,6 @@ namespace BLToolkit.Data.Sql.SqlProvider
 						}
 
 						break;
-
-					/*
-					case "Length":
-						if (func.Parameters[0] is SqlValue)
-						{
-							SqlValue v = (SqlValue)func.Parameters[0];
-
-							if (v.Value is string)
-								return new SqlValue(v.Value.ToString().Length);
-						}
-
-						break;
-
-					case "Reverse":
-						if (func.Parameters[0] is SqlValue)
-						{
-							SqlValue v = (SqlValue)func.Parameters[0];
-
-							if (v.Value is string)
-							{
-								string str   = v.Value.ToString();
-								char[] chars = str.ToCharArray();
-
-								Array.Reverse(chars);
-								return new SqlValue(new string(chars));
-							}
-						}
-
-						break;
-					*/
 				}
 			}
 
@@ -1062,7 +1071,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			return predicate;
 		}
 
-		ISqlPredicate OptimizeCase(SqlBuilder.Predicate.ExprExpr expr)
+		static ISqlPredicate OptimizeCase(SqlBuilder.Predicate.ExprExpr expr)
 		{
 			SqlValue    value = expr.Expr1 as SqlValue;
 			SqlFunction func  = expr.Expr2 as SqlFunction;
@@ -1132,7 +1141,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			return expr;
 		}
 
-		bool Compare(int v1, int v2, SqlBuilder.Predicate.Operator op)
+		static bool Compare(int v1, int v2, SqlBuilder.Predicate.Operator op)
 		{
 			switch (op)
 			{

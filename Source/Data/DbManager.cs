@@ -2394,6 +2394,7 @@ namespace BLToolkit.Data
 						maxBatchSize),
 					1);
 			string baseSql          = SelectCommand.CommandText;
+			string paramName        = _dataProvider.Convert(".", ConvertType.NameToQueryParameter).ToString();
 			int    rowsTotal        = 0;
 			int    nRows            = 0;
 			bool   initParameters   = true;
@@ -2413,12 +2414,18 @@ namespace BLToolkit.Data
 					initParameters = false;
 					baseParameters = getParameters(obj);
 
-					int n = 0;
+					if (maxRows != 1)
+					{
+						int n = 0;
 
-					foreach (IDbDataParameter p in baseParameters)
-						n += p.ParameterName.Length + 3 - "{0}".Length;
+						foreach (IDbDataParameter p in baseParameters)
+							n += p.ParameterName.Length + 3 - "{0}".Length + _dataProvider.EndOfSql.Length;
 
-					maxRows = Math.Min(maxRows, _dataProvider.MaxBatchSize / (baseSql.Length + n));
+						maxRows = Math.Max(1, Math.Min(maxRows, _dataProvider.MaxBatchSize / (baseSql.Length + n)));
+					}
+
+					if (maxRows != 1)
+						baseSql += _dataProvider.EndOfSql;
 				}
 
 				bool isSet;
@@ -2427,12 +2434,16 @@ namespace BLToolkit.Data
 				{
 					isSet = false;
 
+					Converter<IDbDataParameter,string> c1 = delegate(IDbDataParameter p) { return p.ParameterName + nRows; };
+					Converter<IDbDataParameter,string> c2 = delegate(IDbDataParameter p) { return p.ParameterName;         };
+
 					sb
 						.Append("\n")
 						.AppendFormat(
 							baseSql,
 							Array.ConvertAll<IDbDataParameter,string>(
-								baseParameters, delegate(IDbDataParameter p) { return p.ParameterName + nRows; }));
+								baseParameters,
+								baseParameters.Length > 0 && baseParameters[0].ParameterName != paramName? c1 : c2));
 
 					rowSql.Add(sb.Length);
 

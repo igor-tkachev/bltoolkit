@@ -1,5 +1,7 @@
 ﻿using System;
 using System.IO;
+using BLToolkit.DataAccess;
+using Data.Linq.Model;
 using NUnit.Framework;
 
 using BLToolkit.Data.DataProvider;
@@ -11,7 +13,7 @@ namespace Create
 	[TestFixture]
 	public class CreateData : TestBase
 	{
-		static void RunScript(Action<string> execute, string divider, string name)
+		static void RunScript(Action<string> execute, TestDbManager db, string divider, string name)
 		{
 			Console.WriteLine("=== " + name + " === \n");
 
@@ -45,11 +47,60 @@ namespace Create
 
 			if (exception != null)
 				throw exception;
+
+			new SqlQuery<Parent>().Insert(db, new[]
+			{
+				new Parent { ParentID = 1, Value1 = 1    },
+				new Parent { ParentID = 2, Value1 = null },
+				new Parent { ParentID = 3, Value1 = 3    },
+				new Parent { ParentID = 4, Value1 = null },
+				new Parent { ParentID = 5, Value1 = 5    },
+			});
+
+			new SqlQuery<Child>().Insert(db, new[]
+			{
+				new Child { ParentID = 1, ChildID = 11 },
+				new Child { ParentID = 2, ChildID = 21 },
+				new Child { ParentID = 2, ChildID = 22 },
+				new Child { ParentID = 3, ChildID = 31 },
+				new Child { ParentID = 3, ChildID = 32 },
+				new Child { ParentID = 3, ChildID = 33 },
+				new Child { ParentID = 4, ChildID = 41 },
+				new Child { ParentID = 4, ChildID = 42 },
+				new Child { ParentID = 4, ChildID = 43 },
+				new Child { ParentID = 4, ChildID = 44 },
+			});
+
+			new SqlQuery<GrandChild>().Insert(db, new[]
+			{
+				new GrandChild { ParentID = 1, ChildID = 11, GrandChildID = 111 },
+				new GrandChild { ParentID = 2, ChildID = 21, GrandChildID = 211 },
+				new GrandChild { ParentID = 2, ChildID = 21, GrandChildID = 212 },
+				new GrandChild { ParentID = 2, ChildID = 22, GrandChildID = 221 },
+				new GrandChild { ParentID = 2, ChildID = 22, GrandChildID = 222 },
+				new GrandChild { ParentID = 3, ChildID = 31, GrandChildID = 311 },
+				new GrandChild { ParentID = 3, ChildID = 31, GrandChildID = 312 },
+				new GrandChild { ParentID = 3, ChildID = 31, GrandChildID = 313 },
+				new GrandChild { ParentID = 3, ChildID = 32, GrandChildID = 321 },
+				new GrandChild { ParentID = 3, ChildID = 32, GrandChildID = 322 },
+				new GrandChild { ParentID = 3, ChildID = 32, GrandChildID = 323 },
+				new GrandChild { ParentID = 3, ChildID = 33, GrandChildID = 331 },
+				new GrandChild { ParentID = 3, ChildID = 33, GrandChildID = 332 },
+				new GrandChild { ParentID = 3, ChildID = 33, GrandChildID = 333 },
+				new GrandChild { ParentID = 4, ChildID = 41, GrandChildID = 411 },
+				new GrandChild { ParentID = 4, ChildID = 41, GrandChildID = 412 },
+				new GrandChild { ParentID = 4, ChildID = 41, GrandChildID = 413 },
+				new GrandChild { ParentID = 4, ChildID = 41, GrandChildID = 414 },
+				new GrandChild { ParentID = 4, ChildID = 42, GrandChildID = 421 },
+				new GrandChild { ParentID = 4, ChildID = 42, GrandChildID = 422 },
+				new GrandChild { ParentID = 4, ChildID = 42, GrandChildID = 423 },
+				new GrandChild { ParentID = 4, ChildID = 42, GrandChildID = 424 },
+			});
 		}
 
 		static void RunScript(TestDbManager db, string divider, string name)
 		{
-			RunScript(cmd => db.SetCommand(cmd).ExecuteNonQuery(), divider, name);
+			RunScript(cmd => db.SetCommand(cmd).ExecuteNonQuery(), db, divider, name);
 		}
 
 		[Test] public void DB2       () { using (var db = new TestDbManager(ProviderName.DB2))        RunScript(db, "\nGO\n",  "DB2");        }

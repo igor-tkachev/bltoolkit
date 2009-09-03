@@ -83,6 +83,11 @@ namespace BLToolkit.Data.DataProvider
 			get { return DataProvider.ProviderName.DB2; }
 		}
 
+		public override string EndOfSql
+		{
+			get { return ";"; }
+		}
+
 		public override ISqlProvider CreateSqlProvider()
 		{
 			return new DB2SqlProvider(this);

@@ -61,6 +61,11 @@ namespace BLToolkit.Data.Sql
 
 		#region ISqlExpression Members
 
+		public bool CanBeNull()
+		{
+			return Value == null;
+		}
+
 		public object Clone(Dictionary<object,object> objectTree)
 		{
 			object clone;

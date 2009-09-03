@@ -36,7 +36,7 @@ namespace BLToolkit.Data.Sql
 			Name = _mappingSchema.MetadataProvider.GetTableName(objectType, _mappingSchema.Extensions, out isSet);
 
 			foreach (MemberMapper mm in MappingSchema.GetObjectMapper(objectType))
-				Fields.Add(new SqlField(mm.MemberName, mm.Name));
+				Fields.Add(new SqlField(mm.MemberName, mm.Name, mm.MapMemberInfo.Nullable));
 		}
 
 		public SqlTable(Type objectType)
@@ -58,7 +58,7 @@ namespace BLToolkit.Data.Sql
 			_physicalName = table._physicalName;
 
 			foreach (SqlField field in table.Fields.Values)
-				Fields.Add(new SqlField(field.Name, field.PhysicalName));
+				Fields.Add(new SqlField(field.Name, field.PhysicalName, field.Nullable));
 
 			foreach (Join join in table.Joins)
 				Joins.Add(join.Clone());
@@ -96,7 +96,7 @@ namespace BLToolkit.Data.Sql
 			_physicalName = (string)te.Attributes["PhysicalName"].Value;
 
 			foreach (MemberExtension me in te.Members)
-				Fields.Add(new SqlField(me.Name, (string)me["MapField"].Value ?? (string)me["PhysicalName"].Value));
+				Fields.Add(new SqlField(me.Name, (string)me["MapField"].Value ?? (string)me["PhysicalName"].Value, (bool)me["Nullable"].Value));
 
 			foreach (AttributeExtension ae in te.Attributes["Join"])
 				Joins.Add(new Join(ae));
@@ -121,7 +121,7 @@ namespace BLToolkit.Data.Sql
 
 			foreach (SqlField field in baseTable.Fields.Values)
 				if (!Fields.ContainsKey(field.Name))
-					Fields.Add(new SqlField(field.Name, field.PhysicalName));
+					Fields.Add(new SqlField(field.Name, field.PhysicalName, field.Nullable));
 
 			foreach (Join join in baseTable.Joins)
 				if (Joins.Find(delegate(Join j) { return j.TableName == join.TableName; }) == null)
@@ -179,7 +179,7 @@ namespace BLToolkit.Data.Sql
 			{
 				if (_all == null)
 				{
-					_all = new SqlField("*", "*");
+					_all = new SqlField("*", "*", true);
 					((IChild<ISqlTableSource>)_all).Parent = this;
 				}
 
@@ -226,7 +226,7 @@ namespace BLToolkit.Data.Sql
 
 				foreach (KeyValuePair<string,SqlField> field in _fields)
 				{
-					SqlField fc = new SqlField(field.Value.Name, field.Value.PhysicalName);
+					SqlField fc = new SqlField(field.Value.Name, field.Value.PhysicalName, field.Value.Nullable);
 
 					objectTree.Add(field.Value, fc);
 					table._fields.Add(field.Key, fc);

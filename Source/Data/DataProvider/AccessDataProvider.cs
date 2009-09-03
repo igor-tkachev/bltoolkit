@@ -209,6 +209,11 @@ namespace BLToolkit.Data.DataProvider
 			get { return NameString; }
 		}
 
+		public override int MaxBatchSize
+		{
+			get { return 0; }
+		}
+
 		public override ISqlProvider CreateSqlProvider()
 		{
 			return new AccessSqlProvider(this);

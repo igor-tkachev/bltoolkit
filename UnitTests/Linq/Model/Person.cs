@@ -21,11 +21,10 @@ namespace Data.Linq.Model
 			FirstName = firstName;
 		}
 
-		[MapField("PersonID")] 
-		public int    ID;
-		public string FirstName { get; set; }
-		public string LastName;
-		public string MiddleName;
-		public char   Gender;
+		[MapField("PersonID")] public int    ID;
+		                       public string FirstName { get; set; }
+		                       public string LastName;
+		[Nullable]             public string MiddleName;
+		                       public char   Gender;
 	}
 }

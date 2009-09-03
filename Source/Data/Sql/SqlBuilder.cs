@@ -116,6 +116,21 @@ namespace BLToolkit.Data.Sql
 				get { return Sql.Precedence.Primary; } // _expression.Precedence; }
 			}
 
+			public bool CanBeNull()
+			{
+				return Expression.CanBeNull();
+			}
+
+			public object Clone(Dictionary<object,object> objectTree)
+			{
+				object clone;
+
+				if (!objectTree.TryGetValue(this, out clone))
+					objectTree.Add(this, clone = new Column((ISqlTableSource)_parent.Clone(objectTree), (ISqlExpression)_expression.Clone(objectTree), _alias));
+
+				return clone;
+			}
+
 			#endregion
 
 			#region IEquatable<ISqlExpression> Members
@@ -154,20 +169,6 @@ namespace BLToolkit.Data.Sql
 			{
 				get { return _parent;  }
 				set { _parent = value; }
-			}
-
-			#endregion
-
-			#region ISqlExpression Members
-
-			public object Clone(Dictionary<object,object> objectTree)
-			{
-				object clone;
-
-				if (!objectTree.TryGetValue(this, out clone))
-					objectTree.Add(this, clone = new Column((ISqlTableSource)_parent.Clone(objectTree), (ISqlExpression)_expression.Clone(objectTree), _alias));
-
-				return clone;
 			}
 
 			#endregion
@@ -871,6 +872,11 @@ namespace BLToolkit.Data.Sql
 			#endregion
 
 			#region ISqlExpression Members
+
+			public bool CanBeNull()
+			{
+				return false;
+			}
 
 			public object Clone(Dictionary<object,object> objectTree)
 			{
@@ -2134,6 +2140,11 @@ namespace BLToolkit.Data.Sql
 
 		#region ISqlExpression Members
 
+		public bool CanBeNull()
+		{
+			return true;
+		}
+
 		public int Precedence
 		{
 			get { return Sql.Precedence.Unknown; }
@@ -2190,7 +2201,7 @@ namespace BLToolkit.Data.Sql
 			{
 				if (_all == null)
 				{
-					_all = new SqlField("*", "*");
+					_all = new SqlField("*", "*", true);
 					((IChild<ISqlTableSource>)_all).Parent = this;
 				}
 

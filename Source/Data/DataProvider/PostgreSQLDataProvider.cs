@@ -70,6 +70,11 @@ namespace BLToolkit.Data.DataProvider
 			get { return DataProvider.ProviderName.PostgreSQL; }
 		}
 
+		public override int MaxBatchSize
+		{
+			get { return 0; }
+		}
+
 		public override ISqlProvider CreateSqlProvider()
 		{
 			return new PostgreSQLSqlProvider(this);

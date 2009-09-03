@@ -577,88 +577,9 @@ VALUES
 
 
 
-CREATE TABLE Parent      (ParentID int)
+CREATE TABLE Parent      (ParentID int, Value1 int)
 /
 CREATE TABLE Child       (ParentID int, ChildID int)
 /
 CREATE TABLE GrandChild  (ParentID int, ChildID int, GrandChildID int)
-/
-
-INSERT INTO Parent     VALUES (1)
-/
-INSERT INTO Child      VALUES (1,11)
-/
-INSERT INTO GrandChild VALUES (1,11,111)
-/
-
-INSERT INTO Parent     VALUES (2)
-/
-INSERT INTO Child      VALUES (2,21)
-/
-INSERT INTO GrandChild VALUES (2,21,211)
-/
-INSERT INTO GrandChild VALUES (2,21,212)
-/
-INSERT INTO Child      VALUES (2,22)
-/
-INSERT INTO GrandChild VALUES (2,22,221)
-/
-INSERT INTO GrandChild VALUES (2,22,222)
-/
-
-INSERT INTO Parent     VALUES (3)
-/
-INSERT INTO Child      VALUES (3,31)
-/
-INSERT INTO GrandChild VALUES (3,31,311)
-/
-INSERT INTO GrandChild VALUES (3,31,312)
-/
-INSERT INTO GrandChild VALUES (3,31,313)
-/
-INSERT INTO Child      VALUES (3,32)
-/
-INSERT INTO GrandChild VALUES (3,32,321)
-/
-INSERT INTO GrandChild VALUES (3,32,322)
-/
-INSERT INTO GrandChild VALUES (3,32,323)
-/
-INSERT INTO Child      VALUES (3,33)
-/
-INSERT INTO GrandChild VALUES (3,33,331)
-/
-INSERT INTO GrandChild VALUES (3,33,332)
-/
-INSERT INTO GrandChild VALUES (3,33,333)
-/
-
-INSERT INTO Parent     VALUES (4)
-/
-INSERT INTO Child      VALUES (4,41)
-/
-INSERT INTO GrandChild VALUES (4,41,411)
-/
-INSERT INTO GrandChild VALUES (4,41,412)
-/
-INSERT INTO GrandChild VALUES (4,41,413)
-/
-INSERT INTO GrandChild VALUES (4,41,414)
-/
-INSERT INTO Child      VALUES (4,42)
-/
-INSERT INTO GrandChild VALUES (4,42,421)
-/
-INSERT INTO GrandChild VALUES (4,42,422)
-/
-INSERT INTO GrandChild VALUES (4,42,423)
-/
-INSERT INTO GrandChild VALUES (4,42,424)
-/
-INSERT INTO Child      VALUES (4,43)
-/
-INSERT INTO Child      VALUES (4,44)
-/
-
-INSERT INTO Parent     VALUES (5)
 /

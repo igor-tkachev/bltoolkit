@@ -78,6 +78,11 @@ namespace BLToolkit.Data.DataProvider
 			get { return DataProvider.ProviderName.Informix; }
 		}
 
+		public override string EndOfSql
+		{
+			get { return ";"; }
+		}
+
 		public override ISqlProvider CreateSqlProvider()
 		{
 			return new InformixSqlProvider(this);

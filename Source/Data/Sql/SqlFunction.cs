@@ -92,7 +92,7 @@ namespace BLToolkit.Data.Sql
 			{
 				if (_all == null)
 				{
-					_all = new SqlField("*", "*");
+					_all = new SqlField("*", "*", true);
 					((IChild<ISqlTableSource>)_all).Parent = this;
 				}
 
@@ -103,6 +103,11 @@ namespace BLToolkit.Data.Sql
 		#endregion
 
 		#region ISqlExpression Members
+
+		public bool CanBeNull()
+		{
+			return true;
+		}
 
 		public object Clone(Dictionary<object,object> objectTree)
 		{

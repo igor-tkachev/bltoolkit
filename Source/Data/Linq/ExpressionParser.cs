@@ -1190,6 +1190,17 @@ namespace BLToolkit.Data.Linq
 						break;
 					}
 
+				case ExpressionType.Convert:
+					{
+						var pi = parseInfo.Convert<UnaryExpression>();
+						var e  = parseInfo.Expr as UnaryExpression;
+
+						if (e.Method == null && e.IsLifted)
+							return ParseExpression(query, pi.Create(e.Operand, pi.Property(Unary.Operand)));
+
+						break;
+					}
+
 				case ExpressionType.Conditional:
 					{
 						var pi = parseInfo.Convert<ConditionalExpression>();
@@ -1499,7 +1510,7 @@ namespace BLToolkit.Data.Linq
 
 		public static bool IsConstant(Type type)
 		{
-			return type == typeof(int) || type == typeof(string) || type == typeof(char) || type == typeof(long);
+			return type == typeof(int) || type == typeof(string) || type == typeof(char) || type == typeof(long) || type == typeof(bool);
 		}
 
 		#endregion
@@ -1523,6 +1534,17 @@ namespace BLToolkit.Data.Linq
 						var r  = ParseExpression(query, pi.Create(e.Right, pi.Property(Binary.Right)));
 
 						SqlBuilder.Predicate.Operator op;
+
+						switch (parseInfo.NodeType)
+						{
+							case ExpressionType.Equal   :
+							case ExpressionType.NotEqual:
+
+								if (!CurrentSql.ParameterDependent && (l is SqlParameter && r.CanBeNull() || r is SqlParameter && l.CanBeNull()))
+									CurrentSql.ParameterDependent = true;
+
+								break;
+						}
 
 						switch (parseInfo.NodeType)
 						{
@@ -1555,6 +1577,26 @@ namespace BLToolkit.Data.Linq
 
 						if (predicate != null)
 							return Convert(predicate);
+
+						break;
+					}
+
+				case ExpressionType.Conditional:
+					return Convert(new SqlBuilder.Predicate.ExprExpr(
+						ParseExpression(query, parseInfo),
+						SqlBuilder.Predicate.Operator.Equal,
+						new SqlValue(true)));
+
+				case ExpressionType.MemberAccess:
+					{
+						var pi = parseInfo.Convert<MemberExpression>();
+						var e  = pi.Expr as MemberExpression;
+
+						if (e.Member.Name == "HasValue" && e.Member.DeclaringType.GetGenericTypeDefinition() == typeof(Nullable<>))
+						{
+							var expr = ParseExpression(query, pi.Create(e.Expression, pi.Property(Member.Expression)));
+							return Convert(new SqlBuilder.Predicate.IsNull(expr, true));
+						}
 
 						break;
 					}

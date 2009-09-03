@@ -138,6 +138,11 @@ namespace BLToolkit.Data.DataProvider
 			get { return DataProvider.ProviderName.Firebird; }
 		}
 
+		public override int MaxBatchSize
+		{
+			get { return 0; }
+		}
+
 		public override ISqlProvider CreateSqlProvider()
 		{
 			return new FirebirdSqlProvider(this);

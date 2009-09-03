@@ -80,6 +80,26 @@ namespace Data.Linq
 			TestOneJohn(db => from p in db.Person where p.ID == id && p.FirstName == name select p);
 		}
 
+		[Test]
+		public void NullParam1()
+		{
+			var    id   = 1;
+			string name = null;
+			TestOneJohn(db => from p in db.Person where p.ID == id && p.MiddleName == name select p);
+		}
+
+		[Test]
+		public void NullParam2()
+		{
+			var    id   = 1;
+			string name = null;
+			TestOneJohn(db =>
+			{
+				(from p in db.Person where p.ID == id && p.MiddleName == name select p).ToList();
+				return from p in db.Person where p.ID == id && p.MiddleName == name select p;
+			});
+		}
+
 		int TestMethod()
 		{
 			return 1;
@@ -233,7 +253,7 @@ namespace Data.Linq
 		}
 
 		[Test]
-		public void Coalesce()
+		public void Coalesce1()
 		{
 			TestOneJohn(db =>
 
@@ -245,6 +265,24 @@ namespace Data.Linq
 				select p
 
 			);
+		}
+
+		[Test]
+		public void Coalesce2()
+		{
+			ForEachProvider(db => Assert.AreEqual(1, (from p in db.Parent where p.ParentID == 1 ? true : false select p).ToList().Count));
+		}
+
+		[Test]
+		public void Coalesce3()
+		{
+			ForEachProvider(db => Assert.AreEqual(1, (from p in db.Parent where p.ParentID != 1 ? false: true select p).ToList().Count));
+		}
+
+		[Test]
+		public void Coalesce4()
+		{
+			ForEachProvider(db => Assert.AreEqual(4, (from p in db.Parent where p.ParentID == 1 ? false: true select p).ToList().Count));
 		}
 
 		[Test]
@@ -290,6 +328,70 @@ namespace Data.Linq
 				select p
 
 			);
+		}
+
+		[Test]
+		public void MultipleQuery1()
+		{
+			ForEachProvider(db =>
+			{
+				var id = 1;
+				var q  = from p in db.Person where p.ID == id select p;
+
+				var list = q.ToList();
+				Assert.AreEqual(1, list[0].ID);
+
+				id = 2;
+				list = q.ToList();
+				Assert.AreEqual(2, list[0].ID);
+			});
+		}
+
+		[Test]
+		public void MultipleQuery2()
+		{
+			ForEachProvider(db =>
+			{
+				string str = null;
+				var    q   = from p in db.Person where p.MiddleName == str select p;
+
+				var list = q.ToList();
+				Assert.AreNotEqual(0, list.Count);
+
+				str = "123";
+				list = q.ToList();
+				Assert.AreEqual(0, list.Count);
+			});
+		}
+
+		[Test]
+		public void HasValue1()
+		{
+			ForEachProvider(db => Assert.AreEqual(3, (from p in db.Parent where p.Value1.HasValue select p).ToList().Count));
+		}
+
+		[Test]
+		public void HasValue2()
+		{
+			ForEachProvider(db => Assert.AreEqual(2, (from p in db.Parent where !p.Value1.HasValue select p).ToList().Count));
+		}
+
+		[Test]
+		public void CompareNullable1()
+		{
+			ForEachProvider(db => Assert.AreEqual(1, (from p in db.Parent where p.Value1 == 1 select p).ToList().Count));
+		}
+
+		[Test]
+		public void CompareNullable2()
+		{
+			ForEachProvider(db => Assert.AreEqual(1, (from p in db.Parent where p.ParentID == p.Value1 && p.Value1 == 1 select p).ToList().Count));
+		}
+
+		[Test]
+		public void CompareNullable3()
+		{
+			ForEachProvider(db => Assert.AreEqual(1, (from p in db.Parent where p.Value1 == p.ParentID && p.Value1 == 1 select p).ToList().Count));
 		}
 	}
 }
