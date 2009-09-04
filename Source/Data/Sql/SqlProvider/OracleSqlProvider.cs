@@ -37,12 +37,41 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		protected override bool BuildWhere()
 		{
-			return base.BuildWhere() || SqlBuilder.Select.TakeValue != null;
+			return (base.BuildWhere() || SqlBuilder.Select.TakeValue != null) && SqlBuilder.OrderBy.IsEmpty && SqlBuilder.Having.IsEmpty;
+		}
+
+		protected override void BuildSql(StringBuilder sb)
+		{
+			bool buildRowNum = SqlBuilder.Select.TakeValue != null && (!SqlBuilder.OrderBy.IsEmpty || !SqlBuilder.Having.IsEmpty);
+
+			if (buildRowNum)
+			{
+				AppendIndent(sb).Append("SELECT * FROM (").AppendLine();
+				Indent++;
+			}
+
+			base.BuildSql(sb);
+
+			if (buildRowNum)
+			{
+				string alias = SqlBuilder.GetTempAliases(1, "t")[0];
+
+				Indent--;
+
+				AppendIndent(sb).Append(") ").Append(alias).AppendLine();
+				AppendIndent(sb).Append("WHERE").AppendLine();
+
+				Indent++;
+				AppendIndent(sb).Append("rownum <= ");
+				BuildExpression(sb, Precedence.Comparison, SqlBuilder.Select.TakeValue);
+				sb.AppendLine();
+				Indent--;
+			}
 		}
 
 		protected override void BuildWhereSearchCondition(StringBuilder sb, SqlBuilder.SearchCondition condition)
 		{
-			if (SqlBuilder.Select.TakeValue != null)
+			if (SqlBuilder.Select.TakeValue != null && SqlBuilder.OrderBy.IsEmpty && SqlBuilder.Having.IsEmpty)
 			{
 				BuildPredicate(
 					sb,

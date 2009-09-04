@@ -433,6 +433,11 @@ namespace BLToolkit.Data.Sql
 					_expr1 = _expr1.Walk(skipColumns, func);
 				}
 
+				public override bool CanBeNull()
+				{
+					return _expr1.CanBeNull();
+				}
+
 				protected override object Clone(Dictionary<object, object> objectTree)
 				{
 					object clone;
@@ -483,6 +488,11 @@ namespace BLToolkit.Data.Sql
 				{
 					base.Walk(skipColumns, func);
 					_expr2 = _expr2.Walk(skipColumns, func);
+				}
+
+				public override bool CanBeNull()
+				{
+					return base.CanBeNull() || _expr2.CanBeNull();
 				}
 
 				protected override object Clone(Dictionary<object, object> objectTree)
@@ -696,6 +706,11 @@ namespace BLToolkit.Data.Sql
 					_func = (SqlFunction)((ISqlExpression)_func).Walk(skipColumns, func);
 				}
 
+				public override bool CanBeNull()
+				{
+					return _func.CanBeNull();
+				}
+
 				protected override object Clone(Dictionary<object, object> objectTree)
 				{
 					object clone;
@@ -720,8 +735,9 @@ namespace BLToolkit.Data.Sql
 				get { return _precedence;  }
 			}
 
-			protected abstract void   Walk (bool skipColumns, WalkingFunc action);
-			protected abstract object Clone(Dictionary<object,object> objectTree);
+			public    abstract bool   CanBeNull();
+			protected abstract void   Walk     (bool skipColumns, WalkingFunc action);
+			protected abstract object Clone    (Dictionary<object,object> objectTree);
 
 			ISqlExpression ISqlExpressionWalkable.Walk(bool skipColumns, WalkingFunc func)
 			{
@@ -778,6 +794,11 @@ namespace BLToolkit.Data.Sql
 				}
 
 				return clone;
+			}
+
+			public bool CanBeNull()
+			{
+				return Predicate.CanBeNull();
 			}
 
 			public override string ToString()
@@ -875,6 +896,10 @@ namespace BLToolkit.Data.Sql
 
 			public bool CanBeNull()
 			{
+				foreach (Condition c in Conditions)
+					if (c.CanBeNull())
+						return true;
+
 				return false;
 			}
 
@@ -1986,9 +2011,52 @@ namespace BLToolkit.Data.Sql
 				From.Tables[i] = OptimizeSubQuery(From.Tables[i]);
 		}
 
+		IDictionary<string,object> _aliases;
+
+		public void RemoveAlias(string alias)
+		{
+			if (_aliases != null && _aliases.ContainsKey(alias))
+				_aliases.Remove(alias);
+		}
+
+		public string GetAlias(string desiredAlias, string defaultAlias)
+		{
+			if (_aliases == null)
+				_aliases = new Dictionary<string,object>();
+
+			string alias = desiredAlias;
+
+			if (string.IsNullOrEmpty(desiredAlias))
+			{
+				desiredAlias = defaultAlias;
+				alias        = defaultAlias + "1";
+			}
+
+			for (int i = 1; _aliases.ContainsKey(alias); i++)
+				alias = desiredAlias + i;
+
+			_aliases.Add(alias, alias);
+
+			return alias;
+		}
+
+		public string[] GetTempAliases(int n, string defaultAlias)
+		{
+			string[] aliases = new string[n];
+
+			for (int i = 0; i < aliases.Length; i++)
+				aliases[i] = GetAlias(null, defaultAlias);
+
+			for (int i = 0; i < aliases.Length; i++)
+				RemoveAlias(aliases[i]);
+
+			return aliases;
+		}
+
 		void SetAliases()
 		{
-			Dictionary<string,object>      names   = new Dictionary<string,object>();
+			_aliases = null;
+
 			Dictionary<TableSource,object> sources = new Dictionary<TableSource,object>();
 
 			ForEachTable(delegate(TableSource table)
@@ -1996,40 +2064,14 @@ namespace BLToolkit.Data.Sql
 				if (!sources.ContainsKey(table))
 				{
 					sources.Add(table, table);
-
-					string alias = table.Alias;
-
-					if (string.IsNullOrEmpty(alias))
-					{
-						table.Alias = "t";
-						alias       = "t1";
-					}
-
-					for (int i = 1; names.ContainsKey(alias); i++)
-						alias = table.Alias + i;
-
-					names.Add(table.Alias = alias, table);
+					table.Alias = GetAlias(table.Alias, "t");
 				}
 			});
 
 			foreach (Column c in Select.Columns)
-			{
-				string alias = c.Alias;
-
-				if (alias == "*")
-					continue;
-
-				if (string.IsNullOrEmpty(alias))
-				{
-					c.Alias = "c";
-					alias   = "c1";
-				}
-
-				for (int i = 1; names.ContainsKey(alias); i++)
-					alias = c.Alias + i;
-
-				names.Add(c.Alias = alias, c);
-			}
+				if (c.Alias != "*")
+					c.Alias = GetAlias(c.Alias, "c");
+			
 
 			Parameters.Clear();
 
@@ -2039,18 +2081,7 @@ namespace BLToolkit.Data.Sql
 				{
 					SqlParameter p = (SqlParameter)expr;
 
-					string alias = p.Name;
-
-					if (string.IsNullOrEmpty(alias))
-					{
-						p.Name = "p";
-						alias  = "p1";
-					}
-
-					for (int i = 1; names.ContainsKey(alias); i++)
-						alias = p.Name + i;
-
-					names.Add(p.Name = alias, p);
+					p.Name = GetAlias(p.Name, "p");
 					Parameters.Add(p);
 				}
 

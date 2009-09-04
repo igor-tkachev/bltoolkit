@@ -21,21 +21,27 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		{
 		}
 
+		protected override void BuildSql(StringBuilder sb)
+		{
+			AlternativeBuildSql(sb, base.BuildSql);
+		}
+
 		protected override void BuildSelectClause(StringBuilder sb)
 		{
 			if (SqlBuilder.From.Tables.Count == 0)
 			{
-				AppendIndent(sb);
-				sb.Append("SELECT").AppendLine();
+				AppendIndent(sb).Append("SELECT").AppendLine();
 				BuildColumns(sb);
-				AppendIndent(sb);
-				sb.Append("FROM SYSIBM.SYSDUMMY1 FETCH FIRST 1 ROW ONLY").AppendLine();
+				AppendIndent(sb).Append("FROM SYSIBM.SYSDUMMY1 FETCH FIRST 1 ROW ONLY").AppendLine();
 			}
 			else
 				base.BuildSelectClause(sb);
 		}
 
-		protected override string FetchFormat { get { return "FETCH FIRST {0} ROWS ONLY"; } }
+		protected override string FetchFormat
+		{
+			get { return SqlBuilder.Select.SkipValue == null ? "FETCH FIRST {0} ROWS ONLY" : base.FetchFormat; }
+		}
 
 		public override ISqlExpression ConvertExpression(ISqlExpression expr)
 		{

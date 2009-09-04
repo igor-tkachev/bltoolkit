@@ -124,6 +124,7 @@
     <Compile Include="DataAccess\DataAccessorBase.cs" />
     <Compile Include="DataAccess\SqlIgnoreAttribute.cs" />
     <Compile Include="Data\DataProvider\ProviderName.cs" />
+    <Compile Include="Data\Linq\ElementMethod.cs" />
     <Compile Include="Data\Linq\FieldIndex.cs" />
     <Compile Include="Data\Linq\LambdaInfo.cs" />
     <Compile Include="Data\Linq\QueryContext.cs" />

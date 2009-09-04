@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Text;
 
 namespace BLToolkit.Data.Sql.SqlProvider
@@ -62,21 +63,14 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		#endregion
 
-		#region BuildSQL
+		#region BuildSql
 
 		public StringBuilder BuildSql(SqlBuilder sqlBuilder, StringBuilder sb, int indent)
 		{
 			_sqlBuilder = sqlBuilder;
 			_indent     = indent;
 
-			BuildSelectClause (sb);
-			BuildFromClause   (sb);
-			BuildWhereClause  (sb);
-			BuildGroupByClause(sb);
-			BuildOrderByClause(sb);
-
-			if (SqlBuilder.Select.TakeValue != null)
-				BuildFetch(sb);
+			BuildSql(sb);
 
 			return sb;
 		}
@@ -87,6 +81,9 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		protected virtual void BuildSqlBuilder(SqlBuilder sqlBuilder, StringBuilder sb, int indent)
 		{
+			if (!IsSkipSupported && sqlBuilder.Select.SkipValue != null)
+				throw new SqlException("Skip for subqueries is not supported by the '{0}' provider.", _dataProvider.Name);
+
 			if (!IsTakeSupported && sqlBuilder.Select.TakeValue != null)
 				throw new SqlException("Take for subqueries is not supported by the '{0}' provider.", _dataProvider.Name);
 
@@ -96,6 +93,18 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		protected virtual bool ParenthesizeJoin()
 		{
 			return false;
+		}
+
+		protected virtual void BuildSql(StringBuilder sb)
+		{
+			BuildSelectClause (sb);
+			BuildFromClause   (sb);
+			BuildWhereClause  (sb);
+			BuildGroupByClause(sb);
+			BuildOrderByClause(sb);
+
+			if (SqlBuilder.Select.TakeValue != null)
+				BuildFetch(sb);
 		}
 
 		#endregion
@@ -109,6 +118,9 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 			if (SqlBuilder.Select.IsDistinct)
 				sb.Append(" DISTINCT");
+
+			if (SqlBuilder.Select.SkipValue != null)
+				BuildSkip(sb);
 
 			if (SqlBuilder.Select.TakeValue != null)
 				BuildTop(sb);
@@ -345,12 +357,14 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		#endregion
 
-		#region Top/Fetch
+		#region Top/Fetch Skip
 
 		public virtual bool IsTakeSupported { get { return true; } }
+		public virtual bool IsSkipSupported { get { return true; } }
 
 		protected virtual string TopFormat   { get { return null; } }
 		protected virtual string FetchFormat { get { return null; } }
+		protected virtual string SkipFormat  { get { return null; } }
 
 		protected virtual void BuildTop(StringBuilder sb)
 		{
@@ -374,6 +388,18 @@ namespace BLToolkit.Data.Sql.SqlProvider
 				BuildExpression(fetchsb, SqlBuilder.Select.TakeValue);
 				sb.AppendFormat(fetch, fetchsb);
 				sb.AppendLine();
+			}
+		}
+
+		protected virtual void BuildSkip(StringBuilder sb)
+		{
+			string skip = SkipFormat;
+
+			if (skip != null)
+			{
+				StringBuilder skipsb = new StringBuilder();
+				BuildExpression(skipsb, SqlBuilder.Select.SkipValue);
+				sb.AppendFormat(skip, skipsb);
 			}
 		}
 
@@ -517,6 +543,15 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			{
 				BuildSearchCondition(sb, predicate.Precedence, (SqlBuilder.SearchCondition)predicate);
 			}
+			else if (predicate is SqlBuilder.Predicate.NotExpr)
+			{
+				SqlBuilder.Predicate.NotExpr p = (SqlBuilder.Predicate.NotExpr)predicate;
+
+				if (p.IsNot)
+					sb.Append("NOT ");
+
+				BuildExpression(sb, p.IsNot ? Precedence.LogicalNegation : GetPrecedence(p), p.Expr1);
+			}
 			else if (predicate is SqlBuilder.Predicate.Expr)
 			{
 				SqlBuilder.Predicate.Expr p = (SqlBuilder.Predicate.Expr)predicate;
@@ -533,10 +568,6 @@ namespace BLToolkit.Data.Sql.SqlProvider
 				}
 
 				BuildExpression(sb, GetPrecedence(p), p.Expr1);
-			}
-			else if (predicate is SqlBuilder.Predicate.NotExpr)
-			{
-				throw new NotImplementedException();
 			}
 			else
 			{
@@ -792,6 +823,73 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		}
 
 		#endregion
+
+		#endregion
+
+		#region Alternative Builders
+
+		protected virtual void BuildAliases(StringBuilder sb, string table, List<SqlBuilder.Column> columns)
+		{
+			_indent++;
+
+			bool first = true;
+
+			foreach (SqlBuilder.Column col in columns)
+			{
+				if (!first)
+					sb.Append(',').AppendLine();
+				first = false;
+
+				AppendIndent(sb).AppendFormat("{0}.{1}", table, DataProvider.Convert(col.Alias, ConvertType.NameToQueryFieldAlias));
+			}
+
+			_indent--;
+
+			sb.AppendLine();
+		}
+
+		protected void AlternativeBuildSql(StringBuilder sb, Action<StringBuilder> buildSql)
+		{
+			if (SqlBuilder.Select.SkipValue != null)
+			{
+				string[] aliases = SqlBuilder.GetTempAliases(2, "t");
+
+				AppendIndent(sb).Append("SELECT * FROM (").AppendLine();
+				_indent++;
+
+				AppendIndent(sb).AppendFormat("SELECT {0}.*, ROW_NUMBER() OVER(ORDER BY", aliases[0]).AppendLine();
+
+				_indent++;
+				BuildAliases(sb, aliases[0], SqlBuilder.Select.Columns);
+				AppendIndent(sb).Append(") as row_number").AppendLine();
+				_indent--;
+
+				AppendIndent(sb).Append("FROM (").AppendLine();
+
+				_indent++;
+				buildSql(sb);
+				_indent--;
+
+				AppendIndent(sb).AppendFormat(") as {0}", aliases[0]).AppendLine();
+
+				_indent--;
+
+				AppendIndent(sb).AppendFormat(") as {0}", aliases[1]).AppendLine();
+				AppendIndent(sb).Append("WHERE ");
+
+				if (SqlBuilder.Select.TakeValue == null)
+				{
+					sb.AppendFormat("{0}.row_number > ", aliases[1]);
+					BuildExpression(sb, SqlBuilder.Select.SkipValue);
+				}
+
+				sb.AppendLine();
+
+				AppendIndent(sb).AppendFormat("ORDER BY {0}.row_number", aliases[1]); sb.AppendLine();
+			}
+			else
+				buildSql(sb);
+		}
 
 		#endregion
 
@@ -1067,11 +1165,39 @@ namespace BLToolkit.Data.Sql.SqlProvider
 					case SqlBuilder.Predicate.Operator.Less : return OptimizeCase(expr);
 				}
 			}
+			else if (predicate.GetType() == typeof(SqlBuilder.Predicate.NotExpr))
+			{
+				SqlBuilder.Predicate.NotExpr expr = (SqlBuilder.Predicate.NotExpr)predicate;
+
+				if (expr.IsNot && expr.Expr1 is SqlBuilder.SearchCondition)
+				{
+					SqlBuilder.SearchCondition sc = (SqlBuilder.SearchCondition)expr.Expr1;
+
+					if (sc.Conditions.Count == 1)
+					{
+						SqlBuilder.Condition cond = sc.Conditions[0];
+
+						if (cond.IsNot)
+							return cond.Predicate;
+
+						if (cond.Predicate is SqlBuilder.Predicate.ExprExpr)
+						{
+							SqlBuilder.Predicate.ExprExpr ee = (SqlBuilder.Predicate.ExprExpr)cond.Predicate;
+
+							if (ee.Operator == SqlBuilder.Predicate.Operator.Equal)
+								return new SqlBuilder.Predicate.ExprExpr(ee.Expr1, SqlBuilder.Predicate.Operator.NotEqual, ee.Expr2);
+
+							if (ee.Operator == SqlBuilder.Predicate.Operator.NotEqual)
+								return new SqlBuilder.Predicate.ExprExpr(ee.Expr1, SqlBuilder.Predicate.Operator.Equal, ee.Expr2);
+						}
+					}
+				}
+			}
 
 			return predicate;
 		}
 
-		static ISqlPredicate OptimizeCase(SqlBuilder.Predicate.ExprExpr expr)
+		ISqlPredicate OptimizeCase(SqlBuilder.Predicate.ExprExpr expr)
 		{
 			SqlValue    value = expr.Expr1 as SqlValue;
 			SqlFunction func  = expr.Expr2 as SqlFunction;
@@ -1087,53 +1213,71 @@ namespace BLToolkit.Data.Sql.SqlProvider
 				func  = expr.Expr1 as SqlFunction;
 			}
 
-			if (value != null && func != null && value.Value is int && func.Name == "CASE" && func.Parameters.Length == 5)
+			if (value != null && func != null && func.Name == "CASE")
 			{
-				SqlBuilder.SearchCondition c1 = func.Parameters[0] as SqlBuilder.SearchCondition;
-				SqlValue                   v1 = func.Parameters[1] as SqlValue;
-				SqlBuilder.SearchCondition c2 = func.Parameters[2] as SqlBuilder.SearchCondition;
-				SqlValue                   v2 = func.Parameters[3] as SqlValue;
-				SqlValue                   v3 = func.Parameters[4] as SqlValue;
-
-				if (c1 != null && c1.Conditions.Count == 1 && v1 != null && v1.Value is int &&
-				    c2 != null && c2.Conditions.Count == 1 && v2 != null && v2.Value is int && v3 != null && v3.Value is int)
+				if (value.Value is int && func.Parameters.Length == 5)
 				{
-					SqlBuilder.Predicate.ExprExpr ee1 = c1.Conditions[0].Predicate as SqlBuilder.Predicate.ExprExpr;
-					SqlBuilder.Predicate.ExprExpr ee2 = c2.Conditions[0].Predicate as SqlBuilder.Predicate.ExprExpr;
+					SqlBuilder.SearchCondition c1 = func.Parameters[0] as SqlBuilder.SearchCondition;
+					SqlValue                   v1 = func.Parameters[1] as SqlValue;
+					SqlBuilder.SearchCondition c2 = func.Parameters[2] as SqlBuilder.SearchCondition;
+					SqlValue                   v2 = func.Parameters[3] as SqlValue;
+					SqlValue                   v3 = func.Parameters[4] as SqlValue;
 
-					if (ee1 != null && ee2 != null && ee1.Expr1.Equals(ee2.Expr1) && ee1.Expr2.Equals(ee2.Expr2))
+					if (c1 != null && c1.Conditions.Count == 1 && v1 != null && v1.Value is int &&
+						c2 != null && c2.Conditions.Count == 1 && v2 != null && v2.Value is int && v3 != null && v3.Value is int)
 					{
-						int e = 0, g = 0, l = 0;
+						SqlBuilder.Predicate.ExprExpr ee1 = c1.Conditions[0].Predicate as SqlBuilder.Predicate.ExprExpr;
+						SqlBuilder.Predicate.ExprExpr ee2 = c2.Conditions[0].Predicate as SqlBuilder.Predicate.ExprExpr;
 
-						if (ee1.Operator == SqlBuilder.Predicate.Operator.Equal   || ee2.Operator == SqlBuilder.Predicate.Operator.Equal)   e = 1;
-						if (ee1.Operator == SqlBuilder.Predicate.Operator.Greater || ee2.Operator == SqlBuilder.Predicate.Operator.Greater) g = 1;
-						if (ee1.Operator == SqlBuilder.Predicate.Operator.Less    || ee2.Operator == SqlBuilder.Predicate.Operator.Less)    l = 1;
-
-						if (e + g + l == 2)
+						if (ee1 != null && ee2 != null && ee1.Expr1.Equals(ee2.Expr1) && ee1.Expr2.Equals(ee2.Expr2))
 						{
-							int n  = (int)value.Value;
-							int i1 = (int)v1.Value;
-							int i2 = (int)v2.Value;
-							int i3 = (int)v3.Value;
+							int e = 0, g = 0, l = 0;
 
-							int n1 = Compare(valueFirst ? n : i1, valueFirst ? i1 : n, expr.Operator) ? 1 : 0;
-							int n2 = Compare(valueFirst ? n : i2, valueFirst ? i2 : n, expr.Operator) ? 1 : 0;
-							int n3 = Compare(valueFirst ? n : i3, valueFirst ? i3 : n, expr.Operator) ? 1 : 0;
+							if (ee1.Operator == SqlBuilder.Predicate.Operator.Equal   || ee2.Operator == SqlBuilder.Predicate.Operator.Equal)   e = 1;
+							if (ee1.Operator == SqlBuilder.Predicate.Operator.Greater || ee2.Operator == SqlBuilder.Predicate.Operator.Greater) g = 1;
+							if (ee1.Operator == SqlBuilder.Predicate.Operator.Less    || ee2.Operator == SqlBuilder.Predicate.Operator.Less)    l = 1;
 
-							if (n1 + n2 + n3 == 1)
+							if (e + g + l == 2)
 							{
-								if (n1 == 1) return ee1;
-								if (n2 == 1) return ee2;
+								int n  = (int)value.Value;
+								int i1 = (int)v1.Value;
+								int i2 = (int)v2.Value;
+								int i3 = (int)v3.Value;
 
-								return new SqlBuilder.Predicate.ExprExpr(
-									ee1.Expr1,
-									e == 0 ? SqlBuilder.Predicate.Operator.Equal :
-									g == 0 ? SqlBuilder.Predicate.Operator.Greater :
-									         SqlBuilder.Predicate.Operator.Less,
-									ee1.Expr2);
+								int n1 = Compare(valueFirst ? n : i1, valueFirst ? i1 : n, expr.Operator) ? 1 : 0;
+								int n2 = Compare(valueFirst ? n : i2, valueFirst ? i2 : n, expr.Operator) ? 1 : 0;
+								int n3 = Compare(valueFirst ? n : i3, valueFirst ? i3 : n, expr.Operator) ? 1 : 0;
+
+								if (n1 + n2 + n3 == 1)
+								{
+									if (n1 == 1) return ee1;
+									if (n2 == 1) return ee2;
+
+									return ConvertPredicate(new SqlBuilder.Predicate.ExprExpr(
+										ee1.Expr1,
+										e == 0 ? SqlBuilder.Predicate.Operator.Equal :
+										g == 0 ? SqlBuilder.Predicate.Operator.Greater :
+												 SqlBuilder.Predicate.Operator.Less,
+										ee1.Expr2));
+								}
 							}
-						}
 
+						}
+					}
+				}
+				else if (expr.Operator == SqlBuilder.Predicate.Operator.Equal && func.Parameters.Length == 3)
+				{
+					SqlBuilder.SearchCondition sc = func.Parameters[0] as SqlBuilder.SearchCondition;
+					SqlValue                   v1 = func.Parameters[1] as SqlValue;
+					SqlValue                   v2 = func.Parameters[2] as SqlValue;
+
+					if (sc != null && v1 != null && v2 != null)
+					{
+						if (object.Equals(value.Value, v1.Value))
+							return sc;
+
+						if (object.Equals(value.Value, v2.Value) && !sc.CanBeNull())
+							return ConvertPredicate(new SqlBuilder.Predicate.NotExpr(sc, true, Precedence.LogicalNegation));
 					}
 				}
 			}

@@ -286,6 +286,24 @@ namespace Data.Linq
 		}
 
 		[Test]
+		public void Coalesce5()
+		{
+			ForEachProvider(db => Assert.AreEqual(1, (from p in db.Parent where (p.Value1 == 1 ? 10 : 20) == 10 select p).ToList().Count));
+		}
+
+		[Test]
+		public void Coalesce6()
+		{
+			ForEachProvider(db => Assert.AreEqual(4, (from p in db.Parent where (p.Value1 == 1 ? 10 : 20) == 20 select p).ToList().Count));
+		}
+
+		[Test]
+		public void Coalesce7()
+		{
+			ForEachProvider(db => Assert.AreEqual(4, (from p in db.Parent where (p.ParentID == 1 ? 10 : 20) == 20 select p).ToList().Count));
+		}
+
+		[Test]
 		public void Conditional()
 		{
 			TestOneJohn(db =>

@@ -59,5 +59,15 @@ namespace Data.Linq
 				Assert.AreEqual(3, q.ToList().Count);
 			});
 		}
+
+		[Test]
+		public void Skip()
+		{
+			ForEachProvider(db =>
+			{
+				var q = db.Child.Skip(3);
+				Assert.AreEqual(7, q.ToList().Count);
+			});
+		}
 	}
 }

@@ -5,7 +5,8 @@ namespace BLToolkit.Data.Sql
 {
 	public interface ISqlPredicate : ISqlExpressionWalkable
 	{
-		object Clone(Dictionary<object,object> objectTree);
+		object Clone    (Dictionary<object,object> objectTree);
+		bool   CanBeNull();
 		int    Precedence { get; }
 	}
 }

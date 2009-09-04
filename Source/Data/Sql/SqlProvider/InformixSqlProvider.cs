@@ -25,17 +25,16 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		{
 			if (SqlBuilder.From.Tables.Count == 0)
 			{
-				AppendIndent(sb);
-				sb.Append("SELECT FIRST 1").AppendLine();
+				AppendIndent(sb).Append("SELECT FIRST 1").AppendLine();
 				BuildColumns(sb);
-				AppendIndent(sb);
-				sb.Append("FROM SYSTABLES").AppendLine();
+				AppendIndent(sb).Append("FROM SYSTABLES").AppendLine();
 			}
 			else
 				base.BuildSelectClause(sb);
 		}
 
-		protected override string TopFormat { get { return " FIRST {0} "; } }
+		protected override string TopFormat  { get { return " FIRST {0}"; } }
+		protected override string SkipFormat { get { return " SKIP {0}";  } }
 
 		protected override void BuildLikePredicate(StringBuilder sb, SqlBuilder.Predicate.Like predicate)
 		{

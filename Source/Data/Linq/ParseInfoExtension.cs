@@ -23,7 +23,9 @@ namespace BLToolkit.Data.Linq
 		{
 			var method = pi.Expr;
 
-			if (declaringType == method.Method.DeclaringType && method.Method.Name == methodName && method.Arguments.Count == args.Length)
+			if (declaringType == method.Method.DeclaringType &&
+				(methodName == null || method.Method.Name == methodName) &&
+				method.Arguments.Count == args.Length)
 			{
 				for (var i = 0; i < args.Length; i++)
 					if (!args[i](pi.CreateArgument(i)))
@@ -47,6 +49,19 @@ namespace BLToolkit.Data.Linq
 			return IsMethod(pi, typeof(Queryable), methodName, args, p => true);
 		}
 
+		public static bool IsQueryableMethod(
+			this ParseInfo<MethodCallExpression>        pi,
+			Func<ParseInfo<Expression>,LambdaInfo,bool> lambda)
+		{
+			ParseInfo<Expression> seq = null;
+			return IsMethod(pi, typeof(Queryable), null, new FTest[]
+			{
+				p => { seq = p; return true; },
+				l => l.CheckIfLambda(1, p => lambda(seq, p))
+			}, p => true);
+		}
+
+		[Obsolete]
 		public static bool IsQueryableMethod(
 			this ParseInfo<MethodCallExpression> pi,
 			string                               methodName,
@@ -155,15 +170,14 @@ namespace BLToolkit.Data.Linq
 			Action<ParseInfo<Expression>>        seq,
 			Func<ParseInfo<Expression>,bool>     action)
 		{
-			return IsMethod(pi, typeof(Queryable), methodName, new FTest[] { p => { seq(p); return true; }, action }, p => true);
+			return IsMethod(pi, typeof(Queryable), methodName, new [] { p => { seq(p); return true; }, action }, p => true);
 		}
 
 		public static bool IsQueryableMethod(
 			this ParseInfo<MethodCallExpression> pi,
-			string                               methodName,
-			Action<ParseInfo<Expression>>        seq)
+			Func<ParseInfo<Expression>,bool>     func)
 		{
-			return IsMethod(pi, typeof(Queryable), methodName, new FTest[] { p => { seq(p); return true; } }, p => true);
+			return IsMethod(pi, typeof(Queryable), null, new [] { func }, p => true);
 		}
 
 		[Obsolete]

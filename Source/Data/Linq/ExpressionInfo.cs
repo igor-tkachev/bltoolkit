@@ -27,6 +27,7 @@ namespace BLToolkit.Data.Linq
 		public bool              PreloadData;
 
 		public Func<QueryContext,DbManager,Expression,IEnumerable<T>> GetIEnumerable;
+		public Func<QueryContext,DbManager,Expression,object>         GetElement;
 
 		private ISqlProvider _sqlProvider; 
 		public  ISqlProvider  SqlProvider
@@ -118,6 +119,15 @@ namespace BLToolkit.Data.Linq
 			Func<DbManager,Expression,int,IEnumerable<IDataReader>> query = Query;
 
 			var select = Queries[0].SqlBuilder.Select;
+
+			if (select.SkipValue != null && !SqlProvider.IsSkipSupported)
+			{
+				var q = query;
+				var n = (int)((SqlValue)select.SkipValue).Value;
+
+				if (n > 0)
+					query = (db, expr, qn) => q(db, expr, qn).Skip(n);
+			}
 
 			if (select.TakeValue != null && !SqlProvider.IsTakeSupported)
 			{
@@ -537,6 +547,21 @@ namespace BLToolkit.Data.Linq
 		public MethodInfo GetGroupingMethodInfo<TKey,TElement>()
 		{
 			return Expressor<ExpressionInfo<T>>.MethodExpressor(e => e.GetGrouping<TKey,TElement>(null, null, null, null, null, null));
+		}
+
+		#endregion
+
+		#region Element Operations
+
+		public void MakeElementOperator(ElementMethod em)
+		{
+			switch (em)
+			{
+				case ElementMethod.First           : GetElement = (ctx, db, expr) => GetIEnumerable(ctx, db, expr).First();           break;
+				case ElementMethod.FirstOrDefault  : GetElement = (ctx, db, expr) => GetIEnumerable(ctx, db, expr).FirstOrDefault();  break;
+				case ElementMethod.Single          : GetElement = (ctx, db, expr) => GetIEnumerable(ctx, db, expr).Single();          break;
+				case ElementMethod.SingleOrDefault : GetElement = (ctx, db, expr) => GetIEnumerable(ctx, db, expr).SingleOrDefault(); break;
+			}
 		}
 
 		#endregion

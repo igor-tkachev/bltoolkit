@@ -75,5 +75,17 @@ namespace Data.Linq
 					select ch)
 			);
 		}
+
+		[Test]
+		public void ConditionOrderBy()
+		{
+			ForEachProvider(db =>
+				(
+					from ch in db.Child
+					orderby ch.ParentID > 0 && ch.ChildID != ch.ParentID descending
+					select ch
+				).ToList()
+			);
+		}
 	}
 }

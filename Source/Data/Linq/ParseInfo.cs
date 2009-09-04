@@ -138,7 +138,17 @@ namespace BLToolkit.Data.Linq
 			return IsLambda<Expression>(
 				parameters.Select((_,i) => GetFParm(parameters, i)).ToArray(),
 				body => { lambda(new LambdaInfo(body, parameters)); return true; },
-				p => true);
+				_    => true);
+		}
+
+		public bool CheckIfLambda(int nparms, Func<LambdaInfo,bool> lambda)
+		{
+			var parameters = new ParseInfo<ParameterExpression>[nparms];
+
+			return IsLambda<Expression>(
+				parameters.Select((_,i) => GetFParm(parameters, i)).ToArray(),
+				body => lambda(new LambdaInfo(body, parameters)),
+				_    => true);
 		}
 
 		#endregion

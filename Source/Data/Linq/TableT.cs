@@ -121,12 +121,17 @@ namespace BLToolkit.Data.Linq
 
 		TResult IQueryProvider.Execute<TResult>(Expression expression)
 		{
-			return (TResult)Execute(_expression);
+			var info = ExpressionInfo<T>.GetExpressionInfo(
+				_dbManager != null? _dbManager.DataProvider:  DbManager.GetDataProvider(DbManager.DefaultConfiguration),
+				_dbManager != null? _dbManager.MappingSchema: Map.DefaultSchema,
+				expression);
+
+			return (TResult)info.GetElement(null, _dbManager, expression);
 		}
 
 		object IQueryProvider.Execute(Expression expression)
 		{
-			return Execute(_expression);
+			return Execute(expression);
 		}
 
 		#endregion

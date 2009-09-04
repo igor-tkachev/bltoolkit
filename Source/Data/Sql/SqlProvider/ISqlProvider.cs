@@ -15,6 +15,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		ISqlExpression ConvertExpression(ISqlExpression expression);
 		ISqlPredicate  ConvertPredicate (ISqlPredicate  predicate);
 
+		bool           IsSkipSupported { get; }
 		bool           IsTakeSupported { get; }
 
 #if FW3

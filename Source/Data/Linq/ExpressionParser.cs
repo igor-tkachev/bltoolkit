@@ -106,23 +106,57 @@ namespace BLToolkit.Data.Linq
 
 			info.ConvertTo<MethodCallExpression>().Match
 			(
-				pi => pi.IsQueryableMethod ("Select",            seq => select = ParseSequence(seq, null),  l         => select = ParseSelect     (l,        select)),
-				pi => pi.IsQueryableMethod ("Where",             seq => select = ParseSequence(seq, null),  l         => select = ParseWhere      (l,        select)),
-				pi => pi.IsQueryableMethod ("SelectMany",        seq => select = ParseSequence(seq, null),  l         => select = ParseSelectMany (l,  null, select)),
-				pi => pi.IsQueryableMethod ("SelectMany", 1, 2,  seq => select = ParseSequence(seq, null), (l1,l2)    => select = ParseSelectMany (l1, l2,   select)),
-				pi => pi.IsQueryableMethod ("Join",              seq => select = ParseSequence(seq, null), (i,l2,l3,l4) => select = ParseJoin     (i,  l2, l3, l4, select)),
-				pi => pi.IsQueryableMethod ("GroupJoin",         seq => select = ParseSequence(seq, null), (i,l2,l3,l4) => select = ParseGroupJoin(i,  l2, l3, l4, select)),
-				pi => pi.IsEnumerableMethod("DefaultIfEmpty",    seq => { select = ParseDefaultIfEmpty(parent, seq); return select != null; }),
-				pi => pi.IsQueryableMethod ("GroupBy",           seq => select = ParseSequence(seq, null),  l         => select = ParseGroupBy    (l,  null, null, select, pi.Expr.Type.GetGenericArguments()[0])),
-				pi => pi.IsQueryableMethod ("GroupBy",    1, 1,  seq => select = ParseSequence(seq, null), (l1,l2)    => select = ParseGroupBy    (l1, l2,   null, select, pi.Expr.Type.GetGenericArguments()[0])),
-				pi => pi.IsQueryableMethod ("GroupBy",    1, 2,  seq => select = ParseSequence(seq, null), (l1,l2)    => select = ParseGroupBy    (l1, null, l2,   select, null)),
-				pi => pi.IsQueryableMethod ("GroupBy", 1, 1, 2,  seq => select = ParseSequence(seq, null), (l1,l2,l3) => select = ParseGroupBy    (l1, l2,   l3,   select, null)),
-				pi => pi.IsQueryableMethod ("OrderBy",           seq => select = ParseSequence(seq, null),  l         => select = ParseOrderBy    (l, select, false, true)),
-				pi => pi.IsQueryableMethod ("OrderByDescending", seq => select = ParseSequence(seq, null),  l         => select = ParseOrderBy    (l, select, false, false)),
-				pi => pi.IsQueryableMethod ("ThenBy",            seq => select = ParseSequence(seq, null),  l         => select = ParseOrderBy    (l, select, true,  true)),
-				pi => pi.IsQueryableMethod ("ThenByDescending",  seq => select = ParseSequence(seq, null),  l         => select = ParseOrderBy    (l, select, true,  false)),
-				pi => pi.IsQueryableMethod ("Distinct",          seq => { select = ParseSequence(seq, null); CurrentSql.Select.IsDistinct = true; }),
-				pi => pi.IsQueryableMethod ("Take",              seq => select = ParseSequence(seq, null),  ex        => ParseTake(select, ex)),
+				//
+				// db.Table.Method()
+				//
+				pi => pi.IsQueryableMethod(seq =>
+				{
+					switch (pi.Expr.Method.Name)
+					{
+						case "Distinct"        : select = ParseSequence(seq, null); CurrentSql.Select.IsDistinct = true;                                                 break;
+						case "First"           : select = ParseSequence(seq, null); CurrentSql.Select.Take(1); _info.MakeElementOperator(ElementMethod.First);           break;
+						case "FirstOrDefault"  : select = ParseSequence(seq, null); CurrentSql.Select.Take(1); _info.MakeElementOperator(ElementMethod.FirstOrDefault);  break;
+						case "Single"          : select = ParseSequence(seq, null); CurrentSql.Select.Take(2); _info.MakeElementOperator(ElementMethod.Single);          break;
+						case "SingleOrDefault" : select = ParseSequence(seq, null); CurrentSql.Select.Take(2); _info.MakeElementOperator(ElementMethod.SingleOrDefault); break;
+						default                : return false;
+					}
+					return true;
+				}),
+				//
+				// db.Table.Method(l => ...)
+				//
+				pi => pi.IsQueryableMethod((seq,l) =>
+				{
+					switch (pi.Expr.Method.Name)
+					{
+						case "Select"            : select = ParseSequence(seq, null); select = ParseSelect    (l, select);               break;
+						case "Where"             : select = ParseSequence(seq, null); select = ParseWhere     (l, select);               break;
+						case "SelectMany"        : select = ParseSequence(seq, null); select = ParseSelectMany(l, null, select);         break;
+						case "OrderBy"           : select = ParseSequence(seq, null); select = ParseOrderBy   (l, select, false, true);  break;
+						case "OrderByDescending" : select = ParseSequence(seq, null); select = ParseOrderBy   (l, select, false, false); break;
+						case "ThenBy"            : select = ParseSequence(seq, null); select = ParseOrderBy   (l, select, true,  true);  break;
+						case "ThenByDescending"  : select = ParseSequence(seq, null); select = ParseOrderBy   (l, select, true,  false); break;
+						case "GroupBy"           : select = ParseSequence(seq, null); select = ParseGroupBy   (l, null, null, select, pi.Expr.Type.GetGenericArguments()[0]); break;
+						case "First"           : { select = ParseSequence(seq, null); select = ParseWhere     (l, select); CurrentSql.Select.Take(1); _info.MakeElementOperator(ElementMethod.First);           break; }
+						case "FirstOrDefault"  : { select = ParseSequence(seq, null); select = ParseWhere     (l, select); CurrentSql.Select.Take(1); _info.MakeElementOperator(ElementMethod.FirstOrDefault);  break; }
+						case "Single"          : { select = ParseSequence(seq, null); select = ParseWhere     (l, select); CurrentSql.Select.Take(2); _info.MakeElementOperator(ElementMethod.Single);          break; }
+						case "SingleOrDefault" : { select = ParseSequence(seq, null); select = ParseWhere     (l, select); CurrentSql.Select.Take(2); _info.MakeElementOperator(ElementMethod.SingleOrDefault); break; }
+						default                : return false;
+					}
+					return true;
+				}),
+				//
+				// everything else
+				//
+				pi => pi.IsQueryableMethod ("SelectMany", 1, 2, seq => select = ParseSequence(seq, null), (l1, l2)        => select = ParseSelectMany(l1, l2, select)),
+				pi => pi.IsQueryableMethod ("Join",             seq => select = ParseSequence(seq, null), (i, l2, l3, l4) => select = ParseJoin      (i,  l2, l3, l4, select)),
+				pi => pi.IsQueryableMethod ("GroupJoin",        seq => select = ParseSequence(seq, null), (i, l2, l3, l4) => select = ParseGroupJoin (i,  l2, l3, l4, select)),
+				pi => pi.IsQueryableMethod ("GroupBy",    1, 1, seq => select = ParseSequence(seq, null), (l1, l2)        => select = ParseGroupBy   (l1, l2,   null, select, pi.Expr.Type.GetGenericArguments()[0])),
+				pi => pi.IsQueryableMethod ("GroupBy",    1, 2, seq => select = ParseSequence(seq, null), (l1, l2)        => select = ParseGroupBy   (l1, null, l2,   select, null)),
+				pi => pi.IsQueryableMethod ("GroupBy", 1, 1, 2, seq => select = ParseSequence(seq, null), (l1, l2, l3)    => select = ParseGroupBy   (l1, l2,   l3,   select, null)),
+				pi => pi.IsQueryableMethod ("Take",             seq => select = ParseSequence(seq, null), ex => ParseTake(select, ex)),
+				pi => pi.IsQueryableMethod ("Skip",             seq => select = ParseSequence(seq, null), ex => ParseSkip(select, ex)),
+				pi => pi.IsEnumerableMethod("DefaultIfEmpty",   seq => { select = ParseDefaultIfEmpty(parent, seq); return select != null; }),
 				pi => pi.IsMethod(m =>
 				{
 					if (m.Expr.Method.DeclaringType == typeof(Queryable) || !TypeHelper.IsSameOrParent(typeof(IQueryable), pi.Expr.Type))
@@ -459,7 +493,26 @@ namespace BLToolkit.Data.Linq
 					throw new LinqException("Cannot order by type '{0}'", lambda.Body.Expr.Type);
 
 				foreach (var expr in exprs)
-					CurrentSql.OrderBy.Expr(expr, !ascending);
+				{
+					var e = expr;
+
+					if (e is SqlBuilder.SearchCondition)
+					{
+						if (e.CanBeNull())
+						{
+							var notExpr = new SqlBuilder.SearchCondition
+							{
+								Conditions = { new SqlBuilder.Condition(true, new SqlBuilder.Predicate.Expr(expr, expr.Precedence)) }
+							};
+
+							e = Convert(new SqlFunction("CASE", expr, new SqlValue(1), notExpr, new SqlValue(0), new SqlValue(null)));
+						}
+						else
+							e = Convert(new SqlFunction("CASE", expr, new SqlValue(1), new SqlValue(0)));
+					}
+
+					CurrentSql.OrderBy.Expr(e, !ascending);
+				}
 			}
 
 			return source;
@@ -475,7 +528,19 @@ namespace BLToolkit.Data.Linq
 				return false;
 
 			CurrentSql.Select.Take(ParseExpression(select, value));
+			return true;
+		}
 
+		#endregion
+
+		#region Parse Skip
+
+		bool ParseSkip(QuerySource select, ParseInfo<Expression> value)
+		{
+			if (value.Expr.Type != typeof(int))
+				return false;
+
+			CurrentSql.Select.Skip(ParseExpression(select, value));
 			return true;
 		}
 
