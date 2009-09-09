@@ -118,6 +118,8 @@ namespace BLToolkit.Data.Linq
 
 			Func<DbManager,Expression,int,IEnumerable<IDataReader>> query = Query;
 
+			SqlProvider.SqlBuilder = Queries[0].SqlBuilder;
+
 			var select = Queries[0].SqlBuilder.Select;
 
 			if (select.SkipValue != null && !SqlProvider.IsSkipSupported)
@@ -322,7 +324,9 @@ namespace BLToolkit.Data.Linq
 				SqlProvider.UpdateParameters(sql);
 			}
 
-			var command = SqlProvider.BuildSql(sql, new StringBuilder(), 0).ToString();
+			var sb      = new StringBuilder();
+			SqlProvider.BuildSql(sql, sb, 0, 0);
+			var command = sb.ToString();
 
 			if (!query.OriginalSql.ParameterDependent)
 				query.CommandText = command;

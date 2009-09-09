@@ -142,6 +142,7 @@
     <Compile Include="Data\Linq\SqlFunctionAttribute.cs" />
     <Compile Include="Data\Linq\TableT.cs" />
     <Compile Include="Data\Sql\ChildContainer.cs" />
+    <Compile Include="Data\Sql\SqlDataType.cs" />
     <Compile Include="Data\Sql\ISqlPredicate.cs" />
     <Compile Include="Data\Sql\Precedence.cs" />
     <Compile Include="Data\Sql\SqlBinaryExpression.cs" />

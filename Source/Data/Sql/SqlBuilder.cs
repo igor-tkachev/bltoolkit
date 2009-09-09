@@ -2045,7 +2045,7 @@ namespace BLToolkit.Data.Sql
 			string[] aliases = new string[n];
 
 			for (int i = 0; i < aliases.Length; i++)
-				aliases[i] = GetAlias(null, defaultAlias);
+				aliases[i] = GetAlias(defaultAlias, defaultAlias);
 
 			for (int i = 0; i < aliases.Length; i++)
 				RemoveAlias(aliases[i]);

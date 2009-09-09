@@ -21,7 +21,10 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		{
 		}
 
-		protected override string FetchFormat { get { return "LIMIT {0}"; } }
+		protected override string LimitFormat  { get { return "LIMIT {0}";  } }
+		protected override string OffsetFormat { get { return "OFFSET {0}"; } }
+
+		public override bool IsSkipSupported { get { return SqlBuilder.Select.TakeValue != null; } }
 
 		public override ISqlExpression ConvertExpression(ISqlExpression expr)
 		{
@@ -46,7 +49,6 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 				switch (func.Name)
 				{
-					case "Substring" : return new SqlFunction("Substr",   func.Parameters);
 					case "Space"     : return new SqlFunction("PadR",     new SqlValue(" "), func.Parameters[0]);
 					case "Left"      : return new SqlFunction("LeftStr",  func.Parameters);
 					case "Right"     : return new SqlFunction("RightStr", func.Parameters);

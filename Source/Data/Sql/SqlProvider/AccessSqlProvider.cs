@@ -21,7 +21,45 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		{
 		}
 
-		protected override string TopFormat { get { return " TOP {0} "; } }
+		#region Skip / Take Support
+
+		protected override string FirstFormat     { get { return "TOP {0}"; } }
+		public    override bool   IsSkipSupported { get { return SqlBuilder.Select.TakeValue != null; } }
+
+		protected override void BuildSql(StringBuilder sb)
+		{
+			if (NeedSkip)
+				AlternativeBuildSql2(sb, base.BuildSql);
+			else
+				base.BuildSql(sb);
+		}
+
+		protected override IEnumerable<SqlBuilder.Column> GetSelectedColumns()
+		{
+			if (NeedSkip && !SqlBuilder.OrderBy.IsEmpty)
+				return AlternativeGetSelectedColumns(base.GetSelectedColumns);
+			return base.GetSelectedColumns();
+		}
+
+		protected override void BuildSkipFirst(StringBuilder sb)
+		{
+			if (NeedSkip)
+			{
+				if (!NeedTake)
+				{
+					sb.AppendFormat(" TOP {0}", int.MaxValue);
+				}
+				else if (!SqlBuilder.OrderBy.IsEmpty)
+				{
+					sb.Append(" TOP ");
+					BuildExpression(sb, Add<int>(SqlBuilder.Select.SkipValue, SqlBuilder.Select.TakeValue));
+				}
+			}
+			else
+				base.BuildSkipFirst(sb);
+		}
+
+		#endregion
 
 		protected override bool ParenthesizeJoin()
 		{
@@ -157,7 +195,6 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 					case "CASE"      : return ConvertCase(func.Parameters, 0);
 					case "Length"    : return new SqlFunction("Len",    func.Parameters);
-					case "Substring" : return new SqlFunction("Mid",    func.Parameters);
 					case "Lower"     : return new SqlFunction("LCase",  func.Parameters);
 					case "Upper"     : return new SqlFunction("UCase",  func.Parameters);
 					case "Replicate" : return new SqlFunction("String", func.Parameters[1], func.Parameters[0]);

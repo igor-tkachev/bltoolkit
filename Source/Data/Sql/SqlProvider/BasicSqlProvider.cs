@@ -24,7 +24,8 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		private SqlBuilder _sqlBuilder;
 		public  SqlBuilder  SqlBuilder
 		{
-			get { return _sqlBuilder; }
+			get { return _sqlBuilder;  }
+			set { _sqlBuilder = value; }
 		}
 
 		private int _indent;
@@ -32,6 +33,13 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		{
 			get { return _indent;  }
 			set { _indent = value; }
+		}
+
+		private int _nextNesting = 1;
+		private int _nesting;
+		public  int  Nesting
+		{
+			get { return _nesting; }
 		}
 
 		#endregion
@@ -65,21 +73,23 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		#region BuildSql
 
-		public StringBuilder BuildSql(SqlBuilder sqlBuilder, StringBuilder sb, int indent)
+		public int BuildSql(SqlBuilder sqlBuilder, StringBuilder sb, int indent, int nesting)
 		{
-			_sqlBuilder = sqlBuilder;
-			_indent     = indent;
+			_sqlBuilder  = sqlBuilder;
+			_indent      = indent;
+			_nesting     = nesting;
+			_nextNesting = _nesting + 1;
 
 			BuildSql(sb);
 
-			return sb;
+			return _nextNesting;
 		}
 
 		#endregion
 
 		#region Overrides
 
-		protected virtual void BuildSqlBuilder(SqlBuilder sqlBuilder, StringBuilder sb, int indent)
+		protected virtual int BuildSqlBuilder(SqlBuilder sqlBuilder, StringBuilder sb, int indent, int nesting)
 		{
 			if (!IsSkipSupported && sqlBuilder.Select.SkipValue != null)
 				throw new SqlException("Skip for subqueries is not supported by the '{0}' provider.", _dataProvider.Name);
@@ -87,7 +97,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			if (!IsTakeSupported && sqlBuilder.Select.TakeValue != null)
 				throw new SqlException("Take for subqueries is not supported by the '{0}' provider.", _dataProvider.Name);
 
-			DataProvider.CreateSqlProvider().BuildSql(sqlBuilder, sb, indent);
+			return DataProvider.CreateSqlProvider().BuildSql(sqlBuilder, sb, indent, nesting);
 		}
 
 		protected virtual bool ParenthesizeJoin()
@@ -102,9 +112,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			BuildWhereClause  (sb);
 			BuildGroupByClause(sb);
 			BuildOrderByClause(sb);
-
-			if (SqlBuilder.Select.TakeValue != null)
-				BuildFetch(sb);
+			BuildOffsetLimit  (sb);
 		}
 
 		#endregion
@@ -119,14 +127,15 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			if (SqlBuilder.Select.IsDistinct)
 				sb.Append(" DISTINCT");
 
-			if (SqlBuilder.Select.SkipValue != null)
-				BuildSkip(sb);
-
-			if (SqlBuilder.Select.TakeValue != null)
-				BuildTop(sb);
+			BuildSkipFirst(sb);
 
 			sb.AppendLine();
 			BuildColumns(sb);
+		}
+
+		protected virtual IEnumerable<SqlBuilder.Column> GetSelectedColumns()
+		{
+			return _sqlBuilder.Select.Columns;
 		}
 
 		protected virtual void BuildColumns(StringBuilder sb)
@@ -135,7 +144,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 			bool first = true;
 
-			foreach (SqlBuilder.Column col in _sqlBuilder.Select.Columns)
+			foreach (SqlBuilder.Column col in GetSelectedColumns())
 			{
 				if (!first)
 					sb.Append(',').AppendLine();
@@ -221,7 +230,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			else if (table is SqlBuilder)
 			{
 				sb.Append("(").AppendLine();
-				BuildSqlBuilder((SqlBuilder)table, sb, _indent + 1);
+				_nextNesting = BuildSqlBuilder((SqlBuilder)table, sb, _indent + 1, _nextNesting);
 				AppendIndent(sb).Append(")");
 			}
 			else
@@ -357,49 +366,53 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		#endregion
 
-		#region Top/Fetch Skip
+		#region Skip/Take
 
-		public virtual bool IsTakeSupported { get { return true; } }
-		public virtual bool IsSkipSupported { get { return true; } }
+		public    virtual bool   IsTakeSupported { get { return true; } }
+		public    virtual bool   IsSkipSupported { get { return true; } }
 
-		protected virtual string TopFormat   { get { return null; } }
-		protected virtual string FetchFormat { get { return null; } }
-		protected virtual string SkipFormat  { get { return null; } }
+		protected virtual bool   SkipFirst       { get { return true; } }
+		protected virtual string SkipFormat      { get { return null; } }
+		protected virtual string FirstFormat     { get { return null; } }
+		protected virtual string LimitFormat     { get { return null; } }
+		protected virtual string OffsetFormat    { get { return null; } }
 
-		protected virtual void BuildTop(StringBuilder sb)
+		protected bool NeedSkip { get { return SqlBuilder.Select.SkipValue != null && IsSkipSupported; } }
+		protected bool NeedTake { get { return SqlBuilder.Select.TakeValue != null && IsTakeSupported; } }
+
+		protected virtual void BuildSkipFirst(StringBuilder sb)
 		{
-			string top = TopFormat;
+			if (SkipFirst && NeedSkip && SkipFormat != null)
+				sb.Append(' ').AppendFormat(SkipFormat,  BuildExpression(new StringBuilder(), SqlBuilder.Select.SkipValue));
 
-			if (top != null)
-			{
-				StringBuilder topsb = new StringBuilder();
-				BuildExpression(topsb, SqlBuilder.Select.TakeValue);
-				sb.AppendFormat(top, topsb);
-			}
+			if (NeedTake && FirstFormat != null)
+				sb.Append(' ').AppendFormat(FirstFormat, BuildExpression(new StringBuilder(), SqlBuilder.Select.TakeValue));
+
+			if (!SkipFirst && NeedSkip && SkipFormat != null)
+				sb.Append(' ').AppendFormat(SkipFormat,  BuildExpression(new StringBuilder(), SqlBuilder.Select.SkipValue));
 		}
 
-		protected virtual void BuildFetch(StringBuilder sb)
+		protected virtual void BuildOffsetLimit(StringBuilder sb)
 		{
-			string fetch = FetchFormat;
+			bool doSkip = NeedSkip && OffsetFormat != null;
+			bool doTake = NeedTake && LimitFormat  != null;
 
-			if (fetch != null)
+			if (doSkip || doTake)
 			{
-				StringBuilder fetchsb = new StringBuilder();
-				BuildExpression(fetchsb, SqlBuilder.Select.TakeValue);
-				sb.AppendFormat(fetch, fetchsb);
+				AppendIndent(sb);
+
+				if (doTake)
+				{
+					sb.AppendFormat(LimitFormat, BuildExpression(new StringBuilder(), SqlBuilder.Select.TakeValue));
+
+					if (doSkip)
+						sb.Append(' ');
+				}
+
+				if (doSkip)
+					sb.AppendFormat(OffsetFormat, BuildExpression(new StringBuilder(), SqlBuilder.Select.SkipValue));
+
 				sb.AppendLine();
-			}
-		}
-
-		protected virtual void BuildSkip(StringBuilder sb)
-		{
-			string skip = SkipFormat;
-
-			if (skip != null)
-			{
-				StringBuilder skipsb = new StringBuilder();
-				BuildExpression(skipsb, SqlBuilder.Select.SkipValue);
-				sb.AppendFormat(skip, skipsb);
 			}
 		}
 
@@ -604,7 +617,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		#region BuildExpression
 
-		protected virtual void BuildExpression(StringBuilder sb, ISqlExpression expr, string alias, ref bool addAlias)
+		protected virtual StringBuilder BuildExpression(StringBuilder sb, ISqlExpression expr, string alias, ref bool addAlias)
 		{
 			expr = ConvertExpression(expr);
 
@@ -652,7 +665,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			else if (expr is SqlBuilder)
 			{
 				sb.Append("(").AppendLine();
-				BuildSqlBuilder((SqlBuilder)expr, sb, _indent + 1);
+				_nextNesting = BuildSqlBuilder((SqlBuilder)expr, sb, _indent + 1, _nextNesting);
 				AppendIndent(sb).Append(")");
 			}
 			else if (expr is SqlValue)
@@ -695,6 +708,10 @@ namespace BLToolkit.Data.Sql.SqlProvider
 				SqlParameter parm = (SqlParameter)expr;
 				sb.Append(_dataProvider.Convert(parm.Name, ConvertType.NameToQueryParameter));
 			}
+			else if (expr is SqlDataType)
+			{
+				BuildDataType(sb, (SqlDataType)expr);
+			}
 			else if (expr is SqlBuilder.SearchCondition)
 			{
 				BuildSearchCondition(sb, expr.Precedence, (SqlBuilder.SearchCondition)expr);
@@ -703,6 +720,8 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			{
 				throw new InvalidOperationException();
 			}
+
+			return sb;
 		}
 
 		protected void BuildExpression(StringBuilder sb, int parentPrecedence, ISqlExpression expr, string alias, ref bool addAlias)
@@ -714,10 +733,10 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			if (wrap) sb.Append(')');
 		}
 
-		protected virtual void BuildExpression(StringBuilder sb, ISqlExpression expr)
+		protected virtual StringBuilder BuildExpression(StringBuilder sb, ISqlExpression expr)
 		{
 			bool dummy = false;
-			BuildExpression(sb, expr, null, ref dummy);
+			return BuildExpression(sb, expr, null, ref dummy);
 		}
 
 		protected void BuildExpression(StringBuilder sb, int precedence, ISqlExpression expr)
@@ -810,6 +829,15 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		#endregion
 
+		#region BuildDataType
+	
+		protected virtual void BuildDataType(StringBuilder sb, SqlDataType type)
+		{
+
+		}
+	
+		#endregion
+
 		#region GetPrecedence
 
 		protected virtual int GetPrecedence(ISqlExpression expr)
@@ -828,7 +856,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		#region Alternative Builders
 
-		protected virtual void BuildAliases(StringBuilder sb, string table, List<SqlBuilder.Column> columns)
+		protected virtual void BuildAliases(StringBuilder sb, string table, List<SqlBuilder.Column> columns, string postfix)
 		{
 			_indent++;
 
@@ -841,6 +869,9 @@ namespace BLToolkit.Data.Sql.SqlProvider
 				first = false;
 
 				AppendIndent(sb).AppendFormat("{0}.{1}", table, DataProvider.Convert(col.Alias, ConvertType.NameToQueryFieldAlias));
+
+				if (postfix != null)
+					sb.Append(postfix);
 			}
 
 			_indent--;
@@ -848,48 +879,193 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			sb.AppendLine();
 		}
 
-		protected void AlternativeBuildSql(StringBuilder sb, Action<StringBuilder> buildSql)
+		protected void AlternativeBuildSql(StringBuilder sb, bool implementOrderBy, Action<StringBuilder> buildSql)
 		{
-			if (SqlBuilder.Select.SkipValue != null)
+			if (NeedSkip)
 			{
-				string[] aliases = SqlBuilder.GetTempAliases(2, "t");
+				string[] aliases = GetTempAliases(2, "t");
+				string  rnaliase = GetTempAliases(1, "rn")[0];
 
-				AppendIndent(sb).Append("SELECT * FROM (").AppendLine();
+				AppendIndent(sb).Append("SELECT *").AppendLine();
+				AppendIndent(sb).Append("FROM").    AppendLine();
+				AppendIndent(sb).Append("(").       AppendLine();
 				_indent++;
 
-				AppendIndent(sb).AppendFormat("SELECT {0}.*, ROW_NUMBER() OVER(ORDER BY", aliases[0]).AppendLine();
+				AppendIndent(sb).Append("SELECT").AppendLine();
 
 				_indent++;
-				BuildAliases(sb, aliases[0], SqlBuilder.Select.Columns);
-				AppendIndent(sb).Append(") as row_number").AppendLine();
+				AppendIndent(sb).AppendFormat("{0}.*,", aliases[0]).AppendLine();
+				AppendIndent(sb).Append("ROW_NUMBER() OVER");
+
+				if (!SqlBuilder.OrderBy.IsEmpty && !implementOrderBy)
+					sb.Append("()");
+				else
+				{
+					sb.AppendLine();
+					AppendIndent(sb).Append("(").AppendLine();
+
+					_indent++;
+
+					if (SqlBuilder.OrderBy.IsEmpty)
+					{
+						AppendIndent(sb).Append("ORDER BY").AppendLine();
+						BuildAliases(sb, aliases[0], SqlBuilder.Select.Columns, null);
+					}
+					else
+						BuildAlternativeOrderBy(sb, true);
+
+					_indent--;
+					AppendIndent(sb).Append(")");
+				}
+
+				sb.AppendFormat(" as {0}", rnaliase).AppendLine();
 				_indent--;
 
-				AppendIndent(sb).Append("FROM (").AppendLine();
+				AppendIndent(sb).Append("FROM").AppendLine();
+				AppendIndent(sb).Append("(").AppendLine();
 
 				_indent++;
 				buildSql(sb);
 				_indent--;
 
-				AppendIndent(sb).AppendFormat(") as {0}", aliases[0]).AppendLine();
+				AppendIndent(sb).AppendFormat(") {0}", aliases[0]).AppendLine();
 
 				_indent--;
 
-				AppendIndent(sb).AppendFormat(") as {0}", aliases[1]).AppendLine();
-				AppendIndent(sb).Append("WHERE ");
+				AppendIndent(sb).AppendFormat(") {0}", aliases[1]).AppendLine();
+				AppendIndent(sb).Append("WHERE").AppendLine();
 
-				if (SqlBuilder.Select.TakeValue == null)
+				_indent++;
+
+				if (NeedTake)
 				{
-					sb.AppendFormat("{0}.row_number > ", aliases[1]);
+					AppendIndent(sb).AppendFormat("{0}.{1} BETWEEN ", aliases[1], rnaliase);
+					BuildExpression(sb, Add(SqlBuilder.Select.SkipValue, 1));
+					sb.Append(" AND ");
+					BuildExpression(sb, Add<int>(SqlBuilder.Select.SkipValue, SqlBuilder.Select.TakeValue));
+				}
+				else
+				{
+					AppendIndent(sb).AppendFormat("{0}.{1} > ", aliases[1], rnaliase);
 					BuildExpression(sb, SqlBuilder.Select.SkipValue);
 				}
 
 				sb.AppendLine();
+				_indent--;
 
-				AppendIndent(sb).AppendFormat("ORDER BY {0}.row_number", aliases[1]); sb.AppendLine();
+				//AppendIndent(sb).Append("ORDER BY").AppendLine();
+				//_indent++;
+				//AppendIndent(sb).AppendFormat("{0}.{1}", aliases[1], rnaliase).AppendLine();
+				//_indent--;
 			}
 			else
 				buildSql(sb);
 		}
+
+		protected void AlternativeBuildSql2(StringBuilder sb, Action<StringBuilder> buildSql)
+		{
+			string[] aliases = GetTempAliases(3, "t");
+
+			AppendIndent(sb).Append("SELECT *").AppendLine();
+			AppendIndent(sb).Append("FROM")    .AppendLine();
+			AppendIndent(sb).Append("(")       .AppendLine();
+			_indent++;
+
+			AppendIndent(sb).Append("SELECT TOP ");
+			BuildExpression(sb, SqlBuilder.Select.TakeValue);
+			sb.Append(" *").AppendLine();
+			AppendIndent(sb).Append("FROM").AppendLine();
+			AppendIndent(sb).Append("(")   .AppendLine();
+			_indent++;
+
+			if (SqlBuilder.OrderBy.IsEmpty)
+			{
+				AppendIndent(sb).Append("SELECT TOP ");
+				BuildExpression(sb, Add<int>(SqlBuilder.Select.SkipValue, SqlBuilder.Select.TakeValue));
+				sb.Append(" *").AppendLine();
+				AppendIndent(sb).Append("FROM").AppendLine();
+				AppendIndent(sb).Append("(")   .AppendLine();
+				_indent++;
+			}
+
+			buildSql(sb);
+
+			if (SqlBuilder.OrderBy.IsEmpty)
+			{
+				_indent--;
+				AppendIndent(sb).AppendFormat(") {0}", aliases[2]).AppendLine();
+				AppendIndent(sb).Append("ORDER BY").AppendLine();
+				BuildAliases(sb, aliases[2], SqlBuilder.Select.Columns, null);
+			}
+
+			_indent--;
+			AppendIndent(sb).AppendFormat(") {0}", aliases[1]).AppendLine();
+
+			if (SqlBuilder.OrderBy.IsEmpty)
+			{
+				AppendIndent(sb).Append("ORDER BY").AppendLine();
+				BuildAliases(sb, aliases[1], SqlBuilder.Select.Columns, " DESC");
+			}
+			else
+			{
+				BuildAlternativeOrderBy(sb, false);
+			}
+
+			_indent--;
+			AppendIndent(sb).AppendFormat(") {0}", aliases[0]).AppendLine();
+
+			if (SqlBuilder.OrderBy.IsEmpty)
+			{
+				AppendIndent(sb).Append("ORDER BY").AppendLine();
+				BuildAliases(sb, aliases[0], SqlBuilder.Select.Columns, null);
+			}
+			else
+			{
+				BuildAlternativeOrderBy(sb, true);
+			}
+		}
+
+		protected void BuildAlternativeOrderBy(StringBuilder sb, bool ascending)
+		{
+			AppendIndent(sb).Append("ORDER BY").AppendLine();
+
+			string[] obys = GetTempAliases(SqlBuilder.OrderBy.Items.Count, "oby");
+
+			_indent++;
+
+			for (int i = 0; i < obys.Length; i++)
+			{
+				AppendIndent(sb).Append(obys[i]);
+
+				if ( ascending &&  SqlBuilder.OrderBy.Items[i].IsDescending ||
+					!ascending && !SqlBuilder.OrderBy.Items[i].IsDescending)
+					sb.Append(" DESC");
+
+				if (i + 1 < obys.Length)
+					sb.Append(',');
+
+				sb.AppendLine();
+			}
+
+			_indent--;
+		}
+
+#pragma warning disable 1911
+
+		protected delegate IEnumerable<SqlBuilder.Column> ColumnSelector();
+
+		protected IEnumerable<SqlBuilder.Column> AlternativeGetSelectedColumns(ColumnSelector columnSelector)
+		{
+			foreach (SqlBuilder.Column col in columnSelector())
+				yield return col;
+
+			string[] obys = GetTempAliases(SqlBuilder.OrderBy.Items.Count, "oby");
+
+			for (int i = 0; i < obys.Length; i++)
+				yield return new SqlBuilder.Column(SqlBuilder, SqlBuilder.OrderBy.Items[i].Expression, obys[i]);
+		}
+
+#pragma warning restore 1911
 
 		#endregion
 
@@ -901,6 +1077,11 @@ namespace BLToolkit.Data.Sql.SqlProvider
 				precedence == 0 ||
 				precedence < parentPrecedence ||
 				(precedence == parentPrecedence && parentPrecedence == Precedence.Subtraction); 
+		}
+
+		protected string[] GetTempAliases(int n, string defaultAlias)
+		{
+			return SqlBuilder.GetTempAliases(n, defaultAlias + (Nesting == 0? "": "n" + Nesting.ToString()));
 		}
 
 		static string GetTableAlias(ISqlTableSource table)
@@ -1300,6 +1481,11 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			}
 
 			throw new InvalidOperationException();
+		}
+
+		public virtual string Name
+		{
+			get { return GetType().Name.Replace("SqlProvider", ""); }
 		}
 
 		#endregion

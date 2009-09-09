@@ -253,3 +253,12 @@ CREATE TABLE Child      (ParentID int, ChildID int)
 GO
 CREATE TABLE GrandChild (ParentID int, ChildID int, GrandChildID int)
 GO
+DROP TABLE LinqDataTypes
+GO
+
+CREATE TABLE LinqDataTypes
+(
+	ID         int,
+	MoneyValue decimal(10,4)
+)
+GO

@@ -10,17 +10,18 @@ namespace BLToolkit.Data.Sql.SqlProvider
 {
 	public interface ISqlProvider
 	{
-		StringBuilder  BuildSql         (SqlBuilder sqlBuilder, StringBuilder sb, int indent);
+		int            BuildSql         (SqlBuilder sqlBuilder, StringBuilder sb, int indent, int nesting);
 		void           UpdateParameters (SqlBuilder sql);
 		ISqlExpression ConvertExpression(ISqlExpression expression);
 		ISqlPredicate  ConvertPredicate (ISqlPredicate  predicate);
 
+		SqlBuilder     SqlBuilder      { get; set; }
 		bool           IsSkipSupported { get; }
 		bool           IsTakeSupported { get; }
+		string         Name            { get; }
 
 #if FW3
 		Expression     ConvertMember    (MemberInfo mi);
 #endif
-
 	}
 }

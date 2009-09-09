@@ -25,11 +25,9 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		{
 			if (SqlBuilder.From.Tables.Count == 0)
 			{
-				AppendIndent(sb);
-				sb.Append("SELECT").AppendLine();
+				AppendIndent(sb).Append("SELECT").AppendLine();
 				BuildColumns(sb);
-				AppendIndent(sb);
-				sb.Append("FROM SYS.DUAL").AppendLine();
+				AppendIndent(sb).Append("FROM SYS.DUAL").AppendLine();
 			}
 			else
 				base.BuildSelectClause(sb);
@@ -37,16 +35,32 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		protected override bool BuildWhere()
 		{
-			return (base.BuildWhere() || SqlBuilder.Select.TakeValue != null) && SqlBuilder.OrderBy.IsEmpty && SqlBuilder.Having.IsEmpty;
+			return base.BuildWhere() || !NeedSkip && NeedTake && SqlBuilder.OrderBy.IsEmpty && SqlBuilder.Having. IsEmpty;
 		}
+
+		string _rowNumberAlias;
 
 		protected override void BuildSql(StringBuilder sb)
 		{
-			bool buildRowNum = SqlBuilder.Select.TakeValue != null && (!SqlBuilder.OrderBy.IsEmpty || !SqlBuilder.Having.IsEmpty);
+			bool buildRowNum = NeedSkip || NeedTake && (!SqlBuilder.OrderBy.IsEmpty || !SqlBuilder.Having.IsEmpty);
+
+			string[] aliases = null;
 
 			if (buildRowNum)
 			{
-				AppendIndent(sb).Append("SELECT * FROM (").AppendLine();
+				aliases = GetTempAliases(2, "t");
+
+				if (_rowNumberAlias == null)
+					_rowNumberAlias = GetTempAliases(1, "rn")[0];
+
+				AppendIndent(sb).AppendFormat("SELECT {0}.*", aliases[1]).AppendLine();
+				AppendIndent(sb).Append("FROM").    AppendLine();
+				AppendIndent(sb).Append("(").       AppendLine();
+				Indent++;
+
+				AppendIndent(sb).AppendFormat("SELECT {0}.*, ROWNUM as {1}", aliases[0], _rowNumberAlias).AppendLine();
+				AppendIndent(sb).Append("FROM").    AppendLine();
+				AppendIndent(sb).Append("(").       AppendLine();
 				Indent++;
 			}
 
@@ -54,16 +68,32 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 			if (buildRowNum)
 			{
-				string alias = SqlBuilder.GetTempAliases(1, "t")[0];
-
 				Indent--;
-
-				AppendIndent(sb).Append(") ").Append(alias).AppendLine();
+				AppendIndent(sb).Append(") ").Append(aliases[0]).AppendLine();
+				Indent--;
+				AppendIndent(sb).Append(") ").Append(aliases[1]).AppendLine();
 				AppendIndent(sb).Append("WHERE").AppendLine();
 
 				Indent++;
-				AppendIndent(sb).Append("rownum <= ");
-				BuildExpression(sb, Precedence.Comparison, SqlBuilder.Select.TakeValue);
+
+				if (NeedTake && NeedSkip)
+				{
+					AppendIndent(sb).AppendFormat("{0}.{1} BETWEEN ", aliases[1], _rowNumberAlias);
+					BuildExpression(sb, Add(SqlBuilder.Select.SkipValue, 1));
+					sb.Append(" AND ");
+					BuildExpression(sb, Add<int>(SqlBuilder.Select.SkipValue, SqlBuilder.Select.TakeValue));
+				}
+				else if (NeedTake)
+				{
+					AppendIndent(sb).AppendFormat("{0}.{1} <= ", aliases[1], _rowNumberAlias);
+					BuildExpression(sb, Precedence.Comparison, SqlBuilder.Select.TakeValue);
+				}
+				else
+				{
+					AppendIndent(sb).AppendFormat("{0}.{1} > ", aliases[1], _rowNumberAlias);
+					BuildExpression(sb, Precedence.Comparison, SqlBuilder.Select.SkipValue);
+				}
+
 				sb.AppendLine();
 				Indent--;
 			}
@@ -71,13 +101,13 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		protected override void BuildWhereSearchCondition(StringBuilder sb, SqlBuilder.SearchCondition condition)
 		{
-			if (SqlBuilder.Select.TakeValue != null && SqlBuilder.OrderBy.IsEmpty && SqlBuilder.Having.IsEmpty)
+			if (NeedTake && !NeedSkip && SqlBuilder.OrderBy.IsEmpty && SqlBuilder.Having.IsEmpty)
 			{
 				BuildPredicate(
 					sb,
 					Precedence.LogicalConjunction,
 					new SqlBuilder.Predicate.ExprExpr(
-						new SqlExpression("rownum", Precedence.Primary),
+						new SqlExpression("ROWNUM", Precedence.Primary),
 						SqlBuilder.Predicate.Operator.LessOrEqual,
 						SqlBuilder.Select.TakeValue));
 
@@ -124,7 +154,6 @@ namespace BLToolkit.Data.Sql.SqlProvider
 				switch (func.Name)
 				{
 					case "Coalesce"  : return new SqlFunction("Nvl",    func.Parameters);
-					case "Substring" : return new SqlFunction("Substr", func.Parameters);
 					case "CharIndex" :
 						return func.Parameters.Length == 2?
 							new SqlFunction("InStr", func.Parameters[1], func.Parameters[0]):

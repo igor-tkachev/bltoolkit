@@ -48,6 +48,13 @@ namespace Create
 			if (exception != null)
 				throw exception;
 
+			new SqlQuery<LinqDataTypes>().Insert(db, new[]
+			{
+				new LinqDataTypes { ID = 1, MoneyValue = 1.11m },
+				new LinqDataTypes { ID = 2, MoneyValue = 2.22m },
+				new LinqDataTypes { ID = 3, MoneyValue = 3.33m },
+			});
+
 			new SqlQuery<Parent>().Insert(db, new[]
 			{
 				new Parent { ParentID = 1, Value1 = 1    },

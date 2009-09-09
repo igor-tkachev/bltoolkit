@@ -4,7 +4,7 @@
 
 * Informix
 | SELECT x | db.Select(() => x) | #sql SELECT FIRST 1 x\nFROM SYSTABLES
-| TAKE x   | query.Take(x)         | #sql SELECT FIRST x
+| TAKE x   | query.Take(x)      | #sql SELECT FIRST x
 
 * Oracle
 | SELECT x | db.Select(() => x) | #sql SELECT x \nFROM SYS.DUAL

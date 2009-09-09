@@ -3,7 +3,7 @@
 namespace BLToolkit.Data.Linq
 {
 	[SerializableAttribute]
-	[AttributeUsageAttribute(AttributeTargets.Property, AllowMultiple = false, Inherited = false)]
+	[AttributeUsageAttribute(AttributeTargets.Property, AllowMultiple = true, Inherited = false)]
 	public class SqlPropertyAttribute : SqlFunctionAttribute
 	{
 		public SqlPropertyAttribute()
@@ -12,6 +12,11 @@ namespace BLToolkit.Data.Linq
 
 		public SqlPropertyAttribute(string name)
 			: base(name)
+		{
+		}
+
+		public SqlPropertyAttribute(string sqlProvider, string name)
+			: base(sqlProvider, name)
 		{
 		}
 	}

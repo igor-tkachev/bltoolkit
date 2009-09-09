@@ -530,3 +530,13 @@ DROP TABLE GrandChild COMMIT;
 CREATE TABLE Parent      (ParentID int, Value1 int)                    COMMIT;
 CREATE TABLE Child       (ParentID int, ChildID int)                   COMMIT;
 CREATE TABLE GrandChild  (ParentID int, ChildID int, GrandChildID int) COMMIT;
+
+
+DROP TABLE LinqDataTypes COMMIT;
+
+CREATE TABLE LinqDataTypes
+(
+	ID         int,
+	MoneyValue decimal(10,4)
+)
+COMMIT;

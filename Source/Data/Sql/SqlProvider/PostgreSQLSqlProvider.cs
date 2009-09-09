@@ -21,7 +21,8 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		{
 		}
 
-		protected override string FetchFormat { get { return "LIMIT {0}"; } }
+		protected override string LimitFormat  { get { return "LIMIT {0}"; } }
+		protected override string OffsetFormat { get { return "OFFSET {0} "; } }
 
 		public override ISqlExpression ConvertExpression(ISqlExpression expr)
 		{

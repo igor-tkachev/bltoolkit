@@ -33,8 +33,8 @@ namespace BLToolkit.Data.Sql.SqlProvider
 				base.BuildSelectClause(sb);
 		}
 
-		protected override string TopFormat  { get { return " FIRST {0}"; } }
-		protected override string SkipFormat { get { return " SKIP {0}";  } }
+		protected override string FirstFormat { get { return "FIRST {0}"; } }
+		protected override string SkipFormat  { get { return "SKIP {0}";  } }
 
 		protected override void BuildLikePredicate(StringBuilder sb, SqlBuilder.Predicate.Like predicate)
 		{
@@ -78,7 +78,6 @@ namespace BLToolkit.Data.Sql.SqlProvider
 				switch (func.Name)
 				{
 					case "Coalesce"  : return new SqlFunction("Nvl",    func.Parameters);
-					case "Substring" : return new SqlFunction("Substr", func.Parameters);
 				}
 			}
 			else if (expr is SqlExpression)

@@ -1950,7 +1950,9 @@ namespace BLToolkit.Data
 
 		public DbManager SetCommand(SqlBuilder sql, params IDbDataParameter[] commandParameters)
 		{
-			string command = DataProvider.CreateSqlProvider().BuildSql(sql, new StringBuilder(), 0).ToString();
+			StringBuilder sb      = new StringBuilder();
+			DataProvider.CreateSqlProvider().BuildSql(sql, sb, 0, 0);
+			string        command = sb.ToString();
 
 #if DEBUG
 			string info = string.Format("{0} {1}\n{2}", DataProvider.Name, ConfigurationString, command);

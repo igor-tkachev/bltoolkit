@@ -36,7 +36,8 @@ namespace BLToolkit.Data.Sql
 			Name = _mappingSchema.MetadataProvider.GetTableName(objectType, _mappingSchema.Extensions, out isSet);
 
 			foreach (MemberMapper mm in MappingSchema.GetObjectMapper(objectType))
-				Fields.Add(new SqlField(mm.MemberName, mm.Name, mm.MapMemberInfo.Nullable));
+				if (mm.MapMemberInfo.SqlIgnore == false)
+					Fields.Add(new SqlField(mm.MemberName, mm.Name, mm.MapMemberInfo.Nullable));
 		}
 
 		public SqlTable(Type objectType)

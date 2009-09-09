@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Reflection;
+using System.Text;
 
 namespace BLToolkit.Data.Sql.SqlProvider
 {
@@ -20,7 +21,32 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		{
 		}
 
-		protected override string TopFormat { get { return " TOP {0} "; } }
+		protected override string FirstFormat
+		{
+			get { return SqlBuilder.Select.SkipValue == null ? "TOP {0}" : null; }
+		}
+
+		protected override void BuildSql(StringBuilder sb)
+		{
+			AlternativeBuildSql(sb, true, base.BuildSql);
+		}
+
+		protected override void BuildOrderByClause(StringBuilder sb)
+		{
+			if (!NeedSkip)
+				base.BuildOrderByClause(sb);
+		}
+
+#pragma warning disable 1911
+
+		protected override IEnumerable<SqlBuilder.Column> GetSelectedColumns()
+		{
+			if (NeedSkip && !SqlBuilder.OrderBy.IsEmpty)
+				return AlternativeGetSelectedColumns(base.GetSelectedColumns);
+			return base.GetSelectedColumns();
+		}
+
+#pragma warning restore 1911
 
 		public override ISqlExpression ConvertExpression(ISqlExpression expr)
 		{

@@ -21,7 +21,24 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		{
 		}
 
-		protected override string FetchFormat { get { return "LIMIT {0}"; } }
+		protected override string LimitFormat { get { return "LIMIT {0}"; } }
+
+		protected override void BuildOffsetLimit(StringBuilder sb)
+		{
+			if (SqlBuilder.Select.SkipValue == null)
+				base.BuildOffsetLimit(sb);
+			else
+			{
+				AppendIndent(sb).AppendFormat
+				(
+					SqlBuilder.Select.SkipValue != null ? "LIMIT {0},{1}" : "LIMIT {1}",
+					BuildExpression(new StringBuilder(), SqlBuilder.Select.SkipValue),
+					SqlBuilder.Select.TakeValue == null?
+						long.MaxValue.ToString():
+						BuildExpression(new StringBuilder(), SqlBuilder.Select.TakeValue).ToString()
+				).AppendLine();
+			}
+		}
 
 		public override ISqlExpression ConvertExpression(ISqlExpression expr)
 		{

@@ -409,13 +409,7 @@ namespace BLToolkit.Data.Linq
 			SetAlias(select, l.Parameters[0].Expr.Name);
 
 			if (CheckForSubQuery(select, l.Body))
-			{
-				var subQuery = new QuerySource.SubQuery(new SqlBuilder(), CurrentSql, select);
-
-				CurrentSql = subQuery.SqlBuilder;
-
-				select = subQuery;
-			}
+				select = WrapInSubQuery(select);
 
 			ParseSearchCondition(CurrentSql.Where.SearchCondition.Conditions, select, l.Body);
 
@@ -480,6 +474,9 @@ namespace BLToolkit.Data.Linq
 		{
 			CheckExplicitCtor(lambda.Body);
 
+			if (CurrentSql.Select.TakeValue != null || CurrentSql.Select.SkipValue != null)
+				source = WrapInSubQuery(source);
+
 			var order = ParseSelect(lambda, source);
 
 			if (!isThen)
@@ -528,6 +525,13 @@ namespace BLToolkit.Data.Linq
 				return false;
 
 			CurrentSql.Select.Take(ParseExpression(select, value));
+
+			_info.SqlProvider.SqlBuilder = CurrentSql;
+
+			if (CurrentSql.Select.SkipValue != null && _info.SqlProvider.IsTakeSupported && !_info.SqlProvider.IsSkipSupported)
+				CurrentSql.Select.Take(Convert(
+					new SqlBinaryExpression(CurrentSql.Select.SkipValue, "+", CurrentSql.Select.TakeValue, typeof(int), Precedence.Additive)));
+
 			return true;
 		}
 
@@ -540,7 +544,23 @@ namespace BLToolkit.Data.Linq
 			if (value.Expr.Type != typeof(int))
 				return false;
 
+			var prevSkipValue = CurrentSql.Select.SkipValue;
+
 			CurrentSql.Select.Skip(ParseExpression(select, value));
+
+			_info.SqlProvider.SqlBuilder = CurrentSql;
+
+			if (CurrentSql.Select.TakeValue != null)
+			{
+				if (_info.SqlProvider.IsSkipSupported || !_info.SqlProvider.IsTakeSupported)
+					CurrentSql.Select.Take(Convert(
+						new SqlBinaryExpression(CurrentSql.Select.TakeValue, "-", CurrentSql.Select.SkipValue, typeof (int), Precedence.Additive)));
+
+				if (prevSkipValue != null)
+					CurrentSql.Select.Skip(Convert(
+						new SqlBinaryExpression(prevSkipValue, "+", CurrentSql.Select.SkipValue, typeof (int), Precedence.Additive)));
+			}
+
 			return true;
 		}
 
@@ -1259,11 +1279,12 @@ namespace BLToolkit.Data.Linq
 					{
 						var pi = parseInfo.Convert<UnaryExpression>();
 						var e  = parseInfo.Expr as UnaryExpression;
+						var o  = ParseExpression(query, pi.Create(e.Operand, pi.Property(Unary.Operand)));
 
 						if (e.Method == null && e.IsLifted)
-							return ParseExpression(query, pi.Create(e.Operand, pi.Property(Unary.Operand)));
+							return o;
 
-						break;
+						return Convert(new SqlFunction("Convert", new SqlDataType(e.Type), o));
 					}
 
 				case ExpressionType.Conditional:
@@ -1390,12 +1411,10 @@ namespace BLToolkit.Data.Linq
 							return ParseExpression(query, pie);
 						}
 
-						var attrs = e.Method.GetCustomAttributes(typeof(SqlFunctionAttribute), true);
+						var attr = GetFunctionAttribute(e.Method);
 
-						if (attrs.Length > 0)
+						if (attr != null)
 						{
-							var attr = (SqlFunctionAttribute)attrs[0];
-
 							if (attr is SqlPropertyAttribute)
 								return Convert(new SqlExpression(attr.Name ?? e.Method.Name));
 
@@ -1439,9 +1458,9 @@ namespace BLToolkit.Data.Linq
 								break;
 							}
 
-							var attrs = ma.Member.GetCustomAttributes(typeof(SqlFunctionAttribute), true);
+							var attr = GetFunctionAttribute(ma.Member);
 
-							isServerSideOnly = attrs.Length > 0 && ((SqlFunctionAttribute)attrs[0]).ServerSideOnly;
+							isServerSideOnly = attr != null && attr.ServerSideOnly;
 						}
 
 						break;
@@ -1457,9 +1476,9 @@ namespace BLToolkit.Data.Linq
 								break;
 							}
 
-							var attrs = e.Method.GetCustomAttributes(typeof(SqlFunctionAttribute), true);
+							var attr = GetFunctionAttribute(e.Method);
 
-							isServerSideOnly = attrs.Length > 0 && ((SqlFunctionAttribute)attrs[0]).ServerSideOnly;
+							isServerSideOnly = attr != null && attr.ServerSideOnly;
 						}
 
 						break;
@@ -1471,7 +1490,7 @@ namespace BLToolkit.Data.Linq
 			return isServerSideOnly;
 		}
 
-		static bool CanBeConstant(ParseInfo expr)
+		bool CanBeConstant(ParseInfo expr)
 		{
 			var canbe = true;
 
@@ -1511,9 +1530,9 @@ namespace BLToolkit.Data.Linq
 							if (IsConstant(mc.Method.DeclaringType) || mc.Method.DeclaringType == typeof(object))
 								return pi;
 
-							var attrs = mc.Method.GetCustomAttributes(typeof(SqlFunctionAttribute), true);
+							var attr = GetFunctionAttribute(mc.Method);
 
-							if (attrs.Length > 0 && !((SqlFunctionAttribute)attrs[0]).ServerSideOnly)
+							if (attr != null && !attr.ServerSideOnly)
 								return pi;
 
 							break;
@@ -1547,19 +1566,19 @@ namespace BLToolkit.Data.Linq
 
 						case ExpressionType.MemberAccess:
 							{
-								var ma    = (MemberExpression)pi.Expr;
-								var attrs = ma.Member.GetCustomAttributes(typeof(SqlFunctionAttribute), true);
+								var ma   = (MemberExpression)pi.Expr;
+								var attr = GetFunctionAttribute(ma.Member);
 
-								canbe = attrs.Length == 0  || !((SqlFunctionAttribute)attrs[0]).ServerSideOnly;
+								canbe = attr == null  || !attr.ServerSideOnly;
 								break;
 							}
 
 						case ExpressionType.Call:
 							{
-								var mc    = (MethodCallExpression)pi.Expr;
-								var attrs = mc.Method.GetCustomAttributes(typeof(SqlFunctionAttribute), true);
+								var mc   = (MethodCallExpression)pi.Expr;
+								var attr = GetFunctionAttribute(mc.Method);
 
-								canbe = attrs.Length == 0  || !((SqlFunctionAttribute)attrs[0]).ServerSideOnly;
+								canbe = attr == null  || !attr.ServerSideOnly;
 								break;
 							}
 					}
@@ -1817,6 +1836,41 @@ namespace BLToolkit.Data.Linq
 
 			var predicate = ParsePredicate(query, parseInfo);
 			conditions.Add(new SqlBuilder.Condition(false, predicate));
+		}
+
+		#endregion
+
+		#region Helpers
+
+		QuerySource WrapInSubQuery(QuerySource source)
+		{
+			source = new QuerySource.SubQuery(new SqlBuilder(), source.SqlBuilder, source);
+			CurrentSql = source.SqlBuilder;
+			return source;
+		}
+
+		SqlFunctionAttribute GetFunctionAttribute(ICustomAttributeProvider member)
+		{
+			var attrs = member.GetCustomAttributes(typeof(SqlFunctionAttribute), true);
+
+			if (attrs.Length == 0)
+				return null;
+
+			SqlFunctionAttribute attr = null;
+
+			foreach (SqlFunctionAttribute a in attrs)
+			{
+				if (a.SqlProvider == _info.SqlProvider.Name)
+				{
+					attr = a;
+					break;
+				}
+
+				if (a.SqlProvider == null)
+					attr = a;
+			}
+
+			return attr;
 		}
 
 		#endregion

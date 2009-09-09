@@ -14,6 +14,11 @@ namespace BLToolkit.Data.Linq
 		}
 
 		[SqlFunction]
+		[SqlFunction("Access",   "Mid")]
+		[SqlFunction("DB2",      "Substr")]
+		[SqlFunction("Informix", "Substr")]
+		[SqlFunction("Oracle",   "Substr")]
+		[SqlFunction("SQLite",   "Substr")]
 		public static string Substring(string str, int startIndex, int length)
 		{
 			return str.Substring(startIndex, length);

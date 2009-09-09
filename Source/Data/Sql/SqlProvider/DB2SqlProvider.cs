@@ -23,7 +23,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		protected override void BuildSql(StringBuilder sb)
 		{
-			AlternativeBuildSql(sb, base.BuildSql);
+			AlternativeBuildSql(sb, false, base.BuildSql);
 		}
 
 		protected override void BuildSelectClause(StringBuilder sb)
@@ -38,9 +38,9 @@ namespace BLToolkit.Data.Sql.SqlProvider
 				base.BuildSelectClause(sb);
 		}
 
-		protected override string FetchFormat
+		protected override string LimitFormat
 		{
-			get { return SqlBuilder.Select.SkipValue == null ? "FETCH FIRST {0} ROWS ONLY" : base.FetchFormat; }
+			get { return SqlBuilder.Select.SkipValue == null ? "FETCH FIRST {0} ROWS ONLY" : null; }
 		}
 
 		public override ISqlExpression ConvertExpression(ISqlExpression expr)
@@ -67,7 +67,6 @@ namespace BLToolkit.Data.Sql.SqlProvider
 				switch (func.Name)
 				{
 					case "CharIndex" : return new SqlFunction("Locate", func.Parameters);
-					case "Substring" : return new SqlFunction("Substr", func.Parameters);
 					case "Replicate" : return new SqlFunction("Repeat", func.Parameters);
 				}
 			}

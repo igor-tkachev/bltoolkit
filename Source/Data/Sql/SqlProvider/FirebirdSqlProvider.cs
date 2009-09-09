@@ -35,7 +35,9 @@ namespace BLToolkit.Data.Sql.SqlProvider
 				base.BuildSelectClause(sb);
 		}
 
-		protected override string TopFormat { get { return " FIRST {0} "; } }
+		protected override bool   SkipFirst   { get { return false;       } }
+		protected override string SkipFormat  { get { return "SKIP {0}";  } }
+		protected override string FirstFormat { get { return "FIRST {0}"; } }
 
 		public override ISqlExpression ConvertExpression(ISqlExpression expr)
 		{
