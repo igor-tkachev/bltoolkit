@@ -31,29 +31,21 @@ namespace Data.Linq
 		[Test]
 		public void New()
 		{
+			var expected = from p in Person select new {p.ID, p.FirstName};
+
 			ForEachProvider(db =>
 			{
-				var person = (
-
-					from p in db.Person select new { p.ID, p.FirstName }
-
-				).ToList().Where(p => p.ID == 1).First();
-				Assert.AreEqual(1,      person.ID);
-				Assert.AreEqual("John", person.FirstName);
+				var result = from p in db.Person select new { p.ID, p.FirstName };
+				Assert.IsTrue(result.ToList().SequenceEqual(expected));
 			});
 		}
 
-		static void NewParam(IQueryable<Person> table, int i)
+		void NewParam(IQueryable<Person> table, int i)
 		{
-			var person = (
+			var expected = from p in Person select new { i, p.ID, p.FirstName };
+			var result   = from p in table  select new { i, p.ID, p.FirstName };
 
-				from p in table select new { i, p.ID, p.FirstName }
-
-			).ToList().Where(p => p.ID == 1).First();
-
-			Assert.AreEqual(i,      person.i);
-			Assert.AreEqual(1,      person.ID);
-			Assert.AreEqual("John", person.FirstName);
+			Assert.IsTrue(result.ToList().SequenceEqual(expected));
 		}
 
 		[Test]

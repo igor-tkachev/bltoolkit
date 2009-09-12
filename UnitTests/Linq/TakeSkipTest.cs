@@ -50,13 +50,12 @@ namespace Data.Linq
 		[Test]
 		public void Take6()
 		{
+			var expected = Child.OrderBy(c => c.ChildID).Take(3);
+
 			ForEachProvider(db =>
 			{
-				var list = db.Child.OrderBy(c => c.ChildID).Take(3).ToList();
-				Assert.AreEqual( 3, list.Count);
-				Assert.AreEqual(11, list[0].ChildID);
-				Assert.AreEqual(21, list[1].ChildID);
-				Assert.AreEqual(22, list[2].ChildID);
+				var result = db.Child.OrderBy(c => c.ChildID).Take(3);
+				Assert.IsTrue(result.ToList().SequenceEqual(expected));
 			});
 		}
 
@@ -83,18 +82,13 @@ namespace Data.Linq
 		[Test]
 		public void Skip4()
 		{
+			var expected = Child.OrderByDescending(c => c.ChildID).Skip(3);
+
 			ForEachProvider(db =>
 			{
-				var list = db.Child.OrderByDescending(c => c.ChildID).Skip(3).ToList();
-				Assert.AreEqual( 7, list.Count);
-				Assert.AreEqual(41, list[0].ChildID);
-				Assert.AreEqual(33, list[1].ChildID);
-				Assert.AreEqual(32, list[2].ChildID);
-				Assert.AreEqual(31, list[3].ChildID);
-				Assert.AreEqual(22, list[4].ChildID);
-				Assert.AreEqual(21, list[5].ChildID);
-				Assert.AreEqual(11, list[6].ChildID);
-	});
+				var result = db.Child.OrderByDescending(c => c.ChildID).Skip(3);
+				Assert.IsTrue(result.ToList().SequenceEqual(expected));
+			});
 		}
 
 		[Test]
@@ -106,60 +100,44 @@ namespace Data.Linq
 		[Test]
 		public void SkipTake1()
 		{
+			var expected = Child.OrderByDescending(c => c.ChildID).Skip(2).Take(5);
 			ForEachProvider(db =>
 			{
-				var list = db.Child.OrderByDescending(c => c.ChildID).Skip(2).Take(5).ToList();
-				Assert.AreEqual( 5, list.Count);
-				Assert.AreEqual(42, list[0].ChildID);
-				Assert.AreEqual(41, list[1].ChildID);
-				Assert.AreEqual(33, list[2].ChildID);
-				Assert.AreEqual(32, list[3].ChildID);
-				Assert.AreEqual(31, list[4].ChildID);
+				var result = db.Child.OrderByDescending(c => c.ChildID).Skip(2).Take(5);
+				Assert.IsTrue(result.ToList().SequenceEqual(expected));
 			});
 		}
 
 		[Test]
 		public void SkipTake2()
 		{
+			var expected = Child.OrderByDescending(c => c.ChildID).Take(7).Skip(2);
 			ForEachProvider(db =>
 			{
-				var list = db.Child.OrderByDescending(c => c.ChildID).Take(7).Skip(2).ToList();
-				Assert.AreEqual( 5, list.Count);
-				Assert.AreEqual(42, list[0].ChildID);
-				Assert.AreEqual(41, list[1].ChildID);
-				Assert.AreEqual(33, list[2].ChildID);
-				Assert.AreEqual(32, list[3].ChildID);
-				Assert.AreEqual(31, list[4].ChildID);
+				var result = db.Child.OrderByDescending(c => c.ChildID).Take(7).Skip(2);
+				Assert.IsTrue(result.ToList().SequenceEqual(expected));
 			});
 		}
 
 		[Test]
 		public void SkipTake3()
 		{
+			var expected = Child.OrderBy(c => c.ChildID).Skip(1).Take(7).Skip(2);
 			ForEachProvider(db =>
 			{
-				var list = db.Child.OrderBy(c => c.ChildID).Skip(1).Take(7).Skip(2).ToList();
-				Assert.AreEqual( 5, list.Count);
-				Assert.AreEqual(31, list[0].ChildID);
-				Assert.AreEqual(32, list[1].ChildID);
-				Assert.AreEqual(33, list[2].ChildID);
-				Assert.AreEqual(41, list[3].ChildID);
-				Assert.AreEqual(42, list[4].ChildID);
+				var result = db.Child.OrderBy(c => c.ChildID).Skip(1).Take(7).Skip(2);
+				Assert.IsTrue(result.ToList().SequenceEqual(expected));
 			});
 		}
 
 		[Test]
 		public void SkipTake4()
 		{
+			var expected = Child.OrderByDescending(c => c.ChildID).Skip(1).Take(7).OrderBy(c => c.ChildID).Skip(2);
 			ForEachProvider(new[] { ProviderName.SqlCe, ProviderName.SQLite, ProviderName.Sybase, ProviderName.Access }, db =>
 			{
-				var list = db.Child.OrderByDescending(c => c.ChildID).Skip(1).Take(7).OrderBy(c => c.ChildID).Skip(2).ToList();
-				Assert.AreEqual( 5, list.Count);
-				Assert.AreEqual(32, list[0].ChildID);
-				Assert.AreEqual(33, list[1].ChildID);
-				Assert.AreEqual(41, list[2].ChildID);
-				Assert.AreEqual(42, list[3].ChildID);
-				Assert.AreEqual(43, list[4].ChildID);
+				var result = db.Child.OrderByDescending(c => c.ChildID).Skip(1).Take(7).OrderBy(c => c.ChildID).Skip(2);
+				Assert.IsTrue(result.ToList().SequenceEqual(expected));
 			});
 		}
 

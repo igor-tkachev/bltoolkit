@@ -95,7 +95,7 @@ namespace Data.Linq
 			string name = null;
 			TestOneJohn(db =>
 			{
-				(from p in db.Person where p.ID == id && p.MiddleName == name select p).ToList();
+				      (from p in db.Person where p.ID == id && p.MiddleName == name select p).ToList();
 				return from p in db.Person where p.ID == id && p.MiddleName == name select p;
 			});
 		}

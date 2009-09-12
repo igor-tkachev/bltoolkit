@@ -135,5 +135,65 @@ namespace Data.Linq
 		{
 			TestOnePerson(Array<string>.Empty, 1, "John", func);
 		}
+
+		private   List<Person>       _person;
+		protected List<Person>        Person
+		{
+			get
+			{
+				if (_person == null)
+					using (var db = new TestDbManager("Sql2008"))
+						_person = db.Person.ToList();
+				return _person;
+			}
+		}
+
+		private   List<Parent>        _parent;
+		protected List<Parent>         Parent
+		{
+			get
+			{
+				if (_parent == null)
+					using (var db = new TestDbManager("Sql2008"))
+						_parent = db.Parent.ToList();
+				return _parent;
+			}
+		}
+
+		private   List<Child>         _child;
+		protected List<Child>          Child
+		{
+			get
+			{
+				if (_child == null)
+					using (var db = new TestDbManager("Sql2008"))
+						_child = db.Child.ToList();
+				return _child;
+			}
+		}
+
+		private   List<GrandChild>    _grandChild;
+		protected List<GrandChild>     GrandChild
+		{
+			get
+			{
+				if (_grandChild == null)
+					using (var db = new TestDbManager("Sql2008"))
+						_grandChild = db.GrandChild.ToList();
+				return _grandChild;
+			}
+		}
+
+		private   List<LinqDataTypes> _types;
+		protected List<LinqDataTypes>  Types
+		{
+			get
+			{
+				if (_types == null)
+					using (var db = new TestDbManager("Sql2008"))
+						_types = db.Types.ToList();
+				return _types;
+			}
+		}
 	}
 }

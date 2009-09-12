@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-
+using BLToolkit.Data.DataProvider;
 using BLToolkit.Mapping;
 using BLToolkit.Reflection;
 
@@ -21,7 +21,7 @@ namespace BLToolkit.Data.Linq
 
 		public Table(DbManager dbManager)
 		{
-			_dbManager = dbManager;
+			DbManager   = dbManager;
 			_expression = Expression.Constant(this);
 		}
 
@@ -32,18 +32,13 @@ namespace BLToolkit.Data.Linq
 
 		public Table(DbManager dbManager, Expression expression)
 		{
-			_dbManager  = dbManager;
+			DbManager   = dbManager;
 			_expression = expression;
 		}
 
 		readonly Expression _expression;
 
-		private DbManager _dbManager;
-		public  DbManager  DbManager
-		{
-			get { return _dbManager;  }
-			set { _dbManager = value; }
-		}
+		public   DbManager   DbManager { get; set; }
 
 		#endregion
 
@@ -51,12 +46,15 @@ namespace BLToolkit.Data.Linq
 
 		IEnumerable<T> Execute(Expression expression)
 		{
-			var info = ExpressionInfo<T>.GetExpressionInfo(
-				_dbManager != null? _dbManager.DataProvider:  DbManager.GetDataProvider(DbManager.DefaultConfiguration),
-				_dbManager != null? _dbManager.MappingSchema: Map.DefaultSchema,
-				expression);
+			return GetExpressionInfo(expression).GetIEnumerable(null, DbManager, expression);
+		}
 
-			return info.GetIEnumerable(null, _dbManager, expression);
+		private ExpressionInfo<T> GetExpressionInfo(Expression expression)
+		{
+			var dataProvider  = DbManager != null ? DbManager.DataProvider  : DbManager.GetDataProvider(DbManager.DefaultConfiguration);
+			var mappingSchema = DbManager != null ? DbManager.MappingSchema : Map.DefaultSchema;
+
+			return ExpressionInfo<T>.GetExpressionInfo(dataProvider, mappingSchema, expression);
 		}
 
 		#endregion
@@ -98,7 +96,7 @@ namespace BLToolkit.Data.Linq
 			if (expression == null)
 				throw new ArgumentNullException("expression");
 
-			return new Table<TElement>(_dbManager, expression);
+			return new Table<TElement>(DbManager, expression);
 		}
 
 		IQueryable IQueryProvider.CreateQuery(Expression expression)
@@ -106,12 +104,11 @@ namespace BLToolkit.Data.Linq
 			if (expression == null)
 				throw new ArgumentNullException("expression");
 
-			var elementType   = TypeHelper.GetElementType(expression.Type) ?? expression.Type;
-			//var queryableType = typeof(IQueryable<>).MakeGenericType(new [] { elementType });
+			var elementType = TypeHelper.GetElementType(expression.Type) ?? expression.Type;
 
 			try
 			{
-				return (IQueryable)Activator.CreateInstance(typeof(Table<>).MakeGenericType(elementType), new object[] { _dbManager, expression });
+				return (IQueryable)Activator.CreateInstance(typeof(Table<>).MakeGenericType(elementType), new object[] { DbManager, expression });
 			}
 			catch (TargetInvocationException ex)
 			{
@@ -121,12 +118,7 @@ namespace BLToolkit.Data.Linq
 
 		TResult IQueryProvider.Execute<TResult>(Expression expression)
 		{
-			var info = ExpressionInfo<T>.GetExpressionInfo(
-				_dbManager != null? _dbManager.DataProvider:  DbManager.GetDataProvider(DbManager.DefaultConfiguration),
-				_dbManager != null? _dbManager.MappingSchema: Map.DefaultSchema,
-				expression);
-
-			return (TResult)info.GetElement(null, _dbManager, expression);
+			return (TResult)GetExpressionInfo(expression).GetElement(null, DbManager, expression);
 		}
 
 		object IQueryProvider.Execute(Expression expression)

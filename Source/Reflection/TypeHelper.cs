@@ -933,7 +933,7 @@ namespace BLToolkit.Reflection
 		/// <remarks>Note that nullable types does not have a parent-child relation to it's underlying type.
 		/// For example, the 'int?' type (nullable int) and the 'int' type
 		/// aren't a parent and it's child.</remarks>
-		public static bool IsSameOrParent(Type parent, Type child)
+		public static bool IsSameOrParent([JetBrains.Annotations.NotNull] Type parent, [JetBrains.Annotations.NotNull] Type child)
 		{
 			if (parent == null) throw new ArgumentNullException("parent");
 			if (child  == null) throw new ArgumentNullException("child");
@@ -957,6 +957,32 @@ namespace BLToolkit.Reflection
 			return false;
 		}
 
+		public static Type GetGenericType([JetBrains.Annotations.NotNull] Type genericType, Type type)
+		{
+			if (genericType == null) throw new ArgumentNullException("genericType");
+
+			while (type != null && type != typeof(object))
+			{
+				if (type.IsGenericType && (type.GetGenericTypeDefinition() == genericType))
+					return type;
+
+				if (genericType.IsInterface)
+				{
+					foreach (Type interfaceType in type.GetInterfaces())
+					{
+						Type gType = GetGenericType(genericType, interfaceType);
+
+						if (gType != null)
+							return gType;
+					}
+				}
+
+				type = type.BaseType;
+			}
+
+			return null;
+		}
+
 		/// <summary>
 		/// Searches for the method defined for a <see cref="System.Type"/>,
 		/// using the specified name and binding flags.
@@ -969,7 +995,7 @@ namespace BLToolkit.Reflection
 		/// that specify how the search is conducted.</param>
 		/// <returns>A <see cref="MethodInfo"/> object representing the method
 		/// that matches the specified requirements, if found; otherwise, null.</returns>
-		public static MethodInfo GetMethod(Type type, bool generic, string methodName, BindingFlags flags)
+		public static MethodInfo GetMethod([JetBrains.Annotations.NotNull] Type type, bool generic, string methodName, BindingFlags flags)
 		{
 			if (type == null) throw new ArgumentNullException("type");
 

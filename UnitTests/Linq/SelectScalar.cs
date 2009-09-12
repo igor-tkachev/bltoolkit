@@ -121,39 +121,58 @@ namespace Data.Linq
 		[Test]
 		public void Scalar22()
 		{
+			var expected =
+				from p in Person
+				select new {p1 = p, p2 = p}
+				into p1
+					where p1.p1.ID == 1 && p1.p2.ID == 1
+					select p1;
+
 			ForEachProvider(db =>
 			{
-				var q = (
+				var result =
+					from p in db.Person
+					select new {p1 = p, p2 = p}
+					into p1
+						where p1.p1.ID == 1 && p1.p2.ID == 1
+						select p1;
 
-					from p in db.Person select new { p1 = p, p2 = p } into p1 where p1.p1.ID == 1 && p1.p2.ID == 1 select p1
-
-				).ToList();
-
-				Assert.AreEqual(1, q.Count);
-				Assert.AreEqual(1, q[0].p1.ID);
-				Assert.AreEqual(1, q[0].p2.ID);
+				Assert.IsTrue(result.ToList().SequenceEqual(expected));
 			});
 		}
 
 		[Test]
 		public void Scalar23()
 		{
+			var expected =
+				from p in Person
+				select p.ID
+				into p1
+					where p1 == 1
+					select new {p1};
+
 			ForEachProvider(db =>
 			{
-				var q = (from p in db.Person select p.ID into p1 where p1 == 1 select new { p1 }).ToList();
-				Assert.AreEqual(1, q.Count);
-				Assert.AreEqual(1, q[0].p1);
+				var result =
+					from p in db.Person
+					select p.ID
+					into p1
+						where p1 == 1
+						select new {p1};
+
+				Assert.IsTrue(result.ToList().SequenceEqual(expected));
 			});
 		}
 
 		[Test]
 		public void Scalar3()
 		{
+			var expected = from p in Person where p.ID == 1 select 1;
+
 			ForEachProvider(db =>
 			{
-				var q = (from p in db.Person where p.ID == 1 select 1).ToList();
-				Assert.AreEqual(1, q.Count);
-				Assert.AreEqual(1, q[0]);
+				var result = from p in db.Person where p.ID == 1 select 1;
+				Assert.IsTrue(result.ToList().SequenceEqual(expected));
 			});
 		}
 
@@ -161,12 +180,12 @@ namespace Data.Linq
 		public void Scalar31()
 		{
 			var n = 1;
+			var expected = from p in Person where p.ID == 1 select n;
 
 			ForEachProvider(_exceptList, db =>
 			{
-				var q = (from p in db.Person where p.ID == 1 select n).ToList();
-				Assert.AreEqual(1, q.Count);
-				Assert.AreEqual(1, q[0]);
+				var result = from p in db.Person where p.ID == 1 select n;
+				Assert.IsTrue(result.ToList().SequenceEqual(expected));
 			});
 		}
 	}

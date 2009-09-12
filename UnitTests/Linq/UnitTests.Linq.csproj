@@ -122,6 +122,7 @@
       <Link>Providers\SybaseDataProvider.cs</Link>
     </Compile>
     <Compile Include="ConvertTest.cs" />
+    <Compile Include="CompileTest.cs" />
     <Compile Include="Distinct.cs" />
     <Compile Include="ElementOperationTest.cs" />
     <Compile Include="Exceptions\ElementOperationTest.cs" />

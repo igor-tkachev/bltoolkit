@@ -180,7 +180,7 @@ namespace Data.Linq
 			ParameterExpression CS$0$0000;
 			this.Foo
 			(
-				Expression.Lambda<Func<IDataReader, object>>
+				Expression.Query<Func<IDataReader, object>>
 				(
 					Expression.Call
 					(
