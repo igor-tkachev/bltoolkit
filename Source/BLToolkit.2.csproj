@@ -227,6 +227,7 @@
     <Compile Include="Data\Sql\ISqlExpressionWalkable.cs" />
     <Compile Include="Data\Sql\ISqlPredicate.cs" />
     <Compile Include="Data\Sql\ISqlTableSource.cs" />
+    <Compile Include="Data\Sql\IValueContainer.cs" />
     <Compile Include="Data\Sql\Precedence.cs" />
     <Compile Include="Data\Sql\SqlBinaryExpression.cs" />
     <Compile Include="Data\Sql\SqlBuilder.cs">

@@ -403,7 +403,7 @@ namespace BLToolkit.Data.Linq
 				case ExpressionType.Subtract:
 				case ExpressionType.SubtractChecked:
 					{
-						var pi = func(Convert<BinaryExpression>());
+						var pi = func(ConvertTo<BinaryExpression>());
 						if (pi.StopWalking)
 							return pi.ClearStopWalkingFlag();
 
@@ -428,7 +428,7 @@ namespace BLToolkit.Data.Linq
 				case ExpressionType.TypeAs:
 				case ExpressionType.UnaryPlus:
 					{
-						var pi = func(Convert<UnaryExpression>());
+						var pi = func(ConvertTo<UnaryExpression>());
 						if (pi.StopWalking)
 							return pi.ClearStopWalkingFlag();
 
@@ -459,7 +459,7 @@ namespace BLToolkit.Data.Linq
 
 				case ExpressionType.Conditional:
 					{
-						var pi = func(Convert<ConditionalExpression>());
+						var pi = func(ConvertTo<ConditionalExpression>());
 						if (pi.StopWalking)
 							return pi.ClearStopWalkingFlag();
 
@@ -476,7 +476,7 @@ namespace BLToolkit.Data.Linq
 
 				case ExpressionType.Invoke:
 					{
-						var pi = func(Convert<InvocationExpression>());
+						var pi = func(ConvertTo<InvocationExpression>());
 						if (pi.StopWalking)
 							return pi.ClearStopWalkingFlag();
 
@@ -492,7 +492,7 @@ namespace BLToolkit.Data.Linq
 
 				case ExpressionType.Lambda:
 					{
-						var pi = func(Convert<LambdaExpression>());
+						var pi = func(ConvertTo<LambdaExpression>());
 						if (pi.StopWalking)
 							return pi.ClearStopWalkingFlag();
 
@@ -508,7 +508,7 @@ namespace BLToolkit.Data.Linq
 
 				case ExpressionType.ListInit:
 					{
-						var pi = func(Convert<ListInitExpression>());
+						var pi = func(ConvertTo<ListInitExpression>());
 						if (pi.StopWalking)
 							return pi.ClearStopWalkingFlag();
 
@@ -588,7 +588,7 @@ namespace BLToolkit.Data.Linq
 							return b;
 						};
 
-						var pi = func(Convert<MemberInitExpression>());
+						var pi = func(ConvertTo<MemberInitExpression>());
 						if (pi.StopWalking)
 							return pi.ClearStopWalkingFlag();
 
@@ -604,7 +604,7 @@ namespace BLToolkit.Data.Linq
 
 				case ExpressionType.New:
 					{
-						var pi = func(Convert<NewExpression>());
+						var pi = func(ConvertTo<NewExpression>());
 						if (pi.StopWalking)
 							return pi.ClearStopWalkingFlag();
 
@@ -621,7 +621,7 @@ namespace BLToolkit.Data.Linq
 
 				case ExpressionType.NewArrayBounds:
 					{
-						var pi = func(Convert<NewArrayExpression>());
+						var pi = func(ConvertTo<NewArrayExpression>());
 						if (pi.StopWalking)
 							return pi.ClearStopWalkingFlag();
 
@@ -636,7 +636,7 @@ namespace BLToolkit.Data.Linq
 
 				case ExpressionType.NewArrayInit:
 					{
-						var pi = func(Convert<NewArrayExpression>());
+						var pi = func(ConvertTo<NewArrayExpression>());
 						if (pi.StopWalking)
 							return pi.ClearStopWalkingFlag();
 
@@ -651,7 +651,7 @@ namespace BLToolkit.Data.Linq
 
 				case ExpressionType.TypeIs:
 					{
-						var pi = func(Convert<TypeBinaryExpression>());
+						var pi = func(ConvertTo<TypeBinaryExpression>());
 						if (pi.StopWalking)
 							return pi.ClearStopWalkingFlag();
 
@@ -664,8 +664,8 @@ namespace BLToolkit.Data.Linq
 						return pi;
 					}
 
-				case ExpressionType.Constant : return func(Convert<ConstantExpression> ());
-				case ExpressionType.Parameter: return func(Convert<ParameterExpression>());
+				case ExpressionType.Constant : return func(ConvertTo<ConstantExpression> ());
+				case ExpressionType.Parameter: return func(ConvertTo<ParameterExpression>());
 			}
 
 			throw new InvalidOperationException();

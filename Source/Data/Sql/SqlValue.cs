@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace BLToolkit.Data.Sql
 {
-	public class SqlValue : ISqlExpression
+	public class SqlValue : ISqlExpression, IValueContainer
 	{
 		public SqlValue(object value)
 		{

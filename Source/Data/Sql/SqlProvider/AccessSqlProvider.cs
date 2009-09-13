@@ -23,8 +23,9 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		#region Skip / Take Support
 
-		protected override string FirstFormat     { get { return "TOP {0}"; } }
-		public    override bool   IsSkipSupported { get { return SqlBuilder.Select.TakeValue != null; } }
+		protected override string FirstFormat          { get { return "TOP {0}"; } }
+		public    override bool   IsSkipSupported      { get { return SqlBuilder.Select.TakeValue != null; } }
+		public    override bool   TakeAcceptsParameter { get { return false; } }
 
 		protected override void BuildSql(StringBuilder sb)
 		{

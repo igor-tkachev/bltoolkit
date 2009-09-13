@@ -15,10 +15,12 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		ISqlExpression ConvertExpression(ISqlExpression expression);
 		ISqlPredicate  ConvertPredicate (ISqlPredicate  predicate);
 
-		SqlBuilder     SqlBuilder      { get; set; }
-		bool           IsSkipSupported { get; }
-		bool           IsTakeSupported { get; }
-		string         Name            { get; }
+		string         Name                 { get; }
+		SqlBuilder     SqlBuilder           { get; set; }
+		bool           IsSkipSupported      { get; }
+		bool           IsTakeSupported      { get; }
+		bool           SkipAcceptsParameter { get; }
+		bool           TakeAcceptsParameter { get; }
 
 #if FW3
 		Expression     ConvertMember    (MemberInfo mi);

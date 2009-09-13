@@ -23,7 +23,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		protected override string FirstFormat
 		{
-			get { return SqlBuilder.Select.SkipValue == null ? "TOP {0}" : null; }
+			get { return SqlBuilder.Select.SkipValue == null ? "TOP ({0})" : null; }
 		}
 
 		protected override void BuildSql(StringBuilder sb)

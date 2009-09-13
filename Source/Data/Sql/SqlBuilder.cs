@@ -113,7 +113,7 @@ namespace BLToolkit.Data.Sql
 
 			public int Precedence
 			{
-				get { return Sql.Precedence.Primary; } // _expression.Precedence; }
+				get { return Sql.Precedence.Primary; }
 			}
 
 			public bool CanBeNull()
@@ -1385,6 +1385,9 @@ namespace BLToolkit.Data.Sql
 						Columns[i] = new Column(col.Parent, expr, col.Alias);
 				}
 
+				if (TakeValue != null) TakeValue = TakeValue.Walk(skipColumns, func);
+				if (SkipValue != null) SkipValue = SkipValue.Walk(skipColumns, func);
+
 				return null;
 			}
 
@@ -1837,6 +1840,9 @@ namespace BLToolkit.Data.Sql
 				{
 					sb.FinalizeAndValidate();
 					sb.RemoveOrderBy();
+
+					if (sb.ParameterDependent)
+						ParameterDependent = true;
 				}
 
 				return expr;
@@ -1985,7 +1991,7 @@ namespace BLToolkit.Data.Sql
 			return source;
 		}
 
-		void ConcatSearchCondition(WhereClause where1, WhereClause where2)
+		static void ConcatSearchCondition(WhereClause where1, WhereClause where2)
 		{
 			if (where1.IsEmpty)
 			{
@@ -2081,8 +2087,13 @@ namespace BLToolkit.Data.Sql
 				{
 					SqlParameter p = (SqlParameter)expr;
 
-					p.Name = GetAlias(p.Name, "p");
-					Parameters.Add(p);
+					if (p.IsQueryParameter)
+					{
+						p.Name = GetAlias(p.Name, "p");
+						Parameters.Add(p);
+					}
+					else
+						ParameterDependent = true;
 				}
 
 				return expr;

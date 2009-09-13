@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace BLToolkit.Data.Sql
 {
-	public class SqlParameter : ISqlExpression
+	public class SqlParameter : ISqlExpression, IValueContainer
 	{
 		public SqlParameter(string name, object value)
 		{
@@ -31,16 +31,18 @@ namespace BLToolkit.Data.Sql
 			set { _value = value; }
 		}
 
-		//public object RawValue
-		//{
-		//	get { return _value; }
-		//}
-
 		private Converter<object, object> _valueConverter;
 		public  Converter<object, object>  ValueConverter
 		{
 			get { return _valueConverter;  }
 			set { _valueConverter = value; }
+		}
+
+		private bool _isQueryParameter = true;
+		public  bool  IsQueryParameter
+		{
+			get { return _isQueryParameter;  }
+			set { _isQueryParameter = value; }
 		}
 
 		#region Overrides
@@ -95,7 +97,13 @@ namespace BLToolkit.Data.Sql
 			object clone;
 
 			if (!objectTree.TryGetValue(this, out clone))
-				objectTree.Add(this, clone = new SqlParameter(_name, _value, _valueConverter));
+			{
+				SqlParameter p = new SqlParameter(_name, _value, _valueConverter);
+
+				p._isQueryParameter = _isQueryParameter;
+
+				objectTree.Add(this, clone = p);
+			}
 
 			return clone;
 		}

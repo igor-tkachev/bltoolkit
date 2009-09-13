@@ -19,7 +19,7 @@ namespace BLToolkit.Data.Linq
 			public Table(MappingSchema mappingSchema, SqlBuilder sqlBuilder, LambdaInfo lambda)
 				: base(sqlBuilder, lambda)
 			{
-				ObjectType = ((IQueryable)((ConstantExpression)lambda.Body.Expr).Value).ElementType;
+				ObjectType = TypeHelper.GetGenericType(typeof(IQueryable<>), lambda.Body.Expr.Type).GetGenericArguments()[0];
 				SqlTable   = new SqlTable(mappingSchema, ObjectType);
 
 				sqlBuilder.From.Table(SqlTable);

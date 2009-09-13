@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using BLToolkit.Data.DataProvider;
+
 using BLToolkit.Mapping;
 using BLToolkit.Reflection;
 
@@ -16,45 +16,49 @@ namespace BLToolkit.Data.Linq
 
 		public Table()
 		{
-			_expression = Expression.Constant(this);
+			Expression = Expression.Constant(this);
 		}
 
 		public Table(DbManager dbManager)
 		{
-			DbManager   = dbManager;
-			_expression = Expression.Constant(this);
+			DbManager  = dbManager;
+			Expression = Expression.Constant(this);
 		}
 
 		public Table(Expression expression)
 		{
-			_expression = expression;
+			Expression = expression;
 		}
 
 		public Table(DbManager dbManager, Expression expression)
 		{
-			DbManager   = dbManager;
-			_expression = expression;
+			DbManager  = dbManager;
+			Expression = expression;
 		}
 
-		readonly Expression _expression;
-
-		public   DbManager   DbManager { get; set; }
+		protected Expression        Expression;
+		public    DbManager         DbManager { get; set; }
+		internal  ExpressionInfo<T> Info;
+		internal  object[]          Parameters;
 
 		#endregion
 
 		#region Execute
 
-		IEnumerable<T> Execute(Expression expression)
+		IEnumerable<T> Execute(DbManager db, Expression expression)
 		{
-			return GetExpressionInfo(expression).GetIEnumerable(null, DbManager, expression);
+			return GetExpressionInfo(expression).GetIEnumerable(null, db, expression, Parameters);
 		}
 
 		private ExpressionInfo<T> GetExpressionInfo(Expression expression)
 		{
+			if (Info != null)
+				return Info;
+
 			var dataProvider  = DbManager != null ? DbManager.DataProvider  : DbManager.GetDataProvider(DbManager.DefaultConfiguration);
 			var mappingSchema = DbManager != null ? DbManager.MappingSchema : Map.DefaultSchema;
 
-			return ExpressionInfo<T>.GetExpressionInfo(dataProvider, mappingSchema, expression);
+			return Info = ExpressionInfo<T>.GetExpressionInfo(dataProvider, mappingSchema, expression);
 		}
 
 		#endregion
@@ -63,9 +67,9 @@ namespace BLToolkit.Data.Linq
 
 		public override string ToString()
 		{
-			return _expression.NodeType == ExpressionType.Constant && ((ConstantExpression)_expression).Value == this?
+			return Expression.NodeType == ExpressionType.Constant && ((ConstantExpression)Expression).Value == this?
 				"Table(" + typeof(T).Name + ")":
-				_expression.ToString();
+				Expression.ToString();
 		}
 
 		#endregion
@@ -79,7 +83,7 @@ namespace BLToolkit.Data.Linq
 
 		Expression IQueryable.Expression
 		{
-			get { return _expression; }
+			get { return Expression; }
 		}
 
 		IQueryProvider IQueryable.Provider
@@ -118,12 +122,12 @@ namespace BLToolkit.Data.Linq
 
 		TResult IQueryProvider.Execute<TResult>(Expression expression)
 		{
-			return (TResult)GetExpressionInfo(expression).GetElement(null, DbManager, expression);
+			return (TResult)GetExpressionInfo(expression).GetElement(null, DbManager, expression, Parameters);
 		}
 
 		object IQueryProvider.Execute(Expression expression)
 		{
-			return Execute(expression);
+			return Execute(DbManager, expression);
 		}
 
 		#endregion
@@ -132,12 +136,12 @@ namespace BLToolkit.Data.Linq
 
 		IEnumerator<T> IEnumerable<T>.GetEnumerator()
 		{
-			return Execute(_expression).GetEnumerator();
+			return Execute(DbManager, Expression).GetEnumerator();
 		}
 
 		IEnumerator IEnumerable.GetEnumerator()
 		{
-			return Execute(_expression).GetEnumerator();
+			return Execute(DbManager, Expression).GetEnumerator();
 		}
 
 		#endregion

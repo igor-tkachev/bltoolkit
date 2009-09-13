@@ -52,7 +52,6 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 			sqlBuilder.Parameters.Clear();
 
-
 			((ISqlExpressionWalkable)sqlBuilder).Walk(true, delegate(ISqlExpression expr)
 			{
 				if (expr is SqlParameter)
@@ -62,7 +61,8 @@ namespace BLToolkit.Data.Sql.SqlProvider
 					if (p.Value == null)
 						return new SqlValue(null);
 
-					sqlBuilder.Parameters.Add(p);
+					if (p.IsQueryParameter)
+						sqlBuilder.Parameters.Add(p);
 				}
 
 				return expr;
@@ -371,6 +371,9 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		public    virtual bool   IsTakeSupported { get { return true; } }
 		public    virtual bool   IsSkipSupported { get { return true; } }
 
+		public    virtual bool   SkipAcceptsParameter { get { return true; } }
+		public    virtual bool   TakeAcceptsParameter { get { return true; } }
+
 		protected virtual bool   SkipFirst       { get { return true; } }
 		protected virtual string SkipFormat      { get { return null; } }
 		protected virtual string FirstFormat     { get { return null; } }
@@ -670,13 +673,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			}
 			else if (expr is SqlValue)
 			{
-				object value = ((SqlValue)expr).Value;
-
-				if      (value == null)   sb.Append("NULL");
-				else if (value is string) sb.Append('\'').Append(value.ToString().Replace("'", "''")).Append('\'');
-				else if (value is char)   sb.Append('\'').Append(value.ToString().Replace("'", "''")).Append('\'');
-				else if (value is bool)   sb.Append((bool)value? "1": "0");
-				else    sb.Append(value);
+				BuildValue(sb, ((SqlValue)expr).Value);
 			}
 			else if (expr is SqlExpression)
 			{
@@ -706,7 +703,11 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			else if (expr is SqlParameter)
 			{
 				SqlParameter parm = (SqlParameter)expr;
-				sb.Append(_dataProvider.Convert(parm.Name, ConvertType.NameToQueryParameter));
+
+				if (parm.IsQueryParameter)
+					sb.Append(_dataProvider.Convert(parm.Name, ConvertType.NameToQueryParameter));
+				else
+					BuildValue(sb, parm.Value);
 			}
 			else if (expr is SqlDataType)
 			{
@@ -743,6 +744,15 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		{
 			bool dummy = false;
 			BuildExpression(sb, precedence, expr, null, ref dummy);
+		}
+
+		void BuildValue(StringBuilder sb, object value)
+		{
+			if      (value == null)   sb.Append("NULL");
+			else if (value is string) sb.Append('\'').Append(value.ToString().Replace("'", "''")).Append('\'');
+			else if (value is char)   sb.Append('\'').Append(value.ToString().Replace("'", "''")).Append('\'');
+			else if (value is bool)   sb.Append((bool)value? "1": "0");
+			else    sb.Append(value);
 		}
 
 		#endregion

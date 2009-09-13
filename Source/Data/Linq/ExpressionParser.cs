@@ -27,6 +27,7 @@ namespace BLToolkit.Data.Linq
 
 		readonly ExpressionInfo<T>   _info            = new ExpressionInfo<T>();
 		readonly ParameterExpression _expressionParam = Expression.Parameter(typeof(Expression),        "expr");
+		readonly ParameterExpression _parametersParam = Expression.Parameter(typeof(object[]),          "ps");
 		readonly ParameterExpression _contextParam    = Expression.Parameter(typeof(QueryContext),      "context");
 		readonly ParameterExpression _dataReaderParam = Expression.Parameter(typeof(IDataReader),       "rd");
 		readonly ParameterExpression _mapSchemaParam  = Expression.Parameter(typeof(MappingSchema),     "ms");
@@ -49,11 +50,19 @@ namespace BLToolkit.Data.Linq
 
 		#region Parse
 
-		public ExpressionInfo<T> Parse(DataProviderBase dataProvider, MappingSchema mappingSchema, Expression expression)
+		public ExpressionInfo<T> Parse(
+			DataProviderBase      dataProvider,
+			MappingSchema         mappingSchema,
+			Expression            expression,
+			ParameterExpression[] parameters)
 		{
+			if (parameters != null)
+				expression = ConvertParameters(expression, parameters);
+
 			_info.DataProvider  = dataProvider;
 			_info.MappingSchema = mappingSchema;
 			_info.Expression    = expression;
+			_info.Parameters    = parameters;
 
 			ParseInfo.CreateRoot(expression, _expressionParam).Match(
 				//
@@ -86,20 +95,38 @@ namespace BLToolkit.Data.Linq
 			return _info;
 		}
 
+		private Expression ConvertParameters(Expression expression, ParameterExpression[] parameters)
+		{
+			return ParseInfo.CreateRoot(expression, _expressionParam).Walk(pi =>
+			{
+				if (pi.NodeType == ExpressionType.Parameter)
+				{
+					var idx = Array.IndexOf(parameters, (ParameterExpression)pi.Expr);
+
+					if (idx > 0)
+						return pi.Parent.Replace(
+							Expression.Convert(
+								Expression.ArrayIndex(
+									_parametersParam,
+									Expression.Constant(Array.IndexOf(parameters, (ParameterExpression)pi.Expr))),
+								pi.Expr.Type),
+							pi.ParamAccessor);
+				}
+
+				return pi;
+			});
+		}
+
 		QuerySource ParseSequence(ParseInfo info, QuerySource parent)
 		{
-			QuerySource select = null;
+			QuerySource select = ParseTable(info);
+
+			if (select != null)
+				return select;
 
 			if (TypeHelper.IsSameOrParent(typeof(IQueryable), info.Expr.Type))
 				if (info.NodeType == ExpressionType.MemberAccess)
 					info = GetIQueriable(info);
-
-			if (info.IsConstant<IQueryable>((value,expr) =>
-				{
-					select = new QuerySource.Table(_info.MappingSchema, CurrentSql, new LambdaInfo(expr));
-					return true;
-				}))
-				return select;
 
 			if (info.NodeType != ExpressionType.Call)
 				throw new ArgumentException(string.Format("Queryable method call expected. Got '{0}'.", info.Expr), "info");
@@ -167,6 +194,42 @@ namespace BLToolkit.Data.Linq
 				}),
 				pi => { throw new ArgumentException(string.Format("Queryable method call expected. Got '{0}'.", pi.Expr), "info"); }
 			);
+
+			return select;
+		}
+
+		QuerySource ParseTable(ParseInfo info)
+		{
+			if (info.NodeType == ExpressionType.MemberAccess)
+			{
+				if (_info.Parameters != null)
+				{
+					var me = (MemberExpression)info.Expr;
+
+					if (me.Expression == _info.Parameters[0])
+						return new QuerySource.Table(_info.MappingSchema, CurrentSql, new LambdaInfo(info));
+				}
+			}
+
+			if (info.NodeType == ExpressionType.Call)
+			{
+				if (_info.Parameters != null)
+				{
+					var mc = (MethodCallExpression)info.Expr;
+
+					if (mc.Object == _info.Parameters[0])
+						return new QuerySource.Table(_info.MappingSchema, CurrentSql, new LambdaInfo(info));
+				}
+			}
+
+			QuerySource select = null;
+
+			if (info.IsConstant<IQueryable>((value,expr) =>
+			{
+				select = new QuerySource.Table(_info.MappingSchema, CurrentSql, new LambdaInfo(expr));
+				return true;
+			}))
+			{}
 
 			return select;
 		}
@@ -532,6 +595,14 @@ namespace BLToolkit.Data.Linq
 				CurrentSql.Select.Take(Convert(
 					new SqlBinaryExpression(CurrentSql.Select.SkipValue, "+", CurrentSql.Select.TakeValue, typeof(int), Precedence.Additive)));
 
+			if (!_info.SqlProvider.TakeAcceptsParameter)
+			{
+				var p = CurrentSql.Select.TakeValue as SqlParameter;
+
+				if (p != null)
+					p.IsQueryParameter = false;
+			}
+
 			return true;
 		}
 
@@ -561,6 +632,14 @@ namespace BLToolkit.Data.Linq
 						new SqlBinaryExpression(prevSkipValue, "+", CurrentSql.Select.SkipValue, typeof (int), Precedence.Additive)));
 			}
 
+			if (!_info.SqlProvider.TakeAcceptsParameter)
+			{
+				var p = CurrentSql.Select.SkipValue as SqlParameter;
+
+				if (p != null)
+					p.IsQueryParameter = false;
+			}
+
 			return true;
 		}
 
@@ -577,7 +656,7 @@ namespace BLToolkit.Data.Linq
 		void SetQuery(ParseInfo info)
 		{
 			var mapper = Expression.Lambda<ExpressionInfo<T>.Mapper<T>>(
-				info, new[] { _infoParam, _contextParam, _dataReaderParam, _mapSchemaParam, _expressionParam });
+				info, new[] { _infoParam, _contextParam, _dataReaderParam, _mapSchemaParam, _expressionParam, _parametersParam });
 
 			_info.SetQuery(mapper.Compile());
 		}
@@ -703,16 +782,25 @@ namespace BLToolkit.Data.Linq
 				}
 
 				var keyReader = Expression.Lambda<ExpressionInfo<T>.Mapper<TKey>>(
-					info, new[] { parser._infoParam, parser._contextParam, parser._dataReaderParam, parser._mapSchemaParam, parser._expressionParam });
+					info, new[]
+					{
+						parser._infoParam,
+						parser._contextParam,
+						parser._dataReaderParam,
+						parser._mapSchemaParam,
+						parser._expressionParam,
+						parser._parametersParam
+					});
 
 				return expr.Parent.Replace(
 					Expression.Call(parser._infoParam, parser._info.GetGroupingMethodInfo<TKey,TElement>(),
 						parser._contextParam,
 						parser._dataReaderParam,
 						parser._expressionParam,
+						parser._parametersParam,
 						Expression.Constant(keyReader.Compile()),
 						keyConst,
-						Expression.Constant(valueParser.Parse(parser._info.DataProvider, parser._info.MappingSchema, valueExpr))),
+						Expression.Constant(valueParser.Parse(parser._info.DataProvider, parser._info.MappingSchema, valueExpr, parser._info.Parameters))),
 					expr.ParamAccessor);
 			}
 		}
@@ -912,13 +1000,22 @@ namespace BLToolkit.Data.Linq
 			public ParseInfo GetParseInfo(ExpressionParser<T> parser, ParseInfo ma, FieldIndex counterIndex, Expression info)
 			{
 				var itemReader = Expression.Lambda<ExpressionInfo<T>.Mapper<TE>>(
-					info, new[] { parser._infoParam, parser._contextParam, parser._dataReaderParam, parser._mapSchemaParam, parser._expressionParam });
+					info, new[]
+					{
+						parser._infoParam,
+						parser._contextParam,
+						parser._dataReaderParam,
+						parser._mapSchemaParam,
+						parser._expressionParam,
+						parser._parametersParam
+					});
 
 				return ma.Parent.Replace(
 					Expression.Call(parser._infoParam, parser._info.GetGroupJoinEnumeratorMethodInfo<TE>(),
 						parser._contextParam,
 						parser._dataReaderParam,
 						parser._expressionParam,
+						parser._parametersParam,
 						Expression.Constant(counterIndex.Index),
 						Expression.Constant(itemReader.Compile())),
 					ma.ParamAccessor);
@@ -1075,7 +1172,7 @@ namespace BLToolkit.Data.Linq
 			var pi = BuildField(parseInfo, new[] { 0 }, parseInfo.Expr.Type);
 
 			var mapper = Expression.Lambda<ExpressionInfo<T>.Mapper<T>>(
-				pi, new [] { _infoParam, _contextParam, _dataReaderParam, _mapSchemaParam, _expressionParam });
+				pi, new [] { _infoParam, _contextParam, _dataReaderParam, _mapSchemaParam, _expressionParam, _parametersParam });
 
 			_info.SetQuery(mapper.Compile());
 		}
@@ -1119,9 +1216,9 @@ namespace BLToolkit.Data.Linq
 			string name = null;
 
 			var newExpr = ReplaceParameter(expr, nm => name = nm);
-			var mapper  = Expression.Lambda<Func<ExpressionInfo<T>,Expression,object>>(
+			var mapper  = Expression.Lambda<Func<ExpressionInfo<T>,Expression,object[],object>>(
 				Expression.Convert(newExpr, typeof(object)),
-				new [] { _infoParam, _expressionParam });
+				new [] { _infoParam, _expressionParam, _parametersParam });
 
 			p = new ExpressionInfo<T>.Parameter
 			{
@@ -1561,8 +1658,13 @@ namespace BLToolkit.Data.Linq
 					if (canbe) switch (pi.NodeType)
 					{
 						case ExpressionType.Parameter:
-							canbe = false;
-							break;
+							{
+								var p = (ParameterExpression)pi.Expr;
+
+								canbe = p == _parametersParam;
+								break;
+							}
+
 
 						case ExpressionType.MemberAccess:
 							{

@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Linq;
 using System.Linq.Expressions;
+using BLToolkit.Reflection;
 
 namespace BLToolkit.Data.Linq
 {
@@ -13,12 +15,87 @@ namespace BLToolkit.Data.Linq
 			_query = query;
 		}
 
-		readonly LambdaExpression _query;
-
+		readonly object                _sync = new object();
+		readonly LambdaExpression      _query;
+		private  Func<object[],object> _compiledQuery;
 
 		TResult ExecuteQuery<TResult>(params object[] args)
 		{
-			return default(TResult);
+			if (_compiledQuery == null)
+				lock (_sync)
+					if (_compiledQuery == null)
+						_compiledQuery = CompileQuery(_query);
+
+			return (TResult)_compiledQuery(args);
+		}
+
+		private interface ITableHelper
+		{
+			Expression CallTable(LambdaExpression query, Expression expr, ParameterExpression ps, bool isQueriable);
+		}
+
+		internal class TableHelper<T> : ITableHelper
+		{
+			public Expression CallTable(LambdaExpression query, Expression expr, ParameterExpression ps, bool isQueriable)
+			{
+				var table = new CompiledTable<T>(query, expr);
+
+				return Expression.Call(
+					Expression.Constant(table),
+					isQueriable ?
+						ReflectionHelper.Expressor<CompiledTable<T>>.MethodExpressor(t => t.Create (null)) :
+						ReflectionHelper.Expressor<CompiledTable<T>>.MethodExpressor(t => t.Execute(null)),
+					ps);
+			}
+		}
+
+		static Func<object[],object> CompileQuery(LambdaExpression query)
+		{
+			var ps = Expression.Parameter(typeof(object[]), "ps");
+
+			var info = ParseInfo.CreateRoot(query.Body, null).Walk(pi =>
+			{
+				switch (pi.NodeType)
+				{
+					case ExpressionType.Parameter:
+						return new ParseInfo<Expression>
+						{
+							Expr =
+								Expression.Convert(
+									Expression.ArrayIndex(
+										ps,
+										Expression.Constant(query.Parameters.IndexOf((ParameterExpression)pi.Expr))),
+									pi.Expr.Type),
+							IsReplaced = true,
+							StopWalking = true
+						};
+
+					case ExpressionType.Call:
+						{
+							var expr = (MethodCallExpression)pi.Expr;
+
+							if (expr.Method.DeclaringType == typeof(Queryable))
+							{
+								var qtype  = TypeHelper.GetGenericType(typeof (IQueryable<>), expr.Type);
+								var helper = (ITableHelper)Activator.CreateInstance(
+									typeof (TableHelper<>).MakeGenericType(qtype == null ? expr.Type : qtype.GetGenericArguments()[0]));
+
+								return new ParseInfo<Expression>
+								{
+									Expr        = helper.CallTable(query, expr, ps, qtype != null),
+									IsReplaced  = true,
+									StopWalking = true
+								};
+							}
+						}
+
+						break;
+				}
+
+				return pi;
+			});
+
+			return Expression.Lambda<Func<object[],object>>(Expression.Convert(info.Expr, typeof(object)), ps).Compile();
 		}
 
 		#region Invoke

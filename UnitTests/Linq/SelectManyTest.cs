@@ -174,31 +174,26 @@ namespace Data.Linq
 			});
 		}
 
-		void Foo(Expression<Func<IDataReader,object>> func)
+		void Foo(Expression<Func<object[],object>> func)
 		{
 			/*
-			ParameterExpression CS$0$0000;
-			this.Foo
-			(
-				Expression.Query<Func<IDataReader, object>>
-				(
-					Expression.Call
-					(
-						Expression.Field
-						(
-							Expression.Constant(this, typeof(SelectManyTest)),
-							fieldof(SelectManyTest._dic)
-						),
-						(MethodInfo) methodof
-						(
-							Dictionary<string, string>.get_Item,
-							Dictionary<string, string>
-						),
-						new Expression[] { Expression.Constant("123", typeof(string)) }
-					),
-					new ParameterExpression[] { CS$0$0000 = Expression.Parameter(typeof(IDataReader), "rd") }
-				)
-			);
+				ParameterExpression ps;
+				Expression.Lambda<Func<object[],object>>(
+					Expression.Add(
+						Expression.Convert(
+							Expression.ArrayIndex(
+								ps = Expression.Parameter(typeof(object[]), "p"),
+								Expression.Constant(0, typeof(int))),
+							typeof(string)),
+						Expression.Convert(
+							Expression.Convert(
+								Expression.ArrayIndex(
+									ps,
+									Expression.Constant(1, typeof(int))),
+								typeof(int)),
+							typeof(object)),
+						(MethodInfo)methodof(string.Concat)),
+					new ParameterExpression[] { ps });
 			*/
 		}
 
@@ -206,7 +201,7 @@ namespace Data.Linq
 
 		void Bar()
 		{
-			Foo(rd => _dic["123"]);
+			Foo(p => (string)p[0] + (int)p[1]);
 		}
 
 		//[Test]

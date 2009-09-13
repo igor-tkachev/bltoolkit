@@ -125,6 +125,7 @@
     <Compile Include="DataAccess\SqlIgnoreAttribute.cs" />
     <Compile Include="Data\DataProvider\ProviderName.cs" />
     <Compile Include="Data\Linq\CompiledQuery.cs" />
+    <Compile Include="Data\Linq\CompiledTableT.cs" />
     <Compile Include="Data\Linq\ElementMethod.cs" />
     <Compile Include="Data\Linq\FieldIndex.cs" />
     <Compile Include="Data\Linq\LambdaInfo.cs" />
@@ -143,6 +144,7 @@
     <Compile Include="Data\Linq\SqlFunctionAttribute.cs" />
     <Compile Include="Data\Linq\TableT.cs" />
     <Compile Include="Data\Sql\ChildContainer.cs" />
+    <Compile Include="Data\Sql\IValueContainer.cs" />
     <Compile Include="Data\Sql\SqlDataType.cs" />
     <Compile Include="Data\Sql\ISqlPredicate.cs" />
     <Compile Include="Data\Sql\Precedence.cs" />

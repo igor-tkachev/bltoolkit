@@ -43,6 +43,11 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			get { return SqlBuilder.Select.SkipValue == null ? "FETCH FIRST {0} ROWS ONLY" : null; }
 		}
 
+		public override bool TakeAcceptsParameter
+		{
+			get { return SqlBuilder.Select.SkipValue != null; }
+		}
+
 		public override ISqlExpression ConvertExpression(ISqlExpression expr)
 		{
 			expr = base.ConvertExpression(expr);

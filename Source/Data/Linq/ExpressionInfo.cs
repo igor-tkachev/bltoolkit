@@ -19,15 +19,16 @@ namespace BLToolkit.Data.Linq
 
 	class ExpressionInfo<T> : ReflectionHelper
 	{
-		public ExpressionInfo<T> Next;
-		public Expression        Expression;
-		public DataProviderBase  DataProvider;
-		public MappingSchema     MappingSchema;
-		public List<QueryInfo>   Queries = new List<QueryInfo>(1);
-		public bool              PreloadData;
+		public ExpressionInfo<T>     Next;
+		public Expression            Expression;
+		public ParameterExpression[] Parameters;
+		public DataProviderBase      DataProvider;
+		public MappingSchema         MappingSchema;
+		public List<QueryInfo>       Queries = new List<QueryInfo>(1);
+		public bool                  PreloadData;
 
-		public Func<QueryContext,DbManager,Expression,IEnumerable<T>> GetIEnumerable;
-		public Func<QueryContext,DbManager,Expression,object>         GetElement;
+		public Func<QueryContext,DbManager,Expression,object[],IEnumerable<T>> GetIEnumerable;
+		public Func<QueryContext,DbManager,Expression,object[],object>         GetElement;
 
 		private ISqlProvider _sqlProvider; 
 		public  ISqlProvider  SqlProvider
@@ -53,7 +54,7 @@ namespace BLToolkit.Data.Linq
 
 					if (info == null)
 					{
-						info = new ExpressionParser<T>().Parse(dataProvider, mappingSchema, expr);
+						info = new ExpressionParser<T>().Parse(dataProvider, mappingSchema, expr, null);
 						info.Next = _first;
 						_first = info;
 					}
@@ -116,7 +117,7 @@ namespace BLToolkit.Data.Linq
 			if (PreloadData || Queries.Count != 1)
 				throw new InvalidOperationException();
 
-			Func<DbManager,Expression,int,IEnumerable<IDataReader>> query = Query;
+			Func<DbManager,Expression,object[],int,IEnumerable<IDataReader>> query = Query;
 
 			SqlProvider.SqlBuilder = Queries[0].SqlBuilder;
 
@@ -125,24 +126,42 @@ namespace BLToolkit.Data.Linq
 			if (select.SkipValue != null && !SqlProvider.IsSkipSupported)
 			{
 				var q = query;
-				var n = (int)((SqlValue)select.SkipValue).Value;
 
-				if (n > 0)
-					query = (db, expr, qn) => q(db, expr, qn).Skip(n);
+				if (select.SkipValue is SqlValue)
+				{
+					var n = (int)((IValueContainer)select.SkipValue).Value;
+
+					if (n > 0)
+						query = (db, expr, ps, qn) => q(db, expr, ps, qn).Skip(n);
+				}
+				else if (select.SkipValue is SqlParameter)
+				{
+					var i = GetParameterIndex(select.SkipValue);
+					query = (db, expr, ps, qn) => q(db, expr, ps, qn).Skip((int)Queries[0].Parameters[i].Accessor(this, expr, ps));
+				}
 			}
 
 			if (select.TakeValue != null && !SqlProvider.IsTakeSupported)
 			{
 				var q = query;
-				var n = (int)((SqlValue)select.TakeValue).Value;
 
-				if (n > 0)
-					query = (db, expr, qn) => q(db, expr, qn).Take(n);
+				if (select.TakeValue is SqlValue)
+				{
+					var n = (int)((IValueContainer)select.TakeValue).Value;
+
+					if (n > 0)
+						query = (db, expr, ps, qn) => q(db, expr, ps, qn).Take(n);
+				}
+				else if (select.TakeValue is SqlParameter)
+				{
+					var i = GetParameterIndex(select.TakeValue);
+					query = (db, expr, ps, qn) => q(db, expr, ps, qn).Take((int)Queries[0].Parameters[i].Accessor(this, expr, ps));
+				}
 			}
 
 			if (mapper != null)
 			{
-				GetIEnumerable = (ctx, db, expr) => Map(query(db, expr, 0), ctx, db, expr, mapper);
+				GetIEnumerable = (ctx, db, expr, ps) => Map(query(db, expr, ps, 0), ctx, db, expr, ps, mapper);
 			}
 			else
 			{
@@ -151,11 +170,24 @@ namespace BLToolkit.Data.Linq
 				for (var i = 0; i < index.Length; i++)
 					index[i] = i;
 
-				GetIEnumerable = (_, db, expr) => Map(query(db, expr, 0), GetMapperSlot(index));
+				GetIEnumerable = (_, db, expr, ps) => Map(query(db, expr, ps, 0), GetMapperSlot(index));
 			}
 		}
 
-		IEnumerable<IDataReader> Query(DbManager db, Expression expr, int queryNumber)
+		int GetParameterIndex(ISqlExpression parameter)
+		{
+			for (var i = 0; i < Queries[0].Parameters.Count; i++)
+			{
+				var p = Queries[0].Parameters[i].SqlParameter;
+						
+				if (p == parameter)
+					return i;
+			}
+
+			throw new InvalidOperationException();
+		}
+
+		IEnumerable<IDataReader> Query(DbManager db, Expression expr, object[] parameters, int queryNumber)
 		{
 			var dispose = db == null;
 
@@ -164,7 +196,7 @@ namespace BLToolkit.Data.Linq
 
 			try
 			{
-				using (var dr = GetReader(db, expr, queryNumber))
+				using (var dr = GetReader(db, expr, parameters, queryNumber))
 					while (dr.Read())
 						yield return dr;
 			}
@@ -181,18 +213,18 @@ namespace BLToolkit.Data.Linq
 				yield return (T)MapDataReaderToObject(typeof(T), dr, slot);
 		}
 
-		IEnumerable<T> Map(IEnumerable<IDataReader> data, QueryContext context, DbManager db, Expression expr, Mapper<T> mapper)
+		IEnumerable<T> Map(IEnumerable<IDataReader> data, QueryContext context, DbManager db, Expression expr, object[] ps, Mapper<T> mapper)
 		{
 			if (context == null)
 				context = new QueryContext { RootDbManager = db };
 
 			foreach (var dr in data)
-				yield return mapper(this, context, dr, MappingSchema, expr);
+				yield return mapper(this, context, dr, MappingSchema, expr, ps);
 		}
 
-		IDataReader GetReader(DbManager db, Expression expr, int idx)
+		IDataReader GetReader(DbManager db, Expression expr, object[] parameters, int idx)
 		{
-			SetParameters(expr, idx);
+			SetParameters(expr, parameters, idx);
 
 			string             command;
 			IDbDataParameter[] parms;
@@ -236,14 +268,14 @@ namespace BLToolkit.Data.Linq
 			return db.SetCommand(command, parms).ExecuteReader();
 		}
 
-		private void SetParameters(Expression expr, int idx)
+		private void SetParameters(Expression expr, object[] parameters, int idx)
 		{
 			foreach (var p in Queries[idx].Parameters)
 			{
 				if (p.OriginalSqlParameter == null)
 					p.OriginalSqlParameter = p.SqlParameter;
 
-				p.OriginalSqlParameter.Value = p.Accessor(this, expr);
+				p.OriginalSqlParameter.Value = p.Accessor(this, expr, parameters);
 			}
 		}
 
@@ -485,16 +517,17 @@ namespace BLToolkit.Data.Linq
 			QueryContext     qc,
 			IDataReader      dataReader,
 			Expression       expr,
+			object[]         ps,
 			int              counterIndex,
 			Mapper<TElement> itemReader)
 		{
 			var count = MappingSchema.ConvertToInt32(dataReader[counterIndex]);
-			return GetGroupJoinEnumerator(count, count == 0? default(TElement): itemReader(this, qc, dataReader, MappingSchema, expr));
+			return GetGroupJoinEnumerator(count, count == 0? default(TElement): itemReader(this, qc, dataReader, MappingSchema, expr, ps));
 		}
 
 		public MethodInfo GetGroupJoinEnumeratorMethodInfo<TElement>()
 		{
-			return Expressor<ExpressionInfo<T>>.MethodExpressor(e => e.GetGroupJoinEnumerator<TElement>(null, null, null, 0, null));
+			return Expressor<ExpressionInfo<T>>.MethodExpressor(e => e.GetGroupJoinEnumerator<TElement>(null, null, null, null, 0, null));
 		}
 
 		#endregion
@@ -528,6 +561,7 @@ namespace BLToolkit.Data.Linq
 			QueryContext                        context,
 			IDataReader                         dataReader,
 			Expression                          expr,
+			object[]                            ps,
 			Mapper<TKey>                        keyReader,
 			ExpressionInfo<TKey>.KeyValueHolder keyHolder,
 			ExpressionInfo<TElement>            valueReader)
@@ -536,9 +570,9 @@ namespace BLToolkit.Data.Linq
 
 			try
 			{
-				keyHolder.Key = keyReader(this, context, dataReader, MappingSchema, expr);
+				keyHolder.Key = keyReader(this, context, dataReader, MappingSchema, expr, ps);
 
-				var values = valueReader.GetIEnumerable(context, db.DbManager, valueReader.Expression);
+				var values = valueReader.GetIEnumerable(context, db.DbManager, valueReader.Expression, ps);
 
 				return new Grouping<TKey, TElement>(keyHolder.Key, Common.Configuration.Linq.PreloadGroups ? values.ToList() : values);
 			}
@@ -550,7 +584,7 @@ namespace BLToolkit.Data.Linq
 
 		public MethodInfo GetGroupingMethodInfo<TKey,TElement>()
 		{
-			return Expressor<ExpressionInfo<T>>.MethodExpressor(e => e.GetGrouping<TKey,TElement>(null, null, null, null, null, null));
+			return Expressor<ExpressionInfo<T>>.MethodExpressor(e => e.GetGrouping<TKey,TElement>(null, null, null, null, null, null, null));
 		}
 
 		#endregion
@@ -561,10 +595,10 @@ namespace BLToolkit.Data.Linq
 		{
 			switch (em)
 			{
-				case ElementMethod.First           : GetElement = (ctx, db, expr) => GetIEnumerable(ctx, db, expr).First();           break;
-				case ElementMethod.FirstOrDefault  : GetElement = (ctx, db, expr) => GetIEnumerable(ctx, db, expr).FirstOrDefault();  break;
-				case ElementMethod.Single          : GetElement = (ctx, db, expr) => GetIEnumerable(ctx, db, expr).Single();          break;
-				case ElementMethod.SingleOrDefault : GetElement = (ctx, db, expr) => GetIEnumerable(ctx, db, expr).SingleOrDefault(); break;
+				case ElementMethod.First           : GetElement = (ctx, db, expr, ps) => GetIEnumerable(ctx, db, expr, ps).First();           break;
+				case ElementMethod.FirstOrDefault  : GetElement = (ctx, db, expr, ps) => GetIEnumerable(ctx, db, expr, ps).FirstOrDefault();  break;
+				case ElementMethod.Single          : GetElement = (ctx, db, expr, ps) => GetIEnumerable(ctx, db, expr, ps).Single();          break;
+				case ElementMethod.SingleOrDefault : GetElement = (ctx, db, expr, ps) => GetIEnumerable(ctx, db, expr, ps).SingleOrDefault(); break;
 			}
 		}
 
@@ -901,14 +935,14 @@ namespace BLToolkit.Data.Linq
 
 		#region Inner Types
 
-		public delegate TE Mapper<TE>(ExpressionInfo<T> info,QueryContext qc,IDataReader rd,MappingSchema ms,Expression expr);
+		public delegate TE Mapper<TE>(ExpressionInfo<T> info,QueryContext qc,IDataReader rd,MappingSchema ms,Expression expr, object[] ps);
 
 		public class Parameter
 		{
-			public Expression                                Expression;
-			public Func<ExpressionInfo<T>,Expression,object> Accessor;
-			public SqlParameter                              SqlParameter;
-			public SqlParameter                              OriginalSqlParameter;
+			public Expression                                         Expression;
+			public Func<ExpressionInfo<T>,Expression,object[],object> Accessor;
+			public SqlParameter                                       SqlParameter;
+			public SqlParameter                                       OriginalSqlParameter;
 		}
 
 		public class QueryInfo
