@@ -71,8 +71,16 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 				switch (func.Name)
 				{
-					case "CharIndex" : return new SqlFunction("Locate", func.Parameters);
-					case "Replicate" : return new SqlFunction("Repeat", func.Parameters);
+					case "Convert" :
+						SqlDataType type = (SqlDataType)func.Parameters[0];
+
+						if (type.Length > 0)
+							return new SqlFunction(type.DbType.ToString(), func.Parameters[1], new SqlValue(type.Length));
+
+						if (type.Precision > 0)
+							return new SqlFunction(type.DbType.ToString(), func.Parameters[1], new SqlValue(type.Precision), new SqlValue(type.Scale));
+
+						return new SqlFunction(type.DbType.ToString(), func.Parameters[1]);
 				}
 			}
 

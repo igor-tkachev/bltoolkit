@@ -63,7 +63,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 				switch (func.Name)
 				{
 					case "Substring" : return new SqlExpression("Substring({0} from {1} for {2})", Precedence.Primary, func.Parameters);
-					case "Length"    : return new SqlFunction  ("Char_Length", func.Parameters);
+					case "Convert"   : return new SqlExpression("Cast({0} as {1})", Precedence.Primary, func.Parameters[1], func.Parameters[0]);
 				}
 			}
 

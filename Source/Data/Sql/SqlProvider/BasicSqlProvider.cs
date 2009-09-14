@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Text;
 
 namespace BLToolkit.Data.Sql.SqlProvider
@@ -746,7 +747,11 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			BuildExpression(sb, precedence, expr, null, ref dummy);
 		}
 
-		void BuildValue(StringBuilder sb, object value)
+		#endregion
+
+		#region BuildValue
+
+		protected virtual void BuildValue(StringBuilder sb, object value)
 		{
 			if      (value == null)   sb.Append("NULL");
 			else if (value is string) sb.Append('\'').Append(value.ToString().Replace("'", "''")).Append('\'');
@@ -843,7 +848,13 @@ namespace BLToolkit.Data.Sql.SqlProvider
 	
 		protected virtual void BuildDataType(StringBuilder sb, SqlDataType type)
 		{
+			sb.Append(type.DbType.ToString());
 
+			if (type.Length > 0)
+				sb.Append('(').Append(type.Length).Append(')');
+
+			if (type.Precision > 0)
+				sb.Append('(').Append(type.Precision).Append(',').Append(type.Scale).Append(')');
 		}
 	
 		#endregion
@@ -1174,6 +1185,40 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		#endregion
 
+		#region DataTypes
+
+		protected virtual int GetMaxLength     (SqlDataType type) { return SqlDataType.GetMaxLength     (type.DbType); }
+		protected virtual int GetMaxPrecision  (SqlDataType type) { return SqlDataType.GetMaxPrecision  (type.DbType); }
+		protected virtual int GetMaxScale      (SqlDataType type) { return SqlDataType.GetMaxScale      (type.DbType); }
+		protected virtual int GetMaxDisplaySize(SqlDataType type) { return SqlDataType.GetMaxDisplaySize(type.DbType); }
+
+		protected virtual ISqlExpression ConvertConvertion(SqlFunction func)
+		{
+			SqlDataType from = (SqlDataType)func.Parameters[1];
+			SqlDataType to   = (SqlDataType)func.Parameters[0];
+
+			if (to.Precision > 0)
+			{
+				int maxPrecision = GetMaxPrecision(from);
+				int maxScale     = GetMaxScale    (from);
+
+				to = new SqlDataType(
+					to.DbType,
+					to.Type,
+					maxPrecision >= 0 ? Math.Min(to.Precision, maxPrecision) : to.Precision,
+					maxScale     >= 0 ? Math.Min(to.Scale,     maxScale)     : to.Scale);
+			}
+			else if (to.Length > 0)
+			{
+				int maxLength = GetMaxLength(from);
+				to = new SqlDataType(to.DbType, to.Type, maxLength >= 0 ? Math.Min(to.Length, maxLength) : to.Length);
+			}
+
+			return ConvertExpression(new SqlFunction("Convert", to, func.Parameters[2]));
+		}
+
+		#endregion
+
 		#region ISqlProvider Members
 
 		public virtual ISqlExpression ConvertExpression(ISqlExpression expression)
@@ -1281,8 +1326,8 @@ namespace BLToolkit.Data.Sql.SqlProvider
 				{
 					case "ConvertToCaseCompareTo":
 						return ConvertExpression(new SqlFunction("CASE",
-							new SqlBuilder.SearchCondition().Expr(func.Parameters[0]). Greater .Expr(func.Parameters[1]).ToExpr(),   new SqlValue(1),
-							new SqlBuilder.SearchCondition().Expr(func.Parameters[0]). Equal   .Expr(func.Parameters[1]).ToExpr(),   new SqlValue(0),
+							new SqlBuilder.SearchCondition().Expr(func.Parameters[0]). Greater .Expr(func.Parameters[1]).ToExpr(), new SqlValue(1),
+							new SqlBuilder.SearchCondition().Expr(func.Parameters[0]). Equal   .Expr(func.Parameters[1]).ToExpr(), new SqlValue(0),
 							new SqlValue(-1)));
 
 					case "CASE":
@@ -1331,6 +1376,8 @@ namespace BLToolkit.Data.Sql.SqlProvider
 						}
 
 						break;
+
+					case "$Convert$": return ConvertConvertion(func);
 				}
 			}
 

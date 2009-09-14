@@ -124,9 +124,14 @@ namespace BLToolkit.Data.Linq
 			if (select != null)
 				return select;
 
-			if (TypeHelper.IsSameOrParent(typeof(IQueryable), info.Expr.Type))
-				if (info.NodeType == ExpressionType.MemberAccess)
-					info = GetIQueriable(info);
+			if (info.NodeType == ExpressionType.MemberAccess && TypeHelper.IsSameOrParent(typeof(IQueryable), info.Expr.Type))
+			{
+				info   = GetIQueriable(info);
+				select = ParseTable(info);
+
+				if (select != null)
+					return select;
+			}
 
 			if (info.NodeType != ExpressionType.Call)
 				throw new ArgumentException(string.Format("Queryable method call expected. Got '{0}'.", info.Expr), "info");
@@ -471,7 +476,7 @@ namespace BLToolkit.Data.Linq
 		{
 			SetAlias(select, l.Parameters[0].Expr.Name);
 
-			if (CheckForSubQuery(select, l.Body))
+			if (CheckSubQueryForWhere(select, l.Body))
 				select = WrapInSubQuery(select);
 
 			ParseSearchCondition(CurrentSql.Where.SearchCondition.Conditions, select, l.Body);
@@ -479,9 +484,9 @@ namespace BLToolkit.Data.Linq
 			return select;
 		}
 
-		static bool CheckForSubQuery(QuerySource query, ParseInfo expr)
+		static bool CheckSubQueryForWhere(QuerySource query, ParseInfo expr)
 		{
-			var makeSubquery = false;
+			var makeSubQuery = false;
 
 			expr.Walk(pi =>
 			{
@@ -489,17 +494,14 @@ namespace BLToolkit.Data.Linq
 				{
 					var field = query.GetField(pi.Expr);
 
-					//while (field is QueryField.SubQueryColumn)
-					//	field = ((QueryField.SubQueryColumn)field).Field;
-
 					if (field is QueryField.ExprColumn)
-						makeSubquery = pi.StopWalking = true;
+						makeSubQuery = pi.StopWalking = true;
 				}
 
 				return pi;
 			});
 
-			return makeSubquery;
+			return makeSubQuery;
 		}
 
 		#endregion
@@ -513,18 +515,32 @@ namespace BLToolkit.Data.Linq
 			var group   = ParseSelect(keySelector, source);
 			var element = elementSelector != null? ParseSelect(elementSelector, source) : null;
 
-			foreach (var field in group.Fields)
+			var fields  = new ISqlExpression[group.Fields.Count];
+			var sub     = false;
+
+			for (var i = 0; i < group.Fields.Count; i++)
 			{
+				var field = group.Fields[i];
 				var exprs = field.GetExpressions(this);
 
 				if (exprs == null || exprs.Length != 1)
 					throw new LinqException("Cannot group by type '{0}'", keySelector.Body.Expr.Type);
 
-				CurrentSql.GroupBy.Expr(exprs[0]);
+				fields[i] = exprs[0];
+
+				sub = sub || !(exprs[0] is SqlField);
 			}
 
+			if (sub)
+			{
+				
+			}
+			//else
+				foreach (var field in fields)
+					CurrentSql.GroupBy.Expr(field);
+
 			if (resultSelector == null)
-				return new QuerySource.GroupBy(CurrentSql, group, element, groupingType);
+				return new QuerySource.GroupBy(CurrentSql, group, keySelector, element, groupingType);
 
 			return ParseSelect(resultSelector, group, source);
 		}
@@ -1381,7 +1397,7 @@ namespace BLToolkit.Data.Linq
 						if (e.Method == null && e.IsLifted)
 							return o;
 
-						return Convert(new SqlFunction("Convert", new SqlDataType(e.Type), o));
+						return Convert(new SqlFunction("$Convert$", new SqlDataType(e.Type), new SqlDataType(e.Operand.Type), o));
 					}
 
 				case ExpressionType.Conditional:

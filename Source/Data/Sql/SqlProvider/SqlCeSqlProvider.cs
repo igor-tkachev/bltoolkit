@@ -32,10 +32,12 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			{
 				SqlFunction func = (SqlFunction) expr;
 
+				/*
 				switch (func.Name)
 				{
 					case "Length" : return new SqlFunction("Len", func.Parameters);
 				}
+				*/
 			}
 			else if (expr is SqlExpression)
 			{

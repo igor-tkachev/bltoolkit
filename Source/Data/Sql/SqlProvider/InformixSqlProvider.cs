@@ -77,7 +77,8 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 				switch (func.Name)
 				{
-					case "Coalesce"  : return new SqlFunction("Nvl",    func.Parameters);
+					case "Coalesce" : return new SqlFunction("Nvl", func.Parameters);
+					case "Convert"  : return new SqlExpression("Cast({0} as {1})", Precedence.Primary, func.Parameters[1], func.Parameters[0]);
 				}
 			}
 			else if (expr is SqlExpression)

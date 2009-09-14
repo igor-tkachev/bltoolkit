@@ -381,8 +381,8 @@ namespace BLToolkit.Data.Linq
 
 		public class GroupBy : Expr
 		{
-			public GroupBy(SqlBuilder sqlBilder, QuerySource groupQuery, QuerySource elementSource, Type groupingType)
-				: base(sqlBilder, groupQuery.Lambda, groupQuery)
+			public GroupBy(SqlBuilder sqlBilder, QuerySource groupQuery, LambdaInfo keySelector, QuerySource elementSource, Type groupingType)
+				: base(sqlBilder, keySelector, groupQuery)
 			{
 				ElementSource = elementSource;
 				GroupingType  = groupingType;

@@ -134,6 +134,8 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		// DB2, PostgreSQL, MS SQL, SqlCe
 		//
 		[SqlFunction]
+		[SqlFunction("DB2",        "Repeat")]
+		[SqlFunction("PostgreSQL", "Repeat")]
 		protected static string Replicate(string str, int count)
 		{
 			if (str == null)
@@ -148,6 +150,8 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		}
 
 		[SqlFunction]
+		[SqlFunction("DB2",        "Repeat")]
+		[SqlFunction("PostgreSQL", "Repeat")]
 		protected static string Replicate(char ch, int count)
 		{
 			var sb = new StringBuilder(count);

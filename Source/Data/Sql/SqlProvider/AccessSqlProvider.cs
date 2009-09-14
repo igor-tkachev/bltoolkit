@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Reflection;
 using System.Text;
 
@@ -195,14 +196,58 @@ namespace BLToolkit.Data.Sql.SqlProvider
 						return new SqlFunction("Iif", sc, func.Parameters[1], func.Parameters[0]);
 
 					case "CASE"      : return ConvertCase(func.Parameters, 0);
-					case "Length"    : return new SqlFunction("Len",    func.Parameters);
-					case "Lower"     : return new SqlFunction("LCase",  func.Parameters);
-					case "Upper"     : return new SqlFunction("UCase",  func.Parameters);
 					case "Replicate" : return new SqlFunction("String", func.Parameters[1], func.Parameters[0]);
 					case "CharIndex" :
 						return func.Parameters.Length == 2?
 							new SqlFunction("InStr", new SqlValue(1),    func.Parameters[1], func.Parameters[0], new SqlValue(1)):
 							new SqlFunction("InStr", func.Parameters[2], func.Parameters[1], func.Parameters[0], new SqlValue(1));
+
+					case "Convert" :
+						return func.Parameters[1];
+
+						/*
+					case "Convert"   :
+						{
+							string name = null;
+
+							switch (((SqlDataType)func.Parameters[0]).DbType)
+							{
+								case SqlDbType.BigInt           : name = "CLng"; break;
+								case SqlDbType.TinyInt          : name = "CByte"; break;
+								case SqlDbType.Int              :
+								case SqlDbType.SmallInt         : name = "CInt"; break;
+								case SqlDbType.Bit              : name = "CBool"; break;
+								case SqlDbType.Char             :
+								case SqlDbType.Text             :
+								case SqlDbType.VarChar          :
+								case SqlDbType.NChar            :
+								case SqlDbType.NText            :
+								case SqlDbType.NVarChar         : name = "CStr"; break;
+								case SqlDbType.DateTime         :
+								case SqlDbType.Date             :
+								case SqlDbType.Time             :
+								case SqlDbType.DateTime2        :
+								case SqlDbType.SmallDateTime    :
+								case SqlDbType.DateTimeOffset   : name = "CDate"; break;
+								case SqlDbType.Decimal          : name = "CDec"; break;
+								case SqlDbType.Float            : name = "CDbl"; break;
+								case SqlDbType.Money            :
+								case SqlDbType.SmallMoney       : name = "CCur"; break;
+								case SqlDbType.Real             : name = "CSng"; break;
+								case SqlDbType.Image            :
+								case SqlDbType.Binary           :
+								case SqlDbType.UniqueIdentifier :
+								case SqlDbType.Timestamp        :
+								case SqlDbType.VarBinary        :
+								case SqlDbType.Variant          :
+								case SqlDbType.Xml              :
+								case SqlDbType.Udt              :
+								case SqlDbType.Structured       : name = "CVar"; break;
+							}
+
+							return new SqlFunction(name, func.Parameters[1]);
+						}
+						*/
 				}
 			}
 			else if (expr is SqlExpression)

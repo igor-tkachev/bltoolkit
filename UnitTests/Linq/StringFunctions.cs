@@ -497,27 +497,27 @@ namespace Data.Linq
 			});
 		}
 
-		//[Test]
+		[Test]
 		public void Test()
 		{
-			using (var db = new TestDbManager(ProviderName.Firebird))
+			using (var db = new TestDbManager(ProviderName.SQLite))
 			{
 				var p = db
 					.SetCommand(@"
-						SELECT
-							p.PersonID,
-							p.LastName,
-							p.MiddleName,
-							p.Gender,
-							p.FirstName
-						FROM
-							Person p
-						WHERE
-							NOT p.FirstName LIKE ? ESCAPE '~' AND p.PersonID = 1",
-						db.Parameter("?", "%o~%h%", DbType.String))
-					.ExecuteObject<Person>();
+SELECT
+	t.[MoneyValue] * Cast(t.[ID] as Decimal(10,0)),
+t.[ID],
+    t.[MoneyValue]
+FROM
+    [LinqDataTypes] t
+WHERE
+    t.[MoneyValue] * Cast(t.[ID] as Decimal(10,0)) = @p1
+LIMIT 2
+",
+						db.Parameter("@p1", 9.9900m, DbType.Decimal))
+					.ExecuteScalar();
 
-				Assert.AreEqual(1, p.ID);
+				//Assert.AreEqual(1, p.ID);
 			}
 		}
 	}

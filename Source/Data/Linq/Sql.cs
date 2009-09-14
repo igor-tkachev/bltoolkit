@@ -8,9 +8,14 @@ namespace BLToolkit.Data.Linq
 		#region String Finctions
 
 		[SqlFunction]
+		[SqlFunction("Access",   "Len")]
+		[SqlFunction("Firebird", "Char_Length")]
+		[SqlFunction("MSSql",    "Len")]
+		[SqlFunction("SqlCe",    "Len")]
+		[SqlFunction("Sybase",   "Len")]
 		public static int Length(string str)
 		{
-			return str.Length;
+			return (str ?? "").Length;
 		}
 
 		[SqlFunction]
@@ -37,6 +42,8 @@ namespace BLToolkit.Data.Linq
 		}
 
 		[SqlFunction]
+		[SqlFunction("DB2",   "Locate")]
+		[SqlFunction("MySql", "Locate")]
 		public static int? CharIndex(string value, string str)
 		{
 			if (str == null || value == null)
@@ -46,6 +53,8 @@ namespace BLToolkit.Data.Linq
 		}
 
 		[SqlFunction]
+		[SqlFunction("DB2",   "Locate")]
+		[SqlFunction("MySql", "Locate")]
 		public static int? CharIndex(string value, string str, int startLocation)
 		{
 			if (str == null || value == null)
@@ -55,6 +64,8 @@ namespace BLToolkit.Data.Linq
 		}
 
 		[SqlFunction]
+		[SqlFunction("DB2",   "Locate")]
+		[SqlFunction("MySql", "Locate")]
 		public static int? CharIndex(char value, string str)
 		{
 			if (str == null)
@@ -64,6 +75,8 @@ namespace BLToolkit.Data.Linq
 		}
 
 		[SqlFunction]
+		[SqlFunction("DB2",   "Locate")]
+		[SqlFunction("MySql", "Locate")]
 		public static int? CharIndex(char value, string str, int startLocation)
 		{
 			if (str == null)
@@ -84,12 +97,14 @@ namespace BLToolkit.Data.Linq
 		}
 
 		[SqlFunction]
+		[SqlFunction("SQLite", "LeftStr")]
 		public static string Left(string str, int length)
 		{
 			return str == null || str.Length < length? null: str.Substring(1, length);
 		}
 
 		[SqlFunction]
+		[SqlFunction("SQLite", "RightStr")]
 		public static string Right(string str, int length)
 		{
 			return str == null || str.Length < length? null: str.Substring(str.Length - length);
@@ -120,12 +135,14 @@ namespace BLToolkit.Data.Linq
 		}
 
 		[SqlFunction]
+		[SqlFunction("Sybase", "Str_Replace")]
 		public static string Replace(string str, string oldValue, string newValue)
 		{
 			return str.Replace(oldValue, newValue);
 		}
 
 		[SqlFunction]
+		[SqlFunction("Sybase", "Str_Replace")]
 		public static string Replace(string str, char oldValue, char newValue)
 		{
 			return str.Replace(oldValue, newValue);
@@ -150,12 +167,14 @@ namespace BLToolkit.Data.Linq
 		}
 
 		[SqlFunction]
+		[SqlFunction("Access",   "LCase")]
 		public static string Lower(string str)
 		{
 			return str.ToLower();
 		}
 
 		[SqlFunction]
+		[SqlFunction("Access",   "UCase")]
 		public static string Upper(string str)
 		{
 			return str.ToUpper();

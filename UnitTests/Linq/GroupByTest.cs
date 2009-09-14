@@ -162,5 +162,59 @@ namespace Data.Linq
 				Assert.AreEqual(8, list.Count);
 			});
 		}
+
+		[Test]
+		public void GroupBySubQuery1()
+		{
+			var n = 1;
+
+			var expected =
+				from ch in
+					from ch in Child select ch.ParentID + 1
+				where ch + 1 > n group ch by ch into g select g.Key;
+
+			ForEachProvider(db =>
+			{
+				var result =
+					from ch in
+						from ch in db.Child select ch.ParentID + 1
+					where ch > n group ch by ch into g select g.Key;
+
+				Assert.AreEqual(0, result.ToList().Except(expected).Count());
+			});
+		}
+
+		[Test]
+		public void GroupBySubQuery2()
+		{
+			var n = 1;
+
+			var expected =
+				from ch in Child select new { ParentID = ch.ParentID + 1 } into ch
+				where ch.ParentID > n
+				group ch by ch into g select g.Key;
+
+			ForEachProvider(db =>
+			{
+				var result =
+					from ch in db.Child select new { ParentID = ch.ParentID + 1 } into ch
+					where ch.ParentID > n
+					group ch by ch into g select g.Key;
+
+				Assert.AreEqual(0, result.ToList().Except(expected).Count());
+			});
+		}
+
+		[Test]
+		public void GroupByCalculated()
+		{
+			var expected = from ch in Child group ch by ch.ParentID > 2 ? ch.ParentID > 3 ? "1" : "2" : "3" into g select g;
+
+			ForEachProvider(db =>
+			{
+				var result = from ch in db.Child group ch by ch.ParentID > 2 ? ch.ParentID > 3 ? "1" : "2" : "3" into g select g;
+				Assert.AreEqual(0, result.ToList().Except(expected).Count());
+			});
+		}
 	}
 }

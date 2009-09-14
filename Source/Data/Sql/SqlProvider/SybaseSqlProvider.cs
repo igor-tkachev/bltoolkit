@@ -35,8 +35,6 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 				switch (func.Name)
 				{
-					case "Length"    : return new SqlFunction("Len",         func.Parameters);
-					case "Replace"   : return new SqlFunction("Str_Replace", func.Parameters);
 					case "CharIndex" :
 						if (func.Parameters.Length == 3)
 							return Add<int>(

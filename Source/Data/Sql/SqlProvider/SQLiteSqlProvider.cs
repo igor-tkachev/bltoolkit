@@ -49,9 +49,8 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 				switch (func.Name)
 				{
-					case "Space"     : return new SqlFunction("PadR",     new SqlValue(" "), func.Parameters[0]);
-					case "Left"      : return new SqlFunction("LeftStr",  func.Parameters);
-					case "Right"     : return new SqlFunction("RightStr", func.Parameters);
+					case "Space"   : return new SqlFunction("PadR", new SqlValue(" "), func.Parameters[0]);
+					case "Convert" : return new SqlExpression("Cast({0} as {1})", Precedence.Primary, func.Parameters[1], func.Parameters[0]);
 				}
 			}
 
