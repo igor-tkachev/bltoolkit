@@ -17,6 +17,8 @@ namespace BLToolkit.Data.Linq
 				_table  = table;
 				_field  = field;
 				_mapper = mapper;
+
+				ParsingTracer.WriteLine(this);
 			}
 
 			readonly QuerySource.Table _table;
@@ -27,7 +29,15 @@ namespace BLToolkit.Data.Linq
 
 			public override FieldIndex[] Select<T>(ExpressionParser<T> parser)
 			{
-				return new[] { new FieldIndex { Index = _table.SqlBuilder.Select.Add(_field, _field.Name), Field = this } };
+				ParsingTracer.WriteLine(this);
+				ParsingTracer.WriteLine("table", _table);
+				ParsingTracer.IncIndentLevel();
+
+				var index =  new[] { new FieldIndex { Index = _table.SqlBuilder.Select.Add(_field, _field.Name), Field = this } };
+
+				ParsingTracer.DecIndentLevel();
+				ParsingTracer.WriteLine("table", _table);
+				return index;
 			}
 
 			public override ISqlExpression[] GetExpressions<T>(ExpressionParser<T> parser)
@@ -44,6 +54,11 @@ namespace BLToolkit.Data.Linq
 
 				return clone;
 			}
+
+			public override string ToString()
+			{
+				return _field.ToString();
+			}
 		}
 
 		#endregion
@@ -56,16 +71,18 @@ namespace BLToolkit.Data.Linq
 			{
 				QuerySource = source;
 				Expr        = expr;
-
 				_alias      = alias;
+
+				ParsingTracer.WriteLine(this);
 			}
 
 			public ExprColumn(QuerySource source, ISqlExpression expr, string alias)
 			{
 				QuerySource    = source;
-
 				_sqlExpression = expr;
 				_alias         = alias;
+
+				ParsingTracer.WriteLine("sql", this);
 			}
 
 			public readonly QuerySource QuerySource;
@@ -79,6 +96,10 @@ namespace BLToolkit.Data.Linq
 
 			public override FieldIndex[] Select<T>(ExpressionParser<T> parser)
 			{
+				ParsingTracer.WriteLine(this);
+				ParsingTracer.WriteLine(QuerySource);
+				ParsingTracer.IncIndentLevel();
+
 				if (_index == null)
 				{
 					if (_sqlExpression == null)
@@ -87,6 +108,8 @@ namespace BLToolkit.Data.Linq
 					_index = new[] { new FieldIndex { Index = QuerySource.SqlBuilder.Select.Add(_sqlExpression, _alias), Field = this } };
 				}
 
+				ParsingTracer.DecIndentLevel();
+				ParsingTracer.WriteLine(QuerySource);
 				return _index;
 			}
 
@@ -123,6 +146,11 @@ namespace BLToolkit.Data.Linq
 
 				return clone;
 			}
+
+			public override string ToString()
+			{
+				return _sqlExpression != null ? _sqlExpression.ToString() : Expr.ToString();
+			}
 		}
 
 		#endregion
@@ -135,6 +163,8 @@ namespace BLToolkit.Data.Linq
 			{
 				QuerySource = querySource;
 				Field       = field;
+
+				ParsingTracer.WriteLine(field);
 			}
 
 			public readonly QuerySource.SubQuery QuerySource;
@@ -147,6 +177,10 @@ namespace BLToolkit.Data.Linq
 
 			public override FieldIndex[] Select<T>(ExpressionParser<T> parser)
 			{
+				ParsingTracer.WriteLine(this);
+				ParsingTracer.WriteLine(QuerySource);
+				ParsingTracer.IncIndentLevel();
+
 				if (_index == null)
 				{
 					if (_subIndex == null)
@@ -161,6 +195,8 @@ namespace BLToolkit.Data.Linq
 					}
 				}
 
+				ParsingTracer.DecIndentLevel();
+				ParsingTracer.WriteLine(QuerySource);
 				return _index;
 			}
 
@@ -184,6 +220,11 @@ namespace BLToolkit.Data.Linq
 
 				return clone;
 			}
+
+			public override string ToString()
+			{
+				return Field.ToString();
+			}
 		}
 
 		#endregion
@@ -195,6 +236,8 @@ namespace BLToolkit.Data.Linq
 			public GroupByColumn(QuerySource.GroupBy groupBySource)
 			{
 				GroupBySource = groupBySource;
+
+				ParsingTracer.WriteLine("groupBy", this);
 			}
 
 			public readonly QuerySource.GroupBy GroupBySource;
@@ -205,9 +248,15 @@ namespace BLToolkit.Data.Linq
 
 			public override FieldIndex[] Select<T>(ExpressionParser<T> parser)
 			{
+				ParsingTracer.WriteLine(this);
+				ParsingTracer.WriteLine(GroupBySource.ParentQueries[0]);
+				ParsingTracer.IncIndentLevel();
+
 				if (_index == null)
 					_index = GroupBySource.ParentQueries[0].Select(parser);
 
+				ParsingTracer.DecIndentLevel();
+				ParsingTracer.WriteLine(GroupBySource.ParentQueries[0]);
 				return _index;
 			}
 
@@ -224,6 +273,11 @@ namespace BLToolkit.Data.Linq
 					objectTree.Add(this, clone = new GroupByColumn((QuerySource.GroupBy)GroupBySource.Clone(objectTree)));
 
 				return clone;
+			}
+
+			public override string ToString()
+			{
+				return GroupBySource.ToString();
 			}
 		}
 

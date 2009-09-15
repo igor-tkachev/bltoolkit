@@ -672,5 +672,14 @@ namespace BLToolkit.Data.Linq
 		}
 
 		#endregion
+
+		#region Overrides
+
+		public override string ToString()
+		{
+			return Expr.ToString();
+		}
+
+		#endregion
 	}
 }

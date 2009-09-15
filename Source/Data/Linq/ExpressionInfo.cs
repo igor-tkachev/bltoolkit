@@ -563,18 +563,22 @@ namespace BLToolkit.Data.Linq
 			Expression                          expr,
 			object[]                            ps,
 			Mapper<TKey>                        keyReader,
-			ExpressionInfo<TKey>.KeyValueHolder keyHolder,
 			ExpressionInfo<TElement>            valueReader)
 		{
 			var db = context.GetDbManager();
 
 			try
 			{
-				keyHolder.Key = keyReader(this, context, dataReader, MappingSchema, expr, ps);
+				TKey key = keyReader(this, context, dataReader, MappingSchema, expr, ps);
+
+				if (ps == null)
+					ps = new object[1];
+
+				ps[0] = key;
 
 				var values = valueReader.GetIEnumerable(context, db.DbManager, valueReader.Expression, ps);
 
-				return new Grouping<TKey, TElement>(keyHolder.Key, Common.Configuration.Linq.PreloadGroups ? values.ToList() : values);
+				return new Grouping<TKey, TElement>(key, Common.Configuration.Linq.PreloadGroups ? values.ToList() : values);
 			}
 			finally
 			{
@@ -584,7 +588,7 @@ namespace BLToolkit.Data.Linq
 
 		public MethodInfo GetGroupingMethodInfo<TKey,TElement>()
 		{
-			return Expressor<ExpressionInfo<T>>.MethodExpressor(e => e.GetGrouping<TKey,TElement>(null, null, null, null, null, null, null));
+			return Expressor<ExpressionInfo<T>>.MethodExpressor(e => e.GetGrouping<TKey,TElement>(null, null, null, null, null, null));
 		}
 
 		#endregion
@@ -953,13 +957,6 @@ namespace BLToolkit.Data.Linq
 			public SqlBuilder      OriginalSql;
 			public string          CommandText;
 		}
-
-		public class KeyValueHolder
-		{
-			public T Key;
-		}
-
-		public static FieldInfo KeyValueHolderField = Expressor<KeyValueHolder>.FieldExpressor(e => e.Key);
 
 		#endregion
 	}

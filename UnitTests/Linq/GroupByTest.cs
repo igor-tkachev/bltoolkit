@@ -92,18 +92,21 @@ namespace Data.Linq
 		[Test]
 		public void GroupBy5()
 		{
+			var result =
+				from ch in GrandChild
+				group ch by new { ch.ParentID, ch.ChildID } into g
+				group g  by new { g.Key.ParentID }          into g
+				select g.Key;
+
 			ForEachProvider(db =>
 			{
-				var q =
+				var expected =
 					from ch in db.GrandChild
 					group ch by new { ch.ParentID, ch.ChildID } into g
 					group g  by new { g.Key.ParentID }          into g
 					select g.Key;
 
-				var list = q.ToList();
-
-				Assert.AreEqual   (8, list.Count);
-				Assert.AreNotEqual(0, list.OrderBy(c => c.ParentID).ToList().Count);
+				Assert.AreEqual(0, result.ToList().Except(expected).Count());
 			});
 		}
 
@@ -160,6 +163,20 @@ namespace Data.Linq
 				var list = q.ToList();
 
 				Assert.AreEqual(8, list.Count);
+			});
+		}
+
+		[Test]
+		public void GroupBy10()
+		{
+			var expected = (from ch in Child group ch by ch.ParentID into g select g).ToList().OrderBy(p => p.Key).ToList();
+
+			ForEachProvider(db =>
+			{
+				var result = (from ch in db.Child group ch by ch.ParentID into g select g).ToList().OrderBy(p => p.Key).ToList();
+
+				Assert.AreEqual(0, result[0].ToList().Except(expected[0].ToList()).Count());
+				Assert.AreEqual(0, result.Select(p => p.Key).Except(expected.Select(p => p.Key)).Count());
 			});
 		}
 

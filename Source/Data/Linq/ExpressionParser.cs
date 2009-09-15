@@ -16,7 +16,14 @@ namespace BLToolkit.Data.Linq
 	using Reflection;
 	using Data.Sql;
 
-	class ExpressionParser<T> : ReflectionHelper
+	class ExpressionParser : ReflectionHelper
+	{
+		// Should be only one instance.
+		//
+		static protected readonly ParameterExpression ParametersParam = Expression.Parameter(typeof(object[]), "ps");
+	}
+
+	class ExpressionParser<T> : ExpressionParser
 	{
 		#region Init
 
@@ -27,7 +34,6 @@ namespace BLToolkit.Data.Linq
 
 		readonly ExpressionInfo<T>   _info            = new ExpressionInfo<T>();
 		readonly ParameterExpression _expressionParam = Expression.Parameter(typeof(Expression),        "expr");
-		readonly ParameterExpression _parametersParam = Expression.Parameter(typeof(object[]),          "ps");
 		readonly ParameterExpression _contextParam    = Expression.Parameter(typeof(QueryContext),      "context");
 		readonly ParameterExpression _dataReaderParam = Expression.Parameter(typeof(IDataReader),       "rd");
 		readonly ParameterExpression _mapSchemaParam  = Expression.Parameter(typeof(MappingSchema),     "ms");
@@ -56,6 +62,9 @@ namespace BLToolkit.Data.Linq
 			Expression            expression,
 			ParameterExpression[] parameters)
 		{
+			ParsingTracer.WriteLine(expression);
+			ParsingTracer.IncIndentLevel();
+
 			if (parameters != null)
 				expression = ConvertParameters(expression, parameters);
 
@@ -92,6 +101,7 @@ namespace BLToolkit.Data.Linq
 				}
 			);
 
+			ParsingTracer.DecIndentLevel();
 			return _info;
 		}
 
@@ -107,7 +117,7 @@ namespace BLToolkit.Data.Linq
 						return pi.Parent.Replace(
 							Expression.Convert(
 								Expression.ArrayIndex(
-									_parametersParam,
+									ParametersParam,
 									Expression.Constant(Array.IndexOf(parameters, (ParameterExpression)pi.Expr))),
 								pi.Expr.Type),
 							pi.ParamAccessor);
@@ -119,10 +129,17 @@ namespace BLToolkit.Data.Linq
 
 		QuerySource ParseSequence(ParseInfo info, QuerySource parent)
 		{
-			QuerySource select = ParseTable(info);
+			ParsingTracer.WriteLine(info);
+			ParsingTracer.IncIndentLevel();
+
+			var select = ParseTable(info);
 
 			if (select != null)
+			{
+				ParsingTracer.DecIndentLevel();
+				ParsingTracer.WriteLine(select);
 				return select;
+			}
 
 			if (info.NodeType == ExpressionType.MemberAccess && TypeHelper.IsSameOrParent(typeof(IQueryable), info.Expr.Type))
 			{
@@ -130,7 +147,11 @@ namespace BLToolkit.Data.Linq
 				select = ParseTable(info);
 
 				if (select != null)
+				{
+					ParsingTracer.DecIndentLevel();
+					ParsingTracer.WriteLine(select);
 					return select;
+				}
 			}
 
 			if (info.NodeType != ExpressionType.Call)
@@ -143,6 +164,9 @@ namespace BLToolkit.Data.Linq
 				//
 				pi => pi.IsQueryableMethod(seq =>
 				{
+					ParsingTracer.WriteLine(pi);
+					ParsingTracer.IncIndentLevel();
+
 					switch (pi.Expr.Method.Name)
 					{
 						case "Distinct"        : select = ParseSequence(seq, null); CurrentSql.Select.IsDistinct = true;                                                 break;
@@ -150,8 +174,13 @@ namespace BLToolkit.Data.Linq
 						case "FirstOrDefault"  : select = ParseSequence(seq, null); CurrentSql.Select.Take(1); _info.MakeElementOperator(ElementMethod.FirstOrDefault);  break;
 						case "Single"          : select = ParseSequence(seq, null); CurrentSql.Select.Take(2); _info.MakeElementOperator(ElementMethod.Single);          break;
 						case "SingleOrDefault" : select = ParseSequence(seq, null); CurrentSql.Select.Take(2); _info.MakeElementOperator(ElementMethod.SingleOrDefault); break;
-						default                : return false;
+						default                :
+							ParsingTracer.DecIndentLevel();
+							return false;
 					}
+
+					ParsingTracer.DecIndentLevel();
+
 					return true;
 				}),
 				//
@@ -200,6 +229,8 @@ namespace BLToolkit.Data.Linq
 				pi => { throw new ArgumentException(string.Format("Queryable method call expected. Got '{0}'.", pi.Expr), "info"); }
 			);
 
+			ParsingTracer.DecIndentLevel();
+			ParsingTracer.WriteLine(select);
 			return select;
 		}
 
@@ -266,20 +297,34 @@ namespace BLToolkit.Data.Linq
 
 		QuerySource ParseSelect(LambdaInfo l, params QuerySource[] sources)
 		{
-			for (var i = 0; i < sources.Length && i < l.Parameters.Length; i++)
-				SetAlias(sources[i], l.Parameters[i].Expr.Name);
+			ParsingTracer.WriteLine();
+			ParsingTracer.IncIndentLevel();
 
-			switch (l.Body.NodeType)
+#if DEBUG
+			try
 			{
-				case ExpressionType.Parameter   :
-					for (var i = 0; i < sources.Length; i++)
-						if (l.Body == l.Parameters[i].Expr)
-							return sources[i];
-					throw new InvalidOperationException();
-				case ExpressionType.New         : return new QuerySource.Expr  (CurrentSql, l.ConvertTo<NewExpression>(),        sources);
-				case ExpressionType.MemberInit  : return new QuerySource.Expr  (CurrentSql, l.ConvertTo<MemberInitExpression>(), sources);
-				default                         : return new QuerySource.Scalar(CurrentSql, l,                                   sources);
+#endif
+				for (var i = 0; i < sources.Length && i < l.Parameters.Length; i++)
+					SetAlias(sources[i], l.Parameters[i].Expr.Name);
+
+				switch (l.Body.NodeType)
+				{
+					case ExpressionType.Parameter  :
+						for (var i = 0; i < sources.Length; i++)
+							if (l.Body == l.Parameters[i].Expr)
+								return sources[i];
+						throw new InvalidOperationException();
+					case ExpressionType.New        : return new QuerySource.Expr  (CurrentSql, l.ConvertTo<NewExpression>(),        sources);
+					case ExpressionType.MemberInit : return new QuerySource.Expr  (CurrentSql, l.ConvertTo<MemberInitExpression>(), sources);
+					default                        : return new QuerySource.Scalar(CurrentSql, l,                                   sources);
+				}
+#if DEBUG
 			}
+			finally
+			{
+				ParsingTracer.DecIndentLevel();
+			}
+#endif
 		}
 
 		#endregion
@@ -288,6 +333,9 @@ namespace BLToolkit.Data.Linq
 
 		QuerySource ParseSelectMany(LambdaInfo collectionSelector, LambdaInfo resultSelector, QuerySource source)
 		{
+			ParsingTracer.WriteLine();
+			ParsingTracer.IncIndentLevel();
+
 			var sql = CurrentSql;
 
 			CurrentSql = new SqlBuilder();
@@ -309,7 +357,9 @@ namespace BLToolkit.Data.Linq
 
 			CurrentSql = current;
 
-			return resultSelector == null ? source2 : ParseSelect(resultSelector, source1, source2);
+			var result = resultSelector == null ? source2 : ParseSelect(resultSelector, source1, source2);
+			ParsingTracer.DecIndentLevel();
+			return result;
 		}
 
 		#endregion
@@ -323,6 +373,9 @@ namespace BLToolkit.Data.Linq
 			LambdaInfo  resultSelector,
 			QuerySource outerSource)
 		{
+			ParsingTracer.WriteLine();
+			ParsingTracer.IncIndentLevel();
+
 			CheckExplicitCtor(outerKeySelector.Body);
 
 			var current = new SqlBuilder();
@@ -355,15 +408,16 @@ namespace BLToolkit.Data.Linq
 					.Expr(ParseExpression(source2, innerKeySelector.Body));
 			}
 
-			return resultSelector == null ? source2 : ParseSelect(resultSelector, source1, source2);
+			var result = resultSelector == null ? source2 : ParseSelect(resultSelector, source1, source2);
+			ParsingTracer.DecIndentLevel();
+			return result;
 		}
 
 		static void CheckExplicitCtor(Expression expr)
 		{
 			if (expr.NodeType == ExpressionType.MemberInit)
 				throw new NotSupportedException(
-					string.Format("Explicit construction of entity type '{0}' in query is not allowed.",
-					              expr.Type));
+					string.Format("Explicit construction of entity type '{0}' in query is not allowed.", expr.Type));
 		}
 
 		#endregion
@@ -377,6 +431,9 @@ namespace BLToolkit.Data.Linq
 			LambdaInfo  resultSelector,
 			QuerySource outerSource)
 		{
+			ParsingTracer.WriteLine();
+			ParsingTracer.IncIndentLevel();
+
 			if (outerKeySelector.Body.NodeType == ExpressionType.MemberInit)
 				throw new NotSupportedException(
 					string.Format("Explicit construction of entity type '{0}' in query is not allowed.",
@@ -456,6 +513,7 @@ namespace BLToolkit.Data.Linq
 			source2.Counter = new QueryField.ExprColumn(select, counter.SubSql.Select.Columns[0], null);
 			//source2.SourceInfo = inner;
 
+			ParsingTracer.DecIndentLevel();
 			return select;
 		}
 
@@ -474,6 +532,9 @@ namespace BLToolkit.Data.Linq
 
 		QuerySource ParseWhere(LambdaInfo l, QuerySource select)
 		{
+			ParsingTracer.WriteLine();
+			ParsingTracer.IncIndentLevel();
+
 			SetAlias(select, l.Parameters[0].Expr.Name);
 
 			if (CheckSubQueryForWhere(select, l.Body))
@@ -481,6 +542,7 @@ namespace BLToolkit.Data.Linq
 
 			ParseSearchCondition(CurrentSql.Where.SearchCondition.Conditions, select, l.Body);
 
+			ParsingTracer.DecIndentLevel();
 			return select;
 		}
 
@@ -510,6 +572,9 @@ namespace BLToolkit.Data.Linq
 
 		QuerySource ParseGroupBy(LambdaInfo keySelector, LambdaInfo elementSelector, LambdaInfo resultSelector, QuerySource source, Type groupingType)
 		{
+			ParsingTracer.WriteLine();
+			ParsingTracer.IncIndentLevel();
+
 			CheckExplicitCtor(keySelector.Body);
 
 			var group   = ParseSelect(keySelector, source);
@@ -528,20 +593,29 @@ namespace BLToolkit.Data.Linq
 
 				fields[i] = exprs[0];
 
-				sub = sub || !(exprs[0] is SqlField);
+				sub = sub || !(exprs[0] is SqlField || exprs[0] is SqlBuilder.Column);
 			}
 
 			if (sub)
 			{
-				
+				var subQuery = WrapInSubQuery(group);
+
+				foreach (var field in group.Fields)
+					CurrentSql.GroupBy.Expr(group.SqlBuilder.Select.Columns[field.Select(this)[0].Index]);
+
+				group = subQuery;
 			}
-			//else
+			else
 				foreach (var field in fields)
 					CurrentSql.GroupBy.Expr(field);
 
 			if (resultSelector == null)
-				return new QuerySource.GroupBy(CurrentSql, group, keySelector, element, groupingType);
+			{
+				ParsingTracer.DecIndentLevel();
+				return new QuerySource.GroupBy(CurrentSql, group, source, keySelector, element, groupingType);
+			}
 
+			ParsingTracer.DecIndentLevel();
 			return ParseSelect(resultSelector, group, source);
 		}
 
@@ -551,6 +625,9 @@ namespace BLToolkit.Data.Linq
 
 		QuerySource ParseOrderBy(LambdaInfo lambda, QuerySource source, bool isThen, bool ascending)
 		{
+			ParsingTracer.WriteLine();
+			ParsingTracer.IncIndentLevel();
+
 			CheckExplicitCtor(lambda.Body);
 
 			if (CurrentSql.Select.TakeValue != null || CurrentSql.Select.SkipValue != null)
@@ -591,6 +668,7 @@ namespace BLToolkit.Data.Linq
 				}
 			}
 
+			ParsingTracer.DecIndentLevel();
 			return source;
 		}
 
@@ -602,6 +680,9 @@ namespace BLToolkit.Data.Linq
 		{
 			if (value.Expr.Type != typeof(int))
 				return false;
+
+			ParsingTracer.WriteLine();
+			ParsingTracer.IncIndentLevel();
 
 			CurrentSql.Select.Take(ParseExpression(select, value));
 
@@ -619,6 +700,7 @@ namespace BLToolkit.Data.Linq
 					p.IsQueryParameter = false;
 			}
 
+			ParsingTracer.DecIndentLevel();
 			return true;
 		}
 
@@ -630,6 +712,9 @@ namespace BLToolkit.Data.Linq
 		{
 			if (value.Expr.Type != typeof(int))
 				return false;
+
+			ParsingTracer.WriteLine();
+			ParsingTracer.IncIndentLevel();
 
 			var prevSkipValue = CurrentSql.Select.SkipValue;
 
@@ -656,6 +741,7 @@ namespace BLToolkit.Data.Linq
 					p.IsQueryParameter = false;
 			}
 
+			ParsingTracer.DecIndentLevel();
 			return true;
 		}
 
@@ -672,13 +758,16 @@ namespace BLToolkit.Data.Linq
 		void SetQuery(ParseInfo info)
 		{
 			var mapper = Expression.Lambda<ExpressionInfo<T>.Mapper<T>>(
-				info, new[] { _infoParam, _contextParam, _dataReaderParam, _mapSchemaParam, _expressionParam, _parametersParam });
+				info, new[] { _infoParam, _contextParam, _dataReaderParam, _mapSchemaParam, _expressionParam, ParametersParam });
 
 			_info.SetQuery(mapper.Compile());
 		}
 
 		void BuildSelect(QuerySource query, Action<QuerySource,IndexConverter> queryAction, Action<ParseInfo> newAction, IndexConverter converter)
 		{
+			ParsingTracer.WriteLine(query);
+			ParsingTracer.IncIndentLevel();
+
 			query.Match
 			(
 				table  => queryAction(table, converter),                                  // QueryInfo.Table
@@ -687,50 +776,34 @@ namespace BLToolkit.Data.Linq
 				scalar => BuildNew     (query, scalar.Lambda.Body, newAction),            // QueryInfo.Scalar
 				group  => BuildGroupBy (group, group.Lambda.Body,  newAction)             // QueryInfo.GroupBy
 			);
+
+			ParsingTracer.DecIndentLevel();
 		}
 
 		void BuildNew(QuerySource query, ParseInfo expr, Action<ParseInfo> newAction)
 		{
+			ParsingTracer.WriteLine(expr);
+			ParsingTracer.WriteLine(query);
+			ParsingTracer.IncIndentLevel();
+
 			var info = BuildNewExpression(query, expr, i => i);
 			newAction(info);
+
+			ParsingTracer.DecIndentLevel();
 		}
 
 		void BuildSubQuery(QuerySource.SubQuery subQuery, Action<QuerySource,IndexConverter> queryAction, Action<ParseInfo> newAction, IndexConverter converter)
 		{
+			ParsingTracer.WriteLine();
+			ParsingTracer.IncIndentLevel();
+
 			subQuery.ParentQueries[0].Match
 			(
 				_    => queryAction(subQuery, converter), // QueryInfo.Table
 				expr => // QueryInfo.Expr
 				{
-					if (expr.Lambda.Body.Expr is NewExpression)
-					{
-						ParseInfo newExpr = null;
-						var       member  = 0;
-
-						var info = expr.Lambda.Body.Walk(pi =>
-						{
-							if (newExpr == null && pi.NodeType == ExpressionType.New)
-							{
-								newExpr = pi;
-							}
-							else if (newExpr != null)
-							{
-								var mi = ((NewExpression)newExpr.Expr).Members[member++];
-
-								if (mi is MethodInfo)
-									mi = TypeHelper.GetPropertyByMethod((MethodInfo)mi);
-
-								var field = subQuery.GetField(mi);
-								var idx   = field.Select(this);
-
-								return BuildField(pi, idx.Select(i => i.Index).ToArray(), pi.Expr.Type);
-							}
-
-							return pi;
-						});
-
-						newAction(info);
-					}
+					if (expr.Lambda.Body.NodeType == ExpressionType.New)
+						newAction(BuildQuerySourceExpr(subQuery, expr.Lambda.Body, converter));
 					else
 						throw new NotImplementedException();
 				}, 
@@ -738,6 +811,42 @@ namespace BLToolkit.Data.Linq
 				_ => { throw new NotImplementedException(); }, // QueryInfo.Scalar
 				_ => { throw new NotImplementedException(); }  // QueryInfo.GroupBy
 			);
+
+			ParsingTracer.DecIndentLevel();
+		}
+
+		ParseInfo BuildQuerySourceExpr(QuerySource query, ParseInfo parseInfo, IndexConverter converter)
+		{
+			ParsingTracer.WriteLine();
+			ParsingTracer.IncIndentLevel();
+
+			NewExpression newExpr = null;
+			var           member  = 0;
+
+			var result = parseInfo.Walk(pi =>
+			{
+				if (newExpr == null && pi.NodeType == ExpressionType.New)
+				{
+					newExpr = (NewExpression)pi.Expr;
+				}
+				else if (newExpr != null)
+				{
+					var mi = newExpr.Members[member++];
+
+					if (mi is MethodInfo)
+						mi = TypeHelper.GetPropertyByMethod((MethodInfo)mi);
+
+					var field = query.GetField(mi);
+					var idx   = field.Select(this);
+
+					return BuildField(pi, idx.Select(i => converter(i).Index).ToArray(), pi.Expr.Type);
+				}
+
+				return pi;
+			});
+
+			ParsingTracer.DecIndentLevel();
+			return result;
 		}
 
 		#region BuildGroupBy
@@ -752,28 +861,25 @@ namespace BLToolkit.Data.Linq
 			public ParseInfo GetParseInfo(ExpressionParser<T> parser, QuerySource.GroupBy query, ParseInfo expr, Expression info)
 			{
 				var valueParser = new ExpressionParser<TElement>();
-				var keyConst    = Expression.Constant(new ExpressionInfo<TKey>.KeyValueHolder());
+				var keyParam    = Expression.Convert(Expression.ArrayIndex(ParametersParam, Expression.Constant(0)), typeof(TKey));
 
 				Expression valueExpr = null;
 
 				if (expr.NodeType == ExpressionType.New)
 				{
-					var ne  = (NewExpression)expr.Expr;
-					var key = Expression.MakeMemberAccess(keyConst, ExpressionInfo<TKey>.KeyValueHolderField);
+					var ne = (NewExpression)expr.Expr;
 
 					for (var i = 0; i < ne.Arguments.Count; i++)
 					{
 						var member = TypeHelper.GetPropertyByMethod((MethodInfo)ne.Members[i]);
-						var equal  = Expression.Equal(ne.Arguments[i], Expression.MakeMemberAccess(key, member));
+						var equal  = Expression.Equal(ne.Arguments[i], Expression.MakeMemberAccess(keyParam, member));
 
 						valueExpr = valueExpr == null ? equal : Expression.AndAlso(valueExpr, equal);
 					}
 				}
 				else
 				{
-					valueExpr = Expression.Equal(
-						query.Lambda.Body,
-						Expression.MakeMemberAccess(keyConst, ExpressionInfo<TKey>.KeyValueHolderField));
+					valueExpr = Expression.Equal(query.Lambda.Body, keyParam);
 				}
 
 				valueExpr = Expression.Call(
@@ -781,7 +887,7 @@ namespace BLToolkit.Data.Linq
 					Expressor<object>.MethodExpressor(_ => Queryable.Where(null, (Expression<Func<TSource,bool>>)null)),
 					new[]
 					{
-						query.ParentQueries[0].ParentQueries[0].Lambda.Body.Expr,
+						query.OriginalQuery.Lambda.Body.Expr,
 						Expression.Lambda<Func<TSource,bool>>(valueExpr, new[] { query.Lambda.Parameters[0].Expr })
 					});
 
@@ -805,7 +911,7 @@ namespace BLToolkit.Data.Linq
 						parser._dataReaderParam,
 						parser._mapSchemaParam,
 						parser._expressionParam,
-						parser._parametersParam
+						ParametersParam
 					});
 
 				return expr.Parent.Replace(
@@ -813,9 +919,8 @@ namespace BLToolkit.Data.Linq
 						parser._contextParam,
 						parser._dataReaderParam,
 						parser._expressionParam,
-						parser._parametersParam,
+						ParametersParam,
 						Expression.Constant(keyReader.Compile()),
-						keyConst,
 						Expression.Constant(valueParser.Parse(parser._info.DataProvider, parser._info.MappingSchema, valueExpr, parser._info.Parameters))),
 					expr.ParamAccessor);
 			}
@@ -823,6 +928,10 @@ namespace BLToolkit.Data.Linq
 
 		void BuildGroupBy(QuerySource.GroupBy query, ParseInfo expr, Action<ParseInfo> newAction)
 		{
+			ParsingTracer.WriteLine(expr);
+			ParsingTracer.WriteLine(query);
+			ParsingTracer.IncIndentLevel();
+
 			_info.PreloadData = false;
 
 			var args   = query.GroupingType.GetGenericArguments();
@@ -832,13 +941,19 @@ namespace BLToolkit.Data.Linq
 			var info   = helper.GetParseInfo(this, query, expr, BuildNewExpression(query, expr, i => i));
 
 			newAction(info);
+
+			ParsingTracer.DecIndentLevel();
 		}
 
 		#endregion
 
 		ParseInfo BuildNewExpression(QuerySource query, ParseInfo expr, IndexConverter converter)
 		{
-			return expr.Walk(pi =>
+			ParsingTracer.WriteLine(expr);
+			ParsingTracer.WriteLine(query);
+			ParsingTracer.IncIndentLevel();
+
+			var newExpr = expr.Walk(pi =>
 			{
 				switch (pi.NodeType)
 				{
@@ -858,7 +973,7 @@ namespace BLToolkit.Data.Linq
 								if (field != null)
 								{
 									if (field is QueryField.Column || field is QuerySource.SubQuery)
-										return BuildField(ma, field, i => i);
+										return BuildField(ma, field, converter/*i => i*/);
 
 									if (field is QueryField.ExprColumn)
 									{
@@ -896,7 +1011,7 @@ namespace BLToolkit.Data.Linq
 								var field = query.GetField(ma);
 
 								if (field != null)
-									return BuildField(ma, field, i => i);
+									return BuildField(ma, field, converter/*i => i*/);
 							}
 
 							if (ex.NodeType == ExpressionType.Constant)
@@ -928,6 +1043,12 @@ namespace BLToolkit.Data.Linq
 								{
 									var source = (QuerySource)field;
 									return BuildNewExpression(source, source.Lambda.Body, converter);
+								}
+
+								if (field is QuerySource.Expr)
+								{
+									var source = (QuerySource)field;
+									return BuildQuerySourceExpr(query, source.Lambda.Body, converter);
 								}
 
 								if (field is QuerySource.GroupJoinQuery)
@@ -974,10 +1095,16 @@ namespace BLToolkit.Data.Linq
 
 				return pi;
 			});
+
+			ParsingTracer.DecIndentLevel();
+			return newExpr;
 		}
 
 		ParseInfo BuildSubQuery(ParseInfo<MemberExpression> ma, QueryField.SubQueryColumn query, IndexConverter converter)
 		{
+			ParsingTracer.WriteLine();
+			ParsingTracer.IncIndentLevel();
+
 			if (query.Field is QuerySource.Table)
 				return BuildQueryField(ma, (QuerySource.Table)query.Field, i => converter(query.QuerySource.EnsureField(i.Field).Select(this)[0]));
 
@@ -987,14 +1114,20 @@ namespace BLToolkit.Data.Linq
 			if (query.Field is QueryField.SubQueryColumn)
 				return BuildSubQuery(ma, (QueryField.SubQueryColumn)query.Field, i => converter(query.QuerySource.EnsureField(i.Field).Select(this)[0]));
 
-			return BuildField(ma, query, converter);
+			var field = BuildField(ma, query, converter);
+
+			ParsingTracer.DecIndentLevel();
+			return field;
 		}
 
 		ParseInfo BuildQueryField(ParseInfo pi, QuerySource query, IndexConverter converter)
 		{
+			ParsingTracer.WriteLine();
+			ParsingTracer.IncIndentLevel();
+
 			var index = query.Select(this).Select(i => converter(i).Index).ToArray();
 
-			return pi.Parent.Replace(
+			var field = pi.Parent.Replace(
 				Expression.Convert(
 					Expression.Call(_infoParam, _info.GetMapperMethodInfo(),
 						Expression.Constant(pi.Expr.Type),
@@ -1002,6 +1135,9 @@ namespace BLToolkit.Data.Linq
 						Expression.Constant(_info.GetMapperSlot(index))),
 					pi.Expr.Type),
 				pi.ParamAccessor);
+
+			ParsingTracer.DecIndentLevel();
+			return field;
 		}
 
 		#region BuildGroupJoin
@@ -1023,7 +1159,7 @@ namespace BLToolkit.Data.Linq
 						parser._dataReaderParam,
 						parser._mapSchemaParam,
 						parser._expressionParam,
-						parser._parametersParam
+						ParametersParam
 					});
 
 				return ma.Parent.Replace(
@@ -1031,7 +1167,7 @@ namespace BLToolkit.Data.Linq
 						parser._contextParam,
 						parser._dataReaderParam,
 						parser._expressionParam,
-						parser._parametersParam,
+						ParametersParam,
 						Expression.Constant(counterIndex.Index),
 						Expression.Constant(itemReader.Compile())),
 					ma.ParamAccessor);
@@ -1040,6 +1176,9 @@ namespace BLToolkit.Data.Linq
 
 		ParseInfo BuildGroupJoin(ParseInfo ma, QuerySource.GroupJoinQuery query, IndexConverter converter)
 		{
+			ParsingTracer.WriteLine();
+			ParsingTracer.IncIndentLevel();
+
 			var args = ma.Expr.Type.GetGenericArguments();
 
 			Expression expr = null;
@@ -1063,58 +1202,93 @@ namespace BLToolkit.Data.Linq
 			var helper       = (IGroupJoinHelper)Activator.CreateInstance(typeof(GroupJoinHelper<>).MakeGenericType(typeof(T), args[0]));
 			var counterIndex = converter(query.Counter.Select(this)[0]);
 
-			return helper.GetParseInfo(this, ma, counterIndex, expr);
+			var result       = helper.GetParseInfo(this, ma, counterIndex, expr);
+			ParsingTracer.DecIndentLevel();
+			return result;
 		}
 
 		#endregion
 
 		ParseInfo BuildGroupBy(ParseInfo<MemberExpression> ma, QueryField.GroupByColumn field, IndexConverter converter)
 		{
+			ParsingTracer.WriteLine(ma);
+			ParsingTracer.WriteLine(field);
+			ParsingTracer.IncIndentLevel();
+
 			var source = field.GroupBySource.ParentQueries[0];
 
 			if (source is QuerySource.Scalar)
 				return BuildField(ma, field.GroupBySource, converter);
 
-			return BuildNewExpression(field.GroupBySource.ParentQueries[0], field.GroupBySource.Lambda.Body, converter);
+			if (source is QuerySource.SubQuery)
+			{
+				if (source.ParentQueries[0] is QuerySource.Scalar)
+					return BuildField(ma, field.GroupBySource, converter);
+
+				return BuildNewExpression(source, field.GroupBySource.Lambda.Body, converter /*i => converter(source.EnsureField(i.Field).Select(this)[0])*/);
+			}
+
+			var result = BuildNewExpression(source, field.GroupBySource.Lambda.Body, converter);
+			ParsingTracer.DecIndentLevel();
+			return result;
 		}
 
 		ParseInfo BuildField(QuerySource query, ParseInfo pi)
 		{
+			ParsingTracer.WriteLine();
+			ParsingTracer.IncIndentLevel();
+
 			var sqlex = ParseExpression(query, pi);
 			var idx   = CurrentSql.Select.Add(sqlex);
 
-			return BuildField(pi, new[] { idx }, pi.Expr.Type);
+			var field = BuildField(pi, new[] { idx }, pi.Expr.Type);
+			ParsingTracer.IncIndentLevel();
+			return field;
 		}
 
 		ParseInfo BuildField(ParseInfo<MemberExpression> ma, QueryField field, IndexConverter converter)
 		{
+			ParsingTracer.WriteLine(ma);
+			ParsingTracer.WriteLine(field);
+			ParsingTracer.IncIndentLevel();
+
+			ParseInfo result = null;
+
 			if (field is QuerySource.SubQuery)
 			{
 				var query = (QuerySource.SubQuery)field;
 
 				if (query is QuerySource.GroupJoinQuery && TypeHelper.IsSameOrParent(typeof(IEnumerable), ma.Expr.Type))
-					return BuildGroupJoin(ma, (QuerySource.GroupJoinQuery)query, converter);
-
-				if (query.Sources[0] is QuerySource.Table)
+					result = BuildGroupJoin(ma, (QuerySource.GroupJoinQuery)query, converter);
+				else if (query.Sources[0] is QuerySource.Table)
 				{
 					var table = (QuerySource.Table)query.Sources[0];
 
 					if (ma.Expr.Type == table.ObjectType)
-						return BuildQueryField(ma, table, i => converter(query.EnsureField(i.Field).Select(this)[0]));
+						result = BuildQueryField(ma, table, i => converter(query.EnsureField(i.Field).Select(this)[0]));
 				}
 			}
 
-			var memberType = ma.Expr.Member.MemberType == MemberTypes.Field ?
-				((FieldInfo)   ma.Expr.Member).FieldType :
-				((PropertyInfo)ma.Expr.Member).PropertyType;
+			if (result == null)
+			{
+				var memberType = ma.Expr.Member.MemberType == MemberTypes.Field ?
+					((FieldInfo)   ma.Expr.Member).FieldType :
+					((PropertyInfo)ma.Expr.Member).PropertyType;
 
-			var idx = field.Select(this);
+				var idx = field.Select(this);
 
-			return BuildField(ma, idx.Select(i => converter(i).Index).ToArray(), memberType);
+				result = BuildField(ma, idx.Select(i => converter(i).Index).ToArray(), memberType);
+			}
+
+			ParsingTracer.DecIndentLevel();
+			return result;
 		}
 
 		ParseInfo BuildField(ParseInfo ma, int[] idx, Type memberType)
 		{
+			ParsingTracer.WriteLine();
+			ParsingTracer.IncIndentLevel();
+
 			if (idx.Length != 1)
 				throw new InvalidOperationException();
 
@@ -1123,11 +1297,14 @@ namespace BLToolkit.Data.Linq
 			if (!MapSchema.Converters.TryGetValue(memberType, out mi))
 				throw new LinqException("Cannot find converter for the '{0}' type.", memberType.FullName);
 
-			return ma.Parent.Replace(
+			var result =  ma.Parent.Replace(
 				Expression.Call(_mapSchemaParam, mi,
 					Expression.Call(_dataReaderParam, DataReader.GetValue,
 						Expression.Constant(idx[0]))),
 				ma.ParamAccessor);
+
+			ParsingTracer.DecIndentLevel();
+			return result;
 		}
 
 		static void SetAlias(QuerySource query, string alias)
@@ -1188,7 +1365,7 @@ namespace BLToolkit.Data.Linq
 			var pi = BuildField(parseInfo, new[] { 0 }, parseInfo.Expr.Type);
 
 			var mapper = Expression.Lambda<ExpressionInfo<T>.Mapper<T>>(
-				pi, new [] { _infoParam, _contextParam, _dataReaderParam, _mapSchemaParam, _expressionParam, _parametersParam });
+				pi, new [] { _infoParam, _contextParam, _dataReaderParam, _mapSchemaParam, _expressionParam, ParametersParam });
 
 			_info.SetQuery(mapper.Compile());
 		}
@@ -1234,7 +1411,7 @@ namespace BLToolkit.Data.Linq
 			var newExpr = ReplaceParameter(expr, nm => name = nm);
 			var mapper  = Expression.Lambda<Func<ExpressionInfo<T>,Expression,object[],object>>(
 				Expression.Convert(newExpr, typeof(object)),
-				new [] { _infoParam, _expressionParam, _parametersParam });
+				new [] { _infoParam, _expressionParam, ParametersParam });
 
 			p = new ExpressionInfo<T>.Parameter
 			{
@@ -1677,10 +1854,9 @@ namespace BLToolkit.Data.Linq
 							{
 								var p = (ParameterExpression)pi.Expr;
 
-								canbe = p == _parametersParam;
+								canbe = p == ParametersParam;
 								break;
 							}
-
 
 						case ExpressionType.MemberAccess:
 							{
@@ -1960,11 +2136,11 @@ namespace BLToolkit.Data.Linq
 
 		#region Helpers
 
-		QuerySource WrapInSubQuery(QuerySource source)
+		QuerySource.SubQuery WrapInSubQuery(QuerySource source)
 		{
-			source = new QuerySource.SubQuery(new SqlBuilder(), source.SqlBuilder, source);
-			CurrentSql = source.SqlBuilder;
-			return source;
+			var result = new QuerySource.SubQuery(new SqlBuilder(), source.SqlBuilder, source);
+			CurrentSql = result.SqlBuilder;
+			return result;
 		}
 
 		SqlFunctionAttribute GetFunctionAttribute(ICustomAttributeProvider member)

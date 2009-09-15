@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -34,6 +35,8 @@ namespace BLToolkit.Data.Linq
 					Fields.Add(column);
 					_columns.Add(mapper.MemberAccessor.MemberInfo, column);
 				}
+
+				ParsingTracer.DecIndentLevel();
 			}
 
 			public Type     ObjectType;
@@ -138,6 +141,8 @@ namespace BLToolkit.Data.Linq
 							throw new InvalidOperationException();
 					}
 				}
+
+				ParsingTracer.DecIndentLevel();
 			}
 
 			protected readonly Dictionary<MemberInfo,QueryField> Members = new Dictionary<MemberInfo,QueryField>();
@@ -236,6 +241,8 @@ namespace BLToolkit.Data.Linq
 			public SubQuery(SqlBuilder currentSql, SqlBuilder subSql, QuerySource parentQuery, bool addToSource)
 				: base(currentSql, null, parentQuery)
 			{
+				ParsingTracer.WriteLine(subSql);
+
 				SubSql = subSql;
 
 				if (addToSource)
@@ -243,6 +250,8 @@ namespace BLToolkit.Data.Linq
 
 				foreach (var field in parentQuery.Fields)
 					EnsureField(field);
+
+				ParsingTracer.DecIndentLevel();
 			}
 
 			public SubQuery(SqlBuilder currentSql, SqlBuilder subSql, QuerySource parentQuery)
@@ -349,6 +358,8 @@ namespace BLToolkit.Data.Linq
 				_field = GetParentField(lambda.Body) ?? new ExprColumn(this, lambda.Body, null);
 
 				Fields.Add(_field);
+
+				ParsingTracer.DecIndentLevel();
 			}
 
 			QueryField _field;
@@ -381,9 +392,18 @@ namespace BLToolkit.Data.Linq
 
 		public class GroupBy : Expr
 		{
-			public GroupBy(SqlBuilder sqlBilder, QuerySource groupQuery, LambdaInfo keySelector, QuerySource elementSource, Type groupingType)
+			public GroupBy(
+				SqlBuilder  sqlBilder,
+				QuerySource groupQuery,
+				QuerySource originalQuery,
+				LambdaInfo  keySelector,
+				QuerySource elementSource,
+				Type groupingType)
 				: base(sqlBilder, keySelector, groupQuery)
 			{
+				ParsingTracer.IncIndentLevel();
+
+				OriginalQuery = originalQuery;
 				ElementSource = elementSource;
 				GroupingType  = groupingType;
 
@@ -391,14 +411,17 @@ namespace BLToolkit.Data.Linq
 
 				Fields.Add(field);
 				Members.Add(groupingType.GetProperty("Key"), field);
+
+				ParsingTracer.DecIndentLevel();
 			}
 
+			public QuerySource OriginalQuery;
 			public QuerySource ElementSource;
 			public Type        GroupingType;
 
 			public override QueryField GetParentField(Expression expr)
 			{
-			    return ParentQueries[0].GetParentField(expr);
+				return ParentQueries[0].GetParentField(expr);
 			}
 
 			GroupBy() {}
@@ -413,11 +436,35 @@ namespace BLToolkit.Data.Linq
 
 		#region base
 
-		protected QuerySource(SqlBuilder sqlBilder, LambdaInfo lambda, params QuerySource[] parentQueries)
+		protected QuerySource(SqlBuilder sqlBuilder, LambdaInfo lambda, params QuerySource[] parentQueries)
 		{
-			SqlBuilder    = sqlBilder;
+			SqlBuilder    = sqlBuilder;
 			Lambda        = lambda;
 			ParentQueries = parentQueries;
+
+#if TRACE_PARSING
+			ParsingTracer.WriteLine(lambda);
+			ParsingTracer.WriteLine(this);
+
+			foreach (var parent in parentQueries)
+				ParsingTracer.WriteLine("parent", parent);
+
+			foreach (var field in Fields)
+				ParsingTracer.WriteLine("field ", field);
+
+			ParsingTracer.IncIndentLevel();
+#endif
+		}
+
+		public override string ToString()
+		{
+			var str = SqlBuilder.ToString().Replace('\t', ' ').Replace('\n', ' ');
+
+			for (var len = str.Length; len != (str = str.Replace("  ", " ")).Length; len = str.Length)
+			{
+			}
+
+			return str;
 		}
 
 		protected QuerySource()
@@ -511,6 +558,9 @@ namespace BLToolkit.Data.Linq
 
 		public override FieldIndex[] Select<T>(ExpressionParser<T> parser)
 		{
+			ParsingTracer.WriteLine(this);
+			ParsingTracer.IncIndentLevel();
+
 			if (_indexes == null)
 			{
 				_indexes = new FieldIndex[Fields.Count];
@@ -528,6 +578,7 @@ namespace BLToolkit.Data.Linq
 				}
 			}
 
+			ParsingTracer.DecIndentLevel();
 			return _indexes;
 		}
 
