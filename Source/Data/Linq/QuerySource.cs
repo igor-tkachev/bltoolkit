@@ -287,6 +287,9 @@ namespace BLToolkit.Data.Linq
 
 			public override QueryField GetField(Expression expr)
 			{
+				if (expr.NodeType == ExpressionType.Parameter && ParentQueries[0] is Scalar)
+					return EnsureField(ParentQueries[0].Fields[0]);
+
 				return EnsureField(ParentQueries[0].GetField(expr));
 			}
 
@@ -393,12 +396,14 @@ namespace BLToolkit.Data.Linq
 		public class GroupBy : Expr
 		{
 			public GroupBy(
-				SqlBuilder  sqlBilder,
-				QuerySource groupQuery,
-				QuerySource originalQuery,
-				LambdaInfo  keySelector,
-				QuerySource elementSource,
-				Type groupingType)
+				SqlBuilder       sqlBilder,
+				QuerySource      groupQuery,
+				QuerySource      originalQuery,
+				LambdaInfo       keySelector,
+				QuerySource      elementSource,
+				Type             groupingType,
+				bool             isWrapped,
+				ISqlExpression[] byExpressions)
 				: base(sqlBilder, keySelector, groupQuery)
 			{
 				ParsingTracer.IncIndentLevel();
@@ -406,6 +411,8 @@ namespace BLToolkit.Data.Linq
 				OriginalQuery = originalQuery;
 				ElementSource = elementSource;
 				GroupingType  = groupingType;
+				IsWrapped     = isWrapped;
+				ByExpressions = byExpressions;
 
 				var field = new GroupByColumn(this);
 
@@ -415,9 +422,12 @@ namespace BLToolkit.Data.Linq
 				ParsingTracer.DecIndentLevel();
 			}
 
-			public QuerySource OriginalQuery;
-			public QuerySource ElementSource;
-			public Type        GroupingType;
+			public QuerySource      OriginalQuery;
+			public QuerySource      ElementSource;
+			public Type             GroupingType;
+			public bool             IsWrapped;
+			public ISqlExpression[] ByExpressions;
+
 
 			public override QueryField GetParentField(Expression expr)
 			{

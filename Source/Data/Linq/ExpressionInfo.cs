@@ -25,7 +25,6 @@ namespace BLToolkit.Data.Linq
 		public DataProviderBase      DataProvider;
 		public MappingSchema         MappingSchema;
 		public List<QueryInfo>       Queries = new List<QueryInfo>(1);
-		public bool                  PreloadData;
 
 		public Func<QueryContext,DbManager,Expression,object[],IEnumerable<T>> GetIEnumerable;
 		public Func<QueryContext,DbManager,Expression,object[],object>         GetElement;
@@ -114,7 +113,7 @@ namespace BLToolkit.Data.Linq
 			foreach (var sql in Queries)
 				sql.SqlBuilder.FinalizeAndValidate();
 
-			if (PreloadData || Queries.Count != 1)
+			if (Queries.Count != 1)
 				throw new InvalidOperationException();
 
 			Func<DbManager,Expression,object[],int,IEnumerable<IDataReader>> query = Query;
@@ -569,11 +568,9 @@ namespace BLToolkit.Data.Linq
 
 			try
 			{
-				TKey key = keyReader(this, context, dataReader, MappingSchema, expr, ps);
+				var key = keyReader(this, context, dataReader, MappingSchema, expr, ps);
 
-				if (ps == null)
-					ps = new object[1];
-
+				ps = ps == null ? new object[1] : ps.ToArray();
 				ps[0] = key;
 
 				var values = valueReader.GetIEnumerable(context, db.DbManager, valueReader.Expression, ps);

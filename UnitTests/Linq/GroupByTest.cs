@@ -223,13 +223,86 @@ namespace Data.Linq
 		}
 
 		[Test]
-		public void GroupByCalculated()
+		public void GroupByCalculated1()
 		{
-			var expected = from ch in Child group ch by ch.ParentID > 2 ? ch.ParentID > 3 ? "1" : "2" : "3" into g select g;
+			var expected = 
+				(
+					from ch in Child
+					group ch by ch.ParentID > 2 ? ch.ParentID > 3 ? "1" : "2" : "3"
+					into g select g
+				).ToList().OrderBy(p => p.Key).ToList();
 
 			ForEachProvider(db =>
 			{
-				var result = from ch in db.Child group ch by ch.ParentID > 2 ? ch.ParentID > 3 ? "1" : "2" : "3" into g select g;
+				var result =
+					(
+						from ch in db.Child
+						group ch by ch.ParentID > 2 ? ch.ParentID > 3 ? "1" : "2" : "3"
+						into g select g
+					).ToList().OrderBy(p => p.Key).ToList();
+
+				Assert.AreEqual(0, result[0].ToList().Except(expected[0].ToList()).Count());
+				Assert.AreEqual(0, result.Select(p => p.Key).Except(expected.Select(p => p.Key)).Count());
+			});
+		}
+
+		[Test]
+		public void GroupByCalculated2()
+		{
+			var expected =
+				from p in
+					from ch in
+						from ch in Child
+						group ch by ch.ParentID > 2 ? ch.ParentID > 3 ? "1" : "2" : "3"
+						into g select g
+					select ch.Key + "2"
+				where p == "22"
+				select p;
+
+			ForEachProvider(db =>
+			{
+				var result =
+					from p in
+						from ch in
+							from ch in db.Child
+							group ch by ch.ParentID > 2 ? ch.ParentID > 3 ? "1" : "2" : "3"
+							into g select g
+						select ch.Key + "2"
+					where p == "22"
+					select p;
+
+				Assert.AreEqual(0, result.ToList().Except(expected).Count());
+			});
+		}
+
+		[Test]
+		public void GroupBySum1()
+		{
+			var expected =
+				from ch in Child
+				group ch by ch.ParentID into g
+				select g.Sum(p => p.ChildID);
+
+			ForEachProvider(db =>
+			{
+				var result =
+					from ch in db.Child
+					group ch by ch.ParentID into g
+					select g.Sum(p => p.ChildID);
+
+				Assert.AreEqual(0, result.ToList().Except(expected).Count());
+			});
+		}
+
+		[Test]
+		public void GroupBySum2()
+		{
+			var expected = Child.GroupBy(ch => ch.ParentID).GroupBy(ch => ch).GroupBy(ch => ch).Select(p => p.Key.Key.Key);
+
+			ForEachProvider(db =>
+			{
+				var result = db.Child.GroupBy(ch => ch.ParentID).GroupBy(ch => ch).GroupBy(ch => ch).Select(p => p.Key.Key.Key);
+
 				Assert.AreEqual(0, result.ToList().Except(expected).Count());
 			});
 		}
