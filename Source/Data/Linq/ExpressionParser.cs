@@ -39,7 +39,8 @@ namespace BLToolkit.Data.Linq
 		readonly ParameterExpression _mapSchemaParam  = Expression.Parameter(typeof(MappingSchema),     "ms");
 		readonly ParameterExpression _infoParam       = Expression.Parameter(typeof(ExpressionInfo<T>), "info");
 
-		int _currentSql = 0;
+		int  _currentSql = 0;
+		bool _doNotBuildSelect;
 
 		SqlBuilder CurrentSql
 		{
@@ -96,7 +97,11 @@ namespace BLToolkit.Data.Linq
 				//
 				pi =>
 				{
-					BuildSelect(ParseSequence(pi, null), SetQuery, SetQuery, i => i);
+					var query = ParseSequence(pi, null);
+
+					if (!_doNotBuildSelect)
+						BuildSelect(query, SetQuery, SetQuery, i => i);
+
 					return true;
 				}
 			);
@@ -174,6 +179,7 @@ namespace BLToolkit.Data.Linq
 						case "FirstOrDefault"  : select = ParseSequence(seq, null); CurrentSql.Select.Take(1); _info.MakeElementOperator(ElementMethod.FirstOrDefault);  break;
 						case "Single"          : select = ParseSequence(seq, null); CurrentSql.Select.Take(2); _info.MakeElementOperator(ElementMethod.Single);          break;
 						case "SingleOrDefault" : select = ParseSequence(seq, null); CurrentSql.Select.Take(2); _info.MakeElementOperator(ElementMethod.SingleOrDefault); break;
+						case "Count"           : select = ParseSequence(seq, null); ParseCount(pi, select); break;
 						default                :
 							ParsingTracer.DecIndentLevel();
 							return false;
@@ -202,6 +208,7 @@ namespace BLToolkit.Data.Linq
 						case "FirstOrDefault"  : { select = ParseSequence(seq, null); select = ParseWhere     (l, select); CurrentSql.Select.Take(1); _info.MakeElementOperator(ElementMethod.FirstOrDefault);  break; }
 						case "Single"          : { select = ParseSequence(seq, null); select = ParseWhere     (l, select); CurrentSql.Select.Take(2); _info.MakeElementOperator(ElementMethod.Single);          break; }
 						case "SingleOrDefault" : { select = ParseSequence(seq, null); select = ParseWhere     (l, select); CurrentSql.Select.Take(2); _info.MakeElementOperator(ElementMethod.SingleOrDefault); break; }
+						case "Count"           : { select = ParseSequence(seq, null); select = ParseWhere     (l, select); ParseCount(pi, select); break; }
 						default                : return false;
 					}
 					return true;
@@ -756,6 +763,28 @@ namespace BLToolkit.Data.Linq
 
 			ParsingTracer.DecIndentLevel();
 			return true;
+		}
+
+		#endregion
+
+		#region Parse Count
+
+		void ParseCount(ParseInfo parseInfo, QuerySource select)
+		{
+			ParsingTracer.WriteLine();
+			ParsingTracer.IncIndentLevel();
+
+			var idx = select.SqlBuilder.Select.Add(new SqlFunction.Count(select.SqlBuilder), "cnt");
+			var pi  = BuildField(parseInfo, new[] { idx });
+
+			var mapper = Expression.Lambda<ExpressionInfo<T>.Mapper<int>>(
+				pi, new[] { _infoParam, _contextParam, _dataReaderParam, _mapSchemaParam, _expressionParam, ParametersParam });
+
+			_info.SetElementQuery(mapper.Compile());
+
+			_doNotBuildSelect = true;
+
+			ParsingTracer.DecIndentLevel();
 		}
 
 		#endregion
@@ -1326,11 +1355,8 @@ namespace BLToolkit.Data.Linq
 			if (!MapSchema.Converters.TryGetValue(ma.Expr.Type, out mi))
 				throw new LinqException("Cannot find converter for the '{0}' type.", ma.Expr.Type.FullName);
 
-			var result =  ma.Parent.Replace(
-				Expression.Call(_mapSchemaParam, mi,
-					Expression.Call(_dataReaderParam, DataReader.GetValue,
-						Expression.Constant(idx[0]))),
-				ma.ParamAccessor);
+			var mapper = Expression.Call(_mapSchemaParam, mi, Expression.Call(_dataReaderParam, DataReader.GetValue, Expression.Constant(idx[0])));
+			var result = ma.Parent == null ? ma.Create(mapper, ma.ParamAccessor) : ma.Parent.Replace(mapper, ma.ParamAccessor);
 
 			ParsingTracer.DecIndentLevel();
 			return result;
@@ -1765,21 +1791,30 @@ namespace BLToolkit.Data.Linq
 
 		ISqlExpression ParseEnumerable(QuerySource query, ParseInfo<Expression> pi)
 		{
+			if (!(query.ParentQueries[0] is QuerySource.GroupBy))
+				throw new LinqException("'{0}' cannot be converted to SQL.", pi.Expr);
+
+			var groupBy = ((QuerySource.GroupBy)query.ParentQueries[0]).OriginalQuery;
+
 			var expr = pi.Expr as MethodCallExpression;
 			var args = new ISqlExpression[expr.Arguments.Count - 1];
 
-			for (var i = 1; i < expr.Arguments.Count; i++)
+			if (args.Length > 0)
 			{
-				var arg = pi.Create(expr.Arguments[i], pi.Index(expr.Arguments, MethodCall.Arguments, i));
-
-				arg.IsLambda<Expression>(new Func<ParseInfo<ParameterExpression>,bool>[]
+				for (var i = 1; i < expr.Arguments.Count; i++)
 				{
-					p => true
-				},
-				body => { arg = body; return true; },
-				l    => true);
+					var arg = pi.Create(expr.Arguments[i], pi.Index(expr.Arguments, MethodCall.Arguments, i));
 
-				args[i-1] = ParseExpression(query, arg);
+					arg.IsLambda<Expression>(new Func<ParseInfo<ParameterExpression>, bool>[] { _ => true },
+					body => { arg = body; return true; },
+					_ => true);
+
+					args[i - 1] = ParseExpression(groupBy, arg);
+				}
+			}
+			else if (expr.Method.Name == "Count")
+			{
+				return new SqlFunction.Count(groupBy.SqlBuilder);
 			}
 
 			return new SqlFunction(expr.Method.Name, args);

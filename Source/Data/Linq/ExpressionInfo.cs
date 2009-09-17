@@ -16,6 +16,7 @@ namespace BLToolkit.Data.Linq
 	using DataProvider;
 	using Mapping;
 	using Data.Sql;
+	using BLToolkit.Common;
 
 	class ExpressionInfo<T> : ReflectionHelper
 	{
@@ -99,14 +100,53 @@ namespace BLToolkit.Data.Linq
 
 		#endregion
 
+		#region ElementQuery
+
+		public void SetElementQuery<TE>(Mapper<TE> mapper)
+		{
+			foreach (var sql in Queries)
+				sql.SqlBuilder.FinalizeAndValidate();
+
+			if (Queries.Count != 1)
+				throw new InvalidOperationException();
+
+			SqlProvider.SqlBuilder = Queries[0].SqlBuilder;
+
+			GetElement = (ctx, db, expr, ps) => Query(ctx, db, expr, ps, mapper);
+		}
+
+		TE Query<TE>(QueryContext ctx, DbManager db, Expression expr, object[] parameters, Mapper<TE> mapper)
+		{
+			var dispose = db == null;
+
+			if (db == null)
+				db = new DbManager();
+
+			try
+			{
+				using (var dr = GetReader(db, expr, parameters, 0))
+					while (dr.Read())
+						return mapper(this, ctx, dr, MappingSchema, expr, parameters);
+
+				return Array<TE>.Empty.First();
+			}
+			finally
+			{
+				if (dispose)
+					db.Dispose();
+			}
+		}
+
+		#endregion
+
 		#region Query
 
-		internal void SetQuery()
+		public void SetQuery()
 		{
 			SetQuery(null);
 		}
 
-		internal void SetQuery(Mapper<T> mapper)
+		public void SetQuery(Mapper<T> mapper)
 		{
 			Queries[0].Mapper = mapper;
 
@@ -936,7 +976,7 @@ namespace BLToolkit.Data.Linq
 
 		#region Inner Types
 
-		public delegate TE Mapper<TE>(ExpressionInfo<T> info,QueryContext qc,IDataReader rd,MappingSchema ms,Expression expr, object[] ps);
+		public delegate TE Mapper<TE>(ExpressionInfo<T> info, QueryContext qc, IDataReader rd, MappingSchema ms, Expression expr, object[] ps);
 
 		public class Parameter
 		{

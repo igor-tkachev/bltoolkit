@@ -170,14 +170,14 @@ namespace BLToolkit.Data.Linq
 			Action<ParseInfo<Expression>>        seq,
 			Func<ParseInfo<Expression>,bool>     action)
 		{
-			return IsMethod(pi, typeof(Queryable), methodName, new [] { p => { seq(p); return true; }, action }, p => true);
+			return IsMethod(pi, typeof(Queryable), methodName, new [] { p => { seq(p); return true; }, action }, _ => true);
 		}
 
 		public static bool IsQueryableMethod(
 			this ParseInfo<MethodCallExpression> pi,
 			Func<ParseInfo<Expression>,bool>     func)
 		{
-			return IsMethod(pi, typeof(Queryable), null, new [] { func }, p => true);
+			return IsMethod(pi, typeof(Queryable), null, new [] { func }, _ => true);
 		}
 
 		[Obsolete]

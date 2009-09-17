@@ -1330,6 +1330,9 @@ namespace BLToolkit.Data.Sql.SqlProvider
 							new SqlBuilder.SearchCondition().Expr(func.Parameters[0]). Equal   .Expr(func.Parameters[1]).ToExpr(), new SqlValue(0),
 							new SqlValue(-1)));
 
+					case "$Convert$": return ConvertConvertion(func);
+					case "Average"  : return new SqlFunction("Avg", func.Parameters);
+
 					case "CASE":
 						{
 							ISqlExpression[] parms = func.Parameters;
@@ -1376,8 +1379,6 @@ namespace BLToolkit.Data.Sql.SqlProvider
 						}
 
 						break;
-
-					case "$Convert$": return ConvertConvertion(func);
 				}
 			}
 
