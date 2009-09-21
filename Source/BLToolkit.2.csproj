@@ -221,6 +221,7 @@
     <Compile Include="Data\Sql\IChild.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Data\Sql\IClonableElement.cs" />
     <Compile Include="Data\Sql\ISqlExpression.cs">
       <SubType>Code</SubType>
     </Compile>

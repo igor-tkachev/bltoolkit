@@ -463,9 +463,16 @@ namespace BLToolkit.Data.Sql
 			return false;
 		}
 
-		public object Clone(Dictionary<object,object> objectTree)
+		#endregion
+
+		#region ICloneableElement Members
+
+		public ICloneableElement Clone(Dictionary<ICloneableElement, ICloneableElement> objectTree, Predicate<ICloneableElement> doClone)
 		{
-			object clone;
+			if (!doClone(this))
+				return this;
+
+			ICloneableElement clone;
 
 			if (!objectTree.TryGetValue(this, out clone))
 				objectTree.Add(this, clone = new SqlDataType(_dbType, _type, _length, _precision, _scale));

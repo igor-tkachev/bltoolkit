@@ -47,10 +47,10 @@ namespace BLToolkit.Data.Linq
 
 		IEnumerable<T> Execute(DbManager db, Expression expression)
 		{
-			return GetExpressionInfo(expression).GetIEnumerable(null, db, expression, Parameters);
+			return GetExpressionInfo(expression, true).GetIEnumerable(null, db, expression, Parameters);
 		}
 
-		private ExpressionInfo<T> GetExpressionInfo(Expression expression)
+		private ExpressionInfo<T> GetExpressionInfo(Expression expression, bool cache)
 		{
 			if (Info != null)
 				return Info;
@@ -58,7 +58,12 @@ namespace BLToolkit.Data.Linq
 			var dataProvider  = DbManager != null ? DbManager.DataProvider  : DbManager.GetDataProvider(DbManager.DefaultConfiguration);
 			var mappingSchema = DbManager != null ? DbManager.MappingSchema : Map.DefaultSchema;
 
-			return Info = ExpressionInfo<T>.GetExpressionInfo(dataProvider, mappingSchema, expression);
+			var info = ExpressionInfo<T>.GetExpressionInfo(dataProvider, mappingSchema, expression);
+
+			if (cache)
+				Info = info;
+
+			return info;
 		}
 
 		#endregion
@@ -122,7 +127,7 @@ namespace BLToolkit.Data.Linq
 
 		TResult IQueryProvider.Execute<TResult>(Expression expression)
 		{
-			return (TResult)GetExpressionInfo(expression).GetElement(null, DbManager, expression, Parameters);
+			return (TResult)GetExpressionInfo(expression, false).GetElement(null, DbManager, expression, Parameters);
 		}
 
 		object IQueryProvider.Execute(Expression expression)

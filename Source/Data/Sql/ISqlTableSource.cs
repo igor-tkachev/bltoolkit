@@ -1,12 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
 
 namespace BLToolkit.Data.Sql
 {
-	public interface ISqlTableSource
+	public interface ISqlTableSource : ICloneableElement
 	{
-		object   Clone(Dictionary<object,object> objectTree);
-
 		SqlField All      { get; }
 		int      SourceID { get; }
 	}

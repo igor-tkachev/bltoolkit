@@ -75,16 +75,23 @@ namespace BLToolkit.Data.Sql
 			return Expr1.CanBeNull() || Expr2.CanBeNull();
 		}
 
-		public object Clone(Dictionary<object,object> objectTree)
+		#endregion
+
+		#region ICloneableElement Members
+
+		public ICloneableElement Clone(Dictionary<ICloneableElement, ICloneableElement> objectTree, Predicate<ICloneableElement> doClone)
 		{
-			object clone;
+			if (!doClone(this))
+				return this;
+
+			ICloneableElement clone;
 
 			if (!objectTree.TryGetValue(this, out clone))
 			{
 				objectTree.Add(this, clone = new SqlBinaryExpression(
-					(ISqlExpression)_expr1.Clone(objectTree),
+					(ISqlExpression)_expr1.Clone(objectTree, doClone),
 					_operation,
-					(ISqlExpression)_expr2.Clone(objectTree),
+					(ISqlExpression)_expr2.Clone(objectTree, doClone),
 					_type,
 					_precedence));
 			}

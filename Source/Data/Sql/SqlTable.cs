@@ -207,11 +207,14 @@ namespace BLToolkit.Data.Sql
 
 		#endregion
 
-		#region ISqlTableSource Members
+		#region ICloneableElement Members
 
-		public object Clone(Dictionary<object,object> objectTree)
+		public ICloneableElement Clone(Dictionary<ICloneableElement, ICloneableElement> objectTree, Predicate<ICloneableElement> doClone)
 		{
-			object clone;
+			if (!doClone(this))
+				return this;
+
+			ICloneableElement clone;
 
 			if (!objectTree.TryGetValue(this, out clone))
 			{

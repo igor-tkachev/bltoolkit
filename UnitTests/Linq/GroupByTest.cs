@@ -97,17 +97,12 @@ namespace Data.Linq
 				group ch by new { ch.ParentID, ch.ChildID } into g
 				group g  by new { g.Key.ParentID }          into g
 				select g.Key;
-			Assert.AreNotEqual(0, expected.Count());
 
-			ForEachProvider(db =>
-			{
-				var result =
-					from ch in db.GrandChild
-					group ch by new { ch.ParentID, ch.ChildID } into g
-					group g  by new { g.Key.ParentID }          into g
-					select g.Key;
-				Assert.AreEqual(0, result.ToList().Except(expected).Count());
-			});
+			ForEachProvider(db => AreEqual(expected,
+				from ch in db.GrandChild
+				group ch by new { ch.ParentID, ch.ChildID } into g
+				group g  by new { g.Key.ParentID }          into g
+				select g.Key));
 		}
 
 		[Test]
@@ -115,13 +110,11 @@ namespace Data.Linq
 		{
 			ForEachProvider(db =>
 			{
-				var q = db.GrandChild.GroupBy(ch => new { ch.ParentID, ch.ChildID }, ch => ch.GrandChildID);
-
+				var q    = db.GrandChild.GroupBy(ch => new { ch.ParentID, ch.ChildID }, ch => ch.GrandChildID);
 				var list = q.ToList();
 
-				list[0].Count();
-
-				Assert.AreEqual(8, list.Count);
+				Assert.AreNotEqual(0, list[0].Count());
+				Assert.AreEqual   (8, list.Count);
 			});
 		}
 
@@ -135,7 +128,6 @@ namespace Data.Linq
 					.Select (gr => new { gr.Key.ParentID, gr.Key.ChildID });
 
 				var list = q.ToList();
-
 				Assert.AreEqual(8, list.Count);
 			});
 		}
@@ -148,7 +140,6 @@ namespace Data.Linq
 				var q = db.GrandChild.GroupBy(ch => new { ch.ParentID, ch.ChildID }, (g,ch) => g.ChildID);
 
 				var list = q.ToList();
-
 				Assert.AreEqual(8, list.Count);
 			});
 		}
@@ -158,8 +149,7 @@ namespace Data.Linq
 		{
 			ForEachProvider(db =>
 			{
-				var q = db.GrandChild.GroupBy(ch => new { ch.ParentID, ch.ChildID }, ch => ch.GrandChildID,  (g,ch) => g.ChildID);
-
+				var q    = db.GrandChild.GroupBy(ch => new { ch.ParentID, ch.ChildID }, ch => ch.GrandChildID,  (g,ch) => g.ChildID);
 				var list = q.ToList();
 
 				Assert.AreEqual(8, list.Count);
@@ -170,14 +160,13 @@ namespace Data.Linq
 		public void Simple10()
 		{
 			var expected = (from ch in Child group ch by ch.ParentID into g select g).ToList().OrderBy(p => p.Key).ToList();
-			Assert.AreNotEqual(0, expected.Count());
 
 			ForEachProvider(db =>
 			{
 				var result = (from ch in db.Child group ch by ch.ParentID into g select g).ToList().OrderBy(p => p.Key).ToList();
 
-				Assert.AreEqual(0, result[0].ToList().Except(expected[0].ToList()).Count());
-				Assert.AreEqual(0, result.Select(p => p.Key).Except(expected.Select(p => p.Key)).Count());
+				AreEqual(expected[0], result[0]);
+				AreEqual(expected.Select(p => p.Key), result.Select(p => p.Key));
 			});
 		}
 
@@ -190,16 +179,11 @@ namespace Data.Linq
 				from ch in
 					from ch in Child select ch.ParentID + 1
 				where ch + 1 > n group ch by ch into g select g.Key;
-			Assert.AreNotEqual(0, expected.Count());
 
-			ForEachProvider(db =>
-			{
-				var result =
-					from ch in
-						from ch in db.Child select ch.ParentID + 1
-					where ch > n group ch by ch into g select g.Key;
-				Assert.AreEqual(0, result.ToList().Except(expected).Count());
-			});
+			ForEachProvider(db => AreEqual(expected,
+				from ch in
+					from ch in db.Child select ch.ParentID + 1
+				where ch > n group ch by ch into g select g.Key));
 		}
 
 		[Test]
@@ -211,16 +195,11 @@ namespace Data.Linq
 				from ch in Child select new { ParentID = ch.ParentID + 1 } into ch
 				where ch.ParentID > n
 				group ch by ch into g select g.Key;
-			Assert.AreNotEqual(0, expected.Count());
 
-			ForEachProvider(db =>
-			{
-				var result =
-					from ch in db.Child select new { ParentID = ch.ParentID + 1 } into ch
-					where ch.ParentID > n
-					group ch by ch into g select g.Key;
-				Assert.AreEqual(0, result.ToList().Except(expected).Count());
-			});
+			ForEachProvider(db => AreEqual(expected,
+				from ch in db.Child select new { ParentID = ch.ParentID + 1 } into ch
+				where ch.ParentID > n
+				group ch by ch into g select g.Key));
 		}
 
 		[Test]
@@ -233,8 +212,6 @@ namespace Data.Linq
 					into g select g
 				).ToList().OrderBy(p => p.Key).ToList();
 
-			Assert.AreNotEqual(0, expected.Count());
-
 			ForEachProvider(db =>
 			{
 				var result =
@@ -244,8 +221,8 @@ namespace Data.Linq
 						into g select g
 					).ToList().OrderBy(p => p.Key).ToList();
 
-				Assert.AreEqual(0, result[0].ToList().Except(expected[0].ToList()).Count());
-				Assert.AreEqual(0, result.Select(p => p.Key).Except(expected.Select(p => p.Key)).Count());
+				AreEqual(expected[0], result[0]);
+				AreEqual(expected.Select(p => p.Key), result.Select(p => p.Key));
 			});
 		}
 
@@ -261,35 +238,24 @@ namespace Data.Linq
 					select ch.Key + "2"
 				where p == "22"
 				select p;
-			Assert.AreNotEqual(0, expected.Count());
 
-			ForEachProvider(db =>
-			{
-				var result =
-					from p in
-						from ch in
-							from ch in db.Child
-							group ch by ch.ParentID > 2 ? ch.ParentID > 3 ? "1" : "2" : "3"
-							into g select g
-						select ch.Key + "2"
-					where p == "22"
-					select p;
-
-				Assert.AreEqual(0, result.ToList().Except(expected).Count());
-			});
+			ForEachProvider(db => AreEqual(expected,
+				from p in
+					from ch in
+						from ch in db.Child
+						group ch by ch.ParentID > 2 ? ch.ParentID > 3 ? "1" : "2" : "3"
+						into g select g
+					select ch.Key + "2"
+				where p == "22"
+				select p));
 		}
 
 		[Test]
 		public void Sum1()
 		{
 			var expected = Child.GroupBy(ch => ch.ParentID).GroupBy(ch => ch).GroupBy(ch => ch).Select(p => p.Key.Key.Key);
-			Assert.AreNotEqual(0, expected.Count());
 
-			ForEachProvider(db =>
-			{
-				var result = db.Child.GroupBy(ch => ch.ParentID).GroupBy(ch => ch).GroupBy(ch => ch).Select(p => p.Key.Key.Key);
-				Assert.AreEqual(0, result.ToList().Except(expected).Count());
-			});
+			ForEachProvider(db => AreEqual(expected, db.Child.GroupBy(ch => ch.ParentID).GroupBy(ch => ch).GroupBy(ch => ch).Select(p => p.Key.Key.Key)));
 		}
 
 		[Test]
@@ -299,16 +265,11 @@ namespace Data.Linq
 				from ch in Child
 				group ch by ch.ParentID into g
 				select g.Sum(p => p.ChildID);
-			Assert.AreNotEqual(0, expected.Count());
 
-			ForEachProvider(db =>
-			{
-				var result =
-					from ch in db.Child
-					group ch by ch.ParentID into g
-					select g.Sum(p => p.ChildID);
-				Assert.AreEqual(0, result.ToList().Except(expected).Count());
-			});
+			ForEachProvider(db => AreEqual(expected,
+				from ch in db.Child
+				group ch by ch.ParentID into g
+				select g.Sum(p => p.ChildID)));
 		}
 
 		[Test]
@@ -318,16 +279,11 @@ namespace Data.Linq
 				from ch in Child
 				group ch by ch.ParentID into g
 				select new { Sum = g.Sum(p => p.ChildID) };
-			Assert.AreNotEqual(0, expected.Count());
 
-			ForEachProvider(db =>
-			{
-				var result =
-					from ch in db.Child
-					group ch by ch.ParentID into g
-					select new { Sum = g.Sum(p => p.ChildID) };
-				Assert.AreEqual(0, result.ToList().Except(expected).Count());
-			});
+			ForEachProvider(db => AreEqual(expected,
+				from ch in db.Child
+				group ch by ch.ParentID into g
+				select new { Sum = g.Sum(p => p.ChildID) }));
 		}
 
 		[Test]
@@ -341,18 +297,11 @@ namespace Data.Linq
 				where ch.ParentID + 1 > n group ch by ch into g
 				select g.Sum(p => p.ParentID - 3);
 
-			Assert.AreNotEqual(0, expected.Count());
-
-			ForEachProvider(db =>
-			{
-				var result =
-					from ch in
-						from ch in db.Child select new { ParentID = ch.ParentID + 1, ch.ChildID }
-					where ch.ParentID + 1 > n group ch by ch into g
-					select g.Sum(p => p.ParentID - 3);
-
-				Assert.AreEqual(0, result.ToList().Except(expected).Count());
-			});
+			ForEachProvider(db => AreEqual(expected,
+				from ch in
+					from ch in db.Child select new { ParentID = ch.ParentID + 1, ch.ChildID }
+				where ch.ParentID + 1 > n group ch by ch into g
+				select g.Sum(p => p.ParentID - 3)));
 		}
 
 		[Test]
@@ -370,28 +319,126 @@ namespace Data.Linq
 					Cnt = g.Count()
 				};
 
-			Assert.AreNotEqual(0, expected.Count());
-
-			ForEachProvider(db =>
-			{
-				var result =
-					from ch in db.Child
-					group ch by ch.ParentID into g
-					select new
-					{
-						Sum = g.Sum(c => c.ChildID),
-						Min = g.Min(c => c.ChildID),
-						Max = g.Max(c => c.ChildID),
-						Avg = (int)g.Average(c => c.ChildID),
-						Cnt = g.Count()
-					};
-
-				Assert.AreEqual(0, result.ToList().Except(expected).Count());
-			});
+			ForEachProvider(db => AreEqual(expected,
+				from ch in db.Child
+				group ch by ch.ParentID into g
+				select new
+				{
+					Sum = g.Sum(c => c.ChildID),
+					Min = g.Min(c => c.ChildID),
+					Max = g.Max(c => c.ChildID),
+					Avg = (int)g.Average(c => c.ChildID),
+					Cnt = g.Count()
+				}));
 		}
 
 		[Test]
-		public void Count()
+		public void Min()
+		{
+			var expected = Child.Min(c => c.ChildID);
+			ForEachProvider(db => Assert.AreEqual(expected, db.Child.Min(c => c.ChildID)));
+		}
+
+		[Test]
+		public void Max()
+		{
+			var expected = Child.Max(c => c.ChildID);
+			Assert.AreNotEqual(0, expected);
+			ForEachProvider(db => Assert.AreEqual(expected, db.Child.Max(c => c.ChildID)));
+		}
+
+		[Test]
+		public void Average()
+		{
+			var expected = Child.Average(c => c.ChildID);
+			Assert.AreNotEqual(0, expected);
+			ForEachProvider(db => Assert.AreEqual(expected, db.Child.Average(c => c.ChildID)));
+		}
+
+		[Test]
+		public void Count1()
+		{
+			var expected =
+				from ch in Child
+				group ch by ch.ParentID into g
+				select g.Count(ch => ch.ChildID > 20);
+
+			ForEachProvider(db => AreEqual(expected,
+				from ch in db.Child
+				group ch by ch.ParentID into g
+				select g.Count(ch => ch.ChildID > 20)));
+		}
+
+		[Test]
+		public void Count21()
+		{
+			var n = 1;
+
+			var expected =
+				from ch in
+					from ch in Child select new { ParentID = ch.ParentID + 1, ch.ChildID }
+				where ch.ParentID + 1 > n
+				group ch by ch into g
+				select g.Count(p => p.ParentID < 3);
+
+			ForEachProvider(db => AreEqual(expected,
+				from ch in
+					from ch in db.Child select new { ParentID = ch.ParentID + 1, ch.ChildID }
+				where ch.ParentID + 1 > n
+				group ch by ch into g
+				select g.Count(p => p.ParentID < 3)));
+		}
+
+		[Test]
+		public void Count22()
+		{
+			var n = 1;
+
+			var expected =
+				from ch in
+					from ch in Child select new { ParentID = ch.ParentID + 1, ch.ChildID }
+				where ch.ParentID + 1 > n
+				group ch by new { ch.ParentID } into g
+				select g.Count(p => p.ParentID < 3);
+
+			ForEachProvider(db => AreEqual(expected,
+				from ch in
+					from ch in db.Child select new { ParentID = ch.ParentID + 1, ch.ChildID }
+				where ch.ParentID + 1 > n
+				group ch by new { ch.ParentID } into g
+				select g.Count(p => p.ParentID < 3)));
+		}
+
+		[Test]
+		public void Count3()
+		{
+			var expected =
+				from ch in
+					from ch in Child select new { ParentID = ch.ParentID + 1, ch.ChildID }
+				where ch.ParentID - 1 > 0
+				group ch by new { ch.ParentID } into g
+				select new
+				{
+					g.Key.ParentID,
+					ChildMin   = g.Min(p => p.ChildID),
+					ChildCount = g.Count(p => p.ChildID > 25)
+				};
+
+			ForEachProvider(db => AreEqual(expected,
+				from ch in
+					from ch in db.Child select new { ParentID = ch.ParentID + 1, ch.ChildID }
+				where ch.ParentID - 1 > 0
+				group ch by new { ch.ParentID } into g
+				select new
+				{
+					g.Key.ParentID,
+					ChildMin   = g.Min(p => p.ChildID),
+					ChildCount = g.Count(p => p.ChildID > 25)
+				}));
+		}
+
+		[Test]
+		public void Count4()
 		{
 			var expected = Child.Count();
 

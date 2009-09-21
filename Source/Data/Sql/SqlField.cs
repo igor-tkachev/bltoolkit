@@ -67,9 +67,16 @@ namespace BLToolkit.Data.Sql
 			return Nullable;
 		}
 
-		public object Clone(Dictionary<object,object> objectTree)
+		#endregion
+
+		#region ICloneableElement Members
+
+		public ICloneableElement Clone(Dictionary<ICloneableElement, ICloneableElement> objectTree, Predicate<ICloneableElement> doClone)
 		{
-			_parent.Clone(objectTree);
+			if (!doClone(this))
+				return this;
+
+			_parent.Clone(objectTree, doClone);
 			return objectTree[this];
 		}
 

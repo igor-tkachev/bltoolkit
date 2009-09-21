@@ -16,7 +16,7 @@ namespace BLToolkit.Data.Linq
 	using DataProvider;
 	using Mapping;
 	using Data.Sql;
-	using BLToolkit.Common;
+	using Common;
 
 	class ExpressionInfo<T> : ReflectionHelper
 	{
@@ -381,13 +381,13 @@ namespace BLToolkit.Data.Linq
 
 			if (query.OriginalSql.ParameterDependent)
 			{
-				var dic = new Dictionary<object,object>();
+				var dic = new Dictionary<ICloneableElement,ICloneableElement>();
 
-				query.SqlBuilder = sql = (SqlBuilder)query.OriginalSql.Clone(dic);
+				query.SqlBuilder = sql = (SqlBuilder)query.OriginalSql.Clone(dic, _ => true);
 
 				foreach (var p in query.Parameters)
 				{
-					object sp;
+					ICloneableElement sp;
 					if (dic.TryGetValue(p.OriginalSqlParameter, out sp))
 						p.SqlParameter = (SqlParameter)sp;
 				}

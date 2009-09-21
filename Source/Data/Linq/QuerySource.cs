@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -66,16 +65,19 @@ namespace BLToolkit.Data.Linq
 
 			Table() {}
 
-			protected override QuerySource CloneInstance(Dictionary<object, object> objectTree)
+			protected override QuerySource CloneInstance(Dictionary<ICloneableElement,ICloneableElement> objectTree, Predicate<ICloneableElement> doClone)
 			{
+				if (!doClone(this))
+					return this;
+
 				var table = new Table
 				{
 					ObjectType = ObjectType,
-					SqlTable   = (SqlTable)SqlTable.Clone(objectTree)
+					SqlTable   = (SqlTable)SqlTable.Clone(objectTree, doClone)
 				};
 
 				foreach (var c in _columns)
-					table._columns.Add(c.Key, (Column)c.Value.Clone(objectTree));
+					table._columns.Add(c.Key, (Column)c.Value.Clone(objectTree, doClone));
 
 				return table;
 			}
@@ -216,17 +218,20 @@ namespace BLToolkit.Data.Linq
 
 			protected Expr() {}
 
-			protected virtual Expr CreateExpr(Dictionary<object,object> objectTree)
+			protected virtual Expr CreateExpr(Dictionary<ICloneableElement,ICloneableElement> objectTree)
 			{
 				return new Expr();
 			}
 
-			protected override QuerySource CloneInstance(Dictionary<object, object> objectTree)
+			protected override QuerySource CloneInstance(Dictionary<ICloneableElement,ICloneableElement> objectTree, Predicate<ICloneableElement> doClone)
 			{
+				if (!doClone(this))
+					return this;
+
 				var expr = CreateExpr(objectTree);
 
 				foreach (var c in Members)
-					expr.Members.Add(c.Key, (QueryField)c.Value.Clone(objectTree));
+					expr.Members.Add(c.Key, (QueryField)c.Value.Clone(objectTree, doClone));
 
 				return expr;
 			}
@@ -310,19 +315,22 @@ namespace BLToolkit.Data.Linq
 
 			protected SubQuery() {}
 
-			protected virtual SubQuery CreateSubQuery(Dictionary<object,object> objectTree)
+			protected virtual SubQuery CreateSubQuery(Dictionary<ICloneableElement,ICloneableElement> objectTree, Predicate<ICloneableElement> doClone)
 			{
 				return new SubQuery();
 			}
 
-			protected override QuerySource CloneInstance(Dictionary<object, object> objectTree)
+			protected override QuerySource CloneInstance(Dictionary<ICloneableElement,ICloneableElement> objectTree, Predicate<ICloneableElement> doClone)
 			{
-				var sub = CreateSubQuery(objectTree);
+				if (!doClone(this))
+					return this;
 
-				sub.SubSql = (SqlBuilder)SubSql.Clone(objectTree);
+				var sub = CreateSubQuery(objectTree, doClone);
+
+				sub.SubSql = (SqlBuilder)SubSql.Clone(objectTree, doClone);
 
 				foreach (var c in _columns)
-					sub._columns.Add(c.Key, (SubQueryColumn)c.Value.Clone(objectTree));
+					sub._columns.Add(c.Key, (SubQueryColumn)c.Value.Clone(objectTree, doClone));
 
 				return sub;
 			}
@@ -343,9 +351,9 @@ namespace BLToolkit.Data.Linq
 
 			GroupJoinQuery() {}
 
-			protected override SubQuery CreateSubQuery(Dictionary<object,object> objectTree)
+			protected override SubQuery CreateSubQuery(Dictionary<ICloneableElement,ICloneableElement> objectTree, Predicate<ICloneableElement> doClone)
 			{
-				return new GroupJoinQuery { Counter = (ExprColumn)Counter.Clone(objectTree) };
+				return new GroupJoinQuery { Counter = (ExprColumn)Counter.Clone(objectTree, doClone) };
 			}
 		}
 
@@ -383,9 +391,12 @@ namespace BLToolkit.Data.Linq
 
 			Scalar() {}
 
-			protected override QuerySource CloneInstance(Dictionary<object, object> objectTree)
+			protected override QuerySource CloneInstance(Dictionary<ICloneableElement,ICloneableElement> objectTree, Predicate<ICloneableElement> doClone)
 			{
-				return new Scalar { _field = (QueryField)_field.Clone(objectTree) };
+				if (!doClone(this))
+					return this;
+
+				return new Scalar { _field = (QueryField)_field.Clone(objectTree, doClone) };
 			}
 		}
 
@@ -436,7 +447,7 @@ namespace BLToolkit.Data.Linq
 
 			GroupBy() {}
 
-			protected override Expr CreateExpr(Dictionary<object,object> objectTree)
+			protected override Expr CreateExpr(Dictionary<ICloneableElement,ICloneableElement> objectTree)
 			{
 				return new GroupBy { ElementSource = ElementSource };
 			}
@@ -481,22 +492,25 @@ namespace BLToolkit.Data.Linq
 		{
 		}
 
-		protected abstract QuerySource CloneInstance(Dictionary<object,object> objectTree);
+		protected abstract QuerySource CloneInstance(Dictionary<ICloneableElement,ICloneableElement> objectTree, Predicate<ICloneableElement> doClone);
 
-		public override object Clone(Dictionary<object,object> objectTree)
+		public override ICloneableElement Clone(Dictionary<ICloneableElement, ICloneableElement> objectTree, Predicate<ICloneableElement> doClone)
 		{
-			object clone;
+			if (!doClone(this))
+				return this;
+
+			ICloneableElement clone;
 
 			if (!objectTree.TryGetValue(this, out clone))
 			{
-				var qs = CloneInstance(objectTree);
+				var qs = CloneInstance(objectTree, doClone);
 
 				objectTree.Add(this, qs);
 
-				qs.SqlBuilder    = (SqlBuilder)SqlBuilder.Clone(objectTree);
+				qs.SqlBuilder    = (SqlBuilder)SqlBuilder.Clone(objectTree, doClone);
 				qs.Lambda        = Lambda;
-				qs.ParentQueries = Array. ConvertAll(ParentQueries, q => (QuerySource)q.Clone(objectTree));
-				qs.Fields        = Fields.ConvertAll(f => (QueryField)f.Clone(objectTree));
+				qs.ParentQueries = Array. ConvertAll(ParentQueries, q => (QuerySource)q.Clone(objectTree, doClone));
+				qs.Fields        = Fields.ConvertAll(f => (QueryField)f.Clone(objectTree, doClone));
 
 				clone = qs;
 			}

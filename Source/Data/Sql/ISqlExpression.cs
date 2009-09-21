@@ -1,12 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
 
 namespace BLToolkit.Data.Sql
 {
-	public interface ISqlExpression : IEquatable<ISqlExpression>, ISqlExpressionWalkable
+	public interface ISqlExpression : IEquatable<ISqlExpression>, ISqlExpressionWalkable, ICloneableElement
 	{
-		object Clone(Dictionary<object,object> objectTree);
-		bool   CanBeNull();
-		int    Precedence { get; }
+		bool CanBeNull();
+		int  Precedence { get; }
 	}
 }

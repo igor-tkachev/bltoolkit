@@ -109,16 +109,23 @@ namespace BLToolkit.Data.Sql
 			return true;
 		}
 
-		public object Clone(Dictionary<object,object> objectTree)
+		#endregion
+
+		#region ICloneableElement Members
+
+		public ICloneableElement Clone(Dictionary<ICloneableElement, ICloneableElement> objectTree, Predicate<ICloneableElement> doClone)
 		{
-			object clone;
+			if (!doClone(this))
+				return this;
+
+			ICloneableElement clone;
 
 			if (!objectTree.TryGetValue(this, out clone))
 			{
 				objectTree.Add(this, clone = new SqlFunction(
 					_name,
 					_precedence,
-					Array.ConvertAll<ISqlExpression,ISqlExpression>(_parameters, delegate(ISqlExpression e) { return (ISqlExpression)e.Clone(objectTree); })));
+					Array.ConvertAll<ISqlExpression,ISqlExpression>(_parameters, delegate(ISqlExpression e) { return (ISqlExpression)e.Clone(objectTree, doClone); })));
 			}
 
 			return clone;

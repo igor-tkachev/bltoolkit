@@ -3,10 +3,9 @@ using System.Collections.Generic;
 
 namespace BLToolkit.Data.Sql
 {
-	public interface ISqlPredicate : ISqlExpressionWalkable
+	public interface ISqlPredicate : ISqlExpressionWalkable, ICloneableElement
 	{
-		object Clone    (Dictionary<object,object> objectTree);
-		bool   CanBeNull();
-		int    Precedence { get; }
+		bool CanBeNull();
+		int  Precedence { get; }
 	}
 }

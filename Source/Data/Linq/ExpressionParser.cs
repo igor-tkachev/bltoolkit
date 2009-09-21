@@ -39,8 +39,8 @@ namespace BLToolkit.Data.Linq
 		readonly ParameterExpression _mapSchemaParam  = Expression.Parameter(typeof(MappingSchema),     "ms");
 		readonly ParameterExpression _infoParam       = Expression.Parameter(typeof(ExpressionInfo<T>), "info");
 
-		int  _currentSql = 0;
-		bool _doNotBuildSelect;
+		int    _currentSql = 0;
+		Action _buildSelect;
 
 		SqlBuilder CurrentSql
 		{
@@ -99,7 +99,9 @@ namespace BLToolkit.Data.Linq
 				{
 					var query = ParseSequence(pi, null);
 
-					if (!_doNotBuildSelect)
+					if (_buildSelect != null)
+						_buildSelect();
+					else
 						BuildSelect(query, SetQuery, SetQuery, i => i);
 
 					return true;
@@ -174,12 +176,12 @@ namespace BLToolkit.Data.Linq
 
 					switch (pi.Expr.Method.Name)
 					{
-						case "Distinct"        : select = ParseSequence(seq, null); CurrentSql.Select.IsDistinct = true;                                                 break;
+						case "Distinct"        : select = ParseSequence(seq, null); CurrentSql.Select.IsDistinct = true; break;
 						case "First"           : select = ParseSequence(seq, null); CurrentSql.Select.Take(1); _info.MakeElementOperator(ElementMethod.First);           break;
 						case "FirstOrDefault"  : select = ParseSequence(seq, null); CurrentSql.Select.Take(1); _info.MakeElementOperator(ElementMethod.FirstOrDefault);  break;
 						case "Single"          : select = ParseSequence(seq, null); CurrentSql.Select.Take(2); _info.MakeElementOperator(ElementMethod.Single);          break;
 						case "SingleOrDefault" : select = ParseSequence(seq, null); CurrentSql.Select.Take(2); _info.MakeElementOperator(ElementMethod.SingleOrDefault); break;
-						case "Count"           : select = ParseSequence(seq, null); ParseCount(pi, select); break;
+						case "Count"           : select = ParseSequence(seq, null); ParseAggregate(pi, null, select); break;
 						default                :
 							ParsingTracer.DecIndentLevel();
 							return false;
@@ -208,7 +210,10 @@ namespace BLToolkit.Data.Linq
 						case "FirstOrDefault"  : { select = ParseSequence(seq, null); select = ParseWhere     (l, select); CurrentSql.Select.Take(1); _info.MakeElementOperator(ElementMethod.FirstOrDefault);  break; }
 						case "Single"          : { select = ParseSequence(seq, null); select = ParseWhere     (l, select); CurrentSql.Select.Take(2); _info.MakeElementOperator(ElementMethod.Single);          break; }
 						case "SingleOrDefault" : { select = ParseSequence(seq, null); select = ParseWhere     (l, select); CurrentSql.Select.Take(2); _info.MakeElementOperator(ElementMethod.SingleOrDefault); break; }
-						case "Count"           : { select = ParseSequence(seq, null); select = ParseWhere     (l, select); ParseCount(pi, select); break; }
+						case "Count"           : { select = ParseSequence(seq, null); select = ParseWhere     (l, select); ParseAggregate(pi, null, select); break; }
+						case "Min"             :
+						case "Max"             :
+						case "Average"         : { select = ParseSequence(seq, null); ParseAggregate(pi, l, select); break; }
 						default                : return false;
 					}
 					return true;
@@ -555,10 +560,8 @@ namespace BLToolkit.Data.Linq
 
 		static bool CheckSubQueryForWhere(QuerySource query, ParseInfo expr)
 		{
-			bool checkParameter =
-				query is QuerySource.Scalar && query.Fields[0] is QueryField.ExprColumn;
-
-			var makeSubQuery = false;
+			var checkParameter = query is QuerySource.Scalar && query.Fields[0] is QueryField.ExprColumn;
+			var makeSubQuery   = false;
 
 			expr.Walk(pi =>
 			{
@@ -767,22 +770,49 @@ namespace BLToolkit.Data.Linq
 
 		#endregion
 
-		#region Parse Count
+		#region Parse Aggregate
 
-		void ParseCount(ParseInfo parseInfo, QuerySource select)
+		interface IAggregateHelper
+		{
+			void SetAggregate(ExpressionParser<T> parser, ParseInfo pi);
+		}
+
+		class AggregateHelper<TE> : IAggregateHelper
+		{
+			public void SetAggregate(ExpressionParser<T> parser, ParseInfo pi)
+			{
+				var mapper = Expression.Lambda<ExpressionInfo<T>.Mapper<TE>>(
+					pi, new[]
+					{
+						parser._infoParam,
+						parser._contextParam,
+						parser._dataReaderParam,
+						parser._mapSchemaParam,
+						parser._expressionParam,
+						ParametersParam
+					});
+
+				parser._info.SetElementQuery(mapper.Compile());
+			}
+		}
+
+		void ParseAggregate(ParseInfo<MethodCallExpression> parseInfo, LambdaInfo lambda, QuerySource select)
 		{
 			ParsingTracer.WriteLine();
 			ParsingTracer.IncIndentLevel();
 
-			var idx = select.SqlBuilder.Select.Add(new SqlFunction.Count(select.SqlBuilder), "cnt");
-			var pi  = BuildField(parseInfo, new[] { idx });
+			var idx =
+				parseInfo.Expr.Method.Name == "Count" ?
+					select.SqlBuilder.Select.Add(new SqlFunction.Count(select.SqlBuilder), "cnt"):
+					select.SqlBuilder.Select.Add(new SqlFunction(parseInfo.Expr.Method.Name, ParseExpression(select, lambda.Body)));
 
-			var mapper = Expression.Lambda<ExpressionInfo<T>.Mapper<int>>(
-				pi, new[] { _infoParam, _contextParam, _dataReaderParam, _mapSchemaParam, _expressionParam, ParametersParam });
+			_buildSelect = () =>
+			{
+				var pi     = BuildField(parseInfo, new[] { idx });
+				var helper = (IAggregateHelper)Activator.CreateInstance(typeof (AggregateHelper<>).MakeGenericType(typeof (T), parseInfo.Expr.Type));
 
-			_info.SetElementQuery(mapper.Compile());
-
-			_doNotBuildSelect = true;
+				helper.SetAggregate(this, pi);
+			};
 
 			ParsingTracer.DecIndentLevel();
 		}
@@ -913,7 +943,6 @@ namespace BLToolkit.Data.Linq
 			{
 				var valueParser = new ExpressionParser<TElement>();
 				var keyParam    = Expression.Convert(Expression.ArrayIndex(ParametersParam, Expression.Constant(0)), typeof(TKey));
-				var nullValue   = Expression.Constant(null);
 
 				Expression valueExpr = null;
 
@@ -1796,28 +1825,60 @@ namespace BLToolkit.Data.Linq
 
 			var groupBy = ((QuerySource.GroupBy)query.ParentQueries[0]).OriginalQuery;
 
-			var expr = pi.Expr as MethodCallExpression;
+			var expr = (MethodCallExpression)pi.Expr;
 			var args = new ISqlExpression[expr.Arguments.Count - 1];
 
-			if (args.Length > 0)
+			if (expr.Method.Name == "Count")
 			{
-				for (var i = 1; i < expr.Arguments.Count; i++)
+				if (args.Length > 0)
 				{
-					var arg = pi.Create(expr.Arguments[i], pi.Index(expr.Arguments, MethodCall.Arguments, i));
+					var predicate = ParsePredicate(groupBy, ParseLambdaArgument(pi, 1));
+					groupBy.SqlBuilder.Where.SearchCondition.Conditions.Add(new SqlBuilder.Condition(false, predicate));
 
-					arg.IsLambda<Expression>(new Func<ParseInfo<ParameterExpression>, bool>[] { _ => true },
-					body => { arg = body; return true; },
-					_ => true);
+					var sql = groupBy.SqlBuilder.Clone(o => !(o is SqlParameter));
 
-					args[i - 1] = ParseExpression(groupBy, arg);
+					groupBy.SqlBuilder.Where.SearchCondition.Conditions.RemoveAt(groupBy.SqlBuilder.Where.SearchCondition.Conditions.Count - 1);
+
+					for (var i = 0; i < sql.GroupBy.Items.Count; i++)
+					{
+						var item1 = sql.GroupBy.Items[i];
+						var item2 = groupBy.SqlBuilder.GroupBy.Items[i];
+
+						if (item1.CanBeNull() && item2.CanBeNull())
+							sql.Where
+								.Expr(item1).IsNull.    And .Expr(item2).IsNull. Or
+								.Expr(item1).IsNotNull. And .Expr(item2).IsNotNull. And .Expr(item1).Equal.Expr(item2);
+						else
+							sql.Where.Expr(item1).Equal.Expr(item2);
+					}
+
+					sql.GroupBy.Items.RemoveAll(_ => true);
+					sql.Select.Expr(new SqlFunction.Count(sql));
+					sql.ParentSql = groupBy.SqlBuilder;
+
+					return sql;
 				}
-			}
-			else if (expr.Method.Name == "Count")
-			{
+
 				return new SqlFunction.Count(groupBy.SqlBuilder);
 			}
 
+			for (var i = 1; i < expr.Arguments.Count; i++)
+				args[i - 1] = ParseExpression(groupBy, ParseLambdaArgument(pi, i));
+
 			return new SqlFunction(expr.Method.Name, args);
+		}
+
+		ParseInfo ParseLambdaArgument(ParseInfo<Expression> pi, int idx)
+		{
+			var expr = (MethodCallExpression)pi.Expr;
+			var arg  = pi.Create(expr.Arguments[idx], pi.Index(expr.Arguments, MethodCall.Arguments, idx));
+			
+			arg.IsLambda<Expression>(new Func<ParseInfo<ParameterExpression>,bool>[]
+				{ _ => true },
+				body => { arg = body; return true; },
+				_ => true);
+
+			return arg;
 		}
 
 		bool IsServerSideOnly(ParseInfo parseInfo)
@@ -1999,7 +2060,21 @@ namespace BLToolkit.Data.Linq
 
 		public static bool IsConstant(Type type)
 		{
-			return type == typeof(int) || type == typeof(string) || type == typeof(char) || type == typeof(long) || type == typeof(bool);
+			switch (Type.GetTypeCode(type))
+			{
+				case TypeCode.Int16   :
+				case TypeCode.Int32   :
+				case TypeCode.Int64   :
+				case TypeCode.UInt16  :
+				case TypeCode.UInt32  :
+				case TypeCode.UInt64  :
+				case TypeCode.SByte   :
+				case TypeCode.Byte    :
+				case TypeCode.Boolean :
+				case TypeCode.String  :
+				case TypeCode.Char    : return true;
+				default               : return false;
+			}
 		}
 
 		#endregion

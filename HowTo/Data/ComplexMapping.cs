@@ -167,7 +167,12 @@ namespace HowTo.Data
 			public int     ID;
 			public ChildEx Child = new ChildEx();
 		}
-		
+
+		static readonly MappingSchema _mappingSchema = new MappingSchema
+		{
+			Extensions = TypeExtension.GetExtensions("RelationExtension.xml")
+		};
+
 		[Test]
 		public void Test3()
 		{
@@ -178,12 +183,9 @@ namespace HowTo.Data
 			sets[1] = new MapResultSet(typeof(ChildEx));
 			sets[2] = new MapResultSet(typeof(GrandchildEx));
 
-			MappingSchema ms = new MappingSchema();
-			ms.Extensions = TypeExtension.GetExtensions("RelationExtension.xml");
-
 			using (DbManager db = new DbManager())
 			{
-				db.MappingSchema = ms;
+				db.MappingSchema = _mappingSchema;
 
 				db
 					.SetCommand(TestQuery)

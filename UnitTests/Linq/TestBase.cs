@@ -195,5 +195,17 @@ namespace Data.Linq
 				return _types;
 			}
 		}
+
+		protected void AreEqual<T>(IEnumerable<T> expected, IEnumerable<T> result)
+		{
+			var expectedList = expected.ToList();
+			var resultList   = result.  ToList();
+
+			Assert.AreNotEqual(0, expectedList.Count());
+			Assert.AreNotEqual(0, resultList.  Count());
+
+			Assert.AreEqual(0, resultList.  ToList().Except(expectedList).Count());
+			Assert.AreEqual(0, expectedList.ToList().Except(resultList).  Count());
+		}
 	}
 }

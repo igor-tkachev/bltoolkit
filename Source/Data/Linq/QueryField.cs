@@ -6,7 +6,7 @@ namespace BLToolkit.Data.Linq
 	using Mapping;
 	using Data.Sql;
 
-	abstract class QueryField : ReflectionHelper
+	abstract class QueryField : ReflectionHelper, ICloneableElement
 	{
 		#region Column
 
@@ -45,12 +45,18 @@ namespace BLToolkit.Data.Linq
 				return new [] { _field };
 			}
 
-			public override object Clone(Dictionary<object, object> objectTree)
+			public override ICloneableElement Clone(Dictionary<ICloneableElement, ICloneableElement> objectTree, Predicate<ICloneableElement> doClone)
 			{
-				object clone;
+				if (!doClone(this))
+					return this;
+
+				ICloneableElement clone;
 
 				if (!objectTree.TryGetValue(this, out clone))
-					objectTree.Add(this, clone = new Column((QuerySource.Table)_table.Clone(objectTree), (SqlField)_field.Clone(objectTree), _mapper));
+					objectTree.Add(this, clone = new Column(
+						(QuerySource.Table)_table.Clone(objectTree, doClone),
+						(SqlField)_field.Clone(objectTree, doClone),
+						_mapper));
 
 				return clone;
 			}
@@ -130,16 +136,19 @@ namespace BLToolkit.Data.Linq
 				return new [] { _sqlExpression };
 			}
 
-			public override object Clone(Dictionary<object,object> objectTree)
+			public override ICloneableElement Clone(Dictionary<ICloneableElement, ICloneableElement> objectTree, Predicate<ICloneableElement> doClone)
 			{
-				object clone;
+				if (!doClone(this))
+					return this;
+
+				ICloneableElement clone;
 
 				if (!objectTree.TryGetValue(this, out clone))
 				{
-					var col = new ExprColumn((QuerySource)QuerySource.Clone(objectTree), Expr, _alias);
+					var col = new ExprColumn((QuerySource)QuerySource.Clone(objectTree, doClone), Expr, _alias);
 
 					if (_sqlExpression != null)
-						col._sqlExpression = (ISqlExpression)_sqlExpression.Clone(objectTree);
+						col._sqlExpression = (ISqlExpression)_sqlExpression.Clone(objectTree, doClone);
 
 					objectTree.Add(this, clone = col);
 				}
@@ -211,12 +220,17 @@ namespace BLToolkit.Data.Linq
 				return new [] { QuerySource.SubSql.Select.Columns[_subIndex[0].Index] };
 			}
 
-			public override object Clone(Dictionary<object, object> objectTree)
+			public override ICloneableElement Clone(Dictionary<ICloneableElement, ICloneableElement> objectTree, Predicate<ICloneableElement> doClone)
 			{
-				object clone;
+				if (!doClone(this))
+					return this;
+
+				ICloneableElement clone;
 
 				if (!objectTree.TryGetValue(this, out clone))
-					objectTree.Add(this, clone = new SubQueryColumn((QuerySource.SubQuery)QuerySource.Clone(objectTree), (QueryField)Field.Clone(objectTree)));
+					objectTree.Add(this, clone = new SubQueryColumn(
+						(QuerySource.SubQuery)QuerySource.Clone(objectTree, doClone),
+						(QueryField)Field.Clone(objectTree, doClone)));
 
 				return clone;
 			}
@@ -265,12 +279,15 @@ namespace BLToolkit.Data.Linq
 				return GroupBySource.ParentQueries[0].GetExpressions(parser);
 			}
 
-			public override object Clone(Dictionary<object, object> objectTree)
+			public override ICloneableElement Clone(Dictionary<ICloneableElement, ICloneableElement> objectTree, Predicate<ICloneableElement> doClone)
 			{
-				object clone;
+				if (!doClone(this))
+					return this;
+
+				ICloneableElement clone;
 
 				if (!objectTree.TryGetValue(this, out clone))
-					objectTree.Add(this, clone = new GroupByColumn((QuerySource.GroupBy)GroupBySource.Clone(objectTree)));
+					objectTree.Add(this, clone = new GroupByColumn((QuerySource.GroupBy)GroupBySource.Clone(objectTree, doClone)));
 
 				return clone;
 			}
@@ -287,14 +304,14 @@ namespace BLToolkit.Data.Linq
 
 		public object Clone()
 		{
-			return Clone(new Dictionary<object,object>());
+			return Clone(new Dictionary<ICloneableElement,ICloneableElement>(), _ => true);
 		}
 
 		public abstract QuerySource[]    Sources { get; }
 
-		public abstract object           Clone            (Dictionary<object,object> objectTree);
-		public abstract FieldIndex[]     Select        <T>(ExpressionParser<T> parser);
-		public abstract ISqlExpression[] GetExpressions<T>(ExpressionParser<T> parser);
+		public abstract ICloneableElement Clone            (Dictionary<ICloneableElement, ICloneableElement> objectTree, Predicate<ICloneableElement> doClone);
+		public abstract FieldIndex[]      Select        <T>(ExpressionParser<T> parser);
+		public abstract ISqlExpression[]  GetExpressions<T>(ExpressionParser<T> parser);
 
 		#endregion
 	}
