@@ -97,7 +97,7 @@ namespace BLToolkit.Data.Sql
 			_physicalName = (string)te.Attributes["PhysicalName"].Value;
 
 			foreach (MemberExtension me in te.Members)
-				Fields.Add(new SqlField(me.Name, (string)me["MapField"].Value ?? (string)me["PhysicalName"].Value, (bool)me["Nullable"].Value));
+				Fields.Add(new SqlField(me.Name, (string)me["MapField"].Value ?? (string)me["PhysicalName"].Value, (bool?)me["Nullable"].Value ?? false));
 
 			foreach (AttributeExtension ae in te.Attributes["Join"])
 				Joins.Add(new Join(ae));

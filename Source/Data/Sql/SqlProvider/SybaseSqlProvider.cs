@@ -21,9 +21,11 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		{
 		}
 
-		protected override string FirstFormat          { get { return "TOP {0}"; } }
-		public    override bool   IsSkipSupported      { get { return false;     } }
-		public    override bool   TakeAcceptsParameter { get { return false;     } }
+		protected override string FirstFormat              { get { return "TOP {0}"; } }
+
+		public    override bool   IsSkipSupported          { get { return false;     } }
+		public    override bool   TakeAcceptsParameter     { get { return false;     } }
+		public    override bool   IsCountSubQuerySupported { get { return false;     } }
 
 		public override ISqlExpression ConvertExpression(ISqlExpression expr)
 		{

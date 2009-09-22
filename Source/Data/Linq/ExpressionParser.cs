@@ -1833,30 +1833,59 @@ namespace BLToolkit.Data.Linq
 				if (args.Length > 0)
 				{
 					var predicate = ParsePredicate(groupBy, ParseLambdaArgument(pi, 1));
+
 					groupBy.SqlBuilder.Where.SearchCondition.Conditions.Add(new SqlBuilder.Condition(false, predicate));
 
 					var sql = groupBy.SqlBuilder.Clone(o => !(o is SqlParameter));
 
 					groupBy.SqlBuilder.Where.SearchCondition.Conditions.RemoveAt(groupBy.SqlBuilder.Where.SearchCondition.Conditions.Count - 1);
 
+					sql.Select.Columns.RemoveAll(_ => true);
+
+					if (_info.SqlProvider.IsSubQueryColumnSupported && _info.SqlProvider.IsCountSubQuerySupported)
+					{
+						for (var i = 0; i < sql.GroupBy.Items.Count; i++)
+						{
+							var item1 = sql.GroupBy.Items[i];
+							var item2 = groupBy.SqlBuilder.GroupBy.Items[i];
+
+							if (item1.CanBeNull() && item2.CanBeNull())
+								sql.Where
+									.Expr(item1).IsNull.    And .Expr(item2).IsNull. Or
+									.Expr(item1).IsNotNull. And .Expr(item2).IsNotNull. And .Expr(item1).Equal.Expr(item2);
+							else
+								sql.Where.Expr(item1).Equal.Expr(item2);
+						}
+
+						sql.GroupBy.Items.RemoveAll(_ => true);
+						sql.Select.Expr(new SqlFunction.Count(sql));
+						sql.ParentSql = groupBy.SqlBuilder;
+
+						return sql;
+					}
+
+					var join = sql.WeakLeftJoin();
+
+					groupBy.SqlBuilder.From.Tables[0].Joins.Add(join.JoinedTable);
+
 					for (var i = 0; i < sql.GroupBy.Items.Count; i++)
 					{
 						var item1 = sql.GroupBy.Items[i];
 						var item2 = groupBy.SqlBuilder.GroupBy.Items[i];
+						var col   = sql.Select.Columns[sql.Select.Add(item1)];
 
 						if (item1.CanBeNull() && item2.CanBeNull())
-							sql.Where
-								.Expr(item1).IsNull.    And .Expr(item2).IsNull. Or
-								.Expr(item1).IsNotNull. And .Expr(item2).IsNotNull. And .Expr(item1).Equal.Expr(item2);
+							join
+								.Expr(col).IsNull.    And .Expr(item2).IsNull. Or
+								.Expr(col).IsNotNull. And .Expr(item2).IsNotNull. And .Expr(col).Equal.Expr(item2);
 						else
-							sql.Where.Expr(item1).Equal.Expr(item2);
+							join
+								.Expr(col).Equal.Expr(item2);
 					}
 
-					sql.GroupBy.Items.RemoveAll(_ => true);
-					sql.Select.Expr(new SqlFunction.Count(sql));
 					sql.ParentSql = groupBy.SqlBuilder;
 
-					return sql;
+					return new SqlFunction("Count", sql.Select.Columns[0]);
 				}
 
 				return new SqlFunction.Count(groupBy.SqlBuilder);

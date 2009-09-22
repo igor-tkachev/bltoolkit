@@ -1383,7 +1383,7 @@ namespace BLToolkit.Mapping
 		#region Base Mapping
 
 		[CLSCompliant(false)]
-		protected static int[] GetIndex(
+		internal protected static int[] GetIndex(
 			IMapDataSource      source,
 			IMapDataDestination dest)
 		{

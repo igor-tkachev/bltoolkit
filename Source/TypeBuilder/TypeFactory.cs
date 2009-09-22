@@ -5,6 +5,11 @@ using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Reflection;
 using System.Runtime.InteropServices;
+
+#if FW3
+using System.Linq.Expressions;
+#endif
+
 using BLToolkit.Reflection;
 using BLToolkit.Reflection.Emit;
 using BLToolkit.TypeBuilder.Builders;
@@ -258,9 +263,21 @@ namespace BLToolkit.TypeBuilder
 					GetType(sourceType, sourceType, new AbstractClassBuilder());
 		}
 
+#if FW3
+		static class InstanceCreator<T>
+		{
+			public static readonly Func<T> CreateInstance =
+				Expression.Lambda<Func<T>>(Expression.New(TypeFactory.GetType(typeof(T)))).Compile();
+		}
+#endif
+
 		public static T CreateInstance<T>() where T: class
 		{
+#if FW3
+			return InstanceCreator<T>.CreateInstance();
+#else
 			return (T)Activator.CreateInstance(GetType(typeof(T)));
+#endif
 		}
 
 		#endregion

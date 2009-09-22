@@ -128,9 +128,11 @@ namespace BLToolkit.Data.Sql
 
 				ICloneableElement clone;
 
+				ISqlTableSource parent = (ISqlTableSource)_parent.Clone(objectTree, doClone);
+
 				if (!objectTree.TryGetValue(this, out clone))
 					objectTree.Add(this, clone = new Column(
-						(ISqlTableSource)_parent.Clone(objectTree, doClone),
+						parent,
 						(ISqlExpression)_expression.Clone(objectTree, doClone),
 						_alias));
 

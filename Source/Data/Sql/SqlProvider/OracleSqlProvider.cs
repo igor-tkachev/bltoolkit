@@ -21,6 +21,8 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		{
 		}
 
+		public override bool IsCountSubQuerySupported { get { return false; } }
+
 		protected override void BuildSelectClause(StringBuilder sb)
 		{
 			if (SqlBuilder.From.Tables.Count == 0)

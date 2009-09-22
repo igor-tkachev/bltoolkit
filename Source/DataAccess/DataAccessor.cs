@@ -8,18 +8,18 @@ using System.IO;
 using System.Reflection;
 using System.Xml;
 
-using BLToolkit.Aspects;
-using BLToolkit.Common;
-using BLToolkit.Data;
-using BLToolkit.Data.DataProvider;
-using BLToolkit.Mapping;
-using BLToolkit.Patterns;
-using BLToolkit.Properties;
-using BLToolkit.Reflection;
-using BLToolkit.TypeBuilder;
-
 namespace BLToolkit.DataAccess
 {
+	using Aspects;
+	using Common;
+	using Data;
+	using Data.DataProvider;
+	using Mapping;
+	using Patterns;
+	using Properties;
+	using Reflection;
+	using TypeBuilder;
+
 	[DataAccessor, DebuggerStepThrough]
 	public abstract class DataAccessor : DataAccessorBase
 	{
@@ -324,20 +324,56 @@ namespace BLToolkit.DataAccess
 
 		protected IEnumerable<T> ExecuteEnumerable<T>(DbManager db, Type objectType, bool disposeDbManager)
 		{
-			MappingSchema ms = db.MappingSchema;
+			try
+			{
+				using (IDataReader rd = db.ExecuteReader())
+				{
+					if (rd.Read())
+					{
+						ObjectMapper     dest   = MappingSchema.GetObjectMapper(objectType);
+						DataReaderMapper source = MappingSchema.CreateDataReaderMapper(rd);
 
-			if (disposeDbManager)
-			{
-				using (db)
-				using (IDataReader rd = db.ExecuteReader())
-					while (rd.Read())
-						yield return (T)ms.MapDataReaderToObject(rd, objectType);
+						InitContext ctx = new InitContext();
+
+						ctx.MappingSchema = MappingSchema;
+						ctx.ObjectMapper  = dest;
+						ctx.DataSource    = source;
+						ctx.SourceObject  = rd;
+
+						int[]          index   = MappingSchema.GetIndex(source, dest);
+						IValueMapper[] mappers = ctx.MappingSchema.GetValueMappers(source, dest, index);
+
+						do
+						{
+							T destObject = (T)dest.CreateInstance(ctx);
+
+							if (ctx.StopMapping)
+								yield return destObject;
+
+							var smDest = destObject as ISupportMapping;
+
+							if (smDest != null)
+							{
+								smDest.BeginMapping(ctx);
+
+								if (ctx.StopMapping)
+									yield return destObject;
+							}
+
+							MappingSchema.MapInternal(source, rd, dest, destObject, index, mappers);
+
+							if (smDest != null)
+								smDest.EndMapping(ctx);
+
+							yield return destObject;
+						} while (rd.Read());
+					}
+				}
 			}
-			else
+			finally
 			{
-				using (IDataReader rd = db.ExecuteReader())
-					while (rd.Read())
-						yield return (T)ms.MapDataReaderToObject(rd, objectType);
+				if (disposeDbManager)
+					db.Dispose();
 			}
 		}
 

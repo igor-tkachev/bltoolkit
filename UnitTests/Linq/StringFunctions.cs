@@ -500,20 +500,27 @@ namespace Data.Linq
 		[Test]
 		public void Test()
 		{
-			using (var db = new TestDbManager(ProviderName.SQLite))
+			using (var db = new TestDbManager(ProviderName.SqlCe))
 			{
 				var p = db
 					.SetCommand(@"
-SELECT
-	t.[MoneyValue] * Cast(t.[ID] as Decimal(10,0)),
-t.[ID],
-    t.[MoneyValue]
-FROM
-    [LinqDataTypes] t
-WHERE
-    t.[MoneyValue] * Cast(t.[ID] as Decimal(10,0)) = @p1
-LIMIT 2
-",
+						SELECT
+							Count(ch2.ParentID) as c1
+						FROM
+							[Child] ch
+								LEFT JOIN
+								(
+									SELECT
+										ch1.ParentID
+									FROM
+										[Child] ch1
+									WHERE
+										ch1.[ChildID] > 20
+									GROUP BY
+										ch1.ParentID
+								) as ch2 ON ch2.ParentID = ch.ParentID
+						GROUP BY
+							ch.[ParentID]",
 						db.Parameter("@p1", 9.9900m, DbType.Decimal))
 					.ExecuteScalar();
 

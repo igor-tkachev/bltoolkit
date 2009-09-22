@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data;
 using System.Text;
 
 namespace BLToolkit.Data.Sql.SqlProvider
@@ -42,6 +41,18 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		{
 			get { return _nesting; }
 		}
+
+		#endregion
+
+		#region Support Flags
+
+		public virtual bool SkipAcceptsParameter      { get { return true; } }
+		public virtual bool TakeAcceptsParameter      { get { return true; } }
+
+		public virtual bool IsTakeSupported           { get { return true; } }
+		public virtual bool IsSkipSupported           { get { return true; } }
+		public virtual bool IsSubQueryColumnSupported { get { return true; } }
+		public virtual bool IsCountSubQuerySupported  { get { return true; } }
 
 		#endregion
 
@@ -369,17 +380,11 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		#region Skip/Take
 
-		public    virtual bool   IsTakeSupported { get { return true; } }
-		public    virtual bool   IsSkipSupported { get { return true; } }
-
-		public    virtual bool   SkipAcceptsParameter { get { return true; } }
-		public    virtual bool   TakeAcceptsParameter { get { return true; } }
-
-		protected virtual bool   SkipFirst       { get { return true; } }
-		protected virtual string SkipFormat      { get { return null; } }
-		protected virtual string FirstFormat     { get { return null; } }
-		protected virtual string LimitFormat     { get { return null; } }
-		protected virtual string OffsetFormat    { get { return null; } }
+		protected virtual bool   SkipFirst    { get { return true; } }
+		protected virtual string SkipFormat   { get { return null; } }
+		protected virtual string FirstFormat  { get { return null; } }
+		protected virtual string LimitFormat  { get { return null; } }
+		protected virtual string OffsetFormat { get { return null; } }
 
 		protected bool NeedSkip { get { return SqlBuilder.Select.SkipValue != null && IsSkipSupported; } }
 		protected bool NeedTake { get { return SqlBuilder.Select.TakeValue != null && IsTakeSupported; } }
@@ -1125,7 +1130,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 				return _dataProvider.Convert(((SqlTable)table).PhysicalName, ConvertType.NameToQueryTable).ToString();
 
 			if (table is SqlBuilder.TableSource)
-				return GetTablePhysicalName(table);
+				return GetTablePhysicalName(((SqlBuilder.TableSource)table).Source);
 
 			throw new InvalidOperationException();
 		}
