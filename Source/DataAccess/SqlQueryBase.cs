@@ -165,14 +165,32 @@ namespace BLToolkit.DataAccess
 
 			sb.Remove(sb.Length - 2, 1);
 
-			sb.AppendFormat("FROM\n\t{0}\n",
-				db.DataProvider.Convert(GetTableName(type), ConvertType.NameToQueryTable));
+			sb.Append("FROM\n\t");
+
+			AppendTableName(sb, db, type);
 
 			AddWherePK(db, query, sb, -1);
 
 			query.QueryText = sb.ToString();
 
 			return query;
+		}
+
+		private void AppendTableName(StringBuilder sb, DbManager db, Type type)
+		{
+			string database = GetDatabaseName(type);
+			string owner    = GetOwnerName   (type);
+			string name     = GetTableName   (type);
+
+			if (database != null)
+				sb.Append(db.DataProvider.Convert(database, ConvertType.NameToQueryTable)).Append('.');
+
+			if (owner != null)
+				sb.Append(db.DataProvider.Convert(owner, ConvertType.NameToQueryTable)).Append('.');
+			else if (database != null)
+				sb.Append('.');
+
+			sb.Append(name).AppendLine();
 		}
 
 		protected SqlQueryInfo CreateSelectAllSqlText(DbManager db, Type type)
@@ -189,8 +207,8 @@ namespace BLToolkit.DataAccess
 
 			sb.Remove(sb.Length - 2, 1);
 
-			sb.AppendFormat("FROM\n\t{0}",
-				db.DataProvider.Convert(GetTableName(type), ConvertType.NameToQueryTable));
+			sb.Append("FROM\n\t");
+			AppendTableName(sb, db, type);
 
 			query.QueryText = sb.ToString();
 
@@ -206,8 +224,9 @@ namespace BLToolkit.DataAccess
 			SqlQueryInfo         query   = new SqlQueryInfo(om);
 			MetadataProviderBase mp      = MappingSchema.MetadataProvider;
 
-			sb.AppendFormat("INSERT INTO {0} (\n",
-				db.DataProvider.Convert(GetTableName(type), ConvertType.NameToQueryTable));
+			sb.Append("INSERT INTO ");
+			AppendTableName(sb, db, type);
+			sb.Append(" (\n");
 
 			foreach (MemberMapper mm in GetFieldList(om))
 			{
@@ -260,8 +279,9 @@ namespace BLToolkit.DataAccess
 			SqlQueryInfo    query   = new SqlQueryInfo(om);
 			MetadataProviderBase mp = MappingSchema.MetadataProvider;
 
-			sb.AppendFormat("UPDATE\n\t{0}\nSET\n",
-				db.DataProvider.Convert(GetTableName(type), ConvertType.NameToQueryTable));
+			sb.Append("UPDATE\n\t");
+			AppendTableName(sb, db, type);
+			sb.Append("\nSET\n");
 
 			foreach (MemberMapper mm in GetFieldList(om))
 			{
@@ -302,8 +322,9 @@ namespace BLToolkit.DataAccess
 			StringBuilder sb    = new StringBuilder();
 			SqlQueryInfo  query = new SqlQueryInfo(om);
 
-			sb.AppendFormat("DELETE FROM\n\t{0}\n",
-				db.DataProvider.Convert(GetTableName(type), ConvertType.NameToQueryTable));
+			sb.Append("DELETE FROM\n\t");
+			AppendTableName(sb, db, type);
+			sb.AppendLine();
 
 			AddWherePK(db, query, sb, nParameter);
 

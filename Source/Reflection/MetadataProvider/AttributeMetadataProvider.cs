@@ -417,6 +417,42 @@ namespace BLToolkit.Reflection.MetadataProvider
 
 		#endregion
 
+		#region GetDbName
+
+		public override string GetDatabaseName(Type type, ExtensionList extensions, out bool isSet)
+		{
+			object[] attrs = type.GetCustomAttributes(typeof(TableNameAttribute), true);
+
+			if (attrs.Length > 0)
+			{
+				string name = ((TableNameAttribute)attrs[0]).Database;
+				isSet = name != null;
+				return name;
+			}
+
+			return base.GetDatabaseName(type, extensions, out isSet);
+		}
+
+		#endregion
+
+		#region GetTableName
+
+		public override string GetOwnerName(Type type, ExtensionList extensions, out bool isSet)
+		{
+			object[] attrs = type.GetCustomAttributes(typeof(TableNameAttribute), true);
+
+			if (attrs.Length > 0)
+			{
+				string name = ((TableNameAttribute)attrs[0]).Owner;
+				isSet = name != null;
+				return name;
+			}
+
+			return base.GetOwnerName(type, extensions, out isSet);
+		}
+
+		#endregion
+
 		#region GetTableName
 
 		public override string GetTableName(Type type, ExtensionList extensions, out bool isSet)
@@ -425,8 +461,9 @@ namespace BLToolkit.Reflection.MetadataProvider
 
 			if (attrs.Length > 0)
 			{
-				isSet = true;
-				return ((TableNameAttribute)attrs[0]).Name;
+				string name = ((TableNameAttribute)attrs[0]).Name;
+				isSet = name != null;
+				return name;
 			}
 
 			return base.GetTableName(type, extensions, out isSet);

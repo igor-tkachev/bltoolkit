@@ -350,7 +350,7 @@ namespace BLToolkit.DataAccess
 							if (ctx.StopMapping)
 								yield return destObject;
 
-							var smDest = destObject as ISupportMapping;
+							ISupportMapping smDest = destObject as ISupportMapping;
 
 							if (smDest != null)
 							{

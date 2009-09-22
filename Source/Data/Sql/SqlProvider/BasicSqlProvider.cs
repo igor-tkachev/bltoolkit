@@ -1127,7 +1127,26 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		string GetTablePhysicalName(ISqlTableSource table)
 		{
 			if (table is SqlTable)
-				return _dataProvider.Convert(((SqlTable)table).PhysicalName, ConvertType.NameToQueryTable).ToString();
+			{
+				SqlTable tbl = (SqlTable)table;
+
+				string tableName = _dataProvider.Convert(tbl.PhysicalName, ConvertType.NameToQueryTable).ToString();
+
+				if (tbl.Database == null && tbl.Owner == null)
+					return tableName;
+
+				string name = null;
+
+				if (tbl.Database != null)
+					name = _dataProvider.Convert(tbl.Database, ConvertType.NameToQueryTable) + ".";
+
+				if (tbl.Owner != null)
+					name += _dataProvider.Convert(tbl.Owner, ConvertType.NameToQueryTable) + ".";
+				else if (tbl.Database != null)
+					name += ".";
+
+				return name + tableName;
+			}
 
 			if (table is SqlBuilder.TableSource)
 				return GetTablePhysicalName(((SqlBuilder.TableSource)table).Source);

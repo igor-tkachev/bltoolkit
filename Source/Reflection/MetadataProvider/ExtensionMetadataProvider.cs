@@ -253,6 +253,44 @@ namespace BLToolkit.Reflection.MetadataProvider
 
 		#endregion
 
+		#region GetDbName
+
+		public override string GetDatabaseName(Type type, ExtensionList extensions, out bool isSet)
+		{
+			TypeExtension typeExt = TypeExtension.GetTypeExtension(type, extensions);
+
+			object value = typeExt.Attributes["DatabaseName"].Value;
+
+			if (value != null)
+			{
+				isSet = true;
+				return value.ToString();
+			}
+
+			return base.GetDatabaseName(type, extensions, out isSet);
+		}
+
+		#endregion
+
+		#region GetOwnerName
+
+		public override string GetOwnerName(Type type, ExtensionList extensions, out bool isSet)
+		{
+			TypeExtension typeExt = TypeExtension.GetTypeExtension(type, extensions);
+
+			object value = typeExt.Attributes["OwnerName"].Value;
+
+			if (value != null)
+			{
+				isSet = true;
+				return value.ToString();
+			}
+
+			return base.GetOwnerName(type, extensions, out isSet);
+		}
+
+		#endregion
+
 		#region GetTableName
 
 		public override string GetTableName(Type type, ExtensionList extensions, out bool isSet)

@@ -137,6 +137,26 @@ namespace BLToolkit.Reflection.MetadataProvider
 
 		#endregion
 
+		#region GetDbName
+
+		public virtual string GetDatabaseName(Type type, ExtensionList extensions, out bool isSet)
+		{
+			isSet = false;
+			return null;
+		}
+
+		#endregion
+
+		#region GetOwnerName
+
+		public virtual string GetOwnerName(Type type, ExtensionList extensions, out bool isSet)
+		{
+			isSet = false;
+			return null;
+		}
+
+		#endregion
+
 		#region GetTableName
 
 		public virtual string GetTableName(Type type, ExtensionList extensions, out bool isSet)

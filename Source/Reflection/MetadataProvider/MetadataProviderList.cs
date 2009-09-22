@@ -202,6 +202,40 @@ namespace BLToolkit.Reflection.MetadataProvider
 
 		#endregion
 
+		#region GetDbName
+
+		public override string GetDatabaseName(Type type, ExtensionList extensions, out bool isSet)
+		{
+			foreach (MetadataProviderBase p in _list)
+			{
+				string value = p.GetDatabaseName(type, extensions, out isSet);
+
+				if (isSet)
+					return value;
+			}
+
+			return base.GetDatabaseName(type, extensions, out isSet);
+		}
+
+		#endregion
+
+		#region GetOwnerName
+
+		public override string GetOwnerName(Type type, ExtensionList extensions, out bool isSet)
+		{
+			foreach (MetadataProviderBase p in _list)
+			{
+				string value = p.GetOwnerName(type, extensions, out isSet);
+
+				if (isSet)
+					return value;
+			}
+
+			return base.GetOwnerName(type, extensions, out isSet);
+		}
+
+		#endregion
+
 		#region GetTableName
 
 		public override string GetTableName(Type type, ExtensionList extensions, out bool isSet)

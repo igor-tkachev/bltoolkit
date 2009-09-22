@@ -33,7 +33,9 @@ namespace BLToolkit.Data.Sql
 			: this(mappingSchema)
 		{
 			bool isSet;
-			Name = _mappingSchema.MetadataProvider.GetTableName(objectType, _mappingSchema.Extensions, out isSet);
+			_database = _mappingSchema.MetadataProvider.GetDatabaseName(objectType, _mappingSchema.Extensions, out isSet);
+			_owner    = _mappingSchema.MetadataProvider.GetOwnerName   (objectType, _mappingSchema.Extensions, out isSet);
+			_name     = _mappingSchema.MetadataProvider.GetTableName   (objectType, _mappingSchema.Extensions, out isSet);
 
 			foreach (MemberMapper mm in MappingSchema.GetObjectMapper(objectType))
 				if (mm.MapMemberInfo.SqlIgnore == false)

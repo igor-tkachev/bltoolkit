@@ -1,9 +1,11 @@
 ﻿using System;
+using BLToolkit.DataAccess;
 
 namespace Data.Linq.Model
 {
 	using BLToolkit.Mapping;
 
+	[TableName(Database = "BLTD")]
 	public class Person
 	{
 		public Person()

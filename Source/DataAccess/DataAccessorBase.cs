@@ -163,6 +163,20 @@ namespace BLToolkit.DataAccess
 		}
 
 		[NoInterception]
+		protected virtual string GetDatabaseName(Type type)
+		{
+			bool isSet;
+			return MappingSchema.MetadataProvider.GetDatabaseName(type, Extensions, out isSet);
+		}
+
+		[NoInterception]
+		protected virtual string GetOwnerName(Type type)
+		{
+			bool isSet;
+			return MappingSchema.MetadataProvider.GetOwnerName(type, Extensions, out isSet);
+		}
+
+		[NoInterception]
 		protected virtual string GetTableName(Type type)
 		{
 			bool isSet;
