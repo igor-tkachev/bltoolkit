@@ -10,15 +10,13 @@ namespace BLToolkit.Data.DataProvider
 
 	class InformixDataProvider :  DataProviderBase
 	{
-		public override IDbConnection CreateConnectionObject()
-		{
-			return new IfxConnection();
-		}
+		public override IDbConnection CreateConnectionObject () { return new IfxConnection      ();     }
+		public override DbDataAdapter CreateDataAdapterObject() { return new IfxDataAdapter     ();     }
+		public override ISqlProvider  CreateSqlProvider      () { return new InformixSqlProvider(this); }
 
-		public override DbDataAdapter CreateDataAdapterObject()
-		{
-			return new IfxDataAdapter();
-		}
+		public override Type   ConnectionType         { get { return typeof(IfxConnection);              } }
+		public override string Name                   { get { return DataProvider.ProviderName.Informix; } }
+		public override string EndOfSql               { get { return ";"; } }
 
 		public override bool DeriveParameters(IDbCommand command)
 		{
@@ -66,26 +64,6 @@ namespace BLToolkit.Data.DataProvider
 			}
 
 			return value;
-		}
-
-		public override Type ConnectionType
-		{
-			get { return typeof(IfxConnection); }
-		}
-
-		public override string Name
-		{
-			get { return DataProvider.ProviderName.Informix; }
-		}
-
-		public override string EndOfSql
-		{
-			get { return ";"; }
-		}
-
-		public override ISqlProvider CreateSqlProvider()
-		{
-			return new InformixSqlProvider(this);
 		}
 	}
 }

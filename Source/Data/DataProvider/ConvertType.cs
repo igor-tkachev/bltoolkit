@@ -45,6 +45,26 @@ namespace BLToolkit.Data.DataProvider
 		NameToQueryFieldAlias,
 
 		/// <summary>
+		/// Provided name should be converted to query database.
+		/// For example:
+		///     MyDatabase -> [MyDatabase]
+		/// for the following query:
+		///     SELECT * FROM [MyDatabase]..[Person]
+		///                   ^ and      ^
+		/// </summary>
+		NameToDatabase,
+
+		/// <summary>
+		/// Provided name should be converted to query database.
+		/// For example:
+		///     dbo -> [dbo]
+		/// for the following query:
+		///     SELECT * FROM [ dbo ].[Person]
+		///                   ^ and ^
+		/// </summary>
+		NameToOwner,
+
+		/// <summary>
 		/// Provided name should be converted to query table name.
 		/// For example:
 		///     Person -> [Person]

@@ -182,15 +182,27 @@ namespace BLToolkit.DataAccess
 			string owner    = GetOwnerName   (type);
 			string name     = GetTableName   (type);
 
-			if (database != null)
-				sb.Append(db.DataProvider.Convert(database, ConvertType.NameToQueryTable)).Append('.');
+			name = db.DataProvider.Convert(name, ConvertType.NameToQueryTable).ToString();
 
-			if (owner != null)
-				sb.Append(db.DataProvider.Convert(owner, ConvertType.NameToQueryTable)).Append('.');
-			else if (database != null)
-				sb.Append('.');
+			if (database == null && owner == null)
+				sb.Append(name);
+			else
+			{
+				if (database != null)
+					sb.Append(db.DataProvider.Convert(database, ConvertType.NameToDatabase));
 
-			sb.Append(name).AppendLine();
+				if (owner != null)
+					sb
+						.Append(db.DataProvider.DatabaseOwnerDelimiter)
+						.Append(db.DataProvider.Convert(owner, ConvertType.NameToOwner))
+						.Append(db.DataProvider.OwnerTableDelimiter);
+				else
+					sb.Append(db.DataProvider.DatabaseTableDelimiter);
+
+				sb.Append(name);
+			}
+
+			sb.AppendLine();
 		}
 
 		protected SqlQueryInfo CreateSelectAllSqlText(DbManager db, Type type)

@@ -46,6 +46,8 @@ namespace BLToolkit.Data.DataProvider
 
 					return "[" + value + "]";
 
+				case ConvertType.NameToDatabase:
+				case ConvertType.NameToOwner:
 				case ConvertType.NameToQueryTable:
 					{
 						string name = value.ToString();
@@ -142,6 +144,11 @@ namespace BLToolkit.Data.DataProvider
 		public override ISqlProvider CreateSqlProvider()
 		{
 			return new SybaseSqlProvider(this);
+		}
+
+		public override string DatabaseTableDelimiter
+		{
+			get { return ".."; }
 		}
 
 		public override void PrepareCommand(ref CommandType commandType, ref string commandText, ref IDbDataParameter[] commandParameters)

@@ -26,6 +26,12 @@ namespace BLToolkit.Data.Linq
 		}
 
 		[Conditional("TRACE_PARSING")]
+		static void WriteLineInternal(string format, params object[] args)
+		{
+			Debug.WriteLine(string.Format(format, args), GetMethodName());
+		}
+
+		[Conditional("TRACE_PARSING")]
 		static void WriteLineInternal(string prefix, Expression expr)
 		{
 			if (expr != null)
@@ -69,18 +75,20 @@ namespace BLToolkit.Data.Linq
 		}
 
 		[Conditional("TRACE_PARSING")] public static void WriteLine() { WriteLineInternal(); }
+		[JetBrains.Annotations.StringFormatMethod("format")]
+		[Conditional("TRACE_PARSING")] public static void WriteLine(string format, params object[] args) { WriteLineInternal(format, args);     }
 
-		[Conditional("TRACE_PARSING")] public static void WriteLine(               Expression  expr)   { WriteLineInternal("expr",   expr);   }
-		[Conditional("TRACE_PARSING")] public static void WriteLine(               QueryField  field)  { WriteLineInternal("field",  field);  }
-		[Conditional("TRACE_PARSING")] public static void WriteLine(               QuerySource source) { WriteLineInternal("query",  source); }
-		[Conditional("TRACE_PARSING")] public static void WriteLine(               SqlBuilder  sql)    { WriteLineInternal("sql",    sql);    }
-		[Conditional("TRACE_PARSING")] public static void WriteLine(               LambdaInfo  lambda) { WriteLineInternal("lambda", lambda); }
+		[Conditional("TRACE_PARSING")] public static void WriteLine(               Expression  expr)     { WriteLineInternal("expr",   expr);   }
+		[Conditional("TRACE_PARSING")] public static void WriteLine(               QueryField  field)    { WriteLineInternal("field",  field);  }
+		[Conditional("TRACE_PARSING")] public static void WriteLine(               QuerySource source)   { WriteLineInternal("query",  source); }
+		[Conditional("TRACE_PARSING")] public static void WriteLine(               SqlBuilder  sql)      { WriteLineInternal("sql",    sql);    }
+		[Conditional("TRACE_PARSING")] public static void WriteLine(               LambdaInfo  lambda)   { WriteLineInternal("lambda", lambda); }
 
-		[Conditional("TRACE_PARSING")] public static void WriteLine(string prefix, Expression  expr)   { WriteLineInternal(prefix,   expr);   }
-		[Conditional("TRACE_PARSING")] public static void WriteLine(string prefix, QueryField  field)  { WriteLineInternal(prefix,   field);  }
-		[Conditional("TRACE_PARSING")] public static void WriteLine(string prefix, QuerySource source) { WriteLineInternal(prefix,   source); }
-		[Conditional("TRACE_PARSING")] public static void WriteLine(string prefix, LambdaInfo  lambda) { WriteLineInternal(prefix,   lambda); }
-		[Conditional("TRACE_PARSING")] public static void WriteLine(string prefix, SqlBuilder  sql)    { WriteLineInternal(prefix,   sql);    }
+		[Conditional("TRACE_PARSING")] public static void WriteLine(string prefix, Expression  expr)     { WriteLineInternal(prefix,   expr);   }
+		[Conditional("TRACE_PARSING")] public static void WriteLine(string prefix, QueryField  field)    { WriteLineInternal(prefix,   field);  }
+		[Conditional("TRACE_PARSING")] public static void WriteLine(string prefix, QuerySource source)   { WriteLineInternal(prefix,   source); }
+		[Conditional("TRACE_PARSING")] public static void WriteLine(string prefix, LambdaInfo  lambda)   { WriteLineInternal(prefix,   lambda); }
+		[Conditional("TRACE_PARSING")] public static void WriteLine(string prefix, SqlBuilder  sql)      { WriteLineInternal(prefix,   sql);    }
 
 		static string GetMethodName()
 		{

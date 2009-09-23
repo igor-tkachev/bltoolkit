@@ -461,5 +461,37 @@ namespace Data.Linq
 				Assert.AreEqual(expected, result);
 			});
 		}
+
+		[Test]
+		public void WhereCount1()
+		{
+			var expected =
+				from ch in Child
+				group ch by ch.ParentID into g
+				where g.Key > 2
+				select g.Key;
+
+			ForEachProvider(db => AreEqual(expected,
+				from ch in db.Child
+				group ch by ch.ParentID into g
+				where g.Key > 2
+				select g.Key));
+		}
+
+		[Test]
+		public void WhereCount2()
+		{
+			var expected =
+				from ch in Child
+				group ch by ch.ParentID into g
+				where g.Count() > 2
+				select g.Key;
+
+			ForEachProvider(db => AreEqual(expected,
+				from ch in db.Child
+				group ch by ch.ParentID into g
+				where g.Count() > 2
+				select g.Key));
+		}
 	}
 }

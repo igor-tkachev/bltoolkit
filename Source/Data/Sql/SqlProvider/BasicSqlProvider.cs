@@ -1135,15 +1135,18 @@ namespace BLToolkit.Data.Sql.SqlProvider
 				if (tbl.Database == null && tbl.Owner == null)
 					return tableName;
 
-				string name = null;
+				string name = string.Empty;
 
 				if (tbl.Database != null)
-					name = _dataProvider.Convert(tbl.Database, ConvertType.NameToQueryTable) + ".";
+					name = _dataProvider.Convert(tbl.Database, ConvertType.NameToDatabase).ToString();
 
 				if (tbl.Owner != null)
-					name += _dataProvider.Convert(tbl.Owner, ConvertType.NameToQueryTable) + ".";
-				else if (tbl.Database != null)
-					name += ".";
+					name +=
+						_dataProvider.DatabaseOwnerDelimiter +
+						_dataProvider.Convert(tbl.Owner, ConvertType.NameToOwner) +
+						_dataProvider.OwnerTableDelimiter;
+				else
+					name += _dataProvider.DatabaseTableDelimiter;
 
 				return name + tableName;
 			}

@@ -77,6 +77,8 @@ namespace BLToolkit.Data.DataProvider
 
 					return "[" + value + "]";
 
+				case ConvertType.NameToDatabase:
+				case ConvertType.NameToOwner:
 				case ConvertType.NameToQueryTable:
 					{
 						string name = value.ToString();
@@ -148,6 +150,11 @@ namespace BLToolkit.Data.DataProvider
 		public override int MaxBatchSize
 		{
 			get { return 65536; }
+		}
+
+		public override string DatabaseTableDelimiter
+		{
+			get { return ".."; }
 		}
 	}
 }

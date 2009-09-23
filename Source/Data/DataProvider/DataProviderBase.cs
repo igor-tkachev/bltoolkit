@@ -192,30 +192,18 @@ namespace BLToolkit.Data.DataProvider
 		{
 		}
 
-		public virtual string ProviderName
-		{
-			get { return ConnectionType.Namespace; }
-		}
-
 		public virtual ISqlProvider CreateSqlProvider()
 		{
 			return new BasicSqlProvider(this);
 		}
 
-		public virtual int MaxParameters
-		{
-			get { return 100; }
-		}
-
-		public virtual int MaxBatchSize
-		{
-			get { return 65536; }
-		}
-
-		public virtual string EndOfSql
-		{
-			get { return ";"; }
-		}
+		public virtual string ProviderName           { get { return ConnectionType.Namespace; } }
+		public virtual int    MaxParameters          { get { return 100;   } }
+		public virtual int    MaxBatchSize           { get { return 65536; } }
+		public virtual string EndOfSql               { get { return ";";   } }
+		public virtual string DatabaseOwnerDelimiter { get { return ".";   } }
+		public virtual string DatabaseTableDelimiter { get { return ".";   } }
+		public virtual string OwnerTableDelimiter    { get { return ".";   } }
 
 		#endregion
 	}

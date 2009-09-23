@@ -41,6 +41,9 @@ namespace BLToolkit.Data.Linq
 
 		int    _currentSql = 0;
 		Action _buildSelect;
+#pragma warning disable 414
+		bool   _isParsingPhase;
+#pragma warning restore 414
 
 		SqlBuilder CurrentSql
 		{
@@ -63,6 +66,9 @@ namespace BLToolkit.Data.Linq
 			Expression            expression,
 			ParameterExpression[] parameters)
 		{
+			_isParsingPhase = true;
+
+			ParsingTracer.WriteLine(expression);
 			ParsingTracer.WriteLine(expression);
 			ParsingTracer.IncIndentLevel();
 
@@ -97,7 +103,13 @@ namespace BLToolkit.Data.Linq
 				//
 				pi =>
 				{
+					ParsingTracer.WriteLine("Sequence parsing phase...");
+
 					var query = ParseSequence(pi, null);
+
+					ParsingTracer.WriteLine("Select building phase...");
+
+					_isParsingPhase = false;
 
 					if (_buildSelect != null)
 						_buildSelect();
@@ -1417,6 +1429,8 @@ namespace BLToolkit.Data.Linq
 
 		bool SimpleQuery(Type type, string alias)
 		{
+			_isParsingPhase = false;
+
 			var table = new SqlTable(_info.MappingSchema, type) { Alias = alias };
 
 			foreach (var field in table.Fields.Values)
@@ -1434,6 +1448,8 @@ namespace BLToolkit.Data.Linq
 
 		void BuildScalarSelect(ParseInfo parseInfo)
 		{
+			_isParsingPhase = false;
+
 			switch (parseInfo.NodeType)
 			{
 				case ExpressionType.New:
@@ -1564,337 +1580,359 @@ namespace BLToolkit.Data.Linq
 
 		public ISqlExpression ParseExpression(QuerySource query, ParseInfo parseInfo)
 		{
-			if (parseInfo.NodeType == ExpressionType.Parameter && query is QuerySource.Scalar)
+			ParsingTracer.WriteLine(query);
+			ParsingTracer.WriteLine(parseInfo);
+			ParsingTracer.IncIndentLevel();
+
+			try
 			{
-				var ma = (QuerySource.Scalar)query;
-				return ParseExpression(ma.ParentQueries[0], ma.Lambda.Body);
-			}
+				if (parseInfo.NodeType == ExpressionType.Parameter && query is QuerySource.Scalar)
+				{
+					var ma = (QuerySource.Scalar)query;
+					return ParseExpression(ma.ParentQueries[0], ma.Lambda.Body);
+				}
 
-			if (CanBeConstant(parseInfo))
-				return BuildConstant(parseInfo);
+				if (CanBeConstant(parseInfo))
+					return BuildConstant(parseInfo);
 
-			if (CanBeCompiled(parseInfo))
-				return BuildParameter(parseInfo).SqlParameter;
+				if (CanBeCompiled(parseInfo))
+					return BuildParameter(parseInfo).SqlParameter;
 
-			switch (parseInfo.NodeType)
-			{
-				case ExpressionType.AndAlso:
-				case ExpressionType.OrElse:
-				case ExpressionType.Not:
-				case ExpressionType.Equal:
-				case ExpressionType.NotEqual:
-				case ExpressionType.GreaterThan:
-				case ExpressionType.GreaterThanOrEqual:
-				case ExpressionType.LessThan:
-				case ExpressionType.LessThanOrEqual:
-					{
-						var condition = new SqlBuilder.SearchCondition();
-						ParseSearchCondition(condition.Conditions, query, parseInfo);
-						return condition;
-					}
-
-				case ExpressionType.Add:
-				case ExpressionType.AddChecked:
-				case ExpressionType.And:
-				case ExpressionType.Divide:
-				case ExpressionType.ExclusiveOr:
-				case ExpressionType.Modulo:
-				case ExpressionType.Multiply:
-				case ExpressionType.Or:
-				case ExpressionType.Power:
-				case ExpressionType.Subtract:
-				case ExpressionType.SubtractChecked:
-				case ExpressionType.Coalesce:
-					{
-						var pi = parseInfo.Convert<BinaryExpression>();
-						var e  = parseInfo.Expr as BinaryExpression;
-						var l  = ParseExpression(query, pi.Create(e.Left,  pi.Property(Binary.Left)));
-						var r  = ParseExpression(query, pi.Create(e.Right, pi.Property(Binary.Right)));
-						var t  = e.Left.Type ?? e.Right.Type;
-
-						switch (parseInfo.NodeType)
+				switch (parseInfo.NodeType)
+				{
+					case ExpressionType.AndAlso:
+					case ExpressionType.OrElse:
+					case ExpressionType.Not:
+					case ExpressionType.Equal:
+					case ExpressionType.NotEqual:
+					case ExpressionType.GreaterThan:
+					case ExpressionType.GreaterThanOrEqual:
+					case ExpressionType.LessThan:
+					case ExpressionType.LessThanOrEqual:
 						{
-							case ExpressionType.Add            :
-							case ExpressionType.AddChecked     : return Convert(new SqlBinaryExpression(l, "+", r, t, Precedence.Additive));
-							case ExpressionType.And            : return Convert(new SqlBinaryExpression(l, "&", r, t, Precedence.Bitwise));
-							case ExpressionType.Divide         : return Convert(new SqlBinaryExpression(l, "/", r, t, Precedence.Multiplicative));
-							case ExpressionType.ExclusiveOr    : return Convert(new SqlBinaryExpression(l, "^", r, t, Precedence.Bitwise));
-							case ExpressionType.Modulo         : return Convert(new SqlBinaryExpression(l, "%", r, t, Precedence.Multiplicative));
-							case ExpressionType.Multiply       : return Convert(new SqlBinaryExpression(l, "*", r, t, Precedence.Multiplicative));
-							case ExpressionType.Or             : return Convert(new SqlBinaryExpression(l, "|", r, t, Precedence.Bitwise));
-							case ExpressionType.Power          : return Convert(new SqlFunction("Power", l, r));
-							case ExpressionType.Subtract       :
-							case ExpressionType.SubtractChecked: return Convert(new SqlBinaryExpression(l, "-", r, t, Precedence.Subtraction));
-							case ExpressionType.Coalesce       :
-								{
-									if (r is SqlFunction)
-									{
-										var c = (SqlFunction)r;
+							var condition = new SqlBuilder.SearchCondition();
+							ParseSearchCondition(condition.Conditions, query, parseInfo);
+							return condition;
+						}
 
-										if (c.Name == "Coalesce")
+					case ExpressionType.Add:
+					case ExpressionType.AddChecked:
+					case ExpressionType.And:
+					case ExpressionType.Divide:
+					case ExpressionType.ExclusiveOr:
+					case ExpressionType.Modulo:
+					case ExpressionType.Multiply:
+					case ExpressionType.Or:
+					case ExpressionType.Power:
+					case ExpressionType.Subtract:
+					case ExpressionType.SubtractChecked:
+					case ExpressionType.Coalesce:
+						{
+							var pi = parseInfo.Convert<BinaryExpression>();
+							var e  = parseInfo.Expr as BinaryExpression;
+							var l  = ParseExpression(query, pi.Create(e.Left,  pi.Property(Binary.Left)));
+							var r  = ParseExpression(query, pi.Create(e.Right, pi.Property(Binary.Right)));
+							var t  = e.Left.Type ?? e.Right.Type;
+
+							switch (parseInfo.NodeType)
+							{
+								case ExpressionType.Add            :
+								case ExpressionType.AddChecked     : return Convert(new SqlBinaryExpression(l, "+", r, t, Precedence.Additive));
+								case ExpressionType.And            : return Convert(new SqlBinaryExpression(l, "&", r, t, Precedence.Bitwise));
+								case ExpressionType.Divide         : return Convert(new SqlBinaryExpression(l, "/", r, t, Precedence.Multiplicative));
+								case ExpressionType.ExclusiveOr    : return Convert(new SqlBinaryExpression(l, "^", r, t, Precedence.Bitwise));
+								case ExpressionType.Modulo         : return Convert(new SqlBinaryExpression(l, "%", r, t, Precedence.Multiplicative));
+								case ExpressionType.Multiply       : return Convert(new SqlBinaryExpression(l, "*", r, t, Precedence.Multiplicative));
+								case ExpressionType.Or             : return Convert(new SqlBinaryExpression(l, "|", r, t, Precedence.Bitwise));
+								case ExpressionType.Power          : return Convert(new SqlFunction("Power", l, r));
+								case ExpressionType.Subtract       :
+								case ExpressionType.SubtractChecked: return Convert(new SqlBinaryExpression(l, "-", r, t, Precedence.Subtraction));
+								case ExpressionType.Coalesce       :
+									{
+										if (r is SqlFunction)
 										{
-											var parms = new ISqlExpression[c.Parameters.Length + 1];
+											var c = (SqlFunction)r;
 
-											parms[0] = l;
-											c.Parameters.CopyTo(parms, 1);
+											if (c.Name == "Coalesce")
+											{
+												var parms = new ISqlExpression[c.Parameters.Length + 1];
 
-											return Convert(new SqlFunction("Coalesce", parms));
+												parms[0] = l;
+												c.Parameters.CopyTo(parms, 1);
+
+												return Convert(new SqlFunction("Coalesce", parms));
+											}
 										}
+
+										return Convert(new SqlFunction("Coalesce", l, r));
 									}
-
-									return Convert(new SqlFunction("Coalesce", l, r));
-								}
-						}
-
-						break;
-					}
-
-				case ExpressionType.Convert:
-					{
-						var pi = parseInfo.Convert<UnaryExpression>();
-						var e  = parseInfo.Expr as UnaryExpression;
-						var o  = ParseExpression(query, pi.Create(e.Operand, pi.Property(Unary.Operand)));
-
-						if (e.Method == null && e.IsLifted)
-							return o;
-
-						return Convert(new SqlFunction("$Convert$", new SqlDataType(e.Type), new SqlDataType(e.Operand.Type), o));
-					}
-
-				case ExpressionType.Conditional:
-					{
-						var pi = parseInfo.Convert<ConditionalExpression>();
-						var e  = parseInfo.Expr as ConditionalExpression;
-						var s  = ParseExpression(query, pi.Create(e.Test,    pi.Property(Conditional.Test)));
-						var t  = ParseExpression(query, pi.Create(e.IfTrue,  pi.Property(Conditional.IfTrue)));
-						var f  = ParseExpression(query, pi.Create(e.IfFalse, pi.Property(Conditional.IfFalse)));
-
-						if (f is SqlFunction)
-						{
-							var c = (SqlFunction)f;
-
-							if (c.Name == "CASE")
-							{
-								var parms = new ISqlExpression[c.Parameters.Length + 2];
-
-								parms[0] = s;
-								parms[1] = t;
-								c.Parameters.CopyTo(parms, 2);
-
-								return Convert(new SqlFunction("CASE", parms));
 							}
+
+							break;
 						}
 
-						return Convert(new SqlFunction("CASE", s, t, f));
-					}
-
-				case ExpressionType.MemberAccess:
-					{
-						var ma = (MemberExpression)parseInfo.Expr;
-						var ef = _info.SqlProvider.ConvertMember(ma.Member);
-
-						if (ef != null)
+					case ExpressionType.Convert:
 						{
-							var pi = parseInfo.ConvertTo<MemberExpression>();
+							var pi = parseInfo.Convert<UnaryExpression>();
+							var e  = parseInfo.Expr as UnaryExpression;
+							var o  = ParseExpression(query, pi.Create(e.Operand, pi.Property(Unary.Operand)));
 
-							var pie = parseInfo.Parent.Replace(ef, null).Walk(wpi =>
+							if (e.Method == null && e.IsLifted)
+								return o;
+
+							return Convert(new SqlFunction("$Convert$", new SqlDataType(e.Type), new SqlDataType(e.Operand.Type), o));
+						}
+
+					case ExpressionType.Conditional:
+						{
+							var pi = parseInfo.Convert<ConditionalExpression>();
+							var e  = parseInfo.Expr as ConditionalExpression;
+							var s  = ParseExpression(query, pi.Create(e.Test,    pi.Property(Conditional.Test)));
+							var t  = ParseExpression(query, pi.Create(e.IfTrue,  pi.Property(Conditional.IfTrue)));
+							var f  = ParseExpression(query, pi.Create(e.IfFalse, pi.Property(Conditional.IfFalse)));
+
+							if (f is SqlFunction)
 							{
-								if (wpi.NodeType == ExpressionType.Parameter)
+								var c = (SqlFunction)f;
+
+								if (c.Name == "CASE")
 								{
-									var expr = ma.Expression;
+									var parms = new ISqlExpression[c.Parameters.Length + 2];
 
-									if (expr.NodeType == ExpressionType.MemberAccess)
-										if (!_accessors.ContainsKey(expr))
-											_accessors.Add(expr, pi.Property(Member.Expression));
+									parms[0] = s;
+									parms[1] = t;
+									c.Parameters.CopyTo(parms, 2);
 
-									return pi.Create(expr, null);
+									return Convert(new SqlFunction("CASE", parms));
 								}
+							}
 
-								return wpi;
-							});
-
-							return ParseExpression(query, pie);
+							return Convert(new SqlFunction("CASE", s, t, f));
 						}
 
-						var attrs = ma.Member.GetCustomAttributes(typeof(SqlPropertyAttribute), true);
-
-						if (attrs.Length > 0)
+					case ExpressionType.MemberAccess:
 						{
-							var attr = (SqlPropertyAttribute)attrs[0];
-							return Convert(new SqlExpression(attr.Name ?? ma.Member.Name));
-						}
+							var ma = (MemberExpression)parseInfo.Expr;
+							var ef = _info.SqlProvider.ConvertMember(ma.Member);
 
-						goto case ExpressionType.Parameter;
-					}
-
-				case ExpressionType.Parameter:
-					{
-						var field = query.GetField(parseInfo.Expr);
-
-						if (field != null)
-						{
-							var exprs = field.GetExpressions(this);
-
-							if (exprs == null)
-								break;
-
-							if (exprs.Length == 1)
-								return exprs[0];
-
-							throw new InvalidOperationException();
-						}
-
-						break;
-					}
-
-				case ExpressionType.Call:
-					{
-						var pi = parseInfo.Convert<MethodCallExpression>();
-						var e  = parseInfo.Expr as MethodCallExpression;
-
-						if (e.Method.DeclaringType == typeof(Enumerable))
-							return ParseEnumerable(query, pi);
-
-						var ef = _info.SqlProvider.ConvertMember(e.Method);
-
-						if (ef != null)
-						{
-							var pie = parseInfo.Parent.Replace(ef, null).Walk(wpi =>
+							if (ef != null)
 							{
-								if (wpi.NodeType == ExpressionType.Parameter)
+								var pi = parseInfo.ConvertTo<MemberExpression>();
+
+								var pie = parseInfo.Parent.Replace(ef, null).Walk(wpi =>
 								{
-									Expression       expr;
-									Func<Expression> fparam;
-
-									var pe = (ParameterExpression)wpi.Expr;
-
-									if (pe.Name == "obj")
+									if (wpi.NodeType == ExpressionType.Parameter)
 									{
-										expr   = e.Object;
-										fparam = () => pi.Property(MethodCall.Object);
-									}
-									else
-									{
-										var i  = int.Parse(pe.Name.Substring(1));
-										expr   = e.Arguments[i];
-										fparam = () => pi.Index(e.Arguments, MethodCall.Arguments, i);
+										var expr = ma.Expression;
+
+										if (expr.NodeType == ExpressionType.MemberAccess)
+											if (!_accessors.ContainsKey(expr))
+												_accessors.Add(expr, pi.Property(Member.Expression));
+
+										return pi.Create(expr, null);
 									}
 
-									if (expr.NodeType == ExpressionType.MemberAccess)
-										if (!_accessors.ContainsKey(expr))
-											_accessors.Add(expr, fparam());
+									return wpi;
+								});
 
-									return pi.Create(expr, null);
-								}
+								return ParseExpression(query, pie);
+							}
 
-								return wpi;
-							});
+							var attrs = ma.Member.GetCustomAttributes(typeof(SqlPropertyAttribute), true);
 
-							return ParseExpression(query, pie);
+							if (attrs.Length > 0)
+							{
+								var attr = (SqlPropertyAttribute)attrs[0];
+								return Convert(new SqlExpression(attr.Name ?? ma.Member.Name));
+							}
+
+							goto case ExpressionType.Parameter;
 						}
 
-						var attr = GetFunctionAttribute(e.Method);
-
-						if (attr != null)
+					case ExpressionType.Parameter:
 						{
-							if (attr is SqlPropertyAttribute)
-								return Convert(new SqlExpression(attr.Name ?? e.Method.Name));
+							var field = query.GetField(parseInfo.Expr);
 
-							var parms = new List<ISqlExpression>();
+							if (field != null)
+							{
+								var exprs = field.GetExpressions(this);
 
-							if (e.Object != null)
-								parms.Add(ParseExpression(query, pi.Create(e.Object, pi.Property(MethodCall.Object))));
+								if (exprs == null)
+									break;
 
-							for (var i = 0; i < e.Arguments.Count; i++)
-								parms.Add(ParseExpression(query, pi.Create(e.Arguments[i], pi.Index(e.Arguments, MethodCall.Arguments, i))));
+								if (exprs.Length == 1)
+									return exprs[0];
 
-							return Convert(new SqlFunction(attr.Name ?? e.Method.Name, parms.ToArray()));
+								throw new InvalidOperationException();
+							}
+
+							break;
 						}
 
-						break;
-					}
+					case ExpressionType.Call:
+						{
+							var pi = parseInfo.Convert<MethodCallExpression>();
+							var e  = parseInfo.Expr as MethodCallExpression;
+
+							if (e.Method.DeclaringType == typeof(Enumerable))
+								return ParseEnumerable(query, pi);
+
+							var ef = _info.SqlProvider.ConvertMember(e.Method);
+
+							if (ef != null)
+							{
+								var pie = parseInfo.Parent.Replace(ef, null).Walk(wpi =>
+								{
+									if (wpi.NodeType == ExpressionType.Parameter)
+									{
+										Expression       expr;
+										Func<Expression> fparam;
+
+										var pe = (ParameterExpression)wpi.Expr;
+
+										if (pe.Name == "obj")
+										{
+											expr   = e.Object;
+											fparam = () => pi.Property(MethodCall.Object);
+										}
+										else
+										{
+											var i  = int.Parse(pe.Name.Substring(1));
+											expr   = e.Arguments[i];
+											fparam = () => pi.Index(e.Arguments, MethodCall.Arguments, i);
+										}
+
+										if (expr.NodeType == ExpressionType.MemberAccess)
+											if (!_accessors.ContainsKey(expr))
+												_accessors.Add(expr, fparam());
+
+										return pi.Create(expr, null);
+									}
+
+									return wpi;
+								});
+
+								return ParseExpression(query, pie);
+							}
+
+							var attr = GetFunctionAttribute(e.Method);
+
+							if (attr != null)
+							{
+								if (attr is SqlPropertyAttribute)
+									return Convert(new SqlExpression(attr.Name ?? e.Method.Name));
+
+								var parms = new List<ISqlExpression>();
+
+								if (e.Object != null)
+									parms.Add(ParseExpression(query, pi.Create(e.Object, pi.Property(MethodCall.Object))));
+
+								for (var i = 0; i < e.Arguments.Count; i++)
+									parms.Add(ParseExpression(query, pi.Create(e.Arguments[i], pi.Index(e.Arguments, MethodCall.Arguments, i))));
+
+								return Convert(new SqlFunction(attr.Name ?? e.Method.Name, parms.ToArray()));
+							}
+
+							break;
+						}
+				}
+
+				throw new LinqException("'{0}' cannot be converted to SQL.", parseInfo.Expr);
 			}
-
-			throw new LinqException("'{0}' cannot be converted to SQL.", parseInfo.Expr);
+			finally
+			{
+				ParsingTracer.DecIndentLevel();
+			}
 		}
 
 		ISqlExpression ParseEnumerable(QuerySource query, ParseInfo<Expression> pi)
 		{
-			if (!(query.ParentQueries[0] is QuerySource.GroupBy))
-				throw new LinqException("'{0}' cannot be converted to SQL.", pi.Expr);
+			ParsingTracer.WriteLine(query);
+			ParsingTracer.WriteLine(pi);
+			ParsingTracer.IncIndentLevel();
 
-			var groupBy = ((QuerySource.GroupBy)query.ParentQueries[0]).OriginalQuery;
-
-			var expr = (MethodCallExpression)pi.Expr;
-			var args = new ISqlExpression[expr.Arguments.Count - 1];
-
-			if (expr.Method.Name == "Count")
+			try
 			{
-				if (args.Length > 0)
+				if (!(query.ParentQueries[0] is QuerySource.GroupBy))
+					throw new LinqException("'{0}' cannot be converted to SQL.", pi.Expr);
+
+				var groupBy = ((QuerySource.GroupBy)query.ParentQueries[0]).OriginalQuery;
+
+				var expr = (MethodCallExpression)pi.Expr;
+				var args = new ISqlExpression[expr.Arguments.Count - 1];
+
+				if (expr.Method.Name == "Count")
 				{
-					var predicate = ParsePredicate(groupBy, ParseLambdaArgument(pi, 1));
-
-					groupBy.SqlBuilder.Where.SearchCondition.Conditions.Add(new SqlBuilder.Condition(false, predicate));
-
-					var sql = groupBy.SqlBuilder.Clone(o => !(o is SqlParameter));
-
-					groupBy.SqlBuilder.Where.SearchCondition.Conditions.RemoveAt(groupBy.SqlBuilder.Where.SearchCondition.Conditions.Count - 1);
-
-					sql.Select.Columns.RemoveAll(_ => true);
-
-					if (_info.SqlProvider.IsSubQueryColumnSupported && _info.SqlProvider.IsCountSubQuerySupported)
+					if (args.Length > 0)
 					{
+						var predicate = ParsePredicate(groupBy, ParseLambdaArgument(pi, 1));
+
+						groupBy.SqlBuilder.Where.SearchCondition.Conditions.Add(new SqlBuilder.Condition(false, predicate));
+
+						var sql = groupBy.SqlBuilder.Clone(o => !(o is SqlParameter));
+
+						groupBy.SqlBuilder.Where.SearchCondition.Conditions.RemoveAt(groupBy.SqlBuilder.Where.SearchCondition.Conditions.Count - 1);
+
+						sql.Select.Columns.RemoveAll(_ => true);
+
+						if (_info.SqlProvider.IsSubQueryColumnSupported && _info.SqlProvider.IsCountSubQuerySupported)
+						{
+							for (var i = 0; i < sql.GroupBy.Items.Count; i++)
+							{
+								var item1 = sql.GroupBy.Items[i];
+								var item2 = groupBy.SqlBuilder.GroupBy.Items[i];
+
+								if (item1.CanBeNull() && item2.CanBeNull())
+									sql.Where
+										.Expr(item1).IsNull.    And .Expr(item2).IsNull. Or
+										.Expr(item1).IsNotNull. And .Expr(item2).IsNotNull. And .Expr(item1).Equal.Expr(item2);
+								else
+									sql.Where.Expr(item1).Equal.Expr(item2);
+							}
+
+							sql.GroupBy.Items.RemoveAll(_ => true);
+							sql.Select.Expr(new SqlFunction.Count(sql));
+							sql.ParentSql = groupBy.SqlBuilder;
+
+							return sql;
+						}
+
+						var join = sql.WeakLeftJoin();
+
+						groupBy.SqlBuilder.From.Tables[0].Joins.Add(join.JoinedTable);
+
 						for (var i = 0; i < sql.GroupBy.Items.Count; i++)
 						{
 							var item1 = sql.GroupBy.Items[i];
 							var item2 = groupBy.SqlBuilder.GroupBy.Items[i];
+							var col   = sql.Select.Columns[sql.Select.Add(item1)];
 
 							if (item1.CanBeNull() && item2.CanBeNull())
-								sql.Where
-									.Expr(item1).IsNull.    And .Expr(item2).IsNull. Or
-									.Expr(item1).IsNotNull. And .Expr(item2).IsNotNull. And .Expr(item1).Equal.Expr(item2);
+								join
+									.Expr(col).IsNull.    And .Expr(item2).IsNull. Or
+									.Expr(col).IsNotNull. And .Expr(item2).IsNotNull. And .Expr(col).Equal.Expr(item2);
 							else
-								sql.Where.Expr(item1).Equal.Expr(item2);
+								join
+									.Expr(col).Equal.Expr(item2);
 						}
 
-						sql.GroupBy.Items.RemoveAll(_ => true);
-						sql.Select.Expr(new SqlFunction.Count(sql));
 						sql.ParentSql = groupBy.SqlBuilder;
 
-						return sql;
+						return new SqlFunction("Count", sql.Select.Columns[0]);
 					}
 
-					var join = sql.WeakLeftJoin();
-
-					groupBy.SqlBuilder.From.Tables[0].Joins.Add(join.JoinedTable);
-
-					for (var i = 0; i < sql.GroupBy.Items.Count; i++)
-					{
-						var item1 = sql.GroupBy.Items[i];
-						var item2 = groupBy.SqlBuilder.GroupBy.Items[i];
-						var col   = sql.Select.Columns[sql.Select.Add(item1)];
-
-						if (item1.CanBeNull() && item2.CanBeNull())
-							join
-								.Expr(col).IsNull.    And .Expr(item2).IsNull. Or
-								.Expr(col).IsNotNull. And .Expr(item2).IsNotNull. And .Expr(col).Equal.Expr(item2);
-						else
-							join
-								.Expr(col).Equal.Expr(item2);
-					}
-
-					sql.ParentSql = groupBy.SqlBuilder;
-
-					return new SqlFunction("Count", sql.Select.Columns[0]);
+					return new SqlFunction.Count(groupBy.SqlBuilder);
 				}
 
-				return new SqlFunction.Count(groupBy.SqlBuilder);
+				for (var i = 1; i < expr.Arguments.Count; i++)
+					args[i - 1] = ParseExpression(groupBy, ParseLambdaArgument(pi, i));
+
+				return new SqlFunction(expr.Method.Name, args);
 			}
-
-			for (var i = 1; i < expr.Arguments.Count; i++)
-				args[i - 1] = ParseExpression(groupBy, ParseLambdaArgument(pi, i));
-
-			return new SqlFunction(expr.Method.Name, args);
+			finally
+			{
+				ParsingTracer.DecIndentLevel();
+			}
 		}
 
 		ParseInfo ParseLambdaArgument(ParseInfo<Expression> pi, int idx)
@@ -2112,90 +2150,101 @@ namespace BLToolkit.Data.Linq
 
 		ISqlPredicate ParsePredicate(QuerySource query, ParseInfo parseInfo)
 		{
-			switch (parseInfo.NodeType)
+			ParsingTracer.WriteLine(query);
+			ParsingTracer.WriteLine(parseInfo);
+			ParsingTracer.IncIndentLevel();
+
+			try
 			{
-				case ExpressionType.Equal:
-				case ExpressionType.NotEqual:
-				case ExpressionType.GreaterThan:
-				case ExpressionType.GreaterThanOrEqual:
-				case ExpressionType.LessThan:
-				case ExpressionType.LessThanOrEqual:
-					{
-						var pi = parseInfo.Convert<BinaryExpression>();
-						var e  = parseInfo.Expr as BinaryExpression;
-						var l  = ParseExpression(query, pi.Create(e.Left,  pi.Property(Binary.Left)));
-						var r  = ParseExpression(query, pi.Create(e.Right, pi.Property(Binary.Right)));
-
-						SqlBuilder.Predicate.Operator op;
-
-						switch (parseInfo.NodeType)
+				switch (parseInfo.NodeType)
+				{
+					case ExpressionType.Equal:
+					case ExpressionType.NotEqual:
+					case ExpressionType.GreaterThan:
+					case ExpressionType.GreaterThanOrEqual:
+					case ExpressionType.LessThan:
+					case ExpressionType.LessThanOrEqual:
 						{
-							case ExpressionType.Equal   :
-							case ExpressionType.NotEqual:
+							var pi = parseInfo.Convert<BinaryExpression>();
+							var e  = parseInfo.Expr as BinaryExpression;
+							var l  = ParseExpression(query, pi.Create(e.Left,  pi.Property(Binary.Left)));
+							var r  = ParseExpression(query, pi.Create(e.Right, pi.Property(Binary.Right)));
 
-								if (!CurrentSql.ParameterDependent && (l is SqlParameter && r.CanBeNull() || r is SqlParameter && l.CanBeNull()))
-									CurrentSql.ParameterDependent = true;
+							SqlBuilder.Predicate.Operator op;
 
-								break;
+							switch (parseInfo.NodeType)
+							{
+								case ExpressionType.Equal   :
+								case ExpressionType.NotEqual:
+
+									if (!CurrentSql.ParameterDependent && (l is SqlParameter && r.CanBeNull() || r is SqlParameter && l.CanBeNull()))
+										CurrentSql.ParameterDependent = true;
+
+									break;
+							}
+
+							switch (parseInfo.NodeType)
+							{
+								case ExpressionType.Equal             : op = SqlBuilder.Predicate.Operator.Equal;          break;
+								case ExpressionType.NotEqual          : op = SqlBuilder.Predicate.Operator.NotEqual;       break;
+								case ExpressionType.GreaterThan       : op = SqlBuilder.Predicate.Operator.Greater;        break;
+								case ExpressionType.GreaterThanOrEqual: op = SqlBuilder.Predicate.Operator.GreaterOrEqual; break;
+								case ExpressionType.LessThan          : op = SqlBuilder.Predicate.Operator.Less;           break;
+								case ExpressionType.LessThanOrEqual   : op = SqlBuilder.Predicate.Operator.LessOrEqual;    break;
+								default: throw new InvalidOperationException();
+							}
+
+							return Convert(new SqlBuilder.Predicate.ExprExpr(l, op, r));
 						}
 
-						switch (parseInfo.NodeType)
+					case ExpressionType.Call:
 						{
-							case ExpressionType.Equal             : op = SqlBuilder.Predicate.Operator.Equal;          break;
-							case ExpressionType.NotEqual          : op = SqlBuilder.Predicate.Operator.NotEqual;       break;
-							case ExpressionType.GreaterThan       : op = SqlBuilder.Predicate.Operator.Greater;        break;
-							case ExpressionType.GreaterThanOrEqual: op = SqlBuilder.Predicate.Operator.GreaterOrEqual; break;
-							case ExpressionType.LessThan          : op = SqlBuilder.Predicate.Operator.Less;           break;
-							case ExpressionType.LessThanOrEqual   : op = SqlBuilder.Predicate.Operator.LessOrEqual;    break;
-							default: throw new InvalidOperationException();
+							var pi = parseInfo.Convert<MethodCallExpression>();
+							var e  = pi.Expr as MethodCallExpression;
+
+							ISqlPredicate predicate = null;
+
+							if      (e.Method == Functions.String.Contains)   predicate = BuildLikePredicate(query, pi, "%", "%");
+							else if (e.Method == Functions.String.StartsWith) predicate = BuildLikePredicate(query, pi, "",  "%");
+							else if (e.Method == Functions.String.EndsWith)   predicate = BuildLikePredicate(query, pi, "%", "");
+							else if (e.Method == Functions.String.Like11)     predicate = BuildLikePredicate(query, pi);
+							else if (e.Method == Functions.String.Like12)     predicate = BuildLikePredicate(query, pi);
+							else if (e.Method == Functions.String.Like21)     predicate = BuildLikePredicate(query, pi);
+							else if (e.Method == Functions.String.Like22)     predicate = BuildLikePredicate(query, pi);
+
+							if (predicate != null)
+								return Convert(predicate);
+
+							break;
 						}
 
-						return Convert(new SqlBuilder.Predicate.ExprExpr(l, op, r));
-					}
+					case ExpressionType.Conditional:
+						return Convert(new SqlBuilder.Predicate.ExprExpr(
+							ParseExpression(query, parseInfo),
+							SqlBuilder.Predicate.Operator.Equal,
+							new SqlValue(true)));
 
-				case ExpressionType.Call:
-					{
-						var pi = parseInfo.Convert<MethodCallExpression>();
-						var e  = pi.Expr as MethodCallExpression;
-
-						ISqlPredicate predicate = null;
-
-						if      (e.Method == Functions.String.Contains)   predicate = BuildLikePredicate(query, pi, "%", "%");
-						else if (e.Method == Functions.String.StartsWith) predicate = BuildLikePredicate(query, pi, "",  "%");
-						else if (e.Method == Functions.String.EndsWith)   predicate = BuildLikePredicate(query, pi, "%", "");
-						else if (e.Method == Functions.String.Like11)     predicate = BuildLikePredicate(query, pi);
-						else if (e.Method == Functions.String.Like12)     predicate = BuildLikePredicate(query, pi);
-						else if (e.Method == Functions.String.Like21)     predicate = BuildLikePredicate(query, pi);
-						else if (e.Method == Functions.String.Like22)     predicate = BuildLikePredicate(query, pi);
-
-						if (predicate != null)
-							return Convert(predicate);
-
-						break;
-					}
-
-				case ExpressionType.Conditional:
-					return Convert(new SqlBuilder.Predicate.ExprExpr(
-						ParseExpression(query, parseInfo),
-						SqlBuilder.Predicate.Operator.Equal,
-						new SqlValue(true)));
-
-				case ExpressionType.MemberAccess:
-					{
-						var pi = parseInfo.Convert<MemberExpression>();
-						var e  = pi.Expr as MemberExpression;
-
-						if (e.Member.Name == "HasValue" && e.Member.DeclaringType.GetGenericTypeDefinition() == typeof(Nullable<>))
+					case ExpressionType.MemberAccess:
 						{
-							var expr = ParseExpression(query, pi.Create(e.Expression, pi.Property(Member.Expression)));
-							return Convert(new SqlBuilder.Predicate.IsNull(expr, true));
-						}
+							var pi = parseInfo.Convert<MemberExpression>();
+							var e  = pi.Expr as MemberExpression;
 
-						break;
-					}
+							if (e.Member.Name == "HasValue" && e.Member.DeclaringType.GetGenericTypeDefinition() == typeof(Nullable<>))
+							{
+								var expr = ParseExpression(query, pi.Create(e.Expression, pi.Property(Member.Expression)));
+								return Convert(new SqlBuilder.Predicate.IsNull(expr, true));
+							}
+
+							break;
+						}
+				}
+
+				throw new InvalidOperationException();
 			}
-
-			throw new InvalidOperationException();
+			finally
+			{
+				ParsingTracer.DecIndentLevel();
+			}
 		}
 
 		#region LIKE predicate
@@ -2291,6 +2340,10 @@ namespace BLToolkit.Data.Linq
 
 		void ParseSearchCondition(ICollection<SqlBuilder.Condition> conditions, QuerySource query, ParseInfo parseInfo)
 		{
+			ParsingTracer.WriteLine(query);
+			ParsingTracer.WriteLine(parseInfo);
+			ParsingTracer.IncIndentLevel();
+
 			switch (parseInfo.NodeType)
 			{
 				case ExpressionType.AndAlso:
@@ -2301,7 +2354,7 @@ namespace BLToolkit.Data.Linq
 						ParseSearchCondition(conditions, query, pi.Create(e.Left,  pi.Property(Binary.Left)));
 						ParseSearchCondition(conditions, query, pi.Create(e.Right, pi.Property(Binary.Right)));
 
-						return;
+						break;
 					}
 
 				case ExpressionType.OrElse:
@@ -2318,7 +2371,7 @@ namespace BLToolkit.Data.Linq
 
 						conditions.Add(new SqlBuilder.Condition(false, orCondition));
 
-						return;
+						break;
 					}
 
 				case ExpressionType.Not:
@@ -2339,12 +2392,16 @@ namespace BLToolkit.Data.Linq
 						else
 							conditions.Add(new SqlBuilder.Condition(true, notCondition));
 
-						return;
+						break;
 					}
+
+				default:
+					var predicate = ParsePredicate(query, parseInfo);
+					conditions.Add(new SqlBuilder.Condition(false, predicate));
+					break;
 			}
 
-			var predicate = ParsePredicate(query, parseInfo);
-			conditions.Add(new SqlBuilder.Condition(false, predicate));
+			ParsingTracer.DecIndentLevel();
 		}
 
 		#endregion
