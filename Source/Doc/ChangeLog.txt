@@ -1,8 +1,9 @@
 v 3.2 (working)
 
-Demo
+Demo (see the dev version of the project)
 
-- WebServices powered by BLToolkit (see the dev version of the project).
+- WebServices powered by BLToolkit.
+- Partial.Trust.
 
 Bug fixes
 
@@ -16,6 +17,7 @@ Enhancement
 - DB2 Data Provider added.
 - New SqlIgnore attribute.
 - New SqlBuilder class.
+- Partial trust support.
 
 
 v 3.1

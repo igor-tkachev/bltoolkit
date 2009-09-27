@@ -3610,9 +3610,9 @@ namespace BLToolkit.Data
 			if (_prepared)
 				InitParameters(CommandAction.Select);
 
-			using (IDataReader dr = ExecuteReaderInternal(CommandBehavior.SingleRow))
+			using (IDataReader dr = ExecuteReaderInternal(/*CommandBehavior.SingleRow*/)) // Sybase provider does not support this flag.
 			{
-				if (dr.Read())
+				while (dr.Read())
 				{
 					return entity == null?
 						_mappingSchema.MapDataReaderToObject(dr, type,   parameters):

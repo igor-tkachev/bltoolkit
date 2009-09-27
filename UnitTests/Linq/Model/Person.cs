@@ -1,9 +1,10 @@
 ﻿using System;
 
+using BLToolkit.Mapping;
+using BLToolkit.DataAccess;
+
 namespace Data.Linq.Model
 {
-	using BLToolkit.Mapping;
-
 	public class Person
 	{
 		public Person()
@@ -21,6 +22,7 @@ namespace Data.Linq.Model
 			FirstName = firstName;
 		}
 
+		[PrimaryKey]
 		[MapField("PersonID")] public int    ID;
 		                       public string FirstName { get; set; }
 		                       public string LastName;

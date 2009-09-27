@@ -67,9 +67,6 @@ namespace BLToolkit.Data.Linq
 
 			protected override QuerySource CloneInstance(Dictionary<ICloneableElement,ICloneableElement> objectTree, Predicate<ICloneableElement> doClone)
 			{
-				if (!doClone(this))
-					return this;
-
 				var table = new Table
 				{
 					ObjectType = ObjectType,
@@ -161,8 +158,11 @@ namespace BLToolkit.Data.Linq
 				switch (expr.NodeType)
 				{
 					case ExpressionType.Parameter:
+						for (var i = 0; i < Lambda.Parameters.Length; i++)
+							if (Lambda.Parameters[i] == expr)
+								return ParentQueries[i];
+
 						throw new InvalidOperationException();
-						//return this;
 
 					case ExpressionType.MemberAccess:
 						{
@@ -225,9 +225,6 @@ namespace BLToolkit.Data.Linq
 
 			protected override QuerySource CloneInstance(Dictionary<ICloneableElement,ICloneableElement> objectTree, Predicate<ICloneableElement> doClone)
 			{
-				if (!doClone(this))
-					return this;
-
 				var expr = CreateExpr(objectTree);
 
 				foreach (var c in Members)
@@ -322,9 +319,6 @@ namespace BLToolkit.Data.Linq
 
 			protected override QuerySource CloneInstance(Dictionary<ICloneableElement,ICloneableElement> objectTree, Predicate<ICloneableElement> doClone)
 			{
-				if (!doClone(this))
-					return this;
-
 				var sub = CreateSubQuery(objectTree, doClone);
 
 				sub.SubSql = (SqlBuilder)SubSql.Clone(objectTree, doClone);
@@ -393,9 +387,6 @@ namespace BLToolkit.Data.Linq
 
 			protected override QuerySource CloneInstance(Dictionary<ICloneableElement,ICloneableElement> objectTree, Predicate<ICloneableElement> doClone)
 			{
-				if (!doClone(this))
-					return this;
-
 				return new Scalar { _field = (QueryField)_field.Clone(objectTree, doClone) };
 			}
 		}
@@ -450,6 +441,85 @@ namespace BLToolkit.Data.Linq
 			protected override Expr CreateExpr(Dictionary<ICloneableElement,ICloneableElement> objectTree)
 			{
 				return new GroupBy { ElementSource = ElementSource };
+			}
+		}
+
+		#endregion
+
+		#region Path
+
+		public class Path : QuerySource
+		{
+			public Path(SqlBuilder currentSql, LambdaInfo lambda, params QuerySource[] parentQuery)
+				: base(currentSql, lambda, parentQuery)
+			{
+			}
+
+			Path() {}
+
+			protected override QuerySource CloneInstance(Dictionary<ICloneableElement, ICloneableElement> objectTree, Predicate<ICloneableElement> doClone)
+			{
+				return new Path();
+			}
+
+			public override QueryField GetField(Expression expr)
+			{
+				switch (expr.NodeType)
+				{
+					case ExpressionType.Parameter :
+						for (var i = 0; i < Lambda.Parameters.Length; i++)
+							if (Lambda.Parameters[i] == expr)
+								return ParentQueries[i];
+
+						throw new InvalidOperationException();
+				}
+
+				return GetParentField(expr);
+			}
+
+			public override QueryField GetParentField(Expression expr)
+			{
+				foreach (var query in ParentQueries)
+				{
+					var field = query.GetParentField(expr);
+
+					if (field != null)
+						return field;
+				}
+
+				throw new InvalidOperationException();
+			}
+
+			public override QueryField GetField(MemberInfo mi)
+			{
+				foreach (var query in ParentQueries)
+				{
+					var field = query.GetField(mi);
+
+					if (field != null)
+						return field;
+				}
+
+				throw new InvalidOperationException();
+			}
+
+			public override List<QueryField> Fields
+			{
+				get
+				{
+					if (ParentQueries.Length == 1)
+						return ParentQueries[0].Fields;
+
+					throw new InvalidOperationException();
+				}
+			}
+
+			public override QuerySource GetParent(ParseInfo pi)
+			{
+				if (ParentQueries.Length == 1)
+					return ParentQueries[0];
+
+				throw new InvalidOperationException();
 			}
 		}
 
@@ -510,7 +580,7 @@ namespace BLToolkit.Data.Linq
 				qs.SqlBuilder    = (SqlBuilder)SqlBuilder.Clone(objectTree, doClone);
 				qs.Lambda        = Lambda;
 				qs.ParentQueries = Array. ConvertAll(ParentQueries, q => (QuerySource)q.Clone(objectTree, doClone));
-				qs.Fields        = Fields.ConvertAll(f => (QueryField)f.Clone(objectTree, doClone));
+				qs._fields       = Fields.ConvertAll(f => (QueryField)f.Clone(objectTree, doClone));
 
 				clone = qs;
 			}
@@ -523,7 +593,9 @@ namespace BLToolkit.Data.Linq
 		public QuerySource[]    ParentQueries;
 		public SqlBuilder       SqlBuilder;
 		public LambdaInfo       Lambda;
-		public List<QueryField> Fields = new List<QueryField>();
+
+		private        List<QueryField> _fields = new List<QueryField>();
+		public virtual List<QueryField>  Fields { get { return _fields; } }
 
 		public abstract QueryField GetField(Expression expr);
 		public abstract QueryField GetField(MemberInfo mi);
@@ -578,6 +650,11 @@ namespace BLToolkit.Data.Linq
 			return null;
 		}
 
+		public virtual QuerySource GetParent(ParseInfo pi)
+		{
+			return this;
+		}
+
 		FieldIndex[] _indexes;
 
 		public override FieldIndex[] Select<T>(ExpressionParser<T> parser)
@@ -624,13 +701,15 @@ namespace BLToolkit.Data.Linq
 			Action<Expr>     exprAction,
 			Action<SubQuery> subQueryAction,
 			Action<Scalar>   scalarAction,
-			Action<GroupBy>  groupByAction)
+			Action<GroupBy>  groupByAction,
+			Action<Path>     pathAction)
 		{
 			if      (this is Table)    tableAction   (this as Table);
 			else if (this is GroupBy)  groupByAction (this as GroupBy);
 			else if (this is Expr)     exprAction    (this as Expr);
 			else if (this is SubQuery) subQueryAction(this as SubQuery);
 			else if (this is Scalar)   scalarAction  (this as Scalar);
+			else if (this is Path)     pathAction    (this as Path);
 			else
 				throw new InvalidOperationException();
 		}

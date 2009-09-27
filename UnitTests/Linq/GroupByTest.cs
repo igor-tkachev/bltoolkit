@@ -333,6 +333,28 @@ namespace Data.Linq
 		}
 
 		[Test]
+		public void JoinMax()
+		{
+			var expected =
+				from ch in Child
+					join max in
+						from ch in Child
+						group ch by ch.ParentID into g
+						select g.Max(c => c.ChildID)
+					on ch.ChildID equals max
+				select ch;
+
+			ForEachProvider(db => AreEqual(expected,
+				from ch in db.Child
+					join max in
+						from ch in db.Child
+						group ch by ch.ParentID into g
+						select g.Max(c => c.ChildID)
+					on ch.ChildID equals max
+				select ch));
+		}
+
+		[Test]
 		public void Min()
 		{
 			var expected = Child.Min(c => c.ChildID);

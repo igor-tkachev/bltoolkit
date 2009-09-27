@@ -5,6 +5,8 @@ using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Security;
+using System.Security.Permissions;
 
 #if FW3
 using System.Linq.Expressions;
@@ -22,21 +24,29 @@ namespace BLToolkit.TypeBuilder
 	{
 		static TypeFactory()
 		{
-			AppDomain.CurrentDomain.AssemblyResolve += CurrentDomain_AssemblyResolve;
-
 			BLToolkitSection section = BLToolkitSection.Instance;
-			if (section == null)
-				return;
 
-			TypeFactoryElement elm = section.TypeFactory;
-			if (elm == null)
-				return;
+			if (section != null)
+			{
+				TypeFactoryElement elm = section.TypeFactory;
 
-			SaveTypes = elm.SaveTypes;
-			SealTypes = elm.SealTypes;
-			LoadTypes = elm.LoadTypes;
+				if (elm != null)
+				{
+					SaveTypes = elm.SaveTypes;
+					SealTypes = elm.SealTypes;
+					LoadTypes = elm.LoadTypes;
 
-			SetGlobalAssembly(elm.AssemblyPath, elm.Version, elm.KeyFile);
+					SetGlobalAssembly(elm.AssemblyPath, elm.Version, elm.KeyFile);
+				}
+			}
+
+			if (SecurityManager.IsGranted(new SecurityPermission(SecurityPermissionFlag.ControlAppDomain)))
+				SubscribeAssemblyResolver();
+		}
+
+		static void SubscribeAssemblyResolver()
+		{
+			AppDomain.CurrentDomain.AssemblyResolve += CurrentDomain_AssemblyResolve;
 		}
 
 		#region Create Assembly

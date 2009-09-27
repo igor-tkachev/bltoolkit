@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Configuration;
+using System.Security;
 
 namespace BLToolkit.Configuration
 {
@@ -31,7 +32,17 @@ namespace BLToolkit.Configuration
 
 		public static BLToolkitSection Instance
 		{
-			get { return (BLToolkitSection)ConfigurationManager.GetSection(SectionName); }
+			get
+			{
+				try
+				{
+					return (BLToolkitSection)ConfigurationManager.GetSection(SectionName);
+				}
+				catch (SecurityException)
+				{
+					return null;
+				}
+			}
 		}
 
 		protected override ConfigurationPropertyCollection Properties

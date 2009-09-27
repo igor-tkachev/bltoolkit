@@ -2,7 +2,7 @@
 using System.Data;
 using System.Data.Linq.SqlClient;
 using System.Linq;
-
+using BLToolkit.DataAccess;
 using NUnit.Framework;
 
 using BLToolkit.Data.DataProvider;
@@ -500,8 +500,9 @@ namespace Data.Linq
 		[Test]
 		public void Test()
 		{
-			using (var db = new TestDbManager(ProviderName.SqlCe))
+			using (var db = new TestDbManager(ProviderName.Sybase))
 			{
+				/*
 				var p = db
 					.SetCommand(@"
 						SELECT
@@ -523,6 +524,20 @@ namespace Data.Linq
 							ch.[ParentID]",
 						db.Parameter("@p1", 9.9900m, DbType.Decimal))
 					.ExecuteScalar();
+				 */
+
+				int PersonID_W = 1;
+
+				var q = from p in db.Person where p.ID == PersonID_W select p;
+				var p1 = q.First();
+				Assert.AreEqual(1, p1.ID);
+
+
+				var da = new SqlQuery();
+				var pr  = (Person)da.SelectByKey(typeof(Person), 1);
+
+				Assert.AreEqual("Pupkin", pr.LastName);
+
 
 				//Assert.AreEqual(1, p.ID);
 			}

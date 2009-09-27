@@ -2,6 +2,7 @@ using System;
 using System.Configuration.Assemblies;
 using System.Reflection;
 using System.Reflection.Emit;
+using System.Security;
 using System.Threading;
 
 namespace BLToolkit.Reflection.Emit
@@ -100,6 +101,11 @@ namespace BLToolkit.Reflection.Emit
 				Thread.GetDomain().DefineDynamicAssembly(_assemblyName, AssemblyBuilderAccess.RunAndSave, assemblyDir);
 
 			_assemblyBuilder.SetCustomAttribute(BLToolkitAttribute);
+			_assemblyBuilder.SetCustomAttribute(
+				new CustomAttributeBuilder(
+					typeof(AllowPartiallyTrustedCallersAttribute)
+						.GetConstructor(Type.EmptyTypes),
+					new object[0]));
 		}
 
 		private readonly string _path;

@@ -274,6 +274,8 @@ namespace BLToolkit.Data.Linq
 				parms   = GetParameters(db, idx);
 			}
 
+			db.SetCommand(command, parms);
+
 			//string s = sql.ToString();
 
 #if DEBUG
@@ -282,7 +284,9 @@ namespace BLToolkit.Data.Linq
 			if (parms != null && parms.Length > 0)
 			{
 				foreach (var p in parms)
-					info += string.Format("DECLARE {0} {1}\n", p.ParameterName, p.DbType);
+					info += string.Format("DECLARE {0} {1}\n",
+						p.ParameterName,
+						p.Value == null ? p.DbType.ToString() : p.Value.GetType().Name);
 
 				info += "\n";
 
@@ -304,7 +308,7 @@ namespace BLToolkit.Data.Linq
 			Debug.WriteLineIf(DbManager.TraceSwitch.TraceInfo, info, DbManager.TraceSwitch.DisplayName);
 #endif
 
-			return db.SetCommand(command, parms).ExecuteReader();
+			return db.ExecuteReader();
 		}
 
 		private void SetParameters(Expression expr, object[] parameters, int idx)

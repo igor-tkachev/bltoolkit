@@ -69,6 +69,7 @@ namespace BLTgen
 				Directory.CreateDirectory(extensionAssemblyFolder);
 
 			Type[] typesToProcess = sourceAsm.GetExportedTypes();
+
 			typesToProcess = FilterBaseTypes(typesToProcess, parsedArgs.BaseTypes);
 			typesToProcess = FilterTypes(typesToProcess, parsedArgs.Include, true);
 			typesToProcess = FilterTypes(typesToProcess, parsedArgs.Exclude, false);

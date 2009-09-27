@@ -56,7 +56,7 @@ namespace BLToolkit.Data.Linq
 		static void WriteLineInternal(string prefix, LambdaInfo lambda)
 		{
 			if (lambda != null)
-				Debug.WriteLine(prefix + " - " + lambda.Body + " : Expression." + lambda.Body.GetType().Name, GetMethodName());
+				Debug.WriteLine(prefix + " - " + lambda.Body + " : Expression." + lambda.Body.Expr.GetType().Name, GetMethodName());
 		}
 
 		[Conditional("TRACE_PARSING")]

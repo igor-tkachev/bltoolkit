@@ -3,8 +3,8 @@ using BLToolkit.TypeBuilder;
 
 namespace BLToolkit.DataAccess
 {
-	public abstract class DataAccessor<T,A> : DataAccessor<T>
-		where A : DataAccessor<T>
+	public abstract class DataAccessor<T,TA> : DataAccessor<T>
+		where TA : DataAccessor<T>
 	{
 		#region Constructors
 
@@ -23,19 +23,19 @@ namespace BLToolkit.DataAccess
 
 		#region CreateInstance
 
-		public static A CreateInstance()
+		public static TA CreateInstance()
 		{
-			return TypeFactory.CreateInstance<A>();
+			return TypeFactory.CreateInstance<TA>();
 		}
 
-		public static A CreateInstance(DbManager dbManager)
+		public static TA CreateInstance(DbManager dbManager)
 		{
 			return CreateInstance(dbManager, false);
 		}
 
-		public static A CreateInstance(DbManager dbManager, bool dispose)
+		public static TA CreateInstance(DbManager dbManager, bool dispose)
 		{
-			A da = TypeFactory.CreateInstance<A>();
+			TA da = TypeFactory.CreateInstance<TA>();
 
 			da.SetDbManager(dbManager, dispose);
 
