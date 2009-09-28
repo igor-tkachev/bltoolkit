@@ -4,7 +4,6 @@ using System.Data;
 using System.Text;
 
 using BLToolkit.Aspects;
-using BLToolkit.Common;
 using BLToolkit.Data;
 using BLToolkit.DataAccess;
 using BLToolkit.Reflection;

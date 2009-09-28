@@ -5,15 +5,18 @@ using System.Reflection;
 using System.Reflection.Emit;
 using System.Runtime.CompilerServices;
 
-using BLToolkit.Reflection;
-using BLToolkit.Reflection.Emit;
-
 namespace BLToolkit.TypeBuilder.Builders
 {
+	using Reflection;
+	using Reflection.Emit;
+
 	internal class TypeAccessorBuilder : ITypeBuilder
 	{
 		public TypeAccessorBuilder(Type type, Type originalType)
 		{
+			if (type == null) throw new ArgumentNullException("type");
+			if (originalType == null) throw new ArgumentNullException("originalType");
+
 			_type         = type;
 			_originalType = originalType;
 		}
@@ -31,18 +34,22 @@ namespace BLToolkit.TypeBuilder.Builders
 			get { return "TypeAccessor"; }
 		}
 
-		public string GetTypeName(Type sourceType)
+		public string GetTypeName()
 		{
  			// It's a bad idea to use '.TypeAccessor' here since we got
  			// a class and a namespace with the same full name.
  			// The sgen utility fill fail in such case.
  			//
- 			return sourceType.FullName.Replace('+', '.')	+ "$TypeAccessor";
+ 			return _type.FullName.Replace('+', '.') + "$TypeAccessor";
 		}
 
-		public Type Build(Type sourceType, AssemblyBuilderHelper assemblyBuilder)
+		public Type GetBuildingType()
 		{
-			if (sourceType == null)      throw new ArgumentNullException("sourceType");
+			return _type;
+		}
+
+		public Type Build(AssemblyBuilderHelper assemblyBuilder)
+		{
 			if (assemblyBuilder == null) throw new ArgumentNullException("assemblyBuilder");
 
 			// Check InternalsVisibleToAttributes of the source type's assembly.
@@ -53,7 +60,7 @@ namespace BLToolkit.TypeBuilder.Builders
 			// Usually, there is no such attribute in the source assembly.
 			// Therefore we do not cache the result.
 			//
-			object[] attributes = sourceType.Assembly.GetCustomAttributes(typeof(InternalsVisibleToAttribute), true);
+			object[] attributes = _originalType.Type.Assembly.GetCustomAttributes(typeof(InternalsVisibleToAttribute), true);
 
 			foreach (InternalsVisibleToAttribute visibleToAttribute in attributes)
 			{
@@ -66,10 +73,10 @@ namespace BLToolkit.TypeBuilder.Builders
 				}
 			}
 
-			if (!sourceType.IsVisible && !_friendlyAssembly)
-				throw new TypeBuilderException(string.Format("Can not build type accessor for non-public type '{0}'.", sourceType.FullName));
+			if (!_originalType.Type.IsVisible && !_friendlyAssembly)
+				throw new TypeBuilderException(string.Format("Can not build type accessor for non-public type '{0}'.", _originalType.FullName));
 
-			string typeName = GetTypeName(_type);
+			string typeName = GetTypeName();
 
 			_typeBuilder = assemblyBuilder.DefineType(typeName, _accessorType);
 

@@ -227,8 +227,7 @@ namespace BLToolkit.TypeBuilder
 
 						if (extensionAssembly != null)
 						{
-							type = extensionAssembly.GetType(
-								typeBuilder.GetTypeName(sourceType));
+							type = extensionAssembly.GetType(typeBuilder.GetTypeName());
 
 							if (type != null)
 							{
@@ -238,10 +237,9 @@ namespace BLToolkit.TypeBuilder
 						}
 					}
 
-					AssemblyBuilderHelper assemblyBuilder =
-						GetAssemblyBuilder(sourceType, typeBuilder.AssemblyNameSuffix);
+					AssemblyBuilderHelper assemblyBuilder = GetAssemblyBuilder(sourceType, typeBuilder.AssemblyNameSuffix);
 
-					type = typeBuilder.Build(sourceType, assemblyBuilder);
+					type = typeBuilder.Build(assemblyBuilder);
 
 					if (type != null)
 					{
@@ -269,8 +267,9 @@ namespace BLToolkit.TypeBuilder
 		{
 			return
 				TypeHelper.IsScalar(sourceType) || sourceType.IsSealed ||
-						(!sourceType.IsAbstract && sourceType.IsDefined(typeof(BLToolkitGeneratedAttribute), true))? sourceType:
-					GetType(sourceType, sourceType, new AbstractClassBuilder());
+						(!sourceType.IsAbstract && sourceType.IsDefined(typeof(BLToolkitGeneratedAttribute), true)) ?
+					sourceType:
+					GetType(sourceType, sourceType, new AbstractClassBuilder(sourceType));
 		}
 
 #if FW3

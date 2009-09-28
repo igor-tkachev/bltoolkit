@@ -9,5 +9,10 @@ namespace Partial.Trust.Components
 	{
 		[SqlQuery("SELECT * FROM Customers")]
 		public abstract List<Customers> GetPersonList();
+
+		public static PersonDataAccessor CreateInstance()
+		{
+			return CreateInstance<PersonDataAccessor>();
+		}
 	}
 }

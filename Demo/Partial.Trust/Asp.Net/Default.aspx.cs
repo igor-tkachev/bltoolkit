@@ -4,7 +4,6 @@ using System.Web.UI;
 
 using BLToolkit.Data;
 using BLToolkit.Data.Linq;
-using BLToolkit.DataAccess;
 
 namespace Partial.Trust.Asp.Net
 {
@@ -14,7 +13,7 @@ namespace Partial.Trust.Asp.Net
 	{
 		protected void Page_Load(object sender, EventArgs e)
 		{
-			var da   = DataAccessor.CreateInstance<PersonDataAccessor>();
+			var da   = PersonDataAccessor.CreateInstance();
 			var list = da.GetPersonList();
 
 			Label1.Text = list[0].ContactName;

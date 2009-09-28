@@ -23,7 +23,7 @@ namespace BLToolkit.TypeBuilder.Builders
 		public  TypeHelper  Type
 		{
 			get { return _type;  }
-			set { _type = value; }
+			//set { _type = value; }
 		}
 
 		private AssemblyBuilderHelper _assemblyBuilder;

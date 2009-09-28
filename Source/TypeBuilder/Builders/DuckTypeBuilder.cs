@@ -28,9 +28,9 @@ namespace BLToolkit.TypeBuilder.Builders
 			get { return "DuckType." + AbstractClassBuilder.GetTypeFullName(_interfaceType).Replace('+', '.'); }
 		}
 
-		public Type Build(Type sourceType, AssemblyBuilderHelper assemblyBuilder)
+		public Type Build(AssemblyBuilderHelper assemblyBuilder)
 		{
-			_typeBuilder = assemblyBuilder.DefineType(GetTypeName(sourceType), typeof(DuckType), _interfaceType);
+			_typeBuilder = assemblyBuilder.DefineType(GetTypeName(), typeof(DuckType), _interfaceType);
 
 			if (!BuildMembers(_interfaceType))
 				return null;
@@ -42,7 +42,7 @@ namespace BLToolkit.TypeBuilder.Builders
 			return _typeBuilder.Create();
 		}
 
-		public string GetTypeName(Type sourceType)
+		public string GetTypeName()
 		{
 			string name = String.Empty;
 
@@ -54,6 +54,11 @@ namespace BLToolkit.TypeBuilder.Builders
 			}
 
 			return name + AssemblyNameSuffix;
+		}
+
+		public Type GetBuildingType()
+		{
+			return _interfaceType;
 		}
 
 		#endregion

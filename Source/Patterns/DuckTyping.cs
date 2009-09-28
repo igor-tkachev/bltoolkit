@@ -63,7 +63,7 @@ namespace BLToolkit.Patterns
 
 					type = TypeFactory.GetType(
 						new CompoundValue(interfaceType, objectType),
-						objectType,
+						interfaceType, //objectType,
 						new DuckTypeBuilder(MustImplementAttribute.Default, interfaceType, new Type[] { objectType }));
 
 					types.Add(objectType, type);

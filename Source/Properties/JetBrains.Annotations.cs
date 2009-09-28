@@ -9,7 +9,7 @@ namespace JetBrains.Annotations
 	/// The format string should be in <see cref="string.Format(IFormatProvider,string,object[])"/> -like form
 	/// </summary>
 	[AttributeUsage(AttributeTargets.Constructor | AttributeTargets.Method, AllowMultiple = false, Inherited = true)]
-	public sealed class StringFormatMethodAttribute : Attribute
+	internal sealed class StringFormatMethodAttribute : Attribute
 	{
 		private readonly string _formatParameterName;
 
@@ -36,7 +36,7 @@ namespace JetBrains.Annotations
 	/// For example, <see cref="ArgumentNullException"/> has such parameter.
 	/// </summary>
 	[AttributeUsage(AttributeTargets.Parameter, AllowMultiple = false, Inherited = true)]
-	public sealed class InvokerParameterNameAttribute : Attribute
+	internal sealed class InvokerParameterNameAttribute : Attribute
 	{
 	}
 
@@ -46,7 +46,7 @@ namespace JetBrains.Annotations
 	/// </summary>
 	/// <seealso cref="AssertionConditionAttribute"/>
 	[AttributeUsage(AttributeTargets.Method, AllowMultiple = false, Inherited = true)]
-	public sealed class AssertionMethodAttribute : Attribute
+	internal sealed class AssertionMethodAttribute : Attribute
 	{
 	}
 
@@ -57,7 +57,7 @@ namespace JetBrains.Annotations
 	/// </summary>
 	/// <seealso cref="AssertionConditionType"/>
 	[AttributeUsage(AttributeTargets.Parameter, AllowMultiple = false, Inherited = true)]
-	public sealed class AssertionConditionAttribute : Attribute
+	internal sealed class AssertionConditionAttribute : Attribute
 	{
 		private readonly AssertionConditionType _conditionType;
 
@@ -83,7 +83,7 @@ namespace JetBrains.Annotations
 	/// Specifies assertion type. If the assertion method argument satisifes the condition, then the execution continues. 
 	/// Otherwise, execution is assumed to be halted
 	/// </summary>
-	public enum AssertionConditionType
+	internal enum AssertionConditionType
 	{
 		/// <summary>
 		/// Indicates that the marked parameter should be evaluated to true
@@ -111,7 +111,7 @@ namespace JetBrains.Annotations
 	/// For example, it could unconditionally throw exception
 	/// </summary>
 	[AttributeUsage(AttributeTargets.Method, AllowMultiple = false, Inherited = true)]
-	public sealed class TerminatesProgramAttribute : Attribute
+	internal sealed class TerminatesProgramAttribute : Attribute
 	{
 	}
 
@@ -119,7 +119,7 @@ namespace JetBrains.Annotations
 	/// Indicates that the value of marked element could be <c>null</c> sometimes, so the check for <c>null</c> is necessary before its usage
 	/// </summary>
 	[AttributeUsage(AttributeTargets.Method | AttributeTargets.Parameter | AttributeTargets.Property | AttributeTargets.Delegate | AttributeTargets.Field, AllowMultiple = false, Inherited = true)]
-	public sealed class CanBeNullAttribute : Attribute
+	internal sealed class CanBeNullAttribute : Attribute
 	{
 	}
 
@@ -127,7 +127,7 @@ namespace JetBrains.Annotations
 	/// Indicates that the value of marked element could never be <c>null</c>
 	/// </summary>
 	[AttributeUsage(AttributeTargets.Method | AttributeTargets.Parameter | AttributeTargets.Property | AttributeTargets.Delegate | AttributeTargets.Field, AllowMultiple = false, Inherited = true)]
-	public sealed class NotNullAttribute : Attribute
+	internal sealed class NotNullAttribute : Attribute
 	{
 	}
 
@@ -136,7 +136,7 @@ namespace JetBrains.Annotations
 	/// There is only exception to compare with <c>null</c>, it is permitted
 	/// </summary>
 	[AttributeUsage(AttributeTargets.Interface | AttributeTargets.Class | AttributeTargets.Struct, AllowMultiple = false, Inherited = true)]
-	public sealed class CannotApplyEqualityOperatorAttribute : Attribute
+	internal sealed class CannotApplyEqualityOperatorAttribute : Attribute
 	{
 	}
 
@@ -157,7 +157,7 @@ namespace JetBrains.Annotations
 	/// </example>
 	[AttributeUsage(AttributeTargets.Class, AllowMultiple = true, Inherited = true)]
 	[BaseTypeRequired(typeof(Attribute))]
-	public sealed class BaseTypeRequiredAttribute : Attribute
+	internal sealed class BaseTypeRequiredAttribute : Attribute
 	{
 		private readonly Type[] _baseTypes;
 
@@ -193,7 +193,7 @@ namespace JetBrains.Annotations
 	/// so this symbol will not be marked as unused (as well as by other usage inspections)
 	/// </summary>
 	[AttributeUsage(AttributeTargets.All, AllowMultiple = false, Inherited = false)]
-	public class UsedImplicitlyAttribute : Attribute
+	internal class UsedImplicitlyAttribute : Attribute
 	{
 		readonly ImplicitUseFlags _flags;
 		/// <summary>
@@ -227,7 +227,7 @@ namespace JetBrains.Annotations
 	/// Should be used on attributes and causes ReSharper to not mark symbols marked with such attributes as unused (as well as by other usage inspections)
 	/// </summary>
 	[AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = true)]
-	public class MeansImplicitUseAttribute : Attribute
+	internal class MeansImplicitUseAttribute : Attribute
 	{
 		readonly ImplicitUseFlags _flags;
 		/// <summary>
@@ -263,7 +263,7 @@ namespace JetBrains.Annotations
 	/// Specify what is considered used implicitly when marked with <see cref="MeansImplicitUseAttribute"/> or <see cref="UsedImplicitlyAttribute"/>
 	/// </summary>
 	[Flags]
-	public enum ImplicitUseFlags
+	internal enum ImplicitUseFlags
 	{
 		/// <summary>
 		/// Only entity marked with attribute considered used

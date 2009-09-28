@@ -4,22 +4,30 @@ using System.Collections.Generic;
 using System.Reflection;
 using System.Reflection.Emit;
 using System.Diagnostics.CodeAnalysis;
-using BLToolkit.Properties;
-using BLToolkit.Reflection;
-using BLToolkit.Reflection.Emit;
 
 namespace BLToolkit.TypeBuilder.Builders
 {
+	using Properties;
+	using Reflection;
+	using Reflection.Emit;
+
 	internal class AbstractClassBuilder : ITypeBuilder
 	{
+		public AbstractClassBuilder(Type sourceType)
+		{
+			_sourceType = sourceType;
+		}
+
+		readonly Type _sourceType;
+
 		public string AssemblyNameSuffix
 		{
 			get { return TypeBuilderConsts.AssemblyNameSuffix; }
 		}
 
-		public Type Build(Type sourceType, AssemblyBuilderHelper assemblyBuilder)
+		public Type Build(AssemblyBuilderHelper assemblyBuilder)
 		{
-			_context  = new BuildContext(sourceType);
+			_context  = new BuildContext(_sourceType);
 			_builders = new AbstractTypeBuilderList();
 
 			_context.TypeBuilders    = GetBuilderList(_context.Type);
@@ -61,15 +69,15 @@ namespace BLToolkit.TypeBuilder.Builders
 			return name;
 		}
 
-		public string GetTypeName(Type sourceType)
+		public string GetTypeName()
 		{
-			string typeFullName  = sourceType.FullName;
-			string typeShortName = sourceType.Name;
+			string typeFullName  = _sourceType.FullName;
+			string typeShortName = _sourceType.Name;
 
-			if (sourceType.IsGenericType)
+			if (_sourceType.IsGenericType)
 			{
-				typeFullName  = GetTypeFullName (sourceType);
-				typeShortName = GetTypeShortName(sourceType);
+				typeFullName  = GetTypeFullName (_sourceType);
+				typeShortName = GetTypeShortName(_sourceType);
 			}
 
 			typeFullName  = typeFullName. Replace('+', '.');
@@ -79,6 +87,11 @@ namespace BLToolkit.TypeBuilder.Builders
 			typeFullName = typeFullName + "BLToolkitExtension." + typeShortName;
 
 			return typeFullName;
+		}
+
+		public Type GetBuildingType()
+		{
+			return _sourceType;
 		}
 
 		private static AbstractTypeBuilderList GetBuilderList(TypeHelper type)
@@ -241,7 +254,7 @@ namespace BLToolkit.TypeBuilder.Builders
 				}
 			}
 
-			string typeName = GetTypeName(_context.Type);
+			string typeName = GetTypeName();
 
 			_context.TypeBuilder = _context.AssemblyBuilder.DefineType(
 				typeName,
