@@ -926,7 +926,7 @@ namespace BLToolkit.Data.Sql
 
 					int precedence = Sql.Precedence.Primary;
 
-					foreach (var condition in _conditions)
+					foreach (Condition condition in _conditions)
 						precedence = Math.Min(precedence, condition.Precedence);
 
 					return precedence;
