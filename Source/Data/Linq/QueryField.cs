@@ -98,6 +98,8 @@ namespace BLToolkit.Data.Linq
 			FieldIndex[]    _index;
 			ISqlExpression  _sqlExpression;
 
+			public ISqlExpression SqlExpression { get { return _sqlExpression; } }
+
 			public override QuerySource[] Sources { get { return new[] { QuerySource }; } }
 
 			public override FieldIndex[] Select<T>(ExpressionParser<T> parser)
@@ -109,7 +111,10 @@ namespace BLToolkit.Data.Linq
 				if (_index == null)
 				{
 					if (_sqlExpression == null)
-						_sqlExpression = parser.ParseExpression(QuerySource.ParentQueries.Length == 0 ? null: QuerySource.ParentQueries[0], Expr);
+						_sqlExpression =
+							//QuerySource is QuerySource.Scalar ?
+							//	parser.ParseExpression(Expr, QuerySource):
+								parser.ParseExpression(Expr, QuerySource.ParentQueries);
 
 					_index = new[] { new FieldIndex { Index = QuerySource.SqlBuilder.Select.Add(_sqlExpression, _alias), Field = this } };
 				}
@@ -129,7 +134,7 @@ namespace BLToolkit.Data.Linq
 						return null;
 
 					_inParsing = true;
-					_sqlExpression = parser.ParseExpression(QuerySource, Expr);
+					_sqlExpression = parser.ParseExpression(Expr, QuerySource);
 					_inParsing = false;
 				}
 

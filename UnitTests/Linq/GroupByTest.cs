@@ -333,6 +333,20 @@ namespace Data.Linq
 		}
 
 		[Test]
+		public void SelectMax()
+		{
+			var expected =
+				from ch in Child
+				group ch by ch.ParentID into g
+				select g.Max(c => c.ChildID);
+
+			ForEachProvider(db => AreEqual(expected,
+				from ch in db.Child
+				group ch by ch.ParentID into g
+				select g.Max(c => c.ChildID)));
+		}
+
+		[Test]
 		public void JoinMax()
 		{
 			var expected =
@@ -432,6 +446,24 @@ namespace Data.Linq
 		}
 
 		[Test]
+		public void Count23()
+		{
+			var expected =
+				from p in
+					from p in Parent select new { ParentID = p.ParentID + 1, p.Value1 }
+				where p.ParentID + 1 > 1
+				group p by new { p.Value1 } into g
+				select g.Count(p => p.ParentID < 3);
+
+			ForEachProvider(db => AreEqual(expected,
+				from p in
+					from p in db.Parent select new { ParentID = p.ParentID + 1, p.Value1 }
+				where p.ParentID + 1 > 1
+				group p by new { p.Value1 } into g
+				select g.Count(p => p.ParentID < 3)));
+		}
+
+		[Test]
 		public void Count3()
 		{
 			var expected =
@@ -513,6 +545,22 @@ namespace Data.Linq
 				from ch in db.Child
 				group ch by ch.ParentID into g
 				where g.Count() > 2
+				select g.Key));
+		}
+
+		[Test]
+		public void WhereCount3()
+		{
+			var expected =
+				from ch in Child
+				group ch by ch.ParentID into g
+				where g.Count() > 2 && g.Key > 2
+				select g.Key;
+
+			ForEachProvider(db => AreEqual(expected,
+				from ch in db.Child
+				group ch by ch.ParentID into g
+				where g.Count() > 2 && g.Key > 2
 				select g.Key));
 		}
 	}

@@ -289,8 +289,14 @@ namespace BLToolkit.Data.Linq
 
 			public override QueryField GetField(Expression expr)
 			{
-				if (expr.NodeType == ExpressionType.Parameter && ParentQueries[0] is Scalar)
-					return EnsureField(ParentQueries[0].Fields[0]);
+				if (expr.NodeType == ExpressionType.Parameter)
+				{
+					if (ParentQueries[0] is Scalar)
+						return EnsureField(ParentQueries[0].Fields[0]);
+
+					if (ParentQueries[0] is GroupBy)
+						return ParentQueries[0];
+				}
 
 				return EnsureField(ParentQueries[0].GetField(expr));
 			}
@@ -419,6 +425,7 @@ namespace BLToolkit.Data.Linq
 				var field = new GroupByColumn(this);
 
 				Fields.Add(field);
+
 				Members.Add(groupingType.GetProperty("Key"), field);
 
 				ParsingTracer.DecIndentLevel();
@@ -434,6 +441,17 @@ namespace BLToolkit.Data.Linq
 			public override QueryField GetParentField(Expression expr)
 			{
 				return ParentQueries[0].GetParentField(expr);
+			}
+
+			public ExprColumn FindField(ExprColumn column)
+			{
+				foreach (var field in Fields)
+					if (field is ExprColumn && ((ExprColumn)field).SqlExpression == column.SqlExpression)
+						return (ExprColumn)field;
+
+				Fields.Add(column);
+
+				return column;
 			}
 
 			GroupBy() {}

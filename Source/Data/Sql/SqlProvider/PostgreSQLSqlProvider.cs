@@ -21,6 +21,8 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		{
 		}
 
+		public override bool IsConvertNullParameterRequired { get { return true; } }
+
 		protected override string LimitFormat  { get { return "LIMIT {0}"; } }
 		protected override string OffsetFormat { get { return "OFFSET {0} "; } }
 

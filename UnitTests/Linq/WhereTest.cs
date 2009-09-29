@@ -411,5 +411,97 @@ namespace Data.Linq
 		{
 			ForEachProvider(db => Assert.AreEqual(1, (from p in db.Parent where p.Value1 == p.ParentID && p.Value1 == 1 select p).ToList().Count));
 		}
+
+		[Test]
+		public void SubQuery()
+		{
+			var expected =
+				from t in
+					from ch in Child
+					select ch.ParentID * 1000
+				where t > 2000
+				select t / 1000;
+
+			ForEachProvider(db => AreEqual(expected,
+				from t in
+					from ch in db.Child
+					select ch.ParentID * 1000
+				where t > 2000
+				select t / 1000));
+		}
+
+		[Test]
+		public void AnonymousEqual1()
+		{
+			var child    = new { ParentID = 2, ChildID = 21 };
+			var expected =
+				from ch in Child
+				where ch.ParentID == child.ParentID && ch.ChildID == child.ChildID
+				select ch;
+
+			ForEachProvider(db => AreEqual(expected,
+				from ch in db.Child
+				where new { ch.ParentID, ch.ChildID } == child
+				select ch));
+		}
+
+		[Test]
+		public void AnonymousEqual2()
+		{
+			var child    = new { ParentID = 2, ChildID = 21 };
+			var expected =
+				from ch in Child
+				where !(ch.ParentID == child.ParentID && ch.ChildID == child.ChildID)
+				select ch;
+
+			ForEachProvider(db => AreEqual(expected,
+				from ch in db.Child
+				where child != new { ch.ParentID, ch.ChildID }
+				select ch));
+		}
+
+		[Test]
+		public void AnonymousEqual3()
+		{
+			var expected =
+				from ch in Child
+				where ch.ParentID == 2 && ch.ChildID == 21
+				select ch;
+
+			ForEachProvider(db => AreEqual(expected,
+				from ch in db.Child
+				where new { ch.ParentID, ch.ChildID } == new { ParentID = 2, ChildID = 21 }
+				select ch));
+		}
+
+		[Test]
+		public void AnonymousEqual4()
+		{
+			var parent   = new { ParentID = 2, Value1 = (int?)null };
+			var expected =
+				from p in Parent
+				where p.ParentID == parent.ParentID && p.Value1 == null
+				select p;
+
+			ForEachProvider(db => AreEqual(expected,
+				from p in db.Parent
+				where new { p.ParentID, p.Value1 } == parent
+				select p));
+		}
+
+		[Test]
+		public void AnonymousEqual5()
+		{
+			var parent   = new { ParentID = 3, Value1 = (int?)3 };
+			var expected =
+				from p in Parent
+				where p.ParentID == parent.ParentID && p.Value1 == 3
+				select p;
+
+			ForEachProvider(db => AreEqual(expected,
+				from p in db.Parent
+				where new { p.ParentID, p.Value1 } == parent
+				select p));
+		}
 	}
 }

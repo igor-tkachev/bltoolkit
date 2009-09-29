@@ -21,6 +21,9 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		{
 		}
 
+		public override bool TakeAcceptsParameter            { get { return SqlBuilder.Select.SkipValue != null; } }
+		public override bool IsCompareNullParameterSupported { get { return false; } }
+
 		protected override void BuildSql(StringBuilder sb)
 		{
 			AlternativeBuildSql(sb, false, base.BuildSql);
@@ -41,11 +44,6 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		protected override string LimitFormat
 		{
 			get { return SqlBuilder.Select.SkipValue == null ? "FETCH FIRST {0} ROWS ONLY" : null; }
-		}
-
-		public override bool TakeAcceptsParameter
-		{
-			get { return SqlBuilder.Select.SkipValue != null; }
 		}
 
 		public override ISqlExpression ConvertExpression(ISqlExpression expr)

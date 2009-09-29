@@ -46,13 +46,16 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		#region Support Flags
 
-		public virtual bool SkipAcceptsParameter      { get { return true; } }
-		public virtual bool TakeAcceptsParameter      { get { return true; } }
+		public virtual bool SkipAcceptsParameter            { get { return true; } }
+		public virtual bool TakeAcceptsParameter            { get { return true; } }
 
-		public virtual bool IsTakeSupported           { get { return true; } }
-		public virtual bool IsSkipSupported           { get { return true; } }
-		public virtual bool IsSubQueryColumnSupported { get { return true; } }
-		public virtual bool IsCountSubQuerySupported  { get { return true; } }
+		public virtual bool IsTakeSupported                 { get { return true; } }
+		public virtual bool IsSkipSupported                 { get { return true; } }
+		public virtual bool IsSubQueryColumnSupported       { get { return true; } }
+		public virtual bool IsCountSubQuerySupported        { get { return true; } }
+
+		public virtual bool IsCompareNullParameterSupported { get { return true;  } }
+		public virtual bool IsConvertNullParameterRequired  { get { return false; } }
 
 		#endregion
 
@@ -123,6 +126,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			BuildFromClause   (sb);
 			BuildWhereClause  (sb);
 			BuildGroupByClause(sb);
+			BuildHavingClause (sb);
 			BuildOrderByClause(sb);
 			BuildOffsetLimit  (sb);
 		}
@@ -271,7 +275,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 			sb.Append(" ON ");
 
-			BuildSearchCondition(sb, join.Condition);
+			BuildSearchCondition(sb, Precedence.Unknown, join.Condition);
 
 			if (joinCounter > 0)
 			{
@@ -339,6 +343,27 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			}
 
 			_indent--;
+		}
+
+		#endregion
+
+		#region Where Having
+
+		protected virtual void BuildHavingClause(StringBuilder sb)
+		{
+			if (_sqlBuilder.Having.SearchCondition.Conditions.Count == 0)
+				return;
+
+			AppendIndent(sb);
+
+			sb.Append("HAVING").AppendLine();
+
+			_indent++;
+			AppendIndent(sb);
+			BuildWhereSearchCondition(sb, _sqlBuilder.Having.SearchCondition);
+			_indent--;
+
+			sb.AppendLine();
 		}
 
 		#endregion
@@ -433,7 +458,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		protected virtual void BuildWhereSearchCondition(StringBuilder sb, SqlBuilder.SearchCondition condition)
 		{
-			BuildSearchCondition(sb, condition);
+			BuildSearchCondition(sb, Precedence.Unknown, condition);
 		}
 
 		protected virtual void BuildSearchCondition(StringBuilder sb, SqlBuilder.SearchCondition condition)

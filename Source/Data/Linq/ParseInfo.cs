@@ -323,7 +323,7 @@ namespace BLToolkit.Data.Linq
 
 		public static bool operator != (ParseInfo pi, Expression expr)
 		{
-			return pi.Expr != expr;
+			return (object)pi != null ? pi.Expr != expr : expr != null;
 		}
 
 		public static implicit operator Expression(ParseInfo pi)

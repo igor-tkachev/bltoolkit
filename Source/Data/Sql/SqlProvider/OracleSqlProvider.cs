@@ -120,7 +120,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 				}
 			}
 			else
-				BuildSearchCondition(sb, condition);
+				BuildSearchCondition(sb, Precedence.Unknown, condition);
 		}
 
 		public override ISqlExpression ConvertExpression(ISqlExpression expr)

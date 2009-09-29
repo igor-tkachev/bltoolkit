@@ -77,6 +77,46 @@ namespace Data.Linq
 		}
 
 		[Test]
+		public void InnerJoin7()
+		{
+			var expected =
+				from t in
+					from ch in Child
+						join p in Parent on ch.ParentID equals p.ParentID
+					select ch.ParentID + p.ParentID
+				where t > 2
+				select t;
+
+			ForEachProvider(db => AreEqual(expected,
+				from t in
+					from ch in db.Child
+						join p in db.Parent on ch.ParentID equals p.ParentID
+					select ch.ParentID + p.ParentID
+				where t > 2
+				select t));
+		}
+
+		[Test]
+		public void InnerJoin8()
+		{
+			var expected =
+				from t in
+					from ch in Child
+						join p in Parent on ch.ParentID equals p.ParentID
+					select new { ID = ch.ParentID + p.ParentID }
+				where t.ID > 2
+				select t;
+
+			ForEachProvider(db => AreEqual(expected,
+				from t in
+					from ch in db.Child
+						join p in db.Parent on ch.ParentID equals p.ParentID
+					select new { ID = ch.ParentID + p.ParentID }
+				where t.ID > 2
+				select t));
+		}
+
+		[Test]
 		public void LeftJoin1()
 		{
 			ForEachProvider(db =>
@@ -128,10 +168,10 @@ namespace Data.Linq
 						db.Child,
 						p => p.ParentID,
 						ch => ch.ParentID,
-						(p, lj1) => new { p = p, lj1 = new { lj1 } }
+						(p, lj1) => new { p, lj1 = new { lj1 } }
 					)
 					.Where (t => t.p.ParentID == 2)
-					.Select(t => new { p = t.p, lj1 = t.lj1 });
+					.Select(t => new { t.p, t.lj1 });
 
 				var list = q.ToList();
 

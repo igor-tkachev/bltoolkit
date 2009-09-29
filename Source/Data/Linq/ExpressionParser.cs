@@ -87,7 +87,7 @@ namespace BLToolkit.Data.Linq
 				//
 				// db.Table.ToList()
 				//
-				pi => pi.IsConstant<IQueryable>((value,_) => SimpleQuery(value.ElementType, null)),
+				pi => pi.IsConstant<IQueryable>((value,_) => BuildSimpleQuery(value.ElementType, null)),
 				//
 				// from p in db.Table select p
 				// db.Table.Select(p => p)
@@ -96,7 +96,7 @@ namespace BLToolkit.Data.Linq
 					obj => obj.IsConstant<IQueryable>(),
 					arg => arg.IsLambda<T>(
 						body => body.NodeType == ExpressionType.Parameter,
-						l    => SimpleQuery(typeof(T), l.Expr.Parameters[0].Name))),
+						l    => BuildSimpleQuery(typeof(T), l.Expr.Parameters[0].Name))),
 				//
 				// everything else
 				//
@@ -425,14 +425,14 @@ namespace BLToolkit.Data.Linq
 
 				for (var i = 0; i < new1.Expr.Arguments.Count; i++)
 					join
-						.Expr(ParseExpression(source1, new1.Create(new1.Expr.Arguments[i], new1.Index(new1.Expr.Arguments, New.Arguments, i)))).Equal
-						.Expr(ParseExpression(source2, new2.Create(new2.Expr.Arguments[i], new2.Index(new2.Expr.Arguments, New.Arguments, i))));
+						.Expr(ParseExpression(new1.Create(new1.Expr.Arguments[i], new1.Index(new1.Expr.Arguments, New.Arguments, i)), source1)).Equal
+						.Expr(ParseExpression(new2.Create(new2.Expr.Arguments[i], new2.Index(new2.Expr.Arguments, New.Arguments, i)), source2));
 			}
 			else
 			{
 				join
-					.Expr(ParseExpression(source1, outerKeySelector.Body)).Equal
-					.Expr(ParseExpression(source2, innerKeySelector.Body));
+					.Expr(ParseExpression(outerKeySelector.Body, source1)).Equal
+					.Expr(ParseExpression(innerKeySelector.Body, source2));
 			}
 
 			var result = resultSelector == null ? source2 : ParseSelect(resultSelector, source1, source2);
@@ -442,7 +442,7 @@ namespace BLToolkit.Data.Linq
 
 		static void CheckExplicitCtor(Expression expr)
 		{
-			if (expr.NodeType == ExpressionType.MemberInit)
+			if (expr.NodeType == ExpressionType	.MemberInit)
 				throw new NotSupportedException(
 					string.Format("Explicit construction of entity type '{0}' in query is not allowed.", expr.Type));
 		}
@@ -506,30 +506,30 @@ namespace BLToolkit.Data.Linq
 				for (var i = 0; i < new1.Expr.Arguments.Count; i++)
 				{
 					join
-						.Expr(ParseExpression(source1, new1.Create(new1.Expr.Arguments[i], new1.Index(new1.Expr.Arguments, New.Arguments, i)))).Equal
-						.Expr(ParseExpression(source2, new2.Create(new2.Expr.Arguments[i], new2.Index(new2.Expr.Arguments, New.Arguments, i))));
+						.Expr(ParseExpression(new1.Create(new1.Expr.Arguments[i], new1.Index(new1.Expr.Arguments, New.Arguments, i)), source1)).Equal
+						.Expr(ParseExpression(new2.Create(new2.Expr.Arguments[i], new2.Index(new2.Expr.Arguments, New.Arguments, i)), source2));
 
 					//counter.SqlBuilder.Where
 					cntjoin
-						.Expr(ParseExpression(source1, new1.Create(new1.Expr.Arguments[i], new1.Index(new1.Expr.Arguments, New.Arguments, i)))).Equal
-						.Expr(ParseExpression(counter, new2.Create(new2.Expr.Arguments[i], new2.Index(new2.Expr.Arguments, New.Arguments, i))));
+						.Expr(ParseExpression(new1.Create(new1.Expr.Arguments[i], new1.Index(new1.Expr.Arguments, New.Arguments, i)), source1)).Equal
+						.Expr(ParseExpression(new2.Create(new2.Expr.Arguments[i], new2.Index(new2.Expr.Arguments, New.Arguments, i)), counter));
 
 					counter.SubSql.GroupBy
-						.Expr(ParseExpression(cntseq, new2.Create(new2.Expr.Arguments[i], new2.Index(new2.Expr.Arguments, New.Arguments, i))));
+						.Expr(ParseExpression(new2.Create(new2.Expr.Arguments[i], new2.Index(new2.Expr.Arguments, New.Arguments, i)), cntseq));
 				}
 			}
 			else
 			{
 				join
-					.Expr(ParseExpression(source1, outerKeySelector.Body)).Equal
-					.Expr(ParseExpression(source2, innerKeySelector.Body));
+					.Expr(ParseExpression(outerKeySelector.Body, source1)).Equal
+					.Expr(ParseExpression(innerKeySelector.Body, source2));
 
 				cntjoin
-					.Expr(ParseExpression(source1, outerKeySelector.Body)).Equal
-					.Expr(ParseExpression(counter, innerKeySelector.Body));
+					.Expr(ParseExpression(outerKeySelector.Body, source1)).Equal
+					.Expr(ParseExpression(innerKeySelector.Body, counter));
 
 				counter.SubSql.GroupBy
-					.Expr(ParseExpression(cntseq, innerKeySelector.Body));
+					.Expr(ParseExpression(innerKeySelector.Body, cntseq));
 			}
 
 			if (resultSelector == null)
@@ -564,19 +564,25 @@ namespace BLToolkit.Data.Linq
 
 			SetAlias(select, l.Parameters[0].Expr.Name);
 
-			if (CheckSubQueryForWhere(select, l.Body))
+			bool makeHaving;
+
+			if (CheckSubQueryForWhere(select, l.Body, out makeHaving))
 				select = WrapInSubQuery(select);
 
-			ParseSearchCondition(CurrentSql.Where.SearchCondition.Conditions, select, l.Body);
+			ParseSearchCondition(
+				makeHaving? CurrentSql.Having.SearchCondition.Conditions : CurrentSql.Where.SearchCondition.Conditions,
+				l.Body, select);
 
 			ParsingTracer.DecIndentLevel();
 			return select;
 		}
 
-		static bool CheckSubQueryForWhere(QuerySource query, ParseInfo expr)
+		static bool CheckSubQueryForWhere(QuerySource query, ParseInfo expr, out bool makeHaving)
 		{
 			var checkParameter = query is QuerySource.Scalar && query.Fields[0] is QueryField.ExprColumn;
 			var makeSubQuery   = false;
+			var isHaving       = false;
+			var isWhere        = false;
 
 			expr.Walk(pi =>
 			{
@@ -589,20 +595,40 @@ namespace BLToolkit.Data.Linq
 							if (field is QueryField.ExprColumn)
 								makeSubQuery = pi.StopWalking = true;
 
+							isWhere = true;
+
+							break;
+						}
+
+					case ExpressionType.Call:
+						{
+							var e = pi.Expr as MethodCallExpression;
+
+							if (e.Method.DeclaringType == typeof(Enumerable))
+							{
+								isHaving = true;
+								pi.StopWalking = true;
+							}
+							else
+								isWhere = true;
+
 							break;
 						}
 
 					case ExpressionType.Parameter:
 						if (checkParameter)
 							makeSubQuery = pi.StopWalking = true;
-						break;
 
+						isWhere = true;
+
+						break;
 				}
 
 				return pi;
 			});
 
-			return makeSubQuery;
+			makeHaving = isHaving && !isWhere;
+			return makeSubQuery || isHaving && isWhere;
 		}
 
 		#endregion
@@ -722,7 +748,7 @@ namespace BLToolkit.Data.Linq
 			ParsingTracer.WriteLine();
 			ParsingTracer.IncIndentLevel();
 
-			CurrentSql.Select.Take(ParseExpression(select, value));
+			CurrentSql.Select.Take(ParseExpression(value, select));
 
 			_info.SqlProvider.SqlBuilder = CurrentSql;
 
@@ -756,7 +782,7 @@ namespace BLToolkit.Data.Linq
 
 			var prevSkipValue = CurrentSql.Select.SkipValue;
 
-			CurrentSql.Select.Skip(ParseExpression(select, value));
+			CurrentSql.Select.Skip(ParseExpression(value, select));
 
 			_info.SqlProvider.SqlBuilder = CurrentSql;
 
@@ -819,7 +845,7 @@ namespace BLToolkit.Data.Linq
 			var idx =
 				parseInfo.Expr.Method.Name == "Count" ?
 					select.SqlBuilder.Select.Add(new SqlFunction.Count(select.SqlBuilder), "cnt"):
-					select.SqlBuilder.Select.Add(new SqlFunction(parseInfo.Expr.Method.Name, ParseExpression(select, lambda.Body)));
+					select.SqlBuilder.Select.Add(new SqlFunction(parseInfo.Expr.Method.Name, ParseExpression(lambda.Body, select)));
 
 			_buildSelect = () =>
 			{
@@ -834,7 +860,7 @@ namespace BLToolkit.Data.Linq
 
 		#endregion
 
-		#region Build Select
+		#region SetQuery
 
 		void SetQuery(QuerySource query, IndexConverter converter)
 		{
@@ -849,6 +875,12 @@ namespace BLToolkit.Data.Linq
 
 			_info.SetQuery(mapper.Compile());
 		}
+
+		#endregion
+
+		#region Build Select
+
+		#region BuildSelect
 
 		void BuildSelect(QuerySource query, Action<QuerySource,IndexConverter> queryAction, Action<ParseInfo> newAction, IndexConverter converter)
 		{
@@ -868,7 +900,7 @@ namespace BLToolkit.Data.Linq
 						throw new InvalidOperationException();
 					BuildSelect(path.ParentQueries[0], queryAction, newAction, converter);
 				}
-	);
+			);
 
 			ParsingTracer.DecIndentLevel();
 		}
@@ -884,6 +916,10 @@ namespace BLToolkit.Data.Linq
 
 			ParsingTracer.DecIndentLevel();
 		}
+
+		#endregion
+
+		#region BuildSubQuery
 
 		void BuildSubQuery(
 			QuerySource                        subQuery,
@@ -957,6 +993,8 @@ namespace BLToolkit.Data.Linq
 			ParsingTracer.DecIndentLevel();
 			return result;
 		}
+
+		#endregion
 
 		#region BuildGroupBy
 
@@ -1067,6 +1105,8 @@ namespace BLToolkit.Data.Linq
 
 		#endregion
 
+		#region BuildNewExpression
+
 		ParseInfo BuildNewExpression(QuerySource query, ParseInfo expr, IndexConverter converter)
 		{
 			ParsingTracer.WriteLine(expr);
@@ -1174,6 +1214,9 @@ namespace BLToolkit.Data.Linq
 								if (field is QuerySource.GroupJoinQuery)
 									return BuildGroupJoin(pi, (QuerySource.GroupJoinQuery)field, converter);
 
+								if (field is QuerySource.SubQuery)
+									return BuildSubQuery(pi, (QuerySource.SubQuery)field, converter);
+
 								throw new InvalidOperationException();
 							}
 
@@ -1193,7 +1236,7 @@ namespace BLToolkit.Data.Linq
 								}
 							}
 
-							if (query is QuerySource.Scalar)
+							if (query is QuerySource.Scalar && CurrentSql.Select.Columns.Count == 0)
 								return BuildField(query, pi);
 
 							break;
@@ -1220,24 +1263,72 @@ namespace BLToolkit.Data.Linq
 			return newExpr;
 		}
 
-		ParseInfo BuildSubQuery(ParseInfo<MemberExpression> ma, QueryField.SubQueryColumn query, IndexConverter converter)
+		#endregion
+
+		#region BuildSubQuery
+
+		ParseInfo BuildSubQuery(ParseInfo ma, QuerySource.SubQuery query, IndexConverter converter)
 		{
-			ParsingTracer.WriteLine();
+#if DEBUG
+			ParsingTracer.WriteLine(ma);
+			ParsingTracer.WriteLine(query);
 			ParsingTracer.IncIndentLevel();
 
-			if (query.Field is QuerySource.Table)
-				return BuildQueryField(ma, (QuerySource.Table)query.Field, i => converter(query.QuerySource.EnsureField(i.Field).Select(this)[0]));
+			try
+			{
+#endif
+				if (query.ParentQueries.Length == 1)
+				{
+					var parent = query.ParentQueries[0];
 
-			if (query.Field is QuerySource)
+					Func<FieldIndex,FieldIndex> conv = i => converter(query.EnsureField(i.Field).Select(this)[0]);
+
+					if (parent is QuerySource.Table)
+						return BuildQueryField(ma, parent, conv);
+
+					if (parent is QuerySource.Scalar)
+						return BuildNewExpression(query, ma, conv);
+
+					return BuildNewExpression(parent, parent.Lambda.Body, conv);
+				}
+
 				throw new InvalidOperationException();
+#if DEBUG
+			}
+			finally
+			{
+				ParsingTracer.DecIndentLevel();
+			}
+#endif
+		}
 
-			if (query.Field is QueryField.SubQueryColumn)
-				return BuildSubQuery(ma, (QueryField.SubQueryColumn)query.Field, i => converter(query.QuerySource.EnsureField(i.Field).Select(this)[0]));
+		ParseInfo BuildSubQuery(ParseInfo ma, QueryField.SubQueryColumn query, IndexConverter converter)
+		{
+#if DEBUG
+			ParsingTracer.WriteLine(ma);
+			ParsingTracer.WriteLine(query);
+			ParsingTracer.IncIndentLevel();
 
-			var field = BuildField(ma, query, converter);
+			try
+			{
+#endif
+				if (query.Field is QuerySource.Table)
+					return BuildQueryField(ma, (QuerySource.Table)query.Field, i => converter(query.QuerySource.EnsureField(i.Field).Select(this)[0]));
 
-			ParsingTracer.DecIndentLevel();
-			return field;
+				if (query.Field is QuerySource)
+					throw new InvalidOperationException();
+
+				if (query.Field is QueryField.SubQueryColumn)
+					return BuildSubQuery(ma, (QueryField.SubQueryColumn)query.Field, i => converter(query.QuerySource.EnsureField(i.Field).Select(this)[0]));
+
+				return BuildField(ma, query, converter);
+#if DEBUG
+			}
+			finally
+			{
+				ParsingTracer.DecIndentLevel();
+			}
+#endif
 		}
 
 		ParseInfo BuildQueryField(ParseInfo pi, QuerySource query, IndexConverter converter)
@@ -1260,6 +1351,8 @@ namespace BLToolkit.Data.Linq
 			ParsingTracer.DecIndentLevel();
 			return field;
 		}
+
+		#endregion
 
 		#region BuildGroupJoin
 
@@ -1330,6 +1423,8 @@ namespace BLToolkit.Data.Linq
 
 		#endregion
 
+		#region BuildGroupBy
+
 		ParseInfo BuildGroupBy(ParseInfo<MemberExpression> ma, QueryField.GroupByColumn field, IndexConverter converter)
 		{
 			ParsingTracer.WriteLine(ma);
@@ -1354,13 +1449,17 @@ namespace BLToolkit.Data.Linq
 			return result;
 		}
 
+		#endregion
+
+		#region BuildField
+
 		ParseInfo BuildField(QuerySource query, ParseInfo pi)
 		{
 			ParsingTracer.WriteLine(pi);
 			ParsingTracer.WriteLine(query);
 			ParsingTracer.IncIndentLevel();
 
-			var sqlex = ParseExpression(query, pi);
+			var sqlex = ParseExpression(pi, query);
 			var idx   = CurrentSql.Select.Add(sqlex);
 			var field = BuildField(pi, new[] { idx });
 
@@ -1368,7 +1467,7 @@ namespace BLToolkit.Data.Linq
 			return field;
 		}
 
-		ParseInfo BuildField(ParseInfo<MemberExpression> ma, QueryField field, IndexConverter converter)
+		ParseInfo BuildField(ParseInfo ma, QueryField field, IndexConverter converter)
 		{
 			ParsingTracer.WriteLine(ma);
 			ParsingTracer.WriteLine(field);
@@ -1421,32 +1520,13 @@ namespace BLToolkit.Data.Linq
 			return result;
 		}
 
-		static void SetAlias(QuerySource query, string alias)
-		{
-			if (alias.Contains('<'))
-				return;
+		#endregion
 
-			query.Match
-			(
-				table  =>
-				{
-					if (table.SqlTable.Alias == null)
-						table.SqlTable.Alias = alias;
-				},
-				_ => {},
-				subQuery =>
-				{
-					var table = subQuery.SqlBuilder.From.Tables[0];
-					if (table.Alias == null)
-						table.Alias = alias;
-				},
-				_ => {},
-				_ => {},
-				_ => {}
-			);
-		}
+		#endregion
 
-		bool SimpleQuery(Type type, string alias)
+		#region BuildSimpleQuery
+
+		bool BuildSimpleQuery(Type type, string alias)
 		{
 			_isParsingPhase = false;
 
@@ -1477,7 +1557,7 @@ namespace BLToolkit.Data.Linq
 					return;
 			}
 
-			var expr = ParseExpression(null, parseInfo);
+			var expr = ParseExpression(parseInfo);
 
 			CurrentSql.Select.Expr(expr);
 
@@ -1587,28 +1667,22 @@ namespace BLToolkit.Data.Linq
 
 		#region Expression Parser
 
-		ISqlExpression Convert(ISqlExpression expr)
-		{
-			return _info.SqlProvider.ConvertExpression(expr);
-		}
+		#region ParseExpression
 
-		ISqlPredicate Convert(ISqlPredicate predicate)
+		public ISqlExpression ParseExpression(ParseInfo parseInfo, params QuerySource[] queries)
 		{
-			return _info.SqlProvider.ConvertPredicate(predicate);
-		}
-
-		public ISqlExpression ParseExpression(QuerySource query, ParseInfo parseInfo)
-		{
-			ParsingTracer.WriteLine(query);
 			ParsingTracer.WriteLine(parseInfo);
+			ParsingTracer.WriteLine(queries);
 			ParsingTracer.IncIndentLevel();
 
 			try
 			{
-				if (parseInfo.NodeType == ExpressionType.Parameter && query is QuerySource.Scalar)
+				var qlen = queries.Length;
+
+				if (parseInfo.NodeType == ExpressionType.Parameter && qlen == 1 && queries[0] is QuerySource.Scalar)
 				{
-					var ma = (QuerySource.Scalar)query;
-					return ParseExpression(ma.ParentQueries[0], ma.Lambda.Body);
+					var ma = (QuerySource.Scalar)queries[0];
+					return ParseExpression(ma.Lambda.Body, ma.ParentQueries);
 				}
 
 				if (CanBeConstant(parseInfo))
@@ -1630,7 +1704,7 @@ namespace BLToolkit.Data.Linq
 					case ExpressionType.LessThanOrEqual:
 						{
 							var condition = new SqlBuilder.SearchCondition();
-							ParseSearchCondition(condition.Conditions, query, parseInfo);
+							ParseSearchCondition(condition.Conditions, parseInfo, queries);
 							return condition;
 						}
 
@@ -1649,8 +1723,8 @@ namespace BLToolkit.Data.Linq
 						{
 							var pi = parseInfo.Convert<BinaryExpression>();
 							var e  = parseInfo.Expr as BinaryExpression;
-							var l  = ParseExpression(query, pi.Create(e.Left,  pi.Property(Binary.Left)));
-							var r  = ParseExpression(query, pi.Create(e.Right, pi.Property(Binary.Right)));
+							var l  = ParseExpression(pi.Create(e.Left,  pi.Property(Binary.Left)),  queries);
+							var r  = ParseExpression(pi.Create(e.Right, pi.Property(Binary.Right)), queries);
 							var t  = e.Left.Type ?? e.Right.Type;
 
 							switch (parseInfo.NodeType)
@@ -1694,7 +1768,7 @@ namespace BLToolkit.Data.Linq
 						{
 							var pi = parseInfo.Convert<UnaryExpression>();
 							var e  = parseInfo.Expr as UnaryExpression;
-							var o  = ParseExpression(query, pi.Create(e.Operand, pi.Property(Unary.Operand)));
+							var o  = ParseExpression(pi.Create(e.Operand, pi.Property(Unary.Operand)), queries);
 
 							if (e.Method == null && e.IsLifted)
 								return o;
@@ -1706,9 +1780,9 @@ namespace BLToolkit.Data.Linq
 						{
 							var pi = parseInfo.Convert<ConditionalExpression>();
 							var e  = parseInfo.Expr as ConditionalExpression;
-							var s  = ParseExpression(query, pi.Create(e.Test,    pi.Property(Conditional.Test)));
-							var t  = ParseExpression(query, pi.Create(e.IfTrue,  pi.Property(Conditional.IfTrue)));
-							var f  = ParseExpression(query, pi.Create(e.IfFalse, pi.Property(Conditional.IfFalse)));
+							var s  = ParseExpression(pi.Create(e.Test,    pi.Property(Conditional.Test)),    queries);
+							var t  = ParseExpression(pi.Create(e.IfTrue,  pi.Property(Conditional.IfTrue)),  queries);
+							var f  = ParseExpression(pi.Create(e.IfFalse, pi.Property(Conditional.IfFalse)), queries);
 
 							if (f is SqlFunction)
 							{
@@ -1754,7 +1828,7 @@ namespace BLToolkit.Data.Linq
 									return wpi;
 								});
 
-								return ParseExpression(query, pie);
+								return ParseExpression(pie, queries);
 							}
 
 							var attrs = ma.Member.GetCustomAttributes(typeof(SqlPropertyAttribute), true);
@@ -1770,19 +1844,22 @@ namespace BLToolkit.Data.Linq
 
 					case ExpressionType.Parameter:
 						{
-							var field = query.GetField(parseInfo.Expr);
-
-							if (field != null)
+							foreach (var query in queries)
 							{
-								var exprs = field.GetExpressions(this);
+								var field = query.GetField(parseInfo.Expr);
 
-								if (exprs == null)
-									break;
+								if (field != null)
+								{
+									var exprs = field.GetExpressions(this);
 
-								if (exprs.Length == 1)
-									return exprs[0];
+									if (exprs == null)
+										break;
 
-								throw new InvalidOperationException();
+									if (exprs.Length == 1)
+										return exprs[0];
+
+									throw new InvalidOperationException();
+								}
 							}
 
 							break;
@@ -1794,7 +1871,7 @@ namespace BLToolkit.Data.Linq
 							var e  = parseInfo.Expr as MethodCallExpression;
 
 							if (e.Method.DeclaringType == typeof(Enumerable))
-								return ParseEnumerable(query, pi);
+								return ParseEnumerable(pi, queries);
 
 							var ef = _info.SqlProvider.ConvertMember(e.Method);
 
@@ -1831,7 +1908,7 @@ namespace BLToolkit.Data.Linq
 									return wpi;
 								});
 
-								return ParseExpression(query, pie);
+								return ParseExpression(pie, queries);
 							}
 
 							var attr = GetFunctionAttribute(e.Method);
@@ -1844,10 +1921,10 @@ namespace BLToolkit.Data.Linq
 								var parms = new List<ISqlExpression>();
 
 								if (e.Object != null)
-									parms.Add(ParseExpression(query, pi.Create(e.Object, pi.Property(MethodCall.Object))));
+									parms.Add(ParseExpression(pi.Create(e.Object, pi.Property(MethodCall.Object)), queries));
 
 								for (var i = 0; i < e.Arguments.Count; i++)
-									parms.Add(ParseExpression(query, pi.Create(e.Arguments[i], pi.Index(e.Arguments, MethodCall.Arguments, i))));
+									parms.Add(ParseExpression(pi.Create(e.Arguments[i], pi.Index(e.Arguments, MethodCall.Arguments, i)), queries));
 
 								return Convert(new SqlFunction(attr.Name ?? e.Method.Name, parms.ToArray()));
 							}
@@ -1864,98 +1941,133 @@ namespace BLToolkit.Data.Linq
 			}
 		}
 
-		ISqlExpression ParseEnumerable(QuerySource query, ParseInfo<MethodCallExpression> pi)
+		#endregion
+
+		#region ParseEnumerable
+
+		ISqlExpression ParseEnumerable(ParseInfo<MethodCallExpression> pi, params QuerySource[] queries)
 		{
-			ParsingTracer.WriteLine(query);
 			ParsingTracer.WriteLine(pi);
+			ParsingTracer.WriteLine(queries);
 			ParsingTracer.IncIndentLevel();
 
-			try
-			{
-				var field = query.GetField(pi.Expr.Arguments[0]);
+			QueryField field = queries.Length == 1 && queries[0] is QuerySource.GroupBy ? queries[0] : null;
 
-				if (!(field is QuerySource.GroupBy))
-					throw new LinqException("'{0}' cannot be converted to SQL.", pi.Expr);
-
-				var groupBy = ((QuerySource.GroupBy)field).OriginalQuery;
-				var expr    = pi.Expr;
-				var args    = new ISqlExpression[expr.Arguments.Count - 1];
-
-				if (expr.Method.Name == "Count")
+			if (field == null)
+				foreach (var query in queries)
 				{
-					if (args.Length > 0)
+					field = query.GetField(pi.Expr.Arguments[0]);
+					if (field != null)
+						break;
+				}
+
+			if (!(field is QuerySource.GroupBy))
+				throw new LinqException("'{0}' cannot be converted to SQL.", pi.Expr);
+
+			var groupBy = (QuerySource.GroupBy)field;
+			var expr    = ParseEnumerable(pi, groupBy);
+
+			if (queries.Length == 1 && queries[0] is QuerySource.SubQuery)
+			{
+				var subQuery  = (QuerySource.SubQuery)queries[0];
+				var column    = groupBy.FindField(new QueryField.ExprColumn(groupBy, expr, null));
+				var subColumn = subQuery.EnsureField(column);
+
+				expr = subColumn.GetExpressions(this)[0];
+			}
+
+			ParsingTracer.DecIndentLevel();
+			return expr;
+		}
+
+		ISqlExpression ParseEnumerable(ParseInfo<MethodCallExpression> pi, QuerySource.GroupBy query)
+		{
+			var groupBy = query.OriginalQuery;
+			var expr    = pi.Expr;
+			var args    = new ISqlExpression[expr.Arguments.Count - 1];
+
+			if (expr.Method.Name == "Count")
+			{
+				if (args.Length > 0)
+				{
+					var predicate = ParsePredicate(ParseLambdaArgument(pi, 1), groupBy);
+
+					groupBy.SqlBuilder.Where.SearchCondition.Conditions.Add(new SqlBuilder.Condition(false, predicate));
+
+					var sql = groupBy.SqlBuilder.Clone(o => !(o is SqlParameter));
+
+					groupBy.SqlBuilder.Where.SearchCondition.Conditions.RemoveAt(groupBy.SqlBuilder.Where.SearchCondition.Conditions.Count - 1);
+
+					sql.Select.Columns.RemoveAll(_ => true);
+
+					if (_info.SqlProvider.IsSubQueryColumnSupported && _info.SqlProvider.IsCountSubQuerySupported)
 					{
-						var predicate = ParsePredicate(groupBy, ParseLambdaArgument(pi, 1));
-
-						groupBy.SqlBuilder.Where.SearchCondition.Conditions.Add(new SqlBuilder.Condition(false, predicate));
-
-						var sql = groupBy.SqlBuilder.Clone(o => !(o is SqlParameter));
-
-						groupBy.SqlBuilder.Where.SearchCondition.Conditions.RemoveAt(groupBy.SqlBuilder.Where.SearchCondition.Conditions.Count - 1);
-
-						sql.Select.Columns.RemoveAll(_ => true);
-
-						if (_info.SqlProvider.IsSubQueryColumnSupported && _info.SqlProvider.IsCountSubQuerySupported)
-						{
-							for (var i = 0; i < sql.GroupBy.Items.Count; i++)
-							{
-								var item1 = sql.GroupBy.Items[i];
-								var item2 = groupBy.SqlBuilder.GroupBy.Items[i];
-
-								if (item1.CanBeNull() && item2.CanBeNull())
-									sql.Where
-										.Expr(item1).IsNull.    And .Expr(item2).IsNull. Or
-										.Expr(item1).IsNotNull. And .Expr(item2).IsNotNull. And .Expr(item1).Equal.Expr(item2);
-								else
-									sql.Where.Expr(item1).Equal.Expr(item2);
-							}
-
-							sql.GroupBy.Items.RemoveAll(_ => true);
-							sql.Select.Expr(new SqlFunction.Count(sql));
-							sql.ParentSql = groupBy.SqlBuilder;
-
-							return sql;
-						}
-
-						var join = sql.WeakLeftJoin();
-
-						groupBy.SqlBuilder.From.Tables[0].Joins.Add(join.JoinedTable);
-
 						for (var i = 0; i < sql.GroupBy.Items.Count; i++)
 						{
 							var item1 = sql.GroupBy.Items[i];
 							var item2 = groupBy.SqlBuilder.GroupBy.Items[i];
-							var col   = sql.Select.Columns[sql.Select.Add(item1)];
 
 							if (item1.CanBeNull() && item2.CanBeNull())
-								join
-									.Expr(col).IsNull.    And .Expr(item2).IsNull. Or
-									.Expr(col).IsNotNull. And .Expr(item2).IsNotNull. And .Expr(col).Equal.Expr(item2);
+							{
+								var cond = new SqlBuilder.SearchCondition();
+
+								cond
+									.Expr(item1).IsNull.    And .Expr(item2).IsNull. Or
+									.Expr(item1).IsNotNull. And .Expr(item2).IsNotNull. And .Expr(item1).Equal.Expr(item2);
+
+								sql.Where.SearchCondition.Conditions.Add(new SqlBuilder.Condition(false, cond));
+							}
 							else
-								join
-									.Expr(col).Equal.Expr(item2);
+								sql.Where.Expr(item1).Equal.Expr(item2);
 						}
 
+						sql.GroupBy.Items.RemoveAll(_ => true);
+						sql.Select.Expr(new SqlFunction.Count(sql));
 						sql.ParentSql = groupBy.SqlBuilder;
 
-						return new SqlFunction("Count", sql.Select.Columns[0]);
+						return sql;
 					}
 
-					return new SqlFunction.Count(groupBy.SqlBuilder);
+					var join = sql.WeakLeftJoin();
+
+					groupBy.SqlBuilder.From.Tables[0].Joins.Add(join.JoinedTable);
+
+					for (var i = 0; i < sql.GroupBy.Items.Count; i++)
+					{
+						var item1 = sql.GroupBy.Items[i];
+						var item2 = groupBy.SqlBuilder.GroupBy.Items[i];
+						var col   = sql.Select.Columns[sql.Select.Add(item1)];
+
+						if (item1.CanBeNull() && item2.CanBeNull())
+						{
+							var cond = new SqlBuilder.SearchCondition();
+
+							cond
+								.Expr(col).IsNull.    And .Expr(item2).IsNull. Or
+								.Expr(col).IsNotNull. And .Expr(item2).IsNotNull. And .Expr(col).Equal.Expr(item2);
+
+							join.JoinedTable.Condition.Conditions.Add(new SqlBuilder.Condition(false, cond));
+						}
+						else
+							join
+								.Expr(col).Equal.Expr(item2);
+					}
+
+					sql.ParentSql = groupBy.SqlBuilder;
+
+					return new SqlFunction("Count", sql.Select.Columns[0]);
 				}
 
-				for (var i = 1; i < expr.Arguments.Count; i++)
-					args[i - 1] = ParseExpression(groupBy, ParseLambdaArgument(pi, i));
+				return new SqlFunction.Count(groupBy.SqlBuilder);
+			}
 
-				return new SqlFunction(expr.Method.Name, args);
-			}
-			finally
-			{
-				ParsingTracer.DecIndentLevel();
-			}
+			for (var i = 1; i < expr.Arguments.Count; i++)
+				args[i - 1] = ParseExpression(ParseLambdaArgument(pi, i), groupBy);
+
+			return new SqlFunction(expr.Method.Name, args);
 		}
 
-		ParseInfo ParseLambdaArgument(ParseInfo pi, int idx)
+		static ParseInfo ParseLambdaArgument(ParseInfo pi, int idx)
 		{
 			var expr = (MethodCallExpression)pi.Expr;
 			var arg  = pi.Create(expr.Arguments[idx], pi.Index(expr.Arguments, MethodCall.Arguments, idx));
@@ -1967,6 +2079,10 @@ namespace BLToolkit.Data.Linq
 
 			return arg;
 		}
+
+		#endregion
+
+		#region IsServerSideOnly
 
 		bool IsServerSideOnly(ParseInfo parseInfo)
 		{
@@ -2039,6 +2155,10 @@ namespace BLToolkit.Data.Linq
 			return isServerSideOnly;
 		}
 
+		#endregion
+
+		#region CanBeConstant
+
 		bool CanBeConstant(ParseInfo expr)
 		{
 			var canbe = true;
@@ -2097,6 +2217,10 @@ namespace BLToolkit.Data.Linq
 			return canbe;
 		}
 
+		#endregion
+
+		#region CanBeCompiled
+
 		bool CanBeCompiled(ParseInfo expr)
 		{
 			var canbe = true;
@@ -2145,6 +2269,10 @@ namespace BLToolkit.Data.Linq
 			return canbe;
 		}
 
+		#endregion
+
+		#region IsConstant
+
 		public static bool IsConstant(Type type)
 		{
 			switch (Type.GetTypeCode(type))
@@ -2169,12 +2297,14 @@ namespace BLToolkit.Data.Linq
 
 		#endregion
 
+		#endregion
+
 		#region Predicate Parser
 
-		ISqlPredicate ParsePredicate(QuerySource query, ParseInfo parseInfo)
+		ISqlPredicate ParsePredicate(ParseInfo parseInfo, params QuerySource[] queries)
 		{
-			ParsingTracer.WriteLine(query);
 			ParsingTracer.WriteLine(parseInfo);
+			ParsingTracer.WriteLine(queries);
 			ParsingTracer.IncIndentLevel();
 
 			try
@@ -2190,8 +2320,14 @@ namespace BLToolkit.Data.Linq
 						{
 							var pi = parseInfo.Convert<BinaryExpression>();
 							var e  = parseInfo.Expr as BinaryExpression;
-							var l  = ParseExpression(query, pi.Create(e.Left,  pi.Property(Binary.Left)));
-							var r  = ParseExpression(query, pi.Create(e.Right, pi.Property(Binary.Right)));
+							var el = pi.Create(e.Left,  pi.Property(Binary.Left));
+							var er = pi.Create(e.Right, pi.Property(Binary.Right));
+
+							if (el.NodeType == ExpressionType.New || er.NodeType == ExpressionType.New)
+								return Convert(ParseObjectComparison(pi, el, er, queries));
+
+							var l  = ParseExpression(el, queries);
+							var r  = ParseExpression(er, queries);
 
 							SqlBuilder.Predicate.Operator op;
 
@@ -2227,13 +2363,13 @@ namespace BLToolkit.Data.Linq
 
 							ISqlPredicate predicate = null;
 
-							if      (e.Method == Functions.String.Contains)   predicate = BuildLikePredicate(query, pi, "%", "%");
-							else if (e.Method == Functions.String.StartsWith) predicate = BuildLikePredicate(query, pi, "",  "%");
-							else if (e.Method == Functions.String.EndsWith)   predicate = BuildLikePredicate(query, pi, "%", "");
-							else if (e.Method == Functions.String.Like11)     predicate = BuildLikePredicate(query, pi);
-							else if (e.Method == Functions.String.Like12)     predicate = BuildLikePredicate(query, pi);
-							else if (e.Method == Functions.String.Like21)     predicate = BuildLikePredicate(query, pi);
-							else if (e.Method == Functions.String.Like22)     predicate = BuildLikePredicate(query, pi);
+							if      (e.Method == Functions.String.Contains)   predicate = BuildLikePredicate(pi, "%", "%", queries);
+							else if (e.Method == Functions.String.StartsWith) predicate = BuildLikePredicate(pi, "",  "%", queries);
+							else if (e.Method == Functions.String.EndsWith)   predicate = BuildLikePredicate(pi, "%", "",  queries);
+							else if (e.Method == Functions.String.Like11)     predicate = BuildLikePredicate(pi,           queries);
+							else if (e.Method == Functions.String.Like12)     predicate = BuildLikePredicate(pi,           queries);
+							else if (e.Method == Functions.String.Like21)     predicate = BuildLikePredicate(pi,           queries);
+							else if (e.Method == Functions.String.Like22)     predicate = BuildLikePredicate(pi,           queries);
 
 							if (predicate != null)
 								return Convert(predicate);
@@ -2243,7 +2379,7 @@ namespace BLToolkit.Data.Linq
 
 					case ExpressionType.Conditional:
 						return Convert(new SqlBuilder.Predicate.ExprExpr(
-							ParseExpression(query, parseInfo),
+							ParseExpression(parseInfo, queries),
 							SqlBuilder.Predicate.Operator.Equal,
 							new SqlValue(true)));
 
@@ -2254,7 +2390,7 @@ namespace BLToolkit.Data.Linq
 
 							if (e.Member.Name == "HasValue" && e.Member.DeclaringType.GetGenericTypeDefinition() == typeof(Nullable<>))
 							{
-								var expr = ParseExpression(query, pi.Create(e.Expression, pi.Property(Member.Expression)));
+								var expr = ParseExpression(pi.Create(e.Expression, pi.Property(Member.Expression)), queries);
 								return Convert(new SqlBuilder.Predicate.IsNull(expr, true));
 							}
 
@@ -2270,14 +2406,127 @@ namespace BLToolkit.Data.Linq
 			}
 		}
 
+		ISqlPredicate ParseObjectComparison(ParseInfo pi, ParseInfo left, ParseInfo right, params QuerySource[] queries)
+		{
+			left  = ConvertExpression(left);
+			right = ConvertExpression(right);
+
+			var condition = new SqlBuilder.SearchCondition();
+
+			if (left.NodeType != ExpressionType.New)
+			{
+				var temp = left;
+				left  = right;
+				right = temp;
+			}
+
+			var newExpr  = (NewExpression)left.Expr;
+			var newRight = right.Expr as NewExpression;
+
+			for (var i = 0; i < newExpr.Arguments.Count; i++)
+			{
+				var lex = ParseExpression(left.Create(newExpr.Arguments[i], left.Index(newExpr.Arguments, New.Arguments, i)), queries);
+				var rex =
+					right.NodeType == ExpressionType.New ?
+						ParseExpression(right.Create(newRight.Arguments[i], right.Index(newRight.Arguments, New.Arguments, i)), queries) :
+						GetParameter(right, newExpr.Members[i]);
+
+				if (lex.CanBeNull() && rex.CanBeNull())
+				{
+					if (rex is SqlParameter && !_info.SqlProvider.IsCompareNullParameterSupported)
+					{
+						((SqlParameter)rex).IsQueryParameter = false;
+						condition
+							.Expr(lex).Equal.Expr(rex);
+					}
+					else
+					{
+						var memberType = newExpr.Arguments[i].Type;
+						var rightParam = rex is SqlParameter && _info.SqlProvider.IsConvertNullParameterRequired?
+							Convert(new SqlFunction("$Convert$", new SqlDataType(memberType), new SqlDataType(memberType), rex)) :
+							rex;
+
+						var cond       = new SqlBuilder.SearchCondition();
+
+						cond
+							.Expr(lex).IsNull.    And .Expr(rex).IsNull. Or
+							.Expr(lex).IsNotNull. And .Expr(rex).IsNotNull. And .Expr(lex).Equal.Expr(rightParam);
+
+						condition.Conditions.Add(new SqlBuilder.Condition(false, cond));
+					}
+				}
+				else
+					condition
+						.Expr(lex).Equal.Expr(rex);
+			}
+
+			if (pi.NodeType == ExpressionType.NotEqual)
+			{
+				var cond  = condition;
+
+				condition = new SqlBuilder.SearchCondition();
+				condition.Conditions.Add(new SqlBuilder.Condition(true, cond));
+			}
+
+			return condition;
+		}
+
+		ISqlExpression GetParameter(ParseInfo pi, MemberInfo member)
+		{
+			if (member is MethodInfo)
+				member = TypeHelper.GetPropertyByMethod((MethodInfo)member);
+
+			var par    = ReplaceParameter(pi, _ => {});
+			var expr   = Expression.MakeMemberAccess(par, member);
+			var mapper = Expression.Lambda<Func<ExpressionInfo<T>,Expression,object[],object>>(
+				Expression.Convert(expr, typeof(object)),
+				new [] { _infoParam, _expressionParam, ParametersParam });
+
+			var p = new ExpressionInfo<T>.Parameter
+			{
+				Expression   = expr,
+				Accessor     = mapper.Compile(),
+				SqlParameter = new SqlParameter(member.Name, null)
+			};
+
+			_parameters.Add(expr, p);
+			CurrentSqlParameters.Add(p);
+
+			return p.SqlParameter;
+		}
+
+		ParseInfo ConvertExpression(ParseInfo expr)
+		{
+			ParseInfo ret = null;
+
+			expr.Walk(pi =>
+			{
+				if (ret == null) switch (pi.NodeType)
+				{
+					case ExpressionType.MemberAccess:
+					case ExpressionType.New:
+						ret = pi;
+						pi.StopWalking = true;
+						break;
+				}
+
+				return pi;
+			});
+
+			if (ret == null)
+				throw new NotImplementedException();
+
+			return ret;
+		}
+
 		#region LIKE predicate
 
-		private ISqlPredicate BuildLikePredicate(QuerySource query, ParseInfo pi, string start, string end)
+		private ISqlPredicate BuildLikePredicate(ParseInfo pi, string start, string end, params QuerySource[] queries)
 		{
 			var e  = pi.Expr as MethodCallExpression;
 
-			var o = ParseExpression(query, pi.Create(e.Object,       pi.Property(MethodCall.Object)));
-			var a = ParseExpression(query, pi.Create(e.Arguments[0], pi.Index(e.Arguments, MethodCall.Arguments, 0)));
+			var o = ParseExpression(pi.Create(e.Object,       pi.Property(MethodCall.Object)),                 queries);
+			var a = ParseExpression(pi.Create(e.Arguments[0], pi.Index(e.Arguments, MethodCall.Arguments, 0)), queries);
 
 			if (a is SqlValue)
 			{
@@ -2312,16 +2561,16 @@ namespace BLToolkit.Data.Linq
 			return null;
 		}
 
-		private ISqlPredicate BuildLikePredicate(QuerySource query, ParseInfo pi)
+		private ISqlPredicate BuildLikePredicate(ParseInfo pi, params QuerySource[] queries)
 		{
 			var e  = pi.Expr as MethodCallExpression;
-			var a1 = ParseExpression(query, pi.Create(e.Arguments[0], pi.Index(e.Arguments, MethodCall.Arguments, 0)));
-			var a2 = ParseExpression(query, pi.Create(e.Arguments[1], pi.Index(e.Arguments, MethodCall.Arguments, 1)));
+			var a1 = ParseExpression(pi.Create(e.Arguments[0], pi.Index(e.Arguments, MethodCall.Arguments, 0)), queries);
+			var a2 = ParseExpression(pi.Create(e.Arguments[1], pi.Index(e.Arguments, MethodCall.Arguments, 1)), queries);
 
 			ISqlExpression a3 = null;
 
 			if (e.Arguments.Count == 3)
-				a3 = ParseExpression(query, pi.Create(e.Arguments[2], pi.Index(e.Arguments, MethodCall.Arguments, 2)));
+				a3 = ParseExpression(pi.Create(e.Arguments[2], pi.Index(e.Arguments, MethodCall.Arguments, 2)), queries);
 
 			return new SqlBuilder.Predicate.Like(a1, false, a2, a3);
 		}
@@ -2361,10 +2610,10 @@ namespace BLToolkit.Data.Linq
 
 		#region Search Condition Parser
 
-		void ParseSearchCondition(ICollection<SqlBuilder.Condition> conditions, QuerySource query, ParseInfo parseInfo)
+		void ParseSearchCondition(ICollection<SqlBuilder.Condition> conditions, ParseInfo parseInfo, params QuerySource[] queries)
 		{
-			ParsingTracer.WriteLine(query);
 			ParsingTracer.WriteLine(parseInfo);
+			ParsingTracer.WriteLine(queries);
 			ParsingTracer.IncIndentLevel();
 
 			switch (parseInfo.NodeType)
@@ -2374,8 +2623,8 @@ namespace BLToolkit.Data.Linq
 						var pi = parseInfo.Convert<BinaryExpression>();
 						var e  = parseInfo.Expr as BinaryExpression;
 
-						ParseSearchCondition(conditions, query, pi.Create(e.Left,  pi.Property(Binary.Left)));
-						ParseSearchCondition(conditions, query, pi.Create(e.Right, pi.Property(Binary.Right)));
+						ParseSearchCondition(conditions, pi.Create(e.Left,  pi.Property(Binary.Left)),  queries);
+						ParseSearchCondition(conditions, pi.Create(e.Right, pi.Property(Binary.Right)), queries);
 
 						break;
 					}
@@ -2387,8 +2636,8 @@ namespace BLToolkit.Data.Linq
 
 						var orCondition = new SqlBuilder.SearchCondition();
 
-						ParseSearchCondition(orCondition.Conditions, query, pi.Create(e.Left,  pi.Property(Binary.Left)));
-						ParseSearchCondition(orCondition.Conditions, query, pi.Create(e.Right, pi.Property(Binary.Right)));
+						ParseSearchCondition(orCondition.Conditions, pi.Create(e.Left,  pi.Property(Binary.Left)),  queries);
+						ParseSearchCondition(orCondition.Conditions, pi.Create(e.Right, pi.Property(Binary.Right)), queries);
 
 						orCondition.Conditions[0].IsOr = true;
 
@@ -2404,7 +2653,7 @@ namespace BLToolkit.Data.Linq
 
 						var notCondition = new SqlBuilder.SearchCondition();
 
-						ParseSearchCondition(notCondition.Conditions, query, pi.Create(e.Operand, pi.Property(Unary.Operand)));
+						ParseSearchCondition(notCondition.Conditions, pi.Create(e.Operand, pi.Property(Unary.Operand)), queries);
 
 						if (notCondition.Conditions.Count == 1 && notCondition.Conditions[0].Predicate is SqlBuilder.Predicate.NotExpr)
 						{
@@ -2419,7 +2668,7 @@ namespace BLToolkit.Data.Linq
 					}
 
 				default:
-					var predicate = ParsePredicate(query, parseInfo);
+					var predicate = ParsePredicate(parseInfo, queries);
 					conditions.Add(new SqlBuilder.Condition(false, predicate));
 					break;
 			}
@@ -2430,6 +2679,31 @@ namespace BLToolkit.Data.Linq
 		#endregion
 
 		#region Helpers
+
+		static void SetAlias(QuerySource query, string alias)
+		{
+			if (alias.Contains('<'))
+				return;
+
+			query.Match
+			(
+				table  =>
+				{
+					if (table.SqlTable.Alias == null)
+						table.SqlTable.Alias = alias;
+				},
+				_ => {},
+				subQuery =>
+				{
+					var table = subQuery.SqlBuilder.From.Tables[0];
+					if (table.Alias == null)
+						table.Alias = alias;
+				},
+				_ => {},
+				_ => {},
+				_ => {}
+			);
+		}
 
 		QuerySource.SubQuery WrapInSubQuery(QuerySource source)
 		{
@@ -2460,6 +2734,16 @@ namespace BLToolkit.Data.Linq
 			}
 
 			return attr;
+		}
+
+		ISqlExpression Convert(ISqlExpression expr)
+		{
+			return _info.SqlProvider.ConvertExpression(expr);
+		}
+
+		ISqlPredicate Convert(ISqlPredicate predicate)
+		{
+			return _info.SqlProvider.ConvertPredicate(predicate);
 		}
 
 		#endregion

@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Linq;
-using BLToolkit.Data.DataProvider;
+
 using NUnit.Framework;
 
 namespace Data.Linq
@@ -31,7 +31,7 @@ namespace Data.Linq
 		[Test]
 		public void New()
 		{
-			var expected = from p in Person select new {p.ID, p.FirstName};
+			var expected = from p in Person select new { p.ID, p.FirstName };
 
 			ForEachProvider(db =>
 			{

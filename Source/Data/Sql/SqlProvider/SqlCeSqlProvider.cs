@@ -21,9 +21,10 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		{
 		}
 
-		public override bool IsSkipSupported           { get { return false; } }
-		public override bool IsTakeSupported           { get { return false; } }
-		public override bool IsSubQueryColumnSupported { get { return false; } }
+		public override bool IsSkipSupported                 { get { return false; } }
+		public override bool IsTakeSupported                 { get { return false; } }
+		public override bool IsSubQueryColumnSupported       { get { return false; } }
+		public override bool IsCompareNullParameterSupported { get { return false; } }
 
 		public override ISqlExpression ConvertExpression(ISqlExpression expr)
 		{
