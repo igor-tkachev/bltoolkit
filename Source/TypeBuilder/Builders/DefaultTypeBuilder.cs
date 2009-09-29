@@ -339,12 +339,17 @@ namespace BLToolkit.TypeBuilder.Builders
 						if (objectType.Type.IsGenericType)
 						{
 							Type nullableType = null;
-							genericNestedConstructors = GetGenericNestedConstructors(objectType,
-							                                                         typeHelper => typeHelper.IsValueType == false ||
-							                                                                       (typeHelper.Type.IsGenericType &&
-							                                                                        typeHelper.Type.GetGenericTypeDefinition() == typeof (Nullable<>)),
-							                                                         typeHelper => nullableType = typeHelper.Type, 
-																					 () => nullableType != null);
+							genericNestedConstructors = GetGenericNestedConstructors(
+								objectType,
+								delegate(TypeHelper typeHelper)
+								{
+									return
+										typeHelper.IsValueType == false ||
+										(typeHelper.Type.IsGenericType &&
+										typeHelper.Type.GetGenericTypeDefinition() == typeof(Nullable<>));
+								},
+								delegate(TypeHelper typeHelper) { nullableType = typeHelper.Type; },
+								delegate() { return nullableType != null; });
 
 							if (nullableType == null)
 								throw new Exception("Cannot find nullable type in generic types chain");
@@ -438,10 +443,12 @@ namespace BLToolkit.TypeBuilder.Builders
 			// Do some heuristics for Nullable<DateTime> and EditableValue<Decimal>
 			//
 			ConstructorInfo objectCtor = null;
-			genericNestedConstructors = GetGenericNestedConstructors(objectType,
-			                                                         typeHelper => true,
-			                                                         typeHelper => objectCtor = typeHelper.GetPublicConstructor(types), 
-																	 () => objectCtor != null);
+			genericNestedConstructors = GetGenericNestedConstructors(
+				objectType,
+				delegate(TypeHelper typeHelper) { return true; },
+				delegate(TypeHelper typeHelper) { objectCtor = typeHelper.GetPublicConstructor(types); }, 
+				delegate()                      { return objectCtor != null; }
+		);
 
 			if (objectCtor == null)
 			{
