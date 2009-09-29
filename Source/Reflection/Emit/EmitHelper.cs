@@ -1061,7 +1061,19 @@ namespace BLToolkit.Reflection.Emit
 				case TypeCode.Double:  conv_r8.end(); break;
 
 				default:
-					throw CreateNotExpectedTypeException(type);
+					{
+						if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>))
+						{
+							ConstructorInfo ci = type.GetConstructor(type.GetGenericArguments());
+							if (ci != null)
+							{
+								newobj(ci);
+								break;
+							}
+						}
+
+						throw CreateNotExpectedTypeException(type);
+					}
 			}
 
 			return this;

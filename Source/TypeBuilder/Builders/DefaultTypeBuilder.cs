@@ -314,6 +314,7 @@ namespace BLToolkit.TypeBuilder.Builders
 			if (!CheckObjectHolderCtor(fieldType, objectType))
 				return;
 
+			Stack<ConstructorInfo> genericNestedConstructors;
 			if (parameters.Length == 1)
 			{
 				object o = parameters[0];
@@ -333,6 +334,51 @@ namespace BLToolkit.TypeBuilder.Builders
 							.newobj (fieldType, objectType)
 							;
 					}
+					else
+					{
+						if (objectType.Type.IsGenericType)
+						{
+							Type nullableType = null;
+							genericNestedConstructors = GetGenericNestedConstructors(objectType,
+							                                                         typeHelper => typeHelper.IsValueType == false ||
+							                                                                       (typeHelper.Type.IsGenericType &&
+							                                                                        typeHelper.Type.GetGenericTypeDefinition() == typeof (Nullable<>)),
+							                                                         typeHelper => nullableType = typeHelper.Type, 
+																					 () => nullableType != null);
+
+							if (nullableType == null)
+								throw new Exception("Cannot find nullable type in generic types chain");
+
+							if (nullableType.IsValueType == false)
+							{
+								emit
+									.ldarg_0
+									.ldnull
+									.end()
+									;
+							}
+							else
+							{
+								LocalBuilder nullable = emit.DeclareLocal(nullableType);
+								emit
+									.ldloca(nullable)
+									.initobj(nullableType)
+									.ldarg_0
+									.ldloc(nullable)
+									;
+
+								if (genericNestedConstructors != null)
+								{
+									while (genericNestedConstructors.Count != 0)
+									{
+										emit
+											.newobj(genericNestedConstructors.Pop())
+											;
+									}
+								}
+							}
+						}
+					}
 
 					emit
 						.stfld (field)
@@ -340,39 +386,37 @@ namespace BLToolkit.TypeBuilder.Builders
 
 					return;
 				}
-				else
+				
+				if (objectType.Type == o.GetType())
 				{
-					if (objectType.Type == o.GetType())
+					if (objectType.Type == typeof(string))
 					{
-						if (objectType.Type == typeof(string))
+						emit
+							.ldarg_0
+							.ldstr   ((string)o)
+							.stfld   (field)
+							;
+
+						return;
+					}
+
+					if (objectType.IsValueType)
+					{
+						emit.ldarg_0.end();
+
+						if (emit.LoadWellKnownValue(o) == false)
 						{
 							emit
-								.ldarg_0
-								.ldstr   ((string)o)
-								.stfld   (field)
+								.ldsfld     (GetParameterField())
+								.ldc_i4_0
+								.ldelem_ref
+								.end()
 								;
-
-							return;
 						}
 
-						if (objectType.IsValueType)
-						{
-							emit.ldarg_0.end();
+						emit.stfld(field);
 
-							if (emit.LoadWellKnownValue(o) == false)
-							{
-								emit
-									.ldsfld     (GetParameterField())
-									.ldc_i4_0
-									.ldelem_ref
-									.end()
-									;
-							}
-
-							emit.stfld(field);
-
-							return;
-						}
+						return;
 					}
 				}
 			}
@@ -391,36 +435,13 @@ namespace BLToolkit.TypeBuilder.Builders
 					types[i] = typeof(object);
 			}
 
-			ConstructorInfo objectCtor  = objectType.GetPublicConstructor(types);
-
-			Stack<ConstructorInfo> intermediateConstructors = null;
-
 			// Do some heuristics for Nullable<DateTime> and EditableValue<Decimal>
 			//
-			if (objectCtor == null)
-			{
-				TypeHelper nestedType = objectType;
-
-				while (nestedType.Type.IsGenericType && objectCtor == null)
-				{
-					Type[] typeArgs = nestedType.Type.GetGenericArguments();
-
-					if (typeArgs.Length == 1)
-					{
-						ConstructorInfo genericCtor = nestedType.GetPublicConstructor(typeArgs[0]);
-
-						if (genericCtor != null)
-						{
-							if (intermediateConstructors == null)
-								intermediateConstructors = new Stack<ConstructorInfo>();
-
-							intermediateConstructors.Push(genericCtor);
-							nestedType = typeArgs[0];
-							objectCtor = nestedType.GetPublicConstructor(types);
-						}
-					}
-				}
-			}
+			ConstructorInfo objectCtor = null;
+			genericNestedConstructors = GetGenericNestedConstructors(objectType,
+			                                                         typeHelper => true,
+			                                                         typeHelper => objectCtor = typeHelper.GetPublicConstructor(types), 
+																	 () => objectCtor != null);
 
 			if (objectCtor == null)
 			{
@@ -473,12 +494,12 @@ namespace BLToolkit.TypeBuilder.Builders
 				.newobj (objectCtor)
 				;
 
-			if (intermediateConstructors != null)
+			if (genericNestedConstructors != null)
 			{
-				while (intermediateConstructors.Count != 0)
+				while (genericNestedConstructors.Count != 0)
 				{
 					emit
-						.newobj(intermediateConstructors.Pop())
+						.newobj(genericNestedConstructors.Pop())
 						;
 				}
 			}
@@ -493,6 +514,55 @@ namespace BLToolkit.TypeBuilder.Builders
 			emit
 				.stfld  (field)
 				;
+		}
+
+
+#if !FW3
+		/// <summary>Encapsulates a method that has no parameters and returns a value of the type specified by the <paramref name="TResult" /> parameter.</summary>
+		/// <returns>The return value of the method that this delegate encapsulates.</returns>
+		private delegate TResult Func<TResult>();
+#endif
+		private Stack<ConstructorInfo> GetGenericNestedConstructors(TypeHelper objectType, 
+			Predicate<TypeHelper> isActionable, 
+			Action<TypeHelper> action, 
+			Func<bool> isBreakCondition)
+		{
+			Stack<ConstructorInfo> genericNestedConstructors = null;
+
+			if (isActionable(objectType))
+				action(objectType);
+
+			while (objectType.Type.IsGenericType && !isBreakCondition())
+			{
+				Type[] typeArgs = objectType.Type.GetGenericArguments();
+
+				if (typeArgs.Length == 1)
+				{
+					ConstructorInfo genericCtor = objectType.GetPublicConstructor(typeArgs[0]);
+
+					if (genericCtor != null)
+					{
+						if (genericNestedConstructors == null)
+							genericNestedConstructors = new Stack<ConstructorInfo>();
+
+						genericNestedConstructors.Push(genericCtor);
+						objectType = typeArgs[0];
+
+						if (isActionable(objectType))
+							action(objectType);
+					}
+				}
+				else
+				{
+					throw new TypeBuilderException(
+						string.Format(Resources.TypeBuilder_GenericShouldBeSingleTyped,
+							Context.CurrentProperty.Name,
+							Context.Type.FullName,
+							objectType.FullName));
+				}
+			}
+
+			return genericNestedConstructors;
 		}
 
 		#endregion

@@ -9,6 +9,10 @@ Bug fixes
 
 - Extension assemblies are ignored in TypeFactory.GetType(type).
 - Default parameter values were ignored by OverloadAspectBuilder.
+- [Parameter(null)] wasn't setting Nullable<> and EditableValue<Nullable<>> values to null
+- DefaultTypeBuilde throwing exception if [Parameter(value)] was used on 
+  EditableValue<Nullable<>> generated properties when Nullable<> did have appropriate 
+  constructor accepting value type
 
 Enhancement
 
