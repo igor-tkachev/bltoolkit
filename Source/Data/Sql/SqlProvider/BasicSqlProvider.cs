@@ -1517,7 +1517,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			ISqlExpression expr1 = expr.Expr1;
 			ISqlExpression expr2 = expr.Expr2;
 
-			var cond = new SqlBuilder.SearchCondition();
+			SqlBuilder.SearchCondition cond = new SqlBuilder.SearchCondition();
 
 			if (expr.Operator == SqlBuilder.Predicate.Operator.Equal)
 				cond
