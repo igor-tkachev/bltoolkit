@@ -2,13 +2,14 @@ using System;
 using System.Collections;
 using System.Reflection;
 using System.Reflection.Emit;
-using BLToolkit.Properties;
-using BLToolkit.Reflection;
-using BLToolkit.Reflection.Emit;
 using System.Collections.Generic;
 
 namespace BLToolkit.TypeBuilder.Builders
 {
+	using Properties;
+	using Reflection;
+	using Reflection.Emit;
+
 	public class DefaultTypeBuilder : AbstractTypeBuilderBase
 	{
 		#region Interface Overrides

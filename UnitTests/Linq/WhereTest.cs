@@ -451,12 +451,12 @@ namespace Data.Linq
 			var child    = new { ParentID = 2, ChildID = 21 };
 			var expected =
 				from ch in Child
-				where !(ch.ParentID == child.ParentID && ch.ChildID == child.ChildID)
+				where !(ch.ParentID == child.ParentID && ch.ChildID == child.ChildID) && ch.ParentID > 0
 				select ch;
 
 			ForEachProvider(db => AreEqual(expected,
 				from ch in db.Child
-				where child != new { ch.ParentID, ch.ChildID }
+				where child != new { ch.ParentID, ch.ChildID } && ch.ParentID > 0
 				select ch));
 		}
 
@@ -480,7 +480,7 @@ namespace Data.Linq
 			var parent   = new { ParentID = 2, Value1 = (int?)null };
 			var expected =
 				from p in Parent
-				where p.ParentID == parent.ParentID && p.Value1 == null
+				where p.ParentID == parent.ParentID && p.Value1 == parent.Value1
 				select p;
 
 			ForEachProvider(db => AreEqual(expected,
@@ -495,12 +495,30 @@ namespace Data.Linq
 			var parent   = new { ParentID = 3, Value1 = (int?)3 };
 			var expected =
 				from p in Parent
-				where p.ParentID == parent.ParentID && p.Value1 == 3
+				where p.ParentID == parent.ParentID && p.Value1 == parent.Value1
 				select p;
 
 			ForEachProvider(db => AreEqual(expected,
 				from p in db.Parent
 				where new { p.ParentID, p.Value1 } == parent
+				select p));
+		}
+
+		//[Test]
+		public void CheckLeftJoin()
+		{
+			var expected =
+				from p in Parent
+					join ch in Child on p.ParentID equals ch.ParentID into lj1
+					from ch in lj1.DefaultIfEmpty()
+				where ch == null
+				select p;
+
+			ForEachProvider(db => AreEqual(expected,
+				from p in db.Parent
+					join ch in db.Child on p.ParentID equals ch.ParentID into lj1
+					from ch in lj1.DefaultIfEmpty()
+				where ch == null
 				select p));
 		}
 	}

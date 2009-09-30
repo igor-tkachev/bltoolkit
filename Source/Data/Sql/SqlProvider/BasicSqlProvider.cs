@@ -46,16 +46,13 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		#region Support Flags
 
-		public virtual bool SkipAcceptsParameter            { get { return true; } }
-		public virtual bool TakeAcceptsParameter            { get { return true; } }
+		public virtual bool SkipAcceptsParameter      { get { return true; } }
+		public virtual bool TakeAcceptsParameter      { get { return true; } }
 
-		public virtual bool IsTakeSupported                 { get { return true; } }
-		public virtual bool IsSkipSupported                 { get { return true; } }
-		public virtual bool IsSubQueryColumnSupported       { get { return true; } }
-		public virtual bool IsCountSubQuerySupported        { get { return true; } }
-
-		public virtual bool IsCompareNullParameterSupported { get { return true;  } }
-		public virtual bool IsConvertNullParameterRequired  { get { return false; } }
+		public virtual bool IsTakeSupported           { get { return true; } }
+		public virtual bool IsSkipSupported           { get { return true; } }
+		public virtual bool IsSubQueryColumnSupported { get { return true; } }
+		public virtual bool IsCountSubQuerySupported  { get { return true; } }
 
 		#endregion
 
@@ -1453,7 +1450,34 @@ namespace BLToolkit.Data.Sql.SqlProvider
 				{
 					case SqlBuilder.Predicate.Operator.Equal:
 					case SqlBuilder.Predicate.Operator.Greater:
-					case SqlBuilder.Predicate.Operator.Less : return OptimizeCase(expr);
+					case SqlBuilder.Predicate.Operator.Less :
+						predicate = OptimizeCase(expr);
+						break;
+				}
+
+				if (predicate is SqlBuilder.Predicate.ExprExpr)
+				{
+					expr = (SqlBuilder.Predicate.ExprExpr)predicate;
+
+					switch (expr.Operator)
+					{
+						case SqlBuilder.Predicate.Operator.Equal :
+						case SqlBuilder.Predicate.Operator.NotEqual :
+							ISqlExpression expr1 = expr.Expr1;
+							ISqlExpression expr2 = expr.Expr2;
+
+							if (expr1.CanBeNull() && expr2.CanBeNull())
+							{
+								if (expr1 is SqlParameter || expr2 is SqlParameter)
+									SqlBuilder.ParameterDependent = true;
+								else
+									if (expr1 is SqlBuilder.Column || expr1 is SqlField)
+									if (expr2 is SqlBuilder.Column || expr2 is SqlField)
+										predicate = ConvertEqualPredicate(expr);
+							}
+
+							break;
+					}
 				}
 			}
 			else if (predicate.GetType() == typeof(SqlBuilder.Predicate.NotExpr))
@@ -1486,6 +1510,26 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			}
 
 			return predicate;
+		}
+
+		protected ISqlPredicate ConvertEqualPredicate(SqlBuilder.Predicate.ExprExpr expr)
+		{
+			ISqlExpression expr1 = expr.Expr1;
+			ISqlExpression expr2 = expr.Expr2;
+
+			var cond = new SqlBuilder.SearchCondition();
+
+			if (expr.Operator == SqlBuilder.Predicate.Operator.Equal)
+				cond
+					.Expr(expr1).IsNull.    And .Expr(expr2).IsNull. Or
+					.Expr(expr1).IsNotNull. And .Expr(expr2).IsNotNull. And .Expr(expr1).Equal.Expr(expr2);
+			else
+				cond
+					.Expr(expr1).IsNull.    And .Expr(expr2).IsNotNull. Or
+					.Expr(expr1).IsNotNull. And .Expr(expr2).IsNull.    Or
+					.Expr(expr1).NotEqual.Expr(expr2);
+
+			return cond;
 		}
 
 		ISqlPredicate OptimizeCase(SqlBuilder.Predicate.ExprExpr expr)

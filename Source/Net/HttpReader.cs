@@ -365,11 +365,27 @@ namespace BLToolkit.Net
 			return StatusCode;
 		}
 
+		private HttpStatusCode Soap(
+			string        soapAction,
+			ProcessStream inputStreamProcessor,
+			ProcessStream outputStreamProcessor)
+		{
+			return Request("\"" + soapAction + "\"", "SOAP", inputStreamProcessor, outputStreamProcessor);
+		}
+
 		public HttpStatusCode Soap(string soapAction, string postData)
 		{
-			return Request("\"" + soapAction + "\"", "SOAP",
+			return Soap(soapAction,
 				new DefaultRequestStreamProcessor(postData).Process,
 				new DefaultResponseStreamProcessor(this).Process);
+		}
+
+		public HttpStatusCode Soap(string soapAction, string postData, ProcessStream outputStreamProcessor)
+		{
+			return Soap(
+				soapAction,
+				new DefaultRequestStreamProcessor(postData).Process,
+				outputStreamProcessor);
 		}
 
 		#endregion

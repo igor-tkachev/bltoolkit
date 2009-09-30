@@ -1,20 +1,33 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.SqlTypes;
+using BLToolkit.Reflection;
 
 namespace BLToolkit.Data.Sql
 {
 	public class SqlParameter : ISqlExpression, IValueContainer
 	{
-		public SqlParameter(string name, object value)
+		public SqlParameter(string name, Type type, object value)
 		{
 			_name  = name;
+			_type  = type;
 			_value = value;
 		}
 
-		public SqlParameter(string name, object value, Converter<object,object> valueConverter)
-			: this(name, value)
+		public SqlParameter(string name, Type type, object value, Converter<object,object> valueConverter)
+			: this(name, type, value)
 		{
 			_valueConverter = valueConverter;
+		}
+
+		public SqlParameter(string name, object value)
+			: this(name, value == null ? null : value.GetType(), value)
+		{
+		}
+
+		public SqlParameter(string name, object value, Converter<object,object> valueConverter)
+			: this(name, value == null ? null : value.GetType(), value, valueConverter)
+		{
 		}
 
 		private string _name;
@@ -22,6 +35,13 @@ namespace BLToolkit.Data.Sql
 		{
 			get { return _name;  }
 			set { _name = value; }
+		}
+
+		private Type _type;
+		public  Type  Type
+		{
+			get { return _type;  }
+			set { _type = value; }
 		}
 
 		private object _value;
@@ -89,7 +109,17 @@ namespace BLToolkit.Data.Sql
 
 		public bool CanBeNull()
 		{
-			return true;
+			if (_type == null && _value == null)
+				return true;
+
+			Type type = _type ?? _value.GetType();
+
+			if (type.IsValueType == false ||
+				type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>) ||
+				TypeHelper.IsSameOrParent(typeof(INullable), type))
+				return true;
+
+			return false;
 		}
 
 		#endregion
@@ -105,7 +135,7 @@ namespace BLToolkit.Data.Sql
 
 			if (!objectTree.TryGetValue(this, out clone))
 			{
-				SqlParameter p = new SqlParameter(_name, _value, _valueConverter);
+				SqlParameter p = new SqlParameter(_name, _type, _value, _valueConverter);
 
 				p._isQueryParameter = _isQueryParameter;
 

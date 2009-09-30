@@ -1121,7 +1121,7 @@ namespace BLToolkit.Data.Sql
 
 				readonly ConditionBase<T1,T2> _condition;
 
-				public Expr_ Expr    (ISqlExpression expr)     { return new Expr_(_condition, true, expr);  }
+				public Expr_ Expr    (ISqlExpression expr)     { return new Expr_(_condition, true, expr); }
 				public Expr_ Field   (SqlField       field)    { return Expr(field);               }
 				public Expr_ SubQuery(SqlBuilder     subQuery) { return Expr(subQuery);            }
 				public Expr_ Value   (object         value)    { return Expr(new SqlValue(value)); }

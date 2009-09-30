@@ -21,8 +21,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		{
 		}
 
-		public override bool TakeAcceptsParameter            { get { return SqlBuilder.Select.SkipValue != null; } }
-		public override bool IsCompareNullParameterSupported { get { return false; } }
+		public override bool TakeAcceptsParameter { get { return SqlBuilder.Select.SkipValue != null; } }
 
 		protected override void BuildSql(StringBuilder sb)
 		{

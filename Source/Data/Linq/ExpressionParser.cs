@@ -1616,7 +1616,7 @@ namespace BLToolkit.Data.Linq
 			{
 				Expression   = expr.Expr,
 				Accessor     = mapper.Compile(),
-				SqlParameter = new SqlParameter(name, null)
+				SqlParameter = new SqlParameter(name, expr.Expr.Type, (object)null)
 			};
 
 			_parameters.Add(expr.Expr, p);
@@ -2006,19 +2006,9 @@ namespace BLToolkit.Data.Linq
 						{
 							var item1 = sql.GroupBy.Items[i];
 							var item2 = groupBy.SqlBuilder.GroupBy.Items[i];
+							var pr    = Convert(new SqlBuilder.Predicate.ExprExpr(item1, SqlBuilder.Predicate.Operator.Equal, item2));
 
-							if (item1.CanBeNull() && item2.CanBeNull())
-							{
-								var cond = new SqlBuilder.SearchCondition();
-
-								cond
-									.Expr(item1).IsNull.    And .Expr(item2).IsNull. Or
-									.Expr(item1).IsNotNull. And .Expr(item2).IsNotNull. And .Expr(item1).Equal.Expr(item2);
-
-								sql.Where.SearchCondition.Conditions.Add(new SqlBuilder.Condition(false, cond));
-							}
-							else
-								sql.Where.Expr(item1).Equal.Expr(item2);
+							sql.Where.SearchCondition.Conditions.Add(new SqlBuilder.Condition(false, pr));
 						}
 
 						sql.GroupBy.Items.RemoveAll(_ => true);
@@ -2037,20 +2027,9 @@ namespace BLToolkit.Data.Linq
 						var item1 = sql.GroupBy.Items[i];
 						var item2 = groupBy.SqlBuilder.GroupBy.Items[i];
 						var col   = sql.Select.Columns[sql.Select.Add(item1)];
+						var pr    = Convert(new SqlBuilder.Predicate.ExprExpr(col, SqlBuilder.Predicate.Operator.Equal, item2));
 
-						if (item1.CanBeNull() && item2.CanBeNull())
-						{
-							var cond = new SqlBuilder.SearchCondition();
-
-							cond
-								.Expr(col).IsNull.    And .Expr(item2).IsNull. Or
-								.Expr(col).IsNotNull. And .Expr(item2).IsNotNull. And .Expr(col).Equal.Expr(item2);
-
-							join.JoinedTable.Condition.Conditions.Add(new SqlBuilder.Condition(false, cond));
-						}
-						else
-							join
-								.Expr(col).Equal.Expr(item2);
+						join.JoinedTable.Condition.Conditions.Add(new SqlBuilder.Condition(false, pr));
 					}
 
 					sql.ParentSql = groupBy.SqlBuilder;
@@ -2324,7 +2303,7 @@ namespace BLToolkit.Data.Linq
 							var er = pi.Create(e.Right, pi.Property(Binary.Right));
 
 							if (el.NodeType == ExpressionType.New || er.NodeType == ExpressionType.New)
-								return Convert(ParseObjectComparison(pi, el, er, queries));
+								return ParseObjectComparison(pi, el, er, queries);
 
 							var l  = ParseExpression(el, queries);
 							var r  = ParseExpression(er, queries);
@@ -2336,7 +2315,7 @@ namespace BLToolkit.Data.Linq
 								case ExpressionType.Equal   :
 								case ExpressionType.NotEqual:
 
-									if (!CurrentSql.ParameterDependent && (l is SqlParameter && r.CanBeNull() || r is SqlParameter && l.CanBeNull()))
+									if (!CurrentSql.ParameterDependent && (l is SqlParameter || r is SqlParameter) && l.CanBeNull() && r.CanBeNull())
 										CurrentSql.ParameterDependent = true;
 
 									break;
@@ -2431,41 +2410,16 @@ namespace BLToolkit.Data.Linq
 						ParseExpression(right.Create(newRight.Arguments[i], right.Index(newRight.Arguments, New.Arguments, i)), queries) :
 						GetParameter(right, newExpr.Members[i]);
 
-				if (lex.CanBeNull() && rex.CanBeNull())
-				{
-					if (rex is SqlParameter && !_info.SqlProvider.IsCompareNullParameterSupported)
-					{
-						((SqlParameter)rex).IsQueryParameter = false;
-						condition
-							.Expr(lex).Equal.Expr(rex);
-					}
-					else
-					{
-						var memberType = newExpr.Arguments[i].Type;
-						var rightParam = rex is SqlParameter && _info.SqlProvider.IsConvertNullParameterRequired?
-							Convert(new SqlFunction("$Convert$", new SqlDataType(memberType), new SqlDataType(memberType), rex)) :
-							rex;
+				var predicate = Convert(new SqlBuilder.Predicate.ExprExpr(
+					lex,
+					pi.NodeType == ExpressionType.Equal ? SqlBuilder.Predicate.Operator.Equal : SqlBuilder.Predicate.Operator.NotEqual,
+					rex));
 
-						var cond       = new SqlBuilder.SearchCondition();
+				condition.Conditions.Add(new SqlBuilder.Condition(false, predicate));
 
-						cond
-							.Expr(lex).IsNull.    And .Expr(rex).IsNull. Or
-							.Expr(lex).IsNotNull. And .Expr(rex).IsNotNull. And .Expr(lex).Equal.Expr(rightParam);
-
-						condition.Conditions.Add(new SqlBuilder.Condition(false, cond));
-					}
-				}
-				else
-					condition
-						.Expr(lex).Equal.Expr(rex);
-			}
-
-			if (pi.NodeType == ExpressionType.NotEqual)
-			{
-				var cond  = condition;
-
-				condition = new SqlBuilder.SearchCondition();
-				condition.Conditions.Add(new SqlBuilder.Condition(true, cond));
+				if (pi.NodeType == ExpressionType.NotEqual)
+					foreach (var c in condition.Conditions)
+						c.IsOr = true;
 			}
 
 			return condition;
@@ -2486,7 +2440,7 @@ namespace BLToolkit.Data.Linq
 			{
 				Expression   = expr,
 				Accessor     = mapper.Compile(),
-				SqlParameter = new SqlParameter(member.Name, null)
+				SqlParameter = new SqlParameter(member.Name, expr.Type, (object)null)
 			};
 
 			_parameters.Add(expr, p);
@@ -2549,7 +2503,7 @@ namespace BLToolkit.Data.Linq
 				{
 					Expression   = ep.Expression,
 					Accessor     = ep.Accessor,
-					SqlParameter = new SqlParameter(p.Name, p.Value, GetLikeEscaper(start, end))
+					SqlParameter = new SqlParameter(p.Name, ep.Expression.Type, p.Value, GetLikeEscaper(start, end))
 				};
 
 				_parameters.Add(e, ep);
@@ -2738,11 +2692,13 @@ namespace BLToolkit.Data.Linq
 
 		ISqlExpression Convert(ISqlExpression expr)
 		{
+			_info.SqlProvider.SqlBuilder = CurrentSql;
 			return _info.SqlProvider.ConvertExpression(expr);
 		}
 
 		ISqlPredicate Convert(ISqlPredicate predicate)
 		{
+			_info.SqlProvider.SqlBuilder = CurrentSql;
 			return _info.SqlProvider.ConvertPredicate(predicate);
 		}
 

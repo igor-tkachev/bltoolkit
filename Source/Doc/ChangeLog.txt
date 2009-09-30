@@ -3,7 +3,7 @@ v 3.2 (working)
 Demo (see the dev version of the project)
 
 - WebServices powered by BLToolkit.
-- Partial.Trust.
+- Partial.Trust demo.
 
 Bug fixes
 

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Reflection;
-using System.Text;
 
 namespace BLToolkit.Data.Sql.SqlProvider
 {
@@ -9,8 +8,6 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 #if FW3
 	using Linq;
-
-	using C = Char;
 	using S = String;
 	using I = Int32;
 #endif
@@ -20,8 +17,6 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		public PostgreSQLSqlProvider(DataProviderBase dataProvider) : base(dataProvider)
 		{
 		}
-
-		public override bool IsConvertNullParameterRequired { get { return true; } }
 
 		protected override string LimitFormat  { get { return "LIMIT {0}"; } }
 		protected override string OffsetFormat { get { return "OFFSET {0} "; } }
