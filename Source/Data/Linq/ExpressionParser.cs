@@ -604,7 +604,7 @@ namespace BLToolkit.Data.Linq
 						{
 							var e = pi.Expr as MethodCallExpression;
 
-							if (e.Method.DeclaringType == typeof(Enumerable))
+							if (e.Method.DeclaringType == typeof(Enumerable) && e.Method.Name != "Contains")
 							{
 								isHaving = true;
 								pi.StopWalking = true;
@@ -850,7 +850,7 @@ namespace BLToolkit.Data.Linq
 			_buildSelect = () =>
 			{
 				var pi     = BuildField(parseInfo, new[] { idx });
-				var helper = (IAggregateHelper)Activator.CreateInstance(typeof (AggregateHelper<>).MakeGenericType(typeof (T), parseInfo.Expr.Type));
+				var helper = (IAggregateHelper)Activator.CreateInstance(typeof(AggregateHelper<>).MakeGenericType(typeof(T), parseInfo.Expr.Type));
 
 				helper.SetAggregate(this, pi);
 			};
@@ -1154,9 +1154,7 @@ namespace BLToolkit.Data.Linq
 									if (field is QueryField.GroupByColumn)
 									{
 										var ret = BuildGroupBy(ma, (QueryField.GroupByColumn)field, converter);
-
 										ret.StopWalking = true;
-
 										return ret;
 									}
 
@@ -2305,6 +2303,22 @@ namespace BLToolkit.Data.Linq
 							if (el.NodeType == ExpressionType.New || er.NodeType == ExpressionType.New)
 								return ParseObjectComparison(pi, el, er, queries);
 
+							switch (parseInfo.NodeType)
+							{
+								case ExpressionType.Equal   :
+								case ExpressionType.NotEqual:
+
+									var p = ParseObjectNullComparison(el, er, queries, parseInfo.NodeType == ExpressionType.Equal);
+									if (p != null)
+										return p;
+
+									p = ParseObjectNullComparison(er, el, queries, parseInfo.NodeType == ExpressionType.Equal);
+									if (p != null)
+										return p;
+
+									break;
+							}
+
 							var l  = ParseExpression(el, queries);
 							var r  = ParseExpression(er, queries);
 
@@ -2342,13 +2356,26 @@ namespace BLToolkit.Data.Linq
 
 							ISqlPredicate predicate = null;
 
-							if      (e.Method == Functions.String.Contains)   predicate = BuildLikePredicate(pi, "%", "%", queries);
-							else if (e.Method == Functions.String.StartsWith) predicate = BuildLikePredicate(pi, "",  "%", queries);
-							else if (e.Method == Functions.String.EndsWith)   predicate = BuildLikePredicate(pi, "%", "",  queries);
-							else if (e.Method == Functions.String.Like11)     predicate = BuildLikePredicate(pi,           queries);
-							else if (e.Method == Functions.String.Like12)     predicate = BuildLikePredicate(pi,           queries);
-							else if (e.Method == Functions.String.Like21)     predicate = BuildLikePredicate(pi,           queries);
-							else if (e.Method == Functions.String.Like22)     predicate = BuildLikePredicate(pi,           queries);
+							if (e.Method.DeclaringType == typeof(string))
+							{
+								switch (e.Method.Name)
+								{
+									case "Contains"   : predicate = ParseLikePredicate(pi, "%", "%", queries); break;
+									case "StartsWith" : predicate = ParseLikePredicate(pi, "",  "%", queries); break;
+									case "EndsWith"   : predicate = ParseLikePredicate(pi, "%",  "", queries); break;
+								}
+							}
+							else if (e.Method.DeclaringType == typeof(Enumerable))
+							{
+								switch (e.Method.Name)
+								{
+									case "Contains" : predicate = ParseInPredicate(pi, queries); break;
+								}
+							}
+							else if (e.Method == Functions.String.Like11) predicate = ParseLikePredicate(pi, queries);
+							else if (e.Method == Functions.String.Like12) predicate = ParseLikePredicate(pi, queries);
+							else if (e.Method == Functions.String.Like21) predicate = ParseLikePredicate(pi, queries);
+							else if (e.Method == Functions.String.Like22) predicate = ParseLikePredicate(pi, queries);
 
 							if (predicate != null)
 								return Convert(predicate);
@@ -2377,13 +2404,59 @@ namespace BLToolkit.Data.Linq
 						}
 				}
 
-				throw new InvalidOperationException();
+				throw new LinqException("'{0}' cannot be converted to SQL.", parseInfo.Expr);
 			}
 			finally
 			{
 				ParsingTracer.DecIndentLevel();
 			}
 		}
+
+		#region
+
+		ISqlPredicate ParseObjectNullComparison(ParseInfo left, ParseInfo right, QuerySource[] queries, bool isEqual)
+		{
+			if (left.NodeType == ExpressionType.MemberAccess &&
+				right.NodeType == ExpressionType.Constant && ((ConstantExpression)right).Value == null)
+			{
+				foreach (var query in queries)
+				{
+					var field = query.GetField(left);
+
+					if (field is QuerySource.GroupJoinQuery)
+					{
+						var join = (QuerySource.GroupJoinQuery)field;
+
+						ISqlExpression expr = null;
+
+						foreach (var f in join.Fields)
+						{
+							if (!f.CanBeNull())
+							{
+								expr = f.GetExpressions(this)[0];
+								break;
+							}
+						}
+
+						if (expr == null)
+						{
+							var valueCol = new QueryField.ExprColumn(join.ParentQueries[0], new SqlValue(1), null);
+							var subCol   = join.EnsureField(valueCol);
+
+							expr = subCol.GetExpressions(this)[0];
+						}
+
+						return Convert(new SqlBuilder.Predicate.IsNull(expr, !isEqual));
+					}
+				}
+			}
+
+			return null;
+		}
+
+		#endregion
+
+		#region ParseObjectComparison
 
 		ISqlPredicate ParseObjectComparison(ParseInfo pi, ParseInfo left, ParseInfo right, params QuerySource[] queries)
 		{
@@ -2473,9 +2546,54 @@ namespace BLToolkit.Data.Linq
 			return ret;
 		}
 
+		#endregion
+
+		private ISqlPredicate ParseInPredicate(ParseInfo pi, params QuerySource[] queries)
+		{
+			var e    = pi.Expr as MethodCallExpression;
+			var expr = ParseExpression(pi.Create(e.Arguments[1], pi.Index(e.Arguments, MethodCall.Arguments, 1)), queries);
+			var arr  = pi.Create(e.Arguments[0], pi.Index(e.Arguments, MethodCall.Arguments, 0));
+
+			switch (arr.NodeType)
+			{
+				case ExpressionType.NewArrayInit:
+					{
+						var newArr = arr.ConvertTo<NewArrayExpression>();
+
+						if (newArr.Expr.Expressions.Count == 0)
+							return new SqlBuilder.Predicate.Expr(new SqlValue(false));
+
+						var exprs  = new ISqlExpression[newArr.Expr.Expressions.Count];
+
+						for (var i = 0; i < newArr.Expr.Expressions.Count; i++)
+						{
+							var item = ParseExpression(
+								newArr.Create(newArr.Expr.Expressions[i], newArr.Index(newArr.Expr.Expressions, NewArray.Expressions, i)),
+								queries);
+
+							exprs[i] = item;
+						}
+
+						return new SqlBuilder.Predicate.InList(expr, false, exprs);
+					}
+
+				default:
+					if (CanBeCompiled(arr))
+					{
+						var p = BuildParameter(arr).SqlParameter;
+						p.IsQueryParameter = false;
+						return new SqlBuilder.Predicate.InList(expr, false, p);
+					}
+
+					break;
+			}
+
+			throw new LinqException("'{0}' cannot be converted to SQL.", pi.Expr);
+		}
+
 		#region LIKE predicate
 
-		private ISqlPredicate BuildLikePredicate(ParseInfo pi, string start, string end, params QuerySource[] queries)
+		private ISqlPredicate ParseLikePredicate(ParseInfo pi, string start, string end, params QuerySource[] queries)
 		{
 			var e  = pi.Expr as MethodCallExpression;
 
@@ -2515,7 +2633,7 @@ namespace BLToolkit.Data.Linq
 			return null;
 		}
 
-		private ISqlPredicate BuildLikePredicate(ParseInfo pi, params QuerySource[] queries)
+		private ISqlPredicate ParseLikePredicate(ParseInfo pi, params QuerySource[] queries)
 		{
 			var e  = pi.Expr as MethodCallExpression;
 			var a1 = ParseExpression(pi.Create(e.Arguments[0], pi.Index(e.Arguments, MethodCall.Arguments, 0)), queries);

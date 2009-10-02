@@ -497,40 +497,31 @@ namespace Data.Linq
 			});
 		}
 
-		[Test]
+		//[Test]
 		public void Test()
 		{
-			using (var db = new TestDbManager(ProviderName.Sybase))
+			using (var db = new TestDbManager(ProviderName.Firebird))
 			{
-				/*
 				var p = db
 					.SetCommand(@"
 						SELECT
-							Count(ch2.ParentID) as c1
+							t1.ParentID,
+							t1.Value1
 						FROM
-							[Child] ch
-								LEFT JOIN
-								(
+							Parent t1
+								LEFT JOIN (
 									SELECT
-										ch1.ParentID
+										t3.ParentID as ParentID1,
+										Coalesce(t3.ParentID, 1) as c1
 									FROM
-										[Child] ch1
-									WHERE
-										ch1.[ChildID] > 20
-									GROUP BY
-										ch1.ParentID
-								) as ch2 ON ch2.ParentID = ch.ParentID
-						GROUP BY
-							ch.[ParentID]",
-						db.Parameter("@p1", 9.9900m, DbType.Decimal))
-					.ExecuteScalar();
-				 */
+										Child t3
+								) t2 ON t1.ParentID = t2.ParentID1
+						WHERE
+							t2.c1 IS NULL")
+					.ExecuteList<Parent>();
 
-				int PersonID_W = 1;
-
-				var q = from p in db.Person where p.ID == PersonID_W select p;
-				var p1 = q.First();
-				Assert.AreEqual(1, p1.ID);
+				var p1 = p.First();
+				Assert.AreEqual(1, p1.ParentID);
 
 
 				var da = new SqlQuery();

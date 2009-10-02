@@ -444,6 +444,12 @@ namespace BLToolkit.Data.Sql
 					_expr1 = exp1;
 				}
 
+				public Expr(ISqlExpression exp1)
+					: base(exp1.Precedence)
+				{
+					_expr1 = exp1;
+				}
+
 				ISqlExpression _expr1; public ISqlExpression Expr1 { get { return _expr1; } }
 
 				protected override void Walk(bool skipColumns, WalkingFunc func)
@@ -2039,12 +2045,12 @@ namespace BLToolkit.Data.Sql
 			});
 		}
 
-		TableSource OptimizeSubQuery(TableSource source)
+		TableSource OptimizeSubQuery(TableSource source, bool optimizeWhere)
 		{
 			for (int i = 0; i < source.Joins.Count; i++)
 			{
 				JoinedTable jt = source.Joins[i];
-				jt.Table = OptimizeSubQuery(jt.Table);
+				jt.Table = OptimizeSubQuery(jt.Table, jt.JoinType == JoinType.Inner);
 			}
 
 			if (source.Source is SqlBuilder)
@@ -2053,6 +2059,7 @@ namespace BLToolkit.Data.Sql
 
 				if (builder.From.Tables.Count == 1     &&
 				    //builder.From.Tables[0].Joins.Count == 0 &&
+				    (optimizeWhere || builder.Where.IsEmpty && builder.Having.IsEmpty) &&
 				    builder.GroupBy.IsEmpty            &&
 				    builder.Select.IsDistinct == false &&
 				    builder.Select.SkipValue  == null  &&
@@ -2110,7 +2117,7 @@ namespace BLToolkit.Data.Sql
 		void OptimizeSubQueries()
 		{
 			for (int i = 0; i < From.Tables.Count; i++)
-				From.Tables[i] = OptimizeSubQuery(From.Tables[i]);
+				From.Tables[i] = OptimizeSubQuery(From.Tables[i], true);
 		}
 
 		IDictionary<string,object> _aliases;

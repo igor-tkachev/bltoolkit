@@ -63,6 +63,32 @@ namespace BLToolkit.Reflection.MetadataProvider
 
 		#endregion
 
+		#region GetFieldStorage
+
+		public override string GetFieldStorage(TypeExtension typeExtension, MemberAccessor member, out bool isSet)
+		{
+			MapFieldAttribute a = member.GetAttribute<MapFieldAttribute>();
+
+			if (a != null)
+			{
+				isSet = true;
+				return a.Storage;
+			}
+
+			foreach (MapFieldAttribute attr in GetMapFieldAttributes(member.TypeAccessor))
+			{
+				if (string.Equals(attr.OrigName, member.Name, StringComparison.InvariantCultureIgnoreCase))
+				{
+					isSet = true;
+					return attr.Storage;
+				}
+			}
+
+			return base.GetFieldStorage(typeExtension, member, out isSet);
+		}
+
+		#endregion
+
 		#region EnsureMapper
 
 		public override void EnsureMapper(TypeAccessor typeAccessor, MappingSchema mappingSchema, EnsureMapperHandler handler)

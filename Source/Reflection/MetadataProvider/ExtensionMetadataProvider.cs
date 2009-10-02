@@ -38,6 +38,20 @@ namespace BLToolkit.Reflection.MetadataProvider
 
 		#endregion
 
+		#region GetFieldStorage
+
+		public override string GetFieldStorage(TypeExtension typeExtension, MemberAccessor member, out bool isSet)
+		{
+			object value = GetValue(typeExtension, member, "FieldStorage", out isSet);
+
+			if (value != null)
+				return value.ToString();
+
+			return base.GetFieldStorage(typeExtension, member, out isSet);
+		}
+
+		#endregion
+
 		#region GetMapIgnore
 
 		public override bool GetMapIgnore(TypeExtension typeExtension, MemberAccessor member, out bool isSet)

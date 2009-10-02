@@ -40,6 +40,16 @@ namespace BLToolkit.Reflection.MetadataProvider
 
 		#endregion
 
+		#region GetFieldStorage
+
+		public virtual string GetFieldStorage(TypeExtension typeExtension, MemberAccessor member, out bool isSet)
+		{
+			isSet = false;
+			return null;
+		}
+
+		#endregion
+
 		#region EnsureMapper
 
 		public virtual void EnsureMapper(TypeAccessor typeAccessor, MappingSchema mappingSchema, EnsureMapperHandler handler)

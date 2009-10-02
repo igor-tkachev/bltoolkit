@@ -8,6 +8,7 @@ using BLToolkit.Data.DataProvider;
 namespace Data.Linq
 {
 	using Model;
+	using BLToolkit.Data.Linq;
 
 	[TestFixture]
 	public class WhereTest : TestBase
@@ -504,8 +505,8 @@ namespace Data.Linq
 				select p));
 		}
 
-		//[Test]
-		public void CheckLeftJoin()
+		[Test]
+		public void CheckLeftJoin1()
 		{
 			var expected =
 				from p in Parent
@@ -517,6 +518,76 @@ namespace Data.Linq
 			ForEachProvider(db => AreEqual(expected,
 				from p in db.Parent
 					join ch in db.Child on p.ParentID equals ch.ParentID into lj1
+					from ch in lj1.DefaultIfEmpty()
+				where ch == null
+				select p));
+		}
+
+		[Test]
+		public void CheckLeftJoin2()
+		{
+			var expected =
+				from p in Parent
+					join ch in Child on p.ParentID equals ch.ParentID into lj1
+					from ch in lj1.DefaultIfEmpty()
+				where ch != null
+				select p;
+
+			ForEachProvider(data => AreEqual(expected, CompiledQuery.Compile<TestDbManager,IQueryable<Parent>>(db =>
+				from p in db.Parent
+					join ch in db.Child on p.ParentID equals ch.ParentID into lj1
+					from ch in lj1.DefaultIfEmpty()
+				where null != ch
+				select p)(data)));
+		}
+
+		[Test]
+		public void CheckLeftJoin3()
+		{
+			var expected =
+				from p in Parent
+					join ch in 
+						from c in GrandChild
+						where c.ParentID > 0
+						select new { ParentID = 1 + c.ParentID, c.ChildID }
+					on p.ParentID equals ch.ParentID into lj1
+					from ch in lj1.DefaultIfEmpty()
+				where ch == null && ch == null
+				select p;
+
+			ForEachProvider(new[] { ProviderName.Firebird, ProviderName.Access }, db => AreEqual(expected,
+				from p in db.Parent
+					join ch in 
+						from c in db.GrandChild
+						where c.ParentID > 0
+						select new { ParentID = 1 + c.ParentID, c.ChildID }
+					on p.ParentID equals ch.ParentID into lj1
+					from ch in lj1.DefaultIfEmpty()
+				where ch == null && ch == null
+				select p));
+		}
+
+		[Test]
+		public void CheckLeftJoin4()
+		{
+			var expected =
+				from p in Parent
+					join ch in 
+						from c in Child
+						where c.ParentID > 0
+						select new { c.ParentID, c.ChildID }
+					on p.ParentID equals ch.ParentID into lj1
+					from ch in lj1.DefaultIfEmpty()
+				where ch == null
+				select p;
+
+			ForEachProvider(db => AreEqual(expected,
+				from p in db.Parent
+					join ch in 
+						from c in db.Child
+						where c.ParentID > 0
+						select new { c.ParentID, c.ChildID }
+					on p.ParentID equals ch.ParentID into lj1
 					from ch in lj1.DefaultIfEmpty()
 				where ch == null
 				select p));

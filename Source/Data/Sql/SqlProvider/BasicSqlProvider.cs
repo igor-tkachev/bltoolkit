@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Text;
+using BLToolkit.Mapping;
 
 namespace BLToolkit.Data.Sql.SqlProvider
 {
@@ -577,7 +579,39 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			}
 			else if (predicate is SqlBuilder.Predicate.InList)
 			{
-				throw new NotImplementedException();
+				SqlBuilder.Predicate.InList p = (SqlBuilder.Predicate.InList)predicate;
+
+				if (p.Values == null || p.Values.Count == 0)
+				{
+					BuildPredicate(sb, new SqlBuilder.Predicate.Expr(new SqlValue(false)));
+				}
+				else
+				{
+					IEnumerable values = p.Values;
+
+					if (p.Values.Count == 1 && p.Values[0] is SqlParameter)
+					{
+						SqlParameter pr = (SqlParameter)p.Values[0];
+
+						if (pr.Type != null && pr.Type.IsArray)
+							values = (IEnumerable)pr.Value;
+					}
+
+					BuildExpression(sb, GetPrecedence(p), p.Expr1);
+					sb.Append(p.IsNot ? " NOT IN (" : " IN (");
+
+					foreach (object value in values)
+					{
+						if (value is ISqlExpression)
+							BuildExpression(sb, (ISqlExpression)value);
+						else
+							BuildValue(sb, value);
+
+						sb.Append(", ");
+					}
+
+					sb.Remove(sb.Length - 2, 2).Append(')');
+				}
 			}
 			else if (predicate is SqlBuilder.Predicate.FuncLike)
 			{
@@ -778,13 +812,57 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		#region BuildValue
 
+		interface INullableValueReader
+		{
+			object GetValue(object value);
+		}
+
+		class NullableValueReader<T> : INullableValueReader where T : struct
+		{
+			public object GetValue(object value)
+			{
+				return ((T?)value).Value;
+			}
+		}
+
+		static readonly Dictionary<Type,INullableValueReader> _nullableValueReader = new Dictionary<Type,INullableValueReader>();
+
 		protected virtual void BuildValue(StringBuilder sb, object value)
 		{
-			if      (value == null)   sb.Append("NULL");
-			else if (value is string) sb.Append('\'').Append(value.ToString().Replace("'", "''")).Append('\'');
-			else if (value is char)   sb.Append('\'').Append(value.ToString().Replace("'", "''")).Append('\'');
-			else if (value is bool)   sb.Append((bool)value? "1": "0");
-			else    sb.Append(value);
+			if      (value == null)                   sb.Append("NULL");
+			else if (value is string)                 sb.Append('\'').Append(value.ToString().Replace("'", "''")).Append('\'');
+			else if (value is char || value is char?) sb.Append('\'').Append(value.ToString().Replace("'", "''")).Append('\'');
+			else if (value is bool || value is bool?) sb.Append((bool)value ? "1" : "0");
+			else
+			{
+				Type type = value.GetType();
+
+				if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>))
+				{
+					type = type.GetGenericArguments()[0];
+
+					if (type.IsEnum)
+					{
+						lock (_nullableValueReader)
+						{
+							INullableValueReader reader;
+
+							if (_nullableValueReader.TryGetValue(type, out reader) == false)
+							{
+								reader = (INullableValueReader)Activator.CreateInstance(typeof(NullableValueReader<>).MakeGenericType(type));
+								_nullableValueReader.Add(type, reader);
+							}
+
+							value = reader.GetValue(value);
+						}
+					}
+				}
+
+				if (type.IsEnum)
+					value = Map.EnumToValue(value);
+
+				sb.Append(value);
+			}
 		}
 
 		#endregion

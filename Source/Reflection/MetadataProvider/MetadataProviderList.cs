@@ -61,6 +61,23 @@ namespace BLToolkit.Reflection.MetadataProvider
 
 		#endregion
 
+		#region GetFieldStorage
+
+		public override string GetFieldStorage(TypeExtension typeExtension, MemberAccessor member, out bool isSet)
+		{
+			foreach (MetadataProviderBase p in _list)
+			{
+				string name = p.GetFieldStorage(typeExtension, member, out isSet);
+
+				if (isSet)
+					return name;
+			}
+
+			return base.GetFieldStorage(typeExtension, member, out isSet);
+		}
+
+		#endregion
+
 		#region EnsureMapper
 
 		public override void EnsureMapper(TypeAccessor typeAccessor, MappingSchema mappingSchema, EnsureMapperHandler handler)

@@ -4,8 +4,8 @@ namespace Data.Linq.Model
 {
 	public class GrandChild
 	{
-		public int ParentID;
-		public int ChildID;
-		public int GrandChildID;
+		public int? ParentID;
+		public int? ChildID;
+		public int? GrandChildID;
 	}
 }

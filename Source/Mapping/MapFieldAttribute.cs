@@ -47,5 +47,13 @@ namespace BLToolkit.Mapping
 			get { return _format;  }
 			set { _format = value; }
 		}
+
+		private string _storage;
+		public  string  Storage
+		{
+			[DebuggerStepThrough]
+			get { return _storage;  }
+			set { _storage = value; }
+		}
 	}
 }

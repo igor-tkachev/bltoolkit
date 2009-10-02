@@ -258,6 +258,7 @@ namespace BLToolkit.Mapping
 					mi.MemberExtension = _extension[ma.Name];
 					mi.Name            = GetFieldName   (ma);
 					mi.MemberName      = ma.Name;
+					mi.Storage         = GetFieldStorage(ma);
 					mi.Trimmable       = GetTrimmable   (ma);
 					mi.SqlIgnore       = GetSqlIgnore   (ma);
 					mi.MapValues       = GetMapValues   (ma);
@@ -439,6 +440,12 @@ namespace BLToolkit.Mapping
 		{
 			bool isSet;
 			return MetadataProvider.GetFieldName(Extension, memberAccessor, out isSet);
+		}
+
+		protected virtual string GetFieldStorage(MemberAccessor memberAccessor)
+		{
+			bool isSet;
+			return MetadataProvider.GetFieldStorage(Extension, memberAccessor, out isSet);
 		}
 
 		protected virtual bool GetTrimmable(MemberAccessor memberAccessor)

@@ -294,6 +294,7 @@ namespace BLToolkit.TypeBuilder.Builders
 						underlyingType = Enum.GetUnderlyingType(underlyingType);
 						type = typeof(Nullable<>).MakeGenericType(underlyingType);
 					}
+
 					typedPropertyName = "Nullable" + underlyingType.Name;
 				}
 				else
@@ -501,7 +502,7 @@ namespace BLToolkit.TypeBuilder.Builders
 				return;
 
 			MethodBuilderHelper method = nestedType.DefineMethod(methodInfo);
-			EmitHelper emit = method.Emitter;
+			EmitHelper          emit   = method.Emitter;
 
 			if (isValueType)
 			{

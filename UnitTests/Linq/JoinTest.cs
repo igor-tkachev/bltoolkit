@@ -218,5 +218,29 @@ namespace Data.Linq
 				Assert.AreEqual(4, list[0].p.ParentID);
 			});
 		}
+
+		[Test]
+		public void SubQueryJoin()
+		{
+			var expected =
+				from p in Parent
+					join ch in 
+						from c in Child
+						where c.ParentID > 0
+						select new { c.ParentID, c.ChildID }
+					on p.ParentID equals ch.ParentID into lj1
+					from ch in lj1.DefaultIfEmpty()
+				select p;
+
+			ForEachProvider(db => AreEqual(expected,
+				from p in db.Parent
+					join ch in 
+						from c in db.Child
+						where c.ParentID > 0
+						select new { c.ParentID, c.ChildID }
+					on p.ParentID equals ch.ParentID into lj1
+					from ch in lj1.DefaultIfEmpty()
+				select p));
+		}
 	}
 }

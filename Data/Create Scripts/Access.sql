@@ -247,7 +247,7 @@ GO
 DROP TABLE GrandChild
 GO
 
-CREATE TABLE Parent     (ParentID int, Value1 int)
+CREATE TABLE Parent     (ParentID int, Value1 int NULL)
 GO
 CREATE TABLE Child      (ParentID int, ChildID int)
 GO

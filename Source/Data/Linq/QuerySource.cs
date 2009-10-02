@@ -714,6 +714,11 @@ namespace BLToolkit.Data.Linq
 			return exprs.ToArray();
 		}
 
+		public override bool CanBeNull()
+		{
+			return true;
+		}
+
 		public void Match(
 			Action<Table>    tableAction,
 			Action<Expr>     exprAction,

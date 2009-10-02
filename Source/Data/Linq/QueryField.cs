@@ -45,6 +45,11 @@ namespace BLToolkit.Data.Linq
 				return new [] { _field };
 			}
 
+			public override bool CanBeNull()
+			{
+				return _field.CanBeNull();
+			}
+
 			public override ICloneableElement Clone(Dictionary<ICloneableElement, ICloneableElement> objectTree, Predicate<ICloneableElement> doClone)
 			{
 				if (!doClone(this))
@@ -98,9 +103,8 @@ namespace BLToolkit.Data.Linq
 			FieldIndex[]    _index;
 			ISqlExpression  _sqlExpression;
 
-			public ISqlExpression SqlExpression { get { return _sqlExpression; } }
-
-			public override QuerySource[] Sources { get { return new[] { QuerySource }; } }
+			public          ISqlExpression SqlExpression { get { return _sqlExpression;        } }
+			public override QuerySource[]  Sources       { get { return new[] { QuerySource }; } }
 
 			public override FieldIndex[] Select<T>(ExpressionParser<T> parser)
 			{
@@ -111,10 +115,7 @@ namespace BLToolkit.Data.Linq
 				if (_index == null)
 				{
 					if (_sqlExpression == null)
-						_sqlExpression =
-							//QuerySource is QuerySource.Scalar ?
-							//	parser.ParseExpression(Expr, QuerySource):
-								parser.ParseExpression(Expr, QuerySource.ParentQueries);
+						_sqlExpression = parser.ParseExpression(Expr, QuerySource.ParentQueries);
 
 					_index = new[] { new FieldIndex { Index = QuerySource.SqlBuilder.Select.Add(_sqlExpression, _alias), Field = this } };
 				}
@@ -139,6 +140,14 @@ namespace BLToolkit.Data.Linq
 				}
 
 				return new [] { _sqlExpression };
+			}
+
+			public override bool CanBeNull()
+			{
+				if (_sqlExpression != null)
+					return _sqlExpression.CanBeNull();
+
+				return SqlDataType.CanBeNull(Expr.Expr.Type);
 			}
 
 			public override ICloneableElement Clone(Dictionary<ICloneableElement, ICloneableElement> objectTree, Predicate<ICloneableElement> doClone)
@@ -225,6 +234,11 @@ namespace BLToolkit.Data.Linq
 				return new [] { QuerySource.SubSql.Select.Columns[_subIndex[0].Index] };
 			}
 
+			public override bool CanBeNull()
+			{
+				return Field.CanBeNull();
+			}
+
 			public override ICloneableElement Clone(Dictionary<ICloneableElement, ICloneableElement> objectTree, Predicate<ICloneableElement> doClone)
 			{
 				if (!doClone(this))
@@ -284,6 +298,11 @@ namespace BLToolkit.Data.Linq
 				return GroupBySource.ParentQueries[0].GetExpressions(parser);
 			}
 
+			public override bool CanBeNull()
+			{
+				return false;
+			}
+
 			public override ICloneableElement Clone(Dictionary<ICloneableElement, ICloneableElement> objectTree, Predicate<ICloneableElement> doClone)
 			{
 				if (!doClone(this))
@@ -317,6 +336,7 @@ namespace BLToolkit.Data.Linq
 		public abstract ICloneableElement Clone            (Dictionary<ICloneableElement, ICloneableElement> objectTree, Predicate<ICloneableElement> doClone);
 		public abstract FieldIndex[]      Select        <T>(ExpressionParser<T> parser);
 		public abstract ISqlExpression[]  GetExpressions<T>(ExpressionParser<T> parser);
+		public abstract bool              CanBeNull        ();
 
 		#endregion
 	}

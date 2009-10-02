@@ -348,6 +348,7 @@
     <Compile Include="Patterns\DuckType.cs" />
     <Compile Include="Patterns\MustImplementAttribute.cs" />
     <Compile Include="Properties\JetBrains.Annotations.cs" />
+    <Compile Include="Reflection\StorageMemberAccessor.cs" />
     <Compile Include="Reflection\GenericBinder.cs" />
     <Compile Include="Reflection\MetadataProvider\AttributeMetadataProvider.cs" />
     <Compile Include="Reflection\MetadataProvider\ExtensionMetadataProvider.cs" />

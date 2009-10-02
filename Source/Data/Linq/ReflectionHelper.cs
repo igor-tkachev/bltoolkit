@@ -240,9 +240,9 @@ namespace BLToolkit.Data.Linq
 		{
 			public class String : Expressor<string>
 			{
-				public static MethodInfo Contains   = MethodExpressor(s => s.Contains(""));
-				public static MethodInfo StartsWith = MethodExpressor(s => s.StartsWith(""));
-				public static MethodInfo EndsWith   = MethodExpressor(s => s.EndsWith(""));
+				//public static MethodInfo Contains   = MethodExpressor(s => s.Contains(""));
+				//public static MethodInfo StartsWith = MethodExpressor(s => s.StartsWith(""));
+				//public static MethodInfo EndsWith   = MethodExpressor(s => s.EndsWith(""));
 				public static MethodInfo Like11     = MethodExpressor(s => SqlMethods.Like("", ""));
 				public static MethodInfo Like12     = MethodExpressor(s => SqlMethods.Like("", "", ' '));
 				public static MethodInfo Like21     = MethodExpressor(s => Sql.Like(s, ""));

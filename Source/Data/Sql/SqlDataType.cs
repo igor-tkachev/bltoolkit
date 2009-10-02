@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlTypes;
 
+using BLToolkit.Reflection;
+
 namespace BLToolkit.Data.Sql
 {
 	public class SqlDataType : ISqlExpression
@@ -135,11 +137,11 @@ namespace BLToolkit.Data.Sql
 				MaxDisplaySize = maxDisplaySize;
 			}
 
-			public SqlDbType DbType;
-			public int       MaxLength;
-			public int       MaxPrecision;
-			public int       MaxScale;
-			public int       MaxDisplaySize;
+			public readonly SqlDbType DbType;
+			public readonly int       MaxLength;
+			public readonly int       MaxPrecision;
+			public readonly int       MaxScale;
+			public readonly int       MaxDisplaySize;
 		}
 
 		static TypeInfo[] SortTypeInfo(params TypeInfo[] info)
@@ -163,7 +165,7 @@ namespace BLToolkit.Data.Sql
 			return obj.ToString().Length;
 		}
 
-		private static TypeInfo[] _typeInfo = SortTypeInfo
+		static TypeInfo[] _typeInfo = SortTypeInfo
 		(
 			//           DbType                         MaxLength           MaxPrecision               MaxScale       MaxDisplaySize
 			//
@@ -309,6 +311,16 @@ namespace BLToolkit.Data.Sql
 			}
 
 			throw new InvalidOperationException();
+		}
+
+		public static bool CanBeNull(Type type)
+		{
+			if (type.IsValueType == false ||
+				type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>) ||
+				TypeHelper.IsSameOrParent(typeof(INullable), type))
+				return true;
+
+			return false;
 		}
 
 		#endregion

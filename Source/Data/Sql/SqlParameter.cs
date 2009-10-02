@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data.SqlTypes;
-using BLToolkit.Reflection;
 
 namespace BLToolkit.Data.Sql
 {
@@ -112,14 +110,7 @@ namespace BLToolkit.Data.Sql
 			if (_type == null && _value == null)
 				return true;
 
-			Type type = _type ?? _value.GetType();
-
-			if (type.IsValueType == false ||
-				type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>) ||
-				TypeHelper.IsSameOrParent(typeof(INullable), type))
-				return true;
-
-			return false;
+			return SqlDataType.CanBeNull(_type ?? _value.GetType());
 		}
 
 		#endregion
