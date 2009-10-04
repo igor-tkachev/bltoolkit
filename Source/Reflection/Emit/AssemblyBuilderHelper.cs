@@ -56,7 +56,7 @@ namespace BLToolkit.Reflection.Emit
 				}
 			}
 
-			path = path.Replace("+", ".");
+			path = path.Replace("+", ".").Replace("<", "_").Replace(">", "_");
 
 			if (path.Length >= 260)
 			{
@@ -95,17 +95,20 @@ namespace BLToolkit.Reflection.Emit
 			_assemblyName.Flags |= AssemblyNameFlags.EnableJITcompileOptimizer;
 #endif
 
-			_assemblyBuilder =
-				string.IsNullOrEmpty(assemblyDir)?
-				Thread.GetDomain().DefineDynamicAssembly(_assemblyName, AssemblyBuilderAccess.RunAndSave):
-				Thread.GetDomain().DefineDynamicAssembly(_assemblyName, AssemblyBuilderAccess.RunAndSave, assemblyDir);
+			_createAssemblyBuilder = delegate(int _)
+			{
+				_assemblyBuilder =
+					string.IsNullOrEmpty(assemblyDir)?
+					Thread.GetDomain().DefineDynamicAssembly(_assemblyName, AssemblyBuilderAccess.RunAndSave):
+					Thread.GetDomain().DefineDynamicAssembly(_assemblyName, AssemblyBuilderAccess.RunAndSave, assemblyDir);
 
-			_assemblyBuilder.SetCustomAttribute(BLToolkitAttribute);
-			_assemblyBuilder.SetCustomAttribute(
-				new CustomAttributeBuilder(
-					typeof(AllowPartiallyTrustedCallersAttribute)
-						.GetConstructor(Type.EmptyTypes),
-					new object[0]));
+				_assemblyBuilder.SetCustomAttribute(BLToolkitAttribute);
+				_assemblyBuilder.SetCustomAttribute(
+					new CustomAttributeBuilder(
+						typeof(AllowPartiallyTrustedCallersAttribute)
+							.GetConstructor(Type.EmptyTypes),
+						new object[0]));
+			};
 		}
 
 		private readonly string _path;
@@ -126,13 +129,20 @@ namespace BLToolkit.Reflection.Emit
 			get { return _assemblyName; }
 		}
 
-		private readonly AssemblyBuilder _assemblyBuilder;
+		readonly Action<int> _createAssemblyBuilder; 
+
+		AssemblyBuilder _assemblyBuilder;
 		/// <summary>
 		/// Gets AssemblyBuilder.
 		/// </summary>
-		public           AssemblyBuilder  AssemblyBuilder
+		public   AssemblyBuilder  AssemblyBuilder
 		{
-			get { return _assemblyBuilder; }
+			get
+			{
+				if (_assemblyBuilder == null)
+					_createAssemblyBuilder(0);
+				return _assemblyBuilder;
+			}
 		}
 
 		/// <summary>
@@ -153,7 +163,7 @@ namespace BLToolkit.Reflection.Emit
 			{
 				if (_moduleBuilder == null)
 				{
-					_moduleBuilder = _assemblyBuilder.DefineDynamicModule(ModulePath);
+					_moduleBuilder = AssemblyBuilder.DefineDynamicModule(ModulePath);
 					_moduleBuilder.SetCustomAttribute(BLToolkitAttribute);
 
 				}
@@ -211,7 +221,8 @@ namespace BLToolkit.Reflection.Emit
 		/// </summary>
 		public void Save()
 		{
-			_assemblyBuilder.Save(ModulePath);
+			if (_assemblyBuilder != null)
+				_assemblyBuilder.Save(ModulePath);
 		}
 
 		#region DefineType Overrides

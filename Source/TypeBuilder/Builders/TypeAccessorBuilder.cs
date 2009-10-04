@@ -74,7 +74,11 @@ namespace BLToolkit.TypeBuilder.Builders
 			}
 
 			if (!_originalType.Type.IsVisible && !_friendlyAssembly)
+#if FW3
+				return typeof (ExprTypeAccessor<,>).MakeGenericType(_type, _originalType);
+#else
 				throw new TypeBuilderException(string.Format("Can not build type accessor for non-public type '{0}'.", _originalType.FullName));
+#endif
 
 			string typeName = GetTypeName();
 
@@ -102,7 +106,7 @@ namespace BLToolkit.TypeBuilder.Builders
 			return result;
 		}
 
-		private void BuildCreateInstanceMethods()
+		void BuildCreateInstanceMethods()
 		{
 			bool            isValueType  = _type.IsValueType;
 			ConstructorInfo baseDefCtor  = isValueType? null: _type.GetPublicDefaultConstructor();

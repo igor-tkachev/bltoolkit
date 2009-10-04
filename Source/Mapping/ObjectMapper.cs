@@ -6,12 +6,12 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 
-using BLToolkit.Reflection;
-using BLToolkit.Reflection.Extension;
-using BLToolkit.Reflection.MetadataProvider;
-
 namespace BLToolkit.Mapping
 {
+	using Reflection;
+	using Reflection.Extension;
+	using Reflection.MetadataProvider;
+
 	[DebuggerDisplay("Type = {TypeAccessor.Type}, OriginalType = {TypeAccessor.OriginalType}")]
 	public class ObjectMapper : MapDataSourceDestinationBase, IEnumerable<MemberMapper>
 	{

@@ -22,6 +22,7 @@ Enhancement
 - New SqlIgnore attribute.
 - New SqlBuilder class.
 - Partial trust support.
+- Mapping to/from private classes (FW 3.x only).
 
 
 v 3.1

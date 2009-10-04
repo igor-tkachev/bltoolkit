@@ -15,6 +15,7 @@ using BLToolkit.EditableObjects;
 using BLToolkit.Mapping;
 using BLToolkit.TypeBuilder;
 using BLToolkit.TypeBuilder.Builders;
+using JetBrains.Annotations;
 
 namespace BLToolkit.Reflection
 {
@@ -274,6 +275,17 @@ namespace BLToolkit.Reflection
 			}
 
 			return accessor;
+		}
+
+		public static TypeAccessor GetAccessor([NotNull] object obj)
+		{
+			if (obj == null) throw new ArgumentNullException("obj");
+			return GetAccessor(obj.GetType());
+		}
+
+		public static TypeAccessor GetAccessor<T>()
+		{
+			return TypeAccessor<T>.Instance;
 		}
 
 		private static bool IsClassBulderNeeded(Type type)

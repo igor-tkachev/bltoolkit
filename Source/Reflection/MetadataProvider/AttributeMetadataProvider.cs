@@ -43,7 +43,7 @@ namespace BLToolkit.Reflection.MetadataProvider
 		{
 			MapFieldAttribute a = member.GetAttribute<MapFieldAttribute>();
 
-			if (a != null)
+			if (a != null && a.MapName != null)
 			{
 				isSet = true;
 				return a.MapName;
@@ -51,7 +51,7 @@ namespace BLToolkit.Reflection.MetadataProvider
 
 			foreach (MapFieldAttribute attr in GetMapFieldAttributes(member.TypeAccessor))
 			{
-				if (string.Equals(attr.OrigName, member.Name, StringComparison.InvariantCultureIgnoreCase))
+				if (attr.MapName != null && string.Equals(attr.OrigName, member.Name, StringComparison.InvariantCultureIgnoreCase))
 				{
 					isSet = true;
 					return attr.MapName;

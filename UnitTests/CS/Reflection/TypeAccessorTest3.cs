@@ -10,9 +10,9 @@ namespace Reflection
 	[TestFixture]
 	public class TypeAccessorTest3
 	{
-		public class TestObject
+		class TestObject
 		{
-			private int _field;
+			private int _field = 15;
 			[MapField("_field")]
 			public  int  Field
 			{
@@ -24,22 +24,21 @@ namespace Reflection
 		[Test]
 		public void Test()
 		{
-			var o = TypeAccessor<TestObject>.CreateInstance();
+			var o  = TypeAccessor<TestObject>.CreateInstance();
+			var ma = ExprMemberAccessor.GetMemberAccessor(TypeAccessor<TestObject>.Instance, "_field");
 
-			TypeAccessor<TestObject>.Instance["Field"].SetValue(o, 5);
+			ma.SetInt32(o, 5);
 
 			Assert.AreEqual(5, o.Field);
 		}
 
-		class AAA
+		[Test]
+		public void TestAnonymous()
 		{
-			private delegate object GetValueAsObject(object o);
+			var o = new { Field1 = 1 };
+			var a = TypeAccessor.GetAccessor(o);
 
-			private GetValueAsObject _getValueAsObject;
-
-			public virtual object GetValue(object o) { return _getValueAsObject(o); }
-			
+			Assert.AreEqual(1, a["Field1"].GetInt32(o));
 		}
-
 	}
 }

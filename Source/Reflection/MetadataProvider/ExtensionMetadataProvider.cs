@@ -3,11 +3,10 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
 
-using BLToolkit.Mapping;
-
 namespace BLToolkit.Reflection.MetadataProvider
 {
 	using Extension;
+	using Mapping;
 
 	public class ExtensionMetadataProvider : MetadataProviderBase
 	{

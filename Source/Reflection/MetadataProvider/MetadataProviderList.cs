@@ -1,12 +1,11 @@
 using System;
 using System.Collections;
-
-using BLToolkit.Mapping;
+using System.Collections.Generic;
 
 namespace BLToolkit.Reflection.MetadataProvider
 {
 	using Extension;
-	using System.Collections.Generic;
+	using Mapping;
 
 	public class MetadataProviderList : MetadataProviderBase, ICollection
 	{

@@ -155,6 +155,7 @@ namespace TypeBuilder.Builders
 			Assert.IsNotNull(i);
 		}
 
+#if FW2
 		private class PrivateType
 		{
 		}
@@ -174,6 +175,7 @@ namespace TypeBuilder.Builders
 		{
 			TypeAccessor.CreateInstance(typeof(InternalType));
 		}
+#endif
 
 		public class CloneTestObject
 		{

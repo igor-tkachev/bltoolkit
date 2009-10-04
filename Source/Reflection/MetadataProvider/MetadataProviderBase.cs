@@ -1,11 +1,10 @@
 using System;
-
-using BLToolkit.Mapping;
+using System.Collections.Generic;
 
 namespace BLToolkit.Reflection.MetadataProvider
 {
 	using Extension;
-	using System.Collections.Generic;
+	using Mapping;
 
 	public delegate void                 OnCreateProvider(MetadataProviderBase parentProvider);
 	public delegate MetadataProviderBase CreateProvider();

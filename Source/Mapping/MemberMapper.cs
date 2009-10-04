@@ -22,12 +22,18 @@ namespace BLToolkit.Mapping
 
 			_mapMemberInfo         = mapMemberInfo;
 			_name                  = mapMemberInfo.Name;
-		    _dbType                = mapMemberInfo.DbType;
-			_type                  = mapMemberInfo.Type;
 			_memberName            = mapMemberInfo.MemberName;
+			_storage               = mapMemberInfo.Storage;
+			_dbType                = mapMemberInfo.DbType;
+			_type                  = mapMemberInfo.Type;
 			_memberAccessor        = mapMemberInfo.MemberAccessor;
 			_complexMemberAccessor = mapMemberInfo.ComplexMemberAccessor;
 			_mappingSchema         = mapMemberInfo.MappingSchema;
+
+#if FW3
+			if (_storage != null)
+				_memberAccessor = ExprMemberAccessor.GetMemberAccessor(_memberAccessor.TypeAccessor, _storage);
+#endif
 		}
 
 		internal static MemberMapper CreateMemberMapper(MapMemberInfo mi)
@@ -96,33 +102,11 @@ namespace BLToolkit.Mapping
 			get { return _mappingSchema; }
 		}
 
-		private string _name;
-		public  string  Name
-		{
-			[DebuggerStepThrough]
-			get { return _name; }
-		}
-
-		private string _memberName;
-		public  string  MemberName
-		{
-			[DebuggerStepThrough]
-			get { return _memberName; }
-		}
-
-		private DbType _dbType;
-		public  DbType  DbType
-		{
-			[DebuggerStepThrough]
-			get { return _dbType; }
-		}
-
-		private         Type  _type;
-		public  virtual Type   Type
-		{
-			[DebuggerStepThrough]
-			get { return _type; }
-		}
+		private string _name;       public         string  Name       { [DebuggerStepThrough] get { return _name;       } }
+		private string _memberName; public         string  MemberName { [DebuggerStepThrough] get { return _memberName; } }
+		private string _storage;    public         string  Storage    { [DebuggerStepThrough] get { return _storage;    } }
+		private DbType _dbType;     public         DbType  DbType     { [DebuggerStepThrough] get { return _dbType;     } } 
+		private Type   _type;       public virtual Type    Type       { [DebuggerStepThrough] get { return _type;       } }
 
 		#endregion
 
@@ -1314,15 +1298,15 @@ namespace BLToolkit.Mapping
 
 		abstract class NullableEnumMapper : MemberMapper
 		{
-			protected Type _memberType;
-			protected Type _underlyingType;
+			protected Type MemberType;
+			protected Type UnderlyingType;
 
 			public override void Init(MapMemberInfo mapMemberInfo)
 			{
 				if (mapMemberInfo == null) throw new ArgumentNullException("mapMemberInfo");
 
-				_memberType     = Nullable.GetUnderlyingType(mapMemberInfo.Type);
-				_underlyingType = mapMemberInfo.MemberAccessor.UnderlyingType;
+				MemberType     = Nullable.GetUnderlyingType(mapMemberInfo.Type);
+				UnderlyingType = mapMemberInfo.MemberAccessor.UnderlyingType;
 
 				base.Init(mapMemberInfo);
 			}
@@ -1347,12 +1331,12 @@ namespace BLToolkit.Mapping
 					{
 						Type valueType = value.GetType();
 						
-						if (valueType != _memberType)
+						if (valueType != MemberType)
 						{
-							if (valueType != _underlyingType)
+							if (valueType != UnderlyingType)
 								value = _mappingSchema.ConvertToNullableInt16(value);
 
-							value = System.Enum.ToObject(_memberType, (Int16)value);
+							value = System.Enum.ToObject(MemberType, (Int16)value);
 						}
 					}
 
@@ -1380,12 +1364,12 @@ namespace BLToolkit.Mapping
 					{
 						Type valueType = value.GetType();
 						
-						if (valueType != _memberType)
+						if (valueType != MemberType)
 						{
-							if (valueType != _underlyingType)
+							if (valueType != UnderlyingType)
 								value = _mappingSchema.ConvertToNullableInt32(value);
 
-							value = System.Enum.ToObject(_memberType, (Int32)value);
+							value = System.Enum.ToObject(MemberType, (Int32)value);
 						}
 					}
 
@@ -1413,12 +1397,12 @@ namespace BLToolkit.Mapping
 					{
 						Type valueType = value.GetType();
 						
-						if (valueType != _memberType)
+						if (valueType != MemberType)
 						{
-							if (valueType != _underlyingType)
+							if (valueType != UnderlyingType)
 								value = _mappingSchema.ConvertToNullableSByte(value);
 
-							value = System.Enum.ToObject(_memberType, (SByte)value);
+							value = System.Enum.ToObject(MemberType, (SByte)value);
 						}
 					}
 
@@ -1446,12 +1430,12 @@ namespace BLToolkit.Mapping
 					{
 						Type valueType = value.GetType();
 						
-						if (valueType != _memberType)
+						if (valueType != MemberType)
 						{
-							if (valueType != _underlyingType)
+							if (valueType != UnderlyingType)
 								value = _mappingSchema.ConvertToNullableInt64(value);
 
-							value = System.Enum.ToObject(_memberType, (Int64)value);
+							value = System.Enum.ToObject(MemberType, (Int64)value);
 						}
 					}
 
@@ -1479,12 +1463,12 @@ namespace BLToolkit.Mapping
 					{
 						Type valueType = value.GetType();
 						
-						if (valueType != _memberType)
+						if (valueType != MemberType)
 						{
-							if (valueType != _underlyingType)
+							if (valueType != UnderlyingType)
 								value = _mappingSchema.ConvertToNullableByte(value);
 
-							value = System.Enum.ToObject(_memberType, (Byte)value);
+							value = System.Enum.ToObject(MemberType, (Byte)value);
 						}
 					}
 
@@ -1512,12 +1496,12 @@ namespace BLToolkit.Mapping
 					{
 						Type valueType = value.GetType();
 						
-						if (valueType != _memberType)
+						if (valueType != MemberType)
 						{
-							if (valueType != _underlyingType)
+							if (valueType != UnderlyingType)
 								value = _mappingSchema.ConvertToNullableUInt16(value);
 
-							value = System.Enum.ToObject(_memberType, (UInt16)value);
+							value = System.Enum.ToObject(MemberType, (UInt16)value);
 						}
 					}
 
@@ -1545,12 +1529,12 @@ namespace BLToolkit.Mapping
 					{
 						Type valueType = value.GetType();
 						
-						if (valueType != _memberType)
+						if (valueType != MemberType)
 						{
-							if (valueType != _underlyingType)
+							if (valueType != UnderlyingType)
 								value = _mappingSchema.ConvertToNullableUInt32(value);
 
-							value = System.Enum.ToObject(_memberType, (UInt32)value);
+							value = System.Enum.ToObject(MemberType, (UInt32)value);
 						}
 					}
 
@@ -1578,12 +1562,12 @@ namespace BLToolkit.Mapping
 					{
 						Type valueType = value.GetType();
 						
-						if (valueType != _memberType)
+						if (valueType != MemberType)
 						{
-							if (valueType != _underlyingType)
+							if (valueType != UnderlyingType)
 								value = _mappingSchema.ConvertToNullableUInt64(value);
 
-							value = System.Enum.ToObject(_memberType, (UInt64)value);
+							value = System.Enum.ToObject(MemberType, (UInt64)value);
 						}
 					}
 
