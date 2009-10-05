@@ -51,7 +51,7 @@ namespace BLToolkit.Data.Linq
 			if (source.Length != 0)
 				for (var i = 0; i < source.Length; i++)
 					Debug.WriteLine(
-						prefix + (source.Length == 1 ? "" : i.ToString()) + " - " + source + " : QuerySource." + source.GetType().Name,
+						prefix + (source.Length == 1 ? "" : i.ToString()) + " - " + source[i] + " : QuerySource." + source[i].GetType().Name,
 						GetMethodName());
 		}
 

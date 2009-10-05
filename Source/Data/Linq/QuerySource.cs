@@ -551,7 +551,7 @@ namespace BLToolkit.Data.Linq
 			Lambda        = lambda;
 			ParentQueries = parentQueries;
 
-#if TRACE_PARSING
+#if DEBUG && TRACE_PARSING
 			ParsingTracer.WriteLine(lambda);
 			ParsingTracer.WriteLine(this);
 
@@ -567,7 +567,7 @@ namespace BLToolkit.Data.Linq
 
 		public override string ToString()
 		{
-			var str = SqlBuilder.ToString().Replace('\t', ' ').Replace('\n', ' ');
+			var str = SqlBuilder.ToString().Replace('\t', ' ').Replace('\n', ' ').Replace("\r", "");
 
 			for (var len = str.Length; len != (str = str.Replace("  ", " ")).Length; len = str.Length)
 			{

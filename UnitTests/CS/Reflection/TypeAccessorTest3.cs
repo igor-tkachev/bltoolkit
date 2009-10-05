@@ -2,7 +2,6 @@ using System;
 
 using NUnit.Framework;
 
-using BLToolkit.Mapping;
 using BLToolkit.Reflection;
 
 namespace Reflection
@@ -13,11 +12,9 @@ namespace Reflection
 		class TestObject
 		{
 			private int _field = 15;
-			[MapField("_field")]
 			public  int  Field
 			{
 				get { return _field; }
-				set { _field = 10;   }
 			}
 		}
 

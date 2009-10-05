@@ -54,7 +54,7 @@ namespace BLToolkit.Data.Sql
 				return true;
 
 			SqlValue value = other as SqlValue;
-			return _value == null && value._value == null || _value != null && _value.Equals(value._value);
+			return value != null && (_value == null && value._value == null || _value != null && _value.Equals(value._value));
 		}
 
 		#endregion

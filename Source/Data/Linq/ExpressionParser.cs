@@ -199,7 +199,6 @@ namespace BLToolkit.Data.Linq
 					}
 
 					ParsingTracer.DecIndentLevel();
-
 					return true;
 				}),
 				//
@@ -1132,8 +1131,11 @@ namespace BLToolkit.Data.Linq
 
 								if (field != null)
 								{
-									if (field is QueryField.Column || field is QuerySource.SubQuery)
-										return BuildField(ma, field, converter/*i => i*/);
+									if (field is QueryField.Column /*|| field is QuerySource.SubQuery*/)
+										return BuildField(ma, field, converter);
+
+									if (field is QuerySource.SubQuery)
+										return BuildSubQuery(ma, (QuerySource.SubQuery)field, converter);
 
 									if (field is QueryField.ExprColumn)
 									{
@@ -1275,6 +1277,9 @@ namespace BLToolkit.Data.Linq
 			try
 			{
 #endif
+				if (query is QuerySource.GroupJoinQuery && TypeHelper.IsSameOrParent(typeof(IEnumerable), ma.Expr.Type))
+					return BuildGroupJoin(ma, (QuerySource.GroupJoinQuery)query, converter);
+
 				if (query.ParentQueries.Length == 1)
 				{
 					var parent = query.ParentQueries[0];
@@ -1284,8 +1289,14 @@ namespace BLToolkit.Data.Linq
 					if (parent is QuerySource.Table)
 						return BuildQueryField(ma, parent, conv);
 
+					if (parent is QuerySource.SubQuery)
+						return BuildSubQuery(ma, (QuerySource.SubQuery)parent, conv);
+
 					if (parent is QuerySource.Scalar)
-						return BuildNewExpression(query, ma, conv);
+					{
+						var idx = query.Select(this);
+						return BuildField(ma, idx.Select(i => converter(i).Index).ToArray());
+					}
 
 					return BuildNewExpression(parent, parent.Lambda.Body, conv);
 				}

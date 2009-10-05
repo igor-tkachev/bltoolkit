@@ -276,36 +276,8 @@ namespace BLToolkit.Data.Linq
 
 			db.SetCommand(command, parms);
 
-			//string s = sql.ToString();
-
 #if DEBUG
-			var info = string.Format("{0} {1}\n", DataProvider.Name, db.ConfigurationString);
-
-			if (parms != null && parms.Length > 0)
-			{
-				foreach (var p in parms)
-					info += string.Format("DECLARE {0} {1}\n",
-						p.ParameterName,
-						p.Value == null ? p.DbType.ToString() : p.Value.GetType().Name);
-
-				info += "\n";
-
-				foreach (var p in parms)
-				{
-					var value = p.Value;
-
-					if (value is string || value is char)
-						value = "'" + value.ToString().Replace("'", "''") + "'";
-
-					info += string.Format("SET {0} = {1}\n", p.ParameterName, value);
-				}
-
-				info += "\n";
-			}
-
-			info += command;
-
-			Debug.WriteLineIf(DbManager.TraceSwitch.TraceInfo, info, DbManager.TraceSwitch.DisplayName);
+			Debug.WriteLineIf(DbManager.TraceSwitch.TraceInfo, GetSqlText(db, expr, parms, idx), DbManager.TraceSwitch.DisplayName);
 #endif
 
 			return db.ExecuteReader();
@@ -974,6 +946,57 @@ namespace BLToolkit.Data.Linq
 			}
 
 			throw new InvalidOperationException();
+		}
+
+		#endregion
+
+		#region GetSqlText
+
+		public string GetSqlText(DbManager db, Expression expr, object[] parameters, int idx)
+		{
+			SetParameters(expr, parameters, idx);
+
+			string             command;
+			IDbDataParameter[] parms;
+
+			lock (this)
+			{
+				command = GetCommand(idx);
+				parms   = GetParameters(db, idx);
+			}
+
+			return GetSqlText(db, parms, command);
+		}
+
+		string GetSqlText(DbManager db, IDbDataParameter[] parms, string command)
+		{
+			var info = string.Format("-- {0} {1}\n", DataProvider.Name, db.ConfigurationString);
+
+			if (parms != null && parms.Length > 0)
+			{
+				foreach (var p in parms)
+					info += string.Format("-- DECLARE {0} {1}\n",
+					                      p.ParameterName,
+					                      p.Value == null ? p.DbType.ToString() : p.Value.GetType().Name);
+
+				info += "\n";
+
+				foreach (var p in parms)
+				{
+					var value = p.Value;
+
+					if (value is string || value is char)
+						value = "'" + value.ToString().Replace("'", "''") + "'";
+
+					info += string.Format("-- SET {0} = {1}\n", p.ParameterName, value);
+				}
+
+				info += "\n";
+			}
+
+			info += command;
+
+			return info;
 		}
 
 		#endregion

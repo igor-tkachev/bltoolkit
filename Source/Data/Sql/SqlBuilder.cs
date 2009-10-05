@@ -539,8 +539,6 @@ namespace BLToolkit.Data.Sql
 					return clone;
 				}
 
-				#region Overrides
-
 				public override string ToString()
 				{
 					string op;
@@ -560,8 +558,6 @@ namespace BLToolkit.Data.Sql
 
 					return Expr1 + " " + op + " " + Expr2;
 				}
-
-				#endregion
 			}
 
 			// string_expression [ NOT ] LIKE string_expression [ ESCAPE 'escape_character' ]
@@ -661,6 +657,11 @@ namespace BLToolkit.Data.Sql
 						objectTree.Add(this, clone = new IsNull((ISqlExpression)Expr1.Clone(objectTree, doClone), IsNot));
 
 					return clone;
+				}
+
+				public override string ToString()
+				{
+					return Expr1 + " IS " + (IsNot ? "NOT " : "") + "NULL";
 				}
 			}
 

@@ -1,12 +1,14 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 
 using BLToolkit.Mapping;
 using BLToolkit.Reflection;
+using JetBrains.Annotations;
 
 namespace BLToolkit.Data.Linq
 {
@@ -40,6 +42,32 @@ namespace BLToolkit.Data.Linq
 		public    DbManager         DbManager { get; set; }
 		internal  ExpressionInfo<T> Info;
 		internal  object[]          Parameters;
+
+		#endregion
+
+		#region Public Members
+
+		[DebuggerBrowsable(DebuggerBrowsableState.Never)]
+		private string _sqlTextHolder;
+
+// ReSharper disable InconsistentNaming
+		[UsedImplicitly]
+		private string _sqlText { get { return SqlText; }}
+// ReSharper restore InconsistentNaming
+
+		public  string  SqlText
+		{
+			get
+			{
+				if (_sqlTextHolder == null)
+				{
+					var info = GetExpressionInfo(Expression, true);
+					_sqlTextHolder = info.GetSqlText(DbManager ?? new DbManager(), Expression, Parameters, 0);
+				}
+
+				return _sqlTextHolder;
+			}
+		}
 
 		#endregion
 
