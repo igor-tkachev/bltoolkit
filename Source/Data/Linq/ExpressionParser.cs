@@ -589,10 +589,15 @@ namespace BLToolkit.Data.Linq
 				{
 					case ExpressionType.MemberAccess:
 						{
-							var field = query.GetField(pi.Expr);
+							var ma = (MemberExpression)pi.Expr;
 
-							if (field is QueryField.ExprColumn)
-								makeSubQuery = pi.StopWalking = true;
+							if (ma.Member.Name != "Value" || ma.Member.DeclaringType.GetGenericTypeDefinition() != typeof(Nullable<>))
+							{
+								var field = query.GetField(pi.Expr);
+
+								if (field is QueryField.ExprColumn)
+									makeSubQuery = pi.StopWalking = true;
+							}
 
 							isWhere = true;
 
@@ -1174,7 +1179,7 @@ namespace BLToolkit.Data.Linq
 									return BuildField(ma, field, converter/*i => i*/);
 							}
 
-							if (ex.NodeType == ExpressionType.Constant)
+							if (ex.Expr != null && ex.NodeType == ExpressionType.Constant)
 							{
 								// field = localVariable
 								//
@@ -1321,14 +1326,19 @@ namespace BLToolkit.Data.Linq
 			try
 			{
 #endif
+				IndexConverter conv = i => converter(query.QuerySource.EnsureField(i.Field).Select(this)[0]);
+
 				if (query.Field is QuerySource.Table)
-					return BuildQueryField(ma, (QuerySource.Table)query.Field, i => converter(query.QuerySource.EnsureField(i.Field).Select(this)[0]));
+					return BuildQueryField(ma, (QuerySource.Table)query.Field, conv);
+
+				if (query.Field is QuerySource.SubQuery)
+					return BuildSubQuery(ma, (QuerySource.SubQuery)query.Field, conv);
 
 				if (query.Field is QuerySource)
 					throw new InvalidOperationException();
 
 				if (query.Field is QueryField.SubQueryColumn)
-					return BuildSubQuery(ma, (QueryField.SubQueryColumn)query.Field, i => converter(query.QuerySource.EnsureField(i.Field).Select(this)[0]));
+					return BuildSubQuery(ma, (QueryField.SubQueryColumn)query.Field, conv);
 
 				return BuildField(ma, query, converter);
 #if DEBUG
@@ -1814,13 +1824,12 @@ namespace BLToolkit.Data.Linq
 
 					case ExpressionType.MemberAccess:
 						{
+							var pi = parseInfo.ConvertTo<MemberExpression>();
 							var ma = (MemberExpression)parseInfo.Expr;
 							var ef = _info.SqlProvider.ConvertMember(ma.Member);
 
 							if (ef != null)
 							{
-								var pi = parseInfo.ConvertTo<MemberExpression>();
-
 								var pie = parseInfo.Parent.Replace(ef, null).Walk(wpi =>
 								{
 									if (wpi.NodeType == ExpressionType.Parameter)
@@ -1846,6 +1855,11 @@ namespace BLToolkit.Data.Linq
 							{
 								var attr = (SqlPropertyAttribute)attrs[0];
 								return Convert(new SqlExpression(attr.Name ?? ma.Member.Name));
+							}
+
+							if (ma.Member.Name == "Value" && ma.Member.DeclaringType.GetGenericTypeDefinition() == typeof(Nullable<>))
+							{
+								return ParseExpression(pi.Create(ma.Expression, pi.Property(Member.Expression)), queries);
 							}
 
 							goto case ExpressionType.Parameter;
@@ -2074,73 +2088,66 @@ namespace BLToolkit.Data.Linq
 
 		bool IsServerSideOnly(ParseInfo parseInfo)
 		{
-			var isServerSideOnly = false;
-
-			parseInfo.Walk(pi =>
+			switch (parseInfo.NodeType)
 			{
-				if (isServerSideOnly)
-					return pi;
+				case ExpressionType.MemberAccess:
+					{
+						var pi = parseInfo.ConvertTo<MemberExpression>();
+						var ef = _info.SqlProvider.ConvertMember(pi.Expr.Member);
 
-				switch (pi.NodeType)
-				{
-					case ExpressionType.MemberAccess:
+						if (ef != null)
+							return IsServerSideOnly(pi.Parent.Replace(ef, null));
+
+						var attr = GetFunctionAttribute(pi.Expr.Member);
+
+						return attr != null && attr.ServerSideOnly;
+					}
+
+				case ExpressionType.Call:
+					{
+						var pi = parseInfo.ConvertTo<MethodCallExpression>();
+						var e  = pi.Expr;
+
+						if (e.Method.DeclaringType == typeof(Enumerable))
 						{
-							var ma = (MemberExpression)pi.Expr;
-							var ef = _info.SqlProvider.ConvertMember(ma.Member);
+							switch (e.Method.Name)
+							{
+								case "Count":
+								case "Average":
+								case "Min":
+								case "Max":
+								case "Sum":
+									return IsQueryMember(e.Arguments[0]);
+							}
+						}
+						else
+						{
+							var ef = _info.SqlProvider.ConvertMember(e.Method);
 
 							if (ef != null)
-							{
-								isServerSideOnly = IsServerSideOnly(pi.Parent.Replace(ef, null));
-								break;
-							}
+								return IsServerSideOnly(pi.Parent.Replace(ef, null));
 
-							var attr = GetFunctionAttribute(ma.Member);
+							var attr = GetFunctionAttribute(e.Method);
 
-							isServerSideOnly = attr != null && attr.ServerSideOnly;
+							return attr != null && attr.ServerSideOnly;
 						}
 
 						break;
+					}
+			}
 
-					case ExpressionType.Call:
-						{
-							var e  = pi.Expr as MethodCallExpression;
+			return false;
+		}
 
-							if (e.Method.DeclaringType == typeof(Enumerable))
-							{
-								switch (e.Method.Name)
-								{
-									case "Count":
-									case "Average":
-									case "Min":
-									case "Max":
-									case "Sum":
-										isServerSideOnly = true;
-										break;
-								}
-							}
-							else
-							{
-								var ef = _info.SqlProvider.ConvertMember(e.Method);
+		static bool IsQueryMember(Expression expr)
+		{
+			if (expr != null) switch (expr.NodeType)
+			{
+				case ExpressionType.Parameter    : return true;
+				case ExpressionType.MemberAccess : return IsQueryMember(((MemberExpression)expr).Expression);
+			}
 
-								if (ef != null)
-								{
-									isServerSideOnly = IsServerSideOnly(pi.Parent.Replace(ef, null));
-									break;
-								}
-
-								var attr = GetFunctionAttribute(e.Method);
-
-								isServerSideOnly = attr != null && attr.ServerSideOnly;
-							}
-						}
-
-						break;
-				}
-
-				return pi;
-			});
-
-			return isServerSideOnly;
+			return false;
 		}
 
 		#endregion
@@ -2299,12 +2306,12 @@ namespace BLToolkit.Data.Linq
 			{
 				switch (parseInfo.NodeType)
 				{
-					case ExpressionType.Equal:
-					case ExpressionType.NotEqual:
-					case ExpressionType.GreaterThan:
-					case ExpressionType.GreaterThanOrEqual:
-					case ExpressionType.LessThan:
-					case ExpressionType.LessThanOrEqual:
+					case ExpressionType.Equal :
+					case ExpressionType.NotEqual :
+					case ExpressionType.GreaterThan :
+					case ExpressionType.GreaterThanOrEqual :
+					case ExpressionType.LessThan :
+					case ExpressionType.LessThanOrEqual :
 						{
 							var pi = parseInfo.Convert<BinaryExpression>();
 							var e  = parseInfo.Expr as BinaryExpression;
@@ -2316,8 +2323,8 @@ namespace BLToolkit.Data.Linq
 
 							switch (parseInfo.NodeType)
 							{
-								case ExpressionType.Equal   :
-								case ExpressionType.NotEqual:
+								case ExpressionType.Equal    :
+								case ExpressionType.NotEqual :
 
 									var p = ParseObjectNullComparison(el, er, queries, parseInfo.NodeType == ExpressionType.Equal);
 									if (p != null)
@@ -2330,21 +2337,7 @@ namespace BLToolkit.Data.Linq
 									break;
 							}
 
-							var l  = ParseExpression(el, queries);
-							var r  = ParseExpression(er, queries);
-
 							SqlBuilder.Predicate.Operator op;
-
-							switch (parseInfo.NodeType)
-							{
-								case ExpressionType.Equal   :
-								case ExpressionType.NotEqual:
-
-									if (!CurrentSql.ParameterDependent && (l is SqlParameter || r is SqlParameter) && l.CanBeNull() && r.CanBeNull())
-										CurrentSql.ParameterDependent = true;
-
-									break;
-							}
 
 							switch (parseInfo.NodeType)
 							{
@@ -2355,6 +2348,27 @@ namespace BLToolkit.Data.Linq
 								case ExpressionType.LessThan          : op = SqlBuilder.Predicate.Operator.Less;           break;
 								case ExpressionType.LessThanOrEqual   : op = SqlBuilder.Predicate.Operator.LessOrEqual;    break;
 								default: throw new InvalidOperationException();
+							}
+
+							if (el.NodeType == ExpressionType.Convert || er.NodeType == ExpressionType.Convert)
+							{
+								var p = ParseEnumConversion(pi, el, op, er, queries);
+								if (p != null)
+									return p;
+							}
+
+							var l  = ParseExpression(el, queries);
+							var r  = ParseExpression(er, queries);
+
+							switch (parseInfo.NodeType)
+							{
+								case ExpressionType.Equal   :
+								case ExpressionType.NotEqual:
+
+									if (!CurrentSql.ParameterDependent && (l is SqlParameter || r is SqlParameter) && l.CanBeNull() && r.CanBeNull())
+										CurrentSql.ParameterDependent = true;
+
+									break;
 							}
 
 							return Convert(new SqlBuilder.Predicate.ExprExpr(l, op, r));
@@ -2420,6 +2434,102 @@ namespace BLToolkit.Data.Linq
 			finally
 			{
 				ParsingTracer.DecIndentLevel();
+			}
+		}
+
+		ISqlPredicate ParseEnumConversion(ParseInfo pi, ParseInfo left, SqlBuilder.Predicate.Operator op, ParseInfo right, QuerySource[] queries)
+		{
+			ParseInfo<UnaryExpression> conv;
+			ParseInfo                  value;
+
+			if (left.NodeType == ExpressionType.Convert)
+			{
+				conv  = left.ConvertTo<UnaryExpression>();
+				value = right;
+			}
+			else
+			{
+				conv  = right.ConvertTo<UnaryExpression>();
+				value = left;
+			}
+
+			var operand = conv.Create(conv.Expr.Operand, conv.Property(Unary.Operand));
+			var type    = operand.Expr.Type;
+
+			if (!type.IsEnum)
+				return null;
+
+			var dic = new Dictionary<object, object>();
+
+			var nullValue = _info.MappingSchema.GetNullValue(type);
+
+			if (nullValue != null)
+				dic.Add(nullValue, null);
+
+			var mapValues = _info.MappingSchema.GetMapValues(type);
+
+			if (mapValues != null)
+				foreach (var mv in mapValues)
+					if (!dic.ContainsKey(mv.OrigValue))
+						dic.Add(mv.OrigValue, mv.MapValues[0]);
+
+			if (dic.Count == 0)
+				return null;
+
+			switch (value.NodeType)
+			{
+				case ExpressionType.Constant:
+					{
+						var    origValue = Enum.Parse(type, Enum.GetName(type, ((ConstantExpression)value).Value));
+						object mapValue;
+
+						if (!dic.TryGetValue(origValue, out mapValue))
+							return null;
+
+						ISqlExpression l, r;
+
+						if (left.NodeType == ExpressionType.Convert)
+						{
+							l = ParseExpression(operand, queries);
+							r = new SqlValue(mapValue);
+						}
+						else
+						{
+							r = ParseExpression(operand, queries);
+							l = new SqlValue(mapValue);
+						}
+
+						return Convert(new SqlBuilder.Predicate.ExprExpr(l, op, r));
+					}
+
+				case ExpressionType.Convert:
+					{
+						value = value.ConvertTo<UnaryExpression>();
+						value = value.Create(((UnaryExpression)value.Expr).Operand, value.Property(Unary.Operand));
+
+						var l = ParseExpression(operand, queries);
+						var r = ParseExpression(value,   queries);
+
+						if (l is SqlParameter) SetParameterEnumConverter((SqlParameter)l, type, _info.MappingSchema);
+						if (r is SqlParameter) SetParameterEnumConverter((SqlParameter)r, type, _info.MappingSchema);
+
+						return Convert(new SqlBuilder.Predicate.ExprExpr(l, op, r));
+					}
+			}
+
+			return null;
+		}
+
+		static void SetParameterEnumConverter(SqlParameter p, Type type, MappingSchema ms)
+		{
+			if (p.ValueConverter == null)
+			{
+				p.ValueConverter = o => ms.MapEnumToValue(o, type);
+			}
+			else
+			{
+				var converter = p.ValueConverter;
+				p.ValueConverter = o => ms.MapEnumToValue(converter(o), type);
 			}
 		}
 

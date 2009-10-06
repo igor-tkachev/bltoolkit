@@ -8,6 +8,7 @@ using System.Reflection;
 
 using BLToolkit.Mapping;
 using BLToolkit.Reflection;
+
 using JetBrains.Annotations;
 
 namespace BLToolkit.Data.Linq
@@ -133,7 +134,7 @@ namespace BLToolkit.Data.Linq
 			if (expression == null)
 				throw new ArgumentNullException("expression");
 
-			return new Table<TElement>(DbManager, expression);
+			return new Query<TElement>(DbManager, expression);
 		}
 
 		IQueryable IQueryProvider.CreateQuery(Expression expression)
@@ -145,7 +146,7 @@ namespace BLToolkit.Data.Linq
 
 			try
 			{
-				return (IQueryable)Activator.CreateInstance(typeof(Table<>).MakeGenericType(elementType), new object[] { DbManager, expression });
+				return (IQueryable)Activator.CreateInstance(typeof(Query<>).MakeGenericType(elementType), new object[] { DbManager, expression });
 			}
 			catch (TargetInvocationException ex)
 			{

@@ -130,6 +130,7 @@
     <Compile Include="Data\Linq\CompiledTableT.cs" />
     <Compile Include="Data\Linq\ElementMethod.cs" />
     <Compile Include="Data\Linq\FieldIndex.cs" />
+    <Compile Include="Data\Linq\QueryT.cs" />
     <Compile Include="Data\Sql\IClonableElement.cs" />
     <Compile Include="Data\Linq\LambdaInfo.cs" />
     <Compile Include="Data\Linq\ParsingTracer.cs" />

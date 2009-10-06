@@ -396,6 +396,12 @@ namespace Data.Linq
 		}
 
 		[Test]
+		public void Value()
+		{
+			ForEachProvider(db => Assert.AreEqual(1, (from p in db.Parent where p.Value1.Value == 1 select p).ToList().Count));
+		}
+
+		[Test]
 		public void CompareNullable1()
 		{
 			ForEachProvider(db => Assert.AreEqual(1, (from p in db.Parent where p.Value1 == 1 select p).ToList().Count));

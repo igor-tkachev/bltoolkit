@@ -15,7 +15,7 @@ namespace Data.Linq
 		{
 			ForEachProvider(db =>
 			{
-				var q = from p in db.Person where p.ID == 1 select new { Now = Sql.GetDate() };
+				var q = from p in db.Person where p.ID == 1 select new { Now = Sql.CurrentTimestamp };
 				Assert.AreEqual(DateTime.Now.Year, q.ToList().First().Now.Year);
 			});
 		}

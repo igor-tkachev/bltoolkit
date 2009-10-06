@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 using NUnit.Framework;
@@ -239,6 +240,21 @@ namespace Data.Linq
 				var f = q.Where(p => p.FirstName == "123John456").ToList().First();
 				Assert.AreEqual(1, f.ID);
 			});
+		}
+
+		IEnumerable<int> GetList(int i)
+		{
+			yield return i;
+		}
+
+		[Test]
+		public void SelectEnumerable()
+		{
+			var expected =
+				from p in Parent select new {  Max = GetList(p.ParentID).Max() };
+
+			ForEachProvider(db => AreEqual(expected,
+				from p in db.Parent select new {  Max = GetList(p.ParentID).Max() }));
 		}
 	}
 }

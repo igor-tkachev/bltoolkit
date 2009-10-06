@@ -184,16 +184,21 @@ namespace BLToolkit.Data.Linq
 
 		#region DateTime Functions
 
-		[SqlFunction(ServerSideOnly = true)]
 		public static DateTime GetDate()
 		{
-			throw new LinqException("The 'GetDate' method is server side only method.");
+			return DateTime.Now;
 		}
 
 		[SqlProperty(Name = "CURRENT_TIMESTAMP", ServerSideOnly = true)]
 		public static DateTime CurrentTimestamp
 		{
 			get { throw new LinqException("The 'CurrentTimestamp' property is server side only property."); }
+		}
+
+		[SqlProperty(Name = "CURRENT_TIMESTAMP")]
+		public static DateTime CurrentTimestamp2
+		{
+			get { return DateTime.Now; }
 		}
 
 		#endregion

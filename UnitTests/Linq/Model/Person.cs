@@ -27,7 +27,9 @@ namespace Data.Linq.Model
 		                       public string FirstName { get; set; }
 		                       public string LastName;
 		[Nullable]             public string MiddleName;
-		                       public char   Gender;
+		                       public Gender Gender;
+
+		[MapIgnore]            public string Name { get { return FirstName + " " + LastName; }}
 
 		public override bool Equals(object obj)
 		{

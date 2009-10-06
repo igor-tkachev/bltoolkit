@@ -859,9 +859,9 @@ namespace BLToolkit.Data.Sql.SqlProvider
 				}
 
 				if (type.IsEnum)
-					value = Map.EnumToValue(value);
-
-				sb.Append(value);
+					BuildValue(sb, Map.EnumToValue(value));
+				else
+					sb.Append(value);
 			}
 		}
 

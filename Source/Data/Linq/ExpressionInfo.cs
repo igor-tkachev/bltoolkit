@@ -277,7 +277,7 @@ namespace BLToolkit.Data.Linq
 			db.SetCommand(command, parms);
 
 #if DEBUG
-			Debug.WriteLineIf(DbManager.TraceSwitch.TraceInfo, GetSqlText(db, expr, parms, idx), DbManager.TraceSwitch.DisplayName);
+			Debug.WriteLineIf(DbManager.TraceSwitch.TraceInfo, GetSqlText(db, parms, command), DbManager.TraceSwitch.DisplayName);
 #endif
 
 			return db.ExecuteReader();
@@ -970,16 +970,29 @@ namespace BLToolkit.Data.Linq
 
 		string GetSqlText(DbManager db, IDbDataParameter[] parms, string command)
 		{
-			var info = string.Format("-- {0} {1}\n", DataProvider.Name, db.ConfigurationString);
+			var sb = new StringBuilder();
+
+			sb.Append("-- ").Append(db.ConfigurationString);
+
+			if (db.ConfigurationString != DataProvider.Name)
+				sb.Append(' ').Append(DataProvider.Name);
+
+			if (DataProvider.Name != SqlProvider.Name)
+				sb.Append(' ').Append(SqlProvider.Name);
+
+			sb.AppendLine();
 
 			if (parms != null && parms.Length > 0)
 			{
 				foreach (var p in parms)
-					info += string.Format("-- DECLARE {0} {1}\n",
-					                      p.ParameterName,
-					                      p.Value == null ? p.DbType.ToString() : p.Value.GetType().Name);
+					sb
+						.Append("-- DECLARE ")
+						.Append(p.ParameterName)
+						.Append(' ')
+						.Append(p.Value == null ? p.DbType.ToString() : p.Value.GetType().Name)
+						.AppendLine();
 
-				info += "\n";
+				sb.AppendLine();
 
 				foreach (var p in parms)
 				{
@@ -988,15 +1001,20 @@ namespace BLToolkit.Data.Linq
 					if (value is string || value is char)
 						value = "'" + value.ToString().Replace("'", "''") + "'";
 
-					info += string.Format("-- SET {0} = {1}\n", p.ParameterName, value);
+					sb
+						.Append("-- SET ")
+						.Append(p.ParameterName)
+						.Append(" = ")
+						.Append(value)
+						.AppendLine();
 				}
 
-				info += "\n";
+				sb.AppendLine();
 			}
 
-			info += command;
+			sb.Append(command);
 
-			return info;
+			return sb.ToString();
 		}
 
 		#endregion

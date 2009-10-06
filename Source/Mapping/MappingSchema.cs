@@ -1679,6 +1679,7 @@ namespace BLToolkit.Mapping
 			}
 
 			InvalidCastException exInvalidCast = null;
+
 			try
 			{
 				value = ConvertChangeType(value, Enum.GetUnderlyingType(type));
@@ -1715,12 +1716,12 @@ namespace BLToolkit.Mapping
 		}
 
 		[SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
-		public virtual object MapEnumToValue(object value, bool convertToUnderlyingType)
+		public virtual object MapEnumToValue(object value, Type type, bool convertToUnderlyingType)
 		{
 			if (value == null)
 				return null;
 
-			Type type = value.GetType();
+			type = value.GetType();
 
 			object nullValue = GetNullValue(type);
 
@@ -1762,9 +1763,23 @@ namespace BLToolkit.Mapping
 				value;
 		}
 
+		[SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
+		public virtual object MapEnumToValue(object value, bool convertToUnderlyingType)
+		{
+			if (value == null)
+				return null;
+
+			return MapEnumToValue(value, value.GetType(), convertToUnderlyingType);
+		}
+
 		public object MapEnumToValue(object value)
 		{
 			return MapEnumToValue(value, false);
+		}
+
+		public virtual object MapEnumToValue(object value, Type type)
+		{
+			return MapEnumToValue(value, type, false);
 		}
 
 		public T MapValueToEnum<T>(object value)

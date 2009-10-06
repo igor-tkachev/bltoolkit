@@ -265,8 +265,8 @@ namespace BLToolkit.Data.Linq
 			where T : Expression
 		{
 			return Parent == null?
-				CreateRoot   (Expr as T, ConvertExpressionTo<T>()):
-				Parent.Create(Expr as T, ConvertExpressionTo<T>());
+				CreateRoot   ((T)Expr, ConvertExpressionTo<T>()):
+				Parent.Create((T)Expr, ConvertExpressionTo<T>());
 		}
 
 		public UnaryExpression ConvertExpressionTo<T>()
