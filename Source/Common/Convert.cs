@@ -150,7 +150,7 @@ namespace BLToolkit.Common
 		/// <summary>Converts the value of a specified object to an equivalent <c>String</c> value.</summary>
 		public static String ToString(object p)         
 		{
-			if (p == null || p is DBNull) return String.Empty;
+			if (p == null || p is DBNull) return Common.Configuration.NullableValues.String;
 
 			if (p is String) return (String)p;
 
@@ -344,7 +344,7 @@ namespace BLToolkit.Common
 		[CLSCompliant(false)]
 		public static SByte ToSByte(object p)         
 		{
-			if (p == null || p is DBNull) return 0;
+			if (p == null || p is DBNull) return Common.Configuration.NullableValues.SByte;
 
 			if (p is SByte) return (SByte)p;
 
@@ -504,7 +504,7 @@ namespace BLToolkit.Common
 		/// <summary>Converts the value of a specified object to an equivalent <c>Int16</c> value.</summary>
 		public static Int16 ToInt16(object p)         
 		{
-			if (p == null || p is DBNull) return 0;
+			if (p == null || p is DBNull) return Common.Configuration.NullableValues.Int16;
 
 			if (p is Int16) return (Int16)p;
 
@@ -664,7 +664,7 @@ namespace BLToolkit.Common
 		/// <summary>Converts the value of a specified object to an equivalent <c>Int32</c> value.</summary>
 		public static Int32 ToInt32(object p)
 		{
-			if (p == null || p is DBNull) return 0;
+			if (p == null || p is DBNull) return Common.Configuration.NullableValues.Int32;
 
 			if (p is Int32) return (Int32)p;
 
@@ -842,7 +842,7 @@ namespace BLToolkit.Common
 		/// <summary>Converts the value of a specified object to an equivalent <c>Int64</c> value.</summary>
 		public static Int64 ToInt64(object p)         
 		{
-			if (p == null || p is DBNull) return 0;
+			if (p == null || p is DBNull) return Common.Configuration.NullableValues.Int64;
 
 			if (p is Int64) return (Int64)p;
 
@@ -1007,7 +1007,7 @@ namespace BLToolkit.Common
 		/// <summary>Converts the value of a specified object to an equivalent <c>Byte</c> value.</summary>
 		public static Byte ToByte(object p)         
 		{
-			if (p == null || p is DBNull) return 0;
+			if (p == null || p is DBNull) return Common.Configuration.NullableValues.Byte;
 
 			if (p is Byte) return (Byte)p;
 
@@ -1197,7 +1197,7 @@ namespace BLToolkit.Common
 		[CLSCompliant(false)]
 		public static UInt16 ToUInt16(object p)         
 		{
-			if (p == null || p is DBNull) return 0;
+			if (p == null || p is DBNull) return Common.Configuration.NullableValues.UInt16;
 
 			if (p is UInt16) return (UInt16)p;
 
@@ -1387,7 +1387,7 @@ namespace BLToolkit.Common
 		[CLSCompliant(false)]
 		public static UInt32 ToUInt32(object p)         
 		{
-			if (p == null || p is DBNull) return 0;
+			if (p == null || p is DBNull) return Common.Configuration.NullableValues.UInt32;
 
 			if (p is UInt32) return (UInt32)p;
 
@@ -1577,7 +1577,7 @@ namespace BLToolkit.Common
 		[CLSCompliant(false)]
 		public static UInt64 ToUInt64(object p)         
 		{
-			if (p == null || p is DBNull) return 0;
+			if (p == null || p is DBNull) return Common.Configuration.NullableValues.UInt64;
 
 			if (p is UInt64) return (UInt64)p;
 
@@ -1737,7 +1737,7 @@ namespace BLToolkit.Common
 		/// <summary>Converts the value of a specified object to an equivalent <c>Char</c> value.</summary>
 		public static Char ToChar(object p)         
 		{
-			if (p == null || p is DBNull) return '\x0';
+			if (p == null || p is DBNull) return Common.Configuration.NullableValues.Char;
 
 			if (p is Char) return (Char)p;
 
@@ -1898,7 +1898,7 @@ namespace BLToolkit.Common
 		/// <summary>Converts the value of a specified object to an equivalent <c>Single</c> value.</summary>
 		public static Single ToSingle(object p)         
 		{
-			if (p == null || p is DBNull) return 0.0f;
+			if (p == null || p is DBNull) return Common.Configuration.NullableValues.Single;
 
 			if (p is Single) return (Single)p;
 
@@ -2076,7 +2076,7 @@ namespace BLToolkit.Common
 		/// <summary>Converts the value of a specified object to an equivalent <c>Double</c> value.</summary>
 		public static Double ToDouble(object p)         
 		{
-			if (p == null || p is DBNull) return 0.0;
+			if (p == null || p is DBNull) return Common.Configuration.NullableValues.Double;
 
 			if (p is Double) return (Double)p;
 
@@ -2263,7 +2263,7 @@ namespace BLToolkit.Common
 		/// <summary>Converts the value of a specified object to an equivalent <c>Boolean</c> value.</summary>
 		public static Boolean ToBoolean(object p)         
 		{
-			if (p == null || p is DBNull) return false;
+			if (p == null || p is DBNull) return Common.Configuration.NullableValues.Boolean;
 
 			if (p is Boolean) return (Boolean)p;
 
@@ -2433,7 +2433,7 @@ namespace BLToolkit.Common
 		/// <summary>Converts the value of a specified object to an equivalent <c>Decimal</c> value.</summary>
 		public static Decimal ToDecimal(object p)         
 		{
-			if (p == null || p is DBNull) return 0.0m;
+			if (p == null || p is DBNull) return Common.Configuration.NullableValues.Decimal;
 
 			if (p is Decimal) return (Decimal)p;
 
@@ -2534,7 +2534,7 @@ namespace BLToolkit.Common
 		/// <summary>Converts the value of a specified object to an equivalent <c>DateTime</c> value.</summary>
 		public static DateTime ToDateTime(object p)         
 		{
-			if (p == null || p is DBNull) return DateTime.MinValue;
+			if (p == null || p is DBNull) return Common.Configuration.NullableValues.DateTime;
 
 			if (p is DateTime) return (DateTime)p;
 
@@ -7895,7 +7895,7 @@ namespace BLToolkit.Common
 		// Scalar Types.
 		// 
 		/// <summary>Converts the value from <c>String</c> to an equivalent <c>XmlDocument</c> value.</summary>
-		public static XmlDocument ToXmlDocument(String p)         
+		public static XmlDocument ToXmlDocument(String p)
 		{
 			if (string.IsNullOrEmpty(p)) return null;
 

@@ -190,6 +190,7 @@
     <Compile Include="TypeBuilder\Builders\PropertyChangeBuilderTest.cs" />
     <Compile Include="TypeBuilder\TypeFactoryTest.cs" />
     <Compile Include="Reflection\Extension\ExtensionTest.cs" />
+    <Compile Include="Validation\MinValue.cs" />
     <Compile Include="Validation\NullValue.cs" />
     <Compile Include="Validation\RegExValidationTest.cs" />
   </ItemGroup>

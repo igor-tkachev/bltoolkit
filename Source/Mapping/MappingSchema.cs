@@ -203,7 +203,7 @@ namespace BLToolkit.Mapping
 		{
 			return
 				value is Int16? (Int16)value:
-				value == null?  _defaultInt16NullValue:
+				value == null || value is DBNull? _defaultInt16NullValue:
 					Convert.ToInt16(value);
 		}
 
@@ -218,7 +218,7 @@ namespace BLToolkit.Mapping
 		{
 			return
 				value is Int32? (Int32)value:
-				value == null?  _defaultInt32NullValue:
+				value == null || value is DBNull? _defaultInt32NullValue:
 					Convert.ToInt32(value);
 		}
 
@@ -233,7 +233,7 @@ namespace BLToolkit.Mapping
 		{
 			return
 				value is Int64? (Int64)value:
-				value == null?  _defaultInt64NullValue:
+				value == null || value is DBNull? _defaultInt64NullValue:
 					Convert.ToInt64(value);
 		}
 
@@ -248,7 +248,7 @@ namespace BLToolkit.Mapping
 		{
 			return
 				value is Byte? (Byte)value:
-				value == null? _defaultByteNullValue:
+				value == null || value is DBNull? _defaultByteNullValue:
 					Convert.ToByte(value);
 		}
 
@@ -265,7 +265,7 @@ namespace BLToolkit.Mapping
 		{
 			return
 				value is UInt16? (UInt16)value:
-				value == null?   _defaultUInt16NullValue:
+				value == null || value is DBNull? _defaultUInt16NullValue:
 					Convert.ToUInt16(value);
 		}
 
@@ -282,7 +282,7 @@ namespace BLToolkit.Mapping
 		{
 			return
 				value is UInt32? (UInt32)value:
-				value == null?   _defaultUInt32NullValue:
+				value == null || value is DBNull? _defaultUInt32NullValue:
 					Convert.ToUInt32(value);
 		}
 
@@ -299,7 +299,7 @@ namespace BLToolkit.Mapping
 		{
 			return
 				value is UInt64? (UInt64)value:
-				value == null?   _defaultUInt64NullValue:
+				value == null || value is DBNull? _defaultUInt64NullValue:
 					Convert.ToUInt64(value);
 		}
 
@@ -314,7 +314,7 @@ namespace BLToolkit.Mapping
 		{
 			return
 				value is Char? (Char)value:
-				value == null? _defaultCharNullValue:
+				value == null || value is DBNull? _defaultCharNullValue:
 					Convert.ToChar(value);
 		}
 
@@ -329,7 +329,7 @@ namespace BLToolkit.Mapping
 		{
 			return
 				value is Single? (Single)value:
-				value == null?   _defaultSingleNullValue:
+				value == null || value is DBNull? _defaultSingleNullValue:
 					Convert.ToSingle(value);
 		}
 
@@ -344,7 +344,7 @@ namespace BLToolkit.Mapping
 		{
 			return
 				value is Double? (Double)value:
-				value == null?   _defaultDoubleNullValue:
+				value == null || value is DBNull? _defaultDoubleNullValue:
 					Convert.ToDouble(value);
 		}
 
@@ -359,7 +359,7 @@ namespace BLToolkit.Mapping
 		{
 			return
 				value is Boolean? (Boolean)value:
-				value == null?    _defaultBooleanNullValue:
+				value == null || value is DBNull? _defaultBooleanNullValue:
 					Convert.ToBoolean(value);
 		}
 
@@ -378,7 +378,7 @@ namespace BLToolkit.Mapping
 		{
 			return
 				value is String? (String)value :
-				value == null?   _defaultStringNullValue:
+				value == null || value is DBNull? _defaultStringNullValue:
 					Convert.ToString(value);
 		}
 
@@ -393,7 +393,7 @@ namespace BLToolkit.Mapping
 		{
 			return
 				value is DateTime? (DateTime)value:
-				value == null?     _defaultDateTimeNullValue:
+				value == null || value is DBNull? _defaultDateTimeNullValue:
 					Convert.ToDateTime(value);
 		}
 
@@ -409,7 +409,7 @@ namespace BLToolkit.Mapping
 		{
 			return
 				value is DateTimeOffset? (DateTimeOffset)value:
-				value == null?     _defaultDateTimeOffsetNullValue:
+				value == null || value is DBNull? _defaultDateTimeOffsetNullValue:
 					Convert.ToDateTimeOffset(value);
 		}
 #endif
@@ -425,7 +425,7 @@ namespace BLToolkit.Mapping
 		{
 			return
 				value is Decimal? (Decimal)value:
-				value == null?    _defaultDecimalNullValue:
+				value == null || value is DBNull? _defaultDecimalNullValue:
 					Convert.ToDecimal(value);
 		}
 
@@ -440,7 +440,7 @@ namespace BLToolkit.Mapping
 		{
 			return
 				value is Guid? (Guid)value:
-				value == null?  _defaultGuidNullValue:
+				value == null || value is DBNull? _defaultGuidNullValue:
 					Convert.ToGuid(value);
 		}
 
@@ -455,7 +455,7 @@ namespace BLToolkit.Mapping
 		{
 			return
 				value is Stream? (Stream)value:
-				value == null?   _defaultStreamNullValue:
+				value == null || value is DBNull? _defaultStreamNullValue:
 					 Convert.ToStream(value);
 		}
 
@@ -470,7 +470,7 @@ namespace BLToolkit.Mapping
 		{
 			return
 				value is XmlReader? (XmlReader)value:
-				value == null?      _defaultXmlReaderNullValue:
+				value == null || value is DBNull? _defaultXmlReaderNullValue:
 					Convert.ToXmlReader(value);
 		}
 
@@ -485,7 +485,7 @@ namespace BLToolkit.Mapping
 		{
 			return
 				value is XmlDocument? (XmlDocument)value:
-				value == null?        _defaultXmlDocumentNullValue:
+				value == null || value is DBNull? _defaultXmlDocumentNullValue:
 					Convert.ToXmlDocument(value);
 		}
 
@@ -493,7 +493,7 @@ namespace BLToolkit.Mapping
 		{
 			return
 				value is byte[]? (byte[])value:
-				value == null?    null:
+				value == null || value is DBNull? null:
 					Convert.ToByteArray(value);
 		}
 
@@ -501,7 +501,7 @@ namespace BLToolkit.Mapping
 		{
 			return
 				value is char[]? (char[])value:
-				value == null?    null:
+				value == null || value is DBNull? null:
 					Convert.ToCharArray(value);
 		}
 
@@ -514,7 +514,7 @@ namespace BLToolkit.Mapping
 		{
 			return
 				value is SByte? (SByte?)value:
-				value == null?  null:
+				value == null || value is DBNull? null:
 					Convert.ToNullableSByte(value);
 		}
 
@@ -522,7 +522,7 @@ namespace BLToolkit.Mapping
 		{
 			return
 				value is Int16? (Int16?)value:
-				value == null?  null:
+				value == null || value is DBNull? null:
 					Convert.ToNullableInt16(value);
 		}
 
@@ -530,7 +530,7 @@ namespace BLToolkit.Mapping
 		{
 			return
 				value is Int32? (Int32?)value:
-				value == null?  null:
+				value == null || value is DBNull? null:
 					Convert.ToNullableInt32(value);
 		}
 
@@ -538,7 +538,7 @@ namespace BLToolkit.Mapping
 		{
 			return
 				value is Int64? (Int64?)value:
-				value == null?  null:
+				value == null || value is DBNull? null:
 					Convert.ToNullableInt64(value);
 		}
 
@@ -546,7 +546,7 @@ namespace BLToolkit.Mapping
 		{
 			return
 				value is Byte? (Byte?)value:
-				value == null? null:
+				value == null || value is DBNull? null:
 					Convert.ToNullableByte(value);
 		}
 
@@ -555,7 +555,7 @@ namespace BLToolkit.Mapping
 		{
 			return
 				value is UInt16? (UInt16?)value:
-				value == null?   null:
+				value == null || value is DBNull? null:
 					Convert.ToNullableUInt16(value);
 		}
 
@@ -564,7 +564,7 @@ namespace BLToolkit.Mapping
 		{
 			return
 				value is UInt32? (UInt32?)value:
-				value == null?   null:
+				value == null || value is DBNull? null:
 					Convert.ToNullableUInt32(value);
 		}
 
@@ -573,7 +573,7 @@ namespace BLToolkit.Mapping
 		{
 			return
 				value is UInt64? (UInt64?)value:
-				value == null?   null:
+				value == null || value is DBNull? null:
 					Convert.ToNullableUInt64(value);
 		}
 
@@ -581,7 +581,7 @@ namespace BLToolkit.Mapping
 		{
 			return
 				value is Char? (Char?)value:
-				value == null? null:
+				value == null || value is DBNull? null:
 					Convert.ToNullableChar(value);
 		}
 
@@ -589,7 +589,7 @@ namespace BLToolkit.Mapping
 		{
 			return
 				value is Double? (Double?)value:
-				value == null?   null:
+				value == null || value is DBNull? null:
 					Convert.ToNullableDouble(value);
 		}
 
@@ -597,7 +597,7 @@ namespace BLToolkit.Mapping
 		{
 			return
 				value is Single? (Single?)value:
-				value == null? null:
+				value == null || value is DBNull? null:
 					Convert.ToNullableSingle(value);
 		}
 
@@ -605,7 +605,7 @@ namespace BLToolkit.Mapping
 		{
 			return
 				value is Boolean? (Boolean?)value:
-				value == null?    null:
+				value == null || value is DBNull? null:
 					Convert.ToNullableBoolean(value);
 		}
 
@@ -613,7 +613,7 @@ namespace BLToolkit.Mapping
 		{
 			return
 				value is DateTime? (DateTime?)value:
-				value == null?     null:
+				value == null || value is DBNull? null:
 					Convert.ToNullableDateTime(value);
 		}
 
@@ -622,7 +622,7 @@ namespace BLToolkit.Mapping
 		{
 			return
 				value is DateTimeOffset? (DateTimeOffset?)value:
-				value == null?           null:
+				value == null || value is DBNull? null:
 					Convert.ToNullableDateTimeOffset(value);
 		}
 #endif
@@ -631,7 +631,7 @@ namespace BLToolkit.Mapping
 		{
 			return
 				value is Decimal? (Decimal?)value:
-				value == null?    null:
+				value == null || value is DBNull? null:
 					Convert.ToNullableDecimal(value);
 		}
 
@@ -639,7 +639,7 @@ namespace BLToolkit.Mapping
 		{
 			return
 				value is Guid? (Guid?)value:
-				value == null? null:
+				value == null || value is DBNull? null:
 					Convert.ToNullableGuid(value);
 		}
 
@@ -650,7 +650,7 @@ namespace BLToolkit.Mapping
 		public virtual SqlByte ConvertToSqlByte(object value)
 		{
 			return
-				value == null?     SqlByte.Null :
+				value == null || value is DBNull? SqlByte.Null :
 				value is SqlByte? (SqlByte)value:
 					Convert.ToSqlByte(value);
 		}
@@ -658,7 +658,7 @@ namespace BLToolkit.Mapping
 		public virtual SqlInt16 ConvertToSqlInt16(object value)
 		{
 			return
-				value == null?      SqlInt16.Null:
+				value == null || value is DBNull? SqlInt16.Null:
 				value is SqlInt16? (SqlInt16)value:
 					Convert.ToSqlInt16(value);
 		}
@@ -666,7 +666,7 @@ namespace BLToolkit.Mapping
 		public virtual SqlInt32 ConvertToSqlInt32(object value)
 		{
 			return
-				value == null?      SqlInt32.Null:
+				value == null || value is DBNull? SqlInt32.Null:
 				value is SqlInt32? (SqlInt32)value:
 					Convert.ToSqlInt32(value);
 		}
@@ -674,7 +674,7 @@ namespace BLToolkit.Mapping
 		public virtual SqlInt64 ConvertToSqlInt64(object value)
 		{
 			return
-				value == null?      SqlInt64.Null:
+				value == null || value is DBNull? SqlInt64.Null:
 				value is SqlInt64? (SqlInt64)value:
 					Convert.ToSqlInt64(value);
 		}
@@ -682,7 +682,7 @@ namespace BLToolkit.Mapping
 		public virtual SqlSingle ConvertToSqlSingle(object value)
 		{
 			return
-				value == null?       SqlSingle.Null:
+				value == null || value is DBNull? SqlSingle.Null:
 				value is SqlSingle? (SqlSingle)value:
 					Convert.ToSqlSingle(value);
 		}
@@ -690,7 +690,7 @@ namespace BLToolkit.Mapping
 		public virtual SqlBoolean ConvertToSqlBoolean(object value)
 		{
 			return
-				value == null?        SqlBoolean.Null:
+				value == null || value is DBNull? SqlBoolean.Null:
 				value is SqlBoolean? (SqlBoolean)value:
 					Convert.ToSqlBoolean(value);
 		}
@@ -698,7 +698,7 @@ namespace BLToolkit.Mapping
 		public virtual SqlDouble ConvertToSqlDouble(object value)
 		{
 			return
-				value == null?       SqlDouble.Null:
+				value == null || value is DBNull? SqlDouble.Null:
 				value is SqlDouble? (SqlDouble)value:
 					Convert.ToSqlDouble(value);
 		}
@@ -706,7 +706,7 @@ namespace BLToolkit.Mapping
 		public virtual SqlDateTime ConvertToSqlDateTime(object value)
 		{
 			return
-				value == null?         SqlDateTime.Null:
+				value == null || value is DBNull? SqlDateTime.Null:
 				value is SqlDateTime? (SqlDateTime)value:
 					Convert.ToSqlDateTime(value);
 		}
@@ -714,7 +714,7 @@ namespace BLToolkit.Mapping
 		public virtual SqlDecimal ConvertToSqlDecimal(object value)
 		{
 			return
-				value == null?        SqlDecimal.Null:
+				value == null || value is DBNull? SqlDecimal.Null:
 				value is SqlDecimal? (SqlDecimal)value:
 				value is SqlMoney?   ((SqlMoney)value).ToSqlDecimal():
 					Convert.ToSqlDecimal(value);
@@ -723,7 +723,7 @@ namespace BLToolkit.Mapping
 		public virtual SqlMoney ConvertToSqlMoney(object value)
 		{
 			return
-				value == null?        SqlMoney.Null:
+				value == null || value is DBNull? SqlMoney.Null:
 				value is SqlMoney?   (SqlMoney)value:
 				value is SqlDecimal? ((SqlDecimal)value).ToSqlMoney():
 					Convert.ToSqlMoney(value);
@@ -732,7 +732,7 @@ namespace BLToolkit.Mapping
 		public virtual SqlString ConvertToSqlString(object value)
 		{
 			return
-				value == null?       SqlString.Null:
+				value == null || value is DBNull? SqlString.Null:
 				value is SqlString? (SqlString)value:
 					Convert.ToSqlString(value);
 		}
@@ -740,7 +740,7 @@ namespace BLToolkit.Mapping
 		public virtual SqlBinary ConvertToSqlBinary(object value)
 		{
 			return
-				value == null?       SqlBinary.Null:
+				value == null || value is DBNull? SqlBinary.Null:
 				value is SqlBinary? (SqlBinary)value:
 					Convert.ToSqlBinary(value);
 		}
@@ -748,7 +748,7 @@ namespace BLToolkit.Mapping
 		public virtual SqlGuid ConvertToSqlGuid(object value)
 		{
 			return
-				value == null?     SqlGuid.Null:
+				value == null || value is DBNull? SqlGuid.Null:
 				value is SqlGuid? (SqlGuid)value:
 					Convert.ToSqlGuid(value);
 		}
@@ -756,7 +756,7 @@ namespace BLToolkit.Mapping
 		public virtual SqlBytes ConvertToSqlBytes(object value)
 		{
 			return
-				value == null?      SqlBytes.Null:
+				value == null || value is DBNull? SqlBytes.Null:
 				value is SqlBytes? (SqlBytes)value:
 					Convert.ToSqlBytes(value);
 		}
@@ -764,7 +764,7 @@ namespace BLToolkit.Mapping
 		public virtual SqlChars ConvertToSqlChars(object value)
 		{
 			return
-				value == null?      SqlChars.Null:
+				value == null || value is DBNull? SqlChars.Null:
 				value is SqlChars? (SqlChars)value:
 					Convert.ToSqlChars(value);
 		}
@@ -772,7 +772,7 @@ namespace BLToolkit.Mapping
 		public virtual SqlXml ConvertToSqlXml(object value)
 		{
 			return
-				value == null?    SqlXml.Null:
+				value == null || value is DBNull? SqlXml.Null:
 				value is SqlXml? (SqlXml)value:
 					Convert.ToSqlXml(value);
 		}

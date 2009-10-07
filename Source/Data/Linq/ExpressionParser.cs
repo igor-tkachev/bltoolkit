@@ -11,10 +11,10 @@ using IndexConverter = System.Func<BLToolkit.Data.Linq.FieldIndex,BLToolkit.Data
 
 namespace BLToolkit.Data.Linq
 {
+	using Data.Sql;
 	using DataProvider;
 	using Mapping;
 	using Reflection;
-	using Data.Sql;
 
 	class ExpressionParser : ReflectionHelper
 	{
@@ -57,6 +57,8 @@ namespace BLToolkit.Data.Linq
 		}
 
 		#endregion
+
+		#region Parsing
 
 		#region Parse
 
@@ -591,7 +593,9 @@ namespace BLToolkit.Data.Linq
 						{
 							var ma = (MemberExpression)pi.Expr;
 
-							if (ma.Member.Name != "Value" || ma.Member.DeclaringType.GetGenericTypeDefinition() != typeof(Nullable<>))
+							if (ma.Member.Name != "Value" ||
+								ma.Member.DeclaringType.IsGenericType == false ||
+								ma.Member.DeclaringType.GetGenericTypeDefinition() != typeof(Nullable<>))
 							{
 								var field = query.GetField(pi.Expr);
 
@@ -861,6 +865,8 @@ namespace BLToolkit.Data.Linq
 
 			ParsingTracer.DecIndentLevel();
 		}
+
+		#endregion
 
 		#endregion
 
@@ -1136,7 +1142,7 @@ namespace BLToolkit.Data.Linq
 
 								if (field != null)
 								{
-									if (field is QueryField.Column /*|| field is QuerySource.SubQuery*/)
+									if (field is QueryField.Column)
 										return BuildField(ma, field, converter);
 
 									if (field is QuerySource.SubQuery)
@@ -1249,7 +1255,9 @@ namespace BLToolkit.Data.Linq
 
 					case ExpressionType.Coalesce:
 					//case ExpressionType.Conditional:
-						return BuildField(query.ParentQueries[0], pi);
+						if (pi.Expr.Type == typeof(string) && _info.MappingSchema.GetDefaultNullValue<string>() != null)
+							return BuildField(query.ParentQueries[0], pi);
+						break;
 
 					case ExpressionType.Call:
 						{
@@ -1857,7 +1865,9 @@ namespace BLToolkit.Data.Linq
 								return Convert(new SqlExpression(attr.Name ?? ma.Member.Name));
 							}
 
-							if (ma.Member.Name == "Value" && ma.Member.DeclaringType.GetGenericTypeDefinition() == typeof(Nullable<>))
+							if (ma.Member.Name == "Value" &&
+								ma.Member.DeclaringType.IsGenericType &&
+								ma.Member.DeclaringType.GetGenericTypeDefinition() == typeof(Nullable<>))
 							{
 								return ParseExpression(pi.Create(ma.Expression, pi.Property(Member.Expression)), queries);
 							}
@@ -2419,7 +2429,9 @@ namespace BLToolkit.Data.Linq
 							var pi = parseInfo.Convert<MemberExpression>();
 							var e  = pi.Expr as MemberExpression;
 
-							if (e.Member.Name == "HasValue" && e.Member.DeclaringType.GetGenericTypeDefinition() == typeof(Nullable<>))
+							if (e.Member.Name == "HasValue" && 
+								e.Member.DeclaringType.IsGenericType && 
+								e.Member.DeclaringType.GetGenericTypeDefinition() == typeof(Nullable<>))
 							{
 								var expr = ParseExpression(pi.Create(e.Expression, pi.Property(Member.Expression)), queries);
 								return Convert(new SqlBuilder.Predicate.IsNull(expr, true));

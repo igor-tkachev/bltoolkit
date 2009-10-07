@@ -23,7 +23,7 @@ namespace BLToolkit.Configuration
 		/// </summary>
 		public string TypeName
 		{
-			get { return (string) base[_propTypeName]; }
+			get { return (string)base[_propTypeName]; }
 		}
 
 		/// <summary>
@@ -32,7 +32,7 @@ namespace BLToolkit.Configuration
 		/// </summary>
 		public string Name
 		{
-			get { return (string) base[_propName]; }
+			get { return (string)base[_propName]; }
 		}
 
 		/// <summary>
@@ -40,7 +40,7 @@ namespace BLToolkit.Configuration
 		/// </summary>
 		public bool Default
 		{
-			get { return (bool) base[_propDefault]; }
+			get { return (bool)base[_propDefault]; }
 		}
 	}
 }

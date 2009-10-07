@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Linq;
-
 using NUnit.Framework;
 
 using BLToolkit.Data.Linq;
 
-namespace Data.Linq.Exceptions
+namespace Data.Exceptions
 {
+	using Linq;
+
 	[TestFixture]
 	public class Mapping : TestBase
 	{

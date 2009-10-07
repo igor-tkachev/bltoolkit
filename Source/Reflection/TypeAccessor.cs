@@ -429,46 +429,46 @@ namespace BLToolkit.Reflection
 
 				if (type.IsPrimitive)
 				{
-					if (type == typeof(Int32))       return 0;
-					if (type == typeof(Double))      return (Double)0;
-					if (type == typeof(Int16))       return (Int16)0;
-					if (type == typeof(Boolean))     return false;
-					if (type == typeof(SByte))       return (SByte)0;
-					if (type == typeof(Int64))       return (Int64)0;
-					if (type == typeof(Byte))        return (Byte)0;
-					if (type == typeof(UInt16))      return (UInt16)0;
-					if (type == typeof(UInt32))      return (UInt32)0;
-					if (type == typeof(UInt64))      return (UInt64)0;
-					if (type == typeof(Single))      return (Single)0;
-					if (type == typeof(Char))        return new char();
+					if (type == typeof(Int32))          return Common.Configuration.NullableValues.Int32;
+					if (type == typeof(Double))         return Common.Configuration.NullableValues.Double;
+					if (type == typeof(Int16))          return Common.Configuration.NullableValues.Int16;
+					if (type == typeof(Boolean))        return Common.Configuration.NullableValues.Boolean;
+					if (type == typeof(SByte))          return Common.Configuration.NullableValues.SByte;
+					if (type == typeof(Int64))          return Common.Configuration.NullableValues.Int64;
+					if (type == typeof(Byte))           return Common.Configuration.NullableValues.Byte;
+					if (type == typeof(UInt16))         return Common.Configuration.NullableValues.UInt16;
+					if (type == typeof(UInt32))         return Common.Configuration.NullableValues.UInt32;
+					if (type == typeof(UInt64))         return Common.Configuration.NullableValues.UInt64;
+					if (type == typeof(Single))         return Common.Configuration.NullableValues.Single;
+					if (type == typeof(Char))           return Common.Configuration.NullableValues.Char;
 				}
 				else
 				{
-					if (type == typeof(DateTime))    return DateTime.MinValue;
+					if (type == typeof(DateTime))       return Common.Configuration.NullableValues.DateTime;
 #if FW3
-					if (type == typeof(DateTimeOffset))    return DateTimeOffset.MinValue;
+					if (type == typeof(DateTimeOffset)) return Common.Configuration.NullableValues.DateTimeOffset;
 #endif
-					if (type == typeof(Decimal))     return 0m;
-					if (type == typeof(Guid))        return Guid.Empty;
+					if (type == typeof(Decimal))        return Common.Configuration.NullableValues.Decimal;
+					if (type == typeof(Guid))           return Common.Configuration.NullableValues.Guid;
 
-					if (type == typeof(SqlInt32))    return SqlInt32.   Null;
-					if (type == typeof(SqlString))   return SqlString.  Null;
-					if (type == typeof(SqlBoolean))  return SqlBoolean. Null;
-					if (type == typeof(SqlByte))     return SqlByte.    Null;
-					if (type == typeof(SqlDateTime)) return SqlDateTime.Null;
-					if (type == typeof(SqlDecimal))  return SqlDecimal. Null;
-					if (type == typeof(SqlDouble))   return SqlDouble.  Null;
-					if (type == typeof(SqlGuid))     return SqlGuid.    Null;
-					if (type == typeof(SqlInt16))    return SqlInt16.   Null;
-					if (type == typeof(SqlInt64))    return SqlInt64.   Null;
-					if (type == typeof(SqlMoney))    return SqlMoney.   Null;
-					if (type == typeof(SqlSingle))   return SqlSingle.  Null;
-					if (type == typeof(SqlBinary))   return SqlBinary.  Null;
+					if (type == typeof(SqlInt32))       return SqlInt32.   Null;
+					if (type == typeof(SqlString))      return SqlString.  Null;
+					if (type == typeof(SqlBoolean))     return SqlBoolean. Null;
+					if (type == typeof(SqlByte))        return SqlByte.    Null;
+					if (type == typeof(SqlDateTime))    return SqlDateTime.Null;
+					if (type == typeof(SqlDecimal))     return SqlDecimal. Null;
+					if (type == typeof(SqlDouble))      return SqlDouble.  Null;
+					if (type == typeof(SqlGuid))        return SqlGuid.    Null;
+					if (type == typeof(SqlInt16))       return SqlInt16.   Null;
+					if (type == typeof(SqlInt64))       return SqlInt64.   Null;
+					if (type == typeof(SqlMoney))       return SqlMoney.   Null;
+					if (type == typeof(SqlSingle))      return SqlSingle.  Null;
+					if (type == typeof(SqlBinary))      return SqlBinary.  Null;
 				}
 			}
 			else
 			{
-				if (type == typeof(String)) return string.Empty;
+				if (type == typeof(String)) return Common.Configuration.NullableValues.String;
 				if (type == typeof(DBNull)) return DBNull.Value;
 				if (type == typeof(Stream)) return Stream.Null;
 				if (type == typeof(SqlXml)) return SqlXml.Null;

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-
+using BLToolkit.Mapping;
 using NUnit.Framework;
 
 namespace Data.Linq
@@ -210,6 +210,45 @@ namespace Data.Linq
 		{
 			ForEachProvider(db =>
 			{
+				var q = (
+
+					from p in db.Person
+					where p.ID == 1
+					select new
+					{
+						p.ID,
+						FirstName  = p.MiddleName ?? p.FirstName  ?? "None",
+						LastName   = p.LastName   ?? p.FirstName  ?? "None",
+						MiddleName = p.MiddleName ?? p.MiddleName ?? "None"
+					}
+
+				).ToList().First();
+
+				Assert.AreEqual(1,        q.ID);
+				Assert.AreEqual("John",   q.FirstName);
+				Assert.AreEqual("Pupkin", q.LastName);
+				Assert.AreEqual("None",   q.MiddleName);
+			});
+		}
+
+		class MyMapSchema : MappingSchema
+		{
+			public override void InitNullValues()
+			{
+				base.InitNullValues();
+				DefaultStringNullValue = null;
+			}
+		}
+
+		static readonly MyMapSchema _myMapSchema = new MyMapSchema();
+
+		[Test]
+		public void Coalesce3()
+		{
+			ForEachProvider(db =>
+			{
+				db.MappingSchema = _myMapSchema;
+
 				var q = (
 
 					from p in db.Person

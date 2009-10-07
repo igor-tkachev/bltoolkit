@@ -85,7 +85,7 @@
 				<from type="XmlDocument">return p == null? null: p.InnerXml;</from>
 				<from type="Byte[]"     >return p == null? null: System.Text.Encoding.UTF8.GetString(p);</from>
 			</group>
-			<default nullvalue="String.Empty" nothrow="true">
+			<default nullvalue="Common.Configuration.NullableValues.String" nothrow="true">
 			if (p is IConvertible) return ((IConvertible)p).ToString(null);
 			if (p is IFormattable) return ((IFormattable)p).ToString(null, null);
 
@@ -116,7 +116,7 @@
 			<group name="Other Types">
 				<from type="Byte[]"   >return p == null || p.Length == 0? (SByte)0: checked((SByte)p[0]);</from>
 			</group>
-			<default nullvalue="0">
+			<default nullvalue="Common.Configuration.NullableValues.SByte">
 			if (p is IConvertible) return ((IConvertible)p).ToSByte(null);
 			</default>
 		</converter>
@@ -145,7 +145,7 @@
 			<group name="Other Types">
 				<from type="Byte[]"   >return p == null || p.Length == 0? (Int16)0: BitConverter.ToInt16(p, 0);</from>
 			</group>
-			<default nullvalue="0">
+			<default nullvalue="Common.Configuration.NullableValues.Int16">
 			if (p is IConvertible) return ((IConvertible)p).ToInt16(null);
 			</default>
 		</converter>
@@ -174,7 +174,7 @@
 			<group name="Other Types">
 				<from type="Byte[]"   >return p == null || p.Length == 0? 0: BitConverter.ToInt32(p, 0);</from>
 			</group>
-			<default nullvalue="0">
+			<default nullvalue="Common.Configuration.NullableValues.Int32">
 			if (p is IConvertible) return ((IConvertible)p).ToInt32(null);
 			</default>
 		</converter>
@@ -210,7 +210,7 @@
 			<group name="Other Types">
 				<from type="Byte[]"   >return p == null || p.Length == 0? 0: BitConverter.ToInt64(p, 0);</from>
 			</group>
-			<default nullvalue="0">
+			<default nullvalue="Common.Configuration.NullableValues.Int64">
 			if (p is IConvertible) return ((IConvertible)p).ToInt64(null);
 			</default>
 		</converter>
@@ -240,7 +240,7 @@
 			<group name="Other Types">
 				<from type="Byte[]"   >return p == null || p.Length == 0? (Byte)0: p[0];</from>
 			</group>
-			<default nullvalue="0">
+			<default nullvalue="Common.Configuration.NullableValues.Byte">
 			if (p is IConvertible) return ((IConvertible)p).ToByte(null);
 			</default>
 		</converter>
@@ -268,7 +268,7 @@
 			<group name="Other Types">
 				<from type="Byte[]"   >return p == null || p.Length == 0? (UInt16)0: BitConverter.ToUInt16(p, 0);</from>
 			</group>
-			<default nullvalue="0">
+			<default nullvalue="Common.Configuration.NullableValues.UInt16">
 			if (p is IConvertible) return ((IConvertible)p).ToUInt16(null);
 			</default>
 		</converter>
@@ -296,7 +296,7 @@
 			<group name="Other Types">
 				<from type="Byte[]"   >return p == null || p.Length == 0? 0: BitConverter.ToUInt32(p, 0);</from>
 			</group>
-			<default nullvalue="0">
+			<default nullvalue="Common.Configuration.NullableValues.UInt32">
 			if (p is IConvertible) return ((IConvertible)p).ToUInt32(null);
 			</default>
 		</converter>
@@ -324,7 +324,7 @@
 			<group name="Other Types">
 				<from type="Byte[]"   >return p == null || p.Length == 0? 0: BitConverter.ToUInt64(p, 0);</from>
 			</group>
-			<default nullvalue="0">
+			<default nullvalue="Common.Configuration.NullableValues.UInt64">
 			if (p is IConvertible) return ((IConvertible)p).ToUInt64(null);
 			</default>
 		</converter>
@@ -351,7 +351,7 @@
 			<group name="Other Types">
 				<from type="Byte[]"   >return p == null || p.Length == 0? (Char)0: BitConverter.ToChar(p, 0);</from>
 			</group>
-			<default nullvalue="'\x0'">
+			<default nullvalue="Common.Configuration.NullableValues.Char">
 			if (p is IConvertible) return ((IConvertible)p).ToChar(null);
 			</default>
 		</converter>
@@ -380,7 +380,7 @@
 			<group name="Other Types">
 				<from type="Byte[]"   >return p == null || p.Length == 0? 0.0f: BitConverter.ToSingle(p, 0);</from>
 			</group>
-			<default nullvalue="0.0f">
+			<default nullvalue="Common.Configuration.NullableValues.Single">
 			if (p is IConvertible) return ((IConvertible)p).ToSingle(null);
 			</default>
 		</converter>
@@ -416,7 +416,7 @@
 			<group name="Other Types">
 				<from type="Byte[]"   >return p == null || p.Length == 0? 0.0: BitConverter.ToDouble(p, 0);</from>
 			</group>
-			<default nullvalue="0.0">
+			<default nullvalue="Common.Configuration.NullableValues.Double">
 			if (p is IConvertible) return ((IConvertible)p).ToDouble(null);
 			</default>
 		</converter>
@@ -464,7 +464,7 @@
 			<group name="Other Types">
 				<from type="Byte[]"    >return p == null || p.Length == 0? false: BitConverter.ToBoolean(p, 0);</from>
 			</group>
-			<default nullvalue="false">
+			<default nullvalue="Common.Configuration.NullableValues.Boolean">
 			if (p is IConvertible) return ((IConvertible)p).ToBoolean(null);
 			</default>
 		</converter>
@@ -500,7 +500,7 @@
 					Buffer.BlockCopy(p, 0, bits, 0, p.Length);
 					return new Decimal(bits);</from>
 			</group>
-			<default nullvalue="0.0m">
+			<default nullvalue="Common.Configuration.NullableValues.Decimal">
 			if (p is IConvertible) return ((IConvertible)p).ToDecimal(null);
 			</default>
 		</converter>
@@ -528,7 +528,7 @@
 			<group name="Other Types">
 				<from type="Byte[]"     >return p == null || p.Length == 0? DateTime.MinValue: DateTime.FromBinary(ToInt64(p));</from>
 			</group>
-			<default nullvalue="DateTime.MinValue">
+			<default nullvalue="Common.Configuration.NullableValues.DateTime">
 			if (p is IConvertible) return ((IConvertible)p).ToDateTime(null);
 			</default>
 		</converter>
@@ -556,7 +556,7 @@
 			<group name="Other Types">
 				<from type="Byte[]"     >return p == null || p.Length == 0? DateTimeOffset.MinValue: new DateTimeOffset(ToDateTime(p));</from>
 			</group>
-			<default nullvalue="DateTimeOffset.MinValue">
+			<default nullvalue="Common.Configuration.NullableValues.DateTimeOffset">
 			if (p is IConvertible) return ToDateTimeOffset(((IConvertible)p).ToDateTime(null));
 			</default>
 		</converter>
@@ -584,7 +584,7 @@
 			<group name="Other Types">
 				<from type="Byte[]"     >return p == null || p.Length == 0? TimeSpan.MinValue: TimeSpan.FromTicks(ToInt64(p));</from>
 			</group>
-			<default nullvalue="TimeSpan.MinValue"/>
+			<default nullvalue="Common.Configuration.NullableValues.TimeSpan"/>
 		</converter>
 		<converter type="Guid"     nullable="false">
 			<group name="Scalar Types.">
@@ -602,7 +602,7 @@
 				<from type="Byte[]"   >return p == null? Guid.Empty: new Guid(p);</from>
 				<from type="Type"     >return p == null? Guid.Empty: p.GUID;</from>
 			</group>
-			<default nullvalue="Guid.Empty"/>
+			<default nullvalue="Common.Configuration.NullableValues.Guid"/>
 		</converter>
 	</region>
 	<region name="Nullable Types">

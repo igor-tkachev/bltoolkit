@@ -5,8 +5,8 @@ using NUnit.Framework;
 
 namespace Data.Exceptions
 {
-	using Linq.Model;
 	using Linq;
+	using Linq.Model;
 
 	[TestFixture]
 	public class JoinTest : TestBase
