@@ -81,7 +81,7 @@ namespace BLToolkit.Data.Linq
 
 		private ExpressionInfo<T> GetExpressionInfo(Expression expression, bool cache)
 		{
-			if (Info != null)
+			if (cache && Info != null)
 				return Info;
 
 			var dataProvider  = DbManager != null ? DbManager.DataProvider  : DbManager.GetDataProvider(DbManager.DefaultConfiguration);

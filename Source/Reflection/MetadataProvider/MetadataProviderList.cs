@@ -337,6 +337,23 @@ namespace BLToolkit.Reflection.MetadataProvider
 
 		#endregion
 
+		#region GetAssociation
+
+		public override Association GetAssociation(TypeExtension typeExtension, MemberAccessor member)
+		{
+			foreach (MetadataProviderBase p in _list)
+			{
+				Association attr = p.GetAssociation(typeExtension, member);
+
+				if (attr != null)
+					return attr;
+			}
+
+			return base.GetAssociation(typeExtension, member);
+		}
+
+		#endregion
+
 		#region ICollection Members
 
 		public void CopyTo(Array array, int index)

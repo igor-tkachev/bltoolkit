@@ -13,6 +13,7 @@ namespace BLToolkit.Reflection.Extension
 		{
 			public const string Type        = "Type";
 			public const string Member      = "Member";
+			public const string Association = "Association";
 			public const string Relation    = "Relation";
 			public const string MasterIndex = "MasterIndex";
 			public const string SlaveIndex  = "SlaveIndex";
@@ -85,7 +86,7 @@ namespace BLToolkit.Reflection.Extension
 
 		#region Conversion
 
-		public static bool ToBoolean(object value,  bool defaultValue)
+		public static bool ToBoolean(object value, bool defaultValue)
 		{
 			return value == null? defaultValue: ToBoolean(value);
 		}

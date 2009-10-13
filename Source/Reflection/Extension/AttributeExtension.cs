@@ -1,3 +1,5 @@
+using System;
+
 namespace BLToolkit.Reflection.Extension
 {
 	public class AttributeExtension

@@ -1,5 +1,7 @@
 ﻿using System;
 
+using BLToolkit.Mapping;
+
 namespace Data.Linq.Model
 {
 	public class GrandChild : IEquatable<GrandChild>
@@ -7,6 +9,9 @@ namespace Data.Linq.Model
 		public int? ParentID;
 		public int? ChildID;
 		public int? GrandChildID;
+
+		[Association(ThisKey = "ParentID, ChildID", OtherKey = "ParentID, ChildID")]
+		public Child Child;
 
 		public override bool Equals(object obj)
 		{

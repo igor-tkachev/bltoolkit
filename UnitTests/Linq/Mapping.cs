@@ -32,5 +32,16 @@ namespace Data.Linq
 			var expected = from p in Person where p.Gender != fm select p;
 			ForEachProvider(db => AreEqual(expected, from p in db.Person where p.Gender != fm select p));
 		}
+
+		[Test]
+		public void EditableObject()
+		{
+			ForEachProvider(db =>
+			{
+				var e = (from p in db.GetTable<EditableParent>() where p.ParentID == 1 select p).First();
+				Assert.AreEqual(1, e.ParentID);
+				Assert.AreEqual(1, e.Value1);
+			});
+		}
 	}
 }

@@ -1,3 +1,5 @@
+using System;
+
 namespace BLToolkit.Mapping
 {
 	public class MapRelation : MapRelationBase
@@ -21,6 +23,5 @@ namespace BLToolkit.Mapping
 		{
 			get { return _slaveResultSet; }
 		}
-
 	}
 }

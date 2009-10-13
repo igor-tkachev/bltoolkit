@@ -136,50 +136,72 @@ namespace Data.Linq
 			TestOnePerson(Array<string>.Empty, 1, "John", func);
 		}
 
-		private   List<Person>       _person;
-		protected List<Person>        Person
+		private   List<Person> _person;
+		protected List<Person>  Person
 		{
 			get
 			{
 				if (_person == null)
 					using (var db = new TestDbManager("Sql2008"))
 						_person = db.Person.ToList();
+
 				return _person;
 			}
 		}
 
-		private   List<Parent>        _parent;
-		protected List<Parent>         Parent
+		private   List<Parent> _parent;
+		protected List<Parent>  Parent
 		{
 			get
 			{
 				if (_parent == null)
 					using (var db = new TestDbManager("Sql2008"))
+					{
 						_parent = db.Parent.ToList();
+
+						foreach (var p in _parent)
+							p.Children = Child.Where(c => c.ParentID == p.ParentID).ToList();
+					}
+
 				return _parent;
 			}
 		}
 
-		private   List<Child>         _child;
-		protected List<Child>          Child
+		private   List<Child> _child;
+		protected List<Child>  Child
 		{
 			get
 			{
 				if (_child == null)
 					using (var db = new TestDbManager("Sql2008"))
+					{
 						_child = db.Child.ToList();
+
+						foreach (var ch in _child)
+						{
+							ch.Parent        = Parent.Single(p => p.ParentID == ch.ParentID);
+							ch.GrandChildren = GrandChild.Where(c => c.ParentID == ch.ParentID && c.ChildID == ch.ChildID).ToList();
+						}
+					}
+
 				return _child;
 			}
 		}
 
-		private   List<GrandChild>    _grandChild;
-		protected List<GrandChild>     GrandChild
+		private   List<GrandChild> _grandChild;
+		protected List<GrandChild>  GrandChild
 		{
 			get
 			{
 				if (_grandChild == null)
 					using (var db = new TestDbManager("Sql2008"))
+					{
 						_grandChild = db.GrandChild.ToList();
+
+						foreach (var ch in _grandChild)
+							ch.Child = Child.Single(c => c.ParentID == ch.ParentID && c.ChildID == ch.ChildID);
+					}
+
 				return _grandChild;
 			}
 		}

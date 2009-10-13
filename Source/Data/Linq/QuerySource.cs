@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
@@ -24,6 +25,56 @@ namespace BLToolkit.Data.Linq
 
 				sqlBuilder.From.Table(SqlTable);
 
+				Init(mappingSchema);
+
+				ParsingTracer.DecIndentLevel();
+			}
+
+			Table(MappingSchema mappingSchema, SqlBuilder sqlBuilder, Association association, Table parent)
+				: base(sqlBuilder, null)
+			{
+				var type = association.MemberAccessor.MemberInfo.MemberType == MemberTypes.Property ?
+					((PropertyInfo)association.MemberAccessor.MemberInfo).PropertyType :
+					((FieldInfo)   association.MemberAccessor.MemberInfo).FieldType;
+
+				var left = association.CanBeNull;
+
+				if (TypeHelper.IsSameOrParent(typeof(IList), type))
+				{
+					type = TypeHelper.GetListItemType(type);
+					left = true;
+				}
+
+				ObjectType = type;
+				SqlTable   = new SqlTable(mappingSchema, ObjectType);
+
+				var psrc = sqlBuilder.From[parent.SqlTable];
+				var join = left ? SqlTable.WeakLeftJoin() : SqlTable.InnerJoin();
+
+				psrc.Joins.Add(join.JoinedTable);
+
+				Init(mappingSchema);
+
+				for (var i = 0; i < association.ThisKey.Length; i++)
+				{
+					Column col1, col2;
+
+					if (!parent._columns.TryGetValue(association.ThisKey[i], out col1))
+						throw new LinqException("Association key '{0}' not found for type '{1}.", association.ThisKey[i], parent.ObjectType);
+
+					if (!_columns.TryGetValue(association.OtherKey[i], out col2))
+						throw new LinqException("Association key '{0}' not found for type '{1}.", association.OtherKey[i], ObjectType);
+
+					join.Field(col1.Field).Equal.Field(col2.Field);
+				}
+
+				ParsingTracer.DecIndentLevel();
+			}
+
+			void Init(MappingSchema mappingSchema)
+			{
+				_mappingSchema = mappingSchema;
+
 				var objectMapper = mappingSchema.GetObjectMapper(ObjectType);
 
 				foreach (var field in SqlTable.Fields)
@@ -32,22 +83,45 @@ namespace BLToolkit.Data.Linq
 					var column = new Column(this, field.Value, mapper);
 
 					Fields.Add(column);
-					_columns.Add(mapper.MemberAccessor.MemberInfo, column);
+					_columns.Add(mapper.MemberAccessor.MemberInfo.Name, column);
 				}
 
-				ParsingTracer.DecIndentLevel();
+				foreach (var a in objectMapper.Associations)
+					_associations.Add(a.MemberAccessor.Name, a);
 			}
 
 			public Type     ObjectType;
 			public SqlTable SqlTable;
 
-			readonly Dictionary<MemberInfo,Column> _columns = new Dictionary<MemberInfo,Column>();
+			MappingSchema _mappingSchema;
+
+			readonly Dictionary<string,Column>      _columns          = new Dictionary<string,Column>();
+			readonly Dictionary<string,Association> _associations     = new Dictionary<string,Association>();
+			readonly Dictionary<string,Table>       _associatedTables = new Dictionary<string,Table>();
 
 			public override QueryField GetField(MemberInfo mi)
 			{
 				Column col;
-				_columns.TryGetValue(mi, out col);
-				return col;
+
+				if (_columns.TryGetValue(mi.Name, out col))
+					return col;
+
+				Table tbl;
+
+				if (_associatedTables.TryGetValue(mi.Name, out tbl))
+					return tbl;
+
+				Association a;
+
+				if (_associations.TryGetValue(mi.Name, out a))
+				{
+					tbl = new Table(_mappingSchema, SqlBuilder, a, this);
+					_associatedTables.Add(mi.Name, tbl);
+
+					return tbl;
+				}
+
+				return null;
 			}
 
 			public override QueryField GetField(Expression expr)

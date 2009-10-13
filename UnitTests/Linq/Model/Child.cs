@@ -1,4 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
+
+using BLToolkit.Mapping;
 
 namespace Data.Linq.Model
 {
@@ -6,6 +9,12 @@ namespace Data.Linq.Model
 	{
 		public int ParentID;
 		public int ChildID;
+
+		[Association(ThisKey = "ParentID", OtherKey = "ParentID", CanBeNull = false)]
+		public Parent Parent;
+
+		[Association(ThisKey = "ParentID, ChildID", OtherKey = "ParentID, ChildID")]
+		public List<GrandChild> GrandChildren;
 
 		public override bool Equals(object obj)
 		{

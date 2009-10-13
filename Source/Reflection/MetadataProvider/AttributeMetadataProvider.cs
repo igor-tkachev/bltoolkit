@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
 
@@ -7,7 +8,6 @@ namespace BLToolkit.Reflection.MetadataProvider
 	using DataAccess;
 	using Extension;
 	using Mapping;
-	using System.Collections;
 
 	public class AttributeMetadataProvider : MetadataProviderBase
 	{
@@ -124,7 +124,7 @@ namespace BLToolkit.Reflection.MetadataProvider
 				return attr.Ignore;
 			}
 
-			if (member.GetAttribute<MapFieldAttribute>() != null ||
+			if (member.GetAttribute<MapFieldAttribute>()    != null ||
 				member.GetAttribute<MapImplicitAttribute>() != null ||
 				TypeHelper.GetFirstAttribute(member.Type, typeof(MapImplicitAttribute)) != null)
 			{
@@ -132,7 +132,7 @@ namespace BLToolkit.Reflection.MetadataProvider
 				return false;
 			}
 
-			return base.GetMapIgnore(typeExtension, member, out isSet);
+			return base.GetMapIgnore(typeExtension, member, out isSet) || member.GetAttribute<AssociationAttribute>() != null;
 		}
 
 		#endregion
@@ -566,13 +566,12 @@ namespace BLToolkit.Reflection.MetadataProvider
 					continue;
 
 				if (slave == null)
-					slaveAccessor = TypeAccessor.GetAccessor(attr.Destination != null ? attr.Destination : ma.Type);
+					slaveAccessor = TypeAccessor.GetAccessor(attr.Destination ?? ma.Type);
 
 
 				bool toMany = TypeHelper.IsSameOrParent(typeof(IEnumerable), ma.Type);
 				if (toMany && attr.Destination == null)
 					throw new InvalidOperationException("Destination type should be set for enumerable relations: " + ma.Type.FullName + "." + ma.Name);
-
 
 				MapIndex masterIndex = attr.MasterIndex;
 				MapIndex slaveIndex  = attr.SlaveIndex;
@@ -594,7 +593,7 @@ namespace BLToolkit.Reflection.MetadataProvider
 				if (masterIndex == null)
 					masterIndex = slaveIndex;
 
-				MapRelationBase relation = new MapRelationBase(attr.Destination != null ? attr.Destination : ma.Type, slaveIndex, masterIndex, ma.Name);
+				MapRelationBase relation = new MapRelationBase(attr.Destination ?? ma.Type, slaveIndex, masterIndex, ma.Name);
 
 				relations.Add(relation);
 			}
@@ -603,6 +602,25 @@ namespace BLToolkit.Reflection.MetadataProvider
 			return relations;
 		}
 		
+		#endregion
+
+		#region GetAssociation
+
+		public override Association GetAssociation(TypeExtension typeExtension, MemberAccessor member)
+		{
+			AssociationAttribute aa = member.GetAttribute<AssociationAttribute>();
+
+			if (aa == null)
+				return base.GetAssociation(typeExtension, member);
+
+			return new Association(
+				member,
+				aa.GetThisKeys(),
+				aa.GetOtherKeys(),
+				aa.Storage,
+				aa.CanBeNull);
+		}
+
 		#endregion
 	}
 }

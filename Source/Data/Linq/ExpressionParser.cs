@@ -18,7 +18,7 @@ namespace BLToolkit.Data.Linq
 
 	class ExpressionParser : ReflectionHelper
 	{
-		// Should be single instance.
+		// Should be a single instance.
 		//
 		static protected readonly ParameterExpression ParametersParam = Expression.Parameter(typeof(object[]), "ps");
 	}

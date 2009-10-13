@@ -60,7 +60,7 @@ namespace BLToolkit.Reflection.MetadataProvider
 			if (value != null)
 				return TypeExtension.ToBoolean(value);
 
-			return base.GetMapIgnore(typeExtension, member, out isSet);
+			return base.GetMapIgnore(typeExtension, member, out isSet) || GetAssociation(typeExtension, member) != null;
 		}
 
 		#endregion
@@ -457,6 +457,33 @@ namespace BLToolkit.Reflection.MetadataProvider
 
 			isSet = relations.Count > 0;
 			return relations;
+		}
+
+		#endregion
+
+		#region GetAssociation
+
+		public override Association GetAssociation(TypeExtension typeExtension, MemberAccessor member)
+		{
+			if (typeExtension == TypeExtension.Null)
+				return null;
+
+			MemberExtension mex = typeExtension[member.Name];
+
+			if (mex == MemberExtension.Null)
+				return null;
+
+			AttributeExtensionCollection attrs = mex.Attributes[TypeExtension.NodeName.Association];
+
+			if (attrs == AttributeExtensionCollection.Null)
+				return null;
+
+			return new Association(
+				member,
+				Association.ParseKeys(attrs[0]["ThisKey",  string.Empty].ToString()),
+				Association.ParseKeys(attrs[0]["OtherKey", string.Empty].ToString()),
+				attrs[0]["Storage", string.Empty].ToString(),
+				TypeExtension.ToBoolean(attrs[0]["Storage", "True"], true));
 		}
 
 		#endregion

@@ -124,12 +124,14 @@
     <Compile Include="ConvertTest.cs" />
     <Compile Include="CompileTest.cs" />
     <Compile Include="ComplexTest.cs" />
+    <Compile Include="Association.cs" />
     <Compile Include="Exceptions\Mapping.cs" />
     <Compile Include="Functions.cs" />
     <Compile Include="Distinct.cs" />
     <Compile Include="ElementOperationTest.cs" />
     <Compile Include="Exceptions\ElementOperationTest.cs" />
     <Compile Include="Mapping.cs" />
+    <Compile Include="Model\EditableParent.cs" />
     <Compile Include="Model\Gender.cs" />
     <Compile Include="Model\LinqDataTypes.cs" />
     <Compile Include="TakeSkipTest.cs" />

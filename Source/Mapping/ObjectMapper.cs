@@ -19,9 +19,6 @@ namespace BLToolkit.Mapping
 
 		public ObjectMapper()
 		{
-			_members            = new List<MemberMapper>();
-			_nameToMember       = new Hashtable();
-			_memberNameToMember = new Hashtable();
 		}
 
 		#endregion
@@ -96,10 +93,16 @@ namespace BLToolkit.Mapping
 
 		#region Public Members
 
-		private readonly List<MemberMapper> _members;
+		private readonly List<MemberMapper> _members = new List<MemberMapper>();
 		public  MemberMapper this[int index]
 		{
 			get { return _members[index]; }
+		}
+
+		readonly List<Association> _associations = new List<Association>();
+		public   List<Association>  Associations
+		{
+			get { return _associations; }
 		}
 
 		private TypeExtension _extension;
@@ -140,8 +143,8 @@ namespace BLToolkit.Mapping
 			}
 		}
 
-		private readonly Hashtable _nameToMember;
-		private readonly Hashtable _memberNameToMember;
+		private readonly Hashtable _nameToMember       = new Hashtable();
+		private readonly Hashtable _memberNameToMember = new Hashtable();
 		public  MemberMapper this[string name]
 		{
 			get
@@ -243,6 +246,14 @@ namespace BLToolkit.Mapping
 
 			foreach (MemberAccessor ma in _typeAccessor)
 			{
+				Association a = GetAssociation(ma);
+
+				if (a != null)
+				{
+					_associations.Add(a);
+					continue;
+				}
+
 				if (GetMapIgnore(ma))
 					continue;
 
@@ -463,6 +474,11 @@ namespace BLToolkit.Mapping
 			}
 
 			return MappingSchema.GetNullValue(memberAccessor.Type);
+		}
+
+		protected virtual Association GetAssociation(MemberAccessor memberAccessor)
+		{
+			return MetadataProvider.GetAssociation(Extension, memberAccessor);
 		}
 
 		#endregion

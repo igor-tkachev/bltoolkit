@@ -28,7 +28,7 @@ namespace BLToolkit.Reflection.MetadataProvider
 
 			if (_isLinqObject == null)
 			{
-				object[] attrs = type.GetCustomAttributes(typeof(TableAttribute), true);
+				var attrs = type.GetCustomAttributes(typeof(TableAttribute), true);
 				_isLinqObject = attrs.Length > 0;
 			}
 
@@ -43,7 +43,7 @@ namespace BLToolkit.Reflection.MetadataProvider
 		{
 			if (IsLinqObject(member.TypeAccessor.Type))
 			{
-				ColumnAttribute a = member.GetAttribute<ColumnAttribute>();
+				var a = member.GetAttribute<ColumnAttribute>();
 
 				if (a != null && !string.IsNullOrEmpty(a.Name))
 				{
@@ -63,7 +63,7 @@ namespace BLToolkit.Reflection.MetadataProvider
 		{
 			if (IsLinqObject(member.TypeAccessor.Type))
 			{
-				ColumnAttribute a = member.GetAttribute<ColumnAttribute>();
+				var a = member.GetAttribute<ColumnAttribute>();
 
 				if (a != null && !string.IsNullOrEmpty(a.Name))
 				{
@@ -126,7 +126,7 @@ namespace BLToolkit.Reflection.MetadataProvider
 			{
 				isSet = true;
 
-				object[] attrs = type.GetCustomAttributes(typeof(TableAttribute), true);
+				var attrs = type.GetCustomAttributes(typeof(TableAttribute), true);
 
 				return ((TableAttribute)attrs[0]).Name;
 			}
@@ -160,9 +160,9 @@ namespace BLToolkit.Reflection.MetadataProvider
 
 		public override bool GetNonUpdatableFlag(Type type, TypeExtension typeExt, MemberAccessor member, out bool isSet)
 		{
-			if (IsLinqObject(type))
+			if (IsLinqObject(member.TypeAccessor.Type))
 			{
-				ColumnAttribute a = member.GetAttribute<ColumnAttribute>();
+				var a = member.GetAttribute<ColumnAttribute>();
 
 				if (a != null)
 				{
@@ -175,5 +175,23 @@ namespace BLToolkit.Reflection.MetadataProvider
 		}
 
 		#endregion
+
+		#region GetAssociation
+
+		public override Association GetAssociation(TypeExtension typeExtension, MemberAccessor member)
+		{
+			if (IsLinqObject(member.TypeAccessor.Type))
+			{
+				var a = member.GetAttribute<System.Data.Linq.Mapping.AssociationAttribute>();
+
+				if (a != null)
+					return new Association(member, Association.ParseKeys(a.ThisKey), Association.ParseKeys(a.OtherKey), a.Storage, true);
+			}
+
+			return base.GetAssociation(typeExtension, member);
+		}
+
+		#endregion
+
 	}
 }
