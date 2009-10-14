@@ -1,5 +1,8 @@
 using System;
 using System.Collections;
+#if FW3
+using System.Collections.Specialized;
+#endif
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Reflection;
@@ -14,6 +17,9 @@ namespace BLToolkit.EditableObjects
 	[Serializable]
 	public class EditableArrayList : ArrayList, IEditable, ISortable, ISupportMapping,
 		IDisposable, IPrintDebugState, ITypedList, IBindingListView, ICancelAddNew
+#if FW3
+		, INotifyCollectionChanged
+#endif
 	{
 		#region Constructors
 
@@ -197,6 +203,22 @@ namespace BLToolkit.EditableObjects
 		protected void OnListChanged(ListChangedType listChangedType, int index)
 		{
 			OnListChanged(new EditableListChangedEventArgs(listChangedType, index));
+		}
+
+		private void OnResetList()
+		{
+			OnListChanged(ListChangedType.Reset, -1);
+#if FW3
+			OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
+#endif
+		}
+
+		private void OnAddItem(object newObject, int index)
+		{
+			OnListChanged(ListChangedType.ItemAdded, index);
+#if FW3
+			OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, newObject, index));
+#endif
 		}
 
 		#endregion
@@ -660,7 +682,7 @@ namespace BLToolkit.EditableObjects
 				throw new InvalidOperationException("Reverse is not supported for already sorted arrays. Invoke IBindingList.RemoveSort() first or provide reverse sort direction.");
 
 			if (_list.Count > 1)
-				OnListChanged(ListChangedType.Reset, -1);
+				OnResetList();
 		}
 
 		public override void Reverse(int index, int count)
@@ -673,7 +695,7 @@ namespace BLToolkit.EditableObjects
 				throw new InvalidOperationException("Range Reverse is not supported for already sorted arrays. Invoke IBindingList.RemoveSort() first.");
 
 			if (count > 1)
-				OnListChanged(ListChangedType.Reset, -1);
+				OnResetList();
 		}
 
 		public override void SetRange(int index, ICollection c)
@@ -695,7 +717,7 @@ namespace BLToolkit.EditableObjects
 				_list.Sort();
 
 				if (_list.Count > 1)
-					OnListChanged(ListChangedType.Reset, -1);
+					OnResetList();
 			}
 			else
 			{
@@ -718,7 +740,7 @@ namespace BLToolkit.EditableObjects
 				throw new InvalidOperationException("Custom sorting is not supported on already sorted arrays. Invoke IBindingList.RemoveSort first.");
 
 			if (count > 1)
-				OnListChanged(ListChangedType.Reset, -1);
+				OnResetList();
 		}
 
 		public override void Sort(IComparer comparer)
@@ -731,7 +753,7 @@ namespace BLToolkit.EditableObjects
 				throw new InvalidOperationException("Custom sorting is not supported on already sorted arrays. Invoke IBindingList.RemoveSort first.");
 
 			if (_list.Count > 1)
-				OnListChanged(ListChangedType.Reset, -1);
+				OnResetList();
 		}
 
 		public override object[] ToArray()
@@ -906,7 +928,8 @@ namespace BLToolkit.EditableObjects
 
 				AddInternal(newObject);
 
-				OnListChanged(ListChangedType.ItemAdded, IndexOf(newObject));
+				int index = IndexOf(newObject);
+				OnAddItem(newObject, index);
 
 				return newObject;
 			}
@@ -974,7 +997,7 @@ namespace BLToolkit.EditableObjects
 		private event ListChangedEventHandler _listChanged;
 		public  event ListChangedEventHandler  ListChanged
 		{
-			add    
+			add
 			{
 				if (_listChanged == null)
 					BindingListImpl.ListChanged += BindingListImpl_ListChanged;
@@ -983,7 +1006,7 @@ namespace BLToolkit.EditableObjects
 			}
 			remove 
 			{ 
-				_listChanged -= value; 
+				_listChanged -= value;
 
 				if (_listChanged == null)
 					BindingListImpl.ListChanged -= BindingListImpl_ListChanged;
@@ -999,12 +1022,21 @@ namespace BLToolkit.EditableObjects
 		{
 			if (_listChanged != null)
 				BindingListImpl.ListChanged -= BindingListImpl_ListChanged;
+
+#if FW3
+			if (_collectionChanged != null)
+				BindingListImpl.CollectionChanged -= BindingListImpl_CollectionChanged;
+#endif
 		}
 
 		private void EndSuppressEvent()
 		{
 			if (_listChanged != null)
 				BindingListImpl.ListChanged += BindingListImpl_ListChanged;
+#if FW3
+			if (_collectionChanged != null)
+				BindingListImpl.CollectionChanged += BindingListImpl_CollectionChanged;
+#endif
 		}
 
 		public bool SupportsSearching
@@ -1081,5 +1113,41 @@ namespace BLToolkit.EditableObjects
 		}
 
 		#endregion
+
+#if FW3
+		#region INotifyCollectionChanged Members
+
+		private event NotifyCollectionChangedEventHandler _collectionChanged;
+		public  event NotifyCollectionChangedEventHandler  CollectionChanged
+		{
+			add
+			{
+				if (_collectionChanged == null)
+					BindingListImpl.CollectionChanged += BindingListImpl_CollectionChanged;
+
+				_collectionChanged += value;
+			}
+			remove
+			{
+				_collectionChanged -= value;
+
+				if (_collectionChanged == null)
+					BindingListImpl.CollectionChanged -= BindingListImpl_CollectionChanged;
+			}
+		}
+
+		private void BindingListImpl_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+		{
+			OnCollectionChanged(e);
+		}
+
+		protected virtual void OnCollectionChanged(NotifyCollectionChangedEventArgs e)
+		{
+			if (NotifyChanges && _collectionChanged != null)
+				_collectionChanged(this, e);
+		}
+
+		#endregion
+#endif
 	}
 }

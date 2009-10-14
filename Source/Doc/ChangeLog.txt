@@ -10,8 +10,8 @@ Bug fixes
 - Extension assemblies are ignored in TypeFactory.GetType(type).
 - Default parameter values were ignored by OverloadAspectBuilder.
 - [Parameter(null)] wasn't setting Nullable<> and EditableValue<Nullable<>> values to null
-- DefaultTypeBuilde throwing exception if [Parameter(value)] was used on 
-  EditableValue<Nullable<>> generated properties when Nullable<> did have appropriate 
+- DefaultTypeBuilder throwing exception if [Parameter(value)] was used on
+  EditableValue<Nullable<>> generated properties when Nullable<> did have appropriate
   constructor accepting value type
 
 Enhancement
@@ -23,6 +23,8 @@ Enhancement
 - New SqlBuilder class.
 - Partial trust support.
 - Mapping to/from private classes (FW 3.x only).
+- New ParamTypeName attribute for SqlServer2008 table-type parameter support.
+- EditableArrayList & BindingListImpl implements INotifyCollectionChanged interface (FW 3.x only).
 
 
 v 3.1

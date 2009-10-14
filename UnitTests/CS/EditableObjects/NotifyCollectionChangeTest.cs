@@ -1,18 +1,17 @@
 using System;
+using System.Collections.Specialized;
 using System.ComponentModel;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Windows.Forms;
-
-using NUnit.Framework;
-
 using BLToolkit.EditableObjects;
 using BLToolkit.Reflection;
+using NUnit.Framework;
 
 namespace EditableObjects
 {
 	[TestFixture]
-	public class EditableArrayListTest
+	public class NotifyCollectionChangeTest
 	{
 		public abstract class EditableTestObject : EditableObject
 		{
@@ -22,7 +21,7 @@ namespace EditableObjects
 
 			public static EditableTestObject CreateInstance()
 			{
-				return (EditableTestObject)TypeAccessor.CreateInstance(typeof(EditableTestObject));
+				return TypeAccessor<EditableTestObject>.CreateInstance();
 			}
 			
 			public static EditableTestObject CreateInstance(int id, string name, int seconds)
@@ -43,35 +42,36 @@ namespace EditableObjects
 		}
 		
 		private static readonly EditableTestObject[] _testObjects = new EditableTestObject[6]
-			{
-				EditableTestObject.CreateInstance(0, "Smith",  24),
-				EditableTestObject.CreateInstance(1, "John",   22),
-				EditableTestObject.CreateInstance(2, "Anna",   48),
-				EditableTestObject.CreateInstance(3, "Tim",    56),
-				EditableTestObject.CreateInstance(4, "Xiniu",  39),
-				EditableTestObject.CreateInstance(5, "Kirill", 30)
-			};
-		
-		public EditableArrayListTest()
 		{
-			_testList = new EditableArrayList(typeof(EditableTestObject));
-			_testList.ListChanged += TestList_ListChanged;
+			EditableTestObject.CreateInstance(0, "Smith",  24),
+			EditableTestObject.CreateInstance(1, "John",   22),
+			EditableTestObject.CreateInstance(2, "Anna",   48),
+			EditableTestObject.CreateInstance(3, "Tim",    56),
+			EditableTestObject.CreateInstance(4, "Xiniu",  39),
+			EditableTestObject.CreateInstance(5, "Kirill", 30)
+		};
+		
+		public NotifyCollectionChangeTest()
+		{
+			_testList = new EditableList<EditableTestObject>();
+			_testList.CollectionChanged += TestList_CollectionChanged;
 		}
 
 		private readonly EditableArrayList _testList;
-		
-		private void TestList_ListChanged(object sender, ListChangedEventArgs e)
+
+		private void TestList_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
 		{
 			EditableArrayList array = sender as EditableArrayList;
 			
 			Assert.IsNotNull(array);
-			if (e.ListChangedType != ListChangedType.Reset)
+			if (e.Action != NotifyCollectionChangedAction.Reset)
 				Assert.That(array.IsDirty);
 
-			if (e.ListChangedType != ListChangedType.ItemDeleted && e.ListChangedType != ListChangedType.Reset)
-				Console.WriteLine("ListChanged (ID:{3}). Type: {0}, OldIndex: {1}, NewIndex: {2}", e.ListChangedType, e.OldIndex, e.NewIndex, (e.NewIndex >= 0 && e.NewIndex < _testList.Count) ? ((EditableTestObject)_testList[e.NewIndex]).ID : -1);
-			else
-				Console.WriteLine("ListChanged (ID:???). Type: {0}, OldIndex: {1}, NewIndex: {2}", e.ListChangedType, e.OldIndex, e.NewIndex);
+			EditableTestObject o = (EditableTestObject)(e.NewItems != null? e.NewItems[0]:
+									e.OldItems != null ? e.OldItems[0]: null);
+
+			Console.WriteLine("CollectionChanged (ID:{3}). Type: {0}, OldIndex: {1}, NewIndex: {2}",
+				e.Action, e.OldStartingIndex, e.NewStartingIndex, o != null? o.ID: -1);
 		}
 		
 		[Test]
@@ -89,16 +89,16 @@ namespace EditableObjects
 			Assert.AreEqual(_testList[1], _testObjects[1]);
 			Assert.AreEqual(_testList[2], _testObjects[2]);
 			
-			EditableTestObject[] _subArray = new EditableTestObject[3];
+			EditableTestObject[] subArray = new EditableTestObject[3];
 
 			for (int i = 3; i < _testObjects.Length; i++)
-				_subArray[i-3] = _testObjects[i];
+				subArray[i-3] = _testObjects[i];
 
-			_testList.AddRange(_subArray);
+			_testList.AddRange(subArray);
 			Assert.AreEqual(_testList.Count, 6);
 			
 			for (int i = 3; i < _testObjects.Length; i++)
-				Assert.AreEqual(_subArray[i - 3], _testObjects[i]);
+				Assert.AreEqual(subArray[i - 3], _testObjects[i]);
 
 			PrintList();
 			
@@ -109,16 +109,16 @@ namespace EditableObjects
 		public void TestAddNew()
 		{
 			EditableList<EditableTestObject> list = new EditableList<EditableTestObject>();
-			bool listChangedFired = false;
-			list.ListChanged += delegate { listChangedFired = true; };
+			bool collectionChangedFired = false;
+			list.CollectionChanged += delegate { collectionChangedFired = true; };
 
 			list.AddNew();
-			Assert.That(listChangedFired);
+			Assert.That(collectionChangedFired);
 			Assert.AreEqual(1, list.Count);
 
-			listChangedFired = false;
+			collectionChangedFired = false;
 			list.CancelNew(0);
-			Assert.That(listChangedFired);
+			Assert.That(collectionChangedFired);
 			Assert.IsEmpty(list);
 		}
 
@@ -418,7 +418,7 @@ namespace EditableObjects
 
 				Console.WriteLine(eal.Count);
 
-				eal.ListChanged += eal_ListChanged;
+				eal.CollectionChanged += eal_CollectionChanged;
 
 				eal[0].ID = 0;
 				_notificationCount = 0;
@@ -439,9 +439,9 @@ namespace EditableObjects
 
 		private static int _notificationCount = 0;
 
-		static void eal_ListChanged(object sender, ListChangedEventArgs e)
+		static void eal_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
 		{
-			Console.WriteLine(e.ListChangedType);
+			Console.WriteLine(e.Action);
 			_notificationCount++;
 		}
 

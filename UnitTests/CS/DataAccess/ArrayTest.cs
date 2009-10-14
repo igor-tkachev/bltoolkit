@@ -3,7 +3,6 @@ using BLToolkit.Data;
 #else
 using System.Collections.Generic;
 #endif
-using System.Data;
 using NUnit.Framework;
 
 using BLToolkit.DataAccess;

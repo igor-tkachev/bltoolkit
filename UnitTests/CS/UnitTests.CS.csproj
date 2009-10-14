@@ -70,6 +70,9 @@
     <Reference Include="System.Xml.Linq">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
+    <Reference Include="WindowsBase">
+      <RequiredTargetFramework>3.0</RequiredTargetFramework>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Aspects\AsyncAndDataAccessorTest.cs" />
@@ -137,6 +140,7 @@
     <Compile Include="EditableObjects\EditableObjectTest.cs" />
     <Compile Include="EditableObjects\InnerObjectTest.cs" />
     <Compile Include="EditableObjects\NestedObjectTest.cs" />
+    <Compile Include="EditableObjects\NotifyCollectionChangeTest.cs" />
     <Compile Include="Mapping\NullableEnum.cs" />
     <Compile Include="Mapping\DefaultValueAttributeTest.cs" />
     <Compile Include="Mapping\EnumExtension.cs" />

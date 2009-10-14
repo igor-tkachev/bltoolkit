@@ -1,5 +1,7 @@
 using System;
+
 using System.Collections;
+using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Diagnostics;
 
@@ -9,6 +11,9 @@ using BLToolkit.Reflection;
 namespace BLToolkit.ComponentModel
 {
 	public class BindingListImpl: IBindingListView, ICancelAddNew
+#if FW3
+	, INotifyCollectionChanged
+#endif
 	{
 		#region Init
 
@@ -75,7 +80,7 @@ namespace BLToolkit.ComponentModel
 				_newObject.ObjectEdit += NewObject_ObjectEdit;
 
 			_newItemIndex = _list.Add(o);
-			OnListChanged(new EditableListChangedEventArgs(ListChangedType.ItemAdded, _newItemIndex));
+			OnAddItem(o, _newItemIndex);
 
 			Debug.WriteLine(string.Format("AddNew - ({0})", o.GetType().Name));
 
@@ -133,7 +138,7 @@ namespace BLToolkit.ComponentModel
 			if (_notifyChanges && ListChanged != null)
 				ListChanged(sender, e);
 		}
-		
+
 		public virtual void OnListChanged(EditableListChangedEventArgs e)
 		{
 			FireListChangedEvent(this, e);
@@ -159,6 +164,8 @@ namespace BLToolkit.ComponentModel
 					else
 						OnListChanged(new EditableListChangedEventArgs(ListChangedType.ItemChanged, indexOfSender));
 
+					// Do not fire an event for OnCollectionChanged here.
+
 					if (_isSorted && _list.Count > 1)
 					{
 						int newIndex = GetItemSortedPosition(indexOfSender, sender);
@@ -168,13 +175,14 @@ namespace BLToolkit.ComponentModel
 							_list.RemoveAt(indexOfSender);
 							_list.Insert(newIndex, sender);
 
-							OnListChanged(new EditableListChangedEventArgs(newIndex, indexOfSender));
+							OnMoveItem(sender, indexOfSender, newIndex);
 						}
 					}
 				}
 			}
 		}
-			#endregion
+
+		#endregion
 
 			#region Sorting
 
@@ -213,9 +221,9 @@ namespace BLToolkit.ComponentModel
 			_sortDescriptions = null;
 
 			ApplySort(GetSortComparer(_sortProperty, _sortDirection));
-			
+
 			if (_list.Count > 0)
-				OnListChanged(new EditableListChangedEventArgs(ListChangedType.Reset));
+				OnReset();
 
 			Debug.WriteLine(string.Format("End   ApplySort(\"{0}\", {1})", property.Name, direction));
 		}
@@ -226,7 +234,7 @@ namespace BLToolkit.ComponentModel
 			_sortProperty = null;
 			_sortDescriptions = null;
 
-			OnListChanged(new EditableListChangedEventArgs(ListChangedType.Reset));
+			OnReset();
 		}
 
 			#endregion
@@ -273,7 +281,7 @@ namespace BLToolkit.ComponentModel
 			if (itemIndex >= 0 && itemIndex == _newItemIndex)
 			{
 				_list.RemoveAt(itemIndex);
-				OnListChanged(new EditableListChangedEventArgs(ListChangedType.ItemDeleted, itemIndex));
+				OnRemoveItem(_newObject, itemIndex);
 				EndNew();
 			}
 		}
@@ -311,8 +319,8 @@ namespace BLToolkit.ComponentModel
 			}
 
 			AddInternal(value);
-			OnListChanged(new EditableListChangedEventArgs(ListChangedType.ItemAdded, index));
-			
+			OnAddItem(value, index);
+
 			return index;
 		}
 
@@ -321,10 +329,9 @@ namespace BLToolkit.ComponentModel
 			if (_list.Count > 0)
 			{
 				RemoveInternal(_list);
-				
+
 				_list.Clear();
-				
-				OnListChanged(new EditableListChangedEventArgs(ListChangedType.Reset));
+				OnReset();
 			}
 		}
 
@@ -345,8 +352,8 @@ namespace BLToolkit.ComponentModel
 			
 			_list.Insert(index, value);
 			AddInternal(value);
-			
-			OnListChanged(new EditableListChangedEventArgs(ListChangedType.ItemAdded, index));
+
+			OnAddItem(value, index);
 		}
 
 		public bool IsFixedSize
@@ -361,26 +368,26 @@ namespace BLToolkit.ComponentModel
 
 		public void Remove(object value)
 		{
-			int removalIndex = IndexOf(value);
+			int index = IndexOf(value);
 			
-			if (removalIndex >= 0)
+			if (index >= 0)
 				RemoveInternal(value);
 
 			_list.Remove(value);
-			
-			if (removalIndex >= 0)
-			OnListChanged(new EditableListChangedEventArgs(ListChangedType.ItemDeleted, removalIndex));
+
+			if (index >= 0)
+				OnRemoveItem(value, index);
 		}
 
 		public void RemoveAt(int index)
 		{
-			object o = this[index];
+			object value = this[index];
 
-			RemoveInternal(o);
-			
+			RemoveInternal(value);
+
 			_list.RemoveAt(index);
-			
-			OnListChanged(new EditableListChangedEventArgs(ListChangedType.ItemDeleted, index));
+
+			OnRemoveItem(value, index);
 		}
 
 		public object this[int index]
@@ -398,8 +405,8 @@ namespace BLToolkit.ComponentModel
 
 					AddInternal(value);
 
-					OnListChanged(new EditableListChangedEventArgs(ListChangedType.ItemChanged, index));
-					
+					OnChangeItem(o, value, index);
+
 					if (_isSorted)
 					{
 						int newIndex = GetItemSortedPosition(index, value);
@@ -409,8 +416,8 @@ namespace BLToolkit.ComponentModel
 							_list.RemoveAt(index);
 							_list.Insert(newIndex, value);
 						}
-						
-						OnListChanged(new EditableListChangedEventArgs(newIndex, index));
+
+						OnMoveItem(value, index, newIndex);
 					}
 				}
 			}
@@ -549,9 +556,9 @@ namespace BLToolkit.ComponentModel
 			_sortProperty = null;
 			
 			ApplySort(GetSortComparer(sorts));
-			
+
 			if (_list.Count > 0)
-				OnListChanged(new EditableListChangedEventArgs(ListChangedType.Reset));
+				OnReset();
 		}
 
 		[NonSerialized]
@@ -708,7 +715,7 @@ namespace BLToolkit.ComponentModel
 				else
 					_list.Insert(newIndex = GetSortedInsertIndex(o), o);
 
-				OnListChanged(new EditableListChangedEventArgs(newIndex, oldIndex));
+				OnMoveItem(o, oldIndex, newIndex);
 			}
 		}
 		
@@ -724,7 +731,7 @@ namespace BLToolkit.ComponentModel
 
 			AddInternal(c);
 
-			OnListChanged(new EditableListChangedEventArgs(ListChangedType.Reset, -1));
+			OnReset();
 		}
 		
 		public void InsertRange(int index, ICollection c)
@@ -742,7 +749,7 @@ namespace BLToolkit.ComponentModel
 
 			AddInternal(c);
 
-			OnListChanged(new EditableListChangedEventArgs(ListChangedType.Reset, -1));
+			OnReset();
 		}
 		
 		public void RemoveRange(int index, int count)
@@ -757,7 +764,7 @@ namespace BLToolkit.ComponentModel
 			foreach (object o in toRemove)
 				_list.Remove(o);
 
-			OnListChanged(new EditableListChangedEventArgs(ListChangedType.Reset, -1));
+			OnReset();
 		}
 		
 		public void SetRange(int index, ICollection c)
@@ -783,9 +790,9 @@ namespace BLToolkit.ComponentModel
 				ApplySort(GetSortComparer());
 
 			_notifyChanges = oldNotifyChanges;
-			OnListChanged(new EditableListChangedEventArgs(ListChangedType.Reset));
+			OnReset();
 		}
-		
+
 		#endregion
 
 		#region Add/Remove Internal
@@ -820,6 +827,65 @@ namespace BLToolkit.ComponentModel
 				RemoveInternal(o);
 		}
 
+		private void OnAddItem(object item, int index)
+		{
+			OnListChanged(new EditableListChangedEventArgs(ListChangedType.ItemAdded, index));
+#if FW3
+			OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, item, index));
+#endif
+		}
+
+		private void OnRemoveItem(object item, int index)
+		{
+			OnListChanged(new EditableListChangedEventArgs(ListChangedType.ItemDeleted, index));
+#if FW3
+			OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, item, index));
+#endif
+		}
+
+		private void OnMoveItem(object item, int oldIndex, int newIndex)
+		{
+			OnListChanged(new EditableListChangedEventArgs(newIndex, oldIndex));
+#if FW3
+			OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Move, item, newIndex, oldIndex));
+#endif
+		}
+
+		private void OnChangeItem(object oldValue, object newValue, int index)
+		{
+			OnListChanged(new EditableListChangedEventArgs(ListChangedType.ItemChanged, index));
+#if FW3
+			OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Replace, oldValue, newValue, index));
+#endif
+		}
+
+		private void OnReset()
+		{
+			OnListChanged(new EditableListChangedEventArgs(ListChangedType.Reset));
+#if FW3
+			OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
+#endif
+		}
+
 		#endregion
+
+#if FW3
+		#region INotifyCollectionChanged Members
+
+		public event NotifyCollectionChangedEventHandler CollectionChanged;
+
+		private void FireCollectionChangedEvent(object sender, NotifyCollectionChangedEventArgs ea)
+		{
+			if (_notifyChanges && CollectionChanged != null)
+				CollectionChanged(sender, ea);
+		}
+
+		private void OnCollectionChanged(NotifyCollectionChangedEventArgs ea)
+		{
+			FireCollectionChangedEvent(this, ea);
+		}
+
+		#endregion
+#endif
 	}
 }
