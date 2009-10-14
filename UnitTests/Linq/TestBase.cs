@@ -206,6 +206,24 @@ namespace Data.Linq
 			}
 		}
 
+		private   List<GrandChild1> _grandChild1;
+		protected List<GrandChild1>  GrandChild1
+		{
+			get
+			{
+				if (_grandChild1 == null)
+					using (var db = new TestDbManager("Sql2008"))
+					{
+						_grandChild1 = db.GrandChild1.ToList();
+
+						foreach (var ch in _grandChild1)
+							ch.Child = Child.Single(c => c.ParentID == ch.ParentID && c.ChildID == ch.ChildID);
+					}
+
+				return _grandChild1;
+			}
+		}
+
 		private   List<LinqDataTypes> _types;
 		protected List<LinqDataTypes>  Types
 		{

@@ -62,21 +62,22 @@ namespace Data.Linq
 		[Test]
 		public void Skip1()
 		{
-			ForEachProvider(db => Assert.AreEqual(7, db.Child.Skip(3).ToList().Count));
+			var expected = Child.Skip(3);
+			ForEachProvider(db => AreEqual(expected, db.Child.Skip(3)));
 		}
 
 		[Test]
 		public void Skip2()
 		{
-			ForEachProvider(db =>
-				Assert.AreEqual(7, (from ch in db.Child where ch.ChildID > 3 || ch.ChildID < 4 select ch).Skip(3).ToList().Count));
+			var expected = (from ch in Child where ch.ChildID > 3 || ch.ChildID < 4 select ch).Skip(3);
+			ForEachProvider(db => AreEqual(expected, (from ch in db.Child where ch.ChildID > 3 || ch.ChildID < 4 select ch).Skip(3)));
 		}
 
 		[Test]
 		public void Skip3()
 		{
-			ForEachProvider(db =>
-				Assert.AreEqual(7, (from ch in db.Child where ch.ChildID >= 0 && ch.ChildID <= 100 select ch).Skip(3).ToList().Count));
+			var expected = (from ch in Child where ch.ChildID >= 0 && ch.ChildID <= 100 select ch).Skip(3);
+			ForEachProvider(db => AreEqual(expected, (from ch in db.Child where ch.ChildID >= 0 && ch.ChildID <= 100 select ch).Skip(3)));
 		}
 
 		[Test]
@@ -94,7 +95,8 @@ namespace Data.Linq
 		[Test]
 		public void Skip5()
 		{
-			ForEachProvider(db => Assert.AreEqual(7, db.Child.OrderByDescending(c => c.ChildID).ThenBy(c => c.ParentID + 1).Skip(3).ToList().Count));
+			var expected = Child.OrderByDescending(c => c.ChildID).ThenBy(c => c.ParentID + 1).Skip(3);
+			ForEachProvider(db => AreEqual(expected, db.Child.OrderByDescending(c => c.ChildID).ThenBy(c => c.ParentID + 1).Skip(3)));
 		}
 
 		[Test]

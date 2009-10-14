@@ -25,6 +25,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		public override bool IsSkipSupported          { get { return SqlBuilder.Select.TakeValue != null; } }
 		public override bool TakeAcceptsParameter     { get { return false; } }
 		public override bool IsCountSubQuerySupported { get { return false; } }
+		public override bool IsNestedJoinSupported    { get { return false; } }
 
 		#region Skip / Take Support
 

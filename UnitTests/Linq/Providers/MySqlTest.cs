@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Linq;
 using System.Transactions;
-
-using NUnit.Framework;
 
 using BLToolkit.Data.DataProvider;
 

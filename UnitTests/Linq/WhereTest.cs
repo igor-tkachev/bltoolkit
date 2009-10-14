@@ -283,7 +283,8 @@ namespace Data.Linq
 		[Test]
 		public void Coalesce4()
 		{
-			ForEachProvider(db => Assert.AreEqual(4, (from p in db.Parent where p.ParentID == 1 ? false: true select p).ToList().Count));
+			var expected = from p in Parent where p.ParentID == 1 ? false: true select p;
+			ForEachProvider(db => AreEqual(expected, from p in db.Parent where p.ParentID == 1 ? false: true select p));
 		}
 
 		[Test]
@@ -295,13 +296,15 @@ namespace Data.Linq
 		[Test]
 		public void Coalesce6()
 		{
-			ForEachProvider(db => Assert.AreEqual(4, (from p in db.Parent where (p.Value1 == 1 ? 10 : 20) == 20 select p).ToList().Count));
+			var expected = from p in Parent where (p.Value1 == 1 ? 10 : 20) == 20 select p;
+			ForEachProvider(db => AreEqual(expected, from p in db.Parent where (p.Value1 == 1 ? 10 : 20) == 20 select p));
 		}
 
 		[Test]
 		public void Coalesce7()
 		{
-			ForEachProvider(db => Assert.AreEqual(4, (from p in db.Parent where (p.ParentID == 1 ? 10 : 20) == 20 select p).ToList().Count));
+			var expected = from p in Parent where (p.ParentID == 1 ? 10 : 20) == 20 select p;
+			ForEachProvider(db => AreEqual(expected, from p in db.Parent where (p.ParentID == 1 ? 10 : 20) == 20 select p));
 		}
 
 		[Test]
@@ -386,7 +389,8 @@ namespace Data.Linq
 		[Test]
 		public void HasValue1()
 		{
-			ForEachProvider(db => Assert.AreEqual(3, (from p in db.Parent where p.Value1.HasValue select p).ToList().Count));
+			var expected = from p in Parent where p.Value1.HasValue select p;
+			ForEachProvider(db => AreEqual(expected, from p in db.Parent where p.Value1.HasValue select p));
 		}
 
 		[Test]

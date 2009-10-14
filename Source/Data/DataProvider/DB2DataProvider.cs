@@ -43,7 +43,7 @@ namespace BLToolkit.Data.DataProvider
 					if (value != null)
 					{
 						string str = value.ToString();
-						return (str.Length > 0 && str[0] == ':')? str.Substring(1): str;
+						return str.Length > 0 && str[0] == ':'? str.Substring(1): str;
 					}
 
 					break;

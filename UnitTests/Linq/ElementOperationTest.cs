@@ -11,7 +11,8 @@ namespace Data.Linq
 		[Test]
 		public void First()
 		{
-			ForEachProvider(db => Assert.AreEqual(5, db.Parent.OrderByDescending(p => p.ParentID).First().ParentID));
+			var expected = Parent.OrderByDescending(p => p.ParentID).First().ParentID;
+			ForEachProvider(db => Assert.AreEqual(expected, db.Parent.OrderByDescending(p => p.ParentID).First().ParentID));
 		}
 
 		[Test]

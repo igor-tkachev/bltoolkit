@@ -23,6 +23,8 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		protected override string LimitFormat { get { return "LIMIT {0}"; } }
 
+		public override bool IsNestedJoinParenthesisRequired { get { return true; } }
+
 		protected override void BuildOffsetLimit(StringBuilder sb)
 		{
 			if (SqlBuilder.Select.SkipValue == null)

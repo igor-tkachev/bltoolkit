@@ -162,6 +162,7 @@ namespace BLToolkit.Data.Linq
 		public class DataReader : Expressor<IDataReader>
 		{
 			public static MethodInfo GetValue = MethodExpressor(rd => rd.GetValue(0));
+			public static MethodInfo IsDBNull = MethodExpressor(rd => rd.IsDBNull(0));
 		}
 
 		public class MapSchema : Expressor<Mapping.MappingSchema>

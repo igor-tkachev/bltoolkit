@@ -131,6 +131,7 @@
     <Compile Include="ElementOperationTest.cs" />
     <Compile Include="Exceptions\ElementOperationTest.cs" />
     <Compile Include="Mapping.cs" />
+    <Compile Include="Model\GrandChild1.cs" />
     <Compile Include="Model\EditableParent.cs" />
     <Compile Include="Model\Gender.cs" />
     <Compile Include="Model\LinqDataTypes.cs" />

@@ -33,7 +33,7 @@ Bug fixes
 - MappingSchema.ConvertChangeType does not handle nullable enums properly.
 - EditableArrayList indexer add/remove bug.
 - ParameterAttribute doesn't work with Nullabe<T> and EditableValue<T>
-  when `T' constructor is not trivial.
+  when 'T' constructor is not trivial.
 - BindingListImpl.AddNew does not fire ListChanged event.
 - Some inner types are missing in ObjectMappes, some included w/o reason.
 - Setter for ObjectBinder.ItemType fires OnListChanged event before the list changes.

@@ -423,6 +423,27 @@ namespace BLToolkit.Data.Linq
 
 			public ExprColumn Counter;
 
+			private QueryField _checkNullField;
+			public  QueryField  CheckNullField
+			{
+				get
+				{
+					if (_checkNullField == null)
+					{
+						foreach (var f in Fields)
+							if (!f.CanBeNull())
+								return _checkNullField = f;
+
+						var valueCol = new ExprColumn(ParentQueries[0], new SqlValue(1), null);
+						var subCol   = EnsureField(valueCol);
+
+						_checkNullField = subCol;
+					}
+
+					return _checkNullField;
+				}
+			}
+
 			GroupJoinQuery() {}
 
 			protected override SubQuery CreateSubQuery(Dictionary<ICloneableElement,ICloneableElement> objectTree, Predicate<ICloneableElement> doClone)

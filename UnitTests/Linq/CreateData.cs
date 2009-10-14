@@ -62,6 +62,7 @@ namespace Create
 				new Parent { ParentID = 3, Value1 = 3    },
 				new Parent { ParentID = 4, Value1 = null },
 				new Parent { ParentID = 5, Value1 = 5    },
+				new Parent { ParentID = 6, Value1 = 6    },
 			});
 
 			new SqlQuery<Child>().Insert(db, new[]
@@ -76,6 +77,12 @@ namespace Create
 				new Child { ParentID = 4, ChildID = 42 },
 				new Child { ParentID = 4, ChildID = 43 },
 				new Child { ParentID = 4, ChildID = 44 },
+				new Child { ParentID = 6, ChildID = 61 },
+				new Child { ParentID = 6, ChildID = 62 },
+				new Child { ParentID = 6, ChildID = 63 },
+				new Child { ParentID = 6, ChildID = 64 },
+				new Child { ParentID = 6, ChildID = 65 },
+				new Child { ParentID = 6, ChildID = 66 },
 			});
 
 			new SqlQuery<GrandChild>().Insert(db, new[]

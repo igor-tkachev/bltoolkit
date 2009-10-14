@@ -1,14 +1,12 @@
 ﻿using System;
 
-using BLToolkit.DataAccess;
 using BLToolkit.Mapping;
 
 namespace Data.Linq.Model
 {
-	[TableName("GrandChild")]
-	public class GrandChild1 : IEquatable<GrandChild1>
+	public class GrandChild : IEquatable<GrandChild>
 	{
-		public int  ParentID;
+		public int? ParentID;
 		public int? ChildID;
 		public int? GrandChildID;
 
@@ -19,12 +17,12 @@ namespace Data.Linq.Model
 		{
 			if (ReferenceEquals(null, obj)) return false;
 			if (ReferenceEquals(this, obj)) return true;
-			if (obj.GetType() != typeof (GrandChild1)) return false;
+			if (obj.GetType() != typeof (GrandChild)) return false;
 
-			return Equals((GrandChild1)obj);
+			return Equals((GrandChild)obj);
 		}
 
-		public bool Equals(GrandChild1 other)
+		public bool Equals(GrandChild other)
 		{
 			if (ReferenceEquals(null, other)) return false;
 			if (ReferenceEquals(this, other)) return true;
@@ -36,7 +34,7 @@ namespace Data.Linq.Model
 		{
 			unchecked
 			{
-				var result = ParentID;
+				var result = ParentID.HasValue ? ParentID.Value : 0;
 
 				result = (result * 397) ^ (ChildID.     HasValue ? ChildID.     Value : 0);
 				result = (result * 397) ^ (GrandChildID.HasValue ? GrandChildID.Value : 0);

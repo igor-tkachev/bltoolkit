@@ -48,13 +48,14 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		#region Support Flags
 
-		public virtual bool SkipAcceptsParameter      { get { return true; } }
-		public virtual bool TakeAcceptsParameter      { get { return true; } }
-
-		public virtual bool IsTakeSupported           { get { return true; } }
-		public virtual bool IsSkipSupported           { get { return true; } }
-		public virtual bool IsSubQueryColumnSupported { get { return true; } }
-		public virtual bool IsCountSubQuerySupported  { get { return true; } }
+		public virtual bool SkipAcceptsParameter            { get { return true;  } }
+		public virtual bool TakeAcceptsParameter            { get { return true;  } }
+		public virtual bool IsTakeSupported                 { get { return true;  } }
+		public virtual bool IsSkipSupported                 { get { return true;  } }
+		public virtual bool IsSubQueryColumnSupported       { get { return true;  } }
+		public virtual bool IsCountSubQuerySupported        { get { return true;  } }
+		public virtual bool IsNestedJoinSupported           { get { return true;  } }
+		public virtual bool IsNestedJoinParenthesisRequired { get { return false; } }
 
 		#endregion
 
@@ -253,6 +254,59 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		}
 
 		void BuildJoinTable(StringBuilder sb, SqlBuilder.JoinedTable join, ref int joinCounter)
+		{
+			sb.AppendLine();
+			_indent++;
+			AppendIndent(sb);
+
+			switch (join.JoinType)
+			{
+				case SqlBuilder.JoinType.Inner : sb.Append("INNER JOIN "); break;
+				case SqlBuilder.JoinType.Left  : sb.Append("LEFT JOIN ");  break;
+				default: throw new InvalidOperationException();
+			}
+
+			if (IsNestedJoinParenthesisRequired && join.Table.Joins.Count != 0)
+				sb.Append('(');
+
+			BuildPhysicalTable(sb, join.Table.Source);
+
+			string alias = GetTableAlias(join.Table);
+
+			if (!string.IsNullOrEmpty(alias))
+				sb.Append(" ").Append(alias);
+
+			if (IsNestedJoinSupported && join.Table.Joins.Count != 0)
+			{
+				foreach (SqlBuilder.JoinedTable jt in join.Table.Joins)
+					BuildJoinTable(sb, jt, ref joinCounter);
+
+				if (IsNestedJoinParenthesisRequired && join.Table.Joins.Count != 0)
+					sb.Append(')');
+
+				sb.AppendLine();
+				AppendIndent(sb);
+				sb.Append("ON ");
+			}
+			else
+				sb.Append(" ON ");
+
+			BuildSearchCondition(sb, Precedence.Unknown, join.Condition);
+
+			if (joinCounter > 0)
+			{
+				joinCounter--;
+				sb.Append(")");
+			}
+
+			if (!IsNestedJoinSupported)
+				foreach (SqlBuilder.JoinedTable jt in join.Table.Joins)
+					BuildJoinTable(sb, jt, ref joinCounter);
+
+			_indent--;
+		}
+
+		void BuildJoinTable1(StringBuilder sb, SqlBuilder.JoinedTable join, ref int joinCounter)
 		{
 			sb.AppendLine();
 			_indent++;

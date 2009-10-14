@@ -8,15 +8,14 @@ using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
 
-using BLToolkit.Data.Sql.SqlProvider;
-using BLToolkit.Reflection;
-
 namespace BLToolkit.Data.Linq
 {
+	using Common;
+	using Data.Sql;
+	using Data.Sql.SqlProvider;
 	using DataProvider;
 	using Mapping;
-	using Data.Sql;
-	using Common;
+	using Reflection;
 
 	class ExpressionInfo<T> : ReflectionHelper
 	{
@@ -591,7 +590,7 @@ namespace BLToolkit.Data.Linq
 
 				var values = valueReader.GetIEnumerable(context, db.DbManager, valueReader.Expression, ps);
 
-				return new Grouping<TKey, TElement>(key, Common.Configuration.Linq.PreloadGroups ? values.ToList() : values);
+				return new Grouping<TKey, TElement>(key, Configuration.Linq.PreloadGroups ? values.ToList() : values);
 			}
 			finally
 			{
@@ -968,7 +967,7 @@ namespace BLToolkit.Data.Linq
 			return GetSqlText(db, parms, command);
 		}
 
-		string GetSqlText(DbManager db, IDbDataParameter[] parms, string command)
+		string GetSqlText(DbManager db, ICollection<IDbDataParameter> parms, string command)
 		{
 			var sb = new StringBuilder();
 
@@ -982,7 +981,7 @@ namespace BLToolkit.Data.Linq
 
 			sb.AppendLine();
 
-			if (parms != null && parms.Length > 0)
+			if (parms != null && parms.Count > 0)
 			{
 				foreach (var p in parms)
 					sb

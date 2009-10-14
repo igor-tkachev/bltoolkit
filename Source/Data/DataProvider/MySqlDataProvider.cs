@@ -31,7 +31,7 @@ namespace BLToolkit.Data.DataProvider
 		public  static string  ParameterPrefix
 		{
 			get { return _parameterPrefix; }
-			set { _parameterPrefix = String.IsNullOrEmpty(value) ? string.Empty : value; }
+			set { _parameterPrefix = string.IsNullOrEmpty(value) ? string.Empty : value; }
 		}
 
 		public static void ConfigureOldStyle()
