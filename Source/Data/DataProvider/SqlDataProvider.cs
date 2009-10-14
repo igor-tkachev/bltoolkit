@@ -56,7 +56,57 @@ namespace BLToolkit.Data.DataProvider
 		public override bool DeriveParameters(IDbCommand command)
 		{
 			SqlCommandBuilder.DeriveParameters((SqlCommand)command);
+
+			foreach (SqlParameter p in command.Parameters)
+			{
+				// We have to clear UDT type names.
+				// Otherwise it will fail with error
+				// "Database name is not allowed with a table-valued parameter"
+				// but this is exactly the way how they are discovered.
+				//
+				if (p.SqlDbType == SqlDbType.Structured)
+				{
+					int lastDot = p.TypeName.LastIndexOf('.');
+					if (lastDot >= 0)
+						p.TypeName = p.TypeName.Substring(lastDot + 1);
+				}
+			}
 			return true;
+		}
+
+		public override void PrepareCommand(ref CommandType commandType, ref string commandText, ref IDbDataParameter[] commandParameters)
+		{
+			if (commandParameters == null)
+				return;
+
+			foreach (IDbDataParameter p in commandParameters)
+			{
+				object val = p.Value;
+				if (val == null || !val.GetType().IsArray || val is byte[] || val is char[])
+					continue;
+
+				DataTable dt = new DataTable();
+				dt.Columns.Add("column_value", val.GetType().GetElementType());
+
+				dt.BeginLoadData();
+				foreach (object o in (Array)val)
+				{
+					DataRow row = dt.NewRow();
+					row[0] = o;
+					dt.Rows.Add(row);
+				}
+				dt.EndLoadData();
+
+				p.Value = dt;
+			}
+		}
+
+		public override void SetUserDefinedType(IDbDataParameter parameter, string typeName)
+		{
+			if (!(parameter is SqlParameter))
+				throw new ArgumentException("SqlParameter expected.", "parameter");
+
+			((SqlParameter)parameter).TypeName = typeName;
 		}
 
 		public override object Convert(object value, ConvertType convertType)

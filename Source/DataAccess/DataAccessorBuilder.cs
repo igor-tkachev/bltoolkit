@@ -1777,18 +1777,22 @@ namespace BLToolkit.DataAccess
 
 		private void BuildParameter(ParameterInfo pi)
 		{
-			EmitHelper emit  = Context.MethodBuilder.Emitter;
+			EmitHelper  emit = Context.MethodBuilder.Emitter;
+			Type        type = pi.ParameterType;
 			object[]   attrs = pi.GetCustomAttributes(typeof(ParamNameAttribute), true);
+			string paramName = attrs.Length == 0 ? pi.Name : ((ParamNameAttribute)attrs[0]).Name;
 
-			string methodName;
-			string paramName = attrs.Length == 0?
-				pi.Name: ((ParamNameAttribute)attrs[0]).Name;
+			ParameterDirection direction = !type.IsByRef? ParameterDirection.Input:
+				pi.IsOut? ParameterDirection.Output: ParameterDirection.InputOutput;
 
-			emit.ldloc        (_locManager);
+			emit
+				.ldloc        (_locManager)
+				.ldc_i4_      ((int)direction)
+				;
 
 			if (paramName[0] != '@')
 			{
-				methodName = _sqlQueryAttribute == null? "GetSpParameterName": "GetQueryParameterName";
+				string methodName = _sqlQueryAttribute == null? "GetSpParameterName": "GetQueryParameterName";
 				emit
 					.ldarg_0
 					.ldloc    (_locManager)
@@ -1799,9 +1803,6 @@ namespace BLToolkit.DataAccess
 			else
 				emit.ldstr    (paramName);
 
-			Type type  = pi.ParameterType;
-			methodName = "Parameter";
-
 			if (type.IsByRef)
 			{
 				if (_outputParameters == null)
@@ -1809,15 +1810,29 @@ namespace BLToolkit.DataAccess
 
 				_outputParameters.Add(pi);
 
-				type       = type.GetElementType();
-				methodName = pi.IsOut? "OutputParameter": "InputOutputParameter";
+				type = type.GetElementType();
 			}
 
 			LoadParameterOrNull(pi, type);
 
-			emit
-				.callvirt          (typeof(DbManager), methodName, typeof(string), typeof(object))
-				;
+			// Special case for user-defined types.
+			//
+			attrs = pi.GetCustomAttributes(typeof(ParamTypeNameAttribute), true);
+			if (attrs.Length > 0)
+			{
+				emit
+					.ldstr             (((ParamTypeNameAttribute)attrs[0]).TypeName)
+					.callvirt          (typeof(DbManager), "Parameter",
+					                    typeof(ParameterDirection), typeof(string), typeof(object), typeof(string))
+					;
+			}
+			else
+			{
+				emit
+					.callvirt          (typeof(DbManager), "Parameter",
+					                    typeof(ParameterDirection), typeof(string), typeof(object))
+					;
+			}
 
 			// Check if parameter type/size is specified.
 			//

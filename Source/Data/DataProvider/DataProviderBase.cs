@@ -146,6 +146,11 @@ namespace BLToolkit.Data.DataProvider
 			command.Parameters.Add(parameter);
 		}
 
+		public virtual void SetUserDefinedType(IDbDataParameter parameter, string typeName)
+		{
+			throw new NotSupportedException(Name + " data provider does not support UDT.");
+		}
+
 		public virtual bool IsValueParameter(IDbDataParameter parameter)
 		{
 			return parameter.Direction != ParameterDirection.ReturnValue;

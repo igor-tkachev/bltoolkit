@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading;
 
 namespace BLToolkit.Data.Sql
 {
@@ -13,7 +14,7 @@ namespace BLToolkit.Data.Sql
 
 		public SqlFunction(string name, int precedence, params ISqlExpression[] parameters)
 		{
-			_sourceID = ++SqlBuilder.SourceIDCounter;
+			_sourceID = Interlocked.Increment(ref SqlBuilder.SourceIDCounter);
 
 			if (parameters == null) throw new ArgumentNullException("parameters");
 
@@ -28,6 +29,13 @@ namespace BLToolkit.Data.Sql
 		readonly string           _name;       public string           Name       { get { return _name;       } }
 		readonly int              _precedence; public int              Precedence { get { return _precedence; } }
 		readonly ISqlExpression[] _parameters; public ISqlExpression[] Parameters { get { return _parameters; } }
+
+		public class Count  : SqlFunction { public Count(ISqlTableSource table) : base("Count", table.All) { } }
+
+		public class All    : SqlFunction { public All   (SqlBuilder subQuery)  : base("ALL",    Sql.Precedence.Comparison, subQuery) { } }
+		public class Some   : SqlFunction { public Some  (SqlBuilder subQuery)  : base("SOME",   Sql.Precedence.Comparison, subQuery) { } }
+		public class Any    : SqlFunction { public Any   (SqlBuilder subQuery)  : base("ANY",    Sql.Precedence.Comparison, subQuery) { } }
+		public class Exists : SqlFunction { public Exists(SqlBuilder subQuery)  : base("EXISTS", Sql.Precedence.Comparison, subQuery) { } }
 
 		#region Overrides
 
@@ -132,12 +140,5 @@ namespace BLToolkit.Data.Sql
 		}
 
 		#endregion
-
-		public class Count  : SqlFunction { public Count (ISqlTableSource table) : base("Count", table.All) {} }
-
-		public class All    : SqlFunction { public All   (SqlBuilder subQuery) : base("ALL",    Sql.Precedence.Comparison, subQuery) {} }
-		public class Some   : SqlFunction { public Some  (SqlBuilder subQuery) : base("SOME",   Sql.Precedence.Comparison, subQuery) {} }
-		public class Any    : SqlFunction { public Any   (SqlBuilder subQuery) : base("ANY",    Sql.Precedence.Comparison, subQuery) {} }
-		public class Exists : SqlFunction { public Exists(SqlBuilder subQuery) : base("EXISTS", Sql.Precedence.Comparison, subQuery) {} }
 	}
 }

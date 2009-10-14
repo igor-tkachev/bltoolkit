@@ -1,15 +1,16 @@
-using System;
-
+#if ORACLE
+using BLToolkit.Data;
+#else
+using System.Collections.Generic;
+#endif
+using System.Data;
 using NUnit.Framework;
 
-using BLToolkit.Data;
 using BLToolkit.DataAccess;
 using BLToolkit.TypeBuilder;
 
 namespace DataAccess
 {
-#if ORACLE
-
 	[TestFixture]
 	public class ArrayTest
 	{
@@ -18,6 +19,7 @@ namespace DataAccess
 			TypeFactory.SaveTypes = true;
 		}
 
+#if ORACLE
 		public abstract class TestAccessor : DataAccessor
 		{
 			public abstract void ArrayTest(
@@ -111,7 +113,32 @@ END;"
 			Assert.AreEqual(intArray, inputOutputIntArray);
 		}
 
-	}
 
+#elif MSSQL
+
+		public abstract class TestAccessor : DataAccessor
+		{
+			[SprocName("ArrayTest")]
+			public abstract IList<int> SprocTest(int[] @inputIntArray);
+			[SqlQuery("SELECT Num * 3 FROM @inputIntArray")]
+			public abstract IList<int> QueryTest([ParamTypeName("IntArray")] int[] @inputIntArray);
+		}
+
+		[Test]
+		public void Test()
+		{
+			int[] intArray = { 1, 2, 3, 4, 5 };
+
+			TestAccessor a = TypeFactory.CreateInstance<TestAccessor>();
+			IList<int> list;
+
+			list = a.SprocTest(intArray);
+			for (int i = 0; i < list.Count; i++)
+				Assert.That(list[i], Is.EqualTo(intArray[i]*2));
+			list = a.QueryTest(intArray);
+			for (int i = 0; i < list.Count; i++)
+				Assert.That(list[i], Is.EqualTo(intArray[i]*3));
+		}
 #endif
+	}
 }

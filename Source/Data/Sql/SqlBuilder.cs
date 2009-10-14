@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
+using System.Threading;
 
 namespace BLToolkit.Data.Sql
 {
@@ -14,7 +15,7 @@ namespace BLToolkit.Data.Sql
 
 		public SqlBuilder()
 		{
-			_sourceID = ++SourceIDCounter;
+			_sourceID = Interlocked.Increment(ref SourceIDCounter);
 
 			_select  = new SelectClause (this);
 			_from    = new FromClause   (this);
@@ -2224,7 +2225,7 @@ namespace BLToolkit.Data.Sql
 		{
 			objectTree.Add(clone, this);
 
-			_sourceID = ++SourceIDCounter;
+			_sourceID = Interlocked.Increment(ref SourceIDCounter);
 
 			_select  = new SelectClause (this, clone._select,  objectTree, doClone);
 			_from    = new FromClause   (this, clone._from,    objectTree, doClone);
@@ -2361,8 +2362,8 @@ namespace BLToolkit.Data.Sql
 
 		public static int SourceIDCounter;
 
-		private int _sourceID;
-		public  int  SourceID { get { return _sourceID; } }
+		readonly int _sourceID;
+		public   int  SourceID { get { return _sourceID; } }
 
 		private SqlField _all;
 		public  SqlField  All

@@ -451,6 +451,22 @@ VALUES
 	'<root><element strattr="strvalue" intattr="12345"/></root>')
 GO
 
+--
+-- Arrays
+--
+CREATE TYPE IntArray AS TABLE
+(
+	Num int NULL
+)
+GO
+
+CREATE PROCEDURE ArrayTest
+	@InputIntArray IntArray READONLY    
+AS
+BEGIN
+        SELECT Num * 2 FROM @InputIntArray;     
+END
+GO
 
 DROP TABLE Parent
 GO

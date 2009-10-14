@@ -124,6 +124,7 @@
     <Compile Include="Configuration\TypeFactoryElement.cs" />
     <Compile Include="DataAccess\ActualTypeAttribute.cs" />
     <Compile Include="DataAccess\DataAccessorBase.cs" />
+    <Compile Include="DataAccess\ParamTypeNameAttribute.cs" />
     <Compile Include="DataAccess\SqlIgnoreAttribute.cs" />
     <Compile Include="Data\DataProvider\ProviderName.cs" />
     <Compile Include="Data\Linq\CompiledQuery.cs" />

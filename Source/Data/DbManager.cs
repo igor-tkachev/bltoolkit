@@ -1574,6 +1574,35 @@ namespace BLToolkit.Data
 		}
 
 		/// <summary>
+		/// Adds a parameter to the <see cref="Command"/>.
+		/// </summary>
+		/// <remarks>
+		/// The method creates a parameter with the specified
+		/// <see cref="System.Data.ParameterDirection"/> type.
+		/// </remarks>
+		/// <param name="parameterDirection">One of the <see cref="System.Data.ParameterDirection"/> values.</param>
+		/// <param name="parameterName">The name of the parameter.</param>
+		/// <param name="value">The <see cref="System.Object"/>
+		/// that is the value of the parameter.</param>
+		/// <param name="typeName">User defined type name for a table-valued parameter.</param>
+		/// <returns>The <see cref="IDbDataParameter"/> object.</returns>
+		public IDbDataParameter Parameter(
+			ParameterDirection parameterDirection,
+			string             parameterName,
+			object             value,
+			string             typeName)
+		{
+			IDbDataParameter parameter = _dataProvider.CreateParameterObject(Command);
+
+			parameter.ParameterName = parameterName;
+			parameter.Direction     = parameterDirection;
+			_dataProvider.SetUserDefinedType(parameter, typeName);
+			parameter.Value         = value;
+
+			return parameter;
+		}
+
+		/// <summary>
 		/// Adds an input parameter to the <see cref="Command"/>.
 		/// </summary>
 		/// <param name="parameterName">The name of the parameter.</param>

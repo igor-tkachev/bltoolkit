@@ -169,6 +169,17 @@ namespace BLToolkit.Data.DataProvider
 			return base.CloneParameter(parameter);
 		}
 
+		public override void SetUserDefinedType(IDbDataParameter parameter, string typeName)
+		{
+			OracleParameter oraParameter = (parameter is OracleParameterWrap) ?
+				(parameter as OracleParameterWrap).OracleParameter : parameter as OracleParameter;
+
+			if (oraParameter == null)
+				throw new ArgumentException("OracleParameter expected.", "parameter");
+
+			oraParameter.UdtTypeName = typeName;
+		}
+
 		/// <summary>
 		/// Creates the data adapter object.
 		/// </summary>

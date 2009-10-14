@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading;
 
 namespace BLToolkit.Data.Sql
 {
@@ -16,7 +17,7 @@ namespace BLToolkit.Data.Sql
 
 		public SqlTable(MappingSchema mappingSchema)
 		{
-			_sourceID = ++SqlBuilder.SourceIDCounter;
+			_sourceID = Interlocked.Increment(ref SqlBuilder.SourceIDCounter);
 
 			if (mappingSchema == null) throw new ArgumentNullException("mappingSchema");
 

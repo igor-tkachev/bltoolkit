@@ -176,9 +176,9 @@ namespace Data
 #if MSSQL
 		[Test]
 #endif
-		public void NewConnection()
+		public void NativeConnection()
 		{
-			string connectionString = "Server=.;Database=BLToolkitData;Integrated Security=SSPI";
+			string connectionString = DbManager.GetConnectionString(null);
 
 			using (DbManager db = new DbManager(new SqlConnection(connectionString)))
 			{
