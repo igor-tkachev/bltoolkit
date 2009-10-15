@@ -602,5 +602,33 @@ namespace Data.Linq
 				where ch == null
 				select p));
 		}
+
+		[Test]
+		public void ChecCondition1()
+		{
+			var expected =
+				from p in Parent
+				where p.ParentID == 1 && p.Value1 == 1 || p.ParentID == 2 && p.Value1.HasValue
+				select p;
+
+			ForEachProvider(db => AreEqual(expected,
+				from p in db.Parent
+				where p.ParentID == 1 && p.Value1 == 1 || p.ParentID == 2 && p.Value1.HasValue
+				select p));
+		}
+
+		[Test]
+		public void ChecCondition2()
+		{
+			var expected =
+				from p in Parent
+				where p.ParentID == 1 && p.Value1 == 1 || p.ParentID == 2 && (p.ParentID != 3 || p.ParentID == 4) && p.Value1.HasValue
+				select p;
+
+			ForEachProvider(db => AreEqual(expected,
+				from p in db.Parent
+				where p.ParentID == 1 && p.Value1 == 1 || p.ParentID == 2 && (p.ParentID != 3 || p.ParentID == 4) && p.Value1.HasValue
+				select p));
+		}
 	}
 }

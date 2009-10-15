@@ -454,6 +454,14 @@ GO
 --
 -- Arrays
 --
+IF EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID('DataTypeTest') AND type in (N'U'))
+BEGIN DROP PROCEDURE ArrayTest END
+GO
+
+IF EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID('DataTypeTest') AND type in (N'U'))
+BEGIN DROP TYPE IntArray END
+GO
+
 CREATE TYPE IntArray AS TABLE
 (
 	Num int NULL
@@ -464,7 +472,7 @@ CREATE PROCEDURE ArrayTest
 	@InputIntArray IntArray READONLY    
 AS
 BEGIN
-        SELECT Num * 2 FROM @InputIntArray;     
+	SELECT Num * 2 FROM @InputIntArray;     
 END
 GO
 
