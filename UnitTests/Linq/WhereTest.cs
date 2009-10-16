@@ -604,7 +604,14 @@ namespace Data.Linq
 		}
 
 		[Test]
-		public void ChecCondition1()
+		public void CheckNull1()
+		{
+			var expected = from p in Parent where p != null select p;
+			ForEachProvider(db => AreEqual(expected, from p in db.Parent where p != null select p));
+		}
+
+		[Test]
+		public void CheckCondition1()
 		{
 			var expected =
 				from p in Parent
@@ -618,7 +625,7 @@ namespace Data.Linq
 		}
 
 		[Test]
-		public void ChecCondition2()
+		public void CheckCondition2()
 		{
 			var expected =
 				from p in Parent

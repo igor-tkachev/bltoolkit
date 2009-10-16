@@ -6,6 +6,8 @@ using System.Threading;
 
 namespace BLToolkit.Data.Sql
 {
+	using SqlProvider;
+
 	using FJoin = SqlBuilder.FromClause.Join;
 
 	[DebuggerDisplay("SQL = {SqlText}")]
@@ -1931,19 +1933,36 @@ namespace BLToolkit.Data.Sql
 
 		public void FinalizeAndValidate()
 		{
-			FinalizeAndValidateInternal();
+			FinalizeAndValidate(null);
+		}
+
+		public void FinalizeAndValidate(ISqlProvider sqlProvider)
+		{
+			FinalizeAndValidateInternal(sqlProvider);
 			SetAliases();
 		}
 
-		public void FinalizeAndValidateInternal()
+		public void FinalizeAndValidateInternal(ISqlProvider sqlProvider)
 		{
+			if (sqlProvider != null)
+			{
+				sqlProvider.ConvertSearchCondition(Where. SearchCondition);
+				sqlProvider.ConvertSearchCondition(Having.SearchCondition);
+
+				ForEachTable(delegate(TableSource table)
+				{
+					foreach (JoinedTable join in table.Joins)
+						sqlProvider.ConvertSearchCondition(join.Condition);
+				});
+			}
+
 			((ISqlExpressionWalkable)this).Walk(false, delegate(ISqlExpression expr)
 			{
 				SqlBuilder sb = expr as SqlBuilder;
 
 				if (sb != null && sb != this)
 				{
-					sb.FinalizeAndValidateInternal();
+					sb.FinalizeAndValidateInternal(sqlProvider);
 					sb.RemoveOrderBy();
 
 					if (sb.ParameterDependent)
@@ -2104,15 +2123,26 @@ namespace BLToolkit.Data.Sql
 			}
 			else
 			{
-				SearchCondition sc1 = new SearchCondition();
-				SearchCondition sc2 = new SearchCondition();
+				if (where1.SearchCondition.Precedence < Sql.Precedence.LogicalConjunction)
+				{
+					SearchCondition sc1 = new SearchCondition();
 
-				sc1.Conditions.AddRange(where1.SearchCondition.Conditions);
-				sc2.Conditions.AddRange(where2.SearchCondition.Conditions);
+					sc1.Conditions.AddRange(where1.SearchCondition.Conditions);
 
-				where1.SearchCondition.Conditions.Clear();
-				where1.SearchCondition.Conditions.Add(new Condition(false, sc1));
-				where1.SearchCondition.Conditions.Add(new Condition(false, sc2));
+					where1.SearchCondition.Conditions.Clear();
+					where1.SearchCondition.Conditions.Add(new Condition(false, sc1));
+				}
+
+				if (where2.SearchCondition.Precedence < Sql.Precedence.LogicalConjunction)
+				{
+					SearchCondition sc2 = new SearchCondition();
+
+					sc2.Conditions.AddRange(where2.SearchCondition.Conditions);
+
+					where1.SearchCondition.Conditions.Add(new Condition(false, sc2));
+				}
+				else
+					where1.SearchCondition.Conditions.AddRange(where2.SearchCondition.Conditions);
 			}
 		}
 

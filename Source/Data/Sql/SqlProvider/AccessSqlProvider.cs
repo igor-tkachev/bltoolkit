@@ -279,6 +279,14 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			return new SqlFunction("Iif", parameters[start], parameters[start + 1], ConvertCase(parameters, start + 2));
 		}
 
+		protected override void BuildValue(StringBuilder sb, object value)
+		{
+			if (value is bool)
+				sb.Append(value);
+			else
+				base.BuildValue(sb, value);
+		}
+
 #if FW3
 		protected override Dictionary<MemberInfo,BaseExpressor> GetExpressors() { return _members; }
 		static    readonly Dictionary<MemberInfo,BaseExpressor> _members = new Dictionary<MemberInfo,BaseExpressor>

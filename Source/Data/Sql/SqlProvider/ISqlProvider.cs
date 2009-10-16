@@ -10,10 +10,11 @@ namespace BLToolkit.Data.Sql.SqlProvider
 {
 	public interface ISqlProvider
 	{
-		int            BuildSql         (SqlBuilder sqlBuilder, StringBuilder sb, int indent, int nesting);
-		void           UpdateParameters (SqlBuilder sql);
-		ISqlExpression ConvertExpression(ISqlExpression expression);
-		ISqlPredicate  ConvertPredicate (ISqlPredicate  predicate);
+		int            BuildSql               (SqlBuilder sqlBuilder, StringBuilder sb, int indent, int nesting);
+		void           UpdateParameters       (SqlBuilder sql);
+		ISqlExpression ConvertExpression      (ISqlExpression expression);
+		ISqlPredicate  ConvertPredicate       (ISqlPredicate  predicate);
+		void           ConvertSearchCondition (SqlBuilder.SearchCondition searchCondition);
 
 		string         Name                      { get; }
 		SqlBuilder     SqlBuilder                { get; set; }

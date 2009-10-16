@@ -3,6 +3,8 @@ using System.Linq;
 
 using NUnit.Framework;
 
+using BLToolkit.Data.DataProvider;
+
 namespace Data.Linq
 {
 	[TestFixture]
@@ -455,7 +457,7 @@ namespace Data.Linq
 				group p by new { p.Value1 } into g
 				select g.Count(p => p.ParentID < 3);
 
-			ForEachProvider(db => AreEqual(expected,
+			ForEachProvider(new[] { ProviderName.Access }, db => AreEqual(expected,
 				from p in
 					from p in db.Parent select new { ParentID = p.ParentID + 1, p.Value1 }
 				where p.ParentID + 1 > 1

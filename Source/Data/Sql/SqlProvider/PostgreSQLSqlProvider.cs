@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Reflection;
+using System.Text;
 
 namespace BLToolkit.Data.Sql.SqlProvider
 {
@@ -56,6 +57,14 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			}
 
 			return expr;
+		}
+
+		protected override void BuildValue(StringBuilder sb, object value)
+		{
+			if (value is bool)
+				sb.Append(value);
+			else
+				base.BuildValue(sb, value);
 		}
 
 #if FW3

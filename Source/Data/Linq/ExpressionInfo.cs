@@ -104,7 +104,7 @@ namespace BLToolkit.Data.Linq
 		public void SetElementQuery<TE>(Mapper<TE> mapper)
 		{
 			foreach (var sql in Queries)
-				sql.SqlBuilder.FinalizeAndValidate();
+				sql.SqlBuilder.FinalizeAndValidate(SqlProvider);
 
 			if (Queries.Count != 1)
 				throw new InvalidOperationException();
@@ -150,7 +150,7 @@ namespace BLToolkit.Data.Linq
 			Queries[0].Mapper = mapper;
 
 			foreach (var sql in Queries)
-				sql.SqlBuilder.FinalizeAndValidate();
+				sql.SqlBuilder.FinalizeAndValidate(SqlProvider);
 
 			if (Queries.Count != 1)
 				throw new InvalidOperationException();

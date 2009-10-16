@@ -2456,7 +2456,11 @@ namespace BLToolkit.Data.Linq
 						}
 				}
 
-				throw new LinqException("'{0}' cannot be converted to SQL.", parseInfo.Expr);
+				//throw new LinqException("'{0}' cannot be converted to SQL.", parseInfo.Expr);
+				return Convert(new SqlBuilder.Predicate.ExprExpr(
+					ParseExpression(parseInfo, queries),
+					SqlBuilder.Predicate.Operator.Equal,
+					new SqlValue(true)));
 			}
 			finally
 			{
@@ -2564,19 +2568,24 @@ namespace BLToolkit.Data.Linq
 
 		ISqlPredicate ParseObjectNullComparison(ParseInfo left, ParseInfo right, QuerySource[] queries, bool isEqual)
 		{
-			if (left.NodeType == ExpressionType.MemberAccess &&
-				right.NodeType == ExpressionType.Constant && ((ConstantExpression)right).Value == null)
+			if (right.NodeType == ExpressionType.Constant && ((ConstantExpression)right).Value == null)
 			{
-				foreach (var query in queries)
+				if (left.NodeType == ExpressionType.MemberAccess || left.NodeType == ExpressionType.Parameter)
 				{
-					var field = query.GetField(left);
-
-					if (field is QuerySource.GroupJoinQuery)
+					foreach (var query in queries)
 					{
-						var join = (QuerySource.GroupJoinQuery)field;
-						var expr = join.CheckNullField.GetExpressions(this)[0];
+						var field = query.GetField(left);
 
-						return Convert(new SqlBuilder.Predicate.IsNull(expr, !isEqual));
+						if (field is QuerySource.GroupJoinQuery)
+						{
+							var join = (QuerySource.GroupJoinQuery)field;
+							var expr = join.CheckNullField.GetExpressions(this)[0];
+
+							return Convert(new SqlBuilder.Predicate.IsNull(expr, !isEqual));
+						}
+
+						if (field is QuerySource || field == null && left.NodeType == ExpressionType.Parameter)
+							return new SqlBuilder.Predicate.Expr(new SqlValue(!isEqual));
 					}
 				}
 			}
@@ -2839,9 +2848,8 @@ namespace BLToolkit.Data.Linq
 						var orCondition = new SqlBuilder.SearchCondition();
 
 						ParseSearchCondition(orCondition.Conditions, pi.Create(e.Left,  pi.Property(Binary.Left)),  queries);
+						orCondition.Conditions[orCondition.Conditions.Count - 1].IsOr = true;
 						ParseSearchCondition(orCondition.Conditions, pi.Create(e.Right, pi.Property(Binary.Right)), queries);
-
-						orCondition.Conditions[0].IsOr = true;
 
 						conditions.Add(new SqlBuilder.Condition(false, orCondition));
 

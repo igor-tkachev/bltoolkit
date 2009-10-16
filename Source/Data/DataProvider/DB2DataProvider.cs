@@ -14,9 +14,9 @@ namespace BLToolkit.Data.DataProvider
 		public override DbDataAdapter CreateDataAdapterObject() { return new DB2DataAdapter();     }
 		public override ISqlProvider  CreateSqlProvider      () { return new DB2SqlProvider(this); }
 
-		public override Type   ConnectionType         { get { return typeof(DB2Connection);         } }
-		public override string Name                   { get { return DataProvider.ProviderName.DB2; } }
-		public override string EndOfSql               { get { return ";"; } }
+		public override Type   ConnectionType { get { return typeof(DB2Connection);         } }
+		public override string Name           { get { return DataProvider.ProviderName.DB2; } }
+		public override string EndOfSql       { get { return ";"; } }
 
 		public override bool DeriveParameters(IDbCommand command)
 		{
@@ -69,6 +69,14 @@ namespace BLToolkit.Data.DataProvider
 			}
 
 			return value;
+		}
+
+		public override void PrepareCommand(ref CommandType commandType, ref string commandText, ref IDbDataParameter[] commandParameters)
+		{
+			if (commandParameters != null)
+				foreach (var p in commandParameters)
+					if (p.DbType == DbType.Boolean)
+						p.Value = (bool)p.Value ? 1 : 0;
 		}
 	}
 }

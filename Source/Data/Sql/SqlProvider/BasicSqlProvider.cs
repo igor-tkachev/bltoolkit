@@ -518,6 +518,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		{
 			bool? isOr = null;
 			int   len  = sb.Length;
+			int   prevPrecedence = Precedence.LogicalDisjunction;
 
 			foreach (SqlBuilder.Condition cond in condition.Conditions)
 			{
@@ -537,21 +538,14 @@ namespace BLToolkit.Data.Sql.SqlProvider
 					}
 				}
 
-				int precedence;
-
 				if (cond.IsNot)
-				{
 					sb.Append("NOT ");
-					precedence = Precedence.LogicalNegation;
-				}
-				else
-				{
-					precedence = GetPrecedence(condition as ISqlExpression);
-				}
 
-				BuildPredicate(sb, precedence, cond.Predicate);
+				BuildPredicate(sb, cond.IsNot ? Precedence.LogicalNegation : prevPrecedence, cond.Predicate);
 
 				isOr = cond.IsOr;
+
+				prevPrecedence = cond.Precedence;
 			}
 		}
 
@@ -1562,6 +1556,10 @@ namespace BLToolkit.Data.Sql.SqlProvider
 						break;
 				}
 			}
+			else if (expression is SqlBuilder.SearchCondition)
+			{
+				ConvertSearchCondition((SqlBuilder.SearchCondition)expression);
+			}
 
 			return expression;
 		}
@@ -1767,6 +1765,74 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			}
 
 			throw new InvalidOperationException();
+		}
+
+		public virtual void ConvertSearchCondition(SqlBuilder.SearchCondition searchCondition)
+		{
+			if (searchCondition.Conditions.Count == 1)
+			{
+				SqlBuilder.Condition cond = searchCondition.Conditions[0];
+
+				if (!cond.IsNot && cond.Predicate is SqlBuilder.SearchCondition)
+				{
+					searchCondition.Conditions.RemoveAll(_ => true);
+					searchCondition.Conditions.AddRange(((SqlBuilder.SearchCondition)cond.Predicate).Conditions);
+
+					ConvertSearchCondition(searchCondition);
+					return;
+				}
+
+				if (cond.Predicate is SqlBuilder.Predicate.Expr)
+				{
+					SqlBuilder.Predicate.Expr expr = (SqlBuilder.Predicate.Expr)cond.Predicate;
+
+					if (expr.Expr1 is SqlValue)
+					{
+						SqlValue value = (SqlValue)expr.Expr1;
+
+						if (value.Value is bool)
+							if (cond.IsNot ? !(bool)value.Value : (bool)value.Value)
+								searchCondition.Conditions.RemoveAll(_ => true);
+					}
+				}
+			}
+
+			for (int i = 0; i < searchCondition.Conditions.Count; i++)
+			{
+				SqlBuilder.Condition cond = searchCondition.Conditions[i];
+
+				if (cond.Predicate is SqlBuilder.Predicate.Expr)
+				{
+					SqlBuilder.Predicate.Expr expr = (SqlBuilder.Predicate.Expr)cond.Predicate;
+
+					if (expr.Expr1 is SqlValue)
+					{
+						SqlValue value = (SqlValue)expr.Expr1;
+
+						if (value.Value is bool)
+						{
+							if (cond.IsNot ? !(bool)value.Value : (bool)value.Value)
+							{
+								if (i > 0)
+								{
+									if (searchCondition.Conditions[i-1].IsOr)
+									{
+										searchCondition.Conditions.RemoveRange(0, i);
+										ConvertSearchCondition(searchCondition);
+
+										break;
+									}
+								}
+							}
+						}
+					}
+				}
+				else if (cond.Predicate is SqlBuilder.SearchCondition)
+				{
+					SqlBuilder.SearchCondition sc = (SqlBuilder.SearchCondition)cond.Predicate;
+					ConvertSearchCondition(sc);
+				}
+			}
 		}
 
 		public virtual string Name
