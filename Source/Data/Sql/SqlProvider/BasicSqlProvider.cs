@@ -1775,7 +1775,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 				if (!cond.IsNot && cond.Predicate is SqlBuilder.SearchCondition)
 				{
-					searchCondition.Conditions.RemoveAll(_ => true);
+					searchCondition.Conditions.RemoveAll(delegate(SqlBuilder.Condition _) { return true; });
 					searchCondition.Conditions.AddRange(((SqlBuilder.SearchCondition)cond.Predicate).Conditions);
 
 					ConvertSearchCondition(searchCondition);
@@ -1792,7 +1792,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 						if (value.Value is bool)
 							if (cond.IsNot ? !(bool)value.Value : (bool)value.Value)
-								searchCondition.Conditions.RemoveAll(_ => true);
+								searchCondition.Conditions.RemoveAll(delegate(SqlBuilder.Condition _) { return true; });
 					}
 				}
 			}
