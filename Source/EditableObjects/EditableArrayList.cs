@@ -1104,9 +1104,6 @@ namespace BLToolkit.EditableObjects
 
 		public void CancelNew(int itemIndex)
 		{
-			if (itemIndex >= 0)
-				NewItems.Remove(List[itemIndex]);
-
 			BindingListImpl.CancelNew(itemIndex);
 		}
 
