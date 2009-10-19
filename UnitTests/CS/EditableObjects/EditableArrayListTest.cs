@@ -115,11 +115,15 @@ namespace EditableObjects
 			list.AddNew();
 			Assert.That(listChangedFired);
 			Assert.AreEqual(1, list.Count);
+			Assert.AreEqual(1, list.NewItems.Count);
+			Assert.AreEqual(0, list.DelItems.Count);
 
 			listChangedFired = false;
 			list.CancelNew(0);
 			Assert.That(listChangedFired);
 			Assert.IsEmpty(list);
+			Assert.IsEmpty(list.NewItems);
+			Assert.IsEmpty(list.DelItems);
 		}
 
 		[Test]
