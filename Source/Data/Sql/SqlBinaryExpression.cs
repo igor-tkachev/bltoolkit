@@ -44,6 +44,7 @@ namespace BLToolkit.Data.Sql
 
 		#region ISqlExpressionWalkable Members
 
+		[Obsolete]
 		ISqlExpression ISqlExpressionWalkable.Walk(bool skipColumns, WalkingFunc func)
 		{
 			_expr1 = _expr1.Walk(skipColumns, func);
@@ -98,6 +99,12 @@ namespace BLToolkit.Data.Sql
 
 			return clone;
 		}
+
+		#endregion
+
+		#region IQueryElement Members
+
+		public QueryElementType ElementType { get { return QueryElementType.SqlBinaryExpression; } }
 
 		#endregion
 	}

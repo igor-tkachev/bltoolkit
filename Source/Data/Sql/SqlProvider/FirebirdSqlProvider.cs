@@ -23,7 +23,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		protected override void BuildSelectClause(StringBuilder sb)
 		{
-			if (SqlBuilder.From.Tables.Count == 0)
+			if (SqlQuery.From.Tables.Count == 0)
 			{
 				AppendIndent(sb);
 				sb.Append("SELECT").AppendLine();

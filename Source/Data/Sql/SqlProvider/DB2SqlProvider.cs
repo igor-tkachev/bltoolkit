@@ -21,7 +21,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		{
 		}
 
-		public override bool TakeAcceptsParameter { get { return SqlBuilder.Select.SkipValue != null; } }
+		public override bool TakeAcceptsParameter { get { return SqlQuery.Select.SkipValue != null; } }
 
 		protected override void BuildSql(StringBuilder sb)
 		{
@@ -30,7 +30,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		protected override void BuildSelectClause(StringBuilder sb)
 		{
-			if (SqlBuilder.From.Tables.Count == 0)
+			if (SqlQuery.From.Tables.Count == 0)
 			{
 				AppendIndent(sb).Append("SELECT").AppendLine();
 				BuildColumns(sb);
@@ -42,7 +42,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		protected override string LimitFormat
 		{
-			get { return SqlBuilder.Select.SkipValue == null ? "FETCH FIRST {0} ROWS ONLY" : null; }
+			get { return SqlQuery.Select.SkipValue == null ? "FETCH FIRST {0} ROWS ONLY" : null; }
 		}
 
 		public override ISqlExpression ConvertExpression(ISqlExpression expr)

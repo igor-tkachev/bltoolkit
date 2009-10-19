@@ -493,5 +493,11 @@ namespace BLToolkit.Data.Sql
 		}
 
 		#endregion
+
+		#region IQueryElement Members
+
+		public QueryElementType ElementType { get { return QueryElementType.SqlDataType; } }
+
+		#endregion
 	}
 }

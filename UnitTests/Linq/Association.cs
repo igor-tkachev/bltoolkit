@@ -8,7 +8,7 @@ namespace Data.Linq
 	[TestFixture]
 	public class Association : TestBase
 	{
-		[Test]
+		//[Test]
 		public void Test1()
 		{
 			var expected = from p in Parent select p.Children;
@@ -22,7 +22,7 @@ namespace Data.Linq
 			ForEachProvider(db => AreEqual(expected, from ch in db.Child where ch.ParentID == 1 select new { ch, ch.Parent }));
 		}
 
-		[Test]
+		//[Test]
 		public void Test3()
 		{
 			var expected =

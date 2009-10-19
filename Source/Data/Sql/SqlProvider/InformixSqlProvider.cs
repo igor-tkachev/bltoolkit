@@ -23,7 +23,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		protected override void BuildSelectClause(StringBuilder sb)
 		{
-			if (SqlBuilder.From.Tables.Count == 0)
+			if (SqlQuery.From.Tables.Count == 0)
 			{
 				AppendIndent(sb).Append("SELECT FIRST 1").AppendLine();
 				BuildColumns(sb);
@@ -36,7 +36,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		protected override string FirstFormat { get { return "FIRST {0}"; } }
 		protected override string SkipFormat  { get { return "SKIP {0}";  } }
 
-		protected override void BuildLikePredicate(StringBuilder sb, SqlBuilder.Predicate.Like predicate)
+		protected override void BuildLikePredicate(StringBuilder sb, SqlQuery.Predicate.Like predicate)
 		{
 			if (predicate.IsNot)
 				sb.Append("NOT ");

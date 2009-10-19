@@ -1977,11 +1977,13 @@ namespace BLToolkit.Data
 			return SetSpCommand(CommandAction.Select, spName, openNewConnectionToDiscoverParameters, parameterValues);
 		}
 
-		public DbManager SetCommand(SqlBuilder sql, params IDbDataParameter[] commandParameters)
+		public DbManager SetCommand(SqlQuery sql, params IDbDataParameter[] commandParameters)
 		{
-			StringBuilder sb      = new StringBuilder();
+			StringBuilder sb = new StringBuilder();
+
 			DataProvider.CreateSqlProvider().BuildSql(sql, sb, 0, 0);
-			string        command = sb.ToString();
+
+			string command = sb.ToString();
 
 #if DEBUG
 			string info = string.Format("{0} {1}\n{2}", DataProvider.Name, ConfigurationString, command);

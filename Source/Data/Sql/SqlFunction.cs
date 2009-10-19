@@ -14,7 +14,7 @@ namespace BLToolkit.Data.Sql
 
 		public SqlFunction(string name, int precedence, params ISqlExpression[] parameters)
 		{
-			_sourceID = Interlocked.Increment(ref SqlBuilder.SourceIDCounter);
+			_sourceID = Interlocked.Increment(ref SqlQuery.SourceIDCounter);
 
 			if (parameters == null) throw new ArgumentNullException("parameters");
 
@@ -30,12 +30,11 @@ namespace BLToolkit.Data.Sql
 		readonly int              _precedence; public int              Precedence { get { return _precedence; } }
 		readonly ISqlExpression[] _parameters; public ISqlExpression[] Parameters { get { return _parameters; } }
 
-		public class Count  : SqlFunction { public Count(ISqlTableSource table) : base("Count", table.All) { } }
-
-		public class All    : SqlFunction { public All   (SqlBuilder subQuery)  : base("ALL",    Sql.Precedence.Comparison, subQuery) { } }
-		public class Some   : SqlFunction { public Some  (SqlBuilder subQuery)  : base("SOME",   Sql.Precedence.Comparison, subQuery) { } }
-		public class Any    : SqlFunction { public Any   (SqlBuilder subQuery)  : base("ANY",    Sql.Precedence.Comparison, subQuery) { } }
-		public class Exists : SqlFunction { public Exists(SqlBuilder subQuery)  : base("EXISTS", Sql.Precedence.Comparison, subQuery) { } }
+		public static SqlFunction CreateCount (ISqlTableSource table) { return new SqlFunction("Count",  table.All); }
+		public static SqlFunction CreateAll   (SqlQuery subQuery)     { return new SqlFunction("ALL",    Sql.Precedence.Comparison, subQuery); }
+		public static SqlFunction CreateSome  (SqlQuery subQuery)     { return new SqlFunction("SOME",   Sql.Precedence.Comparison, subQuery); }
+		public static SqlFunction CreateAny   (SqlQuery subQuery)     { return new SqlFunction("ANY",    Sql.Precedence.Comparison, subQuery); }
+		public static SqlFunction CreateExists(SqlQuery subQuery)     { return new SqlFunction("EXISTS", Sql.Precedence.Comparison, subQuery); }
 
 		#region Overrides
 
@@ -57,6 +56,7 @@ namespace BLToolkit.Data.Sql
 
 		#region ISqlExpressionWalkable Members
 
+		[Obsolete]
 		ISqlExpression ISqlExpressionWalkable.Walk(bool skipColumns, WalkingFunc action)
 		{
 			for (int i = 0; i < _parameters.Length; i++)
@@ -138,6 +138,12 @@ namespace BLToolkit.Data.Sql
 
 			return clone;
 		}
+
+		#endregion
+
+		#region IQueryElement Members
+
+		public QueryElementType ElementType { get { return QueryElementType.SqlFunction; } }
 
 		#endregion
 	}

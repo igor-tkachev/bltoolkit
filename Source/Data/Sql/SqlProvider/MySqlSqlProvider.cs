@@ -27,17 +27,17 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		protected override void BuildOffsetLimit(StringBuilder sb)
 		{
-			if (SqlBuilder.Select.SkipValue == null)
+			if (SqlQuery.Select.SkipValue == null)
 				base.BuildOffsetLimit(sb);
 			else
 			{
 				AppendIndent(sb).AppendFormat
 				(
-					SqlBuilder.Select.SkipValue != null ? "LIMIT {0},{1}" : "LIMIT {1}",
-					BuildExpression(new StringBuilder(), SqlBuilder.Select.SkipValue),
-					SqlBuilder.Select.TakeValue == null?
+					SqlQuery.Select.SkipValue != null ? "LIMIT {0},{1}" : "LIMIT {1}",
+					BuildExpression(new StringBuilder(), SqlQuery.Select.SkipValue),
+					SqlQuery.Select.TakeValue == null?
 						long.MaxValue.ToString():
-						BuildExpression(new StringBuilder(), SqlBuilder.Select.TakeValue).ToString()
+						BuildExpression(new StringBuilder(), SqlQuery.Select.TakeValue).ToString()
 				).AppendLine();
 			}
 		}

@@ -17,7 +17,7 @@ namespace BLToolkit.Data.Sql
 
 		public SqlTable(MappingSchema mappingSchema)
 		{
-			_sourceID = Interlocked.Increment(ref SqlBuilder.SourceIDCounter);
+			_sourceID = Interlocked.Increment(ref SqlQuery.SourceIDCounter);
 
 			if (mappingSchema == null) throw new ArgumentNullException("mappingSchema");
 
@@ -71,6 +71,19 @@ namespace BLToolkit.Data.Sql
 		public SqlTable(SqlTable table)
 			: this(table.MappingSchema, table)
 		{
+		}
+
+		public SqlTable(SqlTable table, IEnumerable<SqlField> fields, IEnumerable<Join> joins)
+			: this(table.MappingSchema)
+		{
+			_alias        = table._alias;
+			_database     = table._database;
+			_owner        = table._owner;
+			_name         = table._name;
+			_physicalName = table._physicalName;
+
+			Fields.AddRange(fields);
+			Joins. AddRange(joins);
 		}
 
 		#endregion
@@ -246,6 +259,12 @@ namespace BLToolkit.Data.Sql
 
 			return clone;
 		}
+
+		#endregion
+
+		#region IQueryElement Members
+
+		public QueryElementType ElementType { get { return QueryElementType.SqlTable; } }
 
 		#endregion
 	}

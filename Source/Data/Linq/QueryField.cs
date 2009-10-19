@@ -33,7 +33,7 @@ namespace BLToolkit.Data.Linq
 				ParsingTracer.WriteLine("table", _table);
 				ParsingTracer.IncIndentLevel();
 
-				var index =  new[] { new FieldIndex { Index = _table.SqlBuilder.Select.Add(Field, Field.Name), Field = this } };
+				var index =  new[] { new FieldIndex { Index = _table.SqlQuery.Select.Add(Field, Field.Name), Field = this } };
 
 				ParsingTracer.DecIndentLevel();
 				ParsingTracer.WriteLine("table", _table);
@@ -117,7 +117,7 @@ namespace BLToolkit.Data.Linq
 					if (_sqlExpression == null)
 						_sqlExpression = parser.ParseExpression(Expr, QuerySource.ParentQueries);
 
-					_index = new[] { new FieldIndex { Index = QuerySource.SqlBuilder.Select.Add(_sqlExpression, _alias), Field = this } };
+					_index = new[] { new FieldIndex { Index = QuerySource.SqlQuery.Select.Add(_sqlExpression, _alias), Field = this } };
 				}
 
 				ParsingTracer.DecIndentLevel();
@@ -214,7 +214,7 @@ namespace BLToolkit.Data.Linq
 					for (var i = 0; i < _subIndex.Length; i++)
 					{
 						var col = QuerySource.SubSql.Select.Columns[_subIndex[i].Index];
-						_index[i] = new FieldIndex { Index = QuerySource.SqlBuilder.Select.Add(col), Field = this };
+						_index[i] = new FieldIndex { Index = QuerySource.SqlQuery.Select.Add(col), Field = this };
 					}
 				}
 

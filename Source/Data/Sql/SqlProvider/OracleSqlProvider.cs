@@ -25,7 +25,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		protected override void BuildSelectClause(StringBuilder sb)
 		{
-			if (SqlBuilder.From.Tables.Count == 0)
+			if (SqlQuery.From.Tables.Count == 0)
 			{
 				AppendIndent(sb).Append("SELECT").AppendLine();
 				BuildColumns(sb);
@@ -37,14 +37,14 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		protected override bool BuildWhere()
 		{
-			return base.BuildWhere() || !NeedSkip && NeedTake && SqlBuilder.OrderBy.IsEmpty && SqlBuilder.Having. IsEmpty;
+			return base.BuildWhere() || !NeedSkip && NeedTake && SqlQuery.OrderBy.IsEmpty && SqlQuery.Having. IsEmpty;
 		}
 
 		string _rowNumberAlias;
 
 		protected override void BuildSql(StringBuilder sb)
 		{
-			bool buildRowNum = NeedSkip || NeedTake && (!SqlBuilder.OrderBy.IsEmpty || !SqlBuilder.Having.IsEmpty);
+			bool buildRowNum = NeedSkip || NeedTake && (!SqlQuery.OrderBy.IsEmpty || !SqlQuery.Having.IsEmpty);
 
 			string[] aliases = null;
 
@@ -81,19 +81,19 @@ namespace BLToolkit.Data.Sql.SqlProvider
 				if (NeedTake && NeedSkip)
 				{
 					AppendIndent(sb).AppendFormat("{0}.{1} BETWEEN ", aliases[1], _rowNumberAlias);
-					BuildExpression(sb, Add(SqlBuilder.Select.SkipValue, 1));
+					BuildExpression(sb, Add(SqlQuery.Select.SkipValue, 1));
 					sb.Append(" AND ");
-					BuildExpression(sb, Add<int>(SqlBuilder.Select.SkipValue, SqlBuilder.Select.TakeValue));
+					BuildExpression(sb, Add<int>(SqlQuery.Select.SkipValue, SqlQuery.Select.TakeValue));
 				}
 				else if (NeedTake)
 				{
 					AppendIndent(sb).AppendFormat("{0}.{1} <= ", aliases[1], _rowNumberAlias);
-					BuildExpression(sb, Precedence.Comparison, SqlBuilder.Select.TakeValue);
+					BuildExpression(sb, Precedence.Comparison, SqlQuery.Select.TakeValue);
 				}
 				else
 				{
 					AppendIndent(sb).AppendFormat("{0}.{1} > ", aliases[1], _rowNumberAlias);
-					BuildExpression(sb, Precedence.Comparison, SqlBuilder.Select.SkipValue);
+					BuildExpression(sb, Precedence.Comparison, SqlQuery.Select.SkipValue);
 				}
 
 				sb.AppendLine();
@@ -101,17 +101,17 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			}
 		}
 
-		protected override void BuildWhereSearchCondition(StringBuilder sb, SqlBuilder.SearchCondition condition)
+		protected override void BuildWhereSearchCondition(StringBuilder sb, SqlQuery.SearchCondition condition)
 		{
-			if (NeedTake && !NeedSkip && SqlBuilder.OrderBy.IsEmpty && SqlBuilder.Having.IsEmpty)
+			if (NeedTake && !NeedSkip && SqlQuery.OrderBy.IsEmpty && SqlQuery.Having.IsEmpty)
 			{
 				BuildPredicate(
 					sb,
 					Precedence.LogicalConjunction,
-					new SqlBuilder.Predicate.ExprExpr(
+					new SqlQuery.Predicate.ExprExpr(
 						new SqlExpression("ROWNUM", Precedence.Primary),
-						SqlBuilder.Predicate.Operator.LessOrEqual,
-						SqlBuilder.Select.TakeValue));
+						SqlQuery.Predicate.Operator.LessOrEqual,
+						SqlQuery.Select.TakeValue));
 
 				if (base.BuildWhere())
 				{

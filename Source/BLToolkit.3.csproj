@@ -135,7 +135,6 @@
     <Compile Include="Data\Linq\ElementMethod.cs" />
     <Compile Include="Data\Linq\FieldIndex.cs" />
     <Compile Include="Data\Linq\QueryT.cs" />
-    <Compile Include="Data\Sql\IClonableElement.cs" />
     <Compile Include="Data\Linq\LambdaInfo.cs" />
     <Compile Include="Data\Linq\ParsingTracer.cs" />
     <Compile Include="Data\Linq\QueryContext.cs" />
@@ -153,7 +152,11 @@
     <Compile Include="Data\Linq\SqlFunctionAttribute.cs" />
     <Compile Include="Data\Linq\TableT.cs" />
     <Compile Include="Data\Sql\ChildContainer.cs" />
+    <Compile Include="Data\Sql\ICloneableElement.cs" />
+    <Compile Include="Data\Sql\ISqlExpressionWalkable.cs" />
     <Compile Include="Data\Sql\IValueContainer.cs" />
+    <Compile Include="Data\Sql\QueryElementType.cs" />
+    <Compile Include="Data\Sql\QueryVisitor.cs" />
     <Compile Include="Data\Sql\SqlDataType.cs" />
     <Compile Include="Data\Sql\ISqlPredicate.cs" />
     <Compile Include="Data\Sql\Precedence.cs" />
@@ -161,15 +164,14 @@
     <Compile Include="Data\Sql\SqlException.cs" />
     <Compile Include="Data\Sql\Extensions.cs" />
     <Compile Include="Data\Sql\IChild.cs" />
-    <Compile Include="Data\Sql\ISqlExpressionWalkable.cs" />
+    <Compile Include="Data\Sql\IQueryElement.cs" />
     <Compile Include="Data\Sql\ISqlExpression.cs" />
     <Compile Include="Data\Sql\ISqlTableSource.cs" />
-    <Compile Include="Data\Sql\SqlBuilder.cs" />
     <Compile Include="Data\Sql\SqlExpression.cs" />
     <Compile Include="Data\Sql\SqlField.cs" />
     <Compile Include="Data\Sql\SqlFunction.cs" />
-    <Compile Include="Data\Sql\SqlJoin.cs" />
-    <Compile Include="Data\Sql\SqlJoinOn.cs" />
+    <Compile Include="Data\Sql\Join.cs" />
+    <Compile Include="Data\Sql\JoinOn.cs" />
     <Compile Include="Data\Sql\SqlParameter.cs" />
     <Compile Include="Data\Sql\SqlProvider\BasicSqlProvider.cs" />
     <Compile Include="Data\Sql\SqlProvider\AccessSqlProvider.cs" />
@@ -185,6 +187,7 @@
     <Compile Include="Data\Sql\SqlProvider\DB2SqlProvider.cs" />
     <Compile Include="Data\Sql\SqlProvider\InformixSqlProvider.cs" />
     <Compile Include="Data\Sql\SqlProvider\ISqlProvider.cs" />
+    <Compile Include="Data\Sql\SqlQuery.cs" />
     <Compile Include="Data\Sql\SqlTable.cs" />
     <Compile Include="Data\Sql\SqlTableT.cs" />
     <Compile Include="Data\Sql\SqlValue.cs" />

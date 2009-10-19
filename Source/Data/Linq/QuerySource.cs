@@ -17,21 +17,21 @@ namespace BLToolkit.Data.Linq
 
 		public class Table : QuerySource
 		{
-			public Table(MappingSchema mappingSchema, SqlBuilder sqlBuilder, LambdaInfo lambda)
-				: base(sqlBuilder, lambda)
+			public Table(MappingSchema mappingSchema, SqlQuery sqlQuery, LambdaInfo lambda)
+				: base(sqlQuery, lambda)
 			{
 				ObjectType = TypeHelper.GetGenericType(typeof(IQueryable<>), lambda.Body.Expr.Type).GetGenericArguments()[0];
 				SqlTable   = new SqlTable(mappingSchema, ObjectType);
 
-				sqlBuilder.From.Table(SqlTable);
+				sqlQuery.From.Table(SqlTable);
 
 				Init(mappingSchema);
 
 				ParsingTracer.DecIndentLevel();
 			}
 
-			Table(MappingSchema mappingSchema, SqlBuilder sqlBuilder, Association association, Table parent)
-				: base(sqlBuilder, null)
+			Table(MappingSchema mappingSchema, SqlQuery sqlQuery, Association association, Table parent)
+				: base(sqlQuery, null)
 			{
 				var type = association.MemberAccessor.MemberInfo.MemberType == MemberTypes.Property ?
 					((PropertyInfo)association.MemberAccessor.MemberInfo).PropertyType :
@@ -48,7 +48,7 @@ namespace BLToolkit.Data.Linq
 				ObjectType = type;
 				SqlTable   = new SqlTable(mappingSchema, ObjectType);
 
-				var psrc = sqlBuilder.From[parent.SqlTable];
+				var psrc = sqlQuery.From[parent.SqlTable];
 				var join = left ? SqlTable.WeakLeftJoin() : SqlTable.InnerJoin();
 
 				psrc.Joins.Add(join.JoinedTable);
@@ -115,7 +115,7 @@ namespace BLToolkit.Data.Linq
 
 				if (_associations.TryGetValue(mi.Name, out a))
 				{
-					tbl = new Table(_mappingSchema, SqlBuilder, a, this);
+					tbl = new Table(_mappingSchema, SqlQuery, a, this);
 					_associatedTables.Add(mi.Name, tbl);
 
 					return tbl;
@@ -160,7 +160,7 @@ namespace BLToolkit.Data.Linq
 
 		public class Expr : QuerySource
 		{
-			public Expr(SqlBuilder sqlBilder, LambdaInfo lambda, params QuerySource[] parentQueries)
+			public Expr(SqlQuery sqlBilder, LambdaInfo lambda, params QuerySource[] parentQueries)
 				: base(sqlBilder, lambda, parentQueries)
 			{
 				if (lambda.Body.Expr is NewExpression)
@@ -314,7 +314,7 @@ namespace BLToolkit.Data.Linq
 
 		public class SubQuery : QuerySource
 		{
-			public SubQuery(SqlBuilder currentSql, SqlBuilder subSql, QuerySource parentQuery, bool addToSource)
+			public SubQuery(SqlQuery currentSql, SqlQuery subSql, QuerySource parentQuery, bool addToSource)
 				: base(currentSql, null, parentQuery)
 			{
 				ParsingTracer.WriteLine(subSql);
@@ -322,7 +322,7 @@ namespace BLToolkit.Data.Linq
 				SubSql = subSql;
 
 				if (addToSource)
-					SqlBuilder.From.Table(subSql);
+					SqlQuery.From.Table(subSql);
 
 				foreach (var field in parentQuery.Fields)
 					EnsureField(field);
@@ -330,12 +330,12 @@ namespace BLToolkit.Data.Linq
 				ParsingTracer.DecIndentLevel();
 			}
 
-			public SubQuery(SqlBuilder currentSql, SqlBuilder subSql, QuerySource parentQuery)
+			public SubQuery(SqlQuery currentSql, SqlQuery subSql, QuerySource parentQuery)
 				: this(currentSql, subSql, parentQuery, true)
 			{
 			}
 
-			public   SqlBuilder                            SubSql;
+			public   SqlQuery                              SubSql;
 			readonly Dictionary<QueryField,SubQueryColumn> _columns = new Dictionary<QueryField,SubQueryColumn>();
 
 			public override QueryField EnsureField(QueryField field)
@@ -401,7 +401,7 @@ namespace BLToolkit.Data.Linq
 			{
 				var sub = CreateSubQuery(objectTree, doClone);
 
-				sub.SubSql = (SqlBuilder)SubSql.Clone(objectTree, doClone);
+				sub.SubSql = (SqlQuery)SubSql.Clone(objectTree, doClone);
 
 				foreach (var c in _columns)
 					sub._columns.Add(c.Key, (SubQueryColumn)c.Value.Clone(objectTree, doClone));
@@ -416,7 +416,7 @@ namespace BLToolkit.Data.Linq
 
 		public class GroupJoinQuery : SubQuery
 		{
-			public GroupJoinQuery(SqlBuilder currentSql, SqlBuilder subSql, QuerySource parentQuery)
+			public GroupJoinQuery(SqlQuery currentSql, SqlQuery subSql, QuerySource parentQuery)
 				: base(currentSql, subSql, parentQuery, false)
 			{
 			}
@@ -458,7 +458,7 @@ namespace BLToolkit.Data.Linq
 
 		public class Scalar : QuerySource
 		{
-			public Scalar(SqlBuilder sqlBilder, LambdaInfo lambda, params QuerySource[] parentQueries)
+			public Scalar(SqlQuery sqlBilder, LambdaInfo lambda, params QuerySource[] parentQueries)
 				: base(sqlBilder, lambda, parentQueries)
 			{
 				_field = GetParentField(lambda.Body) ?? new ExprColumn(this, lambda.Body, null);
@@ -499,7 +499,7 @@ namespace BLToolkit.Data.Linq
 		public class GroupBy : Expr
 		{
 			public GroupBy(
-				SqlBuilder       sqlBilder,
+				SqlQuery         sqlBilder,
 				QuerySource      groupQuery,
 				QuerySource      originalQuery,
 				LambdaInfo       keySelector,
@@ -563,7 +563,7 @@ namespace BLToolkit.Data.Linq
 
 		public class Path : QuerySource
 		{
-			public Path(SqlBuilder currentSql, LambdaInfo lambda, params QuerySource[] parentQuery)
+			public Path(SqlQuery currentSql, LambdaInfo lambda, params QuerySource[] parentQuery)
 				: base(currentSql, lambda, parentQuery)
 			{
 			}
@@ -640,9 +640,9 @@ namespace BLToolkit.Data.Linq
 
 		#region base
 
-		protected QuerySource(SqlBuilder sqlBuilder, LambdaInfo lambda, params QuerySource[] parentQueries)
+		protected QuerySource(SqlQuery sqlQuery, LambdaInfo lambda, params QuerySource[] parentQueries)
 		{
-			SqlBuilder    = sqlBuilder;
+			SqlQuery      = sqlQuery;
 			Lambda        = lambda;
 			ParentQueries = parentQueries;
 
@@ -662,7 +662,7 @@ namespace BLToolkit.Data.Linq
 
 		public override string ToString()
 		{
-			var str = SqlBuilder.ToString().Replace('\t', ' ').Replace('\n', ' ').Replace("\r", "");
+			var str = SqlQuery.ToString().Replace('\t', ' ').Replace('\n', ' ').Replace("\r", "");
 
 			for (var len = str.Length; len != (str = str.Replace("  ", " ")).Length; len = str.Length)
 			{
@@ -690,7 +690,7 @@ namespace BLToolkit.Data.Linq
 
 				objectTree.Add(this, qs);
 
-				qs.SqlBuilder    = (SqlBuilder)SqlBuilder.Clone(objectTree, doClone);
+				qs.SqlQuery     = (SqlQuery)SqlQuery.Clone(objectTree, doClone);
 				qs.Lambda        = Lambda;
 				qs.ParentQueries = Array. ConvertAll(ParentQueries, q => (QuerySource)q.Clone(objectTree, doClone));
 				qs._fields       = Fields.ConvertAll(f => (QueryField)f.Clone(objectTree, doClone));
@@ -703,9 +703,9 @@ namespace BLToolkit.Data.Linq
 
 		public override QuerySource[] Sources { get { return ParentQueries; } }
 
-		public QuerySource[]    ParentQueries;
-		public SqlBuilder       SqlBuilder;
-		public LambdaInfo       Lambda;
+		public QuerySource[] ParentQueries;
+		public SqlQuery      SqlQuery;
+		public LambdaInfo    Lambda;
 
 		private        List<QueryField> _fields = new List<QueryField>();
 		public virtual List<QueryField>  Fields { get { return _fields; } }

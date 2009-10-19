@@ -45,10 +45,10 @@ namespace BLToolkit.Data.Linq
 		bool   _isParsingPhase;
 #pragma warning restore 414
 
-		SqlBuilder CurrentSql
+		SqlQuery CurrentSql
 		{
-			get { return _info.Queries[_currentSql].SqlBuilder;  }
-			set { _info.Queries[_currentSql].SqlBuilder = value; }
+			get { return _info.Queries[_currentSql].SqlQuery;  }
+			set { _info.Queries[_currentSql].SqlQuery = value; }
 		}
 
 		List<ExpressionInfo<T>.Parameter> CurrentSqlParameters
@@ -366,7 +366,7 @@ namespace BLToolkit.Data.Linq
 
 			var sql = CurrentSql;
 
-			CurrentSql = new SqlBuilder();
+			CurrentSql = new SqlQuery();
 
 			var seq2 = ParseSequence(collectionSelector.Body, source);
 
@@ -376,7 +376,7 @@ namespace BLToolkit.Data.Linq
 				return resultSelector == null ? seq2 : ParseSelect(resultSelector, source, seq2);
 			}
 
-			var current = new SqlBuilder();
+			var current = new SqlQuery();
 			var source1 = new QuerySource.SubQuery(current, sql,        source);
 			var source2 = new QuerySource.SubQuery(current, CurrentSql, seq2);
 
@@ -406,10 +406,10 @@ namespace BLToolkit.Data.Linq
 
 			CheckExplicitCtor(outerKeySelector.Body);
 
-			var current = new SqlBuilder();
+			var current = new SqlQuery();
 			var source1 = new QuerySource.SubQuery(current, CurrentSql, outerSource);
 
-			CurrentSql = new SqlBuilder();
+			CurrentSql = new SqlQuery();
 
 			var seq     = ParseSequence(inner, null);
 			var source2 = new QuerySource.SubQuery(current, CurrentSql, seq, false);
@@ -469,12 +469,12 @@ namespace BLToolkit.Data.Linq
 
 			// Process outer source.
 			//
-			var current = new SqlBuilder();
+			var current = new SqlQuery();
 			var source1 = new QuerySource.SubQuery(current, CurrentSql, outerSource);
 
 			// Process inner source.
 			//
-			CurrentSql = new SqlBuilder();
+			CurrentSql = new SqlQuery();
 
 			var seq     = ParseSequence(inner, null);
 			var source2 = new QuerySource.GroupJoinQuery(current, CurrentSql, seq);
@@ -486,7 +486,7 @@ namespace BLToolkit.Data.Linq
 
 			// Process counter.
 			//
-			CurrentSql = new SqlBuilder();
+			CurrentSql = new SqlQuery();
 
 			var cntseq   = ParseSequence(inner, null);
 			var counter  = new QuerySource.SubQuery(current, CurrentSql, cntseq, false);
@@ -494,7 +494,7 @@ namespace BLToolkit.Data.Linq
  
 			CurrentSql = current;
 
-			counter.SubSql.Select.Expr(new SqlFunction.Count(counter.SubSql.From.Tables[0]), "cnt");
+			counter.SubSql.Select.Expr(SqlFunction.CreateCount(counter.SubSql.From.Tables[0]), "cnt");
 			current.From.Table(source1.SubSql, cntjoin);
 
 			// Make join and where for the counter.
@@ -510,7 +510,7 @@ namespace BLToolkit.Data.Linq
 						.Expr(ParseExpression(new1.Create(new1.Expr.Arguments[i], new1.Index(new1.Expr.Arguments, New.Arguments, i)), source1)).Equal
 						.Expr(ParseExpression(new2.Create(new2.Expr.Arguments[i], new2.Index(new2.Expr.Arguments, New.Arguments, i)), source2));
 
-					//counter.SqlBuilder.Where
+					//counter.SqlQuery.Where
 					cntjoin
 						.Expr(ParseExpression(new1.Create(new1.Expr.Arguments[i], new1.Index(new1.Expr.Arguments, New.Arguments, i)), source1)).Equal
 						.Expr(ParseExpression(new2.Create(new2.Expr.Arguments[i], new2.Index(new2.Expr.Arguments, New.Arguments, i)), counter));
@@ -666,7 +666,7 @@ namespace BLToolkit.Data.Linq
 
 				byExprs[i] = exprs[0];
 
-				wrap = wrap || !(exprs[0] is SqlField || exprs[0] is SqlBuilder.Column);
+				wrap = wrap || !(exprs[0] is SqlField || exprs[0] is SqlQuery.Column);
 			}
 
 			if (wrap)
@@ -674,7 +674,7 @@ namespace BLToolkit.Data.Linq
 				var subQuery = WrapInSubQuery(group);
 
 				foreach (var field in group.Fields)
-					CurrentSql.GroupBy.Expr(group.SqlBuilder.Select.Columns[field.Select(this)[0].Index]);
+					CurrentSql.GroupBy.Expr(group.SqlQuery.Select.Columns[field.Select(this)[0].Index]);
 
 				group = subQuery;
 			}
@@ -721,13 +721,13 @@ namespace BLToolkit.Data.Linq
 				{
 					var e = expr;
 
-					if (e is SqlBuilder.SearchCondition)
+					if (e is SqlQuery.SearchCondition)
 					{
 						if (e.CanBeNull())
 						{
-							var notExpr = new SqlBuilder.SearchCondition
+							var notExpr = new SqlQuery.SearchCondition
 							{
-								Conditions = { new SqlBuilder.Condition(true, new SqlBuilder.Predicate.Expr(expr, expr.Precedence)) }
+								Conditions = { new SqlQuery.Condition(true, new SqlQuery.Predicate.Expr(expr, expr.Precedence)) }
 							};
 
 							e = Convert(new SqlFunction("CASE", expr, new SqlValue(1), notExpr, new SqlValue(0), new SqlValue(null)));
@@ -758,7 +758,7 @@ namespace BLToolkit.Data.Linq
 
 			CurrentSql.Select.Take(ParseExpression(value, select));
 
-			_info.SqlProvider.SqlBuilder = CurrentSql;
+			_info.SqlProvider.SqlQuery = CurrentSql;
 
 			if (CurrentSql.Select.SkipValue != null && _info.SqlProvider.IsTakeSupported && !_info.SqlProvider.IsSkipSupported)
 				CurrentSql.Select.Take(Convert(
@@ -792,7 +792,7 @@ namespace BLToolkit.Data.Linq
 
 			CurrentSql.Select.Skip(ParseExpression(value, select));
 
-			_info.SqlProvider.SqlBuilder = CurrentSql;
+			_info.SqlProvider.SqlQuery = CurrentSql;
 
 			if (CurrentSql.Select.TakeValue != null)
 			{
@@ -852,8 +852,8 @@ namespace BLToolkit.Data.Linq
 
 			var idx =
 				parseInfo.Expr.Method.Name == "Count" ?
-					select.SqlBuilder.Select.Add(new SqlFunction.Count(select.SqlBuilder), "cnt"):
-					select.SqlBuilder.Select.Add(new SqlFunction(parseInfo.Expr.Method.Name, ParseExpression(lambda.Body, select)));
+					select.SqlQuery.Select.Add(SqlFunction.CreateCount(select.SqlQuery), "cnt"):
+					select.SqlQuery.Select.Add(new SqlFunction(parseInfo.Expr.Method.Name, ParseExpression(lambda.Body, select)));
 
 			_buildSelect = () =>
 			{
@@ -1745,7 +1745,7 @@ namespace BLToolkit.Data.Linq
 					case ExpressionType.LessThan:
 					case ExpressionType.LessThanOrEqual:
 						{
-							var condition = new SqlBuilder.SearchCondition();
+							var condition = new SqlQuery.SearchCondition();
 							ParseSearchCondition(condition.Conditions, parseInfo, queries);
 							return condition;
 						}
@@ -2040,11 +2040,11 @@ namespace BLToolkit.Data.Linq
 				{
 					var predicate = ParsePredicate(ParseLambdaArgument(pi, 1), groupBy);
 
-					groupBy.SqlBuilder.Where.SearchCondition.Conditions.Add(new SqlBuilder.Condition(false, predicate));
+					groupBy.SqlQuery.Where.SearchCondition.Conditions.Add(new SqlQuery.Condition(false, predicate));
 
-					var sql = groupBy.SqlBuilder.Clone(o => !(o is SqlParameter));
+					var sql = groupBy.SqlQuery.Clone(o => !(o is SqlParameter));
 
-					groupBy.SqlBuilder.Where.SearchCondition.Conditions.RemoveAt(groupBy.SqlBuilder.Where.SearchCondition.Conditions.Count - 1);
+					groupBy.SqlQuery.Where.SearchCondition.Conditions.RemoveAt(groupBy.SqlQuery.Where.SearchCondition.Conditions.Count - 1);
 
 					sql.Select.Columns.RemoveAll(_ => true);
 
@@ -2053,39 +2053,39 @@ namespace BLToolkit.Data.Linq
 						for (var i = 0; i < sql.GroupBy.Items.Count; i++)
 						{
 							var item1 = sql.GroupBy.Items[i];
-							var item2 = groupBy.SqlBuilder.GroupBy.Items[i];
-							var pr    = Convert(new SqlBuilder.Predicate.ExprExpr(item1, SqlBuilder.Predicate.Operator.Equal, item2));
+							var item2 = groupBy.SqlQuery.GroupBy.Items[i];
+							var pr    = Convert(new SqlQuery.Predicate.ExprExpr(item1, SqlQuery.Predicate.Operator.Equal, item2));
 
-							sql.Where.SearchCondition.Conditions.Add(new SqlBuilder.Condition(false, pr));
+							sql.Where.SearchCondition.Conditions.Add(new SqlQuery.Condition(false, pr));
 						}
 
 						sql.GroupBy.Items.RemoveAll(_ => true);
-						sql.Select.Expr(new SqlFunction.Count(sql));
-						sql.ParentSql = groupBy.SqlBuilder;
+						sql.Select.Expr(SqlFunction.CreateCount(sql));
+						sql.ParentSql = groupBy.SqlQuery;
 
 						return sql;
 					}
 
 					var join = sql.WeakLeftJoin();
 
-					groupBy.SqlBuilder.From.Tables[0].Joins.Add(join.JoinedTable);
+					groupBy.SqlQuery.From.Tables[0].Joins.Add(join.JoinedTable);
 
 					for (var i = 0; i < sql.GroupBy.Items.Count; i++)
 					{
 						var item1 = sql.GroupBy.Items[i];
-						var item2 = groupBy.SqlBuilder.GroupBy.Items[i];
+						var item2 = groupBy.SqlQuery.GroupBy.Items[i];
 						var col   = sql.Select.Columns[sql.Select.Add(item1)];
-						var pr    = Convert(new SqlBuilder.Predicate.ExprExpr(col, SqlBuilder.Predicate.Operator.Equal, item2));
+						var pr    = Convert(new SqlQuery.Predicate.ExprExpr(col, SqlQuery.Predicate.Operator.Equal, item2));
 
-						join.JoinedTable.Condition.Conditions.Add(new SqlBuilder.Condition(false, pr));
+						join.JoinedTable.Condition.Conditions.Add(new SqlQuery.Condition(false, pr));
 					}
 
-					sql.ParentSql = groupBy.SqlBuilder;
+					sql.ParentSql = groupBy.SqlQuery;
 
 					return new SqlFunction("Count", sql.Select.Columns[0]);
 				}
 
-				return new SqlFunction.Count(groupBy.SqlBuilder);
+				return SqlFunction.CreateCount(groupBy.SqlQuery);
 			}
 
 			for (var i = 1; i < expr.Arguments.Count; i++)
@@ -2362,16 +2362,16 @@ namespace BLToolkit.Data.Linq
 									break;
 							}
 
-							SqlBuilder.Predicate.Operator op;
+							SqlQuery.Predicate.Operator op;
 
 							switch (parseInfo.NodeType)
 							{
-								case ExpressionType.Equal             : op = SqlBuilder.Predicate.Operator.Equal;          break;
-								case ExpressionType.NotEqual          : op = SqlBuilder.Predicate.Operator.NotEqual;       break;
-								case ExpressionType.GreaterThan       : op = SqlBuilder.Predicate.Operator.Greater;        break;
-								case ExpressionType.GreaterThanOrEqual: op = SqlBuilder.Predicate.Operator.GreaterOrEqual; break;
-								case ExpressionType.LessThan          : op = SqlBuilder.Predicate.Operator.Less;           break;
-								case ExpressionType.LessThanOrEqual   : op = SqlBuilder.Predicate.Operator.LessOrEqual;    break;
+								case ExpressionType.Equal             : op = SqlQuery.Predicate.Operator.Equal;          break;
+								case ExpressionType.NotEqual          : op = SqlQuery.Predicate.Operator.NotEqual;       break;
+								case ExpressionType.GreaterThan       : op = SqlQuery.Predicate.Operator.Greater;        break;
+								case ExpressionType.GreaterThanOrEqual: op = SqlQuery.Predicate.Operator.GreaterOrEqual; break;
+								case ExpressionType.LessThan          : op = SqlQuery.Predicate.Operator.Less;           break;
+								case ExpressionType.LessThanOrEqual   : op = SqlQuery.Predicate.Operator.LessOrEqual;    break;
 								default: throw new InvalidOperationException();
 							}
 
@@ -2396,7 +2396,7 @@ namespace BLToolkit.Data.Linq
 									break;
 							}
 
-							return Convert(new SqlBuilder.Predicate.ExprExpr(l, op, r));
+							return Convert(new SqlQuery.Predicate.ExprExpr(l, op, r));
 						}
 
 					case ExpressionType.Call:
@@ -2434,9 +2434,9 @@ namespace BLToolkit.Data.Linq
 						}
 
 					case ExpressionType.Conditional:
-						return Convert(new SqlBuilder.Predicate.ExprExpr(
+						return Convert(new SqlQuery.Predicate.ExprExpr(
 							ParseExpression(parseInfo, queries),
-							SqlBuilder.Predicate.Operator.Equal,
+							SqlQuery.Predicate.Operator.Equal,
 							new SqlValue(true)));
 
 					case ExpressionType.MemberAccess:
@@ -2449,7 +2449,7 @@ namespace BLToolkit.Data.Linq
 								e.Member.DeclaringType.GetGenericTypeDefinition() == typeof(Nullable<>))
 							{
 								var expr = ParseExpression(pi.Create(e.Expression, pi.Property(Member.Expression)), queries);
-								return Convert(new SqlBuilder.Predicate.IsNull(expr, true));
+								return Convert(new SqlQuery.Predicate.IsNull(expr, true));
 							}
 
 							break;
@@ -2457,9 +2457,9 @@ namespace BLToolkit.Data.Linq
 				}
 
 				//throw new LinqException("'{0}' cannot be converted to SQL.", parseInfo.Expr);
-				return Convert(new SqlBuilder.Predicate.ExprExpr(
+				return Convert(new SqlQuery.Predicate.ExprExpr(
 					ParseExpression(parseInfo, queries),
-					SqlBuilder.Predicate.Operator.Equal,
+					SqlQuery.Predicate.Operator.Equal,
 					new SqlValue(true)));
 			}
 			finally
@@ -2468,7 +2468,7 @@ namespace BLToolkit.Data.Linq
 			}
 		}
 
-		ISqlPredicate ParseEnumConversion(ParseInfo pi, ParseInfo left, SqlBuilder.Predicate.Operator op, ParseInfo right, QuerySource[] queries)
+		ISqlPredicate ParseEnumConversion(ParseInfo pi, ParseInfo left, SqlQuery.Predicate.Operator op, ParseInfo right, QuerySource[] queries)
 		{
 			ParseInfo<UnaryExpression> conv;
 			ParseInfo                  value;
@@ -2530,7 +2530,7 @@ namespace BLToolkit.Data.Linq
 							l = new SqlValue(mapValue);
 						}
 
-						return Convert(new SqlBuilder.Predicate.ExprExpr(l, op, r));
+						return Convert(new SqlQuery.Predicate.ExprExpr(l, op, r));
 					}
 
 				case ExpressionType.Convert:
@@ -2544,7 +2544,7 @@ namespace BLToolkit.Data.Linq
 						if (l is SqlParameter) SetParameterEnumConverter((SqlParameter)l, type, _info.MappingSchema);
 						if (r is SqlParameter) SetParameterEnumConverter((SqlParameter)r, type, _info.MappingSchema);
 
-						return Convert(new SqlBuilder.Predicate.ExprExpr(l, op, r));
+						return Convert(new SqlQuery.Predicate.ExprExpr(l, op, r));
 					}
 			}
 
@@ -2581,11 +2581,11 @@ namespace BLToolkit.Data.Linq
 							var join = (QuerySource.GroupJoinQuery)field;
 							var expr = join.CheckNullField.GetExpressions(this)[0];
 
-							return Convert(new SqlBuilder.Predicate.IsNull(expr, !isEqual));
+							return Convert(new SqlQuery.Predicate.IsNull(expr, !isEqual));
 						}
 
 						if (field is QuerySource || field == null && left.NodeType == ExpressionType.Parameter)
-							return new SqlBuilder.Predicate.Expr(new SqlValue(!isEqual));
+							return new SqlQuery.Predicate.Expr(new SqlValue(!isEqual));
 					}
 				}
 			}
@@ -2602,7 +2602,7 @@ namespace BLToolkit.Data.Linq
 			left  = ConvertExpression(left);
 			right = ConvertExpression(right);
 
-			var condition = new SqlBuilder.SearchCondition();
+			var condition = new SqlQuery.SearchCondition();
 
 			if (left.NodeType != ExpressionType.New)
 			{
@@ -2622,12 +2622,12 @@ namespace BLToolkit.Data.Linq
 						ParseExpression(right.Create(newRight.Arguments[i], right.Index(newRight.Arguments, New.Arguments, i)), queries) :
 						GetParameter(right, newExpr.Members[i]);
 
-				var predicate = Convert(new SqlBuilder.Predicate.ExprExpr(
+				var predicate = Convert(new SqlQuery.Predicate.ExprExpr(
 					lex,
-					pi.NodeType == ExpressionType.Equal ? SqlBuilder.Predicate.Operator.Equal : SqlBuilder.Predicate.Operator.NotEqual,
+					pi.NodeType == ExpressionType.Equal ? SqlQuery.Predicate.Operator.Equal : SqlQuery.Predicate.Operator.NotEqual,
 					rex));
 
-				condition.Conditions.Add(new SqlBuilder.Condition(false, predicate));
+				condition.Conditions.Add(new SqlQuery.Condition(false, predicate));
 
 				if (pi.NodeType == ExpressionType.NotEqual)
 					foreach (var c in condition.Conditions)
@@ -2700,7 +2700,7 @@ namespace BLToolkit.Data.Linq
 						var newArr = arr.ConvertTo<NewArrayExpression>();
 
 						if (newArr.Expr.Expressions.Count == 0)
-							return new SqlBuilder.Predicate.Expr(new SqlValue(false));
+							return new SqlQuery.Predicate.Expr(new SqlValue(false));
 
 						var exprs  = new ISqlExpression[newArr.Expr.Expressions.Count];
 
@@ -2713,7 +2713,7 @@ namespace BLToolkit.Data.Linq
 							exprs[i] = item;
 						}
 
-						return new SqlBuilder.Predicate.InList(expr, false, exprs);
+						return new SqlQuery.Predicate.InList(expr, false, exprs);
 					}
 
 				default:
@@ -2721,7 +2721,7 @@ namespace BLToolkit.Data.Linq
 					{
 						var p = BuildParameter(arr).SqlParameter;
 						p.IsQueryParameter = false;
-						return new SqlBuilder.Predicate.InList(expr, false, p);
+						return new SqlQuery.Predicate.InList(expr, false, p);
 					}
 
 					break;
@@ -2747,8 +2747,8 @@ namespace BLToolkit.Data.Linq
 					throw new LinqException("NULL cannot be used as a LIKE predicate parameter.");
 
 				return value.ToString().IndexOfAny(new[] { '%', '_' }) < 0?
-					new SqlBuilder.Predicate.Like(o, false, new SqlValue(start + value + end), null):
-					new SqlBuilder.Predicate.Like(o, false, new SqlValue(start + EscapeLikeText(value.ToString()) + end), new SqlValue('~'));
+					new SqlQuery.Predicate.Like(o, false, new SqlValue(start + value + end), null):
+					new SqlQuery.Predicate.Like(o, false, new SqlValue(start + EscapeLikeText(value.ToString()) + end), new SqlValue('~'));
 			}
 
 			if (a is SqlParameter)
@@ -2766,7 +2766,7 @@ namespace BLToolkit.Data.Linq
 				_parameters.Add(e, ep);
 				CurrentSqlParameters.Add(ep);
 
-				return new SqlBuilder.Predicate.Like(o, false, ep.SqlParameter, new SqlValue('~'));
+				return new SqlQuery.Predicate.Like(o, false, ep.SqlParameter, new SqlValue('~'));
 			}
 
 			return null;
@@ -2783,7 +2783,7 @@ namespace BLToolkit.Data.Linq
 			if (e.Arguments.Count == 3)
 				a3 = ParseExpression(pi.Create(e.Arguments[2], pi.Index(e.Arguments, MethodCall.Arguments, 2)), queries);
 
-			return new SqlBuilder.Predicate.Like(a1, false, a2, a3);
+			return new SqlQuery.Predicate.Like(a1, false, a2, a3);
 		}
 
 		static string EscapeLikeText(string text)
@@ -2821,7 +2821,7 @@ namespace BLToolkit.Data.Linq
 
 		#region Search Condition Parser
 
-		void ParseSearchCondition(ICollection<SqlBuilder.Condition> conditions, ParseInfo parseInfo, params QuerySource[] queries)
+		void ParseSearchCondition(ICollection<SqlQuery.Condition> conditions, ParseInfo parseInfo, params QuerySource[] queries)
 		{
 			ParsingTracer.WriteLine(parseInfo);
 			ParsingTracer.WriteLine(queries);
@@ -2845,13 +2845,13 @@ namespace BLToolkit.Data.Linq
 						var pi = parseInfo.Convert<BinaryExpression>();
 						var e  = parseInfo.Expr as BinaryExpression;
 
-						var orCondition = new SqlBuilder.SearchCondition();
+						var orCondition = new SqlQuery.SearchCondition();
 
 						ParseSearchCondition(orCondition.Conditions, pi.Create(e.Left,  pi.Property(Binary.Left)),  queries);
 						orCondition.Conditions[orCondition.Conditions.Count - 1].IsOr = true;
 						ParseSearchCondition(orCondition.Conditions, pi.Create(e.Right, pi.Property(Binary.Right)), queries);
 
-						conditions.Add(new SqlBuilder.Condition(false, orCondition));
+						conditions.Add(new SqlQuery.Condition(false, orCondition));
 
 						break;
 					}
@@ -2861,25 +2861,25 @@ namespace BLToolkit.Data.Linq
 						var pi = parseInfo.Convert<UnaryExpression>();
 						var e  = parseInfo.Expr as UnaryExpression;
 
-						var notCondition = new SqlBuilder.SearchCondition();
+						var notCondition = new SqlQuery.SearchCondition();
 
 						ParseSearchCondition(notCondition.Conditions, pi.Create(e.Operand, pi.Property(Unary.Operand)), queries);
 
-						if (notCondition.Conditions.Count == 1 && notCondition.Conditions[0].Predicate is SqlBuilder.Predicate.NotExpr)
+						if (notCondition.Conditions.Count == 1 && notCondition.Conditions[0].Predicate is SqlQuery.Predicate.NotExpr)
 						{
-							var p = notCondition.Conditions[0].Predicate as SqlBuilder.Predicate.NotExpr;
+							var p = notCondition.Conditions[0].Predicate as SqlQuery.Predicate.NotExpr;
 							p.IsNot = !p.IsNot;
 							conditions.Add(notCondition.Conditions[0]);
 						}
 						else
-							conditions.Add(new SqlBuilder.Condition(true, notCondition));
+							conditions.Add(new SqlQuery.Condition(true, notCondition));
 
 						break;
 					}
 
 				default:
 					var predicate = ParsePredicate(parseInfo, queries);
-					conditions.Add(new SqlBuilder.Condition(false, predicate));
+					conditions.Add(new SqlQuery.Condition(false, predicate));
 					break;
 			}
 
@@ -2905,7 +2905,7 @@ namespace BLToolkit.Data.Linq
 				_ => {},
 				subQuery =>
 				{
-					var table = subQuery.SqlBuilder.From.Tables[0];
+					var table = subQuery.SqlQuery.From.Tables[0];
 					if (table.Alias == null)
 						table.Alias = alias;
 				},
@@ -2917,8 +2917,8 @@ namespace BLToolkit.Data.Linq
 
 		QuerySource.SubQuery WrapInSubQuery(QuerySource source)
 		{
-			var result = new QuerySource.SubQuery(new SqlBuilder(), source.SqlBuilder, source);
-			CurrentSql = result.SqlBuilder;
+			var result = new QuerySource.SubQuery(new SqlQuery(), source.SqlQuery, source);
+			CurrentSql = result.SqlQuery;
 			return result;
 		}
 
@@ -2948,13 +2948,13 @@ namespace BLToolkit.Data.Linq
 
 		ISqlExpression Convert(ISqlExpression expr)
 		{
-			_info.SqlProvider.SqlBuilder = CurrentSql;
+			_info.SqlProvider.SqlQuery = CurrentSql;
 			return _info.SqlProvider.ConvertExpression(expr);
 		}
 
 		ISqlPredicate Convert(ISqlPredicate predicate)
 		{
-			_info.SqlProvider.SqlBuilder = CurrentSql;
+			_info.SqlProvider.SqlQuery = CurrentSql;
 			return _info.SqlProvider.ConvertPredicate(predicate);
 		}
 

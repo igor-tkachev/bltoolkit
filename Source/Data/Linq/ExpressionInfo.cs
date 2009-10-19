@@ -104,12 +104,12 @@ namespace BLToolkit.Data.Linq
 		public void SetElementQuery<TE>(Mapper<TE> mapper)
 		{
 			foreach (var sql in Queries)
-				sql.SqlBuilder.FinalizeAndValidate(SqlProvider);
+				sql.SqlQuery.FinalizeAndValidate(SqlProvider);
 
 			if (Queries.Count != 1)
 				throw new InvalidOperationException();
 
-			SqlProvider.SqlBuilder = Queries[0].SqlBuilder;
+			SqlProvider.SqlQuery = Queries[0].SqlQuery;
 
 			GetElement = (ctx, db, expr, ps) => Query(ctx, db, expr, ps, mapper);
 		}
@@ -150,16 +150,16 @@ namespace BLToolkit.Data.Linq
 			Queries[0].Mapper = mapper;
 
 			foreach (var sql in Queries)
-				sql.SqlBuilder.FinalizeAndValidate(SqlProvider);
+				sql.SqlQuery.FinalizeAndValidate(SqlProvider);
 
 			if (Queries.Count != 1)
 				throw new InvalidOperationException();
 
 			Func<DbManager,Expression,object[],int,IEnumerable<IDataReader>> query = Query;
 
-			SqlProvider.SqlBuilder = Queries[0].SqlBuilder;
+			SqlProvider.SqlQuery = Queries[0].SqlQuery;
 
-			var select = Queries[0].SqlBuilder.Select;
+			var select = Queries[0].SqlQuery.Select;
 
 			if (select.SkipValue != null && !SqlProvider.IsSkipSupported)
 			{
@@ -269,8 +269,9 @@ namespace BLToolkit.Data.Linq
 
 			lock (this)
 			{
-				command = GetCommand(idx);
-				parms   = GetParameters(db, idx);
+				List<SqlParameter> ps;
+				command = GetCommand(idx, out ps);
+				parms   = GetParameters(db, idx, ps);
 			}
 
 			db.SetCommand(command, parms);
@@ -282,35 +283,30 @@ namespace BLToolkit.Data.Linq
 			return db.ExecuteReader();
 		}
 
-		private void SetParameters(Expression expr, object[] parameters, int idx)
+		void SetParameters(Expression expr, object[] parameters, int idx)
 		{
 			foreach (var p in Queries[idx].Parameters)
-			{
-				if (p.OriginalSqlParameter == null)
-					p.OriginalSqlParameter = p.SqlParameter;
-
-				p.OriginalSqlParameter.Value = p.Accessor(this, expr, parameters);
-			}
+				p.SqlParameter.Value = p.Accessor(this, expr, parameters);
 		}
 
-		private IDbDataParameter[] GetParameters(DbManager db, int idx)
+		IDbDataParameter[] GetParameters(DbManager db, int idx, List<SqlParameter> sqlParameters)
 		{
-			var sql        = Queries[idx].SqlBuilder;
+			//var sql        = Queries[idx].SqlQuery;
 			var parameters = Queries[idx].Parameters;
 
-			if (parameters.Count == 0 && sql.Parameters.Count == 0)
+			if (parameters.Count == 0 && sqlParameters.Count == 0)
 				return null;
 
 			var x = db.DataProvider.Convert("x", ConvertType.NameToQueryParameter).ToString();
 			var y = db.DataProvider.Convert("y", ConvertType.NameToQueryParameter).ToString();
 
-			var parms = new IDbDataParameter[x == y? sql.Parameters.Count: parameters.Count];
+			var parms = new IDbDataParameter[x == y? sqlParameters.Count: parameters.Count];
 
 			if (x == y)
 			{
 				for (var i = 0; i < parms.Length; i++)
 				{
-					var sqlp = sql.Parameters[i];
+					var sqlp = sqlParameters[i];
 					var parm = parameters.Count > i && parameters[i].SqlParameter == sqlp ? parameters[i] : parameters.First(p => p.SqlParameter == sqlp);
 
 					parms[i] = db.Parameter(x, parm.SqlParameter.Value);
@@ -324,7 +320,7 @@ namespace BLToolkit.Data.Linq
 				{
 					var parm = parameters[i];
 
-					if (sql.Parameters.Contains(parm.SqlParameter))
+					if (sqlParameters.Contains(parm.SqlParameter))
 					{
 						var name = db.DataProvider.Convert(parm.SqlParameter.Name, ConvertType.NameToQueryParameter).ToString();
 						parms[j++] = db.Parameter(name, parm.SqlParameter.Value);
@@ -342,40 +338,42 @@ namespace BLToolkit.Data.Linq
 			return parms;
 		}
 
-		string GetCommand(int idx)
+		string GetCommand(int idx, out List<SqlParameter> parameters)
 		{
 			var query = Queries[idx];
 
 			if (query.CommandText != null)
-				return query.CommandText;
-
-			if (query.OriginalSql == null)
-				query.OriginalSql = query.SqlBuilder;
-
-			var sql = query.SqlBuilder;
-
-			if (query.OriginalSql.ParameterDependent)
 			{
-				var dic = new Dictionary<ICloneableElement,ICloneableElement>();
+				parameters = query.SqlQuery.Parameters;
+				return query.CommandText;
+			}
 
-				query.SqlBuilder = sql = (SqlBuilder)query.OriginalSql.Clone(dic, _ => true);
+			var sql = query.SqlQuery;
 
-				foreach (var p in query.Parameters)
+			if (sql.ParameterDependent)
+			{
+				sql = new QueryVisitor().Convert(query.SqlQuery, e =>
 				{
-					ICloneableElement sp;
-					if (dic.TryGetValue(p.OriginalSqlParameter, out sp))
-						p.SqlParameter = (SqlParameter)sp;
-				}
+					if (e.ElementType == QueryElementType.SqlParameter)
+					{
+						var p = (SqlParameter)e;
 
-				SqlProvider.UpdateParameters(sql);
+						if (p.Value == null)
+							return new SqlValue(null);
+					}
+
+					return e;
+				});
 			}
 
 			var sb      = new StringBuilder();
 			SqlProvider.BuildSql(sql, sb, 0, 0);
 			var command = sb.ToString();
 
-			if (!query.OriginalSql.ParameterDependent)
+			if (!query.SqlQuery.ParameterDependent)
 				query.CommandText = command;
+
+			parameters = sql.Parameters;
 
 			return command;
 		}
@@ -960,8 +958,9 @@ namespace BLToolkit.Data.Linq
 
 			lock (this)
 			{
-				command = GetCommand(idx);
-				parms   = GetParameters(db, idx);
+				List<SqlParameter> ps;
+				command = GetCommand(idx, out ps);
+				parms   = GetParameters(db, idx, ps);
 			}
 
 			return GetSqlText(db, parms, command);
@@ -1027,15 +1026,13 @@ namespace BLToolkit.Data.Linq
 			public Expression                                         Expression;
 			public Func<ExpressionInfo<T>,Expression,object[],object> Accessor;
 			public SqlParameter                                       SqlParameter;
-			public SqlParameter                                       OriginalSqlParameter;
 		}
 
 		public class QueryInfo
 		{
-			public SqlBuilder      SqlBuilder = new SqlBuilder();
+			public SqlQuery        SqlQuery   = new SqlQuery();
 			public List<Parameter> Parameters = new List<Parameter>();
 			public Mapper<T>       Mapper;
-			public SqlBuilder      OriginalSql;
 			public string          CommandText;
 		}
 

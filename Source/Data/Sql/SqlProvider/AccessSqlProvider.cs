@@ -22,7 +22,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		{
 		}
 
-		public override bool IsSkipSupported          { get { return SqlBuilder.Select.TakeValue != null; } }
+		public override bool IsSkipSupported          { get { return SqlQuery.Select.TakeValue != null; } }
 		public override bool TakeAcceptsParameter     { get { return false; } }
 		public override bool IsCountSubQuerySupported { get { return false; } }
 		public override bool IsNestedJoinSupported    { get { return false; } }
@@ -39,9 +39,9 @@ namespace BLToolkit.Data.Sql.SqlProvider
 				base.BuildSql(sb);
 		}
 
-		protected override IEnumerable<SqlBuilder.Column> GetSelectedColumns()
+		protected override IEnumerable<SqlQuery.Column> GetSelectedColumns()
 		{
-			if (NeedSkip && !SqlBuilder.OrderBy.IsEmpty)
+			if (NeedSkip && !SqlQuery.OrderBy.IsEmpty)
 				return AlternativeGetSelectedColumns(base.GetSelectedColumns);
 			return base.GetSelectedColumns();
 		}
@@ -54,10 +54,10 @@ namespace BLToolkit.Data.Sql.SqlProvider
 				{
 					sb.AppendFormat(" TOP {0}", int.MaxValue);
 				}
-				else if (!SqlBuilder.OrderBy.IsEmpty)
+				else if (!SqlQuery.OrderBy.IsEmpty)
 				{
 					sb.Append(" TOP ");
-					BuildExpression(sb, Add<int>(SqlBuilder.Select.SkipValue, SqlBuilder.Select.TakeValue));
+					BuildExpression(sb, Add<int>(SqlQuery.Select.SkipValue, SqlQuery.Select.TakeValue));
 				}
 			}
 			else
@@ -73,9 +73,9 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		public override ISqlPredicate ConvertPredicate(ISqlPredicate predicate)
 		{
-			if (predicate is SqlBuilder.Predicate.Like)
+			if (predicate is SqlQuery.Predicate.Like)
 			{
-				SqlBuilder.Predicate.Like l = (SqlBuilder.Predicate.Like)predicate;
+				SqlQuery.Predicate.Like l = (SqlQuery.Predicate.Like)predicate;
 
 				if (l.Escape != null)
 				{
@@ -84,7 +84,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 						string   text = ((SqlValue) l.Expr2).Value.ToString();
 						SqlValue val  = new SqlValue(ReescapeLikeText(text, (char)((SqlValue)l.Escape).Value));
 
-						return new SqlBuilder.Predicate.Like(l.Expr1, l.IsNot, val, null);
+						return new SqlQuery.Predicate.Like(l.Expr1, l.IsNot, val, null);
 					}
 
 					if (l.Expr2 is SqlParameter)
@@ -97,7 +97,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 						p.ValueConverter = GetLikeEscaper(v.StartsWith("%") ? "%" : "", v.EndsWith("%") ? "%" : "");
 
-						return new SqlBuilder.Predicate.Like(l.Expr1, l.IsNot, p, null);
+						return new SqlQuery.Predicate.Like(l.Expr1, l.IsNot, p, null);
 					}
 				}
 			}
@@ -192,9 +192,9 @@ namespace BLToolkit.Data.Sql.SqlProvider
 							return new SqlFunction(func.Name, func.Parameters[0], new SqlFunction(func.Name, parms));
 						}
 
-						SqlBuilder.SearchCondition sc = new SqlBuilder.SearchCondition();
+						SqlQuery.SearchCondition sc = new SqlQuery.SearchCondition();
 
-						sc.Conditions.Add(new SqlBuilder.Condition(false, new SqlBuilder.Predicate.IsNull(func.Parameters[0], false)));
+						sc.Conditions.Add(new SqlQuery.Condition(false, new SqlQuery.Predicate.IsNull(func.Parameters[0], false)));
 
 						return new SqlFunction("Iif", sc, func.Parameters[1], func.Parameters[0]);
 

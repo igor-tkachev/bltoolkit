@@ -298,7 +298,7 @@ namespace BLToolkit.Data.Linq
 
 		#endregion
 
-		#region Walk
+		#region Walker
 
 		public ParseInfo ClearStopWalkingFlag()
 		{

@@ -23,7 +23,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		protected override string FirstFormat
 		{
-			get { return SqlBuilder.Select.SkipValue == null ? "TOP ({0})" : null; }
+			get { return SqlQuery.Select.SkipValue == null ? "TOP ({0})" : null; }
 		}
 
 		protected override void BuildSql(StringBuilder sb)
@@ -39,9 +39,9 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 #pragma warning disable 1911
 
-		protected override IEnumerable<SqlBuilder.Column> GetSelectedColumns()
+		protected override IEnumerable<SqlQuery.Column> GetSelectedColumns()
 		{
-			if (NeedSkip && !SqlBuilder.OrderBy.IsEmpty)
+			if (NeedSkip && !SqlQuery.OrderBy.IsEmpty)
 				return AlternativeGetSelectedColumns(base.GetSelectedColumns);
 			return base.GetSelectedColumns();
 		}

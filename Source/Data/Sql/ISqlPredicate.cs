@@ -2,7 +2,7 @@
 
 namespace BLToolkit.Data.Sql
 {
-	public interface ISqlPredicate : ISqlExpressionWalkable, ICloneableElement
+	public interface ISqlPredicate : IQueryElement, ISqlExpressionWalkable, ICloneableElement
 	{
 		bool CanBeNull();
 		int  Precedence { get; }

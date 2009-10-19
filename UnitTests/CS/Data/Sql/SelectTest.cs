@@ -16,7 +16,7 @@ namespace Data.Sql
 		[Test]
 		public void Test1()
 		{
-			var sb = new SqlBuilder();
+			var sb = new SqlQuery();
 
 			sb
 				.Select
@@ -30,7 +30,7 @@ namespace Data.Sql
 		[Test]
 		public void Test2()
 		{
-			var sb = new SqlBuilder();
+			var sb = new SqlQuery();
 
 			sb
 				.Select
@@ -45,7 +45,7 @@ namespace Data.Sql
 		[Test]
 		public void Test3()
 		{
-			var sb = new SqlBuilder();
+			var sb = new SqlQuery();
 
 			sb
 				.Select
