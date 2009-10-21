@@ -68,6 +68,14 @@ namespace EditableObjects
 			if (e.ListChangedType != ListChangedType.Reset)
 				Assert.That(array.IsDirty);
 
+			if(e.ListChangedType == ListChangedType.ItemAdded)
+			{
+				object o = array[e.NewIndex];
+
+				Assert.IsNotNull(o);
+				Assert.That(array.NewItems.Contains(o));
+			}
+
 			if (e.ListChangedType != ListChangedType.ItemDeleted && e.ListChangedType != ListChangedType.Reset)
 				Console.WriteLine("ListChanged (ID:{3}). Type: {0}, OldIndex: {1}, NewIndex: {2}", e.ListChangedType, e.OldIndex, e.NewIndex, (e.NewIndex >= 0 && e.NewIndex < _testList.Count) ? ((EditableTestObject)_testList[e.NewIndex]).ID : -1);
 			else
@@ -115,11 +123,13 @@ namespace EditableObjects
 			list.AddNew();
 			Assert.That(listChangedFired);
 			Assert.AreEqual(1, list.Count);
+			Assert.AreEqual(1, list.NewItems.Count);
 
 			listChangedFired = false;
 			list.CancelNew(0);
 			Assert.That(listChangedFired);
 			Assert.IsEmpty(list);
+			Assert.IsEmpty(list.NewItems);
 		}
 
 		[Test]
@@ -162,11 +172,18 @@ namespace EditableObjects
 			_testList.Clear();
 			_testList.RemoveSort();
 			_testList.AddRange(_testObjects);
-			
+
 			_testList.RemoveAt(2);
 			Assert.AreEqual(_testList.Count, 5);
+			Assert.IsEmpty(_testList.DelItems);
+
+			_testList.AcceptChanges();
+			Assert.IsEmpty(_testList.NewItems);
+
 			_testList.Remove(_testList[0]);
 			Assert.AreEqual(_testList.Count, 4);
+			Assert.IsNotEmpty(_testList.DelItems);
+
 			_testList.Clear();
 			Assert.AreEqual(_testList.Count, 0);
 		}
@@ -479,5 +496,51 @@ namespace EditableObjects
 				prev = o.ID;
 			}
 		}
+
+		public class DerivedEditableList<T> : EditableList<T>
+		{
+			public event EventHandler OnListChangedCalled;
+
+			protected void OnOnListChangedCalled()
+			{
+				if (OnListChangedCalled != null)
+					OnListChangedCalled(this, EventArgs.Empty);
+			}
+
+			protected override void OnListChanged(ListChangedEventArgs e)
+			{
+				OnOnListChangedCalled();
+				base.OnListChanged(e);
+			}
+		}
+
+
+		[Test]
+		public void DerivedOnListChanged()
+		{
+			bool called = false;
+
+			DerivedEditableList<int> list = new DerivedEditableList<int>();
+			list.OnListChangedCalled += delegate
+			{
+				called = true;
+			};
+
+			list.Add(1);
+
+			Assert.IsTrue(called);
+			Assert.AreEqual(1, list.NewItems.Count);
+			Assert.AreEqual(1, list.Count);
+			Assert.AreEqual(0, list.DelItems.Count);
+
+			called = false;
+			list.RemoveAt(0);
+			
+			Assert.IsTrue(called);
+			Assert.AreEqual(0, list.NewItems.Count);
+			Assert.AreEqual(0, list.Count);
+			Assert.AreEqual(0, list.DelItems.Count);
+		}
+
 	}
 }

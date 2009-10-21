@@ -252,12 +252,12 @@ namespace BLToolkit.EditableObjects
 
 		public int IndexOf(T item)
 		{
-			return base.IndexOf(item);
+			return IndexOf((object)item);
 		}
 
 		public void Insert(int index, T item)
 		{
-			base.Insert(index, item);
+			Insert(index, (object)item);
 		}
 
 		#endregion
@@ -266,25 +266,25 @@ namespace BLToolkit.EditableObjects
 
 		public void Add(T item)
 		{
-			base.Add(item);
+			Add((object)item);
 		}
 
 		public bool Contains(T item)
 		{
-			return base.Contains(item);
+			return Contains((object)item);
 		}
 
 		public void CopyTo(T[] array, int arrayIndex)
 		{
-			base.CopyTo(array, arrayIndex);
+			CopyTo((Array)array, arrayIndex);
 		}
 
 		public bool Remove(T item)
 		{
-			if (base.Contains(item) == false)
+			if (Contains(item) == false)
 				return false;
 
-			base.Remove(item);
+			Remove((object)item);
 
 			return true;
 		}

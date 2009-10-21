@@ -115,11 +115,15 @@ namespace EditableObjects
 			list.AddNew();
 			Assert.That(collectionChangedFired);
 			Assert.AreEqual(1, list.Count);
+			Assert.AreEqual(1, list.NewItems.Count);
+			Assert.AreEqual(0, list.DelItems.Count);
 
 			collectionChangedFired = false;
 			list.CancelNew(0);
 			Assert.That(collectionChangedFired);
 			Assert.IsEmpty(list);
+			Assert.IsEmpty(list.NewItems);
+			Assert.IsEmpty(list.DelItems);
 		}
 
 		[Test]
@@ -479,5 +483,51 @@ namespace EditableObjects
 				prev = o.ID;
 			}
 		}
+
+		public class DerivedEditableList<T> : EditableList<T>
+		{
+			public event EventHandler OnListChangedCalled;
+
+			protected void OnOnListChangedCalled()
+			{
+				if (OnListChangedCalled != null)
+					OnListChangedCalled(this, EventArgs.Empty);
+			}
+
+			protected override void OnCollectionChanged(NotifyCollectionChangedEventArgs e)
+			{
+				OnOnListChangedCalled();
+				base.OnCollectionChanged(e);
+			}
+		}
+
+
+		[Test]
+		public void DerivedOnListChanged()
+		{
+			bool called = false;
+
+			DerivedEditableList<int> list = new DerivedEditableList<int>();
+			list.OnListChangedCalled += delegate
+			{
+				called = true;
+			};
+
+			list.Add(1);
+
+			Assert.IsTrue(called);
+			Assert.AreEqual(1, list.NewItems.Count);
+			Assert.AreEqual(1, list.Count);
+			Assert.AreEqual(0, list.DelItems.Count);
+
+			called = false;
+			list.RemoveAt(0);
+
+			Assert.IsTrue(called);
+			Assert.AreEqual(0, list.NewItems.Count);
+			Assert.AreEqual(0, list.Count);
+			Assert.AreEqual(0, list.DelItems.Count);
+		}
+
 	}
 }

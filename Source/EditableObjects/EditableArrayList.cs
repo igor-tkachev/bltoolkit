@@ -196,8 +196,8 @@ namespace BLToolkit.EditableObjects
 
 		protected virtual void OnListChanged(ListChangedEventArgs e)
 		{
-			if (NotifyChanges && _listChanged != null)
-				_listChanged(this, e);
+			if (!_supressEvent && NotifyChanges && ListChanged != null)
+				ListChanged(this, e);
 		}
 
 		protected void OnListChanged(ListChangedType listChangedType, int index)
@@ -901,6 +901,29 @@ namespace BLToolkit.EditableObjects
 
 		#region IBindingList Members
 
+		sealed class BindingListImplInternal : BindingListImpl
+		{
+			private EditableArrayList _owner;
+
+			public BindingListImplInternal(IList list, Type itemType, EditableArrayList owner)
+				: base(list, itemType)
+			{
+				_owner = owner;
+			}
+
+			protected override void OnListChanged(EditableListChangedEventArgs e)
+			{
+				_owner.OnListChanged(e);
+			}
+
+#if FW3
+			protected override void OnCollectionChanged(NotifyCollectionChangedEventArgs ea)
+			{
+				_owner.OnCollectionChanged(ea);
+			}
+#endif
+		}
+
 		[NonSerialized]
 		private BindingListImpl _bindingListImpl;
 		private BindingListImpl  BindingListImpl
@@ -908,7 +931,7 @@ namespace BLToolkit.EditableObjects
 			get
 			{
 				if (_bindingListImpl == null)
-					_bindingListImpl = new BindingListImpl(_list, _itemType);
+					_bindingListImpl = new BindingListImplInternal(_list, _itemType, this);
 				return _bindingListImpl;
 			}
 		}
@@ -920,23 +943,25 @@ namespace BLToolkit.EditableObjects
 
 		public object AddNew()
 		{
+			object newObject = null;
 			try
 			{
 				BeginSuppressEvent();
-
-				object newObject = BindingListImpl.AddNew();
-
-				AddInternal(newObject);
-
-				int index = IndexOf(newObject);
-				OnAddItem(newObject, index);
-
-				return newObject;
+				newObject = BindingListImpl.AddNew();
 			}
 			finally
 			{
 				EndSuppressEvent();
 			}
+
+			AddInternal(newObject);
+
+			int index = IndexOf(newObject);
+
+			EndSuppressEvent();
+			OnAddItem(newObject, index);
+
+			return newObject;
 		}
 
 		public bool AllowEdit
@@ -994,49 +1019,18 @@ namespace BLToolkit.EditableObjects
 			get { return BindingListImpl.SupportsChangeNotification; }
 		}
 
-		private event ListChangedEventHandler _listChanged;
-		public  event ListChangedEventHandler  ListChanged
-		{
-			add
-			{
-				if (_listChanged == null)
-					BindingListImpl.ListChanged += BindingListImpl_ListChanged;
+		public event ListChangedEventHandler ListChanged;
 
-				_listChanged += value; 
-			}
-			remove 
-			{ 
-				_listChanged -= value;
-
-				if (_listChanged == null)
-					BindingListImpl.ListChanged -= BindingListImpl_ListChanged;
-			}
-		}
-
-		private void BindingListImpl_ListChanged(object sender, ListChangedEventArgs e)
-		{
-			OnListChanged(e);
-		}
+		private bool _supressEvent = false;
 
 		private void BeginSuppressEvent()
 		{
-			if (_listChanged != null)
-				BindingListImpl.ListChanged -= BindingListImpl_ListChanged;
-
-#if FW3
-			if (_collectionChanged != null)
-				BindingListImpl.CollectionChanged -= BindingListImpl_CollectionChanged;
-#endif
+			_supressEvent = true;
 		}
 
 		private void EndSuppressEvent()
 		{
-			if (_listChanged != null)
-				BindingListImpl.ListChanged += BindingListImpl_ListChanged;
-#if FW3
-			if (_collectionChanged != null)
-				BindingListImpl.CollectionChanged += BindingListImpl_CollectionChanged;
-#endif
+			_supressEvent = false;
 		}
 
 		public bool SupportsSearching
@@ -1104,6 +1098,9 @@ namespace BLToolkit.EditableObjects
 
 		public void CancelNew(int itemIndex)
 		{
+			if (itemIndex >= 0 && itemIndex < List.Count)
+				NewItems.Remove(List[itemIndex]);
+
 			BindingListImpl.CancelNew(itemIndex);
 		}
 
@@ -1117,34 +1114,12 @@ namespace BLToolkit.EditableObjects
 #if FW3
 		#region INotifyCollectionChanged Members
 
-		private event NotifyCollectionChangedEventHandler _collectionChanged;
-		public  event NotifyCollectionChangedEventHandler  CollectionChanged
-		{
-			add
-			{
-				if (_collectionChanged == null)
-					BindingListImpl.CollectionChanged += BindingListImpl_CollectionChanged;
-
-				_collectionChanged += value;
-			}
-			remove
-			{
-				_collectionChanged -= value;
-
-				if (_collectionChanged == null)
-					BindingListImpl.CollectionChanged -= BindingListImpl_CollectionChanged;
-			}
-		}
-
-		private void BindingListImpl_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
-		{
-			OnCollectionChanged(e);
-		}
+		public event NotifyCollectionChangedEventHandler CollectionChanged;
 
 		protected virtual void OnCollectionChanged(NotifyCollectionChangedEventArgs e)
 		{
-			if (NotifyChanges && _collectionChanged != null)
-				_collectionChanged(this, e);
+			if (!_supressEvent && NotifyChanges && CollectionChanged != null)
+				CollectionChanged(this, e);
 		}
 
 		#endregion

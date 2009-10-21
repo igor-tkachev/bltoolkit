@@ -139,7 +139,7 @@ namespace BLToolkit.ComponentModel
 				ListChanged(sender, e);
 		}
 
-		public virtual void OnListChanged(EditableListChangedEventArgs e)
+		protected virtual void OnListChanged(EditableListChangedEventArgs e)
 		{
 			FireListChangedEvent(this, e);
 		}
@@ -880,7 +880,7 @@ namespace BLToolkit.ComponentModel
 				CollectionChanged(sender, ea);
 		}
 
-		private void OnCollectionChanged(NotifyCollectionChangedEventArgs ea)
+		protected virtual void OnCollectionChanged(NotifyCollectionChangedEventArgs ea)
 		{
 			FireCollectionChangedEvent(this, ea);
 		}
