@@ -1198,8 +1198,6 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			_indent--;
 		}
 
-#pragma warning disable 1911
-
 		protected delegate IEnumerable<SqlQuery.Column> ColumnSelector();
 
 		protected IEnumerable<SqlQuery.Column> AlternativeGetSelectedColumns(ColumnSelector columnSelector)
@@ -1212,8 +1210,6 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			for (int i = 0; i < obys.Length; i++)
 				yield return new SqlQuery.Column(SqlQuery, SqlQuery.OrderBy.Items[i].Expression, obys[i]);
 		}
-
-#pragma warning restore 1911
 
 		#endregion
 

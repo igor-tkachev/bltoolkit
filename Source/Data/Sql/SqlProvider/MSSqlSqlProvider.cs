@@ -37,16 +37,12 @@ namespace BLToolkit.Data.Sql.SqlProvider
 				base.BuildOrderByClause(sb);
 		}
 
-#pragma warning disable 1911
-
 		protected override IEnumerable<SqlQuery.Column> GetSelectedColumns()
 		{
 			if (NeedSkip && !SqlQuery.OrderBy.IsEmpty)
 				return AlternativeGetSelectedColumns(base.GetSelectedColumns);
 			return base.GetSelectedColumns();
 		}
-
-#pragma warning restore 1911
 
 		public override ISqlExpression ConvertExpression(ISqlExpression expr)
 		{

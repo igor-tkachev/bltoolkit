@@ -13,6 +13,10 @@ namespace BLToolkit.Data.DataProvider
 	/// See the <see cref="DbManager.AddDataProvider(DataProviderBase)"/> method to find an example.
 	/// </remarks>
 	/// <seealso cref="DbManager.AddDataProvider(DataProviderBase)">AddDataManager Method</seealso>
+#if FW4
+	[Obsolete("OracleDataProvider has been deprecated. http://go.microsoft.com/fwlink/?LinkID=144260")]
+#pragma warning disable 0618
+#endif
 	public sealed class OracleDataProvider : DataProviderBase
 	{
 		private string _parameterPrefix = "P";
@@ -131,4 +135,7 @@ namespace BLToolkit.Data.DataProvider
 			get { return NameString; }
 		}
 	}
+#if FW4
+#pragma warning restore 0618
+#endif
 }

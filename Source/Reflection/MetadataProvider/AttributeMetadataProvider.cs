@@ -191,7 +191,7 @@ namespace BLToolkit.Reflection.MetadataProvider
 
 				foreach (MapValueAttribute a in attrs)
 					if (a.Type == null && a.OrigValue != null && a.OrigValue.GetType() == member.Type ||
-						a.Type != null && a.Type == member.Type)
+						a.Type is Type && (Type)a.Type == member.Type)
 						list.Add(new MapValue(a.OrigValue, a.Values));
 			}
 
@@ -389,7 +389,7 @@ namespace BLToolkit.Reflection.MetadataProvider
 
 		private static object CheckNullValue(object value, MemberAccessor member)
 		{
-			if (value is Type && value == typeof(DBNull))
+			if (value is Type && (Type)value == typeof(DBNull))
 			{
 				value = DBNull.Value;
 

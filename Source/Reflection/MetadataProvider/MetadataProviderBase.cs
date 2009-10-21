@@ -133,7 +133,7 @@ namespace BLToolkit.Reflection.MetadataProvider
 
 			object value = mappingSchema.GetNullValue(member.Type);
 
-			if (value is Type && value == typeof(DBNull))
+			if (value is Type && (Type)value == typeof(DBNull))
 			{
 				value = DBNull.Value;
 
