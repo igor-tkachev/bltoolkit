@@ -131,6 +131,7 @@
     <Compile Include="DataAccess\ParamTypeNameAttribute.cs" />
     <Compile Include="DataAccess\SqlIgnoreAttribute.cs" />
     <Compile Include="Data\DataProvider\ProviderName.cs" />
+    <Compile Include="Data\IDataReaderEx.cs" />
     <Compile Include="Data\Linq\CompiledQuery.cs" />
     <Compile Include="Data\Linq\CompiledTableT.cs" />
     <Compile Include="Data\Linq\ElementMethod.cs" />

@@ -168,6 +168,7 @@
     <Compile Include="DataAccess\TableNameAttribute.cs" />
     <Compile Include="Common\NameOrIndexParameter.cs" />
     <Compile Include="Data\DataProvider\ProviderName.cs" />
+    <Compile Include="Data\IDataReaderEx.cs" />
     <Compile Include="Data\InitCommandEventArgs.cs" />
     <Compile Include="Data\OperationExceptionEventArgs.cs" />
     <Compile Include="Data\DataProvider\OracleDataProvider.cs" />

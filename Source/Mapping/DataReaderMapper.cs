@@ -4,22 +4,27 @@ using System.Data.SqlTypes;
 
 namespace BLToolkit.Mapping
 {
+	using Data;
+
 	public class DataReaderMapper : IMapDataSource
 	{
 		public DataReaderMapper(MappingSchema mappingSchema, IDataReader dataReader)
 		{
 			_mappingSchema = mappingSchema;
 			_dataReader    = dataReader;
+			_dataReaderEx  = dataReader as IDataReaderEx;
 		}
 
-		private readonly IDataReader _dataReader;
-		public           IDataReader  DataReader
+		IDataReaderEx _dataReaderEx;
+
+		readonly IDataReader _dataReader;
+		public   IDataReader  DataReader
 		{
 			get { return _dataReader; }
 		}
 
-		private readonly MappingSchema _mappingSchema;
-		public           MappingSchema  MappingSchema
+		readonly MappingSchema _mappingSchema;
+		public   MappingSchema  MappingSchema
 		{
 			get { return _mappingSchema; }
 		}
@@ -84,11 +89,13 @@ namespace BLToolkit.Mapping
 		public virtual Decimal  GetDecimal (object o, int index) { return _dataReader.GetDecimal (index); }
 		public virtual Guid     GetGuid    (object o, int index) { return _dataReader.GetGuid    (index); }
 		public virtual DateTime GetDateTime(object o, int index) { return _dataReader.GetDateTime(index); }
+
 #if FW3
 		public virtual DateTimeOffset GetDateTimeOffset(object o, int index)
 		{
-			return _mappingSchema.ConvertToDateTimeOffset(_dataReader.GetValue(index));
-			//return _dataReader.GetDateTime(index);
+			return _dataReaderEx != null ?
+				_dataReaderEx.GetDateTimeOffset(index) :
+				_mappingSchema.ConvertToDateTimeOffset(_dataReader.GetValue(index));
 		}
 #endif
 

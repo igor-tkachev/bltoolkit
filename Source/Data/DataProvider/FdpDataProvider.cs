@@ -127,10 +127,7 @@ namespace BLToolkit.Data.DataProvider
 
 		public override Type ConnectionType
 		{
-			get
-			{
-				return typeof(FbConnection);
-			}
+			get { return typeof(FbConnection); }
 		}
 
 		public override string Name
