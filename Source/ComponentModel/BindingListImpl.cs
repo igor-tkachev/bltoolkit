@@ -10,10 +10,7 @@ using BLToolkit.Reflection;
 
 namespace BLToolkit.ComponentModel
 {
-	public class BindingListImpl: IBindingListView, ICancelAddNew
-#if FW3
-	, INotifyCollectionChanged
-#endif
+	public class BindingListImpl: IBindingListView, ICancelAddNew, INotifyCollectionChanged
 	{
 		#region Init
 
@@ -830,46 +827,35 @@ namespace BLToolkit.ComponentModel
 		private void OnAddItem(object item, int index)
 		{
 			OnListChanged(new EditableListChangedEventArgs(ListChangedType.ItemAdded, index));
-#if FW3
 			OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, item, index));
-#endif
 		}
 
 		private void OnRemoveItem(object item, int index)
 		{
 			OnListChanged(new EditableListChangedEventArgs(ListChangedType.ItemDeleted, index));
-#if FW3
 			OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, item, index));
-#endif
 		}
 
 		private void OnMoveItem(object item, int oldIndex, int newIndex)
 		{
 			OnListChanged(new EditableListChangedEventArgs(newIndex, oldIndex));
-#if FW3
 			OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Move, item, newIndex, oldIndex));
-#endif
 		}
 
 		private void OnChangeItem(object oldValue, object newValue, int index)
 		{
 			OnListChanged(new EditableListChangedEventArgs(ListChangedType.ItemChanged, index));
-#if FW3
 			OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Replace, oldValue, newValue, index));
-#endif
 		}
 
 		private void OnReset()
 		{
 			OnListChanged(new EditableListChangedEventArgs(ListChangedType.Reset));
-#if FW3
 			OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
-#endif
 		}
 
 		#endregion
 
-#if FW3
 		#region INotifyCollectionChanged Members
 
 		public event NotifyCollectionChangedEventHandler CollectionChanged;
@@ -886,6 +872,5 @@ namespace BLToolkit.ComponentModel
 		}
 
 		#endregion
-#endif
 	}
 }

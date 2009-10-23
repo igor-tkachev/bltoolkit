@@ -24,7 +24,7 @@ Enhancement
 - Partial trust support.
 - Mapping to/from private classes (FW 3.x only).
 - New ParamTypeName attribute for SqlServer2008 table-type parameter support.
-- EditableArrayList & BindingListImpl implements INotifyCollectionChanged interface (FW 3.x only).
+- EditableArrayList & BindingListImpl implements INotifyCollectionChanged interface.
 
 
 v 3.1

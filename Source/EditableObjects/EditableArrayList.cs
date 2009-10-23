@@ -1,8 +1,6 @@
 using System;
 using System.Collections;
-#if FW3
 using System.Collections.Specialized;
-#endif
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Reflection;
@@ -16,10 +14,7 @@ namespace BLToolkit.EditableObjects
 	[DebuggerDisplay("Count = {Count}, ItemType = {ItemType}")]
 	[Serializable]
 	public class EditableArrayList : ArrayList, IEditable, ISortable, ISupportMapping,
-		IDisposable, IPrintDebugState, ITypedList, IBindingListView, ICancelAddNew
-#if FW3
-		, INotifyCollectionChanged
-#endif
+		IDisposable, IPrintDebugState, ITypedList, IBindingListView, ICancelAddNew, INotifyCollectionChanged
 	{
 		#region Constructors
 
@@ -208,17 +203,13 @@ namespace BLToolkit.EditableObjects
 		private void OnResetList()
 		{
 			OnListChanged(ListChangedType.Reset, -1);
-#if FW3
 			OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
-#endif
 		}
 
 		private void OnAddItem(object newObject, int index)
 		{
 			OnListChanged(ListChangedType.ItemAdded, index);
-#if FW3
 			OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, newObject, index));
-#endif
 		}
 
 		#endregion
@@ -916,12 +907,10 @@ namespace BLToolkit.EditableObjects
 				_owner.OnListChanged(e);
 			}
 
-#if FW3
 			protected override void OnCollectionChanged(NotifyCollectionChangedEventArgs ea)
 			{
 				_owner.OnCollectionChanged(ea);
 			}
-#endif
 		}
 
 		[NonSerialized]
@@ -1111,7 +1100,6 @@ namespace BLToolkit.EditableObjects
 
 		#endregion
 
-#if FW3
 		#region INotifyCollectionChanged Members
 
 		public event NotifyCollectionChangedEventHandler CollectionChanged;
@@ -1123,6 +1111,5 @@ namespace BLToolkit.EditableObjects
 		}
 
 		#endregion
-#endif
 	}
 }
