@@ -575,7 +575,10 @@ namespace BLToolkit.Data
 
 		private IDataReader ExecuteReaderInternal(CommandBehavior commandBehavior)
 		{
-			return ExecuteOperation<IDataReader>(OperationType.ExecuteReader, delegate { return SelectCommand.ExecuteReader(commandBehavior); });
+			return ExecuteOperation<IDataReader>(OperationType.ExecuteReader, delegate
+			{
+				return _dataProvider.GetDataReader(_mappingSchema, SelectCommand.ExecuteReader(commandBehavior));
+			});
 		}
 
 		private int ExecuteNonQueryInternal()
@@ -2735,7 +2738,8 @@ namespace BLToolkit.Data
 			if (_prepared)
 				InitParameters(CommandAction.Select);
 
-			return ExecuteOperation<object>(OperationType.ExecuteScalar, SelectCommand.ExecuteScalar);
+			using (IDataReader rd = ExecuteReaderInternal(CommandBehavior.Default))
+				return rd.Read() && rd.FieldCount <= 0 ? null : rd.GetValue(0);
 		}
 
 		/// <summary>
@@ -4244,11 +4248,6 @@ namespace BLToolkit.Data
 
 		#region ExecuteOperation
 
-#if !FW3
-		/// <summary>Encapsulates a method that takes no parameters and does not return a value.</summary>
-		private delegate void Action();
-#endif
-
 		private void ExecuteOperation(OperationType operationType, Action operation)
 		{
 			try
@@ -4263,12 +4262,6 @@ namespace BLToolkit.Data
 				throw;
 			}
 		}
-
-#if !FW3
-		/// <summary>Encapsulates a method that has no parameters and returns a value of the type specified by the <paramref name="TResult" /> parameter.</summary>
-		/// <returns>The return value of the method that this delegate encapsulates.</returns>
-		private delegate TResult Func<TResult>();
-#endif
 
 		private T ExecuteOperation<T>(OperationType operationType, Func<T> operation)
 		{

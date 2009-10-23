@@ -37,7 +37,7 @@ namespace BLToolkit.Data.Sql
 
 		#region ISqlExpressionWalkable Members
 
-			[Obsolete]
+		[Obsolete]
 		ISqlExpression ISqlExpressionWalkable.Walk(bool skipColumns, WalkingFunc func)
 		{
 			for (int i = 0; i < _values.Length; i++)

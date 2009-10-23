@@ -963,7 +963,7 @@ namespace BLToolkit.Reflection
 
 			while (type != null && type != typeof(object))
 			{
-				if (type.IsGenericType && (type.GetGenericTypeDefinition() == genericType))
+				if (type.IsGenericType && type.GetGenericTypeDefinition() == genericType)
 					return type;
 
 				if (genericType.IsInterface)

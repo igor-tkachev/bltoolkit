@@ -16,7 +16,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		void           ConvertSearchCondition (SqlQuery.SearchCondition searchCondition);
 
 		string         Name                      { get; }
-		SqlQuery     SqlQuery                { get; set; }
+		SqlQuery       SqlQuery                  { get; set; }
 
 		bool           SkipAcceptsParameter      { get; }
 		bool           TakeAcceptsParameter      { get; }

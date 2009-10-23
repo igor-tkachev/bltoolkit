@@ -47,6 +47,13 @@ namespace BLToolkit.Data.Sql
 			_parentSql          = parentSql;
 			_parameterDependent = parameterDependent;
 			_parameters.AddRange(parameters);
+
+			_select. SetSqlQuery(this);
+			_from.   SetSqlQuery(this);
+			_where.  SetSqlQuery(this);
+			_groupBy.SetSqlQuery(this);
+			_having. SetSqlQuery(this);
+			_orderBy.SetSqlQuery(this);
 		}
 
 		readonly List<SqlParameter> _parameters = new List<SqlParameter>();
@@ -2299,7 +2306,7 @@ namespace BLToolkit.Data.Sql
 						{
 							tables = new List<ISqlTableSource>();
 
-							VisitFunc tableCollector = delegate(IQueryElement expr)
+							Action<IQueryElement> tableCollector = delegate(IQueryElement expr)
 							{
 								SqlField field = expr as SqlField;
 

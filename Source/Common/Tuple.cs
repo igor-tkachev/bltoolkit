@@ -2,6 +2,7 @@
 
 namespace BLToolkit.Common
 {
+	[Obsolete("Use System.Tuple")]
 	public struct Tuple<T1,T2>
 	{
 		public Tuple(T1 field1, T2 field2)
@@ -36,6 +37,7 @@ namespace BLToolkit.Common
 		}
 	}
 
+	[Obsolete("Use System.Tuple")]
 	public struct Tuple<T1,T2,T3>
 	{
 		public Tuple(T1 field1, T2 field2, T3 field3)
@@ -76,6 +78,7 @@ namespace BLToolkit.Common
 		}
 	}
 
+	[Obsolete("Use System.Tuple")]
 	public struct Tuple<T1,T2,T3,T4>
 	{
 		public Tuple(T1 field1, T2 field2, T3 field3, T4 field4)

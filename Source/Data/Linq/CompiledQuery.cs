@@ -244,8 +244,6 @@ namespace BLToolkit.Data.Linq
 			return new CompiledQuery(query).Invoke<TDb,TArg1,TArg2,TArg3,TResult>;
 		}
 
-		public delegate TResult Func<TDb,TArg1,TArg2,TArg3,TArg4,TResult>(TDb db, TArg1 arg1,TArg2 arg2,TArg3 arg3,TArg4 arg4);
-
 		/// <summary>
 		/// Compiles the query.
 		/// </summary>
@@ -280,8 +278,6 @@ namespace BLToolkit.Data.Linq
 			if (query == null) throw new ArgumentNullException("query");
 			return new CompiledQuery(query).Invoke<TDb,TArg1,TArg2,TArg3,TArg4,TResult>;
 		}
-
-		public delegate TResult Func<TDb,TArg1,TArg2,TArg3,TArg4,TArg5,TResult>(TDb db, TArg1 arg1, TArg2 arg2, TArg3 arg3, TArg4 arg4, TArg5 arg5);
 
 		/// <summary>
 		/// Compiles the query.

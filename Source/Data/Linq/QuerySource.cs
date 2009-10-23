@@ -7,8 +7,8 @@ using System.Reflection;
 
 namespace BLToolkit.Data.Linq
 {
-	using Mapping;
 	using Data.Sql;
+	using Mapping;
 	using Reflection;
 
 	abstract class QuerySource : QueryField
@@ -160,8 +160,8 @@ namespace BLToolkit.Data.Linq
 
 		public class Expr : QuerySource
 		{
-			public Expr(SqlQuery sqlBilder, LambdaInfo lambda, params QuerySource[] parentQueries)
-				: base(sqlBilder, lambda, parentQueries)
+			public Expr(SqlQuery sqlBilder, LambdaInfo lambda, params QuerySource[] baseQueries)
+				: base(sqlBilder, lambda, baseQueries)
 			{
 				if (lambda.Body.Expr is NewExpression)
 				{
@@ -178,7 +178,7 @@ namespace BLToolkit.Data.Linq
 							member = TypeHelper.GetPropertyByMethod((MethodInfo)member);
 
 						var field = 
-							GetParentField(ex.Arguments[i]) ??
+							GetBaseField(ex.Arguments[i]) ??
 							new ExprColumn(this, lambda.Body.Create(ex.Arguments[i], lambda.Body.Index(ex.Arguments, New.Arguments, i)), member.Name);
 
 						Fields.Add(field);
@@ -205,7 +205,7 @@ namespace BLToolkit.Data.Linq
 							var piAssign     = piBinding.  Create(ma.Expression, piBinding.ConvertExpressionTo<MemberAssignment>());
 							var piExpression = piAssign.   Create(ma.Expression, piAssign.Property(MemberAssignmentBind.Expression));
 
-							var field = GetParentField(piExpression) ?? new ExprColumn(this, piExpression, member.Name);
+							var field = GetBaseField(piExpression) ?? new ExprColumn(this, piExpression, member.Name);
 
 							Fields.Add(field);
 							Members.Add(member, field);
@@ -234,7 +234,7 @@ namespace BLToolkit.Data.Linq
 					case ExpressionType.Parameter:
 						for (var i = 0; i < Lambda.Parameters.Length; i++)
 							if (Lambda.Parameters[i] == expr)
-								return ParentQueries[i];
+								return Sources[i];
 
 						throw new InvalidOperationException();
 
@@ -314,8 +314,8 @@ namespace BLToolkit.Data.Linq
 
 		public class SubQuery : QuerySource
 		{
-			public SubQuery(SqlQuery currentSql, SqlQuery subSql, QuerySource parentQuery, bool addToSource)
-				: base(currentSql, null, parentQuery)
+			public SubQuery(SqlQuery currentSql, SqlQuery subSql, QuerySource baseQuery, bool addToSource)
+				: base(currentSql, null, baseQuery)
 			{
 				ParsingTracer.WriteLine(subSql);
 
@@ -324,14 +324,14 @@ namespace BLToolkit.Data.Linq
 				if (addToSource)
 					SqlQuery.From.Table(subSql);
 
-				foreach (var field in parentQuery.Fields)
+				foreach (var field in baseQuery.Fields)
 					EnsureField(field);
 
 				ParsingTracer.DecIndentLevel();
 			}
 
-			public SubQuery(SqlQuery currentSql, SqlQuery subSql, QuerySource parentQuery)
-				: this(currentSql, subSql, parentQuery, true)
+			public SubQuery(SqlQuery currentSql, SqlQuery subSql, QuerySource baseQuery)
+				: this(currentSql, subSql, baseQuery, true)
 			{
 			}
 
@@ -358,21 +358,21 @@ namespace BLToolkit.Data.Linq
 
 			public override QueryField GetField(MemberInfo mi)
 			{
-				return EnsureField(ParentQueries[0].GetField(mi));
+				return EnsureField(BaseQuery.GetField(mi));
 			}
 
 			public override QueryField GetField(Expression expr)
 			{
 				if (expr.NodeType == ExpressionType.Parameter)
 				{
-					if (ParentQueries[0] is Scalar)
-						return EnsureField(ParentQueries[0].Fields[0]);
+					if (BaseQuery is Scalar)
+						return EnsureField(BaseQuery.Fields[0]);
 
-					if (ParentQueries[0] is GroupBy)
-						return ParentQueries[0];
+					if (BaseQuery is GroupBy)
+						return BaseQuery;
 				}
 
-				return EnsureField(ParentQueries[0].GetField(expr));
+				return EnsureField(BaseQuery.GetField(expr));
 			}
 
 			protected override QueryField GetField(List<MemberInfo> members, int currentMember)
@@ -385,7 +385,7 @@ namespace BLToolkit.Data.Linq
 				if (!(field is SubQueryColumn))
 					return ((QuerySource)field).GetField(members, currentMember + 1);
 
-				field = ParentQueries[0].GetField(members, currentMember);
+				field = BaseQuery.GetField(members, currentMember);
 
 				return EnsureField(field);
 			}
@@ -412,12 +412,12 @@ namespace BLToolkit.Data.Linq
 
 		#endregion
 
-		#region GroupJoinQuery
+		#region GroupJoin
 
-		public class GroupJoinQuery : SubQuery
+		public class GroupJoin : SubQuery
 		{
-			public GroupJoinQuery(SqlQuery currentSql, SqlQuery subSql, QuerySource parentQuery)
-				: base(currentSql, subSql, parentQuery, false)
+			public GroupJoin(SqlQuery currentSql, SqlQuery subSql, QuerySource baseQuery)
+				: base(currentSql, subSql, baseQuery, false)
 			{
 			}
 
@@ -434,7 +434,7 @@ namespace BLToolkit.Data.Linq
 							if (!f.CanBeNull())
 								return _checkNullField = f;
 
-						var valueCol = new ExprColumn(ParentQueries[0], new SqlValue(1), null);
+						var valueCol = new ExprColumn(BaseQuery, new SqlValue(1), null);
 						var subCol   = EnsureField(valueCol);
 
 						_checkNullField = subCol;
@@ -444,11 +444,11 @@ namespace BLToolkit.Data.Linq
 				}
 			}
 
-			GroupJoinQuery() {}
+			GroupJoin() {}
 
 			protected override SubQuery CreateSubQuery(Dictionary<ICloneableElement,ICloneableElement> objectTree, Predicate<ICloneableElement> doClone)
 			{
-				return new GroupJoinQuery { Counter = (ExprColumn)Counter.Clone(objectTree, doClone) };
+				return new GroupJoin { Counter = (ExprColumn)Counter.Clone(objectTree, doClone) };
 			}
 		}
 
@@ -458,10 +458,10 @@ namespace BLToolkit.Data.Linq
 
 		public class Scalar : QuerySource
 		{
-			public Scalar(SqlQuery sqlBilder, LambdaInfo lambda, params QuerySource[] parentQueries)
-				: base(sqlBilder, lambda, parentQueries)
+			public Scalar(SqlQuery sqlBilder, LambdaInfo lambda, params QuerySource[] baseQueries)
+				: base(sqlBilder, lambda, baseQueries)
 			{
-				_field = GetParentField(lambda.Body) ?? new ExprColumn(this, lambda.Body, null);
+				_field = GetBaseField(lambda.Body) ?? new ExprColumn(this, lambda.Body, null);
 
 				Fields.Add(_field);
 
@@ -481,7 +481,7 @@ namespace BLToolkit.Data.Linq
 					if (((MemberExpression)expr).Member == ((MemberExpression)Lambda.Body.Expr).Member)
 						return _field;
 
-				return GetParentField(expr);
+				return GetBaseField(expr);
 			}
 
 			Scalar() {}
@@ -533,9 +533,9 @@ namespace BLToolkit.Data.Linq
 			public ISqlExpression[] ByExpressions;
 
 
-			public override QueryField GetParentField(Expression expr)
+			public override QueryField GetBaseField(Expression expr)
 			{
-				return ParentQueries[0].GetParentField(expr);
+				return BaseQuery.GetBaseField(expr);
 			}
 
 			public ExprColumn FindField(ExprColumn column)
@@ -559,99 +559,21 @@ namespace BLToolkit.Data.Linq
 
 		#endregion
 
-		#region Path
-
-		public class Path : QuerySource
-		{
-			public Path(SqlQuery currentSql, LambdaInfo lambda, params QuerySource[] parentQuery)
-				: base(currentSql, lambda, parentQuery)
-			{
-			}
-
-			Path() {}
-
-			protected override QuerySource CloneInstance(Dictionary<ICloneableElement, ICloneableElement> objectTree, Predicate<ICloneableElement> doClone)
-			{
-				return new Path();
-			}
-
-			public override QueryField GetField(Expression expr)
-			{
-				switch (expr.NodeType)
-				{
-					case ExpressionType.Parameter :
-						for (var i = 0; i < Lambda.Parameters.Length; i++)
-							if (Lambda.Parameters[i] == expr)
-								return ParentQueries[i];
-
-						throw new InvalidOperationException();
-				}
-
-				return GetParentField(expr);
-			}
-
-			public override QueryField GetParentField(Expression expr)
-			{
-				foreach (var query in ParentQueries)
-				{
-					var field = query.GetParentField(expr);
-
-					if (field != null)
-						return field;
-				}
-
-				throw new InvalidOperationException();
-			}
-
-			public override QueryField GetField(MemberInfo mi)
-			{
-				foreach (var query in ParentQueries)
-				{
-					var field = query.GetField(mi);
-
-					if (field != null)
-						return field;
-				}
-
-				throw new InvalidOperationException();
-			}
-
-			public override List<QueryField> Fields
-			{
-				get
-				{
-					if (ParentQueries.Length == 1)
-						return ParentQueries[0].Fields;
-
-					throw new InvalidOperationException();
-				}
-			}
-
-			public override QuerySource GetParent(ParseInfo pi)
-			{
-				if (ParentQueries.Length == 1)
-					return ParentQueries[0];
-
-				throw new InvalidOperationException();
-			}
-		}
-
-		#endregion
-
 		#region base
 
-		protected QuerySource(SqlQuery sqlQuery, LambdaInfo lambda, params QuerySource[] parentQueries)
+		protected QuerySource(SqlQuery sqlQuery, LambdaInfo lambda, params QuerySource[] baseQueries)
 		{
-			SqlQuery      = sqlQuery;
-			Lambda        = lambda;
-			ParentQueries = parentQueries;
+			SqlQuery = sqlQuery;
+			Lambda   = lambda;
+
+			_sources = baseQueries;
 
 #if DEBUG && TRACE_PARSING
 			ParsingTracer.WriteLine(lambda);
 			ParsingTracer.WriteLine(this);
 
-			foreach (var parent in parentQueries)
-				ParsingTracer.WriteLine("parent", parent);
+			foreach (var query in baseQueries)
+				ParsingTracer.WriteLine("base", query);
 
 			foreach (var field in Fields)
 				ParsingTracer.WriteLine("field ", field);
@@ -690,10 +612,10 @@ namespace BLToolkit.Data.Linq
 
 				objectTree.Add(this, qs);
 
-				qs.SqlQuery     = (SqlQuery)SqlQuery.Clone(objectTree, doClone);
-				qs.Lambda        = Lambda;
-				qs.ParentQueries = Array. ConvertAll(ParentQueries, q => (QuerySource)q.Clone(objectTree, doClone));
-				qs._fields       = Fields.ConvertAll(f => (QueryField)f.Clone(objectTree, doClone));
+				qs.SqlQuery = (SqlQuery)SqlQuery.Clone(objectTree, doClone);
+				qs.Lambda   = Lambda;
+				qs._sources = Array. ConvertAll(Sources, q => (QuerySource)q.Clone(objectTree, doClone));
+				qs._fields  = Fields.ConvertAll(f => (QueryField)f.Clone(objectTree, doClone));
 
 				clone = qs;
 			}
@@ -701,11 +623,13 @@ namespace BLToolkit.Data.Linq
 			return clone;
 		}
 
-		public override QuerySource[] Sources { get { return ParentQueries; } }
+		private         QuerySource[] _sources;
+		public override QuerySource[]  Sources { get { return _sources; } }
 
-		public QuerySource[] ParentQueries;
-		public SqlQuery      SqlQuery;
-		public LambdaInfo    Lambda;
+		public QuerySource BaseQuery { get { return _sources[0]; } }
+
+		public SqlQuery    SqlQuery;
+		public LambdaInfo  Lambda;
 
 		private        List<QueryField> _fields = new List<QueryField>();
 		public virtual List<QueryField>  Fields { get { return _fields; } }
@@ -721,7 +645,7 @@ namespace BLToolkit.Data.Linq
 				 return field;
 
 			if (field is GroupByColumn)
-				return ((GroupByColumn)field).GroupBySource.ParentQueries[0].GetField(members, currentMember + 1);
+				return ((GroupByColumn)field).GroupBySource.BaseQuery.GetField(members, currentMember + 1);
 
 			return ((QuerySource)field).GetField(members, currentMember + 1);
 		}
@@ -735,24 +659,24 @@ namespace BLToolkit.Data.Linq
 			throw new InvalidOperationException();
 		}
 
-		public virtual QueryField GetParentField(Expression expr)
+		public virtual QueryField GetBaseField(Expression expr)
 		{
-			if (ParentQueries.Length > 0)
+			if (Sources.Length > 0)
 			{
 				if (expr.NodeType == ExpressionType.Parameter)
 				{
-					if (ParentQueries.Length == 1)
-						return ParentQueries[0];
+					if (Sources.Length == 1)
+						return BaseQuery;
 
-					if (ParentQueries.Length < Lambda.Parameters.Length)
+					if (Sources.Length < Lambda.Parameters.Length)
 						throw new InvalidOperationException();
 
-					for (var i = 0; i < ParentQueries.Length; i++)
+					for (var i = 0; i < Sources.Length; i++)
 						if (Lambda.Parameters[i].Expr == expr)
-							return ParentQueries[i];
+							return Sources[i];
 				}
 
-				foreach (var pq in ParentQueries)
+				foreach (var pq in Sources)
 				{
 					var field = pq.GetField(expr);
 					if (field != null)
@@ -761,11 +685,6 @@ namespace BLToolkit.Data.Linq
 			}
 
 			return null;
-		}
-
-		public virtual QuerySource GetParent(ParseInfo pi)
-		{
-			return this;
 		}
 
 		FieldIndex[] _indexes;
@@ -819,15 +738,13 @@ namespace BLToolkit.Data.Linq
 			Action<Expr>     exprAction,
 			Action<SubQuery> subQueryAction,
 			Action<Scalar>   scalarAction,
-			Action<GroupBy>  groupByAction,
-			Action<Path>     pathAction)
+			Action<GroupBy>  groupByAction)
 		{
 			if      (this is Table)    tableAction   (this as Table);
 			else if (this is GroupBy)  groupByAction (this as GroupBy);
 			else if (this is Expr)     exprAction    (this as Expr);
 			else if (this is SubQuery) subQueryAction(this as SubQuery);
 			else if (this is Scalar)   scalarAction  (this as Scalar);
-			else if (this is Path)     pathAction    (this as Path);
 			else
 				throw new InvalidOperationException();
 		}

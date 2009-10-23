@@ -202,6 +202,11 @@ namespace BLToolkit.Data.DataProvider
 			return new BasicSqlProvider(this);
 		}
 
+		public virtual IDataReader GetDataReader(MappingSchema schema, IDataReader dataReader)
+		{
+			return dataReader;
+		}
+
 		public virtual string ProviderName           { get { return ConnectionType.Namespace; } }
 		public virtual int    MaxParameters          { get { return 100;   } }
 		public virtual int    MaxBatchSize           { get { return 65536; } }

@@ -83,10 +83,12 @@
     <Compile Include="Aspects\NotNullAttribute.cs" />
     <Compile Include="Aspects\OverloadAttribute.cs" />
     <Compile Include="Common\ArrayT.cs" />
+    <Compile Include="Common\Compatibility3.cs" />
     <Compile Include="Common\CompoundValue.cs" />
     <Compile Include="Common\Configuration.cs" />
     <Compile Include="Common\Convert.cs" />
     <Compile Include="Common\ConvertT.cs" />
+    <Compile Include="Common\Compatibility4.cs" />
     <Compile Include="Common\EntityBase.cs" />
     <Compile Include="Common\EntityBaseT.cs" />
     <Compile Include="Common\IOperable.cs" />

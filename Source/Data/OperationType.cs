@@ -1,3 +1,5 @@
+using System;
+
 namespace BLToolkit.Data
 {
 	/// <summary>
@@ -14,6 +16,7 @@ namespace BLToolkit.Data
 		DeriveParameters,
 		PrepareCommand,
 		ExecuteNonQuery,
+		[Obsolete]
 		ExecuteScalar,
 		ExecuteReader,
 		Fill,

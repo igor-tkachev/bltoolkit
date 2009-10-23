@@ -85,7 +85,11 @@ namespace BLToolkit.Mapping
 		public virtual Guid     GetGuid    (object o, int index) { return _dataReader.GetGuid    (index); }
 		public virtual DateTime GetDateTime(object o, int index) { return _dataReader.GetDateTime(index); }
 #if FW3
-		public virtual DateTimeOffset GetDateTimeOffset(object o, int index) { return _dataReader.GetDateTime(index); }
+		public virtual DateTimeOffset GetDateTimeOffset(object o, int index)
+		{
+			return _mappingSchema.ConvertToDateTimeOffset(_dataReader.GetValue(index));
+			//return _dataReader.GetDateTime(index);
+		}
 #endif
 
 		// Nullable type getters.

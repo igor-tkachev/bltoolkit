@@ -362,7 +362,7 @@ namespace BLToolkit.Data.Linq
 							return new SqlValue(null);
 					}
 
-					return e;
+					return null;
 				});
 			}
 

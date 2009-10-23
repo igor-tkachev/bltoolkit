@@ -115,7 +115,7 @@ namespace BLToolkit.Data.Linq
 				if (_index == null)
 				{
 					if (_sqlExpression == null)
-						_sqlExpression = parser.ParseExpression(Expr, QuerySource.ParentQueries);
+						_sqlExpression = parser.ParseExpression(Expr, QuerySource.Sources);
 
 					_index = new[] { new FieldIndex { Index = QuerySource.SqlQuery.Select.Add(_sqlExpression, _alias), Field = this } };
 				}
@@ -282,20 +282,20 @@ namespace BLToolkit.Data.Linq
 			public override FieldIndex[] Select<T>(ExpressionParser<T> parser)
 			{
 				ParsingTracer.WriteLine(this);
-				ParsingTracer.WriteLine(GroupBySource.ParentQueries[0]);
+				ParsingTracer.WriteLine(GroupBySource.BaseQuery);
 				ParsingTracer.IncIndentLevel();
 
 				if (_index == null)
-					_index = GroupBySource.ParentQueries[0].Select(parser);
+					_index = GroupBySource.BaseQuery.Select(parser);
 
 				ParsingTracer.DecIndentLevel();
-				ParsingTracer.WriteLine(GroupBySource.ParentQueries[0]);
+				ParsingTracer.WriteLine(GroupBySource.BaseQuery);
 				return _index;
 			}
 
 			public override ISqlExpression[] GetExpressions<T>(ExpressionParser<T> parser)
 			{
-				return GroupBySource.ParentQueries[0].GetExpressions(parser);
+				return GroupBySource.BaseQuery.GetExpressions(parser);
 			}
 
 			public override bool CanBeNull()

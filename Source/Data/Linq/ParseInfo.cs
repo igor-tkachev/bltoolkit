@@ -153,19 +153,6 @@ namespace BLToolkit.Data.Linq
 
 		#endregion
 
-		#region IsUnary
-
-		[Obsolete]
-		static bool IsUnary(ParseInfo<Expression> pi, ExpressionType nodeType, FTest func)
-		{
-			return
-				pi.NodeType == nodeType?
-					func(pi.Create(((UnaryExpression)pi.Expr).Operand, pi.Property<UnaryExpression>(Unary.Operand))):
-					false;
-		}
-
-		#endregion
-
 		#region IsConstant
 
 		public bool IsConstant(Func<ParseInfo<ConstantExpression>,bool> func)
@@ -271,7 +258,13 @@ namespace BLToolkit.Data.Linq
 
 		public UnaryExpression ConvertExpressionTo<T>()
 		{
-			return ParamAccessor != null ? Expression.Convert(ParamAccessor, typeof(T)) : null;
+			return
+				ParamAccessor == null ?
+					null :
+				ParamAccessor.NodeType == ExpressionType.Convert && ParamAccessor.Type == typeof(T) ?
+					(UnaryExpression)ParamAccessor
+				:
+					Expression.Convert(ParamAccessor, typeof(T));
 		}
 
 		public MemberExpression Property(MethodInfo mi)

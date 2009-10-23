@@ -125,7 +125,7 @@ namespace BLToolkit.Data.Linq
 			return _info;
 		}
 
-		private Expression ConvertParameters(Expression expression, ParameterExpression[] parameters)
+		Expression ConvertParameters(Expression expression, ParameterExpression[] parameters)
 		{
 			return ParseInfo.CreateRoot(expression, _expressionParam).Walk(pi =>
 			{
@@ -147,7 +147,7 @@ namespace BLToolkit.Data.Linq
 			});
 		}
 
-		QuerySource ParseSequence(ParseInfo info, QuerySource parent)
+		QuerySource ParseSequence(ParseInfo info, QuerySource baseSource)
 		{
 			ParsingTracer.WriteLine(info);
 			ParsingTracer.IncIndentLevel();
@@ -241,7 +241,7 @@ namespace BLToolkit.Data.Linq
 				pi => pi.IsQueryableMethod ("GroupBy", 1, 1, 2, seq => select = ParseSequence(seq, null), (l1, l2, l3)    => select = ParseGroupBy   (l1, l2,   l3,   select, null)),
 				pi => pi.IsQueryableMethod ("Take",             seq => select = ParseSequence(seq, null), ex => ParseTake(select, ex)),
 				pi => pi.IsQueryableMethod ("Skip",             seq => select = ParseSequence(seq, null), ex => ParseSkip(select, ex)),
-				pi => pi.IsEnumerableMethod("DefaultIfEmpty",   seq => { select = ParseDefaultIfEmpty(parent, seq); return select != null; }),
+				pi => pi.IsEnumerableMethod("DefaultIfEmpty",   seq => { select = ParseDefaultIfEmpty(baseSource, seq); return select != null; }),
 				pi => pi.IsMethod(m =>
 				{
 					if (m.Expr.Method.DeclaringType == typeof(Queryable) || !TypeHelper.IsSameOrParent(typeof(IQueryable), pi.Expr.Type))
@@ -370,7 +370,7 @@ namespace BLToolkit.Data.Linq
 
 			var seq2 = ParseSequence(collectionSelector.Body, source);
 
-			if (source.ParentQueries.Contains(seq2))
+			if (source.Sources.Contains(seq2))
 			{
 				CurrentSql = sql;
 				return resultSelector == null ? seq2 : ParseSelect(resultSelector, source, seq2);
@@ -477,7 +477,7 @@ namespace BLToolkit.Data.Linq
 			CurrentSql = new SqlQuery();
 
 			var seq     = ParseSequence(inner, null);
-			var source2 = new QuerySource.GroupJoinQuery(current, CurrentSql, seq);
+			var source2 = new QuerySource.GroupJoin(current, CurrentSql, seq);
 			var join    = source2.SubSql.LeftJoin();
 
 			CurrentSql = current;
@@ -549,9 +549,9 @@ namespace BLToolkit.Data.Linq
 
 		#region Parse DefaultIfEmpty
 
-		QuerySource ParseDefaultIfEmpty(QuerySource parent, ParseInfo<Expression> seq)
+		QuerySource ParseDefaultIfEmpty(QuerySource baseQuery, ParseInfo<Expression> seq)
 		{
-			return parent.GetField(seq) as QuerySource;
+			return baseQuery.GetField(seq) as QuerySource;
 		}
 
 		#endregion
@@ -899,17 +899,11 @@ namespace BLToolkit.Data.Linq
 
 			query.Match
 			(
-				table  => queryAction(table, converter),                                  // QueryInfo.Table
+				table  => queryAction  (table, converter),                                // QueryInfo.Table
 				expr   => BuildNew     (query, expr.Lambda.Body,   newAction),            // QueryInfo.Expr
 				sub    => BuildSubQuery(sub,   queryAction,        newAction, converter), // QueryInfo.SubQuery
 				scalar => BuildNew     (query, scalar.Lambda.Body, newAction),            // QueryInfo.Scalar
-				group  => BuildGroupBy (group, group.Lambda.Body,  newAction),            // QueryInfo.GroupBy
-				path   =>                                                                 // QueryInfo.Path
-				{
-					if (path.ParentQueries.Length != 1)
-						throw new InvalidOperationException();
-					BuildSelect(path.ParentQueries[0], queryAction, newAction, converter);
-				}
+				group  => BuildGroupBy (group, group.Lambda.Body,  newAction)             // QueryInfo.GroupBy
 			);
 
 			ParsingTracer.DecIndentLevel();
@@ -929,7 +923,7 @@ namespace BLToolkit.Data.Linq
 
 		#endregion
 
-		#region BuildSubQuery
+		#region BuildSubQuerySource
 
 		void BuildSubQuery(
 			QuerySource                        subQuery,
@@ -940,7 +934,7 @@ namespace BLToolkit.Data.Linq
 			ParsingTracer.WriteLine();
 			ParsingTracer.IncIndentLevel();
 
-			subQuery.ParentQueries[0].Match
+			subQuery.BaseQuery.Match
 			(
 				_      => queryAction(subQuery, converter),         // QueryInfo.Table
 				expr   =>                                           // QueryInfo.Expr
@@ -957,13 +951,7 @@ namespace BLToolkit.Data.Linq
 					var info = BuildField(scalar.Lambda.Body, idx.Select(i => converter(i).Index).ToArray());
 					newAction(info);
 				},
-				_      => { throw new NotImplementedException(); }, // QueryInfo.GroupBy
-				path   =>                                           // QueryInfo.Path
-				{
-					if (path.ParentQueries.Length != 1)
-						throw new NotImplementedException();
-					BuildSubQuery(path.ParentQueries[0], queryAction, newAction, converter);
-				}
+				_      => { throw new NotImplementedException(); }  // QueryInfo.GroupBy
 			);
 
 			ParsingTracer.DecIndentLevel();
@@ -1129,16 +1117,15 @@ namespace BLToolkit.Data.Linq
 				{
 					case ExpressionType.MemberAccess:
 						{
+							if (IsServerSideOnly(pi)) return BuildField   (query, pi);
+							if (IsSubQuery      (pi)) return BuildSubQuery(query, pi, converter);
+
 							var ma = (ParseInfo<MemberExpression>)pi;
-
-							if (IsServerSideOnly(pi))
-								return BuildField(query, ma);
-
 							var ex = pi.Create(ma.Expr.Expression, pi.Property(Member.Expression));
 
-							if (query.ParentQueries.Length > 0)
+							if (query.Sources.Length > 0)
 							{
-								var field = query.GetParentField(ma);
+								var field = query.GetBaseField(ma);
 
 								if (field != null)
 								{
@@ -1146,7 +1133,7 @@ namespace BLToolkit.Data.Linq
 										return BuildField(ma, field, converter);
 
 									if (field is QuerySource.SubQuery)
-										return BuildSubQuery(ma, (QuerySource.SubQuery)field, converter);
+										return BuildSubQuerySource(ma, (QuerySource.SubQuery)field, converter);
 
 									if (field is QueryField.ExprColumn)
 									{
@@ -1162,7 +1149,7 @@ namespace BLToolkit.Data.Linq
 										return BuildQueryField(ma, (QuerySource.Table)field, converter);
 
 									if (field is QueryField.SubQueryColumn)
-										return BuildSubQuery(ma, (QueryField.SubQueryColumn)field, converter);
+										return BuildSubQuerySource(ma, (QueryField.SubQueryColumn)field, converter);
 
 									if (field is QueryField.GroupByColumn)
 									{
@@ -1203,7 +1190,7 @@ namespace BLToolkit.Data.Linq
 
 					case ExpressionType.Parameter:
 						{
-							var field = query.GetParentField(pi.Expr);
+							var field = query.GetBaseField(pi.Expr);
 
 							if (field != null)
 							{
@@ -1222,11 +1209,11 @@ namespace BLToolkit.Data.Linq
 									return BuildQuerySourceExpr(query, source.Lambda.Body, converter);
 								}
 
-								if (field is QuerySource.GroupJoinQuery)
-									return BuildGroupJoin(pi, (QuerySource.GroupJoinQuery)field, converter);
+								if (field is QuerySource.GroupJoin)
+									return BuildGroupJoin(pi, (QuerySource.GroupJoin)field, converter);
 
 								if (field is QuerySource.SubQuery)
-									return BuildSubQuery(pi, (QuerySource.SubQuery)field, converter);
+									return BuildSubQuerySource(pi, (QuerySource.SubQuery)field, converter);
 
 								throw new InvalidOperationException();
 							}
@@ -1236,7 +1223,7 @@ namespace BLToolkit.Data.Linq
 
 					case ExpressionType.Constant:
 						{
-							if (query.ParentQueries.Length == 0)
+							if (query.Sources.Length == 0)
 							{
 								var field = query.GetField(pi);
 
@@ -1256,13 +1243,13 @@ namespace BLToolkit.Data.Linq
 					case ExpressionType.Coalesce:
 					//case ExpressionType.Conditional:
 						if (pi.Expr.Type == typeof(string) && _info.MappingSchema.GetDefaultNullValue<string>() != null)
-							return BuildField(query.ParentQueries[0], pi);
+							return BuildField(query.BaseQuery, pi);
 						break;
 
 					case ExpressionType.Call:
 						{
-							if (IsServerSideOnly(pi))
-								return BuildField(query, pi);
+							if (IsServerSideOnly(pi)) return BuildField   (query, pi);
+							if (IsSubQuery      (pi)) return BuildSubQuery(query, pi, converter);
 						}
 
 						break;
@@ -1280,7 +1267,16 @@ namespace BLToolkit.Data.Linq
 
 		#region BuildSubQuery
 
-		ParseInfo BuildSubQuery(ParseInfo ma, QuerySource.SubQuery query, IndexConverter converter)
+		ParseInfo BuildSubQuery(QuerySource query, ParseInfo expr, IndexConverter converter)
+		{
+			throw new NotImplementedException("SubQueries are not supported yet.");
+		}
+
+		#endregion
+
+		#region BuildSubQuerySource
+
+		ParseInfo BuildSubQuerySource(ParseInfo ma, QuerySource.SubQuery query, IndexConverter converter)
 		{
 			ParsingTracer.WriteLine(ma);
 			ParsingTracer.WriteLine(query);
@@ -1288,35 +1284,35 @@ namespace BLToolkit.Data.Linq
 
 			ParseInfo result = null;
 
-			if (query is QuerySource.GroupJoinQuery && TypeHelper.IsSameOrParent(typeof(IEnumerable), ma.Expr.Type))
+			if (query is QuerySource.GroupJoin && TypeHelper.IsSameOrParent(typeof(IEnumerable), ma.Expr.Type))
 			{
-				result = BuildGroupJoin(ma, (QuerySource.GroupJoinQuery)query, converter);
+				result = BuildGroupJoin(ma, (QuerySource.GroupJoin)query, converter);
 			}
-			else if (query.ParentQueries.Length == 1)
+			else if (query.Sources.Length == 1)
 			{
-				var parent = query.ParentQueries[0];
+				var baseQuery = query.BaseQuery;
 
 				Func<FieldIndex,FieldIndex> conv = i => converter(query.EnsureField(i.Field).Select(this)[0]);
 
-				if (parent is QuerySource.Table)
+				if (baseQuery is QuerySource.Table)
 				{
-					result = BuildQueryField(ma, parent, conv);
+					result = BuildQueryField(ma, baseQuery, conv);
 				}
-				else if (parent is QuerySource.SubQuery)
+				else if (baseQuery is QuerySource.SubQuery)
 				{
-					result = BuildSubQuery(ma, (QuerySource.SubQuery)parent, conv);
+					result = BuildSubQuerySource(ma, (QuerySource.SubQuery)baseQuery, conv);
 				}
-				else if (parent is QuerySource.Scalar)
+				else if (baseQuery is QuerySource.Scalar)
 				{
 					var idx = query.Select(this);
 					result = BuildField(ma, idx.Select(i => converter(i).Index).ToArray());
 				}
 				else
-					result = BuildNewExpression(parent, parent.Lambda.Body, conv);
+					result = BuildNewExpression(baseQuery, baseQuery.Lambda.Body, conv);
 
-				if (query is QuerySource.GroupJoinQuery)
+				if (query is QuerySource.GroupJoin)
 				{
-					var join  = (QuerySource.GroupJoinQuery)query;
+					var join  = (QuerySource.GroupJoin)query;
 					var check = join.CheckNullField;
 					var idx   = converter(check.Select(this)[0]);
 
@@ -1339,7 +1335,7 @@ namespace BLToolkit.Data.Linq
 			return result;
 		}
 
-		ParseInfo BuildSubQuery(ParseInfo ma, QueryField.SubQueryColumn query, IndexConverter converter)
+		ParseInfo BuildSubQuerySource(ParseInfo ma, QueryField.SubQueryColumn query, IndexConverter converter)
 		{
 #if DEBUG
 			ParsingTracer.WriteLine(ma);
@@ -1355,13 +1351,13 @@ namespace BLToolkit.Data.Linq
 					return BuildQueryField(ma, (QuerySource.Table)query.Field, conv);
 
 				if (query.Field is QuerySource.SubQuery)
-					return BuildSubQuery(ma, (QuerySource.SubQuery)query.Field, conv);
+					return BuildSubQuerySource(ma, (QuerySource.SubQuery)query.Field, conv);
 
 				if (query.Field is QuerySource)
 					throw new InvalidOperationException();
 
 				if (query.Field is QueryField.SubQueryColumn)
-					return BuildSubQuery(ma, (QueryField.SubQueryColumn)query.Field, conv);
+					return BuildSubQuerySource(ma, (QueryField.SubQueryColumn)query.Field, conv);
 
 				return BuildField(ma, query, converter);
 #if DEBUG
@@ -1430,7 +1426,7 @@ namespace BLToolkit.Data.Linq
 			}
 		}
 
-		ParseInfo BuildGroupJoin(ParseInfo ma, QuerySource.GroupJoinQuery query, IndexConverter converter)
+		ParseInfo BuildGroupJoin(ParseInfo ma, QuerySource.GroupJoin query, IndexConverter converter)
 		{
 			ParsingTracer.WriteLine();
 			ParsingTracer.IncIndentLevel();
@@ -1440,7 +1436,7 @@ namespace BLToolkit.Data.Linq
 			Expression expr = null;
 
 			BuildSelect(
-				query.ParentQueries[0],
+				query.BaseQuery,
 				(q, c) =>
 				{
 					var index = q.Select(this).Select(i => c(i).Index).ToArray();
@@ -1473,14 +1469,14 @@ namespace BLToolkit.Data.Linq
 			ParsingTracer.WriteLine(field);
 			ParsingTracer.IncIndentLevel();
 
-			var source = field.GroupBySource.ParentQueries[0].GetParent(ma);
+			var source = field.GroupBySource.BaseQuery;
 
 			if (source is QuerySource.Scalar)
 				return BuildField(ma, field.GroupBySource, converter);
 
 			if (source is QuerySource.SubQuery)
 			{
-				if (source.ParentQueries[0] is QuerySource.Scalar)
+				if (source.BaseQuery is QuerySource.Scalar)
 					return BuildField(ma, field.GroupBySource, converter);
 
 				return BuildNewExpression(source, field.GroupBySource.Lambda.Body, converter /*i => converter(source.EnsureField(i.Field).Select(this)[0])*/);
@@ -1521,11 +1517,11 @@ namespace BLToolkit.Data.Linq
 			{
 				var query = (QuerySource.SubQuery)field;
 
-				if (query is QuerySource.GroupJoinQuery && TypeHelper.IsSameOrParent(typeof(IEnumerable), ma.Expr.Type))
-					result = BuildGroupJoin(ma, (QuerySource.GroupJoinQuery)query, converter);
-				else if (query.Sources[0] is QuerySource.Table)
+				if (query is QuerySource.GroupJoin && TypeHelper.IsSameOrParent(typeof(IEnumerable), ma.Expr.Type))
+					result = BuildGroupJoin(ma, (QuerySource.GroupJoin)query, converter);
+				else if (query.BaseQuery is QuerySource.Table)
 				{
-					var table = (QuerySource.Table)query.Sources[0];
+					var table = (QuerySource.Table)query.BaseQuery;
 
 					if (ma.Expr.Type == table.ObjectType)
 						result = BuildQueryField(ma, table, i => converter(query.EnsureField(i.Field).Select(this)[0]));
@@ -1724,7 +1720,7 @@ namespace BLToolkit.Data.Linq
 				if (parseInfo.NodeType == ExpressionType.Parameter && qlen == 1 && queries[0] is QuerySource.Scalar)
 				{
 					var ma = (QuerySource.Scalar)queries[0];
-					return ParseExpression(ma.Lambda.Body, ma.ParentQueries);
+					return ParseExpression(ma.Lambda.Body, ma.Sources);
 				}
 
 				if (CanBeConstant(parseInfo))
@@ -2105,6 +2101,34 @@ namespace BLToolkit.Data.Linq
 				_ => true);
 
 			return arg;
+		}
+
+		#endregion
+
+		#region IsSubQuery
+
+		bool IsSubQuery(ParseInfo parseInfo)
+		{
+			switch (parseInfo.NodeType)
+			{
+				case ExpressionType.MemberAccess :
+				case ExpressionType.Call         :
+					{
+						var type = parseInfo.Expr.Type;
+
+						if (type.IsClass && type != typeof(string) && TypeHelper.IsSameOrParent(typeof(IEnumerable), type))
+						{
+							if (CanBeCompiled(parseInfo))
+								return false;
+
+							return true;
+						}
+					}
+
+					break;
+			}
+
+			return false;
 		}
 
 		#endregion
@@ -2576,9 +2600,9 @@ namespace BLToolkit.Data.Linq
 					{
 						var field = query.GetField(left);
 
-						if (field is QuerySource.GroupJoinQuery)
+						if (field is QuerySource.GroupJoin)
 						{
-							var join = (QuerySource.GroupJoinQuery)field;
+							var join = (QuerySource.GroupJoin)field;
 							var expr = join.CheckNullField.GetExpressions(this)[0];
 
 							return Convert(new SqlQuery.Predicate.IsNull(expr, !isEqual));
@@ -2909,7 +2933,6 @@ namespace BLToolkit.Data.Linq
 					if (table.Alias == null)
 						table.Alias = alias;
 				},
-				_ => {},
 				_ => {},
 				_ => {}
 			);

@@ -336,10 +336,6 @@ namespace BLToolkit.Data.Sql
 			_scale     = scale;
 		}
 
-#if FW2
-		delegate TResult Func<TArg0,TResult>(TArg0 arg0);
-#endif
-
 		SqlDataType(SqlDbType dbType, Type type, Func<SqlDbType,int> length, int precision, int scale)
 			: this(dbType, type, length(dbType), precision, scale)
 		{

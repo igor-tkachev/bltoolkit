@@ -3,8 +3,8 @@ using System.Collections.Generic;
 
 namespace BLToolkit.Data.Sql
 {
-	public delegate void          VisitFunc  (IQueryElement expr);
-	public delegate IQueryElement ConvertFunc(IQueryElement expr);
+	using VisitFunc   = Action<IQueryElement>;
+	using ConvertFunc = Func<IQueryElement,IQueryElement>;
 
 	public class QueryVisitor
 	{
@@ -230,10 +230,10 @@ namespace BLToolkit.Data.Sql
 		}
 
 		public T Convert<T>(T element, ConvertFunc action)
-			where T : IQueryElement
+			where T : class, IQueryElement
 		{
 			_visitedElements.Clear();
-			return (T)ConvertInternal(element, action);
+			return (T)ConvertInternal(element, action) ?? element;
 		}
 
 		IQueryElement ConvertInternal(IQueryElement element, ConvertFunc action)
@@ -253,8 +253,8 @@ namespace BLToolkit.Data.Sql
 						SqlFunction      func  = (SqlFunction)element;
 						ISqlExpression[] parms = Convert(func.Parameters, action);
 
-						if (!ReferenceEquals(parms, func.Parameters))
-							element = new SqlFunction(func.Name, func.Precedence, parms);
+						if (parms != null && !ReferenceEquals(parms, func.Parameters))
+							newElement = new SqlFunction(func.Name, func.Precedence, parms);
 
 						break;
 					}
@@ -264,8 +264,8 @@ namespace BLToolkit.Data.Sql
 						SqlExpression    expr  = (SqlExpression)element;
 						ISqlExpression[] values = Convert(expr.Values, action);
 
-						if (!ReferenceEquals(values, expr.Values))
-							element = new SqlExpression(expr.Expr, expr.Precedence, values);
+						if (values != null && !ReferenceEquals(values, expr.Values))
+							newElement = new SqlExpression(expr.Expr, expr.Precedence, values);
 
 						break;
 					}
@@ -276,8 +276,9 @@ namespace BLToolkit.Data.Sql
 						ISqlExpression      expr1 = (ISqlExpression)ConvertInternal(bexpr.Expr1, action);
 						ISqlExpression      expr2 = (ISqlExpression)ConvertInternal(bexpr.Expr2, action);
 
-						if (!ReferenceEquals(expr1, bexpr.Expr1) || !ReferenceEquals(expr2, bexpr.Expr2))
-							element = new SqlBinaryExpression(expr1, bexpr.Operation, expr2, bexpr.Type, bexpr.Precedence);
+						if (expr1 != null && !ReferenceEquals(expr1, bexpr.Expr1) ||
+							expr2 != null && !ReferenceEquals(expr2, bexpr.Expr2))
+							newElement = new SqlBinaryExpression(expr1 ?? bexpr.Expr1, bexpr.Operation, expr2 ?? bexpr.Expr2, bexpr.Type, bexpr.Precedence);
 
 						break;
 					}
@@ -290,13 +291,15 @@ namespace BLToolkit.Data.Sql
 						SqlField[] fields2 = Convert(fields1, action, delegate(SqlField f) { return new SqlField(f.Name, f.PhysicalName, f.Nullable); });
 						List<Join> joins   = Convert(table.Joins, action, delegate(Join j) { return j.Clone(); });
 
-						bool fe = ReferenceEquals(fields1,     fields2);
-						bool je = ReferenceEquals(table.Joins, joins);
+						bool fe = fields2 == null || ReferenceEquals(fields1,     fields2);
+						bool je = joins   == null || ReferenceEquals(table.Joins, joins);
 
 						if (!fe || !je)
 						{
 							if (fe)
 							{
+								fields2 = fields1;
+
 								for (int i = 0; i < fields2.Length; i++)
 								{
 									SqlField f = fields2[i];
@@ -304,7 +307,7 @@ namespace BLToolkit.Data.Sql
 								}
 							}
 
-							element = new SqlTable(table, fields2, joins);
+							newElement = new SqlTable(table, fields2, joins ?? table.Joins);
 						}
 
 						break;
@@ -315,8 +318,8 @@ namespace BLToolkit.Data.Sql
 						Join         join = (Join)element;
 						List<JoinOn> ons  = Convert(join.JoinOns, action);
 
-						if (!ReferenceEquals(join.JoinOns, ons))
-							element = new Join(join.TableName, join.Alias, ons);
+						if (ons != null && !ReferenceEquals(join.JoinOns, ons))
+							newElement = new Join(join.TableName, join.Alias, ons);
 
 						break;
 					}
@@ -326,8 +329,8 @@ namespace BLToolkit.Data.Sql
 						SqlQuery.Column col  = (SqlQuery.Column)element;
 						ISqlExpression  expr = (ISqlExpression)ConvertInternal(col.Expression, action);
 
-						if (!ReferenceEquals(expr, col.Expression))
-							element = new SqlQuery.Column( col.Parent, expr, col._alias);
+						if (expr != null && !ReferenceEquals(expr, col.Expression))
+							newElement = new SqlQuery.Column( col.Parent, expr, col._alias);
 
 						break;
 					}
@@ -338,8 +341,9 @@ namespace BLToolkit.Data.Sql
 						ISqlTableSource            source = (ISqlTableSource)ConvertInternal(table.Source, action);
 						List<SqlQuery.JoinedTable> joins  = Convert(table.Joins, action);
 
-						if (!ReferenceEquals(source, table.Source) || !ReferenceEquals(table.Joins, joins))
-							element = new SqlQuery.TableSource(source, table._alias, joins);
+						if (source != null && !ReferenceEquals(source, table.Source) ||
+							joins  != null && !ReferenceEquals(table.Joins, joins))
+							newElement = new SqlQuery.TableSource(source ?? table.Source, table._alias, joins ?? table.Joins);
 
 						break;
 					}
@@ -350,8 +354,9 @@ namespace BLToolkit.Data.Sql
 						SqlQuery.TableSource     table = (SqlQuery.TableSource)    ConvertInternal(join.Table,     action);
 						SqlQuery.SearchCondition cond  = (SqlQuery.SearchCondition)ConvertInternal(join.Condition, action);
 
-						if (!ReferenceEquals(table, join.Table) || !ReferenceEquals(cond, join.Condition))
-							element = new SqlQuery.JoinedTable(join.JoinType, table, join.IsWeak);
+						if (table != null && !ReferenceEquals(table, join.Table) ||
+							cond  != null && !ReferenceEquals(cond,  join.Condition))
+							newElement = new SqlQuery.JoinedTable(join.JoinType, table ?? join.Table, join.IsWeak, cond ?? join.Condition);
 
 						break;
 					}
@@ -361,8 +366,8 @@ namespace BLToolkit.Data.Sql
 						SqlQuery.SearchCondition sc    = (SqlQuery.SearchCondition)element;
 						List<SqlQuery.Condition> conds = Convert(sc.Conditions, action);
 
-						if (!ReferenceEquals(sc.Conditions, conds))
-							element = new SqlQuery.SearchCondition(conds);
+						if (conds != null && !ReferenceEquals(sc.Conditions, conds))
+							newElement = new SqlQuery.SearchCondition(conds);
 
 						break;
 					}
@@ -372,8 +377,8 @@ namespace BLToolkit.Data.Sql
 						SqlQuery.Condition c = (SqlQuery.Condition)element;
 						ISqlPredicate      p = (ISqlPredicate)ConvertInternal(c.Predicate, action);
 
-						if (!ReferenceEquals(c.Predicate, p))
-							element = new SqlQuery.Condition(c.IsNot, p, c.IsOr);
+						if (p != null && !ReferenceEquals(c.Predicate, p))
+							newElement = new SqlQuery.Condition(c.IsNot, p, c.IsOr);
 
 						break;
 					}
@@ -383,8 +388,8 @@ namespace BLToolkit.Data.Sql
 						SqlQuery.Predicate.Expr p = (SqlQuery.Predicate.Expr)element;
 						ISqlExpression          e = (ISqlExpression)ConvertInternal(p.Expr1, action);
 
-						if (!ReferenceEquals(p.Expr1, e))
-							element = new SqlQuery.Predicate.Expr(e, p.Precedence);
+						if (e != null && !ReferenceEquals(p.Expr1, e))
+							newElement = new SqlQuery.Predicate.Expr(e, p.Precedence);
 
 						break;
 					}
@@ -394,33 +399,35 @@ namespace BLToolkit.Data.Sql
 						SqlQuery.Predicate.NotExpr p = (SqlQuery.Predicate.NotExpr)element;
 						ISqlExpression             e = (ISqlExpression)ConvertInternal(p.Expr1, action);
 
-						if (!ReferenceEquals(p.Expr1, e))
-							element = new SqlQuery.Predicate.NotExpr(e, p.IsNot, p.Precedence);
+						if (e != null && !ReferenceEquals(p.Expr1, e))
+							newElement = new SqlQuery.Predicate.NotExpr(e, p.IsNot, p.Precedence);
 
 						break;
 					}
 
 				case QueryElementType.ExprExprPredicate:
 					{
-						SqlQuery.Predicate.ExprExpr p = (SqlQuery.Predicate.ExprExpr)element;
+						SqlQuery.Predicate.ExprExpr p  = (SqlQuery.Predicate.ExprExpr)element;
 						ISqlExpression              e1 = (ISqlExpression)ConvertInternal(p.Expr1, action);
 						ISqlExpression              e2 = (ISqlExpression)ConvertInternal(p.Expr2, action);
 
-						if (!ReferenceEquals(p.Expr1, e1) || !ReferenceEquals(p.Expr2, e2))
-							element = new SqlQuery.Predicate.ExprExpr(e1, p.Operator, e2);
+						if (e1 != null && !ReferenceEquals(p.Expr1, e1) || e2 != null && !ReferenceEquals(p.Expr2, e2))
+							newElement = new SqlQuery.Predicate.ExprExpr(e1 ?? p.Expr1, p.Operator, e2 ?? p.Expr2);
 
 						break;
 					}
 
 				case QueryElementType.LikePredicate:
 					{
-						SqlQuery.Predicate.Like p = (SqlQuery.Predicate.Like)element;
+						SqlQuery.Predicate.Like p  = (SqlQuery.Predicate.Like)element;
 						ISqlExpression          e1 = (ISqlExpression)ConvertInternal(p.Expr1,  action);
 						ISqlExpression          e2 = (ISqlExpression)ConvertInternal(p.Expr2,  action);
 						ISqlExpression          es = (ISqlExpression)ConvertInternal(p.Escape, action);
 
-						if (!ReferenceEquals(p.Expr1, e1) || !ReferenceEquals(p.Expr2, e2) || !ReferenceEquals(p.Escape, es))
-							element = new SqlQuery.Predicate.Like(e1, p.IsNot, e2, es);
+						if (e1 != null && !ReferenceEquals(p.Expr1, e1) ||
+							e2 != null && !ReferenceEquals(p.Expr2, e2) ||
+							es != null && !ReferenceEquals(p.Escape, es))
+							newElement = new SqlQuery.Predicate.Like(e1 ?? p.Expr1, p.IsNot, e2 ?? p.Expr2, es ?? p.Escape);
 
 						break;
 					}
@@ -432,8 +439,10 @@ namespace BLToolkit.Data.Sql
 						ISqlExpression             e2 = (ISqlExpression)ConvertInternal(p.Expr2, action);
 						ISqlExpression             e3 = (ISqlExpression)ConvertInternal(p.Expr3, action);
 
-						if (!ReferenceEquals(p.Expr1, e1) || !ReferenceEquals(p.Expr2, e2) || !ReferenceEquals(p.Expr3, e3))
-							element = new SqlQuery.Predicate.Between(e1, p.IsNot, e2, e3);
+						if (e1 != null && !ReferenceEquals(p.Expr1, e1) ||
+							e2 != null && !ReferenceEquals(p.Expr2, e2) ||
+							e3 != null && !ReferenceEquals(p.Expr3, e3))
+							newElement = new SqlQuery.Predicate.Between(e1 ?? p.Expr1, p.IsNot, e2 ?? p.Expr2, e3 ?? p.Expr3);
 
 						break;
 					}
@@ -443,8 +452,8 @@ namespace BLToolkit.Data.Sql
 						SqlQuery.Predicate.IsNull p = (SqlQuery.Predicate.IsNull)element;
 						ISqlExpression            e = (ISqlExpression)ConvertInternal(p.Expr1, action);
 
-						if (!ReferenceEquals(p.Expr1, e))
-							element = new SqlQuery.Predicate.IsNull(e, p.IsNot);
+						if (e != null && !ReferenceEquals(p.Expr1, e))
+							newElement = new SqlQuery.Predicate.IsNull(e, p.IsNot);
 
 						break;
 					}
@@ -455,8 +464,8 @@ namespace BLToolkit.Data.Sql
 						ISqlExpression                e = (ISqlExpression)ConvertInternal(p.Expr1,    action);
 						SqlQuery                      q = (SqlQuery)ConvertInternal(p.SubQuery, action);
 
-						if (!ReferenceEquals(p.Expr1, e) || !ReferenceEquals(p.SubQuery, q))
-							element = new SqlQuery.Predicate.InSubquery(e, p.IsNot, q);
+						if (e != null && !ReferenceEquals(p.Expr1, e) || q != null && !ReferenceEquals(p.SubQuery, q))
+							newElement = new SqlQuery.Predicate.InSubquery(e ?? p.Expr1, p.IsNot, q ?? p.SubQuery);
 
 						break;
 					}
@@ -467,8 +476,8 @@ namespace BLToolkit.Data.Sql
 						ISqlExpression            e = (ISqlExpression)ConvertInternal(p.Expr1,    action);
 						List<ISqlExpression>      v = Convert(p.Values, action);
 
-						if (!ReferenceEquals(p.Expr1, e) || !ReferenceEquals(p.Values, v))
-							element = new SqlQuery.Predicate.InList(e, p.IsNot, v);
+						if (e != null && !ReferenceEquals(p.Expr1, e) || v != null && !ReferenceEquals(p.Values, v))
+							newElement = new SqlQuery.Predicate.InList(e ?? p.Expr1, p.IsNot, v ?? p.Values);
 
 						break;
 					}
@@ -478,8 +487,8 @@ namespace BLToolkit.Data.Sql
 						SqlQuery.Predicate.FuncLike p = (SqlQuery.Predicate.FuncLike)element;
 						SqlFunction                 f = (SqlFunction)ConvertInternal(p.Function, action);
 
-						if (!ReferenceEquals(p.Function, f))
-							element = new SqlQuery.Predicate.FuncLike(f);
+						if (f != null && !ReferenceEquals(p.Function, f))
+							newElement = new SqlQuery.Predicate.FuncLike(f);
 
 						break;
 					}
@@ -491,8 +500,10 @@ namespace BLToolkit.Data.Sql
 						ISqlExpression        take = (ISqlExpression)ConvertInternal(sc.TakeValue, action);
 						ISqlExpression        skip = (ISqlExpression)ConvertInternal(sc.SkipValue, action);
 
-						if (!ReferenceEquals(sc.Columns, cols) || !ReferenceEquals(sc.TakeValue, take) || !ReferenceEquals(sc.SkipValue, skip))
-							element = new SqlQuery.SelectClause(sc.IsDistinct, take, skip, cols);
+						if (cols != null && !ReferenceEquals(sc.Columns,   cols) ||
+							take != null && !ReferenceEquals(sc.TakeValue, take) ||
+							skip != null && !ReferenceEquals(sc.SkipValue, skip))
+							newElement = new SqlQuery.SelectClause(sc.IsDistinct, take ?? sc.TakeValue, skip ?? sc.SkipValue, cols ?? sc.Columns);
 
 						break;
 					}
@@ -502,8 +513,8 @@ namespace BLToolkit.Data.Sql
 						SqlQuery.FromClause        fc   = (SqlQuery.FromClause)element;
 						List<SqlQuery.TableSource> ts = Convert(fc.Tables, action);
 
-						if (!ReferenceEquals(fc.Tables, ts))
-							element = new SqlQuery.FromClause(ts);
+						if (ts != null && !ReferenceEquals(fc.Tables, ts))
+							newElement = new SqlQuery.FromClause(ts);
 
 						break;
 					}
@@ -513,8 +524,8 @@ namespace BLToolkit.Data.Sql
 						SqlQuery.WhereClause     wc   = (SqlQuery.WhereClause)element;
 						SqlQuery.SearchCondition cond = (SqlQuery.SearchCondition)ConvertInternal(wc.SearchCondition, action);
 
-						if (!ReferenceEquals(wc.SearchCondition, cond))
-							element = new SqlQuery.WhereClause(cond);
+						if (cond != null && !ReferenceEquals(wc.SearchCondition, cond))
+							newElement = new SqlQuery.WhereClause(cond);
 
 						break;
 					}
@@ -524,8 +535,8 @@ namespace BLToolkit.Data.Sql
 						SqlQuery.GroupByClause gc = (SqlQuery.GroupByClause)element;
 						List<ISqlExpression>   es = Convert(gc.Items, action);
 
-						if (!ReferenceEquals(gc.Items, es))
-							element = new SqlQuery.GroupByClause(es);
+						if (es != null && !ReferenceEquals(gc.Items, es))
+							newElement = new SqlQuery.GroupByClause(es);
 
 						break;
 					}
@@ -535,8 +546,8 @@ namespace BLToolkit.Data.Sql
 						SqlQuery.OrderByClause     oc = (SqlQuery.OrderByClause)element;
 						List<SqlQuery.OrderByItem> es = Convert(oc.Items, action);
 
-						if (!ReferenceEquals(oc.Items, es))
-							element = new SqlQuery.OrderByClause(es);
+						if (es != null && !ReferenceEquals(oc.Items, es))
+							newElement = new SqlQuery.OrderByClause(es);
 
 						break;
 					}
@@ -546,8 +557,8 @@ namespace BLToolkit.Data.Sql
 						SqlQuery.OrderByItem i = (SqlQuery.OrderByItem)element;
 						ISqlExpression       e = (ISqlExpression)ConvertInternal(i.Expression, action);
 
-						if (!ReferenceEquals(i.Expression, e))
-							element = new SqlQuery.OrderByItem(e, i.IsDescending);
+						if (e != null && !ReferenceEquals(i.Expression, e))
+							newElement = new SqlQuery.OrderByItem(e, i.IsDescending);
 
 						break;
 					}
@@ -570,12 +581,12 @@ namespace BLToolkit.Data.Sql
 						SqlQuery.WhereClause   hc = (SqlQuery.WhereClause)  ConvertInternal(q.Having,  func);
 						SqlQuery.OrderByClause oc = (SqlQuery.OrderByClause)ConvertInternal(q.OrderBy, func);
 
-						bool bsc = ReferenceEquals(sc, q.Select);
-						bool bfc = ReferenceEquals(fc, q.From);
-						bool bwc = ReferenceEquals(wc, q.Where);
-						bool bgc = ReferenceEquals(gc, q.GroupBy);
-						bool bhc = ReferenceEquals(hc, q.Having);
-						bool boc = ReferenceEquals(oc, q.OrderBy);
+						bool bsc = sc == null || ReferenceEquals(sc, q.Select);
+						bool bfc = fc == null || ReferenceEquals(fc, q.From);
+						bool bwc = wc == null || ReferenceEquals(wc, q.Where);
+						bool bgc = gc == null || ReferenceEquals(gc, q.GroupBy);
+						bool bhc = hc == null || ReferenceEquals(hc, q.Having);
+						bool boc = oc == null || ReferenceEquals(oc, q.OrderBy);
 
 						if (!bsc || !bfc || !bwc || !bgc || !bhc || !boc)
 						{
@@ -609,39 +620,52 @@ namespace BLToolkit.Data.Sql
 								hc = (SqlQuery.WhereClause)  visitor.ConvertInternal(q.Having,  func);
 								oc = (SqlQuery.OrderByClause)visitor.ConvertInternal(q.OrderBy, func);
 
-								bsc = ReferenceEquals(sc, q.Select);
-								bfc = ReferenceEquals(fc, q.From);
-								bwc = ReferenceEquals(wc, q.Where);
-								bgc = ReferenceEquals(gc, q.GroupBy);
-								bhc = ReferenceEquals(hc, q.Having);
-								boc = ReferenceEquals(oc, q.OrderBy);
+								bsc = sc == null || ReferenceEquals(sc, q.Select);
+								bfc = fc == null || ReferenceEquals(fc, q.From);
+								bwc = wc == null || ReferenceEquals(wc, q.Where);
+								bgc = gc == null || ReferenceEquals(gc, q.GroupBy);
+								bhc = hc == null || ReferenceEquals(hc, q.Having);
+								boc = oc == null || ReferenceEquals(oc, q.OrderBy);
 							}
 
-							if (bsc) sc = new SqlQuery.SelectClause (sc.IsDistinct, sc.TakeValue, sc.SkipValue, sc.Columns); sc.SetSqlQuery(nq);
-							if (bfc) fc = new SqlQuery.FromClause   (fc.Tables);                                             fc.SetSqlQuery(nq);
-							if (bwc) wc = new SqlQuery.WhereClause  (wc.SearchCondition);                                    wc.SetSqlQuery(nq);
-							if (bgc) gc = new SqlQuery.GroupByClause(gc.Items);                                              gc.SetSqlQuery(nq);
-							if (bhc) hc = new SqlQuery.WhereClause  (hc.SearchCondition);                                    hc.SetSqlQuery(nq);
-							if (boc) oc = new SqlQuery.OrderByClause(oc.Items);                                              oc.SetSqlQuery(nq);
+							sc = sc ?? q.Select;
+							fc = fc ?? q.From;
+							wc = wc ?? q.Where;
+							gc = gc ?? q.GroupBy;
+							hc = hc ?? q.Having;
+							oc = oc ?? q.OrderBy;
+
+							if (bsc) sc = new SqlQuery.SelectClause (sc.IsDistinct, sc.TakeValue, sc.SkipValue, sc.Columns);
+							if (bfc) fc = new SqlQuery.FromClause   (fc.Tables);
+							if (bwc) wc = new SqlQuery.WhereClause  (wc.SearchCondition);
+							if (bgc) gc = new SqlQuery.GroupByClause(gc.Items);
+							if (bhc) hc = new SqlQuery.WhereClause  (hc.SearchCondition);
+							if (boc) oc = new SqlQuery.OrderByClause(oc.Items);
 
 							List<SqlParameter> ps = new List<SqlParameter>(q.Parameters.Count);
 
 							foreach (SqlParameter p in q.Parameters)
 							{
 								IQueryElement e;
-								if (_visitedElements.TryGetValue(p, out e) && e is SqlParameter)
-									ps.Add((SqlParameter)e);
+
+								if (_visitedElements.TryGetValue(p, out e))
+								{
+									if (e == null)
+										ps.Add(p);
+									else if (e is SqlParameter)
+										ps.Add((SqlParameter)e);
+								}
 							}
 
 							nq.Set(sc, fc, wc, gc, hc, oc, q.ParentSql, q.ParameterDependent, ps);
-							element = nq;
+							newElement = nq;
 						}
 
 						break;
 					}
 			}
 
-			newElement = action(element);
+			newElement = newElement == null ? action(element) : (action(newElement) ?? newElement);
 
 			_visitedElements.Add(element, newElement);
 
@@ -662,13 +686,13 @@ namespace BLToolkit.Data.Sql
 		delegate T Clone<T>(T obj);
 
 		T[] Convert<T>(T[] arr, ConvertFunc action)
-			where T : IQueryElement
+			where T : class, IQueryElement
 		{
 			return Convert(arr, action, null);
 		}
 
 		T[] Convert<T>(T[] arr1, ConvertFunc action, Clone<T> clone)
-			where T : IQueryElement
+			where T : class, IQueryElement
 		{
 			T[] arr2 = null;
 
@@ -677,7 +701,7 @@ namespace BLToolkit.Data.Sql
 				T elem1 = arr1[i];
 				T elem2 = (T)ConvertInternal(elem1, action);
 
-				if (!ReferenceEquals(elem1, elem2))
+				if (elem2 != null && ReferenceEquals(elem1, elem2))
 				{
 					if (arr2 == null)
 					{
@@ -693,17 +717,17 @@ namespace BLToolkit.Data.Sql
 					arr2[i] = clone == null ? elem1 : clone(elem1);
 			}
 
-			return arr2 ?? arr1;
+			return arr2;
 		}
 
 		List<T> Convert<T>(List<T> list, ConvertFunc action)
-			where T : IQueryElement
+			where T : class, IQueryElement
 		{
 			return Convert(list, action, null);
 		}
 
 		List<T> Convert<T>(List<T> list1, ConvertFunc action, Clone<T> clone)
-			where T : IQueryElement
+			where T : class, IQueryElement
 		{
 			List<T> list2 = null;
 
@@ -712,7 +736,7 @@ namespace BLToolkit.Data.Sql
 				T elem1 = list1[i];
 				T elem2 = (T)ConvertInternal(elem1, action);
 
-				if (!ReferenceEquals(elem1, elem2))
+				if (elem2 != null && !ReferenceEquals(elem1, elem2))
 				{
 					if (list2 == null)
 					{
@@ -728,7 +752,7 @@ namespace BLToolkit.Data.Sql
 					list2.Add(clone == null ? elem1 : clone(elem1));
 			}
 
-			return list2 ?? list1;
+			return list2;
 		}
 	}
 }
