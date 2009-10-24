@@ -566,6 +566,27 @@ namespace BLToolkit.Data.DataProvider
 			return new OracleSqlProvider(this);
 		}
 
+		public virtual IDataReader GetDataReader(MappingSchema schema, IDataReader dataReader)
+		{
+			return dataReader is OracleDataReader ?
+				new OracleDataReaderEx((OracleDataReader)dataReader) :
+				base.GetDataReader(schema, dataReader);
+		}
+
+		class OracleDataReaderEx: DataReaderEx<OracleDataReader>
+		{
+			public OracleDataReaderEx(OracleDataReader rd)
+				: base(rd)
+			{
+			}
+
+			public override DateTimeOffset GetDateTimeOffset(int i)
+			{
+				OracleTimeStampTZ ts = _rd.GetOracleTimeStampTZ(i);
+				return new DateTimeOffset(ts.Value, ts.GetTimeZoneOffset());
+			}
+		}
+
 		private string _parameterPrefix = "P";
 		public  string  ParameterPrefix
 		{
