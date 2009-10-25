@@ -134,7 +134,7 @@ namespace System.Collections.Specialized
 			NotifyCollectionChangedAction action,
 			object                        newItem,
 			object                        oldItem)
-			: this(action, new[] { newItem }, new[] { oldItem }, -1)
+			: this(action, new object[] { newItem }, new object[] { oldItem }, -1)
 		{
 		}
 
@@ -150,7 +150,7 @@ namespace System.Collections.Specialized
 			object                        newItem,
 			object                        oldItem,
 			int                           index)
-			: this(action, new[] { newItem }, new[] { oldItem }, index)
+			: this(action, new object[] { newItem }, new object[] { oldItem }, index)
 		{
 		}
 

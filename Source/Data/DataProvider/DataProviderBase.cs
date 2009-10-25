@@ -217,73 +217,74 @@ namespace BLToolkit.Data.DataProvider
 
 		#endregion
 
-		protected abstract class DataReaderEx<T> : IDataReader, IDataReaderEx where T: IDataReader
+		protected abstract class DataReaderEx<T> : IDataReader, IDataReaderEx
+			where T: IDataReader
 		{
-			protected readonly T _rd;
+			protected readonly T DataReader;
 
 			protected DataReaderEx(T rd)
 			{
-				_rd = rd;
+				DataReader = rd;
 			}
 
 			#region Implementation of IDisposable
 
 			public void Dispose()
 			{
-				_rd.Dispose();
+				DataReader.Dispose();
 			}
 
 			#endregion
 
 			#region Implementation of IDataRecord
 
-			public string GetName(int i) { return _rd.GetName(i); }
-			public string GetDataTypeName(int i) { return _rd.GetDataTypeName(i); }
-			public Type GetFieldType(int i) { return _rd.GetFieldType(i); }
-			public object GetValue(int i) { return _rd.GetValue(i); }
-			public int GetValues(object[] values) { return _rd.GetValues(values); }
-			public int GetOrdinal(string name) { return _rd.GetOrdinal(name); }
-			public bool GetBoolean(int i) { return _rd.GetBoolean(i); }
-			public byte GetByte(int i) { return _rd.GetByte(i); }
-			public char GetChar(int i) { return _rd.GetChar(i); }
-			public Guid GetGuid(int i) { return _rd.GetGuid(i); }
-			public short GetInt16(int i) { return _rd.GetInt16(i); }
-			public int GetInt32(int i) { return _rd.GetInt32(i); }
-			public long GetInt64(int i) { return _rd.GetInt64(i); }
-			public float GetFloat(int i) { return _rd.GetFloat(i); }
-			public double GetDouble(int i) { return _rd.GetDouble(i); }
-			public string GetString(int i) { return _rd.GetString(i); }
-			public decimal GetDecimal(int i) { return _rd.GetDecimal(i); }
-			public DateTime GetDateTime(int i) { return _rd.GetDateTime(i); }
-			public IDataReader GetData(int i) { return _rd.GetData(i); }
-			public bool IsDBNull(int i) { return _rd.IsDBNull(i); }
+			public string      GetName        (int i)           { return DataReader.GetName        (i); }
+			public string      GetDataTypeName(int i)           { return DataReader.GetDataTypeName(i); }
+			public Type        GetFieldType   (int i)           { return DataReader.GetFieldType   (i); }
+			public object      GetValue       (int i)           { return DataReader.GetValue       (i); }
+			public int         GetValues      (object[] values) { return DataReader.GetValues      (values); }
+			public int         GetOrdinal     (string   name)   { return DataReader.GetOrdinal     (name);   }
+			public bool        GetBoolean     (int i)           { return DataReader.GetBoolean     (i); }
+			public byte        GetByte        (int i)           { return DataReader.GetByte        (i); }
+			public char        GetChar        (int i)           { return DataReader.GetChar        (i); }
+			public Guid        GetGuid        (int i)           { return DataReader.GetGuid        (i); }
+			public short       GetInt16       (int i)           { return DataReader.GetInt16       (i); }
+			public int         GetInt32       (int i)           { return DataReader.GetInt32       (i); }
+			public long        GetInt64       (int i)           { return DataReader.GetInt64       (i); }
+			public float       GetFloat       (int i)           { return DataReader.GetFloat       (i); }
+			public double      GetDouble      (int i)           { return DataReader.GetDouble      (i); }
+			public string      GetString      (int i)           { return DataReader.GetString      (i); }
+			public decimal     GetDecimal     (int i)           { return DataReader.GetDecimal     (i); }
+			public DateTime    GetDateTime    (int i)           { return DataReader.GetDateTime    (i); }
+			public IDataReader GetData        (int i)           { return DataReader.GetData        (i); }
+			public bool        IsDBNull       (int i)           { return DataReader.IsDBNull       (i); }
 
-			public int FieldCount { get { return _rd.FieldCount; } }
+			public int FieldCount { get { return DataReader.FieldCount; } }
 
-			object IDataRecord.this[int i] { get { return _rd[i]; } }
-			object IDataRecord.this[string name] { get { return _rd[name]; } }
+			object IDataRecord.this[int i]       { get { return DataReader[i];    } }
+			object IDataRecord.this[string name] { get { return DataReader[name]; } }
 
 			public long GetBytes(int i, long fieldOffset, byte[] buffer, int bufferoffset, int length)
 			{
-				return _rd.GetBytes(i, fieldOffset, buffer, bufferoffset, length);
+				return DataReader.GetBytes(i, fieldOffset, buffer, bufferoffset, length);
 			}
 
 			public long GetChars(int i, long fieldoffset, char[] buffer, int bufferoffset, int length)
 			{
-				return _rd.GetChars(i, fieldoffset, buffer, bufferoffset, length);
+				return DataReader.GetChars(i, fieldoffset, buffer, bufferoffset, length);
 			}
 
 			#endregion
 
 			#region Implementation of IDataReader
 
-			public void Close() { _rd.Close(); }
-			public DataTable GetSchemaTable() { return _rd.GetSchemaTable(); }
-			public bool NextResult() { return _rd.NextResult(); }
-			public bool Read() { return _rd.Read(); }
-			public int Depth { get { return _rd.Depth; } }
-			public bool IsClosed { get { return _rd.IsClosed; } }
-			public int RecordsAffected { get { return _rd.RecordsAffected; } }
+			public void      Close         () {        DataReader.Close         (); }
+			public DataTable GetSchemaTable() { return DataReader.GetSchemaTable(); }
+			public bool      NextResult    () { return DataReader.NextResult    (); }
+			public bool      Read          () { return DataReader.Read          (); }
+			public int       Depth           { get { return DataReader.Depth;           } }
+			public bool      IsClosed        { get { return DataReader.IsClosed;        } }
+			public int       RecordsAffected { get { return DataReader.RecordsAffected; } }
 
 			#endregion
 

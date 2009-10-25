@@ -224,7 +224,7 @@ namespace BLToolkit.Data.DataProvider
 
 			public override DateTimeOffset GetDateTimeOffset(int i)
 			{
-				return _rd.GetDateTimeOffset(i);
+				return DataReader.GetDateTimeOffset(i);
 			}
 		}
 

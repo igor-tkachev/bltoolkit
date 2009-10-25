@@ -566,7 +566,7 @@ namespace BLToolkit.Data.DataProvider
 			return new OracleSqlProvider(this);
 		}
 
-		public virtual IDataReader GetDataReader(MappingSchema schema, IDataReader dataReader)
+		public override IDataReader GetDataReader(MappingSchema schema, IDataReader dataReader)
 		{
 			return dataReader is OracleDataReader ?
 				new OracleDataReaderEx((OracleDataReader)dataReader) :
@@ -582,7 +582,7 @@ namespace BLToolkit.Data.DataProvider
 
 			public override DateTimeOffset GetDateTimeOffset(int i)
 			{
-				OracleTimeStampTZ ts = _rd.GetOracleTimeStampTZ(i);
+				OracleTimeStampTZ ts = DataReader.GetOracleTimeStampTZ(i);
 				return new DateTimeOffset(ts.Value, ts.GetTimeZoneOffset());
 			}
 		}
