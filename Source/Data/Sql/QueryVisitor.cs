@@ -288,8 +288,8 @@ namespace BLToolkit.Data.Sql
 						SqlTable table = (SqlTable)element;
 
 						SqlField[] fields1 = ToArray(table.Fields);
-						SqlField[] fields2 = Convert(fields1, action, delegate(SqlField f) { return new SqlField(f.Name, f.PhysicalName, f.Nullable); });
-						List<Join> joins   = Convert(table.Joins, action, delegate(Join j) { return j.Clone(); });
+						SqlField[] fields2 = Convert(fields1, action, delegate(SqlField f) { return new SqlField(f); });
+						List<Join> joins   = Convert(table.Joins, action, delegate(Join j) { return j.Clone();       });
 
 						bool fe = fields2 == null || ReferenceEquals(fields1,     fields2);
 						bool je = joins   == null || ReferenceEquals(table.Joins, joins);
@@ -301,10 +301,7 @@ namespace BLToolkit.Data.Sql
 								fields2 = fields1;
 
 								for (int i = 0; i < fields2.Length; i++)
-								{
-									SqlField f = fields2[i];
-									fields2[i] = new SqlField(f.Name, f.PhysicalName, f.Nullable);
-								}
+									fields2[i] = new SqlField(fields2[i]);
 							}
 
 							newElement = new SqlTable(table, fields2, joins ?? table.Joins);

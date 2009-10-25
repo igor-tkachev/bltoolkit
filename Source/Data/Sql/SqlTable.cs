@@ -62,7 +62,7 @@ namespace BLToolkit.Data.Sql
 			_physicalName = table._physicalName;
 
 			foreach (SqlField field in table.Fields.Values)
-				Fields.Add(new SqlField(field.Name, field.PhysicalName, field.Nullable));
+				Fields.Add(new SqlField(field));
 
 			foreach (Join join in table.Joins)
 				Joins.Add(join.Clone());
@@ -138,7 +138,7 @@ namespace BLToolkit.Data.Sql
 
 			foreach (SqlField field in baseTable.Fields.Values)
 				if (!Fields.ContainsKey(field.Name))
-					Fields.Add(new SqlField(field.Name, field.PhysicalName, field.Nullable));
+					Fields.Add(new SqlField(field));
 
 			foreach (Join join in baseTable.Joins)
 				if (Joins.Find(delegate(Join j) { return j.TableName == join.TableName; }) == null)
@@ -246,7 +246,7 @@ namespace BLToolkit.Data.Sql
 
 				foreach (KeyValuePair<string,SqlField> field in _fields)
 				{
-					SqlField fc = new SqlField(field.Value.Name, field.Value.PhysicalName, field.Value.Nullable);
+					SqlField fc = new SqlField(field.Value);
 
 					objectTree.Add(field.Value, fc);
 					table._fields.Add(field.Key, fc);

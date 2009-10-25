@@ -1119,7 +1119,9 @@ namespace BLToolkit.Data.DataProvider
 			public OracleDataReaderMapper(MappingSchema mappingSchema, IDataReader dataReader)
 				: base(mappingSchema, dataReader)
 			{
-				_dataReader = (OracleDataReader)dataReader;
+				_dataReader = dataReader is OracleDataReaderEx ?
+					(OracleDataReader)((OracleDataReaderEx)dataReader).DataReader :
+					(OracleDataReader)dataReader;
 			}
 
 			private readonly OracleDataReader _dataReader;

@@ -33,7 +33,7 @@ namespace BLToolkit.Data.Linq
 				ParsingTracer.WriteLine("table", _table);
 				ParsingTracer.IncIndentLevel();
 
-				var index =  new[] { new FieldIndex { Index = _table.SqlQuery.Select.Add(Field, Field.Name), Field = this } };
+				var index =  new[] { new FieldIndex { Index = _table.SqlQuery.Select.Add(Field, Field.Alias), Field = this } };
 
 				ParsingTracer.DecIndentLevel();
 				ParsingTracer.WriteLine("table", _table);

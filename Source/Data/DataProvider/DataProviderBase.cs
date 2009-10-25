@@ -220,7 +220,7 @@ namespace BLToolkit.Data.DataProvider
 		protected abstract class DataReaderEx<T> : IDataReader, IDataReaderEx
 			where T: IDataReader
 		{
-			protected readonly T DataReader;
+			public readonly T DataReader;
 
 			protected DataReaderEx(T rd)
 			{

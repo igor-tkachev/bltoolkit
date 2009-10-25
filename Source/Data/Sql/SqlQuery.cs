@@ -113,7 +113,7 @@ namespace BLToolkit.Data.Sql
 						if (_expression is SqlField)
 						{
 							SqlField field = (SqlField)_expression;
-							return field.Name ?? field.PhysicalName;
+							return field.Alias ?? field.PhysicalName;
 						}
 
 						if (_expression is Column)

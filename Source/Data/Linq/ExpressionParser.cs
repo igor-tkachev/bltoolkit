@@ -337,14 +337,18 @@ namespace BLToolkit.Data.Linq
 
 				switch (l.Body.NodeType)
 				{
-					case ExpressionType.Parameter  : //return new QuerySource.Path  (CurrentSql, l.ConvertTo<ParameterExpression>(),  sources);
+					case ExpressionType.Parameter  :
 						for (var i = 0; i < sources.Length; i++)
 							if (l.Body == l.Parameters[i].Expr)
 								return sources[i];
 						throw new InvalidOperationException();
 					case ExpressionType.New        : return new QuerySource.Expr  (CurrentSql, l.ConvertTo<NewExpression>(),        sources);
 					case ExpressionType.MemberInit : return new QuerySource.Expr  (CurrentSql, l.ConvertTo<MemberInitExpression>(), sources);
-					default                        : return new QuerySource.Scalar(CurrentSql, l,                                   sources);
+					default                        :
+						{
+							var scalar = new QuerySource.Scalar(CurrentSql, l, sources);
+							return scalar.Fields[0] is QuerySource ? (QuerySource)scalar.Fields[0] : scalar;
+						}
 				}
 #if DEBUG
 			}
@@ -560,7 +564,8 @@ namespace BLToolkit.Data.Linq
 
 		QuerySource ParseWhere(LambdaInfo l, QuerySource select)
 		{
-			ParsingTracer.WriteLine();
+			ParsingTracer.WriteLine(l);
+			ParsingTracer.WriteLine(select);
 			ParsingTracer.IncIndentLevel();
 
 			SetAlias(select, l.Parameters[0].Expr.Name);
@@ -847,13 +852,24 @@ namespace BLToolkit.Data.Linq
 
 		void ParseAggregate(ParseInfo<MethodCallExpression> parseInfo, LambdaInfo lambda, QuerySource select)
 		{
-			ParsingTracer.WriteLine();
+			ParsingTracer.WriteLine(parseInfo);
+			ParsingTracer.WriteLine(lambda);
+			ParsingTracer.WriteLine(select);
 			ParsingTracer.IncIndentLevel();
 
+			var query = select;
+
+			if (query.SqlQuery.Select.IsDistinct)
+			{
+				query.Select(this);
+				query = WrapInSubQuery(query);
+			}
+
+			var sql = query.SqlQuery;
 			var idx =
 				parseInfo.Expr.Method.Name == "Count" ?
-					select.SqlQuery.Select.Add(SqlFunction.CreateCount(select.SqlQuery), "cnt"):
-					select.SqlQuery.Select.Add(new SqlFunction(parseInfo.Expr.Method.Name, ParseExpression(lambda.Body, select)));
+					sql.Select.Add(SqlFunction.CreateCount(sql), "cnt"):
+					sql.Select.Add(new SqlFunction(parseInfo.Expr.Method.Name, ParseExpression(lambda.Body, query)));
 
 			_buildSelect = () =>
 			{

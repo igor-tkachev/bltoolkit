@@ -378,11 +378,32 @@ namespace Data.Linq
 		}
 
 		[Test]
-		public void Max()
+		public void Max1()
 		{
 			var expected = Child.Max(c => c.ChildID);
 			Assert.AreNotEqual(0, expected);
 			ForEachProvider(db => Assert.AreEqual(expected, db.Child.Max(c => c.ChildID)));
+		}
+
+		[Test]
+		public void Max2()
+		{
+			var expected =
+				from p in Parent
+					join c in Child on p.ParentID equals c.ParentID
+				where c.ChildID > 20
+				select p;
+
+			ForEachProvider(db =>
+			{
+				var result =
+					from p in db.Parent
+						join c in db.Child on p.ParentID equals c.ParentID
+					where c.ChildID > 20
+					select p;
+
+				Assert.AreEqual(expected.Max(p => p.ParentID), result.Max(p => p.ParentID));
+			});
 		}
 
 		[Test]

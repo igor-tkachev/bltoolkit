@@ -188,5 +188,26 @@ namespace Data.Linq
 				Assert.IsTrue(result.ToList().SequenceEqual(expected));
 			});
 		}
+
+		[Test]
+		public void Scalar4()
+		{
+			var expected =
+				from p in Parent
+					join c in Child on p.ParentID equals c.ParentID
+				where c.ChildID > 20
+				select p;
+
+			ForEachProvider(db =>
+			{
+				var result =
+					from p in db.Parent
+						join c in db.Child on p.ParentID equals c.ParentID
+					where c.ChildID > 20
+					select p;
+
+				Assert.AreEqual(expected.Where(p => p.ParentID == 3).First(), result.Where(p => p.ParentID == 3).First());
+			});
+		}
 	}
 }

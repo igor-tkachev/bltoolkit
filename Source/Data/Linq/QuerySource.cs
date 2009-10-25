@@ -20,8 +20,8 @@ namespace BLToolkit.Data.Linq
 			public Table(MappingSchema mappingSchema, SqlQuery sqlQuery, LambdaInfo lambda)
 				: base(sqlQuery, lambda)
 			{
-				ObjectType = TypeHelper.GetGenericType(typeof(IQueryable<>), lambda.Body.Expr.Type).GetGenericArguments()[0];
-				SqlTable   = new SqlTable(mappingSchema, ObjectType);
+				_objectType = TypeHelper.GetGenericType(typeof(IQueryable<>), lambda.Body.Expr.Type).GetGenericArguments()[0];
+				SqlTable    = new SqlTable(mappingSchema, _objectType);
 
 				sqlQuery.From.Table(SqlTable);
 
@@ -45,8 +45,8 @@ namespace BLToolkit.Data.Linq
 					left = true;
 				}
 
-				ObjectType = type;
-				SqlTable   = new SqlTable(mappingSchema, ObjectType);
+				_objectType = type;
+				SqlTable    = new SqlTable(mappingSchema, ObjectType);
 
 				var psrc = sqlQuery.From[parent.SqlTable];
 				var join = left ? SqlTable.WeakLeftJoin() : SqlTable.InnerJoin();
@@ -83,15 +83,17 @@ namespace BLToolkit.Data.Linq
 					var column = new Column(this, field.Value, mapper);
 
 					Fields.Add(column);
-					_columns.Add(mapper.MemberAccessor.MemberInfo.Name, column);
+					_columns.Add(field.Value.Name, column);
 				}
 
 				foreach (var a in objectMapper.Associations)
 					_associations.Add(a.MemberAccessor.Name, a);
 			}
 
-			public Type     ObjectType;
 			public SqlTable SqlTable;
+
+			private         Type _objectType;
+			public override Type  ObjectType { get { return _objectType; } }
 
 			MappingSchema _mappingSchema;
 
@@ -130,8 +132,36 @@ namespace BLToolkit.Data.Linq
 				{
 					var ma = (MemberExpression)expr;
 
-					if (ma.Expression != null && ma.Expression.Type == ObjectType)
-						return GetField(ma.Member);
+					if (ma.Expression != null)
+					{
+						if (ma.Expression.Type == ObjectType)
+							return GetField(ma.Member);
+
+						// Check for 'InnerObject.Field' case.
+						//
+						var name = ma.Member.Name;
+						var e    = ma.Expression;
+
+						while (e != null)
+						{
+							if (e.NodeType == ExpressionType.MemberAccess)
+							{
+								ma   = (MemberExpression)e;
+								name = ma.Member.Name + '.' + name;
+
+								if (ma.Expression.Type == ObjectType)
+								{
+									Column col;
+									if (_columns.TryGetValue(name, out col))
+										return col;
+								}
+
+								e = ma.Expression;
+							}
+							else
+								break;
+						}
+					}
 				}
 
 				return null;
@@ -143,8 +173,8 @@ namespace BLToolkit.Data.Linq
 			{
 				var table = new Table
 				{
-					ObjectType = ObjectType,
-					SqlTable   = (SqlTable)SqlTable.Clone(objectTree, doClone)
+					_objectType = ObjectType,
+					SqlTable    = (SqlTable)SqlTable.Clone(objectTree, doClone)
 				};
 
 				foreach (var c in _columns)
@@ -390,6 +420,8 @@ namespace BLToolkit.Data.Linq
 				return EnsureField(field);
 			}
 
+			public override Type ObjectType { get { return BaseQuery.ObjectType; } }
+
 			protected SubQuery() {}
 
 			protected virtual SubQuery CreateSubQuery(Dictionary<ICloneableElement,ICloneableElement> objectTree, Predicate<ICloneableElement> doClone)
@@ -632,7 +664,8 @@ namespace BLToolkit.Data.Linq
 		public LambdaInfo  Lambda;
 
 		private        List<QueryField> _fields = new List<QueryField>();
-		public virtual List<QueryField>  Fields { get { return _fields; } }
+		public virtual List<QueryField>  Fields     { get { return _fields; } }
+		public virtual Type              ObjectType { get { return Lambda.Body.Expr.Type; }}
 
 		public abstract QueryField GetField(Expression expr);
 		public abstract QueryField GetField(MemberInfo mi);
@@ -696,19 +729,13 @@ namespace BLToolkit.Data.Linq
 
 			if (_indexes == null)
 			{
-				_indexes = new FieldIndex[Fields.Count];
-
-				var i = 0;
+				var indexes = new List<FieldIndex>(Fields.Count);
 
 				foreach (var field in Fields)
-				{
-					var idx = field.Select(parser);
+					foreach (var idx in field.Select(parser))
+						indexes.Add(new FieldIndex { Index = idx.Index, Field = field });
 
-					if (idx.Length != 1)
-						throw new InvalidOperationException();
-
-					_indexes[i++] = new FieldIndex { Index = idx[0].Index, Field = field };
-				}
+				_indexes = indexes.ToArray();
 			}
 
 			ParsingTracer.DecIndentLevel();
