@@ -199,7 +199,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 				string alias = GetTableAlias(ts);
 
 				if (!string.IsNullOrEmpty(alias))
-					sb.Append(" ").Append(alias);
+					sb.Append(" ").Append(DataProvider.Convert(alias, ConvertType.NameToQueryTableAlias));
 
 				foreach (SqlQuery.JoinedTable jt in ts.Joins)
 					BuildJoinTable(sb, jt, ref jn);
@@ -252,7 +252,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			string alias = GetTableAlias(join.Table);
 
 			if (!string.IsNullOrEmpty(alias))
-				sb.Append(" ").Append(alias);
+				sb.Append(" ").Append(DataProvider.Convert(alias, ConvertType.NameToQueryTableAlias));
 
 			if (IsNestedJoinSupported && join.Table.Joins.Count != 0)
 			{
@@ -715,7 +715,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 							addAlias = alias != field.PhysicalName;
 
 							sb
-								.Append(table)
+								.Append(DataProvider.Convert(table, ConvertType.NameToQueryTableAlias))
 								.Append('.')
 								.Append(_dataProvider.Convert(field.PhysicalName, ConvertType.NameToQueryField));
 						}
@@ -739,7 +739,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 						addAlias = alias != column.Alias;
 
 						sb
-							.Append(tableAlias)
+							.Append(DataProvider.Convert(tableAlias, ConvertType.NameToQueryTableAlias))
 							.Append('.')
 							.Append(_dataProvider.Convert(column.Alias, ConvertType.NameToQueryField));
 					}
@@ -1071,7 +1071,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 					AppendIndent(sb).Append(")");
 				}
 
-				sb.AppendFormat(" as {0}", rnaliase).AppendLine();
+				sb.Append(" as ").Append(rnaliase).AppendLine();
 				_indent--;
 
 				AppendIndent(sb).Append("FROM").AppendLine();

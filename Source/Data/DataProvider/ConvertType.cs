@@ -75,6 +75,16 @@ namespace BLToolkit.Data.DataProvider
 		NameToQueryTable,
 
 		/// <summary>
+		/// Provided name should be converted to query table alias.
+		/// For example:
+		///     table1 -> [table1]
+		/// for the following query:
+		///     SELECT * FROM [Person] [table1]
+		///                            ^ and  ^
+		/// </summary>
+		NameToQueryTableAlias,
+
+		/// <summary>
 		/// Provided command parameter name should be converted to name.
 		/// For example:
 		///     @firstName -> firstName

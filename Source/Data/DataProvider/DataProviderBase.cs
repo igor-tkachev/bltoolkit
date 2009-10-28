@@ -217,6 +217,8 @@ namespace BLToolkit.Data.DataProvider
 
 		#endregion
 
+		#region DataReaderEx
+
 		protected abstract class DataReaderEx<T> : IDataReader, IDataReaderEx
 			where T: IDataReader
 		{
@@ -294,5 +296,7 @@ namespace BLToolkit.Data.DataProvider
 
 			#endregion
 		}
+
+		#endregion
 	}
 }

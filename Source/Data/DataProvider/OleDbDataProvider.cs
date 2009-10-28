@@ -66,6 +66,8 @@ namespace BLToolkit.Data.DataProvider
 					return "@" + value;
 
 				case ConvertType.NameToQueryField:
+				case ConvertType.NameToQueryFieldAlias:
+				case ConvertType.NameToQueryTableAlias:
 					{
 						string name = value.ToString();
 
@@ -75,6 +77,8 @@ namespace BLToolkit.Data.DataProvider
 
 					return "[" + value + "]";
 
+				case ConvertType.NameToDatabase:
+				case ConvertType.NameToOwner:
 				case ConvertType.NameToQueryTable:
 					{
 						string name = value.ToString();

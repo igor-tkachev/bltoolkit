@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using BLToolkit.Mapping;
+
 using NUnit.Framework;
+
+using BLToolkit.Mapping;
 
 namespace Data.Linq
 {

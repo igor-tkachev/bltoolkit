@@ -75,31 +75,44 @@ namespace BLToolkit.Data.DataProvider
 					return "@" + value;
 
 				case ConvertType.NameToQueryField:
-				case ConvertType.NameToQueryTable:
-				{
-					string name = (string)value;
+				case ConvertType.NameToQueryFieldAlias:
+				case ConvertType.NameToQueryTableAlias:
+					{
+						string name = value.ToString();
 
-					if (name.Length > 0 && name[0] == '[')
-						return value;
-
-					if (name.IndexOf('.') > 0)
-						value = string.Join("].[", name.Split('.'));
+						if (name.Length > 0 && name[0] == '[')
+							return value;
+					}
 
 					return "[" + value + "]";
-				}
+
+				case ConvertType.NameToDatabase:
+				case ConvertType.NameToOwner:
+				case ConvertType.NameToQueryTable:
+					{
+						string name = value.ToString();
+
+						if (name.Length > 0 && name[0] == '[')
+							return value;
+
+						if (name.IndexOf('.') > 0)
+							value = string.Join("].[", name.Split('.'));
+					}
+
+					return "[" + value + "]";
 
 				case ConvertType.ParameterToName:
-				{
-					string name = (string)value;
-					return name.Length > 0 && name[0] == '@'? name.Substring(1): name;
-				}
+					{
+						string name = (string)value;
+						return name.Length > 0 && name[0] == '@'? name.Substring(1): name;
+					}
 
 				case ConvertType.ExceptionToErrorNumber:
-				{
-					if (value is SQLiteException)
-						return ((SQLiteException)value).ErrorCode;
-					break;
-				}
+					{
+						if (value is SQLiteException)
+							return ((SQLiteException)value).ErrorCode;
+						break;
+					}
 			}
 
 			return value;
