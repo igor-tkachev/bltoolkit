@@ -33,6 +33,9 @@ namespace BLToolkit.EditableObjects
 			_list            = list;
 
 			AddInternal(_list);
+
+			if (list.Count > 0)
+				AcceptChanges();
 		}
 
 		public EditableArrayList(Type itemType)

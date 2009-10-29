@@ -542,5 +542,76 @@ namespace EditableObjects
 			Assert.AreEqual(0, list.DelItems.Count);
 		}
 
+		[Test]
+		public void CloneTest()
+		{
+			EditableList<int> src = new EditableList<int>();
+			src.Add(1);
+			src.Add(2);
+			src.Add(3);
+
+			EditableList<int> clone = (EditableList<int>)src.Clone();
+
+			Assert.AreEqual(src.Count,          clone.Count);
+			Assert.AreEqual(src.NewItems.Count, clone.NewItems.Count);
+			Assert.AreEqual(src.DelItems.Count, clone.DelItems.Count);
+
+			src.AcceptChanges();
+
+			clone = (EditableList<int>)src.Clone();
+			
+			Assert.AreEqual(src.Count,          clone.Count);
+			Assert.AreEqual(src.NewItems.Count, clone.NewItems.Count);
+			Assert.AreEqual(src.DelItems.Count, clone.DelItems.Count);
+
+			src.RemoveAt(1);
+
+			clone = (EditableList<int>)src.Clone();
+			
+			Assert.AreEqual(src.Count,          clone.Count);
+			Assert.AreEqual(src.NewItems.Count, clone.NewItems.Count);
+			Assert.AreEqual(src.DelItems.Count, clone.DelItems.Count);
+		}
+
+		[Test]
+		public void CreateCleanTest()
+		{
+			EditableList<int> list = new EditableList<int>(new int[] { 1, 2, 3 });
+
+			Assert.IsFalse(list.IsDirty);
+
+			Assert.AreEqual(3, list.Count);
+			Assert.AreEqual(0, list.NewItems.Count);
+			Assert.AreEqual(0, list.DelItems.Count);
+			
+			list = new EditableList<int>(new int[] { });
+
+			Assert.IsFalse(list.IsDirty);
+
+			Assert.AreEqual(0, list.Count);
+			Assert.AreEqual(0, list.NewItems.Count);
+			Assert.AreEqual(0, list.DelItems.Count);		
+		}
+
+		[Test]
+		public void IsDirtyTest()
+		{
+			EditableList<EditableTestObject> list = new EditableList<EditableTestObject>();
+
+			list.AddNew();
+			list.AddNew();
+
+			Assert.IsTrue(list.IsDirty);
+
+			list.AcceptChanges();
+
+			Assert.IsFalse(list.IsDirty);
+
+			list[1].ID = 101;
+
+			Assert.IsTrue(list[1].IsDirty);
+			Assert.IsTrue(list.IsDirty);
+		}
+
 	}
 }
