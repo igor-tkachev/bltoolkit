@@ -219,5 +219,15 @@ namespace Data
 				Assert.AreEqual(expectedValue, actualValue);
 			}
 		}
+
+		[Test]
+		public void NoResult()
+		{
+			using (DbManager db = new DbManager())
+			{
+				string actualValue = db.SetCommand("SELECT FirstName FROM Person WHERE PersonID = -1").ExecuteScalar<string>();
+				Assert.AreEqual("", actualValue);
+			}
+		}
 	}
 }

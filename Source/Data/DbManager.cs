@@ -2739,7 +2739,7 @@ namespace BLToolkit.Data
 				InitParameters(CommandAction.Select);
 
 			using (IDataReader rd = ExecuteReaderInternal(CommandBehavior.Default))
-				return rd.Read() && rd.FieldCount <= 0 ? null : rd.GetValue(0);
+				return rd.Read() && rd.FieldCount > 0 ? rd.GetValue(0) : null;
 		}
 
 		/// <summary>
