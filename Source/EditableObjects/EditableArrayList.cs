@@ -23,19 +23,18 @@ namespace BLToolkit.EditableObjects
 			if (itemType == null) throw new ArgumentNullException("itemType");
 			if (list     == null) throw new ArgumentNullException("list");
 
+			_itemType = itemType;
+			_list     = list;
+
+			_noTrackingChangesCount++;
+			AddInternal(_list);
+			_noTrackingChangesCount--;
+
 			if (!trackChanges)
 			{
 				SetTrackingChanges(trackChanges);
 				_minTrackingChangesCount = 1;
 			}
-
-			_itemType        = itemType;
-			_list            = list;
-
-			AddInternal(_list);
-
-			if (list.Count > 0)
-				AcceptChanges();
 		}
 
 		public EditableArrayList(Type itemType)

@@ -613,5 +613,19 @@ namespace EditableObjects
 			Assert.IsTrue(list.IsDirty);
 		}
 
+		[Test]
+		public void CreateWithDirtyTest()
+		{
+			EditableTestObject to = EditableTestObject.CreateInstance();
+
+			to.ID = 10;
+
+			Assert.IsTrue(to.IsDirty);
+
+			EditableList<EditableTestObject> list = new EditableList<EditableTestObject>(new EditableTestObject[] { to });
+
+			Assert.IsTrue(to.IsDirty);
+			Assert.IsTrue(list.IsDirty);
+		}
 	}
 }
