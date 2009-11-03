@@ -52,6 +52,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		public virtual bool TakeAcceptsParameter            { get { return true;  } }
 		public virtual bool IsTakeSupported                 { get { return true;  } }
 		public virtual bool IsSkipSupported                 { get { return true;  } }
+		public virtual bool IsSubQueryTakeSupported         { get { return true;  } }
 		public virtual bool IsSubQueryColumnSupported       { get { return true;  } }
 		public virtual bool IsCountSubQuerySupported        { get { return true;  } }
 		public virtual bool IsNestedJoinSupported           { get { return true;  } }
@@ -63,7 +64,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		public int BuildSql(SqlQuery sqlQuery, StringBuilder sb, int indent, int nesting)
 		{
-			_sqlQuery  = sqlQuery;
+			_sqlQuery    = sqlQuery;
 			_indent      = indent;
 			_nesting     = nesting;
 			_nextNesting = _nesting + 1;
@@ -85,7 +86,12 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			if (!IsTakeSupported && sqlQuery.Select.TakeValue != null)
 				throw new SqlException("Take for subqueries is not supported by the '{0}' provider.", _dataProvider.Name);
 
-			return DataProvider.CreateSqlProvider().BuildSql(sqlQuery, sb, indent, nesting);
+			return CreateSqlProvider().BuildSql(sqlQuery, sb, indent, nesting);
+		}
+
+		protected virtual ISqlProvider CreateSqlProvider()
+		{
+			return DataProvider.CreateSqlProvider();
 		}
 
 		protected virtual bool ParenthesizeJoin()
@@ -726,7 +732,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 				case QueryElementType.Column:
 					{
 						SqlQuery.Column column = (SqlQuery.Column)expr;
-						ISqlTableSource   table  = _sqlQuery.GetTableSource(column.Parent);
+						ISqlTableSource table  = _sqlQuery.GetTableSource(column.Parent);
 
 						if (table == null)
 							throw new SqlException(string.Format("Table not found for '{0}'.", column));
@@ -1534,7 +1540,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			}
 			else if (expression is SqlQuery.SearchCondition)
 			{
-				ConvertSearchCondition((SqlQuery.SearchCondition)expression);
+				SqlQuery.OptimizeSearchCondition((SqlQuery.SearchCondition)expression);
 			}
 
 			return expression;
@@ -1751,87 +1757,10 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			throw new InvalidOperationException();
 		}
 
-		public virtual void ConvertSearchCondition(SqlQuery.SearchCondition searchCondition)
+		public virtual SqlQuery Finalize(SqlQuery sqlQuery)
 		{
-			// This 'if' could be replaced by one simple match:
-			//
-			// match (searchCondition.Conditions)
-			// {
-			// | [SearchCondition(true) sc] =>
-			//     searchCondition.Conditions = sc.Conditions;
-			//     ConvertSearchCondition(searchCodition)
-			//
-			// | [Expr(true,  SqlValue(true))]
-			// | [Expr(false, SqlValue(false))]
-			//     searchCondition.Conditions = []
-			// }
-			//
-			// One day I am going to rewrite all this crap in Nemerle.
-			//
-			if (searchCondition.Conditions.Count == 1)
-			{
-				SqlQuery.Condition cond = searchCondition.Conditions[0];
-
-				if (!cond.IsNot && cond.Predicate is SqlQuery.SearchCondition)
-				{
-					searchCondition.Conditions.RemoveAll(delegate(SqlQuery.Condition _) { return true; });
-					searchCondition.Conditions.AddRange(((SqlQuery.SearchCondition)cond.Predicate).Conditions);
-
-					ConvertSearchCondition(searchCondition);
-					return;
-				}
-
-				if (cond.Predicate is SqlQuery.Predicate.Expr)
-				{
-					SqlQuery.Predicate.Expr expr = (SqlQuery.Predicate.Expr)cond.Predicate;
-
-					if (expr.Expr1 is SqlValue)
-					{
-						SqlValue value = (SqlValue)expr.Expr1;
-
-						if (value.Value is bool)
-							if (cond.IsNot ? !(bool)value.Value : (bool)value.Value)
-								searchCondition.Conditions.RemoveAll(delegate(SqlQuery.Condition _) { return true; });
-					}
-				}
-			}
-
-			for (int i = 0; i < searchCondition.Conditions.Count; i++)
-			{
-				SqlQuery.Condition cond = searchCondition.Conditions[i];
-
-				if (cond.Predicate is SqlQuery.Predicate.Expr)
-				{
-					SqlQuery.Predicate.Expr expr = (SqlQuery.Predicate.Expr)cond.Predicate;
-
-					if (expr.Expr1 is SqlValue)
-					{
-						SqlValue value = (SqlValue)expr.Expr1;
-
-						if (value.Value is bool)
-						{
-							if (cond.IsNot ? !(bool)value.Value : (bool)value.Value)
-							{
-								if (i > 0)
-								{
-									if (searchCondition.Conditions[i-1].IsOr)
-									{
-										searchCondition.Conditions.RemoveRange(0, i);
-										ConvertSearchCondition(searchCondition);
-
-										break;
-									}
-								}
-							}
-						}
-					}
-				}
-				else if (cond.Predicate is SqlQuery.SearchCondition)
-				{
-					SqlQuery.SearchCondition sc = (SqlQuery.SearchCondition)cond.Predicate;
-					ConvertSearchCondition(sc);
-				}
-			}
+			sqlQuery.FinalizeAndValidate();
+			return sqlQuery;
 		}
 
 		public virtual string Name

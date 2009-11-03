@@ -123,11 +123,11 @@ namespace Data.Linq
 			TestOneJohn(db => from p in db.Person where p.ID == StaticTestMethod() select p);
 		}
 
-		class TestMethodClas
+		class TestMethodClass
 		{
 			private readonly int _n;
 
-			public TestMethodClas(int n)
+			public TestMethodClass(int n)
 			{
 				_n = n;
 			}
@@ -140,7 +140,7 @@ namespace Data.Linq
 
 		public void MethodParam(int n)
 		{
-			var t = new TestMethodClas(n);
+			var t = new TestMethodClass(n);
 
 			ForEachProvider(db =>
 			{
@@ -636,6 +636,15 @@ namespace Data.Linq
 				from p in db.Parent
 				where p.ParentID == 1 && p.Value1 == 1 || p.ParentID == 2 && (p.ParentID != 3 || p.ParentID == 4) && p.Value1.HasValue
 				select p));
+		}
+
+		[Test]
+		public void CompareObject1()
+		{
+			var expected = (from ch in Child where ch.ParentID == 2 select ch).First();
+
+			ForEachProvider(db => Assert.AreEqual(expected,
+				(from ch in db.Child where ch == expected select ch).Single()));
 		}
 	}
 }

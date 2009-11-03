@@ -13,7 +13,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		int            BuildSql               (SqlQuery sqlQuery, StringBuilder sb, int indent, int nesting);
 		ISqlExpression ConvertExpression      (ISqlExpression expression);
 		ISqlPredicate  ConvertPredicate       (ISqlPredicate  predicate);
-		void           ConvertSearchCondition (SqlQuery.SearchCondition searchCondition);
+		SqlQuery       Finalize               (SqlQuery sqlQuery);
 
 		string         Name                      { get; }
 		SqlQuery       SqlQuery                  { get; set; }
@@ -22,6 +22,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		bool           TakeAcceptsParameter      { get; }
 		bool           IsSkipSupported           { get; }
 		bool           IsTakeSupported           { get; }
+		bool           IsSubQueryTakeSupported   { get; }
 		bool           IsSubQueryColumnSupported { get; }
 		bool           IsCountSubQuerySupported  { get; }
 

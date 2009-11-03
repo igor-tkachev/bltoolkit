@@ -371,10 +371,17 @@ namespace Data.Linq
 		}
 
 		[Test]
-		public void Min()
+		public void Min1()
 		{
 			var expected = Child.Min(c => c.ChildID);
 			ForEachProvider(db => Assert.AreEqual(expected, db.Child.Min(c => c.ChildID)));
+		}
+
+		[Test]
+		public void Min2()
+		{
+			var expected = Child.Select(c => c.ChildID).Min();
+			ForEachProvider(db => Assert.AreEqual(expected, db.Child.Select(c => c.ChildID).Min()));
 		}
 
 		[Test]
@@ -407,11 +414,25 @@ namespace Data.Linq
 		}
 
 		[Test]
-		public void Average()
+		public void Max3()
+		{
+			var expected = Child.Select(c => c.ChildID).Max();
+			ForEachProvider(db => Assert.AreEqual(expected, db.Child.Select(c => c.ChildID).Max()));
+		}
+
+		[Test]
+		public void Average1()
 		{
 			var expected = Child.Average(c => c.ChildID);
 			Assert.AreNotEqual(0, expected);
 			ForEachProvider(db => Assert.AreEqual((int)expected, (int)db.Child.Average(c => c.ChildID)));
+		}
+
+		[Test]
+		public void Average2()
+		{
+			var expected = Child.Select(c => c.ChildID).Average();
+			ForEachProvider(db => Assert.AreEqual((int)expected, (int)db.Child.Select(c => c.ChildID).Average()));
 		}
 
 		[Test]

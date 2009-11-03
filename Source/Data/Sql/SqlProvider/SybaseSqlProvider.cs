@@ -24,6 +24,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		public    override bool   IsSkipSupported          { get { return false;     } }
 		public    override bool   TakeAcceptsParameter     { get { return false;     } }
+		public    override bool   IsSubQueryTakeSupported  { get { return false;     } }
 		public    override bool   IsCountSubQuerySupported { get { return false;     } }
 
 		public override ISqlExpression ConvertExpression(ISqlExpression expr)
@@ -76,6 +77,32 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			}
 
 			return expr;
+		}
+
+		bool _isSelect;
+		bool _skipAliases;
+
+		SybaseSqlProvider(DataProviderBase dataProvider, bool skipAliases) : base(dataProvider)
+		{
+			_skipAliases = skipAliases;
+		}
+
+		protected override void BuildSelectClause(System.Text.StringBuilder sb)
+		{
+			_isSelect = true;
+			base.BuildSelectClause(sb);
+			_isSelect = false;
+		}
+
+		protected override void BuildColumn(System.Text.StringBuilder sb, SqlQuery.Column col, ref bool addAlias)
+		{
+			base.BuildColumn(sb, col, ref addAlias);
+			if (_skipAliases) addAlias = false;
+		}
+
+		protected override ISqlProvider CreateSqlProvider()
+		{
+			return new SybaseSqlProvider(DataProvider, _isSelect);
 		}
 
 #if FW3

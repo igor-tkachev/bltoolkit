@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using BLToolkit.Reflection.Extension;
 
 namespace BLToolkit.Data.Sql
 {
+	using Reflection.Extension;
+
 	public class JoinOn : IQueryElement, ICloneableElement
 	{
 		public JoinOn()

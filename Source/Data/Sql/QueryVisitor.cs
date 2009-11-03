@@ -301,7 +301,13 @@ namespace BLToolkit.Data.Sql
 								fields2 = fields1;
 
 								for (int i = 0; i < fields2.Length; i++)
-									fields2[i] = new SqlField(fields2[i]);
+								{
+									SqlField field = fields2[i];
+
+									fields2[i] = new SqlField(field);
+
+									_visitedElements[field] = fields2[i];
+								}
 							}
 
 							newElement = new SqlTable(table, fields2, joins ?? table.Joins);
@@ -571,8 +577,8 @@ namespace BLToolkit.Data.Sql
 							return action(e);
 						};
 
-						SqlQuery.SelectClause  sc = (SqlQuery.SelectClause) ConvertInternal(q.Select,  func);
 						SqlQuery.FromClause    fc = (SqlQuery.FromClause)   ConvertInternal(q.From,    func);
+						SqlQuery.SelectClause  sc = (SqlQuery.SelectClause) ConvertInternal(q.Select,  func);
 						SqlQuery.WhereClause   wc = (SqlQuery.WhereClause)  ConvertInternal(q.Where,   func);
 						SqlQuery.GroupByClause gc = (SqlQuery.GroupByClause)ConvertInternal(q.GroupBy, func);
 						SqlQuery.WhereClause   hc = (SqlQuery.WhereClause)  ConvertInternal(q.Having,  func);
@@ -698,7 +704,7 @@ namespace BLToolkit.Data.Sql
 				T elem1 = arr1[i];
 				T elem2 = (T)ConvertInternal(elem1, action);
 
-				if (elem2 != null && ReferenceEquals(elem1, elem2))
+				if (elem2 != null && !ReferenceEquals(elem1, elem2))
 				{
 					if (arr2 == null)
 					{

@@ -125,6 +125,7 @@
     <Compile Include="CompileTest.cs" />
     <Compile Include="ComplexTest.cs" />
     <Compile Include="Association.cs" />
+    <Compile Include="SubQuery.cs" />
     <Compile Include="Types.cs" />
     <Compile Include="Exceptions\Mapping.cs" />
     <Compile Include="Functions.cs" />
@@ -159,7 +160,6 @@
     <Compile Include="SelectScalar.cs" />
     <Compile Include="TestBase.cs" />
     <Compile Include="TestDbManager.cs">
-      <SubType>Component</SubType>
     </Compile>
     <Compile Include="WhereTest.cs" />
   </ItemGroup>

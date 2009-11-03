@@ -6,8 +6,6 @@ using System.Threading;
 
 namespace BLToolkit.Data.Sql
 {
-	using SqlProvider;
-
 	using FJoin = SqlQuery.FromClause.Join;
 
 	[DebuggerDisplay("SQL = {SqlText}")]
@@ -26,6 +24,26 @@ namespace BLToolkit.Data.Sql
 			_having  = new WhereClause  (this);
 			_orderBy = new OrderByClause(this);
 		}
+
+		/*
+		public SqlQuery Copy()
+		{
+			SqlQuery newQuery = new SqlQuery();
+
+			newQuery.Set(
+				new SelectClause (Select.IsDistinct, Select.TakeValue, Select.SkipValue, Select.Columns),
+				new FromClause   (From.Tables),
+				new WhereClause  (Where.SearchCondition),
+				new GroupByClause(GroupBy.Items),
+				new WhereClause  (Having.SearchCondition),
+				new OrderByClause(OrderBy.Items),
+				ParentSql,
+				ParameterDependent,
+				Parameters);
+
+			return newQuery;
+		}
+		*/
 
 		internal void Set(
 			SelectClause       select,
@@ -1948,7 +1966,7 @@ namespace BLToolkit.Data.Sql
 			private SearchCondition _searchCondition;
 			public  SearchCondition  SearchCondition
 			{
-				get { return _searchCondition; }
+				get { return _searchCondition;  }
 			}
 
 			public bool IsEmpty
@@ -2208,28 +2226,20 @@ namespace BLToolkit.Data.Sql
 
 		public void FinalizeAndValidate()
 		{
-			FinalizeAndValidate(null);
-		}
-
-		public void FinalizeAndValidate(ISqlProvider sqlProvider)
-		{
-			FinalizeAndValidateInternal(sqlProvider);
+			FinalizeAndValidateInternal();
 			SetAliases();
 		}
 
-		public void FinalizeAndValidateInternal(ISqlProvider sqlProvider)
+		public void FinalizeAndValidateInternal()
 		{
-			if (sqlProvider != null)
-			{
-				sqlProvider.ConvertSearchCondition(Where. SearchCondition);
-				sqlProvider.ConvertSearchCondition(Having.SearchCondition);
+			OptimizeSearchCondition(Where. SearchCondition);
+			OptimizeSearchCondition(Having.SearchCondition);
 
-				ForEachTable(delegate(TableSource table)
-				{
-					foreach (JoinedTable join in table.Joins)
-						sqlProvider.ConvertSearchCondition(join.Condition);
-				});
-			}
+			ForEachTable(delegate(TableSource table)
+			{
+				foreach (JoinedTable join in table.Joins)
+					OptimizeSearchCondition(join.Condition);
+			});
 
 			new QueryVisitor().Visit(this, delegate(IQueryElement e)
 			{
@@ -2237,7 +2247,7 @@ namespace BLToolkit.Data.Sql
 
 				if (sql != null && sql != this)
 				{
-					sql.FinalizeAndValidateInternal(sqlProvider);
+					sql.FinalizeAndValidateInternal();
 					sql.RemoveOrderBy();
 
 					if (sql.ParameterDependent)
@@ -2247,6 +2257,89 @@ namespace BLToolkit.Data.Sql
 
 			ResolveWeakJoins();
 			OptimizeSubQueries();
+		}
+
+		internal static void OptimizeSearchCondition(SearchCondition searchCondition)
+		{
+			// This 'if' could be replaced by one simple match:
+			//
+			// match (searchCondition.Conditions)
+			// {
+			// | [SearchCondition(true) sc] =>
+			//     searchCondition.Conditions = sc.Conditions;
+			//     ConvertSearchCondition(searchCodition)
+			//
+			// | [Expr(true,  SqlValue(true))]
+			// | [Expr(false, SqlValue(false))]
+			//     searchCondition.Conditions = []
+			// }
+			//
+			// One day I am going to rewrite all this crap in Nemerle.
+			//
+			if (searchCondition.Conditions.Count == 1)
+			{
+				Condition cond = searchCondition.Conditions[0];
+
+				if (!cond.IsNot && cond.Predicate is SearchCondition)
+				{
+					searchCondition.Conditions.RemoveAll(delegate(Condition _) { return true; });
+					searchCondition.Conditions.AddRange(((SearchCondition)cond.Predicate).Conditions);
+
+					OptimizeSearchCondition(searchCondition);
+					return;
+				}
+
+				if (cond.Predicate is Predicate.Expr)
+				{
+					Predicate.Expr expr = (Predicate.Expr)cond.Predicate;
+
+					if (expr.Expr1 is SqlValue)
+					{
+						SqlValue value = (SqlValue)expr.Expr1;
+
+						if (value.Value is bool)
+							if (cond.IsNot ? !(bool)value.Value : (bool)value.Value)
+								searchCondition.Conditions.RemoveAll(delegate(Condition _) { return true; });
+					}
+				}
+			}
+
+			for (int i = 0; i < searchCondition.Conditions.Count; i++)
+			{
+				Condition cond = searchCondition.Conditions[i];
+
+				if (cond.Predicate is Predicate.Expr)
+				{
+					Predicate.Expr expr = (Predicate.Expr)cond.Predicate;
+
+					if (expr.Expr1 is SqlValue)
+					{
+						SqlValue value = (SqlValue)expr.Expr1;
+
+						if (value.Value is bool)
+						{
+							if (cond.IsNot ? !(bool)value.Value : (bool)value.Value)
+							{
+								if (i > 0)
+								{
+									if (searchCondition.Conditions[i-1].IsOr)
+									{
+										searchCondition.Conditions.RemoveRange(0, i);
+										OptimizeSearchCondition(searchCondition);
+
+										break;
+									}
+								}
+							}
+						}
+					}
+				}
+				else if (cond.Predicate is SearchCondition)
+				{
+					SearchCondition sc = (SearchCondition)cond.Predicate;
+					OptimizeSearchCondition(sc);
+				}
+			}
 		}
 
 		void ForEachTable(Action<TableSource> action)
@@ -2683,7 +2776,7 @@ namespace BLToolkit.Data.Sql
 			{
 				if (_all == null)
 				{
-					_all = new SqlField("*", "*", true);
+					_all = new SqlField("*", "*", true, -1);
 					((IChild<ISqlTableSource>)_all).Parent = this;
 				}
 

@@ -38,9 +38,14 @@ namespace BLToolkit.Data.Sql
 			_owner    = _mappingSchema.MetadataProvider.GetOwnerName   (objectType, _mappingSchema.Extensions, out isSet);
 			_name     = _mappingSchema.MetadataProvider.GetTableName   (objectType, _mappingSchema.Extensions, out isSet);
 
+			TypeExtension typeExt = TypeExtension.GetTypeExtension(objectType, _mappingSchema.Extensions);
+
 			foreach (MemberMapper mm in MappingSchema.GetObjectMapper(objectType))
 				if (mm.MapMemberInfo.SqlIgnore == false)
-					Fields.Add(new SqlField(mm.MemberName, mm.Name, mm.MapMemberInfo.Nullable));
+				{
+					int order = _mappingSchema.MetadataProvider.GetPrimaryKeyOrder(objectType, typeExt, mm.MemberAccessor, out isSet);
+					Fields.Add(new SqlField(mm.MemberName, mm.Name, mm.MapMemberInfo.Nullable, isSet ? order : -1));
+				}
 		}
 
 		public SqlTable(Type objectType)
@@ -113,7 +118,7 @@ namespace BLToolkit.Data.Sql
 			_physicalName = (string)te.Attributes["PhysicalName"].Value;
 
 			foreach (MemberExtension me in te.Members)
-				Fields.Add(new SqlField(me.Name, (string)me["MapField"].Value ?? (string)me["PhysicalName"].Value, (bool?)me["Nullable"].Value ?? false));
+				Fields.Add(new SqlField(me.Name, (string)me["MapField"].Value ?? (string)me["PhysicalName"].Value, (bool?)me["Nullable"].Value ?? false, -1));
 
 			foreach (AttributeExtension ae in te.Attributes["Join"])
 				Joins.Add(new Join(ae));
@@ -196,7 +201,7 @@ namespace BLToolkit.Data.Sql
 			{
 				if (_all == null)
 				{
-					_all = new SqlField("*", "*", true);
+					_all = new SqlField("*", "*", true, -1);
 					((IChild<ISqlTableSource>)_all).Parent = this;
 				}
 

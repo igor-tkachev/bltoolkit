@@ -1,14 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 
+using BLToolkit.DataAccess;
 using BLToolkit.Mapping;
 
 namespace Data.Linq.Model
 {
 	public class Child
 	{
-		public int ParentID;
-		public int ChildID;
+		[PrimaryKey] public int ParentID;
+		[PrimaryKey] public int ChildID;
 
 		[Association(ThisKey = "ParentID", OtherKey = "ParentID", CanBeNull = false)]
 		public Parent Parent;
