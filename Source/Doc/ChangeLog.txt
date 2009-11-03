@@ -13,6 +13,7 @@ Bug fixes
 - DefaultTypeBuilder throwing exception if [Parameter(value)] was used on
   EditableValue<Nullable<>> generated properties when Nullable<> did have appropriate
   constructor accepting value type
+- DateTimeOffset wasn't handled in DataReaderMapper correctly.
 
 Enhancement
 
@@ -23,7 +24,7 @@ Enhancement
 - New SqlBuilder class.
 - Partial trust support.
 - Mapping to/from private classes (FW 3.x only).
-- New ParamTypeName attribute for SqlServer2008 table-type parameter support.
+- New ParamTypeName attribute for SqlServer2008 table-type parameter support (FW 3.x only).
 - EditableArrayList & BindingListImpl implements INotifyCollectionChanged interface.
 
 

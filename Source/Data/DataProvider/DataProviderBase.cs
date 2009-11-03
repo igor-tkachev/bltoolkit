@@ -291,9 +291,9 @@ namespace BLToolkit.Data.DataProvider
 			#endregion
 
 			#region Implementation of IDataReaderEx
-
+#if FW3
 			public abstract DateTimeOffset GetDateTimeOffset(int i);
-
+#endif
 			#endregion
 		}
 

@@ -1815,6 +1815,7 @@ namespace BLToolkit.DataAccess
 
 			LoadParameterOrNull(pi, type);
 
+#if FW3
 			// Special case for user-defined types.
 			//
 			attrs = pi.GetCustomAttributes(typeof(ParamTypeNameAttribute), true);
@@ -1827,6 +1828,7 @@ namespace BLToolkit.DataAccess
 					;
 			}
 			else
+#endif
 			{
 				emit
 					.callvirt          (typeof(DbManager), "Parameter",
