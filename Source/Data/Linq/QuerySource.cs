@@ -97,9 +97,11 @@ namespace BLToolkit.Data.Linq
 
 			MappingSchema _mappingSchema;
 
-			readonly Dictionary<string,Column>      _columns          = new Dictionary<string,Column>();
-			readonly Dictionary<string,Association> _associations     = new Dictionary<string,Association>();
-			readonly Dictionary<string,Table>       _associatedTables = new Dictionary<string,Table>();
+			readonly Dictionary<string,Column>      _columns      = new Dictionary<string,Column>();
+			readonly Dictionary<string,Association> _associations = new Dictionary<string,Association>();
+
+			readonly Dictionary<string,Table> _associatedTables = new Dictionary<string,Table>();
+			public   Dictionary<string,Table> AssociatedTables { get { return _associatedTables; }}
 
 			public override QueryField GetField(MemberInfo mi)
 			{

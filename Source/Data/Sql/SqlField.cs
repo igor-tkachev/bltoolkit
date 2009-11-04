@@ -29,7 +29,7 @@ namespace BLToolkit.Data.Sql
 		private bool   _nullable;     public bool   Nullable        { get { return _nullable;              } set { _nullable     = value; } }
 		private int    _pkOrder;      public int    PrimaryKeyOrder { get { return _pkOrder;               } set { _pkOrder      = value; } }
 
-		public bool IsPrimaryKey { get { return _pkOrder >= 0; } }
+		public bool IsPrimaryKey { get { return _pkOrder != int.MinValue; } }
 
 		private         ISqlTableSource        _parent;
 		ISqlTableSource IChild<ISqlTableSource>.Parent { get { return _parent; } set { _parent = value; } }

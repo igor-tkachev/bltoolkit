@@ -177,12 +177,10 @@ namespace BLToolkit.Data.Linq
 						return select;
 					}
 				}
-				else if (_parentQueries.Count > 0)
-				{
-					var association = GetField(info) as QuerySource;
-					if (association != null)
-						return association;
-				}
+
+				var association = GetSource(null, info, baseSource == null ? new QuerySource[0] : new[] { baseSource} );
+				if (association != null)
+					return association;
 			}
 
 			if (info.NodeType != ExpressionType.Call)
@@ -394,6 +392,50 @@ namespace BLToolkit.Data.Linq
 				return resultSelector == null ? seq2 : ParseSelect(resultSelector, source, seq2);
 			}
 
+			if (seq2 is QuerySource.Table)
+			{
+				var parent = GetParentSource(source, seq2);
+
+				if (parent != null)
+				{
+					Action updt = null;
+
+					new QueryVisitor().Visit(parent.SqlQuery.From, e =>
+					{
+						if (e.ElementType == QueryElementType.TableSource)
+						{
+							var ts = (SqlQuery.TableSource)e;
+
+							if (ts.Source == parent.SqlTable)
+							{
+								for (var i = 0; i < ts.Joins.Count; i++)
+								{
+									var join = ts.Joins[i];
+									var atbl = (QuerySource.Table)seq2;
+
+									if (join.Table.Source == atbl.SqlTable)
+									{
+										updt = () =>
+										{
+											parent.SqlQuery.From.Table(atbl.SqlTable);
+											parent.SqlQuery.Where.SearchCondition.Conditions.Add(new SqlQuery.Condition(false, join.Condition));
+											ts.Joins.RemoveAt(i);
+										};
+										break;
+									}
+								}
+							}
+						}
+					});
+
+					if (updt != null)
+						updt();
+
+					CurrentSql = sql;
+					return resultSelector == null ? seq2 : ParseSelect(resultSelector, source, seq2);
+				}
+			}
+
 			var current = new SqlQuery();
 			var source1 = new QuerySource.SubQuery(current, sql,        source);
 			var source2 = new QuerySource.SubQuery(current, CurrentSql, seq2);
@@ -406,6 +448,27 @@ namespace BLToolkit.Data.Linq
 			var result = resultSelector == null ? source2 : ParseSelect(resultSelector, source1, source2);
 			ParsingTracer.DecIndentLevel();
 			return result;
+		}
+
+		static QuerySource.Table GetParentSource(QuerySource parent, QuerySource query)
+		{
+			if (parent is QuerySource.Table)
+			{
+				var tbl = (QuerySource.Table)parent;
+
+				foreach (var at in tbl.AssociatedTables.Values)
+					if (at == query)
+						return tbl;
+			}
+
+			foreach (var source in parent.Sources)
+			{
+				var table = GetParentSource(source, query);
+				if (table != null)
+					return table;
+			}
+
+			return null;
 		}
 
 		#endregion
@@ -2461,23 +2524,23 @@ namespace BLToolkit.Data.Linq
 							var el = pi.Create(e.Left,  pi.Property(Binary.Left));
 							var er = pi.Create(e.Right, pi.Property(Binary.Right));
 
-							if (el.NodeType == ExpressionType.New || er.NodeType == ExpressionType.New)
-								return ParseNewObjectComparison(pi, el, er, queries);
-
-							var p = ParseObjectComparison(lambda, pi, el, er, queries);
-							if (p != null)
-								return p;
-
 							switch (parseInfo.NodeType)
 							{
 								case ExpressionType.Equal    :
 								case ExpressionType.NotEqual :
 
-									p = ParseObjectNullComparison(el, er, queries, parseInfo.NodeType == ExpressionType.Equal);
+									var p = ParseObjectNullComparison(el, er, queries, parseInfo.NodeType == ExpressionType.Equal);
 									if (p != null)
 										return p;
 
 									p = ParseObjectNullComparison(er, el, queries, parseInfo.NodeType == ExpressionType.Equal);
+									if (p != null)
+										return p;
+
+									if (el.NodeType == ExpressionType.New || er.NodeType == ExpressionType.New)
+										return ParseNewObjectComparison(pi, el, er, queries);
+
+									p = ParseObjectComparison(lambda, pi, el, er, queries);
 									if (p != null)
 										return p;
 
@@ -2499,7 +2562,7 @@ namespace BLToolkit.Data.Linq
 
 							if (el.NodeType == ExpressionType.Convert || er.NodeType == ExpressionType.Convert)
 							{
-								p = ParseEnumConversion(pi, el, op, er, queries);
+								var p = ParseEnumConversion(pi, el, op, er, queries);
 								if (p != null)
 									return p;
 							}
@@ -2589,6 +2652,8 @@ namespace BLToolkit.Data.Linq
 				ParsingTracer.DecIndentLevel();
 			}
 		}
+
+		#region ParseEnumConversion
 
 		ISqlPredicate ParseEnumConversion(ParseInfo pi, ParseInfo left, SqlQuery.Predicate.Operator op, ParseInfo right, QuerySource[] queries)
 		{
@@ -2686,7 +2751,9 @@ namespace BLToolkit.Data.Linq
 			}
 		}
 
-		#region
+		#endregion
+
+		#region ParseObjectNullComparison
 
 		ISqlPredicate ParseObjectNullComparison(ParseInfo left, ParseInfo right, QuerySource[] queries, bool isEqual)
 		{
@@ -2716,15 +2783,54 @@ namespace BLToolkit.Data.Linq
 
 		#region ParseObjectComparison
 
-		ISqlPredicate ParseObjectComparison(LambdaInfo lambda, ParseInfo pi, ParseInfo el, ParseInfo er, QuerySource[] queries)
+		ISqlPredicate ParseObjectComparison(LambdaInfo lambda, ParseInfo pi, ParseInfo left, ParseInfo right, QuerySource[] queries)
 		{
-			var sl = GetSource(lambda, el, queries);
-			var sr = GetSource(lambda, er, queries);
+			var sl = GetSource(lambda, left,  queries) as QuerySource.Table;
+			var sr = GetSource(lambda, right, queries) as QuerySource.Table;
 
 			if (sl == null && sr == null)
 				return null;
 
-			throw new NotImplementedException();
+			if (sl == null)
+			{
+				var temp = left;
+				left  = right;
+				right = temp;
+				sl    = sr;
+				sr    = null;
+			}
+
+			var q =
+				from f in sl.SqlTable.Fields.Values
+				where f.IsPrimaryKey
+				orderby f.PrimaryKeyOrder
+				select f;
+
+			var fields = q.ToList();
+
+			if (fields.Count == 0)
+				fields = sl.SqlTable.Fields.Values.ToList();
+
+			var condition = new SqlQuery.SearchCondition();
+			var ta        = TypeAccessor.GetAccessor(right.Expr.Type);
+
+			foreach (var field in fields)
+			{
+				var rex = sr != null ? sr.SqlTable.Fields[field.Name] : GetParameter(right, ta[field.Name].MemberInfo);
+
+				var predicate = Convert(new SqlQuery.Predicate.ExprExpr(
+					field,
+					pi.NodeType == ExpressionType.Equal ? SqlQuery.Predicate.Operator.Equal : SqlQuery.Predicate.Operator.NotEqual,
+					rex));
+
+				condition.Conditions.Add(new SqlQuery.Condition(false, predicate));
+			}
+
+			if (pi.NodeType == ExpressionType.NotEqual)
+				foreach (var c in condition.Conditions)
+					c.IsOr = true;
+
+			return condition;
 		}
 
 		ISqlPredicate ParseNewObjectComparison(ParseInfo pi, ParseInfo left, ParseInfo right, params QuerySource[] queries)
@@ -2758,11 +2864,11 @@ namespace BLToolkit.Data.Linq
 					rex));
 
 				condition.Conditions.Add(new SqlQuery.Condition(false, predicate));
-
-				if (pi.NodeType == ExpressionType.NotEqual)
-					foreach (var c in condition.Conditions)
-						c.IsOr = true;
 			}
+
+			if (pi.NodeType == ExpressionType.NotEqual)
+				foreach (var c in condition.Conditions)
+					c.IsOr = true;
 
 			return condition;
 		}

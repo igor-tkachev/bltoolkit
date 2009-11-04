@@ -44,7 +44,7 @@ namespace BLToolkit.Data.Sql
 				if (mm.MapMemberInfo.SqlIgnore == false)
 				{
 					int order = _mappingSchema.MetadataProvider.GetPrimaryKeyOrder(objectType, typeExt, mm.MemberAccessor, out isSet);
-					Fields.Add(new SqlField(mm.MemberName, mm.Name, mm.MapMemberInfo.Nullable, isSet ? order : -1));
+					Fields.Add(new SqlField(mm.MemberName, mm.Name, mm.MapMemberInfo.Nullable, isSet ? order : int.MinValue));
 				}
 		}
 

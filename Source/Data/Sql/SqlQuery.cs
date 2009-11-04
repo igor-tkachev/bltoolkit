@@ -2267,7 +2267,7 @@ namespace BLToolkit.Data.Sql
 			// {
 			// | [SearchCondition(true) sc] =>
 			//     searchCondition.Conditions = sc.Conditions;
-			//     ConvertSearchCondition(searchCodition)
+			//     OptimizeSearchCondition(searchCodition)
 			//
 			// | [Expr(true,  SqlValue(true))]
 			// | [Expr(false, SqlValue(false))]

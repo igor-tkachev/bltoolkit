@@ -641,10 +641,28 @@ namespace Data.Linq
 		[Test]
 		public void CompareObject1()
 		{
-			var expected = (from ch in Child where ch.ParentID == 2 select ch).First();
+			var child    = (from ch in Child where ch.ParentID == 2 select ch).First();
+			var expected = from ch in Child where ch == child select ch;
 
-			ForEachProvider(db => Assert.AreEqual(expected,
-				(from ch in db.Child where ch == expected select ch).Single()));
+			ForEachProvider(db => AreEqual(expected, from ch in db.Child where ch == child select ch));
+		}
+
+		[Test]
+		public void CompareObject2()
+		{
+			var parent   = (from p in Parent where p.ParentID == 2 select p).First();
+			var expected = from p in Parent where parent == p select p;
+
+			ForEachProvider(db => AreEqual(expected, from p in db.Parent where parent == p select p));
+		}
+
+		[Test]
+		public void CompareObject3()
+		{
+			var child    = (from ch in Child where ch.ParentID == 2 select ch).First();
+			var expected = from ch in Child where ch != child select ch;
+
+			ForEachProvider(db => AreEqual(expected, from ch in db.Child where ch != child select ch));
 		}
 	}
 }

@@ -160,6 +160,7 @@
     <Compile Include="SelectScalar.cs" />
     <Compile Include="TestBase.cs" />
     <Compile Include="TestDbManager.cs">
+      <SubType>Component</SubType>
     </Compile>
     <Compile Include="WhereTest.cs" />
   </ItemGroup>

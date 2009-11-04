@@ -53,5 +53,21 @@ namespace Data.Linq
 					AreEqual(elist[i], list[i]);
 			});
 		}
+
+		[Test]
+		public void Test5()
+		{
+			var expected =
+				from p  in Parent
+				from ch in p.Children
+				where ch.ParentID < 4
+				select new { p.ParentID, ch.ChildID };
+
+			ForEachProvider(db => AreEqual(expected,
+				from p  in db.Parent
+				from ch in p.Children
+				where ch.ParentID < 4
+				select new { p.ParentID, ch.ChildID }));
+		}
 	}
 }
