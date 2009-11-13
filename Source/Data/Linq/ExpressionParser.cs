@@ -39,13 +39,13 @@ namespace BLToolkit.Data.Linq
 		readonly ParameterExpression _mapSchemaParam  = Expression.Parameter(typeof(MappingSchema),     "ms");
 		readonly ParameterExpression _infoParam       = Expression.Parameter(typeof(ExpressionInfo<T>), "info");
 
-		List<QuerySource> _parentQueries = new List<QuerySource>();
-
 		int    _currentSql = 0;
 		Action _buildSelect;
 #pragma warning disable 414
 		bool   _isParsingPhase;
 #pragma warning restore 414
+
+		Func<QuerySource,LambdaInfo,QuerySource> _convertSource = (s,_) => s;
 
 		SqlQuery CurrentSql
 		{
@@ -108,7 +108,7 @@ namespace BLToolkit.Data.Linq
 				{
 					ParsingTracer.WriteLine("Sequence parsing phase...");
 
-					var query = ParseSequence(pi, null);
+					var query = ParseSequence(pi);
 
 					ParsingTracer.WriteLine("Select building phase...");
 
@@ -117,7 +117,7 @@ namespace BLToolkit.Data.Linq
 					if (_buildSelect != null)
 						_buildSelect();
 					else
-						BuildSelect(query, SetQuery, SetQuery, i => i);
+						BuildSelect(query[0], SetQuery, SetQuery, i => i);
 
 					return true;
 				}
@@ -149,7 +149,7 @@ namespace BLToolkit.Data.Linq
 			});
 		}
 
-		QuerySource ParseSequence(ParseInfo info, QuerySource baseSource)
+		QuerySource[] ParseSequence(ParseInfo info)
 		{
 			ParsingTracer.WriteLine(info);
 			ParsingTracer.IncIndentLevel();
@@ -160,31 +160,73 @@ namespace BLToolkit.Data.Linq
 			{
 				ParsingTracer.DecIndentLevel();
 				ParsingTracer.WriteLine(select);
-				return select;
+				return new[] { select };
 			}
 
-			if (info.NodeType == ExpressionType.MemberAccess)
+			switch (info.NodeType)
 			{
-				if (TypeHelper.IsSameOrParent(typeof(IQueryable), info.Expr.Type))
-				{
-					info   = GetIQueriable(info);
-					select = ParseTable(info);
+				case ExpressionType.Call:
+					break;
 
-					if (select != null)
+				case ExpressionType.MemberAccess:
 					{
-						ParsingTracer.DecIndentLevel();
-						ParsingTracer.WriteLine(select);
-						return select;
-					}
-				}
+						if (TypeHelper.IsSameOrParent(typeof(IQueryable), info.Expr.Type))
+						{
+							info   = GetIQueriable(info);
+							select = ParseTable(info);
 
-				var association = GetSource(null, info, baseSource == null ? new QuerySource[0] : new[] { baseSource} );
-				if (association != null)
-					return association;
+							if (select != null)
+							{
+								ParsingTracer.DecIndentLevel();
+								ParsingTracer.WriteLine(select);
+								return new[] { select };
+							}
+						}
+
+						var association = GetSource(null, info);
+
+						if (association != null)
+						{
+							association = _convertSource(association, new LambdaInfo(info));
+
+							if (CurrentSql.From.Tables.Count == 0)
+							{
+								var table = association as QuerySource.Table;
+
+								if (table != null)
+								{
+									while (table.ParentAssociation != null)
+										table = table.ParentAssociation;
+
+									CurrentSql = table.SqlQuery;
+								}
+							}
+
+							ParsingTracer.DecIndentLevel();
+							ParsingTracer.WriteLine(select);
+							return new[] { association };
+						}
+
+						break;
+					}
+
+				case ExpressionType.Parameter:
+					if (_parentQueries.Count > 0)
+						foreach (var query in _parentQueries)
+							if (query.Parameter == info.Expr)
+							{
+								ParsingTracer.DecIndentLevel();
+								ParsingTracer.WriteLine(select);
+								return new[] { query.Parent };
+							}
+
+					goto default;
+
+				default:
+					throw new ArgumentException(string.Format("Queryable method call expected. Got '{0}'.", info.Expr), "info");
 			}
 
-			if (info.NodeType != ExpressionType.Call)
-				throw new ArgumentException(string.Format("Queryable method call expected. Got '{0}'.", info.Expr), "info");
+			QuerySource[] sequence = null;
 
 			info.ConvertTo<MethodCallExpression>().Match
 			(
@@ -198,15 +240,15 @@ namespace BLToolkit.Data.Linq
 
 					switch (pi.Expr.Method.Name)
 					{
-						case "Distinct"        : select = ParseSequence(seq, null); CurrentSql.Select.IsDistinct = true;                 break;
-						case "First"           : select = ParseSequence(seq, null); ParseElementOperator(ElementMethod.First);           break;
-						case "FirstOrDefault"  : select = ParseSequence(seq, null); ParseElementOperator(ElementMethod.FirstOrDefault);  break;
-						case "Single"          : select = ParseSequence(seq, null); ParseElementOperator(ElementMethod.Single);          break;
-						case "SingleOrDefault" : select = ParseSequence(seq, null); ParseElementOperator(ElementMethod.SingleOrDefault); break;
+						case "Distinct"        : sequence = ParseSequence(seq); select = ParseDistinct(sequence[0]);                 break;
+						case "First"           : sequence = ParseSequence(seq); ParseElementOperator(ElementMethod.First);           break;
+						case "FirstOrDefault"  : sequence = ParseSequence(seq); ParseElementOperator(ElementMethod.FirstOrDefault);  break;
+						case "Single"          : sequence = ParseSequence(seq); ParseElementOperator(ElementMethod.Single);          break;
+						case "SingleOrDefault" : sequence = ParseSequence(seq); ParseElementOperator(ElementMethod.SingleOrDefault); break;
 						case "Count"           :
 						case "Min"             :
 						case "Max"             :
-						case "Average"         : select = ParseSequence(seq, null); ParseAggregate(pi, null, select); break;
+						case "Average"         : sequence = ParseSequence(seq); ParseAggregate(pi, null, sequence[0]); break;
 						default                :
 							ParsingTracer.DecIndentLevel();
 							return false;
@@ -222,22 +264,22 @@ namespace BLToolkit.Data.Linq
 				{
 					switch (pi.Expr.Method.Name)
 					{
-						case "Select"            : select = ParseSequence(seq, null); select = ParseSelect    (l, select);               break;
-						case "Where"             : select = ParseSequence(seq, null); select = ParseWhere     (l, select);               break;
-						case "SelectMany"        : select = ParseSequence(seq, null); select = ParseSelectMany(l, null, select);         break;
-						case "OrderBy"           : select = ParseSequence(seq, null); select = ParseOrderBy   (l, select, false, true);  break;
-						case "OrderByDescending" : select = ParseSequence(seq, null); select = ParseOrderBy   (l, select, false, false); break;
-						case "ThenBy"            : select = ParseSequence(seq, null); select = ParseOrderBy   (l, select, true,  true);  break;
-						case "ThenByDescending"  : select = ParseSequence(seq, null); select = ParseOrderBy   (l, select, true,  false); break;
-						case "GroupBy"           : select = ParseSequence(seq, null); select = ParseGroupBy   (l, null, null, select, pi.Expr.Type.GetGenericArguments()[0]);   break;
-						case "First"             : select = ParseSequence(seq, null); select = ParseWhere     (l, select); ParseElementOperator(ElementMethod.First);           break;
-						case "FirstOrDefault"    : select = ParseSequence(seq, null); select = ParseWhere     (l, select); ParseElementOperator(ElementMethod.FirstOrDefault);  break;
-						case "Single"            : select = ParseSequence(seq, null); select = ParseWhere     (l, select); ParseElementOperator(ElementMethod.Single);          break;
-						case "SingleOrDefault"   : select = ParseSequence(seq, null); select = ParseWhere     (l, select); ParseElementOperator(ElementMethod.SingleOrDefault); break;
-						case "Count"             : select = ParseSequence(seq, null); select = ParseWhere     (l, select); ParseAggregate(pi, null, select); break;
+						case "Select"            : sequence = ParseSequence(seq); select = ParseSelect    (l, sequence[0]);               break;
+						case "Where"             : sequence = ParseSequence(seq); select = ParseWhere     (l, sequence[0]);               break;
+						case "SelectMany"        : sequence = ParseSequence(seq); select = ParseSelectMany(l, null, sequence[0]);         break;
+						case "OrderBy"           : sequence = ParseSequence(seq); select = ParseOrderBy   (l, sequence[0], false, true);  break;
+						case "OrderByDescending" : sequence = ParseSequence(seq); select = ParseOrderBy   (l, sequence[0], false, false); break;
+						case "ThenBy"            : sequence = ParseSequence(seq); select = ParseOrderBy   (l, sequence[0], true,  true);  break;
+						case "ThenByDescending"  : sequence = ParseSequence(seq); select = ParseOrderBy   (l, sequence[0], true,  false); break;
+						case "GroupBy"           : sequence = ParseSequence(seq); select = ParseGroupBy   (l, null, null, sequence[0], pi.Expr.Type.GetGenericArguments()[0]);   break;
+						case "First"             : sequence = ParseSequence(seq); select = ParseWhere     (l, sequence[0]); ParseElementOperator(ElementMethod.First);           break;
+						case "FirstOrDefault"    : sequence = ParseSequence(seq); select = ParseWhere     (l, sequence[0]); ParseElementOperator(ElementMethod.FirstOrDefault);  break;
+						case "Single"            : sequence = ParseSequence(seq); select = ParseWhere     (l, sequence[0]); ParseElementOperator(ElementMethod.Single);          break;
+						case "SingleOrDefault"   : sequence = ParseSequence(seq); select = ParseWhere     (l, sequence[0]); ParseElementOperator(ElementMethod.SingleOrDefault); break;
+						case "Count"             : sequence = ParseSequence(seq); select = ParseWhere     (l, sequence[0]); ParseAggregate(pi, null, sequence[0]); break;
 						case "Min"               :
 						case "Max"               :
-						case "Average"           : select = ParseSequence(seq, null); ParseAggregate(pi, l, select); break;
+						case "Average"           : sequence = ParseSequence(seq); ParseAggregate(pi, l, sequence[0]); break;
 						default                  : return false;
 					}
 					return true;
@@ -245,21 +287,21 @@ namespace BLToolkit.Data.Linq
 				//
 				// everything else
 				//
-				pi => pi.IsQueryableMethod ("SelectMany", 1, 2, seq => select = ParseSequence(seq, null), (l1, l2)        => select = ParseSelectMany(l1, l2, select)),
-				pi => pi.IsQueryableMethod ("Join",             seq => select = ParseSequence(seq, null), (i, l2, l3, l4) => select = ParseJoin      (i,  l2, l3, l4, select)),
-				pi => pi.IsQueryableMethod ("GroupJoin",        seq => select = ParseSequence(seq, null), (i, l2, l3, l4) => select = ParseGroupJoin (i,  l2, l3, l4, select)),
-				pi => pi.IsQueryableMethod ("GroupBy",    1, 1, seq => select = ParseSequence(seq, null), (l1, l2)        => select = ParseGroupBy   (l1, l2,   null, select, pi.Expr.Type.GetGenericArguments()[0])),
-				pi => pi.IsQueryableMethod ("GroupBy",    1, 2, seq => select = ParseSequence(seq, null), (l1, l2)        => select = ParseGroupBy   (l1, null, l2,   select, null)),
-				pi => pi.IsQueryableMethod ("GroupBy", 1, 1, 2, seq => select = ParseSequence(seq, null), (l1, l2, l3)    => select = ParseGroupBy   (l1, l2,   l3,   select, null)),
-				pi => pi.IsQueryableMethod ("Take",             seq => select = ParseSequence(seq, null), ex => ParseTake(select, ex)),
-				pi => pi.IsQueryableMethod ("Skip",             seq => select = ParseSequence(seq, null), ex => ParseSkip(select, ex)),
-				pi => pi.IsEnumerableMethod("DefaultIfEmpty",   seq => { select = ParseDefaultIfEmpty(baseSource, seq); return select != null; }),
+				pi => pi.IsQueryableMethod ("SelectMany", 1, 2, seq => sequence = ParseSequence(seq), (l1, l2)        => select = ParseSelectMany(l1, l2, sequence[0])),
+				pi => pi.IsQueryableMethod ("Join",             seq => sequence = ParseSequence(seq), (i, l2, l3, l4) => select = ParseJoin      (i,  l2, l3, l4, sequence[0])),
+				pi => pi.IsQueryableMethod ("GroupJoin",        seq => sequence = ParseSequence(seq), (i, l2, l3, l4) => select = ParseGroupJoin (i,  l2, l3, l4, sequence[0])),
+				pi => pi.IsQueryableMethod ("GroupBy",    1, 1, seq => sequence = ParseSequence(seq), (l1, l2)        => select = ParseGroupBy   (l1, l2,   null, sequence[0], pi.Expr.Type.GetGenericArguments()[0])),
+				pi => pi.IsQueryableMethod ("GroupBy",    1, 2, seq => sequence = ParseSequence(seq), (l1, l2)        => select = ParseGroupBy   (l1, null, l2,   sequence[0], null)),
+				pi => pi.IsQueryableMethod ("GroupBy", 1, 1, 2, seq => sequence = ParseSequence(seq), (l1, l2, l3)    => select = ParseGroupBy   (l1, l2,   l3,   sequence[0], null)),
+				pi => pi.IsQueryableMethod ("Take",             seq => sequence = ParseSequence(seq), ex => ParseTake(sequence[0], ex)),
+				pi => pi.IsQueryableMethod ("Skip",             seq => sequence = ParseSequence(seq), ex => ParseSkip(sequence[0], ex)),
+				pi => pi.IsEnumerableMethod("DefaultIfEmpty",   seq => { select = ParseDefaultIfEmpty(seq); return select != null; }),
 				pi => pi.IsMethod(m =>
 				{
 					if (m.Expr.Method.DeclaringType == typeof(Queryable) || !TypeHelper.IsSameOrParent(typeof(IQueryable), pi.Expr.Type))
 						return false;
 
-					select = ParseSequence(GetIQueriable(info), null);
+					sequence = ParseSequence(GetIQueriable(info));
 					return true;
 				}),
 				pi => { throw new ArgumentException(string.Format("Queryable method call expected. Got '{0}'.", pi.Expr), "info"); }
@@ -267,7 +309,15 @@ namespace BLToolkit.Data.Linq
 
 			ParsingTracer.DecIndentLevel();
 			ParsingTracer.WriteLine(select);
-			return select;
+
+			if (select   == null) return sequence;
+			if (sequence == null) return new[] { select };
+
+			var list = new List<QuerySource> { select };
+
+			list.AddRange(sequence);
+
+			return list.ToArray();
 		}
 
 		QuerySource ParseTable(ParseInfo info)
@@ -353,12 +403,45 @@ namespace BLToolkit.Data.Linq
 						for (var i = 0; i < sources.Length; i++)
 							if (l.Body == l.Parameters[i].Expr)
 								return sources[i];
+
+						foreach (var query in _parentQueries)
+							if (l.Body == query.Parameter)
+								return query.Parent;
+
 						throw new InvalidOperationException();
-					case ExpressionType.New        : return new QuerySource.Expr  (CurrentSql, l.ConvertTo<NewExpression>(),        sources);
-					case ExpressionType.MemberInit : return new QuerySource.Expr  (CurrentSql, l.ConvertTo<MemberInitExpression>(), sources);
+
+					case ExpressionType.MemberAccess:
+						{
+							var src = GetSource(l, l.Body, sources);
+
+							if (src != null)
+							{
+								src = _convertSource(src, l);
+
+								if (CurrentSql.From.Tables.Count == 0)
+								{
+									var table = src as QuerySource.Table;
+
+									if (table != null)
+									{
+										while (table.ParentAssociation != null)
+											table = table.ParentAssociation;
+
+										CurrentSql = table.SqlQuery;
+									}
+								}
+
+								return src;
+							}
+						}
+
+						goto default;
+
+					case ExpressionType.New        : return new QuerySource.Expr(CurrentSql, l.ConvertTo<NewExpression>(),        Concat(sources, _parentQueries));
+					case ExpressionType.MemberInit : return new QuerySource.Expr(CurrentSql, l.ConvertTo<MemberInitExpression>(), Concat(sources, _parentQueries));
 					default                        :
 						{
-							var scalar = new QuerySource.Scalar(CurrentSql, l, sources);
+							var scalar = new QuerySource.Scalar(CurrentSql, l, Concat(sources, _parentQueries));
 							return scalar.Fields[0] is QuerySource ? (QuerySource)scalar.Fields[0] : scalar;
 						}
 				}
@@ -380,74 +463,176 @@ namespace BLToolkit.Data.Linq
 			ParsingTracer.WriteLine();
 			ParsingTracer.IncIndentLevel();
 
-			var sql = CurrentSql;
+			if (collectionSelector.Parameters[0].Expr == collectionSelector.Body.Expr)
+			{
+				ParsingTracer.DecIndentLevel();
+				return resultSelector == null ? source : ParseSelect(resultSelector, source);
+			}
+
+			var sql  = CurrentSql;
+			var conv = _convertSource;
 
 			CurrentSql = new SqlQuery();
 
-			var seq2 = ParseSequence(collectionSelector.Body, source);
+			var associationList = new Dictionary<QuerySource,QuerySource>();
 
-			if (source.Sources.Contains(seq2))
+			_convertSource = (s,l) =>
 			{
-				CurrentSql = sql;
-				return resultSelector == null ? seq2 : ParseSelect(resultSelector, source, seq2);
+				var t = s as QuerySource.Table;
+
+				if (t != null && t.ParentAssociation != null)
+				{
+					t.ParentAssociationJoin.IsWeak   = false;
+					t.ParentAssociationJoin.JoinType = SqlQuery.JoinType.Inner;
+
+					var orig = s;
+
+					if (t.ParentAssociation != source)
+						s = new QuerySource.Table(_info.MappingSchema, new SqlQuery(), l);
+
+					associationList.Add(s, orig);
+				}
+
+				return s;
+			};
+
+			_parentQueries.Insert(0, new ParentQuery { Parent = source, Parameter = collectionSelector.Parameters[0] });
+			var seq2 = ParseSequence(collectionSelector.Body);
+			_parentQueries.RemoveAt(0);
+
+			_convertSource = conv;
+
+			if (associationList.Count > 0)
+			{
+				foreach (var a in associationList)
+				{
+					if (a.Key == a.Value)
+					{
+						CurrentSql = sql;
+						break;
+					}
+
+					var assc = (QuerySource.Table)a.Key;
+					var orig = (QuerySource.Table)a.Value;
+
+					var current = new SqlQuery();
+					var source1 = new QuerySource.SubQuery(current, sql,        source,  false);
+					var source2 = new QuerySource.SubQuery(current, CurrentSql, seq2[0], false);
+					var join    = SqlQuery.InnerJoin(CurrentSql);
+
+					current.From.Table(sql, join);
+
+					CurrentSql = current;
+
+					foreach (var cond in orig.ParentAssociationJoin.Condition.Conditions)
+					{
+						var ee = (SqlQuery.Predicate.ExprExpr)cond.Predicate;
+
+						var field1 = (SqlField)ee.Expr2;
+						var field2 = assc.SqlTable[((SqlField)ee.Expr2).Name];
+
+						var col1 = source1.GetField(field1);
+						var col2 = source2.GetField(field2);
+
+						join
+							.Expr(col2.GetExpressions(this)[0])
+							.Equal
+							.Expr(col1.GetExpressions(this)[0]);
+					}
+
+					break;
+				}
+
+				ParsingTracer.DecIndentLevel();
+				return resultSelector == null ? seq2[0] : ParseSelect(resultSelector, source, seq2[0]);
 			}
 
-			if (seq2 is QuerySource.Table)
+			/*
+			if (CurrentSql.From.Tables.Count == 0)
 			{
-				var parent = GetParentSource(source, seq2);
+				var table = seq2[0] as QuerySource.Table;
 
-				if (parent != null)
+				if (table != null)
 				{
-					Action updt = null;
+					while (table.ParentAssociation != null)
+						table = table.ParentAssociation;
 
-					new QueryVisitor().Visit(parent.SqlQuery.From, e =>
-					{
-						if (e.ElementType == QueryElementType.TableSource)
-						{
-							var ts = (SqlQuery.TableSource)e;
-
-							if (ts.Source == parent.SqlTable)
-							{
-								for (var i = 0; i < ts.Joins.Count; i++)
-								{
-									var join = ts.Joins[i];
-									var atbl = (QuerySource.Table)seq2;
-
-									if (join.Table.Source == atbl.SqlTable)
-									{
-										updt = () =>
-										{
-											parent.SqlQuery.From.Table(atbl.SqlTable);
-											parent.SqlQuery.Where.SearchCondition.Conditions.Add(new SqlQuery.Condition(false, join.Condition));
-											ts.Joins.RemoveAt(i);
-										};
-										break;
-									}
-								}
-							}
-						}
-					});
-
-					if (updt != null)
-						updt();
-
-					CurrentSql = sql;
-					return resultSelector == null ? seq2 : ParseSelect(resultSelector, source, seq2);
+					CurrentSql = table.SqlQuery; //.From.Table(table.SqlTable);
 				}
 			}
+			*/
 
-			var current = new SqlQuery();
-			var source1 = new QuerySource.SubQuery(current, sql,        source);
-			var source2 = new QuerySource.SubQuery(current, CurrentSql, seq2);
+			/*
+			if (seq2[0] is QuerySource.Table)
+			{
+				var tbl = (QuerySource.Table)seq2[0];
 
-			current.From.Table(source1.SubSql);
-			current.From.Table(source2.SubSql);
+				if (tbl.ParentAssociation == source)
+				{
+					tbl.ParentAssociationJoin.IsWeak   = false;
+					tbl.ParentAssociationJoin.JoinType = SqlQuery.JoinType.Inner;
 
-			CurrentSql = current;
+					CurrentSql = sql;
+					ParsingTracer.DecIndentLevel();
+					return resultSelector == null ? tbl : ParseSelect(resultSelector, source, tbl);
+				}
 
-			var result = resultSelector == null ? source2 : ParseSelect(resultSelector, source1, source2);
-			ParsingTracer.DecIndentLevel();
-			return result;
+				if (seq2.Length > 1 && seq2[1] is QuerySource.GroupBy)
+				{
+					var gby = (QuerySource.GroupBy)seq2[1];
+
+					if (tbl.ParentAssociation == gby.OriginalQuery)
+					{
+						
+					}
+				}
+			}
+			*/
+
+			/*
+			if (seq2.Length > 1 && seq2[1] is QuerySource.Table)
+			{
+				var tbl = (QuerySource.Table)seq2[1];
+
+				if (HasSource(seq2[0], tbl.ParentAssociation))
+				{
+					tbl.ParentAssociationJoin.IsWeak   = false;
+					tbl.ParentAssociationJoin.JoinType = SqlQuery.JoinType.Inner;
+
+					if (seq2[0] == tbl.ParentAssociation)
+					{
+						CurrentSql = sql;
+						ParsingTracer.DecIndentLevel();
+						return resultSelector == null ? seq2[0] : ParseSelect(resultSelector, source, seq2[0]);
+					}
+				}
+			}
+			*/
+
+			if (source.Sources.Contains(seq2[0]))
+			{
+				CurrentSql = sql;
+				ParsingTracer.DecIndentLevel();
+				return resultSelector == null ? seq2[0] : ParseSelect(resultSelector, source, seq2[0]);
+			}
+
+			{
+				var current = new SqlQuery();
+				var source1 = new QuerySource.SubQuery(current, sql,        source);
+				var source2 = new QuerySource.SubQuery(current, CurrentSql, seq2[0]);
+
+				//current.From.Table(source1.SubSql);
+				//current.From.Table(source2.SubSql);
+
+				CurrentSql = current;
+
+				var result = resultSelector == null ?
+					new QuerySource.SubQuery(current, seq2[0].SqlQuery, seq2[0]) :
+					ParseSelect(resultSelector, source1, source2);
+
+				ParsingTracer.DecIndentLevel();
+				return result;
+			}
 		}
 
 		static QuerySource.Table GetParentSource(QuerySource parent, QuerySource query)
@@ -492,7 +677,7 @@ namespace BLToolkit.Data.Linq
 
 			CurrentSql = new SqlQuery();
 
-			var seq     = ParseSequence(inner, null);
+			var seq     = ParseSequence(inner)[0];
 			var source2 = new QuerySource.SubQuery(current, CurrentSql, seq, false);
 			var join    = source2.SubSql.InnerJoin();
 
@@ -557,7 +742,7 @@ namespace BLToolkit.Data.Linq
 			//
 			CurrentSql = new SqlQuery();
 
-			var seq     = ParseSequence(inner, null);
+			var seq     = ParseSequence(inner)[0];
 			var source2 = new QuerySource.GroupJoin(current, CurrentSql, seq);
 			var join    = source2.SubSql.LeftJoin();
 
@@ -569,7 +754,7 @@ namespace BLToolkit.Data.Linq
 			//
 			CurrentSql = new SqlQuery();
 
-			var cntseq   = ParseSequence(inner, null);
+			var cntseq   = ParseSequence(inner)[0];
 			var counter  = new QuerySource.SubQuery(current, CurrentSql, cntseq, false);
 			var cntjoin  = counter.SubSql.WeakLeftJoin();
  
@@ -630,9 +815,9 @@ namespace BLToolkit.Data.Linq
 
 		#region Parse DefaultIfEmpty
 
-		QuerySource ParseDefaultIfEmpty(QuerySource baseQuery, ParseInfo<Expression> seq)
+		QuerySource ParseDefaultIfEmpty(ParseInfo<Expression> seq)
 		{
-			return GetField(seq, baseQuery) as QuerySource;
+			return GetField(seq) as QuerySource;
 		}
 
 		#endregion
@@ -735,12 +920,17 @@ namespace BLToolkit.Data.Linq
 			var group   = ParseSelect(keySelector, source);
 			var element = elementSelector != null? ParseSelect(elementSelector, source) : null;
 
-			var byExprs = new ISqlExpression[group.Fields.Count];
+			var fields = new List<QueryField>(
+				group is QuerySource.Table ?
+					((QuerySource.Table)group).KeyFields.Select(f => f as QueryField) :
+					group.Fields);
+
+			var byExprs = new ISqlExpression[fields.Count];
 			var wrap    = false;
 
-			for (var i = 0; i < group.Fields.Count; i++)
+			for (var i = 0; i < fields.Count; i++)
 			{
-				var field = group.Fields[i];
+				var field = fields[i];
 				var exprs = field.GetExpressions(this);
 
 				if (exprs == null || exprs.Length != 1)
@@ -751,18 +941,26 @@ namespace BLToolkit.Data.Linq
 				wrap = wrap || !(exprs[0] is SqlField || exprs[0] is SqlQuery.Column);
 			}
 
+			// Can be used instead of GroupBy.Items.Clear().
+			//
+			//if (!wrap)
+			//	wrap = CurrentSql.GroupBy.Items.Count > 0;
+
 			if (wrap)
 			{
 				var subQuery = WrapInSubQuery(group);
 
-				foreach (var field in group.Fields)
+				foreach (var field in fields)
 					CurrentSql.GroupBy.Expr(group.SqlQuery.Select.Columns[field.Select(this)[0].Index]);
 
 				group = subQuery;
 			}
 			else
+			{
+				CurrentSql.GroupBy.Items.Clear();
 				foreach (var field in byExprs)
 					CurrentSql.GroupBy.Expr(field);
+			}
 
 			var result =
 				resultSelector == null ?
@@ -789,10 +987,15 @@ namespace BLToolkit.Data.Linq
 
 			var order = ParseSelect(lambda, source);
 
+			var fields = new List<QueryField>(
+				order is QuerySource.Table ?
+					((QuerySource.Table)order).KeyFields.Select(f => f as QueryField) :
+					order.Fields);
+
 			if (!isThen)
 				CurrentSql.OrderBy.Items.Clear();
 
-			foreach (var field in order.Fields)
+			foreach (var field in fields)
 			{
 				var exprs = field.GetExpressions(this);
 
@@ -901,6 +1104,24 @@ namespace BLToolkit.Data.Linq
 
 		#endregion
 
+		#region ParseDistinct
+
+		QuerySource ParseDistinct(QuerySource select)
+		{
+			ParsingTracer.WriteLine(select);
+			ParsingTracer.IncIndentLevel();
+
+			if (CurrentSql.Select.TakeValue != null || CurrentSql.Select.SkipValue != null)
+				select = WrapInSubQuery(select);
+
+			CurrentSql.Select.IsDistinct = true;
+
+			ParsingTracer.DecIndentLevel();
+			return select;
+		}
+
+		#endregion
+
 		#region Parse Aggregate
 
 		interface IAggregateHelper
@@ -1003,7 +1224,11 @@ namespace BLToolkit.Data.Linq
 
 		void SetQuery(QuerySource query, IndexConverter converter)
 		{
-			query.Select(this);
+			var idx = query.Select(this);
+
+			foreach (var i in idx)
+				converter(i);
+
 			_info.SetQuery();
 		}
 
@@ -1065,7 +1290,7 @@ namespace BLToolkit.Data.Linq
 
 			subQuery.BaseQuery.Match
 			(
-				_      => queryAction(subQuery, converter),         // QueryInfo.Table
+				table  => queryAction(table, i => converter(subQuery.EnsureField(i.Field).Select(this)[0])), // QueryInfo.Table
 				expr   =>                                           // QueryInfo.Expr
 				{
 					if (expr.Lambda.Body.NodeType == ExpressionType.New)
@@ -1151,6 +1376,24 @@ namespace BLToolkit.Data.Linq
 						valueExpr = valueExpr == null ? equal : Expression.AndAlso(valueExpr, equal);
 					}
 				}
+				else if (query.BaseQuery is QuerySource.Table)
+				{
+					var table  = (QuerySource.Table)query.BaseQuery;
+					var parent = table.ParentAssociation;
+					var pexpr  = ((MemberExpression)expr.Expr).Expression;
+					var conds = table.ParentAssociationJoin.Condition.Conditions;
+
+					foreach (var cond in conds)
+					{
+						var ee = (SqlQuery.Predicate.ExprExpr)cond.Predicate;
+
+						var equal  = Expression.Equal(
+							Expression.MakeMemberAccess(pexpr,    parent.Columns[((SqlField)ee.Expr1).Name].Mapper.MemberAccessor.MemberInfo),
+							Expression.MakeMemberAccess(keyParam, table. Columns[((SqlField)ee.Expr2).Name].Mapper.MemberAccessor.MemberInfo));
+
+						valueExpr = valueExpr == null ? equal : Expression.AndAlso(valueExpr, equal);
+					}
+				}
 				else
 				{
 					valueExpr = Expression.Equal(query.Lambda.Body, keyParam);
@@ -1159,22 +1402,16 @@ namespace BLToolkit.Data.Linq
 				valueExpr = Expression.Call(
 					null,
 					Expressor<object>.MethodExpressor(_ => Queryable.Where(null, (Expression<Func<TSource,bool>>)null)),
-					new[]
-					{
-						query.OriginalQuery.Lambda.Body.Expr,
-						Expression.Lambda<Func<TSource,bool>>(valueExpr, new[] { query.Lambda.Parameters[0].Expr })
-					});
+					query.OriginalQuery.Lambda.Body.Expr,
+					Expression.Lambda<Func<TSource,bool>>(valueExpr, new[] { query.Lambda.Parameters[0].Expr }));
 
 				if (query.ElementSource != null)
 				{
 					valueExpr = Expression.Call(
 						null,
 						Expressor<object>.MethodExpressor(_ => Queryable.Select(null, (Expression<Func<TSource,TElement>>)null)),
-						new[]
-						{
-							valueExpr,
-							Expression.Lambda<Func<TSource,TElement>>(query.ElementSource.Lambda.Body, new[] { query.ElementSource.Lambda.Parameters[0].Expr })
-						});
+						valueExpr,
+						Expression.Lambda<Func<TSource,TElement>>(query.ElementSource.Lambda.Body, new[] { query.ElementSource.Lambda.Parameters[0].Expr }));
 				}
 
 				var keyReader = Expression.Lambda<ExpressionInfo<T>.Mapper<TKey>>(
@@ -1208,7 +1445,32 @@ namespace BLToolkit.Data.Linq
 
 			ParseInfo info;
 
-			if (query.IsWrapped && expr.NodeType != ExpressionType.New)
+			if (query.BaseQuery is QuerySource.Table)
+			{
+				var table = (QuerySource.Table)query.BaseQuery;
+				var conds = table.ParentAssociationJoin.Condition.Conditions;
+				var index = new int[table.Fields.Count];
+
+				for (var i = 0; i < index.Length; i++)
+					index[i] = -1;
+
+				foreach (var cond in conds)
+				{
+					var field = (SqlField)((SqlQuery.Predicate.ExprExpr)cond.Predicate).Expr2;
+
+					index[table.Fields.IndexOf(table.Columns[field.Name])] = query.GetField(field).Select(this)[0].Index;
+				}
+
+				info = ParseInfo.CreateRoot(
+					Expression.Convert(
+						Expression.Call(_infoParam, _info.GetMapperMethodInfo(),
+							Expression.Constant(expr.Expr.Type),
+							_dataReaderParam,
+							Expression.Constant(_info.GetMapperSlot(index))),
+						expr.Expr.Type),
+					expr);
+			}
+			else if (query.IsWrapped && expr.NodeType != ExpressionType.New)
 			{
 				var idx = query.Fields[0].Select(this);
 
@@ -1402,12 +1664,12 @@ namespace BLToolkit.Data.Linq
 			ParsingTracer.WriteLine(query);
 			ParsingTracer.IncIndentLevel();
 
-			_parentQueries.Insert(0, query);
+			_parentQueries.Insert(0, new ParentQuery { Parent = query, Parameter = query.Lambda.Parameters[0]});
 			var sql = CurrentSql;
 
 			CurrentSql = new SqlQuery { ParentSql = sql };
 
-			var seq = ParseSequence(expr, null);
+			var seq = ParseSequence(expr)[0];
 
 			if (seq.Fields.Count == 1 && CurrentSql.Select.Columns.Count == 0)
 				seq.Fields[0].Select(this);
@@ -1583,10 +1845,14 @@ namespace BLToolkit.Data.Linq
 
 		ParseInfo BuildGroupJoin(ParseInfo ma, QuerySource.GroupJoin query, IndexConverter converter)
 		{
-			ParsingTracer.WriteLine();
+			ParsingTracer.WriteLine(ma);
+			ParsingTracer.WriteLine(query);
 			ParsingTracer.IncIndentLevel();
 
 			var args = ma.Expr.Type.GetGenericArguments();
+
+			if (args.Length == 0)
+				return BuildSubQuerySource(ma, query, converter);
 
 			Expression expr = null;
 
@@ -2785,41 +3051,101 @@ namespace BLToolkit.Data.Linq
 
 		ISqlPredicate ParseObjectComparison(LambdaInfo lambda, ParseInfo pi, ParseInfo left, ParseInfo right, QuerySource[] queries)
 		{
-			var sl = GetSource(lambda, left,  queries) as QuerySource.Table;
-			var sr = GetSource(lambda, right, queries) as QuerySource.Table;
+			var qsl = GetSource(lambda, left,  queries);
+			var qsr = GetSource(lambda, right, queries);
+
+			var sl = qsl as QuerySource.Table;
+			var sr = qsr as QuerySource.Table;
+
+			if (qsl != null) for (var query = qsl; sl == null; query = query.BaseQuery)
+			{
+				sl = query as QuerySource.Table;
+				if (!(query is QuerySource.SubQuery))
+					break;
+			}
+
+			if (qsr != null) for (var query = qsr; sr == null; query = query.BaseQuery)
+			{
+				sr = query as QuerySource.Table;
+				if (!(query is QuerySource.SubQuery))
+					break;
+			}
 
 			if (sl == null && sr == null)
 				return null;
 
 			if (sl == null)
 			{
-				var temp = left;
-				left  = right;
-				right = temp;
+				right = left;
 				sl    = sr;
 				sr    = null;
+				qsl   = qsr;
 			}
 
-			var q =
-				from f in sl.SqlTable.Fields.Values
-				where f.IsPrimaryKey
-				orderby f.PrimaryKeyOrder
-				select f;
-
-			var fields = q.ToList();
-
-			if (fields.Count == 0)
-				fields = sl.SqlTable.Fields.Values.ToList();
+			var cols = sl.KeyFields;
 
 			var condition = new SqlQuery.SearchCondition();
 			var ta        = TypeAccessor.GetAccessor(right.Expr.Type);
 
-			foreach (var field in fields)
+			foreach (var col in cols)
 			{
-				var rex = sr != null ? sr.SqlTable.Fields[field.Name] : GetParameter(right, ta[field.Name].MemberInfo);
+				QueryField.Column rcol = null;
+
+				var lcol = col;
+
+				if (sr != null)
+				{
+					var rfield = sr.SqlTable.Fields[lcol.Field.Name];
+
+					rcol = (QueryField.Column)sr.GetField(rfield);
+
+					if (sr.ParentAssociation != null)
+					{
+						foreach (var c in sr.ParentAssociationJoin.Condition.Conditions)
+						{
+							var ee = (SqlQuery.Predicate.ExprExpr)c.Predicate;
+
+							if (ee.Expr2 == rfield)
+							{
+								rfield = (SqlField)ee.Expr1;
+								rcol  = (QueryField.Column)sr.ParentAssociation.GetField(rfield);
+								qsr   = sr.ParentAssociation;
+								break;
+							}
+						}
+					}
+
+					rcol.Select(this);
+				}
+
+				{
+					var lfield = sl.SqlTable.Fields[lcol.Field.Name];
+
+					if (sl.ParentAssociation != null)
+					{
+						foreach (var c in sl.ParentAssociationJoin.Condition.Conditions)
+						{
+							var ee = (SqlQuery.Predicate.ExprExpr)c.Predicate;
+
+							if (ee.Expr2 == lfield)
+							{
+								lfield = (SqlField)ee.Expr1;
+								lcol   = (QueryField.Column)sl.ParentAssociation.GetField(lfield);
+								qsl    = sl.ParentAssociation;
+								break;
+							}
+						}
+					}
+
+					lcol.Select(this);
+				}
+
+				var rex = sr != null ?
+					qsr.GetField(rcol.Field).GetExpressions(this)[0] :
+					GetParameter(right, ta[lcol.Field.Name].MemberInfo);
 
 				var predicate = Convert(new SqlQuery.Predicate.ExprExpr(
-					field,
+					qsl.GetField(lcol.Field).GetExpressions(this)[0],
 					pi.NodeType == ExpressionType.Equal ? SqlQuery.Predicate.Operator.Equal : SqlQuery.Predicate.Operator.NotEqual,
 					rex));
 
@@ -3125,6 +3451,18 @@ namespace BLToolkit.Data.Linq
 
 		#endregion
 
+		#region ParentQueries
+
+		class ParentQuery
+		{
+			public QuerySource                    Parent;
+			public ParseInfo<ParameterExpression> Parameter;
+		}
+
+		readonly List<ParentQuery> _parentQueries = new List<ParentQuery>();
+
+		#endregion
+
 		#region Helpers
 
 		QueryField GetField(Expression expr, params QuerySource[] queries)
@@ -3139,7 +3477,7 @@ namespace BLToolkit.Data.Linq
 
 			foreach (var query in _parentQueries)
 			{
-				var field = query.GetField(expr);
+				var field = query.Parent.GetField(expr);
 
 				if (field != null)
 					return field;
@@ -3164,25 +3502,78 @@ namespace BLToolkit.Data.Linq
 					}
 
 					break;
+
+				case ExpressionType.MemberAccess:
+					{
+						var ma = (MemberExpression)expr;
+
+						if (lambda != null && ma.Expression == lambda.Parameters[0].Expr)
+						{
+							foreach (var query in queries)
+							{
+								var gb = query as QuerySource.GroupBy;
+								if (gb != null && gb.BaseQuery.ObjectType == expr.Type)
+									return gb.BaseQuery;
+							}
+						}
+					}
+
+					break;
 			}
 
 			foreach (var query in queries)
 			{
-				var field = query.GetField(expr) as QuerySource;
+				var field = query.GetField(expr);
 
 				if (field != null)
-					return field;
+				{
+					if (field is QuerySource)
+						return (QuerySource)field;
+
+					var sq = field as QueryField.SubQueryColumn;
+
+					if (sq != null)
+						return sq.Field as QuerySource;
+
+					return null;
+				}
 			}
 
 			foreach (var query in _parentQueries)
 			{
-				var field = query.GetField(expr) as QuerySource;
+				var field = query.Parent.GetField(expr) as QuerySource;
 
 				if (field != null)
 					return field;
 			}
 
 			return null;
+		}
+
+		static QuerySource[] Concat(QuerySource[] q1, QuerySource[] q2)
+		{
+			if (q2 == null || q2.Length == 0) return q1;
+			if (q1 == null || q1.Length == 0) return q2;
+
+			return q1.Concat(q2).ToArray();
+		}
+
+		static QuerySource[] Concat(QuerySource[] q1, ICollection<ParentQuery> q2)
+		{
+			if (q2 == null || q2.Count == 0) return q1;
+			return Concat(q1, q2.Select(q => q.Parent).ToArray());
+		}
+
+		bool HasSource(QuerySource query, QuerySource source)
+		{
+			if (source == null)  return false;
+			if (source == query) return true;
+
+			foreach (var s in query.Sources)
+				if (HasSource(s, source))
+					return true;
+
+			return false;
 		}
 
 		static void SetAlias(QuerySource query, string alias)

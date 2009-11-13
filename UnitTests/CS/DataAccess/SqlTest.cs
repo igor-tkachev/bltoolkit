@@ -131,5 +131,18 @@ namespace DataAccess
 				Assert.That(insert.QueryText.Contains("CategoryId"), "Insert");
 			}
 		}
+
+
+		[TableName("DataTypeTest")]
+		class UpdateTest
+		{
+			[PrimaryKey] public Guid Guid_;
+		}
+
+		[Test, ExpectedException(typeof(DataAccessException))]
+		public void UpdateGuid()
+		{
+			new SqlQuery<UpdateTest>().Update(new UpdateTest { Guid_ = Guid.NewGuid() });
+		}
 	}
 }

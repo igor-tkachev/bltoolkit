@@ -1,15 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 
-using FExpr = System.Func<System.Linq.Expressions.Expression>;
-using FParm = System.Func<BLToolkit.Data.Linq.ParseInfo<System.Linq.Expressions.ParameterExpression>, bool>;
-using FTest = System.Func<BLToolkit.Data.Linq.ParseInfo<System.Linq.Expressions.Expression>, bool>;
-
 namespace BLToolkit.Data.Linq
 {
+	using FExpr = Func<Expression>;
+	using FParm = Func<ParseInfo<ParameterExpression>, bool>;
+	using FTest = Func<ParseInfo<Expression>, bool>;
+
 	using Common;
 
 	abstract class ParseInfo : ReflectionHelper
@@ -248,6 +249,7 @@ namespace BLToolkit.Data.Linq
 
 		#region Helpers
 
+		[DebuggerStepThrough]
 		public ParseInfo<T> ConvertTo<T>()
 			where T : Expression
 		{

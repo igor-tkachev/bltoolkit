@@ -295,29 +295,38 @@ namespace BLToolkit.DataAccess
 			AppendTableName(sb, db, type);
 			sb.Append("\nSET\n");
 
-			foreach (MemberMapper mm in GetFieldList(om))
+			MemberMapper[] fields    = GetFieldList(om);
+			bool           hasFields = false;
+
+			foreach (MemberMapper mm in fields)
 			{
 				bool isSet;
 
-				if (!mp.GetNonUpdatableFlag(type, typeExt, mm.MemberAccessor, out isSet) || !isSet)
-				{
-					mp.GetPrimaryKeyOrder(type, typeExt, mm.MemberAccessor, out isSet);
+				if (mp.GetNonUpdatableFlag(type, typeExt, mm.MemberAccessor, out isSet) && isSet)
+					continue;
 
-					if (isSet)
-						continue;
+				mp.GetPrimaryKeyOrder(type, typeExt, mm.MemberAccessor, out isSet);
 
-					SqlQueryParameterInfo p = query.AddParameter(
-						db.DataProvider.Convert(mm.Name, ConvertType.NameToQueryParameter).ToString(),
-						mm.Name);
+				if (isSet)
+					continue;
 
-					sb.AppendFormat("\t{0} = ", db.DataProvider.Convert(p.FieldName, ConvertType.NameToQueryField));
+				hasFields = true;
 
-					if (nParameter < 0)
-						sb.AppendFormat("{0},\n", p.ParameterName);
-					else
-						sb.AppendFormat("\t{{{0}}},\n", nParameter++);
-				}
+				SqlQueryParameterInfo p = query.AddParameter(
+					db.DataProvider.Convert(mm.Name, ConvertType.NameToQueryParameter).ToString(),
+					mm.Name);
+
+				sb.AppendFormat("\t{0} = ", db.DataProvider.Convert(p.FieldName, ConvertType.NameToQueryField));
+
+				if (nParameter < 0)
+					sb.AppendFormat("{0},\n", p.ParameterName);
+				else
+					sb.AppendFormat("\t{{{0}}},\n", nParameter++);
 			}
+
+			if (!hasFields)
+				throw new DataAccessException(
+						string.Format("There are no fields to update in the type '{0}'.", query.ObjectType.FullName));
 
 			sb.Remove(sb.Length - 2, 1);
 

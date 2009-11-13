@@ -11,8 +11,11 @@ namespace Data.Linq.Model
 		[PrimaryKey] public int ParentID;
 		[PrimaryKey] public int ChildID;
 
+		[Association(ThisKey = "ParentID", OtherKey = "ParentID")]
+		public Parent  Parent;
+
 		[Association(ThisKey = "ParentID", OtherKey = "ParentID", CanBeNull = false)]
-		public Parent Parent;
+		public Parent1 Parent1;
 
 		[Association(ThisKey = "ParentID, ChildID", OtherKey = "ParentID, ChildID")]
 		public List<GrandChild> GrandChildren;

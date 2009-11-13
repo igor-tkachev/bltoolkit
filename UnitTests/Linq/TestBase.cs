@@ -158,12 +158,22 @@ namespace Data.Linq
 					using (var db = new TestDbManager("Sql2008"))
 					{
 						_parent = db.Parent.ToList();
+						db.Close();
 
 						foreach (var p in _parent)
 							p.Children = Child.Where(c => c.ParentID == p.ParentID).ToList();
 					}
 
 				return _parent;
+			}
+		}
+
+		private   List<Parent1> _parent1;
+		protected List<Parent1>  Parent1
+		{
+			get
+			{
+				return _parent1 ?? (_parent1 = Parent.Select(p => new Parent1 { ParentID = p.ParentID, Value1 = p.Value1 }).ToList());
 			}
 		}
 
@@ -176,10 +186,12 @@ namespace Data.Linq
 					using (var db = new TestDbManager("Sql2008"))
 					{
 						_child = db.Child.ToList();
+						db.Clone();
 
 						foreach (var ch in _child)
 						{
-							ch.Parent        = Parent.Single(p => p.ParentID == ch.ParentID);
+							ch.Parent        = Parent. Single(p => p.ParentID == ch.ParentID);
+							ch.Parent1       = Parent1.Single(p => p.ParentID == ch.ParentID);
 							ch.GrandChildren = GrandChild.Where(c => c.ParentID == ch.ParentID && c.ChildID == ch.ChildID).ToList();
 						}
 					}
@@ -197,6 +209,7 @@ namespace Data.Linq
 					using (var db = new TestDbManager("Sql2008"))
 					{
 						_grandChild = db.GrandChild.ToList();
+						db.Close();
 
 						foreach (var ch in _grandChild)
 							ch.Child = Child.Single(c => c.ParentID == ch.ParentID && c.ChildID == ch.ChildID);
@@ -241,6 +254,7 @@ namespace Data.Linq
 			var expectedList = expected.ToList();
 			var resultList   = result.  ToList();
 
+			Assert.AreEqual(expectedList.Count(), resultList.Count());
 			Assert.AreNotEqual(0, expectedList.Count());
 			Assert.AreNotEqual(0, resultList.  Count());
 

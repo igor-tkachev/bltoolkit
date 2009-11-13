@@ -21,7 +21,7 @@ namespace Data.Linq
 				select (from ch in db.Child where ch.ParentID == p.ParentID select ch.ChildID).Max()));
 		}
 
-		[Test]
+		//[Test]
 		public void Test2()
 		{
 			var expected =

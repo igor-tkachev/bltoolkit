@@ -20,7 +20,9 @@ namespace BLToolkit.Data.Linq
 			public Table(MappingSchema mappingSchema, SqlQuery sqlQuery, LambdaInfo lambda)
 				: base(sqlQuery, lambda)
 			{
-				_objectType = TypeHelper.GetGenericType(typeof(IQueryable<>), lambda.Body.Expr.Type).GetGenericArguments()[0];
+				var type = TypeHelper.GetGenericType(typeof(IQueryable<>), lambda.Body.Expr.Type);
+
+				_objectType = type == null ? lambda.Body.Expr.Type : type.GetGenericArguments()[0];
 				SqlTable    = new SqlTable(mappingSchema, _objectType);
 
 				sqlQuery.From.Table(SqlTable);
@@ -50,6 +52,9 @@ namespace BLToolkit.Data.Linq
 
 				var psrc = sqlQuery.From[parent.SqlTable];
 				var join = left ? SqlTable.WeakLeftJoin() : SqlTable.InnerJoin();
+
+				_parentAssociation     = parent;
+				_parentAssociationJoin = join.JoinedTable;
 
 				psrc.Joins.Add(join.JoinedTable);
 
@@ -95,13 +100,30 @@ namespace BLToolkit.Data.Linq
 			private         Type _objectType;
 			public override Type  ObjectType { get { return _objectType; } }
 
+			readonly SqlQuery.JoinedTable _parentAssociationJoin;
+			public   SqlQuery.JoinedTable  ParentAssociationJoin
+			{
+				get { return _parentAssociationJoin; }
+			}
+
+			readonly Table _parentAssociation;
+			public   Table  ParentAssociation
+			{
+				get { return _parentAssociation; }
+			}
+
 			MappingSchema _mappingSchema;
 
-			readonly Dictionary<string,Column>      _columns      = new Dictionary<string,Column>();
+			readonly Dictionary<string,Column> _columns = new Dictionary<string,Column>();
+			public   Dictionary<string,Column>  Columns
+			{
+				get { return _columns; }
+			}
+
 			readonly Dictionary<string,Association> _associations = new Dictionary<string,Association>();
 
 			readonly Dictionary<string,Table> _associatedTables = new Dictionary<string,Table>();
-			public   Dictionary<string,Table> AssociatedTables { get { return _associatedTables; }}
+			public   Dictionary<string,Table>  AssociatedTables { get { return _associatedTables; }}
 
 			public override QueryField GetField(MemberInfo mi)
 			{
@@ -110,6 +132,32 @@ namespace BLToolkit.Data.Linq
 				if (_columns.TryGetValue(mi.Name, out col))
 					return col;
 
+				return GetAssociation(mi);
+			}
+
+			private List<Column> _keyFields;
+			public  List<Column>  KeyFields
+			{
+				get
+				{
+					if (_keyFields == null)
+					{
+						_keyFields = new List<Column>(
+							from c in Fields.Select(f => (Column)f)
+							where   c.Field.IsPrimaryKey
+							orderby c.Field.PrimaryKeyOrder
+							select c);
+
+						if (_keyFields.Count == 0)
+							_keyFields.AddRange(Fields.Select(f => (Column)f));
+					}
+
+					return _keyFields;
+				}
+			}
+
+			Table GetAssociation(MemberInfo mi)
+			{
 				Table tbl;
 
 				if (_associatedTables.TryGetValue(mi.Name, out tbl))
@@ -139,7 +187,7 @@ namespace BLToolkit.Data.Linq
 						if (ma.Expression.Type == ObjectType)
 							return GetField(ma.Member);
 
-						// Check for 'InnerObject.Field' case.
+						// Check for associations and 'InnerObject.Field' case.
 						//
 						var name = ma.Member.Name;
 						var e    = ma.Expression;
@@ -156,6 +204,10 @@ namespace BLToolkit.Data.Linq
 									Column col;
 									if (_columns.TryGetValue(name, out col))
 										return col;
+
+									var tbl = GetAssociation(ma.Member);
+									if (tbl != null)
+										return tbl.GetField(expr);
 								}
 
 								e = ma.Expression;
@@ -167,6 +219,23 @@ namespace BLToolkit.Data.Linq
 				}
 
 				return null;
+			}
+
+			public override QueryField GetField(SqlField field)
+			{
+				QueryField col = Columns.Values.FirstOrDefault(f => f.Field == field);
+
+				if (col == null)
+				{
+					foreach (var table in AssociatedTables.Values)
+					{
+						col = table.GetField(field);
+						if (col != null)
+							return col;
+					}
+				}
+
+				return col;
 			}
 
 			Table() {}
@@ -197,7 +266,8 @@ namespace BLToolkit.Data.Linq
 			{
 				if (lambda.Body.Expr is NewExpression)
 				{
-					var ex = (NewExpression)lambda.Body.Expr;
+					var body = lambda.Body.ConvertTo<NewExpression>();
+					var ex   = body.Expr;
 
 					if (ex.Members == null)
 						return;
@@ -211,7 +281,7 @@ namespace BLToolkit.Data.Linq
 
 						var field = 
 							GetBaseField(ex.Arguments[i]) ??
-							new ExprColumn(this, lambda.Body.Create(ex.Arguments[i], lambda.Body.Index(ex.Arguments, New.Arguments, i)), member.Name);
+							new ExprColumn(this, body.Create(ex.Arguments[i], body.Index(ex.Arguments, New.Arguments, i)), member.Name);
 
 						Fields.Add(field);
 						Members.Add(member, field);
@@ -219,7 +289,8 @@ namespace BLToolkit.Data.Linq
 				}
 				else if (lambda.Body.Expr is MemberInitExpression)
 				{
-					var ex = (MemberInitExpression)lambda.Body.Expr;
+					var body = lambda.Body.ConvertTo<MemberInitExpression>();
+					var ex   = body.Expr;
 
 					for (var i = 0; i < ex.Bindings.Count; i++)
 					{
@@ -233,9 +304,9 @@ namespace BLToolkit.Data.Linq
 						{
 							var ma = binding as MemberAssignment;
 
-							var piBinding    = lambda.Body.Create(ma.Expression, lambda.Body.Index(ex.Bindings, MemberInit.Bindings, i));
-							var piAssign     = piBinding.  Create(ma.Expression, piBinding.ConvertExpressionTo<MemberAssignment>());
-							var piExpression = piAssign.   Create(ma.Expression, piAssign.Property(MemberAssignmentBind.Expression));
+							var piBinding    = body.     Create(ma.Expression, body.Index(ex.Bindings, MemberInit.Bindings, i));
+							var piAssign     = piBinding.Create(ma.Expression, piBinding.ConvertExpressionTo<MemberAssignment>());
+							var piExpression = piAssign. Create(ma.Expression, piAssign.Property(MemberAssignmentBind.Expression));
 
 							var field = GetBaseField(piExpression) ?? new ExprColumn(this, piExpression, member.Name);
 
@@ -422,6 +493,11 @@ namespace BLToolkit.Data.Linq
 				return EnsureField(field);
 			}
 
+			public override QueryField GetField(SqlField field)
+			{
+				return EnsureField(base.GetField(field));
+			}
+
 			public override Type ObjectType { get { return BaseQuery.ObjectType; } }
 
 			protected SubQuery() {}
@@ -566,7 +642,6 @@ namespace BLToolkit.Data.Linq
 			public bool             IsWrapped;
 			public ISqlExpression[] ByExpressions;
 
-
 			public override QueryField GetBaseField(Expression expr)
 			{
 				return BaseQuery.GetBaseField(expr);
@@ -581,6 +656,11 @@ namespace BLToolkit.Data.Linq
 				Fields.Add(column);
 
 				return column;
+			}
+
+			public override QueryField GetField(SqlField field)
+			{
+				return OriginalQuery.GetField(field);
 			}
 
 			GroupBy() {}
@@ -672,7 +752,7 @@ namespace BLToolkit.Data.Linq
 		public abstract QueryField GetField(Expression expr);
 		public abstract QueryField GetField(MemberInfo mi);
 
-		protected virtual  QueryField GetField(List<MemberInfo> members, int currentMember)
+		protected virtual QueryField GetField(List<MemberInfo> members, int currentMember)
 		{
 			var field = GetField(members[currentMember]);
 
@@ -681,6 +761,18 @@ namespace BLToolkit.Data.Linq
 
 			if (field is GroupByColumn)
 				return ((GroupByColumn)field).GroupBySource.BaseQuery.GetField(members, currentMember + 1);
+
+			if (field is SubQueryColumn)
+			{
+				var subQuery = ((SubQueryColumn)field).Field as QuerySource;
+
+				if (subQuery == null)
+					return null;
+
+				var f = subQuery.GetField(members, currentMember + 1);
+
+				return field.Sources[0].EnsureField(f);
+			}
 
 			return ((QuerySource)field).GetField(members, currentMember + 1);
 		}
@@ -717,6 +809,18 @@ namespace BLToolkit.Data.Linq
 					if (field != null)
 						return field;
 				}
+			}
+
+			return null;
+		}
+
+		public virtual QueryField GetField(SqlField field)
+		{
+			foreach (var source in Sources)
+			{
+				var f = source.GetField(field);
+				if (f != null)
+					return f;
 			}
 
 			return null;

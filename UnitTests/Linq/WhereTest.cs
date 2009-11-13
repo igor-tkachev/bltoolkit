@@ -380,7 +380,7 @@ namespace Data.Linq
 				var list = q.ToList();
 				Assert.AreNotEqual(0, list.Count);
 
-				str = "123";
+				str  = "123";
 				list = q.ToList();
 				Assert.AreEqual(0, list.Count);
 			});
@@ -663,6 +663,34 @@ namespace Data.Linq
 			var expected = from ch in Child where ch != child select ch;
 
 			ForEachProvider(db => AreEqual(expected, from ch in db.Child where ch != child select ch));
+		}
+
+		[Test]
+		public void OrAnd()
+		{
+			var expected =
+				from c in Child
+				where (c.ParentID == 2 || c.ParentID == 3) && c.ChildID != 21
+				select c;
+
+			ForEachProvider(db => AreEqual(expected,
+				from c in db.Child
+				where (c.ParentID == 2 || c.ParentID == 3) && c.ChildID != 21
+				select c));
+		}
+
+		[Test]
+		public void NotOrAnd()
+		{
+			var expected =
+				from c in Child
+				where !(c.ParentID == 2 || c.ParentID == 3) && c.ChildID != 44
+				select c;
+
+			ForEachProvider(db => AreEqual(expected,
+				from c in db.Child
+				where !(c.ParentID == 2 || c.ParentID == 3) && c.ChildID != 44
+				select c));
 		}
 	}
 }

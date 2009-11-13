@@ -25,26 +25,6 @@ namespace BLToolkit.Data.Sql
 			_orderBy = new OrderByClause(this);
 		}
 
-		/*
-		public SqlQuery Copy()
-		{
-			SqlQuery newQuery = new SqlQuery();
-
-			newQuery.Set(
-				new SelectClause (Select.IsDistinct, Select.TakeValue, Select.SkipValue, Select.Columns),
-				new FromClause   (From.Tables),
-				new WhereClause  (Where.SearchCondition),
-				new GroupByClause(GroupBy.Items),
-				new WhereClause  (Having.SearchCondition),
-				new OrderByClause(OrderBy.Items),
-				ParentSql,
-				ParameterDependent,
-				Parameters);
-
-			return newQuery;
-		}
-		*/
-
 		internal void Set(
 			SelectClause       select,
 			FromClause         from,
@@ -2248,7 +2228,6 @@ namespace BLToolkit.Data.Sql
 				if (sql != null && sql != this)
 				{
 					sql.FinalizeAndValidateInternal();
-					sql.RemoveOrderBy();
 
 					if (sql.ParameterDependent)
 						ParameterDependent = true;
@@ -2257,6 +2236,14 @@ namespace BLToolkit.Data.Sql
 
 			ResolveWeakJoins();
 			OptimizeSubQueries();
+
+			new QueryVisitor().Visit(this, delegate(IQueryElement e)
+			{
+				SqlQuery sql = e as SqlQuery;
+
+				if (sql != null && sql != this)
+					sql.RemoveOrderBy();
+			});
 		}
 
 		internal static void OptimizeSearchCondition(SearchCondition searchCondition)
@@ -2435,8 +2422,19 @@ namespace BLToolkit.Data.Sql
 		{
 			for (int i = 0; i < source.Joins.Count; i++)
 			{
-				JoinedTable jt = source.Joins[i];
-				jt.Table = OptimizeSubQuery(jt.Table, jt.JoinType == JoinType.Inner);
+				JoinedTable jt    = source.Joins[i];
+				TableSource table = OptimizeSubQuery(jt.Table, jt.JoinType == JoinType.Inner);
+
+				if (table != jt.Table)
+				{
+					SqlQuery sql = jt.Table.Source as SqlQuery;
+
+					if (sql != null && sql.OrderBy.Items.Count > 0)
+						foreach (OrderByItem item in sql.OrderBy.Items)
+							OrderBy.Expr(item.Expression, item.IsDescending);
+
+					jt.Table = table;
+				}
 			}
 
 			if (source.Source is SqlQuery)
@@ -2469,6 +2467,9 @@ namespace BLToolkit.Data.Sql
 					});
 
 					query.From.Tables[0].Joins.AddRange(source.Joins);
+
+					if (query.From.Tables[0].Alias == null)
+						query.From.Tables[0].Alias = source.Alias;
 
 					if (!query.Where. IsEmpty) ConcatSearchCondition(Where,  query.Where);
 					if (!query.Having.IsEmpty) ConcatSearchCondition(Having, query.Having);
@@ -2514,7 +2515,20 @@ namespace BLToolkit.Data.Sql
 		void OptimizeSubQueries()
 		{
 			for (int i = 0; i < From.Tables.Count; i++)
-				From.Tables[i] = OptimizeSubQuery(From.Tables[i], true);
+			{
+				TableSource table = OptimizeSubQuery(From.Tables[i], true);
+
+				if (table != From.Tables[i])
+				{
+					SqlQuery sql = From.Tables[i].Source as SqlQuery;
+
+					if (sql != null && sql.OrderBy.Items.Count > 0)
+						foreach (OrderByItem item in sql.OrderBy.Items)
+							OrderBy.Expr(item.Expression, item.IsDescending);
+
+					From.Tables[i] = table;
+				}
+			}
 		}
 
 		IDictionary<string,object> _aliases;

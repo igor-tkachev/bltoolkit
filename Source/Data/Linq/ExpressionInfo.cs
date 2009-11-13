@@ -449,6 +449,9 @@ namespace BLToolkit.Data.Linq
 				{
 					var n = index[i];
 
+					if (n < 0)
+						continue;
+
 					if (!dest.SupportsTypedValues(i))
 					{
 						mappers[i] = MappingSchema.DefaultValueMapper;
@@ -502,7 +505,12 @@ namespace BLToolkit.Data.Linq
 			var ms = slot.ValueMappers;
 
 			for (var i = 0; i < index.Length; i++)
-				ms[i].Map(source, dataReader, index[i], dest, destObject, i);
+			{
+				var n = index[i];
+
+				if (n >= 0)
+					ms[i].Map(source, dataReader, n, dest, destObject, i);
+			}
 
 			if (smDest != null)
 				smDest.EndMapping(initContext);

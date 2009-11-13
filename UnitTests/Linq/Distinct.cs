@@ -3,6 +3,8 @@ using System.Linq;
 
 using NUnit.Framework;
 
+using BLToolkit.Data.DataProvider;
+
 namespace Data.Linq
 {
 	[TestFixture]
@@ -55,6 +57,14 @@ namespace Data.Linq
 
 				Assert.AreEqual(expected.Distinct().Max(p => p.ParentID), result.Distinct().Max(p => p.ParentID));
 			});
+		}
+
+		[Test]
+		public void TakeDistinct()
+		{
+			var expected = (from ch in Child select ch.ParentID).Take(4).Distinct();
+			ForEachProvider(new[] { ProviderName.SqlCe, ProviderName.Sybase, ProviderName.SQLite },
+				db => AreEqual(expected, (from ch in db.Child select ch.ParentID).Take(4).Distinct()));
 		}
 	}
 }

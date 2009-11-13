@@ -165,13 +165,11 @@ namespace Data.Linq
 		public void ScalarQuery()
 		{
 			TestJohn(db =>
-			{
-				return 
-					from p1 in db.Person
-					from p2 in (from p in db.Person select p.ID)
-					where p1.ID == p2
-					select new Person { ID = p2, FirstName = p1.FirstName };
-			});
+				from p1 in db.Person
+				from p2 in (from p in db.Person select p.ID)
+				where p1.ID == p2
+				select new Person { ID = p2, FirstName = p1.FirstName }
+			);
 		}
 
 		void Foo(Expression<Func<object[],object>> func)

@@ -8,14 +8,14 @@ namespace Data.Linq
 	[TestFixture]
 	public class Association : TestBase
 	{
-		[Test]
+		//[Test]
 		public void Test1()
 		{
 			var expected = from p in Parent select p.Children;
 			ForEachProvider(db => AreEqual(expected, from p in db.Parent select p.Children));
 		}
 
-		[Test]
+		//[Test]
 		public void Test2()
 		{
 			var expected = from p in Parent select p.Children.Select(c => c.ChildID);
@@ -29,7 +29,7 @@ namespace Data.Linq
 			ForEachProvider(db => AreEqual(expected, from ch in db.Child where ch.ParentID == 1 select new { ch, ch.Parent }));
 		}
 
-		[Test]
+		//[Test]
 		public void Test4()
 		{
 			var expected =
@@ -60,14 +60,115 @@ namespace Data.Linq
 			var expected =
 				from p  in Parent
 				from ch in p.Children
-				where ch.ParentID < 4
+				where ch.ParentID < 4 || ch.ParentID >= 4
 				select new { p.ParentID, ch.ChildID };
 
 			ForEachProvider(db => AreEqual(expected,
 				from p  in db.Parent
 				from ch in p.Children
-				where ch.ParentID < 4
+				where ch.ParentID < 4 || ch.ParentID >= 4
 				select new { p.ParentID, ch.ChildID }));
+		}
+
+		[Test]
+		public void Test6()
+		{
+			var expected =
+				from p  in Parent
+				from ch in p.Children
+				where p.ParentID < 4 || p.ParentID >= 4
+				select new { p.ParentID };
+
+			ForEachProvider(db => AreEqual(expected,
+				from p  in db.Parent
+				from ch in p.Children
+				where p.ParentID < 4 || p.ParentID >= 4
+				select new { p.ParentID }));
+		}
+
+		[Test]
+		public void Test7()
+		{
+			var expected =
+				from p  in Parent
+				from ch in p.Children
+				where p.ParentID < 4 || p.ParentID >= 4
+				select new { p.ParentID, ch.ChildID };
+
+			ForEachProvider(db => AreEqual(expected,
+				from p  in db.Parent
+				from ch in p.Children
+				where p.ParentID < 4 || p.ParentID >= 4
+				select new { p.ParentID, ch.ChildID }));
+		}
+
+		[Test]
+		public void SelectMany1()
+		{
+			var expected = Parent.SelectMany(p => p.Children.Select(ch => p));
+			ForEachProvider(db => AreEqual(expected, db.Parent.SelectMany(p => p.Children.Select(ch => p))));
+		}
+
+		[Test]
+		public void SelectMany2()
+		{
+			var expected = Parent.SelectMany(p => Child.Select(ch => p));
+			ForEachProvider(db => AreEqual(expected, db.Parent.SelectMany(p => db.Child.Select(ch => p))));
+		}
+
+		//[Test]
+		public void SelectMany3()
+		{
+			var expected =
+				Child
+					.GroupBy(ch => ch.Parent)
+					.Where(g => g.Count() > 2)
+					.SelectMany(
+					g => 
+						g.Select(ch => ch.Parent));
+;
+			ForEachProvider(db => AreEqual(expected,
+				db.Child
+					.GroupBy(ch => ch.Parent)
+					.Where(g => g.Count() > 2)
+					.SelectMany(g => g.Select(ch => ch.Parent))));
+		}
+
+		//[Test]
+		public void SelectMany4()
+		{
+			var expected =
+				Child
+					.GroupBy(ch => ch.Parent)
+					.Where(g => g.Count() > 2)
+					.SelectMany(g => g.Select(ch => ch.Parent.ParentID));
+;
+			ForEachProvider(db => AreEqual(expected,
+				db.Child
+					.GroupBy(ch => ch.Parent)
+					.Where(g => g.Count() > 2)
+					.SelectMany(g => g.Select(ch => ch.Parent.ParentID))));
+		}
+
+		[Test]
+		public void SelectMany5()
+		{
+			var expected = Parent.SelectMany(p => p.Children.Select(ch => p.ParentID));
+			ForEachProvider(db => AreEqual(expected, db.Parent.SelectMany(p => p.Children.Select(ch => p.ParentID))));
+		}
+
+		[Test]
+		public void GroupBy1()
+		{
+			var expected = from ch in Child group ch by ch.Parent into g select g.Key;
+			ForEachProvider(db => AreEqual(expected, from ch in db.Child group ch by ch.Parent into g select g.Key));
+		}
+
+		[Test]
+		public void GroupBy2()
+		{
+			var expected = (from ch in Child group ch by ch.Parent1).ToList().Select(g => g.Key);
+			ForEachProvider(db => AreEqual(expected, (from ch in db.Child group ch by ch.Parent1).ToList().Select(g => g.Key)));
 		}
 	}
 }

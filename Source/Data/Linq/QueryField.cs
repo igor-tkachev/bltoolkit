@@ -14,29 +14,29 @@ namespace BLToolkit.Data.Linq
 		{
 			public Column(QuerySource.Table table, SqlField field, MemberMapper mapper)
 			{
-				Field   = field;
-				_table  = table;
-				_mapper = mapper;
+				Field  = field;
+				Table  = table;
+				Mapper = mapper;
 
 				ParsingTracer.WriteLine(this);
 			}
 
-			public readonly SqlField    Field;
-			readonly QuerySource.Table _table;
-			readonly MemberMapper      _mapper;
+			public readonly SqlField          Field;
+			public readonly QuerySource.Table Table;
+			public readonly MemberMapper      Mapper;
 
-			public override QuerySource[] Sources { get { return new[] { _table }; } }
+			public override QuerySource[] Sources { get { return new[] { Table }; } }
 
-			public override FieldIndex[] Select<T>(ExpressionParser<T> parser)
+			public override FieldIndex[] Select<T>(ExpressionParser<T> _)
 			{
 				ParsingTracer.WriteLine(this);
-				ParsingTracer.WriteLine("table", _table);
+				ParsingTracer.WriteLine("table", Table);
 				ParsingTracer.IncIndentLevel();
 
-				var index =  new[] { new FieldIndex { Index = _table.SqlQuery.Select.Add(Field, Field.Alias), Field = this } };
+				var index =  new[] { new FieldIndex { Index = Table.SqlQuery.Select.Add(Field, Field.Alias), Field = this } };
 
 				ParsingTracer.DecIndentLevel();
-				ParsingTracer.WriteLine("table", _table);
+				ParsingTracer.WriteLine("table", Table);
 				return index;
 			}
 
@@ -59,9 +59,9 @@ namespace BLToolkit.Data.Linq
 
 				if (!objectTree.TryGetValue(this, out clone))
 					objectTree.Add(this, clone = new Column(
-						(QuerySource.Table)_table.Clone(objectTree, doClone),
+						(QuerySource.Table)Table.Clone(objectTree, doClone),
 						(SqlField)Field.Clone(objectTree, doClone),
-						_mapper));
+						Mapper));
 
 				return clone;
 			}

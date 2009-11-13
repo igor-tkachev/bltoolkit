@@ -466,7 +466,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		{
 			bool? isOr = null;
 			int   len  = sb.Length;
-			int   prevPrecedence = Precedence.LogicalDisjunction;
+			int   prevPrecedence = condition.Conditions.Count > 1 && !condition.Conditions[0].IsOr ? Precedence.LogicalConjunction : Precedence.LogicalDisjunction;
 
 			foreach (SqlQuery.Condition cond in condition.Conditions)
 			{

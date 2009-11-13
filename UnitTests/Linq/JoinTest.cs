@@ -203,20 +203,35 @@ namespace Data.Linq
 		[Test]
 		public void LeftJoin5()
 		{
-			ForEachProvider(db =>
-			{
-				var q = 
-					from p in db.Parent
-						join ch in db.Child on p.ParentID equals ch.ParentID into lj1
-						from ch in lj1.DefaultIfEmpty()
-					where p.ParentID == 4
-					select new { p, ch };
+			var expected =
+				from p in Parent
+					join ch in Child on p.ParentID equals ch.ParentID into lj1
+					from ch in lj1.DefaultIfEmpty()
+				where p.ParentID == 4
+				select new { p, ch };
 
-				var list = q.ToList();
+			ForEachProvider(db => AreEqual(expected,
+				from p in db.Parent
+					join ch in db.Child on p.ParentID equals ch.ParentID into lj1
+					from ch in lj1.DefaultIfEmpty()
+				where p.ParentID == 4
+				select new { p, ch }));
+		}
 
-				Assert.AreEqual(4, list.Count);
-				Assert.AreEqual(4, list[0].p.ParentID);
-			});
+		[Test]
+		public void LeftJoin6()
+		{
+			var expected =
+				from p in Parent
+					join ch in Child on p.ParentID equals ch.ParentID into lj1
+					from ch in lj1.DefaultIfEmpty()
+				select new { p, ch };
+
+			ForEachProvider(db => AreEqual(expected,
+				from p in db.Parent
+					join ch in db.Child on p.ParentID equals ch.ParentID into lj1
+					from ch in lj1.DefaultIfEmpty()
+				select new { p, ch }));
 		}
 
 		[Test]
