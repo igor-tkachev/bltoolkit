@@ -13,10 +13,11 @@ namespace BLToolkit.Reflection.MetadataProvider
 	{
 		#region Helpers
 
-		private TypeAccessor _typeAccessor;
-		private object[]     _mapFieldAttributes;
+		private  TypeAccessor _typeAccessor;
+		private  object[]     _mapFieldAttributes;
+		readonly object       _sync = new object();
 
-		private void EnsureMapper(TypeAccessor typeAccessor)
+		void EnsureMapper(TypeAccessor typeAccessor)
 		{
 			if (_typeAccessor != typeAccessor)
 			{
@@ -25,14 +26,17 @@ namespace BLToolkit.Reflection.MetadataProvider
 			}
 		}
 
-		private object[] GetMapFieldAttributes(TypeAccessor typeAccessor)
+		object[] GetMapFieldAttributes(TypeAccessor typeAccessor)
 		{
-			EnsureMapper(typeAccessor);
+			lock (_sync)
+			{
+				EnsureMapper(typeAccessor);
 
-			if (_mapFieldAttributes == null)
-				_mapFieldAttributes = TypeHelper.GetAttributes(typeAccessor.Type, typeof(MapFieldAttribute));
+				if (_mapFieldAttributes == null)
+					_mapFieldAttributes = TypeHelper.GetAttributes(typeAccessor.Type, typeof(MapFieldAttribute));
 
-			return _mapFieldAttributes;
+				return _mapFieldAttributes;
+			}
 		}
 
 		#endregion

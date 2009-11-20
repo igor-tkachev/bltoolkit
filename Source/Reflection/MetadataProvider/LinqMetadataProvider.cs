@@ -10,10 +10,11 @@ namespace BLToolkit.Reflection.MetadataProvider
 	{
 		#region Helpers
 
-		private Type  _type;
-		private bool? _isLinqObject;
+		private  Type   _type;
+		private  bool?  _isLinqObject;
+		readonly object _sync = new object();
 
-		private void EnsureMapper(Type type)
+		void EnsureMapper(Type type)
 		{
 			if (_type != type)
 			{
@@ -22,17 +23,20 @@ namespace BLToolkit.Reflection.MetadataProvider
 			}
 		}
 
-		private bool IsLinqObject(Type type)
+		bool IsLinqObject(Type type)
 		{
-			EnsureMapper(type);
-
-			if (_isLinqObject == null)
+			lock (_sync)
 			{
-				var attrs = type.GetCustomAttributes(typeof(TableAttribute), true);
-				_isLinqObject = attrs.Length > 0;
-			}
+				EnsureMapper(type);
 
-			return _isLinqObject.Value;
+				if (_isLinqObject == null)
+				{
+					var attrs = type.GetCustomAttributes(typeof(TableAttribute), true);
+					_isLinqObject = attrs.Length > 0;
+				}
+
+				return _isLinqObject.Value;
+			}
 		}
 
 		#endregion

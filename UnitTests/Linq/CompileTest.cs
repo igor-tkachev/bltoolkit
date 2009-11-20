@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Linq;
-
+using System.Threading;
 using NUnit.Framework;
 
 using BLToolkit.Data.Linq;
@@ -46,6 +46,72 @@ namespace Data.Linq
 				Assert.AreEqual(1, query(db, 1).ToList().Count());
 				Assert.AreEqual(2, query(db, 2).ToList().Count());
 			});
+		}
+
+		[Test]
+		public void ConcurentTest1()
+		{
+			var query = CompiledQuery.Compile((TestDbManager db, int n) => db.GetTable<Parent>().Where(p => p.ParentID == n).First().ParentID);
+
+			const int count = 100;
+
+			var threads = new Thread[count];
+			var results = new int   [count, 2];
+
+			for (var i = 0; i < count; i++)
+			{
+				var n = i;
+
+				threads[i] = new Thread(() =>
+				{
+					using (var db = new TestDbManager("Sql2008"))
+					{
+						var id = (n % 6) + 1;
+						results[n,0] = id;
+						results[n,1] = query(db, id);
+					}
+				});
+			}
+
+			for (var i = 0; i < count; i++)
+				threads[i].Start();
+
+			for (var i = 0; i < count; i++)
+				threads[i].Join();
+
+			for (var i = 0; i < count; i++)
+				Assert.AreEqual(results[i,0], results[i,1]);
+		}
+
+		[Test]
+		public void ConcurentTest2()
+		{
+			var threads = new Thread[100];
+			var results = new int   [100,2];
+
+			for (var i = 0; i < 100; i++)
+			{
+				var n = i;
+
+				threads[i] = new Thread(() =>
+				{
+					using (var db = new TestDbManager("Sql2008"))
+					{
+						var id = (n % 6) + 1;
+						results[n,0] = id;
+						results[n,1] = db.Parent.Where(p => p.ParentID == id).First().ParentID;
+					}
+				});
+			}
+
+			for (var i = 0; i < 100; i++)
+				threads[i].Start();
+
+			for (var i = 0; i < 100; i++)
+				threads[i].Join();
+
+			for (var i = 0; i < 100; i++)
+				Assert.AreEqual(results[i,0], results[i,1]);
 		}
 	}
 }

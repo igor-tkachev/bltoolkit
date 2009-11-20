@@ -253,13 +253,14 @@ namespace BLToolkit.Data.Sql
 				{
 					SqlField fc = new SqlField(field.Value);
 
-					objectTree.Add(field.Value, fc);
-					table._fields.Add(field.Key, fc);
+					objectTree.   Add(field.Value, fc);
+					table._fields.Add(field.Key,   fc);
 				}
 
 				table._joins.AddRange(_joins.ConvertAll<Join>(delegate(Join j) { return j.Clone(); }));
 
 				objectTree.Add(this, clone = table);
+				objectTree.Add(All,  table.All);
 			}
 
 			return clone;

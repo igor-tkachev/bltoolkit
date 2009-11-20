@@ -170,5 +170,12 @@ namespace Data.Linq
 			var expected = (from ch in Child group ch by ch.Parent1).ToList().Select(g => g.Key);
 			ForEachProvider(db => AreEqual(expected, (from ch in db.Child group ch by ch.Parent1).ToList().Select(g => g.Key)));
 		}
+
+		[Test]
+		public void Count1()
+		{
+			var expected = from p in Parent where p.Children.Count > 2 select p;
+			ForEachProvider(db => AreEqual(expected, from p in Parent where p.Children.Count > 2 select p));
+		}
 	}
 }

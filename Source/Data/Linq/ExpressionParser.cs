@@ -296,6 +296,8 @@ namespace BLToolkit.Data.Linq
 				pi => pi.IsQueryableMethod ("Take",             seq => sequence = ParseSequence(seq), ex => ParseTake(sequence[0], ex)),
 				pi => pi.IsQueryableMethod ("Skip",             seq => sequence = ParseSequence(seq), ex => ParseSkip(sequence[0], ex)),
 				pi => pi.IsEnumerableMethod("DefaultIfEmpty",   seq => { select = ParseDefaultIfEmpty(seq); return select != null; }),
+				pi => pi.IsQueryableMethod ("Concat",           seq => sequence = ParseSequence(seq), ex => { select = ParseUnion(sequence[0], ex, true);  return true; }),
+				pi => pi.IsQueryableMethod ("Union",            seq => sequence = ParseSequence(seq), ex => { select = ParseUnion(sequence[0], ex, false); return true; }),
 				pi => pi.IsMethod(m =>
 				{
 					if (m.Expr.Method.DeclaringType == typeof(Queryable) || !TypeHelper.IsSameOrParent(typeof(IQueryable), pi.Expr.Type))
@@ -858,19 +860,27 @@ namespace BLToolkit.Data.Linq
 				{
 					case ExpressionType.MemberAccess:
 						{
-							var ma = (MemberExpression)pi.Expr;
+							var ma      = (MemberExpression)pi.Expr;
+							var isCount = IsListCount(ma.Member);
 
-							if (ma.Member.Name != "Value" ||
-								ma.Member.DeclaringType.IsGenericType == false ||
-								ma.Member.DeclaringType.GetGenericTypeDefinition() != typeof(Nullable<>))
+							if (!IsNullableValueMember(ma.Member) && !isCount)
 							{
-								var field = GetField(pi, query);
+								if (_info.SqlProvider.ConvertMember(ma.Member) == null)
+								{
+									var field = GetField(pi, query);
 
-								if (field is QueryField.ExprColumn)
-									makeSubQuery = pi.StopWalking = true;
+									if (field is QueryField.ExprColumn)
+										makeSubQuery = pi.StopWalking = true;
+								}
 							}
 
-							isWhere = true;
+							if (isCount)
+							{
+								isHaving = true;
+								pi.StopWalking = true;
+							}
+							else
+								isWhere = true;
 
 							break;
 						}
@@ -1033,7 +1043,7 @@ namespace BLToolkit.Data.Linq
 
 		#region Parse Take
 
-		bool ParseTake(QuerySource select, ParseInfo<Expression> value)
+		bool ParseTake(QuerySource select, ParseInfo value)
 		{
 			if (value.Expr.Type != typeof(int))
 				return false;
@@ -1065,7 +1075,7 @@ namespace BLToolkit.Data.Linq
 
 		#region Parse Skip
 
-		bool ParseSkip(QuerySource select, ParseInfo<Expression> value)
+		bool ParseSkip(QuerySource select, ParseInfo value)
 		{
 			if (value.Expr.Type != typeof(int))
 				return false;
@@ -1214,6 +1224,34 @@ namespace BLToolkit.Data.Linq
 				CurrentSql.Select.Take(take);
 
 			_info.MakeElementOperator(elementMethod);
+		}
+
+		#endregion
+
+		#region ParseUnion
+
+		QuerySource ParseUnion(QuerySource select, ParseInfo ex, bool all)
+		{
+			var sql = CurrentSql;
+
+			CurrentSql = new SqlQuery();
+
+			var query = ParseSequence(ex);
+			var union = new SqlQuery.Union(query[0].SqlQuery, all);
+
+			CurrentSql = sql;
+
+			var sq = select as QuerySource.SubQuery;
+
+			if (sq == null || !sq.SubSql.HasUnion || !sql.IsSimple)
+			{
+				sq = WrapInSubQuery(select);
+			}
+
+			sq.SubSql.Unions.Add(union);
+			sq.Unions.Add(query[0]);
+
+			return sq;
 		}
 
 		#endregion
@@ -2297,11 +2335,14 @@ namespace BLToolkit.Data.Linq
 								return Convert(new SqlExpression(attr.Name ?? ma.Member.Name));
 							}
 
-							if (ma.Member.Name == "Value" &&
-								ma.Member.DeclaringType.IsGenericType &&
-								ma.Member.DeclaringType.GetGenericTypeDefinition() == typeof(Nullable<>))
-							{
+							if (IsNullableValueMember(ma.Member))
 								return ParseExpression(pi.Create(ma.Expression, pi.Property(Member.Expression)), queries);
+
+							if (IsListCount(ma.Member))
+							{
+								var src = GetSource(null, pi.Create(ma.Expression, pi.Property(Member.Expression)), queries);
+								if (src != null)
+									return SqlFunction.CreateCount(src.SqlQuery);
 							}
 
 							goto case ExpressionType.Parameter;
@@ -2455,7 +2496,7 @@ namespace BLToolkit.Data.Linq
 
 					groupBy.SqlQuery.Where.SearchCondition.Conditions.RemoveAt(groupBy.SqlQuery.Where.SearchCondition.Conditions.Count - 1);
 
-					sql.Select.Columns.RemoveAll(_ => true);
+					sql.Select.Columns.Clear();
 
 					if (_info.SqlProvider.IsSubQueryColumnSupported && _info.SqlProvider.IsCountSubQuerySupported)
 					{
@@ -2468,7 +2509,7 @@ namespace BLToolkit.Data.Linq
 							sql.Where.SearchCondition.Conditions.Add(new SqlQuery.Condition(false, pr));
 						}
 
-						sql.GroupBy.Items.RemoveAll(_ => true);
+						sql.GroupBy.Items.Clear();
 						sql.Select.Expr(SqlFunction.CreateCount(sql));
 						sql.ParentSql = groupBy.SqlQuery;
 
@@ -3641,6 +3682,26 @@ namespace BLToolkit.Data.Linq
 		{
 			_info.SqlProvider.SqlQuery = CurrentSql;
 			return _info.SqlProvider.ConvertPredicate(predicate);
+		}
+
+		static bool IsNullableValueMember(MemberInfo member)
+		{
+			return
+				member.Name == "Value" &&
+				member.DeclaringType.IsGenericType &&
+				member.DeclaringType.GetGenericTypeDefinition() == typeof(Nullable<>);
+		}
+
+		static bool IsListCount(MemberInfo member)
+		{
+			return
+				member.Name == "Count" &&
+				(
+					member.DeclaringType.IsGenericType &&
+					member.DeclaringType.GetGenericTypeDefinition() == typeof(List<>)
+					||
+					member.DeclaringType.GetGenericTypeDefinition() == typeof(CollectionBase)
+				);
 		}
 
 		#endregion

@@ -37,7 +37,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		protected override bool BuildWhere()
 		{
-			return base.BuildWhere() || !NeedSkip && NeedTake && SqlQuery.OrderBy.IsEmpty && SqlQuery.Having. IsEmpty;
+			return base.BuildWhere() || !NeedSkip && NeedTake && SqlQuery.OrderBy.IsEmpty && SqlQuery.Having.IsEmpty;
 		}
 
 		string _rowNumberAlias;

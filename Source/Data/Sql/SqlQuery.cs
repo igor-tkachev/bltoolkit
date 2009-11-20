@@ -32,6 +32,7 @@ namespace BLToolkit.Data.Sql
 			GroupByClause      groupBy,
 			WhereClause        having,
 			OrderByClause      orderBy,
+			List<Union>        unions,
 			SqlQuery           parentSql,
 			bool               parameterDependent,
 			List<SqlParameter> parameters)
@@ -42,6 +43,7 @@ namespace BLToolkit.Data.Sql
 			_groupBy            = groupBy;
 			_having             = having;
 			_orderBy            = orderBy;
+			_unions             = unions;
 			_parentSql          = parentSql;
 			_parameterDependent = parameterDependent;
 			_parameters.AddRange(parameters);
@@ -72,6 +74,14 @@ namespace BLToolkit.Data.Sql
 		{
 			get { return _parentSql;  }
 			set { _parentSql = value; }
+		}
+
+		public bool IsSimple
+		{
+			get
+			{
+				return !Select.HasModifier && Where.IsEmpty && GroupBy.IsEmpty && Having.IsEmpty && OrderBy.IsEmpty;
+			}
 		}
 
 		#endregion
@@ -1590,6 +1600,15 @@ namespace BLToolkit.Data.Sql
 
 			#endregion
 
+			#region HasModifier
+
+			public bool HasModifier
+			{
+				get { return IsDistinct || SkipValue != null || TakeValue != null; }
+			}
+
+			#endregion
+
 			#region Distinct
 
 			public SelectClause Distinct
@@ -2202,15 +2221,115 @@ namespace BLToolkit.Data.Sql
 
 		#endregion
 
+		#region Union
+
+		public class Union : IQueryElement
+		{
+			public Union()
+			{
+			}
+
+			public Union(SqlQuery sqlQuery, bool isAll)
+			{
+				_sqlQuery = sqlQuery;
+				_isAll    = isAll;
+			}
+
+			private SqlQuery _sqlQuery; public SqlQuery SqlQuery { get { return _sqlQuery; } }
+			private bool     _isAll;    public bool     IsAll    { get { return _isAll;    } }
+
+			public QueryElementType ElementType
+			{
+				get { return QueryElementType.Union; }
+			}
+
+			public override string ToString()
+			{
+				return " \nUNION" + (IsAll ? " ALL" : "") + " \n" + SqlQuery;
+			}
+		}
+
+		private List<Union> _unions;
+		public  List<Union>  Unions
+		{
+			get
+			{
+				if (_unions == null)
+					_unions = new List<Union>();
+				return _unions;
+			}
+		}
+
+		public bool HasUnion { get { return _unions != null && _unions.Count > 0; } }
+
+		public void AddUnion(SqlQuery union, bool isAll)
+		{
+			Unions.Add(new Union(union, isAll));
+		}
+
+		#endregion
+
 		#region FinalizeAndValidate
 
 		public void FinalizeAndValidate()
 		{
+			OptimizeUnions();
 			FinalizeAndValidateInternal();
 			SetAliases();
 		}
 
-		public void FinalizeAndValidateInternal()
+		void OptimizeUnions()
+		{
+			Dictionary<ISqlExpression,ISqlExpression> exprs = new Dictionary<ISqlExpression,ISqlExpression>();
+
+			new QueryVisitor().Visit(this, delegate(IQueryElement e)
+			{
+				SqlQuery sql = e as SqlQuery;
+
+				if (sql == null || sql.From.Tables.Count != 1 || !sql.IsSimple)
+					return;
+
+				TableSource table = sql.From.Tables[0];
+
+				if (table.Joins.Count != 0 || !(table.Source is SqlQuery))
+					return;
+
+				SqlQuery union = (SqlQuery)table.Source;
+
+				if (!union.HasUnion)
+					return;
+
+				exprs.Add(sql, union);
+
+				for (int i = 0; i < sql.Select.Columns.Count; i++)
+				{
+					Column scol = sql.  Select.Columns[i];
+					Column ucol = union.Select.Columns[i];
+
+					scol.Expression = ucol.Expression;
+					scol._alias     = ucol._alias;
+
+					exprs.Add(ucol, scol);
+				}
+
+				sql.From.Tables.Clear();
+				sql.From.Tables.AddRange(union.From.Tables);
+
+				sql.Where.  SearchCondition.Conditions.AddRange(union.Where. SearchCondition.Conditions);
+				sql.Having. SearchCondition.Conditions.AddRange(union.Having.SearchCondition.Conditions);
+				sql.GroupBy.Items.                     AddRange(union.GroupBy.Items);
+				sql.OrderBy.Items.                     AddRange(union.OrderBy.Items);
+				sql.Unions.InsertRange(0, union.Unions);
+			});
+
+			((ISqlExpressionWalkable)this).Walk(false, delegate(ISqlExpression expr)
+			{
+				ISqlExpression e;
+				return exprs.TryGetValue(expr, out e)? e: expr;
+			});
+		}
+
+		void FinalizeAndValidateInternal()
 		{
 			OptimizeSearchCondition(Where. SearchCondition);
 			OptimizeSearchCondition(Having.SearchCondition);
@@ -2269,7 +2388,7 @@ namespace BLToolkit.Data.Sql
 
 				if (!cond.IsNot && cond.Predicate is SearchCondition)
 				{
-					searchCondition.Conditions.RemoveAll(delegate(Condition _) { return true; });
+					searchCondition.Conditions.Clear();
 					searchCondition.Conditions.AddRange(((SearchCondition)cond.Predicate).Conditions);
 
 					OptimizeSearchCondition(searchCondition);
@@ -2286,7 +2405,7 @@ namespace BLToolkit.Data.Sql
 
 						if (value.Value is bool)
 							if (cond.IsNot ? !(bool)value.Value : (bool)value.Value)
-								searchCondition.Conditions.RemoveAll(delegate(Condition _) { return true; });
+								searchCondition.Conditions.Clear();
 					}
 				}
 			}
@@ -2441,13 +2560,12 @@ namespace BLToolkit.Data.Sql
 			{
 				SqlQuery query = (SqlQuery)source.Source;
 
-				if (query.From.Tables.Count == 1     &&
+				if (query.From.Tables.Count == 1 &&
 				    //query.From.Tables[0].Joins.Count == 0 &&
 				    (optimizeWhere || query.Where.IsEmpty && query.Having.IsEmpty) &&
-				    query.GroupBy.IsEmpty            &&
-				    query.Select.IsDistinct == false &&
-				    query.Select.SkipValue  == null  &&
-				    query.Select.TakeValue  == null  &&
+				   !query.HasUnion               &&
+				    query.GroupBy.IsEmpty        &&
+				   !query.Select.HasModifier     &&
 				   !query.Select.Columns.Exists(delegate(Column c) { return !(c.Expression is SqlField); }))
 				{
 					Dictionary<ISqlExpression,SqlField> map = new Dictionary<ISqlExpression,SqlField>(query.Select.Columns.Count);
@@ -2632,6 +2750,33 @@ namespace BLToolkit.Data.Sql
 						}
 
 						break;
+
+					case QueryElementType.SqlQuery:
+						{
+							SqlQuery sql = (SqlQuery)expr;
+
+							if (sql.HasUnion)
+							{
+								for (int i = 0; i < sql.Select.Columns.Count; i++)
+								{
+									Column col = sql.Select.Columns[i];
+
+									for (int j = 0; j < sql.Unions.Count; j++)
+									{
+										SelectClause union = sql.Unions[j].SqlQuery.Select;
+
+										objs.Remove(union.Columns[i].Alias);
+
+										union.Columns[i].Alias = null;
+
+										if (union.Columns[i].Alias != col.Alias)
+											union.Columns[i].Alias = col.Alias;
+									}
+								}
+							}
+						}
+
+						break;
 				}
 			});
 		}
@@ -2714,7 +2859,21 @@ namespace BLToolkit.Data.Sql
 
 		public override string ToString()
 		{
-			return Select.ToString() + From + Where + GroupBy + Having + OrderBy;
+			StringBuilder sb = new StringBuilder();
+
+			sb
+				.Append(Select)
+				.Append(From)
+				.Append(Where)
+				.Append(GroupBy)
+				.Append(Having)
+				.Append(OrderBy);
+
+			if (HasUnion)
+				foreach (Union u in Unions)
+					sb.Append(u);
+
+			return sb.ToString();
 		}
 
 		#endregion

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Reflection;
 
 namespace BLToolkit.Data.Linq
 {
@@ -206,8 +207,7 @@ namespace BLToolkit.Data.Linq
 
 				if (_index == null)
 				{
-					if (_subIndex == null)
-						_subIndex = Field.Select(parser);
+					SetSubIndex(parser);
 
 					_index = new FieldIndex[_subIndex.Length];
 
@@ -223,10 +223,47 @@ namespace BLToolkit.Data.Linq
 				return _index;
 			}
 
-			public override ISqlExpression[] GetExpressions<T>(ExpressionParser<T> parser)
+			void SetSubIndex<T>(ExpressionParser<T> parser)
 			{
 				if (_subIndex == null)
+				{
 					_subIndex = Field.Select(parser);
+
+					if (QuerySource.SubSql.HasUnion)
+					{
+						var sub = QuerySource.BaseQuery;
+						var idx = sub.Fields.IndexOf(Field);
+
+						MemberInfo mi = sub.GetMember(Field);
+
+						foreach (var union in QuerySource.Unions)
+						{
+							if (mi != null)
+							{
+								var f = union.GetField(mi);
+
+								if (f != null)
+								{
+									f.Select(parser);
+									continue;
+								}
+
+								if (union is QuerySource.Expr)
+								{
+									union.SqlQuery.Select.Add(new SqlValue(null));
+									continue;
+								}
+							}
+
+							union.Fields[idx].Select(parser);
+						}
+					}
+				}
+			}
+
+			public override ISqlExpression[] GetExpressions<T>(ExpressionParser<T> parser)
+			{
+				SetSubIndex(parser);
 
 				if (_subIndex.Length != 1)
 					throw new LinqException("Cannot convert '{0}' to SQL.", Field.GetExpressions(parser)[0]);

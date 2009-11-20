@@ -208,7 +208,9 @@ namespace BLToolkit.Data.Linq
 				for (var i = 0; i < index.Length; i++)
 					index[i] = i;
 
-				GetIEnumerable = (_, db, expr, ps) => Map(query(db, expr, ps, 0), GetMapperSlot(index));
+				var slot = GetMapperSlot(index);
+
+				GetIEnumerable = (_, db, expr, ps) => Map(query(db, expr, ps, 0), slot);
 			}
 		}
 
@@ -262,13 +264,13 @@ namespace BLToolkit.Data.Linq
 
 		IDataReader GetReader(DbManager db, Expression expr, object[] parameters, int idx)
 		{
-			SetParameters(expr, parameters, idx);
-
 			string             command;
 			IDbDataParameter[] parms;
 
 			lock (this)
 			{
+				SetParameters(expr, parameters, idx);
+
 				List<SqlParameter> ps;
 				command = GetCommand(idx, out ps);
 				parms   = GetParameters(db, idx, ps);
@@ -810,12 +812,15 @@ namespace BLToolkit.Data.Linq
 
 						if (e1.Member == e2.Member)
 						{
-							if (_queryableAccessorDic.Count > 0)
+							if (e1.Expression == e2.Expression)
 							{
-								Func<Expression,IQueryable> func;
+								if (_queryableAccessorDic.Count > 0)
+								{
+									Func<Expression,IQueryable> func;
 
-								if (_queryableAccessorDic.TryGetValue(expr1, out func))
-									return Compare(func(expr1).Expression, func(expr2).Expression);
+									if (_queryableAccessorDic.TryGetValue(expr1, out func))
+										return Compare(func(expr1).Expression, func(expr2).Expression);
+								}
 							}
 
 							return Compare(e1.Expression, e2.Expression);

@@ -7,6 +7,12 @@ namespace BLToolkit.Aspects
 	[System.Diagnostics.DebuggerStepThrough]
 	public class CallMethodInfo
 	{
+		#region Init
+
+		readonly object _sync = new object();
+
+		#endregion
+
 		#region Public Members
 
 		public CallMethodInfo(MethodInfo methodInfo)
@@ -32,7 +38,7 @@ namespace BLToolkit.Aspects
 		{
 			get
 			{
-				if (_items == null) lock (this) if (_items == null)
+				if (_items == null) lock (_sync) if (_items == null)
 					_items = Hashtable.Synchronized(new Hashtable());
 
 				return _items;

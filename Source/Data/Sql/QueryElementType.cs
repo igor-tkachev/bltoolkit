@@ -37,6 +37,7 @@ namespace BLToolkit.Data.Sql
 			WhereClause,
 			GroupByClause,
 			OrderByClause,
-				OrderByItem
+				OrderByItem,
+			Union,
 	}
 }

@@ -692,5 +692,21 @@ namespace Data.Linq
 				where !(c.ParentID == 2 || c.ParentID == 3) && c.ChildID != 44
 				select c));
 		}
+
+		[Test]
+		public void Contains()
+		{
+			var words = new [] { "John", "Pupkin" };
+
+			var expected =
+				from p in Person
+				where words.Contains(p.FirstName) || words.Contains(p.LastName)
+				select p;
+
+			ForEachProvider(db => AreEqual(expected,
+				from p in db.Person
+				where words.Contains(p.FirstName) || words.Contains(p.LastName)
+				select p));
+		}
 	}
 }

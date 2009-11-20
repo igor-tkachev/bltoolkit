@@ -56,6 +56,8 @@ namespace BLToolkit.Data.Sql
 				case QueryElementType.SqlTable:
 					{
 						SqlTable table = (SqlTable)element;
+
+						Visit(table.All, all, action);
 						foreach (SqlField field in table.Fields.Values) Visit(field, all, action);
 						foreach (Join     join  in table.Joins)         Visit(join,  all, action);
 						break;
@@ -208,6 +210,10 @@ namespace BLToolkit.Data.Sql
 						break;
 					}
 
+				case QueryElementType.Union:
+					Visit(((SqlQuery.Union)element).SqlQuery, all, action);
+					break;
+
 				case QueryElementType.SqlQuery:
 					{
 						SqlQuery q = (SqlQuery)element;
@@ -218,6 +224,9 @@ namespace BLToolkit.Data.Sql
 						Visit(q.GroupBy, all, action);
 						Visit(q.Having,  all, action);
 						Visit(q.OrderBy, all, action);
+
+						if (q.HasUnion)
+							foreach (SqlQuery.Union i in q.Unions) Visit(i, all, action);
 
 						break;
 					}
@@ -311,6 +320,8 @@ namespace BLToolkit.Data.Sql
 							}
 
 							newElement = new SqlTable(table, fields2, joins ?? table.Joins);
+
+							_visitedElements[((SqlTable)newElement).All] = table.All;
 						}
 
 						break;
@@ -566,6 +577,17 @@ namespace BLToolkit.Data.Sql
 						break;
 					}
 
+				case QueryElementType.Union:
+					{
+						SqlQuery.Union u = (SqlQuery.Union)element;
+						SqlQuery       q = (SqlQuery)ConvertInternal(u.SqlQuery, action);
+
+						if (q != null && !ReferenceEquals(u.SqlQuery, q))
+							newElement = new SqlQuery.Union(q, u.IsAll);
+
+						break;
+					}
+
 				case QueryElementType.SqlQuery:
 					{
 						SqlQuery q = (SqlQuery)element;
@@ -583,6 +605,8 @@ namespace BLToolkit.Data.Sql
 						SqlQuery.GroupByClause gc = (SqlQuery.GroupByClause)ConvertInternal(q.GroupBy, func);
 						SqlQuery.WhereClause   hc = (SqlQuery.WhereClause)  ConvertInternal(q.Having,  func);
 						SqlQuery.OrderByClause oc = (SqlQuery.OrderByClause)ConvertInternal(q.OrderBy, func);
+						List<SqlQuery.Union>   us = q.HasUnion ? Convert(q.Unions, func) : null;
+
 
 						bool bsc = sc == null || ReferenceEquals(sc, q.Select);
 						bool bfc = fc == null || ReferenceEquals(fc, q.From);
@@ -590,8 +614,9 @@ namespace BLToolkit.Data.Sql
 						bool bgc = gc == null || ReferenceEquals(gc, q.GroupBy);
 						bool bhc = hc == null || ReferenceEquals(hc, q.Having);
 						bool boc = oc == null || ReferenceEquals(oc, q.OrderBy);
+						bool bus = q.HasUnion && (us == null || ReferenceEquals(us, q.Unions));
 
-						if (!bsc || !bfc || !bwc || !bgc || !bhc || !boc)
+						if (!bsc || !bfc || !bwc || !bgc || !bhc || !boc || !bus)
 						{
 							SqlQuery nq = new SqlQuery();
 
@@ -606,7 +631,17 @@ namespace BLToolkit.Data.Sql
 										if (sql.ParentSql == q)
 										{
 											SqlQuery nsql = new SqlQuery();
-											nsql.Set(sql.Select, sql.From, sql.Where, sql.GroupBy, sql.Having, sql.OrderBy, nq, sql.ParameterDependent, sql.Parameters);
+											nsql.Set(
+												sql.Select,
+												sql.From,
+												sql.Where,
+												sql.GroupBy,
+												sql.Having,
+												sql.OrderBy,
+												sql.HasUnion ? sql.Unions : null,
+												nq,
+												sql.ParameterDependent,
+												sql.Parameters);
 											return nsql;
 										}
 									}
@@ -622,6 +657,7 @@ namespace BLToolkit.Data.Sql
 								gc = (SqlQuery.GroupByClause)visitor.ConvertInternal(q.GroupBy, func);
 								hc = (SqlQuery.WhereClause)  visitor.ConvertInternal(q.Having,  func);
 								oc = (SqlQuery.OrderByClause)visitor.ConvertInternal(q.OrderBy, func);
+								us = q.HasUnion ? Convert(q.Unions, func) : null;
 
 								bsc = sc == null || ReferenceEquals(sc, q.Select);
 								bfc = fc == null || ReferenceEquals(fc, q.From);
@@ -629,6 +665,7 @@ namespace BLToolkit.Data.Sql
 								bgc = gc == null || ReferenceEquals(gc, q.GroupBy);
 								bhc = hc == null || ReferenceEquals(hc, q.Having);
 								boc = oc == null || ReferenceEquals(oc, q.OrderBy);
+								bus = q.HasUnion && (us == null || ReferenceEquals(us, q.Unions));
 							}
 
 							sc = sc ?? q.Select;
@@ -637,6 +674,7 @@ namespace BLToolkit.Data.Sql
 							gc = gc ?? q.GroupBy;
 							hc = hc ?? q.Having;
 							oc = oc ?? q.OrderBy;
+							us = q.HasUnion ? (us ?? q.Unions) : null;
 
 							if (bsc) sc = new SqlQuery.SelectClause (sc.IsDistinct, sc.TakeValue, sc.SkipValue, sc.Columns);
 							if (bfc) fc = new SqlQuery.FromClause   (fc.Tables);
@@ -660,7 +698,7 @@ namespace BLToolkit.Data.Sql
 								}
 							}
 
-							nq.Set(sc, fc, wc, gc, hc, oc, q.ParentSql, q.ParameterDependent, ps);
+							nq.Set(sc, fc, wc, gc, hc, oc, us, q.ParentSql, q.ParameterDependent, ps);
 							newElement = nq;
 						}
 

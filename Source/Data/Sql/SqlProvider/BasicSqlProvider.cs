@@ -71,6 +71,20 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 			BuildSql(sb);
 
+			if (sqlQuery.HasUnion)
+			{
+				foreach (SqlQuery.Union union in sqlQuery.Unions)
+				{
+					sb.AppendLine();
+					AppendIndent(sb);
+					sb.Append("UNION");
+					if (union.IsAll) sb.Append(" ALL");
+					sb.AppendLine();
+
+					CreateSqlProvider().BuildSql(union.SqlQuery, sb, indent, nesting);
+				}
+			}
+
 			return _nextNesting;
 		}
 
@@ -708,12 +722,18 @@ namespace BLToolkit.Data.Sql.SqlProvider
 				case QueryElementType.SqlField:
 					{
 						SqlField field = (SqlField)expr;
-
 						if (field == field.Table.All)
+						{
 							sb.Append("*");
+						}
 						else
 						{
-							string table = GetTableAlias(_sqlQuery.GetTableSource(field.Table)) ?? GetTablePhysicalName(field.Table);
+							SqlQuery.TableSource ts = _sqlQuery.GetTableSource(field.Table);
+
+							if (ts == null)
+								throw new SqlException(string.Format("Table {0} not found.", field.Table));
+
+							string table = GetTableAlias(ts) ?? GetTablePhysicalName(field.Table);
 
 							if (string.IsNullOrEmpty(table))
 								throw new SqlException(string.Format("Table {0} should have an alias.", field.Table));
@@ -1266,11 +1286,10 @@ namespace BLToolkit.Data.Sql.SqlProvider
 						string name = string.Empty;
 
 						if (tbl.Database != null)
-							name = _dataProvider.Convert(tbl.Database, ConvertType.NameToDatabase).ToString();
+							name = _dataProvider.Convert(tbl.Database, ConvertType.NameToDatabase) + _dataProvider.DatabaseOwnerDelimiter;
 
 						if (tbl.Owner != null)
 							name +=
-								_dataProvider.DatabaseOwnerDelimiter +
 								_dataProvider.Convert(tbl.Owner, ConvertType.NameToOwner) +
 								_dataProvider.OwnerTableDelimiter;
 						else

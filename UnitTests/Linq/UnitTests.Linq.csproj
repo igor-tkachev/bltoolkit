@@ -126,6 +126,7 @@
     <Compile Include="ComplexTest.cs" />
     <Compile Include="Association.cs" />
     <Compile Include="Model\Parent1.cs" />
+    <Compile Include="SetTest.cs" />
     <Compile Include="SubQuery.cs" />
     <Compile Include="Types.cs" />
     <Compile Include="Exceptions\Mapping.cs" />

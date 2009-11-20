@@ -18,12 +18,13 @@ namespace BLToolkit.Data.Linq
 
 		readonly LambdaExpression _lambda;
 		readonly Expression       _expression;
+		readonly object           _sync = new object();
 
 		DataProviderBase  _lastDataProvider;
 		MappingSchema     _lastMappingSchema;
 		ExpressionInfo<T> _lastInfo;
 
-		Dictionary<object,ExpressionInfo<T>> _infos = new Dictionary<object, ExpressionInfo<T>>();
+		readonly Dictionary<object,ExpressionInfo<T>> _infos = new Dictionary<object, ExpressionInfo<T>>();
 
 		ExpressionInfo<T> GetInfo(DbManager db)
 		{
@@ -31,7 +32,7 @@ namespace BLToolkit.Data.Linq
 			MappingSchema     lastMappingSchema;
 			ExpressionInfo<T> info;
 
-			lock (this)
+			lock (_sync)
 			{
 				lastDataProvider  = _lastDataProvider;
 				lastMappingSchema = _lastMappingSchema;
@@ -48,20 +49,25 @@ namespace BLToolkit.Data.Linq
 			{
 				var key = new { dataProvider, mappingSchema };
 
-				lock (this)
+				lock (_sync)
 					_infos.TryGetValue(key, out info);
 
 				if (info == null)
 				{
-					info = new ExpressionParser<T>().Parse(dataProvider, mappingSchema, _expression, _lambda.Parameters.ToArray());
-
-					lock (this)
+					lock (_sync)
 					{
-						_infos.Add(key, info);
+						_infos.TryGetValue(key, out info);
 
-						_lastDataProvider  = dataProvider;
-						_lastMappingSchema = mappingSchema;
-						_lastInfo          = info;
+						if (info == null)
+						{
+							info = new ExpressionParser<T>().Parse(dataProvider, mappingSchema, _expression, _lambda.Parameters.ToArray());
+
+							_infos.Add(key, info);
+
+							_lastDataProvider  = dataProvider;
+							_lastMappingSchema = mappingSchema;
+							_lastInfo = info;
+						}
 					}
 				}
 			}

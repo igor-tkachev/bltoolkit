@@ -238,6 +238,13 @@ namespace BLToolkit.Data.Linq
 				return col;
 			}
 
+			public override MemberInfo GetMember(QueryField field)
+			{
+				var objectMapper = _mappingSchema.GetObjectMapper(ObjectType);
+
+				return objectMapper[((Column)field).Field.Name].MemberAccessor.MemberInfo;
+			}
+
 			Table() {}
 
 			protected override QuerySource CloneInstance(Dictionary<ICloneableElement,ICloneableElement> objectTree, Predicate<ICloneableElement> doClone)
@@ -328,6 +335,15 @@ namespace BLToolkit.Data.Linq
 				QueryField fld;
 				Members.TryGetValue(mi, out fld);
 				return fld;
+			}
+
+			public override MemberInfo GetMember(QueryField field)
+			{
+				foreach (KeyValuePair<MemberInfo,QueryField> member in Members)
+					if (member.Value == field)
+						return member.Key;
+
+				return null;
 			}
 
 			public override QueryField GetField(Expression expr)
@@ -439,6 +455,7 @@ namespace BLToolkit.Data.Linq
 			}
 
 			public   SqlQuery                              SubSql;
+			public   List<QuerySource>                     Unions = new List<QuerySource>();
 			readonly Dictionary<QueryField,SubQueryColumn> _columns = new Dictionary<QueryField,SubQueryColumn>();
 
 			public override QueryField EnsureField(QueryField field)
@@ -496,6 +513,15 @@ namespace BLToolkit.Data.Linq
 			public override QueryField GetField(SqlField field)
 			{
 				return EnsureField(base.GetField(field));
+			}
+
+			public override MemberInfo GetMember(QueryField field)
+			{
+				foreach (KeyValuePair<QueryField,SubQueryColumn> col in _columns)
+					if (col.Value == field)
+						BaseQuery.GetMember(col.Value);
+
+				return null;
 			}
 
 			public override Type ObjectType { get { return BaseQuery.ObjectType; } }
@@ -583,6 +609,11 @@ namespace BLToolkit.Data.Linq
 			public override QueryField GetField(MemberInfo mi)
 			{
 				throw new NotImplementedException();
+			}
+
+			public override MemberInfo GetMember(QueryField field)
+			{
+				return null;
 			}
 
 			public override QueryField GetField(Expression expr)
@@ -825,6 +856,8 @@ namespace BLToolkit.Data.Linq
 
 			return null;
 		}
+
+		public abstract MemberInfo GetMember(QueryField field);
 
 		FieldIndex[] _indexes;
 
