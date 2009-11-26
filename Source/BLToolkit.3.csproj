@@ -196,7 +196,9 @@
     <Compile Include="Data\Sql\SqlValue.cs" />
     <Compile Include="Mapping\AssociationAttribute.cs" />
     <Compile Include="Mapping\Association.cs" />
+    <Compile Include="Mapping\InheritanceMappingAttribute.cs" />
     <Compile Include="Mapping\MapRelationBase.cs" />
+    <Compile Include="Mapping\NotNullAttribute.cs" />
     <Compile Include="Mapping\RelationAttribute.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>

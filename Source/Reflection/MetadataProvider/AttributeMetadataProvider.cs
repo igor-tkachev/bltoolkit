@@ -93,6 +93,32 @@ namespace BLToolkit.Reflection.MetadataProvider
 
 		#endregion
 
+		#region GetInheritanceDiscriminator
+
+		public override bool GetInheritanceDiscriminator(TypeExtension typeExtension, MemberAccessor member, out bool isSet)
+		{
+			MapFieldAttribute a = member.GetAttribute<MapFieldAttribute>();
+
+			if (a != null)
+			{
+				isSet = true;
+				return a.IsInheritanceDiscriminator;
+			}
+
+			foreach (MapFieldAttribute attr in GetMapFieldAttributes(member.TypeAccessor))
+			{
+				if (string.Equals(attr.OrigName, member.Name, StringComparison.InvariantCultureIgnoreCase))
+				{
+					isSet = true;
+					return attr.IsInheritanceDiscriminator;
+				}
+			}
+
+			return base.GetInheritanceDiscriminator(typeExtension, member, out isSet);
+		}
+
+		#endregion
+
 		#region EnsureMapper
 
 		public override void EnsureMapper(TypeAccessor typeAccessor, MappingSchema mappingSchema, EnsureMapperHandler handler)
@@ -623,6 +649,27 @@ namespace BLToolkit.Reflection.MetadataProvider
 				aa.GetOtherKeys(),
 				aa.Storage,
 				aa.CanBeNull);
+		}
+
+		#endregion
+
+		#region GetInheritanceMapping
+
+		public override InheritanceMappingAttribute[] GetInheritanceMapping(Type type, TypeExtension typeExtension)
+		{
+			object[] attrs = type.GetCustomAttributes(typeof(InheritanceMappingAttribute), true);
+
+			if (attrs.Length > 0)
+			{
+				InheritanceMappingAttribute[] maps = new InheritanceMappingAttribute[attrs.Length];
+
+				for (int i = 0; i < attrs.Length; i++)
+					maps[i] = (InheritanceMappingAttribute)attrs[i];
+
+				return maps;
+			}
+
+			return base.GetInheritanceMapping(type, typeExtension);
 		}
 
 		#endregion

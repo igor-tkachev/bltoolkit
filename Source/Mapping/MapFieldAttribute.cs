@@ -55,5 +55,13 @@ namespace BLToolkit.Mapping
 			get { return _storage;  }
 			set { _storage = value; }
 		}
+
+		private bool _isInheritanceDiscriminator;
+		public  bool  IsInheritanceDiscriminator
+		{
+			[DebuggerStepThrough]
+			get { return _isInheritanceDiscriminator;  }
+			set { _isInheritanceDiscriminator = value; }
+		}
 	}
 }

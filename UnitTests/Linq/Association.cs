@@ -5,6 +5,8 @@ using NUnit.Framework;
 
 namespace Data.Linq
 {
+	using Model;
+
 	[TestFixture]
 	public class Association : TestBase
 	{
@@ -126,7 +128,7 @@ namespace Data.Linq
 					.SelectMany(
 					g => 
 						g.Select(ch => ch.Parent));
-;
+
 			ForEachProvider(db => AreEqual(expected,
 				db.Child
 					.GroupBy(ch => ch.Parent)
@@ -142,7 +144,7 @@ namespace Data.Linq
 					.GroupBy(ch => ch.Parent)
 					.Where(g => g.Count() > 2)
 					.SelectMany(g => g.Select(ch => ch.Parent.ParentID));
-;
+
 			ForEachProvider(db => AreEqual(expected,
 				db.Child
 					.GroupBy(ch => ch.Parent)
@@ -175,7 +177,22 @@ namespace Data.Linq
 		public void Count1()
 		{
 			var expected = from p in Parent where p.Children.Count > 2 select p;
-			ForEachProvider(db => AreEqual(expected, from p in Parent where p.Children.Count > 2 select p));
+			ForEachProvider(db => AreEqual(expected, from p in db.Parent where p.Children.Count > 2 select p));
+		}
+
+
+		[Test]
+		public void EqualsNull()
+		{
+			var expected =
+				from   employee in Employee
+				where  employee.ReportsToEmployee != null
+				select employee.EmployeeID;
+
+			using (var db = new NorthwindDB()) AreEqual(expected, 
+				from   employee in db.Employee
+				where  employee.ReportsToEmployee != null
+				select employee.EmployeeID);
 		}
 	}
 }

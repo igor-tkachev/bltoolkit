@@ -2,6 +2,8 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
+using BLToolkit.Common;
+using Convert=System.Convert;
 
 namespace BLToolkit.Reflection.MetadataProvider
 {
@@ -47,6 +49,20 @@ namespace BLToolkit.Reflection.MetadataProvider
 				return value.ToString();
 
 			return base.GetFieldStorage(typeExtension, member, out isSet);
+		}
+
+		#endregion
+
+		#region GetInheritanceDiscriminator
+
+		public override bool GetInheritanceDiscriminator(TypeExtension typeExtension, MemberAccessor member, out bool isSet)
+		{
+			object value = GetValue(typeExtension, member, "IsInheritanceDiscriminator", out isSet);
+
+			if (value != null)
+				return TypeExtension.ToBoolean(value);
+
+			return base.GetInheritanceDiscriminator(typeExtension, member, out isSet);
 		}
 
 		#endregion
@@ -487,5 +503,32 @@ namespace BLToolkit.Reflection.MetadataProvider
 		}
 
 		#endregion
+
+		#region GetInheritanceMapping
+
+		public override InheritanceMappingAttribute[] GetInheritanceMapping(Type type, TypeExtension typeExtension)
+		{
+			AttributeExtensionCollection extList = typeExtension.Attributes["InheritanceMapping"];
+
+			if (extList == AttributeExtensionCollection.Null)
+				return Array<InheritanceMappingAttribute>.Empty;
+
+			InheritanceMappingAttribute[] attrs = new InheritanceMappingAttribute[extList.Count];
+
+			for (int i = 0; i < extList.Count; i++)
+			{
+				AttributeExtension ext = extList[i];
+
+				attrs[i] = new InheritanceMappingAttribute();
+				attrs[i].Code      = ext["Code"];
+				attrs[i].IsDefault = TypeExtension.ToBoolean(ext["IsDefault", "False"], false);
+				attrs[i].Type      = Type.GetType(Convert.ToString(ext["Type"]));
+			}
+
+			return attrs;
+		}
+
+		#endregion
+
 	}
 }

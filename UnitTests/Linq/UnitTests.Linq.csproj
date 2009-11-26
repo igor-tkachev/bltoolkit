@@ -125,7 +125,13 @@
     <Compile Include="CompileTest.cs" />
     <Compile Include="ComplexTest.cs" />
     <Compile Include="Association.cs" />
-    <Compile Include="Model\Parent1.cs" />
+    <Compile Include="Exceptions\Inheritance.cs" />
+    <Compile Include="Inheritance.cs" />
+    <Compile Include="Model\Northwind.cs" />
+    <Compile Include="Model\NorthwindDB.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Model\ParentChild.cs" />
     <Compile Include="SetTest.cs" />
     <Compile Include="SubQuery.cs" />
     <Compile Include="Types.cs" />
@@ -135,7 +141,6 @@
     <Compile Include="ElementOperationTest.cs" />
     <Compile Include="Exceptions\ElementOperationTest.cs" />
     <Compile Include="Mapping.cs" />
-    <Compile Include="Model\GrandChild1.cs" />
     <Compile Include="Model\EditableParent.cs" />
     <Compile Include="Model\Gender.cs" />
     <Compile Include="Model\LinqDataTypes.cs" />
@@ -146,9 +151,6 @@
     <Compile Include="Exceptions\JoinTest.cs" />
     <Compile Include="JoinTest.cs" />
     <Compile Include="DateTimeFunctions.cs" />
-    <Compile Include="Model\Child.cs" />
-    <Compile Include="Model\GrandChild.cs" />
-    <Compile Include="Model\Parent.cs" />
     <Compile Include="Providers\MySqlTest.cs" />
     <Compile Include="SelectManyTest.cs" />
     <Compile Include="StringFunctions.cs" />

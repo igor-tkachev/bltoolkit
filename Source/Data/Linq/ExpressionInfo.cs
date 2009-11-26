@@ -140,11 +140,6 @@ namespace BLToolkit.Data.Linq
 
 		#region Query
 
-		public void SetQuery()
-		{
-			SetQuery(null);
-		}
-
 		public void SetQuery(Mapper<T> mapper)
 		{
 			Queries[0].Mapper = mapper;

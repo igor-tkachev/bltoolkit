@@ -15,14 +15,6 @@ namespace BLToolkit.Mapping
 	[DebuggerDisplay("Type = {TypeAccessor.Type}, OriginalType = {TypeAccessor.OriginalType}")]
 	public class ObjectMapper : MapDataSourceDestinationBase, IEnumerable<MemberMapper>
 	{
-		#region Constructor
-
-		public ObjectMapper()
-		{
-		}
-
-		#endregion
-
 		#region Protected Members
 
 		protected virtual MemberMapper CreateMemberMapper(MapMemberInfo mapMemberInfo)
@@ -103,6 +95,12 @@ namespace BLToolkit.Mapping
 		public   List<Association>  Associations
 		{
 			get { return _associations; }
+		}
+
+		readonly List<InheritanceMappingAttribute> _inheritanceMapping = new List<InheritanceMappingAttribute>();
+		public   List<InheritanceMappingAttribute>  InheritanceMapping
+		{
+			get { return _inheritanceMapping; }
 		}
 
 		private TypeExtension _extension;
@@ -241,8 +239,9 @@ namespace BLToolkit.Mapping
 
 			_typeAccessor  = TypeAccessor.GetAccessor(type);
 			_mappingSchema = mappingSchema;
-			_extension     = TypeExtension.GetTypeExtension(
-				_typeAccessor.OriginalType, mappingSchema.Extensions);
+			_extension     = TypeExtension.GetTypeExtension(_typeAccessor.OriginalType, mappingSchema.Extensions);
+
+			_inheritanceMapping.AddRange(GetInheritanceMapping());
 
 			foreach (MemberAccessor ma in _typeAccessor)
 			{
@@ -263,19 +262,20 @@ namespace BLToolkit.Mapping
 				{
 					MapMemberInfo mi = new MapMemberInfo();
 
-					mi.MemberAccessor  = ma;
-					mi.Type            = ma.Type;
-					mi.MappingSchema   = mappingSchema;
-					mi.MemberExtension = _extension[ma.Name];
-					mi.Name            = GetFieldName   (ma);
-					mi.MemberName      = ma.Name;
-					mi.Storage         = GetFieldStorage(ma);
-					mi.Trimmable       = GetTrimmable   (ma);
-					mi.SqlIgnore       = GetSqlIgnore   (ma);
-					mi.MapValues       = GetMapValues   (ma);
-					mi.DefaultValue    = GetDefaultValue(ma);
-					mi.Nullable        = GetNullable    (ma);
-					mi.NullValue       = GetNullValue   (ma, mi.Nullable);
+					mi.MemberAccessor             = ma;
+					mi.Type                       = ma.Type;
+					mi.MappingSchema              = mappingSchema;
+					mi.MemberExtension            = _extension[ma.Name];
+					mi.Name                       = GetFieldName   (ma);
+					mi.MemberName                 = ma.Name;
+					mi.Storage                    = GetFieldStorage(ma);
+					mi.IsInheritanceDiscriminator = GetInheritanceDiscriminator(ma);
+					mi.Trimmable                  = GetTrimmable   (ma);
+					mi.SqlIgnore                  = GetSqlIgnore   (ma);
+					mi.MapValues                  = GetMapValues   (ma);
+					mi.DefaultValue               = GetDefaultValue(ma);
+					mi.Nullable                   = GetNullable    (ma);
+					mi.NullValue                  = GetNullValue   (ma, mi.Nullable);
 
 					Add(CreateMemberMapper(mi));
 				}
@@ -459,6 +459,12 @@ namespace BLToolkit.Mapping
 			return MetadataProvider.GetFieldStorage(Extension, memberAccessor, out isSet);
 		}
 
+		protected virtual bool GetInheritanceDiscriminator(MemberAccessor memberAccessor)
+		{
+			bool isSet;
+			return MetadataProvider.GetInheritanceDiscriminator(Extension, memberAccessor, out isSet);
+		}
+
 		protected virtual bool GetTrimmable(MemberAccessor memberAccessor)
 		{
 			bool isSet;
@@ -479,6 +485,11 @@ namespace BLToolkit.Mapping
 		protected virtual Association GetAssociation(MemberAccessor memberAccessor)
 		{
 			return MetadataProvider.GetAssociation(Extension, memberAccessor);
+		}
+
+		protected virtual InheritanceMappingAttribute[] GetInheritanceMapping()
+		{
+			return MetadataProvider.GetInheritanceMapping(_typeAccessor.OriginalType, Extension);
 		}
 
 		#endregion

@@ -14,7 +14,7 @@ namespace BLToolkit.Data.Linq
 			return Expression.Convert(expr, typeof(T));
 		}
 
-		[DebuggerStepThrough]
+		//[DebuggerStepThrough]
 		public static bool IsMethod(
 			this ParseInfo<MethodCallExpression> pi,
 			Type                                 declaringType,
@@ -135,7 +135,7 @@ namespace BLToolkit.Data.Linq
 			return false;
 		}
 
-		[DebuggerStepThrough]
+		//[DebuggerStepThrough]
 		public static bool IsEnumerableMethod(
 			this ParseInfo<MethodCallExpression> pi,
 			string                               methodName,
@@ -144,7 +144,7 @@ namespace BLToolkit.Data.Linq
 			return IsMethod(pi, typeof(Enumerable), methodName, new [] { action }, p => true);
 		}
 
-		[DebuggerStepThrough]
+		//[DebuggerStepThrough]
 		public static ParseInfo<Expression> CreateArgument(this ParseInfo<MethodCallExpression> pi, int idx)
 		{
 			return pi.Create(pi.Expr.Arguments[idx], pi.Indexer(ReflectionHelper.MethodCall.Arguments, ReflectionHelper.ExprItem, idx));

@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 
+using BLToolkit.Common;
+
 namespace BLToolkit.Reflection.MetadataProvider
 {
 	using Extension;
@@ -45,6 +47,16 @@ namespace BLToolkit.Reflection.MetadataProvider
 		{
 			isSet = false;
 			return null;
+		}
+
+		#endregion
+
+		#region GetInheritanceDiscriminator
+
+		public virtual bool GetInheritanceDiscriminator(TypeExtension typeExtension, MemberAccessor member, out bool isSet)
+		{
+			isSet = false;
+			return false;
 		}
 
 		#endregion
@@ -242,6 +254,15 @@ namespace BLToolkit.Reflection.MetadataProvider
 		public virtual Association GetAssociation(TypeExtension typeExtension, MemberAccessor member)
 		{
 			return null;
+		}
+
+		#endregion
+
+		#region GetInheritanceMapping
+
+		public virtual InheritanceMappingAttribute[] GetInheritanceMapping(Type type, TypeExtension typeExtension)
+		{
+			return Array<InheritanceMappingAttribute>.Empty;
 		}
 
 		#endregion

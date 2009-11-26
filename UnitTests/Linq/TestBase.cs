@@ -149,6 +149,8 @@ namespace Data.Linq
 			}
 		}
 
+		#region Parent/Child Model
+
 		private   List<Parent> _parent;
 		protected List<Parent>  Parent
 		{
@@ -174,6 +176,19 @@ namespace Data.Linq
 			get
 			{
 				return _parent1 ?? (_parent1 = Parent.Select(p => new Parent1 { ParentID = p.ParentID, Value1 = p.Value1 }).ToList());
+			}
+		}
+
+		private   List<ParentInheritanceBase> _parentInheritance;
+		protected List<ParentInheritanceBase>  ParentInheritance
+		{
+			get
+			{
+				return _parentInheritance ?? (_parentInheritance = Parent.Select(p =>
+					p.Value1       == null ? new ParentInheritanceNull  { ParentID = p.ParentID } :
+					p.Value1.Value == 1    ? new ParentInheritance1     { ParentID = p.ParentID, Value1 = p.Value1.Value } :
+					 (ParentInheritanceBase) new ParentInheritanceValue { ParentID = p.ParentID, Value1 = p.Value1.Value }
+				).ToList());
 			}
 		}
 
@@ -248,6 +263,167 @@ namespace Data.Linq
 				return _types;
 			}
 		}
+
+		#endregion
+
+		#region Northwind
+
+		private List<Northwind.Category> _category;
+		public  List<Northwind.Category>  Category
+		{
+			get
+			{
+				if (_category == null)
+					using (var db = new NorthwindDB())
+						_category = db.Category.ToList();
+				return _category;
+			}
+		}
+
+		private List<Northwind.Customer> _customer;
+		public  List<Northwind.Customer>  Customer
+		{
+			get
+			{
+				if (_customer == null)
+					using (var db = new NorthwindDB())
+						_customer = db.Customer.ToList();
+				return _customer;
+			}
+		}
+
+		private List<Northwind.Employee> _employee;
+		public  List<Northwind.Employee>  Employee
+		{
+			get
+			{
+				if (_employee == null)
+				{
+					using (var db = new NorthwindDB())
+					{
+						_employee = db.Employee.ToList();
+
+						foreach (var employee in _employee)
+						{
+							employee.Employees         = (from e in _employee where e.ReportsTo == employee.EmployeeID select e).ToList();
+							employee.ReportsToEmployee = (from e in _employee where e.EmployeeID == employee.ReportsTo select e).SingleOrDefault();
+						}
+					}
+				}
+
+				return _employee;
+			}
+		}
+
+		private List<Northwind.EmployeeTerritory> _employeeTerritory;
+		public  List<Northwind.EmployeeTerritory>  EmployeeTerritory
+		{
+			get
+			{
+				if (_employeeTerritory == null)
+					using (var db = new NorthwindDB())
+						_employeeTerritory = db.EmployeeTerritory.ToList();
+				return _employeeTerritory;
+			}
+		}
+
+		private List<Northwind.OrderDetail> _orderDetail;
+		public  List<Northwind.OrderDetail>  OrderDetail
+		{
+			get
+			{
+				if (_orderDetail == null)
+					using (var db = new NorthwindDB())
+						_orderDetail = db.OrderDetail.ToList();
+				return _orderDetail;
+			}
+		}
+
+		private List<Northwind.Order> _order;
+		public  List<Northwind.Order>  Order
+		{
+			get
+			{
+				if (_order == null)
+					using (var db = new NorthwindDB())
+						_order = db.Order.ToList();
+				return _order;
+			}
+		}
+
+		private List<Northwind.Product> _product;
+		public  List<Northwind.Product>  Product
+		{
+			get
+			{
+				if (_product == null)
+					using (var db = new NorthwindDB())
+						_product = db.Product.ToList();
+				return _product;
+			}
+		}
+
+		private List<Northwind.ActiveProduct> _activeProduct;
+		public  List<Northwind.ActiveProduct>  ActiveProduct
+		{
+			get { return _activeProduct ?? (_activeProduct = Product.OfType<Northwind.ActiveProduct>().ToList()); }
+		}
+
+		private List<Northwind.DiscontinuedProduct> _discontinuedProduct;
+		public  List<Northwind.DiscontinuedProduct>  DiscontinuedProduct
+		{
+			get { return _discontinuedProduct ?? (_discontinuedProduct = Product.OfType<Northwind.DiscontinuedProduct>().ToList()); }
+		}
+
+		private List<Northwind.Region> _region;
+		public  List<Northwind.Region>  Region
+		{
+			get
+			{
+				if (_region == null)
+					using (var db = new NorthwindDB())
+						_region = db.Region.ToList();
+				return _region;
+			}
+		}
+
+		private List<Northwind.Shipper> _shipper;
+		public  List<Northwind.Shipper>  Shipper
+		{
+			get
+			{
+				if (_shipper == null)
+					using (var db = new NorthwindDB())
+						_shipper = db.Shipper.ToList();
+				return _shipper;
+			}
+		}
+
+		private List<Northwind.Supplier> _supplier;
+		public  List<Northwind.Supplier>  Supplier
+		{
+			get
+			{
+				if (_supplier == null)
+					using (var db = new NorthwindDB())
+						_supplier = db.Supplier.ToList();
+				return _supplier;
+			}
+		}
+
+		private List<Northwind.Territory> _territory;
+		public  List<Northwind.Territory>  Territory
+		{
+			get
+			{
+				if (_territory == null)
+					using (var db = new NorthwindDB())
+						_territory = db.Territory.ToList();
+				return _territory;
+			}
+		}
+
+		#endregion
 
 		protected void AreEqual<T>(IEnumerable<T> expected, IEnumerable<T> result)
 		{

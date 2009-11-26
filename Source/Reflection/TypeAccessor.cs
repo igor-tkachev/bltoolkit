@@ -15,7 +15,8 @@ using BLToolkit.EditableObjects;
 using BLToolkit.Mapping;
 using BLToolkit.TypeBuilder;
 using BLToolkit.TypeBuilder.Builders;
-using JetBrains.Annotations;
+
+using JNotNull = JetBrains.Annotations.NotNullAttribute;
 
 namespace BLToolkit.Reflection
 {
@@ -277,7 +278,7 @@ namespace BLToolkit.Reflection
 			return accessor;
 		}
 
-		public static TypeAccessor GetAccessor([NotNull] object obj)
+		public static TypeAccessor GetAccessor([JNotNull] object obj)
 		{
 			if (obj == null) throw new ArgumentNullException("obj");
 			return GetAccessor(obj.GetType());

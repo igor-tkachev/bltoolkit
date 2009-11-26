@@ -77,6 +77,23 @@ namespace BLToolkit.Reflection.MetadataProvider
 
 		#endregion
 
+		#region GetInheritanceDiscriminator
+
+		public override bool GetInheritanceDiscriminator(TypeExtension typeExtension, MemberAccessor member, out bool isSet)
+		{
+			foreach (MetadataProviderBase p in _list)
+			{
+				bool value = p.GetInheritanceDiscriminator(typeExtension, member, out isSet);
+
+				if (isSet)
+					return value;
+			}
+
+			return base.GetInheritanceDiscriminator(typeExtension, member, out isSet);
+		}
+
+		#endregion
+
 		#region EnsureMapper
 
 		public override void EnsureMapper(TypeAccessor typeAccessor, MappingSchema mappingSchema, EnsureMapperHandler handler)
@@ -350,6 +367,23 @@ namespace BLToolkit.Reflection.MetadataProvider
 			}
 
 			return base.GetAssociation(typeExtension, member);
+		}
+
+		#endregion
+
+		#region GetInheritanceMapping
+
+		public override InheritanceMappingAttribute[] GetInheritanceMapping(Type type, TypeExtension typeExtension)
+		{
+			foreach (MetadataProviderBase p in _list)
+			{
+				InheritanceMappingAttribute[] attrs = p.GetInheritanceMapping(type, typeExtension);
+
+				if (attrs.Length > 0)
+					return attrs;
+			}
+
+			return base.GetInheritanceMapping(type, typeExtension);
 		}
 
 		#endregion

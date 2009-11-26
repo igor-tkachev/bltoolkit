@@ -1,6 +1,6 @@
 ﻿using System;
 
-using JetBrains.Annotations;
+using JNotNull = JetBrains.Annotations.NotNullAttribute;
 
 namespace BLToolkit.Mapping
 {
@@ -10,9 +10,9 @@ namespace BLToolkit.Mapping
 	public class Association
 	{
 		public Association(
-			[NotNull] MemberAccessor memberAccessor,
-			[NotNull] string[]       thisKey,
-			[NotNull] string[]       otherKey,
+			[JNotNull] MemberAccessor memberAccessor,
+			[JNotNull] string[]       thisKey,
+			[JNotNull] string[]       otherKey,
 			          string         storage,
 			          bool           canBeNull)
 		{

@@ -32,6 +32,19 @@ namespace BLToolkit.Data.Linq
 				ParsingTracer.DecIndentLevel();
 			}
 
+			public Table(MappingSchema mappingSchema, SqlQuery sqlQuery, Type type)
+				: base(sqlQuery, null)
+			{
+				_objectType = type;
+				SqlTable    = new SqlTable(mappingSchema, _objectType);
+
+				sqlQuery.From.Table(SqlTable);
+
+				Init(mappingSchema);
+
+				ParsingTracer.DecIndentLevel();
+			}
+
 			Table(MappingSchema mappingSchema, SqlQuery sqlQuery, Association association, Table parent)
 				: base(sqlQuery, null)
 			{
@@ -93,6 +106,40 @@ namespace BLToolkit.Data.Linq
 
 				foreach (var a in objectMapper.Associations)
 					_associations.Add(a.MemberAccessor.Name, a);
+
+				InheritanceMapping = objectMapper.InheritanceMapping;
+
+				if (InheritanceMapping.Count > 0)
+				{
+					foreach (var mapping in InheritanceMapping)
+					{
+						if (mapping.Type != ObjectType)
+						{
+							foreach (MemberMapper mm in mappingSchema.GetObjectMapper(mapping.Type))
+							{
+								if (mm.MapMemberInfo.SqlIgnore == false)
+								{
+									if (!_columns.ContainsKey(mm.MemberName))
+									{
+										var field = new SqlField(mm.MemberName, mm.Name, mm.MapMemberInfo.Nullable, int.MinValue);
+										SqlTable.Fields.Add(field);
+
+										var column = new Column(this, field, null);
+
+										Fields.Add(column);
+										_columns.Add(field.Name, column);
+									}
+
+									if (mm.MapMemberInfo.IsInheritanceDiscriminator)
+										InheritanceDiscriminatorName = mm.MapMemberInfo.Name;
+								}
+							}
+						}
+					}
+
+					if (InheritanceDiscriminatorName == null)
+						throw new LinqException("Inheritance Discriminator is not defined for the '{0}' hierarchy.", ObjectType.Name);
+				}
 			}
 
 			public SqlTable SqlTable;
@@ -119,6 +166,9 @@ namespace BLToolkit.Data.Linq
 			{
 				get { return _columns; }
 			}
+
+			public List<InheritanceMappingAttribute> InheritanceMapping;
+			public string InheritanceDiscriminatorName;
 
 			readonly Dictionary<string,Association> _associations = new Dictionary<string,Association>();
 

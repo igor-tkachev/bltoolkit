@@ -24,15 +24,16 @@ namespace BLToolkit.Mapping
 			set { _complexMemberAccessor = value; }
 		}
 
-		private string _name;         public string  Name         { get { return _name;         } set { _name         = value; } }
-		private string _memberName;   public string  MemberName   { get { return _memberName;   } set { _memberName   = value; } }
-		private string _storage;      public string  Storage      { get { return _storage;      } set { _storage      = value; } }
-		private bool   _trimmable;    public bool    Trimmable    { get { return _trimmable;    } set { _trimmable    = value; } }
-		private bool   _sqlIgnore;    public bool    SqlIgnore    { get { return _sqlIgnore;    } set { _sqlIgnore    = value; } }
-		private bool   _nullable;     public bool    Nullable     { get { return _nullable;     } set { _nullable     = value; } }
-		private object _nullValue;    public object  NullValue    { get { return _nullValue;    } set { _nullValue    = value; } }
-		private object _defaultValue; public object  DefaultValue { get { return _defaultValue; } set { _defaultValue = value; } }
-		private Type   _type;         public Type    Type         { get { return _type;         } set { _type         = value; } }
+		private string _name;            public string  Name                       { get { return _name;            } set { _name         = value;    } }
+		private string _memberName;      public string  MemberName                 { get { return _memberName;      } set { _memberName   = value;    } }
+		private string _storage;         public string  Storage                    { get { return _storage;         } set { _storage      = value;    } }
+		private bool   _isDiscriminator; public bool    IsInheritanceDiscriminator { get { return _isDiscriminator; } set { _isDiscriminator = value; } }
+		private bool   _trimmable;       public bool    Trimmable                  { get { return _trimmable;       } set { _trimmable    = value;    } }
+		private bool   _sqlIgnore;       public bool    SqlIgnore                  { get { return _sqlIgnore;       } set { _sqlIgnore    = value;    } }
+		private bool   _nullable;        public bool    Nullable                   { get { return _nullable;        } set { _nullable     = value;    } }
+		private object _nullValue;       public object  NullValue                  { get { return _nullValue;       } set { _nullValue    = value;    } }
+		private object _defaultValue;    public object  DefaultValue               { get { return _defaultValue;    } set { _defaultValue = value;    } }
+		private Type   _type;            public Type    Type                       { get { return _type;            } set { _type         = value;    } }
 
 		private MappingSchema _mappingSchema;
 		public  MappingSchema  MappingSchema

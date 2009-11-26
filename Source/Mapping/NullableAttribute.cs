@@ -5,7 +5,7 @@ namespace BLToolkit.Mapping
 	[AttributeUsage(
 		AttributeTargets.Property | AttributeTargets.Field |
 		AttributeTargets.Class | AttributeTargets.Interface)]
-	public sealed class NullableAttribute : Attribute
+	public class NullableAttribute : Attribute
 	{
 		public NullableAttribute()
 		{

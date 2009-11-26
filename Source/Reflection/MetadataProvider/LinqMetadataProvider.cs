@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Data.Linq.Mapping;
+using System.Linq;
 
 namespace BLToolkit.Reflection.MetadataProvider
 {
@@ -77,6 +78,26 @@ namespace BLToolkit.Reflection.MetadataProvider
 			}
 
 			return base.GetFieldStorage(typeExtension, member, out isSet);
+		}
+
+		#endregion
+
+		#region GetInheritanceDiscriminator
+
+		public override bool GetInheritanceDiscriminator(TypeExtension typeExtension, MemberAccessor member, out bool isSet)
+		{
+			if (IsLinqObject(member.TypeAccessor.Type))
+			{
+				var a = member.GetAttribute<ColumnAttribute>();
+
+				if (a != null && !string.IsNullOrEmpty(a.Name))
+				{
+					isSet = true;
+					return a.IsDiscriminator;
+				}
+			}
+
+			return base.GetInheritanceDiscriminator(typeExtension, member, out isSet);
 		}
 
 		#endregion
@@ -197,5 +218,21 @@ namespace BLToolkit.Reflection.MetadataProvider
 
 		#endregion
 
+		#region GetInheritanceMapping
+
+		public override InheritanceMappingAttribute[] GetInheritanceMapping(Type type,TypeExtension typeExtension)
+		{
+			if (IsLinqObject(type))
+			{
+				var attrs = type.GetCustomAttributes(typeof(InheritanceMappingAttribute), true);
+
+				if (attrs.Length > 0)
+					return attrs.Select(a => (InheritanceMappingAttribute)a).ToArray();
+			}
+
+			return base.GetInheritanceMapping(type, typeExtension);
+		}
+
+		#endregion
 	}
 }
