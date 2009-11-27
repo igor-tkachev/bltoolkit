@@ -1272,9 +1272,12 @@ namespace BLToolkit.Data.Linq
 
 		void SetQuery(ParseInfo info, QuerySource query, IndexConverter converter)
 		{
-			var idx = query.Select(this);
-
 			var table = query as QuerySource.Table;
+
+			if (table != null)
+				CurrentSql.Select.Columns.Clear();
+
+			var idx = query.Select(this);
 
 			if (table == null || table.InheritanceMapping.Count == 0)
 			{
