@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using BLToolkit.Reflection.Extension;
 
 namespace BLToolkit.Data.Linq
 {
@@ -22,8 +23,9 @@ namespace BLToolkit.Data.Linq
 			{
 				var type = TypeHelper.GetGenericType(typeof(IQueryable<>), lambda.Body.Expr.Type);
 
-				_objectType = type == null ? lambda.Body.Expr.Type : type.GetGenericArguments()[0];
-				SqlTable    = new SqlTable(mappingSchema, _objectType);
+				OriginalType = type == null ? lambda.Body.Expr.Type : type.GetGenericArguments()[0];
+				_objectType  = GetObjectType(OriginalType, mappingSchema);
+				SqlTable     = new SqlTable(mappingSchema, _objectType);
 
 				sqlQuery.From.Table(SqlTable);
 
@@ -35,8 +37,9 @@ namespace BLToolkit.Data.Linq
 			public Table(MappingSchema mappingSchema, SqlQuery sqlQuery, Type type)
 				: base(sqlQuery, null)
 			{
-				_objectType = type;
-				SqlTable    = new SqlTable(mappingSchema, _objectType);
+				OriginalType = type;
+				_objectType  = GetObjectType(OriginalType, mappingSchema);
+				SqlTable     = new SqlTable(mappingSchema, _objectType);
 
 				sqlQuery.From.Table(SqlTable);
 
@@ -60,8 +63,9 @@ namespace BLToolkit.Data.Linq
 					left = true;
 				}
 
-				_objectType = type;
-				SqlTable    = new SqlTable(mappingSchema, ObjectType);
+				OriginalType = type;
+				_objectType  = GetObjectType(OriginalType, mappingSchema);
+				SqlTable     = new SqlTable(mappingSchema, ObjectType);
 
 				var psrc = sqlQuery.From[parent.SqlTable];
 				var join = left ? SqlTable.WeakLeftJoin() : SqlTable.InnerJoin();
@@ -111,39 +115,63 @@ namespace BLToolkit.Data.Linq
 
 				if (InheritanceMapping.Count > 0)
 				{
+					InheritanceDiscriminators = new List<string>(InheritanceMapping.Count);
+
 					foreach (var mapping in InheritanceMapping)
 					{
-						if (mapping.Type != ObjectType)
+						string discriminator = null;
+
+						foreach (MemberMapper mm in mappingSchema.GetObjectMapper(mapping.Type))
 						{
-							foreach (MemberMapper mm in mappingSchema.GetObjectMapper(mapping.Type))
+							if (mm.MapMemberInfo.SqlIgnore == false)
 							{
-								if (mm.MapMemberInfo.SqlIgnore == false)
+								if (!_columns.ContainsKey(mm.MemberName))
 								{
-									if (!_columns.ContainsKey(mm.MemberName))
-									{
-										var field = new SqlField(mm.MemberName, mm.Name, mm.MapMemberInfo.Nullable, int.MinValue);
-										SqlTable.Fields.Add(field);
+									var field = new SqlField(mm.MemberName, mm.Name, mm.MapMemberInfo.Nullable, int.MinValue);
+									SqlTable.Fields.Add(field);
 
-										var column = new Column(this, field, null);
+									var column = new Column(this, field, null);
 
-										Fields.Add(column);
-										_columns.Add(field.Name, column);
-									}
-
-									if (mm.MapMemberInfo.IsInheritanceDiscriminator)
-										InheritanceDiscriminatorName = mm.MapMemberInfo.Name;
+									Fields.Add(column);
+									_columns.Add(field.Name, column);
 								}
+
+								if (mm.MapMemberInfo.IsInheritanceDiscriminator)
+									discriminator = mm.MapMemberInfo.Name;
 							}
 						}
+
+						InheritanceDiscriminators.Add(discriminator);
 					}
 
-					if (InheritanceDiscriminatorName == null)
-						throw new LinqException("Inheritance Discriminator is not defined for the '{0}' hierarchy.", ObjectType.Name);
+					var dname = InheritanceDiscriminators.FirstOrDefault(s => s != null);
+
+					if (dname == null)
+						throw new LinqException("Inheritance Discriminator is not defined for the '{0}' hierarchy.", ObjectType);
+
+					for (var i = 0; i < InheritanceDiscriminators.Count; i++)
+						if (InheritanceDiscriminators[i] == null)
+							InheritanceDiscriminators[i] = dname;
 				}
+			}
+
+			Type GetObjectType(Type originalType, MappingSchema mappingSchema)
+			{
+				for (var type = originalType.BaseType; type != null && type != typeof(object); type = type.BaseType)
+				{
+					var extension = TypeExtension.GetTypeExtension(type, mappingSchema.Extensions);
+					var mapping   = mappingSchema.MetadataProvider.GetInheritanceMapping(type, extension);
+
+					if (mapping.Length > 0)
+						return type;
+				}
+
+				return OriginalType;
 			}
 
 			public SqlTable SqlTable;
 
+			public          Type  OriginalType;
 			private         Type _objectType;
 			public override Type  ObjectType { get { return _objectType; } }
 
@@ -168,7 +196,7 @@ namespace BLToolkit.Data.Linq
 			}
 
 			public List<InheritanceMappingAttribute> InheritanceMapping;
-			public string InheritanceDiscriminatorName;
+			public List<string>                      InheritanceDiscriminators;
 
 			readonly Dictionary<string,Association> _associations = new Dictionary<string,Association>();
 

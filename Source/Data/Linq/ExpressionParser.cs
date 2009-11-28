@@ -332,7 +332,7 @@ namespace BLToolkit.Data.Linq
 					var me = (MemberExpression)info.Expr;
 
 					if (me.Expression == _info.Parameters[0])
-						return new QuerySource.Table(_info.MappingSchema, CurrentSql, new LambdaInfo(info));
+						return CreateTable(CurrentSql, new LambdaInfo(info));
 				}
 			}
 
@@ -343,7 +343,7 @@ namespace BLToolkit.Data.Linq
 					var mc = (MethodCallExpression)info.Expr;
 
 					if (mc.Object == _info.Parameters[0])
-						return new QuerySource.Table(_info.MappingSchema, CurrentSql, new LambdaInfo(info));
+						return CreateTable(CurrentSql, new LambdaInfo(info));
 				}
 			}
 
@@ -351,7 +351,7 @@ namespace BLToolkit.Data.Linq
 
 			if (info.IsConstant<IQueryable>((value,expr) =>
 			{
-				select = new QuerySource.Table(_info.MappingSchema, CurrentSql, new LambdaInfo(expr));
+				select = CreateTable(CurrentSql, new LambdaInfo(expr));
 				return true;
 			}))
 			{}
@@ -491,7 +491,7 @@ namespace BLToolkit.Data.Linq
 					var orig = s;
 
 					if (t.ParentAssociation != source)
-						s = new QuerySource.Table(_info.MappingSchema, new SqlQuery(), l);
+						s = CreateTable(new SqlQuery(), l);
 
 					associationList.Add(s, orig);
 				}
@@ -827,8 +827,23 @@ namespace BLToolkit.Data.Linq
 
 		#region Parse OfType
 
-		private QuerySource ParseOfType(ParseInfo pi, QuerySource[] sequence)
+		QuerySource ParseOfType(ParseInfo pi, QuerySource[] sequence)
 		{
+			var table = sequence[0] as QuerySource.Table;
+
+			if (table != null && table.InheritanceMapping.Count > 0)
+			{
+				var objectType = pi.Expr.Type.GetGenericArguments()[0];
+
+				if (TypeHelper.IsSameOrParent(table.ObjectType, objectType))
+				{
+					var predicate = MakeIsPredicate(table, objectType);
+
+					if (predicate.GetType() != typeof(SqlQuery.Predicate.Expr))
+						CurrentSql.Where.SearchCondition.Conditions.Add(new SqlQuery.Condition(false, predicate));
+				}
+			}
+
 			return sequence[0];
 		}
 
@@ -1756,6 +1771,116 @@ namespace BLToolkit.Data.Linq
 
 		#endregion
 
+		#region BuildTable
+
+		static object DefaultInheritanceMappingException(object value, Type type)
+		{
+			throw new LinqException("Inheritance mapping is not defined for discriminator value '{0}' in the '{1}' hierarchy.", value, type);
+		}
+
+		ParseInfo BuildTable(ParseInfo pi, QuerySource.Table table, IndexConverter converter)
+		{
+			ParsingTracer.WriteLine(pi);
+			ParsingTracer.WriteLine(table);
+			ParsingTracer.IncIndentLevel();
+
+			var objectType = table.ObjectType;
+
+			if (table.InheritanceMapping.Count > 0 && pi.Expr.Type.IsGenericType)
+			{
+				var types = pi.Expr.Type.GetGenericArguments();
+
+				if (types.Length == 1 && TypeHelper.IsSameOrParent(objectType, types[0]))
+					objectType = types[0];
+			}
+
+			var mapperMethod = _info.GetMapperMethodInfo();
+
+			Func<Type,int[],UnaryExpression> makeExpr = (ty,idx) =>
+				Expression.Convert(
+					Expression.Call(_infoParam, mapperMethod,
+						Expression.Constant(ty),
+						_dataReaderParam,
+						Expression.Constant(_info.GetMapperSlot(idx))),
+					objectType);
+
+			Func<Type,int[]> makeIndex = ty =>
+			{
+				var q =
+					from mm in _info.MappingSchema.GetObjectMapper(ty)
+					where !mm.MapMemberInfo.SqlIgnore
+					select converter(table.Columns[mm.MemberName].Select(this)[0]).Index;
+
+				return q.ToArray();
+			};
+
+			Expression expr;
+
+			if (objectType != table.ObjectType)
+			{
+				expr = makeExpr(objectType, makeIndex(objectType));
+			}
+			else if (table.InheritanceMapping.Count == 0)
+			{
+				expr = makeExpr(objectType, table.Select(this).Select(i => converter(i).Index).ToArray());
+			}
+			else
+			{
+				var defaultMapping = table.InheritanceMapping.SingleOrDefault(m => m.IsDefault);
+
+				if (defaultMapping != null)
+				{
+					expr = makeExpr(defaultMapping.Type, makeIndex(defaultMapping.Type));
+				}
+				else
+				{
+					var exceptionMethod = Expressor<ExpressionParser<T>>.MethodExpressor(_ => DefaultInheritanceMappingException(null, null));
+					var dindex         = table.Columns[table.InheritanceDiscriminators[0]].Select(this)[0].Index;
+
+					expr = Expression.Convert(
+						Expression.Call(_infoParam, exceptionMethod,
+							Expression.Call(_dataReaderParam, DataReader.GetValue, Expression.Constant(dindex)),
+							Expression.Constant(table.ObjectType)),
+						table.ObjectType);
+				}
+
+				foreach (var mapping in table.InheritanceMapping.Select((m,i) => new { m, i }).Where(m => m.m != defaultMapping))
+				{
+					var dindex = table.Columns[table.InheritanceDiscriminators[mapping.i]].Select(this)[0].Index;
+					Expression testExpr;
+
+					if (mapping.m.Code == null)
+					{
+						testExpr = Expression.Call(_dataReaderParam, DataReader.IsDBNull, Expression.Constant(dindex));
+					}
+					else
+					{
+						MethodInfo mi;
+						var codeType = mapping.m.Code.GetType();
+
+						if (!MapSchema.Converters.TryGetValue(codeType, out mi))
+							throw new LinqException("Cannot find converter for the '{0}' type.", codeType.FullName);
+
+						testExpr =
+							Expression.Equal(
+								Expression.Constant(mapping.m.Code),
+								Expression.Call(_mapSchemaParam, mi, Expression.Call(_dataReaderParam, DataReader.GetValue, Expression.Constant(dindex))));
+					}
+
+					expr = Expression.Condition(testExpr, makeExpr(mapping.m.Type, makeIndex(mapping.m.Type)), expr);
+				}
+			}
+
+			var field = pi.Parent == null ?
+				pi.       Replace(expr, pi.ParamAccessor) :
+				pi.Parent.Replace(expr, pi.ParamAccessor);
+
+			ParsingTracer.DecIndentLevel();
+			return field;
+		}
+
+		#endregion
+
 		#region BuildSubQuerySource
 
 		ParseInfo BuildSubQuerySource(ParseInfo ma, QuerySource.SubQuery query, IndexConverter converter)
@@ -1849,98 +1974,6 @@ namespace BLToolkit.Data.Linq
 				ParsingTracer.DecIndentLevel();
 			}
 #endif
-		}
-
-		static object DefaultInheritanceMappingException(object value, Type type)
-		{
-			throw new LinqException("Inheritance mapping is not defined for discriminator value '{0}' in the '{1}' hierarchy.", value, type);
-		}
-
-		ParseInfo BuildTable(ParseInfo pi, QuerySource.Table table, IndexConverter converter)
-		{
-			ParsingTracer.WriteLine(pi);
-			ParsingTracer.WriteLine(table);
-			ParsingTracer.IncIndentLevel();
-
-			var mapperMethod = _info.GetMapperMethodInfo();
-
-			Func<Type,int[],UnaryExpression> makeExpr = (ty,idx) =>
-				Expression.Convert(
-					Expression.Call(_infoParam, mapperMethod,
-						Expression.Constant(ty),
-						_dataReaderParam,
-						Expression.Constant(_info.GetMapperSlot(idx))),
-					table.ObjectType);
-
-			Expression expr;
-
-			if (table.InheritanceMapping.Count == 0)
-			{
-				expr = makeExpr(table.ObjectType, table.Select(this).Select(i => converter(i).Index).ToArray());
-			}
-			else
-			{
-				var dindex = table.Columns[table.InheritanceDiscriminatorName].Select(this)[0].Index;
-
-				Func<Type,int[]> makeIndex = ty =>
-				{
-					var q =
-						from mm in _info.MappingSchema.GetObjectMapper(ty)
-						where !mm.MapMemberInfo.SqlIgnore
-						select table.Columns[mm.MemberName].Select(this)[0].Index;
-
-					return q.ToArray();
-				};
-
-				var defaultMapping = table.InheritanceMapping.SingleOrDefault(m => m.IsDefault);
-
-				if (defaultMapping != null)
-				{
-					expr = makeExpr(defaultMapping.Type, makeIndex(defaultMapping.Type));
-				}
-				else
-				{
-					var exceptionMethod = Expressor<ExpressionParser<T>>.MethodExpressor(_ => DefaultInheritanceMappingException(null, null));
-
-					expr = Expression.Convert(
-						Expression.Call(_infoParam, exceptionMethod,
-							 Expression.Call(_dataReaderParam, DataReader.GetValue, Expression.Constant(dindex)),
-							Expression.Constant(table.ObjectType)),
-						table.ObjectType);
-				}
-
-				foreach (var mapping in table.InheritanceMapping.Where(m => m != defaultMapping))
-				{
-					Expression testExpr;
-
-					if (mapping.Code == null)
-					{
-						testExpr = Expression.Call(_dataReaderParam, DataReader.IsDBNull, Expression.Constant(dindex));
-					}
-					else
-					{
-						MethodInfo mi;
-						var codeType = mapping.Code.GetType();
-
-						if (!MapSchema.Converters.TryGetValue(codeType, out mi))
-							throw new LinqException("Cannot find converter for the '{0}' type.", codeType.FullName);
-
-						testExpr =
-							Expression.Equal(
-								Expression.Constant(mapping.Code),
-								Expression.Call(_mapSchemaParam, mi, Expression.Call(_dataReaderParam, DataReader.GetValue, Expression.Constant(dindex))));
-					}
-
-					expr = Expression.Condition(testExpr, makeExpr(mapping.Type, makeIndex(mapping.Type)), expr);
-				}
-			}
-
-			var field = pi.Parent == null ?
-				pi.       Replace(expr, pi.ParamAccessor) :
-				pi.Parent.Replace(expr, pi.ParamAccessor);
-
-			ParsingTracer.DecIndentLevel();
-			return field;
 		}
 
 		#endregion
@@ -2125,10 +2158,11 @@ namespace BLToolkit.Data.Linq
 		{
 			_isParsingPhase = false;
 
-			SetQuery(
-				info,
-				new QuerySource.Table(_info.MappingSchema, CurrentSql, type) { SqlTable = { Alias = alias } },
-				i => i);
+			var table = CreateTable(CurrentSql, type);
+
+			table.SqlTable.Alias = alias;
+
+			SetQuery(info, table, i => i);
 
 			return true;
 		}
@@ -3050,59 +3084,7 @@ namespace BLToolkit.Data.Linq
 							var table = GetSource(lambda, e.Expression, queries) as QuerySource.Table;
 
 							if (table != null && table.InheritanceMapping.Count > 0)
-							{
-								if (e.TypeOperand == table.ObjectType && table.InheritanceMapping.Count(m => m.Type == e.TypeOperand) == 0)
-									return Convert(new SqlQuery.Predicate.Expr(new SqlValue(true)));
-
-								var mapping = table.InheritanceMapping.Where(m => m.Type == e.TypeOperand && !m.IsDefault).ToList();
-								var descr   = table.Columns[table.InheritanceDiscriminatorName];
-
-								switch (mapping.Count)
-								{
-									case 0:
-										{
-											var cond = new SqlQuery.SearchCondition();
-
-											foreach (var m in table.InheritanceMapping.Where(m => !m.IsDefault))
-											{
-												cond.Conditions.Add(
-													new SqlQuery.Condition(
-														false, 
-														Convert(new SqlQuery.Predicate.ExprExpr(
-															descr.Field,
-															SqlQuery.Predicate.Operator.NotEqual,
-															new SqlValue(m.Code)))));
-											}
-
-											return cond;
-										}
-
-									case 1:
-										return Convert(new SqlQuery.Predicate.ExprExpr(
-											descr.Field,
-											SqlQuery.Predicate.Operator.Equal,
-											new SqlValue(mapping[0].Code)));
-
-									default:
-										{
-											var cond = new SqlQuery.SearchCondition();
-
-											foreach (var m in mapping)
-											{
-												cond.Conditions.Add(
-													new SqlQuery.Condition(
-														false,
-														Convert(new SqlQuery.Predicate.ExprExpr(
-															descr.Field,
-															SqlQuery.Predicate.Operator.Equal,
-															new SqlValue(m.Code))),
-														true));
-											}
-
-											return cond;
-										}
-								}
-							}
+								return MakeIsPredicate(table, e.TypeOperand);
 
 							break;
 						}
@@ -3588,6 +3570,64 @@ namespace BLToolkit.Data.Linq
 
 		#endregion
 
+		#region MakeIsPredicate
+
+		ISqlPredicate MakeIsPredicate(QuerySource.Table table, Type typeOperand)
+		{
+			if (typeOperand == table.ObjectType && table.InheritanceMapping.Count(m => m.Type == typeOperand) == 0)
+				return Convert(new SqlQuery.Predicate.Expr(new SqlValue(true)));
+
+			var mapping = table.InheritanceMapping.Select((m,i) => new { m, i }).Where(m => m.m.Type == typeOperand && !m.m.IsDefault).ToList();
+
+			switch (mapping.Count)
+			{
+				case 0:
+					{
+						var cond = new SqlQuery.SearchCondition();
+
+						foreach (var m in table.InheritanceMapping.Select((m,i) => new { m, i }).Where(m => !m.m.IsDefault))
+						{
+							cond.Conditions.Add(
+								new SqlQuery.Condition(
+									false, 
+									Convert(new SqlQuery.Predicate.ExprExpr(
+										table.Columns[table.InheritanceDiscriminators[m.i]].Field,
+										SqlQuery.Predicate.Operator.NotEqual,
+										new SqlValue(m.m.Code)))));
+						}
+
+						return cond;
+					}
+
+				case 1:
+					return Convert(new SqlQuery.Predicate.ExprExpr(
+						table.Columns[table.InheritanceDiscriminators[mapping[0].i]].Field,
+						SqlQuery.Predicate.Operator.Equal,
+						new SqlValue(mapping[0].m.Code)));
+
+				default:
+					{
+						var cond = new SqlQuery.SearchCondition();
+
+						foreach (var m in mapping)
+						{
+							cond.Conditions.Add(
+								new SqlQuery.Condition(
+									false,
+									Convert(new SqlQuery.Predicate.ExprExpr(
+										table.Columns[table.InheritanceDiscriminators[m.i]].Field,
+										SqlQuery.Predicate.Operator.Equal,
+										new SqlValue(m.m.Code))),
+									true));
+						}
+
+						return cond;
+					}
+			}
+		}
+
+		#endregion
+
 		#endregion
 
 		#region Search Condition Parser
@@ -3673,6 +3713,36 @@ namespace BLToolkit.Data.Linq
 		#endregion
 
 		#region Helpers
+
+		QuerySource.Table CreateTable(SqlQuery sqlQuery, LambdaInfo lambda)
+		{
+			var table = new QuerySource.Table(_info.MappingSchema, sqlQuery, lambda);
+
+			if (table.ObjectType != table.OriginalType)
+			{
+				var predicate = MakeIsPredicate(table, table.OriginalType);
+
+				if (predicate.GetType() != typeof(SqlQuery.Predicate.Expr))
+					CurrentSql.Where.SearchCondition.Conditions.Add(new SqlQuery.Condition(false, predicate));
+			}
+
+			return table;
+		}
+
+		QuerySource.Table CreateTable(SqlQuery sqlQuery, Type type)
+		{
+			var table = new QuerySource.Table(_info.MappingSchema, sqlQuery, type);
+
+			if (table.ObjectType != table.OriginalType)
+			{
+				var predicate = MakeIsPredicate(table, table.OriginalType);
+
+				if (predicate.GetType() != typeof(SqlQuery.Predicate.Expr))
+					CurrentSql.Where.SearchCondition.Conditions.Add(new SqlQuery.Condition(false, predicate));
+			}
+
+			return table;
+		}
 
 		QueryField GetField(Expression expr, params QuerySource[] queries)
 		{

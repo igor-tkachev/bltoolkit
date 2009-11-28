@@ -10,6 +10,21 @@ namespace Data.Linq.Model
 {
 	public class Northwind
 	{
+		public abstract class EntityBase<T>
+		{
+			protected abstract T Key { get; }
+
+			public override bool Equals(object obj)
+			{
+				return GetType() == obj.GetType() && Key.Equals(((EntityBase<T>)obj).Key);
+			}
+
+			public override int GetHashCode()
+			{
+				return Key.GetHashCode();
+			}
+		}
+
 		[TableName("Categories")]
 		public class Category
 		{
@@ -68,7 +83,7 @@ namespace Data.Linq.Model
 		}
 
 		[TableName("Employees")]
-		public class Employee
+		public class Employee : EntityBase<int>
 		{
 			[PrimaryKey, NonUpdatable] public int       EmployeeID;
 			[NotNull]                  public string    LastName;
@@ -93,6 +108,12 @@ namespace Data.Linq.Model
 			[Association(ThisKey="EmployeeID", OtherKey="EmployeeID")] public List<EmployeeTerritory> EmployeeTerritories;
 			[Association(ThisKey="EmployeeID", OtherKey="EmployeeID")] public List<Order>             Orders;
 			[Association(ThisKey="ReportsTo",  OtherKey="EmployeeID")] public Employee                ReportsToEmployee;
+
+			//[MapIgnore]
+			protected override int Key
+			{
+				get { return EmployeeID; }
+			}
 		}
 
 		[TableName("EmployeeTerritories")]

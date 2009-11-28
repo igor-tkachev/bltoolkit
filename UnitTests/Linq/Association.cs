@@ -180,9 +180,8 @@ namespace Data.Linq
 			ForEachProvider(db => AreEqual(expected, from p in db.Parent where p.Children.Count > 2 select p));
 		}
 
-
 		[Test]
-		public void EqualsNull()
+		public void EqualsNull1()
 		{
 			var expected =
 				from   employee in Employee
@@ -193,6 +192,35 @@ namespace Data.Linq
 				from   employee in db.Employee
 				where  employee.ReportsToEmployee != null
 				select employee.EmployeeID);
+		}
+
+		[Test]
+		public void EqualsNull2()
+		{
+			var expected =
+				from   employee in Employee
+				where  employee.ReportsToEmployee != null
+				select employee;
+
+			using (var db = new NorthwindDB()) AreEqual(expected, 
+				from   employee in db.Employee
+				where  employee.ReportsToEmployee != null
+				select employee);
+		}
+
+
+		[Test]
+		public void EqualsNull3()
+		{
+			var expected =
+				from employee in Employee
+				where employee.ReportsToEmployee != null
+				select new { employee.ReportsToEmployee, employee };
+
+			using (var db = new NorthwindDB()) AreEqual(expected, 
+				from   employee in db.Employee
+				where  employee.ReportsToEmployee != null
+				select new { employee.ReportsToEmployee, employee });
 		}
 	}
 }
