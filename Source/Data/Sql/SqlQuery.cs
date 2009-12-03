@@ -2859,6 +2859,8 @@ namespace BLToolkit.Data.Sql
 
 		public override string ToString()
 		{
+			//return "";
+
 			StringBuilder sb = new StringBuilder();
 
 			sb

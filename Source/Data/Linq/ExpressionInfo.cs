@@ -286,7 +286,7 @@ namespace BLToolkit.Data.Linq
 				p.SqlParameter.Value = p.Accessor(this, expr, parameters);
 		}
 
-		IDbDataParameter[] GetParameters(DbManager db, int idx, List<SqlParameter> sqlParameters)
+		IDbDataParameter[] GetParameters(DbManager db, int idx, IList<SqlParameter> sqlParameters)
 		{
 			//var sql        = Queries[idx].SqlQuery;
 			var parameters = Queries[idx].Parameters;
@@ -364,7 +364,7 @@ namespace BLToolkit.Data.Linq
 			}
 
 			var sb      = new StringBuilder();
-			SqlProvider.BuildSql(sql, sb, 0, 0);
+			SqlProvider.BuildSql(sql, sb, 0, 0, false);
 			var command = sb.ToString();
 
 			if (!query.SqlQuery.ParameterDependent)
@@ -959,13 +959,13 @@ namespace BLToolkit.Data.Linq
 
 		public string GetSqlText(DbManager db, Expression expr, object[] parameters, int idx)
 		{
-			SetParameters(expr, parameters, idx);
-
 			string             command;
 			IDbDataParameter[] parms;
 
 			lock (this)
 			{
+				SetParameters(expr, parameters, idx);
+
 				List<SqlParameter> ps;
 				command = GetCommand(idx, out ps);
 				parms   = GetParameters(db, idx, ps);

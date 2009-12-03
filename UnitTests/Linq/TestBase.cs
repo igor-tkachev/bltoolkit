@@ -286,8 +286,18 @@ namespace Data.Linq
 			get
 			{
 				if (_customer == null)
+				{
 					using (var db = new NorthwindDB())
+					{
 						_customer = db.Customer.ToList();
+
+						foreach (var c in _customer)
+						{
+							c.Orders = (from o in Order where o.CustomerID == c.CustomerID select o).ToList();
+						}
+					}
+				}
+
 				return _customer;
 			}
 		}

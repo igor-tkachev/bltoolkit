@@ -172,6 +172,20 @@ namespace Data.Linq
 			);
 		}
 
+		//[Test]
+		public void SelectManyLeftJoin()
+		{
+			var expected =
+				from p in Parent
+				from c in p.Children.Select(o => new { o.ChildID, p.ParentID }).DefaultIfEmpty()
+				select new { p.Value1, o = c };
+
+			ForEachProvider(db => AreEqual(expected,
+				from p in db.Parent
+				from c in p.Children.Select(o => new { o.ChildID, p.ParentID }).DefaultIfEmpty()
+				select new { p.Value1, o = c }));
+		}
+
 		void Foo(Expression<Func<object[],object>> func)
 		{
 			/*

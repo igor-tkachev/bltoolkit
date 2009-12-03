@@ -4,13 +4,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using BLToolkit.Reflection.Extension;
 
 namespace BLToolkit.Data.Linq
 {
 	using Data.Sql;
 	using Mapping;
 	using Reflection;
+	using Reflection.Extension;
 
 	abstract class QuerySource : QueryField
 	{
@@ -51,9 +51,7 @@ namespace BLToolkit.Data.Linq
 			Table(MappingSchema mappingSchema, SqlQuery sqlQuery, Association association, Table parent)
 				: base(sqlQuery, null)
 			{
-				var type = association.MemberAccessor.MemberInfo.MemberType == MemberTypes.Property ?
-					((PropertyInfo)association.MemberAccessor.MemberInfo).PropertyType :
-					((FieldInfo)   association.MemberAccessor.MemberInfo).FieldType;
+				var type = TypeHelper.GetMemberType(association.MemberAccessor.MemberInfo);
 
 				var left = association.CanBeNull;
 
@@ -213,25 +211,24 @@ namespace BLToolkit.Data.Linq
 				return GetAssociation(mi);
 			}
 
-			private List<Column> _keyFields;
-			public  List<Column>  KeyFields
+			List<QueryField> _keyFields;
+
+			public override List<QueryField> GetKeyFields()
 			{
-				get
+				if (_keyFields == null)
 				{
-					if (_keyFields == null)
-					{
-						_keyFields = new List<Column>(
-							from c in Fields.Select(f => (Column)f)
-							where   c.Field.IsPrimaryKey
-							orderby c.Field.PrimaryKeyOrder
-							select c);
+					_keyFields = (
+						from c in Fields.Select(f => (Column)f)
+						where   c.Field.IsPrimaryKey
+						orderby c.Field.PrimaryKeyOrder
+						select (QueryField)c
+					).ToList();
 
-						if (_keyFields.Count == 0)
-							_keyFields.AddRange(Fields.Select(f => (Column)f));
-					}
-
-					return _keyFields;
+					if (_keyFields.Count == 0)
+						_keyFields = Fields;
 				}
+
+				return _keyFields;
 			}
 
 			Table GetAssociation(MemberInfo mi)
@@ -320,7 +317,7 @@ namespace BLToolkit.Data.Linq
 			{
 				var objectMapper = _mappingSchema.GetObjectMapper(ObjectType);
 
-				return objectMapper[((Column)field).Field.Name].MemberAccessor.MemberInfo;
+				return objectMapper[((Column)field).Field.Name, true].MemberAccessor.MemberInfo;
 			}
 
 			Table() {}
@@ -415,9 +412,14 @@ namespace BLToolkit.Data.Linq
 				return fld;
 			}
 
+			public override List<QueryField> GetKeyFields()
+			{
+				return Fields;
+			}
+
 			public override MemberInfo GetMember(QueryField field)
 			{
-				foreach (KeyValuePair<MemberInfo,QueryField> member in Members)
+				foreach (var member in Members)
 					if (member.Value == field)
 						return member.Key;
 
@@ -433,7 +435,8 @@ namespace BLToolkit.Data.Linq
 							if (Lambda.Parameters[i] == expr)
 								return Sources[i];
 
-						throw new InvalidOperationException();
+						return null;
+						//throw new InvalidOperationException();
 
 					case ExpressionType.MemberAccess:
 						{
@@ -559,6 +562,11 @@ namespace BLToolkit.Data.Linq
 				return EnsureField(BaseQuery.GetField(mi));
 			}
 
+			public override List<QueryField> GetKeyFields()
+			{
+				return BaseQuery.GetKeyFields().Select(f => (QueryField)_columns[f]).ToList();
+			}
+
 			public override QueryField GetField(Expression expr)
 			{
 				if (expr.NodeType == ExpressionType.Parameter)
@@ -595,7 +603,7 @@ namespace BLToolkit.Data.Linq
 
 			public override MemberInfo GetMember(QueryField field)
 			{
-				foreach (KeyValuePair<QueryField,SubQueryColumn> col in _columns)
+				foreach (var col in _columns)
 					if (col.Value == field)
 						BaseQuery.GetMember(col.Value);
 
@@ -685,6 +693,11 @@ namespace BLToolkit.Data.Linq
 			QueryField _field;
 
 			public override QueryField GetField(MemberInfo mi)
+			{
+				throw new NotImplementedException();
+			}
+
+			public override List<QueryField> GetKeyFields()
 			{
 				throw new NotImplementedException();
 			}
@@ -858,8 +871,9 @@ namespace BLToolkit.Data.Linq
 		public virtual List<QueryField>  Fields     { get { return _fields; } }
 		public virtual Type              ObjectType { get { return Lambda.Body.Expr.Type; }}
 
-		public abstract QueryField GetField(Expression expr);
-		public abstract QueryField GetField(MemberInfo mi);
+		public abstract QueryField       GetField    (Expression expr);
+		public abstract QueryField       GetField    (MemberInfo mi);
+		public abstract List<QueryField> GetKeyFields();
 
 		protected virtual QueryField GetField(List<MemberInfo> members, int currentMember)
 		{
@@ -907,7 +921,7 @@ namespace BLToolkit.Data.Linq
 					if (Sources.Length < Lambda.Parameters.Length)
 						throw new InvalidOperationException();
 
-					for (var i = 0; i < Sources.Length; i++)
+					for (var i = 0; i < Lambda.Parameters.Length; i++)
 						if (Lambda.Parameters[i].Expr == expr)
 							return Sources[i];
 				}
@@ -975,6 +989,18 @@ namespace BLToolkit.Data.Linq
 		public override bool CanBeNull()
 		{
 			return true;
+		}
+
+		public bool Find(QuerySource query)
+		{
+			if (query == this)
+				return true;
+
+			foreach (var source in Sources)
+				if (source.Find(query))
+					return true;
+
+			return false;
 		}
 
 		public void Match(

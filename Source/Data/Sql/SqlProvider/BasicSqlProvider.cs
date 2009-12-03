@@ -44,6 +44,15 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			get { return _nesting; }
 		}
 
+		bool _skipAlias;
+
+		private Step _buildStep;
+		public  Step  BuildStep
+		{
+			get { return _buildStep;  }
+			set { _buildStep = value; }
+		}
+
 		#endregion
 
 		#region Support Flags
@@ -62,12 +71,13 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		#region BuildSql
 
-		public int BuildSql(SqlQuery sqlQuery, StringBuilder sb, int indent, int nesting)
+		public int BuildSql(SqlQuery sqlQuery, StringBuilder sb, int indent, int nesting, bool skipAlias)
 		{
 			_sqlQuery    = sqlQuery;
 			_indent      = indent;
 			_nesting     = nesting;
 			_nextNesting = _nesting + 1;
+			_skipAlias   = skipAlias;
 
 			BuildSql(sb);
 
@@ -75,13 +85,12 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			{
 				foreach (SqlQuery.Union union in sqlQuery.Unions)
 				{
-					sb.AppendLine();
 					AppendIndent(sb);
 					sb.Append("UNION");
 					if (union.IsAll) sb.Append(" ALL");
 					sb.AppendLine();
 
-					CreateSqlProvider().BuildSql(union.SqlQuery, sb, indent, nesting);
+					CreateSqlProvider().BuildSql(union.SqlQuery, sb, indent, nesting, skipAlias);
 				}
 			}
 
@@ -92,7 +101,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		#region Overrides
 
-		protected virtual int BuildSqlBuilder(SqlQuery sqlQuery, StringBuilder sb, int indent, int nesting)
+		protected virtual int BuildSqlBuilder(SqlQuery sqlQuery, StringBuilder sb, int indent, int nesting, bool skipAlias)
 		{
 			if (!IsSkipSupported && sqlQuery.Select.SkipValue != null)
 				throw new SqlException("Skip for subqueries is not supported by the '{0}' provider.", _dataProvider.Name);
@@ -100,7 +109,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			if (!IsTakeSupported && sqlQuery.Select.TakeValue != null)
 				throw new SqlException("Take for subqueries is not supported by the '{0}' provider.", _dataProvider.Name);
 
-			return CreateSqlProvider().BuildSql(sqlQuery, sb, indent, nesting);
+			return CreateSqlProvider().BuildSql(sqlQuery, sb, indent, nesting, skipAlias);
 		}
 
 		protected virtual ISqlProvider CreateSqlProvider()
@@ -115,13 +124,13 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		protected virtual void BuildSql(StringBuilder sb)
 		{
-			BuildSelectClause (sb);
-			BuildFromClause   (sb);
-			BuildWhereClause  (sb);
-			BuildGroupByClause(sb);
-			BuildHavingClause (sb);
-			BuildOrderByClause(sb);
-			BuildOffsetLimit  (sb);
+			_buildStep = Step.SelectClause;  BuildSelectClause (sb);
+			_buildStep = Step.FromClause;    BuildFromClause   (sb);
+			_buildStep = Step.WhereClause;   BuildWhereClause  (sb);
+			_buildStep = Step.GroupByClause; BuildGroupByClause(sb);
+			_buildStep = Step.HavingClause;  BuildHavingClause (sb);
+			_buildStep = Step.OrderByClause; BuildOrderByClause(sb);
+			_buildStep = Step.OffsetLimit;   BuildOffsetLimit  (sb);
 		}
 
 		#endregion
@@ -164,7 +173,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 				AppendIndent(sb);
 				BuildColumn(sb, col, ref addAlias);
 
-				if (addAlias)
+				if (!_skipAlias && addAlias)
 					sb.Append(" as ").Append(DataProvider.Convert(col.Alias, ConvertType.NameToQueryFieldAlias));
 			}
 
@@ -241,7 +250,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 				case QueryElementType.SqlQuery    :
 					sb.Append("(").AppendLine();
-					_nextNesting = BuildSqlBuilder((SqlQuery)table, sb, _indent + 1, _nextNesting);
+					_nextNesting = BuildSqlBuilder((SqlQuery)table, sb, _indent + 1, _nextNesting, false);
 					AppendIndent(sb).Append(")");
 
 					break;
@@ -641,7 +650,12 @@ namespace BLToolkit.Data.Sql.SqlProvider
 					break;
 
 				case QueryElementType.FuncLikePredicate:
-					throw new NotImplementedException();
+					{
+						SqlQuery.Predicate.FuncLike f = (SqlQuery.Predicate.FuncLike)predicate;
+						BuildExpression(sb, f.Function.Precedence, f.Function);
+					}
+
+					break;
 
 				case QueryElementType.SearchCondition:
 					BuildSearchCondition(sb, predicate.Precedence, (SqlQuery.SearchCondition)predicate);
@@ -774,9 +788,18 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 				case QueryElementType.SqlQuery:
 					{
-						sb.Append("(").AppendLine();
-						_nextNesting = BuildSqlBuilder((SqlQuery)expr, sb, _indent + 1, _nextNesting);
-						AppendIndent(sb).Append(")");
+						bool hasParentheses = sb[sb.Length - 1] == '(';
+
+						if (!hasParentheses)
+							sb.Append("(");
+						sb.AppendLine();
+
+						_nextNesting = BuildSqlBuilder((SqlQuery)expr, sb, _indent + 1, _nextNesting, _buildStep != Step.FromClause);
+
+						AppendIndent(sb);
+
+						if (!hasParentheses)
+							sb.Append(")");
 					}
 
 					break;
@@ -1030,6 +1053,21 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		}
 
 		#endregion
+
+		#endregion
+
+		#region Internal Types
+
+		public enum Step
+		{
+			SelectClause,
+			FromClause,
+			WhereClause,
+			GroupByClause,
+			HavingClause,
+			OrderByClause,
+			OffsetLimit
+		}
 
 		#endregion
 

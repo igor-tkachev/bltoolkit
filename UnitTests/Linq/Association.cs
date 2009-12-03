@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Linq;
-
+using BLToolkit.Data.DataProvider;
 using NUnit.Framework;
 
 namespace Data.Linq
@@ -177,7 +177,7 @@ namespace Data.Linq
 		public void Count1()
 		{
 			var expected = from p in Parent where p.Children.Count > 2 select p;
-			ForEachProvider(db => AreEqual(expected, from p in db.Parent where p.Children.Count > 2 select p));
+			ForEachProvider(new[] { ProviderName.SqlCe }, db => AreEqual(expected, from p in db.Parent where p.Children.Count > 2 select p));
 		}
 
 		[Test]
@@ -207,7 +207,6 @@ namespace Data.Linq
 				where  employee.ReportsToEmployee != null
 				select employee);
 		}
-
 
 		[Test]
 		public void EqualsNull3()

@@ -11,6 +11,7 @@ using System.IO;
 using System.Net;
 using System.Text;
 using System.Security.Cryptography.X509Certificates;
+using System.Collections.Generic;
 
 namespace BLToolkit.Net
 {
@@ -158,11 +159,7 @@ namespace BLToolkit.Net
 
 		#region Request Methods
 
-		public HttpStatusCode Request(
-			string        requestUri,
-			string        method,
-			ProcessStream requestStreamProcessor,
-			ProcessStream responseStreamProcessor)
+		private HttpWebRequest PrepareRequest(string method, string requestUri, ProcessStream requestStreamProcessor)
 		{
 			_html = "";
 
@@ -219,6 +216,17 @@ namespace BLToolkit.Net
 				using (Stream st = request.GetRequestStream())
 					requestStreamProcessor(st);
 
+			return request;
+		}
+
+		public HttpStatusCode Request(
+			string        requestUri,
+			string        method,
+			ProcessStream requestStreamProcessor,
+			ProcessStream responseStreamProcessor)
+		{
+			HttpWebRequest request = PrepareRequest(method, requestUri, requestStreamProcessor);
+
 			using (HttpWebResponse resp = (HttpWebResponse)request.GetResponse())
 			using (Stream          sm   = resp.GetResponseStream())
 			{
@@ -243,6 +251,45 @@ namespace BLToolkit.Net
 			}
 
 			return StatusCode;
+		}
+
+		public IEnumerable<string> Request(
+			string        requestUri,
+			string        method,
+			ProcessStream requestStreamProcessor)
+		{
+			HttpWebRequest request = PrepareRequest(method, requestUri, requestStreamProcessor);
+
+			using (HttpWebResponse resp = (HttpWebResponse)request.GetResponse())
+			using (Stream          sm   = resp.GetResponseStream())
+			using (StreamReader    sr   = new StreamReader(sm, Encoding.Default))
+			{
+				_statusCode = resp.StatusCode;
+				_location   = resp.Headers["Location"];
+
+				if (resp.ResponseUri.AbsoluteUri.StartsWith(BaseUri) == false)
+					BaseUri = resp.ResponseUri.Scheme + "://" + resp.ResponseUri.Host;
+
+				CookieCollection cc = request.CookieContainer.GetCookies(request.RequestUri);
+
+				// This code fixes the case when a server sets a cookie without the 'path'.
+				// IE takes this as the root ('/') value,
+				// the HttpWebRequest class as the RequestUri.AbsolutePath value.
+				//
+				foreach (Cookie c in cc)
+					if (c.Path == request.RequestUri.AbsolutePath)
+						CookieContainer.Add(new Cookie(c.Name, c.Value, "/", c.Domain));
+
+				while (true)
+				{
+					string str = sr.ReadLine();
+
+					if (str == null)
+						break;
+
+					yield return str;
+				}
+			}
 		}
 
 		class DefaultRequestStreamProcessor
@@ -386,6 +433,11 @@ namespace BLToolkit.Net
 				soapAction,
 				new DefaultRequestStreamProcessor(postData).Process,
 				outputStreamProcessor);
+		}
+
+		public IEnumerable<string> SoapEx(string soapAction, string postData)
+		{
+			return Request("\"" + soapAction + "\"", "SOAP", new DefaultRequestStreamProcessor(postData).Process);
 		}
 
 		#endregion

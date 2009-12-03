@@ -10,7 +10,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 {
 	public interface ISqlProvider
 	{
-		int            BuildSql               (SqlQuery sqlQuery, StringBuilder sb, int indent, int nesting);
+		int            BuildSql               (SqlQuery sqlQuery, StringBuilder sb, int indent, int nesting, bool skipAlias);
 		ISqlExpression ConvertExpression      (ISqlExpression expression);
 		ISqlPredicate  ConvertPredicate       (ISqlPredicate  predicate);
 		SqlQuery       Finalize               (SqlQuery sqlQuery);

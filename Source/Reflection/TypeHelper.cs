@@ -1414,6 +1414,13 @@ namespace BLToolkit.Reflection
 			return null;
 		}
 
+		public static Type GetMemberType(MemberInfo memberInfo)
+		{
+			return memberInfo.MemberType == MemberTypes.Property ?
+				((PropertyInfo)memberInfo).PropertyType :
+				((FieldInfo)   memberInfo).FieldType;
+		}
+
 		#endregion
 	}
 }

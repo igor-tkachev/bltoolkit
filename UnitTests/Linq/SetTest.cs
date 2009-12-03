@@ -76,5 +76,40 @@ namespace Data.Linq
 				(from c in db.Child where c.ParentID == 3 select new Child { ChildID = c.ChildID + 1000})).
 				Where(c => c.ChildID != 1032)));
 		}
+
+		[Test]
+		public void Concat6()
+		{
+			var expected =
+				Child.Where(c => c.GrandChildren.Count == 2).Concat(Child.Where(c => c.GrandChildren.Count() == 3));
+
+			ForEachProvider(new[] { ProviderName.SqlCe }, db => AreEqual(expected, 
+				db.Child.Where(c => c.GrandChildren.Count == 2).Concat(db.Child.Where(c => c.GrandChildren.Count() == 3))));
+		}
+
+		[Test]
+		public void Concat7()
+		{
+			using (var db = new NorthwindDB())
+				AreEqual(
+					   Customer.Where(c => c.Orders.Count <= 1).Concat(   Customer.Where(c => c.Orders.Count > 1)),
+					db.Customer.Where(c => c.Orders.Count <= 1).Concat(db.Customer.Where(c => c.Orders.Count > 1)));
+		}
+
+		[Test]
+		public void Except()
+		{
+			ForEachProvider(db => AreEqual(
+				   Child.Except(   Child.Where(p => p.ParentID == 3)),
+				db.Child.Except(db.Child.Where(p => p.ParentID == 3))));
+		}
+
+		[Test]
+		public void Intersect()
+		{
+			ForEachProvider(db => AreEqual(
+				   Child.Intersect(   Child.Where(p => p.ParentID == 3)),
+				db.Child.Intersect(db.Child.Where(p => p.ParentID == 3))));
+		}
 	}
 }

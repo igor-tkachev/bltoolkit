@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace BLToolkit.Data.Sql
 {
@@ -30,6 +31,8 @@ namespace BLToolkit.Data.Sql
 		{
 			if (element == null || !all && _visitedElements.ContainsKey(element))
 				return;
+
+//Debug.WriteLine(element + "      ---   " + element.GetType());
 
 			switch (element.ElementType)
 			{
@@ -216,6 +219,13 @@ namespace BLToolkit.Data.Sql
 
 				case QueryElementType.SqlQuery:
 					{
+						if (all)
+						{
+							if (_visitedElements.ContainsKey(element))
+								return;
+							_visitedElements.Add(element, element);
+						}
+
 						SqlQuery q = (SqlQuery)element;
 
 						Visit(q.Select,  all, action);
@@ -226,7 +236,15 @@ namespace BLToolkit.Data.Sql
 						Visit(q.OrderBy, all, action);
 
 						if (q.HasUnion)
-							foreach (SqlQuery.Union i in q.Unions) Visit(i, all, action);
+						{
+							foreach (SqlQuery.Union i in q.Unions)
+							{
+								if (i.SqlQuery == q)
+									throw new InvalidOperationException();
+
+								Visit(i, all, action);
+							}
+						}
 
 						break;
 					}

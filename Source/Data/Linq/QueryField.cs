@@ -116,7 +116,7 @@ namespace BLToolkit.Data.Linq
 				if (_index == null)
 				{
 					if (_sqlExpression == null)
-						_sqlExpression = parser.ParseExpression(Expr, QuerySource.Sources);
+						_sqlExpression = Parse(parser, QuerySource.Sources);
 
 					_index = new[] { new FieldIndex { Index = QuerySource.SqlQuery.Select.Add(_sqlExpression, _alias), Field = this } };
 				}
@@ -136,11 +136,30 @@ namespace BLToolkit.Data.Linq
 						return null;
 
 					_inParsing = true;
-					_sqlExpression = parser.ParseExpression(Expr, QuerySource);
+					_sqlExpression = Parse(parser, QuerySource);
 					_inParsing = false;
 				}
 
 				return new [] { _sqlExpression };
+			}
+
+			ISqlExpression Parse<T>(ExpressionParser<T> parser, params QuerySource[] sources)
+			{
+				var expr = parser.ParseExpression(Expr, sources);
+
+				if (expr is SqlQuery.SearchCondition)
+				{
+					/*
+					expr = parser.Convert(new SqlFunction("CASE",
+						expr, new SqlValue(true),
+						new SqlQuery.SearchCondition(new[] { new SqlQuery.Condition(true, (SqlQuery.SearchCondition)expr) }), new SqlValue(false),
+						new SqlValue(false)));
+					*/
+
+					expr = parser.Convert(new SqlFunction("CASE", expr, new SqlValue(true), new SqlValue(false)));
+				}
+
+				return expr;
 			}
 
 			public override bool CanBeNull()

@@ -76,6 +76,7 @@ namespace Data.Linq
 				ParentInheritance
 					.Where(p => p.ParentID == 1 || p.ParentID == 2 || p.ParentID == 4)
 					.OfType<ParentInheritanceNull>();
+
 			ForEachProvider(db => AreEqual(expected,
 				db.ParentInheritance
 					.Where(p => p.ParentID == 1 || p.ParentID == 2 || p.ParentID == 4)

@@ -61,7 +61,7 @@ namespace Data.Linq.Model
 		}
 
 		[TableName("Customers")]
-		public class Customer
+		public class Customer : EntityBase<string>
 		{
 			[PrimaryKey] public string CustomerID;
 			[NotNull]    public string CompanyName;
@@ -80,6 +80,11 @@ namespace Data.Linq.Model
 
 			[Association(ThisKey="CustomerID", OtherKey="CustomerID")]
 			public List<Order> Orders;
+
+			protected override string Key
+			{
+				get { return CustomerID; }
+			}
 		}
 
 		[TableName("Employees")]

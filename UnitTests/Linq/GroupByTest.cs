@@ -7,6 +7,8 @@ using BLToolkit.Data.DataProvider;
 
 namespace Data.Linq
 {
+	using Model;
+
 	[TestFixture]
 	public class GroupByTest : TestBase
 	{
@@ -606,6 +608,81 @@ namespace Data.Linq
 				group ch by ch.ParentID into g
 				where g.Count() > 2 && g.Key > 2
 				select g.Key));
+		}
+
+		[Test]
+		public void GroupByAggregate1()
+		{
+			var expected =
+				from p in Parent
+				group p by p.Children.Count > 0 && p.Children.Average(c => c.ParentID) > 3 into g
+				select g.Key;
+
+			ForEachProvider(new[] { ProviderName.SqlCe }, db => AreEqual(expected,
+				from p in db.Parent
+				group p by p.Children.Average(c => c.ParentID) > 3 into g
+				select g.Key));
+		}
+
+		[Test]
+		public void GroupByAggregate11()
+		{
+			var expected =
+				from p in Parent
+				where p.Children.Count > 0
+				group p by p.Children.Average(c => c.ParentID) > 3 into g
+				select g.Key;
+
+			ForEachProvider(new[] { ProviderName.SqlCe }, db => AreEqual(expected,
+				from p in db.Parent
+				where p.Children.Count > 0
+				group p by p.Children.Average(c => c.ParentID) > 3 into g
+				select g.Key));
+		}
+
+		[Test]
+		public void GroupByAggregate12()
+		{
+			var expected =
+				from p in Parent
+				group p by p.Children.Count > 0 && p.Children.Average(c => c.ParentID) > 3 into g
+				select g.Key;
+
+			ForEachProvider(new[] { ProviderName.SqlCe }, db => AreEqual(expected,
+				from p in db.Parent
+				group p by p.Children.Count > 0 && p.Children.Average(c => c.ParentID) > 3 into g
+				select g.Key));
+		}
+
+		[Test]
+		public void GroupByAggregate2()
+		{
+			using (var db = new NorthwindDB())
+				AreEqual(
+					(
+						from c in Customer
+						group c by c.Orders.Count > 0 && c.Orders.Average(o => o.Freight) >= 80
+					).ToList().Select(k => k.Key),
+					(
+						from c in db.Customer
+						group c by c.Orders.Average(o => o.Freight) >= 80
+					).ToList().Select(k => k.Key));
+		}
+
+		[Test]
+		public void GroupByAggregate3()
+		{
+			var expected =
+				(
+					from p in Parent
+					group p by p.Children.Count > 0 && p.Children.Average(c => c.ParentID) > 3
+				).ToList().First(g => !g.Key);
+
+			ForEachProvider(new[] { ProviderName.SqlCe }, db => AreEqual(expected,
+				(
+					from p in db.Parent
+					group p by p.Children.Average(c => c.ParentID) > 3
+				).ToList().First(g => !g.Key)));
 		}
 
 		//[Test]

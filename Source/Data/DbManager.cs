@@ -1984,7 +1984,7 @@ namespace BLToolkit.Data
 		{
 			StringBuilder sb = new StringBuilder();
 
-			DataProvider.CreateSqlProvider().BuildSql(sql, sb, 0, 0);
+			DataProvider.CreateSqlProvider().BuildSql(sql, sb, 0, 0, false);
 
 			string command = sb.ToString();
 
