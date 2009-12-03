@@ -3145,78 +3145,7 @@ namespace BLToolkit.Data.Linq
 							var el = pi.Create(e.Left,  pi.Property(Binary.Left));
 							var er = pi.Create(e.Right, pi.Property(Binary.Right));
 
-							switch (parseInfo.NodeType)
-							{
-								case ExpressionType.Equal    :
-								case ExpressionType.NotEqual :
-
-									var p = ParseObjectComparison(lambda, pi, el, er, queries);
-									if (p != null)
-										return p;
-
-									p = ParseObjectNullComparison(el, er, queries, parseInfo.NodeType == ExpressionType.Equal);
-									if (p != null)
-										return p;
-
-									p = ParseObjectNullComparison(er, el, queries, parseInfo.NodeType == ExpressionType.Equal);
-									if (p != null)
-										return p;
-
-									if (el.NodeType == ExpressionType.New || er.NodeType == ExpressionType.New)
-										return ParseNewObjectComparison(pi, el, er, queries);
-
-									break;
-							}
-
-							SqlQuery.Predicate.Operator op;
-
-							switch (parseInfo.NodeType)
-							{
-								case ExpressionType.Equal             : op = SqlQuery.Predicate.Operator.Equal;          break;
-								case ExpressionType.NotEqual          : op = SqlQuery.Predicate.Operator.NotEqual;       break;
-								case ExpressionType.GreaterThan       : op = SqlQuery.Predicate.Operator.Greater;        break;
-								case ExpressionType.GreaterThanOrEqual: op = SqlQuery.Predicate.Operator.GreaterOrEqual; break;
-								case ExpressionType.LessThan          : op = SqlQuery.Predicate.Operator.Less;           break;
-								case ExpressionType.LessThanOrEqual   : op = SqlQuery.Predicate.Operator.LessOrEqual;    break;
-								default: throw new InvalidOperationException();
-							}
-
-							if (el.NodeType == ExpressionType.Convert || er.NodeType == ExpressionType.Convert)
-							{
-								var p = ParseEnumConversion(pi, el, op, er, queries);
-								if (p != null)
-									return p;
-							}
-
-							var l = ParseExpression(el, queries);
-							var r = ParseExpression(er, queries);
-
-							switch (parseInfo.NodeType)
-							{
-								case ExpressionType.Equal   :
-								case ExpressionType.NotEqual:
-
-									if (!CurrentSql.ParameterDependent && (l is SqlParameter || r is SqlParameter) && l.CanBeNull() && r.CanBeNull())
-										CurrentSql.ParameterDependent = true;
-
-									break;
-							}
-
-							if (l is SqlQuery.SearchCondition)
-								l = Convert(new SqlFunction("CASE", l, new SqlValue(true), new SqlValue(false)));
-								//l = Convert(new SqlFunction("CASE",
-								//	l, new SqlValue(true),
-								//	new SqlQuery.SearchCondition(new[] { new SqlQuery.Condition(true, (SqlQuery.SearchCondition)l) }), new SqlValue(false),
-								//	new SqlValue(false)));
-
-							if (r is SqlQuery.SearchCondition)
-								r = Convert(new SqlFunction("CASE", r, new SqlValue(true), new SqlValue(false)));
-								//r = Convert(new SqlFunction("CASE",
-								//	r, new SqlValue(true),
-								//	new SqlQuery.SearchCondition(new[] { new SqlQuery.Condition(true, (SqlQuery.SearchCondition)r) }), new SqlValue(false),
-								//	new SqlValue(false)));
-
-							return Convert(new SqlQuery.Predicate.ExprExpr(l, op, r));
+							return ParseCompare(lambda, parseInfo.NodeType, el, er, queries);
 						}
 
 					case ExpressionType.Call:
@@ -3226,7 +3155,14 @@ namespace BLToolkit.Data.Linq
 
 							ISqlPredicate predicate = null;
 
-							if (e.Method.DeclaringType == typeof(string))
+							if (e.Method.Name == "Equals" && e.Object != null && e.Arguments.Count == 1)
+							{
+								var el = pi.Create(e.Object,       pi.Property(MethodCall.Object));
+								var er = pi.Create(e.Arguments[0], pi.Index(e.Arguments, MethodCall.Arguments, 0));
+
+								return ParseCompare(lambda, ExpressionType.Equal, el, er, queries);
+							}
+							else if (e.Method.DeclaringType == typeof(string))
 							{
 								switch (e.Method.Name)
 								{
@@ -3301,9 +3237,89 @@ namespace BLToolkit.Data.Linq
 			}
 		}
 
+		#region ParseCompare
+
+		ISqlPredicate ParseCompare(LambdaInfo lambda, ExpressionType nodeType, ParseInfo left, ParseInfo right, QuerySource[] queries)
+		{
+			switch (nodeType)
+			{
+				case ExpressionType.Equal    :
+				case ExpressionType.NotEqual :
+
+					var p = ParseObjectComparison(lambda, nodeType, left, right, queries);
+					if (p != null)
+						return p;
+
+					p = ParseObjectNullComparison(left, right, queries, nodeType == ExpressionType.Equal);
+					if (p != null)
+						return p;
+
+					p = ParseObjectNullComparison(right, left, queries, nodeType == ExpressionType.Equal);
+					if (p != null)
+						return p;
+
+					if (left.NodeType == ExpressionType.New || right.NodeType == ExpressionType.New)
+						return ParseNewObjectComparison(nodeType, left, right, queries);
+
+					break;
+			}
+
+			SqlQuery.Predicate.Operator op;
+
+			switch (nodeType)
+			{
+				case ExpressionType.Equal             : op = SqlQuery.Predicate.Operator.Equal;          break;
+				case ExpressionType.NotEqual          : op = SqlQuery.Predicate.Operator.NotEqual;       break;
+				case ExpressionType.GreaterThan       : op = SqlQuery.Predicate.Operator.Greater;        break;
+				case ExpressionType.GreaterThanOrEqual: op = SqlQuery.Predicate.Operator.GreaterOrEqual; break;
+				case ExpressionType.LessThan          : op = SqlQuery.Predicate.Operator.Less;           break;
+				case ExpressionType.LessThanOrEqual   : op = SqlQuery.Predicate.Operator.LessOrEqual;    break;
+				default: throw new InvalidOperationException();
+			}
+
+			if (left.NodeType == ExpressionType.Convert || right.NodeType == ExpressionType.Convert)
+			{
+				var p = ParseEnumConversion(left, op, right, queries);
+				if (p != null)
+					return p;
+			}
+
+			var l = ParseExpression(left,  queries);
+			var r = ParseExpression(right, queries);
+
+			switch (nodeType)
+			{
+				case ExpressionType.Equal   :
+				case ExpressionType.NotEqual:
+
+					if (!CurrentSql.ParameterDependent && (l is SqlParameter || r is SqlParameter) && l.CanBeNull() && r.CanBeNull())
+						CurrentSql.ParameterDependent = true;
+
+					break;
+			}
+
+			if (l is SqlQuery.SearchCondition)
+				l = Convert(new SqlFunction("CASE", l, new SqlValue(true), new SqlValue(false)));
+			//l = Convert(new SqlFunction("CASE",
+			//	l, new SqlValue(true),
+			//	new SqlQuery.SearchCondition(new[] { new SqlQuery.Condition(true, (SqlQuery.SearchCondition)l) }), new SqlValue(false),
+			//	new SqlValue(false)));
+
+			if (r is SqlQuery.SearchCondition)
+				r = Convert(new SqlFunction("CASE", r, new SqlValue(true), new SqlValue(false)));
+			//r = Convert(new SqlFunction("CASE",
+			//	r, new SqlValue(true),
+			//	new SqlQuery.SearchCondition(new[] { new SqlQuery.Condition(true, (SqlQuery.SearchCondition)r) }), new SqlValue(false),
+			//	new SqlValue(false)));
+
+			return Convert(new SqlQuery.Predicate.ExprExpr(l, op, r));
+		}
+
+		#endregion
+
 		#region ParseEnumConversion
 
-		ISqlPredicate ParseEnumConversion(ParseInfo pi, ParseInfo left, SqlQuery.Predicate.Operator op, ParseInfo right, QuerySource[] queries)
+		ISqlPredicate ParseEnumConversion(ParseInfo left, SqlQuery.Predicate.Operator op, ParseInfo right, QuerySource[] queries)
 		{
 			ParseInfo<UnaryExpression> conv;
 			ParseInfo                  value;
@@ -3431,7 +3447,7 @@ namespace BLToolkit.Data.Linq
 
 		#region ParseObjectComparison
 
-		ISqlPredicate ParseObjectComparison(LambdaInfo lambda, ParseInfo pi, ParseInfo left, ParseInfo right, QuerySource[] queries)
+		ISqlPredicate ParseObjectComparison(LambdaInfo lambda, ExpressionType nodeType, ParseInfo left, ParseInfo right, QuerySource[] queries)
 		{
 			var qsl = GetSource(lambda, left,  queries);
 			var qsr = GetSource(lambda, right, queries);
@@ -3532,20 +3548,20 @@ namespace BLToolkit.Data.Linq
 
 				var predicate = Convert(new SqlQuery.Predicate.ExprExpr(
 					qsl.GetField(lcol.Field).GetExpressions(this)[0],
-					pi.NodeType == ExpressionType.Equal ? SqlQuery.Predicate.Operator.Equal : SqlQuery.Predicate.Operator.NotEqual,
+					nodeType == ExpressionType.Equal ? SqlQuery.Predicate.Operator.Equal : SqlQuery.Predicate.Operator.NotEqual,
 					rex));
 
 				condition.Conditions.Add(new SqlQuery.Condition(false, predicate));
 			}
 
-			if (pi.NodeType == ExpressionType.NotEqual)
+			if (nodeType == ExpressionType.NotEqual)
 				foreach (var c in condition.Conditions)
 					c.IsOr = true;
 
 			return condition;
 		}
 
-		ISqlPredicate ParseNewObjectComparison(ParseInfo pi, ParseInfo left, ParseInfo right, params QuerySource[] queries)
+		ISqlPredicate ParseNewObjectComparison(ExpressionType nodeType, ParseInfo left, ParseInfo right, params QuerySource[] queries)
 		{
 			left  = ConvertExpression(left);
 			right = ConvertExpression(right);
@@ -3572,13 +3588,13 @@ namespace BLToolkit.Data.Linq
 
 				var predicate = Convert(new SqlQuery.Predicate.ExprExpr(
 					lex,
-					pi.NodeType == ExpressionType.Equal ? SqlQuery.Predicate.Operator.Equal : SqlQuery.Predicate.Operator.NotEqual,
+					nodeType == ExpressionType.Equal ? SqlQuery.Predicate.Operator.Equal : SqlQuery.Predicate.Operator.NotEqual,
 					rex));
 
 				condition.Conditions.Add(new SqlQuery.Condition(false, predicate));
 			}
 
-			if (pi.NodeType == ExpressionType.NotEqual)
+			if (nodeType == ExpressionType.NotEqual)
 				foreach (var c in condition.Conditions)
 					c.IsOr = true;
 

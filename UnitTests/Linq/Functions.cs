@@ -108,5 +108,39 @@ namespace Data.Linq
 				where new int[0].Contains(p.ParentID) || p.ParentID == 2
 				select p));
 		}
+
+		[Test]
+		public void Equals1()
+		{
+			ForEachProvider(db => AreEqual(
+				from p in    Parent where p.ParentID.Equals(2) select p,
+				from p in db.Parent where p.ParentID.Equals(2) select p));
+		}
+
+		[Test]
+		public void Equals2()
+		{
+			var child    = (from ch in Child where ch.ParentID == 2 select ch).First();
+			var expected = from ch in Child where !ch.Equals(child) select ch;
+
+			ForEachProvider(db => AreEqual(expected, from ch in db.Child where !ch.Equals(child) select ch));
+		}
+
+		[Test]
+		public void Equals3()
+		{
+			ForEachProvider(db => AreEqual(
+				from p in    Parent where p.Value1.Equals(null) select p,
+				from p in db.Parent where p.Value1.Equals(null) select p));
+		}
+
+		[Test]
+		public void Equals4()
+		{
+			using (var db = new NorthwindDB())
+				AreEqual(
+					   Customer.Where(c => !c.Address.Equals(null)),
+					db.Customer.Where(c => !c.Address.Equals(null)));
+		}
 	}
 }
