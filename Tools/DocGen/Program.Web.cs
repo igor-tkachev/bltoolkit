@@ -22,7 +22,7 @@ namespace DocGen
 		{
 			new Generator().Generate(
 				new FileItem(),
-				_template, new string[] { "Source" }, destPath, @"..\..\..\..\", false, true,
+				_template, new[] { "Source" }, destPath, @"..\..\..\..\", false, true,
 				fileName =>
 				{
 					var name = Path.GetFileName(fileName).ToLower();

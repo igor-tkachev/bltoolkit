@@ -56,14 +56,31 @@ namespace BLToolkit.Data.Sql.SqlProvider
 					case "+": return be.Type == typeof(string)? new SqlBinaryExpression(be.Expr1, "||", be.Expr2, be.Type, be.Precedence): expr;
 				}
 			}
+			else if (expr is SqlExpression)
+			{
+				SqlExpression e = (SqlExpression)expr;
+
+				if (e.Expr.StartsWith("Extract(Quarter"))
+					return
+						new SqlBinaryExpression(
+							new SqlBinaryExpression(
+								new SqlBinaryExpression(
+									new SqlExpression("Extract(Month from {0})", e.Values),
+									"-",
+									new SqlValue(1), typeof(int), Precedence.Subtraction),
+								"/",
+								new SqlValue(3), typeof(int), Precedence.Multiplicative),
+							"+",
+							new SqlValue(1), typeof(int), Precedence.Additive);
+				
+			}
 			else if (expr is SqlFunction)
 			{
 				SqlFunction func = (SqlFunction)expr;
 
 				switch (func.Name)
 				{
-					case "Substring" : return new SqlExpression("Substring({0} from {1} for {2})", Precedence.Primary, func.Parameters);
-					case "Convert"   : return new SqlExpression("Cast({0} as {1})", Precedence.Primary, func.Parameters[1], func.Parameters[0]);
+					case "Convert" : return new SqlExpression("Cast({0} as {1})", Precedence.Primary, func.Parameters[1], func.Parameters[0]);
 				}
 			}
 

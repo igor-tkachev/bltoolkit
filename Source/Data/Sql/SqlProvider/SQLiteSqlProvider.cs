@@ -51,6 +51,46 @@ namespace BLToolkit.Data.Sql.SqlProvider
 				{
 					case "Space"   : return new SqlFunction("PadR", new SqlValue(" "), func.Parameters[0]);
 					case "Convert" : return new SqlExpression("Cast({0} as {1})", Precedence.Primary, func.Parameters[1], func.Parameters[0]);
+
+#if FW3
+					case "DatePart":
+						{
+							string        str = null;
+							Sql.DateParts part = (Sql.DateParts)((SqlValue)func.Parameters[0]).Value;
+
+							switch (part)
+							{
+								case Sql.DateParts.Year        : str = "%Y"; break;
+								case Sql.DateParts.Quarter     :
+								case Sql.DateParts.Month       : str = "%m"; break;
+								case Sql.DateParts.DayOfYear   : str = "%j"; break;
+								case Sql.DateParts.Day         : str = "%d"; break;
+								case Sql.DateParts.Week        : str = "%W"; break;
+								case Sql.DateParts.WeekDay     : str = "%w"; break;
+								case Sql.DateParts.Hour        : str = "%H"; break;
+								case Sql.DateParts.Minute      : str = "%M"; break;
+								case Sql.DateParts.Second      : str = "%S"; break;
+								case Sql.DateParts.Millisecond : str = "%f"; break;
+							}
+
+							SqlFunction   toChar = new SqlFunction("StrFTime", new SqlValue(str), func.Parameters[1]);
+							SqlExpression result = new SqlExpression("Cast({0} as int)", Precedence.Primary, toChar);
+
+							return
+								part == Sql.DateParts.Quarter?
+									new SqlBinaryExpression(
+										new SqlBinaryExpression(
+											new SqlBinaryExpression(
+												result,
+												"-",
+												new SqlValue(1), typeof(int), Precedence.Subtraction),
+											"/",
+											new SqlValue(3), typeof(int), Precedence.Multiplicative),
+										"+",
+										new SqlValue(1), typeof(int), Precedence.Additive) :
+									(ISqlExpression)result;
+						}
+#endif
 				}
 			}
 

@@ -1,7 +1,10 @@
 ﻿using System;
+using System.Reflection;
 
 namespace BLToolkit.Data.Linq
 {
+	using Data.Sql;
+
 	[SerializableAttribute]
 	[AttributeUsageAttribute(AttributeTargets.Property, AllowMultiple = true, Inherited = false)]
 	public class SqlPropertyAttribute : SqlFunctionAttribute
@@ -18,6 +21,11 @@ namespace BLToolkit.Data.Linq
 		public SqlPropertyAttribute(string sqlProvider, string name)
 			: base(sqlProvider, name)
 		{
+		}
+
+		public override ISqlExpression GetExpression(MemberInfo member, params ISqlExpression[] args)
+		{
+			return new SqlExpression(Name ?? member.Name);
 		}
 	}
 }

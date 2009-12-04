@@ -107,6 +107,10 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 			{ MI(() => Linq.Sql.GetDate()     ), new F<D>        (()             => Linq.Sql.CurrentTimestamp2 ) },
 			{ MI(() => DateTime.Now           ), new F<D>        (()             => Linq.Sql.CurrentTimestamp2 ) },
+			{ MI(() => DateTime.Now.Year      ), new F<D,I>      (obj            => Linq.Sql.DatePart(Linq.Sql.DateParts.Year,      obj) ) },
+			{ MI(() => DateTime.Now.Month     ), new F<D,I>      (obj            => Linq.Sql.DatePart(Linq.Sql.DateParts.Month,     obj) ) },
+			{ MI(() => DateTime.Now.DayOfYear ), new F<D,I>      (obj            => Linq.Sql.DatePart(Linq.Sql.DateParts.DayOfYear, obj) ) },
+			{ MI(() => DateTime.Now.Day       ), new F<D,I>      (obj            => Linq.Sql.DatePart(Linq.Sql.DateParts.Day,       obj) ) },
 		};
 
 		[SqlFunction]
@@ -131,11 +135,13 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			return obj.ToString();
 		}
 
-		// DB2, PostgreSQL, MS SQL, SqlCe
+		// DB2, PostgreSQL, Access, MS SQL, SqlCe
 		//
 		[SqlFunction]
 		[SqlFunction("DB2",        "Repeat")]
 		[SqlFunction("PostgreSQL", "Repeat")]
+		[SqlFunction("Access",     "String", 1, 0)]
+		[CLSCompliant(false)]
 		protected static string Replicate(string str, int count)
 		{
 			if (str == null)
@@ -152,6 +158,8 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		[SqlFunction]
 		[SqlFunction("DB2",        "Repeat")]
 		[SqlFunction("PostgreSQL", "Repeat")]
+		[SqlFunction("Access",     "String", 1, 0)]
+		[CLSCompliant(false)]
 		protected static string Replicate(char ch, int count)
 		{
 			var sb = new StringBuilder(count);

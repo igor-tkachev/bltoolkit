@@ -935,7 +935,14 @@ namespace BLToolkit.Data.Sql.SqlProvider
 				}
 
 				if (type.IsEnum)
-					BuildValue(sb, Map.EnumToValue(value));
+				{
+					value = Map.EnumToValue(value);
+
+					if (value != null && !value.GetType().IsEnum)
+						BuildValue(sb, value);
+					else
+						sb.Append(value);
+				}
 				else
 					sb.Append(value);
 			}

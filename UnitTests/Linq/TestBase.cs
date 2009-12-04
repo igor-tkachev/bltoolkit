@@ -37,14 +37,14 @@ namespace Data.Linq
 
 		static readonly List<string> _configurations = new List<string>
 		{
+			"Sql2008",
+			"Sql2005",
 			ProviderName.DB2,
 			ProviderName.Informix,
 			"Oracle",
 			ProviderName.Firebird,
 			ProviderName.PostgreSQL,
 			ProviderName.MySql,
-			"Sql2005",
-			"Sql2008",
 			ProviderName.SqlCe,
 			ProviderName.Sybase,
 			ProviderName.SQLite,
@@ -134,6 +134,18 @@ namespace Data.Linq
 		protected void TestOneJohn(Func<TestDbManager,IQueryable<Person>> func)
 		{
 			TestOnePerson(Array<string>.Empty, 1, "John", func);
+		}
+
+		private   List<LinqDataTypes> _types;
+		protected List<LinqDataTypes>  Types
+		{
+			get
+			{
+				if (_types == null)
+					using (var db = new TestDbManager("Sql2008"))
+						_types = db.Types.ToList();
+				return _types;
+			}
 		}
 
 		private   List<Person> _person;
@@ -249,18 +261,6 @@ namespace Data.Linq
 					}
 
 				return _grandChild1;
-			}
-		}
-
-		private   List<LinqDataTypes> _types;
-		protected List<LinqDataTypes>  Types
-		{
-			get
-			{
-				if (_types == null)
-					using (var db = new TestDbManager("Sql2008"))
-						_types = db.Types.ToList();
-				return _types;
 			}
 		}
 

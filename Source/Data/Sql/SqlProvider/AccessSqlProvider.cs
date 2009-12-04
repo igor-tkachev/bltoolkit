@@ -199,14 +199,12 @@ namespace BLToolkit.Data.Sql.SqlProvider
 						return new SqlFunction("Iif", sc, func.Parameters[1], func.Parameters[0]);
 
 					case "CASE"      : return ConvertCase(func.Parameters, 0);
-					case "Replicate" : return new SqlFunction("String", func.Parameters[1], func.Parameters[0]);
 					case "CharIndex" :
 						return func.Parameters.Length == 2?
 							new SqlFunction("InStr", new SqlValue(1),    func.Parameters[1], func.Parameters[0], new SqlValue(1)):
 							new SqlFunction("InStr", func.Parameters[2], func.Parameters[1], func.Parameters[0], new SqlValue(1));
 
-					case "Convert" :
-						return func.Parameters[1];
+					case "Convert"   : return func.Parameters[1];
 
 						/*
 					case "Convert"   :
@@ -251,15 +249,6 @@ namespace BLToolkit.Data.Sql.SqlProvider
 							return new SqlFunction(name, func.Parameters[1]);
 						}
 						*/
-				}
-			}
-			else if (expr is SqlExpression)
-			{
-				SqlExpression ex = (SqlExpression)expr;
-
-				switch (ex.Expr)
-				{
-					case "CURRENT_TIMESTAMP" : return new SqlExpression("Now");
 				}
 			}
 

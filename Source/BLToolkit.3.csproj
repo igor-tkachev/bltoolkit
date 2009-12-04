@@ -134,6 +134,7 @@
     <Compile Include="Data\IDataReaderEx.cs" />
     <Compile Include="Data\Linq\CompiledQuery.cs" />
     <Compile Include="Data\Linq\CompiledTableT.cs" />
+    <Compile Include="Data\Linq\SqlExpressionAttribute.cs" />
     <Compile Include="Data\Linq\ElementMethod.cs" />
     <Compile Include="Data\Linq\FieldIndex.cs" />
     <Compile Include="Data\Linq\IDataContext.cs" />

@@ -536,7 +536,8 @@ DROP TABLE LinqDataTypes COMMIT;
 
 CREATE TABLE LinqDataTypes
 (
-	ID         int,
-	MoneyValue decimal(10,4)
+	ID            int,
+	MoneyValue    decimal(10,4),
+	DateTimeValue timestamp
 )
 COMMIT;

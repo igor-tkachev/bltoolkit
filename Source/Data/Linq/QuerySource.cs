@@ -897,7 +897,10 @@ namespace BLToolkit.Data.Linq
 				return field.Sources[0].EnsureField(f);
 			}
 
-			return ((QuerySource)field).GetField(members, currentMember + 1);
+			if (field is QuerySource)
+				return ((QuerySource)field).GetField(members, currentMember + 1);
+
+			return field;
 		}
 
 		public virtual QueryField EnsureField(QueryField field)

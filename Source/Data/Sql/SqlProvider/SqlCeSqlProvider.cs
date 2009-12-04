@@ -33,10 +33,10 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			{
 				SqlExpression ex = (SqlExpression)expr;
 
-				switch (ex.Expr)
-				{
-					case "CURRENT_TIMESTAMP" : return new SqlFunction("GetDate");
-				}
+				//switch (ex.Expr)
+				//{
+				//	case "CURRENT_TIMESTAMP" : return new SqlFunction("GetDate");
+				//}
 			}
 
 			return expr;

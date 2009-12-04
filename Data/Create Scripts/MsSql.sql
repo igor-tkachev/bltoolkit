@@ -451,15 +451,18 @@ VALUES
 	'<root><element strattr="strvalue" intattr="12345"/></root>')
 GO
 
+-- SKIP Sql2005 BEGIN
 --
 -- Arrays
 --
-IF EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID('DataTypeTest') AND type in (N'U'))
+IF EXISTS (SELECT * FROM sys.objects WHERE type = 'P' AND name = 'ArrayTest')
 BEGIN DROP PROCEDURE ArrayTest END
 GO
 
-IF EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID('DataTypeTest') AND type in (N'U'))
-BEGIN DROP TYPE IntArray END
+--IF EXISTS (SELECT * FROM sys.objects WHERE type = 'T' AND name = 'IntArray')
+--BEGIN
+	DROP TYPE IntArray
+--END
 GO
 
 CREATE TYPE IntArray AS TABLE
@@ -469,12 +472,13 @@ CREATE TYPE IntArray AS TABLE
 GO
 
 CREATE PROCEDURE ArrayTest
-	@InputIntArray IntArray READONLY    
+	@InputIntArray IntArray READONLY
 AS
 BEGIN
-	SELECT Num * 2 FROM @InputIntArray;     
+	SELECT Num * 2 FROM @InputIntArray;
 END
 GO
+-- SKIP Sql2005 END
 
 DROP TABLE Parent
 GO
@@ -496,7 +500,8 @@ GO
 
 CREATE TABLE LinqDataTypes
 (
-	ID         int,
-	MoneyValue decimal(10,4)
+	ID            int,
+	MoneyValue    decimal(10,4),
+	DateTimeValue datetime
 )
 GO

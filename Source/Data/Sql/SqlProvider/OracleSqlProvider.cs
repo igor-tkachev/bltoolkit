@@ -161,6 +161,32 @@ namespace BLToolkit.Data.Sql.SqlProvider
 						return func.Parameters.Length == 2?
 							new SqlFunction("InStr", func.Parameters[1], func.Parameters[0]):
 							new SqlFunction("InStr", func.Parameters[1], func.Parameters[0], func.Parameters[2]);
+
+#if FW3
+					case "DatePart":
+						{
+							string str = null;
+
+							switch ((Sql.DateParts)((SqlValue)func.Parameters[0]).Value)
+							{
+								case Sql.DateParts.Year        : str = "YYYY"; break;
+								case Sql.DateParts.Quarter     : str = "Q";    break;
+								case Sql.DateParts.Month       : str = "MM";   break;
+								case Sql.DateParts.DayOfYear   : str = "DDD";  break;
+								case Sql.DateParts.Day         : str = "DD";   break;
+								case Sql.DateParts.Week        : str = "IW";   break;
+								case Sql.DateParts.WeekDay     : str = "D";    break;
+								case Sql.DateParts.Hour        : str = "HH";   break;
+								case Sql.DateParts.Minute      : str = "MI";   break;
+								case Sql.DateParts.Second      : str = "SS";   break;
+								case Sql.DateParts.Millisecond : str = "FF";   break;
+							}
+
+							var toChar = new SqlFunction("To_Char", func.Parameters[1], new SqlValue(str));
+
+							return new SqlFunction("To_Number", toChar);
+						}
+#endif
 				}
 			}
 

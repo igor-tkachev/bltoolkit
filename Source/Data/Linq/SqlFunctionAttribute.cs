@@ -1,9 +1,12 @@
 ﻿using System;
+using System.Reflection;
 
 namespace BLToolkit.Data.Linq
 {
+	using Data.Sql;
+
 	[SerializableAttribute]
-	[AttributeUsageAttribute(AttributeTargets.Method, AllowMultiple = true, Inherited = false)]
+	[AttributeUsageAttribute(AttributeTargets.Method | AttributeTargets.Property, AllowMultiple = true, Inherited = false)]
 	public class SqlFunctionAttribute : Attribute
 	{
 		public SqlFunctionAttribute()
@@ -15,14 +18,48 @@ namespace BLToolkit.Data.Linq
 			Name = name;
 		}
 
+		public SqlFunctionAttribute(string name, params int[] argIndices)
+		{
+			Name        = name;
+			ArgIndices  = argIndices;
+		}
+
 		public SqlFunctionAttribute(string sqlProvider, string name)
 		{
 			SqlProvider = sqlProvider;
 			Name        = name;
 		}
 
+		public SqlFunctionAttribute(string sqlProvider, string name, params int[] argIndices)
+		{
+			SqlProvider = sqlProvider;
+			Name        = name;
+			ArgIndices  = argIndices;
+		}
+
 		public string SqlProvider    { get; set; }
 		public string Name           { get; set; }
 		public bool   ServerSideOnly { get; set; }
+		public int[]  ArgIndices     { get; set; }
+
+		protected ISqlExpression[] ConvertArgs(ISqlExpression[] args)
+		{
+			if (ArgIndices != null)
+			{
+				var idxs = new ISqlExpression[ArgIndices.Length];
+
+				for (var i = 0; i < ArgIndices.Length; i++)
+					idxs[i] = args[ArgIndices[i]];
+
+				return idxs;
+			}
+
+			return args;
+		}
+
+		public virtual ISqlExpression GetExpression(MemberInfo member, params ISqlExpression[] args)
+		{
+			return new SqlFunction(Name ?? member.Name, ConvertArgs(args));
+		}
 	}
 }

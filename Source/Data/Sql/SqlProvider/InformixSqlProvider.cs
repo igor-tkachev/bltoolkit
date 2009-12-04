@@ -81,15 +81,19 @@ namespace BLToolkit.Data.Sql.SqlProvider
 				{
 					case "Coalesce" : return new SqlFunction("Nvl", func.Parameters);
 					case "Convert"  : return new SqlExpression("Cast({0} as {1})", Precedence.Primary, func.Parameters[1], func.Parameters[0]);
-				}
-			}
-			else if (expr is SqlExpression)
-			{
-				SqlExpression ex = (SqlExpression)expr;
-
-				switch (ex.Expr)
-				{
-					case "CURRENT_TIMESTAMP" : return new SqlExpression("CURRENT");
+					case "Quarter"  :
+						return
+							new SqlBinaryExpression(
+								new SqlBinaryExpression(
+									new SqlBinaryExpression(
+										new SqlFunction("Month", func.Parameters),
+										"-",
+										new SqlValue(1), typeof(int), Precedence.Subtraction),
+									"/",
+									new SqlValue(3), typeof(int), Precedence.Multiplicative),
+								"+",
+								new SqlValue(1), typeof(int), Precedence.Additive);
+							
 				}
 			}
 

@@ -999,12 +999,7 @@ namespace BLToolkit.Data.Linq
 
 			var group   = ParseSelect(keySelector, source);
 			var element = elementSelector != null? ParseSelect(elementSelector, source) : null;
-
-			var fields = new List<QueryField>(
-				group is QuerySource.Table ?
-					((QuerySource.Table)group).GetKeyFields().Select(f => f as QueryField) :
-					group.Fields);
-
+			var fields  = new List<QueryField>(group is QuerySource.Table ? group.GetKeyFields() : group.Fields);
 			var byExprs = new ISqlExpression[fields.Count];
 			var wrap    = false;
 
@@ -1065,12 +1060,8 @@ namespace BLToolkit.Data.Linq
 			if (CurrentSql.Select.TakeValue != null || CurrentSql.Select.SkipValue != null)
 				source = WrapInSubQuery(source);
 
-			var order = ParseSelect(lambda, source);
-
-			var fields = new List<QueryField>(
-				order is QuerySource.Table ?
-					((QuerySource.Table)order).GetKeyFields().Select(f => f as QueryField) :
-					order.Fields);
+			var order  = ParseSelect(lambda, source);
+			var fields = new List<QueryField>(order is QuerySource.Table ? order.GetKeyFields().Select(f => f) : order.Fields);
 
 			if (!isThen)
 				CurrentSql.OrderBy.Items.Clear();
@@ -1565,6 +1556,7 @@ namespace BLToolkit.Data.Linq
 					valueExpr = Expression.Equal(query.Lambda.Body, keyParam);
 				}
 
+// ReSharper disable AssignNullToNotNullAttribute
 				valueExpr = Expression.Call(
 					null,
 					Expressor<object>.MethodExpressor(_ => Queryable.Where(null, (Expression<Func<TSource,bool>>)null)),
@@ -1579,6 +1571,7 @@ namespace BLToolkit.Data.Linq
 						valueExpr,
 						Expression.Lambda<Func<TSource,TElement>>(query.ElementSource.Lambda.Body, new[] { query.ElementSource.Lambda.Parameters[0].Expr }));
 				}
+// ReSharper restore AssignNullToNotNullAttribute
 
 				var keyReader = Expression.Lambda<ExpressionInfo<T>.Mapper<TKey>>(
 					info, new[]
@@ -1718,7 +1711,7 @@ namespace BLToolkit.Data.Linq
 									throw new InvalidOperationException();
 								}
 
-								if (query is QuerySource.Scalar && ex.NodeType == ExpressionType.Constant)
+								if (ex.Expr != null && query is QuerySource.Scalar && ex.NodeType == ExpressionType.Constant)
 									return BuildField(query, ma);
 							}
 							else
@@ -1780,6 +1773,9 @@ namespace BLToolkit.Data.Linq
 
 					case ExpressionType.Constant:
 						{
+							if (IsConstant(pi.Expr.Type))
+								break;
+
 							if (query.Sources.Length == 0)
 							{
 								var field = GetField(pi, query);
@@ -2224,8 +2220,13 @@ namespace BLToolkit.Data.Linq
 
 			MethodInfo mi;
 
-			if (!MapSchema.Converters.TryGetValue(ma.Expr.Type, out mi))
-				throw new LinqException("Cannot find converter for the '{0}' type.", ma.Expr.Type.FullName);
+			var type = ma.Expr.Type;
+
+			//if (type.IsEnum)
+			//	type = Enum.GetUnderlyingType(type);
+
+			if (!MapSchema.Converters.TryGetValue(type, out mi))
+				throw new LinqException("Cannot find converter for the '{0}' type.", type.FullName);
 
 			var mapper = Expression.Call(_mapSchemaParam, mi, Expression.Call(_dataReaderParam, DataReader.GetValue, Expression.Constant(idx[0])));
 			var result = ma.Parent == null ? ma.Create(mapper, ma.ParamAccessor) : ma.Parent.Replace(mapper, ma.ParamAccessor);
@@ -2545,13 +2546,10 @@ namespace BLToolkit.Data.Linq
 								return ParseExpression(pie, queries);
 							}
 
-							var attrs = ma.Member.GetCustomAttributes(typeof(SqlPropertyAttribute), true);
+							var attr = GetFunctionAttribute(ma.Member);
 
-							if (attrs.Length > 0)
-							{
-								var attr = (SqlPropertyAttribute)attrs[0];
-								return Convert(new SqlExpression(attr.Name ?? ma.Member.Name));
-							}
+							if (attr != null)
+								return Convert(attr.GetExpression(ma.Member));
 
 							if (IsNullableValueMember(ma.Member))
 								return ParseExpression(pi.Create(ma.Expression, pi.Property(Member.Expression)), queries);
@@ -2636,9 +2634,6 @@ namespace BLToolkit.Data.Linq
 
 							if (attr != null)
 							{
-								if (attr is SqlPropertyAttribute)
-									return Convert(new SqlExpression(attr.Name ?? e.Method.Name));
-
 								var parms = new List<ISqlExpression>();
 
 								if (e.Object != null)
@@ -2647,7 +2642,7 @@ namespace BLToolkit.Data.Linq
 								for (var i = 0; i < e.Arguments.Count; i++)
 									parms.Add(ParseExpression(pi.Create(e.Arguments[i], pi.Index(e.Arguments, MethodCall.Arguments, i)), queries));
 
-								return Convert(new SqlFunction(attr.Name ?? e.Method.Name, parms.ToArray()));
+								return Convert(attr.GetExpression(e.Method, parms.ToArray()));
 							}
 
 							break;
@@ -3096,6 +3091,9 @@ namespace BLToolkit.Data.Linq
 
 		public static bool IsConstant(Type type)
 		{
+			if (type.IsEnum)
+				return true;
+
 			switch (Type.GetTypeCode(type))
 			{
 				case TypeCode.Int16   :

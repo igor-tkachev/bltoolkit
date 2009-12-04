@@ -117,6 +117,7 @@ CREATE TABLE GrandChild  (ParentID int, ChildID int, GrandChildID int);
 DROP TABLE IF EXISTS LinqDataTypes;
 CREATE TABLE LinqDataTypes
 (
-	ID         int,
-	MoneyValue decimal(10,4)
+	ID            int,
+	MoneyValue    decimal(10,4),
+	DateTimeValue datetime
 );
