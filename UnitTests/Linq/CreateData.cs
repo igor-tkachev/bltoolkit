@@ -59,9 +59,17 @@ namespace Create
 
 				new SqlQuery<LinqDataTypes>().Insert(db, new[]
 				{
-					new LinqDataTypes { ID = 1, MoneyValue = 1.11m, DateTimeValue = new DateTime(2001, 1, 11, 1, 11, 21, 100) },
-					new LinqDataTypes { ID = 2, MoneyValue = 2.22m, DateTimeValue = new DateTime(2005, 5, 15, 5, 15, 25, 500) },
-					new LinqDataTypes { ID = 3, MoneyValue = 3.33m, DateTimeValue = new DateTime(2009, 9, 19, 9, 19, 29, 900) },
+					new LinqDataTypes { ID =  1, MoneyValue =  1.11m, DateTimeValue = new DateTime(2001, 1, 11, 1, 11, 21, 100) },
+					new LinqDataTypes { ID =  2, MoneyValue =  2.22m, DateTimeValue = new DateTime(2005, 5, 15, 5, 15, 25, 500) },
+					new LinqDataTypes { ID =  3, MoneyValue =  3.33m, DateTimeValue = new DateTime(2009, 9, 19, 9, 19, 29, 900) },
+					new LinqDataTypes { ID =  4, MoneyValue =  4.33m, DateTimeValue = new DateTime(2009, 9, 20, 9, 19, 29, 900) },
+					new LinqDataTypes { ID =  5, MoneyValue =  5.33m, DateTimeValue = new DateTime(2009, 9, 21, 9, 19, 29, 900) },
+					new LinqDataTypes { ID =  6, MoneyValue =  6.33m, DateTimeValue = new DateTime(2009, 9, 22, 9, 19, 29, 900) },
+					new LinqDataTypes { ID =  7, MoneyValue =  7.33m, DateTimeValue = new DateTime(2009, 9, 23, 9, 19, 29, 900) },
+					new LinqDataTypes { ID =  8, MoneyValue =  8.33m, DateTimeValue = new DateTime(2009, 9, 24, 9, 19, 29, 900) },
+					new LinqDataTypes { ID =  9, MoneyValue =  9.33m, DateTimeValue = new DateTime(2009, 9, 25, 9, 19, 29, 900) },
+					new LinqDataTypes { ID = 10, MoneyValue = 10.33m, DateTimeValue = new DateTime(2009, 9, 26, 9, 19, 29, 900) },
+					new LinqDataTypes { ID = 11, MoneyValue = 11.33m, DateTimeValue = new DateTime(2009, 9, 27, 9, 19, 29, 900) },
 				});
 
 				new SqlQuery<Parent>().Insert(db, new[]

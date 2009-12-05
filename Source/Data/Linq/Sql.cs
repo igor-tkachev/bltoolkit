@@ -319,8 +319,8 @@ namespace BLToolkit.Data.Linq
 				case DateParts.Month       : return date.Month;
 				case DateParts.DayOfYear   : return date.DayOfYear;
 				case DateParts.Day         : return date.Day;
-				case DateParts.Week        : return date.DayOfYear / 7;
-				case DateParts.WeekDay     : return date.DayOfYear % 7;
+				case DateParts.Week        : return (date.DayOfYear - 1 + 6 - DatePart(DateParts.WeekDay, new DateTime(date.Year, 1, 1)) + 1) / 7 + 1;
+				case DateParts.WeekDay     : return ((int)date.DayOfWeek + 1 + DateFirst + 6) % 7 + 1;
 				case DateParts.Hour        : return date.Hour;
 				case DateParts.Minute      : return date.Minute;
 				case DateParts.Second      : return date.Second;
@@ -328,6 +328,12 @@ namespace BLToolkit.Data.Linq
 			}
 
 			throw new InvalidOperationException();
+		}
+
+		[SqlProperty("@@DATEFIRST")]
+		public static int DateFirst
+		{
+			get { return 7; }
 		}
 
 		#endregion

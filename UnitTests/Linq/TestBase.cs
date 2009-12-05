@@ -38,7 +38,7 @@ namespace Data.Linq
 		static readonly List<string> _configurations = new List<string>
 		{
 			"Sql2008",
-			"Sql2005",
+			/*"Sql2005",
 			ProviderName.DB2,
 			ProviderName.Informix,
 			"Oracle",
@@ -49,6 +49,7 @@ namespace Data.Linq
 			ProviderName.Sybase,
 			ProviderName.SQLite,
 			ProviderName.Access,
+			*/
 		};
 
 		protected void ForEachProvider(Action<TestDbManager> func)
@@ -446,6 +447,18 @@ namespace Data.Linq
 
 			Assert.AreEqual(0, resultList.  ToList().Except(expectedList).Count());
 			Assert.AreEqual(0, expectedList.ToList().Except(resultList).  Count());
+		}
+
+		protected void AreSame<T>(IEnumerable<T> expected, IEnumerable<T> result)
+		{
+			var expectedList = expected.ToList();
+			var resultList   = result.  ToList();
+
+			Assert.AreEqual(expectedList.Count(), resultList.Count());
+			Assert.AreNotEqual(0, expectedList.Count());
+			Assert.AreNotEqual(0, resultList.  Count());
+
+			Assert.IsTrue(expectedList.SequenceEqual(resultList));
 		}
 	}
 }
