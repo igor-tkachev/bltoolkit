@@ -137,12 +137,17 @@ namespace DataAccess
 		class UpdateTest
 		{
 			[PrimaryKey] public Guid Guid_;
+
+		    public UpdateTest(Guid guid)
+		    {
+		        Guid_ = guid;
+		    }
 		}
 
 		[Test, ExpectedException(typeof(DataAccessException))]
 		public void UpdateGuid()
 		{
-			new SqlQuery<UpdateTest>().Update(new UpdateTest { Guid_ = Guid.NewGuid() });
+			new SqlQuery<UpdateTest>().Update(new UpdateTest (Guid.NewGuid()));
 		}
 	}
 }

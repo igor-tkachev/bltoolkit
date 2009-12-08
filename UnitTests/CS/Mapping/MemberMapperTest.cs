@@ -191,9 +191,9 @@ namespace Mapping
 		[Test]
 		public void MapToStorageTest()
 		{
-			var o  = new Class1();
-			var om = Map.GetObjectMapper(o.GetType());
-			var mm = om["Int32"];
+			Class1 o  = new Class1();
+			ObjectMapper om = Map.GetObjectMapper(o.GetType());
+			MemberMapper mm = om["Int32"];
 			mm.SetValue(o, 5);
 
 			Assert.AreEqual(5, o.Int32);

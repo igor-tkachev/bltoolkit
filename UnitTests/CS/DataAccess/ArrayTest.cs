@@ -113,7 +113,7 @@ END;"
 		}
 
 
-#elif MSSQL
+#elif MSSQL && FW3
 
 		public abstract class TestAccessor : DataAccessor
 		{

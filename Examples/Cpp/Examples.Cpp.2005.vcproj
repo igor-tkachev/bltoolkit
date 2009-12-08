@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="windows-1251"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="8.00"
+	Version="8,00"
 	Name="Examples.Cpp.2005"
 	ProjectGUID="{1710C5C2-0416-4981-81FC-BBBDFDA0B24D}"
 	RootNamespace="ExamplesCpp2"
@@ -181,8 +181,8 @@
 			RelativePathToProject=".\Source\BLToolkit.2.csproj"
 		/>
 		<AssemblyReference
-			RelativePath="..\..\Tools\NUnit\nunit.framework.dll"
-			AssemblyName="nunit.framework, Version=2.4.6.0, PublicKeyToken=96d09a1eb7f44a77, processorArchitecture=MSIL"
+			RelativePath="..\..\Tools\NUnit\framework\nunit.framework.dll"
+			AssemblyName="nunit.framework, Version=2.5.0.9122, PublicKeyToken=96d09a1eb7f44a77, processorArchitecture=MSIL"
 		/>
 	</References>
 	<Files>
