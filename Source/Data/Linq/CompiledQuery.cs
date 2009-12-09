@@ -1,7 +1,7 @@
 ﻿using System;
-using System.Diagnostics;
 using System.Linq;
 using System.Linq.Expressions;
+
 using BLToolkit.Reflection;
 
 namespace BLToolkit.Data.Linq
@@ -52,8 +52,6 @@ namespace BLToolkit.Data.Linq
 
 		static Func<object[],object> CompileQuery(LambdaExpression query)
 		{
-Debug.WriteLine("Compile...");
-
 			var ps = Expression.Parameter(typeof(object[]), "ps");
 
 			var info = ParseInfo.CreateRoot(query.Body, null).Walk(pi =>

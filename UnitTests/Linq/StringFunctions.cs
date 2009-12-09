@@ -1,12 +1,12 @@
 ﻿using System;
-using System.Data;
 using System.Data.Linq.SqlClient;
 using System.Linq;
-using BLToolkit.DataAccess;
+
 using NUnit.Framework;
 
 using BLToolkit.Data.DataProvider;
 using BLToolkit.Data.Linq;
+using BLToolkit.DataAccess;
 
 namespace Data.Linq
 {
@@ -493,6 +493,16 @@ namespace Data.Linq
 			ForEachProvider(db =>
 			{
 				var q = from p in db.Person where p.FirstName.CompareTo(55) > 0 && p.ID == 1 select p;
+				Assert.AreEqual(1, q.ToList().First().ID);
+			});
+		}
+
+		[Test]
+		public void IsNullOrEmpty1()
+		{
+			ForEachProvider(db =>
+			{
+				var q = from p in db.Person where !string.IsNullOrEmpty(p.FirstName) && p.ID == 1 select p;
 				Assert.AreEqual(1, q.ToList().First().ID);
 			});
 		}

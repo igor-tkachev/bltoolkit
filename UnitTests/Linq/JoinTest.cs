@@ -207,14 +207,14 @@ namespace Data.Linq
 				from p in Parent
 					join ch in Child on p.ParentID equals ch.ParentID into lj1
 					from ch in lj1.DefaultIfEmpty()
-				where p.ParentID == 4
+				where p.ParentID >= 4
 				select new { p, ch };
 
 			ForEachProvider(db => AreEqual(expected,
 				from p in db.Parent
 					join ch in db.Child on p.ParentID equals ch.ParentID into lj1
 					from ch in lj1.DefaultIfEmpty()
-				where p.ParentID == 4
+				where p.ParentID >= 4
 				select new { p, ch }));
 		}
 

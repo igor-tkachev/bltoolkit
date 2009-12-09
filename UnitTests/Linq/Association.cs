@@ -160,6 +160,14 @@ namespace Data.Linq
 		}
 
 		[Test]
+		public void LeftJoin1()
+		{
+			ForEachProvider(db => AreEqual(
+				from p in    Parent from c in p.Children.DefaultIfEmpty() where p.ParentID >= 4 select new { p, c },
+				from p in db.Parent from c in p.Children.DefaultIfEmpty() where p.ParentID >= 4 select new { p, c }));
+		}
+
+		[Test]
 		public void GroupBy1()
 		{
 			var expected = from ch in Child group ch by ch.Parent into g select g.Key;

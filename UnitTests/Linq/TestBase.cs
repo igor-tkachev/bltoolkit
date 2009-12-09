@@ -38,7 +38,7 @@ namespace Data.Linq
 		static readonly List<string> _configurations = new List<string>
 		{
 			"Sql2008",
-			/*"Sql2005",
+			"Sql2005",
 			ProviderName.DB2,
 			ProviderName.Informix,
 			"Oracle",
@@ -49,7 +49,6 @@ namespace Data.Linq
 			ProviderName.Sybase,
 			ProviderName.SQLite,
 			ProviderName.Access,
-			*/
 		};
 
 		protected void ForEachProvider(Action<TestDbManager> func)

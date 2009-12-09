@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using NUnit.Framework;
@@ -112,6 +113,21 @@ namespace Data.Linq
 
 			for (var i = 0; i < 100; i++)
 				Assert.AreEqual(results[i,0], results[i,1]);
+		}
+
+		[Test]
+		public void ParamTest1()
+		{
+			var query = CompiledQuery.Compile<TestDbManager,int,IEnumerable<Child>>((db, id) =>
+				from c in db.Child
+				where c.ParentID == id
+				select new Child
+				{
+					ParentID = id,
+					ChildID  = c.ChildID
+				});
+
+			ForEachProvider(db => Assert.AreEqual(2, query(db, 2).ToList().Count()));
 		}
 	}
 }

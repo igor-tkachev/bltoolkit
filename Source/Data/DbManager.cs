@@ -30,7 +30,7 @@ namespace BLToolkit.Data
 	[DesignerCategory("Code")]
 	public partial class DbManager: Component
 	{
-		#region Constructors
+		#region Init
 
 		public DbManager(DataProviderBase dataProvider, string connectionString)
 		{
@@ -86,6 +86,8 @@ namespace BLToolkit.Data
 
 			return clone;
 		}
+
+		public string LastQuery;
 
 		#endregion
 
@@ -2179,6 +2181,8 @@ namespace BLToolkit.Data
 			IDbDataParameter[] commandParameters)
 		{
 			DataProvider.PrepareCommand(ref commandType, ref commandText, ref commandParameters);
+
+			LastQuery = commandText;
 
 			IDbCommand command = GetCommand(commandAction, commandType, commandText);
 
