@@ -73,7 +73,23 @@ namespace BLToolkit.DataAccess
 			{
 				SqlQueryParameterInfo info = _parameters[i];
 
-				parameters[i] = db.Parameter(info.ParameterName, info.MemberMapper.GetValue(obj));
+			    MapMemberInfo mmi = info.MemberMapper.MapMemberInfo;
+			    object val = info.MemberMapper.GetValue(obj);
+                if (val == null && mmi.Nullable && mmi.NullValue == null)
+                {
+                    //replace value with DbNull
+                    val = DBNull.Value;
+                }
+                if (mmi.IsDbTypeSet)
+                {
+                    parameters[i] = mmi.IsDbSizeSet 
+                        ? db.Parameter(info.ParameterName, val, info.MemberMapper.DbType, mmi.DbSize) 
+                        : db.Parameter(info.ParameterName, val, info.MemberMapper.DbType);
+                }
+                else
+                {
+                    parameters[i] = db.Parameter(info.ParameterName, val);
+                }
 			}
 
 			return parameters;

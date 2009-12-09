@@ -34,6 +34,9 @@ namespace BLToolkit.Mapping
 		private object _nullValue;       public object  NullValue                  { get { return _nullValue;       } set { _nullValue    = value;    } }
 		private object _defaultValue;    public object  DefaultValue               { get { return _defaultValue;    } set { _defaultValue = value;    } }
 		private Type   _type;            public Type    Type                       { get { return _type;            } set { _type         = value;    } }
+	    private int    _dbSize;          public int     DbSize                     { get { return _dbSize;          } set { _dbSize       = value;    } }
+        private bool _isDbTypeSet;       public bool    IsDbTypeSet                { get { return _isDbTypeSet;     } set { _isDbTypeSet  = value;    } }
+        private bool _isDbSizeSet;       public bool    IsDbSizeSet                { get { return _isDbSizeSet;     } set { _isDbSizeSet  = value;    } }
 
 		private MappingSchema _mappingSchema;
 		public  MappingSchema  MappingSchema

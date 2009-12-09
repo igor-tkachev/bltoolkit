@@ -132,6 +132,7 @@
     <Compile Include="DataAccess\ActualTypeAttribute.cs" />
     <Compile Include="DataAccess\CommandBehaviorAttribute.cs" />
     <Compile Include="DataAccess\DataAccessorBase.cs" />
+    <Compile Include="DataAccess\DbTypeAttribute.cs" />
     <Compile Include="DataAccess\ParamDbTypeAttribute.cs" />
     <Compile Include="DataAccess\ParamSizeAttribute.cs" />
     <Compile Include="DataAccess\DataSetTableAttribute.cs" />

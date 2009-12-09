@@ -5,6 +5,7 @@ using System.Data.SqlTypes;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
+using BLToolkit.DataAccess;
 
 namespace BLToolkit.Mapping
 {
@@ -261,6 +262,19 @@ namespace BLToolkit.Mapping
 				if (mapFieldAttr == null || (mapFieldAttr.OrigName == null && mapFieldAttr.Format == null))
 				{
 					MapMemberInfo mi = new MapMemberInfo();
+
+				    DbTypeAttribute dbTypeAttribute = ma.GetAttribute<DbTypeAttribute>();
+
+                    if (dbTypeAttribute != null)
+                    {
+                        mi.DbType = dbTypeAttribute.DbType;
+                        mi.IsDbTypeSet = true;
+                        if (dbTypeAttribute.Size != null)
+                        {
+                            mi.DbSize = dbTypeAttribute.Size.Value;
+                            mi.IsDbSizeSet = true;
+                        }
+                    }
 
 					mi.MemberAccessor             = ma;
 					mi.Type                       = ma.Type;

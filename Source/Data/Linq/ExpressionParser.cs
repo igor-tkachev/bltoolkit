@@ -651,7 +651,7 @@ namespace BLToolkit.Data.Linq
 			}
 			*/
 
-			if ((source.SqlQuery == seq2[0].SqlQuery && CurrentSql.From.Tables.Count == 0) || source.Sources.Contains(seq2[0]))
+			if (source.Sources.Contains(seq2[0]))
 			{
 				CurrentSql = sql;
 				ParsingTracer.DecIndentLevel();
@@ -1740,12 +1740,6 @@ namespace BLToolkit.Data.Linq
 
 					case ExpressionType.Parameter:
 						{
-							if (pi.Expr == ParametersParam)
-							{
-								pi.StopWalking = true;
-								return pi;
-							}
-
 							var field = query.GetBaseField(pi.Expr);
 
 							if (field != null)
@@ -1911,34 +1905,6 @@ namespace BLToolkit.Data.Linq
 			else if (table.InheritanceMapping.Count == 0)
 			{
 				expr = makeExpr(objectType, table.Select(this).Select(i => converter(i).Index).ToArray());
-
-				if (table.ParentAssociation != null && table.ParentAssociationJoin.JoinType == SqlQuery.JoinType.Left)
-				{
-					Expression cond = null;
-
-					foreach (var c in table.ParentAssociationJoin.Condition.Conditions)
-					{
-						var ee = (SqlQuery.Predicate.ExprExpr)c.Predicate;
-
-						var field1  = (SqlField)ee.Expr1;
-						var column1 = (QueryField.Column)table.ParentAssociation.GetField(field1);
-						var index1  = column1.Select(this)[0].Index;
-
-						var field2  = (SqlField)ee.Expr2;
-						var column2 = (QueryField.Column)table.ParentAssociation.GetField(field2);
-						var index2  = column2.Select(this)[0].Index;
-
-						var e =
-							Expression.AndAlso(
-								Expression.Call(_dataReaderParam, DataReader.IsDBNull, Expression.Constant(index2)),
-								Expression.Not(
-									Expression.Call(_dataReaderParam, DataReader.IsDBNull, Expression.Constant(index1))));
-
-						cond = cond == null ? e : Expression.AndAlso(cond, e);
-					}
-
-					expr = Expression.Condition(cond, Expression.Convert(Expression.Constant(null), objectType), expr);
-				}
 			}
 			else
 			{
@@ -2300,10 +2266,7 @@ namespace BLToolkit.Data.Linq
 			{
 				case ExpressionType.New:
 				case ExpressionType.MemberInit:
-					var query = ParseSelect(new LambdaInfo(parseInfo));
-
-					query.Select(this);
-					BuildNew(query, parseInfo, SetQuery);
+					BuildNew(ParseSelect(new LambdaInfo(parseInfo)), parseInfo, SetQuery);
 					return;
 			}
 
@@ -2937,7 +2900,10 @@ namespace BLToolkit.Data.Linq
 		static bool IsIEnumerableType(Expression expr)
 		{
 			var type = expr.Type;
-			return type.IsClass && type != typeof(string) && TypeHelper.IsSameOrParent(typeof(IEnumerable), type);
+			return type.IsClass 
+                && type != typeof(string) 
+                && (type != typeof(byte[]))
+                && TypeHelper.IsSameOrParent(typeof(IEnumerable), type);
 		}
 
 		#endregion
@@ -3260,12 +3226,11 @@ namespace BLToolkit.Data.Linq
 						}
 				}
 
-				var ex = ParseExpression(parseInfo, queries);
-
-				if (ex is SqlParameter)
-					return Convert(new SqlQuery.Predicate.ExprExpr(ex, SqlQuery.Predicate.Operator.Equal, new SqlValue(true)));
-				else
-					return Convert(new SqlQuery.Predicate.Expr(ex));
+				//throw new LinqException("'{0}' cannot be converted to SQL.", parseInfo.Expr);
+				return Convert(new SqlQuery.Predicate.ExprExpr(
+					ParseExpression(parseInfo, queries),
+					SqlQuery.Predicate.Operator.Equal,
+					new SqlValue(true)));
 			}
 			finally
 			{
