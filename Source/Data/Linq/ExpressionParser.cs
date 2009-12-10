@@ -2951,7 +2951,10 @@ namespace BLToolkit.Data.Linq
 		static bool IsIEnumerableType(Expression expr)
 		{
 			var type = expr.Type;
-			return type.IsClass && type != typeof(string) && TypeHelper.IsSameOrParent(typeof(IEnumerable), type);
+			return type.IsClass
+				&& type != typeof(string)
+				&& (type != typeof(byte[]))
+				&& TypeHelper.IsSameOrParent(typeof(IEnumerable), type);
 		}
 
 		#endregion
