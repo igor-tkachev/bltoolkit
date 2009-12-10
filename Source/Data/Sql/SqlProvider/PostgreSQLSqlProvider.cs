@@ -55,6 +55,16 @@ namespace BLToolkit.Data.Sql.SqlProvider
 								Sub(func.Parameters[2], 1));
 				}
 			}
+			else if (expr is SqlExpression)
+			{
+				SqlExpression e = (SqlExpression)expr;
+
+				if (e.Expr.StartsWith("Extract(DOW"))
+					return Inc(new SqlExpression(e.Expr.Replace("Extract(DOW", "Extract(Dow"), e.Values));
+
+				if (e.Expr.StartsWith("Extract(Millisecond"))
+					return new SqlExpression("Cast(To_Char(t.DateTimeValue, 'MS') as int)", e.Values);
+			}
 
 			return expr;
 		}

@@ -68,7 +68,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 				switch (func.Name)
 				{
-					case "Convert" :
+					case "Convert"    :
 						SqlDataType type = (SqlDataType)func.Parameters[0];
 
 						if (type.Length > 0)
@@ -78,6 +78,8 @@ namespace BLToolkit.Data.Sql.SqlProvider
 							return new SqlFunction(type.DbType.ToString(), func.Parameters[1], new SqlValue(type.Precision), new SqlValue(type.Scale));
 
 						return new SqlFunction(type.DbType.ToString(), func.Parameters[1]);
+
+					case "Millisecond": return Div(new SqlFunction("Microsecond", func.Parameters), 1000);
 				}
 			}
 

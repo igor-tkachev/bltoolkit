@@ -6,7 +6,7 @@ namespace BLToolkit.Data.Linq
 	using Data.Sql;
 
 	[SerializableAttribute]
-	[AttributeUsageAttribute(AttributeTargets.Property, AllowMultiple = true, Inherited = false)]
+	[AttributeUsageAttribute(AttributeTargets.Property | AttributeTargets.Method, AllowMultiple = true, Inherited = false)]
 	public class SqlPropertyAttribute : SqlFunctionAttribute
 	{
 		public SqlPropertyAttribute()

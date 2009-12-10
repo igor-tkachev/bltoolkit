@@ -155,39 +155,31 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 				switch (func.Name)
 				{
-					case "Coalesce"  : return new SqlFunction("Nvl",    func.Parameters);
-					case "Convert"   : return new SqlExpression("Cast({0} as {1})", Precedence.Primary, func.Parameters[1], func.Parameters[0]);
-					case "CharIndex" :
+					case "Coalesce"       : return new SqlFunction("Nvl",    func.Parameters);
+					case "Convert"        : return new SqlExpression("Cast({0} as {1})", Precedence.Primary, func.Parameters[1], func.Parameters[0]);
+					case "CharIndex"      :
 						return func.Parameters.Length == 2?
 							new SqlFunction("InStr", func.Parameters[1], func.Parameters[0]):
 							new SqlFunction("InStr", func.Parameters[1], func.Parameters[0], func.Parameters[2]);
-
-#if FW3
-					case "DatePart":
-						{
-							string str = null;
-
-							switch ((Sql.DateParts)((SqlValue)func.Parameters[0]).Value)
-							{
-								case Sql.DateParts.Year        : str = "YYYY"; break;
-								case Sql.DateParts.Quarter     : str = "Q";    break;
-								case Sql.DateParts.Month       : str = "MM";   break;
-								case Sql.DateParts.DayOfYear   : str = "DDD";  break;
-								case Sql.DateParts.Day         : str = "DD";   break;
-								case Sql.DateParts.Week        : str = "IW";   break;
-								case Sql.DateParts.WeekDay     : str = "D";    break;
-								case Sql.DateParts.Hour        : str = "HH";   break;
-								case Sql.DateParts.Minute      : str = "MI";   break;
-								case Sql.DateParts.Second      : str = "SS";   break;
-								case Sql.DateParts.Millisecond : str = "FF";   break;
-							}
-
-							var toChar = new SqlFunction("To_Char", func.Parameters[1], new SqlValue(str));
-
-							return new SqlFunction("To_Number", toChar);
-						}
-#endif
+					case "AddYear"        : return new SqlFunction("Add_Months", func.Parameters[0], Mul(func.Parameters[1], 12));
+					case "AddQuarter"     : return new SqlFunction("Add_Months", func.Parameters[0], Mul(func.Parameters[1],  3));
+					case "AddMonth"       : return new SqlFunction("Add_Months", func.Parameters[0],     func.Parameters[1]);
+					case "AddDayOfYear"   :
+					case "AddWeekDay"     :
+					case "AddDay"         : return Add<DateTime>(func.Parameters[0],     func.Parameters[1]);
+					case "AddWeek"        : return Add<DateTime>(func.Parameters[0], Mul(func.Parameters[1], 7));
+					case "AddHour"        : return Add<DateTime>(func.Parameters[0], Div(func.Parameters[1],                  24));
+					case "AddMinute"      : return Add<DateTime>(func.Parameters[0], Div(func.Parameters[1],             60 * 24));
+					case "AddSecond"      : return Add<DateTime>(func.Parameters[0], Div(func.Parameters[1],        60 * 60 * 24));
+					case "AddMillisecond" : return Add<DateTime>(func.Parameters[0], Div(func.Parameters[1], 1000 * 60 * 60 * 24));
 				}
+			}
+			else if (expr is SqlExpression)
+			{
+				SqlExpression e = (SqlExpression)expr;
+
+				if (e.Expr.StartsWith("To_Number(To_Char(") && e.Expr.EndsWith(", 'FF'))"))
+					return Div(new SqlExpression(e.Expr.Replace("To_Number(To_Char(", "to_Number(To_Char("), e.Values), 1000);
 			}
 
 			return expr;

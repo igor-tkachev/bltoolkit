@@ -81,19 +81,27 @@ namespace BLToolkit.Data.Sql.SqlProvider
 				{
 					case "Coalesce" : return new SqlFunction("Nvl", func.Parameters);
 					case "Convert"  : return new SqlExpression("Cast({0} as {1})", Precedence.Primary, func.Parameters[1], func.Parameters[0]);
-					case "Quarter"  :
+					case "Quarter"  : return Inc(Div(Dec(new SqlFunction("Month", func.Parameters)), 3));
+					case "WeekDay"  : return Inc(new SqlFunction("weekDay", func.Parameters));
+					case "DayOfYear":
 						return
-							new SqlBinaryExpression(
-								new SqlBinaryExpression(
-									new SqlBinaryExpression(
-										new SqlFunction("Month", func.Parameters),
-										"-",
-										new SqlValue(1), typeof(int), Precedence.Subtraction),
-									"/",
-									new SqlValue(3), typeof(int), Precedence.Multiplicative),
-								"+",
-								new SqlValue(1), typeof(int), Precedence.Additive);
-							
+							Inc(Sub<int>(
+								new SqlFunction("Mdy",
+									new SqlFunction("Month", func.Parameters),
+									new SqlFunction("Day",   func.Parameters),
+									new SqlFunction("Year",  func.Parameters)),
+								new SqlFunction("Mdy",
+									new SqlValue(1),
+									new SqlValue(1),
+									new SqlFunction("Year", func.Parameters))));
+					case "Week"     :
+						return
+							new SqlExpression(
+								"((Extend({0}, year to day) - (Mdy(12, 31 - WeekDay(Mdy(1, 1, year(t.DateTimeValue))), Year({0}) - 1) + Interval(1) day to day)) / 7 + Interval(1) day to day)::char(10)::int",
+								func.Parameters);
+					case "Hour"     :
+					case "Minute"   :
+					case "Second"   : return new SqlExpression(string.Format("({{0}}::datetime {0} to {0})::char(3)::int", func.Name), func.Parameters);
 				}
 			}
 

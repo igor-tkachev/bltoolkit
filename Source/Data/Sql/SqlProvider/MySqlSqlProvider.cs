@@ -82,8 +82,32 @@ namespace BLToolkit.Data.Sql.SqlProvider
 					case "Convert" : return new SqlExpression("Cast({0} as {1})", Precedence.Primary, func.Parameters[1], func.Parameters[0]);
 				}
 			}
+			else if (expr is SqlExpression)
+			{
+				SqlExpression e = (SqlExpression)expr;
+
+				if (e.Expr.StartsWith("Extract(DayOfYear"))
+					return new SqlFunction("DayOfYear", e.Values);
+
+				if (e.Expr.StartsWith("Extract(WeekDay"))
+					return Inc(
+						new SqlFunction(
+							"WeekDay",
+							new SqlFunction(
+								"Date_Add",
+								e.Values[0],
+								new SqlExpression("interval 1 day"))));
+			}
 
 			return expr;
+		}
+
+		protected override void BuildDataType(StringBuilder sb, SqlDataType type)
+		{
+			if (type.Type == typeof(int))
+				sb.Append("Signed");
+			else
+				base.BuildDataType(sb, type);
 		}
 
 #if FW3

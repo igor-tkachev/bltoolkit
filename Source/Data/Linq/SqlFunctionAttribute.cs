@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Reflection;
 
 namespace BLToolkit.Data.Linq
@@ -42,8 +43,16 @@ namespace BLToolkit.Data.Linq
 		public bool   ServerSideOnly { get; set; }
 		public int[]  ArgIndices     { get; set; }
 
-		protected ISqlExpression[] ConvertArgs(ISqlExpression[] args)
+		protected ISqlExpression[] ConvertArgs(MemberInfo member, ISqlExpression[] args)
 		{
+			if (member is MethodInfo)
+			{
+				var method = (MethodInfo)member;
+
+				if (method.IsGenericMethod)
+					args = args.Concat(method.GetGenericArguments().Select(t => (ISqlExpression)new SqlDataType(t))).ToArray();
+			}
+
 			if (ArgIndices != null)
 			{
 				var idxs = new ISqlExpression[ArgIndices.Length];
@@ -59,7 +68,7 @@ namespace BLToolkit.Data.Linq
 
 		public virtual ISqlExpression GetExpression(MemberInfo member, params ISqlExpression[] args)
 		{
-			return new SqlFunction(Name ?? member.Name, ConvertArgs(args));
+			return new SqlFunction(Name ?? member.Name, ConvertArgs(member, args));
 		}
 	}
 }

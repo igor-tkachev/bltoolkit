@@ -56,24 +56,6 @@ namespace BLToolkit.Data.Sql.SqlProvider
 					case "+": return be.Type == typeof(string)? new SqlBinaryExpression(be.Expr1, "||", be.Expr2, be.Type, be.Precedence): expr;
 				}
 			}
-			else if (expr is SqlExpression)
-			{
-				SqlExpression e = (SqlExpression)expr;
-
-				if (e.Expr.StartsWith("Extract(Quarter"))
-					return
-						new SqlBinaryExpression(
-							new SqlBinaryExpression(
-								new SqlBinaryExpression(
-									new SqlExpression("Extract(Month from {0})", e.Values),
-									"-",
-									new SqlValue(1), typeof(int), Precedence.Subtraction),
-								"/",
-								new SqlValue(3), typeof(int), Precedence.Multiplicative),
-							"+",
-							new SqlValue(1), typeof(int), Precedence.Additive);
-				
-			}
 			else if (expr is SqlFunction)
 			{
 				SqlFunction func = (SqlFunction)expr;
@@ -81,7 +63,37 @@ namespace BLToolkit.Data.Sql.SqlProvider
 				switch (func.Name)
 				{
 					case "Convert" : return new SqlExpression("Cast({0} as {1})", Precedence.Primary, func.Parameters[1], func.Parameters[0]);
+
+#if FW3
+					case "DateAdd" :
+						switch ((Sql.DateParts)((SqlValue)func.Parameters[0]).Value)
+						{
+							case Sql.DateParts.Quarter  :
+								return new SqlFunction(func.Name, new SqlValue(Sql.DateParts.Month), Mul(func.Parameters[1], 3), func.Parameters[2]);
+							case Sql.DateParts.DayOfYear:
+							case Sql.DateParts.WeekDay:
+								return new SqlFunction(func.Name, new SqlValue(Sql.DateParts.Day),   func.Parameters[1],         func.Parameters[2]);
+							case Sql.DateParts.Week     :
+								return new SqlFunction(func.Name, new SqlValue(Sql.DateParts.Day),   Mul(func.Parameters[1], 7), func.Parameters[2]);
+						}
+
+						break;
+#endif
+
 				}
+			}
+			else if (expr is SqlExpression)
+			{
+				SqlExpression e = (SqlExpression)expr;
+
+				if (e.Expr.StartsWith("Extract(Quarter"))
+					return Inc(Div(Dec(new SqlExpression("Extract(Month from {0})", e.Values)), 3));
+
+				if (e.Expr.StartsWith("Extract(YearDay"))
+					return Inc(new SqlExpression(e.Expr.Replace("Extract(YearDay", "Extract(yearDay"), e.Values));
+
+				if (e.Expr.StartsWith("Extract(WeekDay"))
+					return Inc(new SqlExpression(e.Expr.Replace("Extract(WeekDay", "Extract(weekDay"), e.Values));
 			}
 
 			return expr;

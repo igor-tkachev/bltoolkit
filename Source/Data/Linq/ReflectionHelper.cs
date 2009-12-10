@@ -167,6 +167,8 @@ namespace BLToolkit.Data.Linq
 
 		public class MapSchema : Expressor<Mapping.MappingSchema>
 		{
+			public static MethodInfo MapValueToEnum = MethodExpressor(m => m.MapValueToEnum(null, null));
+
 			public static Dictionary<Type,MethodInfo> Converters = new Dictionary<Type,MethodInfo>
 			{
 				// Primitive Types

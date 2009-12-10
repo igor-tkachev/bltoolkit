@@ -41,6 +41,6 @@ CREATE TABLE LinqDataTypes
 (
 	ID            int,
 	MoneyValue    decimal(10,4),
-	DateTimeValue datetime year to second
+	DateTimeValue datetime year to fraction(3)
 )
 GO

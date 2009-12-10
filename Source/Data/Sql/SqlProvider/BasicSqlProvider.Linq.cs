@@ -3,16 +3,19 @@ using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
-using BLToolkit.Data.Linq;
 
 namespace BLToolkit.Data.Sql.SqlProvider
 {
+	using Common;
+	using Linq;
+
 	using B = Boolean;
 	using C = Char;
 	using S = String;
 	using I = Int32;
 	using O = Object;
 	using D = DateTime;
+	using F = Double;
 
 	partial class BasicSqlProvider
 	{
@@ -72,47 +75,61 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		static readonly Dictionary<MemberInfo,BaseExpressor> _expressors = new Dictionary<MemberInfo,BaseExpressor>
 		{
-			{ MI(() => "".Length               ), new F<S,I>      ( obj           => Linq.Sql.Length(obj)) },
-			{ MI(() => "".Substring  (0)       ), new F<S,I,S>    ((obj,p0)       => Linq.Sql.Substring(obj, p0 + 1, obj.Length - p0)) },
-			{ MI(() => "".Substring  (0,0)     ), new F<S,I,I,S>  ((obj,p0,p1)    => Linq.Sql.Substring(obj, p0 + 1, p1)) },
-			{ MI(() => "".IndexOf    ("")      ), new F<S,S,I>    ((obj,p0)       => p0.Length == 0 ? 0  : (Linq.Sql.CharIndex(p0, obj)         ?? 0) - 1) },
-			{ MI(() => "".IndexOf    ("",0)    ), new F<S,S,I,I>  ((obj,p0,p1)    => p0.Length == 0 && obj.Length > p1 ? p1 : (Linq.Sql.CharIndex(p0, obj, p1 + 1) ?? 0) - 1) },
-			{ MI(() => "".IndexOf    ("",0,0)  ), new F<S,S,I,I,I>((obj,p0,p1,p2) => p0.Length == 0 && obj.Length > p1 ? p1 : (Linq.Sql.CharIndex(p0, Linq.Sql.Left(obj, p2), p1) ?? 0) - 1) },
-			{ MI(() => "".IndexOf    (' ')     ), new F<S,C,I>    ((obj,p0)       => (Linq.Sql.CharIndex(p0, obj)         ?? 0) - 1) },
-			{ MI(() => "".IndexOf    (' ',0)   ), new F<S,C,I,I>  ((obj,p0,p1)    => (Linq.Sql.CharIndex(p0, obj, p1 + 1) ?? 0) - 1) },
-			{ MI(() => "".IndexOf    (' ',0,0) ), new F<S,C,I,I,I>((obj,p0,p1,p2) => (Linq.Sql.CharIndex(p0, Linq.Sql.Left(obj, p2), p1) ?? 0) - 1) },
-			{ MI(() => "".LastIndexOf("")      ), new F<S,S,I>    ((obj,p0)       => p0.Length == 0 ? obj.Length - 1 : (Linq.Sql.CharIndex(p0, obj) ?? 0) == 0 ? -1 : obj.Length - (Linq.Sql.CharIndex(Linq.Sql.Reverse(p0), Linq.Sql.Reverse(obj)) ?? 0) - p0.Length + 1) },
-			{ MI(() => "".LastIndexOf("",0)    ), new F<S,S,I,I>  ((obj,p0,p1)    => p0.Length == 0 ? p1 : (Linq.Sql.CharIndex(p0, obj,                         p1 + 1) ?? 0) == 0 ? -1 : obj.Length - (Linq.Sql.CharIndex(Linq.Sql.Reverse(p0), Linq.Sql.Reverse(obj.Substring(p1, obj.Length - p1))) ?? 0) - p0.Length + 1) },
-			{ MI(() => "".LastIndexOf("",0,0)  ), new F<S,S,I,I,I>((obj,p0,p1,p2) => p0.Length == 0 ? p1 : (Linq.Sql.CharIndex(p0, Linq.Sql.Left(obj, p1 + p2), p1 + 1) ?? 0) == 0 ? -1 : p1 + p2 - (Linq.Sql.CharIndex(Linq.Sql.Reverse(p0), Linq.Sql.Reverse(obj.Substring(p1, p2))) ?? 0) - p0.Length + 1) },
-			{ MI(() => "".LastIndexOf(' ')     ), new F<S,C,I>    ((obj,p0)       => (Linq.Sql.CharIndex(p0, obj)         ?? 0) == 0 ? -1 : Linq.Sql.Length(obj) - (Linq.Sql.CharIndex(p0, Linq.Sql.Reverse(obj)) ?? 0)) },
-			{ MI(() => "".LastIndexOf(' ',0)   ), new F<S,C,I,I>  ((obj,p0,p1)    => (Linq.Sql.CharIndex(p0, obj, p1 + 1) ?? 0) == 0 ? -1 : Linq.Sql.Length(obj) - (Linq.Sql.CharIndex(p0, Linq.Sql.Reverse(obj.Substring(p1, obj.Length - p1))) ?? 0)) },
-			{ MI(() => "".LastIndexOf(' ',0,0) ), new F<S,C,I,I,I>((obj,p0,p1,p2) => (Linq.Sql.CharIndex(p0, Linq.Sql.Left(obj, p1 + p2), p1 + 1) ?? 0) == 0 ? -1 : p1 + p2 - (Linq.Sql.CharIndex(p0, Linq.Sql.Reverse(obj.Substring(p1, p2))) ?? 0)) },
-			{ MI(() => "".Insert     (0,"")    ), new F<S,I,S,S>  ((obj,p0,p1)    => obj.Length == p0 ? obj + p1 : Linq.Sql.Stuff(obj, p0 + 1, 0, p1)) },
-			{ MI(() => "".Remove     (0)       ), new F<S,I,S>    ((obj,p0)       => Linq.Sql.Left(obj, p0)) },
-			{ MI(() => "".Remove     (0,0)     ), new F<S,I,I,S>  ((obj,p0,p1)    => Linq.Sql.Stuff(obj, p0 + 1, p1, "")) },
-			{ MI(() => "".PadLeft    (0)       ), new F<S,I,S>    ((obj,p0)       => Linq.Sql.PadLeft(obj, p0, ' ')) },
-			{ MI(() => "".PadLeft    (0,' ')   ), new F<S,I,C,S>  ((obj,p0,p1)    => Linq.Sql.PadLeft(obj, p0, p1)) },
-			{ MI(() => "".PadRight   (0)       ), new F<S,I,S>    ((obj,p0)       => Linq.Sql.PadRight(obj, p0, ' ')) },
-			{ MI(() => "".PadRight   (0,' ')   ), new F<S,I,C,S>  ((obj,p0,p1)    => Linq.Sql.PadRight(obj, p0, p1)) },
-			{ MI(() => "".Replace    ("","")   ), new F<S,S,S,S>  ((obj,p0,p1)    => Linq.Sql.Replace(obj, p0, p1)) },
-			{ MI(() => "".Replace    (' ',' ') ), new F<S,C,C,S>  ((obj,p0,p1)    => Linq.Sql.Replace(obj, p0, p1)) },
-			{ MI(() => "".Trim       ()        ), new F<S,S>      ( obj           => Linq.Sql.Trim(obj)) },
-			{ MI(() => "".TrimEnd    ()        ), new F<S,S>      ( obj           => Linq.Sql.TrimRight(obj)) },
-			{ MI(() => "".TrimStart  ()        ), new F<S,S>      ( obj           => Linq.Sql.TrimLeft(obj)) },
-			{ MI(() => "".ToLower    ()        ), new F<S,S>      ( obj           => Linq.Sql.Lower(obj)) },
-			{ MI(() => "".ToUpper    ()        ), new F<S,S>      ( obj           => Linq.Sql.Upper(obj)) },
-			{ MI(() => "".CompareTo  ("")      ), new F<S,S,I>    ((obj,p0)       => ConvertToCaseCompareTo(obj, p0) ) },
-			{ MI(() => "".CompareTo  (1)       ), new F<S,O,I>    ((obj,p0)       => ConvertToCaseCompareTo(obj, p0.ToString()) ) },
-			{ MI(() => string.IsNullOrEmpty("")), new F<S,S,B>    ((obj,p0)       => p0 == null || p0.Length == 0 ) },
+			{ MI(() => "".Length                      ), new F<S,I>      ( obj           => Sql.Length(obj)) },
+			{ MI(() => "".Substring  (0)              ), new F<S,I,S>    ((obj,p0)       => Sql.Substring(obj, p0 + 1, obj.Length - p0)) },
+			{ MI(() => "".Substring  (0,0)            ), new F<S,I,I,S>  ((obj,p0,p1)    => Sql.Substring(obj, p0 + 1, p1)) },
+			{ MI(() => "".IndexOf    ("")             ), new F<S,S,I>    ((obj,p0)       => p0.Length == 0 ? 0  : (Sql.CharIndex(p0, obj)         ?? 0) - 1) },
+			{ MI(() => "".IndexOf    ("",0)           ), new F<S,S,I,I>  ((obj,p0,p1)    => p0.Length == 0 && obj.Length > p1 ? p1 : (Sql.CharIndex(p0, obj, p1 + 1) ?? 0) - 1) },
+			{ MI(() => "".IndexOf    ("",0,0)         ), new F<S,S,I,I,I>((obj,p0,p1,p2) => p0.Length == 0 && obj.Length > p1 ? p1 : (Sql.CharIndex(p0, Linq.Sql.Left(obj, p2), p1) ?? 0) - 1) },
+			{ MI(() => "".IndexOf    (' ')            ), new F<S,C,I>    ((obj,p0)       => (Sql.CharIndex(p0, obj)         ?? 0) - 1) },
+			{ MI(() => "".IndexOf    (' ',0)          ), new F<S,C,I,I>  ((obj,p0,p1)    => (Sql.CharIndex(p0, obj, p1 + 1) ?? 0) - 1) },
+			{ MI(() => "".IndexOf    (' ',0,0)        ), new F<S,C,I,I,I>((obj,p0,p1,p2) => (Sql.CharIndex(p0, Sql.Left(obj, p2), p1) ?? 0) - 1) },
+			{ MI(() => "".LastIndexOf("")             ), new F<S,S,I>    ((obj,p0)       => p0.Length == 0 ? obj.Length - 1 : (Sql.CharIndex(p0, obj)                            ?? 0) == 0 ? -1 : obj.Length - (Sql.CharIndex(Sql.Reverse(p0), Sql.Reverse(obj))                                ?? 0) - p0.Length + 1) },
+			{ MI(() => "".LastIndexOf("",0)           ), new F<S,S,I,I>  ((obj,p0,p1)    => p0.Length == 0 ? p1             : (Sql.CharIndex(p0, obj,                    p1 + 1) ?? 0) == 0 ? -1 : obj.Length - (Sql.CharIndex(Sql.Reverse(p0), Sql.Reverse(obj.Substring(p1, obj.Length - p1))) ?? 0) - p0.Length + 1) },
+			{ MI(() => "".LastIndexOf("",0,0)         ), new F<S,S,I,I,I>((obj,p0,p1,p2) => p0.Length == 0 ? p1             : (Sql.CharIndex(p0, Sql.Left(obj, p1 + p2), p1 + 1) ?? 0) == 0 ? -1 :    p1 + p2 - (Sql.CharIndex(Sql.Reverse(p0), Sql.Reverse(obj.Substring(p1, p2)))              ?? 0) - p0.Length + 1) },
+			{ MI(() => "".LastIndexOf(' ')            ), new F<S,C,I>    ((obj,p0)       => (Sql.CharIndex(p0, obj)         ?? 0)                    == 0 ? -1 : Sql.Length(obj) - (Sql.CharIndex(p0, Sql.Reverse(obj))                                ?? 0)) },
+			{ MI(() => "".LastIndexOf(' ',0)          ), new F<S,C,I,I>  ((obj,p0,p1)    => (Sql.CharIndex(p0, obj, p1 + 1) ?? 0)                    == 0 ? -1 : Sql.Length(obj) - (Sql.CharIndex(p0, Sql.Reverse(obj.Substring(p1, obj.Length - p1))) ?? 0)) },
+			{ MI(() => "".LastIndexOf(' ',0,0)        ), new F<S,C,I,I,I>((obj,p0,p1,p2) => (Sql.CharIndex(p0, Sql.Left(obj, p1 + p2), p1 + 1) ?? 0) == 0 ? -1 : p1 + p2         - (Sql.CharIndex(p0, Sql.Reverse(obj.Substring(p1, p2)))              ?? 0)) },
+			{ MI(() => "".Insert     (0,"")           ), new F<S,I,S,S>  ((obj,p0,p1)    => obj.Length == p0 ? obj + p1 : Sql.Stuff(obj, p0 + 1, 0, p1)) },
+			{ MI(() => "".Remove     (0)              ), new F<S,I,S>    ((obj,p0)       => Sql.Left(obj, p0)) },
+			{ MI(() => "".Remove     (0,0)            ), new F<S,I,I,S>  ((obj,p0,p1)    => Sql.Stuff(obj, p0 + 1, p1, "")) },
+			{ MI(() => "".PadLeft    (0)              ), new F<S,I,S>    ((obj,p0)       => Sql.PadLeft(obj, p0, ' ')) },
+			{ MI(() => "".PadLeft    (0,' ')          ), new F<S,I,C,S>  ((obj,p0,p1)    => Sql.PadLeft(obj, p0, p1)) },
+			{ MI(() => "".PadRight   (0)              ), new F<S,I,S>    ((obj,p0)       => Sql.PadRight(obj, p0, ' ')) },
+			{ MI(() => "".PadRight   (0,' ')          ), new F<S,I,C,S>  ((obj,p0,p1)    => Sql.PadRight(obj, p0, p1)) },
+			{ MI(() => "".Replace    ("","")          ), new F<S,S,S,S>  ((obj,p0,p1)    => Sql.Replace(obj, p0, p1)) },
+			{ MI(() => "".Replace    (' ',' ')        ), new F<S,C,C,S>  ((obj,p0,p1)    => Sql.Replace(obj, p0, p1)) },
+			{ MI(() => "".Trim       ()               ), new F<S,S>      ( obj           => Sql.Trim(obj)) },
+			{ MI(() => "".TrimEnd    ()               ), new F<S,S>      ( obj           => Sql.TrimRight(obj)) },
+			{ MI(() => "".TrimStart  ()               ), new F<S,S>      ( obj           => Sql.TrimLeft(obj)) },
+			{ MI(() => "".ToLower    ()               ), new F<S,S>      ( obj           => Sql.Lower(obj)) },
+			{ MI(() => "".ToUpper    ()               ), new F<S,S>      ( obj           => Sql.Upper(obj)) },
+			{ MI(() => "".CompareTo  ("")             ), new F<S,S,I>    ((obj,p0)       => ConvertToCaseCompareTo(obj, p0) ) },
+			{ MI(() => "".CompareTo  (1)              ), new F<S,O,I>    ((obj,p0)       => ConvertToCaseCompareTo(obj, p0.ToString()) ) },
+			{ MI(() => string.IsNullOrEmpty("")       ), new F<S,S,B>    ((obj,p0)       => p0 == null || p0.Length == 0 ) },
 
-			{ MI(() => AltStuff    ("",0,0,"")), new F<S,I,I,S,S>((p0, p1,p2,p3) => Linq.Sql.Left(p0, p1 - 1) + p3 + Linq.Sql.Right(p0, p0.Length - (p1 + p2 - 1))) },
+			{ MI(() => AltStuff      ("",0,0,"")),       new F<S,I,I,S,S>((p0, p1,p2,p3) => Sql.Left(p0, p1 - 1) + p3 + Sql.Right(p0, p0.Length - (p1 + p2 - 1))) },
 
-			{ MI(() => Linq.Sql.GetDate()     ), new F<D>        (()             => Linq.Sql.CurrentTimestamp2 ) },
-			{ MI(() => DateTime.Now           ), new F<D>        (()             => Linq.Sql.CurrentTimestamp2 ) },
-			{ MI(() => DateTime.Now.Year      ), new F<D,I>      (obj            => Linq.Sql.DatePart(Linq.Sql.DateParts.Year,      obj) ) },
-			{ MI(() => DateTime.Now.Month     ), new F<D,I>      (obj            => Linq.Sql.DatePart(Linq.Sql.DateParts.Month,     obj) ) },
-			{ MI(() => DateTime.Now.DayOfYear ), new F<D,I>      (obj            => Linq.Sql.DatePart(Linq.Sql.DateParts.DayOfYear, obj) ) },
-			{ MI(() => DateTime.Now.Day       ), new F<D,I>      (obj            => Linq.Sql.DatePart(Linq.Sql.DateParts.Day,       obj) ) },
+			{ MI(() => Sql.GetDate()                  ), new F<D>        (()             => Sql.CurrentTimestamp2 ) },
+			{ MI(() => DateTime.Now                   ), new F<D>        (()             => Sql.CurrentTimestamp2 ) },
+			{ MI(() => DateTime.Now.Year              ), new F<D,I>      (obj            => Sql.DatePart(Sql.DateParts.Year,        obj)     ) },
+			{ MI(() => DateTime.Now.Month             ), new F<D,I>      (obj            => Sql.DatePart(Sql.DateParts.Month,       obj)     ) },
+			{ MI(() => DateTime.Now.DayOfYear         ), new F<D,I>      (obj            => Sql.DatePart(Sql.DateParts.DayOfYear,   obj)     ) },
+			{ MI(() => DateTime.Now.Day               ), new F<D,I>      (obj            => Sql.DatePart(Sql.DateParts.Day,         obj)     ) },
+			{ MI(() => DateTime.Now.DayOfWeek         ), new F<D,I>      (obj            => Sql.DatePart(Sql.DateParts.WeekDay,     obj) - 1 ) },
+			{ MI(() => DateTime.Now.Hour              ), new F<D,I>      (obj            => Sql.DatePart(Sql.DateParts.Hour,        obj)     ) },
+			{ MI(() => DateTime.Now.Minute            ), new F<D,I>      (obj            => Sql.DatePart(Sql.DateParts.Minute,      obj)     ) },
+			{ MI(() => DateTime.Now.Second            ), new F<D,I>      (obj            => Sql.DatePart(Sql.DateParts.Second,      obj)     ) },
+			{ MI(() => DateTime.Now.Millisecond       ), new F<D,I>      (obj            => Sql.DatePart(Sql.DateParts.Millisecond, obj)     ) },
+			{ MI(() => DateTime.Now.AddYears       (0)), new F<D,I,D>    ((obj,p0)       => Sql.DateAdd (Sql.DateParts.Year,        p0, obj) ) },
+			{ MI(() => DateTime.Now.AddMonths      (0)), new F<D,I,D>    ((obj,p0)       => Sql.DateAdd (Sql.DateParts.Month,       p0, obj) ) },
+			{ MI(() => DateTime.Now.AddDays        (0)), new F<D,F,D>    ((obj,p0)       => Sql.DateAdd (Sql.DateParts.Day,         p0, obj) ) },
+			{ MI(() => DateTime.Now.AddHours       (0)), new F<D,F,D>    ((obj,p0)       => Sql.DateAdd (Sql.DateParts.Hour,        p0, obj) ) },
+			{ MI(() => DateTime.Now.AddMinutes     (0)), new F<D,F,D>    ((obj,p0)       => Sql.DateAdd (Sql.DateParts.Minute,      p0, obj) ) },
+			{ MI(() => DateTime.Now.AddSeconds     (0)), new F<D,F,D>    ((obj,p0)       => Sql.DateAdd (Sql.DateParts.Second,      p0, obj) ) },
+			{ MI(() => DateTime.Now.AddMilliseconds(0)), new F<D,F,D>    ((obj,p0)       => Sql.DateAdd (Sql.DateParts.Millisecond, p0, obj) ) },
+
+			{ MI(() => DateTime.Parse("")             ), new F<S,D>      (p0             => Sql.Convert<DateTime,string>(p0)                ) },
 		};
 
 		[SqlFunction]

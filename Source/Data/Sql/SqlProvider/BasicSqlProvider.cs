@@ -909,6 +909,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			else if (value is string)                 sb.Append('\'').Append(value.ToString().Replace("'", "''")).Append('\'');
 			else if (value is char || value is char?) sb.Append('\'').Append(value.ToString().Replace("'", "''")).Append('\'');
 			else if (value is bool || value is bool?) sb.Append((bool)value ? "1" : "0");
+			else if (value is DateTime)               sb.AppendFormat("'{0:yyyy-MM-dd HH:mm:ss.fffffff}'", value);
 			else
 			{
 				Type type = value.GetType();
@@ -1044,7 +1045,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			if (type.Precision > 0)
 				sb.Append('(').Append(type.Precision).Append(',').Append(type.Scale).Append(')');
 		}
-	
+
 		#endregion
 
 		#region GetPrecedence
@@ -1374,6 +1375,11 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			return Add<int>(expr1, new SqlValue(value));
 		}
 
+		public ISqlExpression Inc(ISqlExpression expr1)
+		{
+			return Add(expr1, 1);
+		}
+
 		public ISqlExpression Sub(ISqlExpression expr1, ISqlExpression expr2, Type type)
 		{
 			return ConvertExpression(new SqlBinaryExpression(expr1, "-", expr2, type, Precedence.Subtraction));
@@ -1389,9 +1395,14 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			return Sub<int>(expr1, new SqlValue(value));
 		}
 
+		public ISqlExpression Dec(ISqlExpression expr1)
+		{
+			return Sub(expr1, 1);
+		}
+
 		public ISqlExpression Mul(ISqlExpression expr1, ISqlExpression expr2, Type type)
 		{
-			return ConvertExpression(new SqlBinaryExpression(expr1, "*", expr2, type, Precedence.Subtraction));
+			return ConvertExpression(new SqlBinaryExpression(expr1, "*", expr2, type, Precedence.Multiplicative));
 		}
 
 		public ISqlExpression Mul<T>(ISqlExpression expr1, ISqlExpression expr2)
@@ -1402,6 +1413,21 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		public ISqlExpression Mul(ISqlExpression expr1, int value)
 		{
 			return Mul<int>(expr1, new SqlValue(value));
+		}
+
+		public ISqlExpression Div(ISqlExpression expr1, ISqlExpression expr2, Type type)
+		{
+			return ConvertExpression(new SqlBinaryExpression(expr1, "/", expr2, type, Precedence.Multiplicative));
+		}
+
+		public ISqlExpression Div<T>(ISqlExpression expr1, ISqlExpression expr2)
+		{
+			return Div(expr1, expr2, typeof(T));
+		}
+
+		public ISqlExpression Div(ISqlExpression expr1, int value)
+		{
+			return Div<int>(expr1, new SqlValue(value));
 		}
 
 		#endregion
@@ -1502,7 +1528,30 @@ namespace BLToolkit.Data.Sql.SqlProvider
 						if (be.Expr2 is SqlValue)
 						{
 							SqlValue v2 = (SqlValue) be.Expr2;
-							if (v2.Value is int && (int) v2.Value == 0) return be.Expr1;
+
+							if (v2.Value is int)
+							{
+								if ((int)v2.Value == 0) return be.Expr1;
+
+								if (be.Expr1 is SqlBinaryExpression)
+								{
+									SqlBinaryExpression be1 = (SqlBinaryExpression)be.Expr1;
+
+									if (be1.Expr2 is SqlValue)
+									{
+										SqlValue be1v2 = (SqlValue)be1.Expr2;
+
+										if (be1v2.Value is int)
+										{
+											switch (be1.Operation)
+											{
+												case "+": return new SqlBinaryExpression(be1.Expr1, be1.Operation, new SqlValue((int)be1v2.Value - (int)v2.Value), be.Type, be.Precedence);
+												case "-": return new SqlBinaryExpression(be1.Expr1, be1.Operation, new SqlValue((int)be1v2.Value + (int)v2.Value), be.Type, be.Precedence);
+											}
+										}
+									}
+								}
+							}
 						}
 
 						if (be.Expr1 is SqlValue && be.Expr2 is SqlValue)
@@ -1533,7 +1582,17 @@ namespace BLToolkit.Data.Sql.SqlProvider
 						{
 							SqlValue v1 = (SqlValue)be.Expr1;
 							SqlValue v2 = (SqlValue)be.Expr2;
-							if (v1.Value is int && v2.Value is int) return new SqlValue((int)v1.Value * (int)v2.Value);
+
+							if (v1.Value is int)
+							{
+								if (v2.Value is int)    return new SqlValue((int)   v1.Value * (int)   v2.Value);
+								if (v2.Value is double) return new SqlValue((int)   v1.Value * (double)v2.Value);
+							}
+							else if (v1.Value is double)
+							{
+								if (v2.Value is int)    return new SqlValue((double)v1.Value * (int)   v2.Value);
+								if (v2.Value is double) return new SqlValue((double)v1.Value * (double)v2.Value);
+							}
 						}
 
 						break;

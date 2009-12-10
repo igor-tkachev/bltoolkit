@@ -1,12 +1,33 @@
 ﻿using System;
 using System.Data.Linq.SqlClient;
+using System.Globalization;
 using System.Reflection;
-using BLToolkit.Data.Sql;
 
 namespace BLToolkit.Data.Linq
 {
+	using Common;
+	using Data.Sql;
+
 	public static class Sql
 	{
+		#region Common Functions
+
+		[CLSCompliant(false)]
+		[SqlExpression("{0}", 0, ServerSideOnly = true)]
+		public static T OnServer<T>(T obj)
+		{
+			throw new LinqException("This function is server side only.");
+		}
+
+		[CLSCompliant(false)]
+		[SqlFunction("Convert", 1, 0)]
+		public static TTo Convert<TTo,TFrom>(TFrom obj)
+		{
+			return ConvertTo<TTo>.From(obj);
+		}
+
+		#endregion
+
 		#region String Finctions
 
 		[SqlFunction]
@@ -187,7 +208,9 @@ namespace BLToolkit.Data.Linq
 
 		#region DateTime Functions
 
-		[SqlFunction]
+		[SqlProperty("CURRENT_TIMESTAMP")]
+		[SqlProperty("Informix", "CURRENT")]
+		[SqlProperty("Access",   "Now")]
 		public static DateTime GetDate()
 		{
 			return DateTime.Now;
@@ -211,6 +234,24 @@ namespace BLToolkit.Data.Linq
 		public static DateTime CurrentTimestamp2
 		{
 			get { return DateTime.Now; }
+		}
+
+		[SqlFunction]
+		public static DateTime ToDate(int year, int month, int day, int hour, int minute, int second, int millisecond)
+		{
+			return new DateTime(year, month, day, hour, minute, second, millisecond);
+		}
+
+		[SqlFunction]
+		public static DateTime ToDate(int year, int month, int day, int hour, int minute, int second)
+		{
+			return new DateTime(year, month, day, hour, minute, second);
+		}
+
+		[SqlFunction]
+		public static DateTime ToDate(int year, int month, int day)
+		{
+			return new DateTime(year, month, day);
 		}
 
 		public enum DateParts
@@ -271,24 +312,31 @@ namespace BLToolkit.Data.Linq
 			public override ISqlExpression GetExpression(MemberInfo member, params ISqlExpression[] args)
 			{
 				var part = (DateParts)((SqlValue)args[_datePartIndex]).Value;
-				var str  = string.Format(Expression, _partMapping != null ? _partMapping[(int)part] : part.ToString());
+				var pstr = _partMapping != null ? _partMapping[(int)part] : part.ToString();
+				var str  = string.Format(Expression, pstr ?? part.ToString());
 
 				return _isExpression ?
-					new SqlExpression(str, Precedence, ConvertArgs(args)) :
-					(ISqlExpression)new SqlFunction  (str, ConvertArgs(args));
+					new SqlExpression(str, Precedence, ConvertArgs(member, args)) :
+					(ISqlExpression)new SqlFunction  (str, ConvertArgs(member, args));
 			}
 		}
 
 		[CLSCompliant(false)]
 		[SqlFunction]
-		[DatePart("DB2", "{{0}} + {{1}} {0}s", Precedence.Additive, true, 0, 2, 1)]
-		public static DateTime DateAdd(DateParts part, int number, DateTime date)
+		[DatePart("Oracle",     "Add{0}",                                                   false, 0, 2, 1)]
+		[DatePart("DB2",        "{{1}} + {0}",                         Precedence.Additive, true,  new[] { "{0} Year",          "({0} * 3) Month",         "{0} Month",           "{0} Day",         "{0} Day",         "({0} * 7) Day",       "{0} Day",         "{0} Hour",          "{0} Minute",            "{0} Second",            "({0} * 1000) Microsecond" }, 0, 1, 2)]
+		[DatePart("Informix",   "{{1}} + Interval({0}",                Precedence.Additive, true,  new[] { "{0}) Year to Year", "{0}) Month to Month * 3", "{0}) Month to Month", "{0}) Day to Day", "{0}) Day to Day", "{0}) Day to Day * 7", "{0}) Day to Day", "{0}) Hour to Hour", "{0}) Minute to Minute", "{0}) Second to Second", null                       }, 0, 1, 2)]
+		[DatePart("PostgreSQL", "{{1}} + Interval '{{0}} {0}",         Precedence.Additive, true,  new[] { "Year'",             "Month' * 3",              "Month'",              "Day'",            "Day'",            "Day' * 7",            "Day'",            "Hour'",             "Minute'",               "Second'",               "Millisecond'"             }, 0, 1, 2)]
+		[DatePart("MySql",      "Date_Add({{1}}, Interval {{0}} {0})",                      true,  new[] { null,                null,                      null,                  "Day",             null,              null,                  "Day",             null,                null,                    null,                    null                       }, 0, 1, 2)]
+		[DatePart("SQLite",     "DateTime({{1}}, '{{0}} {0}')",                             true,  new[] { null,                null,                      null,                  "Day",             null,              null,                  "Day",             null,                null,                    null,                    null                       }, 0, 1, 2)]
+		[DatePart("Access",     "DateAdd({0}, {{0}}, {{1}})",                               true,  new[] { "'yyyy'",            "'q'",                     "'m'",                 "'y'",             "'d'",             "'ww'",                "'w'",             "'h'",               "'n'",                   "'s'",                   null                       }, 0, 1, 2)]
+		public static DateTime DateAdd(DateParts part, double number, DateTime date)
 		{
 			switch (part)
 			{
-				case DateParts.Year        : return date.AddYears       (number);
-				case DateParts.Quarter     : return date.AddMonths      (number * 3);
-				case DateParts.Month       : return date.AddMonths      (number);
+				case DateParts.Year        : return date.AddYears       ((int)number);
+				case DateParts.Quarter     : return date.AddMonths      ((int)number * 3);
+				case DateParts.Month       : return date.AddMonths      ((int)number);
 				case DateParts.DayOfYear   : return date.AddDays        (number);
 				case DateParts.Day         : return date.AddDays        (number);
 				case DateParts.Week        : return date.AddDays        (number * 7);
@@ -304,12 +352,14 @@ namespace BLToolkit.Data.Linq
 
 		[CLSCompliant(false)]
 		[SqlFunction]
-		[DatePart("DB2",        "{0}", 0, 1)]
-		[DatePart("Informix",   "{0}", 0, 1)]
-		[DatePart("Firebird",   "Extract({0} from {{0}})", true, 0, 1)]
-		[DatePart("PostgreSQL", "Extract({0} from {{0}})", true, 0, 1)]
-		[DatePart("MySql",      "Extract({0} from {{0}})", true, 0, 1)]
-		[DatePart("Access",     "DatePart({0}, {{0}})",    true, new[] { "'yyyy'", "'q'", "'m'", "'y'", "'d'", "'ww'", "'w'", "'h'", "'n'", "'s'", null }, 0, 1)]
+		[DatePart("DB2",        "{0}",                               false, new[] { null,     null,  null,   null,      null,   null,   "DayOfWeek", null,   null,   null,   null   }, 0, 1)]
+		[DatePart("Informix",   "{0}",                                      0, 1)]
+		[DatePart("MySql",      "Extract({0} from {{0}})",           true,  0, 1)]
+		[DatePart("PostgreSQL", "Extract({0} from {{0}})",           true,  new[] { null,     null,  null,   "DOY",     null,   null,   "DOW",       null,   null,   null,   null   }, 0, 1)]
+		[DatePart("Firebird",   "Extract({0} from {{0}})",           true,  new[] { null,     null,  null,   "YearDay", null,   null,   null,        null,   null,   null,   null   }, 0, 1)]
+		[DatePart("Oracle",     "To_Number(To_Char({{0}}, {0}))",    true,  new[] { "'YYYY'", "'Q'", "'MM'", "'DDD'",   "'DD'", "'WW'", "'D'",       "'HH'", "'MI'", "'SS'", "'FF'" }, 0, 1)]
+		[DatePart("SQLite",     "Cast(StrFTime({0}, {{0}}) as int)", true,  new[] { "'%Y'",   null,  "'%m'", "'%j'",    "'%d'", "'%W'", "'%w'",      "'%H'", "'%M'", "'%S'", "'%f'" }, 0, 1)]
+		[DatePart("Access",     "DatePart({0}, {{0}})",              true,  new[] { "'yyyy'", "'q'", "'m'",  "'y'",     "'d'",  "'ww'", "'w'",       "'h'",  "'n'",  "'s'",  null   }, 0, 1)]
 		public static int DatePart(DateParts part, DateTime date)
 		{
 			switch (part)
@@ -319,7 +369,7 @@ namespace BLToolkit.Data.Linq
 				case DateParts.Month       : return date.Month;
 				case DateParts.DayOfYear   : return date.DayOfYear;
 				case DateParts.Day         : return date.Day;
-				case DateParts.Week        : return (date.DayOfYear - 1 + 6 - DatePart(DateParts.WeekDay, new DateTime(date.Year, 1, 1)) + 1) / 7 + 1;
+				case DateParts.Week        : return CultureInfo.CurrentCulture.Calendar.GetWeekOfYear(date, CalendarWeekRule.FirstDay, DayOfWeek.Sunday);
 				case DateParts.WeekDay     : return ((int)date.DayOfWeek + 1 + DateFirst + 6) % 7 + 1;
 				case DateParts.Hour        : return date.Hour;
 				case DateParts.Minute      : return date.Minute;

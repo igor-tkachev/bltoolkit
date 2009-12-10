@@ -63,6 +63,8 @@ namespace Data.Linq
 				if (exceptList.Contains(_configurations[i]))
 					continue;
 
+				Debug.WriteLine(_configurations[i], "Provider ");
+
 				var reThrow = false;
 
 				try

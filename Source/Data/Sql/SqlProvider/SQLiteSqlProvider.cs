@@ -51,46 +51,28 @@ namespace BLToolkit.Data.Sql.SqlProvider
 				{
 					case "Space"   : return new SqlFunction("PadR", new SqlValue(" "), func.Parameters[0]);
 					case "Convert" : return new SqlExpression("Cast({0} as {1})", Precedence.Primary, func.Parameters[1], func.Parameters[0]);
+				}
+			}
+			else if (expr is SqlExpression)
+			{
+				SqlExpression e = (SqlExpression)expr;
 
-#if FW3
-					case "DatePart":
-						{
-							string        str = null;
-							Sql.DateParts part = (Sql.DateParts)((SqlValue)func.Parameters[0]).Value;
+				if (e.Expr.StartsWith("Cast(StrFTime(Quarter"))
+					return Inc(Div(Dec(new SqlExpression(e.Expr.Replace("Cast(StrFTime(Quarter", "Cast(StrFTime('%m'"), e.Values)), 3));
 
-							switch (part)
-							{
-								case Sql.DateParts.Year        : str = "%Y"; break;
-								case Sql.DateParts.Quarter     :
-								case Sql.DateParts.Month       : str = "%m"; break;
-								case Sql.DateParts.DayOfYear   : str = "%j"; break;
-								case Sql.DateParts.Day         : str = "%d"; break;
-								case Sql.DateParts.Week        : str = "%W"; break;
-								case Sql.DateParts.WeekDay     : str = "%w"; break;
-								case Sql.DateParts.Hour        : str = "%H"; break;
-								case Sql.DateParts.Minute      : str = "%M"; break;
-								case Sql.DateParts.Second      : str = "%S"; break;
-								case Sql.DateParts.Millisecond : str = "%f"; break;
-							}
+				if (e.Expr.StartsWith("Cast(StrFTime('%w'"))
+					return Inc(new SqlExpression(e.Expr.Replace("Cast(StrFTime('%w'", "Cast(strFTime('%w'"), e.Values));
 
-							SqlFunction   toChar = new SqlFunction("StrFTime", new SqlValue(str), func.Parameters[1]);
-							SqlExpression result = new SqlExpression("Cast({0} as int)", Precedence.Primary, toChar);
+				if (e.Expr.StartsWith("Cast(StrFTime('%f'"))
+					return new SqlExpression("Cast(strFTime('%f', {0}) * 1000 as int) % 1000", Precedence.Multiplicative, e.Values);
 
-							return
-								part == Sql.DateParts.Quarter?
-									new SqlBinaryExpression(
-										new SqlBinaryExpression(
-											new SqlBinaryExpression(
-												result,
-												"-",
-												new SqlValue(1), typeof(int), Precedence.Subtraction),
-											"/",
-											new SqlValue(3), typeof(int), Precedence.Multiplicative),
-										"+",
-										new SqlValue(1), typeof(int), Precedence.Additive) :
-									(ISqlExpression)result;
-						}
-#endif
+				if (e.Expr.StartsWith("DateTime"))
+				{
+					if (e.Expr.EndsWith("Quarter')"))
+						return new SqlExpression("DateTime({1}, '{0} Month')", Precedence.Primary, Mul(e.Values[0], 3), e.Values[1]);
+
+					if (e.Expr.EndsWith("Week')"))
+						return new SqlExpression("DateTime({1}, '{0} Day')",   Precedence.Primary, Mul(e.Values[0], 7), e.Values[1]);
 				}
 			}
 
