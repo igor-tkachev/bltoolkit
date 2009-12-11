@@ -7,6 +7,7 @@ namespace Data.Linq.Model
 		public int      ID;
 		public decimal  MoneyValue;
 		public DateTime DateTimeValue;
+		public bool     BoolValue;
 
 		public override bool Equals(object obj)
 		{
@@ -17,7 +18,11 @@ namespace Data.Linq.Model
 		{
 			if (ReferenceEquals(null, other)) return false;
 			if (ReferenceEquals(this, other)) return true;
-			return other.ID == ID && other.MoneyValue == MoneyValue && other.DateTimeValue.Equals(DateTimeValue);
+			return
+				other.ID            == ID            &&
+				other.MoneyValue    == MoneyValue    &&
+				other.BoolValue     == BoolValue     &&
+				other.DateTimeValue == DateTimeValue;
 		}
 
 		public override int GetHashCode()
@@ -47,5 +52,6 @@ namespace Data.Linq.Model
 		public int       ID;
 		public decimal   MoneyValue;
 		public DateTime? DateTimeValue;
+		public bool?     BoolValue;
 	}
 }

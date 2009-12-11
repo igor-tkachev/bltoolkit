@@ -2223,11 +2223,8 @@ namespace BLToolkit.Data
 			{
 				foreach (IDbDataParameter p in commandParameters)
 				{
-					// This mysterious line of code required to fix a bug in MsSql.
-					// It forces parameter's filed 'MetaType' to be set.
-					// Same for p.Size = p.Size below.
-					//
-					p.DbType = p.DbType;
+					if (_dataProvider.InitParameter(p))
+						continue;
 
 					if (p.Value is string)
 					{
@@ -2272,6 +2269,7 @@ namespace BLToolkit.Data
 					else if (p.Value is decimal)
 					{
 						SqlDecimal d = (decimal)p.Value;
+
 						if (p.Precision < d.Precision)
 						{
 							p.Precision = d.Precision;

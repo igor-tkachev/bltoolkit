@@ -161,6 +161,11 @@ namespace BLToolkit.Data.DataProvider
 			return (IDbDataParameter)((ICloneable)parameter).Clone();
 		}
 
+		public virtual bool InitParameter(IDbDataParameter parameter)
+		{
+			return false;
+		}
+
 		#endregion
 
 		#region Virtual Members

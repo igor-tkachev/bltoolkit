@@ -86,23 +86,38 @@ namespace BLToolkit.Data.DataProvider
 			foreach (IDbDataParameter p in commandParameters)
 			{
 				object val = p.Value;
+
 				if (val == null || !val.GetType().IsArray || val is byte[] || val is char[])
 					continue;
 
 				DataTable dt = new DataTable();
+
 				dt.Columns.Add("column_value", val.GetType().GetElementType());
 
 				dt.BeginLoadData();
+
 				foreach (object o in (Array)val)
 				{
 					DataRow row = dt.NewRow();
 					row[0] = o;
 					dt.Rows.Add(row);
 				}
+
 				dt.EndLoadData();
 
 				p.Value = dt;
 			}
+		}
+
+		public override bool InitParameter(IDbDataParameter parameter)
+		{
+			// This mysterious line of code required to fix a bug in MsSql.
+			// It forces parameter's filed 'MetaType' to be set.
+			// Same for p.Size = p.Size below.
+			//
+			parameter.DbType = parameter.DbType;
+
+			return false;
 		}
 
 #if FW3

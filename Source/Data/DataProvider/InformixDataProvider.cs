@@ -66,13 +66,12 @@ namespace BLToolkit.Data.DataProvider
 			return value;
 		}
 
-
-		public override void PrepareCommand(ref CommandType commandType, ref string commandText, ref IDbDataParameter[] commandParameters)
-		{
-			if (commandParameters != null)
-				foreach (var p in commandParameters)
-					if (p.DbType == DbType.Boolean)
-						p.Value = (bool)p.Value ? 1 : 0;
-		}
+		//public override void PrepareCommand(ref CommandType commandType, ref string commandText, ref IDbDataParameter[] commandParameters)
+		//{
+		//	if (commandParameters != null)
+		//		foreach (var p in commandParameters)
+		//			if (p.DbType == DbType.Boolean)
+		//				p.Value = (bool)p.Value ? 1 : 0;
+		//}
 	}
 }

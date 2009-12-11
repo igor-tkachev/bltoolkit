@@ -426,6 +426,7 @@ CREATE TABLE LinqDataTypes
 (
 	ID            int,
 	MoneyValue    decimal(10,4),
-	DateTimeValue datetime
+	DateTimeValue datetime,
+	BoolValue     boolean
 )
 GO

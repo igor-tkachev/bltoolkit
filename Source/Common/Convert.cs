@@ -2136,7 +2136,7 @@ namespace BLToolkit.Common
 		// Scalar Types.
 		// 
 		/// <summary>Converts the value from <c>String</c> to an equivalent <c>Boolean</c> value.</summary>
-		public static Boolean ToBoolean(String p)          { return p == null? false: Boolean.Parse(p); }
+		public static Boolean ToBoolean(String p)          { return p == null? false : p.Length == 1 ? ToBoolean(p[0]) : Boolean.Parse(p); }
 
 		/// <summary>Converts the value from <c>SByte</c> to an equivalent <c>Boolean</c> value.</summary>
 		[CLSCompliant(false)]

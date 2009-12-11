@@ -538,6 +538,7 @@ CREATE TABLE LinqDataTypes
 (
 	ID            int,
 	MoneyValue    decimal(10,4),
-	DateTimeValue timestamp
+	DateTimeValue timestamp,
+	BoolValue     char(1)
 )
 COMMIT;

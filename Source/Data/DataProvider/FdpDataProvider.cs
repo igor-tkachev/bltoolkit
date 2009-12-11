@@ -80,6 +80,7 @@ namespace BLToolkit.Data.DataProvider
 
 				return true;
 			}
+
 			return false;
 		}
 
@@ -98,6 +99,7 @@ namespace BLToolkit.Data.DataProvider
 
 						return '"' + name + '"';
 					}
+
 					break;
 
 				case ConvertType.NameToQueryParameter:
@@ -110,6 +112,7 @@ namespace BLToolkit.Data.DataProvider
 						string str = value.ToString();
 						return str.Length > 0 && str[0] == '@' ? str.Substring(1) : str;
 					}
+
 					break;
 
 				case ConvertType.ExceptionToErrorNumber:
@@ -119,6 +122,7 @@ namespace BLToolkit.Data.DataProvider
 						if (ex.Errors.Count > 0)
 							return ex.Errors[0].Number;
 					}
+
 					break;
 			}
 
@@ -179,6 +183,7 @@ namespace BLToolkit.Data.DataProvider
 		public override void PrepareCommand(ref CommandType commandType, ref string commandText, ref IDbDataParameter[] commandParameters)
 		{
 			#region "smart" input-output parameter detection
+
 			if (commandType == CommandType.StoredProcedure && IsInOutParameterEmulation)
 			{
 				foreach (IDbDataParameter par in commandParameters)
@@ -194,13 +199,28 @@ namespace BLToolkit.Data.DataProvider
 					// direction should be output, or parameter mistmath for procedure exception
 					// would be thrown
 					par.Direction = ParameterDirection.Output;
+
 					// direction should be Input
 					fakeIOParameter.Direction = ParameterDirection.Input;
 				}
 			}
+
 			#endregion
 
 			base.PrepareCommand(ref commandType, ref commandText, ref commandParameters);
+		}
+
+		public override bool InitParameter(IDbDataParameter parameter)
+		{
+			FbParameter p = (FbParameter)parameter;
+
+			if (p.FbDbType == FbDbType.Boolean)
+			{
+				p.Value = (bool)p.Value ? "1" : "0";
+				p.Size  = 1;
+			}
+
+			return false;
 		}
 
 		public override void Configure(System.Collections.Specialized.NameValueCollection attributes)
@@ -249,10 +269,13 @@ namespace BLToolkit.Data.DataProvider
 
 			public bool ConvertToBoolean(string value)
 			{
-				value = value.ToLower();
-				if (value == "1" || value == "0"
-					|| value == "t" || value == "f")
-					return value == "1" || value == "t";
+				if (value.Length == 1)
+					switch (value[0])
+					{
+						case '1': case 'T' :case 'Y' : case 't': case 'y': return true;
+						case '0': case 'F' :case 'N' : case 'f': case 'n': return false;
+					}
+
 				return Common.Convert.ToBoolean(value);
 			}
 

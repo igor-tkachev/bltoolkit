@@ -108,6 +108,14 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			return expr;
 		}
 
+		protected override void BuildValue(StringBuilder sb, object value)
+		{
+			if (value is bool || value is bool?)
+				sb.Append((bool)value ? "'t'" : "'f'");
+			else
+				base.BuildValue(sb, value);
+		}
+
 #if FW3
 		protected override Dictionary<MemberInfo,BaseExpressor> GetExpressors() { return _members; }
 		static    readonly Dictionary<MemberInfo,BaseExpressor> _members = new Dictionary<MemberInfo,BaseExpressor>
