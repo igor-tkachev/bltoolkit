@@ -2540,7 +2540,7 @@ namespace BLToolkit.Data.Linq
 							if (e.Method == null && e.IsLifted)
 								return o;
 
-							return Convert(new SqlFunction("$Convert$", new SqlDataType(e.Type), new SqlDataType(e.Operand.Type), o));
+							return Convert(new SqlFunction("$Convert$", SqlDataType.GetDataType(e.Type), SqlDataType.GetDataType(e.Operand.Type), o));
 						}
 
 					case ExpressionType.Conditional:

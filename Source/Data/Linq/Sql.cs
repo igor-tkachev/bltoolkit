@@ -5,7 +5,6 @@ using System.Reflection;
 
 namespace BLToolkit.Data.Linq
 {
-	using Common;
 	using Data.Sql;
 
 	public static class Sql
@@ -16,19 +15,79 @@ namespace BLToolkit.Data.Linq
 		[SqlExpression("{0}", 0, ServerSideOnly = true)]
 		public static T OnServer<T>(T obj)
 		{
-			throw new LinqException("This function is server side only.");
+			return obj;
+		}
+
+		#endregion
+
+		#region Convert Functions
+
+		[CLSCompliant(false)]
+		[SqlFunction("Convert", 0, 1, ServerSideOnly = true)]
+		public static TTo Convert<TTo,TFrom>(TTo to, TFrom from)
+		{
+			return Common.ConvertTo<TTo>.From(from);
 		}
 
 		[CLSCompliant(false)]
 		[SqlFunction("Convert", 1, 0)]
 		public static TTo Convert<TTo,TFrom>(TFrom obj)
 		{
-			return ConvertTo<TTo>.From(obj);
+			return Common.ConvertTo<TTo>.From(obj);
 		}
+
+		public static class ConvertTo<TTo>
+		{
+			[CLSCompliant(false)]
+			[SqlFunction("Convert", 1, 0)]
+			public static TTo From<TFrom>(TFrom obj)
+			{
+				return Common.ConvertTo<TTo>.From(obj);
+			}
+		}
+
+		[SqlProperty("Oracle",     "Number(19)",     ServerSideOnly=true)]
+		[SqlProperty(              "BigInt",         ServerSideOnly=true)] public static Int64          BigInt                            { get { return 0; } }
+
+		[SqlProperty("MySql",      "Signed",         ServerSideOnly=true)]
+		[SqlProperty(              "Int",            ServerSideOnly=true)] public static Int32          Int                               { get { return 0; } }
+
+		[SqlProperty("MySql",      "Signed",         ServerSideOnly=true)]
+		[SqlProperty(              "SmallInt",       ServerSideOnly=true)] public static Int16          SmallInt                          { get { return 0; } }
+
+		[SqlProperty("DB2",        "SmallInt",       ServerSideOnly=true)]
+		[SqlProperty("Informix",   "SmallInt",       ServerSideOnly=true)]
+		[SqlProperty("Oracle",     "Number(3)",      ServerSideOnly=true)]
+		[SqlProperty("DB2",        "SmallInt",       ServerSideOnly=true)]
+		[SqlProperty("Firebird",   "SmallInt",       ServerSideOnly=true)]
+		[SqlProperty("PostgreSQL", "SmallInt",       ServerSideOnly=true)]
+		[SqlProperty("MySql",      "Unsigned",       ServerSideOnly=true)]
+		[SqlProperty(              "TinyInt",        ServerSideOnly=true)] public static Byte           TinyInt                           { get { return 0; } }
+
+		[SqlProperty(              "Decimal",        ServerSideOnly=true)] public static Decimal DefaultDecimal                           { get { return 0; } }
+		[SqlFunction(                                ServerSideOnly=true)] public static Decimal        Decimal(int precision)            {       return 0;   }
+		[SqlFunction(                                ServerSideOnly=true)] public static Decimal        Decimal(int precision, int scale) {       return 0;   }
+
+		[SqlProperty("Oracle",     "Number(19,4)",   ServerSideOnly=true)]
+		[SqlProperty("Firebird",   "Decimal(18,4)",  ServerSideOnly=true)]
+		[SqlProperty("PostgreSQL", "Decimal(19,4)",  ServerSideOnly=true)]
+		[SqlProperty("MySql",      "Decimal(19,4)",  ServerSideOnly=true)]
+		[SqlProperty(              "Money",          ServerSideOnly=true)] public static Decimal        Money                             { get { return 0; } }
+
+		[SqlProperty("Informix",   "Decimal(10,4)",  ServerSideOnly=true)]
+		[SqlProperty("Oracle",     "Number(10,4)",   ServerSideOnly=true)]
+		[SqlProperty("Firebird",   "Decimal(10,4)",  ServerSideOnly=true)]
+		[SqlProperty("PostgreSQL", "Decimal(10,4)",  ServerSideOnly=true)]
+		[SqlProperty("MySql",      "Decimal(10,4)",  ServerSideOnly=true)]
+		[SqlProperty("SqlCe",      "Decimal(10,4)",  ServerSideOnly=true)]
+		[SqlProperty(              "SmallMoney",     ServerSideOnly=true)] public static Decimal        SmallMoney                        { get { return 0; } }
+
+		[SqlProperty("MySql",      "Decimal(29,10)", ServerSideOnly=true)]
+		[SqlProperty(              "Float",          ServerSideOnly=true)] public static Double         Float                             { get { return 0; } }
 
 		#endregion
 
-		#region String Finctions
+		#region String Functions
 
 		[SqlFunction]
 		[SqlFunction("Access",   "Len")]
@@ -276,11 +335,6 @@ namespace BLToolkit.Data.Linq
 			{
 			}
 
-			public DatePartAttribute(string sqlProvider, string expression, string[] partMapping, int datePartIndex, params int[] argIndices)
-				: this(sqlProvider, expression, Data.Sql.Precedence.Primary, false, partMapping, datePartIndex, argIndices)
-			{
-			}
-
 			public DatePartAttribute(string sqlProvider, string expression, bool isExpression, int datePartIndex, params int[] argIndices)
 				: this(sqlProvider, expression, Data.Sql.Precedence.Primary, isExpression, null, datePartIndex, argIndices)
 			{
@@ -288,11 +342,6 @@ namespace BLToolkit.Data.Linq
 
 			public DatePartAttribute(string sqlProvider, string expression, bool isExpression, string[] partMapping, int datePartIndex, params int[] argIndices)
 				: this(sqlProvider, expression, Data.Sql.Precedence.Primary, isExpression, partMapping, datePartIndex, argIndices)
-			{
-			}
-
-			public DatePartAttribute(string sqlProvider, string expression, int precedence, bool isExpression, int datePartIndex, params int[] argIndices)
-				: this(sqlProvider, expression, precedence, isExpression, null, datePartIndex, argIndices)
 			{
 			}
 

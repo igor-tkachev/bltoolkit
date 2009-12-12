@@ -44,8 +44,8 @@ namespace Data.Linq
 		public void Parse1()
 		{
 			ForEachProvider(db => AreSame(
-				from d in from t in    Types select DateTime.Parse(Sql.Convert<string,DateTime>(t.DateTimeValue)) where d.Day > 0 select d.Date,
-				from d in from t in db.Types select DateTime.Parse(Sql.Convert<string,DateTime>(t.DateTimeValue)) where d.Day > 0 select d.Date));
+				from d in from t in    Types select DateTime.Parse(Sql.ConvertTo<string>.From(t.DateTimeValue)) where d.Day > 0 select d.Date,
+				from d in from t in db.Types select DateTime.Parse(Sql.ConvertTo<string>.From(t.DateTimeValue)) where d.Day > 0 select d.Date));
 		}
 
 		//[Test]

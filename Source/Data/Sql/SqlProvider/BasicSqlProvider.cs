@@ -812,18 +812,24 @@ namespace BLToolkit.Data.Sql.SqlProvider
 					{
 						SqlExpression e = (SqlExpression)expr;
 						StringBuilder s = new StringBuilder();
-						object[] values = new object[e.Values.Length];
 
-						for (int i = 0; i < values.Length; i++)
+						if (e.Values == null || e.Values.Length == 0)
+							sb.Append(e.Expr);
+						else
 						{
-							ISqlExpression value = e.Values[i];
+							object[] values = new object[e.Values.Length];
 
-							s.Length = 0;
-							BuildExpression(s, GetPrecedence(e), value);
-							values[i] = s.ToString();
+							for (int i = 0; i < values.Length; i++)
+							{
+								ISqlExpression value = e.Values[i];
+
+								s.Length = 0;
+								BuildExpression(s, GetPrecedence(e), value);
+								values[i] = s.ToString();
+							}
+
+							sb.AppendFormat(e.Expr, values);
 						}
-
-						sb.AppendFormat(e.Expr, values);
 					}
 
 					break;
@@ -1448,17 +1454,19 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			{
 				int maxPrecision = GetMaxPrecision(from);
 				int maxScale     = GetMaxScale    (from);
+				int newPrecision = maxPrecision >= 0 ? Math.Min(to.Precision, maxPrecision) : to.Precision;
+				int newScale     = maxScale     >= 0 ? Math.Min(to.Scale,     maxScale)     : to.Scale;
 
-				to = new SqlDataType(
-					to.DbType,
-					to.Type,
-					maxPrecision >= 0 ? Math.Min(to.Precision, maxPrecision) : to.Precision,
-					maxScale     >= 0 ? Math.Min(to.Scale,     maxScale)     : to.Scale);
+				if (to.Precision != newPrecision || to.Scale != newScale)
+					to = new SqlDataType(to.DbType, to.Type, newPrecision, newScale);
 			}
 			else if (to.Length > 0)
 			{
 				int maxLength = GetMaxLength(from);
-				to = new SqlDataType(to.DbType, to.Type, maxLength >= 0 ? Math.Min(to.Length, maxLength) : to.Length);
+				int newLength = maxLength >= 0 ? Math.Min(to.Length, maxLength) : to.Length;
+
+				if (to.Length != newLength)
+					to = new SqlDataType(to.DbType, to.Type, newLength);
 			}
 
 			return ConvertExpression(new SqlFunction("Convert", to, func.Parameters[2]));

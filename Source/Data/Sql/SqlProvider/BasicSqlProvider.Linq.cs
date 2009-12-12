@@ -6,7 +6,6 @@ using System.Text;
 
 namespace BLToolkit.Data.Sql.SqlProvider
 {
-	using Common;
 	using Linq;
 
 	using B = Boolean;
@@ -129,7 +128,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			{ MI(() => DateTime.Now.AddSeconds     (0)), new F<D,F,D>    ((obj,p0)       => Sql.DateAdd (Sql.DateParts.Second,      p0, obj) ) },
 			{ MI(() => DateTime.Now.AddMilliseconds(0)), new F<D,F,D>    ((obj,p0)       => Sql.DateAdd (Sql.DateParts.Millisecond, p0, obj) ) },
 
-			{ MI(() => DateTime.Parse("")             ), new F<S,D>      (p0             => Sql.Convert<DateTime,string>(p0)                ) },
+			{ MI(() => DateTime.Parse("")             ), new F<S,D>      (p0             => Sql.ConvertTo<DateTime>.From(p0)                 ) },
 		};
 
 		[SqlFunction]
@@ -143,7 +142,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		[SqlFunction]
 		protected static string AltStuff(string str, int startLocation, int length, string value)
 		{
-			return Linq.Sql.Stuff(str, startLocation, length, value);
+			return Sql.Stuff(str, startLocation, length, value);
 		}
 
 		// DB2

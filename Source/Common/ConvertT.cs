@@ -1,10 +1,10 @@
 using System;
 using System.Reflection;
 
-using BLToolkit.Reflection;
-
 namespace BLToolkit.Common
 {
+	using Reflection;
+
 	/// <summary>
 	/// Converts a base data type to another base data type.
 	/// </summary>

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Reflection;
 using System.Text;
 
@@ -183,6 +184,18 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			}
 
 			return expr;
+		}
+
+		protected override void BuildDataType(StringBuilder sb, SqlDataType type)
+		{
+			switch (type.DbType)
+			{
+				case SqlDbType.BigInt     : sb.Append("Number(19)");      break;
+				case SqlDbType.TinyInt    : sb.Append("Number(3)");       break;
+				case SqlDbType.Money      : sb.Append("Number(19,4)");    break;
+				case SqlDbType.SmallMoney : sb.Append("Number(10,4)");    break;
+				default                   : base.BuildDataType(sb, type); break;
+			}
 		}
 
 #if FW3

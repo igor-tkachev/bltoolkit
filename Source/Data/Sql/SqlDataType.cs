@@ -83,11 +83,11 @@ namespace BLToolkit.Data.Sql
 
 			SqlDataType defaultType = GetDataType(dbType);
 
-			_dbType = dbType;
-			_type   = type;
-			_length = defaultType.Length;
-			_precision   = defaultType.Precision;
-			_scale  = defaultType.Scale;
+			_dbType    = dbType;
+			_type      = type;
+			_length    = defaultType.Length;
+			_precision = defaultType.Precision;
+			_scale     = defaultType.Scale;
 		}
 
 		public SqlDataType(SqlDbType dbType, [JetBrains.Annotations.NotNull] Type type, int length)
@@ -428,7 +428,7 @@ namespace BLToolkit.Data.Sql
 
 		public override string ToString()
 		{
-			return _type.Name + (_length != 0 ? "(" + _length + ")" : "(" + _precision + "," + _scale + ")");
+			return _dbType + (_length != 0 ? "(" + _length + ")" : "(" + _precision + "," + _scale + ")");
 		}
 
 		#endregion

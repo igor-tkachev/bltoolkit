@@ -210,19 +210,6 @@ namespace BLToolkit.Data.DataProvider
 			base.PrepareCommand(ref commandType, ref commandText, ref commandParameters);
 		}
 
-		public override bool InitParameter(IDbDataParameter parameter)
-		{
-			FbParameter p = (FbParameter)parameter;
-
-			if (p.FbDbType == FbDbType.Boolean)
-			{
-				p.Value = (bool)p.Value ? "1" : "0";
-				p.Size  = 1;
-			}
-
-			return false;
-		}
-
 		public override void Configure(System.Collections.Specialized.NameValueCollection attributes)
 		{
 			string inOutInputParameterPrefix = attributes["InOutInputParameterPrefix"];

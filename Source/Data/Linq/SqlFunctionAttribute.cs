@@ -49,8 +49,11 @@ namespace BLToolkit.Data.Linq
 			{
 				var method = (MethodInfo)member;
 
+				if (method.DeclaringType.IsGenericType)
+					args = args.Concat(method.DeclaringType.GetGenericArguments().Select(t => (ISqlExpression)SqlDataType.GetDataType(t))).ToArray();
+
 				if (method.IsGenericMethod)
-					args = args.Concat(method.GetGenericArguments().Select(t => (ISqlExpression)new SqlDataType(t))).ToArray();
+					args = args.Concat(method.GetGenericArguments().Select(t => (ISqlExpression)SqlDataType.GetDataType(t))).ToArray();
 			}
 
 			if (ArgIndices != null)

@@ -69,16 +69,36 @@ namespace BLToolkit.Data.Sql.SqlProvider
 				switch (func.Name)
 				{
 					case "Convert"    :
-						SqlDataType type = (SqlDataType)func.Parameters[0];
+						if (func.Parameters[0] is SqlDataType)
+						{
+							SqlDataType type = (SqlDataType)func.Parameters[0];
 
-						if (type.Length > 0)
-							return new SqlFunction(type.DbType.ToString(), func.Parameters[1], new SqlValue(type.Length));
+							if (type.Length > 0)
+								return new SqlFunction(type.DbType.ToString(), func.Parameters[1], new SqlValue(type.Length));
 
-						if (type.Precision > 0)
-							return new SqlFunction(type.DbType.ToString(), func.Parameters[1], new SqlValue(type.Precision), new SqlValue(type.Scale));
+							if (type.Precision > 0)
+								return new SqlFunction(type.DbType.ToString(), func.Parameters[1], new SqlValue(type.Precision), new SqlValue(type.Scale));
 
-						return new SqlFunction(type.DbType.ToString(), func.Parameters[1]);
+							return new SqlFunction(type.DbType.ToString(), func.Parameters[1]);
+						}
 
+						if (func.Parameters[0] is SqlFunction)
+						{
+							SqlFunction f = (SqlFunction)func.Parameters[0];
+
+							return f.Parameters.Length == 1 ?
+								new SqlFunction(f.Name, func.Parameters[1], f.Parameters[0]):
+								new SqlFunction(f.Name, func.Parameters[1], f.Parameters[0], f.Parameters[1]);
+						}
+
+						{
+							SqlExpression e = (SqlExpression)func.Parameters[0];
+							return new SqlFunction(e.Expr, func.Parameters[1]);
+						}
+
+					case "TinyInt"    : return new SqlFunction("SmallInt", func.Parameters);
+					case "Money"      : return new SqlFunction("Decimal",  func.Parameters[0], new SqlValue(19), new SqlValue(4));
+					case "SmallMoney" : return new SqlFunction("Decimal",  func.Parameters[0], new SqlValue(10), new SqlValue(4));
 					case "Millisecond": return Div(new SqlFunction("Microsecond", func.Parameters), 1000);
 				}
 			}

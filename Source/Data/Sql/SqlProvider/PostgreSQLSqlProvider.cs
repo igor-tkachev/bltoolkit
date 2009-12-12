@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Reflection;
 using System.Text;
 
@@ -75,6 +76,17 @@ namespace BLToolkit.Data.Sql.SqlProvider
 				sb.Append(value);
 			else
 				base.BuildValue(sb, value);
+		}
+
+		protected override void BuildDataType(StringBuilder sb, SqlDataType type)
+		{
+			switch (type.DbType)
+			{
+				case SqlDbType.TinyInt    : sb.Append("SmallInt");        break;
+				case SqlDbType.Money      : sb.Append("Decimal(19,4)");   break;
+				case SqlDbType.SmallMoney : sb.Append("Decimal(10,4)");   break;
+				default                   : base.BuildDataType(sb, type); break;
+			}
 		}
 
 #if FW3
