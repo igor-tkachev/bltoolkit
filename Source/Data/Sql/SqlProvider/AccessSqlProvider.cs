@@ -170,7 +170,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 				switch (be.Operation[0])
 				{
-					case '%': return new SqlBinaryExpression(be.Expr1, "MOD", be.Expr2, be.Type, Precedence.Additive - 1);
+					case '%': return new SqlBinaryExpression(be.SystemType, be.Expr1, "MOD", be.Expr2, Precedence.Additive - 1);
 					case '&':
 					case '|':
 					case '^': throw new SqlException("Operator '{0}' is not supported by the {1}.", be.Operation, GetType().Name);
@@ -189,20 +189,20 @@ namespace BLToolkit.Data.Sql.SqlProvider
 							ISqlExpression[] parms = new ISqlExpression[func.Parameters.Length - 1];
 
 							Array.Copy(func.Parameters, 1, parms, 0, parms.Length);
-							return new SqlFunction(func.Name, func.Parameters[0], new SqlFunction(func.Name, parms));
+							return new SqlFunction(func.SystemType, func.Name, func.Parameters[0], new SqlFunction(func.SystemType, func.Name, parms));
 						}
 
 						SqlQuery.SearchCondition sc = new SqlQuery.SearchCondition();
 
 						sc.Conditions.Add(new SqlQuery.Condition(false, new SqlQuery.Predicate.IsNull(func.Parameters[0], false)));
 
-						return new SqlFunction("Iif", sc, func.Parameters[1], func.Parameters[0]);
+						return new SqlFunction(func.SystemType, "Iif", sc, func.Parameters[1], func.Parameters[0]);
 
-					case "CASE"      : return ConvertCase(func.Parameters, 0);
+					case "CASE"      : return ConvertCase(func.SystemType, func.Parameters, 0);
 					case "CharIndex" :
 						return func.Parameters.Length == 2?
-							new SqlFunction("InStr", new SqlValue(1),    func.Parameters[1], func.Parameters[0], new SqlValue(1)):
-							new SqlFunction("InStr", func.Parameters[2], func.Parameters[1], func.Parameters[0], new SqlValue(1));
+							new SqlFunction(func.SystemType, "InStr", new SqlValue(1),    func.Parameters[1], func.Parameters[0], new SqlValue(1)):
+							new SqlFunction(func.SystemType, "InStr", func.Parameters[2], func.Parameters[1], func.Parameters[0], new SqlValue(1));
 
 					case "Convert"   : return func.Parameters[1];
 
@@ -255,7 +255,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			return expr;
 		}
 
-		SqlFunction ConvertCase(ISqlExpression[] parameters, int start)
+		SqlFunction ConvertCase(Type systemType, ISqlExpression[] parameters, int start)
 		{
 			int len = parameters.Length - start;
 
@@ -263,9 +263,9 @@ namespace BLToolkit.Data.Sql.SqlProvider
 				throw new SqlException("CASE statement is not supported by the {0}.", GetType().Name);
 
 			if (len == 3)
-				return new SqlFunction("Iif", parameters[start], parameters[start + 1], parameters[start + 2]);
+				return new SqlFunction(systemType, "Iif", parameters[start], parameters[start + 1], parameters[start + 2]);
 
-			return new SqlFunction("Iif", parameters[start], parameters[start + 1], ConvertCase(parameters, start + 2));
+			return new SqlFunction(systemType, "Iif", parameters[start], parameters[start + 1], ConvertCase(systemType, parameters, start + 2));
 		}
 
 		protected override void BuildValue(StringBuilder sb, object value)

@@ -6,5 +6,6 @@ namespace BLToolkit.Data.Sql
 	{
 		bool CanBeNull();
 		int  Precedence { get; }
+		Type SystemType { get; }
 	}
 }

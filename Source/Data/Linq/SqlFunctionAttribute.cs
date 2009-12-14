@@ -5,6 +5,7 @@ using System.Reflection;
 namespace BLToolkit.Data.Linq
 {
 	using Data.Sql;
+	using Reflection;
 
 	[SerializableAttribute]
 	[AttributeUsageAttribute(AttributeTargets.Method | AttributeTargets.Property, AllowMultiple = true, Inherited = false)]
@@ -71,7 +72,7 @@ namespace BLToolkit.Data.Linq
 
 		public virtual ISqlExpression GetExpression(MemberInfo member, params ISqlExpression[] args)
 		{
-			return new SqlFunction(Name ?? member.Name, ConvertArgs(member, args));
+			return new SqlFunction(TypeHelper.GetMemberType(member), Name ?? member.Name, ConvertArgs(member, args));
 		}
 	}
 }

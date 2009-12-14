@@ -128,7 +128,24 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			{ MI(() => DateTime.Now.AddSeconds     (0)), new F<D,F,D>    ((obj,p0)       => Sql.DateAdd (Sql.DateParts.Second,      p0, obj) ) },
 			{ MI(() => DateTime.Now.AddMilliseconds(0)), new F<D,F,D>    ((obj,p0)       => Sql.DateAdd (Sql.DateParts.Millisecond, p0, obj) ) },
 
-			{ MI(() => DateTime.Parse("")             ), new F<S,D>      (p0             => Sql.ConvertTo<DateTime>.From(p0)                 ) },
+			#region Parse
+
+			{ MI(() => Boolean. Parse("")), new F<String,Boolean> (p0 => Sql.ConvertTo<Boolean>. From(p0) ) },
+			{ MI(() => Byte.    Parse("")), new F<String,Byte>    (p0 => Sql.ConvertTo<Byte>.    From(p0) ) },
+			{ MI(() => Char.    Parse("")), new F<String,Char>    (p0 => Sql.ConvertTo<Char>.    From(p0) ) },
+			{ MI(() => DateTime.Parse("")), new F<String,DateTime>(p0 => Sql.ConvertTo<DateTime>.From(p0) ) },
+			{ MI(() => Decimal. Parse("")), new F<String,Decimal> (p0 => Sql.ConvertTo<Decimal>. From(p0) ) },
+			{ MI(() => Double.  Parse("")), new F<String,Double>  (p0 => Sql.ConvertTo<Double>.  From(p0) ) },
+			{ MI(() => Int16.   Parse("")), new F<String,Int16>   (p0 => Sql.ConvertTo<Int16>.   From(p0) ) },
+			{ MI(() => Int32.   Parse("")), new F<String,Int32>   (p0 => Sql.ConvertTo<Int32>.   From(p0) ) },
+			{ MI(() => Int64.   Parse("")), new F<String,Int64>   (p0 => Sql.ConvertTo<Int64>.   From(p0) ) },
+			{ MI(() => SByte.   Parse("")), new F<String,SByte>   (p0 => Sql.ConvertTo<SByte>.   From(p0) ) },
+			{ MI(() => Single.  Parse("")), new F<String,Single>  (p0 => Sql.ConvertTo<Single>.  From(p0) ) },
+			{ MI(() => UInt16.  Parse("")), new F<String,UInt16>  (p0 => Sql.ConvertTo<UInt16>.  From(p0) ) },
+			{ MI(() => UInt32.  Parse("")), new F<String,UInt32>  (p0 => Sql.ConvertTo<UInt32>.  From(p0) ) },
+			{ MI(() => UInt64.  Parse("")), new F<String,UInt64>  (p0 => Sql.ConvertTo<UInt64>.  From(p0) ) },
+
+			#endregion
 
 			#region Convert
 

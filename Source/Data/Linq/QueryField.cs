@@ -156,7 +156,7 @@ namespace BLToolkit.Data.Linq
 						new SqlValue(false)));
 					*/
 
-					expr = parser.Convert(new SqlFunction("CASE", expr, new SqlValue(true), new SqlValue(false)));
+					expr = parser.Convert(new SqlFunction(typeof(bool), "CASE", expr, new SqlValue(true), new SqlValue(false)));
 				}
 
 				return expr;

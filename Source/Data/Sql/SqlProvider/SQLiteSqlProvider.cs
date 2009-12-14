@@ -36,11 +36,11 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 				switch (be.Operation)
 				{
-					case "+": return be.Type == typeof(string)? new SqlBinaryExpression(be.Expr1, "||", be.Expr2, be.Type, be.Precedence): expr;
+					case "+": return be.SystemType == typeof(string)? new SqlBinaryExpression(be.SystemType, be.Expr1, "||", be.Expr2, be.Precedence): expr;
 					case "^": // (a + b) - (a & b) * 2
 						return Sub(
-							Add(be.Expr1, be.Expr2, be.Type),
-							Mul(new SqlBinaryExpression(be.Expr1, "&", be.Expr2, be.Type), 2), be.Type);
+							Add(be.Expr1, be.Expr2, be.SystemType),
+							Mul(new SqlBinaryExpression(be.SystemType, be.Expr1, "&", be.Expr2), 2), be.SystemType);
 				}
 			}
 			else if (expr is SqlFunction)
@@ -49,8 +49,8 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 				switch (func.Name)
 				{
-					case "Space"   : return new SqlFunction("PadR", new SqlValue(" "), func.Parameters[0]);
-					case "Convert" : return new SqlExpression("Cast({0} as {1})", Precedence.Primary, func.Parameters[1], func.Parameters[0]);
+					case "Space"   : return new SqlFunction  (func.SystemType, "PadR", new SqlValue(" "), func.Parameters[0]);
+					case "Convert" : return new SqlExpression(func.SystemType, "Cast({0} as {1})", Precedence.Primary, func.Parameters[1], func.Parameters[0]);
 				}
 			}
 			else if (expr is SqlExpression)
@@ -58,21 +58,21 @@ namespace BLToolkit.Data.Sql.SqlProvider
 				SqlExpression e = (SqlExpression)expr;
 
 				if (e.Expr.StartsWith("Cast(StrFTime(Quarter"))
-					return Inc(Div(Dec(new SqlExpression(e.Expr.Replace("Cast(StrFTime(Quarter", "Cast(StrFTime('%m'"), e.Values)), 3));
+					return Inc(Div(Dec(new SqlExpression(e.SystemType, e.Expr.Replace("Cast(StrFTime(Quarter", "Cast(StrFTime('%m'"), e.Values)), 3));
 
 				if (e.Expr.StartsWith("Cast(StrFTime('%w'"))
-					return Inc(new SqlExpression(e.Expr.Replace("Cast(StrFTime('%w'", "Cast(strFTime('%w'"), e.Values));
+					return Inc(new SqlExpression(e.SystemType, e.Expr.Replace("Cast(StrFTime('%w'", "Cast(strFTime('%w'"), e.Values));
 
 				if (e.Expr.StartsWith("Cast(StrFTime('%f'"))
-					return new SqlExpression("Cast(strFTime('%f', {0}) * 1000 as int) % 1000", Precedence.Multiplicative, e.Values);
+					return new SqlExpression(e.SystemType, "Cast(strFTime('%f', {0}) * 1000 as int) % 1000", Precedence.Multiplicative, e.Values);
 
 				if (e.Expr.StartsWith("DateTime"))
 				{
 					if (e.Expr.EndsWith("Quarter')"))
-						return new SqlExpression("DateTime({1}, '{0} Month')", Precedence.Primary, Mul(e.Values[0], 3), e.Values[1]);
+						return new SqlExpression(e.SystemType, "DateTime({1}, '{0} Month')", Precedence.Primary, Mul(e.Values[0], 3), e.Values[1]);
 
 					if (e.Expr.EndsWith("Week')"))
-						return new SqlExpression("DateTime({1}, '{0} Day')",   Precedence.Primary, Mul(e.Values[0], 7), e.Values[1]);
+						return new SqlExpression(e.SystemType, "DateTime({1}, '{0} Day')",   Precedence.Primary, Mul(e.Values[0], 7), e.Values[1]);
 				}
 			}
 

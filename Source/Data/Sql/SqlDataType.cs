@@ -165,7 +165,7 @@ namespace BLToolkit.Data.Sql
 			return obj.ToString().Length;
 		}
 
-		static TypeInfo[] _typeInfo = SortTypeInfo
+		static readonly TypeInfo[] _typeInfo = SortTypeInfo
 		(
 			//           DbType                         MaxLength           MaxPrecision               MaxScale       MaxDisplaySize
 			//
@@ -438,6 +438,11 @@ namespace BLToolkit.Data.Sql
 		public int Precedence
 		{
 			get { return Sql.Precedence.Primary; }
+		}
+
+		public Type SystemType
+		{
+			get { return typeof (Type); }
 		}
 
 		#endregion

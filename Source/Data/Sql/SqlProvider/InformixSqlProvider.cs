@@ -67,11 +67,11 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 				switch (be.Operation)
 				{
-					case "%": return new SqlFunction("Mod",    be.Expr1, be.Expr2);
-					case "&": return new SqlFunction("BitAnd", be.Expr1, be.Expr2);
-					case "|": return new SqlFunction("BitOr",  be.Expr1, be.Expr2);
-					case "^": return new SqlFunction("BitXor", be.Expr1, be.Expr2);
-					case "+": return be.Type == typeof(string)? new SqlBinaryExpression(be.Expr1, "||", be.Expr2, be.Type, be.Precedence): expr;
+					case "%": return new SqlFunction(be.SystemType, "Mod",    be.Expr1, be.Expr2);
+					case "&": return new SqlFunction(be.SystemType, "BitAnd", be.Expr1, be.Expr2);
+					case "|": return new SqlFunction(be.SystemType, "BitOr",  be.Expr1, be.Expr2);
+					case "^": return new SqlFunction(be.SystemType, "BitXor", be.Expr1, be.Expr2);
+					case "+": return be.SystemType == typeof(string)? new SqlBinaryExpression(be.SystemType, be.Expr1, "||", be.Expr2, be.Precedence): expr;
 				}
 			}
 			else if (expr is SqlFunction)
@@ -80,29 +80,30 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 				switch (func.Name)
 				{
-					case "Coalesce" : return new SqlFunction("Nvl", func.Parameters);
-					case "Convert"  : return new SqlExpression("Cast({0} as {1})", Precedence.Primary, func.Parameters[1], func.Parameters[0]);
-					case "Quarter"  : return Inc(Div(Dec(new SqlFunction("Month", func.Parameters)), 3));
-					case "WeekDay"  : return Inc(new SqlFunction("weekDay", func.Parameters));
+					case "Coalesce" : return new SqlFunction(func.SystemType, "Nvl", func.Parameters);
+					case "Convert"  : return new SqlExpression(func.SystemType, "Cast({0} as {1})", Precedence.Primary, func.Parameters[1], func.Parameters[0]);
+					case "Quarter"  : return Inc(Div(Dec(new SqlFunction(func.SystemType, "Month", func.Parameters)), 3));
+					case "WeekDay"  : return Inc(new SqlFunction(func.SystemType, "weekDay", func.Parameters));
 					case "DayOfYear":
 						return
 							Inc(Sub<int>(
-								new SqlFunction("Mdy",
-									new SqlFunction("Month", func.Parameters),
-									new SqlFunction("Day",   func.Parameters),
-									new SqlFunction("Year",  func.Parameters)),
-								new SqlFunction("Mdy",
+								new SqlFunction(null, "Mdy",
+									new SqlFunction(null, "Month", func.Parameters),
+									new SqlFunction(null, "Day",   func.Parameters),
+									new SqlFunction(null, "Year",  func.Parameters)),
+								new SqlFunction(null, "Mdy",
 									new SqlValue(1),
 									new SqlValue(1),
-									new SqlFunction("Year", func.Parameters))));
+									new SqlFunction(null, "Year", func.Parameters))));
 					case "Week"     :
 						return
 							new SqlExpression(
+								func.SystemType,
 								"((Extend({0}, year to day) - (Mdy(12, 31 - WeekDay(Mdy(1, 1, year(t.DateTimeValue))), Year({0}) - 1) + Interval(1) day to day)) / 7 + Interval(1) day to day)::char(10)::int",
 								func.Parameters);
 					case "Hour"     :
 					case "Minute"   :
-					case "Second"   : return new SqlExpression(string.Format("({{0}}::datetime {0} to {0})::char(3)::int", func.Name), func.Parameters);
+					case "Second"   : return new SqlExpression(func.SystemType, string.Format("({{0}}::datetime {0} to {0})::char(3)::int", func.Name), func.Parameters);
 				}
 			}
 

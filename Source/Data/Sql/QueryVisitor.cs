@@ -281,7 +281,7 @@ namespace BLToolkit.Data.Sql
 						ISqlExpression[] parms = Convert(func.Parameters, action);
 
 						if (parms != null && !ReferenceEquals(parms, func.Parameters))
-							newElement = new SqlFunction(func.Name, func.Precedence, parms);
+							newElement = new SqlFunction(func.SystemType, func.Name, func.Precedence, parms);
 
 						break;
 					}
@@ -292,7 +292,7 @@ namespace BLToolkit.Data.Sql
 						ISqlExpression[] values = Convert(expr.Values, action);
 
 						if (values != null && !ReferenceEquals(values, expr.Values))
-							newElement = new SqlExpression(expr.Expr, expr.Precedence, values);
+							newElement = new SqlExpression(expr.SystemType, expr.Expr, expr.Precedence, values);
 
 						break;
 					}
@@ -305,7 +305,7 @@ namespace BLToolkit.Data.Sql
 
 						if (expr1 != null && !ReferenceEquals(expr1, bexpr.Expr1) ||
 							expr2 != null && !ReferenceEquals(expr2, bexpr.Expr2))
-							newElement = new SqlBinaryExpression(expr1 ?? bexpr.Expr1, bexpr.Operation, expr2 ?? bexpr.Expr2, bexpr.Type, bexpr.Precedence);
+							newElement = new SqlBinaryExpression(bexpr.SystemType, expr1 ?? bexpr.Expr1, bexpr.Operation, expr2 ?? bexpr.Expr2, bexpr.Precedence);
 
 						break;
 					}

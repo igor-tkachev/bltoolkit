@@ -10,12 +10,13 @@ namespace BLToolkit.Data.Sql
 		}
 
 		public SqlField(SqlField field)
-			: this(field.Name, field.PhysicalName, field.Nullable, field.PrimaryKeyOrder)
+			: this(field.SystemType, field.Name, field.PhysicalName, field.Nullable, field.PrimaryKeyOrder)
 		{
 		}
 
-		public SqlField(string name, string physicalName, bool nullable, int pkOrder)
+		public SqlField(Type systemType, string name, string physicalName, bool nullable, int pkOrder)
 		{
+			_systemType   = systemType;
 			_alias        = name.Replace('.', '_');
 			_name         = name;
 			_physicalName = physicalName;
@@ -23,6 +24,7 @@ namespace BLToolkit.Data.Sql
 			_pkOrder      = pkOrder;
 		}
 
+		private Type   _systemType;   public Type   SystemType      { get { return _systemType;            } set { _systemType   = value; } }
 		private string _alias;        public string Alias           { get { return _alias;                 } set { _alias        = value; } }
 		private string _name;         public string Name            { get { return _name;                  } set { _name         = value; } }
 		private string _physicalName; public string PhysicalName    { get { return _physicalName ?? _name; } set { _physicalName = value; } }

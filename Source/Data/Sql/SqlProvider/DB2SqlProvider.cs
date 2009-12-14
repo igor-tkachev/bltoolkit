@@ -55,11 +55,11 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 				switch (be.Operation)
 				{
-					case "%": return new SqlFunction("Mod",    be.Expr1, be.Expr2);
-					case "&": return new SqlFunction("BitAnd", be.Expr1, be.Expr2);
-					case "|": return new SqlFunction("BitOr",  be.Expr1, be.Expr2);
-					case "^": return new SqlFunction("BitXor", be.Expr1, be.Expr2);
-					case "+": return be.Type == typeof(string)? new SqlBinaryExpression(be.Expr1, "||", be.Expr2, be.Type, be.Precedence): expr;
+					case "%": return new SqlFunction(be.SystemType, "Mod",    be.Expr1, be.Expr2);
+					case "&": return new SqlFunction(be.SystemType, "BitAnd", be.Expr1, be.Expr2);
+					case "|": return new SqlFunction(be.SystemType, "BitOr",  be.Expr1, be.Expr2);
+					case "^": return new SqlFunction(be.SystemType, "BitXor", be.Expr1, be.Expr2);
+					case "+": return be.SystemType == typeof(string)? new SqlBinaryExpression(be.SystemType, be.Expr1, "||", be.Expr2, be.Precedence): expr;
 				}
 			}
 			else if (expr is SqlFunction)
@@ -74,12 +74,12 @@ namespace BLToolkit.Data.Sql.SqlProvider
 							SqlDataType type = (SqlDataType)func.Parameters[0];
 
 							if (type.Length > 0)
-								return new SqlFunction(type.DbType.ToString(), func.Parameters[1], new SqlValue(type.Length));
+								return new SqlFunction(func.SystemType, type.DbType.ToString(), func.Parameters[1], new SqlValue(type.Length));
 
 							if (type.Precision > 0)
-								return new SqlFunction(type.DbType.ToString(), func.Parameters[1], new SqlValue(type.Precision), new SqlValue(type.Scale));
+								return new SqlFunction(func.SystemType, type.DbType.ToString(), func.Parameters[1], new SqlValue(type.Precision), new SqlValue(type.Scale));
 
-							return new SqlFunction(type.DbType.ToString(), func.Parameters[1]);
+							return new SqlFunction(func.SystemType, type.DbType.ToString(), func.Parameters[1]);
 						}
 
 						if (func.Parameters[0] is SqlFunction)
@@ -87,19 +87,20 @@ namespace BLToolkit.Data.Sql.SqlProvider
 							SqlFunction f = (SqlFunction)func.Parameters[0];
 
 							return f.Parameters.Length == 1 ?
-								new SqlFunction(f.Name, func.Parameters[1], f.Parameters[0]):
-								new SqlFunction(f.Name, func.Parameters[1], f.Parameters[0], f.Parameters[1]);
+								new SqlFunction(func.SystemType, f.Name, func.Parameters[1], f.Parameters[0]):
+								new SqlFunction(func.SystemType, f.Name, func.Parameters[1], f.Parameters[0], f.Parameters[1]);
 						}
 
 						{
 							SqlExpression e = (SqlExpression)func.Parameters[0];
-							return new SqlFunction(e.Expr, func.Parameters[1]);
+							return new SqlFunction(func.SystemType, e.Expr, func.Parameters[1]);
 						}
 
-					case "TinyInt"    : return new SqlFunction("SmallInt", func.Parameters);
-					case "Money"      : return new SqlFunction("Decimal",  func.Parameters[0], new SqlValue(19), new SqlValue(4));
-					case "SmallMoney" : return new SqlFunction("Decimal",  func.Parameters[0], new SqlValue(10), new SqlValue(4));
-					case "Millisecond": return Div(new SqlFunction("Microsecond", func.Parameters), 1000);
+					case "TinyInt"    : return new SqlFunction(func.SystemType, "SmallInt", func.Parameters);
+					case "Money"      : return new SqlFunction(func.SystemType, "Decimal",  func.Parameters[0], new SqlValue(19), new SqlValue(4));
+					case "SmallMoney" : return new SqlFunction(func.SystemType, "Decimal",  func.Parameters[0], new SqlValue(10), new SqlValue(4));
+					case "Millisecond": return Div(new SqlFunction(func.SystemType, "Microsecond", func.Parameters), 1000);
+					case "DateTime"   : return new SqlFunction(func.SystemType, "TimeStamp", func.Parameters);
 				}
 			}
 

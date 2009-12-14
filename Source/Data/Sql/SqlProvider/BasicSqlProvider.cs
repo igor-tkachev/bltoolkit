@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Data;
 using System.Text;
 
 namespace BLToolkit.Data.Sql.SqlProvider
@@ -618,7 +619,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 							{
 								SqlParameter pr = (SqlParameter)p.Values[0];
 
-								if (pr.Type != null && pr.Type.IsArray)
+								if (pr.SystemType != null && pr.SystemType.IsArray)
 								{
 									values = (ICollection)pr.Value;
 
@@ -1368,7 +1369,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		public ISqlExpression Add(ISqlExpression expr1, ISqlExpression expr2, Type type)
 		{
-			return ConvertExpression(new SqlBinaryExpression(expr1, "+", expr2, type, Precedence.Additive));
+			return ConvertExpression(new SqlBinaryExpression(type, expr1, "+", expr2, Precedence.Additive));
 		}
 
 		public ISqlExpression Add<T>(ISqlExpression expr1, ISqlExpression expr2)
@@ -1388,7 +1389,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		public ISqlExpression Sub(ISqlExpression expr1, ISqlExpression expr2, Type type)
 		{
-			return ConvertExpression(new SqlBinaryExpression(expr1, "-", expr2, type, Precedence.Subtraction));
+			return ConvertExpression(new SqlBinaryExpression(type, expr1, "-", expr2, Precedence.Subtraction));
 		}
 
 		public ISqlExpression Sub<T>(ISqlExpression expr1, ISqlExpression expr2)
@@ -1408,7 +1409,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		public ISqlExpression Mul(ISqlExpression expr1, ISqlExpression expr2, Type type)
 		{
-			return ConvertExpression(new SqlBinaryExpression(expr1, "*", expr2, type, Precedence.Multiplicative));
+			return ConvertExpression(new SqlBinaryExpression(type, expr1, "*", expr2, Precedence.Multiplicative));
 		}
 
 		public ISqlExpression Mul<T>(ISqlExpression expr1, ISqlExpression expr2)
@@ -1423,7 +1424,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		public ISqlExpression Div(ISqlExpression expr1, ISqlExpression expr2, Type type)
 		{
-			return ConvertExpression(new SqlBinaryExpression(expr1, "/", expr2, type, Precedence.Multiplicative));
+			return ConvertExpression(new SqlBinaryExpression(type, expr1, "/", expr2, Precedence.Multiplicative));
 		}
 
 		public ISqlExpression Div<T>(ISqlExpression expr1, ISqlExpression expr2)
@@ -1450,6 +1451,9 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			SqlDataType from = (SqlDataType)func.Parameters[1];
 			SqlDataType to   = (SqlDataType)func.Parameters[0];
 
+			if (to.Type == typeof(object))
+				return func.Parameters[2];
+
 			if (to.Precision > 0)
 			{
 				int maxPrecision = GetMaxPrecision(from);
@@ -1469,7 +1473,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 					to = new SqlDataType(to.DbType, to.Type, newLength);
 			}
 
-			return ConvertExpression(new SqlFunction("Convert", to, func.Parameters[2]));
+			return ConvertExpression(new SqlFunction(func.SystemType, "Convert", to, func.Parameters[2]));
 		}
 
 		#endregion
@@ -1512,8 +1516,8 @@ namespace BLToolkit.Data.Sql.SqlProvider
 										{
 											switch (be1.Operation)
 											{
-												case "+": return new SqlBinaryExpression(be1.Expr1, be1.Operation, new SqlValue((int)be1v2.Value + (int)v2.Value), be.Type, be.Precedence);
-												case "-": return new SqlBinaryExpression(be1.Expr1, be1.Operation, new SqlValue((int)be1v2.Value - (int)v2.Value), be.Type, be.Precedence);
+												case "+": return new SqlBinaryExpression(be.SystemType, be1.Expr1, be1.Operation, new SqlValue((int)be1v2.Value + (int)v2.Value), be.Precedence);
+												case "-": return new SqlBinaryExpression(be.SystemType, be1.Expr1, be1.Operation, new SqlValue((int)be1v2.Value - (int)v2.Value), be.Precedence);
 											}
 										}
 									}
@@ -1526,8 +1530,38 @@ namespace BLToolkit.Data.Sql.SqlProvider
 						{
 							SqlValue v1 = (SqlValue)be.Expr1;
 							SqlValue v2 = (SqlValue)be.Expr2;
-							if (v1.Value is int    && v2.Value is int)    return new SqlValue((int)   v1.Value + (int)   v2.Value);
-							if (v1.Value is string && v2.Value is string) return new SqlValue((string)v1.Value + (string)v2.Value);
+							if (v1.Value is int    && v2.Value is int)    return new SqlValue((int)v1.Value + (int)v2.Value);
+							if (v1.Value is string || v2.Value is string) return new SqlValue(v1.Value.ToString() + v2.Value);
+						}
+
+						if (be.Expr1.SystemType == typeof(string) && be.Expr2.SystemType != typeof(string))
+						{
+							var len = be.Expr2.SystemType == null ? 100 : SqlDataType.GetMaxDisplaySize(SqlDataType.GetDataType(be.Expr2.SystemType).DbType);
+
+							if (len <= 0)
+								len = 100;
+
+							return new SqlBinaryExpression(
+								be.SystemType,
+								be.Expr1,
+								be.Operation,
+								ConvertExpression(new SqlFunction(typeof(string), "Convert", new SqlDataType(SqlDbType.VarChar, len), be.Expr2)),
+								be.Precedence);
+						}
+
+						if (be.Expr1.SystemType != typeof(string) && be.Expr2.SystemType == typeof(string))
+						{
+							var len = be.Expr1.SystemType == null ? 100 : SqlDataType.GetMaxDisplaySize(SqlDataType.GetDataType(be.Expr1.SystemType).DbType);
+
+							if (len <= 0)
+								len = 100;
+
+							return new SqlBinaryExpression(
+								be.SystemType,
+								ConvertExpression(new SqlFunction(typeof(string), "Convert", new SqlDataType(SqlDbType.VarChar, len), be.Expr1)),
+								be.Operation,
+								be.Expr2,
+								be.Precedence);
 						}
 
 						break;
@@ -1553,8 +1587,8 @@ namespace BLToolkit.Data.Sql.SqlProvider
 										{
 											switch (be1.Operation)
 											{
-												case "+": return new SqlBinaryExpression(be1.Expr1, be1.Operation, new SqlValue((int)be1v2.Value - (int)v2.Value), be.Type, be.Precedence);
-												case "-": return new SqlBinaryExpression(be1.Expr1, be1.Operation, new SqlValue((int)be1v2.Value + (int)v2.Value), be.Type, be.Precedence);
+												case "+": return new SqlBinaryExpression(be.SystemType, be1.Expr1, be1.Operation, new SqlValue((int)be1v2.Value - (int)v2.Value), be.Precedence);
+												case "-": return new SqlBinaryExpression(be.SystemType, be1.Expr1, be1.Operation, new SqlValue((int)be1v2.Value + (int)v2.Value), be.Precedence);
 											}
 										}
 									}
@@ -1613,13 +1647,13 @@ namespace BLToolkit.Data.Sql.SqlProvider
 				switch (func.Name)
 				{
 					case "ConvertToCaseCompareTo":
-						return ConvertExpression(new SqlFunction("CASE",
+						return ConvertExpression(new SqlFunction(func.SystemType, "CASE",
 							new SqlQuery.SearchCondition().Expr(func.Parameters[0]). Greater .Expr(func.Parameters[1]).ToExpr(), new SqlValue(1),
 							new SqlQuery.SearchCondition().Expr(func.Parameters[0]). Equal   .Expr(func.Parameters[1]).ToExpr(), new SqlValue(0),
 							new SqlValue(-1)));
 
 					case "$Convert$": return ConvertConvertion(func);
-					case "Average"  : return new SqlFunction("Avg", func.Parameters);
+					case "Average"  : return new SqlFunction(func.SystemType, "Avg", func.Parameters);
 
 					case "CASE":
 						{
@@ -1663,7 +1697,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 								return parms[0];
 
 							if (parms.Length != len)
-								return new SqlFunction(func.Name, func.Precedence, parms);
+								return new SqlFunction(func.SystemType, func.Name, func.Precedence, parms);
 						}
 
 						break;

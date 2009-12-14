@@ -50,11 +50,11 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 				switch (be.Operation)
 				{
-					case "%": return new SqlFunction("Mod",     be.Expr1, be.Expr2);
-					case "&": return new SqlFunction("Bin_And", be.Expr1, be.Expr2);
-					case "|": return new SqlFunction("Bin_Or",  be.Expr1, be.Expr2);
-					case "^": return new SqlFunction("Bin_Xor", be.Expr1, be.Expr2);
-					case "+": return be.Type == typeof(string)? new SqlBinaryExpression(be.Expr1, "||", be.Expr2, be.Type, be.Precedence): expr;
+					case "%": return new SqlFunction(be.SystemType, "Mod",     be.Expr1, be.Expr2);
+					case "&": return new SqlFunction(be.SystemType, "Bin_And", be.Expr1, be.Expr2);
+					case "|": return new SqlFunction(be.SystemType, "Bin_Or",  be.Expr1, be.Expr2);
+					case "^": return new SqlFunction(be.SystemType, "Bin_Xor", be.Expr1, be.Expr2);
+					case "+": return be.SystemType == typeof(string)? new SqlBinaryExpression(be.SystemType, be.Expr1, "||", be.Expr2, be.Precedence): expr;
 				}
 			}
 			else if (expr is SqlFunction)
@@ -63,19 +63,19 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 				switch (func.Name)
 				{
-					case "Convert" : return new SqlExpression("Cast({0} as {1})", Precedence.Primary, func.Parameters[1], func.Parameters[0]);
+					case "Convert" : return new SqlExpression(func.SystemType, "Cast({0} as {1})", Precedence.Primary, func.Parameters[1], func.Parameters[0]);
 
 #if FW3
 					case "DateAdd" :
 						switch ((Sql.DateParts)((SqlValue)func.Parameters[0]).Value)
 						{
 							case Sql.DateParts.Quarter  :
-								return new SqlFunction(func.Name, new SqlValue(Sql.DateParts.Month), Mul(func.Parameters[1], 3), func.Parameters[2]);
+								return new SqlFunction(func.SystemType, func.Name, new SqlValue(Sql.DateParts.Month), Mul(func.Parameters[1], 3), func.Parameters[2]);
 							case Sql.DateParts.DayOfYear:
 							case Sql.DateParts.WeekDay:
-								return new SqlFunction(func.Name, new SqlValue(Sql.DateParts.Day),   func.Parameters[1],         func.Parameters[2]);
+								return new SqlFunction(func.SystemType, func.Name, new SqlValue(Sql.DateParts.Day),   func.Parameters[1],         func.Parameters[2]);
 							case Sql.DateParts.Week     :
-								return new SqlFunction(func.Name, new SqlValue(Sql.DateParts.Day),   Mul(func.Parameters[1], 7), func.Parameters[2]);
+								return new SqlFunction(func.SystemType, func.Name, new SqlValue(Sql.DateParts.Day),   Mul(func.Parameters[1], 7), func.Parameters[2]);
 						}
 
 						break;
@@ -88,13 +88,13 @@ namespace BLToolkit.Data.Sql.SqlProvider
 				SqlExpression e = (SqlExpression)expr;
 
 				if (e.Expr.StartsWith("Extract(Quarter"))
-					return Inc(Div(Dec(new SqlExpression("Extract(Month from {0})", e.Values)), 3));
+					return Inc(Div(Dec(new SqlExpression(e.SystemType, "Extract(Month from {0})", e.Values)), 3));
 
 				if (e.Expr.StartsWith("Extract(YearDay"))
-					return Inc(new SqlExpression(e.Expr.Replace("Extract(YearDay", "Extract(yearDay"), e.Values));
+					return Inc(new SqlExpression(e.SystemType, e.Expr.Replace("Extract(YearDay", "Extract(yearDay"), e.Values));
 
 				if (e.Expr.StartsWith("Extract(WeekDay"))
-					return Inc(new SqlExpression(e.Expr.Replace("Extract(WeekDay", "Extract(weekDay"), e.Values));
+					return Inc(new SqlExpression(e.SystemType, e.Expr.Replace("Extract(WeekDay", "Extract(weekDay"), e.Values));
 			}
 
 			return expr;

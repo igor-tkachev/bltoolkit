@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Reflection;
+using BLToolkit.Reflection;
 
 namespace BLToolkit.Data.Linq
 {
@@ -48,7 +49,7 @@ namespace BLToolkit.Data.Linq
 
 		public override ISqlExpression GetExpression(MemberInfo member, params ISqlExpression[] args)
 		{
-			return new SqlExpression(Expression ?? member.Name, Precedence, ConvertArgs(member, args));
+			return new SqlExpression(TypeHelper.GetMemberType(member), Expression ?? member.Name, Precedence, ConvertArgs(member, args));
 		}
 	}
 }

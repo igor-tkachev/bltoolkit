@@ -5,42 +5,33 @@ namespace BLToolkit.Data.Sql
 {
 	public class SqlParameter : ISqlExpression, IValueContainer
 	{
-		public SqlParameter(string name, Type type, object value)
+		public SqlParameter(Type systemType, string name, object value)
 		{
-			_name  = name;
-			_type  = type;
-			_value = value;
+			_name       = name;
+			_systemType = systemType;
+			_value      = value;
 		}
 
-		public SqlParameter(string name, Type type, object value, Converter<object,object> valueConverter)
-			: this(name, type, value)
+		public SqlParameter(Type systemType, string name, object value, Converter<object, object> valueConverter)
+			: this(systemType, name, value)
 		{
 			_valueConverter = valueConverter;
 		}
 
+		[Obsolete]
 		public SqlParameter(string name, object value)
-			: this(name, value == null ? null : value.GetType(), value)
+			: this(value == null ? null : value.GetType(), name, value)
 		{
 		}
 
+		[Obsolete]
 		public SqlParameter(string name, object value, Converter<object,object> valueConverter)
-			: this(name, value == null ? null : value.GetType(), value, valueConverter)
+			: this(value == null ? null : value.GetType(), name, value, valueConverter)
 		{
 		}
 
-		private string _name;
-		public  string  Name
-		{
-			get { return _name;  }
-			set { _name = value; }
-		}
-
-		private Type _type;
-		public  Type  Type
-		{
-			get { return _type;  }
-			set { _type = value; }
-		}
+		private string _name;       public string Name       { get { return _name;       } set { _name = value;       } }
+		private Type   _systemType; public Type   SystemType { get { return _systemType; } set { _systemType = value; } }
 
 		private object _value;
 		public  object  Value
@@ -98,7 +89,7 @@ namespace BLToolkit.Data.Sql
 				return true;
 
 			SqlParameter p = other as SqlParameter;
-			return _name != null && p._name != null && _name == p._name;
+			return _name != null && p._name != null && _name == p._name && _systemType == p._systemType;
 		}
 
 		#endregion
@@ -107,10 +98,10 @@ namespace BLToolkit.Data.Sql
 
 		public bool CanBeNull()
 		{
-			if (_type == null && _value == null)
+			if (_systemType == null && _value == null)
 				return true;
 
-			return SqlDataType.CanBeNull(_type ?? _value.GetType());
+			return SqlDataType.CanBeNull(_systemType ?? _value.GetType());
 		}
 
 		#endregion
@@ -126,7 +117,7 @@ namespace BLToolkit.Data.Sql
 
 			if (!objectTree.TryGetValue(this, out clone))
 			{
-				SqlParameter p = new SqlParameter(_name, _type, _value, _valueConverter);
+				SqlParameter p = new SqlParameter(_systemType, _name, _value, _valueConverter);
 
 				p._isQueryParameter = _isQueryParameter;
 

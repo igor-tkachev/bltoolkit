@@ -54,7 +54,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 				switch (be.Operation)
 				{
 					case "+":
-						if (be.Type == typeof(string))
+						if (be.SystemType == typeof(string))
 						{
 							if (be.Expr1 is SqlFunction)
 							{
@@ -64,11 +64,11 @@ namespace BLToolkit.Data.Sql.SqlProvider
 								{
 									List<ISqlExpression> list = new List<ISqlExpression>(func.Parameters);
 									list.Add(be.Expr2);
-									return new SqlFunction("Concat", list.ToArray());
+									return new SqlFunction(be.SystemType, "Concat", list.ToArray());
 								}
 							}
 
-							return new SqlFunction("Concat", be.Expr1, be.Expr2);
+							return new SqlFunction(be.SystemType, "Concat", be.Expr1, be.Expr2);
 						}
 
 						break;
@@ -80,7 +80,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 				switch (func.Name)
 				{
-					case "Convert" : return new SqlExpression("Cast({0} as {1})", Precedence.Primary, func.Parameters[1], func.Parameters[0]);
+					case "Convert" : return new SqlExpression(func.SystemType, "Cast({0} as {1})", Precedence.Primary, func.Parameters[1], func.Parameters[0]);
 				}
 			}
 			else if (expr is SqlExpression)
@@ -88,16 +88,17 @@ namespace BLToolkit.Data.Sql.SqlProvider
 				SqlExpression e = (SqlExpression)expr;
 
 				if (e.Expr.StartsWith("Extract(DayOfYear"))
-					return new SqlFunction("DayOfYear", e.Values);
+					return new SqlFunction(e.SystemType, "DayOfYear", e.Values);
 
 				if (e.Expr.StartsWith("Extract(WeekDay"))
 					return Inc(
-						new SqlFunction(
+						new SqlFunction(e.SystemType,
 							"WeekDay",
 							new SqlFunction(
+								null,
 								"Date_Add",
 								e.Values[0],
-								new SqlExpression("interval 1 day"))));
+								new SqlExpression(null, "interval 1 day"))));
 			}
 
 			return expr;

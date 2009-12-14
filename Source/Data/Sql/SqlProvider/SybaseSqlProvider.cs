@@ -40,11 +40,11 @@ namespace BLToolkit.Data.Sql.SqlProvider
 					case "CharIndex" :
 						if (func.Parameters.Length == 3)
 							return Add<int>(
-								ConvertExpression(new SqlFunction("CharIndex",
+								ConvertExpression(new SqlFunction(func.SystemType, "CharIndex",
 									func.Parameters[0],
-									ConvertExpression(new SqlFunction("Substring",
+									ConvertExpression(new SqlFunction(typeof(string), "Substring",
 										func.Parameters[1],
-										func.Parameters[2], new SqlFunction("Len", func.Parameters[1]))))),
+										func.Parameters[2], new SqlFunction(typeof(int), "Len", func.Parameters[1]))))),
 								Sub(func.Parameters[2], 1));
 						break;
 
@@ -55,6 +55,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 							if (value.Value is string && string.IsNullOrEmpty((string)value.Value))
 								return new SqlFunction(
+									func.SystemType,
 									func.Name,
 									func.Precedence,
 									func.Parameters[0],

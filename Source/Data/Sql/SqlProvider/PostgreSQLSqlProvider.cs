@@ -33,8 +33,8 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 				switch (be.Operation)
 				{
-					case "^": return new SqlBinaryExpression(be.Expr1, "#", be.Expr2, be.Type);
-					case "+": return be.Type == typeof(string)? new SqlBinaryExpression(be.Expr1, "||", be.Expr2, be.Type, be.Precedence): expr;
+					case "^": return new SqlBinaryExpression(be.SystemType, be.Expr1, "#", be.Expr2);
+					case "+": return be.SystemType == typeof(string)? new SqlBinaryExpression(be.SystemType, be.Expr1, "||", be.Expr2, be.Precedence): expr;
 				}
 			}
 			else if (expr is SqlFunction)
@@ -43,16 +43,16 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 				switch (func.Name)
 				{
-					case "Convert"   : return new SqlExpression("Cast({0} as {1})", Precedence.Primary, func.Parameters[1], func.Parameters[0]);
+					case "Convert"   : return new SqlExpression(func.SystemType, "Cast({0} as {1})", Precedence.Primary, func.Parameters[1], func.Parameters[0]);
 					case "CharIndex" :
 						return func.Parameters.Length == 2?
-							new SqlExpression("Position({0} in {1})", Precedence.Primary, func.Parameters[0], func.Parameters[1]):
+							new SqlExpression(func.SystemType, "Position({0} in {1})", Precedence.Primary, func.Parameters[0], func.Parameters[1]):
 							Add<int>(
-								new SqlExpression("Position({0} in {1})", Precedence.Primary, func.Parameters[0],
-									ConvertExpression(new SqlFunction("Substring",
+								new SqlExpression(func.SystemType, "Position({0} in {1})", Precedence.Primary, func.Parameters[0],
+									ConvertExpression(new SqlFunction(typeof(string), "Substring",
 										func.Parameters[1],
 										func.Parameters[2],
-										Sub<int>(ConvertExpression(new SqlFunction("Length", func.Parameters[1])), func.Parameters[2])))),
+										Sub<int>(ConvertExpression(new SqlFunction(typeof(int), "Length", func.Parameters[1])), func.Parameters[2])))),
 								Sub(func.Parameters[2], 1));
 				}
 			}
@@ -61,10 +61,10 @@ namespace BLToolkit.Data.Sql.SqlProvider
 				SqlExpression e = (SqlExpression)expr;
 
 				if (e.Expr.StartsWith("Extract(DOW"))
-					return Inc(new SqlExpression(e.Expr.Replace("Extract(DOW", "Extract(Dow"), e.Values));
+					return Inc(new SqlExpression(expr.SystemType, e.Expr.Replace("Extract(DOW", "Extract(Dow"), e.Values));
 
 				if (e.Expr.StartsWith("Extract(Millisecond"))
-					return new SqlExpression("Cast(To_Char(t.DateTimeValue, 'MS') as int)", e.Values);
+					return new SqlExpression(expr.SystemType, "Cast(To_Char(t.DateTimeValue, 'MS') as int)", e.Values);
 			}
 
 			return expr;

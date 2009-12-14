@@ -7,12 +7,24 @@ namespace BLToolkit.Data.Sql
 {
 	public class SqlFunction : ISqlExpression, ISqlTableSource
 	{
+		[Obsolete]
 		public SqlFunction(string name, params ISqlExpression[] parameters)
-			: this(name, Sql.Precedence.Primary, parameters)
+			: this(null, name, Sql.Precedence.Primary, parameters)
 		{
 		}
 
+		[Obsolete]
 		public SqlFunction(string name, int precedence, params ISqlExpression[] parameters)
+			: this(null, name, precedence, parameters)
+		{
+		}
+
+		public SqlFunction(Type systemType, string name, params ISqlExpression[] parameters)
+			: this(systemType, name, Sql.Precedence.Primary, parameters)
+		{
+		}
+
+		public SqlFunction(Type systemType, string name, int precedence, params ISqlExpression[] parameters)
 		{
 			_sourceID = Interlocked.Increment(ref SqlQuery.SourceIDCounter);
 
@@ -21,20 +33,23 @@ namespace BLToolkit.Data.Sql
 			foreach (ISqlExpression p in parameters)
 				if (p == null) throw new ArgumentNullException("parameters");
 
+			_systemType = systemType;
 			_name       = name;
 			_precedence = precedence;
 			_parameters = parameters;
 		}
 
+		readonly Type             _systemType; public Type             SystemType { get { return _systemType; } }
 		readonly string           _name;       public string           Name       { get { return _name;       } }
 		readonly int              _precedence; public int              Precedence { get { return _precedence; } }
 		readonly ISqlExpression[] _parameters; public ISqlExpression[] Parameters { get { return _parameters; } }
 
-		public static SqlFunction CreateCount (ISqlTableSource table) { return new SqlFunction("Count",  table.All); }
-		public static SqlFunction CreateAll   (SqlQuery subQuery)     { return new SqlFunction("ALL",    Sql.Precedence.Comparison, subQuery); }
-		public static SqlFunction CreateSome  (SqlQuery subQuery)     { return new SqlFunction("SOME",   Sql.Precedence.Comparison, subQuery); }
-		public static SqlFunction CreateAny   (SqlQuery subQuery)     { return new SqlFunction("ANY",    Sql.Precedence.Comparison, subQuery); }
-		public static SqlFunction CreateExists(SqlQuery subQuery)     { return new SqlFunction("EXISTS", Sql.Precedence.Comparison, subQuery); }
+		public static SqlFunction CreateCount (Type type, ISqlTableSource table) { return new SqlFunction(type, "Count",  table.All); }
+
+		public static SqlFunction CreateAll   (SqlQuery subQuery) { return new SqlFunction(typeof(bool), "ALL",    Sql.Precedence.Comparison, subQuery); }
+		public static SqlFunction CreateSome  (SqlQuery subQuery) { return new SqlFunction(typeof(bool), "SOME",   Sql.Precedence.Comparison, subQuery); }
+		public static SqlFunction CreateAny   (SqlQuery subQuery) { return new SqlFunction(typeof(bool), "ANY",    Sql.Precedence.Comparison, subQuery); }
+		public static SqlFunction CreateExists(SqlQuery subQuery) { return new SqlFunction(typeof(bool), "EXISTS", Sql.Precedence.Comparison, subQuery); }
 
 		#region Overrides
 
@@ -76,7 +91,7 @@ namespace BLToolkit.Data.Sql
 
 			SqlFunction func = other as SqlFunction;
 
-			if (func == null || _name != func._name || _parameters.Length != func._parameters.Length)
+			if (func == null || _name != func._name || _parameters.Length != func._parameters.Length && _systemType != func._systemType)
 				return false;
 
 			for (int i = 0; i < _parameters.Length; i++)
@@ -100,7 +115,7 @@ namespace BLToolkit.Data.Sql
 			{
 				if (_all == null)
 				{
-					_all = new SqlField("*", "*", true, -1);
+					_all = new SqlField(null, "*", "*", true, -1);
 					((IChild<ISqlTableSource>)_all).Parent = this;
 				}
 
@@ -131,6 +146,7 @@ namespace BLToolkit.Data.Sql
 			if (!objectTree.TryGetValue(this, out clone))
 			{
 				objectTree.Add(this, clone = new SqlFunction(
+					_systemType,
 					_name,
 					_precedence,
 					Array.ConvertAll<ISqlExpression,ISqlExpression>(_parameters, delegate(ISqlExpression e) { return (ISqlExpression)e.Clone(objectTree, doClone); })));

@@ -44,7 +44,7 @@ namespace BLToolkit.Data.Sql
 				if (mm.MapMemberInfo.SqlIgnore == false)
 				{
 					int order = _mappingSchema.MetadataProvider.GetPrimaryKeyOrder(objectType, typeExt, mm.MemberAccessor, out isSet);
-					Fields.Add(new SqlField(mm.MemberName, mm.Name, mm.MapMemberInfo.Nullable, isSet ? order : int.MinValue));
+					Fields.Add(new SqlField(mm.Type, mm.MemberName, mm.Name, mm.MapMemberInfo.Nullable, isSet ? order : int.MinValue));
 				}
 		}
 
@@ -118,7 +118,12 @@ namespace BLToolkit.Data.Sql
 			_physicalName = (string)te.Attributes["PhysicalName"].Value;
 
 			foreach (MemberExtension me in te.Members)
-				Fields.Add(new SqlField(me.Name, (string)me["MapField"].Value ?? (string)me["PhysicalName"].Value, (bool?)me["Nullable"].Value ?? false, -1));
+				Fields.Add(new SqlField(
+					(Type)me["Type"].Value,
+					me.Name,
+					(string)me["MapField"].Value ?? (string)me["PhysicalName"].Value,
+					(bool?)me["Nullable"].Value ?? false,
+					-1));
 
 			foreach (AttributeExtension ae in te.Attributes["Join"])
 				Joins.Add(new Join(ae));
@@ -201,7 +206,7 @@ namespace BLToolkit.Data.Sql
 			{
 				if (_all == null)
 				{
-					_all = new SqlField("*", "*", true, -1);
+					_all = new SqlField(null, "*", "*", true, -1);
 					((IChild<ISqlTableSource>)_all).Parent = this;
 				}
 

@@ -156,6 +156,11 @@ namespace BLToolkit.Data.Sql
 				get { return Sql.Precedence.Primary; }
 			}
 
+			public Type SystemType
+			{
+				get { return Expression.SystemType; }
+			}
+
 			public bool CanBeNull()
 			{
 				return Expression.CanBeNull();
@@ -1119,6 +1124,11 @@ namespace BLToolkit.Data.Sql
 				}
 			}
 
+			public Type SystemType
+			{
+				get { return typeof(bool); }
+			}
+
 			[Obsolete]
 			ISqlExpression ISqlExpressionWalkable.Walk(bool skipColumns, WalkingFunc func)
 			{
@@ -1535,39 +1545,60 @@ namespace BLToolkit.Data.Sql
 				return this;
 			}
 
+			[Obsolete]
 			public SelectClause Expr(string expr, params ISqlExpression[] values)
 			{
-				AddOrGetColumn(new Column(SqlQuery, new SqlExpression(expr, values)));
+				AddOrGetColumn(new Column(SqlQuery, new SqlExpression(null, expr, values)));
 				return this;
 			}
 
+			public SelectClause Expr(Type systemType, string expr, params ISqlExpression[] values)
+			{
+				AddOrGetColumn(new Column(SqlQuery, new SqlExpression(systemType, expr, values)));
+				return this;
+			}
+
+			[Obsolete]
 			public SelectClause Expr(string expr, int priority, params ISqlExpression[] values)
 			{
-				AddOrGetColumn(new Column(SqlQuery, new SqlExpression(expr, priority, values)));
+				AddOrGetColumn(new Column(SqlQuery, new SqlExpression(null, expr, priority, values)));
 				return this;
 			}
 
+			public SelectClause Expr(Type systemType, string expr, int priority, params ISqlExpression[] values)
+			{
+				AddOrGetColumn(new Column(SqlQuery, new SqlExpression(systemType, expr, priority, values)));
+				return this;
+			}
+
+			[Obsolete]
 			public SelectClause Expr(string alias, string expr, int priority, params ISqlExpression[] values)
 			{
-				AddOrGetColumn(new Column(SqlQuery, new SqlExpression(expr, priority, values)));
+				AddOrGetColumn(new Column(SqlQuery, new SqlExpression(null, expr, priority, values)));
+				return this;
+			}
+
+			public SelectClause Expr(Type systemType, string alias, string expr, int priority, params ISqlExpression[] values)
+			{
+				AddOrGetColumn(new Column(SqlQuery, new SqlExpression(systemType, expr, priority, values)));
 				return this;
 			}
 
 			public SelectClause Expr<T>(ISqlExpression expr1, string operation, ISqlExpression expr2)
 			{
-				AddOrGetColumn(new Column(SqlQuery, new SqlBinaryExpression(expr1, operation, expr2, typeof(T))));
+				AddOrGetColumn(new Column(SqlQuery, new SqlBinaryExpression(typeof(T), expr1, operation, expr2)));
 				return this;
 			}
 
 			public SelectClause Expr<T>(ISqlExpression expr1, string operation, ISqlExpression expr2, int priority)
 			{
-				AddOrGetColumn(new Column(SqlQuery, new SqlBinaryExpression(expr1, operation, expr2, typeof(T), priority)));
+				AddOrGetColumn(new Column(SqlQuery, new SqlBinaryExpression(typeof(T), expr1, operation, expr2, priority)));
 				return this;
 			}
 
 			public SelectClause Expr<T>(string alias, ISqlExpression expr1, string operation, ISqlExpression expr2, int priority)
 			{
-				AddOrGetColumn(new Column(SqlQuery, new SqlBinaryExpression(expr1, operation, expr2, typeof(T), priority), alias));
+				AddOrGetColumn(new Column(SqlQuery, new SqlBinaryExpression(typeof(T), expr1, operation, expr2, priority), alias));
 				return this;
 			}
 
@@ -2892,6 +2923,16 @@ namespace BLToolkit.Data.Sql
 			get { return Sql.Precedence.Unknown; }
 		}
 
+		public Type SystemType
+		{
+			get
+			{
+				if (Select.Columns.Count == 1)
+					return Select.Columns[0].SystemType;
+				return null;
+			}
+		}
+
 		#endregion
 
 		#region ICloneableElement Members
@@ -2951,7 +2992,7 @@ namespace BLToolkit.Data.Sql
 			{
 				if (_all == null)
 				{
-					_all = new SqlField("*", "*", true, -1);
+					_all = new SqlField(null, "*", "*", true, -1);
 					((IChild<ISqlTableSource>)_all).Parent = this;
 				}
 

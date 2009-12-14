@@ -2,6 +2,7 @@
 using System.Data.Linq.SqlClient;
 using System.Globalization;
 using System.Reflection;
+using BLToolkit.Reflection;
 
 namespace BLToolkit.Data.Linq
 {
@@ -369,10 +370,12 @@ namespace BLToolkit.Data.Linq
 				var part = (DateParts)((SqlValue)args[_datePartIndex]).Value;
 				var pstr = _partMapping != null ? _partMapping[(int)part] : part.ToString();
 				var str  = string.Format(Expression, pstr ?? part.ToString());
+				var type = TypeHelper.GetMemberType(member);
+
 
 				return _isExpression ?
-					new SqlExpression(str, Precedence, ConvertArgs(member, args)) :
-					(ISqlExpression)new SqlFunction  (str, ConvertArgs(member, args));
+					                new SqlExpression(type, str, Precedence, ConvertArgs(member, args)) :
+					(ISqlExpression)new SqlFunction  (type, str, ConvertArgs(member, args));
 			}
 		}
 

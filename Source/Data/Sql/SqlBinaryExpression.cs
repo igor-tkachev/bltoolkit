@@ -7,7 +7,7 @@ namespace BLToolkit.Data.Sql
 	[DebuggerDisplay("SQL = {SqlText}")]
 	public class SqlBinaryExpression : ISqlExpression
 	{
-		public SqlBinaryExpression(ISqlExpression expr1, string operation, ISqlExpression expr2, Type type, int precedence)
+		public SqlBinaryExpression(Type systemType, ISqlExpression expr1, string operation, ISqlExpression expr2, int precedence)
 		{
 			if (expr1     == null) throw new ArgumentNullException("expr1");
 			if (operation == null) throw new ArgumentNullException("operation");
@@ -16,19 +16,19 @@ namespace BLToolkit.Data.Sql
 			_expr1      = expr1;
 			_operation  = operation;
 			_expr2      = expr2;
-			_type       = type;
+			_systemType = systemType;
 			_precedence = precedence;
 		}
 
-		public SqlBinaryExpression(ISqlExpression expr1, string operation, ISqlExpression expr2, Type type)
-			: this(expr1, operation, expr2, type, Sql.Precedence.Unknown)
+		public SqlBinaryExpression(Type systemType, ISqlExpression expr1, string operation, ISqlExpression expr2)
+			: this(systemType, expr1, operation, expr2, Sql.Precedence.Unknown)
 		{
 		}
 
 		private  ISqlExpression _expr1;      public ISqlExpression Expr1      { get { return _expr1;      } }
 		readonly string         _operation;  public string         Operation  { get { return _operation;  } }
 		private  ISqlExpression _expr2;      public ISqlExpression Expr2      { get { return _expr2;      } }
-		readonly Type           _type;       public Type           Type       { get { return _type;       } }
+		readonly Type           _systemType; public Type           SystemType { get { return _systemType; } }
 		readonly int            _precedence; public int            Precedence { get { return _precedence; } }
 
 		#region Overrides
@@ -64,7 +64,12 @@ namespace BLToolkit.Data.Sql
 
 			SqlBinaryExpression expr = other as SqlBinaryExpression;
 
-			return expr != null && _operation == expr._operation && _expr1.Equals(expr._expr1) && _expr2.Equals(expr._expr2);
+			return
+				expr        != null &&
+				_operation  == expr._operation &&
+				_systemType == expr._systemType &&
+				_expr1.Equals(expr._expr1) &&
+				_expr2.Equals(expr._expr2);
 		}
 
 		#endregion
@@ -90,10 +95,10 @@ namespace BLToolkit.Data.Sql
 			if (!objectTree.TryGetValue(this, out clone))
 			{
 				objectTree.Add(this, clone = new SqlBinaryExpression(
+					_systemType,
 					(ISqlExpression)_expr1.Clone(objectTree, doClone),
 					_operation,
 					(ISqlExpression)_expr2.Clone(objectTree, doClone),
-					_type,
 					_precedence));
 			}
 

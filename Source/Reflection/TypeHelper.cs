@@ -1416,9 +1416,15 @@ namespace BLToolkit.Reflection
 
 		public static Type GetMemberType(MemberInfo memberInfo)
 		{
-			return memberInfo.MemberType == MemberTypes.Property ?
-				((PropertyInfo)memberInfo).PropertyType :
-				((FieldInfo)   memberInfo).FieldType;
+			switch (memberInfo.MemberType)
+			{
+				case MemberTypes.Property    : return ((PropertyInfo)   memberInfo).PropertyType;
+				case MemberTypes.Field       : return ((FieldInfo)      memberInfo).FieldType;
+				case MemberTypes.Method      : return ((MethodInfo)     memberInfo).ReturnType;
+				case MemberTypes.Constructor : return ((ConstructorInfo)memberInfo).DeclaringType;
+			}
+
+			throw new InvalidOperationException();
 		}
 
 		#endregion

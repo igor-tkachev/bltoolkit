@@ -110,7 +110,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 					sb,
 					Precedence.LogicalConjunction,
 					new SqlQuery.Predicate.ExprExpr(
-						new SqlExpression("ROWNUM", Precedence.Primary),
+						new SqlExpression(null, "ROWNUM", Precedence.Primary),
 						SqlQuery.Predicate.Operator.LessOrEqual,
 						SqlQuery.Select.TakeValue));
 
@@ -134,20 +134,20 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 				switch (be.Operation)
 				{
-					case "%": return new SqlFunction("MOD",    be.Expr1, be.Expr2);
-					case "&": return new SqlFunction("BITAND", be.Expr1, be.Expr2);
+					case "%": return new SqlFunction(be.SystemType, "MOD",    be.Expr1, be.Expr2);
+					case "&": return new SqlFunction(be.SystemType, "BITAND", be.Expr1, be.Expr2);
 					case "|": // (a + b) - BITAND(a, b)
 						return Sub(
-							Add(be.Expr1, be.Expr2, be.Type),
-							new SqlFunction("BITAND", be.Expr1, be.Expr2),
-							be.Type);
+							Add(be.Expr1, be.Expr2, be.SystemType),
+							new SqlFunction(be.SystemType, "BITAND", be.Expr1, be.Expr2),
+							be.SystemType);
 
 					case "^": // (a + b) - BITAND(a, b) * 2
 						return Sub(
-							Add(be.Expr1, be.Expr2, be.Type),
-							Mul(new SqlFunction("BITAND", be.Expr1, be.Expr2), 2),
-							be.Type);
-					case "+": return be.Type == typeof(string)? new SqlBinaryExpression(be.Expr1, "||", be.Expr2, be.Type, be.Precedence): expr;
+							Add(be.Expr1, be.Expr2, be.SystemType),
+							Mul(new SqlFunction(be.SystemType, "BITAND", be.Expr1, be.Expr2), 2),
+							be.SystemType);
+					case "+": return be.SystemType == typeof(string)? new SqlBinaryExpression(be.SystemType, be.Expr1, "||", be.Expr2, be.Precedence): expr;
 				}
 			}
 			else if (expr is SqlFunction)
@@ -156,15 +156,15 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 				switch (func.Name)
 				{
-					case "Coalesce"       : return new SqlFunction("Nvl",    func.Parameters);
-					case "Convert"        : return new SqlExpression("Cast({0} as {1})", Precedence.Primary, func.Parameters[1], func.Parameters[0]);
+					case "Coalesce"       : return new SqlFunction  (func.SystemType, "Nvl",    func.Parameters);
+					case "Convert"        : return new SqlExpression(func.SystemType, "Cast({0} as {1})", Precedence.Primary, func.Parameters[1], func.Parameters[0]);
 					case "CharIndex"      :
 						return func.Parameters.Length == 2?
-							new SqlFunction("InStr", func.Parameters[1], func.Parameters[0]):
-							new SqlFunction("InStr", func.Parameters[1], func.Parameters[0], func.Parameters[2]);
-					case "AddYear"        : return new SqlFunction("Add_Months", func.Parameters[0], Mul(func.Parameters[1], 12));
-					case "AddQuarter"     : return new SqlFunction("Add_Months", func.Parameters[0], Mul(func.Parameters[1],  3));
-					case "AddMonth"       : return new SqlFunction("Add_Months", func.Parameters[0],     func.Parameters[1]);
+							new SqlFunction(func.SystemType, "InStr", func.Parameters[1], func.Parameters[0]):
+							new SqlFunction(func.SystemType, "InStr", func.Parameters[1], func.Parameters[0], func.Parameters[2]);
+					case "AddYear"        : return new SqlFunction(func.SystemType, "Add_Months", func.Parameters[0], Mul(func.Parameters[1], 12));
+					case "AddQuarter"     : return new SqlFunction(func.SystemType, "Add_Months", func.Parameters[0], Mul(func.Parameters[1],  3));
+					case "AddMonth"       : return new SqlFunction(func.SystemType, "Add_Months", func.Parameters[0],     func.Parameters[1]);
 					case "AddDayOfYear"   :
 					case "AddWeekDay"     :
 					case "AddDay"         : return Add<DateTime>(func.Parameters[0],     func.Parameters[1]);
@@ -180,7 +180,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 				SqlExpression e = (SqlExpression)expr;
 
 				if (e.Expr.StartsWith("To_Number(To_Char(") && e.Expr.EndsWith(", 'FF'))"))
-					return Div(new SqlExpression(e.Expr.Replace("To_Number(To_Char(", "to_Number(To_Char("), e.Values), 1000);
+					return Div(new SqlExpression(e.SystemType, e.Expr.Replace("To_Number(To_Char(", "to_Number(To_Char("), e.Values), 1000);
 			}
 
 			return expr;

@@ -193,7 +193,7 @@ namespace BLToolkit.Data.Linq
 
 							var qs = ParseSequence(ex);
 
-							CurrentSql.Select.Expr(SqlFunction.CreateCount(CurrentSql.From.Tables[0]), "cnt");
+							CurrentSql.Select.Expr(SqlFunction.CreateCount(info.Expr.Type, CurrentSql.From.Tables[0]), "cnt");
 
 							return qs;
 						}
@@ -802,7 +802,7 @@ namespace BLToolkit.Data.Linq
  
 			CurrentSql = current;
 
-			counter.SubSql.Select.Expr(SqlFunction.CreateCount(counter.SubSql.From.Tables[0]), "cnt");
+			counter.SubSql.Select.Expr(SqlFunction.CreateCount(typeof(int), counter.SubSql.From.Tables[0]), "cnt");
 			current.From.Table(source1.SubSql, cntjoin);
 
 			// Make join and where for the counter.
@@ -1086,10 +1086,10 @@ namespace BLToolkit.Data.Linq
 								Conditions = { new SqlQuery.Condition(true, new SqlQuery.Predicate.Expr(expr, expr.Precedence)) }
 							};
 
-							e = Convert(new SqlFunction("CASE", expr, new SqlValue(1), notExpr, new SqlValue(0), new SqlValue(null)));
+							e = Convert(new SqlFunction(e.SystemType, "CASE", expr, new SqlValue(1), notExpr, new SqlValue(0), new SqlValue(null)));
 						}
 						else
-							e = Convert(new SqlFunction("CASE", expr, new SqlValue(1), new SqlValue(0)));
+							e = Convert(new SqlFunction(e.SystemType, "CASE", expr, new SqlValue(1), new SqlValue(0)));
 					}
 
 					CurrentSql.OrderBy.Expr(e, !ascending);
@@ -1118,7 +1118,7 @@ namespace BLToolkit.Data.Linq
 
 			if (CurrentSql.Select.SkipValue != null && _info.SqlProvider.IsTakeSupported && !_info.SqlProvider.IsSkipSupported)
 				CurrentSql.Select.Take(Convert(
-					new SqlBinaryExpression(CurrentSql.Select.SkipValue, "+", CurrentSql.Select.TakeValue, typeof(int), Precedence.Additive)));
+					new SqlBinaryExpression(typeof(int), CurrentSql.Select.SkipValue, "+", CurrentSql.Select.TakeValue, Precedence.Additive)));
 
 			if (!_info.SqlProvider.TakeAcceptsParameter)
 			{
@@ -1154,11 +1154,11 @@ namespace BLToolkit.Data.Linq
 			{
 				if (_info.SqlProvider.IsSkipSupported || !_info.SqlProvider.IsTakeSupported)
 					CurrentSql.Select.Take(Convert(
-						new SqlBinaryExpression(CurrentSql.Select.TakeValue, "-", CurrentSql.Select.SkipValue, typeof (int), Precedence.Additive)));
+						new SqlBinaryExpression(typeof (int), CurrentSql.Select.TakeValue, "-", CurrentSql.Select.SkipValue, Precedence.Additive)));
 
 				if (prevSkipValue != null)
 					CurrentSql.Select.Skip(Convert(
-						new SqlBinaryExpression(prevSkipValue, "+", CurrentSql.Select.SkipValue, typeof (int), Precedence.Additive)));
+						new SqlBinaryExpression(typeof (int), prevSkipValue, "+", CurrentSql.Select.SkipValue, Precedence.Additive)));
 			}
 
 			if (!_info.SqlProvider.TakeAcceptsParameter)
@@ -1242,10 +1242,10 @@ namespace BLToolkit.Data.Linq
 			var sql = query.SqlQuery;
 			var idx =
 				name == "Count" ?
-					sql.Select.Add(SqlFunction.CreateCount(sql), "cnt") :
+					sql.Select.Add(SqlFunction.CreateCount(parseInfo.Expr.Type, sql), "cnt") :
 					lambda != null ?
-						sql.Select.Add(new SqlFunction(name, ParseExpression(lambda.Body, query))) :
-						sql.Select.Add(new SqlFunction(name, query.Fields[0].GetExpressions(this)[0]));
+						sql.Select.Add(new SqlFunction(parseInfo.Expr.Type, name, ParseExpression(lambda.Body, query))) :
+						sql.Select.Add(new SqlFunction(parseInfo.Expr.Type, name, query.Fields[0].GetExpressions(this)[0]));
 
 			if (!_isSubQueryParsing)
 				_buildSelect = () =>
@@ -2380,7 +2380,7 @@ namespace BLToolkit.Data.Linq
 			{
 				Expression   = expr.Expr,
 				Accessor     = mapper.Compile(),
-				SqlParameter = new SqlParameter(name, expr.Expr.Type, (object)null)
+				SqlParameter = new SqlParameter(expr.Expr.Type, name, (object)null)
 			};
 
 			_parameters.Add(expr.Expr, p);
@@ -2497,16 +2497,16 @@ namespace BLToolkit.Data.Linq
 							switch (parseInfo.NodeType)
 							{
 								case ExpressionType.Add            :
-								case ExpressionType.AddChecked     : return Convert(new SqlBinaryExpression(l, "+", r, t, Precedence.Additive));
-								case ExpressionType.And            : return Convert(new SqlBinaryExpression(l, "&", r, t, Precedence.Bitwise));
-								case ExpressionType.Divide         : return Convert(new SqlBinaryExpression(l, "/", r, t, Precedence.Multiplicative));
-								case ExpressionType.ExclusiveOr    : return Convert(new SqlBinaryExpression(l, "^", r, t, Precedence.Bitwise));
-								case ExpressionType.Modulo         : return Convert(new SqlBinaryExpression(l, "%", r, t, Precedence.Multiplicative));
-								case ExpressionType.Multiply       : return Convert(new SqlBinaryExpression(l, "*", r, t, Precedence.Multiplicative));
-								case ExpressionType.Or             : return Convert(new SqlBinaryExpression(l, "|", r, t, Precedence.Bitwise));
-								case ExpressionType.Power          : return Convert(new SqlFunction("Power", l, r));
+								case ExpressionType.AddChecked     : return Convert(new SqlBinaryExpression(t, l, "+", r, Precedence.Additive));
+								case ExpressionType.And            : return Convert(new SqlBinaryExpression(t, l, "&", r, Precedence.Bitwise));
+								case ExpressionType.Divide         : return Convert(new SqlBinaryExpression(t, l, "/", r, Precedence.Multiplicative));
+								case ExpressionType.ExclusiveOr    : return Convert(new SqlBinaryExpression(t, l, "^", r, Precedence.Bitwise));
+								case ExpressionType.Modulo         : return Convert(new SqlBinaryExpression(t, l, "%", r, Precedence.Multiplicative));
+								case ExpressionType.Multiply       : return Convert(new SqlBinaryExpression(t, l, "*", r, Precedence.Multiplicative));
+								case ExpressionType.Or             : return Convert(new SqlBinaryExpression(t, l, "|", r, Precedence.Bitwise));
+								case ExpressionType.Power          : return Convert(new SqlFunction(t, "Power", l, r));
 								case ExpressionType.Subtract       :
-								case ExpressionType.SubtractChecked: return Convert(new SqlBinaryExpression(l, "-", r, t, Precedence.Subtraction));
+								case ExpressionType.SubtractChecked: return Convert(new SqlBinaryExpression(t, l, "-", r, Precedence.Subtraction));
 								case ExpressionType.Coalesce       :
 									{
 										if (r is SqlFunction)
@@ -2520,11 +2520,11 @@ namespace BLToolkit.Data.Linq
 												parms[0] = l;
 												c.Parameters.CopyTo(parms, 1);
 
-												return Convert(new SqlFunction("Coalesce", parms));
+												return Convert(new SqlFunction(t, "Coalesce", parms));
 											}
 										}
 
-										return Convert(new SqlFunction("Coalesce", l, r));
+										return Convert(new SqlFunction(t, "Coalesce", l, r));
 									}
 							}
 
@@ -2540,7 +2540,7 @@ namespace BLToolkit.Data.Linq
 							if (e.Method == null && e.IsLifted)
 								return o;
 
-							return Convert(new SqlFunction("$Convert$", SqlDataType.GetDataType(e.Type), SqlDataType.GetDataType(e.Operand.Type), o));
+							return Convert(new SqlFunction(e.Type, "$Convert$", SqlDataType.GetDataType(e.Type), SqlDataType.GetDataType(e.Operand.Type), o));
 						}
 
 					case ExpressionType.Conditional:
@@ -2563,11 +2563,11 @@ namespace BLToolkit.Data.Linq
 									parms[1] = t;
 									c.Parameters.CopyTo(parms, 2);
 
-									return Convert(new SqlFunction("CASE", parms));
+									return Convert(new SqlFunction(e.Type, "CASE", parms));
 								}
 							}
 
-							return Convert(new SqlFunction("CASE", s, t, f));
+							return Convert(new SqlFunction(e.Type, "CASE", s, t, f));
 						}
 
 					case ExpressionType.MemberAccess:
@@ -2609,7 +2609,7 @@ namespace BLToolkit.Data.Linq
 							{
 								var src = GetSource(null, pi.Create(ma.Expression, pi.Property(Member.Expression)), queries);
 								if (src != null)
-									return SqlFunction.CreateCount(src.SqlQuery);
+									return SqlFunction.CreateCount(parseInfo.Expr.Type, src.SqlQuery);
 							}
 
 							goto case ExpressionType.Parameter;
@@ -2774,7 +2774,7 @@ namespace BLToolkit.Data.Linq
 						}
 
 						sql.GroupBy.Items.Clear();
-						sql.Select.Expr(SqlFunction.CreateCount(sql));
+						sql.Select.Expr(SqlFunction.CreateCount(expr.Type, sql));
 						sql.ParentSql = groupBy.SqlQuery;
 
 						return sql;
@@ -2796,16 +2796,16 @@ namespace BLToolkit.Data.Linq
 
 					sql.ParentSql = groupBy.SqlQuery;
 
-					return new SqlFunction("Count", sql.Select.Columns[0]);
+					return new SqlFunction(expr.Type, "Count", sql.Select.Columns[0]);
 				}
 
-				return SqlFunction.CreateCount(groupBy.SqlQuery);
+				return SqlFunction.CreateCount(expr.Type, groupBy.SqlQuery);
 			}
 
 			for (var i = 1; i < expr.Arguments.Count; i++)
 				args[i - 1] = ParseExpression(ParseLambdaArgument(pi, i), groupBy);
 
-			return new SqlFunction(expr.Method.Name, args);
+			return new SqlFunction(expr.Type, expr.Method.Name, args);
 		}
 
 		static ParseInfo ParseLambdaArgument(ParseInfo pi, int idx)
@@ -3352,14 +3352,14 @@ namespace BLToolkit.Data.Linq
 			}
 
 			if (l is SqlQuery.SearchCondition)
-				l = Convert(new SqlFunction("CASE", l, new SqlValue(true), new SqlValue(false)));
+				l = Convert(new SqlFunction(typeof(bool), "CASE", l, new SqlValue(true), new SqlValue(false)));
 			//l = Convert(new SqlFunction("CASE",
 			//	l, new SqlValue(true),
 			//	new SqlQuery.SearchCondition(new[] { new SqlQuery.Condition(true, (SqlQuery.SearchCondition)l) }), new SqlValue(false),
 			//	new SqlValue(false)));
 
 			if (r is SqlQuery.SearchCondition)
-				r = Convert(new SqlFunction("CASE", r, new SqlValue(true), new SqlValue(false)));
+				r = Convert(new SqlFunction(typeof(bool), "CASE", r, new SqlValue(true), new SqlValue(false)));
 			//r = Convert(new SqlFunction("CASE",
 			//	r, new SqlValue(true),
 			//	new SqlQuery.SearchCondition(new[] { new SqlQuery.Condition(true, (SqlQuery.SearchCondition)r) }), new SqlValue(false),
@@ -3594,7 +3594,7 @@ namespace BLToolkit.Data.Linq
 
 				var rex =
 					isNull ?
-						new SqlValue(null) :
+						new SqlValue(right.Expr.Type, null) :
 						sr != null ?
 							qsr.GetField(rcol.Field).GetExpressions(this)[0] :
 							GetParameter(right, ta[lcol.Field.Name].MemberInfo);
@@ -3669,7 +3669,7 @@ namespace BLToolkit.Data.Linq
 			{
 				Expression   = expr,
 				Accessor     = mapper.Compile(),
-				SqlParameter = new SqlParameter(member.Name, expr.Type, (object)null)
+				SqlParameter = new SqlParameter(expr.Type, member.Name, (object)null)
 			};
 
 			_parameters.Add(expr, p);
@@ -3781,7 +3781,7 @@ namespace BLToolkit.Data.Linq
 				{
 					Expression   = ep.Expression,
 					Accessor     = ep.Accessor,
-					SqlParameter = new SqlParameter(p.Name, ep.Expression.Type, p.Value, GetLikeEscaper(start, end))
+					SqlParameter = new SqlParameter(ep.Expression.Type, p.Name, p.Value, GetLikeEscaper(start, end))
 				};
 
 				_parameters.Add(e, ep);
