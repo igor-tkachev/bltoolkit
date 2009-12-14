@@ -140,7 +140,7 @@ namespace TypeBuilder
 			public CustomGenerateAttribute(): base(typeof(NonInheritedAttribute))
 			{
 				this["NamedArgument"] = "NamedValue";
-				this["Type"] = Type.GetType("System.Int32");
+				this["Type"]          = Type.GetType("System.Int32");
 			}
 		}
 
@@ -158,8 +158,8 @@ namespace TypeBuilder
 			NonInheritedAttribute attr = (NonInheritedAttribute)
 				Attribute.GetCustomAttribute(type, typeof(NonInheritedAttribute));
 
-			Assert.That(attr, Is.Not.Null);
-			Assert.That(attr.Type, Is.EqualTo(typeof(int)));
+			Assert.That(attr,               Is.Not.Null);
+			Assert.That(attr.Type,          Is.EqualTo(typeof(int)));
 			Assert.That(attr.NamedArgument, Is.EqualTo("NamedValue"));
 		}
 	}

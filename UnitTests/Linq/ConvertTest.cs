@@ -51,6 +51,14 @@ namespace Data.Linq
 		}
 
 		[Test]
+		public void ConvertToInt64()
+		{
+			ForEachProvider(new[] { ProviderName.MySql }, db => AreEqual(
+				from p in from t in    Types select Convert.ToInt64(t.MoneyValue) where p > 0 select p,
+				from p in from t in db.Types select Convert.ToInt64(t.MoneyValue) where p > 0 select p));
+		}
+
+		[Test]
 		public void ToInt()
 		{
 			ForEachProvider(db => AreEqual(
@@ -64,6 +72,14 @@ namespace Data.Linq
 			ForEachProvider(db => AreEqual(
 				from p in from t in    Types select (Int32)t.MoneyValue where p > 0 select p,
 				from p in from t in db.Types select (Int32)t.MoneyValue where p > 0 select p));
+		}
+
+		[Test]
+		public void ConvertToInt32()
+		{
+			ForEachProvider(db => AreEqual(
+				from p in from t in    Types select Convert.ToInt32(t.MoneyValue) where p > 0 select p,
+				from p in from t in db.Types select Convert.ToInt32(t.MoneyValue) where p > 0 select p));
 		}
 
 		[Test]
@@ -83,6 +99,14 @@ namespace Data.Linq
 		}
 
 		[Test]
+		public void ConvertToInt16()
+		{
+			ForEachProvider(db => AreEqual(
+				from p in from t in    Types select Convert.ToInt16(t.MoneyValue) where p > 0 select p,
+				from p in from t in db.Types select Convert.ToInt16(t.MoneyValue) where p > 0 select p));
+		}
+
+		[Test]
 		public void ToTinyInt()
 		{
 			ForEachProvider(db => AreEqual(
@@ -96,6 +120,14 @@ namespace Data.Linq
 			ForEachProvider(db => AreEqual(
 				from p in from t in    Types select (byte)t.MoneyValue where p > 0 select p,
 				from p in from t in db.Types select (byte)t.MoneyValue where p > 0 select p));
+		}
+
+		[Test]
+		public void ConvertToByte()
+		{
+			ForEachProvider(db => AreEqual(
+				from p in from t in    Types select Convert.ToByte(t.MoneyValue) where p > 0 select p,
+				from p in from t in db.Types select Convert.ToByte(t.MoneyValue) where p > 0 select p));
 		}
 
 		[Test]
@@ -131,6 +163,14 @@ namespace Data.Linq
 		}
 
 		[Test]
+		public void ConvertToDecimal()
+		{
+			ForEachProvider(db => AreEqual(
+				from p in from t in    Types select Convert.ToDecimal(t.MoneyValue) where p > 0 select p,
+				from p in from t in db.Types select Convert.ToDecimal(t.MoneyValue) where p > 0 select p));
+		}
+
+		[Test]
 		public void ToMoney()
 		{
 			ForEachProvider(db => AreEqual(
@@ -160,6 +200,62 @@ namespace Data.Linq
 			ForEachProvider(db => AreEqual(
 				from p in from t in    Types select (int)(Double)t.MoneyValue where p > 0 select p,
 				from p in from t in db.Types select (int)(Double)t.MoneyValue where p > 0 select p));
+		}
+
+		[Test]
+		public void ConvertToDouble()
+		{
+			ForEachProvider(db => AreEqual(
+				from p in from t in    Types select Convert.ToDouble(t.MoneyValue) where p > 0 select (int)p,
+				from p in from t in db.Types select Convert.ToDouble(t.MoneyValue) where p > 0 select (int)p));
+		}
+
+		[Test]
+		public void ToSqlReal()
+		{
+			ForEachProvider(db => AreEqual(
+				from t in    Types select (int)Sql.Convert(Sql.Real, t.MoneyValue),
+				from t in db.Types select (int)Sql.Convert(Sql.Real, t.MoneyValue)));
+		}
+
+		[Test]
+		public void ToSingle()
+		{
+			ForEachProvider(db => AreEqual(
+				from p in from t in    Types select (Single)t.MoneyValue where p > 0 select p,
+				from p in from t in db.Types select (Single)t.MoneyValue where p > 0 select p));
+		}
+
+		[Test]
+		public void ConvertToSingle()
+		{
+			ForEachProvider(db => AreEqual(
+				from p in from t in    Types select Convert.ToSingle(t.MoneyValue) where p > 0 select (int)p,
+				from p in from t in db.Types select Convert.ToSingle(t.MoneyValue) where p > 0 select (int)p));
+		}
+
+		[Test]
+		public void ToSqlDateTime()
+		{
+			ForEachProvider(db => AreEqual(
+				from t in    Types select Sql.Convert(Sql.DateTime, t.DateTimeValue),
+				from t in db.Types select Sql.Convert(Sql.DateTime, t.DateTimeValue)));
+		}
+
+		[Test]
+		public void ToDateTime()
+		{
+			ForEachProvider(db => AreEqual(
+				from p in from t in    Types select (DateTime)t.DateTimeValue where p.Day > 0 select p,
+				from p in from t in db.Types select (DateTime)t.DateTimeValue where p.Day > 0 select p));
+		}
+
+		[Test]
+		public void ConvertToDateTime()
+		{
+			ForEachProvider(db => AreEqual(
+				from p in from t in    Types select Convert.ToDateTime(t.DateTimeValue) where p.Day > 0 select p,
+				from p in from t in db.Types select Convert.ToDateTime(t.DateTimeValue) where p.Day > 0 select p));
 		}
 	}
 }

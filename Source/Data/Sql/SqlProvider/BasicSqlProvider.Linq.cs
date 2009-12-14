@@ -129,6 +129,157 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			{ MI(() => DateTime.Now.AddMilliseconds(0)), new F<D,F,D>    ((obj,p0)       => Sql.DateAdd (Sql.DateParts.Millisecond, p0, obj) ) },
 
 			{ MI(() => DateTime.Parse("")             ), new F<S,D>      (p0             => Sql.ConvertTo<DateTime>.From(p0)                 ) },
+
+			#region Convert
+
+			#region ToInt64
+
+			{ MI(() => Convert.ToInt64((Boolean)true)), new F<Boolean, Int64>(p0 => Sql.ConvertTo<Int64>.From(p0) ) },
+			{ MI(() => Convert.ToInt64((Byte)    0)  ), new F<Byte,    Int64>(p0 => Sql.ConvertTo<Int64>.From(p0) ) },
+			{ MI(() => Convert.ToInt64((Char)   '0') ), new F<Char,    Int64>(p0 => Sql.ConvertTo<Int64>.From(p0) ) },
+			{ MI(() => Convert.ToInt64(DateTime.Now) ), new F<DateTime,Int64>(p0 => Sql.ConvertTo<Int64>.From(p0) ) },
+			{ MI(() => Convert.ToInt64((Decimal) 0)  ), new F<Decimal, Int64>(p0 => Sql.ConvertTo<Int64>.From(p0) ) },
+			{ MI(() => Convert.ToInt64((Double)  0)  ), new F<Double,  Int64>(p0 => Sql.ConvertTo<Int64>.From(p0) ) },
+			{ MI(() => Convert.ToInt64((Int16)   0)  ), new F<Int16,   Int64>(p0 => Sql.ConvertTo<Int64>.From(p0) ) },
+			{ MI(() => Convert.ToInt64((Int32)   0)  ), new F<Int32,   Int64>(p0 => Sql.ConvertTo<Int64>.From(p0) ) },
+			{ MI(() => Convert.ToInt64((Int64)   0)  ), new F<Int64,   Int64>(p0 => Sql.ConvertTo<Int64>.From(p0) ) },
+			{ MI(() => Convert.ToInt64((Object)  0)  ), new F<Object,  Int64>(p0 => Sql.ConvertTo<Int64>.From(p0) ) },
+			{ MI(() => Convert.ToInt64((SByte)   0)  ), new F<SByte,   Int64>(p0 => Sql.ConvertTo<Int64>.From(p0) ) },
+			{ MI(() => Convert.ToInt64((Single)  0)  ), new F<Single,  Int64>(p0 => Sql.ConvertTo<Int64>.From(p0) ) },
+			{ MI(() => Convert.ToInt64((String) "0") ), new F<String,  Int64>(p0 => Sql.ConvertTo<Int64>.From(p0) ) },
+			{ MI(() => Convert.ToInt64((UInt16)  0)  ), new F<UInt16,  Int64>(p0 => Sql.ConvertTo<Int64>.From(p0) ) },
+			{ MI(() => Convert.ToInt64((UInt32)  0)  ), new F<UInt32,  Int64>(p0 => Sql.ConvertTo<Int64>.From(p0) ) },
+			{ MI(() => Convert.ToInt64((UInt64)  0)  ), new F<UInt64,  Int64>(p0 => Sql.ConvertTo<Int64>.From(p0) ) },
+
+			#endregion
+
+			#region ToInt32
+
+			{ MI(() => Convert.ToInt32((Boolean)true)), new F<Boolean, Int32>(p0 => Sql.ConvertTo<Int32>.From(p0) ) },
+			{ MI(() => Convert.ToInt32((Byte)    0)  ), new F<Byte,    Int32>(p0 => Sql.ConvertTo<Int32>.From(p0) ) },
+			{ MI(() => Convert.ToInt32((Char)   '0') ), new F<Char,    Int32>(p0 => Sql.ConvertTo<Int32>.From(p0) ) },
+			{ MI(() => Convert.ToInt32(DateTime.Now) ), new F<DateTime,Int32>(p0 => Sql.ConvertTo<Int32>.From(p0) ) },
+			{ MI(() => Convert.ToInt32((Decimal) 0)  ), new F<Decimal, Int32>(p0 => Sql.ConvertTo<Int32>.From(p0) ) },
+			{ MI(() => Convert.ToInt32((Double)  0)  ), new F<Double,  Int32>(p0 => Sql.ConvertTo<Int32>.From(p0) ) },
+			{ MI(() => Convert.ToInt32((Int16)   0)  ), new F<Int16,   Int32>(p0 => Sql.ConvertTo<Int32>.From(p0) ) },
+			{ MI(() => Convert.ToInt32((Int32)   0)  ), new F<Int32,   Int32>(p0 => Sql.ConvertTo<Int32>.From(p0) ) },
+			{ MI(() => Convert.ToInt32((Int64)   0)  ), new F<Int64,   Int32>(p0 => Sql.ConvertTo<Int32>.From(p0) ) },
+			{ MI(() => Convert.ToInt32((Object)  0)  ), new F<Object,  Int32>(p0 => Sql.ConvertTo<Int32>.From(p0) ) },
+			{ MI(() => Convert.ToInt32((SByte)   0)  ), new F<SByte,   Int32>(p0 => Sql.ConvertTo<Int32>.From(p0) ) },
+			{ MI(() => Convert.ToInt32((Single)  0)  ), new F<Single,  Int32>(p0 => Sql.ConvertTo<Int32>.From(p0) ) },
+			{ MI(() => Convert.ToInt32((String) "0") ), new F<String,  Int32>(p0 => Sql.ConvertTo<Int32>.From(p0) ) },
+			{ MI(() => Convert.ToInt32((UInt16)  0)  ), new F<UInt16,  Int32>(p0 => Sql.ConvertTo<Int32>.From(p0) ) },
+			{ MI(() => Convert.ToInt32((UInt32)  0)  ), new F<UInt32,  Int32>(p0 => Sql.ConvertTo<Int32>.From(p0) ) },
+			{ MI(() => Convert.ToInt32((UInt64)  0)  ), new F<UInt64,  Int32>(p0 => Sql.ConvertTo<Int32>.From(p0) ) },
+
+			#endregion
+
+			#region ToInt16
+
+			{ MI(() => Convert.ToInt16((Boolean)true)), new F<Boolean, Int16>(p0 => Sql.ConvertTo<Int16>.From(p0) ) },
+			{ MI(() => Convert.ToInt16((Byte)    0)  ), new F<Byte,    Int16>(p0 => Sql.ConvertTo<Int16>.From(p0) ) },
+			{ MI(() => Convert.ToInt16((Char)   '0') ), new F<Char,    Int16>(p0 => Sql.ConvertTo<Int16>.From(p0) ) },
+			{ MI(() => Convert.ToInt16(DateTime.Now) ), new F<DateTime,Int16>(p0 => Sql.ConvertTo<Int16>.From(p0) ) },
+			{ MI(() => Convert.ToInt16((Decimal) 0)  ), new F<Decimal, Int16>(p0 => Sql.ConvertTo<Int16>.From(p0) ) },
+			{ MI(() => Convert.ToInt16((Double)  0)  ), new F<Double,  Int16>(p0 => Sql.ConvertTo<Int16>.From(p0) ) },
+			{ MI(() => Convert.ToInt16((Int16)   0)  ), new F<Int16,   Int16>(p0 => Sql.ConvertTo<Int16>.From(p0) ) },
+			{ MI(() => Convert.ToInt16((Int32)   0)  ), new F<Int32,   Int16>(p0 => Sql.ConvertTo<Int16>.From(p0) ) },
+			{ MI(() => Convert.ToInt16((Int64)   0)  ), new F<Int64,   Int16>(p0 => Sql.ConvertTo<Int16>.From(p0) ) },
+			{ MI(() => Convert.ToInt16((Object)  0)  ), new F<Object,  Int16>(p0 => Sql.ConvertTo<Int16>.From(p0) ) },
+			{ MI(() => Convert.ToInt16((SByte)   0)  ), new F<SByte,   Int16>(p0 => Sql.ConvertTo<Int16>.From(p0) ) },
+			{ MI(() => Convert.ToInt16((Single)  0)  ), new F<Single,  Int16>(p0 => Sql.ConvertTo<Int16>.From(p0) ) },
+			{ MI(() => Convert.ToInt16((String) "0") ), new F<String,  Int16>(p0 => Sql.ConvertTo<Int16>.From(p0) ) },
+			{ MI(() => Convert.ToInt16((UInt16)  0)  ), new F<UInt16,  Int16>(p0 => Sql.ConvertTo<Int16>.From(p0) ) },
+			{ MI(() => Convert.ToInt16((UInt32)  0)  ), new F<UInt32,  Int16>(p0 => Sql.ConvertTo<Int16>.From(p0) ) },
+			{ MI(() => Convert.ToInt16((UInt64)  0)  ), new F<UInt64,  Int16>(p0 => Sql.ConvertTo<Int16>.From(p0) ) },
+
+			#endregion
+
+			#region ToByte
+
+			{ MI(() => Convert.ToByte((Boolean)true)), new F<Boolean, Byte>(p0 => Sql.ConvertTo<Byte>.From(p0) ) },
+			{ MI(() => Convert.ToByte((Byte)    0)  ), new F<Byte,    Byte>(p0 => Sql.ConvertTo<Byte>.From(p0) ) },
+			{ MI(() => Convert.ToByte((Char)   '0') ), new F<Char,    Byte>(p0 => Sql.ConvertTo<Byte>.From(p0) ) },
+			{ MI(() => Convert.ToByte(DateTime.Now) ), new F<DateTime,Byte>(p0 => Sql.ConvertTo<Byte>.From(p0) ) },
+			{ MI(() => Convert.ToByte((Decimal) 0)  ), new F<Decimal, Byte>(p0 => Sql.ConvertTo<Byte>.From(p0) ) },
+			{ MI(() => Convert.ToByte((Double)  0)  ), new F<Double,  Byte>(p0 => Sql.ConvertTo<Byte>.From(p0) ) },
+			{ MI(() => Convert.ToByte((Int16)   0)  ), new F<Int16,   Byte>(p0 => Sql.ConvertTo<Byte>.From(p0) ) },
+			{ MI(() => Convert.ToByte((Int32)   0)  ), new F<Int32,   Byte>(p0 => Sql.ConvertTo<Byte>.From(p0) ) },
+			{ MI(() => Convert.ToByte((Int64)   0)  ), new F<Int64,   Byte>(p0 => Sql.ConvertTo<Byte>.From(p0) ) },
+			{ MI(() => Convert.ToByte((Object)  0)  ), new F<Object,  Byte>(p0 => Sql.ConvertTo<Byte>.From(p0) ) },
+			{ MI(() => Convert.ToByte((SByte)   0)  ), new F<SByte,   Byte>(p0 => Sql.ConvertTo<Byte>.From(p0) ) },
+			{ MI(() => Convert.ToByte((Single)  0)  ), new F<Single,  Byte>(p0 => Sql.ConvertTo<Byte>.From(p0) ) },
+			{ MI(() => Convert.ToByte((String) "0") ), new F<String,  Byte>(p0 => Sql.ConvertTo<Byte>.From(p0) ) },
+			{ MI(() => Convert.ToByte((UInt16)  0)  ), new F<UInt16,  Byte>(p0 => Sql.ConvertTo<Byte>.From(p0) ) },
+			{ MI(() => Convert.ToByte((UInt32)  0)  ), new F<UInt32,  Byte>(p0 => Sql.ConvertTo<Byte>.From(p0) ) },
+			{ MI(() => Convert.ToByte((UInt64)  0)  ), new F<UInt64,  Byte>(p0 => Sql.ConvertTo<Byte>.From(p0) ) },
+
+			#endregion
+
+			#region ToDecimal
+
+			{ MI(() => Convert.ToDecimal((Boolean)true)), new F<Boolean, Decimal>(p0 => Sql.ConvertTo<Decimal>.From(p0) ) },
+			{ MI(() => Convert.ToDecimal((Byte)    0)  ), new F<Byte,    Decimal>(p0 => Sql.ConvertTo<Decimal>.From(p0) ) },
+			{ MI(() => Convert.ToDecimal((Char)   '0') ), new F<Char,    Decimal>(p0 => Sql.ConvertTo<Decimal>.From(p0) ) },
+			{ MI(() => Convert.ToDecimal(DateTime.Now) ), new F<DateTime,Decimal>(p0 => Sql.ConvertTo<Decimal>.From(p0) ) },
+			{ MI(() => Convert.ToDecimal((Decimal) 0)  ), new F<Decimal, Decimal>(p0 => Sql.ConvertTo<Decimal>.From(p0) ) },
+			{ MI(() => Convert.ToDecimal((Double)  0)  ), new F<Double,  Decimal>(p0 => Sql.ConvertTo<Decimal>.From(p0) ) },
+			{ MI(() => Convert.ToDecimal((Int16)   0)  ), new F<Int16,   Decimal>(p0 => Sql.ConvertTo<Decimal>.From(p0) ) },
+			{ MI(() => Convert.ToDecimal((Int32)   0)  ), new F<Int32,   Decimal>(p0 => Sql.ConvertTo<Decimal>.From(p0) ) },
+			{ MI(() => Convert.ToDecimal((Int64)   0)  ), new F<Int64,   Decimal>(p0 => Sql.ConvertTo<Decimal>.From(p0) ) },
+			{ MI(() => Convert.ToDecimal((Object)  0)  ), new F<Object,  Decimal>(p0 => Sql.ConvertTo<Decimal>.From(p0) ) },
+			{ MI(() => Convert.ToDecimal((SByte)   0)  ), new F<SByte,   Decimal>(p0 => Sql.ConvertTo<Decimal>.From(p0) ) },
+			{ MI(() => Convert.ToDecimal((Single)  0)  ), new F<Single,  Decimal>(p0 => Sql.ConvertTo<Decimal>.From(p0) ) },
+			{ MI(() => Convert.ToDecimal((String) "0") ), new F<String,  Decimal>(p0 => Sql.ConvertTo<Decimal>.From(p0) ) },
+			{ MI(() => Convert.ToDecimal((UInt16)  0)  ), new F<UInt16,  Decimal>(p0 => Sql.ConvertTo<Decimal>.From(p0) ) },
+			{ MI(() => Convert.ToDecimal((UInt32)  0)  ), new F<UInt32,  Decimal>(p0 => Sql.ConvertTo<Decimal>.From(p0) ) },
+			{ MI(() => Convert.ToDecimal((UInt64)  0)  ), new F<UInt64,  Decimal>(p0 => Sql.ConvertTo<Decimal>.From(p0) ) },
+
+			#endregion
+
+			#region ToDouble
+
+			{ MI(() => Convert.ToDouble((Boolean)true)), new F<Boolean, Double>(p0 => Sql.ConvertTo<Double>.From(p0) ) },
+			{ MI(() => Convert.ToDouble((Byte)    0)  ), new F<Byte,    Double>(p0 => Sql.ConvertTo<Double>.From(p0) ) },
+			{ MI(() => Convert.ToDouble((Char)   '0') ), new F<Char,    Double>(p0 => Sql.ConvertTo<Double>.From(p0) ) },
+			{ MI(() => Convert.ToDouble(DateTime.Now) ), new F<DateTime,Double>(p0 => Sql.ConvertTo<Double>.From(p0) ) },
+			{ MI(() => Convert.ToDouble((Decimal) 0)  ), new F<Decimal, Double>(p0 => Sql.ConvertTo<Double>.From(p0) ) },
+			{ MI(() => Convert.ToDouble((Double)  0)  ), new F<Double,  Double>(p0 => Sql.ConvertTo<Double>.From(p0) ) },
+			{ MI(() => Convert.ToDouble((Int16)   0)  ), new F<Int16,   Double>(p0 => Sql.ConvertTo<Double>.From(p0) ) },
+			{ MI(() => Convert.ToDouble((Int32)   0)  ), new F<Int32,   Double>(p0 => Sql.ConvertTo<Double>.From(p0) ) },
+			{ MI(() => Convert.ToDouble((Int64)   0)  ), new F<Int64,   Double>(p0 => Sql.ConvertTo<Double>.From(p0) ) },
+			{ MI(() => Convert.ToDouble((Object)  0)  ), new F<Object,  Double>(p0 => Sql.ConvertTo<Double>.From(p0) ) },
+			{ MI(() => Convert.ToDouble((SByte)   0)  ), new F<SByte,   Double>(p0 => Sql.ConvertTo<Double>.From(p0) ) },
+			{ MI(() => Convert.ToDouble((Single)  0)  ), new F<Single,  Double>(p0 => Sql.ConvertTo<Double>.From(p0) ) },
+			{ MI(() => Convert.ToDouble((String) "0") ), new F<String,  Double>(p0 => Sql.ConvertTo<Double>.From(p0) ) },
+			{ MI(() => Convert.ToDouble((UInt16)  0)  ), new F<UInt16,  Double>(p0 => Sql.ConvertTo<Double>.From(p0) ) },
+			{ MI(() => Convert.ToDouble((UInt32)  0)  ), new F<UInt32,  Double>(p0 => Sql.ConvertTo<Double>.From(p0) ) },
+			{ MI(() => Convert.ToDouble((UInt64)  0)  ), new F<UInt64,  Double>(p0 => Sql.ConvertTo<Double>.From(p0) ) },
+
+			#endregion
+
+			#region ToSingle
+
+			{ MI(() => Convert.ToSingle((Boolean)true)), new F<Boolean, Single>(p0 => Sql.ConvertTo<Single>.From(p0) ) },
+			{ MI(() => Convert.ToSingle((Byte)    0)  ), new F<Byte,    Single>(p0 => Sql.ConvertTo<Single>.From(p0) ) },
+			{ MI(() => Convert.ToSingle((Char)   '0') ), new F<Char,    Single>(p0 => Sql.ConvertTo<Single>.From(p0) ) },
+			{ MI(() => Convert.ToSingle(DateTime.Now) ), new F<DateTime,Single>(p0 => Sql.ConvertTo<Single>.From(p0) ) },
+			{ MI(() => Convert.ToSingle((Decimal) 0)  ), new F<Decimal, Single>(p0 => Sql.ConvertTo<Single>.From(p0) ) },
+			{ MI(() => Convert.ToSingle((Double)  0)  ), new F<Double,  Single>(p0 => Sql.ConvertTo<Single>.From(p0) ) },
+			{ MI(() => Convert.ToSingle((Int16)   0)  ), new F<Int16,   Single>(p0 => Sql.ConvertTo<Single>.From(p0) ) },
+			{ MI(() => Convert.ToSingle((Int32)   0)  ), new F<Int32,   Single>(p0 => Sql.ConvertTo<Single>.From(p0) ) },
+			{ MI(() => Convert.ToSingle((Int64)   0)  ), new F<Int64,   Single>(p0 => Sql.ConvertTo<Single>.From(p0) ) },
+			{ MI(() => Convert.ToSingle((Object)  0)  ), new F<Object,  Single>(p0 => Sql.ConvertTo<Single>.From(p0) ) },
+			{ MI(() => Convert.ToSingle((SByte)   0)  ), new F<SByte,   Single>(p0 => Sql.ConvertTo<Single>.From(p0) ) },
+			{ MI(() => Convert.ToSingle((Single)  0)  ), new F<Single,  Single>(p0 => Sql.ConvertTo<Single>.From(p0) ) },
+			{ MI(() => Convert.ToSingle((String) "0") ), new F<String,  Single>(p0 => Sql.ConvertTo<Single>.From(p0) ) },
+			{ MI(() => Convert.ToSingle((UInt16)  0)  ), new F<UInt16,  Single>(p0 => Sql.ConvertTo<Single>.From(p0) ) },
+			{ MI(() => Convert.ToSingle((UInt32)  0)  ), new F<UInt32,  Single>(p0 => Sql.ConvertTo<Single>.From(p0) ) },
+			{ MI(() => Convert.ToSingle((UInt64)  0)  ), new F<UInt64,  Single>(p0 => Sql.ConvertTo<Single>.From(p0) ) },
+
+			#endregion
+
+			#endregion
 		};
 
 		[SqlFunction]
