@@ -50,7 +50,16 @@ namespace BLToolkit.Data.Sql.SqlProvider
 				switch (func.Name)
 				{
 					case "Space"   : return new SqlFunction  (func.SystemType, "PadR", new SqlValue(" "), func.Parameters[0]);
-					case "Convert" : return new SqlExpression(func.SystemType, "Cast({0} as {1})", Precedence.Primary, func.Parameters[1], func.Parameters[0]);
+					case "Convert" :
+						{
+							switch (Type.GetTypeCode(func.SystemType))
+							{
+								//case TypeCode.String   : return new SqlFunction(func.SystemType, "To_Char", func.Parameters[1]);
+								case TypeCode.DateTime : return new SqlFunction(func.SystemType, "DateTime", func.Parameters[1]);
+							}
+
+							return new SqlExpression(func.SystemType, "Cast({0} as {1})", Precedence.Primary, func.Parameters[1], func.Parameters[0]);
+						}
 				}
 			}
 			else if (expr is SqlExpression)

@@ -90,6 +90,8 @@ namespace BLToolkit.Data.Linq
 		[SqlProperty(              "Real",           ServerSideOnly=true)] public static Single         Real                              { get { return 0; } }
 
 		//[SqlProperty("MySql",      "Decimal(29,10)", ServerSideOnly=true)]
+		[SqlProperty("PostgreSQL", "TimeStamp",      ServerSideOnly=true)]
+		[SqlProperty("Firebird",   "TimeStamp",      ServerSideOnly=true)]
 		[SqlProperty(              "DateTime",       ServerSideOnly=true)] public static DateTime       DateTime                          { get { return DateTime.Now; } }
 
 		#endregion

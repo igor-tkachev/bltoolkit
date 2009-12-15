@@ -18,7 +18,6 @@ namespace BLToolkit.Data.Sql
 			_values     = values;
 		}
 
-		[Obsolete]
 		public SqlExpression(string expr, int precedence, params ISqlExpression[] values)
 			: this(null, expr, precedence, values)
 		{
@@ -29,7 +28,6 @@ namespace BLToolkit.Data.Sql
 		{
 		}
 
-		[Obsolete]
 		public SqlExpression(string expr, params ISqlExpression[] values)
 			: this(null, expr, Sql.Precedence.Unknown, values)
 		{

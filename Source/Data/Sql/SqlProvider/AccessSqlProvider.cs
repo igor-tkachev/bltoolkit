@@ -204,7 +204,15 @@ namespace BLToolkit.Data.Sql.SqlProvider
 							new SqlFunction(func.SystemType, "InStr", new SqlValue(1),    func.Parameters[1], func.Parameters[0], new SqlValue(1)):
 							new SqlFunction(func.SystemType, "InStr", func.Parameters[2], func.Parameters[1], func.Parameters[0], new SqlValue(1));
 
-					case "Convert"   : return func.Parameters[1];
+					case "Convert"   : 
+						{
+							switch (Type.GetTypeCode(func.SystemType))
+							{
+								case TypeCode.DateTime : return new SqlFunction(func.SystemType, "DateValue", func.Parameters[1]);
+							}
+
+							return func.Parameters[1];
+						}
 
 						/*
 					case "Convert"   :

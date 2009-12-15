@@ -2492,7 +2492,7 @@ namespace BLToolkit.Data.Linq
 							var e  = parseInfo.Expr as BinaryExpression;
 							var l  = ParseExpression(pi.Create(e.Left,  pi.Property(Binary.Left)),  queries);
 							var r  = ParseExpression(pi.Create(e.Right, pi.Property(Binary.Right)), queries);
-							var t  = e.Left.Type ?? e.Right.Type;
+							var t  = e.Type;
 
 							switch (parseInfo.NodeType)
 							{

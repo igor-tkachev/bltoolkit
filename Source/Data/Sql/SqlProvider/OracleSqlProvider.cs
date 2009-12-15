@@ -157,7 +157,17 @@ namespace BLToolkit.Data.Sql.SqlProvider
 				switch (func.Name)
 				{
 					case "Coalesce"       : return new SqlFunction  (func.SystemType, "Nvl",    func.Parameters);
-					case "Convert"        : return new SqlExpression(func.SystemType, "Cast({0} as {1})", Precedence.Primary, func.Parameters[1], func.Parameters[0]);
+					case "Convert"        :
+						{
+							switch (Type.GetTypeCode(func.SystemType))
+							{
+								case TypeCode.DateTime :
+									return new SqlFunction(func.SystemType, "To_Timestamp", func.Parameters[1], new SqlValue("YYYY-MM-DD HH24-MI-SS"));
+							}
+
+							return new SqlExpression(func.SystemType, "Cast({0} as {1})", Precedence.Primary, func.Parameters[1], func.Parameters[0]);
+						}
+
 					case "CharIndex"      :
 						return func.Parameters.Length == 2?
 							new SqlFunction(func.SystemType, "InStr", func.Parameters[1], func.Parameters[0]):

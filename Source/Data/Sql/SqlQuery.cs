@@ -1545,7 +1545,6 @@ namespace BLToolkit.Data.Sql
 				return this;
 			}
 
-			[Obsolete]
 			public SelectClause Expr(string expr, params ISqlExpression[] values)
 			{
 				AddOrGetColumn(new Column(SqlQuery, new SqlExpression(null, expr, values)));
@@ -1558,7 +1557,6 @@ namespace BLToolkit.Data.Sql
 				return this;
 			}
 
-			[Obsolete]
 			public SelectClause Expr(string expr, int priority, params ISqlExpression[] values)
 			{
 				AddOrGetColumn(new Column(SqlQuery, new SqlExpression(null, expr, priority, values)));
@@ -1571,7 +1569,6 @@ namespace BLToolkit.Data.Sql
 				return this;
 			}
 
-			[Obsolete]
 			public SelectClause Expr(string alias, string expr, int priority, params ISqlExpression[] values)
 			{
 				AddOrGetColumn(new Column(SqlQuery, new SqlExpression(null, expr, priority, values)));

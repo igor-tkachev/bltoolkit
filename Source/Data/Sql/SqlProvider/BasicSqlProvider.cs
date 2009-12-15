@@ -1536,7 +1536,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 						if (be.Expr1.SystemType == typeof(string) && be.Expr2.SystemType != typeof(string))
 						{
-							var len = be.Expr2.SystemType == null ? 100 : SqlDataType.GetMaxDisplaySize(SqlDataType.GetDataType(be.Expr2.SystemType).DbType);
+							int len = be.Expr2.SystemType == null ? 100 : SqlDataType.GetMaxDisplaySize(SqlDataType.GetDataType(be.Expr2.SystemType).DbType);
 
 							if (len <= 0)
 								len = 100;
@@ -1551,7 +1551,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 						if (be.Expr1.SystemType != typeof(string) && be.Expr2.SystemType == typeof(string))
 						{
-							var len = be.Expr1.SystemType == null ? 100 : SqlDataType.GetMaxDisplaySize(SqlDataType.GetDataType(be.Expr1.SystemType).DbType);
+							int len = be.Expr1.SystemType == null ? 100 : SqlDataType.GetMaxDisplaySize(SqlDataType.GetDataType(be.Expr1.SystemType).DbType);
 
 							if (len <= 0)
 								len = 100;

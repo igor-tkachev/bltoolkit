@@ -81,7 +81,17 @@ namespace BLToolkit.Data.Sql.SqlProvider
 				switch (func.Name)
 				{
 					case "Coalesce" : return new SqlFunction(func.SystemType, "Nvl", func.Parameters);
-					case "Convert"  : return new SqlExpression(func.SystemType, "Cast({0} as {1})", Precedence.Primary, func.Parameters[1], func.Parameters[0]);
+					case "Convert"  :
+						{
+							switch (Type.GetTypeCode(func.SystemType))
+							{
+								case TypeCode.String   : return new SqlFunction(func.SystemType, "To_Char", func.Parameters[1]);
+								case TypeCode.DateTime : return new SqlFunction(func.SystemType, "To_Date", func.Parameters[1]);
+							}
+
+							return new SqlExpression(func.SystemType, "Cast({0} as {1})", Precedence.Primary, func.Parameters[1], func.Parameters[0]);
+						}
+
 					case "Quarter"  : return Inc(Div(Dec(new SqlFunction(func.SystemType, "Month", func.Parameters)), 3));
 					case "WeekDay"  : return Inc(new SqlFunction(func.SystemType, "weekDay", func.Parameters));
 					case "DayOfYear":

@@ -238,24 +238,24 @@ namespace Data.Linq
 		public void ToSqlDateTime()
 		{
 			ForEachProvider(db => AreEqual(
-				from t in    Types select Sql.Convert(Sql.DateTime, t.DateTimeValue.Year + "-01-01"),
-				from t in db.Types select Sql.Convert(Sql.DateTime, t.DateTimeValue.Year + "-01-01")));
+				from t in    Types select Sql.Convert(Sql.DateTime, t.DateTimeValue.Year + "-01-01 00:20:00"),
+				from t in db.Types select Sql.Convert(Sql.DateTime, t.DateTimeValue.Year + "-01-01 00:20:00")));
 		}
 
 		[Test]
 		public void ToDateTime()
 		{
 			ForEachProvider(db => AreEqual(
-				from p in from t in    Types select DateTime.Parse(t.DateTimeValue.Year + "-01-01") where p.Day > 0 select p,
-				from p in from t in db.Types select DateTime.Parse(t.DateTimeValue.Year + "-01-01") where p.Day > 0 select p));
+				from p in from t in    Types select DateTime.Parse(t.DateTimeValue.Year + "-01-01 00:00:00") where p.Day > 0 select p,
+				from p in from t in db.Types select DateTime.Parse(t.DateTimeValue.Year + "-01-01 00:00:00") where p.Day > 0 select p));
 		}
 
 		[Test]
 		public void ConvertToDateTime()
 		{
 			ForEachProvider(db => AreEqual(
-				from p in from t in    Types select Convert.ToDateTime(t.DateTimeValue.Year + "-01-01") where p.Day > 0 select p,
-				from p in from t in db.Types select Convert.ToDateTime(t.DateTimeValue.Year + "-01-01") where p.Day > 0 select p));
+				from p in from t in    Types select Convert.ToDateTime(t.DateTimeValue.Year + "-01-01 00:00:00") where p.Day > 0 select p,
+				from p in from t in db.Types select Convert.ToDateTime(t.DateTimeValue.Year + "-01-01 00:00:00") where p.Day > 0 select p));
 		}
 	}
 }

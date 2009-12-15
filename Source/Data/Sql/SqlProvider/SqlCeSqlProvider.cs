@@ -186,6 +186,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			switch (type.DbType)
 			{
 				case SqlDbType.SmallMoney : sb.Append("Decimal(10,4)"); break;
+				case SqlDbType.VarChar    : sb.Append("NVarChar");      break;
 				default: base.BuildDataType(sb, type); break;
 			}
 		}

@@ -108,5 +108,50 @@ namespace Aspects
 			CustomCacheAspect.MethodCache.Clear();
 			CustomTestClass.Value = 4; Assert.AreEqual(4, t.Test(2, 1));
 		}
+
+		public abstract class GenericClass<T>
+			where T : new()
+		{
+			[Cache]
+			public virtual T GetT(int i)
+			{
+				return new T();
+			}
+		}
+
+		[Test]
+		public void GenericClassTest()
+		{
+			TypeAccessor<GenericClass<int>>.     CreateInstance().GetT(0);
+			TypeAccessor<GenericClass<DateTime>>.CreateInstance().GetT(0);
+		}
+
+		public abstract class TestClass1
+		{
+			[Cache]
+			public virtual T Get<T>()
+				where T : new()
+			{
+				return new T();
+			}
+
+			[Cache]
+			public virtual T Get<T>(int i)
+			{
+				if (typeof(T) == typeof(int)) return (T)(object)10;
+
+				return (T)(object)new DateTime();
+			}
+		}
+
+		//[Test]
+		public void GenericMethodTest()
+		{
+			var i = TypeAccessor<TestClass1>.CreateInstance().Get<int>     ();
+			var d = TypeAccessor<TestClass1>.CreateInstance().Get<DateTime>();
+
+			i = TypeAccessor<TestClass1>.CreateInstance().Get<int>     (0);
+			d = TypeAccessor<TestClass1>.CreateInstance().Get<DateTime>(0);
+		}
 	}
 }

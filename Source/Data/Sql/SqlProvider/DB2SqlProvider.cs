@@ -101,6 +101,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 					case "SmallMoney" : return new SqlFunction(func.SystemType, "Decimal",  func.Parameters[0], new SqlValue(10), new SqlValue(4));
 					case "Millisecond": return Div(new SqlFunction(func.SystemType, "Microsecond", func.Parameters), 1000);
 					case "DateTime"   : return new SqlFunction(func.SystemType, "TimeStamp", func.Parameters);
+					case "VarChar"    : return new SqlFunction(typeof(string), "RTrim", new SqlFunction(typeof(string), "Char", func.Parameters[0]));
 				}
 			}
 
@@ -108,10 +109,18 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		}
 
 #if FW3
+		// DB2
+		//
+		[SqlFunction]
+		static string Varchar(object obj, int size)
+		{
+			return obj.ToString();
+		}
+
 		protected override Dictionary<MemberInfo,BaseExpressor> GetExpressors() { return _members; }
 		static    readonly Dictionary<MemberInfo,BaseExpressor> _members = new Dictionary<MemberInfo,BaseExpressor>
 		{
-			{ MI(() => Sql.Space   (0)        ), new F<I,S>      ( p0           => VarChar(Replicate(" ", p0), 1000)) },
+			{ MI(() => Sql.Space   (0)        ), new F<I,S>      ( p0           => Varchar(Replicate(" ", p0), 1000)) },
 			{ MI(() => Sql.Stuff   ("",0,0,"")), new F<S,I,I,S,S>((p0,p1,p2,p3) => AltStuff(p0, p1, p2, p3)) },
 			{ MI(() => Sql.PadRight("",0,' ') ), new F<S,I,C,S>  ((p0,p1,p2)    => p0.Length > p1 ? p0 : p0 + VarChar(Replicate(p2, p1 - p0.Length), 1000)) },
 			{ MI(() => Sql.PadLeft ("",0,' ') ), new F<S,I,C,S>  ((p0,p1,p2)    => p0.Length > p1 ? p0 : VarChar(Replicate(p2, p1 - p0.Length), 1000) + p0) },
