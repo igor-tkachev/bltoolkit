@@ -15,9 +15,9 @@ namespace BLToolkit.Data.Sql.SqlProvider
 	using I = Int32;
 #endif
 
-	public class MSSqlSqlProvider : BasicSqlProvider
+	public abstract class MsSqlSqlProvider : BasicSqlProvider
 	{
-		public MSSqlSqlProvider(DataProviderBase dataProvider) : base(dataProvider)
+		public MsSqlSqlProvider(DataProviderBase dataProvider) : base(dataProvider)
 		{
 		}
 

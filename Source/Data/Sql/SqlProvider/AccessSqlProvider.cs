@@ -208,7 +208,8 @@ namespace BLToolkit.Data.Sql.SqlProvider
 						{
 							switch (Type.GetTypeCode(func.SystemType))
 							{
-								case TypeCode.DateTime : return new SqlFunction(func.SystemType, "DateValue", func.Parameters[1]);
+								case TypeCode.String   : return new SqlFunction(func.SystemType, "CStr",  func.Parameters[1]);
+								case TypeCode.DateTime : return new SqlFunction(func.SystemType, "CDate", func.Parameters[1]);
 							}
 
 							return func.Parameters[1];

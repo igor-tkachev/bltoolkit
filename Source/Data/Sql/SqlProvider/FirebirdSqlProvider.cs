@@ -110,11 +110,13 @@ namespace BLToolkit.Data.Sql.SqlProvider
 					else
 						base.BuildDataType(sb, type);
 					break;
-				case SqlDbType.TinyInt    : sb.Append("SmallInt");        break;
-				case SqlDbType.Money      : sb.Append("Decimal(18,4)");   break;
-				case SqlDbType.SmallMoney : sb.Append("Decimal(10,4)");   break;
-				case SqlDbType.DateTime   : sb.Append("TimeStamp");       break;
-				default                   : base.BuildDataType(sb, type); break;
+				case SqlDbType.TinyInt       : sb.Append("SmallInt");        break;
+				case SqlDbType.Money         : sb.Append("Decimal(18,4)");   break;
+				case SqlDbType.SmallMoney    : sb.Append("Decimal(10,4)");   break;
+				case SqlDbType.SmallDateTime :
+				case SqlDbType.DateTime      :
+				case SqlDbType.DateTime2     : sb.Append("TimeStamp");       break;
+				default                      : base.BuildDataType(sb, type); break;
 			}
 		}
 

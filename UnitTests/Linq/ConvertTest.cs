@@ -243,6 +243,30 @@ namespace Data.Linq
 		}
 
 		[Test]
+		public void ToSqlDateTime2()
+		{
+			ForEachProvider(db => AreEqual(
+				from t in    Types select Sql.Convert(Sql.DateTime2, t.DateTimeValue.Year + "-01-01 00:20:00"),
+				from t in db.Types select Sql.Convert(Sql.DateTime2, t.DateTimeValue.Year + "-01-01 00:20:00")));
+		}
+
+		[Test]
+		public void ToSqlSmallDateTime()
+		{
+			ForEachProvider(db => AreEqual(
+				from t in    Types select Sql.Convert(Sql.SmallDateTime, t.DateTimeValue.Year + "-01-01 00:20:00"),
+				from t in db.Types select Sql.Convert(Sql.SmallDateTime, t.DateTimeValue.Year + "-01-01 00:20:00")));
+		}
+
+		[Test]
+		public void ToSqlDate()
+		{
+			ForEachProvider(db => AreEqual(
+				from t in    Types select Sql.Convert(Sql.Date, t.DateTimeValue.Year + "-01-01"),
+				from t in db.Types select Sql.Convert(Sql.Date, t.DateTimeValue.Year + "-01-01")));
+		}
+
+		[Test]
 		public void ToDateTime()
 		{
 			ForEachProvider(db => AreEqual(

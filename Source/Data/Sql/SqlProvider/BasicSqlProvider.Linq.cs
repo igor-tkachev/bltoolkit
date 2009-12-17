@@ -120,6 +120,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			{ MI(() => DateTime.Now.Minute            ), new F<D,I>      (obj            => Sql.DatePart(Sql.DateParts.Minute,      obj)     ) },
 			{ MI(() => DateTime.Now.Second            ), new F<D,I>      (obj            => Sql.DatePart(Sql.DateParts.Second,      obj)     ) },
 			{ MI(() => DateTime.Now.Millisecond       ), new F<D,I>      (obj            => Sql.DatePart(Sql.DateParts.Millisecond, obj)     ) },
+			{ MI(() => DateTime.Now.Date              ), new F<D,D>      (obj            => Sql.Convert2(Sql.Date,                  obj)     ) },
 			{ MI(() => DateTime.Now.AddYears       (0)), new F<D,I,D>    ((obj,p0)       => Sql.DateAdd (Sql.DateParts.Year,        p0, obj) ) },
 			{ MI(() => DateTime.Now.AddMonths      (0)), new F<D,I,D>    ((obj,p0)       => Sql.DateAdd (Sql.DateParts.Month,       p0, obj) ) },
 			{ MI(() => DateTime.Now.AddDays        (0)), new F<D,F,D>    ((obj,p0)       => Sql.DateAdd (Sql.DateParts.Day,         p0, obj) ) },
@@ -293,6 +294,27 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			{ MI(() => Convert.ToSingle((UInt16)  0)  ), new F<UInt16,  Single>(p0 => Sql.ConvertTo<Single>.From(p0) ) },
 			{ MI(() => Convert.ToSingle((UInt32)  0)  ), new F<UInt32,  Single>(p0 => Sql.ConvertTo<Single>.From(p0) ) },
 			{ MI(() => Convert.ToSingle((UInt64)  0)  ), new F<UInt64,  Single>(p0 => Sql.ConvertTo<Single>.From(p0) ) },
+
+			#endregion
+
+			#region ToDateTime
+
+			{ MI(() => Convert.ToDateTime((Boolean)true)), new F<Boolean, DateTime>(p0 => Sql.ConvertTo<DateTime>.From(p0) ) },
+			{ MI(() => Convert.ToDateTime((Byte)    0)  ), new F<Byte,    DateTime>(p0 => Sql.ConvertTo<DateTime>.From(p0) ) },
+			{ MI(() => Convert.ToDateTime((Char)   '0') ), new F<Char,    DateTime>(p0 => Sql.ConvertTo<DateTime>.From(p0) ) },
+			{ MI(() => Convert.ToDateTime(DateTime.Now) ), new F<DateTime,DateTime>(p0 => Sql.ConvertTo<DateTime>.From(p0) ) },
+			{ MI(() => Convert.ToDateTime((Decimal) 0)  ), new F<Decimal, DateTime>(p0 => Sql.ConvertTo<DateTime>.From(p0) ) },
+			{ MI(() => Convert.ToDateTime((Double)  0)  ), new F<Double,  DateTime>(p0 => Sql.ConvertTo<DateTime>.From(p0) ) },
+			{ MI(() => Convert.ToDateTime((Int16)   0)  ), new F<Int16,   DateTime>(p0 => Sql.ConvertTo<DateTime>.From(p0) ) },
+			{ MI(() => Convert.ToDateTime((Int32)   0)  ), new F<Int32,   DateTime>(p0 => Sql.ConvertTo<DateTime>.From(p0) ) },
+			{ MI(() => Convert.ToDateTime((Int64)   0)  ), new F<Int64,   DateTime>(p0 => Sql.ConvertTo<DateTime>.From(p0) ) },
+			{ MI(() => Convert.ToDateTime((Object)  0)  ), new F<Object,  DateTime>(p0 => Sql.ConvertTo<DateTime>.From(p0) ) },
+			{ MI(() => Convert.ToDateTime((SByte)   0)  ), new F<SByte,   DateTime>(p0 => Sql.ConvertTo<DateTime>.From(p0) ) },
+			{ MI(() => Convert.ToDateTime((Single)  0)  ), new F<Single,  DateTime>(p0 => Sql.ConvertTo<DateTime>.From(p0) ) },
+			{ MI(() => Convert.ToDateTime((String) "0") ), new F<String,  DateTime>(p0 => Sql.ConvertTo<DateTime>.From(p0) ) },
+			{ MI(() => Convert.ToDateTime((UInt16)  0)  ), new F<UInt16,  DateTime>(p0 => Sql.ConvertTo<DateTime>.From(p0) ) },
+			{ MI(() => Convert.ToDateTime((UInt32)  0)  ), new F<UInt32,  DateTime>(p0 => Sql.ConvertTo<DateTime>.From(p0) ) },
+			{ MI(() => Convert.ToDateTime((UInt64)  0)  ), new F<UInt64,  DateTime>(p0 => Sql.ConvertTo<DateTime>.From(p0) ) },
 
 			#endregion
 

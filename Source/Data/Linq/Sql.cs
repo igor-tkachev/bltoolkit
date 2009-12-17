@@ -31,6 +31,13 @@ namespace BLToolkit.Data.Linq
 		}
 
 		[CLSCompliant(false)]
+		[SqlFunction("Convert", 0, 1)]
+		public static TTo Convert2<TTo,TFrom>(TTo to, TFrom from)
+		{
+			return Common.ConvertTo<TTo>.From(from);
+		}
+
+		[CLSCompliant(false)]
 		[SqlFunction("Convert", 1, 0)]
 		public static TTo Convert<TTo,TFrom>(TFrom obj)
 		{
@@ -89,10 +96,28 @@ namespace BLToolkit.Data.Linq
 		[SqlProperty("MySql",      "Decimal(29,10)", ServerSideOnly=true)]
 		[SqlProperty(              "Real",           ServerSideOnly=true)] public static Single         Real                              { get { return 0; } }
 
-		//[SqlProperty("MySql",      "Decimal(29,10)", ServerSideOnly=true)]
 		[SqlProperty("PostgreSQL", "TimeStamp",      ServerSideOnly=true)]
 		[SqlProperty("Firebird",   "TimeStamp",      ServerSideOnly=true)]
 		[SqlProperty(              "DateTime",       ServerSideOnly=true)] public static DateTime       DateTime                          { get { return DateTime.Now; } }
+
+		[SqlProperty("MsSql2005",  "DateTime",       ServerSideOnly=true)]
+		[SqlProperty("PostgreSQL", "TimeStamp",      ServerSideOnly=true)]
+		[SqlProperty("Firebird",   "TimeStamp",      ServerSideOnly=true)]
+		[SqlProperty("MySql",      "DateTime",       ServerSideOnly=true)]
+		[SqlProperty("SqlCe",      "DateTime",       ServerSideOnly=true)]
+		[SqlProperty("Sybase",     "DateTime",       ServerSideOnly=true)]
+		[SqlProperty(              "DateTime2",      ServerSideOnly=true)] public static DateTime       DateTime2                         { get { return DateTime.Now; } }
+
+		[SqlProperty("PostgreSQL", "TimeStamp",      ServerSideOnly=true)]
+		[SqlProperty("Firebird",   "TimeStamp",      ServerSideOnly=true)]
+		[SqlProperty("MySql",      "DateTime",       ServerSideOnly=true)]
+		[SqlProperty("SqlCe",      "DateTime",       ServerSideOnly=true)]
+		[SqlProperty(              "SmallDateTime",  ServerSideOnly=true)] public static DateTime       SmallDateTime                     { get { return DateTime.Now; } }
+
+		[SqlProperty(              "Date",           ServerSideOnly=true)] public static DateTime       Date                              { get { return DateTime.Now; } }
+
+
+		[SqlFunction(                                ServerSideOnly=true)] public static String         VarChar(int length)               {       return "";   }
 
 		#endregion
 

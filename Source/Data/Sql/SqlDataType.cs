@@ -397,7 +397,7 @@ namespace BLToolkit.Data.Sql
 		public static readonly SqlDataType Single             = DbReal;
 		public static readonly SqlDataType Double             = DbFloat;
 		public static readonly SqlDataType Decimal            = DbDecimal;
-		public static readonly SqlDataType DateTime           = DbDateTime;
+		public static readonly SqlDataType DateTime           = DbDateTime2;
 		public static readonly SqlDataType String             = DbNVarChar;
 		public static readonly SqlDataType Guid               = DbUniqueIdentifier;
 		public static readonly SqlDataType ByteArray          = DbVarBinary;

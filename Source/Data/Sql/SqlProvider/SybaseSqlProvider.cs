@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Reflection;
+using System.Text;
 
 namespace BLToolkit.Data.Sql.SqlProvider
 {
@@ -95,6 +97,15 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		protected override ISqlProvider CreateSqlProvider()
 		{
 			return new SybaseSqlProvider(DataProvider, _isSelect);
+		}
+
+		protected override void BuildDataType(StringBuilder sb, SqlDataType type)
+		{
+			switch (type.DbType)
+			{
+				case SqlDbType.DateTime2 : sb.Append("DateTime");        break;
+				default                  : base.BuildDataType(sb, type); break;
+			}
 		}
 
 #if FW3

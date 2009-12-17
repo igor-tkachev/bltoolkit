@@ -108,14 +108,16 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		{
 			switch (type.DbType)
 			{
-				case SqlDbType.Int        :
-				case SqlDbType.SmallInt   : sb.Append("Signed");        break;
-				case SqlDbType.TinyInt    : sb.Append("Unsigned");      break;
-				case SqlDbType.Money      : sb.Append("Decimal(19,4)"); break;
-				case SqlDbType.SmallMoney : sb.Append("Decimal(10,4)"); break;
-				case SqlDbType.VarChar    : sb.Append("Char");          break;
-				case SqlDbType.Float      :
-				case SqlDbType.Real       : base.BuildDataType(sb, SqlDataType.Decimal); break;
+				case SqlDbType.Int           :
+				case SqlDbType.SmallInt      : sb.Append("Signed");        break;
+				case SqlDbType.TinyInt       : sb.Append("Unsigned");      break;
+				case SqlDbType.Money         : sb.Append("Decimal(19,4)"); break;
+				case SqlDbType.SmallMoney    : sb.Append("Decimal(10,4)"); break;
+				case SqlDbType.VarChar       : sb.Append("Char");          break;
+				case SqlDbType.SmallDateTime :
+				case SqlDbType.DateTime2     : sb.Append("DateTime");      break;
+				case SqlDbType.Float         :
+				case SqlDbType.Real          : base.BuildDataType(sb, SqlDataType.Decimal); break;
 				default: base.BuildDataType(sb, type); break;
 			}
 		}

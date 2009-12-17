@@ -134,6 +134,8 @@
     <Compile Include="DataAccess\DbTypeAttribute.cs" />
     <Compile Include="DataAccess\ParamTypeNameAttribute.cs" />
     <Compile Include="DataAccess\SqlIgnoreAttribute.cs" />
+    <Compile Include="Data\DataProvider\Sql2008DataProvider.cs" />
+    <Compile Include="Data\DataProvider\SqlDataProvider.cs" />
     <Compile Include="Data\DataProvider\ProviderName.cs" />
     <Compile Include="Data\IDataReaderEx.cs" />
     <Compile Include="Data\Linq\CompiledQuery.cs" />
@@ -184,8 +186,10 @@
     <Compile Include="Data\Sql\SqlProvider\BasicSqlProvider.cs" />
     <Compile Include="Data\Sql\SqlProvider\AccessSqlProvider.cs" />
     <Compile Include="Data\Sql\SqlProvider\BasicSqlProvider.Linq.cs" />
+    <Compile Include="Data\Sql\SqlProvider\MsSql2005SqlProvider.cs" />
+    <Compile Include="Data\Sql\SqlProvider\MsSql2008SqlProvider.cs" />
     <Compile Include="Data\Sql\SqlProvider\SybaseSqlProvider.cs" />
-    <Compile Include="Data\Sql\SqlProvider\MSSqlSqlProvider.cs" />
+    <Compile Include="Data\Sql\SqlProvider\MsSqlSqlProvider.cs" />
     <Compile Include="Data\Sql\SqlProvider\MySqlSqlProvider.cs" />
     <Compile Include="Data\Sql\SqlProvider\SqlCeSqlProvider.cs" />
     <Compile Include="Data\Sql\SqlProvider\SQLiteSqlProvider.cs" />
@@ -317,7 +321,7 @@
     <Compile Include="Data\DataProvider\DataProviderBase.cs" />
     <Compile Include="Data\DataProvider\OdbcDataProvider.cs" />
     <Compile Include="Data\DataProvider\OleDbDataProvider.cs" />
-    <Compile Include="Data\DataProvider\SqlDataProvider.cs" />
+    <Compile Include="Data\DataProvider\SqlDataProviderBase.cs" />
     <Compile Include="Data\DbManager.cs">
       <SubType>Component</SubType>
     </Compile>

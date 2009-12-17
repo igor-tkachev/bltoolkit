@@ -245,6 +245,7 @@ namespace BLToolkit.Data
 
 		static DbManager()
 		{
+			AddDataProvider(new Sql2008DataProvider());
 			AddDataProvider(new SqlDataProvider());
 			AddDataProvider(new AccessDataProvider());
 			AddDataProvider(new OleDbDataProvider());
@@ -295,7 +296,7 @@ namespace BLToolkit.Data
 				_defaultConfiguration = ConfigurationManager.AppSettings.Get("BLToolkit.DefaultConfiguration");
 
 			if (string.IsNullOrEmpty(_defaultDataProviderName))
-				_defaultDataProviderName = SqlDataProvider.NameString;
+				_defaultDataProviderName = SqlDataProviderBase.NameString;
 		}
 
 		private static string             _firstConfiguration;
@@ -334,7 +335,15 @@ namespace BLToolkit.Data
 
 				if (css != null && !string.IsNullOrEmpty(css.ProviderName))
 				{
-					dp = _dataProviderNameList[css.ProviderName];
+					// This hack should be redone.
+					//
+					string provider = css.ProviderName == "System.Data.SqlClient" ?
+						configurationString.IndexOf("2008") >= 0 ?
+							"MSSQL2008" :
+							css.ProviderName :
+						css.ProviderName;
+
+					dp = _dataProviderNameList[provider];
 				}
 				else
 				{
@@ -535,11 +544,9 @@ namespace BLToolkit.Data
 
 		#region AddDataProvider
 
-		private static readonly Dictionary<string, DataProviderBase> _dataProviderNameList =
-			new Dictionary<string, DataProviderBase>(8, StringComparer.OrdinalIgnoreCase);
-		private static readonly Dictionary<Type,   DataProviderBase> _dataProviderTypeList =
-			new Dictionary<Type,   DataProviderBase>(4);
-		private static readonly object                               _dataProviderListLock = new object();
+		static readonly Dictionary<string, DataProviderBase> _dataProviderNameList = new Dictionary<string, DataProviderBase>(8, StringComparer.OrdinalIgnoreCase);
+		static readonly Dictionary<Type,   DataProviderBase> _dataProviderTypeList = new Dictionary<Type,   DataProviderBase>(4);
+		static readonly object                               _dataProviderListLock = new object();
 
 		/// <summary>
 		/// Adds a new data provider.
