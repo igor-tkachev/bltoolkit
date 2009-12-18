@@ -86,7 +86,21 @@ namespace BLToolkit.Data.Sql.SqlProvider
 							switch (Type.GetTypeCode(func.SystemType))
 							{
 								case TypeCode.String   : return new SqlFunction(func.SystemType, "To_Char", func.Parameters[1]);
-								case TypeCode.DateTime : return new SqlFunction(func.SystemType, "To_Date", func.Parameters[1]);
+								case TypeCode.DateTime :
+									if (IsDateDataType(func.Parameters[0], "Date"))
+									{
+										if (func.Parameters[1].SystemType == typeof(string))
+										{
+											return new SqlFunction(
+												func.SystemType,
+												"Date",
+												new SqlFunction(func.SystemType, "To_Date", func.Parameters[1], new SqlValue("%Y-%m-%d")));
+										}
+
+										return new SqlFunction(func.SystemType, "Date", func.Parameters[1]);
+									}
+
+									return new SqlFunction(func.SystemType, "To_Date", func.Parameters[1]);
 							}
 
 							return new SqlExpression(func.SystemType, "Cast({0} as {1})", Precedence.Primary, func.Parameters[1], func.Parameters[0]);

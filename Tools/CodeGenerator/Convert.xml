@@ -3,6 +3,7 @@
 
 	<using namespace="System"/>
 	<using namespace="System.Data.SqlTypes"/>
+	<using namespace="System.Globalization"/>
 	<using namespace="System.IO"/>
 	<using namespace="System.Xml"/>
 	<br/>
@@ -506,7 +507,7 @@
 		</converter>
 		<converter type="DateTime" nullable="false">
 			<group name="Scalar Types.">
-				<from type="String"   >return p == null? DateTime.MinValue: DateTime.Parse(p);</from>
+				<from type="String"   >return p == null? DateTime.MinValue: DateTime.Parse(p, null, DateTimeStyles.NoCurrentDateDefault);</from>
 				<from type="TimeSpan" >return DateTime.MinValue + p;</from>
 				<from type="Int64"    >return DateTime.MinValue + TimeSpan.FromTicks(p);</from>
 				<from type="Double"   >return DateTime.MinValue + TimeSpan.FromDays(p);</from>

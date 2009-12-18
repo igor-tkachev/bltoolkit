@@ -397,6 +397,12 @@ namespace BLToolkit.Mapping
 					Convert.ToDateTime(value);
 		}
 
+		public virtual TimeSpan ConvertToTimeSpan(object value)
+		{
+			DateTime dt = ConvertToDateTime(value);
+			return new TimeSpan(dt.Ticks);
+		}
+
 #if FW3
 		private DateTimeOffset _defaultDateTimeOffsetNullValue;
 		public  DateTimeOffset  DefaultDateTimeOffsetNullValue
@@ -615,6 +621,12 @@ namespace BLToolkit.Mapping
 				value is DateTime? (DateTime?)value:
 				value == null || value is DBNull? null:
 					Convert.ToNullableDateTime(value);
+		}
+
+		public virtual TimeSpan? ConvertToNullableTimeSpan(object value)
+		{
+			DateTime? dt = ConvertToNullableDateTime(value);
+			return dt == null? null : (TimeSpan?)new TimeSpan(dt.Value.Ticks);
 		}
 
 #if FW3

@@ -162,6 +162,8 @@ namespace BLToolkit.Data.Sql.SqlProvider
 							switch (Type.GetTypeCode(func.SystemType))
 							{
 								case TypeCode.DateTime :
+									if (func.Parameters[1].SystemType == typeof(DateTime) && IsDateDataType(func.Parameters[0], "Date"))
+										return new SqlFunction(func.SystemType, "Trunc", func.Parameters[1], new SqlValue("DD"));
 									return new SqlFunction(func.SystemType, "To_Timestamp", func.Parameters[1], new SqlValue("YYYY-MM-DD HH24-MI-SS"));
 							}
 

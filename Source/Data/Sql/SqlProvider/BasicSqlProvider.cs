@@ -1171,10 +1171,21 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 				if (NeedTake)
 				{
-					AppendIndent(sb).AppendFormat("{0}.{1} BETWEEN ", aliases[1], rnaliase);
-					BuildExpression(sb, Add(SqlQuery.Select.SkipValue, 1));
-					sb.Append(" AND ");
-					BuildExpression(sb, Add<int>(SqlQuery.Select.SkipValue, SqlQuery.Select.TakeValue));
+					ISqlExpression expr1 = Add(SqlQuery.Select.SkipValue, 1);
+					ISqlExpression expr2 = Add<int>(SqlQuery.Select.SkipValue, SqlQuery.Select.TakeValue);
+
+					if (expr1 is SqlValue && expr2 is SqlValue && Equals(((SqlValue)expr1).Value, ((SqlValue)expr2).Value))
+					{
+						AppendIndent(sb).AppendFormat("{0}.{1} = ", aliases[1], rnaliase);
+						BuildExpression(sb, expr1);
+					}
+					else
+					{
+						AppendIndent(sb).AppendFormat("{0}.{1} BETWEEN ", aliases[1], rnaliase);
+						BuildExpression(sb, expr1);
+						sb.Append(" AND ");
+						BuildExpression(sb, expr2);
+					}
 				}
 				else
 				{
@@ -1288,6 +1299,17 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 			for (int i = 0; i < obys.Length; i++)
 				yield return new SqlQuery.Column(SqlQuery, SqlQuery.OrderBy.Items[i].Expression, obys[i]);
+		}
+
+		protected bool IsDateDataType(ISqlExpression expr, string dateName)
+		{
+			switch (expr.ElementType)
+			{
+				case QueryElementType.SqlDataType   : return ((SqlDataType)expr).DbType == SqlDbType.Date;
+				case QueryElementType.SqlExpression : return ((SqlExpression)expr).Expr == dateName;
+			}
+
+			return false;
 		}
 
 		#endregion

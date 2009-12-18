@@ -1,5 +1,6 @@
 using System;
 using System.Data.SqlTypes;
+using System.Globalization;
 using System.IO;
 using System.Xml;
 
@@ -2488,7 +2489,7 @@ namespace BLToolkit.Common
 		// Scalar Types.
 		// 
 		/// <summary>Converts the value from <c>String</c> to an equivalent <c>DateTime</c> value.</summary>
-		public static DateTime ToDateTime(String p)          { return p == null? DateTime.MinValue: DateTime.Parse(p); }
+		public static DateTime ToDateTime(String p)          { return p == null? DateTime.MinValue: DateTime.Parse(p, null, DateTimeStyles.NoCurrentDateDefault); }
 		/// <summary>Converts the value from <c>TimeSpan</c> to an equivalent <c>DateTime</c> value.</summary>
 		public static DateTime ToDateTime(TimeSpan p)        { return DateTime.MinValue + p; }
 		/// <summary>Converts the value from <c>Int64</c> to an equivalent <c>DateTime</c> value.</summary>

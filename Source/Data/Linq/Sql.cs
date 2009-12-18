@@ -27,7 +27,8 @@ namespace BLToolkit.Data.Linq
 		[SqlFunction("Convert", 0, 1, ServerSideOnly = true)]
 		public static TTo Convert<TTo,TFrom>(TTo to, TFrom from)
 		{
-			return Common.ConvertTo<TTo>.From(from);
+			var dt = Common.ConvertTo<TTo>.From(from);
+			return dt;
 		}
 
 		[CLSCompliant(false)]
@@ -52,6 +53,12 @@ namespace BLToolkit.Data.Linq
 			{
 				return Common.ConvertTo<TTo>.From(obj);
 			}
+		}
+
+		[SqlExpression("{0}")]
+		public static TimeSpan DateToTime(DateTime date)
+		{
+			return new TimeSpan(date.Ticks);
 		}
 
 		[SqlProperty("Oracle",     "Number(19)",     ServerSideOnly=true)]
@@ -114,7 +121,11 @@ namespace BLToolkit.Data.Linq
 		[SqlProperty("SqlCe",      "DateTime",       ServerSideOnly=true)]
 		[SqlProperty(              "SmallDateTime",  ServerSideOnly=true)] public static DateTime       SmallDateTime                     { get { return DateTime.Now; } }
 
+		[SqlProperty("MsSql2005",  "Datetime",       ServerSideOnly=true)]
+		[SqlProperty("SqlCe",      "Datetime",       ServerSideOnly=true)]
 		[SqlProperty(              "Date",           ServerSideOnly=true)] public static DateTime       Date                              { get { return DateTime.Now; } }
+
+		[SqlProperty(              "Time",           ServerSideOnly=true)] public static DateTime       Time                              { get { return DateTime.Now; } }
 
 
 		[SqlFunction(                                ServerSideOnly=true)] public static String         VarChar(int length)               {       return "";   }
@@ -124,11 +135,12 @@ namespace BLToolkit.Data.Linq
 		#region String Functions
 
 		[SqlFunction]
-		[SqlFunction("Access",   "Len")]
-		[SqlFunction("Firebird", "Char_Length")]
-		[SqlFunction("MSSql",    "Len")]
-		[SqlFunction("SqlCe",    "Len")]
-		[SqlFunction("Sybase",   "Len")]
+		[SqlFunction("Access",    "Len")]
+		[SqlFunction("Firebird",  "Char_Length")]
+		[SqlFunction("MsSql2005", "Len")]
+		[SqlFunction("MsSql2008", "Len")]
+		[SqlFunction("SqlCe",     "Len")]
+		[SqlFunction("Sybase",    "Len")]
 		public static int Length(string str)
 		{
 			return (str ?? "").Length;

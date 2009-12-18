@@ -14,6 +14,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 	using I = Int32;
 	using O = Object;
 	using D = DateTime;
+	using T = TimeSpan;
 	using F = Double;
 
 	partial class BasicSqlProvider
@@ -121,6 +122,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			{ MI(() => DateTime.Now.Second            ), new F<D,I>      (obj            => Sql.DatePart(Sql.DateParts.Second,      obj)     ) },
 			{ MI(() => DateTime.Now.Millisecond       ), new F<D,I>      (obj            => Sql.DatePart(Sql.DateParts.Millisecond, obj)     ) },
 			{ MI(() => DateTime.Now.Date              ), new F<D,D>      (obj            => Sql.Convert2(Sql.Date,                  obj)     ) },
+			{ MI(() => DateTime.Now.TimeOfDay         ), new F<D,T>      (obj            => Sql.DateToTime(Sql.Convert2(Sql.Time,   obj))    ) },
 			{ MI(() => DateTime.Now.AddYears       (0)), new F<D,I,D>    ((obj,p0)       => Sql.DateAdd (Sql.DateParts.Year,        p0, obj) ) },
 			{ MI(() => DateTime.Now.AddMonths      (0)), new F<D,I,D>    ((obj,p0)       => Sql.DateAdd (Sql.DateParts.Month,       p0, obj) ) },
 			{ MI(() => DateTime.Now.AddDays        (0)), new F<D,F,D>    ((obj,p0)       => Sql.DateAdd (Sql.DateParts.Day,         p0, obj) ) },

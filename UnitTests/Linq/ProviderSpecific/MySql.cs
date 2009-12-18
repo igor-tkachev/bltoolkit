@@ -3,7 +3,7 @@ using System.Transactions;
 
 using BLToolkit.Data.DataProvider;
 
-namespace Data.Providers
+namespace Data.ProviderSpecific
 {
 	using Linq;
 

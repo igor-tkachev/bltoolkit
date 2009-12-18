@@ -132,6 +132,9 @@
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="Model\ParentChild.cs" />
+    <Compile Include="ProviderSpecific\Access.cs" />
+    <Compile Include="ProviderSpecific\MsSql2008s.cs" />
+    <Compile Include="ProviderSpecific\SqlCe.cs" />
     <Compile Include="SetTest.cs" />
     <Compile Include="SubQuery.cs" />
     <Compile Include="Types.cs" />
@@ -151,7 +154,7 @@
     <Compile Include="Exceptions\JoinTest.cs" />
     <Compile Include="JoinTest.cs" />
     <Compile Include="DateTimeFunctions.cs" />
-    <Compile Include="Providers\MySqlTest.cs" />
+    <Compile Include="ProviderSpecific\MySql.cs" />
     <Compile Include="SelectManyTest.cs" />
     <Compile Include="StringFunctions.cs" />
     <Compile Include="SelectTest.cs" />

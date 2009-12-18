@@ -220,6 +220,22 @@ namespace Data.Linq
 				from t in    Types select              t.DateTimeValue.Millisecond,
 				from t in db.Types select Sql.OnServer(t.DateTimeValue.Millisecond)));
 		}
+
+		[Test]
+		public void Date()
+		{
+			ForEachProvider(db => AreEqual(
+				from t in    Types select Sql.OnServer(t.DateTimeValue.Date),
+				from t in db.Types select Sql.OnServer(t.DateTimeValue.Date)));
+		}
+
+		[Test]
+		public void TimeOfDay()
+		{
+			ForEachProvider(db => AreEqual(
+				from t in    Types select Sql.OnServer(t.DateTimeValue.TimeOfDay),
+				from t in db.Types select Sql.OnServer(t.DateTimeValue.TimeOfDay)));
+		}
 	}
 
 	#endregion
@@ -369,14 +385,6 @@ namespace Data.Linq
 		{
 			ForEachProvider(new[] { ProviderName.Informix, ProviderName.MySql, ProviderName.Access },
 				db => (from t in db.Types select Sql.OnServer(t.DateTimeValue.AddMilliseconds(221))).ToList());
-		}
-
-		[Test]
-		public void Date()
-		{
-			ForEachProvider(db => AreEqual(
-				from t in    Types select Sql.OnServer(t.DateTimeValue.Date),
-				from t in db.Types select Sql.OnServer(t.DateTimeValue.Date)));
 		}
 	}
 

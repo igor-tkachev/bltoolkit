@@ -1112,7 +1112,15 @@ namespace BLToolkit.Data.Linq
 			ParsingTracer.WriteLine();
 			ParsingTracer.IncIndentLevel();
 
-			CurrentSql.Select.Take(ParseExpression(value, select));
+			ParseTake(ParseExpression(value, select));
+
+			ParsingTracer.DecIndentLevel();
+			return true;
+		}
+
+		void ParseTake(ISqlExpression expr)
+		{
+			CurrentSql.Select.Take(expr);
 
 			_info.SqlProvider.SqlQuery = CurrentSql;
 
@@ -1127,9 +1135,6 @@ namespace BLToolkit.Data.Linq
 				if (p != null)
 					p.IsQueryParameter = false;
 			}
-
-			ParsingTracer.DecIndentLevel();
-			return true;
 		}
 
 		#endregion
@@ -1283,7 +1288,7 @@ namespace BLToolkit.Data.Linq
 				}
 
 			if (take != 0)
-				CurrentSql.Select.Take(take);
+				ParseTake(new SqlValue(take));
 
 			_info.MakeElementOperator(elementMethod);
 		}

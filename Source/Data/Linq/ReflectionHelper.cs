@@ -190,6 +190,7 @@ namespace BLToolkit.Data.Linq
 				//
 				{ typeof(String),          MethodExpressor(m => m.ConvertToString                (null)) },
 				{ typeof(DateTime),        MethodExpressor(m => m.ConvertToDateTime              (null)) },
+				{ typeof(TimeSpan),        MethodExpressor(m => m.ConvertToTimeSpan              (null)) },
 				{ typeof(DateTimeOffset),  MethodExpressor(m => m.ConvertToDateTimeOffset        (null)) },
 				{ typeof(Decimal),         MethodExpressor(m => m.ConvertToDecimal               (null)) },
 				{ typeof(Guid),            MethodExpressor(m => m.ConvertToGuid                  (null)) },
@@ -214,6 +215,7 @@ namespace BLToolkit.Data.Linq
 				{ typeof(Single?),         MethodExpressor(m => m.ConvertToNullableSingle        (null)) },
 				{ typeof(Boolean?),        MethodExpressor(m => m.ConvertToNullableBoolean       (null)) },
 				{ typeof(DateTime?),       MethodExpressor(m => m.ConvertToNullableDateTime      (null)) },
+				{ typeof(TimeSpan?),       MethodExpressor(m => m.ConvertToNullableTimeSpan      (null)) },
 				{ typeof(DateTimeOffset?), MethodExpressor(m => m.ConvertToNullableDateTimeOffset(null)) },
 				{ typeof(Decimal?),        MethodExpressor(m => m.ConvertToNullableDecimal       (null)) },
 				{ typeof(Guid?),           MethodExpressor(m => m.ConvertToNullableGuid          (null)) },

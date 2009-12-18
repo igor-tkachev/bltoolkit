@@ -31,14 +31,23 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		{
 			expr = base.ConvertExpression(expr);
 
-			if (expr is SqlExpression)
+			if (expr is SqlFunction)
 			{
-				SqlExpression ex = (SqlExpression)expr;
+				SqlFunction func = (SqlFunction)expr;
 
-				//switch (ex.Expr)
-				//{
-				//	case "CURRENT_TIMESTAMP" : return new SqlFunction("GetDate");
-				//}
+				switch (Type.GetTypeCode(func.SystemType))
+				{
+					case TypeCode.DateTime :
+
+						if (func.Name == "Convert" && func.Parameters[1].SystemType == typeof(DateTime))
+						{
+							if (IsDateDataType(func.Parameters[0], "Datetime"))
+								return new SqlExpression(
+									func.SystemType, "Cast(Floor(Cast({0} as Float)) as DateTime)", Precedence.Primary, func.Parameters[1]);
+						}
+
+						break;
+				}
 			}
 
 			return expr;
@@ -187,6 +196,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			{
 				case SqlDbType.SmallMoney    : sb.Append("Decimal(10,4)");   break;
 				case SqlDbType.VarChar       : sb.Append("NVarChar");        break;
+				case SqlDbType.Date          :
 				case SqlDbType.SmallDateTime :
 				case SqlDbType.DateTime2     : sb.Append("DateTime");        break;
 				default                      : base.BuildDataType(sb, type); break;

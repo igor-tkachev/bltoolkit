@@ -263,18 +263,18 @@ namespace BLToolkit.Mapping
 				{
 					MapMemberInfo mi = new MapMemberInfo();
 
-				    DbTypeAttribute dbTypeAttribute = ma.GetAttribute<DbTypeAttribute>();
+					DbTypeAttribute dbTypeAttribute = ma.GetAttribute<DbTypeAttribute>();
 
-                    if (dbTypeAttribute != null)
-                    {
-                        mi.DbType = dbTypeAttribute.DbType;
-                        mi.IsDbTypeSet = true;
-                        if (dbTypeAttribute.Size != null)
-                        {
-                            mi.DbSize = dbTypeAttribute.Size.Value;
-                            mi.IsDbSizeSet = true;
-                        }
-                    }
+					if (dbTypeAttribute != null)
+					{
+						mi.DbType = dbTypeAttribute.DbType;
+						mi.IsDbTypeSet = true;
+						if (dbTypeAttribute.Size != null)
+						{
+							mi.DbSize = dbTypeAttribute.Size.Value;
+							mi.IsDbSizeSet = true;
+						}
+					}
 
 					mi.MemberAccessor             = ma;
 					mi.Type                       = ma.Type;

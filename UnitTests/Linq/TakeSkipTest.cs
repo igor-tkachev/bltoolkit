@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Linq;
-
+using Data.Linq.Model;
 using NUnit.Framework;
 
 using BLToolkit.Data.DataProvider;
@@ -150,6 +150,21 @@ namespace Data.Linq
 			{
 				var list = db.Child.Skip(2).Take(5).ToList();
 				Assert.AreEqual( 5, list.Count);
+			});
+		}
+
+		[Test]
+		public void SkipFirst()
+		{
+			var expected = (from p in Parent where p.ParentID > 1 select p).Skip(1).First();
+
+			ForEachProvider(db =>
+			{
+				var result = from p in db.GetTable<Parent>() select p;
+				result = from p in result where p.ParentID > 1 select p;
+				var b = result.Skip(1).First();
+
+				Assert.AreEqual(expected, b);
 			});
 		}
 	}
