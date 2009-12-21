@@ -399,8 +399,7 @@ namespace BLToolkit.Mapping
 
 		public virtual TimeSpan ConvertToTimeSpan(object value)
 		{
-			DateTime dt = ConvertToDateTime(value);
-			return new TimeSpan(dt.Ticks);
+			return ConvertToDateTime(value).TimeOfDay;
 		}
 
 #if FW3
@@ -626,7 +625,7 @@ namespace BLToolkit.Mapping
 		public virtual TimeSpan? ConvertToNullableTimeSpan(object value)
 		{
 			DateTime? dt = ConvertToNullableDateTime(value);
-			return dt == null? null : (TimeSpan?)new TimeSpan(dt.Value.Ticks);
+			return dt == null? null : (TimeSpan?)dt.Value.TimeOfDay;
 		}
 
 #if FW3

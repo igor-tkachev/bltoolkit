@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data;
 using System.Reflection;
 using System.Text;
 
@@ -212,7 +211,16 @@ namespace BLToolkit.Data.Sql.SqlProvider
 								case TypeCode.DateTime :
 									if (IsDateDataType(func.Parameters[0], "Date"))
 										return new SqlFunction(func.SystemType, "DateValue", func.Parameters[1]);
+
+									if (IsTimeDataType(func.Parameters[0]))
+										return new SqlFunction(func.SystemType, "TimeValue", func.Parameters[1]);
+
 									return new SqlFunction(func.SystemType, "CDate", func.Parameters[1]);
+
+								default:
+									if (func.SystemType == typeof(DateTime))
+										goto case TypeCode.DateTime;
+									break;
 							}
 
 							return func.Parameters[1];

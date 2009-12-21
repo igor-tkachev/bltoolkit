@@ -224,12 +224,12 @@ namespace BLToolkit.Data.DataProvider
 
 		#region DataReaderEx
 
-		protected abstract class DataReaderEx<T> : IDataReader, IDataReaderEx
+		protected class DataReaderBase<T> : IDataReader
 			where T: IDataReader
 		{
 			public readonly T DataReader;
 
-			protected DataReaderEx(T rd)
+			protected DataReaderBase(T rd)
 			{
 				DataReader = rd;
 			}
@@ -294,6 +294,14 @@ namespace BLToolkit.Data.DataProvider
 			public int       RecordsAffected { get { return DataReader.RecordsAffected; } }
 
 			#endregion
+		}
+
+		protected abstract class DataReaderEx<T> : DataReaderBase<T>, IDataReaderEx
+			where T: IDataReader
+		{
+			protected DataReaderEx(T rd) : base(rd)
+			{
+			}
 
 			#region Implementation of IDataReaderEx
 #if FW3

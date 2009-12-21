@@ -52,13 +52,11 @@ namespace BLToolkit.Data.Sql.SqlProvider
 					case "Space"   : return new SqlFunction  (func.SystemType, "PadR", new SqlValue(" "), func.Parameters[0]);
 					case "Convert" :
 						{
-							switch (Type.GetTypeCode(func.SystemType))
+							if (func.SystemType == typeof(DateTime) || func.SystemType == typeof(DateTimeOffset))
 							{
-								//case TypeCode.String   : return new SqlFunction(func.SystemType, "To_Char", func.Parameters[1]);
-								case TypeCode.DateTime :
-									if (IsDateDataType(func.Parameters[0], "Date"))
-										return new SqlFunction(func.SystemType, "Date", func.Parameters[1]);
-									return new SqlFunction(func.SystemType, "DateTime", func.Parameters[1]);
+								if (IsDateDataType(func.Parameters[0], "Date"))
+									return new SqlFunction(func.SystemType, "Date", func.Parameters[1]);
+								return new SqlFunction(func.SystemType, "DateTime", func.Parameters[1]);
 							}
 
 							return new SqlExpression(func.SystemType, "Cast({0} as {1})", Precedence.Primary, func.Parameters[1], func.Parameters[0]);

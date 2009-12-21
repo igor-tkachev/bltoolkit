@@ -1798,7 +1798,7 @@ namespace BLToolkit.Data.Linq
 								}
 							}
 
-							if (query is QuerySource.Scalar && CurrentSql.Select.Columns.Count == 0)
+							if (query is QuerySource.Scalar && CurrentSql.Select.Columns.Count == 0 && expr == pi)
 								return BuildField(query, pi);
 
 							break;

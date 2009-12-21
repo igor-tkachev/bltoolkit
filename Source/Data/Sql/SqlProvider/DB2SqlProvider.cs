@@ -89,9 +89,12 @@ namespace BLToolkit.Data.Sql.SqlProvider
 						{
 							SqlFunction f = (SqlFunction)func.Parameters[0];
 
-							return f.Parameters.Length == 1 ?
-								new SqlFunction(func.SystemType, f.Name, func.Parameters[1], f.Parameters[0]):
-								new SqlFunction(func.SystemType, f.Name, func.Parameters[1], f.Parameters[0], f.Parameters[1]);
+							return
+								f.Name == "Char" ?
+									new SqlFunction(func.SystemType, f.Name, func.Parameters[1]) :
+								f.Parameters.Length == 1 ?
+									new SqlFunction(func.SystemType, f.Name, func.Parameters[1], f.Parameters[0]) :
+									new SqlFunction(func.SystemType, f.Name, func.Parameters[1], f.Parameters[0], f.Parameters[1]);
 						}
 
 						{
@@ -99,13 +102,16 @@ namespace BLToolkit.Data.Sql.SqlProvider
 							return new SqlFunction(func.SystemType, e.Expr, func.Parameters[1]);
 						}
 
-					case "TinyInt"       : return new SqlFunction(func.SystemType, "SmallInt", func.Parameters);
-					case "Money"         : return new SqlFunction(func.SystemType, "Decimal",  func.Parameters[0], new SqlValue(19), new SqlValue(4));
-					case "SmallMoney"    : return new SqlFunction(func.SystemType, "Decimal",  func.Parameters[0], new SqlValue(10), new SqlValue(4));
 					case "Millisecond"   : return Div(new SqlFunction(func.SystemType, "Microsecond", func.Parameters), 1000);
 					case "SmallDateTime" :
 					case "DateTime"      :
-					case "DateTime2"     : return new SqlFunction(func.SystemType, "TimeStamp", func.Parameters);
+					case "DateTime2"     : return new SqlFunction  (func.SystemType, "TimeStamp", func.Parameters);
+					case "TinyInt"       : return new SqlFunction  (func.SystemType, "SmallInt",  func.Parameters);
+					case "Money"         : return new SqlFunction  (func.SystemType, "Decimal",   func.Parameters[0], new SqlValue(19), new SqlValue(4));
+					case "SmallMoney"    : return new SqlFunction  (func.SystemType, "Decimal",   func.Parameters[0], new SqlValue(10), new SqlValue(4));
+					case "VarChar"       :
+					case "NChar"         :
+					case "NVarChar"      : return new SqlFunction  (func.SystemType, "Char",      func.Parameters);
 				}
 			}
 

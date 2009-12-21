@@ -2,6 +2,7 @@ using System;
 using System.Data;
 using System.Data.OleDb;
 using System.Text.RegularExpressions;
+using BLToolkit.Mapping;
 
 namespace BLToolkit.Data.DataProvider
 {
@@ -218,5 +219,48 @@ namespace BLToolkit.Data.DataProvider
 		{
 			return new AccessSqlProvider(this);
 		}
+
+		#region DataReaderEx
+
+		public override IDataReader GetDataReader(MappingSchema schema, IDataReader dataReader)
+		{
+			return dataReader is OleDbDataReader?
+				new DataReaderEx((OleDbDataReader)dataReader):
+				base.GetDataReader(schema, dataReader);
+		}
+
+		class DataReaderEx : DataReaderBase<OleDbDataReader>, IDataReader
+		{
+			public DataReaderEx(OleDbDataReader rd): base(rd)
+			{
+			}
+
+			public new object GetValue(int i)
+			{
+				object value = DataReader.GetValue(i);
+
+				if (value is DateTime)
+				{
+					DateTime dt = (DateTime)value;
+
+					if (dt.Year == 1899 && dt.Month == 12 && dt.Day == 30)
+						return new DateTime(1, 1, 1, dt.Hour, dt.Minute, dt.Second, dt.Millisecond);
+				}
+
+				return value;
+			}
+
+			public new DateTime GetDateTime(int i)
+			{
+				var dt = DataReader.GetDateTime(i);
+
+				if (dt.Year == 1899 && dt.Month == 12 && dt.Day == 30)
+					return new DateTime(1, 1, 1, dt.Hour, dt.Minute, dt.Second, dt.Millisecond);
+
+				return dt;
+			}
+		}
+
+		#endregion
 	}
 }

@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Linq;
-using BLToolkit.Data.DataProvider;
+
 using NUnit.Framework;
+
+using BLToolkit.Data.DataProvider;
 
 namespace Data.Linq
 {

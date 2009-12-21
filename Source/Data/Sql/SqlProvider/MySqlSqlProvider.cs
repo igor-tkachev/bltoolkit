@@ -118,6 +118,11 @@ namespace BLToolkit.Data.Sql.SqlProvider
 				case SqlDbType.DateTime2     : sb.Append("DateTime");      break;
 				case SqlDbType.Float         :
 				case SqlDbType.Real          : base.BuildDataType(sb, SqlDataType.Decimal); break;
+				case SqlDbType.NVarChar      :
+					sb.Append("VarChar");
+					if (type.Length > 0)
+						sb.Append('(').Append(type.Length).Append(')');
+					break;
 				default: base.BuildDataType(sb, type); break;
 			}
 		}

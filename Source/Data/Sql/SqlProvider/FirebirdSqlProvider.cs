@@ -104,7 +104,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		{
 			switch (type.DbType)
 			{
-				case SqlDbType.Decimal    :
+				case SqlDbType.Decimal       :
 					if (type == SqlDataType.DbDecimal)
 						base.BuildDataType(sb, new SqlDataType(type.DbType, type.Type, 18, type.Scale));
 					else
@@ -116,6 +116,11 @@ namespace BLToolkit.Data.Sql.SqlProvider
 				case SqlDbType.SmallDateTime :
 				case SqlDbType.DateTime      :
 				case SqlDbType.DateTime2     : sb.Append("TimeStamp");       break;
+				case SqlDbType.NVarChar      :
+					sb.Append("VarChar");
+					if (type.Length > 0)
+						sb.Append('(').Append(type.Length).Append(')');
+					break;
 				default                      : base.BuildDataType(sb, type); break;
 			}
 		}

@@ -127,8 +127,46 @@ namespace BLToolkit.Data.Linq
 
 		[SqlProperty(              "Time",           ServerSideOnly=true)] public static DateTime       Time                              { get { return DateTime.Now; } }
 
+		[SqlProperty("PostgreSQL", "TimeStamp",      ServerSideOnly=true)]
+		[SqlProperty("Firebird",   "TimeStamp",      ServerSideOnly=true)]
+		[SqlProperty("MsSql2008",  "DateTimeOffset", ServerSideOnly=true)]
+		[SqlProperty(              "DateTime",       ServerSideOnly=true)] public static DateTimeOffset DateTimeOffset                    { get { return DateTimeOffset.Now; } }
 
-		[SqlFunction(                                ServerSideOnly=true)] public static String         VarChar(int length)               {       return "";   }
+		[SqlFunction("SqlCe",      "NChar",          ServerSideOnly=true)]
+		[SqlFunction(                                ServerSideOnly=true)] public static String         Char(int length)                  {       return ""; }
+
+		[SqlProperty("SqlCe",      "NChar",          ServerSideOnly=true)]
+		[SqlProperty(              "Char",           ServerSideOnly=true)] public static String  DefaultChar                              { get { return ""; } }
+
+		[SqlFunction("DB2",        "Char",           ServerSideOnly=true)]
+		[SqlFunction("MySql",      "Char",           ServerSideOnly=true)]
+		[SqlFunction("SqlCe",      "NVarChar",       ServerSideOnly=true)]
+		[SqlFunction(                                ServerSideOnly=true)] public static String         VarChar(int length)               {       return ""; }
+
+		[SqlProperty("DB2",        "Char",           ServerSideOnly=true)]
+		[SqlProperty("MySql",      "Char",           ServerSideOnly=true)]
+		[SqlProperty("SqlCe",      "NVarChar",       ServerSideOnly=true)]
+		[SqlProperty(              "VarChar",        ServerSideOnly=true)] public static String  DefaultVarChar                           { get { return ""; } }
+
+		[SqlFunction("DB2",        "Char",           ServerSideOnly=true)]
+		[SqlFunction(                                ServerSideOnly=true)] public static String         NChar(int length)                 {       return ""; }
+
+		[SqlProperty("DB2",        "Char",           ServerSideOnly=true)]
+		[SqlProperty(              "NChar",          ServerSideOnly=true)] public static String  DefaultNChar                             { get { return ""; } }
+
+		[SqlFunction("DB2",        "Char",           ServerSideOnly=true)]
+		[SqlFunction("Oracle",     "VarChar2",       ServerSideOnly=true)]
+		[SqlFunction("Firebird",   "VarChar",        ServerSideOnly=true)]
+		[SqlFunction("PostgreSQL", "VarChar",        ServerSideOnly=true)]
+		[SqlFunction("MySql",      "Char",           ServerSideOnly=true)]
+		[SqlFunction(                                ServerSideOnly=true)] public static String         NVarChar(int length)              {       return ""; }
+
+		[SqlProperty("DB2",        "Char",           ServerSideOnly=true)]
+		[SqlProperty("Oracle",     "VarChar2",       ServerSideOnly=true)]
+		[SqlProperty("Firebird",   "VarChar",        ServerSideOnly=true)]
+		[SqlProperty("PostgreSQL", "VarChar",        ServerSideOnly=true)]
+		[SqlProperty("MySql",      "Char",           ServerSideOnly=true)]
+		[SqlProperty(              "NVarChar",       ServerSideOnly=true)] public static String  DefaultNVarChar                          { get { return ""; } }
 
 		#endregion
 

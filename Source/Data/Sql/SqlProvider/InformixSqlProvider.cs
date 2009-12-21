@@ -100,7 +100,15 @@ namespace BLToolkit.Data.Sql.SqlProvider
 										return new SqlFunction(func.SystemType, "Date", func.Parameters[1]);
 									}
 
+									if (IsTimeDataType(func.Parameters[0]))
+										return new SqlExpression(func.SystemType, "Cast(Extend({0}, hour to second) as Char(8))", Precedence.Primary, func.Parameters[1]);
+
 									return new SqlFunction(func.SystemType, "To_Date", func.Parameters[1]);
+
+								default:
+									if (func.SystemType == typeof(DateTimeOffset))
+										goto case TypeCode.DateTime;
+									break;
 							}
 
 							return new SqlExpression(func.SystemType, "Cast({0} as {1})", Precedence.Primary, func.Parameters[1], func.Parameters[0]);
@@ -123,7 +131,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 						return
 							new SqlExpression(
 								func.SystemType,
-								"((Extend({0}, year to day) - (Mdy(12, 31 - WeekDay(Mdy(1, 1, year(t.DateTimeValue))), Year({0}) - 1) + Interval(1) day to day)) / 7 + Interval(1) day to day)::char(10)::int",
+								"((Extend({0}, year to day) - (Mdy(12, 31 - WeekDay(Mdy(1, 1, year({0}))), Year({0}) - 1) + Interval(1) day to day)) / 7 + Interval(1) day to day)::char(10)::int",
 								func.Parameters);
 					case "Hour"     :
 					case "Minute"   :

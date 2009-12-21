@@ -1312,6 +1312,17 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			return false;
 		}
 
+		protected bool IsTimeDataType(ISqlExpression expr)
+		{
+			switch (expr.ElementType)
+			{
+				case QueryElementType.SqlDataType   : return ((SqlDataType)expr).DbType == SqlDbType.Time;
+				case QueryElementType.SqlExpression : return ((SqlExpression)expr).Expr == "Time";
+			}
+
+			return false;
+		}
+
 		#endregion
 
 		#region Helpers

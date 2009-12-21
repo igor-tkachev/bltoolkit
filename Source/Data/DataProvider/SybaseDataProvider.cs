@@ -3,7 +3,7 @@ using System.Collections;
 using System.Data;
 using System.Data.Common;
 using System.Text;
-
+using BLToolkit.Mapping;
 using Sybase.Data.AseClient;
 
 namespace BLToolkit.Data.DataProvider
@@ -186,5 +186,48 @@ namespace BLToolkit.Data.DataProvider
 					commandParameters = (IDbDataParameter[])list.ToArray(typeof(IDbDataParameter));
 			}
 		}
+
+		#region DataReaderEx
+
+		public override IDataReader GetDataReader(MappingSchema schema, IDataReader dataReader)
+		{
+			return dataReader is AseDataReader?
+				new DataReaderEx((AseDataReader)dataReader):
+				base.GetDataReader(schema, dataReader);
+		}
+
+		class DataReaderEx : DataReaderBase<AseDataReader>, IDataReader
+		{
+			public DataReaderEx(AseDataReader rd): base(rd)
+			{
+			}
+
+			public new object GetValue(int i)
+			{
+				object value = DataReader.GetValue(i);
+
+				if (value is DateTime)
+				{
+					DateTime dt = (DateTime)value;
+
+					if (dt.Year == 1900 && dt.Month == 1 && dt.Day == 1)
+						return new DateTime(1, 1, 1, dt.Hour, dt.Minute, dt.Second, dt.Millisecond);
+				}
+
+				return value;
+			}
+
+			public new DateTime GetDateTime(int i)
+			{
+				var dt = DataReader.GetDateTime(i);
+
+				if (dt.Year == 1900 && dt.Month == 1 && dt.Day == 1)
+					return new DateTime(1, 1, 1, dt.Hour, dt.Minute, dt.Second, dt.Millisecond);
+
+				return dt;
+			}
+		}
+
+		#endregion
 	}
 }

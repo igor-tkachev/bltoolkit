@@ -55,13 +55,9 @@ namespace Data.Linq
 				from d in from t in    Types select              DateTime.Parse("2001-10-24")  where d.Day > 0 select d,
 				from d in from t in db.Types select Sql.OnServer(DateTime.Parse("2001-10-24")) where d.Day > 0 select d));
 		}
-	}
 
-	#region DatePart
+		#region DatePart
 
-	[TestFixture]
-	public class DatePart : TestBase
-	{
 		[Test]
 		public void DatePartYear()
 		{
@@ -229,22 +225,23 @@ namespace Data.Linq
 				from t in db.Types select Sql.OnServer(t.DateTimeValue.Date)));
 		}
 
+		static TimeSpan TruncMiliseconds(TimeSpan ts)
+		{
+			return new TimeSpan(ts.Hours, ts.Minutes, ts.Seconds);
+		}
+
 		[Test]
 		public void TimeOfDay()
 		{
 			ForEachProvider(db => AreEqual(
-				from t in    Types select Sql.OnServer(t.DateTimeValue.TimeOfDay),
-				from t in db.Types select Sql.OnServer(t.DateTimeValue.TimeOfDay)));
+				from t in    Types select TruncMiliseconds(Sql.OnServer(t.DateTimeValue.TimeOfDay)),
+				from t in db.Types select TruncMiliseconds(Sql.OnServer(t.DateTimeValue.TimeOfDay))));
 		}
-	}
 
-	#endregion
+		#endregion
 
-	#region DateAdd
+		#region DateAdd
 
-	[TestFixture]
-	public class DateAdd : TestBase
-	{
 		[Test]
 		public void DateAddYear()
 		{
@@ -386,7 +383,7 @@ namespace Data.Linq
 			ForEachProvider(new[] { ProviderName.Informix, ProviderName.MySql, ProviderName.Access },
 				db => (from t in db.Types select Sql.OnServer(t.DateTimeValue.AddMilliseconds(221))).ToList());
 		}
-	}
 
-	#endregion
+		#endregion
+	}
 }
