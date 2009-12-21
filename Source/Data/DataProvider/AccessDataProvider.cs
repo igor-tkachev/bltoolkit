@@ -252,7 +252,7 @@ namespace BLToolkit.Data.DataProvider
 
 			public new DateTime GetDateTime(int i)
 			{
-				var dt = DataReader.GetDateTime(i);
+				DateTime dt = DataReader.GetDateTime(i);
 
 				if (dt.Year == 1899 && dt.Month == 12 && dt.Day == 30)
 					return new DateTime(1, 1, 1, dt.Hour, dt.Minute, dt.Second, dt.Millisecond);

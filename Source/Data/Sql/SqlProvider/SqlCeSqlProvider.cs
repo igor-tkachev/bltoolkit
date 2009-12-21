@@ -41,7 +41,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 						if (func.Name == "Convert")
 						{
-							var type1 = func.Parameters[1].SystemType;
+							Type type1 = func.Parameters[1].SystemType;
 
 							if (IsTimeDataType(func.Parameters[0]))
 							{
