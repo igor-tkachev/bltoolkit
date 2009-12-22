@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Data;
-using System.Reflection;
 using System.Text;
 
 namespace BLToolkit.Data.Sql.SqlProvider
@@ -10,10 +8,6 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 #if FW3
 	using Linq;
-
-	using C = Char;
-	using S = String;
-	using I = Int32;
 #endif
 
 	public class FirebirdSqlProvider : BasicSqlProvider
@@ -124,14 +118,5 @@ namespace BLToolkit.Data.Sql.SqlProvider
 				default                      : base.BuildDataType(sb, type); break;
 			}
 		}
-
-#if FW3
-		protected override Dictionary<MemberInfo,BaseExpressor> GetExpressors() { return _members; }
-		static    readonly Dictionary<MemberInfo,BaseExpressor> _members = new Dictionary<MemberInfo,BaseExpressor>
-		{
-			{ MI<S>(_ => Sql.Space(0         )), new F<I,S>      ( p0           => Sql.PadRight(" ", p0, ' ')) },
-			{ MI<S>(s => Sql.Stuff(s, 0, 0, s)), new F<S,I,I,S,S>((p0,p1,p2,p3) => AltStuff(p0, p1, p2, p3)) },
-		};
-#endif
 	}
 }

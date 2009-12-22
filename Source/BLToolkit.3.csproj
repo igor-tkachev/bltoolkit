@@ -140,6 +140,7 @@
     <Compile Include="Data\IDataReaderEx.cs" />
     <Compile Include="Data\Linq\CompiledQuery.cs" />
     <Compile Include="Data\Linq\CompiledTableT.cs" />
+    <Compile Include="Data\Linq\Sql.Members.cs" />
     <Compile Include="Data\Linq\SqlExpressionAttribute.cs" />
     <Compile Include="Data\Linq\ElementMethod.cs" />
     <Compile Include="Data\Linq\FieldIndex.cs" />
@@ -185,7 +186,6 @@
     <Compile Include="Data\Sql\SqlParameter.cs" />
     <Compile Include="Data\Sql\SqlProvider\BasicSqlProvider.cs" />
     <Compile Include="Data\Sql\SqlProvider\AccessSqlProvider.cs" />
-    <Compile Include="Data\Sql\SqlProvider\BasicSqlProvider.Linq.cs" />
     <Compile Include="Data\Sql\SqlProvider\MsSql2005SqlProvider.cs" />
     <Compile Include="Data\Sql\SqlProvider\MsSql2008SqlProvider.cs" />
     <Compile Include="Data\Sql\SqlProvider\SybaseSqlProvider.cs" />

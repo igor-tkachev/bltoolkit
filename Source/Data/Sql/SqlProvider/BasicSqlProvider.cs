@@ -4,6 +4,11 @@ using System.Collections.Generic;
 using System.Data;
 using System.Text;
 
+#if FW3
+using System.Linq.Expressions;
+using System.Reflection;
+#endif
+
 namespace BLToolkit.Data.Sql.SqlProvider
 {
 	using DataProvider;
@@ -1961,10 +1966,29 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			return sqlQuery;
 		}
 
-		public virtual string Name
+		private        string _name;
+		public virtual string  Name
 		{
-			get { return GetType().Name.Replace("SqlProvider", ""); }
+			get { return _name ?? (_name = GetType().Name.Replace("SqlProvider", "")); }
 		}
+
+		#endregion
+
+		#region Linq Support
+
+#if FW3
+		public virtual LambdaExpression ConvertMember(MemberInfo mi)
+		{
+			Dictionary<MemberInfo,LambdaExpression> dic;
+			LambdaExpression expr;
+
+			if (Linq.Sql.Members.TryGetValue(Name, out dic))
+				if (dic.TryGetValue(mi, out expr))
+					return expr;
+
+			return Linq.Sql.Members[""].TryGetValue(mi, out expr) ? expr : null;
+		}
+#endif
 
 		#endregion
 	}
