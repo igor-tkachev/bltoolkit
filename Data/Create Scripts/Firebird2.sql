@@ -472,7 +472,7 @@ CREATE TABLE DataTypeTest
 	CHAR_           CHAR(1),
 	DateTime_       TIMESTAMP,
 	Decimal_        DECIMAL(10, 2),
-	Double_         DOUBLE	PRECISION,
+	Double_         DOUBLE PRECISION,
 	Guid_           CHAR(38),
 	Int16_          SMALLINT,
 	Int32_          INTEGER,
@@ -539,6 +539,7 @@ CREATE TABLE LinqDataTypes
 	ID            int,
 	MoneyValue    decimal(10,4),
 	DateTimeValue timestamp,
-	BoolValue     char(1)
+	BoolValue     char(1),
+	GuidValue     char(38)
 )
 COMMIT;

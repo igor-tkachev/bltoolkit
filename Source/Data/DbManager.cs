@@ -784,10 +784,8 @@ namespace BLToolkit.Data
 		{
 			command.Parameters.Clear();
 
-			foreach (IDbDataParameter p in commandParameters)
-			{
-				_dataProvider.AttachParameter(command, p);
-			}
+			for (int i = 0; i < commandParameters.Length; i++)
+				_dataProvider.AttachParameter(command, commandParameters[i]);
 		}
 
 		private static readonly Dictionary<string, IDbDataParameter[]> _paramCache =
@@ -997,7 +995,7 @@ namespace BLToolkit.Data
 
 			foreach (MemberMapper mm in om)
 			{
-				string name  = _dataProvider.Convert(mm.Name, ConvertType.NameToParameter).ToString();
+				string name = _dataProvider.Convert(mm.Name, ConvertType.NameToParameter).ToString();
 
 				if (Command.Parameters.Contains(name))
 				{
@@ -2225,6 +2223,11 @@ namespace BLToolkit.Data
 				{
 					if (_dataProvider.InitParameter(p))
 						continue;
+
+					// It forces parameter's filed 'MetaType' to be set.
+					// Same for p.Size = p.Size below.
+					//
+					p.DbType = p.DbType;
 
 					if (p.Value is string)
 					{

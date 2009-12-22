@@ -411,11 +411,11 @@ GO
 DROP TABLE GrandChild
 GO
 
-CREATE TABLE Parent      (ParentID int, Value1 int)
+CREATE TABLE Parent     (ParentID int, Value1 int)
 GO
-CREATE TABLE Child       (ParentID int, ChildID int)
+CREATE TABLE Child      (ParentID int, ChildID int)
 GO
-CREATE TABLE GrandChild  (ParentID int, ChildID int, GrandChildID int)
+CREATE TABLE GrandChild (ParentID int, ChildID int, GrandChildID int)
 GO
 
 
@@ -427,6 +427,7 @@ CREATE TABLE LinqDataTypes
 	ID            int,
 	MoneyValue    decimal(10,4),
 	DateTimeValue datetime,
-	BoolValue     boolean
+	BoolValue     boolean,
+	GuidValue     char(36)
 )
 GO

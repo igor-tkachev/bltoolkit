@@ -109,17 +109,6 @@ namespace BLToolkit.Data.DataProvider
 			}
 		}
 
-		public override bool InitParameter(IDbDataParameter parameter)
-		{
-			// This mysterious line of code required to fix a bug in MsSql.
-			// It forces parameter's filed 'MetaType' to be set.
-			// Same for p.Size = p.Size below.
-			//
-			parameter.DbType = parameter.DbType;
-
-			return false;
-		}
-
 #if FW3
 		public override void SetUserDefinedType(IDbDataParameter parameter, string typeName)
 		{

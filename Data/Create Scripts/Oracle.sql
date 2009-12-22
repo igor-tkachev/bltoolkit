@@ -590,6 +590,7 @@ CREATE TABLE LinqDataTypes
 	ID            int,
 	MoneyValue    decimal(10,4),
 	DateTimeValue timestamp,
-	BoolValue     smallint
+	BoolValue     smallint,
+	GuidValue     raw(16)
 )
 /

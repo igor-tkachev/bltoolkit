@@ -2579,10 +2579,15 @@ namespace BLToolkit.Data.Linq
 						{
 							var pi = parseInfo.ConvertTo<MemberExpression>();
 							var ma = (MemberExpression)parseInfo.Expr;
-							var ef = _info.SqlProvider.ConvertMember(ma.Member);
+							var l  = _info.SqlProvider.ConvertMember(ma.Member);
 
-							if (ef != null)
+							if (l != null)
 							{
+								var ef = l.Body;
+
+								if (ef is UnaryExpression)
+									ef = ((UnaryExpression)ef).Operand;
+
 								var pie = parseInfo.Parent.Replace(ef, null).Walk(wpi =>
 								{
 									if (wpi.NodeType == ExpressionType.Parameter)
@@ -2648,10 +2653,21 @@ namespace BLToolkit.Data.Linq
 							if (e.Method.DeclaringType == typeof(Enumerable))
 								return ParseEnumerable(pi, queries);
 
-							var ef = _info.SqlProvider.ConvertMember(e.Method);
+							var lambda = _info.SqlProvider.ConvertMember(e.Method);
 
-							if (ef != null)
+							if (lambda != null)
 							{
+								var ef = lambda.Body;
+
+								if (ef is UnaryExpression)
+									ef = ((UnaryExpression)ef).Operand;
+
+								var parms = new Dictionary<string,int>(lambda.Parameters.Count);
+								var pn    = e.Method.IsStatic ? 0 : -1;
+
+								foreach (var p in lambda.Parameters)
+									parms.Add(p.Name, pn++);
+
 								var pie = parseInfo.Parent.Replace(ef, null).Walk(wpi =>
 								{
 									if (wpi.NodeType == ExpressionType.Parameter)
@@ -2661,16 +2677,17 @@ namespace BLToolkit.Data.Linq
 
 										var pe = (ParameterExpression)wpi.Expr;
 
-										if (pe.Name == "obj")
+										var n = parms[pe.Name];
+
+										if (n < 0)
 										{
 											expr   = e.Object;
 											fparam = () => pi.Property(MethodCall.Object);
 										}
 										else
 										{
-											var i  = int.Parse(pe.Name.Substring(1));
-											expr   = e.Arguments[i];
-											fparam = () => pi.Index(e.Arguments, MethodCall.Arguments, i);
+											expr   = e.Arguments[n];
+											fparam = () => pi.Index(e.Arguments, MethodCall.Arguments, n);
 										}
 
 										if (expr.NodeType == ExpressionType.MemberAccess)
@@ -2973,10 +2990,17 @@ namespace BLToolkit.Data.Linq
 				case ExpressionType.MemberAccess:
 					{
 						var pi = parseInfo.ConvertTo<MemberExpression>();
-						var ef = _info.SqlProvider.ConvertMember(pi.Expr.Member);
+						var l  = _info.SqlProvider.ConvertMember(pi.Expr.Member);
 
-						if (ef != null)
+						if (l != null)
+						{
+							var ef = l.Body;
+
+							if (ef is UnaryExpression)
+								ef = ((UnaryExpression)ef).Operand;
+
 							return IsServerSideOnly(pi.Parent.Replace(ef, null));
+						}
 
 						var attr = GetFunctionAttribute(pi.Expr.Member);
 
@@ -3002,10 +3026,17 @@ namespace BLToolkit.Data.Linq
 						}
 						else
 						{
-							var ef = _info.SqlProvider.ConvertMember(e.Method);
+							var lambda = _info.SqlProvider.ConvertMember(e.Method);
 
-							if (ef != null)
+							if (lambda != null)
+							{
+								var ef = lambda.Body;
+
+								if (ef is UnaryExpression)
+									ef = ((UnaryExpression)ef).Operand;
+
 								return IsServerSideOnly(pi.Parent.Replace(ef, null));
+							}
 
 							var attr = GetFunctionAttribute(e.Method);
 
@@ -3317,7 +3348,11 @@ namespace BLToolkit.Data.Linq
 						return p;
 
 					if (left.NodeType == ExpressionType.New || right.NodeType == ExpressionType.New)
-						return ParseNewObjectComparison(nodeType, left, right, queries);
+					{
+						p = ParseNewObjectComparison(nodeType, left, right, queries);
+						if (p != null)
+							return p;
+					}
 
 					break;
 			}
@@ -3633,8 +3668,11 @@ namespace BLToolkit.Data.Linq
 				right = temp;
 			}
 
-			var newExpr  = (NewExpression)left.Expr;
 			var newRight = right.Expr as NewExpression;
+			var newExpr  = (NewExpression)left.Expr;
+
+			if (newExpr.Members == null)
+				return null;
 
 			for (var i = 0; i < newExpr.Arguments.Count; i++)
 			{

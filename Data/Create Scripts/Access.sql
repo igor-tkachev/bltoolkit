@@ -261,6 +261,7 @@ CREATE TABLE LinqDataTypes
 	ID            int,
 	MoneyValue    decimal(10,4),
 	DateTimeValue datetime,
-	BoolValue     bit
+	BoolValue     bit,
+	GuidValue     uniqueidentifier
 )
 GO

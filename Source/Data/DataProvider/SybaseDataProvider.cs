@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
 using System.Text;
@@ -157,19 +158,26 @@ namespace BLToolkit.Data.DataProvider
 		{
 			base.PrepareCommand(ref commandType, ref commandText, ref commandParameters);
 
-			if (commandType == CommandType.Text && commandParameters != null)
+			List<IDbDataParameter> list = null;
+
+			if (commandParameters != null) for (int i = 0; i < commandParameters.Length; i++)
 			{
-				ArrayList list = null;
+				IDbDataParameter p = commandParameters[i];
 
-				for (int i = 0; i < commandParameters.Length; i++)
+				if (p.Value is Guid)
 				{
-					IDbDataParameter p = commandParameters[i];
+					p.Value  = ((Guid)p.Value).ToByteArray();
+					p.DbType = DbType.Binary;
+					p.Size   = 16;
+				}
 
+				if (commandType == CommandType.Text)
+				{
 					if (commandText.IndexOf(p.ParameterName) < 0)
 					{
 						if (list == null)
 						{
-							list = new ArrayList(commandParameters.Length);
+							list = new List<IDbDataParameter>(commandParameters.Length);
 
 							for (int j = 0; j < i; j++)
 								list.Add(commandParameters[j]);
@@ -181,10 +189,10 @@ namespace BLToolkit.Data.DataProvider
 							list.Add(p);
 					}
 				}
-
-				if (list != null)
-					commandParameters = (IDbDataParameter[])list.ToArray(typeof(IDbDataParameter));
 			}
+
+			if (list != null)
+				commandParameters = list.ToArray();
 		}
 
 		#region DataReaderEx

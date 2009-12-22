@@ -74,10 +74,17 @@ namespace BLToolkit.Data.DataProvider
 
 		public override void PrepareCommand(ref CommandType commandType, ref string commandText, ref IDbDataParameter[] commandParameters)
 		{
-			if (commandParameters != null)
-				foreach (var p in commandParameters)
-					if (p.DbType == DbType.Boolean)
-						p.Value = (bool)p.Value ? 1 : 0;
+			if (commandParameters != null) foreach (var p in commandParameters)
+			{
+				if (p.Value is bool)
+					p.Value = (bool)p.Value ? 1 : 0;
+				else if (p.Value is Guid)
+				{
+					p.Value  = ((Guid)p.Value).ToByteArray();
+					p.DbType = DbType.Binary;
+					p.Size   = 16;
+				}
+			}
 		}
 	}
 }

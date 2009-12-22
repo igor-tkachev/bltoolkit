@@ -27,7 +27,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		bool           IsCountSubQuerySupported  { get; }
 
 #if FW3
-		Expression     ConvertMember    (MemberInfo mi);
+		LambdaExpression ConvertMember    (MemberInfo mi);
 #endif
 	}
 }

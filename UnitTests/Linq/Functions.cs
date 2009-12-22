@@ -3,6 +3,7 @@ using System.Linq;
 
 using NUnit.Framework;
 
+using BLToolkit.Data.DataProvider;
 using BLToolkit.Data.Linq;
 
 namespace Data.Linq
@@ -15,15 +16,9 @@ namespace Data.Linq
 		[Test]
 		public void Contains1()
 		{
-			var expected =
-				from p in Parent
-				where new[] { 1, 2 }.Contains(p.ParentID)
-				select p;
-
-			ForEachProvider(db => AreEqual(expected,
-				from p in db.Parent
-				where new[] { 1, 2 }.Contains(p.ParentID)
-				select p));
+			ForEachProvider(db => AreEqual(
+				from p in    Parent where new[] { 1, 2 }.Contains(p.ParentID) select p,
+				from p in db.Parent where new[] { 1, 2 }.Contains(p.ParentID) select p));
 		}
 
 		[Test]
@@ -31,15 +26,9 @@ namespace Data.Linq
 		{
 			var arr = new[] { 1, 2 };
 
-			var expected =
-				from p in Parent
-				where arr.Contains(p.ParentID)
-				select p;
-
-			ForEachProvider(db => AreEqual(expected,
-				from p in db.Parent
-				where arr.Contains(p.ParentID)
-				select p));
+			ForEachProvider(db => AreEqual(
+				from p in    Parent where arr.Contains(p.ParentID) select p,
+				from p in db.Parent where arr.Contains(p.ParentID) select p));
 		}
 
 		[Test]
@@ -141,6 +130,22 @@ namespace Data.Linq
 				AreEqual(
 					   Customer.Where(c => !c.Address.Equals(null)),
 					db.Customer.Where(c => !c.Address.Equals(null)));
+		}
+
+		[Test]
+		public void NewGuid1()
+		{
+			ForEachProvider(new[] { ProviderName.DB2, ProviderName.Informix, ProviderName.PostgreSQL, ProviderName.SQLite, ProviderName.Access }, db => AreEqual(
+				from p in    Types where p.GuidValue != Sql.NewGuid() select p.GuidValue,
+				from p in db.Types where p.GuidValue != Sql.NewGuid() select p.GuidValue));
+		}
+
+
+		[Test]
+		public void NewGuid2()
+		{
+			ForEachProvider(new[] { ProviderName.DB2, ProviderName.Informix, ProviderName.PostgreSQL, ProviderName.SQLite, ProviderName.Access }, db =>
+				Assert.AreNotEqual(Guid.Empty, (from p in db.Types select Sql.NewGuid()).First()));
 		}
 	}
 }

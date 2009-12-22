@@ -182,32 +182,67 @@ namespace BLToolkit.Data.DataProvider
 
 		public override void PrepareCommand(ref CommandType commandType, ref string commandText, ref IDbDataParameter[] commandParameters)
 		{
-			#region "smart" input-output parameter detection
-
-			if (commandType == CommandType.StoredProcedure && IsInOutParameterEmulation)
+			if (commandParameters != null) foreach (IDbDataParameter par in commandParameters)
 			{
-				foreach (IDbDataParameter par in commandParameters)
+				if (par.Value is bool)
+				{
+					string value = (bool)par.Value ? "1" : "0";
+					par.DbType = DbType.AnsiString;
+					par.Value  = value;
+					par.Size   = value.Length;
+				}
+				else if (par.Value is Guid)
+				{
+					string value = par.Value.ToString().ToUpper();
+					par.DbType = DbType.AnsiStringFixedLength;
+					par.Value  = value;
+					par.Size   = value.Length;
+				}
+
+				#region "smart" input-output parameter detection
+
+				if (commandType == CommandType.StoredProcedure && IsInOutParameterEmulation)
 				{
 					string           iParameterName  = GetInputParameterName(par.ParameterName);
 					IDbDataParameter fakeIOParameter = GetParameter(iParameterName, commandParameters);
 
-					if (fakeIOParameter == null)
-						continue;
+					if (fakeIOParameter != null)
+					{
+						fakeIOParameter.Value = par.Value;
 
-					fakeIOParameter.Value = par.Value;
+						// direction should be output, or parameter mistmath for procedure exception
+						// would be thrown
+						par.Direction = ParameterDirection.Output;
 
-					// direction should be output, or parameter mistmath for procedure exception
-					// would be thrown
-					par.Direction = ParameterDirection.Output;
-
-					// direction should be Input
-					fakeIOParameter.Direction = ParameterDirection.Input;
+						// direction should be Input
+						fakeIOParameter.Direction = ParameterDirection.Input;
+					}
 				}
+
+				#endregion
 			}
 
-			#endregion
-
 			base.PrepareCommand(ref commandType, ref commandText, ref commandParameters);
+		}
+
+		public override bool InitParameter(IDbDataParameter parameter)
+		{
+			if (parameter.Value is bool)
+			{
+				string value = (bool)parameter.Value ? "1" : "0";
+				parameter.DbType = DbType.AnsiString;
+				parameter.Value  = value;
+				parameter.Size   = value.Length;
+			}
+			else if (parameter.Value is Guid)
+			{
+				string value = parameter.Value.ToString().ToUpper();
+				parameter.DbType = DbType.AnsiStringFixedLength;
+				parameter.Value  = value;
+				parameter.Size   = value.Length;
+			}
+
+			return base.InitParameter(parameter);
 		}
 
 		public override void Configure(System.Collections.Specialized.NameValueCollection attributes)
@@ -269,7 +304,7 @@ namespace BLToolkit.Data.DataProvider
 
 			public new DateTime GetDateTime(int i)
 			{
-				var dt = DataReader.GetDateTime(i);
+				DateTime dt = DataReader.GetDateTime(i);
 
 				if (dt.Year == 1970 && dt.Month == 1 && dt.Day == 1)
 					return new DateTime(1, 1, 1, dt.Hour, dt.Minute, dt.Second, dt.Millisecond);

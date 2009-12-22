@@ -85,5 +85,21 @@ namespace Data.Linq
 				from p in from t in    Types select new { t.MoneyValue, b = !t.BoolValue } where p.b select p.MoneyValue,
 				from p in from t in db.Types select new { t.MoneyValue, b = !t.BoolValue } where p.b select p.MoneyValue));
 		}
+
+		[Test]
+		public void GuidNew()
+		{
+			ForEachProvider(db => AreEqual(
+				from p in    Types where p.GuidValue != Guid.NewGuid() select p.GuidValue,
+				from p in db.Types where p.GuidValue != Guid.NewGuid() select p.GuidValue));
+		}
+
+		[Test]
+		public void Guid1()
+		{
+			ForEachProvider(db => AreEqual(
+				from p in    Types where p.GuidValue == new Guid("D2F970C0-35AC-4987-9CD5-5BADB1757436") select p.GuidValue,
+				from p in db.Types where p.GuidValue == new Guid("D2F970C0-35AC-4987-9CD5-5BADB1757436") select p.GuidValue));
+		}
 	}
 }

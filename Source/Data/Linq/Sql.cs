@@ -2,11 +2,11 @@
 using System.Data.Linq.SqlClient;
 using System.Globalization;
 using System.Reflection;
-using BLToolkit.Reflection;
 
 namespace BLToolkit.Data.Linq
 {
 	using Data.Sql;
+	using Reflection;
 
 	public static class Sql
 	{
@@ -17,6 +17,20 @@ namespace BLToolkit.Data.Linq
 		public static T OnServer<T>(T obj)
 		{
 			return obj;
+		}
+
+		#endregion
+
+		#region Guid Functions
+
+		[SqlFunction("Oracle",    "Sys_Guid", ServerSideOnly=true)]
+		[SqlFunction("Firebird",  "Gen_Uuid", ServerSideOnly=true)]
+		[SqlFunction("MySql",     "Uuid",     ServerSideOnly=true)]
+		[SqlFunction("SQLite",    "Uuid",     ServerSideOnly=true)]
+		[SqlFunction(             "NewID",    ServerSideOnly=true)]
+		public static Guid NewGuid()
+		{
+			return Guid.NewGuid();
 		}
 
 		#endregion
@@ -138,12 +152,10 @@ namespace BLToolkit.Data.Linq
 		[SqlProperty("SqlCe",      "NChar",          ServerSideOnly=true)]
 		[SqlProperty(              "Char",           ServerSideOnly=true)] public static String  DefaultChar                              { get { return ""; } }
 
-		[SqlFunction("DB2",        "Char",           ServerSideOnly=true)]
 		[SqlFunction("MySql",      "Char",           ServerSideOnly=true)]
 		[SqlFunction("SqlCe",      "NVarChar",       ServerSideOnly=true)]
 		[SqlFunction(                                ServerSideOnly=true)] public static String         VarChar(int length)               {       return ""; }
 
-		[SqlProperty("DB2",        "Char",           ServerSideOnly=true)]
 		[SqlProperty("MySql",      "Char",           ServerSideOnly=true)]
 		[SqlProperty("SqlCe",      "NVarChar",       ServerSideOnly=true)]
 		[SqlProperty(              "VarChar",        ServerSideOnly=true)] public static String  DefaultVarChar                           { get { return ""; } }

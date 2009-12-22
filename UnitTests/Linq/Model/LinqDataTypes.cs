@@ -8,10 +8,11 @@ namespace Data.Linq.Model
 		public decimal  MoneyValue;
 		public DateTime DateTimeValue;
 		public bool     BoolValue;
+		public Guid     GuidValue;
 
 		public override bool Equals(object obj)
 		{
-			return base.Equals(obj);
+			return Equals(obj as LinqDataTypes);
 		}
 
 		public bool Equals(LinqDataTypes other)
@@ -22,6 +23,7 @@ namespace Data.Linq.Model
 				other.ID            == ID            &&
 				other.MoneyValue    == MoneyValue    &&
 				other.BoolValue     == BoolValue     &&
+				other.GuidValue     == GuidValue     &&
 				other.DateTimeValue == DateTimeValue;
 		}
 
@@ -53,5 +55,6 @@ namespace Data.Linq.Model
 		public decimal   MoneyValue;
 		public DateTime? DateTimeValue;
 		public bool?     BoolValue;
+		public Guid?     GuidValue;
 	}
 }

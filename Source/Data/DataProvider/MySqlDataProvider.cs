@@ -11,7 +11,6 @@ using MySql.Data.MySqlClient;
 namespace BLToolkit.Data.DataProvider
 {
 	using Sql.SqlProvider;
-	using Common;
 
 	public class MySqlDataProvider :  DataProviderBase
 	{

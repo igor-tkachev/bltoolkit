@@ -24,7 +24,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			return null;
 		}
 
-		public virtual Expression ConvertMember(MemberInfo mi)
+		public virtual LambdaExpression ConvertMember(MemberInfo mi)
 		{
 			BaseExpressor expr;
 
@@ -56,14 +56,11 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		protected abstract class BaseExpressor
 		{
-			public Expression Expr;
+			public LambdaExpression Expr;
 
 			protected void Set(LambdaExpression func)
 			{
-				Expr = func.Body;
-
-				if (Expr is UnaryExpression)
-					Expr = ((UnaryExpression)func.Body).Operand;
+				Expr = func;
 			}
 		}
 
@@ -106,7 +103,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			{ MI(() => "".ToUpper    ()               ), new F<S,S>      ( obj           => Sql.Upper(obj)) },
 			{ MI(() => "".CompareTo  ("")             ), new F<S,S,I>    ((obj,p0)       => ConvertToCaseCompareTo(obj, p0) ) },
 			{ MI(() => "".CompareTo  (1)              ), new F<S,O,I>    ((obj,p0)       => ConvertToCaseCompareTo(obj, p0.ToString()) ) },
-			{ MI(() => string.IsNullOrEmpty("")       ), new F<S,S,B>    ((obj,p0)       => p0 == null || p0.Length == 0 ) },
+			{ MI(() => string.IsNullOrEmpty("")       ), new F<S,B>      (     p0        => p0 == null || p0.Length == 0 ) },
 
 			{ MI(() => AltStuff      ("",0,0,"")),       new F<S,I,I,S,S>((p0, p1,p2,p3) => Sql.Left(p0, p1 - 1) + p3 + Sql.Right(p0, p0.Length - (p1 + p2 - 1))) },
 
