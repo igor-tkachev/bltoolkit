@@ -494,8 +494,8 @@ GO
 CREATE TABLE GrandChild  (ParentID int, ChildID int, GrandChildID int)
 GO
 
-
-DROP TABLE LinqDataTypes
+IF EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID('LinqDataTypes') AND type in (N'U'))
+BEGIN DROP TABLE LinqDataTypes END
 GO
 
 CREATE TABLE LinqDataTypes
