@@ -1124,8 +1124,8 @@ namespace BLToolkit.Data.DataProvider
 				: base(mappingSchema, dataReader)
 			{
 #if FW3
-				_dataReader = dataReader is OracleDataReaderEx ?
-					(OracleDataReader)((OracleDataReaderEx)dataReader).DataReader :
+				_dataReader = dataReader is OracleDataReaderEx?
+					((OracleDataReaderEx)dataReader).DataReader:
 					(OracleDataReader)dataReader;
 #else
 				_dataReader = (OracleDataReader)dataReader;
@@ -1205,8 +1205,14 @@ namespace BLToolkit.Data.DataProvider
 				NameOrIndexParameter nameOrIndex)
 				: base(mappingSchema, dataReader, nameOrIndex)
 			{
+#if FW3
+				_dataReader = dataReader is OracleDataReaderEx?
+					((OracleDataReaderEx)dataReader).DataReader:
+					(OracleDataReader)dataReader;
+#else
 				_dataReader = (OracleDataReader)dataReader;
-				_fieldType  = _dataReader.GetProviderSpecificFieldType(Index);
+#endif
+				_fieldType = _dataReader.GetProviderSpecificFieldType(Index);
 
 				if (_fieldType != typeof(OracleXmlType) && _fieldType != typeof(OracleBlob))
 					_fieldType = _dataReader.GetFieldType(Index);

@@ -197,23 +197,23 @@ namespace BLToolkit.Data.DataProvider
 
 		public override void AttachParameter(IDbCommand command, IDbDataParameter parameter)
 		{
-            // Do some magic to workaround 'Data type mismatch in criteria expression' error
-            // in JET for some european locales.
-            //
-            if (parameter.Value is DateTime)
-            {
-                // OleDbType.DBTimeStamp is locale aware, OleDbType.Date is locale neutral.
-                //
-                ((OleDbParameter)parameter).OleDbType = OleDbType.Date;
-            }
-            else if (parameter.Value is decimal)
-            {
-                // OleDbType.Decimal is locale aware, OleDbType.Currency is locale neutral.
-                //
-                ((OleDbParameter)parameter).OleDbType = OleDbType.Currency;
-            }
+			// Do some magic to workaround 'Data type mismatch in criteria expression' error
+			// in JET for some european locales.
+			//
+			if (parameter.Value is DateTime)
+			{
+				// OleDbType.DBTimeStamp is locale aware, OleDbType.Date is locale neutral.
+				//
+				((OleDbParameter)parameter).OleDbType = OleDbType.Date;
+			}
+			else if (parameter.Value is decimal)
+			{
+				// OleDbType.Decimal is locale aware, OleDbType.Currency is locale neutral.
+				//
+				((OleDbParameter)parameter).OleDbType = OleDbType.Currency;
+			}
 
-		    base.AttachParameter(command, parameter);
+			base.AttachParameter(command, parameter);
 		}
 
 		public new const string NameString = DataProvider.ProviderName.Access;
