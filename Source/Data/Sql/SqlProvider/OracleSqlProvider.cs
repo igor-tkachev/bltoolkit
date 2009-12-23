@@ -204,7 +204,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 				case SqlDbType.TinyInt    : sb.Append("Number(3)");       break;
 				case SqlDbType.Money      : sb.Append("Number(19,4)");    break;
 				case SqlDbType.SmallMoney : sb.Append("Number(10,4)");    break;
-				case SqlDbType.VarChar    :
+				case SqlDbType.NVarChar   :
 					sb.Append("VarChar2");
 					if (type.Length > 0)
 						sb.Append('(').Append(type.Length).Append(')');

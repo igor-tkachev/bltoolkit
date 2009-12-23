@@ -982,6 +982,18 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		protected void BuildBinaryExpression(StringBuilder sb, string op, SqlBinaryExpression expr)
 		{
+			if (expr.Operation == "*" && expr.Expr1 is SqlValue)
+			{
+				SqlValue value = (SqlValue)expr.Expr1;
+
+				if (value.Value is int && (int)value.Value == -1)
+				{
+					sb.Append('-');
+					BuildExpression(sb, GetPrecedence(expr), expr.Expr2);
+					return;
+				}
+			}
+
 			BuildExpression(sb, GetPrecedence(expr), expr.Expr1);
 			sb.Append(' ').Append(op).Append(' ');
 			BuildExpression(sb, GetPrecedence(expr), expr.Expr2);
@@ -1504,7 +1516,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			}
 			else if (to.Length > 0)
 			{
-				int maxLength = GetMaxLength(from);
+				int maxLength = to.Type == typeof(string) ? GetMaxDisplaySize(from) : GetMaxLength(from);
 				int newLength = maxLength >= 0 ? Math.Min(to.Length, maxLength) : to.Length;
 
 				if (to.Length != newLength)
@@ -1561,7 +1573,24 @@ namespace BLToolkit.Data.Sql.SqlProvider
 									}
 								}
 							}
-							else if (v2.Value is string && (string)v2.Value == "") return be.Expr1;
+							else if (v2.Value is string)
+							{
+								if ((string)v2.Value == "") return be.Expr1;
+
+								if (be.Expr1 is SqlBinaryExpression)
+								{
+									SqlBinaryExpression be1 = (SqlBinaryExpression)be.Expr1;
+
+									if (be1.Expr2 is SqlValue)
+									{
+										return new SqlBinaryExpression(
+											be1.SystemType,
+											be1.Expr1,
+											be1.Operation,
+											new SqlValue(string.Concat(((SqlValue)be1.Expr2).Value, v2.Value)));
+									}
+								}
+							}
 						}
 
 						if (be.Expr1 is SqlValue && be.Expr2 is SqlValue)
@@ -1647,8 +1676,32 @@ namespace BLToolkit.Data.Sql.SqlProvider
 						if (be.Expr1 is SqlValue)
 						{
 							SqlValue v1 = (SqlValue)be.Expr1;
-							if (v1.Value is int && (int)v1.Value == 1) return be.Expr2;
-							if (v1.Value is int && (int)v1.Value == 0) return new SqlValue(0);
+							if (v1.Value is int)
+							{
+								int v1v = (int)v1.Value;
+
+								switch (v1v)
+								{
+									case  0 : return new SqlValue(0);
+									case  1 : return be.Expr2;
+									default :
+										{
+											SqlBinaryExpression be2 = be.Expr2 as SqlBinaryExpression;
+
+											if (be2 != null && be2.Operation == "*" && be2.Expr1 is SqlValue)
+											{
+												SqlValue be2v1 = be2.Expr1 as SqlValue;
+
+												if (be2v1.Value is int)
+													return ConvertExpression(
+														new SqlBinaryExpression(be2.SystemType, new SqlValue(v1v * (int)be2v1.Value), "*", be2.Expr2));
+											}
+
+											break;
+										}
+
+								}
+							}
 						}
 
 						if (be.Expr2 is SqlValue)

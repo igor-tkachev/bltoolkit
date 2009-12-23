@@ -166,9 +166,9 @@ namespace BLToolkit.Data.DataProvider
 
 				if (p.Value is Guid)
 				{
-					p.Value  = ((Guid)p.Value).ToByteArray();
-					p.DbType = DbType.Binary;
-					p.Size   = 16;
+					p.Value  = p.Value.ToString();
+					p.DbType = DbType.StringFixedLength;
+					p.Size   = 36;
 				}
 
 				if (commandType == CommandType.Text)

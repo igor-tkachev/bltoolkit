@@ -29,11 +29,11 @@ namespace BLToolkit.Data.Linq
 			{
 				var ex = func.Body;
 
+				if (ex is UnaryExpression)
+					ex = ((UnaryExpression)ex).Operand;
+
 				//if (ex is MemberExpression)
 				//	return ((PropertyInfo)((MemberExpression)ex).Member).GetGetMethod();
-
-				if (ex is UnaryExpression)
-					ex = ((UnaryExpression)func.Body).Operand;
 
 				return ((MethodCallExpression)ex).Method;
 			}
@@ -44,11 +44,12 @@ namespace BLToolkit.Data.Linq
 			var ex = func.Body;
 
 			if (ex is UnaryExpression)
-				ex = ((UnaryExpression)func.Body).Operand;
+				ex = ((UnaryExpression)ex).Operand;
 
-			return ex is MemberExpression?
-				((MemberExpression)    ex).Member:
-				((MethodCallExpression)ex).Method;
+			return
+				ex is MemberExpression     ? ((MemberExpression)    ex).Member :
+				ex is MethodCallExpression ? ((MethodCallExpression)ex).Method :
+				                 (MemberInfo)((NewExpression)       ex).Constructor;
 		}
 
 		public class Binary : Expressor<BinaryExpression>

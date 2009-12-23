@@ -53,7 +53,7 @@ namespace BLToolkit.Data.Linq
 		}
 
 		[CLSCompliant(false)]
-		[SqlFunction("Convert", 1, 0)]
+		[SqlFunction("$Convert$", 1, 2, 0)]
 		public static TTo Convert<TTo,TFrom>(TFrom obj)
 		{
 			return Common.ConvertTo<TTo>.From(obj);
@@ -62,7 +62,7 @@ namespace BLToolkit.Data.Linq
 		public static class ConvertTo<TTo>
 		{
 			[CLSCompliant(false)]
-			[SqlFunction("Convert", 1, 0)]
+			[SqlFunction("$Convert$", 1, 2, 0)]
 			public static TTo From<TFrom>(TFrom obj)
 			{
 				return Common.ConvertTo<TTo>.From(obj);
@@ -70,9 +70,9 @@ namespace BLToolkit.Data.Linq
 		}
 
 		[SqlExpression("{0}")]
-		public static TimeSpan DateToTime(DateTime date)
+		public static TimeSpan? DateToTime(DateTime? date)
 		{
-			return new TimeSpan(date.Ticks);
+			return date == null ? null : (TimeSpan?)new TimeSpan(date.Value.Ticks);
 		}
 
 		[SqlProperty("Oracle",     "Number(19)",     ServerSideOnly=true)]
@@ -191,9 +191,9 @@ namespace BLToolkit.Data.Linq
 		[SqlFunction("MsSql2008", "Len")]
 		[SqlFunction("SqlCe",     "Len")]
 		[SqlFunction("Sybase",    "Len")]
-		public static int Length(string str)
+		public static int? Length(string str)
 		{
-			return (str ?? "").Length;
+			return str == null ? null : (int?)str.Length;
 		}
 
 		[SqlFunction]
@@ -203,21 +203,23 @@ namespace BLToolkit.Data.Linq
 		[SqlFunction  ("Oracle",   "Substr")]
 		[SqlFunction  ("SQLite",   "Substr")]
 		[SqlExpression("Firebird", "Substring({0} from {1} for {2})")]
-		public static string Substring(string str, int startIndex, int length)
+		public static string Substring(string str, int? startIndex, int? length)
 		{
-			return str.Substring(startIndex, length);
+			return str == null || startIndex == null || length == null ? null : str.Substring(startIndex.Value, length.Value);
 		}
 
 		[SqlFunction]
 		public static bool Like(string matchExpression, string pattern)
 		{
-			return SqlMethods.Like(matchExpression, pattern);
+			return matchExpression == null || pattern == null ? false : SqlMethods.Like(matchExpression, pattern);
 		}
 
 		[SqlFunction]
-		public static bool Like(string matchExpression, string pattern, char escapeCharacter)
+		public static bool Like(string matchExpression, string pattern, char? escapeCharacter)
 		{
-			return SqlMethods.Like(matchExpression, pattern, escapeCharacter);
+			return matchExpression == null || pattern == null || escapeCharacter == null ?
+				false :
+				SqlMethods.Like(matchExpression, pattern, escapeCharacter.Value);
 		}
 
 		[SqlFunction]
@@ -234,34 +236,34 @@ namespace BLToolkit.Data.Linq
 		[SqlFunction]
 		[SqlFunction("DB2",   "Locate")]
 		[SqlFunction("MySql", "Locate")]
-		public static int? CharIndex(string value, string str, int startLocation)
+		public static int? CharIndex(string value, string str, int? startLocation)
 		{
-			if (str == null || value == null)
+			if (str == null || value == null || startLocation == null)
 				return null;
 
-			return str.IndexOf(value, startLocation - 1) + 1;
+			return str.IndexOf(value, startLocation.Value - 1) + 1;
 		}
 
 		[SqlFunction]
 		[SqlFunction("DB2",   "Locate")]
 		[SqlFunction("MySql", "Locate")]
-		public static int? CharIndex(char value, string str)
+		public static int? CharIndex(char? value, string str)
 		{
-			if (str == null)
+			if (value == null || str == null)
 				return null;
 
-			return str.IndexOf(value) + 1;
+			return str.IndexOf(value.Value) + 1;
 		}
 
 		[SqlFunction]
 		[SqlFunction("DB2",   "Locate")]
 		[SqlFunction("MySql", "Locate")]
-		public static int? CharIndex(char value, string str, int startLocation)
+		public static int? CharIndex(char? value, string str, int? startLocation)
 		{
-			if (str == null)
+			if (str == null || value == null || startLocation == null)
 				return null;
 
-			return str.IndexOf(value, startLocation - 1) + 1;
+			return str.IndexOf(value.Value, startLocation.Value - 1) + 1;
 		}
 
 		[SqlFunction]
@@ -277,86 +279,119 @@ namespace BLToolkit.Data.Linq
 
 		[SqlFunction]
 		[SqlFunction("SQLite", "LeftStr")]
-		public static string Left(string str, int length)
+		public static string Left(string str, int? length)
 		{
-			return str == null || str.Length < length? null: str.Substring(1, length);
+			return length == null || str == null || str.Length < length? null: str.Substring(1, length.Value);
 		}
 
 		[SqlFunction]
 		[SqlFunction("SQLite", "RightStr")]
-		public static string Right(string str, int length)
+		public static string Right(string str, int? length)
 		{
-			return str == null || str.Length < length? null: str.Substring(str.Length - length);
+			return length == null || str == null || str.Length < length?
+				null :
+				str.Substring(str.Length - length.Value);
 		}
 
 		[SqlFunction]
-		public static string Stuff(string str, int startLocation, int length, string value)
+		public static string Stuff(string str, int? startLocation, int? length, string value)
 		{
-			return str.Remove(startLocation - 1, length).Insert(startLocation - 1, value);
+			return str == null || value == null || startLocation == null || length == null ?
+				null :
+				str.Remove(startLocation.Value - 1, length.Value).Insert(startLocation.Value - 1, value);
 		}
 
 		[SqlFunction]
-		public static string Space(int length)
+		public static string Space(int? length)
 		{
-			return "".PadRight(length);
+			return length == null ? null : "".PadRight(length.Value);
 		}
 
 		[SqlFunction(Name = "LPad")]
-		public static string PadLeft(string str, int totalWidth, char paddingChar)
+		public static string PadLeft(string str, int? totalWidth, char? paddingChar)
 		{
-			return str.PadLeft(totalWidth, paddingChar);
+			return str == null || totalWidth == null || paddingChar == null ?
+				null :
+				str.PadLeft(totalWidth.Value, paddingChar.Value);
 		}
 
 		[SqlFunction(Name = "RPad")]
-		public static string PadRight(string str, int totalWidth, char paddingChar)
+		public static string PadRight(string str, int? totalWidth, char? paddingChar)
 		{
-			return str.PadRight(totalWidth, paddingChar);
+			return str == null || totalWidth == null || paddingChar == null ?
+				null :
+				str.PadRight(totalWidth.Value, paddingChar.Value);
 		}
 
 		[SqlFunction]
 		[SqlFunction("Sybase", "Str_Replace")]
 		public static string Replace(string str, string oldValue, string newValue)
 		{
-			return str.Replace(oldValue, newValue);
+			return str == null || oldValue == null || newValue == null ?
+				null :
+				str.Replace(oldValue, newValue);
 		}
 
 		[SqlFunction]
 		[SqlFunction("Sybase", "Str_Replace")]
-		public static string Replace(string str, char oldValue, char newValue)
+		public static string Replace(string str, char? oldValue, char? newValue)
 		{
-			return str.Replace(oldValue, newValue);
+			return str == null || oldValue == null || newValue == null ?
+				null :
+				str.Replace(oldValue.Value, newValue.Value);
 		}
 
 		[SqlFunction]
 		public static string Trim(string str)
 		{
-			return str.Trim();
+			return str == null ? null : str.Trim();
 		}
 
-		[SqlFunction(Name = "LTrim")]
+		[SqlFunction("LTrim")]
 		public static string TrimLeft(string str)
 		{
-			return str.TrimStart();
+			return str == null ? null : str.TrimStart();
 		}
 
-		[SqlFunction(Name = "RTrim")]
+		[SqlFunction("RTrim")]
 		public static string TrimRight(string str)
 		{
-			return str.TrimEnd();
+			return str == null ? null : str.TrimEnd();
+		}
+
+		[SqlExpression("DB2", "Strip({0}, B, {1})")]
+		[SqlFunction]
+		public static string Trim(string str, char? ch)
+		{
+			return str == null || ch == null ? null : str.Trim(ch.Value);
+		}
+
+		[SqlExpression("DB2", "Strip({0}, L, {1})")]
+		[SqlFunction  (       "LTrim")]
+		public static string TrimLeft(string str, char? ch)
+		{
+			return str == null || ch == null ? null : str.TrimStart(ch.Value);
+		}
+
+		[SqlExpression("DB2", "Strip({0}, T, {1})")]
+		[SqlFunction  (       "RTrim")]
+		public static string TrimRight(string str, char? ch)
+		{
+			return str == null || ch == null ? null : str.TrimEnd(ch.Value);
 		}
 
 		[SqlFunction]
 		[SqlFunction("Access",   "LCase")]
 		public static string Lower(string str)
 		{
-			return str.ToLower();
+			return str == null ? null : str.ToLower();
 		}
 
 		[SqlFunction]
 		[SqlFunction("Access",   "UCase")]
 		public static string Upper(string str)
 		{
-			return str.ToUpper();
+			return str == null ? null : str.ToUpper();
 		}
 
 		#endregion
@@ -392,21 +427,27 @@ namespace BLToolkit.Data.Linq
 		}
 
 		[SqlFunction]
-		public static DateTime ToDate(int year, int month, int day, int hour, int minute, int second, int millisecond)
+		public static DateTime? ToDate(int? year, int? month, int? day, int? hour, int? minute, int? second, int? millisecond)
 		{
-			return new DateTime(year, month, day, hour, minute, second, millisecond);
+			return year == null || month == null || day == null || hour == null || minute == null || second == null || millisecond == null ?
+				(DateTime?)null :
+				new DateTime(year.Value, month.Value, day.Value, hour.Value, minute.Value, second.Value, millisecond.Value);
 		}
 
 		[SqlFunction]
-		public static DateTime ToDate(int year, int month, int day, int hour, int minute, int second)
+		public static DateTime? ToDate(int? year, int? month, int? day, int? hour, int? minute, int? second)
 		{
-			return new DateTime(year, month, day, hour, minute, second);
+			return year == null || month == null || day == null || hour == null || minute == null || second == null ?
+				(DateTime?)null :
+				new DateTime(year.Value, month.Value, day.Value, hour.Value, minute.Value, second.Value);
 		}
 
 		[SqlFunction]
-		public static DateTime ToDate(int year, int month, int day)
+		public static DateTime? ToDate(int? year, int? month, int? day)
 		{
-			return new DateTime(year, month, day);
+			return year == null || month == null || day == null ?
+				(DateTime?)null :
+				new DateTime(year.Value, month.Value, day.Value);
 		}
 
 		public enum DateParts
@@ -477,21 +518,24 @@ namespace BLToolkit.Data.Linq
 		[DatePart("MySql",      "Date_Add({{1}}, Interval {{0}} {0})",                      true,  new[] { null,                null,                      null,                  "Day",             null,              null,                  "Day",             null,                null,                    null,                    null                       }, 0, 1, 2)]
 		[DatePart("SQLite",     "DateTime({{1}}, '{{0}} {0}')",                             true,  new[] { null,                null,                      null,                  "Day",             null,              null,                  "Day",             null,                null,                    null,                    null                       }, 0, 1, 2)]
 		[DatePart("Access",     "DateAdd({0}, {{0}}, {{1}})",                               true,  new[] { "'yyyy'",            "'q'",                     "'m'",                 "'y'",             "'d'",             "'ww'",                "'w'",             "'h'",               "'n'",                   "'s'",                   null                       }, 0, 1, 2)]
-		public static DateTime DateAdd(DateParts part, double number, DateTime date)
+		public static DateTime? DateAdd(DateParts part, double? number, DateTime? date)
 		{
+			if (number == null || date == null)
+				return null;
+
 			switch (part)
 			{
-				case DateParts.Year        : return date.AddYears       ((int)number);
-				case DateParts.Quarter     : return date.AddMonths      ((int)number * 3);
-				case DateParts.Month       : return date.AddMonths      ((int)number);
-				case DateParts.DayOfYear   : return date.AddDays        (number);
-				case DateParts.Day         : return date.AddDays        (number);
-				case DateParts.Week        : return date.AddDays        (number * 7);
-				case DateParts.WeekDay     : return date.AddDays        (number);
-				case DateParts.Hour        : return date.AddHours       (number);
-				case DateParts.Minute      : return date.AddMinutes     (number);
-				case DateParts.Second      : return date.AddSeconds     (number);
-				case DateParts.Millisecond : return date.AddMilliseconds(number);
+				case DateParts.Year        : return date.Value.AddYears       ((int)number);
+				case DateParts.Quarter     : return date.Value.AddMonths      ((int)number * 3);
+				case DateParts.Month       : return date.Value.AddMonths      ((int)number);
+				case DateParts.DayOfYear   : return date.Value.AddDays        (number.Value);
+				case DateParts.Day         : return date.Value.AddDays        (number.Value);
+				case DateParts.Week        : return date.Value.AddDays        (number.Value * 7);
+				case DateParts.WeekDay     : return date.Value.AddDays        (number.Value);
+				case DateParts.Hour        : return date.Value.AddHours       (number.Value);
+				case DateParts.Minute      : return date.Value.AddMinutes     (number.Value);
+				case DateParts.Second      : return date.Value.AddSeconds     (number.Value);
+				case DateParts.Millisecond : return date.Value.AddMilliseconds(number.Value);
 			}
 
 			throw new InvalidOperationException();
@@ -507,21 +551,24 @@ namespace BLToolkit.Data.Linq
 		[DatePart("Oracle",     "To_Number(To_Char({{0}}, {0}))",    true,  new[] { "'YYYY'", "'Q'", "'MM'", "'DDD'",   "'DD'", "'WW'", "'D'",       "'HH'", "'MI'", "'SS'", "'FF'" }, 0, 1)]
 		[DatePart("SQLite",     "Cast(StrFTime({0}, {{0}}) as int)", true,  new[] { "'%Y'",   null,  "'%m'", "'%j'",    "'%d'", "'%W'", "'%w'",      "'%H'", "'%M'", "'%S'", "'%f'" }, 0, 1)]
 		[DatePart("Access",     "DatePart({0}, {{0}})",              true,  new[] { "'yyyy'", "'q'", "'m'",  "'y'",     "'d'",  "'ww'", "'w'",       "'h'",  "'n'",  "'s'",  null   }, 0, 1)]
-		public static int DatePart(DateParts part, DateTime date)
+		public static int? DatePart(DateParts part, DateTime? date)
 		{
+			if (date == null)
+				return null;
+
 			switch (part)
 			{
-				case DateParts.Year        : return date.Year;
-				case DateParts.Quarter     : return (date.Month - 1) / 3 + 1;
-				case DateParts.Month       : return date.Month;
-				case DateParts.DayOfYear   : return date.DayOfYear;
-				case DateParts.Day         : return date.Day;
-				case DateParts.Week        : return CultureInfo.CurrentCulture.Calendar.GetWeekOfYear(date, CalendarWeekRule.FirstDay, DayOfWeek.Sunday);
-				case DateParts.WeekDay     : return ((int)date.DayOfWeek + 1 + DateFirst + 6) % 7 + 1;
-				case DateParts.Hour        : return date.Hour;
-				case DateParts.Minute      : return date.Minute;
-				case DateParts.Second      : return date.Second;
-				case DateParts.Millisecond : return date.Millisecond;
+				case DateParts.Year        : return date.Value.Year;
+				case DateParts.Quarter     : return (date.Value.Month - 1) / 3 + 1;
+				case DateParts.Month       : return date.Value.Month;
+				case DateParts.DayOfYear   : return date.Value.DayOfYear;
+				case DateParts.Day         : return date.Value.Day;
+				case DateParts.Week        : return CultureInfo.CurrentCulture.Calendar.GetWeekOfYear(date.Value, CalendarWeekRule.FirstDay, DayOfWeek.Sunday);
+				case DateParts.WeekDay     : return ((int)date.Value.DayOfWeek + 1 + DateFirst + 6) % 7 + 1;
+				case DateParts.Hour        : return date.Value.Hour;
+				case DateParts.Minute      : return date.Value.Minute;
+				case DateParts.Second      : return date.Value.Second;
+				case DateParts.Millisecond : return date.Value.Millisecond;
 			}
 
 			throw new InvalidOperationException();
@@ -532,6 +579,72 @@ namespace BLToolkit.Data.Linq
 		{
 			get { return 7; }
 		}
+
+		[SqlFunction]
+		public static DateTime? MakeDateTime(int? year, int? month, int? day)
+		{
+			return year == null || month == null || day == null ?
+				(DateTime?)null :
+				new DateTime(year.Value, month.Value, day.Value);
+		}
+
+		[SqlFunction]
+		public static DateTime? MakeDateTime(int? year, int? month, int? day, int? hour, int? minute, int? second)
+		{
+			return year == null || month == null || day == null || hour == null || minute == null || second == null ?
+				(DateTime?)null :
+				new DateTime(year.Value, month.Value, day.Value, hour.Value, minute.Value, second.Value);
+		}
+
+		#endregion
+
+		#region Math Functions
+
+		[SqlFunction] public static Decimal? Abs    (Decimal? value)      { return value == null ? null : (Decimal?)Math.Abs    (value.Value); }
+		[SqlFunction] public static Double?  Abs    (Double?  value)      { return value == null ? null : (Double?) Math.Abs    (value.Value); }
+		[SqlFunction] public static Int16?   Abs    (Int16?   value)      { return value == null ? null : (Int16?)  Math.Abs    (value.Value); }
+		[SqlFunction] public static Int32?   Abs    (Int32?   value)      { return value == null ? null : (Int32?)  Math.Abs    (value.Value); }
+		[SqlFunction] public static Int64?   Abs    (Int64?   value)      { return value == null ? null : (Int64?)  Math.Abs    (value.Value); }
+		[CLSCompliant(false)]
+		[SqlFunction] public static SByte?   Abs    (SByte?   value)      { return value == null ? null : (SByte?)  Math.Abs    (value.Value); }
+		[SqlFunction] public static Single?  Abs    (Single?  value)      { return value == null ? null : (Single?) Math.Abs    (value.Value); }
+
+		[SqlFunction] public static Double?  Acos   (Double?  value)      { return value == null ? null : (Double?) Math.Acos   (value.Value); }
+		[SqlFunction] public static Double?  Asin   (Double?  value)      { return value == null ? null : (Double?) Math.Asin   (value.Value); }
+
+		[SqlFunction("Access", "Atn")]
+		[SqlFunction] public static Double?  Atan   (Double?  value)      { return value == null ? null : (Double?) Math.Atan   (value.Value); }
+
+		[CLSCompliant(false)]
+		[SqlFunction( "MsSql2008", "Atn2")]
+		[SqlFunction( "MsSql2005", "Atn2")]
+		[SqlFunction( "DB2",       "Atan2", 1, 0)]
+		[SqlFunction( "SqlCe",     "Atn2")]
+		[SqlFunction( "Sybase",    "Atn2")]
+		[SqlFunction] public static Double?  Atan2  (Double? x, Double? y) { return x == null || y == null? null : (Double?)Math.Atan2(x.Value, y.Value); }
+
+		[SqlFunction("Informix", "Ceil")]
+		[SqlFunction("Oracle",   "Ceil")]
+		[SqlFunction] public static Decimal? Ceiling(Decimal? value)      { return value == null ? null : (Decimal?)Math.Ceiling(value.Value); }
+		[SqlFunction("Informix", "Ceil")]
+		[SqlFunction("Oracle",   "Ceil")]
+		[SqlFunction] public static Double?  Ceiling(Double?  value)      { return value == null ? null : (Double?)Math.Ceiling(value.Value); }
+
+		[SqlFunction] public static Double?  Cos    (Double?  value)      { return value == null ? null : (Double?)Math.Cos    (value.Value); }
+
+		[SqlFunction(ServerSideOnly = true)]
+		              public static Double?  Cot    (Double?  value)      { throw new LinqException("The 'Cot' is server side only function."); }
+
+
+
+
+		[SqlFunction] public static Double?  Sin    (Double?  value)      { return value == null ? null : (Double?)Math.Sin    (value.Value); }
+
+
+		[SqlFunction("Access", "Int")]
+		[SqlFunction] public static Decimal? Floor  (Decimal? value)      { return value == null ? null : (Decimal?)Math.Floor  (value.Value); }
+		[SqlFunction("Access", "Int")]
+		[SqlFunction] public static Double?  Floor  (Double?  value)      { return value == null ? null : (Double?) Math.Floor  (value.Value); }
 
 		#endregion
 	}

@@ -193,7 +193,7 @@ namespace BLToolkit.Data.DataProvider
 				}
 				else if (par.Value is Guid)
 				{
-					string value = par.Value.ToString().ToUpper();
+					string value = par.Value.ToString();
 					par.DbType = DbType.AnsiStringFixedLength;
 					par.Value  = value;
 					par.Size   = value.Length;
@@ -236,7 +236,7 @@ namespace BLToolkit.Data.DataProvider
 			}
 			else if (parameter.Value is Guid)
 			{
-				string value = parameter.Value.ToString().ToUpper();
+				string value = parameter.Value.ToString();
 				parameter.DbType = DbType.AnsiStringFixedLength;
 				parameter.Value  = value;
 				parameter.Size   = value.Length;

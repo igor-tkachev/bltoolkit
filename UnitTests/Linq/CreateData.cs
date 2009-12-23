@@ -59,17 +59,17 @@ namespace Create
 
 				new SqlQuery<LinqDataTypes>().Insert(db, new[]
 				{
-					new LinqDataTypes { ID =  1, MoneyValue =  1.11m, DateTimeValue = new DateTime(2001, 1, 11, 1, 11, 21, 100), BoolValue = true,  GuidValue = new Guid("EF129165-6FFE-4DF9-BB6B-BB16E413C883") },
-					new LinqDataTypes { ID =  2, MoneyValue =  2.22m, DateTimeValue = new DateTime(2005, 5, 15, 5, 15, 25, 500), BoolValue = false, GuidValue = new Guid("BC663A61-7B40-4681-AC38-F9AAF55B706B") },
-					new LinqDataTypes { ID =  3, MoneyValue =  3.33m, DateTimeValue = new DateTime(2009, 9, 19, 9, 19, 29,  90), BoolValue = true,  GuidValue = new Guid("D2F970C0-35AC-4987-9CD5-5BADB1757436") },
-					new LinqDataTypes { ID =  4, MoneyValue =  4.33m, DateTimeValue = new DateTime(2009, 9, 20, 9, 19, 29,  90), BoolValue = false, GuidValue = new Guid("40932FDB-1543-4E4A-AC2C-CA371604FB4B") },
-					new LinqDataTypes { ID =  5, MoneyValue =  5.33m, DateTimeValue = new DateTime(2009, 9, 21, 9, 19, 29,  90), BoolValue = true,  GuidValue = new Guid("FEBE3ECA-CB5F-40B2-AD39-2979D312AFCA") },
-					new LinqDataTypes { ID =  6, MoneyValue =  6.33m, DateTimeValue = new DateTime(2009, 9, 22, 9, 19, 29,  90), BoolValue = false, GuidValue = new Guid("8D3C5D1D-47DB-4730-9FE7-968F6228A4C0") },
-					new LinqDataTypes { ID =  7, MoneyValue =  7.33m, DateTimeValue = new DateTime(2009, 9, 23, 9, 19, 29,  90), BoolValue = true,  GuidValue = new Guid("48094115-83AF-46DD-A906-BFF26EE21EE2") },
-					new LinqDataTypes { ID =  8, MoneyValue =  8.33m, DateTimeValue = new DateTime(2009, 9, 24, 9, 19, 29,  90), BoolValue = false, GuidValue = new Guid("C1139F1F-1335-4CD4-937E-92602F732DD3") },
-					new LinqDataTypes { ID =  9, MoneyValue =  9.33m, DateTimeValue = new DateTime(2009, 9, 25, 9, 19, 29,  90), BoolValue = true,  GuidValue = new Guid("46C5C512-3D4B-4CF7-B4E7-1DE080789E5D") },
-					new LinqDataTypes { ID = 10, MoneyValue = 10.33m, DateTimeValue = new DateTime(2009, 9, 26, 9, 19, 29,  90), BoolValue = false, GuidValue = new Guid("61B2BC55-147F-4B40-93ED-A4AA83602FEE") },
-					new LinqDataTypes { ID = 11, MoneyValue = 11.33m, DateTimeValue = new DateTime(2009, 9, 27, 9, 19, 29,  90), BoolValue = true,  GuidValue = new Guid("D3021D18-97F0-4DC0-98D0-F0C7DF4A1230") },
+					new LinqDataTypes { ID =  1, MoneyValue =  1.11m, DateTimeValue = new DateTime(2001, 1, 11, 1, 11, 21, 100), BoolValue = true,  GuidValue = new Guid("ef129165-6ffe-4df9-bb6b-bb16e413c883") },
+					new LinqDataTypes { ID =  2, MoneyValue =  2.22m, DateTimeValue = new DateTime(2005, 5, 15, 5, 15, 25, 500), BoolValue = false, GuidValue = new Guid("bc663a61-7b40-4681-ac38-f9aaf55b706b") },
+					new LinqDataTypes { ID =  3, MoneyValue =  3.33m, DateTimeValue = new DateTime(2009, 9, 19, 9, 19, 29,  90), BoolValue = true,  GuidValue = new Guid("d2f970c0-35ac-4987-9cd5-5badb1757436") },
+					new LinqDataTypes { ID =  4, MoneyValue =  4.33m, DateTimeValue = new DateTime(2009, 9, 20, 9, 19, 29,  90), BoolValue = false, GuidValue = new Guid("40932fdb-1543-4e4a-ac2c-ca371604fb4b") },
+					new LinqDataTypes { ID =  5, MoneyValue =  5.33m, DateTimeValue = new DateTime(2009, 9, 21, 9, 19, 29,  90), BoolValue = true,  GuidValue = new Guid("febe3eca-cb5f-40b2-ad39-2979d312afca") },
+					new LinqDataTypes { ID =  6, MoneyValue =  6.33m, DateTimeValue = new DateTime(2009, 9, 22, 9, 19, 29,  90), BoolValue = false, GuidValue = new Guid("8d3c5d1d-47db-4730-9fe7-968f6228a4c0") },
+					new LinqDataTypes { ID =  7, MoneyValue =  7.33m, DateTimeValue = new DateTime(2009, 9, 23, 9, 19, 29,  90), BoolValue = true,  GuidValue = new Guid("48094115-83af-46dd-a906-bff26ee21ee2") },
+					new LinqDataTypes { ID =  8, MoneyValue =  8.33m, DateTimeValue = new DateTime(2009, 9, 24, 9, 19, 29,  90), BoolValue = false, GuidValue = new Guid("c1139f1f-1335-4cd4-937e-92602f732dd3") },
+					new LinqDataTypes { ID =  9, MoneyValue =  9.33m, DateTimeValue = new DateTime(2009, 9, 25, 9, 19, 29,  90), BoolValue = true,  GuidValue = new Guid("46c5c512-3d4b-4cf7-b4e7-1de080789e5d") },
+					new LinqDataTypes { ID = 10, MoneyValue = 10.33m, DateTimeValue = new DateTime(2009, 9, 26, 9, 19, 29,  90), BoolValue = false, GuidValue = new Guid("61b2bc55-147f-4b40-93ed-a4aa83602fee") },
+					new LinqDataTypes { ID = 11, MoneyValue = 11.33m, DateTimeValue = new DateTime(2009, 9, 27, 9, 19, 29,  90), BoolValue = true,  GuidValue = new Guid("d3021d18-97f0-4dc0-98d0-f0c7df4a1230") },
 				});
 
 				new SqlQuery<Parent>().Insert(db, new[]

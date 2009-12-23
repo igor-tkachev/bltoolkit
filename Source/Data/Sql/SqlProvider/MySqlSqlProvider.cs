@@ -104,13 +104,13 @@ namespace BLToolkit.Data.Sql.SqlProvider
 				case SqlDbType.TinyInt       : sb.Append("Unsigned");      break;
 				case SqlDbType.Money         : sb.Append("Decimal(19,4)"); break;
 				case SqlDbType.SmallMoney    : sb.Append("Decimal(10,4)"); break;
-				case SqlDbType.VarChar       : sb.Append("Char");          break;
 				case SqlDbType.SmallDateTime :
 				case SqlDbType.DateTime2     : sb.Append("DateTime");      break;
 				case SqlDbType.Float         :
 				case SqlDbType.Real          : base.BuildDataType(sb, SqlDataType.Decimal); break;
+				case SqlDbType.VarChar       :
 				case SqlDbType.NVarChar      :
-					sb.Append("VarChar");
+					sb.Append("Char");
 					if (type.Length > 0)
 						sb.Append('(').Append(type.Length).Append(')');
 					break;

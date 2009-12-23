@@ -16,12 +16,31 @@ namespace BLToolkit.Data.Linq
 	using Mapping;
 	using Reflection;
 
+	#region ExpressionParser
+
 	class ExpressionParser : ReflectionHelper
 	{
 		// Should be a single instance.
 		//
 		static protected readonly ParameterExpression ParametersParam = Expression.Parameter(typeof(object[]), "ps");
+
+
+		static public Expression UnwrapLambda(Expression ex)
+		{
+			if (ex == null)
+				return null;
+
+			switch (ex.NodeType)
+			{
+				case ExpressionType.Convert        :
+				case ExpressionType.ConvertChecked : return ((UnaryExpression)ex).Operand;
+			}
+
+			return ex;
+		}
 	}
+
+	#endregion
 
 	class ExpressionParser<T> : ExpressionParser
 	{
@@ -150,14 +169,16 @@ namespace BLToolkit.Data.Linq
 			});
 		}
 
-#if DEBUG && TRACE_PARSING
+		int _sequenceNumber;
 
 		QuerySource[] ParseSequence(ParseInfo info)
 		{
 			ParsingTracer.WriteLine(info);
 			ParsingTracer.IncIndentLevel();
 
+			_sequenceNumber++;
 			var result = ParseSequenceInternal(info);
+			_sequenceNumber--;
 
 			ParsingTracer.DecIndentLevel();
 			ParsingTracer.WriteLine(result);
@@ -166,11 +187,6 @@ namespace BLToolkit.Data.Linq
 		}
 
 		QuerySource[] ParseSequenceInternal(ParseInfo info)
-
-#else
-		QuerySource[] ParseSequence(ParseInfo info)
-
-#endif
 		{
 			var select = ParseTable(info);
 
@@ -479,8 +495,21 @@ namespace BLToolkit.Data.Linq
 
 						goto default;
 
-					case ExpressionType.New        : return new QuerySource.Expr(CurrentSql, l.ConvertTo<NewExpression>(),        Concat(sources, _parentQueries));
+					case ExpressionType.New        :
+						{
+							if (_sequenceNumber > 1)
+							{
+								var pie = ConvertNew(l.Body.ConvertTo<NewExpression>());
+
+								if (pie != null)
+									return ParseSelect(new LambdaInfo(pie, l.Parameters), sources);
+							}
+
+							return new QuerySource.Expr(CurrentSql, l.ConvertTo<NewExpression>(), Concat(sources, _parentQueries));
+						}
+
 					case ExpressionType.MemberInit : return new QuerySource.Expr(CurrentSql, l.ConvertTo<MemberInitExpression>(), Concat(sources, _parentQueries));
+
 					default                        :
 						{
 							var scalar = new QuerySource.Scalar(CurrentSql, l, Concat(sources, _parentQueries));
@@ -2536,6 +2565,25 @@ namespace BLToolkit.Data.Linq
 							break;
 						}
 
+					case ExpressionType.UnaryPlus:
+					case ExpressionType.Negate:
+					case ExpressionType.NegateChecked:
+						{
+							var pi = parseInfo.Convert<UnaryExpression>();
+							var e  = parseInfo.Expr as UnaryExpression;
+							var o  = ParseExpression(pi.Create(e.Operand,  pi.Property(Unary.Operand)),  queries);
+							var t  = e.Type;
+
+							switch (parseInfo.NodeType)
+							{
+								case ExpressionType.UnaryPlus     : return o;
+								case ExpressionType.Negate        :
+								case ExpressionType.NegateChecked : return Convert(new SqlBinaryExpression(t, new SqlValue(-1), "*", o, Precedence.Multiplicative));
+							}
+
+							break;
+						}
+
 					case ExpressionType.Convert:
 						{
 							var pi = parseInfo.Convert<UnaryExpression>();
@@ -2583,11 +2631,7 @@ namespace BLToolkit.Data.Linq
 
 							if (l != null)
 							{
-								var ef = l.Body;
-
-								if (ef is UnaryExpression)
-									ef = ((UnaryExpression)ef).Operand;
-
+								var ef  = UnwrapLambda(l.Body);
 								var pie = parseInfo.Parent.Replace(ef, null).Walk(wpi =>
 								{
 									if (wpi.NodeType == ExpressionType.Parameter)
@@ -2657,11 +2701,7 @@ namespace BLToolkit.Data.Linq
 
 							if (lambda != null)
 							{
-								var ef = lambda.Body;
-
-								if (ef is UnaryExpression)
-									ef = ((UnaryExpression)ef).Operand;
-
+								var ef    = UnwrapLambda(lambda.Body);
 								var parms = new Dictionary<string,int>(lambda.Parameters.Count);
 								var pn    = e.Method.IsStatic ? 0 : -1;
 
@@ -2717,6 +2757,16 @@ namespace BLToolkit.Data.Linq
 
 								return Convert(attr.GetExpression(e.Method, parms.ToArray()));
 							}
+
+							break;
+						}
+
+					case ExpressionType.New:
+						{
+							var pie = ConvertNew(parseInfo.ConvertTo<NewExpression>());
+
+							if (pie != null)
+								return ParseExpression(pie, queries);
 
 							break;
 						}
@@ -2993,14 +3043,7 @@ namespace BLToolkit.Data.Linq
 						var l  = _info.SqlProvider.ConvertMember(pi.Expr.Member);
 
 						if (l != null)
-						{
-							var ef = l.Body;
-
-							if (ef is UnaryExpression)
-								ef = ((UnaryExpression)ef).Operand;
-
-							return IsServerSideOnly(pi.Parent.Replace(ef, null));
-						}
+							return IsServerSideOnly(pi.Parent.Replace(UnwrapLambda(l.Body), null));
 
 						var attr = GetFunctionAttribute(pi.Expr.Member);
 
@@ -3029,14 +3072,7 @@ namespace BLToolkit.Data.Linq
 							var lambda = _info.SqlProvider.ConvertMember(e.Method);
 
 							if (lambda != null)
-							{
-								var ef = lambda.Body;
-
-								if (ef is UnaryExpression)
-									ef = ((UnaryExpression)ef).Operand;
-
-								return IsServerSideOnly(pi.Parent.Replace(ef, null));
-							}
+								return IsServerSideOnly(pi.Parent.Replace(UnwrapLambda(lambda.Body), null));
 
 							var attr = GetFunctionAttribute(e.Method);
 
@@ -4254,6 +4290,47 @@ namespace BLToolkit.Data.Linq
 			}
 
 			return false;
+		}
+
+		ParseInfo ConvertNew(ParseInfo<NewExpression> pi)
+		{
+			var lambda = _info.SqlProvider.ConvertMember(pi.Expr.Constructor);
+
+			if (lambda != null)
+			{
+				var ef    = UnwrapLambda(lambda.Body);
+				var parms = new Dictionary<string,int>(lambda.Parameters.Count);
+				var pn    = 0;
+
+				foreach (var p in lambda.Parameters)
+					parms.Add(p.Name, pn++);
+
+				return pi.Parent.Replace(ef, null).Walk(wpi =>
+				{
+					if (wpi.NodeType == ExpressionType.Parameter)
+					{
+						Expression       expr;
+						Func<Expression> fparam;
+
+						var pe = (ParameterExpression)wpi.Expr;
+
+						var n = parms[pe.Name];
+
+						expr   = pi.Expr.Arguments[n];
+						fparam = () => pi.Index(pi.Expr.Arguments, New.Arguments, n);
+
+						if (expr.NodeType == ExpressionType.MemberAccess)
+							if (!_accessors.ContainsKey(expr))
+								_accessors.Add(expr, fparam());
+
+						return pi.Create(expr, null);
+					}
+
+					return wpi;
+				});
+			}
+
+			return null;
 		}
 
 		#endregion

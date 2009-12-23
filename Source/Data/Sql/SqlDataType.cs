@@ -200,7 +200,7 @@ namespace BLToolkit.Data.Sql
 			new TypeInfo(SqlDbType.Image,            int.MaxValue,                    -1,                    -1,                      -1),
 
 			new TypeInfo(SqlDbType.Timestamp,                   8,                    -1,                    -1,                      -1),
-			new TypeInfo(SqlDbType.UniqueIdentifier,           16,                    -1,                    -1,                      38),
+			new TypeInfo(SqlDbType.UniqueIdentifier,           16,                    -1,                    -1,                      36),
 
 			new TypeInfo(SqlDbType.Variant,                    -1,                    -1,                    -1,                      -1),
 			new TypeInfo(SqlDbType.Xml,                        -1,                    -1,                    -1,                      -1),

@@ -366,5 +366,29 @@ namespace Data.Linq
 				from t in    Types select Sql.Convert(Sql.DefaultNVarChar, t.MoneyValue).Trim(' ', '0'),
 				from t in db.Types select Sql.Convert(Sql.DefaultNVarChar, t.MoneyValue).Trim(' ', '0')));
 		}
+
+		[Test]
+		public void DecimalToString()
+		{
+			ForEachProvider(db => AreEqual(
+				from p in from t in    Types select Convert.ToString(t.MoneyValue) where p.Length > 0 select p.TrimEnd('0'),
+				from p in from t in db.Types select Convert.ToString(t.MoneyValue) where p.Length > 0 select p.TrimEnd('0')));
+		}
+
+		[Test]
+		public void ByteToString()
+		{
+			ForEachProvider(db => AreEqual(
+				from p in from t in    Types select ((byte)t.ID).ToString() where p.Length > 0 select p,
+				from p in from t in db.Types select ((byte)t.ID).ToString() where p.Length > 0 select p));
+		}
+
+		[Test]
+		public void GuidToString()
+		{
+			ForEachProvider(db => AreEqual(
+				from t in    Types where Sql.ConvertTo<string>.From(t.GuidValue) == "febe3eca-cb5f-40b2-ad39-2979d312afca" select t.GuidValue,
+				from t in db.Types where Sql.ConvertTo<string>.From(t.GuidValue) == "febe3eca-cb5f-40b2-ad39-2979d312afca" select t.GuidValue));
+		}
 	}
 }

@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Linq;
-
+using System.Linq.Expressions;
 using NUnit.Framework;
 
 using BLToolkit.Data.DataProvider;
@@ -140,12 +140,29 @@ namespace Data.Linq
 				from p in db.Types where p.GuidValue != Sql.NewGuid() select p.GuidValue));
 		}
 
-
 		[Test]
 		public void NewGuid2()
 		{
 			ForEachProvider(new[] { ProviderName.DB2, ProviderName.Informix, ProviderName.PostgreSQL, ProviderName.SQLite, ProviderName.Access }, db =>
 				Assert.AreNotEqual(Guid.Empty, (from p in db.Types select Sql.NewGuid()).First()));
+		}
+
+		[Test]
+		public void CustomFunc()
+		{
+			Sql.AddMember<Person>(p => p.FullName(), (Expression<Func<Person,string>>)(p => p.LastName + ", " + p.FirstName));
+
+			ForEachProvider(db => AreEqual(
+				from p in    Person where p.FullName() == "Pupkin, John" select p.FullName(),
+				from p in db.Person where p.FullName() == "Pupkin, John" select p.FullName()));
+		}
+	}
+
+	public static class PersonExtension
+	{
+		static public string FullName(this Person person)
+		{
+			return person.LastName + ", " + person.FirstName;
 		}
 	}
 }

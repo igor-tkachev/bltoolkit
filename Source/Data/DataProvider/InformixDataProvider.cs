@@ -72,7 +72,7 @@ namespace BLToolkit.Data.DataProvider
 			{
 				if (p.Value is Guid)
 				{
-					string value = p.Value.ToString().ToUpper();
+					string value = p.Value.ToString();
 					p.DbType = DbType.AnsiStringFixedLength;
 					p.Value  = value;
 					p.Size   = value.Length;

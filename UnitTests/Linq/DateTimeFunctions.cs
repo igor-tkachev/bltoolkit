@@ -246,80 +246,80 @@ namespace Data.Linq
 		public void DateAddYear()
 		{
 			ForEachProvider(db => AreSame(
-				from t in    Types select              Sql.DateAdd(Sql.DateParts.Year, 1, t.DateTimeValue). Date,
-				from t in db.Types select Sql.OnServer(Sql.DateAdd(Sql.DateParts.Year, 1, t.DateTimeValue)).Date));
+				from t in    Types select              Sql.DateAdd(Sql.DateParts.Year, 1, t.DateTimeValue). Value.Date,
+				from t in db.Types select Sql.OnServer(Sql.DateAdd(Sql.DateParts.Year, 1, t.DateTimeValue)).Value.Date));
 		}
 
 		[Test]
 		public void DateAddQuarter()
 		{
 			ForEachProvider(db => AreSame(
-				from t in    Types select              Sql.DateAdd(Sql.DateParts.Quarter, -1, t.DateTimeValue). Date,
-				from t in db.Types select Sql.OnServer(Sql.DateAdd(Sql.DateParts.Quarter, -1, t.DateTimeValue)).Date));
+				from t in    Types select              Sql.DateAdd(Sql.DateParts.Quarter, -1, t.DateTimeValue). Value.Date,
+				from t in db.Types select Sql.OnServer(Sql.DateAdd(Sql.DateParts.Quarter, -1, t.DateTimeValue)).Value.Date));
 		}
 
 		[Test]
 		public void DateAddMonth()
 		{
 			ForEachProvider(db => AreSame(
-				from t in    Types select              Sql.DateAdd(Sql.DateParts.Month, 2, t.DateTimeValue). Date,
-				from t in db.Types select Sql.OnServer(Sql.DateAdd(Sql.DateParts.Month, 2, t.DateTimeValue)).Date));
+				from t in    Types select              Sql.DateAdd(Sql.DateParts.Month, 2, t.DateTimeValue). Value.Date,
+				from t in db.Types select Sql.OnServer(Sql.DateAdd(Sql.DateParts.Month, 2, t.DateTimeValue)).Value.Date));
 		}
 
 		[Test]
 		public void DateAddDayOfYear()
 		{
 			ForEachProvider(db => AreSame(
-				from t in    Types select              Sql.DateAdd(Sql.DateParts.DayOfYear, 3, t.DateTimeValue). Date,
-				from t in db.Types select Sql.OnServer(Sql.DateAdd(Sql.DateParts.DayOfYear, 3, t.DateTimeValue)).Date));
+				from t in    Types select              Sql.DateAdd(Sql.DateParts.DayOfYear, 3, t.DateTimeValue). Value.Date,
+				from t in db.Types select Sql.OnServer(Sql.DateAdd(Sql.DateParts.DayOfYear, 3, t.DateTimeValue)).Value.Date));
 		}
 
 		[Test]
 		public void DateAddDay()
 		{
 			ForEachProvider(db => AreSame(
-				from t in    Types select              Sql.DateAdd(Sql.DateParts.Day, 5, t.DateTimeValue). Date,
-				from t in db.Types select Sql.OnServer(Sql.DateAdd(Sql.DateParts.Day, 5, t.DateTimeValue)).Date));
+				from t in    Types select              Sql.DateAdd(Sql.DateParts.Day, 5, t.DateTimeValue). Value.Date,
+				from t in db.Types select Sql.OnServer(Sql.DateAdd(Sql.DateParts.Day, 5, t.DateTimeValue)).Value.Date));
 		}
 
 		[Test]
 		public void DateAddWeek()
 		{
 			ForEachProvider(db => AreSame(
-				from t in    Types select              Sql.DateAdd(Sql.DateParts.Week, -1, t.DateTimeValue). Date,
-				from t in db.Types select Sql.OnServer(Sql.DateAdd(Sql.DateParts.Week, -1, t.DateTimeValue)).Date));
+				from t in    Types select              Sql.DateAdd(Sql.DateParts.Week, -1, t.DateTimeValue). Value.Date,
+				from t in db.Types select Sql.OnServer(Sql.DateAdd(Sql.DateParts.Week, -1, t.DateTimeValue)).Value.Date));
 		}
 
 		[Test]
 		public void DateAddWeekDay()
 		{
 			ForEachProvider(db => AreSame(
-				from t in    Types select              Sql.DateAdd(Sql.DateParts.WeekDay, 1, t.DateTimeValue). Date,
-				from t in db.Types select Sql.OnServer(Sql.DateAdd(Sql.DateParts.WeekDay, 1, t.DateTimeValue)).Date));
+				from t in    Types select              Sql.DateAdd(Sql.DateParts.WeekDay, 1, t.DateTimeValue). Value.Date,
+				from t in db.Types select Sql.OnServer(Sql.DateAdd(Sql.DateParts.WeekDay, 1, t.DateTimeValue)).Value.Date));
 		}
 
 		[Test]
 		public void DateAddHour()
 		{
 			ForEachProvider(db => AreSame(
-				from t in    Types select              Sql.DateAdd(Sql.DateParts.Hour, 1, t.DateTimeValue). Hour,
-				from t in db.Types select Sql.OnServer(Sql.DateAdd(Sql.DateParts.Hour, 1, t.DateTimeValue)).Hour));
+				from t in    Types select              Sql.DateAdd(Sql.DateParts.Hour, 1, t.DateTimeValue). Value.Hour,
+				from t in db.Types select Sql.OnServer(Sql.DateAdd(Sql.DateParts.Hour, 1, t.DateTimeValue)).Value.Hour));
 		}
 
 		[Test]
 		public void DateAddMinute()
 		{
 			ForEachProvider(db => AreSame(
-				from t in    Types select              Sql.DateAdd(Sql.DateParts.Minute, 5, t.DateTimeValue). Minute,
-				from t in db.Types select Sql.OnServer(Sql.DateAdd(Sql.DateParts.Minute, 5, t.DateTimeValue)).Minute));
+				from t in    Types select              Sql.DateAdd(Sql.DateParts.Minute, 5, t.DateTimeValue). Value.Minute,
+				from t in db.Types select Sql.OnServer(Sql.DateAdd(Sql.DateParts.Minute, 5, t.DateTimeValue)).Value.Minute));
 		}
 
 		[Test]
 		public void DateAddSecond()
 		{
 			ForEachProvider(db => AreSame(
-				from t in    Types select              Sql.DateAdd(Sql.DateParts.Second, 41, t.DateTimeValue). Second,
-				from t in db.Types select Sql.OnServer(Sql.DateAdd(Sql.DateParts.Second, 41, t.DateTimeValue)).Second));
+				from t in    Types select              Sql.DateAdd(Sql.DateParts.Second, 41, t.DateTimeValue). Value.Second,
+				from t in db.Types select Sql.OnServer(Sql.DateAdd(Sql.DateParts.Second, 41, t.DateTimeValue)).Value.Second));
 		}
 
 		[Test]
@@ -385,5 +385,53 @@ namespace Data.Linq
 		}
 
 		#endregion
+
+		[Test]
+		public void MakeDateTime()
+		{
+			ForEachProvider(db => AreSame(
+				from t in from p in    Types select Sql.MakeDateTime(2010, p.ID, 1) where t.Value.Year == 2010 select t,
+				from t in from p in db.Types select Sql.MakeDateTime(2010, p.ID, 1) where t.Value.Year == 2010 select t));
+		}
+
+		[Test]
+		public void NewDateTime1()
+		{
+			ForEachProvider(db => AreSame(
+				from t in from p in    Types select new DateTime(p.DateTimeValue.Year, 10, 1) where t.Month == 10 select t,
+				from t in from p in db.Types select new DateTime(p.DateTimeValue.Year, 10, 1) where t.Month == 10 select t));
+		}
+
+		[Test]
+		public void NewDateTime2()
+		{
+			ForEachProvider(db => AreSame(
+				from p in    Types select new DateTime(p.DateTimeValue.Year, 10, 1),
+				from p in db.Types select new DateTime(p.DateTimeValue.Year, 10, 1)));
+		}
+
+		[Test]
+		public void MakeDateTime2()
+		{
+			ForEachProvider(db => AreSame(
+				from t in from p in    Types select Sql.MakeDateTime(2010, p.ID, 1, 20, 35, 44) where t.Value.Year == 2010 select t,
+				from t in from p in db.Types select Sql.MakeDateTime(2010, p.ID, 1, 20, 35, 44) where t.Value.Year == 2010 select t));
+		}
+
+		[Test]
+		public void NewDateTime3()
+		{
+			ForEachProvider(db => AreSame(
+				from t in from p in    Types select new DateTime(p.DateTimeValue.Year, 10, 1, 20, 35, 44) where t.Month == 10 select t,
+				from t in from p in db.Types select new DateTime(p.DateTimeValue.Year, 10, 1, 20, 35, 44) where t.Month == 10 select t));
+		}
+
+		[Test]
+		public void NewDateTime4()
+		{
+			ForEachProvider(db => AreSame(
+				from p in    Types select new DateTime(p.DateTimeValue.Year, 10, 1, 20, 35, 44),
+				from p in db.Types select new DateTime(p.DateTimeValue.Year, 10, 1, 20, 35, 44)));
+		}
 	}
 }

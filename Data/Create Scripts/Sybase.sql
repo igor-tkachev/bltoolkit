@@ -456,6 +456,6 @@ CREATE TABLE LinqDataTypes
 	MoneyValue    decimal(10,4),
 	DateTimeValue datetime,
 	BoolValue     bit,
-	GuidValue     varbinary(16)
+	GuidValue     char(36)
 )
 GO
