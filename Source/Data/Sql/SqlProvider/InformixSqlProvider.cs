@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Data;
 using System.Text;
+using BLToolkit.Reflection;
 
 namespace BLToolkit.Data.Sql.SqlProvider
 {
@@ -76,6 +77,14 @@ namespace BLToolkit.Data.Sql.SqlProvider
 							switch (Type.GetTypeCode(func.SystemType))
 							{
 								case TypeCode.String   : return new SqlFunction(func.SystemType, "To_Char", func.Parameters[1]);
+								case TypeCode.Boolean  :
+									{
+										ISqlExpression ex = AlternativeConvertToBoolean(func, 1);
+										if (ex != null)
+											return ex;
+										break;
+									}
+
 								case TypeCode.DateTime :
 									if (IsDateDataType(func.Parameters[0], "Date"))
 									{

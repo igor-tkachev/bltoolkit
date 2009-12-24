@@ -446,8 +446,15 @@ namespace Data.Linq
 			Assert.AreNotEqual(0, expectedList.Count());
 			Assert.AreNotEqual(0, resultList.  Count());
 
-			Assert.AreEqual(0, resultList.  ToList().Except(expectedList).Count());
-			Assert.AreEqual(0, expectedList.ToList().Except(resultList).  Count());
+			var exceptExpected = resultList.  Except(expectedList).Count();
+			var exceptResult   = expectedList.Except(resultList).  Count();
+
+			if (exceptResult != 0 || exceptExpected != 0)
+				for (int i = 0; i < resultList.Count; i++)
+					Debug.WriteLine(string.Format("{0}   ---   {1}", expectedList[i], resultList[i]));
+
+			Assert.AreEqual(0, exceptExpected);
+			Assert.AreEqual(0, exceptResult);
 		}
 
 		protected void AreSame<T>(IEnumerable<T> expected, IEnumerable<T> result)

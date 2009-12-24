@@ -3351,7 +3351,7 @@ namespace BLToolkit.Data.Linq
 
 				var ex = ParseExpression(parseInfo, queries);
 
-				if (ex is SqlParameter || ex is SqlField || ex is SqlQuery.Column)
+				if (ex is SqlParameter || ex is SqlField || ex is SqlQuery.Column || ex is SqlFunction)
 					return Convert(new SqlQuery.Predicate.ExprExpr(ex, SqlQuery.Predicate.Operator.Equal, new SqlValue(true)));
 				else
 					return Convert(new SqlQuery.Predicate.Expr(ex));

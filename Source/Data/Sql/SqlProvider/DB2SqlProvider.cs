@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Text;
+using BLToolkit.Reflection;
 
 namespace BLToolkit.Data.Sql.SqlProvider
 {
@@ -45,7 +46,11 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 				switch (be.Operation)
 				{
-					case "%": return new SqlFunction(be.SystemType, "Mod",    be.Expr1, be.Expr2);
+					case "%":
+						{
+							ISqlExpression expr1 = !TypeHelper.IsIntegerType(be.Expr1.SystemType) ? new SqlFunction(typeof(int), "Int", be.Expr1) : be.Expr1;
+							return new SqlFunction(be.SystemType, "Mod", expr1, be.Expr2);
+						}
 					case "&": return new SqlFunction(be.SystemType, "BitAnd", be.Expr1, be.Expr2);
 					case "|": return new SqlFunction(be.SystemType, "BitOr",  be.Expr1, be.Expr2);
 					case "^": return new SqlFunction(be.SystemType, "BitXor", be.Expr1, be.Expr2);
@@ -105,6 +110,14 @@ namespace BLToolkit.Data.Sql.SqlProvider
 						break;
 					case "NChar"         :
 					case "NVarChar"      : return new SqlFunction  (func.SystemType, "Char",      func.Parameters);
+					case "Bit"           :
+						{
+							ISqlExpression ex = AlternativeConvertToBoolean(func, 0);
+							if (ex != null)
+								return ex;
+							break;
+						}
+
 				}
 			}
 

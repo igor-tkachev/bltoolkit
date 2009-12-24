@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Text;
+using BLToolkit.Reflection;
 
 namespace BLToolkit.Data.Sql.SqlProvider
 {
@@ -22,7 +23,24 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		{
 			expr = base.ConvertExpression(expr);
 
-			if (expr is SqlFunction)
+			if (expr is SqlBinaryExpression)
+			{
+				SqlBinaryExpression be = (SqlBinaryExpression)expr;
+
+				switch (be.Operation)
+				{
+					case "%":
+						return TypeHelper.IsIntegerType(be.Expr1.SystemType)?
+							be :
+							new SqlBinaryExpression(
+								typeof(int),
+								new SqlFunction(typeof(int), "Convert", SqlDataType.Int32, be.Expr1),
+								be.Operation,
+								be.Expr2,
+								be.Precedence);
+				}
+			}
+			else if (expr is SqlFunction)
 			{
 				SqlFunction func = (SqlFunction)expr;
 

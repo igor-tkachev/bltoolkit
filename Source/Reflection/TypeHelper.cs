@@ -899,6 +899,11 @@ namespace BLToolkit.Reflection
 			return (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>));
 		}
 
+		public static bool IsNullableType(Type type)
+		{
+			return (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>));
+		}
+
 		/// <summary>
 		/// Returns the underlying type argument of the specified type.
 		/// </summary>
@@ -1425,6 +1430,41 @@ namespace BLToolkit.Reflection
 			}
 
 			throw new InvalidOperationException();
+		}
+
+		public static bool IsFloatType(Type type)
+		{
+			if (IsNullableType(type))
+				type = type.GetGenericArguments()[0];
+
+			switch (Type.GetTypeCode(type))
+			{
+				case TypeCode.Single  :
+				case TypeCode.Double  :
+				case TypeCode.Decimal : return true;
+			}
+
+			return false;
+		}
+
+		public static bool IsIntegerType(Type type)
+		{
+			if (IsNullableType(type))
+				type = type.GetGenericArguments()[0];
+
+			switch (Type.GetTypeCode(type))
+			{
+				case TypeCode.SByte  :
+				case TypeCode.Byte   :
+				case TypeCode.Int16  :
+				case TypeCode.UInt16 :
+				case TypeCode.Int32  :
+				case TypeCode.UInt32 :
+				case TypeCode.Int64  :
+				case TypeCode.UInt64 : return true;
+			}
+
+			return false;
 		}
 
 		#endregion

@@ -15,7 +15,7 @@ namespace Data.Linq
 		public void Test1()
 		{
 			ForEachProvider(new[] { ProviderName.SQLite },
-				db => Assert.AreEqual(3, (from t in db.Types where t.MoneyValue * t.ID == 9.99m  select t).Single().ID));
+				db => Assert.AreEqual(1, (from t in db.Types where t.MoneyValue * t.ID == 1.11m  select t).Single().ID));
 		}
 
 		[Test]
@@ -134,16 +134,16 @@ namespace Data.Linq
 		public void ToDefaultDecimal()
 		{
 			ForEachProvider(db => AreEqual(
-				from t in    Types select (int)Sql.Convert(Sql.DefaultDecimal, t.MoneyValue),
-				from t in db.Types select (int)Sql.Convert(Sql.DefaultDecimal, t.MoneyValue)));
+				from t in    Types select Sql.Convert(Sql.DefaultDecimal, t.MoneyValue * 1000),
+				from t in db.Types select Sql.Convert(Sql.DefaultDecimal, t.MoneyValue * 1000)));
 		}
 
 		[Test]
 		public void ToDecimal1()
 		{
 			ForEachProvider(db => AreEqual(
-				from t in    Types select (int)Sql.Convert(Sql.Decimal(10), t.MoneyValue),
-				from t in db.Types select (int)Sql.Convert(Sql.Decimal(10), t.MoneyValue)));
+				from t in    Types select Sql.Convert(Sql.Decimal(10), t.MoneyValue * 1000),
+				from t in db.Types select Sql.Convert(Sql.Decimal(10), t.MoneyValue * 1000)));
 		}
 
 		[Test]
@@ -307,72 +307,72 @@ namespace Data.Linq
 		public void ToChar()
 		{
 			ForEachProvider(db => AreEqual(
-				from t in    Types select Sql.Convert(Sql.Char(20), t.MoneyValue).Trim(' ', '0'),
-				from t in db.Types select Sql.Convert(Sql.Char(20), t.MoneyValue).Trim(' ', '0')));
+				from t in    Types select Sql.Convert(Sql.Char(20), t.MoneyValue).Trim(' ', '0', '.'),
+				from t in db.Types select Sql.Convert(Sql.Char(20), t.MoneyValue).Trim(' ', '0', '.')));
 		}
 
 		[Test]
 		public void ToDefaultChar()
 		{
 			ForEachProvider(new[] { "Oracle", ProviderName.Firebird, ProviderName.PostgreSQL }, db => AreEqual(
-				from t in    Types select Sql.Convert(Sql.DefaultChar, t.MoneyValue).Trim(' ', '0'),
-				from t in db.Types select Sql.Convert(Sql.DefaultChar, t.MoneyValue).Trim(' ', '0')));
+				from t in    Types select Sql.Convert(Sql.DefaultChar, t.MoneyValue).Trim(' ', '0', '.'),
+				from t in db.Types select Sql.Convert(Sql.DefaultChar, t.MoneyValue).Trim(' ', '0', '.')));
 		}
 
 		[Test]
 		public void ToVarChar()
 		{
 			ForEachProvider(db => AreEqual(
-				from t in    Types select Sql.Convert(Sql.VarChar(20), t.MoneyValue).Trim(' ', '0'),
-				from t in db.Types select Sql.Convert(Sql.VarChar(20), t.MoneyValue).Trim(' ', '0')));
+				from t in    Types select Sql.Convert(Sql.VarChar(20), t.MoneyValue).Trim(' ', '0', '.'),
+				from t in db.Types select Sql.Convert(Sql.VarChar(20), t.MoneyValue).Trim(' ', '0', '.')));
 		}
 
 		[Test]
 		public void ToDefaultVarChar()
 		{
 			ForEachProvider(new[] { "Oracle", ProviderName.Firebird, ProviderName.PostgreSQL }, db => AreEqual(
-				from t in    Types select Sql.Convert(Sql.DefaultVarChar, t.MoneyValue).Trim(' ', '0'),
-				from t in db.Types select Sql.Convert(Sql.DefaultVarChar, t.MoneyValue).Trim(' ', '0')));
+				from t in    Types select Sql.Convert(Sql.DefaultVarChar, t.MoneyValue).Trim(' ', '0', '.'),
+				from t in db.Types select Sql.Convert(Sql.DefaultVarChar, t.MoneyValue).Trim(' ', '0', '.')));
 		}
 
 		[Test]
 		public void ToNChar()
 		{
 			ForEachProvider(db => AreEqual(
-				from t in    Types select Sql.Convert(Sql.NChar(20), t.MoneyValue).Trim(' ', '0'),
-				from t in db.Types select Sql.Convert(Sql.NChar(20), t.MoneyValue).Trim(' ', '0')));
+				from t in    Types select Sql.Convert(Sql.NChar(20), t.MoneyValue).Trim(' ', '0', '.'),
+				from t in db.Types select Sql.Convert(Sql.NChar(20), t.MoneyValue).Trim(' ', '0', '.')));
 		}
 
 		[Test]
 		public void ToDefaultNChar()
 		{
 			ForEachProvider(new[] { "Oracle", ProviderName.Firebird, ProviderName.PostgreSQL }, db => AreEqual(
-				from t in    Types select Sql.Convert(Sql.DefaultNChar, t.MoneyValue).Trim(' ', '0'),
-				from t in db.Types select Sql.Convert(Sql.DefaultNChar, t.MoneyValue).Trim(' ', '0')));
+				from t in    Types select Sql.Convert(Sql.DefaultNChar, t.MoneyValue).Trim(' ', '0', '.'),
+				from t in db.Types select Sql.Convert(Sql.DefaultNChar, t.MoneyValue).Trim(' ', '0', '.')));
 		}
 
 		[Test]
 		public void ToNVarChar()
 		{
 			ForEachProvider(db => AreEqual(
-				from t in    Types select Sql.Convert(Sql.NVarChar(20), t.MoneyValue).Trim(' ', '0'),
-				from t in db.Types select Sql.Convert(Sql.NVarChar(20), t.MoneyValue).Trim(' ', '0')));
+				from t in    Types select Sql.Convert(Sql.NVarChar(20), t.MoneyValue).Trim(' ', '0', '.'),
+				from t in db.Types select Sql.Convert(Sql.NVarChar(20), t.MoneyValue).Trim(' ', '0', '.')));
 		}
 
 		[Test]
 		public void ToDefaultNVarChar()
 		{
 			ForEachProvider(new[] { "Oracle", ProviderName.Firebird, ProviderName.PostgreSQL }, db => AreEqual(
-				from t in    Types select Sql.Convert(Sql.DefaultNVarChar, t.MoneyValue).Trim(' ', '0'),
-				from t in db.Types select Sql.Convert(Sql.DefaultNVarChar, t.MoneyValue).Trim(' ', '0')));
+				from t in    Types select Sql.Convert(Sql.DefaultNVarChar, t.MoneyValue).Trim(' ', '0', '.'),
+				from t in db.Types select Sql.Convert(Sql.DefaultNVarChar, t.MoneyValue).Trim(' ', '0', '.')));
 		}
 
 		[Test]
 		public void DecimalToString()
 		{
 			ForEachProvider(db => AreEqual(
-				from p in from t in    Types select Convert.ToString(t.MoneyValue) where p.Length > 0 select p.TrimEnd('0'),
-				from p in from t in db.Types select Convert.ToString(t.MoneyValue) where p.Length > 0 select p.TrimEnd('0')));
+				from p in from t in    Types select Convert.ToString(t.MoneyValue) where p.Length > 0 select p.TrimEnd('0', '.'),
+				from p in from t in db.Types select Convert.ToString(t.MoneyValue) where p.Length > 0 select p.TrimEnd('0', '.')));
 		}
 
 		[Test]
@@ -389,6 +389,22 @@ namespace Data.Linq
 			ForEachProvider(db => AreEqual(
 				from t in    Types where Sql.ConvertTo<string>.From(t.GuidValue) == "febe3eca-cb5f-40b2-ad39-2979d312afca" select t.GuidValue,
 				from t in db.Types where Sql.ConvertTo<string>.From(t.GuidValue) == "febe3eca-cb5f-40b2-ad39-2979d312afca" select t.GuidValue));
+		}
+
+		[Test]
+		public void ToBit()
+		{
+			ForEachProvider(db => AreEqual(
+				from t in from t in    Types where Sql.Convert(Sql.Bit, t.MoneyValue) select t select t,
+				from t in from t in db.Types where Sql.Convert(Sql.Bit, t.MoneyValue) select t select t));
+		}
+
+		[Test]
+		public void ConvertToBoolean()
+		{
+			ForEachProvider(new[] { ProviderName.MySql }, db => AreEqual(
+				from p in from t in    Types select Convert.ToBoolean(t.MoneyValue) where p == true select p,
+				from p in from t in db.Types select Convert.ToBoolean(t.MoneyValue) where p == true select p));
 		}
 	}
 }

@@ -2,17 +2,18 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Data;
+using System.Reflection;
 using System.Text;
 
 #if FW3
 using System.Linq.Expressions;
-using System.Reflection;
 #endif
 
 namespace BLToolkit.Data.Sql.SqlProvider
 {
 	using DataProvider;
 	using Mapping;
+	using Reflection;
 
 	public partial class BasicSqlProvider : ISqlProvider
 	{
@@ -1340,6 +1341,31 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			return false;
 		}
 
+		protected ISqlExpression FloorBeforeConvert(SqlFunction func)
+		{
+			ISqlExpression par1 = func.Parameters[1];
+
+			return TypeHelper.IsFloatType(par1.SystemType) && TypeHelper.IsIntegerType(func.SystemType) ?
+				new SqlFunction(par1.SystemType, "Floor", par1) : par1;
+		}
+
+		protected ISqlExpression AlternativeConvertToBoolean(SqlFunction func, int paramNumber)
+		{
+			ISqlExpression par = func.Parameters[paramNumber];
+
+			if (TypeHelper.IsFloatType(par.SystemType) || TypeHelper.IsIntegerType(par.SystemType))
+			{
+				SqlQuery.SearchCondition sc = new SqlQuery.SearchCondition();
+
+				sc.Conditions.Add(
+					new SqlQuery.Condition(false, new SqlQuery.Predicate.ExprExpr(par, SqlQuery.Predicate.Operator.Equal, new SqlValue(0))));
+
+				return ConvertExpression(new SqlFunction(func.SystemType, "CASE", sc, new SqlValue(false), new SqlValue(true)));
+			}
+
+			return null;
+		}
+
 		#endregion
 
 		#region Helpers
@@ -1929,10 +1955,10 @@ namespace BLToolkit.Data.Sql.SqlProvider
 				if (value.Value is int && func.Parameters.Length == 5)
 				{
 					SqlQuery.SearchCondition c1 = func.Parameters[0] as SqlQuery.SearchCondition;
-					SqlValue                   v1 = func.Parameters[1] as SqlValue;
+					SqlValue                 v1 = func.Parameters[1] as SqlValue;
 					SqlQuery.SearchCondition c2 = func.Parameters[2] as SqlQuery.SearchCondition;
-					SqlValue                   v2 = func.Parameters[3] as SqlValue;
-					SqlValue                   v3 = func.Parameters[4] as SqlValue;
+					SqlValue                 v2 = func.Parameters[3] as SqlValue;
+					SqlValue                 v3 = func.Parameters[4] as SqlValue;
 
 					if (c1 != null && c1.Conditions.Count == 1 && v1 != null && v1.Value is int &&
 						c2 != null && c2.Conditions.Count == 1 && v2 != null && v2.Value is int && v3 != null && v3.Value is int)
@@ -1979,8 +2005,8 @@ namespace BLToolkit.Data.Sql.SqlProvider
 				else if (expr.Operator == SqlQuery.Predicate.Operator.Equal && func.Parameters.Length == 3)
 				{
 					SqlQuery.SearchCondition sc = func.Parameters[0] as SqlQuery.SearchCondition;
-					SqlValue                   v1 = func.Parameters[1] as SqlValue;
-					SqlValue                   v2 = func.Parameters[2] as SqlValue;
+					SqlValue                 v1 = func.Parameters[1] as SqlValue;
+					SqlValue                 v2 = func.Parameters[2] as SqlValue;
 
 					if (sc != null && v1 != null && v2 != null)
 					{
