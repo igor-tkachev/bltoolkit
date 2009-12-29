@@ -44,7 +44,7 @@ namespace BLToolkit.Data.Sql
 
 				case QueryElementType.SqlExpression:
 					{
-						foreach (ISqlExpression v in ((SqlExpression)element).Values) Visit(v, all, action);
+						foreach (ISqlExpression v in ((SqlExpression)element).Parameters) Visit(v, all, action);
 						break;
 					}
 
@@ -288,11 +288,11 @@ namespace BLToolkit.Data.Sql
 
 				case QueryElementType.SqlExpression:
 					{
-						SqlExpression    expr  = (SqlExpression)element;
-						ISqlExpression[] values = Convert(expr.Values, action);
+						SqlExpression    expr      = (SqlExpression)element;
+						ISqlExpression[] parameter = Convert(expr.Parameters, action);
 
-						if (values != null && !ReferenceEquals(values, expr.Values))
-							newElement = new SqlExpression(expr.SystemType, expr.Expr, expr.Precedence, values);
+						if (parameter != null && !ReferenceEquals(parameter, expr.Parameters))
+							newElement = new SqlExpression(expr.SystemType, expr.Expr, expr.Precedence, parameter);
 
 						break;
 					}

@@ -2,7 +2,7 @@
 
 namespace Data.Linq.Model
 {
-	public class LinqDataTypes : IEquatable<LinqDataTypes>
+	public class LinqDataTypes : IEquatable<LinqDataTypes>, IComparable
 	{
 		public int      ID;
 		public decimal  MoneyValue;
@@ -20,22 +20,24 @@ namespace Data.Linq.Model
 			if (ReferenceEquals(null, other)) return false;
 			if (ReferenceEquals(this, other)) return true;
 			return
-				other.ID            == ID            &&
-				other.MoneyValue    == MoneyValue    &&
-				other.BoolValue     == BoolValue     &&
-				other.GuidValue     == GuidValue     &&
-				other.DateTimeValue == DateTimeValue;
+				other.ID                   == ID            &&
+				other.MoneyValue           == MoneyValue    &&
+				other.BoolValue            == BoolValue     &&
+				other.GuidValue            == GuidValue     &&
+				other.DateTimeValue.Date   == DateTimeValue.Date &&
+				other.DateTimeValue.Hour   == DateTimeValue.Hour &&
+				other.DateTimeValue.Minute == DateTimeValue.Minute &&
+				other.DateTimeValue.Second == DateTimeValue.Second;
 		}
 
 		public override int GetHashCode()
 		{
-			unchecked
-			{
-				int result = ID;
-				result = (result * 397) ^ MoneyValue.GetHashCode();
-				result = (result * 397) ^ DateTimeValue.GetHashCode();
-				return result;
-			}
+			return ID;
+		}
+
+		public int CompareTo(object obj)
+		{
+			return ID - ((LinqDataTypes)obj).ID;
 		}
 
 		public static bool operator ==(LinqDataTypes left, LinqDataTypes right)
@@ -46,6 +48,11 @@ namespace Data.Linq.Model
 		public static bool operator !=(LinqDataTypes left, LinqDataTypes right)
 		{
 			return !Equals(left, right);
+		}
+
+		public override string ToString()
+		{
+			return string.Format("{{{0,2}, {1,7}, {2}, {3,5}, {4}}}", ID, MoneyValue, DateTimeValue, BoolValue, GuidValue);
 		}
 	}
 

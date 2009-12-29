@@ -42,6 +42,13 @@ namespace BLToolkit.Data.Sql.SqlProvider
 					case "Space"   : return new SqlFunction  (func.SystemType, "PadR", new SqlValue(" "), func.Parameters[0]);
 					case "Convert" :
 						{
+							if (func.SystemType == typeof(bool))
+							{
+								ISqlExpression ex = AlternativeConvertToBoolean(func, 1);
+								if (ex != null)
+									return ex;
+							}
+
 							if (func.SystemType == typeof(DateTime) || func.SystemType == typeof(DateTimeOffset))
 							{
 								if (IsDateDataType(func.Parameters[0], "Date"))
@@ -58,21 +65,21 @@ namespace BLToolkit.Data.Sql.SqlProvider
 				SqlExpression e = (SqlExpression)expr;
 
 				if (e.Expr.StartsWith("Cast(StrFTime(Quarter"))
-					return Inc(Div(Dec(new SqlExpression(e.SystemType, e.Expr.Replace("Cast(StrFTime(Quarter", "Cast(StrFTime('%m'"), e.Values)), 3));
+					return Inc(Div(Dec(new SqlExpression(e.SystemType, e.Expr.Replace("Cast(StrFTime(Quarter", "Cast(StrFTime('%m'"), e.Parameters)), 3));
 
 				if (e.Expr.StartsWith("Cast(StrFTime('%w'"))
-					return Inc(new SqlExpression(e.SystemType, e.Expr.Replace("Cast(StrFTime('%w'", "Cast(strFTime('%w'"), e.Values));
+					return Inc(new SqlExpression(e.SystemType, e.Expr.Replace("Cast(StrFTime('%w'", "Cast(strFTime('%w'"), e.Parameters));
 
 				if (e.Expr.StartsWith("Cast(StrFTime('%f'"))
-					return new SqlExpression(e.SystemType, "Cast(strFTime('%f', {0}) * 1000 as int) % 1000", Precedence.Multiplicative, e.Values);
+					return new SqlExpression(e.SystemType, "Cast(strFTime('%f', {0}) * 1000 as int) % 1000", Precedence.Multiplicative, e.Parameters);
 
 				if (e.Expr.StartsWith("DateTime"))
 				{
 					if (e.Expr.EndsWith("Quarter')"))
-						return new SqlExpression(e.SystemType, "DateTime({1}, '{0} Month')", Precedence.Primary, Mul(e.Values[0], 3), e.Values[1]);
+						return new SqlExpression(e.SystemType, "DateTime({1}, '{0} Month')", Precedence.Primary, Mul(e.Parameters[0], 3), e.Parameters[1]);
 
 					if (e.Expr.EndsWith("Week')"))
-						return new SqlExpression(e.SystemType, "DateTime({1}, '{0} Day')",   Precedence.Primary, Mul(e.Values[0], 7), e.Values[1]);
+						return new SqlExpression(e.SystemType, "DateTime({1}, '{0} Day')",   Precedence.Primary, Mul(e.Parameters[0], 7), e.Parameters[1]);
 				}
 			}
 

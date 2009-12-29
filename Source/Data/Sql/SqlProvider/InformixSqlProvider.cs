@@ -74,6 +74,9 @@ namespace BLToolkit.Data.Sql.SqlProvider
 					case "Coalesce" : return new SqlFunction(func.SystemType, "Nvl", func.Parameters);
 					case "Convert"  :
 						{
+							ISqlExpression par0 = func.Parameters[0];
+							ISqlExpression par1 = func.Parameters[1];
+
 							switch (Type.GetTypeCode(func.SystemType))
 							{
 								case TypeCode.String   : return new SqlFunction(func.SystemType, "To_Char", func.Parameters[1]);
@@ -84,6 +87,11 @@ namespace BLToolkit.Data.Sql.SqlProvider
 											return ex;
 										break;
 									}
+
+								case TypeCode.UInt64:
+									if (TypeHelper.IsFloatType(func.Parameters[1].SystemType))
+										par1 = new SqlFunction(func.SystemType, "Floor", func.Parameters[1]);
+									break;
 
 								case TypeCode.DateTime :
 									if (IsDateDataType(func.Parameters[0], "Date"))
@@ -110,7 +118,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 									break;
 							}
 
-							return new SqlExpression(func.SystemType, "Cast({0} as {1})", Precedence.Primary, func.Parameters[1], func.Parameters[0]);
+							return new SqlExpression(func.SystemType, "Cast({0} as {1})", Precedence.Primary, par1, par0);
 						}
 
 					case "Quarter"  : return Inc(Div(Dec(new SqlFunction(func.SystemType, "Month", func.Parameters)), 3));

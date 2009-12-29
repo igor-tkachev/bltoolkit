@@ -472,8 +472,7 @@ namespace BLToolkit.Data
 			return dp;
 		}
 
-		private static readonly Dictionary<string, string>
-			_connectionStringList = new Dictionary<string, string>(4);
+		private static readonly Dictionary<string,string> _connectionStringList = new Dictionary<string,string>(4);
 
 		public static string GetConnectionString(string configurationString)
 		{

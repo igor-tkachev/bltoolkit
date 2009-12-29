@@ -40,7 +40,7 @@ namespace Data.Linq
 			});
 		}
 
-		//[Test]
+		[Test]
 		public void Parse1()
 		{
 			ForEachProvider(db => AreSame(
@@ -48,12 +48,12 @@ namespace Data.Linq
 				from d in from t in db.Types select DateTime.Parse(Sql.ConvertTo<string>.From(t.DateTimeValue)) where d.Day > 0 select d.Date));
 		}
 
-		//[Test]
+		[Test]
 		public void Parse2()
 		{
 			ForEachProvider(db => AreSame(
-				from d in from t in    Types select              DateTime.Parse("2001-10-24")  where d.Day > 0 select d,
-				from d in from t in db.Types select Sql.OnServer(DateTime.Parse("2001-10-24")) where d.Day > 0 select d));
+				from d in from t in    Types select              DateTime.Parse(t.DateTimeValue.Year + "-02-24 00:00:00")  where d.Day > 0 select d,
+				from d in from t in db.Types select Sql.OnServer(DateTime.Parse(t.DateTimeValue.Year + "-02-24 00:00:00")) where d.Day > 0 select d));
 		}
 
 		#region DatePart

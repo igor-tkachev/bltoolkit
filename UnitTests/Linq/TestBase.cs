@@ -451,7 +451,7 @@ namespace Data.Linq
 
 			if (exceptResult != 0 || exceptExpected != 0)
 				for (int i = 0; i < resultList.Count; i++)
-					Debug.WriteLine(string.Format("{0}   ---   {1}", expectedList[i], resultList[i]));
+					Debug.WriteLine(string.Format("{0} {1} --- {2}", Equals(expectedList[i], resultList[i]) ? " " : "-", expectedList[i], resultList[i]));
 
 			Assert.AreEqual(0, exceptExpected);
 			Assert.AreEqual(0, exceptResult);
@@ -466,7 +466,13 @@ namespace Data.Linq
 			Assert.AreNotEqual(0, expectedList.Count());
 			Assert.AreNotEqual(0, resultList.  Count());
 
-			Assert.IsTrue(expectedList.SequenceEqual(resultList));
+			var b = expectedList.SequenceEqual(resultList);
+
+			if (!b)
+				for (int i = 0; i < resultList.Count; i++)
+					Debug.WriteLine(string.Format("{0} {1} --- {2}", Equals(expectedList[i], resultList[i]) ? " " : "-", expectedList[i], resultList[i]));
+
+			Assert.IsTrue(b);
 		}
 	}
 }

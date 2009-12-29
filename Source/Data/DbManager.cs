@@ -2494,7 +2494,6 @@ namespace BLToolkit.Data
 
 						parameters.Add(Parameter(baseParameters[i].ParameterName + nRows, value ?? DBNull.Value));
 					}
-
 				}
 				else
 				{

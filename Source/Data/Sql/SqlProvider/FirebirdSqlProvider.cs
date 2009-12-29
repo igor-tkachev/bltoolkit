@@ -57,7 +57,15 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 				switch (func.Name)
 				{
-					case "Convert" : return new SqlExpression(func.SystemType, "Cast({0} as {1})", Precedence.Primary, FloorBeforeConvert(func), func.Parameters[0]);
+					case "Convert" :
+						if (func.SystemType == typeof(bool))
+						{
+							ISqlExpression ex = AlternativeConvertToBoolean(func, 1);
+							if (ex != null)
+								return ex;
+						}
+
+						return new SqlExpression(func.SystemType, "Cast({0} as {1})", Precedence.Primary, FloorBeforeConvert(func), func.Parameters[0]);
 
 #if FW3
 					case "DateAdd" :
@@ -82,13 +90,13 @@ namespace BLToolkit.Data.Sql.SqlProvider
 				SqlExpression e = (SqlExpression)expr;
 
 				if (e.Expr.StartsWith("Extract(Quarter"))
-					return Inc(Div(Dec(new SqlExpression(e.SystemType, "Extract(Month from {0})", e.Values)), 3));
+					return Inc(Div(Dec(new SqlExpression(e.SystemType, "Extract(Month from {0})", e.Parameters)), 3));
 
 				if (e.Expr.StartsWith("Extract(YearDay"))
-					return Inc(new SqlExpression(e.SystemType, e.Expr.Replace("Extract(YearDay", "Extract(yearDay"), e.Values));
+					return Inc(new SqlExpression(e.SystemType, e.Expr.Replace("Extract(YearDay", "Extract(yearDay"), e.Parameters));
 
 				if (e.Expr.StartsWith("Extract(WeekDay"))
-					return Inc(new SqlExpression(e.SystemType, e.Expr.Replace("Extract(WeekDay", "Extract(weekDay"), e.Values));
+					return Inc(new SqlExpression(e.SystemType, e.Expr.Replace("Extract(WeekDay", "Extract(weekDay"), e.Parameters));
 			}
 
 			return expr;
@@ -99,7 +107,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			switch (type.DbType)
 			{
 				case SqlDbType.Decimal       :
-					if (type == SqlDataType.DbDecimal)
+					if (type == SqlDataType.DbDecimal || type == SqlDataType.UInt64)
 						base.BuildDataType(sb, new SqlDataType(type.DbType, type.Type, 18, type.Scale));
 					else
 						base.BuildDataType(sb, type);

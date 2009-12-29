@@ -76,7 +76,9 @@ namespace BLToolkit.Data.Linq
 		}
 
 		[SqlProperty("Informix",   "Boolean",        ServerSideOnly=true)]
-		[SqlProperty("DB2",        "Bit",            ServerSideOnly=true)]
+		[SqlProperty("PostgreSQL", "Boolean",        ServerSideOnly=true)]
+		[SqlProperty("MySql",      "Boolean",        ServerSideOnly=true)]
+		[SqlProperty("SQLite",     "Boolean",        ServerSideOnly=true)]
 		[SqlProperty(              "Bit",            ServerSideOnly=true)] public static Boolean        Bit                               { get { return false; } }
 
 		[SqlProperty("Oracle",     "Number(19)",     ServerSideOnly=true)]
@@ -604,20 +606,20 @@ namespace BLToolkit.Data.Linq
 
 		#region Math Functions
 
-		[SqlFunction] public static Decimal? Abs    (Decimal? value)      { return value == null ? null : (Decimal?)Math.Abs    (value.Value); }
-		[SqlFunction] public static Double?  Abs    (Double?  value)      { return value == null ? null : (Double?) Math.Abs    (value.Value); }
-		[SqlFunction] public static Int16?   Abs    (Int16?   value)      { return value == null ? null : (Int16?)  Math.Abs    (value.Value); }
-		[SqlFunction] public static Int32?   Abs    (Int32?   value)      { return value == null ? null : (Int32?)  Math.Abs    (value.Value); }
-		[SqlFunction] public static Int64?   Abs    (Int64?   value)      { return value == null ? null : (Int64?)  Math.Abs    (value.Value); }
+		[SqlFunction] public static Decimal? Abs    (Decimal? value)       { return value == null ? null : (Decimal?)Math.Abs    (value.Value); }
+		[SqlFunction] public static Double?  Abs    (Double?  value)       { return value == null ? null : (Double?) Math.Abs    (value.Value); }
+		[SqlFunction] public static Int16?   Abs    (Int16?   value)       { return value == null ? null : (Int16?)  Math.Abs    (value.Value); }
+		[SqlFunction] public static Int32?   Abs    (Int32?   value)       { return value == null ? null : (Int32?)  Math.Abs    (value.Value); }
+		[SqlFunction] public static Int64?   Abs    (Int64?   value)       { return value == null ? null : (Int64?)  Math.Abs    (value.Value); }
 		[CLSCompliant(false)]
-		[SqlFunction] public static SByte?   Abs    (SByte?   value)      { return value == null ? null : (SByte?)  Math.Abs    (value.Value); }
-		[SqlFunction] public static Single?  Abs    (Single?  value)      { return value == null ? null : (Single?) Math.Abs    (value.Value); }
+		[SqlFunction] public static SByte?   Abs    (SByte?   value)       { return value == null ? null : (SByte?)  Math.Abs    (value.Value); }
+		[SqlFunction] public static Single?  Abs    (Single?  value)       { return value == null ? null : (Single?) Math.Abs    (value.Value); }
 
-		[SqlFunction] public static Double?  Acos   (Double?  value)      { return value == null ? null : (Double?) Math.Acos   (value.Value); }
-		[SqlFunction] public static Double?  Asin   (Double?  value)      { return value == null ? null : (Double?) Math.Asin   (value.Value); }
+		[SqlFunction] public static Double?  Acos   (Double?  value)       { return value == null ? null : (Double?) Math.Acos   (value.Value); }
+		[SqlFunction] public static Double?  Asin   (Double?  value)       { return value == null ? null : (Double?) Math.Asin   (value.Value); }
 
 		[SqlFunction("Access", "Atn")]
-		[SqlFunction] public static Double?  Atan   (Double?  value)      { return value == null ? null : (Double?) Math.Atan   (value.Value); }
+		[SqlFunction] public static Double?  Atan   (Double?  value)       { return value == null ? null : (Double?) Math.Atan   (value.Value); }
 
 		[CLSCompliant(false)]
 		[SqlFunction( "MsSql2008", "Atn2")]
@@ -629,46 +631,46 @@ namespace BLToolkit.Data.Linq
 
 		[SqlFunction("Informix", "Ceil")]
 		[SqlFunction("Oracle",   "Ceil")]
-		[SqlFunction] public static Decimal? Ceiling(Decimal? value)      { return value == null ? null : (Decimal?)Math.Ceiling(value.Value); }
+		[SqlFunction] public static Decimal? Ceiling(Decimal? value)       { return value == null ? null : (Decimal?)Math.Ceiling(value.Value); }
 		[SqlFunction("Informix", "Ceil")]
 		[SqlFunction("Oracle",   "Ceil")]
-		[SqlFunction] public static Double?  Ceiling(Double?  value)      { return value == null ? null : (Double?)Math.Ceiling(value.Value); }
+		[SqlFunction] public static Double?  Ceiling(Double?  value)       { return value == null ? null : (Double?)Math.Ceiling(value.Value); }
 
-		[SqlFunction] public static Double?  Cos    (Double?  value)      { return value == null ? null : (Double?)Math.Cos    (value.Value); }
+		[SqlFunction] public static Double?  Cos    (Double?  value)       { return value == null ? null : (Double?)Math.Cos    (value.Value); }
 
-		[SqlFunction] public static Double?  Cosh   (Double?  value)      { return value == null ? null : (Double?)Math.Cosh   (value.Value); }
+		[SqlFunction] public static Double?  Cosh   (Double?  value)       { return value == null ? null : (Double?)Math.Cosh   (value.Value); }
 
-		[SqlFunction] public static Double?  Cot    (Double?  value)      { return value == null ? null : (Double?)Math.Cos(value.Value) / Math.Sin(value.Value); }
+		[SqlFunction] public static Double?  Cot    (Double?  value)       { return value == null ? null : (Double?)Math.Cos(value.Value) / Math.Sin(value.Value); }
 
-		[SqlFunction] public static Decimal? Degrees(Decimal? value)      { return value == null ? null : (Decimal?)(value.Value * 180m / (Decimal)Math.PI); }
-		[SqlFunction] public static Double?  Degrees(Double?  value)      { return value == null ? null : (Double?) (value * 180 / Math.PI); }
-		[SqlFunction] public static Int16?   Degrees(Int16?   value)      { return value == null ? null : (Int16?)  (value * 180 / Math.PI); }
-		[SqlFunction] public static Int32?   Degrees(Int32?   value)      { return value == null ? null : (Int32?)  (value * 180 / Math.PI); }
-		[SqlFunction] public static Int64?   Degrees(Int64?   value)      { return value == null ? null : (Int64?)  (value * 180 / Math.PI); }
+		[SqlFunction] public static Decimal? Degrees(Decimal? value)       { return value == null ? null : (Decimal?)(value.Value * 180m / (Decimal)Math.PI); }
+		[SqlFunction] public static Double?  Degrees(Double?  value)       { return value == null ? null : (Double?) (value * 180 / Math.PI); }
+		[SqlFunction] public static Int16?   Degrees(Int16?   value)       { return value == null ? null : (Int16?)  (value * 180 / Math.PI); }
+		[SqlFunction] public static Int32?   Degrees(Int32?   value)       { return value == null ? null : (Int32?)  (value * 180 / Math.PI); }
+		[SqlFunction] public static Int64?   Degrees(Int64?   value)       { return value == null ? null : (Int64?)  (value * 180 / Math.PI); }
 		[CLSCompliant(false)]
-		[SqlFunction] public static SByte?   Degrees(SByte?   value)      { return value == null ? null : (SByte?)  (value * 180 / Math.PI); }
-		[SqlFunction] public static Single?  Degrees(Single?  value)      { return value == null ? null : (Single?) (value * 180 / Math.PI); }
+		[SqlFunction] public static SByte?   Degrees(SByte?   value)       { return value == null ? null : (SByte?)  (value * 180 / Math.PI); }
+		[SqlFunction] public static Single?  Degrees(Single?  value)       { return value == null ? null : (Single?) (value * 180 / Math.PI); }
 
-		[SqlFunction] public static Double?  Exp    (Double?  value)      { return value == null ? null : (Double?)Math.Exp    (value.Value); }
+		[SqlFunction] public static Double?  Exp    (Double?  value)       { return value == null ? null : (Double?)Math.Exp    (value.Value); }
 
 		[SqlFunction("Access", "Int")]
-		[SqlFunction] public static Decimal? Floor  (Decimal? value)      { return value == null ? null : (Decimal?)Math.Floor  (value.Value); }
+		[SqlFunction] public static Decimal? Floor  (Decimal? value)       { return value == null ? null : (Decimal?)Math.Floor  (value.Value); }
 		[SqlFunction("Access", "Int")]
-		[SqlFunction] public static Double?  Floor  (Double?  value)      { return value == null ? null : (Double?) Math.Floor  (value.Value); }
+		[SqlFunction] public static Double?  Floor  (Double?  value)       { return value == null ? null : (Double?) Math.Floor  (value.Value); }
 
 		[SqlFunction("Informix",   "LogN")]
 		[SqlFunction("Oracle",     "Ln")]
 		[SqlFunction("Firebird",   "Ln")]
 		[SqlFunction("PostgreSQL", "Ln")]
-		[SqlFunction] public static Decimal? Log    (Decimal? value)      { return value == null ? null : (Decimal?)Math.Log     ((Double)value.Value); }
+		[SqlFunction] public static Decimal? Log    (Decimal? value)       { return value == null ? null : (Decimal?)Math.Log     ((Double)value.Value); }
 		[SqlFunction("Informix",   "LogN")]
 		[SqlFunction("Oracle",     "Ln")]
 		[SqlFunction("Firebird",   "Ln")]
 		[SqlFunction("PostgreSQL", "Ln")]
-		[SqlFunction] public static Double?  Log    (Double?  value)      { return value == null ? null : (Double?) Math.Log     (value.Value); }
+		[SqlFunction] public static Double?  Log    (Double?  value)       { return value == null ? null : (Double?) Math.Log     (value.Value); }
 
 		[SqlFunction("PostgreSQL", "Log")]
-		[SqlFunction] public static Double?  Log10  (Double?  value)      { return value == null ? null : (Double?) Math.Log10   (value.Value); }
+		[SqlFunction] public static Double?  Log10  (Double?  value)       { return value == null ? null : (Double?) Math.Log10   (value.Value); }
 
 		[SqlFunction]
 		public static double?  Log(double? newBase, double? value)
@@ -689,18 +691,55 @@ namespace BLToolkit.Data.Linq
 			return x == null || y == null ? null : (Double?)Math.Pow(x.Value, y.Value);
 		}
 
-		//[SqlFunction] public static Decimal? Round(Decimal? value) { return Round(value, 0); }
-		//[SqlFunction] public static Double?  Round(Double?  value) { return Round(value, 0); }
+		[SqlFunction] public static Decimal? Round(Decimal? value) { return Round(value, 0); }
+		[SqlFunction] public static Double?  Round(Double?  value) { return Round(value, 0); }
 
-		[SqlFunction] public static Decimal? Round(Decimal? value, int? precision) { return value == null ? null : (Decimal?)Math.Round(value.Value, MidpointRounding.AwayFromZero); }
-		[SqlFunction] public static Double?  Round(Double?  value, int? precision) { return value == null ? null : (Double?) Math.Round(value.Value, MidpointRounding.AwayFromZero); }
+		[SqlFunction] public static Decimal? Round(Decimal? value, int? precision) { return value == null || precision == null? null : (Decimal?)Math.Round(value.Value, precision.Value, MidpointRounding.AwayFromZero); }
+		[SqlFunction] public static Double?  Round(Double?  value, int? precision) { return value == null || precision == null? null : (Double?) Math.Round(value.Value, precision.Value, MidpointRounding.AwayFromZero); }
 
-		[SqlFunction] public static Decimal? RoundToEven(Decimal? d) { return d == null ? null : (Decimal?)Math.Round(d.Value, MidpointRounding.ToEven); }
-		[SqlFunction] public static Double?  RoundToEven(Double?  d) { return d == null ? null : (Double?) Math.Round(d.Value, MidpointRounding.ToEven); }
+		[SqlFunction] public static Decimal? RoundToEven(Decimal? value) { return value == null ? null : (Decimal?)Math.Round(value.Value, MidpointRounding.ToEven); }
+		[SqlFunction] public static Double?  RoundToEven(Double?  value) { return value == null ? null : (Double?) Math.Round(value.Value, MidpointRounding.ToEven); }
 
+		[SqlFunction] public static Decimal? RoundToEven(Decimal? value, int? precision) { return value == null || precision == null? null : (Decimal?)Math.Round(value.Value, precision.Value, MidpointRounding.ToEven); }
+		[SqlFunction] public static Double?  RoundToEven(Double?  value, int? precision) { return value == null || precision == null? null : (Double?) Math.Round(value.Value, precision.Value, MidpointRounding.ToEven); }
 
+		[SqlFunction("Access", "Sgn"), SqlFunction] public static int? Sign(Decimal? value) { return value == null ? null : (int?)Math.Sign(value.Value); }
+		[SqlFunction("Access", "Sgn"), SqlFunction] public static int? Sign(Double?  value) { return value == null ? null : (int?)Math.Sign(value.Value); }
+		[SqlFunction("Access", "Sgn"), SqlFunction] public static int? Sign(Int16?   value) { return value == null ? null : (int?)Math.Sign(value.Value); }
+		[SqlFunction("Access", "Sgn"), SqlFunction] public static int? Sign(Int32?   value) { return value == null ? null : (int?)Math.Sign(value.Value); }
+		[SqlFunction("Access", "Sgn"), SqlFunction] public static int? Sign(Int64?   value) { return value == null ? null : (int?)Math.Sign(value.Value); }
+		[CLSCompliant(false)]
+		[SqlFunction("Access", "Sgn"), SqlFunction] public static int? Sign(SByte?   value) { return value == null ? null : (int?)Math.Sign(value.Value); }
+		[SqlFunction("Access", "Sgn"), SqlFunction] public static int? Sign(Single?  value) { return value == null ? null : (int?)Math.Sign(value.Value); }
 
-		[SqlFunction] public static Double?  Sin    (Double?  value)      { return value == null ? null : (Double?)Math.Sin    (value.Value); }
+		[SqlFunction] public static Double?  Sin     (Double?  value)      { return value == null ? null : (Double?)Math.Sin (value.Value); }
+		[SqlFunction] public static Double?  Sinh    (Double?  value)      { return value == null ? null : (Double?)Math.Sinh(value.Value); }
+		[SqlFunction("Access", "Sqr")]
+		[SqlFunction] public static Double?  Sqrt    (Double?  value)      { return value == null ? null : (Double?)Math.Sqrt(value.Value); }
+		[SqlFunction] public static Double?  Tan     (Double?  value)      { return value == null ? null : (Double?)Math.Tan (value.Value); }
+		[SqlFunction] public static Double?  Tanh    (Double?  value)      { return value == null ? null : (Double?)Math.Tanh(value.Value); }
+
+		[SqlExpression("MsSql2008",  "Round({0}, 0, 1)")]
+		[SqlExpression("MsSql2005",  "Round({0}, 0, 1)")]
+		[SqlExpression("DB2",        "Truncate({0}, 0)")]
+		[SqlExpression("Informix",   "Trunc({0}, 0)")]
+		[SqlExpression("Oracle",     "Trunc({0}, 0)")]
+		[SqlExpression("Firebird",   "Trunc({0}, 0)")]
+		[SqlExpression("PostgreSQL", "Trunc({0}, 0)")]
+		[SqlExpression("MySql",      "Truncate({0}, 0)")]
+		[SqlExpression("SqlCe",      "Round({0}, 0, 1)")]
+		[SqlFunction] public static Decimal? Truncate(Decimal? value)      { return value == null ? null : (Decimal?)Math.Truncate(value.Value); }
+
+		[SqlExpression("MsSql2008",  "Round({0}, 0, 1)")]
+		[SqlExpression("MsSql2005",  "Round({0}, 0, 1)")]
+		[SqlExpression("DB2",        "Truncate({0}, 0)")]
+		[SqlExpression("Informix",   "Trunc({0}, 0)")]
+		[SqlExpression("Oracle",     "Trunc({0}, 0)")]
+		[SqlExpression("Firebird",   "Trunc({0}, 0)")]
+		[SqlExpression("PostgreSQL", "Trunc({0}, 0)")]
+		[SqlExpression("MySql",      "Truncate({0}, 0)")]
+		[SqlExpression("SqlCe",      "Round({0}, 0, 1)")]
+		[SqlFunction] public static Double?  Truncate(Double?  value)      { return value == null ? null : (Double?) Math.Truncate(value.Value); }
 
 		#endregion
 	}

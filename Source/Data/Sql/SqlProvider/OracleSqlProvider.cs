@@ -149,6 +149,13 @@ namespace BLToolkit.Data.Sql.SqlProvider
 					case "Coalesce"       : return new SqlFunction  (func.SystemType, "Nvl",    func.Parameters);
 					case "Convert"        :
 						{
+							if (func.SystemType == typeof(bool))
+							{
+								ISqlExpression ex = AlternativeConvertToBoolean(func, 1);
+								if (ex != null)
+									return ex;
+							}
+
 							if (func.SystemType == typeof(DateTime) || func.SystemType == typeof(DateTimeOffset))
 							{
 								if (IsTimeDataType(func.Parameters[0]))
@@ -190,7 +197,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 				SqlExpression e = (SqlExpression)expr;
 
 				if (e.Expr.StartsWith("To_Number(To_Char(") && e.Expr.EndsWith(", 'FF'))"))
-					return Div(new SqlExpression(e.SystemType, e.Expr.Replace("To_Number(To_Char(", "to_Number(To_Char("), e.Values), 1000);
+					return Div(new SqlExpression(e.SystemType, e.Expr.Replace("To_Number(To_Char(", "to_Number(To_Char("), e.Parameters), 1000);
 			}
 
 			return expr;

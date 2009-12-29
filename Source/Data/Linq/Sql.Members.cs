@@ -90,38 +90,38 @@ namespace BLToolkit.Data.Linq
 
 				#region String
 
-				{ M(() => "".Length                      ), L<S,I>      ( obj           => Length(obj).Value) },
-				{ M(() => "".Substring  (0)              ), L<S,I,S>    ((obj,p0)       => Substring(obj, p0 + 1, obj.Length - p0)) },
-				{ M(() => "".Substring  (0,0)            ), L<S,I,I,S>  ((obj,p0,p1)    => Substring(obj, p0 + 1, p1)) },
-				{ M(() => "".IndexOf    ("")             ), L<S,S,I>    ((obj,p0)       => p0.Length == 0                    ? 0  : (CharIndex(p0, obj)                  .Value) - 1) },
-				{ M(() => "".IndexOf    ("",0)           ), L<S,S,I,I>  ((obj,p0,p1)    => p0.Length == 0 && obj.Length > p1 ? p1 : (CharIndex(p0, obj,           p1 + 1).Value) - 1) },
-				{ M(() => "".IndexOf    ("",0,0)         ), L<S,S,I,I,I>((obj,p0,p1,p2) => p0.Length == 0 && obj.Length > p1 ? p1 : (CharIndex(p0, Left(obj, p2), p1)    .Value) - 1) },
-				{ M(() => "".IndexOf    (' ')            ), L<S,C,I>    ((obj,p0)       =>                                          (CharIndex(p0, obj)                  .Value) - 1) },
-				{ M(() => "".IndexOf    (' ',0)          ), L<S,C,I,I>  ((obj,p0,p1)    =>                                          (CharIndex(p0, obj,           p1 + 1).Value) - 1) },
-				{ M(() => "".IndexOf    (' ',0,0)        ), L<S,C,I,I,I>((obj,p0,p1,p2) =>                                          (CharIndex(p0, Left(obj, p2), p1)     ?? 0) - 1) },
-				{ M(() => "".LastIndexOf("")             ), L<S,S,I>    ((obj,p0)       => p0.Length == 0 ? obj.Length - 1 : (CharIndex(p0, obj)                       .Value) == 0 ? -1 : obj.Length - (CharIndex(Reverse(p0), Reverse(obj))                               .Value) - p0.Length + 1) },
-				{ M(() => "".LastIndexOf("",0)           ), L<S,S,I,I>  ((obj,p0,p1)    => p0.Length == 0 ? p1             : (CharIndex(p0, obj,                p1 + 1).Value) == 0 ? -1 : obj.Length - (CharIndex(Reverse(p0), Reverse(obj.Substring(p1, obj.Length - p1))).Value) - p0.Length + 1) },
-				{ M(() => "".LastIndexOf("",0,0)         ), L<S,S,I,I,I>((obj,p0,p1,p2) => p0.Length == 0 ? p1             : (CharIndex(p0, Left(obj, p1 + p2), p1 + 1).Value) == 0 ? -1 :    p1 + p2 - (CharIndex(Reverse(p0), Reverse(obj.Substring(p1, p2)))             .Value) - p0.Length + 1) },
-				{ M(() => "".LastIndexOf(' ')            ), L<S,C,I>    ((obj,p0)       => (CharIndex(p0, obj)                       .Value) == 0 ? -1 : obj.Length - (CharIndex(p0, Reverse(obj))                               .Value)) },
-				{ M(() => "".LastIndexOf(' ',0)          ), L<S,C,I,I>  ((obj,p0,p1)    => (CharIndex(p0, obj, p1 + 1)               .Value) == 0 ? -1 : obj.Length - (CharIndex(p0, Reverse(obj.Substring(p1, obj.Length - p1))).Value)) },
-				{ M(() => "".LastIndexOf(' ',0,0)        ), L<S,C,I,I,I>((obj,p0,p1,p2) => (CharIndex(p0, Left(obj, p1 + p2), p1 + 1).Value) == 0 ? -1 : p1 + p2    - (CharIndex(p0, Reverse(obj.Substring(p1, p2)))             .Value)) },
-				{ M(() => "".Insert     (0,"")           ), L<S,I,S,S>  ((obj,p0,p1)    => obj.Length == p0 ? obj + p1 : Stuff(obj, p0 + 1, 0, p1)) },
-				{ M(() => "".Remove     (0)              ), L<S,I,S>    ((obj,p0)       => Left     (obj, p0)) },
-				{ M(() => "".Remove     (0,0)            ), L<S,I,I,S>  ((obj,p0,p1)    => Stuff    (obj, p0 + 1, p1, "")) },
-				{ M(() => "".PadLeft    (0)              ), L<S,I,S>    ((obj,p0)       => PadLeft  (obj, p0, ' ')) },
-				{ M(() => "".PadLeft    (0,' ')          ), L<S,I,C,S>  ((obj,p0,p1)    => PadLeft  (obj, p0, p1)) },
-				{ M(() => "".PadRight   (0)              ), L<S,I,S>    ((obj,p0)       => PadRight (obj, p0, ' ')) },
-				{ M(() => "".PadRight   (0,' ')          ), L<S,I,C,S>  ((obj,p0,p1)    => PadRight (obj, p0, p1)) },
-				{ M(() => "".Replace    ("","")          ), L<S,S,S,S>  ((obj,p0,p1)    => Replace  (obj, p0, p1)) },
-				{ M(() => "".Replace    (' ',' ')        ), L<S,C,C,S>  ((obj,p0,p1)    => Replace  (obj, p0, p1)) },
-				{ M(() => "".Trim       ()               ), L<S,S>      ( obj           => Trim     (obj)) },
-				{ M(() => "".TrimEnd    ()               ), L<S,S>      ( obj           => TrimRight(obj)) },
-				{ M(() => "".TrimStart  ()               ), L<S,S>      ( obj           => TrimLeft(obj)) },
-				{ M(() => "".ToLower    ()               ), L<S,S>      ( obj           => Lower(obj)) },
-				{ M(() => "".ToUpper    ()               ), L<S,S>      ( obj           => Upper(obj)) },
-				{ M(() => "".CompareTo  ("")             ), L<S,S,I>    ((obj,p0)       => ConvertToCaseCompareTo(obj, p0).Value ) },
-				{ M(() => "".CompareTo  (1)              ), L<S,O,I>    ((obj,p0)       => ConvertToCaseCompareTo(obj, p0.ToString()).Value ) },
-				{ M(() => string.IsNullOrEmpty("")       ), L<S,B>      (     p0        => p0 == null || p0.Length == 0 ) },
+				{ M(() => "".Length               ), L<S,I>      ( obj           => Length(obj).Value) },
+				{ M(() => "".Substring  (0)       ), L<S,I,S>    ((obj,p0)       => Substring(obj, p0 + 1, obj.Length - p0)) },
+				{ M(() => "".Substring  (0,0)     ), L<S,I,I,S>  ((obj,p0,p1)    => Substring(obj, p0 + 1, p1)) },
+				{ M(() => "".IndexOf    ("")      ), L<S,S,I>    ((obj,p0)       => p0.Length == 0                    ? 0  : (CharIndex(p0, obj)                  .Value) - 1) },
+				{ M(() => "".IndexOf    ("",0)    ), L<S,S,I,I>  ((obj,p0,p1)    => p0.Length == 0 && obj.Length > p1 ? p1 : (CharIndex(p0, obj,           p1 + 1).Value) - 1) },
+				{ M(() => "".IndexOf    ("",0,0)  ), L<S,S,I,I,I>((obj,p0,p1,p2) => p0.Length == 0 && obj.Length > p1 ? p1 : (CharIndex(p0, Left(obj, p2), p1)    .Value) - 1) },
+				{ M(() => "".IndexOf    (' ')     ), L<S,C,I>    ((obj,p0)       =>                                          (CharIndex(p0, obj)                  .Value) - 1) },
+				{ M(() => "".IndexOf    (' ',0)   ), L<S,C,I,I>  ((obj,p0,p1)    =>                                          (CharIndex(p0, obj,           p1 + 1).Value) - 1) },
+				{ M(() => "".IndexOf    (' ',0,0) ), L<S,C,I,I,I>((obj,p0,p1,p2) =>                                          (CharIndex(p0, Left(obj, p2), p1)     ?? 0) - 1) },
+				{ M(() => "".LastIndexOf("")      ), L<S,S,I>    ((obj,p0)       => p0.Length == 0 ? obj.Length - 1 : (CharIndex(p0, obj)                       .Value) == 0 ? -1 : obj.Length - (CharIndex(Reverse(p0), Reverse(obj))                               .Value) - p0.Length + 1) },
+				{ M(() => "".LastIndexOf("",0)    ), L<S,S,I,I>  ((obj,p0,p1)    => p0.Length == 0 ? p1             : (CharIndex(p0, obj,                p1 + 1).Value) == 0 ? -1 : obj.Length - (CharIndex(Reverse(p0), Reverse(obj.Substring(p1, obj.Length - p1))).Value) - p0.Length + 1) },
+				{ M(() => "".LastIndexOf("",0,0)  ), L<S,S,I,I,I>((obj,p0,p1,p2) => p0.Length == 0 ? p1             : (CharIndex(p0, Left(obj, p1 + p2), p1 + 1).Value) == 0 ? -1 :    p1 + p2 - (CharIndex(Reverse(p0), Reverse(obj.Substring(p1, p2)))             .Value) - p0.Length + 1) },
+				{ M(() => "".LastIndexOf(' ')     ), L<S,C,I>    ((obj,p0)       => (CharIndex(p0, obj)                       .Value) == 0 ? -1 : obj.Length - (CharIndex(p0, Reverse(obj))                               .Value)) },
+				{ M(() => "".LastIndexOf(' ',0)   ), L<S,C,I,I>  ((obj,p0,p1)    => (CharIndex(p0, obj, p1 + 1)               .Value) == 0 ? -1 : obj.Length - (CharIndex(p0, Reverse(obj.Substring(p1, obj.Length - p1))).Value)) },
+				{ M(() => "".LastIndexOf(' ',0,0) ), L<S,C,I,I,I>((obj,p0,p1,p2) => (CharIndex(p0, Left(obj, p1 + p2), p1 + 1).Value) == 0 ? -1 : p1 + p2    - (CharIndex(p0, Reverse(obj.Substring(p1, p2)))             .Value)) },
+				{ M(() => "".Insert     (0,"")    ), L<S,I,S,S>  ((obj,p0,p1)    => obj.Length == p0 ? obj + p1 : Stuff(obj, p0 + 1, 0, p1)) },
+				{ M(() => "".Remove     (0)       ), L<S,I,S>    ((obj,p0)       => Left     (obj, p0)) },
+				{ M(() => "".Remove     (0,0)     ), L<S,I,I,S>  ((obj,p0,p1)    => Stuff    (obj, p0 + 1, p1, "")) },
+				{ M(() => "".PadLeft    (0)       ), L<S,I,S>    ((obj,p0)       => PadLeft  (obj, p0, ' ')) },
+				{ M(() => "".PadLeft    (0,' ')   ), L<S,I,C,S>  ((obj,p0,p1)    => PadLeft  (obj, p0, p1)) },
+				{ M(() => "".PadRight   (0)       ), L<S,I,S>    ((obj,p0)       => PadRight (obj, p0, ' ')) },
+				{ M(() => "".PadRight   (0,' ')   ), L<S,I,C,S>  ((obj,p0,p1)    => PadRight (obj, p0, p1)) },
+				{ M(() => "".Replace    ("","")   ), L<S,S,S,S>  ((obj,p0,p1)    => Replace  (obj, p0, p1)) },
+				{ M(() => "".Replace    (' ',' ') ), L<S,C,C,S>  ((obj,p0,p1)    => Replace  (obj, p0, p1)) },
+				{ M(() => "".Trim       ()        ), L<S,S>      ( obj           => Trim     (obj)) },
+				{ M(() => "".TrimEnd    ()        ), L<S,S>      ( obj           => TrimRight(obj)) },
+				{ M(() => "".TrimStart  ()        ), L<S,S>      ( obj           => TrimLeft(obj)) },
+				{ M(() => "".ToLower    ()        ), L<S,S>      ( obj           => Lower(obj)) },
+				{ M(() => "".ToUpper    ()        ), L<S,S>      ( obj           => Upper(obj)) },
+				{ M(() => "".CompareTo  ("")      ), L<S,S,I>    ((obj,p0)       => ConvertToCaseCompareTo(obj, p0).Value ) },
+				{ M(() => "".CompareTo  (1)       ), L<S,O,I>    ((obj,p0)       => ConvertToCaseCompareTo(obj, p0.ToString()).Value ) },
+				{ M(() => string.IsNullOrEmpty("")), L<S,B>      (     p0        => p0 == null || p0.Length == 0 ) },
 
 				{ M(() => AltStuff("",0,0,"")), L<S,I?,I?,S,S>((p0, p1,p2,p3) => Left(p0, p1 - 1) + p3 + Right(p0, p0.Length - (p1 + p2 - 1))) },
 
@@ -220,134 +220,6 @@ namespace BLToolkit.Data.Linq
 
 				#endregion
 
-
-
-				#region ToInt64
-
-				{ M(() => System.Convert.ToInt64((Boolean)true)), L<Boolean, Int64>(p0 => ConvertTo<Int64>.From(p0) ) },
-				{ M(() => System.Convert.ToInt64((Byte)    0)  ), L<Byte,    Int64>(p0 => ConvertTo<Int64>.From(p0) ) },
-				{ M(() => System.Convert.ToInt64((Char)   '0') ), L<Char,    Int64>(p0 => ConvertTo<Int64>.From(p0) ) },
-				{ M(() => System.Convert.ToInt64(DateTime.Now) ), L<DateTime,Int64>(p0 => ConvertTo<Int64>.From(p0) ) },
-				{ M(() => System.Convert.ToInt64((Decimal) 0)  ), L<Decimal, Int64>(p0 => ConvertTo<Int64>.From(RoundToEven(p0)) ) },
-				{ M(() => System.Convert.ToInt64((Double)  0)  ), L<Double,  Int64>(p0 => ConvertTo<Int64>.From(RoundToEven(p0)) ) },
-				{ M(() => System.Convert.ToInt64((Int16)   0)  ), L<Int16,   Int64>(p0 => ConvertTo<Int64>.From(p0) ) },
-				{ M(() => System.Convert.ToInt64((Int32)   0)  ), L<Int32,   Int64>(p0 => ConvertTo<Int64>.From(p0) ) },
-				{ M(() => System.Convert.ToInt64((Int64)   0)  ), L<Int64,   Int64>(p0 => ConvertTo<Int64>.From(p0) ) },
-				{ M(() => System.Convert.ToInt64((Object)  0)  ), L<Object,  Int64>(p0 => ConvertTo<Int64>.From(p0) ) },
-				{ M(() => System.Convert.ToInt64((SByte)   0)  ), L<SByte,   Int64>(p0 => ConvertTo<Int64>.From(p0) ) },
-				{ M(() => System.Convert.ToInt64((Single)  0)  ), L<Single,  Int64>(p0 => ConvertTo<Int64>.From(RoundToEven(p0)) ) },
-				{ M(() => System.Convert.ToInt64((String) "0") ), L<String,  Int64>(p0 => ConvertTo<Int64>.From(p0) ) },
-				{ M(() => System.Convert.ToInt64((UInt16)  0)  ), L<UInt16,  Int64>(p0 => ConvertTo<Int64>.From(p0) ) },
-				{ M(() => System.Convert.ToInt64((UInt32)  0)  ), L<UInt32,  Int64>(p0 => ConvertTo<Int64>.From(p0) ) },
-				{ M(() => System.Convert.ToInt64((UInt64)  0)  ), L<UInt64,  Int64>(p0 => ConvertTo<Int64>.From(p0) ) },
-
-				#endregion
-
-				#region ToUInt64
-
-				{ M(() => System.Convert.ToUInt64((Boolean)true)), L<Boolean, UInt64>(p0 => ConvertTo<UInt64>.From(p0) ) },
-				{ M(() => System.Convert.ToUInt64((Byte)    0)  ), L<Byte,    UInt64>(p0 => ConvertTo<UInt64>.From(p0) ) },
-				{ M(() => System.Convert.ToUInt64((Char)   '0') ), L<Char,    UInt64>(p0 => ConvertTo<UInt64>.From(p0) ) },
-				{ M(() => System.Convert.ToUInt64(DateTime.Now) ), L<DateTime,UInt64>(p0 => ConvertTo<UInt64>.From(p0) ) },
-				{ M(() => System.Convert.ToUInt64((Decimal) 0)  ), L<Decimal, UInt64>(p0 => ConvertTo<UInt64>.From(RoundToEven(p0)) ) },
-				{ M(() => System.Convert.ToUInt64((Double)  0)  ), L<Double,  UInt64>(p0 => ConvertTo<UInt64>.From(RoundToEven(p0)) ) },
-				{ M(() => System.Convert.ToUInt64((Int16)   0)  ), L<Int16,   UInt64>(p0 => ConvertTo<UInt64>.From(p0) ) },
-				{ M(() => System.Convert.ToUInt64((Int32)   0)  ), L<Int32,   UInt64>(p0 => ConvertTo<UInt64>.From(p0) ) },
-				{ M(() => System.Convert.ToUInt64((Int64)   0)  ), L<Int64,   UInt64>(p0 => ConvertTo<UInt64>.From(p0) ) },
-				{ M(() => System.Convert.ToUInt64((Object)  0)  ), L<Object,  UInt64>(p0 => ConvertTo<UInt64>.From(p0) ) },
-				{ M(() => System.Convert.ToUInt64((SByte)   0)  ), L<SByte,   UInt64>(p0 => ConvertTo<UInt64>.From(p0) ) },
-				{ M(() => System.Convert.ToUInt64((Single)  0)  ), L<Single,  UInt64>(p0 => ConvertTo<UInt64>.From(RoundToEven(p0)) ) },
-				{ M(() => System.Convert.ToUInt64((String) "0") ), L<String,  UInt64>(p0 => ConvertTo<UInt64>.From(p0) ) },
-				{ M(() => System.Convert.ToUInt64((UInt16)  0)  ), L<UInt16,  UInt64>(p0 => ConvertTo<UInt64>.From(p0) ) },
-				{ M(() => System.Convert.ToUInt64((UInt32)  0)  ), L<UInt32,  UInt64>(p0 => ConvertTo<UInt64>.From(p0) ) },
-				{ M(() => System.Convert.ToUInt64((UInt64)  0)  ), L<UInt64,  UInt64>(p0 => ConvertTo<UInt64>.From(p0) ) },
-
-				#endregion
-
-				#region ToInt32
-
-				{ M(() => System.Convert.ToInt32((Boolean)true)), L<Boolean, Int32>(p0 => ConvertTo<Int32>.From(p0) ) },
-				{ M(() => System.Convert.ToInt32((Byte)    0)  ), L<Byte,    Int32>(p0 => ConvertTo<Int32>.From(p0) ) },
-				{ M(() => System.Convert.ToInt32((Char)   '0') ), L<Char,    Int32>(p0 => ConvertTo<Int32>.From(p0) ) },
-				{ M(() => System.Convert.ToInt32(DateTime.Now) ), L<DateTime,Int32>(p0 => ConvertTo<Int32>.From(p0) ) },
-				{ M(() => System.Convert.ToInt32((Decimal) 0)  ), L<Decimal, Int32>(p0 => ConvertTo<Int32>.From(RoundToEven(p0)) ) },
-				{ M(() => System.Convert.ToInt32((Double)  0)  ), L<Double,  Int32>(p0 => ConvertTo<Int32>.From(RoundToEven(p0)) ) },
-				{ M(() => System.Convert.ToInt32((Int16)   0)  ), L<Int16,   Int32>(p0 => ConvertTo<Int32>.From(p0) ) },
-				{ M(() => System.Convert.ToInt32((Int32)   0)  ), L<Int32,   Int32>(p0 => ConvertTo<Int32>.From(p0) ) },
-				{ M(() => System.Convert.ToInt32((Int64)   0)  ), L<Int64,   Int32>(p0 => ConvertTo<Int32>.From(p0) ) },
-				{ M(() => System.Convert.ToInt32((Object)  0)  ), L<Object,  Int32>(p0 => ConvertTo<Int32>.From(p0) ) },
-				{ M(() => System.Convert.ToInt32((SByte)   0)  ), L<SByte,   Int32>(p0 => ConvertTo<Int32>.From(p0) ) },
-				{ M(() => System.Convert.ToInt32((Single)  0)  ), L<Single,  Int32>(p0 => ConvertTo<Int32>.From(RoundToEven(p0)) ) },
-				{ M(() => System.Convert.ToInt32((String) "0") ), L<String,  Int32>(p0 => ConvertTo<Int32>.From(p0) ) },
-				{ M(() => System.Convert.ToInt32((UInt16)  0)  ), L<UInt16,  Int32>(p0 => ConvertTo<Int32>.From(p0) ) },
-				{ M(() => System.Convert.ToInt32((UInt32)  0)  ), L<UInt32,  Int32>(p0 => ConvertTo<Int32>.From(p0) ) },
-				{ M(() => System.Convert.ToInt32((UInt64)  0)  ), L<UInt64,  Int32>(p0 => ConvertTo<Int32>.From(p0) ) },
-
-				#endregion
-
-				#region ToInt32
-
-				{ M(() => System.Convert.ToUInt32((Boolean)true)), L<Boolean, UInt32>(p0 => ConvertTo<UInt32>.From(p0) ) },
-				{ M(() => System.Convert.ToUInt32((Byte)    0)  ), L<Byte,    UInt32>(p0 => ConvertTo<UInt32>.From(p0) ) },
-				{ M(() => System.Convert.ToUInt32((Char)   '0') ), L<Char,    UInt32>(p0 => ConvertTo<UInt32>.From(p0) ) },
-				{ M(() => System.Convert.ToUInt32(DateTime.Now) ), L<DateTime,UInt32>(p0 => ConvertTo<UInt32>.From(p0) ) },
-				{ M(() => System.Convert.ToUInt32((Decimal) 0)  ), L<Decimal, UInt32>(p0 => ConvertTo<UInt32>.From(RoundToEven(p0)) ) },
-				{ M(() => System.Convert.ToUInt32((Double)  0)  ), L<Double,  UInt32>(p0 => ConvertTo<UInt32>.From(RoundToEven(p0)) ) },
-				{ M(() => System.Convert.ToUInt32((Int16)   0)  ), L<Int16,   UInt32>(p0 => ConvertTo<UInt32>.From(p0) ) },
-				{ M(() => System.Convert.ToUInt32((Int32)   0)  ), L<Int32,   UInt32>(p0 => ConvertTo<UInt32>.From(p0) ) },
-				{ M(() => System.Convert.ToUInt32((Int64)   0)  ), L<Int64,   UInt32>(p0 => ConvertTo<UInt32>.From(p0) ) },
-				{ M(() => System.Convert.ToUInt32((Object)  0)  ), L<Object,  UInt32>(p0 => ConvertTo<UInt32>.From(p0) ) },
-				{ M(() => System.Convert.ToUInt32((SByte)   0)  ), L<SByte,   UInt32>(p0 => ConvertTo<UInt32>.From(p0) ) },
-				{ M(() => System.Convert.ToUInt32((Single)  0)  ), L<Single,  UInt32>(p0 => ConvertTo<UInt32>.From(RoundToEven(p0)) ) },
-				{ M(() => System.Convert.ToUInt32((String) "0") ), L<String,  UInt32>(p0 => ConvertTo<UInt32>.From(p0) ) },
-				{ M(() => System.Convert.ToUInt32((UInt16)  0)  ), L<UInt16,  UInt32>(p0 => ConvertTo<UInt32>.From(p0) ) },
-				{ M(() => System.Convert.ToUInt32((UInt32)  0)  ), L<UInt32,  UInt32>(p0 => ConvertTo<UInt32>.From(p0) ) },
-				{ M(() => System.Convert.ToUInt32((UInt64)  0)  ), L<UInt64,  UInt32>(p0 => ConvertTo<UInt32>.From(p0) ) },
-
-				#endregion
-
-				#region ToInt16
-
-				{ M(() => System.Convert.ToInt16((Boolean)true)), L<Boolean, Int16>(p0 => ConvertTo<Int16>.From(p0) ) },
-				{ M(() => System.Convert.ToInt16((Byte)    0)  ), L<Byte,    Int16>(p0 => ConvertTo<Int16>.From(p0) ) },
-				{ M(() => System.Convert.ToInt16((Char)   '0') ), L<Char,    Int16>(p0 => ConvertTo<Int16>.From(p0) ) },
-				{ M(() => System.Convert.ToInt16(DateTime.Now) ), L<DateTime,Int16>(p0 => ConvertTo<Int16>.From(p0) ) },
-				{ M(() => System.Convert.ToInt16((Decimal) 0)  ), L<Decimal, Int16>(p0 => ConvertTo<Int16>.From(RoundToEven(p0)) ) },
-				{ M(() => System.Convert.ToInt16((Double)  0)  ), L<Double,  Int16>(p0 => ConvertTo<Int16>.From(RoundToEven(p0)) ) },
-				{ M(() => System.Convert.ToInt16((Int16)   0)  ), L<Int16,   Int16>(p0 => ConvertTo<Int16>.From(p0) ) },
-				{ M(() => System.Convert.ToInt16((Int32)   0)  ), L<Int32,   Int16>(p0 => ConvertTo<Int16>.From(p0) ) },
-				{ M(() => System.Convert.ToInt16((Int64)   0)  ), L<Int64,   Int16>(p0 => ConvertTo<Int16>.From(p0) ) },
-				{ M(() => System.Convert.ToInt16((Object)  0)  ), L<Object,  Int16>(p0 => ConvertTo<Int16>.From(p0) ) },
-				{ M(() => System.Convert.ToInt16((SByte)   0)  ), L<SByte,   Int16>(p0 => ConvertTo<Int16>.From(p0) ) },
-				{ M(() => System.Convert.ToInt16((Single)  0)  ), L<Single,  Int16>(p0 => ConvertTo<Int16>.From(RoundToEven(p0)) ) },
-				{ M(() => System.Convert.ToInt16((String) "0") ), L<String,  Int16>(p0 => ConvertTo<Int16>.From(p0) ) },
-				{ M(() => System.Convert.ToInt16((UInt16)  0)  ), L<UInt16,  Int16>(p0 => ConvertTo<Int16>.From(p0) ) },
-				{ M(() => System.Convert.ToInt16((UInt32)  0)  ), L<UInt32,  Int16>(p0 => ConvertTo<Int16>.From(p0) ) },
-				{ M(() => System.Convert.ToInt16((UInt64)  0)  ), L<UInt64,  Int16>(p0 => ConvertTo<Int16>.From(p0) ) },
-
-				#endregion
-
-				#region ToInt16
-
-				{ M(() => System.Convert.ToUInt16((Boolean)true)), L<Boolean, UInt16>(p0 => ConvertTo<UInt16>.From(p0) ) },
-				{ M(() => System.Convert.ToUInt16((Byte)    0)  ), L<Byte,    UInt16>(p0 => ConvertTo<UInt16>.From(p0) ) },
-				{ M(() => System.Convert.ToUInt16((Char)   '0') ), L<Char,    UInt16>(p0 => ConvertTo<UInt16>.From(p0) ) },
-				{ M(() => System.Convert.ToUInt16(DateTime.Now) ), L<DateTime,UInt16>(p0 => ConvertTo<UInt16>.From(p0) ) },
-				{ M(() => System.Convert.ToUInt16((Decimal) 0)  ), L<Decimal, UInt16>(p0 => ConvertTo<UInt16>.From(RoundToEven(p0)) ) },
-				{ M(() => System.Convert.ToUInt16((Double)  0)  ), L<Double,  UInt16>(p0 => ConvertTo<UInt16>.From(RoundToEven(p0)) ) },
-				{ M(() => System.Convert.ToUInt16((Int16)   0)  ), L<Int16,   UInt16>(p0 => ConvertTo<UInt16>.From(p0) ) },
-				{ M(() => System.Convert.ToUInt16((Int32)   0)  ), L<Int32,   UInt16>(p0 => ConvertTo<UInt16>.From(p0) ) },
-				{ M(() => System.Convert.ToUInt16((Int64)   0)  ), L<Int64,   UInt16>(p0 => ConvertTo<UInt16>.From(p0) ) },
-				{ M(() => System.Convert.ToUInt16((Object)  0)  ), L<Object,  UInt16>(p0 => ConvertTo<UInt16>.From(p0) ) },
-				{ M(() => System.Convert.ToUInt16((SByte)   0)  ), L<SByte,   UInt16>(p0 => ConvertTo<UInt16>.From(p0) ) },
-				{ M(() => System.Convert.ToUInt16((Single)  0)  ), L<Single,  UInt16>(p0 => ConvertTo<UInt16>.From(RoundToEven(p0)) ) },
-				{ M(() => System.Convert.ToUInt16((String) "0") ), L<String,  UInt16>(p0 => ConvertTo<UInt16>.From(p0) ) },
-				{ M(() => System.Convert.ToUInt16((UInt16)  0)  ), L<UInt16,  UInt16>(p0 => ConvertTo<UInt16>.From(p0) ) },
-				{ M(() => System.Convert.ToUInt16((UInt32)  0)  ), L<UInt32,  UInt16>(p0 => ConvertTo<UInt16>.From(p0) ) },
-				{ M(() => System.Convert.ToUInt16((UInt64)  0)  ), L<UInt64,  UInt16>(p0 => ConvertTo<UInt16>.From(p0) ) },
-
-				#endregion
-
 				#region ToByte
 
 				{ M(() => System.Convert.ToByte((Boolean)true)), L<Boolean, Byte>(p0 => ConvertTo<Byte>.From(p0) ) },
@@ -369,24 +241,45 @@ namespace BLToolkit.Data.Linq
 
 				#endregion
 
-				#region ToByte
+				#region ToChar
 
-				{ M(() => System.Convert.ToSByte((Boolean)true)), L<Boolean, SByte>(p0 => ConvertTo<SByte>.From(p0) ) },
-				{ M(() => System.Convert.ToSByte((Byte)    0)  ), L<Byte,    SByte>(p0 => ConvertTo<SByte>.From(p0) ) },
-				{ M(() => System.Convert.ToSByte((Char)   '0') ), L<Char,    SByte>(p0 => ConvertTo<SByte>.From(p0) ) },
-				{ M(() => System.Convert.ToSByte(DateTime.Now) ), L<DateTime,SByte>(p0 => ConvertTo<SByte>.From(p0) ) },
-				{ M(() => System.Convert.ToSByte((Decimal) 0)  ), L<Decimal, SByte>(p0 => ConvertTo<SByte>.From(RoundToEven(p0)) ) },
-				{ M(() => System.Convert.ToSByte((Double)  0)  ), L<Double,  SByte>(p0 => ConvertTo<SByte>.From(RoundToEven(p0)) ) },
-				{ M(() => System.Convert.ToSByte((Int16)   0)  ), L<Int16,   SByte>(p0 => ConvertTo<SByte>.From(p0) ) },
-				{ M(() => System.Convert.ToSByte((Int32)   0)  ), L<Int32,   SByte>(p0 => ConvertTo<SByte>.From(p0) ) },
-				{ M(() => System.Convert.ToSByte((Int64)   0)  ), L<Int64,   SByte>(p0 => ConvertTo<SByte>.From(p0) ) },
-				{ M(() => System.Convert.ToSByte((Object)  0)  ), L<Object,  SByte>(p0 => ConvertTo<SByte>.From(p0) ) },
-				{ M(() => System.Convert.ToSByte((SByte)   0)  ), L<SByte,   SByte>(p0 => ConvertTo<SByte>.From(p0) ) },
-				{ M(() => System.Convert.ToSByte((Single)  0)  ), L<Single,  SByte>(p0 => ConvertTo<SByte>.From(RoundToEven(p0)) ) },
-				{ M(() => System.Convert.ToSByte((String) "0") ), L<String,  SByte>(p0 => ConvertTo<SByte>.From(p0) ) },
-				{ M(() => System.Convert.ToSByte((UInt16)  0)  ), L<UInt16,  SByte>(p0 => ConvertTo<SByte>.From(p0) ) },
-				{ M(() => System.Convert.ToSByte((UInt32)  0)  ), L<UInt32,  SByte>(p0 => ConvertTo<SByte>.From(p0) ) },
-				{ M(() => System.Convert.ToSByte((UInt64)  0)  ), L<UInt64,  SByte>(p0 => ConvertTo<SByte>.From(p0) ) },
+				{ M(() => System.Convert.ToChar((Boolean)true)), L<Boolean, Char>(p0 => ConvertTo<Char>.From(p0) ) },
+				{ M(() => System.Convert.ToChar((Byte)    0)  ), L<Byte,    Char>(p0 => ConvertTo<Char>.From(p0) ) },
+				{ M(() => System.Convert.ToChar((Char)   '0') ), L<Char,    Char>(p0 => p0                       ) },
+				{ M(() => System.Convert.ToChar(DateTime.Now) ), L<DateTime,Char>(p0 => ConvertTo<Char>.From(p0) ) },
+				{ M(() => System.Convert.ToChar((Decimal) 0)  ), L<Decimal, Char>(p0 => ConvertTo<Char>.From(RoundToEven(p0)) ) },
+				{ M(() => System.Convert.ToChar((Double)  0)  ), L<Double,  Char>(p0 => ConvertTo<Char>.From(RoundToEven(p0)) ) },
+				{ M(() => System.Convert.ToChar((Int16)   0)  ), L<Int16,   Char>(p0 => ConvertTo<Char>.From(p0) ) },
+				{ M(() => System.Convert.ToChar((Int32)   0)  ), L<Int32,   Char>(p0 => ConvertTo<Char>.From(p0) ) },
+				{ M(() => System.Convert.ToChar((Int64)   0)  ), L<Int64,   Char>(p0 => ConvertTo<Char>.From(p0) ) },
+				{ M(() => System.Convert.ToChar((Object)  0)  ), L<Object,  Char>(p0 => ConvertTo<Char>.From(p0) ) },
+				{ M(() => System.Convert.ToChar((SByte)   0)  ), L<SByte,   Char>(p0 => ConvertTo<Char>.From(p0) ) },
+				{ M(() => System.Convert.ToChar((Single)  0)  ), L<Single,  Char>(p0 => ConvertTo<Char>.From(RoundToEven(p0)) ) },
+				{ M(() => System.Convert.ToChar((String) "0") ), L<String,  Char>(p0 => ConvertTo<Char>.From(p0) ) },
+				{ M(() => System.Convert.ToChar((UInt16)  0)  ), L<UInt16,  Char>(p0 => ConvertTo<Char>.From(p0) ) },
+				{ M(() => System.Convert.ToChar((UInt32)  0)  ), L<UInt32,  Char>(p0 => ConvertTo<Char>.From(p0) ) },
+				{ M(() => System.Convert.ToChar((UInt64)  0)  ), L<UInt64,  Char>(p0 => ConvertTo<Char>.From(p0) ) },
+
+				#endregion
+
+				#region ToDateTime
+
+				{ M(() => System.Convert.ToDateTime((Boolean)true)), L<Boolean, DateTime>(p0 => ConvertTo<DateTime>.From(p0) ) },
+				{ M(() => System.Convert.ToDateTime((Byte)    0)  ), L<Byte,    DateTime>(p0 => ConvertTo<DateTime>.From(p0) ) },
+				{ M(() => System.Convert.ToDateTime((Char)   '0') ), L<Char,    DateTime>(p0 => ConvertTo<DateTime>.From(p0) ) },
+				{ M(() => System.Convert.ToDateTime(DateTime.Now) ), L<DateTime,DateTime>(p0 => p0                           ) },
+				{ M(() => System.Convert.ToDateTime((Decimal) 0)  ), L<Decimal, DateTime>(p0 => ConvertTo<DateTime>.From(p0) ) },
+				{ M(() => System.Convert.ToDateTime((Double)  0)  ), L<Double,  DateTime>(p0 => ConvertTo<DateTime>.From(p0) ) },
+				{ M(() => System.Convert.ToDateTime((Int16)   0)  ), L<Int16,   DateTime>(p0 => ConvertTo<DateTime>.From(p0) ) },
+				{ M(() => System.Convert.ToDateTime((Int32)   0)  ), L<Int32,   DateTime>(p0 => ConvertTo<DateTime>.From(p0) ) },
+				{ M(() => System.Convert.ToDateTime((Int64)   0)  ), L<Int64,   DateTime>(p0 => ConvertTo<DateTime>.From(p0) ) },
+				{ M(() => System.Convert.ToDateTime((Object)  0)  ), L<Object,  DateTime>(p0 => ConvertTo<DateTime>.From(p0) ) },
+				{ M(() => System.Convert.ToDateTime((SByte)   0)  ), L<SByte,   DateTime>(p0 => ConvertTo<DateTime>.From(p0) ) },
+				{ M(() => System.Convert.ToDateTime((Single)  0)  ), L<Single,  DateTime>(p0 => ConvertTo<DateTime>.From(p0) ) },
+				{ M(() => System.Convert.ToDateTime((String) "0") ), L<String,  DateTime>(p0 => ConvertTo<DateTime>.From(p0) ) },
+				{ M(() => System.Convert.ToDateTime((UInt16)  0)  ), L<UInt16,  DateTime>(p0 => ConvertTo<DateTime>.From(p0) ) },
+				{ M(() => System.Convert.ToDateTime((UInt32)  0)  ), L<UInt32,  DateTime>(p0 => ConvertTo<DateTime>.From(p0) ) },
+				{ M(() => System.Convert.ToDateTime((UInt64)  0)  ), L<UInt64,  DateTime>(p0 => ConvertTo<DateTime>.From(p0) ) },
 
 				#endregion
 
@@ -432,6 +325,90 @@ namespace BLToolkit.Data.Linq
 
 				#endregion
 
+				#region ToInt64
+
+				{ M(() => System.Convert.ToInt64((Boolean)true)), L<Boolean, Int64>(p0 => ConvertTo<Int64>.From(p0) ) },
+				{ M(() => System.Convert.ToInt64((Byte)    0)  ), L<Byte,    Int64>(p0 => ConvertTo<Int64>.From(p0) ) },
+				{ M(() => System.Convert.ToInt64((Char)   '0') ), L<Char,    Int64>(p0 => ConvertTo<Int64>.From(p0) ) },
+				{ M(() => System.Convert.ToInt64(DateTime.Now) ), L<DateTime,Int64>(p0 => ConvertTo<Int64>.From(p0) ) },
+				{ M(() => System.Convert.ToInt64((Decimal) 0)  ), L<Decimal, Int64>(p0 => ConvertTo<Int64>.From(RoundToEven(p0)) ) },
+				{ M(() => System.Convert.ToInt64((Double)  0)  ), L<Double,  Int64>(p0 => ConvertTo<Int64>.From(RoundToEven(p0)) ) },
+				{ M(() => System.Convert.ToInt64((Int16)   0)  ), L<Int16,   Int64>(p0 => ConvertTo<Int64>.From(p0) ) },
+				{ M(() => System.Convert.ToInt64((Int32)   0)  ), L<Int32,   Int64>(p0 => ConvertTo<Int64>.From(p0) ) },
+				{ M(() => System.Convert.ToInt64((Int64)   0)  ), L<Int64,   Int64>(p0 => ConvertTo<Int64>.From(p0) ) },
+				{ M(() => System.Convert.ToInt64((Object)  0)  ), L<Object,  Int64>(p0 => ConvertTo<Int64>.From(p0) ) },
+				{ M(() => System.Convert.ToInt64((SByte)   0)  ), L<SByte,   Int64>(p0 => ConvertTo<Int64>.From(p0) ) },
+				{ M(() => System.Convert.ToInt64((Single)  0)  ), L<Single,  Int64>(p0 => ConvertTo<Int64>.From(RoundToEven(p0)) ) },
+				{ M(() => System.Convert.ToInt64((String) "0") ), L<String,  Int64>(p0 => ConvertTo<Int64>.From(p0) ) },
+				{ M(() => System.Convert.ToInt64((UInt16)  0)  ), L<UInt16,  Int64>(p0 => ConvertTo<Int64>.From(p0) ) },
+				{ M(() => System.Convert.ToInt64((UInt32)  0)  ), L<UInt32,  Int64>(p0 => ConvertTo<Int64>.From(p0) ) },
+				{ M(() => System.Convert.ToInt64((UInt64)  0)  ), L<UInt64,  Int64>(p0 => ConvertTo<Int64>.From(p0) ) },
+
+				#endregion
+
+				#region ToInt32
+
+				{ M(() => System.Convert.ToInt32((Boolean)true)), L<Boolean, Int32>(p0 => ConvertTo<Int32>.From(p0) ) },
+				{ M(() => System.Convert.ToInt32((Byte)    0)  ), L<Byte,    Int32>(p0 => ConvertTo<Int32>.From(p0) ) },
+				{ M(() => System.Convert.ToInt32((Char)   '0') ), L<Char,    Int32>(p0 => ConvertTo<Int32>.From(p0) ) },
+				{ M(() => System.Convert.ToInt32(DateTime.Now) ), L<DateTime,Int32>(p0 => ConvertTo<Int32>.From(p0) ) },
+				{ M(() => System.Convert.ToInt32((Decimal) 0)  ), L<Decimal, Int32>(p0 => ConvertTo<Int32>.From(RoundToEven(p0)) ) },
+				{ M(() => System.Convert.ToInt32((Double)  0)  ), L<Double,  Int32>(p0 => ConvertTo<Int32>.From(RoundToEven(p0)) ) },
+				{ M(() => System.Convert.ToInt32((Int16)   0)  ), L<Int16,   Int32>(p0 => ConvertTo<Int32>.From(p0) ) },
+				{ M(() => System.Convert.ToInt32((Int32)   0)  ), L<Int32,   Int32>(p0 => ConvertTo<Int32>.From(p0) ) },
+				{ M(() => System.Convert.ToInt32((Int64)   0)  ), L<Int64,   Int32>(p0 => ConvertTo<Int32>.From(p0) ) },
+				{ M(() => System.Convert.ToInt32((Object)  0)  ), L<Object,  Int32>(p0 => ConvertTo<Int32>.From(p0) ) },
+				{ M(() => System.Convert.ToInt32((SByte)   0)  ), L<SByte,   Int32>(p0 => ConvertTo<Int32>.From(p0) ) },
+				{ M(() => System.Convert.ToInt32((Single)  0)  ), L<Single,  Int32>(p0 => ConvertTo<Int32>.From(RoundToEven(p0)) ) },
+				{ M(() => System.Convert.ToInt32((String) "0") ), L<String,  Int32>(p0 => ConvertTo<Int32>.From(p0) ) },
+				{ M(() => System.Convert.ToInt32((UInt16)  0)  ), L<UInt16,  Int32>(p0 => ConvertTo<Int32>.From(p0) ) },
+				{ M(() => System.Convert.ToInt32((UInt32)  0)  ), L<UInt32,  Int32>(p0 => ConvertTo<Int32>.From(p0) ) },
+				{ M(() => System.Convert.ToInt32((UInt64)  0)  ), L<UInt64,  Int32>(p0 => ConvertTo<Int32>.From(p0) ) },
+
+				#endregion
+
+				#region ToInt16
+
+				{ M(() => System.Convert.ToInt16((Boolean)true)), L<Boolean, Int16>(p0 => ConvertTo<Int16>.From(p0) ) },
+				{ M(() => System.Convert.ToInt16((Byte)    0)  ), L<Byte,    Int16>(p0 => ConvertTo<Int16>.From(p0) ) },
+				{ M(() => System.Convert.ToInt16((Char)   '0') ), L<Char,    Int16>(p0 => ConvertTo<Int16>.From(p0) ) },
+				{ M(() => System.Convert.ToInt16(DateTime.Now) ), L<DateTime,Int16>(p0 => ConvertTo<Int16>.From(p0) ) },
+				{ M(() => System.Convert.ToInt16((Decimal) 0)  ), L<Decimal, Int16>(p0 => ConvertTo<Int16>.From(RoundToEven(p0)) ) },
+				{ M(() => System.Convert.ToInt16((Double)  0)  ), L<Double,  Int16>(p0 => ConvertTo<Int16>.From(RoundToEven(p0)) ) },
+				{ M(() => System.Convert.ToInt16((Int16)   0)  ), L<Int16,   Int16>(p0 => ConvertTo<Int16>.From(p0) ) },
+				{ M(() => System.Convert.ToInt16((Int32)   0)  ), L<Int32,   Int16>(p0 => ConvertTo<Int16>.From(p0) ) },
+				{ M(() => System.Convert.ToInt16((Int64)   0)  ), L<Int64,   Int16>(p0 => ConvertTo<Int16>.From(p0) ) },
+				{ M(() => System.Convert.ToInt16((Object)  0)  ), L<Object,  Int16>(p0 => ConvertTo<Int16>.From(p0) ) },
+				{ M(() => System.Convert.ToInt16((SByte)   0)  ), L<SByte,   Int16>(p0 => ConvertTo<Int16>.From(p0) ) },
+				{ M(() => System.Convert.ToInt16((Single)  0)  ), L<Single,  Int16>(p0 => ConvertTo<Int16>.From(RoundToEven(p0)) ) },
+				{ M(() => System.Convert.ToInt16((String) "0") ), L<String,  Int16>(p0 => ConvertTo<Int16>.From(p0) ) },
+				{ M(() => System.Convert.ToInt16((UInt16)  0)  ), L<UInt16,  Int16>(p0 => ConvertTo<Int16>.From(p0) ) },
+				{ M(() => System.Convert.ToInt16((UInt32)  0)  ), L<UInt32,  Int16>(p0 => ConvertTo<Int16>.From(p0) ) },
+				{ M(() => System.Convert.ToInt16((UInt64)  0)  ), L<UInt64,  Int16>(p0 => ConvertTo<Int16>.From(p0) ) },
+
+				#endregion
+
+				#region ToSByte
+
+				{ M(() => System.Convert.ToSByte((Boolean)true)), L<Boolean, SByte>(p0 => ConvertTo<SByte>.From(p0) ) },
+				{ M(() => System.Convert.ToSByte((Byte)    0)  ), L<Byte,    SByte>(p0 => ConvertTo<SByte>.From(p0) ) },
+				{ M(() => System.Convert.ToSByte((Char)   '0') ), L<Char,    SByte>(p0 => ConvertTo<SByte>.From(p0) ) },
+				{ M(() => System.Convert.ToSByte(DateTime.Now) ), L<DateTime,SByte>(p0 => ConvertTo<SByte>.From(p0) ) },
+				{ M(() => System.Convert.ToSByte((Decimal) 0)  ), L<Decimal, SByte>(p0 => ConvertTo<SByte>.From(RoundToEven(p0)) ) },
+				{ M(() => System.Convert.ToSByte((Double)  0)  ), L<Double,  SByte>(p0 => ConvertTo<SByte>.From(RoundToEven(p0)) ) },
+				{ M(() => System.Convert.ToSByte((Int16)   0)  ), L<Int16,   SByte>(p0 => ConvertTo<SByte>.From(p0) ) },
+				{ M(() => System.Convert.ToSByte((Int32)   0)  ), L<Int32,   SByte>(p0 => ConvertTo<SByte>.From(p0) ) },
+				{ M(() => System.Convert.ToSByte((Int64)   0)  ), L<Int64,   SByte>(p0 => ConvertTo<SByte>.From(p0) ) },
+				{ M(() => System.Convert.ToSByte((Object)  0)  ), L<Object,  SByte>(p0 => ConvertTo<SByte>.From(p0) ) },
+				{ M(() => System.Convert.ToSByte((SByte)   0)  ), L<SByte,   SByte>(p0 => ConvertTo<SByte>.From(p0) ) },
+				{ M(() => System.Convert.ToSByte((Single)  0)  ), L<Single,  SByte>(p0 => ConvertTo<SByte>.From(RoundToEven(p0)) ) },
+				{ M(() => System.Convert.ToSByte((String) "0") ), L<String,  SByte>(p0 => ConvertTo<SByte>.From(p0) ) },
+				{ M(() => System.Convert.ToSByte((UInt16)  0)  ), L<UInt16,  SByte>(p0 => ConvertTo<SByte>.From(p0) ) },
+				{ M(() => System.Convert.ToSByte((UInt32)  0)  ), L<UInt32,  SByte>(p0 => ConvertTo<SByte>.From(p0) ) },
+				{ M(() => System.Convert.ToSByte((UInt64)  0)  ), L<UInt64,  SByte>(p0 => ConvertTo<SByte>.From(p0) ) },
+
+				#endregion
+
 				#region ToSingle
 
 				{ M(() => System.Convert.ToSingle((Boolean)true)), L<Boolean, Single>(p0 => ConvertTo<Single>.From(p0) ) },
@@ -450,27 +427,6 @@ namespace BLToolkit.Data.Linq
 				{ M(() => System.Convert.ToSingle((UInt16)  0)  ), L<UInt16,  Single>(p0 => ConvertTo<Single>.From(p0) ) },
 				{ M(() => System.Convert.ToSingle((UInt32)  0)  ), L<UInt32,  Single>(p0 => ConvertTo<Single>.From(p0) ) },
 				{ M(() => System.Convert.ToSingle((UInt64)  0)  ), L<UInt64,  Single>(p0 => ConvertTo<Single>.From(p0) ) },
-
-				#endregion
-
-				#region ToDateTime
-
-				{ M(() => System.Convert.ToDateTime((Boolean)true)), L<Boolean, DateTime>(p0 => ConvertTo<DateTime>.From(p0) ) },
-				{ M(() => System.Convert.ToDateTime((Byte)    0)  ), L<Byte,    DateTime>(p0 => ConvertTo<DateTime>.From(p0) ) },
-				{ M(() => System.Convert.ToDateTime((Char)   '0') ), L<Char,    DateTime>(p0 => ConvertTo<DateTime>.From(p0) ) },
-				{ M(() => System.Convert.ToDateTime(DateTime.Now) ), L<DateTime,DateTime>(p0 => p0                           ) },
-				{ M(() => System.Convert.ToDateTime((Decimal) 0)  ), L<Decimal, DateTime>(p0 => ConvertTo<DateTime>.From(p0) ) },
-				{ M(() => System.Convert.ToDateTime((Double)  0)  ), L<Double,  DateTime>(p0 => ConvertTo<DateTime>.From(p0) ) },
-				{ M(() => System.Convert.ToDateTime((Int16)   0)  ), L<Int16,   DateTime>(p0 => ConvertTo<DateTime>.From(p0) ) },
-				{ M(() => System.Convert.ToDateTime((Int32)   0)  ), L<Int32,   DateTime>(p0 => ConvertTo<DateTime>.From(p0) ) },
-				{ M(() => System.Convert.ToDateTime((Int64)   0)  ), L<Int64,   DateTime>(p0 => ConvertTo<DateTime>.From(p0) ) },
-				{ M(() => System.Convert.ToDateTime((Object)  0)  ), L<Object,  DateTime>(p0 => ConvertTo<DateTime>.From(p0) ) },
-				{ M(() => System.Convert.ToDateTime((SByte)   0)  ), L<SByte,   DateTime>(p0 => ConvertTo<DateTime>.From(p0) ) },
-				{ M(() => System.Convert.ToDateTime((Single)  0)  ), L<Single,  DateTime>(p0 => ConvertTo<DateTime>.From(p0) ) },
-				{ M(() => System.Convert.ToDateTime((String) "0") ), L<String,  DateTime>(p0 => ConvertTo<DateTime>.From(p0) ) },
-				{ M(() => System.Convert.ToDateTime((UInt16)  0)  ), L<UInt16,  DateTime>(p0 => ConvertTo<DateTime>.From(p0) ) },
-				{ M(() => System.Convert.ToDateTime((UInt32)  0)  ), L<UInt32,  DateTime>(p0 => ConvertTo<DateTime>.From(p0) ) },
-				{ M(() => System.Convert.ToDateTime((UInt64)  0)  ), L<UInt64,  DateTime>(p0 => ConvertTo<DateTime>.From(p0) ) },
 
 				#endregion
 
@@ -495,17 +451,80 @@ namespace BLToolkit.Data.Linq
 
 				#endregion
 
+				#region ToInt16
+
+				{ M(() => System.Convert.ToUInt16((Boolean)true)), L<Boolean, UInt16>(p0 => ConvertTo<UInt16>.From(p0) ) },
+				{ M(() => System.Convert.ToUInt16((Byte)    0)  ), L<Byte,    UInt16>(p0 => ConvertTo<UInt16>.From(p0) ) },
+				{ M(() => System.Convert.ToUInt16((Char)   '0') ), L<Char,    UInt16>(p0 => ConvertTo<UInt16>.From(p0) ) },
+				{ M(() => System.Convert.ToUInt16(DateTime.Now) ), L<DateTime,UInt16>(p0 => ConvertTo<UInt16>.From(p0) ) },
+				{ M(() => System.Convert.ToUInt16((Decimal) 0)  ), L<Decimal, UInt16>(p0 => ConvertTo<UInt16>.From(RoundToEven(p0)) ) },
+				{ M(() => System.Convert.ToUInt16((Double)  0)  ), L<Double,  UInt16>(p0 => ConvertTo<UInt16>.From(RoundToEven(p0)) ) },
+				{ M(() => System.Convert.ToUInt16((Int16)   0)  ), L<Int16,   UInt16>(p0 => ConvertTo<UInt16>.From(p0) ) },
+				{ M(() => System.Convert.ToUInt16((Int32)   0)  ), L<Int32,   UInt16>(p0 => ConvertTo<UInt16>.From(p0) ) },
+				{ M(() => System.Convert.ToUInt16((Int64)   0)  ), L<Int64,   UInt16>(p0 => ConvertTo<UInt16>.From(p0) ) },
+				{ M(() => System.Convert.ToUInt16((Object)  0)  ), L<Object,  UInt16>(p0 => ConvertTo<UInt16>.From(p0) ) },
+				{ M(() => System.Convert.ToUInt16((SByte)   0)  ), L<SByte,   UInt16>(p0 => ConvertTo<UInt16>.From(p0) ) },
+				{ M(() => System.Convert.ToUInt16((Single)  0)  ), L<Single,  UInt16>(p0 => ConvertTo<UInt16>.From(RoundToEven(p0)) ) },
+				{ M(() => System.Convert.ToUInt16((String) "0") ), L<String,  UInt16>(p0 => ConvertTo<UInt16>.From(p0) ) },
+				{ M(() => System.Convert.ToUInt16((UInt16)  0)  ), L<UInt16,  UInt16>(p0 => ConvertTo<UInt16>.From(p0) ) },
+				{ M(() => System.Convert.ToUInt16((UInt32)  0)  ), L<UInt32,  UInt16>(p0 => ConvertTo<UInt16>.From(p0) ) },
+				{ M(() => System.Convert.ToUInt16((UInt64)  0)  ), L<UInt64,  UInt16>(p0 => ConvertTo<UInt16>.From(p0) ) },
+
+				#endregion
+
+				#region ToInt32
+
+				{ M(() => System.Convert.ToUInt32((Boolean)true)), L<Boolean, UInt32>(p0 => ConvertTo<UInt32>.From(p0) ) },
+				{ M(() => System.Convert.ToUInt32((Byte)    0)  ), L<Byte,    UInt32>(p0 => ConvertTo<UInt32>.From(p0) ) },
+				{ M(() => System.Convert.ToUInt32((Char)   '0') ), L<Char,    UInt32>(p0 => ConvertTo<UInt32>.From(p0) ) },
+				{ M(() => System.Convert.ToUInt32(DateTime.Now) ), L<DateTime,UInt32>(p0 => ConvertTo<UInt32>.From(p0) ) },
+				{ M(() => System.Convert.ToUInt32((Decimal) 0)  ), L<Decimal, UInt32>(p0 => ConvertTo<UInt32>.From(RoundToEven(p0)) ) },
+				{ M(() => System.Convert.ToUInt32((Double)  0)  ), L<Double,  UInt32>(p0 => ConvertTo<UInt32>.From(RoundToEven(p0)) ) },
+				{ M(() => System.Convert.ToUInt32((Int16)   0)  ), L<Int16,   UInt32>(p0 => ConvertTo<UInt32>.From(p0) ) },
+				{ M(() => System.Convert.ToUInt32((Int32)   0)  ), L<Int32,   UInt32>(p0 => ConvertTo<UInt32>.From(p0) ) },
+				{ M(() => System.Convert.ToUInt32((Int64)   0)  ), L<Int64,   UInt32>(p0 => ConvertTo<UInt32>.From(p0) ) },
+				{ M(() => System.Convert.ToUInt32((Object)  0)  ), L<Object,  UInt32>(p0 => ConvertTo<UInt32>.From(p0) ) },
+				{ M(() => System.Convert.ToUInt32((SByte)   0)  ), L<SByte,   UInt32>(p0 => ConvertTo<UInt32>.From(p0) ) },
+				{ M(() => System.Convert.ToUInt32((Single)  0)  ), L<Single,  UInt32>(p0 => ConvertTo<UInt32>.From(RoundToEven(p0)) ) },
+				{ M(() => System.Convert.ToUInt32((String) "0") ), L<String,  UInt32>(p0 => ConvertTo<UInt32>.From(p0) ) },
+				{ M(() => System.Convert.ToUInt32((UInt16)  0)  ), L<UInt16,  UInt32>(p0 => ConvertTo<UInt32>.From(p0) ) },
+				{ M(() => System.Convert.ToUInt32((UInt32)  0)  ), L<UInt32,  UInt32>(p0 => ConvertTo<UInt32>.From(p0) ) },
+				{ M(() => System.Convert.ToUInt32((UInt64)  0)  ), L<UInt64,  UInt32>(p0 => ConvertTo<UInt32>.From(p0) ) },
+
+				#endregion
+
+				#region ToUInt64
+
+				{ M(() => System.Convert.ToUInt64((Boolean)true)), L<Boolean, UInt64>(p0 => ConvertTo<UInt64>.From(p0) ) },
+				{ M(() => System.Convert.ToUInt64((Byte)    0)  ), L<Byte,    UInt64>(p0 => ConvertTo<UInt64>.From(p0) ) },
+				{ M(() => System.Convert.ToUInt64((Char)   '0') ), L<Char,    UInt64>(p0 => ConvertTo<UInt64>.From(p0) ) },
+				{ M(() => System.Convert.ToUInt64(DateTime.Now) ), L<DateTime,UInt64>(p0 => ConvertTo<UInt64>.From(p0) ) },
+				{ M(() => System.Convert.ToUInt64((Decimal) 0)  ), L<Decimal, UInt64>(p0 => ConvertTo<UInt64>.From(RoundToEven(p0)) ) },
+				{ M(() => System.Convert.ToUInt64((Double)  0)  ), L<Double,  UInt64>(p0 => ConvertTo<UInt64>.From(RoundToEven(p0)) ) },
+				{ M(() => System.Convert.ToUInt64((Int16)   0)  ), L<Int16,   UInt64>(p0 => ConvertTo<UInt64>.From(p0) ) },
+				{ M(() => System.Convert.ToUInt64((Int32)   0)  ), L<Int32,   UInt64>(p0 => ConvertTo<UInt64>.From(p0) ) },
+				{ M(() => System.Convert.ToUInt64((Int64)   0)  ), L<Int64,   UInt64>(p0 => ConvertTo<UInt64>.From(p0) ) },
+				{ M(() => System.Convert.ToUInt64((Object)  0)  ), L<Object,  UInt64>(p0 => ConvertTo<UInt64>.From(p0) ) },
+				{ M(() => System.Convert.ToUInt64((SByte)   0)  ), L<SByte,   UInt64>(p0 => ConvertTo<UInt64>.From(p0) ) },
+				{ M(() => System.Convert.ToUInt64((Single)  0)  ), L<Single,  UInt64>(p0 => ConvertTo<UInt64>.From(RoundToEven(p0)) ) },
+				{ M(() => System.Convert.ToUInt64((String) "0") ), L<String,  UInt64>(p0 => ConvertTo<UInt64>.From(p0) ) },
+				{ M(() => System.Convert.ToUInt64((UInt16)  0)  ), L<UInt16,  UInt64>(p0 => ConvertTo<UInt64>.From(p0) ) },
+				{ M(() => System.Convert.ToUInt64((UInt32)  0)  ), L<UInt32,  UInt64>(p0 => ConvertTo<UInt64>.From(p0) ) },
+				{ M(() => System.Convert.ToUInt64((UInt64)  0)  ), L<UInt64,  UInt64>(p0 => ConvertTo<UInt64>.From(p0) ) },
+
+				#endregion
+
 				#endregion
 
 				#region Math
 
-				{ M(() => Math.Abs    ((Decimal)0)), L<Decimal,Decimal>( p    => Abs    (p)   .Value ) },
-				{ M(() => Math.Abs    ((Double) 0)), L<Double, Double> ( p    => Abs    (p)   .Value ) },
-				{ M(() => Math.Abs    ((Int16)  0)), L<Int16,  Int16>  ( p    => Abs    (p)   .Value ) },
-				{ M(() => Math.Abs    ((Int32)  0)), L<Int32,  Int32>  ( p    => Abs    (p)   .Value ) },
-				{ M(() => Math.Abs    ((Int64)  0)), L<Int64,  Int64>  ( p    => Abs    (p)   .Value ) },
-				{ M(() => Math.Abs    ((SByte)  0)), L<SByte,  SByte>  ( p    => Abs    (p)   .Value ) },
-				{ M(() => Math.Abs    ((Single) 0)), L<Single, Single> ( p    => Abs    (p)   .Value ) },
+				{ M(() => Math.Abs    ((Decimal)0)), L<Decimal,Decimal>(p => Abs(p).Value ) },
+				{ M(() => Math.Abs    ((Double) 0)), L<Double, Double> (p => Abs(p).Value ) },
+				{ M(() => Math.Abs    ((Int16)  0)), L<Int16,  Int16>  (p => Abs(p).Value ) },
+				{ M(() => Math.Abs    ((Int32)  0)), L<Int32,  Int32>  (p => Abs(p).Value ) },
+				{ M(() => Math.Abs    ((Int64)  0)), L<Int64,  Int64>  (p => Abs(p).Value ) },
+				{ M(() => Math.Abs    ((SByte)  0)), L<SByte,  SByte>  (p => Abs(p).Value ) },
+				{ M(() => Math.Abs    ((Single) 0)), L<Single, Single> (p => Abs(p).Value ) },
 
 				{ M(() => Math.Acos   (0)   ), L<F,F>  ( p    => Acos   (p)   .Value ) },
 				{ M(() => Math.Asin   (0)   ), L<F,F>  ( p    => Asin   (p)   .Value ) },
@@ -548,14 +567,43 @@ namespace BLToolkit.Data.Linq
 
 				{ M(() => Math.Pow    (0,0) ), L<F,F,F>((x,y) => Power(x, y).Value ) },
 
+				{ M(() => Round      (0m)   ), L<M?,M?>   ( d    => Round(d, 0)) },
+				{ M(() => Round      (0.0)  ), L<F?,F?>   ( d    => Round(d, 0)) },
 
+				{ M(() => RoundToEven(0m)   ), L<M?,M?>   ( d    => d - Floor(d) == 0.5m && Floor(d) % 2 == 0? Floor(d) : Round(d)) },
+				{ M(() => RoundToEven(0.0)  ), L<F?,F?>   ( d    => d - Floor(d) == 0.5  && Floor(d) % 2 == 0? Floor(d) : Round(d)) },
 
+				{ M(() => RoundToEven(0m, 0)), L<M?,I?,M?>((d,n) => d * 2 == Round(d * 2, n) && d != Round(d, n) ? Round(d / 2, n) * 2 : Round(d, n)) },
+				{ M(() => RoundToEven(0.0,0)), L<F?,I?,F?>((d,n) => d * 2 == Round(d * 2, n) && d != Round(d, n) ? Round(d / 2, n) * 2 : Round(d, n)) },
 
-				{ M(() => Math.Sin    (0)   ), L<F,F>  ( p    => Sin    (p)   .Value ) },
+				{ M(() => Math.Round (0m)   ), L<M,M>     ( d    => RoundToEven(d).Value ) },
+				{ M(() => Math.Round (0.0)  ), L<F,F>     ( d    => RoundToEven(d).Value ) },
 
-				{ M(() => RoundToEven(0m)   ), L<M?,M?>( d => d - Floor(d) == 0.5m && Floor(d) % 2 == 0? Floor(d) : Round(d, 0)) },
-				{ M(() => RoundToEven(0.0)  ), L<F?,F?>( d => d - Floor(d) == 0.5  && Floor(d) % 2 == 0? Floor(d) : Round(d, 0)) },
+				{ M(() => Math.Round (0m, 0)), L<M,I,M>   ((d,n) => RoundToEven(d, n).Value ) },
+				{ M(() => Math.Round (0.0,0)), L<F,I,F>   ((d,n) => RoundToEven(d, n).Value ) },
 
+				{ M(() => Math.Round (0m,    MidpointRounding.ToEven)), L<M,  MidpointRounding,M>((d,  p) => p == MidpointRounding.ToEven ? RoundToEven(d).  Value : Round(d).  Value ) },
+				{ M(() => Math.Round (0.0,   MidpointRounding.ToEven)), L<F,  MidpointRounding,F>((d,  p) => p == MidpointRounding.ToEven ? RoundToEven(d).  Value : Round(d).  Value ) },
+
+				{ M(() => Math.Round (0m, 0, MidpointRounding.ToEven)), L<M,I,MidpointRounding,M>((d,n,p) => p == MidpointRounding.ToEven ? RoundToEven(d,n).Value : Round(d,n).Value ) },
+				{ M(() => Math.Round (0.0,0, MidpointRounding.ToEven)), L<F,I,MidpointRounding,F>((d,n,p) => p == MidpointRounding.ToEven ? RoundToEven(d,n).Value : Round(d,n).Value ) },
+
+				{ M(() => Math.Sign  ((Decimal)0)), L<Decimal,I>(p => Sign(p).Value ) },
+				{ M(() => Math.Sign  ((Double) 0)), L<Double, I>(p => Sign(p).Value ) },
+				{ M(() => Math.Sign  ((Int16)  0)), L<Int16,  I>(p => Sign(p).Value ) },
+				{ M(() => Math.Sign  ((Int32)  0)), L<Int32,  I>(p => Sign(p).Value ) },
+				{ M(() => Math.Sign  ((Int64)  0)), L<Int64,  I>(p => Sign(p).Value ) },
+				{ M(() => Math.Sign  ((SByte)  0)), L<SByte,  I>(p => Sign(p).Value ) },
+				{ M(() => Math.Sign  ((Single) 0)), L<Single, I>(p => Sign(p).Value ) },
+
+				{ M(() => Math.Sin   (0)), L<F,F>( p => Sin (p).Value ) },
+				{ M(() => Math.Sinh  (0)), L<F,F>( p => Sinh(p).Value ) },
+				{ M(() => Math.Sqrt  (0)), L<F,F>( p => Sqrt(p).Value ) },
+				{ M(() => Math.Tan   (0)), L<F,F>( p => Tan (p).Value ) },
+				{ M(() => Math.Tanh  (0)), L<F,F>( p => Tanh(p).Value ) },
+
+				{ M(() => Math.Truncate(0m)),  L<M,M>( p => Truncate(p).Value ) },
+				{ M(() => Math.Truncate(0.0)), L<F,F>( p => Truncate(p).Value ) },
 
 				#endregion
 			}},
@@ -571,6 +619,8 @@ namespace BLToolkit.Data.Linq
 				{ M(() => Cosh(0)   ), L<F?,F?>   ( v    => (Exp(v) + Exp(-v)) / 2) },
 				{ M(() => Log(0m, 0)), L<M?,M?,M?>((m,n) => Log(n) / Log(m)) },
 				{ M(() => Log(0.0,0)), L<F?,F?,F?>((m,n) => Log(n) / Log(m)) },
+				{ M(() => Sinh(0)   ), L<F?,F?>   ( v    => (Exp(v) - Exp(-v)) / 2) },
+				{ M(() => Tanh(0)   ), L<F?,F?>   ( v    => (Exp(v) - Exp(-v)) / (Exp(v) + Exp(-v))) },
 			}},
 
 			#endregion
@@ -586,6 +636,8 @@ namespace BLToolkit.Data.Linq
 				{ M(() => Cosh(0)   ), L<F?,F?>   ( v    => (Exp(v) + Exp(-v)) / 2) },
 				{ M(() => Log(0m, 0)), L<M?,M?,M?>((m,n) => Log(n) / Log(m)) },
 				{ M(() => Log(0.0,0)), L<F?,F?,F?>((m,n) => Log(n) / Log(m)) },
+				{ M(() => Sinh(0)   ), L<F?,F?>   ( v    => (Exp(v) - Exp(-v)) / 2) },
+				{ M(() => Tanh(0)   ), L<F?,F?>   ( v    => (Exp(v) - Exp(-v)) / (Exp(v) + Exp(-v))) },
 			}},
 
 			#endregion
@@ -602,6 +654,8 @@ namespace BLToolkit.Data.Linq
 				{ M(() => Cosh(0)    ), L<F?,F?>   ( v    => (Exp(v) + Exp(-v)) / 2) },
 				{ M(() => Log (0m, 0)), L<M?,M?,M?>((m,n) => Log(n) / Log(m)) },
 				{ M(() => Log (0.0,0)), L<F?,F?,F?>((m,n) => Log(n) / Log(m)) },
+				{ M(() => Sinh(0)    ), L<F?,F?>   ( v    => (Exp(v) - Exp(-v)) / 2) },
+				{ M(() => Tanh(0)    ), L<F?,F?>   ( v    => (Exp(v) - Exp(-v)) / (Exp(v) + Exp(-v))) },
 			}},
 
 			#endregion
@@ -636,6 +690,8 @@ namespace BLToolkit.Data.Linq
 				{ M(() => Stuff("",0,0,"")), L<S,I?,I?,S,S>((p0,p1,p2,p3) => AltStuff (p0,  p1, p2, p3))             },
 				{ M(() => Space(0)        ), L<I?,S>       ( p0           => PadRight (" ", p0, ' '))                },
 
+				{ M(() => MakeDateTime(0,0,0)), L<I?,I?,I?,D?>((y,m,d) => Mdy(m, d, y)) },
+
 				{ M(() => Cot (0)         ), L<F?,F?>      ( v            => Cos(v) / Sin(v) )        },
 				{ M(() => Cosh(0)         ), L<F?,F?>      ( v            => (Exp(v) + Exp(-v)) / 2 ) },
 
@@ -649,6 +705,17 @@ namespace BLToolkit.Data.Linq
 
 				{ M(() => Log(0m, 0)), L<M?,M?,M?>((m,n) => Log(n) / Log(m)) },
 				{ M(() => Log(0.0,0)), L<F?,F?,F?>((m,n) => Log(n) / Log(m)) },
+
+				{ M(() => Sign((Decimal?)0)), L<Decimal?,I?>(p => p > 0 ? 1 : p < 0 ? -1 : 0 ) },
+				{ M(() => Sign((Double?) 0)), L<Double?, I?>(p => p > 0 ? 1 : p < 0 ? -1 : 0 ) },
+				{ M(() => Sign((Int16?)  0)), L<Int16?,  I?>(p => p > 0 ? 1 : p < 0 ? -1 : 0 ) },
+				{ M(() => Sign((Int32?)  0)), L<Int32?,  I?>(p => p > 0 ? 1 : p < 0 ? -1 : 0 ) },
+				{ M(() => Sign((Int64?)  0)), L<Int64?,  I?>(p => p > 0 ? 1 : p < 0 ? -1 : 0 ) },
+				{ M(() => Sign((SByte?)  0)), L<SByte?,  I?>(p => p > 0 ? 1 : p < 0 ? -1 : 0 ) },
+				{ M(() => Sign((Single?) 0)), L<Single?, I?>(p => p > 0 ? 1 : p < 0 ? -1 : 0 ) },
+
+				{ M(() => Sinh(0)), L<F?,F?>( v => (Exp(v) - Exp(-v)) / 2) },
+				{ M(() => Tanh(0)), L<F?,F?>( v => (Exp(v) - Exp(-v)) / (Exp(v) + Exp(-v))) },
 			}},
 
 			#endregion
@@ -695,6 +762,9 @@ namespace BLToolkit.Data.Linq
 				{ M(() => Degrees((Int64?)  0)), L<Int64?,  Int64?>  ( v => (Int64?)  (v.Value * (180 / Math.PI))) },
 				{ M(() => Degrees((SByte?)  0)), L<SByte?,  SByte?>  ( v => (SByte?)  (v.Value * (180 / Math.PI))) },
 				{ M(() => Degrees((Single?) 0)), L<Single?, Single?> ( v => (Single?) (v.Value * (180 / Math.PI))) },
+
+				{ M(() => RoundToEven(0.0)  ), L<F?,F?>      ( v            => (double)RoundToEven((decimal)v))    },
+				{ M(() => RoundToEven(0.0,0)), L<F?,I?,F?>   ((v,p)         => (double)RoundToEven((decimal)v, p)) },
 			}},
 
 			#endregion
@@ -704,7 +774,9 @@ namespace BLToolkit.Data.Linq
 			{ "MySql", new Dictionary<MemberInfo,LambdaExpression> {
 				{ M<S>(s => Stuff(s, 0, 0, s)), L<S,I?,I?,S,S>((p0,p1,p2,p3) => AltStuff(p0, p1, p2, p3)) },
 
-				{ M(() => Cosh(0)), L<F?,F?>(v => (Exp(v) + Exp(-v)) / 2 ) },
+				{ M(() => Cosh(0)), L<F?,F?>(v => (Exp(v) + Exp(-v)) / 2) },
+				{ M(() => Sinh(0)), L<F?,F?>(v => (Exp(v) - Exp(-v)) / 2) },
+				{ M(() => Tanh(0)), L<F?,F?>(v => (Exp(v) - Exp(-v)) / (Exp(v) + Exp(-v))) },
 			}},
 
 			#endregion
@@ -717,9 +789,16 @@ namespace BLToolkit.Data.Linq
 				{ M(() => Stuff("",0,0,"")), L<S,I?,I?,S,S>((p0,p1,p2,p3) => AltStuff(p0, p1, p2, p3)) },
 				{ M(() => Space(0)        ), L<I?,S>       ( p0           => Replicate(" ", p0)) },
 
-				{ M(() => Cosh(0)         ), L<F?,F?>      ( v            => (Exp(v) + Exp(-v)) / 2 ) },
+				{ M(() => Cosh(0)           ), L<F?,F?>    ( v            => (Exp(v) + Exp(-v)) / 2 ) },
+				{ M(() => Round      (0.0,0)), L<F?,I?,F?> ((v,p)         => (double)Round      ((decimal)v, p)) },
+				{ M(() => RoundToEven(0.0)  ), L<F?,F?>    ( v            => (double)RoundToEven((decimal)v))    },
+				{ M(() => RoundToEven(0.0,0)), L<F?,I?,F?> ((v,p)         => (double)RoundToEven((decimal)v, p)) },
 
 				{ M(() => Log  ((double)0,0)), L<F?,F?,F?> ((m,n)         => (F?)Log((M)m,(M)n).Value ) },
+				{ M(() => Sinh (0)          ), L<F?,F?>    ( v            => (Exp(v) - Exp(-v)) / 2) },
+				{ M(() => Tanh (0)          ), L<F?,F?>    ( v            => (Exp(v) - Exp(-v)) / (Exp(v) + Exp(-v))) },
+
+				{ M(() => Truncate(0.0)     ), L<F?,F?>    ( v            => (double)Truncate((decimal)v)) },
 			}},
 
 			#endregion
@@ -753,6 +832,9 @@ namespace BLToolkit.Data.Linq
 
 				{ M(() => Log (0m, 0)), L<M?,M?,M?>((m,n) => Log(n) / Log(m)) },
 				{ M(() => Log (0.0,0)), L<F?,F?,F?>((m,n) => Log(n) / Log(m)) },
+
+				{ M(() => Truncate(0m)),  L<M?,M?>( v => v >= 0 ? Floor(v) : Ceiling(v)) },
+				{ M(() => Truncate(0.0)), L<F?,F?>( v => v >= 0 ? Floor(v) : Ceiling(v)) },
 			}},
 
 			#endregion
@@ -775,6 +857,12 @@ namespace BLToolkit.Data.Linq
 				{ M(() => Degrees((Int64?)  0)), L<Int64?,  Int64?>  ( v => (Int64?)  (v.Value * (180 / Math.PI))) },
 				{ M(() => Degrees((SByte?)  0)), L<SByte?,  SByte?>  ( v => (SByte?)  (v.Value * (180 / Math.PI))) },
 				{ M(() => Degrees((Single?) 0)), L<Single?, Single?> ( v => (Single?) (v.Value * (180 / Math.PI))) },
+
+				{ M(() => Sinh(0)), L<F?,F?>( v => (Exp(v) - Exp(-v)) / 2) },
+				{ M(() => Tanh(0)), L<F?,F?>( v => (Exp(v) - Exp(-v)) / (Exp(v) + Exp(-v))) },
+
+				{ M(() => Truncate(0m)),  L<M?,M?>( v => v >= 0 ? Floor(v) : Ceiling(v)) },
+				{ M(() => Truncate(0.0)), L<F?,F?>( v => v >= 0 ? Floor(v) : Ceiling(v)) },
 			}},
 
 			#endregion
@@ -805,6 +893,33 @@ namespace BLToolkit.Data.Linq
 				{ M(() => Degrees((Int64?)  0)), L<Int64?,  Int64?>  ( v => (Int64?)  AccessInt(AccessInt(v.Value) * (180 / Math.PI))) },
 				{ M(() => Degrees((SByte?)  0)), L<SByte?,  SByte?>  ( v => (SByte?)  AccessInt(AccessInt(v.Value) * (180 / Math.PI))) },
 				{ M(() => Degrees((Single?) 0)), L<Single?, Single?> ( v => (Single?)          (          v.Value  * (180 / Math.PI))) },
+
+				{ M(() => Round      (0m)   ), L<M?,M?>   ( d   => d - Floor(d) == 0.5m && Floor(d) % 2 == 0? Ceiling(d) : AccessRound(d, 0)) },
+				{ M(() => Round      (0.0)  ), L<F?,F?>   ( d   => d - Floor(d) == 0.5  && Floor(d) % 2 == 0? Ceiling(d) : AccessRound(d, 0)) },
+				{ M(() => Round      (0m, 0)), L<M?,I?,M?>((v,p)=>
+					p == 1 ? Round(v * 10) / 10 :
+					p == 2 ? Round(v * 10) / 10 :
+					p == 3 ? Round(v * 10) / 10 :
+					p == 4 ? Round(v * 10) / 10 :
+					p == 5 ? Round(v * 10) / 10 :
+					         Round(v * 10) / 10) },
+				{ M(() => Round      (0.0,0)), L<F?,I?,F?>((v,p)=>
+					p == 1 ? Round(v * 10) / 10 :
+					p == 2 ? Round(v * 10) / 10 :
+					p == 3 ? Round(v * 10) / 10 :
+					p == 4 ? Round(v * 10) / 10 :
+					p == 5 ? Round(v * 10) / 10 :
+					         Round(v * 10) / 10) },
+				{ M(() => RoundToEven(0m)   ), L<M?,M?>   ( v   => AccessRound(v, 0))},
+				{ M(() => RoundToEven(0.0)  ), L<F?,F?>   ( v   => AccessRound(v, 0))},
+				{ M(() => RoundToEven(0m, 0)), L<M?,I?,M?>((v,p)=> AccessRound(v, p))},
+				{ M(() => RoundToEven(0.0,0)), L<F?,I?,F?>((v,p)=> AccessRound(v, p))},
+
+				{ M(() => Sinh(0)), L<F?,F?>( v => (Exp(v) - Exp(-v)) / 2) },
+				{ M(() => Tanh(0)), L<F?,F?>( v => (Exp(v) - Exp(-v)) / (Exp(v) + Exp(-v))) },
+
+				{ M(() => Truncate(0m)),  L<M?,M?>( v => v >= 0 ? Floor(v) : Ceiling(v)) },
+				{ M(() => Truncate(0.0)), L<F?,F?>( v => v >= 0 ? Floor(v) : Ceiling(v)) },
 			}},
 
 			#endregion
@@ -888,6 +1003,11 @@ namespace BLToolkit.Data.Linq
 			return days == null ? null : DateAdd(part, number, new DateTime(1900, 1, days.Value + 1));
 		}
 
+		// MSSQL
+		//
+		[SqlFunction] static Decimal? Round(Decimal? value, int precision, int mode) { return 0; }
+		[SqlFunction] static Double?  Round(Double?  value, int precision, int mode) { return 0; }
+
 		// Access
 		//
 		[SqlFunction("Access", "DateSerial")]
@@ -899,6 +1019,7 @@ namespace BLToolkit.Data.Linq
 		}
 
 		// Access
+		//
 		[CLSCompliant(false)]
 		[SqlFunction("Int", 0)]
 		static T AccessInt<T>(T value)
@@ -906,9 +1027,25 @@ namespace BLToolkit.Data.Linq
 			return value;
 		}
 
+		// Access
+		//
+		[CLSCompliant(false)]
+		[SqlFunction("Round", 0, 1)]
+		static T AccessRound<T>(T value, int? precision) { return value; }
+
 		// Firebird
 		//
 		[SqlFunction("PI", ServerSideOnly = true)] static decimal DecimalPI() { return (decimal)Math.PI; }
 		[SqlFunction("PI", ServerSideOnly = true)] static double  DoublePI () { return          Math.PI; }
+
+		// Informix
+		//
+		[SqlFunction]
+		static DateTime? Mdy(int? month, int? day, int? year)
+		{
+			return year == null || month == null || day == null ?
+				(DateTime?)null :
+				new DateTime(year.Value, month.Value, day.Value);
+		}
 	}
 }

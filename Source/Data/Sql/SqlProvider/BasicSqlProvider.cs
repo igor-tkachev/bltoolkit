@@ -820,15 +820,15 @@ namespace BLToolkit.Data.Sql.SqlProvider
 						SqlExpression e = (SqlExpression)expr;
 						StringBuilder s = new StringBuilder();
 
-						if (e.Values == null || e.Values.Length == 0)
+						if (e.Parameters == null || e.Parameters.Length == 0)
 							sb.Append(e.Expr);
 						else
 						{
-							object[] values = new object[e.Values.Length];
+							object[] values = new object[e.Parameters.Length];
 
 							for (int i = 0; i < values.Length; i++)
 							{
-								ISqlExpression value = e.Values[i];
+								ISqlExpression value = e.Parameters[i];
 
 								s.Length = 0;
 								BuildExpression(s, GetPrecedence(e), value);
@@ -1017,8 +1017,25 @@ namespace BLToolkit.Data.Sql.SqlProvider
 				for (; i < func.Parameters.Length - 1; i += 2)
 				{
 					AppendIndent(sb).Append("WHEN ");
+
+					int len = sb.Length;
+
 					BuildExpression(sb, func.Parameters[i]);
-					sb.Append(" THEN ");
+
+					if (SqlExpression.NeedsEqual(func.Parameters[i]))
+					{
+						sb.Append(" = ");
+						BuildValue(sb, true);
+					}
+
+					if (sb.Length - len > 20)
+					{
+						sb.AppendLine();
+						AppendIndent(sb).Append("\tTHEN ");
+					}
+					else
+						sb.Append(" THEN ");
+
 					BuildExpression(sb, func.Parameters[i+1]);
 					sb.AppendLine();
 				}
@@ -1346,7 +1363,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			ISqlExpression par1 = func.Parameters[1];
 
 			return TypeHelper.IsFloatType(par1.SystemType) && TypeHelper.IsIntegerType(func.SystemType) ?
-				new SqlFunction(par1.SystemType, "Floor", par1) : par1;
+				new SqlFunction(func.SystemType, "Floor", par1) : par1;
 		}
 
 		protected ISqlExpression AlternativeConvertToBoolean(SqlFunction func, int paramNumber)
@@ -1558,271 +1575,304 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		public virtual ISqlExpression ConvertExpression(ISqlExpression expression)
 		{
-			if (expression is SqlBinaryExpression)
+			switch (expression.ElementType)
 			{
-				SqlBinaryExpression be = (SqlBinaryExpression)expression;
+				case QueryElementType.SqlBinaryExpression:
 
-				switch (be.Operation)
-				{
-					case "+":
-						if (be.Expr1 is SqlValue)
+					#region SqlBinaryExpression
+
+					{
+						SqlBinaryExpression be = (SqlBinaryExpression)expression;
+
+						switch (be.Operation)
 						{
-							SqlValue v1 = (SqlValue)be.Expr1;
-							if (v1.Value is int    && (int)   v1.Value == 0 ||
-								v1.Value is string && (string)v1.Value == "") return be.Expr2;
-						}
-
-						if (be.Expr2 is SqlValue)
-						{
-							SqlValue v2 = (SqlValue) be.Expr2;
-
-							if (v2.Value is int)
-							{
-								if ((int)v2.Value == 0) return be.Expr1;
-
-								if (be.Expr1 is SqlBinaryExpression)
+							case "+":
+								if (be.Expr1 is SqlValue)
 								{
-									SqlBinaryExpression be1 = (SqlBinaryExpression) be.Expr1;
+									SqlValue v1 = (SqlValue)be.Expr1;
+									if (v1.Value is int    && (int)   v1.Value == 0 ||
+										v1.Value is string && (string)v1.Value == "") return be.Expr2;
+								}
 
-									if (be1.Expr2 is SqlValue)
+								if (be.Expr2 is SqlValue)
+								{
+									SqlValue v2 = (SqlValue) be.Expr2;
+
+									if (v2.Value is int)
 									{
-										SqlValue be1v2 = (SqlValue)be1.Expr2;
+										if ((int)v2.Value == 0) return be.Expr1;
 
-										if (be1v2.Value is int)
+										if (be.Expr1 is SqlBinaryExpression)
 										{
-											switch (be1.Operation)
+											SqlBinaryExpression be1 = (SqlBinaryExpression) be.Expr1;
+
+											if (be1.Expr2 is SqlValue)
 											{
-												case "+": return new SqlBinaryExpression(be.SystemType, be1.Expr1, be1.Operation, new SqlValue((int)be1v2.Value + (int)v2.Value), be.Precedence);
-												case "-": return new SqlBinaryExpression(be.SystemType, be1.Expr1, be1.Operation, new SqlValue((int)be1v2.Value - (int)v2.Value), be.Precedence);
+												SqlValue be1v2 = (SqlValue)be1.Expr2;
+
+												if (be1v2.Value is int)
+												{
+													switch (be1.Operation)
+													{
+														case "+": return new SqlBinaryExpression(be.SystemType, be1.Expr1, be1.Operation, new SqlValue((int)be1v2.Value + (int)v2.Value), be.Precedence);
+														case "-": return new SqlBinaryExpression(be.SystemType, be1.Expr1, be1.Operation, new SqlValue((int)be1v2.Value - (int)v2.Value), be.Precedence);
+													}
+												}
+											}
+										}
+									}
+									else if (v2.Value is string)
+									{
+										if ((string)v2.Value == "") return be.Expr1;
+
+										if (be.Expr1 is SqlBinaryExpression)
+										{
+											SqlBinaryExpression be1 = (SqlBinaryExpression)be.Expr1;
+
+											if (be1.Expr2 is SqlValue)
+											{
+												return new SqlBinaryExpression(
+													be1.SystemType,
+													be1.Expr1,
+													be1.Operation,
+													new SqlValue(string.Concat(((SqlValue)be1.Expr2).Value, v2.Value)));
 											}
 										}
 									}
 								}
-							}
-							else if (v2.Value is string)
-							{
-								if ((string)v2.Value == "") return be.Expr1;
 
-								if (be.Expr1 is SqlBinaryExpression)
+								if (be.Expr1 is SqlValue && be.Expr2 is SqlValue)
 								{
-									SqlBinaryExpression be1 = (SqlBinaryExpression)be.Expr1;
-
-									if (be1.Expr2 is SqlValue)
-									{
-										return new SqlBinaryExpression(
-											be1.SystemType,
-											be1.Expr1,
-											be1.Operation,
-											new SqlValue(string.Concat(((SqlValue)be1.Expr2).Value, v2.Value)));
-									}
+									SqlValue v1 = (SqlValue)be.Expr1;
+									SqlValue v2 = (SqlValue)be.Expr2;
+									if (v1.Value is int    && v2.Value is int)    return new SqlValue((int)v1.Value + (int)v2.Value);
+									if (v1.Value is string || v2.Value is string) return new SqlValue(v1.Value.ToString() + v2.Value);
 								}
-							}
-						}
 
-						if (be.Expr1 is SqlValue && be.Expr2 is SqlValue)
-						{
-							SqlValue v1 = (SqlValue)be.Expr1;
-							SqlValue v2 = (SqlValue)be.Expr2;
-							if (v1.Value is int    && v2.Value is int)    return new SqlValue((int)v1.Value + (int)v2.Value);
-							if (v1.Value is string || v2.Value is string) return new SqlValue(v1.Value.ToString() + v2.Value);
-						}
-
-						if (be.Expr1.SystemType == typeof(string) && be.Expr2.SystemType != typeof(string))
-						{
-							int len = be.Expr2.SystemType == null ? 100 : SqlDataType.GetMaxDisplaySize(SqlDataType.GetDataType(be.Expr2.SystemType).DbType);
-
-							if (len <= 0)
-								len = 100;
-
-							return new SqlBinaryExpression(
-								be.SystemType,
-								be.Expr1,
-								be.Operation,
-								ConvertExpression(new SqlFunction(typeof(string), "Convert", new SqlDataType(SqlDbType.VarChar, len), be.Expr2)),
-								be.Precedence);
-						}
-
-						if (be.Expr1.SystemType != typeof(string) && be.Expr2.SystemType == typeof(string))
-						{
-							int len = be.Expr1.SystemType == null ? 100 : SqlDataType.GetMaxDisplaySize(SqlDataType.GetDataType(be.Expr1.SystemType).DbType);
-
-							if (len <= 0)
-								len = 100;
-
-							return new SqlBinaryExpression(
-								be.SystemType,
-								ConvertExpression(new SqlFunction(typeof(string), "Convert", new SqlDataType(SqlDbType.VarChar, len), be.Expr1)),
-								be.Operation,
-								be.Expr2,
-								be.Precedence);
-						}
-
-						break;
-
-					case "-":
-						if (be.Expr2 is SqlValue)
-						{
-							SqlValue v2 = (SqlValue) be.Expr2;
-
-							if (v2.Value is int)
-							{
-								if ((int)v2.Value == 0) return be.Expr1;
-
-								if (be.Expr1 is SqlBinaryExpression)
+								if (be.Expr1.SystemType == typeof(string) && be.Expr2.SystemType != typeof(string))
 								{
-									SqlBinaryExpression be1 = (SqlBinaryExpression)be.Expr1;
+									int len = be.Expr2.SystemType == null ? 100 : SqlDataType.GetMaxDisplaySize(SqlDataType.GetDataType(be.Expr2.SystemType).DbType);
 
-									if (be1.Expr2 is SqlValue)
+									if (len <= 0)
+										len = 100;
+
+									return new SqlBinaryExpression(
+										be.SystemType,
+										be.Expr1,
+										be.Operation,
+										ConvertExpression(new SqlFunction(typeof(string), "Convert", new SqlDataType(SqlDbType.VarChar, len), be.Expr2)),
+										be.Precedence);
+								}
+
+								if (be.Expr1.SystemType != typeof(string) && be.Expr2.SystemType == typeof(string))
+								{
+									int len = be.Expr1.SystemType == null ? 100 : SqlDataType.GetMaxDisplaySize(SqlDataType.GetDataType(be.Expr1.SystemType).DbType);
+
+									if (len <= 0)
+										len = 100;
+
+									return new SqlBinaryExpression(
+										be.SystemType,
+										ConvertExpression(new SqlFunction(typeof(string), "Convert", new SqlDataType(SqlDbType.VarChar, len), be.Expr1)),
+										be.Operation,
+										be.Expr2,
+										be.Precedence);
+								}
+
+								break;
+
+							case "-":
+								if (be.Expr2 is SqlValue)
+								{
+									SqlValue v2 = (SqlValue) be.Expr2;
+
+									if (v2.Value is int)
 									{
-										SqlValue be1v2 = (SqlValue)be1.Expr2;
+										if ((int)v2.Value == 0) return be.Expr1;
 
-										if (be1v2.Value is int)
+										if (be.Expr1 is SqlBinaryExpression)
 										{
-											switch (be1.Operation)
+											SqlBinaryExpression be1 = (SqlBinaryExpression)be.Expr1;
+
+											if (be1.Expr2 is SqlValue)
 											{
-												case "+": return new SqlBinaryExpression(be.SystemType, be1.Expr1, be1.Operation, new SqlValue((int)be1v2.Value - (int)v2.Value), be.Precedence);
-												case "-": return new SqlBinaryExpression(be.SystemType, be1.Expr1, be1.Operation, new SqlValue((int)be1v2.Value + (int)v2.Value), be.Precedence);
+												SqlValue be1v2 = (SqlValue)be1.Expr2;
+
+												if (be1v2.Value is int)
+												{
+													switch (be1.Operation)
+													{
+														case "+": return new SqlBinaryExpression(be.SystemType, be1.Expr1, be1.Operation, new SqlValue((int)be1v2.Value - (int)v2.Value), be.Precedence);
+														case "-": return new SqlBinaryExpression(be.SystemType, be1.Expr1, be1.Operation, new SqlValue((int)be1v2.Value + (int)v2.Value), be.Precedence);
+													}
+												}
 											}
 										}
 									}
 								}
-							}
-						}
 
-						if (be.Expr1 is SqlValue && be.Expr2 is SqlValue)
-						{
-							SqlValue v1 = (SqlValue)be.Expr1;
-							SqlValue v2 = (SqlValue)be.Expr2;
-							if (v1.Value is int && v2.Value is int) return new SqlValue((int)v1.Value - (int)v2.Value);
-						}
-
-						break;
-
-					case "*":
-						if (be.Expr1 is SqlValue)
-						{
-							SqlValue v1 = (SqlValue)be.Expr1;
-							if (v1.Value is int)
-							{
-								int v1v = (int)v1.Value;
-
-								switch (v1v)
+								if (be.Expr1 is SqlValue && be.Expr2 is SqlValue)
 								{
-									case  0 : return new SqlValue(0);
-									case  1 : return be.Expr2;
-									default :
+									SqlValue v1 = (SqlValue)be.Expr1;
+									SqlValue v2 = (SqlValue)be.Expr2;
+									if (v1.Value is int && v2.Value is int) return new SqlValue((int)v1.Value - (int)v2.Value);
+								}
+
+								break;
+
+							case "*":
+								if (be.Expr1 is SqlValue)
+								{
+									SqlValue v1 = (SqlValue)be.Expr1;
+									if (v1.Value is int)
+									{
+										int v1v = (int)v1.Value;
+
+										switch (v1v)
 										{
-											SqlBinaryExpression be2 = be.Expr2 as SqlBinaryExpression;
+											case  0 : return new SqlValue(0);
+											case  1 : return be.Expr2;
+											default :
+												{
+													SqlBinaryExpression be2 = be.Expr2 as SqlBinaryExpression;
 
-											if (be2 != null && be2.Operation == "*" && be2.Expr1 is SqlValue)
-											{
-												SqlValue be2v1 = be2.Expr1 as SqlValue;
+													if (be2 != null && be2.Operation == "*" && be2.Expr1 is SqlValue)
+													{
+														SqlValue be2v1 = be2.Expr1 as SqlValue;
 
-												if (be2v1.Value is int)
-													return ConvertExpression(
-														new SqlBinaryExpression(be2.SystemType, new SqlValue(v1v * (int)be2v1.Value), "*", be2.Expr2));
-											}
+														if (be2v1.Value is int)
+															return ConvertExpression(
+																new SqlBinaryExpression(be2.SystemType, new SqlValue(v1v * (int)be2v1.Value), "*", be2.Expr2));
+													}
 
-											break;
+													break;
+												}
+
 										}
-
+									}
 								}
-							}
-						}
 
-						if (be.Expr2 is SqlValue)
-						{
-							SqlValue v2 = (SqlValue)be.Expr2;
-							if (v2.Value is int && (int)v2.Value == 1) return be.Expr1;
-							if (v2.Value is int && (int)v2.Value == 0) return new SqlValue(0);
-						}
-
-						if (be.Expr1 is SqlValue && be.Expr2 is SqlValue)
-						{
-							SqlValue v1 = (SqlValue)be.Expr1;
-							SqlValue v2 = (SqlValue)be.Expr2;
-
-							if (v1.Value is int)
-							{
-								if (v2.Value is int)    return new SqlValue((int)   v1.Value * (int)   v2.Value);
-								if (v2.Value is double) return new SqlValue((int)   v1.Value * (double)v2.Value);
-							}
-							else if (v1.Value is double)
-							{
-								if (v2.Value is int)    return new SqlValue((double)v1.Value * (int)   v2.Value);
-								if (v2.Value is double) return new SqlValue((double)v1.Value * (double)v2.Value);
-							}
-						}
-
-						break;
-				}
-			}
-			else if (expression is SqlFunction)
-			{
-				SqlFunction func = (SqlFunction)expression;
-
-				switch (func.Name)
-				{
-					case "ConvertToCaseCompareTo":
-						return ConvertExpression(new SqlFunction(func.SystemType, "CASE",
-							new SqlQuery.SearchCondition().Expr(func.Parameters[0]). Greater .Expr(func.Parameters[1]).ToExpr(), new SqlValue(1),
-							new SqlQuery.SearchCondition().Expr(func.Parameters[0]). Equal   .Expr(func.Parameters[1]).ToExpr(), new SqlValue(0),
-							new SqlValue(-1)));
-
-					case "$Convert$": return ConvertConvertion(func);
-					case "Average"  : return new SqlFunction(func.SystemType, "Avg", func.Parameters);
-
-					case "CASE":
-						{
-							ISqlExpression[] parms = func.Parameters;
-							int              len   = parms.Length;
-
-							for (int i = 0; i < parms.Length - 1; i += 2)
-							{
-								SqlValue value = parms[i] as SqlValue;
-
-								if (value != null)
+								if (be.Expr2 is SqlValue)
 								{
-									if ((bool)value.Value == false)
+									SqlValue v2 = (SqlValue)be.Expr2;
+									if (v2.Value is int && (int)v2.Value == 1) return be.Expr1;
+									if (v2.Value is int && (int)v2.Value == 0) return new SqlValue(0);
+								}
+
+								if (be.Expr1 is SqlValue && be.Expr2 is SqlValue)
+								{
+									SqlValue v1 = (SqlValue)be.Expr1;
+									SqlValue v2 = (SqlValue)be.Expr2;
+
+									if (v1.Value is int)
 									{
-										ISqlExpression[] newParms = new ISqlExpression[parms.Length - 2];
-
-										if (i != 0)
-											Array.Copy(parms, 0, newParms, 0, i);
-
-										Array.Copy(parms, i + 2, newParms, i, parms.Length - i - 2);
-
-										parms = newParms;
-										i -= 2;
+										if (v2.Value is int)    return new SqlValue((int)   v1.Value * (int)   v2.Value);
+										if (v2.Value is double) return new SqlValue((int)   v1.Value * (double)v2.Value);
 									}
-									else
+									else if (v1.Value is double)
 									{
-										ISqlExpression[] newParms = new ISqlExpression[i + 1];
-
-										if (i != 0)
-											Array.Copy(parms, 0, newParms, 0, i);
-
-										newParms[i] = parms[i + 1];
-
-										parms = newParms;
-										break;
+										if (v2.Value is int)    return new SqlValue((double)v1.Value * (int)   v2.Value);
+										if (v2.Value is double) return new SqlValue((double)v1.Value * (double)v2.Value);
 									}
 								}
-							}
 
-							if (parms.Length == 1)
-								return parms[0];
-
-							if (parms.Length != len)
-								return new SqlFunction(func.SystemType, func.Name, func.Precedence, parms);
+								break;
 						}
+					}
 
-						break;
-				}
-			}
-			else if (expression is SqlQuery.SearchCondition)
-			{
-				SqlQuery.OptimizeSearchCondition((SqlQuery.SearchCondition)expression);
+					#endregion
+
+					break;
+
+				case QueryElementType.SqlFunction:
+
+					#region SqlFunction
+
+					{
+						SqlFunction func = (SqlFunction)expression;
+
+						switch (func.Name)
+						{
+							case "ConvertToCaseCompareTo":
+								return ConvertExpression(new SqlFunction(func.SystemType, "CASE",
+									new SqlQuery.SearchCondition().Expr(func.Parameters[0]). Greater .Expr(func.Parameters[1]).ToExpr(), new SqlValue(1),
+									new SqlQuery.SearchCondition().Expr(func.Parameters[0]). Equal   .Expr(func.Parameters[1]).ToExpr(), new SqlValue(0),
+									new SqlValue(-1)));
+
+							case "$Convert$": return ConvertConvertion(func);
+							case "Average"  : return new SqlFunction(func.SystemType, "Avg", func.Parameters);
+
+							case "CASE":
+								{
+									ISqlExpression[] parms = func.Parameters;
+									int              len   = parms.Length;
+
+									for (int i = 0; i < parms.Length - 1; i += 2)
+									{
+										SqlValue value = parms[i] as SqlValue;
+
+										if (value != null)
+										{
+											if ((bool)value.Value == false)
+											{
+												ISqlExpression[] newParms = new ISqlExpression[parms.Length - 2];
+
+												if (i != 0)
+													Array.Copy(parms, 0, newParms, 0, i);
+
+												Array.Copy(parms, i + 2, newParms, i, parms.Length - i - 2);
+
+												parms = newParms;
+												i -= 2;
+											}
+											else
+											{
+												ISqlExpression[] newParms = new ISqlExpression[i + 1];
+
+												if (i != 0)
+													Array.Copy(parms, 0, newParms, 0, i);
+
+												newParms[i] = parms[i + 1];
+
+												parms = newParms;
+												break;
+											}
+										}
+									}
+
+									if (parms.Length == 1)
+										return parms[0];
+
+									if (parms.Length != len)
+										return new SqlFunction(func.SystemType, func.Name, func.Precedence, parms);
+								}
+
+								break;
+
+							case "Convert":
+								{
+									SqlFunction from = func.Parameters[1] as SqlFunction;
+
+									if (from != null && from.Name == "Convert" && from.Parameters[1].SystemType == func.SystemType)
+										return from.Parameters[1];
+
+									SqlExpression fe = func.Parameters[1] as SqlExpression;
+
+									if (fe != null && fe.Expr == "Cast({0} as {1})" && fe.Parameters[0].SystemType == func.SystemType)
+										return fe.Parameters[0];
+								}
+
+								break;
+						}
+					}
+
+					#endregion
+
+					break;
+
+				case QueryElementType.SearchCondition:
+					SqlQuery.OptimizeSearchCondition((SqlQuery.SearchCondition)expression);
+					break;
 			}
 
 			return expression;
@@ -1999,6 +2049,57 @@ namespace BLToolkit.Data.Sql.SqlProvider
 								}
 							}
 
+						}
+					}
+				}
+				else if (value.Value is bool && func.Parameters.Length == 3)
+				{
+					SqlQuery.SearchCondition c1 = func.Parameters[0] as SqlQuery.SearchCondition;
+					SqlValue                 v1 = func.Parameters[1] as SqlValue;
+					SqlValue                 v2 = func.Parameters[2] as SqlValue;
+
+					if (c1 != null && c1.Conditions.Count == 1 && v1 != null && v1.Value is bool && v2 != null && v2.Value is bool)
+					{
+						bool bv  = (bool)value.Value;
+						bool bv1 = (bool)v1.Value;
+						bool bv2 = (bool)v2.Value;
+
+						if (bv == bv1 && expr.Operator == SqlQuery.Predicate.Operator.Equal ||
+						    bv != bv1 && expr.Operator == SqlQuery.Predicate.Operator.NotEqual)
+						{
+							return c1;
+						}
+
+						if (bv == bv2 && expr.Operator == SqlQuery.Predicate.Operator.NotEqual ||
+						    bv != bv1 && expr.Operator == SqlQuery.Predicate.Operator.Equal)
+						{
+							SqlQuery.Predicate.ExprExpr ee = c1.Conditions[0].Predicate as SqlQuery.Predicate.ExprExpr;
+
+							if (ee != null)
+							{
+								SqlQuery.Predicate.Operator op;
+
+								switch (ee.Operator)
+								{
+									case SqlQuery.Predicate.Operator.Equal          : op = SqlQuery.Predicate.Operator.NotEqual;       break;
+									case SqlQuery.Predicate.Operator.NotEqual       : op = SqlQuery.Predicate.Operator.Equal;          break;
+									case SqlQuery.Predicate.Operator.Greater        : op = SqlQuery.Predicate.Operator.LessOrEqual;    break;
+									case SqlQuery.Predicate.Operator.NotLess        :
+									case SqlQuery.Predicate.Operator.GreaterOrEqual : op = SqlQuery.Predicate.Operator.Less;           break;
+									case SqlQuery.Predicate.Operator.Less           : op = SqlQuery.Predicate.Operator.GreaterOrEqual; break;
+									case SqlQuery.Predicate.Operator.NotGreater     :
+									case SqlQuery.Predicate.Operator.LessOrEqual    : op = SqlQuery.Predicate.Operator.Greater;        break;;
+									default: throw new InvalidOperationException();
+								}
+
+								return new SqlQuery.Predicate.ExprExpr(ee.Expr1, op, ee.Expr2);
+							}
+
+							SqlQuery.SearchCondition sc = new SqlQuery.SearchCondition();
+
+							sc.Conditions.Add(new SqlQuery.Condition(true, c1));
+
+							return sc;
 						}
 					}
 				}

@@ -18,6 +18,8 @@ namespace Data.Linq
 				db => Assert.AreEqual(1, (from t in db.Types where t.MoneyValue * t.ID == 1.11m  select t).Single().ID));
 		}
 
+		#region Int
+
 		[Test]
 		public void ToInt1()
 		{
@@ -115,6 +117,90 @@ namespace Data.Linq
 		}
 
 		[Test]
+		public void ToSByte()
+		{
+			ForEachProvider(db => AreEqual(
+				from p in from t in    Types select (sbyte)t.MoneyValue where p > 0 select p,
+				from p in from t in db.Types select (sbyte)t.MoneyValue where p > 0 select p));
+		}
+
+		[Test]
+		public void ConvertToSByte()
+		{
+			ForEachProvider(db => AreEqual(
+				from p in from t in    Types select Convert.ToSByte(t.MoneyValue) where p > 0 select p,
+				from p in from t in db.Types select Convert.ToSByte(t.MoneyValue) where p > 0 select p));
+		}
+
+		#endregion
+
+		#region UInts
+
+		[Test]
+		public void ToUInt1()
+		{
+			ForEachProvider(new[] { ProviderName.MySql }, db => AreEqual(
+				from t in    Types select              Sql.ConvertTo<uint>.From(t.MoneyValue),
+				from t in db.Types select Sql.OnServer(Sql.ConvertTo<uint>.From(t.MoneyValue))));
+		}
+
+		[Test]
+		public void ToUInt2()
+		{
+			ForEachProvider(new[] { ProviderName.MySql }, db => AreEqual(
+				from t in    Types select              Sql.Convert<uint,decimal>(t.MoneyValue),
+				from t in db.Types select Sql.OnServer(Sql.Convert<uint,decimal>(t.MoneyValue))));
+		}
+
+		[Test]
+		public void ToUInt64()
+		{
+			ForEachProvider(new[] { ProviderName.MySql }, db => AreEqual(
+				from p in from t in    Types select (UInt64)t.MoneyValue where p > 0 select p,
+				from p in from t in db.Types select (UInt64)t.MoneyValue where p > 0 select p));
+		}
+
+		[Test]
+		public void ConvertToUInt64()
+		{
+			ForEachProvider(new[] { ProviderName.MySql }, db => AreEqual(
+				from p in from t in    Types select Convert.ToUInt64(t.MoneyValue) where p > 0 select p,
+				from p in from t in db.Types select Convert.ToUInt64(t.MoneyValue) where p > 0 select p));
+		}
+
+		[Test]
+		public void ToUInt32()
+		{
+			ForEachProvider(new[] { ProviderName.MySql }, db => AreEqual(
+				from p in from t in    Types select (UInt32)t.MoneyValue where p > 0 select p,
+				from p in from t in db.Types select (UInt32)t.MoneyValue where p > 0 select p));
+		}
+
+		[Test]
+		public void ConvertToUInt32()
+		{
+			ForEachProvider(new[] { ProviderName.MySql }, db => AreEqual(
+				from p in from t in    Types select Convert.ToUInt32(t.MoneyValue) where p > 0 select p,
+				from p in from t in db.Types select Convert.ToUInt32(t.MoneyValue) where p > 0 select p));
+		}
+
+		[Test]
+		public void ToUInt16()
+		{
+			ForEachProvider(db => AreEqual(
+				from p in from t in    Types select (UInt16)t.MoneyValue where p > 0 select p,
+				from p in from t in db.Types select (UInt16)t.MoneyValue where p > 0 select p));
+		}
+
+		[Test]
+		public void ConvertToUInt16()
+		{
+			ForEachProvider(db => AreEqual(
+				from p in from t in    Types select Convert.ToUInt16(t.MoneyValue) where p > 0 select p,
+				from p in from t in db.Types select Convert.ToUInt16(t.MoneyValue) where p > 0 select p));
+		}
+
+		[Test]
 		public void ToByte()
 		{
 			ForEachProvider(db => AreEqual(
@@ -129,6 +215,10 @@ namespace Data.Linq
 				from p in from t in    Types select Convert.ToByte(t.MoneyValue) where p > 0 select p,
 				from p in from t in db.Types select Convert.ToByte(t.MoneyValue) where p > 0 select p));
 		}
+
+		#endregion
+
+		#region Floats
 
 		[Test]
 		public void ToDefaultDecimal()
@@ -234,6 +324,10 @@ namespace Data.Linq
 				from p in from t in db.Types select Convert.ToSingle(t.MoneyValue) where p > 0 select (int)p));
 		}
 
+		#endregion
+
+		#region DateTime
+
 		[Test]
 		public void ToSqlDateTime()
 		{
@@ -302,6 +396,10 @@ namespace Data.Linq
 				from p in from t in    Types select Convert.ToDateTime(t.DateTimeValue.Year + "-01-01 00:00:00") where p.Day > 0 select p,
 				from p in from t in db.Types select Convert.ToDateTime(t.DateTimeValue.Year + "-01-01 00:00:00") where p.Day > 0 select p));
 		}
+
+		#endregion
+
+		#region String
 
 		[Test]
 		public void ToChar()
@@ -391,8 +489,12 @@ namespace Data.Linq
 				from t in db.Types where Sql.ConvertTo<string>.From(t.GuidValue) == "febe3eca-cb5f-40b2-ad39-2979d312afca" select t.GuidValue));
 		}
 
+		#endregion
+
+		#region Boolean
+
 		[Test]
-		public void ToBit()
+		public void ToBit1()
 		{
 			ForEachProvider(db => AreEqual(
 				from t in from t in    Types where Sql.Convert(Sql.Bit, t.MoneyValue) select t select t,
@@ -400,11 +502,29 @@ namespace Data.Linq
 		}
 
 		[Test]
-		public void ConvertToBoolean()
+		public void ToBit2()
 		{
-			ForEachProvider(new[] { ProviderName.MySql }, db => AreEqual(
+			ForEachProvider(db => AreEqual(
+				from t in from t in    Types where !Sql.Convert(Sql.Bit, t.MoneyValue - 4.5m) select t select t,
+				from t in from t in db.Types where !Sql.Convert(Sql.Bit, t.MoneyValue - 4.5m) select t select t));
+		}
+
+		[Test]
+		public void ConvertToBoolean1()
+		{
+			ForEachProvider(db => AreEqual(
 				from p in from t in    Types select Convert.ToBoolean(t.MoneyValue) where p == true select p,
 				from p in from t in db.Types select Convert.ToBoolean(t.MoneyValue) where p == true select p));
 		}
+
+		[Test]
+		public void ConvertToBoolean2()
+		{
+			ForEachProvider(db => AreEqual(
+				from p in from t in    Types select Convert.ToBoolean(t.MoneyValue - 4.5m) where !p select p,
+				from p in from t in db.Types select Convert.ToBoolean(t.MoneyValue - 4.5m) where !p select p));
+		}
+
+		#endregion
 	}
 }

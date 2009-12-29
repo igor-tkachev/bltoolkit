@@ -71,7 +71,18 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 				switch (func.Name)
 				{
-					case "Convert" : return new SqlExpression(func.SystemType, "Cast({0} as {1})", Precedence.Primary, FloorBeforeConvert(func), func.Parameters[0]);
+					case "Convert" :
+						if (func.SystemType == typeof(bool))
+						{
+							ISqlExpression ex = AlternativeConvertToBoolean(func, 1);
+							if (ex != null)
+								return ex;
+						}
+
+						if ((func.SystemType == typeof(double) || func.SystemType == typeof(float)) && func.Parameters[1].SystemType == typeof(decimal))
+							return func.Parameters[1];
+
+						return new SqlExpression(func.SystemType, "Cast({0} as {1})", Precedence.Primary, FloorBeforeConvert(func), func.Parameters[0]);
 				}
 			}
 			else if (expr is SqlExpression)
@@ -79,7 +90,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 				SqlExpression e = (SqlExpression)expr;
 
 				if (e.Expr.StartsWith("Extract(DayOfYear"))
-					return new SqlFunction(e.SystemType, "DayOfYear", e.Values);
+					return new SqlFunction(e.SystemType, "DayOfYear", e.Parameters);
 
 				if (e.Expr.StartsWith("Extract(WeekDay"))
 					return Inc(
@@ -88,7 +99,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 							new SqlFunction(
 								null,
 								"Date_Add",
-								e.Values[0],
+								e.Parameters[0],
 								new SqlExpression(null, "interval 1 day"))));
 			}
 
@@ -106,6 +117,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 				case SqlDbType.SmallMoney    : sb.Append("Decimal(10,4)"); break;
 				case SqlDbType.SmallDateTime :
 				case SqlDbType.DateTime2     : sb.Append("DateTime");      break;
+				case SqlDbType.Bit           : sb.Append("Boolean");       break;
 				case SqlDbType.Float         :
 				case SqlDbType.Real          : base.BuildDataType(sb, SqlDataType.Decimal); break;
 				case SqlDbType.VarChar       :

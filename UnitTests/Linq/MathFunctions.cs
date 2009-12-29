@@ -179,11 +179,165 @@ namespace Data.Linq
 		}
 
 		[Test]
+		public void Round1()
+		{
+			ForEachProvider(db => AreSame(
+				from t in from p in    Types select Math.Round(p.MoneyValue) where t != 0 select t,
+				from t in from p in db.Types select Math.Round(p.MoneyValue) where t != 0 select t));
+		}
+
+		[Test]
+		public void Round2()
+		{
+			ForEachProvider(db => AreSame(
+				from t in from p in    Types select Math.Round((double)p.MoneyValue) where t != 0 select t,
+				from t in from p in db.Types select Math.Round((double)p.MoneyValue) where t != 0 select t));
+		}
+
+		[Test]
+		public void Round3()
+		{
+			ForEachProvider(db => AreSame(
+				from t in from p in    Types select Math.Round(p.MoneyValue, 1) where t != 0 select t,
+				from t in from p in db.Types select Math.Round(p.MoneyValue, 1) where t != 0 select t));
+		}
+
+		[Test]
+		public void Round4()
+		{
+			ForEachProvider(db => AreSame(
+				from t in from p in    Types select Math.Round((double)p.MoneyValue, 1) where t != 0 select Math.Round(t, 5),
+				from t in from p in db.Types select Math.Round((double)p.MoneyValue, 1) where t != 0 select Math.Round(t, 5)));
+		}
+
+		[Test]
+		public void Round5()
+		{
+			ForEachProvider(db => AreSame(
+				from t in from p in    Types select Math.Round(p.MoneyValue, MidpointRounding.AwayFromZero) where t != 0 select t,
+				from t in from p in db.Types select Math.Round(p.MoneyValue, MidpointRounding.AwayFromZero) where t != 0 select t));
+		}
+
+		[Test]
+		public void Round6()
+		{
+			ForEachProvider(db => AreSame(
+				from t in from p in    Types select Math.Round((double)p.MoneyValue, MidpointRounding.AwayFromZero) where t != 0 select t,
+				from t in from p in db.Types select Math.Round((double)p.MoneyValue, MidpointRounding.AwayFromZero) where t != 0 select t));
+		}
+
+		[Test]
+		public void Round7()
+		{
+			ForEachProvider(db => AreSame(
+				from t in from p in    Types select Math.Round(p.MoneyValue, MidpointRounding.ToEven) where t != 0 select t,
+				from t in from p in db.Types select Math.Round(p.MoneyValue, MidpointRounding.ToEven) where t != 0 select t));
+		}
+
+		[Test]
+		public void Round8()
+		{
+			ForEachProvider(db => AreSame(
+				from t in from p in    Types select Math.Round((double)p.MoneyValue, MidpointRounding.ToEven) where t != 0 select t,
+				from t in from p in db.Types select Math.Round((double)p.MoneyValue, MidpointRounding.ToEven) where t != 0 select t));
+		}
+
+		[Test]
+		public void Round9()
+		{
+			ForEachProvider(new[] { ProviderName.SQLite }, db => AreSame(
+				from t in from p in    Types select Math.Round(p.MoneyValue, 1, MidpointRounding.AwayFromZero) where t != 0 select t,
+				from t in from p in db.Types select Math.Round(p.MoneyValue, 1, MidpointRounding.AwayFromZero) where t != 0 select t));
+		}
+
+		[Test]
+		public void Round10()
+		{
+			ForEachProvider(db => AreSame(
+				from t in from p in    Types select Math.Round(p.MoneyValue, 1, MidpointRounding.ToEven) where t != 0 select t,
+				from t in from p in db.Types select Math.Round(p.MoneyValue, 1, MidpointRounding.ToEven) where t != 0 select t));
+		}
+
+		[Test]
+		public void Round11()
+		{
+			ForEachProvider(db => AreSame(
+				from t in from p in    Types select Math.Round((double)p.MoneyValue, 1, MidpointRounding.ToEven) where t != 0 select Math.Round(t, 5),
+				from t in from p in db.Types select Math.Round((double)p.MoneyValue, 1, MidpointRounding.ToEven) where t != 0 select Math.Round(t, 5)));
+		}
+
+		[Test]
+		public void Round12()
+		{
+			var mp = MidpointRounding.AwayFromZero;
+
+			ForEachProvider(new[] { ProviderName.SQLite }, db => AreSame(
+				from t in from p in    Types select Math.Round(p.MoneyValue, 1, mp) where t != 0 select t,
+				from t in from p in db.Types select Math.Round(p.MoneyValue, 1, mp) where t != 0 select t));
+		}
+
+		[Test]
+		public void Sign()
+		{
+			ForEachProvider(db => AreSame(
+				from t in from p in    Types select Math.Sign(p.MoneyValue) where t != 0 select t,
+				from t in from p in db.Types select Math.Sign(p.MoneyValue) where t != 0 select t));
+		}
+
+		[Test]
 		public void Sin()
 		{
 			ForEachProvider(db => AreSame(
 				from t in from p in    Types select Math.Floor(Math.Sin((double)p.MoneyValue / 15) * 15) where t != 0.1 select t,
 				from t in from p in db.Types select Math.Floor(Math.Sin((double)p.MoneyValue / 15) * 15) where t != 0.1 select t));
+		}
+
+		[Test]
+		public void Sinh()
+		{
+			ForEachProvider(db => AreSame(
+				from t in from p in    Types select Math.Floor(Math.Sinh((double)p.MoneyValue / 15) * 15) where t != 0.1 select t,
+				from t in from p in db.Types select Math.Floor(Math.Sinh((double)p.MoneyValue / 15) * 15) where t != 0.1 select t));
+		}
+
+		[Test]
+		public void Sqrt()
+		{
+			ForEachProvider(db => AreSame(
+				from t in from p in    Types select Math.Floor(Math.Sqrt((double)p.MoneyValue / 15) * 15) where t != 0.1 select t,
+				from t in from p in db.Types select Math.Floor(Math.Sqrt((double)p.MoneyValue / 15) * 15) where t != 0.1 select t));
+		}
+
+		[Test]
+		public void Tan()
+		{
+			ForEachProvider(db => AreSame(
+				from t in from p in    Types select Math.Floor(Math.Tan((double)p.MoneyValue / 15) * 15) where t != 0.1 select t,
+				from t in from p in db.Types select Math.Floor(Math.Tan((double)p.MoneyValue / 15) * 15) where t != 0.1 select t));
+		}
+
+		[Test]
+		public void Tanh()
+		{
+			ForEachProvider(db => AreSame(
+				from t in from p in    Types select Math.Floor(Math.Tanh((double)p.MoneyValue / 15) * 15) where t != 0.1 select t,
+				from t in from p in db.Types select Math.Floor(Math.Tanh((double)p.MoneyValue / 15) * 15) where t != 0.1 select t));
+		}
+
+		[Test]
+		public void Truncate1()
+		{
+			ForEachProvider(db => AreSame(
+				from t in from p in    Types select Math.Truncate(p.MoneyValue) where t != 0.1m select t,
+				from t in from p in db.Types select Math.Truncate(p.MoneyValue) where t != 0.1m select t));
+		}
+
+		[Test]
+		public void Truncate2()
+		{
+			ForEachProvider(db => AreSame(
+				from t in from p in    Types select Math.Truncate((double)-p.MoneyValue) where t != 0.1 select t,
+				from t in from p in db.Types select Math.Truncate((double)-p.MoneyValue) where t != 0.1 select t));
 		}
 	}
 }

@@ -64,6 +64,13 @@ namespace BLToolkit.Data.Sql.SqlProvider
 				switch (func.Name)
 				{
 					case "Convert"    :
+						if (func.SystemType == typeof(bool))
+						{
+							ISqlExpression ex = AlternativeConvertToBoolean(func, 1);
+							if (ex != null)
+								return ex;
+						}
+
 						if (func.Parameters[0] is SqlDataType)
 						{
 							SqlDataType type = (SqlDataType)func.Parameters[0];
@@ -110,14 +117,6 @@ namespace BLToolkit.Data.Sql.SqlProvider
 						break;
 					case "NChar"         :
 					case "NVarChar"      : return new SqlFunction  (func.SystemType, "Char",      func.Parameters);
-					case "Bit"           :
-						{
-							ISqlExpression ex = AlternativeConvertToBoolean(func, 0);
-							if (ex != null)
-								return ex;
-							break;
-						}
-
 				}
 			}
 

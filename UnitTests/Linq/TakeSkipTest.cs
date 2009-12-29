@@ -167,5 +167,13 @@ namespace Data.Linq
 				Assert.AreEqual(expected, b);
 			});
 		}
+
+		[Test]
+		public void ElementAt()
+		{
+			ForEachProvider(db => Assert.AreEqual(
+				(from p in    Parent where p.ParentID > 1 select p).ElementAt(3),
+				(from p in db.Parent where p.ParentID > 1 select p).ElementAt(3)));
+		}
 	}
 }

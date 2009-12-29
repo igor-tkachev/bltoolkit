@@ -350,8 +350,9 @@ namespace BLToolkit.Data.Linq
 				pi => pi.IsQueryableMethod ("GroupBy",    1, 1, seq => sequence = ParseSequence(seq), (l1, l2)        => select = ParseGroupBy   (l1, l2,   null, sequence[0], pi.Expr.Type.GetGenericArguments()[0])),
 				pi => pi.IsQueryableMethod ("GroupBy",    1, 2, seq => sequence = ParseSequence(seq), (l1, l2)        => select = ParseGroupBy   (l1, null, l2,   sequence[0], null)),
 				pi => pi.IsQueryableMethod ("GroupBy", 1, 1, 2, seq => sequence = ParseSequence(seq), (l1, l2, l3)    => select = ParseGroupBy   (l1, l2,   l3,   sequence[0], null)),
-				pi => pi.IsQueryableMethod ("Take",             seq => sequence = ParseSequence(seq), ex => ParseTake  (sequence[0], ex)),
-				pi => pi.IsQueryableMethod ("Skip",             seq => sequence = ParseSequence(seq), ex => ParseSkip  (sequence[0], ex)),
+				pi => pi.IsQueryableMethod ("Take",             seq => sequence = ParseSequence(seq), ex => ParseTake     (sequence[0], ex)),
+				pi => pi.IsQueryableMethod ("Skip",             seq => sequence = ParseSequence(seq), ex => ParseSkip     (sequence[0], ex)),
+				pi => pi.IsQueryableMethod ("ElementAt",        seq => sequence = ParseSequence(seq), ex => ParseElementAt(sequence[0], ex)),
 				pi => pi.IsQueryableMethod ("Concat",           seq => sequence = ParseSequence(seq), ex => { select = ParseUnion    (sequence[0], ex, true);  return true; }),
 				pi => pi.IsQueryableMethod ("Union",            seq => sequence = ParseSequence(seq), ex => { select = ParseUnion    (sequence[0], ex, false); return true; }),
 				pi => pi.IsQueryableMethod ("Except",           seq => sequence = ParseSequence(seq), ex => { select = ParseIntersect(sequence,    ex, true);  return true; }),
@@ -1202,6 +1203,24 @@ namespace BLToolkit.Data.Linq
 				if (p != null)
 					p.IsQueryParameter = false;
 			}
+
+			ParsingTracer.DecIndentLevel();
+			return true;
+		}
+
+		#endregion
+
+		#region Parse Skip
+
+		bool ParseElementAt(QuerySource select, ParseInfo value)
+		{
+			ParsingTracer.WriteLine();
+			ParsingTracer.IncIndentLevel();
+
+			ParseSkip(select, value);
+			ParseTake(new SqlValue(1));
+
+			_info.MakeElementOperator(ElementMethod.First);
 
 			ParsingTracer.DecIndentLevel();
 			return true;
@@ -3351,7 +3370,7 @@ namespace BLToolkit.Data.Linq
 
 				var ex = ParseExpression(parseInfo, queries);
 
-				if (ex is SqlParameter || ex is SqlField || ex is SqlQuery.Column || ex is SqlFunction)
+				if (SqlExpression.NeedsEqual(ex))
 					return Convert(new SqlQuery.Predicate.ExprExpr(ex, SqlQuery.Predicate.Operator.Equal, new SqlValue(true)));
 				else
 					return Convert(new SqlQuery.Predicate.Expr(ex));

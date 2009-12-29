@@ -5,44 +5,44 @@ namespace BLToolkit.Data.Sql
 {
 	public class SqlExpression : ISqlExpression
 	{
-		public SqlExpression(Type systemType, string expr, int precedence, params ISqlExpression[] values)
+		public SqlExpression(Type systemType, string expr, int precedence, params ISqlExpression[] parameters)
 		{
-			if (values == null) throw new ArgumentNullException("values");
+			if (parameters == null) throw new ArgumentNullException("parameters");
 
-			foreach (ISqlExpression value in values)
-				if (value == null) throw new ArgumentNullException("values");
+			foreach (ISqlExpression value in parameters)
+				if (value == null) throw new ArgumentNullException("parameters");
 
 			_systemType = systemType;
 			_expr       = expr;
 			_precedence = precedence;
-			_values     = values;
+			_parameters     = parameters;
 		}
 
-		public SqlExpression(string expr, int precedence, params ISqlExpression[] values)
-			: this(null, expr, precedence, values)
+		public SqlExpression(string expr, int precedence, params ISqlExpression[] parameters)
+			: this(null, expr, precedence, parameters)
 		{
 		}
 
-		public SqlExpression(Type systemType, string expr, params ISqlExpression[] values)
-			: this(systemType, expr, Sql.Precedence.Unknown, values)
+		public SqlExpression(Type systemType, string expr, params ISqlExpression[] parameters)
+			: this(systemType, expr, Sql.Precedence.Unknown, parameters)
 		{
 		}
 
-		public SqlExpression(string expr, params ISqlExpression[] values)
-			: this(null, expr, Sql.Precedence.Unknown, values)
+		public SqlExpression(string expr, params ISqlExpression[] parameters)
+			: this(null, expr, Sql.Precedence.Unknown, parameters)
 		{
 		}
 
 		readonly Type             _systemType; public Type             SystemType { get { return _systemType; } }
 		readonly string           _expr;       public string           Expr       { get { return _expr;       } }
 		readonly int              _precedence; public int              Precedence { get { return _precedence; } }
-		readonly ISqlExpression[] _values;     public ISqlExpression[] Values     { get { return _values;     } }
+		readonly ISqlExpression[] _parameters; public ISqlExpression[] Parameters { get { return _parameters;     } }
 
 		#region Overrides
 
 		public override string ToString()
 		{
-			return string.Format(Expr, Values);
+			return string.Format(Expr, Parameters);
 		}
 
 		#endregion
@@ -52,8 +52,8 @@ namespace BLToolkit.Data.Sql
 		[Obsolete]
 		ISqlExpression ISqlExpressionWalkable.Walk(bool skipColumns, WalkingFunc func)
 		{
-			for (int i = 0; i < _values.Length; i++)
-				_values[i] = _values[i].Walk(skipColumns, func);
+			for (int i = 0; i < _parameters.Length; i++)
+				_parameters[i] = _parameters[i].Walk(skipColumns, func);
 
 			return func(this);
 		}
@@ -69,11 +69,11 @@ namespace BLToolkit.Data.Sql
 
 			SqlExpression expr = other as SqlExpression;
 
-			if (expr == null || _systemType != expr._systemType || _expr != expr._expr || _values.Length != expr._values.Length)
+			if (expr == null || _systemType != expr._systemType || _expr != expr._expr || _parameters.Length != expr._parameters.Length)
 				return false;
 
-			for (int i = 0; i < _values.Length; i++)
-				if (!_values[i].Equals(expr._values[i]))
+			for (int i = 0; i < _parameters.Length; i++)
+				if (!_parameters[i].Equals(expr._parameters[i]))
 					return false;
 
 			return true;
@@ -85,7 +85,7 @@ namespace BLToolkit.Data.Sql
 
 		public bool CanBeNull()
 		{
-			foreach (ISqlExpression value in Values)
+			foreach (ISqlExpression value in Parameters)
 				if (value.CanBeNull())
 					return true;
 
@@ -110,7 +110,7 @@ namespace BLToolkit.Data.Sql
 					_expr,
 					_precedence,
 					Array.ConvertAll<ISqlExpression,ISqlExpression>(
-						_values,
+						_parameters,
 						delegate(ISqlExpression e) { return (ISqlExpression)e.Clone(objectTree, doClone); })));
 			}
 
@@ -122,6 +122,23 @@ namespace BLToolkit.Data.Sql
 		#region IQueryElement Members
 
 		public QueryElementType ElementType { get { return QueryElementType.SqlExpression; } }
+
+		#endregion
+
+		#region Public Static Members
+
+		public static bool NeedsEqual(IQueryElement ex)
+		{
+			switch (ex.ElementType)
+			{
+				case QueryElementType.SqlParameter:
+				case QueryElementType.SqlField    :
+				case QueryElementType.Column      :
+				case QueryElementType.SqlFunction : return true;
+			}
+
+			return false;
+		}
 
 		#endregion
 	}

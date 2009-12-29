@@ -5,6 +5,7 @@ using System.Text;
 namespace BLToolkit.Data.Sql.SqlProvider
 {
 	using DataProvider;
+	using Reflection;
 
 	public abstract class MsSqlSqlProvider : BasicSqlProvider
 	{
@@ -39,16 +40,56 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		{
 			expr = base.ConvertExpression(expr);
 
-			if (expr is SqlFunction)
+			switch (expr.ElementType)
 			{
-				SqlFunction func = (SqlFunction) expr;
+				case QueryElementType.SqlBinaryExpression:
+					{
+						SqlBinaryExpression be = (SqlBinaryExpression)expr;
 
-				/*
-				switch (func.Name)
-				{
-					case "Length" : return new SqlFunction("Len", func.Parameters);
-				}
-				*/
+						switch (be.Operation)
+						{
+							case "%":
+								{
+									Type type1 = TypeHelper.GetUnderlyingType(be.Expr1.SystemType);
+
+									if (type1 == typeof(double) || type1 == typeof(float))
+									{
+										return new SqlBinaryExpression(
+											be.Expr2.SystemType,
+											new SqlFunction(typeof(int), "Convert", SqlDataType.Int32, be.Expr1),
+											be.Operation,
+											be.Expr2);
+									}
+
+									break;
+								}
+						}
+
+						break;
+					}
+
+				case QueryElementType.SqlFunction:
+					{
+						SqlFunction func = (SqlFunction)expr;
+
+						switch (func.Name)
+						{
+							case "Convert" :
+								{
+									if (func.SystemType == typeof(ulong) && TypeHelper.IsFloatType(func.Parameters[1].SystemType))
+										return new SqlFunction(
+											func.SystemType,
+											func.Name,
+											func.Precedence,
+											func.Parameters[0],
+											new SqlFunction(func.SystemType, "Floor", func.Parameters[1]));
+
+									break;
+								}
+						}
+
+						break;
+					}
 			}
 
 			return expr;

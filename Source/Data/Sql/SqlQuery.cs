@@ -2399,9 +2399,11 @@ namespace BLToolkit.Data.Sql
 			//
 			// match (searchCondition.Conditions)
 			// {
-			// | [SearchCondition(true) sc] =>
+			// | [SearchCondition(true, _) sc] =>
 			//     searchCondition.Conditions = sc.Conditions;
 			//     OptimizeSearchCondition(searchCodition)
+			//
+			// | [SearchCondition(false, [SearchCondition(true, [ExprExpr]) sc])] => ...
 			//
 			// | [Expr(true,  SqlValue(true))]
 			// | [Expr(false, SqlValue(false))]
@@ -2414,13 +2416,50 @@ namespace BLToolkit.Data.Sql
 			{
 				Condition cond = searchCondition.Conditions[0];
 
-				if (!cond.IsNot && cond.Predicate is SearchCondition)
+				if (cond.Predicate is SearchCondition)
 				{
-					searchCondition.Conditions.Clear();
-					searchCondition.Conditions.AddRange(((SearchCondition)cond.Predicate).Conditions);
+					SearchCondition sc = (SearchCondition)cond.Predicate;
 
-					OptimizeSearchCondition(searchCondition);
-					return;
+					if (!cond.IsNot)
+					{
+						searchCondition.Conditions.Clear();
+						searchCondition.Conditions.AddRange(sc.Conditions);
+
+						OptimizeSearchCondition(searchCondition);
+						return;
+					}
+
+					if (sc.Conditions.Count == 1)
+					{
+						Condition c1 = sc.Conditions[0];
+
+						if (!c1.IsNot && c1.Predicate is Predicate.ExprExpr)
+						{
+							Predicate.ExprExpr ee = (Predicate.ExprExpr)c1.Predicate;
+							Predicate.Operator op;
+
+							switch (ee.Operator)
+							{
+								case Predicate.Operator.Equal          : op = Predicate.Operator.NotEqual;       break;
+								case Predicate.Operator.NotEqual       : op = Predicate.Operator.Equal;          break;
+								case Predicate.Operator.Greater        : op = Predicate.Operator.LessOrEqual;    break;
+								case Predicate.Operator.NotLess        :
+								case Predicate.Operator.GreaterOrEqual : op = Predicate.Operator.Less;           break;
+								case Predicate.Operator.Less           : op = Predicate.Operator.GreaterOrEqual; break;
+								case Predicate.Operator.NotGreater     :
+								case Predicate.Operator.LessOrEqual    : op = Predicate.Operator.Greater;        break;;
+								default: throw new InvalidOperationException();
+							}
+
+							c1.Predicate = new Predicate.ExprExpr(ee.Expr1, op, ee.Expr2);
+
+							searchCondition.Conditions.Clear();
+							searchCondition.Conditions.AddRange(sc.Conditions);
+
+							OptimizeSearchCondition(searchCondition);
+							return;
+						}
+					}
 				}
 
 				if (cond.Predicate is Predicate.Expr)
