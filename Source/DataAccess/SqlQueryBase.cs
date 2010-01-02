@@ -188,12 +188,14 @@ namespace BLToolkit.DataAccess
 				sb.Append(name);
 			else
 			{
-				if (database != null)
-					sb.Append(db.DataProvider.Convert(database, ConvertType.NameToDatabase));
+                if (database != null)
+                    sb
+                        .Append(db.DataProvider.Convert(database, ConvertType.NameToDatabase))
+                        .Append(db.DataProvider.DatabaseOwnerDelimiter);
+
 
 				if (owner != null)
 					sb
-						.Append(db.DataProvider.DatabaseOwnerDelimiter)
 						.Append(db.DataProvider.Convert(owner, ConvertType.NameToOwner))
 						.Append(db.DataProvider.OwnerTableDelimiter);
 				else
