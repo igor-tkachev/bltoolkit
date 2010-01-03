@@ -1,4 +1,6 @@
-﻿namespace System
+﻿#if FW2 || FW3
+
+namespace System
 {
 	using Collections;
 	using Collections.Generic;
@@ -988,3 +990,4 @@
 	}
 }
 
+#endif

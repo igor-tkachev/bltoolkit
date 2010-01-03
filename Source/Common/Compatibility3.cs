@@ -1,4 +1,6 @@
-﻿namespace System
+﻿#if FW2
+
+namespace System
 {
 	public delegate void Action();
 
@@ -283,3 +285,5 @@ namespace System.Collections.Specialized
 	/// </summary>
 	public delegate void NotifyCollectionChangedEventHandler(object sender, NotifyCollectionChangedEventArgs e);
 }
+
+#endif
