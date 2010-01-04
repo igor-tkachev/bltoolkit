@@ -55,16 +55,7 @@ namespace BLToolkit.Data.Sql
 
 		public override string ToString()
 		{
-			StringBuilder sb = new StringBuilder(Name);
-
-			sb.Append("(");
-
-			foreach (ISqlExpression p in Parameters)
-				sb.Append(p.ToString());
-
-			sb.Append(")");
-
-			return sb.ToString();
+			return ((IQueryElement)this).ToString(new StringBuilder(), new Dictionary<IQueryElement,IQueryElement>()).ToString();
 		}
 
 		#endregion
@@ -160,6 +151,24 @@ namespace BLToolkit.Data.Sql
 		#region IQueryElement Members
 
 		public QueryElementType ElementType { get { return QueryElementType.SqlFunction; } }
+
+		StringBuilder IQueryElement.ToString(StringBuilder sb, Dictionary<IQueryElement,IQueryElement> dic)
+		{
+			sb
+				.Append(Name)
+				.Append("(");
+
+			foreach (ISqlExpression p in Parameters)
+			{
+				p.ToString(sb, dic);
+				sb.Append(", ");
+			}
+
+			if (Parameters.Length > 0)
+				sb.Length -= 2;
+
+			return sb.Append(")");
+		}
 
 		#endregion
 	}

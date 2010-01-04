@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlTypes;
-
+using System.Text;
 using BLToolkit.Reflection;
 
 namespace BLToolkit.Data.Sql
@@ -428,7 +428,7 @@ namespace BLToolkit.Data.Sql
 
 		public override string ToString()
 		{
-			return _dbType + (_length != 0 ? "(" + _length + ")" : "(" + _precision + "," + _scale + ")");
+			return ((IQueryElement)this).ToString(new StringBuilder(), new Dictionary<IQueryElement,IQueryElement>()).ToString();
 		}
 
 		#endregion
@@ -498,6 +498,18 @@ namespace BLToolkit.Data.Sql
 		#region IQueryElement Members
 
 		public QueryElementType ElementType { get { return QueryElementType.SqlDataType; } }
+
+		StringBuilder IQueryElement.ToString(StringBuilder sb, Dictionary<IQueryElement,IQueryElement> dic)
+		{
+			sb.Append(_dbType);
+
+			if (_length != 0)
+				sb.Append('(').Append(_length).Append(')');
+			else if (_precision != 0)
+				sb.Append('(').Append(_precision).Append(',').Append(_scale).Append(')');
+
+			return sb;
+		}
 
 		#endregion
 	}

@@ -111,5 +111,59 @@ namespace Data.Linq
 				   Child.Intersect(   Child.Where(p => p.ParentID == 3)),
 				db.Child.Intersect(db.Child.Where(p => p.ParentID == 3))));
 		}
+
+		[Test]
+		public void Any1()
+		{
+			ForEachProvider(db => AreEqual(
+				   Parent.Where(p =>    Child.Where(c => c.ParentID == p.ParentID).Any(c => c.ParentID > 3)),
+				db.Parent.Where(p => db.Child.Where(c => c.ParentID == p.ParentID).Any(c => c.ParentID > 3))));
+		}
+
+		[Test]
+		public void Any2()
+		{
+			ForEachProvider(db => AreEqual(
+				   Parent.Where(p =>    Child.Where(c => c.ParentID == p.ParentID).Any()),
+				db.Parent.Where(p => db.Child.Where(c => c.ParentID == p.ParentID).Any())));
+		}
+
+		[Test]
+		public void Any3()
+		{
+			ForEachProvider(db => AreEqual(
+				   Parent.Where(p => p.Children.Any(c => c.ParentID > 3)),
+				db.Parent.Where(p => p.Children.Any(c => c.ParentID > 3))));
+		}
+
+		[Test]
+		public void Any4()
+		{
+			ForEachProvider(db => AreEqual(
+				   Parent.Where(p => p.Children.Any()),
+				db.Parent.Where(p => p.Children.Any())));
+		}
+
+		[Test]
+		public void Any5()
+		{
+			ForEachProvider(db => AreEqual(
+				   Parent.Where(p => p.Children.Any(c => c.GrandChildren.Any(g => g.ParentID > 3))),
+				db.Parent.Where(p => p.Children.Any(c => c.GrandChildren.Any(g => g.ParentID > 3)))));
+		}
+
+		[Test]
+		public void Any6()
+		{
+			ForEachProvider(db => Assert.AreEqual(
+				   Child.Any(c => c.ParentID > 3),
+				db.Child.Any(c => c.ParentID > 3)));
+		}
+
+		[Test]
+		public void Any7()
+		{
+			ForEachProvider(db => Assert.AreEqual(Child.Any(), db.Child.Any()));
+		}
 	}
 }

@@ -143,10 +143,7 @@ namespace BLToolkit.Data.Sql
 
 			public override string ToString()
 			{
-				if (Expression is SqlQuery)
-					return "(\n\t\t" + Expression.ToString().Replace("\n", "\n\t\t") + "\n\t)";
-
-				return Expression.ToString();
+			return ((IQueryElement)this).ToString(new StringBuilder(), new Dictionary<IQueryElement,IQueryElement>()).ToString();
 			}
 
 			#region ISqlExpression Members
@@ -230,6 +227,30 @@ namespace BLToolkit.Data.Sql
 			#region IQueryElement Members
 
 			public QueryElementType ElementType { get { return QueryElementType.Column; } }
+
+			StringBuilder IQueryElement.ToString(StringBuilder sb, Dictionary<IQueryElement,IQueryElement> dic)
+			{
+				if (dic.ContainsKey(this))
+					return sb.Append("...");
+
+				dic.Add(this, this);
+
+				if (Expression is SqlQuery)
+				{
+					sb.Append("(\n\t\t");
+					int len = sb.Length;
+					Expression.ToString(sb, dic).Replace("\n", "\n\t\t", len, sb.Length - len);
+					sb.Append("\n\t)");
+				}
+				else
+				{
+					Expression.ToString(sb, dic);
+				}
+
+				dic.Remove(this);
+
+				return sb;
+			}
 
 			#endregion
 		}
@@ -342,16 +363,7 @@ namespace BLToolkit.Data.Sql
 
 			public override string ToString()
 			{
-				StringBuilder sb = new StringBuilder(Source is SqlQuery ?
-					"(\n\t" + Source.ToString().Replace("\n", "\n\t") + "\n)" :
-					Source.ToString());
-
-				sb.Append(" as t").Append(SourceID);
-
-				foreach (JoinedTable join in Joins)
-					sb.AppendLine().Append('\t').Append(join.ToString().Replace("\n", "\n\t"));
-
-				return sb.ToString();
+				return ((IQueryElement)this).ToString(new StringBuilder(), new Dictionary<IQueryElement,IQueryElement>()).ToString();
 			}
 
 			#region ISqlExpressionWalkable Members
@@ -403,6 +415,39 @@ namespace BLToolkit.Data.Sql
 			#region IQueryElement Members
 
 			public QueryElementType ElementType { get { return QueryElementType.TableSource; } }
+
+			StringBuilder IQueryElement.ToString(StringBuilder sb, Dictionary<IQueryElement,IQueryElement> dic)
+			{
+				if (dic.ContainsKey(this))
+					return sb.Append("...");
+
+				dic.Add(this, this);
+
+				if (Source is SqlQuery)
+				{
+					sb.Append("(\n\t");
+					int len = sb.Length;
+					Source.ToString(sb, dic).Replace("\n", "\n\t", len, sb.Length - len);
+					sb.Append("\n)");
+				}
+				else
+					Source.ToString(sb, dic);
+
+				sb
+					.Append(" as t")
+					.Append(SourceID);
+
+				foreach (IQueryElement join in Joins)
+				{
+					sb.AppendLine().Append('\t');
+					int len = sb.Length;
+					join.ToString(sb, dic).Replace("\n", "\n\t", len, sb.Length - len);
+				}
+
+				dic.Remove(this);
+
+				return sb;
+			}
 
 			#endregion
 		}
@@ -489,7 +534,7 @@ namespace BLToolkit.Data.Sql
 
 			public override string ToString()
 			{
-				return (JoinType == JoinType.Inner? "INNER" : "LEFT") + " JOIN " + Table + " ON " + Condition;
+				return ((IQueryElement)this).ToString(new StringBuilder(), new Dictionary<IQueryElement,IQueryElement>()).ToString();
 			}
 
 			#region ISqlExpressionWalkable Members
@@ -508,9 +553,23 @@ namespace BLToolkit.Data.Sql
 
 			#region IQueryElement Members
 
-			public QueryElementType ElementType
+			public QueryElementType ElementType { get { return QueryElementType.JoinedTable; } }
+
+			StringBuilder IQueryElement.ToString(StringBuilder sb, Dictionary<IQueryElement,IQueryElement> dic)
 			{
-				get { return QueryElementType.JoinedTable; }
+				if (dic.ContainsKey(this))
+					return sb.Append("...");
+
+				dic.Add(this, this);
+
+				sb.Append(JoinType == JoinType.Inner ? "INNER" : "LEFT").Append(" JOIN ");
+				((IQueryElement)Table).ToString(sb, dic);
+				sb.Append(" ON ");
+				((IQueryElement)Condition).ToString(sb, dic);
+
+				dic.Remove(this);
+
+				return sb;
 			}
 
 			#endregion
@@ -578,6 +637,11 @@ namespace BLToolkit.Data.Sql
 				{
 					get { return QueryElementType.ExprPredicate; }
 				}
+
+				protected override void ToString(StringBuilder sb, Dictionary<IQueryElement, IQueryElement> dic)
+				{
+					Expr1.ToString(sb, dic);
+				}
 			}
 
 			public class NotExpr : Expr
@@ -606,6 +670,13 @@ namespace BLToolkit.Data.Sql
 				public override QueryElementType ElementType
 				{
 					get { return QueryElementType.NotExprPredicate; }
+				}
+
+				protected override void ToString(StringBuilder sb, Dictionary<IQueryElement, IQueryElement> dic)
+				{
+					if (IsNot) sb.Append("NOT (");
+					base.ToString(sb, dic);
+					if (IsNot) sb.Append(")");
 				}
 			}
 
@@ -649,8 +720,15 @@ namespace BLToolkit.Data.Sql
 					return clone;
 				}
 
-				public override string ToString()
+				public override QueryElementType ElementType
 				{
+					get { return QueryElementType.ExprExprPredicate; }
+				}
+
+				protected override void ToString(StringBuilder sb, Dictionary<IQueryElement, IQueryElement> dic)
+				{
+					Expr1.ToString(sb, dic);
+
 					string op;
 
 					switch (_op)
@@ -666,12 +744,9 @@ namespace BLToolkit.Data.Sql
 						default: throw new InvalidOperationException();
 					}
 
-					return Expr1 + " " + op + " " + Expr2;
-				}
+					sb.Append(" ").Append(op).Append(" ");
 
-				public override QueryElementType ElementType
-				{
-					get { return QueryElementType.ExprExprPredicate; }
+					Expr2.ToString(sb, dic);
 				}
 			}
 
@@ -716,6 +791,22 @@ namespace BLToolkit.Data.Sql
 				public override QueryElementType ElementType
 				{
 					get { return QueryElementType.LikePredicate; }
+				}
+
+				protected override void ToString(StringBuilder sb, Dictionary<IQueryElement, IQueryElement> dic)
+				{
+					Expr1.ToString(sb, dic);
+
+					if (IsNot) sb.Append(" NOT");
+					sb.Append(" LINKE ");
+
+					Expr2.ToString(sb, dic);
+
+					if (Escape != null)
+					{
+						sb.Append(" ESCAPE ");
+						Escape.ToString(sb, dic);
+					}
 				}
 			}
 
@@ -762,6 +853,18 @@ namespace BLToolkit.Data.Sql
 				{
 					get { return QueryElementType.BetweenPredicate; }
 				}
+
+				protected override void ToString(StringBuilder sb, Dictionary<IQueryElement, IQueryElement> dic)
+				{
+					Expr1.ToString(sb, dic);
+
+					if (IsNot) sb.Append(" NOT");
+					sb.Append(" BETWEEN ");
+
+					Expr2.ToString(sb, dic);
+					sb.Append(" AND ");
+					Expr3.ToString(sb, dic);
+				}
 			}
 
 			// expression IS [ NOT ] NULL
@@ -786,9 +889,13 @@ namespace BLToolkit.Data.Sql
 					return clone;
 				}
 
-				public override string ToString()
+				protected override void ToString(StringBuilder sb, Dictionary<IQueryElement, IQueryElement> dic)
 				{
-					return Expr1 + " IS " + (IsNot ? "NOT " : "") + "NULL";
+					Expr1.ToString(sb, dic);
+					sb
+						.Append(" IS ")
+						.Append(IsNot ? "NOT " : "")
+						.Append("NULL");
 				}
 
 				public override QueryElementType ElementType
@@ -835,6 +942,17 @@ namespace BLToolkit.Data.Sql
 				public override QueryElementType ElementType
 				{
 					get { return QueryElementType.InSubqueryPredicate; }
+				}
+
+				protected override void ToString(StringBuilder sb, Dictionary<IQueryElement, IQueryElement> dic)
+				{
+					Expr1.ToString(sb, dic);
+
+					if (IsNot) sb.Append(" NOT");
+					sb.Append(" IN (");
+
+					((IQueryElement)SubQuery).ToString(sb, dic);
+					sb.Append(")");
 				}
 			}
 
@@ -887,6 +1005,25 @@ namespace BLToolkit.Data.Sql
 				{
 					get { return QueryElementType.InListPredicate; }
 				}
+
+				protected override void ToString(StringBuilder sb, Dictionary<IQueryElement, IQueryElement> dic)
+				{
+					Expr1.ToString(sb, dic);
+
+					if (IsNot) sb.Append(" NOT");
+					sb.Append(" IN (");
+
+					foreach (ISqlExpression value in Values)
+					{
+						value.ToString(sb, dic);
+						sb.Append(',');
+					}
+
+					if (Values.Count > 0)
+						sb.Length--;
+
+					sb.Append(")");
+				}
 			}
 
 			// CONTAINS ( { column | * } , '< contains_search_condition >' )
@@ -932,7 +1069,21 @@ namespace BLToolkit.Data.Sql
 				{
 					get { return QueryElementType.FuncLikePredicate; }
 				}
+
+				protected override void ToString(StringBuilder sb, Dictionary<IQueryElement, IQueryElement> dic)
+				{
+					((IQueryElement)Function).ToString(sb, dic);
+				}
 			}
+
+			#region Overrides
+
+			public override string ToString()
+			{
+				return ((IQueryElement)this).ToString(new StringBuilder(), new Dictionary<IQueryElement,IQueryElement>()).ToString();
+			}
+
+			#endregion
 
 			protected Predicate(int precedence)
 			{
@@ -972,6 +1123,20 @@ namespace BLToolkit.Data.Sql
 			#region IQueryElement Members
 
 			public abstract QueryElementType ElementType { get; }
+
+			protected abstract void ToString(StringBuilder sb, Dictionary<IQueryElement, IQueryElement> dic);
+
+			StringBuilder IQueryElement.ToString(StringBuilder sb, Dictionary<IQueryElement,IQueryElement> dic)
+			{
+				if (dic.ContainsKey(this))
+					return sb.Append("...");
+
+				dic.Add(this, this);
+				ToString(sb, dic);
+				dic.Remove(this);
+
+				return sb;
+			}
 
 			#endregion
 		}
@@ -1030,14 +1195,30 @@ namespace BLToolkit.Data.Sql
 
 			public override string ToString()
 			{
-				return "(" + (IsNot ? "NOT " : "") + Predicate + ")" + (IsOr ? " OR " : " AND ");
+				return ((IQueryElement)this).ToString(new StringBuilder(), new Dictionary<IQueryElement,IQueryElement>()).ToString();
 			}
 
 			#region IQueryElement Members
 
-			public QueryElementType ElementType
+			public QueryElementType ElementType { get { return QueryElementType.Condition; } }
+
+			StringBuilder IQueryElement.ToString(StringBuilder sb, Dictionary<IQueryElement,IQueryElement> dic)
 			{
-				get { return QueryElementType.Condition; }
+				if (dic.ContainsKey(this))
+					return sb.Append("...");
+
+				dic.Add(this, this);
+
+				sb.Append('(');
+
+				if (IsNot) sb.Append("NOT ");
+
+				Predicate.ToString(sb, dic);
+				sb.Append(')').Append(IsOr ? " OR " : " AND ");
+
+				dic.Remove(this);
+
+				return sb;
 			}
 
 			#endregion
@@ -1093,15 +1274,7 @@ namespace BLToolkit.Data.Sql
 
 			public override string ToString()
 			{
-				StringBuilder sb = new StringBuilder();
-
-				foreach (Condition c in Conditions)
-					sb.Append(c);
-
-				if (Conditions.Count > 0)
-					sb.Remove(sb.Length - 4, 4);
-
-				return sb.ToString();
+				return ((IQueryElement)this).ToString(new StringBuilder(), new Dictionary<IQueryElement,IQueryElement>()).ToString();
 			}
 
 			#endregion
@@ -1188,6 +1361,24 @@ namespace BLToolkit.Data.Sql
 			#region IQueryElement Members
 
 			public QueryElementType ElementType { get { return QueryElementType.SearchCondition; } }
+
+			StringBuilder IQueryElement.ToString(StringBuilder sb, Dictionary<IQueryElement,IQueryElement> dic)
+			{
+				if (dic.ContainsKey(this))
+					return sb.Append("...");
+
+				dic.Add(this, this);
+
+				foreach (IQueryElement c in Conditions)
+					c.ToString(sb, dic);
+
+				if (Conditions.Count > 0)
+					sb.Length -= 4;
+
+				dic.Remove(this);
+
+				return sb;
+			}
 
 			#endregion
 		}
@@ -1393,11 +1584,30 @@ namespace BLToolkit.Data.Sql
 				return clone;
 			}
 
+			#region Overrides
+
+			public override string ToString()
+			{
+				return ((IQueryElement)this).ToString(new StringBuilder(), new Dictionary<IQueryElement,IQueryElement>()).ToString();
+			}
+
+			#endregion
+
 			#region IQueryElement Members
 
 			public QueryElementType ElementType
 			{
 				get { return QueryElementType.OrderByItem; }
+			}
+
+			StringBuilder IQueryElement.ToString(StringBuilder sb, Dictionary<IQueryElement,IQueryElement> dic)
+			{
+				Expression.ToString(sb, dic);
+
+				if (IsDescending)
+					sb.Append(" DESC");
+
+				return sb;
 			}
 
 			#endregion
@@ -1691,15 +1901,7 @@ namespace BLToolkit.Data.Sql
 
 			public override string ToString()
 			{
-				StringBuilder sb = new StringBuilder("SELECT \n");
-
-				if (Columns.Count == 0)
-					sb.Append("\t*, \n");
-				else
-					foreach (Column c in Columns)
-						sb.Append("\t").Append(c.ToString()).Append(", \n");
-
-				return sb.Remove(sb.Length - 3, 3).ToString();
+				return ((IQueryElement)this).ToString(new StringBuilder(), new Dictionary<IQueryElement,IQueryElement>()).ToString();
 			}
 
 			#endregion
@@ -1730,9 +1932,32 @@ namespace BLToolkit.Data.Sql
 
 			#region IQueryElement Members
 
-			public QueryElementType ElementType
+			public QueryElementType ElementType { get { return QueryElementType.SelectClause; } }
+
+			StringBuilder IQueryElement.ToString(StringBuilder sb, Dictionary<IQueryElement,IQueryElement> dic)
 			{
-				get { return QueryElementType.SelectClause; }
+				if (dic.ContainsKey(this))
+					return sb.Append("...");
+
+				dic.Add(this, this);
+
+				sb.AppendLine("SELECT ");
+
+				if (Columns.Count == 0)
+					sb.Append("\t*, \n");
+				else
+					foreach (IQueryElement c in Columns)
+					{
+						sb.Append("\t");
+						c.ToString(sb, dic);
+						sb.Append(", \n");
+					}
+
+				sb.Length -= 3;
+
+				dic.Remove(this);
+
+				return sb;
 			}
 
 			#endregion
@@ -1893,17 +2118,7 @@ namespace BLToolkit.Data.Sql
 
 			public override string ToString()
 			{
-				StringBuilder sb = new StringBuilder(" \nFROM \n");
-
-				if (Tables.Count > 0)
-				{
-					foreach (TableSource ts in Tables)
-						sb.Append('\t').Append(ts.ToString().Replace("\n", "\n\t")).Append(", ");
-
-					sb.Remove(sb.Length - 2, 2);
-				}
-
-				return sb.ToString();
+				return ((IQueryElement)this).ToString(new StringBuilder(), new Dictionary<IQueryElement,IQueryElement>()).ToString();
 			}
 
 			#endregion
@@ -1923,9 +2138,26 @@ namespace BLToolkit.Data.Sql
 
 			#region IQueryElement Members
 
-			public QueryElementType ElementType
+			public QueryElementType ElementType { get { return QueryElementType.FromClause; } }
+
+			StringBuilder IQueryElement.ToString(StringBuilder sb, Dictionary<IQueryElement,IQueryElement> dic)
 			{
-				get { return QueryElementType.FromClause; }
+				sb.Append(" \nFROM \n");
+
+				if (Tables.Count > 0)
+				{
+					foreach (IQueryElement ts in Tables)
+					{
+						sb.Append('\t');
+						int len = sb.Length;
+						ts.ToString(sb, dic).Replace("\n", "\n\t", len, sb.Length - len);
+						sb.Append(", ");
+					}
+
+					sb.Length -= 2;
+				}
+
+				return sb;
 			}
 
 			#endregion
@@ -2013,7 +2245,7 @@ namespace BLToolkit.Data.Sql
 
 			public override string ToString()
 			{
-				return Search.Conditions.Count == 0 ? "" : "\nWHERE\n\t" + Search;
+				return ((IQueryElement)this).ToString(new StringBuilder(), new Dictionary<IQueryElement,IQueryElement>()).ToString();
 			}
 
 			#region ISqlExpressionWalkable Members
@@ -2032,6 +2264,15 @@ namespace BLToolkit.Data.Sql
 			public QueryElementType ElementType
 			{
 				get { return QueryElementType.WhereClause; }
+			}
+
+			StringBuilder IQueryElement.ToString(StringBuilder sb, Dictionary<IQueryElement,IQueryElement> dic)
+			{
+				if (Search.Conditions.Count == 0)
+					return sb;
+
+				sb.Append("\nWHERE\n\t");
+				return ((IQueryElement)Search).ToString(sb, dic);
 			}
 
 			#endregion
@@ -2101,15 +2342,7 @@ namespace BLToolkit.Data.Sql
 
 			public override string ToString()
 			{
-				if (Items.Count == 0)
-					return "";
-
-				StringBuilder sb = new StringBuilder(" \nGROUP BY \n");
-
-				foreach (ISqlExpression item in Items)
-					sb.Append('\t').Append(item.ToString()).Append(",");
-
-				return sb.Remove(sb.Length - 1, 1).ToString();
+				return ((IQueryElement)this).ToString(new StringBuilder(), new Dictionary<IQueryElement,IQueryElement>()).ToString();
 			}
 
 			#region ISqlExpressionWalkable Members
@@ -2127,9 +2360,25 @@ namespace BLToolkit.Data.Sql
 
 			#region IQueryElement Members
 
-			public QueryElementType ElementType
+			public QueryElementType ElementType { get { return QueryElementType.GroupByClause; } }
+
+			StringBuilder IQueryElement.ToString(StringBuilder sb, Dictionary<IQueryElement,IQueryElement> dic)
 			{
-				get { return QueryElementType.GroupByClause; }
+				if (Items.Count == 0)
+					return sb;
+
+				sb.Append(" \nGROUP BY \n");
+
+				foreach (ISqlExpression item in Items)
+				{
+					sb.Append('\t');
+					item.ToString(sb, dic);
+					sb.Append(",");
+				}
+
+				sb.Length--;
+
+				return sb;
 			}
 
 			#endregion
@@ -2212,10 +2461,7 @@ namespace BLToolkit.Data.Sql
 
 			public override string ToString()
 			{
-				if (Items.Count == 0)
-					return "";
-
-				return base.ToString();
+				return ((IQueryElement)this).ToString(new StringBuilder(), new Dictionary<IQueryElement,IQueryElement>()).ToString();
 			}
 
 			#region ISqlExpressionWalkable Members
@@ -2233,9 +2479,25 @@ namespace BLToolkit.Data.Sql
 
 			#region IQueryElement Members
 
-			public QueryElementType ElementType
+			public QueryElementType ElementType { get { return QueryElementType.OrderByClause; } }
+
+			StringBuilder IQueryElement.ToString(StringBuilder sb, Dictionary<IQueryElement,IQueryElement> dic)
 			{
-				get { return QueryElementType.OrderByClause; }
+				if (Items.Count == 0)
+					return sb;
+
+				sb.Append(" \nORDER BY \n");
+
+				foreach (ISqlExpression item in Items)
+				{
+					sb.Append('\t');
+					item.ToString(sb, dic);
+					sb.Append(", ");
+				}
+
+				sb.Length -= 2;
+
+				return sb;
 			}
 
 			#endregion
@@ -2273,7 +2535,13 @@ namespace BLToolkit.Data.Sql
 
 			public override string ToString()
 			{
-				return " \nUNION" + (IsAll ? " ALL" : "") + " \n" + SqlQuery;
+				return ((IQueryElement)this).ToString(new StringBuilder(), new Dictionary<IQueryElement,IQueryElement>()).ToString();
+			}
+
+			StringBuilder IQueryElement.ToString(StringBuilder sb, Dictionary<IQueryElement,IQueryElement> dic)
+			{
+				sb.Append(" \nUNION").Append(IsAll ? " ALL" : "").Append(" \n");
+				return ((IQueryElement)SqlQuery).ToString(sb, dic);
 			}
 		}
 
@@ -2301,6 +2569,23 @@ namespace BLToolkit.Data.Sql
 
 		public void FinalizeAndValidate()
 		{
+#if DEBUG
+			Dictionary<SqlQuery,SqlQuery> dic = new Dictionary<SqlQuery,SqlQuery>();
+
+			new QueryVisitor().VisitAll(this, delegate(IQueryElement e)
+			{
+				SqlQuery sql = e as SqlQuery;
+
+				if (sql != null)
+				{
+					if (dic.ContainsKey(sql))
+						throw new InvalidOperationException("SqlQuery circle reference detected.");
+
+					dic.Add(sql, sql);
+				}
+			});
+#endif
+
 			OptimizeUnions();
 			FinalizeAndValidateInternal();
 			SetAliases();
@@ -2926,23 +3211,7 @@ namespace BLToolkit.Data.Sql
 
 		public override string ToString()
 		{
-			//return "";
-
-			StringBuilder sb = new StringBuilder();
-
-			sb
-				.Append(Select)
-				.Append(From)
-				.Append(Where)
-				.Append(GroupBy)
-				.Append(Having)
-				.Append(OrderBy);
-
-			if (HasUnion)
-				foreach (Union u in Unions)
-					sb.Append(u);
-
-			return sb.ToString();
+			return ((IQueryElement)this).ToString(new StringBuilder(), new Dictionary<IQueryElement,IQueryElement>()).ToString();
 		}
 
 		#endregion
@@ -3041,6 +3310,29 @@ namespace BLToolkit.Data.Sql
 		#region IQueryElement Members
 
 		public QueryElementType ElementType { get { return QueryElementType.SqlQuery; } }
+
+		StringBuilder IQueryElement.ToString(StringBuilder sb, Dictionary<IQueryElement,IQueryElement> dic)
+		{
+			if (dic.ContainsKey(this))
+				return sb.Append("...");
+
+			dic.Add(this, this);
+
+			((IQueryElement)Select). ToString(sb, dic);
+			((IQueryElement)From).   ToString(sb, dic);
+			((IQueryElement)Where).  ToString(sb, dic);
+			((IQueryElement)GroupBy).ToString(sb, dic);
+			((IQueryElement)Having). ToString(sb, dic);
+			((IQueryElement)OrderBy).ToString(sb, dic);
+
+			if (HasUnion)
+				foreach (IQueryElement u in Unions)
+					u.ToString(sb, dic);
+
+			dic.Remove(this);
+
+			return sb;
+		}
 
 		#endregion
 	}

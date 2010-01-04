@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text;
 using System.Threading;
 
 namespace BLToolkit.Data.Sql
@@ -161,7 +162,7 @@ namespace BLToolkit.Data.Sql
 
 		public override string ToString()
 		{
-			return string.IsNullOrEmpty(Alias) ? Name : Name + " as " + Alias;
+			return ((IQueryElement)this).ToString(new StringBuilder(), new Dictionary<IQueryElement,IQueryElement>()).ToString();
 		}
 
 		#endregion
@@ -276,6 +277,11 @@ namespace BLToolkit.Data.Sql
 		#region IQueryElement Members
 
 		public QueryElementType ElementType { get { return QueryElementType.SqlTable; } }
+
+		StringBuilder IQueryElement.ToString(StringBuilder sb, Dictionary<IQueryElement,IQueryElement> dic)
+		{
+			return sb.Append(string.IsNullOrEmpty(Alias) ? Name : Name + " as " + Alias);
+		}
 
 		#endregion
 	}

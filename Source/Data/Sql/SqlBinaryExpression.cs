@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Text;
 
 namespace BLToolkit.Data.Sql
 {
@@ -37,7 +38,7 @@ namespace BLToolkit.Data.Sql
 
 		public override string ToString()
 		{
-			return string.Format("{0} {1} {2}", Expr1, Operation, Expr2);
+			return ((IQueryElement)this).ToString(new StringBuilder(), new Dictionary<IQueryElement,IQueryElement>()).ToString();
 		}
 
 		#endregion
@@ -110,6 +111,17 @@ namespace BLToolkit.Data.Sql
 		#region IQueryElement Members
 
 		public QueryElementType ElementType { get { return QueryElementType.SqlBinaryExpression; } }
+
+		StringBuilder IQueryElement.ToString(StringBuilder sb, Dictionary<IQueryElement,IQueryElement> dic)
+		{
+			Expr1
+				.ToString(sb, dic)
+				.Append(' ')
+				.Append(Operation)
+				.Append(' ');
+
+			return Expr2.ToString(sb, dic);
+		}
 
 		#endregion
 	}

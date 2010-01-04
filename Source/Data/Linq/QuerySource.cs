@@ -21,7 +21,7 @@ namespace BLToolkit.Data.Linq
 			public Table(MappingSchema mappingSchema, SqlQuery sqlQuery, LambdaInfo lambda)
 				: base(sqlQuery, lambda)
 			{
-				var type = TypeHelper.GetGenericType(typeof(IQueryable<>), lambda.Body.Expr.Type);
+				var type = TypeHelper.GetGenericType(typeof(IEnumerable<>), lambda.Body.Expr.Type);
 
 				OriginalType = type == null ? lambda.Body.Expr.Type : type.GetGenericArguments()[0];
 				_objectType  = GetObjectType(OriginalType, mappingSchema);

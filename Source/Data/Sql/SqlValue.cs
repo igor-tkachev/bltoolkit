@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text;
 
 namespace BLToolkit.Data.Sql
 {
@@ -26,13 +27,7 @@ namespace BLToolkit.Data.Sql
 
 		public override string ToString()
 		{
-			if (_value == null)
-				return "NULL";
-
-			if (_value is string)
-				return "'" + _value.ToString().Replace("\'", "''");
-
-			return _value.ToString();
+			return ((IQueryElement)this).ToString(new StringBuilder(), new Dictionary<IQueryElement,IQueryElement>()).ToString();
 		}
 
 		#endregion
@@ -100,6 +95,20 @@ namespace BLToolkit.Data.Sql
 		#region IQueryElement Members
 
 		public QueryElementType ElementType { get { return QueryElementType.SqlValue; } }
+
+		StringBuilder IQueryElement.ToString(StringBuilder sb, Dictionary<IQueryElement,IQueryElement> dic)
+		{
+			return 
+				_value == null ?
+					sb.Append("NULL") :
+				_value is string ?
+					sb
+						.Append('\'')
+						.Append(_value.ToString().Replace("\'", "''"))
+						.Append('\'')
+				:
+					sb.Append(_value);
+		}
 
 		#endregion
 	}

@@ -306,6 +306,7 @@ namespace BLToolkit.Data.Linq
 						case "Max"             :
 						case "Average"         : sequence = ParseSequence(seq); ParseAggregate(pi, null, sequence[0]); break;
 						case "OfType"          : sequence = ParseSequence(seq); select = ParseOfType(pi, sequence);    break;
+						case "Any"             : sequence = ParseAny(seq, null);                                       break;
 						default                :
 							ParsingTracer.DecIndentLevel();
 							return false;
@@ -337,6 +338,7 @@ namespace BLToolkit.Data.Linq
 						case "Min"               :
 						case "Max"               :
 						case "Average"           : sequence = ParseSequence(seq); ParseAggregate(pi, l, sequence[0]); break;
+						case "Any"               : sequence = ParseAny(seq, l);                                       break;
 						default                  : return false;
 					}
 					return true;
@@ -1407,6 +1409,92 @@ namespace BLToolkit.Data.Linq
 			}
 
 			return select;
+		}
+
+		#endregion
+
+		#region ParseAny
+
+		QuerySource[] ParseAny(ParseInfo expr, LambdaInfo lambda)
+		{
+			var cond = ParseAnyCondition(expr, lambda);
+
+			CurrentSql.Where.SearchCondition.Conditions.Add(cond);
+
+			//new QuerySource.SubQuery()
+
+			return new[] { _parentQueries[0].Parent };
+		}
+
+		SqlQuery.Condition ParseAnyCondition(ParseInfo expr, LambdaInfo lambda)
+		{
+			ParsingTracer.WriteLine(lambda);
+			ParsingTracer.WriteLine(expr);
+			ParsingTracer.IncIndentLevel();
+
+			var sql = CurrentSql;
+			var cs  = _convertSource;
+
+			CurrentSql = new SqlQuery();
+
+			var associationList = new Dictionary<QuerySource,QuerySource>();
+
+			_convertSource = (s,l) =>
+			{
+				var t = s as QuerySource.Table;
+
+				if (t != null && t.ParentAssociation != null)
+				{
+					var orig = t;
+					t = CreateTable(new SqlQuery(), l);
+
+					associationList.Add(t, orig);
+
+					if (_parentQueries.Count > 0)
+					{
+						foreach (var parentQuery in _parentQueries)
+						{
+							if (parentQuery.Parent.Find(orig.ParentAssociation))
+							{
+								var csql = CurrentSql.From.Tables.Count == 0 ? t.SqlQuery : CurrentSql;
+
+								foreach (var c in orig.ParentAssociationJoin.Condition.Conditions)
+								{
+									var predicate = (SqlQuery.Predicate.ExprExpr)c.Predicate;
+									csql.Where
+										.Expr(predicate.Expr1)
+										.Equal
+										.Field(t.Columns[((SqlField)predicate.Expr2).Name].Field);
+								}
+
+								break;
+							}
+						}
+					}
+
+					s = t;
+				}
+				else
+					s = cs(s, l);
+
+				return s;
+			};
+
+			var query  = ParseSequence(expr)[0];
+			var any    = CurrentSql;
+
+			_convertSource = cs;
+
+			if (lambda != null)
+				ParseWhere(lambda, query);
+
+			any.ParentSql = sql;
+			CurrentSql    = sql;
+
+			var cond = new SqlQuery.Condition(false, new SqlQuery.Predicate.FuncLike(SqlFunction.CreateExists(any)));
+
+			ParsingTracer.DecIndentLevel();
+			return cond;
 		}
 
 		#endregion
@@ -4005,6 +4093,18 @@ namespace BLToolkit.Data.Linq
 			ParsingTracer.WriteLine(queries);
 			ParsingTracer.IncIndentLevel();
 
+			if (IsSubQuery(parseInfo, queries))
+			{
+				var cond = ParseConditionSubQuery(parseInfo, queries);
+
+				if (cond != null)
+				{
+					conditions.Add(cond);
+					ParsingTracer.DecIndentLevel();
+					return;
+				}
+			}
+
 			switch (parseInfo.NodeType)
 			{
 				case ExpressionType.AndAlso:
@@ -4063,6 +4163,54 @@ namespace BLToolkit.Data.Linq
 
 			ParsingTracer.DecIndentLevel();
 		}
+
+		#region ParsePredicateSubQuery
+
+		SqlQuery.Condition ParseConditionSubQuery(ParseInfo expr, params QuerySource[] queries)
+		{
+			SqlQuery.Condition cond = null;
+
+			if (expr.Expr.NodeType == ExpressionType.Call)
+			{
+				Func<SqlQuery.Condition> func = null;
+
+				expr.ConvertTo<MethodCallExpression>().Match
+				(
+					pi => pi.IsQueryableMethod(pexpr =>
+					{
+						switch (pi.Expr.Method.Name)
+						{
+							case "Any" : func = () => ParseAnyCondition(pexpr, null); return true;
+						}
+						return false;
+					}),
+					pi => pi.IsQueryableMethod((pexpr,l) =>
+					{
+						switch (pi.Expr.Method.Name)
+						{
+							case "Any" : func = () => ParseAnyCondition(pexpr, l); return true;
+						}
+						return false;
+					})
+				);
+
+				if (func != null)
+				{
+					var parentQueries = queries.Select(q => new ParentQuery { Parent = q, Parameter = q.Lambda.Parameters.FirstOrDefault()}).ToList();
+
+					_parentQueries.InsertRange(0, parentQueries);
+
+					cond = func();
+
+					_parentQueries.RemoveRange(0, parentQueries.Count);
+				}
+			}
+
+			return cond;
+		}
+
+		#endregion
+
 
 		#endregion
 

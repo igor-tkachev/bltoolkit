@@ -15,7 +15,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 	using Mapping;
 	using Reflection;
 
-	public partial class BasicSqlProvider : ISqlProvider
+	public class BasicSqlProvider : ISqlProvider
 	{
 		#region Init
 

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text;
 
 namespace BLToolkit.Data.Sql
 {
@@ -65,9 +66,11 @@ namespace BLToolkit.Data.Sql
 
 		#region IQueryElement Members
 
-		public QueryElementType ElementType
+		public QueryElementType ElementType { get { return QueryElementType.Join; } }
+
+		StringBuilder IQueryElement.ToString(StringBuilder sb, Dictionary<IQueryElement,IQueryElement> dic)
 		{
-			get { return QueryElementType.Join; }
+			return sb;
 		}
 
 		#endregion

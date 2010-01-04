@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text;
 
 namespace BLToolkit.Data.Sql
 {
@@ -58,7 +59,7 @@ namespace BLToolkit.Data.Sql
 
 		public override string ToString()
 		{
-			return "@" + (Name ?? "parameter") + "[" + (Value ?? "NULL") + "]";
+			return ((IQueryElement)this).ToString(new StringBuilder(), new Dictionary<IQueryElement,IQueryElement>()).ToString();
 		}
 
 		#endregion
@@ -132,6 +133,16 @@ namespace BLToolkit.Data.Sql
 		#region IQueryElement Members
 
 		public QueryElementType ElementType { get { return QueryElementType.SqlParameter; } }
+
+		StringBuilder IQueryElement.ToString(StringBuilder sb, Dictionary<IQueryElement,IQueryElement> dic)
+		{
+			return sb
+				.Append('@')
+				.Append(Name ?? "parameter")
+				.Append('[')
+				.Append(Value ?? "NULL")
+				.Append(']');
+		}
 
 		#endregion
 	}

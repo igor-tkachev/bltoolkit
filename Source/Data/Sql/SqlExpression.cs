@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text;
 
 namespace BLToolkit.Data.Sql
 {
@@ -42,7 +43,7 @@ namespace BLToolkit.Data.Sql
 
 		public override string ToString()
 		{
-			return string.Format(Expr, Parameters);
+			return ((IQueryElement)this).ToString(new StringBuilder(), new Dictionary<IQueryElement,IQueryElement>()).ToString();
 		}
 
 		#endregion
@@ -122,6 +123,20 @@ namespace BLToolkit.Data.Sql
 		#region IQueryElement Members
 
 		public QueryElementType ElementType { get { return QueryElementType.SqlExpression; } }
+
+		StringBuilder IQueryElement.ToString(StringBuilder sb, Dictionary<IQueryElement,IQueryElement> dic)
+		{
+			int      len = sb.Length;
+			string[] ss  = Array.ConvertAll<ISqlExpression,string>(Parameters, delegate(ISqlExpression p)
+			{
+				p.ToString(sb, dic);
+				string s = sb.ToString(len, sb.Length - len);
+				sb.Length = len;
+				return s;
+			});
+			
+			return sb.AppendFormat(Expr, ss);
+		}
 
 		#endregion
 
