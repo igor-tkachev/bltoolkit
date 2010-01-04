@@ -639,7 +639,7 @@ namespace BLToolkit.Data.Linq
 						var ex = pi.Walk(e.Expressions, NewArray.Expressions, func);
 
 						if (ex != e.Expressions)
-							pi.Expr = Expression.NewArrayInit(e.Type, ex);
+							pi.Expr = Expression.NewArrayInit(e.Type.GetElementType(), ex);
 
 						return pi;
 					}
