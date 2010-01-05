@@ -346,7 +346,8 @@ namespace BLToolkit.Data.Linq
 				//
 				// everything else
 				//
-				pi => pi.IsQueryableMethod ("SelectMany", 1, 2, seq => sequence = ParseSequence(seq), (l1, l2)        => select = ParseSelectMany(l1, l2, sequence[0])),
+				pi => pi.IsQueryableMethod ("SelectMany", 1, 2, seq => sequence = ParseSequence(seq), (l1, l2)        => select = ParseSelectMany(l1, l2,         sequence[0])),
+				pi => pi.IsQueryableMethod ("Select",  2,       seq => sequence = ParseSequence(seq), l               => select = ParseSelect    (l,              sequence[0])),
 				pi => pi.IsQueryableMethod ("Join",             seq => sequence = ParseSequence(seq), (i, l2, l3, l4) => select = ParseJoin      (i,  l2, l3, l4, sequence[0])),
 				pi => pi.IsQueryableMethod ("GroupJoin",        seq => sequence = ParseSequence(seq), (i, l2, l3, l4) => select = ParseGroupJoin (i,  l2, l3, l4, sequence[0])),
 				pi => pi.IsQueryableMethod ("GroupBy",    1, 1, seq => sequence = ParseSequence(seq), (l1, l2)        => select = ParseGroupBy   (l1, l2,   null, sequence[0], pi.Expr.Type.GetGenericArguments()[0])),
@@ -1881,6 +1882,14 @@ namespace BLToolkit.Data.Linq
 
 					case ExpressionType.Parameter:
 						{
+							if (query.Lambda.MethodInfo         != null     &&
+							    query.Lambda.MethodInfo.Name    == "Select" &&
+							    query.Lambda.Parameters.Length  == 2        &&
+							    query.Lambda.Parameters[1].Expr == pi.Expr)
+							{
+								return pi.Create(Expression.MakeMemberAccess(_contextParam, QueryCtx.Counter), pi.ParamAccessor);
+							}
+
 							if (pi.Expr == ParametersParam)
 							{
 								pi.StopWalking = true;

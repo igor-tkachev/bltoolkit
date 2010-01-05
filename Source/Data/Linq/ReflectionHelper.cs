@@ -166,6 +166,11 @@ namespace BLToolkit.Data.Linq
 			public static MethodInfo IsDBNull = MethodExpressor(rd => rd.IsDBNull(0));
 		}
 
+		public class QueryCtx : Expressor<QueryContext>
+		{
+			public static FieldInfo Counter = FieldExpressor(ctx => ctx.Counter);
+		}
+
 		public class MapSchema : Expressor<Mapping.MappingSchema>
 		{
 			public static MethodInfo MapValueToEnum = MethodExpressor(m => m.MapValueToEnum(null, null));

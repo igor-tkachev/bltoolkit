@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq.Expressions;
+using System.Reflection;
 
 namespace BLToolkit.Data.Linq
 {
@@ -13,6 +14,7 @@ namespace BLToolkit.Data.Linq
 
 		public ParseInfo                        Body;
 		public ParseInfo<ParameterExpression>[] Parameters;
+		public MethodInfo                       MethodInfo;
 
 		public LambdaInfo ConvertTo<T>()
 			where T : Expression

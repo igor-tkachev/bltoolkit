@@ -52,6 +52,30 @@ namespace BLToolkit.Data.Linq
 			}, p => true);
 		}
 
+		//[DebuggerStepThrough]
+		public static bool IsQueryableMethod(
+			this ParseInfo<MethodCallExpression> pi,
+			string                               methodName,
+			int                                  nparams1,
+			Action<ParseInfo<Expression>>        seq,
+			Action<LambdaInfo>                   parms)
+		{
+			LambdaInfo lambda = null;
+
+			if (IsMethod(pi, null, methodName, new FTest[]
+				{
+					p => { seq(p); return true; },
+					l => l.IsLambda(nparams1, lm => lambda = lm),
+				}, p => true))
+			{
+				lambda.MethodInfo = pi.Expr.Method;
+				parms(lambda);
+				return true;
+			}
+
+			return false;
+		}
+
 		[DebuggerStepThrough]
 		public static bool IsQueryableMethod(
 			this ParseInfo<MethodCallExpression> pi,

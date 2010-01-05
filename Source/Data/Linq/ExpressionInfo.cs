@@ -254,7 +254,10 @@ namespace BLToolkit.Data.Linq
 				context = new QueryContext { RootDbManager = db };
 
 			foreach (var dr in data)
+			{
+				context.AfterQuery();
 				yield return mapper(this, context, dr, MappingSchema, expr, ps);
+			}
 		}
 
 		IDataReader GetReader(DbManager db, Expression expr, object[] parameters, int idx)

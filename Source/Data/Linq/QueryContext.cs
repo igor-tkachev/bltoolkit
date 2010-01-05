@@ -12,6 +12,7 @@ namespace BLToolkit.Data.Linq
 		}
 
 		public DbManager RootDbManager;
+		public int       Counter;
 
 		List<DbManagerContext> _contexts;
 
@@ -52,6 +53,11 @@ namespace BLToolkit.Data.Linq
 			RootDbManager.OnClosing -= OnRootClosing;
 
 			_contexts = null;
+		}
+
+		public void AfterQuery()
+		{
+			Counter++;
 		}
 	}
 }

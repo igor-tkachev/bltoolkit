@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-
+using System.Windows.Forms;
 using NUnit.Framework;
 
 using BLToolkit.Mapping;
@@ -291,11 +291,45 @@ namespace Data.Linq
 		[Test]
 		public void SelectEnumerable()
 		{
-			var expected =
-				from p in Parent select new {  Max = GetList(p.ParentID).Max() };
-
-			ForEachProvider(db => AreEqual(expected,
+			ForEachProvider(db => AreEqual(
+				from p in    Parent select new {  Max = GetList(p.ParentID).Max() },
 				from p in db.Parent select new {  Max = GetList(p.ParentID).Max() }));
+		}
+
+		[Test]
+		public void ConstractClass()
+		{
+			ForEachProvider(db =>
+				db.Parent.Select(f =>
+					new ListViewItem(new[] { "", f.ParentID.ToString(), f.Value1.ToString() })
+					{
+						Checked    = true,
+						ImageIndex = 0,
+						Tag        = f.ParentID
+					}).ToList());
+		}
+
+		static string ConvertString(string s, int? i, bool b)
+		{
+			return s + "." + i + "." + b;
+		}
+
+		[Test]
+		public void Index()
+		{
+			ForEachProvider(db =>
+			{
+				var q =
+					db.Child
+						.OrderByDescending(m => m.ChildID)
+						.Where(m => m.Parent != null && m.ParentID > 0);
+
+				var lines =
+					q.Select(
+						(m, i) =>
+							ConvertString(m.Parent.ParentID.ToString(), m.ChildID, i % 2 == 0)).ToArray();
+				lines.ToString();
+			});
 		}
 	}
 }
