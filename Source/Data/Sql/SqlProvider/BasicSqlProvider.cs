@@ -625,15 +625,41 @@ namespace BLToolkit.Data.Sql.SqlProvider
 							{
 								SqlParameter pr = (SqlParameter)p.Values[0];
 
-								if (pr.SystemType != null && pr.SystemType.IsArray)
+								if (pr.Value == null)
 								{
-									values = (ICollection)pr.Value;
+									BuildPredicate(sb, new SqlQuery.Predicate.Expr(new SqlValue(false)));
+									return;
+								}
 
-									if (values == null || values.Count == 0)
+								if (pr.Value is IEnumerable)
+								{
+									IEnumerable items = (IEnumerable)pr.Value;
+
+									bool firstValue = true;
+
+									foreach (object item in items)
 									{
-										BuildPredicate(sb, new SqlQuery.Predicate.Expr(new SqlValue(false)));
-										return;
+										if (firstValue)
+										{
+											firstValue = false;
+											BuildExpression(sb, GetPrecedence(p), p.Expr1);
+											sb.Append(p.IsNot ? " NOT IN (" : " IN (");
+										}
+
+										if (item is ISqlExpression)
+											BuildExpression(sb, (ISqlExpression)item);
+										else
+											BuildValue(sb, item);
+
+										sb.Append(", ");
 									}
+
+									if (firstValue)
+										BuildPredicate(sb, new SqlQuery.Predicate.Expr(new SqlValue(false)));
+									else
+										sb.Remove(sb.Length - 2, 2).Append(')');
+
+									return;
 								}
 							}
 

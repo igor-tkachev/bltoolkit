@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 using NUnit.Framework;
@@ -694,7 +695,7 @@ namespace Data.Linq
 		}
 
 		[Test]
-		public void Contains()
+		public void Contains1()
 		{
 			var words = new [] { "John", "Pupkin" };
 
@@ -707,6 +708,44 @@ namespace Data.Linq
 				from p in db.Person
 				where words.Contains(p.FirstName) || words.Contains(p.LastName)
 				select p));
+		}
+
+		[Test]
+		public void Contains2()
+		{
+			IEnumerable<int> ids = new [] { 2, 3 };
+
+			ForEachProvider(db => AreEqual(
+				from p in    Parent where ids.Contains(p.ParentID) select p,
+				from p in db.Parent where ids.Contains(p.ParentID) select p));
+		}
+
+		static IEnumerable<int> GetIds()
+		{
+			yield return 1;
+			yield return 2;
+		}
+
+		[Test]
+		public void Contains3()
+		{
+			ForEachProvider(db => AreEqual(
+				from p in    Parent where GetIds().Contains(p.ParentID) select p,
+				from p in db.Parent where GetIds().Contains(p.ParentID) select p));
+		}
+
+		static IEnumerable<int> GetIds(int start, int n)
+		{
+			for (int i = 0; i < n; i++)
+				yield return start + i;
+		}
+
+		[Test]
+		public void Contains4()
+		{
+			ForEachProvider(db => AreEqual(
+				from p in    Parent where GetIds(1, 2).Contains(p.ParentID) || GetIds(3, 0).Contains(p.ParentID) select p,
+				from p in db.Parent where GetIds(1, 2).Contains(p.ParentID) || GetIds(3, 0).Contains(p.ParentID) select p));
 		}
 	}
 }

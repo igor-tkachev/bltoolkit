@@ -361,8 +361,11 @@ namespace BLToolkit.Data.Sql
 						SqlQuery.Column col  = (SqlQuery.Column)element;
 						ISqlExpression  expr = (ISqlExpression)ConvertInternal(col.Expression, action);
 
-						if (expr != null && !ReferenceEquals(expr, col.Expression))
-							newElement = new SqlQuery.Column( col.Parent, expr, col._alias);
+						IQueryElement parent;
+						_visitedElements.TryGetValue(col.Parent, out parent);
+
+						if (parent != null || expr != null && !ReferenceEquals(expr, col.Expression))
+							newElement = new SqlQuery.Column(parent == null ? col.Parent : (SqlQuery)parent, expr, col._alias);
 
 						break;
 					}
@@ -694,7 +697,18 @@ namespace BLToolkit.Data.Sql
 							oc = oc ?? q.OrderBy;
 							us = q.HasUnion ? (us ?? q.Unions) : null;
 
-							if (bsc) sc = new SqlQuery.SelectClause (sc.IsDistinct, sc.TakeValue, sc.SkipValue, sc.Columns);
+							if (bsc)
+							{
+								List<SqlQuery.Column> cols = sc.Columns.ConvertAll<SqlQuery.Column>(delegate(SqlQuery.Column c)
+								{
+									SqlQuery.Column newCol = new SqlQuery.Column(nq, c.Expression, c._alias);
+									_visitedElements[c] = newCol;
+									return newCol;
+								});
+
+								sc = new SqlQuery.SelectClause (sc.IsDistinct, sc.TakeValue, sc.SkipValue, cols);
+							}
+
 							if (bfc) fc = new SqlQuery.FromClause   (fc.Tables);
 							if (bwc) wc = new SqlQuery.WhereClause  (wc.SearchCondition);
 							if (bgc) gc = new SqlQuery.GroupByClause(gc.Items);

@@ -280,7 +280,7 @@ namespace BLToolkit.Data.Sql
 
 		StringBuilder IQueryElement.ToString(StringBuilder sb, Dictionary<IQueryElement,IQueryElement> dic)
 		{
-			return sb.Append(string.IsNullOrEmpty(Alias) ? Name : Name + " as " + Alias);
+			return sb.Append(Name);
 		}
 
 		#endregion

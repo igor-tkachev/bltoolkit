@@ -48,6 +48,9 @@ namespace BLToolkit.Data.Sql
 			_parameterDependent = parameterDependent;
 			_parameters.AddRange(parameters);
 
+			foreach (Column col in select.Columns)
+				col.Parent = this;
+
 			_select. SetSqlQuery(this);
 			_from.   SetSqlQuery(this);
 			_where.  SetSqlQuery(this);
@@ -88,9 +91,9 @@ namespace BLToolkit.Data.Sql
 
 		#region Column
 
-		public class Column : IEquatable<Column>, ISqlExpression, IChild<ISqlTableSource>
+		public class Column : IEquatable<Column>, ISqlExpression, IChild<SqlQuery>
 		{
-			public Column(ISqlTableSource parent, ISqlExpression expression, string alias)
+			public Column(SqlQuery parent, ISqlExpression expression, string alias)
 			{
 				if (expression == null) throw new ArgumentNullException("expression");
 
@@ -99,7 +102,7 @@ namespace BLToolkit.Data.Sql
 				_alias      = alias;
 			}
 
-			public Column(ISqlTableSource builder, ISqlExpression expression)
+			public Column(SqlQuery builder, ISqlExpression expression)
 				: this(builder, expression, null)
 			{
 			}
@@ -143,7 +146,7 @@ namespace BLToolkit.Data.Sql
 
 			public override string ToString()
 			{
-			return ((IQueryElement)this).ToString(new StringBuilder(), new Dictionary<IQueryElement,IQueryElement>()).ToString();
+				return ((IQueryElement)this).ToString(new StringBuilder(), new Dictionary<IQueryElement,IQueryElement>()).ToString();
 			}
 
 			#region ISqlExpression Members
@@ -170,7 +173,7 @@ namespace BLToolkit.Data.Sql
 
 				ICloneableElement clone;
 
-				ISqlTableSource parent = (ISqlTableSource)_parent.Clone(objectTree, doClone);
+				SqlQuery parent = (SqlQuery)_parent.Clone(objectTree, doClone);
 
 				if (!objectTree.TryGetValue(this, out clone))
 					objectTree.Add(this, clone = new Column(
@@ -210,13 +213,13 @@ namespace BLToolkit.Data.Sql
 
 			#region IChild<ISqlTableSource> Members
 
-			string IChild<ISqlTableSource>.Name
+			string IChild<SqlQuery>.Name
 			{
 				get { return Alias; }
 			}
 
-			private ISqlTableSource _parent;
-			public  ISqlTableSource  Parent
+			private SqlQuery _parent;
+			public  SqlQuery  Parent
 			{
 				get { return _parent;  }
 				set { _parent = value; }
@@ -241,6 +244,15 @@ namespace BLToolkit.Data.Sql
 					int len = sb.Length;
 					Expression.ToString(sb, dic).Replace("\n", "\n\t\t", len, sb.Length - len);
 					sb.Append("\n\t)");
+				}
+				else if (Expression is Column)
+				{
+					Column col = (Column)Expression;
+					sb
+						.Append('t')
+						.Append(col.Parent.SourceID)
+						.Append(".")
+						.Append(col.Alias ?? "c" + (col.Parent.Select.Columns.IndexOf(col) + 1));
 				}
 				else
 				{
@@ -1941,16 +1953,37 @@ namespace BLToolkit.Data.Sql
 
 				dic.Add(this, this);
 
-				sb.AppendLine("SELECT ");
+				sb.Append("SELECT ");
+
+				if (IsDistinct) sb.Append("DISTINCT ");
+
+				if (SkipValue != null)
+				{
+					sb.Append("SKIP ");
+					SkipValue.ToString(sb, dic);
+					sb.Append(" ");
+				}
+
+				if (TakeValue != null)
+				{
+					sb.Append("TAKE ");
+					TakeValue.ToString(sb, dic);
+					sb.Append(" ");
+				}
+
+				sb.AppendLine();
 
 				if (Columns.Count == 0)
 					sb.Append("\t*, \n");
 				else
-					foreach (IQueryElement c in Columns)
+					foreach (Column c in Columns)
 					{
 						sb.Append("\t");
-						c.ToString(sb, dic);
-						sb.Append(", \n");
+						((IQueryElement)c).ToString(sb, dic);
+						sb
+							.Append(" as ")
+							.Append(c.Alias ?? "c" + (Columns.IndexOf(c) + 1))
+							.Append(", \n");
 					}
 
 				sb.Length -= 3;
@@ -2913,6 +2946,7 @@ namespace BLToolkit.Data.Sql
 				SqlQuery query = (SqlQuery)source.Source;
 
 				if (query.From.Tables.Count == 1 &&
+				   //!query.Select.IsDistinct      &&
 				    //query.From.Tables[0].Joins.Count == 0 &&
 				    (optimizeWhere || query.Where.IsEmpty && query.Having.IsEmpty) &&
 				   !query.HasUnion               &&
@@ -3317,6 +3351,11 @@ namespace BLToolkit.Data.Sql
 				return sb.Append("...");
 
 			dic.Add(this, this);
+
+			sb
+				.Append("(")
+				.Append(SourceID)
+				.Append(") ");
 
 			((IQueryElement)Select). ToString(sb, dic);
 			((IQueryElement)From).   ToString(sb, dic);
