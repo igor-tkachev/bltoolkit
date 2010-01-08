@@ -240,7 +240,10 @@ namespace BLToolkit.Data.Sql
 
 				if (Expression is SqlQuery)
 				{
-					sb.Append("(\n\t\t");
+					sb
+						.Append('t')
+						.Append(Parent.SourceID)
+						.Append(".(\n\t\t");
 					int len = sb.Length;
 					Expression.ToString(sb, dic).Replace("\n", "\n\t\t", len, sb.Length - len);
 					sb.Append("\n\t)");
@@ -250,6 +253,8 @@ namespace BLToolkit.Data.Sql
 					Column col = (Column)Expression;
 					sb
 						.Append('t')
+						.Append(Parent.SourceID)
+						.Append(".t")
 						.Append(col.Parent.SourceID)
 						.Append(".")
 						.Append(col.Alias ?? "c" + (col.Parent.Select.Columns.IndexOf(col) + 1));
@@ -1644,8 +1649,8 @@ namespace BLToolkit.Data.Sql
 			public OrderByClause OrderBy { get { return SqlQuery.OrderBy; } }
 			public SqlQuery      End()   { return SqlQuery; }
 
-			private   SqlQuery _sqlQuery;
-			protected SqlQuery  SqlQuery
+			private            SqlQuery _sqlQuery;
+			protected internal SqlQuery  SqlQuery
 			{
 				get { return _sqlQuery;  }
 			}
@@ -1671,8 +1676,8 @@ namespace BLToolkit.Data.Sql
 			public OrderByClause OrderBy { get { return SqlQuery.OrderBy; } }
 			public SqlQuery      End()   { return SqlQuery; }
 
-			private   SqlQuery _sqlQuery;
-			protected SqlQuery  SqlQuery
+			private            SqlQuery _sqlQuery;
+			protected internal SqlQuery  SqlQuery
 			{
 				get { return _sqlQuery; }
 			}
@@ -2141,6 +2146,22 @@ namespace BLToolkit.Data.Sql
 				}
 			}
 
+			public bool IsChild(ISqlTableSource table)
+			{
+				foreach (TableSource ts in Tables)
+					if (ts.Source == table || CheckChild(ts.Joins, table))
+						return true;
+				return false;
+			}
+
+			static bool CheckChild(IList<JoinedTable> joins, ISqlTableSource table)
+			{
+				foreach (JoinedTable j in joins)
+					if (j.Table == table || CheckChild(j.Table.Joins, table))
+						return true;
+				return false;
+			}
+
 			readonly List<TableSource> _tables = new List<TableSource>();
 			public   List<TableSource>  Tables
 			{
@@ -2521,7 +2542,7 @@ namespace BLToolkit.Data.Sql
 
 				sb.Append(" \nORDER BY \n");
 
-				foreach (ISqlExpression item in Items)
+				foreach (IQueryElement item in Items)
 				{
 					sb.Append('\t');
 					item.ToString(sb, dic);

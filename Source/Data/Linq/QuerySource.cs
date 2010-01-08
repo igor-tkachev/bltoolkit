@@ -271,7 +271,11 @@ namespace BLToolkit.Data.Linq
 						{
 							if (e.NodeType == ExpressionType.MemberAccess)
 							{
-								ma   = (MemberExpression)e;
+								ma = (MemberExpression)e;
+
+								if (ma.Expression == null)
+									break;
+
 								name = ma.Member.Name + '.' + name;
 
 								if (ma.Expression.Type == ObjectType)

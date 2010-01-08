@@ -939,6 +939,8 @@ namespace BLToolkit.Data.Linq
 
 		QuerySource ParseWhere(LambdaInfo l, QuerySource select)
 		{
+			CurrentSql.ToString();
+
 			ParsingTracer.WriteLine(l);
 			ParsingTracer.WriteLine(select);
 			ParsingTracer.IncIndentLevel();
@@ -1256,7 +1258,7 @@ namespace BLToolkit.Data.Linq
 				select = WrapInSubQuery(select);
 
 			CurrentSql.Select.IsDistinct = true;
-			select.Select(this);
+			//select.Select(this);
 
 			ParsingTracer.DecIndentLevel();
 			return select;
@@ -1824,7 +1826,7 @@ namespace BLToolkit.Data.Linq
 				{
 					case ExpressionType.MemberAccess:
 						{
-							if (IsServerSideOnly(pi))        return BuildField   (query, pi);
+							if (IsServerSideOnly(pi))        return BuildField   (query.BaseQuery, pi);
 							if (IsSubQuery      (pi, query)) return BuildSubQuery(pi, query, converter);
 
 							var ma = (ParseInfo<MemberExpression>)pi;
@@ -1961,7 +1963,7 @@ namespace BLToolkit.Data.Linq
 							}
 
 							if (query is QuerySource.Scalar && CurrentSql.Select.Columns.Count == 0 && expr == pi)
-								return BuildField(query, pi);
+								return BuildField(query.BaseQuery, pi);
 
 							break;
 						}
@@ -1974,12 +1976,26 @@ namespace BLToolkit.Data.Linq
 
 					case ExpressionType.Call:
 						{
-							if (IsServerSideOnly(pi))        return BuildField   (query, pi);
+							if (IsServerSideOnly(pi))        return BuildField   (query.BaseQuery, pi);
 							if (IsSubQuery      (pi, query)) return BuildSubQuery(pi, query, converter);
 						}
 
 						break;
+				}
 
+				if (EnforceServerSide())
+				{
+					switch (pi.NodeType)
+					{
+						case ExpressionType.MemberInit:
+						case ExpressionType.New:
+						case ExpressionType.Convert:
+							break;
+						default:
+							if (CanBeCompiled(pi))
+								break;
+							return BuildField(query.BaseQuery, pi);
+					}
 				}
 
 				return pi;
@@ -1987,6 +2003,11 @@ namespace BLToolkit.Data.Linq
 
 			ParsingTracer.DecIndentLevel();
 			return newExpr;
+		}
+
+		bool EnforceServerSide()
+		{
+			return CurrentSql.Select.IsDistinct;
 		}
 
 		#endregion
@@ -4421,7 +4442,7 @@ namespace BLToolkit.Data.Linq
 
 		QuerySource.SubQuery WrapInSubQuery(QuerySource source)
 		{
-			var result = new QuerySource.SubQuery(new SqlQuery(), source.SqlQuery, source);
+			var result = new QuerySource.SubQuery(new SqlQuery() { ParentSql = source.SqlQuery.ParentSql }, source.SqlQuery, source);
 			CurrentSql = result.SqlQuery;
 			return result;
 		}

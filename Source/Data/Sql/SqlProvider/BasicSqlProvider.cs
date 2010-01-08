@@ -799,6 +799,12 @@ namespace BLToolkit.Data.Sql.SqlProvider
 				case QueryElementType.Column:
 					{
 						SqlQuery.Column column = (SqlQuery.Column)expr;
+
+						if (column.ToString() == "(t102).t104.ParentID1")
+						{
+							column.ToString();
+						}
+
 						ISqlTableSource table  = _sqlQuery.GetTableSource(column.Parent);
 
 						if (table == null)

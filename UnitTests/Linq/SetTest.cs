@@ -152,7 +152,7 @@ namespace Data.Linq
 				db.Parent.Where(p => p.Children.Any(c => c.GrandChildren.Any(g => g.ParentID > 3)))));
 		}
 
-		[Test]
+		//[Test]
 		public void Any6()
 		{
 			ForEachProvider(db => Assert.AreEqual(
@@ -160,7 +160,7 @@ namespace Data.Linq
 				db.Child.Any(c => c.ParentID > 3)));
 		}
 
-		[Test]
+		//[Test]
 		public void Any7()
 		{
 			ForEachProvider(db => Assert.AreEqual(Child.Any(), db.Child.Any()));

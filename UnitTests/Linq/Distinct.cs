@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Linq;
-
+using Data.Linq.Model;
 using NUnit.Framework;
 
 using BLToolkit.Data.DataProvider;
@@ -11,10 +11,55 @@ namespace Data.Linq
 	public class DistinctTest : TestBase
 	{
 		[Test]
-		public void Distinct()
+		public void Distinct1()
 		{
-			var expected = (from ch in Child select ch.ParentID).Distinct();
-			ForEachProvider(db => AreEqual(expected, (from ch in db.Child select ch.ParentID).Distinct()));
+			ForEachProvider(db => AreEqual(
+				(from ch in    Child select ch.ParentID).Distinct(),
+				(from ch in db.Child select ch.ParentID).Distinct()));
+		}
+
+		[Test]
+		public void Distinct2()
+		{
+			ForEachProvider(db => AreEqual(
+				(from p in    Parent select p.Value1 ?? p.ParentID % 2).Distinct(),
+				(from p in db.Parent select p.Value1 ?? p.ParentID % 2).Distinct()));
+		}
+
+		[Test]
+		public void Distinct3()
+		{
+			ForEachProvider(db => AreEqual(
+				(from p in    Parent select new { Value = p.Value1 ?? p.ParentID % 2, p.Value1 }).Distinct(),
+				(from p in db.Parent select new { Value = p.Value1 ?? p.ParentID % 2, p.Value1 }).Distinct()));
+		}
+
+		[Test]
+		public void Distinct4()
+		{
+			ForEachProvider(db => AreEqual(
+				(from p in    Parent select new Parent { ParentID = p.Value1 ?? p.ParentID % 2, Value1 = p.Value1 }).Distinct(),
+				(from p in db.Parent select new Parent { ParentID = p.Value1 ?? p.ParentID % 2, Value1 = p.Value1 }).Distinct()));
+		}
+
+		[Test]
+		public void Distinct5()
+		{
+			var id = 2;
+
+			ForEachProvider(db => AreEqual(
+				(from p in    Parent select new Parent { ParentID = p.Value1 ?? p.ParentID % 2, Value1 = id + 1 }).Distinct(),
+				(from p in db.Parent select new Parent { ParentID = p.Value1 ?? p.ParentID % 2, Value1 = id + 1 }).Distinct()));
+		}
+
+		[Test]
+		public void Distinct6()
+		{
+			var id = 2;
+
+			ForEachProvider(new[] { ProviderName.Informix }, db => AreEqual(
+				(from p in    Parent select new Parent { ParentID = p.Value1 ?? p.ParentID + id % 2, Value1 = id + 1 }).Distinct(),
+				(from p in db.Parent select new Parent { ParentID = p.Value1 ?? p.ParentID + id % 2, Value1 = id + 1 }).Distinct()));
 		}
 
 		[Test]

@@ -313,12 +313,12 @@ namespace BLToolkit.Data.Linq
 
 		public static bool operator == (ParseInfo pi, Expression expr)
 		{
-			return (object)pi == null && expr == null || pi.Expr == expr;
+			return (object)pi == null ? expr == null : pi.Expr == expr;
 		}
 
 		public static bool operator != (ParseInfo pi, Expression expr)
 		{
-			return (object)pi != null ? pi.Expr != expr : expr != null;
+			return (object)pi == null ? expr != null : pi.Expr != expr;
 		}
 
 		public static implicit operator Expression(ParseInfo pi)

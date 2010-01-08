@@ -113,19 +113,18 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 						new QueryVisitor().Visit(subQuery, delegate(IQueryElement e)
 						{
-							if (e.ElementType == QueryElementType.SqlTable)
-								tables.Add((SqlTable)e, null);
+							if (e is ISqlTableSource && subQuery.From.IsChild((ISqlTableSource)e))
+								tables.Add((ISqlTableSource)e, null);
 						});
 
-						bool refersParent = false;
-
-						new QueryVisitor().Visit(subQuery, delegate(IQueryElement e)
+						bool refersParent = null != new QueryVisitor().Find(subQuery, delegate(IQueryElement e)
 						{
 							switch (e.ElementType)
 							{
-								case QueryElementType.SqlField : if (!tables.ContainsKey(((SqlField)e).Table))         refersParent = true; break;
-								case QueryElementType.Column   : if (!tables.ContainsKey(((SqlQuery.Column)e).Parent)) refersParent = true; break;
+								case QueryElementType.SqlField : return !tables.ContainsKey(((SqlField)e).Table);
+								case QueryElementType.Column   : return !tables.ContainsKey(((SqlQuery.Column)e).Parent);
 							}
+							return false;
 						});
 
 						if (!refersParent)
@@ -137,9 +136,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 						SqlQuery.OptimizeSearchCondition(subQuery.Where.SearchCondition);
 
-						bool isAggregated = false;
-
-						new QueryVisitor().Visit(subQuery, delegate(IQueryElement e)
+						bool isAggregated = null != new QueryVisitor().Find(subQuery, delegate(IQueryElement e)
 						{
 							if (e.ElementType == QueryElementType.SqlFunction)
 								switch (((SqlFunction)e).Name)
@@ -147,8 +144,9 @@ namespace BLToolkit.Data.Sql.SqlProvider
 									case "Min"     :
 									case "Max"     :
 									case "Count"   :
-									case "Average" : isAggregated = true; break;
+									case "Average" : return true;
 								}
+							return false;
 						});
 
 						bool allAnd = true;
@@ -170,45 +168,59 @@ namespace BLToolkit.Data.Sql.SqlProvider
 						{
 							SqlQuery.Condition cond = subQuery.Where.SearchCondition.Conditions[j];
 
-							bool hasParentRef = false;
-
-							new QueryVisitor().Visit(cond, delegate(IQueryElement e)
+							bool hasParentRef = null != new QueryVisitor().Find(cond, delegate(IQueryElement e)
 							{
 								switch (e.ElementType)
 								{
-									case QueryElementType.SqlField : if (!tables.ContainsKey(((SqlField)e).Table))         hasParentRef = true; break;
-									case QueryElementType.Column   : if (!tables.ContainsKey(((SqlQuery.Column)e).Parent)) hasParentRef = true; break;
+									case QueryElementType.SqlField : return !tables.ContainsKey(((SqlField)e).Table);
+									case QueryElementType.Column   : return !tables.ContainsKey(((SqlQuery.Column)e).Parent);
 								}
+								return false;
 							});
 
 							if (!hasParentRef)
 								continue;
 
+							Dictionary<IQueryElement,IQueryElement> replaced = new Dictionary<IQueryElement,IQueryElement>();
+
 							SqlQuery.Condition nc = new QueryVisitor().Convert(cond, delegate(IQueryElement e)
 							{
+								IQueryElement ne = e;
+
 								switch (e.ElementType)
 								{
 									case QueryElementType.SqlField :
+										if (replaced.TryGetValue(e, out ne))
+											return ne;
+
 										if (tables.ContainsKey(((SqlField)e).Table))
 										{
 											if (isAggregated)
 												subQuery.GroupBy.Expr((SqlField)e);
-											return subQuery.Select.Columns[subQuery.Select.Add((SqlField)e)];
+											ne = subQuery.Select.Columns[subQuery.Select.Add((SqlField)e)];
+											break;
 										}
 
 										break;
 									case QueryElementType.Column   :
+										if (replaced.TryGetValue(e, out ne))
+											return ne;
+
 										if (tables.ContainsKey(((SqlQuery.Column)e).Parent))
 										{
 											if (isAggregated)
 												subQuery.GroupBy.Expr((SqlQuery.Column)e);
-											return subQuery.Select.Columns[subQuery.Select.Add((SqlQuery.Column)e)];
+											ne = subQuery.Select.Columns[subQuery.Select.Add((SqlQuery.Column)e)];
+											break;
 										}
 
 										break;
 								}
 
-								return e;
+								if (!ReferenceEquals(e, ne))
+									replaced.Add(e, ne);
+
+								return ne;
 							});
 
 							if (nc != null && !object.ReferenceEquals(nc, cond))

@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 
 namespace BLToolkit.Data.Sql
 {
 	using VisitFunc   = Action<IQueryElement>;
+	using FindFunc    = Func<IQueryElement,bool>;
 	using ConvertFunc = Func<IQueryElement,IQueryElement>;
 
 	public class QueryVisitor
@@ -31,8 +31,6 @@ namespace BLToolkit.Data.Sql
 		{
 			if (element == null || !all && _visitedElements.ContainsKey(element))
 				return;
-
-//Debug.WriteLine(element + "      ---   " + element.GetType());
 
 			switch (element.ElementType)
 			{
@@ -179,7 +177,8 @@ namespace BLToolkit.Data.Sql
 						SqlQuery.SelectClause sc = (SqlQuery.SelectClause)element;
 						Visit(sc.TakeValue, all, action);
 						Visit(sc.SkipValue, all, action);
-						foreach (SqlQuery.Column c in sc.Columns) Visit(c, all, action);
+
+						foreach (SqlQuery.Column c in sc.Columns.ToArray()) Visit(c, all, action);
 						break;
 					}
 
@@ -254,6 +253,145 @@ namespace BLToolkit.Data.Sql
 
 			if (!all)
 				_visitedElements.Add(element, element);
+		}
+
+		IQueryElement Find<T>(IEnumerable<T> arr, FindFunc find)
+			where T : class, IQueryElement
+		{
+			foreach (T item in arr)
+			{
+				IQueryElement e = Find(item, find);
+				if (e != null)
+					return e;
+			}
+
+			return null;
+		}
+
+		public IQueryElement Find(IQueryElement element, FindFunc find)
+		{
+			if (element == null || find(element))
+				return element;
+
+			switch (element.ElementType)
+			{
+				case QueryElementType.SqlFunction       : return Find(((SqlFunction)                element).Parameters,      find);
+				case QueryElementType.SqlExpression     : return Find(((SqlExpression)              element).Parameters,      find);
+				case QueryElementType.Join              : return Find(((Join)                       element).JoinOns,         find);
+				case QueryElementType.Column            : return Find(((SqlQuery.Column)            element).Expression,      find);
+				case QueryElementType.SearchCondition   : return Find(((SqlQuery.SearchCondition)   element).Conditions,      find);
+				case QueryElementType.Condition         : return Find(((SqlQuery.Condition)         element).Predicate,       find);
+				case QueryElementType.ExprPredicate     : return Find(((SqlQuery.Predicate.Expr)    element).Expr1,           find);
+				case QueryElementType.NotExprPredicate  : return Find(((SqlQuery.Predicate.NotExpr) element).Expr1,           find);
+				case QueryElementType.IsNullPredicate   : return Find(((SqlQuery.Predicate.IsNull)  element).Expr1,           find);
+				case QueryElementType.FromClause        : return Find(((SqlQuery.FromClause)        element).Tables,          find);
+				case QueryElementType.WhereClause       : return Find(((SqlQuery.WhereClause)       element).SearchCondition, find);
+				case QueryElementType.GroupByClause     : return Find(((SqlQuery.GroupByClause)     element).Items,           find);
+				case QueryElementType.OrderByClause     : return Find(((SqlQuery.OrderByClause)     element).Items,           find);
+				case QueryElementType.OrderByItem       : return Find(((SqlQuery.OrderByItem)       element).Expression,      find);
+				case QueryElementType.Union             : return Find(((SqlQuery.Union)             element).SqlQuery,        find);
+				case QueryElementType.FuncLikePredicate : return Find(((SqlQuery.Predicate.FuncLike)element).Function,        find);
+
+				case QueryElementType.SqlBinaryExpression:
+					{
+						SqlBinaryExpression bexpr = (SqlBinaryExpression)element;
+						return
+							Find(bexpr.Expr1, find) ??
+							Find(bexpr.Expr2, find);
+					}
+
+				case QueryElementType.SqlTable:
+					{
+						SqlTable table = (SqlTable)element;
+						return
+							Find(table.All,           find) ?? 
+							Find(table.Fields.Values, find) ?? 
+							Find(table.Joins,         find);
+					}
+
+				case QueryElementType.TableSource:
+					{
+						SqlQuery.TableSource table = (SqlQuery.TableSource)element;
+						return
+							Find(table.Source, find) ??
+							Find(table.Joins,  find);
+					}
+
+				case QueryElementType.JoinedTable:
+					{
+						SqlQuery.JoinedTable join = (SqlQuery.JoinedTable)element;
+						return
+							Find(join.Table,     find) ??
+							Find(join.Condition, find);
+					}
+
+				case QueryElementType.ExprExprPredicate:
+					{
+						SqlQuery.Predicate.ExprExpr p = (SqlQuery.Predicate.ExprExpr)element;
+						return
+							Find(p.Expr1, find) ??
+							Find(p.Expr2, find);
+					}
+
+				case QueryElementType.LikePredicate:
+					{
+						SqlQuery.Predicate.Like p = (SqlQuery.Predicate.Like)element;
+						return
+							Find(p.Expr1,  find) ??
+							Find(p.Expr2,  find) ??
+							Find(p.Escape, find);
+					}
+
+				case QueryElementType.BetweenPredicate:
+					{
+						SqlQuery.Predicate.Between p = (SqlQuery.Predicate.Between)element;
+						return
+							Find(p.Expr1, find) ??
+							Find(p.Expr2, find) ??
+							Find(p.Expr3, find);
+					}
+
+				case QueryElementType.InSubqueryPredicate:
+					{
+						SqlQuery.Predicate.InSubquery p = (SqlQuery.Predicate.InSubquery)element;
+						return
+							Find(p.Expr1,    find) ??
+							Find(p.SubQuery, find);
+					}
+
+				case QueryElementType.InListPredicate:
+					{
+						SqlQuery.Predicate.InList p = (SqlQuery.Predicate.InList)element;
+						return
+							Find(p.Expr1,  find) ??
+							Find(p.Values, find);
+					}
+
+				case QueryElementType.SelectClause:
+					{
+						SqlQuery.SelectClause sc = (SqlQuery.SelectClause)element;
+						return
+							Find(sc.TakeValue, find) ??
+							Find(sc.SkipValue, find) ??
+							Find(sc.Columns,   find);
+					}
+
+				case QueryElementType.SqlQuery:
+					{
+						SqlQuery q = (SqlQuery)element;
+
+						return
+							Find(q.Select,  find) ??
+							Find(q.From,    find) ??
+							Find(q.Where,   find) ??
+							Find(q.GroupBy, find) ??
+							Find(q.Having,  find) ??
+							Find(q.OrderBy, find) ??
+							(q.HasUnion ? Find(q.Unions, find) : null);
+					}
+			}
+
+			return find(element) ? element : null;
 		}
 
 		public T Convert<T>(T element, ConvertFunc action)
@@ -365,7 +503,7 @@ namespace BLToolkit.Data.Sql
 						_visitedElements.TryGetValue(col.Parent, out parent);
 
 						if (parent != null || expr != null && !ReferenceEquals(expr, col.Expression))
-							newElement = new SqlQuery.Column(parent == null ? col.Parent : (SqlQuery)parent, expr, col._alias);
+							newElement = new SqlQuery.Column(parent == null ? col.Parent : (SqlQuery)parent, expr ?? col.Expression, col._alias);
 
 						break;
 					}
@@ -535,10 +673,17 @@ namespace BLToolkit.Data.Sql
 						ISqlExpression        take = (ISqlExpression)ConvertInternal(sc.TakeValue, action);
 						ISqlExpression        skip = (ISqlExpression)ConvertInternal(sc.SkipValue, action);
 
-						if (cols != null && !ReferenceEquals(sc.Columns,   cols) ||
+						IQueryElement parent;
+						_visitedElements.TryGetValue(sc.SqlQuery, out parent);
+
+						if (parent != null ||
+							cols != null && !ReferenceEquals(sc.Columns,   cols) ||
 							take != null && !ReferenceEquals(sc.TakeValue, take) ||
 							skip != null && !ReferenceEquals(sc.SkipValue, skip))
+						{
 							newElement = new SqlQuery.SelectClause(sc.IsDistinct, take ?? sc.TakeValue, skip ?? sc.SkipValue, cols ?? sc.Columns);
+							((SqlQuery.SelectClause)newElement).SetSqlQuery((SqlQuery)parent);
+						}
 
 						break;
 					}
@@ -548,8 +693,14 @@ namespace BLToolkit.Data.Sql
 						SqlQuery.FromClause        fc   = (SqlQuery.FromClause)element;
 						List<SqlQuery.TableSource> ts = Convert(fc.Tables, action);
 
-						if (ts != null && !ReferenceEquals(fc.Tables, ts))
-							newElement = new SqlQuery.FromClause(ts);
+						IQueryElement parent;
+						_visitedElements.TryGetValue(fc.SqlQuery, out parent);
+
+						if (parent != null || ts != null && !ReferenceEquals(fc.Tables, ts))
+						{
+							newElement = new SqlQuery.FromClause(ts ?? fc.Tables);
+							((SqlQuery.FromClause)newElement).SetSqlQuery((SqlQuery)parent);
+						}
 
 						break;
 					}
@@ -559,8 +710,14 @@ namespace BLToolkit.Data.Sql
 						SqlQuery.WhereClause     wc   = (SqlQuery.WhereClause)element;
 						SqlQuery.SearchCondition cond = (SqlQuery.SearchCondition)ConvertInternal(wc.SearchCondition, action);
 
-						if (cond != null && !ReferenceEquals(wc.SearchCondition, cond))
-							newElement = new SqlQuery.WhereClause(cond);
+						IQueryElement parent;
+						_visitedElements.TryGetValue(wc.SqlQuery, out parent);
+
+						if (parent != null || cond != null && !ReferenceEquals(wc.SearchCondition, cond))
+						{
+							newElement = new SqlQuery.WhereClause(cond ?? wc.SearchCondition);
+							((SqlQuery.WhereClause)newElement).SetSqlQuery((SqlQuery)parent);
+						}
 
 						break;
 					}
@@ -570,8 +727,14 @@ namespace BLToolkit.Data.Sql
 						SqlQuery.GroupByClause gc = (SqlQuery.GroupByClause)element;
 						List<ISqlExpression>   es = Convert(gc.Items, action);
 
-						if (es != null && !ReferenceEquals(gc.Items, es))
-							newElement = new SqlQuery.GroupByClause(es);
+						IQueryElement parent;
+						_visitedElements.TryGetValue(gc.SqlQuery, out parent);
+
+						if (parent != null || es != null && !ReferenceEquals(gc.Items, es))
+						{
+							newElement = new SqlQuery.GroupByClause(es ?? gc.Items);
+							((SqlQuery.GroupByClause)newElement).SetSqlQuery((SqlQuery)parent);
+						}
 
 						break;
 					}
@@ -581,8 +744,14 @@ namespace BLToolkit.Data.Sql
 						SqlQuery.OrderByClause     oc = (SqlQuery.OrderByClause)element;
 						List<SqlQuery.OrderByItem> es = Convert(oc.Items, action);
 
-						if (es != null && !ReferenceEquals(oc.Items, es))
-							newElement = new SqlQuery.OrderByClause(es);
+						IQueryElement parent;
+						_visitedElements.TryGetValue(oc.SqlQuery, out parent);
+
+						if (parent != null || es != null && !ReferenceEquals(oc.Items, es))
+						{
+							newElement = new SqlQuery.OrderByClause(es ?? oc.Items);
+							((SqlQuery.OrderByClause)newElement).SetSqlQuery((SqlQuery)parent);
+						}
 
 						break;
 					}
@@ -612,129 +781,60 @@ namespace BLToolkit.Data.Sql
 				case QueryElementType.SqlQuery:
 					{
 						SqlQuery q = (SqlQuery)element;
-						bool isParent = false;
+						IQueryElement parent = null;
 
-						ConvertFunc func = delegate(IQueryElement e)
+						bool doConvert = q.ParentSql != null && !_visitedElements.TryGetValue(q.ParentSql, out parent);
+
+						if (!doConvert)
 						{
-							isParent = isParent || e != null && e.ElementType == QueryElementType.SqlQuery && ((SqlQuery)e).ParentSql == q;
-							return action(e);
-						};
-
-						SqlQuery.FromClause    fc = (SqlQuery.FromClause)   ConvertInternal(q.From,    func);
-						SqlQuery.SelectClause  sc = (SqlQuery.SelectClause) ConvertInternal(q.Select,  func);
-						SqlQuery.WhereClause   wc = (SqlQuery.WhereClause)  ConvertInternal(q.Where,   func);
-						SqlQuery.GroupByClause gc = (SqlQuery.GroupByClause)ConvertInternal(q.GroupBy, func);
-						SqlQuery.WhereClause   hc = (SqlQuery.WhereClause)  ConvertInternal(q.Having,  func);
-						SqlQuery.OrderByClause oc = (SqlQuery.OrderByClause)ConvertInternal(q.OrderBy, func);
-						List<SqlQuery.Union>   us = q.HasUnion ? Convert(q.Unions, func) : null;
-
-
-						bool bsc = sc == null || ReferenceEquals(sc, q.Select);
-						bool bfc = fc == null || ReferenceEquals(fc, q.From);
-						bool bwc = wc == null || ReferenceEquals(wc, q.Where);
-						bool bgc = gc == null || ReferenceEquals(gc, q.GroupBy);
-						bool bhc = hc == null || ReferenceEquals(hc, q.Having);
-						bool boc = oc == null || ReferenceEquals(oc, q.OrderBy);
-						bool bus = q.HasUnion && (us == null || ReferenceEquals(us, q.Unions));
-
-						if (!bsc || !bfc || !bwc || !bgc || !bhc || !boc || !bus)
-						{
-							SqlQuery nq = new SqlQuery();
-
-							if (isParent)
+							doConvert = null != Find(q, delegate(IQueryElement e)
 							{
-								func = delegate(IQueryElement e)
+								IQueryElement ret = action(e);
+								if (ret != null && !ReferenceEquals(e, ret))
 								{
-									if (e != null && e.ElementType == QueryElementType.SqlQuery)
-									{
-										SqlQuery sql = (SqlQuery)e;
-
-										if (sql.ParentSql == q)
-										{
-											SqlQuery nsql = new SqlQuery();
-											nsql.Set(
-												sql.Select,
-												sql.From,
-												sql.Where,
-												sql.GroupBy,
-												sql.Having,
-												sql.OrderBy,
-												sql.HasUnion ? sql.Unions : null,
-												nq,
-												sql.ParameterDependent,
-												sql.Parameters);
-											return nsql;
-										}
-									}
-
-									return action(e);
-								};
-
-								QueryVisitor visitor = new QueryVisitor();
-
-								sc = (SqlQuery.SelectClause) visitor.ConvertInternal(q.Select,  func);
-								fc = (SqlQuery.FromClause)   visitor.ConvertInternal(q.From,    func);
-								wc = (SqlQuery.WhereClause)  visitor.ConvertInternal(q.Where,   func);
-								gc = (SqlQuery.GroupByClause)visitor.ConvertInternal(q.GroupBy, func);
-								hc = (SqlQuery.WhereClause)  visitor.ConvertInternal(q.Having,  func);
-								oc = (SqlQuery.OrderByClause)visitor.ConvertInternal(q.OrderBy, func);
-								us = q.HasUnion ? Convert(q.Unions, func) : null;
-
-								bsc = sc == null || ReferenceEquals(sc, q.Select);
-								bfc = fc == null || ReferenceEquals(fc, q.From);
-								bwc = wc == null || ReferenceEquals(wc, q.Where);
-								bgc = gc == null || ReferenceEquals(gc, q.GroupBy);
-								bhc = hc == null || ReferenceEquals(hc, q.Having);
-								boc = oc == null || ReferenceEquals(oc, q.OrderBy);
-								bus = q.HasUnion && (us == null || ReferenceEquals(us, q.Unions));
-							}
-
-							sc = sc ?? q.Select;
-							fc = fc ?? q.From;
-							wc = wc ?? q.Where;
-							gc = gc ?? q.GroupBy;
-							hc = hc ?? q.Having;
-							oc = oc ?? q.OrderBy;
-							us = q.HasUnion ? (us ?? q.Unions) : null;
-
-							if (bsc)
-							{
-								List<SqlQuery.Column> cols = sc.Columns.ConvertAll<SqlQuery.Column>(delegate(SqlQuery.Column c)
-								{
-									SqlQuery.Column newCol = new SqlQuery.Column(nq, c.Expression, c._alias);
-									_visitedElements[c] = newCol;
-									return newCol;
-								});
-
-								sc = new SqlQuery.SelectClause (sc.IsDistinct, sc.TakeValue, sc.SkipValue, cols);
-							}
-
-							if (bfc) fc = new SqlQuery.FromClause   (fc.Tables);
-							if (bwc) wc = new SqlQuery.WhereClause  (wc.SearchCondition);
-							if (bgc) gc = new SqlQuery.GroupByClause(gc.Items);
-							if (bhc) hc = new SqlQuery.WhereClause  (hc.SearchCondition);
-							if (boc) oc = new SqlQuery.OrderByClause(oc.Items);
-
-							List<SqlParameter> ps = new List<SqlParameter>(q.Parameters.Count);
-
-							foreach (SqlParameter p in q.Parameters)
-							{
-								IQueryElement e;
-
-								if (_visitedElements.TryGetValue(p, out e))
-								{
-									if (e == null)
-										ps.Add(p);
-									else if (e is SqlParameter)
-										ps.Add((SqlParameter)e);
+									_visitedElements.Add(e, ret);
+									return true;
 								}
-							}
 
-							nq.Set(sc, fc, wc, gc, hc, oc, us, q.ParentSql, q.ParameterDependent, ps);
-							newElement = nq;
+								return false;
+							});
 						}
 
-						break;
+						if (!doConvert)
+							break;
+
+						SqlQuery nq = new SqlQuery();
+
+						_visitedElements.Add(q, nq);
+
+						SqlQuery.FromClause    fc = (SqlQuery.FromClause)   ConvertInternal(q.From,    action) ?? q.From;
+						SqlQuery.SelectClause  sc = (SqlQuery.SelectClause) ConvertInternal(q.Select,  action) ?? q.Select;
+						SqlQuery.WhereClause   wc = (SqlQuery.WhereClause)  ConvertInternal(q.Where,   action) ?? q.Where;
+						SqlQuery.GroupByClause gc = (SqlQuery.GroupByClause)ConvertInternal(q.GroupBy, action) ?? q.GroupBy;
+						SqlQuery.WhereClause   hc = (SqlQuery.WhereClause)  ConvertInternal(q.Having,  action) ?? q.Having;
+						SqlQuery.OrderByClause oc = (SqlQuery.OrderByClause)ConvertInternal(q.OrderBy, action) ?? q.OrderBy;
+						List<SqlQuery.Union>   us = q.HasUnion ? Convert(q.Unions, action) : q.Unions;
+
+						List<SqlParameter> ps = new List<SqlParameter>(q.Parameters.Count);
+
+						foreach (SqlParameter p in q.Parameters)
+						{
+							IQueryElement e;
+
+							if (_visitedElements.TryGetValue(p, out e))
+							{
+								if (e == null)
+									ps.Add(p);
+								else if (e is SqlParameter)
+									ps.Add((SqlParameter)e);
+							}
+						}
+
+						nq.Set(sc, fc, wc, gc, hc, oc, us, (SqlQuery)parent, q.ParameterDependent, ps);
+
+						_visitedElements[q] = action(nq) ?? nq;
+
+						return nq;
 					}
 			}
 

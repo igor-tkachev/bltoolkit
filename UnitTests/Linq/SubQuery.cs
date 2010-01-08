@@ -61,6 +61,8 @@ namespace Data.Linq
 				select (from ch in db.Child where ch.ParentID == p.ParentID && ch.ChildID == ch.ParentID * 10 + 1 select ch.ChildID).FirstOrDefault()));
 		}
 
+		static int _testValue = 3;
+
 		[Test]
 		public void Test5()
 		{
@@ -75,8 +77,8 @@ namespace Data.Linq
 				new 
 				{
 					id,
-					Count  = Child.Where(p => p.ParentID == id).Count(),
-					Count2 = Child.Where(p => p.ParentID == id).Count()
+					Count1 = Child.Where(p => p.ParentID == id).Count(),
+					Count2 = Child.Where(p => p.ParentID == id && p.ParentID == _testValue).Count(),
 				});
 
 			ForEachProvider(db =>
@@ -90,8 +92,8 @@ namespace Data.Linq
 					new
 					{
 						id,
-						Count  = db.Child.Where(p => p.ParentID == id).Count(),
-						Count2 = db.Child.Where(p => p.ParentID == id).Count()
+						Count1 = db.Child.Where(p => p.ParentID == id).Count(),
+						Count2 = db.Child.Where(p => p.ParentID == id && p.ParentID == _testValue).Count(),
 					});
 
 				AreEqual(expected, result);
