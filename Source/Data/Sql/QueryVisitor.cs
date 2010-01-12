@@ -790,6 +790,7 @@ namespace BLToolkit.Data.Sql
 							doConvert = null != Find(q, delegate(IQueryElement e)
 							{
 								IQueryElement ret = action(e);
+
 								if (ret != null && !ReferenceEquals(e, ret))
 								{
 									_visitedElements.Add(e, ret);

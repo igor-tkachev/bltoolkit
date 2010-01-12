@@ -304,6 +304,7 @@ namespace BLToolkit.Data.Linq
 						case "Count"           :
 						case "Min"             :
 						case "Max"             :
+						case "Sum"             :
 						case "Average"         : sequence = ParseSequence(seq); ParseAggregate(pi, null, sequence[0]); break;
 						case "OfType"          : sequence = ParseSequence(seq); select = ParseOfType(pi, sequence);    break;
 						case "Any"             : sequence = ParseAny(seq, null);                                       break;
@@ -337,6 +338,7 @@ namespace BLToolkit.Data.Linq
 						case "Count"             : sequence = ParseSequence(seq); select   = ParseWhere     (l, sequence[0]); ParseAggregate(pi, null, sequence[0]); break;
 						case "Min"               :
 						case "Max"               :
+						case "Sum"               :
 						case "Average"           : sequence = ParseSequence(seq); ParseAggregate(pi, l, sequence[0]); break;
 						case "Any"               : sequence = ParseAny(seq, l);                                       break;
 						default                  : return false;
@@ -2020,7 +2022,7 @@ namespace BLToolkit.Data.Linq
 			ParsingTracer.WriteLine(query);
 			ParsingTracer.IncIndentLevel();
 
-			_parentQueries.Insert(0, new ParentQuery { Parent = query, Parameter = query.Lambda.Parameters[0]});
+			_parentQueries.Insert(0, new ParentQuery { Parent = query.BaseQuery, Parameter = query.Lambda.Parameters[0]});
 			var sql = CurrentSql;
 
 			CurrentSql = new SqlQuery { ParentSql = sql };

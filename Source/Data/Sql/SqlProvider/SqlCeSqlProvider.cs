@@ -144,6 +144,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 									case "Min"     :
 									case "Max"     :
 									case "Count"   :
+									case "Sum"     :
 									case "Average" : return true;
 								}
 							return false;

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-
+using BLToolkit.Data.DataProvider;
 using NUnit.Framework;
 
 namespace Data.Linq
@@ -98,6 +98,80 @@ namespace Data.Linq
 
 				AreEqual(expected, result);
 			});
+		}
+
+		[Test]
+		public void Test6()
+		{
+			var  id = 2;
+			bool b  = false;
+
+			var q = Child.Where(c => c.ParentID == id).OrderBy(c => c.ChildID);
+			q = b
+				? q.OrderBy(m => m.ParentID)
+				: q.OrderByDescending(m => m.ParentID);
+
+			var gc = GrandChild;
+			var expected = q.Select(c => new
+			{
+				ID = c.ChildID,
+				c.ParentID,
+				Sum = gc.Where(g => g.ChildID == c.ChildID && g.GrandChildID > 0).Sum(g => (int)g.ChildID * g.GrandChildID),
+				Count1 = gc.Count(g => g.ChildID == c.ChildID && g.GrandChildID > 0),
+                    //AgreesImpl
+                        //rates
+                        //  .Count(r => r.MessageID == m.ID && r.RateType == MessageRates.Agree),
+                    //DisagreesImpl
+                        //rates
+                        //  .Count(r => r.MessageID == m.ID && r.RateType == MessageRates.DisAgree),
+                    //ModeratorialsImpl
+                        //db
+                        //  .Moderatorials()
+                        //  .Count(mod => mod.MessageID == m.ID && (m.LastModerated != null || mod.Create > m.LastModerated)),
+			});
+
+			ForEachProvider(db =>
+			{
+				var r = db.Child.Where(c => c.ParentID == id).OrderBy(c => c.ChildID);
+				r = b
+					? r.OrderBy(m => m.ParentID)
+					: r.OrderByDescending(m => m.ParentID);
+
+				var rgc = db.GrandChild;
+				var result = r.Select(c => new
+				{
+					ID = c.ChildID,
+					c.ParentID,
+					Sum = rgc.Where(g => g.ChildID == c.ChildID && g.GrandChildID > 0).Sum(g => (int)g.ChildID * g.GrandChildID),
+					Count1 = rgc.Count(g => g.ChildID == c.ChildID && g.GrandChildID > 0),
+						//AgreesImpl
+							//rates
+							//  .Count(r => r.MessageID == m.ID && r.RateType == MessageRates.Agree),
+						//DisagreesImpl
+							//rates
+							//  .Count(r => r.MessageID == m.ID && r.RateType == MessageRates.DisAgree),
+						//ModeratorialsImpl
+							//db
+							//  .Moderatorials()
+							//  .Count(mod => mod.MessageID == m.ID && (m.LastModerated != null || mod.Create > m.LastModerated)),
+				});
+
+				AreEqual(expected, result);
+			});
+		}
+
+		[Test]
+		public void Test7()
+		{
+			ForEachProvider(db => AreEqual(
+				from c in Child select new
+				{
+					Count = GrandChild.Where(g => g.ChildID == c.ChildID).Count(),
+				},
+				from c in db.Child select new
+				{
+					Count = db.GrandChild.Where(g => g.ChildID == c.ChildID).Count(),
+				}));
 		}
 	}
 }

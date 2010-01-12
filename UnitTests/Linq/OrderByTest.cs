@@ -222,5 +222,17 @@ namespace Data.Linq
 				Assert.IsTrue(result.ToList().SequenceEqual(expected));
 			});
 		}
+
+		[Test]
+		public void OrderAscDesc()
+		{
+			var expected = Parent.OrderBy(p => p.ParentID).OrderByDescending(p => p.ParentID);
+
+			ForEachProvider(db =>
+			{
+				var result = db.Parent.OrderBy(p => p.ParentID).OrderByDescending(p => p.ParentID);
+				Assert.IsTrue(result.ToList().SequenceEqual(expected));
+			});
+		}
 	}
 }
