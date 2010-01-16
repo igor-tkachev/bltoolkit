@@ -183,7 +183,10 @@ namespace BLToolkit.Reflection.MetadataProvider
 		public virtual string GetTableName(Type type, ExtensionList extensions, out bool isSet)
 		{
 			isSet = false;
-			return type.Name;
+			return
+				type.IsInterface && type.Name.StartsWith("I")
+					? type.Name.Substring(1)
+					: type.Name;
 		}
 
 		#endregion

@@ -2,7 +2,7 @@ using System;
 
 namespace BLToolkit.DataAccess
 {
-	[AttributeUsage(AttributeTargets.Class)]
+	[AttributeUsage(AttributeTargets.Class | AttributeTargets.Interface)]
 	public class TableNameAttribute : Attribute
 	{
 		public TableNameAttribute()
