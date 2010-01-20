@@ -4,6 +4,7 @@ using BLToolkit.Data.DataProvider;
 using NUnit.Framework;
 
 using BLToolkit.Data.Linq;
+using Data.Linq.Model;
 
 namespace Data.Linq
 {

@@ -251,7 +251,7 @@ namespace BLToolkit.Data.Linq
 				return null;
 			}
 
-			public override QueryField GetField(Expression expr)
+			public override QueryField GetField(Expression expr, int currentMember)
 			{
 				if (expr.NodeType == ExpressionType.MemberAccess)
 				{
@@ -265,7 +265,7 @@ namespace BLToolkit.Data.Linq
 
 							if (list != null && list.Count > 1)
 							{
-								var field = GetField(list, 0);
+								var field = GetField(list, currentMember);
 								if (field != null)
 									return field;
 							}
@@ -297,7 +297,7 @@ namespace BLToolkit.Data.Linq
 
 									var tbl = GetAssociation(ma.Member);
 									if (tbl != null)
-										return tbl.GetField(expr);
+										return tbl.GetField(expr, currentMember + 1);
 								}
 
 								e = ma.Expression;
@@ -441,7 +441,7 @@ namespace BLToolkit.Data.Linq
 				return null;
 			}
 
-			public override QueryField GetField(Expression expr)
+			public override QueryField GetField(Expression expr, int currentMember)
 			{
 				switch (expr.NodeType)
 				{
@@ -470,7 +470,7 @@ namespace BLToolkit.Data.Linq
 							if (list == null)
 								return null;
 
-							var field = GetField(list, 0);
+							var field = GetField(list, currentMember);
 
 							if (field != null)
 								return field;
@@ -565,7 +565,7 @@ namespace BLToolkit.Data.Linq
 				return BaseQuery.GetKeyFields().Select(f => _columns[f]).ToList();
 			}
 
-			public override QueryField GetField(Expression expr)
+			public override QueryField GetField(Expression expr, int currentMember)
 			{
 				if (expr.NodeType == ExpressionType.Parameter)
 				{
@@ -576,7 +576,7 @@ namespace BLToolkit.Data.Linq
 						return BaseQuery;
 				}
 
-				return EnsureField(BaseQuery.GetField(expr));
+				return EnsureField(BaseQuery.GetField(expr, currentMember));
 			}
 
 			protected override QueryField GetField(List<MemberInfo> members, int currentMember)
@@ -705,7 +705,7 @@ namespace BLToolkit.Data.Linq
 				return null;
 			}
 
-			public override QueryField GetField(Expression expr)
+			public override QueryField GetField(Expression expr, int currentMember)
 			{
 				if (Lambda.Body.Expr is MemberExpression && expr is MemberExpression)
 					if (((MemberExpression)expr).Member == ((MemberExpression)Lambda.Body.Expr).Member)
@@ -809,12 +809,12 @@ namespace BLToolkit.Data.Linq
 			public SubQuery    QuerySource;
 			public QuerySource SourceColumn;
 
-			public override QueryField GetField(Expression expr)
+			public override QueryField GetField(Expression expr, int currentMember)
 			{
 				if (expr == Lambda.Body.Expr)
 					return null;
 
-				var field = SourceColumn.GetField(expr);
+				var field = SourceColumn.GetField(expr, currentMember);
 				return field == null ? null : QuerySource.EnsureField(field);
 			}
 
@@ -1013,7 +1013,7 @@ namespace BLToolkit.Data.Linq
 		public virtual List<QueryField>  Fields     { get { return _fields; } }
 		public virtual Type              ObjectType { get { return Lambda.Body.Expr.Type; }}
 
-		public abstract QueryField       GetField    (Expression expr);
+		public abstract QueryField       GetField    (Expression expr, int currentMember);
 		public abstract QueryField       GetField    (MemberInfo mi);
 		public abstract List<QueryField> GetKeyFields();
 
@@ -1073,7 +1073,7 @@ namespace BLToolkit.Data.Linq
 
 				foreach (var pq in Sources)
 				{
-					var field = pq.GetField(expr);
+					var field = pq.GetField(expr, 0);
 					if (field != null)
 						return field;
 				}

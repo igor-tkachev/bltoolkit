@@ -5,10 +5,10 @@ using System.Data.SqlTypes;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
-using BLToolkit.DataAccess;
 
 namespace BLToolkit.Mapping
 {
+	using DataAccess;
 	using Reflection;
 	using Reflection.Extension;
 	using Reflection.MetadataProvider;

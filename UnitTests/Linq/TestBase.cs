@@ -221,6 +221,7 @@ namespace Data.Linq
 						{
 							ch.Parent        = Parent. Single(p => p.ParentID == ch.ParentID);
 							ch.Parent1       = Parent1.Single(p => p.ParentID == ch.ParentID);
+							ch.ParentID2     = new Parent3 { ParentID2 = ch.Parent.ParentID, Value1 = ch.Parent.Value1 };
 							ch.GrandChildren = GrandChild.Where(c => c.ParentID == ch.ParentID && c.ChildID == ch.ChildID).ToList();
 						}
 					}

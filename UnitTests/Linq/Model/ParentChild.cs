@@ -57,6 +57,9 @@ namespace Data.Linq.Model
 		[Association(ThisKey = "ParentID", OtherKey = "ParentID", CanBeNull = false)]
 		public Parent1 Parent1;
 
+		[Association(ThisKey = "ParentID", OtherKey = "ParentID2", CanBeNull = false)]
+		public Parent3 ParentID2;
+
 		[Association(ThisKey = "ParentID, ChildID", OtherKey = "ParentID, ChildID")]
 		public List<GrandChild> GrandChildren;
 
@@ -116,6 +119,37 @@ namespace Data.Linq.Model
 
 				return result;
 			}
+		}
+	}
+
+	[TableName("Parent")]
+	public class Parent3 : IEquatable<Parent>, IComparable
+	{
+		[MapField("ParentID")]
+		public int  ParentID2 { get; set; }
+		public int? Value1    { get; set; }
+
+		public override bool Equals(object obj)
+		{
+			if (obj.GetType() != typeof (Parent)) return false;
+			return Equals((Parent)obj);
+		}
+
+		public bool Equals(Parent other)
+		{
+			if (ReferenceEquals(null, other)) return false;
+			if (ReferenceEquals(this, other)) return true;
+			return other.ParentID == ParentID2 && other.Value1.Equals(Value1);
+		}
+
+		public override int GetHashCode()
+		{
+			unchecked { return (ParentID2 * 397) ^ (Value1 ?? 0); }
+		}
+
+		public int CompareTo(object obj)
+		{
+			return ParentID2 - ((Parent)obj).ParentID;
 		}
 	}
 

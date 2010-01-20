@@ -4397,7 +4397,7 @@ namespace BLToolkit.Data.Linq
 		{
 			foreach (var query in queries)
 			{
-				var field = query.GetField(expr);
+				var field = query.GetField(expr, 0);
 
 				if (field != null)
 					return field;
@@ -4405,7 +4405,7 @@ namespace BLToolkit.Data.Linq
 
 			foreach (var query in _parentQueries)
 			{
-				var field = query.Parent.GetField(expr);
+				var field = query.Parent.GetField(expr, 0);
 
 				if (field != null)
 					return field;
@@ -4451,7 +4451,7 @@ namespace BLToolkit.Data.Linq
 
 			foreach (var query in queries)
 			{
-				var field = query.GetField(expr);
+				var field = query.GetField(expr, 0);
 
 				if (field != null)
 				{
@@ -4474,7 +4474,7 @@ namespace BLToolkit.Data.Linq
 
 			foreach (var query in _parentQueries)
 			{
-				var field = query.Parent.GetField(expr) as QuerySource;
+				var field = query.Parent.GetField(expr, 0) as QuerySource;
 
 				if (field != null)
 					return field;
