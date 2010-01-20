@@ -115,20 +115,10 @@ namespace Data.Linq
 			var gc = GrandChild;
 			var expected = q.Select(c => new
 			{
-				ID = c.ChildID,
+				ID     = c.ChildID,
 				c.ParentID,
-				Sum = gc.Where(g => g.ChildID == c.ChildID && g.GrandChildID > 0).Sum(g => (int)g.ChildID * g.GrandChildID),
-				Count1 = gc.Count(g => g.ChildID == c.ChildID && g.GrandChildID > 0),
-                    //AgreesImpl
-                        //rates
-                        //  .Count(r => r.MessageID == m.ID && r.RateType == MessageRates.Agree),
-                    //DisagreesImpl
-                        //rates
-                        //  .Count(r => r.MessageID == m.ID && r.RateType == MessageRates.DisAgree),
-                    //ModeratorialsImpl
-                        //db
-                        //  .Moderatorials()
-                        //  .Count(mod => mod.MessageID == m.ID && (m.LastModerated != null || mod.Create > m.LastModerated)),
+				Sum    = gc.Where(g => g.ChildID == c.ChildID && g.GrandChildID > 0).Sum(g => (int)g.ChildID * g.GrandChildID),
+				Count1 = gc.Count(g => g.ChildID == c.ChildID && g.GrandChildID > 0)
 			});
 
 			ForEachProvider(db =>
@@ -141,20 +131,10 @@ namespace Data.Linq
 				var rgc = db.GrandChild;
 				var result = r.Select(c => new
 				{
-					ID = c.ChildID,
+					ID     = c.ChildID,
 					c.ParentID,
-					Sum = rgc.Where(g => g.ChildID == c.ChildID && g.GrandChildID > 0).Sum(g => (int)g.ChildID * g.GrandChildID),
+					Sum    = rgc.Where(g => g.ChildID == c.ChildID && g.GrandChildID > 0).Sum(g => (int)g.ChildID * g.GrandChildID),
 					Count1 = rgc.Count(g => g.ChildID == c.ChildID && g.GrandChildID > 0),
-						//AgreesImpl
-							//rates
-							//  .Count(r => r.MessageID == m.ID && r.RateType == MessageRates.Agree),
-						//DisagreesImpl
-							//rates
-							//  .Count(r => r.MessageID == m.ID && r.RateType == MessageRates.DisAgree),
-						//ModeratorialsImpl
-							//db
-							//  .Moderatorials()
-							//  .Count(mod => mod.MessageID == m.ID && (m.LastModerated != null || mod.Create > m.LastModerated)),
 				});
 
 				AreEqual(expected, result);
@@ -197,6 +177,18 @@ namespace Data.Linq
 					select c
 				where p == c.Parent
 				select new { p.ParentID, c.ChildID }));
+		}
+
+		[Test]
+		public void TestCount()
+		{
+			ForEachProvider(db => AreEqual(
+				from p in Parent
+				where p.ParentID != 5
+				select new { p.ParentID, Count = p.Children.Where(c => c.ParentID == p.ParentID && c.ChildID != 0m).Count() },
+				from p in db.Parent
+				where p.ParentID != 5
+				select new { p.ParentID, Count = p.Children.Where(c => c.ParentID == p.ParentID && c.ChildID != 0m).Count() }));
 		}
 	}
 }

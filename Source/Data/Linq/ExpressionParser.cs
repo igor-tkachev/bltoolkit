@@ -2056,7 +2056,12 @@ namespace BLToolkit.Data.Linq
 
 			CurrentSql = new SqlQuery { ParentSql = sql };
 
+			var prev = _isSubQueryParsing;
+			_isSubQueryParsing = true;
+
 			var seq = ParseSequence(expr)[0];
+
+			_isSubQueryParsing = prev;
 
 			if (seq.Fields.Count == 1 && CurrentSql.Select.Columns.Count == 0)
 				seq.Fields[0].Select(this);
@@ -3135,7 +3140,7 @@ namespace BLToolkit.Data.Linq
 			ParsingTracer.WriteLine(queries);
 			ParsingTracer.IncIndentLevel();
 
-			var parentQueries = queries.Select(q => new ParentQuery { Parent = q, Parameter = q.Lambda.Parameters.FirstOrDefault()}).ToList();
+			var parentQueries = queries.Select(q => new ParentQuery { Parent = q, Parameter = q.Lambda.Parameters.FirstOrDefault() }).ToList();
 
 			_parentQueries.InsertRange(0, parentQueries);
 			var sql = CurrentSql;
@@ -3143,7 +3148,6 @@ namespace BLToolkit.Data.Linq
 			CurrentSql = new SqlQuery { ParentSql = sql };
 
 			var prev = _isSubQueryParsing;
-
 			_isSubQueryParsing = true;
 
 			var seq = ParseSequence(expr)[0];
@@ -3188,7 +3192,12 @@ namespace BLToolkit.Data.Linq
 							if (arg.NodeType == ExpressionType.Call)
 								return IsSubQuery(pi.Create(arg, pi.Index(call.Arguments, MethodCall.Arguments, 0)), queries);
 
-							if (IsSubQuerySource(arg, queries))
+							var qs = queries;
+
+							if (queries.Length > 0 && queries[0].GetType() == typeof(QuerySource.Expr))
+								qs = new[] { queries[0].BaseQuery }.Concat(queries).ToArray();
+
+							if (IsSubQuerySource(arg, qs))
 								return true;
 						}
 
