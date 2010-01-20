@@ -260,7 +260,18 @@ namespace BLToolkit.Data.Linq
 					if (ma.Expression != null)
 					{
 						if (ma.Expression.Type == ObjectType)
+						{
+							var list = GetMemberList(expr);
+
+							if (list != null && list.Count > 1)
+							{
+								var field = GetField(list, 0);
+								if (field != null)
+									return field;
+							}
+
 							return GetField(ma.Member);
+						}
 
 						// Check for associations and 'InnerObject.Field' case.
 						//
@@ -455,28 +466,9 @@ namespace BLToolkit.Data.Linq
 									break;
 							}
 
-							var list = new List<MemberInfo>();
-
-							while (expr != null)
-							{
-								switch (expr.NodeType)
-								{
-									case ExpressionType.MemberAccess:
-										ma = (MemberExpression)expr;
-
-										list.Insert(0, ma.Member);
-
-										expr = ma.Expression;
-										break;
-
-									case ExpressionType.Parameter:
-										expr = null;
-										break;
-
-									default:
-										return null;
-								}
-							}
+							var list  = GetMemberList(expr);
+							if (list == null)
+								return null;
 
 							var field = GetField(list, 0);
 
@@ -539,20 +531,22 @@ namespace BLToolkit.Data.Linq
 			{
 			}
 
-			public   SqlQuery                              SubSql;
-			public   List<QuerySource>                     Unions = new List<QuerySource>();
-			readonly Dictionary<QueryField,SubQueryColumn> _columns = new Dictionary<QueryField,SubQueryColumn>();
+			public   SqlQuery                          SubSql;
+			public   List<QuerySource>                 Unions   = new List<QuerySource>();
+			readonly Dictionary<QueryField,QueryField> _columns = new Dictionary<QueryField,QueryField>();
 
 			public override QueryField EnsureField(QueryField field)
 			{
 				if (field == null)
 					return null;
 
-				SubQueryColumn col;
+				QueryField col;
 
 				if (!_columns.TryGetValue(field, out col))
 				{
-					col = new SubQueryColumn(this, field);
+					col = field is QuerySource ?
+						(QueryField)new SubQuerySourceColumn(this, (QuerySource)field) :
+						new SubQueryColumn(this, field);
 
 					Fields.Add(col);
 					_columns.Add(field, col);
@@ -568,7 +562,7 @@ namespace BLToolkit.Data.Linq
 
 			public override List<QueryField> GetKeyFields()
 			{
-				return BaseQuery.GetKeyFields().Select(f => (QueryField)_columns[f]).ToList();
+				return BaseQuery.GetKeyFields().Select(f => _columns[f]).ToList();
 			}
 
 			public override QueryField GetField(Expression expr)
@@ -799,6 +793,146 @@ namespace BLToolkit.Data.Linq
 
 		#endregion
 
+		#region SubQuerySourceColumn
+
+		public class SubQuerySourceColumn : QuerySource
+		{
+			public SubQuerySourceColumn(SubQuery querySource, QuerySource sourceColumn)
+				: base(sourceColumn.SqlQuery, sourceColumn.Lambda, sourceColumn.Sources)
+			{
+				QuerySource  = querySource;
+				SourceColumn = sourceColumn;
+
+				ParsingTracer.WriteLine(sourceColumn);
+			}
+
+			public SubQuery    QuerySource;
+			public QuerySource SourceColumn;
+
+			public override QueryField GetField(Expression expr)
+			{
+				if (expr == Lambda.Body.Expr)
+					return null;
+
+				var field = SourceColumn.GetField(expr);
+				return field == null ? null : QuerySource.EnsureField(field);
+			}
+
+			public override QueryField GetField(MemberInfo mi)
+			{
+				var field = SourceColumn.GetField(mi);
+				return field == null ? null : QuerySource.EnsureField(field);
+			}
+
+			public override List<QueryField> GetKeyFields()
+			{
+				throw new NotImplementedException();
+			}
+
+			public override MemberInfo GetMember(QueryField field)
+			{
+				throw new NotImplementedException();
+			}
+
+			public override FieldIndex[] Select<T>(ExpressionParser<T> parser)
+			{
+				if (_indexes == null)
+				{
+					var idx = SourceColumn.Select(parser);
+
+					var list = new List<FieldIndex>(idx.Length);
+
+					for (var i = 0; i < idx.Length; i++)
+						list.AddRange(QuerySource.EnsureField(idx[i].Field).Select(parser));
+
+					_indexes = list.ToArray();
+				}
+
+				return _indexes;
+			}
+
+			/*
+			void SetSubIndex<T>(ExpressionParser<T> parser)
+			{
+				if (_subIndex == null)
+				{
+					_subIndex = SourceColumn.Select(parser);
+
+					if (QuerySource.SubSql.HasUnion)
+					{
+						var sub = QuerySource.BaseQuery;
+						var idx = sub.Fields.IndexOf(SourceColumn);
+
+						MemberInfo mi = sub.GetMember(SourceColumn);
+
+						foreach (var union in QuerySource.Unions)
+						{
+							if (mi != null)
+							{
+								var f = union.GetField(mi);
+
+								if (f != null)
+								{
+									f.Select(parser);
+									continue;
+								}
+
+								if (union is QuerySource.Expr)
+								{
+									union.SqlQuery.Select.Add(new SqlValue(null));
+									continue;
+								}
+							}
+
+							union.Fields[idx].Select(parser);
+						}
+					}
+				}
+			}
+			*/
+
+			public override ISqlExpression[] GetExpressions<T>(ExpressionParser<T> parser)
+			{
+				throw new NotImplementedException();
+				/*
+				SetSubIndex(parser);
+
+				if (_subIndex.Length != 1)
+					throw new LinqException("Cannot convert '{0}' to SQL.", SourceColumn.GetExpressions(parser)[0]);
+
+				return new [] { QuerySource.SubSql.Select.Columns[_subIndex[0].Index] };
+				*/
+			}
+
+			public override bool CanBeNull()
+			{
+				return SourceColumn.CanBeNull();
+			}
+
+			SubQuerySourceColumn() {}
+
+			protected override QuerySource CloneInstance(Dictionary<ICloneableElement, ICloneableElement> objectTree, Predicate<ICloneableElement> doClone)
+			{
+				return new SubQuerySourceColumn
+				{
+					QuerySource  = (SubQuery)   QuerySource. Clone(objectTree, doClone),
+					SourceColumn = (QuerySource)SourceColumn.Clone(objectTree, doClone)
+				};
+			}
+
+#if OVERRIDETOSTRING
+
+			public override string ToString()
+			{
+				return SourceColumn.ToString();
+			}
+
+#endif
+		}
+
+		#endregion
+
+
 		#region base
 
 		protected QuerySource(SqlQuery sqlQuery, LambdaInfo lambda, params QuerySource[] baseQueries)
@@ -822,6 +956,8 @@ namespace BLToolkit.Data.Linq
 #endif
 		}
 
+#if OVERRIDETOSTRING
+
 		public override string ToString()
 		{
 			var str = SqlQuery.ToString().Replace('\t', ' ').Replace('\n', ' ').Replace("\r", "");
@@ -832,6 +968,8 @@ namespace BLToolkit.Data.Linq
 
 			return str;
 		}
+
+#endif
 
 		protected QuerySource()
 		{
@@ -956,6 +1094,30 @@ namespace BLToolkit.Data.Linq
 			return null;
 		}
 
+		protected List<MemberInfo> GetMemberList(Expression expr)
+		{
+			var list = new List<MemberInfo>();
+
+			while (expr != null)
+			{
+				switch (expr.NodeType)
+				{
+					case ExpressionType.MemberAccess:
+						var ma = (MemberExpression)expr;
+
+						list.Insert(0, ma.Member);
+
+						expr = ma.Expression;
+						break;
+
+					case ExpressionType.Parameter : return list;
+					default                       : return null;
+				}
+			}
+
+			return list;
+		}
+
 		public abstract MemberInfo GetMember(QueryField field);
 
 		FieldIndex[] _indexes;
@@ -1011,17 +1173,19 @@ namespace BLToolkit.Data.Linq
 		}
 
 		public void Match(
-			Action<Table>    tableAction,
-			Action<Expr>     exprAction,
-			Action<SubQuery> subQueryAction,
-			Action<Scalar>   scalarAction,
-			Action<GroupBy>  groupByAction)
+			Action<Table>                tableAction,
+			Action<Expr>                 exprAction,
+			Action<SubQuery>             subQueryAction,
+			Action<Scalar>               scalarAction,
+			Action<GroupBy>              groupByAction,
+			Action<SubQuerySourceColumn> columnAction)
 		{
-			if      (this is Table)    tableAction   (this as Table);
-			else if (this is GroupBy)  groupByAction (this as GroupBy);
-			else if (this is Expr)     exprAction    (this as Expr);
-			else if (this is SubQuery) subQueryAction(this as SubQuery);
-			else if (this is Scalar)   scalarAction  (this as Scalar);
+			if      (this is Table)                tableAction   (this as Table);
+			else if (this is GroupBy)              groupByAction (this as GroupBy);
+			else if (this is Expr)                 exprAction    (this as Expr);
+			else if (this is SubQuery)             subQueryAction(this as SubQuery);
+			else if (this is Scalar)               scalarAction  (this as Scalar);
+			else if (this is SubQuerySourceColumn) columnAction  (this as SubQuerySourceColumn);
 			else
 				throw new InvalidOperationException();
 		}

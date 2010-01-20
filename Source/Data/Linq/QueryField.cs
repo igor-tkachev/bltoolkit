@@ -67,10 +67,14 @@ namespace BLToolkit.Data.Linq
 				return clone;
 			}
 
+#if OVERRIDETOSTRING
+
 			public override string ToString()
 			{
 				return Field.ToString();
 			}
+
+#endif
 		}
 
 		#endregion
@@ -190,10 +194,14 @@ namespace BLToolkit.Data.Linq
 				return clone;
 			}
 
+#if OVERRIDETOSTRING
+
 			public override string ToString()
 			{
 				return _sqlExpression != null ? _sqlExpression.ToString() : Expr.ToString();
 			}
+
+#endif
 		}
 
 		#endregion
@@ -310,10 +318,14 @@ namespace BLToolkit.Data.Linq
 				return clone;
 			}
 
+#if OVERRIDETOSTRING
+
 			public override string ToString()
 			{
 				return Field.ToString();
 			}
+
+#endif
 		}
 
 		#endregion
@@ -372,10 +384,14 @@ namespace BLToolkit.Data.Linq
 				return clone;
 			}
 
+#if OVERRIDETOSTRING
+
 			public override string ToString()
 			{
 				return GroupBySource.ToString();
 			}
+
+#endif
 		}
 
 		#endregion

@@ -170,6 +170,14 @@ namespace Data.Linq
 		}
 
 		[Test]
+		public void LeftJoin2()
+		{
+			ForEachProvider(db => AreEqual(
+				from p in    Parent from c in p.Children.DefaultIfEmpty() where p.ParentID >= 4 select new { c, p },
+				from p in db.Parent from c in p.Children.DefaultIfEmpty() where p.ParentID >= 4 select new { c, p }));
+		}
+
+		[Test]
 		public void GroupBy1()
 		{
 			var expected = from ch in Child group ch by ch.Parent into g select g.Key;
@@ -193,43 +201,28 @@ namespace Data.Linq
 		[Test]
 		public void EqualsNull1()
 		{
-			var expected =
-				from   employee in Employee
-				where  employee.ReportsToEmployee != null
-				select employee.EmployeeID;
-
-			using (var db = new NorthwindDB()) AreEqual(expected, 
-				from   employee in db.Employee
-				where  employee.ReportsToEmployee != null
-				select employee.EmployeeID);
+			using (var db = new NorthwindDB())
+				AreEqual(
+					from employee in    Employee where employee.ReportsToEmployee != null select employee.EmployeeID,
+					from employee in db.Employee where employee.ReportsToEmployee != null select employee.EmployeeID);
 		}
 
 		[Test]
 		public void EqualsNull2()
 		{
-			var expected =
-				from   employee in Employee
-				where  employee.ReportsToEmployee != null
-				select employee;
-
-			using (var db = new NorthwindDB()) AreEqual(expected, 
-				from   employee in db.Employee
-				where  employee.ReportsToEmployee != null
-				select employee);
+			using (var db = new NorthwindDB())
+				AreEqual(
+					from employee in    Employee where employee.ReportsToEmployee != null select employee, 
+					from employee in db.Employee where employee.ReportsToEmployee != null select employee);
 		}
 
 		[Test]
 		public void EqualsNull3()
 		{
-			var expected =
-				from employee in Employee
-				where employee.ReportsToEmployee != null
-				select new { employee.ReportsToEmployee, employee };
-
-			using (var db = new NorthwindDB()) AreEqual(expected, 
-				from   employee in db.Employee
-				where  employee.ReportsToEmployee != null
-				select new { employee.ReportsToEmployee, employee });
+			using (var db = new NorthwindDB())
+				AreEqual(
+					from employee in    Employee where employee.ReportsToEmployee != null select new { employee.ReportsToEmployee, employee },
+					from employee in db.Employee where employee.ReportsToEmployee != null select new { employee.ReportsToEmployee, employee });
 		}
 	}
 }

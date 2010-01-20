@@ -750,9 +750,8 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 			if (predicate.Escape != null)
 			{
-				sb.Append(" ESCAPE '");
-				sb.Append(predicate.Escape);
-				sb.Append("'");
+				sb.Append(" ESCAPE ");
+				BuildExpression(sb, predicate.Escape);
 			}
 		}
 

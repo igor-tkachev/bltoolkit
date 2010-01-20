@@ -40,10 +40,14 @@ namespace BLToolkit.Data.Sql
 
 		#region Overrides
 
+#if OVERRIDETOSTRING
+
 		public override string ToString()
 		{
 			return ((IQueryElement)this).ToString(new StringBuilder(), new Dictionary<IQueryElement,IQueryElement>()).ToString();
 		}
+
+#endif
 
 		#endregion
 

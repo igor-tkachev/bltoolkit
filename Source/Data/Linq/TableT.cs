@@ -99,12 +99,16 @@ namespace BLToolkit.Data.Linq
 
 		#region Overrides
 
+#if OVERRIDETOSTRING
+
 		public override string ToString()
 		{
 			return Expression.NodeType == ExpressionType.Constant && ((ConstantExpression)Expression).Value == this?
 				"Table(" + typeof(T).Name + ")":
 				Expression.ToString();
 		}
+
+#endif
 
 		#endregion
 

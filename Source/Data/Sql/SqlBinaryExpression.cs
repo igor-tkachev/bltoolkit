@@ -36,10 +36,14 @@ namespace BLToolkit.Data.Sql
 
 		public string SqlText { get { return ToString(); } }
 
+#if OVERRIDETOSTRING
+
 		public override string ToString()
 		{
 			return ((IQueryElement)this).ToString(new StringBuilder(), new Dictionary<IQueryElement,IQueryElement>()).ToString();
 		}
+
+#endif
 
 		#endregion
 

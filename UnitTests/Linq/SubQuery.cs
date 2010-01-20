@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using BLToolkit.Data.DataProvider;
+using Data.Linq.Model;
 using NUnit.Framework;
 
 namespace Data.Linq
@@ -172,6 +173,30 @@ namespace Data.Linq
 				{
 					Count = db.GrandChild.Where(g => g.ChildID == c.ChildID).Count(),
 				}));
+		}
+
+		[Test]
+		public void ObjectCompare()
+		{
+			var expected =
+				from p in Parent
+				from c in
+					from c in
+						from c in Child select new Child { ParentID = c.ParentID, ChildID = c.ChildID + 1, Parent = c.Parent }
+					where c.ChildID > 0
+					select c
+				where p == c.Parent
+				select new { p.ParentID, c.ChildID };
+
+			ForEachProvider(new[] { ProviderName.Access }, db => AreEqual(expected,
+				from p in db.Parent
+				from c in
+					from c in
+						from c in db.Child select new Child { ParentID = c.ParentID, ChildID = c.ChildID + 1, Parent = c.Parent }
+					where c.ChildID > 0
+					select c
+				where p == c.Parent
+				select new { p.ParentID, c.ChildID }));
 		}
 	}
 }

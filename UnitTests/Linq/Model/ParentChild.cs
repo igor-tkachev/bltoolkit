@@ -8,6 +8,12 @@ namespace Data.Linq.Model
 {
 	#region Parent/Child/GrandChild
 
+	public interface IParent
+	{
+		int  ParentID { get; }
+		int? Value1   { get; }
+	}
+
 	public class Parent : IEquatable<Parent>, IComparable
 	{
 		public int  ParentID;

@@ -144,10 +144,14 @@ namespace BLToolkit.Data.Sql
 				return _alias == other._alias && _expression.Equals(other._expression);
 			}
 
+#if OVERRIDETOSTRING
+
 			public override string ToString()
 			{
 				return ((IQueryElement)this).ToString(new StringBuilder(), new Dictionary<IQueryElement,IQueryElement>()).ToString();
 			}
+
+#endif
 
 			#region ISqlExpression Members
 
@@ -378,10 +382,14 @@ namespace BLToolkit.Data.Sql
 				return n;
 			}
 
+#if OVERRIDETOSTRING
+
 			public override string ToString()
 			{
 				return ((IQueryElement)this).ToString(new StringBuilder(), new Dictionary<IQueryElement,IQueryElement>()).ToString();
 			}
+
+#endif
 
 			#region ISqlExpressionWalkable Members
 
@@ -549,10 +557,14 @@ namespace BLToolkit.Data.Sql
 				Table.ForEach(action);
 			}
 
+#if OVERRIDETOSTRING
+
 			public override string ToString()
 			{
 				return ((IQueryElement)this).ToString(new StringBuilder(), new Dictionary<IQueryElement,IQueryElement>()).ToString();
 			}
+
+#endif
 
 			#region ISqlExpressionWalkable Members
 
@@ -1095,10 +1107,14 @@ namespace BLToolkit.Data.Sql
 
 			#region Overrides
 
+#if OVERRIDETOSTRING
+
 			public override string ToString()
 			{
 				return ((IQueryElement)this).ToString(new StringBuilder(), new Dictionary<IQueryElement,IQueryElement>()).ToString();
 			}
+
+#endif
 
 			#endregion
 
@@ -1210,10 +1226,14 @@ namespace BLToolkit.Data.Sql
 				return Predicate.CanBeNull();
 			}
 
+#if OVERRIDETOSTRING
+
 			public override string ToString()
 			{
 				return ((IQueryElement)this).ToString(new StringBuilder(), new Dictionary<IQueryElement,IQueryElement>()).ToString();
 			}
+
+#endif
 
 			#region IQueryElement Members
 
@@ -1289,10 +1309,14 @@ namespace BLToolkit.Data.Sql
 
 			#region Overrides
 
+#if OVERRIDETOSTRING
+
 			public override string ToString()
 			{
 				return ((IQueryElement)this).ToString(new StringBuilder(), new Dictionary<IQueryElement,IQueryElement>()).ToString();
 			}
+
+#endif
 
 			#endregion
 
@@ -1603,10 +1627,14 @@ namespace BLToolkit.Data.Sql
 
 			#region Overrides
 
+#if OVERRIDETOSTRING
+
 			public override string ToString()
 			{
 				return ((IQueryElement)this).ToString(new StringBuilder(), new Dictionary<IQueryElement,IQueryElement>()).ToString();
 			}
+
+#endif
 
 			#endregion
 
@@ -1916,10 +1944,14 @@ namespace BLToolkit.Data.Sql
 
 			#region Overrides
 
+#if OVERRIDETOSTRING
+
 			public override string ToString()
 			{
 				return ((IQueryElement)this).ToString(new StringBuilder(), new Dictionary<IQueryElement,IQueryElement>()).ToString();
 			}
+
+#endif
 
 			#endregion
 
@@ -2170,10 +2202,14 @@ namespace BLToolkit.Data.Sql
 
 			#region Overrides
 
+#if OVERRIDETOSTRING
+
 			public override string ToString()
 			{
 				return ((IQueryElement)this).ToString(new StringBuilder(), new Dictionary<IQueryElement,IQueryElement>()).ToString();
 			}
+
+#endif
 
 			#endregion
 
@@ -2297,10 +2333,14 @@ namespace BLToolkit.Data.Sql
 				return new Next(this);
 			}
 
+#if OVERRIDETOSTRING
+
 			public override string ToString()
 			{
 				return ((IQueryElement)this).ToString(new StringBuilder(), new Dictionary<IQueryElement,IQueryElement>()).ToString();
 			}
+
+#endif
 
 			#region ISqlExpressionWalkable Members
 
@@ -2394,10 +2434,14 @@ namespace BLToolkit.Data.Sql
 				get { return Items.Count == 0; }
 			}
 
+#if OVERRIDETOSTRING
+
 			public override string ToString()
 			{
 				return ((IQueryElement)this).ToString(new StringBuilder(), new Dictionary<IQueryElement,IQueryElement>()).ToString();
 			}
+
+#endif
 
 			#region ISqlExpressionWalkable Members
 
@@ -2513,10 +2557,14 @@ namespace BLToolkit.Data.Sql
 				get { return Items.Count == 0; }
 			}
 
+#if OVERRIDETOSTRING
+
 			public override string ToString()
 			{
 				return ((IQueryElement)this).ToString(new StringBuilder(), new Dictionary<IQueryElement,IQueryElement>()).ToString();
 			}
+
+#endif
 
 			#region ISqlExpressionWalkable Members
 
@@ -2587,10 +2635,14 @@ namespace BLToolkit.Data.Sql
 				get { return QueryElementType.Union; }
 			}
 
+#if OVERRIDETOSTRING
+
 			public override string ToString()
 			{
 				return ((IQueryElement)this).ToString(new StringBuilder(), new Dictionary<IQueryElement,IQueryElement>()).ToString();
 			}
+
+#endif
 
 			StringBuilder IQueryElement.ToString(StringBuilder sb, Dictionary<IQueryElement,IQueryElement> dic)
 			{
@@ -3264,10 +3316,14 @@ namespace BLToolkit.Data.Sql
 
 		public string SqlText { get { return ToString(); } }
 
+#if OVERRIDETOSTRING
+
 		public override string ToString()
 		{
 			return ((IQueryElement)this).ToString(new StringBuilder(), new Dictionary<IQueryElement,IQueryElement>()).ToString();
 		}
+
+#endif
 
 		#endregion
 

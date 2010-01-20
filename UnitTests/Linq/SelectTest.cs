@@ -331,5 +331,15 @@ namespace Data.Linq
 				lines.ToString();
 			});
 		}
+
+		[Test]
+		public void InterfaceTest()
+		{
+			ForEachProvider(db =>
+			{
+				var q = from p in db.Parent2 select new { p.ParentID, p.Value1 };
+				q.ToList();
+			});
+		}
 	}
 }
