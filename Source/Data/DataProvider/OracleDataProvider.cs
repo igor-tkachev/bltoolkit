@@ -3,9 +3,14 @@ using System.Data;
 using System.Data.Common;
 using System.Data.OracleClient;
 using System.Globalization;
+using BLToolkit.Data.Sql.SqlProvider;
 
 namespace BLToolkit.Data.DataProvider
 {
+#if FW4
+	[Obsolete("OracleDataProvider has been deprecated. http://go.microsoft.com/fwlink/?LinkID=144260")]
+#pragma warning disable 0618
+#endif
 	/// <summary>
 	/// Implements access to the Data Provider for Oracle.
 	/// </summary>
@@ -13,10 +18,6 @@ namespace BLToolkit.Data.DataProvider
 	/// See the <see cref="DbManager.AddDataProvider(DataProviderBase)"/> method to find an example.
 	/// </remarks>
 	/// <seealso cref="DbManager.AddDataProvider(DataProviderBase)">AddDataManager Method</seealso>
-#if FW4
-	[Obsolete("OracleDataProvider has been deprecated. http://go.microsoft.com/fwlink/?LinkID=144260")]
-#pragma warning disable 0618
-#endif
 	public sealed class OracleDataProvider : DataProviderBase
 	{
 		private string _parameterPrefix = "P";
@@ -133,6 +134,11 @@ namespace BLToolkit.Data.DataProvider
 		public override string Name
 		{
 			get { return NameString; }
+		}
+
+		public override ISqlProvider CreateSqlProvider()
+		{
+			return new OracleSqlProvider(this);
 		}
 	}
 #if FW4
