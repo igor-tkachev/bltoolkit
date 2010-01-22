@@ -1423,7 +1423,9 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			return
 				precedence == 0 ||
 				precedence < parentPrecedence ||
-				(precedence == parentPrecedence && parentPrecedence == Precedence.Subtraction); 
+				(precedence == parentPrecedence && 
+					(parentPrecedence == Precedence.Subtraction ||
+					 parentPrecedence == Precedence.LogicalNegation));
 		}
 
 		protected string[] GetTempAliases(int n, string defaultAlias)
@@ -1455,24 +1457,10 @@ namespace BLToolkit.Data.Sql.SqlProvider
 					{
 						SqlTable tbl = (SqlTable)table;
 
-						string tableName = _dataProvider.Convert(tbl.PhysicalName, ConvertType.NameToQueryTable).ToString();
-
-						if (tbl.Database == null && tbl.Owner == null)
-							return tableName;
-
-						string name = string.Empty;
-
-						if (tbl.Database != null)
-							name = _dataProvider.Convert(tbl.Database, ConvertType.NameToDatabase) + _dataProvider.DatabaseOwnerDelimiter;
-
-						if (tbl.Owner != null)
-							name +=
-								_dataProvider.Convert(tbl.Owner, ConvertType.NameToOwner) +
-								_dataProvider.OwnerTableDelimiter;
-						else
-							name += _dataProvider.DatabaseTableDelimiter;
-
-						return name + tableName;
+						return _dataProvider.BuildTableName(new StringBuilder(), 
+							tbl.Database     == null ? null : _dataProvider.Convert(tbl.Database,     ConvertType.NameToDatabase).  ToString(),
+							tbl.Owner        == null ? null : _dataProvider.Convert(tbl.Owner,        ConvertType.NameToOwner).     ToString(),
+							tbl.PhysicalName == null ? null : _dataProvider.Convert(tbl.PhysicalName, ConvertType.NameToQueryTable).ToString()).ToString();
 					}
 
 				case QueryElementType.TableSource :

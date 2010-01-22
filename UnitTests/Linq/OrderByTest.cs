@@ -234,5 +234,45 @@ namespace Data.Linq
 				Assert.IsTrue(result.ToList().SequenceEqual(expected));
 			});
 		}
+
+		[Test]
+		public void Count1()
+		{
+			ForEachProvider(db => Assert.AreEqual(
+				   Parent.OrderBy(p => p.ParentID).Count(),
+				db.Parent.OrderBy(p => p.ParentID).Count()));
+		}
+
+		[Test]
+		public void Count2()
+		{
+			ForEachProvider(new[] { ProviderName.SqlCe, ProviderName.Sybase }, db => Assert.AreEqual(
+				   Parent.OrderBy(p => p.ParentID).Take(3).Count(),
+				db.Parent.OrderBy(p => p.ParentID).Take(3).Count()));
+		}
+
+		[Test]
+		public void Min1()
+		{
+			ForEachProvider(db => Assert.AreEqual(
+				   Parent.OrderBy(p => p.ParentID).Min(p => p.ParentID),
+				db.Parent.OrderBy(p => p.ParentID).Min(p => p.ParentID)));
+		}
+
+		[Test]
+		public void Min2()
+		{
+			ForEachProvider(new[] { ProviderName.SqlCe, ProviderName.Sybase }, db => Assert.AreEqual(
+				   Parent.OrderBy(p => p.ParentID).Take(3).Min(p => p.ParentID),
+				db.Parent.OrderBy(p => p.ParentID).Take(3).Min(p => p.ParentID)));
+		}
+
+		[Test]
+		public void Min3()
+		{
+			ForEachProvider(new[] { ProviderName.SqlCe, ProviderName.Sybase }, db => Assert.AreEqual(
+				   Parent.OrderBy(p => p.Value1).Take(3).Min(p => p.ParentID),
+				db.Parent.OrderBy(p => p.Value1).Take(3).Min(p => p.ParentID)));
+		}
 	}
 }

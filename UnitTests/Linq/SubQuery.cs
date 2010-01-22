@@ -1,12 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+
 using BLToolkit.Data.DataProvider;
-using Data.Linq.Model;
+
 using NUnit.Framework;
 
 namespace Data.Linq
 {
+	using Model;
+
 	[TestFixture]
 	public class SubQuery : TestBase
 	{
@@ -189,6 +192,30 @@ namespace Data.Linq
 				from p in db.Parent
 				where p.ParentID != 5
 				select new { p.ParentID, Count = p.Children.Where(c => c.ParentID == p.ParentID && c.ChildID != 0m).Count() }));
+		}
+
+		[Test]
+		public void TestCount2()
+		{
+			ForEachProvider(db => AreEqual(
+				from p in Parent
+				where p.ParentID != 5
+				select new { Count = p.Value1 == null ? p.Children.Count : p.Children.Count(c => c.ParentID == p.ParentID) },
+				from p in db.Parent
+				where p.ParentID != 5
+				select new { Count = p.Value1 == null ? p.Children.Count : p.Children.Count(c => c.ParentID == p.ParentID) }));
+		}
+
+		[Test]
+		public void TestCount3()
+		{
+			ForEachProvider(db => AreEqual(
+				from p in Parent
+				where p.ParentID != 5
+				select new { Count = p.Value1 == null ? p.Children.Count() : p.Children.Count(c => c.ParentID == p.ParentID) },
+				from p in db.Parent
+				where p.ParentID != 5
+				select new { Count = p.Value1 == null ? p.Children.Count() : p.Children.Count(c => c.ParentID == p.ParentID) }));
 		}
 	}
 }

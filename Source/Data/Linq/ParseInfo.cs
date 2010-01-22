@@ -31,7 +31,7 @@ namespace BLToolkit.Data.Linq
 			return new ParseInfo<T> { Expr = expr, Parent = null, ParamAccessor = paramAccesor };
 		}
 
-		public ParseInfo<T> Create<T>(T expr, Expression paramAccesor)
+		virtual public ParseInfo<T> Create<T>(T expr, Expression paramAccesor)
 			where T : Expression
 		{
 			return new ParseInfo<T> { Expr = expr, Parent = this, ParamAccessor = paramAccesor };

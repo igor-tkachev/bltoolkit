@@ -423,7 +423,14 @@ namespace BLToolkit.Data.Linq
 			public override QueryField GetField(MemberInfo mi)
 			{
 				QueryField fld;
-				Members.TryGetValue(mi, out fld);
+				if (Members.TryGetValue(mi, out fld))
+					return fld;
+
+				fld = BaseQuery.GetField(mi) as QuerySource;
+
+				if (fld != null)
+					Members.Add(mi, fld);
+
 				return fld;
 			}
 
@@ -682,6 +689,16 @@ namespace BLToolkit.Data.Linq
 				: base(sqlBilder, lambda, baseQueries)
 			{
 				_field = GetBaseField(lambda.Body) ?? new ExprColumn(this, lambda.Body, null);
+
+				Fields.Add(_field);
+
+				ParsingTracer.DecIndentLevel();
+			}
+
+			public Scalar(SqlQuery sqlBilder, LambdaInfo lambda, ISqlExpression field, params QuerySource[] baseQueries)
+				: base(sqlBilder, lambda, baseQueries)
+			{
+				_field = new ExprColumn(this, field, null);
 
 				Fields.Add(_field);
 

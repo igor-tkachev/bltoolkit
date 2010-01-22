@@ -310,7 +310,7 @@ namespace BLToolkit.Data.Linq
 						case "Sum"             :
 						case "Average"         : sequence = ParseSequence(seq); ParseAggregate(pi, null, sequence[0]); break;
 						case "OfType"          : sequence = ParseSequence(seq); select = ParseOfType(pi, sequence);    break;
-						case "Any"             : sequence = ParseAny(seq, null);                                       break;
+						case "Any"             : sequence = ParseAny(true, seq, null, pi);                             break;
 						default                :
 							ParsingTracer.DecIndentLevel();
 							return false;
@@ -343,7 +343,8 @@ namespace BLToolkit.Data.Linq
 						case "Max"               :
 						case "Sum"               :
 						case "Average"           : sequence = ParseSequence(seq); ParseAggregate(pi, l, sequence[0]); break;
-						case "Any"               : sequence = ParseAny(seq, l);                                       break;
+						case "Any"               : sequence = ParseAny(true,  seq, l, pi);                            break;
+						case "All"               : sequence = ParseAny(false, seq, l, pi);                            break;
 						default                  : return false;
 					}
 					return true;
@@ -1317,6 +1318,14 @@ namespace BLToolkit.Data.Linq
 			if (lambda == null && name != "Count" && query.Fields.Count != 1)
 				throw new LinqException("Incorrent use of the '{0}' function.", name);
 
+			if (CurrentSql.OrderBy.Items.Count > 0)
+			{
+				if (CurrentSql.Select.TakeValue == null && CurrentSql.Select.SkipValue == null)
+					CurrentSql.OrderBy.Items.Clear();
+				else
+					query = WrapInSubQuery(query);
+			}
+
 			var sql = query.SqlQuery;
 			var idx =
 				name == "Count" ?
@@ -1439,16 +1448,65 @@ namespace BLToolkit.Data.Linq
 
 		#region ParseAny
 
-		QuerySource[] ParseAny(ParseInfo expr, LambdaInfo lambda)
+		QuerySource[] ParseAny(bool isAny, ParseInfo expr, LambdaInfo lambda, ParseInfo parentInfo)
 		{
-			var cond = ParseAnyCondition(expr, lambda);
+			var cond = ParseAnyCondition(isAny, expr, lambda);
+
+			if (_parentQueries.Count == 0)
+			{
+				var sc = new SqlQuery.SearchCondition();
+				sc.Conditions.Add(cond);
+
+				var func   = Convert(new SqlFunction(typeof(bool), "CASE", sc, new SqlValue(true), new SqlValue(false)));
+				var scalar = new QuerySource.Scalar(CurrentSql, new LambdaInfo(parentInfo), func, null);
+
+				scalar.Select(this);
+
+				_buildSelect = () =>
+				{
+					var pi     = BuildField(parentInfo, new[] { 0 });
+
+					var mapper = Expression.Lambda<ExpressionInfo<T>.Mapper<bool>>(
+						pi, new[]
+						{
+							_infoParam,
+							_contextParam,
+							_dataReaderParam,
+							_mapSchemaParam,
+							_expressionParam,
+							ParametersParam
+						});
+
+						_info.SetElementQuery(mapper.Compile());
+				};
+
+				return new[] { scalar };
+			}
 
 			CurrentSql.Where.SearchCondition.Conditions.Add(cond);
 
 			return new[] { _parentQueries[0].Parent };
 		}
 
-		SqlQuery.Condition ParseAnyCondition(ParseInfo expr, LambdaInfo lambda)
+		class NotParseInfo : ParseInfo<UnaryExpression>
+		{
+			public NotParseInfo(UnaryExpression e, ParseInfo pi)
+			{
+				Expr          = e;
+				Parent        = pi.Parent;
+				ParamAccessor = pi.ParamAccessor;
+				_parseInfo    = pi;
+			}
+
+			ParseInfo _parseInfo;
+
+			public override ParseInfo<TE> Create<TE>(TE expr, Expression paramAccesor)
+			{
+				return (ParseInfo<TE>)_parseInfo;
+			}
+		}
+
+		SqlQuery.Condition ParseAnyCondition(bool isAny, ParseInfo expr, LambdaInfo lambda)
 		{
 			ParsingTracer.WriteLine(lambda);
 			ParsingTracer.WriteLine(expr);
@@ -1508,12 +1566,23 @@ namespace BLToolkit.Data.Linq
 			_convertSource = cs;
 
 			if (lambda != null)
+			{
+				if (!isAny)
+				{
+					var e  = Expression.Not(lambda.Body);
+					//var pi = lambda.Body.Parent.Create(e, lambda.Body.ParamAccessor);
+					var pi = new NotParseInfo(e, lambda.Body);
+
+					lambda = new LambdaInfo(pi, lambda.Parameters);
+				}
+
 				ParseWhere(lambda, query);
+			}
 
 			any.ParentSql = sql;
 			CurrentSql    = sql;
 
-			var cond = new SqlQuery.Condition(false, new SqlQuery.Predicate.FuncLike(SqlFunction.CreateExists(any)));
+			var cond = new SqlQuery.Condition(!isAny, new SqlQuery.Predicate.FuncLike(SqlFunction.CreateExists(any)));
 
 			ParsingTracer.DecIndentLevel();
 			return cond;
@@ -3229,7 +3298,7 @@ namespace BLToolkit.Data.Linq
 			if (expr == null)
 				return false;
 
-			var tbl = GetSource(null, expr, queries) as QuerySource.Table;
+			var tbl = GetSource(queries[0].Lambda, expr, queries) as QuerySource.Table;
 
 			if (tbl != null)
 				return true;
@@ -3309,6 +3378,15 @@ namespace BLToolkit.Data.Linq
 								case "Max":
 								case "Sum":
 									return IsQueryMember(e.Arguments[0]);
+							}
+						}
+						else if (e.Method.DeclaringType == typeof(Queryable))
+						{
+							switch (e.Method.Name)
+							{
+								case "Any":
+								case "All":
+									return true;
 							}
 						}
 						else
@@ -4285,7 +4363,7 @@ namespace BLToolkit.Data.Linq
 
 						var notCondition = new SqlQuery.SearchCondition();
 
-						ParseSearchCondition(notCondition.Conditions, lambda, pi.Create(e.Operand, pi.Property(Unary.Operand)), queries);
+						ParseSearchCondition(notCondition.Conditions, lambda, parseInfo.Create(e.Operand, pi.Property(Unary.Operand)), queries);
 
 						if (notCondition.Conditions.Count == 1 && notCondition.Conditions[0].Predicate is SqlQuery.Predicate.NotExpr)
 						{
@@ -4324,7 +4402,7 @@ namespace BLToolkit.Data.Linq
 					{
 						switch (pi.Expr.Method.Name)
 						{
-							case "Any" : func = () => ParseAnyCondition(pexpr, null); return true;
+							case "Any" : func = () => ParseAnyCondition(true,  pexpr, null); return true;
 						}
 						return false;
 					}),
@@ -4332,7 +4410,8 @@ namespace BLToolkit.Data.Linq
 					{
 						switch (pi.Expr.Method.Name)
 						{
-							case "Any" : func = () => ParseAnyCondition(pexpr, l); return true;
+							case "Any" : func = () => ParseAnyCondition(true,  pexpr, l); return true;
+							case "All" : func = () => ParseAnyCondition(false, pexpr, l); return true;
 						}
 						return false;
 					})
@@ -4354,7 +4433,6 @@ namespace BLToolkit.Data.Linq
 		}
 
 		#endregion
-
 
 		#endregion
 
@@ -4444,7 +4522,7 @@ namespace BLToolkit.Data.Linq
 					{
 						var ma = (MemberExpression)expr;
 
-						if (lambda != null && ma.Expression == lambda.Parameters[0].Expr)
+						if (lambda != null && lambda.Parameters.Length > 0 && ma.Expression == lambda.Parameters[0].Expr)
 						{
 							foreach (var query in queries)
 							{

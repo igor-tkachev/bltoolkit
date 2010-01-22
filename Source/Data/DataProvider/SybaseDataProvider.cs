@@ -149,11 +149,6 @@ namespace BLToolkit.Data.DataProvider
 			return new SybaseSqlProvider(this);
 		}
 
-		public override string DatabaseTableDelimiter
-		{
-			get { return ".."; }
-		}
-
 		public override void PrepareCommand(ref CommandType commandType, ref string commandText, ref IDbDataParameter[] commandParameters)
 		{
 			base.PrepareCommand(ref commandType, ref commandText, ref commandParameters);

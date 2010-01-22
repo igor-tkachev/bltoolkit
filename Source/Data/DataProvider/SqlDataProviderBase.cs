@@ -214,11 +214,6 @@ namespace BLToolkit.Data.DataProvider
 			get { return 65536; }
 		}
 
-		public override string DatabaseTableDelimiter
-		{
-			get { return ".."; }
-		}
-
 		#region GetDataReader
 
 #if FW3

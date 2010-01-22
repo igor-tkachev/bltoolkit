@@ -152,18 +152,62 @@ namespace Data.Linq
 				db.Parent.Where(p => p.Children.Any(c => c.GrandChildren.Any(g => g.ParentID > 3)))));
 		}
 
-		//[Test]
+		[Test]
 		public void Any6()
 		{
-			ForEachProvider(db => Assert.AreEqual(
+			ForEachProvider(new[] { ProviderName.Access }, db => Assert.AreEqual(
 				   Child.Any(c => c.ParentID > 3),
 				db.Child.Any(c => c.ParentID > 3)));
 		}
 
-		//[Test]
+		[Test]
 		public void Any7()
 		{
-			ForEachProvider(db => Assert.AreEqual(Child.Any(), db.Child.Any()));
+			ForEachProvider(new[] { ProviderName.Access }, db => Assert.AreEqual(
+				   Child.Any(),
+				db.Child.Any()));
+		}
+
+		[Test]
+		public void All1()
+		{
+			ForEachProvider(db => AreEqual(
+				   Parent.Where(p =>    Child.Where(c => c.ParentID == p.ParentID).All(c => c.ParentID > 3)),
+				db.Parent.Where(p => db.Child.Where(c => c.ParentID == p.ParentID).All(c => c.ParentID > 3))));
+		}
+
+		[Test]
+		public void All2()
+		{
+			ForEachProvider(db => AreEqual(
+				   Parent.Where(p => p.Children.All(c => c.ParentID > 3)),
+				db.Parent.Where(p => p.Children.All(c => c.ParentID > 3))));
+		}
+
+		[Test]
+		public void All3()
+		{
+			ForEachProvider(db => AreEqual(
+				   Parent.Where(p => p.Children.All(c => c.GrandChildren.All(g => g.ParentID > 3))),
+				db.Parent.Where(p => p.Children.All(c => c.GrandChildren.All(g => g.ParentID > 3)))));
+		}
+
+		[Test]
+		public void All4()
+		{
+			ForEachProvider(new[] { ProviderName.Access }, db => Assert.AreEqual(
+				   Child.All(c => c.ParentID > 3),
+				db.Child.All(c => c.ParentID > 3)));
+		}
+
+		[Test]
+		public void All5()
+		{
+			int n = 3;
+
+			ForEachProvider(new[] { ProviderName.Access }, db => Assert.AreEqual(
+				   Child.All(c => c.ParentID > n),
+				db.Child.All(c => c.ParentID > n)));
 		}
 	}
 }

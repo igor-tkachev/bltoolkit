@@ -1,7 +1,7 @@
 using System;
 using System.Data;
 using System.Data.Common;
-
+using System.Text;
 using BLToolkit.Common;
 using BLToolkit.Mapping;
 
@@ -212,13 +212,22 @@ namespace BLToolkit.Data.DataProvider
 			return dataReader;
 		}
 
+		public virtual StringBuilder BuildTableName(StringBuilder sb, string database, string owner, string table)
+		{
+			if (database != null)
+			{
+				if (owner == null)  sb.Append(database).Append("..");
+				else                sb.Append(database).Append(".").Append(owner).Append(".");
+			}
+			else if (owner != null) sb.Append(owner).Append(".");
+
+			return sb.Append(table);
+		}
+
 		public virtual string ProviderName           { get { return ConnectionType.Namespace; } }
 		public virtual int    MaxParameters          { get { return 100;   } }
 		public virtual int    MaxBatchSize           { get { return 65536; } }
 		public virtual string EndOfSql               { get { return ";";   } }
-		public virtual string DatabaseOwnerDelimiter { get { return ".";   } }
-		public virtual string DatabaseTableDelimiter { get { return ".";   } }
-		public virtual string OwnerTableDelimiter    { get { return ".";   } }
 
 		#endregion
 
