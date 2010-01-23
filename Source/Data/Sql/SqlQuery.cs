@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+//using System.Linq;
 using System.Text;
 using System.Threading;
 
@@ -21,6 +22,13 @@ namespace BLToolkit.Data.Sql
 			using (Stream       stream = typeof(SqlQuery).Assembly.GetManifestResourceStream(typeof(SqlQuery), "ReservedWords.txt"))
 			using (StreamReader reader = new StreamReader(stream))
 			{
+				/*
+				var words = reader.ReadToEnd().Replace(' ', '\n').Replace('\t', '\n').Split('\n');
+				var q = from w in words where w.Length > 0 orderby w select w;
+
+				var text = string.Join("\n", q.Distinct().ToArray());
+				*/
+
 				string s;
 				while ((s = reader.ReadLine()) != null)
 					_reservedWords.Add(s, s);
