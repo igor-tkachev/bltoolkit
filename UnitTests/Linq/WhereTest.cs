@@ -747,5 +747,15 @@ namespace Data.Linq
 				from p in    Parent where GetIds(1, 2).Contains(p.ParentID) || GetIds(3, 0).Contains(p.ParentID) select p,
 				from p in db.Parent where GetIds(1, 2).Contains(p.ParentID) || GetIds(3, 0).Contains(p.ParentID) select p));
 		}
+
+		[Test]
+		public void AliasTest()
+		{
+			int user = 3;
+
+			ForEachProvider(db => AreEqual(
+				from p in    Parent where p.ParentID == user select p,
+				from p in db.Parent where p.ParentID == user select p));
+		}
 	}
 }

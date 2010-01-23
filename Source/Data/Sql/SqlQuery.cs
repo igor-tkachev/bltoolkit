@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Text;
 using System.Threading;
 
@@ -12,6 +13,19 @@ namespace BLToolkit.Data.Sql
 	public class SqlQuery : ISqlExpression, ISqlTableSource
 	{
 		#region Init
+
+		static readonly Dictionary<string,object> _reservedWords = new Dictionary<string,object>();
+
+		static SqlQuery()
+		{
+			using (Stream       stream = typeof(SqlQuery).Assembly.GetManifestResourceStream(typeof(SqlQuery), "ReservedWords.txt"))
+			using (StreamReader reader = new StreamReader(stream))
+			{
+				string s;
+				while ((s = reader.ReadLine()) != null)
+					_reservedWords.Add(s, s);
+			}
+		}
 
 		public SqlQuery()
 		{
@@ -3129,10 +3143,18 @@ namespace BLToolkit.Data.Sql
 				alias        = defaultAlias + "1";
 			}
 
-			for (int i = 1; _aliases.ContainsKey(alias); i++)
-				alias = desiredAlias + i;
+			for (int i = 1; ; i++)
+			{
+				string s = alias.ToUpper();
 
-			_aliases.Add(alias, alias);
+				if (!_aliases.ContainsKey(s) && !_reservedWords.ContainsKey(s))
+				{
+					_aliases.Add(s, s);
+					break;
+				}
+
+				alias = desiredAlias + i;
+			}
 
 			return alias;
 		}
