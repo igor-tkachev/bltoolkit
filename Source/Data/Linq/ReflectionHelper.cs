@@ -39,7 +39,7 @@ namespace BLToolkit.Data.Linq
 			}
 		}
 
-		public static MemberInfo MemeberInfo(Expression<Func<object>> func)
+		public static MemberInfo MemeberInfo(LambdaExpression func)
 		{
 			var ex = func.Body;
 

@@ -257,5 +257,21 @@ namespace Data.Linq
 					from ch in lj1.DefaultIfEmpty()
 				select p));
 		}
+
+		[Test]
+		public void ReferenceJoin1()
+		{
+			ForEachProvider(db => AreEqual(
+				from c in    Child join g in    GrandChild on c equals g.Child select new { c.ParentID, g.GrandChildID },
+				from c in db.Child join g in db.GrandChild on c equals g.Child select new { c.ParentID, g.GrandChildID }));
+		}
+
+		[Test]
+		public void ReferenceJoin2()
+		{
+			ForEachProvider(db => AreEqual(
+				from g in    GrandChild join c in    Child on g.Child equals c select new { c.ParentID, g.GrandChildID },
+				from g in db.GrandChild join c in db.Child on g.Child equals c select new { c.ParentID, g.GrandChildID }));
+		}
 	}
 }

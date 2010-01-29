@@ -3134,8 +3134,12 @@ namespace BLToolkit.Data.Sql
 
 		public void RemoveAlias(string alias)
 		{
-			if (_aliases != null && _aliases.ContainsKey(alias))
-				_aliases.Remove(alias);
+			if (_aliases != null)
+			{
+				alias = alias.ToUpper();
+				if (_aliases.ContainsKey(alias))
+					_aliases.Remove(alias);
+			}
 		}
 
 		public string GetAlias(string desiredAlias, string defaultAlias)

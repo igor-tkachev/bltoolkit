@@ -250,7 +250,7 @@ namespace BLToolkit.DataAccess
 			foreach (MemberMapper mm in list)
 			{
 				SqlQueryParameterInfo p = query.AddParameter(
-					db.DataProvider.Convert(mm.Name, ConvertType.NameToQueryParameter).ToString(),
+					db.DataProvider.Convert(mm.Name + "_P", ConvertType.NameToQueryParameter).ToString(),
 					mm.Name);
 
 				if (nParameter < 0)
@@ -298,7 +298,7 @@ namespace BLToolkit.DataAccess
 				hasFields = true;
 
 				SqlQueryParameterInfo p = query.AddParameter(
-					db.DataProvider.Convert(mm.Name, ConvertType.NameToQueryParameter).ToString(),
+					db.DataProvider.Convert(mm.Name + "_P", ConvertType.NameToQueryParameter).ToString(),
 					mm.Name);
 
 				sb.AppendFormat("\t{0} = ", db.DataProvider.Convert(p.FieldName, ConvertType.NameToQueryField));

@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Reflection;
-using BLToolkit.Reflection;
 
 namespace BLToolkit.Data.Linq
 {
 	using Data.Sql;
+	using Reflection;
 
 	[SerializableAttribute]
 	[AttributeUsageAttribute(AttributeTargets.Property | AttributeTargets.Method, AllowMultiple = true, Inherited = false)]

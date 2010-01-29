@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 
 using BLToolkit.Data.DataProvider;
-
+using BLToolkit.Data.Linq;
 using NUnit.Framework;
 
 namespace Data.Linq
@@ -216,6 +216,30 @@ namespace Data.Linq
 				from p in db.Parent
 				where p.ParentID != 5
 				select new { Count = p.Value1 == null ? p.Children.Count() : p.Children.Count(c => c.ParentID == p.ParentID) }));
+		}
+
+		[Test]
+		public void TestCount4()
+		{
+			ForEachProvider(db => AreEqual(
+				from p in    Parent select new { Count =    Parent.Count(p1 => p1.ParentID == p.ParentID) },
+				from p in db.Parent select new { Count = db.Parent.Count(p1 => p1.ParentID == p.ParentID) }));
+		}
+
+		[Test]
+		public void TestCount5()
+		{
+			ForEachProvider(db => AreEqual(
+				from p in    Parent select new { Count =    Parent.Where(p1 => p1.ParentID == p.ParentID).Count() },
+				from p in db.Parent select new { Count = db.Parent.Where(p1 => p1.ParentID == p.ParentID).Count() }));
+		}
+
+		[Test]
+		public void TestCount6()
+		{
+			ForEachProvider(db => AreEqual(
+				   Parent.Take(5).OrderByDescending(p => p.ParentID).Select(p => p.Children.Count()),
+				db.Parent.Take(5).OrderByDescending(p => p.ParentID).Select(p => p.Children.Count())));
 		}
 	}
 }

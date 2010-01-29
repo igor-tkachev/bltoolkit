@@ -2181,11 +2181,11 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			Dictionary<MemberInfo,LambdaExpression> dic;
 			LambdaExpression expr;
 
-			if (Linq.Sql.Members.TryGetValue(Name, out dic))
+			if (Linq.Expressions.Members.TryGetValue(Name, out dic))
 				if (dic.TryGetValue(mi, out expr))
 					return expr;
 
-			return Linq.Sql.Members[""].TryGetValue(mi, out expr) ? expr : null;
+			return Linq.Expressions.Members[""].TryGetValue(mi, out expr) ? expr : null;
 		}
 #endif
 
