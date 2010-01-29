@@ -70,6 +70,8 @@ namespace BLToolkit.Data.Linq
 
 		#endregion
 
+		#region Helpers
+
 		static MemberInfo M<T>(Expression<Func<T,object>> func)
 		{
 			return ReflectionHelper.MemeberInfo(func);
@@ -87,6 +89,8 @@ namespace BLToolkit.Data.Linq
 		static LambdaExpression L<T1,T2,T3,T4,TR>       (Expression<Func<T1,T2,T3,T4,TR>>       func) { return func; }
 		static LambdaExpression L<T1,T2,T3,T4,T5,TR>    (Expression<Func<T1,T2,T3,T4,T5,TR>>    func) { return func; }
 		static LambdaExpression L<T1,T2,T3,T4,T5,T6,TR> (Expression<Func<T1,T2,T3,T4,T5,T6,TR>> func) { return func; }
+
+		#endregion
 
 		static public   Dictionary<string,Dictionary<MemberInfo,LambdaExpression>>  Members { get { return _members; } }
 		static readonly Dictionary<string,Dictionary<MemberInfo,LambdaExpression>> _members = new Dictionary<string,Dictionary<MemberInfo,LambdaExpression>>
@@ -120,8 +124,8 @@ namespace BLToolkit.Data.Linq
 				{ M(() => "".Replace    ("","")   ), L<S,S,S,S>  ((obj,p0,p1)    => Sql.Replace  (obj, p0, p1)) },
 				{ M(() => "".Replace    (' ',' ') ), L<S,C,C,S>  ((obj,p0,p1)    => Sql.Replace  (obj, p0, p1)) },
 				{ M(() => "".Trim       ()        ), L<S,S>      ( obj           => Sql.Trim     (obj)) },
-				{ M(() => "".TrimEnd    ()        ), L<S,S>      ( obj           => Sql.TrimRight(obj)) },
-				{ M(() => "".TrimStart  ()        ), L<S,S>      ( obj           => Sql.TrimLeft(obj)) },
+				{ M(() => "".TrimEnd    ()        ), L<S,C[],S>  ((obj,ch)       =>     TrimRight(obj, ch)) },
+				{ M(() => "".TrimStart  ()        ), L<S,C[],S>  ((obj,ch)       =>     TrimLeft (obj, ch)) },
 				{ M(() => "".ToLower    ()        ), L<S,S>      ( obj           => Sql.Lower(obj)) },
 				{ M(() => "".ToUpper    ()        ), L<S,S>      ( obj           => Sql.Upper(obj)) },
 				{ M(() => "".CompareTo  ("")      ), L<S,S,I>    ((obj,p0)       => ConvertToCaseCompareTo(obj, p0).Value ) },
@@ -930,6 +934,26 @@ namespace BLToolkit.Data.Linq
 			#endregion
 		};
 
+		#region Sql specific
+
+		[CLSCompliant(false)]
+		[SqlFunction("RTrim", 0)]
+		public static string TrimRight(string str, char[] trimChars)
+		{
+			return str == null ? null : str.TrimEnd(trimChars);
+		}
+
+		[CLSCompliant(false)]
+		[SqlFunction("LTrim", 0)]
+		public static string TrimLeft(string str, char[] trimChars)
+		{
+			return str == null ? null : str.TrimStart(trimChars);
+		}
+
+		#endregion
+
+		#region Provider specific functions
+
 		[SqlFunction]
 		static int? ConvertToCaseCompareTo(string str, string value)
 		{
@@ -1052,5 +1076,7 @@ namespace BLToolkit.Data.Linq
 				(DateTime?)null :
 				new DateTime(year.Value, month.Value, day.Value);
 		}
+
+		#endregion
 	}
 }

@@ -234,12 +234,22 @@ namespace Data.Linq
 				from p in db.Parent select new { Count = db.Parent.Where(p1 => p1.ParentID == p.ParentID).Count() }));
 		}
 
-		[Test]
+		//[Test]
 		public void TestCount6()
 		{
 			ForEachProvider(db => AreEqual(
 				   Parent.Take(5).OrderByDescending(p => p.ParentID).Select(p => p.Children.Count()),
 				db.Parent.Take(5).OrderByDescending(p => p.ParentID).Select(p => p.Children.Count())));
+		}
+
+		[Test]
+		public void TestCount7()
+		{
+			ForEachProvider(
+				new[] { ProviderName.SqlCe }, // Fix It
+				db => AreEqual(
+				from p in    Parent select    Child.Count(c => c.Parent == p),
+				from p in db.Parent select db.Child.Count(c => c.Parent == p)));
 		}
 	}
 }

@@ -172,7 +172,7 @@ namespace Data.Linq
 			);
 		}
 
-		//[Test]
+		[Test]
 		public void SelectManyLeftJoin()
 		{
 			var expected =
@@ -180,10 +180,24 @@ namespace Data.Linq
 				from c in p.Children.Select(o => new { o.ChildID, p.ParentID }).DefaultIfEmpty()
 				select new { p.Value1, o = c };
 
-			ForEachProvider(db => AreEqual(expected,
-				from p in db.Parent
+			ForEachProvider(db => Assert.AreEqual(expected.Count(),
+				(from p in db.Parent
 				from c in p.Children.Select(o => new { o.ChildID, p.ParentID }).DefaultIfEmpty()
-				select new { p.Value1, o = c }));
+				select new { p.Value1, o = c }).AsEnumerable().Count()));
+		}
+
+		[Test]
+		public void SelectManyLeftJoinCount()
+		{
+			var expected =
+				from p in Parent
+				from c in p.Children.Select(o => new { o.ChildID, p.ParentID }).DefaultIfEmpty()
+				select new { p.Value1, o = c };
+
+			ForEachProvider(db => Assert.AreEqual(expected.Count(),
+				(from p in db.Parent
+				from c in p.Children.Select(o => new { o.ChildID, p.ParentID }).DefaultIfEmpty()
+				select new { p.Value1, n = c.ChildID + 1, o = c }).Count()));
 		}
 
 		void Foo(Expression<Func<object[],object>> func)

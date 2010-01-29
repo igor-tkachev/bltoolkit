@@ -367,7 +367,7 @@ namespace BLToolkit.Data.Linq
 				pi => pi.IsQueryableMethod ("Union",            seq => sequence = ParseSequence(seq), ex => { select = ParseUnion    (sequence[0], ex, false); return true; }),
 				pi => pi.IsQueryableMethod ("Except",           seq => sequence = ParseSequence(seq), ex => { select = ParseIntersect(sequence,    ex, true);  return true; }),
 				pi => pi.IsQueryableMethod ("Intersect",        seq => sequence = ParseSequence(seq), ex => { select = ParseIntersect(sequence,    ex, false); return true; }),
-				pi => pi.IsEnumerableMethod("DefaultIfEmpty",   seq => { select = ParseDefaultIfEmpty(seq); return select != null; }),
+				pi => pi.IsEnumerableMethod("DefaultIfEmpty",   seq => { sequence = ParseDefaultIfEmpty(seq); return sequence != null; }),
 				pi => pi.IsMethod(m =>
 				{
 					if (m.Expr.Method.DeclaringType == typeof(Queryable) || !TypeHelper.IsSameOrParent(typeof(IQueryable), pi.Expr.Type))
@@ -919,9 +919,22 @@ namespace BLToolkit.Data.Linq
 
 		#region Parse DefaultIfEmpty
 
-		QuerySource ParseDefaultIfEmpty(ParseInfo seq)
+		QuerySource[] ParseDefaultIfEmpty(ParseInfo seq)
 		{
-			return GetField(null, seq) as QuerySource;
+			var field = GetField(null, seq);
+
+			if (field != null)
+				return new[] { field as QuerySource };
+
+			var conv = _convertSource;
+
+			_convertSource = (s,l) => s;
+
+			var query = ParseSequence(seq);
+
+			_convertSource = conv;
+
+			return query;
 		}
 
 		#endregion
@@ -1320,6 +1333,11 @@ namespace BLToolkit.Data.Linq
 			{
 				query.Select(this);
 				query = WrapInSubQuery(query);
+			}
+			else
+			{
+				foreach (var queryField in query.Fields)
+					queryField.GetExpressions(this);
 			}
 
 			var name = parseInfo.Expr.Method.Name;
@@ -2085,6 +2103,19 @@ namespace BLToolkit.Data.Linq
 
 					case ExpressionType.Call:
 						{
+							var ce = pi.ConvertTo<MethodCallExpression>();
+							var cm = ConvertMethod(ce);
+
+							if (cm != null)
+							{
+								if (ce.Expr.Method.GetCustomAttributes(typeof(MethodExpressionAttribute), true).Length != 0)
+								{
+									var ex = BuildNewExpression(lambda, query, cm, converter);
+									ex.StopWalking = true;
+									return ex;
+								}
+							}
+
 							if (IsSubQuery      (pi, query)) return BuildSubQuery(pi, query, converter);
 							if (IsServerSideOnly(pi))        return BuildField   (query.BaseQuery, pi);
 						}
@@ -3017,53 +3048,9 @@ namespace BLToolkit.Data.Linq
 							if (e.Method.DeclaringType == typeof(Enumerable))
 								return ParseEnumerable(lambda, pi, queries);
 
-							var l = ConvertMember(e.Method);
-
-							if (l != null)
-							{
-								var ef    = UnwrapLambda(l.Body);
-								var parms = new Dictionary<string,int>(l.Parameters.Count);
-								var pn    = e.Method.IsStatic ? 0 : -1;
-
-								foreach (var p in l.Parameters)
-									parms.Add(p.Name, pn++);
-
-								var pie = parseInfo.Parent.Replace(ef, null).Walk(wpi =>
-								{
-									if (wpi.NodeType == ExpressionType.Parameter)
-									{
-										Expression       expr;
-										Func<Expression> fparam;
-
-										var pe = (ParameterExpression)wpi.Expr;
-										int n;
-
-										if (parms.TryGetValue(pe.Name, out n))
-										{
-											if (n < 0)
-											{
-												expr   = e.Object;
-												fparam = () => pi.Property(MethodCall.Object);
-											}
-											else
-											{
-												expr   = e.Arguments[n];
-												fparam = () => pi.Index(e.Arguments, MethodCall.Arguments, n);
-											}
-
-											if (expr.NodeType == ExpressionType.MemberAccess)
-												if (!_accessors.ContainsKey(expr))
-													_accessors.Add(expr, fparam());
-
-											return pi.Create(expr, null);
-										}
-									}
-
-									return wpi;
-								});
-
-								return ParseExpression(pie, queries);
-							}
+							var cm = ConvertMethod(pi);
+							if (cm != null)
+								return ParseExpression(cm, queries);
 
 							var attr = GetFunctionAttribute(e.Method);
 
@@ -3294,13 +3281,19 @@ namespace BLToolkit.Data.Linq
 
 				case ExpressionType.MemberAccess:
 					{
-						var ma  = (MemberExpression)parseInfo.Expr;
+						var ma = (MemberExpression)parseInfo.Expr;
 
 						if (IsSubQueryMember(parseInfo.Expr) && IsSubQuerySource(ma.Expression, queries))
 							return !CanBeCompiled(parseInfo);
 
 						if (IsIEnumerableType(parseInfo.Expr))
 							return !CanBeCompiled(parseInfo);
+
+						if (ma.Expression != null)
+						{
+							var pi = parseInfo.ConvertTo<MemberExpression>();
+							return IsSubQuery(pi.Create(ma.Expression, pi.Property(Member.Expression)), queries);
+						}
 					}
 
 					break;
@@ -3413,6 +3406,9 @@ namespace BLToolkit.Data.Linq
 						else
 						{
 							var lambda = ConvertMember(e.Method);
+
+							//if (lambda != null)
+							//	return IsServerSideOnly(pi.Parent.Replace(UnwrapLambda(lambda.Body), null));
 
 							if (lambda != null)
 							{
@@ -4581,6 +4577,10 @@ namespace BLToolkit.Data.Linq
 							if (p.Expr == expr)
 								return queries[i];
 						}
+
+						foreach (var query in _parentQueries)
+							if (query.Parameter == expr)
+								return query.Parent;
 					}
 
 					break;
@@ -4756,7 +4756,6 @@ namespace BLToolkit.Data.Linq
 			return lambda;
 		}
 
-
 		public ISqlExpression Convert(ISqlExpression expr)
 		{
 			_info.SqlProvider.SqlQuery = CurrentSql;
@@ -4831,6 +4830,58 @@ namespace BLToolkit.Data.Linq
 			}
 
 			return null;
+		}
+
+		ParseInfo ConvertMethod(ParseInfo<MethodCallExpression> pi)
+		{
+			var e = pi.Expr;
+			var l = ConvertMember(e.Method);
+
+			if (l == null)
+				return null;
+
+			var ef    = UnwrapLambda(l.Body);
+			var parms = new Dictionary<string,int>(l.Parameters.Count);
+			var pn    = e.Method.IsStatic ? 0 : -1;
+
+			foreach (var p in l.Parameters)
+				parms.Add(p.Name, pn++);
+
+			var pie = pi.Parent.Replace(ef, null).Walk(wpi =>
+			{
+				if (wpi.NodeType == ExpressionType.Parameter)
+				{
+					Expression       expr;
+					Func<Expression> fparam;
+
+					var pe = (ParameterExpression)wpi.Expr;
+					int n;
+
+					if (parms.TryGetValue(pe.Name, out n))
+					{
+						if (n < 0)
+						{
+							expr   = e.Object;
+							fparam = () => pi.Property(MethodCall.Object);
+						}
+						else
+						{
+							expr   = e.Arguments[n];
+							fparam = () => pi.Index(e.Arguments, MethodCall.Arguments, n);
+						}
+
+						if (expr.NodeType == ExpressionType.MemberAccess)
+							if (!_accessors.ContainsKey(expr))
+								_accessors.Add(expr, fparam());
+
+						return pi.Create(expr, null);
+					}
+				}
+
+				return wpi;
+			});
+
+			return pie;
 		}
 
 		#endregion

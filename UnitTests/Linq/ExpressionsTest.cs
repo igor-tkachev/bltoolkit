@@ -14,14 +14,6 @@ namespace Data.Linq
 	[TestFixture]
 	public class ExpressionsTest : TestBase
 	{
-		[Test]
-		public void TestCount6()
-		{
-			ForEachProvider(db => AreEqual(
-				   Parent.Take(5).OrderByDescending(p => p.ParentID).Select(p => p.Children.Count()),
-				db.Parent.Take(5).OrderByDescending(p => p.ParentID).Select(p => p.Children.Count())));
-		}
-
 		static int Count1(Parent p) { return p.Children.Count(c => c.ChildID > 0); }
 
 		[Test]
@@ -49,7 +41,7 @@ namespace Data.Linq
 		{
 			Expressions.MapMember<Parent,int,int>((p,id) => Count3(p, id), (p, id) => p.Children.Count(c => c.ChildID > id) + id);
 
-			ForEachProvider(new[] { ProviderName.SqlCe}, db => AreEqual(Parent.Select(p => Count3(p, 2)), db.Parent.Select(p => Count3(p, 2))));
+			ForEachProvider(new[] { ProviderName.SqlCe }, db => AreEqual(Parent.Select(p => Count3(p, 2)), db.Parent.Select(p => Count3(p, 2))));
 		}
 
 		[MethodExpression("Count4Expression")]
@@ -68,7 +60,7 @@ namespace Data.Linq
 		[Test]
 		public void MethodExpression1()
 		{
-			ForEachProvider(new[] { ProviderName.SqlCe}, db => AreEqual(
+			ForEachProvider(db => AreEqual(
 				   Parent.Select(p => Count4(p, 3, 4)),
 				db.Parent.Select(p => Count4(p, 3, 4))));
 		}

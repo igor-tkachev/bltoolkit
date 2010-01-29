@@ -140,7 +140,7 @@ namespace BLToolkit.Data.Linq
 						return null;
 
 					_inParsing = true;
-					_sqlExpression = Parse(parser, QuerySource);
+					_sqlExpression = Parse(parser, QuerySource.Sources);
 					_inParsing = false;
 				}
 
@@ -405,10 +405,10 @@ namespace BLToolkit.Data.Linq
 
 		public abstract QuerySource[]    Sources { get; }
 
-		public abstract ICloneableElement Clone            (Dictionary<ICloneableElement, ICloneableElement> objectTree, Predicate<ICloneableElement> doClone);
-		public abstract FieldIndex[]      Select        <T>(ExpressionParser<T> parser);
-		public abstract ISqlExpression[]  GetExpressions<T>(ExpressionParser<T> parser);
-		public abstract bool              CanBeNull        ();
+		public abstract ICloneableElement     Clone              (Dictionary<ICloneableElement, ICloneableElement> objectTree, Predicate<ICloneableElement> doClone);
+		public abstract FieldIndex[]          Select          <T>(ExpressionParser<T> parser);
+		public abstract ISqlExpression[]      GetExpressions  <T>(ExpressionParser<T> parser);
+		public abstract bool                  CanBeNull          ();
 
 		#endregion
 	}

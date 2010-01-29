@@ -55,5 +55,31 @@ namespace Data.Linq
 		{
 			ForEachProvider(db => Assert.AreEqual(2, db.Parent.SingleOrDefault(p => p.ParentID == 2).ParentID));
 		}
+
+		[Test]
+		public void NestedFirstOrDefaultTest1()
+		{
+			ForEachProvider(db => AreEqual(
+				from p in    Parent select    Child.FirstOrDefault().ChildID,
+				from p in db.Parent select db.Child.FirstOrDefault().ChildID));
+		}
+
+		[Test]
+		public void NestedFirstOrDefaultTest2()
+		{
+			ForEachProvider(db =>
+			{
+				var result =
+					from p in db.Parent
+					select new
+					{
+						p.ParentID,
+						MaxChild = db.Child.Where(c => c.Parent == p).OrderByDescending(c => c.ChildID * c.ParentID).FirstOrDefault().ChildID
+					};
+
+				var list = result.ToList();
+				Assert.Greater(list.Count, 0);
+			});
+		}
 	}
 }
