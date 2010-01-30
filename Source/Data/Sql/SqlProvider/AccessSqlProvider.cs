@@ -24,15 +24,58 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		protected override void BuildSql(StringBuilder sb)
 		{
 			if (NeedSkip)
+			{
 				AlternativeBuildSql2(sb, base.BuildSql);
-			else
-				base.BuildSql(sb);
+				return;
+			}
+			else if (SqlQuery.From.Tables.Count == 0 && SqlQuery.Select.Columns.Count == 1 && SqlQuery.Select.Columns[0].Expression is SqlFunction)
+			{
+				SqlFunction func = (SqlFunction)SqlQuery.Select.Columns[0].Expression;
+
+				if (func.Name == "Iif" && func.Parameters.Length == 3 && func.Parameters[0] is SqlQuery.SearchCondition)
+				{
+					SqlQuery.SearchCondition sc = (SqlQuery.SearchCondition)func.Parameters[0];
+
+					if (sc.Conditions.Count == 1 && sc.Conditions[0].Predicate is SqlQuery.Predicate.FuncLike)
+					{
+						SqlQuery.Predicate.FuncLike p = (SqlQuery.Predicate.FuncLike)sc.Conditions[0].Predicate;
+
+						if (p.Function.Name == "EXISTS")
+						{
+							BuildAnyAsCount(sb);
+							return;
+						}
+					}
+				}
+			}
+
+			base.BuildSql(sb);
+		}
+
+		SqlQuery.Column _selectColumn;
+
+		void BuildAnyAsCount(StringBuilder sb)
+		{
+			SqlFunction                 func  = (SqlFunction)SqlQuery.Select.Columns[0].Expression;
+			SqlQuery.SearchCondition    cond  = (SqlQuery.SearchCondition)func.Parameters[0];
+			SqlFunction                 exist = ((SqlQuery.Predicate.FuncLike)cond.Conditions[0].Predicate).Function;
+			SqlQuery                    query = (SqlQuery)exist.Parameters[0];
+
+			_selectColumn = new SqlQuery.Column(SqlQuery, new SqlExpression(cond.Conditions[0].IsNot ? "Count(*) = 0" : "Count(*) > 0"), SqlQuery.Select.Columns[0].Alias);
+
+			BuildSql(query, sb, 0, 0, false);
+
+			_selectColumn = null;
 		}
 
 		protected override IEnumerable<SqlQuery.Column> GetSelectedColumns()
 		{
+			if (_selectColumn != null)
+				return new[] { _selectColumn };
+
 			if (NeedSkip && !SqlQuery.OrderBy.IsEmpty)
 				return AlternativeGetSelectedColumns(base.GetSelectedColumns);
+
 			return base.GetSelectedColumns();
 		}
 

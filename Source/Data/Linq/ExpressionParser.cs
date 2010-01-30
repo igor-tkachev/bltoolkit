@@ -210,13 +210,14 @@ namespace BLToolkit.Data.Linq
 						{
 							var pi = info.ConvertTo<MemberExpression>();
 							var ex = pi.Create(ma.Expression, pi.Property(Member.Expression));
-
 							var qs = ParseSequence(ex);
 
 							CurrentSql.Select.Expr(SqlFunction.CreateCount(info.Expr.Type, CurrentSql.From.Tables[0]), "cnt");
 
 							return qs;
 						}
+
+						var originalInfo = info;
 
 						if (TypeHelper.IsSameOrParent(typeof(IQueryable), info.Expr.Type))
 						{
@@ -269,6 +270,25 @@ namespace BLToolkit.Data.Linq
 							}
 
 							return new[] { association };
+						}
+
+						if (ma.Expression != null) switch (ma.Expression.NodeType)
+						{
+							case ExpressionType.Call:
+							case ExpressionType.MemberAccess:
+							case ExpressionType.Parameter:
+								{
+									var pi = originalInfo.ConvertTo<MemberExpression>();
+									var ex = pi.Create(ma.Expression, pi.Property(Member.Expression));
+									var qs = ParseSequence(ex);
+
+									qs[0].GetField(pi.Expr.Member).Select(this);
+
+									return qs;
+								}
+
+							default:
+								break;
 						}
 					}
 
@@ -977,12 +997,16 @@ namespace BLToolkit.Data.Linq
 
 			bool makeHaving;
 
+			_parentQueries.Insert(0, new ParentQuery { Parent = select, Parameter = l.Parameters[0] });
+
 			if (CheckSubQueryForWhere(l, select, out makeHaving))
 				select = WrapInSubQuery(select);
 
 			ParseSearchCondition(
 				makeHaving? CurrentSql.Having.SearchCondition.Conditions : CurrentSql.Where.SearchCondition.Conditions,
 				l, l.Body, select);
+
+			_parentQueries.RemoveAt(0);
 
 			ParsingTracer.DecIndentLevel();
 			return select;
@@ -1381,7 +1405,7 @@ namespace BLToolkit.Data.Linq
 		{
 			var take = 0;
 
-			if (_parentQueries.Count == 0 || _info.SqlProvider.IsSubQueryTakeSupported)
+			if (!_isSubQueryParsing || _info.SqlProvider.IsSubQueryTakeSupported)
 				switch (elementMethod)
 				{
 					case ElementMethod.First           :
@@ -1391,7 +1415,7 @@ namespace BLToolkit.Data.Linq
 
 					case ElementMethod.Single          :
 					case ElementMethod.SingleOrDefault :
-						if (_parentQueries.Count == 0)
+						if (!_isSubQueryParsing)
 							take = 2;
 						break;
 				}
@@ -1479,7 +1503,7 @@ namespace BLToolkit.Data.Linq
 		{
 			var cond = ParseAnyCondition(isAny, expr, lambda);
 
-			if (_parentQueries.Count == 0)
+			if (!_isSubQueryParsing)
 			{
 				var sc = new SqlQuery.SearchCondition();
 				sc.Conditions.Add(cond);
@@ -4551,6 +4575,40 @@ namespace BLToolkit.Data.Linq
 
 				if (field != null)
 					return field;
+			}
+
+			ParameterExpression param = null;
+
+			for (Expression ex = expr; ex != null; )
+			{
+				switch (ex.NodeType)
+				{
+					case ExpressionType.MemberAccess:
+						ex = ((MemberExpression)ex).Expression;
+						continue;
+
+					case ExpressionType.Parameter:
+						param = (ParameterExpression)ex;
+						goto default;
+
+					default:
+						ex = null;
+						break;
+				}
+			}
+
+			if (param != null)
+			{
+				foreach (var query in _parentQueries)
+				{
+					if (query.Parameter == param)
+					{
+						var field = query.Parent.GetField(null, expr, 0);
+
+						if (field != null)
+							return field;
+					}
+				}
 			}
 
 			foreach (var query in _parentQueries)

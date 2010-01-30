@@ -155,7 +155,7 @@ namespace Data.Linq
 		[Test]
 		public void Any6()
 		{
-			ForEachProvider(new[] { ProviderName.Access }, db => Assert.AreEqual(
+			ForEachProvider(db => Assert.AreEqual(
 				   Child.Any(c => c.ParentID > 3),
 				db.Child.Any(c => c.ParentID > 3)));
 		}
@@ -163,7 +163,7 @@ namespace Data.Linq
 		[Test]
 		public void Any7()
 		{
-			ForEachProvider(new[] { ProviderName.Access }, db => Assert.AreEqual(
+			ForEachProvider(db => Assert.AreEqual(
 				   Child.Any(),
 				db.Child.Any()));
 		}
@@ -195,7 +195,7 @@ namespace Data.Linq
 		[Test]
 		public void All4()
 		{
-			ForEachProvider(new[] { ProviderName.Access }, db => Assert.AreEqual(
+			ForEachProvider(db => Assert.AreEqual(
 				   Child.All(c => c.ParentID > 3),
 				db.Child.All(c => c.ParentID > 3)));
 		}
@@ -205,9 +205,21 @@ namespace Data.Linq
 		{
 			int n = 3;
 
-			ForEachProvider(new[] { ProviderName.Access }, db => Assert.AreEqual(
+			ForEachProvider(db => Assert.AreEqual(
 				   Child.All(c => c.ParentID > n),
 				db.Child.All(c => c.ParentID > n)));
+		}
+
+		[Test]
+		public void SubQueryAllAny()
+		{
+			ForEachProvider(db => AreEqual(
+				from c in    Parent
+				where    Child.Where(o => o.Parent == c).All(o =>    Child.Where(e => o == e).Any(e => e.ChildID > 10))
+				select c,
+				from c in db.Parent
+				where db.Child.Where(o => o.Parent == c).All(o => db.Child.Where(e => o == e).Any(e => e.ChildID > 10))
+				select c));
 		}
 	}
 }

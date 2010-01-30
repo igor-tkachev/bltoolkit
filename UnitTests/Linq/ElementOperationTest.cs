@@ -1,5 +1,7 @@
 ﻿using System.Linq;
 
+using BLToolkit.Data.DataProvider;
+
 using NUnit.Framework;
 
 namespace Data.Linq
@@ -57,17 +59,23 @@ namespace Data.Linq
 		}
 
 		[Test]
-		public void NestedFirstOrDefaultTest1()
+		public void FirstOrDefaultScalar()
 		{
-			ForEachProvider(db => AreEqual(
+			ForEachProvider(db => Assert.AreEqual(Parent.FirstOrDefault().ParentID, db.Parent.FirstOrDefault().ParentID));
+		}
+
+		[Test]
+		public void NestedFirstOrDefaultScalar1()
+		{
+			ForEachProvider(new[] { ProviderName.SqlCe, ProviderName.Informix, ProviderName.Sybase }, db => AreEqual(
 				from p in    Parent select    Child.FirstOrDefault().ChildID,
 				from p in db.Parent select db.Child.FirstOrDefault().ChildID));
 		}
 
 		[Test]
-		public void NestedFirstOrDefaultTest2()
+		public void NestedFirstOrDefaultScalar2()
 		{
-			ForEachProvider(db =>
+			ForEachProvider(new[] { ProviderName.SqlCe, ProviderName.Informix, "Oracle", ProviderName.Sybase }, db =>
 			{
 				var result =
 					from p in db.Parent
