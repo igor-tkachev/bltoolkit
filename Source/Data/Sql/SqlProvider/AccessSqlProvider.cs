@@ -71,7 +71,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		protected override IEnumerable<SqlQuery.Column> GetSelectedColumns()
 		{
 			if (_selectColumn != null)
-				return new[] { _selectColumn };
+				return new SqlQuery.Column[] { _selectColumn };
 
 			if (NeedSkip && !SqlQuery.OrderBy.IsEmpty)
 				return AlternativeGetSelectedColumns(base.GetSelectedColumns);
