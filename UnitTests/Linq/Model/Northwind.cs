@@ -145,7 +145,7 @@ namespace Data.Linq.Model
 		}
 
 		[TableName("Orders")]
-		public class Order
+		public class Order : EntityBase<int>
 		{
 			[PrimaryKey, NonUpdatable] public int       OrderID;
 			                           public string    CustomerID;
@@ -166,6 +166,11 @@ namespace Data.Linq.Model
 			[Association(ThisKey="CustomerID", OtherKey="CustomerID", CanBeNull=false)] public Customer          Customer;
 			[Association(ThisKey="EmployeeID", OtherKey="EmployeeID")]                  public Employee          Employee;
 			[Association(ThisKey="ShipVia",    OtherKey="ShipperID")]                   public Shipper           Shipper;
+
+			protected override int Key
+			{
+				get { return OrderID; }
+			}
 		}
 
 		[TableName("Products")]

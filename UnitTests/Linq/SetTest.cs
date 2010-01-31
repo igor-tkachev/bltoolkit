@@ -163,9 +163,15 @@ namespace Data.Linq
 		[Test]
 		public void Any7()
 		{
-			ForEachProvider(db => Assert.AreEqual(
-				   Child.Any(),
-				db.Child.Any()));
+			ForEachProvider(db => Assert.AreEqual(Child.Any(), db.Child.Any()));
+		}
+
+		[Test]
+		public void Any8()
+		{
+			ForEachProvider(db => AreEqual(
+				from p in    Parent select    Child.Select(c => c.Parent).Any(c => c == p),
+				from p in db.Parent select db.Child.Select(c => c.Parent).Any(c => c == p)));
 		}
 
 		[Test]
@@ -220,6 +226,44 @@ namespace Data.Linq
 				from c in db.Parent
 				where db.Child.Where(o => o.Parent == c).All(o => db.Child.Where(e => o == e).Any(e => e.ChildID > 10))
 				select c));
+		}
+
+		[Test]
+		public void AllNestedTest()
+		{
+			using (var db = new NorthwindDB())
+				AreEqual(
+					from c in    Customer
+					where    Order.Where(o => o.Customer == c).All(o =>    Employee.Where(e => o.Employee == e).Any(e => e.FirstName.StartsWith("A")))
+					select c,
+					from c in db.Customer
+					where db.Order.Where(o => o.Customer == c).All(o => db.Employee.Where(e => o.Employee == e).Any(e => e.FirstName.StartsWith("A")))
+					select c);
+		}
+
+		[Test]
+		public void ComplexAllTest()
+		{
+			using (var db = new NorthwindDB())
+				AreEqual(
+					from o in Order
+					where
+						Customer.Where(c => c == o.Customer).All(c => c.CompanyName.StartsWith("A")) ||
+						Employee.Where(e => e == o.Employee).All(e => e.FirstName.EndsWith("t"))
+					select o,
+					from o in db.Order
+					where
+						db.Customer.Where(c => c == o.Customer).All(c => c.CompanyName.StartsWith("A")) ||
+						db.Employee.Where(e => e == o.Employee).All(e => e.FirstName.EndsWith("t"))
+					select o);
+		}
+
+		[Test]
+		public void Contains1()
+		{
+			ForEachProvider(db => AreEqual(
+				from p in    Parent select    Child.Select(c => c.Parent).Contains(p),
+				from p in db.Parent select db.Child.Select(c => c.Parent).Contains(p)));
 		}
 	}
 }

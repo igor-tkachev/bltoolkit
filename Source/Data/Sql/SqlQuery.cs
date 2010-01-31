@@ -2795,6 +2795,7 @@ namespace BLToolkit.Data.Sql
 			});
 
 			ResolveWeakJoins();
+			OptimizeColumns();
 			OptimizeSubQueries();
 
 			new QueryVisitor().Visit(this, delegate(IQueryElement e)
@@ -3128,6 +3129,19 @@ namespace BLToolkit.Data.Sql
 					From.Tables[i] = table;
 				}
 			}
+		}
+
+		void OptimizeColumns()
+		{
+			((ISqlExpressionWalkable)Select).Walk(false, delegate(ISqlExpression expr)
+			{
+				SqlQuery query = expr as SqlQuery;
+					
+				if (query != null && query.From.Tables.Count == 0 && query.Select.Columns.Count == 1)
+					return query.Select.Columns[0].Expression;
+
+				return expr;
+			});
 		}
 
 		IDictionary<string,object> _aliases;

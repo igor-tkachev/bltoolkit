@@ -291,14 +291,10 @@ namespace Data.Linq
 				if (_customer == null)
 				{
 					using (var db = new NorthwindDB())
-					{
 						_customer = db.Customer.ToList();
 
-						foreach (var c in _customer)
-						{
-							c.Orders = (from o in Order where o.CustomerID == c.CustomerID select o).ToList();
-						}
-					}
+					foreach (var c in _customer)
+						c.Orders = (from o in Order where o.CustomerID == c.CustomerID select o).ToList();
 				}
 
 				return _customer;
@@ -318,8 +314,8 @@ namespace Data.Linq
 
 						foreach (var employee in _employee)
 						{
-							employee.Employees         = (from e in _employee where e.ReportsTo == employee.EmployeeID select e).ToList();
-							employee.ReportsToEmployee = (from e in _employee where e.EmployeeID == employee.ReportsTo select e).SingleOrDefault();
+							employee.Employees         = (from e in _employee where e.ReportsTo  == employee.EmployeeID select e).ToList();
+							employee.ReportsToEmployee = (from e in _employee where e.EmployeeID == employee.ReportsTo  select e).SingleOrDefault();
 						}
 					}
 				}
@@ -358,8 +354,17 @@ namespace Data.Linq
 			get
 			{
 				if (_order == null)
+				{
 					using (var db = new NorthwindDB())
 						_order = db.Order.ToList();
+
+					foreach (var o in _order)
+					{
+						o.Customer = Customer.Single(c => o.CustomerID == c.CustomerID);
+						o.Employee = Employee.Single(e => o.EmployeeID == e.EmployeeID);
+					}
+				}
+
 				return _order;
 			}
 		}

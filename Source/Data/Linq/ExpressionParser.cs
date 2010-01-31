@@ -62,9 +62,6 @@ namespace BLToolkit.Data.Linq
 		bool   _isSubQueryParsing;
 		int    _currentSql = 0;
 		Action _buildSelect;
-#pragma warning disable 414
-		bool   _isParsingPhase;
-#pragma warning restore 414
 
 		Func<QuerySource,LambdaInfo,QuerySource> _convertSource = (s,_) => s;
 
@@ -81,6 +78,18 @@ namespace BLToolkit.Data.Linq
 
 		#endregion
 
+		#region Parsing Method
+
+		enum ParsingMethod
+		{
+			Select,
+			Where
+		}
+
+		List<ParsingMethod> _parsingMethod = new List<ParsingMethod>() { ParsingMethod.Select };
+
+		#endregion
+
 		#region Parsing
 
 		#region Parse
@@ -91,8 +100,6 @@ namespace BLToolkit.Data.Linq
 			Expression            expression,
 			ParameterExpression[] parameters)
 		{
-			_isParsingPhase = true;
-
 			ParsingTracer.WriteLine(expression);
 			ParsingTracer.IncIndentLevel();
 
@@ -132,8 +139,6 @@ namespace BLToolkit.Data.Linq
 					var query = ParseSequence(pi);
 
 					ParsingTracer.WriteLine("Select building phase...");
-
-					_isParsingPhase = false;
 
 					if (_buildSelect != null)
 						_buildSelect();
@@ -388,6 +393,11 @@ namespace BLToolkit.Data.Linq
 				pi => pi.IsQueryableMethod ("Except",           seq => sequence = ParseSequence(seq), ex => { select = ParseIntersect(sequence,    ex, true);  return true; }),
 				pi => pi.IsQueryableMethod ("Intersect",        seq => sequence = ParseSequence(seq), ex => { select = ParseIntersect(sequence,    ex, false); return true; }),
 				pi => pi.IsEnumerableMethod("DefaultIfEmpty",   seq => { sequence = ParseDefaultIfEmpty(seq); return sequence != null; }),
+				pi =>
+				{
+					ParseInfo s = null;
+					return pi.IsQueryableMethod("Contains", seq => s = seq, ex => { sequence = ParseContains(s, ex, pi); return true; });
+				},
 				pi => pi.IsMethod(m =>
 				{
 					if (m.Expr.Method.DeclaringType == typeof(Queryable) || !TypeHelper.IsSameOrParent(typeof(IQueryable), pi.Expr.Type))
@@ -475,7 +485,11 @@ namespace BLToolkit.Data.Linq
 
 			ParsingTracer.IncIndentLevel();
 
+			_parsingMethod.Insert(0, ParsingMethod.Select);
+
 			var select = ParseSelectInternal(l, sources);
+
+			_parsingMethod.RemoveAt(0);
 
 			ParsingTracer.DecIndentLevel();
 
@@ -997,6 +1011,7 @@ namespace BLToolkit.Data.Linq
 
 			bool makeHaving;
 
+			_parsingMethod.Insert(0, ParsingMethod.Where);
 			_parentQueries.Insert(0, new ParentQuery { Parent = select, Parameter = l.Parameters[0] });
 
 			if (CheckSubQueryForWhere(l, select, out makeHaving))
@@ -1007,6 +1022,7 @@ namespace BLToolkit.Data.Linq
 				l, l.Body, select);
 
 			_parentQueries.RemoveAt(0);
+			_parsingMethod.RemoveAt(0);
 
 			ParsingTracer.DecIndentLevel();
 			return select;
@@ -1281,7 +1297,7 @@ namespace BLToolkit.Data.Linq
 
 		#endregion
 
-		#region Parse Skip
+		#region Parse ElementAt
 
 		bool ParseElementAt(QuerySource select, ParseInfo value)
 		{
@@ -1503,7 +1519,7 @@ namespace BLToolkit.Data.Linq
 		{
 			var cond = ParseAnyCondition(isAny, expr, lambda);
 
-			if (!_isSubQueryParsing)
+			if (_parsingMethod[0] == ParsingMethod.Select)
 			{
 				var sc = new SqlQuery.SearchCondition();
 				sc.Conditions.Add(cond);
@@ -1576,17 +1592,17 @@ namespace BLToolkit.Data.Linq
 
 				if (t != null && t.ParentAssociation != null)
 				{
-					var orig = t;
-					t = CreateTable(new SqlQuery(), l);
-
-					associationList.Add(t, orig);
-
 					if (_parentQueries.Count > 0)
 					{
 						foreach (var parentQuery in _parentQueries)
 						{
-							if (parentQuery.Parent.Find(orig.ParentAssociation))
+							if (parentQuery.Parent.Find(t.ParentAssociation))
 							{
+								var orig = t;
+								t = CreateTable(new SqlQuery(), l);
+
+								associationList.Add(t, orig);
+
 								var csql = CurrentSql.From.Tables.Count == 0 ? t.SqlQuery : CurrentSql;
 
 								foreach (var c in orig.ParentAssociationJoin.Condition.Conditions)
@@ -1598,12 +1614,12 @@ namespace BLToolkit.Data.Linq
 										.Field(t.Columns[((SqlField)predicate.Expr2).Name].Field);
 								}
 
+								s = t;
+
 								break;
 							}
 						}
 					}
-
-					s = t;
 				}
 				else
 					s = cs(s, l);
@@ -1637,6 +1653,23 @@ namespace BLToolkit.Data.Linq
 
 			ParsingTracer.DecIndentLevel();
 			return cond;
+		}
+
+		#endregion
+
+		#region Parse Contains
+
+		QuerySource[] ParseContains(ParseInfo sequence, ParseInfo expr, ParseInfo<MethodCallExpression> parentInfo)
+		{
+			ParsingTracer.WriteLine();
+			ParsingTracer.IncIndentLevel();
+
+			var param  = Expression.Parameter(expr.Expr.Type, expr.NodeType == ExpressionType.Parameter ? ((ParameterExpression)expr).Name : "t");
+			var lambda = new LambdaInfo(ParseInfo.CreateRoot(Expression.Equal(param, expr), null), ParseInfo.CreateRoot(param, null));
+			var ret    = ParseAny(true, sequence, lambda, parentInfo);
+
+			ParsingTracer.DecIndentLevel();
+			return ret;
 		}
 
 		#endregion
@@ -2694,8 +2727,6 @@ namespace BLToolkit.Data.Linq
 
 		bool BuildSimpleQuery(ParseInfo info, Type type, string alias)
 		{
-			_isParsingPhase = false;
-
 			var table = CreateTable(CurrentSql, type);
 
 			table.SqlTable.Alias = alias;
@@ -2711,8 +2742,6 @@ namespace BLToolkit.Data.Linq
 
 		void BuildScalarSelect(ParseInfo parseInfo)
 		{
-			_isParsingPhase = false;
-
 			switch (parseInfo.NodeType)
 			{
 				case ExpressionType.New:
@@ -3639,7 +3668,7 @@ namespace BLToolkit.Data.Linq
 					case ExpressionType.LessThan :
 					case ExpressionType.LessThanOrEqual :
 						{
-							var pi = parseInfo.Convert<BinaryExpression>();
+							var pi = parseInfo.ConvertTo<BinaryExpression>();
 							var e  = parseInfo.Expr as BinaryExpression;
 							var el = pi.Create(e.Left,  pi.Property(Binary.Left));
 							var er = pi.Create(e.Right, pi.Property(Binary.Right));
@@ -4040,9 +4069,14 @@ namespace BLToolkit.Data.Linq
 
 							if (ee.Expr2 == column.Field)
 							{
-								rcol = rightQueries[0].GetField((SqlField)ee.Expr1);
-								break;
-							}
+								var fld = rightQueries[0].GetField((SqlField)ee.Expr1);
+
+								if (fld != null)
+								{
+									rcol = fld;
+									break;
+								}
+}
 						}
 					}
 
@@ -4075,8 +4109,13 @@ namespace BLToolkit.Data.Linq
 
 							if (ee.Expr2 == column.Field)
 							{
-								lcol = leftQueries[0].GetField((SqlField)ee.Expr1);
-								break;
+								var fld = leftQueries[0].GetField((SqlField)ee.Expr1);
+
+								if (fld != null)
+								{
+									lcol = fld;
+									break;
+								}
 							}
 						}
 					}
@@ -4603,6 +4642,9 @@ namespace BLToolkit.Data.Linq
 				{
 					if (query.Parameter == param)
 					{
+						//if (param == expr && query.Parent is QuerySource.Scalar)
+						//	return query.Parent.Fields[0];
+
 						var field = query.Parent.GetField(null, expr, 0);
 
 						if (field != null)

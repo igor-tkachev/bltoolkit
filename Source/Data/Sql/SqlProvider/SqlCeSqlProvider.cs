@@ -95,6 +95,8 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		public override SqlQuery Finalize(SqlQuery sqlQuery)
 		{
+			sqlQuery = base.Finalize(sqlQuery);
+
 			new QueryVisitor().Visit(sqlQuery, delegate(IQueryElement element)
 			{
 				if (element.ElementType != QueryElementType.SqlQuery)

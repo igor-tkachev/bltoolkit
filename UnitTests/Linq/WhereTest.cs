@@ -757,5 +757,14 @@ namespace Data.Linq
 				from p in    Parent where p.ParentID == user select p,
 				from p in db.Parent where p.ParentID == user select p));
 		}
+
+		[Test]
+		public void SelectNestedCalculatedTest()
+		{
+			using (var db = new NorthwindDB())
+				AreEqual(
+					from r in from o in    Order select o.Freight * 1000 where r > 100000 select r / 1000,
+					from r in from o in db.Order select o.Freight * 1000 where r > 100000 select r / 1000);
+		}
 	}
 }
