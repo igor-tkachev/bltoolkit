@@ -2,6 +2,7 @@
 using System.Linq;
 
 using BLToolkit.Data.DataProvider;
+using BLToolkit.Data.Linq;
 
 using NUnit.Framework;
 
