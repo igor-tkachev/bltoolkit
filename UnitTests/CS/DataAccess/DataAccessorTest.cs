@@ -872,7 +872,7 @@ namespace DataAccess
 				else
 					retParams = new ArrayList(1);
 
-				retParams.Add(db.Parameter((string)db.DataProvider.Convert("ID", ConvertType.NameToParameter), 1));
+				retParams.Add(db.Parameter((string)db.DataProvider.Convert("ID", db.GetConvertTypeToParameter()), 1));
 
 				return (IDbDataParameter[]) retParams.ToArray(typeof(IDbDataParameter));
 			}

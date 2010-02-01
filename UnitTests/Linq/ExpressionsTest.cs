@@ -64,5 +64,26 @@ namespace Data.Linq
 				   Parent.Select(p => Count4(p, 3, 4)),
 				db.Parent.Select(p => Count4(p, 3, 4))));
 		}
+
+		[MethodExpression("Count4Expression2")]
+		static int Count5(TestDbManager db, Parent p)
+		{
+			return (_count4Expression2 ?? (_count4Expression2 = Count4Expression2().Compile()))(db, p);
+		}
+
+		static Func<TestDbManager,Parent,int> _count4Expression2;
+
+		static Expression<Func<TestDbManager,Parent,int>> Count4Expression2()
+		{
+			return (db, p) => db.Child.Where(c => c.ParentID == p.ParentID).Count();
+		}
+
+		[Test]
+		public void MethodExpression2()
+		{
+			ForEachProvider(db => AreEqual(
+				   Parent.Select(p => Child.Where(c => c.ParentID == p.ParentID).Count()),
+				db.Parent.Select(p => Count5(db, p))));
+		}
 	}
 }

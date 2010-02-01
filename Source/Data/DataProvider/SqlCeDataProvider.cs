@@ -68,7 +68,8 @@ namespace BLToolkit.Data.DataProvider
 			switch (convertType)
 			{
 				case ConvertType.NameToQueryParameter:
-				case ConvertType.NameToParameter:
+				case ConvertType.NameToCommandParameter:
+				case ConvertType.NameToSprocParameter:
 					return "@" + value;
 
 				case ConvertType.NameToQueryField:

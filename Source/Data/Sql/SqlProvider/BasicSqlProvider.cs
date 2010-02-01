@@ -799,10 +799,12 @@ namespace BLToolkit.Data.Sql.SqlProvider
 					{
 						SqlQuery.Column column = (SqlQuery.Column)expr;
 
-						if (column.ToString() == "(t102).t104.ParentID1")
+#if DEBUG
+						if (column.ToString() == "t8.ParentID")
 						{
 							column.ToString();
 						}
+#endif
 
 						ISqlTableSource table  = _sqlQuery.GetTableSource(column.Parent);
 

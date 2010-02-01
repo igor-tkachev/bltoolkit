@@ -817,7 +817,9 @@ namespace BLToolkit.Data
 					cmd.CommandText = spName;
 
 					bool res = ExecuteOperation<bool>(OperationType.DeriveParameters, delegate { return _dataProvider.DeriveParameters(cmd); });
-					ExecuteOperation(OperationType.CloseConnection, con.Close);
+
+					if (openNewConnection)
+						ExecuteOperation(OperationType.CloseConnection, con.Close);
 
 					if (res == false)
 						return null;
@@ -964,7 +966,7 @@ namespace BLToolkit.Data
 				if (c.AutoIncrement == false && c.ReadOnly == false)
 				{
 					object o    = dataRow[c.ColumnName];
-					string name = _dataProvider.Convert(c.ColumnName, ConvertType.NameToParameter).ToString();
+					string name = _dataProvider.Convert(c.ColumnName, GetConvertTypeToParameter()).ToString();
 
 					Parameter(name).Value =
 						c.AllowDBNull && _mappingSchema.IsNull(o)? DBNull.Value: o;
@@ -995,7 +997,7 @@ namespace BLToolkit.Data
 
 			foreach (MemberMapper mm in om)
 			{
-				string name = _dataProvider.Convert(mm.Name, ConvertType.NameToParameter).ToString();
+				string name = _dataProvider.Convert(mm.Name, GetConvertTypeToParameter()).ToString();
 
 				if (Command.Parameters.Contains(name))
 				{
@@ -1081,7 +1083,7 @@ namespace BLToolkit.Data
 				if (c.AutoIncrement || c.ReadOnly)
 					continue;
 
-				string           name      = _dataProvider.Convert(c.ColumnName, ConvertType.NameToParameter).ToString();
+				string           name      = _dataProvider.Convert(c.ColumnName, GetConvertTypeToParameter()).ToString();
 				IDbDataParameter parameter = c.AllowDBNull?
 					NullParameter(name, dataRow[c.ColumnName]):
 					Parameter    (name, dataRow[c.ColumnName]);
@@ -1158,7 +1160,7 @@ namespace BLToolkit.Data
 					continue;
 				
 				object value = isType? null: mm.GetValue(obj);
-				string name  = _dataProvider.Convert(mm.Name, ConvertType.NameToParameter).ToString();
+				string name  = _dataProvider.Convert(mm.Name, GetConvertTypeToParameter()).ToString();
 
 				IDbDataParameter parameter   = mm.MapMemberInfo.Nullable || value == null?
 					NullParameter(name, value, mm.MapMemberInfo.NullValue): (mm.DbType != DbType.Object)?
@@ -1782,6 +1784,13 @@ namespace BLToolkit.Data
 			param.SourceVersion = dataRowVersion;
 
 			return param;
+		}
+
+		public ConvertType GetConvertTypeToParameter()
+		{
+			return Command.CommandType == CommandType.StoredProcedure ?
+				ConvertType.NameToCommandParameter:
+				ConvertType.NameToSprocParameter;
 		}
 
 		#endregion
@@ -2410,7 +2419,7 @@ namespace BLToolkit.Data
 
 			foreach (MemberMapper mm in om)
 			{
-				string name = _dataProvider.Convert(mm.Name, ConvertType.NameToParameter).ToString();
+				string name = _dataProvider.Convert(mm.Name, GetConvertTypeToParameter()).ToString();
 
 				if (Command.Parameters.Contains(name))
 					mms.Add(mm);
@@ -2836,9 +2845,7 @@ namespace BLToolkit.Data
 
 					if (nameOrIndex.ByName)
 					{
-						string name = (string)_dataProvider.Convert(nameOrIndex.Name,
-							ConvertType.NameToParameter);
-						
+						string name = (string)_dataProvider.Convert(nameOrIndex.Name, GetConvertTypeToParameter());
 						return Parameter(name).Value;
 					}
 

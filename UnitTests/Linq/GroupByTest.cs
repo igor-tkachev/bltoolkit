@@ -688,8 +688,9 @@ namespace Data.Linq
 		//[Test]
 		public void SelectMany()
 		{
-			var expected = Child.GroupBy(ch => ch.ParentID).SelectMany(g => g);
-			ForEachProvider(db => AreEqual(expected, db.Child.GroupBy(ch => ch.ParentID).SelectMany(g => g)));
+			ForEachProvider(db => AreEqual(
+				   Child.GroupBy(ch => ch.ParentID).SelectMany(g => g),
+				db.Child.GroupBy(ch => ch.ParentID).SelectMany(g => g)));
 		}
 	}
 }

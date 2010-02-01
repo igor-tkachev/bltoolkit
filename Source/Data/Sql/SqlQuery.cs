@@ -264,12 +264,15 @@ namespace BLToolkit.Data.Sql
 
 				dic.Add(this, this);
 
+				sb
+					.Append('t')
+					.Append(Parent.SourceID)
+					.Append(".");
+
 				if (Expression is SqlQuery)
 				{
 					sb
-						.Append('t')
-						.Append(Parent.SourceID)
-						.Append(".(\n\t\t");
+						.Append("(\n\t\t");
 					int len = sb.Length;
 					Expression.ToString(sb, dic).Replace("\n", "\n\t\t", len, sb.Length - len);
 					sb.Append("\n\t)");
@@ -278,9 +281,7 @@ namespace BLToolkit.Data.Sql
 				{
 					Column col = (Column)Expression;
 					sb
-						.Append('t')
-						.Append(Parent.SourceID)
-						.Append(".t")
+						.Append("t")
 						.Append(col.Parent.SourceID)
 						.Append(".")
 						.Append(col.Alias ?? "c" + (col.Parent.Select.Columns.IndexOf(col) + 1));
@@ -2698,6 +2699,8 @@ namespace BLToolkit.Data.Sql
 		public void FinalizeAndValidate()
 		{
 #if DEBUG
+			string sqlText = SqlText;
+
 			Dictionary<SqlQuery,SqlQuery> dic = new Dictionary<SqlQuery,SqlQuery>();
 
 			new QueryVisitor().VisitAll(this, delegate(IQueryElement e)
@@ -2717,6 +2720,10 @@ namespace BLToolkit.Data.Sql
 			OptimizeUnions();
 			FinalizeAndValidateInternal();
 			SetAliases();
+
+#if DEBUG
+			sqlText = SqlText;
+#endif
 		}
 
 		void OptimizeUnions()
@@ -2787,6 +2794,7 @@ namespace BLToolkit.Data.Sql
 
 				if (sql != null && sql != this)
 				{
+					sql.ParentSql = this;
 					sql.FinalizeAndValidateInternal();
 
 					if (sql.ParameterDependent)
@@ -3073,6 +3081,19 @@ namespace BLToolkit.Data.Sql
 
 					if (!query.Where. IsEmpty) ConcatSearchCondition(Where,  query.Where);
 					if (!query.Having.IsEmpty) ConcatSearchCondition(Having, query.Having);
+
+					((ISqlExpressionWalkable)top).Walk(false, delegate(ISqlExpression expr)
+					{
+						if (expr is SqlQuery)
+						{
+							SqlQuery sql = (SqlQuery)expr;
+
+							if (sql.ParentSql == query)
+								sql.ParentSql = query.ParentSql ?? this;
+						}
+
+						return expr;
+					});
 
 					return query.From.Tables[0];
 				}

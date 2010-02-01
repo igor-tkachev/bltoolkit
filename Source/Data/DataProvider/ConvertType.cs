@@ -22,7 +22,20 @@ namespace BLToolkit.Data.DataProvider
 		///     db.Parameter("@firstName") = "John";
 		///                   ^ here
 		/// </summary>
-		NameToParameter,
+		NameToCommandParameter,
+
+		[Obsolete("Use NameToCommandParameter or NameToSprocParameter instead.")]
+		NameToParameter = NameToCommandParameter,
+
+		/// <summary>
+		/// Provided name should be converted to command parameter name.
+		/// For example:
+		///     firstName -> @firstName
+		/// for the following query:
+		///     db.Parameter("@firstName") = "John";
+		///                   ^ here
+		/// </summary>
+		NameToSprocParameter,
 
 		/// <summary>
 		/// Provided name should be converted to query field name.

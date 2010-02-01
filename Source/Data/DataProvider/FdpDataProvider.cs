@@ -103,7 +103,8 @@ namespace BLToolkit.Data.DataProvider
 					break;
 
 				case ConvertType.NameToQueryParameter:
-				case ConvertType.NameToParameter:
+				case ConvertType.NameToCommandParameter:
+				case ConvertType.NameToSprocParameter:
 					return "@" + value;
 
 				case ConvertType.ParameterToName:
@@ -159,7 +160,7 @@ namespace BLToolkit.Data.DataProvider
 		{
 			return (string)Convert(
 				InOutInputParameterPrefix + (string)Convert(ioParameterName, ConvertType.ParameterToName),
-				ConvertType.NameToParameter);
+				ConvertType.NameToSprocParameter);
 		}
 
 		private static IDbDataParameter GetParameter(string parameterName, IDbDataParameter[] commandParameters)
@@ -173,7 +174,7 @@ namespace BLToolkit.Data.DataProvider
 		private bool IsReturnValue(IDbDataParameter parameter)
 		{
 			if (string.Compare(parameter.ParameterName,
-					(string)Convert(ReturnParameterName, ConvertType.NameToParameter), true) == 0
+					(string)Convert(ReturnParameterName, ConvertType.NameToSprocParameter), true) == 0
 				)
 				return true;
 

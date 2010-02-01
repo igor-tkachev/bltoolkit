@@ -36,7 +36,8 @@ namespace BLToolkit.Data.DataProvider
 				case ConvertType.NameToQueryParameter:
 					return "?";
 
-				case ConvertType.NameToParameter:
+				case ConvertType.NameToCommandParameter:
+				case ConvertType.NameToSprocParameter:
 					return ":" + value;
 
 				case ConvertType.ParameterToName:

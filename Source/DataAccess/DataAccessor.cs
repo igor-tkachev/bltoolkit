@@ -116,33 +116,25 @@ namespace BLToolkit.DataAccess
 		#region Parameters
 
 		[NoInterception]
-		protected virtual string GetQueryParameterName(
-			DbManager db,
-			string    paramName)
+		protected virtual string GetQueryParameterName(DbManager db, string paramName)
 		{
 			return (string)db.DataProvider.Convert(paramName, ConvertType.NameToQueryParameter);
 		}
 
 		[NoInterception]
-		protected virtual string GetSpParameterName(
-			DbManager db,
-			string    paramName)
+		protected virtual string GetSpParameterName(DbManager db, string paramName)
 		{
-			return (string)db.DataProvider.Convert(paramName, ConvertType.NameToParameter);
+			return (string)db.DataProvider.Convert(paramName, db.GetConvertTypeToParameter());
 		}
 
 		[NoInterception]
-		protected virtual IDbDataParameter[] PrepareParameters(
-			DbManager db,
-			object[]  parameters)
+		protected virtual IDbDataParameter[] PrepareParameters(DbManager db, object[] parameters)
 		{
 			return db.PrepareParameters(parameters);
 		}
 
 		[NoInterception]
-		protected virtual IDbDataParameter GetParameter(
-			DbManager db,
-			string    paramName)
+		protected virtual IDbDataParameter GetParameter(DbManager db, string paramName)
 		{
 			IDbDataParameter p = db.Parameter(paramName);
 

@@ -79,7 +79,8 @@ namespace BLToolkit.Data.DataProvider
 				case ConvertType.NameToQueryParameter:
 					return ":" + value;
 
-				case ConvertType.NameToParameter:
+				case ConvertType.NameToCommandParameter:
+				case ConvertType.NameToSprocParameter:
 					return ParameterPrefix == null? value: ParameterPrefix + value;
 
 				case ConvertType.ParameterToName:

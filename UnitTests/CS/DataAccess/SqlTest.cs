@@ -111,7 +111,7 @@ namespace DataAccess
 				SqlQueryInfo insert = da.GetSqlQueryInfo<TestCategory>(db, "Insert");
 
 				Assert.That(update.QueryText, Is.Not.Contains(
-					"\t" + db.DataProvider.Convert("Id", ConvertType.NameToQueryField) + " = " + db.DataProvider.Convert("Id", ConvertType.NameToParameter) + "\n"),
+					"\t" + db.DataProvider.Convert("Id", ConvertType.NameToQueryField) + " = " + db.DataProvider.Convert("Id", db.GetConvertTypeToParameter()) + "\n"),
 					"Update");
 				Assert.That(insert.QueryText, Is.Not.Contains("Id"), "Insert");
 			}

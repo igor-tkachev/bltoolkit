@@ -119,25 +119,21 @@ namespace Data.Linq
 		[Test]
 		public void LeftJoin1()
 		{
-			ForEachProvider(db =>
-			{
-				var q = 
-					from p in db.Parent
-						join ch in db.Child on p.ParentID equals ch.ParentID into lj1
-					where p.ParentID == 1
-					select p;
-
-				var list = q.ToList();
-
-				Assert.AreEqual(1, list.Count);
-				Assert.AreEqual(1, list[0].ParentID);
-			});
+			ForEachProvider(db => AreEqual(
+				from p in Parent
+					join ch in Child on p.ParentID equals ch.ParentID into lj1
+				where p.ParentID == 1
+				select p,
+				from p in db.Parent
+					join ch in db.Child on p.ParentID equals ch.ParentID into lj1
+				where p.ParentID == 1
+				select p));
 		}
 
 		[Test]
 		public void LeftJoin2()
 		{
-			ForEachProvider(new[] { ProviderName.SqlCe }, db =>
+			ForEachProvider(db =>
 			{
 				var q = 
 					from p in db.Parent
@@ -272,6 +268,28 @@ namespace Data.Linq
 			ForEachProvider(db => AreEqual(
 				from g in    GrandChild join c in    Child on g.Child equals c select new { c.ParentID, g.GrandChildID },
 				from g in db.GrandChild join c in db.Child on g.Child equals c select new { c.ParentID, g.GrandChildID }));
+		}
+
+		[Test]
+		public void CountGroupJoin()
+		{
+			ForEachProvider(db => AreEqual(
+				from p in Parent
+				join c in Child on p.ParentID equals c.ParentID into gc
+				join g in GrandChild on p.ParentID equals g.ParentID into gg
+				select new
+				{
+					Count1 = gc.Count(),
+					Count2 = gg.Count()
+				},
+				from p in db.Parent
+				join c in db.Child on p.ParentID equals c.ParentID into gc
+				join g in db.GrandChild on p.ParentID equals g.ParentID into gg
+				select new
+				{
+					Count1 = gc.Count(),
+					Count2 = gg.Count()
+				}));
 		}
 	}
 }

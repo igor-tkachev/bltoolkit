@@ -339,7 +339,7 @@ namespace Data
 
 				foreach (MemberMapper mm in ObjectMapper<DataTypeTest>.Instance)
 				{
-					string paramName = (string)db.DataProvider.Convert(mm.Name, ConvertType.NameToParameter);
+					string paramName = (string)db.DataProvider.Convert(mm.Name, db.GetConvertTypeToParameter());
 					IDbDataParameter p = Array.Find(parameters,
 						delegate(IDbDataParameter obj) { return obj.ParameterName == paramName; });
 
@@ -386,7 +386,7 @@ namespace Data
 
 				foreach (MemberMapper mm in ObjectMapper<DataTypeSqlTest>.Instance)
 				{
-					string paramName = (string)db.DataProvider.Convert(mm.Name, ConvertType.NameToParameter);
+					string paramName = (string)db.DataProvider.Convert(mm.Name, db.GetConvertTypeToParameter());
 					IDbDataParameter p = Array.Find(parameters,
 						delegate(IDbDataParameter obj) { return obj.ParameterName == paramName; });
 

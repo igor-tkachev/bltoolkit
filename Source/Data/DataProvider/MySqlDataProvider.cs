@@ -72,7 +72,7 @@ namespace BLToolkit.Data.DataProvider
 					p.ParameterName =
 						Convert(
 							Convert(p.ParameterName, ConvertType.ParameterToName),
-							ConvertType.NameToParameter).ToString();
+							command.CommandType == CommandType.StoredProcedure ? ConvertType.NameToSprocParameter : ConvertType.NameToCommandParameter).ToString();
 			}
 		}
 
@@ -96,7 +96,8 @@ namespace BLToolkit.Data.DataProvider
 				case ConvertType.NameToQueryParameter:
 					return ParameterSymbol + value.ToString();
 
-				case ConvertType.NameToParameter:
+				case ConvertType.NameToCommandParameter:
+				case ConvertType.NameToSprocParameter:
 					return ParameterSymbol + ParameterPrefix + value.ToString();
 
 				case ConvertType.ParameterToName:

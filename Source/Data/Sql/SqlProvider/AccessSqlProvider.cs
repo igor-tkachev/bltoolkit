@@ -166,7 +166,11 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			return delegate(object value)
 			{
 				if (value == null)
+#if DEBUG
+					value = "";
+#else
 					throw new SqlException("NULL cannot be used as a LIKE predicate parameter.");
+#endif
 
 				string text = value.ToString();
 
