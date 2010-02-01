@@ -466,7 +466,7 @@ namespace BLToolkit.Data.Linq
 					Expression.Call(
 						_infoParam,
 						Expressor<ExpressionInfo<T>>.MethodExpressor(a => a.GetIQueryable(0, null)),
-						new [] { Expression.Constant(n), info.ParamAccessor }));
+						new [] { Expression.Constant(n), info.ParamAccessor ?? Expression.Constant(null) }));
 			}
 
 			throw new InvalidOperationException();
@@ -821,9 +821,22 @@ namespace BLToolkit.Data.Linq
 				var new2 = innerKeySelector.Body.ConvertTo<NewExpression>();
 
 				for (var i = 0; i < new1.Expr.Arguments.Count; i++)
-					join
-						.Expr(ParseExpression(new1.Create(new1.Expr.Arguments[i], new1.Index(new1.Expr.Arguments, New.Arguments, i)), source1)).Equal
-						.Expr(ParseExpression(new2.Create(new2.Expr.Arguments[i], new2.Index(new2.Expr.Arguments, New.Arguments, i)), source2));
+				{
+					var arg1 = new1.Create(new1.Expr.Arguments[i], new1.Index(new1.Expr.Arguments, New.Arguments, i));
+					var arg2 = new2.Create(new2.Expr.Arguments[i], new2.Index(new2.Expr.Arguments, New.Arguments, i));
+
+					var predicate = ParseObjectComparison(
+						ExpressionType.Equal,
+						outerKeySelector, arg1, new[] { source1 },
+						innerKeySelector, arg2, new[] { source2 });
+
+					if (predicate != null)
+						join.JoinedTable.Condition.Conditions.Add(new SqlQuery.Condition(false, predicate));
+					else
+						join
+							.Expr(ParseExpression(arg1, source1)).Equal
+							.Expr(ParseExpression(arg2, source2));
+				}
 			}
 			else
 			{
@@ -2846,7 +2859,8 @@ namespace BLToolkit.Data.Linq
 						var ma = (MemberExpression)pi.Expr;
 						setName(ma.Member.Name);
 
-						return pi.Parent.Replace(pi.Expr, accessor);
+						if (pi.Parent != null)
+							return pi.Parent.Replace(pi.Expr, accessor);
 					}
 				}
 

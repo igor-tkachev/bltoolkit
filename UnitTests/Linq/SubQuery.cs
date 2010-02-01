@@ -4,6 +4,7 @@ using System.Linq;
 
 using BLToolkit.Data.DataProvider;
 using BLToolkit.Data.Linq;
+
 using NUnit.Framework;
 
 namespace Data.Linq
@@ -248,8 +249,16 @@ namespace Data.Linq
 			ForEachProvider(
 				new[] { ProviderName.SqlCe }, // Fix It
 				db => AreEqual(
-				from p in    Parent select    Child.Count(c => c.Parent == p),
-				from p in db.Parent select db.Child.Count(c => c.Parent == p)));
+					from p in    Parent select    Child.Count(c => c.Parent == p),
+					from p in db.Parent select db.Child.Count(c => c.Parent == p)));
+		}
+
+		//[Test]
+		public void TestMaxCount()
+		{
+			ForEachProvider(db => Assert.AreEqual(
+				   Parent.Max(p =>    Child.Count(c => c.Parent.ParentID == p.ParentID)),
+				db.Parent.Max(p => db.Child.Count(c => c.Parent.ParentID == p.ParentID))));
 		}
 	}
 }

@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Linq;
 
-using NUnit.Framework;
-
 using BLToolkit.Data.DataProvider;
+
+using NUnit.Framework;
 
 namespace Data.Linq
 {
@@ -290,6 +290,18 @@ namespace Data.Linq
 					Count1 = gc.Count(),
 					Count2 = gg.Count()
 				}));
+		}
+
+		[Test]
+		public void JoinByAnonymousTest()
+		{
+			ForEachProvider(new[] { ProviderName.Access }, db => AreEqual(
+				from p in    Parent
+				join c in    Child on new { Parent = p, p.ParentID } equals new { c.Parent, c.ParentID }
+				select new { p.ParentID, c.ChildID },
+				from p in db.Parent
+				join c in db.Child on new { Parent = p, p.ParentID } equals new { c.Parent, c.ParentID }
+				select new { p.ParentID, c.ChildID }));
 		}
 	}
 }

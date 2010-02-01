@@ -34,14 +34,16 @@ namespace Data.Linq
 			ForEachProvider(db => AreEqual(Parent.Select(p => Count2(p, 1)), db.Parent.Select(p => Count2(p, 1))));
 		}
 
-		static int Count3(Parent p, int id) { return p.Children.Count(c => c.ChildID > id) + id; }
+		static int Count3(Parent p, int id) { return p.Children.Count(c => c.ChildID > id) + 2; }
 
 		[Test]
 		public void MapMember3()
 		{
-			Expressions.MapMember<Parent,int,int>((p,id) => Count3(p, id), (p, id) => p.Children.Count(c => c.ChildID > id) + id);
+			Expressions.MapMember<Parent,int,int>((p,id) => Count3(p, id), (p, id) => p.Children.Count(c => c.ChildID > id) + 2);
 
-			ForEachProvider(new[] { ProviderName.SqlCe }, db => AreEqual(Parent.Select(p => Count3(p, 2)), db.Parent.Select(p => Count3(p, 2))));
+			var n = 2;
+
+			ForEachProvider(new[] { ProviderName.SqlCe }, db => AreEqual(Parent.Select(p => Count3(p, n)), db.Parent.Select(p => Count3(p, n))));
 		}
 
 		[MethodExpression("Count4Expression")]
@@ -58,32 +60,80 @@ namespace Data.Linq
 		}
 
 		[Test]
-		public void MethodExpression1()
+		public void MethodExpression4()
 		{
+			var n = 3;
+
 			ForEachProvider(db => AreEqual(
-				   Parent.Select(p => Count4(p, 3, 4)),
-				db.Parent.Select(p => Count4(p, 3, 4))));
+				   Parent.Select(p => Count4(p, n, 4)),
+				db.Parent.Select(p => Count4(p, n, 4))));
 		}
 
-		[MethodExpression("Count4Expression2")]
-		static int Count5(TestDbManager db, Parent p)
+		[MethodExpression("Count5Expression")]
+		static int Count5(TestDbManager db, Parent p, int n)
 		{
-			return (_count4Expression2 ?? (_count4Expression2 = Count4Expression2().Compile()))(db, p);
+			return (_count5Expression ?? (_count5Expression = Count5Expression().Compile()))(db, p, n);
 		}
 
-		static Func<TestDbManager,Parent,int> _count4Expression2;
+		static Func<TestDbManager,Parent,int,int> _count5Expression;
 
-		static Expression<Func<TestDbManager,Parent,int>> Count4Expression2()
+		static Expression<Func<TestDbManager,Parent,int,int>> Count5Expression()
 		{
-			return (db, p) => db.Child.Where(c => c.ParentID == p.ParentID).Count();
+			return (db, p, n) => Sql.OnServer(db.Child.Where(c => c.ParentID == p.ParentID).Count() + n);
 		}
 
 		[Test]
-		public void MethodExpression2()
+		public void MethodExpression5()
+		{
+			var n = 2;
+
+			ForEachProvider(new[] { ProviderName.SqlCe, ProviderName.Firebird }, db => AreEqual(
+				   Parent.Select(p => Child.Where(c => c.ParentID == p.ParentID).Count() + n),
+				db.Parent.Select(p => Count5(db, p, n))));
+		}
+
+		[MethodExpression("Count6Expression")]
+		static int Count6(Table<Child> c, Parent p)
+		{
+			return (_count6Expression ?? (_count6Expression = Count6Expression().Compile()))(c, p);
+		}
+
+		static Func<Table<Child>,Parent,int> _count6Expression;
+
+		static Expression<Func<Table<Child>,Parent,int>> Count6Expression()
+		{
+			return (ch, p) => ch.Where(c => c.ParentID == p.ParentID).Count();
+		}
+
+		[Test]
+		public void MethodExpression6()
 		{
 			ForEachProvider(db => AreEqual(
 				   Parent.Select(p => Child.Where(c => c.ParentID == p.ParentID).Count()),
-				db.Parent.Select(p => Count5(db, p))));
+				db.Parent.Select(p => Count6(db.Child, p))));
+		}
+
+		[MethodExpression("Count7Expression")]
+		static int Count7(Table<Child> ch, Parent p, int n)
+		{
+			return (_count7Expression ?? (_count7Expression = Count7Expression().Compile()))(ch, p, n);
+		}
+
+		static Func<Table<Child>,Parent,int,int> _count7Expression;
+
+		static Expression<Func<Table<Child>,Parent,int,int>> Count7Expression()
+		{
+			return (ch, p, n) => Sql.OnServer(ch.Where(c => c.ParentID == p.ParentID).Count() + n);
+		}
+
+		[Test]
+		public void MethodExpression7()
+		{
+			var n = 2;
+
+			ForEachProvider(new[] { ProviderName.SqlCe, ProviderName.Firebird }, db => AreEqual(
+				   Parent.Select(p => Child.Where(c => c.ParentID == p.ParentID).Count() + n),
+				db.Parent.Select(p => Count7(db.Child, p, n))));
 		}
 	}
 }
