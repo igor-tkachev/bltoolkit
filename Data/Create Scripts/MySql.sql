@@ -55,6 +55,37 @@ GO
 INSERT INTO Patient (PersonID, Diagnosis) VALUES (2, 'Hallucination with Paranoid Bugs'' Delirium of Persecution')
 GO
 
+
+-- GetPersonById
+
+DROP Procedure GetPersonById
+GO
+
+CREATE Procedure GetPersonById(_ID INT)
+BEGIN
+
+	SELECT * FROM Person WHERE PersonID = _ID;
+
+END
+GO
+
+-- GetPersonByName
+
+DROP Procedure GetPersonByName
+GO
+
+CREATE Procedure GetPersonByName
+(
+	_firstName varchar(50),
+	_lastName  varchar(50)
+)
+BEGIN
+
+	SELECT * FROM Person WHERE FirstName = _firstName AND LastName = _lastName;
+
+END
+GO
+
 -- Person_SelectByKey
 
 DROP Procedure Person_SelectByKey

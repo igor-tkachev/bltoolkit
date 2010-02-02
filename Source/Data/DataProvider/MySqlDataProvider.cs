@@ -81,8 +81,10 @@ namespace BLToolkit.Data.DataProvider
 			if (command is MySqlCommand)
 			{
 				MySqlCommandBuilder.DeriveParameters((MySqlCommand)command);
+
 				if (TryConvertParameterSymbol && ConvertParameterSymbols.Count > 0)
 					ConvertParameterNames(command);
+
 				return true;
 			}
 
