@@ -337,6 +337,7 @@ namespace BLToolkit.Data.Linq
 						case "Average"         : sequence = ParseSequence(seq); ParseAggregate(pi, null, sequence[0]); break;
 						case "OfType"          : sequence = ParseSequence(seq); select = ParseOfType(pi, sequence);    break;
 						case "Any"             : sequence = ParseAny(true, seq, null, pi);                             break;
+						case "Delete"          : sequence = ParseSequence(seq); ParseDelete(null, sequence[0]);        break;
 						default                :
 							ParsingTracer.DecIndentLevel();
 							return false;
@@ -371,6 +372,7 @@ namespace BLToolkit.Data.Linq
 						case "Average"           : sequence = ParseSequence(seq); ParseAggregate(pi, l, sequence[0]); break;
 						case "Any"               : sequence = ParseAny(true,  seq, l, pi);                            break;
 						case "All"               : sequence = ParseAny(false, seq, l, pi);                            break;
+						case "Delete"            : sequence = ParseSequence(seq); ParseDelete(l, sequence[0]);        break;
 						default                  : return false;
 					}
 					return true;
@@ -1016,7 +1018,7 @@ namespace BLToolkit.Data.Linq
 
 		QuerySource ParseWhere(LambdaInfo l, QuerySource select)
 		{
-			CurrentSql.ToString();
+			//CurrentSql.ToString();
 
 			ParsingTracer.WriteLine(l);
 			ParsingTracer.WriteLine(select);
@@ -1689,6 +1691,20 @@ namespace BLToolkit.Data.Linq
 
 		#endregion
 
+		#region Parse Delete
+
+		void ParseDelete(LambdaInfo lambda, QuerySource select)
+		{
+			if (lambda != null)
+				ParseWhere(lambda, select);
+
+			CurrentSql.IsDelete = true;
+
+			_buildSelect = () => { _info.SetCommandQuery(); };
+		}
+
+		#endregion
+
 		#endregion
 
 		#region SetQuery
@@ -2072,8 +2088,8 @@ namespace BLToolkit.Data.Linq
 									throw new InvalidOperationException();
 								}
 
-								if (ex.Expr != null && query is QuerySource.Scalar && ex.NodeType == ExpressionType.Constant)
-									return BuildField(lambda, query, ma);
+								//if (ex.Expr == expr.Expr && query is QuerySource.Scalar && ex.NodeType == ExpressionType.Constant)
+								//	return BuildField(lambda, query, ma);
 							}
 							else
 							{

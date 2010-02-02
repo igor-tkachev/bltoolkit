@@ -183,7 +183,7 @@ namespace Data.Linq
 			var n = 1;
 			var expected = from p in Person where p.ID == 1 select n;
 
-			ForEachProvider(_exceptList, db =>
+			ForEachProvider(db =>
 			{
 				var result = from p in db.Person where p.ID == 1 select n;
 				Assert.IsTrue(result.ToList().SequenceEqual(expected));
@@ -209,6 +209,16 @@ namespace Data.Linq
 
 				Assert.AreEqual(expected.Where(p => p.ParentID == 3).First(), result.Where(p => p.ParentID == 3).First());
 			});
+		}
+
+		[Test]
+		public void Function()
+		{
+			var text = "123";
+
+			ForEachProvider(db => Assert.AreEqual(
+				   Child.Select(c => string.Format("{0},{1}", c.ChildID, text)).FirstOrDefault(),
+				db.Child.Select(c => string.Format("{0},{1}", c.ChildID, text)).FirstOrDefault()));
 		}
 	}
 }

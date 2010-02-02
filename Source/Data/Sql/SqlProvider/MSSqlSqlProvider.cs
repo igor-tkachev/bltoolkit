@@ -94,5 +94,13 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 			return expr;
 		}
+
+		protected override void BuildDeleteClause(StringBuilder sb)
+		{
+			AppendIndent(sb)
+				.Append("DELETE ")
+				.Append(DataProvider.Convert(GetTableAlias(SqlQuery.From.Tables[0]), ConvertType.NameToQueryTableAlias))
+				.AppendLine();
+		}
 	}
 }

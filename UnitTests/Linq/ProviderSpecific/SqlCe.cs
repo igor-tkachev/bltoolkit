@@ -19,11 +19,12 @@ namespace Data.Linq.ProviderSpecific
 				{
 					var list = db
 						.SetCommand(@"
-							SELECT
-								Cast(Floor(Cast([t].[DateTimeValue] as Float)) as DateTime)
+							DELETE 
 							FROM
-								[LinqDataTypes] [t]")
-						.ExecuteList<DateTime>();
+								[Parent]
+							WHERE
+								[Parent].[ParentID] = 100000")
+						.ExecuteNonQuery();
 				}
 			}
 		}

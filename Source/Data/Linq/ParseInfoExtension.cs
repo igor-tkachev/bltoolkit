@@ -25,7 +25,7 @@ namespace BLToolkit.Data.Linq
 			var method = pi.Expr;
 			var dtype  = method.Method.DeclaringType;
 
-			if ((declaringType == null && (dtype == typeof(Queryable) || dtype == typeof(Enumerable)) || declaringType == dtype) &&
+			if ((declaringType == null && (dtype == typeof(Queryable) || dtype == typeof(Enumerable) || dtype == typeof(Extensions)) || declaringType == dtype) &&
 				(methodName == null || method.Method.Name == methodName) &&
 				method.Arguments.Count == args.Length)
 			{

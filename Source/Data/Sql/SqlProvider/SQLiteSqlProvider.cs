@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text;
 
 namespace BLToolkit.Data.Sql.SqlProvider
 {
@@ -84,6 +85,16 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			}
 
 			return expr;
+		}
+
+		public override SqlQuery Finalize(SqlQuery sqlQuery)
+		{
+			sqlQuery = GetAlternativeDelete(base.Finalize(sqlQuery));
+
+			if (sqlQuery.IsDelete)
+				sqlQuery.From.Tables[0].Alias = "$";
+
+			return sqlQuery;
 		}
 	}
 }

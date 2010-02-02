@@ -333,5 +333,10 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			else
 				base.BuildValue(sb, value);
 		}
+
+		public override SqlQuery Finalize(SqlQuery sqlQuery)
+		{
+			return GetAlternativeDelete(base.Finalize(sqlQuery));
+		}
 	}
 }

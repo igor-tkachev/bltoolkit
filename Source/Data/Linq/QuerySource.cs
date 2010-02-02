@@ -206,7 +206,14 @@ namespace BLToolkit.Data.Linq
 				Column col;
 
 				if (_columns.TryGetValue(mi.Name, out col))
+				{
+					if (_parentAssociation != null && _parentAssociationJoin.JoinType == SqlQuery.JoinType.Inner)
+					{
+						
+					}
+
 					return col;
+				}
 
 				return GetAssociation(mi);
 			}

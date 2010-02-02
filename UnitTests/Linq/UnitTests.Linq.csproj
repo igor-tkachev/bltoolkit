@@ -127,6 +127,7 @@
     <Compile Include="CompileTest.cs" />
     <Compile Include="ComplexTest.cs" />
     <Compile Include="Association.cs" />
+    <Compile Include="DmlTest.cs" />
     <Compile Include="ExpressionsTest.cs" />
     <Compile Include="MathFunctions.cs" />
     <Compile Include="Exceptions\Inheritance.cs" />

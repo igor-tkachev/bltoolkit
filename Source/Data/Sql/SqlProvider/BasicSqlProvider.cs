@@ -131,7 +131,15 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		protected virtual void BuildSql(StringBuilder sb)
 		{
-			_buildStep = Step.SelectClause;  BuildSelectClause (sb);
+			if (_sqlQuery.IsDelete)
+			{
+				_buildStep = Step.DeleteClause; BuildDeleteClause(sb);
+			}
+			else
+			{
+				_buildStep = Step.SelectClause; BuildSelectClause(sb);
+			}
+
 			_buildStep = Step.FromClause;    BuildFromClause   (sb);
 			_buildStep = Step.WhereClause;   BuildWhereClause  (sb);
 			_buildStep = Step.GroupByClause; BuildGroupByClause(sb);
@@ -199,6 +207,16 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		#endregion
 
+		#region Build Delete
+
+		protected virtual void BuildDeleteClause(StringBuilder sb)
+		{
+			AppendIndent(sb);
+			sb.Append("DELETE ");
+		}
+
+		#endregion
+
 		#region Build From
 
 		protected virtual void BuildFromClause(StringBuilder sb)
@@ -246,7 +264,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			sb.AppendLine();
 		}
 
-		void BuildPhysicalTable(StringBuilder sb, ISqlTableSource table)
+		protected void BuildPhysicalTable(StringBuilder sb, ISqlTableSource table)
 		{
 			switch (table.ElementType)
 			{
@@ -779,7 +797,11 @@ namespace BLToolkit.Data.Sql.SqlProvider
 							if (ts == null)
 								throw new SqlException(string.Format("Table {0} not found.", field.Table));
 
-							string table = GetTableAlias(ts) ?? GetTablePhysicalName(field.Table);
+							string table = GetTableAlias(ts);
+
+							table = table == null ?
+								GetTablePhysicalName(field.Table) :
+								DataProvider.Convert(table, ConvertType.NameToQueryTableAlias).ToString();
 
 							if (string.IsNullOrEmpty(table))
 								throw new SqlException(string.Format("Table {0} should have an alias.", field.Table));
@@ -787,7 +809,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 							addAlias = alias != field.PhysicalName;
 
 							sb
-								.Append(DataProvider.Convert(table, ConvertType.NameToQueryTableAlias))
+								.Append(table)
 								.Append('.')
 								.Append(_dataProvider.Convert(field.PhysicalName, ConvertType.NameToQueryField));
 						}
@@ -1144,6 +1166,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		public enum Step
 		{
 			SelectClause,
+			DeleteClause,
 			FromClause,
 			WhereClause,
 			GroupByClause,
@@ -1416,6 +1439,38 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			return null;
 		}
 
+		protected SqlQuery GetAlternativeDelete(SqlQuery sqlQuery)
+		{
+			if (sqlQuery.IsDelete && 
+				(sqlQuery.From.Tables.Count > 1 || sqlQuery.From.Tables[0].Joins.Count > 0) && 
+				sqlQuery.From.Tables[0].Source is SqlTable)
+			{
+				SqlQuery sql = new SqlQuery();
+
+				sql.IsDelete = true;
+
+				sqlQuery.ParentSql = sql;
+				sqlQuery.IsDelete = false;
+
+				SqlTable table = (SqlTable)sqlQuery.From.Tables[0].Source;
+				SqlTable copy  = new SqlTable(table);
+
+				copy.Alias = null;
+
+				List<SqlField> tableKeys = table.GetKeyFields();
+				List<SqlField> copyKeys  = copy. GetKeyFields();
+
+				for (int i = 0; i < tableKeys.Count; i++)
+					sqlQuery.Where
+						.Field(copyKeys[i]).Equal.Field(tableKeys[i]);
+
+				sql.From.Table(copy).Where.Exists(sqlQuery);
+				sqlQuery = sql;
+			}
+
+			return sqlQuery;
+		}
+
 		#endregion
 
 		#region Helpers
@@ -1435,13 +1490,14 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			return SqlQuery.GetTempAliases(n, defaultAlias + (Nesting == 0? "": "n" + Nesting.ToString()));
 		}
 
-		static string GetTableAlias(ISqlTableSource table)
+		protected static string GetTableAlias(ISqlTableSource table)
 		{
 			switch (table.ElementType)
 			{
 				case QueryElementType.TableSource :
 					SqlQuery.TableSource ts = (SqlQuery.TableSource)table;
-					return string.IsNullOrEmpty(ts.Alias) ? GetTableAlias(ts.Source) : ts.Alias;
+					string alias = string.IsNullOrEmpty(ts.Alias) ? GetTableAlias(ts.Source) : ts.Alias;
+					return alias != "$" ? alias : null;
 
 				case QueryElementType.SqlTable :
 					return ((SqlTable)table).Alias;
@@ -2183,11 +2239,11 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			Dictionary<MemberInfo,LambdaExpression> dic;
 			LambdaExpression expr;
 
-			if (Linq.Expressions.Members.TryGetValue(Name, out dic))
+			if (Linq.Extensions.Members.TryGetValue(Name, out dic))
 				if (dic.TryGetValue(mi, out expr))
 					return expr;
 
-			return Linq.Expressions.Members[""].TryGetValue(mi, out expr) ? expr : null;
+			return Linq.Extensions.Members[""].TryGetValue(mi, out expr) ? expr : null;
 		}
 #endif
 

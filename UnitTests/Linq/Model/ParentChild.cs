@@ -201,6 +201,9 @@ namespace Data.Linq.Model
 		[Association(ThisKey = "ParentID, ChildID", OtherKey = "ParentID, ChildID")]
 		public Child Child;
 
+		[Association(ThisKey = "ParentID", OtherKey = "ParentID", CanBeNull = false)]
+		public Parent1 Parent;
+
 		public override bool Equals(object obj)
 		{
 			if (ReferenceEquals(null, obj)) return false;

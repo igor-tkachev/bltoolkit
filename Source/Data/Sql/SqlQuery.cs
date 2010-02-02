@@ -2694,6 +2694,17 @@ namespace BLToolkit.Data.Sql
 
 		#endregion
 
+		#region Insert / Update / Delete
+
+		private bool _isDelete;
+		public  bool  IsDelete
+		{
+			get { return _isDelete;  }
+			set { _isDelete = value; }
+		}
+
+		#endregion
+
 		#region FinalizeAndValidate
 
 		public void FinalizeAndValidate()

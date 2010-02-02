@@ -219,6 +219,22 @@ namespace BLToolkit.Data.Sql
 			}
 		}
 
+		public List<SqlField> GetKeyFields()
+		{
+			List<SqlField> keys = new List<SqlField>();
+
+			foreach (SqlField field in Fields.Values)
+			{
+				if (field.IsPrimaryKey)
+					keys.Add(field);
+			}
+
+			if (keys.Count == 0)
+				keys.AddRange(Fields.Values);
+
+			return keys;
+		}
+
 		#endregion
 
 		#region Protected Members

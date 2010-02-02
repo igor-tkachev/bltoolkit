@@ -242,7 +242,12 @@ namespace BLToolkit.Data.Sql.SqlProvider
 				}
 			});
 
-			return base.Finalize(sqlQuery);
+			sqlQuery = GetAlternativeDelete(base.Finalize(sqlQuery));
+
+			if (sqlQuery.IsDelete)
+				sqlQuery.From.Tables[0].Alias = "$";
+
+			return sqlQuery;
 		}
 
 		protected override void BuildDataType(StringBuilder sb, SqlDataType type)

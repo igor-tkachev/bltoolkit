@@ -97,5 +97,13 @@ namespace BLToolkit.Data.Sql.SqlProvider
 				default                  : base.BuildDataType(sb, type); break;
 			}
 		}
+
+		protected override void BuildDeleteClause(StringBuilder sb)
+		{
+			AppendIndent(sb);
+			sb.Append("DELETE FROM ");
+			BuildPhysicalTable(sb, SqlQuery.From.Tables[0].Source);
+			sb.AppendLine();
+		}
 	}
 }

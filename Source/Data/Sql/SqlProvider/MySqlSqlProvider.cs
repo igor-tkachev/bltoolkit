@@ -129,5 +129,13 @@ namespace BLToolkit.Data.Sql.SqlProvider
 				default: base.BuildDataType(sb, type); break;
 			}
 		}
+
+		protected override void BuildDeleteClause(StringBuilder sb)
+		{
+			AppendIndent(sb)
+				.Append("DELETE ")
+				.Append(DataProvider.Convert(GetTableAlias(SqlQuery.From.Tables[0]), ConvertType.NameToQueryTableAlias))
+				.AppendLine();
+		}
 	}
 }

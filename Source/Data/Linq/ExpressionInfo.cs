@@ -99,6 +99,41 @@ namespace BLToolkit.Data.Linq
 
 		#endregion
 
+		#region CommandQuery
+
+		public void SetCommandQuery()
+		{
+			foreach (var sql in Queries)
+				sql.SqlQuery = SqlProvider.Finalize(sql.SqlQuery);
+
+			if (Queries.Count != 1)
+				throw new InvalidOperationException();
+
+			SqlProvider.SqlQuery = Queries[0].SqlQuery;
+
+			GetElement = (ctx, db, expr, ps) => Query(db, expr, ps);
+		}
+
+		int Query(DbManager db, Expression expr, object[] parameters)
+		{
+			var dispose = db == null;
+
+			if (db == null)
+				db = new DbManager();
+
+			try
+			{
+				return SetCommand(db, expr, parameters, 0).ExecuteNonQuery();
+			}
+			finally
+			{
+				if (dispose)
+					db.Dispose();
+			}
+		}
+
+		#endregion
+
 		#region ElementQuery
 
 		public void SetElementQuery<TE>(Mapper<TE> mapper)
@@ -123,7 +158,7 @@ namespace BLToolkit.Data.Linq
 
 			try
 			{
-				using (var dr = GetReader(db, expr, parameters, 0))
+				using (var dr = SetCommand(db, expr, parameters, 0).ExecuteReader())
 					while (dr.Read())
 						return mapper(this, ctx, dr, MappingSchema, expr, parameters);
 
@@ -231,7 +266,7 @@ namespace BLToolkit.Data.Linq
 
 			try
 			{
-				using (var dr = GetReader(db, expr, parameters, queryNumber))
+				using (var dr = SetCommand(db, expr, parameters, queryNumber).ExecuteReader())
 					while (dr.Read())
 						yield return dr;
 			}
@@ -260,7 +295,7 @@ namespace BLToolkit.Data.Linq
 			}
 		}
 
-		IDataReader GetReader(DbManager db, Expression expr, object[] parameters, int idx)
+		DbManager SetCommand(DbManager db, Expression expr, object[] parameters, int idx)
 		{
 			string             command;
 			IDbDataParameter[] parms;
@@ -280,7 +315,7 @@ namespace BLToolkit.Data.Linq
 			Debug.WriteLineIf(DbManager.TraceSwitch.TraceInfo, GetSqlText(db, parms, command), DbManager.TraceSwitch.DisplayName);
 #endif
 
-			return db.ExecuteReader();
+			return db;
 		}
 
 		void SetParameters(Expression expr, object[] parameters, int idx)

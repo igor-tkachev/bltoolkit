@@ -166,5 +166,15 @@ namespace BLToolkit.Data.Sql.SqlProvider
 				default                   : base.BuildDataType(sb, type); break;
 			}
 		}
+
+		public override SqlQuery Finalize(SqlQuery sqlQuery)
+		{
+			sqlQuery = GetAlternativeDelete(base.Finalize(sqlQuery));
+
+			if (sqlQuery.IsDelete)
+				sqlQuery.From.Tables[0].Alias = "$";
+
+			return sqlQuery;
+		}
 	}
 }

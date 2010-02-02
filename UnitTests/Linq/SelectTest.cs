@@ -343,7 +343,7 @@ namespace Data.Linq
 		}
 
 		[Test]
-		public void ProjectionTest()
+		public void ProjectionTest1()
 		{
 			ForEachProvider(db => AreEqual(
 				from c in    Child select new { c.ChildID, ID = 0, ID1 = c.ParentID2.ParentID2, c.ParentID2.Value1, ID2 = c.ParentID },

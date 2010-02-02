@@ -122,5 +122,10 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 			return expr;
 		}
+
+		public override SqlQuery Finalize(SqlQuery sqlQuery)
+		{
+			return GetAlternativeDelete(base.Finalize(sqlQuery));
+		}
 	}
 }
