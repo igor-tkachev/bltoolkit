@@ -123,7 +123,7 @@ namespace Data.Linq.Model
 	}
 
 	[TableName("Parent")]
-	public class Parent3 : IEquatable<Parent>, IComparable
+	public class Parent3 : IEquatable<Parent3>, IComparable
 	{
 		[MapField("ParentID")]
 		public int  ParentID2 { get; set; }
@@ -131,15 +131,15 @@ namespace Data.Linq.Model
 
 		public override bool Equals(object obj)
 		{
-			if (obj.GetType() != typeof (Parent)) return false;
-			return Equals((Parent)obj);
+			if (obj.GetType() != typeof (Parent3)) return false;
+			return Equals((Parent3)obj);
 		}
 
-		public bool Equals(Parent other)
+		public bool Equals(Parent3 other)
 		{
 			if (ReferenceEquals(null, other)) return false;
 			if (ReferenceEquals(this, other)) return true;
-			return other.ParentID == ParentID2 && other.Value1.Equals(Value1);
+			return other.ParentID2 == ParentID2 && other.Value1.Equals(Value1);
 		}
 
 		public override int GetHashCode()
@@ -149,7 +149,7 @@ namespace Data.Linq.Model
 
 		public int CompareTo(object obj)
 		{
-			return ParentID2 - ((Parent)obj).ParentID;
+			return ParentID2 - ((Parent3)obj).ParentID2;
 		}
 	}
 

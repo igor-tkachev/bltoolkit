@@ -337,6 +337,7 @@ namespace BLToolkit.Data.Linq
 						case "Average"         : sequence = ParseSequence(seq); ParseAggregate(pi, null, sequence[0]); break;
 						case "OfType"          : sequence = ParseSequence(seq); select = ParseOfType(pi, sequence);    break;
 						case "Any"             : sequence = ParseAny(true, seq, null, pi);                             break;
+						case "Cast"            : sequence = ParseSequence(seq);                                        break;
 						case "Delete"          : sequence = ParseSequence(seq); ParseDelete(null, sequence[0]);        break;
 						default                :
 							ParsingTracer.DecIndentLevel();

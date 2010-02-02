@@ -103,5 +103,13 @@ namespace Data.Linq
 					.Select(p => p as Northwind.Product)
 					.Select(p => p == null ? "NULL" : p.ProductName));
 		}
+
+		[Test]
+		public void Cast()
+		{
+			ForEachProvider(db => AreEqual(
+				   ParentInheritance.OfType<ParentInheritance1>().Cast<ParentInheritanceBase>(),
+				db.ParentInheritance.OfType<ParentInheritance1>().Cast<ParentInheritanceBase>()));
+		}
 	}
 }
