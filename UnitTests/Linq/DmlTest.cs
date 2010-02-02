@@ -62,7 +62,7 @@ namespace Data.Linq
 			});
 		}
 
-		//[Test]
+		[Test]
 		public void Delete4()
 		{
 			ForEachProvider(db =>

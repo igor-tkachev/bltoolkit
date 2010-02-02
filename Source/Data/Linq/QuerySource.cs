@@ -53,12 +53,13 @@ namespace BLToolkit.Data.Linq
 			{
 				var type = TypeHelper.GetMemberType(association.MemberAccessor.MemberInfo);
 
-				var left = association.CanBeNull;
+				var left   = association.CanBeNull;
+				var isList = false;
 
-				if (TypeHelper.IsSameOrParent(typeof(IList), type))
+				if (TypeHelper.IsSameOrParent(typeof(IEnumerable), type))
 				{
-					type = TypeHelper.GetListItemType(type);
-					left = true;
+					type   = TypeHelper.GetListItemType(type);
+					isList = true;
 				}
 
 				OriginalType = type;
@@ -66,7 +67,7 @@ namespace BLToolkit.Data.Linq
 				SqlTable     = new SqlTable(mappingSchema, ObjectType);
 
 				var psrc = sqlQuery.From[parent.SqlTable];
-				var join = left ? SqlTable.WeakLeftJoin() : SqlTable.InnerJoin();
+				var join = left ? SqlTable.WeakLeftJoin() : isList ? SqlTable.InnerJoin() : SqlTable.WeakInnerJoin();
 
 				_parentAssociation     = parent;
 				_parentAssociationJoin = join.JoinedTable;
@@ -201,21 +202,32 @@ namespace BLToolkit.Data.Linq
 			readonly Dictionary<string,Table> _associatedTables = new Dictionary<string,Table>();
 			public   Dictionary<string,Table>  AssociatedTables { get { return _associatedTables; }}
 
-			public override QueryField GetField(MemberInfo mi)
+			QueryField GetField(string name)
 			{
 				Column col;
 
-				if (_columns.TryGetValue(mi.Name, out col))
+				if (_columns.TryGetValue(name, out col))
 				{
-					if (_parentAssociation != null && _parentAssociationJoin.JoinType == SqlQuery.JoinType.Inner)
+					if (_parentAssociation != null && _parentAssociationJoin.JoinType == SqlQuery.JoinType.Inner && _parentAssociationJoin.IsWeak)
 					{
-						
+						foreach (var cond in _parentAssociationJoin.Condition.Conditions)
+						{
+							var predicate = (SqlQuery.Predicate.ExprExpr)cond.Predicate;
+
+							if (predicate.Expr2 == col.Field)
+								return _parentAssociation.GetField(((SqlField)predicate.Expr1).Name);
+						}
 					}
 
 					return col;
 				}
 
-				return GetAssociation(mi);
+				return null;
+			}
+
+			public override QueryField GetField(MemberInfo mi)
+			{
+				return GetField(mi.Name) ?? GetAssociation(mi);
 			}
 
 			List<QueryField> _keyFields;

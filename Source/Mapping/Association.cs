@@ -13,8 +13,8 @@ namespace BLToolkit.Mapping
 			[JNotNull] MemberAccessor memberAccessor,
 			[JNotNull] string[]       thisKey,
 			[JNotNull] string[]       otherKey,
-			          string         storage,
-			          bool           canBeNull)
+			           string         storage,
+			           bool           canBeNull)
 		{
 			if (memberAccessor == null) throw new ArgumentNullException("memberAccessor");
 			if (thisKey        == null) throw new ArgumentNullException("thisKey");
