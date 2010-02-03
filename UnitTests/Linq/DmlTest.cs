@@ -147,5 +147,32 @@ namespace Update
 				}
 			});
 		}
+
+		[Test]
+		public void Update4()
+		{
+			ForEachProvider(new[] { ProviderName.Informix }, db =>
+			{
+				try
+				{
+					var id = 1001;
+
+					db.Child.Delete(c => c.ChildID > 1000);
+					new SqlQuery().Insert(db, new Child { ParentID = 1, ChildID = id});
+
+					Assert.AreEqual(1, db.Child.Count(c => c.ChildID == id));
+					Assert.AreEqual(1,
+						db.Child
+							.Where(c => c.ChildID == id && c.Parent.Value1 == 1)
+							.Set(c => c.ChildID, c => c.ChildID + 1)
+							.Update());
+					Assert.AreEqual(1, db.Child.Count(c => c.ChildID == id + 1));
+				}
+				finally
+				{
+					db.Child.Delete(c => c.ChildID > 1000);
+				}
+			});
+		}
 	}
 }

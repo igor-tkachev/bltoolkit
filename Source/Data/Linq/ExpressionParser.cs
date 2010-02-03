@@ -339,6 +339,7 @@ namespace BLToolkit.Data.Linq
 						case "Any"             : sequence = ParseAny(true, seq, null, pi);                             break;
 						case "Cast"            : sequence = ParseSequence(seq);                                        break;
 						case "Delete"          : sequence = ParseSequence(seq); ParseDelete(null, sequence[0]);        break;
+						case "Update"          : sequence = ParseSequence(seq); ParseUpdate(null, null, sequence[0]);  break;
 						default                :
 							ParsingTracer.DecIndentLevel();
 							return false;
@@ -390,6 +391,7 @@ namespace BLToolkit.Data.Linq
 				pi => pi.IsQueryableMethod ("GroupBy",    1, 2, seq => sequence = ParseSequence(seq), (l1, l2)        => select   = ParseGroupBy   (l1, null, l2,   sequence[0], null)),
 				pi => pi.IsQueryableMethod ("GroupBy", 1, 1, 2, seq => sequence = ParseSequence(seq), (l1, l2, l3)    => select   = ParseGroupBy   (l1, l2,   l3,   sequence[0], null)),
 				pi => pi.IsQueryableMethod ("Update",     1, 1, seq => sequence = ParseSequence(seq), (l1, l2)        => ParseUpdate(l1, l2, sequence[0])),
+				pi => pi.IsQueryableMethod ("Set",        1, 1, seq => sequence = ParseSequence(seq), (l1, l2)        => ParseSet   (l1, l2, sequence[0])),
 				pi => pi.IsQueryableMethod ("Take",             seq => sequence = ParseSequence(seq), ex => ParseTake     (sequence[0], ex)),
 				pi => pi.IsQueryableMethod ("Skip",             seq => sequence = ParseSequence(seq), ex => ParseSkip     (sequence[0], ex)),
 				pi => pi.IsQueryableMethod ("ElementAt",        seq => sequence = ParseSequence(seq), ex => ParseElementAt(sequence[0], ex)),
@@ -1713,40 +1715,60 @@ namespace BLToolkit.Data.Linq
 			if (predicate != null)
 				select = ParseWhere(predicate, select);
 
-			if (setter.Body.NodeType != ExpressionType.MemberInit)
-				throw new LinqException("Object initializer expected for update statement.");
-
-			var body = setter.Body.ConvertTo<MemberInitExpression>();
-			var ex   = body.Expr;
-
-			for (var i = 0; i < ex.Bindings.Count; i++)
+			if (setter != null)
 			{
-				var binding = ex.Bindings[i];
-				var member  = binding.Member;
+				if (setter.Body.NodeType != ExpressionType.MemberInit)
+					throw new LinqException("Object initializer expected for update statement.");
 
-				if (member is MethodInfo)
-					member = TypeHelper.GetPropertyByMethod((MethodInfo)member);
+				var body = setter.Body.ConvertTo<MemberInitExpression>();
+				var ex   = body.Expr;
 
-				if (binding is MemberAssignment)
+				for (var i = 0; i < ex.Bindings.Count; i++)
 				{
-					var ma = binding as MemberAssignment;
+					var binding = ex.Bindings[i];
+					var member  = binding.Member;
 
-					var piBinding    = body.     Create(ma.Expression, body.Index(ex.Bindings, MemberInit.Bindings, i));
-					var piAssign     = piBinding.Create(ma.Expression, piBinding.ConvertExpressionTo<MemberAssignment>());
-					var piExpression = piAssign. Create(ma.Expression, piAssign.Property(MemberAssignmentBind.Expression));
+					if (member is MethodInfo)
+						member = TypeHelper.GetPropertyByMethod((MethodInfo)member);
 
-					var column = select.GetField(member);
-					var expr   = ParseExpression(setter, piExpression, select);
+					if (binding is MemberAssignment)
+					{
+						var ma = binding as MemberAssignment;
 
-					CurrentSql.Set.Items.Add(new SqlQuery.SetExpression(column.GetExpressions(this)[0], expr));
+						var piBinding    = body.     Create(ma.Expression, body.Index(ex.Bindings, MemberInit.Bindings, i));
+						var piAssign     = piBinding.Create(ma.Expression, piBinding.ConvertExpressionTo<MemberAssignment>());
+						var piExpression = piAssign. Create(ma.Expression, piAssign.Property(MemberAssignmentBind.Expression));
+
+						var column = select.GetField(member);
+						var expr   = ParseExpression(setter, piExpression, select);
+
+						CurrentSql.Set.Items.Add(new SqlQuery.SetExpression(column.GetExpressions(this)[0], expr));
+					}
+					else
+						throw new InvalidOperationException();
 				}
-				else
-					throw new InvalidOperationException();
 			}
 
 			CurrentSql.IsUpdate = true;
 
 			_buildSelect = () => { _info.SetCommandQuery(); };
+		}
+
+		void ParseSet(LambdaInfo extract, LambdaInfo update, QuerySource select)
+		{
+			if (extract.Body.NodeType != ExpressionType.MemberAccess)
+				throw new LinqException("Member expression expected for set statement.");
+
+			var body   = extract.Body.ConvertTo<MemberExpression>();
+			var member = body.Expr.Member;
+
+			if (member is MethodInfo)
+				member = TypeHelper.GetPropertyByMethod((MethodInfo)member);
+
+			var column = select.GetField(member);
+			var expr   = ParseExpression(update, update.Body, select);
+
+			CurrentSql.Set.Items.Add(new SqlQuery.SetExpression(column.GetExpressions(this)[0], expr));
 		}
 
 		#endregion

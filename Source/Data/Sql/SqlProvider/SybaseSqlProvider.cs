@@ -71,14 +71,14 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			_skipAliases = skipAliases;
 		}
 
-		protected override void BuildSelectClause(System.Text.StringBuilder sb)
+		protected override void BuildSelectClause(StringBuilder sb)
 		{
 			_isSelect = true;
 			base.BuildSelectClause(sb);
 			_isSelect = false;
 		}
 
-		protected override void BuildColumn(System.Text.StringBuilder sb, SqlQuery.Column col, ref bool addAlias)
+		protected override void BuildColumn(StringBuilder sb, SqlQuery.Column col, ref bool addAlias)
 		{
 			base.BuildColumn(sb, col, ref addAlias);
 			if (_skipAliases) addAlias = false;

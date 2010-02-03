@@ -7,6 +7,11 @@ using System.Text;
 
 using JetBrains.Annotations;
 
+#region ReSharper C# 2.0 disable
+// ReSharper disable RedundantTypeArgumentsOfMethod
+// ReSharper disable RedundantCast
+#endregion
+
 namespace BLToolkit.Data.Linq
 {
 	using B = Boolean;
@@ -73,10 +78,14 @@ namespace BLToolkit.Data.Linq
 					new[] { source.Expression, Expression.Quote(predicate) }));
 		}
 
+		#endregion
+
+		#region Update
+
 		public static int Update<T>([NotNull] this IQueryable<T> source, [NotNull] Expression<Func<T,T>> setter)
 		{
-			if (source    == null) throw new ArgumentNullException("source");
-			if (setter    == null) throw new ArgumentNullException("setter");
+			if (source == null) throw new ArgumentNullException("source");
+			if (setter == null) throw new ArgumentNullException("setter");
 
 			return source.Provider.Execute<int>(
 				Expression.Call(
@@ -98,20 +107,40 @@ namespace BLToolkit.Data.Linq
 					new[] { source.Expression, Expression.Quote(predicate), Expression.Quote(setter) }));
 		}
 
-		/*
-		public static int Delete<T>([NotNull] this DbManager dataContext, T obj)
+		public static int Update<T>([NotNull] this IUpdateable<T> source)
 		{
-			if (dataContext == null) throw new ArgumentNullException("dataContext");
+			if (source == null) throw new ArgumentNullException("source");
 
-			var queryable = (IQueryable)source;
-
-			return queryable.Provider.Execute<int>(
+			return source.Provider.Execute<int>(
 				Expression.Call(
 					null,
 					((MethodInfo)MethodBase.GetCurrentMethod()).MakeGenericMethod(new[] { typeof(T) }),
-					new[] { queryable.Expression, Expression.Quote(selector) }));
+					new[] { source.Expression }));
 		}
-		*/
+
+		public static IUpdateable<T> Set<T,TV>(
+			[NotNull] this IQueryable<T>     source,
+			[NotNull] Expression<Func<T,TV>> extract,
+			[NotNull] Expression<Func<T,TV>> update)
+		{
+			if (source  == null) throw new ArgumentNullException("source");
+			if (extract == null) throw new ArgumentNullException("extract");
+			if (update  == null) throw new ArgumentNullException("update");
+
+			return (IUpdateable<T>)source.Provider.CreateQuery<T>(
+				Expression.Call(
+					null,
+					((MethodInfo)MethodBase.GetCurrentMethod()).MakeGenericMethod(new[] { typeof(T), typeof(TV) }),
+					new[] { source.Expression, Expression.Quote(extract), Expression.Quote(update) }));
+		}
+
+		public static IUpdateable<T> Set<T,TV>(
+			[NotNull] this IUpdateable<T>     source,
+			[NotNull] Expression<Func<T,TV>> extract,
+			[NotNull] Expression<Func<T,TV>> update)
+		{
+			return Set<T,TV>((IQueryable<T>)source, extract, update);
+		}
 
 		#endregion
 
@@ -133,8 +162,8 @@ namespace BLToolkit.Data.Linq
 		/// Returned type of the delegate returned by the method.
 		/// </typeparam>
 		static public Func<TDb,TResult> Compile<TDb,TResult>(
-			[JetBrains.Annotations.NotNull] this DbManager dbManager,
-			[JetBrains.Annotations.NotNull] Expression<Func<TDb,TResult>> query)
+			[NotNull] this DbManager dbManager,
+			[NotNull] Expression<Func<TDb,TResult>> query)
 			where TDb : DbManager
 		{
 			return CompiledQuery.Compile(query);
@@ -159,8 +188,8 @@ namespace BLToolkit.Data.Linq
 		/// Returned type of the delegate returned by the method.
 		/// </typeparam>
 		static public Func<TDb,TArg1,TResult> Compile<TDb,TArg1, TResult>(
-			[JetBrains.Annotations.NotNull] this DbManager dbManager,
-			[JetBrains.Annotations.NotNull] Expression<Func<TDb,TArg1,TResult>> query)
+			[NotNull] this DbManager dbManager,
+			[NotNull] Expression<Func<TDb,TArg1,TResult>> query)
 			where TDb : DbManager
 		{
 			return CompiledQuery.Compile(query);
@@ -188,8 +217,8 @@ namespace BLToolkit.Data.Linq
 		/// Returned type of the delegate returned by the method.
 		/// </typeparam>
 		static public Func<TDb,TArg1,TArg2,TResult> Compile<TDb,TArg1,TArg2,TResult>(
-			[JetBrains.Annotations.NotNull] this DbManager dbManager,
-			[JetBrains.Annotations.NotNull] Expression<Func<TDb,TArg1,TArg2,TResult>> query)
+			[NotNull] this DbManager dbManager,
+			[NotNull] Expression<Func<TDb,TArg1,TArg2,TResult>> query)
 			where TDb : DbManager
 		{
 			return CompiledQuery.Compile(query);
@@ -220,8 +249,8 @@ namespace BLToolkit.Data.Linq
 		/// Returned type of the delegate returned by the method.
 		/// </typeparam>
 		static public Func<TDb,TArg1,TArg2,TArg3,TResult> Compile<TDb,TArg1,TArg2,TArg3,TResult>(
-			[JetBrains.Annotations.NotNull] this DbManager dbManager,
-			[JetBrains.Annotations.NotNull] Expression<Func<TDb,TArg1,TArg2,TArg3,TResult>> query)
+			[NotNull] this DbManager dbManager,
+			[NotNull] Expression<Func<TDb,TArg1,TArg2,TArg3,TResult>> query)
 			where TDb : DbManager
 		{
 			return CompiledQuery.Compile(query);
@@ -304,9 +333,6 @@ namespace BLToolkit.Data.Linq
 		static LambdaExpression L<T1,T2,T3,T4,T5,T6,TR> (Expression<Func<T1,T2,T3,T4,T5,T6,TR>> func) { return func; }
 
 		#endregion
-
-// ReSharper disable RedundantTypeArgumentsOfMethod
-// ReSharper disable RedundantCast
 
 		static public   Dictionary<string,Dictionary<MemberInfo,LambdaExpression>>  Members { get { return _members; } }
 		static readonly Dictionary<string,Dictionary<MemberInfo,LambdaExpression>> _members = new Dictionary<string,Dictionary<MemberInfo,LambdaExpression>>
