@@ -137,5 +137,18 @@ namespace BLToolkit.Data.Sql.SqlProvider
 				.Append(DataProvider.Convert(GetTableAlias(SqlQuery.From.Tables[0]), ConvertType.NameToQueryTableAlias))
 				.AppendLine();
 		}
+
+		protected override void BuildUpdateClause(StringBuilder sb)
+		{
+			base.BuildFromClause(sb);
+			sb.Remove(0, 4).Insert(0, "UPDATE");
+			base.BuildUpdateSet(sb);
+		}
+
+		protected override void BuildFromClause(StringBuilder sb)
+		{
+			if (!SqlQuery.IsUpdate)
+				base.BuildFromClause(sb);
+		}
 	}
 }

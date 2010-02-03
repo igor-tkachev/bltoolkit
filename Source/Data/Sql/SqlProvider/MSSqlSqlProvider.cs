@@ -102,5 +102,10 @@ namespace BLToolkit.Data.Sql.SqlProvider
 				.Append(DataProvider.Convert(GetTableAlias(SqlQuery.From.Tables[0]), ConvertType.NameToQueryTableAlias))
 				.AppendLine();
 		}
+
+		protected override void BuildUpdateTableName(StringBuilder sb)
+		{
+			sb.Append(DataProvider.Convert(GetTableAlias(SqlQuery.From.Tables[0]), ConvertType.NameToQueryTableAlias));
+		}
 	}
 }

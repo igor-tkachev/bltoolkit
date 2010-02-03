@@ -7,10 +7,11 @@ using BLToolkit.Data.Linq;
 
 using NUnit.Framework;
 
-namespace Data.Linq
-{
-	using Model;
+using Data.Linq;
+using Data.Linq.Model;
 
+namespace Update
+{
 	[TestFixture]
 	public class DmlTest : TestBase
 	{
@@ -75,6 +76,75 @@ namespace Data.Linq
 				Assert.AreEqual(3, db.GrandChild1.Count(gc => gc.ParentID == 1));
 				Assert.AreEqual(2, db.GrandChild1.Where(gc => gc.Parent.ParentID == 1 && new[] { 1001, 1002 }.Contains(gc.GrandChildID.Value)).Delete());
 				Assert.AreEqual(1, db.GrandChild1.Count(gc => gc.ParentID == 1));
+			});
+		}
+
+		[Test]
+		public void Update1()
+		{
+			ForEachProvider(db =>
+			{
+				try
+				{
+					var parent = new Parent1 { ParentID = 1001, Value1 = 1001 };
+
+					db.Parent.Delete(p => p.ParentID > 1000);
+					new SqlQuery().Insert(db, parent);
+
+					Assert.AreEqual(1, db.Parent.Count (p => p.ParentID == parent.ParentID));
+					Assert.AreEqual(1, db.Parent.Update(p => p.ParentID == parent.ParentID, p => new Parent { ParentID = p.ParentID + 1 }));
+					Assert.AreEqual(1, db.Parent.Count (p => p.ParentID == parent.ParentID + 1));
+				}
+				finally
+				{
+					db.Child.Delete(c => c.ChildID > 1000);
+				}
+			});
+		}
+
+		[Test]
+		public void Update2()
+		{
+			ForEachProvider(db =>
+			{
+				try
+				{
+					var parent = new Parent1 { ParentID = 1001, Value1 = 1001 };
+
+					db.Parent.Delete(p => p.ParentID > 1000);
+					new SqlQuery().Insert(db, parent);
+
+					Assert.AreEqual(1, db.Parent.Count(p => p.ParentID == parent.ParentID));
+					Assert.AreEqual(1, db.Parent.Where(p => p.ParentID == parent.ParentID).Update(p => new Parent { ParentID = p.ParentID + 1 }));
+					Assert.AreEqual(1, db.Parent.Count(p => p.ParentID == parent.ParentID + 1));
+				}
+				finally
+				{
+					db.Child.Delete(c => c.ChildID > 1000);
+				}
+			});
+		}
+
+		[Test]
+		public void Update3()
+		{
+			ForEachProvider(new[] { ProviderName.Informix }, db =>
+			{
+				try
+				{
+					var id = 1001;
+
+					db.Child.Delete(c => c.ChildID > 1000);
+					new SqlQuery().Insert(db, new Child { ParentID = 1, ChildID = id});
+
+					Assert.AreEqual(1, db.Child.Count(c => c.ChildID == id));
+					Assert.AreEqual(1, db.Child.Where(c => c.ChildID == id && c.Parent.Value1 == 1).Update(c => new Child { ChildID = c.ChildID + 1 }));
+					Assert.AreEqual(1, db.Child.Count(c => c.ChildID == id + 1));
+				}
+				finally
+				{
+					db.Child.Delete(c => c.ChildID > 1000);
+				}
 			});
 		}
 	}

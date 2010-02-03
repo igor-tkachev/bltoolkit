@@ -107,7 +107,7 @@ namespace BLToolkit.Data.DataProvider
 				case ConvertType.NameToSprocParameter:
 					return "@" + value;
 
-				case ConvertType.ParameterToName:
+				case ConvertType.SprocParameterToName:
 					if (value != null)
 					{
 						string str = value.ToString();
@@ -159,7 +159,7 @@ namespace BLToolkit.Data.DataProvider
 		private string GetInputParameterName(string ioParameterName)
 		{
 			return (string)Convert(
-				InOutInputParameterPrefix + (string)Convert(ioParameterName, ConvertType.ParameterToName),
+				InOutInputParameterPrefix + (string)Convert(ioParameterName, ConvertType.SprocParameterToName),
 				ConvertType.NameToSprocParameter);
 		}
 

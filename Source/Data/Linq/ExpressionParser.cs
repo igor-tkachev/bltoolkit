@@ -373,7 +373,8 @@ namespace BLToolkit.Data.Linq
 						case "Average"           : sequence = ParseSequence(seq); ParseAggregate(pi, l, sequence[0]); break;
 						case "Any"               : sequence = ParseAny(true,  seq, l, pi);                            break;
 						case "All"               : sequence = ParseAny(false, seq, l, pi);                            break;
-						case "Delete"            : sequence = ParseSequence(seq); ParseDelete(l, sequence[0]);        break;
+						case "Delete"            : sequence = ParseSequence(seq); ParseDelete(      l, sequence[0]);  break;
+						case "Update"            : sequence = ParseSequence(seq); ParseUpdate(null, l, sequence[0]);  break;
 						default                  : return false;
 					}
 					return true;
@@ -388,6 +389,7 @@ namespace BLToolkit.Data.Linq
 				pi => pi.IsQueryableMethod ("GroupBy",    1, 1, seq => sequence = ParseSequence(seq), (l1, l2)        => select   = ParseGroupBy   (l1, l2,   null, sequence[0], pi.Expr.Type.GetGenericArguments()[0])),
 				pi => pi.IsQueryableMethod ("GroupBy",    1, 2, seq => sequence = ParseSequence(seq), (l1, l2)        => select   = ParseGroupBy   (l1, null, l2,   sequence[0], null)),
 				pi => pi.IsQueryableMethod ("GroupBy", 1, 1, 2, seq => sequence = ParseSequence(seq), (l1, l2, l3)    => select   = ParseGroupBy   (l1, l2,   l3,   sequence[0], null)),
+				pi => pi.IsQueryableMethod ("Update",     1, 1, seq => sequence = ParseSequence(seq), (l1, l2)        => ParseUpdate(l1, l2, sequence[0])),
 				pi => pi.IsQueryableMethod ("Take",             seq => sequence = ParseSequence(seq), ex => ParseTake     (sequence[0], ex)),
 				pi => pi.IsQueryableMethod ("Skip",             seq => sequence = ParseSequence(seq), ex => ParseSkip     (sequence[0], ex)),
 				pi => pi.IsQueryableMethod ("ElementAt",        seq => sequence = ParseSequence(seq), ex => ParseElementAt(sequence[0], ex)),
@@ -1019,8 +1021,6 @@ namespace BLToolkit.Data.Linq
 
 		QuerySource ParseWhere(LambdaInfo l, QuerySource select)
 		{
-			//CurrentSql.ToString();
-
 			ParsingTracer.WriteLine(l);
 			ParsingTracer.WriteLine(select);
 			ParsingTracer.IncIndentLevel();
@@ -1700,6 +1700,51 @@ namespace BLToolkit.Data.Linq
 				ParseWhere(lambda, select);
 
 			CurrentSql.IsDelete = true;
+
+			_buildSelect = () => { _info.SetCommandQuery(); };
+		}
+
+		#endregion
+
+		#region Parse Update
+
+		void ParseUpdate(LambdaInfo predicate, LambdaInfo setter, QuerySource select)
+		{
+			if (predicate != null)
+				select = ParseWhere(predicate, select);
+
+			if (setter.Body.NodeType != ExpressionType.MemberInit)
+				throw new LinqException("Object initializer expected for update statement.");
+
+			var body = setter.Body.ConvertTo<MemberInitExpression>();
+			var ex   = body.Expr;
+
+			for (var i = 0; i < ex.Bindings.Count; i++)
+			{
+				var binding = ex.Bindings[i];
+				var member  = binding.Member;
+
+				if (member is MethodInfo)
+					member = TypeHelper.GetPropertyByMethod((MethodInfo)member);
+
+				if (binding is MemberAssignment)
+				{
+					var ma = binding as MemberAssignment;
+
+					var piBinding    = body.     Create(ma.Expression, body.Index(ex.Bindings, MemberInit.Bindings, i));
+					var piAssign     = piBinding.Create(ma.Expression, piBinding.ConvertExpressionTo<MemberAssignment>());
+					var piExpression = piAssign. Create(ma.Expression, piAssign.Property(MemberAssignmentBind.Expression));
+
+					var column = select.GetField(member);
+					var expr   = ParseExpression(setter, piExpression, select);
+
+					CurrentSql.Set.Items.Add(new SqlQuery.SetExpression(column.GetExpressions(this)[0], expr));
+				}
+				else
+					throw new InvalidOperationException();
+			}
+
+			CurrentSql.IsUpdate = true;
 
 			_buildSelect = () => { _info.SetCommandQuery(); };
 		}
@@ -3037,6 +3082,9 @@ namespace BLToolkit.Data.Linq
 							var o  = ParseExpression(pi.Create(e.Operand, pi.Property(Unary.Operand)), queries);
 
 							if (e.Method == null && e.IsLifted)
+								return o;
+
+							if (e.Operand.Type.IsEnum && Enum.GetUnderlyingType(e.Operand.Type) == e.Type)
 								return o;
 
 							return Convert(new SqlFunction(e.Type, "$Convert$", SqlDataType.GetDataType(e.Type), SqlDataType.GetDataType(e.Operand.Type), o));

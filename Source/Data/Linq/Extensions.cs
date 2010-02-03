@@ -61,16 +61,41 @@ namespace BLToolkit.Data.Linq
 					new[] { source.Expression }));
 		}
 
-		public static int Delete<T>([NotNull] this IQueryable<T> source, [NotNull] Expression<Func<T,bool>> selector)
+		public static int Delete<T>([NotNull] this IQueryable<T> source, [NotNull] Expression<Func<T,bool>> predicate)
 		{
-			if (source   == null) throw new ArgumentNullException("source");
-			if (selector == null) throw new ArgumentNullException("selector");
+			if (source    == null) throw new ArgumentNullException("source");
+			if (predicate == null) throw new ArgumentNullException("predicate");
 
 			return source.Provider.Execute<int>(
 				Expression.Call(
 					null,
 					((MethodInfo)MethodBase.GetCurrentMethod()).MakeGenericMethod(new[] { typeof(T) }),
-					new[] { source.Expression, Expression.Quote(selector) }));
+					new[] { source.Expression, Expression.Quote(predicate) }));
+		}
+
+		public static int Update<T>([NotNull] this IQueryable<T> source, [NotNull] Expression<Func<T,T>> setter)
+		{
+			if (source    == null) throw new ArgumentNullException("source");
+			if (setter    == null) throw new ArgumentNullException("setter");
+
+			return source.Provider.Execute<int>(
+				Expression.Call(
+					null,
+					((MethodInfo)MethodBase.GetCurrentMethod()).MakeGenericMethod(new[] { typeof(T) }),
+					new[] { source.Expression, Expression.Quote(setter) }));
+		}
+
+		public static int Update<T>([NotNull] this IQueryable<T> source, [NotNull] Expression<Func<T,bool>> predicate, [NotNull] Expression<Func<T,T>> setter)
+		{
+			if (source    == null) throw new ArgumentNullException("source");
+			if (predicate == null) throw new ArgumentNullException("predicate");
+			if (setter    == null) throw new ArgumentNullException("setter");
+
+			return source.Provider.Execute<int>(
+				Expression.Call(
+					null,
+					((MethodInfo)MethodBase.GetCurrentMethod()).MakeGenericMethod(new[] { typeof(T) }),
+					new[] { source.Expression, Expression.Quote(predicate), Expression.Quote(setter) }));
 		}
 
 		/*
@@ -279,6 +304,9 @@ namespace BLToolkit.Data.Linq
 		static LambdaExpression L<T1,T2,T3,T4,T5,T6,TR> (Expression<Func<T1,T2,T3,T4,T5,T6,TR>> func) { return func; }
 
 		#endregion
+
+// ReSharper disable RedundantTypeArgumentsOfMethod
+// ReSharper disable RedundantCast
 
 		static public   Dictionary<string,Dictionary<MemberInfo,LambdaExpression>>  Members { get { return _members; } }
 		static readonly Dictionary<string,Dictionary<MemberInfo,LambdaExpression>> _members = new Dictionary<string,Dictionary<MemberInfo,LambdaExpression>>

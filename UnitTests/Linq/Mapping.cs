@@ -36,6 +36,34 @@ namespace Data.Linq
 		}
 
 		[Test]
+		public void Enum4()
+		{
+			ForEachProvider(db => AreEqual(
+				from p in    Parent4 where p.Value1 == TypeValue.Value1 select p,
+				from p in db.Parent4 where p.Value1 == TypeValue.Value1 select p));
+		}
+
+		[Test]
+		public void Enum5()
+		{
+			ForEachProvider(db => AreEqual(
+				from p in    Parent4 where p.Value1 == TypeValue.Value3 select p,
+				from p in db.Parent4 where p.Value1 == TypeValue.Value3 select p));
+		}
+
+		[Test]
+		public void Enum6()
+		{
+			ForEachProvider(db => AreEqual(
+				from p in Parent4
+				join c in Child on p.ParentID equals c.ParentID
+				where p.Value1 == TypeValue.Value1 select p,
+				from p in db.Parent4
+				join c in db.Child on p.ParentID equals c.ParentID
+				where p.Value1 == TypeValue.Value1 select p));
+		}
+
+		[Test]
 		public void EditableObject()
 		{
 			ForEachProvider(db =>

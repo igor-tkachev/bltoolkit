@@ -1,6 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 
+#region ReSharper C# 2.0 disable
+// ReSharper disable SuggestUseVarKeywordEvident
+// ReSharper disable SuggestUseVarKeywordEverywhere
+// ReSharper disable ConvertToLambdaExpression
+#endregion
+
 namespace BLToolkit.Data.Sql
 {
 	using VisitFunc   = Action<IQueryElement>;
@@ -172,6 +178,22 @@ namespace BLToolkit.Data.Sql
 						break;
 					}
 
+				case QueryElementType.SetExpression:
+					{
+						SqlQuery.SetExpression s = (SqlQuery.SetExpression)element;
+						Visit(s.Column,     all, action);
+						Visit(s.Expression, all, action);
+						break;
+					}
+
+				case QueryElementType.SetClause:
+					{
+						SqlQuery.SetClause sc = (SqlQuery.SetClause)element;
+
+						foreach (SqlQuery.SetExpression c in sc.Items.ToArray()) Visit(c, all, action);
+						break;
+					}
+
 				case QueryElementType.SelectClause:
 					{
 						SqlQuery.SelectClause sc = (SqlQuery.SelectClause)element;
@@ -228,6 +250,8 @@ namespace BLToolkit.Data.Sql
 						SqlQuery q = (SqlQuery)element;
 
 						Visit(q.Select,  all, action);
+						if (q.IsUpdate || q.IsInsert)
+							Visit(q.Set, all, action);
 						Visit(q.From,    all, action);
 						Visit(q.Where,   all, action);
 						Visit(q.GroupBy, all, action);
@@ -367,6 +391,20 @@ namespace BLToolkit.Data.Sql
 							Find(p.Values, find);
 					}
 
+				case QueryElementType.SetExpression:
+					{
+						SqlQuery.SetExpression s = (SqlQuery.SetExpression)element;
+						return
+							Find(s.Column,     find) ??
+							Find(s.Expression, find);
+					}
+
+				case QueryElementType.SetClause:
+					{
+						SqlQuery.SetClause sc = (SqlQuery.SetClause)element;
+						return Find(sc.Items, find);
+					}
+
 				case QueryElementType.SelectClause:
 					{
 						SqlQuery.SelectClause sc = (SqlQuery.SelectClause)element;
@@ -382,6 +420,7 @@ namespace BLToolkit.Data.Sql
 
 						return
 							Find(q.Select,  find) ??
+							(q.IsUpdate || q.IsInsert ? Find(q.Set, find) : null) ??
 							Find(q.From,    find) ??
 							Find(q.Where,   find) ??
 							Find(q.GroupBy, find) ??
@@ -666,6 +705,33 @@ namespace BLToolkit.Data.Sql
 						break;
 					}
 
+				case QueryElementType.SetExpression:
+					{
+						SqlQuery.SetExpression s = (SqlQuery.SetExpression)element;
+						ISqlExpression         c = (ISqlExpression)ConvertInternal(s.Column,     action);
+						ISqlExpression         e = (ISqlExpression)ConvertInternal(s.Expression, action);
+
+						if (c != null && !ReferenceEquals(s.Column, c) || e != null && !ReferenceEquals(s.Expression, e))
+							newElement = new SqlQuery.SetExpression(c ?? s.Column, e ?? s.Expression);
+
+						break;
+					}
+
+				case QueryElementType.SetClause:
+					{
+						SqlQuery.SetClause           s = (SqlQuery.SetClause)element;
+						List<SqlQuery.SetExpression> i = Convert(s.Items, action);
+
+						if (i != null && !ReferenceEquals(s.Items, i))
+						{
+							SqlQuery.SetClause sc = new SqlQuery.SetClause();
+							sc.Items.AddRange(i);
+							newElement = sc;
+						}
+
+						break;
+					}
+
 				case QueryElementType.SelectClause:
 					{
 						SqlQuery.SelectClause sc   = (SqlQuery.SelectClause)element;
@@ -810,6 +876,7 @@ namespace BLToolkit.Data.Sql
 
 						SqlQuery.FromClause    fc = (SqlQuery.FromClause)   ConvertInternal(q.From,    action) ?? q.From;
 						SqlQuery.SelectClause  sc = (SqlQuery.SelectClause) ConvertInternal(q.Select,  action) ?? q.Select;
+						SqlQuery.SetClause     tc = q.IsUpdate || q.IsInsert ? ((SqlQuery.SetClause)ConvertInternal(q.Set, action) ?? q.Set) : null;
 						SqlQuery.WhereClause   wc = (SqlQuery.WhereClause)  ConvertInternal(q.Where,   action) ?? q.Where;
 						SqlQuery.GroupByClause gc = (SqlQuery.GroupByClause)ConvertInternal(q.GroupBy, action) ?? q.GroupBy;
 						SqlQuery.WhereClause   hc = (SqlQuery.WhereClause)  ConvertInternal(q.Having,  action) ?? q.Having;
@@ -831,7 +898,7 @@ namespace BLToolkit.Data.Sql
 							}
 						}
 
-						nq.Set(sc, fc, wc, gc, hc, oc, us, (SqlQuery)parent, q.ParameterDependent, ps);
+						nq.Init(tc, sc, fc, wc, gc, hc, oc, us, (SqlQuery)parent, q.ParameterDependent, ps);
 
 						_visitedElements[q] = action(nq) ?? nq;
 

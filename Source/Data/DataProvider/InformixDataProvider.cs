@@ -40,7 +40,7 @@ namespace BLToolkit.Data.DataProvider
 				case ConvertType.NameToSprocParameter:
 					return ":" + value;
 
-				case ConvertType.ParameterToName:
+				case ConvertType.SprocParameterToName:
 					if (value != null)
 					{
 						string str = value.ToString();

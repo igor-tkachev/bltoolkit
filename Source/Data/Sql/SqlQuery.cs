@@ -2,9 +2,19 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-//using System.Linq;
 using System.Text;
 using System.Threading;
+
+#region ReSharper C# 2.0 disable
+
+// ReSharper disable SuggestUseVarKeywordEvident
+// ReSharper disable SuggestUseVarKeywordEverywhere
+// ReSharper disable ConvertToLambdaExpression
+// ReSharper disable ConvertToAutoProperty
+// ReSharper disable RedundantTypeArgumentsOfMethod
+// ReSharper disable UnusedAnonymousMethodSignature
+
+#endregion
 
 namespace BLToolkit.Data.Sql
 {
@@ -47,7 +57,8 @@ namespace BLToolkit.Data.Sql
 			_orderBy = new OrderByClause(this);
 		}
 
-		internal void Set(
+		internal void Init(
+			SetClause          set,
 			SelectClause       select,
 			FromClause         from,
 			WhereClause        where,
@@ -59,6 +70,7 @@ namespace BLToolkit.Data.Sql
 			bool               parameterDependent,
 			List<SqlParameter> parameters)
 		{
+			_set                = set;
 			_select             = select;
 			_from               = from;
 			_where              = where;
@@ -2064,6 +2076,165 @@ namespace BLToolkit.Data.Sql
 
 		#endregion
 
+		#region SetClause
+
+		public class SetExpression : IQueryElement, ISqlExpressionWalkable, ICloneableElement
+		{
+			public SetExpression(ISqlExpression column, ISqlExpression expression)
+			{
+				_column     = column;
+				_expression = expression;
+			}
+
+			private ISqlExpression _column;     public ISqlExpression Column     { get { return _column;     } set { _column     = value; } }
+			private ISqlExpression _expression; public ISqlExpression Expression { get { return _expression; } set { _expression = value; } }
+
+			#region Overrides
+
+#if OVERRIDETOSTRING
+
+			public override string ToString()
+			{
+				return ((IQueryElement)this).ToString(new StringBuilder(), new Dictionary<IQueryElement,IQueryElement>()).ToString();
+			}
+
+#endif
+
+			#endregion
+
+			#region ICloneableElement Members
+
+			public ICloneableElement Clone(Dictionary<ICloneableElement, ICloneableElement> objectTree, Predicate<ICloneableElement> doClone)
+			{
+				if (!doClone(this))
+					return this;
+
+				ICloneableElement clone;
+
+				objectTree.Add(this, clone = new SetExpression(
+						(ISqlExpression)_column.    Clone(objectTree, doClone),
+						(ISqlExpression)_expression.Clone(objectTree, doClone)));
+
+				return clone;
+			}
+
+			#endregion
+
+			#region ISqlExpressionWalkable Members
+
+			[Obsolete]
+			ISqlExpression ISqlExpressionWalkable.Walk(bool skipColumns, WalkingFunc func)
+			{
+				_column     = _column.    Walk(skipColumns, func);
+				_expression = _expression.Walk(skipColumns, func);
+				return null;
+			}
+
+			#endregion
+
+			#region IQueryElement Members
+
+			public QueryElementType ElementType { get { return QueryElementType.SetExpression; } }
+
+			StringBuilder IQueryElement.ToString(StringBuilder sb, Dictionary<IQueryElement,IQueryElement> dic)
+			{
+				_column.ToString(sb, dic);
+				sb.Append(" = ");
+				_expression.ToString(sb, dic);
+
+				return sb;
+			}
+
+			#endregion
+		}
+
+		public class SetClause : IQueryElement, ISqlExpressionWalkable, ICloneableElement
+		{
+			private List<SetExpression> _items = new List<SetExpression>();
+			public  List<SetExpression>  Items { get { return _items; } }
+
+			#region Overrides
+
+#if OVERRIDETOSTRING
+
+			public override string ToString()
+			{
+				return ((IQueryElement)this).ToString(new StringBuilder(), new Dictionary<IQueryElement,IQueryElement>()).ToString();
+			}
+
+#endif
+
+			#endregion
+
+			#region ICloneableElement Members
+
+			public ICloneableElement Clone(Dictionary<ICloneableElement, ICloneableElement> objectTree, Predicate<ICloneableElement> doClone)
+			{
+				if (!doClone(this))
+					return this;
+
+				SetClause clone = new SetClause();
+
+				foreach (SetExpression item in Items)
+				{
+					clone.Items.Add((SetExpression)item.Clone(objectTree, doClone));
+				}
+
+				objectTree.Add(this, clone);
+
+				return clone;
+			}
+
+			#endregion
+
+			#region ISqlExpressionWalkable Members
+
+			[Obsolete]
+			ISqlExpression ISqlExpressionWalkable.Walk(bool skipColumns, WalkingFunc func)
+			{
+				for (int i = 0; i < Items.Count; i++)
+					((ISqlExpressionWalkable)Items[i]).Walk(skipColumns, func);
+				return null;
+			}
+
+			#endregion
+
+			#region IQueryElement Members
+
+			public QueryElementType ElementType { get { return QueryElementType.SetClause; } }
+
+			StringBuilder IQueryElement.ToString(StringBuilder sb, Dictionary<IQueryElement,IQueryElement> dic)
+			{
+				sb.Append("SET ");
+
+				sb.AppendLine();
+
+				foreach (SetExpression e in Items)
+				{
+					sb.Append("\t");
+					((IQueryElement)e).ToString(sb, dic);
+					sb.AppendLine();
+				}
+
+				return sb;
+			}
+
+			#endregion
+		}
+
+		private SetClause _set;
+		public  SetClause  Set
+		{
+			get
+			{
+				if (_set == null)
+					_set = new SetClause();
+				return _set;
+			}
+		}
+
+		#endregion
+
 		#region FromClause
 
 		public class FromClause : ClauseBase, IQueryElement, ISqlExpressionWalkable
@@ -2650,8 +2821,8 @@ namespace BLToolkit.Data.Sql
 				_isAll    = isAll;
 			}
 
-			private SqlQuery _sqlQuery; public SqlQuery SqlQuery { get { return _sqlQuery; } }
-			private bool     _isAll;    public bool     IsAll    { get { return _isAll;    } }
+			private readonly SqlQuery _sqlQuery; public SqlQuery SqlQuery { get { return _sqlQuery; } }
+			private readonly bool     _isAll;    public bool     IsAll    { get { return _isAll;    } }
 
 			public QueryElementType ElementType
 			{
@@ -2696,12 +2867,9 @@ namespace BLToolkit.Data.Sql
 
 		#region Insert / Update / Delete
 
-		private bool _isDelete;
-		public  bool  IsDelete
-		{
-			get { return _isDelete;  }
-			set { _isDelete = value; }
-		}
+		private bool _isDelete; public bool IsDelete { get { return _isDelete; } set { _isDelete = value; } }
+		private bool _isUpdate; public bool IsUpdate { get { return _isUpdate; } set { _isUpdate = value; } }
+		private bool _isInsert; public bool IsInsert { get { return _isInsert; } set { _isInsert = value; } }
 
 		#endregion
 
@@ -2880,7 +3048,7 @@ namespace BLToolkit.Data.Sql
 								case Predicate.Operator.GreaterOrEqual : op = Predicate.Operator.Less;           break;
 								case Predicate.Operator.Less           : op = Predicate.Operator.GreaterOrEqual; break;
 								case Predicate.Operator.NotGreater     :
-								case Predicate.Operator.LessOrEqual    : op = Predicate.Operator.Greater;        break;;
+								case Predicate.Operator.LessOrEqual    : op = Predicate.Operator.Greater;        break;
 								default: throw new InvalidOperationException();
 							}
 
@@ -3329,6 +3497,13 @@ namespace BLToolkit.Data.Sql
 			objectTree.Add(clone, this);
 
 			_sourceID = Interlocked.Increment(ref SourceIDCounter);
+
+			_isDelete = clone._isDelete;
+			_isUpdate = clone._isUpdate;
+			_isInsert = clone._isInsert;
+
+			if (_isInsert || _isUpdate)
+				_set = (SetClause)clone._set.Clone(objectTree, doClone);
 
 			_select  = new SelectClause (this, clone._select,  objectTree, doClone);
 			_from    = new FromClause   (this, clone._from,    objectTree, doClone);

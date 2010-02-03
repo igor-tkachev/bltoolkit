@@ -26,11 +26,25 @@ namespace BLToolkit.Data.DataProvider
 			set { _convertParameterSymbols = value ?? new List<char>(); }
 		}
 
-		private static string _parameterPrefix = "";
+		[Obsolete("Use CommandParameterPrefix or SprocParameterPrefix instead.")]
 		public  static string  ParameterPrefix
 		{
-			get { return _parameterPrefix; }
-			set { _parameterPrefix = string.IsNullOrEmpty(value) ? string.Empty : value; }
+			get { return _sprocParameterPrefix; }
+			set { _sprocParameterPrefix = _commandParameterPrefix = string.IsNullOrEmpty(value) ? string.Empty : value; }
+		}
+
+		private static string _commandParameterPrefix = "";
+		public  static string  CommandParameterPrefix
+		{
+			get { return _commandParameterPrefix; }
+			set { _commandParameterPrefix = string.IsNullOrEmpty(value) ? string.Empty : value; }
+		}
+
+		private static string _sprocParameterPrefix = "";
+		public  static string  SprocParameterPrefix
+		{
+			get { return _sprocParameterPrefix; }
+			set { _sprocParameterPrefix = string.IsNullOrEmpty(value) ? string.Empty : value; }
 		}
 
 		public static void ConfigureOldStyle()
@@ -71,7 +85,7 @@ namespace BLToolkit.Data.DataProvider
 				if (p.ParameterName[0] != ParameterSymbol)
 					p.ParameterName =
 						Convert(
-							Convert(p.ParameterName, ConvertType.ParameterToName),
+							Convert(p.ParameterName, ConvertType.SprocParameterToName),
 							command.CommandType == CommandType.StoredProcedure ? ConvertType.NameToSprocParameter : ConvertType.NameToCommandParameter).ToString();
 			}
 		}
@@ -99,18 +113,20 @@ namespace BLToolkit.Data.DataProvider
 					return ParameterSymbol + value.ToString();
 
 				case ConvertType.NameToCommandParameter:
-				case ConvertType.NameToSprocParameter:
-					return ParameterSymbol + ParameterPrefix + value.ToString();
+					return ParameterSymbol + CommandParameterPrefix + value.ToString();
 
-				case ConvertType.ParameterToName:
+				case ConvertType.NameToSprocParameter:
+					return ParameterSymbol + SprocParameterPrefix + value.ToString();
+
+				case ConvertType.SprocParameterToName:
 					if (value != null)
 					{
 						string str = value.ToString();
 						str = (str.Length > 0 && (str[0] == ParameterSymbol || (TryConvertParameterSymbol && ConvertParameterSymbols.Contains(str[0])))) ? str.Substring(1) : str;
 
-						if ((!string.IsNullOrEmpty(ParameterPrefix))
-							&& str.StartsWith(ParameterPrefix))
-							str = str.Substring(ParameterPrefix.Length);
+						if ((!string.IsNullOrEmpty(SprocParameterPrefix))
+							&& str.StartsWith(SprocParameterPrefix))
+							str = str.Substring(SprocParameterPrefix.Length);
 
 						return str;
 					}
@@ -149,7 +165,15 @@ namespace BLToolkit.Data.DataProvider
 		{
 			string paremeterPrefix = attributes["ParameterPrefix"];
 			if (paremeterPrefix != null)
-				ParameterPrefix = paremeterPrefix;
+				CommandParameterPrefix = SprocParameterPrefix = paremeterPrefix;
+
+			paremeterPrefix = attributes["CommandParameterPrefix"];
+			if (paremeterPrefix != null)
+				CommandParameterPrefix = paremeterPrefix;
+
+			paremeterPrefix = attributes["SprocParameterPrefix"];
+			if (paremeterPrefix != null)
+				SprocParameterPrefix = paremeterPrefix;
 
 			string configName = attributes["ParameterSymbolConfig"];
 			if (configName != null)

@@ -7,6 +7,7 @@ using System.Reflection;
 using BLToolkit.Data.DataProvider;
 using BLToolkit.Common;
 using BLToolkit.Data;
+using BLToolkit.Mapping;
 
 using NUnit.Framework;
 
@@ -163,6 +164,24 @@ namespace Data.Linq
 			}
 		}
 
+		private   List<Patient> _patient;
+		protected List<Patient>  Patient
+		{
+			get
+			{
+				if (_patient == null)
+				{
+					using (var db = new TestDbManager("Sql2008"))
+						_patient = db.Patient.ToList();
+
+					foreach (var p in _patient)
+						p.Person = Person.Single(ps => ps.ID == p.PersonID);
+				}
+
+				return _patient;
+			}
+		}
+
 		#region Parent/Child Model
 
 		private   List<Parent> _parent;
@@ -190,6 +209,15 @@ namespace Data.Linq
 			get
 			{
 				return _parent1 ?? (_parent1 = Parent.Select(p => new Parent1 { ParentID = p.ParentID, Value1 = p.Value1 }).ToList());
+			}
+		}
+
+		private   List<Parent4> _parent4;
+		protected List<Parent4>  Parent4
+		{
+			get
+			{
+				return _parent4 ?? (_parent4 = Parent.Select(p => new Parent4 { ParentID = p.ParentID, Value1 = Map.ToEnum<TypeValue>(p.Value1) }).ToList());
 			}
 		}
 

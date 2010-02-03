@@ -646,7 +646,8 @@ namespace BLToolkit.Data
 
 					foreach (IDbDataParameter p in parameterValues)
 					{
-						if (string.Compare(name, p.ParameterName, true) == 0)
+						if (string.Compare(name, p.ParameterName, true) == 0 || 
+							string.Compare(name, _dataProvider.Convert(p.ParameterName, ConvertType.NameToSprocParameter).ToString()) == 0)
 						{
 							if (param.Direction != p.Direction)
 							{
@@ -677,7 +678,7 @@ namespace BLToolkit.Data
 							"Stored Procedure '{0}'. Parameter '{1}' not assigned.", spName, name),
 							TraceSwitch.DisplayName);
 
-						param.SourceColumn = _dataProvider.Convert(name, ConvertType.ParameterToName).ToString();
+						param.SourceColumn = _dataProvider.Convert(name, ConvertType.SprocParameterToName).ToString();
 					}
 				}
 			}
@@ -1201,7 +1202,7 @@ namespace BLToolkit.Data
 					case ParameterDirection.InputOutput:
 					case ParameterDirection.Output:
 						ordinal = dest.GetOrdinal(
-							_dataProvider.Convert(parameter.ParameterName, ConvertType.ParameterToName).ToString());
+							_dataProvider.Convert(parameter.ParameterName, ConvertType.SprocParameterToName).ToString());
 						break;
 
 					case ParameterDirection.ReturnValue:
@@ -1789,8 +1790,8 @@ namespace BLToolkit.Data
 		public ConvertType GetConvertTypeToParameter()
 		{
 			return Command.CommandType == CommandType.StoredProcedure ?
-				ConvertType.NameToCommandParameter:
-				ConvertType.NameToSprocParameter;
+				ConvertType.NameToSprocParameter:
+				ConvertType.NameToCommandParameter;
 		}
 
 		#endregion

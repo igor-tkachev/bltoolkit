@@ -65,7 +65,7 @@ namespace BLToolkit.Data.DataProvider
 
 					return "[" + value + "]";
 
-				case ConvertType.ParameterToName:
+				case ConvertType.SprocParameterToName:
 					if (value != null)
 					{
 						string str = value.ToString();

@@ -153,6 +153,36 @@ namespace Data.Linq.Model
 		}
 	}
 
+	[TableName("Parent")]
+	public class Parent4 : IEquatable<Parent4>, IComparable
+	{
+		public int       ParentID;
+		public TypeValue Value1;
+
+		public override bool Equals(object obj)
+		{
+			if (obj.GetType() != typeof (Parent4)) return false;
+			return Equals((Parent4)obj);
+		}
+
+		public bool Equals(Parent4 other)
+		{
+			if (ReferenceEquals(null, other)) return false;
+			if (ReferenceEquals(this, other)) return true;
+			return other.ParentID == ParentID && other.Value1.Equals(Value1);
+		}
+
+		public override int GetHashCode()
+		{
+			unchecked { return (ParentID * 397) ^ (int)Value1; }
+		}
+
+		public int CompareTo(object obj)
+		{
+			return ParentID - ((Parent4)obj).ParentID;
+		}
+	}
+
 	#endregion
 
 	#region Parent1/GrandChild1

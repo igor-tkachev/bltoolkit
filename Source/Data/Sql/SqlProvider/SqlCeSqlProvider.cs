@@ -242,10 +242,17 @@ namespace BLToolkit.Data.Sql.SqlProvider
 				}
 			});
 
-			sqlQuery = GetAlternativeDelete(base.Finalize(sqlQuery));
+			sqlQuery = base.Finalize(sqlQuery);
 
 			if (sqlQuery.IsDelete)
+			{
+				sqlQuery = GetAlternativeDelete(sqlQuery);
 				sqlQuery.From.Tables[0].Alias = "$";
+			}
+			else if (sqlQuery.IsUpdate)
+			{
+				sqlQuery = GetAlternativeUpdate(sqlQuery);
+			}
 
 			return sqlQuery;
 		}
@@ -263,6 +270,12 @@ namespace BLToolkit.Data.Sql.SqlProvider
 				case SqlDbType.DateTime2     : sb.Append("DateTime");        break;
 				default                      : base.BuildDataType(sb, type); break;
 			}
+		}
+
+		protected override void BuildFromClause(StringBuilder sb)
+		{
+			if (!SqlQuery.IsUpdate)
+				base.BuildFromClause(sb);
 		}
 	}
 }

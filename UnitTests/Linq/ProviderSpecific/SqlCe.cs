@@ -19,11 +19,17 @@ namespace Data.Linq.ProviderSpecific
 				{
 					var list = db
 						.SetCommand(@"
-							DELETE 
-							FROM
-								[Parent]
-							WHERE
-								[Parent].[ParentID] = 100000")
+UPDATE
+    [Child]
+SET
+    [ChildID] = [ChildID] + 1
+WHERE EXISTS(
+FROM
+    [Child] [c]
+        LEFT JOIN [Parent] [t1] ON [c].[ParentID] = [t1].[ParentID]
+WHERE
+    [c].[ChildID] = @id AND [t1].[Value1] = 1
+")
 						.ExecuteNonQuery();
 				}
 			}

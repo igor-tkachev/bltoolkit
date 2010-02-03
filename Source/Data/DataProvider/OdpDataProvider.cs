@@ -237,7 +237,7 @@ namespace BLToolkit.Data.DataProvider
 				case ConvertType.NameToSprocParameter:
 					return ParameterPrefix == null? value: ParameterPrefix + value;
 
-				case ConvertType.ParameterToName:
+				case ConvertType.SprocParameterToName:
 					string name = (string)value;
 					if (name.Length > 0)
 					{

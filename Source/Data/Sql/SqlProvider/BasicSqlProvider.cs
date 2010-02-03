@@ -9,6 +9,12 @@ using System.Text;
 using System.Linq.Expressions;
 #endif
 
+#region ReSharper C# 2.0 disable
+// ReSharper disable SuggestUseVarKeywordEverywhere
+// ReSharper disable SuggestUseVarKeywordEvident
+// ReSharper disable UseObjectOrCollectionInitializer
+#endregion
+
 namespace BLToolkit.Data.Sql.SqlProvider
 {
 	using DataProvider;
@@ -135,6 +141,10 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			{
 				_buildStep = Step.DeleteClause; BuildDeleteClause(sb);
 			}
+			else if (_sqlQuery.IsUpdate)
+			{
+				_buildStep = Step.UpdateClause; BuildUpdateClause(sb);
+			}
 			else
 			{
 				_buildStep = Step.SelectClause; BuildSelectClause(sb);
@@ -202,7 +212,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		protected virtual void BuildColumn(StringBuilder sb, SqlQuery.Column col, ref bool addAlias)
 		{
-			BuildExpression(sb, col.Expression, col.Alias, ref addAlias);
+			BuildExpression(sb, col.Expression, true, col.Alias, ref addAlias);
 		}
 
 		#endregion
@@ -213,6 +223,56 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		{
 			AppendIndent(sb);
 			sb.Append("DELETE ");
+		}
+
+		#endregion
+
+		#region Build Update
+
+		protected virtual void BuildUpdateClause(StringBuilder sb)
+		{
+			BuildUpdateTable(sb);
+			BuildUpdateSet  (sb);
+		}
+
+		protected virtual void BuildUpdateTable(StringBuilder sb)
+		{
+			AppendIndent(sb)
+				.AppendLine("UPDATE")
+				.Append('\t');
+			BuildUpdateTableName(sb);
+			sb.AppendLine();
+		}
+
+		protected virtual void BuildUpdateTableName(StringBuilder sb)
+		{
+			BuildTableName(sb, SqlQuery.From.Tables[0], true, true);
+		}
+
+		protected virtual void BuildUpdateSet(StringBuilder sb)
+		{
+			AppendIndent(sb)
+				.AppendLine("SET");
+
+			_indent++;
+
+			bool first = true;
+
+			foreach (SqlQuery.SetExpression expr in _sqlQuery.Set.Items)
+			{
+				if (!first)
+					sb.Append(',').AppendLine();
+				first = false;
+
+				AppendIndent(sb);
+				BuildExpression(sb, expr.Column, false);
+				sb.Append(" = ");
+				BuildExpression(sb, expr.Expression);
+			}
+
+			_indent--;
+
+			sb.AppendLine();
 		}
 
 		#endregion
@@ -248,12 +308,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 						sb.Append("(");
 				}
 
-				BuildPhysicalTable(sb, ts.Source);
-
-				string alias = GetTableAlias(ts);
-
-				if (!string.IsNullOrEmpty(alias))
-					sb.Append(" ").Append(DataProvider.Convert(alias, ConvertType.NameToQueryTableAlias));
+				BuildTableName(sb, ts, true, true);
 
 				foreach (SqlQuery.JoinedTable jt in ts.Joins)
 					BuildJoinTable(sb, jt, ref jn);
@@ -285,6 +340,24 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			}
 		}
 
+		protected void BuildTableName(StringBuilder sb, SqlQuery.TableSource ts, bool buildName, bool buildAlias)
+		{
+			if (buildName)
+				BuildPhysicalTable(sb, ts.Source);
+
+			if (buildAlias)
+			{
+				string alias = GetTableAlias(ts);
+
+				if (!string.IsNullOrEmpty(alias))
+				{
+					if (buildName)
+						sb.Append(" ");
+					sb.Append(DataProvider.Convert(alias, ConvertType.NameToQueryTableAlias));
+				}
+			}
+		}
+
 		void BuildJoinTable(StringBuilder sb, SqlQuery.JoinedTable join, ref int joinCounter)
 		{
 			sb.AppendLine();
@@ -301,12 +374,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			if (IsNestedJoinParenthesisRequired && join.Table.Joins.Count != 0)
 				sb.Append('(');
 
-			BuildPhysicalTable(sb, join.Table.Source);
-
-			string alias = GetTableAlias(join.Table);
-
-			if (!string.IsNullOrEmpty(alias))
-				sb.Append(" ").Append(DataProvider.Convert(alias, ConvertType.NameToQueryTableAlias));
+			BuildTableName(sb, join.Table, true, true);
 
 			if (IsNestedJoinSupported && join.Table.Joins.Count != 0)
 			{
@@ -777,7 +845,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		#region BuildExpression
 
-		protected virtual StringBuilder BuildExpression(StringBuilder sb, ISqlExpression expr, string alias, ref bool addAlias)
+		protected virtual StringBuilder BuildExpression(StringBuilder sb, ISqlExpression expr, bool buildTableName, string alias, ref bool addAlias)
 		{
 			expr = ConvertExpression(expr);
 
@@ -792,26 +860,30 @@ namespace BLToolkit.Data.Sql.SqlProvider
 						}
 						else
 						{
-							SqlQuery.TableSource ts = _sqlQuery.GetTableSource(field.Table);
+							if (buildTableName)
+							{
+								SqlQuery.TableSource ts = _sqlQuery.GetTableSource(field.Table);
 
-							if (ts == null)
-								throw new SqlException(string.Format("Table {0} not found.", field.Table));
+								if (ts == null)
+									throw new SqlException(string.Format("Table {0} not found.", field.Table));
 
-							string table = GetTableAlias(ts);
+								string table = GetTableAlias(ts);
 
-							table = table == null ?
-								GetTablePhysicalName(field.Table) :
-								DataProvider.Convert(table, ConvertType.NameToQueryTableAlias).ToString();
+								table = table == null ?
+									GetTablePhysicalName(field.Table) :
+									DataProvider.Convert(table, ConvertType.NameToQueryTableAlias).ToString();
 
-							if (string.IsNullOrEmpty(table))
-								throw new SqlException(string.Format("Table {0} should have an alias.", field.Table));
+								if (string.IsNullOrEmpty(table))
+									throw new SqlException(string.Format("Table {0} should have an alias.", field.Table));
 
-							addAlias = alias != field.PhysicalName;
+								addAlias = alias != field.PhysicalName;
 
-							sb
-								.Append(table)
-								.Append('.')
-								.Append(_dataProvider.Convert(field.PhysicalName, ConvertType.NameToQueryField));
+								sb
+									.Append(table)
+									.Append('.');
+							}
+
+							sb.Append(_dataProvider.Convert(field.PhysicalName, ConvertType.NameToQueryField));
 						}
 					}
 
@@ -936,14 +1008,20 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			bool wrap = Wrap(GetPrecedence(expr), parentPrecedence);
 
 			if (wrap) sb.Append('(');
-			BuildExpression(sb, expr, alias, ref addAlias);
+			BuildExpression(sb, expr, true, alias, ref addAlias);
 			if (wrap) sb.Append(')');
 		}
 
 		protected virtual StringBuilder BuildExpression(StringBuilder sb, ISqlExpression expr)
 		{
 			bool dummy = false;
-			return BuildExpression(sb, expr, null, ref dummy);
+			return BuildExpression(sb, expr, true, null, ref dummy);
+		}
+
+		protected virtual StringBuilder BuildExpression(StringBuilder sb, ISqlExpression expr, bool buildTableName)
+		{
+			bool dummy = false;
+			return BuildExpression(sb, expr, buildTableName, null, ref dummy);
 		}
 
 		protected void BuildExpression(StringBuilder sb, int precedence, ISqlExpression expr)
@@ -1167,6 +1245,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		{
 			SelectClause,
 			DeleteClause,
+			UpdateClause,
 			FromClause,
 			WhereClause,
 			GroupByClause,
@@ -1465,7 +1544,66 @@ namespace BLToolkit.Data.Sql.SqlProvider
 						.Field(copyKeys[i]).Equal.Field(tableKeys[i]);
 
 				sql.From.Table(copy).Where.Exists(sqlQuery);
+				sql.Parameters.AddRange(sqlQuery.Parameters);
+
+				sqlQuery.Parameters.Clear();
+
 				sqlQuery = sql;
+			}
+
+			return sqlQuery;
+		}
+
+		protected SqlQuery GetAlternativeUpdate(SqlQuery sqlQuery)
+		{
+			if (sqlQuery.IsUpdate && sqlQuery.From.Tables[0].Source is SqlTable)
+			{
+				if (sqlQuery.From.Tables.Count > 1 || sqlQuery.From.Tables[0].Joins.Count > 0)
+				{
+					SqlQuery sql = new SqlQuery();
+
+					sql.IsUpdate = true;
+
+					sqlQuery.ParentSql = sql;
+					sqlQuery.IsUpdate = false;
+
+					SqlTable table = (SqlTable)sqlQuery.From.Tables[0].Source;
+					SqlTable copy  = new SqlTable(table);
+
+					List<SqlField> tableKeys = table.GetKeyFields();
+					List<SqlField> copyKeys  = copy. GetKeyFields();
+
+					for (int i = 0; i < tableKeys.Count; i++)
+						sqlQuery.Where
+							.Field(copyKeys[i]).Equal.Field(tableKeys[i]);
+
+					sql.From.Table(copy).Where.Exists(sqlQuery);
+
+					Dictionary<SqlField,SqlField> map = new Dictionary<SqlField, SqlField>(table.Fields.Count);
+
+					foreach (SqlField field in table.Fields.Values)
+						map.Add(field, copy[field.Name]);
+
+					foreach (SqlQuery.SetExpression item in sqlQuery.Set.Items)
+					{
+						((ISqlExpressionWalkable)item).Walk(false, delegate(ISqlExpression expr)
+						{
+							SqlField fld = expr as SqlField;
+							return fld != null && map.TryGetValue(fld, out fld) ? fld : expr;
+						});
+
+						sql.Set.Items.Add(item);
+					}
+
+					sql.Parameters.AddRange(sqlQuery.Parameters);
+
+					sqlQuery.Parameters.Clear();
+					sqlQuery.Set.Items.Clear();
+
+					sqlQuery = sql;
+				}
+
+				sqlQuery.From.Tables[0].Alias = "$";
 			}
 
 			return sqlQuery;
@@ -2165,7 +2303,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 									case SqlQuery.Predicate.Operator.GreaterOrEqual : op = SqlQuery.Predicate.Operator.Less;           break;
 									case SqlQuery.Predicate.Operator.Less           : op = SqlQuery.Predicate.Operator.GreaterOrEqual; break;
 									case SqlQuery.Predicate.Operator.NotGreater     :
-									case SqlQuery.Predicate.Operator.LessOrEqual    : op = SqlQuery.Predicate.Operator.Greater;        break;;
+									case SqlQuery.Predicate.Operator.LessOrEqual    : op = SqlQuery.Predicate.Operator.Greater;        break;
 									default: throw new InvalidOperationException();
 								}
 

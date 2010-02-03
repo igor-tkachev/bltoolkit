@@ -117,6 +117,20 @@ namespace Data.Linq
 		}
 
 		[Test]
+		public void InnerJoin9()
+		{
+			ForEachProvider(new[] { ProviderName.Access }, db => AreEqual(
+				from g in GrandChild
+				join p in Parent4 on g.Child.ParentID equals p.ParentID
+				where g.ParentID < 10 && p.Value1 == TypeValue.Value3
+				select g,
+				from g in db.GrandChild
+				join p in db.Parent4 on g.Child.ParentID equals p.ParentID
+				where g.ParentID < 10 && p.Value1 == TypeValue.Value3
+				select g));
+		}
+
+		[Test]
 		public void LeftJoin1()
 		{
 			ForEachProvider(db => AreEqual(

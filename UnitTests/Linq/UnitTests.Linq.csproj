@@ -137,6 +137,8 @@
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="Model\ParentChild.cs" />
+    <Compile Include="Model\Patient.cs" />
+    <Compile Include="Model\TypeValue.cs" />
     <Compile Include="ProviderSpecific\Access.cs" />
     <Compile Include="ProviderSpecific\MsSql2008s.cs" />
     <Compile Include="ProviderSpecific\SqlCe.cs" />
@@ -166,7 +168,6 @@
     <Compile Include="Model\BinaryData.cs" />
     <Compile Include="Model\DataTypeTest.cs" />
     <Compile Include="Model\Doctor.cs" />
-    <Compile Include="Model\Patient.cs" />
     <Compile Include="Model\Person.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SelectScalar.cs" />

@@ -28,7 +28,7 @@ namespace BLToolkit.Data.DataProvider
 		NameToParameter = NameToCommandParameter,
 
 		/// <summary>
-		/// Provided name should be converted to command parameter name.
+		/// Provided name should be converted to stored procedure parameter name.
 		/// For example:
 		///     firstName -> @firstName
 		/// for the following query:
@@ -98,14 +98,17 @@ namespace BLToolkit.Data.DataProvider
 		NameToQueryTableAlias,
 
 		/// <summary>
-		/// Provided command parameter name should be converted to name.
+		/// Provided stored procedure parameter name should be converted to name.
 		/// For example:
 		///     @firstName -> firstName
 		/// for the following query:
 		///     db.Parameter("@firstName") = "John";
 		///                   ^ '@' has to be removed
 		/// </summary>
-		ParameterToName,
+		SprocParameterToName,
+
+		[Obsolete("Use SprocParameterToName instead.")]
+		ParameterToName = SprocParameterToName,
 
 		/// <summary>
 		/// Gets error number from a native exception.

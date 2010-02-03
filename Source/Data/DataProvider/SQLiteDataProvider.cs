@@ -102,7 +102,7 @@ namespace BLToolkit.Data.DataProvider
 
 					return "[" + value + "]";
 
-				case ConvertType.ParameterToName:
+				case ConvertType.SprocParameterToName:
 					{
 						string name = (string)value;
 						return name.Length > 0 && name[0] == '@'? name.Substring(1): name;

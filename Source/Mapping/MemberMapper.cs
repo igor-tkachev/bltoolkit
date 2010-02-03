@@ -2151,7 +2151,8 @@ namespace BLToolkit.Mapping
 					Type underlyingType = mapInfo.MemberAccessor.UnderlyingType;
 
 					if (valueType != underlyingType)
-						value = _mappingSchema.ConvertChangeType(value, underlyingType);
+						//value = _mappingSchema.ConvertChangeType(value, underlyingType);
+						return MapFrom(_mappingSchema.ConvertChangeType(value, underlyingType), mapInfo);
 
 					//value = Enum.Parse(type, Enum.GetName(type, value));
 					value = Enum.ToObject(memberType, value);

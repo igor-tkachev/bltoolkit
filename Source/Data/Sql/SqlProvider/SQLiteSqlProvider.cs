@@ -89,12 +89,25 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		public override SqlQuery Finalize(SqlQuery sqlQuery)
 		{
-			sqlQuery = GetAlternativeDelete(base.Finalize(sqlQuery));
+			sqlQuery = base.Finalize(sqlQuery);
 
 			if (sqlQuery.IsDelete)
+			{
+				sqlQuery = GetAlternativeDelete(base.Finalize(sqlQuery));
 				sqlQuery.From.Tables[0].Alias = "$";
+			}
+			else if (sqlQuery.IsUpdate)
+			{
+				sqlQuery = GetAlternativeUpdate(sqlQuery);
+			}
 
 			return sqlQuery;
+		}
+
+		protected override void BuildFromClause(StringBuilder sb)
+		{
+			if (!SqlQuery.IsUpdate)
+				base.BuildFromClause(sb);
 		}
 	}
 }

@@ -102,8 +102,13 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		{
 			AppendIndent(sb);
 			sb.Append("DELETE FROM ");
-			BuildPhysicalTable(sb, SqlQuery.From.Tables[0].Source);
+			BuildTableName(sb, SqlQuery.From.Tables[0], true, false);
 			sb.AppendLine();
+		}
+
+		protected override void BuildUpdateTableName(StringBuilder sb)
+		{
+			BuildTableName(sb, SqlQuery.From.Tables[0], true, false);
 		}
 	}
 }
