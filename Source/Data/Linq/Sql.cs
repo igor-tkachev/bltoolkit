@@ -456,6 +456,7 @@ namespace BLToolkit.Data.Linq
 				new DateTime(year.Value, month.Value, day.Value);
 		}
 
+		[SqlEnum]
 		public enum DateParts
 		{
 			Year        =  0,

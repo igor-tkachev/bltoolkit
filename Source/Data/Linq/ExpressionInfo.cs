@@ -101,10 +101,22 @@ namespace BLToolkit.Data.Linq
 
 		#region CommandQuery
 
-		public void SetCommandQuery()
+		private void FinalizeQuery()
 		{
 			foreach (var sql in Queries)
+			{
 				sql.SqlQuery = SqlProvider.Finalize(sql.SqlQuery);
+				sql.Parameters = sql.Parameters
+					.Select(p => new { p, idx = sql.SqlQuery.Parameters.IndexOf(p.SqlParameter) })
+					.OrderBy(p => p.idx)
+					.Select(p => p.p)
+					.ToList();
+			}
+		}
+
+		public void SetCommandQuery()
+		{
+			FinalizeQuery();
 
 			if (Queries.Count != 1)
 				throw new InvalidOperationException();
@@ -138,8 +150,7 @@ namespace BLToolkit.Data.Linq
 
 		public void SetElementQuery<TE>(Mapper<TE> mapper)
 		{
-			foreach (var sql in Queries)
-				sql.SqlQuery = SqlProvider.Finalize(sql.SqlQuery);
+			FinalizeQuery();
 
 			if (Queries.Count != 1)
 				throw new InvalidOperationException();
@@ -179,8 +190,7 @@ namespace BLToolkit.Data.Linq
 		{
 			Queries[0].Mapper = mapper;
 
-			foreach (var sql in Queries)
-				sql.SqlQuery = SqlProvider.Finalize(sql.SqlQuery);
+			FinalizeQuery();
 
 			if (Queries.Count != 1)
 				throw new InvalidOperationException();
@@ -335,42 +345,36 @@ namespace BLToolkit.Data.Linq
 			var x = db.DataProvider.Convert("x", ConvertType.NameToQueryParameter).ToString();
 			var y = db.DataProvider.Convert("y", ConvertType.NameToQueryParameter).ToString();
 
-			var parms = new IDbDataParameter[x == y? sqlParameters.Count: parameters.Count];
+			var parms = new List<IDbDataParameter>(x == y? sqlParameters.Count: parameters.Count);
 
 			if (x == y)
 			{
-				for (var i = 0; i < parms.Length; i++)
+				for (var i = 0; i < sqlParameters.Count; i++)
 				{
 					var sqlp = sqlParameters[i];
-					var parm = parameters.Count > i && parameters[i].SqlParameter == sqlp ? parameters[i] : parameters.First(p => p.SqlParameter == sqlp);
 
-					parms[i] = db.Parameter(x, parm.SqlParameter.Value);
+					if (sqlp.IsQueryParameter)
+					{
+						var parm = parameters.Count > i && parameters[i].SqlParameter == sqlp ? parameters[i] : parameters.First(p => p.SqlParameter == sqlp);
+						parms.Add(db.Parameter(x, parm.SqlParameter.Value));
+					}
 				}
 			}
 			else
 			{
-				int i = 0, j = 0;
-
-				for (; i < parms.Length; i++)
+				for (var i = 0; i < parameters.Count; i++)
 				{
-					var parm = parameters[i];
+					var parm = parameters[i].SqlParameter;
 
-					if (sqlParameters.Contains(parm.SqlParameter))
+					if (parm.IsQueryParameter && sqlParameters.Contains(parm))
 					{
-						var name = db.DataProvider.Convert(parm.SqlParameter.Name, ConvertType.NameToQueryParameter).ToString();
-						parms[j++] = db.Parameter(name, parm.SqlParameter.Value);
+						var name = db.DataProvider.Convert(parm.Name, ConvertType.NameToQueryParameter).ToString();
+						parms.Add(db.Parameter(name, parm.Value));
 					}
-				}
-
-				if (i > j)
-				{
-					var parms1 = new IDbDataParameter[j];
-					Array.Copy(parms, parms1, j);
-					parms = parms1;
 				}
 			}
 
-			return parms;
+			return parms.ToArray();
 		}
 
 		string GetCommand(int idx, out List<SqlParameter> parameters)

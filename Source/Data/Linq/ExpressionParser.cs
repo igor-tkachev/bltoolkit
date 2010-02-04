@@ -338,8 +338,9 @@ namespace BLToolkit.Data.Linq
 						case "OfType"          : sequence = ParseSequence(seq); select = ParseOfType(pi, sequence);    break;
 						case "Any"             : sequence = ParseAny(true, seq, null, pi);                             break;
 						case "Cast"            : sequence = ParseSequence(seq);                                        break;
-						case "Delete"          : sequence = ParseSequence(seq); ParseDelete(null, sequence[0]);        break;
+						case "Delete"          : sequence = ParseSequence(seq); ParseDelete(null,       sequence[0]);  break;
 						case "Update"          : sequence = ParseSequence(seq); ParseUpdate(null, null, sequence[0]);  break;
+						case "Insert"          : sequence = ParseSequence(seq); ParseInsert(null, null, sequence[0]);  break;
 						default                :
 							ParsingTracer.DecIndentLevel();
 							return false;
@@ -384,7 +385,7 @@ namespace BLToolkit.Data.Linq
 				// everything else
 				//
 				pi => pi.IsQueryableMethod ("SelectMany", 1, 2, seq => sequence = ParseSequence(seq), (l1, l2)        => select   = ParseSelectMany(l1, l2,         sequence[0])),
-				pi => pi.IsQueryableMethod ("Select",  2,       seq => sequence = ParseSequence(seq), l               => sequence = ParseSelect    (l,              sequence[0])),
+				pi => pi.IsQueryableMethod ("Select",        2, seq => sequence = ParseSequence(seq), l               => sequence = ParseSelect    (l,              sequence[0])),
 				pi => pi.IsQueryableMethod ("Join",             seq => sequence = ParseSequence(seq), (i, l2, l3, l4) => select   = ParseJoin      (i,  l2, l3, l4, sequence[0])),
 				pi => pi.IsQueryableMethod ("GroupJoin",        seq => sequence = ParseSequence(seq), (i, l2, l3, l4) => select   = ParseGroupJoin (i,  l2, l3, l4, sequence[0])),
 				pi => pi.IsQueryableMethod ("GroupBy",    1, 1, seq => sequence = ParseSequence(seq), (l1, l2)        => select   = ParseGroupBy   (l1, l2,   null, sequence[0], pi.Expr.Type.GetGenericArguments()[0])),
@@ -392,6 +393,9 @@ namespace BLToolkit.Data.Linq
 				pi => pi.IsQueryableMethod ("GroupBy", 1, 1, 2, seq => sequence = ParseSequence(seq), (l1, l2, l3)    => select   = ParseGroupBy   (l1, l2,   l3,   sequence[0], null)),
 				pi => pi.IsQueryableMethod ("Update",     1, 1, seq => sequence = ParseSequence(seq), (l1, l2)        => ParseUpdate(l1, l2, sequence[0])),
 				pi => pi.IsQueryableMethod ("Set",        1, 1, seq => sequence = ParseSequence(seq), (l1, l2)        => ParseSet   (l1, l2, sequence[0])),
+				pi => pi.IsQueryableMethod ("Set",        1, 0, seq => sequence = ParseSequence(seq), (l1, l2)        => ParseSet   (l1, l2, sequence[0])),
+				pi => pi.IsQueryableMethod ("Value",      1, 1, seq => sequence = ParseSequence(seq), (l1, l2)        => ParseSet   (l1, l2, sequence[0])),
+				pi => pi.IsQueryableMethod ("Value",      1, 0, seq => sequence = ParseSequence(seq), (l1, l2)        => ParseSet   (l1, l2, sequence[0])),
 				pi => pi.IsQueryableMethod ("Take",             seq => sequence = ParseSequence(seq), ex => ParseTake     (sequence[0], ex)),
 				pi => pi.IsQueryableMethod ("Skip",             seq => sequence = ParseSequence(seq), ex => ParseSkip     (sequence[0], ex)),
 				pi => pi.IsQueryableMethod ("ElementAt",        seq => sequence = ParseSequence(seq), ex => ParseElementAt(sequence[0], ex)),
@@ -400,6 +404,27 @@ namespace BLToolkit.Data.Linq
 				pi => pi.IsQueryableMethod ("Except",           seq => sequence = ParseSequence(seq), ex => { select = ParseIntersect(sequence,    ex, true);  return true; }),
 				pi => pi.IsQueryableMethod ("Intersect",        seq => sequence = ParseSequence(seq), ex => { select = ParseIntersect(sequence,    ex, false); return true; }),
 				pi => pi.IsEnumerableMethod("DefaultIfEmpty",   seq => { sequence = ParseDefaultIfEmpty(seq); return sequence != null; }),
+				pi => pi.IsQueryableMethod ("Insert",        0, seq => sequence = ParseSequence(seq), l               => ParseInsert(null, l, sequence[0])),
+				pi =>
+				{
+					ParseInfo into = null;
+
+					return pi.IsMethod(null, "Insert", new Func<ParseInfo,bool>[]
+					{
+						p => { sequence = ParseSequence(p); return true; },
+						p => { into = p; return true; },
+						p => { p.IsLambda(1, l => ParseInsert(into, l, sequence[0]) ); return true; }
+					}, _ => true);
+				},
+				pi =>
+				{
+					ParseInfo arg1 = null;
+					return pi.IsMethod(null, "Into", new Func<ParseInfo,bool>[]
+					{
+						p => { arg1 = p; return true; },
+						p => { sequence = ParseInto(arg1, p); return true; }
+					}, _ => true);
+				},
 				pi =>
 				{
 					ParseInfo s = null;
@@ -1701,7 +1726,7 @@ namespace BLToolkit.Data.Linq
 			if (lambda != null)
 				ParseWhere(lambda, select);
 
-			CurrentSql.IsDelete = true;
+			CurrentSql.QueryType = QueryType.Delete;
 
 			_buildSelect = () => { _info.SetCommandQuery(); };
 		}
@@ -1716,42 +1741,45 @@ namespace BLToolkit.Data.Linq
 				select = ParseWhere(predicate, select);
 
 			if (setter != null)
-			{
-				if (setter.Body.NodeType != ExpressionType.MemberInit)
-					throw new LinqException("Object initializer expected for update statement.");
+				ParseSetter(setter, select);
 
-				var body = setter.Body.ConvertTo<MemberInitExpression>();
-				var ex   = body.Expr;
-
-				for (var i = 0; i < ex.Bindings.Count; i++)
-				{
-					var binding = ex.Bindings[i];
-					var member  = binding.Member;
-
-					if (member is MethodInfo)
-						member = TypeHelper.GetPropertyByMethod((MethodInfo)member);
-
-					if (binding is MemberAssignment)
-					{
-						var ma = binding as MemberAssignment;
-
-						var piBinding    = body.     Create(ma.Expression, body.Index(ex.Bindings, MemberInit.Bindings, i));
-						var piAssign     = piBinding.Create(ma.Expression, piBinding.ConvertExpressionTo<MemberAssignment>());
-						var piExpression = piAssign. Create(ma.Expression, piAssign.Property(MemberAssignmentBind.Expression));
-
-						var column = select.GetField(member);
-						var expr   = ParseExpression(setter, piExpression, select);
-
-						CurrentSql.Set.Items.Add(new SqlQuery.SetExpression(column.GetExpressions(this)[0], expr));
-					}
-					else
-						throw new InvalidOperationException();
-				}
-			}
-
-			CurrentSql.IsUpdate = true;
+			CurrentSql.QueryType = QueryType.Update;
 
 			_buildSelect = () => { _info.SetCommandQuery(); };
+		}
+
+		private void ParseSetter(LambdaInfo setter, QuerySource select)
+		{
+			if (setter.Body.NodeType != ExpressionType.MemberInit)
+				throw new LinqException("Object initializer expected for update statement.");
+
+			var body = setter.Body.ConvertTo<MemberInitExpression>();
+			var ex   = body.Expr;
+
+			for (var i = 0; i < ex.Bindings.Count; i++)
+			{
+				var binding = ex.Bindings[i];
+				var member  = binding.Member;
+
+				if (member is MethodInfo)
+					member = TypeHelper.GetPropertyByMethod((MethodInfo)member);
+
+				if (binding is MemberAssignment)
+				{
+					var ma = binding as MemberAssignment;
+
+					var piBinding    = body.     Create(ma.Expression, body.Index(ex.Bindings, MemberInit.Bindings, i));
+					var piAssign     = piBinding.Create(ma.Expression, piBinding.ConvertExpressionTo<MemberAssignment>());
+					var piExpression = piAssign. Create(ma.Expression, piAssign.Property(MemberAssignmentBind.Expression));
+
+					var column = select.GetField(member);
+					var expr   = ParseExpression(setter, piExpression, select);
+
+					CurrentSql.Set.Items.Add(new SqlQuery.SetExpression(column.GetExpressions(this)[0], expr));
+				}
+				else
+					throw new InvalidOperationException();
+			}
 		}
 
 		void ParseSet(LambdaInfo extract, LambdaInfo update, QuerySource select)
@@ -1769,6 +1797,76 @@ namespace BLToolkit.Data.Linq
 			var expr   = ParseExpression(update, update.Body, select);
 
 			CurrentSql.Set.Items.Add(new SqlQuery.SetExpression(column.GetExpressions(this)[0], expr));
+		}
+
+		#endregion
+
+		#region Parse Insert
+
+		void ParseInsert(ParseInfo into, LambdaInfo setter, QuerySource select)
+		{
+			if (into != null)
+			{
+				ParseSetter(setter, select);
+
+				foreach (var item in CurrentSql.Set.Items)
+					CurrentSql.Select.Expr(item.Expression);
+
+				var sql = CurrentSql;
+
+				CurrentSql = new SqlQuery();
+
+				var source = ParseTable(into);
+
+				CurrentSql = sql;
+				CurrentSql.Set.Into  = ((QuerySource.Table)source).SqlTable;
+			}
+			else if (setter != null)
+			{
+				ParseSetter(setter, select);
+
+				CurrentSql.Set.Into  = ((QuerySource.Table)select).SqlTable;
+				CurrentSql.From.Tables.Clear();
+			}
+			else
+			{
+				foreach (var item in CurrentSql.Set.Items)
+					CurrentSql.Select.Expr(item.Expression);
+			}
+
+			CurrentSql.QueryType = QueryType.Insert;
+
+			_buildSelect = () => { _info.SetCommandQuery(); };
+		}
+
+		QuerySource[] ParseInto(ParseInfo source, ParseInfo into)
+		{
+			QuerySource[] sequence;
+
+			if (source.NodeType == ExpressionType.Constant && ((ConstantExpression)source).Value == null)
+			{
+				sequence = ParseSequence(into);
+				CurrentSql.Set.Into  = ((QuerySource.Table)sequence[0]).SqlTable;
+				CurrentSql.From.Tables.Clear();
+			}
+			else
+			{
+				sequence = ParseSequence(source);
+
+				var sql = CurrentSql;
+
+				CurrentSql = new SqlQuery();
+
+				var tbl = ParseSequence(into);
+
+				CurrentSql = sql;
+
+				CurrentSql.Set.Into = ((QuerySource.Table)tbl[0]).SqlTable;
+			}
+
+			CurrentSql.Select.Columns.Clear();
+
+			return sequence;
 		}
 
 		#endregion
@@ -2889,7 +2987,16 @@ namespace BLToolkit.Data.Linq
 
 			var lambda = Expression.Lambda<Func<object>>(Expression.Convert(expr,typeof(object)));
 
-			value = new SqlValue(lambda.Compile()());
+			var v = lambda.Compile()();
+
+			if (v != null && v.GetType().IsEnum)
+			{
+				var attrs = v.GetType().GetCustomAttributes(typeof(SqlEnumAttribute), true);
+
+				v = Map.EnumToValue(v, attrs.Length == 0);
+			}
+
+			value = new SqlValue(v);
 
 			_constants.Add(expr.Expr, value);
 
@@ -2921,7 +3028,7 @@ namespace BLToolkit.Data.Linq
 			{
 				Expression   = expr.Expr,
 				Accessor     = mapper.Compile(),
-				SqlParameter = new SqlParameter(expr.Expr.Type, name, (object)null)
+				SqlParameter = new SqlParameter(expr.Expr.Type, name, null)
 			};
 
 			_parameters.Add(expr.Expr, p);
@@ -3366,8 +3473,8 @@ namespace BLToolkit.Data.Linq
 
 		static ParseInfo ParseLambdaArgument(ParseInfo pi, int idx)
 		{
-			var expr = (MethodCallExpression)pi.Expr;
-			var arg  = pi.Create(expr.Arguments[idx], pi.Index(expr.Arguments, MethodCall.Arguments, idx));
+			var       expr = (MethodCallExpression)pi.Expr;
+			ParseInfo arg  = pi.Create(expr.Arguments[idx], pi.Index(expr.Arguments, MethodCall.Arguments, idx));
 			
 			arg.IsLambda<Expression>(new Func<ParseInfo<ParameterExpression>,bool>[]
 				{ _ => true },

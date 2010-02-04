@@ -140,6 +140,10 @@
     <Compile Include="Data\IDataReaderEx.cs" />
     <Compile Include="Data\Linq\CompiledQuery.cs" />
     <Compile Include="Data\Linq\CompiledTableT.cs" />
+    <Compile Include="Data\Linq\ISelectInsertable.cs" />
+    <Compile Include="Data\Linq\Expressions.cs" />
+    <Compile Include="Data\Linq\IValueInsertable.cs" />
+    <Compile Include="Data\Linq\SqlEnumAttribute.cs" />
     <Compile Include="Data\Linq\Extensions.cs" />
     <Compile Include="Data\Linq\IUpdateable.cs" />
     <Compile Include="Data\Linq\MethodExpressionAttribute.cs" />
@@ -169,6 +173,7 @@
     <Compile Include="Data\Sql\ISqlExpressionWalkable.cs" />
     <Compile Include="Data\Sql\IValueContainer.cs" />
     <Compile Include="Data\Sql\QueryElementType.cs" />
+    <Compile Include="Data\Sql\QueryType.cs" />
     <Compile Include="Data\Sql\QueryVisitor.cs" />
     <Compile Include="Data\Sql\SqlDataType.cs" />
     <Compile Include="Data\Sql\ISqlPredicate.cs" />

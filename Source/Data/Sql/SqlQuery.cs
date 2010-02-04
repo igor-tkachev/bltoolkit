@@ -115,10 +115,14 @@ namespace BLToolkit.Data.Sql
 
 		public bool IsSimple
 		{
-			get
-			{
-				return !Select.HasModifier && Where.IsEmpty && GroupBy.IsEmpty && Having.IsEmpty && OrderBy.IsEmpty;
-			}
+			get { return !Select.HasModifier && Where.IsEmpty && GroupBy.IsEmpty && Having.IsEmpty && OrderBy.IsEmpty; }
+		}
+
+		private QueryType _queryType = QueryType.Select;
+		public  QueryType  QueryType
+		{
+			get { return _queryType;  }
+			set { _queryType = value; }
 		}
 
 		#endregion
@@ -2150,8 +2154,15 @@ namespace BLToolkit.Data.Sql
 
 		public class SetClause : IQueryElement, ISqlExpressionWalkable, ICloneableElement
 		{
-			private List<SetExpression> _items = new List<SetExpression>();
-			public  List<SetExpression>  Items { get { return _items; } }
+			readonly List<SetExpression> _items = new List<SetExpression>();
+			public   List<SetExpression>  Items { get { return _items; } }
+
+			private ISqlTableSource _into;
+			public  ISqlTableSource  Into
+			{
+				get { return _into;  }
+				set { _into = value; }
+			}
 
 			#region Overrides
 
@@ -2175,10 +2186,11 @@ namespace BLToolkit.Data.Sql
 
 				SetClause clone = new SetClause();
 
+				if (_into != null)
+					clone.Into = (ISqlTableSource)_into.Clone(objectTree, doClone);
+
 				foreach (SetExpression item in Items)
-				{
 					clone.Items.Add((SetExpression)item.Clone(objectTree, doClone));
-				}
 
 				objectTree.Add(this, clone);
 
@@ -2192,6 +2204,9 @@ namespace BLToolkit.Data.Sql
 			[Obsolete]
 			ISqlExpression ISqlExpressionWalkable.Walk(bool skipColumns, WalkingFunc func)
 			{
+				if (_into != null)
+					((ISqlExpressionWalkable)_into).Walk(skipColumns, func);
+
 				for (int i = 0; i < Items.Count; i++)
 					((ISqlExpressionWalkable)Items[i]).Walk(skipColumns, func);
 				return null;
@@ -2206,6 +2221,9 @@ namespace BLToolkit.Data.Sql
 			StringBuilder IQueryElement.ToString(StringBuilder sb, Dictionary<IQueryElement,IQueryElement> dic)
 			{
 				sb.Append("SET ");
+
+				if (_into != null)
+					_into.ToString(sb, dic);
 
 				sb.AppendLine();
 
@@ -2865,14 +2883,6 @@ namespace BLToolkit.Data.Sql
 
 		#endregion
 
-		#region Insert / Update / Delete
-
-		private bool _isDelete; public bool IsDelete { get { return _isDelete; } set { _isDelete = value; } }
-		private bool _isUpdate; public bool IsUpdate { get { return _isUpdate; } set { _isUpdate = value; } }
-		private bool _isInsert; public bool IsInsert { get { return _isInsert; } set { _isInsert = value; } }
-
-		#endregion
-
 		#region FinalizeAndValidate
 
 		public void FinalizeAndValidate()
@@ -3498,11 +3508,9 @@ namespace BLToolkit.Data.Sql
 
 			_sourceID = Interlocked.Increment(ref SourceIDCounter);
 
-			_isDelete = clone._isDelete;
-			_isUpdate = clone._isUpdate;
-			_isInsert = clone._isInsert;
+			_queryType = clone._queryType;
 
-			if (_isInsert || _isUpdate)
+			if (_queryType == QueryType.Insert || _queryType == QueryType.Update)
 				_set = (SetClause)clone._set.Clone(objectTree, doClone);
 
 			_select  = new SelectClause (this, clone._select,  objectTree, doClone);

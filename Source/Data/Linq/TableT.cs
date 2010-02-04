@@ -13,7 +13,7 @@ using JetBrains.Annotations;
 
 namespace BLToolkit.Data.Linq
 {
-	public class Table<T> : IUpdateable<T>, IQueryProvider
+	public class Table<T> : IOrderedQueryable<T>, IQueryProvider
 	{
 		#region Init
 

@@ -224,17 +224,17 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		{
 			sqlQuery = base.Finalize(sqlQuery);
 
-			return
-				sqlQuery.IsDelete ?
-					GetAlternativeDelete(sqlQuery) :
-				sqlQuery.IsUpdate ?
-					GetAlternativeUpdate(sqlQuery) :
-					sqlQuery;
+			switch (sqlQuery.QueryType)
+			{
+				case QueryType.Delete : return GetAlternativeDelete(sqlQuery);
+				case QueryType.Update : return GetAlternativeUpdate(sqlQuery);
+				default               : return sqlQuery;
+			}
 		}
 
 		protected override void BuildFromClause(StringBuilder sb)
 		{
-			if (!SqlQuery.IsUpdate)
+			if (SqlQuery.QueryType != QueryType.Update)
 				base.BuildFromClause(sb);
 		}
 	}

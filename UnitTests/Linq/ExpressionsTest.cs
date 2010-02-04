@@ -19,7 +19,7 @@ namespace Data.Linq
 		[Test]
 		public void MapMember1()
 		{
-			Extensions.MapMember<Parent,int>(p => Count1(p), p => p.Children.Count(c => c.ChildID > 0));
+			Expressions.MapMember<Parent,int>(p => Count1(p), p => p.Children.Count(c => c.ChildID > 0));
 
 			ForEachProvider(db => AreEqual(Parent.Select(p => Count1(p)), db.Parent.Select(p => Count1(p))));
 		}
@@ -29,7 +29,7 @@ namespace Data.Linq
 		[Test]
 		public void MapMember2()
 		{
-			Extensions.MapMember<Parent,int,int>((p,id) => Count2(p, id), (p, id) => p.Children.Count(c => c.ChildID > id));
+			Expressions.MapMember<Parent,int,int>((p,id) => Count2(p, id), (p, id) => p.Children.Count(c => c.ChildID > id));
 
 			ForEachProvider(db => AreEqual(Parent.Select(p => Count2(p, 1)), db.Parent.Select(p => Count2(p, 1))));
 		}
@@ -39,7 +39,7 @@ namespace Data.Linq
 		[Test]
 		public void MapMember3()
 		{
-			Extensions.MapMember<Parent,int,int>((p,id) => Count3(p, id), (p, id) => p.Children.Count(c => c.ChildID > id) + 2);
+			Expressions.MapMember<Parent,int,int>((p,id) => Count3(p, id), (p, id) => p.Children.Count(c => c.ChildID > id) + 2);
 
 			var n = 2;
 

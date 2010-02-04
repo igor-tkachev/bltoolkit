@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Linq;
 
-using BLToolkit.Data.DataProvider;
 using BLToolkit.Data.Linq;
 
 using NUnit.Framework;
@@ -13,22 +12,17 @@ namespace Data.Linq
 	[TestFixture]
 	public class SelectScalar : TestBase
 	{
-		private static readonly string[] _exceptList = new[]
-		{
-			ProviderName.Firebird, ProviderName.SqlCe, ProviderName.Informix, ProviderName.DB2
-		};
-
 		[Test]
 		public void Parameter1()
 		{
 			var p = 1;
-			ForEachProvider(_exceptList, db => Assert.AreEqual(p, db.Select(() => p)));
+			ForEachProvider(db => Assert.AreEqual(p, db.Select(() => p)));
 		}
 
 		[Test]
 		public void Parameter2()
 		{
-			ForEachProvider(_exceptList, db =>
+			ForEachProvider(db =>
 			{
 				var p = 1;
 				Assert.AreEqual(p, db.Select(() => new { p }).p);

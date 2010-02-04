@@ -14,13 +14,19 @@ namespace Data.Linq.ProviderSpecific
 		{
 			using (var db = new TestDbManager(ProviderName.Access))
 			{
-				var list = db
+				var res = db
 					.SetCommand(@"
-						SELECT
-							DateValue([t].[DateTimeValue])
-						FROM
-							[LinqDataTypes] [t]")
-					.ExecuteScalarList<DateTime>();
+						UPDATE
+							[Child] [c]
+								LEFT JOIN [Parent] [t1] ON [c].[ParentID] = [t1].[ParentID]
+						SET
+							[ChildID] = @id
+						WHERE
+							[c].[ChildID] = @id1 AND [t1].[Value1] = 1
+",
+						db.Parameter("@id1", 1001),
+						db.Parameter("@id", 1002))
+					.ExecuteNonQuery();
 			}
 		}
 	}

@@ -88,6 +88,11 @@ namespace BLToolkit.Mapping
 			return _defaultSchema.MapEnumToValue(value);
 		}
 
+		public static object EnumToValue(object value, bool convertToUnderlyingType)
+		{
+			return _defaultSchema.MapEnumToValue(value, convertToUnderlyingType);
+		}
+
 		public static T ToEnum<T>(object value)
 		{
 			return (T)_defaultSchema.MapValueToEnum(value, typeof(T));

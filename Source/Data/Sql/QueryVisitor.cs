@@ -190,6 +190,9 @@ namespace BLToolkit.Data.Sql
 					{
 						SqlQuery.SetClause sc = (SqlQuery.SetClause)element;
 
+						if (sc.Into != null)
+							Visit(sc.Into, all, action);
+
 						foreach (SqlQuery.SetExpression c in sc.Items.ToArray()) Visit(c, all, action);
 						break;
 					}
@@ -249,9 +252,11 @@ namespace BLToolkit.Data.Sql
 
 						SqlQuery q = (SqlQuery)element;
 
-						Visit(q.Select,  all, action);
-						if (q.IsUpdate || q.IsInsert)
+						if (q.QueryType == QueryType.Update || q.QueryType == QueryType.Insert)
 							Visit(q.Set, all, action);
+						else
+							Visit(q.Select, all, action);
+
 						Visit(q.From,    all, action);
 						Visit(q.Where,   all, action);
 						Visit(q.GroupBy, all, action);
@@ -402,7 +407,9 @@ namespace BLToolkit.Data.Sql
 				case QueryElementType.SetClause:
 					{
 						SqlQuery.SetClause sc = (SqlQuery.SetClause)element;
-						return Find(sc.Items, find);
+						return
+							Find(sc.Into,  find) ??
+							Find(sc.Items, find);
 					}
 
 				case QueryElementType.SelectClause:
@@ -420,7 +427,7 @@ namespace BLToolkit.Data.Sql
 
 						return
 							Find(q.Select,  find) ??
-							(q.IsUpdate || q.IsInsert ? Find(q.Set, find) : null) ??
+							(q.QueryType == QueryType.Update || q.QueryType == QueryType.Insert ? Find(q.Set, find) : null) ??
 							Find(q.From,    find) ??
 							Find(q.Where,   find) ??
 							Find(q.GroupBy, find) ??
@@ -720,11 +727,13 @@ namespace BLToolkit.Data.Sql
 				case QueryElementType.SetClause:
 					{
 						SqlQuery.SetClause           s = (SqlQuery.SetClause)element;
+						ISqlTableSource              t = s.Into != null ? (ISqlTableSource)ConvertInternal(s.Into, action) : null;
 						List<SqlQuery.SetExpression> i = Convert(s.Items, action);
 
-						if (i != null && !ReferenceEquals(s.Items, i))
+						if (t != null && !ReferenceEquals(s.Into, t) || i != null && !ReferenceEquals(s.Items, i))
 						{
 							SqlQuery.SetClause sc = new SqlQuery.SetClause();
+							sc.Into = t ?? sc.Into;
 							sc.Items.AddRange(i);
 							newElement = sc;
 						}
@@ -876,7 +885,7 @@ namespace BLToolkit.Data.Sql
 
 						SqlQuery.FromClause    fc = (SqlQuery.FromClause)   ConvertInternal(q.From,    action) ?? q.From;
 						SqlQuery.SelectClause  sc = (SqlQuery.SelectClause) ConvertInternal(q.Select,  action) ?? q.Select;
-						SqlQuery.SetClause     tc = q.IsUpdate || q.IsInsert ? ((SqlQuery.SetClause)ConvertInternal(q.Set, action) ?? q.Set) : null;
+						SqlQuery.SetClause     tc = q.QueryType == QueryType.Update || q.QueryType == QueryType.Insert ? ((SqlQuery.SetClause)ConvertInternal(q.Set, action) ?? q.Set) : null;
 						SqlQuery.WhereClause   wc = (SqlQuery.WhereClause)  ConvertInternal(q.Where,   action) ?? q.Where;
 						SqlQuery.GroupByClause gc = (SqlQuery.GroupByClause)ConvertInternal(q.GroupBy, action) ?? q.GroupBy;
 						SqlQuery.WhereClause   hc = (SqlQuery.WhereClause)  ConvertInternal(q.Having,  action) ?? q.Having;

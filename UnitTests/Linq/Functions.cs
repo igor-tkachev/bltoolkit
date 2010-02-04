@@ -150,7 +150,7 @@ namespace Data.Linq
 		[Test]
 		public void CustomFunc()
 		{
-			Extensions.MapMember<Person>(p => p.FullName(), (Expression<Func<Person,string>>)(p => p.LastName + ", " + p.FirstName));
+			Expressions.MapMember<Person>(p => p.FullName(), (Expression<Func<Person,string>>)(p => p.LastName + ", " + p.FirstName));
 
 			ForEachProvider(db => AreEqual(
 				from p in    Person where p.FullName() == "Pupkin, John" select p.FullName(),

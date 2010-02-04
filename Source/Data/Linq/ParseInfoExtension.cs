@@ -5,7 +5,7 @@ using System.Linq.Expressions;
 
 namespace BLToolkit.Data.Linq
 {
-	using FTest = Func<ParseInfo<Expression>, bool>;
+	using FTest = Func<ParseInfo, bool>;
 
 	static class ParseInfoExtension
 	{
@@ -41,10 +41,10 @@ namespace BLToolkit.Data.Linq
 
 		[DebuggerStepThrough]
 		public static bool IsQueryableMethod(
-			this ParseInfo<MethodCallExpression>        pi,
-			Func<ParseInfo<Expression>,LambdaInfo,bool> lambda)
+			this ParseInfo<MethodCallExpression> pi,
+			Func<ParseInfo,LambdaInfo,bool>      lambda)
 		{
-			ParseInfo<Expression> seq = null;
+			ParseInfo seq = null;
 			return IsMethod(pi, null, null, new FTest[]
 			{
 				p => { seq = p; return true; },
@@ -57,17 +57,19 @@ namespace BLToolkit.Data.Linq
 			this ParseInfo<MethodCallExpression> pi,
 			string                               methodName,
 			int                                  nparams1,
-			Action<ParseInfo<Expression>>        seq,
+			Action<ParseInfo>                    seq,
 			Action<LambdaInfo>                   parms)
 		{
-			LambdaInfo lambda = null;
+			ParseInfo  seqInfo = null;
+			LambdaInfo lambda  = null;
 
 			if (IsMethod(pi, null, methodName, new FTest[]
 				{
-					p => { seq(p); return true; },
+					p => { seqInfo = p; return true; },
 					l => l.IsLambda(nparams1, lm => lambda = lm),
 				}, p => true))
 			{
+				seq(seqInfo);
 				lambda.MethodInfo = pi.Expr.Method;
 				parms(lambda);
 				return true;
@@ -82,19 +84,21 @@ namespace BLToolkit.Data.Linq
 			string                               methodName,
 			int                                  nparams1,
 			int                                  nparams2,
-			Action<ParseInfo<Expression>>        seq,
+			Action<ParseInfo>                    seq,
 			Action<LambdaInfo,LambdaInfo>        parms)
 		{
+			ParseInfo  seqInfo = null;
 			LambdaInfo lambda1 = null;
 			LambdaInfo lambda2 = null;
 
 			if (IsMethod(pi, null, methodName, new FTest[]
 				{
-					p => { seq(p); return true; },
+					p => { seqInfo = p; return true; },
 					l => l.IsLambda(nparams1, l1 => lambda1 = l1),
 					l => l.IsLambda(nparams2, l2 => lambda2 = l2),
 				}, p => true))
 			{
+				seq(seqInfo);
 				parms(lambda1, lambda2);
 				return true;
 			}
@@ -109,21 +113,23 @@ namespace BLToolkit.Data.Linq
 			int                                      nparams1,
 			int                                      nparams2,
 			int                                      nparams3,
-			Action<ParseInfo<Expression>>            seq,
+			Action<ParseInfo>                        seq,
 			Action<LambdaInfo,LambdaInfo,LambdaInfo> parms)
 		{
+			ParseInfo  seqInfo = null;
 			LambdaInfo lambda1 = null;
 			LambdaInfo lambda2 = null;
 			LambdaInfo lambda3 = null;
 
 			if (IsMethod(pi, null, methodName, new FTest[]
 				{
-					p => { seq(p); return true; },
+					p => { seqInfo = p; return true; },
 					l => l.IsLambda(nparams1, l1 => lambda1 = l1),
 					l => l.IsLambda(nparams2, l2 => lambda2 = l2),
 					l => l.IsLambda(nparams3, l3 => lambda3 = l3),
 				}, p => true))
 			{
+				seq(seqInfo);
 				parms(lambda1, lambda2, lambda3);
 				return true;
 			}
@@ -135,23 +141,25 @@ namespace BLToolkit.Data.Linq
 		public static bool IsQueryableMethod(
 			this ParseInfo<MethodCallExpression> pi,
 			string                               methodName,
-			Action<ParseInfo<Expression>>        seq,
-			Action<ParseInfo<Expression>,LambdaInfo,LambdaInfo,LambdaInfo> parms)
+			Action<ParseInfo>                    seq,
+			Action<ParseInfo,LambdaInfo,LambdaInfo,LambdaInfo> parms)
 		{
-			ParseInfo<Expression> inner   = null;
-			LambdaInfo            lambda1 = null;
-			LambdaInfo            lambda2 = null;
-			LambdaInfo            lambda3 = null;
+			ParseInfo  seqInfo = null;
+			ParseInfo  inner   = null;
+			LambdaInfo lambda1 = null;
+			LambdaInfo lambda2 = null;
+			LambdaInfo lambda3 = null;
 
 			if (IsMethod(pi, null, methodName, new FTest[]
 				{
-					p => { seq(p);    return true; },
-					p => { inner = p; return true; },
+					p => { seqInfo = p;return true; },
+					p => { inner   = p; return true; },
 					l => l.IsLambda(1, l1 => lambda1 = l1),
 					l => l.IsLambda(1, l2 => lambda2 = l2),
 					l => l.IsLambda(2, l3 => lambda3 = l3),
 				}, p => true))
 			{
+				seq(seqInfo);
 				parms(inner, lambda1, lambda2, lambda3);
 				return true;
 			}
@@ -163,7 +171,7 @@ namespace BLToolkit.Data.Linq
 		public static bool IsEnumerableMethod(
 			this ParseInfo<MethodCallExpression> pi,
 			string                               methodName,
-			Func<ParseInfo<Expression>,bool>     action)
+			Func<ParseInfo,bool>                 action)
 		{
 			return IsMethod(pi, typeof(Enumerable), methodName, new [] { action }, p => true);
 		}
@@ -178,8 +186,8 @@ namespace BLToolkit.Data.Linq
 		public static bool IsQueryableMethod(
 			this ParseInfo<MethodCallExpression> pi,
 			string                               methodName,
-			Action<ParseInfo<Expression>>        seq,
-			Func<ParseInfo<Expression>,bool>     action)
+			Action<ParseInfo>                    seq,
+			Func<ParseInfo,bool>                 action)
 		{
 			return IsMethod(pi, null, methodName, new [] { p => { seq(p); return true; }, action }, _ => true);
 		}
@@ -187,7 +195,7 @@ namespace BLToolkit.Data.Linq
 		[DebuggerStepThrough]
 		public static bool IsQueryableMethod(
 			this ParseInfo<MethodCallExpression> pi,
-			Func<ParseInfo<Expression>,bool>     func)
+			Func<ParseInfo,bool>                 func)
 		{
 			return IsMethod(pi, null, null, new [] { func }, _ => true);
 		}

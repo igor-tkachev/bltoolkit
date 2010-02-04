@@ -174,5 +174,157 @@ namespace Update
 				}
 			});
 		}
+
+		[Test]
+		public void Update5()
+		{
+			ForEachProvider(new[] { ProviderName.Informix }, db =>
+			{
+				try
+				{
+					var id = 1001;
+
+					db.Child.Delete(c => c.ChildID > 1000);
+					new SqlQuery().Insert(db, new Child { ParentID = 1, ChildID = id});
+
+					Assert.AreEqual(1, db.Child.Count(c => c.ChildID == id));
+					Assert.AreEqual(1,
+						db.Child
+							.Where(c => c.ChildID == id && c.Parent.Value1 == 1)
+							.Set(c => c.ChildID, () => id + 1)
+							.Update());
+					Assert.AreEqual(1, db.Child.Count(c => c.ChildID == id + 1));
+				}
+				finally
+				{
+					db.Child.Delete(c => c.ChildID > 1000);
+				}
+			});
+		}
+
+		[Test]
+		public void Update6()
+		{
+			ForEachProvider(new[] { ProviderName.Informix }, db =>
+			{
+				try
+				{
+					var id = 1001;
+
+					db.Parent4.Delete(p => p.ParentID > 1000);
+					new SqlQuery().Insert(db, new Parent4 { ParentID = id, Value1 = TypeValue.Value1 });
+
+					Assert.AreEqual(1, db.Parent4.Count(p => p.ParentID == id && p.Value1 == TypeValue.Value1));
+					Assert.AreEqual(1,
+						db.Parent4
+							.Where(p => p.ParentID == id)
+							.Set(p => p.Value1, () => TypeValue.Value2)
+							.Update());
+					Assert.AreEqual(1, db.Parent4.Count(p => p.ParentID == id && p.Value1 == TypeValue.Value2));
+				}
+				finally
+				{
+					db.Parent4.Delete(p => p.ParentID > 1000);
+				}
+			});
+		}
+
+		[Test]
+		public void Insert1()
+		{
+			ForEachProvider(db =>
+			{
+				try
+				{
+					var id = 1001;
+
+					db.Child.Delete(c => c.ChildID > 1000);
+
+					Assert.AreEqual(1, db.Child.Insert(() => new Child { ParentID = 1, ChildID = id}));
+					Assert.AreEqual(1, db.Child.Count(c => c.ChildID == id));
+				}
+				finally
+				{
+					db.Child.Delete(c => c.ChildID > 1000);
+				}
+			});
+		}
+
+		[Test]
+		public void Insert2()
+		{
+			ForEachProvider(db =>
+			{
+				try
+				{
+					var id = 1001;
+
+					db.Child.Delete(c => c.ChildID > 1000);
+
+					Assert.AreEqual(1,
+						db
+							.Into(db.Child)
+							.Value(c => c.ParentID, () => 1)
+							.Value(c => c.ChildID,  () => id)
+							.Insert());
+					Assert.AreEqual(1, db.Child.Count(c => c.ChildID == id));
+				}
+				finally
+				{
+					db.Child.Delete(c => c.ChildID > 1000);
+				}
+			});
+		}
+
+		[Test]
+		public void Insert3()
+		{
+			ForEachProvider(db =>
+			{
+				try
+				{
+					var id = 1001;
+
+					db.Child.Delete(c => c.ChildID > 1000);
+
+					Assert.AreEqual(1,
+						db.Child
+							.Where(c => c.ChildID == 11)
+							.Insert(db.Child, c => new Child { ParentID = c.ParentID, ChildID = id}));
+					Assert.AreEqual(1, db.Child.Count(c => c.ChildID == id));
+				}
+				finally
+				{
+					db.Child.Delete(c => c.ChildID > 1000);
+				}
+			});
+		}
+
+		[Test]
+		public void Insert4()
+		{
+			ForEachProvider(db =>
+			{
+				try
+				{
+					var id = 1001;
+
+					db.Child.Delete(c => c.ChildID > 1000);
+
+					Assert.AreEqual(1,
+						db.Child
+							.Where(c => c.ChildID == 11)
+							.Into(db.Child)
+								.Value(c => c.ParentID, c => c.ParentID)
+								.Value(c => c.ChildID,  _ => id)
+							.Insert());
+					Assert.AreEqual(1, db.Child.Count(c => c.ChildID == id));
+				}
+				finally
+				{
+					db.Child.Delete(c => c.ChildID > 1000);
+				}
+			});
+		}
 	}
 }

@@ -2,7 +2,7 @@
 
 namespace BLToolkit.Data.Linq
 {
-	public interface IUpdateable<T>
+	public interface ISelectInsertable<TSource,TTarget>
 	{
 	}
 }

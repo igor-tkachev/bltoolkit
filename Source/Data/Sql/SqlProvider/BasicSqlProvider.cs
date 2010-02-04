@@ -137,17 +137,15 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		protected virtual void BuildSql(StringBuilder sb)
 		{
-			if (_sqlQuery.IsDelete)
+			switch (_sqlQuery.QueryType)
 			{
-				_buildStep = Step.DeleteClause; BuildDeleteClause(sb);
-			}
-			else if (_sqlQuery.IsUpdate)
-			{
-				_buildStep = Step.UpdateClause; BuildUpdateClause(sb);
-			}
-			else
-			{
-				_buildStep = Step.SelectClause; BuildSelectClause(sb);
+				case QueryType.Delete : _buildStep = Step.DeleteClause; BuildDeleteClause(sb); break;
+				case QueryType.Update : _buildStep = Step.UpdateClause; BuildUpdateClause(sb); break;
+				case QueryType.Insert : _buildStep = Step.InsertClause; BuildInsertClause(sb);
+					if (_sqlQuery.From.Tables.Count == 0)
+						break;
+					goto default;
+				default               : _buildStep = Step.SelectClause; BuildSelectClause(sb); break;
 			}
 
 			_buildStep = Step.FromClause;    BuildFromClause   (sb);
@@ -198,7 +196,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 				AppendIndent(sb);
 				BuildColumn(sb, col, ref addAlias);
 
-				if (!_skipAlias && addAlias)
+				if (!_skipAlias && addAlias && col.Alias != null)
 					sb.Append(" as ").Append(DataProvider.Convert(col.Alias, ConvertType.NameToQueryFieldAlias));
 			}
 
@@ -273,6 +271,67 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			_indent--;
 
 			sb.AppendLine();
+		}
+
+		#endregion
+
+		#region Build Insert
+
+		protected virtual void BuildInsertClause(StringBuilder sb)
+		{
+			AppendIndent(sb).Append("INSERT INTO ");
+			BuildPhysicalTable(sb, SqlQuery.Set.Into);
+			sb.AppendLine(" ");
+
+			AppendIndent(sb).AppendLine("(");
+
+			_indent++;
+
+			bool first = true;
+
+			foreach (SqlQuery.SetExpression expr in _sqlQuery.Set.Items)
+			{
+				if (!first)
+					sb.Append(',').AppendLine();
+				first = false;
+
+				AppendIndent(sb);
+				BuildExpression(sb, expr.Column, false);
+			}
+
+			_indent--;
+
+			sb.AppendLine();
+			AppendIndent(sb).AppendLine(")");
+
+			if (_sqlQuery.From.Tables.Count > 0)
+			{
+				
+			}
+			else
+			{
+				AppendIndent(sb).AppendLine("VALUES");
+				AppendIndent(sb).AppendLine("(");
+
+				_indent++;
+
+				first = true;
+
+				foreach (SqlQuery.SetExpression expr in _sqlQuery.Set.Items)
+				{
+					if (!first)
+						sb.Append(',').AppendLine();
+					first = false;
+
+					AppendIndent(sb);
+					BuildExpression(sb, expr.Expression);
+				}
+
+				_indent--;
+
+				sb.AppendLine();
+				AppendIndent(sb).AppendLine(")");
+			}
 		}
 
 		#endregion
@@ -1246,6 +1305,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			SelectClause,
 			DeleteClause,
 			UpdateClause,
+			InsertClause,
 			FromClause,
 			WhereClause,
 			GroupByClause,
@@ -1520,16 +1580,16 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		protected SqlQuery GetAlternativeDelete(SqlQuery sqlQuery)
 		{
-			if (sqlQuery.IsDelete && 
+			if (sqlQuery.QueryType == QueryType.Delete && 
 				(sqlQuery.From.Tables.Count > 1 || sqlQuery.From.Tables[0].Joins.Count > 0) && 
 				sqlQuery.From.Tables[0].Source is SqlTable)
 			{
 				SqlQuery sql = new SqlQuery();
 
-				sql.IsDelete = true;
+				sql.QueryType = QueryType.Delete;
 
 				sqlQuery.ParentSql = sql;
-				sqlQuery.IsDelete = false;
+				sqlQuery.QueryType = QueryType.Select;
 
 				SqlTable table = (SqlTable)sqlQuery.From.Tables[0].Source;
 				SqlTable copy  = new SqlTable(table);
@@ -1556,16 +1616,16 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		protected SqlQuery GetAlternativeUpdate(SqlQuery sqlQuery)
 		{
-			if (sqlQuery.IsUpdate && sqlQuery.From.Tables[0].Source is SqlTable)
+			if (sqlQuery.QueryType == QueryType.Update && sqlQuery.From.Tables[0].Source is SqlTable)
 			{
 				if (sqlQuery.From.Tables.Count > 1 || sqlQuery.From.Tables[0].Joins.Count > 0)
 				{
 					SqlQuery sql = new SqlQuery();
 
-					sql.IsUpdate = true;
+					sql.QueryType = QueryType.Update;
 
 					sqlQuery.ParentSql = sql;
-					sqlQuery.IsUpdate = false;
+					sqlQuery.QueryType = QueryType.Select;
 
 					SqlTable table = (SqlTable)sqlQuery.From.Tables[0].Source;
 					SqlTable copy  = new SqlTable(table);
@@ -2377,11 +2437,11 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			Dictionary<MemberInfo,LambdaExpression> dic;
 			LambdaExpression expr;
 
-			if (Linq.Extensions.Members.TryGetValue(Name, out dic))
+			if (Linq.Expressions.Members.TryGetValue(Name, out dic))
 				if (dic.TryGetValue(mi, out expr))
 					return expr;
 
-			return Linq.Extensions.Members[""].TryGetValue(mi, out expr) ? expr : null;
+			return Linq.Expressions.Members[""].TryGetValue(mi, out expr) ? expr : null;
 		}
 #endif
 

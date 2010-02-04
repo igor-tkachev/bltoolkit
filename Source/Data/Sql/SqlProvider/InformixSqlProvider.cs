@@ -169,16 +169,24 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		public override SqlQuery Finalize(SqlQuery sqlQuery)
 		{
+			new QueryVisitor().Visit(sqlQuery.Select, delegate(IQueryElement element)
+			{
+				if (element.ElementType == QueryElementType.SqlParameter)
+					((SqlParameter)element).IsQueryParameter = false;
+			});
+
 			sqlQuery = base.Finalize(sqlQuery);
 
-			if (sqlQuery.IsDelete)
+			switch (sqlQuery.QueryType)
 			{
-				sqlQuery = GetAlternativeDelete(sqlQuery);
-				sqlQuery.From.Tables[0].Alias = "$";
-			}
-			else if (sqlQuery.IsUpdate)
-			{
-				sqlQuery = GetAlternativeUpdate(sqlQuery);
+				case QueryType.Delete :
+					sqlQuery = GetAlternativeDelete(sqlQuery);
+					sqlQuery.From.Tables[0].Alias = "$";
+					break;
+
+				case QueryType.Update:
+					sqlQuery = GetAlternativeUpdate(sqlQuery);
+					break;
 			}
 
 			return sqlQuery;
@@ -186,7 +194,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		protected override void BuildFromClause(StringBuilder sb)
 		{
-			if (!SqlQuery.IsUpdate)
+			if (SqlQuery.QueryType != QueryType.Update)
 				base.BuildFromClause(sb);
 		}
 	}

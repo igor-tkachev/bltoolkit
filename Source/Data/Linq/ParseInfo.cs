@@ -9,7 +9,7 @@ namespace BLToolkit.Data.Linq
 {
 	using FExpr = Func<Expression>;
 	using FParm = Func<ParseInfo<ParameterExpression>, bool>;
-	using FTest = Func<ParseInfo<Expression>, bool>;
+	using FTest = Func<ParseInfo, bool>;
 
 	using Common;
 
@@ -105,7 +105,7 @@ namespace BLToolkit.Data.Linq
 			return IsLambda<Expression>(parms, p => true, func);
 		}
 
-		public bool IsLambda(int parameters, Func<ParseInfo<Expression>,bool> func)
+		public bool IsLambda(int parameters, Func<ParseInfo,bool> func)
 		{
 			var parms = parameters == 0? Array<FParm>.Empty : parameters == 1? _singleParam : new FParm[parameters];
 
@@ -117,7 +117,7 @@ namespace BLToolkit.Data.Linq
 		}
 
 		[Obsolete]
-		public bool IsLambda(Action<ParseInfo<ParameterExpression>,ParseInfo<Expression>> lambda)
+		public bool IsLambda(Action<ParseInfo<ParameterExpression>,ParseInfo> lambda)
 		{
 			ParseInfo<ParameterExpression> parameter = null;
 
