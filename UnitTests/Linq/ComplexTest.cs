@@ -1,6 +1,10 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
-
+using BLToolkit.Data.Linq;
+using BLToolkit.DataAccess;
+using BLToolkit.Mapping;
 using NUnit.Framework;
 
 using BLToolkit.Data.DataProvider;
@@ -239,5 +243,128 @@ namespace Data.Linq
 					AreEqual(expected, result);
 			});
 		}
+
+		#region IEnumerableTest
+
+		/*
+		public class Entity
+		{
+			public int Id { get; set; }
+		}
+
+		public enum TestEntityType : byte { Type1, Type2 }
+
+		[MapField("LookupEntityId", "Id")]
+		[MapField("LookupLink", "InnerEnity.Id")]
+		public class LookupEntity : Entity
+		{
+			public Entity         InnerEnity      { get; set; }
+			public TestEntityType InnerEntityType { get; set; }
+		}
+
+		[TableName("TestEntity")]
+		[MapField("TestEntityBaseId", "Id")]
+		[MapField("SuperAccountId",   "Owner.Id")]
+		public class TestEntityBase : Entity
+		{
+			public TestEntityType EntityType { get; set; }
+			public SuperAccount   Owner      { get; set; }
+			public decimal        Amount     { get; set; }
+		}
+
+		[IgnoreIEnumerable]
+		public class TestEntity : TestEntityBase, IEnumerable<object>
+		{
+			#region IEnumerable<object> Members
+
+			public IEnumerator<object> GetEnumerator()
+			{
+				throw new NotImplementedException();
+			}
+
+			#endregion
+
+			#region IEnumerable Members
+
+			IEnumerator IEnumerable.GetEnumerator()
+			{
+				throw new NotImplementedException();
+			}
+
+			#endregion
+		}
+
+		[TableName("TestEntity2")]
+		public class TestEntity2 : TestEntityBase
+		{
+		}
+
+		public enum SuperAccountType { Client, Organization }
+	    
+		[IgnoreIEnumerable]
+		public class SuperAccount : Entity, IEnumerable<object>
+		{
+			public List<Entity>     InnerAccounts { get; set; }
+			public SuperAccountType Type          { get; set; }
+
+
+			#region IEnumerable<object> Members
+
+			public IEnumerator<object> GetEnumerator()
+			{
+				throw new NotImplementedException();
+			}
+
+			#endregion
+
+			#region IEnumerable Members
+
+			IEnumerator IEnumerable.GetEnumerator()
+			{
+				throw new NotImplementedException();
+			}
+
+			#endregion
+		}
+
+		[Test]
+		public void WrongQueryTest()
+		{
+			using (var db = new TestDbManager())
+			{
+				try
+				{
+					var res =
+						from rc in db.GetTable<TestEntity>()
+						join li in db.GetTable<LookupEntity>() on rc.Id equals li.InnerEnity.Id
+						where rc.EntityType == TestEntityType.Type1
+						select rc;
+
+					res.ToList();
+
+				}
+				finally
+				{
+					Console.WriteLine(db.LastQuery);
+				}
+			}
+		}
+
+		[Test]
+		public void NRETest()
+		{
+			using (var db = new TestDbManager())
+			{
+				var zones =
+					(
+						from z in db.GetTable<TestEntity2>()
+						join o in db.GetTable<SuperAccount>() on z.Owner.Id equals o.Id
+						select z
+					).ToList();
+			}
+		}
+		*/
+
+		#endregion
 	}
 }

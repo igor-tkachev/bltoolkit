@@ -3637,13 +3637,19 @@ namespace BLToolkit.Data.Linq
 			return false;
 		}
 
-		static bool IsIEnumerableType(Expression expr)
+		bool IsIEnumerableType(Expression expr)
 		{
 			var type = expr.Type;
-			return type.IsClass
+
+			var res  = type.IsClass
 				&& type != typeof(string)
 				&& (type != typeof(byte[]))
 				&& TypeHelper.IsSameOrParent(typeof(IEnumerable), type);
+
+			if (res && expr.NodeType == ExpressionType.MemberAccess)
+				res = TypeHelper.GetAttributes(type, typeof(IgnoreIEnumerableAttribute)).Length == 0;
+
+			return res;
 		}
 
 		#endregion

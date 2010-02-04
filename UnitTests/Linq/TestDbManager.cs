@@ -14,6 +14,11 @@ namespace Data.Linq
 		{
 		}
 
+		public TestDbManager()
+			: base("Sql2008")
+		{
+		}
+
 		public Table<Person>                 Person             { get { return GetTable<Person>();                 } }
 		public Table<Patient>                Patient            { get { return GetTable<Patient>();                } }
 		public Table<Parent>                 Parent             { get { return GetTable<Parent>();                 } }

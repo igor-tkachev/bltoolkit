@@ -140,6 +140,7 @@
     <Compile Include="Data\IDataReaderEx.cs" />
     <Compile Include="Data\Linq\CompiledQuery.cs" />
     <Compile Include="Data\Linq\CompiledTableT.cs" />
+    <Compile Include="Data\Linq\IgnoreIEnumerableAttribute.cs" />
     <Compile Include="Data\Linq\ISelectInsertable.cs" />
     <Compile Include="Data\Linq\Expressions.cs" />
     <Compile Include="Data\Linq\IValueInsertable.cs" />
