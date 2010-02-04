@@ -1784,10 +1784,18 @@ namespace BLToolkit.Data.Linq
 
 		void ParseSet(LambdaInfo extract, LambdaInfo update, QuerySource select)
 		{
-			if (extract.Body.NodeType != ExpressionType.MemberAccess)
+			var pi = extract.Body;
+
+			while (pi.NodeType == ExpressionType.Convert)
+			{
+				var ue = pi.ConvertTo<UnaryExpression>();
+				pi = ue.Create(ue.Expr.Operand, ue.Property(Unary.Operand));
+			}
+
+			if (pi.NodeType != ExpressionType.MemberAccess)
 				throw new LinqException("Member expression expected for set statement.");
 
-			var body   = extract.Body.ConvertTo<MemberExpression>();
+			var body   = pi.ConvertTo<MemberExpression>();
 			var member = body.Expr.Member;
 
 			if (member is MethodInfo)

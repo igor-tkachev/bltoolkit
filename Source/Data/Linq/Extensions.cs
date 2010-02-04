@@ -134,7 +134,19 @@ namespace BLToolkit.Data.Linq
 			[NotNull] Expression<Func<T,TV>> extract,
 			[NotNull] Expression<Func<T,TV>> update)
 		{
-			return Set(((Updateable<T>)source).Query, extract, update);
+			if (source  == null) throw new ArgumentNullException("source");
+			if (extract == null) throw new ArgumentNullException("extract");
+			if (update  == null) throw new ArgumentNullException("update");
+
+			var query = ((Updateable<T>)source).Query;
+
+			query = query.Provider.CreateQuery<T>(
+				Expression.Call(
+					null,
+					((MethodInfo)MethodBase.GetCurrentMethod()).MakeGenericMethod(new[] { typeof(T), typeof(TV) }),
+					new[] { query.Expression, Expression.Quote(extract), Expression.Quote(update) }));
+
+			return new Updateable<T> { Query = query };
 		}
 
 		public static IUpdateable<T> Set<T,TV>(
@@ -160,7 +172,19 @@ namespace BLToolkit.Data.Linq
 			[NotNull] Expression<Func<T,TV>> extract,
 			[NotNull] Expression<Func<TV>>   update)
 		{
-			return Set(((Updateable<T>)source).Query, extract, update);
+			if (source  == null) throw new ArgumentNullException("source");
+			if (extract == null) throw new ArgumentNullException("extract");
+			if (update  == null) throw new ArgumentNullException("update");
+
+			var query = ((Updateable<T>)source).Query;
+
+			query = query.Provider.CreateQuery<T>(
+				Expression.Call(
+					null,
+					((MethodInfo)MethodBase.GetCurrentMethod()).MakeGenericMethod(new[] { typeof(T), typeof(TV) }),
+					new[] { query.Expression, Expression.Quote(extract), Expression.Quote(update) }));
+
+			return new Updateable<T> { Query = query };
 		}
 
 		#endregion
