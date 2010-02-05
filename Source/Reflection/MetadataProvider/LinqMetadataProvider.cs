@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Data.Linq.Mapping;
 using System.Linq;
+using BLToolkit.DataAccess;
 
 namespace BLToolkit.Reflection.MetadataProvider
 {
@@ -183,7 +184,7 @@ namespace BLToolkit.Reflection.MetadataProvider
 
 		#region GetNonUpdatableFlag
 
-		public override bool GetNonUpdatableFlag(Type type, TypeExtension typeExt, MemberAccessor member, out bool isSet)
+		public override NonUpdatableAttribute GetNonUpdatableAttribute(Type type, TypeExtension typeExt, MemberAccessor member, out bool isSet)
 		{
 			if (IsLinqObject(member.TypeAccessor.Type))
 			{
@@ -192,11 +193,11 @@ namespace BLToolkit.Reflection.MetadataProvider
 				if (a != null)
 				{
 					isSet = true;
-					return a.IsDbGenerated;
+					return a.IsDbGenerated ? new IdentityAttribute() : null;
 				}
 			}
 
-			return base.GetNonUpdatableFlag(type, typeExt, member, out isSet);
+			return base.GetNonUpdatableAttribute(type, typeExt, member, out isSet);
 		}
 
 		#endregion

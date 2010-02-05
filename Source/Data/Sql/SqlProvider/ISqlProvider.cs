@@ -10,21 +10,23 @@ namespace BLToolkit.Data.Sql.SqlProvider
 {
 	public interface ISqlProvider
 	{
-		int            BuildSql               (SqlQuery sqlQuery, StringBuilder sb, int indent, int nesting, bool skipAlias);
-		ISqlExpression ConvertExpression      (ISqlExpression expression);
-		ISqlPredicate  ConvertPredicate       (ISqlPredicate  predicate);
-		SqlQuery       Finalize               (SqlQuery sqlQuery);
+		int            CommandCount      (SqlQuery sqlQuery);
+		int            BuildSql          (int commandNumber, SqlQuery sqlQuery, StringBuilder sb, int indent, int nesting, bool skipAlias);
+		ISqlExpression ConvertExpression (ISqlExpression expression);
+		ISqlPredicate  ConvertPredicate  (ISqlPredicate  predicate);
+		SqlQuery       Finalize          (SqlQuery sqlQuery);
 
-		string         Name                      { get; }
-		SqlQuery       SqlQuery                  { get; set; }
+		string         Name                        { get; }
+		SqlQuery       SqlQuery                    { get; set; }
 
-		bool           SkipAcceptsParameter      { get; }
-		bool           TakeAcceptsParameter      { get; }
-		bool           IsSkipSupported           { get; }
-		bool           IsTakeSupported           { get; }
-		bool           IsSubQueryTakeSupported   { get; }
-		bool           IsSubQueryColumnSupported { get; }
-		bool           IsCountSubQuerySupported  { get; }
+		bool           SkipAcceptsParameter        { get; }
+		bool           TakeAcceptsParameter        { get; }
+		bool           IsSkipSupported             { get; }
+		bool           IsTakeSupported             { get; }
+		bool           IsSubQueryTakeSupported     { get; }
+		bool           IsSubQueryColumnSupported   { get; }
+		bool           IsCountSubQuerySupported    { get; }
+		bool           IsIdentityParameterRequired { get; }
 
 #if FW3
 		LambdaExpression ConvertMember    (MemberInfo mi);

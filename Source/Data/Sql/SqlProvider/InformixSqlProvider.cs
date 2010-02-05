@@ -13,6 +13,16 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		{
 		}
 
+		public override int CommandCount(SqlQuery sqlQuery)
+		{
+			return sqlQuery.QueryType == QueryType.Insert && sqlQuery.Set.WithIdentity ? 2 : 1;
+		}
+
+		protected override void BuildCommand(int commandNumber, StringBuilder sb)
+		{
+			sb.AppendLine("SELECT DBINFO('sqlca.sqlerrd1') FROM systables where tabid = 1");
+		}
+
 		protected override void BuildSelectClause(StringBuilder sb)
 		{
 			if (SqlQuery.From.Tables.Count == 0)

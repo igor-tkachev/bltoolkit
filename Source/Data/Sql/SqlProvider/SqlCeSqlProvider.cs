@@ -19,6 +19,16 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		public override bool IsSubQueryTakeSupported   { get { return false; } }
 		public override bool IsSubQueryColumnSupported { get { return false; } }
 
+		public override int CommandCount(SqlQuery sqlQuery)
+		{
+			return sqlQuery.QueryType == QueryType.Insert && sqlQuery.Set.WithIdentity ? 2 : 1;
+		}
+
+		protected override void BuildCommand(int commandNumber, StringBuilder sb)
+		{
+			sb.AppendLine("SELECT @@IDENTITY");
+		}
+
 		public override ISqlExpression ConvertExpression(ISqlExpression expr)
 		{
 			expr = base.ConvertExpression(expr);

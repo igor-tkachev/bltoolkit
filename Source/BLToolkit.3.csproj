@@ -130,6 +130,7 @@
     <Compile Include="Configuration\BLToolkitSection.cs" />
     <Compile Include="Configuration\TypeFactoryElement.cs" />
     <Compile Include="DataAccess\ActualTypeAttribute.cs" />
+    <Compile Include="DataAccess\IdentityAttribute.cs" />
     <Compile Include="DataAccess\DataAccessorBase.cs" />
     <Compile Include="DataAccess\DbTypeAttribute.cs" />
     <Compile Include="DataAccess\ParamTypeNameAttribute.cs" />
@@ -196,6 +197,7 @@
     <Compile Include="Data\Sql\SqlProvider\AccessSqlProvider.cs" />
     <Compile Include="Data\Sql\SqlProvider\MsSql2005SqlProvider.cs" />
     <Compile Include="Data\Sql\SqlProvider\MsSql2008SqlProvider.cs" />
+    <Compile Include="Data\Sql\SqlProvider\PostgreSQLSequenceNameAttribute.cs" />
     <Compile Include="Data\Sql\SqlProvider\SybaseSqlProvider.cs" />
     <Compile Include="Data\Sql\SqlProvider\MsSqlSqlProvider.cs" />
     <Compile Include="Data\Sql\SqlProvider\MySqlSqlProvider.cs" />

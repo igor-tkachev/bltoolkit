@@ -34,6 +34,11 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		protected override string SkipFormat  { get { return "SKIP {0}";  } }
 		protected override string FirstFormat { get { return "FIRST {0}"; } }
 
+		protected override void BuildGetIdentity(StringBuilder sb)
+		{
+			throw new SqlException("Firebird does not support returning identity.");
+		}
+
 		public override ISqlExpression ConvertExpression(ISqlExpression expr)
 		{
 			expr = base.ConvertExpression(expr);

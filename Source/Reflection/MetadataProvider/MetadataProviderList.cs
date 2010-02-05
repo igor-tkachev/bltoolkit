@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using BLToolkit.DataAccess;
 
 namespace BLToolkit.Reflection.MetadataProvider
 {
@@ -305,17 +306,17 @@ namespace BLToolkit.Reflection.MetadataProvider
 
 		#region GetNonUpdatableFlag
 
-		public override bool GetNonUpdatableFlag(Type type, TypeExtension typeExt, MemberAccessor member, out bool isSet)
+		public override NonUpdatableAttribute GetNonUpdatableAttribute(Type type, TypeExtension typeExt, MemberAccessor member, out bool isSet)
 		{
 			foreach (MetadataProviderBase p in _list)
 			{
-				bool value = p.GetNonUpdatableFlag(type, typeExt, member, out isSet);
+				NonUpdatableAttribute value = p.GetNonUpdatableAttribute(type, typeExt, member, out isSet);
 
 				if (isSet)
 					return value;
 			}
 
-			return base.GetNonUpdatableFlag(type, typeExt, member, out isSet);
+			return base.GetNonUpdatableAttribute(type, typeExt, member, out isSet);
 		}
 
 		#endregion

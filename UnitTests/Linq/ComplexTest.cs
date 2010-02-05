@@ -246,7 +246,6 @@ namespace Data.Linq
 
 		#region IEnumerableTest
 
-		/*
 		public class Entity
 		{
 			public int Id { get; set; }
@@ -254,25 +253,26 @@ namespace Data.Linq
 
 		public enum TestEntityType : byte { Type1, Type2 }
 
-		[MapField("LookupEntityId", "Id")]
-		[MapField("LookupLink", "InnerEnity.Id")]
+		[TableName("GrandChild")]
+		[MapField("GrandChildID", "Id")]
+		[MapField("ChildID", "InnerEnity.Id")]
+		[MapField("ParentID", "InnerEntityType")]
 		public class LookupEntity : Entity
 		{
 			public Entity         InnerEnity      { get; set; }
 			public TestEntityType InnerEntityType { get; set; }
 		}
 
-		[TableName("TestEntity")]
-		[MapField("TestEntityBaseId", "Id")]
-		[MapField("SuperAccountId",   "Owner.Id")]
+		[TableName("GrandChild")]
+		[MapField("GrandChildID", "Id")]
+		[MapField("ChildID",   "Owner.Id")]
+		[MapField("ParentID", "EntityType")]
 		public class TestEntityBase : Entity
 		{
 			public TestEntityType EntityType { get; set; }
 			public SuperAccount   Owner      { get; set; }
-			public decimal        Amount     { get; set; }
 		}
 
-		[IgnoreIEnumerable]
 		public class TestEntity : TestEntityBase, IEnumerable<object>
 		{
 			#region IEnumerable<object> Members
@@ -294,14 +294,15 @@ namespace Data.Linq
 			#endregion
 		}
 
-		[TableName("TestEntity2")]
 		public class TestEntity2 : TestEntityBase
 		{
 		}
 
 		public enum SuperAccountType { Client, Organization }
 	    
-		[IgnoreIEnumerable]
+		[TableName("GrandChild")]
+		[MapField("GrandChildID", "Id")]
+		[MapField("ParentID", "Type")]
 		public class SuperAccount : Entity, IEnumerable<object>
 		{
 			public List<Entity>     InnerAccounts { get; set; }
@@ -328,42 +329,33 @@ namespace Data.Linq
 		}
 
 		[Test]
-		public void WrongQueryTest()
+		public void IEnumerableTest1()
 		{
 			using (var db = new TestDbManager())
 			{
-				try
-				{
-					var res =
-						from rc in db.GetTable<TestEntity>()
-						join li in db.GetTable<LookupEntity>() on rc.Id equals li.InnerEnity.Id
-						where rc.EntityType == TestEntityType.Type1
-						select rc;
+				var res =
+					from rc in db.GetTable<TestEntity>()
+					join li in db.GetTable<LookupEntity>() on rc.Id equals li.InnerEnity.Id
+					where rc.EntityType == TestEntityType.Type1
+					select rc;
 
-					res.ToList();
-
-				}
-				finally
-				{
-					Console.WriteLine(db.LastQuery);
-				}
+				res.ToList();
 			}
 		}
 
 		[Test]
-		public void NRETest()
+		public void IEnumerableTest2()
 		{
 			using (var db = new TestDbManager())
 			{
 				var zones =
-					(
-						from z in db.GetTable<TestEntity2>()
-						join o in db.GetTable<SuperAccount>() on z.Owner.Id equals o.Id
-						select z
-					).ToList();
+					from z in db.GetTable<TestEntity2>()
+					join o in db.GetTable<SuperAccount>() on z.Owner.Id equals o.Id
+					select z;
+
+				zones.ToList();
 			}
 		}
-		*/
 
 		#endregion
 	}

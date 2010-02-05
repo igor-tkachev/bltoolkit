@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
 using BLToolkit.Common;
+using BLToolkit.DataAccess;
 using Convert=System.Convert;
 
 namespace BLToolkit.Reflection.MetadataProvider
@@ -358,17 +359,25 @@ namespace BLToolkit.Reflection.MetadataProvider
 
 		#region GetNonUpdatableFlag
 
-		public override bool GetNonUpdatableFlag(Type type, TypeExtension typeExt, MemberAccessor member, out bool isSet)
+		public override NonUpdatableAttribute GetNonUpdatableAttribute(Type type, TypeExtension typeExt, MemberAccessor member, out bool isSet)
 		{
 			object value = typeExt[member.Name]["NonUpdatable"].Value;
 
 			if (value != null)
 			{
 				isSet = true;
-				return (bool)TypeExtension.ChangeType(value, typeof(bool));
+				return (bool)TypeExtension.ChangeType(value, typeof(bool)) ? new NonUpdatableAttribute() : null;
 			}
 
-			return base.GetNonUpdatableFlag(type, typeExt, member, out isSet);
+			value = typeExt[member.Name]["Identity"].Value;
+
+			if (value != null)
+			{
+				isSet = true;
+				return (bool)TypeExtension.ChangeType(value, typeof(bool)) ? new IdentityAttribute() : null;
+			}
+
+			return base.GetNonUpdatableAttribute(type, typeExt, member, out isSet);
 		}
 
 		#endregion

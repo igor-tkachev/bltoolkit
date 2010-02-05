@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Threading;
+using BLToolkit.DataAccess;
 
 namespace BLToolkit.Data.Sql
 {
@@ -35,17 +36,28 @@ namespace BLToolkit.Data.Sql
 			: this(mappingSchema)
 		{
 			bool isSet;
-			_database = _mappingSchema.MetadataProvider.GetDatabaseName(objectType, _mappingSchema.Extensions, out isSet);
-			_owner    = _mappingSchema.MetadataProvider.GetOwnerName   (objectType, _mappingSchema.Extensions, out isSet);
-			_name     = _mappingSchema.MetadataProvider.GetTableName   (objectType, _mappingSchema.Extensions, out isSet);
+			_database   = _mappingSchema.MetadataProvider.GetDatabaseName(objectType, _mappingSchema.Extensions, out isSet);
+			_owner      = _mappingSchema.MetadataProvider.GetOwnerName   (objectType, _mappingSchema.Extensions, out isSet);
+			_name       = _mappingSchema.MetadataProvider.GetTableName   (objectType, _mappingSchema.Extensions, out isSet);
+			_objectType = objectType;
 
 			TypeExtension typeExt = TypeExtension.GetTypeExtension(objectType, _mappingSchema.Extensions);
 
 			foreach (MemberMapper mm in MappingSchema.GetObjectMapper(objectType))
 				if (mm.MapMemberInfo.SqlIgnore == false)
 				{
+					NonUpdatableAttribute ua =
+						_mappingSchema.MetadataProvider.GetNonUpdatableAttribute(objectType, typeExt, mm.MemberAccessor, out isSet);
+
 					int order = _mappingSchema.MetadataProvider.GetPrimaryKeyOrder(objectType, typeExt, mm.MemberAccessor, out isSet);
-					Fields.Add(new SqlField(mm.Type, mm.MemberName, mm.Name, mm.MapMemberInfo.Nullable, isSet ? order : int.MinValue));
+
+					Fields.Add(new SqlField(
+						mm.Type,
+						mm.MemberName,
+						mm.Name,
+						mm.MapMemberInfo.Nullable,
+						isSet ? order : int.MinValue,
+						ua != null && ua.IsIdentity));
 				}
 		}
 
@@ -66,6 +78,7 @@ namespace BLToolkit.Data.Sql
 			_owner        = table._owner;
 			_name         = table._name;
 			_physicalName = table._physicalName;
+			_objectType   = table._objectType;
 
 			foreach (SqlField field in table.Fields.Values)
 				Fields.Add(new SqlField(field));
@@ -87,6 +100,7 @@ namespace BLToolkit.Data.Sql
 			_owner        = table._owner;
 			_name         = table._name;
 			_physicalName = table._physicalName;
+			_objectType   = table._objectType;
 
 			Fields.AddRange(fields);
 			Joins. AddRange(joins);
@@ -124,7 +138,8 @@ namespace BLToolkit.Data.Sql
 					me.Name,
 					(string)me["MapField"].Value ?? (string)me["PhysicalName"].Value,
 					(bool?)me["Nullable"].Value ?? false,
-					-1));
+					-1,
+					(bool?)me["Identity"].Value ?? false));
 
 			foreach (AttributeExtension ae in te.Attributes["Join"])
 				Joins.Add(new Join(ae));
@@ -198,6 +213,9 @@ namespace BLToolkit.Data.Sql
 		private string _physicalName;
 		public  string  PhysicalName { get { return _physicalName ?? _name; } set { _physicalName = value; } }
 
+		private Type    _objectType;
+		public  Type     ObjectType { get { return _objectType; } set { _objectType = value; } }
+
 		readonly ChildContainer<ISqlTableSource,SqlField> _fields;
 		public   ChildContainer<ISqlTableSource,SqlField>  Fields { get { return _fields; } }
 
@@ -211,7 +229,7 @@ namespace BLToolkit.Data.Sql
 			{
 				if (_all == null)
 				{
-					_all = new SqlField(null, "*", "*", true, -1);
+					_all = new SqlField(null, "*", "*", true, -1, false);
 					((IChild<ISqlTableSource>)_all).Parent = this;
 				}
 
@@ -272,6 +290,7 @@ namespace BLToolkit.Data.Sql
 				table._database     = _database;
 				table._owner        = _owner;
 				table._physicalName = _physicalName;
+				table._objectType   = _objectType;
 
 				table._fields.Clear();
 

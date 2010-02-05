@@ -110,7 +110,7 @@ namespace BLToolkit.Data.Sql
 			{
 				if (_all == null)
 				{
-					_all = new SqlField(null, "*", "*", true, -1);
+					_all = new SqlField(null, "*", "*", true, -1, false);
 					((IChild<ISqlTableSource>)_all).Parent = this;
 				}
 

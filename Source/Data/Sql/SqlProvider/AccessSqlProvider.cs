@@ -12,6 +12,16 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		{
 		}
 
+		public override int CommandCount(SqlQuery sqlQuery)
+		{
+			return sqlQuery.QueryType == QueryType.Insert && sqlQuery.Set.WithIdentity ? 2 : 1;
+		}
+
+		protected override void BuildCommand(int commandNumber, StringBuilder sb)
+		{
+			sb.AppendLine("SELECT @@IDENTITY");
+		}
+
 		public override bool IsSkipSupported          { get { return SqlQuery.Select.TakeValue != null; } }
 		public override bool TakeAcceptsParameter     { get { return false; } }
 		public override bool IsCountSubQuerySupported { get { return false; } }
@@ -63,7 +73,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 			_selectColumn = new SqlQuery.Column(SqlQuery, new SqlExpression(cond.Conditions[0].IsNot ? "Count(*) = 0" : "Count(*) > 0"), SqlQuery.Select.Columns[0].Alias);
 
-			BuildSql(query, sb, 0, 0, false);
+			BuildSql(0, query, sb, 0, 0, false);
 
 			_selectColumn = null;
 		}

@@ -207,6 +207,20 @@ namespace BLToolkit.Data.Linq
 					new[] { query.Expression, Expression.Quote(setter) }));
 		}
 
+		public static object InsertWithIdentity<T>([NotNull] this Table<T> target, [NotNull] Expression<Func<T>> setter)
+		{
+			if (target == null) throw new ArgumentNullException("target");
+			if (setter == null) throw new ArgumentNullException("setter");
+
+			IQueryable<T> query = target;
+
+			return query.Provider.Execute<object>(
+				Expression.Call(
+					null,
+					((MethodInfo)MethodBase.GetCurrentMethod()).MakeGenericMethod(new[] { typeof(T) }),
+					new[] { query.Expression, Expression.Quote(setter) }));
+		}
+
 		class ValueInsertable<T> : IValueInsertable<T>
 		{
 			public IQueryable<T> Query;
@@ -260,6 +274,19 @@ namespace BLToolkit.Data.Linq
 					new[] { query.Expression }));
 		}
 
+		public static object InsertWithIdentity<T>([NotNull] this IValueInsertable<T> source)
+		{
+			if (source == null) throw new ArgumentNullException("source");
+
+			var query = ((ValueInsertable<T>)source).Query;
+
+			return query.Provider.Execute<object>(
+				Expression.Call(
+					null,
+					((MethodInfo)MethodBase.GetCurrentMethod()).MakeGenericMethod(new[] { typeof(T) }),
+					new[] { query.Expression }));
+		}
+
 		#endregion
 
 		#region SelectInsertable
@@ -272,6 +299,20 @@ namespace BLToolkit.Data.Linq
 			if (setter == null) throw new ArgumentNullException("setter");
 
 			return source.Provider.Execute<int>(
+				Expression.Call(
+					null,
+					((MethodInfo)MethodBase.GetCurrentMethod()).MakeGenericMethod(new[] { typeof(TSource), typeof(TTarget) }),
+					new[] { source.Expression, ((IQueryable<TTarget>)target).Expression, Expression.Quote(setter) }));
+		}
+
+		public static object InsertWithIdentity<TSource,TTarget>(
+			[NotNull] this IQueryable<TSource> source, [NotNull] Table<TTarget> target, [NotNull] Expression<Func<TSource,TTarget>> setter)
+		{
+			if (source == null) throw new ArgumentNullException("source");
+			if (target == null) throw new ArgumentNullException("target");
+			if (setter == null) throw new ArgumentNullException("setter");
+
+			return source.Provider.Execute<object>(
 				Expression.Call(
 					null,
 					((MethodInfo)MethodBase.GetCurrentMethod()).MakeGenericMethod(new[] { typeof(TSource), typeof(TTarget) }),
@@ -325,6 +366,19 @@ namespace BLToolkit.Data.Linq
 			var query = ((SelectInsertable<TSource,TTarget>)source).Query;
 
 			return query.Provider.Execute<int>(
+				Expression.Call(
+					null,
+					((MethodInfo)MethodBase.GetCurrentMethod()).MakeGenericMethod(new[] { typeof(TSource), typeof(TTarget) }),
+					new[] { query.Expression }));
+		}
+
+		public static object InsertWithIdentity<TSource,TTarget>([NotNull] this ISelectInsertable<TSource,TTarget> source)
+		{
+			if (source == null) throw new ArgumentNullException("source");
+
+			var query = ((SelectInsertable<TSource,TTarget>)source).Query;
+
+			return query.Provider.Execute<object>(
 				Expression.Call(
 					null,
 					((MethodInfo)MethodBase.GetCurrentMethod()).MakeGenericMethod(new[] { typeof(TSource), typeof(TTarget) }),

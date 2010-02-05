@@ -2164,6 +2164,13 @@ namespace BLToolkit.Data.Sql
 				set { _into = value; }
 			}
 
+			private bool _withIdentity;
+			public  bool WithIdentity
+			{
+				get { return _withIdentity;  }
+				set { _withIdentity = value; }
+			}
+
 			#region Overrides
 
 #if OVERRIDETOSTRING
@@ -2185,6 +2192,8 @@ namespace BLToolkit.Data.Sql
 					return this;
 
 				SetClause clone = new SetClause();
+
+				clone._withIdentity = _withIdentity;
 
 				if (_into != null)
 					clone.Into = (ISqlTableSource)_into.Clone(objectTree, doClone);
@@ -3671,7 +3680,7 @@ namespace BLToolkit.Data.Sql
 			{
 				if (_all == null)
 				{
-					_all = new SqlField(null, "*", "*", true, -1);
+					_all = new SqlField(null, "*", "*", true, -1, false);
 					((IChild<ISqlTableSource>)_all).Parent = this;
 				}
 

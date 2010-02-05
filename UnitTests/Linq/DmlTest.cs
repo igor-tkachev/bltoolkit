@@ -240,7 +240,14 @@ namespace Update
 
 					db.Child.Delete(c => c.ChildID > 1000);
 
-					Assert.AreEqual(1, db.Child.Insert(() => new Child { ParentID = 1, ChildID = id}));
+					Assert.AreEqual(1,
+						db.Child
+						.Insert(() => new Child
+						{
+							ParentID = 1,
+							ChildID  = id
+						}));
+
 					Assert.AreEqual(1, db.Child.Count(c => c.ChildID == id));
 				}
 				finally
@@ -264,8 +271,8 @@ namespace Update
 					Assert.AreEqual(1,
 						db
 							.Into(db.Child)
-							.Value(c => c.ParentID, () => 1)
-							.Value(c => c.ChildID,  () => id)
+								.Value(c => c.ParentID, () => 1)
+								.Value(c => c.ChildID,  () => id)
 							.Insert());
 					Assert.AreEqual(1, db.Child.Count(c => c.ChildID == id));
 				}
@@ -290,7 +297,11 @@ namespace Update
 					Assert.AreEqual(1,
 						db.Child
 							.Where(c => c.ChildID == 11)
-							.Insert(db.Child, c => new Child { ParentID = c.ParentID, ChildID = id}));
+							.Insert(db.Child, c => new Child
+							{
+								ParentID = c.ParentID,
+								ChildID  = id
+							}));
 					Assert.AreEqual(1, db.Child.Count(c => c.ChildID == id));
 				}
 				finally
@@ -323,6 +334,68 @@ namespace Update
 				finally
 				{
 					db.Child.Delete(c => c.ChildID > 1000);
+				}
+			});
+		}
+
+		[Test]
+		public void InsertWithIdentity1()
+		{
+			ForEachProvider(new[] { ProviderName.Firebird }, db =>
+			{
+				try
+				{
+					db.Person.Delete(p => p.ID > 2);
+
+					var id =
+						db.Person
+							.InsertWithIdentity(() => new Person
+							{
+								FirstName = "John",
+								LastName  = "Shepard",
+								Gender    = Gender.Male
+							});
+
+					Assert.NotNull(id);
+
+					var john = db.Person.Single(p => p.FirstName == "John" && p.LastName == "Shepard");
+
+					Assert.NotNull (john);
+					Assert.AreEqual(id, john.ID);
+				}
+				finally
+				{
+					db.Person.Delete(p => p.ID > 2);
+				}
+			});
+		}
+
+		[Test]
+		public void InsertWithIdentity2()
+		{
+			ForEachProvider(new[] { ProviderName.Firebird }, db =>
+			{
+				try
+				{
+					db.Person.Delete(p => p.ID > 2);
+
+					var id = db
+						.Into(db.Person)
+							.Value(p => p.FirstName, () => "John")
+							.Value(p => p.LastName,  () => "Shepard")
+							.Value(p => p.Gender,    () => Gender.Male)
+						.InsertWithIdentity();
+
+					Assert.NotNull(id);
+
+					var john = db.Person.Single(p => p.FirstName == "John" && p.LastName == "Shepard");
+
+					Assert.NotNull (john);
+					Assert.AreEqual(id, john.ID);
+				}
+				finally
+				{
+					db.Person.Delete(p => p.ID > 2);
 				}
 			});
 		}

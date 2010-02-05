@@ -58,8 +58,9 @@ namespace BLToolkit.Data.Linq
 
 				if (TypeHelper.IsSameOrParent(typeof(IEnumerable), type))
 				{
-					type   = TypeHelper.GetListItemType(type);
-					isList = true;
+					var etypes = TypeHelper.GetGenericArguments(type, typeof(IEnumerable));
+					type       = etypes != null && etypes.Length > 0 ? etypes[0] : TypeHelper.GetListItemType(type);
+					isList     = true;
 				}
 
 				OriginalType = type;
@@ -126,7 +127,7 @@ namespace BLToolkit.Data.Linq
 							{
 								if (!_columns.ContainsKey(mm.MemberName))
 								{
-									var field = new SqlField(mm.Type, mm.MemberName, mm.Name, mm.MapMemberInfo.Nullable, int.MinValue);
+									var field = new SqlField(mm.Type, mm.MemberName, mm.Name, mm.MapMemberInfo.Nullable, int.MinValue, false);
 									SqlTable.Fields.Add(field);
 
 									var column = new Column(this, field, null);

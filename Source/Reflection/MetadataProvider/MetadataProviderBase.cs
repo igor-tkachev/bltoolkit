@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 
 using BLToolkit.Common;
+using BLToolkit.DataAccess;
 
 namespace BLToolkit.Reflection.MetadataProvider
 {
@@ -201,12 +202,12 @@ namespace BLToolkit.Reflection.MetadataProvider
 
 		#endregion
 
-		#region GetNonUpdatableFlag
+		#region GetNonUpdatableAttribute
 
-		public virtual bool GetNonUpdatableFlag(Type type, TypeExtension typeExt, MemberAccessor member, out bool isSet)
+		public virtual NonUpdatableAttribute GetNonUpdatableAttribute(Type type, TypeExtension typeExt, MemberAccessor member, out bool isSet)
 		{
 			isSet = false;
-			return false;
+			return null;
 		}
 
 		#endregion

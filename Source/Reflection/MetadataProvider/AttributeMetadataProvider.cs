@@ -546,15 +546,17 @@ namespace BLToolkit.Reflection.MetadataProvider
 
 		#region GetNonUpdatableFlag
 
-		public override bool GetNonUpdatableFlag(Type type, TypeExtension typeExt, MemberAccessor member, out bool isSet)
+		public override NonUpdatableAttribute GetNonUpdatableAttribute(Type type, TypeExtension typeExt, MemberAccessor member, out bool isSet)
 		{
-			if (member.IsDefined<NonUpdatableAttribute>())
+			NonUpdatableAttribute attr = member.GetAttribute<NonUpdatableAttribute>();
+
+			if (attr != null)
 			{
 				isSet = true;
-				return true;
+				return attr;
 			}
 
-			return base.GetNonUpdatableFlag(type, typeExt, member, out isSet);
+			return base.GetNonUpdatableAttribute(type, typeExt, member, out isSet);
 		}
 
 		#endregion

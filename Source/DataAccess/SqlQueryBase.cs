@@ -235,7 +235,7 @@ namespace BLToolkit.DataAccess
 
 				bool isSet;
 
-				if (!mp.GetNonUpdatableFlag(type, typeExt, mm.MemberAccessor, out isSet) || !isSet)
+				if (mp.GetNonUpdatableAttribute(type, typeExt, mm.MemberAccessor, out isSet) == null || !isSet)
 				{
 					sb.AppendFormat("\t{0},\n",
 						db.DataProvider.Convert(mm.Name, ConvertType.NameToQueryField));
@@ -287,7 +287,7 @@ namespace BLToolkit.DataAccess
 			{
 				bool isSet;
 
-				if (mp.GetNonUpdatableFlag(type, typeExt, mm.MemberAccessor, out isSet) && isSet)
+				if (mp.GetNonUpdatableAttribute(type, typeExt, mm.MemberAccessor, out isSet) != null && isSet)
 					continue;
 
 				mp.GetPrimaryKeyOrder(type, typeExt, mm.MemberAccessor, out isSet);

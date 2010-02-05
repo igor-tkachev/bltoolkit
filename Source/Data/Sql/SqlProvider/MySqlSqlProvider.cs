@@ -13,6 +13,16 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		{
 		}
 
+		public override int CommandCount(SqlQuery sqlQuery)
+		{
+			return sqlQuery.QueryType == QueryType.Insert && sqlQuery.Set.WithIdentity ? 2 : 1;
+		}
+
+		protected override void BuildCommand(int commandNumber, StringBuilder sb)
+		{
+			sb.AppendLine("SELECT LAST_INSERT_ID()");
+		}
+
 		protected override string LimitFormat { get { return "LIMIT {0}"; } }
 
 		public override bool IsNestedJoinParenthesisRequired { get { return true; } }

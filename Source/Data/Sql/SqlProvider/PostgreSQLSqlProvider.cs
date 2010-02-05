@@ -1,16 +1,46 @@
 ﻿using System;
 using System.Data;
 using System.Text;
+using BLToolkit.Mapping;
 
 namespace BLToolkit.Data.Sql.SqlProvider
 {
 	using DataProvider;
-	using Reflection;
 
 	public class PostgreSQLSqlProvider : BasicSqlProvider
 	{
 		public PostgreSQLSqlProvider(DataProviderBase dataProvider) : base(dataProvider)
 		{
+		}
+
+		public override int CommandCount(SqlQuery sqlQuery)
+		{
+			return sqlQuery.QueryType == QueryType.Insert && sqlQuery.Set.WithIdentity ? 2 : 1;
+		}
+
+		protected override void BuildCommand(int commandNumber, StringBuilder sb)
+		{
+			SqlTable table         = (SqlTable)SqlQuery.Set.Into;
+			SqlField identityField = GetIdentityField(table);
+
+			if (identityField == null)
+				throw new SqlException("Identity field must be defined for {0}.", table.Name);
+
+			if (table.ObjectType == null)
+				throw new SqlException("Sequence name can not be retrieved for the {0} table.", table.Name);
+
+			ObjectMapper om = table.MappingSchema.GetObjectMapper(table.ObjectType);
+			MemberMapper mm = om[identityField.Name, true];
+
+			PostgreSQLSequenceNameAttribute attr = mm.MemberAccessor.GetAttribute<PostgreSQLSequenceNameAttribute>();
+
+			if (attr == null)
+				throw new SqlException("Sequence name can not be retrieved for the {0} table.", table.Name);
+
+			AppendIndent(sb)
+				.Append("SELECT currval('")
+				.Append(attr.SequenceName)
+				.AppendLine("')");
 		}
 
 		protected override string LimitFormat  { get { return "LIMIT {0}"; } }

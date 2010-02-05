@@ -133,6 +133,7 @@
     <Compile Include="DataAccess\CommandBehaviorAttribute.cs" />
     <Compile Include="DataAccess\DataAccessorBase.cs" />
     <Compile Include="DataAccess\DbTypeAttribute.cs" />
+    <Compile Include="DataAccess\IdentityAttribute.cs" />
     <Compile Include="DataAccess\ParamDbTypeAttribute.cs" />
     <Compile Include="DataAccess\ParamSizeAttribute.cs" />
     <Compile Include="DataAccess\DataSetTableAttribute.cs" />
@@ -141,6 +142,7 @@
     <Compile Include="DataAccess\Direction.cs" />
     <Compile Include="DataAccess\DestinationAttribute.cs" />
     <Compile Include="DataAccess\NoMapAttribute.cs" />
+    <Compile Include="DataAccess\ParamTypeNameAttribute.cs" />
     <Compile Include="DataAccess\ScalarSourceAttribute.cs" />
     <Compile Include="DataAccess\FormatAttribute.cs" />
     <Compile Include="DataAccess\DataAccessorAttribute.cs" />
@@ -272,6 +274,7 @@
     <Compile Include="Data\Sql\SqlProvider\MsSqlSqlProvider.cs" />
     <Compile Include="Data\Sql\SqlProvider\MySqlSqlProvider.cs" />
     <Compile Include="Data\Sql\SqlProvider\OracleSqlProvider.cs" />
+    <Compile Include="Data\Sql\SqlProvider\PostgreSQLSequenceNameAttribute.cs" />
     <Compile Include="Data\Sql\SqlProvider\PostgreSQLSqlProvider.cs" />
     <Compile Include="Data\Sql\SqlProvider\SqlCeSqlProvider.cs" />
     <Compile Include="Data\Sql\SqlProvider\SQLiteSqlProvider.cs" />

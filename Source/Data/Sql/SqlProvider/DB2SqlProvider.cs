@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Text;
+
 using BLToolkit.Reflection;
 
 namespace BLToolkit.Data.Sql.SqlProvider
@@ -14,6 +15,49 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		public override bool TakeAcceptsParameter { get { return SqlQuery.Select.SkipValue != null; } }
 
+		SqlField _identityField;
+
+		public override int CommandCount(SqlQuery sqlQuery)
+		{
+			if (sqlQuery.QueryType == QueryType.Insert && sqlQuery.Set.WithIdentity)
+			{
+				_identityField = GetIdentityField((SqlTable)sqlQuery.Set.Into);
+
+				if (_identityField == null)
+					return 2;
+			}
+
+			return 1;
+		}
+
+		public override int BuildSql(int commandNumber, SqlQuery sqlQuery, StringBuilder sb, int indent, int nesting, bool skipAlias)
+		{
+			if (_identityField != null)
+			{
+				indent += 2;
+
+				AppendIndent(sb).AppendLine("SELECT");
+				AppendIndent(sb).Append("\t");
+				BuildExpression(sb, _identityField, false);
+				sb.AppendLine();
+				AppendIndent(sb).AppendLine("FROM");
+				AppendIndent(sb).AppendLine("\tNEW TABLE");
+				AppendIndent(sb).AppendLine("\t(");
+			}
+
+			int ret = base.BuildSql(commandNumber, sqlQuery, sb, indent, nesting, skipAlias);
+
+			if (_identityField != null)
+				sb.AppendLine("\t)");
+
+			return ret;
+		}
+
+		protected override void BuildCommand(int commandNumber, StringBuilder sb)
+		{
+			sb.AppendLine("SELECT identity_val_local() FROM SYSIBM.SYSDUMMY1");
+		}
+
 		protected override void BuildSql(StringBuilder sb)
 		{
 			AlternativeBuildSql(sb, false, base.BuildSql);
@@ -23,9 +67,9 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		{
 			if (SqlQuery.From.Tables.Count == 0)
 			{
-				AppendIndent(sb).Append("SELECT").AppendLine();
+				AppendIndent(sb).AppendLine("SELECT");
 				BuildColumns(sb);
-				AppendIndent(sb).Append("FROM SYSIBM.SYSDUMMY1 FETCH FIRST 1 ROW ONLY").AppendLine();
+				AppendIndent(sb).AppendLine("FROM SYSIBM.SYSDUMMY1 FETCH FIRST 1 ROW ONLY");
 			}
 			else
 				base.BuildSelectClause(sb);

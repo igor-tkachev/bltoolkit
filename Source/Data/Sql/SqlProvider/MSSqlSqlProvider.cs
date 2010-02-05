@@ -23,6 +23,13 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			AlternativeBuildSql(sb, true, base.BuildSql);
 		}
 
+		protected override void BuildGetIdentity(StringBuilder sb)
+		{
+			sb
+				.AppendLine()
+				.AppendLine("SELECT SCOPE_IDENTITY()");
+		}
+
 		protected override void BuildOrderByClause(StringBuilder sb)
 		{
 			if (!NeedSkip)

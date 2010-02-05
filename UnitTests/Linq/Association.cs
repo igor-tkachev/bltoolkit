@@ -107,6 +107,22 @@ namespace Data.Linq
 		}
 
 		[Test]
+		public void Test8()
+		{
+			var expected =
+				from p  in Parent
+				from ch in p.Children2
+				where ch.ParentID < 4 || ch.ParentID >= 4
+				select new { p.ParentID, ch.ChildID };
+
+			ForEachProvider(db => AreEqual(expected,
+				from p  in db.Parent
+				from ch in p.Children2
+				where ch.ParentID < 4 || ch.ParentID >= 4
+				select new { p.ParentID, ch.ChildID }));
+		}
+
+		[Test]
 		public void SelectMany1()
 		{
 			var expected = Parent.SelectMany(p => p.Children.Select(ch => p));

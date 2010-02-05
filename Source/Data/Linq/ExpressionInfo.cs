@@ -99,7 +99,7 @@ namespace BLToolkit.Data.Linq
 
 		#endregion
 
-		#region CommandQuery
+		#region NonQueryQuery
 
 		private void FinalizeQuery()
 		{
@@ -114,7 +114,7 @@ namespace BLToolkit.Data.Linq
 			}
 		}
 
-		public void SetCommandQuery()
+		public void SetNonQueryQuery()
 		{
 			FinalizeQuery();
 
@@ -123,10 +123,10 @@ namespace BLToolkit.Data.Linq
 
 			SqlProvider.SqlQuery = Queries[0].SqlQuery;
 
-			GetElement = (ctx, db, expr, ps) => Query(db, expr, ps);
+			GetElement = (ctx, db, expr, ps) => NonQueryQuery(db, expr, ps);
 		}
 
-		int Query(DbManager db, Expression expr, object[] parameters)
+		int NonQueryQuery(DbManager db, Expression expr, object[] parameters)
 		{
 			var dispose = db == null;
 
@@ -135,7 +135,66 @@ namespace BLToolkit.Data.Linq
 
 			try
 			{
-				return SetCommand(db, expr, parameters, 0).ExecuteNonQuery();
+				SetCommand(db, expr, parameters, 0);
+				return db.ExecuteNonQuery();
+			}
+			finally
+			{
+				if (dispose)
+					db.Dispose();
+			}
+		}
+
+		#endregion
+
+		#region ScalarQuery
+
+		public void SetScalarQuery<TS>()
+		{
+			FinalizeQuery();
+
+			if (Queries.Count != 1)
+				throw new InvalidOperationException();
+
+			SqlProvider.SqlQuery = Queries[0].SqlQuery;
+
+			GetElement = (ctx, db, expr, ps) => ScalarQuery<TS>(db, expr, ps);
+		}
+
+		TS ScalarQuery<TS>(DbManager db, Expression expr, object[] parameters)
+		{
+			var dispose = db == null;
+
+			if (db == null)
+				db = new DbManager();
+
+			try
+			{
+				var commands = SetCommand(db, expr, parameters, 0);
+
+				IDbDataParameter idparam = null;
+
+				if (SqlProvider.IsIdentityParameterRequired)
+				{
+					var sql = Queries[0].SqlQuery;
+
+					if (sql.QueryType == QueryType.Insert && sql.Set.WithIdentity)
+					{
+						var pname = DataProvider.Convert("IDENTITY_PARAMETER", ConvertType.NameToQueryParameter).ToString();
+						idparam   = db.OutputParameter(pname, DbType.Decimal);
+						DataProvider.AttachParameter(db.Command, idparam);
+					}
+				}
+
+				if (commands.Length == 1)
+				{
+					var ret = db.ExecuteScalar<TS>();
+					return idparam != null ? (TS)idparam.Value : ret;
+				}
+
+				db.ExecuteNonQuery();
+
+				return db.SetCommand(commands[1]).ExecuteScalar<TS>();
 			}
 			finally
 			{
@@ -169,7 +228,8 @@ namespace BLToolkit.Data.Linq
 
 			try
 			{
-				using (var dr = SetCommand(db, expr, parameters, 0).ExecuteReader())
+				SetCommand(db, expr, parameters, 0);
+				using (var dr = db.ExecuteReader())
 					while (dr.Read())
 						return mapper(this, ctx, dr, MappingSchema, expr, parameters);
 
@@ -276,7 +336,8 @@ namespace BLToolkit.Data.Linq
 
 			try
 			{
-				using (var dr = SetCommand(db, expr, parameters, queryNumber).ExecuteReader())
+				SetCommand(db, expr, parameters, queryNumber);
+				using (var dr = db.ExecuteReader())
 					while (dr.Read())
 						yield return dr;
 			}
@@ -305,9 +366,9 @@ namespace BLToolkit.Data.Linq
 			}
 		}
 
-		DbManager SetCommand(DbManager db, Expression expr, object[] parameters, int idx)
+		string[] SetCommand(DbManager db, Expression expr, object[] parameters, int idx)
 		{
-			string             command;
+			string[]           command;
 			IDbDataParameter[] parms;
 
 			lock (this)
@@ -319,13 +380,13 @@ namespace BLToolkit.Data.Linq
 				parms   = GetParameters(db, idx, ps);
 			}
 
-			db.SetCommand(command, parms);
+			db.SetCommand(command[0], parms);
 
 #if DEBUG
 			Debug.WriteLineIf(DbManager.TraceSwitch.TraceInfo, GetSqlText(db, parms, command), DbManager.TraceSwitch.DisplayName);
 #endif
 
-			return db;
+			return command;
 		}
 
 		void SetParameters(Expression expr, object[] parameters, int idx)
@@ -377,7 +438,7 @@ namespace BLToolkit.Data.Linq
 			return parms.ToArray();
 		}
 
-		string GetCommand(int idx, out List<SqlParameter> parameters)
+		string[] GetCommand(int idx, out List<SqlParameter> parameters)
 		{
 			var query = Queries[idx];
 
@@ -405,16 +466,25 @@ namespace BLToolkit.Data.Linq
 				});
 			}
 
-			var sb      = new StringBuilder();
-			SqlProvider.BuildSql(sql, sb, 0, 0, false);
-			var command = sb.ToString();
+			var cc = SqlProvider.CommandCount(sql);
+			var sb = new StringBuilder();
+
+			var commands = new string[cc];
+
+			for (var i = 0; i < cc; i++)
+			{
+				sb.Length = 0;
+
+				SqlProvider.BuildSql(i, sql, sb, 0, 0, false);
+				commands[i] = sb.ToString();
+			}
 
 			if (!query.SqlQuery.ParameterDependent)
-				query.CommandText = command;
+				query.CommandText = commands;
 
 			parameters = sql.Parameters;
 
-			return command;
+			return commands;
 		}
 
 		#endregion
@@ -1001,7 +1071,7 @@ namespace BLToolkit.Data.Linq
 
 		public string GetSqlText(DbManager db, Expression expr, object[] parameters, int idx)
 		{
-			string             command;
+			string[]           command;
 			IDbDataParameter[] parms;
 
 			lock (this)
@@ -1016,7 +1086,7 @@ namespace BLToolkit.Data.Linq
 			return GetSqlText(db, parms, command);
 		}
 
-		string GetSqlText(DbManager db, ICollection<IDbDataParameter> parms, string command)
+		string GetSqlText(DbManager db, ICollection<IDbDataParameter> parms, IEnumerable<string> commands)
 		{
 			var sb = new StringBuilder();
 
@@ -1060,7 +1130,8 @@ namespace BLToolkit.Data.Linq
 				sb.AppendLine();
 			}
 
-			sb.Append(command);
+			foreach (var command in commands)
+				sb.AppendLine(command);
 
 			return sb.ToString();
 		}
@@ -1083,7 +1154,7 @@ namespace BLToolkit.Data.Linq
 			public SqlQuery        SqlQuery   = new SqlQuery();
 			public List<Parameter> Parameters = new List<Parameter>();
 			public Mapper<T>       Mapper;
-			public string          CommandText;
+			public string[]        CommandText;
 		}
 
 		#endregion

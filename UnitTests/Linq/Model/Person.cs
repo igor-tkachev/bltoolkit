@@ -1,5 +1,6 @@
 ﻿using System;
 
+using BLToolkit.Data.Sql.SqlProvider;
 using BLToolkit.Mapping;
 using BLToolkit.DataAccess;
 
@@ -22,7 +23,7 @@ namespace Data.Linq.Model
 			FirstName = firstName;
 		}
 
-		[PrimaryKey]
+		[Identity, PrimaryKey, PostgreSQLSequenceName("Seq")]
 		[MapField("PersonID")] public int    ID;
 		                       public string FirstName { get; set; }
 		                       public string LastName;

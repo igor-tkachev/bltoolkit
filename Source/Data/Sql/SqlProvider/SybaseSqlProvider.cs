@@ -12,6 +12,13 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		{
 		}
 
+		protected override void BuildGetIdentity(StringBuilder sb)
+		{
+			sb
+				.AppendLine()
+				.AppendLine("SELECT @@IDENTITY");
+		}
+
 		protected override string FirstFormat              { get { return "TOP {0}"; } }
 
 		public    override bool   IsSkipSupported          { get { return false;     } }

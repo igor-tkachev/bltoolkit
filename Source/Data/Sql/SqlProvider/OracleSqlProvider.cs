@@ -12,7 +12,8 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		{
 		}
 
-		public override bool IsCountSubQuerySupported { get { return false; } }
+		public override bool IsCountSubQuerySupported    { get { return false; } }
+		public override bool IsIdentityParameterRequired { get { return true;  } }
 
 		protected override void BuildSelectClause(StringBuilder sb)
 		{
@@ -24,6 +25,19 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			}
 			else
 				base.BuildSelectClause(sb);
+		}
+
+		protected override void BuildGetIdentity(StringBuilder sb)
+		{
+			SqlField identityField = GetIdentityField((SqlTable)SqlQuery.Set.Into);
+
+			if (identityField == null)
+				throw new SqlException("Identity field must be defined for {0}.", ((SqlTable)SqlQuery.Set.Into).Name);
+
+			AppendIndent(sb).AppendLine("RETURNING");
+			AppendIndent(sb).Append("\t");
+			BuildExpression(sb, identityField, false);
+			sb.AppendLine(" INTO :IDENTITY_PARAMETER");
 		}
 
 		protected override bool BuildWhere()

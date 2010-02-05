@@ -22,6 +22,12 @@ namespace Data.Linq.Model
 		[Association(ThisKey = "ParentID", OtherKey = "ParentID")]
 		public List<Child> Children;
 
+		[Association(ThisKey = "ParentID", OtherKey = "ParentID")]
+		public IEnumerable<Child> Children2
+		{
+			get { return Children; }
+		}
+
 		public override bool Equals(object obj)
 		{
 			if (obj.GetType() != typeof (Parent)) return false;

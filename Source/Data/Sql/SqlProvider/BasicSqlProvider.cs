@@ -79,12 +79,22 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		public virtual bool IsCountSubQuerySupported        { get { return true;  } }
 		public virtual bool IsNestedJoinSupported           { get { return true;  } }
 		public virtual bool IsNestedJoinParenthesisRequired { get { return false; } }
+		public virtual bool IsIdentityParameterRequired     { get { return false; } }
+
+		#endregion
+
+		#region CommandCount
+
+		public virtual int CommandCount(SqlQuery sqlQuery)
+		{
+			return 1;
+		}
 
 		#endregion
 
 		#region BuildSql
 
-		public int BuildSql(SqlQuery sqlQuery, StringBuilder sb, int indent, int nesting, bool skipAlias)
+		public virtual int BuildSql(int commandNumber, SqlQuery sqlQuery, StringBuilder sb, int indent, int nesting, bool skipAlias)
 		{
 			_sqlQuery    = sqlQuery;
 			_indent      = indent;
@@ -92,22 +102,33 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			_nextNesting = _nesting + 1;
 			_skipAlias   = skipAlias;
 
-			BuildSql(sb);
-
-			if (sqlQuery.HasUnion)
+			if (commandNumber == 0)
 			{
-				foreach (SqlQuery.Union union in sqlQuery.Unions)
-				{
-					AppendIndent(sb);
-					sb.Append("UNION");
-					if (union.IsAll) sb.Append(" ALL");
-					sb.AppendLine();
+				BuildSql(sb);
 
-					CreateSqlProvider().BuildSql(union.SqlQuery, sb, indent, nesting, skipAlias);
+				if (sqlQuery.HasUnion)
+				{
+					foreach (SqlQuery.Union union in sqlQuery.Unions)
+					{
+						AppendIndent(sb);
+						sb.Append("UNION");
+						if (union.IsAll) sb.Append(" ALL");
+						sb.AppendLine();
+
+						CreateSqlProvider().BuildSql(commandNumber, union.SqlQuery, sb, indent, nesting, skipAlias);
+					}
 				}
+			}
+			else
+			{
+				BuildCommand(commandNumber, sb);
 			}
 
 			return _nextNesting;
+		}
+
+		protected virtual void BuildCommand(int commandNumber, StringBuilder sb)
+		{
 		}
 
 		#endregion
@@ -122,7 +143,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			if (!IsTakeSupported && sqlQuery.Select.TakeValue != null)
 				throw new SqlException("Take for subqueries is not supported by the '{0}' provider.", _dataProvider.Name);
 
-			return CreateSqlProvider().BuildSql(sqlQuery, sb, indent, nesting, skipAlias);
+			return CreateSqlProvider().BuildSql(0, sqlQuery, sb, indent, nesting, skipAlias);
 		}
 
 		protected virtual ISqlProvider CreateSqlProvider()
@@ -154,6 +175,10 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			_buildStep = Step.HavingClause;  BuildHavingClause (sb);
 			_buildStep = Step.OrderByClause; BuildOrderByClause(sb);
 			_buildStep = Step.OffsetLimit;   BuildOffsetLimit  (sb);
+
+			
+			if (SqlQuery.QueryType == QueryType.Insert && SqlQuery.Set.WithIdentity)
+				BuildGetIdentity(sb);
 		}
 
 		#endregion
@@ -304,11 +329,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			sb.AppendLine();
 			AppendIndent(sb).AppendLine(")");
 
-			if (_sqlQuery.From.Tables.Count > 0)
-			{
-				
-			}
-			else
+			if (_sqlQuery.From.Tables.Count == 0)
 			{
 				AppendIndent(sb).AppendLine("VALUES");
 				AppendIndent(sb).AppendLine("(");
@@ -332,6 +353,11 @@ namespace BLToolkit.Data.Sql.SqlProvider
 				sb.AppendLine();
 				AppendIndent(sb).AppendLine(")");
 			}
+		}
+
+		protected virtual void BuildGetIdentity(StringBuilder sb)
+		{
+			//throw new SqlException("Insert with identity is not supported by the '{0}' sql provider.", Name);
 		}
 
 		#endregion
@@ -1672,6 +1698,20 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		#endregion
 
 		#region Helpers
+
+		protected SqlField GetIdentityField(SqlTable table)
+		{
+			foreach (SqlField field in table.Fields.Values)
+				if (field.IsIdentity)
+					return field;
+
+			List<SqlField> keys = table.GetKeyFields();
+
+			if (keys != null && keys.Count == 1)
+				return keys[0];
+
+			return null;
+		}
 
 		static bool Wrap(int precedence, int parentPrecedence)
 		{
