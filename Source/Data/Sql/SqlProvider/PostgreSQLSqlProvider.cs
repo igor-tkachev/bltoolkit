@@ -20,22 +20,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		protected override void BuildCommand(int commandNumber, StringBuilder sb)
 		{
-			SqlTable table         = (SqlTable)SqlQuery.Set.Into;
-			SqlField identityField = GetIdentityField(table);
-
-			if (identityField == null)
-				throw new SqlException("Identity field must be defined for {0}.", table.Name);
-
-			if (table.ObjectType == null)
-				throw new SqlException("Sequence name can not be retrieved for the {0} table.", table.Name);
-
-			ObjectMapper om = table.MappingSchema.GetObjectMapper(table.ObjectType);
-			MemberMapper mm = om[identityField.Name, true];
-
-			PostgreSQLSequenceNameAttribute attr = mm.MemberAccessor.GetAttribute<PostgreSQLSequenceNameAttribute>();
-
-			if (attr == null)
-				throw new SqlException("Sequence name can not be retrieved for the {0} table.", table.Name);
+			SequenceNameAttribute attr = GetSequenceNameAttribute();
 
 			AppendIndent(sb)
 				.Append("SELECT currval('")

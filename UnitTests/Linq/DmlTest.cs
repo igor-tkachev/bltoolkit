@@ -341,7 +341,7 @@ namespace Update
 		[Test]
 		public void InsertWithIdentity1()
 		{
-			ForEachProvider(new[] { ProviderName.Firebird }, db =>
+			ForEachProvider(db =>
 			{
 				try
 				{
@@ -373,7 +373,7 @@ namespace Update
 		[Test]
 		public void InsertWithIdentity2()
 		{
-			ForEachProvider(new[] { ProviderName.Firebird }, db =>
+			ForEachProvider(db =>
 			{
 				try
 				{

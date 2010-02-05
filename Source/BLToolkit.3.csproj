@@ -197,7 +197,7 @@
     <Compile Include="Data\Sql\SqlProvider\AccessSqlProvider.cs" />
     <Compile Include="Data\Sql\SqlProvider\MsSql2005SqlProvider.cs" />
     <Compile Include="Data\Sql\SqlProvider\MsSql2008SqlProvider.cs" />
-    <Compile Include="Data\Sql\SqlProvider\PostgreSQLSequenceNameAttribute.cs" />
+    <Compile Include="Data\Sql\SqlProvider\SequenceNameAttribute.cs" />
     <Compile Include="Data\Sql\SqlProvider\SybaseSqlProvider.cs" />
     <Compile Include="Data\Sql\SqlProvider\MsSqlSqlProvider.cs" />
     <Compile Include="Data\Sql\SqlProvider\MySqlSqlProvider.cs" />

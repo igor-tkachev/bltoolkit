@@ -32,7 +32,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			SqlField identityField = GetIdentityField((SqlTable)SqlQuery.Set.Into);
 
 			if (identityField == null)
-				throw new SqlException("Identity field must be defined for {0}.", ((SqlTable)SqlQuery.Set.Into).Name);
+				throw new SqlException("Identity field must be defined for '{0}'.", ((SqlTable)SqlQuery.Set.Into).Name);
 
 			AppendIndent(sb).AppendLine("RETURNING");
 			AppendIndent(sb).Append("\t");

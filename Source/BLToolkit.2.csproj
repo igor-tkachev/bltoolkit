@@ -274,7 +274,7 @@
     <Compile Include="Data\Sql\SqlProvider\MsSqlSqlProvider.cs" />
     <Compile Include="Data\Sql\SqlProvider\MySqlSqlProvider.cs" />
     <Compile Include="Data\Sql\SqlProvider\OracleSqlProvider.cs" />
-    <Compile Include="Data\Sql\SqlProvider\PostgreSQLSequenceNameAttribute.cs" />
+    <Compile Include="Data\Sql\SqlProvider\SequenceNameAttribute.cs" />
     <Compile Include="Data\Sql\SqlProvider\PostgreSQLSqlProvider.cs" />
     <Compile Include="Data\Sql\SqlProvider\SqlCeSqlProvider.cs" />
     <Compile Include="Data\Sql\SqlProvider\SQLiteSqlProvider.cs" />

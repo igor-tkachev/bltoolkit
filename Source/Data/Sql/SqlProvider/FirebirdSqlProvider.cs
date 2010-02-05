@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Data;
 using System.Text;
+using BLToolkit.Mapping;
 
 namespace BLToolkit.Data.Sql.SqlProvider
 {
@@ -14,6 +15,21 @@ namespace BLToolkit.Data.Sql.SqlProvider
 	{
 		public FirebirdSqlProvider(DataProviderBase dataProvider) : base(dataProvider)
 		{
+		}
+
+		public override int CommandCount(SqlQuery sqlQuery)
+		{
+			return sqlQuery.QueryType == QueryType.Insert && sqlQuery.Set.WithIdentity ? 2 : 1;
+		}
+
+		protected override void BuildCommand(int commandNumber, StringBuilder sb)
+		{
+			SequenceNameAttribute attr = GetSequenceNameAttribute();
+
+			AppendIndent(sb)
+				.Append("SELECT gen_id(")
+				.Append(attr.SequenceName)
+				.AppendLine(", 0) FROM rdb$database");
 		}
 
 		protected override void BuildSelectClause(StringBuilder sb)
@@ -33,11 +49,6 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		protected override bool   SkipFirst   { get { return false;       } }
 		protected override string SkipFormat  { get { return "SKIP {0}";  } }
 		protected override string FirstFormat { get { return "FIRST {0}"; } }
-
-		protected override void BuildGetIdentity(StringBuilder sb)
-		{
-			throw new SqlException("Firebird does not support returning identity.");
-		}
 
 		public override ISqlExpression ConvertExpression(ISqlExpression expr)
 		{

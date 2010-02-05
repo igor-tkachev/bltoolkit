@@ -1713,6 +1713,43 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			return null;
 		}
 
+		protected SequenceNameAttribute GetSequenceNameAttribute()
+		{
+			SqlTable table         = (SqlTable)SqlQuery.Set.Into;
+			SqlField identityField = GetIdentityField(table);
+
+			if (identityField == null)
+				throw new SqlException("Identity field must be defined for '{0}'.", table.Name);
+
+			if (table.ObjectType == null)
+				throw new SqlException("Sequence name can not be retrieved for the '{0}' table.", table.Name);
+
+			ObjectMapper om = table.MappingSchema.GetObjectMapper(table.ObjectType);
+			MemberMapper mm = om[identityField.Name, true];
+
+			SequenceNameAttribute[] attrs = mm.MemberAccessor.GetAttributes<SequenceNameAttribute>();
+
+			if (attrs == null)
+				throw new SqlException("Sequence name can not be retrieved for the '{0}' table.", table.Name);
+
+			SequenceNameAttribute defaultAttr = null;
+
+			foreach (SequenceNameAttribute attr in attrs)
+			{
+				if (attr.ProviderName == Name)
+					return attr;
+
+				if (defaultAttr == null && attr.ProviderName == null)
+					defaultAttr = attr;
+			}
+
+			if (defaultAttr == null)
+				throw new SqlException("Sequence name can not be retrieved for the '{0}' table.", table.Name);
+
+			return defaultAttr;
+		}
+
+
 		static bool Wrap(int precedence, int parentPrecedence)
 		{
 			return
