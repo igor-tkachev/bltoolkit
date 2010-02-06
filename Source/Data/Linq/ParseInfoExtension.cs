@@ -195,6 +195,32 @@ namespace BLToolkit.Data.Linq
 		[DebuggerStepThrough]
 		public static bool IsQueryableMethod(
 			this ParseInfo<MethodCallExpression> pi,
+			string                               methodName,
+			Action<ParseInfo>                    seq,
+			Action<LambdaInfo,ParseInfo>         action)
+		{
+			ParseInfo  seqInfo = null;
+			LambdaInfo lambda  = null;
+			ParseInfo  expr    = null;
+
+			if (IsMethod(pi, null, methodName, new FTest[]
+			{
+				p  => { seqInfo = p; return true; },
+				l  => l.IsLambda(1, l1 => lambda = l1),
+				ex => { expr = ex; return true;  }
+			}, _ => true))
+			{
+				seq(seqInfo);
+				action(lambda, expr);
+				return true;
+			}
+
+			return false;
+		}
+
+		[DebuggerStepThrough]
+		public static bool IsQueryableMethod(
+			this ParseInfo<MethodCallExpression> pi,
 			Func<ParseInfo,bool>                 func)
 		{
 			return IsMethod(pi, null, null, new [] { func }, _ => true);

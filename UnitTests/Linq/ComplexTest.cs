@@ -2,15 +2,21 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
+
 using BLToolkit.Data.Linq;
 using BLToolkit.DataAccess;
 using BLToolkit.Mapping;
+
+
 using NUnit.Framework;
 
 using BLToolkit.Data.DataProvider;
 
 namespace Data.Linq
 {
+	using Model;
+
 	[TestFixture]
 	public class ComplexTest : TestBase
 	{
@@ -242,6 +248,24 @@ namespace Data.Linq
 
 					AreEqual(expected, result);
 			});
+		}
+
+		[Test]
+		public void ExpressionTest()
+		{
+			Expression<Func<Northwind.Customer, bool>> pred1 = cust=>cust.Country=="UK"; 
+			Expression<Func<Northwind.Customer, bool>> pred2 = cust=>cust.Country=="France"; 
+			var param = Expression.Parameter(typeof(Northwind.Customer), "x"); 
+			var final = Expression.Lambda<Func<Northwind.Customer, bool>>( 
+				Expression.OrElse( 
+					Expression.Invoke(pred1, param), 
+					Expression.Invoke(pred2, param) 
+				), param); 
+
+			using (var db = new NorthwindDB()) 
+			{ 
+				var count = db.Customer.Count(final); 
+			} 
 		}
 
 		#region IEnumerableTest

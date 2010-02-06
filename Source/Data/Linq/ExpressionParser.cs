@@ -395,8 +395,10 @@ namespace BLToolkit.Data.Linq
 				pi => pi.IsQueryableMethod ("Update",          1, 1, seq => sequence = ParseSequence(seq), (l1, l2)        => ParseUpdate(l1, l2, sequence[0])),
 				pi => pi.IsQueryableMethod ("Set",             1, 1, seq => sequence = ParseSequence(seq), (l1, l2)        => ParseSet   (l1, l2, sequence[0])),
 				pi => pi.IsQueryableMethod ("Set",             1, 0, seq => sequence = ParseSequence(seq), (l1, l2)        => ParseSet   (l1, l2, sequence[0])),
+				pi => pi.IsQueryableMethod ("Set",                   seq => sequence = ParseSequence(seq), (l,  ex)        => ParseSet   (l,  ex, sequence[0])),
 				pi => pi.IsQueryableMethod ("Value",           1, 1, seq => sequence = ParseSequence(seq), (l1, l2)        => ParseSet   (l1, l2, sequence[0])),
 				pi => pi.IsQueryableMethod ("Value",           1, 0, seq => sequence = ParseSequence(seq), (l1, l2)        => ParseSet   (l1, l2, sequence[0])),
+				pi => pi.IsQueryableMethod ("Value",                 seq => sequence = ParseSequence(seq), (l,  ex)        => ParseSet   (l,  ex, sequence[0])),
 				pi => pi.IsQueryableMethod ("Take",                  seq => sequence = ParseSequence(seq), ex => ParseTake     (sequence[0], ex)),
 				pi => pi.IsQueryableMethod ("Skip",                  seq => sequence = ParseSequence(seq), ex => ParseSkip     (sequence[0], ex)),
 				pi => pi.IsQueryableMethod ("ElementAt",             seq => sequence = ParseSequence(seq), ex => ParseElementAt(sequence[0], ex)),
@@ -1785,6 +1787,9 @@ namespace BLToolkit.Data.Linq
 					var column = select.GetField(member);
 					var expr   = ParseExpression(setter, piExpression, select);
 
+					if (expr is SqlParameter && piExpression.Expr.Type.IsEnum)
+						SetParameterEnumConverter((SqlParameter)expr, piExpression.Expr.Type, _info.MappingSchema);
+
 					CurrentSql.Set.Items.Add(new SqlQuery.SetExpression(column.GetExpressions(this)[0], expr));
 				}
 				else
@@ -1813,6 +1818,37 @@ namespace BLToolkit.Data.Linq
 
 			var column = select.GetField(member);
 			var expr   = ParseExpression(update, update.Body, select);
+
+			if (expr is SqlParameter && update.Body.Expr.Type.IsEnum)
+				SetParameterEnumConverter((SqlParameter)expr, update.Body.Expr.Type, _info.MappingSchema);
+
+			CurrentSql.Set.Items.Add(new SqlQuery.SetExpression(column.GetExpressions(this)[0], expr));
+		}
+
+		void ParseSet(LambdaInfo extract, ParseInfo update, QuerySource select)
+		{
+			var pi = extract.Body;
+
+			while (pi.NodeType == ExpressionType.Convert)
+			{
+				var ue = pi.ConvertTo<UnaryExpression>();
+				pi = ue.Create(ue.Expr.Operand, ue.Property(Unary.Operand));
+			}
+
+			if (pi.NodeType != ExpressionType.MemberAccess)
+				throw new LinqException("Member expression expected for set statement.");
+
+			var body   = pi.ConvertTo<MemberExpression>();
+			var member = body.Expr.Member;
+
+			if (member is MethodInfo)
+				member = TypeHelper.GetPropertyByMethod((MethodInfo)member);
+
+			var column = select.GetField(member);
+			var expr   = ParseExpression(null, update, select);
+
+			if (expr is SqlParameter && update.Expr.Type.IsEnum)
+				SetParameterEnumConverter((SqlParameter)expr, update.Expr.Type, _info.MappingSchema);
 
 			CurrentSql.Set.Items.Add(new SqlQuery.SetExpression(column.GetExpressions(this)[0], expr));
 		}
@@ -3368,6 +3404,38 @@ namespace BLToolkit.Data.Linq
 
 							if (pie != null)
 								return ParseExpression(pie, queries);
+
+							break;
+						}
+
+					case ExpressionType.Invoke:
+						{
+							var pi = parseInfo.ConvertTo<InvocationExpression>();
+							var ex = pi.Create(pi.Expr.Expression, pi.Property(Invocation.Expression));
+
+							if (ex.NodeType == ExpressionType.Quote)
+								ex = ex.Create(((UnaryExpression)ex.Expr).Operand, ex.Property(Unary.Operand));
+
+							if (ex.NodeType == ExpressionType.Lambda)
+							{
+								var l   = ex.ConvertTo<LambdaExpression>();
+								var dic = new Dictionary<Expression,ParseInfo>();
+
+								for (var i = 0; i < l.Expr.Parameters.Count; i++)
+									dic.Add(
+										l.Expr.Parameters[i],
+										pi.Create(pi.Expr.Arguments[i], pi.Index(pi.Expr.Arguments, Invocation.Arguments, i)));
+
+
+								var pie = l.Create(l.Expr.Body, l.Property(LambdaExpr.Body)).Walk(wpi =>
+								{
+									ParseInfo ppi;
+
+									return dic.TryGetValue(wpi.Expr, out ppi) ? ppi : wpi;
+								});
+
+								return ParseExpression(lambda, pie, queries);
+							}
 
 							break;
 						}

@@ -187,6 +187,42 @@ namespace BLToolkit.Data.Linq
 			return new Updateable<T> { Query = query };
 		}
 
+		public static IUpdateable<T> Set<T,TV>(
+			[NotNull] this IQueryable<T>     source,
+			[NotNull] Expression<Func<T,TV>> extract,
+			TV                               value)
+		{
+			if (source  == null) throw new ArgumentNullException("source");
+			if (extract == null) throw new ArgumentNullException("extract");
+
+			var query = source.Provider.CreateQuery<T>(
+				Expression.Call(
+					null,
+					((MethodInfo)MethodBase.GetCurrentMethod()).MakeGenericMethod(new[] { typeof(T), typeof(TV) }),
+					new[] { source.Expression, Expression.Quote(extract), Expression.Constant(value) }));
+
+			return new Updateable<T> { Query = query };
+		}
+
+		public static IUpdateable<T> Set<T,TV>(
+			[NotNull] this IUpdateable<T>    source,
+			[NotNull] Expression<Func<T,TV>> extract,
+			TV                               value)
+		{
+			if (source  == null) throw new ArgumentNullException("source");
+			if (extract == null) throw new ArgumentNullException("extract");
+
+			var query = ((Updateable<T>)source).Query;
+
+			query = query.Provider.CreateQuery<T>(
+				Expression.Call(
+					null,
+					((MethodInfo)MethodBase.GetCurrentMethod()).MakeGenericMethod(new[] { typeof(T), typeof(TV) }),
+					new[] { query.Expression, Expression.Quote(extract), Expression.Constant(value) }));
+
+			return new Updateable<T> { Query = query };
+		}
+
 		#endregion
 
 		#region Insert
@@ -257,6 +293,25 @@ namespace BLToolkit.Data.Linq
 					null,
 					((MethodInfo)MethodBase.GetCurrentMethod()).MakeGenericMethod(new[] { typeof(T), typeof(TV) }),
 					new[] { query.Expression, Expression.Quote(field), Expression.Quote(value) }));
+
+			return new ValueInsertable<T> { Query = q };
+		}
+
+		public static IValueInsertable<T> Value<T,TV>(
+			[NotNull] this IValueInsertable<T> source,
+			[NotNull] Expression<Func<T,TV>>   field,
+			TV                                 value)
+		{
+			if (source == null) throw new ArgumentNullException("source");
+			if (field  == null) throw new ArgumentNullException("field");
+
+			var query = ((ValueInsertable<T>)source).Query;
+
+			var q = query.Provider.CreateQuery<T>(
+				Expression.Call(
+					null,
+					((MethodInfo)MethodBase.GetCurrentMethod()).MakeGenericMethod(new[] { typeof(T), typeof(TV) }),
+					new[] { query.Expression, Expression.Quote(field), Expression.Constant(value) }));
 
 			return new ValueInsertable<T> { Query = q };
 		}
@@ -359,6 +414,45 @@ namespace BLToolkit.Data.Linq
 			return new SelectInsertable<TSource,TTarget> { Query = q };
 		}
 
+		public static ISelectInsertable<TSource,TTarget> Value<TSource,TTarget,TValue>(
+			[NotNull] this ISelectInsertable<TSource,TTarget> source,
+			[NotNull] Expression<Func<TTarget,TValue>>        field,
+			[NotNull] Expression<Func<TValue>>                value)
+		{
+			if (source == null) throw new ArgumentNullException("source");
+			if (field  == null) throw new ArgumentNullException("field");
+			if (value  == null) throw new ArgumentNullException("value");
+
+			var query = ((SelectInsertable<TSource,TTarget>)source).Query;
+
+			var q = query.Provider.CreateQuery<TSource>(
+				Expression.Call(
+					null,
+					((MethodInfo)MethodBase.GetCurrentMethod()).MakeGenericMethod(new[] { typeof(TSource), typeof(TTarget), typeof(TValue) }),
+					new[] { query.Expression, Expression.Quote(field), Expression.Quote(value) }));
+
+			return new SelectInsertable<TSource,TTarget> { Query = q };
+		}
+
+		public static ISelectInsertable<TSource,TTarget> Value<TSource,TTarget,TValue>(
+			[NotNull] this ISelectInsertable<TSource,TTarget> source,
+			[NotNull] Expression<Func<TTarget,TValue>>        field,
+			TValue                                            value)
+		{
+			if (source == null) throw new ArgumentNullException("source");
+			if (field  == null) throw new ArgumentNullException("field");
+
+			var query = ((SelectInsertable<TSource,TTarget>)source).Query;
+
+			var q = query.Provider.CreateQuery<TSource>(
+				Expression.Call(
+					null,
+					((MethodInfo)MethodBase.GetCurrentMethod()).MakeGenericMethod(new[] { typeof(TSource), typeof(TTarget), typeof(TValue) }),
+					new[] { query.Expression, Expression.Quote(field), Expression.Constant(value) }));
+
+			return new SelectInsertable<TSource,TTarget> { Query = q };
+		}
+
 		public static int Insert<TSource,TTarget>([NotNull] this ISelectInsertable<TSource,TTarget> source)
 		{
 			if (source == null) throw new ArgumentNullException("source");
@@ -397,6 +491,7 @@ namespace BLToolkit.Data.Linq
 		/// <returns>
 		/// A generic delegate that represents the compiled query.
 		/// </returns>
+		/// <param name="dbManager"></param>
 		/// <param name="query">
 		/// The query expression to be compiled.
 		/// </param>
@@ -420,6 +515,7 @@ namespace BLToolkit.Data.Linq
 		/// <returns>
 		/// A generic delegate that represents the compiled query.
 		/// </returns>
+		/// <param name="dbManager"></param>
 		/// <param name="query">
 		/// The query expression to be compiled.
 		/// </param>
@@ -446,6 +542,7 @@ namespace BLToolkit.Data.Linq
 		/// <returns>
 		/// A generic delegate that represents the compiled query.
 		/// </returns>
+		/// <param name="dbManager"></param>
 		/// <param name="query">
 		/// The query expression to be compiled.
 		/// </param>
@@ -475,6 +572,7 @@ namespace BLToolkit.Data.Linq
 		/// <returns>
 		/// A generic delegate that represents the compiled query.
 		/// </returns>
+		/// <param name="dbManager"></param>
 		/// <param name="query">
 		/// The query expression to be compiled.
 		/// </param>

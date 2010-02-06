@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 
 using BLToolkit.Data;
+using BLToolkit.Mapping;
 using BLToolkit.Reflection.Extension;
 
 namespace BLToolkit.DataAccess
@@ -167,13 +168,14 @@ namespace BLToolkit.DataAccess
 		{
 			SqlQueryInfo query = GetSqlQueryInfo(db, typeof(T), "InsertBatch");
 
-			return db
-				.SetCommand(query.QueryText)
-				.ExecuteForEach(
-					list,
-					query.GetMemberMappers(),
-					maxBatchSize,
-					delegate(T obj) { return query.GetParameters(db, obj); });
+			db.SetCommand(query.QueryText);
+
+			return ExecuteForEach(
+				db,
+				list,
+				query.GetMemberMappers(),
+				maxBatchSize,
+				delegate(T obj) { return query.GetParameters(db, obj); });
 		}
 
 		public virtual int Insert(int maxBatchSize, IEnumerable<T> list)
@@ -233,13 +235,14 @@ namespace BLToolkit.DataAccess
 		{
 			SqlQueryInfo query = GetSqlQueryInfo(db, typeof(T), "UpdateBatch");
 
-			return db
-				.SetCommand(query.QueryText)
-				.ExecuteForEach(
-					list,
-					query.GetMemberMappers(),
-					maxBatchSize,
-					delegate(T obj) { return query.GetParameters(db, obj); });
+			db.SetCommand(query.QueryText);
+
+			return ExecuteForEach(
+				db,
+				list,
+				query.GetMemberMappers(),
+				maxBatchSize,
+				delegate(T obj) { return query.GetParameters(db, obj); });
 		}
 
 		public virtual int Update(int maxBatchSize, IEnumerable<T> list)
@@ -327,13 +330,14 @@ namespace BLToolkit.DataAccess
 		{
 			SqlQueryInfo query = GetSqlQueryInfo(db, typeof(T), "DeleteBatch");
 
-			return db
-				.SetCommand(query.QueryText)
-				.ExecuteForEach(
-					list,
-					query.GetMemberMappers(),
-					maxBatchSize,
-					delegate(T obj) { return query.GetParameters(db, obj); });
+			db.SetCommand(query.QueryText);
+
+			return ExecuteForEach(
+				db,
+				list,
+				query.GetMemberMappers(),
+				maxBatchSize,
+				delegate(T obj) { return query.GetParameters(db, obj); });
 		}
 
 		public virtual int Delete(int maxBatchSize, IEnumerable<T> list)
@@ -359,6 +363,20 @@ namespace BLToolkit.DataAccess
 		public virtual int Delete(IEnumerable<T> list)
 		{
 			return Delete(int.MaxValue, list);
+		}
+
+		#endregion
+
+		#region Helpers
+
+		protected int ExecuteForEach(
+			DbManager      db,
+			IEnumerable<T> collection,
+			MemberMapper[] members,
+			int            maxBatchSize,
+			DbManager.ParameterProvider<T> getParameters)
+		{
+			return db.ExecuteForEach(collection, members, maxBatchSize, getParameters);
 		}
 
 		#endregion

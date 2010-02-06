@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using BLToolkit.Data.Linq;
 using BLToolkit.Mapping;
 using NUnit.Framework;
 
@@ -61,6 +62,14 @@ namespace Data.Linq
 				from p in db.Parent4
 				join c in db.Child on p.ParentID equals c.ParentID
 				where p.Value1 == TypeValue.Value1 select p));
+		}
+
+		[Test]
+		public void Enum7()
+		{
+			var v1 = TypeValue.Value1;
+
+			ForEachProvider(db => db.Parent4.Update(p => p.Value1 == v1, p => new Parent4 { Value1 = v1 }));
 		}
 
 		[Test]

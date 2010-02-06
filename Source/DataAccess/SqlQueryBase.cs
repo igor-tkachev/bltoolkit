@@ -176,7 +176,7 @@ namespace BLToolkit.DataAccess
 			return query;
 		}
 
-		private void AppendTableName(StringBuilder sb, DbManager db, Type type)
+		protected void AppendTableName(StringBuilder sb, DbManager db, Type type)
 		{
 			string database = GetDatabaseName(type);
 			string owner    = GetOwnerName   (type);
