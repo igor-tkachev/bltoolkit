@@ -398,7 +398,7 @@ namespace BLToolkit.Data.Linq
 				pi => pi.IsQueryableMethod ("Set",                   seq => sequence = ParseSequence(seq), (l,  ex)        => ParseSet   (l,  ex, sequence[0])),
 				pi => pi.IsQueryableMethod ("Value",           1, 1, seq => sequence = ParseSequence(seq), (l1, l2)        => ParseSet   (l1, l2, sequence[0])),
 				pi => pi.IsQueryableMethod ("Value",           1, 0, seq => sequence = ParseSequence(seq), (l1, l2)        => ParseSet   (l1, l2, sequence[0])),
-				pi => pi.IsQueryableMethod ("Value",                 seq => sequence = ParseSequence(seq), (l,  ex)        => ParseSet   (l,  ex, sequence[0])),
+				pi => pi.IsQueryableMethod ("Value",                 seq => sequence = ParseSequence(seq), (l,  ex)        => ParseSetEx (l,  ex, sequence[0])),
 				pi => pi.IsQueryableMethod ("Take",                  seq => sequence = ParseSequence(seq), ex => ParseTake     (sequence[0], ex)),
 				pi => pi.IsQueryableMethod ("Skip",                  seq => sequence = ParseSequence(seq), ex => ParseSkip     (sequence[0], ex)),
 				pi => pi.IsQueryableMethod ("ElementAt",             seq => sequence = ParseSequence(seq), ex => ParseElementAt(sequence[0], ex)),
@@ -1923,6 +1923,17 @@ namespace BLToolkit.Data.Linq
 			CurrentSql.Select.Columns.Clear();
 
 			return sequence;
+		}
+
+		void ParseSetEx(LambdaInfo extract, ParseInfo update, QuerySource select)
+		{
+			if (CurrentSql.Set.Into == null)
+			{
+				CurrentSql.Set.Into = (SqlTable)CurrentSql.From.Tables[0].Source;
+				CurrentSql.From.Tables.Clear();
+			}
+
+			ParseSet(extract, update, select);
 		}
 
 		#endregion

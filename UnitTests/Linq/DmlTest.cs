@@ -421,6 +421,32 @@ namespace Update
 		}
 
 		[Test]
+		public void Insert7()
+		{
+			ForEachProvider(db =>
+			{
+				try
+				{
+					var id = 1001;
+
+					db.Child.Delete(c => c.ChildID > 1000);
+
+					Assert.AreEqual(1,
+						db
+							.Child
+								.Value(c => c.ParentID, 1)
+								.Value(c => c.ChildID,  () => id)
+							.Insert());
+					Assert.AreEqual(1, db.Child.Count(c => c.ChildID == id));
+				}
+				finally
+				{
+					db.Child.Delete(c => c.ChildID > 1000);
+				}
+			});
+		}
+
+		[Test]
 		public void InsertNull()
 		{
 			ForEachProvider(db =>

@@ -278,6 +278,45 @@ namespace BLToolkit.Data.Linq
 		}
 
 		public static IValueInsertable<T> Value<T,TV>(
+			[NotNull] this Table<T>          source,
+			[NotNull] Expression<Func<T,TV>> field,
+			[NotNull] Expression<Func<TV>>   value)
+		{
+			if (source == null) throw new ArgumentNullException("source");
+			if (field  == null) throw new ArgumentNullException("field");
+			if (value  == null) throw new ArgumentNullException("value");
+
+			var query = (IQueryable<T>)source;
+
+			var q = query.Provider.CreateQuery<T>(
+				Expression.Call(
+					null,
+					((MethodInfo)MethodBase.GetCurrentMethod()).MakeGenericMethod(new[] { typeof(T), typeof(TV) }),
+					new[] { query.Expression, Expression.Quote(field), Expression.Quote(value) }));
+
+			return new ValueInsertable<T> { Query = q };
+		}
+
+		public static IValueInsertable<T> Value<T,TV>(
+			[NotNull] this Table<T>          source,
+			[NotNull] Expression<Func<T,TV>> field,
+			TV                               value)
+		{
+			if (source == null) throw new ArgumentNullException("source");
+			if (field  == null) throw new ArgumentNullException("field");
+
+			var query = (IQueryable<T>)source;
+
+			var q = query.Provider.CreateQuery<T>(
+				Expression.Call(
+					null,
+					((MethodInfo)MethodBase.GetCurrentMethod()).MakeGenericMethod(new[] { typeof(T), typeof(TV) }),
+					new[] { query.Expression, Expression.Quote(field), Expression.Constant(value, typeof(TV)) }));
+
+			return new ValueInsertable<T> { Query = q };
+		}
+
+		public static IValueInsertable<T> Value<T,TV>(
 			[NotNull] this IValueInsertable<T> source,
 			[NotNull] Expression<Func<T,TV>>   field,
 			[NotNull] Expression<Func<TV>>     value)
