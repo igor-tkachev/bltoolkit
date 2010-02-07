@@ -2,13 +2,16 @@
 using System.Linq;
 
 using BLToolkit.Data.DataProvider;
-using BLToolkit.DataAccess;
 using BLToolkit.Data.Linq;
 
 using NUnit.Framework;
 
 using Data.Linq;
 using Data.Linq.Model;
+
+#region ReSharper disable
+// ReSharper disable ConvertToConstant.Local
+#endregion
 
 namespace Update
 {
@@ -22,8 +25,8 @@ namespace Update
 			{
 				var parent = new Parent1 { ParentID = 1001, Value1 = 1001 };
 
-				new SqlQuery().Delete(db, parent);
-				new SqlQuery().Insert(db, parent);
+				db.Delete(parent);
+				db.Insert(parent);
 
 				Assert.AreEqual(1, db.Parent.Count (p => p.ParentID == parent.ParentID));
 				Assert.AreEqual(1, db.Parent.Delete(p => p.ParentID == parent.ParentID));
@@ -38,8 +41,8 @@ namespace Update
 			{
 				var parent = new Parent1 { ParentID = 1001, Value1 = 1001 };
 
-				new SqlQuery().Delete(db, parent);
-				new SqlQuery().Insert(db, parent);
+				db.Delete(parent);
+				db.Insert(parent);
 
 				Assert.AreEqual(1, db.Parent.Count(p => p.ParentID == parent.ParentID));
 				Assert.AreEqual(1, db.Parent.Where(p => p.ParentID == parent.ParentID).Delete());
@@ -54,8 +57,8 @@ namespace Update
 			{
 				db.Child.Delete(c => new[] { 1001, 1002 }.Contains(c.ChildID));
 
-				new SqlQuery().Insert(db, new Child { ParentID = 1, ChildID = 1001 });
-				new SqlQuery().Insert(db, new Child { ParentID = 1, ChildID = 1002 });
+				db.Child.Insert(() => new Child { ParentID = 1, ChildID = 1001 });
+				db.Child.Insert(() => new Child { ParentID = 1, ChildID = 1002 });
 
 				Assert.AreEqual(3, db.Child.Count(c => c.ParentID == 1));
 				Assert.AreEqual(2, db.Child.Where(c => c.Parent.ParentID == 1 && new[] { 1001, 1002 }.Contains(c.ChildID)).Delete());
@@ -70,8 +73,8 @@ namespace Update
 			{
 				db.GrandChild1.Delete(gc => new[] { 1001, 1002 }.Contains(gc.GrandChildID.Value));
 
-				new SqlQuery().Insert(db, new GrandChild { ParentID = 1, ChildID = 1, GrandChildID = 1001 });
-				new SqlQuery().Insert(db, new GrandChild { ParentID = 1, ChildID = 2, GrandChildID = 1002 });
+				db.Insert(new GrandChild { ParentID = 1, ChildID = 1, GrandChildID = 1001 });
+				db.Insert(new GrandChild { ParentID = 1, ChildID = 2, GrandChildID = 1002 });
 
 				Assert.AreEqual(3, db.GrandChild1.Count(gc => gc.ParentID == 1));
 				Assert.AreEqual(2, db.GrandChild1.Where(gc => gc.Parent.ParentID == 1 && new[] { 1001, 1002 }.Contains(gc.GrandChildID.Value)).Delete());
@@ -89,7 +92,7 @@ namespace Update
 					var parent = new Parent1 { ParentID = 1001, Value1 = 1001 };
 
 					db.Parent.Delete(p => p.ParentID > 1000);
-					new SqlQuery().Insert(db, parent);
+					db.Insert(parent);
 
 					Assert.AreEqual(1, db.Parent.Count (p => p.ParentID == parent.ParentID));
 					Assert.AreEqual(1, db.Parent.Update(p => p.ParentID == parent.ParentID, p => new Parent { ParentID = p.ParentID + 1 }));
@@ -112,7 +115,7 @@ namespace Update
 					var parent = new Parent1 { ParentID = 1001, Value1 = 1001 };
 
 					db.Parent.Delete(p => p.ParentID > 1000);
-					new SqlQuery().Insert(db, parent);
+					db.Insert(parent);
 
 					Assert.AreEqual(1, db.Parent.Count(p => p.ParentID == parent.ParentID));
 					Assert.AreEqual(1, db.Parent.Where(p => p.ParentID == parent.ParentID).Update(p => new Parent { ParentID = p.ParentID + 1 }));
@@ -212,7 +215,7 @@ namespace Update
 					var id = 1001;
 
 					db.Parent4.Delete(p => p.ParentID > 1000);
-					new SqlQuery().Insert(db, new Parent4 { ParentID = id, Value1 = TypeValue.Value1 });
+					db.Insert(new Parent4 { ParentID = id, Value1 = TypeValue.Value1 });
 
 					Assert.AreEqual(1, db.Parent4.Count(p => p.ParentID == id && p.Value1 == TypeValue.Value1));
 					Assert.AreEqual(1,
@@ -239,7 +242,7 @@ namespace Update
 					var id = 1001;
 
 					db.Parent4.Delete(p => p.ParentID > 1000);
-					new SqlQuery().Insert(db, new Parent4 { ParentID = id, Value1 = TypeValue.Value1 });
+					db.Insert(new Parent4 { ParentID = id, Value1 = TypeValue.Value1 });
 
 					Assert.AreEqual(1, db.Parent4.Count(p => p.ParentID == id && p.Value1 == TypeValue.Value1));
 					Assert.AreEqual(1,
@@ -418,6 +421,30 @@ namespace Update
 		}
 
 		[Test]
+		public void InsertNull()
+		{
+			ForEachProvider(db =>
+			{
+				try
+				{
+					db.Parent.Delete(p => p.ParentID == 1001);
+
+					Assert.AreEqual(1,
+						db
+							.Into(db.Parent)
+								.Value(p => p.ParentID, 1001)
+								.Value(p => p.Value1,   (int?)null)
+							.Insert());
+					Assert.AreEqual(1, db.Parent.Count(p => p.ParentID == 1001));
+				}
+				finally
+				{
+					db.Parent.Delete(p => p.Value1 == 1001);
+				}
+			});
+		}
+
+		[Test]
 		public void InsertWithIdentity1()
 		{
 			ForEachProvider(db =>
@@ -463,6 +490,36 @@ namespace Update
 							.Value(p => p.FirstName, () => "John")
 							.Value(p => p.LastName,  () => "Shepard")
 							.Value(p => p.Gender,    () => Gender.Male)
+						.InsertWithIdentity();
+
+					Assert.NotNull(id);
+
+					var john = db.Person.Single(p => p.FirstName == "John" && p.LastName == "Shepard");
+
+					Assert.NotNull (john);
+					Assert.AreEqual(id, john.ID);
+				}
+				finally
+				{
+					db.Person.Delete(p => p.ID > 2);
+				}
+			});
+		}
+
+		[Test]
+		public void InsertWithIdentity3()
+		{
+			ForEachProvider(db =>
+			{
+				try
+				{
+					db.Person.Delete(p => p.ID > 2);
+
+					var id = db
+						.Into(db.Person)
+							.Value(p => p.FirstName, "John")
+							.Value(p => p.LastName,  "Shepard")
+							.Value(p => p.Gender,    Gender.Male)
 						.InsertWithIdentity();
 
 					Assert.NotNull(id);

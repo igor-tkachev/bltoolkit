@@ -199,7 +199,7 @@ namespace BLToolkit.Data.Linq
 				Expression.Call(
 					null,
 					((MethodInfo)MethodBase.GetCurrentMethod()).MakeGenericMethod(new[] { typeof(T), typeof(TV) }),
-					new[] { source.Expression, Expression.Quote(extract), Expression.Constant(value) }));
+					new[] { source.Expression, Expression.Quote(extract), Expression.Constant(value, typeof(TV)) }));
 
 			return new Updateable<T> { Query = query };
 		}
@@ -218,7 +218,7 @@ namespace BLToolkit.Data.Linq
 				Expression.Call(
 					null,
 					((MethodInfo)MethodBase.GetCurrentMethod()).MakeGenericMethod(new[] { typeof(T), typeof(TV) }),
-					new[] { query.Expression, Expression.Quote(extract), Expression.Constant(value) }));
+					new[] { query.Expression, Expression.Quote(extract), Expression.Constant(value, typeof(TV)) }));
 
 			return new Updateable<T> { Query = query };
 		}
@@ -311,7 +311,7 @@ namespace BLToolkit.Data.Linq
 				Expression.Call(
 					null,
 					((MethodInfo)MethodBase.GetCurrentMethod()).MakeGenericMethod(new[] { typeof(T), typeof(TV) }),
-					new[] { query.Expression, Expression.Quote(field), Expression.Constant(value) }));
+					new[] { query.Expression, Expression.Quote(field), Expression.Constant(value, typeof(TV)) }));
 
 			return new ValueInsertable<T> { Query = q };
 		}
@@ -448,7 +448,7 @@ namespace BLToolkit.Data.Linq
 				Expression.Call(
 					null,
 					((MethodInfo)MethodBase.GetCurrentMethod()).MakeGenericMethod(new[] { typeof(TSource), typeof(TTarget), typeof(TValue) }),
-					new[] { query.Expression, Expression.Quote(field), Expression.Constant(value) }));
+					new[] { query.Expression, Expression.Quote(field), Expression.Constant(value, typeof(TValue)) }));
 
 			return new SelectInsertable<TSource,TTarget> { Query = q };
 		}
