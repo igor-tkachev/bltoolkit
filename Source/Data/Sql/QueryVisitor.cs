@@ -727,7 +727,7 @@ namespace BLToolkit.Data.Sql
 				case QueryElementType.SetClause:
 					{
 						SqlQuery.SetClause           s = (SqlQuery.SetClause)element;
-						ISqlTableSource              t = s.Into != null ? (ISqlTableSource)ConvertInternal(s.Into, action) : null;
+						SqlTable                     t = s.Into != null ? (SqlTable)ConvertInternal(s.Into, action) : null;
 						List<SqlQuery.SetExpression> i = Convert(s.Items, action);
 
 						if (t != null && !ReferenceEquals(s.Into, t) || i != null && !ReferenceEquals(s.Items, i))

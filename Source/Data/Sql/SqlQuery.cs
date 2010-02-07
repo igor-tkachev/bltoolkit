@@ -2157,8 +2157,8 @@ namespace BLToolkit.Data.Sql
 			readonly List<SetExpression> _items = new List<SetExpression>();
 			public   List<SetExpression>  Items { get { return _items; } }
 
-			private ISqlTableSource _into;
-			public  ISqlTableSource  Into
+			private SqlTable _into;
+			public  SqlTable  Into
 			{
 				get { return _into;  }
 				set { _into = value; }
@@ -2196,7 +2196,7 @@ namespace BLToolkit.Data.Sql
 				clone._withIdentity = _withIdentity;
 
 				if (_into != null)
-					clone.Into = (ISqlTableSource)_into.Clone(objectTree, doClone);
+					clone.Into = (SqlTable)_into.Clone(objectTree, doClone);
 
 				foreach (SetExpression item in Items)
 					clone.Items.Add((SetExpression)item.Clone(objectTree, doClone));
@@ -2232,7 +2232,7 @@ namespace BLToolkit.Data.Sql
 				sb.Append("SET ");
 
 				if (_into != null)
-					_into.ToString(sb, dic);
+					((IQueryElement)_into).ToString(sb, dic);
 
 				sb.AppendLine();
 

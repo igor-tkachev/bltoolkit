@@ -1715,7 +1715,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		protected SequenceNameAttribute GetSequenceNameAttribute()
 		{
-			SqlTable table         = (SqlTable)SqlQuery.Set.Into;
+			SqlTable table         = SqlQuery.Set.Into;
 			SqlField identityField = GetIdentityField(table);
 
 			if (identityField == null)

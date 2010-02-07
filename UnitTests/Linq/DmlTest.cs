@@ -135,7 +135,7 @@ namespace Update
 					var id = 1001;
 
 					db.Child.Delete(c => c.ChildID > 1000);
-					new SqlQuery().Insert(db, new Child { ParentID = 1, ChildID = id});
+					db.Child.Insert(() => new Child { ParentID = 1, ChildID = id});
 
 					Assert.AreEqual(1, db.Child.Count(c => c.ChildID == id));
 					Assert.AreEqual(1, db.Child.Where(c => c.ChildID == id && c.Parent.Value1 == 1).Update(c => new Child { ChildID = c.ChildID + 1 }));
@@ -158,7 +158,7 @@ namespace Update
 					var id = 1001;
 
 					db.Child.Delete(c => c.ChildID > 1000);
-					new SqlQuery().Insert(db, new Child { ParentID = 1, ChildID = id});
+					db.Child.Insert(() => new Child { ParentID = 1, ChildID = id});
 
 					Assert.AreEqual(1, db.Child.Count(c => c.ChildID == id));
 					Assert.AreEqual(1,
@@ -185,7 +185,7 @@ namespace Update
 					var id = 1001;
 
 					db.Child.Delete(c => c.ChildID > 1000);
-					new SqlQuery().Insert(db, new Child { ParentID = 1, ChildID = id});
+					db.Child.Insert(() => new Child { ParentID = 1, ChildID = id});
 
 					Assert.AreEqual(1, db.Child.Count(c => c.ChildID == id));
 					Assert.AreEqual(1,
@@ -388,6 +388,31 @@ namespace Update
 				finally
 				{
 					db.Child.Delete(c => c.ChildID > 1000);
+				}
+			});
+		}
+
+		[Test]
+		public void Insert6()
+		{
+			ForEachProvider(db =>
+			{
+				try
+				{
+					db.Parent.Delete(p => p.Value1 == 11);
+
+					Assert.AreEqual(1,
+						db.Child
+							.Where(c => c.ChildID == 11)
+							.Into(db.Parent)
+								.Value(p => p.ParentID, c => c.ParentID)
+								.Value(p => p.Value1,   c => (int?)c.ChildID)
+							.Insert());
+					Assert.AreEqual(1, db.Parent.Count(p => p.Value1 == 11));
+				}
+				finally
+				{
+					db.Parent.Delete(p => p.Value1 == 11);
 				}
 			});
 		}

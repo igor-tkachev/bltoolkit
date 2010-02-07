@@ -1816,13 +1816,13 @@ namespace BLToolkit.Data.Linq
 			if (member is MethodInfo)
 				member = TypeHelper.GetPropertyByMethod((MethodInfo)member);
 
-			var column = select.GetField(member);
+			var column = CurrentSql.Set.Into != null ? CurrentSql.Set.Into.Fields[member.Name] : select.GetField(member).GetExpressions(this)[0];
 			var expr   = ParseExpression(update, update.Body, select);
 
 			if (expr is SqlParameter && update.Body.Expr.Type.IsEnum)
 				SetParameterEnumConverter((SqlParameter)expr, update.Body.Expr.Type, _info.MappingSchema);
 
-			CurrentSql.Set.Items.Add(new SqlQuery.SetExpression(column.GetExpressions(this)[0], expr));
+			CurrentSql.Set.Items.Add(new SqlQuery.SetExpression(column, expr));
 		}
 
 		void ParseSet(LambdaInfo extract, ParseInfo update, QuerySource select)
@@ -1902,7 +1902,7 @@ namespace BLToolkit.Data.Linq
 			if (source.NodeType == ExpressionType.Constant && ((ConstantExpression)source).Value == null)
 			{
 				sequence = ParseSequence(into);
-				CurrentSql.Set.Into  = ((QuerySource.Table)sequence[0]).SqlTable;
+				CurrentSql.Set.Into = ((QuerySource.Table)sequence[0]).SqlTable;
 				CurrentSql.From.Tables.Clear();
 			}
 			else

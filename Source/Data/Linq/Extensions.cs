@@ -397,7 +397,7 @@ namespace BLToolkit.Data.Linq
 		public static ISelectInsertable<TSource,TTarget> Value<TSource,TTarget,TValue>(
 			[NotNull] this ISelectInsertable<TSource,TTarget> source,
 			[NotNull] Expression<Func<TTarget,TValue>>        field,
-			[NotNull] Expression<Func<TTarget,TValue>>        value)
+			[NotNull] Expression<Func<TSource,TValue>>        value)
 		{
 			if (source == null) throw new ArgumentNullException("source");
 			if (field  == null) throw new ArgumentNullException("field");

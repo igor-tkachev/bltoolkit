@@ -29,10 +29,10 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		protected override void BuildGetIdentity(StringBuilder sb)
 		{
-			SqlField identityField = GetIdentityField((SqlTable)SqlQuery.Set.Into);
+			SqlField identityField = GetIdentityField(SqlQuery.Set.Into);
 
 			if (identityField == null)
-				throw new SqlException("Identity field must be defined for '{0}'.", ((SqlTable)SqlQuery.Set.Into).Name);
+				throw new SqlException("Identity field must be defined for '{0}'.", SqlQuery.Set.Into.Name);
 
 			AppendIndent(sb).AppendLine("RETURNING");
 			AppendIndent(sb).Append("\t");
