@@ -18,6 +18,12 @@ namespace Update
 	[TestFixture]
 	public class DmlTest : TestBase
 	{
+		[TestFixtureTearDown]
+		public void TearDown()
+		{
+			ForEachProvider(db => db.Parent.Delete(p => p.ParentID >= 1000));
+		}
+
 		[Test]
 		public void Delete1()
 		{
@@ -422,6 +428,32 @@ namespace Update
 
 		[Test]
 		public void Insert7()
+		{
+			ForEachProvider(db =>
+			{
+				try
+				{
+					var id = 1001;
+
+					db.Child.Delete(c => c.ChildID > 1000);
+
+					Assert.AreEqual(1,
+						db
+							.Child
+								.Value(c => c.ChildID,  () => id)
+								.Value(c => c.ParentID, 1)
+							.Insert());
+					Assert.AreEqual(1, db.Child.Count(c => c.ChildID == id));
+				}
+				finally
+				{
+					db.Child.Delete(c => c.ChildID > 1000);
+				}
+			});
+		}
+
+		[Test]
+		public void Insert8()
 		{
 			ForEachProvider(db =>
 			{

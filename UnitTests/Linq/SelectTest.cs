@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Forms;
+using BLToolkit.Data.DataProvider;
+using BLToolkit.Data.Linq;
 using NUnit.Framework;
 
 using BLToolkit.Mapping;
@@ -270,6 +272,24 @@ namespace Data.Linq
 				Assert.AreEqual("Pupkin", q.LastName);
 				Assert.AreEqual("None",   q.MiddleName);
 			});
+		}
+
+		[Test]
+		public void Coalesce4()
+		{
+			ForEachProvider(new[] { ProviderName.SqlCe }, db => AreEqual(
+				from c in    Child
+				select Sql.OnServer((from ch in    Child where ch.ChildID == c.ChildID select ch.Parent.Value1).FirstOrDefault() ?? c.ChildID),
+				from c in db.Child
+				select Sql.OnServer((from ch in db.Child where ch.ChildID == c.ChildID select ch.Parent.Value1).FirstOrDefault() ?? c.ChildID)));
+		}
+
+		[Test]
+		public void Coalesce5()
+		{
+			ForEachProvider(new[] { ProviderName.SqlCe }, db => AreEqual(
+				from p in    Parent select Sql.OnServer(p.Children.Max(c => (int?)c.ChildID) ?? p.Value1),
+				from p in db.Parent select Sql.OnServer(p.Children.Max(c => (int?)c.ChildID) ?? p.Value1)));
 		}
 
 		[Test]

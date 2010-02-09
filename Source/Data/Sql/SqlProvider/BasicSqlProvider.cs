@@ -235,7 +235,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		protected virtual void BuildColumn(StringBuilder sb, SqlQuery.Column col, ref bool addAlias)
 		{
-			BuildExpression(sb, col.Expression, true, col.Alias, ref addAlias);
+			BuildExpression(sb, col.Expression, true, true, col.Alias, ref addAlias);
 		}
 
 		#endregion
@@ -288,7 +288,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 				first = false;
 
 				AppendIndent(sb);
-				BuildExpression(sb, expr.Column, false);
+				BuildExpression(sb, expr.Column, false, true);
 				sb.Append(" = ");
 				BuildExpression(sb, expr.Expression);
 			}
@@ -321,7 +321,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 				first = false;
 
 				AppendIndent(sb);
-				BuildExpression(sb, expr.Column, false);
+				BuildExpression(sb, expr.Column, false, true);
 			}
 
 			_indent--;
@@ -930,7 +930,13 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		#region BuildExpression
 
-		protected virtual StringBuilder BuildExpression(StringBuilder sb, ISqlExpression expr, bool buildTableName, string alias, ref bool addAlias)
+		protected virtual StringBuilder BuildExpression(
+			StringBuilder  sb,
+			ISqlExpression expr,
+			bool           buildTableName,
+			bool           checkParentheses,
+			string         alias,
+			ref bool       addAlias)
 		{
 			expr = ConvertExpression(expr);
 
@@ -1007,7 +1013,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 				case QueryElementType.SqlQuery:
 					{
-						bool hasParentheses = sb[sb.Length - 1] == '(';
+						bool hasParentheses = checkParentheses && sb[sb.Length - 1] == '(';
 
 						if (!hasParentheses)
 							sb.Append("(");
@@ -1093,20 +1099,20 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			bool wrap = Wrap(GetPrecedence(expr), parentPrecedence);
 
 			if (wrap) sb.Append('(');
-			BuildExpression(sb, expr, true, alias, ref addAlias);
+			BuildExpression(sb, expr, true, true, alias, ref addAlias);
 			if (wrap) sb.Append(')');
 		}
 
-		protected virtual StringBuilder BuildExpression(StringBuilder sb, ISqlExpression expr)
+		protected StringBuilder BuildExpression(StringBuilder sb, ISqlExpression expr)
 		{
 			bool dummy = false;
-			return BuildExpression(sb, expr, true, null, ref dummy);
+			return BuildExpression(sb, expr, true, true, null, ref dummy);
 		}
 
-		protected virtual StringBuilder BuildExpression(StringBuilder sb, ISqlExpression expr, bool buildTableName)
+		protected StringBuilder BuildExpression(StringBuilder sb, ISqlExpression expr, bool buildTableName, bool checkParentheses)
 		{
 			bool dummy = false;
-			return BuildExpression(sb, expr, buildTableName, null, ref dummy);
+			return BuildExpression(sb, expr, buildTableName, checkParentheses, null, ref dummy);
 		}
 
 		protected void BuildExpression(StringBuilder sb, int precedence, ISqlExpression expr)
@@ -1283,9 +1289,10 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			{
 				if (!first)
 					sb.Append(", ");
-				first = false;
 
-				BuildExpression(sb, parameter);
+				BuildExpression(sb, parameter, true, !first || name == "EXISTS");
+
+				first = false;
 			}
 
 			sb.Append(')');

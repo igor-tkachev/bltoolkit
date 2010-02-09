@@ -61,7 +61,9 @@ namespace Data.Linq
 		[Test]
 		public void FirstOrDefaultScalar()
 		{
-			ForEachProvider(db => Assert.AreEqual(Parent.FirstOrDefault().ParentID, db.Parent.FirstOrDefault().ParentID));
+			ForEachProvider(db => Assert.AreEqual(
+				   Parent.OrderBy(p => p.ParentID).FirstOrDefault().ParentID,
+				db.Parent.OrderBy(p => p.ParentID).FirstOrDefault().ParentID));
 		}
 
 		[Test]

@@ -36,7 +36,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 			AppendIndent(sb).AppendLine("RETURNING");
 			AppendIndent(sb).Append("\t");
-			BuildExpression(sb, identityField, false);
+			BuildExpression(sb, identityField, false, true);
 			sb.AppendLine(" INTO :IDENTITY_PARAMETER");
 		}
 

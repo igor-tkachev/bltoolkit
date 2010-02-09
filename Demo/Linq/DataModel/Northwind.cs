@@ -5,32 +5,17 @@ using System.Data.Linq;
 using BLToolkit.DataAccess;
 using BLToolkit.Mapping;
 
-namespace Data.Linq.Model
+namespace Linq.Demo.DataModel
 {
-	public class Northwind
+	public static class Northwind
 	{
-		public abstract class EntityBase<T>
-		{
-			protected abstract T Key { get; }
-
-			public override bool Equals(object obj)
-			{
-				return GetType() == obj.GetType() && Key.Equals(((EntityBase<T>)obj).Key);
-			}
-
-			public override int GetHashCode()
-			{
-				return Key.GetHashCode();
-			}
-		}
-
 		[TableName("Categories")]
 		public class Category
 		{
-			[PrimaryKey, NonUpdatable] public int    CategoryID;
-			[NotNull]                  public string CategoryName;
-			                           public string Description;
-			                           public Binary Picture;
+			[PrimaryKey, Identity] public int    CategoryID;
+			[NotNull]              public string CategoryName;
+			                       public string Description;
+			                       public Binary Picture;
 
 			[Association(ThisKey="CategoryID", OtherKey="CategoryID")]
 			public List<Product> Products;
@@ -60,7 +45,7 @@ namespace Data.Linq.Model
 		}
 
 		[TableName("Customers")]
-		public class Customer : EntityBase<string>
+		public class Customer
 		{
 			[PrimaryKey] public string CustomerID;
 			[NotNull]    public string CompanyName;
@@ -79,45 +64,34 @@ namespace Data.Linq.Model
 
 			[Association(ThisKey="CustomerID", OtherKey="CustomerID")]
 			public List<Order> Orders;
-
-			protected override string Key
-			{
-				get { return CustomerID; }
-			}
 		}
 
 		[TableName("Employees")]
-		public class Employee : EntityBase<int>
+		public class Employee
 		{
-			[PrimaryKey, NonUpdatable] public int       EmployeeID;
-			[NotNull]                  public string    LastName;
-			[NotNull]                  public string    FirstName;
-			                           public string    Title;
-			                           public string    TitleOfCourtesy;
-			                           public DateTime? BirthDate;
-			                           public DateTime? HireDate;
-			                           public string    Address;
-			                           public string    City;
-			                           public string    Region;
-			                           public string    PostalCode;
-			                           public string    Country;
-			                           public string    HomePhone;
-			                           public string    Extension;
-			                           public Binary    Photo;
-			                           public string    Notes;
-			                           public int?      ReportsTo;
-			                           public string    PhotoPath;
+			[PrimaryKey, Identity] public int       EmployeeID;
+			[NotNull]              public string    LastName;
+			[NotNull]              public string    FirstName;
+			                       public string    Title;
+			                       public string    TitleOfCourtesy;
+			                       public DateTime? BirthDate;
+			                       public DateTime? HireDate;
+			                       public string    Address;
+			                       public string    City;
+			                       public string    Region;
+			                       public string    PostalCode;
+			                       public string    Country;
+			                       public string    HomePhone;
+			                       public string    Extension;
+			                       public Binary    Photo;
+			                       public string    Notes;
+			                       public int?      ReportsTo;
+			                       public string    PhotoPath;
 
 			[Association(ThisKey="EmployeeID", OtherKey="ReportsTo")]  public List<Employee>          Employees;
 			[Association(ThisKey="EmployeeID", OtherKey="EmployeeID")] public List<EmployeeTerritory> EmployeeTerritories;
 			[Association(ThisKey="EmployeeID", OtherKey="EmployeeID")] public List<Order>             Orders;
 			[Association(ThisKey="ReportsTo",  OtherKey="EmployeeID")] public Employee                ReportsToEmployee;
-
-			//[MapIgnore]
-			protected override int Key
-			{
-				get { return EmployeeID; }
-			}
 		}
 
 		[TableName("EmployeeTerritories")]
@@ -144,32 +118,27 @@ namespace Data.Linq.Model
 		}
 
 		[TableName("Orders")]
-		public class Order : EntityBase<int>
+		public class Order
 		{
-			[PrimaryKey, NonUpdatable] public int       OrderID;
-			                           public string    CustomerID;
-			                           public int?      EmployeeID;
-			                           public DateTime? OrderDate;
-			                           public DateTime? RequiredDate;
-			                           public DateTime? ShippedDate;
-			                           public int?      ShipVia;
-			                           public decimal   Freight;
-			                           public string    ShipName;
-			                           public string    ShipAddress;
-			                           public string    ShipCity;
-			                           public string    ShipRegion;
-			                           public string    ShipPostalCode;
-			                           public string    ShipCountry;
+			[PrimaryKey, Identity] public int       OrderID;
+			                       public string    CustomerID;
+			                       public int?      EmployeeID;
+			                       public DateTime? OrderDate;
+			                       public DateTime? RequiredDate;
+			                       public DateTime? ShippedDate;
+			                       public int?      ShipVia;
+			                       public decimal   Freight;
+			                       public string    ShipName;
+			                       public string    ShipAddress;
+			                       public string    ShipCity;
+			                       public string    ShipRegion;
+			                       public string    ShipPostalCode;
+			                       public string    ShipCountry;
 
 			[Association(ThisKey="OrderID",    OtherKey="OrderID")]                     public List<OrderDetail> OrderDetails;
 			[Association(ThisKey="CustomerID", OtherKey="CustomerID", CanBeNull=false)] public Customer          Customer;
 			[Association(ThisKey="EmployeeID", OtherKey="EmployeeID")]                  public Employee          Employee;
 			[Association(ThisKey="ShipVia",    OtherKey="ShipperID")]                   public Shipper           Shipper;
-
-			protected override int Key
-			{
-				get { return OrderID; }
-			}
 		}
 
 		[TableName("Products")]
@@ -177,7 +146,7 @@ namespace Data.Linq.Model
 		[InheritanceMapping(Code="False", Type=typeof(ActiveProduct))]
 		public abstract class Product
 		{
-			[PrimaryKey, NonUpdatable]                  public int      ProductID;
+			[PrimaryKey, Identity]                      public int      ProductID;
 			[NotNull]                                   public string   ProductName;
 			                                            public int?     SupplierID;
 			                                            public int?     CategoryID;
@@ -188,9 +157,14 @@ namespace Data.Linq.Model
 			                                            public short?   ReorderLevel;
 			[MapField(IsInheritanceDiscriminator=true)] public bool     Discontinued;
 
-			[Association(ThisKey="ProductID",  OtherKey="ProductID")]  public List<OrderDetail> OrderDetails;
-			[Association(ThisKey="CategoryID", OtherKey="CategoryID")] public Category          Category;
-			[Association(ThisKey="SupplierID", OtherKey="SupplierID")] public Supplier          Supplier;
+			[Association(ThisKey="ProductID",  OtherKey="ProductID")]
+			public List<OrderDetail> OrderDetails;
+
+			[Association(ThisKey="CategoryID", OtherKey="CategoryID", CanBeNull=false)]
+			public Category Category;
+
+			[Association(ThisKey="SupplierID", OtherKey="SupplierID", CanBeNull=false)]
+			public Supplier Supplier;
 		}
 
 		public class ActiveProduct       : Product {}
@@ -209,9 +183,9 @@ namespace Data.Linq.Model
 		[TableName("Shippers")]
 		public class Shipper
 		{
-			[PrimaryKey, NonUpdatable] public int    ShipperID;
-			[NotNull]                  public string CompanyName;
-			                           public string Phone;
+			[PrimaryKey, Identity] public int    ShipperID;
+			[NotNull]              public string CompanyName;
+			                       public string Phone;
 
 			[Association(ThisKey="ShipperID", OtherKey="ShipVia")]
 			public List<Order> Orders;
@@ -220,18 +194,18 @@ namespace Data.Linq.Model
 		[TableName("Suppliers")]
 		public class Supplier
 		{
-			[PrimaryKey, NonUpdatable] public int    SupplierID;
-			[NotNull]                  public string CompanyName;
-			                           public string ContactName;
-			                           public string ContactTitle;
-			                           public string Address;
-			                           public string City;
-			                           public string Region;
-			                           public string PostalCode;
-			                           public string Country;
-			                           public string Phone;
-			                           public string Fax;
-			                           public string HomePage;
+			[PrimaryKey, Identity] public int    SupplierID;
+			[NotNull]              public string CompanyName;
+			                       public string ContactName;
+			                       public string ContactTitle;
+			                       public string Address;
+			                       public string City;
+			                       public string Region;
+			                       public string PostalCode;
+			                       public string Country;
+			                       public string Phone;
+			                       public string Fax;
+			                       public string HomePage;
 
 			[Association(ThisKey="SupplierID", OtherKey="SupplierID")]
 			public List<Product> Products;

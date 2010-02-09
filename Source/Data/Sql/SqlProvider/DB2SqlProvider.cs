@@ -38,7 +38,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 				AppendIndent(sb).AppendLine("SELECT");
 				AppendIndent(sb).Append("\t");
-				BuildExpression(sb, _identityField, false);
+				BuildExpression(sb, _identityField, false, true);
 				sb.AppendLine();
 				AppendIndent(sb).AppendLine("FROM");
 				AppendIndent(sb).AppendLine("\tNEW TABLE");

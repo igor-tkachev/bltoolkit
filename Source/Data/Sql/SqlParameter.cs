@@ -94,7 +94,7 @@ namespace BLToolkit.Data.Sql
 				return true;
 
 			SqlParameter p = other as SqlParameter;
-			return _name != null && p._name != null && _name == p._name && _systemType == p._systemType;
+			return (object)p != null && _name != null && p._name != null && _name == p._name && _systemType == p._systemType;
 		}
 
 		#endregion

@@ -2,7 +2,7 @@
 
 namespace BLToolkit.Mapping
 {
-	[AttributeUsage(AttributeTargets.Property | AttributeTargets.Field, AllowMultiple=false)]
+	[AttributeUsage(AttributeTargets.Method | AttributeTargets.Property | AttributeTargets.Field, AllowMultiple=false)]
 	public class AssociationAttribute : Attribute
 	{
 		private string _thisKey;          public string ThisKey   { get { return _thisKey;   } set { _thisKey   = value; } }
