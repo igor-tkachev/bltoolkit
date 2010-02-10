@@ -279,17 +279,17 @@ namespace Data.Linq
 		{
 			ForEachProvider(new[] { ProviderName.SqlCe }, db => AreEqual(
 				from c in    Child
-				select Sql.OnServer((from ch in    Child where ch.ChildID == c.ChildID select ch.Parent.Value1).FirstOrDefault() ?? c.ChildID),
+				select Sql.AsSql((from ch in    Child where ch.ChildID == c.ChildID select ch.Parent.Value1).FirstOrDefault() ?? c.ChildID),
 				from c in db.Child
-				select Sql.OnServer((from ch in db.Child where ch.ChildID == c.ChildID select ch.Parent.Value1).FirstOrDefault() ?? c.ChildID)));
+				select Sql.AsSql((from ch in db.Child where ch.ChildID == c.ChildID select ch.Parent.Value1).FirstOrDefault() ?? c.ChildID)));
 		}
 
 		[Test]
 		public void Coalesce5()
 		{
 			ForEachProvider(new[] { ProviderName.SqlCe }, db => AreEqual(
-				from p in    Parent select Sql.OnServer(p.Children.Max(c => (int?)c.ChildID) ?? p.Value1),
-				from p in db.Parent select Sql.OnServer(p.Children.Max(c => (int?)c.ChildID) ?? p.Value1)));
+				from p in    Parent select Sql.AsSql(p.Children.Max(c => (int?)c.ChildID) ?? p.Value1),
+				from p in db.Parent select Sql.AsSql(p.Children.Max(c => (int?)c.ChildID) ?? p.Value1)));
 		}
 
 		[Test]

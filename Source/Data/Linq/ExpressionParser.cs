@@ -1209,6 +1209,16 @@ namespace BLToolkit.Data.Linq
 				CurrentSql.GroupBy.Items.Clear();
 				foreach (var field in byExprs)
 					CurrentSql.GroupBy.Expr(field);
+
+				new QueryVisitor().Visit(CurrentSql.From, e =>
+				{
+					if (e.ElementType == QueryElementType.JoinedTable)
+					{
+						var jt = (SqlQuery.JoinedTable)e;
+						if (jt.JoinType == SqlQuery.JoinType.Inner)
+							jt.IsWeak = false;
+					}
+				});
 			}
 
 			var result =

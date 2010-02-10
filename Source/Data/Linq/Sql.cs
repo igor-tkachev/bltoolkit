@@ -14,6 +14,14 @@ namespace BLToolkit.Data.Linq
 
 		[CLSCompliant(false)]
 		[SqlExpression("{0}", 0, ServerSideOnly = true)]
+		public static T AsSql<T>(T obj)
+		{
+			return obj;
+		}
+
+		[Obsolete("Use AsSql instead.")]
+		[CLSCompliant(false)]
+		[SqlExpression("{0}", 0, ServerSideOnly = true)]
 		public static T OnServer<T>(T obj)
 		{
 			return obj;

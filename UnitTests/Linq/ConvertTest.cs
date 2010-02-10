@@ -25,7 +25,7 @@ namespace Data.Linq
 		{
 			ForEachProvider(db => AreEqual(
 				from t in    Types select              Sql.ConvertTo<int>.From(t.MoneyValue),
-				from t in db.Types select Sql.OnServer(Sql.ConvertTo<int>.From(t.MoneyValue))));
+				from t in db.Types select Sql.AsSql(Sql.ConvertTo<int>.From(t.MoneyValue))));
 		}
 
 		[Test]
@@ -33,7 +33,7 @@ namespace Data.Linq
 		{
 			ForEachProvider(db => AreEqual(
 				from t in    Types select              Sql.Convert<int,decimal>(t.MoneyValue),
-				from t in db.Types select Sql.OnServer(Sql.Convert<int,decimal>(t.MoneyValue))));
+				from t in db.Types select Sql.AsSql(Sql.Convert<int,decimal>(t.MoneyValue))));
 		}
 
 		[Test]
@@ -141,7 +141,7 @@ namespace Data.Linq
 		{
 			ForEachProvider(new[] { ProviderName.MySql }, db => AreEqual(
 				from t in    Types select              Sql.ConvertTo<uint>.From(t.MoneyValue),
-				from t in db.Types select Sql.OnServer(Sql.ConvertTo<uint>.From(t.MoneyValue))));
+				from t in db.Types select Sql.AsSql(Sql.ConvertTo<uint>.From(t.MoneyValue))));
 		}
 
 		[Test]
@@ -149,7 +149,7 @@ namespace Data.Linq
 		{
 			ForEachProvider(new[] { ProviderName.MySql }, db => AreEqual(
 				from t in    Types select              Sql.Convert<uint,decimal>(t.MoneyValue),
-				from t in db.Types select Sql.OnServer(Sql.Convert<uint,decimal>(t.MoneyValue))));
+				from t in db.Types select Sql.AsSql(Sql.Convert<uint,decimal>(t.MoneyValue))));
 		}
 
 		[Test]

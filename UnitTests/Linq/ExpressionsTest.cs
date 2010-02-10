@@ -79,7 +79,7 @@ namespace Data.Linq
 
 		static Expression<Func<TestDbManager,Parent,int,int>> Count5Expression()
 		{
-			return (db, p, n) => Sql.OnServer(db.Child.Where(c => c.ParentID == p.ParentID).Count() + n);
+			return (db, p, n) => Sql.AsSql(db.Child.Where(c => c.ParentID == p.ParentID).Count() + n);
 		}
 
 		[Test]
@@ -123,7 +123,7 @@ namespace Data.Linq
 
 		static Expression<Func<Table<Child>,Parent,int,int>> Count7Expression()
 		{
-			return (ch, p, n) => Sql.OnServer(ch.Where(c => c.ParentID == p.ParentID).Count() + n);
+			return (ch, p, n) => Sql.AsSql(ch.Where(c => c.ParentID == p.ParentID).Count() + n);
 		}
 
 		[Test]

@@ -1,10 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 
 using BLToolkit.Data;
-using BLToolkit.Mapping;
 
 namespace Linq.Demo
 {
@@ -25,6 +23,9 @@ namespace Linq.Demo
 			AssociationInnerJoinTest();
 			AssociationCountTest();
 			AssociationObjectTest();
+			MultiLevelAssociationTest();
+			CompareAssociationTest();
+			GroupByAssociationTest();
 		}
 
 		static void FirstTest()
@@ -178,6 +179,65 @@ namespace Linq.Demo
 						OrderID  = o.OrderID,
 						Customer = o.Customer
 					};
+
+				foreach (var item in query)
+				{
+					Console.WriteLine(item);
+				}
+			}
+		}
+
+		static void MultiLevelAssociationTest()
+		{
+			using (var db = new NorthwindDB())
+			{
+				var query =
+					from o in db.OrderDetail
+					select new
+					{
+						o.Product.ProductName,
+						o.Order.OrderID,
+						o.Order.Employee.ReportsToEmployee.Region
+					};
+
+				foreach (var item in query)
+				{
+					Console.WriteLine(item);
+				}
+			}
+		}
+
+		static void CompareAssociationTest()
+		{
+			using (var db = new NorthwindDB())
+			{
+				var query =
+					from o in db.Order
+					from t in db.EmployeeTerritory
+					where o.Employee == t.Employee
+					select new
+					{
+						o.OrderID,
+						o.EmployeeID,
+						t.TerritoryID
+					};
+
+				foreach (var item in query)
+				{
+					Console.WriteLine(item);
+				}
+			}
+		}
+
+		static void GroupByAssociationTest()
+		{
+			using (var db = new NorthwindDB())
+			{
+				var query =
+					from p in db.Product
+					group p by p.Category into g
+					where g.Count() == 12
+					select g.Key.CategoryID;
 
 				foreach (var item in query)
 				{

@@ -29,8 +29,9 @@ namespace Data.Linq
 		[Test]
 		public void Test3()
 		{
-			var expected = from ch in Child where ch.ParentID == 1 select new { ch, ch.Parent };
-			ForEachProvider(db => AreEqual(expected, from ch in db.Child where ch.ParentID == 1 select new { ch, ch.Parent }));
+			ForEachProvider(db => AreEqual(
+				from ch in    Child where ch.ParentID == 1 select new { ch, ch.Parent },
+				from ch in db.Child where ch.ParentID == 1 select new { ch, ch.Parent }));
 		}
 
 		//[Test]
@@ -125,15 +126,17 @@ namespace Data.Linq
 		[Test]
 		public void SelectMany1()
 		{
-			var expected = Parent.SelectMany(p => p.Children.Select(ch => p));
-			ForEachProvider(db => AreEqual(expected, db.Parent.SelectMany(p => p.Children.Select(ch => p))));
+			ForEachProvider(db => AreEqual(
+				   Parent.SelectMany(p => p.Children.Select(ch => p)),
+				db.Parent.SelectMany(p => p.Children.Select(ch => p))));
 		}
 
 		[Test]
 		public void SelectMany2()
 		{
-			var expected = Parent.SelectMany(p => Child.Select(ch => p));
-			ForEachProvider(db => AreEqual(expected, db.Parent.SelectMany(p => db.Child.Select(ch => p))));
+			ForEachProvider(db => AreEqual(
+				   Parent.SelectMany(p =>    Child.Select(ch => p)),
+				db.Parent.SelectMany(p => db.Child.Select(ch => p))));
 		}
 
 		//[Test]
@@ -173,8 +176,9 @@ namespace Data.Linq
 		[Test]
 		public void SelectMany5()
 		{
-			var expected = Parent.SelectMany(p => p.Children.Select(ch => p.ParentID));
-			ForEachProvider(db => AreEqual(expected, db.Parent.SelectMany(p => p.Children.Select(ch => p.ParentID))));
+			ForEachProvider(db => AreEqual(
+				   Parent.SelectMany(p => p.Children.Select(ch => p.ParentID)),
+				db.Parent.SelectMany(p => p.Children.Select(ch => p.ParentID))));
 		}
 
 		[Test]

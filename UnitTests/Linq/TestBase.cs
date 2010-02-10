@@ -288,7 +288,10 @@ namespace Data.Linq
 						_grandChild1 = db.GrandChild1.ToList();
 
 						foreach (var ch in _grandChild1)
-							ch.Child = Child.Single(c => c.ParentID == ch.ParentID && c.ChildID == ch.ChildID);
+						{
+							ch.Parent = Parent1.Single(p => p.ParentID == ch.ParentID);
+							ch.Child  = Child.  Single(c => c.ParentID == ch.ParentID && c.ChildID == ch.ChildID);
+						}
 					}
 
 				return _grandChild1;

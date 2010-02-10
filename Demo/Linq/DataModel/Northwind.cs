@@ -113,8 +113,8 @@ namespace Linq.Demo.DataModel
 			             public short   Quantity;
 			             public float   Discount;
 
-			[Association(ThisKey="OrderID",   OtherKey="OrderID")]   public Order   Order;
-			[Association(ThisKey="ProductID", OtherKey="ProductID")] public Product Product;
+			[Association(ThisKey="OrderID",   OtherKey="OrderID",   CanBeNull=false)] public Order   Order;
+			[Association(ThisKey="ProductID", OtherKey="ProductID", CanBeNull=false)] public Product Product;
 		}
 
 		[TableName("Orders")]
@@ -135,7 +135,7 @@ namespace Linq.Demo.DataModel
 			                       public string    ShipPostalCode;
 			                       public string    ShipCountry;
 
-			[Association(ThisKey="OrderID",    OtherKey="OrderID")]                     public List<OrderDetail> OrderDetails;
+			[Association(ThisKey="OrderID",    OtherKey="OrderID",    CanBeNull=false)] public List<OrderDetail> OrderDetails;
 			[Association(ThisKey="CustomerID", OtherKey="CustomerID", CanBeNull=false)] public Customer          Customer;
 			[Association(ThisKey="EmployeeID", OtherKey="EmployeeID")]                  public Employee          Employee;
 			[Association(ThisKey="ShipVia",    OtherKey="ShipperID")]                   public Shipper           Shipper;

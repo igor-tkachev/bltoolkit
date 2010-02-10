@@ -611,6 +611,36 @@ namespace Data.Linq
 		}
 
 		[Test]
+		public void WhereCount4()
+		{
+			ForEachProvider(db => AreEqual(
+				from ch in GrandChild1
+				group ch by ch.Parent into g
+				where g.Count() > 2
+				select g.Key.ParentID
+				,
+				from ch in db.GrandChild1
+				group ch by ch.Parent into g
+				where g.Count() > 2
+				select g.Key.ParentID));
+		}
+
+		[Test]
+		public void WhereCount5()
+		{
+			ForEachProvider(db => AreEqual(
+				from ch in GrandChild1
+				group ch by ch.Parent into g
+				where g.Count() > 2
+				select g.Key.Value1
+				,
+				from ch in db.GrandChild1
+				group ch by ch.Parent into g
+				where g.Count() > 2
+				select g.Key.Value1));
+		}
+
+		[Test]
 		public void GroupByAggregate1()
 		{
 			var expected =

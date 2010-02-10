@@ -769,7 +769,7 @@ namespace BLToolkit.Data.Linq
 		public class GroupBy : Expr
 		{
 			public GroupBy(
-				SqlQuery         sqlBilder,
+				SqlQuery         sqlQuery,
 				QuerySource      groupQuery,
 				QuerySource      originalQuery,
 				LambdaInfo       keySelector,
@@ -777,7 +777,7 @@ namespace BLToolkit.Data.Linq
 				Type             groupingType,
 				bool             isWrapped,
 				ISqlExpression[] byExpressions)
-				: base(sqlBilder, keySelector, groupQuery)
+				: base(sqlQuery, keySelector, groupQuery)
 			{
 				ParsingTracer.IncIndentLevel();
 
@@ -821,6 +821,21 @@ namespace BLToolkit.Data.Linq
 			public override QueryField GetField(SqlField field)
 			{
 				return OriginalQuery.GetField(field);
+			}
+
+			public override QueryField GetField(LambdaInfo lambda, Expression expr, int currentMember)
+			{
+				var field = base.GetField(lambda, expr, currentMember);
+
+				if (field != null && field is Column)
+				{
+					var f = ((Column)field).Field;
+
+					if (SqlQuery.GroupBy.Items.Find(e => e == f) == null)
+						SqlQuery.GroupBy.Expr(f);
+				}
+
+				return field;
 			}
 
 			GroupBy() {}
