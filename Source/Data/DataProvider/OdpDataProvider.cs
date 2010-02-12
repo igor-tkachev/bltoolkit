@@ -163,7 +163,17 @@ namespace BLToolkit.Data.DataProvider
 				//
 				oraParameterClone.CollectionType = oraParameter.CollectionType;
 
-				return OracleParameterWrap.CreateInstance(oraParameterClone);
+                // Fix Oracle.Net bug #8423178
+                // See http://forums.oracle.com/forums/thread.jspa?threadID=975902&tstart=0
+                //
+                if (oraParameterClone.OracleDbType == OracleDbType.RefCursor)
+                {
+                    // Set OracleDbType to itself to reset m_bSetDbType and m_bOracleDbTypeExSet
+                    //
+                    oraParameterClone.OracleDbType = OracleDbType.RefCursor;
+                }
+
+                return OracleParameterWrap.CreateInstance(oraParameterClone);
 			}
 
 			return base.CloneParameter(parameter);
