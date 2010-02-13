@@ -2517,6 +2517,8 @@ namespace BLToolkit.Common
 					return new Decimal(bits);
 		}
 
+#if FW3
+
 		public static Decimal ToDecimal(Binary p)
 		{
 					if (p == null || p.Length == 0) return 0.0m;
@@ -2526,6 +2528,8 @@ namespace BLToolkit.Common
 					Buffer.BlockCopy(p.ToArray(), 0, bits, 0, p.Length);
 					return new Decimal(bits);
 		}
+
+#endif
 
 		/// <summary>Converts the value of a specified object to an equivalent <c>Decimal</c> value.</summary>
 		public static Decimal ToDecimal(object p)         
@@ -7441,7 +7445,9 @@ namespace BLToolkit.Common
 		// 
 		/// <summary>Converts the value from <c>Byte[]</c> to an equivalent <c>SqlBinary</c> value.</summary>
 		public static SqlBinary ToSqlBinary(Byte[] p)          { return p; }
+#if FW3
 		public static SqlBinary ToSqlBinary(Binary p)          { return p == null ? null : p.ToArray(); }
+#endif
 		/// <summary>Converts the value from <c>Guid</c> to an equivalent <c>SqlBinary</c> value.</summary>
 		public static SqlBinary ToSqlBinary(Guid p)            { return p == Guid.Empty? SqlBinary.Null: new SqlGuid(p).ToSqlBinary(); }
 
@@ -8364,6 +8370,8 @@ namespace BLToolkit.Common
 			
 		}
 
+#if FW3
+
 		public static Char[] ToCharArray(Binary p)
 		{
 				if (p == null) return null;
@@ -8374,6 +8382,8 @@ namespace BLToolkit.Common
 				return chars;
 			
 		}
+
+#endif
 
 		/// <summary>Converts the value of a specified object to an equivalent <c>Char[]</c> value.</summary>
 		public static Char[] ToCharArray(object p)

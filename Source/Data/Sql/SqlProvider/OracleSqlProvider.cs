@@ -256,7 +256,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		{
 			if (value is Guid)
 			{
-				var s = ((Guid)value).ToString("N");
+				string s = ((Guid)value).ToString("N");
 
 				sb
 					.Append("Cast('")
