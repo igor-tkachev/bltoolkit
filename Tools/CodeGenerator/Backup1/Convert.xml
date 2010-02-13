@@ -1,9 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <code transformer="Convert.xslt">
 
-<<<<<<<<<<<<<<< This crap should not be used anymore.
-
-
 	<using namespace="System"/>
 	<using namespace="System.Data.SqlTypes"/>
 	<using namespace="System.Data.Linq"/>

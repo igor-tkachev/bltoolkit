@@ -69,6 +69,8 @@ namespace BLToolkit.Data.DataProvider
 
 		public override void PrepareCommand(ref CommandType commandType, ref string commandText, ref IDbDataParameter[] commandParameters)
 		{
+			base.PrepareCommand(ref commandType, ref commandText, ref commandParameters);
+
 			if (commandParameters != null) foreach (var p in commandParameters)
 			{
 				if (p.Value is Guid)
@@ -78,6 +80,12 @@ namespace BLToolkit.Data.DataProvider
 					p.Value  = value;
 					p.Size   = value.Length;
 				}
+				//else if (p.DbType == DbType.Binary)
+				//{
+				//	var ip = (IfxParameter)p;
+
+				//	ip.IfxType = IfxType.Blob;
+				//}
 			}
 		}
 	}

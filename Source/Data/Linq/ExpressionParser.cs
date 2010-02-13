@@ -1855,7 +1855,11 @@ namespace BLToolkit.Data.Linq
 				member = TypeHelper.GetPropertyByMethod((MethodInfo)member);
 
 			var column = select.GetField(member);
-			var expr   = ParseExpression(null, update, select);
+
+			if (column == null)
+				throw new LinqException("Member '{0}.{1}' is not a table column.", member.DeclaringType.Name, member.Name);
+
+			var expr = ParseExpression(null, update, select);
 
 			if (expr is SqlParameter && update.Expr.Type.IsEnum)
 				SetParameterEnumConverter((SqlParameter)expr, update.Expr.Type, _info.MappingSchema);

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Data.Linq;
 
 namespace Data.Linq.Model
 {
@@ -9,6 +10,7 @@ namespace Data.Linq.Model
 		public DateTime DateTimeValue;
 		public bool     BoolValue;
 		public Guid     GuidValue;
+		public Binary   BinaryValue;
 
 		public override bool Equals(object obj)
 		{

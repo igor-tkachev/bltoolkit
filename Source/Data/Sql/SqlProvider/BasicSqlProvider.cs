@@ -1147,6 +1147,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			else if (value is char || value is char?) sb.Append('\'').Append(value.ToString().Replace("'", "''")).Append('\'');
 			else if (value is bool || value is bool?) sb.Append((bool)value ? "1" : "0");
 			else if (value is DateTime)               sb.AppendFormat("'{0:yyyy-MM-dd HH:mm:ss.fffffff}'", value);
+			else if (value is Guid)                   sb.Append('\'').Append(value).Append('\'');
 			else
 			{
 				Type type = value.GetType();

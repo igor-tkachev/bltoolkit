@@ -492,6 +492,12 @@ namespace BLToolkit.DataAccess
 		{
 			return db.MappingSchema.ConvertToDateTimeOffset(value);
 		}
+
+		[NoInterception]
+		protected virtual System.Data.Linq.Binary ConvertToLinqBinary(DbManager db, object value, object parameter)
+		{
+			return db.MappingSchema.ConvertToLinqBinary(value);
+		}
 #endif
 
 		[NoInterception]

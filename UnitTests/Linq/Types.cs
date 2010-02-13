@@ -1,7 +1,10 @@
 ﻿using System;
+using System.Data.Linq;
 using System.Linq;
 
 using NUnit.Framework;
+
+using BLToolkit.Data.Linq;
 
 namespace Data.Linq
 {
@@ -100,6 +103,35 @@ namespace Data.Linq
 			ForEachProvider(db => AreEqual(
 				from p in    Types where p.GuidValue == new Guid("D2F970C0-35AC-4987-9CD5-5BADB1757436") select p.GuidValue,
 				from p in db.Types where p.GuidValue == new Guid("D2F970C0-35AC-4987-9CD5-5BADB1757436") select p.GuidValue));
+		}
+
+		[Test]
+		public void ContainsGuid()
+		{
+			var ids = new [] { new Guid("D2F970C0-35AC-4987-9CD5-5BADB1757436") };
+
+			ForEachProvider(db => AreEqual(
+				from p in    Types where ids.Contains(p.GuidValue) select p.GuidValue,
+				from p in db.Types where ids.Contains(p.GuidValue) select p.GuidValue));
+		}
+
+		[Test]
+		public void UpdateBinary()
+		{
+			ForEachProvider(db =>
+			{
+				db.Types
+					.Where(t => t.ID == 1)
+					.Set(t => t.BinaryValue, new Binary(new byte[] { 1, 2, 3, 4, 5}))
+					.Update();
+
+				var g = from t in db.Types where t.ID == 1 select t.BinaryValue;
+
+				foreach (var binary in g)
+				{
+					
+				}
+			});
 		}
 	}
 }

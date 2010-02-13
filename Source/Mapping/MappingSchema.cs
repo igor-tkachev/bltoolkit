@@ -16,6 +16,10 @@ using BLToolkit.Reflection;
 using BLToolkit.Reflection.Extension;
 using BLToolkit.Reflection.MetadataProvider;
 
+#if FW3
+using System.Data.Linq;
+#endif
+
 using KeyValue = System.Collections.Generic.KeyValuePair<System.Type,System.Type>;
 using Convert  = BLToolkit.Common.Convert;
 
@@ -164,7 +168,8 @@ namespace BLToolkit.Mapping
 			_defaultStringNullValue      = (String)     GetNullValue(typeof(String));
 			_defaultDateTimeNullValue    = (DateTime)   GetNullValue(typeof(DateTime));
 #if FW3
-			_defaultDateTimeOffsetNullValue = (DateTimeOffset) GetNullValue(typeof(DateTimeOffset));
+			_defaultDateTimeOffsetNullValue = (DateTimeOffset)         GetNullValue(typeof(DateTimeOffset));
+			_defaultLinqBinaryNullValue     = (System.Data.Linq.Binary)GetNullValue(typeof(System.Data.Linq.Binary));
 #endif
 			_defaultDecimalNullValue     = (Decimal)    GetNullValue(typeof(Decimal));
 			_defaultGuidNullValue        = (Guid)       GetNullValue(typeof(Guid));
@@ -416,6 +421,22 @@ namespace BLToolkit.Mapping
 				value is DateTimeOffset? (DateTimeOffset)value:
 				value == null || value is DBNull? _defaultDateTimeOffsetNullValue:
 					Convert.ToDateTimeOffset(value);
+		}
+
+		private System.Data.Linq.Binary _defaultLinqBinaryNullValue;
+		public  System.Data.Linq.Binary  DefaultLinqBinaryNullValue
+		{
+			get { return _defaultLinqBinaryNullValue;  }
+			set { _defaultLinqBinaryNullValue = value; }
+		}
+
+		public virtual System.Data.Linq.Binary ConvertToLinqBinary(object value)
+		{
+			return
+				value is System.Data.Linq.Binary ? (System.Data.Linq.Binary)value:
+				value is byte[] ? new System.Data.Linq.Binary((byte[])value) : 
+				value == null || value is DBNull? _defaultLinqBinaryNullValue:
+					Convert.ToLinqBinary(value);
 		}
 #endif
 
@@ -945,6 +966,10 @@ namespace BLToolkit.Mapping
 				}
 
 				if (typeof(Guid) == conversionType) return ConvertToNullableGuid(value);
+
+#if FW3
+				if (typeof(DateTimeOffset) == conversionType) return ConvertToNullableDateTimeOffset(value);
+#endif
 			}
 
 			switch (Type.GetTypeCode(conversionType))
@@ -966,29 +991,33 @@ namespace BLToolkit.Mapping
 				case TypeCode.UInt64:   return ConvertToUInt64  (value);
 			}
 
-			if (typeof(Guid)        == conversionType) return ConvertToGuid       (value);
-			if (typeof(Stream)      == conversionType) return ConvertToStream     (value);
-			if (typeof(XmlReader)   == conversionType) return ConvertToXmlReader  (value);
-			if (typeof(XmlDocument) == conversionType) return ConvertToXmlDocument(value);
-			if (typeof(byte[])      == conversionType) return ConvertToByteArray  (value);
-			if (typeof(char[])      == conversionType) return ConvertToCharArray  (value);
+			if (typeof(Guid)           == conversionType) return ConvertToGuid          (value);
+			if (typeof(Stream)         == conversionType) return ConvertToStream        (value);
+			if (typeof(XmlReader)      == conversionType) return ConvertToXmlReader     (value);
+			if (typeof(XmlDocument)    == conversionType) return ConvertToXmlDocument   (value);
+			if (typeof(byte[])         == conversionType) return ConvertToByteArray     (value);
+#if FW3
+			if (typeof(Binary)         == conversionType) return ConvertToLinqBinary    (value);
+			if (typeof(DateTimeOffset) == conversionType) return ConvertToDateTimeOffset(value);
+#endif
+			if (typeof(char[])         == conversionType) return ConvertToCharArray     (value);
 
-			if (typeof(SqlInt32)    == conversionType) return ConvertToSqlInt32   (value);
-			if (typeof(SqlString)   == conversionType) return ConvertToSqlString  (value);
-			if (typeof(SqlDecimal)  == conversionType) return ConvertToSqlDecimal (value);
-			if (typeof(SqlDateTime) == conversionType) return ConvertToSqlDateTime(value);
-			if (typeof(SqlBoolean)  == conversionType) return ConvertToSqlBoolean (value);
-			if (typeof(SqlMoney)    == conversionType) return ConvertToSqlMoney   (value);
-			if (typeof(SqlGuid)     == conversionType) return ConvertToSqlGuid    (value);
-			if (typeof(SqlDouble)   == conversionType) return ConvertToSqlDouble  (value);
-			if (typeof(SqlByte)     == conversionType) return ConvertToSqlByte    (value);
-			if (typeof(SqlInt16)    == conversionType) return ConvertToSqlInt16   (value);
-			if (typeof(SqlInt64)    == conversionType) return ConvertToSqlInt64   (value);
-			if (typeof(SqlSingle)   == conversionType) return ConvertToSqlSingle  (value);
-			if (typeof(SqlBinary)   == conversionType) return ConvertToSqlBinary  (value);
-			if (typeof(SqlBytes)    == conversionType) return ConvertToSqlBytes   (value);
-			if (typeof(SqlChars)    == conversionType) return ConvertToSqlChars   (value);
-			if (typeof(SqlXml)      == conversionType) return ConvertToSqlXml     (value);
+			if (typeof(SqlInt32)       == conversionType) return ConvertToSqlInt32      (value);
+			if (typeof(SqlString)      == conversionType) return ConvertToSqlString     (value);
+			if (typeof(SqlDecimal)     == conversionType) return ConvertToSqlDecimal    (value);
+			if (typeof(SqlDateTime)    == conversionType) return ConvertToSqlDateTime   (value);
+			if (typeof(SqlBoolean)     == conversionType) return ConvertToSqlBoolean    (value);
+			if (typeof(SqlMoney)       == conversionType) return ConvertToSqlMoney      (value);
+			if (typeof(SqlGuid)        == conversionType) return ConvertToSqlGuid       (value);
+			if (typeof(SqlDouble)      == conversionType) return ConvertToSqlDouble     (value);
+			if (typeof(SqlByte)        == conversionType) return ConvertToSqlByte       (value);
+			if (typeof(SqlInt16)       == conversionType) return ConvertToSqlInt16      (value);
+			if (typeof(SqlInt64)       == conversionType) return ConvertToSqlInt64      (value);
+			if (typeof(SqlSingle)      == conversionType) return ConvertToSqlSingle     (value);
+			if (typeof(SqlBinary)      == conversionType) return ConvertToSqlBinary     (value);
+			if (typeof(SqlBytes)       == conversionType) return ConvertToSqlBytes      (value);
+			if (typeof(SqlChars)       == conversionType) return ConvertToSqlChars      (value);
+			if (typeof(SqlXml)         == conversionType) return ConvertToSqlXml        (value);
 
 			return System.Convert.ChangeType(value, conversionType);
 		}

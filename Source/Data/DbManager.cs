@@ -934,8 +934,7 @@ namespace BLToolkit.Data
 
 					object value = parameterValues[nValues++];
 
-					parameter.Value = value ?? DBNull.Value;
-					//_dataProvider.SetParameterType(parameter, value);
+					_dataProvider.SetParameterValue(parameter, value ?? DBNull.Value);
 				}
 			}
 
@@ -1004,9 +1003,10 @@ namespace BLToolkit.Data
 				{
 					object value = mm.GetValue(obj);
 
-					Parameter(name).Value =
+					_dataProvider.SetParameterValue(
+						Parameter(name),
 						value == null || mm.MapMemberInfo.Nullable && _mappingSchema.IsNull(value)?
-							DBNull.Value: value;
+							DBNull.Value: value);
 				}
 			}
 
@@ -1495,9 +1495,7 @@ namespace BLToolkit.Data
 			parameter.ParameterName = parameterName;
 			parameter.Direction     = parameterDirection;
 
-			//_dataProvider.SetParameterType(parameter, value);
-
-			parameter.Value = value ?? DBNull.Value;
+			_dataProvider.SetParameterValue(parameter, value ?? DBNull.Value);
 
 			return parameter;
 		}
@@ -1526,7 +1524,8 @@ namespace BLToolkit.Data
 			parameter.ParameterName = parameterName;
 			parameter.Direction     = parameterDirection;
 			parameter.DbType        = dbType;
-			parameter.Value         = value;
+
+			_dataProvider.SetParameterValue(parameter, value);
 
 			return parameter;
 		}
@@ -1574,7 +1573,8 @@ namespace BLToolkit.Data
 			parameter.Direction     = parameterDirection;
 			parameter.DbType        = dbType;
 			parameter.Size          = size;
-			parameter.Value         = value;
+
+			_dataProvider.SetParameterValue(parameter, value);
 
 			return parameter;
 		}
@@ -1603,7 +1603,7 @@ namespace BLToolkit.Data
 			parameter.ParameterName = parameterName;
 			parameter.Direction     = parameterDirection;
 			_dataProvider.SetUserDefinedType(parameter, typeName);
-			parameter.Value         = value;
+			_dataProvider.SetParameterValue (parameter, value);
 
 			return parameter;
 		}
@@ -2513,9 +2513,10 @@ namespace BLToolkit.Data
 					{
 						object value = members[i].GetValue(obj);
 
-						parameters[n + i].Value =
+						_dataProvider.SetParameterValue(
+							parameters[n + i],
 							value == null || members[i].MapMemberInfo.Nullable && _mappingSchema.IsNull(value)?
-								DBNull.Value: value;
+								DBNull.Value: value);
 					}
 				}
 

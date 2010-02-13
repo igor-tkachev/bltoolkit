@@ -626,7 +626,7 @@ namespace Data.Linq
 		}
 
 		[Test]
-		public void WhereCount5()
+		public void GrooupByAssociation1()
 		{
 			ForEachProvider(db => AreEqual(
 				from ch in GrandChild1
@@ -638,6 +638,37 @@ namespace Data.Linq
 				group ch by ch.Parent into g
 				where g.Count() > 2
 				select g.Key.Value1));
+		}
+
+		[Test]
+		public void GrooupByAssociation2()
+		{
+			ForEachProvider(db => AreEqual(
+				from ch in GrandChild1
+				group ch by ch.Parent into g
+				where g.Count() > 2 && g.Key.ParentID != 1
+				select g.Key.Value1
+				,
+				from ch in db.GrandChild1
+				group ch by ch.Parent into g
+				where g.Count() > 2 && g.Key.ParentID != 1
+				select g.Key.Value1));
+		}
+
+		[Test]
+		public void GrooupByAssociation3()
+		{
+			using (var db = new NorthwindDB())
+			{
+				var result = 
+					from p in db.Product
+					group p by p.Category into g
+					where g.Count() == 12
+					select g.Key.CategoryName;
+
+				var list = result.ToList();
+				Assert.AreEqual(3, list.Count);
+			}
 		}
 
 		[Test]

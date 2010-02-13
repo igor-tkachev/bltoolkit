@@ -540,6 +540,7 @@ CREATE TABLE LinqDataTypes
 	MoneyValue    decimal(10,4),
 	DateTimeValue timestamp,
 	BoolValue     char(1),
-	GuidValue     char(38)
+	GuidValue     char(38),
+	BinaryValue   blob
 )
 COMMIT;

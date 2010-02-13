@@ -243,6 +243,9 @@ namespace BLToolkit.Data.Sql
 				case TypeCode.Object   :
 					if (type == typeof(Guid))           return Guid;
 					if (type == typeof(byte[]))         return ByteArray;
+#if FW3
+					if (type == typeof(System.Data.Linq.Binary)) return LinqBinary;
+#endif
 					if (type == typeof(char[]))         return CharArray;
 					if (type == typeof(DateTimeOffset)) return DateTimeOffset;
 					if (type == typeof(TimeSpan))       return TimeSpan;
@@ -401,6 +404,7 @@ namespace BLToolkit.Data.Sql
 		public static readonly SqlDataType String             = DbNVarChar;
 		public static readonly SqlDataType Guid               = DbUniqueIdentifier;
 		public static readonly SqlDataType ByteArray          = DbVarBinary;
+		public static readonly SqlDataType LinqBinary         = DbVarBinary;
 		public static readonly SqlDataType CharArray          = new SqlDataType(SqlDbType.NVarChar,         typeof(Char[]),      GetMaxLength,               0,  0);
 		public static readonly SqlDataType DateTimeOffset     = DbDateTimeOffset;
 		public static readonly SqlDataType TimeSpan           = DbTime;

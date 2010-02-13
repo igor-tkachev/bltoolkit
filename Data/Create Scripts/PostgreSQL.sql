@@ -66,6 +66,7 @@ CREATE TABLE LinqDataTypes
 	MoneyValue    decimal(10,4),
 	DateTimeValue timestamp,
 	BoolValue     boolean,
-	GuidValue     uuid
+	GuidValue     uuid,
+	BinaryValue   bytea
 )
 GO

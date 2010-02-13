@@ -1288,6 +1288,9 @@ namespace BLToolkit.Reflection
 
 			return type.IsValueType
 				|| type == typeof(string)
+#if FW3
+				|| type == typeof(System.Data.Linq.Binary)
+#endif
 				|| type == typeof(Stream)
 				|| type == typeof(XmlReader)
 				|| type == typeof(XmlDocument);

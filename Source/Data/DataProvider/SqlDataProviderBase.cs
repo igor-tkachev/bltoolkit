@@ -80,6 +80,8 @@ namespace BLToolkit.Data.DataProvider
 
 		public override void PrepareCommand(ref CommandType commandType, ref string commandText, ref IDbDataParameter[] commandParameters)
 		{
+			base.PrepareCommand(ref commandType, ref commandText, ref commandParameters);
+
 			if (commandParameters == null)
 				return;
 

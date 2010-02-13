@@ -190,5 +190,28 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			if (SqlQuery.QueryType != QueryType.Update)
 				base.BuildFromClause(sb);
 		}
+
+		protected override void BuildValue(StringBuilder sb, object value)
+		{
+			if (value is Guid)
+			{
+				var s = ((Guid)value).ToString("N");
+
+				sb
+					.Append("Cast(x'")
+					.Append(s.Substring( 6,  2))
+					.Append(s.Substring( 4,  2))
+					.Append(s.Substring( 2,  2))
+					.Append(s.Substring( 0,  2))
+					.Append(s.Substring(10,  2))
+					.Append(s.Substring( 8,  2))
+					.Append(s.Substring(14,  2))
+					.Append(s.Substring(12,  2))
+					.Append(s.Substring(16, 16))
+					.Append("' as char(16) for bit data)");
+			}
+			else
+				base.BuildValue(sb, value);
+		}
 	}
 }

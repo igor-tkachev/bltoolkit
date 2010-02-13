@@ -200,6 +200,37 @@ namespace BLToolkit.Data.DataProvider
 
 		public virtual void PrepareCommand(ref CommandType commandType, ref string commandText, ref IDbDataParameter[] commandParameters)
 		{
+#if FW3
+			/*
+			if (commandParameters != null) foreach (var p in commandParameters)
+			{
+				if (p.Value is System.Data.Linq.Binary)
+				{
+					var arr = ((System.Data.Linq.Binary)p.Value).ToArray();
+
+					p.Value  = arr;
+					p.DbType = DbType.Binary;
+					p.Size   = arr.Length;
+				}
+			}
+			*/
+#endif
+		}
+
+		public virtual void SetParameterValue(IDbDataParameter parameter, object value)
+		{
+#if FW3
+			if (value is System.Data.Linq.Binary)
+			{
+				var arr = ((System.Data.Linq.Binary)value).ToArray();
+
+				parameter.Value  = arr;
+				parameter.DbType = DbType.Binary;
+				parameter.Size   = arr.Length;
+			}
+			else
+#endif
+				parameter.Value = value;
 		}
 
 		public virtual ISqlProvider CreateSqlProvider()

@@ -9,6 +9,8 @@ using System.Linq.Expressions;
 using System.Reflection;
 using System.Xml;
 
+using LinqBinary = System.Data.Linq.Binary;
+
 namespace BLToolkit.Data.Linq
 {
 	class ReflectionHelper
@@ -204,6 +206,7 @@ namespace BLToolkit.Data.Linq
 				{ typeof(XmlReader),       MethodExpressor(m => m.ConvertToXmlReader             (null)) },
 				{ typeof(XmlDocument),     MethodExpressor(m => m.ConvertToXmlDocument           (null)) },
 				{ typeof(Byte[]),          MethodExpressor(m => m.ConvertToByteArray             (null)) },
+				{ typeof(LinqBinary),      MethodExpressor(m => m.ConvertToLinqBinary            (null)) },
 				{ typeof(Char[]),          MethodExpressor(m => m.ConvertToCharArray             (null)) },
 
 				// Nullable Types

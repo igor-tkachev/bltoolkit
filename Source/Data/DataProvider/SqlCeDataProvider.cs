@@ -151,5 +151,11 @@ namespace BLToolkit.Data.DataProvider
 		{
 			return new SqlCeSqlProvider(this);
 		}
+
+		public override void SetParameterValue(IDbDataParameter parameter, object value)
+		{
+
+			base.SetParameterValue(parameter, value);
+		}
 	}
 }

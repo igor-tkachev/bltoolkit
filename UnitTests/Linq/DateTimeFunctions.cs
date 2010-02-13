@@ -44,7 +44,7 @@ namespace Data.Linq
 		[Test]
 		public void Parse1()
 		{
-			ForEachProvider(db => AreSame(
+			ForEachProvider(db => AreEqual(
 				from d in from t in    Types select DateTime.Parse(Sql.ConvertTo<string>.From(t.DateTimeValue)) where d.Day > 0 select d.Date,
 				from d in from t in db.Types select DateTime.Parse(Sql.ConvertTo<string>.From(t.DateTimeValue)) where d.Day > 0 select d.Date));
 		}
@@ -52,7 +52,7 @@ namespace Data.Linq
 		[Test]
 		public void Parse2()
 		{
-			ForEachProvider(db => AreSame(
+			ForEachProvider(db => AreEqual(
 				from d in from t in    Types select           DateTime.Parse(t.DateTimeValue.Year + "-02-24 00:00:00")  where d.Day > 0 select d,
 				from d in from t in db.Types select Sql.AsSql(DateTime.Parse(t.DateTimeValue.Year + "-02-24 00:00:00")) where d.Day > 0 select d));
 		}
@@ -62,7 +62,7 @@ namespace Data.Linq
 		[Test]
 		public void DatePartYear()
 		{
-			ForEachProvider(db => AreSame(
+			ForEachProvider(db => AreEqual(
 				from t in    Types select           Sql.DatePart(Sql.DateParts.Year, t.DateTimeValue),
 				from t in db.Types select Sql.AsSql(Sql.DatePart(Sql.DateParts.Year, t.DateTimeValue))));
 		}
@@ -70,7 +70,7 @@ namespace Data.Linq
 		[Test]
 		public void DatePartQuarter()
 		{
-			ForEachProvider(db => AreSame(
+			ForEachProvider(db => AreEqual(
 				from t in    Types select           Sql.DatePart(Sql.DateParts.Quarter, t.DateTimeValue),
 				from t in db.Types select Sql.AsSql(Sql.DatePart(Sql.DateParts.Quarter, t.DateTimeValue))));
 		}
@@ -78,7 +78,7 @@ namespace Data.Linq
 		[Test]
 		public void DatePartMonth()
 		{
-			ForEachProvider(db => AreSame(
+			ForEachProvider(db => AreEqual(
 				from t in    Types select           Sql.DatePart(Sql.DateParts.Month, t.DateTimeValue),
 				from t in db.Types select Sql.AsSql(Sql.DatePart(Sql.DateParts.Month, t.DateTimeValue))));
 		}
@@ -86,7 +86,7 @@ namespace Data.Linq
 		[Test]
 		public void DatePartDayOfYear()
 		{
-			ForEachProvider(db => AreSame(
+			ForEachProvider(db => AreEqual(
 				from t in    Types select           Sql.DatePart(Sql.DateParts.DayOfYear, t.DateTimeValue),
 				from t in db.Types select Sql.AsSql(Sql.DatePart(Sql.DateParts.DayOfYear, t.DateTimeValue))));
 		}
@@ -94,7 +94,7 @@ namespace Data.Linq
 		[Test]
 		public void DatePartDay()
 		{
-			ForEachProvider(db => AreSame(
+			ForEachProvider(db => AreEqual(
 				from t in    Types select           Sql.DatePart(Sql.DateParts.Day, t.DateTimeValue),
 				from t in db.Types select Sql.AsSql(Sql.DatePart(Sql.DateParts.Day, t.DateTimeValue))));
 		}
@@ -109,7 +109,7 @@ namespace Data.Linq
 		[Test]
 		public void DatePartWeekDay()
 		{
-			ForEachProvider(db => AreSame(
+			ForEachProvider(db => AreEqual(
 				from t in    Types select           Sql.DatePart(Sql.DateParts.WeekDay, t.DateTimeValue),
 				from t in db.Types select Sql.AsSql(Sql.DatePart(Sql.DateParts.WeekDay, t.DateTimeValue))));
 		}
@@ -117,7 +117,7 @@ namespace Data.Linq
 		[Test]
 		public void DatePartHour()
 		{
-			ForEachProvider(db => AreSame(
+			ForEachProvider(db => AreEqual(
 				from t in    Types select           Sql.DatePart(Sql.DateParts.Hour, t.DateTimeValue),
 				from t in db.Types select Sql.AsSql(Sql.DatePart(Sql.DateParts.Hour, t.DateTimeValue))));
 		}
@@ -125,7 +125,7 @@ namespace Data.Linq
 		[Test]
 		public void DatePartMinute()
 		{
-			ForEachProvider(db => AreSame(
+			ForEachProvider(db => AreEqual(
 				from t in    Types select           Sql.DatePart(Sql.DateParts.Minute, t.DateTimeValue),
 				from t in db.Types select Sql.AsSql(Sql.DatePart(Sql.DateParts.Minute, t.DateTimeValue))));
 		}
@@ -133,7 +133,7 @@ namespace Data.Linq
 		[Test]
 		public void DatePartSecond()
 		{
-			ForEachProvider(db => AreSame(
+			ForEachProvider(db => AreEqual(
 				from t in    Types select           Sql.DatePart(Sql.DateParts.Second, t.DateTimeValue),
 				from t in db.Types select Sql.AsSql(Sql.DatePart(Sql.DateParts.Second, t.DateTimeValue))));
 		}
@@ -141,7 +141,7 @@ namespace Data.Linq
 		[Test]
 		public void DatePartMillisecond()
 		{
-			ForEachProvider(new[] { ProviderName.Informix, ProviderName.MySql, ProviderName.Access }, db => AreSame(
+			ForEachProvider(new[] { ProviderName.Informix, ProviderName.MySql, ProviderName.Access }, db => AreEqual(
 				from t in    Types select           Sql.DatePart(Sql.DateParts.Millisecond, t.DateTimeValue),
 				from t in db.Types select Sql.AsSql(Sql.DatePart(Sql.DateParts.Millisecond, t.DateTimeValue))));
 		}
@@ -149,7 +149,7 @@ namespace Data.Linq
 		[Test]
 		public void Year()
 		{
-			ForEachProvider(db => AreSame(
+			ForEachProvider(db => AreEqual(
 				from t in    Types select           t.DateTimeValue.Year,
 				from t in db.Types select Sql.AsSql(t.DateTimeValue.Year)));
 		}
@@ -157,7 +157,7 @@ namespace Data.Linq
 		[Test]
 		public void Month()
 		{
-			ForEachProvider(db => AreSame(
+			ForEachProvider(db => AreEqual(
 				from t in    Types select           t.DateTimeValue.Month,
 				from t in db.Types select Sql.AsSql(t.DateTimeValue.Month)));
 		}
@@ -165,7 +165,7 @@ namespace Data.Linq
 		[Test]
 		public void DayOfYear()
 		{
-			ForEachProvider(db => AreSame(
+			ForEachProvider(db => AreEqual(
 				from t in    Types select           t.DateTimeValue.DayOfYear,
 				from t in db.Types select Sql.AsSql(t.DateTimeValue.DayOfYear)));
 		}
@@ -173,7 +173,7 @@ namespace Data.Linq
 		[Test]
 		public void Day()
 		{
-			ForEachProvider(db => AreSame(
+			ForEachProvider(db => AreEqual(
 				from t in    Types select           t.DateTimeValue.Day,
 				from t in db.Types select Sql.AsSql(t.DateTimeValue.Day)));
 		}
@@ -181,7 +181,7 @@ namespace Data.Linq
 		[Test]
 		public void DayOfWeek()
 		{
-			ForEachProvider(db => AreSame(
+			ForEachProvider(db => AreEqual(
 				from t in    Types select           t.DateTimeValue.DayOfWeek,
 				from t in db.Types select Sql.AsSql(t.DateTimeValue.DayOfWeek)));
 		}
@@ -189,7 +189,7 @@ namespace Data.Linq
 		[Test]
 		public void Hour()
 		{
-			ForEachProvider(db => AreSame(
+			ForEachProvider(db => AreEqual(
 				from t in    Types select           t.DateTimeValue.Hour,
 				from t in db.Types select Sql.AsSql(t.DateTimeValue.Hour)));
 		}
@@ -197,7 +197,7 @@ namespace Data.Linq
 		[Test]
 		public void Minute()
 		{
-			ForEachProvider(db => AreSame(
+			ForEachProvider(db => AreEqual(
 				from t in    Types select           t.DateTimeValue.Minute,
 				from t in db.Types select Sql.AsSql(t.DateTimeValue.Minute)));
 		}
@@ -205,7 +205,7 @@ namespace Data.Linq
 		[Test]
 		public void Second()
 		{
-			ForEachProvider(db => AreSame(
+			ForEachProvider(db => AreEqual(
 				from t in    Types select           t.DateTimeValue.Second,
 				from t in db.Types select Sql.AsSql(t.DateTimeValue.Second)));
 		}
@@ -213,7 +213,7 @@ namespace Data.Linq
 		[Test]
 		public void Millisecond()
 		{
-			ForEachProvider(new[] { ProviderName.Informix, ProviderName.MySql, ProviderName.Access }, db => AreSame(
+			ForEachProvider(new[] { ProviderName.Informix, ProviderName.MySql, ProviderName.Access }, db => AreEqual(
 				from t in    Types select           t.DateTimeValue.Millisecond,
 				from t in db.Types select Sql.AsSql(t.DateTimeValue.Millisecond)));
 		}
@@ -246,7 +246,7 @@ namespace Data.Linq
 		[Test]
 		public void DateAddYear()
 		{
-			ForEachProvider(db => AreSame(
+			ForEachProvider(db => AreEqual(
 				from t in    Types select           Sql.DateAdd(Sql.DateParts.Year, 1, t.DateTimeValue). Value.Date,
 				from t in db.Types select Sql.AsSql(Sql.DateAdd(Sql.DateParts.Year, 1, t.DateTimeValue)).Value.Date));
 		}
@@ -254,7 +254,7 @@ namespace Data.Linq
 		[Test]
 		public void DateAddQuarter()
 		{
-			ForEachProvider(db => AreSame(
+			ForEachProvider(db => AreEqual(
 				from t in    Types select           Sql.DateAdd(Sql.DateParts.Quarter, -1, t.DateTimeValue). Value.Date,
 				from t in db.Types select Sql.AsSql(Sql.DateAdd(Sql.DateParts.Quarter, -1, t.DateTimeValue)).Value.Date));
 		}
@@ -262,7 +262,7 @@ namespace Data.Linq
 		[Test]
 		public void DateAddMonth()
 		{
-			ForEachProvider(db => AreSame(
+			ForEachProvider(db => AreEqual(
 				from t in    Types select           Sql.DateAdd(Sql.DateParts.Month, 2, t.DateTimeValue). Value.Date,
 				from t in db.Types select Sql.AsSql(Sql.DateAdd(Sql.DateParts.Month, 2, t.DateTimeValue)).Value.Date));
 		}
@@ -270,7 +270,7 @@ namespace Data.Linq
 		[Test]
 		public void DateAddDayOfYear()
 		{
-			ForEachProvider(db => AreSame(
+			ForEachProvider(db => AreEqual(
 				from t in    Types select           Sql.DateAdd(Sql.DateParts.DayOfYear, 3, t.DateTimeValue). Value.Date,
 				from t in db.Types select Sql.AsSql(Sql.DateAdd(Sql.DateParts.DayOfYear, 3, t.DateTimeValue)).Value.Date));
 		}
@@ -278,7 +278,7 @@ namespace Data.Linq
 		[Test]
 		public void DateAddDay()
 		{
-			ForEachProvider(db => AreSame(
+			ForEachProvider(db => AreEqual(
 				from t in    Types select           Sql.DateAdd(Sql.DateParts.Day, 5, t.DateTimeValue). Value.Date,
 				from t in db.Types select Sql.AsSql(Sql.DateAdd(Sql.DateParts.Day, 5, t.DateTimeValue)).Value.Date));
 		}
@@ -286,7 +286,7 @@ namespace Data.Linq
 		[Test]
 		public void DateAddWeek()
 		{
-			ForEachProvider(db => AreSame(
+			ForEachProvider(db => AreEqual(
 				from t in    Types select           Sql.DateAdd(Sql.DateParts.Week, -1, t.DateTimeValue). Value.Date,
 				from t in db.Types select Sql.AsSql(Sql.DateAdd(Sql.DateParts.Week, -1, t.DateTimeValue)).Value.Date));
 		}
@@ -294,7 +294,7 @@ namespace Data.Linq
 		[Test]
 		public void DateAddWeekDay()
 		{
-			ForEachProvider(db => AreSame(
+			ForEachProvider(db => AreEqual(
 				from t in    Types select           Sql.DateAdd(Sql.DateParts.WeekDay, 1, t.DateTimeValue). Value.Date,
 				from t in db.Types select Sql.AsSql(Sql.DateAdd(Sql.DateParts.WeekDay, 1, t.DateTimeValue)).Value.Date));
 		}
@@ -302,7 +302,7 @@ namespace Data.Linq
 		[Test]
 		public void DateAddHour()
 		{
-			ForEachProvider(db => AreSame(
+			ForEachProvider(db => AreEqual(
 				from t in    Types select              Sql.DateAdd(Sql.DateParts.Hour, 1, t.DateTimeValue). Value.Hour,
 				from t in db.Types select Sql.AsSql(Sql.DateAdd(Sql.DateParts.Hour, 1, t.DateTimeValue)).Value.Hour));
 		}
@@ -310,7 +310,7 @@ namespace Data.Linq
 		[Test]
 		public void DateAddMinute()
 		{
-			ForEachProvider(db => AreSame(
+			ForEachProvider(db => AreEqual(
 				from t in    Types select           Sql.DateAdd(Sql.DateParts.Minute, 5, t.DateTimeValue). Value.Minute,
 				from t in db.Types select Sql.AsSql(Sql.DateAdd(Sql.DateParts.Minute, 5, t.DateTimeValue)).Value.Minute));
 		}
@@ -318,7 +318,7 @@ namespace Data.Linq
 		[Test]
 		public void DateAddSecond()
 		{
-			ForEachProvider(db => AreSame(
+			ForEachProvider(db => AreEqual(
 				from t in    Types select           Sql.DateAdd(Sql.DateParts.Second, 41, t.DateTimeValue). Value.Second,
 				from t in db.Types select Sql.AsSql(Sql.DateAdd(Sql.DateParts.Second, 41, t.DateTimeValue)).Value.Second));
 		}
@@ -333,7 +333,7 @@ namespace Data.Linq
 		[Test]
 		public void AddYears()
 		{
-			ForEachProvider(db => AreSame(
+			ForEachProvider(db => AreEqual(
 				from t in    Types select           t.DateTimeValue.AddYears(1). Date,
 				from t in db.Types select Sql.AsSql(t.DateTimeValue.AddYears(1)).Date));
 		}
@@ -341,7 +341,7 @@ namespace Data.Linq
 		[Test]
 		public void AddMonths()
 		{
-			ForEachProvider(db => AreSame(
+			ForEachProvider(db => AreEqual(
 				from t in    Types select           t.DateTimeValue.AddMonths(-2). Date,
 				from t in db.Types select Sql.AsSql(t.DateTimeValue.AddMonths(-2)).Date));
 		}
@@ -349,7 +349,7 @@ namespace Data.Linq
 		[Test]
 		public void AddDays()
 		{
-			ForEachProvider(db => AreSame(
+			ForEachProvider(db => AreEqual(
 				from t in    Types select           t.DateTimeValue.AddDays(5). Date,
 				from t in db.Types select Sql.AsSql(t.DateTimeValue.AddDays(5)).Date));
 		}
@@ -357,7 +357,7 @@ namespace Data.Linq
 		[Test]
 		public void AddHours()
 		{
-			ForEachProvider(db => AreSame(
+			ForEachProvider(db => AreEqual(
 				from t in    Types select           t.DateTimeValue.AddHours(22). Hour,
 				from t in db.Types select Sql.AsSql(t.DateTimeValue.AddHours(22)).Hour));
 		}
@@ -365,7 +365,7 @@ namespace Data.Linq
 		[Test]
 		public void AddMinutes()
 		{
-			ForEachProvider(db => AreSame(
+			ForEachProvider(db => AreEqual(
 				from t in    Types select           t.DateTimeValue.AddMinutes(-8). Minute,
 				from t in db.Types select Sql.AsSql(t.DateTimeValue.AddMinutes(-8)).Minute));
 		}
@@ -373,7 +373,7 @@ namespace Data.Linq
 		[Test]
 		public void AddSeconds()
 		{
-			ForEachProvider(db => AreSame(
+			ForEachProvider(db => AreEqual(
 				from t in    Types select           t.DateTimeValue.AddSeconds(-35). Second,
 				from t in db.Types select Sql.AsSql(t.DateTimeValue.AddSeconds(-35)).Second));
 		}
@@ -390,7 +390,7 @@ namespace Data.Linq
 		[Test]
 		public void MakeDateTime()
 		{
-			ForEachProvider(db => AreSame(
+			ForEachProvider(db => AreEqual(
 				from t in from p in    Types select Sql.MakeDateTime(2010, p.ID, 1) where t.Value.Year == 2010 select t,
 				from t in from p in db.Types select Sql.MakeDateTime(2010, p.ID, 1) where t.Value.Year == 2010 select t));
 		}
@@ -398,7 +398,7 @@ namespace Data.Linq
 		[Test]
 		public void NewDateTime1()
 		{
-			ForEachProvider(db => AreSame(
+			ForEachProvider(db => AreEqual(
 				from t in from p in    Types select new DateTime(p.DateTimeValue.Year, 10, 1) where t.Month == 10 select t,
 				from t in from p in db.Types select new DateTime(p.DateTimeValue.Year, 10, 1) where t.Month == 10 select t));
 		}
@@ -406,7 +406,7 @@ namespace Data.Linq
 		[Test]
 		public void NewDateTime2()
 		{
-			ForEachProvider(db => AreSame(
+			ForEachProvider(db => AreEqual(
 				from p in    Types select new DateTime(p.DateTimeValue.Year, 10, 1),
 				from p in db.Types select new DateTime(p.DateTimeValue.Year, 10, 1)));
 		}
@@ -414,7 +414,7 @@ namespace Data.Linq
 		[Test]
 		public void MakeDateTime2()
 		{
-			ForEachProvider(db => AreSame(
+			ForEachProvider(db => AreEqual(
 				from t in from p in    Types select Sql.MakeDateTime(2010, p.ID, 1, 20, 35, 44) where t.Value.Year == 2010 select t,
 				from t in from p in db.Types select Sql.MakeDateTime(2010, p.ID, 1, 20, 35, 44) where t.Value.Year == 2010 select t));
 		}
@@ -422,7 +422,7 @@ namespace Data.Linq
 		[Test]
 		public void NewDateTime3()
 		{
-			ForEachProvider(db => AreSame(
+			ForEachProvider(db => AreEqual(
 				from t in from p in    Types select new DateTime(p.DateTimeValue.Year, 10, 1, 20, 35, 44) where t.Month == 10 select t,
 				from t in from p in db.Types select new DateTime(p.DateTimeValue.Year, 10, 1, 20, 35, 44) where t.Month == 10 select t));
 		}
@@ -430,7 +430,7 @@ namespace Data.Linq
 		[Test]
 		public void NewDateTime4()
 		{
-			ForEachProvider(db => AreSame(
+			ForEachProvider(db => AreEqual(
 				from p in    Types select new DateTime(p.DateTimeValue.Year, 10, 1, 20, 35, 44),
 				from p in db.Types select new DateTime(p.DateTimeValue.Year, 10, 1, 20, 35, 44)));
 		}

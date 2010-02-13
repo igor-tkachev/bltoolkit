@@ -43,6 +43,7 @@ CREATE TABLE LinqDataTypes
 	MoneyValue    decimal(10,4),
 	DateTimeValue datetime year to fraction(3),
 	BoolValue     boolean,
-	GuidValue     char(36)
+	GuidValue     char(36),
+	BinaryValue   byte
 )
 GO

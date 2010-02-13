@@ -121,5 +121,6 @@ CREATE TABLE LinqDataTypes
 	MoneyValue    decimal(10,4),
 	DateTimeValue datetime,
 	BoolValue     boolean,
-	GuidValue     uniqueidentifier
+	GuidValue     uniqueidentifier,
+	BinaryValue   binary(5000)
 );
