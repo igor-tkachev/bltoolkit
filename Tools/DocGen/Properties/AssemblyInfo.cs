@@ -8,7 +8,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyTitle("WebGen")]
 [assembly: AssemblyDescription("Business Logic Toolkit Web content Generator")]
 [assembly: AssemblyProduct("Business Logic Toolkit")]
-[assembly: AssemblyCopyright("\xA9 2002-2009 www.bltoolkit.net")]
+[assembly: AssemblyCopyright("\xA9 2002-2010 www.bltoolkit.net")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

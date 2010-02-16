@@ -9,7 +9,7 @@ using System.Runtime.CompilerServices;
 [assembly: AssemblyTitle("ExampleGenerator")]
 [assembly: AssemblyDescription("Business Logic Toolkit Example Generator")]
 [assembly: AssemblyProduct("Business Logic Toolkit")]
-[assembly: AssemblyCopyright("\xA9 2002-2009 www.bltoolkit.net")]
+[assembly: AssemblyCopyright("\xA9 2002-2010 www.bltoolkit.net")]
 [assembly: AssemblyCulture("")]
 
 //

@@ -8,7 +8,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyTitle("UnitTests.CS.2")]
 [assembly: AssemblyDescription("Business Logic Toolkit Unit tests")]
 [assembly: AssemblyProduct("Business Logic Toolkit")]
-[assembly: AssemblyCopyright("\xA9 2002-2009 www.bltoolkit.net")]
+[assembly: AssemblyCopyright("\xA9 2002-2010 www.bltoolkit.net")]
 [assembly: AssemblyCulture("")]
 
 // Setting ComVisible to false makes the types in this assembly not visible 

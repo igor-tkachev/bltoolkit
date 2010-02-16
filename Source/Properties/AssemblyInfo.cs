@@ -9,7 +9,7 @@ using System.Security;
 [assembly: AssemblyTitle      ("Business Logic Toolkit")]
 [assembly: AssemblyDescription("Business Logic Toolkit for .NET")]
 [assembly: AssemblyProduct    ("Business Logic Toolkit")]
-[assembly: AssemblyCopyright  ("\xA9 2002-2009 www.bltoolkit.net")]
+[assembly: AssemblyCopyright  ("\xA9 2002-2010 www.bltoolkit.net")]
 [assembly: AssemblyCulture    ("")]
 
 // Setting ComVisible to false makes the types in this assembly not visible 

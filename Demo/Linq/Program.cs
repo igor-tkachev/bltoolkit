@@ -45,6 +45,7 @@ namespace Linq.Demo
 			UpdateTest1();
 			UpdateTest2();
 			UpdateTest3();
+			SelfUpdateTest();
 			DeleteTest1();
 			DeleteTest2();
 			SqlLengthTest();
@@ -546,6 +547,20 @@ namespace Linq.Demo
 					db.Employee
 						.Where(e => e.Title == "Spectre")
 						.Set(e => e.Title, "Commander")
+						.Update();
+
+				Console.WriteLine(value);
+			}
+		}
+
+		static void SelfUpdateTest()
+		{
+			using (var db = new NorthwindDB())
+			{
+				var value =
+					db.Employee
+						.Where(e => e.Title == "Spectre")
+						.Set(e => e.HireDate, e => e.HireDate.Value.AddDays(10))
 						.Update();
 
 				Console.WriteLine(value);
