@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
-
+using BLToolkit.Data.DataProvider;
 using NUnit.Framework;
 
 namespace Data.Linq
@@ -190,11 +190,37 @@ namespace Data.Linq
 		{
 			ForEachProvider(db => AreEqual(
 				from p in Parent
-				from ch in (from c in    Child where p.ParentID == c.ChildID select c).DefaultIfEmpty()
+				from ch in (from c in    Child where p.ParentID == c.ParentID select c).DefaultIfEmpty()
 				select ch,
 				from p in db.Parent
-				from ch in (from c in db.Child where p.ParentID == c.ChildID select c).DefaultIfEmpty()
+				from ch in (from c in db.Child where p.ParentID == c.ParentID select c).DefaultIfEmpty()
 				select ch));
+		}
+
+		[Test]
+		public void SelectManyLeftJoin3()
+		{
+			ForEachProvider(new[] { ProviderName.Access }, db => AreEqual(
+				from p in Parent
+				from ch in Child.DefaultIfEmpty()
+				where p.ParentID == ch.ParentID
+				select ch,
+				from p in db.Parent
+				from ch in db.Child.DefaultIfEmpty()
+				where p.ParentID == ch.ParentID
+				select ch));
+		}
+
+		[Test]
+		public void SelectManyLeftJoin4()
+		{
+			ForEachProvider(db => AreEqual(
+				from p in Parent
+				from ch in (from c in    Child where p.ParentID == c.ParentID select c).DefaultIfEmpty()
+				select new { p.ParentID, ch },
+				from p in db.Parent
+				from ch in (from c in db.Child where p.ParentID == c.ParentID select c).DefaultIfEmpty()
+				select new { p.ParentID, ch }));
 		}
 
 		[Test]

@@ -233,7 +233,7 @@ namespace BLToolkit.Data.Linq
 
 			List<QueryField> _keyFields;
 
-			public override List<QueryField> GetKeyFields()
+			public override List<QueryField> GetKeyFields(bool allIfEmpty)
 			{
 				if (_keyFields == null)
 				{
@@ -243,12 +243,9 @@ namespace BLToolkit.Data.Linq
 						orderby c.Field.PrimaryKeyOrder
 						select (QueryField)c
 					).ToList();
-
-					if (_keyFields.Count == 0)
-						_keyFields = Fields;
 				}
 
-				return _keyFields;
+				return _keyFields.Count > 0 ? _keyFields : allIfEmpty ? Fields : _keyFields;
 			}
 
 			Table GetAssociation(MemberInfo mi)
@@ -457,7 +454,7 @@ namespace BLToolkit.Data.Linq
 				return fld;
 			}
 
-			public override List<QueryField> GetKeyFields()
+			public override List<QueryField> GetKeyFields(bool allIfEmpty)
 			{
 				return Fields;
 			}
@@ -562,6 +559,7 @@ namespace BLToolkit.Data.Linq
 			}
 
 			public   SqlQuery                          SubSql;
+			public   QueryField                        CheckNullField;
 			public   List<QuerySource>                 Unions   = new List<QuerySource>();
 			readonly Dictionary<QueryField,QueryField> _columns = new Dictionary<QueryField,QueryField>();
 
@@ -590,9 +588,9 @@ namespace BLToolkit.Data.Linq
 				return EnsureField(BaseQuery.GetField(mi));
 			}
 
-			public override List<QueryField> GetKeyFields()
+			public override List<QueryField> GetKeyFields(bool allIfEmpty)
 			{
-				return BaseQuery.GetKeyFields().Select(f => _columns[f]).ToList();
+				return BaseQuery.GetKeyFields(allIfEmpty).Select(f => _columns[f]).ToList();
 			}
 
 			public override QueryField GetField(LambdaInfo lambda, Expression expr, int currentMember)
@@ -674,7 +672,7 @@ namespace BLToolkit.Data.Linq
 			public ExprColumn Counter;
 
 			private QueryField _checkNullField;
-			public  QueryField  CheckNullField
+			public new QueryField  CheckNullField
 			{
 				get
 				{
@@ -684,7 +682,7 @@ namespace BLToolkit.Data.Linq
 							if (!f.CanBeNull())
 								return _checkNullField = f;
 
-						var valueCol = new ExprColumn(BaseQuery, new SqlValue(1), null);
+						var valueCol = new ExprColumn(BaseQuery, new SqlValue((int?)1), null);
 						var subCol   = EnsureField(valueCol);
 
 						_checkNullField = subCol;
@@ -743,7 +741,7 @@ namespace BLToolkit.Data.Linq
 				return null;
 			}
 
-			public override List<QueryField> GetKeyFields()
+			public override List<QueryField> GetKeyFields(bool allIfEmpty)
 			{
 				throw new NotImplementedException();
 			}
@@ -887,7 +885,7 @@ namespace BLToolkit.Data.Linq
 				return field == null ? null : QuerySource.EnsureField(field);
 			}
 
-			public override List<QueryField> GetKeyFields()
+			public override List<QueryField> GetKeyFields(bool allIfEmpty)
 			{
 				throw new NotImplementedException();
 			}
@@ -1078,7 +1076,7 @@ namespace BLToolkit.Data.Linq
 
 		public abstract QueryField       GetField    (LambdaInfo lambda, Expression expr, int currentMember);
 		public abstract QueryField       GetField    (MemberInfo mi);
-		public abstract List<QueryField> GetKeyFields();
+		public abstract List<QueryField> GetKeyFields(bool allIfEmpty);
 
 		protected virtual QueryField GetField(List<MemberInfo> members, int currentMember)
 		{

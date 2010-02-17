@@ -476,7 +476,10 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			else
 				sb.Append(" ON ");
 
-			BuildSearchCondition(sb, Precedence.Unknown, join.Condition);
+			if (join.Condition.Conditions.Count != 0)
+				BuildSearchCondition(sb, Precedence.Unknown, join.Condition);
+			else
+				sb.Append("1=1");
 
 			if (joinCounter > 0)
 			{
@@ -549,7 +552,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		#endregion
 
-		#region Where Having
+		#region Having Clause
 
 		protected virtual void BuildHavingClause(StringBuilder sb)
 		{

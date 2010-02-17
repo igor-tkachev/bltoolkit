@@ -245,6 +245,14 @@ namespace Data.Linq
 		}
 
 		[Test]
+		public void LeftJoin7()
+		{
+			ForEachProvider(db => AreEqual(
+				from c in    Child select c.Parent,
+				from c in db.Child select c.Parent));
+		}
+
+		[Test]
 		public void SubQueryJoin()
 		{
 			var expected =
