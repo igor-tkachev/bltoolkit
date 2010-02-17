@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data;
 using System.Linq;
 using System.Linq.Expressions;
 
@@ -173,7 +172,7 @@ namespace Data.Linq
 		}
 
 		[Test]
-		public void SelectManyLeftJoin()
+		public void SelectManyLeftJoin1()
 		{
 			var expected =
 				from p in Parent
@@ -184,6 +183,18 @@ namespace Data.Linq
 				(from p in db.Parent
 				from c in p.Children.Select(o => new { o.ChildID, p.ParentID }).DefaultIfEmpty()
 				select new { p.Value1, o = c }).AsEnumerable().Count()));
+		}
+
+		[Test]
+		public void SelectManyLeftJoin2()
+		{
+			ForEachProvider(db => AreEqual(
+				from p in Parent
+				from ch in (from c in    Child where p.ParentID == c.ChildID select c).DefaultIfEmpty()
+				select ch,
+				from p in db.Parent
+				from ch in (from c in db.Child where p.ParentID == c.ChildID select c).DefaultIfEmpty()
+				select ch));
 		}
 
 		[Test]

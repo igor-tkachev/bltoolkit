@@ -102,7 +102,7 @@ namespace Data.Linq
 				var result =
 					from ch in db.Child
 						join p  in db.Parent on ch.ParentID equals p.ParentID
-						join gc in q2     on p.ParentID  equals gc.ParentID into g
+						join gc in q2        on p.ParentID  equals gc.ParentID into g
 						from gc in g.DefaultIfEmpty()
 				where gc == null || gc.GrandChildID != 111 && gc.GrandChildID != 222
 				select new

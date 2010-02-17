@@ -732,7 +732,15 @@ namespace BLToolkit.Data.Linq
 
 			public override QueryField GetField(MemberInfo mi)
 			{
-				throw new NotImplementedException();
+				if (Lambda.Body.NodeType == ExpressionType.MemberAccess)
+				{
+					var ex = (MemberExpression)Lambda.Body.Expr;
+
+					if (ex.Member == mi)
+						return Fields[0];
+				}
+
+				return null;
 			}
 
 			public override List<QueryField> GetKeyFields()

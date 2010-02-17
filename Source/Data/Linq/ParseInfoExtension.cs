@@ -168,12 +168,12 @@ namespace BLToolkit.Data.Linq
 		}
 
 		//[DebuggerStepThrough]
-		public static bool IsEnumerableMethod(
+		public static bool IsQueryableMethod(
 			this ParseInfo<MethodCallExpression> pi,
 			string                               methodName,
 			Func<ParseInfo,bool>                 action)
 		{
-			return IsMethod(pi, typeof(Enumerable), methodName, new [] { action }, p => true);
+			return IsMethod(pi, null, methodName, new [] { action }, p => true);
 		}
 
 		//[DebuggerStepThrough]
