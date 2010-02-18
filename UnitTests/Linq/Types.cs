@@ -129,9 +129,18 @@ namespace Data.Linq
 
 				foreach (var binary in g)
 				{
-					
 				}
 			});
+		}
+
+		[Test]
+		public void DateTime1()
+		{
+			var dt = Types2[3].DateTimeValue;
+
+			ForEachProvider(db => AreEqual(
+				from t in    Types2 where t.DateTimeValue.Value.Date > dt.Value.Date select t,
+				from t in db.Types2 where t.DateTimeValue.Value.Date > dt.Value.Date select t));
 		}
 	}
 }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using BLToolkit.Reflection;
 
 namespace BLToolkit.Data.Sql.SqlProvider
 {
@@ -253,7 +254,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 					case "Convert"   : 
 						{
-							switch (Type.GetTypeCode(func.SystemType))
+							switch (Type.GetTypeCode(TypeHelper.GetUnderlyingType(func.SystemType)))
 							{
 								case TypeCode.String   : return new SqlFunction(func.SystemType, "CStr",  func.Parameters[1]);
 								case TypeCode.DateTime :

@@ -2216,12 +2216,14 @@ namespace BLToolkit.Data.Sql.SqlProvider
 								{
 									SqlFunction from = func.Parameters[1] as SqlFunction;
 
-									if (from != null && from.Name == "Convert" && from.Parameters[1].SystemType == func.SystemType)
+									Type typef = TypeHelper.GetUnderlyingType(func.SystemType);
+
+									if (from != null && from.Name == "Convert" && TypeHelper.GetUnderlyingType(from.Parameters[1].SystemType) == typef)
 										return from.Parameters[1];
 
 									SqlExpression fe = func.Parameters[1] as SqlExpression;
 
-									if (fe != null && fe.Expr == "Cast({0} as {1})" && fe.Parameters[0].SystemType == func.SystemType)
+									if (fe != null && fe.Expr == "Cast({0} as {1})" && TypeHelper.GetUnderlyingType(fe.Parameters[0].SystemType) == typef)
 										return fe.Parameters[0];
 								}
 

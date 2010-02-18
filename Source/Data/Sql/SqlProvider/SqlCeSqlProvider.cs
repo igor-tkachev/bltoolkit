@@ -57,7 +57,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 				switch (func.Name)
 				{
 					case "Convert" :
-						switch (Type.GetTypeCode(func.SystemType))
+						switch (Type.GetTypeCode(TypeHelper.GetUnderlyingType(func.SystemType)))
 						{
 							case TypeCode.UInt64 :
 								if (TypeHelper.IsFloatType(func.Parameters[1].SystemType))
@@ -71,7 +71,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 								break;
 
 							case TypeCode.DateTime :
-								Type type1 = func.Parameters[1].SystemType;
+								Type type1 = TypeHelper.GetUnderlyingType(func.Parameters[1].SystemType);
 
 								if (IsTimeDataType(func.Parameters[0]))
 								{

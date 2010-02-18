@@ -108,7 +108,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 				switch (func.Name)
 				{
 					case "Convert"    :
-						if (func.SystemType == typeof(bool))
+						if (TypeHelper.GetUnderlyingType(func.SystemType) == typeof(bool))
 						{
 							ISqlExpression ex = AlternativeConvertToBoolean(func, 1);
 							if (ex != null)
@@ -151,16 +151,16 @@ namespace BLToolkit.Data.Sql.SqlProvider
 					case "Millisecond"   : return Div(new SqlFunction(func.SystemType, "Microsecond", func.Parameters), 1000);
 					case "SmallDateTime" :
 					case "DateTime"      :
-					case "DateTime2"     : return new SqlFunction  (func.SystemType, "TimeStamp", func.Parameters);
-					case "TinyInt"       : return new SqlFunction  (func.SystemType, "SmallInt",  func.Parameters);
-					case "Money"         : return new SqlFunction  (func.SystemType, "Decimal",   func.Parameters[0], new SqlValue(19), new SqlValue(4));
-					case "SmallMoney"    : return new SqlFunction  (func.SystemType, "Decimal",   func.Parameters[0], new SqlValue(10), new SqlValue(4));
+					case "DateTime2"     : return new SqlFunction(func.SystemType, "TimeStamp", func.Parameters);
+					case "TinyInt"       : return new SqlFunction(func.SystemType, "SmallInt",  func.Parameters);
+					case "Money"         : return new SqlFunction(func.SystemType, "Decimal",   func.Parameters[0], new SqlValue(19), new SqlValue(4));
+					case "SmallMoney"    : return new SqlFunction(func.SystemType, "Decimal",   func.Parameters[0], new SqlValue(10), new SqlValue(4));
 					case "VarChar"       :
-						if (func.Parameters[0].SystemType == typeof(decimal))
+						if (TypeHelper.GetUnderlyingType(func.Parameters[0].SystemType) == typeof(decimal))
 							return new SqlFunction(func.SystemType, "Char", func.Parameters[0]);
 						break;
 					case "NChar"         :
-					case "NVarChar"      : return new SqlFunction  (func.SystemType, "Char",      func.Parameters);
+					case "NVarChar"      : return new SqlFunction(func.SystemType, "Char",      func.Parameters);
 				}
 			}
 

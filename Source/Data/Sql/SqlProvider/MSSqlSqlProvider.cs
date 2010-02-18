@@ -83,7 +83,8 @@ namespace BLToolkit.Data.Sql.SqlProvider
 						{
 							case "Convert" :
 								{
-									if (func.SystemType == typeof(ulong) && TypeHelper.IsFloatType(func.Parameters[1].SystemType))
+									if (TypeHelper.GetUnderlyingType(func.SystemType) == typeof(ulong) &&
+										TypeHelper.IsFloatType(func.Parameters[1].SystemType))
 										return new SqlFunction(
 											func.SystemType,
 											func.Name,

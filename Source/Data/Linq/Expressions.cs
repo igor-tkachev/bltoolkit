@@ -150,6 +150,7 @@ namespace BLToolkit.Data.Linq
 
 				{ M(() => Sql.GetDate()                  ), L<D>      (()       => Sql.CurrentTimestamp2 ) },
 				{ M(() => DateTime.Now                   ), L<D>      (()       => Sql.CurrentTimestamp2 ) },
+
 				{ M(() => DateTime.Now.Year              ), L<D,I>    (obj      => Sql.DatePart(Sql.DateParts.Year,        obj).Value     ) },
 				{ M(() => DateTime.Now.Month             ), L<D,I>    (obj      => Sql.DatePart(Sql.DateParts.Month,       obj).Value     ) },
 				{ M(() => DateTime.Now.DayOfYear         ), L<D,I>    (obj      => Sql.DatePart(Sql.DateParts.DayOfYear,   obj).Value     ) },

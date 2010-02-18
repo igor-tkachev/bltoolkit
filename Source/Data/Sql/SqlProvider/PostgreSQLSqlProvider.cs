@@ -2,6 +2,7 @@
 using System.Data;
 using System.Text;
 using BLToolkit.Mapping;
+using BLToolkit.Reflection;
 
 namespace BLToolkit.Data.Sql.SqlProvider
 {
@@ -52,7 +53,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 				switch (func.Name)
 				{
 					case "Convert"   :
-						if (func.SystemType == typeof(bool))
+						if (TypeHelper.GetUnderlyingType(func.SystemType) == typeof(bool))
 						{
 							ISqlExpression ex = AlternativeConvertToBoolean(func, 1);
 							if (ex != null)

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Data;
+using BLToolkit.Reflection;
 
 namespace BLToolkit.Data.Sql.SqlProvider
 {
@@ -19,13 +20,13 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			{
 				SqlFunction func = (SqlFunction)expr;
 
-				switch (Type.GetTypeCode(func.SystemType))
+				switch (Type.GetTypeCode(TypeHelper.GetUnderlyingType(func.SystemType)))
 				{
 					case TypeCode.DateTime :
 
 						if (func.Name == "Convert")
 						{
-							Type type1 = func.Parameters[1].SystemType;
+							Type type1 = TypeHelper.GetUnderlyingType(func.Parameters[1].SystemType);
 
 							if (IsTimeDataType(func.Parameters[0]))
 							{

@@ -919,7 +919,7 @@ namespace BLToolkit.Reflection
 		{
 			if (type == null) throw new ArgumentNullException("type");
 
-			if (IsNullable(type))
+			if (IsNullableType(type))
 				type = type.GetGenericArguments()[0];
 
 			if (type.IsEnum)

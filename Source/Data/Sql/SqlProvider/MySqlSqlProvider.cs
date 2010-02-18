@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Text;
+using BLToolkit.Reflection;
 
 namespace BLToolkit.Data.Sql.SqlProvider
 {
@@ -82,14 +83,16 @@ namespace BLToolkit.Data.Sql.SqlProvider
 				switch (func.Name)
 				{
 					case "Convert" :
-						if (func.SystemType == typeof(bool))
+						Type ftype = TypeHelper.GetUnderlyingType(func.SystemType);
+
+						if (ftype == typeof(bool))
 						{
 							ISqlExpression ex = AlternativeConvertToBoolean(func, 1);
 							if (ex != null)
 								return ex;
 						}
 
-						if ((func.SystemType == typeof(double) || func.SystemType == typeof(float)) && func.Parameters[1].SystemType == typeof(decimal))
+						if ((ftype == typeof(double) || ftype == typeof(float)) && TypeHelper.GetUnderlyingType(func.Parameters[1].SystemType) == typeof(decimal))
 							return func.Parameters[1];
 
 						return new SqlExpression(func.SystemType, "Cast({0} as {1})", Precedence.Primary, FloorBeforeConvert(func), func.Parameters[0]);

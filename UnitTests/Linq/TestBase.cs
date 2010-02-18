@@ -151,6 +151,18 @@ namespace Data.Linq
 			}
 		}
 
+		private   List<LinqDataTypes2> _types2;
+		protected List<LinqDataTypes2>  Types2
+		{
+			get
+			{
+				if (_types2 == null)
+					using (var db = new TestDbManager("Sql2008"))
+						_types2 = db.Types2.ToList();
+				return _types2;
+			}
+		}
+
 		private   List<Person> _person;
 		protected List<Person>  Person
 		{

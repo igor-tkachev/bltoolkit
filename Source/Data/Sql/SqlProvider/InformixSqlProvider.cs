@@ -87,7 +87,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 							ISqlExpression par0 = func.Parameters[0];
 							ISqlExpression par1 = func.Parameters[1];
 
-							switch (Type.GetTypeCode(func.SystemType))
+							switch (Type.GetTypeCode(TypeHelper.GetUnderlyingType(func.SystemType)))
 							{
 								case TypeCode.String   : return new SqlFunction(func.SystemType, "To_Char", func.Parameters[1]);
 								case TypeCode.Boolean  :
@@ -123,7 +123,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 									return new SqlFunction(func.SystemType, "To_Date", func.Parameters[1]);
 
 								default:
-									if (func.SystemType == typeof(DateTimeOffset))
+									if (TypeHelper.GetUnderlyingType(func.SystemType) == typeof(DateTimeOffset))
 										goto case TypeCode.DateTime;
 									break;
 							}

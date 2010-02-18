@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Text;
+using BLToolkit.Reflection;
 
 namespace BLToolkit.Data.Sql.SqlProvider
 {
@@ -50,17 +51,19 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 				switch (func.Name)
 				{
-					case "Space"   : return new SqlFunction  (func.SystemType, "PadR", new SqlValue(" "), func.Parameters[0]);
+					case "Space"   : return new SqlFunction(func.SystemType, "PadR", new SqlValue(" "), func.Parameters[0]);
 					case "Convert" :
 						{
-							if (func.SystemType == typeof(bool))
+							Type ftype = TypeHelper.GetUnderlyingType(func.SystemType);
+
+							if (ftype == typeof(bool))
 							{
 								ISqlExpression ex = AlternativeConvertToBoolean(func, 1);
 								if (ex != null)
 									return ex;
 							}
 
-							if (func.SystemType == typeof(DateTime) || func.SystemType == typeof(DateTimeOffset))
+							if (ftype == typeof(DateTime) || ftype == typeof(DateTimeOffset))
 							{
 								if (IsDateDataType(func.Parameters[0], "Date"))
 									return new SqlFunction(func.SystemType, "Date", func.Parameters[1]);
