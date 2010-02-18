@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+
 using NUnit.Framework;
 
 using BLToolkit.Data.DataProvider;
@@ -82,6 +84,26 @@ namespace Data.Linq
 				AreEqual(expected1, cq(data, arr1));
 				AreEqual(expected2, cq(data, arr2));
 			});
+		}
+
+		[Test]
+		public void Contains6()
+		{
+			var arr = new List<int> { 1, 2 };
+
+			ForEachProvider(db => AreEqual(
+				from p in    Parent where arr.Contains(p.ParentID) select p,
+				from p in db.Parent where arr.Contains(p.ParentID) select p));
+		}
+
+		[Test]
+		public void Contains7()
+		{
+			IEnumerable<int> arr = new[] { 1, 2 };
+
+			ForEachProvider(db => AreEqual(
+				from p in    Parent where arr.Contains(p.ParentID) select p,
+				from p in db.Parent where arr.Contains(p.ParentID) select p));
 		}
 
 		[Test]

@@ -4183,6 +4183,13 @@ namespace BLToolkit.Data.Linq
 									case "Contains" : predicate = ParseInPredicate(pi, queries); break;
 								}
 							}
+							else if (TypeHelper.IsSameOrParent(typeof(IList), e.Method.DeclaringType))
+							{
+								switch (e.Method.Name)
+								{
+									case "Contains" : predicate = ParseInPredicate(pi, queries); break;
+								}
+							}
 							else if (e.Method == Functions.String.Like11) predicate = ParseLikePredicate(pi, queries);
 							else if (e.Method == Functions.String.Like12) predicate = ParseLikePredicate(pi, queries);
 							else if (e.Method == Functions.String.Like21) predicate = ParseLikePredicate(pi, queries);
@@ -4719,9 +4726,15 @@ namespace BLToolkit.Data.Linq
 
 		private ISqlPredicate ParseInPredicate(ParseInfo pi, params QuerySource[] queries)
 		{
-			var e    = pi.Expr as MethodCallExpression;
-			var expr = ParseExpression(pi.Create(e.Arguments[1], pi.Index(e.Arguments, MethodCall.Arguments, 1)), queries);
-			var arr  = pi.Create(e.Arguments[0], pi.Index(e.Arguments, MethodCall.Arguments, 0));
+			var e = pi.Expr as MethodCallExpression;
+
+			var argIndex = e.Object != null ? 0 : 1;
+
+			var expr = ParseExpression(pi.Create(e.Arguments[argIndex], pi.Index(e.Arguments, MethodCall.Arguments, argIndex)), queries);
+			var arr  = 
+				e.Object != null ?
+					pi.Create(e.Object,       pi.Property(MethodCall.Object)) :
+					pi.Create(e.Arguments[0], pi.Index(e.Arguments, MethodCall.Arguments, 0));
 
 			switch (arr.NodeType)
 			{
