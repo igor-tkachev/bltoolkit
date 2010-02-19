@@ -265,5 +265,55 @@ namespace Data.Linq
 				from p in    Parent select    Child.Select(c => c.Parent).Contains(p),
 				from p in db.Parent select db.Child.Select(c => c.Parent).Contains(p)));
 		}
+
+		[Test]
+		public void Contains2()
+		{
+			ForEachProvider(db => AreEqual(
+				from p in    Parent select    Child.Select(c => c.ParentID).Contains(p.ParentID),
+				from p in db.Parent select db.Child.Select(c => c.ParentID).Contains(p.ParentID)));
+		}
+
+		[Test]
+		public void Contains3()
+		{
+			ForEachProvider(db => AreEqual(
+				from p in    Parent where    Child.Select(c => c.Parent).Contains(p) select p,
+				from p in db.Parent where db.Child.Select(c => c.Parent).Contains(p) select p));
+		}
+
+		[Test]
+		public void Contains4()
+		{
+			ForEachProvider(db => AreEqual(
+				from p in    Parent where    Child.Select(c => c.ParentID).Contains(p.ParentID) select p,
+				from p in db.Parent where db.Child.Select(c => c.ParentID).Contains(p.ParentID) select p));
+		}
+
+		[Test]
+		public void Contains5()
+		{
+			ForEachProvider(db => AreEqual(
+				from p in    Parent where    Child.Select(c => c.ParentID).Contains(p.ParentID + 1) select p,
+				from p in db.Parent where db.Child.Select(c => c.ParentID).Contains(p.ParentID + 1) select p));
+		}
+
+		[Test]
+		public void Contains6()
+		{
+			var n = 1;
+
+			ForEachProvider(db => AreEqual(
+				from p in    Parent where    Child.Select(c => c.ParentID).Contains(p.ParentID + n) select p,
+				from p in db.Parent where db.Child.Select(c => c.ParentID).Contains(p.ParentID + n) select p));
+		}
+
+		[Test]
+		public void Contains7()
+		{
+			ForEachProvider(db => Assert.AreEqual(
+				   Child.Select(c => c.ParentID).Contains(11),
+				db.Child.Select(c => c.ParentID).Contains(11)));
+		}
 	}
 }

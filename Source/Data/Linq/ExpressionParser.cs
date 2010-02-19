@@ -336,7 +336,7 @@ namespace BLToolkit.Data.Linq
 						case "Sum"                :
 						case "Average"            : sequence = ParseSequence(seq); ParseAggregate(pi, null, sequence[0]); break;
 						case "OfType"             : sequence = ParseSequence(seq); select = ParseOfType(pi, sequence);    break;
-						case "Any"                : sequence = ParseAny(true, seq, null, pi);                             break;
+						case "Any"                : sequence = ParseAny(SetType.Any, seq, null, pi);                      break;
 						case "Cast"               : sequence = ParseSequence(seq);                                        break;
 						case "Delete"             : sequence = ParseSequence(seq); ParseDelete(       null,       sequence[0]); break;
 						case "Update"             : sequence = ParseSequence(seq); ParseUpdate(       null, null, sequence[0]); break;
@@ -374,8 +374,8 @@ namespace BLToolkit.Data.Linq
 						case "Max"               :
 						case "Sum"               :
 						case "Average"           : sequence = ParseSequence(seq); ParseAggregate(pi, l, sequence[0]); break;
-						case "Any"               : sequence = ParseAny(true,  seq, l, pi);                            break;
-						case "All"               : sequence = ParseAny(false, seq, l, pi);                            break;
+						case "Any"               : sequence = ParseAny(SetType.Any, seq, l, pi);                      break;
+						case "All"               : sequence = ParseAny(SetType.All, seq, l, pi);                      break;
 						case "Delete"            : sequence = ParseSequence(seq); ParseDelete(      l, sequence[0]);  break;
 						case "Update"            : sequence = ParseSequence(seq); ParseUpdate(null, l, sequence[0]);  break;
 						default                  : return false;
@@ -1638,9 +1638,11 @@ namespace BLToolkit.Data.Linq
 
 		#region ParseAny
 
-		QuerySource[] ParseAny(bool isAny, ParseInfo expr, LambdaInfo lambda, ParseInfo parentInfo)
+		enum SetType { Any, All, In }
+
+		QuerySource[] ParseAny(SetType setType, ParseInfo expr, LambdaInfo lambda, ParseInfo parentInfo)
 		{
-			var cond = ParseAnyCondition(isAny, expr, lambda);
+			var cond = ParseAnyCondition(setType, expr, lambda, null);
 
 			if (_parsingMethod[0] == ParsingMethod.Select)
 			{
@@ -1654,7 +1656,7 @@ namespace BLToolkit.Data.Linq
 
 				_buildSelect = () =>
 				{
-					var pi     = BuildField(parentInfo, new[] { 0 });
+					var pi = BuildField(parentInfo, new[] { 0 });
 
 					var mapper = Expression.Lambda<ExpressionInfo<T>.Mapper<bool>>(
 						pi, new[]
@@ -1696,7 +1698,7 @@ namespace BLToolkit.Data.Linq
 			}
 		}
 
-		SqlQuery.Condition ParseAnyCondition(bool isAny, ParseInfo expr, LambdaInfo lambda)
+		SqlQuery.Condition ParseAnyCondition(SetType setType, ParseInfo expr, LambdaInfo lambda, ParseInfo inExpr)
 		{
 			ParsingTracer.WriteLine(lambda);
 			ParsingTracer.WriteLine(expr);
@@ -1750,29 +1752,38 @@ namespace BLToolkit.Data.Linq
 				return s;
 			};
 
-			var query  = ParseSequence(expr)[0];
-			var any    = CurrentSql;
+			var query = ParseSequence(expr)[0];
+			var any   = CurrentSql;
 
 			_convertSource = cs;
 
 			if (lambda != null)
 			{
-				if (!isAny)
+				if (setType == SetType.All)
 				{
 					var e  = Expression.Not(lambda.Body);
-					//var pi = lambda.Body.Parent.Create(e, lambda.Body.ParamAccessor);
 					var pi = new NotParseInfo(e, lambda.Body);
 
 					lambda = new LambdaInfo(pi, lambda.Parameters);
 				}
 
-				ParseWhere(lambda, query);
+				if (inExpr == null || query.Fields.Count != 1)
+					ParseWhere(lambda, query);
 			}
 
 			any.ParentSql = sql;
 			CurrentSql    = sql;
 
-			var cond = new SqlQuery.Condition(!isAny, new SqlQuery.Predicate.FuncLike(SqlFunction.CreateExists(any)));
+			SqlQuery.Condition cond;
+
+			if (inExpr != null && query.Fields.Count == 1)
+			{
+				query.Select(this);
+				var ex = ParseExpression(inExpr);
+				cond = new SqlQuery.Condition(false, new SqlQuery.Predicate.InSubQuery(ex, false, any));
+			}
+			else
+				cond = new SqlQuery.Condition(setType == SetType.All, new SqlQuery.Predicate.FuncLike(SqlFunction.CreateExists(any)));
 
 			ParsingTracer.DecIndentLevel();
 			return cond;
@@ -1789,7 +1800,7 @@ namespace BLToolkit.Data.Linq
 
 			var param  = Expression.Parameter(expr.Expr.Type, expr.NodeType == ExpressionType.Parameter ? ((ParameterExpression)expr).Name : "t");
 			var lambda = new LambdaInfo(ParseInfo.CreateRoot(Expression.Equal(param, expr), null), ParseInfo.CreateRoot(param, null));
-			var ret    = ParseAny(true, sequence, lambda, parentInfo);
+			var ret    = ParseAny(SetType.In, sequence, lambda, parentInfo);
 
 			ParsingTracer.DecIndentLevel();
 			return ret;
@@ -3918,6 +3929,7 @@ namespace BLToolkit.Data.Linq
 							{
 								case "Any":
 								case "All":
+								case "Contains":
 									return true;
 							}
 						}
@@ -5018,7 +5030,7 @@ namespace BLToolkit.Data.Linq
 					{
 						switch (pi.Expr.Method.Name)
 						{
-							case "Any" : func = () => ParseAnyCondition(true,  pexpr, null); return true;
+							case "Any" : func = () => ParseAnyCondition(SetType.Any,  pexpr, null, null); return true;
 						}
 						return false;
 					}),
@@ -5026,11 +5038,25 @@ namespace BLToolkit.Data.Linq
 					{
 						switch (pi.Expr.Method.Name)
 						{
-							case "Any" : func = () => ParseAnyCondition(true,  pexpr, l); return true;
-							case "All" : func = () => ParseAnyCondition(false, pexpr, l); return true;
+							case "Any" : func = () => ParseAnyCondition(SetType.Any, pexpr, l, null); return true;
+							case "All" : func = () => ParseAnyCondition(SetType.All, pexpr, l, null); return true;
 						}
 						return false;
-					})
+					}),
+					pi =>
+					{
+						ParseInfo s = null;
+						return pi.IsQueryableMethod2("Contains", seq => s = seq, ex =>
+						{
+							func = () =>
+							{
+								var param  = Expression.Parameter(ex.Expr.Type, ex.NodeType == ExpressionType.Parameter ? ((ParameterExpression)ex).Name : "t");
+								var lambda = new LambdaInfo(ParseInfo.CreateRoot(Expression.Equal(param, ex), null), ParseInfo.CreateRoot(param, null));
+								return ParseAnyCondition(SetType.In, s, lambda, ex);
+							};
+							return true;
+						});
+					}
 				);
 
 				if (func != null)

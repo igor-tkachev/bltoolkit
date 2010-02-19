@@ -974,9 +974,9 @@ namespace BLToolkit.Data.Sql
 
 			// expression [ NOT ] IN ( subquery | expression [ ,...n ] )
 			//
-			public class InSubquery : NotExpr
+			public class InSubQuery : NotExpr
 			{
-				public InSubquery(ISqlExpression exp1, bool isNot, SqlQuery subQuery)
+				public InSubQuery(ISqlExpression exp1, bool isNot, SqlQuery subQuery)
 					: base(exp1, isNot, Sql.Precedence.Comparison)
 				{
 					_subQuery = subQuery;
@@ -999,7 +999,7 @@ namespace BLToolkit.Data.Sql
 					ICloneableElement clone;
 
 					if (!objectTree.TryGetValue(this, out clone))
-						objectTree.Add(this, clone = new InSubquery(
+						objectTree.Add(this, clone = new InSubQuery(
 							(ISqlExpression)Expr1.Clone(objectTree, doClone),
 							IsNot,
 							(SqlQuery)_subQuery.Clone(objectTree, doClone)));
@@ -1556,8 +1556,8 @@ namespace BLToolkit.Data.Sql
 
 				#region Predicate.In
 
-				public T2 In   (SqlQuery subQuery) { return Add(new Predicate.InSubquery(_expr, false, subQuery)); }
-				public T2 NotIn(SqlQuery subQuery) { return Add(new Predicate.InSubquery(_expr, true,  subQuery)); }
+				public T2 In   (SqlQuery subQuery) { return Add(new Predicate.InSubQuery(_expr, false, subQuery)); }
+				public T2 NotIn(SqlQuery subQuery) { return Add(new Predicate.InSubQuery(_expr, true,  subQuery)); }
 
 				Predicate.InList CreateInList(bool isNot, object[] exprs)
 				{

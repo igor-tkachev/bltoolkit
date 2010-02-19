@@ -781,7 +781,14 @@ namespace BLToolkit.Data.Sql.SqlProvider
 					break;
 
 				case QueryElementType.InSubqueryPredicate:
-					throw new NotImplementedException();
+					{
+						SqlQuery.Predicate.InSubQuery p = (SqlQuery.Predicate.InSubQuery)predicate;
+						BuildExpression(sb, GetPrecedence(p), p.Expr1);
+						sb.Append(p.IsNot? " NOT IN ": " IN ");
+						BuildExpression(sb, GetPrecedence(p), p.SubQuery);
+					}
+
+					break;
 
 				case QueryElementType.InListPredicate:
 					{
@@ -988,10 +995,10 @@ namespace BLToolkit.Data.Sql.SqlProvider
 						SqlQuery.Column column = (SqlQuery.Column)expr;
 
 #if DEBUG
-						if (column.ToString() == "t8.ParentID")
-						{
-							column.ToString();
-						}
+						//if (column.ToString() == "t8.ParentID")
+						//{
+						//    column.ToString();
+						//}
 #endif
 
 						ISqlTableSource table  = _sqlQuery.GetTableSource(column.Parent);

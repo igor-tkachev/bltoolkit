@@ -157,7 +157,7 @@ namespace BLToolkit.Data.Sql
 
 				case QueryElementType.InSubqueryPredicate:
 					{
-						SqlQuery.Predicate.InSubquery p = (SqlQuery.Predicate.InSubquery)element;
+						SqlQuery.Predicate.InSubQuery p = (SqlQuery.Predicate.InSubQuery)element;
 						Visit(p.Expr1,    all, action);
 						Visit(p.SubQuery, all, action);
 						break;
@@ -382,7 +382,7 @@ namespace BLToolkit.Data.Sql
 
 				case QueryElementType.InSubqueryPredicate:
 					{
-						SqlQuery.Predicate.InSubquery p = (SqlQuery.Predicate.InSubquery)element;
+						SqlQuery.Predicate.InSubQuery p = (SqlQuery.Predicate.InSubQuery)element;
 						return
 							Find(p.Expr1,    find) ??
 							Find(p.SubQuery, find);
@@ -679,12 +679,12 @@ namespace BLToolkit.Data.Sql
 
 				case QueryElementType.InSubqueryPredicate:
 					{
-						SqlQuery.Predicate.InSubquery p = (SqlQuery.Predicate.InSubquery)element;
+						SqlQuery.Predicate.InSubQuery p = (SqlQuery.Predicate.InSubQuery)element;
 						ISqlExpression                e = (ISqlExpression)ConvertInternal(p.Expr1,    action);
 						SqlQuery                      q = (SqlQuery)ConvertInternal(p.SubQuery, action);
 
 						if (e != null && !ReferenceEquals(p.Expr1, e) || q != null && !ReferenceEquals(p.SubQuery, q))
-							newElement = new SqlQuery.Predicate.InSubquery(e ?? p.Expr1, p.IsNot, q ?? p.SubQuery);
+							newElement = new SqlQuery.Predicate.InSubQuery(e ?? p.Expr1, p.IsNot, q ?? p.SubQuery);
 
 						break;
 					}

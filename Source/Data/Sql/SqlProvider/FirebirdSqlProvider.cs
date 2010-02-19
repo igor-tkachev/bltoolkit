@@ -2,8 +2,12 @@
 using System.Data;
 using System.Text;
 
-using BLToolkit.Mapping;
 using BLToolkit.Reflection;
+
+#region ReSharper disable
+// ReSharper disable SuggestUseVarKeywordEverywhere
+// ReSharper disable SuggestUseVarKeywordEvident
+#endregion
 
 namespace BLToolkit.Data.Sql.SqlProvider
 {
@@ -145,12 +149,20 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			}
 		}
 
+		static void SetNonQueryParameter(IQueryElement element)
+		{
+			if (element.ElementType == QueryElementType.SqlParameter)
+				((SqlParameter)element).IsQueryParameter = false;
+		}
+
 		public override SqlQuery Finalize(SqlQuery sqlQuery)
 		{
-			new QueryVisitor().Visit(sqlQuery.Select, delegate(IQueryElement element)
+			new QueryVisitor().Visit(sqlQuery.Select, SetNonQueryParameter);
+
+			new QueryVisitor().Visit(sqlQuery, delegate(IQueryElement element)
 			{
-				if (element.ElementType == QueryElementType.SqlParameter)
-					((SqlParameter)element).IsQueryParameter = false;
+				if (element.ElementType == QueryElementType.InSubqueryPredicate)
+					new QueryVisitor().Visit(((SqlQuery.Predicate.InSubQuery)element).Expr1, SetNonQueryParameter);
 			});
 
 			sqlQuery = base.Finalize(sqlQuery);
