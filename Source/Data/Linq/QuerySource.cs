@@ -538,7 +538,7 @@ namespace BLToolkit.Data.Linq
 		public class SubQuery : QuerySource
 		{
 			public SubQuery(SqlQuery currentSql, SqlQuery subSql, QuerySource baseQuery, bool addToSource)
-				: base(currentSql, null, baseQuery)
+				: base(currentSql, baseQuery.Lambda, baseQuery)
 			{
 				ParsingTracer.WriteLine(subSql);
 

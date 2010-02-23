@@ -325,5 +325,21 @@ namespace Data.Linq
 				join c in db.Child on new { Parent = p, p.ParentID } equals new { c.Parent, c.ParentID }
 				select new { p.ParentID, c.ChildID }));
 		}
+
+		[Test]
+		public void FourTableJoin()
+		{
+			ForEachProvider(db => AreEqual(
+				from p in Parent
+				join c1 in Child      on p.ParentID  equals c1.ParentID
+				join c2 in GrandChild on c1.ParentID equals c2.ParentID
+				join c3 in GrandChild on c2.ParentID equals c3.ParentID
+				select new { p, c1Key = c1.ChildID, c2Key = c2.GrandChildID, c3Key = c3.GrandChildID },
+				from p in db.Parent
+				join c1 in db.Child      on p.ParentID  equals c1.ParentID
+				join c2 in db.GrandChild on c1.ParentID equals c2.ParentID
+				join c3 in db.GrandChild on c2.ParentID equals c3.ParentID
+				select new { p, c1Key = c1.ChildID, c2Key = c2.GrandChildID, c3Key = c3.GrandChildID }));
+		}
 	}
 }
