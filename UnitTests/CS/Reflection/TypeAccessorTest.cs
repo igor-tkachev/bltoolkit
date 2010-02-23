@@ -1,5 +1,7 @@
+using System;
 using System.Collections;
-
+using System.Collections.Generic;
+using System.Linq.Expressions;
 using NUnit.Framework;
 
 using BLToolkit.Reflection;
@@ -175,6 +177,48 @@ namespace Reflection
 
 			TypeAccessor.WriteConsole(o);
 			TypeAccessor.WriteDebug  (o);
+		}
+
+		[Test]
+		public void AccessMember()
+		{
+			var ta  = TypeAccessor.GetAccessor<TestObject3>();
+			var ma  = ta["IntField"];
+			var obj = new TestObject3();
+			var val = ma.GetInt32(obj);
+
+			Assert.AreEqual(obj.IntField, val);
+		}
+
+		static class MemberAccessors<TObject,TValue>
+		{
+			public static readonly Dictionary<string,Func<TObject,TValue>> Accessor = new Dictionary<string,Func<TObject,TValue>>();
+		}
+
+		static Func<TObject,TValue> GetAccessor<TObject,TValue>(string name)
+		{
+			Func<TObject,TValue> func;
+
+			if (!MemberAccessors<TObject,TValue>.Accessor.TryGetValue(name, out func))
+			{
+				var param = Expression.Parameter(typeof(TObject), "obj");
+
+				func = Expression.Lambda<Func<TObject,TValue>>(Expression.PropertyOrField(param, name), param).Compile();
+
+				MemberAccessors<TObject,TValue>.Accessor.Add(name, func);
+			}
+
+			return func;
+		}
+
+		[Test]
+		public void AccessMember2()
+		{
+			var accessor = GetAccessor<TestObject3, int>("IntField");
+
+			var obj = new TestObject3();
+
+			Assert.AreEqual(obj.IntField, accessor(obj));
 		}
 	}
 }

@@ -8,6 +8,15 @@ using System.Data.SqlTypes;
 using System.Diagnostics;
 using System.Text;
 
+#region ReSharper disable
+// ReSharper disable SuggestUseVarKeywordEvident
+// ReSharper disable SuggestUseVarKeywordEverywhere
+// ReSharper disable RedundantTypeArgumentsOfMethod
+// ReSharper disable UnusedParameter.Local
+// ReSharper disable UseObjectOrCollectionInitializer
+// ReSharper disable ConvertToLambdaExpression
+#endregion
+
 namespace BLToolkit.Data
 {
 	using Common;
@@ -446,7 +455,7 @@ namespace BLToolkit.Data
 
 			if (CanRaiseEvents)
 			{
-				InitCommandEventHandler handler = (InitCommandEventHandler)Events[EventInitCommand];
+				InitCommandEventHandler handler = (InitCommandEventHandler)Events[_eventInitCommand];
 
 				if (handler != null)
 					handler(this, new InitCommandEventArgs(command));
@@ -481,44 +490,44 @@ namespace BLToolkit.Data
 		public event EventHandler OnClosing;
 		public event EventHandler OnClosed;
 
-		private static readonly object EventBeforeOperation = new object();
+		private static readonly object _eventBeforeOperation = new object();
 		/// <summary>
 		/// Occurs when a server-side operation is about to start.
 		/// </summary>
 		public event OperationTypeEventHandler BeforeOperation
 		{
-			add    { Events.AddHandler   (EventBeforeOperation, value); }
-			remove { Events.RemoveHandler(EventBeforeOperation, value); }
+			add    { Events.AddHandler   (_eventBeforeOperation, value); }
+			remove { Events.RemoveHandler(_eventBeforeOperation, value); }
 		}
 
-		private static readonly object EventAfterOperation = new object();
+		private static readonly object _eventAfterOperation = new object();
 		/// <summary>
 		/// Occurs when a server-side operation is complete.
 		/// </summary>
 		public event OperationTypeEventHandler AfterOperation
 		{
-			add    { Events.AddHandler   (EventAfterOperation, value); }
-			remove { Events.RemoveHandler(EventAfterOperation, value); }
+			add    { Events.AddHandler   (_eventAfterOperation, value); }
+			remove { Events.RemoveHandler(_eventAfterOperation, value); }
 		}
 
-		private static readonly object EventOperationException = new object();
+		private static readonly object _eventOperationException = new object();
 		/// <summary>
 		/// Occurs when a server-side operation is failed to execute.
 		/// </summary>
 		public event OperationExceptionEventHandler OperationException
 		{
-			add    { Events.AddHandler   (EventOperationException, value); }
-			remove { Events.RemoveHandler(EventOperationException, value); }
+			add    { Events.AddHandler   (_eventOperationException, value); }
+			remove { Events.RemoveHandler(_eventOperationException, value); }
 		}
 
-		private static readonly object EventInitCommand = new object();
+		private static readonly object _eventInitCommand = new object();
 		/// <summary>
 		/// Occurs when the <see cref="Command"/> is initializing.
 		/// </summary>
 		public event InitCommandEventHandler InitCommand
 		{
-			add    { Events.AddHandler   (EventInitCommand, value); }
-			remove { Events.RemoveHandler(EventInitCommand, value); }
+			add    { Events.AddHandler   (_eventInitCommand, value); }
+			remove { Events.RemoveHandler(_eventInitCommand, value); }
 		}
 
 		/// <summary>
@@ -529,7 +538,7 @@ namespace BLToolkit.Data
 		{
 			if (CanRaiseEvents)
 			{
-				OperationTypeEventHandler handler = (OperationTypeEventHandler)Events[EventBeforeOperation];
+				OperationTypeEventHandler handler = (OperationTypeEventHandler)Events[_eventBeforeOperation];
 				if (handler != null)
 					handler(this, new OperationTypeEventArgs(op));
 			}
@@ -543,7 +552,7 @@ namespace BLToolkit.Data
 		{
 			if (CanRaiseEvents)
 			{
-				OperationTypeEventHandler handler = (OperationTypeEventHandler)Events[EventAfterOperation];
+				OperationTypeEventHandler handler = (OperationTypeEventHandler)Events[_eventAfterOperation];
 				if (handler != null)
 					handler(this, new OperationTypeEventArgs(op));
 			}
@@ -558,7 +567,7 @@ namespace BLToolkit.Data
 		{
 			if (CanRaiseEvents)
 			{
-				OperationExceptionEventHandler handler = (OperationExceptionEventHandler)Events[EventOperationException];
+				OperationExceptionEventHandler handler = (OperationExceptionEventHandler)Events[_eventOperationException];
 				if (handler != null)
 					handler(this, new OperationExceptionEventArgs(op, ex));
 			}
@@ -798,6 +807,7 @@ namespace BLToolkit.Data
 		/// </summary>
 		/// <param name="spName">The name of the stored procedure.</param>
 		/// <param name="includeReturnValueParameter">Whether or not to include their return value parameter.</param>
+		/// <param name="openNewConnection"></param>
 		/// <returns></returns>
 		protected virtual IDbDataParameter[] DiscoverSpParameters(string spName, bool includeReturnValueParameter, bool openNewConnection)
 		{
@@ -877,6 +887,7 @@ namespace BLToolkit.Data
 		/// </remarks>
 		/// <param name="spName">The name of the stored procedure.</param>
 		/// <param name="includeReturnValueParameter">A boolean value indicating
+		/// <param name="openNewConnectionToDiscoverParameters"></param>
 		/// whether the return value parameter should be included in the results.</param>
 		/// <returns>An array of the <see cref="IDbDataParameter"/>.</returns>
 		public IDbDataParameter[] GetSpParameters(string spName, bool includeReturnValueParameter, bool openNewConnectionToDiscoverParameters)
@@ -3221,26 +3232,26 @@ namespace BLToolkit.Data
 		/// values are loaded from a column specified by <paramref name="valueField"/>.
 		/// Other columns are ignored.
 		///</summary>
-		///<typeparam name="K">The key type.</typeparam>
+		///<typeparam name="TKey">The key type.</typeparam>
 		///<typeparam name="T">The value type.</typeparam>
 		///<param name="dic">The dictionary to add values.</param>
 		///<param name="keyField">The column name/index to load keys.</param>
 		///<param name="valueField">The column name/index to load values.</param>
 		///<returns>The loaded dictionary.</returns>
-		public IDictionary<K,T> ExecuteScalarDictionary<K,T>(
-			IDictionary<K,T>     dic,
+		public IDictionary<TKey,T> ExecuteScalarDictionary<TKey,T>(
+			IDictionary<TKey,T>  dic,
 			NameOrIndexParameter keyField,
 			NameOrIndexParameter valueField)
 		{
 			if (dic == null)
-				dic = new Dictionary<K,T>();
+				dic = new Dictionary<TKey,T>();
 
 			if (_prepared)
 				InitParameters(CommandAction.Select);
 
 			//object nullValue = _mappingSchema.GetNullValue(type);
 
-			Type keyFieldType   = typeof(K);
+			Type keyFieldType   = typeof(TKey);
 			Type valueFieldType = typeof(T);
 
 			using (IDataReader dr = ExecuteReaderInternal())
@@ -3253,7 +3264,7 @@ namespace BLToolkit.Data
 					do
 					{
 						object value = dr[valueIndex];
-						object key = dr[keyIndex];
+						object key   = dr[keyIndex];
 
 						if (key == null || key.GetType() != keyFieldType)
 							key = key is DBNull ? null : _mappingSchema.ConvertChangeType(key, keyFieldType);
@@ -3261,7 +3272,7 @@ namespace BLToolkit.Data
 						if (value == null || value.GetType() != valueFieldType)
 							value = value is DBNull ? null : _mappingSchema.ConvertChangeType(value, valueFieldType);
 
-						dic.Add((K)key, (T)value);
+						dic.Add((TKey)key, (T)value);
 					}
 					while (dr.Read());
 				}
@@ -3276,18 +3287,18 @@ namespace BLToolkit.Data
 		/// values are loaded from a column specified by <paramref name="valueField"/>.
 		/// Other columns are ignored.
 		///</summary>
-		///<typeparam name="K">The key type.</typeparam>
+		///<typeparam name="TKey">The key type.</typeparam>
 		///<typeparam name="T">The value type.</typeparam>
 		///<param name="keyField">The column name/index to load keys.</param>
 		///<param name="valueField">The column name/index to load values.</param>
 		///<returns>The loaded dictionary.</returns>
-		public Dictionary<K,T> ExecuteScalarDictionary<K,T>(
+		public Dictionary<TKey,T> ExecuteScalarDictionary<TKey,T>(
 			NameOrIndexParameter keyField,
 			NameOrIndexParameter valueField)
 		{
-			Dictionary<K,T> dic = new Dictionary<K,T>();
+			Dictionary<TKey,T> dic = new Dictionary<TKey,T>();
 
-			ExecuteScalarDictionary<K,T>(dic, keyField, valueField);
+			ExecuteScalarDictionary<TKey,T>(dic, keyField, valueField);
 
 			return dic;
 		}

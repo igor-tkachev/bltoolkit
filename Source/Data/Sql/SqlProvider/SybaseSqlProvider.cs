@@ -117,5 +117,13 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		{
 			BuildTableName(sb, SqlQuery.From.Tables[0], true, false);
 		}
+
+		protected override void BuildUnicodeString(StringBuilder sb, string value)
+		{
+			sb
+				.Append("N\'")
+				.Append(value.Replace("'", "''"))
+				.Append('\'');
+		}
 	}
 }

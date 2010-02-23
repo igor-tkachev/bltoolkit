@@ -3,11 +3,11 @@ GO
 
 CREATE TABLE Person
 (
-	PersonID   SERIAL      NOT NULL,
-	FirstName  VARCHAR(50) NOT NULL,
-	LastName   VARCHAR(50) NOT NULL,
-	MiddleName VARCHAR(50),
-	Gender     CHAR(1)     NOT NULL,
+	PersonID   SERIAL       NOT NULL,
+	FirstName  NVARCHAR(50) NOT NULL,
+	LastName   NVARCHAR(50) NOT NULL,
+	MiddleName NVARCHAR(50),
+	Gender     CHAR(1)      NOT NULL,
 
 	PRIMARY KEY(PersonID)
 )

@@ -1153,7 +1153,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		protected virtual void BuildValue(StringBuilder sb, object value)
 		{
 			if      (value == null)                   sb.Append("NULL");
-			else if (value is string)                 sb.Append('\'').Append(value.ToString().Replace("'", "''")).Append('\'');
+			else if (value is string)                 BuildString(sb, value.ToString());
 			else if (value is char || value is char?) sb.Append('\'').Append(value.ToString().Replace("'", "''")).Append('\'');
 			else if (value is bool || value is bool?) sb.Append((bool)value ? "1" : "0");
 			else if (value is DateTime)               sb.AppendFormat("'{0:yyyy-MM-dd HH:mm:ss.fffffff}'", value);
@@ -1195,6 +1195,31 @@ namespace BLToolkit.Data.Sql.SqlProvider
 				else
 					sb.Append(value);
 			}
+		}
+
+		protected virtual void BuildString(StringBuilder sb, string value)
+		{
+			for (int i = 0; i < value.Length; i++)
+			{
+				if (value[i] > 127)
+				{
+					BuildUnicodeString(sb, value);
+					return;
+				}
+			}
+
+			sb
+				.Append('\'')
+				.Append(value.Replace("'", "''"))
+				.Append('\'');
+		}
+
+		protected virtual void BuildUnicodeString(StringBuilder sb, string value)
+		{
+			sb
+				.Append('\'')
+				.Append(value.Replace("'", "''"))
+				.Append("\'");
 		}
 
 		#endregion

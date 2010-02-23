@@ -115,5 +115,13 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		{
 			sb.Append(DataProvider.Convert(GetTableAlias(SqlQuery.From.Tables[0]), ConvertType.NameToQueryTableAlias));
 		}
+
+		protected override void BuildUnicodeString(StringBuilder sb, string value)
+		{
+			sb
+				.Append("N\'")
+				.Append(value.Replace("'", "''"))
+				.Append('\'');
+		}
 	}
 }

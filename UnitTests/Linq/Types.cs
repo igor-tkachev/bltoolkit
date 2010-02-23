@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Data.Linq;
 using System.Linq;
-
+using BLToolkit.Data.DataProvider;
+using Data.Linq.Model;
 using NUnit.Framework;
 
 using BLToolkit.Data.Linq;
@@ -141,6 +142,48 @@ namespace Data.Linq
 			ForEachProvider(db => AreEqual(
 				from t in    Types2 where t.DateTimeValue.Value.Date > dt.Value.Date select t,
 				from t in db.Types2 where t.DateTimeValue.Value.Date > dt.Value.Date select t));
+		}
+
+		[Test]
+		public void Nullable()
+		{
+			ForEachProvider(db => AreEqual(
+				from p in    Parent select new { Value = p.Value1.GetValueOrDefault() },
+				from p in db.Parent select new { Value = p.Value1.GetValueOrDefault() }));
+		}
+
+		[Test]
+		public void Unicode()
+		{
+			ForEachProvider(new[] { ProviderName.Informix, ProviderName.Firebird, ProviderName.Sybase }, db =>
+			{
+				try
+				{
+					db.Person.Delete(p => p.ID > 2);
+
+					var id =
+						db.Person
+							.InsertWithIdentity(() => new Person
+							{
+								FirstName = "擊敗奴隸",
+								LastName  = "Юникодкин",
+								Gender    = Gender.Male
+							});
+
+					Assert.NotNull(id);
+
+					var person = db.Person.Single(p => p.FirstName == "擊敗奴隸" && p.LastName == "Юникодкин");
+
+					Assert.NotNull (person);
+					Assert.AreEqual(id, person.ID);
+					Assert.AreEqual("擊敗奴隸", person.FirstName);
+					Assert.AreEqual("Юникодкин", person.LastName);
+				}
+				finally
+				{
+					db.Person.Delete(p => p.ID > 2);
+				}
+			});
 		}
 	}
 }
