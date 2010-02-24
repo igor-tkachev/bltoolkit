@@ -57,7 +57,7 @@ namespace BLToolkit.Data.Sql
 						mm.Name,
 						mm.MapMemberInfo.Nullable,
 						isSet ? order : int.MinValue,
-						ua != null && ua.IsIdentity));
+						ua));
 				}
 		}
 
@@ -139,7 +139,7 @@ namespace BLToolkit.Data.Sql
 					(string)me["MapField"].Value ?? (string)me["PhysicalName"].Value,
 					(bool?)me["Nullable"].Value ?? false,
 					-1,
-					(bool?)me["Identity"].Value ?? false));
+					(bool?)me["Identity"].Value == true ? new IdentityAttribute() : null));
 
 			foreach (AttributeExtension ae in te.Attributes["Join"])
 				Joins.Add(new Join(ae));
@@ -229,7 +229,7 @@ namespace BLToolkit.Data.Sql
 			{
 				if (_all == null)
 				{
-					_all = new SqlField(null, "*", "*", true, -1, false);
+					_all = new SqlField(null, "*", "*", true, -1, null);
 					((IChild<ISqlTableSource>)_all).Parent = this;
 				}
 

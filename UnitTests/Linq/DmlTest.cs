@@ -79,8 +79,11 @@ namespace Update
 			{
 				db.GrandChild1.Delete(gc => new[] { 1001, 1002 }.Contains(gc.GrandChildID.Value));
 
-				db.Insert(new GrandChild { ParentID = 1, ChildID = 1, GrandChildID = 1001 });
-				db.Insert(new GrandChild { ParentID = 1, ChildID = 2, GrandChildID = 1002 });
+				db.Insert(new[]
+				{
+					new GrandChild { ParentID = 1, ChildID = 1, GrandChildID = 1001 },
+					new GrandChild { ParentID = 1, ChildID = 2, GrandChildID = 1002 }
+				});
 
 				Assert.AreEqual(3, db.GrandChild1.Count(gc => gc.ParentID == 1));
 				Assert.AreEqual(2, db.GrandChild1.Where(gc => gc.Parent.ParentID == 1 && new[] { 1001, 1002 }.Contains(gc.GrandChildID.Value)).Delete());
@@ -261,6 +264,31 @@ namespace Update
 				finally
 				{
 					db.Parent4.Delete(p => p.ParentID > 1000);
+				}
+			});
+		}
+
+		[Test]
+		public void Update8()
+		{
+			ForEachProvider(db =>
+			{
+				try
+				{
+					var parent = new Parent1 { ParentID = 1001, Value1 = 1001 };
+
+					db.Parent.Delete(p => p.ParentID > 1000);
+					db.Insert(parent);
+
+					parent.Value1++;
+
+					db.Update(parent);
+
+					Assert.AreEqual(1002, db.Parent.Single(p => p.ParentID == parent.ParentID).Value1);
+				}
+				finally
+				{
+					db.Child.Delete(c => c.ChildID > 1000);
 				}
 			});
 		}
@@ -586,6 +614,40 @@ namespace Update
 
 					Assert.NotNull (john);
 					Assert.AreEqual(id, john.ID);
+				}
+				finally
+				{
+					db.Person.Delete(p => p.ID > 2);
+				}
+			});
+		}
+
+		[Test]
+		public void InsertWithIdentity4()
+		{
+			ForEachProvider(db =>
+			{
+				try
+				{
+					for (var i = 0; i < 2; i++)
+					{
+						db.Person.Delete(p => p.ID > 2);
+
+						var id = db.InsertWithIdentity(
+							new Person
+							{
+								FirstName = "John" + i,
+								LastName  = "Shepard",
+								Gender    = Gender.Male
+							});
+
+						Assert.NotNull(id);
+
+						var john = db.Person.Single(p => p.FirstName == "John" + i && p.LastName == "Shepard");
+
+						Assert.NotNull (john);
+						Assert.AreEqual(id, john.ID);
+					}
 				}
 				finally
 				{

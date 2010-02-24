@@ -1158,5 +1158,268 @@ namespace BLToolkit.Data.Linq
 		}
 
 		#endregion
+
+		#region Object Operations
+
+		static class ObjectOperation<T1>
+		{
+			public static readonly Dictionary<object,ExpressionInfo<int>>    Insert             = new Dictionary<object,ExpressionInfo<int>>();
+			public static readonly Dictionary<object,ExpressionInfo<object>> InsertWithIdentity = new Dictionary<object,ExpressionInfo<object>>();
+			public static readonly Dictionary<object,ExpressionInfo<int>>    Update             = new Dictionary<object,ExpressionInfo<int>>();
+			public static readonly Dictionary<object,ExpressionInfo<int>>    Delete             = new Dictionary<object,ExpressionInfo<int>>();
+		}
+
+		static ExpressionInfo<TR>.Parameter GetParameter<TR>(DbManager dataContext, SqlField field)
+		{
+			var exprParam = Expression.Parameter(typeof(Expression), "expr");
+			var mapper    = Expression.Lambda<Func<ExpressionInfo<TR>,Expression,object[],object>>(
+				Expression.Convert(
+					Expression.PropertyOrField(
+						Expression.Convert(
+							Expression.Property(
+								Expression.Convert(exprParam, typeof(ConstantExpression)),
+								Constant.Value),
+							typeof(T)),
+						field.Name),
+					typeof(object)),
+				new []
+					{
+						Expression.Parameter(typeof(ExpressionInfo<TR>), "info"),
+						exprParam,
+						Expression.Parameter(typeof(object[]), "ps")
+					});
+
+			var param = new ExpressionInfo<TR>.Parameter
+			{
+				Expression   = null,
+				Accessor     = mapper.Compile(),
+				SqlParameter = new SqlParameter(field.SystemType, field.Name, null)
+			};
+
+			if (field.SystemType.IsEnum)
+			{
+				var ms = dataContext.MappingSchema;
+				var tp = field.SystemType;
+				param.SqlParameter.ValueConverter = o => ms.MapEnumToValue(o, tp);
+			}
+
+			return param;
+		}
+
+		#region Insert
+
+		public static int Insert(DbManager dataContext, T obj)
+		{
+			if (Equals(default(T), obj))
+				return 0;
+
+			ExpressionInfo<int> ei;
+
+			var key = new { dataContext.MappingSchema, dataContext.DataProvider };
+
+			if (!ObjectOperation<T>.Insert.TryGetValue(key, out ei))
+				lock (_sync)
+					if (!ObjectOperation<T>.Insert.TryGetValue(key, out ei))
+					{
+						var sqlTable = new SqlTable<T>(dataContext.MappingSchema);
+						var sqlQuery = new SqlQuery { QueryType = QueryType.Insert };
+
+						sqlQuery.Set.Into = sqlTable;
+
+						ei = new ExpressionInfo<int>
+						{
+							MappingSchema = dataContext.MappingSchema,
+							DataProvider  = dataContext.DataProvider,
+							Queries       = { new ExpressionInfo<int>.QueryInfo { SqlQuery = sqlQuery, } }
+						};
+
+						foreach (var field in sqlTable.Fields)
+						{
+							if (field.Value.IsInsertable)
+							{
+								var param = GetParameter<int>(dataContext, field.Value);
+
+								ei.Queries[0].Parameters.Add(param);
+
+								sqlQuery.Set.Items.Add(new SqlQuery.SetExpression(field.Value, param.SqlParameter));
+							}
+						}
+
+						ei.SetNonQueryQuery();
+
+						ObjectOperation<T>.Insert.Add(key, ei);
+					}
+
+			return (int)ei.GetElement(null, dataContext, Expression.Constant(obj), null);
+		}
+
+		#endregion
+
+		#region InsertWithIdentity
+
+		public static object InsertWithIdentity(DbManager dataContext, T obj)
+		{
+			if (Equals(default(T), obj))
+				return 0;
+
+			ExpressionInfo<object> ei;
+
+			var key = new { dataContext.MappingSchema, dataContext.DataProvider };
+
+			if (!ObjectOperation<T>.InsertWithIdentity.TryGetValue(key, out ei))
+				lock (_sync)
+					if (!ObjectOperation<T>.InsertWithIdentity.TryGetValue(key, out ei))
+					{
+						var sqlTable = new SqlTable<T>(dataContext.MappingSchema);
+						var sqlQuery = new SqlQuery { QueryType = QueryType.Insert };
+
+						sqlQuery.Set.Into         = sqlTable;
+						sqlQuery.Set.WithIdentity = true;
+
+						ei = new ExpressionInfo<object>
+						{
+							MappingSchema = dataContext.MappingSchema,
+							DataProvider  = dataContext.DataProvider,
+							Queries       = { new ExpressionInfo<object>.QueryInfo { SqlQuery = sqlQuery, } }
+						};
+
+						foreach (var field in sqlTable.Fields)
+						{
+							if (field.Value.IsInsertable)
+							{
+								var param = GetParameter<object>(dataContext, field.Value);
+
+								ei.Queries[0].Parameters.Add(param);
+
+								sqlQuery.Set.Items.Add(new SqlQuery.SetExpression(field.Value, param.SqlParameter));
+							}
+						}
+
+						ei.SetScalarQuery<object>();
+
+						ObjectOperation<T>.InsertWithIdentity.Add(key, ei);
+					}
+
+			return ei.GetElement(null, dataContext, Expression.Constant(obj), null);
+		}
+
+		#endregion
+
+		#region Update
+
+		public static int Update(DbManager dataContext, T obj)
+		{
+			if (Equals(default(T), obj))
+				return 0;
+
+			ExpressionInfo<int> ei;
+
+			var key = new { dataContext.MappingSchema, dataContext.DataProvider };
+
+			if (!ObjectOperation<T>.Update.TryGetValue(key, out ei))
+				lock (_sync)
+					if (!ObjectOperation<T>.Update.TryGetValue(key, out ei))
+					{
+						var sqlTable = new SqlTable<T>(dataContext.MappingSchema);
+						var sqlQuery = new SqlQuery { QueryType = QueryType.Update };
+
+						sqlQuery.From.Table(sqlTable);
+
+						ei = new ExpressionInfo<int>
+						{
+							MappingSchema = dataContext.MappingSchema,
+							DataProvider  = dataContext.DataProvider,
+							Queries       = { new ExpressionInfo<int>.QueryInfo { SqlQuery = sqlQuery, } }
+						};
+
+						var keys   = sqlTable.GetKeyFields();
+						var fields = sqlTable.Fields.Values.Where(f => f.IsUpdatable).Except(keys).ToList();
+
+						if (fields.Count == 0)
+							throw new LinqException(
+								string.Format("There are no fields to update in the type '{0}'.", sqlTable.Name));
+
+						foreach (var field in fields)
+						{
+							var param = GetParameter<int>(dataContext, field);
+
+							ei.Queries[0].Parameters.Add(param);
+
+							sqlQuery.Set.Items.Add(new SqlQuery.SetExpression(field, param.SqlParameter));
+						}
+
+						foreach (var field in keys)
+						{
+							var param = GetParameter<int>(dataContext, field);
+
+							ei.Queries[0].Parameters.Add(param);
+
+							sqlQuery.Where.Field(field).Equal.Expr(param.SqlParameter);
+						}
+
+						ei.SetNonQueryQuery();
+
+						ObjectOperation<T>.Update.Add(key, ei);
+					}
+
+			return (int)ei.GetElement(null, dataContext, Expression.Constant(obj), null);
+		}
+
+		#endregion
+
+		#region Delete
+
+		public static int Delete(DbManager dataContext, T obj)
+		{
+			if (Equals(default(T), obj))
+				return 0;
+
+			ExpressionInfo<int> ei;
+
+			var key = new { dataContext.MappingSchema, dataContext.DataProvider };
+
+			if (!ObjectOperation<T>.Delete.TryGetValue(key, out ei))
+				lock (_sync)
+					if (!ObjectOperation<T>.Delete.TryGetValue(key, out ei))
+					{
+						var sqlTable = new SqlTable<T>(dataContext.MappingSchema);
+						var sqlQuery = new SqlQuery { QueryType = QueryType.Delete };
+
+						sqlQuery.From.Table(sqlTable);
+
+						ei = new ExpressionInfo<int>
+						{
+							MappingSchema = dataContext.MappingSchema,
+							DataProvider  = dataContext.DataProvider,
+							Queries       = { new ExpressionInfo<int>.QueryInfo { SqlQuery = sqlQuery, } }
+						};
+
+						var keys = sqlTable.GetKeyFields();
+
+						if (keys.Count == 0)
+							throw new LinqException(
+								string.Format("Table '{0}' does not have primary key.", sqlTable.Name));
+
+						foreach (var field in keys)
+						{
+							var param = GetParameter<int>(dataContext, field);
+
+							ei.Queries[0].Parameters.Add(param);
+
+							sqlQuery.Where.Field(field).Equal.Expr(param.SqlParameter);
+						}
+
+						ei.SetNonQueryQuery();
+
+						ObjectOperation<T>.Delete.Add(key, ei);
+					}
+
+			return (int)ei.GetElement(null, dataContext, Expression.Constant(obj), null);
+		}
+
+		#endregion
+
+
+		#endregion
 	}
 }

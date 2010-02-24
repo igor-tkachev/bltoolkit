@@ -127,7 +127,7 @@ namespace BLToolkit.Data.Linq
 							{
 								if (!_columns.ContainsKey(mm.MemberName))
 								{
-									var field = new SqlField(mm.Type, mm.MemberName, mm.Name, mm.MapMemberInfo.Nullable, int.MinValue, false);
+									var field = new SqlField(mm.Type, mm.MemberName, mm.Name, mm.MapMemberInfo.Nullable, int.MinValue, null);
 									SqlTable.Fields.Add(field);
 
 									var column = new Column(this, field, null);

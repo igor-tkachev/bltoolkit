@@ -646,7 +646,12 @@ namespace BLToolkit.Data.Linq
 
 		public static int Insert<T>(this DbManager dataContext, T obj)
 		{
-			return new SqlQuery<T>().Insert(dataContext, obj);
+			return ExpressionInfo<T>.Insert(dataContext, obj);
+		}
+
+		public static int Insert<T>(this DbManager dataContext, params T[] list)
+		{
+			return Insert(dataContext, int.MaxValue, list);
 		}
 
 		public static int Insert<T>(this DbManager dataContext, int maxBatchSize, IEnumerable<T> list)
@@ -661,11 +666,20 @@ namespace BLToolkit.Data.Linq
 
 		#endregion
 
+		#region InsertWithIdentity
+
+		public static object InsertWithIdentity<T>(this DbManager dataContext, T obj)
+		{
+			return ExpressionInfo<T>.InsertWithIdentity(dataContext, obj);
+		}
+
+		#endregion
+
 		#region Update
 
 		public static int Update<T>(this DbManager dataContext, T obj)
 		{
-			return new SqlQuery<T>().Update(dataContext, obj);
+			return ExpressionInfo<T>.Update(dataContext, obj);
 		}
 
 		public static int Update<T>(this DbManager dataContext, int maxBatchSize, IEnumerable<T> list)
@@ -684,7 +698,7 @@ namespace BLToolkit.Data.Linq
 
 		public static int Delete<T>(this DbManager dataContext, T obj)
 		{
-			return new SqlQuery<T>().Delete(dataContext, obj);
+			return ExpressionInfo<T>.Delete(dataContext, obj);
 		}
 
 		public static int Delete<T>(this DbManager dataContext, int maxBatchSize, IEnumerable<T> list)
