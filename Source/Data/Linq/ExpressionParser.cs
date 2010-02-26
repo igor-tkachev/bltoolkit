@@ -5205,6 +5205,9 @@ namespace BLToolkit.Data.Linq
 					{
 						var ma = (MemberExpression)expr;
 
+						if (IsListCountMember(ma.Member))
+							return null;
+
 						if (lambda != null && lambda.Parameters.Length > 0 && ma.Expression == lambda.Parameters[0].Expr)
 						{
 							foreach (var query in queries)
