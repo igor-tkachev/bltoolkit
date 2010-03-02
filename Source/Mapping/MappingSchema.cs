@@ -3532,7 +3532,7 @@ namespace BLToolkit.Mapping
 
 								if (msm != null)
 								{
-									if (initTable.ContainsValue(master) == false)
+									if (initTable.ContainsKey(master) == false)
 									{
 										msm.BeginMapping(context);
 										initTable.Add(master, msm);
