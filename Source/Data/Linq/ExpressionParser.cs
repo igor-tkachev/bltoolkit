@@ -1906,6 +1906,9 @@ namespace BLToolkit.Data.Linq
 		{
 			var pi = extract.Body;
 
+			if (!_asParameters.Contains(update.Expr))
+				_asParameters.Add(update.Expr);
+
 			while (pi.NodeType == ExpressionType.Convert)
 			{
 				var ue = pi.ConvertTo<UnaryExpression>();
@@ -3183,8 +3186,9 @@ namespace BLToolkit.Data.Linq
 
 		#region Build Parameter
 
-		readonly Dictionary<Expression,ExpressionInfo<T>.Parameter> _parameters = new Dictionary<Expression, ExpressionInfo<T>.Parameter>();
-		readonly Dictionary<Expression,Expression>                  _accessors  = new Dictionary<Expression, Expression>();
+		readonly Dictionary<Expression,ExpressionInfo<T>.Parameter> _parameters   = new Dictionary<Expression, ExpressionInfo<T>.Parameter>();
+		readonly Dictionary<Expression,Expression>                  _accessors    = new Dictionary<Expression, Expression>();
+		readonly HashSet<Expression>                                _asParameters = new HashSet<Expression>();
 
 		ExpressionInfo<T>.Parameter BuildParameter(ParseInfo expr)
 		{
@@ -3233,7 +3237,7 @@ namespace BLToolkit.Data.Linq
 
 				pi.IsConstant(c =>
 				{
-					if (!TypeHelper.IsScalar(pi.Expr.Type))
+					if (!TypeHelper.IsScalar(pi.Expr.Type) || _asParameters.Contains(c))
 					{
 						var e = Expression.Convert(c.ParamAccessor, pi.Expr.Type);
 						pi = pi.Parent.Replace(e, c.ParamAccessor);
