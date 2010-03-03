@@ -189,6 +189,39 @@ namespace Data.Linq.Model
 		}
 	}
 
+	[TableName("Parent")]
+	public class Parent5 : IEquatable<Parent5>, IComparable
+	{
+		public int  ParentID;
+		public int? Value1;
+
+		[Association(ThisKey = "ParentID", OtherKey = "Value1", CanBeNull = true)]
+		public List<Parent5> Children;
+
+		public override bool Equals(object obj)
+		{
+			if (obj.GetType() != typeof(Parent5)) return false;
+			return Equals((Parent5)obj);
+		}
+
+		public bool Equals(Parent5 other)
+		{
+			if (ReferenceEquals(null, other)) return false;
+			if (ReferenceEquals(this, other)) return true;
+			return other.ParentID == ParentID && other.Value1.Equals(Value1);
+		}
+
+		public override int GetHashCode()
+		{
+			unchecked { return (ParentID * 397) ^ (int)Value1; }
+		}
+
+		public int CompareTo(object obj)
+		{
+			return ParentID - ((Parent5)obj).ParentID;
+		}
+	}
+
 	#endregion
 
 	#region Parent1/GrandChild1

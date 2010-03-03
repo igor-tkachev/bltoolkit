@@ -18,7 +18,15 @@ using BLToolkit.Reflection.MetadataProvider;
 
 #if FW3
 using System.Data.Linq;
+using System.Linq.Expressions;
 #endif
+
+#region ReSharper disable
+// ReSharper disable SuggestUseVarKeywordEvident
+// ReSharper disable UseObjectOrCollectionInitializer
+// ReSharper disable SuggestUseVarKeywordEverywhere
+// ReSharper disable RedundantTypeArgumentsOfMethod
+#endregion
 
 using KeyValue = System.Collections.Generic.KeyValuePair<System.Type,System.Type>;
 using Convert  = BLToolkit.Common.Convert;
@@ -168,8 +176,8 @@ namespace BLToolkit.Mapping
 			_defaultStringNullValue      = (String)     GetNullValue(typeof(String));
 			_defaultDateTimeNullValue    = (DateTime)   GetNullValue(typeof(DateTime));
 #if FW3
-			_defaultDateTimeOffsetNullValue = (DateTimeOffset)         GetNullValue(typeof(DateTimeOffset));
-			_defaultLinqBinaryNullValue     = (System.Data.Linq.Binary)GetNullValue(typeof(System.Data.Linq.Binary));
+			_defaultDateTimeOffsetNullValue = (DateTimeOffset)GetNullValue(typeof(DateTimeOffset));
+			_defaultLinqBinaryNullValue     = (Binary)        GetNullValue(typeof(Binary));
 #endif
 			_defaultDecimalNullValue     = (Decimal)    GetNullValue(typeof(Decimal));
 			_defaultGuidNullValue        = (Guid)       GetNullValue(typeof(Guid));
@@ -423,18 +431,18 @@ namespace BLToolkit.Mapping
 					Convert.ToDateTimeOffset(value);
 		}
 
-		private System.Data.Linq.Binary _defaultLinqBinaryNullValue;
-		public  System.Data.Linq.Binary  DefaultLinqBinaryNullValue
+		private Binary _defaultLinqBinaryNullValue;
+		public  Binary  DefaultLinqBinaryNullValue
 		{
 			get { return _defaultLinqBinaryNullValue;  }
 			set { _defaultLinqBinaryNullValue = value; }
 		}
 
-		public virtual System.Data.Linq.Binary ConvertToLinqBinary(object value)
+		public virtual Binary ConvertToLinqBinary(object value)
 		{
 			return
-				value is System.Data.Linq.Binary ? (System.Data.Linq.Binary)value:
-				value is byte[] ? new System.Data.Linq.Binary((byte[])value) : 
+				value is Binary ? (Binary)value:
+				value is byte[] ? new Binary((byte[])value) : 
 				value == null || value is DBNull? _defaultLinqBinaryNullValue:
 					Convert.ToLinqBinary(value);
 		}
@@ -845,11 +853,11 @@ namespace BLToolkit.Mapping
 			return default(T);
 		}
 
-		public virtual T ConvertTo<T, P>(P value)
+		public virtual T ConvertTo<T,TP>(TP value)
 		{
-			return Equals(value, default(P))?
+			return Equals(value, default(TP))?
 				GetDefaultNullValue<T>():
-				Convert<T, P>.From(value);
+				Convert<T, TP>.From(value);
 		}
 
 		public virtual object ConvertChangeType(object value, Type conversionType)
@@ -1087,12 +1095,12 @@ namespace BLToolkit.Mapping
 			return new DictionaryIndexListMapper(dic, index, objectMapper);
 		}
 
-		public virtual DictionaryListMapper<K,T> CreateDictionaryListMapper<K,T>(
-			IDictionary<K,T>     dic,
+		public virtual DictionaryListMapper<TK,T> CreateDictionaryListMapper<TK,T>(
+			IDictionary<TK,T>     dic,
 			NameOrIndexParameter keyFieldNameOrIndex,
 			ObjectMapper         objectMapper)
 		{
-			return new DictionaryListMapper<K,T>(dic, keyFieldNameOrIndex, objectMapper);
+			return new DictionaryListMapper<TK,T>(dic, keyFieldNameOrIndex, objectMapper);
 		}
 
 		public virtual DictionaryIndexListMapper<T> CreateDictionaryListMapper<T>(
@@ -1756,10 +1764,12 @@ namespace BLToolkit.Mapping
 		}
 
 		[SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
-		public virtual object MapEnumToValue(object value, Type type, bool convertToUnderlyingType)
+		public virtual object MapEnumToValue(object value, [JetBrains.Annotations.NotNull] Type type, bool convertToUnderlyingType)
 		{
 			if (value == null)
 				return null;
+
+			if (type == null) throw new ArgumentNullException("type");
 
 			type = value.GetType();
 
@@ -2506,30 +2516,30 @@ namespace BLToolkit.Mapping
 			return destDictionary;
 		}
 
-		public IDictionary<K,T> MapListToDictionary<K,T>(
+		public IDictionary<TK,T> MapListToDictionary<TK,T>(
 			ICollection          sourceList,
-			IDictionary<K,T>     destDictionary,
+			IDictionary<TK,T>     destDictionary,
 			NameOrIndexParameter keyFieldNameOrIndex,
 			params object[]      parameters)
 		{
 			MapSourceListToDestinationList(
 				CreateEnumeratorMapper         (sourceList.GetEnumerator()),
-				CreateDictionaryListMapper<K,T>(destDictionary, keyFieldNameOrIndex, GetObjectMapper(typeof(T))),
+				CreateDictionaryListMapper<TK,T>(destDictionary, keyFieldNameOrIndex, GetObjectMapper(typeof(T))),
 				parameters);
 
 			return destDictionary;
 		}
 
-		public Dictionary<K,T> MapListToDictionary<K,T>(
+		public Dictionary<TK,T> MapListToDictionary<TK,T>(
 			ICollection          sourceList,
 			NameOrIndexParameter keyFieldNameOrIndex,
 			params object[]      parameters)
 		{
-			Dictionary<K,T> destDictionary = new Dictionary<K,T>();
+			Dictionary<TK,T> destDictionary = new Dictionary<TK,T>();
 
 			MapSourceListToDestinationList(
 				CreateEnumeratorMapper          (sourceList.GetEnumerator()),
-				CreateDictionaryListMapper<K,T>(destDictionary, keyFieldNameOrIndex, GetObjectMapper(typeof(T))),
+				CreateDictionaryListMapper<TK,T>(destDictionary, keyFieldNameOrIndex, GetObjectMapper(typeof(T))),
 				parameters);
 
 			return destDictionary;
@@ -2821,30 +2831,30 @@ namespace BLToolkit.Mapping
 			return destDictionary;
 		}
 
-		public IDictionary<K,T> MapDataTableToDictionary<K,T>(
+		public IDictionary<TK,T> MapDataTableToDictionary<TK,T>(
 			DataTable            sourceTable,
-			IDictionary<K,T>     destDictionary,
+			IDictionary<TK,T>     destDictionary,
 			NameOrIndexParameter keyFieldNameOrIndex,
 			params object[]      parameters)
 		{
 			MapSourceListToDestinationList(
 				CreateDataTableMapper          (sourceTable,    DataRowVersion.Default),
-				CreateDictionaryListMapper<K,T>(destDictionary, keyFieldNameOrIndex, GetObjectMapper(typeof(T))),
+				CreateDictionaryListMapper<TK,T>(destDictionary, keyFieldNameOrIndex, GetObjectMapper(typeof(T))),
 				parameters);
 
 			return destDictionary;
 		}
 
-		public Dictionary<K,T> MapDataTableToDictionary<K,T>(
+		public Dictionary<TK,T> MapDataTableToDictionary<TK,T>(
 			DataTable            sourceTable,
 			NameOrIndexParameter keyFieldNameOrIndex,
 			params object[]      parameters)
 		{
-			Dictionary<K,T> destDictionary = new Dictionary<K,T>();
+			Dictionary<TK,T> destDictionary = new Dictionary<TK,T>();
 
 			MapSourceListToDestinationList(
 				CreateDataTableMapper          (sourceTable,    DataRowVersion.Default),
-				CreateDictionaryListMapper<K,T>(destDictionary, keyFieldNameOrIndex, GetObjectMapper(typeof(T))),
+				CreateDictionaryListMapper<TK,T>(destDictionary, keyFieldNameOrIndex, GetObjectMapper(typeof(T))),
 				parameters);
 
 			return destDictionary;
@@ -3102,45 +3112,45 @@ namespace BLToolkit.Mapping
 			return dest;
 		}
 
-		public IDictionary<K,T> MapDataReaderToDictionary<K,T>(
+		public IDictionary<TK,T> MapDataReaderToDictionary<TK,T>(
 			IDataReader          reader,
-			IDictionary<K,T>     destDictionary,
+			IDictionary<TK,T>     destDictionary,
 			NameOrIndexParameter keyFieldNameOrIndex,
 			Type                 destObjectType,
 			params object[]      parameters)
 		{
 			MapSourceListToDestinationList(
 				CreateDataReaderListMapper     (reader),
-				CreateDictionaryListMapper<K,T>(destDictionary, keyFieldNameOrIndex, GetObjectMapper(destObjectType)),
+				CreateDictionaryListMapper<TK,T>(destDictionary, keyFieldNameOrIndex, GetObjectMapper(destObjectType)),
 				parameters);
 
 			return destDictionary;
 		}
 
-		public IDictionary<K,T> MapDataReaderToDictionary<K,T>(
+		public IDictionary<TK,T> MapDataReaderToDictionary<TK,T>(
 			IDataReader          reader,
-			IDictionary<K,T>     destDictionary,
+			IDictionary<TK,T>     destDictionary,
 			NameOrIndexParameter keyFieldNameOrIndex,
 			params object[]      parameters)
 		{
 			MapSourceListToDestinationList(
 				CreateDataReaderListMapper     (reader),
-				CreateDictionaryListMapper<K,T>(destDictionary, keyFieldNameOrIndex, GetObjectMapper(typeof(T))),
+				CreateDictionaryListMapper<TK,T>(destDictionary, keyFieldNameOrIndex, GetObjectMapper(typeof(T))),
 				parameters);
 
 			return destDictionary;
 		}
 
-		public Dictionary<K,T> MapDataReaderToDictionary<K,T>(
+		public Dictionary<TK,T> MapDataReaderToDictionary<TK,T>(
 			IDataReader          reader,
 			NameOrIndexParameter keyFieldNameOrIndex,
 			params object[]      parameters)
 		{
-			Dictionary<K,T> dest = new Dictionary<K,T>();
+			Dictionary<TK,T> dest = new Dictionary<TK,T>();
 
 			MapSourceListToDestinationList(
 				CreateDataReaderListMapper     (reader),
-				CreateDictionaryListMapper<K,T>(dest, keyFieldNameOrIndex, GetObjectMapper(typeof(T))),
+				CreateDictionaryListMapper<TK,T>(dest, keyFieldNameOrIndex, GetObjectMapper(typeof(T))),
 				parameters);
 
 			return dest;
@@ -3369,9 +3379,9 @@ namespace BLToolkit.Mapping
 			return dest;
 		}
 
-		public IDictionary<K,T> MapDictionaryToDictionary<K,T>(
+		public IDictionary<TK,T> MapDictionaryToDictionary<TK,T>(
 			IDictionary          sourceDictionary,
-			IDictionary<K,T>     destDictionary,
+			IDictionary<TK,T>     destDictionary,
 			NameOrIndexParameter keyFieldNameOrIndex,
 			params object[]      parameters)
 		{
@@ -3379,24 +3389,24 @@ namespace BLToolkit.Mapping
 
 			MapSourceListToDestinationList(
 				CreateEnumeratorMapper         (sourceDictionary.Values.GetEnumerator()),
-				CreateDictionaryListMapper<K,T>(destDictionary, keyFieldNameOrIndex, GetObjectMapper(typeof(T))),
+				CreateDictionaryListMapper<TK,T>(destDictionary, keyFieldNameOrIndex, GetObjectMapper(typeof(T))),
 				parameters);
 
 			return destDictionary;
 		}
 
-		public Dictionary<K,T> MapDictionaryToDictionary<K,T>(
+		public Dictionary<TK,T> MapDictionaryToDictionary<TK,T>(
 			IDictionary          sourceDictionary,
 			NameOrIndexParameter keyFieldNameOrIndex,
 			params object[]      parameters)
 		{
 			if (sourceDictionary == null) throw new ArgumentNullException("sourceDictionary");
 
-			Dictionary<K,T> dest = new Dictionary<K,T>();
+			Dictionary<TK,T> dest = new Dictionary<TK,T>();
 
 			MapSourceListToDestinationList(
 				CreateEnumeratorMapper         (sourceDictionary.Values.GetEnumerator()),
-				CreateDictionaryListMapper<K,T>(dest, keyFieldNameOrIndex, GetObjectMapper(typeof(T))),
+				CreateDictionaryListMapper<TK,T>(dest, keyFieldNameOrIndex, GetObjectMapper(typeof(T))),
 				parameters);
 
 			return dest;
@@ -3681,6 +3691,24 @@ namespace BLToolkit.Mapping
 				}
 			}
 		}
+
+		#endregion
+
+		#region GetObjectMapper
+
+#if FW3
+
+		public Func<TSource,TDest> GetObjectMapper<TSource,TDest>()
+		{
+			return new ExpressionMapper<TSource,TDest>(this).GetMapper();
+		}
+
+		public Func<TSource,TDest> GetObjectMapper<TSource,TDest>(bool deepCopy)
+		{
+			return new ExpressionMapper<TSource,TDest>(this) { DeepCopy = deepCopy}.GetMapper();
+		}
+
+#endif
 
 		#endregion
 	}

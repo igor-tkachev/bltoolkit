@@ -260,6 +260,13 @@ namespace Update
 								.Set(p => p.Value1, TypeValue.Value2)
 							.Update());
 					Assert.AreEqual(1, db.Parent4.Count(p => p.ParentID == id && p.Value1 == TypeValue.Value2));
+
+					Assert.AreEqual(1,
+						db.Parent4
+							.Where(p => p.ParentID == id)
+								.Set(p => p.Value1, TypeValue.Value3)
+							.Update());
+					Assert.AreEqual(1, db.Parent4.Count(p => p.ParentID == id && p.Value1 == TypeValue.Value3));
 				}
 				finally
 				{

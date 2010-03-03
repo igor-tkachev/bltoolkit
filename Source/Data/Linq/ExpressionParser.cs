@@ -1349,6 +1349,9 @@ namespace BLToolkit.Data.Linq
 			if (value.Expr.Type != typeof(int))
 				return false;
 
+			//if (!_asParameters.Contains(value.Expr))
+			//	_asParameters.Add(value.Expr);
+
 			ParsingTracer.WriteLine();
 			ParsingTracer.IncIndentLevel();
 
@@ -1906,7 +1909,7 @@ namespace BLToolkit.Data.Linq
 		{
 			var pi = extract.Body;
 
-			if (!_asParameters.Contains(update.Expr))
+			if (!IsConstant(update.Expr.Type) && !_asParameters.Contains(update.Expr))
 				_asParameters.Add(update.Expr);
 
 			while (pi.NodeType == ExpressionType.Convert)
@@ -2011,6 +2014,9 @@ namespace BLToolkit.Data.Linq
 
 		void ParseValue(LambdaInfo extract, ParseInfo update, QuerySource select)
 		{
+			if (!IsConstant(update.Expr.Type) && !_asParameters.Contains(update.Expr))
+				_asParameters.Add(update.Expr);
+
 			if (CurrentSql.Set.Into == null)
 			{
 				CurrentSql.Set.Into = (SqlTable)CurrentSql.From.Tables[0].Source;

@@ -952,5 +952,23 @@ namespace BLToolkit.Mapping
 		}
 
 		#endregion
+
+		#region GetObjectMapper
+
+#if FW3
+
+		public static Func<TSource,TDest> GetObjectMapper<TSource,TDest>()
+		{
+			return _defaultSchema.GetObjectMapper<TSource,TDest>();
+		}
+
+		public static Func<TSource,TDest> GetObjectMapper<TSource,TDest>(bool deepCopy)
+		{
+			return _defaultSchema.GetObjectMapper<TSource,TDest>(deepCopy);
+		}
+
+#endif
+
+		#endregion
 	}
 }

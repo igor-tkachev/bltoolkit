@@ -411,7 +411,7 @@ namespace HowTo.Mapping
 		[Test]
 		public void Test()
 		{
-			JsonMapper    jm = new JsonMapper(new StringBuilder(256));
+			JsonMapper jm = new JsonMapper(new StringBuilder(256));
 
 			Map./*[a]*/MapSourceToDestination/*[/a]*/(Map.GetObjectMapper(typeof(SourceObject)), new SourceObject(), jm, jm);
 			Console.Write(jm.ToString());

@@ -15,7 +15,11 @@ namespace Data.Linq
 		[Test]
 		public void Take1()
 		{
-			ForEachProvider(db => Assert.AreEqual(3, (from ch in db.Child select ch).Take(3).ToList().Count));
+			ForEachProvider(db =>
+			{
+				for (var i = 2; i <= 3; i++)
+					Assert.AreEqual(i, (from ch in db.Child select ch).Take(i).ToList().Count);
+			});
 		}
 
 		static void TakeParam(TestDbManager db, int n)

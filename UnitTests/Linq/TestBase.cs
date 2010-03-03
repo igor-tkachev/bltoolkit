@@ -233,6 +233,23 @@ namespace Data.Linq
 			}
 		}
 
+		private   List<Parent5> _parent5;
+		protected List<Parent5>  Parent5
+		{
+			get
+			{
+				if (_parent5 == null)
+				{
+					_parent5 = Parent.Select(p => new Parent5 { ParentID = p.ParentID, Value1 = p.Value1}).ToList();
+
+					foreach (var p in _parent5)
+						p.Children = _parent5.Where(c => c.Value1 == p.ParentID).ToList();
+				}
+
+				return _parent5;
+			}
+		}
+
 		private   List<ParentInheritanceBase> _parentInheritance;
 		protected List<ParentInheritanceBase>  ParentInheritance
 		{

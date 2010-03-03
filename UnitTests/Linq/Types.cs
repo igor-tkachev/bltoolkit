@@ -1,14 +1,16 @@
 ﻿using System;
 using System.Data.Linq;
 using System.Linq;
-using BLToolkit.Data.DataProvider;
-using Data.Linq.Model;
-using NUnit.Framework;
 
+using BLToolkit.Data.DataProvider;
 using BLToolkit.Data.Linq;
+
+using NUnit.Framework;
 
 namespace Data.Linq
 {
+	using Model;
+
 	[TestFixture]
 	public class Types : TestBase
 	{
@@ -117,13 +119,13 @@ namespace Data.Linq
 		}
 
 		[Test]
-		public void UpdateBinary()
+		public void UpdateBinary1()
 		{
 			ForEachProvider(db =>
 			{
 				db.Types
 					.Where(t => t.ID == 1)
-					.Set(t => t.BinaryValue, new Binary(new byte[] { 1, 2, 3, 4, 5}))
+					.Set(t => t.BinaryValue, new Binary(new byte[] { 1, 2, 3, 4, 5 }))
 					.Update();
 
 				var g = from t in db.Types where t.ID == 1 select t.BinaryValue;
@@ -131,6 +133,29 @@ namespace Data.Linq
 				foreach (var binary in g)
 				{
 				}
+			});
+		}
+
+		[Test]
+		public void UpdateBinary2()
+		{
+			ForEachProvider(new[] { ProviderName.SqlCe }, db =>
+			{
+				var ints     = new[] { 1, 2 };
+				var binaries = new[] { new byte[] { 1, 2, 3, 4, 5 }, new byte[] { 5, 4, 3, 2, 1 } };
+
+				for (var i = 1; i <= 2; i++)
+				{
+					db.Types
+						.Where(t => t.ID == ints[i - 1])
+						.Set(t => t.BinaryValue, binaries[i - 1])
+						.Update();
+				}
+
+				var g = from t in db.Types where new[] { 1, 2 }.Contains(t.ID) select t;
+
+				foreach (var binary in g)
+					Assert.AreEqual(binaries[binary.ID - 1], binary.BinaryValue.ToArray());
 			});
 		}
 

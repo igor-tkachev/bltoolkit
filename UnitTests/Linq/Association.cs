@@ -244,5 +244,30 @@ namespace Data.Linq
 					from employee in    Employee where employee.ReportsToEmployee != null select new { employee.ReportsToEmployee, employee },
 					from employee in db.Employee where employee.ReportsToEmployee != null select new { employee.ReportsToEmployee, employee });
 		}
+
+		[Test]
+		public void StackOverflow1()
+		{
+			using (var db = new NorthwindDB())
+				Assert.AreEqual(
+					(from employee in    Employee where employee.Employees.Count > 0 select employee).FirstOrDefault(),
+					(from employee in db.Employee where employee.Employees.Count > 0 select employee).FirstOrDefault());
+		}
+
+		[Test]
+		public void StackOverflow2()
+		{
+			ForEachProvider(new[] { ProviderName.SqlCe }, db => AreEqual(
+				from p in    Parent5 where p.Children.Count != 0 select p,
+				from p in db.Parent5 where p.Children.Count != 0 select p));
+		}
+
+		[Test]
+		public void StackOverflow3()
+		{
+			ForEachProvider(new[] { ProviderName.SqlCe }, db => AreEqual(
+				from p in    Parent5 where p.Children.Count() != 0 select p,
+				from p in db.Parent5 where p.Children.Count() != 0 select p));
+		}
 	}
 }

@@ -19,6 +19,7 @@ Bug fixes
 Enhancement
 
 - Linq provider for supported databases.
+- New Object to Object mapping. See ExpressionMapper.
 - PostgreSQL Data Provider added.
 - Informix Data Provider added.
 - DB2 Data Provider added.

@@ -141,6 +141,7 @@
     <Compile Include="EditableObjects\InnerObjectTest.cs" />
     <Compile Include="EditableObjects\NestedObjectTest.cs" />
     <Compile Include="EditableObjects\NotifyCollectionChangeTest.cs" />
+    <Compile Include="Mapping\ExpressionMapperTest.cs" />
     <Compile Include="Mapping\NullableEnum.cs" />
     <Compile Include="Mapping\DefaultValueAttributeTest.cs" />
     <Compile Include="Mapping\EnumExtension.cs" />

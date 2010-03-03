@@ -8,8 +8,8 @@ namespace BLToolkit.Common
 	/// <summary>
 	/// Converts a base data type to another base data type.
 	/// </summary>
-	/// <typeparam name="P">Source data type.</typeparam>
 	/// <typeparam name="T">Destination data type.</typeparam>
+	/// <typeparam name="P">Source data type.</typeparam>
 	public static class Convert<T,P>
 	{
 		/// <summary>

@@ -24,7 +24,7 @@ namespace BLToolkit.Reflection
 	public delegate bool   IsNullHandler    (object obj);
 
 	[DebuggerDisplay("Type = {Type}, OriginalType = {OriginalType}")]
-	public abstract class TypeAccessor : ICollection, ITypeDescriptionProvider
+	public abstract class TypeAccessor : ICollection, ITypeDescriptionProvider, IEnumerable<MemberAccessor>
 	{
 		#region Protected Emit Helpers
 
@@ -226,7 +226,7 @@ namespace BLToolkit.Reflection
 					(nameOrIndex.ByName ? _memberNames[nameOrIndex.Name] : _members[nameOrIndex.Index]);
 			}
 		}
-		
+
 		#endregion
 
 		#region Static Members
@@ -1105,6 +1105,16 @@ namespace BLToolkit.Reflection
 		}
 
 		#endregion
+
+		#endregion
+
+		#region IEnumerable<MemberAccessor> Members
+
+		IEnumerator<MemberAccessor> IEnumerable<MemberAccessor>.GetEnumerator()
+		{
+			foreach (MemberAccessor member in _members)
+				yield return member;
+		}
 
 		#endregion
 	}
